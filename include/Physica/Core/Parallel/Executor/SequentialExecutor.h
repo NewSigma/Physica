@@ -43,7 +43,7 @@ namespace Physica::Core {
     public:
         /* Operations */
         template<class Functor, class... Args>
-        static FutureType schedule(Functor func, Args... args);
+        static FutureType schedule(Functor func, Args&&... args);
         template<class Functor>
         static FutureGroup<FutureType> parallel_for(Functor func, unsigned int loopCount);
         template<class Functor>
@@ -58,7 +58,7 @@ namespace Physica::Core {
     };
 
     template<class Functor, class... Args>
-    typename SequentialExecutor::FutureType SequentialExecutor::schedule(Functor func, Args... args) {
+    typename SequentialExecutor::FutureType SequentialExecutor::schedule(Functor func, Args&&... args) {
         func(std::forward<Args>(args)...);
         return FutureType{};
     }

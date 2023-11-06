@@ -46,7 +46,7 @@ namespace Physica::Core {
     public:
         RSpaceGrid() = default;
         template<class... Args>
-        RSpaceGrid(Index3D index, Args... args);
+        RSpaceGrid(Index3D index, Args&&... args);
         RSpaceGrid(const RSpaceGrid&) = default;
         RSpaceGrid(RSpaceGrid&&) noexcept = default;
         ~RSpaceGrid() = default;
@@ -59,7 +59,7 @@ namespace Physica::Core {
         /* Operations */
         using Base::random_normal;
         template<class... Args>
-        inline void resize(Index3D index, Args... args);
+        inline void resize(Index3D index, Args&&... args);
         inline void swap(RSpaceGrid& grid) noexcept;
         /* Getters */
         using Storage::getDimX;
@@ -78,7 +78,7 @@ namespace Physica::Core {
 
     template<class T>
     template<class... Args>
-    RSpaceGrid<T>::RSpaceGrid(Index3D index, Args... args) : Storage(index, std::forward<Args>(args)...) {}
+    RSpaceGrid<T>::RSpaceGrid(Index3D index, Args&&... args) : Storage(index, std::forward<Args>(args)...) {}
 
     template<class T>
     RSpaceGrid<T>& RSpaceGrid<T>::operator=(RSpaceGrid grid) noexcept {
@@ -107,7 +107,7 @@ namespace Physica::Core {
 
     template<class T>
     template<class... Args>
-    inline void RSpaceGrid<T>::resize(Index3D index, Args... args) {
+    inline void RSpaceGrid<T>::resize(Index3D index, Args&&... args) {
         Storage::resize(index, std::forward<Args>(args)...);
     }
 

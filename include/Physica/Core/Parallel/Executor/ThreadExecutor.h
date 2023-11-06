@@ -46,7 +46,7 @@ namespace Physica::Core {
     public:
         /* Operations */
         template<class Functor, class... Args>
-        [[nodiscard]] static FutureType schedule(Functor func, Args... args);
+        [[nodiscard]] static FutureType schedule(Functor func, Args&&... args);
         template<class Functor>
         [[nodiscard]] static FutureGroup<FutureType> parallel_for(Functor func, unsigned int loopCount);
         template<class Functor>
@@ -61,7 +61,7 @@ namespace Physica::Core {
     };
 
     template<class Functor, class... Args>
-    typename ThreadExecutor::FutureType ThreadExecutor::schedule(Functor func, Args... args) {
+    typename ThreadExecutor::FutureType ThreadExecutor::schedule(Functor func, Args&&... args) {
         return ThreadPool::getInstance().schedule(std::move(func), std::forward<Args>(args)...);
     }
 

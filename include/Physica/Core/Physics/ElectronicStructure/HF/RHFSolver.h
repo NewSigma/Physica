@@ -134,11 +134,11 @@ namespace Physica::Core::Physics {
         const MatrixType cholesky = Cholesky(overlap);
         const MatrixType inv_cholesky = cholesky.inverse();
 
-        auto densityMatrices = EDIISBuffer(EDIISBufferSize, MatrixType::Zeros(baseSetSize, baseSetSize));
+        auto densityMatrices = EDIISBuffer(EDIISBufferSize, baseSetSize, baseSetSize, ScalarType(0));
         MatrixType sameSpinElectronDensity = MatrixType::Zeros(baseSetSize);
-        auto fockMatrices = MatrixBuffer(MatrixBufferSize, MatrixType::Zeros(baseSetSize, baseSetSize));
+        auto fockMatrices = MatrixBuffer(MatrixBufferSize, baseSetSize, baseSetSize, ScalarType(0));
         MatrixType fock;
-        auto errorMatrices = DIISBuffer(DIISBufferSize - 1, MatrixType::Zeros(baseSetSize, baseSetSize));
+        auto errorMatrices = DIISBuffer(DIISBufferSize - 1, baseSetSize, baseSetSize, ScalarType(0));
         DIISMatrix DIISMat = DIISMatrix(DIISBufferSize, DIISBufferSize, -ScalarType(1));
         DIISMat(0, 0) = ScalarType(0);
         Vector<ScalarType, EDIISBufferSize> energyBuffer{};

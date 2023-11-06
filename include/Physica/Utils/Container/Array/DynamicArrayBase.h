@@ -46,8 +46,8 @@ namespace Physica::Utils::Internal {
         Derived& operator<<(Derived&& array) { Base::getDerived().append(std::move(array)); return Base::getDerived(); }
         /* Operations */
         ValueType cutLast();
-        inline void grow(const_lvalue_reference t);
-        inline void grow(rvalue_reference t);
+        template<class... Args>
+        inline void grow(Args&&... args);
         void removeAt(size_t index);
         void clear() noexcept;
         /* Setters */

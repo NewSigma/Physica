@@ -69,7 +69,7 @@ namespace Physica::Core {
         ThreadPool& operator=(ThreadPool&&) noexcept = delete;
         /* Operations */
         template<class Function, class... Args>
-        std::future<typename std::invoke_result<Function, Args...>::type> schedule(Function func, Args... args);
+        std::future<typename std::invoke_result<Function, Args&&...>::type> schedule(Function func, Args&&... args);
         std::unique_ptr<Task> steal();
         void waitExit();
         void restart();
@@ -91,9 +91,9 @@ namespace Physica::Core {
         [[nodiscard]] static inline unsigned int threadRand(uint64_t& state);
     };
 
-    template<class Function, class ... Args>
-    std::future<typename std::invoke_result<Function, Args...>::type> ThreadPool::schedule(Function func, Args... args) {
-        using ResultType = typename std::invoke_result<Function, Args...>::type;
+    template<class Function, class... Args>
+    std::future<typename std::invoke_result<Function, Args&&...>::type> ThreadPool::schedule(Function func, Args&&... args) {
+        using ResultType = typename std::invoke_result<Function, Args&&...>::type;
         unsigned int schedule_to;
         auto& info = getThreadInfo();
         if (isMainThread())
@@ -102,7 +102,7 @@ namespace Physica::Core {
             schedule_to = info.id;
         info.numScheduled += 1;
 
-        std::packaged_task<ResultType()> task(std::bind(func, args...));
+        std::packaged_task<ResultType()> task(std::bind(func, std::forward<Args>(args)...));
         auto result = task.get_future();
         auto& data = thread_data[schedule_to];
         data.queueMutex.lock();

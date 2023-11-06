@@ -92,21 +92,12 @@ namespace Physica::Utils::Internal {
         else
             return arr[length];
     }
-    /**
-     * Low level api. Designed for performance.
-     * Allocate a element at the end and increase the length.
-     * This function can be used when you are sure the current capacity is enough.
-     */
-    template<class Derived, class Allocator>
-    inline void DynamicArrayBase<Derived, Allocator>::grow(const_lvalue_reference t) {
-        assert(length < Base::getDerived().getCapacity());
-        alloc.construct(arr + length++, t);
-    }
 
     template<class Derived, class Allocator>
-    inline void DynamicArrayBase<Derived, Allocator>::grow(rvalue_reference t) {
-        assert(length < Base::getDerived().getCapacity());
-        alloc.construct(arr + length++, std::move(t));
+    template<class... Args>
+    inline void DynamicArrayBase<Derived, Allocator>::grow(Args&&... args) {
+        assert(length < Base::getDerived().getCapacity() && "[Error]: You must make sure capacity is enough before calling grow()");
+        alloc.construct(arr + length++, std::forward<Args>(args)...);
     }
 
     template<class Derived, class Allocator>

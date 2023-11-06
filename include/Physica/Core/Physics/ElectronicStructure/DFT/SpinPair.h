@@ -45,7 +45,7 @@ namespace Physica::Core {
         using ElemType = T;
     public:
         template<class... Args>
-        explicit SpinPair(Args... args);
+        explicit SpinPair(Args... args); //TODO: Use Args&&... may lead to incorrect overload
         SpinPair(const SpinPair&) = default;
         SpinPair(SpinPair&&) noexcept = default;
         ~SpinPair() = default;

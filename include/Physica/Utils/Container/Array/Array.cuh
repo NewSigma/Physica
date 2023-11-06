@@ -95,7 +95,7 @@ namespace Physica::Utils {
     public:
         device_obj();
         template<class... Args>
-        explicit device_obj(size_t length_, Args... args);
+        explicit device_obj(size_t length_, Args&&... args);
         explicit device_obj(const host_obj& array);
         device_obj(const device_obj& obj);
         device_obj(device_obj&& obj) noexcept;
@@ -122,7 +122,7 @@ namespace Physica::Utils {
         [[nodiscard]] host_obj toHost() const;
         inline void toHost(host_obj& obj) const;
         void reserve(size_t size);
-        template<class... Args> void resize(size_t size, Args... args);
+        template<class... Args> void resize(size_t size, Args&&... args);
         void swap(device_obj& obj) noexcept;
         [[nodiscard]] pointer release() noexcept;
         /* Getters */
@@ -150,7 +150,7 @@ namespace Physica::Utils {
 
     template<class T, class Allocator>
     template<class... Args>
-    device_obj<Array<T, Dynamic, Dynamic, Allocator>>::device_obj(size_t length_, Args... args)
+    device_obj<Array<T, Dynamic, Dynamic, Allocator>>::device_obj(size_t length_, Args&&... args)
             : device_obj(host_obj(length_, std::forward<Args>(args)...).toDevice()) {}
 
     template<class T, class Allocator>
@@ -249,7 +249,7 @@ namespace Physica::Utils {
 
     template<class T, class Allocator>
     template<class... Args>
-    void device_obj<Array<T, Dynamic, Dynamic, Allocator>>::resize(size_t size, Args... args) {
+    void device_obj<Array<T, Dynamic, Dynamic, Allocator>>::resize(size_t size, Args&&... args) {
         if (size == length)
             return;
         if (capacity < size)

@@ -36,7 +36,7 @@ namespace Physica::Core {
     public:
         GridStorage() = default;
         template<class... Args>
-        GridStorage(Index3D index, Args... args);
+        GridStorage(Index3D index, Args&&... args);
         GridStorage(const GridStorage&) = default;
         GridStorage(GridStorage&&) noexcept = default;
         ~GridStorage() = default;
@@ -48,7 +48,7 @@ namespace Physica::Core {
         [[nodiscard]] const T& operator()(Index3D index) const { return *data_ptr(index); }
         /* Operations */
         template<class Functor> void forIndexInGrid(Functor func) const { Base::forIndexInGrid(getDim(), func); }
-        template<class... Args> void resize(Index3D index, Args... args);
+        template<class... Args> void resize(Index3D index, Args&&... args);
         void swap(GridStorage& obj) noexcept;
         /* Iterator */
         auto begin() noexcept { return values.begin(); }
@@ -81,7 +81,7 @@ namespace Physica::Core {
 
     template<class T>
     template<class... Args>
-    GridStorage<T>::GridStorage(Index3D index, Args... args)
+    GridStorage<T>::GridStorage(Index3D index, Args&&... args)
             : dimX(index[0])
             , dimY(index[1])
             , dimZ(index[2]) {
@@ -90,7 +90,7 @@ namespace Physica::Core {
 
     template<class T>
     template<class... Args>
-    void GridStorage<T>::resize(Index3D index, Args... args) {
+    void GridStorage<T>::resize(Index3D index, Args&&... args) {
         dimX = index[0];
         dimY = index[1];
         dimZ = index[2];

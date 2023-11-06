@@ -30,6 +30,7 @@ namespace Physica::Core {
         static_assert(!ScalarType::isDifferentiable, "[Error]: Differentiable<> pack is not necessary");
 
         ScalarType learnRate;
+        ScalarType meanLearnRate;
         unsigned int batchSize;
     public:
         SGD(ScalarType learnRate_, unsigned int batchSize_);
@@ -49,11 +50,13 @@ namespace Physica::Core {
     };
 
     template<class ScalarType>
-    SGD<ScalarType>::SGD(ScalarType learnRate_, unsigned int batchSize_) : learnRate(learnRate_), batchSize(batchSize_) {}
+    SGD<ScalarType>::SGD(ScalarType learnRate_, unsigned int batchSize_) : learnRate(learnRate_), batchSize(batchSize_) {
+        meanLearnRate = learnRate / ScalarType(batchSize);
+    }
 
     template<class ScalarType>
     inline void SGD<ScalarType>::step(Differentiable<ScalarType, DiffMode::Reverse>& target) const {
-        target.setValue(target.getValue() - learnRate * target.getTangent());
+        target.setValue(target.getValue() - meanLearnRate * target.getTangent());
     }
 
     template<class ScalarType>
@@ -81,6 +84,7 @@ namespace Physica::Core {
     void SGD<ScalarType>::swap(SGD& obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         learnRate.swap(obj.learnRate);
+        meanLearnRate.swap(obj.meanLearnRate);
         std::swap(batchSize, obj.batchSize);
     }
 }

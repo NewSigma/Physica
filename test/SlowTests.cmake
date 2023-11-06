@@ -10,6 +10,7 @@ physica_add_test(KSSolver Core/Physics/KSSolver.cpp)
 ### MD
 physica_add_test(Ewald Core/Physics/MD/ForceModel/Ewald.cpp)
 physica_add_test(Q_TIP4P Core/Physics/MD/ForceModel/Q_TIP4P.cpp)
+physica_add_test(Langevin Core/Physics/MD/Thermostat/Langevin.cpp)
 physica_add_test(RPMD Core/Physics/MD/RPMD.cpp)
 
 if(${PHYSICA_CUDA})
