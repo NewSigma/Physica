@@ -46,10 +46,8 @@ public:
         for (size_t i = 0; i < cell.getDOF(); ++i) {
             for (size_t j = 0; j < cell.getDOF(); ++j) {
                 const ScalarType fc1 = sg.forceConst(cell, i, j);
-                if (!scalarNear(fc(i, j), fc1, 1E-15)) {
-                    std::cout << fc(i, j) << ' ' << fc1 << std::endl;
-                    exit(1);
-                }
+                if (!scalarNear(fc(i, j), fc1, 1E-15))
+                    exit(EXIT_FAILURE);
             }
         }
     }

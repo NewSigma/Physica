@@ -45,7 +45,6 @@ int main() {
         sg.force_functor(0, 0, r, r2).reverse();
         const ScalarType fc = -r.getTangent();
         const ScalarType fc1 = sg.forceConst_functor(r, r2);
-        std::cout << fc << ' ' << fc1 << std::endl;
         if (!scalarNear(fc, fc1, 1E-15))
             return 1;
     }

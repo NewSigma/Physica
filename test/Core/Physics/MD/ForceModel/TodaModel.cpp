@@ -61,10 +61,8 @@ void forceConstTest() {
 
     for (size_t i = 0; i < fc.getRow(); ++i) {
         for (size_t j = 0; j < fc.getColumn(); ++j) {
-            if (!scalarNear(fc(i, j), model.forceConst(cell, i, j), 1E-15)) {
-                std::cout << i << ' ' << j << ' ' << fc(i, j) << ' ' << model.forceConst(cell, i, j) << std::endl;
+            if (!scalarNear(fc(i, j), model.forceConst(cell, i, j), 1E-15))
                 exit(EXIT_FAILURE);
-            }
         }
     }
 }

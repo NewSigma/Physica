@@ -531,8 +531,8 @@ namespace Physica::Core {
 
                 for (size_t j = 0; j < getNumParticle(); ++j) {
                     const auto atomPos1 = pos.segment(j * Dim, (j + 1) * Dim);
-                    const auto block = forceConst.block(Dim * i, Dim, Dim * j, Dim);
-                    const VectorType temp = block.transpose() * deltaPos;
+                    const auto block = forceConst.block(Dim * j, Dim, Dim * i, Dim);
+                    const VectorType temp = block * deltaPos;
                     quantumKineticStress -= atomPos1 * temp.transpose();
                 }
             }
