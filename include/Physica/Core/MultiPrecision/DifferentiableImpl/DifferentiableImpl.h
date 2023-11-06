@@ -60,20 +60,11 @@ namespace Physica::Core {
     template<class ScalarType>
     template<class AnyScalar>
     Differentiable<ScalarType, DiffMode::Reverse>::Differentiable(const ScalarBase<AnyScalar>& s)
-            : value(s.getValue()) {
-        index = DiffTracerType::getInstance().pushOperation(value, ExpressionType::Set);
-    }
+            : index(DiffTracerType::getInstance().pushOperation(s.getValue(), ExpressionType::Set)) {}
 
     template<class ScalarType>
-    Differentiable<ScalarType, DiffMode::Reverse>::Differentiable(ScalarType value_, size_t index_)
-            : value(value_), index(index_) {
-        assert(index <= DiffTracerType::getInstance().getRecords().getLength());
-    }
-
-    template<class ScalarType>
-    Differentiable<ScalarType, DiffMode::Reverse>::Differentiable(ScalarType value_, ScalarType tangent)
-            : value(std::move(value_)) {
-        index = DiffTracerType::getInstance().pushOperation(value, tangent, ExpressionType::Set);
+    Differentiable<ScalarType, DiffMode::Reverse>::Differentiable(ScalarType value, ScalarType tangent)
+            : index(DiffTracerType::getInstance().pushOperation(std::move(value), tangent, ExpressionType::Set)) {
         throw std::runtime_error("[Error]: This function is provided for template meta programming, you should not arrive here");
     }
 
@@ -85,10 +76,9 @@ namespace Physica::Core {
     template<class ScalarType>
     inline Differentiable<ScalarType, DiffMode::Reverse> Differentiable<ScalarType, DiffMode::Reverse>::operator-() const {
         auto& tracer = DiffTracerType::getInstance();
-        ScalarType v = -value;
-        const size_t i = tracer.pushOperation(v, ExpressionType::Minus);
+        const size_t i = tracer.pushOperation(-getValue(), ExpressionType::Minus);
         tracer.pushOperand(index);
-        return Differentiable(v, i);
+        return fromIndex(i);
     }
 
     template<class ScalarType>
@@ -97,10 +87,14 @@ namespace Physica::Core {
     }
 
     template<class ScalarType>
-    void Differentiable<ScalarType, DiffMode::Reverse>::swap(Differentiable<ScalarType, DiffMode::Reverse>& obj) noexcept {
+    inline void Differentiable<ScalarType, DiffMode::Reverse>::swap(Differentiable<ScalarType, DiffMode::Reverse>& obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
-        value.swap(obj.value);
         std::swap(index, obj.index);
+    }
+
+    template<class ScalarType>
+    inline const ScalarType& Differentiable<ScalarType, DiffMode::Reverse>::getValue() const noexcept {
+        return DiffTracerType::getInstance()[index].value;
     }
 
     template<class ScalarType>
@@ -110,8 +104,16 @@ namespace Physica::Core {
 
     template<class ScalarType>
     inline void Differentiable<ScalarType, DiffMode::Reverse>::setValue(const ScalarType& x) {
-        value = x;
         DiffTracerType::getInstance()[index].value = x;
+    }
+
+    template<class ScalarType>
+    inline Differentiable<ScalarType, DiffMode::Reverse>
+    Differentiable<ScalarType, DiffMode::Reverse>::fromIndex(size_t index) noexcept {
+        assert(index <= DiffTracerType::getInstance().getRecords().getLength() && "[Error]: Invalid index");
+        Differentiable<ScalarType, DiffMode::Reverse> result{};
+        result.index = index;
+        return result;
     }
 
     template<class ScalarType>
@@ -151,7 +153,7 @@ namespace Physica::Core {
                 index = tracer.pushOperation(value, ExpressionType::Add);
                 tracer.pushOperand(s1.getTraceIndex()).pushOperand(copy.getTraceIndex());
             }
-            return ResultType(value, index);
+            return ResultType::fromIndex(index);
         }
     }
 
@@ -191,7 +193,7 @@ namespace Physica::Core {
                 index = tracer.pushOperation(value, ExpressionType::Sub);
                 tracer.pushOperand(s1.getTraceIndex()).pushOperand(copy.getTraceIndex());
             }
-            return ResultType(value, index);
+            return ResultType::fromIndex(index);
         }
     }
 
@@ -231,7 +233,7 @@ namespace Physica::Core {
                 index = tracer.pushOperation(value, ExpressionType::Mul);
                 tracer.pushOperand(s1.getTraceIndex()).pushOperand(copy.getTraceIndex());
             }
-            return ResultType(value, index);
+            return ResultType::fromIndex(index);
         }
     }
 
@@ -272,7 +274,7 @@ namespace Physica::Core {
                 index = tracer.pushOperation(value, ExpressionType::Div);
                 tracer.pushOperand(s1.getTraceIndex()).pushOperand(copy.getTraceIndex());
             }
-            return ResultType(value, index);
+            return ResultType::fromIndex(index);
         }
     }
 
@@ -291,7 +293,7 @@ namespace Physica::Core {
             auto& tracer = DiffTracer<ScalarType>::getInstance();
             const size_t index = tracer.pushOperation(value, ExpressionType::Div);
             tracer.pushOperand(copy.getTraceIndex()).pushOperand(s2.getTraceIndex());
-            return ResultType(value, index);
+            return ResultType::fromIndex(index);
         }
     }
 }
