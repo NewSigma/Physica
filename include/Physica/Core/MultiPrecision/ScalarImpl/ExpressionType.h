@@ -44,30 +44,4 @@ namespace Physica::Core {
         Cos,
         Softmax
     };
-
-    constexpr unsigned int numOperand(ExpressionType type) {
-        switch (type) {
-            case ExpressionType::Set: return 0;
-            case ExpressionType::Minus: return 1;
-            case ExpressionType::Add: return 2;
-            case ExpressionType::Sub: return 2;
-            case ExpressionType::Mul: return 2;
-            case ExpressionType::Div: return 2;
-            case ExpressionType::More: return 2;
-            case ExpressionType::MoreEq: return 2;
-            case ExpressionType::Reciprocal: return 1;
-            case ExpressionType::Sqrt: return 1;
-            case ExpressionType::Cbrt: return 1;
-            case ExpressionType::Abs: return 1;
-            case ExpressionType::Relu: return 1;
-            case ExpressionType::Square: return 1;
-            case ExpressionType::Ln: return 1;
-            case ExpressionType::Exp: return 1;
-            case ExpressionType::Pow: return 2;
-            case ExpressionType::Sin: return 1;
-            case ExpressionType::Cos: return 1;
-            default:
-                throw std::invalid_argument("[Error]: Unrecognized type");
-        }
-    }
 }

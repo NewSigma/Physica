@@ -19,21 +19,25 @@
 #pragma once
 
 #include "Physica/Core/Exception/NotImplementedException.h"
-#include "DiffRecord.h"
+#include "Physica/Core/MultiPrecision/ScalarImpl/ExpressionType.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/Vector.h"
 
 namespace Physica::Core {
     template<class ScalarType>
     class DiffTracer {
         static_assert(!ScalarType::isDifferentiable, "[Error]: Differentiable<> pack is not necessary");
-        using RecordArray = Utils::Array<DiffRecord<ScalarType>>;
+        using VectorType = Vector<ScalarType>;
+        struct DiffRecord {
+            size_t startOperandId;
+            ExpressionType source;
+        };
 
-        RecordArray records;
+        Utils::Array<DiffRecord> records;
         Utils::Array<size_t> operands;
+        VectorType values;
+        VectorType tangents;
     public:
         ~DiffTracer() = default;
-        /* Operators */
-        [[nodiscard]] DiffRecord<ScalarType>& operator[](size_t index) { return records[index]; }
-        [[nodiscard]] const DiffRecord<ScalarType>& operator[](size_t index) const { return records[index]; }
         /* Operations */
         inline DiffTracer& pushOperand(size_t operand);
         [[nodiscard]] inline size_t pushOperation(ScalarType value, ExpressionType source);
@@ -45,7 +49,9 @@ namespace Physica::Core {
         void squeeze();
         void release();
         /* Getters */
-        [[nodiscard]] const RecordArray& getRecords() const noexcept { return records; }
+        [[nodiscard]] VectorType& getValues() noexcept { return values; }
+        [[nodiscard]] const VectorType& getValues() const noexcept { return values; }
+        [[nodiscard]] const VectorType& getTangents() const noexcept { return tangents; }
         [[nodiscard]] size_t getNumRecord() const noexcept { return records.getLength(); }
         /* Static members */
         [[nodiscard]] static DiffTracer& getInstance() noexcept;
@@ -56,6 +62,8 @@ namespace Physica::Core {
         /* Operators */
         DiffTracer& operator=(const DiffTracer&) = default;
         DiffTracer& operator=(DiffTracer&&) noexcept = default;
+        /* Static members */
+        [[nodiscard]] constexpr static unsigned int numOperand(ExpressionType type);
     };
 
     template<class ScalarType>
@@ -76,11 +84,13 @@ namespace Physica::Core {
     template<class ScalarType>
     size_t DiffTracer<ScalarType>::pushOperation(ScalarType value, ScalarType tangent, ExpressionType source) {
         if (!records.empty()) {
-            assert(operands.getLength() == (*records.crbegin()).getStartOperandId() + numOperand((*records.crbegin()).getSource())
+            assert(operands.getLength() == (*records.crbegin()).startOperandId + numOperand((*records.crbegin()).source)
                     && "[Error]: New record cannot begin unless last record is done");
         }
-        const size_t index = records.getLength();
-        records.append(DiffRecord(operands.getLength(), source, std::move(value), std::move(tangent)));
+        const size_t index = getNumRecord();
+        records.append(DiffRecord{operands.getLength(), source});
+        values.append(std::move(value));
+        tangents.append(std::move(tangent));
         return index;
     }
 
@@ -88,88 +98,86 @@ namespace Physica::Core {
     void DiffTracer<ScalarType>::reverse(size_t index) {
         assert(index < getNumRecord() && "[Error]: Index overflow");
         assert(records[0].getSource() == ExpressionType::Set && "[Error]: Unexpected source");
-        records[index].tangent = ScalarType(1);
+        tangents[index] = ScalarType(1);
         for (size_t i = index; i != 0; --i) {
-            const auto& record = records[i];
-            const ScalarType& tangent = record.tangent;
+            const ScalarType& tangent = tangents[i];
             if (tangent.isZero())
                 continue;
 
-            const size_t startOperandId = record.getStartOperandId();
-            const ScalarType& value = record.value;
-            switch (record.getSource()) {
+            const auto& record = records[i];
+            const size_t startOperandId = record.startOperandId;
+            const ScalarType& value = values[i];
+            switch (record.source) {
                 case ExpressionType::Set:
                     break;
                 case ExpressionType::Minus:
-                    records[operands[startOperandId]].tangent += -tangent;
+                    tangents[operands[startOperandId]] += -tangent;
                     break;
                 case ExpressionType::Add:
-                    records[operands[startOperandId]].tangent += tangent;
-                    records[operands[startOperandId + 1]].tangent += tangent;
+                    tangents[operands[startOperandId]] += tangent;
+                    tangents[operands[startOperandId + 1]] += tangent;
                     break;
                 case ExpressionType::Sub:
-                    records[operands[startOperandId]].tangent += tangent;
-                    records[operands[startOperandId + 1]].tangent -= tangent;
+                    tangents[operands[startOperandId]] += tangent;
+                    tangents[operands[startOperandId + 1]] -= tangent;
                     break;
                 case ExpressionType::Mul: {
-                    auto& x = records[operands[startOperandId]];
-                    auto& y = records[operands[startOperandId + 1]];
-                    x.tangent += tangent * y.value;
-                    y.tangent += tangent * x.value;
+                    const size_t indexX = operands[startOperandId];
+                    const size_t indexY = operands[startOperandId + 1];
+                    tangents[indexX] += tangent * values[indexY];
+                    tangents[indexY] += tangent * values[indexX];
                     break;
                 }
                 case ExpressionType::Div: {
-                    auto& x = records[operands[startOperandId]];
-                    auto& y = records[operands[startOperandId + 1]];
-                    const ScalarType dx = tangent * reciprocal(y.value);
-                    x.tangent += dx;
-                    y.tangent -= dx * value;
+                    const size_t indexX = operands[startOperandId];
+                    const size_t indexY = operands[startOperandId + 1];
+                    const ScalarType dx = tangent * reciprocal(values[indexY]);
+                    tangents[indexX] += dx;
+                    tangents[indexY] -= dx * value;
                     break;
                 }
                 case ExpressionType::Reciprocal:
-                    records[operands[startOperandId]].tangent -= tangent * square(value);
+                    tangents[operands[startOperandId]] -= tangent * square(value);
                     break;
                 case ExpressionType::Sqrt: {
-                    auto& x = records[operands[startOperandId]];
-                    x.tangent += tangent / value * ScalarType(0.5);
+                    tangents[operands[startOperandId]] += tangent / value * ScalarType(0.5);
                     break;
                 }
                 case ExpressionType::Cbrt:
-                    records[operands[startOperandId]].tangent += tangent / (square(value) * ScalarType(3));
+                    tangents[operands[startOperandId]] += tangent / (square(value) * ScalarType(3));
                     break;
                 case ExpressionType::Abs: {
-                    auto& x = records[operands[startOperandId]];
-                    x.tangent += x.value.isPositive() ? tangent : -tangent;
+                    const size_t index = operands[startOperandId];
+                    tangents[index] += values[index].isPositive() ? tangent : -tangent;
                     break;
                 }
                 case ExpressionType::Relu: {
-                    auto& x = records[operands[startOperandId]];
-                    x.tangent += x.value.isPositive() ? tangent : ScalarType(0);
+                    const size_t index = operands[startOperandId];
+                    tangents[index] += values[index].isPositive() ? tangent : ScalarType(0);
                     break;
                 }
                 case ExpressionType::Square: {
-                    auto& x = records[operands[startOperandId]];
-                    x.tangent += tangent * x.value * ScalarType(2);
+                    const size_t index = operands[startOperandId];
+                    tangents[index] += tangent * values[index] * ScalarType(2);
                     break;
                 }
                 case ExpressionType::Ln: {
-                    auto& x = records[operands[startOperandId]];
-                    x.tangent += tangent / x.value;
+                    const size_t index = operands[startOperandId];
+                    tangents[index] += tangent / values[index];
                     break;
                 }
                 case ExpressionType::Exp: {
-                    auto& x = records[operands[startOperandId]];
-                    x.tangent += tangent * value;
+                    tangents[operands[startOperandId]] += tangent * value;
                     break;
                 }
                 case ExpressionType::Sin: {
-                    auto& x = records[operands[startOperandId]];
-                    x.tangent += tangent * cos(x.value);
+                    const size_t index = operands[startOperandId];
+                    tangents[index] += tangent * cos(values[index]);
                     break;
                 }
                 case ExpressionType::Cos: {
-                    auto& x = records[operands[startOperandId]];
-                    x.tangent -= tangent * sin(x.value);
+                    const size_t index = operands[startOperandId];
+                    tangents[index] -= tangent * sin(values[index]);
                     break;
                 }
                 default: [[unlikely]]
@@ -187,21 +195,25 @@ namespace Physica::Core {
     void DiffTracer<ScalarType>::clear(size_t from, size_t to) {
         assert(from < to && "[Error]: Invalid argument");
         assert(to <= getNumRecord() && "[Error]: Index overflow");
-        for (size_t i = from; i < to; ++i)
-            records[i].tangent = ScalarType(0);
+        auto seg = tangents.segment(from, to);
+        seg = ScalarType(0);
     }
 
     template<class ScalarType>
     void DiffTracer<ScalarType>::forget(size_t fromIndex) {
         assert(fromIndex < getNumRecord() && "[Error]: forgeting a non existent, this may be a bug");
-        operands.resize(records[fromIndex].getStartOperandId());
+        operands.resize(records[fromIndex].startOperandId);
         records.resize(fromIndex);
+        values.resize(fromIndex);
+        tangents.resize(fromIndex);
     }
 
     template<class ScalarType>
     void DiffTracer<ScalarType>::squeeze() {
         records.squeeze();
         operands.squeeze();
+        values.squeeze();
+        tangents.squeeze();
     }
 
     template<class ScalarType>
@@ -214,5 +226,32 @@ namespace Physica::Core {
     DiffTracer<ScalarType>& DiffTracer<ScalarType>::getInstance() noexcept {
         thread_local static DiffTracer<ScalarType> instance{};
         return instance;
+    }
+
+    template<class ScalarType>
+    constexpr unsigned int DiffTracer<ScalarType>::numOperand(ExpressionType type) {
+        switch (type) {
+            case ExpressionType::Set: return 0;
+            case ExpressionType::Minus: return 1;
+            case ExpressionType::Add: return 2;
+            case ExpressionType::Sub: return 2;
+            case ExpressionType::Mul: return 2;
+            case ExpressionType::Div: return 2;
+            case ExpressionType::More: return 2;
+            case ExpressionType::MoreEq: return 2;
+            case ExpressionType::Reciprocal: return 1;
+            case ExpressionType::Sqrt: return 1;
+            case ExpressionType::Cbrt: return 1;
+            case ExpressionType::Abs: return 1;
+            case ExpressionType::Relu: return 1;
+            case ExpressionType::Square: return 1;
+            case ExpressionType::Ln: return 1;
+            case ExpressionType::Exp: return 1;
+            case ExpressionType::Pow: return 2;
+            case ExpressionType::Sin: return 1;
+            case ExpressionType::Cos: return 1;
+            default:
+                throw std::invalid_argument("[Error]: Unrecognized type");
+        }
     }
 }

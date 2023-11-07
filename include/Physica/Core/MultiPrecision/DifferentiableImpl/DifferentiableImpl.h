@@ -94,17 +94,17 @@ namespace Physica::Core {
 
     template<class ScalarType>
     inline const ScalarType& Differentiable<ScalarType, DiffMode::Reverse>::getValue() const noexcept {
-        return DiffTracerType::getInstance()[index].value;
+        return DiffTracerType::getInstance().getValues()[index];
     }
 
     template<class ScalarType>
     inline const ScalarType& Differentiable<ScalarType, DiffMode::Reverse>::getTangent() const noexcept {
-        return DiffTracerType::getInstance()[index].tangent;
+        return DiffTracerType::getInstance().getTangents()[index];
     }
 
     template<class ScalarType>
     inline void Differentiable<ScalarType, DiffMode::Reverse>::setValue(const ScalarType& x) {
-        DiffTracerType::getInstance()[index].value = x;
+        DiffTracerType::getInstance().getValues()[index] = x;
     }
 
     template<class ScalarType>
