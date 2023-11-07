@@ -144,21 +144,21 @@ namespace Physica::Core {
         const ScalarType rep_r7 = rep_r5 * rep_r2;
         const Vector4D rep1 = rep * rep_r7;
         const Vector4D const1{-42 * c6, -72 * c8, 90 * c9, -110 * c10};
-        const ScalarType d2_g = (rep1 * const1).horizontal_add();
+        const ScalarType d2_g = rep1 * const1;
         if (r < PlainScalar(cutoff)) {
             const ScalarType rep_r6 = rep_r5 * rep_r;
             const Vector4D rep2 = rep * rep_r6;
             const Vector4D const2{-12 * c6, -16 * c8, 18 * c9, -20 * c10};
-            const ScalarType d_g = (rep2 * const2).horizontal_add();
+            const ScalarType d_g = rep2 * const2;
 
             const Vector4D rep3 = rep * rep_r5;
             const Vector4D const3{-c6, -c8, c9, -c10};
-            const ScalarType g = (rep3 * const3).horizontal_add();
+            const ScalarType g = rep3 * const3;
 
             const ScalarType term2 = -d_g * (rep_r3 * PlainScalar(2 * squaredCutoff) - rep_r2 * PlainScalar(2 * cutoff));
             const Vector4D rep4{rep_r3, rep_r4, rep_r5, rep_r6};
             const Vector4D const4{4 * cutoff, -2 * squaredCutoff, -8 * cutoff * squaredCutoff, 4 * squaredCutoff * squaredCutoff};
-            const ScalarType term3 = g * (rep4 * const4).horizontal_add();
+            const ScalarType term3 = g * (rep4 * const4);
             result += (d2_g + term2 + term3) * exp(-square(rep_r * PlainScalar(cutoff) - PlainScalar(1)));
         }
         else

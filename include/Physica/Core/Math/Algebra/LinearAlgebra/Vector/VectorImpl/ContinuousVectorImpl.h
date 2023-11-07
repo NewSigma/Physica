@@ -97,7 +97,8 @@ namespace Physica::Core {
     template<class Derived>
     template<class PacketType>
     inline void ContinuousVector<Derived>::writePacket(size_t index, const PacketType packet) {
-        if constexpr (std::is_same_v<ScalarType, typename Internal::Traits<PacketType>::ScalarType>)
+        constexpr bool isSameScalar = std::is_same_v<ScalarType, typename Internal::Traits<PacketType>::ScalarType>;
+        if constexpr (isSameScalar)
             packet.store(Base::data_ptr(index));
         else
             Base::template writePacket(index, packet);
@@ -106,7 +107,8 @@ namespace Physica::Core {
     template<class Derived>
     template<class PacketType>
     inline void ContinuousVector<Derived>::writePacketPartial(size_t index, size_t count, const PacketType packet) {
-        if constexpr (std::is_same_v<ScalarType, typename Internal::Traits<PacketType>::ScalarType>)
+        constexpr bool isSameScalar = std::is_same_v<ScalarType, typename Internal::Traits<PacketType>::ScalarType>;
+        if constexpr (isSameScalar)
             packet.store_partial(count, Base::data_ptr(index));
         else
             Base::template writePacketPartial<PacketType>(index, count, packet);

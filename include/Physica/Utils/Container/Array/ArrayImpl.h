@@ -257,9 +257,10 @@ namespace Physica::Utils {
 
     template<class T, class Allocator>
     void Array<T, Dynamic, Dynamic, Allocator>::reserve(size_t size) {
-        assert (size > getCapacity());
-        arr = alloc.reallocate(arr, size, capacity);
-        capacity = size;
+        if (size > getCapacity()) {
+            arr = alloc.reallocate(arr, size, capacity);
+            capacity = size;
+        }
     }
 
     template<class T, class Allocator>

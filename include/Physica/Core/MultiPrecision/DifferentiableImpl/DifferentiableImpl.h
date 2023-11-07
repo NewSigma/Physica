@@ -110,7 +110,7 @@ namespace Physica::Core {
     template<class ScalarType>
     inline Differentiable<ScalarType, DiffMode::Reverse>
     Differentiable<ScalarType, DiffMode::Reverse>::fromIndex(size_t index) noexcept {
-        assert(index <= DiffTracerType::getInstance().getRecords().getLength() && "[Error]: Invalid index");
+        assert(index < DiffTracerType::getInstance().getNumRecord() && "[Error]: Invalid index");
         Differentiable<ScalarType, DiffMode::Reverse> result{};
         result.index = index;
         return result;

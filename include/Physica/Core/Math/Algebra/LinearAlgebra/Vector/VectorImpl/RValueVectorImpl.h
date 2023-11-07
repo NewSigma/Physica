@@ -127,18 +127,22 @@ namespace Physica::Core {
     template<class Derived>
     template<class PacketType>
     inline PacketType RValueVector<Derived>::packet(size_t index) const {
-        PacketType packet{};
+        ScalarType buffer[PacketType::size()];
         for (size_t i = 0; i < PacketType::size(); ++i, ++index)
-            packet.insert(i, calc(index).getTrivial());
+            buffer[i] = calc(index);
+        PacketType packet{};
+        packet.load(buffer);
         return packet;
     }
 
     template<class Derived>
     template<class PacketType>
     inline PacketType RValueVector<Derived>::packetPartial(size_t index, size_t count) const {
-        auto packet = PacketType(0);
+        ScalarType buffer[PacketType::size()];
         for (size_t i = 0; i < count; ++i, ++index)
-            packet.insert(i, calc(index).getTrivial());
+            buffer[i] = calc(index);
+        PacketType packet{};
+        packet.load_partial(count, buffer);
         return packet;
     }
 

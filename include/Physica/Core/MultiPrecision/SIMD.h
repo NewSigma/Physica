@@ -65,13 +65,14 @@ namespace Physica::Core {
         public:
             using ScalarType = T;
         private:
+            using PlainScalar = typename ScalarType::PlainScalar;
+            constexpr static bool isForward = std::is_same<ScalarType, Differentiable<PlainScalar, DiffMode::Forward>>::value;
             static_assert(ScalarType::Option == Float || ScalarType::Option == Double, "[Error]: Unsupported float type");
             static_assert(!ScalarType::isComplex, "[Error]: The main template targets on real scalar");
-            static_assert(!ScalarType::isDifferentiable, "[Error]: The main template is not differentiable");
+            static_assert(!ScalarType::isForward, "[Error]: SIMD for forward autodiff is not implemented");
             static_assert(Size % 2 == 0 && Size <= 16, "[Error]: Invalid Size");
             constexpr static bool isSinglePrec = ScalarType::Option == Float;
-            constexpr static bool isDifferentiable = ScalarType::isDifferentiable;
-            constexpr static size_t PlainSize = isDifferentiable ? (Size * 2) : Size;
+            constexpr static size_t PlainSize = isForward ? (Size * 2) : Size;
             
             using Size2Type = typename std::conditional<isSinglePrec, void, Vec2d>::type;
             using Size4Type = typename std::conditional<isSinglePrec, Vec4f, Vec4d>::type;
@@ -88,13 +89,14 @@ namespace Physica::Core {
          */
         template<class ScalarType, size_t Length>
         class BestPacket {
+            using PlainScalar = typename ScalarType::PlainScalar;
             constexpr static bool isSinglePrec = ScalarType::Option == Float;
             constexpr static bool isComplex = ScalarType::isComplex;
-            constexpr static bool isDifferentiable = ScalarType::isDifferentiable;
+            constexpr static bool isForward = std::is_same<ScalarType, Differentiable<PlainScalar, DiffMode::Forward>>::value;
             constexpr static bool isDynamic = Length == Utils::Dynamic;
-            constexpr static size_t size128 = (isSinglePrec ? 4 : 2) / (isComplex ? 2 : 1) / (isDifferentiable ? 2 : 1);
-            constexpr static size_t size256 = (isSinglePrec ? 8 : 4) / (isComplex ? 2 : 1) / (isDifferentiable ? 2 : 1);
-            constexpr static size_t size512 = (isSinglePrec ? 16 : 8) / (isComplex ? 2 : 1) / (isDifferentiable ? 2 : 1);
+            constexpr static size_t size128 = (isSinglePrec ? 4 : 2) / (isComplex ? 2 : 1) / (isForward ? 2 : 1);
+            constexpr static size_t size256 = (isSinglePrec ? 8 : 4) / (isComplex ? 2 : 1) / (isForward ? 2 : 1);
+            constexpr static size_t size512 = (isSinglePrec ? 16 : 8) / (isComplex ? 2 : 1) / (isForward ? 2 : 1);
             constexpr static bool support128 = INSTRSET >= 2;
             constexpr static bool support256 = INSTRSET >= 7 && support128;
             constexpr static bool support512 = INSTRSET >= 9 && support256;
@@ -109,7 +111,7 @@ namespace Physica::Core {
             constexpr static size_t BiggestSize = support512 ? size512 : BiggestSize2;
         public:
             constexpr static size_t Size = isDynamic ? BiggestSize : Size3;
-            using Type = typename std::conditional<Size == 1 || isComplex || isDifferentiable, ScalarType, SIMD<ScalarType, Size>>::type;
+            using Type = typename std::conditional<Size == 1 || isComplex || isForward, ScalarType, SIMD<ScalarType, Size>>::type;
         };
     }
 
@@ -119,8 +121,9 @@ namespace Physica::Core {
         using This = SIMD<ScalarType, Size>;
         using Traits = Internal::Traits<This>;
         using BoolSIMDType = typename Traits::BoolSIMDType;
-        using TrivialType = typename ScalarType::TrivialType;
-        constexpr static bool isDifferentiable = ScalarType::isDifferentiable;
+        using PlainScalar = typename ScalarType::PlainScalar;
+        using TrivialType = typename PlainScalar::TrivialType;
+        constexpr static bool isForward = std::is_same<ScalarType, Differentiable<PlainScalar, DiffMode::Forward>>::value;
     public:
         using Base = typename Traits::BaseType;
     public:
@@ -162,7 +165,7 @@ namespace Physica::Core {
 
     template<class ScalarType, size_t Size>
     [[nodiscard]] inline SIMD<ScalarType, Size> operator*(const SIMD<ScalarType, Size>& packet, const ScalarType& scalar) {
-        return SIMD<ScalarType, Size>(packet.getImpl() * scalar.getTrivial());
+        return SIMD<ScalarType, Size>(packet.getImpl() * scalar.getValue().getTrivial());
     }
 
     template<class ScalarType, size_t Size>

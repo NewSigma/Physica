@@ -21,7 +21,7 @@
 namespace Physica::Core {
     template<class ScalarType, size_t Size>
     [[nodiscard]] inline ScalarType SIMD<ScalarType, Size>::operator[](int index) const {
-        if constexpr (isDifferentiable)
+        if constexpr (isForward)
             return ScalarType(Base::operator[](index * 2), Base::operator[](index * 2 + 1));
         else
             return ScalarType(Base::operator[](index));
@@ -86,7 +86,7 @@ namespace Physica::Core {
 
     template<class ScalarType, size_t Size>
     inline void SIMD<ScalarType, Size>::insert(int index, const ScalarType& value) {
-        if constexpr (isDifferentiable) {
+        if constexpr (isForward) {
             Base::insert(index * 2, value.getValue().getTrivial());
             Base::insert(index * 2 + 1, value.getTangent().getTrivial());
         }
