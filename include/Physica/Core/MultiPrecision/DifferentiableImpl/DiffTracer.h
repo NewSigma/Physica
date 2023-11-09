@@ -40,14 +40,20 @@ namespace Physica::Core {
         ~DiffTracer() = default;
         /* Operations */
         inline DiffTracer& pushOperand(size_t operand);
+
         [[nodiscard]] inline size_t pushOperation(ScalarType value, ExpressionType source);
         [[nodiscard]] size_t pushOperation(ScalarType value, ScalarType tangent, ExpressionType source);
+        template<size_t Size>
+        [[nodiscard]] size_t pushOperation(const SIMD<ScalarType, Size>& simd, ExpressionType source);
+
         void reverse(size_t index);
         inline void clear(size_t from);
         void clear(size_t from, size_t to);
         void forget(size_t fromIndex = 0);
         void squeeze();
         void release();
+
+        [[nodiscard]] inline bool checkLastOpDone() const;
         /* Getters */
         [[nodiscard]] VectorType& getValues() noexcept { return values; }
         [[nodiscard]] const VectorType& getValues() const noexcept { return values; }
@@ -69,8 +75,7 @@ namespace Physica::Core {
     template<class ScalarType>
     inline DiffTracer<ScalarType>& DiffTracer<ScalarType>::pushOperand(size_t operand) {
         assert(!records.empty() && "[Error]: Push operand to empty operation is not allowed");
-        assert(operands.getLength() < (*records.crbegin()).getStartOperandId() + numOperand((*records.crbegin()).getSource())
-                && "[Error]: Not enough operand slot for new operand");
+        assert(!checkLastOpDone() && "[Error]: Not enough operand slot for this operand");
         assert(operand < records.getLength() && "[Error]: This operand is not registered");
         operands.append(operand);
         return *this;
@@ -83,10 +88,7 @@ namespace Physica::Core {
 
     template<class ScalarType>
     size_t DiffTracer<ScalarType>::pushOperation(ScalarType value, ScalarType tangent, ExpressionType source) {
-        if (!records.empty()) {
-            assert(operands.getLength() == (*records.crbegin()).startOperandId + numOperand((*records.crbegin()).source)
-                    && "[Error]: New record cannot begin unless last record is done");
-        }
+        assert(checkLastOpDone() && "[Error]: New record cannot begin unless last record is done");
         const size_t index = getNumRecord();
         records.append(DiffRecord{operands.getLength(), source});
         values.append(std::move(value));
@@ -95,9 +97,30 @@ namespace Physica::Core {
     }
 
     template<class ScalarType>
+    template<size_t Size>
+    size_t DiffTracer<ScalarType>::pushOperation(const SIMD<ScalarType, Size>& simd, ExpressionType source) {
+        assert(checkLastOpDone() && "[Error]: New record cannot begin unless last record is done");
+        const size_t index = getNumRecord();
+        const size_t length = operands.getLength();
+        const unsigned int numOp = numOperand(source);
+        for (size_t i = 0; i < Size; ++i)
+            records.append(DiffRecord{length + i * numOp, source});
+
+        values.reserve(index + Size);
+        simd.store(values.data_ptr(index));
+        values.setLength(index + Size);
+
+        SIMD<ScalarType, Size> empty(0);
+        tangents.reserve(index + Size);
+        empty.store(tangents.data_ptr(index));
+        tangents.setLength(index + Size);
+        return index;
+    }
+
+    template<class ScalarType>
     void DiffTracer<ScalarType>::reverse(size_t index) {
         assert(index < getNumRecord() && "[Error]: Index overflow");
-        assert(records[0].getSource() == ExpressionType::Set && "[Error]: Unexpected source");
+        assert(records[0].source == ExpressionType::Set && "[Error]: Unexpected source");
         tangents[index] = ScalarType(1);
         for (size_t i = index; i != 0; --i) {
             const ScalarType& tangent = tangents[i];
@@ -109,6 +132,9 @@ namespace Physica::Core {
             const ScalarType& value = values[i];
             switch (record.source) {
                 case ExpressionType::Set:
+                    break;
+                case ExpressionType::Assign:
+                    tangents[operands[startOperandId]] += tangent;
                     break;
                 case ExpressionType::Minus:
                     tangents[operands[startOperandId]] += -tangent;
@@ -223,6 +249,13 @@ namespace Physica::Core {
     }
 
     template<class ScalarType>
+    inline bool DiffTracer<ScalarType>::checkLastOpDone() const {
+        if (records.empty())
+            return true;
+        return operands.getLength() >= (*records.crbegin()).startOperandId + numOperand((*records.crbegin()).source);
+    }
+
+    template<class ScalarType>
     DiffTracer<ScalarType>& DiffTracer<ScalarType>::getInstance() noexcept {
         thread_local static DiffTracer<ScalarType> instance{};
         return instance;
@@ -232,6 +265,7 @@ namespace Physica::Core {
     constexpr unsigned int DiffTracer<ScalarType>::numOperand(ExpressionType type) {
         switch (type) {
             case ExpressionType::Set: return 0;
+            case ExpressionType::Assign: return 1;
             case ExpressionType::Minus: return 1;
             case ExpressionType::Add: return 2;
             case ExpressionType::Sub: return 2;

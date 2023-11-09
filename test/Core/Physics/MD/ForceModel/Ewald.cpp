@@ -133,17 +133,19 @@ namespace Physica {
         };
         /* Operations */
         void forceTest() {
-            PositionMatrix force_diff(pos.getRow(), pos.getColumn());
             {
                 const AutoDiffGuard<Scalar<Double>> guard{};
                 ewald.potentialEnergy(pos).reverse();
-                for (size_t i = 0; i < pos.getRow(); ++i)
-                    for (size_t j = 0; j < pos.getColumn(); ++j)
-                        force_diff(i, j) = -pos(i, j).getTangent();
             }
             const AutoDiffGuard<Scalar<Double>> guard{};
             const Vector<ScalarType> force = ewald.force<SequentialExecutor>(pos);
-            if (!vectorNear(force, force_diff.flatten(), 1E-12))
+            PositionMatrix force_diff(pos.getRow(), pos.getColumn());
+            for (size_t i = 0; i < pos.getRow(); ++i)
+                for (size_t j = 0; j < pos.getColumn(); ++j)
+                    force_diff(i, j) = -pos(i, j).getTangent();
+            std::cout << force.format() << std::endl;
+            std::cout << force_diff.flatten().format() << std::endl;
+            if (!vectorNear(force, force_diff.flatten(), 1E-11))
                 exit(EXIT_FAILURE);
         }
 

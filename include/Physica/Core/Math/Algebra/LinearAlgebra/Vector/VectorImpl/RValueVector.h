@@ -36,24 +36,12 @@ namespace Physica::Core {
     namespace Internal {
         template<class T> class Traits;
 
-        template<class ScalarType, size_t Length>
-        struct EnableSIMDHelper {
-            constexpr static bool good_scalar = false;
-            constexpr static int packet_size = 1;
-        };
-
-        template<ScalarOption Option, size_t Length>
-        struct EnableSIMDHelper<Scalar<Option>, Length> {
-            constexpr static bool good_scalar = true;
-            constexpr static int packet_size = BestPacket<Scalar<Option>, Length>::Size;
-        };
-
         template<class VectorType1, class VectorType2>
         class EnableSIMD {
-            using Helper = EnableSIMDHelper<typename VectorType1::ScalarType, VectorType1::SizeAtCompile>;
-            constexpr static bool same_scalar = std::is_same<typename VectorType1::ScalarType, typename VectorType2::ScalarType>::value;
+            using ScalarType = typename VectorType1::ScalarType;
+            constexpr static bool isSameScalar = std::is_same<ScalarType, typename VectorType2::ScalarType>::value;
         public:
-            constexpr static bool value = same_scalar && Helper::good_scalar && (Helper::packet_size > 1);
+            constexpr static bool value = isSameScalar && BestPacket<ScalarType, VectorType1::SizeAtCompile>::Size > 1;
         };
     }
 
@@ -70,13 +58,16 @@ namespace Physica::Core {
         using Base = Utils::CRTPBase<Derived>;
     public:
         using ScalarType = typename Internal::Traits<Derived>::ScalarType;
+        using PlainScalar = typename ScalarType::PlainScalar;
         constexpr static size_t SizeAtCompile = Internal::Traits<Derived>::SizeAtCompile;
         constexpr static size_t MaxSizeAtCompile = Internal::Traits<Derived>::MaxSizeAtCompile;
         using ColMatrix = DenseMatrix<ScalarType, MatrixOption::Column | MatrixOption::Vector, SizeAtCompile, 1, MaxSizeAtCompile, 1, Utils::HostAllocator<ScalarType>>;
         using RowMatrix = DenseMatrix<ScalarType, MatrixOption::Row | MatrixOption::Vector, 1, SizeAtCompile, 1, MaxSizeAtCompile, Utils::HostAllocator<ScalarType>>;
+        constexpr static bool isReverseDiff = ScalarType::isReverseDiff;
         constexpr static bool isComplex = ScalarType::isComplex;
     private:
         using RealType = typename ScalarType::RealType;
+        constexpr static bool isExpression = !std::is_base_of<LValueVector<Derived>, Derived>::value;
     public:
         /* Operations */
         template<class OtherDerived>

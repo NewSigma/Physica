@@ -22,7 +22,12 @@
 #include "Physica/Utils/Template/CRTPBase.h"
 
 namespace Physica::Core {
+    enum class DiffMode {
+        Forward,
+        Reverse
+    };
     template<class Derived> class ScalarBase;
+    template<class ScalarType, DiffMode Mode> class Differentiable;
 
     template<class T>
     struct is_scalar : public std::is_base_of<ScalarBase<T>, T> {};
@@ -39,9 +44,10 @@ namespace Physica::Core {
         using RealType = typename Internal::Traits<Derived>::RealType;
         using ComplexType = typename Internal::Traits<Derived>::ComplexType;
         using PlainScalar = typename Internal::Traits<Derived>::PlainScalar;
-        static constexpr ScalarOption Option = Internal::Traits<Derived>::Option;
-        static constexpr bool isComplex = Internal::Traits<Derived>::isComplex;
-        static constexpr bool isDifferentiable = Internal::Traits<Derived>::isDifferentiable;
+        constexpr static ScalarOption Option = Internal::Traits<Derived>::Option;
+        constexpr static bool isComplex = Internal::Traits<Derived>::isComplex;
+        constexpr static bool isDifferentiable = Internal::Traits<Derived>::isDifferentiable;
+        constexpr static bool isReverseDiff = std::is_same<ScalarType, Differentiable<PlainScalar, DiffMode::Reverse>>::value;
 
         static_assert(std::is_same<Derived, ScalarType>::value, "[Error]: Inconsistence type between traits and inherit class");
         /* Operators */

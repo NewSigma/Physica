@@ -125,6 +125,7 @@ namespace Physica::Core {
         [[nodiscard]] inline Differentiable operator-() const;
         /* Operations */
         inline void reverse();
+        [[nodiscard]] Differentiable copy() const;
         inline void swap(Differentiable& obj) noexcept;
         /* Getters */
         [[nodiscard]] inline const ScalarType& getValue() const noexcept;

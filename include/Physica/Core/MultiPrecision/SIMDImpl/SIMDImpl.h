@@ -18,6 +18,8 @@
  */
 #pragma once
 
+#include "Physica/Core/MultiPrecision/ScalarImpl/ExpressionType.h"
+
 namespace Physica::Core {
     template<class ScalarType, size_t Size>
     [[nodiscard]] inline ScalarType SIMD<ScalarType, Size>::operator[](int index) const {
@@ -98,5 +100,148 @@ namespace Physica::Core {
     inline ScalarType SIMD<ScalarType, Size>::horizontal_add() const {
         using Physica::horizontal_add;
         return horizontal_add(getImpl());
+    }
+    //////////////////////////////////////////////////////////////////
+    template<class PlainScalar, size_t Size>
+    SIMD<Differentiable<PlainScalar, DiffMode::Reverse>, Size>::SIMD(PlainScalar s) : Base(s) {
+        auto& tracer = DiffTracer<PlainScalar>::getInstance();
+        headIndex = tracer.pushOperation(*this, ExpressionType::Set);
+    }
+
+    template<class PlainScalar, size_t Size>
+    SIMD<Differentiable<PlainScalar, DiffMode::Reverse>, Size>::SIMD(ScalarType s) : Base(s.getValue()) {
+        auto& tracer = DiffTracer<PlainScalar>::getInstance();
+        headIndex = tracer.pushOperation(*this, ExpressionType::Assign);
+        const size_t traceIndex = s.getTraceIndex();
+        for (size_t i = 0; i < Size; ++i)
+            tracer.pushOperand(traceIndex);
+    }
+
+    template<class PlainScalar, size_t Size>
+    SIMD<Differentiable<PlainScalar, DiffMode::Reverse>, Size>::SIMD(Base base, size_t headIndex_)
+            : Base(std::move(base)), headIndex(headIndex_) {
+        assert(headIndex + Size <= DiffTracer<PlainScalar>::getInstance().getNumRecord() && "[Error]: Index overflow");
+    }
+
+    template<class PlainScalar, size_t Size>
+    inline typename SIMD<Differentiable<PlainScalar, DiffMode::Reverse>, Size>::ScalarType
+    SIMD<Differentiable<PlainScalar, DiffMode::Reverse>, Size>::operator[](int i) const {
+        return ScalarType::fromIndex(headIndex + i);
+    }
+
+    template<class PlainScalar, size_t Size>
+    inline SIMD<Differentiable<PlainScalar, DiffMode::Reverse>, Size>
+    SIMD<Differentiable<PlainScalar, DiffMode::Reverse>, Size>::operator+(const SIMD& other) const {
+        auto& tracer = DiffTracer<PlainScalar>::getInstance();
+        const auto temp = Base::operator+(other);
+        const size_t newHeadIndex = tracer.pushOperation(temp, ExpressionType::Add);
+        for (size_t i = 0; i < Size; ++i) {
+            tracer.pushOperand(headIndex + i);
+            tracer.pushOperand(other.headIndex + i);
+        }
+        return {temp, newHeadIndex};
+    }
+
+    template<class PlainScalar, size_t Size>
+    inline SIMD<Differentiable<PlainScalar, DiffMode::Reverse>, Size>
+    SIMD<Differentiable<PlainScalar, DiffMode::Reverse>, Size>::operator-(const SIMD& other) const {
+        auto& tracer = DiffTracer<PlainScalar>::getInstance();
+        const auto temp = Base::operator-(other);
+        const size_t newHeadIndex = tracer.pushOperation(temp, ExpressionType::Sub);
+        for (size_t i = 0; i < Size; ++i) {
+            tracer.pushOperand(headIndex + i);
+            tracer.pushOperand(other.headIndex + i);
+        }
+        return {temp, newHeadIndex};
+    }
+
+    template<class PlainScalar, size_t Size>
+    inline SIMD<Differentiable<PlainScalar, DiffMode::Reverse>, Size>
+    SIMD<Differentiable<PlainScalar, DiffMode::Reverse>, Size>::operator*(const SIMD& other) const {
+        auto& tracer = DiffTracer<PlainScalar>::getInstance();
+        const auto temp = Base::operator*(other);
+        const size_t newHeadIndex = tracer.pushOperation(temp, ExpressionType::Mul);
+        for (size_t i = 0; i < Size; ++i) {
+            tracer.pushOperand(headIndex + i);
+            tracer.pushOperand(other.headIndex + i);
+        }
+        return {temp, newHeadIndex};
+    }
+
+    template<class PlainScalar, size_t Size>
+    inline SIMD<Differentiable<PlainScalar, DiffMode::Reverse>, Size>
+    SIMD<Differentiable<PlainScalar, DiffMode::Reverse>, Size>::operator/(const SIMD& other) const {
+        auto& tracer = DiffTracer<PlainScalar>::getInstance();
+        const auto temp = Base::operator/(other);
+        const size_t newHeadIndex = tracer.pushOperation(temp, ExpressionType::Div);
+        for (size_t i = 0; i < Size; ++i) {
+            tracer.pushOperand(headIndex + i);
+            tracer.pushOperand(other.headIndex + i);
+        }
+        return {temp, newHeadIndex};
+    }
+
+    template<class PlainScalar, size_t Size>
+    inline SIMD<Differentiable<PlainScalar, DiffMode::Reverse>, Size>
+    SIMD<Differentiable<PlainScalar, DiffMode::Reverse>, Size>::operator-() const {
+        auto& tracer = DiffTracer<PlainScalar>::getInstance();
+        const auto temp = Base::operator-();
+        const size_t newHeadIndex = tracer.pushOperation(temp, ExpressionType::Minus);
+        for (size_t i = 0; i < Size; ++i)
+            tracer.pushOperand(headIndex + i);
+        return {temp, newHeadIndex};
+    }
+
+    template<class PlainScalar, size_t Size>
+    inline void SIMD<Differentiable<PlainScalar, DiffMode::Reverse>, Size>::load(const ScalarType* p) {
+        assert(checkContinuous(Size, p) && "[Error]: Load a uncontinuous pointer is a bug");
+        headIndex = p->getTraceIndex();
+        const auto* p1 = DiffTracer<PlainScalar>::getInstance().getValues().data_ptr(headIndex);
+        Base::load(p1);
+    }
+
+    template<class PlainScalar, size_t Size>
+    inline void SIMD<Differentiable<PlainScalar, DiffMode::Reverse>, Size>::load_partial(int n, const ScalarType* p) {
+        assert(checkContinuous(n, p) && "[Error]: Load a uncontinuous pointer is a bug");
+        headIndex = p->getTraceIndex();
+        const auto* p1 = DiffTracer<PlainScalar>::getInstance().getValues().data_ptr(headIndex);
+        Base::load_partial(n, p1);
+    }
+
+    template<class PlainScalar, size_t Size>
+    inline void SIMD<Differentiable<PlainScalar, DiffMode::Reverse>, Size>::store(ScalarType* p) const {
+        for (size_t i = 0; i < Size; ++i)
+            *(p + i) = ScalarType::fromIndex(headIndex + i);
+    }
+
+    template<class PlainScalar, size_t Size>
+    inline void SIMD<Differentiable<PlainScalar, DiffMode::Reverse>, Size>::store_partial(int n, ScalarType* p) const {
+        for (int i = 0; i < n; ++i)
+            *(p + i) = ScalarType::fromIndex(headIndex + i);
+    }
+
+    template<class PlainScalar, size_t Size>
+    inline typename SIMD<Differentiable<PlainScalar, DiffMode::Reverse>, Size>::ScalarType
+    SIMD<Differentiable<PlainScalar, DiffMode::Reverse>, Size>::horizontal_add() const {
+        ScalarType result = 0;
+        for (size_t i = 0; i < Size; ++i)
+            result += this->operator[](i);
+        return result;
+    }
+
+    template<class PlainScalar, size_t Size>
+    inline void SIMD<Differentiable<PlainScalar, DiffMode::Reverse>, Size>::swap(SIMD& obj) noexcept {
+        assert(this != &obj && "[Error]: Self swap is likely a bug");
+        Base::swap(obj);
+        std::swap(headIndex, obj.headIndex);
+    }
+
+    template<class PlainScalar, size_t Size>
+    bool SIMD<Differentiable<PlainScalar, DiffMode::Reverse>, Size>::checkContinuous(int n, const ScalarType* p) {
+        const size_t traceIndex0 = p->getTraceIndex();
+        for (int i = 1; i < n; ++i)
+            if ((traceIndex0 + i) != (p + i)->getTraceIndex())
+                return false;
+        return true;
     }
 }

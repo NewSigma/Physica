@@ -31,6 +31,7 @@
 namespace Physica::Core {
     template<class T, size_t Size> class SIMD;
     template<class T, size_t Size> class BoolSIMD;
+    template<class ScalarType> class DiffTracer;
 
     namespace Internal {
         class Instrset {
@@ -69,7 +70,7 @@ namespace Physica::Core {
             constexpr static bool isForward = std::is_same<ScalarType, Differentiable<PlainScalar, DiffMode::Forward>>::value;
             static_assert(ScalarType::Option == Float || ScalarType::Option == Double, "[Error]: Unsupported float type");
             static_assert(!ScalarType::isComplex, "[Error]: The main template targets on real scalar");
-            static_assert(!ScalarType::isForward, "[Error]: SIMD for forward autodiff is not implemented");
+            static_assert(!isForward, "[Error]: SIMD for forward autodiff is not implemented");
             static_assert(Size % 2 == 0 && Size <= 16, "[Error]: Invalid Size");
             constexpr static bool isSinglePrec = ScalarType::Option == Float;
             constexpr static size_t PlainSize = isForward ? (Size * 2) : Size;
@@ -110,8 +111,8 @@ namespace Physica::Core {
             constexpr static size_t BiggestSize2 = support256 ? size256 : BiggestSize1;
             constexpr static size_t BiggestSize = support512 ? size512 : BiggestSize2;
         public:
-            constexpr static size_t Size = isDynamic ? BiggestSize : Size3;
-            using Type = typename std::conditional<Size == 1 || isComplex || isForward, ScalarType, SIMD<ScalarType, Size>>::type;
+            constexpr static size_t Size = (isComplex || isForward) ? 1 : (isDynamic ? BiggestSize : Size3);
+            using Type = typename std::conditional<Size == 1, ScalarType, SIMD<ScalarType, Size>>::type;
         };
     }
 
@@ -126,12 +127,15 @@ namespace Physica::Core {
         constexpr static bool isForward = std::is_same<ScalarType, Differentiable<PlainScalar, DiffMode::Forward>>::value;
     public:
         using Base = typename Traits::BaseType;
+        using PlainSIMD = This;
     public:
         SIMD() = default;
+        explicit SIMD(ScalarType s) : Base(s.getTrivial()) {}
         explicit SIMD(Base value) : Base(value) {}
         using Base::Base;
         SIMD(const SIMD&) = default;
         SIMD(SIMD&&) noexcept = default;
+        ~SIMD() = default;
         /* Operators */
         SIMD& operator=(const SIMD&) = default;
         SIMD& operator=(SIMD&&) noexcept = default;
@@ -161,6 +165,63 @@ namespace Physica::Core {
         [[nodiscard]] constexpr static size_t size() { return Size; }
         [[nodiscard]] Base& getImpl() noexcept { return *this; }
         [[nodiscard]] const Base& getImpl() const noexcept { return *this; }
+    };
+
+    template<class PlainScalar, size_t Size>
+    class SIMD<Differentiable<PlainScalar, DiffMode::Reverse>, Size> : public SIMD<PlainScalar, Size> {
+        static_assert(!PlainScalar::isDifferentiable, "[Error]: Invalid template param");
+        using ScalarType = Differentiable<PlainScalar, DiffMode::Reverse>;
+        using This = SIMD<ScalarType, Size>;
+        using Base = SIMD<PlainScalar, Size>;
+        using Traits = Internal::Traits<This>;
+        using BoolSIMDType = typename Traits::BoolSIMDType;
+        using TrivialType = typename PlainScalar::TrivialType;
+    public:
+        using PlainSIMD = Base;
+    private:
+        size_t headIndex;
+    public:
+        SIMD() = default;
+        explicit SIMD(int i) : SIMD(PlainScalar(i)) {}
+        explicit SIMD(PlainScalar s);
+        explicit SIMD(ScalarType s);
+        SIMD(Base base, size_t headIndex_);
+        SIMD(const SIMD&) = default;
+        SIMD(SIMD&&) noexcept = default;
+        ~SIMD() = default;
+        /* Operators */
+        SIMD& operator=(const SIMD&) = default;
+        SIMD& operator=(SIMD&&) noexcept = default;
+        [[nodiscard]] inline ScalarType operator[](int i) const;
+        [[nodiscard]] inline SIMD operator+(const SIMD& other) const;
+        [[nodiscard]] inline SIMD operator-(const SIMD& other) const;
+        [[nodiscard]] inline SIMD operator*(const SIMD& other) const;
+        [[nodiscard]] inline SIMD operator/(const SIMD& other) const;
+        [[nodiscard]] inline SIMD operator-() const;
+        void operator+=(const SIMD& other) { *this = *this + other; }
+        void operator-=(const SIMD& other) { *this = *this - other; }
+        void operator*=(const SIMD& other) { *this = *this * other; }
+        void operator/=(const SIMD& other) { *this = *this / other; }
+        using Base::operator>;
+        using Base::operator<;
+        using Base::operator>=;
+        using Base::operator<=;
+        /* Operations */
+        inline void load(const ScalarType* p);
+        inline void load_partial(int n, const ScalarType* p);
+        inline void store(ScalarType* p) const;
+        inline void store_partial(int n, ScalarType* p) const;
+        [[nodiscard]] inline ScalarType horizontal_add() const;
+        inline void swap(SIMD& obj) noexcept;
+        /* Getters */
+        using Base::size;
+        using Base::getImpl;
+        [[nodiscard]] size_t getHeadTraceIndex() const noexcept { return headIndex; }
+        /* Setters */
+        void setHeadIndex(size_t headIndex_) noexcept { headIndex = headIndex_; }
+    private:
+        using Base::insert; //Insert a scalar may lead to incontineous memory, which harms performance
+        [[nodiscard]] static bool checkContinuous(int n, const ScalarType* p);
     };
 
     template<class ScalarType, size_t Size>

@@ -51,8 +51,10 @@ namespace Physica::Core {
         using typename Base::ColMatrix;
         using typename Base::RowMatrix;
     public:
-        using Storage::Storage;
         Vector() = default;
+        explicit Vector(size_t length_);
+        Vector(size_t length_, const T& value);
+        Vector(std::initializer_list<T> list);
         Vector(Storage array) noexcept;
         template<class Derived>
         Vector(const RValueVector<Derived>& v);

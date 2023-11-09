@@ -41,17 +41,33 @@ namespace Physica::Core {
             using PacketType = typename Internal::BestPacket<typename T1::ScalarType, SizeAtCompile>::Type;
         public:
             static void run(LValueVector<T1>& v1, const RValueVector<T2>& v2) {
-                const size_t length = v1.getLength();
-                size_t i = 0;
-                const size_t to = length / PacketType::size() * PacketType::size();
-                for (; i < to; i += PacketType::size()) {
-                    const PacketType sum = v1.getDerived().template packet<PacketType>(i) + v2.getDerived().template packet<PacketType>(i);
-                    v1.getDerived().writePacket(i, sum);
+                if constexpr (SizeAtCompile != Dynamic) {
+                    constexpr size_t to = SizeAtCompile / PacketType::size() * PacketType::size();
+                    for (size_t i = 0; i < to; i += PacketType::size()) {
+                        const PacketType sum = v1.getDerived().template packet<PacketType>(i) + v2.getDerived().template packet<PacketType>(i);
+                        v1.getDerived().writePacket(i, sum);
+                    }
+
+                    constexpr size_t i = SizeAtCompile - SizeAtCompile % PacketType::size();
+                    if constexpr (i != SizeAtCompile) {
+                        constexpr size_t count = SizeAtCompile - i;
+                        const PacketType sum = v1.getDerived().template packetPartial<PacketType>(i, count) + v2.getDerived().template packetPartial<PacketType>(i, count);
+                        v1.getDerived().writePacketPartial(i, count, sum);
+                    }
                 }
-                if (to != length) {
-                    const size_t count = length - i;
-                    const PacketType sum = v1.getDerived().template packetPartial<PacketType>(i, count) + v2.getDerived().template packetPartial<PacketType>(i, count);
-                    v1.getDerived().writePacketPartial(i, count, sum);
+                else {
+                    const size_t length = v1.getLength();
+                    size_t i = 0;
+                    const size_t to = length / PacketType::size() * PacketType::size();
+                    for (; i < to; i += PacketType::size()) {
+                        const PacketType sum = v1.getDerived().template packet<PacketType>(i) + v2.getDerived().template packet<PacketType>(i);
+                        v1.getDerived().writePacket(i, sum);
+                    }
+                    if (to != length) {
+                        const size_t count = length - i;
+                        const PacketType sum = v1.getDerived().template packetPartial<PacketType>(i, count) + v2.getDerived().template packetPartial<PacketType>(i, count);
+                        v1.getDerived().writePacketPartial(i, count, sum);
+                    }
                 }
             }
         };
@@ -67,6 +83,19 @@ namespace Physica::Core {
     ContinuousVector<Derived>& ContinuousVector<Derived>::operator=(ContinuousVector<Derived>&& v) noexcept {
         Base::operator=(std::forward<Base>(v));
         return *this;
+    }
+
+    template<class Derived>
+    template<class AnyScalar>
+    inline Derived& ContinuousVector<Derived>::operator=(const ScalarBase<AnyScalar>& s) {
+        static_assert(ScalarType::isComplex || !AnyScalar::isComplex, "[Error]: Assigning a complex number to real vector is not allowed");
+        for (size_t i = 0; i < Base::getLength(); ++i) {
+            if constexpr (AnyScalar::isReverseDiff)
+                (*this)[i] = ScalarType(s.getDerived().copy());
+            else
+                (*this)[i] = ScalarType(s.getDerived());
+        }
+        return Base::getDerived();
     }
 
     template<class Derived>
@@ -148,6 +177,27 @@ namespace Physica::Core {
     template<size_t Length>
     inline const ContinuousVectorBlock<Derived, Length> ContinuousVector<Derived>::segment(size_t from, size_t to) const {
         return ContinuousVectorBlock<Derived, Length>(Base::getConstCastDerived(), from, to);
+    }
+
+    template<class Derived>
+    bool ContinuousVector<Derived>::checkContinuous() const {
+        if constexpr (isReverseDiff) {
+            const size_t traceIndex0 = (*this)[0].getTraceIndex();
+            for (size_t i = 1; i < Base::getLength(); ++i)
+                if ((*this)[i].getTraceIndex() != traceIndex0 + i)
+                    return false;
+        }
+        return true;
+    }
+
+    template<class Derived>
+    void ContinuousVector<Derived>::makeContinuous() {
+        if constexpr (isReverseDiff) {
+            for (size_t i = 0; i < Base::getLength(); ++i) {
+                auto& elem = (*this)[i];
+                elem = elem.copy();
+            }
+        }
     }
 
     template<class Derived>

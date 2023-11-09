@@ -197,11 +197,11 @@ namespace Physica::Core {
         [[nodiscard]] ScalarType calc(size_t index) const { return ScalarType(exp.calc(index)) * ScalarType(s); }
         template<class PacketType>
         [[nodiscard]] PacketType packet(size_t index) const {
-            return exp.template packet<PacketType>(index) * PacketType(s.getTrivial());
+            return exp.template packet<PacketType>(index) * PacketType(s);
         }
         template<class PacketType>
         [[nodiscard]] PacketType packetPartial(size_t index, size_t count) const {
-            return exp.template packetPartial<PacketType>(index, count) * PacketType(s.getTrivial());
+            return exp.template packetPartial<PacketType>(index, count) * PacketType(s);
         }
         [[nodiscard]] __host__ __device__ size_t getLength() const { return exp.getLength(); }
     };

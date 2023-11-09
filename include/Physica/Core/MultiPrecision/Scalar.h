@@ -32,11 +32,6 @@
 
 namespace Physica::Core {
     //Forward declarations
-    enum class DiffMode {
-        Forward,
-        Reverse
-    };
-    template<class ScalarType, DiffMode Mode> class Differentiable;
     template<class AnyScalar> class ComplexScalar;
     template<ScalarOption Option> __host__ __device__ inline Scalar<Option> abs(const Scalar<Option>& s);
     template<ScalarOption Option> __host__ __device__ inline Scalar<Option> square(const Scalar<Option>& s);

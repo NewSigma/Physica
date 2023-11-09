@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2022 WeiBo He.
+ * Copyright 2020-2023 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -20,13 +20,25 @@
 
 #include <cassert>
 #include <random>
-/**
- * This file is part of implementations of \Scalar.
- * Do not include this header file, include Scalar.h instead.
- */
+
 namespace Physica::Core {
     template<class T, size_t Length, size_t MaxLength, class Allocator>
-    Vector<T, Length, MaxLength, Allocator>::Vector(Storage array) noexcept : Storage(std::move(array)) {}
+    Vector<T, Length, MaxLength, Allocator>::Vector(size_t length_) : Storage(length_) {}
+
+    template<class T, size_t Length, size_t MaxLength, class Allocator>
+    Vector<T, Length, MaxLength, Allocator>::Vector(size_t length_, const T& value) : Vector(length_) {
+        *this = value;
+    }
+
+    template<class T, size_t Length, size_t MaxLength, class Allocator>
+    Vector<T, Length, MaxLength, Allocator>::Vector(std::initializer_list<T> list) : Storage(std::move(list)) {
+        Base::makeContinuous();
+    }
+
+    template<class T, size_t Length, size_t MaxLength, class Allocator>
+    Vector<T, Length, MaxLength, Allocator>::Vector(Storage array) noexcept : Storage(std::move(array)) {
+        Base::makeContinuous();
+    }
 
     template<class T, size_t Length, size_t MaxLength, class Allocator>
     template<class Derived>

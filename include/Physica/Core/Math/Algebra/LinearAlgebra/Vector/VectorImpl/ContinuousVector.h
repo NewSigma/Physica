@@ -31,12 +31,16 @@ namespace Physica::Core {
     public:
         using Base = LValueVector<Derived>;
         using typename Base::ScalarType;
+        using typename Base::PlainScalar;
+        using Base::isReverseDiff;
     public:
         ~ContinuousVector() = default;
         /* Operators */
+        using Base::operator=;
         ContinuousVector& operator=(const ContinuousVector& v);
         ContinuousVector& operator=(ContinuousVector&& v) noexcept;
-        using Base::operator=;
+        template<class AnyScalar>
+        inline Derived& operator=(const ScalarBase<AnyScalar>& s);
         /* Operations */
         template<class PacketType> [[nodiscard]] inline PacketType packet(size_t index) const;
         template<class PacketType> [[nodiscard]] inline PacketType packetPartial(size_t index, size_t count) const;
@@ -53,6 +57,9 @@ namespace Physica::Core {
         template<size_t Length = Dynamic> inline const ContinuousVectorBlock<Derived, Length> tail(size_t from) const;
         template<size_t Length = Dynamic> inline ContinuousVectorBlock<Derived, Length> segment(size_t from, size_t to);
         template<size_t Length = Dynamic> inline const ContinuousVectorBlock<Derived, Length> segment(size_t from, size_t to) const;
+
+        [[nodiscard]] bool checkContinuous() const;
+        void makeContinuous();
 
         template<class SpaceType>
         void read(const H5::DataSet& dataset,

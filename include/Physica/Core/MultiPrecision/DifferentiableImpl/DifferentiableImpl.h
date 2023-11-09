@@ -87,6 +87,15 @@ namespace Physica::Core {
     }
 
     template<class ScalarType>
+    Differentiable<ScalarType, DiffMode::Reverse> Differentiable<ScalarType, DiffMode::Reverse>::copy() const {
+        auto& tracer = DiffTracer<ScalarType>::getInstance();
+        Differentiable<ScalarType, DiffMode::Reverse> result{};
+        result.index = tracer.pushOperation(getValue(), ExpressionType::Assign);
+        tracer.pushOperand(index);
+        return result;
+    }
+
+    template<class ScalarType>
     inline void Differentiable<ScalarType, DiffMode::Reverse>::swap(Differentiable<ScalarType, DiffMode::Reverse>& obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         std::swap(index, obj.index);

@@ -40,7 +40,7 @@ namespace Physica::Core {
             using ScalarType = typename T1::ScalarType;
             using PacketType = typename Internal::BestPacket<ScalarType, SizeAtCompile>::Type;
 
-            inline static void run(const RValueVector<T1>& v1, LValueVector<T2>& v2) {
+            inline static void run(const RValueVector<T1>& v1, LValueVector<T2>& v2) { //FIXME: The function declaration is not compatible to AddAssignImpl
                 if constexpr (SizeAtCompile != Dynamic) {
                     constexpr size_t to = SizeAtCompile / PacketType::size() * PacketType::size();
                     for (size_t i = 0; i < to; i += PacketType::size())
@@ -130,6 +130,10 @@ namespace Physica::Core {
         ScalarType buffer[PacketType::size()];
         for (size_t i = 0; i < PacketType::size(); ++i, ++index)
             buffer[i] = calc(index);
+        if constexpr (isExpression && isReverseDiff) { //Optimize: For expression such as A + B, there is no need to create new node
+            for (auto& elem : buffer)
+                elem = elem.copy();
+        }
         PacketType packet{};
         packet.load(buffer);
         return packet;
@@ -138,9 +142,13 @@ namespace Physica::Core {
     template<class Derived>
     template<class PacketType>
     inline PacketType RValueVector<Derived>::packetPartial(size_t index, size_t count) const {
-        ScalarType buffer[PacketType::size()];
+        ScalarType buffer[PacketType::size()]{};
         for (size_t i = 0; i < count; ++i, ++index)
             buffer[i] = calc(index);
+        if constexpr (isExpression && isReverseDiff) {
+            for (auto& elem : buffer)
+                elem = elem.copy();
+        }
         PacketType packet{};
         packet.load_partial(count, buffer);
         return packet;

@@ -24,6 +24,7 @@ namespace Physica::Core {
      */
     enum class ExpressionType : char {
         Set,
+        Assign,
         Minus,
         Add,
         Sub,

@@ -353,7 +353,7 @@ namespace Physica::Core {
         else if constexpr (Dim == 2)
             return (lattice.row(0).crossProduct(lattice.row(1))).compute().norm();
         else
-            return abs((lattice.row(0).crossProduct(lattice.row(1))).compute() * lattice.row(2).asVector());
+            return abs(VectorType(lattice.row(0).crossProduct(lattice.row(1))) * lattice.row(2).asVector());
     }
 
     template<class ScalarType, unsigned int Dim>

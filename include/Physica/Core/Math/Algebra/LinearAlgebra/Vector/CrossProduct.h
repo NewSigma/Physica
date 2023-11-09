@@ -40,8 +40,10 @@ namespace Physica::Core {
         static_assert((Internal::Traits<AnyVector1>::SizeAtCompile == 3 || Internal::Traits<AnyVector1>::SizeAtCompile == Dynamic) &&
                       (Internal::Traits<AnyVector2>::SizeAtCompile == 3 || Internal::Traits<AnyVector2>::SizeAtCompile == Dynamic),
                       "CrossProduct can apply on 3-dim vectors only");
-        using ReturnType = Vector<typename Internal::Traits<CrossProduct>::ScalarType, 3, 3>;
-    public:
+        using This = CrossProduct<AnyVector1, AnyVector2>;
+        using Base = RValueVector<This>;
+        using Base::isReverseDiff;
+    private:
         const AnyVector1& v1;
         const AnyVector2& v2;
     public:
@@ -51,19 +53,15 @@ namespace Physica::Core {
             assert(v2.getLength() == 3);
         }
         /* Operations */
-        [[nodiscard]] ReturnType compute() const noexcept {
-            ReturnType result{};
-            result[0] = v1[1] * v2[2] - v1[2] * v2[1];
-            result[1] = v1[2] * v2[0] - v1[0] * v2[2];
-            result[2] = v1[0] * v2[1] - v1[1] * v2[0];
-            return result;
-        }
-
         template<class OtherDerived>
         void assignTo(LValueVector<OtherDerived>& v) const {
             v[0] = v1[1] * v2[2] - v1[2] * v2[1];
             v[1] = v1[2] * v2[0] - v1[0] * v2[2];
             v[2] = v1[0] * v2[1] - v1[1] * v2[0];
+            if constexpr (isReverseDiff) {
+                for (int i = 0; i < 3; ++i)
+                    v[i] = v[i].copy();
+            }
         }
         /* Getters */
         [[nodiscard]] constexpr size_t getLength() const noexcept { return 3; }

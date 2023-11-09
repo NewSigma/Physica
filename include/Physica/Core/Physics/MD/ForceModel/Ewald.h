@@ -181,6 +181,8 @@ namespace Physica::Core {
                     }
                 }
             });
+        if constexpr (ScalarType::isReverseDiff)
+            kSpaceSum.makeContinuous();
         kSpaceSum *= ScalarType(8 * M_PI) * inv_volume; // 8 Pi because time reversal symmetry
         return kSpaceSum;
     }
