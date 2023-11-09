@@ -123,92 +123,84 @@ namespace Physica::Core {
         assert(records[0].source == ExpressionType::Set && "[Error]: Unexpected source");
         tangents[index] = ScalarType(1);
         for (size_t i = index; i != 0; --i) {
-            const ScalarType& tangent = tangents[i];
-            if (tangent.isZero())
-                continue;
-
             const auto& record = records[i];
-            const size_t startOperandId = record.startOperandId;
+            const ScalarType& tangent = tangents[i];
+            if (tangent.isZero() || record.source == ExpressionType::Set)
+                continue;
+            
             const ScalarType& value = values[i];
-            switch (record.source) {
-                case ExpressionType::Set:
-                    break;
-                case ExpressionType::Assign:
-                    tangents[operands[startOperandId]] += tangent;
-                    break;
-                case ExpressionType::Minus:
-                    tangents[operands[startOperandId]] += -tangent;
-                    break;
-                case ExpressionType::Add:
-                    tangents[operands[startOperandId]] += tangent;
-                    tangents[operands[startOperandId + 1]] += tangent;
-                    break;
-                case ExpressionType::Sub:
-                    tangents[operands[startOperandId]] += tangent;
-                    tangents[operands[startOperandId + 1]] -= tangent;
-                    break;
-                case ExpressionType::Mul: {
-                    const size_t indexX = operands[startOperandId];
-                    const size_t indexY = operands[startOperandId + 1];
-                    tangents[indexX] += tangent * values[indexY];
-                    tangents[indexY] += tangent * values[indexX];
-                    break;
+            const size_t startOperandId = record.startOperandId;
+            const ExpressionType source = record.source;
+            const size_t indexX = operands[startOperandId];
+            ScalarType& tangentX = tangents[indexX];
+            /* Unitary Operations */ {
+                switch (source) {
+                    case ExpressionType::Assign:
+                    case ExpressionType::Minus:
+                        tangentX += tangent * ScalarType(source == ExpressionType::Assign ? 1.0 : -1.0);
+                        continue;
+                    case ExpressionType::Reciprocal:
+                        tangentX -= tangent * square(value);
+                        continue;
+                    case ExpressionType::Sqrt:
+                        tangentX += tangent / value * ScalarType(0.5);
+                        continue;
+                    case ExpressionType::Cbrt:
+                        tangentX += tangent / (square(value) * ScalarType(3));
+                        continue;
+                    case ExpressionType::Abs:
+                        tangentX += values[indexX].isPositive() ? tangent : -tangent;
+                        continue;
+                    case ExpressionType::Relu:
+                        tangentX += values[indexX].isPositive() ? tangent : ScalarType(0);
+                        continue;
+                    case ExpressionType::Square:
+                        tangentX += tangent * values[indexX] * ScalarType(2);
+                        continue;
+                    case ExpressionType::Ln:
+                        tangentX += tangent / values[indexX];
+                        continue;
+                    case ExpressionType::Exp:
+                        tangentX += tangent * value;
+                        continue;
+                    case ExpressionType::Sin:
+                        tangentX += tangent * cos(values[indexX]);
+                        continue;
+                    case ExpressionType::Cos:
+                        tangentX -= tangent * sin(values[indexX]);
+                        continue;
+                    default:;
                 }
-                case ExpressionType::Div: {
-                    const size_t indexX = operands[startOperandId];
-                    const size_t indexY = operands[startOperandId + 1];
-                    const ScalarType dx = tangent * reciprocal(values[indexY]);
-                    tangents[indexX] += dx;
-                    tangents[indexY] -= dx * value;
-                    break;
-                }
-                case ExpressionType::Reciprocal:
-                    tangents[operands[startOperandId]] -= tangent * square(value);
-                    break;
-                case ExpressionType::Sqrt: {
-                    tangents[operands[startOperandId]] += tangent / value * ScalarType(0.5);
-                    break;
-                }
-                case ExpressionType::Cbrt:
-                    tangents[operands[startOperandId]] += tangent / (square(value) * ScalarType(3));
-                    break;
-                case ExpressionType::Abs: {
-                    const size_t index = operands[startOperandId];
-                    tangents[index] += values[index].isPositive() ? tangent : -tangent;
-                    break;
-                }
-                case ExpressionType::Relu: {
-                    const size_t index = operands[startOperandId];
-                    tangents[index] += values[index].isPositive() ? tangent : ScalarType(0);
-                    break;
-                }
-                case ExpressionType::Square: {
-                    const size_t index = operands[startOperandId];
-                    tangents[index] += tangent * values[index] * ScalarType(2);
-                    break;
-                }
-                case ExpressionType::Ln: {
-                    const size_t index = operands[startOperandId];
-                    tangents[index] += tangent / values[index];
-                    break;
-                }
-                case ExpressionType::Exp: {
-                    tangents[operands[startOperandId]] += tangent * value;
-                    break;
-                }
-                case ExpressionType::Sin: {
-                    const size_t index = operands[startOperandId];
-                    tangents[index] += tangent * cos(values[index]);
-                    break;
-                }
-                case ExpressionType::Cos: {
-                    const size_t index = operands[startOperandId];
-                    tangents[index] -= tangent * sin(values[index]);
-                    break;
-                }
-                default: [[unlikely]]
-                    throw NotImplementedException("[Error]: Undefined operator for back propagation");
             }
+            /* Binary Operations */ {
+                const size_t indexY = operands[startOperandId + 1];
+                ScalarType& tangentY = tangents[indexY];
+                switch (source) {
+                    case ExpressionType::Add:
+                    case ExpressionType::Sub:
+                        tangentX += tangent;
+                        tangentY += tangent * ScalarType(source == ExpressionType::Add ? 1.0 : -1.0);
+                        continue;
+                    case ExpressionType::MulAdd: {
+                        const size_t indexZ = operands[startOperandId + 2];
+                        ScalarType& tangentZ = tangents[indexZ];
+                        tangentZ += tangent;
+                        [[fallthrough]];
+                    }
+                    case ExpressionType::Mul:
+                        tangentX += tangent * values[indexY];
+                        tangentY += tangent * values[indexX];
+                        break;
+                    case ExpressionType::Div: {
+                        const ScalarType dx = tangent * reciprocal(values[indexY]);
+                        tangentX += dx;
+                        tangentY -= dx * value;
+                        break;
+                    }
+                    default:;
+                }
+            }
+            assert(false && "[Error]: Undefined operator for back propagation");
         }
     }
 
@@ -271,6 +263,7 @@ namespace Physica::Core {
             case ExpressionType::Sub: return 2;
             case ExpressionType::Mul: return 2;
             case ExpressionType::Div: return 2;
+            case ExpressionType::MulAdd: return 3;
             case ExpressionType::More: return 2;
             case ExpressionType::MoreEq: return 2;
             case ExpressionType::Reciprocal: return 1;
@@ -284,7 +277,7 @@ namespace Physica::Core {
             case ExpressionType::Pow: return 2;
             case ExpressionType::Sin: return 1;
             case ExpressionType::Cos: return 1;
-            default:
+            default: [[unlikely]]
                 throw std::invalid_argument("[Error]: Unrecognized type");
         }
     }

@@ -30,6 +30,7 @@ namespace Physica::Core {
         Sub,
         Mul,
         Div,
+        MulAdd,
         More,
         MoreEq,
         Reciprocal,

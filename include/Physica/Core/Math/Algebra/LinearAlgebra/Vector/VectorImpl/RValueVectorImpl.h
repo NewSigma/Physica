@@ -92,10 +92,14 @@ namespace Physica::Core {
                     const size_t to = length / PacketType::size() * PacketType::size();
                     PacketType buffer(0);
                     for (; i < to; i += PacketType::size())
-                        buffer += (v1.getDerived().template packet<PacketType>(i) * v2.getDerived().template packet<PacketType>(i));
+                        buffer = mul_add(v1.getDerived().template packet<PacketType>(i),
+                                         v2.getDerived().template packet<PacketType>(i),
+                                         buffer);
                     if (to != length) {
                         const size_t count = length - i;
-                        buffer += v1.getDerived().template packetPartial<PacketType>(i, count) * v2.getDerived().template packetPartial<PacketType>(i, count);
+                        buffer = mul_add(v1.getDerived().template packetPartial<PacketType>(i, count),
+                                         v2.getDerived().template packetPartial<PacketType>(i, count),
+                                         buffer);
                     }
                     return buffer.horizontal_add();
                 }

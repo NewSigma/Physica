@@ -233,6 +233,24 @@ namespace Physica::Core {
     [[nodiscard]] inline SIMD<ScalarType, Size> operator*(const ScalarType& scalar, const SIMD<ScalarType, Size>& packet) {
         return packet * scalar;
     }
+
+    template<class ScalarType, size_t Size>
+    [[nodiscard]] inline SIMD<ScalarType, Size> mul_add(
+            const SIMD<ScalarType, Size>& a,
+            const SIMD<ScalarType, Size>& b,
+            const SIMD<ScalarType, Size>& c);
+
+    template<class ScalarType, size_t Size>
+    [[nodiscard]] inline SIMD<ScalarType, Size> nmul_add(
+            const SIMD<ScalarType, Size> a,
+            const SIMD<ScalarType, Size> b,
+            const SIMD<ScalarType, Size> c);
+
+    template<class ScalarType, size_t Size>
+    [[nodiscard]] inline SIMD<ScalarType, Size> mul_sub(
+            const SIMD<ScalarType, Size> a,
+            const SIMD<ScalarType, Size> b,
+            const SIMD<ScalarType, Size> c);
 }
 
 #include "SIMDImpl/BoolSIMD.h"

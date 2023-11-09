@@ -244,4 +244,43 @@ namespace Physica::Core {
                 return false;
         return true;
     }
+    //////////////////////////////////////////////////////////////////
+    template<class ScalarType, size_t Size>
+    [[nodiscard]] inline SIMD<ScalarType, Size> mul_add(
+            const SIMD<ScalarType, Size>& a,
+            const SIMD<ScalarType, Size>& b,
+            const SIMD<ScalarType, Size>& c) {
+        if constexpr (ScalarType::isReverseDiff) {
+            using PlainScalar = typename ScalarType::PlainScalar;
+            auto& tracer = DiffTracer<PlainScalar>::getInstance();
+            const auto temp = mul_add<PlainScalar, Size>(a, b, c);
+            const size_t newHeadIndex = tracer.pushOperation(temp, ExpressionType::MulAdd);
+            for (size_t i = 0; i < Size; ++i) {
+                tracer.pushOperand(a.getHeadTraceIndex() + i);
+                tracer.pushOperand(b.getHeadTraceIndex() + i);
+                tracer.pushOperand(c.getHeadTraceIndex() + i);
+            }
+            return {temp, newHeadIndex};
+        }
+        else
+            return SIMD<ScalarType, Size>(mul_add(a.getImpl(), b.getImpl(), c.getImpl()));
+    }
+
+    template<class ScalarType, size_t Size>
+    [[nodiscard]] inline SIMD<ScalarType, Size> nmul_add(
+            const SIMD<ScalarType, Size> a,
+            const SIMD<ScalarType, Size> b,
+            const SIMD<ScalarType, Size> c) {
+        static_assert(!ScalarType::isDifferentiable, "[Error]: Not implemented");
+        return SIMD<ScalarType, Size>(nmul_add(a.getImpl(), b.getImpl(), c.getImpl()));
+    }
+
+    template<class ScalarType, size_t Size>
+    [[nodiscard]] inline SIMD<ScalarType, Size> mul_sub(
+            const SIMD<ScalarType, Size> a,
+            const SIMD<ScalarType, Size> b,
+            const SIMD<ScalarType, Size> c) {
+        static_assert(!ScalarType::isDifferentiable, "[Error]: Not implemented");
+        return SIMD<ScalarType, Size>(mul_sub(a.getImpl(), b.getImpl(), c.getImpl()));
+    }
 }
