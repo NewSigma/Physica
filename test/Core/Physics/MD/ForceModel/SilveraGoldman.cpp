@@ -27,7 +27,7 @@ using PlainScalar = Scalar<Double>;
 using ScalarType = Differentiable<PlainScalar, DiffMode::Reverse>;
 
 int main() {
-    SilveraGoldman<ScalarType> sg(1.0);
+    SilveraGoldman<ScalarType, true> sg(1.0);
     {
         const AutoDiffGuard<PlainScalar> guard{};
         ScalarType r = 2.0;

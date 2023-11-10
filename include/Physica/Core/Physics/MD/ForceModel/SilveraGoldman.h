@@ -21,13 +21,14 @@
 #include "PairModel.h"
 
 namespace Physica::Core {
-    template<class ScalarType> class SilveraGoldman;
+    template<class ScalarType, bool IsPeriodBoundary> class SilveraGoldman;
 
     namespace Internal {
-        template<class T>
-        class Traits<SilveraGoldman<T>> {
+        template<class T, bool B>
+        class Traits<SilveraGoldman<T, B>> {
         public:
             using ScalarType = T;
+            constexpr static bool IsPeriodBoundary = B;
             constexpr static bool IsPotDependOnAtomIndex = false;
         };
     }
@@ -37,8 +38,8 @@ namespace Physica::Core {
      * Reference:
      * [1] I. F. Silvera and V. V. Goldman, J. Chem. Phys. 69, 4209 (1978).
      */
-    template<class ScalarType>
-    class SilveraGoldman final : public PairModel<SilveraGoldman<ScalarType>> {
+    template<class ScalarType, bool IsPeriodBoundary>
+    class SilveraGoldman final : public PairModel<SilveraGoldman<ScalarType, IsPeriodBoundary>> {
         constexpr static double alpha = 1.713;
         constexpr static double beta = 1.5671;
         constexpr static double gamma = 0.00993;
@@ -49,7 +50,7 @@ namespace Physica::Core {
         constexpr static double c10 = 4813.9;
         constexpr static double squaredCutoff = cutoff * cutoff;
 
-        using This = SilveraGoldman<ScalarType>;
+        using This = SilveraGoldman<ScalarType, IsPeriodBoundary>;
         using Base = PairModel<This>;
         using typename Base::PlainScalar;
         using Vector4D = Vector<ScalarType, 4>;
@@ -67,22 +68,23 @@ namespace Physica::Core {
         inline void swap(SilveraGoldman& obj) noexcept;
     };
 
-    template<class ScalarType>
-    SilveraGoldman<ScalarType>::SilveraGoldman(PlainScalar cutoff_) : Base(std::move(cutoff_)) {}
+    template<class ScalarType, bool IsPeriodBoundary>
+    SilveraGoldman<ScalarType, IsPeriodBoundary>::SilveraGoldman(PlainScalar cutoff_) : Base(std::move(cutoff_)) {}
 
-    template<class ScalarType>
-    SilveraGoldman<ScalarType>& SilveraGoldman<ScalarType>::operator=(SilveraGoldman obj) noexcept {
+    template<class ScalarType, bool IsPeriodBoundary>
+    SilveraGoldman<ScalarType, IsPeriodBoundary>&
+    SilveraGoldman<ScalarType, IsPeriodBoundary>::operator=(SilveraGoldman obj) noexcept {
         swap(obj);
         return *this;
     }
 
-    template<class ScalarType>
-    inline void SilveraGoldman<ScalarType>::swap(SilveraGoldman& obj) noexcept {
+    template<class ScalarType, bool IsPeriodBoundary>
+    inline void SilveraGoldman<ScalarType, IsPeriodBoundary>::swap(SilveraGoldman& obj) noexcept {
         Base::swap(obj);
     }
 
-    template<class ScalarType>
-    inline ScalarType SilveraGoldman<ScalarType>::pot_functor(
+    template<class ScalarType, bool IsPeriodBoundary>
+    inline ScalarType SilveraGoldman<ScalarType, IsPeriodBoundary>::pot_functor(
             [[maybe_unused]] size_t i, [[maybe_unused]] size_t j, ScalarType r, ScalarType r2) const {
         ScalarType result = exp(-r2 * PlainScalar(gamma) - r * PlainScalar(beta) + PlainScalar(alpha));
         const ScalarType rep_r = reciprocal(r);
@@ -103,8 +105,8 @@ namespace Physica::Core {
         return result;
     }
 
-    template<class ScalarType>
-    inline ScalarType SilveraGoldman<ScalarType>::force_functor(
+    template<class ScalarType, bool IsPeriodBoundary>
+    inline ScalarType SilveraGoldman<ScalarType, IsPeriodBoundary>::force_functor(
             [[maybe_unused]] size_t i, [[maybe_unused]] size_t j, ScalarType r, ScalarType r2) const {
         const ScalarType factor = r * PlainScalar(gamma * 2) + PlainScalar(beta);
         ScalarType result = exp(-r2 * PlainScalar(gamma) - (r * PlainScalar(beta) - PlainScalar(alpha))) * factor;
@@ -130,8 +132,8 @@ namespace Physica::Core {
         return result;
     }
 
-    template<class ScalarType>
-    inline ScalarType SilveraGoldman<ScalarType>::forceConst_functor(ScalarType r, ScalarType r2) const {
+    template<class ScalarType, bool IsPeriodBoundary>
+    inline ScalarType SilveraGoldman<ScalarType, IsPeriodBoundary>::forceConst_functor(ScalarType r, ScalarType r2) const {
         const ScalarType factor = square(r * PlainScalar(2 * gamma) + PlainScalar(beta)) - PlainScalar(2 * gamma);
         ScalarType result = exp(-r2 * PlainScalar(gamma) - (r * PlainScalar(beta) - PlainScalar(alpha))) * factor;
         const ScalarType rep_r = reciprocal(r);

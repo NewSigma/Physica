@@ -39,7 +39,7 @@ class ForceConstTest {
     constexpr static double mass = PhyConst<AU>::atomMass(1) * 2;
 public:
     static void run() {
-        SilveraGoldman<ScalarType> sg(pair_cutoff);
+        SilveraGoldman<ScalarType, true> sg(pair_cutoff);
         auto& gen = RandomPoolType::getGen();
         const auto cell = makeSystem(gen);
         const auto fc = sg.forceConst(cell);

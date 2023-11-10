@@ -28,10 +28,6 @@
  */
 namespace Physica {
     namespace Core {
-        namespace Internal {
-            template<class T> class device_obj;
-        }
-
         template<class T> class device_obj;
     }
 
@@ -62,11 +58,6 @@ namespace Physica {
 
         template<class T>
         struct is_device_obj<Physica::Core::device_obj<T>> {
-            constexpr static bool value = true;
-        };
-
-        template<class T>
-        struct is_device_obj<Physica::Core::Internal::device_obj<T>> {
             constexpr static bool value = true;
         };
 

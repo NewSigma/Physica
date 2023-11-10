@@ -271,12 +271,12 @@ namespace Physica::Core {
     template<class ScalarType>
     typename CellList<ScalarType>::Index3D
     CellList<ScalarType>::posToIndex(size_t atomId) const {
-        assert(ScalarType(0) <= directPos(atomId, 0) && directPos(atomId, 0) <= ScalarType(1));
-        assert(ScalarType(0) <= directPos(atomId, 1) && directPos(atomId, 1) <= ScalarType(1));
-        assert(ScalarType(0) <= directPos(atomId, 2) && directPos(atomId, 2) <= ScalarType(1));
         const ScalarType x0 = abs(directPos(atomId, 0) - PlainScalar(std::numeric_limits<ScalarType>::epsilon()));
         const ScalarType y0 = abs(directPos(atomId, 1) - PlainScalar(std::numeric_limits<ScalarType>::epsilon()));
         const ScalarType z0 = abs(directPos(atomId, 2) - PlainScalar(std::numeric_limits<ScalarType>::epsilon()));
+        assert(ScalarType(0) <= x0 && x0 <= ScalarType(1));
+        assert(ScalarType(0) <= y0 && y0 <= ScalarType(1));
+        assert(ScalarType(0) <= z0 && z0 <= ScalarType(1));
         const size_t x = size_t(double(x0 * ScalarType(getCellGridDimX())));
         const size_t y = size_t(double(y0 * ScalarType(getCellGridDimY())));
         const size_t z = size_t(double(z0 * ScalarType(getCellGridDimZ())));

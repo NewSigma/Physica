@@ -23,10 +23,11 @@
 
 namespace Physica::Core {
     namespace Internal {
-        template<class T>
-        class Traits<device_obj<SilveraGoldman<T>>> {
+        template<class T, bool B>
+        class Traits<Core::device_obj<SilveraGoldman<T, B>>> {
         public:
             using ScalarType = T;
+            constexpr static bool IsPeriodBoundary = B;
             constexpr static bool IsPotDependOnAtomIndex = false;
         };
     }
@@ -36,8 +37,9 @@ namespace Physica::Core {
      * Reference:
      * [1] I. F. Silvera and V. V. Goldman, J. Chem. Phys. 69, 4209 (1978).
      */
-    template<class ScalarType>
-    class device_obj<SilveraGoldman<ScalarType>> final : public device_obj<PairModel<SilveraGoldman<ScalarType>>> {
+    template<class ScalarType, bool IsPeriodBoundary>
+    class device_obj<SilveraGoldman<ScalarType, IsPeriodBoundary>> final
+            : public device_obj<PairModel<SilveraGoldman<ScalarType, IsPeriodBoundary>>> {
         constexpr static float alpha = 1.713;
         constexpr static float beta = 1.5671;
         constexpr static float gamma = 0.00993;
@@ -47,7 +49,7 @@ namespace Physica::Core {
         constexpr static float c9 = 143.1;
         constexpr static float c10 = 4813.9;
 
-        using host_obj = SilveraGoldman<ScalarType>;
+        using host_obj = SilveraGoldman<ScalarType, IsPeriodBoundary>;
         using This = device_obj<host_obj>;
     public:
         using Base = device_obj<PairModel<host_obj>>;
@@ -67,17 +69,17 @@ namespace Physica::Core {
         [[nodiscard]] static bool isSmallCell(const MDCellType& cell) { return cell.getNumParticle() <= 500U; }
     };
 
-    template<class ScalarType>
-    device_obj<SilveraGoldman<ScalarType>>::device_obj(size_t numParticle, ScalarType cutoff_)
+    template<class ScalarType, bool IsPeriodBoundary>
+    device_obj<SilveraGoldman<ScalarType, IsPeriodBoundary>>::device_obj(size_t numParticle, ScalarType cutoff_)
             : Base(numParticle, cutoff_) {}
 
-    template<class ScalarType>
-    void device_obj<SilveraGoldman<ScalarType>>::swap(device_obj& obj) noexcept {
+    template<class ScalarType, bool IsPeriodBoundary>
+    void device_obj<SilveraGoldman<ScalarType, IsPeriodBoundary>>::swap(device_obj& obj) noexcept {
         Base::swap(obj);
     }
 
-    template<class ScalarType>
-    __host__ __device__ inline ScalarType device_obj<SilveraGoldman<ScalarType>>::pot_functor(
+    template<class ScalarType, bool IsPeriodBoundary>
+    __host__ __device__ inline ScalarType device_obj<SilveraGoldman<ScalarType, IsPeriodBoundary>>::pot_functor(
             [[maybe_unused]] size_t i, [[maybe_unused]] size_t j, ScalarType r, ScalarType r2) const {
         ScalarType result = exp(-r2 * gamma - r * beta + alpha);
         const ScalarType rep_r = reciprocal(r);
@@ -98,8 +100,8 @@ namespace Physica::Core {
         return result;
     }
 
-    template<class ScalarType>
-    __host__ __device__ inline ScalarType device_obj<SilveraGoldman<ScalarType>>::force_functor(
+    template<class ScalarType, bool IsPeriodBoundary>
+    __host__ __device__ inline ScalarType device_obj<SilveraGoldman<ScalarType, IsPeriodBoundary>>::force_functor(
             [[maybe_unused]] size_t i, [[maybe_unused]] size_t j, ScalarType r, ScalarType r2) const {
         const ScalarType factor = r * (gamma * 2) + beta;
         ScalarType result = exp(-r2 * gamma - (r * beta - alpha)) * factor;

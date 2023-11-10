@@ -60,8 +60,9 @@ namespace Physica::Core {
      * [1] T. E. Markland, D. E. Manolopoulos. An efficient ring polymer contraction scheme for imaginary time path integral simulations[J]. J. Chem. Phys. 129, 024105 (2008)
      */
     template<class ScalarType, unsigned int Dim, size_t NumReplica, class ForceMatrixAllocator>
-    template<bool IsPeriodBoundary, class ForceModel, class Executor>
+    template<class ForceModel, class Executor>
     void RPMD<ScalarType, Dim, NumReplica, ForceMatrixAllocator>::updateForce(ForceModel& model) {
+        constexpr bool IsPeriodBoundary = Internal::Traits<ForceModel>::IsPeriodBoundary;
         constexpr bool isCudaEnabled = Internal::Traits<Executor>::isCudaEnabled;
         static_assert(!isCudaEnabled || std::allocator_traits<ForceMatrixAllocator>::isPageLocked
                 , "[Error]: Allocator is not page locked, performance will decrease");
@@ -116,14 +117,16 @@ namespace Physica::Core {
              class Executor>
     void RPMD<ScalarType, Dim, NumReplica, ForceMatrixAllocator>::nve_step(KineticModel& kineticModel, ForceModel& forceModel) {
         constexpr bool isFreeModel = Internal::is_empty_force_model<ForceModel>::value;
-        constexpr bool IsPeriodBoundary = Internal::Traits<KineticModel>::IsPeriodBoundary;
+        constexpr bool IsPeriodBoundary1 = Internal::Traits<KineticModel>::IsPeriodBoundary;
+        constexpr bool IsPeriodBoundary2 = Internal::Traits<ForceModel>::IsPeriodBoundary;
+        static_assert(isFreeModel || (IsPeriodBoundary1 == IsPeriodBoundary2), "[Error]: Inconsistent boundary condition");
         if (isFreeModel) {
             kineticModel.nve_step(ringPolymer, timeStep);
         }
         else {
             forceStep(timeStep * PlainScalar(0.5));
             kineticModel.nve_step(ringPolymer, timeStep);
-            updateForce<IsPeriodBoundary, ForceModel, Executor>(forceModel);
+            updateForce<ForceModel, Executor>(forceModel);
             forceStep(timeStep * PlainScalar(0.5));
         }
     }
@@ -153,9 +156,11 @@ namespace Physica::Core {
             const Thermostat& thermostat,
             KineticModel& kineticModel,
             ForceModel& forceModel) {
-        constexpr bool isFreeModel = Internal::is_empty_force_model<ForceModel>::value;
-        constexpr bool IsPeriodBoundary = Internal::Traits<KineticModel>::IsPeriodBoundary;
         constexpr bool isSeedFixed = RandomPoolType::isSeedFixed();
+        constexpr bool isFreeModel = Internal::is_empty_force_model<ForceModel>::value;
+        constexpr bool IsPeriodBoundary1 = Internal::Traits<KineticModel>::IsPeriodBoundary;
+        constexpr bool IsPeriodBoundary2 = Internal::Traits<ForceModel>::IsPeriodBoundary;
+        static_assert(isFreeModel || (IsPeriodBoundary1 == IsPeriodBoundary2), "[Error]: Inconsistent boundary condition");
         using ThermoStepExecutor = typename std::conditional<isSeedFixed, SequentialExecutor, Executor>::type;
         if (isFreeModel) {
             kineticModel.nve_step(ringPolymer, timeStep * 0.5);
@@ -167,7 +172,7 @@ namespace Physica::Core {
             kineticModel.nve_step(ringPolymer, timeStep * 0.5);
             thermostat.template step<RandomPoolType, ThermoStepExecutor>(ringPolymer, timeStep);
             kineticModel.nve_step(ringPolymer, timeStep * 0.5);
-            updateForce<IsPeriodBoundary, ForceModel, Executor>(forceModel);
+            updateForce<ForceModel, Executor>(forceModel);
             forceStep(timeStep * 0.5);
         }
     }
@@ -201,12 +206,15 @@ namespace Physica::Core {
             Barostat& barostat,
             KineticModel& kineticModel,
             ForceModel& forceModel) {
-        constexpr bool IsPeriodBoundary = Internal::Traits<KineticModel>::IsPeriodBoundary;
+        constexpr bool isFreeModel = Internal::is_empty_force_model<ForceModel>::value;
+        constexpr bool IsPeriodBoundary1 = Internal::Traits<KineticModel>::IsPeriodBoundary;
+        constexpr bool IsPeriodBoundary2 = Internal::Traits<ForceModel>::IsPeriodBoundary;
+        static_assert(isFreeModel || (IsPeriodBoundary1 == IsPeriodBoundary2), "[Error]: Inconsistent boundary condition");
         barostat.forceStep(*this, timeStep * 0.5);
         kineticModel.npt_step(ringPolymer, cell, barostat, timeStep * 0.5);
         thermostat.step(ringPolymer, gen, timeStep);
         kineticModel.npt_step(ringPolymer, cell, barostat, timeStep * 0.5);
-        updateForce<IsPeriodBoundary, ForceModel, Executor>(forceModel);
+        updateForce<ForceModel, Executor>(forceModel);
         barostat.forceStep(*this, timeStep * 0.5);
     }
 
@@ -423,8 +431,13 @@ namespace Physica::Core {
                 const ScalarType factorK = mass * squaredOmegaW;
                 kineticStress -= (factorK * deltaPos) * deltaPos.transpose();
             }
-            if constexpr (!isFreeModel)
-                potStress += model.virial(phaseToCell(replica));
+            if constexpr (!isFreeModel) {
+                constexpr bool IsPeriodBoundary = Internal::Traits<ForceModel>::IsPeriodBoundary;
+                MDCellType cell = phaseToCell(replica);
+                if constexpr (IsPeriodBoundary)
+                    cell.normalize();
+                potStress = model.virial(cell);
+            }
             buffer[replica] = kineticStress * reciprocal(getVolume()) + potStress;
         };
         Executor::parallel_for(kernel, getNumReplica(), Executor::getNumThread()).wait();
@@ -477,8 +490,13 @@ namespace Physica::Core {
                 quantumKineticStress += deltaPos * atomForce.transpose();
             }
             kineticStress = classicalKineticStress - quantumKineticStress * ScalarType(0.5);
-            if constexpr (!isFreeModel)
-                potStress = model.virial(phaseToCell(replica));
+            if constexpr (!isFreeModel) {
+                constexpr bool IsPeriodBoundary = Internal::Traits<ForceModel>::IsPeriodBoundary;
+                MDCellType cell = phaseToCell(replica);
+                if constexpr (IsPeriodBoundary)
+                    cell.normalize();
+                potStress = model.virial(cell);
+            }
             buffer[replica] = kineticStress * reciprocal(getVolume()) + potStress;
         };
         Executor::parallel_for(kernel, getNumReplica(), Executor::getNumThread()).wait();
@@ -501,6 +519,7 @@ namespace Physica::Core {
         const auto centroidPos = ringPolymer.makeCentroidPos();
         auto kernel = [this, &model, &buffer, &centroidPos](unsigned int replica) {
             using VectorType = Vector<ScalarType, Dim>;
+            constexpr bool IsPeriodBoundary = Internal::Traits<ForceModel>::IsPeriodBoundary;
             const size_t dof = getDOF();
             const size_t numReplica = getNumReplica();
             const auto col = getPhaseMatrix().col(replica);
@@ -508,7 +527,9 @@ namespace Physica::Core {
             const auto pos = col.tail(dof);
             const auto centroid = centroidPos.flatten();
             const auto force = forceBuffer.col(replica);
-            const auto cell = phaseToCell(replica);
+            auto cell = phaseToCell(replica);
+            if constexpr (IsPeriodBoundary)
+                cell.normalize();
             const auto forceConst = model.forceConst(cell);
 
             LatticeMatrix kineticStress(Dim, Dim);
@@ -593,8 +614,13 @@ namespace Physica::Core {
                 }
 
                 kineticStress += temp;
-                if constexpr (!isFreeModel)
-                    potStress += model.virial(phaseToCell(replica));
+                if constexpr (!isFreeModel) {
+                    constexpr bool IsPeriodBoundary = Internal::Traits<ForceModel>::IsPeriodBoundary;
+                    MDCellType cell = phaseToCell(replica);
+                    if constexpr (IsPeriodBoundary)
+                        cell.normalize();
+                    potStress = model.virial(cell);
+                }
             }
             stress = (kineticStress * reciprocal(getVolume()) + potStress) * reciprocal(ScalarType(numReplica));
         }

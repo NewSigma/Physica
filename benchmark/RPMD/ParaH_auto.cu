@@ -42,7 +42,7 @@ constexpr double molarVolume = 31.7;
 constexpr double mass = PhyConst<AU>::atomMass(1) * 2;
 
 class ForceModel {
-    using HostModelType = SilveraGoldman<ScalarType>;
+    using HostModelType = SilveraGoldman<ScalarType, true>;
     using DeviceModelType = device_obj<HostModelType>;
     HostModelType hostModel;
     Physica::Utils::Array<DeviceModelType> deviceModels;
@@ -101,6 +101,14 @@ private:
         return !shouldUseCPU() && DeviceModelType::isSmallCell(cell);
     }
 };
+
+namespace Physica::Core::Internal {
+    template<>
+    class Traits<ForceModel> {
+    public:
+        constexpr static bool IsPeriodBoundary = true;
+    };
+}
 
 template<class RandomGenerator>
 MDType makeSystem(size_t numMolecular, RandomGenerator& gen) {

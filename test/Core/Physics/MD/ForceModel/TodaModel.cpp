@@ -47,13 +47,13 @@ MDCellType makeSystem(std::mt19937& gen) {
     return MDCellType(std::move(lattice), std::move(pos), std::move(massVec));
 }
 
-template<bool IsFixedBoundary>
+template<bool IsPeriodBoundary>
 void forceConstTest() {
-    using ForceModel = TodaModel<ScalarType, IsFixedBoundary, 1>;
+    using ForceModel = TodaModel<ScalarType, IsPeriodBoundary>;
     ForceModel model(1.0);
     const auto cell = makeSystem(RandomPoolType::getGen());
     const auto fc = model.forceConst(cell);
-    if constexpr (!IsFixedBoundary) {
+    if constexpr (IsPeriodBoundary) {
         for (size_t i = 0; i < fc.getRow(); ++i)
             if (!scalarNear(fc.row(i).sum(), ScalarType(0), 1E-15))
                 exit(EXIT_FAILURE);

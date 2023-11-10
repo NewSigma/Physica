@@ -28,7 +28,7 @@ using namespace Physica::Core;
 using namespace Physica::Utils;
 using ScalarType = Scalar<Float>;
 using KineticModel = FreeModel<ScalarType, 3, Dynamic, RPMDIntegrator::Exact>;
-using ForceModel = SilveraGoldman<ScalarType>;
+using ForceModel = SilveraGoldman<ScalarType, true>;
 using RandomPoolType = RandomPool<std::mt19937, 3438603950906262893>;
 constexpr size_t numReplica = 24;
 constexpr double temperatureT = PhyConst<AU>::kToTemperature(25);

@@ -28,7 +28,7 @@
 
 using namespace Physica::Core;
 using ScalarType = Scalar<Float>;
-using HostForceModel = SilveraGoldman<ScalarType>;
+using HostForceModel = SilveraGoldman<ScalarType, true>;
 using DeviceForceModel = device_obj<HostForceModel>;
 using RandomPoolType = RandomPool<std::mt19937, 10000>;
 constexpr size_t numReplica = 24;

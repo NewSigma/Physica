@@ -81,7 +81,7 @@ namespace Physica::Core {
         /* Operators */
         RPMD& operator=(RPMD obj) noexcept;
         /* Operations */
-        template<bool IsPeriodBoundary, class ForceModel, class Executor> void updateForce(ForceModel& model);
+        template<class ForceModel, class Executor> void updateForce(ForceModel& model);
         template<class KineticModel,
                  class ForceModel,
                  class Executor>

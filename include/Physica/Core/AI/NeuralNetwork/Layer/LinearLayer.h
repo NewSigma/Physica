@@ -42,6 +42,8 @@ namespace Physica::Core {
         VectorType bias;
     public:
         LinearLayer(size_t inputDim, size_t outputDim);
+        template<class OtherScalar>
+        LinearLayer(const LinearLayer<OtherScalar>& layer);
         LinearLayer(const LinearLayer&) = default;
         LinearLayer(LinearLayer&&) noexcept = default;
         ~LinearLayer() = default;
@@ -60,10 +62,17 @@ namespace Physica::Core {
         /* Getters */
         [[nodiscard]] size_t getInputDim() const noexcept { return weights.getColumn(); }
         [[nodiscard]] size_t getOutputDim() const noexcept { return weights.getRow(); }
+        [[nodiscard]] const MatrixType& getWeights() const noexcept { return weights; }
+        [[nodiscard]] const VectorType& getBias() const noexcept { return bias; }
     };
 
     template<class ScalarType>
     LinearLayer<ScalarType>::LinearLayer(size_t inputDim, size_t outputDim) : weights(outputDim, inputDim), bias(outputDim) {}
+
+    template<class ScalarType>
+    template<class OtherScalar>
+    LinearLayer<ScalarType>::LinearLayer(const LinearLayer<OtherScalar>& layer)
+            : weights(layer.getWeights()), bias(layer.getBias()) {}
 
     template<class ScalarType>
     inline typename LinearLayer<ScalarType>::VectorType LinearLayer<ScalarType>::forward(const VectorType& x) const {

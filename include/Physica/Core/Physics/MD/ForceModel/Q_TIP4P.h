@@ -30,6 +30,14 @@
 
 namespace Physica::Core {
     template<class ScalarType> class Q_TIP4P;
+
+    namespace Internal {
+        template<class ScalarType>
+        class Traits<Q_TIP4P<ScalarType>> {
+        public:
+            constexpr static bool IsPeriodBoundary = true;
+        };
+    }
     /**
      * Reference:
      * [1] S. Habershon, T. E. Markland, and D. E. Manolopoulosa, J. Chem. Phys. 131, 024501(2009)

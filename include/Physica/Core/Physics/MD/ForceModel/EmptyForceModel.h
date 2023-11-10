@@ -34,6 +34,12 @@ namespace Physica::Core {
         struct is_empty_force_model<EmptyForceModel<ScalarType, Dim>> {
             constexpr static bool value = true;
         };
+
+        template<class ScalarType, unsigned int Dim>
+        class Traits<EmptyForceModel<ScalarType, Dim>> {
+        public:
+            constexpr static bool IsPeriodBoundary = true;
+        };
     }
 
     template<class ScalarType, unsigned int Dim>
