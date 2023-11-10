@@ -113,8 +113,10 @@ namespace Physica::Core {
         auto& tracer = DiffTracer<PlainScalar>::getInstance();
         headIndex = tracer.pushOperation(*this, ExpressionType::Assign);
         const size_t traceIndex = s.getTraceIndex();
+        size_t operand[Size];
         for (size_t i = 0; i < Size; ++i)
-            tracer.pushOperand(traceIndex);
+            operand[i] = traceIndex;
+        tracer.pushOperand(operand);
     }
 
     template<class PlainScalar, size_t Size>
@@ -135,10 +137,12 @@ namespace Physica::Core {
         auto& tracer = DiffTracer<PlainScalar>::getInstance();
         const auto temp = Base::operator+(other);
         const size_t newHeadIndex = tracer.pushOperation(temp, ExpressionType::Add);
+        size_t operand[Size * 2];
         for (size_t i = 0; i < Size; ++i) {
-            tracer.pushOperand(headIndex + i);
-            tracer.pushOperand(other.headIndex + i);
+            operand[2 * i] = headIndex + i;
+            operand[2 * i + 1] = other.headIndex + i;
         }
+        tracer.pushOperand(operand);
         return {temp, newHeadIndex};
     }
 
@@ -148,10 +152,12 @@ namespace Physica::Core {
         auto& tracer = DiffTracer<PlainScalar>::getInstance();
         const auto temp = Base::operator-(other);
         const size_t newHeadIndex = tracer.pushOperation(temp, ExpressionType::Sub);
+        size_t operand[Size * 2];
         for (size_t i = 0; i < Size; ++i) {
-            tracer.pushOperand(headIndex + i);
-            tracer.pushOperand(other.headIndex + i);
+            operand[2 * i] = headIndex + i;
+            operand[2 * i + 1] = other.headIndex + i;
         }
+        tracer.pushOperand(operand);
         return {temp, newHeadIndex};
     }
 
@@ -161,10 +167,12 @@ namespace Physica::Core {
         auto& tracer = DiffTracer<PlainScalar>::getInstance();
         const auto temp = Base::operator*(other);
         const size_t newHeadIndex = tracer.pushOperation(temp, ExpressionType::Mul);
+        size_t operand[Size * 2];
         for (size_t i = 0; i < Size; ++i) {
-            tracer.pushOperand(headIndex + i);
-            tracer.pushOperand(other.headIndex + i);
+            operand[2 * i] = headIndex + i;
+            operand[2 * i + 1] = other.headIndex + i;
         }
+        tracer.pushOperand(operand);
         return {temp, newHeadIndex};
     }
 
@@ -174,10 +182,12 @@ namespace Physica::Core {
         auto& tracer = DiffTracer<PlainScalar>::getInstance();
         const auto temp = Base::operator/(other);
         const size_t newHeadIndex = tracer.pushOperation(temp, ExpressionType::Div);
+        size_t operand[Size * 2];
         for (size_t i = 0; i < Size; ++i) {
-            tracer.pushOperand(headIndex + i);
-            tracer.pushOperand(other.headIndex + i);
+            operand[2 * i] = headIndex + i;
+            operand[2 * i + 1] = other.headIndex + i;
         }
+        tracer.pushOperand(operand);
         return {temp, newHeadIndex};
     }
 
@@ -187,8 +197,10 @@ namespace Physica::Core {
         auto& tracer = DiffTracer<PlainScalar>::getInstance();
         const auto temp = Base::operator-();
         const size_t newHeadIndex = tracer.pushOperation(temp, ExpressionType::Minus);
+        size_t operand[Size];
         for (size_t i = 0; i < Size; ++i)
-            tracer.pushOperand(headIndex + i);
+            operand[i] = headIndex + i;
+        tracer.pushOperand(operand);
         return {temp, newHeadIndex};
     }
 
@@ -255,11 +267,13 @@ namespace Physica::Core {
             auto& tracer = DiffTracer<PlainScalar>::getInstance();
             const auto temp = mul_add<PlainScalar, Size>(a, b, c);
             const size_t newHeadIndex = tracer.pushOperation(temp, ExpressionType::MulAdd);
+            size_t operand[Size * 3];
             for (size_t i = 0; i < Size; ++i) {
-                tracer.pushOperand(a.getHeadTraceIndex() + i);
-                tracer.pushOperand(b.getHeadTraceIndex() + i);
-                tracer.pushOperand(c.getHeadTraceIndex() + i);
+                operand[3 * i] = a.getHeadTraceIndex() + i;
+                operand[3 * i + 1] = b.getHeadTraceIndex() + i;
+                operand[3 * i + 2] = c.getHeadTraceIndex() + i;
             }
+            tracer.pushOperand(operand);
             return {temp, newHeadIndex};
         }
         else

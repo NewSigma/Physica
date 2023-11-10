@@ -142,6 +142,7 @@ namespace Physica::Utils::Internal {
         [[nodiscard]] __host__ __device__ size_t getLength() const noexcept { return Base::getDerived().getLength(); }
         [[nodiscard]] __host__ __device__ size_t getCapacity() const noexcept { return Base::getDerived().getCapacity(); }
         [[nodiscard]] __host__ __device__ bool empty() const { return getLength() == 0; }
+        [[nodiscard]] __host__ __device__ bool full() const noexcept { return getLength() == getCapacity(); }
         [[nodiscard]] __host__ __device__ pointer data() noexcept { return Base::getDerived().data(); }
         [[nodiscard]] __host__ __device__ const_pointer data() const noexcept { return Base::getDerived().data(); }
     protected:

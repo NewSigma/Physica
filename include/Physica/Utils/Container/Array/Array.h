@@ -208,14 +208,13 @@ namespace Physica::Utils {
         void decrease(size_t size);
         void swap(Array& array) noexcept;
         [[nodiscard]] inline pointer release() noexcept;
+        void doubleSpace() { increase(capacity * 2 + (MinDeltaSpace + sizeof(T) - 1) / sizeof(T)); }
         [[nodiscard]] inline device_obj<This> toDevice() const;
         void toDevice(device_obj<This>& obj) const;
         /* Getters */
         [[nodiscard]] __host__ __device__ size_t size() const noexcept { return length; }
         [[nodiscard]] __host__ __device__ size_t getLength() const noexcept { return length; }
         [[nodiscard]] __host__ __device__ size_t getCapacity() const noexcept { return capacity; }
-    private:
-        void doubleSpace() { increase(capacity * 2 + (MinDeltaSpace + sizeof(T) - 1) / sizeof(T)); }
     };
 
     template<class T, size_t Length, size_t Capacity, class Allocator>

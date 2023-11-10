@@ -39,7 +39,9 @@ namespace Physica::Core {
     public:
         ~DiffTracer() = default;
         /* Operations */
-        inline DiffTracer& pushOperand(size_t operand);
+        inline void pushOperand(size_t operand);
+        template<size_t Size>
+        inline void pushOperand(const size_t (&operand)[Size]);
 
         [[nodiscard]] inline size_t pushOperation(ScalarType value, ExpressionType source);
         [[nodiscard]] size_t pushOperation(ScalarType value, ScalarType tangent, ExpressionType source);
@@ -73,12 +75,26 @@ namespace Physica::Core {
     };
 
     template<class ScalarType>
-    inline DiffTracer<ScalarType>& DiffTracer<ScalarType>::pushOperand(size_t operand) {
+    inline void DiffTracer<ScalarType>::pushOperand(size_t operand) {
         assert(!records.empty() && "[Error]: Push operand to empty operation is not allowed");
         assert(!checkLastOpDone() && "[Error]: Not enough operand slot for this operand");
         assert(operand < records.getLength() && "[Error]: This operand is not registered");
         operands.append(operand);
-        return *this;
+    }
+
+    template<class ScalarType>
+    template<size_t Size>
+    inline void DiffTracer<ScalarType>::pushOperand(const size_t (&operand)[Size]) {
+        assert(!records.empty() && "[Error]: Push operand to empty operation is not allowed");
+        assert(!checkLastOpDone() && "[Error]: Not enough operand slot for this operand");
+        const size_t length = operands.getLength();
+        const size_t newLength = length + Size;
+        operands.reserve(newLength);
+        operands.setLength(newLength);
+        for (size_t i = 0; i < Size; ++i) {
+            assert(operand[i] < records.getLength() && "[Error]: This operand is not registered");
+            operands[length + i] = operand[i];
+        }
     }
 
     template<class ScalarType>
@@ -90,9 +106,14 @@ namespace Physica::Core {
     size_t DiffTracer<ScalarType>::pushOperation(ScalarType value, ScalarType tangent, ExpressionType source) {
         assert(checkLastOpDone() && "[Error]: New record cannot begin unless last record is done");
         const size_t index = getNumRecord();
-        records.append(DiffRecord{operands.getLength(), source});
-        values.append(std::move(value));
-        tangents.append(std::move(tangent));
+        if (records.full()) {
+            records.doubleSpace();
+            values.doubleSpace();
+            tangents.doubleSpace();
+        }
+        records.grow(DiffRecord{operands.getLength(), source});
+        values.grow(std::move(value));
+        tangents.grow(std::move(tangent));
         return index;
     }
 
@@ -100,21 +121,25 @@ namespace Physica::Core {
     template<size_t Size>
     size_t DiffTracer<ScalarType>::pushOperation(const SIMD<ScalarType, Size>& simd, ExpressionType source) {
         assert(checkLastOpDone() && "[Error]: New record cannot begin unless last record is done");
-        const size_t index = getNumRecord();
-        const size_t length = operands.getLength();
-        const unsigned int numOp = numOperand(source);
-        for (size_t i = 0; i < Size; ++i)
-            records.append(DiffRecord{length + i * numOp, source});
-
-        values.reserve(index + Size);
-        simd.store(values.data_ptr(index));
-        values.setLength(index + Size);
+        const size_t oldNumRecord = getNumRecord();
+        const size_t newNumRecord = oldNumRecord + Size;
+        {
+            records.reserve(newNumRecord);
+            records.setLength(newNumRecord);
+            const size_t length = operands.getLength();
+            const unsigned int numOp = numOperand(source);
+            for (size_t i = 0; i < Size; ++i)
+                records[oldNumRecord + i] = DiffRecord{length + i * numOp, source};
+        }
+        values.reserve(newNumRecord);
+        simd.store(values.data_ptr(oldNumRecord));
+        values.setLength(newNumRecord);
 
         SIMD<ScalarType, Size> empty(0);
-        tangents.reserve(index + Size);
-        empty.store(tangents.data_ptr(index));
-        tangents.setLength(index + Size);
-        return index;
+        tangents.reserve(newNumRecord);
+        empty.store(tangents.data_ptr(oldNumRecord));
+        tangents.setLength(newNumRecord);
+        return oldNumRecord;
     }
 
     template<class ScalarType>
