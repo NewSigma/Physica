@@ -23,6 +23,7 @@
 namespace Physica::Core {
     template<class ScalarType>
     class Loss {
+        using PlainScalar = typename ScalarType::PlainScalar;
         using VectorType = Vector<ScalarType>;
     public:
         [[nodiscard]] static ScalarType crossEntropy(const VectorType& result, const VectorType& answer);
@@ -32,7 +33,11 @@ namespace Physica::Core {
 
     template<class ScalarType>
     ScalarType Loss<ScalarType>::crossEntropy(const VectorType& result, const VectorType& answer) {
-        return -(ln(softmax(result)) * answer);
+        for (size_t i = 0; i < answer.getLength(); ++i)
+            if (!answer[i].isZero())
+                return -ln(softmax(result).calc(i) + ScalarType(std::numeric_limits<PlainScalar>::min())); //Add minimum to avoid ln(0)
+        assert(false && "[Error]: Invalid argument");
+        return ScalarType(0);
     }
     /**
      * \returns polarization rate, the lower the better, minus value means overfitting

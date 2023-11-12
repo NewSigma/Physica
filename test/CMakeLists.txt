@@ -6,6 +6,7 @@ message(STATUS "Configuring tests.")
 # Core
 ## AI
 physica_add_test(AP Core/AI/AP.cpp)
+physica_add_test(Loss Core/AI/Loss.cpp)
 ## Interface
 physica_add_test(VaspWarpper Core/Interface/VaspWarpper.cpp)
 ## IO

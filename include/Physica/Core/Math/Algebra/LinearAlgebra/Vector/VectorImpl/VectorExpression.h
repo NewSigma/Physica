@@ -564,12 +564,14 @@ namespace Physica::Core {
     private:
         const VectorType& v;
         ScalarType factor;
+        ScalarType maximum;
     public:
         VectorExpression(const RValueVector<VectorType>& v_) : v(v_.getDerived()) {
-            factor = reciprocal(exp(v).sum());
+            maximum = v.max();
+            factor = reciprocal(exp(v - maximum).sum());
         }
 
-        [[nodiscard]] ScalarType calc(size_t i) const { return exp(v.calc(i)) * factor; }
+        [[nodiscard]] ScalarType calc(size_t i) const { return exp(v.calc(i) - maximum) * factor; }
         [[nodiscard]] __host__ __device__ size_t getLength() const { return v.getLength(); }
     };
     //////////////////////////////////////Operators//////////////////////////////////////
