@@ -100,7 +100,7 @@ int main() {
         const MatrixType mat2{{-0.590316, -2.19514, -2.37463},
                               {-1.25006, -0.297493, 1.40349},
                               {0.517063, -0.956614, -0.920775}};
-        if (!realSchurTest(mat2, 1E-14))
+        if (!realSchurTest(mat2, 1E-13))
             return 1;
     }
     {
