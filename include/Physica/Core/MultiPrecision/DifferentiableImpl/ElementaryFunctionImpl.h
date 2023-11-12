@@ -26,9 +26,9 @@ namespace Physica::Core {
             return {value, s.getValue().isPositive() ? s.getTangent() : -s.getTangent()};
         else {
             auto& tracer = DiffTracer<ScalarType>::getInstance();
-            const size_t index = tracer.pushOperation(value, ExpressionType::Abs);
-            tracer.pushOperand(s.getTraceIndex());
-            return Differentiable<ScalarType, Mode>::fromIndex(index);
+            const auto result = tracer.pushOperation(value, ExpressionType::Abs);
+            tracer.pushOperand(s);
+            return result;
         }
     }
 
@@ -39,9 +39,9 @@ namespace Physica::Core {
             return {value, s.getValue().isPositive() ? s.getTangent() : ScalarType(0)};
         else {
             auto& tracer = DiffTracer<ScalarType>::getInstance();
-            const size_t index = tracer.pushOperation(value, ExpressionType::Relu);
-            tracer.pushOperand(s.getTraceIndex());
-            return Differentiable<ScalarType, Mode>::fromIndex(index);
+            const auto result = tracer.pushOperation(value, ExpressionType::Relu);
+            tracer.pushOperand(s);
+            return result;
         }
     }
 
@@ -52,9 +52,9 @@ namespace Physica::Core {
             return {value, ScalarType(2) * s.getValue() * s.getTangent()};
         else {
             auto& tracer = DiffTracer<ScalarType>::getInstance();
-            const size_t index = tracer.pushOperation(value, ExpressionType::Square);
-            tracer.pushOperand(s.getTraceIndex());
-            return Differentiable<ScalarType, Mode>::fromIndex(index);
+            const auto result = tracer.pushOperation(value, ExpressionType::Square);
+            tracer.pushOperand(s);
+            return result;
         }
     }
 
@@ -65,9 +65,9 @@ namespace Physica::Core {
             return {rep, -s.getTangent() * square(rep)};
         else {
             auto& tracer = DiffTracer<ScalarType>::getInstance();
-            const size_t index = tracer.pushOperation(rep, ExpressionType::Reciprocal);
-            tracer.pushOperand(s.getTraceIndex());
-            return Differentiable<ScalarType, Mode>::fromIndex(index);
+            const auto result = tracer.pushOperation(rep, ExpressionType::Reciprocal);
+            tracer.pushOperand(s);
+            return result;
         }
     }
 
@@ -78,9 +78,9 @@ namespace Physica::Core {
             return {value, ScalarType(0.5) * s.getTangent() / value};
         else {
             auto& tracer = DiffTracer<ScalarType>::getInstance();
-            const size_t index = tracer.pushOperation(value, ExpressionType::Sqrt);
-            tracer.pushOperand(s.getTraceIndex());
-            return Differentiable<ScalarType, Mode>::fromIndex(index);
+            const auto result = tracer.pushOperation(value, ExpressionType::Sqrt);
+            tracer.pushOperand(s);
+            return result;
         }
     }
 
@@ -93,9 +93,9 @@ namespace Physica::Core {
         }
         else {
             auto& tracer = DiffTracer<ScalarType>::getInstance();
-            const size_t index = tracer.pushOperation(value, ExpressionType::Cbrt);
-            tracer.pushOperand(s.getTraceIndex());
-            return Differentiable<ScalarType, Mode>::fromIndex(index);
+            const auto result = tracer.pushOperation(value, ExpressionType::Cbrt);
+            tracer.pushOperand(s);
+            return result;
         }
     }
 
@@ -106,9 +106,9 @@ namespace Physica::Core {
             return {value, s.getTangent() / s.getValue()};
         else {
             auto& tracer = DiffTracer<ScalarType>::getInstance();
-            const size_t index = tracer.pushOperation(value, ExpressionType::Ln);
-            tracer.pushOperand(s.getTraceIndex());
-            return Differentiable<ScalarType, Mode>::fromIndex(index);
+            const auto result = tracer.pushOperation(value, ExpressionType::Ln);
+            tracer.pushOperand(s);
+            return result;
         }
     }
 
@@ -119,9 +119,9 @@ namespace Physica::Core {
             return {value, value * s.getTangent()};
         else {
             auto& tracer = DiffTracer<ScalarType>::getInstance();
-            const size_t index = tracer.pushOperation(value, ExpressionType::Exp);
-            tracer.pushOperand(s.getTraceIndex());
-            return Differentiable<ScalarType, Mode>::fromIndex(index);
+            const auto result = tracer.pushOperation(value, ExpressionType::Exp);
+            tracer.pushOperand(s);
+            return result;
         }
     }
 
@@ -135,9 +135,9 @@ namespace Physica::Core {
         else {
             const ScalarType value = cos(s.getValue());
             auto& tracer = DiffTracer<ScalarType>::getInstance();
-            const size_t index = tracer.pushOperation(value, ExpressionType::Cos);
-            tracer.pushOperand(s.getTraceIndex());
-            return Differentiable<ScalarType, Mode>::fromIndex(index);
+            const auto result = tracer.pushOperation(value, ExpressionType::Cos);
+            tracer.pushOperand(s);
+            return result;
         }
     }
 
@@ -151,9 +151,9 @@ namespace Physica::Core {
         else {
             const ScalarType value = sin(s.getValue());
             auto& tracer = DiffTracer<ScalarType>::getInstance();
-            const size_t index = tracer.pushOperation(value, ExpressionType::Sin);
-            tracer.pushOperand(s.getTraceIndex());
-            return Differentiable<ScalarType, Mode>::fromIndex(index);
+            const auto result = tracer.pushOperation(value, ExpressionType::Sin);
+            tracer.pushOperand(s);
+            return result;
         }
     }
 
@@ -167,12 +167,10 @@ namespace Physica::Core {
         }
         else {
             auto& tracer = DiffTracer<ScalarType>::getInstance();
-            const size_t index_s = tracer.pushOperation(sin_value, ExpressionType::Sin);
-            tracer.pushOperand(s.getTraceIndex());
-            const size_t index_c = tracer.pushOperation(cos_value, ExpressionType::Cos);
-            tracer.pushOperand(s.getTraceIndex());
-            sin_result = Differentiable<ScalarType, Mode>::fromIndex(index_s);
-            cos_result = Differentiable<ScalarType, Mode>::fromIndex(index_c);
+            sin_result = tracer.pushOperation(sin_value, ExpressionType::Sin);
+            tracer.pushOperand(s);
+            cos_result = tracer.pushOperation(cos_value, ExpressionType::Cos);
+            tracer.pushOperand(s);
         }
     }
 }

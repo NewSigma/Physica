@@ -150,8 +150,8 @@ namespace Physica::Core {
         for (size_t i = 0; i < count; ++i, ++index)
             buffer[i] = calc(index);
         if constexpr (isExpression && isReverseDiff) {
-            for (auto& elem : buffer)
-                elem = elem.copy();
+            for (size_t i = 0; i < count; ++i)
+                buffer[i] = buffer[i].copy();
         }
         PacketType packet{};
         packet.load_partial(count, buffer);

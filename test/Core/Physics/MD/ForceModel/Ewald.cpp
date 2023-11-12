@@ -143,8 +143,6 @@ namespace Physica {
             for (size_t i = 0; i < pos.getRow(); ++i)
                 for (size_t j = 0; j < pos.getColumn(); ++j)
                     force_diff(i, j) = -pos(i, j).getTangent();
-            std::cout << force.format() << std::endl;
-            std::cout << force_diff.flatten().format() << std::endl;
             if (!vectorNear(force, force_diff.flatten(), 1E-11))
                 exit(EXIT_FAILURE);
         }

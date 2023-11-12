@@ -74,9 +74,8 @@ namespace Physica::Core {
     public:
         Differentiable() = default;
         Differentiable(double d) : This(ScalarType(d)) {}
+        Differentiable(ScalarType value_);
         Differentiable(ScalarType value_, ScalarType tangent_);
-        template<class AnyScalar>
-        Differentiable(const ScalarBase<AnyScalar>& s);
         Differentiable(const Differentiable&) = default;
         Differentiable(Differentiable&&) noexcept = default;
         ~Differentiable() = default;
@@ -107,18 +106,20 @@ namespace Physica::Core {
         using This = Differentiable<ScalarType, DiffMode::Reverse>;
         using DiffTracerType = DiffTracer<ScalarType>;
 
+        DiffTracerType* pTracer;
         size_t index;
     public:
         Differentiable() = default;
         Differentiable(double d) : This(ScalarType(d)) {}
-        template<class AnyScalar>
-        Differentiable(const ScalarBase<AnyScalar>& s);
+        Differentiable(ScalarType value);
         Differentiable(ScalarType value, ScalarType tangent);
+        Differentiable(DiffTracerType& tracer, size_t index_);
         Differentiable(const Differentiable&) = default;
         Differentiable(Differentiable&&) noexcept = default;
         ~Differentiable() = default;
         /* Operators */
-        Differentiable& operator=(Differentiable obj) noexcept { swap(obj); return *this; }
+        Differentiable& operator=(const Differentiable&) = default;
+        Differentiable& operator=(Differentiable&&) noexcept = default;
         [[nodiscard]] explicit operator float() const { return float(getValue()); }
         [[nodiscard]] explicit operator double() const { return double(getValue()); }
         [[nodiscard]] inline bool operator==(const This& other) const;
@@ -130,14 +131,15 @@ namespace Physica::Core {
         /* Getters */
         [[nodiscard]] inline const ScalarType& getValue() const noexcept;
         [[nodiscard]] inline const ScalarType& getTangent() const noexcept;
+        [[nodiscard]] DiffTracerType& getTracer() const noexcept { return *pTracer; }
         [[nodiscard]] size_t getTraceIndex() const noexcept { return index; }
         [[nodiscard]] __host__ __device__ bool isZero() const noexcept { return getValue().isZero(); }
         [[nodiscard]] __host__ __device__ bool isPositive() const { return getValue().isPositive(); }
         [[nodiscard]] __host__ __device__ bool isNegative() const { return getValue().isNegative(); }
         /* Setters */
         inline void setValue(const ScalarType& x);
+        inline void setTraceIndex(size_t index_);
         /* Static members */
-        [[nodiscard]] inline static Differentiable fromIndex(size_t index) noexcept;
         template<class Distribution, class RandomGenerator>
         [[nodiscard]] inline static Differentiable random_any(Distribution& dist, RandomGenerator& gen);
     };

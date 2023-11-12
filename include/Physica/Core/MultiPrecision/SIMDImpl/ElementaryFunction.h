@@ -90,15 +90,15 @@ namespace Physica::Core {
             using PlainScalar = typename ScalarType::PlainScalar;
             auto& tracer = DiffTracer<PlainScalar>::getInstance();
             const size_t headIndex = x.getHeadTraceIndex();
-            const size_t sinHeadIndex = tracer.pushOperation(s, ExpressionType::Sin);
-            s.setHeadIndex(sinHeadIndex);
+            const ScalarType sinHeadTrace = tracer.pushOperation(s, ExpressionType::Sin);
             for (size_t i = 0; i < Size; ++i)
                 tracer.pushOperand(headIndex + i);
+            s = SIMD<ScalarType, Size>(s, sinHeadTrace);
 
-            const size_t cosHeadIndex = tracer.pushOperation(c, ExpressionType::Cos);
+            const ScalarType cosHeadTrace = tracer.pushOperation(c, ExpressionType::Cos);
             for (size_t i = 0; i < Size; ++i)
                 tracer.pushOperand(headIndex + i);
-            c.setHeadIndex(cosHeadIndex);
+            c = SIMD<ScalarType, Size>(c, cosHeadTrace);
         }
     }
 }

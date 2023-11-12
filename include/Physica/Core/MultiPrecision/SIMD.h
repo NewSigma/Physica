@@ -176,16 +176,17 @@ namespace Physica::Core {
         using Traits = Internal::Traits<This>;
         using BoolSIMDType = typename Traits::BoolSIMDType;
         using TrivialType = typename PlainScalar::TrivialType;
+        using DiffTracerType = DiffTracer<PlainScalar>;
     public:
         using PlainSIMD = Base;
     private:
-        size_t headIndex;
+        ScalarType headTrace;
     public:
         SIMD() = default;
         explicit SIMD(int i) : SIMD(PlainScalar(i)) {}
         explicit SIMD(PlainScalar s);
         explicit SIMD(ScalarType s);
-        SIMD(Base base, size_t headIndex_);
+        SIMD(Base base, ScalarType headTrace_);
         SIMD(const SIMD&) = default;
         SIMD(SIMD&&) noexcept = default;
         ~SIMD() = default;
@@ -216,9 +217,8 @@ namespace Physica::Core {
         /* Getters */
         using Base::size;
         using Base::getImpl;
-        [[nodiscard]] size_t getHeadTraceIndex() const noexcept { return headIndex; }
-        /* Setters */
-        void setHeadIndex(size_t headIndex_) noexcept { headIndex = headIndex_; }
+        [[nodiscard]] DiffTracerType& getTracer() const noexcept { return headTrace.getTracer(); }
+        [[nodiscard]] size_t getHeadTraceIndex() const noexcept { return headTrace.getTraceIndex(); }
     private:
         using Base::insert; //Insert a scalar may lead to incontineous memory, which harms performance
         [[nodiscard]] static bool checkContinuous(int n, const ScalarType* p);

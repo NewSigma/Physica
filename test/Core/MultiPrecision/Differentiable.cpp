@@ -40,7 +40,8 @@ int main() {
     }
     {
         using ScalarType = Differentiable<PlainScalar, DiffMode::Reverse>;
-        ScalarType x = 3, y = 4;
+        ScalarType x(3);
+        ScalarType y(4);
         ScalarType result = func(x, y);
         result.reverse();
         if (!scalarNear(x.getTangent(), (x.getValue() - 1.0) * 2.0, 1E-15))
