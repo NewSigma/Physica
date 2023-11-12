@@ -97,6 +97,10 @@ namespace Physica::Core {
         [[nodiscard]] __host__ __device__ bool isPositive() const { return value.isPositive(); }
         [[nodiscard]] __host__ __device__ bool isNegative() const { return value.isNegative(); }
         /* Static members */
+        template<class RandomGenerator>
+        [[nodiscard]] inline static Differentiable random_uniform(RandomGenerator& gen);
+        template<class RandomGenerator>
+        [[nodiscard]] inline static Differentiable random_normal(RandomGenerator& gen);
         template<class Distribution, class RandomGenerator>
         [[nodiscard]] inline static Differentiable random_any(Distribution& dist, RandomGenerator& gen);
     };
@@ -136,10 +140,15 @@ namespace Physica::Core {
         [[nodiscard]] __host__ __device__ bool isZero() const noexcept { return getValue().isZero(); }
         [[nodiscard]] __host__ __device__ bool isPositive() const { return getValue().isPositive(); }
         [[nodiscard]] __host__ __device__ bool isNegative() const { return getValue().isNegative(); }
+        [[nodiscard]] inline ExpressionType getSource() const noexcept;
         /* Setters */
         inline void setValue(const ScalarType& x);
         inline void setTraceIndex(size_t index_);
         /* Static members */
+        template<class RandomGenerator>
+        [[nodiscard]] inline static Differentiable random_uniform(RandomGenerator& gen);
+        template<class RandomGenerator>
+        [[nodiscard]] inline static Differentiable random_normal(RandomGenerator& gen);
         template<class Distribution, class RandomGenerator>
         [[nodiscard]] inline static Differentiable random_any(Distribution& dist, RandomGenerator& gen);
     };

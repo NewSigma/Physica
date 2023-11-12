@@ -87,9 +87,10 @@ namespace Physica::Core {
 
     template<class ScalarType>
     Vector<ScalarType, Mnist::NumCategory> Mnist::makeLabelVector(unsigned char label) {
+        using PlainScalar = typename ScalarType::PlainScalar;
         assert(label < NumCategory && "[Error]: Invalid category");
-        Vector<ScalarType, Mnist::NumCategory> result(NumCategory, 0);
-        result[label] = ScalarType(1);
+        Vector<PlainScalar, Mnist::NumCategory> result(NumCategory, 0);
+        result[label] = PlainScalar(1);
         return result;
     }
 }

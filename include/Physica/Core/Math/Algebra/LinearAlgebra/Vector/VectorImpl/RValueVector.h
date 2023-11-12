@@ -115,9 +115,6 @@ namespace Physica::Core {
 
     template<class VectorType1, class VectorType2>
     bool vectorNear(const RValueVector<VectorType1>& v1, const RValueVector<VectorType2>& v2, double precision);
-
-    template<class VectorType>
-    std::ostream& operator<<(std::ostream& os, const RValueVector<VectorType>& v);
 }
 
 #include "RValueVectorImpl.h"

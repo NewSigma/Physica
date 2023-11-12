@@ -37,8 +37,8 @@ namespace Physica::Core {
         ~ContinuousVector() = default;
         /* Operators */
         using Base::operator=;
-        ContinuousVector& operator=(const ContinuousVector& v);
-        ContinuousVector& operator=(ContinuousVector&& v) noexcept;
+        inline ContinuousVector& operator=(const ContinuousVector& v);
+        inline ContinuousVector& operator=(ContinuousVector&& v) noexcept;
         template<class AnyScalar>
         inline Derived& operator=(const ScalarBase<AnyScalar>& s);
         /* Operations */

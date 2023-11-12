@@ -76,7 +76,8 @@ namespace Physica::Core {
         return temp;
     }
     /////////////////////////////////////////////Float////////////////////////////////////////////////
-    __host__ __device__ inline Scalar<Float>::Scalar(const Scalar<Double>& s) : f(float(s)) {}
+    template<class OtherScalar>
+    __host__ __device__ inline Scalar<Float>::Scalar(const ScalarBase<OtherScalar>& s) : f(float(s.getDerived())) {}
 
     inline Scalar<Float>& operator++(Scalar<Float>& s) {
         s += Scalar<Float>(1.0F);
@@ -117,7 +118,8 @@ namespace Physica::Core {
         return Scalar(dist(gen));
     }
     /////////////////////////////////////////////Double////////////////////////////////////////////////
-    __host__ __device__ inline Scalar<Double>::Scalar(const Scalar<Float>& s) : d(double(s)) {}
+    template<class OtherScalar>
+    __host__ __device__ inline Scalar<Double>::Scalar(const ScalarBase<OtherScalar>& s) : d(double(s.getDerived())) {}
 
     inline Scalar<Double>& operator++(Scalar<Double>& s) {
         s += Scalar<Double>(1.0);

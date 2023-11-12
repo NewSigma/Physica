@@ -62,10 +62,11 @@ macro(physica_check_simd type flags)
     if(NOT CXX_${type}_FOUND)
         set(CXX_${type}_FOUND FALSE CACHE BOOL "CXX ${type} support")
         set(CXX_${type}_FLAGS "" CACHE STRING "CXX ${type} flags")
+    else()
+        add_definitions(-DPHYSICA_${type})
     endif()
 
     mark_as_advanced(CXX_${type}_FOUND CXX_${type}_FLAGS)
-    add_definitions(-DPHYSICA_${type})
 endmacro()
 
 physica_check_simd("AVX" " ;-mavx;/arch:AVX")

@@ -180,7 +180,8 @@ namespace Physica::Core {
         __host__ __device__ Scalar(float f_) : f(f_) {}
         Scalar(const Integer& i) : Scalar(float(double(i))) {}
         Scalar(const Rational& r) : Scalar(float(double(r))) {}
-        __host__ __device__ inline Scalar(const Scalar<Double>& s);
+        template<class OtherScalar>
+        __host__ __device__ explicit inline Scalar(const ScalarBase<OtherScalar>& s);
         Scalar(const Scalar&) = default;
         Scalar(Scalar&&) noexcept = default;
         //~Scalar() = default; /* Dynamic parallelism of CUDA 12.1 does not recognize that PlainStruct is trivial */
@@ -242,7 +243,8 @@ namespace Physica::Core {
         __host__ __device__ Scalar(double d_) : d(d_) {}
         Scalar(const Integer& i) : Scalar(double(i)) {}
         Scalar(const Rational& r) : Scalar(double(r)) {}
-        __host__ __device__ inline Scalar(const Scalar<Float>& s);
+        template<class OtherScalar>
+        __host__ __device__ explicit inline Scalar(const ScalarBase<OtherScalar>& s);
         Scalar(const Scalar&) = default;
         Scalar(Scalar&&) noexcept = default;
         //~Scalar() = default; /* Dynamic parallelism of CUDA 12.1 does not recognize that PlainStruct is trivial */

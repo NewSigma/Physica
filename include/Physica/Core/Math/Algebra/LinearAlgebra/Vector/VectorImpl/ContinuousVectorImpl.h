@@ -74,13 +74,13 @@ namespace Physica::Core {
     }
 
     template<class Derived>
-    ContinuousVector<Derived>& ContinuousVector<Derived>::operator=(const ContinuousVector<Derived>& v) {
+    inline ContinuousVector<Derived>& ContinuousVector<Derived>::operator=(const ContinuousVector<Derived>& v) {
         Base::operator=(v);
         return *this;
     }
 
     template<class Derived>
-    ContinuousVector<Derived>& ContinuousVector<Derived>::operator=(ContinuousVector<Derived>&& v) noexcept {
+    inline ContinuousVector<Derived>& ContinuousVector<Derived>::operator=(ContinuousVector<Derived>&& v) noexcept {
         Base::operator=(std::forward<Base>(v));
         return *this;
     }

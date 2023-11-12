@@ -61,6 +61,7 @@ namespace Physica::Core {
         [[nodiscard]] VectorType& getValues() noexcept { return values; }
         [[nodiscard]] const VectorType& getValues() const noexcept { return values; }
         [[nodiscard]] const VectorType& getTangents() const noexcept { return tangents; }
+        [[nodiscard]] const Utils::Array<DiffRecord>& getRecords() const noexcept { return records; }
         [[nodiscard]] size_t getNumRecord() const noexcept { return records.getLength(); }
         /* Static members */
         [[nodiscard]] static DiffTracer& getInstance() noexcept;
@@ -71,6 +72,9 @@ namespace Physica::Core {
         /* Operators */
         DiffTracer& operator=(const DiffTracer&) = default;
         DiffTracer& operator=(DiffTracer&&) noexcept = default;
+        /* Operations */
+        template<size_t Size>
+        void checkOperands(const DiffScalar (&operand)[Size]);
         /* Static members */
         [[nodiscard]] constexpr static unsigned int numOperand(ExpressionType type);
     };
@@ -88,13 +92,32 @@ namespace Physica::Core {
     inline void DiffTracer<ScalarType>::pushOperand(const DiffScalar (&operand)[Size]) {
         assert(!records.empty() && "[Error]: Push operand to empty operation is not allowed");
         assert(!checkLastOpDone() && "[Error]: Not enough operand slot for this operand");
+        checkOperands(operand);
+
         const size_t length = operands.getLength();
         const size_t newLength = length + Size;
         operands.reserve(newLength);
         operands.setLength(newLength);
-        for (size_t i = 0; i < Size; ++i) {
-            assert(operand[i].getTraceIndex() < records.getLength() && "[Error]: This operand is not registered");
-            operands[length + i] = operand[i];
+
+        using DoubleType = Scalar<Double>;
+        auto* const p = operands.data() + length;
+        if constexpr (Size % 4 == 0 && Internal::Instrset::hasAVX512()) {
+            for (size_t i = 0; i < Size; i += 4) {
+                SIMD<DoubleType, 8> temp{};
+                temp.load(reinterpret_cast<const DoubleType*>(operand + i));
+                temp.store(reinterpret_cast<DoubleType*>(p + i));
+            }
+        }
+        else if constexpr (Size % 2 == 0 && Internal::Instrset::hasAVX()) {
+            for (size_t i = 0; i < Size; i += 2) {
+                SIMD<DoubleType, 4> temp{};
+                temp.load(reinterpret_cast<const DoubleType*>(operand + i));
+                temp.store(reinterpret_cast<DoubleType*>(p + i));
+            }
+        }
+        else {
+            for (size_t i = 0; i < Size; ++i)
+                p[i] = operand[i];
         }
     }
 
@@ -284,6 +307,14 @@ namespace Physica::Core {
     DiffTracer<ScalarType>& DiffTracer<ScalarType>::getInstance() noexcept {
         thread_local static DiffTracer<ScalarType> instance{};
         return instance;
+    }
+
+    template<class ScalarType>
+    template<size_t Size>
+    void DiffTracer<ScalarType>::checkOperands([[maybe_unused]] const DiffScalar (&operand)[Size]) {
+        for (size_t i = 0; i < Size; ++i) {
+            assert(operand[i].getTraceIndex() < records.getLength() && "[Error]: This operand is not registered");
+        }
     }
 
     template<class ScalarType>

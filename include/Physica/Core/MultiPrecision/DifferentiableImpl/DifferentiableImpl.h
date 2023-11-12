@@ -50,6 +50,20 @@ namespace Physica::Core {
     }
 
     template<class ScalarType>
+    template<class RandomGenerator>
+    inline Differentiable<ScalarType, DiffMode::Forward>
+    Differentiable<ScalarType, DiffMode::Forward>::random_uniform(RandomGenerator& gen) {
+        return Differentiable(ScalarType::random_uniform(gen));
+    }
+
+    template<class ScalarType>
+    template<class RandomGenerator>
+    inline Differentiable<ScalarType, DiffMode::Forward>
+    Differentiable<ScalarType, DiffMode::Forward>::random_normal(RandomGenerator& gen) {
+        return Differentiable(ScalarType::random_normal(gen));
+    }
+
+    template<class ScalarType>
     template<class Distribution, class RandomGenerator>
     [[nodiscard]] inline Differentiable<ScalarType, DiffMode::Forward>
     Differentiable<ScalarType, DiffMode::Forward>::random_any(Distribution& dist, RandomGenerator& gen) {
@@ -117,6 +131,11 @@ namespace Physica::Core {
     }
 
     template<class ScalarType>
+    inline ExpressionType Differentiable<ScalarType, DiffMode::Reverse>::getSource() const noexcept {
+        return pTracer->getRecords()[index].source;
+    }
+
+    template<class ScalarType>
     inline void Differentiable<ScalarType, DiffMode::Reverse>::setValue(const ScalarType& x) {
         pTracer->getValues()[index] = x;
     }
@@ -128,8 +147,22 @@ namespace Physica::Core {
     }
 
     template<class ScalarType>
+    template<class RandomGenerator>
+    inline Differentiable<ScalarType, DiffMode::Reverse>
+    Differentiable<ScalarType, DiffMode::Reverse>::random_uniform(RandomGenerator& gen) {
+        return Differentiable(ScalarType::random_uniform(gen));
+    }
+
+    template<class ScalarType>
+    template<class RandomGenerator>
+    inline Differentiable<ScalarType, DiffMode::Reverse>
+    Differentiable<ScalarType, DiffMode::Reverse>::random_normal(RandomGenerator& gen) {
+        return Differentiable(ScalarType::random_normal(gen));
+    }
+
+    template<class ScalarType>
     template<class Distribution, class RandomGenerator>
-    [[nodiscard]] inline Differentiable<ScalarType, DiffMode::Reverse>
+    inline Differentiable<ScalarType, DiffMode::Reverse>
     Differentiable<ScalarType, DiffMode::Reverse>::random_any(Distribution& dist, RandomGenerator& gen) {
         return Differentiable(ScalarType::random_any(dist, gen));
     }

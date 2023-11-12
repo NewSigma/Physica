@@ -46,4 +46,33 @@ namespace Physica::Core {
         Cos,
         Softmax
     };
+
+    constexpr const char* expressionTypeToStr(ExpressionType type) {
+        switch (type) {
+            case ExpressionType::Set: return "Set";
+            case ExpressionType::Assign: return "Assign";
+            case ExpressionType::Minus: return "Minus";
+            case ExpressionType::Add: return "Add";
+            case ExpressionType::Sub: return "Sub";
+            case ExpressionType::Mul: return "Mul";
+            case ExpressionType::Div: return "Div";
+            case ExpressionType::MulAdd: return "MulAdd";
+            case ExpressionType::More: return "More";
+            case ExpressionType::MoreEq: return "MoreEq";
+            case ExpressionType::Reciprocal: return "Reciprocal";
+            case ExpressionType::Sqrt: return "Sqrt";
+            case ExpressionType::Cbrt: return "Cbrt";
+            case ExpressionType::Abs: return "Abs";
+            case ExpressionType::Relu: return "Relu";
+            case ExpressionType::Square: return "Square";
+            case ExpressionType::Ln: return "Ln";
+            case ExpressionType::Exp: return "Exp";
+            case ExpressionType::Pow: return "Pow";
+            case ExpressionType::Sin: return "Sin";
+            case ExpressionType::Cos: return "Cos";
+            case ExpressionType::Softmax: return "Softmax";
+            default: [[unlikely]]
+                return "Unknown";
+        }
+    }
 }

@@ -274,10 +274,4 @@ namespace Physica::Core {
                 return false;
         return true;
     }
-
-    template<class VectorType>
-    std::ostream& operator<<(std::ostream& os, const RValueVector<VectorType>& v) {
-        os << v.getDerived();
-        return os;
-    }
 }
