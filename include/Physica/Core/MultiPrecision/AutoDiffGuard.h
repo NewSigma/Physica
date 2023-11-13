@@ -25,7 +25,7 @@ namespace Physica::Core {
     class AutoDiffGuard {
         static_assert(!ScalarType::isDifferentiable, "[Error]: Differentiable<> pack is not necessary");
 
-        size_t recordIndex;
+        size_t traceIndex;
     public:
         AutoDiffGuard();
         AutoDiffGuard(const AutoDiffGuard&) = delete;
@@ -34,19 +34,21 @@ namespace Physica::Core {
         /* Operators */
         AutoDiffGuard& operator=(AutoDiffGuard obj) noexcept { swap(obj); return *this; }
         /* Operations */
-        void swap(AutoDiffGuard& obj) noexcept { std::swap(recordIndex, obj.recordIndex); }
+        void swap(AutoDiffGuard& obj) noexcept { std::swap(traceIndex, obj.traceIndex); }
+        /* Getters */
+        [[nodiscard]] size_t getTraceIndex() const noexcept { return traceIndex; }
     private:
         AutoDiffGuard(size_t index);
     };
 
     template<class ScalarType>
-    AutoDiffGuard<ScalarType>::AutoDiffGuard() : recordIndex(DiffTracer<ScalarType>::getInstance().getNumRecord()) {}
+    AutoDiffGuard<ScalarType>::AutoDiffGuard() : traceIndex(DiffTracer<ScalarType>::getInstance().getNumRecord()) {}
 
     template<class ScalarType>
-    AutoDiffGuard<ScalarType>::AutoDiffGuard(size_t index) : recordIndex(index) {}
+    AutoDiffGuard<ScalarType>::AutoDiffGuard(size_t index) : traceIndex(index) {}
 
     template<class ScalarType>
     AutoDiffGuard<ScalarType>::~AutoDiffGuard() {
-        DiffTracer<ScalarType>::getInstance().forget(recordIndex);
+        DiffTracer<ScalarType>::getInstance().forget(traceIndex);
     }
 }

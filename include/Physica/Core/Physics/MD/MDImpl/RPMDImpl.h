@@ -574,57 +574,61 @@ namespace Physica::Core {
     typename RPMD<ScalarType, Dim, NumReplica, ForceMatrixAllocator>::LatticeMatrix
     RPMD<ScalarType, Dim, NumReplica, ForceMatrixAllocator>::makeStressClassical(const ForceModel& model) const {
         constexpr bool isFreeModel = Internal::is_empty_force_model<ForceModel>::value;
-        const size_t dof = getDOF();
-        LatticeMatrix stress(Dim, Dim, 0);
+        constexpr bool IsPeriodBoundary = Internal::Traits<ForceModel>::IsPeriodBoundary;
+        LatticeMatrix result(Dim, Dim, 0);
         if constexpr (NumReplica == 1) {
             const ScalarType repVolume = reciprocal(getVolume());
             const auto col = getPhaseMatrix().col(0);
-            const auto momentum = col.head(dof);
+            const auto momentum = col.head(getDOF());
             for (size_t i = 0; i < getNumParticle(); ++i) {
                 const size_t from = i * Dim;
                 const size_t to = from + Dim;
                 const ScalarType repMass = reciprocal(getMassVec()[i]);
                 const auto atomMomentum = momentum.segment(from, to);
-                stress += (repMass * atomMomentum) * atomMomentum.transpose();
+                result += (repMass * atomMomentum) * atomMomentum.transpose();
             }
             if constexpr (isFreeModel)
-                stress *= repVolume;
-            else
-                stress = stress * repVolume + model.virial(phaseToCell(0));
+                result *= repVolume;
+            else {
+                MDCellType cell = phaseToCell(0);
+                if constexpr (IsPeriodBoundary)
+                    cell.normalize();
+                result = result * repVolume + model.virial(cell);
+            }
         }
         else {
-            const size_t numReplica = getNumReplica();
-            LatticeMatrix kineticStress(Dim, Dim, 0);
-            LatticeMatrix potStress(Dim, Dim, 0);
-            for (size_t replica = 0; replica < numReplica; ++replica) {
+            Utils::Array<LatticeMatrix> buffer(getNumReplica());
+            auto kernel = [this, &model, &buffer](unsigned int replica) {
+                const size_t dof = getDOF();
+                const size_t numReplica = getNumReplica();
                 const auto col = getPhaseMatrix().col(replica);
                 const auto momentum = col.head(dof);
                 const auto pos = col.tail(dof);
 
-                const auto col1 = getPhaseMatrix().col((replica + 1) % numReplica);
-                const auto pos1 = col1.tail(dof);
-                LatticeMatrix temp(Dim, Dim, 0);
+                LatticeMatrix kineticStress(Dim, Dim);
+                LatticeMatrix potStress(Dim, Dim);
                 for (size_t i = 0; i < getNumParticle(); ++i) {
                     const size_t from = i * Dim;
                     const size_t to = from + Dim;
                     const ScalarType mass = getMassVec()[i];
                     const ScalarType factor = reciprocal(mass * ScalarType(numReplica));
                     const auto atomMomentum = momentum.segment(from, to);
-                    temp += (factor * atomMomentum) * atomMomentum.transpose();
+                    kineticStress += (factor * atomMomentum) * atomMomentum.transpose();
                 }
 
-                kineticStress += temp;
                 if constexpr (!isFreeModel) {
-                    constexpr bool IsPeriodBoundary = Internal::Traits<ForceModel>::IsPeriodBoundary;
                     MDCellType cell = phaseToCell(replica);
                     if constexpr (IsPeriodBoundary)
                         cell.normalize();
                     potStress = model.virial(cell);
                 }
-            }
-            stress = (kineticStress * reciprocal(getVolume()) + potStress) * reciprocal(ScalarType(numReplica));
+                buffer[replica] = kineticStress * reciprocal(getVolume()) + potStress;
+            };
+            Executor::parallel_for(kernel, getNumReplica(), Executor::getNumThread()).wait();
+            for (size_t i = 0; i < buffer.getLength(); ++i)
+                toNextMean(result, i, buffer[i]);
         }
-        return stress;
+        return result;
     }
 
     template<class ScalarType, unsigned int Dim, size_t NumReplica, class ForceMatrixAllocator>
