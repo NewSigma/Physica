@@ -43,7 +43,7 @@ namespace Physica::Core {
     }
 
     template<class ScalarType, unsigned int Dim>
-    class EmptyForceModel final {
+    class EmptyForceModel {
     public:
         using MDCellType = MDCell<ScalarType, Dim>;
         using LatticeMatrix = typename MDCellType::LatticeMatrix;

@@ -41,7 +41,7 @@ namespace Physica::Core {
         constexpr static unsigned int Dim = 3;
 
         using PlainScalar = typename ScalarType::PlainScalar;        
-        using MDCellType = MDCell<ScalarType>;
+        using MDCellType = MDCell<ScalarType, Dim>;
         using LatticeMatrix = typename MDCellType::LatticeMatrix;
         using PositionMatrix = typename MDCellType::PositionMatrix;
         using CellListType = CellList<ScalarType>;

@@ -24,6 +24,10 @@ namespace Physica::Core {
     template<class Derived>
     template<class OtherDerived>
     void RValueMatrix<Derived>::assignTo(LValueMatrix<OtherDerived>& target) const {
+        constexpr size_t OtherRow = OtherDerived::RowAtCompile;
+        constexpr size_t OtherColumn = OtherDerived::ColumnAtCompile;
+        static_assert(RowAtCompile == OtherRow || RowAtCompile == Dynamic || OtherRow == Dynamic, "Row mismatch between two matrix");
+        static_assert(ColumnAtCompile == OtherColumn || ColumnAtCompile == Dynamic || OtherColumn == Dynamic, "Column mismatch between two matrix");
         assert(getRow() == target.getRow());
         assert(getColumn() == target.getColumn());
         for (size_t i = 0; i < target.getMaxMajor(); ++i)
