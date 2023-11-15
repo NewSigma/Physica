@@ -397,6 +397,26 @@ namespace Physica::Core {
 
     template<class ScalarType, unsigned int Dim, size_t NumReplica, class ForceMatrixAllocator>
     template<class ForceModel, class Executor>
+    ScalarType RPMD<ScalarType, Dim, NumReplica, ForceMatrixAllocator>::calcPressThermo(const ForceModel& model) const {
+        constexpr bool isFreeModel = Internal::is_empty_force_model<ForceModel>::value;
+        constexpr bool IsPeriodBoundary = Internal::Traits<ForceModel>::IsPeriodBoundary;
+        ScalarType result = calcKinetic() / (getVolume() * (Dim * 0.5));
+        if constexpr (!isFreeModel) {
+            const size_t numReplica = getNumReplica();
+            ScalarType temp = 0;
+            for (size_t i = 0; i < numReplica; ++i) {
+                auto cell = phaseToCell(i);
+                if constexpr (IsPeriodBoundary)
+                    cell.normalize();
+                temp += model.virial(std::move(cell)).trace();
+            }
+            result += temp / ScalarType(numReplica * Dim);
+        }
+        return result;
+    }
+
+    template<class ScalarType, unsigned int Dim, size_t NumReplica, class ForceMatrixAllocator>
+    template<class ForceModel, class Executor>
     typename RPMD<ScalarType, Dim, NumReplica, ForceMatrixAllocator>::LatticeMatrix
     RPMD<ScalarType, Dim, NumReplica, ForceMatrixAllocator>::makeStressPrim(const ForceModel& model) const {
         constexpr bool isFreeModel = Internal::is_empty_force_model<ForceModel>::value;

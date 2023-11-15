@@ -139,6 +139,9 @@ namespace Physica::Core {
         template<class ForceModel> [[nodiscard]] ScalarType calcClassicalInternalEnergy(const ForceModel& model) const;
 
         template<class ForceModel, class Executor>
+        [[nodiscard]] ScalarType calcPressThermo(const ForceModel& model) const;
+
+        template<class ForceModel, class Executor>
         [[nodiscard]] LatticeMatrix makeStressPrim(const ForceModel& model) const;
         template<class ForceModel, class Executor>
         [[nodiscard]] LatticeMatrix makeStressCentroid(const ForceModel& model) const;
