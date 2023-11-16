@@ -24,7 +24,7 @@ namespace Physica::Logger {
     class FileLogger final : public AbstractLogger {
         int fd;
     public:
-        FileLogger(const char* filename);
+        FileLogger(const char* filename, bool trunc);
         ~FileLogger() override;
         /* Operations */
         void log(LogBuffer& buffer) override final;
