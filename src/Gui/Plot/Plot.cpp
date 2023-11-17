@@ -36,6 +36,7 @@ namespace Physica::Gui {
         QFont font = chart.legend()->font();
         font.setPointSize(15);
         chart.legend()->setFont(font);
+        chart.setTitleFont(font);
         {
             axisX->setTickAnchor(0);
             axisX->setTickInterval(deltaX);
