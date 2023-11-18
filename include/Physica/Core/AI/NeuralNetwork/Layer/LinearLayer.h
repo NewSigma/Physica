@@ -41,6 +41,7 @@ namespace Physica::Core {
         MatrixType weights;
         VectorType bias;
     public:
+        LinearLayer() = default;
         LinearLayer(size_t inputDim, size_t outputDim);
         template<class OtherScalar>
         LinearLayer(const LinearLayer<OtherScalar>& layer);
@@ -53,6 +54,7 @@ namespace Physica::Core {
         [[nodiscard]] inline VectorType forward(const VectorType& x) const;
         template<class Optimizer>
         inline void opt_step(const Optimizer& opt);
+        [[nodiscard]] LinearLayer copy() const;
 
         template<class RandomGenerator>
         void random_normal(RandomGenerator& gen);
@@ -85,6 +87,14 @@ namespace Physica::Core {
     inline void LinearLayer<ScalarType>::opt_step(const Optimizer& opt) {
         opt.step(weights);
         opt.step(bias);
+    }
+
+    template<class ScalarType>
+    LinearLayer<ScalarType> LinearLayer<ScalarType>::copy() const {
+        LinearLayer result{};
+        result.weights = weights.copy();
+        result.bias = bias.copy();
+        return result;
     }
 
     template<class ScalarType>

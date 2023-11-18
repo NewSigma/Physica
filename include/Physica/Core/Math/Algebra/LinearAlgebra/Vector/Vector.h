@@ -50,6 +50,7 @@ namespace Physica::Core {
         using typename Base::ScalarType;
         using typename Base::ColMatrix;
         using typename Base::RowMatrix;
+        using Base::isReverseDiff;
     public:
         Vector() = default;
         explicit Vector(size_t length_);
@@ -71,7 +72,7 @@ namespace Physica::Core {
         using Base::random_normal;
         using Base::random_any;
         Vector& toOpposite();
-        void toUnit();
+        [[nodiscard]] Vector copy() const;
         [[nodiscard]] inline device_obj<This> toDevice() const;
         inline void toDevice(device_obj<This>& obj) const;
         /* Getters */

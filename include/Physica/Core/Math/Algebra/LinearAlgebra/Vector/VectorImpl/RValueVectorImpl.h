@@ -22,31 +22,33 @@
 
 namespace Physica::Core {
     namespace Internal {
-        template<class T1, class T2, bool enableSIMD>
+        template<class T1, class T2, bool enableSIMD, class Executor>
         struct AssignImpl {
             inline static void run(const RValueVector<T1>& v1, LValueVector<T2>& v2) {
                 using ScalarType = typename T2::ScalarType;
-                for (size_t i = 0; i < v1.getLength(); ++i)
+                Executor::parallel_for([&](size_t i) {
                     v2[i] = ScalarType(v1.calc(i));
+                }, v1.getLength(), Executor::getNumThread()).wait();
             }
         };
 
-        template<class T1, class T2>
-        class AssignImpl<T1, T2, true> {
+        template<class T1, class T2, class Executor>
+        class AssignImpl<T1, T2, true, Executor> {
             constexpr static size_t size1 = T1::SizeAtCompile;
             constexpr static size_t size2 = T2::SizeAtCompile;
             constexpr static size_t SizeAtCompile = size1 > size2 ? size1 : size2;
         public:
             using ScalarType = typename T1::ScalarType;
             using PacketType = typename Internal::BestPacket<ScalarType, SizeAtCompile>::Type;
+            constexpr static size_t PacketSize = PacketType::size();
 
             inline static void run(const RValueVector<T1>& v1, LValueVector<T2>& v2) { //FIXME: The function declaration is not compatible to AddAssignImpl
                 if constexpr (SizeAtCompile != Dynamic) {
-                    constexpr size_t to = SizeAtCompile / PacketType::size() * PacketType::size();
-                    for (size_t i = 0; i < to; i += PacketType::size())
+                    constexpr size_t to = SizeAtCompile / PacketSize * PacketSize;
+                    for (size_t i = 0; i < to; i += PacketSize)
                         v2.getDerived().writePacket(i, v1.getDerived().template packet<PacketType>(i));
                     
-                    constexpr size_t i = SizeAtCompile - SizeAtCompile % PacketType::size();
+                    constexpr size_t i = SizeAtCompile - SizeAtCompile % PacketSize;
                     if constexpr (i != SizeAtCompile) {
                         constexpr size_t count = SizeAtCompile - i;
                         v2.getDerived().writePacketPartial(i, count, v1.getDerived().template packetPartial<PacketType>(i, count));
@@ -54,15 +56,32 @@ namespace Physica::Core {
                 }
                 else {
                     const size_t length = v1.getLength();
-                    if (length != 0) {
+                    if (length == 0)
+                        return;
+
+                    const size_t to = length / PacketSize * PacketSize;
+                    if constexpr (std::is_same<Executor, SequentialExecutor>::value) {
                         size_t i = 0;
-                        const size_t to = length / PacketType::size() * PacketType::size();
-                        for (; i < to; i += PacketType::size())
+                        for (; i < to; i += PacketSize)
                             v2.getDerived().writePacket(i, v1.getDerived().template packet<PacketType>(i));
+
                         if (to != length) {
                             const size_t count = length - i;
                             v2.getDerived().writePacketPartial(i, count, v1.getDerived().template packetPartial<PacketType>(i, count));
                         }
+                    }
+                    else {
+                        const size_t numLoop = to / PacketSize;
+                        auto future = Executor::parallel_for([&v1, &v2](size_t i) {
+                            const size_t i1 = i * PacketSize;
+                            v2.getDerived().writePacket(i1, v1.getDerived().template packet<PacketType>(i1));
+                        }, numLoop, Executor::getNumThread());
+
+                        if (to != length) {
+                            const size_t count = length % PacketSize;
+                            v2.getDerived().writePacketPartial(to, count, v1.getDerived().template packetPartial<PacketType>(to, count));
+                        }
+                        future.wait();
                     }
                 }
             }
@@ -114,13 +133,13 @@ namespace Physica::Core {
     }
 
     template<class Derived>
-    template<class OtherDerived>
-    void RValueVector<Derived>::assignTo(LValueVector<OtherDerived>& v) const {
+    template<class OtherDerived, class Executor>
+    inline void RValueVector<Derived>::assignTo(LValueVector<OtherDerived>& v) const {
         constexpr size_t OtherSize = Internal::Traits<OtherDerived>::SizeAtCompile;
         static_assert(SizeAtCompile == Dynamic || OtherSize == Dynamic || SizeAtCompile == OtherSize,
                 "[Error]: Size mismatch between two vector");
         assert(v.getLength() == getLength());
-        Internal::AssignImpl<Derived, OtherDerived, Internal::EnableSIMD<Derived, OtherDerived>::value>::run(*this, v);
+        Internal::AssignImpl<Derived, OtherDerived, Internal::EnableSIMD<Derived, OtherDerived>::value, Executor>::run(*this, v);
     }
 
     template<class Derived>

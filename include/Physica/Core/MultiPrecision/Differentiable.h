@@ -130,6 +130,7 @@ namespace Physica::Core {
         [[nodiscard]] inline Differentiable operator-() const;
         /* Operations */
         inline void reverse();
+        inline void reverse(size_t to);
         [[nodiscard]] Differentiable copy() const;
         inline void swap(Differentiable& obj) noexcept;
         /* Getters */

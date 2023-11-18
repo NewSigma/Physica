@@ -76,6 +76,7 @@ namespace Physica::Core {
         using Storage = DenseMatrixStorage<This, Option>;
         using Dim = DenseMatrixDim<This, Row, Column, MaxRow, MaxColumn>;
         using InitializerType = typename Storage::InitializerType;
+        using Base::isReverseDiff;
     public:
         using ScalarType = typename Base::ScalarType;
         using ColMatrix = DenseMatrix<T, MatrixOption::getStorage<DenseMatrix>() | MatrixOption::Column, Row, Column, MaxRow, MaxColumn>;
@@ -103,6 +104,7 @@ namespace Physica::Core {
         using Base::random_normal;
         using Base::random_any;
         inline void resize(size_t row, size_t column);
+        [[nodiscard]] DenseMatrix copy() const;
         [[nodiscard]] inline device_obj<This> toDevice() const;
         void toDevice(device_obj<This>& obj) const;
 

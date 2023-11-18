@@ -49,9 +49,9 @@ namespace Physica::Core {
         template<size_t Size>
         [[nodiscard]] DiffScalar pushOperation(const SIMD<ScalarType, Size>& simd, ExpressionType source);
 
-        void reverse(size_t index);
-        inline void clear(size_t from);
-        void clear(size_t from, size_t to);
+        void reverse(size_t from, size_t to = 1);
+        inline void zero_grad(size_t from);
+        void zero_grad(size_t from, size_t to);
         void forget(size_t fromIndex = 0);
         void squeeze();
         void release();
@@ -60,6 +60,7 @@ namespace Physica::Core {
         /* Getters */
         [[nodiscard]] VectorType& getValues() noexcept { return values; }
         [[nodiscard]] const VectorType& getValues() const noexcept { return values; }
+        [[nodiscard]] VectorType& getTangents() noexcept { return tangents; }
         [[nodiscard]] const VectorType& getTangents() const noexcept { return tangents; }
         [[nodiscard]] const Utils::Array<DiffRecord>& getRecords() const noexcept { return records; }
         [[nodiscard]] size_t getNumRecord() const noexcept { return records.getLength(); }
@@ -170,11 +171,11 @@ namespace Physica::Core {
     }
 
     template<class ScalarType>
-    void DiffTracer<ScalarType>::reverse(size_t index) {
-        assert(index < getNumRecord() && "[Error]: Index overflow");
+    void DiffTracer<ScalarType>::reverse(size_t from, size_t to) {
+        assert(from < getNumRecord() && "[Error]: Index overflow");
+        assert(to <= from);
         assert(records[0].source == ExpressionType::Set && "[Error]: Unexpected source");
-        tangents[index] = ScalarType(1);
-        for (size_t i = index; i != 0; --i) {
+        for (size_t i = from; i >= to; --i) {
             const auto& record = records[i];
             const ScalarType& tangent = tangents[i];
             if (tangent.isZero() || record.source == ExpressionType::Set)
@@ -261,12 +262,12 @@ namespace Physica::Core {
     }
 
     template<class ScalarType>
-    inline void DiffTracer<ScalarType>::clear(size_t from) {
-        clear(from, getNumRecord());
+    inline void DiffTracer<ScalarType>::zero_grad(size_t from) {
+        zero_grad(from, getNumRecord());
     }
 
     template<class ScalarType>
-    void DiffTracer<ScalarType>::clear(size_t from, size_t to) {
+    void DiffTracer<ScalarType>::zero_grad(size_t from, size_t to) {
         assert(from < to && "[Error]: Invalid argument");
         assert(to <= getNumRecord() && "[Error]: Index overflow");
         auto seg = tangents.segment(from, to);

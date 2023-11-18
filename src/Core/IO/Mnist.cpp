@@ -24,6 +24,18 @@
 namespace Physica::Core {
     Mnist::Mnist(const char* folder) {
         Utils::DirStack dir(folder);
+        dir.push("train-images.idx3-ubyte");
+        trainSamples = readDatas(dir.toPath());
+        if (trainSamples.getLength() != 60000)
+            throw BadFileFormatException("[Error]: Bad data file");
+        dir.pop();
+
+        dir.push("t10k-images.idx3-ubyte");
+        testSamples = readDatas(dir.toPath());
+        if (testSamples.getLength() != 10000)
+            throw BadFileFormatException("[Error]: Bad data file");
+        dir.pop();
+
         dir.push("train-labels.idx1-ubyte");
         trainLabels = readLabels(dir.toPath());
         if (trainLabels.getLength() != 60000)
@@ -34,39 +46,14 @@ namespace Physica::Core {
         testLabels = readLabels(dir.toPath());
         if (testLabels.getLength() != 10000)
             throw BadFileFormatException("[Error]: Bad label file");
-        dir.pop();
-
-        dir.push("train-images.idx3-ubyte");
-        trainDatas = readDatas(dir.toPath());
-        if (trainDatas.getLength() != 60000)
-            throw BadFileFormatException("[Error]: Bad data file");
-        dir.pop();
-
-        dir.push("t10k-images.idx3-ubyte");
-        testDatas = readDatas(dir.toPath());
-        if (testDatas.getLength() != 10000)
-            throw BadFileFormatException("[Error]: Bad data file");
     }
 
     void Mnist::swap(Mnist& obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
+        trainSamples.swap(obj.trainSamples);
+        testSamples.swap(obj.testSamples);
         trainLabels.swap(obj.trainLabels);
         testLabels.swap(obj.testLabels);
-        trainDatas.swap(obj.trainDatas);
-        testDatas.swap(obj.testDatas);
-    }
-
-    typename Mnist::LabelArray Mnist::readLabels(const std::string& path) {
-        std::ifstream fin(path);
-        if (!fin)
-            throw IOException("[Error]: File not found");
-        const auto magic = readInt(fin);
-        if (magic != 2049)
-            throw BadFileFormatException("[Error]: Bad label file");
-        
-        LabelArray result(readInt(fin));
-        fin.read(reinterpret_cast<char*>(result.data()), result.getLength());
-        return result;
     }
 
     typename Mnist::DataArray Mnist::readDatas(const std::string& path) {
@@ -82,6 +69,19 @@ namespace Physica::Core {
         
         DataArray result(numData);
         fin.read(reinterpret_cast<char*>(result.data()), result.getLength() * sizeof(ImageType));
+        return result;
+    }
+
+    typename Mnist::LabelArray Mnist::readLabels(const std::string& path) {
+        std::ifstream fin(path);
+        if (!fin)
+            throw IOException("[Error]: File not found");
+        const auto magic = readInt(fin);
+        if (magic != 2049)
+            throw BadFileFormatException("[Error]: Bad label file");
+        
+        LabelArray result(readInt(fin));
+        fin.read(reinterpret_cast<char*>(result.data()), result.getLength());
         return result;
     }
 

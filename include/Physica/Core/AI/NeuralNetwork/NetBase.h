@@ -26,14 +26,17 @@ namespace Physica::Core {
         using Base = LayerBase<Derived>;
     public:
         using typename Base::ScalarType;
+        using typename Base::PlainScalar;
         using typename Base::VectorType;
     public:
         ~NetBase() = default;
         /* Operations */
         void init() { Base::getDerived().init(); }
-        template<class Dataset>
-        void train_step(const Dataset& dataset) { Base::getDerived().train_step(dataset); }
+        template<class Dataset, class Optimizer, class Executor>
+        void train_step(const Dataset& dataset, const Optimizer& opt) { Base::getDerived().template train_step<Dataset, Optimizer, Executor>(dataset, opt); }
         [[nodiscard]] ScalarType loss(const VectorType& input, const VectorType& answer) { return Base::getDerived().loss(input, answer); }
+
+        [[nodiscard]] size_t classify(const VectorType& input) const;
     protected:
         NetBase() = default;
         NetBase(const NetBase&) = default;
@@ -42,4 +45,18 @@ namespace Physica::Core {
         NetBase& operator=(const NetBase&) = default;
         NetBase& operator=(NetBase&&) noexcept = default;
     };
+
+    template<class Derived>
+    size_t NetBase<Derived>::classify(const VectorType& input) const {
+        const VectorType prob = softmax(forward(input));
+        PlainScalar max = 0;
+        size_t index = 0;
+        for (size_t i = 0; i < prob.getLength(); ++i) {
+            if (prob[i] > max) {
+                index = i;
+                max = prob[i];
+            }
+        }
+        return index;
+    }
 }

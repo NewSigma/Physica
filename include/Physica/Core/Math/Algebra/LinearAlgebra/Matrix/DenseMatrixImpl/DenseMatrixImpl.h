@@ -88,6 +88,21 @@ namespace Physica::Core {
     }
 
     template<class T, int Option, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn, class Allocator>
+    DenseMatrix<T, Option, Row, Column, MaxRow, MaxColumn, Allocator>
+    DenseMatrix<T, Option, Row, Column, MaxRow, MaxColumn, Allocator>::copy() const {
+        if constexpr (isReverseDiff) {
+            This result(Base::getRow(), Base::getColumn());
+            for (size_t major = 0; major < Base::getMaxMajor(); ++major) {
+                for (size_t minor = 0; minor < Base::getMaxMinor(); ++minor)
+                    result.refFromMajorMinor(major, minor) = Base::refFromMajorMinor(major, minor).copy();
+            }
+            return result;
+        }
+        else
+            return *this;
+    }
+
+    template<class T, int Option, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn, class Allocator>
     template<class SpaceType>
     void DenseMatrix<T, Option, Row, Column, MaxRow, MaxColumn, Allocator>::read(
             const H5::DataSet& dataset,

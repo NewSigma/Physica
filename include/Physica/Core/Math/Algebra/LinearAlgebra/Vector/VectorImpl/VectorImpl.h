@@ -61,13 +61,16 @@ namespace Physica::Core {
     }
 
     template<class T, size_t Length, size_t MaxLength, class Allocator>
-    void Vector<T, Length, MaxLength, Allocator>::toUnit() {
-        T norm = Base::norm();
-        if (norm.isZero())
-            return;
-        const auto end = Storage::end();
-        for (auto ite = Storage::begin(); ite != end; ++ite)
-            (*ite) /= norm;
+    Vector<T, Length, MaxLength, Allocator> Vector<T, Length, MaxLength, Allocator>::copy() const {
+        if constexpr (isReverseDiff) {
+            const size_t length = Base::getLength();
+            This result(length);
+            for (size_t i = 0; i < length; ++i)
+                result[i] = Base::operator[](i).copy();
+            return result;
+        }
+        else
+            return *this;
     }
 
     template<class T, size_t Length, size_t MaxLength, class Allocator>

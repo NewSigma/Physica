@@ -22,6 +22,7 @@
 #include "Physica/Core/MultiPrecision/Scalar.h"
 #include "Physica/Core/MultiPrecision/ComplexScalar.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/MatrixOption.h"
+#include "Physica/Core/Parallel/Executor/SequentialExecutor.h"
 #include "RVectorBlock.h"
 
 namespace Physica::Core {
@@ -70,8 +71,8 @@ namespace Physica::Core {
         constexpr static bool isExpression = !std::is_base_of<LValueVector<Derived>, Derived>::value;
     public:
         /* Operations */
-        template<class OtherDerived>
-        void assignTo(LValueVector<OtherDerived>& v) const;
+        template<class OtherDerived, class Executor = SequentialExecutor>
+        inline void assignTo(LValueVector<OtherDerived>& v) const;
         /* Getters */
         [[nodiscard]] ScalarType calc(size_t index) const { return Base::getDerived().calc(index); }
         [[nodiscard]] FormatedVector<Derived> format() const;

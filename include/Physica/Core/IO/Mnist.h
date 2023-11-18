@@ -48,10 +48,10 @@ namespace Physica::Core {
         using LabelArray = Utils::Array<unsigned char>;
         using DataArray = Utils::Array<ImageType>;
 
+        DataArray trainSamples;
+        DataArray testSamples;
         LabelArray trainLabels;
         LabelArray testLabels;
-        DataArray trainDatas;
-        DataArray testDatas;
     public:
         Mnist(const char* folder);
         Mnist(const Mnist&) = default;
@@ -60,22 +60,48 @@ namespace Physica::Core {
         /* Operators */
         Mnist& operator=(Mnist obj) noexcept { swap(obj); return *this; }
         /* Operations */
+        template<class ScalarType> [[nodiscard]] inline Vector<ScalarType> makeTrainSample(size_t i) const;
+        template<class ScalarType> [[nodiscard]] inline Vector<ScalarType> makeTestSample(size_t i) const;
+        template<class ScalarType> [[nodiscard]] inline Vector<ScalarType> makeTrainLabel(size_t i) const;
+        template<class ScalarType> [[nodiscard]] inline Vector<ScalarType> makeTestLabel(size_t i) const;
         void swap(Mnist& obj) noexcept;
         /* Getters */
+        [[nodiscard]] const DataArray& getTrainSamples() const noexcept { return trainSamples; }
+        [[nodiscard]] const DataArray& getTestSamples() const noexcept { return testSamples; }
         [[nodiscard]] const LabelArray& getTrainLabels() const noexcept { return trainLabels; }
         [[nodiscard]] const LabelArray& getTestLabels() const noexcept { return testLabels; }
-        [[nodiscard]] const DataArray& getTrainDatas() const noexcept { return trainDatas; }
-        [[nodiscard]] const DataArray& getTestDatas() const noexcept { return testDatas; }
-        [[nodiscard]] size_t getNumTrainData() const noexcept { return trainDatas.getLength(); }
-        [[nodiscard]] size_t getNumTestData() const noexcept { return testDatas.getLength(); }
+        [[nodiscard]] size_t getNumTrainSample() const noexcept { return trainSamples.getLength(); }
+        [[nodiscard]] size_t getNumTestSample() const noexcept { return testSamples.getLength(); }
         /* Static members */
         template<class ScalarType>
         [[nodiscard]] static Vector<ScalarType, NumCategory> makeLabelVector(unsigned char label);
     private:
-        [[nodiscard]] static LabelArray readLabels(const std::string& path);
         [[nodiscard]] static DataArray readDatas(const std::string& path);
+        [[nodiscard]] static LabelArray readLabels(const std::string& path);
         [[nodiscard]] static int32_t readInt(std::ifstream& fin);
     };
+
+    template<class ScalarType>
+    inline Vector<ScalarType> Mnist::makeTrainSample(size_t i) const {
+        assert(i < getNumTrainSample() && "[Error]: Index overflow");
+        return getTrainSamples()[i].asVector<ScalarType>();
+    }
+
+    template<class ScalarType>
+    inline Vector<ScalarType> Mnist::makeTestSample(size_t i) const {
+        assert(i < getNumTestSample() && "[Error]: Index overflow");
+        return getTestSamples()[i].asVector<ScalarType>();
+    }
+
+    template<class ScalarType>
+    inline Vector<ScalarType> Mnist::makeTrainLabel(size_t i) const {
+        return makeLabelVector<ScalarType>(getTrainLabels()[i]);
+    }
+
+    template<class ScalarType>
+    inline Vector<ScalarType> Mnist::makeTestLabel(size_t i) const {
+        return makeLabelVector<ScalarType>(getTestLabels()[i]);
+    }
 
     template<class ScalarType>
     Vector<ScalarType> Mnist::ImageType::asVector() const {
