@@ -127,7 +127,7 @@ namespace Physica::Core {
         constexpr static bool isForward = std::is_same<ScalarType, Differentiable<PlainScalar, DiffMode::Forward>>::value;
     public:
         using Base = typename Traits::BaseType;
-        using PlainSIMD = This;
+        using PlainPacket = This;
     public:
         SIMD() = default;
         explicit SIMD(ScalarType s) : Base(s.getTrivial()) {}
@@ -178,7 +178,7 @@ namespace Physica::Core {
         using TrivialType = typename PlainScalar::TrivialType;
         using DiffTracerType = DiffTracer<PlainScalar>;
     public:
-        using PlainSIMD = Base;
+        using PlainPacket = Base;
     private:
         ScalarType headTrace;
     public:

@@ -100,7 +100,7 @@ namespace Physica::Core {
                 return square(this->getDerived());
         }
         /* SIMD support */
-        __host__ __device__ constexpr static int size() { return 1; }
+        __host__ __device__ constexpr static size_t size() { return 1; }
 
         Derived& load(const ScalarType* p) {
             this->getDerived() = *p;

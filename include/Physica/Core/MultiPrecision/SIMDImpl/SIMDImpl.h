@@ -207,16 +207,14 @@ namespace Physica::Core {
     inline void SIMD<Differentiable<PlainScalar, DiffMode::Reverse>, Size>::load(const ScalarType* p) {
         assert(checkContinuous(Size, p) && "[Error]: Load a uncontinuous pointer is a bug");
         headTrace = *p;
-        const auto* p1 = DiffTracer<PlainScalar>::getInstance().getValues().data_ptr(getHeadTraceIndex());
-        Base::load(p1);
+        Base::load(&p->getValue());
     }
 
     template<class PlainScalar, size_t Size>
     inline void SIMD<Differentiable<PlainScalar, DiffMode::Reverse>, Size>::load_partial(int n, const ScalarType* p) {
         assert(checkContinuous(n, p) && "[Error]: Load a uncontinuous pointer is a bug");
         headTrace = *p;
-        const auto* p1 = DiffTracer<PlainScalar>::getInstance().getValues().data_ptr(getHeadTraceIndex());
-        Base::load_partial(n, p1);
+        Base::load_partial(n, &p->getValue());
     }
 
     template<class PlainScalar, size_t Size>

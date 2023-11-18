@@ -140,7 +140,7 @@ namespace Physica::Core {
 
     template<class ScalarType>
     void QuadraticProgramming<ScalarType>::updateVariables(const Vector<ScalarType, Dynamic>& direction) {
-        size_t blockedAt;
+        size_t blockedAt = 0;
         const ScalarType step = nextStepSize(direction, blockedAt);
         x = x + step * direction;
         if (step != ScalarType(1)) {

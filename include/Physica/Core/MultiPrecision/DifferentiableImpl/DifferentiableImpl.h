@@ -82,9 +82,8 @@ namespace Physica::Core {
 
     template<class ScalarType>
     Differentiable<ScalarType, DiffMode::Reverse>::Differentiable(DiffTracerType& tracer, size_t index_)
-            : pTracer(&tracer)
-            , index(index_) {
-        assert(index < pTracer->getNumRecord() && "[Error]: Invalid index");
+            : pTracer(&tracer) {
+        setTraceIndex(index_);
     }
 
     template<class ScalarType>

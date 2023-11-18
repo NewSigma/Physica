@@ -114,7 +114,7 @@ namespace Physica::Core {
     Vector<T, Length, MaxLength, Allocator> Vector<T, Length, MaxLength, Allocator>::random_any(
             size_t len, Distribution& dist, RandomGenerator& gen) {
         This result(len);
-        result.random_any(gen);
+        result.random_any(dist, gen);
         return result;
     }
     /**

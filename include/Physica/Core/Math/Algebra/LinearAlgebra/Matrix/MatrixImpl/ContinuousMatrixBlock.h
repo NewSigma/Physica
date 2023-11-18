@@ -20,19 +20,14 @@
 
 namespace Physica::Core {
     template<class Derived> class ContinuousMatrix;
-    template<class MatrixType, size_t Length = Dynamic> class RowContinuousVector;
-    template<class MatrixType, size_t Length = Dynamic> class ColContinuousVector;
+    template<class MatrixType, size_t Length> class RowContinuousVector;
+    template<class MatrixType, size_t Length> class ColContinuousVector;
     template<class MatrixType, size_t Row = Dynamic, size_t Column = Dynamic> class ContinuousMatrixBlock;
 
     namespace Internal {
         template<class MatrixType, size_t Length>
         class Traits<RowContinuousVector<MatrixType, Length>> {
-            using VectorType = RowContinuousVector<MatrixType, Length>;
-            constexpr static bool isRowMatrix = MatrixOption::isRowMatrix<MatrixType>();
-            constexpr static bool isElementMatrix = MatrixOption::isElementMatrix<MatrixType>();
-            constexpr static bool isRowVector = isElementMatrix && MatrixType::RowAtCompile == 1;
         public:
-            using Base = typename std::conditional<isRowMatrix || isRowVector, ContinuousVector<VectorType>, LValueVector<VectorType>>::type;
             using ScalarType = typename MatrixType::ScalarType;
             constexpr static size_t SizeAtCompile = Length;
             constexpr static size_t MaxSizeAtCompile = Length;
@@ -41,12 +36,7 @@ namespace Physica::Core {
 
         template<class MatrixType, size_t Length>
         class Traits<ColContinuousVector<MatrixType, Length>> {
-            using VectorType = ColContinuousVector<MatrixType, Length>;
-            constexpr static bool isColumnMatrix = MatrixOption::isColumnMatrix<MatrixType>();
-            constexpr static bool isElementMatrix = MatrixOption::isElementMatrix<MatrixType>();
-            constexpr static bool isColumnVector = isElementMatrix && MatrixType::ColumnAtCompile == 1;
         public:
-            using Base = typename std::conditional<isColumnMatrix || isColumnVector, ContinuousVector<VectorType>, LValueVector<VectorType>>::type;
             using ScalarType = typename MatrixType::ScalarType;
             constexpr static size_t SizeAtCompile = Length;
             constexpr static size_t MaxSizeAtCompile = Length;
@@ -56,6 +46,12 @@ namespace Physica::Core {
         template<class MatrixType, size_t Row, size_t Column>
         class Traits<ContinuousMatrixBlock<MatrixType, Row, Column>> {
             constexpr static bool isElementMatrix = MatrixOption::isElementMatrix<MatrixType>();
+            constexpr static bool isRowMatrix = MatrixOption::isRowMatrix<MatrixType>();
+            constexpr static bool isColMatrix = MatrixOption::isColumnMatrix<MatrixType>();
+            using RowVectorType = typename std::conditional<
+                    isRowMatrix, RowContinuousVector<MatrixType, Column>, RowLVector<MatrixType>>::type;
+            using ColVectorType = typename std::conditional<
+                    isColMatrix, ColContinuousVector<MatrixType, Row>, ColLVector<MatrixType>>::type;
         public:
             using ScalarType = typename MatrixType::ScalarType;
             constexpr static int Option = MatrixType::Option;
@@ -66,22 +62,21 @@ namespace Physica::Core {
             constexpr static size_t SizeAtCompile = Row * Column;
             constexpr static size_t MaxSizeAtCompile = SizeAtCompile;
             using PacketType = typename Internal::BestPacket<ScalarType, SizeAtCompile>::Type;
+            using VectorBase = typename std::conditional<Column == 1, ColVectorType, RowVectorType>::type;
         };
     }
 
     template<class MatrixType, size_t Length>
-    class RowContinuousVector : public Internal::Traits<RowContinuousVector<MatrixType, Length>>::Base {
+    class RowContinuousVector : public ContinuousVector<RowContinuousVector<MatrixType, Length>> {
     public:
-        using Base = typename Internal::Traits<RowContinuousVector<MatrixType, Length>>::Base;
-        using ScalarType = typename MatrixType::ScalarType;
+        using Base = ContinuousVector<RowContinuousVector<MatrixType, Length>>;
+        using typename Base::ScalarType;
     private:
-        MatrixType& mat;
-        size_t row;
-        size_t fromCol;
+        ScalarType* pVecHead;
         size_t colCount;
     public:
-        RowContinuousVector(ContinuousMatrix<MatrixType>& mat_, size_t row_, size_t fromCol_, size_t colCount_)
-                : mat(mat_.getDerived()), row(row_), fromCol(fromCol_), colCount(colCount_) {
+        RowContinuousVector(ContinuousMatrix<MatrixType>& mat, size_t row, size_t fromCol, size_t colCount_)
+                : pVecHead(mat.data_ptr(row, fromCol)), colCount(colCount_) {
             assert(row < mat.getRow());
             assert(fromCol + colCount <= mat.getColumn());
         }
@@ -96,23 +91,27 @@ namespace Physica::Core {
         void resize([[maybe_unused]] size_t length) { assert(length == getLength()); }
         /* Getters */
         [[nodiscard]] __host__ __device__ size_t getLength() const noexcept { return Length == Dynamic ? colCount : Length; }
-        [[nodiscard]] __host__ __device__ ScalarType* data_ptr(size_t index) { return mat.data_ptr(row, fromCol + index); }
-        [[nodiscard]] __host__ __device__ const ScalarType* data_ptr(size_t index) const { return mat.data_ptr(row, fromCol + index); }
+        [[nodiscard]] __host__ __device__ ScalarType* data_ptr(size_t index) {
+            assert(index < colCount && "[Error]: Index overflow");
+            return pVecHead + index;
+        }
+        [[nodiscard]] __host__ __device__ const ScalarType* data_ptr(size_t index) const {
+            assert(index < colCount && "[Error]: Index overflow");
+            return pVecHead + index;
+        }
     };
 
     template<class MatrixType, size_t Length>
-    class ColContinuousVector : public Internal::Traits<ColContinuousVector<MatrixType, Length>>::Base {
+    class ColContinuousVector : public ContinuousVector<ColContinuousVector<MatrixType, Length>> {
     public:
-        using Base = typename Internal::Traits<ColContinuousVector<MatrixType, Length>>::Base;
-        using ScalarType = typename MatrixType::ScalarType;
+        using Base = ContinuousVector<ColContinuousVector<MatrixType, Length>>;
+        using typename Base::ScalarType;
     private:
-        MatrixType& mat;
-        size_t col;
-        size_t fromRow;
+        ScalarType* pVecHead;
         size_t rowCount;
     public:
-        ColContinuousVector(ContinuousMatrix<MatrixType>& mat_, size_t fromRow_, size_t rowCount_, size_t col_)
-                : mat(mat_.getDerived()), col(col_), fromRow(fromRow_), rowCount(rowCount_) {
+        ColContinuousVector(ContinuousMatrix<MatrixType>& mat, size_t fromRow, size_t rowCount_, size_t col)
+                : pVecHead(mat.data_ptr(fromRow, col)), rowCount(rowCount_) {
             assert(fromRow + rowCount <= mat.getRow());
             assert(col < mat.getColumn());
         }
@@ -127,24 +126,32 @@ namespace Physica::Core {
         void resize([[maybe_unused]] size_t length) { assert(length == getLength()); }
         /* Getters */
         [[nodiscard]] __host__ __device__ size_t getLength() const noexcept { return Length == Dynamic ? rowCount : Length; }
-        [[nodiscard]] __host__ __device__ ScalarType* data_ptr(size_t index) { return mat.data_ptr(fromRow + index, col); }
-        [[nodiscard]] __host__ __device__ const ScalarType* data_ptr(size_t index) const { return mat.data_ptr(fromRow + index, col); }
+        [[nodiscard]] __host__ __device__ ScalarType* data_ptr(size_t index) {
+            assert(index < rowCount && "[Error]: Index overflow");
+            return pVecHead + index;
+        }
+        [[nodiscard]] __host__ __device__ const ScalarType* data_ptr(size_t index) const {
+            assert(index < rowCount && "[Error]: Index overflow");
+            return pVecHead + index;
+        }
     };
 
     template<class MatrixType, size_t Column>
-    class ContinuousMatrixBlock<MatrixType, 1, Column> : public LValueMatrix<ContinuousMatrixBlock<MatrixType, 1, Column>>
-                                                       , public RowContinuousVector<MatrixType, Column> {
+    class ContinuousMatrixBlock<MatrixType, 1, Column>
+            : public LValueMatrix<ContinuousMatrixBlock<MatrixType, 1, Column>>
+            , public Internal::Traits<ContinuousMatrixBlock<MatrixType, 1, Column>>::VectorBase {
         using This = ContinuousMatrixBlock<MatrixType, 1, Column>;
     public:
         using Base = LValueMatrix<This>;
-        using VectorBase = RowContinuousVector<MatrixType, Column>;
+        using VectorBase = typename Internal::Traits<This>::VectorBase;
         using ScalarType = typename MatrixType::ScalarType;
     public:
         ContinuousMatrixBlock(ContinuousMatrix<MatrixType>& mat_, size_t fromRow_, [[maybe_unused]] size_t rowCount_, size_t fromCol_, size_t colCount_)
                 : ContinuousMatrixBlock(mat_, fromRow_, fromCol_, colCount_) {
             assert(rowCount_ == 1);
         }
-        ContinuousMatrixBlock(ContinuousMatrix<MatrixType>& mat_, size_t row_, size_t fromCol_, size_t colCount_) : VectorBase(mat_, row_, fromCol_, colCount_) {}
+        ContinuousMatrixBlock(ContinuousMatrix<MatrixType>& mat_, size_t row_, size_t fromCol_, size_t colCount_)
+                : VectorBase(mat_.getDerived(), row_, fromCol_, colCount_) {}
         ContinuousMatrixBlock(const ContinuousMatrixBlock&) = delete;
         ContinuousMatrixBlock(ContinuousMatrixBlock&&) noexcept = delete;
         ~ContinuousMatrixBlock() = default;
@@ -184,19 +191,21 @@ namespace Physica::Core {
     };
 
     template<class MatrixType, size_t Row>
-    class ContinuousMatrixBlock<MatrixType, Row, 1> : public LValueMatrix<ContinuousMatrixBlock<MatrixType, Row, 1>>
-                                                    , public ColContinuousVector<MatrixType, Row> {
+    class ContinuousMatrixBlock<MatrixType, Row, 1>
+            : public LValueMatrix<ContinuousMatrixBlock<MatrixType, Row, 1>>
+            , public Internal::Traits<ContinuousMatrixBlock<MatrixType, Row, 1>>::VectorBase {
         using This = ContinuousMatrixBlock<MatrixType, Row, 1>;
     public:
         using Base = LValueMatrix<This>;
-        using VectorBase = ColContinuousVector<MatrixType, Row>;
+        using VectorBase = typename Internal::Traits<This>::VectorBase;
         using ScalarType = typename MatrixType::ScalarType;
     public:
         ContinuousMatrixBlock(ContinuousMatrix<MatrixType>& mat_, size_t fromRow_, size_t rowCount_, size_t fromCol_, [[maybe_unused]] size_t colCount_)
                 : ContinuousMatrixBlock(mat_, fromRow_, rowCount_, fromCol_) {
             assert(colCount_ == 1);
         }
-        ContinuousMatrixBlock(ContinuousMatrix<MatrixType>& mat_, size_t fromRow_, size_t rowCount_, size_t col_) : VectorBase(mat_, fromRow_, rowCount_, col_) {}
+        ContinuousMatrixBlock(ContinuousMatrix<MatrixType>& mat_, size_t fromRow_, size_t rowCount_, size_t col_)
+                : VectorBase(mat_.getDerived(), fromRow_, rowCount_, col_) {}
         ContinuousMatrixBlock(const ContinuousMatrixBlock&) = delete;
         ContinuousMatrixBlock(ContinuousMatrixBlock&&) noexcept = delete;
         ~ContinuousMatrixBlock() = default;
@@ -236,15 +245,17 @@ namespace Physica::Core {
     };
 
     template<class MatrixType>
-    class ContinuousMatrixBlock<MatrixType, 1, 1> : public LValueMatrix<ContinuousMatrixBlock<MatrixType, 1, 1>>
-                                                  , public ColContinuousVector<MatrixType, 1> {
+    class ContinuousMatrixBlock<MatrixType, 1, 1>
+            : public LValueMatrix<ContinuousMatrixBlock<MatrixType, 1, 1>>
+            , public Internal::Traits<ContinuousMatrixBlock<MatrixType, 1, 1>>::VectorBase {
+        using This = ContinuousMatrixBlock<MatrixType, 1, 1>;
     public:
-        using Base = LValueMatrix<ContinuousMatrixBlock<MatrixType, 1, 1>>;
-        using VectorBase = ColContinuousVector<MatrixType, 1>;
+        using Base = LValueMatrix<This>;
+        using VectorBase = typename Internal::Traits<This>::VectorBase;
         using ScalarType = typename MatrixType::ScalarType;
     public:
         ContinuousMatrixBlock(ContinuousMatrix<MatrixType>& mat_, size_t fromRow_, size_t rowCount_, size_t col_)
-                : VectorBase(mat_, fromRow_, rowCount_, col_) {}
+                : VectorBase(mat_.getDerived(), fromRow_, rowCount_, col_) {}
         ContinuousMatrixBlock(const ContinuousMatrixBlock&) = delete;
         ContinuousMatrixBlock(ContinuousMatrixBlock&&) noexcept = delete;
         ~ContinuousMatrixBlock() = default;

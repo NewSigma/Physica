@@ -114,6 +114,7 @@ namespace Physica::Core {
     template<class Derived>
     template<class PacketType>
     inline PacketType ContinuousVector<Derived>::packetPartial(size_t index, size_t count) const {
+        assert(index + count <= Base::getLength());
         if constexpr (std::is_same_v<ScalarType, typename Internal::Traits<PacketType>::ScalarType>) {
             PacketType packet{};
             packet.load_partial(count, Base::data_ptr(index));

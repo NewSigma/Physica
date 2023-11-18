@@ -26,8 +26,10 @@ namespace Physica::Core {
     template<class ScalarType>
     class DiffTracer {
         static_assert(!ScalarType::isDifferentiable, "[Error]: Differentiable<> pack is not necessary");
+    public:
         using DiffScalar = Differentiable<ScalarType, DiffMode::Reverse>;
         using VectorType = Vector<ScalarType>;
+    private:
         struct DiffRecord {
             size_t startOperandId;
             ExpressionType source;
@@ -40,7 +42,7 @@ namespace Physica::Core {
     public:
         ~DiffTracer() = default;
         /* Operations */
-        inline void pushOperand(DiffScalar operand);
+        inline void pushOperand(const DiffScalar& operand);
         template<size_t Size>
         inline void pushOperand(const DiffScalar (&operand)[Size]);
 
@@ -49,7 +51,7 @@ namespace Physica::Core {
         template<size_t Size>
         [[nodiscard]] DiffScalar pushOperation(const SIMD<ScalarType, Size>& simd, ExpressionType source);
 
-        void reverse(size_t from, size_t to = 1);
+        void reverse(size_t from, size_t to = 0);
         inline void zero_grad(size_t from);
         void zero_grad(size_t from, size_t to);
         void forget(size_t fromIndex = 0);
@@ -81,7 +83,7 @@ namespace Physica::Core {
     };
 
     template<class ScalarType>
-    inline void DiffTracer<ScalarType>::pushOperand(DiffScalar operand) {
+    inline void DiffTracer<ScalarType>::pushOperand(const DiffScalar& operand) {
         assert(!records.empty() && "[Error]: Push operand to empty operation is not allowed");
         assert(!checkLastOpDone() && "[Error]: Not enough operand slot for this operand");
         assert(operand.getTraceIndex() < records.getLength() && "[Error]: This operand is not registered");
@@ -100,6 +102,7 @@ namespace Physica::Core {
         operands.reserve(newLength);
         operands.setLength(newLength);
 
+        static_assert(sizeof(DiffScalar) == 16, "[Error]: Unexpected size, the optimization is not available");
         using DoubleType = Scalar<Double>;
         auto* const p = operands.data() + length;
         if constexpr (Size % 4 == 0 && Internal::Instrset::hasAVX512()) {
@@ -174,8 +177,7 @@ namespace Physica::Core {
     void DiffTracer<ScalarType>::reverse(size_t from, size_t to) {
         assert(from < getNumRecord() && "[Error]: Index overflow");
         assert(to <= from);
-        assert(records[0].source == ExpressionType::Set && "[Error]: Unexpected source");
-        for (size_t i = from; i >= to; --i) {
+        for (size_t i = from; i >= to && i <= from; --i) {
             const auto& record = records[i];
             const ScalarType& tangent = tangents[i];
             if (tangent.isZero() || record.source == ExpressionType::Set)
