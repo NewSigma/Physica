@@ -36,22 +36,22 @@ namespace Physica::Core {
         };
 
         Utils::Array<DiffRecord> records;
-        Utils::Array<DiffScalar> operands;
+        Utils::Array<size_t> operands;
         VectorType values;
         VectorType tangents;
     public:
         ~DiffTracer() = default;
         /* Operations */
-        inline void pushOperand(const DiffScalar& operand);
+        inline void pushOperand(size_t operand);
         template<size_t Size>
-        inline void pushOperand(const DiffScalar (&operand)[Size]);
+        inline void pushOperand(const size_t (&operand)[Size]);
 
         [[nodiscard]] inline DiffScalar pushOperation(ScalarType value, ExpressionType source);
         [[nodiscard]] DiffScalar pushOperation(ScalarType value, ScalarType tangent, ExpressionType source);
         template<size_t Size>
         [[nodiscard]] DiffScalar pushOperation(const SIMD<ScalarType, Size>& simd, ExpressionType source);
 
-        void reverse(size_t from, size_t to = 0);
+        void reverse(DiffTracer& targetTracer, size_t from, size_t to = 0);
         inline void zero_grad(size_t from);
         void zero_grad(size_t from, size_t to);
         void forget(size_t fromIndex = 0);
@@ -77,22 +77,22 @@ namespace Physica::Core {
         DiffTracer& operator=(DiffTracer&&) noexcept = default;
         /* Operations */
         template<size_t Size>
-        void checkOperands(const DiffScalar (&operand)[Size]);
+        void checkOperands(const size_t (&operand)[Size]);
         /* Static members */
         [[nodiscard]] constexpr static unsigned int numOperand(ExpressionType type);
     };
 
     template<class ScalarType>
-    inline void DiffTracer<ScalarType>::pushOperand(const DiffScalar& operand) {
+    inline void DiffTracer<ScalarType>::pushOperand(size_t operand) {
         assert(!records.empty() && "[Error]: Push operand to empty operation is not allowed");
         assert(!checkLastOpDone() && "[Error]: Not enough operand slot for this operand");
-        assert(operand.getTraceIndex() < records.getLength() && "[Error]: This operand is not registered");
+        assert(operand < records.getLength() && "[Error]: This operand is not registered");
         operands.append(operand);
     }
 
     template<class ScalarType>
     template<size_t Size>
-    inline void DiffTracer<ScalarType>::pushOperand(const DiffScalar (&operand)[Size]) {
+    inline void DiffTracer<ScalarType>::pushOperand(const size_t (&operand)[Size]) {
         assert(!records.empty() && "[Error]: Push operand to empty operation is not allowed");
         assert(!checkLastOpDone() && "[Error]: Not enough operand slot for this operand");
         checkOperands(operand);
@@ -102,27 +102,9 @@ namespace Physica::Core {
         operands.reserve(newLength);
         operands.setLength(newLength);
 
-        static_assert(sizeof(DiffScalar) == 16, "[Error]: Unexpected size, the optimization is not available");
-        using DoubleType = Scalar<Double>;
         auto* const p = operands.data() + length;
-        if constexpr (Size % 4 == 0 && Internal::Instrset::hasAVX512()) {
-            for (size_t i = 0; i < Size; i += 4) {
-                SIMD<DoubleType, 8> temp{};
-                temp.load(reinterpret_cast<const DoubleType*>(operand + i));
-                temp.store(reinterpret_cast<DoubleType*>(p + i));
-            }
-        }
-        else if constexpr (Size % 2 == 0 && Internal::Instrset::hasAVX()) {
-            for (size_t i = 0; i < Size; i += 2) {
-                SIMD<DoubleType, 4> temp{};
-                temp.load(reinterpret_cast<const DoubleType*>(operand + i));
-                temp.store(reinterpret_cast<DoubleType*>(p + i));
-            }
-        }
-        else {
-            for (size_t i = 0; i < Size; ++i)
-                p[i] = operand[i];
-        }
+        for (size_t i = 0; i < Size; ++i)
+            p[i] = operand[i];
     }
 
     template<class ScalarType>
@@ -174,7 +156,7 @@ namespace Physica::Core {
     }
 
     template<class ScalarType>
-    void DiffTracer<ScalarType>::reverse(size_t from, size_t to) {
+    void DiffTracer<ScalarType>::reverse(DiffTracer& targetTracer, size_t from, size_t to) {
         assert(from < getNumRecord() && "[Error]: Index overflow");
         assert(to <= from);
         for (size_t i = from; i >= to && i <= from; --i) {
@@ -186,10 +168,8 @@ namespace Physica::Core {
             const ScalarType& value = values[i];
             const size_t startOperandId = record.startOperandId;
             const ExpressionType source = record.source;
-            DiffScalar operandX = operands[startOperandId];
-            auto& tracerX = operandX.getTracer();
-            const size_t indexX = operandX.getTraceIndex();
-            ScalarType& tangentX = tracerX.tangents[indexX];
+            const size_t indexX = operands[startOperandId];
+            ScalarType& tangentX = targetTracer.tangents[indexX];
             /* Unitary Operations */ {
                 switch (source) {
                     case ExpressionType::Assign:
@@ -206,34 +186,32 @@ namespace Physica::Core {
                         tangentX += tangent / (square(value) * ScalarType(3));
                         continue;
                     case ExpressionType::Abs:
-                        tangentX += tracerX.values[indexX].isPositive() ? tangent : -tangent;
+                        tangentX += targetTracer.values[indexX].isPositive() ? tangent : -tangent;
                         continue;
                     case ExpressionType::Relu:
-                        tangentX += tracerX.values[indexX].isPositive() ? tangent : ScalarType(0);
+                        tangentX += targetTracer.values[indexX].isPositive() ? tangent : ScalarType(0);
                         continue;
                     case ExpressionType::Square:
-                        tangentX += tangent * tracerX.values[indexX] * ScalarType(2);
+                        tangentX += tangent * targetTracer.values[indexX] * ScalarType(2);
                         continue;
                     case ExpressionType::Ln:
-                        tangentX += tangent / tracerX.values[indexX];
+                        tangentX += tangent / targetTracer.values[indexX];
                         continue;
                     case ExpressionType::Exp:
                         tangentX += tangent * value;
                         continue;
                     case ExpressionType::Sin:
-                        tangentX += tangent * cos(tracerX.values[indexX]);
+                        tangentX += tangent * cos(targetTracer.values[indexX]);
                         continue;
                     case ExpressionType::Cos:
-                        tangentX -= tangent * sin(tracerX.values[indexX]);
+                        tangentX -= tangent * sin(targetTracer.values[indexX]);
                         continue;
                     default:;
                 }
             }
             /* Binary Operations */ {
-                DiffScalar operandY = operands[startOperandId + 1];
-                auto& tracerY = operandY.getTracer();
-                const size_t indexY = operandY.getTraceIndex();
-                ScalarType& tangentY = tracerY.tangents[indexY];
+                const size_t indexY = operands[startOperandId + 1];
+                ScalarType& tangentY = targetTracer.tangents[indexY];
                 switch (source) {
                     case ExpressionType::Add:
                     case ExpressionType::Sub:
@@ -241,17 +219,17 @@ namespace Physica::Core {
                         tangentY += tangent * ScalarType(source == ExpressionType::Add ? 1.0 : -1.0);
                         continue;
                     case ExpressionType::MulAdd: {
-                        DiffScalar operandZ = operands[startOperandId + 2];
-                        ScalarType& tangentZ = operandZ.getTracer().tangents[operandZ.getTraceIndex()];
+                        const size_t indexZ = operands[startOperandId + 2];
+                        ScalarType& tangentZ = targetTracer.tangents[indexZ];
                         tangentZ += tangent;
                         [[fallthrough]];
                     }
                     case ExpressionType::Mul:
-                        tangentX += tangent * tracerY.values[indexY];
-                        tangentY += tangent * tracerX.values[indexX];
+                        tangentX += tangent * targetTracer.values[indexY];
+                        tangentY += tangent * targetTracer.values[indexX];
                         continue;
                     case ExpressionType::Div: {
-                        const ScalarType dx = tangent * reciprocal(tracerY.values[indexY]);
+                        const ScalarType dx = tangent * reciprocal(targetTracer.values[indexY]);
                         tangentX += dx;
                         tangentY -= dx * value;
                         continue;
@@ -314,9 +292,9 @@ namespace Physica::Core {
 
     template<class ScalarType>
     template<size_t Size>
-    void DiffTracer<ScalarType>::checkOperands([[maybe_unused]] const DiffScalar (&operand)[Size]) {
+    void DiffTracer<ScalarType>::checkOperands([[maybe_unused]] const size_t (&operand)[Size]) {
         for (size_t i = 0; i < Size; ++i) {
-            assert(operand[i].getTraceIndex() < records.getLength() && "[Error]: This operand is not registered");
+            assert(operand[i] < records.getLength() && "[Error]: This operand is not registered");
         }
     }
 

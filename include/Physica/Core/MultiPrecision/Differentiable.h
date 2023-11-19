@@ -129,8 +129,10 @@ namespace Physica::Core {
         [[nodiscard]] inline bool operator==(const This& other) const;
         [[nodiscard]] inline Differentiable operator-() const;
         /* Operations */
-        inline void reverse();
-        inline void reverse(size_t to);
+        void reverse() { reverse(getTracer()); }
+        void reverse(size_t to) { reverse(to, getTracer()); }
+        inline void reverse(DiffTracerType& targetTracer);
+        inline void reverse(size_t to, DiffTracerType& targetTracer);
         [[nodiscard]] Differentiable copy() const;
         inline void swap(Differentiable& obj) noexcept;
         /* Getters */

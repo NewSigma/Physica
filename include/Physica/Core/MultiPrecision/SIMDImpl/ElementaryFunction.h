@@ -92,12 +92,12 @@ namespace Physica::Core {
             const size_t headIndex = x.getHeadTraceIndex();
             const ScalarType sinHeadTrace = tracer.pushOperation(s, ExpressionType::Sin);
             for (size_t i = 0; i < Size; ++i)
-                tracer.pushOperand({tracer, headIndex + i});
+                tracer.pushOperand(headIndex + i);
             s = SIMD<ScalarType, Size>(s, sinHeadTrace);
 
             const ScalarType cosHeadTrace = tracer.pushOperation(c, ExpressionType::Cos);
             for (size_t i = 0; i < Size; ++i)
-                tracer.pushOperand({tracer, headIndex + i});
+                tracer.pushOperand(headIndex + i);
             c = SIMD<ScalarType, Size>(c, cosHeadTrace);
         }
     }

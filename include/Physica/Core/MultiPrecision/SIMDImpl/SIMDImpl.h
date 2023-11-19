@@ -112,9 +112,9 @@ namespace Physica::Core {
     SIMD<Differentiable<PlainScalar, DiffMode::Reverse>, Size>::SIMD(ScalarType s) : Base(s.getValue()) {
         auto& tracer = DiffTracer<PlainScalar>::getInstance();
         headTrace = tracer.pushOperation(*this, ExpressionType::Assign);
-        ScalarType operand[Size];
+        size_t operand[Size];
         for (size_t i = 0; i < Size; ++i)
-            operand[i] = s;
+            operand[i] = s.getTraceIndex();
         tracer.pushOperand(operand);
     }
 
@@ -136,10 +136,10 @@ namespace Physica::Core {
         auto& tracer = DiffTracer<PlainScalar>::getInstance();
         const auto temp = Base::operator+(other);
         const ScalarType newHeadTrace = tracer.pushOperation(temp, ExpressionType::Add);
-        ScalarType operand[Size * 2];
+        size_t operand[Size * 2];
         for (size_t i = 0; i < Size; ++i) {
-            operand[2 * i] = ScalarType(getTracer(), getHeadTraceIndex() + i);
-            operand[2 * i + 1] = ScalarType(other.getTracer(), other.getHeadTraceIndex() + i);
+            operand[2 * i] = getHeadTraceIndex() + i;
+            operand[2 * i + 1] = other.getHeadTraceIndex() + i;
         }
         tracer.pushOperand(operand);
         return {temp, newHeadTrace};
@@ -151,10 +151,10 @@ namespace Physica::Core {
         auto& tracer = DiffTracer<PlainScalar>::getInstance();
         const auto temp = Base::operator-(other);
         const ScalarType newHeadTrace = tracer.pushOperation(temp, ExpressionType::Sub);
-        ScalarType operand[Size * 2];
+        size_t operand[Size * 2];
         for (size_t i = 0; i < Size; ++i) {
-            operand[2 * i] = ScalarType(getTracer(), getHeadTraceIndex() + i);
-            operand[2 * i + 1] = ScalarType(other.getTracer(), other.getHeadTraceIndex() + i);
+            operand[2 * i] = getHeadTraceIndex() + i;
+            operand[2 * i + 1] = other.getHeadTraceIndex() + i;
         }
         tracer.pushOperand(operand);
         return {temp, newHeadTrace};
@@ -166,10 +166,10 @@ namespace Physica::Core {
         auto& tracer = DiffTracer<PlainScalar>::getInstance();
         const auto temp = Base::operator*(other);
         const ScalarType newHeadTrace = tracer.pushOperation(temp, ExpressionType::Mul);
-        ScalarType operand[Size * 2];
+        size_t operand[Size * 2];
         for (size_t i = 0; i < Size; ++i) {
-            operand[2 * i] = ScalarType(getTracer(), getHeadTraceIndex() + i);
-            operand[2 * i + 1] = ScalarType(other.getTracer(), other.getHeadTraceIndex() + i);
+            operand[2 * i] = getHeadTraceIndex() + i;
+            operand[2 * i + 1] = other.getHeadTraceIndex() + i;
         }
         tracer.pushOperand(operand);
         return {temp, newHeadTrace};
@@ -181,10 +181,10 @@ namespace Physica::Core {
         auto& tracer = DiffTracer<PlainScalar>::getInstance();
         const auto temp = Base::operator/(other);
         const ScalarType newHeadTrace = tracer.pushOperation(temp, ExpressionType::Div);
-        ScalarType operand[Size * 2];
+        size_t operand[Size * 2];
         for (size_t i = 0; i < Size; ++i) {
-            operand[2 * i] = ScalarType(getTracer(), getHeadTraceIndex() + i);
-            operand[2 * i + 1] = ScalarType(other.getTracer(), other.getHeadTraceIndex() + i);
+            operand[2 * i] = getHeadTraceIndex() + i;
+            operand[2 * i + 1] = other.getHeadTraceIndex() + i;
         }
         tracer.pushOperand(operand);
         return {temp, newHeadTrace};
@@ -196,9 +196,9 @@ namespace Physica::Core {
         auto& tracer = DiffTracer<PlainScalar>::getInstance();
         const auto temp = Base::operator-();
         const ScalarType headTrace = tracer.pushOperation(temp, ExpressionType::Minus);
-        ScalarType operand[Size];
+        size_t operand[Size];
         for (size_t i = 0; i < Size; ++i)
-            operand[i] = ScalarType(getTracer(), getHeadTraceIndex() + i);
+            operand[i] = getHeadTraceIndex() + i;
         tracer.pushOperand(operand);
         return {temp, headTrace};
     }
@@ -264,11 +264,11 @@ namespace Physica::Core {
             auto& tracer = DiffTracer<PlainScalar>::getInstance();
             const auto temp = mul_add<PlainScalar, Size>(a, b, c);
             const ScalarType headTrace = tracer.pushOperation(temp, ExpressionType::MulAdd);
-            ScalarType operand[Size * 3];
+            size_t operand[Size * 3];
             for (size_t i = 0; i < Size; ++i) {
-                operand[3 * i] = ScalarType(a.getTracer(), a.getHeadTraceIndex() + i);
-                operand[3 * i + 1] = ScalarType(b.getTracer(), b.getHeadTraceIndex() + i);
-                operand[3 * i + 2] = ScalarType(c.getTracer(), c.getHeadTraceIndex() + i);
+                operand[3 * i] = a.getHeadTraceIndex() + i;
+                operand[3 * i + 1] = b.getHeadTraceIndex() + i;
+                operand[3 * i + 2] = c.getHeadTraceIndex() + i;
             }
             tracer.pushOperand(operand);
             return {temp, headTrace};

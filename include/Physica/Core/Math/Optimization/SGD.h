@@ -47,6 +47,8 @@ namespace Physica::Core {
         /* Getters */
         [[nodiscard]] const ScalarType& getLearnRate() const noexcept { return learnRate; }
         [[nodiscard]] unsigned int getBatchSize() const noexcept { return batchSize; }
+        /* Setters */
+        void setLearnRate(ScalarType lr) { learnRate = lr; }
     };
 
     template<class ScalarType>

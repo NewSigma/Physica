@@ -95,29 +95,29 @@ namespace Physica::Core {
     inline Differentiable<ScalarType, DiffMode::Reverse> Differentiable<ScalarType, DiffMode::Reverse>::operator-() const {
         auto& tracer = DiffTracerType::getInstance();
         const auto result = tracer.pushOperation(-getValue(), ExpressionType::Minus);
-        tracer.pushOperand(*this);
+        tracer.pushOperand(index);
         return result;
     }
 
     template<class ScalarType>
-    inline void Differentiable<ScalarType, DiffMode::Reverse>::reverse() {
+    inline void Differentiable<ScalarType, DiffMode::Reverse>::reverse(DiffTracerType& targetTracer) {
         auto& tracer = DiffTracer<ScalarType>::getInstance();
         tracer.getTangents()[index] = ScalarType(1);
-        tracer.reverse(index);
+        tracer.reverse(targetTracer, index);
     }
 
     template<class ScalarType>
-    inline void Differentiable<ScalarType, DiffMode::Reverse>::reverse(size_t to) {
+    inline void Differentiable<ScalarType, DiffMode::Reverse>::reverse(size_t to, DiffTracerType& targetTracer) {
         auto& tracer = DiffTracer<ScalarType>::getInstance();
         tracer.getTangents()[index] = ScalarType(1);
-        tracer.reverse(index, to);
+        tracer.reverse(targetTracer, index, to);
     }
 
     template<class ScalarType>
     Differentiable<ScalarType, DiffMode::Reverse> Differentiable<ScalarType, DiffMode::Reverse>::copy() const {
         auto& tracer = DiffTracer<ScalarType>::getInstance();
         const auto result = tracer.pushOperation(getValue(), ExpressionType::Assign);
-        tracer.pushOperand(*this);
+        tracer.pushOperand(index);
         return result;
     }
 
@@ -198,14 +198,14 @@ namespace Physica::Core {
             ResultType result;
             if constexpr (OtherScalar::isDifferentiable) {
                 result = tracer.pushOperation(value, ExpressionType::Add);
-                tracer.pushOperand(s1.getDerived());
-                tracer.pushOperand(s2.getDerived());
+                tracer.pushOperand(s1.getTraceIndex());
+                tracer.pushOperand(s2.getTraceIndex());
             }
             else {
                 const ResultType copy = s2.getDerived();
                 result = tracer.pushOperation(value, ExpressionType::Add);
-                tracer.pushOperand(s1.getDerived());
-                tracer.pushOperand(copy);
+                tracer.pushOperand(s1.getTraceIndex());
+                tracer.pushOperand(copy.getTraceIndex());
             }
             return result;
         }
@@ -240,14 +240,14 @@ namespace Physica::Core {
             ResultType result;
             if constexpr (OtherScalar::isDifferentiable) {
                 result = tracer.pushOperation(value, ExpressionType::Sub);
-                tracer.pushOperand(s1.getDerived());
-                tracer.pushOperand(s2.getDerived());
+                tracer.pushOperand(s1.getTraceIndex());
+                tracer.pushOperand(s2.getTraceIndex());
             }
             else {
                 const ResultType copy = s2.getDerived();
                 result = tracer.pushOperation(value, ExpressionType::Sub);
-                tracer.pushOperand(s1.getDerived());
-                tracer.pushOperand(copy);
+                tracer.pushOperand(s1.getTraceIndex());
+                tracer.pushOperand(copy.getTraceIndex());
             }
             return result;
         }
@@ -282,14 +282,14 @@ namespace Physica::Core {
             ResultType result;
             if constexpr (OtherScalar::isDifferentiable) {
                 result = tracer.pushOperation(value, ExpressionType::Mul);
-                tracer.pushOperand(s1.getDerived());
-                tracer.pushOperand(s2.getDerived());
+                tracer.pushOperand(s1.getTraceIndex());
+                tracer.pushOperand(s2.getTraceIndex());
             }
             else {
                 const ResultType copy = s2.getDerived();
                 result = tracer.pushOperation(value, ExpressionType::Mul);
-                tracer.pushOperand(s1.getDerived());
-                tracer.pushOperand(copy);
+                tracer.pushOperand(s1.getTraceIndex());
+                tracer.pushOperand(copy.getTraceIndex());
             }
             return result;
         }
@@ -325,14 +325,14 @@ namespace Physica::Core {
             ResultType result;
             if constexpr (OtherScalar::isDifferentiable) {
                 result = tracer.pushOperation(value, ExpressionType::Div);
-                tracer.pushOperand(s1.getDerived());
-                tracer.pushOperand(s2.getDerived());
+                tracer.pushOperand(s1.getTraceIndex());
+                tracer.pushOperand(s2.getTraceIndex());
             }
             else {
                 const ResultType copy = s2.getDerived();
                 result = tracer.pushOperation(value, ExpressionType::Div);
-                tracer.pushOperand(s1.getDerived());
-                tracer.pushOperand(copy);
+                tracer.pushOperand(s1.getTraceIndex());
+                tracer.pushOperand(copy.getTraceIndex());
             }
             return result;
         }
@@ -352,8 +352,8 @@ namespace Physica::Core {
             const ResultType copy = s1.getDerived();
             auto& tracer = DiffTracer<ScalarType>::getInstance();
             const auto result = tracer.pushOperation(value, ExpressionType::Div);
-            tracer.pushOperand(copy);
-            tracer.pushOperand(s2.getDerived());
+            tracer.pushOperand(copy.getTraceIndex());
+            tracer.pushOperand(s2.getTraceIndex());
             return result;
         }
     }
