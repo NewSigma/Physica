@@ -37,10 +37,12 @@ namespace Physica::Core {
             constexpr static size_t size1 = T1::SizeAtCompile;
             constexpr static size_t size2 = T2::SizeAtCompile;
             constexpr static size_t SizeAtCompile = size1 > size2 ? size1 : size2;
+            constexpr static bool isT2Continuous = std::is_base_of<ContinuousVector<T2>, T2>::value;
         public:
             using ScalarType = typename T1::ScalarType;
             using PacketType = typename Internal::BestPacket<ScalarType, SizeAtCompile>::Type;
             constexpr static size_t PacketSize = PacketType::size();
+            constexpr static bool isReverseDiff = ScalarType::isReverseDiff;
 
             inline static void run(const RValueVector<T1>& v1, LValueVector<T2>& v2) { //FIXME: The function declaration is not compatible to AddAssignImpl
                 if constexpr (SizeAtCompile != Dynamic) {
@@ -84,50 +86,9 @@ namespace Physica::Core {
                         future.wait();
                     }
                 }
-            }
-        };
 
-        template<class T1, class T2>
-        class InnerDotImpl {
-            using This = InnerDotImpl<T1, T2>;
-        public:
-            using ResultType = typename Internal::BinaryScalarOpReturnType<typename T1::ScalarType, typename T2::ScalarType>::Type;
-
-            constexpr static size_t size1 = T1::SizeAtCompile;
-            constexpr static size_t size2 = T2::SizeAtCompile;
-            constexpr static size_t SizeAtCompile = size1 > size2 ? size1 : size2;
-            using PacketType = typename Internal::BestPacket<ResultType, SizeAtCompile>::Type;
-
-            constexpr static bool isSameType = std::is_same<typename T1::ScalarType, typename T2::ScalarType>::value;
-            constexpr static bool isNotComplex = !T1::isComplex && !T2::isComplex;
-            constexpr static bool isBadPacket = std::is_same<typename T1::ScalarType, PacketType>::value;
-
-            constexpr static bool enableSIMD = isSameType && isNotComplex && !isBadPacket;
-        public:
-            inline static ResultType run(const RValueVector<T1>& v1, const RValueVector<T2>& v2) {
-                if constexpr (enableSIMD) {
-                    const size_t length = v1.getLength();
-                    size_t i = 0;
-                    const size_t to = length / PacketType::size() * PacketType::size();
-                    PacketType buffer(0);
-                    for (; i < to; i += PacketType::size())
-                        buffer = mul_add(v1.getDerived().template packet<PacketType>(i),
-                                         v2.getDerived().template packet<PacketType>(i),
-                                         buffer);
-                    if (to != length) {
-                        const size_t count = length - i;
-                        buffer = mul_add(v1.getDerived().template packetPartial<PacketType>(i, count),
-                                         v2.getDerived().template packetPartial<PacketType>(i, count),
-                                         buffer);
-                    }
-                    return buffer.horizontal_add();
-                }
-                else {
-                    auto result = ResultType(0);
-                    for(size_t i = 0; i < v1.getLength(); ++i)
-                        result += ResultType(v1.calc(i)) * ResultType(v2.calc(i));
-                    return result;
-                }
+                if constexpr (isT2Continuous && isReverseDiff)
+                    v2.getDerived().makeContinuous();
             }
         };
     }
@@ -275,13 +236,6 @@ namespace Physica::Core {
     template<class Derived>
     inline const ReverseVector<Derived> RValueVector<Derived>::reverse() const {
         return ReverseVector<Derived>(Base::getConstDerived());
-    }
-
-    template<class VectorType1, class VectorType2>
-    typename Internal::BinaryScalarOpReturnType<typename VectorType1::ScalarType, typename VectorType2::ScalarType>::Type
-    operator*(const RValueVector<VectorType1>& v1, const RValueVector<VectorType2>& v2) {
-        assert(v1.getLength() == v2.getLength());
-        return Internal::InnerDotImpl<VectorType1, VectorType2>::run(v1, v2);
     }
 
     template<class VectorType1, class VectorType2>

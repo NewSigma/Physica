@@ -178,7 +178,7 @@ namespace Physica::Core {
         assert(from < getNumRecord() && "[Error]: Index overflow");
         assert(to <= from);
         for (size_t i = from; i >= to && i <= from; --i) {
-            const auto& record = records[i];
+            const DiffRecord record = records[i];
             const ScalarType& tangent = tangents[i];
             if (tangent.isZero() || record.source == ExpressionType::Set)
                 continue;

@@ -32,6 +32,7 @@ namespace Physica::Core {
     template<class VectorType> class FormatedVector;
     template<class VectorType> class ReverseVector;
     template<class AnyVector1, class AnyVector2> class CrossProduct;
+    template<class Derived> class ContinuousVector;
     template<class Derived> class RValueMatrix;
 
     namespace Internal {
@@ -111,14 +112,11 @@ namespace Physica::Core {
     };
 
     template<class VectorType1, class VectorType2>
-    typename Internal::BinaryScalarOpReturnType<typename VectorType1::ScalarType, typename VectorType2::ScalarType>::Type
-    operator*(const RValueVector<VectorType1>& v1, const RValueVector<VectorType2>& v2);
-
-    template<class VectorType1, class VectorType2>
     bool vectorNear(const RValueVector<VectorType1>& v1, const RValueVector<VectorType2>& v2, double precision);
 }
 
 #include "RValueVectorImpl.h"
+#include "InnerDot.h"
 #include "VectorExpression.h"
 #include "VectorConvert.h"
 #include "ReverseVector.h"

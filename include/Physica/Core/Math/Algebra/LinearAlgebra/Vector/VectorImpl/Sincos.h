@@ -52,5 +52,12 @@ namespace Physica::Core {
                 c.getDerived().writePacketPartial(i, count, c_buffer);
             }
         }
+
+        constexpr bool isV2Continuous = std::is_base_of<ContinuousVector<VectorType2>, VectorType2>::value;
+        constexpr bool isReverseDiff = ScalarType::isReverseDiff;
+        if constexpr (isReverseDiff && isV2Continuous) {
+            s.getDerived().makeContinuous();
+            c.getDerived().makeContinuous();
+        }
     }
 }
