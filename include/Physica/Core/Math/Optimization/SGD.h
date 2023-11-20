@@ -48,12 +48,12 @@ namespace Physica::Core {
         [[nodiscard]] const ScalarType& getLearnRate() const noexcept { return learnRate; }
         [[nodiscard]] unsigned int getBatchSize() const noexcept { return batchSize; }
         /* Setters */
-        void setLearnRate(ScalarType lr) { learnRate = lr; }
+        void setLearnRate(ScalarType lr);
     };
 
     template<class ScalarType>
-    SGD<ScalarType>::SGD(ScalarType learnRate_, unsigned int batchSize_) : learnRate(learnRate_), batchSize(batchSize_) {
-        meanLearnRate = learnRate / ScalarType(batchSize);
+    SGD<ScalarType>::SGD(ScalarType learnRate_, unsigned int batchSize_) : batchSize(batchSize_) {
+        setLearnRate(learnRate_);
     }
 
     template<class ScalarType>
@@ -88,5 +88,11 @@ namespace Physica::Core {
         learnRate.swap(obj.learnRate);
         meanLearnRate.swap(obj.meanLearnRate);
         std::swap(batchSize, obj.batchSize);
+    }
+
+    template<class ScalarType>
+    void SGD<ScalarType>::setLearnRate(ScalarType lr) {
+        learnRate = lr;
+        meanLearnRate = lr / ScalarType(batchSize);
     }
 }
