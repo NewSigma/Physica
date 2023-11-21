@@ -22,6 +22,7 @@
 #include <fstream>
 #include "Physica/Utils/Container/Array/Array.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/Vector.h"
+#include "Physica/Core/AI/NeuralNetwork/SimpleDataset.h"
 
 namespace Physica::Core {
     /**
@@ -39,6 +40,8 @@ namespace Physica::Core {
             template<class ScalarType>
             [[nodiscard]] Vector<ScalarType> asVector() const;
         };
+        template<class ScalarType>
+        using DatasetType = SimpleDataset<Vector<ScalarType>, unsigned char>;
     private:
         union IntDecomp {
             char c[4];
@@ -60,10 +63,8 @@ namespace Physica::Core {
         /* Operators */
         Mnist& operator=(Mnist obj) noexcept { swap(obj); return *this; }
         /* Operations */
-        template<class ScalarType> [[nodiscard]] inline Vector<ScalarType> makeTrainSample(size_t i) const;
-        template<class ScalarType> [[nodiscard]] inline Vector<ScalarType> makeTestSample(size_t i) const;
-        template<class ScalarType> [[nodiscard]] inline Vector<ScalarType> makeTrainLabel(size_t i) const;
-        template<class ScalarType> [[nodiscard]] inline Vector<ScalarType> makeTestLabel(size_t i) const;
+        template<class ScalarType> DatasetType<ScalarType> makeTrainDataset() const;
+        template<class ScalarType> DatasetType<ScalarType> makeTestDataset() const;
         void swap(Mnist& obj) noexcept;
         /* Getters */
         [[nodiscard]] const DataArray& getTrainSamples() const noexcept { return trainSamples; }
@@ -72,9 +73,6 @@ namespace Physica::Core {
         [[nodiscard]] const LabelArray& getTestLabels() const noexcept { return testLabels; }
         [[nodiscard]] size_t getNumTrainSample() const noexcept { return trainSamples.getLength(); }
         [[nodiscard]] size_t getNumTestSample() const noexcept { return testSamples.getLength(); }
-        /* Static members */
-        template<class ScalarType>
-        [[nodiscard]] static Vector<ScalarType, NumCategory> makeLabelVector(unsigned char label);
     private:
         [[nodiscard]] static DataArray readDatas(const std::string& path);
         [[nodiscard]] static LabelArray readLabels(const std::string& path);
@@ -82,25 +80,25 @@ namespace Physica::Core {
     };
 
     template<class ScalarType>
-    inline Vector<ScalarType> Mnist::makeTrainSample(size_t i) const {
-        assert(i < getNumTrainSample() && "[Error]: Index overflow");
-        return getTrainSamples()[i].asVector<ScalarType>();
+    typename Mnist::DatasetType<ScalarType> Mnist::makeTrainDataset() const {
+        static_assert(!ScalarType::isDifferentiable, "[Error]: Dataset is const and should not be differentiable");
+        using SampleArray = typename DatasetType<ScalarType>::SampleArray;
+        const size_t numSample = getNumTrainSample();
+        SampleArray samples(numSample);
+        for (size_t i = 0; i < numSample; ++i)
+            samples[i] = trainSamples[i].asVector<ScalarType>();
+        return DatasetType<ScalarType>(std::move(samples), trainLabels);
     }
 
     template<class ScalarType>
-    inline Vector<ScalarType> Mnist::makeTestSample(size_t i) const {
-        assert(i < getNumTestSample() && "[Error]: Index overflow");
-        return getTestSamples()[i].asVector<ScalarType>();
-    }
-
-    template<class ScalarType>
-    inline Vector<ScalarType> Mnist::makeTrainLabel(size_t i) const {
-        return makeLabelVector<ScalarType>(getTrainLabels()[i]);
-    }
-
-    template<class ScalarType>
-    inline Vector<ScalarType> Mnist::makeTestLabel(size_t i) const {
-        return makeLabelVector<ScalarType>(getTestLabels()[i]);
+    typename Mnist::DatasetType<ScalarType> Mnist::makeTestDataset() const {
+        static_assert(!ScalarType::isDifferentiable, "[Error]: Dataset is const and should not be differentiable");
+        using SampleArray = typename DatasetType<ScalarType>::SampleArray;
+        const size_t numSample = getNumTestSample();
+        SampleArray samples(numSample);
+        for (size_t i = 0; i < numSample; ++i)
+            samples[i] = testSamples[i].asVector<ScalarType>();
+        return DatasetType<ScalarType>(std::move(samples), testLabels);
     }
 
     template<class ScalarType>
@@ -108,15 +106,6 @@ namespace Physica::Core {
         Vector<ScalarType> result(NumPixelInImage);
         for (size_t i = 0; i < NumPixelInImage; ++i)
             result[i] = ScalarType(pixels[i]);
-        return result;
-    }
-
-    template<class ScalarType>
-    Vector<ScalarType, Mnist::NumCategory> Mnist::makeLabelVector(unsigned char label) {
-        using PlainScalar = typename ScalarType::PlainScalar;
-        assert(label < NumCategory && "[Error]: Invalid category");
-        Vector<PlainScalar, Mnist::NumCategory> result(NumCategory, 0);
-        result[label] = PlainScalar(1);
         return result;
     }
 }

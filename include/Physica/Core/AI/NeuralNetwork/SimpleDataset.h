@@ -23,10 +23,8 @@
 namespace Physica::Core {
     template<class SampleType, class LabelType>
     class SimpleDataset {
-        using ScalarType1 = typename SampleType::ScalarType;
-        using ScalarType2 = typename LabelType::ScalarType;
-        static_assert(std::is_same<ScalarType1, ScalarType2>::value, "[Error]: ScalarType should match");
-        static_assert(!ScalarType1::isDifferentiable, "[Error]: Data in a dataset must not be differentiable");
+        static_assert(!SampleType::ScalarType::isDifferentiable, "[Error]: Data in a dataset must not be differentiable");
+    public:
         using SampleArray = Utils::Array<SampleType>;
         using LabelArray = Utils::Array<LabelType>;
     private:

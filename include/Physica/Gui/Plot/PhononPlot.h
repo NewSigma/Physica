@@ -65,6 +65,7 @@ namespace Physica::Gui {
         axisX->setLabelsPosition(QCategoryAxis::AxisLabelsPositionOnValue);
         axisX->setLinePenColor(Qt::black);
         axisX->setLabelsFont(font);
+        axisX->setTitleFont(font);
         Plot::setAxisX(axisX);
 
         Plot::getAxisY()->setLabelFormat("%d");
