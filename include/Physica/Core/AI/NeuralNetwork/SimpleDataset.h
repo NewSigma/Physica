@@ -40,7 +40,9 @@ namespace Physica::Core {
         /* Operations */
         void swap(SimpleDataset& obj) noexcept;
         /* Getters */
+        [[nodiscard]] SampleArray& getSamples() noexcept { return samples; }
         [[nodiscard]] const SampleArray& getSamples() const noexcept { return samples; }
+        [[nodiscard]] LabelArray& getLabels() noexcept { return labels; }
         [[nodiscard]] const LabelArray& getLabels() const noexcept { return labels; }
         [[nodiscard]] size_t getSize() const noexcept { return samples.getLength(); }
     };
