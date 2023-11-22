@@ -109,8 +109,8 @@ namespace Physica::Core {
         using This = Differentiable<ScalarType, DiffMode::Reverse>;
         using DiffTracerType = DiffTracer<ScalarType>;
 
-        ScalarType* pValue;
-        ScalarType* pTangent;
+        ScalarType* __restrict pValue;
+        ScalarType* __restrict pTangent;
     public:
         Differentiable() = default;
         Differentiable(double d) : This(ScalarType(d)) {}

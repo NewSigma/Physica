@@ -138,7 +138,9 @@ namespace Physica::Core {
 
             auto& operand = segment.operands;
             const size_t idFirstOperand = operand.getLength();
-            const unsigned int numOp = SegmentType::numOperand(source);
+            const unsigned int numOp = (source == ExpressionType::MulAdd2 || source == ExpressionType::MulAdd4 || source == ExpressionType::MulAdd8) // Until now, these operantions are optimized using SIMD
+                                     ? 0
+                                     : SegmentType::numOperand(source);
             for (size_t i = 0; i < Size; ++i)
                 records[oldNumRecord + i] = DiffRecord{idFirstOperand + i * numOp, source};
         }

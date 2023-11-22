@@ -33,7 +33,7 @@ namespace Physica::Utils::Internal {
         using typename Base::const_lvalue_reference;
         using typename Base::rvalue_reference;
     protected:
-        pointer arr;
+        pointer __restrict arr;
         allocator_type alloc;
         size_t length;
     public:

@@ -262,16 +262,19 @@ namespace Physica::Core {
             const SIMD<ScalarType, Size>& b,
             const SIMD<ScalarType, Size>& c) {
         if constexpr (ScalarType::isReverseDiff) {
+            static_assert(Size == 2 || Size == 4 || Size == 8, "[Error]: Not implemented");
             using PlainScalar = typename ScalarType::PlainScalar;
             auto& tracer = DiffTracer<PlainScalar>::getInstance();
             const auto temp = mul_add<PlainScalar, Size>(a, b, c);
-            const ScalarType headNode = tracer.pushOperation(temp, ExpressionType::MulAdd);
-            ScalarType operand[Size * 3];
-            for (size_t i = 0; i < Size; ++i) {
-                operand[3 * i] = ScalarType(a.value_ptr() + i, a.tangent_ptr() + i);
-                operand[3 * i + 1] = ScalarType(b.value_ptr() + i, b.tangent_ptr() + i);
-                operand[3 * i + 2] = ScalarType(c.value_ptr() + i, c.tangent_ptr() + i);
-            }
+            ExpressionType source;
+            if constexpr (Size == 2)
+                source = ExpressionType::MulAdd2;
+            else if constexpr (Size == 4)
+                source = ExpressionType::MulAdd4;
+            else
+                source = ExpressionType::MulAdd8;
+            const ScalarType headNode = tracer.pushOperation(temp, source);
+            ScalarType operand[3]{a.getHeadNode(), b.getHeadNode(), c.getHeadNode()};
             tracer.pushOperand(operand);
             return {temp, headNode};
         }

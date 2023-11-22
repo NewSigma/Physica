@@ -217,6 +217,7 @@ namespace Physica::Core {
         /* Getters */
         using Base::size;
         using Base::getImpl;
+        [[nodiscard]] ScalarType getHeadNode() const noexcept { return headNode; }
         [[nodiscard]] PlainScalar* value_ptr() const noexcept { return headNode.value_ptr(); }
         [[nodiscard]] PlainScalar* tangent_ptr() const noexcept { return headNode.tangent_ptr(); }
     private:

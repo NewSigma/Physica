@@ -68,6 +68,9 @@ namespace Physica::Core {
     private:
         /* Operations */
         void reverse(size_t fromIndex, size_t toIndex);
+        template<size_t Size>
+        void reverseMulAdd(DiffScalar firstOpX, DiffScalar firstOpY, DiffScalar firstOpZ, size_t traceId);
+        /* Getters */
         [[nodiscard]] size_t find(DiffScalar s) const noexcept;
     };
 
@@ -172,7 +175,9 @@ namespace Physica::Core {
             case ExpressionType::Sub: return 2;
             case ExpressionType::Mul: return 2;
             case ExpressionType::Div: return 2;
-            case ExpressionType::MulAdd: return 3;
+            case ExpressionType::MulAdd2: [[fallthrough]];
+            case ExpressionType::MulAdd4: [[fallthrough]];
+            case ExpressionType::MulAdd8: return 3;
             case ExpressionType::More: return 2;
             case ExpressionType::MoreEq: return 2;
             case ExpressionType::Reciprocal: return 1;
@@ -253,11 +258,6 @@ namespace Physica::Core {
                         tangentX += tangent;
                         tangentY += tangent * ScalarType(source == ExpressionType::Add ? 1.0 : -1.0);
                         continue;
-                    case ExpressionType::MulAdd: {
-                        DiffScalar operandZ = operands[idFirstOperand + 2];
-                        operandZ.getTangent() += tangent;
-                        [[fallthrough]];
-                    }
                     case ExpressionType::Mul:
                         tangentX += tangent * operandY.getValue();
                         tangentY += tangent * operandX.getValue();
@@ -268,11 +268,60 @@ namespace Physica::Core {
                         tangentY -= dx * value;
                         continue;
                     }
+                    case ExpressionType::MulAdd2:
+                        if constexpr (ScalarType::Option == Double) {
+                            DiffScalar operandZ = operands[idFirstOperand + 2];
+                            i -= 1;
+                            [[maybe_unused]] const bool isInRange = i >= toIndex && i <= fromIndex;
+                            assert(isInRange && "[Error]: Unexpected id");
+                            reverseMulAdd<2>(operandX, operandY, operandZ, i);
+                        }
+                        continue;
+                    case ExpressionType::MulAdd4: {
+                        DiffScalar operandZ = operands[idFirstOperand + 2];
+                        i -= 3;
+                        [[maybe_unused]] const bool isInRange = i >= toIndex && i <= fromIndex;
+                        assert(isInRange && "[Error]: Unexpected id");
+                        reverseMulAdd<4>(operandX, operandY, operandZ, i);
+                        continue;
+                    }
+                    case ExpressionType::MulAdd8: {
+                        DiffScalar operandZ = operands[idFirstOperand + 2];
+                        i -= 7;
+                        [[maybe_unused]] const bool isInRange = i >= toIndex && i <= fromIndex;
+                        assert(isInRange && "[Error]: Unexpected id");
+                        reverseMulAdd<8>(operandX, operandY, operandZ, i);
+                        continue;
+                    }
                     default:;
                 }
             }
             assert(false && "[Error]: Undefined operator for back propagation");
         }
+    }
+
+    template<class ScalarType>
+    template<size_t Size>
+    void TraceSegment<ScalarType>::reverseMulAdd(DiffScalar firstOpX, DiffScalar firstOpY, DiffScalar firstOpZ, size_t traceId) {
+        using PacketType = SIMD<ScalarType, Size>;
+        const PacketType tangent = tangents.template packet<PacketType>(traceId);
+        PacketType tangentZ{};
+        tangentZ.load(firstOpZ.tangent_ptr());
+        tangentZ += tangent;
+        tangentZ.store(firstOpZ.tangent_ptr());
+
+
+        PacketType valueX{}, valueY{}, tangentX{}, tangentY{};
+        valueX.load(firstOpX.value_ptr());
+        valueY.load(firstOpY.value_ptr());
+        tangentX.load(firstOpX.tangent_ptr());
+        tangentY.load(firstOpY.tangent_ptr());
+        tangentX += tangent * valueY;
+        tangentY += tangent * valueX;
+        valueX.store(firstOpX.value_ptr());
+        valueY.store(firstOpY.value_ptr());
+        tangentX.store(firstOpX.tangent_ptr());
+        tangentY.store(firstOpY.tangent_ptr());
     }
 
     template<class ScalarType>
