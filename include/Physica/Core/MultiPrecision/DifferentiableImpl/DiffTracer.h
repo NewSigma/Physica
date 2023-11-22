@@ -44,6 +44,7 @@ namespace Physica::Core {
         template<size_t Size>
         [[nodiscard]] DiffScalar pushOperation(const SIMD<ScalarType, Size>& simd, ExpressionType source);
 
+        void reverse();
         void reverse(DiffScalar from);
         void reverse(DiffScalar from, DiffScalar to);
         inline void zero_grad(DiffScalar from);
@@ -155,6 +156,14 @@ namespace Physica::Core {
         empty.store(pTangent);
         tangents.setLength(newNumRecord);
         return DiffScalar(pValue, pTangent);
+    }
+
+    template<class ScalarType>
+    void DiffTracer<ScalarType>::reverse() {
+        assert(!traceList.empty() && "[Error]: No record found");
+        const auto rend = traceList.rend();
+        for (auto ite = traceList.rbegin(); ite != rend; ++ite)
+            (*ite).reverse();
     }
 
     template<class ScalarType>

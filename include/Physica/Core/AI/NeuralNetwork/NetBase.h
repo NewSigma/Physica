@@ -104,8 +104,7 @@ namespace Physica::Core {
                 }
                 auto& tracer = DiffTracer<PlainScalar>::getInstance();
                 std::lock_guard locker(mutex);
-                tracer.reverse(net_tracer, tracer.getNumRecord() - 1); // TODO: reverse on net_tracer should lock mutex of net_tracer
-                //tracer.release(); // TODO: When should we release DiffTracer
+                tracer.reverse(); // TODO: reverse on net_tracer should lock mutex of net_tracer
             }, Executor::getNumThread(), Executor::getNumThread()).wait();
         }
         opt_step(opt);

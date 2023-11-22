@@ -50,6 +50,7 @@ namespace Physica::Core {
         /* Operators */
         TraceSegment& operator=(TraceSegment obj) noexcept { swap(obj); return *this; }
         /* Operations */
+        inline void reverse();
         void reverse(DiffScalar from);
         void reverse(DiffScalar from, DiffScalar to);
         void zero_grad(DiffScalar from);
@@ -84,6 +85,12 @@ namespace Physica::Core {
         operands.reserve(3 * size); //MulAdd operation is 3-operand
         values.reserve(size);
         tangents.reserve(size);
+    }
+
+    template<class ScalarType>
+    inline void TraceSegment<ScalarType>::reverse() {
+        assert(!empty());
+        reverse(getLength() - 1, 0);
     }
 
     template<class ScalarType>
