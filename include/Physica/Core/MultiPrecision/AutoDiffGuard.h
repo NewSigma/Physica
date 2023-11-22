@@ -21,11 +21,12 @@
 #include "Differentiable.h"
 
 namespace Physica::Core {
-    template<class ScalarType>
+    template<class PlainScalar>
     class AutoDiffGuard {
-        static_assert(!ScalarType::isDifferentiable, "[Error]: Differentiable<> pack is not necessary");
+        static_assert(!PlainScalar::isDifferentiable, "[Error]: Differentiable<> pack is not necessary");
+        using ScalarType = Differentiable<PlainScalar, DiffMode::Reverse>;
 
-        size_t traceIndex;
+        ScalarType node;
     public:
         AutoDiffGuard();
         AutoDiffGuard(const AutoDiffGuard&) = delete;
@@ -34,21 +35,19 @@ namespace Physica::Core {
         /* Operators */
         AutoDiffGuard& operator=(AutoDiffGuard obj) noexcept { swap(obj); return *this; }
         /* Operations */
-        void swap(AutoDiffGuard& obj) noexcept { std::swap(traceIndex, obj.traceIndex); }
+        void swap(AutoDiffGuard& obj) noexcept { std::swap(node, obj.node); }
         /* Getters */
-        [[nodiscard]] size_t getTraceIndex() const noexcept { return traceIndex; }
-    private:
-        AutoDiffGuard(size_t index);
+        [[nodiscard]] ScalarType getNode() const noexcept { return node; }
     };
 
-    template<class ScalarType>
-    AutoDiffGuard<ScalarType>::AutoDiffGuard() : traceIndex(DiffTracer<ScalarType>::getInstance().getNumRecord()) {}
+    template<class PlainScalar>
+    AutoDiffGuard<PlainScalar>::AutoDiffGuard() {
+        const ScalarType anyNewNode = ScalarType(0);
+        node = anyNewNode;
+    }
 
-    template<class ScalarType>
-    AutoDiffGuard<ScalarType>::AutoDiffGuard(size_t index) : traceIndex(index) {}
-
-    template<class ScalarType>
-    AutoDiffGuard<ScalarType>::~AutoDiffGuard() {
-        DiffTracer<ScalarType>::getInstance().forget(traceIndex);
+    template<class PlainScalar>
+    AutoDiffGuard<PlainScalar>::~AutoDiffGuard() {
+        DiffTracer<PlainScalar>::getInstance().forget(node);
     }
 }

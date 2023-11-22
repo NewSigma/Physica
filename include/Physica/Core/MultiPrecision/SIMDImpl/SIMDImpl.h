@@ -105,29 +105,27 @@ namespace Physica::Core {
     template<class PlainScalar, size_t Size>
     SIMD<Differentiable<PlainScalar, DiffMode::Reverse>, Size>::SIMD(PlainScalar s) : Base(s) {
         auto& tracer = DiffTracer<PlainScalar>::getInstance();
-        headTrace = tracer.pushOperation(*this, ExpressionType::Set);
+        headNode = tracer.pushOperation(*this, ExpressionType::Set);
     }
 
     template<class PlainScalar, size_t Size>
     SIMD<Differentiable<PlainScalar, DiffMode::Reverse>, Size>::SIMD(ScalarType s) : Base(s.getValue()) {
         auto& tracer = DiffTracer<PlainScalar>::getInstance();
-        headTrace = tracer.pushOperation(*this, ExpressionType::Assign);
-        size_t operand[Size];
+        headNode = tracer.pushOperation(*this, ExpressionType::Assign);
+        ScalarType operand[Size];
         for (size_t i = 0; i < Size; ++i)
-            operand[i] = s.getTraceIndex();
+            operand[i] = s;
         tracer.pushOperand(operand);
     }
 
     template<class PlainScalar, size_t Size>
-    SIMD<Differentiable<PlainScalar, DiffMode::Reverse>, Size>::SIMD(Base base, ScalarType headTrace_)
-            : Base(std::move(base)), headTrace(headTrace_) {
-        assert(getHeadTraceIndex() + Size <= DiffTracer<PlainScalar>::getInstance().getNumRecord() && "[Error]: Index overflow");
-    }
+    SIMD<Differentiable<PlainScalar, DiffMode::Reverse>, Size>::SIMD(Base base, ScalarType headNode_)
+            : Base(std::move(base)), headNode(headNode_) {}
 
     template<class PlainScalar, size_t Size>
     inline typename SIMD<Differentiable<PlainScalar, DiffMode::Reverse>, Size>::ScalarType
     SIMD<Differentiable<PlainScalar, DiffMode::Reverse>, Size>::operator[](int i) const {
-        return ScalarType(getTracer(), getHeadTraceIndex() + i);
+        return ScalarType(value_ptr() + i, tangent_ptr() + i);
     }
 
     template<class PlainScalar, size_t Size>
@@ -135,14 +133,14 @@ namespace Physica::Core {
     SIMD<Differentiable<PlainScalar, DiffMode::Reverse>, Size>::operator+(const SIMD& other) const {
         auto& tracer = DiffTracer<PlainScalar>::getInstance();
         const auto temp = Base::operator+(other);
-        const ScalarType newHeadTrace = tracer.pushOperation(temp, ExpressionType::Add);
-        size_t operand[Size * 2];
+        const ScalarType newHeadNode = tracer.pushOperation(temp, ExpressionType::Add);
+        ScalarType operand[Size * 2];
         for (size_t i = 0; i < Size; ++i) {
-            operand[2 * i] = getHeadTraceIndex() + i;
-            operand[2 * i + 1] = other.getHeadTraceIndex() + i;
+            operand[2 * i] = ScalarType(value_ptr() + i, tangent_ptr() + i);
+            operand[2 * i + 1] = ScalarType(other.value_ptr() + i, other.tangent_ptr() + i);
         }
         tracer.pushOperand(operand);
-        return {temp, newHeadTrace};
+        return {temp, newHeadNode};
     }
 
     template<class PlainScalar, size_t Size>
@@ -150,14 +148,14 @@ namespace Physica::Core {
     SIMD<Differentiable<PlainScalar, DiffMode::Reverse>, Size>::operator-(const SIMD& other) const {
         auto& tracer = DiffTracer<PlainScalar>::getInstance();
         const auto temp = Base::operator-(other);
-        const ScalarType newHeadTrace = tracer.pushOperation(temp, ExpressionType::Sub);
-        size_t operand[Size * 2];
+        const ScalarType newHeadNode = tracer.pushOperation(temp, ExpressionType::Sub);
+        ScalarType operand[Size * 2];
         for (size_t i = 0; i < Size; ++i) {
-            operand[2 * i] = getHeadTraceIndex() + i;
-            operand[2 * i + 1] = other.getHeadTraceIndex() + i;
+            operand[2 * i] = ScalarType(value_ptr() + i, tangent_ptr() + i);
+            operand[2 * i + 1] = ScalarType(other.value_ptr() + i, other.tangent_ptr() + i);
         }
         tracer.pushOperand(operand);
-        return {temp, newHeadTrace};
+        return {temp, newHeadNode};
     }
 
     template<class PlainScalar, size_t Size>
@@ -165,14 +163,14 @@ namespace Physica::Core {
     SIMD<Differentiable<PlainScalar, DiffMode::Reverse>, Size>::operator*(const SIMD& other) const {
         auto& tracer = DiffTracer<PlainScalar>::getInstance();
         const auto temp = Base::operator*(other);
-        const ScalarType newHeadTrace = tracer.pushOperation(temp, ExpressionType::Mul);
-        size_t operand[Size * 2];
+        const ScalarType newHeadNode = tracer.pushOperation(temp, ExpressionType::Mul);
+        ScalarType operand[Size * 2];
         for (size_t i = 0; i < Size; ++i) {
-            operand[2 * i] = getHeadTraceIndex() + i;
-            operand[2 * i + 1] = other.getHeadTraceIndex() + i;
+            operand[2 * i] = ScalarType(value_ptr() + i, tangent_ptr() + i);
+            operand[2 * i + 1] = ScalarType(other.value_ptr() + i, other.tangent_ptr() + i);
         }
         tracer.pushOperand(operand);
-        return {temp, newHeadTrace};
+        return {temp, newHeadNode};
     }
 
     template<class PlainScalar, size_t Size>
@@ -180,14 +178,14 @@ namespace Physica::Core {
     SIMD<Differentiable<PlainScalar, DiffMode::Reverse>, Size>::operator/(const SIMD& other) const {
         auto& tracer = DiffTracer<PlainScalar>::getInstance();
         const auto temp = Base::operator/(other);
-        const ScalarType newHeadTrace = tracer.pushOperation(temp, ExpressionType::Div);
-        size_t operand[Size * 2];
+        const ScalarType newHeadNode = tracer.pushOperation(temp, ExpressionType::Div);
+        ScalarType operand[Size * 2];
         for (size_t i = 0; i < Size; ++i) {
-            operand[2 * i] = getHeadTraceIndex() + i;
-            operand[2 * i + 1] = other.getHeadTraceIndex() + i;
+            operand[2 * i] = ScalarType(value_ptr() + i, tangent_ptr() + i);
+            operand[2 * i + 1] = ScalarType(other.value_ptr() + i, other.tangent_ptr() + i);
         }
         tracer.pushOperand(operand);
-        return {temp, newHeadTrace};
+        return {temp, newHeadNode};
     }
 
     template<class PlainScalar, size_t Size>
@@ -195,38 +193,38 @@ namespace Physica::Core {
     SIMD<Differentiable<PlainScalar, DiffMode::Reverse>, Size>::operator-() const {
         auto& tracer = DiffTracer<PlainScalar>::getInstance();
         const auto temp = Base::operator-();
-        const ScalarType headTrace = tracer.pushOperation(temp, ExpressionType::Minus);
-        size_t operand[Size];
+        const ScalarType headNode = tracer.pushOperation(temp, ExpressionType::Minus);
+        ScalarType operand[Size];
         for (size_t i = 0; i < Size; ++i)
-            operand[i] = getHeadTraceIndex() + i;
+            operand[i] = ScalarType(value_ptr() + i, tangent_ptr() + i);
         tracer.pushOperand(operand);
-        return {temp, headTrace};
+        return {temp, headNode};
     }
 
     template<class PlainScalar, size_t Size>
     inline void SIMD<Differentiable<PlainScalar, DiffMode::Reverse>, Size>::load(const ScalarType* p) {
         assert(checkContinuous(Size, p) && "[Error]: Load a uncontinuous pointer is a bug");
-        headTrace = *p;
+        headNode = *p;
         Base::load(&p->getValue());
     }
 
     template<class PlainScalar, size_t Size>
     inline void SIMD<Differentiable<PlainScalar, DiffMode::Reverse>, Size>::load_partial(int n, const ScalarType* p) {
         assert(checkContinuous(n, p) && "[Error]: Load a uncontinuous pointer is a bug");
-        headTrace = *p;
+        headNode = *p;
         Base::load_partial(n, &p->getValue());
     }
 
     template<class PlainScalar, size_t Size>
     inline void SIMD<Differentiable<PlainScalar, DiffMode::Reverse>, Size>::store(ScalarType* p) const {
         for (size_t i = 0; i < Size; ++i)
-            *(p + i) = ScalarType(getTracer(), getHeadTraceIndex() + i);
+            *(p + i) = ScalarType(value_ptr() + i, tangent_ptr() + i);
     }
 
     template<class PlainScalar, size_t Size>
     inline void SIMD<Differentiable<PlainScalar, DiffMode::Reverse>, Size>::store_partial(int n, ScalarType* p) const {
         for (int i = 0; i < n; ++i)
-            *(p + i) = ScalarType(getTracer(), getHeadTraceIndex() + i);
+            *(p + i) = ScalarType(value_ptr() + i, tangent_ptr() + i);
     }
 
     template<class PlainScalar, size_t Size>
@@ -242,15 +240,19 @@ namespace Physica::Core {
     inline void SIMD<Differentiable<PlainScalar, DiffMode::Reverse>, Size>::swap(SIMD& obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         Base::swap(obj);
-        std::swap(headTrace, obj.headTrace);
+        std::swap(headNode, obj.headNode);
     }
 
     template<class PlainScalar, size_t Size>
     bool SIMD<Differentiable<PlainScalar, DiffMode::Reverse>, Size>::checkContinuous(int n, const ScalarType* p) {
-        const size_t traceIndex0 = p->getTraceIndex();
-        for (int i = 1; i < n; ++i)
-            if ((traceIndex0 + i) != (p + i)->getTraceIndex())
+        const PlainScalar* pValue = p->value_ptr();
+        const PlainScalar* pTangent = p->tangent_ptr();
+        for (int i = 1; i < n; ++i) {
+            if ((pValue + i) != (p + i)->value_ptr())
                 return false;
+            if ((pTangent + i) != (p + i)->tangent_ptr())
+                return false;
+        }
         return true;
     }
     //////////////////////////////////////////////////////////////////
@@ -263,15 +265,15 @@ namespace Physica::Core {
             using PlainScalar = typename ScalarType::PlainScalar;
             auto& tracer = DiffTracer<PlainScalar>::getInstance();
             const auto temp = mul_add<PlainScalar, Size>(a, b, c);
-            const ScalarType headTrace = tracer.pushOperation(temp, ExpressionType::MulAdd);
-            size_t operand[Size * 3];
+            const ScalarType headNode = tracer.pushOperation(temp, ExpressionType::MulAdd);
+            ScalarType operand[Size * 3];
             for (size_t i = 0; i < Size; ++i) {
-                operand[3 * i] = a.getHeadTraceIndex() + i;
-                operand[3 * i + 1] = b.getHeadTraceIndex() + i;
-                operand[3 * i + 2] = c.getHeadTraceIndex() + i;
+                operand[3 * i] = ScalarType(a.value_ptr() + i, a.tangent_ptr() + i);
+                operand[3 * i + 1] = ScalarType(b.value_ptr() + i, b.tangent_ptr() + i);
+                operand[3 * i + 2] = ScalarType(c.value_ptr() + i, c.tangent_ptr() + i);
             }
             tracer.pushOperand(operand);
-            return {temp, headTrace};
+            return {temp, headNode};
         }
         else
             return SIMD<ScalarType, Size>(mul_add(a.getImpl(), b.getImpl(), c.getImpl()));

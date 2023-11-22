@@ -180,13 +180,13 @@ namespace Physica::Core {
     public:
         using PlainPacket = Base;
     private:
-        ScalarType headTrace;
+        ScalarType headNode;
     public:
         SIMD() = default;
         explicit SIMD(int i) : SIMD(PlainScalar(i)) {}
         explicit SIMD(PlainScalar s);
         explicit SIMD(ScalarType s);
-        SIMD(Base base, ScalarType headTrace_);
+        SIMD(Base base, ScalarType headNode_);
         SIMD(const SIMD&) = default;
         SIMD(SIMD&&) noexcept = default;
         ~SIMD() = default;
@@ -217,8 +217,8 @@ namespace Physica::Core {
         /* Getters */
         using Base::size;
         using Base::getImpl;
-        [[nodiscard]] DiffTracerType& getTracer() const noexcept { return headTrace.getTracer(); }
-        [[nodiscard]] size_t getHeadTraceIndex() const noexcept { return headTrace.getTraceIndex(); }
+        [[nodiscard]] PlainScalar* value_ptr() const noexcept { return headNode.value_ptr(); }
+        [[nodiscard]] PlainScalar* tangent_ptr() const noexcept { return headNode.tangent_ptr(); }
     private:
         using Base::insert; //Insert a scalar may lead to incontineous memory, which harms performance
         [[nodiscard]] static bool checkContinuous(int n, const ScalarType* p);

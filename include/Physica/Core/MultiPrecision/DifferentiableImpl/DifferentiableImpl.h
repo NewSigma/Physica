@@ -45,11 +45,6 @@ namespace Physica::Core {
     }
 
     template<class ScalarType>
-    size_t Differentiable<ScalarType, DiffMode::Forward>::getTraceIndex() const {
-        throw std::runtime_error("[Error]: This function is provided for template meta programming, you should not arrive here");
-    }
-
-    template<class ScalarType>
     template<class RandomGenerator>
     inline Differentiable<ScalarType, DiffMode::Forward>
     Differentiable<ScalarType, DiffMode::Forward>::random_uniform(RandomGenerator& gen) {
@@ -81,77 +76,57 @@ namespace Physica::Core {
     }
 
     template<class ScalarType>
-    Differentiable<ScalarType, DiffMode::Reverse>::Differentiable(DiffTracerType& tracer, size_t index_)
-            : pTracer(&tracer) {
-        setTraceIndex(index_);
-    }
+    Differentiable<ScalarType, DiffMode::Reverse>::Differentiable(ScalarType* pValue_, ScalarType* pTangent_)
+            : pValue(pValue_), pTangent(pTangent_) {}
 
     template<class ScalarType>
     inline bool Differentiable<ScalarType, DiffMode::Reverse>::operator==(const This& other) const {
-        return pTracer == other.pTracer && index == other.index;
+        const bool result = pValue == other.pValue;
+        assert(result == (pTangent == other.pTangent) && "[Error]: Bad scalar");
+        return result;
     }
 
     template<class ScalarType>
     inline Differentiable<ScalarType, DiffMode::Reverse> Differentiable<ScalarType, DiffMode::Reverse>::operator-() const {
         auto& tracer = DiffTracerType::getInstance();
         const auto result = tracer.pushOperation(-getValue(), ExpressionType::Minus);
-        tracer.pushOperand(index);
+        tracer.pushOperand(*this);
         return result;
     }
 
     template<class ScalarType>
-    inline void Differentiable<ScalarType, DiffMode::Reverse>::reverse(DiffTracerType& targetTracer) {
+    inline void Differentiable<ScalarType, DiffMode::Reverse>::reverse() {
         auto& tracer = DiffTracer<ScalarType>::getInstance();
-        tracer.getTangents()[index] = ScalarType(1);
-        tracer.reverse(targetTracer, index);
+        *pTangent = ScalarType(1);
+        tracer.reverse(*this);
     }
 
     template<class ScalarType>
-    inline void Differentiable<ScalarType, DiffMode::Reverse>::reverse(size_t to, DiffTracerType& targetTracer) {
+    inline void Differentiable<ScalarType, DiffMode::Reverse>::reverse(Differentiable to) {
         auto& tracer = DiffTracer<ScalarType>::getInstance();
-        tracer.getTangents()[index] = ScalarType(1);
-        tracer.reverse(targetTracer, index, to);
+        *pTangent = ScalarType(1);
+        tracer.reverse(*this, to);
     }
 
     template<class ScalarType>
     Differentiable<ScalarType, DiffMode::Reverse> Differentiable<ScalarType, DiffMode::Reverse>::copy() const {
         auto& tracer = DiffTracer<ScalarType>::getInstance();
         const auto result = tracer.pushOperation(getValue(), ExpressionType::Assign);
-        tracer.pushOperand(index);
+        tracer.pushOperand(*this);
         return result;
     }
 
     template<class ScalarType>
     inline void Differentiable<ScalarType, DiffMode::Reverse>::swap(Differentiable<ScalarType, DiffMode::Reverse>& obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
-        std::swap(pTracer, obj.pTracer);
-        std::swap(index, obj.index);
-    }
-
-    template<class ScalarType>
-    inline const ScalarType& Differentiable<ScalarType, DiffMode::Reverse>::getValue() const noexcept {
-        return pTracer->getValues()[index];
-    }
-
-    template<class ScalarType>
-    inline const ScalarType& Differentiable<ScalarType, DiffMode::Reverse>::getTangent() const noexcept {
-        return pTracer->getTangents()[index];
+        std::swap(pValue, obj.pValue);
+        std::swap(pTangent, obj.pTangent);
     }
 
     template<class ScalarType>
     inline ExpressionType Differentiable<ScalarType, DiffMode::Reverse>::getSource() const noexcept {
-        return pTracer->getRecords()[index].source;
-    }
-
-    template<class ScalarType>
-    inline void Differentiable<ScalarType, DiffMode::Reverse>::setValue(const ScalarType& x) {
-        pTracer->getValues()[index] = x;
-    }
-
-    template<class ScalarType>
-    inline void Differentiable<ScalarType, DiffMode::Reverse>::setTraceIndex(size_t index_) {
-        assert(index_ < pTracer->getNumRecord() && "[Error]: Invalid index");
-        index = index_;
+        auto& tracer = DiffTracer<ScalarType>::getInstance();
+        return tracer.getSource(*this);
     }
 
     template<class ScalarType>
@@ -198,14 +173,14 @@ namespace Physica::Core {
             ResultType result;
             if constexpr (OtherScalar::isDifferentiable) {
                 result = tracer.pushOperation(value, ExpressionType::Add);
-                tracer.pushOperand(s1.getTraceIndex());
-                tracer.pushOperand(s2.getTraceIndex());
+                tracer.pushOperand(s1.getDerived());
+                tracer.pushOperand(s2.getDerived());
             }
             else {
                 const ResultType copy = s2.getDerived();
                 result = tracer.pushOperation(value, ExpressionType::Add);
-                tracer.pushOperand(s1.getTraceIndex());
-                tracer.pushOperand(copy.getTraceIndex());
+                tracer.pushOperand(s1.getDerived());
+                tracer.pushOperand(copy);
             }
             return result;
         }
@@ -240,14 +215,14 @@ namespace Physica::Core {
             ResultType result;
             if constexpr (OtherScalar::isDifferentiable) {
                 result = tracer.pushOperation(value, ExpressionType::Sub);
-                tracer.pushOperand(s1.getTraceIndex());
-                tracer.pushOperand(s2.getTraceIndex());
+                tracer.pushOperand(s1.getDerived());
+                tracer.pushOperand(s2.getDerived());
             }
             else {
                 const ResultType copy = s2.getDerived();
                 result = tracer.pushOperation(value, ExpressionType::Sub);
-                tracer.pushOperand(s1.getTraceIndex());
-                tracer.pushOperand(copy.getTraceIndex());
+                tracer.pushOperand(s1.getDerived());
+                tracer.pushOperand(copy);
             }
             return result;
         }
@@ -282,14 +257,14 @@ namespace Physica::Core {
             ResultType result;
             if constexpr (OtherScalar::isDifferentiable) {
                 result = tracer.pushOperation(value, ExpressionType::Mul);
-                tracer.pushOperand(s1.getTraceIndex());
-                tracer.pushOperand(s2.getTraceIndex());
+                tracer.pushOperand(s1.getDerived());
+                tracer.pushOperand(s2.getDerived());
             }
             else {
                 const ResultType copy = s2.getDerived();
                 result = tracer.pushOperation(value, ExpressionType::Mul);
-                tracer.pushOperand(s1.getTraceIndex());
-                tracer.pushOperand(copy.getTraceIndex());
+                tracer.pushOperand(s1.getDerived());
+                tracer.pushOperand(copy);
             }
             return result;
         }
@@ -325,14 +300,14 @@ namespace Physica::Core {
             ResultType result;
             if constexpr (OtherScalar::isDifferentiable) {
                 result = tracer.pushOperation(value, ExpressionType::Div);
-                tracer.pushOperand(s1.getTraceIndex());
-                tracer.pushOperand(s2.getTraceIndex());
+                tracer.pushOperand(s1.getDerived());
+                tracer.pushOperand(s2.getDerived());
             }
             else {
                 const ResultType copy = s2.getDerived();
                 result = tracer.pushOperation(value, ExpressionType::Div);
-                tracer.pushOperand(s1.getTraceIndex());
-                tracer.pushOperand(copy.getTraceIndex());
+                tracer.pushOperand(s1.getDerived());
+                tracer.pushOperand(copy);
             }
             return result;
         }
@@ -352,8 +327,8 @@ namespace Physica::Core {
             const ResultType copy = s1.getDerived();
             auto& tracer = DiffTracer<ScalarType>::getInstance();
             const auto result = tracer.pushOperation(value, ExpressionType::Div);
-            tracer.pushOperand(copy.getTraceIndex());
-            tracer.pushOperand(s2.getTraceIndex());
+            tracer.pushOperand(copy);
+            tracer.pushOperand(s2.getDerived());
             return result;
         }
     }

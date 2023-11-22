@@ -78,7 +78,8 @@ namespace Physica::Core {
         using InitializerType = typename Storage::InitializerType;
         using Base::isReverseDiff;
     public:
-        using ScalarType = typename Base::ScalarType;
+        using typename Base::ScalarType;
+        using typename Base::PlainScalar;
         using ColMatrix = DenseMatrix<T, MatrixOption::getStorage<DenseMatrix>() | MatrixOption::Column, Row, Column, MaxRow, MaxColumn>;
         using RowMatrix = DenseMatrix<T, MatrixOption::getStorage<DenseMatrix>() | MatrixOption::Row, Row, Column, MaxRow, MaxColumn>;
         using RealMatrix = DenseMatrix<typename T::RealType, Option, Row, Column, MaxRow, MaxColumn>;

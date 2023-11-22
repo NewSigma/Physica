@@ -133,11 +133,6 @@ namespace Physica::Core {
         [[nodiscard]] const PlainScalar& getTangent() const noexcept {
             return this->getDerived().getTangent();
         }
-
-        [[nodiscard]] size_t getTraceIndex() const {
-            static_assert(isDifferentiable, "[Error]: getTraceIndex() is not defined for undifferentiable scalar");
-            return this->getDerived().getTraceIndex();
-        }
     };
 
     template<class ScalarType>

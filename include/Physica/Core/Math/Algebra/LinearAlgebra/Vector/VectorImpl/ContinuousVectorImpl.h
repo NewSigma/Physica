@@ -89,10 +89,15 @@ namespace Physica::Core {
     template<class AnyScalar>
     inline Derived& ContinuousVector<Derived>::operator=(const ScalarBase<AnyScalar>& s) {
         static_assert(ScalarType::isComplex || !AnyScalar::isComplex, "[Error]: Assigning a complex number to real vector is not allowed");
-        for (size_t i = 0; i < Base::getLength(); ++i) {
-            if constexpr (AnyScalar::isReverseDiff)
+        const size_t length = Base::getLength();
+        if constexpr (isReverseDiff && AnyScalar::isReverseDiff) {
+            static_assert(std::is_same<ScalarType, AnyScalar>::value, "[Error]: Assigning between 2 differentiable scalar of different type will lose grad info");
+            DiffTracer<PlainScalar>::getInstance().reserve(length);
+            for (size_t i = 0; i < length; ++i)
                 (*this)[i] = ScalarType(s.getDerived().copy());
-            else
+        }
+        else {
+            for (size_t i = 0; i < length; ++i)
                 (*this)[i] = ScalarType(s.getDerived());
         }
         return Base::getDerived();
@@ -183,22 +188,21 @@ namespace Physica::Core {
     template<class Derived>
     bool ContinuousVector<Derived>::checkContinuous() const {
         if constexpr (isReverseDiff) {
-            const size_t traceIndex0 = (*this)[0].getTraceIndex();
-            for (size_t i = 1; i < Base::getLength(); ++i)
-                if ((*this)[i].getTraceIndex() != traceIndex0 + i)
+            const ScalarType i0 = (*this)[0];
+            for (size_t i = 1; i < Base::getLength(); ++i) {
+                if ((*this)[i].value_ptr() != i0.value_ptr() + i)
                     return false;
+                if ((*this)[i].tangent_ptr() != i0.tangent_ptr() + i)
+                    return false;
+            }
         }
         return true;
     }
 
     template<class Derived>
-    void ContinuousVector<Derived>::makeContinuous() {
-        if constexpr (isReverseDiff) {
-            for (size_t i = 0; i < Base::getLength(); ++i) {
-                auto& elem = (*this)[i];
-                elem = elem.copy();
-            }
-        }
+    inline void ContinuousVector<Derived>::makeContinuous() {
+        if constexpr (isReverseDiff)
+            Base::getDerived() = Base::getDerived().copy();
     }
 
     template<class Derived>

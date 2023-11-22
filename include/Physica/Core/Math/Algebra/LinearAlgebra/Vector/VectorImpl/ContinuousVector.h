@@ -59,7 +59,7 @@ namespace Physica::Core {
         template<size_t Length = Dynamic> inline const ContinuousVectorBlock<Derived, Length> segment(size_t from, size_t to) const;
 
         [[nodiscard]] bool checkContinuous() const;
-        void makeContinuous();
+        inline void makeContinuous();
 
         template<class SpaceType>
         void read(const H5::DataSet& dataset,

@@ -18,54 +18,45 @@
  */
 #pragma once
 
-#include "Physica/Core/Exception/NotImplementedException.h"
-#include "Physica/Core/MultiPrecision/ScalarImpl/ExpressionType.h"
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/Vector.h"
+#include <list>
+#include "TraceSegment.h"
 
 namespace Physica::Core {
+    /**
+     * \class DiffTracer records a compute graph
+     */
     template<class ScalarType>
     class DiffTracer {
-        static_assert(!ScalarType::isDifferentiable, "[Error]: Differentiable<> pack is not necessary");
+        using SegmentType = TraceSegment<ScalarType>;
     public:
-        using DiffScalar = Differentiable<ScalarType, DiffMode::Reverse>;
-        using VectorType = Vector<ScalarType>;
+        using DiffScalar = typename SegmentType::DiffScalar;
+        using DiffRecord = typename SegmentType::DiffRecord;
     private:
-        struct DiffRecord {
-            size_t startOperandId;
-            ExpressionType source;
-        };
-
-        Utils::Array<DiffRecord> records;
-        Utils::Array<size_t> operands;
-        VectorType values;
-        VectorType tangents;
+        std::list<SegmentType> traceList;
     public:
         ~DiffTracer() = default;
         /* Operations */
-        inline void pushOperand(size_t operand);
+        inline void pushOperand(DiffScalar operand);
         template<size_t Size>
-        inline void pushOperand(const size_t (&operand)[Size]);
+        inline void pushOperand(const DiffScalar (&operand)[Size]);
 
-        [[nodiscard]] inline DiffScalar pushOperation(ScalarType value, ExpressionType source);
-        [[nodiscard]] DiffScalar pushOperation(ScalarType value, ScalarType tangent, ExpressionType source);
+        [[nodiscard]] DiffScalar pushOperation(ScalarType value, ExpressionType source);
         template<size_t Size>
         [[nodiscard]] DiffScalar pushOperation(const SIMD<ScalarType, Size>& simd, ExpressionType source);
 
-        void reverse(DiffTracer& targetTracer, size_t from, size_t to = 0);
-        inline void zero_grad(size_t from);
-        void zero_grad(size_t from, size_t to);
-        void forget(size_t fromIndex = 0);
-        void squeeze();
-        void release();
+        void reverse(DiffScalar from);
+        void reverse(DiffScalar from, DiffScalar to);
+        inline void zero_grad(DiffScalar from);
+        void zero_grad(DiffScalar from, DiffScalar to);
+        void forget(DiffScalar from);
+        void reserve(size_t size);
+        inline void clear();
 
         [[nodiscard]] inline bool checkLastOpDone() const;
         /* Getters */
-        [[nodiscard]] VectorType& getValues() noexcept { return values; }
-        [[nodiscard]] const VectorType& getValues() const noexcept { return values; }
-        [[nodiscard]] VectorType& getTangents() noexcept { return tangents; }
-        [[nodiscard]] const VectorType& getTangents() const noexcept { return tangents; }
-        [[nodiscard]] const Utils::Array<DiffRecord>& getRecords() const noexcept { return records; }
-        [[nodiscard]] size_t getNumRecord() const noexcept { return records.getLength(); }
+        [[nodiscard]] const std::list<SegmentType>& getTraceList() const noexcept { return traceList; }
+        [[nodiscard]] size_t getNumRecord() const noexcept;
+        [[nodiscard]] ExpressionType getSource(DiffScalar s) const noexcept;
         /* Static members */
         [[nodiscard]] static DiffTracer& getInstance() noexcept;
     private:
@@ -76,27 +67,25 @@ namespace Physica::Core {
         DiffTracer& operator=(const DiffTracer&) = default;
         DiffTracer& operator=(DiffTracer&&) noexcept = default;
         /* Operations */
-        template<size_t Size>
-        void checkOperands(const size_t (&operand)[Size]);
-        /* Static members */
-        [[nodiscard]] constexpr static unsigned int numOperand(ExpressionType type);
+        void pushSegment(SegmentType segment);
     };
 
     template<class ScalarType>
-    inline void DiffTracer<ScalarType>::pushOperand(size_t operand) {
-        assert(!records.empty() && "[Error]: Push operand to empty operation is not allowed");
+    inline void DiffTracer<ScalarType>::pushOperand(DiffScalar operand) {
+        assert(!traceList.empty() && !traceList.back().empty() && "[Error]: Pushing operand but operation is unknown");
         assert(!checkLastOpDone() && "[Error]: Not enough operand slot for this operand");
-        assert(operand < records.getLength() && "[Error]: This operand is not registered");
-        operands.append(operand);
+        auto& segment = traceList.back();
+        segment.operands.append(operand);
     }
 
     template<class ScalarType>
     template<size_t Size>
-    inline void DiffTracer<ScalarType>::pushOperand(const size_t (&operand)[Size]) {
-        assert(!records.empty() && "[Error]: Push operand to empty operation is not allowed");
+    inline void DiffTracer<ScalarType>::pushOperand(const DiffScalar (&operand)[Size]) {
+        assert(!traceList.empty() && !traceList.back().empty() && "[Error]: Pushing operand but operation is unknown");
         assert(!checkLastOpDone() && "[Error]: Not enough operand slot for this operand");
-        checkOperands(operand);
 
+        auto& segment = traceList.back();
+        auto& operands = segment.operands;
         const size_t length = operands.getLength();
         const size_t newLength = length + Size;
         operands.reserve(newLength);
@@ -110,23 +99,20 @@ namespace Physica::Core {
     template<class ScalarType>
     inline typename DiffTracer<ScalarType>::DiffScalar
     DiffTracer<ScalarType>::pushOperation(ScalarType value, ExpressionType source) {
-        return pushOperation(value, 0, source);
-    }
-
-    template<class ScalarType>
-    typename DiffTracer<ScalarType>::DiffScalar
-    DiffTracer<ScalarType>::pushOperation(ScalarType value, ScalarType tangent, ExpressionType source) {
         assert(checkLastOpDone() && "[Error]: New record cannot begin unless last record is done");
-        const size_t index = getNumRecord();
-        if (records.full()) {
-            records.doubleSpace();
-            values.doubleSpace();
-            tangents.doubleSpace();
-        }
-        records.grow(DiffRecord{operands.getLength(), source});
+        if (traceList.empty() || traceList.back().full())
+            pushSegment(SegmentType{});
+        auto& segment = traceList.back();
+        auto& operands = segment.operands;
+        segment.records.grow(DiffRecord{operands.getLength(), source});
+
+        auto& values = segment.values;
+        const size_t offset = values.getLength();
         values.grow(std::move(value));
-        tangents.grow(std::move(tangent));
-        return DiffScalar(*this, index);
+
+        auto& tangents = segment.tangents;
+        tangents.grow(0);
+        return DiffScalar(values.data() + offset, tangents.data() + offset);
     }
 
     template<class ScalarType>
@@ -134,154 +120,178 @@ namespace Physica::Core {
     typename DiffTracer<ScalarType>::DiffScalar
     DiffTracer<ScalarType>::pushOperation(const SIMD<ScalarType, Size>& simd, ExpressionType source) {
         assert(checkLastOpDone() && "[Error]: New record cannot begin unless last record is done");
-        const size_t oldNumRecord = getNumRecord();
+        /* Allocate */ {
+            if (traceList.empty())
+                pushSegment(SegmentType{});
+            auto& segment = traceList.back();
+            const bool isSpaceEnough = segment.getLength() + Size <= segment.getCapacity();
+            if (!isSpaceEnough)
+                pushSegment(SegmentType{});
+        }
+
+        auto& segment = traceList.back();
+        const size_t oldNumRecord = segment.getLength();
         const size_t newNumRecord = oldNumRecord + Size;
         {
-            records.reserve(newNumRecord);
+            auto& records = segment.records;
             records.setLength(newNumRecord);
-            const size_t length = operands.getLength();
-            const unsigned int numOp = numOperand(source);
+
+            auto& operand = segment.operands;
+            const size_t idFirstOperand = operand.getLength();
+            const unsigned int numOp = SegmentType::numOperand(source);
             for (size_t i = 0; i < Size; ++i)
-                records[oldNumRecord + i] = DiffRecord{length + i * numOp, source};
+                records[oldNumRecord + i] = DiffRecord{idFirstOperand + i * numOp, source};
         }
-        values.reserve(newNumRecord);
-        simd.store(values.data_ptr(oldNumRecord));
+        auto& values = segment.values;
+        auto* const pValue = values.data_ptr(oldNumRecord);
+        simd.store(pValue);
         values.setLength(newNumRecord);
 
+        auto& tangents = segment.tangents;
         SIMD<ScalarType, Size> empty(0);
-        tangents.reserve(newNumRecord);
-        empty.store(tangents.data_ptr(oldNumRecord));
+        auto* const pTangent = tangents.data_ptr(oldNumRecord);
+        empty.store(pTangent);
         tangents.setLength(newNumRecord);
-        return DiffScalar(*this, oldNumRecord);
+        return DiffScalar(pValue, pTangent);
     }
 
     template<class ScalarType>
-    void DiffTracer<ScalarType>::reverse(DiffTracer& targetTracer, size_t from, size_t to) {
-        assert(from < getNumRecord() && "[Error]: Index overflow");
-        assert(to <= from);
-        for (size_t i = from; i >= to && i <= from; --i) {
-            const DiffRecord record = records[i];
-            const ScalarType& tangent = tangents[i];
-            if (tangent.isZero() || record.source == ExpressionType::Set)
+    void DiffTracer<ScalarType>::reverse(DiffScalar from) {
+        assert(!traceList.empty() && "[Error]: No record found");
+        bool foundBeginSegment = false;
+        const auto rend = traceList.rend();
+        for (auto ite = traceList.rbegin(); ite != rend; ++ite) {
+            auto& segment = *ite;
+            foundBeginSegment |= segment.isFound(from);
+            if (!foundBeginSegment)
                 continue;
-            
-            const ScalarType& value = values[i];
-            const size_t startOperandId = record.startOperandId;
-            const ExpressionType source = record.source;
-            const size_t indexX = operands[startOperandId];
-            ScalarType& tangentX = targetTracer.tangents[indexX];
-            /* Unitary Operations */ {
-                switch (source) {
-                    case ExpressionType::Assign:
-                    case ExpressionType::Minus:
-                        tangentX += tangent * ScalarType(source == ExpressionType::Assign ? 1.0 : -1.0);
-                        continue;
-                    case ExpressionType::Reciprocal:
-                        tangentX -= tangent * square(value);
-                        continue;
-                    case ExpressionType::Sqrt:
-                        tangentX += tangent / value * ScalarType(0.5);
-                        continue;
-                    case ExpressionType::Cbrt:
-                        tangentX += tangent / (square(value) * ScalarType(3));
-                        continue;
-                    case ExpressionType::Abs:
-                        tangentX += targetTracer.values[indexX].isPositive() ? tangent : -tangent;
-                        continue;
-                    case ExpressionType::Relu:
-                        tangentX += targetTracer.values[indexX].isPositive() ? tangent : ScalarType(0);
-                        continue;
-                    case ExpressionType::Square:
-                        tangentX += tangent * targetTracer.values[indexX] * ScalarType(2);
-                        continue;
-                    case ExpressionType::Ln:
-                        tangentX += tangent / targetTracer.values[indexX];
-                        continue;
-                    case ExpressionType::Exp:
-                        tangentX += tangent * value;
-                        continue;
-                    case ExpressionType::Sin:
-                        tangentX += tangent * cos(targetTracer.values[indexX]);
-                        continue;
-                    case ExpressionType::Cos:
-                        tangentX -= tangent * sin(targetTracer.values[indexX]);
-                        continue;
-                    default:;
-                }
-            }
-            /* Binary Operations */ {
-                const size_t indexY = operands[startOperandId + 1];
-                ScalarType& tangentY = targetTracer.tangents[indexY];
-                switch (source) {
-                    case ExpressionType::Add:
-                    case ExpressionType::Sub:
-                        tangentX += tangent;
-                        tangentY += tangent * ScalarType(source == ExpressionType::Add ? 1.0 : -1.0);
-                        continue;
-                    case ExpressionType::MulAdd: {
-                        const size_t indexZ = operands[startOperandId + 2];
-                        ScalarType& tangentZ = targetTracer.tangents[indexZ];
-                        tangentZ += tangent;
-                        [[fallthrough]];
-                    }
-                    case ExpressionType::Mul:
-                        tangentX += tangent * targetTracer.values[indexY];
-                        tangentY += tangent * targetTracer.values[indexX];
-                        continue;
-                    case ExpressionType::Div: {
-                        const ScalarType dx = tangent * reciprocal(targetTracer.values[indexY]);
-                        tangentX += dx;
-                        tangentY -= dx * value;
-                        continue;
-                    }
-                    default:;
-                }
-            }
-            assert(false && "[Error]: Undefined operator for back propagation");
+
+            segment.reverse(from);
         }
+        assert(foundBeginSegment && "[Error]: Cannot find begin record, maybe it is on another thread?");
     }
 
     template<class ScalarType>
-    inline void DiffTracer<ScalarType>::zero_grad(size_t from) {
-        zero_grad(from, getNumRecord());
+    void DiffTracer<ScalarType>::reverse(DiffScalar from, DiffScalar to) {
+        assert(!traceList.empty() && "[Error]: No record found");
+        bool foundBeginSegment = false, foundFinalSegment = false;
+        const auto rend = traceList.rend();
+        for (auto ite = traceList.rbegin(); ite != rend; ++ite) {
+            auto& segment = *ite;
+            foundBeginSegment |= segment.isFound(from);
+            if (!foundBeginSegment)
+                continue;
+
+            foundFinalSegment |= segment.isFound(to);
+            segment.reverse(from, to);
+            if (foundFinalSegment)
+                break;
+        }
+        assert(foundBeginSegment && "[Error]: Cannot find begin record, maybe it is on another thread?");
+        assert(foundFinalSegment && "[Error]: Cannot find final record, maybe it is on another thread?");
     }
 
     template<class ScalarType>
-    void DiffTracer<ScalarType>::zero_grad(size_t from, size_t to) {
-        assert(from < to && "[Error]: Invalid argument");
-        assert(to <= getNumRecord() && "[Error]: Index overflow");
-        auto seg = tangents.segment(from, to);
-        seg = ScalarType(0);
+    inline void DiffTracer<ScalarType>::zero_grad(DiffScalar from) {
+        assert(!traceList.empty() && "[Error]: No record found");
+        bool foundBeginSegment = false;
+        const auto end = traceList.end();
+        for (auto ite = traceList.begin(); ite != end; ++ite) {
+            auto& segment = *ite;
+            foundBeginSegment |= segment.isFound(from);
+            if (!foundBeginSegment)
+                continue;
+            segment.zero_grad(from);
+        }
+        assert(foundBeginSegment && "[Error]: Cannot find begin record, maybe it is on another thread?");
     }
 
     template<class ScalarType>
-    void DiffTracer<ScalarType>::forget(size_t fromIndex) {
-        assert(fromIndex < getNumRecord() && "[Error]: forgeting a non existent, this may be a bug");
-        operands.resize(records[fromIndex].startOperandId);
-        records.resize(fromIndex);
-        values.resize(fromIndex);
-        tangents.resize(fromIndex);
+    void DiffTracer<ScalarType>::zero_grad(DiffScalar from, DiffScalar to) {
+        assert(!traceList.empty() && "[Error]: No record found");
+        bool foundBeginSegment = false, foundFinalSegment = false;
+        const auto end = traceList.end();
+        for (auto ite = traceList.begin(); ite != end; ++ite) {
+            auto& segment = *ite;
+            foundBeginSegment |= segment.isFound(from);
+            if (!foundBeginSegment)
+                continue;
+
+            foundFinalSegment |= segment.isFound(to);
+            segment.zero_grad(from, to);
+            if (foundFinalSegment)
+                break;
+        }
+        assert(foundBeginSegment && "[Error]: Cannot find begin record, maybe it is on another thread?");
+        assert(foundFinalSegment && "[Error]: Cannot find final record, maybe it is on another thread?");
     }
 
     template<class ScalarType>
-    void DiffTracer<ScalarType>::squeeze() {
-        records.squeeze();
-        operands.squeeze();
-        values.squeeze();
-        tangents.squeeze();
+    void DiffTracer<ScalarType>::forget(DiffScalar from) {
+        assert(!traceList.empty() && "[Error]: No record found");
+        const auto end = traceList.end();
+        for (auto ite = traceList.begin(); ite != end; ++ite) {
+            auto& segment = *ite;
+            if (segment.isFound(from)) {
+                segment.forget(from);
+                traceList.erase(++ite, end);
+                return;
+            }
+        }
+        assert(false && "[Error]: Cannot find begin record, maybe it is on another thread?");
+    }
+    /**
+     * Ensure current segment have at least \param size elements of empty space for next continuous store
+     */
+    template<class ScalarType>
+    void DiffTracer<ScalarType>::reserve(size_t size) {
+        const auto& segment = traceList.back();
+        const bool isSpaceEnough = segment.getLength() + size <= segment.getCapacity();
+        if (isSpaceEnough)
+            return;
+        
+        const bool isSmallSize = size < SegmentType::DefaultSize;
+        if (isSmallSize)
+            pushSegment(SegmentType{});
+        else
+            pushSegment(SegmentType(size));
     }
 
     template<class ScalarType>
-    void DiffTracer<ScalarType>::release() {
-        forget();
-        squeeze();
+    inline void DiffTracer<ScalarType>::clear() {
+        traceList.clear();
     }
 
     template<class ScalarType>
     inline bool DiffTracer<ScalarType>::checkLastOpDone() const {
-        if (records.empty())
+        if (traceList.empty() || traceList.back().empty())
             return true;
-        return operands.getLength() >= (*records.crbegin()).startOperandId + numOperand((*records.crbegin()).source);
+        const auto& segment = traceList.back();
+        const auto& operands = segment.operands;
+        const auto& records = segment.records;
+        const auto& record = *records.crbegin();
+        return operands.getLength() >= (record.idFirstOperand + SegmentType::numOperand(record.source));
+    }
+
+    template<class ScalarType>
+    size_t DiffTracer<ScalarType>::getNumRecord() const noexcept {
+        size_t result = 0;
+        for (auto ite = traceList.cbegin(); ite != traceList.cend(); ++ite)
+            result += (*ite).getLength();
+        return result;
+    }
+
+    template<class ScalarType>
+    ExpressionType DiffTracer<ScalarType>::getSource(DiffScalar s) const noexcept {
+        for (auto ite = traceList.cbegin(); ite != traceList.cend(); ++ite) {
+            const auto& segment = *ite;
+            if (!segment.isFound(s))
+                continue;
+            const size_t index = s.value_ptr() - segment.values().data();
+            return segment.records[index].source;
+        }
+        assert(false && "[Error]: Cannot find the record, maybe it is on another thread?");
+        return ExpressionType::Set;
     }
 
     template<class ScalarType>
@@ -291,39 +301,9 @@ namespace Physica::Core {
     }
 
     template<class ScalarType>
-    template<size_t Size>
-    void DiffTracer<ScalarType>::checkOperands([[maybe_unused]] const size_t (&operand)[Size]) {
-        for (size_t i = 0; i < Size; ++i) {
-            assert(operand[i] < records.getLength() && "[Error]: This operand is not registered");
-        }
-    }
-
-    template<class ScalarType>
-    constexpr unsigned int DiffTracer<ScalarType>::numOperand(ExpressionType type) {
-        switch (type) {
-            case ExpressionType::Set: return 0;
-            case ExpressionType::Assign: return 1;
-            case ExpressionType::Minus: return 1;
-            case ExpressionType::Add: return 2;
-            case ExpressionType::Sub: return 2;
-            case ExpressionType::Mul: return 2;
-            case ExpressionType::Div: return 2;
-            case ExpressionType::MulAdd: return 3;
-            case ExpressionType::More: return 2;
-            case ExpressionType::MoreEq: return 2;
-            case ExpressionType::Reciprocal: return 1;
-            case ExpressionType::Sqrt: return 1;
-            case ExpressionType::Cbrt: return 1;
-            case ExpressionType::Abs: return 1;
-            case ExpressionType::Relu: return 1;
-            case ExpressionType::Square: return 1;
-            case ExpressionType::Ln: return 1;
-            case ExpressionType::Exp: return 1;
-            case ExpressionType::Pow: return 2;
-            case ExpressionType::Sin: return 1;
-            case ExpressionType::Cos: return 1;
-            default: [[unlikely]]
-                throw std::invalid_argument("[Error]: Unrecognized type");
-        }
+    void DiffTracer<ScalarType>::pushSegment(SegmentType segment) {
+        if (!traceList.empty())
+            traceList.back().squeeze();
+        traceList.emplace_back(std::move(segment));
     }
 }

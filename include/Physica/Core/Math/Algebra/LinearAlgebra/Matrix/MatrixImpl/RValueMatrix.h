@@ -43,6 +43,7 @@ namespace Physica::Core {
         using BlockType = RMatrixBlock<Derived>;
     public:
         using ScalarType = typename Internal::Traits<Derived>::ScalarType;
+        using PlainScalar = typename ScalarType::PlainScalar;
         using RowVector = RMatrixBlock<Derived, 1, Dynamic>;
         using ColVector = RMatrixBlock<Derived, Dynamic, 1>;
         constexpr static int Option = Internal::Traits<Derived>::Option;

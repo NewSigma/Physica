@@ -100,7 +100,7 @@ namespace Physica::Core {
                 for (size_t _ = 0; _ < batchSizePerThread; ++_) {
                     AutoDiffGuard<PlainScalar> guard{};
                     const size_t index = dist(gen);
-                    tempNet.loss(samples[index], labels[index]).reverse(guard.getTraceIndex());
+                    tempNet.loss(samples[index], labels[index]).reverse(guard.getNode());
                 }
                 auto& tracer = DiffTracer<PlainScalar>::getInstance();
                 std::lock_guard locker(mutex);
@@ -109,7 +109,7 @@ namespace Physica::Core {
             }, Executor::getNumThread(), Executor::getNumThread()).wait();
         }
         opt_step(opt);
-        DiffTracer<PlainScalar>::getInstance().zero_grad(net_guard->getTraceIndex());
+        DiffTracer<PlainScalar>::getInstance().zero_grad(net_guard->getNode());
     }
 
     template<class Derived>

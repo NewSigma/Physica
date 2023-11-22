@@ -115,6 +115,7 @@ namespace Physica::Core {
         for (size_t i = 0; i < PacketType::size(); ++i, ++index)
             buffer[i] = calc(index);
         if constexpr (isExpression && isReverseDiff) { //Optimize: For expression such as A + B, there is no need to create new node
+            DiffTracer<PlainScalar>::getInstance().reserve(PacketType::size());
             for (auto& elem : buffer)
                 elem = elem.copy();
         }
@@ -130,6 +131,7 @@ namespace Physica::Core {
         for (size_t i = 0; i < count; ++i, ++index)
             buffer[i] = calc(index);
         if constexpr (isExpression && isReverseDiff) {
+            DiffTracer<PlainScalar>::getInstance().reserve(count);
             for (size_t i = 0; i < count; ++i)
                 buffer[i] = buffer[i].copy();
         }

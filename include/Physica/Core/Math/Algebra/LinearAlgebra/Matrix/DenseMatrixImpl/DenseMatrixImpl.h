@@ -92,9 +92,18 @@ namespace Physica::Core {
     DenseMatrix<T, Option, Row, Column, MaxRow, MaxColumn, Allocator>::copy() const {
         if constexpr (isReverseDiff) {
             This result(Base::getRow(), Base::getColumn());
-            for (size_t major = 0; major < Base::getMaxMajor(); ++major) {
-                for (size_t minor = 0; minor < Base::getMaxMinor(); ++minor)
-                    result.refFromMajorMinor(major, minor) = Base::refFromMajorMinor(major, minor).copy();
+            if constexpr (MatrixOption::isElementMatrix<This>()) {
+                DiffTracer<PlainScalar>::getInstance().reserve(Storage::getSize());
+                for (size_t major = 0; major < Base::getMaxMajor(); ++major) {
+                    for (size_t minor = 0; minor < Base::getMaxMinor(); ++minor)
+                        result.refFromMajorMinor(major, minor) = Base::refFromMajorMinor(major, minor).copy();
+                }
+            }
+            else {
+                const auto& from = Storage::asArray();
+                auto& to = result.asArray();
+                for (size_t i = 0; i < from.getLength(); ++i)
+                    to[i] = from[i].copy();
             }
             return result;
         }

@@ -42,6 +42,7 @@ namespace Physica::Core {
                       "CrossProduct can apply on 3-dim vectors only");
         using This = CrossProduct<AnyVector1, AnyVector2>;
         using Base = RValueVector<This>;
+        using typename Base::PlainScalar;
         using Base::isReverseDiff;
     private:
         const AnyVector1& v1;
@@ -59,6 +60,7 @@ namespace Physica::Core {
             v[1] = v1[2] * v2[0] - v1[0] * v2[2];
             v[2] = v1[0] * v2[1] - v1[1] * v2[0];
             if constexpr (isReverseDiff) {
+                DiffTracer<PlainScalar>::getInstance().reserve(3);
                 for (int i = 0; i < 3; ++i)
                     v[i] = v[i].copy();
             }

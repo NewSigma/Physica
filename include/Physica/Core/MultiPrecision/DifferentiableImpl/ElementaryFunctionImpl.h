@@ -27,7 +27,7 @@ namespace Physica::Core {
         else {
             auto& tracer = DiffTracer<ScalarType>::getInstance();
             const auto result = tracer.pushOperation(value, ExpressionType::Abs);
-            tracer.pushOperand(s.getTraceIndex());
+            tracer.pushOperand(s);
             return result;
         }
     }
@@ -40,7 +40,7 @@ namespace Physica::Core {
         else {
             auto& tracer = DiffTracer<ScalarType>::getInstance();
             const auto result = tracer.pushOperation(value, ExpressionType::Relu);
-            tracer.pushOperand(s.getTraceIndex());
+            tracer.pushOperand(s);
             return result;
         }
     }
@@ -53,7 +53,7 @@ namespace Physica::Core {
         else {
             auto& tracer = DiffTracer<ScalarType>::getInstance();
             const auto result = tracer.pushOperation(value, ExpressionType::Square);
-            tracer.pushOperand(s.getTraceIndex());
+            tracer.pushOperand(s);
             return result;
         }
     }
@@ -66,7 +66,7 @@ namespace Physica::Core {
         else {
             auto& tracer = DiffTracer<ScalarType>::getInstance();
             const auto result = tracer.pushOperation(rep, ExpressionType::Reciprocal);
-            tracer.pushOperand(s.getTraceIndex());
+            tracer.pushOperand(s);
             return result;
         }
     }
@@ -79,7 +79,7 @@ namespace Physica::Core {
         else {
             auto& tracer = DiffTracer<ScalarType>::getInstance();
             const auto result = tracer.pushOperation(value, ExpressionType::Sqrt);
-            tracer.pushOperand(s.getTraceIndex());
+            tracer.pushOperand(s);
             return result;
         }
     }
@@ -94,7 +94,7 @@ namespace Physica::Core {
         else {
             auto& tracer = DiffTracer<ScalarType>::getInstance();
             const auto result = tracer.pushOperation(value, ExpressionType::Cbrt);
-            tracer.pushOperand(s.getTraceIndex());
+            tracer.pushOperand(s);
             return result;
         }
     }
@@ -107,7 +107,7 @@ namespace Physica::Core {
         else {
             auto& tracer = DiffTracer<ScalarType>::getInstance();
             const auto result = tracer.pushOperation(value, ExpressionType::Ln);
-            tracer.pushOperand(s.getTraceIndex());
+            tracer.pushOperand(s);
             return result;
         }
     }
@@ -120,7 +120,7 @@ namespace Physica::Core {
         else {
             auto& tracer = DiffTracer<ScalarType>::getInstance();
             const auto result = tracer.pushOperation(value, ExpressionType::Exp);
-            tracer.pushOperand(s.getTraceIndex());
+            tracer.pushOperand(s);
             return result;
         }
     }
@@ -136,7 +136,7 @@ namespace Physica::Core {
             const ScalarType value = cos(s.getValue());
             auto& tracer = DiffTracer<ScalarType>::getInstance();
             const auto result = tracer.pushOperation(value, ExpressionType::Cos);
-            tracer.pushOperand(s.getTraceIndex());
+            tracer.pushOperand(s);
             return result;
         }
     }
@@ -152,7 +152,7 @@ namespace Physica::Core {
             const ScalarType value = sin(s.getValue());
             auto& tracer = DiffTracer<ScalarType>::getInstance();
             const auto result = tracer.pushOperation(value, ExpressionType::Sin);
-            tracer.pushOperand(s.getTraceIndex());
+            tracer.pushOperand(s);
             return result;
         }
     }
@@ -168,9 +168,9 @@ namespace Physica::Core {
         else {
             auto& tracer = DiffTracer<ScalarType>::getInstance();
             sin_result = tracer.pushOperation(sin_value, ExpressionType::Sin);
-            tracer.pushOperand(s.getTraceIndex());
+            tracer.pushOperand(s);
             cos_result = tracer.pushOperation(cos_value, ExpressionType::Cos);
-            tracer.pushOperand(s.getTraceIndex());
+            tracer.pushOperand(s);
         }
     }
 }
