@@ -75,8 +75,8 @@ namespace Physica::Core {
             : Differentiable(DiffTracerType::getInstance().pushOperation(std::move(value), ExpressionType::Set)) {}
 
     template<class ScalarType>
-    Differentiable<ScalarType, DiffMode::Reverse>::Differentiable(ScalarType value, ScalarType tangent)
-            : Differentiable(DiffTracerType::getInstance().pushOperation(std::move(value), tangent, ExpressionType::Set)) {
+    Differentiable<ScalarType, DiffMode::Reverse>::Differentiable(
+            [[maybe_unused]] ScalarType value, [[maybe_unused]] ScalarType tangent) {
         throw std::runtime_error("[Error]: This function is provided for template meta programming, you should not arrive here");
     }
 

@@ -12,5 +12,6 @@ if(${PHYSICA_CUDA})
 endif()
 # Anonymous
 physica_add_benchmark(KSSolver KSSolver.cpp)
+physica_add_benchmark(Mnist Mnist.cpp)
 physica_add_benchmark(Q_TIP4P Q_TIP4P.cpp)
 physica_add_benchmark(Q_TIP4P2D Q_TIP4P2D.cpp)
