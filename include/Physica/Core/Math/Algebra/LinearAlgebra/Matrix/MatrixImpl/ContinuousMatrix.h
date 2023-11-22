@@ -30,8 +30,11 @@ namespace Physica::Core {
     class ContinuousMatrix : public LValueMatrix<Derived> {
         using Base = LValueMatrix<Derived>;
     public:
+        using typename Base::ScalarType;
+        using typename Base::PlainScalar;
         using Base::RowAtCompile;
         using Base::ColumnAtCompile;
+        using Base::isReverseDiff;
     public:
         ~ContinuousMatrix() = default;
         /* Operators */
@@ -98,6 +101,14 @@ namespace Physica::Core {
 
         [[nodiscard]] ContinuousFlatten<Derived> flatten() { return {*this}; }
         [[nodiscard]] const ContinuousFlatten<Derived> flatten() const { return {*this}; }
+
+        [[nodiscard]] bool checkContinuous() const;
+        template<class RandomGenerator>
+        void random_uniform(RandomGenerator& gen);
+        template<class RandomGenerator>
+        void random_normal(RandomGenerator& gen);
+        template<class Distribution, class RandomGenerator>
+        void random_any(Distribution& dist, RandomGenerator& gen);
     protected:
         ContinuousMatrix() = default;
         ContinuousMatrix(const ContinuousMatrix&) = default;

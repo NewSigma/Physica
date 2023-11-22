@@ -229,4 +229,66 @@ namespace Physica::Core {
     inline const ContinuousMatrixBlock<Derived, Row, Column> ContinuousMatrix<Derived>::block(size_t fromRow, size_t rowCount, size_t fromCol, size_t colCount) const {
         return {Base::getConstCastDerived(), fromRow, rowCount, fromCol, colCount};
     }
+
+    template<class Derived>
+    bool ContinuousMatrix<Derived>::checkContinuous() const {
+        if constexpr (isReverseDiff) {
+            if constexpr (MatrixOption::isRowMatrix<Derived>()) {
+                for (size_t i = 0; i < Base::getRow(); ++i)
+                    if (!row(i).checkContinuous())
+                        return false;
+            }
+            else {
+                for (size_t i = 0; i < Base::getColumn(); ++i)
+                    if (!col(i).checkContinuous())
+                        return false;
+            }
+        }
+        return true;
+    }
+
+    template<class Derived>
+    template<class RandomGenerator>
+    void ContinuousMatrix<Derived>::random_uniform(RandomGenerator& gen) {
+        if constexpr (isReverseDiff) {
+            const size_t maxMajor = Base::getMaxMajor();
+            const size_t maxMinor = Base::getMaxMinor();
+            DiffTracer<PlainScalar>::getInstance().reserve(maxMajor * maxMinor);
+            for (size_t major = 0; major < maxMajor; ++major)
+                for (size_t minor = 0; minor < maxMinor; ++minor)
+                    Base::refFromMajorMinor(major, minor) = ScalarType::random_uniform(gen);
+        }
+        else
+            Base::random_uniform(gen);
+    }
+
+    template<class Derived>
+    template<class RandomGenerator>
+    void ContinuousMatrix<Derived>::random_normal(RandomGenerator& gen) {
+        if constexpr (isReverseDiff) {
+            const size_t maxMajor = Base::getMaxMajor();
+            const size_t maxMinor = Base::getMaxMinor();
+            DiffTracer<PlainScalar>::getInstance().reserve(maxMajor * maxMinor);
+            for (size_t major = 0; major < maxMajor; ++major)
+                for (size_t minor = 0; minor < maxMinor; ++minor)
+                    Base::refFromMajorMinor(major, minor) = ScalarType::random_normal(gen);
+        }
+        else
+            Base::random_normal(gen);
+    }
+
+    template<class Derived>
+    template<class Distribution, class RandomGenerator>
+    void ContinuousMatrix<Derived>::random_any(Distribution& dist, RandomGenerator& gen) {
+        if constexpr (isReverseDiff) {
+            const size_t maxMajor = Base::getMaxMajor();
+            const size_t maxMinor = Base::getMaxMinor();
+            DiffTracer<PlainScalar>::getInstance().reserve(maxMajor * maxMinor);
+            for (size_t major = 0; major < maxMajor; ++major)
+                for (size_t minor = 0; minor < maxMinor; ++minor)
+                    Base::refFromMajorMinor(major, minor) = ScalarType::random_any(dist, gen);
+        }
+        else
+            Base::random_any(dist, gen);
+    }
 }

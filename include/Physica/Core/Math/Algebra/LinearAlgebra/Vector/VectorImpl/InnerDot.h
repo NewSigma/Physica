@@ -51,15 +51,40 @@ namespace Physica::Core {
                 size_t i = 0;
                 const size_t to = length / PacketType::size() * PacketType::size();
                 PacketType buffer(0);
-                for (; i < to; i += PacketType::size())
-                    buffer = mul_add(v1.getDerived().template packet<PacketType>(i),
-                                     v2.getDerived().template packet<PacketType>(i),
-                                     buffer);
-                if (to != length) {
-                    const size_t count = length - i;
-                    buffer = mul_add(v1.getDerived().template packetPartial<PacketType>(i, count),
-                                     v2.getDerived().template packetPartial<PacketType>(i, count),
-                                     buffer);
+                if constexpr (isT1Continuous && isT2Continuous && isReverseDiff) {
+                    using PlainPacket = typename PacketType::PlainPacket;
+                    const auto head1 = v1.getDerived()[0];
+                    const auto head2 = v2.getDerived()[0];
+                    for (; i < to; i += PacketType::size()) {
+                        const ResultType node1(head1.value_ptr() + i, head1.tangent_ptr() + i);
+                        const ResultType node2(head2.value_ptr() + i, head2.tangent_ptr() + i);
+                        PlainPacket p1{}, p2{};
+                        p1.load(node1.value_ptr());
+                        p2.load(node2.value_ptr());
+                        buffer = mul_add(PacketType(p1, node1), PacketType(p2, node2), buffer);
+                    }
+                    if (to != length) {
+                        const size_t count = length - i;
+                        const ResultType node1(head1.value_ptr() + i, head1.tangent_ptr() + i);
+                        const ResultType node2(head2.value_ptr() + i, head2.tangent_ptr() + i);
+                        PlainPacket p1{}, p2{};
+                        p1.load_partial(count, node1.value_ptr());
+                        p2.load_partial(count, node2.value_ptr());
+                        buffer = mul_add(PacketType(p1, node1), PacketType(p2, node2), buffer);
+                    }
+                }
+                else {
+                    for (; i < to; i += PacketType::size()) {
+                        PacketType p1 = v1.getDerived().template packet<PacketType>(i);
+                        PacketType p2 = v2.getDerived().template packet<PacketType>(i);
+                        buffer = mul_add(p1, p2, buffer);
+                    }
+                    if (to != length) {
+                        const size_t count = length - i;
+                        PacketType p1 = v1.getDerived().template packetPartial<PacketType>(i, count);
+                        PacketType p2 = v2.getDerived().template packetPartial<PacketType>(i, count);
+                        buffer = mul_add(p1, p2, buffer);
+                    }
                 }
                 return buffer.horizontal_add();
             }

@@ -206,6 +206,45 @@ namespace Physica::Core {
     }
 
     template<class Derived>
+    template<class RandomGenerator>
+    inline void ContinuousVector<Derived>::random_uniform(RandomGenerator& gen) {
+        if constexpr (isReverseDiff) {
+            const size_t length = Base::getLength();
+            DiffTracer<PlainScalar>::getInstance().reserve(length);
+            for (size_t i = 0; i < length; ++i)
+                this->operator[](i) = ScalarType::random_uniform(gen);
+        }
+        else
+            Base::random_uniform(gen);
+    }
+
+    template<class Derived>
+    template<class RandomGenerator>
+    inline void ContinuousVector<Derived>::random_normal(RandomGenerator& gen) {
+        if constexpr (isReverseDiff) {
+            const size_t length = Base::getLength();
+            DiffTracer<PlainScalar>::getInstance().reserve(length);
+            for (size_t i = 0; i < length; ++i)
+                this->operator[](i) = ScalarType::random_normal(gen);
+        }
+        else
+            Base::random_normal(gen);
+    }
+
+    template<class Derived>
+    template<class Distribution, class RandomGenerator>
+    inline void ContinuousVector<Derived>::random_any(Distribution& dist, RandomGenerator& gen) {
+        if constexpr (isReverseDiff) {
+            const size_t length = Base::getLength();
+            DiffTracer<PlainScalar>::getInstance().reserve(length);
+            for (size_t i = 0; i < length; ++i)
+                this->operator[](i) = ScalarType::random_any(dist, gen);
+        }
+        else
+            Base::random_any(dist, gen);
+    }
+
+    template<class Derived>
     template<class SpaceType>
     void ContinuousVector<Derived>::read(const H5::DataSet& dataset,
                                          const DataSpaceBase<SpaceType>& file_space,

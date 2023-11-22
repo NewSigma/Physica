@@ -60,6 +60,12 @@ namespace Physica::Core {
 
         [[nodiscard]] bool checkContinuous() const;
         inline void makeContinuous();
+        template<class RandomGenerator>
+        inline void random_uniform(RandomGenerator& gen);
+        template<class RandomGenerator>
+        inline void random_normal(RandomGenerator& gen);
+        template<class Distribution, class RandomGenerator>
+        inline void random_any(Distribution& dist, RandomGenerator& gen);
 
         template<class SpaceType>
         void read(const H5::DataSet& dataset,
