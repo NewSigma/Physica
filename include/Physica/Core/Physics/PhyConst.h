@@ -60,13 +60,14 @@ namespace Physica::Core {
         /**
          * The first element is a space holder
          */
-        constexpr static double relativeAtomMass[19]{0, 1.00798, 4.002602,
+        constexpr static double relativeAtomMass[37]{0, 1.00798, 4.002602,
                 6.968, 9.0121831, 10.814, 12.0106, 14.00686, 15.99940, 18.998403162, 20.1797,
-                22.98976928, 24.306, 26.9815384, 28.085, 30.973761998, 32.068, 35.452, 39.878};
-        constexpr static const char* elementSymbol[21]{"-", "H", "He",
+                22.98976928, 24.306, 26.9815384, 28.085, 30.973761998, 32.068, 35.452, 39.878,
+                39.0983, 40.078, 44.955907, 47.867, 50.9415, 51.9961, 54.938043, 55.845, 58.933194, 58.6934, 63.546, 65.38, 69.723, 72.630, 74.921595, 78.971, 79.904, 83.798};
+        constexpr static const char* elementSymbol[37]{"-", "H", "He",
                 "Li", "Be", "B", "C", "N", "O", "F", "Ne",
                 "Na", "Mg", "Al", "Si", "P", "S", "Cl", "Ar",
-                "K", "Ca"};
+                "K", "Ca", "Sc", "Ti", "V", "Cr", "Mn", "Fe", "Co", "Ni", "Cu", "Zn", "Ga", "Ge", "As", "Se", "Br", "Kr"};
     
         [[nodiscard]] constexpr static double degreeToRadian(double degree) { return degree / 180 * M_PI; }
         [[nodiscard]] constexpr static double radianToDegree(double radian) { return radian / M_PI * 180; }

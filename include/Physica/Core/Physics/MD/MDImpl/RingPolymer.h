@@ -122,8 +122,14 @@ namespace Physica::Core {
     template<class ScalarType, unsigned int Dim, size_t NumReplica>
     template<class RandomGenerator>
     void RingPolymer<ScalarType, Dim, NumReplica>::initMomentum(ScalarType temperatureT, RandomGenerator& gen) {
-        std::normal_distribution<> dist{};
         const size_t dof = getDOF();
+        [[unlikely]] if (temperatureT.isZero()) {
+            auto momentum = phase.topRows(dof);
+            momentum = PlainScalar(0);
+            return;
+        }
+
+        std::normal_distribution<> dist{};
         const ScalarType repBeta = calcRepBeta(temperatureT);
         Vector<ScalarType, Dim> driftMomentum(Dim, 0);
         for (size_t i = 0; i < dof; ++i) {
@@ -148,6 +154,7 @@ namespace Physica::Core {
     template<class ScalarType, unsigned int Dim, size_t NumReplica>
     void RingPolymer<ScalarType, Dim, NumReplica>::scaleVelocity(ScalarType temperatureT) {
         const ScalarType temperatureNow = calcTemperature();
+        assert(!temperatureNow.isZero() && "[Error]: Velocity-scaling fails at 0K");
         const size_t dof = getDOF();
         const ScalarType factor = sqrt(temperatureT / temperatureNow);
         auto momentum = phase.topRows(dof);

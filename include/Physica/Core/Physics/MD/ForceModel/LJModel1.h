@@ -21,64 +21,70 @@
 #include "PairModel.h"
 
 namespace Physica::Core {
-    template<class ScalarType> class LJModel;
+    template<class ScalarType> class LJModel1;
 
     namespace Internal {
         template<class T>
-        class Traits<LJModel<T>> : public Traits<PairModel<LJModel<T>>> {
+        class Traits<LJModel1<T>> : public Traits<PairModel<LJModel1<T>>> {
         public:
             using ScalarType = T;
             constexpr static bool IsPotDependOnAtomIndex = false;
         };
     }
-
+    /**
+     * \class LJModel1 is a variation of \class LJModel
+     * 
+     * Reference:
+     * [1] Phys. Rev. 188, 1407; https://doi.org/10.1103/PhysRev.188.1407
+     */
     template<class ScalarType>
-    class LJModel : public PairModel<LJModel<ScalarType>> {
-        using This = LJModel<ScalarType>;
+    class LJModel1 : public PairModel<LJModel1<ScalarType>> {
+        using This = LJModel1<ScalarType>;
         using Base = PairModel<This>;
         using typename Base::PlainScalar;
 
         ScalarType sigma;
-        ScalarType sigma1;
+        ScalarType epsilon;
+        ScalarType factor;
     public:
-        LJModel(ScalarType sigma_, PlainScalar cutoff);
-        LJModel(const LJModel&) = default;
-        LJModel(LJModel&&) noexcept = default;
-        ~LJModel() = default;
+        LJModel1(ScalarType sigma_, ScalarType epsilon_, PlainScalar cutoff);
+        LJModel1(const LJModel1&) = default;
+        LJModel1(LJModel1&&) noexcept = default;
+        ~LJModel1() = default;
         /* Operators */
-        LJModel& operator=(LJModel obj) noexcept;
+        LJModel1& operator=(LJModel1 obj) noexcept;
         /* Operations */
-        void swap(LJModel& obj) noexcept;
+        void swap(LJModel1& obj) noexcept;
         /* Static members */
         [[nodiscard]] inline ScalarType pot_functor(size_t i, size_t j, ScalarType r, ScalarType r2) const;
         [[nodiscard]] inline ScalarType force_functor(size_t i, size_t j, ScalarType r, ScalarType r2) const;
     };
 
     template<class ScalarType>
-    LJModel<ScalarType>::LJModel(ScalarType sigma_, PlainScalar cutoff)
-            : Base(), sigma(std::move(sigma_)) {
-        sigma1 = PlainScalar(6) / sigma;
+    LJModel1<ScalarType>::LJModel1(ScalarType sigma_, ScalarType epsilon_, PlainScalar cutoff)
+            : Base(), sigma(std::move(sigma_)), epsilon(std::move(epsilon_)) {
+        factor = PlainScalar(12) * epsilon / sigma;
         Base::setCutoff(std::move(cutoff));
     }
 
     template<class ScalarType>
-    LJModel<ScalarType>& LJModel<ScalarType>::operator=(LJModel obj) noexcept {
+    LJModel1<ScalarType>& LJModel1<ScalarType>::operator=(LJModel1 obj) noexcept {
         swap(obj);
         return *this;
     }
 
     template<class ScalarType>
-    inline ScalarType LJModel<ScalarType>::pot_functor(
+    inline ScalarType LJModel1<ScalarType>::pot_functor(
             [[maybe_unused]] size_t i, [[maybe_unused]] size_t j, [[maybe_unused]] ScalarType r, ScalarType r2) const {
         const ScalarType rep_r2 = ScalarType(sigma * sigma) / r2;
         const ScalarType rep_r4 = square(rep_r2);
         const ScalarType rep_r6 = rep_r4 * rep_r2;
         const ScalarType rep_r12 = square(rep_r6);
-        return rep_r12 - rep_r6;
+        return (rep_r12 - rep_r6 * ScalarType(2)) * epsilon;
     }
 
     template<class ScalarType>
-    inline ScalarType LJModel<ScalarType>::force_functor(
+    inline ScalarType LJModel1<ScalarType>::force_functor(
             [[maybe_unused]] size_t i, [[maybe_unused]] size_t j, ScalarType r, [[maybe_unused]] ScalarType r2) const {
         const ScalarType rep_r = sigma / r;
         const ScalarType rep_r2 = square(rep_r);
@@ -86,14 +92,15 @@ namespace Physica::Core {
         const ScalarType rep_r6 = rep_r4 * rep_r2;
         const ScalarType rep_r7 = rep_r6 * rep_r;
         const ScalarType rep_r13 = rep_r7 * rep_r6;
-        return (rep_r13 * PlainScalar(2) - rep_r7) * sigma1;
+        return (rep_r13 - rep_r7) * factor;
     }
 
     template<class ScalarType>
-    void LJModel<ScalarType>::swap(LJModel& obj) noexcept {
+    void LJModel1<ScalarType>::swap(LJModel1& obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         Base::swap(obj);
         sigma.swap(obj.sigma);
-        sigma1.swap(obj.sigma1);
+        epsilon.swap(obj.epsilon);
+        factor.swap(obj.factor);
     }
 }

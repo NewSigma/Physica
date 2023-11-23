@@ -24,7 +24,7 @@ namespace Physica::Core {
      * PILE thermostat as introduced in [1]
      * 
      * Reference:
-     * [1] M. Ceriotti, M. Parrinello, T. E. Markland and D. E. Manolopoulos, J. Chem. Phys. 133, 124104 (2010).
+     * [1] J. Chem. Phys. 133, 124104 (2010); https://doi.org/10.1063/1.3489925
      */
     template<class ScalarType, unsigned int Dim = 3, size_t NumReplica = Dynamic>
     class Langevin {

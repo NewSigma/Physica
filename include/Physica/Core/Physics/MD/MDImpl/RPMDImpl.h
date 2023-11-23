@@ -743,9 +743,13 @@ namespace Physica::Core {
 
     template<class ScalarType, unsigned int Dim, size_t NumReplica, class ForceMatrixAllocator>
     void RPMD<ScalarType, Dim, NumReplica, ForceMatrixAllocator>::checkParam() const {
-        const ScalarType cycle = PlainScalar(2 * M_PI) / ringPolymer.calcOmegaW(temperatureT);
-        bool isSmallEnough = timeStep < cycle / PlainScalar(4);
-        if (!isSmallEnough)
-            throw std::invalid_argument("[Error]: Time step is too large");
+        if constexpr (NumReplica != 1) {
+            if (getNumReplica() == 1)
+                throw std::invalid_argument("[Warning]: Set tparam NumReplica = 1 may gain better performance");
+            const ScalarType cycle = PlainScalar(2 * M_PI) / ringPolymer.calcOmegaW(temperatureT);
+            bool isSmallEnough = timeStep < cycle / PlainScalar(4);
+            if (!isSmallEnough)
+                throw std::invalid_argument("[Error]: Time step is too large");
+        }
     }
 }

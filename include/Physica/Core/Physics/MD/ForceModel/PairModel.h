@@ -24,6 +24,15 @@
 #include "EmptyForceModel.h"
 
 namespace Physica::Core {
+    template<class Derived> class PairModel;
+
+    namespace Internal {
+        template<class Derived>
+        class Traits<PairModel<Derived>> {
+        public:
+            constexpr static bool IsPeriodBoundary = true;
+        };
+    }
     /**
      * Member variable pot_shift is referenced from [1]
      * 
