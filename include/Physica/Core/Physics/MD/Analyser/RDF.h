@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 WeiBo He.
+ * Copyright 2022-2023 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -18,7 +18,7 @@
  */
 #pragma once
 
-#include "MDCell.h"
+#include "Physica/Core/Physics/MD/MDCell.h"
 
 namespace Physica::Core {
     /**
@@ -42,7 +42,7 @@ namespace Physica::Core {
         RDF(RDF&&) noexcept = default;
         ~RDF() = default;
         /* Operators */
-        RDF& operator=(RDF rdf) noexcept;
+        RDF& operator=(RDF obj) noexcept { swap(obj); return *this; }
         /* Operations */
         template<class T>
         void sample(const MDCell<T>& cell);
@@ -71,12 +71,6 @@ namespace Physica::Core {
             , numSample(0) {
         assert(isFromParticle.getLength() == isToParticle.getLength());
         assert(stepSize.isPositive());
-    }
-
-    template<class ScalarType>
-    RDF<ScalarType>& RDF<ScalarType>::operator=(RDF rdf) noexcept {
-        swap(rdf);
-        return *this;
     }
     /**
      * Optimize: If isFromParticle == isToParticle, we may make use of symmetry
@@ -130,14 +124,14 @@ namespace Physica::Core {
     }
 
     template<class ScalarType>
-    void RDF<ScalarType>::swap(RDF& rdf) noexcept {
-        assert(this != &rdf && "[Error]: Self swap is likely a bug");
-        isFromParticle.swap(rdf.isFromParticle);
-        isToParticle.swap(rdf.isToParticle);
-        particleBucket.swap(rdf.particleBucket);
-        stepSize.swap(rdf.stepSize);
-        std::swap(numStep, rdf.numStep);
-        std::swap(numSample, rdf.numSample);
+    void RDF<ScalarType>::swap(RDF& obj) noexcept {
+        assert(this != &obj && "[Error]: Self swap is likely a bug");
+        isFromParticle.swap(obj.isFromParticle);
+        isToParticle.swap(obj.isToParticle);
+        particleBucket.swap(obj.particleBucket);
+        stepSize.swap(obj.stepSize);
+        std::swap(numStep, obj.numStep);
+        std::swap(numSample, obj.numSample);
     }
 
     template<class ScalarType>

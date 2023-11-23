@@ -24,7 +24,7 @@
 #include "Physica/Core/Physics/MD/Thermostat/DoubleThermo.h"
 #include "Physica/Core/Physics/MD/KineticModel/FreeModel.h"
 #include "Physica/Core/Parallel/Executor/ThreadExecutor.h"
-#include "Physica/Core/Physics/MD/RDF.h"
+#include "Physica/Core/Physics/MD/Analyser/RDF.h"
 #include "Physica/Core/IO/Poscar.h"
 
 using namespace Physica::Core;
