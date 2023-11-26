@@ -126,7 +126,7 @@ int main() {
             isFromParticle[i] = isHydrogen;
             isToParticle[i] = isHydrogen;
         }
-        rdf = RDF<ScalarType>(std::move(isFromParticle), std::move(isToParticle), PhyConst<AU>::angstormToBohr(0.01), 700);
+        rdf = RDF<ScalarType>(std::move(isFromParticle), std::move(isToParticle), rpmd.getVolume(), PhyConst<AU>::angstormToBohr(0.01), 700);
     }
 
     ThreadPool::numThreadRequired = 4;
@@ -146,7 +146,7 @@ int main() {
     }
     {
         std::ofstream fout("rdf");
-        fout << rdf.makeRDF(rpmd.getVolume());
+        fout << rdf.makeRDF();
     }
     {
         Poscar<ScalarType> poscar({rpmd.getLattice(), rpmd.getRingPolymer().makeCentroidPos(), Poscar<ScalarType>::Type::Cartesian}, {1, 8}, {rpmd.getNumParticle() * 2 / 3, rpmd.getNumParticle() / 3});
