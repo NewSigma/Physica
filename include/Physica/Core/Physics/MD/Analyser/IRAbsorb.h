@@ -66,7 +66,7 @@ namespace Physica::Core {
                                    unsigned char filterRange,
                                    size_t filterOrder)
             : dipoleCorr(std::move(dipoleCorr_))
-            , fft(2 * dipoleCorr.getLength() - 1, deltaT, PlanFlag::Estimate)
+            , fft(dipoleCorr.getLength(), deltaT, PlanFlag::Estimate)
             , factor(1 / (6 * PhyConst<AU>::vacuumDielectric * PhyConst<AU>::speedOfLight * double(volume) * PhyConst<AU>::boltzmannK * double(temperatureT)))
             , filter(filterRange, filterRange, filterOrder, deltaT) {}
 
@@ -85,22 +85,23 @@ namespace Physica::Core {
     template<class ScalarType>
     typename IRAbsorb<ScalarType>::VectorType IRAbsorb<ScalarType>::makeSpectrum() {
         auto& rSpace = fft.getRSpace();
-        rSpace.head(dipoleCorr.getLength()) = dipoleCorr;
-        rSpace.tail(dipoleCorr.getLength()) = dipoleCorr.tail(1).reverse();
+        rSpace = dipoleCorr;
+        {
+            for (size_t i = 0; i < rSpace.getLength(); ++i) {
+                ScalarType hann = cos(ScalarType(M_PI * i / (rSpace.getLength() - 1))) * 0.5 + 0.5;
+                rSpace[i] *= hann;
+            }
+            rSpace[0] *= ScalarType(0.5);
+        }
         fft.transform();
 
         const auto& kSpace = fft.getKSpace();
         const size_t kSpaceSize = fft.getKSpaceSize();
         const ScalarType deltaOmegaW = getDeltaOmegaW();
-        Vector<ScalarType> spectrum(kSpaceSize + filter.getLRange() + filter.getRRange());
-        size_t index = 0;
-        for (size_t i = 0; i < filter.getLRange(); ++i, ++index)
-            spectrum[index] = 0.0;
-        for (size_t i = 0; i < kSpaceSize; ++i, ++index)
-            spectrum[index] = factor * abs(kSpace[i].getReal()) * square(deltaOmegaW * i);
-        for (size_t i = 0; i < filter.getRRange(); ++i, ++index)
-            spectrum[index] = 0.0;
-        filter.smooth(spectrum);
+        Vector<ScalarType> spectrum(kSpaceSize);
+        for (size_t i = 0; i < kSpaceSize; ++i)
+            spectrum[i] = factor * abs(kSpace[i].getReal()) * square(deltaOmegaW * i);
+        filter.smooth_zero(spectrum);
         return spectrum.segment(filter.getLRange(), kSpaceSize + filter.getLRange());
     }
 

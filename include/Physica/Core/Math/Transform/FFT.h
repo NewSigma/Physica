@@ -114,7 +114,7 @@ namespace Physica::Core {
         /* Static members */
         [[nodiscard]] inline static FFT<ScalarType, 1> makeEmptyFFT(size_t rSpaceSize, RealType rSpaceDelta);
         template<class IndexType>
-        [[nodiscard]] __host__ __device__ inline static IndexType rSizeToKSize(IndexType rSize) noexcept;
+        [[nodiscard]] __host__ __device__ constexpr inline static IndexType rSizeToKSize(IndexType rSize) noexcept;
         static void transform(const This& planProvider, This& bufferProvider);
         static void rawInvTransform(const This& planProvider, This& bufferProvider);
         static void invTransform(const This& planProvider, This& bufferProvider);

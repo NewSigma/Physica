@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 WeiBo He.
+ * Copyright 2022-2023 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -40,11 +40,13 @@ namespace Physica::Core {
         SavitzkyGolay(SavitzkyGolay&&) noexcept = default;
         ~SavitzkyGolay() = default;
         /* Operators */
-        SavitzkyGolay& operator=(SavitzkyGolay filter) noexcept;
+        SavitzkyGolay& operator=(SavitzkyGolay filter) noexcept { swap(filter); return *this; }
         /* Operations */
-        void swap(SavitzkyGolay& filter) noexcept;
         template<class VectorType>
         void smooth(LValueVector<VectorType>& data) const;
+        template<class VectorType>
+        void smooth_zero(LValueVector<VectorType>& data) const;
+        void swap(SavitzkyGolay& filter) noexcept;
         /* Getters */
         [[nodiscard]] unsigned char getLRange() const noexcept { return lRange; }
         [[nodiscard]] unsigned char getRRange() const noexcept { return rRange; }
@@ -75,12 +77,6 @@ namespace Physica::Core {
         MatrixType temp = inv.inverse();
         inv.swap(temp);
     }
-    
-    template<class ScalarType>
-    SavitzkyGolay<ScalarType>& SavitzkyGolay<ScalarType>::operator=(SavitzkyGolay<ScalarType> filter) noexcept {
-        swap(filter);
-        return *this;
-    }
 
     template<class ScalarType>
     template<class VectorType>
@@ -94,6 +90,41 @@ namespace Physica::Core {
         for (size_t pos = lRange; pos < data.getLength() - rRange; ++pos) {
             auto window = data.getDerived().segment(pos - lRange, pos - lRange + windowSize);
             temp[pos] = mask * window;
+        }
+        data.getDerived() = std::move(temp);
+    }
+    /**
+     * Append zeros if data is undefined
+     */
+    template<class ScalarType>
+    template<class VectorType>
+    void SavitzkyGolay<ScalarType>::smooth_zero(LValueVector<VectorType>& data) const {
+        const size_t windowSize = getWindowSize();
+        Vector<ScalarType> mask(windowSize);
+        for (size_t i = 0; i < windowSize; ++i)
+            mask[i] = inv.row(0).asVector() * coeffs.row(i).asVector();
+
+        const size_t length = data.getLength();
+        Vector<ScalarType> temp = data;
+        /* Append zeros to pos < 0 */ {
+            const size_t rRange1 = rRange + 1;
+            for (size_t pos = 0; pos < lRange; ++pos) {
+                auto window = data.getDerived().segment(0, pos + rRange1);
+                auto mask1 = mask.segment(windowSize - window.getLength(), windowSize);
+                temp[pos] = mask1 * window;
+            }
+        }
+        for (size_t pos = lRange; pos < length - rRange; ++pos) {
+            auto window = data.getDerived().segment(pos - lRange, pos - lRange + windowSize);
+            temp[pos] = mask * window;
+        }
+        /* Append zeros to pos > length - 1 */ {
+            const size_t lRange1 = lRange + 1;
+            for (size_t pos = length - lRange1; pos < length; ++pos) {
+                auto window = data.getDerived().segment(pos, length);
+                auto mask1 = mask.segment(0, window.getLength());
+                temp[pos] = mask1 * window;
+            }
         }
         data.getDerived() = std::move(temp);
     }

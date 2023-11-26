@@ -120,6 +120,8 @@ namespace Physica::Core {
     template<class RandomPoolType>
     ScalarType DoubleThermo<ScalarType, Dim, NumReplica>::makeTranslationalFactor(
             const RingPolymerType& ringPolymer, ScalarType deltaT) const {
+        if (temperatureT.isZero())
+            return 0;
         const size_t dof = ringPolymer.getDOF();
         using VectorType = Vector<ScalarType, 1>;
         ScalarType result = 1.0;

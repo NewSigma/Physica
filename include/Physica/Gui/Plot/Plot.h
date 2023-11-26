@@ -82,6 +82,8 @@ namespace Physica::Gui {
         template<class VectorType1, class VectorType2>
         QBoxPlotSeries& errorBar(const Core::LValueVector<VectorType1>& x, const Core::LValueVector<VectorType2>& mean, const Core::LValueVector<VectorType2>& deviation);
         QScatterSeries& label(double x, double y, QString text);
+
+        [[nodiscard]] QImage toImage() { return Base::grab().toImage(); }
         /* Getters */
         [[nodiscard]] QValueAxis* getAxisX() const noexcept { return axisX; }
         [[nodiscard]] QValueAxis* getAxisY() const noexcept { return axisY; }
