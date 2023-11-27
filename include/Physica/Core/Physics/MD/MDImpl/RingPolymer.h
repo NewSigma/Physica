@@ -84,7 +84,6 @@ namespace Physica::Core {
         /* Static members */
         [[nodiscard]] static ScalarType calcRepBeta(ScalarType temperatureT, size_t numReplica) noexcept;
         [[nodiscard]] static ScalarType calcOmegaW(ScalarType temperatureT, size_t numReplica) noexcept;
-        [[nodiscard]] static size_t calcKSpaceSize(size_t numReplica) noexcept;
     };
 
     template<class ScalarType, unsigned int Dim, size_t NumReplica>
@@ -344,10 +343,5 @@ namespace Physica::Core {
     template<class ScalarType, unsigned int Dim, size_t NumReplica>
     ScalarType RingPolymer<ScalarType, Dim, NumReplica>::calcOmegaW(ScalarType temperatureT, size_t numReplica) noexcept {
         return calcRepBeta(temperatureT, numReplica) / PlainScalar(PhyConst<AU>::reducedPlanck);
-    }
-
-    template<class ScalarType, unsigned int Dim, size_t NumReplica>
-    size_t RingPolymer<ScalarType, Dim, NumReplica>::calcKSpaceSize(size_t numReplica) noexcept {
-        return FFTType::rSizeToKSize(numReplica);
     }
 }

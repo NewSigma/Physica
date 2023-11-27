@@ -50,6 +50,7 @@ namespace Physica::Core {
         void step(RingPolymerType& ringPolymer, ScalarType deltaT) const;
         void swap(DoubleThermo& obj) noexcept;
         /* Setters */
+        void setTemperature(ScalarType temperatureT_) { temperatureT = temperatureT_; }
         void setThermostatTime(ScalarType time) { thermostatTime = time; }
     private:
         template<class RandomPoolType>

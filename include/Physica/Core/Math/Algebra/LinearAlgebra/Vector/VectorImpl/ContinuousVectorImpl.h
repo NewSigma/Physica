@@ -245,12 +245,30 @@ namespace Physica::Core {
     }
 
     template<class Derived>
+    void ContinuousVector<Derived>::read(const H5File& h5f, const char* name, const H5::DSetMemXferPropList& xfer_plist) {
+        const auto space = H5DataSpace<1>({Base::getLength()});
+        const auto dataset = h5f.openDataSet<1>(name);
+        dataset.read(data(), ScalarType::getH5DataType(), space, space, xfer_plist);
+    }
+
+    template<class Derived>
     template<class SpaceType>
     void ContinuousVector<Derived>::read(const H5::DataSet& dataset,
                                          const DataSpaceBase<SpaceType>& file_space,
                                          const H5::DSetMemXferPropList& xfer_plist) {
         const auto mem_space = H5DataSpace<1>({Base::getLength()});
         dataset.read(data(), ScalarType::getH5DataType(), mem_space, file_space.asH5Type(), xfer_plist);
+    }
+
+    template<class Derived>
+    void ContinuousVector<Derived>::write(H5File& h5f, const char* name, const H5::DSetMemXferPropList& xfer_plist) const {
+        const auto space = H5DataSpace<1>({Base::getLength()});
+        H5DataSet<1> dataset;
+        if (h5f.exists(name))
+            dataset = h5f.openDataSet<1>(name);
+        else
+            dataset = h5f.createDataSet(name, ScalarType::getH5DataType(), space);
+        dataset.write(data(), ScalarType::getH5DataType(), space, space, xfer_plist);
     }
 
     template<class Derived>

@@ -20,6 +20,7 @@
 
 #include "Physica/Core/Math/Statistics/NumCharacter.h"
 #include "Physica/Core/Physics/MD/MDCell.h"
+#include "Physica/Core/Physics/MD/RPMD.h"
 
 namespace Physica::Core {
     template<class ScalarType, unsigned int Dim>
@@ -40,6 +41,8 @@ namespace Physica::Core {
         MSD& operator=(MSD obj) noexcept { swap(obj); return *this; }
         /* Operations */
         void sample(const MDCellType& sample);
+        template<size_t NumReplica, class ForceMatrixAllocator>
+        void sample(const RPMD<ScalarType, Dim, NumReplica, ForceMatrixAllocator>& rpmd);
         [[nodiscard]] ScalarType calcMSD() const { return mean(calcAtomMSD()); }
         [[nodiscard]] Vector<ScalarType> calcAtomMSD() const;
         [[nodiscard]] inline ScalarType calcFiniteSizeLimit(size_t atomId) const noexcept;
@@ -67,6 +70,13 @@ namespace Physica::Core {
             toNextMean(meanSquaredDist, numSample, squaredDist);
         }
         numSample += 1;
+    }
+
+    template<class ScalarType, unsigned int Dim>
+    template<size_t NumReplica, class ForceMatrixAllocator>
+    void MSD<ScalarType, Dim>::sample(const RPMD<ScalarType, Dim, NumReplica, ForceMatrixAllocator>& rpmd) {
+        for (size_t i = 0; i < rpmd.getNumReplica(); ++i)
+            sample(rpmd.phaseToCell(i));
     }
 
     template<class ScalarType, unsigned int Dim>

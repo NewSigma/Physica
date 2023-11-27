@@ -18,6 +18,8 @@
  */
 #pragma once
 
+#include "Physica/Core/Exception/IOException.h"
+
 namespace Physica::Core {
     template<size_t Dim> class H5DataSet;
 
@@ -55,11 +57,15 @@ namespace Physica::Core {
 
     template<size_t Dim>
     H5DataSet<Dim> H5File::openDataSet(const char* name) {
+        if (!exists(name))
+            throw IOException("[Error]: Dataset not found");
         return Base::openDataSet(name);
     }
 
     template<size_t Dim>
     const H5DataSet<Dim> H5File::openDataSet(const char* name) const {
+        if (!exists(name))
+            throw IOException("[Error]: Dataset not found");
         return Base::openDataSet(name);
     }
 }

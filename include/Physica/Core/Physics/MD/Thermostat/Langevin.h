@@ -47,6 +47,7 @@ namespace Physica::Core {
         void step(RingPolymerType& ringPolymer, ScalarType deltaT) const;
         void swap(Langevin& obj) noexcept;
         /* Setters */
+        void setTemperature(ScalarType temperatureT_) { temperatureT = temperatureT_; }
         void setThermostatTime(ScalarType time) { thermostatTime = time; }
         /* Static members */
         template<class OtherScalar>

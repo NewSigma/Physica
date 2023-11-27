@@ -44,6 +44,8 @@ namespace Physica::Core {
         template<class RandomPoolType, class Executor>
         void step(RingPolymerType& ringPolymer, ScalarType deltaT) const;
         void swap(TRPMDThermo& obj) noexcept;
+        /* Setters */
+        void setTemperature(ScalarType temperatureT_) { temperatureT = temperatureT_; }
     };
 
     template<class ScalarType, unsigned int Dim, size_t NumReplica>

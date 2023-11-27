@@ -56,6 +56,7 @@ namespace Physica::Core {
         using MassVector = typename MDCellType::MassVector;
         using PhaseMatrix = typename RingPolymerType::PhaseMatrix;
         using BufferType = typename RingPolymerType::BufferType;
+        using FFTType = typename RingPolymerType::FFTType;
         using VectorType = Vector<ScalarType>;
         using Vector2D = Vector<ScalarType, 2>;
         static_assert(std::is_same<ComplexType, typename BufferType::ScalarType>::value, "[Error]: Inconsistent type");
@@ -64,9 +65,10 @@ namespace Physica::Core {
         ScalarType omegaW;
         Utils::Array<Vector2D> coeffMatrixBase;
         ScalarType lastTimeStep;
+        size_t numReplica;
     public:
         FreeModel();
-        FreeModel(ScalarType temperatureT, size_t numReplica);
+        FreeModel(ScalarType temperatureT, size_t numReplica_);
         FreeModel(const FreeModel&) = default;
         FreeModel(FreeModel&&) noexcept = default;
         ~FreeModel() = default;
@@ -79,6 +81,8 @@ namespace Physica::Core {
         void swap(FreeModel& obj) noexcept;
         /* Getters */
         [[nodiscard]] ScalarType getOmegaW() const noexcept { return omegaW; }
+        /* Setters */
+        void setTemperature(ScalarType temperatureT);
     protected:
         inline void pre_nve_step_impl([[maybe_unused]] RingPolymerType& ringPolymer, ScalarType deltaT);
         inline void do_nve_step_impl(
@@ -95,14 +99,13 @@ namespace Physica::Core {
     FreeModel<ScalarType, Dim, NumReplica, Integrator>::FreeModel() : lastTimeStep(0) {}
 
     template<class ScalarType, unsigned int Dim, size_t NumReplica, RPMDIntegrator Integrator>
-    FreeModel<ScalarType, Dim, NumReplica, Integrator>::FreeModel(ScalarType temperatureT, size_t numReplica)
-            : omegaW(RingPolymerType::calcOmegaW(temperatureT, numReplica))
-            , lastTimeStep(0) {
-        const size_t kSpaceSize = RingPolymerType::calcKSpaceSize(numReplica);
+    FreeModel<ScalarType, Dim, NumReplica, Integrator>::FreeModel(ScalarType temperatureT, size_t numReplica_)
+            : lastTimeStep(0)
+            , numReplica(numReplica_) {
+        const size_t kSpaceSize = FFTType::rSizeToKSize(numReplica);
         omegaK.resize(kSpaceSize);
         coeffMatrixBase.resize(kSpaceSize);
-        for (size_t i = 0; i < omegaK.getLength(); ++i)
-            omegaK[i] = omegaW * sin(PlainScalar(M_PI * i / numReplica)) * PlainScalar(2);
+        setTemperature(temperatureT);
     }
 
     template<class ScalarType, unsigned int Dim, size_t NumReplica, RPMDIntegrator Integrator>
@@ -147,6 +150,14 @@ namespace Physica::Core {
         omegaW.swap(obj.omegaW);
         coeffMatrixBase.swap(obj.coeffMatrixBase);
         lastTimeStep.swap(obj.lastTimeStep);
+        std::swap(numReplica, obj.numReplica);
+    }
+
+    template<class ScalarType, unsigned int Dim, size_t NumReplica, RPMDIntegrator Integrator>
+    void FreeModel<ScalarType, Dim, NumReplica, Integrator>::setTemperature(ScalarType temperatureT) {
+        omegaW = RingPolymerType::calcOmegaW(temperatureT, numReplica);
+        for (size_t i = 0; i < omegaK.getLength(); ++i)
+            omegaK[i] = omegaW * sin(PlainScalar(M_PI * i / numReplica)) * PlainScalar(2);
     }
 
     template<class ScalarType, unsigned int Dim, size_t NumReplica, RPMDIntegrator Integrator>
