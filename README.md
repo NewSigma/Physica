@@ -1,6 +1,6 @@
 # Physica
 
-Physica is a high performance and scalable template library for computational physics which devotes to provide a rapid iteration platform for new algorithms. Physica is not a textbook nor ready to use solutions. It is expected users write their own codes and usually implement ideas in less than 200 lines of code.
+Physica is a high-performance and scalable template library for computational physics, dedicated to providing a rapid iteration platform for new algorithms. It is not a textbook or a ready-to-use solution. Rather, it is expected that users will write their own codes and implement ideas in less than 200 lines of code.
 
 ## Table of Contents
 
@@ -12,13 +12,13 @@ Physica is a high performance and scalable template library for computational ph
 
 ## Design philosophy
 
-1. Optimal performance and scalability: Balancing between performance, scalability and ease of use is a trade-off. In Physica, we target on performance and scalability. The use of templates enables Physica face the challenge of heterogeneous computing. Ease of use is taken secondary if necessary.
+1. Optimal performance and scalability: Balancing between performance, scalability and ease of use is a trade-off. Physica targets on performance and scalability, taking ease of use as a secondary concern if necessary.
 
-2. Zero overhead abstraction: Users shall not pay for what they do not need. Physica is mainly composed of several sets of header files. Codes that users do not need will not be compiled.
+2. Zero overhead abstraction: Users shall not pay for what they do not need. Physica is primarily composed of several sets of header files. Codes that are not required by users will not be compiled.
 
-3. Template meta algorithm: No seperate input file. Simulation parameters are declared as compile time constant. The program will choose best algorithm and parallization strategy at compile time automatically making use of powerful C++ templates.
+3. Template meta algorithm: No separate input file is required. Simulation parameters are declared as compile-time constants. The program automatically selects the best algorithm and parallelism strategy at compile time, leveraging powerful C++ templates.
 
-4. Self explaination: As little documents and comments as necessary. Documents and comments often lag behind codes. The Physica API are designed to match users' intuition.
+4. Self explaination: Minimizing documentation and comments. Documentation and comments often lag behind code updates. The Physica API is designed to align with users' intuition.
 
 ## Usage
 
