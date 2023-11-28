@@ -19,6 +19,7 @@
 #include <iostream>
 #include <gperftools/profiler.h>
 #include "Physica/Core/Physics/MD/ForceModel/Q_TIP4P.h"
+#include "Physica/Core/Physics/MD/ForceModel/Ewald/Ewald.h"
 #include "Physica/Core/Physics/SolidState/CrystalCell.h"
 #include "Physica/Core/Physics/MD/RPMD.h"
 #include "Physica/Core/Physics/MD/Thermostat/DoubleThermo.h"
@@ -31,7 +32,7 @@ using namespace Physica::Utils;
 using ScalarType = Scalar<Double>;
 using ThermostatType = DoubleThermo<ScalarType>;
 using KineticModel = FreeModel<ScalarType, 3, Dynamic, RPMDIntegrator::Exact>;
-using ForceModel = Q_TIP4P<ScalarType>;
+using ForceModel = Q_TIP4P<ScalarType, Ewald<ScalarType>>;
 using RandomPoolType = RandomPool<std::mt19937>;
 constexpr size_t numReplica = 192;
 constexpr double temperatureT = PhyConst<AU>::kToTemperature(100);
@@ -77,7 +78,7 @@ int main() {
     RPMD<ScalarType> rpmd(std::move(cell), numReplica, 16, temperatureT, timeStep);
     const ThermostatType thermo(temperatureT, thermostatTime);
     rpmd.initMomentum(gen);
-    ForceModel forceModel(rpmd.phaseToCell(0), pair_cutoff);
+    ForceModel forceModel(rpmd.phaseToCell(0), pair_cutoff, {});
     KineticModel kineticModel(temperatureT, numReplica);
     {
         ThreadPool::numThreadRequired = 4;

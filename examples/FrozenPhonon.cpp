@@ -2,6 +2,7 @@
 #include <QApplication>
 #include "Physica/Core/IO/Poscar.h"
 #include "Physica/Core/Physics/MD/ForceModel/Q_TIP4P.h"
+#include "Physica/Core/Physics/MD/ForceModel/Ewald/Ewald.h"
 #include "Physica/Core/Physics/Phonon/FrozenPhonon.h"
 #include "Physica/Core/Physics/Phonon/PhononDOS.h"
 #include "Physica/Gui/Plot/PhononPlot.h"
@@ -42,8 +43,8 @@ const static char* data = "Structure\n"
                            "3.824291156     0.562119077     0.152752783\n"
                            "3.820790917     3.420982462     3.003610409";
 
-class ForceModel : private Q_TIP4P<ScalarType> {
-    using Base = Q_TIP4P<ScalarType>;
+class ForceModel : private Q_TIP4P<ScalarType, Ewald<ScalarType>> {
+    using Base = Q_TIP4P<ScalarType, Ewald<ScalarType>>;
     using typename Base::MDCellType;
 public:
     using Base::Base;
@@ -84,7 +85,7 @@ int main(int argc, char** argv) {
     PhononType ph(unitCell, {8, 8, 1}, displace);
     MDCellType superCell = unitCell.makeSuperCell<ExtendCellOption::CellMajor>(ph.getSuperSize());
     
-    ForceModel model(superCell, pair_cutoff);
+    ForceModel model(superCell, pair_cutoff, {});
     auto fcMatrixGrid = ph.makeForceConstants(model);
     ph.applyTranslate(fcMatrixGrid, 1E-10, 100);
 

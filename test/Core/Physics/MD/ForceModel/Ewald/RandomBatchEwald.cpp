@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 WeiBo He.
+ * Copyright 2022-2023 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -16,24 +16,22 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include <iostream>
-#include <fstream>
-#include "Physica/Core/Physics/MD/ForceModel/Q_TIP4P.h"
 #include "Physica/Core/Physics/SolidState/CrystalCell.h"
+#include "Physica/Core/Physics/MD/ForceModel/Q_TIP4P.h"
 #include "Physica/Core/Physics/MD/RPMD.h"
 #include "Physica/Core/Physics/MD/Thermostat/DoubleThermo.h"
 #include "Physica/Core/Physics/MD/KineticModel/FreeModel.h"
+#include "Physica/Core/Physics/MD/ForceModel/Ewald/RandomBatchEwald.h"
 #include "Physica/Core/Parallel/Executor/ThreadExecutor.h"
-#include "Physica/Core/Physics/MD/Analyser/RDF.h"
-#include "Physica/Core/IO/Poscar.h"
 
 using namespace Physica::Core;
 using ScalarType = Scalar<Double>;
+using RandomPoolType = RandomPool<std::mt19937, 12989825518855205292UL>;
 using ThermostatType = DoubleThermo<ScalarType>;
+using ForceModel = Q_TIP4P<ScalarType, RandomBatchEwald<ScalarType, RandomPoolType>>;
 using KineticModel = FreeModel<ScalarType, 3, Dynamic, RPMDIntegrator::Exact>;
-using ForceModel = Q_TIP4P<ScalarType>;
-using RandomPoolType = RandomPool<std::mt19937>;
 constexpr size_t numReplica = 32;
+constexpr size_t numContract = 8;
 constexpr double temperatureT = PhyConst<AU>::kToTemperature(298);
 constexpr double thermostatTime = PhyConst<AU>::secondToTime(100 * 1E-15);
 constexpr double timeStep = PhyConst<AU>::secondToTime(1E-15) * 0.25;
@@ -109,50 +107,39 @@ MDCell<ScalarType> makeSystem(unsigned int cellSize, RandomGenerator& gen) {
  */
 int main() {
     auto& gen = RandomPoolType::getGen();
-    auto cell = makeSystem(3, gen);
+    auto cell = makeSystem(2, gen);
     ForceModel::sortPosition(cell);
-    const ThermostatType thermo(temperatureT, thermostatTime);
-    RPMD<ScalarType> rpmd(std::move(cell), numReplica, numReplica, temperatureT, timeStep);
+    ForceModel forceModel(cell, pair_cutoff, RandomBatchEwald<ScalarType, RandomPoolType>(1000, 100));
+    RPMD<ScalarType> rpmd(std::move(cell), numReplica, numContract, temperatureT, timeStep);
     rpmd.initMomentum(gen);
-    ForceModel forceModel(rpmd.phaseToCell(0), pair_cutoff);
-    KineticModel kineticModel(temperatureT, numReplica);
 
-    RDF<ScalarType> rdf;
-    {
-        Physica::Utils::Array<bool> isFromParticle(rpmd.getNumParticle());
-        Physica::Utils::Array<bool> isToParticle(rpmd.getNumParticle());
-        for (size_t i = 0; i < isFromParticle.getLength(); ++i) {
-            const bool isHydrogen = i < isFromParticle.getLength() * 2 / 3;
-            isFromParticle[i] = isHydrogen;
-            isToParticle[i] = isHydrogen;
-        }
-        rdf = RDF<ScalarType>(std::move(isFromParticle), std::move(isToParticle), rpmd.getVolume(), PhyConst<AU>::angstormToBohr(0.01), 700);
-    }
+    constexpr double answer = PhyConst<AU>::angstormToBohr(0.978);
+    ScalarType bond = 0;
 
     ThreadPool::numThreadRequired = 4;
     {
-        rpmd.nvt_step_for<ThermostatType, RandomPoolType, KineticModel, decltype(forceModel), ThreadExecutor>(PhyConst<AU>::secondToTime(2 * 1E-12), thermo, kineticModel, forceModel);
-        for (size_t i = 0; i < 1000; ++i) {
+        const ThermostatType thermo(temperatureT, thermostatTime);
+        KineticModel kineticModel(temperatureT, numReplica);
+        rpmd.nvt_step_for<ThermostatType, RandomPoolType, KineticModel, decltype(forceModel), ThreadExecutor>(
+            PhyConst<AU>::secondToTime(1 * 1E-12),
+            thermo,
+            kineticModel,
+            forceModel);
+        for (size_t i = 0; i < 100; ++i) {
+            const PeriodicCell<ScalarType, 3> cell = rpmd.makeAverageCell();
+            ScalarType temp = 0;
+            const size_t numO = rpmd.getNumParticle() / 3;
+            const size_t numH = numO * 2;
+            for (size_t j = 0; j < numO; ++j) {
+                toNextMean(temp, 2 * j, cell.minDistVector(numH + j, 2 * j).norm());
+                toNextMean(temp, 2 * j + 1, cell.minDistVector(numH + j, 2 * j + 1).norm());
+            }
+            toNextMean(bond, i, temp);
             rpmd.nvt_step<ThermostatType, RandomPoolType, KineticModel, decltype(forceModel), ThreadExecutor>(thermo, kineticModel, forceModel);
-            rpmd.normalizeCentroid();
-            for (size_t j = 0; j < numReplica; ++j)
-                rdf.sample(rpmd.phaseToCell(j));
         }
     }
     ThreadPool::getInstance().shouldExit();
-    {
-        std::ofstream fout("dists");
-        fout << rdf.makeDists();
-    }
-    {
-        std::ofstream fout("rdf");
-        fout << rdf.makeRDF();
-    }
-    {
-        Poscar<ScalarType> poscar({rpmd.getLattice(), rpmd.getRingPolymer().makeCentroidPos(), Poscar<ScalarType>::Type::Cartesian}, {1, 8}, {rpmd.getNumParticle() * 2 / 3, rpmd.getNumParticle() / 3});
-        std::ofstream fout("H2O.vasp");
-        fout << poscar;
-        fout.close();
-    }
+    if (!scalarNear(bond, ScalarType(answer), 2E-2))
+        return 1;
     return 0;
 }

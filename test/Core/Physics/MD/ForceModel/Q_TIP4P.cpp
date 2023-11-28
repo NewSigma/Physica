@@ -16,6 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
+#include "Physica/Core/Physics/MD/ForceModel/Ewald/Ewald.h"
 #include "Physica/Core/Physics/MD/ForceModel/Q_TIP4P.h"
 #include "Physica/Core/Physics/SolidState/CrystalCell.h"
 #include "Physica/Core/Physics/MD/RPMD.h"
@@ -26,7 +27,7 @@
 using namespace Physica::Core;
 using ScalarType = Scalar<Double>;
 using ThermostatType = DoubleThermo<ScalarType>;
-using ForceModel = Q_TIP4P<ScalarType>;
+using ForceModel = Q_TIP4P<ScalarType, Ewald<ScalarType>>;
 using KineticModel = FreeModel<ScalarType, 3, Dynamic, RPMDIntegrator::Exact>;
 using RandomPoolType = RandomPool<std::mt19937, 12989825518855205292UL>;
 constexpr size_t numReplica = 32;
@@ -117,7 +118,7 @@ void testForce() {
     std::mt19937 gen(9806048078107704755UL);
     auto cell = makeSystem(2, gen);
     ForceModel::sortPosition(cell);
-    ForceModel model(cell, pair_cutoff);
+    ForceModel model(cell, pair_cutoff, Ewald<ScalarType>{});
     const auto& pos = cell.getPos();
     const Vector<ScalarType> force1 = model.template force<SequentialExecutor>(cell);
     Vector<ScalarType> force2(force1.getLength());
@@ -139,7 +140,7 @@ void testMD() {
     auto& gen = RandomPoolType::getGen();
     auto cell = makeSystem(2, gen);
     ForceModel::sortPosition(cell);
-    ForceModel forceModel(cell, pair_cutoff);
+    ForceModel forceModel(cell, pair_cutoff, Ewald<ScalarType>{});
     RPMD<ScalarType> rpmd(std::move(cell), numReplica, numContract, temperatureT, timeStep);
     rpmd.initMomentum(gen);
 

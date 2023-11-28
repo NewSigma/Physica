@@ -19,7 +19,7 @@
 #pragma once
 
 #include "Physica/Core/Physics/MD/MDCell.h"
-#include "Physica/Core/Physics/MD/ForceModel/Ewald.h"
+#include "Physica/Core/Physics/MD/ForceModel/Ewald/Ewald.h"
 
 namespace Physica::Core {
     template<class ScalarType>

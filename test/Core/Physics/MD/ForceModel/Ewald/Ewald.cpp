@@ -17,7 +17,7 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include "Physica/Core/Math/Calculus/Differential.h"
-#include "Physica/Core/Physics/MD/ForceModel/Ewald.h"
+#include "Physica/Core/Physics/MD/ForceModel/Ewald/Ewald.h"
 #include "Physica/Core/Physics/SolidState/CrystalCell.h"
 #include "Physica/Core/Physics/PhyConst.h"
 #include "Physica/Core/MultiPrecision/AutoDiffGuard.h"
