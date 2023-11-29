@@ -43,13 +43,14 @@ namespace Physica::Core {
         using This = RSpaceEwald<ScalarType>;
         using Base = PairModel<This>;
     public:
-        constexpr static unsigned int Dim = 3;
         using ComplexType = ComplexScalar<ScalarType>;
-        using PlainScalar = typename ScalarType::PlainScalar;
-        using LatticeMatrix = typename PeriodicCell<ScalarType, Dim>::LatticeMatrix;
-        using PositionMatrix = typename PeriodicCell<ScalarType, Dim>::PositionMatrix;
+        using Base::Dim;
+        using typename Base::PlainScalar;
+        using typename Base::LatticeMatrix;
+        using typename Base::PositionMatrix;
+        using typename Base::Vector3D;
+        using typename Base::ForceConstMatrix;
         using SearchRangeType = typename PeriodicCell<ScalarType, Dim>::SearchRangeType;
-        using Vector3D = Vector<ScalarType, Dim>;
         constexpr static size_t ErfcTableSize = 4096 + 512 + 2;
         constexpr static double ErfcTableStep = 0.001;
         constexpr static double SumPrec = (ErfcTableSize - 2) * ErfcTableStep; // Referenced from [1], minus 2 to avoid overflow
@@ -59,7 +60,6 @@ namespace Physica::Core {
         Vector<ScalarType> charges;
         ScalarType inv_volume;
         ScalarType integralLimit;
-        ScalarType selfEnergy;
         Vector<PlainScalar> erfc_table;
         ScalarType erfcStep;
         ScalarType repErfcStep;
@@ -81,6 +81,8 @@ namespace Physica::Core {
         [[nodiscard]] inline Vector<ScalarType> force_short(const PositionMatrix& pos) const;
 
         [[nodiscard]] ComplexType forceConst(const PositionMatrix& pos, const Vector3D& waveQ, size_t dof1, size_t dof2) const;
+
+        [[nodiscard]] inline LatticeMatrix virial(const PositionMatrix& pos) const;
         void swap(RSpaceEwald& obj) noexcept;
         /* Getters */
         [[nodiscard]] const LatticeMatrix& getLattice() const noexcept { return lattice; }
@@ -90,7 +92,6 @@ namespace Physica::Core {
         [[nodiscard]] size_t getNumParticle() const noexcept { return charges.getLength(); }
         [[nodiscard]] ScalarType getInvVolume() const noexcept { return inv_volume; }
         [[nodiscard]] ScalarType getIntegralLimit() const noexcept { return integralLimit; }
-        [[nodiscard]] ScalarType getSelfEnergy() const noexcept { return selfEnergy; }
         [[nodiscard]] ScalarType getRSpaceCutoff() const noexcept { return Base::getCutoff(); }
         [[nodiscard]] ScalarType getSquaredRSpaceCutoff() const noexcept { return Base::getSquaredCutoff(); }
         [[nodiscard]] const SearchRangeType& getRSpaceSumRange() const noexcept { return rSpaceSumRange; }
@@ -99,8 +100,10 @@ namespace Physica::Core {
         void setLattice(LatticeMatrix lattice_);
         void setIntegralLimit(ScalarType integralLimit_);
     protected:
-        inline ScalarType pot_functor(size_t i, size_t j, ScalarType r, ScalarType r2) const;
-        inline ScalarType force_functor(size_t i, size_t j, ScalarType r, ScalarType r2) const;
+        [[nodiscard]] inline ScalarType calcSelfE() const;
+        [[nodiscard]] inline ScalarType calcGammaPointE() const;
+        [[nodiscard]] inline ScalarType pot_functor(size_t i, size_t j, ScalarType r, ScalarType r2) const;
+        [[nodiscard]] inline ScalarType force_functor(size_t i, size_t j, ScalarType r, ScalarType r2) const;
     private:
         /* Operations */
         void makeTables();
@@ -191,6 +194,11 @@ namespace Physica::Core {
     }
 
     template<class ScalarType>
+    inline typename RSpaceEwald<ScalarType>::LatticeMatrix RSpaceEwald<ScalarType>::virial(const PositionMatrix& pos) const {
+        return Base::virial(lattice, pos);
+    }
+
+    template<class ScalarType>
     void RSpaceEwald<ScalarType>::swap(RSpaceEwald& obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         Base::swap(obj);
@@ -199,7 +207,6 @@ namespace Physica::Core {
         charges.swap(obj.charges);
         inv_volume.swap(obj.inv_volume);
         integralLimit.swap(obj.integralLimit);
-        selfEnergy.swap(obj.selfEnergy);
         erfc_table.swap(obj.erfc_table);
         erfcStep.swap(obj.erfcStep);
         repErfcStep.swap(obj.repErfcStep);
@@ -235,10 +242,18 @@ namespace Physica::Core {
         const PlainScalar rSpaceCutoff = PlainScalar(SumPrec) / integralLimit.getValue();
         rSpaceSumRange = PeriodicCell<ScalarType, Dim>::estimateRange(lattice, rSpaceCutoff);
         kSpaceSumRange = PeriodicCell<ScalarType, Dim>::estimateRange(getRepLattice(), PlainScalar(SumPrec * 2) * integralLimit.getValue());
-        selfEnergy = square(charges).sum() * integralLimit / sqrt(PlainScalar(M_PI))
-                   + square(charges.sum()) * PlainScalar(M_PI) / (PlainScalar(2) * square(integralLimit)) * inv_volume;
         makeTables();
         Base::setCutoff(rSpaceCutoff);
+    }
+
+    template<class ScalarType>
+    inline ScalarType RSpaceEwald<ScalarType>::calcSelfE() const {
+        return square(charges).sum() * integralLimit / sqrt(PlainScalar(M_PI));
+    }
+
+    template<class ScalarType>
+    inline ScalarType RSpaceEwald<ScalarType>::calcGammaPointE() const {
+        return square(charges.sum()) * PlainScalar(-M_PI) / (PlainScalar(2) * square(integralLimit)) * inv_volume;
     }
     /**
      * Optimize: make use of x1, x2, x3 are equal distance

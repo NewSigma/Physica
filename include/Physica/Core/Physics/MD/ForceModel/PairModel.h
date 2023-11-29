@@ -88,6 +88,7 @@ namespace Physica::Core {
         [[nodiscard]] ForceConstMatrix forceConst(const MDCellType& cell) const;
 
         [[nodiscard]] LatticeMatrix virial(const MDCellType& cell) const;
+        [[nodiscard]] LatticeMatrix virial(const LatticeMatrix& lattice, const PositionMatrix& pos) const;
         void swap(PairModel& pair) noexcept;
         /* Getters */
         [[nodiscard]] const PlainScalar& getCutoff() const noexcept { return cutoff; }
@@ -254,18 +255,23 @@ namespace Physica::Core {
         }
         return result;
     }
+
+    template<class Derived>
+    typename PairModel<Derived>::LatticeMatrix
+    PairModel<Derived>::virial(const MDCellType& cell) const {
+        return virial(cell.getLattice(), cell.getPos());
+    }
     /**
      * Reference:
      * [1] M. J. Louwerse and E. J. Baerends, Chem. Phys. Lett. 421, 138 (2006); https://doi.org/10.1016/J.CPLETT.2006.01.087
      */
     template<class Derived>
     typename PairModel<Derived>::LatticeMatrix
-    PairModel<Derived>::virial(const MDCellType& cell) const {
-        const auto& pos = cell.getPos();
-        const size_t numParticle = cell.getNumParticle();
-        const CellListType cellList(cell, cutoff);
+    PairModel<Derived>::virial(const LatticeMatrix& lattice, const PositionMatrix& pos) const {        
+        const CellListType cellList(lattice, pos, cutoff);
+        const size_t numParticle = pos.getRow();
 
-        LatticeMatrix result(3, 3, 0);
+        LatticeMatrix result(Dim, Dim, 0);
         for (size_t atom1 = 0; atom1 < numParticle; ++atom1) {
             const Index3D center = cellList.getAtomCellMap()[atom1];
             cellList.forNeighInRange(center, [this, atom1, pos, &cellList, &result](Vector3D translate, Index3D neigh) {
@@ -286,7 +292,7 @@ namespace Physica::Core {
                 });
             });
         }
-        result *= reciprocal(ScalarType(cell.getVolume() * 2.0));
+        result *= reciprocal(MDCellType::getVolume(lattice) * ScalarType(2));
         return result;
     }
 

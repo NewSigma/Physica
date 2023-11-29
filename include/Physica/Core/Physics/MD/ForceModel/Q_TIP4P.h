@@ -40,8 +40,8 @@ namespace Physica::Core {
     }
     /**
      * Reference:
-     * [1] S. Habershon, T. E. Markland, and D. E. Manolopoulosa, J. Chem. Phys. 131, 024501(2009)
-     * [2] Jos Thijssen. Computational Physics[M].London: Cambridge university press, 2013:205
+     * [1] J. Chem. Phys. 131, 024501 (2009); https://doi.org/10.1063/1.3167790
+     * [2] Jos Thijssen. Computational Physics[M]. London: Cambridge university press, 2013:205
      */
     template<class ScalarType, class EwaldType>
     class Q_TIP4P {
@@ -75,6 +75,9 @@ namespace Physica::Core {
         /* Operators */
         Q_TIP4P& operator=(Q_TIP4P model) noexcept;
         /* Operations */
+        [[nodiscard]] ScalarType potentialEnergy(const MDCellType& cell) const;
+        [[nodiscard]] ScalarType potentialEnergy_unsort(const MDCellType& cell) const;
+
         template<class Executor, bool IsSmallCell = false> [[nodiscard]] Vector<ScalarType> force(const MDCellType& cell) const;
         template<class Executor, bool IsSmallCell = false> [[nodiscard]] Vector<ScalarType> force_unsort(const MDCellType& cell) const;
         template<class VectorType, class Executor, bool IsSmallCell = false>
@@ -83,9 +86,6 @@ namespace Physica::Core {
         template<class Executor, bool IsSmallCell = false> [[nodiscard]] Vector<ScalarType> force_short_unsort(const MDCellType& cell) const;
         template<class Executor> [[nodiscard]] Vector<ScalarType> force_long(const MDCellType& cell) const;
         template<class Executor> [[nodiscard]] Vector<ScalarType> force_long_unsort(const MDCellType& cell) const;
-
-        [[nodiscard]] ScalarType potentialEnergy(const MDCellType& cell) const;
-        [[nodiscard]] ScalarType potentialEnergy_unsort(const MDCellType& cell) const;
 
         template<class Executor, bool UseDynamicPolar>
         [[nodiscard]] PositionMatrix makeInducedDipole(const MDCellType& cell) const;
@@ -127,6 +127,20 @@ namespace Physica::Core {
     Q_TIP4P<ScalarType, EwaldType>& Q_TIP4P<ScalarType, EwaldType>::operator=(Q_TIP4P model) noexcept {
         swap(model);
         return *this;
+    }
+
+    template<class ScalarType, class EwaldType>
+    ScalarType Q_TIP4P<ScalarType, EwaldType>::potentialEnergy(const MDCellType& cell) const {
+        assert(cell.getNumParticle() == getNumParticle() && "[Error]: Inconsistent atom number");
+        assert(isCellOrdered(cell));
+        return potentialEnergyWithoutEwald(cell) + ewaldEnergy(cell);
+    }
+
+    template<class ScalarType, class EwaldType>
+    ScalarType Q_TIP4P<ScalarType, EwaldType>::potentialEnergy_unsort(const MDCellType& cell) const {
+        MDCellType copy = cell;
+        const auto permute = sortPosition(copy);
+        return potentialEnergy(cell);
     }
 
     template<class ScalarType, class EwaldType>
@@ -217,20 +231,6 @@ namespace Physica::Core {
         const Vector<ScalarType> sort_f = force_long<Executor>(copy);
         const PositionMatrix unsort_f = permute.inverse() * sort_f.reshape(cell.getPos());
         return unsort_f.flatten();
-    }
-
-    template<class ScalarType, class EwaldType>
-    ScalarType Q_TIP4P<ScalarType, EwaldType>::potentialEnergy(const MDCellType& cell) const {
-        assert(cell.getNumParticle() == getNumParticle() && "[Error]: Inconsistent atom number");
-        assert(isCellOrdered(cell));
-        return potentialEnergyWithoutEwald(cell) + ewaldEnergy(cell);
-    }
-
-    template<class ScalarType, class EwaldType>
-    ScalarType Q_TIP4P<ScalarType, EwaldType>::potentialEnergy_unsort(const MDCellType& cell) const {
-        MDCellType copy = cell;
-        const auto permute = sortPosition(copy);
-        return potentialEnergy(cell);
     }
 
     template<class ScalarType, class EwaldType>
