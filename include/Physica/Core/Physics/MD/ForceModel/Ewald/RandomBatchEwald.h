@@ -56,17 +56,21 @@ namespace Physica::Core {
         [[nodiscard]] Vector<ScalarType> force(const PositionMatrix& pos) const;
         template<class Executor>
         [[nodiscard]] Vector<ScalarType> force_long(const PositionMatrix& pos) const;
+
+        [[nodiscard]] ScalarType calcDefaultIntegralLimit() const;
         void swap(RandomBatchEwald& obj) noexcept;
         /* Getters */
+        using Base::getNumParticle;
         [[nodiscard]] size_t getSamplePoolSize() const noexcept { return samplePool.getRow(); }
         /* Setters */
         void setLattice(LatticeMatrix lattice);
+        void setIntegralLimit(ScalarType integralLimit);
     private:
         void updateSumGauss();
         void updateSamplePool();
         inline void monteCarloStep(int& sample, ScalarType& prop_last, ScalarType deviation, ScalarType factor, ScalarType propAtZero) const;
         [[nodiscard]] Vector3D randWaveG() const;
-        [[nodiscard]] bool checkParam() const;
+        [[nodiscard]] static bool checkParam(const LatticeMatrix& lattice);
     };
 
     template<class ScalarType, class RandomPoolType>
@@ -77,20 +81,20 @@ namespace Physica::Core {
 
     template<class ScalarType, class RandomPoolType>
     RandomBatchEwald<ScalarType, RandomPoolType>::RandomBatchEwald(
-            size_t samplePoolSize, size_t batchSize_, LatticeMatrix lattice, Vector<ScalarType> charges)
-            : Base(std::move(lattice), std::move(charges))
-            , samplePool(samplePoolSize, Dim)
-            , batchSize(batchSize_) {
-        assert(checkParam() && "[Error]: Non-orthogonal lattice is not implemented");
-        updateSumGauss();
-        updateSamplePool();
+            size_t samplePoolSize,
+            size_t batchSize_,
+            LatticeMatrix lattice,
+            Vector<ScalarType> charges) : This(samplePoolSize, batchSize_) {
+        assert(checkParam(lattice) && "[Error]: Non-orthogonal lattice is not implemented");
+        Base::setCharges(std::move(charges));
+        Base::setLattice(std::move(lattice));
+        setIntegralLimit(calcDefaultIntegralLimit());
     }
 
     template<class ScalarType, class RandomPoolType>
     RandomBatchEwald<ScalarType, RandomPoolType>& RandomBatchEwald<ScalarType, RandomPoolType>::operator=(Base base) {
         Base::swap(base);
-        updateSumGauss();
-        updateSamplePool();
+        setIntegralLimit(calcDefaultIntegralLimit());
         return *this;
     }
 
@@ -111,7 +115,7 @@ namespace Physica::Core {
     template<class Executor>
     Vector<ScalarType> RandomBatchEwald<ScalarType, RandomPoolType>::force_long(const PositionMatrix& pos) const {
         static_assert(std::is_same<Executor, SequentialExecutor>::value, "[Error]: Parallelization is not implemented");
-        const size_t numParticle = Base::getNumParticle();
+        const size_t numParticle = getNumParticle();
         Vector<ScalarType> kSpaceSum(numParticle * Dim, 0);
         Vector<ScalarType> dots(numParticle);
         Vector<ScalarType> sin_vec(numParticle);
@@ -146,6 +150,13 @@ namespace Physica::Core {
     }
 
     template<class ScalarType, class RandomPoolType>
+    ScalarType RandomBatchEwald<ScalarType, RandomPoolType>::calcDefaultIntegralLimit() const {
+        const ScalarType averageCellSize = cbrt(Base::getVolume());
+        const ScalarType result = cbrt(ScalarType(getNumParticle())) * ScalarType(M_PI * 0.5) / averageCellSize; // Constant estimated from results of [1]
+        return result;
+    }
+
+    template<class ScalarType, class RandomPoolType>
     void RandomBatchEwald<ScalarType, RandomPoolType>::swap(RandomBatchEwald& obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         Base::swap(obj);
@@ -157,6 +168,12 @@ namespace Physica::Core {
     template<class ScalarType, class RandomPoolType>
     void RandomBatchEwald<ScalarType, RandomPoolType>::setLattice(LatticeMatrix lattice) {
         Base::setLattice(std::move(lattice));
+        setIntegralLimit(calcDefaultIntegralLimit());
+    }
+
+    template<class ScalarType, class RandomPoolType>
+    void RandomBatchEwald<ScalarType, RandomPoolType>::setIntegralLimit(ScalarType integralLimit) {
+        Base::setIntegralLimit(integralLimit);
         updateSumGauss();
         updateSamplePool();
     }
@@ -239,8 +256,7 @@ namespace Physica::Core {
     }
 
     template<class ScalarType, class RandomPoolType>
-    bool RandomBatchEwald<ScalarType, RandomPoolType>::checkParam() const {
-        const auto& lattice = Base::getLattice();
+    bool RandomBatchEwald<ScalarType, RandomPoolType>::checkParam(const LatticeMatrix& lattice) {
         for (int i = 0; i < Dim; ++i) {
             for (int j = 0; j < Dim; ++j) {
                 if (i == j)

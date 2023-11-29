@@ -84,6 +84,7 @@ namespace Physica::Core {
         void swap(RSpaceEwald& obj) noexcept;
         /* Getters */
         [[nodiscard]] const LatticeMatrix& getLattice() const noexcept { return lattice; }
+        [[nodiscard]] ScalarType getVolume() const noexcept { return PeriodicCell<ScalarType, Dim>::getVolume(lattice); }
         [[nodiscard]] const LatticeMatrix& getRepLattice() const noexcept { return repCell.getLattice(); }
         [[nodiscard]] const Vector<ScalarType>& getCharges() const noexcept { return charges; }
         [[nodiscard]] size_t getNumParticle() const noexcept { return charges.getLength(); }
@@ -96,12 +97,12 @@ namespace Physica::Core {
         [[nodiscard]] const SearchRangeType& getKSpaceSumRange() const noexcept { return kSpaceSumRange; }
         /* Setters */
         void setLattice(LatticeMatrix lattice_);
+        void setIntegralLimit(ScalarType integralLimit_);
     protected:
         inline ScalarType pot_functor(size_t i, size_t j, ScalarType r, ScalarType r2) const;
         inline ScalarType force_functor(size_t i, size_t j, ScalarType r, ScalarType r2) const;
     private:
         /* Operations */
-        void initIntegralLimit(ScalarType volume);
         void makeTables();
         [[nodiscard]] ScalarType rSpaceForceConstImpl1(ScalarType r) const;
         [[nodiscard]] ScalarType rSpaceForceConstImpl2(ScalarType r) const;
@@ -212,9 +213,25 @@ namespace Physica::Core {
         assert(charges.getLength() != 0 && "[Error]: Charges should be initialized before lattice update");
         lattice = std::move(lattice_);
         repCell = ReciprocalCell(lattice);
-        const ScalarType volume = PeriodicCell<ScalarType, Dim>::getVolume(lattice);
-        inv_volume = reciprocal(ScalarType(volume));
-        initIntegralLimit(volume);
+        const ScalarType volume = getVolume();
+        inv_volume = reciprocal(volume);
+
+        const ScalarType averageCellSize = cbrt(ScalarType(volume));
+        const ScalarType estimate = sqrt(cbrt(ScalarType(getNumParticle())) * ScalarType(M_PI)) / averageCellSize;
+        setIntegralLimit(estimate);
+    }
+
+    template<class ScalarType>
+    void RSpaceEwald<ScalarType>::setIntegralLimit(ScalarType integralLimit_) {
+        const auto& repLatt = getRepLattice();
+        const ScalarType heightX_2Pi = reciprocal(repLatt.row(0).norm());
+        const ScalarType heightY_2Pi = reciprocal(repLatt.row(1).norm());
+        const ScalarType heightZ_2Pi = reciprocal(repLatt.row(2).norm());
+        constexpr double factor1 = 2 * M_PI * (1 - std::numeric_limits<ScalarType>::epsilon()); //To avoid rSpaceCutoff larger than max value
+        const ScalarType maxRSpaceCutoff = std::min(heightX_2Pi, std::min(heightY_2Pi, heightZ_2Pi)) * PlainScalar(factor1);
+        const ScalarType minLimit = ScalarType(SumPrec) / maxRSpaceCutoff;
+        integralLimit = std::max(integralLimit_, minLimit);
+
         const PlainScalar rSpaceCutoff = PlainScalar(SumPrec) / integralLimit.getValue();
         rSpaceSumRange = PeriodicCell<ScalarType, Dim>::estimateRange(lattice, rSpaceCutoff);
         kSpaceSumRange = PeriodicCell<ScalarType, Dim>::estimateRange(getRepLattice(), PlainScalar(SumPrec * 2) * integralLimit.getValue());
@@ -245,21 +262,6 @@ namespace Physica::Core {
         const ScalarType x1 = erfcStep * floor(temp);
         auto y = erfc_table.template segment<3>(index, index + 3);
         return charges[i] * charges[j] * Internal::quadraticInterpolate_diff1<ScalarType>(repDoubleSquareStep, erfcStep, x1, y[0], y[1], y[2], r);
-    }
-
-    template<class ScalarType>
-    void RSpaceEwald<ScalarType>::initIntegralLimit(ScalarType volume) {
-        const ScalarType averageCellSize = cbrt(ScalarType(volume));
-        const ScalarType estimate = sqrt(cbrt(ScalarType(getNumParticle())) * ScalarType(M_PI)) / averageCellSize;
-
-        const auto& repLatt = getRepLattice();
-        const ScalarType heightX_2Pi = reciprocal(repLatt.row(0).norm());
-        const ScalarType heightY_2Pi = reciprocal(repLatt.row(1).norm());
-        const ScalarType heightZ_2Pi = reciprocal(repLatt.row(2).norm());
-        constexpr double factor1 = 2 * M_PI * (1 - std::numeric_limits<ScalarType>::epsilon()); //To avoid rSpaceCutoff larger than max value
-        const ScalarType maxRSpaceCutoff = std::min(heightX_2Pi, std::min(heightY_2Pi, heightZ_2Pi)) * PlainScalar(factor1);
-        const ScalarType minLimit = ScalarType(SumPrec) / maxRSpaceCutoff;
-        integralLimit = std::max(estimate, minLimit);
     }
 
     template<class ScalarType>
