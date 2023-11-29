@@ -54,6 +54,8 @@ namespace Physica::Core {
         using PositionMatrix = typename MDCellType::PositionMatrix;
 
         constexpr static double epsilon = PhyConst<AU>::eVToHartree(PhyConst<SI>::calorieToJoule(0.1852 * 1000) / PhyConst<SI>::unitCharge) / PhyConst<SI>::avogadroNa;
+        constexpr static double epsilon4 = 4 * epsilon;
+        constexpr static double lj_sigma = PhyConst<AU>::angstormToBohr(3.1589);
         constexpr static double charge = 1.1128;
         constexpr static double gamma = 0.73612;
         constexpr static double Dr = PhyConst<AU>::eVToHartree(PhyConst<SI>::calorieToJoule(116.09 * 1000) / PhyConst<SI>::unitCharge) / PhyConst<SI>::avogadroNa;
@@ -61,8 +63,6 @@ namespace Physica::Core {
         constexpr static double equalR = PhyConst<AU>::angstormToBohr(0.9419);
         constexpr static double kTheta = PhyConst<AU>::eVToHartree(PhyConst<SI>::calorieToJoule(87.85 * 1000) / PhyConst<SI>::unitCharge) / PhyConst<SI>::avogadroNa;
         constexpr static double equalTheta = PhyConst<SI>::degreeToRadian(107.4);
-
-        constexpr static double lj_sigma = PhyConst<AU>::angstormToBohr(3.1589);
     private:
         size_t numMolecule;
         EwaldType ewald;
@@ -183,9 +183,8 @@ namespace Physica::Core {
         Vector<ScalarType> shortForce(3 * numMolecule * Dim, 0);
         /* LJ */ {
             const MDCellType cellWithoutH(cell.getLattice(), cell.getPos().bottomRows(2 * numMolecule), cell.getMassVec());
-            const ScalarType factor = ScalarType(24 * epsilon / lj_sigma);
             auto force = shortForce.tail(2 * numMolecule * Dim);
-            force = lj_model.template force<Executor, IsSmallCell>(cellWithoutH) * factor;
+            force = lj_model.template force<Executor, IsSmallCell>(cellWithoutH) * ScalarType(epsilon4);
         }
         force_short_intraMolecule(cell, shortForce);
         return shortForce;
@@ -504,8 +503,7 @@ namespace Physica::Core {
         const size_t numMolecule = getNumMolecule();
 
         const MDCellType cellWithoutH(cell.getLattice(), cell.getPos().bottomRows(2 * numMolecule), cell.getMassVec());
-        const ScalarType factor = 4 * epsilon;
-        const ScalarType interMoleculeEnergy = lj_model.potentialEnergy(cellWithoutH) * factor;
+        const ScalarType interMoleculeEnergy = lj_model.potentialEnergy(cellWithoutH) * ScalarType(epsilon4);
         ScalarType intraMoleculeEnergy = 0;
         /* Intra molecule */ {
             Vector3D vecOH1, vecOH2;
