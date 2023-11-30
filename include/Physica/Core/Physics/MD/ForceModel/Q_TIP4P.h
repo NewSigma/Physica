@@ -48,6 +48,7 @@ namespace Physica::Core {
         constexpr static unsigned int Dim = 3;
         using This = Q_TIP4P<ScalarType, EwaldType>;
         using LJModelType = LJModel<ScalarType>;
+        using Vector3D = Vector<ScalarType, Dim>;
     public:
         using MDCellType = MDCell<ScalarType, Dim>;
         using LatticeMatrix = typename MDCellType::LatticeMatrix;
@@ -87,6 +88,7 @@ namespace Physica::Core {
         template<class Executor> [[nodiscard]] Vector<ScalarType> force_long(const MDCellType& cell) const;
         template<class Executor> [[nodiscard]] Vector<ScalarType> force_long_unsort(const MDCellType& cell) const;
 
+        [[nodiscard]] LatticeMatrix virial(const MDCellType& cell) const;
         template<class Executor, bool UseDynamicPolar>
         [[nodiscard]] PositionMatrix makeInducedDipole(const MDCellType& cell) const;
         void swap(Q_TIP4P& model) noexcept;
@@ -109,9 +111,10 @@ namespace Physica::Core {
         ScalarType potentialEnergyWithoutEwald(const MDCellType& cell) const;
         ScalarType ewaldEnergy(const MDCellType& cell) const;
 
-        static ScalarType modifiedMorsePot(ScalarType r);
-        static ScalarType modifiedMorseForce(ScalarType r);
-        static bool isCellOrdered(const MDCellType& cell);
+        [[nodiscard]] static ScalarType modifiedMorsePot(ScalarType r);
+        [[nodiscard]] static ScalarType modifiedMorseForce(ScalarType r);
+        [[nodiscard]] inline static MDCellType makeCellWithoutH(const MDCellType& original);
+        [[nodiscard]] static bool isCellOrdered(const MDCellType& cell);
     };
 
     template<class ScalarType, class EwaldType>
@@ -181,11 +184,8 @@ namespace Physica::Core {
         assert(cell.getNumParticle() % 3 == 0);
         assert(isCellOrdered(cell));
         Vector<ScalarType> shortForce(3 * numMolecule * Dim, 0);
-        /* LJ */ {
-            const MDCellType cellWithoutH(cell.getLattice(), cell.getPos().bottomRows(2 * numMolecule), cell.getMassVec());
-            auto force = shortForce.tail(2 * numMolecule * Dim);
-            force = lj_model.template force<Executor, IsSmallCell>(cellWithoutH) * ScalarType(epsilon4);
-        }
+        auto force_oxygen = shortForce.tail(2 * numMolecule * Dim);
+        force_oxygen = lj_model.template force<Executor, IsSmallCell>(makeCellWithoutH(cell)) * ScalarType(epsilon4);
         force_short_intraMolecule(cell, shortForce);
         return shortForce;
     }
@@ -230,6 +230,41 @@ namespace Physica::Core {
         const Vector<ScalarType> sort_f = force_long<Executor>(copy);
         const PositionMatrix unsort_f = permute.inverse() * sort_f.reshape(cell.getPos());
         return unsort_f.flatten();
+    }
+
+    template<class ScalarType, class EwaldType>
+    typename Q_TIP4P<ScalarType, EwaldType>::LatticeMatrix Q_TIP4P<ScalarType, EwaldType>::virial(const MDCellType& cell) const {
+        LatticeMatrix result(Dim, Dim, 0);
+        const size_t offset = 2 * numMolecule;
+        for (size_t i = 0; i < numMolecule; ++i) {
+            const size_t indexO = offset + i;
+            const size_t indexH1 = 2 * i;
+            const size_t indexH2 = 2 * i + 1;
+            Vector3D vecOH1 = cell.minDistVector(indexO, indexH1);
+            Vector3D vecOH2 = cell.minDistVector(indexO, indexH2);
+            const ScalarType r1 = vecOH1.norm();
+            const ScalarType r2 = vecOH2.norm();
+            /* Morse contribution */
+            result += (vecOH1 * (modifiedMorseForce(r1) / r1)) * vecOH1.transpose();
+            result += (vecOH2 * (modifiedMorseForce(r2) / r2)) * vecOH2.transpose();
+            /* Angle contribution */
+            LatticeMatrix temp = vecOH1 * vecOH2.transpose();
+            LatticeMatrix angle = temp + temp.transpose();
+
+            const ScalarType dot = vecOH1 * vecOH2;
+            vecOH1 *= reciprocal(r1);
+            vecOH2 *= reciprocal(r2);
+            temp = vecOH1 * vecOH1.transpose() + vecOH2 * vecOH2.transpose();
+            angle -= temp * dot;
+
+            const ScalarType theta = arccos(dot / (r1 * r2));
+            const ScalarType factor = (theta - ScalarType(equalTheta)) * (ScalarType(kTheta) / sqrt(square(r1 * r2) - square(dot)));
+            result += angle * factor;
+        }
+        result *= reciprocal(ewald.getVolume());
+        result += ewald.virial(cell.getPos());
+        result += lj_model.virial(makeCellWithoutH(cell)) * ScalarType(epsilon4);
+        return result;
     }
 
     template<class ScalarType, class EwaldType>
@@ -397,7 +432,6 @@ namespace Physica::Core {
 
     template<class ScalarType, class EwaldType>
     void Q_TIP4P<ScalarType, EwaldType>::force_short_intraMolecule(const MDCellType& cell, Vector<ScalarType>& shortForce) const {
-        using Vector3D = Vector<ScalarType, Dim>;
         Vector3D vecOH1, vecOH2;
         Vector<ScalarType, 3> f;
         const size_t offset = 2 * numMolecule;
@@ -459,7 +493,6 @@ namespace Physica::Core {
         assert(cell.getNumParticle() % 3 == 0);
         assert(isCellOrdered(cell));
         assert(ewald.getLattice() == cell.getLattice() && "[Error]: Lattice is not updated");
-        using Vector3D = Vector<ScalarType, Dim>;
 
         const PositionMatrix chargePos = makeChargePos(cell);
         Vector<ScalarType> coulomb = ewald.template force<Executor>(chargePos);
@@ -502,8 +535,7 @@ namespace Physica::Core {
         using Vector3D = Vector<ScalarType, Dim>;
         const size_t numMolecule = getNumMolecule();
 
-        const MDCellType cellWithoutH(cell.getLattice(), cell.getPos().bottomRows(2 * numMolecule), cell.getMassVec());
-        const ScalarType interMoleculeEnergy = lj_model.potentialEnergy(cellWithoutH) * ScalarType(epsilon4);
+        const ScalarType interMoleculeEnergy = lj_model.potentialEnergy(makeCellWithoutH(cell)) * ScalarType(epsilon4);
         ScalarType intraMoleculeEnergy = 0;
         /* Intra molecule */ {
             Vector3D vecOH1, vecOH2;
@@ -556,6 +588,13 @@ namespace Physica::Core {
         const ScalarType delta2 = square(delta);
         const ScalarType delta3 = delta2 * delta;
         return -(delta * 2 - delta2 * 3 + delta3 * (7.0 / 3)) * (Dr * alphaR);
+    }
+
+    template<class ScalarType, class EwaldType>
+    inline typename Q_TIP4P<ScalarType, EwaldType>::MDCellType Q_TIP4P<ScalarType, EwaldType>::makeCellWithoutH(
+            const MDCellType& original) {
+        const size_t numMolecule = original.getNumParticle() / 3;
+        return MDCellType(original.getLattice(), original.getPos().bottomRows(2 * numMolecule), original.getMassVec());
     }
 
     template<class ScalarType, class EwaldType>

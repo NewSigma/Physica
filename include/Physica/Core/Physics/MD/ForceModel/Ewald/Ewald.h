@@ -62,11 +62,12 @@ namespace Physica::Core {
 
         [[nodiscard]] ComplexType forceConst(const PositionMatrix& pos, Vector3D qPoint, size_t dof1, size_t dof2) const;
 
-        [[nodiscard]] LatticeMatrix virial(const PositionMatrix& pos);
+        [[nodiscard]] LatticeMatrix virial(const PositionMatrix& pos) const;
         void swap(Ewald& obj) noexcept;
         /* Getters */
         using Base::getNumParticle;
         using Base::getLattice;
+        using Base::getVolume;
         using Base::getRepLattice;
         using Base::getCharges;
         using Base::getIntegralLimit;
@@ -184,7 +185,7 @@ namespace Physica::Core {
     }
 
     template<class ScalarType>
-    typename Ewald<ScalarType>::LatticeMatrix Ewald<ScalarType>::virial(const PositionMatrix& pos) {
+    typename Ewald<ScalarType>::LatticeMatrix Ewald<ScalarType>::virial(const PositionMatrix& pos) const {
         LatticeMatrix kSpaceVirial(Dim, Dim, 0);
         const ScalarType gammaPointP = gammaPointE * Base::getInvVolume();
         for (unsigned int i = 0; i < Dim; ++i)

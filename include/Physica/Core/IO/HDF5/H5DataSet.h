@@ -42,6 +42,7 @@ namespace Physica::Core {
         [[nodiscard]] H5DataSpace<Dim> getDataSpace() const noexcept { return H5DataSpace<Dim>(Base::getSpace()); }
         [[nodiscard]] size_t getDim() const noexcept;
         [[nodiscard]] size_t getSize(size_t dim) const noexcept;
+        [[nodiscard]] bool empty() const noexcept { return getSize(0) == 0; }
     private:
         using Base::getSpace;
     };
