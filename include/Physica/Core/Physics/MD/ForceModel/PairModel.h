@@ -286,7 +286,7 @@ namespace Physica::Core {
                     if (r2 < squared_cutoff) {
                         const ScalarType dist = sqrt(r2);
                         const ScalarType f_norm = force_functor(atom1, atom2, dist, r2);
-                        const Vector3D f = r * ScalarType(-f_norm / dist);
+                        const Vector3D f = r * ScalarType(f_norm / dist);
                         result += f * r.transpose();
                     }
                 });
