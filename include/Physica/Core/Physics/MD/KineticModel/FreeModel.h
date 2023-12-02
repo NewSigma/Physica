@@ -50,8 +50,9 @@ namespace Physica::Core {
     class FreeModel {
         using PlainScalar = typename ScalarType::PlainScalar;
         using ComplexType = ComplexScalar<ScalarType>;
-        using MDCellType = MDCell<ScalarType, Dim>;
-        using RingPolymerType = RingPolymer<ScalarType, Dim, NumReplica>;
+        using MDType = RPMD<ScalarType, Dim, NumReplica>;
+        using MDCellType = typename MDType::MDCellType;
+        using RingPolymerType = typename MDType::RingPolymerType;
         using LatticeMatrix = typename MDCellType::LatticeMatrix;
         using MassVector = typename MDCellType::MassVector;
         using PhaseMatrix = typename RingPolymerType::PhaseMatrix;
@@ -77,7 +78,7 @@ namespace Physica::Core {
         /* Operations */
         void nve_step(RingPolymerType& ringPolymer, ScalarType deltaT);
         template<class Barostat>
-        void npt_step(RingPolymerType& ringPolymer, MDCellType& cell, Barostat& barostat, ScalarType deltaT);
+        void npt_step(MDType& rpmd, Barostat& barostat, ScalarType deltaT);
         void swap(FreeModel& obj) noexcept;
         /* Getters */
         [[nodiscard]] ScalarType getOmegaW() const noexcept { return omegaW; }
@@ -126,13 +127,12 @@ namespace Physica::Core {
     template<class ScalarType, unsigned int Dim, size_t NumReplica, RPMDIntegrator Integrator>
     template<class Barostat>
     void FreeModel<ScalarType, Dim, NumReplica, Integrator>::npt_step(
-            RingPolymerType& ringPolymer,
-            MDCellType& cell,
+            MDType& rpmd,
             Barostat& barostat,
             ScalarType deltaT) {
-        nve_step(ringPolymer, deltaT);
-        LatticeMatrix lattice = cell->getLattice() + barostat.getLatticeMomentum() * (deltaT / barostat.getLatticeMass());
-        cell.setLattice(std::move(lattice));
+        nve_step(rpmd.getRingPolymer(), deltaT);
+        LatticeMatrix lattice = rpmd.getLattice() + barostat.getLatticeMomentum() * (deltaT / barostat.getLatticeMass());
+        rpmd.setLattice(std::move(lattice));
     }
 
     template<class ScalarType, unsigned int Dim, size_t NumReplica, RPMDIntegrator Integrator>

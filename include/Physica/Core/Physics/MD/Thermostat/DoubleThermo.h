@@ -121,27 +121,26 @@ namespace Physica::Core {
     template<class RandomPoolType>
     ScalarType DoubleThermo<ScalarType, Dim, NumReplica>::makeTranslationalFactor(
             const RingPolymerType& ringPolymer, ScalarType deltaT) const {
+        using Integrator = SRK2<ScalarType, 1>;
+        using VectorType = typename Integrator::VectorType;
+
         if (temperatureT.isZero())
             return 0;
         const size_t dof = ringPolymer.getDOF();
-        using VectorType = Vector<ScalarType, 1>;
-        ScalarType result = 1.0;
-        [[maybe_unused]] ScalarType _ = 0;
+        [[maybe_unused]] ScalarType unused = 0;
         const ScalarType nowT = ringPolymer.calcTemperature();
         VectorType sol{nowT};
-        SRK2<ScalarType, 1>::step(deltaT, _, sol,
-                                    [this]([[maybe_unused]] ScalarType x, VectorType sol) -> VectorType {
-                                        return {(temperatureT - sol[0]) / thermostatTime};
-                                    },
-                                    [this, dof]([[maybe_unused]] ScalarType x, VectorType sol) -> VectorType {
-                                        std::normal_distribution dist{};
-                                        auto& gen = RandomPoolType::getGen();
-                                        return {sqrt((temperatureT * sol[0]) / (thermostatTime * dof)) * 2 * dist(gen)};
-                                    });
-        if (sol[0].isPositive()) [[likely]]
-            result = sqrt(temperatureT / sol[0]);
-        else
+        Integrator::step(deltaT, unused, sol,
+                            [this]([[maybe_unused]] ScalarType x, VectorType sol) -> VectorType {
+                                return {(temperatureT - sol[0]) / thermostatTime};
+                            },
+                            [this, dof]([[maybe_unused]] ScalarType x, VectorType sol) -> VectorType {
+                                std::normal_distribution dist{};
+                                auto& gen = RandomPoolType::getGen();
+                                return {sqrt((temperatureT * sol[0]) / (thermostatTime * dof)) * 2 * dist(gen)};
+                            });
+        if (!sol[0].isPositive()) [[unlikely]]
             throw std::invalid_argument("[Error]: Number of particle is too small that negative probability is encountered");
-        return result;
+        return sqrt(temperatureT / sol[0]);
     }
 }

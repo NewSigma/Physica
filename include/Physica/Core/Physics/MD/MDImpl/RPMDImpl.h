@@ -143,8 +143,9 @@ namespace Physica::Core {
     }
     /**
      * BAOAB integrator as introduced in [1]
+     * 
      * Reference:
-     * [1] Liu J, Li D, Liu X. A simple and accurate algorithm for path integral molecular dynamics with the Langevin thermostat[J]. J. Chem. Phys, 2016, 145(2):1291-1301.
+     * [1] J. Chem. Phys, 145, 024103 (2016); https://doi.org/10.1063/1.4954990
      */
     template<class ScalarType, unsigned int Dim, size_t NumReplica, class ForceMatrixAllocator>
     template<class Thermostat,
@@ -195,14 +196,13 @@ namespace Physica::Core {
 
     template<class ScalarType, unsigned int Dim, size_t NumReplica, class ForceMatrixAllocator>
     template<class Thermostat,
-             class RandomGenerator,
+             class RandomPoolType,
              class Barostat,
              class KineticModel,
              class ForceModel,
              class Executor>
     void RPMD<ScalarType, Dim, NumReplica, ForceMatrixAllocator>::npt_step(
             const Thermostat& thermostat,
-            RandomGenerator& gen,
             Barostat& barostat,
             KineticModel& kineticModel,
             ForceModel& forceModel) {
@@ -210,26 +210,43 @@ namespace Physica::Core {
         constexpr bool IsPeriodBoundary1 = Internal::Traits<KineticModel>::IsPeriodBoundary;
         constexpr bool IsPeriodBoundary2 = Internal::Traits<ForceModel>::IsPeriodBoundary;
         static_assert(isFreeModel || (IsPeriodBoundary1 == IsPeriodBoundary2), "[Error]: Inconsistent boundary condition");
-        barostat.forceStep(*this, timeStep * 0.5);
-        kineticModel.npt_step(ringPolymer, cell, barostat, timeStep * 0.5);
-        thermostat.step(ringPolymer, gen, timeStep);
-        kineticModel.npt_step(ringPolymer, cell, barostat, timeStep * 0.5);
-        updateForce<ForceModel, Executor>(forceModel);
-        barostat.forceStep(*this, timeStep * 0.5);
+
+        constexpr unsigned int BarostatOrder = Internal::Traits<Barostat>::Order;
+        static_assert(BarostatOrder == 2 || BarostatOrder == 1, "[Error]: Invalid barostat");
+        constexpr bool isSeedFixed = RandomPoolType::isSeedFixed();
+        using ThermoStepExecutor = typename std::conditional<isSeedFixed, SequentialExecutor, Executor>::type;
+        if constexpr (BarostatOrder == 2) {
+            barostat.forceStep(*this, forceModel, timeStep * 0.5);
+            kineticModel.npt_step(*this, barostat, timeStep * 0.5);
+            thermostat.template step<RandomPoolType, ThermoStepExecutor>(ringPolymer, timeStep);
+            kineticModel.npt_step(*this, barostat, timeStep * 0.5);
+            updateForce<ForceModel, Executor>(forceModel);
+            barostat.forceStep(*this, forceModel, timeStep * 0.5);
+        }
+        else {
+            const LatticeMatrix stress = makeStressPrim<ForceModel, Executor>(forceModel);
+            forceStep(timeStep * 0.5);
+            kineticModel.nve_step(ringPolymer, timeStep * 0.5);
+            barostat.template npt_step<ForceModel>(*this, stress, timeStep * 0.5);
+            thermostat.template step<RandomPoolType, ThermoStepExecutor>(ringPolymer, timeStep);
+            barostat.template npt_step<ForceModel>(*this, stress, timeStep * 0.5);
+            kineticModel.nve_step(ringPolymer, timeStep * 0.5);
+            updateForce<ForceModel, Executor>(forceModel);
+            forceStep(timeStep * 0.5);
+        }
     }
 
     template<class ScalarType, unsigned int Dim, size_t NumReplica, class ForceMatrixAllocator>
-    template<class Thermostat, class RandomGenerator, class Barostat, class KineticModel, class ForceModel, class Executor>
+    template<class Thermostat, class RandomPoolType, class Barostat, class KineticModel, class ForceModel, class Executor>
     void RPMD<ScalarType, Dim, NumReplica, ForceMatrixAllocator>::npt_step_for(
             ScalarType duration,
             const Thermostat& thermostat,
-            RandomGenerator& gen,
             Barostat& barostat,
             KineticModel& kineticModel,
             ForceModel& forceModel) {
         const uint64_t step = Base::durationToStep(duration, timeStep);
         for (uint64_t _ = 0; _ < step; ++_)
-            npt_step<Thermostat, RandomGenerator, Barostat, KineticModel, ForceModel, Executor>(thermostat, gen, barostat, kineticModel, forceModel);
+            npt_step<Thermostat, RandomPoolType, Barostat, KineticModel, ForceModel, Executor>(thermostat, barostat, kineticModel, forceModel);
     }
 
     template<class ScalarType, unsigned int Dim, size_t NumReplica, class ForceMatrixAllocator>
@@ -668,7 +685,7 @@ namespace Physica::Core {
 
     template<class ScalarType, unsigned int Dim, size_t NumReplica, class ForceMatrixAllocator>
     void RPMD<ScalarType, Dim, NumReplica, ForceMatrixAllocator>::setTemperature(ScalarType temperature) {
-        assert(!temperature.isNegative());
+        assert(!temperature.isNegative() && "[Error]: Negative temperature is not physical");
         temperatureT = temperature;
     }
 

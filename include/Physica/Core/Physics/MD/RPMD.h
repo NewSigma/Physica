@@ -105,19 +105,19 @@ namespace Physica::Core {
         void nvt_step_for(ScalarType duration, const Thermostat& thermostat, KineticModel& kineticModel, ForceModel& forceModel);
 
         template<class Thermostat,
-                 class RandomGenerator,
+                 class RandomPoolType,
                  class Barostat,
                  class KineticModel,
                  class ForceModel,
                  class Executor>
-        void npt_step(const Thermostat& thermostat, RandomGenerator& gen, Barostat& barostat, KineticModel& kineticModel, ForceModel& forceModel);
+        void npt_step(const Thermostat& thermostat, Barostat& barostat, KineticModel& kineticModel, ForceModel& forceModel);
         template<class Thermostat,
-                 class RandomGenerator,
+                 class RandomPoolType,
                  class Barostat,
                  class KineticModel,
                  class ForceModel,
                  class Executor>
-        void npt_step_for(ScalarType duration, const Thermostat& thermostat, RandomGenerator& gen, Barostat& barostat, KineticModel& kineticModel, ForceModel& forceModel);
+        void npt_step_for(ScalarType duration, const Thermostat& thermostat, Barostat& barostat, KineticModel& kineticModel, ForceModel& forceModel);
 
         template<class RandomGenerator> void initMomentum(RandomGenerator& gen);
         void scaleVelocity();
@@ -169,6 +169,7 @@ namespace Physica::Core {
         [[nodiscard]] bool isContractEnabled() const noexcept { return getNumReplica() != getNumContract(); }
         [[nodiscard]] ScalarType getTemperature() const noexcept { return temperatureT; }
         /* Setters */
+        void setLattice(LatticeMatrix lattice) { cell.setLattice(std::move(lattice)); }
         void setTemperature(ScalarType temperature);
     private:
         void toContractBeadRepr(size_t posID);

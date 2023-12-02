@@ -32,6 +32,7 @@ namespace Physica::Core {
     template<class ScalarType, size_t Dim>
     class SRK2 : public ODESolver<ScalarType, Dim> {
         using Base = ODESolver<ScalarType, Dim>;
+    public:
         using typename Base::VectorType;
     public:
         using Base::Base;

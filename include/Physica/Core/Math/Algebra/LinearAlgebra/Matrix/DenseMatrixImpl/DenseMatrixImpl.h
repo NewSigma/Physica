@@ -171,10 +171,21 @@ namespace Physica::Core {
 
     template<class T, int Option, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn, class Allocator>
     template<class RandomGenerator>
-    DenseMatrix<T, Option, Row, Column, MaxRow, MaxColumn, Allocator> DenseMatrix<T, Option, Row, Column, MaxRow, MaxColumn, Allocator>::random_uniform(
+    inline DenseMatrix<T, Option, Row, Column, MaxRow, MaxColumn, Allocator>
+    DenseMatrix<T, Option, Row, Column, MaxRow, MaxColumn, Allocator>::random_uniform(
             size_t row, size_t column, RandomGenerator& gen) {
         DenseMatrix result(row, column);
         result.random_uniform(gen);
+        return result;
+    }
+
+    template<class T, int Option, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn, class Allocator>
+    template<class RandomGenerator>
+    inline DenseMatrix<T, Option, Row, Column, MaxRow, MaxColumn, Allocator>
+    DenseMatrix<T, Option, Row, Column, MaxRow, MaxColumn, Allocator>::random_normal(
+            size_t row, size_t column, RandomGenerator& gen) {
+        DenseMatrix result(row, column);
+        result.random_normal(gen);
         return result;
     }
 
