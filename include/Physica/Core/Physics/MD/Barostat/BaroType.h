@@ -20,7 +20,7 @@
 
 namespace Physica::Core {
     enum class BaroType {
-        Isotropic,
-        Anisotropic
+        Anisotropic,
+        XY
     };
 }

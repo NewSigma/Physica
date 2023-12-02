@@ -39,11 +39,12 @@ namespace Physica::Core {
      * [1] J. Chem. Phys. 153, 114107 (2020); https://doi.org/10.1063/5.0020514
      * [2] https://doi.org/10.48550/arXiv.2111.06402
      */
-    template<class ScalarType, size_t NumReplica, class RandomPoolType>
-    class SCRBaro<ScalarType, NumReplica, RandomPoolType, BaroType::Anisotropic> {
+    template<class ScalarType, size_t NumReplica, class RandomPoolType, BaroType Type>
+    class SCRBaro {
         constexpr static unsigned int Dim = 3;
         using MDType = RPMD<ScalarType, Dim, NumReplica>;
         using LatticeMatrix = typename MDType::MDCellType::LatticeMatrix;
+        using Vector3D = Vector<ScalarType, Dim>;
 
         ScalarType compressRate;
         ScalarType tempT;
@@ -61,13 +62,17 @@ namespace Physica::Core {
         template<class ForceModel>
         void npt_step(MDType& rpmd, const LatticeMatrix& stress, ScalarType deltaT);
         void swap(SCRBaro& obj) noexcept;
+        /* Getters */
+        [[nodiscard]] const LatticeMatrix& getLastStress() const noexcept { return lastStress; }
     private:
         [[nodiscard]] LatticeMatrix makeDecayMatrix(ScalarType pressPerDOF) const;
         [[nodiscard]] LatticeMatrix makeDiffuseMatrix(ScalarType pressPerDOF) const;
+        [[nodiscard]] LatticeMatrix makeDeltaLattice(MDType& rpmd, ScalarType deltaT) const;
+        [[nodiscard]] LatticeMatrix makeScaleMatrix(const MDType& rpmd, const LatticeMatrix& deltaLattice) const;
     };
 
-    template<class ScalarType, size_t NumReplica, class RandomPoolType>
-    SCRBaro<ScalarType, NumReplica, RandomPoolType, BaroType::Anisotropic>::SCRBaro(
+    template<class ScalarType, size_t NumReplica, class RandomPoolType, BaroType Type>
+    SCRBaro<ScalarType, NumReplica, RandomPoolType, Type>::SCRBaro(
             ScalarType compressRate_, ScalarType tempT_, ScalarType targetP_)
             : compressRate(compressRate_)
             , tempT(tempT_)
@@ -76,57 +81,38 @@ namespace Physica::Core {
         assert(tempT.isPositive() && "[Error]: Temperature must be positive");
     }
 
-    template<class ScalarType, size_t NumReplica, class RandomPoolType>
+    template<class ScalarType, size_t NumReplica, class RandomPoolType, BaroType Type>
     template<class ForceModel>
-    void SCRBaro<ScalarType, NumReplica, RandomPoolType, BaroType::Anisotropic>::npt_step(
+    void SCRBaro<ScalarType, NumReplica, RandomPoolType, Type>::npt_step(
             MDType& rpmd, const LatticeMatrix& stress, ScalarType deltaT) {
         lastStress = stress;
-        const ScalarType pressPerDOF = (tempT * PhyConst<AU>::boltzmannK) / rpmd.getVolume();
-        const auto decayMatrix = makeDecayMatrix(pressPerDOF);
-        const auto diffuseMatrix = makeDiffuseMatrix(pressPerDOF);
-        const auto& lattice = rpmd.getLattice();
-        LatticeMatrix deltaLattice(Dim, Dim);
-        for (size_t r = 0; r < Dim; ++r) {
-            for (size_t c = 0; c < Dim; ++c) {
-                using Integrator = SRK2<ScalarType, 1>;
-                using VectorType = typename Integrator::VectorType;
-                [[maybe_unused]] ScalarType unused = 0;
-                VectorType sol{ScalarType(0)};
-                Integrator::step(deltaT, unused, sol,
-                    [&lattice, &decayMatrix, r, c]([[maybe_unused]] ScalarType x, [[maybe_unused]] VectorType sol) -> VectorType {
-                        return {(decayMatrix * lattice).calc(r, c)};
-                    },
-                    [&lattice, &diffuseMatrix, r, c]([[maybe_unused]] ScalarType x, [[maybe_unused]] VectorType sol) -> VectorType {
-                        return {(diffuseMatrix * lattice).calc(r, c)};
-                    });
-                deltaLattice(r, c) = sol[0];
-            }
-        }
-        //Scale pos and momentum
+
         const size_t numReplica = rpmd.getNumReplica();
         const size_t numParticle = rpmd.getNumParticle();
         const size_t dof = rpmd.getDOF();
         auto& phase = rpmd.getPhaseMatrix();
-        const LatticeMatrix scaleMat = LatticeMatrix::unitMatrix(Dim) + deltaLattice * rpmd.getInvLattice();
-        const LatticeMatrix invScaleMat = LatticeMatrix::unitMatrix(Dim) - deltaLattice * rpmd.getInvLattice();
+        const auto deltaLattice = makeDeltaLattice(rpmd, deltaT);
+        const LatticeMatrix scaleMatrix = makeScaleMatrix(rpmd, deltaLattice);
         for (size_t i = 0; i < numReplica; ++i) {
             auto col = phase.col(i);
             auto momentum = col.head(dof);
             for (size_t j = 0; j < numParticle; ++j) {
                 auto momentum_j = momentum.segment(j * Dim, (j + 1) * Dim);
-                momentum_j = invScaleMat.transpose() * momentum_j;
+                const Vector3D delta = scaleMatrix * momentum_j;
+                momentum_j -= delta;
             }
             auto pos = col.tail(dof);
             for (size_t j = 0; j < numParticle; ++j) {
                 auto pos_j = pos.segment(j * Dim, (j + 1) * Dim);
-                pos_j = scaleMat * pos_j;
+                const Vector3D delta = scaleMatrix * pos_j;
+                pos_j += delta;
             }
         }
-        rpmd.setLattice(lattice + deltaLattice);
+        rpmd.setLattice(rpmd.getLattice() + deltaLattice);
     }
 
-    template<class ScalarType, size_t NumReplica, class RandomPoolType>
-    void SCRBaro<ScalarType, NumReplica, RandomPoolType, BaroType::Anisotropic>::swap(SCRBaro& obj) noexcept {
+    template<class ScalarType, size_t NumReplica, class RandomPoolType, BaroType Type>
+    void SCRBaro<ScalarType, NumReplica, RandomPoolType, Type>::swap(SCRBaro& obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         compressRate.swap(obj.compressRate);
         tempT.swap(obj.tempT);
@@ -134,24 +120,95 @@ namespace Physica::Core {
         lastStress.swap(obj.lastStress);
     }
 
-    template<class ScalarType, size_t NumReplica, class RandomPoolType>
-    typename SCRBaro<ScalarType, NumReplica, RandomPoolType, BaroType::Anisotropic>::LatticeMatrix
-    SCRBaro<ScalarType, NumReplica, RandomPoolType, BaroType::Anisotropic>::makeDecayMatrix(ScalarType pressPerDOF) const {
+    template<class ScalarType, size_t NumReplica, class RandomPoolType, BaroType Type>
+    typename SCRBaro<ScalarType, NumReplica, RandomPoolType, Type>::LatticeMatrix
+    SCRBaro<ScalarType, NumReplica, RandomPoolType, Type>::makeDecayMatrix(ScalarType pressPerDOF) const {
         LatticeMatrix result = lastStress;
         const ScalarType centerTargetP = targetP - pressPerDOF;
-        for (size_t i = 0; i < Dim; ++i)
-            result(i, i) -= centerTargetP;
+        if constexpr (Type == BaroType::Anisotropic) {
+            for (size_t i = 0; i < Dim; ++i)
+                result(i, i) -= centerTargetP;
+        }
+        else {
+            for (size_t i = 0; i < 2; ++i)
+                result(i, i) -= centerTargetP;
+            auto col = result.col(2);
+            col = ScalarType(0);
+            auto row = result.row(2);
+            row = ScalarType(0);
+        }
         result *= compressRate / ScalarType(Dim);
         return result;
     }
     
-    template<class ScalarType, size_t NumReplica, class RandomPoolType>
-    typename SCRBaro<ScalarType, NumReplica, RandomPoolType, BaroType::Anisotropic>::LatticeMatrix
-    SCRBaro<ScalarType, NumReplica, RandomPoolType, BaroType::Anisotropic>::makeDiffuseMatrix(ScalarType pressPerDOF) const {
-        LatticeMatrix result;
-        const auto rand = LatticeMatrix::random_normal(Dim, Dim, RandomPoolType::getGen());
+    template<class ScalarType, size_t NumReplica, class RandomPoolType, BaroType Type>
+    typename SCRBaro<ScalarType, NumReplica, RandomPoolType, Type>::LatticeMatrix
+    SCRBaro<ScalarType, NumReplica, RandomPoolType, Type>::makeDiffuseMatrix(ScalarType pressPerDOF) const {
         const ScalarType diffuseFactor = sqrt(ScalarType(2.0 / Dim) * compressRate * pressPerDOF);
-        result = (rand + rand.transpose()) * (diffuseFactor * ScalarType(0.5));
+        auto& gen = RandomPoolType::getGen();
+        LatticeMatrix result(Dim, Dim, 0);
+        if constexpr (Type == BaroType::Anisotropic) {
+            const auto rand = LatticeMatrix::random_normal(Dim, Dim, gen);
+            result = (rand + rand.transpose()) * (diffuseFactor * ScalarType(0.5));
+        }
+        else {
+            result(0, 0) = ScalarType::random_normal(gen);
+            result(1, 1) = ScalarType::random_normal(gen);
+            result(0, 1) = result(1, 0) = ScalarType::random_normal(gen) + ScalarType::random_normal(gen);
+            auto corner = result.topLeftCorner(2);
+            corner *= diffuseFactor;
+        }
+        return result;
+    }
+
+    template<class ScalarType, size_t NumReplica, class RandomPoolType, BaroType Type>
+    typename SCRBaro<ScalarType, NumReplica, RandomPoolType, Type>::LatticeMatrix
+    SCRBaro<ScalarType, NumReplica, RandomPoolType, Type>::makeDeltaLattice(MDType& rpmd, ScalarType deltaT) const {
+        const ScalarType pressPerDOF = (tempT * PhyConst<AU>::boltzmannK) / rpmd.getVolume();
+        const auto decayMatrix = makeDecayMatrix(pressPerDOF);
+        const auto diffuseMatrix = makeDiffuseMatrix(pressPerDOF);
+        const auto& lattice = rpmd.getLattice();
+        LatticeMatrix result(Dim, Dim, 0);
+        auto integrateKernel = [&, deltaT](size_t r, size_t c) {
+            using Integrator = SRK2<ScalarType, 1>;
+            using VectorType = typename Integrator::VectorType;
+            [[maybe_unused]] ScalarType unused = 0;
+            VectorType sol{ScalarType(0)};
+            Integrator::step(deltaT, unused, sol,
+                [&lattice, &decayMatrix, r, c]([[maybe_unused]] ScalarType x, [[maybe_unused]] VectorType sol) -> VectorType {
+                    return {(decayMatrix * lattice).calc(r, c)};
+                },
+                [&lattice, &diffuseMatrix, r, c]([[maybe_unused]] ScalarType x, [[maybe_unused]] VectorType sol) -> VectorType {
+                    return {(diffuseMatrix * lattice).calc(r, c)};
+                });
+            result(r, c) = sol[0];
+        };
+
+        if constexpr (Type == BaroType::Anisotropic) {
+            for (size_t r = 0; r < Dim; ++r)
+                for (size_t c = 0; c < Dim; ++c)
+                    integrateKernel(r, c);
+        }
+        else {
+            for (size_t r = 0; r < 2; ++r)
+                for (size_t c = 0; c < 2; ++c)
+                    integrateKernel(r, c);
+        }
+        return result;
+    }
+
+    template<class ScalarType, size_t NumReplica, class RandomPoolType, BaroType Type>
+    typename SCRBaro<ScalarType, NumReplica, RandomPoolType, Type>::LatticeMatrix
+    SCRBaro<ScalarType, NumReplica, RandomPoolType, Type>::makeScaleMatrix(
+            const MDType& rpmd, const LatticeMatrix& deltaLattice) const {
+        LatticeMatrix result;
+        if constexpr (Type == BaroType::Anisotropic)
+            result = deltaLattice * rpmd.getInvLattice();
+        else {
+            result = deltaLattice * rpmd.getInvLattice();
+            auto col = result.col(2);
+            col = ScalarType(0);
+        }
         return result;
     }
 }
