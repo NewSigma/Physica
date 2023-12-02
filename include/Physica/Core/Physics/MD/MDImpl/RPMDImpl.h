@@ -231,6 +231,8 @@ namespace Physica::Core {
             thermostat.template step<RandomPoolType, ThermoStepExecutor>(ringPolymer, timeStep);
             barostat.template npt_step<ForceModel>(*this, stress, timeStep * 0.5);
             kineticModel.nve_step(ringPolymer, timeStep * 0.5);
+            if constexpr (Internal::Traits<ForceModel>::IsLatticeDependent)
+                forceModel.setLattice(getLattice());
             updateForce<ForceModel, Executor>(forceModel);
             forceStep(timeStep * 0.5);
         }

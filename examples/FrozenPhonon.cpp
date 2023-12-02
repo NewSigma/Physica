@@ -56,7 +56,7 @@ public:
     }
     ScalarType potentialEnergy(const MDCellType& cell) const {
         Base base(*this);
-        base.updateLattice(cell.getLattice());
+        base.setLattice(cell.getLattice());
         return base.potentialEnergy_unsort(cell);
     }
     using Base::getNumMolecule;

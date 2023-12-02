@@ -36,6 +36,7 @@ namespace Physica::Core {
         class Traits<Q_TIP4P<ScalarType, EwaldType>> {
         public:
             constexpr static bool IsPeriodBoundary = true;
+            constexpr static bool IsLatticeDependent = true;
         };
     }
     /**
@@ -98,7 +99,7 @@ namespace Physica::Core {
         [[nodiscard]] const EwaldType& getEwald() const noexcept { return ewald; }
         [[nodiscard]] const typename MDCellType::LatticeMatrix& getLattice() const noexcept { return ewald.getLattice(); }
         /* Setters */
-        inline void updateLattice(LatticeMatrix lattice);
+        inline void setLattice(LatticeMatrix lattice);
         /* Static members */
         [[nodiscard]] static PositionMatrix makePermanentDipole(const PeriodicCell<ScalarType, 3>& cell);
         static PermutationMatrix<ScalarType> sortPosition(MDCellType& cell);
@@ -300,7 +301,7 @@ namespace Physica::Core {
     }
 
     template<class ScalarType, class EwaldType>
-    inline void Q_TIP4P<ScalarType, EwaldType>::updateLattice(LatticeMatrix lattice) {
+    inline void Q_TIP4P<ScalarType, EwaldType>::setLattice(LatticeMatrix lattice) {
         ewald.setLattice(std::move(lattice));
     }
 
