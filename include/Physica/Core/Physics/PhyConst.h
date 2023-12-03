@@ -47,7 +47,7 @@ namespace Physica::Core {
     public:
         constexpr static double planck = 6.62607015E-34;
         constexpr static double reducedPlanck = planck / (2 * M_PI);
-        constexpr static double electroMass = 9.1093837015E-31;
+        constexpr static double electronMass = 9.1093837015E-31;
         constexpr static double unitCharge = 1.602176634E-19;
         constexpr static double bohrRadius = 0.529177210903E-10;
         constexpr static double protonMass = 1.67262192369E-27;
@@ -95,8 +95,8 @@ namespace Physica::Core {
         constexpr static double electronMass = 1;
         constexpr static double unitCharge = 1;
         constexpr static double bohrRadius = 1;
-        constexpr static double protonMass = PhyConst<SI>::protonMass / PhyConst<SI>::electroMass;
-        constexpr static double neutronMass = PhyConst<SI>::neutronMass / PhyConst<SI>::electroMass;
+        constexpr static double protonMass = PhyConst<SI>::protonMass / PhyConst<SI>::electronMass;
+        constexpr static double neutronMass = PhyConst<SI>::neutronMass / PhyConst<SI>::electronMass;
         constexpr static double vacuumDielectric = (PhyConst<SI>::vacuumDielectric * PhyConst<SI>::bohrRadius) / (jouleInHartree * PhyConst<SI>::unitCharge * PhyConst<SI>::unitCharge);
         constexpr static double boltzmannK = 1;
         constexpr static double speedOfLight = PhyConst<SI>::speedOfLight / PhyConst<SI>::bohrRadius * timeInSecond;
@@ -111,7 +111,7 @@ namespace Physica::Core {
         [[nodiscard]] constexpr static double kToTemperature(double kelvin) { return kelvin / temperatureInK; }
         [[nodiscard]] constexpr static double pressToGPa(double atomic_press) { return atomic_press * pressInGPa; }
         [[nodiscard]] constexpr static double pressToKBar(double atomic_press) { return pressToGPa(atomic_press) * 10; }
-        [[nodiscard]] constexpr static double atomMass(size_t atomicNum) { return PhyConst<SI>::atomMass(atomicNum) / PhyConst<SI>::electroMass; }
+        [[nodiscard]] constexpr static double atomMass(size_t atomicNum) { return PhyConst<SI>::atomMass(atomicNum) / PhyConst<SI>::electronMass; }
         [[nodiscard]] constexpr static double freqToTHz(double atomic_freq) { return atomic_freq * 1E-12 / timeToSecond(1); }
         [[nodiscard]] constexpr static double THzToFreq(double thz) { return thz * timeToSecond(1) * 1E12; }
     };

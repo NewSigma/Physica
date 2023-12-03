@@ -186,16 +186,12 @@ namespace Physica::Core {
 
     template<class ScalarType>
     typename Ewald<ScalarType>::LatticeMatrix Ewald<ScalarType>::virial(const PositionMatrix& pos) const {
-        LatticeMatrix kSpaceVirial(Dim, Dim, 0);
-        const ScalarType gammaPointP = gammaPointE * Base::getInvVolume();
-        for (unsigned int i = 0; i < Dim; ++i)
-            kSpaceVirial(i, i) = gammaPointP;
-
         const ScalarType factor = reciprocal(square(PlainScalar(2) * getIntegralLimit()));
         const size_t numParticle = getNumParticle();
         Vector<ScalarType> dots(numParticle);
         Vector<ScalarType> sin_vec(numParticle);
         Vector<ScalarType> cos_vec(numParticle);
+        LatticeMatrix kSpaceVirial(Dim, Dim, 0);
         PeriodicCell<ScalarType, Dim>::forReducedCellInRange( // Reduce cell using time reversal symmetry
             getKSpaceSumRange(), getRepLattice(), [this, &pos, &kSpaceVirial, &dots, &sin_vec, &cos_vec, factor](Vector3D delta) {
                 const auto& charges = getCharges();
@@ -218,6 +214,9 @@ namespace Physica::Core {
                 }
             });
         kSpaceVirial *= ScalarType(-M_PI) * square(Base::getInvVolume() / getIntegralLimit());
+        const ScalarType gammaPointP = gammaPointE * Base::getInvVolume();
+        for (unsigned int i = 0; i < Dim; ++i)
+            kSpaceVirial(i, i) += gammaPointP;
         const LatticeMatrix rSpaceVirial = Base::virial(pos);
         return kSpaceVirial + rSpaceVirial;
     }

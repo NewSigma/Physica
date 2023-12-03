@@ -50,7 +50,7 @@ namespace Physica::Core {
             const ScalarType x1_x2 = x1 - x2;
             const ScalarType x2_x3 = x2 - x3;
             const ScalarType x3_x1 = x3 - x1;
-            return (x3 * x3_xx * y1_y2 + x1 * x1_xx * y2_y3 + x2 * x2_xx * y3_y1) / (x1_x2 * x2_x3 * x3_x1);
+            return -(x3 * x3_xx * y1_y2 + x1 * x1_xx * y2_y3 + x2 * x2_xx * y3_y1) / (x1_x2 * x2_x3 * x3_x1);
         }
         /**
          * \param factor
@@ -61,7 +61,7 @@ namespace Physica::Core {
             const ScalarType y1_y2 = y1 - y2;
             const ScalarType y2_y3 = y2 - y3;
             const ScalarType y3_y1 = y3 - y1;
-            return -(step * y3_y1 + ScalarType(2) * (x - x2) * (y1_y2 - y2_y3)) * factor;
+            return (step * y3_y1 + ScalarType(2) * (x - x2) * (y1_y2 - y2_y3)) * factor;
         }
     }
     /**
