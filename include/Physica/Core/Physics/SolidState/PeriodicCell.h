@@ -522,6 +522,8 @@ namespace Physica::Core {
         rowY.asVector() *= ScalarType(y);
         auto rowZ = lattice.row(2);
         rowZ.asVector() *= ScalarType(z);
+        if constexpr (ScalarType::isReverseDiff)
+            lattice.makeContinuous();
     }
 
     template<class ScalarType, unsigned int Dim>
@@ -583,6 +585,8 @@ namespace Physica::Core {
             }
         }
         target.swap(new_pos);
+        if constexpr (ScalarType::isReverseDiff)
+            target.makeContinuous();
     }
 
     template<class ScalarType, unsigned int Dim>

@@ -63,8 +63,13 @@ namespace Physica::Core {
         const bool useSpecialization = ContinuousMatrix<Derived>::ColumnAtCompile == 1;
         if constexpr (useSpecialization)
             return {Base::getConstCastDerived(), r, 1, 0};
-        else
-            return {Base::getConstCastDerived(), r, 0, Base::getColumn()};
+        else {
+            using ResultType = ContinuousMatrixBlock<Derived, 1, ContinuousMatrix<Derived>::ColumnAtCompile>;
+            ResultType result{Base::getConstCastDerived(), r, 0, Base::getColumn()};
+            if constexpr (isRowMatrix && isReverseDiff)
+                assert(result.checkContinuous() && "[Error]: Const matrix must be continuous because we cannot modify it and make it continuous");
+            return result;
+        }
     }
 
     template<class Derived>
@@ -74,7 +79,11 @@ namespace Physica::Core {
 
     template<class Derived>
     inline const ContinuousMatrixBlock<Derived, ContinuousMatrix<Derived>::RowAtCompile, 1> ContinuousMatrix<Derived>::col(size_t c) const {
-        return {Base::getConstCastDerived(), 0, Base::getRow(), c};
+        using ResultType = ContinuousMatrixBlock<Derived, ContinuousMatrix<Derived>::RowAtCompile, 1>;
+        ResultType result{Base::getConstCastDerived(), 0, Base::getRow(), c};
+        if constexpr (isColumnMatrix && isReverseDiff)
+            assert(result.checkContinuous() && "[Error]: Const matrix must be continuous because we cannot modify it and make it continuous");
+        return result;
     }
 
     template<class Derived>
@@ -246,6 +255,12 @@ namespace Physica::Core {
     template<size_t Row, size_t Column>
     inline const ContinuousMatrixBlock<Derived, Row, Column> ContinuousMatrix<Derived>::block(size_t fromRow, size_t rowCount, size_t fromCol, size_t colCount) const {
         return {Base::getConstCastDerived(), fromRow, rowCount, fromCol, colCount};
+    }
+
+    template<class Derived>
+    inline void ContinuousMatrix<Derived>::makeContinuous() {
+        if constexpr (isReverseDiff)
+            Base::getDerived() = Base::getDerived().copy();
     }
 
     template<class Derived>

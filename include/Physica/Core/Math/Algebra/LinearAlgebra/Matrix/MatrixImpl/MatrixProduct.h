@@ -19,6 +19,7 @@
 #pragma once
 
 namespace Physica::Core {
+    template<class Derived> class ContinuousMatrix;
     template<class MatrixType1, class MatrixType2> class MatrixProduct;
     template<class VectorType, class MatrixType> class VectorMatrixProduct;
     template<class MatrixType, class VectorType> class MatrixVectorProduct;
@@ -82,6 +83,7 @@ namespace Physica::Core {
                       "[Error]: Row and column do not match in matrix-vector product");
     public:
         using Base = RValueMatrix<MatrixProduct<MatrixType1, MatrixType2>>;
+        using Base::isReverseDiff;
         using typename Base::ScalarType;
         using DefaultType = DenseMatrix<ScalarType,
                                         Internal::ProductOption<MatrixType1, MatrixType2>::Option,
@@ -116,6 +118,7 @@ namespace Physica::Core {
                       "Row and column do not match in matrix product");
     public:
         using Base = RValueMatrix<VectorMatrixProduct<VectorType, MatrixType>>;
+        using Base::isReverseDiff;
         using typename Base::ScalarType;
     private:
         const VectorType& vec;
@@ -125,9 +128,6 @@ namespace Physica::Core {
                 : vec(vec_.getDerived()), mat(mat_.getDerived()) {
             assert(mat.getRow() == 1);
         }
-        /* Operations */
-        template<class OtherDerived>
-        void assignTo(LValueMatrix<OtherDerived>& target) const;
         /* Getters */
         [[nodiscard]] ScalarType calc(size_t row, size_t column) const;
         [[nodiscard]] __host__ __device__ size_t getRow() const { return vec.getLength(); }

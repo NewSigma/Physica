@@ -183,6 +183,12 @@ namespace Physica::Core {
     }
 
     template<class Derived>
+    inline void ContinuousVector<Derived>::makeContinuous() {
+        if constexpr (isReverseDiff)
+            Base::getDerived() = Base::getDerived().copy();
+    }
+
+    template<class Derived>
     bool ContinuousVector<Derived>::checkContinuous() const {
         if constexpr (isReverseDiff) {
             const ScalarType i0 = (*this)[0];
@@ -194,12 +200,6 @@ namespace Physica::Core {
             }
         }
         return true;
-    }
-
-    template<class Derived>
-    inline void ContinuousVector<Derived>::makeContinuous() {
-        if constexpr (isReverseDiff)
-            Base::getDerived() = Base::getDerived().copy();
     }
 
     template<class Derived>

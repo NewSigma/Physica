@@ -132,6 +132,16 @@ namespace Physica {
             ewald = Ewald<ScalarType>(lattice, {1, 1, 1, 1, 1, 1, 1, 1, 8, 8, 8, 8});
         };
         /* Operations */
+        void functorTest() {
+            const AutoDiffGuard<Scalar<Double>> guard{};
+            const ScalarType r = 2;
+            const ScalarType r2 = square(r);
+            ewald.pot_functor(0, 1, r, r2).reverse();
+            const ScalarType f = ewald.force_functor(0, 1, r, r2);
+            if (!scalarNear(-r.getTangent(), f.getValue(), 1E-10))
+                exit(EXIT_FAILURE);
+        }
+
         void forceTest() {
             {
                 const AutoDiffGuard<Scalar<Double>> guard{};
@@ -146,16 +156,6 @@ namespace Physica {
             if (!vectorNear(force, force_diff.flatten(), 1E-11))
                 exit(EXIT_FAILURE);
         }
-
-        void functorTest() {
-            const AutoDiffGuard<Scalar<Double>> guard{};
-            const ScalarType r = 2;
-            const ScalarType r2 = square(r);
-            ewald.pot_functor(0, 1, r, r2).reverse();
-            const ScalarType f = ewald.force_functor(0, 1, r, r2);
-            if (!scalarNear(-r.getTangent(), f.getValue(), 1E-10))
-                exit(EXIT_FAILURE);
-        }
     };
 }
 
@@ -165,7 +165,7 @@ int main() {
     madelungTest<Scalar<Double>>();
     madelungTest<Scalar<Float>>();
     Physica::Test test{};
-    test.forceTest();
     test.functorTest();
+    test.forceTest();
     return 0;
 }

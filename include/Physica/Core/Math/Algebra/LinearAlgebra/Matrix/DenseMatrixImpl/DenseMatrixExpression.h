@@ -70,19 +70,6 @@ namespace Physica::Core {
             using Base = RValueMatrix<Derived>;
             using typename Base::ScalarType;
         public:
-            template<class OtherDerived>
-            void assignTo(LValueMatrix<OtherDerived>& m) const {
-                using ScalarType_ = typename OtherDerived::ScalarType;
-                assert(getRow() == m.getRow() && getColumn() == m.getColumn());
-                for (size_t i = 0; i < m.getMaxMajor(); ++i) {
-                    for (size_t j = 0; j < m.getMaxMinor(); ++j) {
-                        const size_t r = MatrixOption::rowFromMajorMinor<OtherDerived>(i, j);
-                        const size_t c = MatrixOption::columnFromMajorMinor<OtherDerived>(i, j);
-                        m(r, c) = ScalarType_(calc(r, c));
-                    }
-                }       
-            }
-
             [[nodiscard]] ScalarType calc(size_t row, size_t col) const { return Base::getDerived().calc(row, col); }
             /* Getters */
             [[nodiscard]] __host__ __device__ size_t getRow() const noexcept { return Base::getDerived().getRow(); }

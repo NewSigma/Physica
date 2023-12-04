@@ -34,6 +34,8 @@ namespace Physica::Core {
         using typename Base::PlainScalar;
         using Base::RowAtCompile;
         using Base::ColumnAtCompile;
+        using Base::isColumnMatrix;
+        using Base::isRowMatrix;
         using Base::isReverseDiff;
     public:
         ~ContinuousMatrix() = default;
@@ -103,6 +105,7 @@ namespace Physica::Core {
         [[nodiscard]] ContinuousFlatten<Derived> flatten() { return {*this}; }
         [[nodiscard]] const ContinuousFlatten<Derived> flatten() const { return {*this}; }
 
+        inline void makeContinuous();
         [[nodiscard]] bool checkContinuous() const;
         template<class RandomGenerator>
         void random_uniform(RandomGenerator& gen);

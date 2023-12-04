@@ -26,6 +26,42 @@ using namespace Physica::Core;
 using PlainScalar = Scalar<Double>;
 using ScalarType = Differentiable<PlainScalar, DiffMode::Reverse>;
 
+class PressTest {
+    using RandomGenerator = std::mt19937;
+    using MDCellType = MDCell<ScalarType>;
+    using LatticeMatrix = typename MDCellType::LatticeMatrix;
+    using PositionMatrix = typename MDCellType::PositionMatrix;
+    constexpr static double mass = PhyConst<AU>::atomMass(1) * 2;
+    constexpr static size_t numMolecular = 108;
+    constexpr static double pair_cutoff = 15;
+public:
+    static void run() {
+        const AutoDiffGuard<PlainScalar> guard{};
+        RandomGenerator gen{};
+        const ScalarType volume = 8000;
+        const auto cell = makeSystem(gen, volume);
+        SilveraGoldman<ScalarType, true> sg(pair_cutoff);
+        sg.potentialEnergy(cell).reverse();
+        const ScalarType press_diff = -volume.getTangent();
+        const ScalarType press = sg.virial(cell).trace() / ScalarType(3);
+        if (!scalarNear(press_diff.getValue(), press.getValue(), 1E-15))
+            exit(EXIT_FAILURE);
+    }
+private:
+    static MDCellType makeSystem(RandomGenerator& gen, ScalarType volume) {
+        typename MDCellType::LatticeMatrix lattice = MDCellType::LatticeMatrix::unitMatrix(3);
+        const ScalarType latticeConst = cbrt(volume);
+        lattice *= latticeConst;
+
+        typename MDCellType::PositionMatrix pos(numMolecular, 3);
+        pos.random_uniform(gen);
+        pos *= latticeConst;
+
+        typename MDCellType::MassVector massVec(numMolecular, mass);
+        return MDCellType(std::move(lattice), std::move(pos), std::move(massVec));
+    }
+};
+
 int main() {
     SilveraGoldman<ScalarType, true> sg(1.0);
     {
@@ -48,5 +84,6 @@ int main() {
         if (!scalarNear(fc, fc1, 1E-15))
             return 1;
     }
+    PressTest::run();
     return 0;
 }

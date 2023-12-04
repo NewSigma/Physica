@@ -268,31 +268,14 @@ namespace Physica::Core {
     template<class Derived>
     typename PairModel<Derived>::LatticeMatrix
     PairModel<Derived>::virial(const LatticeMatrix& lattice, const PositionMatrix& pos) const {        
-        const CellListType cellList(lattice, pos, cutoff);
-        const size_t numParticle = pos.getRow();
-
         LatticeMatrix result(Dim, Dim, 0);
-        for (size_t atom1 = 0; atom1 < numParticle; ++atom1) {
-            const Index3D center = cellList.getAtomCellMap()[atom1];
-            cellList.forNeighInRange(center, [this, atom1, pos, &cellList, &result](Vector3D translate, Index3D neigh) {
-                const Vector3D from = pos.row(atom1) - translate;
-                cellList.forAtomInCell(neigh, [this, atom1, pos, &from, &result](size_t atom2) {
-                    const bool isSelf = atom1 == atom2;
-                    if (isSelf) [[unlikely]]
-                        return;
-                    const auto to = pos.row(atom2);
-                    const Vector3D r = to.asVector() - from;
-                    const ScalarType r2 = r.squaredNorm();
-                    if (r2 < squared_cutoff) {
-                        const ScalarType dist = sqrt(r2);
-                        const ScalarType f_norm = force_functor(atom1, atom2, dist, r2);
-                        const Vector3D f = r * ScalarType(f_norm / dist);
-                        result += f * r.transpose();
-                    }
-                });
-            });
-        }
-        result *= reciprocal(MDCellType::getVolume(lattice) * ScalarType(2));
+        auto kernel = [this, &result](size_t i, size_t j, Vector3D r, ScalarType norm1, ScalarType norm2) {
+            const ScalarType f_norm = force_functor(i, j, norm1, norm2);
+            const Vector3D f = r * (f_norm / norm1);
+            result += f * r.transpose();
+        };
+        forPairInCutoff<false, decltype(kernel)>(lattice, pos, kernel);
+        result *= reciprocal(MDCellType::getVolume(lattice));
         return result;
     }
 

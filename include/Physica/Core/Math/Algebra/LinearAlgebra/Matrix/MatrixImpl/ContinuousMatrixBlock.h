@@ -80,8 +80,8 @@ namespace Physica::Core {
             assert(row < mat.getRow());
             assert(fromCol + colCount <= mat.getColumn());
         }
-        RowContinuousVector(const RowContinuousVector&) = delete;
-        RowContinuousVector(RowContinuousVector&&) noexcept = delete;
+        RowContinuousVector(const RowContinuousVector&) = default;
+        RowContinuousVector(RowContinuousVector&&) noexcept = default;
         ~RowContinuousVector() = default;
         /* Operators */
         using Base::operator=;
@@ -89,6 +89,7 @@ namespace Physica::Core {
         RowContinuousVector& operator=(RowContinuousVector&& v) noexcept { return operator=(std::cref(v)); }
         /* Operations */
         void resize([[maybe_unused]] size_t length) { assert(length == getLength()); }
+        void makeContinuous() { /* Nothing, it is matrix's responsibility */ }
         /* Getters */
         [[nodiscard]] __host__ __device__ size_t getLength() const noexcept { return Length == Dynamic ? colCount : Length; }
         [[nodiscard]] __host__ __device__ ScalarType* data_ptr(size_t index) {
@@ -99,6 +100,8 @@ namespace Physica::Core {
             assert(index < colCount && "[Error]: Index overflow");
             return pVecHead + index;
         }
+    private:
+        using Base::makeContinuous;
     };
 
     template<class MatrixType, size_t Length>
@@ -115,8 +118,8 @@ namespace Physica::Core {
             assert(fromRow + rowCount <= mat.getRow());
             assert(col < mat.getColumn());
         }
-        ColContinuousVector(const ColContinuousVector&) = delete;
-        ColContinuousVector(ColContinuousVector&&) noexcept = delete;
+        ColContinuousVector(const ColContinuousVector&) = default;
+        ColContinuousVector(ColContinuousVector&&) noexcept = default;
         ~ColContinuousVector() = default;
         /* Operators */
         using Base::operator=;
@@ -124,6 +127,7 @@ namespace Physica::Core {
         ColContinuousVector& operator=(ColContinuousVector&& v) noexcept { return operator=(std::cref(v)); }
         /* Operations */
         void resize([[maybe_unused]] size_t length) { assert(length == getLength()); }
+        void makeContinuous() { /* Nothing, it is matrix's responsibility */ }
         /* Getters */
         [[nodiscard]] __host__ __device__ size_t getLength() const noexcept { return Length == Dynamic ? rowCount : Length; }
         [[nodiscard]] __host__ __device__ ScalarType* data_ptr(size_t index) {
@@ -134,6 +138,8 @@ namespace Physica::Core {
             assert(index < rowCount && "[Error]: Index overflow");
             return pVecHead + index;
         }
+    private:
+        using Base::makeContinuous;
     };
 
     template<class MatrixType, size_t Column>
@@ -152,8 +158,8 @@ namespace Physica::Core {
         }
         ContinuousMatrixBlock(ContinuousMatrix<MatrixType>& mat_, size_t row_, size_t fromCol_, size_t colCount_)
                 : VectorBase(mat_.getDerived(), row_, fromCol_, colCount_) {}
-        ContinuousMatrixBlock(const ContinuousMatrixBlock&) = delete;
-        ContinuousMatrixBlock(ContinuousMatrixBlock&&) noexcept = delete;
+        ContinuousMatrixBlock(const ContinuousMatrixBlock&) = default;
+        ContinuousMatrixBlock(ContinuousMatrixBlock&&) noexcept = default;
         ~ContinuousMatrixBlock() = default;
         /* Operators */
         ContinuousMatrixBlock& operator=(const ContinuousMatrixBlock& m) { VectorBase::operator=(m.asVector()); return *this; }
@@ -206,8 +212,8 @@ namespace Physica::Core {
         }
         ContinuousMatrixBlock(ContinuousMatrix<MatrixType>& mat_, size_t fromRow_, size_t rowCount_, size_t col_)
                 : VectorBase(mat_.getDerived(), fromRow_, rowCount_, col_) {}
-        ContinuousMatrixBlock(const ContinuousMatrixBlock&) = delete;
-        ContinuousMatrixBlock(ContinuousMatrixBlock&&) noexcept = delete;
+        ContinuousMatrixBlock(const ContinuousMatrixBlock&) = default;
+        ContinuousMatrixBlock(ContinuousMatrixBlock&&) noexcept = default;
         ~ContinuousMatrixBlock() = default;
         /* Operators */
         ContinuousMatrixBlock& operator=(const ContinuousMatrixBlock& m) { VectorBase::operator=(m.asVector()); return *this; }
@@ -256,8 +262,8 @@ namespace Physica::Core {
     public:
         ContinuousMatrixBlock(ContinuousMatrix<MatrixType>& mat_, size_t fromRow_, size_t rowCount_, size_t col_)
                 : VectorBase(mat_.getDerived(), fromRow_, rowCount_, col_) {}
-        ContinuousMatrixBlock(const ContinuousMatrixBlock&) = delete;
-        ContinuousMatrixBlock(ContinuousMatrixBlock&&) noexcept = delete;
+        ContinuousMatrixBlock(const ContinuousMatrixBlock&) = default;
+        ContinuousMatrixBlock(ContinuousMatrixBlock&&) noexcept = default;
         ~ContinuousMatrixBlock() = default;
         /* Operators */
         ContinuousMatrixBlock& operator=(const ContinuousMatrixBlock& m) { VectorBase::operator=(m.asVector()); return *this; }

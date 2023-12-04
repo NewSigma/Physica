@@ -60,7 +60,7 @@ namespace Physica::Core {
         Vector<ScalarType> charges;
         ScalarType inv_volume;
         ScalarType integralLimit;
-        Vector<PlainScalar> erfc_table;
+        Vector<ScalarType> erfc_table;
         ScalarType erfcStep;
         ScalarType repErfcStep;
         ScalarType repDoubleSquareStep;
@@ -281,9 +281,9 @@ namespace Physica::Core {
 
     template<class ScalarType>
     void RSpaceEwald<ScalarType>::makeTables() {
-        for (size_t i = 1; i < erfc_table.getLength(); ++i) {
+        for (size_t i = 2; i < erfc_table.getLength(); ++i) {
             const auto x = PlainScalar((i - 1) * ErfcTableStep);
-            erfc_table[i] = erfc(x) / x * integralLimit.getValue();
+            erfc_table[i] = erfc(x) / x * integralLimit;
         }
         erfc_table[0] = erfc_table[1] = erfc_table[2]; // Smooth out divergent erfc(0) / 0 
         erfcStep = PlainScalar(ErfcTableStep) / integralLimit;

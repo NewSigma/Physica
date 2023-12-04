@@ -24,12 +24,12 @@ namespace Physica::Core {
     namespace Internal {
         template<class SourceType, class TargetType, size_t Size>
         struct InverseImpl {
-            static void run(const SourceType& source, TargetType& target) {
+            static void run(const LValueMatrix<SourceType>& source, LValueMatrix<TargetType>& target) {
                 const size_t order = source.getRow();
                 const size_t order_1 = order - 1;
-                SourceType copy = source;
+                SourceType copy = source.getDerived();
                 if constexpr (MatrixOption::isSameMajor<SourceType, TargetType>()) {
-                    target.toUnitMatrix();
+                    target.getDerived().toUnitMatrix();
                     for (size_t i = 0; i < order_1; ++i) {
                         size_t k = i;
                         while(copy.refFromMajorMinor(k, i).isZero()) {
@@ -39,13 +39,13 @@ namespace Physica::Core {
                         }
                         if (k != i) {
                             copy.majorSwap(k, i);
-                            target.majorSwap(k, i);
+                            target.getDerived().majorSwap(k, i);
                         }
                         
                         for (size_t j = i + 1; j < order; ++j) {
                             auto factor = copy.refFromMajorMinor(j, i) / copy.refFromMajorMinor(i, i);
                             copy.majorReduce(j, i, factor);
-                            target.majorReduce(j, i, factor);
+                            target.getDerived().majorReduce(j, i, factor);
                         }
                     }
 
@@ -58,17 +58,17 @@ namespace Physica::Core {
                         }
                         if (k != i) {
                             copy.majorSwap(k, i);
-                            target.majorSwap(k, i);
+                            target.getDerived().majorSwap(k, i);
                         }
                         
                         for (size_t j = 0; j < i; ++j) {
                             auto factor = copy.refFromMajorMinor(j, i) / copy.refFromMajorMinor(i, i);
                             copy.majorReduce(j, i, factor);
-                            target.majorReduce(j, i, factor);
+                            target.getDerived().majorReduce(j, i, factor);
                         }
                     }
                     for (size_t i = 0; i < order; ++i)
-                        target.majorMulScalar(i, reciprocal(copy(i, i)));
+                        target.getDerived().majorMulScalar(i, reciprocal(copy(i, i)));
                 }
                 else {
                     auto temp = SourceType::unitMatrix(order);
@@ -98,7 +98,7 @@ namespace Physica::Core {
                         }
                         if (k != i) {
                             copy.majorSwap(k, i);
-                            target.majorSwap(k, i);
+                            target.getDerived().majorSwap(k, i);
                         }
 
                         for (size_t j = 0; j < i; ++j) {
@@ -109,16 +109,16 @@ namespace Physica::Core {
                     }
                     for (size_t i = 0; i < order; ++i)
                         temp.majorMulScalar(i, reciprocal(copy(i, i)));
-                    target = temp;
+                    target.getDerived() = temp;
                 }
             }
         };
 
         template<class SourceType, class TargetType>
         struct InverseImpl<SourceType, TargetType, 3> {
-            static void run(const SourceType& source, TargetType& target) {
+            static void run(const LValueMatrix<SourceType>& source, LValueMatrix<TargetType>& target) {
                 using ScalarType = typename SourceType::ScalarType;
-                const ScalarType repDet = reciprocal(source.determinate());
+                const ScalarType repDet = reciprocal(source.getDerived().determinate());
                 if constexpr (TargetType::isRowMatrix) {
                     target(0, 0) = (source(1, 1) * source(2, 2) - source(1, 2) * source(2, 1)) * repDet;
                     target(0, 1) = -(source(0, 1) * source(2, 2) - source(2, 1) * source(0, 2)) * repDet;
@@ -141,6 +141,10 @@ namespace Physica::Core {
                     target(1, 2) = -(source(0, 0) * source(1, 2) - source(1, 0) * source(0, 2)) * repDet;
                     target(2, 2) = (source(0, 0) * source(1, 1) - source(1, 0) * source(0, 1)) * repDet;
                 }
+
+                constexpr bool isContinuous = std::is_base_of<ContinuousMatrix<TargetType>, TargetType>::value;
+                if constexpr (isContinuous && ScalarType::isReverseDiff)
+                    target.getDerived().makeContinuous();
             }
         };
     }

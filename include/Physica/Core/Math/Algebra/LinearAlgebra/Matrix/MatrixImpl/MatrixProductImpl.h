@@ -44,6 +44,10 @@ namespace Physica::Core {
                 }
             }
         }
+
+        constexpr bool isContinuous = std::is_base_of<ContinuousMatrix<OtherDerived>, OtherDerived>::value;
+        if constexpr (isContinuous && isReverseDiff)
+            target.getDerived().makeContinuous();
     }
 
     template<class T1, class T2>
@@ -52,18 +56,6 @@ namespace Physica::Core {
         for (size_t i = 0; i < mat1.getColumn(); ++i)
             result += ScalarType(mat1.calc(row, i)) * ScalarType(mat2.calc(i, column));
         return result;
-    }
-
-    template<class VectorType, class MatrixType>
-    template<class OtherDerived>
-    void VectorMatrixProduct<VectorType, MatrixType>::assignTo(LValueMatrix<OtherDerived>& target) const {
-        using TargetType = LValueMatrix<OtherDerived>;
-        const size_t maxMajor = target.getMaxMajor();
-        const size_t maxMinor = target.getMaxMinor();
-        for (size_t i = 0; i < maxMajor; ++i)
-            for (size_t j = 0; j < maxMinor; ++j)
-                target.refFromMajorMinor(i, j) = calc(TargetType::rowFromMajorMinor(i, j),
-                                                      TargetType::columnFromMajorMinor(i, j));
     }
 
     template<class VectorType, class MatrixType>

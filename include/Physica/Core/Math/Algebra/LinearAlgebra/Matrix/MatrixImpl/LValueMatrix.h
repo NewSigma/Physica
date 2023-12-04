@@ -101,9 +101,6 @@ namespace Physica::Core {
         inline void majorMulScalar(size_t v, const ScalarType& factor);
         inline void majorSwap(size_t v1, size_t v2);
 
-        template<class OtherDerived>
-        void assignTo(LValueMatrix<OtherDerived>& target) const;
-
         template<class RandomGenerator>
         void random_uniform(RandomGenerator& gen);
         template<class RandomGenerator>

@@ -42,10 +42,10 @@ namespace Physica::Core {
         inline Derived& operator=(const ScalarType& s);
         [[nodiscard]] ScalarType& operator[](size_t index) { return *data_ptr(index); }
         [[nodiscard]] const ScalarType& operator[](size_t index) const { return *data_ptr(index); }
-        template<class T> void operator+=(const ScalarBase<T>& s) { (*this) = (*this) + s.getDerived(); }
-        template<class T> void operator-=(const ScalarBase<T>& s) { (*this) = (*this) - s.getDerived(); }
-        template<class T> void operator*=(const ScalarBase<T>& s) { (*this) = (*this) * s.getDerived(); }
-        template<class T> void operator/=(const ScalarBase<T>& s) { (*this) = (*this) / s.getDerived(); }
+        void operator+=(const ScalarType& s) { (*this) = (*this) + s; }
+        void operator-=(const ScalarType& s) { (*this) = (*this) - s; }
+        void operator*=(const ScalarType& s) { (*this) = (*this) * s; }
+        void operator/=(const ScalarType& s) { (*this) = (*this) / s; }
         /* Operations */
         [[nodiscard]] ScalarType calc(size_t index) const { return *data_ptr(index); }
         template<class PacketType> void writePacket(size_t index, const PacketType packet);

@@ -78,8 +78,8 @@ namespace Physica::Core {
             assert(row < mat.getRow());
             assert(fromCol + colCount <= mat.getColumn());
         }
-        RowLVector(const RowLVector&) = delete;
-        RowLVector(RowLVector&&) noexcept = delete;
+        RowLVector(const RowLVector&) = default;
+        RowLVector(RowLVector&&) noexcept = default;
         ~RowLVector() = default;
         /* Operators */
         RowLVector& operator=(const RowLVector& v) { v.assignTo(*this); return *this; }
@@ -109,8 +109,8 @@ namespace Physica::Core {
             assert(fromRow + rowCount <= mat.getRow());
             assert(col < mat.getColumn());
         }
-        ColLVector(const ColLVector&) = delete;
-        ColLVector(ColLVector&&) noexcept = delete;
+        ColLVector(const ColLVector&) = default;
+        ColLVector(ColLVector&&) noexcept = default;
         ~ColLVector() = default;
         /* Operators */
         ColLVector& operator=(const ColLVector& v) { v.assignTo(*this); return *this; }
@@ -134,8 +134,8 @@ namespace Physica::Core {
         using ScalarType = typename MatrixType::ScalarType;
     public:
         LMatrixBlock(MatrixType& mat_, size_t row_, size_t fromCol_, size_t colCount_) : VectorBase(mat_, row_, fromCol_, colCount_) {}
-        LMatrixBlock(const LMatrixBlock&) = delete;
-        LMatrixBlock(LMatrixBlock&&) noexcept = delete;
+        LMatrixBlock(const LMatrixBlock&) = default;
+        LMatrixBlock(LMatrixBlock&&) noexcept = default;
         ~LMatrixBlock() = default;
         /* Operators */
         template<class T> This& operator=(const ScalarBase<T>& s) { VectorBase::operator=(s); return *this; }
@@ -180,8 +180,8 @@ namespace Physica::Core {
         using ScalarType = typename MatrixType::ScalarType;
     public:
         LMatrixBlock(MatrixType& mat_, size_t fromRow_, size_t rowCount_, size_t col_) : VectorBase(mat_, fromRow_, rowCount_, col_) {}
-        LMatrixBlock(const LMatrixBlock&) = delete;
-        LMatrixBlock(LMatrixBlock&&) noexcept = delete;
+        LMatrixBlock(const LMatrixBlock&) = default;
+        LMatrixBlock(LMatrixBlock&&) noexcept = default;
         ~LMatrixBlock() = default;
         /* Operators */
         template<class T> This& operator=(const ScalarBase<T>& s) { VectorBase::operator=(s); return *this; }
@@ -230,8 +230,8 @@ namespace Physica::Core {
         size_t colCount;
     public:
         LMatrixBlock(MatrixType& mat_, size_t fromRow_, size_t rowCount_, size_t fromCol_, size_t colCount_);
-        LMatrixBlock(const LMatrixBlock&) = delete;
-        LMatrixBlock(LMatrixBlock&&) noexcept = delete;
+        LMatrixBlock(const LMatrixBlock&) = default;
+        LMatrixBlock(LMatrixBlock&&) noexcept = default;
         ~LMatrixBlock() = default;
         /* Operators */
         using Base::operator=;

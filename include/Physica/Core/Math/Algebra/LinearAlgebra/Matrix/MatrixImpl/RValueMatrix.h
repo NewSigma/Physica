@@ -22,6 +22,7 @@
 
 namespace Physica::Core {
     template<class Derived> class LValueMatrix;
+    template<class Derived> class ContinuousMatrix;
     template<class MatrixType> class Transpose;
     template<class MatrixType> class Conjugate;
     template<class MatrixType> class RValueFlatten;

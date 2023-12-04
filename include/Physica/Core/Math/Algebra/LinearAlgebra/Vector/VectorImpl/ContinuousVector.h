@@ -57,8 +57,8 @@ namespace Physica::Core {
         template<size_t Length = Dynamic> inline ContinuousVectorBlock<Derived, Length> segment(size_t from, size_t to);
         template<size_t Length = Dynamic> inline const ContinuousVectorBlock<Derived, Length> segment(size_t from, size_t to) const;
 
-        [[nodiscard]] bool checkContinuous() const;
         inline void makeContinuous();
+        [[nodiscard]] bool checkContinuous() const;
         template<class RandomGenerator>
         inline void random_uniform(RandomGenerator& gen);
         template<class RandomGenerator>

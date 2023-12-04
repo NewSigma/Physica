@@ -335,18 +335,6 @@ namespace Physica::Core {
     }
 
     template<class Derived>
-    template<class OtherDerived>
-    void LValueMatrix<Derived>::assignTo(LValueMatrix<OtherDerived>& target) const {
-        using TargetType = LValueMatrix<OtherDerived>;
-        using T = typename TargetType::ScalarType;
-        const size_t max_i = target.getMaxMajor();
-        const size_t max_j = target.getMaxMinor();
-        for (size_t i = 0; i < max_i; ++i)
-            for (size_t j = 0; j < max_j; ++j)
-                target.refFromMajorMinor(i, j) = T(this->operator()(MatrixOption::rowFromMajorMinor<OtherDerived>(i, j), MatrixOption::columnFromMajorMinor<OtherDerived>(i, j)));
-    }
-
-    template<class Derived>
     template<class RandomGenerator>
     void LValueMatrix<Derived>::random_uniform(RandomGenerator& gen) {
         const size_t maxMajor = Base::getMaxMajor();
