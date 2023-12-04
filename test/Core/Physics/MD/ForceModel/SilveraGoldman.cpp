@@ -31,6 +31,7 @@ class PressTest {
     using MDCellType = MDCell<ScalarType>;
     using LatticeMatrix = typename MDCellType::LatticeMatrix;
     using PositionMatrix = typename MDCellType::PositionMatrix;
+    using MassVector = typename MDCellType::MassVector;
     constexpr static double mass = PhyConst<AU>::atomMass(1) * 2;
     constexpr static size_t numMolecular = 108;
     constexpr static double pair_cutoff = 15;
@@ -49,15 +50,15 @@ public:
     }
 private:
     static MDCellType makeSystem(RandomGenerator& gen, ScalarType volume) {
-        typename MDCellType::LatticeMatrix lattice = MDCellType::LatticeMatrix::unitMatrix(3);
+        LatticeMatrix lattice = MDCellType::LatticeMatrix::unitMatrix(3);
         const ScalarType latticeConst = cbrt(volume);
         lattice *= latticeConst;
 
-        typename MDCellType::PositionMatrix pos(numMolecular, 3);
+        PositionMatrix pos(numMolecular, 3);
         pos.random_uniform(gen);
         pos *= latticeConst;
 
-        typename MDCellType::MassVector massVec(numMolecular, mass);
+        MassVector massVec(numMolecular, mass);
         return MDCellType(std::move(lattice), std::move(pos), std::move(massVec));
     }
 };

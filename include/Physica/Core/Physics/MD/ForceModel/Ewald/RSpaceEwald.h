@@ -22,6 +22,7 @@
 #include "Physica/Core/Math/Calculus/SpetialFunctions.h"
 #include "Physica/Core/Physics/MD/ForceModel/PairModel.h"
 #include "Physica/Core/Parallel/Executor/SequentialExecutor.h"
+#include "Physica/Utils/TestHelper.h"
 
 namespace Physica::Core {
     template<class ScalarType> class RSpaceEwald;
@@ -107,6 +108,8 @@ namespace Physica::Core {
     private:
         /* Operations */
         void makeTables();
+        [[nodiscard]] inline ScalarType pot_functor_slow(size_t i, size_t j, ScalarType r, ScalarType r2) const;
+        [[nodiscard]] inline ScalarType force_functor_slow(size_t i, size_t j, ScalarType r, ScalarType r2) const;
         [[nodiscard]] ScalarType rSpaceForceConstImpl1(ScalarType r) const;
         [[nodiscard]] ScalarType rSpaceForceConstImpl2(ScalarType r) const;
         using Base::potentialEnergy;
@@ -117,6 +120,7 @@ namespace Physica::Core {
         using Base::getSquaredCutoff;
         /* Friends */
         friend class PairModel<RSpaceEwald<ScalarType>>;
+        friend class Physica::Test;
     };
 
     template<class ScalarType>
@@ -237,7 +241,7 @@ namespace Physica::Core {
         constexpr double factor1 = 2 * M_PI * (1 - std::numeric_limits<ScalarType>::epsilon()); //To avoid rSpaceCutoff larger than max value
         const ScalarType maxRSpaceCutoff = std::min(heightX_2Pi, std::min(heightY_2Pi, heightZ_2Pi)) * PlainScalar(factor1);
         const ScalarType minLimit = ScalarType(SumPrec) / maxRSpaceCutoff;
-        integralLimit = std::max(integralLimit_, minLimit);
+        integralLimit = std::max(integralLimit_, minLimit).getValue();
 
         const PlainScalar rSpaceCutoff = PlainScalar(SumPrec) / integralLimit.getValue();
         rSpaceSumRange = PeriodicCell<ScalarType, Dim>::estimateRange(lattice, rSpaceCutoff);
@@ -289,6 +293,20 @@ namespace Physica::Core {
         erfcStep = PlainScalar(ErfcTableStep) / integralLimit;
         repErfcStep = reciprocal(erfcStep);
         repDoubleSquareStep = reciprocal(square(erfcStep) * PlainScalar(2));
+    }
+    /**
+     * Slow version functors are provided for debug use
+     */
+    template<class ScalarType>
+    ScalarType RSpaceEwald<ScalarType>::pot_functor_slow(size_t i, size_t j, ScalarType r, [[maybe_unused]] ScalarType r2) const {
+        const ScalarType x = r * integralLimit;
+        return charges[i] * charges[j] * erfc(x) / r;
+    }
+
+    template<class ScalarType>
+    ScalarType RSpaceEwald<ScalarType>::force_functor_slow(size_t i, size_t j, ScalarType r, ScalarType r2) const {
+        const ScalarType x = r * integralLimit;
+        return charges[i] * charges[j] * (erfc(x) + x * exp(-square(x)) * PlainScalar(M_2_SQRTPI)) / r2;
     }
 
     template<class ScalarType>

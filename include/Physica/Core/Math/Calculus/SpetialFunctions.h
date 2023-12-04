@@ -59,8 +59,8 @@ namespace Physica::Core {
         }
     }
 
-    template<ScalarOption Option>
-    Scalar<Option> lnGamma(const Scalar<Option>& s);
+    template<class ScalarType>
+    ScalarType lnGamma(const ScalarBase<ScalarType>& s_);
 
     template<ScalarOption Option>
     inline Scalar<Option> gamma(const Scalar<Option>& s);
@@ -68,11 +68,11 @@ namespace Physica::Core {
     template<ScalarOption Option>
     inline Scalar<Option> beta(const Scalar<Option>& s1, const Scalar<Option>& s2);
 
-    template<ScalarOption Option>
-    Scalar<Option> gammaP(const Scalar<Option>& a, const Scalar<Option>& x);
+    template<class ScalarType>
+    ScalarType gammaP(const ScalarBase<ScalarType>& a_, const ScalarBase<ScalarType>& x_);
 
-    template<ScalarOption Option>
-    Scalar<Option> gammaQ(const Scalar<Option>& a, const Scalar<Option>& x);
+    template<class ScalarType>
+    ScalarType gammaQ(const ScalarBase<ScalarType>& a_, const ScalarBase<ScalarType>& x_);
 
     template<class ScalarType>
     ScalarType bigamma(const ScalarBase<ScalarType>& x, const ScalarType& step);
@@ -80,8 +80,8 @@ namespace Physica::Core {
     template<ScalarOption Option>
     Scalar<Option> erf(const Scalar<Option>& x);
 
-    template<ScalarOption Option>
-    Scalar<Option> erfc(const Scalar<Option>& x);
+    template<class ScalarType>
+    ScalarType erfc(const ScalarBase<ScalarType>& x_);
 
     template<ScalarOption Option>
     Scalar<Option> standardNormalDistribution(const Scalar<Option>& x);

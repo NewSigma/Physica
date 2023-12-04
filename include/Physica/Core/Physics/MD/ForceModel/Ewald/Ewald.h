@@ -20,7 +20,6 @@
 
 #include "Physica/Core/Physics/SolidState/CrystalCell.h"
 #include "Physica/Core/Physics/MD/MDImpl/CellList.h"
-#include "Physica/Utils/TestHelper.h"
 #include "RSpaceEwald.h"
 
 namespace Physica::Core {

@@ -27,58 +27,61 @@ namespace Physica::Core {
          * [1] H.Press, William, A.Teukolsky, Saul, Vetterling, William T., Flannery, Brian P..
          * C++数值算法[M].北京: Publishing House of Electronics Industry, 2009:156
          */
-        template<ScalarOption Option>
-        Scalar<Option> incompGammaImpl1(const Scalar<Option>& a, const Scalar<Option>& x) {
-            using T = Scalar<Option>;
+        template<class ScalarType>
+        ScalarType incompGammaImpl1(const ScalarBase<ScalarType>& a_, const ScalarBase<ScalarType>& x_) {
+            const ScalarType& a = a_.getDerived();
+            const ScalarType& x = x_.getDerived();
             assert(a.isPositive() && !x.isNegative());
-            assert(x < a + T(1)); //When x > a + 1, the algorithm is slow, use the other method is better
-            T ap = a;
-            T temp = reciprocal(a);
-            T sum = temp;
+            assert(x < a + ScalarType(1) && "[Error]: When x > a + 1, the algorithm is slow, use the other method is better");
+            const ScalarType epsilon = std::numeric_limits<ScalarType>::epsilon();
+            ScalarType ap = a;
+            ScalarType temp = reciprocal(a);
+            ScalarType sum = temp;
             do {
-                ap += T(1);
+                ap += ScalarType(1);
                 temp *= x / ap;
                 sum += temp;
-            } while (abs(temp) >= abs(sum) * std::numeric_limits<T>::epsilon());
-            return sum * exp(T(-x + a * ln(x) - lnGamma(a)));
+            } while (abs(temp) >= abs(sum) * epsilon);
+            return sum * exp(ScalarType(-x + a * ln(x) - lnGamma(a)));
         }
         /**
          * Reference:
          * [1] H.Press, William, A.Teukolsky, Saul, Vetterling, William T., Flannery, Brian P..
          * C++数值算法[M].北京: Publishing House of Electronics Industry, 2009:161
          */
-        template<ScalarOption Option>
-        Scalar<Option> incompGammaImpl2(const Scalar<Option>& a, const Scalar<Option>& x) {
-            using T = Scalar<Option>;
+        template<class ScalarType>
+        ScalarType incompGammaImpl2(const ScalarBase<ScalarType>& a_, const ScalarBase<ScalarType>& x_) {
+            const ScalarType& a = a_.getDerived();
+            const ScalarType& x = x_.getDerived();
             assert(a.isPositive() && !x.isNegative());
-            assert(x > a + T(1)); //When x < a + 1, the algorithm is slow, use the other method is better
-            const T epsilon = std::numeric_limits<T>::epsilon();
-            const T floatMin = T(std::numeric_limits<T>::min()) / epsilon;
+            assert(x > a + ScalarType(1) && "[Error]: When x < a + 1, the algorithm is slow, use the other method is better");
+            const ScalarType epsilon = std::numeric_limits<ScalarType>::epsilon();
+            const ScalarType floatMin = ScalarType(std::numeric_limits<ScalarType>::min()) / epsilon;
 
-            T b = x + T(1) - a;
-            T c = reciprocal(T(floatMin));
-            T d = reciprocal(b);
-            T h = d;
-            T temp;
+            ScalarType b = x + ScalarType(1) - a;
+            ScalarType c = reciprocal(ScalarType(floatMin));
+            ScalarType d = reciprocal(b);
+            ScalarType h = d;
+            ScalarType temp;
             size_t i = 1;
             do {
-                T an = -T(i) * (T(i) - a); //Possible to optimize use add instead of multiply
+                ScalarType an = -ScalarType(i) * (ScalarType(i) - a); //Possible to optimize use add instead of multiply
                 ++i;
-                b += T(2);
+                b += ScalarType(2);
                 d = an * d + b;
-                T copy_d(d);
+                ScalarType copy_d(d);
                 if (copy_d.toAbs() < floatMin)
                     d = floatMin;
 
                 c = an / c + b;
-                T copy_c(c);
+                ScalarType copy_c(c);
                 if (copy_c.toAbs() < floatMin)
                     c = floatMin;
                 d = reciprocal(d);
                 temp = c * d;
                 h *= temp; 
-            } while (T(temp - T(1)).toAbs() >= epsilon);
-            return h * exp(T(-x + a * ln(x) - lnGamma(a)));
+            } while (ScalarType(temp - ScalarType(1)).toAbs() >= epsilon);
+            return h * exp(ScalarType(-x + a * ln(x) - lnGamma(a)));
         }
     }
     /**
@@ -89,11 +92,11 @@ namespace Physica::Core {
      * C++数值算法[M].北京: Publishing House of Electronics Industry, 2009:156
      * [2] Lanczos, C. 1964, SIAM Journal on Numerical Analysis, ser. B, vol. 1, pp. 86-96
      */
-    template<ScalarOption Option>
-    Scalar<Option> lnGamma(const Scalar<Option>& s) {
-        using T = Scalar<Option>;
+    template<class ScalarType>
+    ScalarType lnGamma(const ScalarBase<ScalarType>& s_) {
+        const ScalarType& s = s_.getDerived();
         assert(s.isPositive());
-        if constexpr (Option == Double) {
+        if constexpr (ScalarType::Option == Double) {
             /**
              * Double version is implemented with gamma = 6 and N = 9 [1] to make full use of precision of double
              * 
@@ -105,15 +108,15 @@ namespace Physica::Core {
              */
             constexpr static int count = 9;
             constexpr static double coeffcients[count]{228.9344030404165, -342.8104127892456, 151.3843107005646, -20.01174920149977, 0.4619036553182262, -0.0001214195995667437, -1.535239091824004E-6, 1.102873029688190E-6, -2.202670452322396E-7};
-            T temp = s + T(6.5);
-            temp -= (s + T(0.5)) * ln(temp);
-            T ser(1.000000000000123);
-            T copy(s);
+            ScalarType temp = s + ScalarType(6.5);
+            temp -= (s + ScalarType(0.5)) * ln(temp);
+            ScalarType ser(1.000000000000123);
+            ScalarType copy(s);
             for (int j = 0; j < count; ++j) {
-                copy += T(1);
-                ser += T(coeffcients[j]) / copy;
+                copy += ScalarType(1);
+                ser += ScalarType(coeffcients[j]) / copy;
             }
-            return -temp + T(0.91893853320467274178) + ln(ser / s);
+            return -temp + ScalarType(0.91893853320467274178) + ln(ser / s);
         }
         else {
             /**
@@ -121,15 +124,15 @@ namespace Physica::Core {
              */
             constexpr static int count = 4;
             constexpr static float coeffcients[count]{7.6845130, -3.284681, 0.05832037, 0.0001856071};
-            T temp = s + T(3.5);
-            temp -= (s + T(0.5)) * ln(temp);
-            T ser(0.9999998);
-            T copy(s);
+            ScalarType temp = s + ScalarType(3.5);
+            temp -= (s + ScalarType(0.5)) * ln(temp);
+            ScalarType ser(0.9999998);
+            ScalarType copy(s);
             for (int j = 0; j < count; ++j) {
-                copy += T(1);
-                ser += T(coeffcients[j]) / copy;
+                copy += ScalarType(1);
+                ser += ScalarType(coeffcients[j]) / copy;
             }
-            return -temp + T(0.91893853320467274178) + ln(ser / s);
+            return -temp + ScalarType(0.91893853320467274178) + ln(ser / s);
         }
     }
 
@@ -143,23 +146,25 @@ namespace Physica::Core {
         return exp(lnGamma(s1) + lnGamma(s2) - lnGamma(s1 + s2));
     }
 
-    template<ScalarOption Option>
-    Scalar<Option> gammaP(const Scalar<Option>& a, const Scalar<Option>& x) {
+    template<class ScalarType>
+    ScalarType gammaP(const ScalarBase<ScalarType>& a_, const ScalarBase<ScalarType>& x_) {
+        const ScalarType& a = a_.getDerived();
+        const ScalarType& x = x_.getDerived();
         assert(a.isPositive() && !x.isNegative());
-        using T = Scalar<Option>;
-        return (x < a + T(1)) ? Internal::incompGammaImpl1(a, x) : (T(1) - Internal::incompGammaImpl2(a, x));
+        return (x < a + ScalarType(1)) ? Internal::incompGammaImpl1(a, x) : (ScalarType(1) - Internal::incompGammaImpl2(a, x));
     }
 
-    template<ScalarOption Option>
-    Scalar<Option> gammaQ(const Scalar<Option>& a, const Scalar<Option>& x) {
+    template<class ScalarType>
+    ScalarType gammaQ(const ScalarBase<ScalarType>& a_, const ScalarBase<ScalarType>& x_) {
+        const ScalarType& a = a_.getDerived();
+        const ScalarType& x = x_.getDerived();
         assert(a.isPositive() && !x.isNegative());
-        using T = Scalar<Option>;
-        return (x < a + T(1)) ? (T(1) - Internal::incompGammaImpl1(a, x)) : Internal::incompGammaImpl2(a, x);
+        return (x < a + ScalarType(1)) ? (ScalarType(1) - Internal::incompGammaImpl1(a, x)) : Internal::incompGammaImpl2(a, x);
     }
 
     template<class ScalarType>
     ScalarType bigamma(const ScalarBase<ScalarType>& x, const ScalarType& step) {
-        return Differential<ScalarType>::ridders(lnGamma<ScalarType::Option>, x.getDerived(), step);
+        return Differential<ScalarType>::ridders(lnGamma<ScalarType>, x.getDerived(), step);
     }
 
     template<ScalarOption Option>
@@ -169,11 +174,11 @@ namespace Physica::Core {
         return (x.isNegative()) ? -gammaP(T(0.5), x2) : gammaP(T(0.5), x2);
     }
 
-    template<ScalarOption Option>
-    Scalar<Option> erfc(const Scalar<Option>& x) {
-        using T = Scalar<Option>;
-        T x2 = square(x);
-        return (x.isNegative()) ? (T(1) + gammaP(T(0.5), x2)) : gammaQ(T(0.5), x2);
+    template<class ScalarType>
+    ScalarType erfc(const ScalarBase<ScalarType>& x_) {
+        const ScalarType& x = x_.getDerived();
+        ScalarType x2 = square(x);
+        return (x.isNegative()) ? (ScalarType(1) + gammaP(ScalarType(0.5), x2)) : gammaQ(ScalarType(0.5), x2);
     }
 
     template<ScalarOption Option>

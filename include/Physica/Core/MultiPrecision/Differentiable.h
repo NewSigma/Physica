@@ -128,6 +128,7 @@ namespace Physica::Core {
         [[nodiscard]] inline bool operator==(const This& other) const;
         [[nodiscard]] inline Differentiable operator-() const;
         /* Operations */
+        inline Differentiable& toAbs();
         void reverse();
         void reverse(Differentiable to);
         [[nodiscard]] Differentiable copy() const;
