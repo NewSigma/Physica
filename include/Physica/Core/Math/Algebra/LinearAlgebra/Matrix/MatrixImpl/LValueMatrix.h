@@ -51,13 +51,13 @@ namespace Physica::Core {
         LValueMatrix& operator=(const LValueMatrix& m) = delete;
         LValueMatrix& operator=(LValueMatrix&& m) = delete;
         template<class OtherMatrix> Derived& operator=(const RValueMatrix<OtherMatrix>& m);
-        template<class T> Derived& operator=(const ScalarBase<T>& s);
+        Derived& operator=(const ScalarType& s);
         [[nodiscard]] ScalarType& operator()(size_t row, size_t column) { return *data_ptr(row, column); }
         [[nodiscard]] const ScalarType& operator()(size_t row, size_t column) const { return *data_ptr(row, column); }
-        template<class T> void operator+=(const ScalarBase<T>& s) { (*this) = (*this) + s.getDerived(); }
-        template<class T> void operator-=(const ScalarBase<T>& s) { (*this) = (*this) - s.getDerived(); }
-        template<class T> void operator*=(const ScalarBase<T>& s) { (*this) = (*this) * s.getDerived(); }
-        template<class T> void operator/=(const ScalarBase<T>& s) { (*this) = (*this) / s.getDerived(); }
+        void operator+=(const ScalarType& s) { (*this) = (*this) + s; }
+        void operator-=(const ScalarType& s) { (*this) = (*this) - s; }
+        void operator*=(const ScalarType& s) { (*this) = (*this) * s; }
+        void operator/=(const ScalarType& s) { (*this) = (*this) / s; }
         /* Operations */
         [[nodiscard]] inline RowVector row(size_t r);
         [[nodiscard]] inline const RowVector row(size_t r) const;

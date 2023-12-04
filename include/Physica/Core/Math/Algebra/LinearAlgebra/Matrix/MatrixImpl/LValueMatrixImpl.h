@@ -73,9 +73,7 @@ namespace Physica::Core {
     }
     
     template<class Derived>
-    template<class T>
-    Derived& LValueMatrix<Derived>::operator=(const ScalarBase<T>& s) {
-        static_assert(ScalarType::isComplex || !T::isComplex, "[Error]: Assigning a complex number to real matrix is not allowed");
+    Derived& LValueMatrix<Derived>::operator=(const ScalarType& s) {
         for (size_t i = 0; i < Base::getMaxMajor(); ++i)
             for (size_t j = 0; j < Base::getMaxMinor(); ++j)
                 refFromMajorMinor(i, j) = ScalarType(s.getDerived());

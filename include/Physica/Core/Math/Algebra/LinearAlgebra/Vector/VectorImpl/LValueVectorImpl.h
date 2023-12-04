@@ -38,11 +38,9 @@ namespace Physica::Core {
     }
 
     template<class Derived>
-    template<class AnyScalar>
-    inline Derived& LValueVector<Derived>::operator=(const ScalarBase<AnyScalar>& s) {
-        static_assert(ScalarType::isComplex || !AnyScalar::isComplex, "[Error]: Assigning a complex number to real vector is not allowed");
+    inline Derived& LValueVector<Derived>::operator=(const ScalarType& s) {
         for (size_t i = 0; i < Base::getLength(); ++i)
-            (*this)[i] = ScalarType(s.getDerived());
+            (*this)[i] = s;
         return Base::getDerived();
     }
 

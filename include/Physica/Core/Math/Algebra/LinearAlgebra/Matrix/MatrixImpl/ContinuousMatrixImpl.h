@@ -32,6 +32,24 @@ namespace Physica::Core {
     }
 
     template<class Derived>
+    Derived& ContinuousMatrix<Derived>::operator=(const ScalarType& s) {
+        const size_t maxMajor = Base::getMaxMajor();
+        const size_t maxMinor = Base::getMaxMinor();
+        if constexpr (isReverseDiff) {
+            DiffTracer<PlainScalar>::getInstance().reserve(maxMajor * maxMinor);
+            for (size_t i = 0; i < maxMajor; ++i)
+                for (size_t j = 0; j < maxMinor; ++j)
+                    Base::refFromMajorMinor(i, j) = s.copy();
+        }
+        else {
+            for (size_t i = 0; i < maxMajor; ++i)
+                for (size_t j = 0; j < maxMinor; ++j)
+                    Base::refFromMajorMinor(i, j) = s;
+        }
+        return Base::getDerived();
+    }
+
+    template<class Derived>
     inline ContinuousMatrixBlock<Derived, 1, ContinuousMatrix<Derived>::ColumnAtCompile> ContinuousMatrix<Derived>::row(size_t r) {
         const bool useSpecialization = ContinuousMatrix<Derived>::ColumnAtCompile == 1;
         if constexpr (useSpecialization)

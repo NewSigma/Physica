@@ -40,6 +40,7 @@ namespace Physica::Core {
         /* Operators */
         inline ContinuousMatrix& operator=(const ContinuousMatrix& obj);
         inline ContinuousMatrix& operator=(ContinuousMatrix&& obj) noexcept;
+        Derived& operator=(const ScalarType& s);
         using Base::operator=;
         /* Operations */
         [[nodiscard]] inline ContinuousMatrixBlock<Derived, 1, ColumnAtCompile> row(size_t r);

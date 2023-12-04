@@ -86,19 +86,16 @@ namespace Physica::Core {
     }
 
     template<class Derived>
-    template<class AnyScalar>
-    inline Derived& ContinuousVector<Derived>::operator=(const ScalarBase<AnyScalar>& s) {
-        static_assert(ScalarType::isComplex || !AnyScalar::isComplex, "[Error]: Assigning a complex number to real vector is not allowed");
+    inline Derived& ContinuousVector<Derived>::operator=(const ScalarType& s) {
         const size_t length = Base::getLength();
-        if constexpr (isReverseDiff && AnyScalar::isReverseDiff) {
-            static_assert(std::is_same<ScalarType, AnyScalar>::value, "[Error]: Assigning between 2 differentiable scalar of different type will lose grad info");
+        if constexpr (isReverseDiff) {
             DiffTracer<PlainScalar>::getInstance().reserve(length);
             for (size_t i = 0; i < length; ++i)
-                (*this)[i] = ScalarType(s.getDerived().copy());
+                (*this)[i] = s.copy();
         }
         else {
             for (size_t i = 0; i < length; ++i)
-                (*this)[i] = ScalarType(s.getDerived());
+                (*this)[i] = s;
         }
         return Base::getDerived();
     }

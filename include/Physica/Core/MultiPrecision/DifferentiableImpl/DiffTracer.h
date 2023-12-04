@@ -298,7 +298,7 @@ namespace Physica::Core {
             const auto& segment = *ite;
             if (!segment.isFound(s))
                 continue;
-            const size_t index = s.value_ptr() - segment.values().data();
+            const size_t index = s.value_ptr() - segment.values.data();
             return segment.records[index].source;
         }
         assert(false && "[Error]: Cannot find the record, maybe it is on another thread?");

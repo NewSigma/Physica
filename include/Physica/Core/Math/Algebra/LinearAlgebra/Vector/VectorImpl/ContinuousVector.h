@@ -39,8 +39,7 @@ namespace Physica::Core {
         using Base::operator=;
         inline ContinuousVector& operator=(const ContinuousVector& v);
         inline ContinuousVector& operator=(ContinuousVector&& v) noexcept;
-        template<class AnyScalar>
-        inline Derived& operator=(const ScalarBase<AnyScalar>& s);
+        inline Derived& operator=(const ScalarType& s);
         /* Operations */
         template<class PacketType> [[nodiscard]] inline PacketType packet(size_t index) const;
         template<class PacketType> [[nodiscard]] inline PacketType packetPartial(size_t index, size_t count) const;
