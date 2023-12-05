@@ -90,6 +90,7 @@ namespace Physica::Core {
         template<class Executor> [[nodiscard]] Vector<ScalarType> force_long_unsort(const MDCellType& cell) const;
 
         [[nodiscard]] LatticeMatrix virial(const MDCellType& cell) const;
+        [[nodiscard]] LatticeMatrix virial_morse(const MDCellType& cell) const;
         template<class Executor, bool UseDynamicPolar>
         [[nodiscard]] PositionMatrix makeInducedDipole(const MDCellType& cell) const;
         void swap(Q_TIP4P& model) noexcept;
@@ -284,6 +285,26 @@ namespace Physica::Core {
 
         result += ewald.virial(chargePos);
         result += lj_model.virial(makeCellWithoutH(cell)) * ScalarType(epsilon4);
+        return result;
+    }
+
+    template<class ScalarType, class EwaldType>
+    typename Q_TIP4P<ScalarType, EwaldType>::LatticeMatrix Q_TIP4P<ScalarType, EwaldType>::virial_morse(const MDCellType& cell) const {
+        LatticeMatrix result(Dim, Dim, 0);
+        const size_t offset = 2 * numMolecule;
+        for (size_t i = 0; i < numMolecule; ++i) {
+            const size_t indexO = offset + i;
+            const size_t indexH1 = 2 * i;
+            const size_t indexH2 = 2 * i + 1;
+            Vector3D vecOH1 = cell.minDistVector(indexO, indexH1);
+            Vector3D vecOH2 = cell.minDistVector(indexO, indexH2);
+            const ScalarType r1 = vecOH1.norm();
+            const ScalarType r2 = vecOH2.norm();
+            /* Morse contribution */
+            result += (vecOH1 * (modifiedMorseForce(r1) / r1)) * vecOH1.transpose();
+            result += (vecOH2 * (modifiedMorseForce(r2) / r2)) * vecOH2.transpose();
+        }
+        result *= reciprocal(ewald.getVolume());
         return result;
     }
 
