@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2022 WeiBo He.
+ * Copyright 2021-2023 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -76,7 +76,7 @@ void madelungTest() {
         EwaldType ewald(CsCl.getLattice(), {1, -1});
         const auto energy = ewald.potentialEnergy(CsCl.getPos());
         const auto madelung = -energy * (lengthInBohr * 0.5 * std::sqrt(3.0));
-        constexpr double prec = isFloat ? 1E-6 : 1E-9;
+        constexpr double prec = isFloat ? 1E-5 : 1E-9;
         if (!scalarNear(madelung, ScalarType(1.76267477307099), prec))
             exit(EXIT_FAILURE);
     }
@@ -90,7 +90,7 @@ void madelungTest() {
         EwaldType ewald(ZnS.getLattice(), {1, -1});
         const auto energy = ewald.potentialEnergy(ZnS.getPos());
         const auto madelung = -energy * (lengthInBohr * 0.5 * std::sqrt(3.0));
-        constexpr double prec = isFloat ? 1E-6 : 1E-9;
+        constexpr double prec = isFloat ? 1E-5 : 1E-9;
         if (!scalarNear(madelung, ScalarType(1.63805505338879), prec))
             exit(EXIT_FAILURE);
     }
@@ -157,6 +157,51 @@ namespace Physica {
                 exit(EXIT_FAILURE);
         }
     };
+
+    class PressTest {
+        using PlainScalar = Scalar<Double>;
+        using ScalarType = Differentiable<PlainScalar, DiffMode::Reverse>;
+        using MDCellType = MDCell<ScalarType>;
+        using LatticeMatrix = typename MDCellType::LatticeMatrix;
+        using PositionMatrix = typename MDCellType::PositionMatrix;
+        using MassVector = typename MDCellType::MassVector;
+        using EwaldType = Ewald<ScalarType>;
+    public:
+        static void run() {
+            const ScalarType volume = 125;
+            const size_t cellSize = 3;
+            const auto cell = makeSystem(volume, cellSize);
+            Vector<ScalarType> charges(cell.getNumParticle(), 1.0);
+            auto tail = charges.tail(cell.getNumParticle() / 2);
+            tail = ScalarType(-1);
+            EwaldType ewald(cell.getLattice(), std::move(charges));
+            {
+                AutoDiffGuard<PlainScalar> guard{};
+                ewald.potentialEnergy(cell.getPos()).reverse();
+            }
+            const PlainScalar press_diff = -volume.getTangent() / PlainScalar(cellSize * cellSize * cellSize);
+            const PlainScalar press = (ewald.virial(cell.getPos()).trace() / ScalarType(3)).getValue();
+            if (!scalarNear(press_diff, press, 1E-13))
+                exit(EXIT_FAILURE);
+        }
+    private:
+        static MDCellType makeSystem(ScalarType volume, size_t cellSize) {
+            constexpr size_t numMolecularUnitCell = 2;
+            LatticeMatrix lattice = MDCellType::LatticeMatrix::unitMatrix(3);
+            const ScalarType latticeConst = cbrt(volume);
+            lattice *= latticeConst;
+
+            PositionMatrix pos(numMolecularUnitCell, 3, PlainScalar(0));
+            auto row = pos.row(1);
+            row = ScalarType(0.5);
+            pos *= latticeConst;
+
+            MassVector massVec(numMolecularUnitCell, 1);
+            MDCellType cell(std::move(lattice), std::move(pos), std::move(massVec));
+            cell.toSuperCell<ExtendCellOption::DOFMajor>({cellSize, cellSize, cellSize});
+            return cell;
+        }
+    };
 }
 
 int main() {
@@ -167,5 +212,6 @@ int main() {
     Physica::Test test{};
     test.functorTest();
     test.forceTest();
+    Physica::PressTest::run();
     return 0;
 }

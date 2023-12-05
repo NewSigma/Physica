@@ -98,26 +98,23 @@ namespace Physica::Core {
         const ScalarType rSpaceSum = Base::potentialEnergy(pos);
         ScalarType kSpaceSum = 0;
         const ScalarType factor = reciprocal(square(PlainScalar(2) * getIntegralLimit()));
-        PeriodicCell<ScalarType, Dim>::forCellInRange(
-            getKSpaceSumRange(), getRepLattice(), [this, numParticle, factor, &pos, &kSpaceSum](Vector3D delta) {
+        Vector<ScalarType> dots(numParticle);
+        Vector<ScalarType> sin_vec(numParticle);
+        Vector<ScalarType> cos_vec(numParticle);
+        PeriodicCell<ScalarType, Dim>::forReducedCellInRange( // Reduce cell using time reversal symmetry
+            getKSpaceSumRange(), getRepLattice(), [this, numParticle, factor, &pos, &kSpaceSum, &dots, &sin_vec, &cos_vec](Vector3D delta) {
                 const auto& charges = getCharges();
                 const ScalarType squaredNorm = delta.squaredNorm();
                 const bool isNotGammaPoint = ScalarType(std::numeric_limits<ScalarType>::min()) < squaredNorm;
                 if (isNotGammaPoint) {
-                    ScalarType sum_cos = 0;
-                    ScalarType sum_sin = 0;
-                    for (size_t i = 0; i < numParticle; ++i) {
-                        const ScalarType charge = charges[i];
-                        const ScalarType dot = delta * pos.row(i).asVector();
-                        ScalarType cos_temp, sin_temp;
-                        sincos(dot, sin_temp, cos_temp);
-                        sum_cos += charge * cos_temp;
-                        sum_sin += charge * sin_temp;
-                    }
+                    dots = pos * delta;
+                    sincos(dots, sin_vec, cos_vec);
+                    const ScalarType sum_cos = cos_vec * charges;
+                    const ScalarType sum_sin = sin_vec * charges;
                     kSpaceSum += (square(sum_cos) + square(sum_sin)) / (squaredNorm * exp(squaredNorm * factor));
                 }
             });
-        kSpaceSum *= PlainScalar(2 * M_PI) * Base::getInvVolume();
+        kSpaceSum *= PlainScalar(4 * M_PI) * Base::getInvVolume();
         kSpaceSum += gammaPointE;
         return kSpaceSum + rSpaceSum - selfE;
     }

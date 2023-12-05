@@ -154,13 +154,13 @@ namespace Physica::Core {
         values.resize(index);
         tangents.resize(index);
     }
-
+    /**
+     * FIXME: squeeze values and tangents may invalidate pointers, so the unused memory cannot be freed
+     */
     template<class ScalarType>
     void TraceSegment<ScalarType>::squeeze() {
         records.squeeze();
         operands.squeeze();
-        values.squeeze();
-        tangents.squeeze();
     }
 
     template<class ScalarType>
