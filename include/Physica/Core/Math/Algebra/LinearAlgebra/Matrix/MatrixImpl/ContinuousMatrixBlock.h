@@ -177,6 +177,10 @@ namespace Physica::Core {
         void resize([[maybe_unused]] size_t row, [[maybe_unused]] size_t col) { assert(row == 1 && col == getColumn()); }
 
         using Base::row;
+
+        using VectorBase::random_uniform;
+        using VectorBase::random_normal;
+        using VectorBase::random_any;
         /* Getters */
         using Base::calc;
         using VectorBase::calc;
@@ -231,6 +235,10 @@ namespace Physica::Core {
         void resize([[maybe_unused]] size_t row, [[maybe_unused]] size_t col) { assert(row == getRow() && col == 1); }
 
         using Base::col;
+
+        using VectorBase::random_uniform;
+        using VectorBase::random_normal;
+        using VectorBase::random_any;
         /* Getters */
         using Base::calc;
         using VectorBase::calc;

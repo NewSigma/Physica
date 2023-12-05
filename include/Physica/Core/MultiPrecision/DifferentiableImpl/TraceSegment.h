@@ -198,6 +198,7 @@ namespace Physica::Core {
             case ExpressionType::Pow: return 2;
             case ExpressionType::Sin: return 1;
             case ExpressionType::Cos: return 1;
+            case ExpressionType::ArcCos: return 1;
             default: [[unlikely]]
                 throw std::invalid_argument("[Error]: Unrecognized type");
         }
@@ -252,6 +253,9 @@ namespace Physica::Core {
                         continue;
                     case ExpressionType::Cos:
                         tangentX -= tangent * sin(operandX.getValue());
+                        continue;
+                    case ExpressionType::ArcCos:
+                        tangentX -= tangent / sqrt(ScalarType(1) - square(operandX.getValue()));
                         continue;
                     default:;
                 }

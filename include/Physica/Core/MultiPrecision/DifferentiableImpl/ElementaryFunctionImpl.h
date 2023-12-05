@@ -173,4 +173,18 @@ namespace Physica::Core {
             tracer.pushOperand(s);
         }
     }
+
+    template<class ScalarType, DiffMode Mode>
+    Differentiable<ScalarType, Mode> arccos(const Differentiable<ScalarType, Mode>& s) {
+        if constexpr (Mode == DiffMode::Forward) {
+            return {arccos(s.getValue()), -s.getTangent() / sqrt(ScalarType(1) - square(s.getValue()))};
+        }
+        else {
+            const ScalarType value = arccos(s.getValue());
+            auto& tracer = DiffTracer<ScalarType>::getInstance();
+            const auto result = tracer.pushOperation(value, ExpressionType::ArcCos);
+            tracer.pushOperand(s);
+            return result;
+        }
+    }
 }

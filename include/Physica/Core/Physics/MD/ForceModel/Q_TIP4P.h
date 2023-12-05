@@ -122,7 +122,7 @@ namespace Physica::Core {
     Q_TIP4P<ScalarType, EwaldType>::Q_TIP4P(const MDCellType& refer_cell, ScalarType cutoff_, EwaldType ewald_)
             : numMolecule(refer_cell.getNumParticle() / 3)
             , ewald(std::move(ewald_))
-            , lj_model(lj_sigma, std::move(cutoff_)) {
+            , lj_model(lj_sigma, cutoff_.getValue()) {
         assert(refer_cell.getNumParticle() % 3 == 0);
         ewald = RSpaceEwald<ScalarType>(refer_cell.getLattice(), makeCharges());
     }
@@ -262,8 +262,27 @@ namespace Physica::Core {
             const ScalarType factor = (theta - ScalarType(equalTheta)) * (ScalarType(kTheta) / sqrt(square(r1 * r2) - square(dot)));
             result += angle * factor;
         }
+        const PositionMatrix chargePos = makeChargePos(cell);
+        /* Spurious Coulomb Part */ {
+            PeriodicCell<ScalarType, 3> chargeCell(cell.getLattice(), chargePos, cell.getType());
+            for (size_t i = 0; i < numMolecule; ++i) {
+                const size_t indexO = offset + i;
+                const size_t indexH1 = 2 * i;
+                const size_t indexH2 = 2 * i + 1;
+                const Vector3D vecOH1 = chargeCell.minDistVector(indexO, indexH1);
+                const Vector3D vecOH2 = chargeCell.minDistVector(indexO, indexH2);
+                const Vector3D vecH1H2 = vecOH2 - vecOH1;
+                const ScalarType r1 = vecOH1.norm();
+                const ScalarType r2 = vecOH2.norm();
+                const ScalarType r12 = vecH1H2.norm();
+                result -= (vecOH1 * (ScalarType(-charge * charge * 0.5) / (r1 * square(r1)))) * vecOH1.transpose();
+                result -= (vecOH2 * (ScalarType(-charge * charge * 0.5) / (r2 * square(r2)))) * vecOH2.transpose();
+                result -= (vecH1H2 * (ScalarType(charge * charge * 0.25) / (r12 * square(r12)))) * vecH1H2.transpose();
+            }
+        }
         result *= reciprocal(ewald.getVolume());
-        result += ewald.virial(cell.getPos());
+
+        result += ewald.virial(chargePos);
         result += lj_model.virial(makeCellWithoutH(cell)) * ScalarType(epsilon4);
         return result;
     }
@@ -336,7 +355,7 @@ namespace Physica::Core {
         /* Stage 1: Classify H and O */ {
             size_t indexH = 0, indexO = numH;
             for (size_t i = 0; i < numAtom; ++i) {
-                const bool isHydrogen = cell.getMass(i) == PhyConst<AU>::atomMass(1);
+                const bool isHydrogen = cell.getMass(i).getValue() == PhyConst<AU>::atomMass(1);
                 const size_t index = isHydrogen ? indexH : indexO;
                 new_pos.row(index) = source.row(i);
                 new_mass[i] = i < numH ? PhyConst<AU>::atomMass(1) : PhyConst<AU>::atomMass(8);
@@ -546,7 +565,8 @@ namespace Physica::Core {
                 vecOH2 = cell.minDistVector(offset + i, 2 * i + 1);
                 const ScalarType r1 = vecOH1.norm();
                 const ScalarType r2 = vecOH2.norm();
-                const ScalarType elastic = square(arccos((vecOH1 * vecOH2) / (r1 * r2)) - ScalarType(equalTheta)) * (kTheta * 0.5);
+                const ScalarType u = (vecOH1 * vecOH2) / (r1 * r2);
+                const ScalarType elastic = square(arccos(u) - ScalarType(equalTheta)) * ScalarType(kTheta * 0.5);
                 intraMoleculeEnergy += modifiedMorsePot(r1) + modifiedMorsePot(r2) + elastic;
             }
         }
@@ -576,19 +596,19 @@ namespace Physica::Core {
 
     template<class ScalarType, class EwaldType>
     ScalarType Q_TIP4P<ScalarType, EwaldType>::modifiedMorsePot(ScalarType r) {
-        const ScalarType delta = (r - ScalarType(equalR)) * alphaR;
+        const ScalarType delta = (r - ScalarType(equalR)) * ScalarType(alphaR);
         const ScalarType delta2 = square(delta);
         const ScalarType delta3 = delta2 * delta;
         const ScalarType delta4 = square(delta2);
-        return (delta2 - delta3 + delta4 * (7.0 / 12)) * Dr;
+        return (delta2 - delta3 + delta4 * ScalarType(7.0 / 12)) * ScalarType(Dr);
     }
 
     template<class ScalarType, class EwaldType>
     ScalarType Q_TIP4P<ScalarType, EwaldType>::modifiedMorseForce(ScalarType r) {
-        const ScalarType delta = (r - ScalarType(equalR)) * alphaR;
+        const ScalarType delta = (r - ScalarType(equalR)) * ScalarType(alphaR);
         const ScalarType delta2 = square(delta);
         const ScalarType delta3 = delta2 * delta;
-        return -(delta * 2 - delta2 * 3 + delta3 * (7.0 / 3)) * (Dr * alphaR);
+        return -(delta * ScalarType(2) - delta2 * ScalarType(3) + delta3 * ScalarType(7.0 / 3)) * ScalarType(Dr * alphaR);
     }
 
     template<class ScalarType, class EwaldType>
@@ -605,12 +625,12 @@ namespace Physica::Core {
         const size_t minIndexO = maxIndexH;
         const size_t maxIndexO = minIndexO + numParticle / 3;
         for (size_t i = 0; i < maxIndexH; ++i) {
-            const bool isHydrogen = cell.getMass(i) == PhyConst<AU>::atomMass(1);
+            const bool isHydrogen = cell.getMass(i).getValue() == PhyConst<AU>::atomMass(1);
             if (!isHydrogen)
                 return false;
         }
         for (size_t i = minIndexO; i < maxIndexO; ++i) {
-            const bool isOxygen = cell.getMass(i) == PhyConst<AU>::atomMass(8);
+            const bool isOxygen = cell.getMass(i).getValue() == PhyConst<AU>::atomMass(8);
             if (!isOxygen)
                 return false;
         }

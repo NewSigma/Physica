@@ -50,7 +50,7 @@ namespace Physica::Core {
         ~Ewald() = default;
         /* Operators */
         Ewald& operator=(Ewald obj) noexcept { swap(obj); return *this; }
-        using Base::operator=;
+        Ewald& operator=(Base base) noexcept;
         /* Operations */
         [[nodiscard]] ScalarType potentialEnergy(const PositionMatrix& pos) const;
 
@@ -88,6 +88,14 @@ namespace Physica::Core {
             , std::move(charges)) {
         selfE = Base::calcSelfE();
         gammaPointE = Base::calcGammaPointE();
+    }
+
+    template<class ScalarType>
+    Ewald<ScalarType>& Ewald<ScalarType>::operator=(Base base) noexcept {
+        Base::swap(base);
+        selfE = Base::calcSelfE();
+        gammaPointE = Base::calcGammaPointE();
+        return *this;
     }
     /**
      * \param pos must be in cartesian convension

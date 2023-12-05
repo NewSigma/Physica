@@ -72,9 +72,10 @@ namespace Physica::Core {
 
     template<class ScalarType, DiffMode Mode>
     Differentiable<ScalarType, Mode> cot(const Differentiable<ScalarType, Mode>& s);
-    //!Domain of definition: [0, Pi]
+*/
     template<class ScalarType, DiffMode Mode>
     Differentiable<ScalarType, Mode> arccos(const Differentiable<ScalarType, Mode>& s);
+/*
     //!Domain of definition: [-Pi / 2, Pi / 2]
     template<class ScalarType, DiffMode Mode>
     Differentiable<ScalarType, Mode> arcsin(const Differentiable<ScalarType, Mode>& s);
