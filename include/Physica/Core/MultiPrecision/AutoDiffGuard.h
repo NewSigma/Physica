@@ -35,7 +35,7 @@ namespace Physica::Core {
         /* Operators */
         AutoDiffGuard& operator=(AutoDiffGuard obj) noexcept { swap(obj); return *this; }
         /* Operations */
-        void swap(AutoDiffGuard& obj) noexcept { std::swap(node, obj.node); }
+        void swap(AutoDiffGuard& __restrict obj) noexcept { std::swap(node, obj.node); }
         /* Getters */
         [[nodiscard]] ScalarType getNode() const noexcept { return node; }
     };

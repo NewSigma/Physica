@@ -34,7 +34,7 @@ namespace Physica::Core {
         readEnergy(fin, buffer);
     }
 
-    void Outcar::swap(Outcar& obj) noexcept {
+    void Outcar::swap(Outcar& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         force.swap(obj.force);
         internalEnergy.swap(obj.internalEnergy);

@@ -98,7 +98,7 @@ public:
         return PlainScalar(count) / PlainScalar(numTestData);
     }
 
-    void swap(MnistNet& obj) noexcept {
+    void swap(MnistNet& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         Base::swap(obj);
         layer1.swap(obj.layer1);

@@ -226,7 +226,7 @@ namespace Physica::Core {
     }
 
     template<class ScalarType>
-    void Ewald<ScalarType>::swap(Ewald& obj) noexcept {
+    void Ewald<ScalarType>::swap(Ewald& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         Base::swap(obj);
         selfE.swap(obj.selfE);

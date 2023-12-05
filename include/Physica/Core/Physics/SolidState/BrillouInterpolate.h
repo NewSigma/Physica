@@ -227,7 +227,7 @@ namespace Physica::Core {
     }
 
     template<class ScalarType>
-    void BrillouInterpolate<ScalarType>::swap(BrillouInterpolate& obj) noexcept {
+    void BrillouInterpolate<ScalarType>::swap(BrillouInterpolate& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         baseCoeff.swap(obj.baseCoeff);
         lattice.swap(obj.lattice);

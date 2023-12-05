@@ -63,7 +63,7 @@ namespace Physica::Core {
     }
 
     template<class T>
-    void ComplexScalar<T>::swap(ComplexScalar& c) noexcept {
+    void ComplexScalar<T>::swap(ComplexScalar& __restrict c) noexcept {
         assert(this != &c && "[Error]: Self swap is likely a bug");
         real.swap(c.real);
         imag.swap(c.imag);

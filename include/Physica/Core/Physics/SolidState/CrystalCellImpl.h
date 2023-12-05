@@ -92,7 +92,7 @@ namespace Physica::Core {
     }
 
     template<class ScalarType>
-    void CrystalCell<ScalarType>::swap(CrystalCell& cell) noexcept {
+    void CrystalCell<ScalarType>::swap(CrystalCell& __restrict cell) noexcept {
         assert(this != &cell && "[Error]: Self swap is likely a bug");
         Base::swap(cell);
         atomicNumbers.swap(cell.atomicNumbers);

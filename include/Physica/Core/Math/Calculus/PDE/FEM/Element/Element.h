@@ -69,7 +69,7 @@ namespace Physica::Core {
     }
 
     template<class Derived>
-    void Element<Derived>::swap(Element& elem) noexcept {
+    void Element<Derived>::swap(Element& __restrict elem) noexcept {
         assert(this != &elem && "[Error]: Self swap is likely a bug");
         globalNodes.swap(elem.globalNodes);
     }

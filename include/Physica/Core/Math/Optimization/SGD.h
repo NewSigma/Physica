@@ -83,7 +83,7 @@ namespace Physica::Core {
     }
 
     template<class ScalarType>
-    void SGD<ScalarType>::swap(SGD& obj) noexcept {
+    void SGD<ScalarType>::swap(SGD& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         learnRate.swap(obj.learnRate);
         meanLearnRate.swap(obj.meanLearnRate);

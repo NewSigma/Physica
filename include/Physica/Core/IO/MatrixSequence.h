@@ -68,7 +68,7 @@ namespace Physica::Core {
     }
 
     template<class ScalarType>
-    void MatrixSequence<ScalarType>::swap(MatrixSequence& obj) noexcept {
+    void MatrixSequence<ScalarType>::swap(MatrixSequence& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         mat.swap(obj.mat);
         fin.swap(obj.fin);

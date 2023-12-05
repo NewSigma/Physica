@@ -134,7 +134,7 @@ namespace Physica::Core {
     }
 
     template<class ScalarType>
-    void RDF<ScalarType>::swap(RDF& obj) noexcept {
+    void RDF<ScalarType>::swap(RDF& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         isFromParticle.swap(obj.isFromParticle);
         isToParticle.swap(obj.isToParticle);

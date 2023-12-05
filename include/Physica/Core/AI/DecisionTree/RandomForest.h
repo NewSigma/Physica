@@ -44,7 +44,7 @@ namespace Physica::Core {
         RandomForest& operator=(RandomForest obj) noexcept;
         /* Operations */
         [[nodiscard]] ScalarType predict(const VectorType& features) const;
-        void swap(RandomForest& obj) noexcept;
+        void swap(RandomForest& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] size_t getNumTree() const noexcept { return trees.getLength(); }
         /* Static members */
@@ -112,7 +112,7 @@ namespace Physica::Core {
     }
 
     template<class ScalarType, DecisionTreeType Type>
-    void RandomForest<ScalarType, Type>::swap(RandomForest& obj) noexcept {
+    void RandomForest<ScalarType, Type>::swap(RandomForest& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         trees.swap(obj.trees);
     }

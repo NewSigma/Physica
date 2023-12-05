@@ -328,7 +328,7 @@ namespace Physica::Core {
         return Internal::convertDoubleImpl(length, length - 1, byte);
     }
 
-    void Integer::swap(Integer& i) noexcept {
+    void Integer::swap(Integer& __restrict i) noexcept {
         assert(this != &i && "[Error]: Self swap is likely a bug");
         std::swap(byte, i.byte);
         std::swap(length, i.length);

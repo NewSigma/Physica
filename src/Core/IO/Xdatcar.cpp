@@ -45,7 +45,7 @@ namespace Physica::Core {
         return bool(fin);
     }
 
-    void Xdatcar::swap(Xdatcar& xdatcar) noexcept {
+    void Xdatcar::swap(Xdatcar& __restrict xdatcar) noexcept {
         assert(this != &xdatcar && "[Error]: Self swap is likely a bug");
         data.swap(xdatcar.data);
         fin.swap(xdatcar.fin);

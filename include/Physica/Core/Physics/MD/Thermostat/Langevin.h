@@ -127,7 +127,7 @@ namespace Physica::Core {
     }
 
     template<class ScalarType, unsigned int Dim, size_t NumReplica>
-    void Langevin<ScalarType, Dim, NumReplica>::swap(Langevin<ScalarType, Dim, NumReplica>& obj) noexcept {
+    void Langevin<ScalarType, Dim, NumReplica>::swap(Langevin& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         temperatureT.swap(obj.temperatureT);
         thermostatTime.swap(obj.thermostatTime);

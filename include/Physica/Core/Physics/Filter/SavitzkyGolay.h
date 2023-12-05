@@ -130,7 +130,7 @@ namespace Physica::Core {
     }
 
     template<class ScalarType>
-    void SavitzkyGolay<ScalarType>::swap(SavitzkyGolay<ScalarType>& filter) noexcept {
+    void SavitzkyGolay<ScalarType>::swap(SavitzkyGolay<ScalarType>& __restrict filter) noexcept {
         assert(this != &filter && "[Error]: Self swap is likely a bug");
         std::swap(lRange, filter.lRange);
         std::swap(rRange, filter.rRange);

@@ -88,7 +88,7 @@ namespace Physica::Core {
     }
 
     template<class ScalarType, unsigned int Dim>
-    void MonteCarlo<ScalarType, Dim>::swap(MonteCarlo& mc) noexcept {
+    void MonteCarlo<ScalarType, Dim>::swap(MonteCarlo& __restrict mc) noexcept {
         assert(this != &mc && "[Error]: Self swap is likely a bug");
         cell.swap(mc.cell);
         buffer.swap(mc.buffer);

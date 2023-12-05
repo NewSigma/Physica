@@ -112,7 +112,7 @@ namespace Physica::Core {
     }
 
     template<class PlainScalar, DiffMode Mode>
-    void FFT<Differentiable<PlainScalar, Mode>, 1>::swap(FFT& obj) noexcept {
+    void FFT<Differentiable<PlainScalar, Mode>, 1>::swap(FFT& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         fft_impl.swap(obj.fft_impl);
         buffer.swap(obj.buffer);

@@ -179,12 +179,12 @@ namespace Physica::Core {
         return result;
     }
 
-    void CsvFile::swap(CsvFile& obj) noexcept {
+    void CsvFile::swap(CsvFile& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         datatypes.swap(obj.datatypes);
         headers.swap(obj.headers);
         data.swap(obj.data);
-        defaultValues.swap(defaultValues);
+        defaultValues.swap(obj.defaultValues);
     }
 
     const char* CsvFile::toString(DataType type) {

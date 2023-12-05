@@ -206,7 +206,7 @@ namespace Physica::Core {
         /* Helpers */
         Scalar& toOpposite() noexcept { f = -f; return *this; }
         __host__ __device__ Scalar& toAbs() noexcept { *this = abs(*this); return *this; }
-        void swap(Scalar& s) noexcept { std::swap(f, s.f); }
+        void swap(Scalar& __restrict s) noexcept { std::swap(f, s.f); }
         /* Getters */
         [[nodiscard]] constexpr static ScalarOption getOption() { return Float; }
         [[nodiscard]] __host__ __device__ float getTrivial() const noexcept { return f; }
@@ -269,7 +269,7 @@ namespace Physica::Core {
         /* Helpers */
         Scalar& toOpposite() noexcept { d = -d; return *this; }
         __host__ __device__ Scalar& toAbs() noexcept { *this = abs(*this); return *this; }
-        void swap(Scalar& s) noexcept { std::swap(d, s.d); }
+        void swap(Scalar& __restrict s) noexcept { std::swap(d, s.d); }
         /* Getters */
         [[nodiscard]] constexpr static ScalarOption getOption() { return Double; }
         [[nodiscard]] __host__ __device__ double getTrivial() const noexcept { return d; }

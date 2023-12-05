@@ -52,7 +52,7 @@ namespace Physica::Core {
         cudaCheck(cudaGetLastError());
     }
 
-    void CudaStream::swap(CudaStream& obj) noexcept {
+    void CudaStream::swap(CudaStream& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         std::swap(stream, obj.stream);
     }

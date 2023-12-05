@@ -64,7 +64,7 @@ namespace Physica::Core {
         DecisionTree& operator=(DecisionTree tree) noexcept;
         /* Operations */
         [[nodiscard]] ScalarType predict(const VectorType& features) const;
-        void swap(DecisionTree& tree) noexcept;
+        void swap(DecisionTree& __restrict tree) noexcept;
         /* Static members */
         static DecisionTree train(const Dataset& dataset);
     private:

@@ -59,7 +59,7 @@ namespace Physica::Core {
         NetBase(const NetBase&);
         NetBase(NetBase&&) noexcept = default;
         /* Operations */
-        inline void swap(NetBase& obj) noexcept;
+        inline void swap(NetBase& __restrict obj) noexcept;
     };
 
     template<class Derived>
@@ -138,7 +138,7 @@ namespace Physica::Core {
     }
 
     template<class Derived>
-    inline void NetBase<Derived>::swap(NetBase& obj) noexcept {
+    inline void NetBase<Derived>::swap(NetBase& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         net_guard.swap(obj.net_guard);
     }

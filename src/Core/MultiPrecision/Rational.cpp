@@ -93,7 +93,7 @@ namespace Physica::Core {
         denominator /= gcd;
     }
 
-    void Rational::swap(Rational& r) noexcept {
+    void Rational::swap(Rational& __restrict r) noexcept {
         assert(this != &r && "[Error]: Self swap is likely a bug");
         numerator.swap(r.numerator);
         denominator.swap(r.denominator);

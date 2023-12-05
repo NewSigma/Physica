@@ -390,7 +390,7 @@ namespace Physica::Core {
     }
 
     template<class MatrixType>
-    void EigenSolver<MatrixType>::swap(EigenSolver<MatrixType>& solver) noexcept {
+    void EigenSolver<MatrixType>::swap(EigenSolver<MatrixType>& __restrict solver) noexcept {
         assert(this != &solver && "[Error]: Self swap is likely a bug");
         eigenvalues.swap(solver.eigenvalues);
         rawEigenvectors.swap(solver.rawEigenvectors);

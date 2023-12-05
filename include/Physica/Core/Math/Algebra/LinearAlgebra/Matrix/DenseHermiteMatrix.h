@@ -132,7 +132,7 @@ namespace Physica::Core {
     }
 
     template<class ScalarType, size_t Order, size_t MaxOrder>
-    void DenseHermiteMatrix<ScalarType, Order, MaxOrder>::swap(DenseHermiteMatrix& m) noexcept {
+    void DenseHermiteMatrix<ScalarType, Order, MaxOrder>::swap(DenseHermiteMatrix& __restrict m) noexcept {
         assert(this != &m && "[Error]: Self swap is likely a bug");
         Storage::swap(m);
     }

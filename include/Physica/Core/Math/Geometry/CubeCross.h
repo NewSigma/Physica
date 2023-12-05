@@ -115,7 +115,8 @@ namespace Physica::Core {
     }
 
     template<class ScalarType>
-    void CubeCross<ScalarType>::swap(CubeCross& obj) noexcept {
+    void CubeCross<ScalarType>::swap(CubeCross& __restrict obj) noexcept {
+        assert(this != &obj && "[Error]: Self swap is likely a bug");
         area.swap(obj.area);
         std::swap(type, obj.type);
     }

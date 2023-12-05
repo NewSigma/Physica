@@ -51,7 +51,7 @@ namespace Physica::Utils {
         /* Operations */
         [[nodiscard]] __host__ __device__ host_obj toHost() const { return *this; }
         __host__ __device__ void toHost(host_obj& obj) const { obj = *this; }
-        __host__ __device__ void swap(device_obj& obj) noexcept { host_obj::swap(obj); }
+        __host__ __device__ void swap(device_obj& __restrict obj) noexcept { host_obj::swap(obj); }
     };
 
     template<class T, size_t Length, size_t Capacity, class Allocator>
@@ -276,7 +276,7 @@ namespace Physica::Utils {
     }
 
     template<class T, class Allocator>
-    void device_obj<Array<T, Dynamic, Dynamic, Allocator>>::swap(device_obj& obj) noexcept {
+    void device_obj<Array<T, Dynamic, Dynamic, Allocator>>::swap(device_obj& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         std::swap(d_data, obj.d_data);
         std::swap(length, obj.length);

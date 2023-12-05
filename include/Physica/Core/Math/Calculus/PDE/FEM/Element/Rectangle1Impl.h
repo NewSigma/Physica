@@ -124,10 +124,11 @@ namespace Physica::Core {
     }
 
     template<class ScalarType>
-    void Rectangle1<ScalarType>::swap(Rectangle1& elem) noexcept {
-        Base::swap(elem);
-        bottomLeft.swap(elem.bottomLeft);
-        topRight.swap(elem.topRight);
+    void Rectangle1<ScalarType>::swap(Rectangle1& __restrict obj) noexcept {
+        assert(this != &obj && "[Error]: Self swap is likely a bug");
+        Base::swap(obj);
+        bottomLeft.swap(obj.bottomLeft);
+        topRight.swap(obj.topRight);
     }
 
     template<class ScalarType>

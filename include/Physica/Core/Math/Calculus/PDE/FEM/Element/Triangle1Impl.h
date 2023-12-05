@@ -83,9 +83,10 @@ namespace Physica::Core {
     }
 
     template<class ScalarType>
-    void Triangle1<ScalarType>::swap(Triangle1& elem) noexcept {
-        Base::swap(elem);
-        pos.swap(elem.pos);
+    void Triangle1<ScalarType>::swap(Triangle1& __restrict obj) noexcept {
+        assert(this != &obj && "[Error]: Self swap is likely a bug");
+        Base::swap(obj);
+        pos.swap(obj.pos);
     }
 
     template<class ScalarType>

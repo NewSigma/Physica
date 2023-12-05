@@ -100,7 +100,7 @@ namespace Physica::Core {
     }
 
     template<class ScalarType>
-    void IterateSolver<ScalarType>::swap(IterateSolver& solver) noexcept {
+    void IterateSolver<ScalarType>::swap(IterateSolver& __restrict solver) noexcept {
         assert(this != &solver && "[Error]: Self swap is likely a bug");
         error.swap(solver.error);
         std::swap(maxIteration, solver.maxIteration);

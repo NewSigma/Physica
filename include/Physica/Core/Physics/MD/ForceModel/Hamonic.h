@@ -140,7 +140,7 @@ namespace Physica::Core {
     }
 
     template<class ScalarType, unsigned int Dim>
-    void Hamonic<ScalarType, Dim>::swap(Hamonic& obj) noexcept {
+    void Hamonic<ScalarType, Dim>::swap(Hamonic& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         sites.swap(obj.sites);
         springCoeffs.swap(obj.springCoeffs);

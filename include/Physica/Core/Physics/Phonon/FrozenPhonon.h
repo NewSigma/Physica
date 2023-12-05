@@ -167,7 +167,7 @@ namespace Physica::Core {
     }
 
     template<class ScalarType>
-    void FrozenPhonon<ScalarType>::swap(This& obj) noexcept {
+    void FrozenPhonon<ScalarType>::swap(This& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         Base::swap(obj);
         displace.swap(obj.displace);

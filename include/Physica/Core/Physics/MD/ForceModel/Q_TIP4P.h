@@ -333,7 +333,7 @@ namespace Physica::Core {
     }
 
     template<class ScalarType, class EwaldType>
-    void Q_TIP4P<ScalarType, EwaldType>::swap(Q_TIP4P& model) noexcept {
+    void Q_TIP4P<ScalarType, EwaldType>::swap(Q_TIP4P& __restrict model) noexcept {
         assert(this != &model && "[Error]: Self swap is likely a bug");
         std::swap(numMolecule, model.numMolecule);
         ewald.swap(model.ewald);

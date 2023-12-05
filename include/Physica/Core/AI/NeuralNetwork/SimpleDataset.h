@@ -54,7 +54,7 @@ namespace Physica::Core {
     }
 
     template<class SampleType, class LabelType>
-    void SimpleDataset<SampleType, LabelType>::swap(SimpleDataset& obj) noexcept {
+    void SimpleDataset<SampleType, LabelType>::swap(SimpleDataset& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         samples.swap(obj.samples);
         labels.swap(obj.labels);

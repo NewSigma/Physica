@@ -95,7 +95,7 @@ namespace Physica::Core {
     }
 
     template<class ScalarType, unsigned int Dim, size_t NumReplica>
-    void TRPMDThermo<ScalarType, Dim, NumReplica>::swap(TRPMDThermo<ScalarType, Dim, NumReplica>& obj) noexcept {
+    void TRPMDThermo<ScalarType, Dim, NumReplica>::swap(TRPMDThermo& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         temperatureT.swap(obj.temperatureT);
     }

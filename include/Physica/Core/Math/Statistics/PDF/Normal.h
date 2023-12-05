@@ -59,7 +59,7 @@ namespace Physica::Core {
     }
 
     template<class ScalarType>
-    void Normal<ScalarType>::swap(Normal& obj) noexcept {
+    void Normal<ScalarType>::swap(Normal& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         mean.swap(obj.mean);
         deviation.swap(obj.deviation);

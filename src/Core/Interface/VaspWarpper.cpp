@@ -99,7 +99,7 @@ namespace Physica::Core {
         return Outcar(path.c_str(), poscar.getNumParticle());
     }
 
-    void VaspWarpper::swap(VaspWarpper& vasp) noexcept {
+    void VaspWarpper::swap(VaspWarpper& __restrict vasp) noexcept {
         assert(this != &vasp && "[Error]: Self swap is likely a bug");
         pathToVasp.swap(vasp.pathToVasp);
         vaspWorkingDir.swap(vasp.vaspWorkingDir);

@@ -151,7 +151,7 @@ namespace Physica::Core {
     }
 
     template<class ScalarType, bool isSpinPolarized>
-    void BandGrid<ScalarType, isSpinPolarized>::swap(BandGrid& band) noexcept {
+    void BandGrid<ScalarType, isSpinPolarized>::swap(BandGrid& __restrict band) noexcept {
         assert(this != &band && "[Error]: Self swap is likely a bug");
         swap(kPointGrid, band.kPointGrid);
         swap(electronCount, band.electronCount);

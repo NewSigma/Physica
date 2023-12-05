@@ -154,7 +154,7 @@ namespace Physica::Core {
     }
 
     template<class MatrixType>
-    void SymmEigenSolver<MatrixType>::swap(SymmEigenSolver<MatrixType>& solver) noexcept {
+    void SymmEigenSolver<MatrixType>::swap(SymmEigenSolver<MatrixType>& __restrict solver) noexcept {
         assert(this != &solver && "[Error]: Self swap is likely a bug");
         eigenvalues.swap(solver.eigenvalues);
         std::swap(eigenvectors, solver.eigenvectors);

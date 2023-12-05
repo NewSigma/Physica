@@ -102,7 +102,7 @@ namespace Physica::Core {
     }
 
     template<class ScalarType>
-    void PermutationMatrix<ScalarType>::swap(PermutationMatrix& obj) noexcept {
+    void PermutationMatrix<ScalarType>::swap(PermutationMatrix& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         indexes.swap(obj.indexes);
     }

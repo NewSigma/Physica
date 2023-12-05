@@ -112,7 +112,7 @@ namespace Physica::Core {
     }
 
     template<class ScalarType, size_t NumReplica, class RandomPoolType, BaroType Type>
-    void SCRBaro<ScalarType, NumReplica, RandomPoolType, Type>::swap(SCRBaro& obj) noexcept {
+    void SCRBaro<ScalarType, NumReplica, RandomPoolType, Type>::swap(SCRBaro& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         compressRate.swap(obj.compressRate);
         tempT.swap(obj.tempT);

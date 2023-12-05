@@ -37,7 +37,7 @@ namespace Physica::Core {
         return *this;
     }
 
-    void CudaEvent::swap(CudaEvent& obj) noexcept {
+    void CudaEvent::swap(CudaEvent& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         std::swap(event, obj.event);
     }

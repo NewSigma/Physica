@@ -72,7 +72,7 @@ namespace Physica::Utils {
     }
 
     template<class T, size_t Length, size_t Capacity, class Allocator>
-    __host__ __device__ void Array<T, Length, Capacity, Allocator>::swap(Array& array) noexcept {
+    __host__ __device__ void Array<T, Length, Capacity, Allocator>::swap(Array& __restrict array) noexcept {
         assert(this != &array && "[Error]: Self swap is likely a bug");
         for (size_t i = 0; i < Length; ++i) {
         #ifdef __CUDA_ARCH__
@@ -204,7 +204,7 @@ namespace Physica::Utils {
     }
 
     template<class T, size_t Capacity, class Allocator>
-    void Array<T, Dynamic, Capacity, Allocator>::swap(Array<T, Dynamic, Capacity, Allocator>& array) noexcept {
+    void Array<T, Dynamic, Capacity, Allocator>::swap(Array<T, Dynamic, Capacity, Allocator>& __restrict array) noexcept {
         Base::swap(array);
     }
     ///////////////////////////////////////Array<T, Dynamic, Dynamic, Allocator>//////////////////////////////////////////
@@ -312,7 +312,7 @@ namespace Physica::Utils {
     }
 
     template<class T, class Allocator>
-    void Array<T, Dynamic, Dynamic, Allocator>::swap(Array& array) noexcept {
+    void Array<T, Dynamic, Dynamic, Allocator>::swap(Array& __restrict array) noexcept {
         Base::swap(array);
         std::swap(capacity, array.capacity);
     }

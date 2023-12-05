@@ -51,7 +51,7 @@ namespace Physica::Core {
     }
 
     template<class ScalarType, size_t Dim>
-    void SteepestDescent<ScalarType, Dim>::swap(SteepestDescent& obj) noexcept {
+    void SteepestDescent<ScalarType, Dim>::swap(SteepestDescent& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         gradG.swap(obj.gradG);
         tryX.swap(obj.tryX);

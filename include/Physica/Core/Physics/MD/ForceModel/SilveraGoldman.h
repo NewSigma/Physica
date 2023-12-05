@@ -79,7 +79,7 @@ namespace Physica::Core {
     }
 
     template<class ScalarType, bool IsPeriodBoundary>
-    inline void SilveraGoldman<ScalarType, IsPeriodBoundary>::swap(SilveraGoldman& obj) noexcept {
+    inline void SilveraGoldman<ScalarType, IsPeriodBoundary>::swap(SilveraGoldman& __restrict obj) noexcept {
         Base::swap(obj);
     }
 

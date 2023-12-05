@@ -151,7 +151,7 @@ namespace Physica::Core {
     }
 
     template<class ScalarType, LDAType type>
-    void LDA<ScalarType, type, true>::swap(LDA& lda) noexcept {
+    void LDA<ScalarType, type, true>::swap(LDA& __restrict lda) noexcept {
         assert(this != &lda && "[Error]: Self swap is likely a bug");
         buffer.swap(lda.buffer);
         buffer1.swap(lda.buffer1);
@@ -233,7 +233,7 @@ namespace Physica::Core {
     }
 
     template<class ScalarType, LDAType type>
-    void LDA<ScalarType, type, false>::swap(LDA& lda) noexcept {
+    void LDA<ScalarType, type, false>::swap(LDA& __restrict lda) noexcept {
         assert(this != &lda && "[Error]: Self swap is likely a bug");
         buffer.swap(lda.buffer);
     }

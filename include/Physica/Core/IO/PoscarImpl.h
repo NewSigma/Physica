@@ -199,7 +199,7 @@ namespace Physica::Core {
     }
 
     template<class ScalarType>
-    void Poscar<ScalarType>::swap(Poscar& poscar) noexcept {
+    void Poscar<ScalarType>::swap(Poscar& __restrict poscar) noexcept {
         assert(this != &poscar && "[Error]: Self swap is likely a bug");
         Base::swap(poscar);
         elementTypes.swap(poscar.elementTypes);

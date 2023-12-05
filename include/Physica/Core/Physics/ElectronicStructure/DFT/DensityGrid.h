@@ -158,7 +158,7 @@ namespace Physica::Core {
     }
 
     template<class ScalarType, bool IsSpinPolarized>
-    void DensityGrid<ScalarType, IsSpinPolarized>::swap(DensityGrid& obj) noexcept {
+    void DensityGrid<ScalarType, IsSpinPolarized>::swap(DensityGrid& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         densityPair.swap(obj.densityPair);
     }

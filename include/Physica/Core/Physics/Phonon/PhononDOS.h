@@ -145,7 +145,7 @@ namespace Physica::Core {
     }
 
     template<class ScalarType>
-    void PhononDOS<ScalarType>::swap(PhononDOS& obj) noexcept {
+    void PhononDOS<ScalarType>::swap(PhononDOS& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         solver.swap(obj.solver);
         eigenvalues.swap(obj.eigenvalues);

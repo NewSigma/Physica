@@ -164,7 +164,7 @@ namespace Physica::Core {
     }
 
     template<class ScalarType>
-    void TraceSegment<ScalarType>::swap(TraceSegment& obj) noexcept {
+    void TraceSegment<ScalarType>::swap(TraceSegment& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         records.swap(obj.records);
         operands.swap(obj.operands);

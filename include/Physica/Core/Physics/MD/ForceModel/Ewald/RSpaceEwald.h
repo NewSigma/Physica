@@ -203,7 +203,7 @@ namespace Physica::Core {
     }
 
     template<class ScalarType>
-    void RSpaceEwald<ScalarType>::swap(RSpaceEwald& obj) noexcept {
+    void RSpaceEwald<ScalarType>::swap(RSpaceEwald& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         Base::swap(obj);
         lattice.swap(obj.lattice);

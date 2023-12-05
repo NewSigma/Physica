@@ -90,7 +90,7 @@ namespace Physica::Core {
     }
 
     template<class ScalarType>
-    void LJModel<ScalarType>::swap(LJModel& obj) noexcept {
+    void LJModel<ScalarType>::swap(LJModel& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         Base::swap(obj);
         sigma.swap(obj.sigma);

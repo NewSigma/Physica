@@ -54,7 +54,7 @@ namespace Physica::Core {
     }
 
     template<class ScalarType>
-    void LogNormal<ScalarType>::swap(LogNormal& obj) noexcept {
+    void LogNormal<ScalarType>::swap(LogNormal& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         normal.swap(obj.normal);
     }

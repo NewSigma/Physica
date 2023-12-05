@@ -104,7 +104,7 @@ namespace Physica::Core {
     }
 
     template<class ScalarType>
-    void QEModel<ScalarType>::swap(QEModel& obj) noexcept {
+    void QEModel<ScalarType>::swap(QEModel& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         pathToPW.swap(obj.pathToPW);
         input.swap(obj.input);

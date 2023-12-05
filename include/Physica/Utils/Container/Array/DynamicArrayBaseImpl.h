@@ -117,7 +117,7 @@ namespace Physica::Utils::Internal {
     }
 
     template<class Derived, class Allocator>
-    void DynamicArrayBase<Derived, Allocator>::swap(DynamicArrayBase& array) noexcept {
+    void DynamicArrayBase<Derived, Allocator>::swap(DynamicArrayBase& __restrict array) noexcept {
         assert(this != &array && "[Error]: Self swap is likely a bug");
         std::swap(arr, array.arr);
         std::swap(length, array.length);

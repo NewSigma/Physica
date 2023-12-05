@@ -150,7 +150,7 @@ namespace Physica::Core {
     }
 
     template<class Derived>
-    void device_obj<PairModel<Derived>>::swap(device_obj& obj) noexcept {
+    void device_obj<PairModel<Derived>>::swap(device_obj& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         cutoff.swap(obj.cutoff);
         squared_cutoff.swap(squared_cutoff);

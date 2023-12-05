@@ -56,7 +56,7 @@ namespace Physica::Core {
         return is;
     }
 
-    void PWscfIn::swap(PWscfIn& obj) noexcept {
+    void PWscfIn::swap(PWscfIn& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         std::swap(calculation, obj.calculation);
         std::swap(tstress, obj.tstress);

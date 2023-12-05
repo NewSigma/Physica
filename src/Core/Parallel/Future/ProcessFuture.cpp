@@ -57,7 +57,7 @@ namespace Physica::Core {
             throw std::runtime_error(errorMsg);
     }
 
-    void ProcessFuture::swap(ProcessFuture& future) noexcept {
+    void ProcessFuture::swap(ProcessFuture& __restrict future) noexcept {
         assert(this != &future && "[Error]: Self swap is likely a bug");
         std::swap(pid, future.pid);
         std::swap(finished, future.finished);

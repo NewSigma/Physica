@@ -213,7 +213,7 @@ namespace Physica::Core {
     }
 
     template<class ScalarType>
-    void IceGenerator<ScalarType>::swap(IceGenerator& obj) noexcept {
+    void IceGenerator<ScalarType>::swap(IceGenerator& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         initialCell.swap(obj.initialCell);
         std::swap(maxDistOO, obj.maxDistOO);

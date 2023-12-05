@@ -172,7 +172,7 @@ namespace Physica::Core {
     }
 
     template<class ScalarType, bool IsPeriodBoundary, unsigned int Dim>
-    void FPUModel<ScalarType, IsPeriodBoundary, Dim>::swap(FPUModel& obj) noexcept {
+    void FPUModel<ScalarType, IsPeriodBoundary, Dim>::swap(FPUModel& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         springLength.swap(obj.springLength);
     }

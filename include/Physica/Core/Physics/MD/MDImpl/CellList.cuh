@@ -123,7 +123,7 @@ namespace Physica::Core {
     }
 
     template<class ScalarType>
-    void device_obj<CellList<ScalarType>>::swap(device_obj& obj) noexcept {
+    void device_obj<CellList<ScalarType>>::swap(device_obj& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         lattice.swap(obj.lattice);
         cellGridDim.swap(obj.cellGridDim);

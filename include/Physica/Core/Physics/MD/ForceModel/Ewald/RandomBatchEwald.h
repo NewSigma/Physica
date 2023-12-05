@@ -157,7 +157,7 @@ namespace Physica::Core {
     }
 
     template<class ScalarType, class RandomPoolType>
-    void RandomBatchEwald<ScalarType, RandomPoolType>::swap(RandomBatchEwald& obj) noexcept {
+    void RandomBatchEwald<ScalarType, RandomPoolType>::swap(RandomBatchEwald& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         Base::swap(obj);
         sumGauss.swap(obj.sumGauss);

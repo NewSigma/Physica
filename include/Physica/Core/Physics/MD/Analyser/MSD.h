@@ -102,7 +102,7 @@ namespace Physica::Core {
     }
 
     template<class ScalarType, unsigned int Dim>
-    void MSD<ScalarType, Dim>::swap(MSD& obj) noexcept {
+    void MSD<ScalarType, Dim>::swap(MSD& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         initCell.swap(obj.initCell);
         buffer.swap(obj.buffer);

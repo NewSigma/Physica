@@ -119,7 +119,7 @@ namespace Physica::Core {
     }
 
     template<class ScalarType>
-    void PlainWaveBasis<ScalarType>::swap(PlainWaveBasis& obj) noexcept {
+    void PlainWaveBasis<ScalarType>::swap(PlainWaveBasis& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         coeffGrid.swap(obj.coeffGrid);
         repLatt.swap(obj.repLatt);

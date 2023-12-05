@@ -317,7 +317,7 @@ namespace Physica::Core {
     }
 
     template<class ScalarType, unsigned int Dim, size_t NumReplica>
-    void RingPolymer<ScalarType, Dim, NumReplica>::swap(RingPolymer& obj) noexcept {
+    void RingPolymer<ScalarType, Dim, NumReplica>::swap(RingPolymer& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         phase.swap(obj.phase);
         massVec.swap(obj.massVec);

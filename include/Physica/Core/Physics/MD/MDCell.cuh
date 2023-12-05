@@ -72,7 +72,7 @@ namespace Physica::Core {
             , invLattice(obj.getInvLattice()) {}
 
     template<class ScalarType, unsigned int Dim>
-    void device_obj<MDCell<ScalarType, Dim>>::swap(device_obj& obj) noexcept {
+    void device_obj<MDCell<ScalarType, Dim>>::swap(device_obj& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         Base::swap(obj);
         massVec.swap(obj.massVec);

@@ -64,7 +64,7 @@ namespace Physica::Core {
     }
 
     template<class ScalarType>
-    void QuadraticSearch<ScalarType>::swap(QuadraticSearch& obj) noexcept {
+    void QuadraticSearch<ScalarType>::swap(QuadraticSearch& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         x.swap(obj.x);
         y.swap(obj.y);

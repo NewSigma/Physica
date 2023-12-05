@@ -70,7 +70,7 @@ namespace Physica::Core {
         , distR(std::move(distR_)) {}
 
     template<class ScalarType>
-    void GaussKernel<ScalarType>::swap(GaussKernel& obj) noexcept {
+    void GaussKernel<ScalarType>::swap(GaussKernel& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         Base::swap(obj);
         paramEta.swap(obj.paramEta);

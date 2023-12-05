@@ -237,7 +237,7 @@ namespace Physica::Core {
     }
 
     template<class PlainScalar, size_t Size>
-    inline void SIMD<Differentiable<PlainScalar, DiffMode::Reverse>, Size>::swap(SIMD& obj) noexcept {
+    inline void SIMD<Differentiable<PlainScalar, DiffMode::Reverse>, Size>::swap(SIMD& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         Base::swap(obj);
         std::swap(headNode, obj.headNode);

@@ -139,7 +139,7 @@ namespace Physica::Core {
     }
 
     template<class ScalarType>
-    void CuboidLinear<ScalarType>::swap(CuboidLinear& obj) noexcept {
+    void CuboidLinear<ScalarType>::swap(CuboidLinear& __restrict obj) noexcept {
         Base::swap(obj);
         leftFrontBottom.swap(obj.leftFrontBottom);
         rightBehindTop.swap(obj.rightBehindTop);

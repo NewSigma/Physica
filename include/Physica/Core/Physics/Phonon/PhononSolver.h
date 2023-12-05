@@ -283,7 +283,7 @@ namespace Physica::Core {
     }
 
     template<class ScalarType>
-    void PhononSolver<ScalarType>::swap(PhononSolver& obj) noexcept {
+    void PhononSolver<ScalarType>::swap(PhononSolver& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         unitCell.swap(obj.unitCell);
         superSize.swap(obj.superSize);

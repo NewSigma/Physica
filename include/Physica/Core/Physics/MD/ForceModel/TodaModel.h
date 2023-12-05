@@ -264,7 +264,7 @@ namespace Physica::Core {
     }
 
     template<class ScalarType, bool IsPeriodBoundary>
-    void TodaModel<ScalarType, IsPeriodBoundary>::swap(TodaModel& obj) noexcept {
+    void TodaModel<ScalarType, IsPeriodBoundary>::swap(TodaModel& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         springLength.swap(obj.springLength);
     }

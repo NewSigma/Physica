@@ -256,7 +256,7 @@ namespace Physica::Core {
     }
 
     template<class ScalarType>
-    void JacobiDavidson<ScalarType>::swap(JacobiDavidson<ScalarType>& other) noexcept {
+    void JacobiDavidson<ScalarType>::swap(JacobiDavidson<ScalarType>& __restrict other) noexcept {
         assert(this != &other && "[Error]: Self swap is likely a bug");
         linearSolver.swap(other.linearSolver);
         eigenSolver.swap(other.eigenSolver);

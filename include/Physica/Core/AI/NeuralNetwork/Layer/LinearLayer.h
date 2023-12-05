@@ -112,7 +112,7 @@ namespace Physica::Core {
     }
 
     template<class ScalarType>
-    void LinearLayer<ScalarType>::swap(LinearLayer& obj) noexcept {
+    void LinearLayer<ScalarType>::swap(LinearLayer& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         weights.swap(obj.weights);
         bias.swap(obj.bias);

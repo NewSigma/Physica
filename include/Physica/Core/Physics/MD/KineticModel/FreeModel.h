@@ -144,7 +144,7 @@ namespace Physica::Core {
     }
 
     template<class ScalarType, unsigned int Dim, size_t NumReplica, RPMDIntegrator Integrator>
-    void FreeModel<ScalarType, Dim, NumReplica, Integrator>::swap(FreeModel& obj) noexcept {
+    void FreeModel<ScalarType, Dim, NumReplica, Integrator>::swap(FreeModel& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         omegaK.swap(obj.omegaK);
         omegaW.swap(obj.omegaW);

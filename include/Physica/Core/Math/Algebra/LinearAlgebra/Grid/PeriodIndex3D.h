@@ -95,7 +95,7 @@ namespace Physica::Core {
             index[i] %= dim[i];
     }
 
-    __host__ __device__ inline void PeriodIndex3D::swap(PeriodIndex3D& obj) noexcept {
+    __host__ __device__ inline void PeriodIndex3D::swap(PeriodIndex3D& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         index.swap(obj.index);
         dim.swap(obj.dim);

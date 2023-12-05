@@ -129,7 +129,7 @@ namespace Physica::Core {
     }
 
     template<class ScalarType, bool IsFixedBoundary, size_t NumReplica, RPMDIntegrator Integrator>
-    void HardCore<ScalarType, IsFixedBoundary, NumReplica, Integrator, CudaExecutor>::swap(HardCore& obj) noexcept {
+    void HardCore<ScalarType, IsFixedBoundary, NumReplica, Integrator, CudaExecutor>::swap(HardCore& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         latticeSize.swap(obj.latticeSize);
         collideFactor.swap(obj.collideFactor);

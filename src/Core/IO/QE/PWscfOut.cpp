@@ -39,7 +39,7 @@ namespace Physica::Core {
         return *this;
     }
 
-    void PWscfOut::swap(PWscfOut& obj) noexcept {
+    void PWscfOut::swap(PWscfOut& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         force.swap(obj.force);
     }

@@ -74,7 +74,7 @@ namespace Physica::Core {
             : Base(numParticle, cutoff_) {}
 
     template<class ScalarType, bool IsPeriodBoundary>
-    void device_obj<SilveraGoldman<ScalarType, IsPeriodBoundary>>::swap(device_obj& obj) noexcept {
+    void device_obj<SilveraGoldman<ScalarType, IsPeriodBoundary>>::swap(device_obj& __restrict obj) noexcept {
         Base::swap(obj);
     }
 

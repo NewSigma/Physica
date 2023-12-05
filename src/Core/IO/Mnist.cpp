@@ -48,7 +48,7 @@ namespace Physica::Core {
             throw BadFileFormatException("[Error]: Bad label file");
     }
 
-    void Mnist::swap(Mnist& obj) noexcept {
+    void Mnist::swap(Mnist& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         trainSamples.swap(obj.trainSamples);
         testSamples.swap(obj.testSamples);
