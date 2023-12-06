@@ -28,11 +28,12 @@ namespace Physica::Core {
         constexpr size_t OtherColumn = OtherDerived::ColumnAtCompile;
         static_assert(RowAtCompile == OtherRow || RowAtCompile == Dynamic || OtherRow == Dynamic, "Row mismatch between two matrix");
         static_assert(ColumnAtCompile == OtherColumn || ColumnAtCompile == Dynamic || OtherColumn == Dynamic, "Column mismatch between two matrix");
+        using OtherScalar = typename OtherDerived::ScalarType;
         assert(getRow() == target.getRow());
         assert(getColumn() == target.getColumn());
         for (size_t i = 0; i < target.getMaxMajor(); ++i)
             for (size_t j = 0; j < target.getMaxMinor(); ++j)
-                target.refFromMajorMinor(i, j) = calc(target.rowFromMajorMinor(i, j), target.columnFromMajorMinor(i, j));
+                target.refFromMajorMinor(i, j) = OtherScalar(calc(target.rowFromMajorMinor(i, j), target.columnFromMajorMinor(i, j)));
 
         constexpr bool isContinuous = std::is_base_of<ContinuousMatrix<OtherDerived>, OtherDerived>::value;
         if constexpr (isContinuous && isReverseDiff)
