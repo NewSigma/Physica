@@ -42,9 +42,12 @@ namespace Physica::Core {
         /* Operations */
         void sample(const MDCellType& sample);
         template<size_t NumReplica, class ForceMatrixAllocator>
-        void sample(const RPMD<ScalarType, Dim, NumReplica, ForceMatrixAllocator>& rpmd);
+        inline void sample(const RPMD<ScalarType, Dim, NumReplica, ForceMatrixAllocator>& rpmd);
+
         [[nodiscard]] ScalarType calcMSD() const { return mean(calcAtomMSD()); }
+        [[nodiscard]] ScalarType calcMSD2D() const { return mean(calcAtomMSD2D()); }
         [[nodiscard]] Vector<ScalarType> calcAtomMSD() const;
+        [[nodiscard]] Vector<ScalarType> calcAtomMSD2D() const;
         [[nodiscard]] inline ScalarType calcFiniteSizeLimit(size_t atomId) const noexcept;
         void clear();
         void swap(MSD& obj) noexcept;
@@ -74,7 +77,7 @@ namespace Physica::Core {
 
     template<class ScalarType, unsigned int Dim>
     template<size_t NumReplica, class ForceMatrixAllocator>
-    void MSD<ScalarType, Dim>::sample(const RPMD<ScalarType, Dim, NumReplica, ForceMatrixAllocator>& rpmd) {
+    inline void MSD<ScalarType, Dim>::sample(const RPMD<ScalarType, Dim, NumReplica, ForceMatrixAllocator>& rpmd) {
         for (size_t i = 0; i < rpmd.getNumReplica(); ++i)
             sample(rpmd.phaseToCell(i));
     }
@@ -85,6 +88,17 @@ namespace Physica::Core {
         Vector<ScalarType> result(numParticle);
         for (size_t i = 0; i < numParticle; ++i)
             result[i] = buffer.row(i).sum();
+        return result;
+    }
+
+    template<class ScalarType, unsigned int Dim>
+    Vector<ScalarType> MSD<ScalarType, Dim>::calcAtomMSD2D() const {
+        const size_t numParticle = getNumParticle();
+        Vector<ScalarType> result(numParticle);
+        for (size_t i = 0; i < numParticle; ++i) {
+            const auto row = buffer.row(i);
+            result[i] = row[0] + row[1];
+        }
         return result;
     }
     /**
