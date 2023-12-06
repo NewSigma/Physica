@@ -69,6 +69,7 @@ namespace Physica::Core {
         DiffTracer& operator=(DiffTracer&&) noexcept = default;
         /* Operations */
         void pushSegment(SegmentType segment);
+        [[nodiscard]] static DiffRecord makeSetOpNode(const Utils::Array<DiffRecord>& records);
     };
 
     template<class ScalarType>
@@ -104,8 +105,11 @@ namespace Physica::Core {
         if (traceList.empty() || traceList.back().full())
             pushSegment(SegmentType{});
         auto& segment = traceList.back();
-        auto& operands = segment.operands;
-        segment.records.grow(DiffRecord{operands.getLength(), source});
+        auto& records = segment.records;
+        if (source == ExpressionType::Set)
+            records.grow(makeSetOpNode(records));
+        else
+            records.grow(DiffRecord{segment.operands.getLength(), source});
 
         auto& values = segment.values;
         const size_t offset = values.getLength();
@@ -133,18 +137,23 @@ namespace Physica::Core {
         auto& segment = traceList.back();
         const size_t oldNumRecord = segment.getLength();
         const size_t newNumRecord = oldNumRecord + Size;
-        {
-            auto& records = segment.records;
+        auto& records = segment.records;
+        if (source == ExpressionType::Set) {
+            const DiffRecord record = makeSetOpNode(records);
             records.setLength(newNumRecord);
-
-            auto& operand = segment.operands;
-            const size_t idFirstOperand = operand.getLength();
+            for (size_t i = 0; i < Size; ++i)
+                records[oldNumRecord + i] = record;
+        }
+        else {
+            records.setLength(newNumRecord);
+            const size_t idFirstOperand = segment.operands.getLength();
             const unsigned int numOp = (source == ExpressionType::MulAdd2 || source == ExpressionType::MulAdd4 || source == ExpressionType::MulAdd8) // Until now, these operantions are optimized using SIMD
                                      ? 0
                                      : SegmentType::numOperand(source);
             for (size_t i = 0; i < Size; ++i)
                 records[oldNumRecord + i] = DiffRecord{idFirstOperand + i * numOp, source};
         }
+
         auto& values = segment.values;
         auto* const pValue = values.data_ptr(oldNumRecord);
         simd.store(pValue);
@@ -316,5 +325,19 @@ namespace Physica::Core {
         if (!traceList.empty())
             traceList.back().squeeze();
         traceList.emplace_back(std::move(segment));
+    }
+
+    template<class ScalarType>
+    typename DiffTracer<ScalarType>::DiffRecord DiffTracer<ScalarType>::makeSetOpNode(const Utils::Array<DiffRecord>& records) {
+        const size_t length = records.getLength();
+        size_t lastSetOpNode = 0;
+        if (length != 0) {
+            const auto lastRecord = records[length - 1];
+            if (lastRecord.source == ExpressionType::Set)
+                lastSetOpNode = lastRecord.idFirstOperand;
+            else
+                lastSetOpNode = length;
+        }
+        return DiffRecord{lastSetOpNode, ExpressionType::Set};
     }
 }

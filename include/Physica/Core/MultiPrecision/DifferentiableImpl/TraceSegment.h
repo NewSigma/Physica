@@ -209,8 +209,12 @@ namespace Physica::Core {
         assert(toIndex <= fromIndex && "[Error]: Unexpected index");
         for (size_t i = fromIndex; i >= toIndex && i <= fromIndex; --i) {
             const DiffRecord record = records[i];
+            if (record.source == ExpressionType::Set) {
+                i = record.idFirstOperand;
+                continue;
+            }
             const ScalarType& tangent = tangents[i];
-            if (tangent.isZero() || record.source == ExpressionType::Set)
+            if (tangent.isZero())
                 continue;
             
             const ScalarType& value = values[i];
@@ -286,6 +290,9 @@ namespace Physica::Core {
                             [[maybe_unused]] const bool isInRange = i >= toIndex && i <= fromIndex;
                             assert(isInRange && "[Error]: Unexpected id");
                             reverseMulAdd<2>(operandX, operandY, operandZ, i);
+                        }
+                        else {
+                            assert(false && "[Error]: MulAdd2 apply to double type only, you should not arrive here");
                         }
                         continue;
                     case ExpressionType::MulAdd4: {
