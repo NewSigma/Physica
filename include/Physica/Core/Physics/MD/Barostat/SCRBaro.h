@@ -154,7 +154,7 @@ namespace Physica::Core {
         else {
             result(0, 0) = ScalarType::random_normal(gen);
             result(1, 1) = ScalarType::random_normal(gen);
-            result(0, 1) = result(1, 0) = ScalarType::random_normal(gen) + ScalarType::random_normal(gen);
+            result(0, 1) = result(1, 0) = ScalarType::random_normal(gen) * ScalarType(M_SQRT1_2);
             auto corner = result.topLeftCorner(2);
             corner *= diffuseFactor;
         }
