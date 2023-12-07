@@ -49,7 +49,7 @@ namespace Physica::Core {
         void clear();
         [[nodiscard]] MeshType makePosition() const;
         [[nodiscard]] MatrixType makeDistribution() const;
-        void swap(This& obj) noexcept;
+        void swap(This& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] const BucketType& getBucket() const noexcept { return bucket; }
         [[nodiscard]] size_t getNumBinX() const noexcept { return bucket.getDimX(); }

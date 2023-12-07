@@ -57,7 +57,7 @@ namespace Physica::Core {
         void zero_grad(DiffScalar from, DiffScalar to);
         void forget(DiffScalar from);
         void squeeze();
-        void swap(TraceSegment& obj) noexcept;
+        void swap(TraceSegment& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] size_t getLength() const noexcept { return records.getLength(); }
         [[nodiscard]] size_t getCapacity() const noexcept { return records.getCapacity(); }

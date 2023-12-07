@@ -76,7 +76,7 @@ namespace Physica::Core {
         /* Helpers */
         Integer& toOpposite() noexcept { length = -length; return *this; }
         Integer& toAbs() noexcept { length = getSize(); return *this; }
-        void swap(Integer& i) noexcept;
+        void swap(Integer& __restrict i) noexcept;
         static inline bool matchSign(const Integer& i1, const Integer& i2);
         static bool absCompare(const Integer& i1, const Integer& i2);
         /* Getters */
@@ -110,7 +110,7 @@ namespace Physica::Core {
 namespace std {
     template<>
     inline void swap<Physica::Core::Integer>(
-            Physica::Core::Integer& i1, Physica::Core::Integer& i2) noexcept {
+            Physica::Core::Integer& __restrict i1, Physica::Core::Integer& __restrict i2) noexcept {
         i1.swap(i2);
     }
 }

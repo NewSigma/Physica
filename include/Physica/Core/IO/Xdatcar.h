@@ -43,6 +43,6 @@ namespace Physica::Core {
         [[nodiscard]] const Poscar<ScalarType>& getCurrent() const noexcept { return data; }
         [[nodiscard]] uint64_t getStep() const noexcept { return stepNum; }
         /* Helpers */
-        void swap(Xdatcar& xdatcar) noexcept;
+        void swap(Xdatcar& __restrict xdatcar) noexcept;
     };
 }

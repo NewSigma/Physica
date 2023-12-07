@@ -93,7 +93,7 @@ namespace Physica::Core {
         [[nodiscard]] LatticeMatrix virial_morse(const MDCellType& cell) const;
         template<class Executor, bool UseDynamicPolar>
         [[nodiscard]] PositionMatrix makeInducedDipole(const MDCellType& cell) const;
-        void swap(Q_TIP4P& model) noexcept;
+        void swap(Q_TIP4P& __restrict model) noexcept;
         /* Getters */
         [[nodiscard]] size_t getNumMolecule() const noexcept { return numMolecule; }
         [[nodiscard]] size_t getNumParticle() const noexcept { return getNumMolecule() * 3; }

@@ -57,7 +57,7 @@ namespace Physica::Core {
         friend std::ostream& operator<<(std::ostream& os, const PWscfIn& input);
         friend std::istream& operator>>(std::istream& is, PWscfIn& input);
         /* Operations */
-        void swap(PWscfIn& obj) noexcept;
+        void swap(PWscfIn& __restrict obj) noexcept;
         /* Static members */
         static const char* calculationToStr(CalculationType calculation);
     private:

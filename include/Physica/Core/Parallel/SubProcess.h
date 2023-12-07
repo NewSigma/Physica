@@ -41,6 +41,6 @@ namespace Physica::Core {
         /* Getters */
         [[nodiscard]] pid_t getPid() const noexcept { return pid; }
         /* Helpers */
-        void swap(SubProcess& process) noexcept;
+        void swap(SubProcess& __restrict process) noexcept;
     };
 }

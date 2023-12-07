@@ -44,7 +44,7 @@ namespace Physica::Core {
                  class Executor>
         void nvt_step(RandomGenerator& gen, const ForceModel& forceModel);
         void normalizePos() { cell.normalize(); }
-        void swap(MonteCarlo& mc) noexcept;
+        void swap(MonteCarlo& __restrict mc) noexcept;
         /* Getters */
         [[nodiscard]] const MDCellType& getCell() const noexcept { return cell; }
     };

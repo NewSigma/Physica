@@ -58,7 +58,7 @@ namespace Physica::Core {
         [[nodiscard]] Vector<ScalarType> force_long(const PositionMatrix& pos) const;
 
         [[nodiscard]] ScalarType calcDefaultIntegralLimit() const;
-        void swap(RandomBatchEwald& obj) noexcept;
+        void swap(RandomBatchEwald& __restrict obj) noexcept;
         /* Getters */
         using Base::getNumParticle;
         [[nodiscard]] size_t getSamplePoolSize() const noexcept { return samplePool.getRow(); }

@@ -38,6 +38,6 @@ namespace Physica::Core {
         /* Getters */
         ProcessFuture& getFuture() noexcept { return future; }
         /* Helpers */
-        void swap(SSHWarpper& ssh) noexcept;
+        void swap(SSHWarpper& __restrict ssh) noexcept;
     };
 }

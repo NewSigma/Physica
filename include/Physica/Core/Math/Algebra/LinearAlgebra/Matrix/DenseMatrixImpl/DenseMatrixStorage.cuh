@@ -168,7 +168,7 @@ namespace Physica::Core {
         /* Operations */
         [[nodiscard]] host_obj toHost() const { return host_obj(array.toHost()); }
         void resize(size_t row, size_t column);
-        inline void swap(device_obj& obj) noexcept;
+        inline void swap(device_obj& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] __host__ __device__ size_t getSize() const noexcept { return r * array.getLength(); }
         [[nodiscard]] __host__ __device__ T* data_ptr(size_t row, size_t column);
@@ -256,7 +256,7 @@ namespace Physica::Core {
         /* Operations */
         [[nodiscard]] host_obj toHost() const { return host_obj(array.toHost()); }
         void resize(size_t row, size_t column);
-        inline void swap(device_obj& obj) noexcept;
+        inline void swap(device_obj& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] __host__ __device__ size_t getSize() const noexcept { return c * array.getLength(); }
         [[nodiscard]] __host__ __device__ T* data_ptr(size_t row, size_t column);

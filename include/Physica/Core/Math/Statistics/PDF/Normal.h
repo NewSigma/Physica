@@ -36,7 +36,7 @@ namespace Physica::Core {
         template<class VectorType>
         [[nodiscard]] Vector<ScalarType> operator()(const RValueVector<VectorType>& x) const;
         /* Operations */
-        void swap(Normal& obj) noexcept;
+        void swap(Normal& __restrict obj) noexcept;
     };
 
     template<class ScalarType>

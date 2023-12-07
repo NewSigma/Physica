@@ -49,7 +49,7 @@ namespace Physica::Core {
         template<class VectorType>
         [[nodiscard]] VectorType getDensityOfStates(const LValueVector<VectorType>& atEnergy) const;
         /* Helpers */
-        void swap(BandGrid& band) noexcept;
+        void swap(BandGrid& __restrict band) noexcept;
     private:
         [[nodiscard]] Vector<ScalarType, 3> gradEnergy(size_t kPointId) const;
     };
@@ -158,8 +158,8 @@ namespace Physica::Core {
     }
 
     template<class ScalarType, bool isSpinPolarized>
-    inline void swap(Physica::Core::BandGrid<ScalarType, isSpinPolarized>& band1,
-                     Physica::Core::BandGrid<ScalarType, isSpinPolarized>& band2) noexcept {
+    inline void swap(Physica::Core::BandGrid<ScalarType, isSpinPolarized>& __restrict band1,
+                     Physica::Core::BandGrid<ScalarType, isSpinPolarized>& __restrict band2) noexcept {
         band1.swap(band2);
     }
     /**

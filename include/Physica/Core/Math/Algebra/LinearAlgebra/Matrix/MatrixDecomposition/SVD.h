@@ -77,7 +77,7 @@ namespace Physica::Core {
         [[nodiscard]] const LSingularMatrix& getMatrixU() const noexcept { return lSingularMat; }
         [[nodiscard]] const RSingularMatrix& getMatrixV() const noexcept { return rSingularMat; }
         /* Helpers */
-        void swap(SVD& svd) noexcept;
+        void swap(SVD& __restrict svd) noexcept;
     private:
         void stepSVD(size_t lower, size_t sub_order);
         ScalarType computeShift(size_t lower, size_t sub_order);
@@ -267,8 +267,8 @@ namespace Physica::Core {
     }
 
     template<class ScalarType, size_t RowAtCompile, size_t ColumnAtCompile>
-    inline void swap(SVD<ScalarType, RowAtCompile, ColumnAtCompile>& svd1,
-                     SVD<ScalarType, RowAtCompile, ColumnAtCompile>& svd2) noexcept {
+    inline void swap(SVD<ScalarType, RowAtCompile, ColumnAtCompile>& __restrict svd1,
+                     SVD<ScalarType, RowAtCompile, ColumnAtCompile>& __restrict svd2) noexcept {
         svd1.swap(svd2);
     }
 }

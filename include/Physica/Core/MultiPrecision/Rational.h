@@ -49,7 +49,7 @@ namespace Physica::Core {
         Rational& toOpposite() noexcept { numerator.toOpposite(); return *this; }
         Rational& toAbs() noexcept { numerator.toAbs(); return *this; }
         void simplify();
-        void swap(Rational& r) noexcept;
+        void swap(Rational& __restrict r) noexcept;
         /* Getters */
         [[nodiscard]] const Integer& getNumerator() const noexcept { return numerator; }
         [[nodiscard]] const Integer& getDenominator() const noexcept { return denominator; }
@@ -62,14 +62,16 @@ namespace Physica::Core {
         return Rational(-numerator, denominator);
     }
 
-    inline void swap(Rational& r1, Rational& r2) noexcept {
+    inline void swap(Rational& __restrict r1, Rational& __restrict r2) noexcept {
         r1.swap(r2);
     }
 }
 
 namespace std {
     template<>
-    inline void swap<Physica::Core::Rational>(Physica::Core::Rational& r1, Physica::Core::Rational& r2) noexcept {
+    inline void swap<Physica::Core::Rational>(
+            Physica::Core::Rational& __restrict r1,
+            Physica::Core::Rational& __restrict r2) noexcept {
         r1.swap(r2);
     }
 }

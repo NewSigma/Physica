@@ -53,7 +53,7 @@ namespace Physica::Core {
         [[nodiscard]] ScalarType calcDiffCapacityCv(ScalarType omegaW, ScalarType temperatureT);
         [[nodiscard]] ScalarType calcDiffHelmholtzF(ScalarType omegaW, ScalarType temperatureT);
         [[nodiscard]] ScalarType calcDiffEntropyS(ScalarType omegaW, ScalarType temperatureT);
-        void swap(PhononDOS& obj) noexcept;
+        void swap(PhononDOS& __restrict obj) noexcept;
     };
 
     template<class ScalarType>

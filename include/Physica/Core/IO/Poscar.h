@@ -66,7 +66,7 @@ namespace Physica::Core {
         [[nodiscard]] const Utils::Array<size_t>& getNumOfEachType() const noexcept { return numOfEachType; }
         [[nodiscard]] CrystalSystem getCrystalSystem(double precision) const noexcept;
         /* Helpers */
-        void swap(Poscar& poscar) noexcept;
+        void swap(Poscar& __restrict poscar) noexcept;
     private:
         using Base::toUnitCell;
         void readTypesAndNumber(std::istream& is);

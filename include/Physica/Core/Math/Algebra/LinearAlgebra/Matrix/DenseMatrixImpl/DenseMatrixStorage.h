@@ -181,7 +181,7 @@ namespace Physica::Core {
         void rowSwap(size_t r1, size_t r2);
         void columnSwap(size_t c1, size_t r1);
         [[nodiscard]] device_obj<This> toDevice() const;
-        void swap(DenseMatrixStorage& obj) noexcept { array.swap(obj.array); }
+        void swap(DenseMatrixStorage& __restrict obj) noexcept { array.swap(obj.array); }
         /* Getters */
         [[nodiscard]] ArrayType& asArray() noexcept { return array; }
         [[nodiscard]] const ArrayType& asArray() const noexcept { return array; }
@@ -235,7 +235,7 @@ namespace Physica::Core {
         void rowSwap(size_t r1, size_t r2);
         void columnSwap(size_t c1, size_t r1);
         [[nodiscard]] device_obj<This> toDevice() const;
-        void swap(DenseMatrixStorage& obj) noexcept { array.swap(obj.array); }
+        void swap(DenseMatrixStorage& __restrict obj) noexcept { array.swap(obj.array); }
         /* Getters */
         [[nodiscard]] ArrayType& asArray() noexcept { return array; }
         [[nodiscard]] const ArrayType& asArray() const noexcept { return array; }

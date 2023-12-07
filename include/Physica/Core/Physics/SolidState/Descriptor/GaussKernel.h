@@ -54,7 +54,7 @@ namespace Physica::Core {
         /* Operations */
         template<bool IsSmallCell>
         [[nodiscard]] VectorType calc(const CellType& cell) const;
-        void swap(GaussKernel& obj) noexcept;
+        void swap(GaussKernel& __restrict obj) noexcept;
     private:
         using Base::force_functor;
         [[nodiscard]] inline ScalarType pot_functor(size_t i, size_t j, ScalarType r, ScalarType r2) const;

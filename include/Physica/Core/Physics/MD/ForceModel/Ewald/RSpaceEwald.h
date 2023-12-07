@@ -84,7 +84,7 @@ namespace Physica::Core {
         [[nodiscard]] ComplexType forceConst(const PositionMatrix& pos, const Vector3D& waveQ, size_t dof1, size_t dof2) const;
 
         [[nodiscard]] inline LatticeMatrix virial(const PositionMatrix& pos) const;
-        void swap(RSpaceEwald& obj) noexcept;
+        void swap(RSpaceEwald& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] const LatticeMatrix& getLattice() const noexcept { return lattice; }
         [[nodiscard]] ScalarType getVolume() const noexcept { return PeriodicCell<ScalarType, Dim>::getVolume(lattice); }

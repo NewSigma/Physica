@@ -68,7 +68,7 @@ namespace Physica::Core {
 
         [[nodiscard]] inline device_obj<This> toDevice() const;
         void toDevice(device_obj<This>& obj) const;
-        void swap(CellList& obj) noexcept;
+        void swap(CellList& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] const LatticeMatrix& getLattice() const noexcept { return lattice; }
         [[nodiscard]] size_t getNumParticle() const noexcept { return directPos.getRow(); }

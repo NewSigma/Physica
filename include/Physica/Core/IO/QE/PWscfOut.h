@@ -34,7 +34,7 @@ namespace Physica::Core {
         /* Operators */
         PWscfOut& operator=(PWscfOut obj) noexcept;
         /* Operations */
-        void swap(PWscfOut& obj) noexcept;
+        void swap(PWscfOut& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] size_t getNumAtom() const noexcept { return force.getLength() / 3; }
         [[nodiscard]] const Vector<ScalarType>& getForce() const noexcept { return force; }

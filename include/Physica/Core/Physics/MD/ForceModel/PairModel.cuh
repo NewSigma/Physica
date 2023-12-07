@@ -72,7 +72,7 @@ namespace Physica::Core {
         [[nodiscard]] inline Vector<ScalarType> force_long(const MDCellType& cell) const;
 
         [[nodiscard]] LatticeMatrix virial(const MDCellType& hostCell) const;
-        void swap(device_obj& obj) noexcept;
+        void swap(device_obj& __restrict obj) noexcept;
 
         template<bool IsSmallCell>
         __device__ void forceKernelImpl();

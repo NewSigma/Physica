@@ -34,7 +34,7 @@ namespace Physica::Utils {
         /* Operators */
         TempFile& operator=(TempFile obj) noexcept;
         /* Operations */
-        void swap(TempFile& obj) noexcept;
+        void swap(TempFile& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] const char* getName() const noexcept { return name; }
         [[nodiscard]] int getFd() const noexcept { return fd; }

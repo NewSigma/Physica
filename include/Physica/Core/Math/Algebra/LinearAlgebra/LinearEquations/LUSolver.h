@@ -39,7 +39,7 @@ namespace Physica::Core {
         void decomposition(MatrixType A);
         template<class VectorType>
         Vector<T, Order> solve(const RValueVector<VectorType>& b) const;
-        void swap(LUSolver& obj) noexcept;
+        void swap(LUSolver& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] size_t getOrder() const { return lu.getMatrix().getRow(); }
     };

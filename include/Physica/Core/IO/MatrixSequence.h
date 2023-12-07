@@ -42,7 +42,7 @@ namespace Physica::Core {
         [[nodiscard]] const MatrixType& getCurrent() const noexcept { return mat; }
         [[nodiscard]] uint64_t getStep() const noexcept { return stepNum; }
         /* Helpers */
-        void swap(MatrixSequence& obj) noexcept;
+        void swap(MatrixSequence& __restrict obj) noexcept;
     };
 
     template<class ScalarType>

@@ -58,11 +58,11 @@ namespace Physica::Core {
         /* Setters */
         void setElem(ElementType elem, size_t index);
         /* Helpers */
-        void swap(Mesh& mesh) noexcept;
+        void swap(Mesh& __restrict mesh) noexcept;
     };
 
     template<class T>
-    inline void swap(Mesh<T>& mesh1, Mesh<T>& mesh2) noexcept {
+    inline void swap(Mesh<T>& __restrict mesh1, Mesh<T>& __restrict mesh2) noexcept {
         mesh1.swap(mesh2);
     }
 }

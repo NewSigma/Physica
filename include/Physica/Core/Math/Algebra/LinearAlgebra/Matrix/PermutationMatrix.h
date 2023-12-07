@@ -57,7 +57,7 @@ namespace Physica::Core {
         /* Operations */
         void swapRows(size_t row1, size_t row2);
         [[nodiscard]] PermutationMatrix inverse() const noexcept;
-        void swap(PermutationMatrix& obj) noexcept;
+        void swap(PermutationMatrix& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] ScalarType calc(size_t row, size_t col) const;
         [[nodiscard]] size_t getRow() const noexcept { return indexes.getLength(); }

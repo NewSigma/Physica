@@ -65,7 +65,7 @@ namespace Physica::Core {
         /* Operations */
         template<class ScalarType> DatasetType<ScalarType> makeTrainDataset() const;
         template<class ScalarType> DatasetType<ScalarType> makeTestDataset() const;
-        void swap(Mnist& obj) noexcept;
+        void swap(Mnist& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] const DataArray& getTrainSamples() const noexcept { return trainSamples; }
         [[nodiscard]] const DataArray& getTestSamples() const noexcept { return testSamples; }

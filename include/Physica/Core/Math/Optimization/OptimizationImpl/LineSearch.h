@@ -44,7 +44,7 @@ namespace Physica::Core {
         /* Operations */
         template<class Functor, class GradFunctor>
         [[nodiscard]] ScalarType run(Functor func, GradFunctor grad, const VectorType& x, const VectorType& gradient, const VectorType& direction) const;
-        void swap(LineSearch& obj) noexcept;
+        void swap(LineSearch& __restrict obj) noexcept;
     private:
         template<class Functor, class GradFunctor>
         [[nodiscard]] ScalarType zoom(Functor func, GradFunctor grad, const VectorType& x, const VectorType& gradient, const VectorType& direction, ScalarType step1, ScalarType step2) const;

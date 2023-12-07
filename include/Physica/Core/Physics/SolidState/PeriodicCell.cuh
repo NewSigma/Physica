@@ -47,7 +47,7 @@ namespace Physica::Core {
         /* Operators */
         device_obj& operator=(device_obj obj) noexcept { swap(obj); return *this; }
         /* Operations */
-        void swap(device_obj& obj) noexcept;
+        void swap(device_obj& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] __host__ __device__ constexpr static unsigned int getDim() { return Dim; }
         [[nodiscard]] __host__ __device__ const LatticeMatrix& getLattice() const noexcept { return lattice; }

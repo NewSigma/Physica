@@ -62,7 +62,7 @@ namespace Physica::Core {
         ScalarType interpolateFEM(Vector3D kPoint, const RSpaceGrid<ScalarType>& data) const;
         template<class MatrixType>
         MatrixType interpolateHermiteMatrix(Vector3D qPoint, const GridStorage<MatrixType>& matrixGrid);
-        void swap(BrillouInterpolate& obj) noexcept;
+        void swap(BrillouInterpolate& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] Index3D getBaseDim() const noexcept { return baseCoeff.getDim(); }
     private:

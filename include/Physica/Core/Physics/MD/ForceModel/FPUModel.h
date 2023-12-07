@@ -46,7 +46,7 @@ namespace Physica::Core {
         [[nodiscard]] Vector<ScalarType> force_long(const MDCellType& cell) const { return Vector<ScalarType>(cell.getDOF(), 0); }
         [[nodiscard]] ScalarType potentialEnergy(const MDCellType& cell) const;
         [[nodiscard]] LatticeMatrix virial(const MDCellType& cell) const;
-        void swap(FPUModel& obj) noexcept;
+        void swap(FPUModel& __restrict obj) noexcept;
     };
 
     template<class ScalarType, bool IsPeriodBoundary, unsigned int Dim>

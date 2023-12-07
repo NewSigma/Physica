@@ -54,7 +54,7 @@ namespace Physica::Core {
         [[nodiscard]] std::unordered_set<uint16_t> getSpecies() const noexcept;
         [[nodiscard]] size_t getElectronCount() const;
         /* Helpers */
-        void swap(CrystalCell& cell) noexcept;
+        void swap(CrystalCell& __restrict cell) noexcept;
     private:
         using Base::toSuperCell;
     };

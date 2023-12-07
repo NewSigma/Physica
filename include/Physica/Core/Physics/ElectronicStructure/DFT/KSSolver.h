@@ -72,7 +72,7 @@ namespace Physica::Core {
         bool solve(ScalarType criteria, size_t maxIte);
 
         template<class RandomGenerator> void initWaveFunc(const SpinPair<BasisType, IsSpinPolarized>& initial, RandomGenerator& gen);
-        void swap(KSSolver& obj) noexcept;
+        void swap(KSSolver& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] const LatticeMatrix& getLattice() const noexcept { return hamiltonH.getRepLattice(); }
         [[nodiscard]] const LatticeMatrix& getRepLattice() const noexcept { return hamiltonH.getRepLattice(); }

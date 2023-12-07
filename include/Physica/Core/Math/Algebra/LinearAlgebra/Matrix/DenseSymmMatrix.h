@@ -68,7 +68,7 @@ namespace Physica::Core {
         using Storage::getColumn;
         using Storage::data_ptr;
         /* Helpers */
-        void swap(DenseSymmMatrix& m) noexcept;
+        void swap(DenseSymmMatrix& __restrict m) noexcept;
         /* Static members */
         [[nodiscard]] static DenseSymmMatrix unitMatrix(size_t order);
     };
@@ -106,8 +106,8 @@ namespace Physica::Core {
     }
 
     template<class ScalarType, size_t Order, size_t MaxOrder>
-    inline void swap(Physica::Core::DenseSymmMatrix<ScalarType, Order, MaxOrder>& m1,
-                     Physica::Core::DenseSymmMatrix<ScalarType, Order, MaxOrder>& m2) noexcept {
+    inline void swap(Physica::Core::DenseSymmMatrix<ScalarType, Order, MaxOrder>& __restrict m1,
+                     Physica::Core::DenseSymmMatrix<ScalarType, Order, MaxOrder>& __restrict m2) noexcept {
         m1.swap(m2);
     }
 }

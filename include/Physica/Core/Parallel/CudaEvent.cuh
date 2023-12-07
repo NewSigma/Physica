@@ -33,7 +33,7 @@ namespace Physica::Core {
         CudaEvent& operator=(CudaEvent obj) noexcept;
         /* Operations */
         inline void wait();
-        void swap(CudaEvent& obj) noexcept;
+        void swap(CudaEvent& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] cudaEvent_t getEvent() const noexcept { return event; }
     };

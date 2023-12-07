@@ -64,7 +64,7 @@ namespace Physica::Core {
         /* Operations */
         void nve_step(RingPolymerType& ringPolymer, ScalarType deltaT);
         void updateMass(RingPolymerType& ringPolymer);
-        void swap(HardCore& obj) noexcept;
+        void swap(HardCore& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] size_t getNumParticle() const noexcept { return repMass.getLength(); }
         [[nodiscard]] size_t getNumReplica() const noexcept { return buffer.getColumn(); }

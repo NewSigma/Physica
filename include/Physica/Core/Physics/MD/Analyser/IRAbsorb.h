@@ -51,7 +51,7 @@ namespace Physica::Core {
         /* Operations */
         [[nodiscard]] VectorType makeWaveNum() const;
         [[nodiscard]] VectorType makeSpectrum();
-        void swap(IRAbsorb& obj) noexcept;
+        void swap(IRAbsorb& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] size_t getDataLength() const noexcept { return dipoleCorr.getLength(); }
         [[nodiscard]] ScalarType getDeltaOmegaW() const noexcept { return fft.getKSpaceDelta(); }

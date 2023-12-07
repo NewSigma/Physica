@@ -98,7 +98,7 @@ namespace Physica::Core {
         void transform() { transform(*this, *this); }
         void rawInvTransform() { rawInvTransform(*this, *this); }
         void invTransform() { invTransform(*this, *this); }
-        void swap(FFT& fft) noexcept;
+        void swap(FFT& __restrict fft) noexcept;
         /* Getters */
         [[nodiscard]] __host__ __device__ constexpr static size_t getDim() { return 1; }
         [[nodiscard]] __host__ __device__ ComplexTypeFFTW* getBuffer() { return buffer; }
@@ -173,7 +173,7 @@ namespace Physica::Core {
         void transform() { transform(*this, *this); }
         void rawInvTransform() { rawInvTransform(*this, *this); }
         void invTransform() { invTransform(*this, *this); }
-        void swap(FFT& fft) noexcept;
+        void swap(FFT& __restrict fft) noexcept;
         /* Getters */
         [[nodiscard]] size_t getDim() const noexcept { return Dim == Dynamic ? rSpaceSize.getLength() : Dim; }
         [[nodiscard]] __host__ __device__ ComplexTypeFFTW* getBuffer() { return buffer; }

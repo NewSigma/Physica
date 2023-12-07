@@ -62,7 +62,7 @@ namespace Physica::Core {
 
         [[nodiscard]] ScalarType calcKineticClassical() const;
         [[nodiscard]] ScalarType calcTemperature() const;
-        void swap(RingPolymer& obj) noexcept;
+        void swap(RingPolymer& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] constexpr unsigned int getDim() const noexcept { return Dim; }
         [[nodiscard]] const PhaseMatrix& asMatrix() const noexcept { return phase; }

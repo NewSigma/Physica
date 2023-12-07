@@ -66,7 +66,7 @@ namespace Physica::Core {
         /* Getters */
         [[nodiscard]] size_t getBufferSize() const noexcept { return buffer.getLength(); }
         /* Helpers */
-        void swap(LDA& lda) noexcept;
+        void swap(LDA& __restrict lda) noexcept;
     private:
         void fillExchange(const DensityType& density, PotType& xc);
         void addCorreclation(const DensityType& density, PotType& xc);
@@ -181,7 +181,7 @@ namespace Physica::Core {
         /* Getters */
         [[nodiscard]] size_t getBufferSize() const noexcept { return buffer.getLength(); }
         /* Helpers */
-        void swap(LDA& lda) noexcept;
+        void swap(LDA& __restrict lda) noexcept;
     private:
         void fillExchange(const DensityType& density, PotType& xc);
         void addCorreclation(const DensityType& density, PotType& xc);

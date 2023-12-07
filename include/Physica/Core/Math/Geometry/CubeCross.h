@@ -53,7 +53,7 @@ namespace Physica::Core {
         /* Operators */
         CubeCross& operator=(CubeCross obj) noexcept { swap(obj); return *this; }
         /* Operations */
-        void swap(CubeCross& obj) noexcept;
+        void swap(CubeCross& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] ScalarType getArea() const noexcept { return area; }
         [[nodiscard]] CrossType getType() const noexcept { return type; }

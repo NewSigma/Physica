@@ -64,7 +64,7 @@ namespace Physica::Core {
         [[nodiscard]] ForceConstMatrix forceConst(const MDCellType& cell) const;
 
         [[nodiscard]] LatticeMatrix virial(const MDCellType& cell) const;
-        void swap(Hamonic& obj) noexcept;
+        void swap(Hamonic& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] size_t getNumParticle() const noexcept { return sites.getRow(); }
     };

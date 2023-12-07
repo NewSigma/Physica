@@ -213,7 +213,7 @@ namespace Physica::Core {
         inline void store(ScalarType* p) const;
         inline void store_partial(int n, ScalarType* p) const;
         [[nodiscard]] inline ScalarType horizontal_add() const;
-        inline void swap(SIMD& obj) noexcept;
+        inline void swap(SIMD& __restrict obj) noexcept;
         /* Getters */
         using Base::size;
         using Base::getImpl;

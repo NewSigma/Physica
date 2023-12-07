@@ -56,7 +56,7 @@ namespace Physica::Core {
         void fetchInputDensity(DensityType& input);
         void mix(const DensityType& output);
         void mix(size_t iteration, DensityType& result);
-        void swap(ChargeMixer& mixer) noexcept;
+        void swap(ChargeMixer& __restrict mixer) noexcept;
         /* Getters */
         [[nodiscard]] const DensityType& getResidule() const noexcept { return residules[mixIteration]; }
     };

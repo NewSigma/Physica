@@ -64,7 +64,7 @@ namespace Physica::Core {
         [[nodiscard]] const EigenvalueVector& getEigenvalues() const noexcept { return eigenvalues; }
         [[nodiscard]] EigenvectorMatrix getEigenvectors() const noexcept { return eigenvectors; }
         /* Helpers */
-        void swap(SymmEigenSolver& solver) noexcept;
+        void swap(SymmEigenSolver& __restrict solver) noexcept;
     private:
         void stepQR(WorkingMatrix& working, size_t lower, size_t sub_order);
     };
@@ -191,8 +191,8 @@ namespace Physica::Core {
     }
 
     template<class MatrixType>
-    inline void swap(Physica::Core::SymmEigenSolver<MatrixType>& solver1,
-                     Physica::Core::SymmEigenSolver<MatrixType>& solver2) noexcept {
+    inline void swap(Physica::Core::SymmEigenSolver<MatrixType>& __restrict solver1,
+                     Physica::Core::SymmEigenSolver<MatrixType>& __restrict solver2) noexcept {
         solver1.swap(solver2);
     }
 }

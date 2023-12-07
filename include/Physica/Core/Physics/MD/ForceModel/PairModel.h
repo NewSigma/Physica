@@ -89,7 +89,7 @@ namespace Physica::Core {
 
         [[nodiscard]] LatticeMatrix virial(const MDCellType& cell) const;
         [[nodiscard]] LatticeMatrix virial(const LatticeMatrix& lattice, const PositionMatrix& pos) const;
-        void swap(PairModel& pair) noexcept;
+        void swap(PairModel& __restrict pair) noexcept;
         /* Getters */
         [[nodiscard]] const PlainScalar& getCutoff() const noexcept { return cutoff; }
         [[nodiscard]] const ScalarType& getSquaredCutoff() const noexcept { return squared_cutoff; }

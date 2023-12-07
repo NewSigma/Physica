@@ -42,7 +42,7 @@ namespace Physica::Core {
         void solve_functor(Functor dot_functor, LValueVector<AnyVector>& b);
         void resize([[maybe_unused]] size_t size) {}
         /* Helpers */
-        void swap(IterateSolver& solver) noexcept;
+        void swap(IterateSolver& __restrict solver) noexcept;
         /* Setters */
         void setMaxIteration(size_t iteration) noexcept { maxIteration = iteration; }
     };
@@ -107,7 +107,7 @@ namespace Physica::Core {
     }
 
     template<class ScalarType>
-    inline void swap(IterateSolver<ScalarType>& solver1, IterateSolver<ScalarType>& solver2) noexcept {
+    inline void swap(IterateSolver<ScalarType>& __restrict solver1, IterateSolver<ScalarType>& __restrict solver2) noexcept {
         solver1.swap(solver2);
     }
 }

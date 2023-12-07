@@ -86,7 +86,7 @@ namespace Physica::Core {
         [[nodiscard]] inline bool operator==(const This& other) const;
         [[nodiscard]] inline Differentiable operator-() const;
         /* Operations */
-        void swap(Differentiable& obj) noexcept;
+        void swap(Differentiable& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] ScalarType& getValue() noexcept { return value; }
         [[nodiscard]] ScalarType& getTangent() noexcept { return tangent; }
@@ -132,7 +132,7 @@ namespace Physica::Core {
         void reverse();
         void reverse(Differentiable to);
         [[nodiscard]] Differentiable copy() const;
-        inline void swap(Differentiable& obj) noexcept;
+        inline void swap(Differentiable& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] ScalarType* value_ptr() const noexcept { return pValue; }
         [[nodiscard]] ScalarType* tangent_ptr() const noexcept { return pTangent; }

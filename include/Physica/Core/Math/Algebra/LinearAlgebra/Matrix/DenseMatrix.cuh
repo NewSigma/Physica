@@ -53,7 +53,7 @@ namespace Physica::Core {
         /* Operations */
         [[nodiscard]] host_obj toHost() const { return host_obj(Storage::toHost(), Dim::getRow(), Dim::getColumn()); }
         inline void resize(size_t row, size_t column);
-        void swap(device_obj& obj) noexcept;
+        void swap(device_obj& __restrict obj) noexcept;
         /* Getters */
         using Dim::getRow;
         using Dim::getColumn;

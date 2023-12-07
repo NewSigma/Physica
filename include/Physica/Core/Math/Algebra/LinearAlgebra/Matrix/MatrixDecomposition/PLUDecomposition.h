@@ -39,7 +39,7 @@ namespace Physica::Core {
         PLUDecomposition& operator=(PLUDecomposition obj) noexcept;
         /* Operations */
         void compute(MatrixType m);
-        void swap(PLUDecomposition& obj) noexcept;
+        void swap(PLUDecomposition& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] const MatrixType& getMatrix() const noexcept { return matrix; }
         [[nodiscard]] const Utils::Array<size_t>& getBiasOrder() const noexcept { return biasOrder; }

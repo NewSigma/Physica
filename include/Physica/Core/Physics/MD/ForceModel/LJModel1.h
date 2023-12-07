@@ -54,7 +54,7 @@ namespace Physica::Core {
         /* Operators */
         LJModel1& operator=(LJModel1 obj) noexcept;
         /* Operations */
-        void swap(LJModel1& obj) noexcept;
+        void swap(LJModel1& __restrict obj) noexcept;
         /* Static members */
         [[nodiscard]] inline ScalarType pot_functor(size_t i, size_t j, ScalarType r, ScalarType r2) const;
         [[nodiscard]] inline ScalarType force_functor(size_t i, size_t j, ScalarType r, ScalarType r2) const;

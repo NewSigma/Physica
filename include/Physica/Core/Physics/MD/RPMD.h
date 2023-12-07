@@ -149,7 +149,7 @@ namespace Physica::Core {
         [[nodiscard]] LatticeMatrix makeStressVirial(const ForceModel& model) const;
         template<class ForceModel, class Executor>
         [[nodiscard]] LatticeMatrix makeStressClassical(const ForceModel& model) const;
-        void swap(RPMD& obj) noexcept;
+        void swap(RPMD& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] constexpr unsigned int getDim() const noexcept { return Dim; }
         [[nodiscard]] const LatticeMatrix& getLattice() const noexcept { return cell.getLattice(); }

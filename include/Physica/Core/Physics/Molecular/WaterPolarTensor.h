@@ -64,7 +64,7 @@ namespace Physica::Core {
         WaterPolarTensor& operator=(WaterPolarTensor model) noexcept;
         [[nodiscard]] Vector3D operator*(const Vector3D& v) const;
         /* Operations */
-        void swap(WaterPolarTensor& model) noexcept;
+        void swap(WaterPolarTensor& __restrict model) noexcept;
     private:
         static Matrix3D makePolarTensor(ScalarType curvePos1, ScalarType curvePos2, ScalarType curvePos3);
         inline static DiagBaseVector makeDiagBases(ScalarType curvePos1, ScalarType curvePos2, ScalarType curvePos3);

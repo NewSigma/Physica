@@ -87,7 +87,7 @@ namespace Physica::Core {
         template<class ScalarType>
         [[nodiscard]] Vector<ScalarType> asVector(size_t column) const;
         size_t countMissingValue(size_t column, const char* missingTag = "NA") const;
-        void swap(CsvFile& obj) noexcept;
+        void swap(CsvFile& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] const DataTypeArray& getDatatypes() const noexcept { return datatypes; }
         [[nodiscard]] size_t getColumn() const noexcept { return datatypes.getLength(); }

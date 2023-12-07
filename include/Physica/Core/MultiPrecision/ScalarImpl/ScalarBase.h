@@ -237,7 +237,7 @@ namespace Physica::Core {
     }
 
     template<class ScalarType>
-    inline void swap(ScalarBase<ScalarType>& s1, ScalarBase<ScalarType>& s2) noexcept {
+    inline void swap(ScalarBase<ScalarType>& __restrict s1, ScalarBase<ScalarType>& __restrict s2) noexcept {
         s1.getDerived().swap(s2.getDerived());
     }
 }

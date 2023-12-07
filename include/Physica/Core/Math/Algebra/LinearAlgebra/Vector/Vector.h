@@ -96,7 +96,7 @@ namespace Physica::Core {
     };
 
     template<class T, size_t Length, size_t MaxLength>
-    inline void swap(Vector<T, Length, MaxLength>& v1, Vector<T, Length, MaxLength>& v2) noexcept {
+    inline void swap(Vector<T, Length, MaxLength>& __restrict v1, Vector<T, Length, MaxLength>& __restrict v2) noexcept {
         v1.swap(v2);
     }
 }

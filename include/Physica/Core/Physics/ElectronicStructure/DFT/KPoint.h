@@ -49,7 +49,7 @@ namespace Physica::Core {
         template<class VectorType>
         void setBandEnergy(SpinState spin, const RValueVector<VectorType>& v);
         /* Helpers */
-        void swap(KPoint& kPoint) noexcept;
+        void swap(KPoint& __restrict kPoint) noexcept;
     };
 
     template<class ScalarType, size_t NumBand, bool isSpinPolarized>

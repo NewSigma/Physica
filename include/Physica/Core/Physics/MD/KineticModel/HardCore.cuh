@@ -65,7 +65,7 @@ namespace Physica::Core {
 
         void updateMomentum(RingPolymerType& ringPolymer);
         void updateMass(RingPolymerType& ringPolymer);
-        void swap(HardCore& obj) noexcept;
+        void swap(HardCore& __restrict obj) noexcept;
 
         __device__ inline void stepKernelImpl(ScalarType deltaT, size_t numStep);
         /* Getters */

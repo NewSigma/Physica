@@ -48,7 +48,7 @@ namespace Physica::Core {
         /* Operations */
         template<class RandomPoolType, class Executor>
         void step(RingPolymerType& ringPolymer, ScalarType deltaT) const;
-        void swap(DoubleThermo& obj) noexcept;
+        void swap(DoubleThermo& __restrict obj) noexcept;
         /* Setters */
         void setTemperature(ScalarType temperatureT_) { temperatureT = temperatureT_; }
         void setThermostatTime(ScalarType time) { thermostatTime = time; }

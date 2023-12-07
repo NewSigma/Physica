@@ -68,7 +68,7 @@ namespace Physica::Core {
         [[nodiscard]] HouseholderSequence<WorkingMatrix> getMatrixU() const;
         [[nodiscard]] HouseholderSequence<WorkingMatrix, false> getMatrixV() const;
         /* Helpers */
-        void swap(Bidiagonalization& obj) noexcept;
+        void swap(Bidiagonalization& __restrict obj) noexcept;
     private:
         void householderOnCol(size_t colIndex);
         friend class BiDiagMatrixB<MatrixType>;
@@ -165,7 +165,7 @@ namespace Physica::Core {
     }
 
     template<class MatrixType>
-    inline void swap(Bidiagonalization<MatrixType>& obj1, Bidiagonalization<MatrixType>& obj2) noexcept {
+    inline void swap(Bidiagonalization<MatrixType>& __restrict obj1, Bidiagonalization<MatrixType>& __restrict obj2) noexcept {
         obj1.swap(obj2);
     }
 

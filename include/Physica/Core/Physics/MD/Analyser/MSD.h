@@ -50,7 +50,7 @@ namespace Physica::Core {
         [[nodiscard]] Vector<ScalarType> calcAtomMSD2D() const;
         [[nodiscard]] inline ScalarType calcFiniteSizeLimit(size_t atomId) const noexcept;
         void clear();
-        void swap(MSD& obj) noexcept;
+        void swap(MSD& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] size_t getNumParticle() const noexcept { return initCell.getNumParticle(); }
         [[nodiscard]] size_t getNumSample() const noexcept { return numSample; }

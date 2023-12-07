@@ -51,7 +51,7 @@ namespace Physica::Core {
 
         template<class RandomGenerator>
         inline void random_normal(RandomGenerator& gen);
-        void swap(PlainWaveBasis& obj) noexcept;
+        void swap(PlainWaveBasis& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] const GridType& getCoeffGrid() const noexcept { return coeffGrid; }
         [[nodiscard]] size_t getNumPlainWave() const noexcept { return coeffGrid.getSize(); }

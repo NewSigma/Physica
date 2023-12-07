@@ -91,7 +91,7 @@ namespace Physica::Core {
         /* Operations */
         [[nodiscard]] inline PacketType packet() const;
         inline void writePacket(const PacketType packet);
-        void swap(ComplexScalar& c) noexcept;
+        void swap(ComplexScalar& __restrict c) noexcept;
         /* Getters */
         [[nodiscard]] T squaredNorm() const;
         [[nodiscard]] inline T norm() const;
@@ -176,7 +176,7 @@ namespace Physica::Core {
     ComplexScalar<T> operator-(const ComplexScalar<T>& c) { return ComplexScalar(-c.getReal(), -c.getImag()); }
 
     template<class T>
-    void swap(ComplexScalar<T>& c1, ComplexScalar<T>& c2) noexcept { c1.swap(c2); }
+    void swap(ComplexScalar<T>& __restrict c1, ComplexScalar<T>& __restrict c2) noexcept { c1.swap(c2); }
 
     template<class T, class ScalarType>
     void operator+=(ComplexScalar<T>& c, const ScalarType& t) { c = c + t; }

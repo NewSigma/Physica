@@ -54,7 +54,7 @@ namespace Physica::Core::Internal {
         [[nodiscard]] __host__ __device__ inline const T* data_ptr(size_t row, size_t column) const;
         /* Helpers */
         [[nodiscard]] size_t accessingIndex(size_t r, size_t c) const noexcept;
-        void swap(HalfDenseMatrixStorage& storage) noexcept;
+        void swap(HalfDenseMatrixStorage& __restrict storage) noexcept;
     };
 
     template<class T, size_t Order, size_t MaxOrder>
@@ -85,8 +85,8 @@ namespace Physica::Core::Internal {
     }
 
     template<class T, size_t Order, size_t MaxOrder>
-    inline void swap(HalfDenseMatrixStorage<T, Order, MaxOrder>& mat1,
-                     HalfDenseMatrixStorage<T, Order, MaxOrder>& mat2) noexcept {
+    inline void swap(HalfDenseMatrixStorage<T, Order, MaxOrder>& __restrict mat1,
+                     HalfDenseMatrixStorage<T, Order, MaxOrder>& __restrict mat2) noexcept {
         mat1.swap(mat2);
     }
 }

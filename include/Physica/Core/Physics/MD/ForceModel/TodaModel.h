@@ -65,7 +65,7 @@ namespace Physica::Core {
         [[nodiscard]] ForceConstMatrix forceConst(const MDCellType& cell) const;
 
         [[nodiscard]] LatticeMatrix virial(const MDCellType& cell) const;
-        void swap(TodaModel& obj) noexcept;
+        void swap(TodaModel& __restrict obj) noexcept;
     };
 
     template<class ScalarType, bool IsPeriodBoundary>

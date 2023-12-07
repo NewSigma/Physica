@@ -60,7 +60,7 @@ namespace Physica::Core {
         void random_normal(RandomGenerator& gen);
         template<class Distribution, class RandomGenerator>
         void random_any(Distribution& dist, RandomGenerator& gen);
-        void swap(LinearLayer& obj) noexcept;
+        void swap(LinearLayer& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] size_t getInputDim() const noexcept { return weights.getColumn(); }
         [[nodiscard]] size_t getOutputDim() const noexcept { return weights.getRow(); }

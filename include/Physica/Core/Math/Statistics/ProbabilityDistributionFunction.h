@@ -44,7 +44,7 @@ namespace Physica::Core {
         void clear();
         [[nodiscard]] VectorType makePosition() const;
         [[nodiscard]] VectorType makeDistribution() const;
-        void swap(This& obj) noexcept;
+        void swap(This& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] const BucketType& getBucket() const noexcept { return bucket; }
         [[nodiscard]] size_t getNumBin() const noexcept { return bucket.getLength(); }

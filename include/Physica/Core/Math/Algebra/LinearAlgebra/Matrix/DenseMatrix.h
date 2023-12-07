@@ -117,7 +117,7 @@ namespace Physica::Core {
         void write(H5::DataSet& dataset,
                    DataSpaceBase<SpaceType>& file_space,
                    const H5::DSetMemXferPropList& xfer_plist = H5::DSetMemXferPropList::DEFAULT) const;
-        void swap(DenseMatrix& m) noexcept;
+        void swap(DenseMatrix& __restrict m) noexcept;
         /* Getters */
         using Dim::getRow;
         using Dim::getColumn;
@@ -147,8 +147,8 @@ namespace Physica::Core {
 
     template<class T, int Option, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn, class Allocator>
     inline void swap(
-            DenseMatrix<T, Option, Row, Column, MaxRow, MaxColumn, Allocator>& m1,
-            DenseMatrix<T, Option, Row, Column, MaxRow, MaxColumn, Allocator>& m2) noexcept {
+            DenseMatrix<T, Option, Row, Column, MaxRow, MaxColumn, Allocator>& __restrict m1,
+            DenseMatrix<T, Option, Row, Column, MaxRow, MaxColumn, Allocator>& __restrict m2) noexcept {
         m1.swap(m2);
     }
 }

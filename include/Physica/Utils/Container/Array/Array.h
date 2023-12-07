@@ -93,7 +93,7 @@ namespace Physica::Utils {
         __host__ __device__ void reserve([[maybe_unused]] size_t size) { assert(size == Capacity); }
         template<class... Args>
         __host__ __device__ void resize([[maybe_unused]] size_t size, [[maybe_unused]] Args&&... args) { assert(size == Length); }
-        __host__ __device__ void swap(Array& array) noexcept;
+        __host__ __device__ void swap(Array& __restrict array) noexcept;
         [[nodiscard]] inline device_obj<This> toDevice() const;
         inline void toDevice(device_obj<This>& obj) const;
         /* Getters */
@@ -152,7 +152,7 @@ namespace Physica::Utils {
         void append(Array&& t);
         void reserve(size_t size);
         template<class... Args> void resize(size_t size, Args&&... args);
-        void swap(Array& array) noexcept;
+        void swap(Array& __restrict array) noexcept;
         /* Getters */
         [[nodiscard]] __host__ __device__ size_t size() const noexcept { return length; }
         [[nodiscard]] __host__ __device__ size_t getLength() const noexcept { return length; }
@@ -206,7 +206,7 @@ namespace Physica::Utils {
         void squeeze();
         void increase(size_t size);
         void decrease(size_t size);
-        void swap(Array& array) noexcept;
+        void swap(Array& __restrict array) noexcept;
         [[nodiscard]] inline pointer release() noexcept;
         void doubleSpace() { increase(capacity * 2 + (MinDeltaSpace + sizeof(T) - 1) / sizeof(T)); }
         [[nodiscard]] inline device_obj<This> toDevice() const;
@@ -218,8 +218,8 @@ namespace Physica::Utils {
     };
 
     template<class T, size_t Length, size_t Capacity, class Allocator>
-    inline void swap(Physica::Utils::Array<T, Length, Capacity, Allocator>& array1,
-                     Physica::Utils::Array<T, Length, Capacity, Allocator>& array2) noexcept {
+    inline void swap(Physica::Utils::Array<T, Length, Capacity, Allocator>& __restrict array1,
+                     Physica::Utils::Array<T, Length, Capacity, Allocator>& __restrict array2) noexcept {
         array1.swap(array2);
     }
 }

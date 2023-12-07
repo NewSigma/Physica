@@ -52,7 +52,7 @@ namespace Physica::Core {
         __device__ void forNeighInRange(Index3D centerCell, Functor func) const;
         template<class Functor>
         __device__ inline void forAtomInCell(Index3D cellIndex, Functor func) const;
-        void swap(device_obj& obj) noexcept;
+        void swap(device_obj& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] __device__ const LatticeMatrix& getLattice() const noexcept { return lattice; }
         [[nodiscard]] __host__ __device__ Index3D getCellGridDim() const noexcept { return cellGridDim; }

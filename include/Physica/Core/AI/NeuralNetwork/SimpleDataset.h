@@ -38,7 +38,7 @@ namespace Physica::Core {
         /* Operators */
         SimpleDataset& operator=(SimpleDataset obj) noexcept { swap(obj); return *this; }
         /* Operations */
-        void swap(SimpleDataset& obj) noexcept;
+        void swap(SimpleDataset& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] SampleArray& getSamples() noexcept { return samples; }
         [[nodiscard]] const SampleArray& getSamples() const noexcept { return samples; }

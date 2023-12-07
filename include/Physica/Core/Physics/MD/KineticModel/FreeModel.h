@@ -79,7 +79,7 @@ namespace Physica::Core {
         void nve_step(RingPolymerType& ringPolymer, ScalarType deltaT);
         template<class Barostat>
         void npt_step(MDType& rpmd, Barostat& barostat, ScalarType deltaT);
-        void swap(FreeModel& obj) noexcept;
+        void swap(FreeModel& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] ScalarType getOmegaW() const noexcept { return omegaW; }
         /* Setters */

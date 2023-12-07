@@ -60,7 +60,7 @@ namespace Physica::Core {
         using Base::random_normal;
         template<class... Args>
         inline void resize(Index3D index, Args&&... args);
-        inline void swap(RSpaceGrid& grid) noexcept;
+        inline void swap(RSpaceGrid& __restrict grid) noexcept;
         /* Getters */
         using Storage::getDimX;
         using Storage::getDimY;
@@ -134,7 +134,7 @@ namespace Physica::Core {
     }
 
     template<class T>
-    inline void swap(RSpaceGrid<T>& grid1, RSpaceGrid<T>& grid2) noexcept {
+    inline void swap(RSpaceGrid<T>& __restrict grid1, RSpaceGrid<T>& __restrict grid2) noexcept {
         grid1.swap(grid2);
     }
 }

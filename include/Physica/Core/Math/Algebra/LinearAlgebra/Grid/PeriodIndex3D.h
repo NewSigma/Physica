@@ -46,7 +46,7 @@ namespace Physica::Core {
         [[nodiscard]] __host__ __device__ inline bool isInReducedK() const;
         [[nodiscard]] __host__ __device__ inline Index3D toReducedK() const;
         __host__ __device__ inline void normalize();
-        __host__ __device__ inline void swap(PeriodIndex3D& obj) noexcept;
+        __host__ __device__ inline void swap(PeriodIndex3D& __restrict obj) noexcept;
     private:
         __host__ __device__ static Index3D toIndex3D(Index1D index, Index3D dim);
     };

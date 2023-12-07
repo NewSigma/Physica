@@ -50,7 +50,7 @@ namespace Physica::Core {
         [[nodiscard]] ScalarType getPress() const;
         [[nodiscard]] Outcar getOutcar() const;
         /* Helpers */
-        void swap(VaspWarpper& vasp) noexcept;
+        void swap(VaspWarpper& __restrict vasp) noexcept;
     private:
         friend class Test;
     };

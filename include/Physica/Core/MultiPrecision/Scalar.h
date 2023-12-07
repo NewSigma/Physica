@@ -115,7 +115,7 @@ namespace Physica::Core {
         [[nodiscard]] Scalar operator>>(int bits) const;
         [[nodiscard]] Scalar operator-() const;
         /* Operations */
-        void swap(Scalar& obj) noexcept;
+        void swap(Scalar& __restrict obj) noexcept;
         /* Helpers */
         Scalar& toOpposite() noexcept { length = -length; return *this; }
         Scalar& toAbs() noexcept { length = getSize(); return *this; }

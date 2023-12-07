@@ -46,7 +46,7 @@ namespace Physica::Core {
         /* Operators */
         device_obj& operator=(device_obj obj) noexcept { swap(obj); return *this; }
         /* Operations */
-        void swap(device_obj& obj) noexcept;
+        void swap(device_obj& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] __host__ __device__ size_t getDOF() const noexcept { return Dim * Base::getNumParticle(); }
         [[nodiscard]] __host__ __device__ const MassVector& getMassVec() const { return massVec; }

@@ -65,7 +65,7 @@ namespace Physica::Core {
                       ScalarType minFreq,
                       unsigned int numInterpolateStep,
                       unsigned int maxNumStep);
-        void swap(FrozenPhonon& obj) noexcept;
+        void swap(FrozenPhonon& __restrict obj) noexcept;
         /* Getters */
         using Base::getUnitCell;
         using Base::getNumUnitCellAtom;

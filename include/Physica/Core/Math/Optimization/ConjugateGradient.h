@@ -48,7 +48,7 @@ namespace Physica::Core {
         template<class Functor, class GradFunctor> void init(VectorType initial, Functor func, GradFunctor grad);
         template<class Functor, class GradFunctor> void step(Functor func, GradFunctor grad);
         template<class Functor, class GradFunctor> ScalarType solve(ScalarType epsilon, VectorType initial, Functor func, GradFunctor grad);
-        void swap(ConjugateGradient& obj) noexcept;
+        void swap(ConjugateGradient& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] inline size_t getDim() const noexcept;
         [[nodiscard]] const VectorType& getGradG() const noexcept { return gradG; }

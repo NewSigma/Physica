@@ -78,7 +78,7 @@ namespace Physica::Core {
          */
         [[nodiscard]] const RawEigenvectorType& getRawEigenvectors() const noexcept { return rawEigenvectors; }
         /* Helpers */
-        void swap(EigenSolver& solver) noexcept;
+        void swap(EigenSolver& __restrict solver) noexcept;
     private:
         void computeRealMatEigenvalues(const WorkingMatrix& matrixT);
         void computeRealMatEigenvectors(WorkingMatrix& matrixT);
@@ -398,8 +398,8 @@ namespace Physica::Core {
     }
 
     template<class MatrixType>
-    inline void swap(Physica::Core::EigenSolver<MatrixType>& solver1,
-                     Physica::Core::EigenSolver<MatrixType>& solver2) noexcept {
+    inline void swap(Physica::Core::EigenSolver<MatrixType>& __restrict solver1,
+                     Physica::Core::EigenSolver<MatrixType>& __restrict solver2) noexcept {
         solver1.swap(solver2);
     }
 }

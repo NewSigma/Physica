@@ -35,7 +35,7 @@ namespace Physica::Core {
         /* Operators */
         Outcar& operator=(Outcar& obj) noexcept { swap(obj); return *this; }
         /* Operations */
-        void swap(Outcar& obj) noexcept;
+        void swap(Outcar& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] size_t getNumAtom() const noexcept { return force.getLength() / 3; }
         [[nodiscard]] const Vector<ScalarType>& getForce() const noexcept { return force; }

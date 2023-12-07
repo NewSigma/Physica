@@ -49,7 +49,7 @@ namespace Physica::Utils {
         /* Operators */
         RingBuffer& operator=(RingBuffer ring) noexcept;
         /* Operations */
-        void swap(RingBuffer& ring) noexcept;
+        void swap(RingBuffer& __restrict ring) noexcept;
         template<typename T>
         inline void write(T t);
 

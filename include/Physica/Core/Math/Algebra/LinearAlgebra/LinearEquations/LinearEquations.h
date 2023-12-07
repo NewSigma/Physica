@@ -53,11 +53,12 @@ namespace Physica::Core {
         [[nodiscard]] const DenseMatrix<T, type, maxRow, maxColumn>& getWorking() const noexcept { return working; }
         [[nodiscard]] auto getSolution() { return working.col(working.getColumn() - 1); }
         /* Helpers */
-        void swap(LinearEquations& equ) noexcept;
+        void swap(LinearEquations& __restrict equ) noexcept;
     };
 
     template<class T, int type, size_t maxRow, size_t maxColumn>
-    inline void swap(LinearEquations<T, type, maxRow, maxColumn>& equ1, LinearEquations<T, type, maxRow, maxColumn>& equ2) noexcept {
+    inline void swap(LinearEquations<T, type, maxRow, maxColumn>& __restrict equ1,
+                     LinearEquations<T, type, maxRow, maxColumn>& __restrict equ2) noexcept {
         equ1.swap(equ2);
     }
 }

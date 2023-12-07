@@ -73,7 +73,7 @@ namespace Physica::Core {
         using Storage::getRow;
         using Storage::getColumn;
         /* Helpers */
-        void swap(DenseHermiteMatrix& m) noexcept;
+        void swap(DenseHermiteMatrix& __restrict m) noexcept;
         /* Static members */
         [[nodiscard]] static DenseHermiteMatrix unitMatrix(size_t order);
         template<class MatrixType>
@@ -159,8 +159,8 @@ namespace Physica::Core {
 
     template<class ScalarType, size_t Order, size_t MaxOrder>
     inline void swap(
-            Physica::Core::DenseHermiteMatrix<ScalarType, Order, MaxOrder>& m1,
-            Physica::Core::DenseHermiteMatrix<ScalarType, Order, MaxOrder>& m2) noexcept {
+            Physica::Core::DenseHermiteMatrix<ScalarType, Order, MaxOrder>& __restrict m1,
+            Physica::Core::DenseHermiteMatrix<ScalarType, Order, MaxOrder>& __restrict m2) noexcept {
         m1.swap(m2);
     }
 }

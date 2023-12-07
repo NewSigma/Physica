@@ -69,7 +69,7 @@ namespace Physica::Core {
         [[nodiscard]] VectorType getNodePos(size_t localNode) const;
         [[nodiscard]] VectorType toLocalPos(VectorType globalPos) const;
         [[nodiscard]] VectorType toGlobalPos(VectorType localPos) const;
-        void swap(CuboidLinear& obj) noexcept;
+        void swap(CuboidLinear& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] const VectorType& getLeftFrontBottom() const noexcept { return leftFrontBottom; }
         [[nodiscard]] const VectorType& getRightBehindTop() const noexcept { return rightBehindTop; }

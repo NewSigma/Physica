@@ -53,7 +53,7 @@ namespace Physica::Core {
         void sample(const MDCell<T>& cell);
         Vector<ScalarType> makeDists() const;
         Vector<ScalarType> makeRDF() const;
-        void swap(RDF& rdf) noexcept;
+        void swap(RDF& __restrict rdf) noexcept;
         [[nodiscard]] bool checkRadius(const PeriodicCell<ScalarType, 3>& cell) const;
         /* Getters */
         [[nodiscard]] size_t getNumParticle() const noexcept { return isFromParticle.getLength(); }

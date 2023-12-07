@@ -40,7 +40,7 @@ namespace Physica::Core {
         [[nodiscard]] pid_t getPID() const noexcept { return pid; }
         [[nodiscard]] bool valid() const noexcept { return isValid; }
         /* Helpers */
-        void swap(ProcessFuture& future) noexcept;
+        void swap(ProcessFuture& __restrict future) noexcept;
 
         friend class Test;
     };

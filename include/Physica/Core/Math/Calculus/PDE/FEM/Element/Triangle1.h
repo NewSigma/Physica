@@ -61,7 +61,7 @@ namespace Physica::Core {
         [[nodiscard]] VectorType toLocalPos(VectorType globalPos) const;
         [[nodiscard]] VectorType toGlobalPos(VectorType localPos) const;
         /* Helpers */
-        void swap(Triangle1& elem) noexcept;
+        void swap(Triangle1& __restrict elem) noexcept;
         /* Static members */
         [[nodiscard]] static ScalarType baseFunc(size_t localNode, VectorType p);
         [[nodiscard]] static ScalarType dBase_dr(size_t localNode, [[maybe_unused]] VectorType p);

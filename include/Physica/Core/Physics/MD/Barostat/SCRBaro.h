@@ -61,7 +61,7 @@ namespace Physica::Core {
         /* Operations */
         template<class ForceModel>
         void npt_step(MDType& rpmd, const LatticeMatrix& stress, ScalarType deltaT);
-        void swap(SCRBaro& obj) noexcept;
+        void swap(SCRBaro& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] const LatticeMatrix& getLastStress() const noexcept { return lastStress; }
     private:

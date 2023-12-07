@@ -46,7 +46,7 @@ namespace Physica::Core {
         void smooth(LValueVector<VectorType>& data) const;
         template<class VectorType>
         void smooth_zero(LValueVector<VectorType>& data) const;
-        void swap(SavitzkyGolay& filter) noexcept;
+        void swap(SavitzkyGolay& __restrict filter) noexcept;
         /* Getters */
         [[nodiscard]] unsigned char getLRange() const noexcept { return lRange; }
         [[nodiscard]] unsigned char getRRange() const noexcept { return rRange; }

@@ -64,7 +64,7 @@ namespace Physica::Core {
         /* Operations */
         [[nodiscard]] __host__ __device__ inline ScalarType pot_functor(size_t i, size_t j, ScalarType r, ScalarType r2) const;
         [[nodiscard]] __host__ __device__ inline ScalarType force_functor(size_t i, size_t j, ScalarType r, ScalarType r2) const;
-        void swap(device_obj& obj) noexcept;
+        void swap(device_obj& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] static bool isSmallCell(const MDCellType& cell) { return cell.getNumParticle() <= 500U; }
     };

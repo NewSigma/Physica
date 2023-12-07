@@ -54,7 +54,7 @@ namespace Physica::Core {
         using KSpaceType::invTransform;
         void transform() { transform(*this, *this); }
         void invTransform() { invTransform(*this, *this); }
-        void swap(FFT& obj) noexcept;
+        void swap(FFT& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] constexpr static size_t getDim() { return 1; }
         [[nodiscard]] size_t getRSpaceSize() const noexcept { return fft_impl.getRSpaceSize(); }

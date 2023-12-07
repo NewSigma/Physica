@@ -32,7 +32,7 @@ namespace Physica::Core {
         return (i1.length ^ i2.length) >= 0;
     }
 
-    inline void swap(Integer& i1, Integer& i2) noexcept {
+    inline void swap(Integer& __restrict i1, Integer& __restrict i2) noexcept {
         i1.swap(i2);
     }
 }

@@ -49,7 +49,7 @@ namespace Physica::Core {
         /* Operations */
         template<class Functor> void forIndexInGrid(Functor func) const { Base::forIndexInGrid(getDim(), func); }
         template<class... Args> void resize(Index3D index, Args&&... args);
-        void swap(GridStorage& obj) noexcept;
+        void swap(GridStorage& __restrict obj) noexcept;
         /* Iterator */
         auto begin() noexcept { return values.begin(); }
         auto begin() const noexcept { return cbegin(); }

@@ -70,7 +70,7 @@ namespace Physica::Utils::Internal {
         /* Operators */
         DynamicArrayBase& operator=(DynamicArrayBase array) noexcept;
         /* Operations */
-        void swap(DynamicArrayBase& array) noexcept;
+        void swap(DynamicArrayBase& __restrict array) noexcept;
         /* Setters */
         [[nodiscard]] inline pointer release() noexcept;
     };

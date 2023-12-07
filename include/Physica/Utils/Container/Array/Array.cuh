@@ -123,7 +123,7 @@ namespace Physica::Utils {
         inline void toHost(host_obj& obj) const;
         void reserve(size_t size);
         template<class... Args> void resize(size_t size, Args&&... args);
-        void swap(device_obj& obj) noexcept;
+        void swap(device_obj& __restrict obj) noexcept;
         [[nodiscard]] pointer release() noexcept;
         /* Getters */
         [[nodiscard]] __host__ __device__ size_t size() const noexcept { return getLength(); }

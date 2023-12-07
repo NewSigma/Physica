@@ -82,7 +82,7 @@ namespace Physica::Core {
                      ScalarType eigenGoal = ScalarType(InvalidGoal));
         void sort();
         void resize(size_t size, size_t numRequired);
-        void swap(JacobiDavidson& other) noexcept;
+        void swap(JacobiDavidson& __restrict other) noexcept;
         /* Getters */
         [[nodiscard]] size_t getOrder() const noexcept { return linearSolver.getOrder(); }
         [[nodiscard]] size_t getNumRequired() const noexcept { return eigenvalues.getLength(); }
@@ -423,7 +423,7 @@ namespace Physica::Core {
     }
 
     template<class ScalarType>
-    inline void swap(JacobiDavidson<ScalarType>& obj1, JacobiDavidson<ScalarType>& obj2) noexcept {
+    inline void swap(JacobiDavidson<ScalarType>& __restrict obj1, JacobiDavidson<ScalarType>& __restrict obj2) noexcept {
         obj1.swap(obj2);
     }
 }

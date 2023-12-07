@@ -53,7 +53,7 @@ namespace Physica::Core {
         template<class RandomGenerator> CrystalCellType makeDefects(unsigned int numDefect, RandomGenerator& gen) const;
         template<class RandomGenerator> Utils::Array<size_t> randRing(RandomGenerator& gen) const;
         CrystalCellType makeRingMove(const Utils::Array<size_t>& ring, PositionMatrix& momentumMat) const;
-        void swap(IceGenerator& obj) noexcept;
+        void swap(IceGenerator& __restrict obj) noexcept;
         /* Setters */
         void setInitialCell(CrystalCellType cell);
         /* Getters */

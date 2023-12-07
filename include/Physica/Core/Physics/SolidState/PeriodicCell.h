@@ -94,9 +94,9 @@ namespace Physica::Core {
         /* Setters */
         void setLattice(LatticeMatrix new_lattice) { lattice = new_lattice; }
         void setPos(PositionMatrix new_pos) noexcept { pos = std::move(new_pos); }
-        void swapPos(PositionMatrix& new_pos) noexcept { pos.swap(new_pos); }
+        void swapPos(PositionMatrix& __restrict new_pos) noexcept { pos.swap(new_pos); }
         /* Helper */
-        void swap(PeriodicCell& cell) noexcept;
+        void swap(PeriodicCell& __restrict cell) noexcept;
         /* Static members */
         [[nodiscard]] static ScalarType getVolume(const LatticeMatrix& lattice);
         static void toDirect(PositionMatrix& target, const LatticeMatrix& lattice);

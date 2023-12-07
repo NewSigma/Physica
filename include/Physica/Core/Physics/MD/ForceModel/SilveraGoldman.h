@@ -65,7 +65,7 @@ namespace Physica::Core {
         [[nodiscard]] inline ScalarType pot_functor(size_t i, size_t j, ScalarType r, ScalarType r2) const;
         [[nodiscard]] inline ScalarType force_functor(size_t i, size_t j, ScalarType r, ScalarType r2) const;
         [[nodiscard]] inline ScalarType forceConst_functor(ScalarType r, ScalarType r2) const;
-        inline void swap(SilveraGoldman& obj) noexcept;
+        inline void swap(SilveraGoldman& __restrict obj) noexcept;
     };
 
     template<class ScalarType, bool IsPeriodBoundary>

@@ -48,7 +48,7 @@ namespace Physica::Core {
         void pre_lattice2D_step(const ForceModel& model, Optimizer& optimizer, ScalarType diffStep);
         template<class ForceModel, class Executor, class Optimizer>
         void lattice2D_step(const ForceModel& model, Optimizer& optimizer, ScalarType diffStep);
-        void swap(EnergyMinimizer& obj) noexcept;
+        void swap(EnergyMinimizer& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] const MDCellType& getCell() const noexcept { return cell; }
     private:

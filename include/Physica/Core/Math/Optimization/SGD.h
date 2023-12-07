@@ -43,7 +43,7 @@ namespace Physica::Core {
         inline void step(Differentiable<ScalarType, DiffMode::Reverse>& target) const;
         template<class VectorType> void step(LValueVector<VectorType>& target) const;
         template<class MatrixType> void step(LValueMatrix<MatrixType>& target) const;
-        void swap(SGD& obj) noexcept;
+        void swap(SGD& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] const ScalarType& getLearnRate() const noexcept { return learnRate; }
         [[nodiscard]] unsigned int getBatchSize() const noexcept { return batchSize; }

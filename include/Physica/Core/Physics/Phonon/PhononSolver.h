@@ -60,7 +60,7 @@ namespace Physica::Core {
         [[nodiscard]] DenseMatrix<ScalarType> makeEigenVectors(const EigenSolverType& eigen) const;
         [[nodiscard]] inline DenseMatrix<ScalarType> makeEigenVectors(const QPointGrid& qPoints, Index3D qIndex) const;
         [[nodiscard]] MDCellType shiftAtom(const Vector<ScalarType>& eigenVector, ScalarType distance);
-        void swap(PhononSolver& obj) noexcept;
+        void swap(PhononSolver& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] const MDCellType& getUnitCell() const noexcept { return unitCell; }
         [[nodiscard]] size_t getNumUnitCellAtom() const noexcept { return unitCell.getNumParticle(); }

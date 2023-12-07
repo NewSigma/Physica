@@ -63,7 +63,7 @@ namespace Physica::Core {
             const DensityGrid<ScalarType, IsSpinPolarized>& densityRho,
             Vector3D kPoint);
 
-        void swap(KSHamilton& obj);
+        void swap(KSHamilton& __restrict obj);
         /* Getters */
         [[nodiscard]] const CrystalCell<ScalarType>& getCrystalCell() const noexcept { return cell; }
         [[nodiscard]] const LatticeMatrix& getLattice() const noexcept { return cell.getLattice(); }

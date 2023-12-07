@@ -70,7 +70,7 @@ namespace Physica::Core {
         [[nodiscard]] size_t getNumCell() const noexcept { return superSizeX * superSizeY * superSizeZ; }
         [[nodiscard]] Index3D getSuperSize() const noexcept { return {superSizeX, superSizeY, superSizeZ}; }
         /* Helpers */
-        void swap(PIPhonon& obj) noexcept;
+        void swap(PIPhonon& __restrict obj) noexcept;
     private:
         void toKSpace();
         void applyTranslationInvariance(DenseHermiteMatrix<ComplexType>& target);

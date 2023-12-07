@@ -45,7 +45,7 @@ namespace Physica::Core {
         /* Operations */
         template<class Executor, bool IsSmallCell = true>
         [[nodiscard]] Vector<ScalarType> force(const MDCellType& cell) const;
-        void swap(QEModel& obj) noexcept;
+        void swap(QEModel& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] size_t getNumAtom() const noexcept { return elementTypes.getLength(); }
         [[nodiscard]] unsigned int getNumMPIProcess() const noexcept { return numMPIProcess; }

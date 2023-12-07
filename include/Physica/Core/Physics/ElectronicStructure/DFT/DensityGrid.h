@@ -50,7 +50,7 @@ namespace Physica::Core {
         void resize(size_t x, size_t y, size_t z) { resize({x, y, z}); }
         void resize(Index3D index);
         void fit(const DensityGrid& rho);
-        void swap(DensityGrid& obj) noexcept;
+        void swap(DensityGrid& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] const GridType& getTotalDensity() const noexcept { return densityPair[SpinState::Up]; }
         [[nodiscard]] GridType& getTotalDensity() noexcept { return densityPair[SpinState::Up]; }

@@ -35,7 +35,7 @@ namespace Physica::Core {
         /* Operations */
         template<class Functor>
         void step(Functor func);
-        void swap(QuadraticSearch& obj) noexcept;
+        void swap(QuadraticSearch& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] int getOptimalIndex() const noexcept;
         [[nodiscard]] ScalarType getOptimizedX() const noexcept { return x[getOptimalIndex()]; }

@@ -56,7 +56,7 @@ namespace Physica::Core {
     protected:
         Element() = default;
         Element(IndexArray globalNodes_);
-        void swap(Element& elem) noexcept;
+        void swap(Element& __restrict elem) noexcept;
     };
 
     template<class Derived>

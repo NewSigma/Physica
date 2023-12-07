@@ -31,7 +31,7 @@ namespace Physica::Core {
         ReciprocalCell() = default;
         ReciprocalCell(const LatticeMatrix& real_lattice);
         /* Operations */
-        void swap(ReciprocalCell& cell) noexcept { lattice.swap(cell.lattice); }
+        void swap(ReciprocalCell& __restrict cell) noexcept { lattice.swap(cell.lattice); }
         /* Getters */
         [[nodiscard]] const LatticeMatrix& getLattice() const noexcept;
         [[nodiscard]] ScalarType getMinNorm() const noexcept;
