@@ -22,7 +22,6 @@
 #include "Physica/Core/MultiPrecision/Scalar.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/CrossProduct.h"
-#include "ReciprocalCell.h"
 
 namespace Physica::Core {
     namespace Internal {
@@ -75,6 +74,8 @@ namespace Physica::Core {
         [[nodiscard]] VectorType minDistVector(VectorType from, size_t id_to) const;
         void normalize();
         void scale(ScalarType factor);
+        [[nodiscard]] inline LatticeMatrix makeRepLattice() const;
+
         void toDirect() { toDirect(makeInvLattice()); }
         void toCartesian();
         template<ExtendCellOption Option>
@@ -89,7 +90,6 @@ namespace Physica::Core {
         [[nodiscard]] const PositionMatrix& getPos() const noexcept { return pos; }
         [[nodiscard]] Type getType() const noexcept { return type; }
         [[nodiscard]] size_t getNumParticle() const noexcept { return pos.getRow(); }
-        [[nodiscard]] ReciprocalCell<ScalarType> reciprocal() const { return ReciprocalCell(lattice); }
         [[nodiscard]] ScalarType getVolume() const noexcept { return getVolume(lattice); }
         /* Setters */
         void setLattice(LatticeMatrix new_lattice) { lattice = new_lattice; }
@@ -99,6 +99,7 @@ namespace Physica::Core {
         void swap(PeriodicCell& __restrict cell) noexcept;
         /* Static members */
         [[nodiscard]] static ScalarType getVolume(const LatticeMatrix& lattice);
+        [[nodiscard]] static LatticeMatrix makeRepLattice(const LatticeMatrix& lattice);
         static void toDirect(PositionMatrix& target, const LatticeMatrix& lattice);
         static void toCartesian(PositionMatrix& target, const LatticeMatrix& lattice);
         [[nodiscard]] static SearchRangeType estimateRange(const LatticeMatrix& cell, PlainScalar cutoff);
@@ -293,6 +294,11 @@ namespace Physica::Core {
     }
 
     template<class ScalarType, unsigned int Dim>
+    inline typename PeriodicCell<ScalarType, Dim>::LatticeMatrix PeriodicCell<ScalarType, Dim>::makeRepLattice() const {
+        return makeRepLattice(lattice);
+    }
+
+    template<class ScalarType, unsigned int Dim>
     template<ExtendCellOption Option>
     void PeriodicCell<ScalarType, Dim>::toSuperCell(unsigned int x, unsigned int y, unsigned int z) {
         if (type == Type::Cartesian) {
@@ -357,6 +363,17 @@ namespace Physica::Core {
     }
 
     template<class ScalarType, unsigned int Dim>
+    typename PeriodicCell<ScalarType, Dim>::LatticeMatrix PeriodicCell<ScalarType, Dim>::makeRepLattice(const LatticeMatrix& lattice) {
+        LatticeMatrix result{};
+        result.row(0) = lattice.row(1).crossProduct(lattice.row(2));
+        result.row(1) = lattice.row(2).crossProduct(lattice.row(0));
+        result.row(2) = lattice.row(0).crossProduct(lattice.row(1));
+        const ScalarType factor = ScalarType(2 * M_PI) / (lattice.row(0) * result.row(0).asVector());
+        result *= factor;
+        return result;
+    }
+
+    template<class ScalarType, unsigned int Dim>
     void PeriodicCell<ScalarType, Dim>::toDirect(PositionMatrix& target, const LatticeMatrix& lattice) {
         const InvLatticeMatrix inv = lattice.inverse();
         toDirect(target, inv);
@@ -370,8 +387,7 @@ namespace Physica::Core {
     template<class ScalarType, unsigned int Dim>
     typename PeriodicCell<ScalarType, Dim>::SearchRangeType
     PeriodicCell<ScalarType, Dim>::estimateRange(const LatticeMatrix& lattice, PlainScalar cutoff) {
-        const ReciprocalCell repCell(lattice);
-        const auto& repLatt = repCell.getLattice();
+        const auto repLatt = makeRepLattice(lattice);
         const PlainScalar factor = cutoff * PlainScalar(1 / (2 * M_PI));
         SearchRangeType range{};
         if constexpr (Dim == 1) {

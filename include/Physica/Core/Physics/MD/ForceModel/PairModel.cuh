@@ -27,6 +27,7 @@
 namespace Physica::Core {
     template<class Derived>
     class device_obj<PairModel<Derived>> : public Utils::CRTPBase<device_obj<Derived>> {
+        static_assert(!Utils::is_device_obj<Derived>::value, "[Error]: Nested device_obj is unnecessary");
         using host_obj = PairModel<Derived>;
         using This = device_obj<PairModel<Derived>>;
         using Base = Utils::CRTPBase<device_obj<Derived>>;

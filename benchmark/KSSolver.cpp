@@ -39,7 +39,7 @@ int main() {
     RandomSeed::rdrand(seed);
     std::mt19937 gen{};
     {
-        BandGrid<ScalarType, isSpinPolarized> grid(Si.reciprocal().getLattice(), 1, 1, 1, 2, 4);
+        BandGrid<ScalarType, isSpinPolarized> grid(Si.makeRepLattice(), 1, 1, 1, 2, 4);
         using SolverType = KSSolver<ScalarType, LDA<ScalarType, LDAType::HL, isSpinPolarized>>;
         SolverType solver = SolverType(Si, cutEnergy, 2, std::move(grid), 2);
 

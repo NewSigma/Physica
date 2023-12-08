@@ -162,8 +162,7 @@ namespace Physica::Core {
     template<class ScalarType>
     typename PhononSolver<ScalarType>::MatrixType PhononSolver<ScalarType>::interpolatePoint(
             Vector3D qPoint, const MatrixGrid& forceConstants) const {
-        const ReciprocalCell repCell = unitCell.reciprocal();
-        const Vector3D qVector = repCell.getLattice().transpose() * qPoint;
+        const Vector3D qVector = unitCell.makeRepLattice().transpose() * qPoint;
         const size_t unitCellDOF = getUnitCellDOF();
         FFT3D fft(superSize, {1, 1, 1}, PlanFlag::Estimate);
         auto& rSpace = fft.getRSpace();

@@ -84,7 +84,7 @@ namespace Physica::Core {
             , cutEnergyPsi(cutEnergyPsi_)
             , cutEnergyRho(cutEnergyRho_) {
         assert(cutEnergyPsi * 4.0 < cutEnergyRho && "[Error]: Cut energy for charge density is too small");
-        repLatt = cell.reciprocal().getLattice();
+        repLatt = cell.makeRepLattice();
         basisDim = BasisType::makeGridDim(cutEnergyPsi, repLatt);
         const Index3D fftDim = BasisType::makeGridDim(cutEnergyRho, repLatt);
         fft_rho = FFT3D(fftDim, {1, 1, 1}, PlanFlag::Estimate);

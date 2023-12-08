@@ -321,13 +321,11 @@ namespace Physica::Core {
     template<class ScalarType>
     typename CellList<ScalarType>::Index3D
     CellList<ScalarType>::makeGridDim(const LatticeMatrix& lattice, PlainScalar cutoff) {
-        size_t dimX, dimY, dimZ;
-        const ReciprocalCell repCell(lattice);
-        const auto& repLatt = repCell.getLattice();
+        const auto repLatt = MDCellType::makeRepLattice(lattice);
         const PlainScalar factor = reciprocal(cutoff) * PlainScalar(2 * M_PI);
-        dimX = static_cast<size_t>(double(factor * reciprocal(repLatt.row(0).norm())));
-        dimY = static_cast<size_t>(double(factor * reciprocal(repLatt.row(1).norm())));
-        dimZ = static_cast<size_t>(double(factor * reciprocal(repLatt.row(2).norm())));
+        size_t dimX = static_cast<size_t>(double(factor * reciprocal(repLatt.row(0).norm())));
+        size_t dimY = static_cast<size_t>(double(factor * reciprocal(repLatt.row(1).norm())));
+        size_t dimZ = static_cast<size_t>(double(factor * reciprocal(repLatt.row(2).norm())));
         if (dimX == 0 || dimY == 0 || dimZ == 0)
             throw std::invalid_argument("[Error]: Cell is too small that self interaction is calculated");
         return {dimX, dimY, dimZ};

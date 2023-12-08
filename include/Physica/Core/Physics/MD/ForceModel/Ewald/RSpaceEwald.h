@@ -57,7 +57,7 @@ namespace Physica::Core {
         constexpr static double SumPrec = (ErfcTableSize - 2) * ErfcTableStep; // Referenced from [1], minus 2 to avoid overflow
     private:
         LatticeMatrix lattice;
-        ReciprocalCell<ScalarType> repCell;
+        LatticeMatrix repLatt;
         Vector<ScalarType> charges;
         ScalarType inv_volume;
         ScalarType integralLimit;
@@ -88,7 +88,7 @@ namespace Physica::Core {
         /* Getters */
         [[nodiscard]] const LatticeMatrix& getLattice() const noexcept { return lattice; }
         [[nodiscard]] ScalarType getVolume() const noexcept { return PeriodicCell<ScalarType, Dim>::getVolume(lattice); }
-        [[nodiscard]] const LatticeMatrix& getRepLattice() const noexcept { return repCell.getLattice(); }
+        [[nodiscard]] const LatticeMatrix& getRepLattice() const noexcept { return repLatt; }
         [[nodiscard]] const Vector<ScalarType>& getCharges() const noexcept { return charges; }
         [[nodiscard]] size_t getNumParticle() const noexcept { return charges.getLength(); }
         [[nodiscard]] ScalarType getInvVolume() const noexcept { return inv_volume; }
@@ -120,6 +120,7 @@ namespace Physica::Core {
         using Base::getSquaredCutoff;
         /* Friends */
         friend class PairModel<RSpaceEwald<ScalarType>>;
+        friend class device_obj<This>;
         friend class Physica::Test;
     };
 
@@ -207,7 +208,7 @@ namespace Physica::Core {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         Base::swap(obj);
         lattice.swap(obj.lattice);
-        repCell.swap(obj.repCell);
+        repLatt.swap(obj.repLatt);
         charges.swap(obj.charges);
         inv_volume.swap(obj.inv_volume);
         integralLimit.swap(obj.integralLimit);
@@ -223,7 +224,7 @@ namespace Physica::Core {
     void RSpaceEwald<ScalarType>::setLattice(LatticeMatrix lattice_) {
         assert(charges.getLength() != 0 && "[Error]: Charges should be initialized before lattice update");
         lattice = std::move(lattice_);
-        repCell = ReciprocalCell(lattice);
+        repLatt = PeriodicCell<ScalarType, Dim>::makeRepLattice(lattice);
         const ScalarType volume = getVolume();
         inv_volume = reciprocal(volume);
 
