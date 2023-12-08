@@ -138,6 +138,7 @@ namespace Physica::Core {
         [[nodiscard]] ScalarType calcClassicalElastic() const;
         template<class ForceModel> [[nodiscard]] ScalarType calcClassicalInternalEnergy(const ForceModel& model) const;
 
+        [[nodiscard]] ScalarType calcTemperature() const { return getRingPolymer().calcTemperature(); }
         template<class ForceModel, class Executor>
         [[nodiscard]] ScalarType calcPressThermo(const ForceModel& model) const;
 

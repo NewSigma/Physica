@@ -27,6 +27,7 @@
 #pragma GCC diagnostic pop
 #include "Scalar.h"
 #include "Physica/Utils/Container/Array/Array.h"
+#include "SIMDImpl/Instruset.h"
 
 namespace Physica::Core {
     template<class T, size_t Size> class SIMD;
@@ -34,33 +35,6 @@ namespace Physica::Core {
     template<class ScalarType> class DiffTracer;
 
     namespace Internal {
-        class Instrset {
-        public:
-            [[nodiscard]] constexpr static bool hasAVX() {
-            #ifdef PHYSICA_AVX
-                return true;
-            #else
-                return false;
-            #endif
-            }
-
-            [[nodiscard]] constexpr static bool hasAVX2() {
-            #ifdef PHYSICA_AVX2
-                return true;
-            #else
-                return false;
-            #endif
-            }
-
-            [[nodiscard]] constexpr static bool hasAVX512() {
-            #ifdef PHYSICA_AVX512
-                return true;
-            #else
-                return false;
-            #endif
-            }
-        };
-
         template<class T, size_t Size>
         class Traits<SIMD<T, Size>> {
         public:

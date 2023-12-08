@@ -16,7 +16,6 @@ option(PHYSICA_CUDA "Enable CUDA support" OFF)
 option(PHYSICA_HDF5 "Enable HDF5 support" OFF)
 option(PHYSICA_OPTIMIZE "Enable aggressive optimizations" ON)
 set(UseASM 1 CACHE STRING "Enable inline assembly code")
-include(FindSIMD)
 
 message(STATUS "Running under ${CMAKE_BUILD_TYPE} mode.")
 # Policies

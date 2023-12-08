@@ -162,16 +162,16 @@ namespace Physica::Core {
         constexpr bool IsPeriodBoundary1 = Internal::Traits<KineticModel>::IsPeriodBoundary;
         constexpr bool IsPeriodBoundary2 = Internal::Traits<ForceModel>::IsPeriodBoundary;
         static_assert(isFreeModel || (IsPeriodBoundary1 == IsPeriodBoundary2), "[Error]: Inconsistent boundary condition");
-        using ThermoStepExecutor = typename std::conditional<isSeedFixed, SequentialExecutor, Executor>::type;
+        using NoRandExecutor = typename std::conditional<isSeedFixed, SequentialExecutor, Executor>::type;
         if (isFreeModel) {
             kineticModel.nve_step(ringPolymer, timeStep * 0.5);
-            thermostat.template step<RandomPoolType, ThermoStepExecutor>(ringPolymer, timeStep);
+            thermostat.template step<RandomPoolType, NoRandExecutor>(ringPolymer, timeStep);
             kineticModel.nve_step(ringPolymer, timeStep * 0.5);
         }
         else {
             forceStep(timeStep * 0.5);
             kineticModel.nve_step(ringPolymer, timeStep * 0.5);
-            thermostat.template step<RandomPoolType, ThermoStepExecutor>(ringPolymer, timeStep);
+            thermostat.template step<RandomPoolType, NoRandExecutor>(ringPolymer, timeStep);
             kineticModel.nve_step(ringPolymer, timeStep * 0.5);
             updateForce<ForceModel, Executor>(forceModel);
             forceStep(timeStep * 0.5);
@@ -214,11 +214,11 @@ namespace Physica::Core {
         constexpr unsigned int BarostatOrder = Internal::Traits<Barostat>::Order;
         static_assert(BarostatOrder == 2 || BarostatOrder == 1, "[Error]: Invalid barostat");
         constexpr bool isSeedFixed = RandomPoolType::isSeedFixed();
-        using ThermoStepExecutor = typename std::conditional<isSeedFixed, SequentialExecutor, Executor>::type;
+        using NoRandExecutor = typename std::conditional<isSeedFixed, SequentialExecutor, Executor>::type;
         if constexpr (BarostatOrder == 2) {
             barostat.forceStep(*this, forceModel, timeStep * 0.5);
             kineticModel.npt_step(*this, barostat, timeStep * 0.5);
-            thermostat.template step<RandomPoolType, ThermoStepExecutor>(ringPolymer, timeStep);
+            thermostat.template step<RandomPoolType, NoRandExecutor>(ringPolymer, timeStep);
             kineticModel.npt_step(*this, barostat, timeStep * 0.5);
             updateForce<ForceModel, Executor>(forceModel);
             barostat.forceStep(*this, forceModel, timeStep * 0.5);
@@ -228,7 +228,7 @@ namespace Physica::Core {
             forceStep(timeStep * 0.5);
             kineticModel.nve_step(ringPolymer, timeStep * 0.5);
             barostat.template npt_step<ForceModel>(*this, stress, timeStep * 0.5);
-            thermostat.template step<RandomPoolType, ThermoStepExecutor>(ringPolymer, timeStep);
+            thermostat.template step<RandomPoolType, NoRandExecutor>(ringPolymer, timeStep);
             barostat.template npt_step<ForceModel>(*this, stress, timeStep * 0.5);
             kineticModel.nve_step(ringPolymer, timeStep * 0.5);
             if constexpr (Internal::Traits<ForceModel>::IsLatticeDependent)
@@ -455,7 +455,6 @@ namespace Physica::Core {
             const auto pos1 = col1.tail(dof);
 
             LatticeMatrix kineticStress(Dim, Dim, 0);
-            LatticeMatrix potStress(Dim, Dim, 0);
             for (size_t i = 0; i < getNumParticle(); ++i) {
                 const size_t from = i * Dim;
                 const size_t to = from + Dim;
@@ -470,14 +469,15 @@ namespace Physica::Core {
                 const ScalarType factorK = mass * squaredOmegaW;
                 kineticStress -= (factorK * deltaPos) * deltaPos.transpose();
             }
+            buffer[replica] = kineticStress * reciprocal(getVolume());
+
             if constexpr (!isFreeModel) {
                 constexpr bool IsPeriodBoundary = Internal::Traits<ForceModel>::IsPeriodBoundary;
                 MDCellType cell = phaseToCell(replica);
                 if constexpr (IsPeriodBoundary)
                     cell.normalize();
-                potStress = model.virial(cell);
+                buffer[replica] += model.virial(cell);
             }
-            buffer[replica] = kineticStress * reciprocal(getVolume()) + potStress;
         };
         Executor::parallel_for(kernel, getNumReplica(), Executor::getNumThread()).wait();
         LatticeMatrix result(Dim, Dim, 0);
@@ -510,8 +510,6 @@ namespace Physica::Core {
             const auto centroid = centroidPos.flatten();
             const auto force = forceBuffer.col(replica);
 
-            LatticeMatrix kineticStress(Dim, Dim);
-            LatticeMatrix potStress(Dim, Dim);
             LatticeMatrix classicalKineticStress(Dim, Dim, 0);
             LatticeMatrix quantumKineticStress(Dim, Dim, 0);
             for (size_t i = 0; i < getNumParticle(); ++i) {
@@ -528,15 +526,15 @@ namespace Physica::Core {
                 const VectorType deltaPos = atomPos - atomCentroid;
                 quantumKineticStress += deltaPos * atomForce.transpose();
             }
-            kineticStress = classicalKineticStress - quantumKineticStress * ScalarType(0.5);
+            buffer[replica] = (classicalKineticStress - quantumKineticStress * ScalarType(0.5)) * reciprocal(getVolume());
+
             if constexpr (!isFreeModel) {
                 constexpr bool IsPeriodBoundary = Internal::Traits<ForceModel>::IsPeriodBoundary;
                 MDCellType cell = phaseToCell(replica);
                 if constexpr (IsPeriodBoundary)
                     cell.normalize();
-                potStress = model.virial(cell);
+                buffer[replica] += model.virial(cell);
             }
-            buffer[replica] = kineticStress * reciprocal(getVolume()) + potStress;
         };
         Executor::parallel_for(kernel, getNumReplica(), Executor::getNumThread()).wait();
         LatticeMatrix result(Dim, Dim, 0);
@@ -571,8 +569,6 @@ namespace Physica::Core {
                 cell.normalize();
             const auto forceConst = model.forceConst(cell);
 
-            LatticeMatrix kineticStress(Dim, Dim);
-            LatticeMatrix potStress(Dim, Dim);
             LatticeMatrix classicalKineticStress(Dim, Dim, 0);
             LatticeMatrix quantumKineticStress(Dim, Dim, 0);
             for (size_t i = 0; i < getNumParticle(); ++i) {
@@ -596,10 +592,10 @@ namespace Physica::Core {
                     quantumKineticStress -= atomPos1 * temp.transpose();
                 }
             }
-            kineticStress = classicalKineticStress - quantumKineticStress * ScalarType(0.5);
+            buffer[replica] = (classicalKineticStress - quantumKineticStress * ScalarType(0.5)) * reciprocal(getVolume());
+
             if constexpr (!isFreeModel)
-                potStress = model.virial(cell);
-            buffer[replica] = kineticStress * reciprocal(getVolume()) + potStress;
+                buffer[replica] += model.virial(cell);
         };
         Executor::parallel_for(kernel, getNumReplica(), Executor::getNumThread()).wait();
         LatticeMatrix result(Dim, Dim, 0);
@@ -626,13 +622,13 @@ namespace Physica::Core {
                 const auto atomMomentum = momentum.segment(from, to);
                 result += (repMass * atomMomentum) * atomMomentum.transpose();
             }
-            if constexpr (isFreeModel)
-                result *= repVolume;
-            else {
+            result *= repVolume;
+
+            if constexpr (!isFreeModel) {
                 MDCellType cell = phaseToCell(0);
                 if constexpr (IsPeriodBoundary)
                     cell.normalize();
-                result = result * repVolume + model.virial(cell);
+                result += model.virial(cell);
             }
         }
         else {
@@ -645,7 +641,6 @@ namespace Physica::Core {
                 const auto pos = col.tail(dof);
 
                 LatticeMatrix kineticStress(Dim, Dim);
-                LatticeMatrix potStress(Dim, Dim);
                 for (size_t i = 0; i < getNumParticle(); ++i) {
                     const size_t from = i * Dim;
                     const size_t to = from + Dim;
@@ -654,14 +649,14 @@ namespace Physica::Core {
                     const auto atomMomentum = momentum.segment(from, to);
                     kineticStress += (factor * atomMomentum) * atomMomentum.transpose();
                 }
+                buffer[replica] = kineticStress * reciprocal(getVolume());
 
                 if constexpr (!isFreeModel) {
                     MDCellType cell = phaseToCell(replica);
                     if constexpr (IsPeriodBoundary)
                         cell.normalize();
-                    potStress = model.virial(cell);
+                    buffer[replica] += model.virial(cell);
                 }
-                buffer[replica] = kineticStress * reciprocal(getVolume()) + potStress;
             };
             Executor::parallel_for(kernel, getNumReplica(), Executor::getNumThread()).wait();
             for (size_t i = 0; i < buffer.getLength(); ++i)
