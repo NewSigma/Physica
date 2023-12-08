@@ -42,7 +42,7 @@ namespace Physica::Core {
      * Reference:
      * [1] Habershon S, Manolopoulos D E, Markland T E, et al. Ring-Polymer Molecular Dynamics: Quantum Effects in Chemical Dynamics from Classical Trajectories in an Extended Phase Space[J]. Annual Review of Physical Chemistry, 2013, 64(1):387-413.
      * [2] Jos Thijssen. Computational Physics[M].London: Cambridge university press, 2013:197-211
-     * [3] Ian R. Craig and David E. Manolopoulos, J. Chem. Phys. 121, 3368 (2004)
+     * [3] Ian R. Craig and David E. Manolopoulos, J. Chem. Phys. 121, 3368 (2004); https://doi.org/10.1063/1.1777575
      */
     template<class ScalarType,
              unsigned int Dim = 3,

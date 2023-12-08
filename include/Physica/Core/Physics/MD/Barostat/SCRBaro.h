@@ -64,6 +64,8 @@ namespace Physica::Core {
         void swap(SCRBaro& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] const LatticeMatrix& getLastStress() const noexcept { return lastStress; }
+        /* Setters */
+        void setTemperature(ScalarType tempT_) { tempT = std::move(tempT_); }
     private:
         [[nodiscard]] LatticeMatrix makeDecayMatrix(ScalarType pressPerDOF) const;
         [[nodiscard]] LatticeMatrix makeDiffuseMatrix(ScalarType pressPerDOF) const;
