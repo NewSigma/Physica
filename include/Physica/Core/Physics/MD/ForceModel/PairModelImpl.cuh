@@ -26,25 +26,25 @@
 
 namespace Physica::Core {
     namespace Internal {
-        template<class Derived, bool IsSmallCell>
-        __global__ void PairModel_forceKernel(Physica::PlainStruct<Core::device_obj<PairModel<Derived>>> pair) {
+        template<class T, bool IsSmallCell>
+        __global__ void PairModel_forceKernel(Physica::PlainStruct<Core::device_obj<T>> pair) {
+            static_assert(std::is_base_of<PairModel<T>, T>::value, "[Error]: It is expected the param is a PairModel");
             pair.getDerived().template forceKernelImpl<IsSmallCell>();
         }
 
-        template<class Derived>
-        __global__ void PairModel_postForceKernel(Physica::PlainStruct<Core::device_obj<PairModel<Derived>>> pair) {
+        template<class T>
+        __global__ void PairModel_postForceKernel(Physica::PlainStruct<Core::device_obj<T>> pair) {
+            static_assert(std::is_base_of<PairModel<T>, T>::value, "[Error]: It is expected the param is a PairModel");
             pair.getDerived().postForceKernelImpl();
         }
     }
 
     template<class Derived>
-    device_obj<PairModel<Derived>>::device_obj(size_t numParticle, ScalarType cutoff_)
-            : cutoff(std::move(cutoff_))
-            , cell(numParticle)
-            , swapBuffer(numParticle * Dim) {
-        squared_cutoff = square(cutoff_);
-        if constexpr (!IsPotDependOnAtomIndex)
-            pot_shift = pot_functor(0, 0, cutoff, squared_cutoff);
+    device_obj<PairModel<Derived>>::device_obj(size_t numParticle) : cell(numParticle), swapBuffer(numParticle * Dim) {}
+
+    template<class Derived>
+    device_obj<PairModel<Derived>>::device_obj(size_t numParticle, ScalarType cutoff_) : device_obj(numParticle) {
+        setCutoff(std::move(cutoff_));
     }
 
     template<class Derived>
@@ -62,26 +62,39 @@ namespace Physica::Core {
     template<class Derived>
     template<class Executor, bool IsSmallCell>
     Vector<typename device_obj<PairModel<Derived>>::ScalarType>
-    device_obj<PairModel<Derived>>::force(const MDCellType& hostCell) {
-        forceAsync<PageLockedVector, Executor, IsSmallCell>(hostCell, swapBuffer);
+    device_obj<PairModel<Derived>>::force(
+            const LatticeMatrix& lattice,
+            const InvLatticeMatrix& invLattice,
+            const PositionMatrix& cartesianPos) {
+        forceAsync<PageLockedVector, Executor, IsSmallCell>(lattice, invLattice, cartesianPos, swapBuffer);
         StreamPool::getStream().wait();
         return swapBuffer;
     }
 
     template<class Derived>
+    template<class Executor, bool IsSmallCell>
+    inline Vector<typename device_obj<PairModel<Derived>>::ScalarType>
+    device_obj<PairModel<Derived>>::force(const MDCellType& hostCell) {
+        return force<Executor, IsSmallCell>(hostCell.getLattice(), hostCell.getInvLattice(), hostCell.getPos());
+    }
+
+    template<class Derived>
     template<class VectorType, class Executor, bool IsSmallCell>
-    void device_obj<PairModel<Derived>>::forceAsync(const MDCellType& hostCell, ContinuousVector<VectorType>& result) {
+    void device_obj<PairModel<Derived>>::forceAsync(
+            const LatticeMatrix& lattice,
+            const InvLatticeMatrix& invLattice,
+            const PositionMatrix& cartesianPos,
+            ContinuousVector<VectorType>& result) {
         static_assert(std::is_same<Executor, CudaExecutor>::value, "[Error]: Incorrect type of executor");
         StreamPool::getStream().wait(); //Ensure reentrancy
-        swapBuffer = hostCell.getPos().flatten();
+        swapBuffer = cartesianPos.flatten();
         auto flatten_pos = cell.getPos().flatten();
         swapBuffer.toDeviceAsync(flatten_pos);
-        cell.setLattice(hostCell);
+        cell.setLattice(lattice, invLattice);
 
         dim3 gridDims;
         unsigned int numThread;
         if constexpr (IsSmallCell) {
-            const auto& lattice = hostCell.getLattice();
             const auto range = MDCellType::estimateRange(lattice, cutoff);
             Index3D temp;
             for (int i = 0; i < Dim; ++i)
@@ -90,24 +103,22 @@ namespace Physica::Core {
 
             constexpr size_t MaxAtomPerBlock = 128;
             const size_t numParticle = cell.getNumParticle();
-            const auto numBlock = cellList.getNumCell();
-            gridDims.x = (numParticle + MaxAtomPerBlock - 1) / MaxAtomPerBlock;
-            gridDims.y = numBlock;
+            const size_t numBlockPerCell = (numParticle + MaxAtomPerBlock - 1) / MaxAtomPerBlock;
+            const auto numCell = cellList.getNumCell();
+            gridDims.x = numBlockPerCell;
+            gridDims.y = numCell;
             gridDims.z = 1;
             numThread = numParticle > MaxAtomPerBlock ? MaxAtomPerBlock : numParticle;
-            if (numBlock != forceBuffer.getColumn())
-                forceBuffer.resize(cell.getDOF(), numBlock);
+            if (numCell != forceBuffer.getColumn())
+                forceBuffer.resize(cell.getDOF(), numCell);
         }
         else {
             [[maybe_unused]] constexpr unsigned int UintMax = std::numeric_limits<unsigned int>::max();
+            const CellListType hostCellList(lattice, cartesianPos, cutoff);
+            hostCellList.toDevice(cellList);
             assert(cellList.getCellGridDimX() < UintMax && "[Error]: Unexpected large cell");
             assert(cellList.getCellGridDimY() < UintMax && "[Error]: Unexpected large cell");
             assert(cellList.getCellGridDimZ() < UintMax && "[Error]: Unexpected large cell");
-            if (forceBuffer.getColumn() != 1)
-                forceBuffer.resize(cell.getDOF(), 1);
-
-            const CellListType hostCellList(hostCell, cutoff);
-            hostCellList.toDevice(cellList);
             gridDims.x = static_cast<unsigned int>(cellList.getCellGridDimX());
             gridDims.y = static_cast<unsigned int>(cellList.getCellGridDimY());
             gridDims.z = static_cast<unsigned int>(cellList.getCellGridDimZ());
@@ -115,12 +126,21 @@ namespace Physica::Core {
             const size_t maxThread = Utils::DeviceProp::getInstance().getProperty(0).maxThreadsPerBlock;
             numThread = maxNumAtomInCell > maxThread ? maxThread : maxNumAtomInCell;
             assert(maxThread >= maxNumAtomInCell && "[Error]: Too many particle in the cell, performance may be pool");
+            if (forceBuffer.getColumn() != 1)
+                forceBuffer.resize(cell.getDOF(), 1);
         }
 
-        Internal::PairModel_forceKernel<Derived, IsSmallCell><<<gridDims, numThread, numThread * sizeof(Vector3D), StreamPool::getStream()>>>(asStruct(*this));
+        Internal::PairModel_forceKernel<Derived, IsSmallCell>
+                <<<gridDims, numThread, numThread * sizeof(Vector3D), StreamPool::getStream()>>>(asStruct(Base::getDerived()));
         if constexpr (IsSmallCell)
-            Internal::PairModel_postForceKernel<Derived><<<gridDims.x, numThread, 0, StreamPool::getStream()>>>(asStruct(*this));
+            Internal::PairModel_postForceKernel<Derived><<<gridDims.x, numThread, 0, StreamPool::getStream()>>>(asStruct(Base::getDerived()));
         forceBuffer.col(0).toHostAsync(result);
+    }
+
+    template<class Derived>
+    template<class VectorType, class Executor, bool IsSmallCell>
+    inline void device_obj<PairModel<Derived>>::forceAsync(const MDCellType& hostCell, ContinuousVector<VectorType>& result) {
+        forceAsync<VectorType, Executor, IsSmallCell>(hostCell.getLattice(), hostCell.getInvLattice(), hostCell.getPos(), result);
     }
 
     template<class Derived>
@@ -180,19 +200,21 @@ namespace Physica::Core {
             const Vector3D delta = cell.getLattice().transpose() * factor;
             const Vector3D from = pos.row(atom1) + delta;
 
-            const int numActiveThread = cub::min(blockDim.x, numParticle - blockIdx.x * blockDim.x);
+            const int numActiveThread = __syncthreads_count(true);
             const int numBlock = (numParticle + numActiveThread - 1) / numActiveThread;
             Vector3D force_atom1(3, 0);
             for (int block = 0; block < numBlock; ++block) {
                 const int shift = block * numActiveThread;
                 __syncthreads();
-                posBuffer[threadIdx.x] = pos.row(shift + threadIdx.x);
-                __syncthreads();
+                const int index = shift + threadIdx.x;
+                const bool shouldRead = index < numParticle;
+                if (shouldRead)
+                    posBuffer[threadIdx.x] = pos.row(index);
+                const int numRead = __syncthreads_count(shouldRead);
 
-                const int toThread = cub::min(numActiveThread, int(numParticle - block * numActiveThread));
-                for (int thread = 0; thread < toThread; ++thread) {
-                    const int atom2 = shift + thread;
-                    const Vector3D& to = posBuffer[thread];
+                for (int i = 0; i < numRead; ++i) {
+                    const int atom2 = shift + i;
+                    const Vector3D& to = posBuffer[i];
                     Vector3D r = to - from;
                     const ScalarType r2 = r.squaredNorm();
                     const bool isNotSelf = ScalarType(std::numeric_limits<ScalarType>::min()) < r2;
@@ -255,10 +277,24 @@ namespace Physica::Core {
 
     template<class Derived>
     __device__ void device_obj<PairModel<Derived>>::postForceKernelImpl() {
-        const unsigned int atom = blockIdx.x * blockDim.x + threadIdx.x;
+        const size_t numParticle = cell.getNumParticle();
+        const size_t atom = blockIdx.x * blockDim.x + threadIdx.x;
+        if (atom >= numParticle)
+            return;
+
         for (int i = 0; i < Dim; ++i) {
-            const unsigned int index = atom * Dim + i;
+            const size_t index = atom * Dim + i;
             forceBuffer(index, 0) = forceBuffer.row(index).sum();
+        }
+    }
+
+    template<class Derived>
+    void device_obj<PairModel<Derived>>::setCutoff(ScalarType cutoff_) {
+        cutoff = std::move(cutoff_);
+        squared_cutoff = square(cutoff);
+        if constexpr (!IsPotDependOnAtomIndex) {
+            constexpr int unused = 0;
+            pot_shift = pot_functor(unused, unused, cutoff, squared_cutoff);
         }
     }
 }

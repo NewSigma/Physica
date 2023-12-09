@@ -27,11 +27,11 @@ namespace Physica::Core {
         using This = device_obj<host_obj>;
     public:
         using LatticeMatrix = device_obj<typename host_obj::LatticeMatrix>;
+        using InvLatticeMatrix = device_obj<typename host_obj::InvLatticeMatrix>;
         using PositionMatrix = device_obj<typename host_obj::PositionMatrix>;
         using MomentumMatrix = PositionMatrix;
         using SearchRangeType = Utils::Array<ssize_t, Dim>;
     protected:
-        using InvLatticeMatrix = device_obj<typename host_obj::InvLatticeMatrix>;
         using VectorType = device_obj<Vector<ScalarType, Dim>>;
 
         LatticeMatrix lattice;

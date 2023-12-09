@@ -33,13 +33,17 @@ namespace Physica::Core {
         using Base = Utils::CRTPBase<device_obj<Derived>>;
         using TraitType = Internal::Traits<Derived>;
 
-        constexpr static int Dim = 3;
         constexpr static bool IsPotDependOnAtomIndex = TraitType::IsPotDependOnAtomIndex;
     public:
         using ScalarType = typename TraitType::ScalarType;
+        constexpr static int Dim = host_obj::Dim;
+
+        using PlainScalar = typename ScalarType::PlainScalar;
         using MDCellType = MDCell<ScalarType>;
         using DeviceMDCell = device_obj<MDCellType>;
         using LatticeMatrix = typename MDCellType::LatticeMatrix;
+        using InvLatticeMatrix = typename MDCellType::InvLatticeMatrix;
+        using PositionMatrix = typename MDCellType::PositionMatrix;
         using CellListType = CellList<ScalarType>;
         using DeviceCellList = device_obj<CellListType>;
         using Index3D = typename GridBase::Index3D;
@@ -62,9 +66,22 @@ namespace Physica::Core {
 
         [[nodiscard]] ScalarType potentialEnergy(const MDCellType& hostCell) const;
 
-        template<class Executor, bool IsSmallCell> [[nodiscard]] Vector<ScalarType> force(const MDCellType& hostCell);
+        template<class Executor, bool IsSmallCell = false>
+        [[nodiscard]] Vector<ScalarType> force(
+                const LatticeMatrix& lattice,
+                const InvLatticeMatrix& invLattice,
+                const PositionMatrix& cartesianPos);
+        template<class Executor, bool IsSmallCell = false>
+        [[nodiscard]] inline Vector<ScalarType> force(const MDCellType& hostCell);
+
         template<class VectorType, class Executor, bool IsSmallCell>
-        void forceAsync(const MDCellType& hostCell, ContinuousVector<VectorType>& result);
+        void forceAsync(
+                const LatticeMatrix& lattice,
+                const InvLatticeMatrix& invLattice,
+                const PositionMatrix& cartesianPos,
+                ContinuousVector<VectorType>& result);
+        template<class VectorType, class Executor, bool IsSmallCell>
+        inline void forceAsync(const MDCellType& hostCell, ContinuousVector<VectorType>& result);
         template<class VectorType, class Executor>
         inline void forceAsync(const MDCellType& cell, ContinuousVector<VectorType>& result);
         template<class Executor>
@@ -79,10 +96,14 @@ namespace Physica::Core {
         __device__ void forceKernelImpl();
         __device__ void postForceKernelImpl();
         /* Getters */
+        [[nodiscard]] __host__ __device__ const ScalarType& getCutoff() const noexcept { return cutoff; }
+        [[nodiscard]] __host__ __device__ const ScalarType& getSquaredCutoff() const noexcept { return squared_cutoff; }
         [[nodiscard]] __device__ const DeviceMDCell& getCell() const noexcept { return cell; }
         [[nodiscard]] bool isSmallCell(const MDCellType& cell) const noexcept { return Base::getDerived().isSmallCell(cell); }
+        /* Setters */
+        void setCutoff(ScalarType cutoff_);
     protected:
-        device_obj() = default;
+        device_obj(size_t numParticle);
         device_obj(size_t numParticle, ScalarType cutoff_);
         device_obj(const device_obj&) = default;
         device_obj(device_obj&&) noexcept = default;

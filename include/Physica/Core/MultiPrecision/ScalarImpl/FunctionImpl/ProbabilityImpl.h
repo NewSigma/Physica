@@ -21,14 +21,20 @@
 namespace Physica::Core {
     template<ScalarOption Option>
     Scalar<Option> floor(const Scalar<Option>& s) {
-        return Scalar<Option>(std::floor(s.getTrivial()));
+        if constexpr (Option == Float)
+            return Scalar<Option>(::floorf(s.getTrivial()));
+        else
+            return Scalar<Option>(::floor(s.getTrivial()));
     }
 
     template<>
     Scalar<MultiPrecision> floor(const Scalar<MultiPrecision>& s);
 
     template<ScalarOption Option>
-    inline Scalar<Option> ceil(const Scalar<Option>& s) {
-        return Scalar<Option>(std::ceil(s.getTrivial()));
+    __host__ __device__ inline Scalar<Option> ceil(const Scalar<Option>& s) {
+        if constexpr (Option == Float)
+            return Scalar<Option>(::ceilf(s.getTrivial()));
+        else
+            return Scalar<Option>(::ceil(s.getTrivial()));
     }
 }

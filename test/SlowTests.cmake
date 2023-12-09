@@ -16,6 +16,5 @@ physica_add_test(Langevin Core/Physics/MD/Thermostat/Langevin.cpp)
 physica_add_test(RPMD Core/Physics/MD/RPMD.cpp)
 
 if(${PHYSICA_CUDA})
-    physica_add_test(SilveraGoldman_cuda Core/Physics/MD/ForceModel/SilveraGoldman.cu)
     physica_add_test(RPMD_cuda Core/Physics/MD/RPMD.cu)
 endif()

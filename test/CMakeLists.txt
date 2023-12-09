@@ -84,6 +84,8 @@ physica_add_test(SilveraGoldman Core/Physics/MD/ForceModel/SilveraGoldman.cpp)
 physica_add_test(TodaModel Core/Physics/MD/ForceModel/TodaModel.cpp)
 physica_add_test(MDCell Core/Physics/MD/MDCell.cpp)
 if(${PHYSICA_CUDA})
+    physica_add_test(RSpaceEwald_cuda Core/Physics/MD/ForceModel/Ewald/RSpaceEwald.cu)
+    physica_add_test(SilveraGoldman_cuda Core/Physics/MD/ForceModel/SilveraGoldman.cu)
     physica_add_test(HardCore_cuda Core/Physics/MD/HardCore.cu)
 endif()
 ### SolidState

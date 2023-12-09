@@ -28,18 +28,21 @@ namespace Physica::Core {
          * Critical to performance of \class Ewald, refactor with care
          */
         template<class ScalarType>
-        inline ScalarType quadraticInterpolate(ScalarType x1, ScalarType x2, ScalarType x3, ScalarType y1, ScalarType y2, ScalarType y3, ScalarType x) {
+        __host__ __device__ inline ScalarType quadraticInterpolate(
+                ScalarType x1, ScalarType x2, ScalarType x3, ScalarType y1, ScalarType y2, ScalarType y3, ScalarType x) {
             const ScalarType x_x1 = x - x1;
             const ScalarType x_x2 = x - x2;
             const ScalarType x_x3 = x - x3;
             const ScalarType x1_x2 = x1 - x2;
             const ScalarType x2_x3 = x2 - x3;
             const ScalarType x3_x1 = x3 - x1;
-            return -((x_x2 * x_x3) * (x2_x3 * y1) + (x_x1 * x_x3) * (x3_x1 * y2) + (x_x1 * x_x2) * (x1_x2 * y3)) / (x1_x2 * x2_x3 * x3_x1);
+            const ScalarType factor = x1_x2 * x2_x3 * x3_x1;
+            return -((x_x2 * x_x3) * (x2_x3 * y1) + (x_x1 * x_x3) * (x3_x1 * y2) + (x_x1 * x_x2) * (x1_x2 * y3)) / factor;
         }
 
         template<class ScalarType>
-        inline ScalarType quadraticInterpolate_diff(ScalarType x1, ScalarType x2, ScalarType x3, ScalarType y1, ScalarType y2, ScalarType y3, ScalarType x) {
+        __host__ __device__ inline ScalarType quadraticInterpolate_diff(
+                ScalarType x1, ScalarType x2, ScalarType x3, ScalarType y1, ScalarType y2, ScalarType y3, ScalarType x) {
             const ScalarType xx = x * 2.0;
             const ScalarType x1_xx = x1 - xx;
             const ScalarType x2_xx = x2 - xx;
@@ -50,14 +53,16 @@ namespace Physica::Core {
             const ScalarType x1_x2 = x1 - x2;
             const ScalarType x2_x3 = x2 - x3;
             const ScalarType x3_x1 = x3 - x1;
-            return -(x3 * x3_xx * y1_y2 + x1 * x1_xx * y2_y3 + x2 * x2_xx * y3_y1) / (x1_x2 * x2_x3 * x3_x1);
+            const ScalarType factor = x1_x2 * x2_x3 * x3_x1;
+            return -(x3 * x3_xx * y1_y2 + x1 * x1_xx * y2_y3 + x2 * x2_xx * y3_y1) / factor;
         }
         /**
          * \param factor
          * Equals to reciprocal((x1 - x2) * (x2 - x3) * (x3 - x1))
          */
         template<class ScalarType>
-        inline ScalarType quadraticInterpolate_diff1(ScalarType factor, ScalarType step, ScalarType x2, ScalarType y1, ScalarType y2, ScalarType y3, ScalarType x) {
+        __host__ __device__ inline ScalarType quadraticInterpolate_diff1(
+                ScalarType factor, ScalarType step, ScalarType x2, ScalarType y1, ScalarType y2, ScalarType y3, ScalarType x) {
             const ScalarType y1_y2 = y1 - y2;
             const ScalarType y2_y3 = y2 - y3;
             const ScalarType y3_y1 = y3 - y1;

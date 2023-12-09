@@ -59,9 +59,10 @@ namespace Physica::Core {
         LatticeMatrix lattice;
         LatticeMatrix repLatt;
         Vector<ScalarType> charges;
+        Vector<ScalarType> erfc_table;
+        ScalarType volume;
         ScalarType inv_volume;
         ScalarType integralLimit;
-        Vector<ScalarType> erfc_table;
         ScalarType erfcStep;
         ScalarType repErfcStep;
         ScalarType repDoubleSquareStep;
@@ -87,10 +88,10 @@ namespace Physica::Core {
         void swap(RSpaceEwald& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] const LatticeMatrix& getLattice() const noexcept { return lattice; }
-        [[nodiscard]] ScalarType getVolume() const noexcept { return PeriodicCell<ScalarType, Dim>::getVolume(lattice); }
         [[nodiscard]] const LatticeMatrix& getRepLattice() const noexcept { return repLatt; }
         [[nodiscard]] const Vector<ScalarType>& getCharges() const noexcept { return charges; }
         [[nodiscard]] size_t getNumParticle() const noexcept { return charges.getLength(); }
+        [[nodiscard]] ScalarType getVolume() const noexcept { return volume; }
         [[nodiscard]] ScalarType getInvVolume() const noexcept { return inv_volume; }
         [[nodiscard]] ScalarType getIntegralLimit() const noexcept { return integralLimit; }
         [[nodiscard]] ScalarType getRSpaceCutoff() const noexcept { return Base::getCutoff(); }
@@ -210,9 +211,10 @@ namespace Physica::Core {
         lattice.swap(obj.lattice);
         repLatt.swap(obj.repLatt);
         charges.swap(obj.charges);
+        erfc_table.swap(obj.erfc_table);
+        volume.swap(obj.volume);
         inv_volume.swap(obj.inv_volume);
         integralLimit.swap(obj.integralLimit);
-        erfc_table.swap(obj.erfc_table);
         erfcStep.swap(obj.erfcStep);
         repErfcStep.swap(obj.repErfcStep);
         repDoubleSquareStep.swap(obj.repDoubleSquareStep);
@@ -225,7 +227,7 @@ namespace Physica::Core {
         assert(charges.getLength() != 0 && "[Error]: Charges should be initialized before lattice update");
         lattice = std::move(lattice_);
         repLatt = PeriodicCell<ScalarType, Dim>::makeRepLattice(lattice);
-        const ScalarType volume = getVolume();
+        volume = PeriodicCell<ScalarType, Dim>::getVolume(lattice);
         inv_volume = reciprocal(volume);
 
         const ScalarType averageCellSize = cbrt(ScalarType(volume));
@@ -235,7 +237,6 @@ namespace Physica::Core {
 
     template<class ScalarType>
     void RSpaceEwald<ScalarType>::setIntegralLimit(ScalarType integralLimit_) {
-        const auto& repLatt = getRepLattice();
         const ScalarType heightX_2Pi = reciprocal(repLatt.row(0).norm());
         const ScalarType heightY_2Pi = reciprocal(repLatt.row(1).norm());
         const ScalarType heightZ_2Pi = reciprocal(repLatt.row(2).norm());
@@ -246,7 +247,7 @@ namespace Physica::Core {
 
         const PlainScalar rSpaceCutoff = PlainScalar(SumPrec) / integralLimit.getValue();
         rSpaceSumRange = PeriodicCell<ScalarType, Dim>::estimateRange(lattice, rSpaceCutoff);
-        kSpaceSumRange = PeriodicCell<ScalarType, Dim>::estimateRange(getRepLattice(), PlainScalar(SumPrec * 2) * integralLimit.getValue());
+        kSpaceSumRange = PeriodicCell<ScalarType, Dim>::estimateRange(repLatt, PlainScalar(SumPrec * 2) * integralLimit.getValue());
         makeTables();
         Base::setCutoff(rSpaceCutoff);
     }

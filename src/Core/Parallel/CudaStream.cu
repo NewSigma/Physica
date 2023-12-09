@@ -47,7 +47,7 @@ namespace Physica::Core {
     }
 
     void CudaStream::wait() const {
-        while (query() != cudaSuccess)
+        while (query() == cudaErrorNotReady)
             std::this_thread::yield();
         cudaCheck(cudaGetLastError());
     }

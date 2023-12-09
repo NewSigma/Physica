@@ -290,7 +290,8 @@ namespace Physica::Core {
         const auto& operands = segment.operands;
         const auto& records = segment.records;
         const auto& record = *records.crbegin();
-        return operands.getLength() >= (record.idFirstOperand + SegmentType::numOperand(record.source));
+        return record.source == ExpressionType::Set
+            || operands.getLength() >= (record.idFirstOperand + SegmentType::numOperand(record.source));
     }
 
     template<class ScalarType>

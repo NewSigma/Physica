@@ -49,7 +49,7 @@ namespace Physica::Core {
         using ScalarType = typename TraitType::ScalarType;
         constexpr static unsigned int Dim = 3;
 
-        using PlainScalar = typename ScalarType::PlainScalar;        
+        using PlainScalar = typename ScalarType::PlainScalar;
         using MDCellType = MDCell<ScalarType, Dim>;
         using LatticeMatrix = typename MDCellType::LatticeMatrix;
         using PositionMatrix = typename MDCellType::PositionMatrix;
@@ -291,8 +291,10 @@ namespace Physica::Core {
     void PairModel<Derived>::setCutoff(PlainScalar cutoff_) {
         cutoff = std::move(cutoff_);
         squared_cutoff = square(cutoff);
-        if constexpr (!IsPotDependOnAtomIndex)
-            pot_shift = pot_functor(0, 0, cutoff, squared_cutoff);
+        if constexpr (!IsPotDependOnAtomIndex) {
+            constexpr int unused = 0;
+            pot_shift = pot_functor(unused, unused, cutoff, squared_cutoff);
+        }
     }
 
     template<class Derived>

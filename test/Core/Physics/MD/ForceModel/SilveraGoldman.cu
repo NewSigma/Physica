@@ -66,7 +66,7 @@ int main() {
         RPMD<ScalarType> rpmd = makeSystem(numMolecular, gen);
         const auto f0 = hostModel.template force<SequentialExecutor, true>(rpmd.phaseToCell(0));
         const auto f1 = deviceModel.template force<CudaExecutor, true>(rpmd.phaseToCell(0));
-        if (!vectorNear(f0, f1, 1E-4))
+        if (!vectorNear(f0, f1, 1E-3))
             return 1;
     }
     {

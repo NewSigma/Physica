@@ -149,7 +149,17 @@ namespace Physica::Core {
     void TraceSegment<ScalarType>::forget(DiffScalar from) {
         assert(isFound(from) && "[Error]: forgeting a non existent, this may be a bug");
         const size_t index = find(from);
-        operands.resize(records[index].idFirstOperand);
+        const auto& record = records[index];
+        if (record.source == ExpressionType::Set) {
+            size_t idLastOperand = 0;
+            if (index != 0) {
+                const auto& lastRecord = records[index - 1];
+                idLastOperand = lastRecord.idFirstOperand + numOperand(lastRecord.source);
+            }
+            operands.resize(idLastOperand);
+        }
+        else
+            operands.resize(record.idFirstOperand);
         records.resize(index);
         values.resize(index);
         tangents.resize(index);

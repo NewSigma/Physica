@@ -49,11 +49,11 @@ namespace Physica::Core {
         using PlainScalar = typename ScalarType::PlainScalar;
     public:
         using LatticeMatrix = DenseMatrix<ScalarType, MatrixOption::Row | MatrixOption::Element, Dim, Dim>;
+        using InvLatticeMatrix = DenseMatrix<ScalarType, MatrixOption::Column | MatrixOption::Element, Dim, Dim>;
         using PositionMatrix = DenseMatrix<ScalarType, MatrixOption::Row | MatrixOption::Element, Dynamic, Dim>;
         using MomentumMatrix = PositionMatrix;
         using SearchRangeType = Utils::Array<ssize_t, Dim>;
     protected:
-        using InvLatticeMatrix = DenseMatrix<ScalarType, MatrixOption::Column | MatrixOption::Element, Dim, Dim>;
         using VectorType = Vector<ScalarType, Dim>;
 
         LatticeMatrix lattice;
