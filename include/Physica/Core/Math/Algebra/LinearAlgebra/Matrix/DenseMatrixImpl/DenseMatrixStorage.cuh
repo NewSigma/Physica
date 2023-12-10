@@ -28,13 +28,15 @@ namespace Physica::Core {
                                        Internal::Traits<Derived>::SizeAtCompile,
                                        Internal::Traits<Derived>::MaxSizeAtCompile>>
             , public Utils::CRTPBase<device_obj<Derived>, 1> {
+        constexpr static size_t SizeAtCompile = Internal::Traits<Derived>::SizeAtCompile;
         using T = typename Internal::Traits<Derived>::ScalarType;
-        using Base = Utils::device_obj<Utils::Array<T, Internal::Traits<Derived>::SizeAtCompile, Internal::Traits<Derived>::MaxSizeAtCompile>>;
+        using Base = Utils::device_obj<Utils::Array<T, SizeAtCompile, Internal::Traits<Derived>::MaxSizeAtCompile>>;
         using host_obj = DenseMatrixStorage<Derived, MatrixOption::Column | MatrixOption::Element>;
         using Utils::CRTPBase<device_obj<Derived>, 1>::getDerived;
     public:
         device_obj() = default;
-        device_obj(size_t row, size_t column) : Base(row * column) {}
+        __host__ __device__ device_obj(size_t row, size_t column);
+        __host__ __device__ device_obj(size_t row, size_t column, T value);
         device_obj(const host_obj& storage) : Base(storage) {}
         device_obj(const device_obj&) = default;
         device_obj(device_obj&& obj) noexcept = default;
@@ -45,7 +47,8 @@ namespace Physica::Core {
         [[nodiscard]] __device__ const T& operator()(size_t r, size_t c) const;
         /* Operations */
         [[nodiscard]] host_obj toHost() const { return host_obj(Base::toHost()); }
-        void resize(size_t row, size_t column) { Base::resize(row * column); }
+        template<class... Args>
+        __host__ __device__ void resize(size_t row, size_t column, Args&&... args) { Base::resize(row * column, std::forward<Args>(args)...); }
         using Base::swap;
         /* Getters */
         [[nodiscard]] __host__ __device__ size_t getSize() const noexcept { return Base::getLength(); }
@@ -56,6 +59,24 @@ namespace Physica::Core {
 
         using Base::getLength;
     };
+
+    template<class Derived>
+    __host__ __device__ device_obj<DenseMatrixStorage<Derived, MatrixOption::Column | MatrixOption::Element>>::device_obj(
+            size_t row, size_t column) {
+    #ifdef __CUDA_ARCH__
+        static_assert(SizeAtCompile != Dynamic, "[Error]: Do not allocate dynamic matrix in device code");
+    #endif
+        resize(row, column);
+    }
+
+    template<class Derived>
+    __host__ __device__ device_obj<DenseMatrixStorage<Derived, MatrixOption::Column | MatrixOption::Element>>::device_obj(
+            size_t row, size_t column, T value) {
+    #ifdef __CUDA_ARCH__
+        static_assert(SizeAtCompile != Dynamic, "[Error]: Do not allocate dynamic matrix in device code");
+    #endif
+        resize(row, column, std::move(value));
+    }
 
     template<class Derived>
     __device__ typename device_obj<DenseMatrixStorage<Derived, MatrixOption::Column | MatrixOption::Element>>::T&
@@ -88,13 +109,15 @@ namespace Physica::Core {
                                        Internal::Traits<Derived>::SizeAtCompile,
                                        Internal::Traits<Derived>::MaxSizeAtCompile>>
             , public Utils::CRTPBase<device_obj<Derived>, 1> {
+        constexpr static size_t SizeAtCompile = Internal::Traits<Derived>::SizeAtCompile;
         using T = typename Internal::Traits<Derived>::ScalarType;
-        using Base = Utils::device_obj<Utils::Array<T, Internal::Traits<Derived>::SizeAtCompile, Internal::Traits<Derived>::MaxSizeAtCompile>>;
+        using Base = Utils::device_obj<Utils::Array<T, SizeAtCompile, Internal::Traits<Derived>::MaxSizeAtCompile>>;
         using host_obj = DenseMatrixStorage<Derived, MatrixOption::Row | MatrixOption::Element>;
         using Utils::CRTPBase<device_obj<Derived>, 1>::getDerived;
     public:
         device_obj() = default;
-        device_obj(size_t row, size_t column) : Base(row * column) {}
+        __host__ __device__ device_obj(size_t row, size_t column);
+        __host__ __device__ device_obj(size_t row, size_t column, T value);
         device_obj(const host_obj& storage) : Base(storage) {}
         device_obj(const device_obj&) = default;
         device_obj(device_obj&& obj) noexcept = default;
@@ -105,7 +128,8 @@ namespace Physica::Core {
         [[nodiscard]] __device__ const T& operator()(size_t r, size_t c) const;
         /* Operations */
         [[nodiscard]] host_obj toHost() const { return host_obj(Base::toHost()); }
-        void resize(size_t row, size_t column) { Base::resize(row * column); }
+        template<class... Args>
+        __host__ __device__ void resize(size_t row, size_t column, Args&&... args) { Base::resize(row * column, std::forward<Args>(args)...); }
         using Base::swap;
         /* Getters */
         [[nodiscard]] __host__ __device__ size_t getSize() const noexcept { return Base::getLength(); }
@@ -116,6 +140,24 @@ namespace Physica::Core {
 
         using Base::getLength;
     };
+
+    template<class Derived>
+    __host__ __device__ device_obj<DenseMatrixStorage<Derived, MatrixOption::Row | MatrixOption::Element>>::device_obj(
+            size_t row, size_t column) {
+    #ifdef __CUDA_ARCH__
+        static_assert(SizeAtCompile != Dynamic, "[Error]: Do not allocate dynamic matrix in device code");
+    #endif
+        resize(row, column);
+    }
+
+    template<class Derived>
+    __host__ __device__ device_obj<DenseMatrixStorage<Derived, MatrixOption::Row | MatrixOption::Element>>::device_obj(
+            size_t row, size_t column, T value) {
+    #ifdef __CUDA_ARCH__
+        static_assert(SizeAtCompile != Dynamic, "[Error]: Do not allocate dynamic matrix in device code");
+    #endif
+        resize(row, column, std::move(value));
+    }
 
     template<class Derived>
     __device__ typename device_obj<DenseMatrixStorage<Derived, MatrixOption::Row | MatrixOption::Element>>::T&
@@ -157,6 +199,7 @@ namespace Physica::Core {
     public:
         device_obj() : r(0) {}
         device_obj(size_t row, size_t column) : array(column, row), r(row) {}
+        device_obj(size_t row, size_t column, T value) : array(column, row, std::move(value)), r(row) {}
         device_obj(const host_obj& storage) : array(storage.array), r(storage.getDerived().getRow()) {}
         device_obj(const device_obj&) = default;
         device_obj(device_obj&& obj) noexcept = default;
@@ -245,6 +288,7 @@ namespace Physica::Core {
     public:
         device_obj() : c(0) {}
         device_obj(size_t row, size_t column) : array(row, column), c(column) {}
+        device_obj(size_t row, size_t column, T value) : array(row, column, std::move(value)), c(column) {}
         device_obj(const host_obj& storage) : array(storage.array), c(storage.getDerived().getColumn()) {}
         device_obj(const device_obj&) = default;
         device_obj(device_obj&& obj) noexcept = default;

@@ -37,6 +37,7 @@ namespace Physica::Core {
     public:
         using ScalarType = typename TraitType::ScalarType;
         constexpr static int Dim = host_obj::Dim;
+        constexpr static int NumVirialElem = Dim * Dim;
 
         using PlainScalar = typename ScalarType::PlainScalar;
         using MDCellType = MDCell<ScalarType>;
@@ -48,7 +49,8 @@ namespace Physica::Core {
         using DeviceCellList = device_obj<CellListType>;
         using Index3D = typename GridBase::Index3D;
         using Vector3D = device_obj<Vector<ScalarType, 3>>;
-        using DeviceMatrix = device_obj<DenseMatrix<ScalarType>>;
+        using ForceBufferType = device_obj<DenseMatrix<ScalarType>>;
+        using VirialBufferType = device_obj<DenseMatrix<ScalarType, MatrixOption::Column | MatrixOption::Element, NumVirialElem>>;
         using PageLockedVector = Vector<ScalarType, Dynamic, Dynamic, Utils::PageLockedAllocator<ScalarType>>;
     private:
         ScalarType cutoff;
@@ -56,7 +58,8 @@ namespace Physica::Core {
         ScalarType pot_shift;
         DeviceMDCell cell;
         DeviceCellList cellList;
-        DeviceMatrix forceBuffer;
+        ForceBufferType forceBuffer;
+        VirialBufferType virialBuffer;
         PageLockedVector swapBuffer;
     public:
         ~device_obj() = default;
@@ -89,12 +92,18 @@ namespace Physica::Core {
         template<class Executor>
         [[nodiscard]] inline Vector<ScalarType> force_long(const MDCellType& cell) const;
 
-        [[nodiscard]] LatticeMatrix virial(const MDCellType& hostCell) const;
+        [[nodiscard]] LatticeMatrix virial(
+                const LatticeMatrix& lattice,
+                const InvLatticeMatrix& invLattice,
+                const PositionMatrix& cartesianPos);
+        [[nodiscard]] inline LatticeMatrix virial(const MDCellType& hostCell);
         void swap(device_obj& __restrict obj) noexcept;
 
         template<bool IsSmallCell>
         __device__ void forceKernelImpl();
         __device__ void postForceKernelImpl();
+        __device__ void virialKernelImpl();
+        __device__ void postVirialKernelImpl();
         /* Getters */
         [[nodiscard]] __host__ __device__ const ScalarType& getCutoff() const noexcept { return cutoff; }
         [[nodiscard]] __host__ __device__ const ScalarType& getSquaredCutoff() const noexcept { return squared_cutoff; }
@@ -109,6 +118,16 @@ namespace Physica::Core {
         device_obj(device_obj&&) noexcept = default;
         /* Operators */
         device_obj& operator=(device_obj obj) noexcept { swap(obj); return *this; }
+        /* Operations */
+        template<bool IsSmallCell>
+        void preParallel(
+                const LatticeMatrix& lattice,
+                const InvLatticeMatrix& invLattice,
+                const PositionMatrix& cartesianPos,
+                dim3& gridDims,
+                size_t& numThread);
+        template<bool IsSmallCell, class Functor>
+        [[nodiscard]] __device__ size_t forPairInCutoff(Functor func) const;
     };
 }
 

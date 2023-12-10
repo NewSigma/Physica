@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 WeiBo He.
+ * Copyright 2021-2023 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -26,6 +26,9 @@ namespace Physica::Core {
     namespace Internal {
         template<class AnyVector1, class AnyVector2>
         class Traits<CrossProduct<AnyVector1, AnyVector2>> {
+            static_assert((Internal::Traits<AnyVector1>::SizeAtCompile == 3 || Internal::Traits<AnyVector1>::SizeAtCompile == Dynamic) &&
+                          (Internal::Traits<AnyVector2>::SizeAtCompile == 3 || Internal::Traits<AnyVector2>::SizeAtCompile == Dynamic),
+                          "CrossProduct can apply on 3-dim vectors only");
         public:
             using ScalarType = typename Internal::BinaryScalarOpReturnType<typename AnyVector1::ScalarType,
                                                                            typename AnyVector2::ScalarType>::Type;
@@ -37,9 +40,6 @@ namespace Physica::Core {
 
     template<class AnyVector1, class AnyVector2>
     class CrossProduct : public RValueVector<CrossProduct<AnyVector1, AnyVector2>> {
-        static_assert((Internal::Traits<AnyVector1>::SizeAtCompile == 3 || Internal::Traits<AnyVector1>::SizeAtCompile == Dynamic) &&
-                      (Internal::Traits<AnyVector2>::SizeAtCompile == 3 || Internal::Traits<AnyVector2>::SizeAtCompile == Dynamic),
-                      "CrossProduct can apply on 3-dim vectors only");
         using This = CrossProduct<AnyVector1, AnyVector2>;
         using Base = RValueVector<This>;
         using typename Base::PlainScalar;

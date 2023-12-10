@@ -61,7 +61,7 @@ namespace Physica::Core {
         [[nodiscard]] __host__ __device__ size_t getCellGridDimZ() const noexcept { return cellGridDim[2]; }
         [[nodiscard]] __device__ const DeviceIndexArray& getCellAtomMap() const noexcept { return cellAtomMap; }
         [[nodiscard]] __device__ const DeviceIndexArray& getCellStartOffset() const noexcept { return cellStartOffset; }
-        [[nodiscard]] __device__ size_t getNumAtomInCell(size_t cell) { return cellStartOffset[cell + 1] - cellStartOffset[cell]; }
+        [[nodiscard]] __device__ size_t getNumAtomInCell(size_t cell) const { return cellStartOffset[cell + 1] - cellStartOffset[cell]; }
         [[nodiscard]] __host__ __device__ size_t getNumCell() const noexcept { return cellGridDim[0] * cellGridDim[1] * cellGridDim[2]; }
         [[nodiscard]] __device__ const DeviceNeighShift& getNeighShifts() const noexcept { return neighShifts; }
         /* Setters */

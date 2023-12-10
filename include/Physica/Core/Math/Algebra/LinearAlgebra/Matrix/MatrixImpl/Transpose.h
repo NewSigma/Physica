@@ -60,9 +60,10 @@ namespace Physica::Core {
 
     template<class MatrixType>
     class Transpose : public RValueMatrix<Transpose<MatrixType>> {
-        const MatrixType& matrix;
-    public:
         using Base = RValueMatrix<Transpose<MatrixType>>;
+
+        const MatrixType& matrix;
+    public:        
         using typename Base::ScalarType;
     public:
         Transpose(const RValueMatrix<MatrixType>& matrix_) : matrix(matrix_.getDerived()) {}
@@ -86,8 +87,8 @@ namespace Physica::Core {
         void assignTo(LValueMatrix<OtherMatrix>& target) const;
         /* Getters */
         [[nodiscard]] ScalarType calc([[maybe_unused]] size_t row, size_t col) const { assert(row == 0); return vec.calc(col); }
-        [[nodiscard]] constexpr static size_t getRow() noexcept { return 1; }
-        [[nodiscard]] size_t getColumn() const noexcept { return vec.getLength(); }
+        [[nodiscard]] __host__ __device__ constexpr static size_t getRow() noexcept { return 1; }
+        [[nodiscard]] __host__ __device__ size_t getColumn() const noexcept { return vec.getLength(); }
     };
 
     template<class VectorType>

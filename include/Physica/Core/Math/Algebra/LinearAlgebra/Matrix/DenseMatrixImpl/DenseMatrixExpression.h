@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 WeiBo He.
+ * Copyright 2021-2023 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -63,32 +63,13 @@ namespace Physica::Core {
             constexpr static size_t SizeAtCompile = T1::SizeAtCompile;
             constexpr static size_t MaxSizeAtCompile = T1::MaxSizeAtCompile;
         };
-
-        template<class Derived>
-        class DenseMatrixExpressionBase : public RValueMatrix<Derived> {
-        public:
-            using Base = RValueMatrix<Derived>;
-            using typename Base::ScalarType;
-        public:
-            [[nodiscard]] ScalarType calc(size_t row, size_t col) const { return Base::getDerived().calc(row, col); }
-            /* Getters */
-            [[nodiscard]] __host__ __device__ size_t getRow() const noexcept { return Base::getDerived().getRow(); }
-            [[nodiscard]] __host__ __device__ size_t getColumn() const noexcept { return Base::getDerived().getColumn(); }
-            [[nodiscard]] ScalarType sum() const {
-                ScalarType result = 0;
-                for (size_t major = 0; major < MatrixOption::selectMajor<Derived>(getRow(), getColumn()); ++major)
-                    for (size_t minor = 0; minor < MatrixOption::selectMinor<Derived>(getRow(), getColumn()); ++minor)
-                        result += Base::calcFromMajorMinor(major, minor);
-                return result;
-            }
-        };
     }
     //////////////////////////////////////Minus//////////////////////////////////////
     template<class MatrixType>
     class DenseMatrixExpression<ExpressionType::Minus, MatrixType>
-            : public Internal::DenseMatrixExpressionBase<DenseMatrixExpression<ExpressionType::Minus, MatrixType>> {
+            : public RValueMatrix<DenseMatrixExpression<ExpressionType::Minus, MatrixType>> {
     public:
-        using Base = Internal::DenseMatrixExpressionBase<DenseMatrixExpression<ExpressionType::Minus, MatrixType>>;
+        using Base = RValueMatrix<DenseMatrixExpression<ExpressionType::Minus, MatrixType>>;
         using typename Base::ScalarType;
     private:
         const MatrixType& exp;
@@ -102,9 +83,9 @@ namespace Physica::Core {
     //////////////////////////////////////Add//////////////////////////////////////
     template<class MatrixType1, class MatrixType2>
     class DenseMatrixExpression<ExpressionType::Add, MatrixType1, MatrixType2>
-            : public Internal::DenseMatrixExpressionBase<DenseMatrixExpression<ExpressionType::Add, MatrixType1, MatrixType2>> {
+            : public RValueMatrix<DenseMatrixExpression<ExpressionType::Add, MatrixType1, MatrixType2>> {
     public:
-        using Base = Internal::DenseMatrixExpressionBase<DenseMatrixExpression<ExpressionType::Add, MatrixType1, MatrixType2>>;
+        using Base = RValueMatrix<DenseMatrixExpression<ExpressionType::Add, MatrixType1, MatrixType2>>;
         using typename Base::ScalarType;
     private:
         const MatrixType1& exp1;
@@ -122,9 +103,9 @@ namespace Physica::Core {
 
     template<class MatrixType, class AnyScalar>
     class DenseMatrixExpression<ExpressionType::Add, MatrixType, ScalarBase<AnyScalar>>
-            : public Internal::DenseMatrixExpressionBase<DenseMatrixExpression<ExpressionType::Add, MatrixType, ScalarBase<AnyScalar>>> {
+            : public RValueMatrix<DenseMatrixExpression<ExpressionType::Add, MatrixType, ScalarBase<AnyScalar>>> {
     public:
-        using Base = Internal::DenseMatrixExpressionBase<DenseMatrixExpression<ExpressionType::Add, MatrixType, ScalarBase<AnyScalar>>>;
+        using Base = RValueMatrix<DenseMatrixExpression<ExpressionType::Add, MatrixType, ScalarBase<AnyScalar>>>;
         using typename Base::ScalarType;
     private:
         const MatrixType& exp;
@@ -142,9 +123,9 @@ namespace Physica::Core {
     //////////////////////////////////////Minus//////////////////////////////////////
     template<class MatrixType1, class MatrixType2>
     class DenseMatrixExpression<ExpressionType::Sub, MatrixType1, MatrixType2>
-            : public Internal::DenseMatrixExpressionBase<DenseMatrixExpression<ExpressionType::Sub, MatrixType1, MatrixType2>> {
+            : public RValueMatrix<DenseMatrixExpression<ExpressionType::Sub, MatrixType1, MatrixType2>> {
     public:
-        using Base = Internal::DenseMatrixExpressionBase<DenseMatrixExpression<ExpressionType::Sub, MatrixType1, MatrixType2>>;
+        using Base = RValueMatrix<DenseMatrixExpression<ExpressionType::Sub, MatrixType1, MatrixType2>>;
         using typename Base::ScalarType;
     private:
         const MatrixType1& exp1;
@@ -162,9 +143,9 @@ namespace Physica::Core {
 
     template<class MatrixType, class AnyScalar>
     class DenseMatrixExpression<ExpressionType::Sub, MatrixType, ScalarBase<AnyScalar>>
-            : public Internal::DenseMatrixExpressionBase<DenseMatrixExpression<ExpressionType::Sub, MatrixType, ScalarBase<AnyScalar>>> {
+            : public RValueMatrix<DenseMatrixExpression<ExpressionType::Sub, MatrixType, ScalarBase<AnyScalar>>> {
     public:
-        using Base = Internal::DenseMatrixExpressionBase<DenseMatrixExpression<ExpressionType::Sub, MatrixType, ScalarBase<AnyScalar>>>;
+        using Base = RValueMatrix<DenseMatrixExpression<ExpressionType::Sub, MatrixType, ScalarBase<AnyScalar>>>;
         using typename Base::ScalarType;
     private:
         const MatrixType& exp;
@@ -180,9 +161,9 @@ namespace Physica::Core {
     //////////////////////////////////////Mul//////////////////////////////////////
     template<class MatrixType1, class MatrixType2>
     class DenseMatrixExpression<ExpressionType::Mul, MatrixType1, MatrixType2>
-            : public Internal::DenseMatrixExpressionBase<DenseMatrixExpression<ExpressionType::Mul, MatrixType1, MatrixType2>> {
+            : public RValueMatrix<DenseMatrixExpression<ExpressionType::Mul, MatrixType1, MatrixType2>> {
     public:
-        using Base = Internal::DenseMatrixExpressionBase<DenseMatrixExpression<ExpressionType::Mul, MatrixType1, MatrixType2>>;
+        using Base = RValueMatrix<DenseMatrixExpression<ExpressionType::Mul, MatrixType1, MatrixType2>>;
         using typename Base::ScalarType;
     private:
         const MatrixType1& mat1;
@@ -200,9 +181,9 @@ namespace Physica::Core {
 
     template<class MatrixType, class AnyScalar>
     class DenseMatrixExpression<ExpressionType::Mul, MatrixType, ScalarBase<AnyScalar>>
-            : public Internal::DenseMatrixExpressionBase<DenseMatrixExpression<ExpressionType::Mul, MatrixType, ScalarBase<AnyScalar>>> {
+            : public RValueMatrix<DenseMatrixExpression<ExpressionType::Mul, MatrixType, ScalarBase<AnyScalar>>> {
     public:
-        using Base = Internal::DenseMatrixExpressionBase<DenseMatrixExpression<ExpressionType::Mul, MatrixType, ScalarBase<AnyScalar>>>;
+        using Base = RValueMatrix<DenseMatrixExpression<ExpressionType::Mul, MatrixType, ScalarBase<AnyScalar>>>;
         using typename Base::ScalarType;
     private:
         const MatrixType& exp;
@@ -220,9 +201,9 @@ namespace Physica::Core {
     //////////////////////////////////////Div//////////////////////////////////////
     template<class MatrixType, class AnyScalar>
     class DenseMatrixExpression<ExpressionType::Div, MatrixType, AnyScalar>
-            : public Internal::DenseMatrixExpressionBase<DenseMatrixExpression<ExpressionType::Div, MatrixType, AnyScalar>> {
+            : public RValueMatrix<DenseMatrixExpression<ExpressionType::Div, MatrixType, AnyScalar>> {
     public:
-        using Base = Internal::DenseMatrixExpressionBase<DenseMatrixExpression<ExpressionType::Div, MatrixType, AnyScalar>>;
+        using Base = RValueMatrix<DenseMatrixExpression<ExpressionType::Div, MatrixType, AnyScalar>>;
         using typename Base::ScalarType;
     private:
         const MatrixType& exp;
@@ -238,13 +219,13 @@ namespace Physica::Core {
     ////////////////////////////////////////Elementary Functions////////////////////////////////////////////
     template<class MatrixType>
     class DenseMatrixExpression<ExpressionType::Reciprocal, MatrixType, MatrixType, typename MatrixType::ScalarType::RealType>
-            : public Internal::DenseMatrixExpressionBase<DenseMatrixExpression<ExpressionType::Reciprocal,
+            : public RValueMatrix<DenseMatrixExpression<ExpressionType::Reciprocal,
                                                                                MatrixType,
                                                                                MatrixType,
                                                                                typename MatrixType::ScalarType::RealType>> {
     public:
         using ScalarType = typename MatrixType::ScalarType::RealType;
-        using Base = Internal::DenseMatrixExpressionBase<DenseMatrixExpression<ExpressionType::Reciprocal, MatrixType, MatrixType, ScalarType>>;
+        using Base = RValueMatrix<DenseMatrixExpression<ExpressionType::Reciprocal, MatrixType, MatrixType, ScalarType>>;
     private:
         const MatrixType& mat;
     public:
@@ -257,13 +238,13 @@ namespace Physica::Core {
 
     template<class MatrixType>
     class DenseMatrixExpression<ExpressionType::Sqrt, MatrixType, MatrixType, typename MatrixType::ScalarType::RealType>
-            : public Internal::DenseMatrixExpressionBase<DenseMatrixExpression<ExpressionType::Sqrt,
+            : public RValueMatrix<DenseMatrixExpression<ExpressionType::Sqrt,
                                                                                MatrixType,
                                                                                MatrixType,
                                                                                typename MatrixType::ScalarType::RealType>> {
     public:
         using ScalarType = typename MatrixType::ScalarType::RealType;
-        using Base = Internal::DenseMatrixExpressionBase<DenseMatrixExpression<ExpressionType::Sqrt, MatrixType, MatrixType, ScalarType>>;
+        using Base = RValueMatrix<DenseMatrixExpression<ExpressionType::Sqrt, MatrixType, MatrixType, ScalarType>>;
     private:
         const MatrixType& mat;
     public:
@@ -276,13 +257,13 @@ namespace Physica::Core {
 
     template<class MatrixType>
     class DenseMatrixExpression<ExpressionType::Abs, MatrixType, MatrixType, typename MatrixType::ScalarType::RealType>
-            : public Internal::DenseMatrixExpressionBase<DenseMatrixExpression<ExpressionType::Abs,
+            : public RValueMatrix<DenseMatrixExpression<ExpressionType::Abs,
                                                                                MatrixType,
                                                                                MatrixType,
                                                                                typename MatrixType::ScalarType::RealType>> {
     public:
         using ScalarType = typename MatrixType::ScalarType::RealType;
-        using Base = Internal::DenseMatrixExpressionBase<DenseMatrixExpression<ExpressionType::Abs, MatrixType, MatrixType, ScalarType>>;
+        using Base = RValueMatrix<DenseMatrixExpression<ExpressionType::Abs, MatrixType, MatrixType, ScalarType>>;
     private:
         const MatrixType& mat;
     public:
@@ -295,9 +276,9 @@ namespace Physica::Core {
 
     template<class MatrixType>
     class DenseMatrixExpression<ExpressionType::Square, MatrixType>
-            : public Internal::DenseMatrixExpressionBase<DenseMatrixExpression<ExpressionType::Square, MatrixType>> {
+            : public RValueMatrix<DenseMatrixExpression<ExpressionType::Square, MatrixType>> {
     public:
-        using Base = Internal::DenseMatrixExpressionBase<DenseMatrixExpression<ExpressionType::Square, MatrixType>>;
+        using Base = RValueMatrix<DenseMatrixExpression<ExpressionType::Square, MatrixType>>;
         using typename Base::ScalarType;
     private:
         const MatrixType& mat;
@@ -311,9 +292,9 @@ namespace Physica::Core {
 
     template<class MatrixType>
     class DenseMatrixExpression<ExpressionType::Ln, MatrixType>
-            : public Internal::DenseMatrixExpressionBase<DenseMatrixExpression<ExpressionType::Ln, MatrixType>> {
+            : public RValueMatrix<DenseMatrixExpression<ExpressionType::Ln, MatrixType>> {
     public:
-        using Base = Internal::DenseMatrixExpressionBase<DenseMatrixExpression<ExpressionType::Ln, MatrixType>>;
+        using Base = RValueMatrix<DenseMatrixExpression<ExpressionType::Ln, MatrixType>>;
         using typename Base::ScalarType;
     private:
         const MatrixType& mat;
@@ -327,9 +308,9 @@ namespace Physica::Core {
 
     template<class MatrixType>
     class DenseMatrixExpression<ExpressionType::Exp, MatrixType>
-            : public Internal::DenseMatrixExpressionBase<DenseMatrixExpression<ExpressionType::Exp, MatrixType>> {
+            : public RValueMatrix<DenseMatrixExpression<ExpressionType::Exp, MatrixType>> {
     public:
-        using Base = Internal::DenseMatrixExpressionBase<DenseMatrixExpression<ExpressionType::Exp, MatrixType>>;
+        using Base = RValueMatrix<DenseMatrixExpression<ExpressionType::Exp, MatrixType>>;
         using typename Base::ScalarType;
     private:
         const MatrixType& mat;
@@ -343,9 +324,9 @@ namespace Physica::Core {
 
     template<class MatrixType>
     class DenseMatrixExpression<ExpressionType::Sin, MatrixType>
-            : public Internal::DenseMatrixExpressionBase<DenseMatrixExpression<ExpressionType::Sin, MatrixType>> {
+            : public RValueMatrix<DenseMatrixExpression<ExpressionType::Sin, MatrixType>> {
     public:
-        using Base = Internal::DenseMatrixExpressionBase<DenseMatrixExpression<ExpressionType::Sin, MatrixType>>;
+        using Base = RValueMatrix<DenseMatrixExpression<ExpressionType::Sin, MatrixType>>;
         using typename Base::ScalarType;
     private:
         const MatrixType& mat;
@@ -359,9 +340,9 @@ namespace Physica::Core {
 
     template<class MatrixType>
     class DenseMatrixExpression<ExpressionType::Cos, MatrixType>
-            : public Internal::DenseMatrixExpressionBase<DenseMatrixExpression<ExpressionType::Cos, MatrixType>> {
+            : public RValueMatrix<DenseMatrixExpression<ExpressionType::Cos, MatrixType>> {
     public:
-        using Base = Internal::DenseMatrixExpressionBase<DenseMatrixExpression<ExpressionType::Cos, MatrixType>>;
+        using Base = RValueMatrix<DenseMatrixExpression<ExpressionType::Cos, MatrixType>>;
         using typename Base::ScalarType;
     private:
         const MatrixType& mat;
@@ -386,16 +367,16 @@ namespace Physica::Core {
         return DenseMatrixExpression<ExpressionType::Minus, DenseMatrixExpression<type, T1, T2>>(exp);
     }
     //////////////////////////////////////Add//////////////////////////////////////
-    template<class MatrixType, class ScalarType>
-    inline DenseMatrixExpression<ExpressionType::Add, MatrixType, ScalarBase<ScalarType>>
-    operator+(const RValueMatrix<MatrixType>& mat, const ScalarBase<ScalarType>& s) {
-        return DenseMatrixExpression<ExpressionType::Add, MatrixType, ScalarBase<ScalarType>>(mat, s);
-    }
-
     template<class MatrixType1, class MatrixType2>
     inline DenseMatrixExpression<ExpressionType::Add, MatrixType1, MatrixType2>
     operator+(const RValueMatrix<MatrixType1>& mat1, const RValueMatrix<MatrixType2>& mat2) {
-        return DenseMatrixExpression<ExpressionType::Add, MatrixType1, MatrixType2>(mat1, mat2);
+        return {mat1, mat2};
+    }
+
+    template<class MatrixType, class ScalarType>
+    inline DenseMatrixExpression<ExpressionType::Add, MatrixType, ScalarBase<ScalarType>>
+    operator+(const RValueMatrix<MatrixType>& mat, const ScalarBase<ScalarType>& s) {
+        return {mat, s};
     }
     //////////////////////////////////////Sub//////////////////////////////////////
     template<class MatrixType, class ScalarType>

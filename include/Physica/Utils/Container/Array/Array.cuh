@@ -39,6 +39,7 @@ namespace Physica::Utils {
         static_assert(Length != Dynamic, "[Error]: Dynamic length is not implemented");
         static_assert(std::is_trivial<T>::value, "[Error]: Fixed size array with non-trivial element is not supported, it is seldom used on cuda");
         using host_obj = Array<T, Length, Capacity, Allocator>;
+        using Base = host_obj;
     public:
         using host_obj::host_obj;
         device_obj() = default;
@@ -49,6 +50,7 @@ namespace Physica::Utils {
         /* Operators */
         __host__ __device__ device_obj& operator=(device_obj obj) noexcept { swap(obj); return *this; }
         /* Operations */
+        using Base::resize;
         [[nodiscard]] __host__ __device__ host_obj toHost() const { return *this; }
         __host__ __device__ void toHost(host_obj& obj) const { obj = *this; }
         __host__ __device__ void swap(device_obj& __restrict obj) noexcept { host_obj::swap(obj); }

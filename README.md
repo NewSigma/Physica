@@ -34,7 +34,7 @@ To use Physica, simply compile and link Physica as a part of your project.
 
 ## Maintainers
 
-[@NewSigma](https://gitee.com/newsigma).
+[@NewSigma](NewSigma@163.com)
 
 ## Contributing
 

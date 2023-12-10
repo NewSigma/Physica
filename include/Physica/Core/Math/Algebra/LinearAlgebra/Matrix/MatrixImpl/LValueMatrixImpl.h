@@ -66,7 +66,7 @@ namespace Physica::Core {
     template<class OtherMatrix>
     Derived& LValueMatrix<Derived>::operator=(const RValueMatrix<OtherMatrix>& m) {
         static_assert(RowAtCompile == Dynamic || OtherMatrix::RowAtCompile == Dynamic || RowAtCompile == OtherMatrix::RowAtCompile, "[Error]: Incompatible row number");
-        static_assert(ColumnAtCompile == Dynamic || OtherMatrix::ColumnAtCompile == Dynamic || ColumnAtCompile == OtherMatrix::ColumnAtCompile, "[Error]: Incompatible row number");
+        static_assert(ColumnAtCompile == Dynamic || OtherMatrix::ColumnAtCompile == Dynamic || ColumnAtCompile == OtherMatrix::ColumnAtCompile, "[Error]: Incompatible column number");
         Base::getDerived().resize(m.getRow(), m.getColumn());
         m.getDerived().assignTo(*this);
         return Base::getDerived();
@@ -365,47 +365,17 @@ namespace Physica::Core {
     }
 
     template<class Derived>
-    typename LValueMatrix<Derived>::ScalarType LValueMatrix<Derived>::sum() const {
-        ScalarType result;
-        if constexpr (isColumnMatrix) {
-            result = col(0).asVector().sum();
-            for (size_t i = 1; i < Base::getColumn(); ++i)
-                result += col(i).asVector().sum();
-        }
-        else {
-            result = row(0).asVector().sum();
-            for (size_t i = 1; i < Base::getRow(); ++i)
-                result += row(i).asVector().sum();
-        }
-        return result;
-    }
-
-    template<class Derived>
-    typename LValueMatrix<Derived>::ScalarType& LValueMatrix<Derived>::refFromMajorMinor(size_t major, size_t minor) {
-        size_t r, c;
-        if constexpr(MatrixOption::isColumnMatrix<Derived>()) {
-            c = major;
-            r = minor;
-        }
-        else {
-            r = major;
-            c = minor;
-        }
+    inline typename LValueMatrix<Derived>::ScalarType& LValueMatrix<Derived>::refFromMajorMinor(size_t major, size_t minor) {
+        const size_t r = MatrixOption::rowFromMajorMinor<Derived>(major, minor);
+        const size_t c = MatrixOption::columnFromMajorMinor<Derived>(major, minor);
         assert(r < Base::getDerived().getRow() && c < Base::getDerived().getColumn());
         return Base::getDerived()(r, c);
     }
 
     template<class Derived>
-    const typename LValueMatrix<Derived>::ScalarType& LValueMatrix<Derived>::refFromMajorMinor(size_t major, size_t minor) const {
-        size_t r, c;
-        if constexpr(MatrixOption::isColumnMatrix<Derived>()) {
-            c = major;
-            r = minor;
-        }
-        else {
-            r = major;
-            c = minor;
-        }
+    inline const typename LValueMatrix<Derived>::ScalarType& LValueMatrix<Derived>::refFromMajorMinor(size_t major, size_t minor) const {
+        const size_t r = MatrixOption::rowFromMajorMinor<Derived>(major, minor);
+        const size_t c = MatrixOption::columnFromMajorMinor<Derived>(major, minor);
         assert(r < Base::getDerived().getRow() && c < Base::getDerived().getColumn());
         return Base::getDerived()(r, c);
     }

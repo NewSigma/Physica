@@ -71,6 +71,11 @@ namespace Physica::Core {
     }
 
     template<class Derived>
+    __host__ __device__ inline device_obj<TransposeVector<Derived>> device_obj<RValueVector<Derived>>::transpose() const noexcept {
+        return device_obj<TransposeVector<Derived>>(*this);
+    }
+
+    template<class Derived>
     __device__ inline typename device_obj<RValueVector<Derived>>::RealType device_obj<RValueVector<Derived>>::norm() const {
         return sqrt(Base::getDerived().squaredNorm());
     }
@@ -114,6 +119,13 @@ namespace Physica::Core {
         for(size_t i = 0; i < getLength(); ++i)
             result += calc(i);
         return result;
+    }
+
+    template<class Derived>
+    template<class OtherDerived>
+    __device__ inline device_obj<CrossProduct<Derived, OtherDerived>>
+    device_obj<RValueVector<Derived>>::crossProduct(const device_obj<RValueVector<OtherDerived>>& v) const noexcept {
+        return device_obj<CrossProduct<Derived, OtherDerived>>(*this, v);
     }
 
     template<class VectorType1, class VectorType2>

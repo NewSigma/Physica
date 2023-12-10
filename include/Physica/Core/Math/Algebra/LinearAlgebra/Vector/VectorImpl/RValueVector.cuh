@@ -42,12 +42,15 @@ namespace Physica::Core {
         __device__ inline void assignToImpl(OtherDerived& target) const;
         /* Getters */
         [[nodiscard]] __device__ ScalarType calc(size_t index) const { return Base::getDerived().calc(index); }
+        [[nodiscard]] __host__ __device__ inline device_obj<TransposeVector<Derived>> transpose() const noexcept;
         [[nodiscard]] __host__ __device__ size_t getLength() const noexcept { return Base::getDerived().getLength(); }
         [[nodiscard]] __device__ inline RealType norm() const;
         [[nodiscard]] __device__ inline RealType squaredNorm() const;
         [[nodiscard]] __device__ ScalarType max() const;
         [[nodiscard]] __device__ ScalarType min() const;
         [[nodiscard]] __device__ ScalarType sum() const;
+        template<class OtherDerived>
+        [[nodiscard]] __device__ inline device_obj<CrossProduct<Derived, OtherDerived>> crossProduct(const device_obj<RValueVector<OtherDerived>>& v) const noexcept;
     protected:
         device_obj() = default;
         device_obj(const device_obj&) = default;

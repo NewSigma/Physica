@@ -27,7 +27,7 @@ namespace Physica::Core {
     class DenseMatrixDim {
     public:
         DenseMatrixDim() = default;
-        DenseMatrixDim([[maybe_unused]] size_t row_, [[maybe_unused]] size_t column_) { assert(row_ == Row); }
+        __host__ __device__ DenseMatrixDim([[maybe_unused]] size_t row_, [[maybe_unused]] size_t column_) { assert(row_ == Row); }
         DenseMatrixDim(const DenseMatrixDim&) = default;
         DenseMatrixDim(DenseMatrixDim&&) noexcept = default;
         ~DenseMatrixDim() = default;
@@ -47,7 +47,7 @@ namespace Physica::Core {
         using Base = Utils::CRTPBase<Derived, 2>;
     public:
         DenseMatrixDim() = default;
-        DenseMatrixDim([[maybe_unused]] size_t row_, [[maybe_unused]] size_t column_) { /* Do nothing */ }
+        __host__ __device__ DenseMatrixDim([[maybe_unused]] size_t row_, [[maybe_unused]] size_t column_) { /* Do nothing */ }
         DenseMatrixDim(const DenseMatrixDim&) = default;
         DenseMatrixDim(DenseMatrixDim&&) noexcept = default;
         ~DenseMatrixDim() = default;
@@ -71,7 +71,7 @@ namespace Physica::Core {
         using Base = Utils::CRTPBase<Derived, 2>;
     public:
         DenseMatrixDim() = default;
-        DenseMatrixDim([[maybe_unused]] size_t row_, [[maybe_unused]] size_t column_) { assert(row_ == Row); }
+        __host__ __device__ DenseMatrixDim([[maybe_unused]] size_t row_, [[maybe_unused]] size_t column_) { assert(row_ == Row); }
         DenseMatrixDim(const DenseMatrixDim&) = default;
         DenseMatrixDim(DenseMatrixDim&&) noexcept = default;
         ~DenseMatrixDim() = default;
@@ -96,8 +96,8 @@ namespace Physica::Core {
     private:
         size_t r;
     public:
-        DenseMatrixDim() : r(0) {}
-        DenseMatrixDim([[maybe_unused]] size_t row_, [[maybe_unused]] size_t column_) : r(row_) {}
+        __host__ __device__ DenseMatrixDim() : r(0) {}
+        __host__ __device__ DenseMatrixDim([[maybe_unused]] size_t row_, [[maybe_unused]] size_t column_) : r(row_) {}
         DenseMatrixDim(const DenseMatrixDim&) = default;
         DenseMatrixDim(DenseMatrixDim&&) noexcept = default;
         ~DenseMatrixDim() = default;

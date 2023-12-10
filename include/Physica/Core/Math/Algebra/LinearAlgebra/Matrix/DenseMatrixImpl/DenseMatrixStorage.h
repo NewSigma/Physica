@@ -51,7 +51,7 @@ namespace Physica::Core {
     public:
         DenseMatrixStorage() = default;
         DenseMatrixStorage(size_t row, size_t column) : Base(row * column) {}
-        DenseMatrixStorage(size_t row, size_t column, T value) : Base(row * column, value) {}
+        DenseMatrixStorage(size_t row, size_t column, T value) : Base(row * column, std::move(value)) {}
         DenseMatrixStorage(std::initializer_list<T> list) : Base(list) {}
         /* Operators */
         [[nodiscard]] T& operator()(size_t r, size_t c) {
@@ -106,7 +106,7 @@ namespace Physica::Core {
     public:
         DenseMatrixStorage() = default;
         DenseMatrixStorage(size_t row, size_t column) : Base(row * column) {}
-        DenseMatrixStorage(size_t row, size_t column, T value) : Base(row * column, value) {}
+        DenseMatrixStorage(size_t row, size_t column, T value) : Base(row * column, std::move(value)) {}
         DenseMatrixStorage(std::initializer_list<T> list) : Base(list) {}
         /* Operators */
         [[nodiscard]] T& operator()(size_t r, size_t c) {
@@ -162,7 +162,7 @@ namespace Physica::Core {
     public:
         DenseMatrixStorage() = default;
         DenseMatrixStorage(size_t row, size_t column) : array(column, row) {}
-        DenseMatrixStorage(size_t row, size_t column, T value) : array(column, row, value) {}
+        DenseMatrixStorage(size_t row, size_t column, T value) : array(column, row, std::move(value)) {}
         DenseMatrixStorage(std::initializer_list<VectorType> list) : array(list) {}
         /* Operators */
         [[nodiscard]] T& operator()(size_t r, size_t c) {
@@ -216,7 +216,7 @@ namespace Physica::Core {
     public:
         DenseMatrixStorage() = default;
         DenseMatrixStorage(size_t row, size_t column) : array(row, column) {}
-        DenseMatrixStorage(size_t row, size_t column, T value) : array(row, column, value) {}
+        DenseMatrixStorage(size_t row, size_t column, T value) : array(row, column, std::move(value)) {}
         DenseMatrixStorage(std::initializer_list<VectorType> list) : array(list) {}
         /* Operators */
         [[nodiscard]] T& operator()(size_t r, size_t c) {

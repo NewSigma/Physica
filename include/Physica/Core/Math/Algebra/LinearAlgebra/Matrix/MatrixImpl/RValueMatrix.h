@@ -97,14 +97,14 @@ namespace Physica::Core {
         [[nodiscard]] inline const DiagVector<Derived, false> diag() const;
 
         [[nodiscard]] ScalarType calc(size_t row, size_t col) const { return Base::getDerived().calc(row, col); }
-        [[nodiscard]] ScalarType calcFromMajorMinor(size_t row, size_t col) const;
+        [[nodiscard]] inline ScalarType calcFromMajorMinor(size_t major, size_t minor) const;
         [[nodiscard]] ScalarType max() const;
         [[nodiscard]] ScalarType min() const;
         [[nodiscard]] ScalarType trace() const;
         [[nodiscard]] Transpose<Derived> transpose() const noexcept;
         [[nodiscard]] Conjugate<Derived> conjugate() const noexcept;
         [[nodiscard]] RValueFlatten<Derived> flatten() const noexcept;
-        [[nodiscard]] ScalarType sum() const { return Base::getDerived().sum(); }
+        [[nodiscard]] ScalarType sum() const;
         /* Getters */
         [[nodiscard]] __host__ __device__ size_t getRow() const noexcept { return Base::getDerived().getRow(); }
         [[nodiscard]] __host__ __device__ size_t getColumn() const noexcept { return Base::getDerived().getColumn(); }

@@ -22,9 +22,45 @@
 
 namespace Physica::Core {
     namespace Internal {
+        template<class VectorType, class MatrixType>
+        class Traits<Core::device_obj<VectorMatrixProduct<VectorType, MatrixType>>>
+                : public Traits<VectorMatrixProduct<VectorType, MatrixType>> {};
+
         template<class MatrixType, class VectorType>
         class Traits<Core::device_obj<MatrixVectorProduct<MatrixType, VectorType>>>
                 : public Traits<MatrixVectorProduct<MatrixType, VectorType>> {};
+    }
+
+    template<class VectorType, class MatrixType>
+    class device_obj<VectorMatrixProduct<VectorType, MatrixType>>
+            : public device_obj<RValueMatrix<VectorMatrixProduct<VectorType, MatrixType>>> {
+        static_assert(MatrixType::RowAtCompile == 1 || MatrixType::RowAtCompile == Dynamic,
+                      "Row and column do not match in matrix product");
+        using host_obj = VectorMatrixProduct<VectorType, MatrixType>;
+        using This = device_obj<host_obj>;
+        using Base = device_obj<RValueMatrix<host_obj>>;
+    public:
+        using typename Base::ScalarType;
+    private:
+        const device_obj<VectorType>& vec;
+        const device_obj<MatrixType>& mat;
+    public:
+        __host__ __device__ device_obj(const device_obj<RValueVector<VectorType>>& vec_, const device_obj<RValueMatrix<MatrixType>>& mat_)
+                : vec(vec_.getDerived()), mat(mat_.getDerived()) {
+            assert(mat.getRow() == 1);
+        }
+        /* Getters */
+        [[nodiscard]] __device__ ScalarType calc(size_t row, size_t column) const;
+        [[nodiscard]] __host__ __device__ size_t getRow() const { return vec.getLength(); }
+        [[nodiscard]] __host__ __device__ size_t getColumn() const { return mat.getColumn(); }
+        [[nodiscard]] const VectorType& getLHS() const noexcept { return vec; }
+        [[nodiscard]] const MatrixType& getRHS() const noexcept { return mat; }
+    };
+
+    template<class VectorType, class MatrixType>
+    __device__ typename device_obj<VectorMatrixProduct<VectorType, MatrixType>>::ScalarType
+    device_obj<VectorMatrixProduct<VectorType, MatrixType>>::calc(size_t row, size_t column) const {
+        return vec.calc(row) * mat.calc(0, column);
     }
 
     template<class MatrixType, class VectorType>
@@ -68,6 +104,13 @@ namespace Physica::Core {
     __device__ inline typename device_obj<MatrixVectorProduct<MatrixType, VectorType>>::ScalarType
     device_obj<MatrixVectorProduct<MatrixType, VectorType>>::calc(size_t index) const {
         return mat.row(index) * vec;
+    }
+
+    template<class VectorType, class MatrixType>
+    __host__ __device__ inline typename std::enable_if<MatrixType::RowAtCompile == 1, device_obj<VectorMatrixProduct<VectorType, MatrixType>>>::type
+    operator*(const device_obj<RValueVector<VectorType>>& vec, const device_obj<RValueMatrix<MatrixType>>& mat) {
+        assert(mat.getRow() == 1);
+        return {vec, mat};
     }
 
     template<class MatrixType, class VectorType>

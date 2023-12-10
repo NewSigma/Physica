@@ -19,6 +19,7 @@
 #pragma once
 
 #include "Physica/Core/Parallel/StreamPool.cuh"
+#include "Physica/Utils/CUDA/DeviceProp.cuh"
 #include "Transpose.cuh"
 #include "RValueFlatten.cuh"
 
@@ -35,16 +36,21 @@ namespace Physica::Core {
 
     template<class Derived>
     template<class OtherDerived>
-    void device_obj<RValueMatrix<Derived>>::assignTo(device_obj<LValueMatrix<OtherDerived>>& target) const {
-        constexpr int elemPerThread = 64;
+    __host__ __device__ void device_obj<RValueMatrix<Derived>>::assignTo(device_obj<LValueMatrix<OtherDerived>>& target) const {
+        const size_t maxMajor = getMaxMajor();
+        const size_t maxMinor = getMaxMinor();
+    #ifndef __CUDA_ARCH__
         int device;
         cudaGetDevice(&device);
         const int maxThreadsPerBlock = Utils::DeviceProp::getInstance().getProperty(device).maxThreadsPerBlock;
-        const size_t major = getMaxMajor();
-        const size_t minor = getMaxMinor();
-        const size_t numThread = minor > maxThreadPerBlock ? maxThreadPerBlock : minor;
-        const size_t numBlockX = (minor + maxThreadsPerBlock) / maxThreadsPerBlock;
-        Internal::RValueMatrix_assignToKernel<<<{numBlockX, major}, numThread, 0, StreamPool::getStream()>>>(Base::getDerived(), target.getDerived());
+        const size_t numThread = maxMinor > maxThreadsPerBlock ? maxThreadsPerBlock : maxMinor;
+        const size_t numBlockX = (maxMinor + maxThreadsPerBlock) / maxThreadsPerBlock;
+        Internal::RValueMatrix_assignToKernel<<<{numBlockX, maxMajor}, numThread, 0, StreamPool::getStream()>>>(Base::getDerived(), target.getDerived());
+    #else
+        for (size_t major = 0; major < maxMajor; ++major)
+            for (size_t minor = 0; minor < maxMinor; ++minor)
+                target.refFromMajorMinor(major, minor) = calcFromMajorMinor(major, minor);
+    #endif
     }
 
     template<class Derived>

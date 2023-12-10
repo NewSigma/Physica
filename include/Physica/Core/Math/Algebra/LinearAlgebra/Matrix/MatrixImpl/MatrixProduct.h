@@ -56,6 +56,7 @@ namespace Physica::Core {
         public:
             using ScalarType = typename Internal::BinaryScalarOpReturnType<typename VectorType::ScalarType,
                                                                            typename MatrixType::ScalarType>::Type;
+            constexpr static int Option = MatrixOption::AnyMajor | MatrixOption::AnyStorage;
             constexpr static size_t RowAtCompile = VectorType::SizeAtCompile;
             constexpr static size_t ColumnAtCompile = MatrixType::ColumnAtCompile;
             constexpr static size_t MaxRowAtCompile = VectorType::MaxSizeAtCompile;

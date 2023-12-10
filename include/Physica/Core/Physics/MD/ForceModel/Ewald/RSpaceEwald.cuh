@@ -64,6 +64,8 @@ namespace Physica::Core {
         /* Operations */
         template<class Executor, bool IsSmallCell = false>
         [[nodiscard]] inline Vector<ScalarType> force_short(const PositionMatrix& pos);
+
+        [[nodiscard]] inline LatticeMatrix virial(const PositionMatrix& pos);
         void swap(device_obj& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] __host__ __device__ size_t getNumParticle() const noexcept { return charges.getLength(); }
@@ -76,6 +78,8 @@ namespace Physica::Core {
         void setLattice(const LatticeMatrix& lattice_);
         void setIntegralLimit(ScalarType integralLimit_);
     protected:
+        [[nodiscard]] inline ScalarType calcSelfE() const;
+        [[nodiscard]] inline ScalarType calcGammaPointE() const;
         [[nodiscard]] __device__ inline ScalarType pot_functor(size_t i, size_t j, ScalarType r, ScalarType r2) const;
         [[nodiscard]] __device__ inline ScalarType force_functor(size_t i, size_t j, ScalarType r, ScalarType r2) const;
     private:
@@ -83,6 +87,7 @@ namespace Physica::Core {
         void makeTables();
         using Base::potentialEnergy;
         using Base::force_short;
+        using Base::virial;
         /* Getters */
         using Base::getCutoff;
         using Base::getSquaredCutoff;
@@ -103,6 +108,12 @@ namespace Physica::Core {
         static_assert(!IsSmallCell, "[Error]: Small cell does not apply to ewald because self interaction");
         const Vector<ScalarType> rSpaceSum = Base::template force<CudaExecutor, false>(lattice.toHost(), invLatt, pos);
         return rSpaceSum;
+    }
+
+    template<class ScalarType>
+    inline typename device_obj<RSpaceEwald<ScalarType>>::LatticeMatrix
+    device_obj<RSpaceEwald<ScalarType>>::virial(const PositionMatrix& pos) {
+        return Base::virial(lattice.toHost(), invLatt, pos);
     }
 
     template<class ScalarType>
@@ -154,6 +165,16 @@ namespace Physica::Core {
         kSpaceSumRange = PeriodicCell<ScalarType, Dim>::estimateRange(hostRepLatt, PlainScalar(SumPrec * 2) * integralLimit.getValue());
         makeTables();
         Base::setCutoff(rSpaceCutoff);
+    }
+
+    template<class ScalarType>
+    inline ScalarType device_obj<RSpaceEwald<ScalarType>>::calcSelfE() const {
+        return square(charges.toHost()).sum() * integralLimit / sqrt(PlainScalar(M_PI));
+    }
+
+    template<class ScalarType>
+    inline ScalarType device_obj<RSpaceEwald<ScalarType>>::calcGammaPointE() const {
+        return square(charges.toHost().sum()) * PlainScalar(-M_PI) / (PlainScalar(2) * square(integralLimit)) * inv_volume;
     }
     /**
      * Optimize: make use of x1, x2, x3 are equal distance

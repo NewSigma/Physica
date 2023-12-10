@@ -19,6 +19,7 @@
 #pragma once
 
 #include "PeriodicCell.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/CrossProduct.cuh"
 
 namespace Physica::Core {
     template<class ScalarType, unsigned int Dim>
@@ -54,8 +55,11 @@ namespace Physica::Core {
         [[nodiscard]] __host__ __device__ const PositionMatrix& getPos() const noexcept { return pos; }
         [[nodiscard]] __host__ __device__ Type getType() const noexcept { return type; }
         [[nodiscard]] __host__ __device__ size_t getNumParticle() const noexcept { return pos.getRow(); }
+        [[nodiscard]] __device__ ScalarType getVolume() const noexcept { return getVolume(lattice); }
         /* Setters */
-        void setLattice(LatticeMatrix new_lattice) { lattice = new_lattice; }
+        void setLattice(LatticeMatrix new_lattice) { lattice = std::move(new_lattice); }
+        /* Static members */
+        [[nodiscard]] __device__ static ScalarType getVolume(const LatticeMatrix& lattice);
     };
 
     template<class ScalarType, unsigned int Dim>
@@ -83,5 +87,15 @@ namespace Physica::Core {
         lattice.swap(obj.lattice);
         pos.swap(obj.pos);
         std::swap(type, obj.type);
+    }
+
+    template<class ScalarType, unsigned int Dim>
+    __device__ ScalarType device_obj<PeriodicCell<ScalarType, Dim>>::getVolume(const LatticeMatrix& lattice) {
+        if constexpr (Dim == 1)
+            return abs(lattice(0, 0));
+        else if constexpr (Dim == 2)
+            return (lattice.row(0).crossProduct(lattice.row(1))).compute().norm();
+        else
+            return abs(VectorType(lattice.row(0).crossProduct(lattice.row(1))) * lattice.row(2).asVector());
     }
 }

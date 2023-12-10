@@ -44,7 +44,7 @@ namespace Physica::Core {
     public:
         /* Operations */
         template<class OtherDerived>
-        void assignTo(device_obj<LValueMatrix<OtherDerived>>& target) const;
+        __host__ __device__ void assignTo(device_obj<LValueMatrix<OtherDerived>>& target) const;
         [[nodiscard]] __host__ __device__ inline RowVector row(size_t r);
         [[nodiscard]] __host__ __device__ inline const RowVector row(size_t r) const;
         [[nodiscard]] __host__ __device__ inline ColVector col(size_t c);

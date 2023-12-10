@@ -211,7 +211,7 @@ namespace Physica::Core {
     }
 
     template<class Derived>
-    typename RValueMatrix<Derived>::ScalarType RValueMatrix<Derived>::calcFromMajorMinor(size_t major, size_t minor) const {
+    inline typename RValueMatrix<Derived>::ScalarType RValueMatrix<Derived>::calcFromMajorMinor(size_t major, size_t minor) const {
         return calc(MatrixOption::rowFromMajorMinor<Derived>(major, minor), MatrixOption::columnFromMajorMinor<Derived>(major, minor));
     }
 
@@ -281,6 +281,15 @@ namespace Physica::Core {
     template<class Derived>
     RValueFlatten<Derived> RValueMatrix<Derived>::flatten() const noexcept {
         return RValueFlatten<Derived>(Base::getDerived());
+    }
+
+    template<class Derived>
+    typename RValueMatrix<Derived>::ScalarType RValueMatrix<Derived>::sum() const {
+        ScalarType result = 0;
+        for (size_t major = 0; major < getMaxMajor(); ++major)
+            for (size_t minor = 0; minor < getMaxMinor(); ++minor)
+                result += calcFromMajorMinor(major, minor);
+        return result;
     }
 
     template<class MatrixType, class MatrixType2>

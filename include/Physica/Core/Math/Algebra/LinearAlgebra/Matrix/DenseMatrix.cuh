@@ -19,6 +19,7 @@
 #pragma once
 
 #include "MatrixImpl/ContinuousMatrix.cuh"
+#include "DenseMatrixImpl/DenseMatrixExpression.cuh"
 #include "DenseMatrixImpl/DenseMatrixStorage.cuh"
 #include "MatrixImpl/MatrixProduct.cuh"
 
@@ -42,6 +43,8 @@ namespace Physica::Core {
         using Dim = DenseMatrixDim<This, Row, Column, MaxRow, MaxColumn>;
     public:
         device_obj() = default;
+        __host__ __device__ device_obj(size_t row, size_t column);
+        __host__ __device__ device_obj(size_t row, size_t column, T value);
         device_obj(const host_obj& mat);
         device_obj(const device_obj&) = default;
         device_obj(device_obj&&) noexcept = default;
@@ -59,8 +62,16 @@ namespace Physica::Core {
         using Dim::getColumn;
         using Storage::data_ptr;
         /* Static members */
-        [[nodiscard]] inline static device_obj unitMatrix(size_t order);
+        [[nodiscard]] static inline device_obj unitMatrix(size_t order);
     };
+
+    template<class T, int Option, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn, class Allocator>
+    __host__ __device__ device_obj<DenseMatrix<T, Option, Row, Column, MaxRow, MaxColumn, Allocator>>::device_obj(
+            size_t row, size_t column) : Storage(row, column), Dim(row, column) {}
+
+    template<class T, int Option, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn, class Allocator>
+    __host__ __device__ device_obj<DenseMatrix<T, Option, Row, Column, MaxRow, MaxColumn, Allocator>>::device_obj(
+            size_t row, size_t column, T value) : Storage(row, column, std::move(value)), Dim(row, column) {}
 
     template<class T, int Option, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn, class Allocator>
     device_obj<DenseMatrix<T, Option, Row, Column, MaxRow, MaxColumn, Allocator>>::device_obj(const host_obj& mat)

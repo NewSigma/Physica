@@ -24,13 +24,15 @@
 
 namespace Physica::Core {
     /**
+     * \tparam REwaldType: R(Space)EwaldType
+     * 
      * Reference:
      * [1] Martin,Richard M. Electronic structure : basic theory and practical methods[M].Beijing: World publishing corporation; Cambridge: Cambridge University Press, 2017:499-503
      * [2] Toukmaji A Y, Board J A. Ewald summation techniques in perspective: a survey[J]. Computer Physics Communications, 1996, 95(2-3):73-92.
      */
-    template<class ScalarType>
-    class Ewald : private RSpaceEwald<ScalarType> {
-        using Base = RSpaceEwald<ScalarType>;
+    template<class ScalarType, class REwaldType = RSpaceEwald<ScalarType>>
+    class Ewald : private REwaldType {
+        using Base = REwaldType;
         using Base::Dim;
         using typename Base::ComplexType;
         using typename Base::PlainScalar;
@@ -82,16 +84,16 @@ namespace Physica::Core {
         friend class ::Physica::Test;
     };
 
-    template<class ScalarType>
-    Ewald<ScalarType>::Ewald(LatticeMatrix lattice, Vector<ScalarType> charges)
+    template<class ScalarType, class REwaldType>
+    Ewald<ScalarType, REwaldType>::Ewald(LatticeMatrix lattice, Vector<ScalarType> charges)
             : Base(std::move(lattice)
             , std::move(charges)) {
         selfE = Base::calcSelfE();
         gammaPointE = Base::calcGammaPointE();
     }
 
-    template<class ScalarType>
-    Ewald<ScalarType>& Ewald<ScalarType>::operator=(Base base) noexcept {
+    template<class ScalarType, class REwaldType>
+    Ewald<ScalarType, REwaldType>& Ewald<ScalarType, REwaldType>::operator=(Base base) noexcept {
         Base::swap(base);
         selfE = Base::calcSelfE();
         gammaPointE = Base::calcGammaPointE();
@@ -100,8 +102,8 @@ namespace Physica::Core {
     /**
      * \param pos must be in cartesian convension
      */
-    template<class ScalarType>
-    ScalarType Ewald<ScalarType>::potentialEnergy(const PositionMatrix& pos) const {
+    template<class ScalarType, class REwaldType>
+    ScalarType Ewald<ScalarType, REwaldType>::potentialEnergy(const PositionMatrix& pos) const {
         const size_t numParticle = getNumParticle();
         const ScalarType rSpaceSum = Base::potentialEnergy(pos);
         ScalarType kSpaceSum = 0;
@@ -127,9 +129,9 @@ namespace Physica::Core {
         return kSpaceSum + rSpaceSum - selfE;
     }
 
-    template<class ScalarType>
+    template<class ScalarType, class REwaldType>
     template<class Executor>
-    Vector<ScalarType> Ewald<ScalarType>::force(const PositionMatrix& pos) const {
+    Vector<ScalarType> Ewald<ScalarType, REwaldType>::force(const PositionMatrix& pos) const {
         Vector<ScalarType> result;
         auto kSpaceFuture = Executor::schedule([this, pos, &result]() {
             result = force_long<SequentialExecutor>(pos);
@@ -140,9 +142,9 @@ namespace Physica::Core {
         return result;
     }
 
-    template<class ScalarType>
+    template<class ScalarType, class REwaldType>
     template<class Executor>
-    Vector<ScalarType> Ewald<ScalarType>::force_long(const PositionMatrix& pos) const {
+    Vector<ScalarType> Ewald<ScalarType, REwaldType>::force_long(const PositionMatrix& pos) const {
         static_assert(std::is_same<Executor, SequentialExecutor>::value, "[Error]: Parallelization is not implemented");
         const size_t numParticle = getNumParticle();
         Vector<ScalarType> kSpaceSum(numParticle * Dim, 0);
@@ -179,17 +181,17 @@ namespace Physica::Core {
      * Reference:
      * [1] Rev. Mod. Phys. 73, 515; https://doi.org/10.1103/RevModPhys.73.515
      */
-    template<class ScalarType>
-    typename Ewald<ScalarType>::ComplexType
-    Ewald<ScalarType>::forceConst(const PositionMatrix& pos, Vector3D qPoint, size_t dof1, size_t dof2) const {
+    template<class ScalarType, class REwaldType>
+    typename Ewald<ScalarType, REwaldType>::ComplexType
+    Ewald<ScalarType, REwaldType>::forceConst(const PositionMatrix& pos, Vector3D qPoint, size_t dof1, size_t dof2) const {
         const Vector3D waveQ = getRepLattice().transpose() * qPoint;
         const ComplexType kSpaceSum = kSpaceForceConst(pos, waveQ, dof1, dof2);
         const ComplexType rSpaceSum = Base::forceConst(pos, waveQ, dof1, dof2);
         return kSpaceSum + rSpaceSum;
     }
 
-    template<class ScalarType>
-    typename Ewald<ScalarType>::LatticeMatrix Ewald<ScalarType>::virial(const PositionMatrix& pos) const {
+    template<class ScalarType, class REwaldType>
+    typename Ewald<ScalarType, REwaldType>::LatticeMatrix Ewald<ScalarType, REwaldType>::virial(const PositionMatrix& pos) const {
         const ScalarType factor = reciprocal(square(PlainScalar(2) * getIntegralLimit()));
         const size_t numParticle = getNumParticle();
         Vector<ScalarType> dots(numParticle);
@@ -225,24 +227,24 @@ namespace Physica::Core {
         return kSpaceVirial + rSpaceVirial;
     }
 
-    template<class ScalarType>
-    void Ewald<ScalarType>::swap(Ewald& __restrict obj) noexcept {
+    template<class ScalarType, class REwaldType>
+    void Ewald<ScalarType, REwaldType>::swap(Ewald& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         Base::swap(obj);
         selfE.swap(obj.selfE);
         gammaPointE.swap(obj.gammaPointE);
     }
 
-    template<class ScalarType>
-    void Ewald<ScalarType>::setLattice(LatticeMatrix lattice) {
+    template<class ScalarType, class REwaldType>
+    void Ewald<ScalarType, REwaldType>::setLattice(LatticeMatrix lattice) {
         Base::setLattice(std::move(lattice));
         selfE = Base::calcSelfE();
         gammaPointE = Base::calcGammaPointE();
     }
 
-    template<class ScalarType>
-    typename Ewald<ScalarType>::ComplexType
-    Ewald<ScalarType>::kSpaceForceConst(const PositionMatrix& pos, const Vector3D& waveQ, size_t dof1, size_t dof2) const {
+    template<class ScalarType, class REwaldType>
+    typename Ewald<ScalarType, REwaldType>::ComplexType
+    Ewald<ScalarType, REwaldType>::kSpaceForceConst(const PositionMatrix& pos, const Vector3D& waveQ, size_t dof1, size_t dof2) const {
         const size_t atom1 = dof1 / 3;
         const size_t atom2 = dof2 / 3;
         const size_t direction1 = dof1 % 3U;

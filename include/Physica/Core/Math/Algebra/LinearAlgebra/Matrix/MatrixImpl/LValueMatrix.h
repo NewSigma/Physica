@@ -58,6 +58,9 @@ namespace Physica::Core {
         void operator-=(const ScalarType& s) { (*this) = (*this) - s; }
         void operator*=(const ScalarType& s) { (*this) = (*this) * s; }
         void operator/=(const ScalarType& s) { (*this) = (*this) / s; }
+        template<class OtherDerived> void operator+=(const RValueMatrix<OtherDerived>& m) { (*this) = (*this) + m; }
+        template<class OtherDerived> void operator-=(const RValueMatrix<OtherDerived>& m) { (*this) = (*this) - m; }
+        template<class OtherDerived> void operator*=(const RValueMatrix<OtherDerived>& m) { Base::getDerived() = Derived((*this) * m); }
         /* Operations */
         [[nodiscard]] inline RowVector row(size_t r);
         [[nodiscard]] inline const RowVector row(size_t r) const;
@@ -111,9 +114,8 @@ namespace Physica::Core {
         [[nodiscard]] ScalarType calc(size_t row, size_t col) const { return *data_ptr(row, col); }
         [[nodiscard]] __host__ __device__ ScalarType* data_ptr(size_t row, size_t column) { return Base::getDerived().data_ptr(row, column); }
         [[nodiscard]] __host__ __device__ const ScalarType* data_ptr(size_t row, size_t column) const { return Base::getDerived().data_ptr(row, column); }
-        [[nodiscard]] ScalarType sum() const;
-        [[nodiscard]] ScalarType& refFromMajorMinor(size_t major, size_t minor);
-        [[nodiscard]] const ScalarType& refFromMajorMinor(size_t major, size_t minor) const;
+        [[nodiscard]] inline ScalarType& refFromMajorMinor(size_t major, size_t minor);
+        [[nodiscard]] inline const ScalarType& refFromMajorMinor(size_t major, size_t minor) const;
         [[nodiscard]] LValueFlatten<Derived> flatten();
         [[nodiscard]] const LValueFlatten<Derived> flatten() const;
         /* Setters */
@@ -123,18 +125,6 @@ namespace Physica::Core {
         LValueMatrix(const LValueMatrix&) = default;
         LValueMatrix(LValueMatrix&&) noexcept = default;
     };
-
-    template<class Derived, class OtherDerived>
-    inline void operator+=(LValueMatrix<Derived>& m1, const RValueMatrix<OtherDerived>& m2) { m1 = m1 + m2; }
-
-    template<class Derived, class OtherDerived>
-    inline void operator-=(LValueMatrix<Derived>& m1, const RValueMatrix<OtherDerived>& m2) { m1 = m1 - m2; }
-
-    template<class Derived, class OtherDerived>
-    inline void operator*=(LValueMatrix<Derived>& m1, const RValueMatrix<OtherDerived>& m2) {
-        Derived temp = m1 * m2;
-        temp.swap(m1.getDerived());
-    }
 }
 
 #include "LValueMatrixImpl.h"
