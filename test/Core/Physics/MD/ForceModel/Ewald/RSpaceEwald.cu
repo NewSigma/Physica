@@ -50,10 +50,17 @@ int main() {
 
     HostForceModel hostModel(cell.getLattice(), charges);
     DeviceForceModel deviceModel(cell.getLattice(), charges);
-
-    const auto f0 = hostModel.template force_short<SequentialExecutor>(pos);
-    const auto f1 = deviceModel.template force_short<CudaExecutor>(pos);
-    if (!vectorNear(f0, f1, 1E-4))
-        return 1;
+    {
+        const auto f0 = hostModel.template force_short<SequentialExecutor>(pos);
+        const auto f1 = deviceModel.template force_short<CudaExecutor>(pos);
+        if (!vectorNear(f0, f1, 1E-4))
+            return 1;
+    }
+    {
+        const auto v0 = hostModel.virial(pos);
+        const auto v1 = deviceModel.virial(pos);
+        if (!matrixNear(v0, v1, 1E-4))
+            return 1;
+    }
     return 0;
 }

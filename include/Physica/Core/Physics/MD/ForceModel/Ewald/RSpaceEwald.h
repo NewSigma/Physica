@@ -237,6 +237,7 @@ namespace Physica::Core {
 
     template<class ScalarType>
     void RSpaceEwald<ScalarType>::setIntegralLimit(ScalarType integralLimit_) {
+        assert(integralLimit_.isPositive() && "[Error]: Invalid integralLimit");
         const ScalarType heightX_2Pi = reciprocal(repLatt.row(0).norm());
         const ScalarType heightY_2Pi = reciprocal(repLatt.row(1).norm());
         const ScalarType heightZ_2Pi = reciprocal(repLatt.row(2).norm());

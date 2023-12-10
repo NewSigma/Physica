@@ -211,8 +211,9 @@ namespace Physica::Core {
         [[nodiscard]] constexpr static ScalarOption getOption() { return Float; }
         [[nodiscard]] __host__ __device__ float getTrivial() const noexcept { return f; }
         [[nodiscard]] __host__ __device__ bool isZero() const noexcept { return f == 0; }
-        [[nodiscard]] __host__ __device__ bool isPositive() const { return f > 0; }
-        [[nodiscard]] __host__ __device__ bool isNegative() const { return f < 0; }
+        [[nodiscard]] __host__ __device__ bool isPositive() const noexcept { return f > 0; }
+        [[nodiscard]] __host__ __device__ bool isNegative() const noexcept { return f < 0; }
+        [[nodiscard]] bool isFinite() const noexcept { return std::isfinite(f); }
         [[nodiscard]] bool isInteger() const;
         /* Static Members */
         static inline bool matchSign(const Scalar& s1, const Scalar& s2) { return (s1.f > 0 && s2.f > 0) || (s1.f < 0 && s2.f < 0); }
@@ -274,8 +275,9 @@ namespace Physica::Core {
         [[nodiscard]] constexpr static ScalarOption getOption() { return Double; }
         [[nodiscard]] __host__ __device__ double getTrivial() const noexcept { return d; }
         [[nodiscard]] __host__ __device__ bool isZero() const noexcept{ return d == 0; }
-        [[nodiscard]] __host__ __device__ bool isPositive() const { return d > 0; }
-        [[nodiscard]] __host__ __device__ bool isNegative() const { return d < 0; }
+        [[nodiscard]] __host__ __device__ bool isPositive() const noexcept { return d > 0; }
+        [[nodiscard]] __host__ __device__ bool isNegative() const noexcept { return d < 0; }
+        [[nodiscard]] bool isFinite() const noexcept { return std::isfinite(d); }
         [[nodiscard]] bool isInteger() const;
         /* Static Members */
         static inline bool matchSign(const Scalar& s1, const Scalar& s2) { return (s1.d > 0 && s2.d > 0) || (s1.d < 0 && s2.d < 0); }

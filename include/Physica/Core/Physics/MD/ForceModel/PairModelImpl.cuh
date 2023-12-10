@@ -168,11 +168,13 @@ namespace Physica::Core {
                 <<<1, NumVirialElem, 0, StreamPool::getStream()>>>(asStruct(Base::getDerived()));
 
         auto head = swapBuffer.head(NumVirialElem);
-        virialBuffer.col(0).toHost(head);
+        virialBuffer.col(0).toHostAsync(head);
+        StreamPool::getStream().wait();
         LatticeMatrix result(Dim, Dim);
         for (int r = 0; r < Dim; ++r)
             for (int c = 0; c < Dim; ++c)
-                result(r, c) = swapBuffer[r * Dim + c];
+                result(r, c) = swapBuffer[r * Dim + c] * ScalarType(r == c ? 0.5 : 0.25);
+        result *= reciprocal(MDCellType::getVolume(lattice));
         return result;
     }
 
@@ -238,7 +240,7 @@ namespace Physica::Core {
         for (int i = 0; i < Dim; ++i) {
             for (int j = 0; j < Dim; ++j) {
                 const int index = i * Dim + j;
-                virialBuffer(index, atom1) = atomVirial(i, j) * reciprocal(cell.getVolume());
+                virialBuffer(index, atom1) = atomVirial(i, j);
             }
         }
     }

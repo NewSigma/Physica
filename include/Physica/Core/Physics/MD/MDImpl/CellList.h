@@ -99,6 +99,7 @@ namespace Physica::Core {
             : lattice(std::move(lattice_))
             , directPos(std::move(cartesianPos))
             , cutoff(cutoff_) {
+        assert(cutoff.isPositive() && "[Error]: Invalid cutoff");
         cellGridDim = makeGridDim(lattice, cutoff);
         cellAtomMap.resize(getNumParticle());
         cellStartOffset.resize(cellGridDim[0] * cellGridDim[1] * cellGridDim[2] + 1);

@@ -143,20 +143,18 @@ namespace Physica::Core {
 
     template<class Derived>
     __host__ __device__ device_obj<DenseMatrixStorage<Derived, MatrixOption::Row | MatrixOption::Element>>::device_obj(
-            size_t row, size_t column) {
+            size_t row, size_t column) : Base(row * column) {
     #ifdef __CUDA_ARCH__
         static_assert(SizeAtCompile != Dynamic, "[Error]: Do not allocate dynamic matrix in device code");
     #endif
-        resize(row, column);
     }
 
     template<class Derived>
     __host__ __device__ device_obj<DenseMatrixStorage<Derived, MatrixOption::Row | MatrixOption::Element>>::device_obj(
-            size_t row, size_t column, T value) {
+            size_t row, size_t column, T value) : Base(row * column, std::move(value)) {
     #ifdef __CUDA_ARCH__
         static_assert(SizeAtCompile != Dynamic, "[Error]: Do not allocate dynamic matrix in device code");
     #endif
-        resize(row, column, std::move(value));
     }
 
     template<class Derived>
