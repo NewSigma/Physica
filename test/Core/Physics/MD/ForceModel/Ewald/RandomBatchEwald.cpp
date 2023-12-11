@@ -120,7 +120,7 @@ int main() {
     {
         const ThermostatType thermo(temperatureT, thermostatTime);
         KineticModel kineticModel(temperatureT, numReplica);
-        rpmd.nvt_step_for<ThermostatType, RandomPoolType, KineticModel, decltype(forceModel), ThreadExecutor>(
+        rpmd.nvt_step_for<ThermostatType, RandomPoolType, KineticModel, decltype(forceModel), SequentialExecutor>(
             PhyConst<AU>::secondToTime(1 * 1E-12),
             thermo,
             kineticModel,
@@ -135,7 +135,7 @@ int main() {
                 toNextMean(temp, 2 * j + 1, cell.minDistVector(numH + j, 2 * j + 1).norm());
             }
             toNextMean(bond, i, temp);
-            rpmd.nvt_step<ThermostatType, RandomPoolType, KineticModel, decltype(forceModel), ThreadExecutor>(thermo, kineticModel, forceModel);
+            rpmd.nvt_step<ThermostatType, RandomPoolType, KineticModel, decltype(forceModel), SequentialExecutor>(thermo, kineticModel, forceModel);
         }
     }
     ThreadPool::getInstance().shouldExit();
