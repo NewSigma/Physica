@@ -46,12 +46,10 @@ namespace Physica::Core {
         /* Operators */
         device_obj& operator=(device_obj obj) noexcept { swap(obj); return *this; }
         /* Operations */
-        template<class Functor>
-        __device__ void forCellInList(Functor func) const;
-        template<class Functor>
-        __device__ void forNeighInRange(Index3D centerCell, Functor func) const;
-        template<class Functor>
-        __device__ inline void forAtomInCell(Index3D cellIndex, Functor func) const;
+        template<class Functor> __device__ void forCellInList(Functor func) const;
+        template<class Functor> __device__ void forNeighInRange(Index3D centerCell, Functor func) const;
+        template<class Functor> __device__ void forReducedNeighInRange(Index3D centerCell, Functor func) const;
+        template<class Functor> __device__ inline void forAtomInCell(Index3D cellIndex, Functor func) const;
         void swap(device_obj& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] __device__ const LatticeMatrix& getLattice() const noexcept { return lattice; }
@@ -104,6 +102,32 @@ namespace Physica::Core {
                 for (int deltaZ = -1; deltaZ <= 1; ++deltaZ) {
                     if (deltaX == 0 && deltaY == 0 && deltaZ == 0) [[unlikely]]
                         continue;
+                    const int indexShiftZ = host_obj::template findNeighbor<2>(cellGridDim, centerZ, deltaZ, index);
+                    const int indexShift = indexShiftX * 3 * 3 + indexShiftY * 3 + indexShiftZ;
+                    func(neighShifts[indexShift], index);
+                }
+            }
+        }
+    }
+
+    template<class ScalarType>
+    template<class Functor>
+    __device__ void device_obj<CellList<ScalarType>>::forReducedNeighInRange(Index3D centerCell, Functor func) const {
+        auto a1 = lattice.row(0);
+        auto a2 = lattice.row(1);
+        auto a3 = lattice.row(2);
+
+        Index3D index{};
+        const size_t centerX = centerCell[0];
+        for (int deltaX = 0; deltaX <= 1; ++deltaX) {
+            const int indexShiftX = host_obj::template findNeighbor<0>(cellGridDim, centerX, deltaX, index);
+            const size_t centerY = centerCell[1];
+
+            for (int deltaY = (deltaX == 0 ? 0 : -1); deltaY <= 1; ++deltaY) {
+                const int indexShiftY = host_obj::template findNeighbor<1>(cellGridDim, centerY, deltaY, index);
+                const size_t centerZ = centerCell[2];
+
+                for (int deltaZ = ((deltaX == 0 && deltaY == 0) ? 1 : -1); deltaZ <= 1; ++deltaZ) {
                     const int indexShiftZ = host_obj::template findNeighbor<2>(cellGridDim, centerZ, deltaZ, index);
                     const int indexShift = indexShiftX * 3 * 3 + indexShiftY * 3 + indexShiftZ;
                     func(neighShifts[indexShift], index);

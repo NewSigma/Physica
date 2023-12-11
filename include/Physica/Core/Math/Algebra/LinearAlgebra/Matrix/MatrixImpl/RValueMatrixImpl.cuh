@@ -30,15 +30,15 @@ namespace Physica::Core {
             const size_t major = blockIdx.y;
             const size_t minor = blockIdx.x * blockDim.x + threadIdx.x;
             if (minor < source.getMaxMinor())
-                target.refFromMajorMinor(major, minor) = source.calcFromMajorMinor(major, minor);
+                target.refFromMajorMinor(major, minor) = source.calc(target.rowFromMajorMinor(i, j), target.columnFromMajorMinor(i, j));
         }
     }
 
     template<class Derived>
     template<class OtherDerived>
     __host__ __device__ void device_obj<RValueMatrix<Derived>>::assignTo(device_obj<LValueMatrix<OtherDerived>>& target) const {
-        const size_t maxMajor = getMaxMajor();
-        const size_t maxMinor = getMaxMinor();
+        const size_t maxMajor = target.getMaxMajor();
+        const size_t maxMinor = target.getMaxMinor();
     #ifndef __CUDA_ARCH__
         int device;
         cudaGetDevice(&device);
@@ -47,9 +47,13 @@ namespace Physica::Core {
         const size_t numBlockX = (maxMinor + maxThreadsPerBlock) / maxThreadsPerBlock;
         Internal::RValueMatrix_assignToKernel<<<{numBlockX, maxMajor}, numThread, 0, StreamPool::getStream()>>>(Base::getDerived(), target.getDerived());
     #else
-        for (size_t major = 0; major < maxMajor; ++major)
-            for (size_t minor = 0; minor < maxMinor; ++minor)
-                target.refFromMajorMinor(major, minor) = calcFromMajorMinor(major, minor);
+        for (size_t major = 0; major < maxMajor; ++major) {
+            for (size_t minor = 0; minor < maxMinor; ++minor) {
+                const size_t r = target.rowFromMajorMinor(major, minor);
+                const size_t c = target.columnFromMajorMinor(major, minor);
+                target.refFromMajorMinor(major, minor) = calc(r, c);
+            }
+        }
     #endif
     }
 
@@ -234,9 +238,9 @@ namespace Physica::Core {
     }
 
     template<class Derived>
-    typename device_obj<RValueMatrix<Derived>>::ScalarType
+    inline typename device_obj<RValueMatrix<Derived>>::ScalarType
     __device__ device_obj<RValueMatrix<Derived>>::calcFromMajorMinor(size_t major, size_t minor) const {
-        return calc(MatrixOption::rowFromMajorMinor<Derived>(major, minor), MatrixOption::columnFromMajorMinor<Derived>(major, minor));
+        return calc(rowFromMajorMinor(major, minor), columnFromMajorMinor(major, minor));
     }
 
     template<class Derived>

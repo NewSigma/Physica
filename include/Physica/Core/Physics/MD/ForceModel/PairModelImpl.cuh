@@ -173,8 +173,8 @@ namespace Physica::Core {
         LatticeMatrix result(Dim, Dim);
         for (int r = 0; r < Dim; ++r)
             for (int c = 0; c < Dim; ++c)
-                result(r, c) = swapBuffer[r * Dim + c] * ScalarType(r == c ? 0.5 : 0.25);
-        result *= reciprocal(MDCellType::getVolume(lattice));
+                result(r, c) = swapBuffer[r * Dim + c];
+        result *= reciprocal(MDCellType::getVolume(lattice)) * ScalarType(0.5);
         return result;
     }
 

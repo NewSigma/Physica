@@ -55,14 +55,10 @@ namespace Physica::Core {
         /* Operations */
         void update(PositionMatrix pos);
         inline void update(const MDCellType& mdCell);
-        template<class Functor>
-        void forCellInList(Functor func) const;
-        template<class Functor>
-        void forNeighInRange(Index3D centerCell, Functor func) const;
-        template<class Functor>
-        void forReducedNeighInRange(Index3D centerCell, Functor func) const;
-        template<class Functor>
-        inline void forAtomInCell(Index3D cellIndex, Functor func) const;
+        template<class Functor> void forCellInList(Functor func) const;
+        template<class Functor> void forNeighInRange(Index3D centerCell, Functor func) const;
+        template<class Functor> void forReducedNeighInRange(Index3D centerCell, Functor func) const;
+        template<class Functor> inline void forAtomInCell(Index3D cellIndex, Functor func) const;
 
         [[nodiscard]] size_t calcMaxNumAtomInCell() const noexcept;
 

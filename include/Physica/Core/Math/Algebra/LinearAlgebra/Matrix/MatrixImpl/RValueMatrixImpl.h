@@ -31,8 +31,10 @@ namespace Physica::Core {
         using OtherScalar = typename OtherDerived::ScalarType;
         assert(getRow() == target.getRow());
         assert(getColumn() == target.getColumn());
-        for (size_t i = 0; i < target.getMaxMajor(); ++i)
-            for (size_t j = 0; j < target.getMaxMinor(); ++j)
+        const size_t maxMajor = target.getMaxMajor();
+        const size_t maxMinor = target.getMaxMinor();
+        for (size_t i = 0; i < maxMajor; ++i)
+            for (size_t j = 0; j < maxMinor; ++j)
                 target.refFromMajorMinor(i, j) = OtherScalar(calc(target.rowFromMajorMinor(i, j), target.columnFromMajorMinor(i, j)));
 
         constexpr bool isContinuous = std::is_base_of<ContinuousMatrix<OtherDerived>, OtherDerived>::value;
@@ -212,7 +214,7 @@ namespace Physica::Core {
 
     template<class Derived>
     inline typename RValueMatrix<Derived>::ScalarType RValueMatrix<Derived>::calcFromMajorMinor(size_t major, size_t minor) const {
-        return calc(MatrixOption::rowFromMajorMinor<Derived>(major, minor), MatrixOption::columnFromMajorMinor<Derived>(major, minor));
+        return calc(rowFromMajorMinor(major, minor), columnFromMajorMinor(major, minor));
     }
 
     template<class Derived>

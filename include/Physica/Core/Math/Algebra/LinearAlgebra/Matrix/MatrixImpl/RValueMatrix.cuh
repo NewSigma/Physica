@@ -77,7 +77,7 @@ namespace Physica::Core {
         [[nodiscard]] __host__ __device__ inline const BlockType block(size_t fromRow, size_t rowCount, size_t fromCol, size_t colCount) const;
         /* Operations */
         [[nodiscard]] __device__ ScalarType calc(size_t row, size_t col) const { return Base::getDerived().calc(row, col); }
-        [[nodiscard]] __device__ ScalarType calcFromMajorMinor(size_t row, size_t col) const;
+        [[nodiscard]] __device__ inline ScalarType calcFromMajorMinor(size_t row, size_t col) const;
         [[nodiscard]] __host__ __device__ device_obj<Transpose<Derived>> transpose() const noexcept;
         [[nodiscard]] __host__ __device__ device_obj<RValueFlatten<Derived>> flatten() const noexcept;
         /* Getters */
@@ -85,6 +85,9 @@ namespace Physica::Core {
         [[nodiscard]] __host__ __device__ size_t getColumn() const noexcept { return Base::getDerived().getColumn(); }
         [[nodiscard]] __host__ __device__ size_t getMaxMajor() const noexcept { return MatrixOption::getMaxMajor<device_obj<Derived>>(Base::getDerived()); }
         [[nodiscard]] __host__ __device__ size_t getMaxMinor() const noexcept { return MatrixOption::getMaxMinor<device_obj<Derived>>(Base::getDerived()); }
+        /* Static members */
+        [[nodiscard]] __host__ __device__ static size_t rowFromMajorMinor(size_t major, size_t minor) noexcept { return MatrixOption::rowFromMajorMinor<device_obj<Derived>>(major, minor); }
+        [[nodiscard]] __host__ __device__ static size_t columnFromMajorMinor(size_t major, size_t minor) noexcept { return MatrixOption::columnFromMajorMinor<device_obj<Derived>>(major, minor); }
     };
 }
 
