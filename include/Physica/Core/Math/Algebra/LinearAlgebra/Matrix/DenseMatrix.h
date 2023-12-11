@@ -21,7 +21,7 @@
 #include <memory>
 #include "MatrixImpl/ContinuousMatrix.h"
 #include "DenseMatrixImpl/DenseMatrixExpression.h"
-#include "MatrixImpl/MatrixProduct.h"
+#include "MatrixProduct/MatrixProduct.h"
 #include "InverseMatrix.h"
 #include "MatrixDecomposition/LUDecomposition.h"
 #include "DenseMatrixImpl/DenseMatrixStorage.h"

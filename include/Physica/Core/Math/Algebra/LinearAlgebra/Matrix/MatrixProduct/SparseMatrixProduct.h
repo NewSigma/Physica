@@ -18,7 +18,7 @@
  */
 #pragma once
 
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/MatrixImpl/MatrixProduct.h"
+#include "MatrixProduct.h"
 
 namespace Physica::Core {
     template<class T, int Option, class VectorType>

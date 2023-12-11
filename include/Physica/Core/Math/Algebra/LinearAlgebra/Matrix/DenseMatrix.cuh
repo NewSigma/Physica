@@ -21,7 +21,7 @@
 #include "MatrixImpl/ContinuousMatrix.cuh"
 #include "DenseMatrixImpl/DenseMatrixExpression.cuh"
 #include "DenseMatrixImpl/DenseMatrixStorage.cuh"
-#include "MatrixImpl/MatrixProduct.cuh"
+#include "MatrixProduct/MatrixProduct.cuh"
 
 namespace Physica::Core {
     namespace Internal {

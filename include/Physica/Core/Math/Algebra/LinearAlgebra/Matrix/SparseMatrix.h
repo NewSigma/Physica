@@ -170,4 +170,4 @@ namespace Physica::Core {
     }
 }
 
-#include "SparseMatrixImpl/SparseMatrixProduct.h"
+#include "MatrixProduct/SparseMatrixProduct.h"
