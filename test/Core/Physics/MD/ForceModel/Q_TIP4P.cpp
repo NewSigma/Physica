@@ -54,7 +54,7 @@ namespace Physica {
                 forceModel.potentialEnergy(cell).reverse();
             }
             /* Test press */ {
-                const PlainScalar press_diff = -volume.getTangent() / PlainScalar(cellSize * cellSize * cellSize);
+                const PlainScalar press_diff = -volume.getGrad() / PlainScalar(cellSize * cellSize * cellSize);
                 const PlainScalar press = (forceModel.virial(cell).trace() / ScalarType(3)).getValue();
                 std::cout << press << ' ' << press_diff << std::endl;
                 if (!scalarNear(press_diff, press, 1E-12))

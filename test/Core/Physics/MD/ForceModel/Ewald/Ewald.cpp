@@ -138,7 +138,7 @@ namespace Physica {
             const ScalarType r2 = square(r);
             ewald.pot_functor(0, 1, r, r2).reverse();
             const ScalarType f = ewald.force_functor(0, 1, r, r2);
-            if (!scalarNear(-r.getTangent(), f.getValue(), 1E-10))
+            if (!scalarNear(-r.getGrad(), f.getValue(), 1E-10))
                 exit(EXIT_FAILURE);
         }
 
@@ -152,7 +152,7 @@ namespace Physica {
             PositionMatrix force_diff(pos.getRow(), pos.getColumn());
             for (size_t i = 0; i < pos.getRow(); ++i)
                 for (size_t j = 0; j < pos.getColumn(); ++j)
-                    force_diff(i, j) = -pos(i, j).getTangent();
+                    force_diff(i, j) = -pos(i, j).getGrad();
             if (!vectorNear(force, force_diff.flatten(), 1E-11))
                 exit(EXIT_FAILURE);
         }
@@ -179,7 +179,7 @@ namespace Physica {
                 AutoDiffGuard<PlainScalar> guard{};
                 ewald.potentialEnergy(cell.getPos()).reverse();
             }
-            const PlainScalar press_diff = -volume.getTangent() / PlainScalar(cellSize * cellSize * cellSize);
+            const PlainScalar press_diff = -volume.getGrad() / PlainScalar(cellSize * cellSize * cellSize);
             const PlainScalar press = (ewald.virial(cell.getPos()).trace() / ScalarType(3)).getValue();
             if (!scalarNear(press_diff, press, 1E-13))
                 exit(EXIT_FAILURE);

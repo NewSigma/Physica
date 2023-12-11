@@ -195,7 +195,7 @@ namespace Physica::Core {
             for (size_t i = 1; i < Base::getLength(); ++i) {
                 if ((*this)[i].value_ptr() != i0.value_ptr() + i)
                     return false;
-                if ((*this)[i].tangent_ptr() != i0.tangent_ptr() + i)
+                if ((*this)[i].grad_ptr() != i0.grad_ptr() + i)
                     return false;
             }
         }

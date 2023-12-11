@@ -35,13 +35,13 @@ void test_differentiable() {
     constexpr double freq2 = 4;
 
     Vector<PlainScalar> values(N);
-    Vector<PlainScalar> tangents(N);
+    Vector<PlainScalar> grads(N);
     Vector<ScalarType> data(N);
     for (size_t i = 0; i < N; ++i) {
         const PlainScalar x = PlainScalar(i) * 0.01;
         values[i] = sin(PlainScalar(2 * M_PI * freq1) * x) + sin(PlainScalar(2 * M_PI * freq2) * x) * 2;
-        tangents[i] = cos(PlainScalar(2 * M_PI * freq1) * x) * 2 + cos(PlainScalar(2 * M_PI * freq2) * x);
-        data[i] = ScalarType(values[i], tangents[i]);
+        grads[i] = cos(PlainScalar(2 * M_PI * freq1) * x) * 2 + cos(PlainScalar(2 * M_PI * freq2) * x);
+        data[i] = ScalarType(values[i], grads[i]);
     }
     Vector<ComplexType> answer{};
     /* Make answer */ {
@@ -49,15 +49,15 @@ void test_differentiable() {
         fft.getRSpace() = values;
         fft.transform();
         Vector<ComplexPlainScalar> k_values = fft.getKSpace();
-        fft.getRSpace() = tangents;
+        fft.getRSpace() = grads;
         fft.transform();
-        Vector<ComplexPlainScalar> k_tangents = fft.getKSpace();
-        if (k_values.getLength() != k_tangents.getLength()) [[unlikely]]
+        Vector<ComplexPlainScalar> k_grads = fft.getKSpace();
+        if (k_values.getLength() != k_grads.getLength()) [[unlikely]]
             exit(EXIT_FAILURE);
 
         answer.resize(k_values.getLength());
         for (size_t i = 0; i < answer.getLength(); ++i)
-            answer[i] = ComplexType(k_values[i], k_tangents[i]);
+            answer[i] = ComplexType(k_values[i], k_grads[i]);
     }
     FFT<ScalarType> fft(N, 1, PlanFlag::Estimate);
     /* Test transform */ {

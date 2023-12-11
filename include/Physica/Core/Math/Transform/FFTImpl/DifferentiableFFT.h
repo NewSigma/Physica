@@ -143,15 +143,15 @@ namespace Physica::Core {
                 ComplexType& buffer_temp = rSpace[i];
                 PlainComplexType& plan_temp = rSpaceImpl[i];
                 buffer_temp.getValue() = plan_temp;
-                plan_temp = buffer_temp.getTangent();
+                plan_temp = buffer_temp.getGrad();
             }
         }
         else {
             size_t i = 0;
             for (; i < kSpaceSize - 1; ++i) {
                 const PlainComplexType copy = kSpaceImpl[i];
-                rSpaceImpl[2 * i] = rSpace[2 * i].getTangent();
-                rSpaceImpl[2 * i + 1] = rSpace[2 * i + 1].getTangent();
+                rSpaceImpl[2 * i] = rSpace[2 * i].getGrad();
+                rSpaceImpl[2 * i + 1] = rSpace[2 * i + 1].getGrad();
                 kSpace[i].getValue() = copy;
             }
             kSpace[i].getValue() = kSpaceImpl[i];
@@ -159,7 +159,7 @@ namespace Physica::Core {
         FFTType::transform(planProvider.fft_impl, bufferProvider.fft_impl);
 
         for (size_t i = 0; i < kSpaceSize; ++i)
-            kSpace[i].getTangent() = kSpaceImpl[i];
+            kSpace[i].getGrad() = kSpaceImpl[i];
     }
 
     template<class PlainScalar, DiffMode Mode>
@@ -181,22 +181,22 @@ namespace Physica::Core {
                 ComplexType& buffer_temp = rSpace[i];
                 PlainComplexType& plan_temp = rSpaceImpl[i];
                 buffer_temp.getValue() = plan_temp;
-                plan_temp = buffer_temp.getTangent();
+                plan_temp = buffer_temp.getGrad();
             }
         }
         else {
             size_t i = 0;
             for (; i < kSpaceSize - 1; ++i) {
-                const PlainComplexType copy = kSpace[i].getTangent();
+                const PlainComplexType copy = kSpace[i].getGrad();
                 rSpace[2 * i].getValue() = rSpaceImpl[2 * i];
                 rSpace[2 * i + 1].getValue() = rSpaceImpl[2 * i + 1];
                 kSpaceImpl[i] = copy;
             }
-            kSpaceImpl[i] = kSpace[i].getTangent();
+            kSpaceImpl[i] = kSpace[i].getGrad();
         }
         FFTType::invTransform(planProvider.fft_impl, bufferProvider.fft_impl);
 
         for (size_t i = 0; i < rSpaceSize; ++i)
-            rSpace[i].getTangent() = rSpaceImpl[i];
+            rSpace[i].getGrad() = rSpaceImpl[i];
     }
 }

@@ -23,7 +23,7 @@ namespace Physica::Core {
     __host__ __device__ inline Differentiable<ScalarType, Mode> abs(const Differentiable<ScalarType, Mode>& s) {
         const ScalarType value = abs(s.getValue());
         if constexpr (Mode == DiffMode::Forward)
-            return {value, s.getValue().isPositive() ? s.getTangent() : -s.getTangent()};
+            return {value, s.getValue().isPositive() ? s.getGrad() : -s.getGrad()};
         else {
             auto& tracer = DiffTracer<ScalarType>::getInstance();
             const auto result = tracer.pushOperation(value, ExpressionType::Abs);
@@ -36,7 +36,7 @@ namespace Physica::Core {
     inline Differentiable<ScalarType, Mode> relu(const Differentiable<ScalarType, Mode>& s) {
         const ScalarType value = relu(s.getValue());
         if constexpr (Mode == DiffMode::Forward)
-            return {value, s.getValue().isPositive() ? s.getTangent() : ScalarType(0)};
+            return {value, s.getValue().isPositive() ? s.getGrad() : ScalarType(0)};
         else {
             auto& tracer = DiffTracer<ScalarType>::getInstance();
             const auto result = tracer.pushOperation(value, ExpressionType::Relu);
@@ -49,7 +49,7 @@ namespace Physica::Core {
     __host__ __device__ inline Differentiable<ScalarType, Mode> square(const Differentiable<ScalarType, Mode>& s) {
         const ScalarType value = square(s.getValue());
         if constexpr (Mode == DiffMode::Forward)
-            return {value, ScalarType(2) * s.getValue() * s.getTangent()};
+            return {value, ScalarType(2) * s.getValue() * s.getGrad()};
         else {
             auto& tracer = DiffTracer<ScalarType>::getInstance();
             const auto result = tracer.pushOperation(value, ExpressionType::Square);
@@ -62,7 +62,7 @@ namespace Physica::Core {
     __host__ __device__ inline Differentiable<ScalarType, Mode> reciprocal(const Differentiable<ScalarType, Mode>& s) {
         const ScalarType rep = reciprocal(s.getValue());
         if constexpr (Mode == DiffMode::Forward)
-            return {rep, -s.getTangent() * square(rep)};
+            return {rep, -s.getGrad() * square(rep)};
         else {
             auto& tracer = DiffTracer<ScalarType>::getInstance();
             const auto result = tracer.pushOperation(rep, ExpressionType::Reciprocal);
@@ -75,7 +75,7 @@ namespace Physica::Core {
     __host__ __device__ Differentiable<ScalarType, Mode> sqrt(const Differentiable<ScalarType, Mode>& s) {
         const ScalarType value = sqrt(s.getValue());
         if constexpr (Mode == DiffMode::Forward)
-            return {value, ScalarType(0.5) * s.getTangent() / value};
+            return {value, ScalarType(0.5) * s.getGrad() / value};
         else {
             auto& tracer = DiffTracer<ScalarType>::getInstance();
             const auto result = tracer.pushOperation(value, ExpressionType::Sqrt);
@@ -89,7 +89,7 @@ namespace Physica::Core {
         const ScalarType value = cbrt(s.getValue());
         if constexpr (Mode == DiffMode::Forward) {
             constexpr double Factor = 1.0 / 3;
-            return {value, ScalarType(Factor) * value * s.getTangent() / s.getValue()};
+            return {value, ScalarType(Factor) * value * s.getGrad() / s.getValue()};
         }
         else {
             auto& tracer = DiffTracer<ScalarType>::getInstance();
@@ -103,7 +103,7 @@ namespace Physica::Core {
     Differentiable<ScalarType, Mode> ln(const Differentiable<ScalarType, Mode>& s) {
         const ScalarType value = ln(s.getValue());
         if constexpr (Mode == DiffMode::Forward)
-            return {value, s.getTangent() / s.getValue()};
+            return {value, s.getGrad() / s.getValue()};
         else {
             auto& tracer = DiffTracer<ScalarType>::getInstance();
             const auto result = tracer.pushOperation(value, ExpressionType::Ln);
@@ -116,7 +116,7 @@ namespace Physica::Core {
     Differentiable<ScalarType, Mode> exp(const Differentiable<ScalarType, Mode>& s) {
         const ScalarType value = exp(s.getValue());
         if constexpr (Mode == DiffMode::Forward)
-            return {value, value * s.getTangent()};
+            return {value, value * s.getGrad()};
         else {
             auto& tracer = DiffTracer<ScalarType>::getInstance();
             const auto result = tracer.pushOperation(value, ExpressionType::Exp);
@@ -130,7 +130,7 @@ namespace Physica::Core {
         if constexpr (Mode == DiffMode::Forward) {
             ScalarType sin_value, cos_value;
             sincos(s.getValue(), sin_value, cos_value);
-            return {cos_value, -sin_value * s.getTangent()};
+            return {cos_value, -sin_value * s.getGrad()};
         }
         else {
             const ScalarType value = cos(s.getValue());
@@ -146,7 +146,7 @@ namespace Physica::Core {
         if constexpr (Mode == DiffMode::Forward) {
             ScalarType sin_value, cos_value;
             sincos(s.getValue(), sin_value, cos_value);
-            return {sin_value, cos_value * s.getTangent()};
+            return {sin_value, cos_value * s.getGrad()};
         }
         else {
             const ScalarType value = sin(s.getValue());
@@ -162,8 +162,8 @@ namespace Physica::Core {
         ScalarType sin_value, cos_value;
         sincos(s.getValue(), sin_value, cos_value);
         if constexpr (Mode == DiffMode::Forward) {
-            sin_result = Differentiable<ScalarType, Mode>(sin_value, cos_value * s.getTangent());
-            cos_result = Differentiable<ScalarType, Mode>(cos_value, -sin_value * s.getTangent());
+            sin_result = Differentiable<ScalarType, Mode>(sin_value, cos_value * s.getGrad());
+            cos_result = Differentiable<ScalarType, Mode>(cos_value, -sin_value * s.getGrad());
         }
         else {
             auto& tracer = DiffTracer<ScalarType>::getInstance();
@@ -177,7 +177,7 @@ namespace Physica::Core {
     template<class ScalarType, DiffMode Mode>
     Differentiable<ScalarType, Mode> arccos(const Differentiable<ScalarType, Mode>& s) {
         if constexpr (Mode == DiffMode::Forward) {
-            return {arccos(s.getValue()), -s.getTangent() / sqrt(ScalarType(1) - square(s.getValue()))};
+            return {arccos(s.getValue()), -s.getGrad() / sqrt(ScalarType(1) - square(s.getValue()))};
         }
         else {
             const ScalarType value = arccos(s.getValue());

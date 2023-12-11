@@ -51,7 +51,7 @@ namespace Physica {
                 ewald.potentialEnergy(pos).reverse();
             }
             /* Test press */ {
-                const PlainScalar press_diff = -volume.getTangent() / PlainScalar(cellSize * cellSize * cellSize);
+                const PlainScalar press_diff = -volume.getGrad() / PlainScalar(cellSize * cellSize * cellSize);
                 const PlainScalar press = (ewald.virial(pos).trace() / ScalarType(3)).getValue();
                 if (!scalarNear(press_diff, press, 1E-13))
                     exit(EXIT_FAILURE);

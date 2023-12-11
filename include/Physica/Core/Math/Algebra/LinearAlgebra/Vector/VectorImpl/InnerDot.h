@@ -56,8 +56,8 @@ namespace Physica::Core {
                     const auto head1 = v1.getDerived()[0];
                     const auto head2 = v2.getDerived()[0];
                     for (; i < to; i += PacketType::size()) {
-                        const ResultType node1(head1.value_ptr() + i, head1.tangent_ptr() + i);
-                        const ResultType node2(head2.value_ptr() + i, head2.tangent_ptr() + i);
+                        const ResultType node1(head1.value_ptr() + i, head1.grad_ptr() + i);
+                        const ResultType node2(head2.value_ptr() + i, head2.grad_ptr() + i);
                         PlainPacket p1{}, p2{};
                         p1.load(node1.value_ptr());
                         p2.load(node2.value_ptr());
@@ -65,8 +65,8 @@ namespace Physica::Core {
                     }
                     if (to != length) {
                         const size_t count = length - i;
-                        const ResultType node1(head1.value_ptr() + i, head1.tangent_ptr() + i);
-                        const ResultType node2(head2.value_ptr() + i, head2.tangent_ptr() + i);
+                        const ResultType node1(head1.value_ptr() + i, head1.grad_ptr() + i);
+                        const ResultType node2(head2.value_ptr() + i, head2.grad_ptr() + i);
                         PlainPacket p1{}, p2{};
                         p1.load_partial(count, node1.value_ptr());
                         p2.load_partial(count, node2.value_ptr());

@@ -90,7 +90,7 @@ namespace Physica::Core {
     inline void SIMD<ScalarType, Size>::insert(int index, const ScalarType& value) {
         if constexpr (isForward) {
             Base::insert(index * 2, value.getValue().getTrivial());
-            Base::insert(index * 2 + 1, value.getTangent().getTrivial());
+            Base::insert(index * 2 + 1, value.getGrad().getTrivial());
         }
         else
             Base::insert(index, value.getTrivial());
@@ -125,7 +125,7 @@ namespace Physica::Core {
     template<class PlainScalar, size_t Size>
     inline typename SIMD<Differentiable<PlainScalar, DiffMode::Reverse>, Size>::ScalarType
     SIMD<Differentiable<PlainScalar, DiffMode::Reverse>, Size>::operator[](int i) const {
-        return ScalarType(value_ptr() + i, tangent_ptr() + i);
+        return ScalarType(value_ptr() + i, grad_ptr() + i);
     }
 
     template<class PlainScalar, size_t Size>
@@ -136,8 +136,8 @@ namespace Physica::Core {
         const ScalarType newHeadNode = tracer.pushOperation(temp, ExpressionType::Add);
         ScalarType operand[Size * 2];
         for (size_t i = 0; i < Size; ++i) {
-            operand[2 * i] = ScalarType(value_ptr() + i, tangent_ptr() + i);
-            operand[2 * i + 1] = ScalarType(other.value_ptr() + i, other.tangent_ptr() + i);
+            operand[2 * i] = ScalarType(value_ptr() + i, grad_ptr() + i);
+            operand[2 * i + 1] = ScalarType(other.value_ptr() + i, other.grad_ptr() + i);
         }
         tracer.pushOperand(operand);
         return {temp, newHeadNode};
@@ -151,8 +151,8 @@ namespace Physica::Core {
         const ScalarType newHeadNode = tracer.pushOperation(temp, ExpressionType::Sub);
         ScalarType operand[Size * 2];
         for (size_t i = 0; i < Size; ++i) {
-            operand[2 * i] = ScalarType(value_ptr() + i, tangent_ptr() + i);
-            operand[2 * i + 1] = ScalarType(other.value_ptr() + i, other.tangent_ptr() + i);
+            operand[2 * i] = ScalarType(value_ptr() + i, grad_ptr() + i);
+            operand[2 * i + 1] = ScalarType(other.value_ptr() + i, other.grad_ptr() + i);
         }
         tracer.pushOperand(operand);
         return {temp, newHeadNode};
@@ -166,8 +166,8 @@ namespace Physica::Core {
         const ScalarType newHeadNode = tracer.pushOperation(temp, ExpressionType::Mul);
         ScalarType operand[Size * 2];
         for (size_t i = 0; i < Size; ++i) {
-            operand[2 * i] = ScalarType(value_ptr() + i, tangent_ptr() + i);
-            operand[2 * i + 1] = ScalarType(other.value_ptr() + i, other.tangent_ptr() + i);
+            operand[2 * i] = ScalarType(value_ptr() + i, grad_ptr() + i);
+            operand[2 * i + 1] = ScalarType(other.value_ptr() + i, other.grad_ptr() + i);
         }
         tracer.pushOperand(operand);
         return {temp, newHeadNode};
@@ -181,8 +181,8 @@ namespace Physica::Core {
         const ScalarType newHeadNode = tracer.pushOperation(temp, ExpressionType::Div);
         ScalarType operand[Size * 2];
         for (size_t i = 0; i < Size; ++i) {
-            operand[2 * i] = ScalarType(value_ptr() + i, tangent_ptr() + i);
-            operand[2 * i + 1] = ScalarType(other.value_ptr() + i, other.tangent_ptr() + i);
+            operand[2 * i] = ScalarType(value_ptr() + i, grad_ptr() + i);
+            operand[2 * i + 1] = ScalarType(other.value_ptr() + i, other.grad_ptr() + i);
         }
         tracer.pushOperand(operand);
         return {temp, newHeadNode};
@@ -196,7 +196,7 @@ namespace Physica::Core {
         const ScalarType headNode = tracer.pushOperation(temp, ExpressionType::Minus);
         ScalarType operand[Size];
         for (size_t i = 0; i < Size; ++i)
-            operand[i] = ScalarType(value_ptr() + i, tangent_ptr() + i);
+            operand[i] = ScalarType(value_ptr() + i, grad_ptr() + i);
         tracer.pushOperand(operand);
         return {temp, headNode};
     }
@@ -218,13 +218,13 @@ namespace Physica::Core {
     template<class PlainScalar, size_t Size>
     inline void SIMD<Differentiable<PlainScalar, DiffMode::Reverse>, Size>::store(ScalarType* p) const {
         for (size_t i = 0; i < Size; ++i)
-            *(p + i) = ScalarType(value_ptr() + i, tangent_ptr() + i);
+            *(p + i) = ScalarType(value_ptr() + i, grad_ptr() + i);
     }
 
     template<class PlainScalar, size_t Size>
     inline void SIMD<Differentiable<PlainScalar, DiffMode::Reverse>, Size>::store_partial(int n, ScalarType* p) const {
         for (int i = 0; i < n; ++i)
-            *(p + i) = ScalarType(value_ptr() + i, tangent_ptr() + i);
+            *(p + i) = ScalarType(value_ptr() + i, grad_ptr() + i);
     }
 
     template<class PlainScalar, size_t Size>
@@ -246,11 +246,11 @@ namespace Physica::Core {
     template<class PlainScalar, size_t Size>
     bool SIMD<Differentiable<PlainScalar, DiffMode::Reverse>, Size>::checkContinuous(int n, const ScalarType* p) {
         const PlainScalar* pValue = p->value_ptr();
-        const PlainScalar* pTangent = p->tangent_ptr();
+        const PlainScalar* pGrad = p->grad_ptr();
         for (int i = 1; i < n; ++i) {
             if ((pValue + i) != (p + i)->value_ptr())
                 return false;
-            if ((pTangent + i) != (p + i)->tangent_ptr())
+            if ((pGrad + i) != (p + i)->grad_ptr())
                 return false;
         }
         return true;

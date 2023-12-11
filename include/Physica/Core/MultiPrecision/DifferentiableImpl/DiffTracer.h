@@ -115,9 +115,9 @@ namespace Physica::Core {
         const size_t offset = values.getLength();
         values.grow(std::move(value));
 
-        auto& tangents = segment.tangents;
-        tangents.grow(0);
-        return DiffScalar(values.data() + offset, tangents.data() + offset);
+        auto& grads = segment.grads;
+        grads.grow(0);
+        return DiffScalar(values.data() + offset, grads.data() + offset);
     }
 
     template<class ScalarType>
@@ -159,12 +159,12 @@ namespace Physica::Core {
         simd.store(pValue);
         values.setLength(newNumRecord);
 
-        auto& tangents = segment.tangents;
+        auto& grads = segment.grads;
         SIMD<ScalarType, Size> empty(0);
-        auto* const pTangent = tangents.data_ptr(oldNumRecord);
-        empty.store(pTangent);
-        tangents.setLength(newNumRecord);
-        return DiffScalar(pValue, pTangent);
+        auto* const pGrad = grads.data_ptr(oldNumRecord);
+        empty.store(pGrad);
+        grads.setLength(newNumRecord);
+        return DiffScalar(pValue, pGrad);
     }
 
     template<class ScalarType>

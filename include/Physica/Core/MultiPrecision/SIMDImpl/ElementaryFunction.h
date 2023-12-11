@@ -29,7 +29,7 @@ namespace Physica::Core {
             const auto temp = abs(x.getImpl());
             const ScalarType newHeadNode = tracer.pushOperation(temp, ExpressionType::Abs);
             for (size_t i = 0; i < Size; ++i)
-                tracer.pushOperand(ScalarType(x.value_ptr() + i, x.tangent_ptr() + i));
+                tracer.pushOperand(ScalarType(x.value_ptr() + i, x.grad_ptr() + i));
             return {temp, newHeadNode};
         }
     }
@@ -44,7 +44,7 @@ namespace Physica::Core {
             const auto temp = square(x.getImpl());
             const size_t newHeadNode = tracer.pushOperation(temp, ExpressionType::Square);
             for (size_t i = 0; i < Size; ++i)
-                tracer.pushOperand(ScalarType(x.value_ptr() + i, x.tangent_ptr() + i));
+                tracer.pushOperand(ScalarType(x.value_ptr() + i, x.grad_ptr() + i));
             return {temp, newHeadNode};
         }
     }
@@ -59,7 +59,7 @@ namespace Physica::Core {
             const auto temp = sqrt(x.getImpl());
             const size_t newHeadNode = tracer.pushOperation(temp, ExpressionType::Sqrt);
             for (size_t i = 0; i < Size; ++i)
-                tracer.pushOperand(ScalarType(x.value_ptr() + i, x.tangent_ptr() + i));
+                tracer.pushOperand(ScalarType(x.value_ptr() + i, x.grad_ptr() + i));
             return {temp, newHeadNode};
         }
     }
@@ -74,7 +74,7 @@ namespace Physica::Core {
             const auto temp = cbrt(x.getImpl());
             const size_t newHeadNode = tracer.pushOperation(temp, ExpressionType::Cbrt);
             for (size_t i = 0; i < Size; ++i)
-                tracer.pushOperand(ScalarType(x.value_ptr() + i, x.tangent_ptr() + i));
+                tracer.pushOperand(ScalarType(x.value_ptr() + i, x.grad_ptr() + i));
             return {temp, newHeadNode};
         }
     }
@@ -87,12 +87,12 @@ namespace Physica::Core {
             auto& tracer = DiffTracer<PlainScalar>::getInstance();
             const ScalarType sinHeadNode = tracer.pushOperation(s, ExpressionType::Sin);
             for (size_t i = 0; i < Size; ++i)
-                tracer.pushOperand(ScalarType(x.value_ptr() + i, x.tangent_ptr() + i));
+                tracer.pushOperand(ScalarType(x.value_ptr() + i, x.grad_ptr() + i));
             s = SIMD<ScalarType, Size>(s, sinHeadNode);
 
             const ScalarType cosHeadNode = tracer.pushOperation(c, ExpressionType::Cos);
             for (size_t i = 0; i < Size; ++i)
-                tracer.pushOperand(ScalarType(x.value_ptr() + i, x.tangent_ptr() + i));
+                tracer.pushOperand(ScalarType(x.value_ptr() + i, x.grad_ptr() + i));
             c = SIMD<ScalarType, Size>(c, cosHeadNode);
         }
     }

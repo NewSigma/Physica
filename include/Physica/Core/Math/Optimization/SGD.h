@@ -58,7 +58,7 @@ namespace Physica::Core {
 
     template<class ScalarType>
     inline void SGD<ScalarType>::step(Differentiable<ScalarType, DiffMode::Reverse>& target) const {
-        target.setValue(target.getValue() - meanLearnRate * target.getTangent());
+        target.setValue(target.getValue() - meanLearnRate * target.getGrad());
     }
 
     template<class ScalarType>

@@ -70,12 +70,12 @@ namespace Physica::Core {
         using DiffTracerType = DiffTracer<ScalarType>;
 
         ScalarType value;
-        ScalarType tangent;
+        ScalarType grad;
     public:
         Differentiable() = default;
         Differentiable(double d) : This(ScalarType(d)) {}
         Differentiable(ScalarType value_);
-        Differentiable(ScalarType value_, ScalarType tangent_);
+        Differentiable(ScalarType value_, ScalarType grad_);
         Differentiable(const Differentiable&) = default;
         Differentiable(Differentiable&&) noexcept = default;
         ~Differentiable() = default;
@@ -89,9 +89,9 @@ namespace Physica::Core {
         void swap(Differentiable& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] ScalarType& getValue() noexcept { return value; }
-        [[nodiscard]] ScalarType& getTangent() noexcept { return tangent; }
+        [[nodiscard]] ScalarType& getGrad() noexcept { return grad; }
         [[nodiscard]] const ScalarType& getValue() const noexcept { return value; }
-        [[nodiscard]] const ScalarType& getTangent() const noexcept { return tangent; }
+        [[nodiscard]] const ScalarType& getGrad() const noexcept { return grad; }
         [[nodiscard]] __host__ __device__ bool isZero() const noexcept { return value.isZero(); }
         [[nodiscard]] __host__ __device__ bool isPositive() const { return value.isPositive(); }
         [[nodiscard]] __host__ __device__ bool isNegative() const { return value.isNegative(); }
@@ -110,13 +110,13 @@ namespace Physica::Core {
         using DiffTracerType = DiffTracer<ScalarType>;
 
         ScalarType* __restrict pValue;
-        ScalarType* __restrict pTangent;
+        ScalarType* __restrict pGrad;
     public:
         Differentiable() = default;
         Differentiable(double d) : This(ScalarType(d)) {}
         Differentiable(ScalarType value);
-        Differentiable(ScalarType value, ScalarType tangent);
-        Differentiable(ScalarType* pValue_, ScalarType* pTangent_);
+        Differentiable(ScalarType value, ScalarType grad);
+        Differentiable(ScalarType* pValue_, ScalarType* pGrad_);
         Differentiable(const Differentiable&) = default;
         Differentiable(Differentiable&&) noexcept = default;
         ~Differentiable() = default;
@@ -135,11 +135,11 @@ namespace Physica::Core {
         inline void swap(Differentiable& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] ScalarType* value_ptr() const noexcept { return pValue; }
-        [[nodiscard]] ScalarType* tangent_ptr() const noexcept { return pTangent; }
+        [[nodiscard]] ScalarType* grad_ptr() const noexcept { return pGrad; }
         [[nodiscard]] ScalarType& getValue() noexcept { return *pValue; }
-        [[nodiscard]] ScalarType& getTangent() noexcept { return *pTangent; }
+        [[nodiscard]] ScalarType& getGrad() noexcept { return *pGrad; }
         [[nodiscard]] const ScalarType& getValue() const noexcept { return *pValue; }
-        [[nodiscard]] const ScalarType& getTangent() const noexcept { return *pTangent; }
+        [[nodiscard]] const ScalarType& getGrad() const noexcept { return *pGrad; }
         [[nodiscard]] __host__ __device__ bool isZero() const noexcept { return getValue().isZero(); }
         [[nodiscard]] __host__ __device__ bool isPositive() const { return getValue().isPositive(); }
         [[nodiscard]] __host__ __device__ bool isNegative() const { return getValue().isNegative(); }

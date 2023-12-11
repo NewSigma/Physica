@@ -23,7 +23,7 @@ namespace Physica::Core {
     template<class GridType> class ImagGrid;
     template<class GridType> class NormGrid;
     template<class GridType> class ValueGrid;
-    template<class GridType> class TangentGrid;
+    template<class GridType> class GradGrid;
 
     namespace Internal {
         template<class GridType>
@@ -41,13 +41,13 @@ namespace Physica::Core {
         template<class GridType>
         class Traits<ValueGrid<GridType>> {
             using T = typename GridType::ScalarType;
-            static_assert(T::isDifferentiable, "[Error]: Unnecessary toValueGrid() call or toTangentGrid() call");
+            static_assert(T::isDifferentiable, "[Error]: Unnecessary toValueGrid() call or toGradGrid() call");
         public:
             using ScalarType = typename T::PlainType;
         };
 
         template<class GridType>
-        class Traits<TangentGrid<GridType>> : public Traits<ValueGrid<GridType>> {};
+        class Traits<GradGrid<GridType>> : public Traits<ValueGrid<GridType>> {};
     }
 
     template<class GridType>
@@ -115,16 +115,16 @@ namespace Physica::Core {
     };
 
     template<class GridType>
-    class TangentGrid : public RValueGrid<TangentGrid<GridType>> {
-        using Base = RValueGrid<TangentGrid<GridType>>;
+    class GradGrid : public RValueGrid<GradGrid<GridType>> {
+        using Base = RValueGrid<GradGrid<GridType>>;
         const GridType& g;
     public:
         using typename Base::ScalarType;
         using typename Base::Index3D;
     public:
-        explicit TangentGrid(const RValueGrid<GridType>& g_) : g(g_.getDerived()) {}
+        explicit GradGrid(const RValueGrid<GridType>& g_) : g(g_.getDerived()) {}
         /* Getters */
-        [[nodiscard]] ScalarType calc(Index3D index) const { return g.calc(index).getTangent(); }
+        [[nodiscard]] ScalarType calc(Index3D index) const { return g.calc(index).getGrad(); }
         [[nodiscard]] size_t getDimX() const noexcept { return g.getDimX(); }
         [[nodiscard]] size_t getDimY() const noexcept { return g.getDimY(); }
         [[nodiscard]] size_t getDimZ() const noexcept { return g.getDimZ(); }
@@ -151,7 +151,7 @@ namespace Physica::Core {
     }
 
     template<class GridType>
-    [[nodiscard]] inline TangentGrid<GridType> toTangentGrid(const RValueGrid<GridType>& v) {
-        return TangentGrid<GridType>{v};
+    [[nodiscard]] inline GradGrid<GridType> toGradGrid(const RValueGrid<GridType>& v) {
+        return GradGrid<GridType>{v};
     }
 }

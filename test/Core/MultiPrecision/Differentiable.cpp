@@ -35,7 +35,7 @@ int main() {
         const PlainScalar y = 4;
         const ScalarType result = func(ScalarType(x, 1), ScalarType(y, 1));
         const PlainScalar answer = (x + y - 3.0) * 2.0;
-        if (!scalarNear(result.getTangent(), answer, 1E-15))
+        if (!scalarNear(result.getGrad(), answer, 1E-15))
             return 1;
     }
     {
@@ -44,9 +44,9 @@ int main() {
         ScalarType y(4);
         ScalarType result = func(x, y);
         result.reverse();
-        if (!scalarNear(x.getTangent(), (x.getValue() - 1.0) * 2.0, 1E-15))
+        if (!scalarNear(x.getGrad(), (x.getValue() - 1.0) * 2.0, 1E-15))
             return 1;
-        if (!scalarNear(y.getTangent(), (y.getValue() - 2.0) * 2.0, 1E-15))
+        if (!scalarNear(y.getGrad(), (y.getValue() - 2.0) * 2.0, 1E-15))
             return 1;
     }
     return 0;

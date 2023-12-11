@@ -21,27 +21,27 @@
 namespace Physica::Core {
     template<class ScalarType>
     Differentiable<ScalarType, DiffMode::Forward>::Differentiable(ScalarType value_)
-            : value(std::move(value_)), tangent(0) {}
+            : value(std::move(value_)), grad(0) {}
 
     template<class ScalarType>
-    Differentiable<ScalarType, DiffMode::Forward>::Differentiable(ScalarType value_, ScalarType tangent_)
-        : value(std::move(value_)), tangent(std::move(tangent_)) {}
+    Differentiable<ScalarType, DiffMode::Forward>::Differentiable(ScalarType value_, ScalarType grad_)
+        : value(std::move(value_)), grad(std::move(grad_)) {}
 
     template<class ScalarType>
     inline bool Differentiable<ScalarType, DiffMode::Forward>::operator==(const This& other) const {
-        return value == other.value && tangent == other.tangent;
+        return value == other.value && grad == other.grad;
     }
 
     template<class ScalarType>
     inline Differentiable<ScalarType, DiffMode::Forward> Differentiable<ScalarType, DiffMode::Forward>::operator-() const {
-        return {-value, -tangent};
+        return {-value, -grad};
     }
 
     template<class ScalarType>
     void Differentiable<ScalarType, DiffMode::Forward>::swap(Differentiable& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         value.swap(obj.value);
-        tangent.swap(obj.tangent);
+        grad.swap(obj.grad);
     }
 
     template<class ScalarType>
@@ -71,18 +71,18 @@ namespace Physica::Core {
 
     template<class ScalarType>
     Differentiable<ScalarType, DiffMode::Reverse>::Differentiable(
-            [[maybe_unused]] ScalarType value, [[maybe_unused]] ScalarType tangent) {
+            [[maybe_unused]] ScalarType value, [[maybe_unused]] ScalarType grad) {
         throw std::runtime_error("[Error]: This function is provided for template meta programming, you should not arrive here");
     }
 
     template<class ScalarType>
-    Differentiable<ScalarType, DiffMode::Reverse>::Differentiable(ScalarType* pValue_, ScalarType* pTangent_)
-            : pValue(pValue_), pTangent(pTangent_) {}
+    Differentiable<ScalarType, DiffMode::Reverse>::Differentiable(ScalarType* pValue_, ScalarType* pGrad_)
+            : pValue(pValue_), pGrad(pGrad_) {}
 
     template<class ScalarType>
     inline bool Differentiable<ScalarType, DiffMode::Reverse>::operator==(const This& other) const {
         const bool result = pValue == other.pValue;
-        assert(result == (pTangent == other.pTangent) && "[Error]: Bad scalar");
+        assert(result == (pGrad == other.pGrad) && "[Error]: Bad scalar");
         return result;
     }
 
@@ -103,14 +103,14 @@ namespace Physica::Core {
     template<class ScalarType>
     inline void Differentiable<ScalarType, DiffMode::Reverse>::reverse() {
         auto& tracer = DiffTracer<ScalarType>::getInstance();
-        *pTangent = ScalarType(1);
+        *pGrad = ScalarType(1);
         tracer.reverse(*this);
     }
 
     template<class ScalarType>
     inline void Differentiable<ScalarType, DiffMode::Reverse>::reverse(Differentiable to) {
         auto& tracer = DiffTracer<ScalarType>::getInstance();
-        *pTangent = ScalarType(1);
+        *pGrad = ScalarType(1);
         tracer.reverse(*this, to);
     }
 
@@ -126,7 +126,7 @@ namespace Physica::Core {
     inline void Differentiable<ScalarType, DiffMode::Reverse>::swap(Differentiable<ScalarType, DiffMode::Reverse>& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         std::swap(pValue, obj.pValue);
-        std::swap(pTangent, obj.pTangent);
+        std::swap(pGrad, obj.pGrad);
     }
 
     template<class ScalarType>
@@ -164,9 +164,9 @@ namespace Physica::Core {
         using ResultType = typename Internal::BinaryScalarOpReturnType<FirstType, SecondType>::Type;
         if constexpr (Mode == DiffMode::Forward) {
             if constexpr (OtherScalar::isDifferentiable)
-                return ResultType(s1.getValue() + s2.getValue(), s1.getTangent() + s2.getTangent());
+                return ResultType(s1.getValue() + s2.getValue(), s1.getGrad() + s2.getGrad());
             else
-                return ResultType(s1.getValue() + s2.getValue(), s1.getTangent());
+                return ResultType(s1.getValue() + s2.getValue(), s1.getGrad());
         }
         else {
             using FirstPlain = typename FirstType::PlainScalar;
@@ -206,9 +206,9 @@ namespace Physica::Core {
         using ResultType = typename Internal::BinaryScalarOpReturnType<FirstType, SecondType>::Type;
         if constexpr (Mode == DiffMode::Forward) {
             if constexpr (OtherScalar::isDifferentiable)
-                return ResultType(s1.getValue() - s2.getValue(), s1.getTangent() - s2.getTangent());
+                return ResultType(s1.getValue() - s2.getValue(), s1.getGrad() - s2.getGrad());
             else
-                return ResultType(s1.getValue() - s2.getValue(), s1.getTangent());
+                return ResultType(s1.getValue() - s2.getValue(), s1.getGrad());
         }
         else {
             using FirstPlain = typename FirstType::PlainScalar;
@@ -248,9 +248,9 @@ namespace Physica::Core {
         using ResultType = typename Internal::BinaryScalarOpReturnType<FirstType, SecondType>::Type;
         if constexpr (Mode == DiffMode::Forward) {
             if constexpr (OtherScalar::isDifferentiable)
-                return ResultType(s1.getValue() * s2.getValue(), s1.getTangent() * s2.getValue() + s1.getValue() * s2.getTangent());
+                return ResultType(s1.getValue() * s2.getValue(), s1.getGrad() * s2.getValue() + s1.getValue() * s2.getGrad());
             else
-                return ResultType(s1.getValue() * s2.getValue(), s1.getTangent() * s2.getValue());
+                return ResultType(s1.getValue() * s2.getValue(), s1.getGrad() * s2.getValue());
         }
         else {
             using FirstPlain = typename FirstType::PlainScalar;
@@ -291,9 +291,9 @@ namespace Physica::Core {
         if constexpr (Mode == DiffMode::Forward) {
             const auto rep = reciprocal(s2.getValue());
             if constexpr (OtherScalar::isDifferentiable)
-                return ResultType(s1.getValue() * rep, (s1.getTangent() * s2.getValue() - s1.getValue() * s2.getTangent()) * square(rep));
+                return ResultType(s1.getValue() * rep, (s1.getGrad() * s2.getValue() - s1.getValue() * s2.getGrad()) * square(rep));
             else
-                return ResultType(s1.getValue() * rep, s1.getTangent() * rep);
+                return ResultType(s1.getValue() * rep, s1.getGrad() * rep);
         }
         else {
             using FirstPlain = typename FirstType::PlainScalar;
@@ -325,7 +325,7 @@ namespace Physica::Core {
         using ResultType = typename Internal::BinaryScalarOpReturnType<Differentiable<ScalarType, Mode>, OtherScalar>::Type;
         if constexpr (Mode == DiffMode::Forward) {
             const auto rep = reciprocal(s2.getValue());
-            return ResultType(s1.getValue() * rep, -s1.getValue() * s2.getTangent() * square(rep));
+            return ResultType(s1.getValue() * rep, -s1.getValue() * s2.getGrad() * square(rep));
         }
         else {
             static_assert(std::is_same<OtherScalar, ScalarType>::value, "[Error]: Reverse mode between different type is not supported");

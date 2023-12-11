@@ -130,8 +130,8 @@ namespace Physica::Core {
                 return this->getDerived();
         }
 
-        [[nodiscard]] const PlainScalar& getTangent() const noexcept {
-            return this->getDerived().getTangent();
+        [[nodiscard]] const PlainScalar& getGrad() const noexcept {
+            return this->getDerived().getGrad();
         }
     };
 
@@ -158,7 +158,7 @@ namespace Physica::Core {
             const ScalarType diff = s1.getDerived() - s2.getDerived();
             const bool isValueNear = scalarNear(abs(diff.getValue()), PlainRealType(0), precision);
             if constexpr (isDifferentiable)
-                return isValueNear && scalarNear(abs(diff.getTangent()), PlainRealType(0), precision);
+                return isValueNear && scalarNear(abs(diff.getGrad()), PlainRealType(0), precision);
             else
                 return isValueNear;
         }
@@ -166,7 +166,7 @@ namespace Physica::Core {
             using PlainScalar = typename ScalarType::PlainScalar;
             const bool isValueNear = relativeError(s1.getValue().getReal(), s2.getValue().getReal()) < PlainScalar(precision);
             if constexpr (ScalarType::isDifferentiable)
-                return isValueNear && relativeError(s1.getTangent().getReal(), s2.getTangent().getReal()) < PlainScalar(precision);
+                return isValueNear && relativeError(s1.getGrad().getReal(), s2.getGrad().getReal()) < PlainScalar(precision);
             else
                 return isValueNear;
         }

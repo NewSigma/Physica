@@ -23,7 +23,7 @@ namespace Physica::Core {
     template<class VectorType> class ImagVector;
     template<class VectorType> class NormVector;
     template<class VectorType> class ValueVector;
-    template<class VectorType> class TangentVector;
+    template<class VectorType> class GradVector;
 
     namespace Internal {
         template<class VectorType>
@@ -44,7 +44,7 @@ namespace Physica::Core {
         template<class VectorType>
         class Traits<ValueVector<VectorType>> {
             using T = typename VectorType::ScalarType;
-            static_assert(T::isDifferentiable, "[Error]: Unnecessary toValueVector() call or toTangentVector() call");
+            static_assert(T::isDifferentiable, "[Error]: Unnecessary toValueVector() call or toGradVector() call");
         public:
             using ScalarType = typename T::PlainType;
             constexpr static size_t SizeAtCompile = VectorType::SizeAtCompile;
@@ -53,7 +53,7 @@ namespace Physica::Core {
         };
 
         template<class VectorType>
-        class Traits<TangentVector<VectorType>> : public Traits<ValueVector<VectorType>> {};
+        class Traits<GradVector<VectorType>> : public Traits<ValueVector<VectorType>> {};
     }
 
     template<class VectorType>
@@ -101,13 +101,13 @@ namespace Physica::Core {
     };
 
     template<class VectorType>
-    class TangentVector : public RValueVector<TangentVector<VectorType>> {
-        using Base = RValueVector<TangentVector<VectorType>>;
+    class GradVector : public RValueVector<GradVector<VectorType>> {
+        using Base = RValueVector<GradVector<VectorType>>;
         const VectorType& v;
     public:
-        explicit TangentVector(const RValueVector<VectorType>& v_) : v(v_.getDerived()) {}
+        explicit GradVector(const RValueVector<VectorType>& v_) : v(v_.getDerived()) {}
 
-        typename Base::ScalarType calc(size_t s) const { return v.calc(s).getTangent(); }
+        typename Base::ScalarType calc(size_t s) const { return v.calc(s).getGrad(); }
         [[nodiscard]] size_t getLength() const { return v.getLength(); }
     };
 
@@ -132,7 +132,7 @@ namespace Physica::Core {
     }
 
     template<class VectorType>
-    [[nodiscard]] inline TangentVector<VectorType> toTangentVector(const RValueVector<VectorType>& v) {
-        return TangentVector<VectorType>{v};
+    [[nodiscard]] inline GradVector<VectorType> toGradVector(const RValueVector<VectorType>& v) {
+        return GradVector<VectorType>{v};
     }
 }

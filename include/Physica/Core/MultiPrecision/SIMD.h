@@ -193,7 +193,7 @@ namespace Physica::Core {
         using Base::getImpl;
         [[nodiscard]] ScalarType getHeadNode() const noexcept { return headNode; }
         [[nodiscard]] PlainScalar* value_ptr() const noexcept { return headNode.value_ptr(); }
-        [[nodiscard]] PlainScalar* tangent_ptr() const noexcept { return headNode.tangent_ptr(); }
+        [[nodiscard]] PlainScalar* grad_ptr() const noexcept { return headNode.grad_ptr(); }
     private:
         using Base::insert; //Insert a scalar may lead to incontineous memory, which harms performance
         [[nodiscard]] static bool checkContinuous(int n, const ScalarType* p);

@@ -40,7 +40,7 @@ namespace Physica::Core {
         Utils::Array<DiffRecord> records;
         Utils::Array<DiffScalar> operands;
         VectorType values;
-        VectorType tangents;
+        VectorType grads;
     public:
         TraceSegment();
         TraceSegment(size_t size);
@@ -84,7 +84,7 @@ namespace Physica::Core {
         records.reserve(size);
         operands.reserve(3 * size); //MulAdd operation is 3-operand
         values.reserve(size);
-        tangents.reserve(size);
+        grads.reserve(size);
     }
 
     template<class ScalarType>
@@ -125,7 +125,7 @@ namespace Physica::Core {
         const bool isFromNotFound = fromIndex >= getLength();
         if (isFromNotFound)
             fromIndex = 0;
-        auto segment = tangents.segment(fromIndex, getLength());
+        auto segment = grads.segment(fromIndex, getLength());
         segment = ScalarType(0);
     }
 
@@ -141,7 +141,7 @@ namespace Physica::Core {
         if (isToNotFound)
             toIndex = getLength();
         assert(fromIndex < toIndex && "[Error]: Invalid range");
-        auto segment = tangents.segment(fromIndex, toIndex);
+        auto segment = grads.segment(fromIndex, toIndex);
         segment = ScalarType(0);
     }
 
@@ -162,10 +162,10 @@ namespace Physica::Core {
             operands.resize(record.idFirstOperand);
         records.resize(index);
         values.resize(index);
-        tangents.resize(index);
+        grads.resize(index);
     }
     /**
-     * FIXME: squeeze values and tangents may invalidate pointers, so the unused memory cannot be freed
+     * FIXME: squeeze values and grads may invalidate pointers, so the unused memory cannot be freed
      */
     template<class ScalarType>
     void TraceSegment<ScalarType>::squeeze() {
@@ -179,7 +179,7 @@ namespace Physica::Core {
         records.swap(obj.records);
         operands.swap(obj.operands);
         values.swap(obj.values);
-        tangents.swap(obj.tangents);
+        grads.swap(obj.grads);
     }
 
     template<class ScalarType>
@@ -223,74 +223,74 @@ namespace Physica::Core {
                 i = record.idFirstOperand;
                 continue;
             }
-            const ScalarType& tangent = tangents[i];
-            if (tangent.isZero())
+            const ScalarType& grad = grads[i];
+            if (grad.isZero())
                 continue;
             
             const ScalarType& value = values[i];
             const size_t idFirstOperand = record.idFirstOperand;
             const ExpressionType source = record.source;
             DiffScalar operandX = operands[idFirstOperand];
-            ScalarType& tangentX = operandX.getTangent();
+            ScalarType& gradX = operandX.getGrad();
             /* Unitary Operations */ {
                 switch (source) {
                     case ExpressionType::Assign:
                     case ExpressionType::Minus:
-                        tangentX += tangent * ScalarType(source == ExpressionType::Assign ? 1.0 : -1.0);
+                        gradX += grad * ScalarType(source == ExpressionType::Assign ? 1.0 : -1.0);
                         continue;
                     case ExpressionType::Reciprocal:
-                        tangentX -= tangent * square(value);
+                        gradX -= grad * square(value);
                         continue;
                     case ExpressionType::Sqrt:
-                        tangentX += tangent / value * ScalarType(0.5);
+                        gradX += grad / value * ScalarType(0.5);
                         continue;
                     case ExpressionType::Cbrt:
-                        tangentX += tangent / (square(value) * ScalarType(3));
+                        gradX += grad / (square(value) * ScalarType(3));
                         continue;
                     case ExpressionType::Abs:
-                        tangentX += operandX.getValue().isPositive() ? tangent : -tangent;
+                        gradX += operandX.getValue().isPositive() ? grad : -grad;
                         continue;
                     case ExpressionType::Relu:
-                        tangentX += operandX.getValue().isPositive() ? tangent : ScalarType(0);
+                        gradX += operandX.getValue().isPositive() ? grad : ScalarType(0);
                         continue;
                     case ExpressionType::Square:
-                        tangentX += tangent * operandX.getValue() * ScalarType(2);
+                        gradX += grad * operandX.getValue() * ScalarType(2);
                         continue;
                     case ExpressionType::Ln:
-                        tangentX += tangent / operandX.getValue();
+                        gradX += grad / operandX.getValue();
                         continue;
                     case ExpressionType::Exp:
-                        tangentX += tangent * value;
+                        gradX += grad * value;
                         continue;
                     case ExpressionType::Sin:
-                        tangentX += tangent * cos(operandX.getValue());
+                        gradX += grad * cos(operandX.getValue());
                         continue;
                     case ExpressionType::Cos:
-                        tangentX -= tangent * sin(operandX.getValue());
+                        gradX -= grad * sin(operandX.getValue());
                         continue;
                     case ExpressionType::ArcCos:
-                        tangentX -= tangent / sqrt(ScalarType(1) - square(operandX.getValue()));
+                        gradX -= grad / sqrt(ScalarType(1) - square(operandX.getValue()));
                         continue;
                     default:;
                 }
             }
             /* Binary Operations */ {
                 DiffScalar operandY = operands[idFirstOperand + 1];
-                ScalarType& tangentY = operandY.getTangent();
+                ScalarType& gradY = operandY.getGrad();
                 switch (source) {
                     case ExpressionType::Add:
                     case ExpressionType::Sub:
-                        tangentX += tangent;
-                        tangentY += tangent * ScalarType(source == ExpressionType::Add ? 1.0 : -1.0);
+                        gradX += grad;
+                        gradY += grad * ScalarType(source == ExpressionType::Add ? 1.0 : -1.0);
                         continue;
                     case ExpressionType::Mul:
-                        tangentX += tangent * operandY.getValue();
-                        tangentY += tangent * operandX.getValue();
+                        gradX += grad * operandY.getValue();
+                        gradY += grad * operandX.getValue();
                         continue;
                     case ExpressionType::Div: {
-                        const ScalarType dx = tangent * reciprocal(operandY.getValue());
-                        tangentX += dx;
-                        tangentY -= dx * value;
+                        const ScalarType dx = grad * reciprocal(operandY.getValue());
+                        gradX += dx;
+                        gradY -= dx * value;
                         continue;
                     }
                     case ExpressionType::MulAdd2:
@@ -332,24 +332,24 @@ namespace Physica::Core {
     template<size_t Size>
     void TraceSegment<ScalarType>::reverseMulAdd(DiffScalar firstOpX, DiffScalar firstOpY, DiffScalar firstOpZ, size_t traceId) {
         using PacketType = SIMD<ScalarType, Size>;
-        const PacketType tangent = tangents.template packet<PacketType>(traceId);
-        PacketType tangentZ{};
-        tangentZ.load(firstOpZ.tangent_ptr());
-        tangentZ += tangent;
-        tangentZ.store(firstOpZ.tangent_ptr());
+        const PacketType grad = grads.template packet<PacketType>(traceId);
+        PacketType gradZ{};
+        gradZ.load(firstOpZ.grad_ptr());
+        gradZ += grad;
+        gradZ.store(firstOpZ.grad_ptr());
 
 
-        PacketType valueX{}, valueY{}, tangentX{}, tangentY{};
+        PacketType valueX{}, valueY{}, gradX{}, gradY{};
         valueX.load(firstOpX.value_ptr());
         valueY.load(firstOpY.value_ptr());
-        tangentX.load(firstOpX.tangent_ptr());
-        tangentY.load(firstOpY.tangent_ptr());
-        tangentX += tangent * valueY;
-        tangentY += tangent * valueX;
+        gradX.load(firstOpX.grad_ptr());
+        gradY.load(firstOpY.grad_ptr());
+        gradX += grad * valueY;
+        gradY += grad * valueX;
         valueX.store(firstOpX.value_ptr());
         valueY.store(firstOpY.value_ptr());
-        tangentX.store(firstOpX.tangent_ptr());
-        tangentY.store(firstOpY.tangent_ptr());
+        gradX.store(firstOpX.grad_ptr());
+        gradY.store(firstOpY.grad_ptr());
     }
 
     template<class ScalarType>
@@ -360,8 +360,8 @@ namespace Physica::Core {
             return values.getLength();
         const size_t index = pValue1 - pValue;
         [[maybe_unused]] const bool isValueFound = index < getLength();
-        [[maybe_unused]] const bool isTangentFound = s.tangent_ptr() == tangents.data() + index;
-        assert((!isValueFound || (isValueFound && isTangentFound)) && "[Error]: Bad DiffScalar");
+        [[maybe_unused]] const bool isGradFound = s.grad_ptr() == grads.data() + index;
+        assert((!isValueFound || (isValueFound && isGradFound)) && "[Error]: Bad DiffScalar");
         return index;
     }
 }
