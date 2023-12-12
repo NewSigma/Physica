@@ -1,8 +1,8 @@
 /*
- * Copyright 2020 WeiBo He.
+ * Copyright 2020-2023 WeiBo He.
  *
  * This file is part of Physica.
-
+ *
  * Physica is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
@@ -31,5 +31,5 @@ void initPhysica() {
 
 void deInitPhysica() {
     using namespace Physica::Logger;
-    LoggerRuntime::getInstance().loggerShouldExit();
+    LoggerRuntime::getInstance().waitExit();
 }
