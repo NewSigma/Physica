@@ -274,8 +274,7 @@ namespace Physica::Core {
             else
                 source = ExpressionType::MulAdd8;
             const ScalarType headNode = tracer.pushOperation(temp, source);
-            ScalarType operand[3]{a.getHeadNode(), b.getHeadNode(), c.getHeadNode()};
-            tracer.pushOperand(operand);
+            tracer.pushOperand(a.getHeadNode(), b.getHeadNode(), c.getHeadNode());
             return {temp, headNode};
         }
         else

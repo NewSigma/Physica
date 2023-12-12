@@ -36,7 +36,8 @@ namespace Physica::Core {
     public:
         ~DiffTracer() = default;
         /* Operations */
-        inline void pushOperand(DiffScalar operand);
+        template<class... Args>
+        inline void pushOperand(DiffScalar operand, Args... args);
         template<size_t Size>
         inline void pushOperand(const DiffScalar (&operand)[Size]);
 
@@ -68,16 +69,25 @@ namespace Physica::Core {
         DiffTracer& operator=(const DiffTracer&) = default;
         DiffTracer& operator=(DiffTracer&&) noexcept = default;
         /* Operations */
+        template<class... Args>
+        inline void pushOperandImpl(DiffScalar* p, DiffScalar operand, Args... args);
+        void pushOperandImpl([[maybe_unused]] DiffScalar* p) {}
         void pushSegment(SegmentType segment);
         [[nodiscard]] static DiffRecord makeSetOpNode(const Utils::Array<DiffRecord>& records);
     };
 
     template<class ScalarType>
-    inline void DiffTracer<ScalarType>::pushOperand(DiffScalar operand) {
+    template<class... Args>
+    inline void DiffTracer<ScalarType>::pushOperand(DiffScalar operand, Args... args) {
         assert(!traceList.empty() && !traceList.back().empty() && "[Error]: Pushing operand but operation is unknown");
         assert(!checkLastOpDone() && "[Error]: Not enough operand slot for this operand");
         auto& segment = traceList.back();
-        segment.operands.append(operand);
+        auto& operands = segment.operands;
+        const size_t length = operands.getLength();
+        const size_t newLength = length + 1 + sizeof...(Args);
+        operands.reserve(newLength);
+        operands.setLength(newLength);
+        pushOperandImpl(operands.data() + length, operand, args...);
     }
 
     template<class ScalarType>
@@ -326,6 +336,13 @@ namespace Physica::Core {
         if (!traceList.empty())
             traceList.back().squeeze();
         traceList.emplace_back(std::move(segment));
+    }
+
+    template<class ScalarType>
+    template<class... Args>
+    inline void DiffTracer<ScalarType>::pushOperandImpl(DiffScalar* p, DiffScalar operand, Args... args) {
+        *p = operand;
+        pushOperandImpl(p + 1, args...);
     }
 
     template<class ScalarType>
