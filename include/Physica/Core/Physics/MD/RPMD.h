@@ -26,6 +26,8 @@
 #include "MDImpl/RingPolymer.h"
 
 namespace Physica::Core {
+    template<class ScalarType, unsigned int Dim> class FireModel;
+
     template<class ScalarType>
     class RPMDBase {        
     public:
@@ -59,6 +61,8 @@ namespace Physica::Core {
         using LatticeMatrix = typename MDCellType::LatticeMatrix;
         using PositionMatrix = typename MDCellType::PositionMatrix;
     private:
+        using FireModelType = FireModel<ScalarType, Dim>;
+
         MDCellType cell;
         RingPolymerType ringPolymer;
         ForceMatrix forceBuffer;
@@ -81,7 +85,7 @@ namespace Physica::Core {
         /* Operators */
         RPMD& operator=(RPMD obj) noexcept;
         /* Operations */
-        template<class ForceModel, class Executor> void updateForce(ForceModel& model);
+        template<class ForceModel, class Executor, bool IsSmallCell> void updateForce(ForceModel& model);
         template<class KineticModel,
                  class ForceModel,
                  class Executor>
@@ -118,6 +122,11 @@ namespace Physica::Core {
                  class ForceModel,
                  class Executor>
         void npt_step_for(ScalarType duration, const Thermostat& thermostat, Barostat& barostat, KineticModel& kineticModel, ForceModel& forceModel);
+
+        template<class KineticModel, class ForceModel, class Executor, bool IsSmallCell>
+        void fire_vstep(FireModelType& fire, KineticModel& kineticModel, ForceModel& forceModel);
+        template<class KineticModel, class ForceModel, class Executor, bool IsSmallCell>
+        void fire_pstep(FireModelType& fire, KineticModel& kineticModel, ForceModel& forceModel);
 
         template<class RandomGenerator> void initMomentum(RandomGenerator& gen);
         void scaleVelocity();
