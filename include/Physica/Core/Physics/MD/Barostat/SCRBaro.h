@@ -18,9 +18,7 @@
  */
 #pragma once
 
-#include "Physica/Core/Physics/MD/RPMD.h"
-#include "Physica/Core/Math/Calculus/ODE/SRK2.h"
-#include "BaroType.h"
+#include "Berendsen.h"
 
 namespace Physica::Core {
     template<class ScalarType, size_t NumReplica, class RandomPoolType, BaroType Type> class SCRBaro;
@@ -40,19 +38,15 @@ namespace Physica::Core {
      * [2] https://doi.org/10.48550/arXiv.2111.06402
      */
     template<class ScalarType, size_t NumReplica, class RandomPoolType, BaroType Type>
-    class SCRBaro {
-        constexpr static unsigned int Dim = 3;
-        using MDType = RPMD<ScalarType, Dim, NumReplica>;
-        using LatticeMatrix = typename MDType::MDCellType::LatticeMatrix;
-        using Vector3D = Vector<ScalarType, Dim>;
-
-        ScalarType compressRate;
-        ScalarType tempT;
-        ScalarType targetP;
-        LatticeMatrix lastStress;
+    class SCRBaro : private Berendsen<ScalarType, NumReplica, Type> {
+        using Base = Berendsen<ScalarType, NumReplica, Type>;
+        using typename Base::MDType;
+        using typename Base::LatticeMatrix;
+        using typename Base::Vector3D;
+        using Base::Dim;
     public:
         SCRBaro() = default;
-        SCRBaro(ScalarType compressRate_, ScalarType tempT_, ScalarType targetP_);
+        SCRBaro(ScalarType compressRate, ScalarType tempT, ScalarType targetP);
         SCRBaro(const SCRBaro&) = default;
         SCRBaro(SCRBaro&&) noexcept = default;
         ~SCRBaro() = default;
@@ -61,40 +55,32 @@ namespace Physica::Core {
         /* Operations */
         template<class ForceModel>
         void npt_step(MDType& rpmd, const LatticeMatrix& stress, ScalarType deltaT);
-        void swap(SCRBaro& __restrict obj) noexcept;
+        using Base::swap;
         /* Getters */
-        [[nodiscard]] const LatticeMatrix& getLastStress() const noexcept { return lastStress; }
+        using Base::getLastStress;
         /* Setters */
-        void setTemperature(ScalarType tempT_) { tempT = std::move(tempT_); }
+        using Base::setTemperature;
     private:
-        [[nodiscard]] LatticeMatrix makeDecayMatrix(ScalarType pressPerDOF) const;
         [[nodiscard]] LatticeMatrix makeDiffuseMatrix(ScalarType pressPerDOF) const;
         [[nodiscard]] LatticeMatrix makeDeltaLattice(MDType& rpmd, ScalarType deltaT) const;
-        [[nodiscard]] LatticeMatrix makeScaleMatrix(const MDType& rpmd, const LatticeMatrix& deltaLattice) const;
     };
 
     template<class ScalarType, size_t NumReplica, class RandomPoolType, BaroType Type>
     SCRBaro<ScalarType, NumReplica, RandomPoolType, Type>::SCRBaro(
-            ScalarType compressRate_, ScalarType tempT_, ScalarType targetP_)
-            : compressRate(compressRate_)
-            , tempT(tempT_)
-            , targetP(targetP_) {
-        assert(compressRate.isPositive() && "[Error]: Compress rate must be positive");
-        assert(tempT.isPositive() && "[Error]: Temperature must be positive");
-    }
+            ScalarType compressRate, ScalarType tempT, ScalarType targetP) : Base(compressRate, tempT, targetP) {}
 
     template<class ScalarType, size_t NumReplica, class RandomPoolType, BaroType Type>
     template<class ForceModel>
     void SCRBaro<ScalarType, NumReplica, RandomPoolType, Type>::npt_step(
             MDType& rpmd, const LatticeMatrix& stress, ScalarType deltaT) {
-        lastStress = stress;
+        Base::lastStress = stress;
 
         const size_t numReplica = rpmd.getNumReplica();
         const size_t numParticle = rpmd.getNumParticle();
         const size_t dof = rpmd.getDOF();
         auto& phase = rpmd.getPhaseMatrix();
         const auto deltaLattice = makeDeltaLattice(rpmd, deltaT);
-        const LatticeMatrix scaleMatrix = makeScaleMatrix(rpmd, deltaLattice);
+        const LatticeMatrix scaleMatrix = Base::makeScaleMatrix(rpmd, deltaLattice);
         for (size_t i = 0; i < numReplica; ++i) {
             auto col = phase.col(i);
             auto momentum = col.head(dof);
@@ -114,39 +100,9 @@ namespace Physica::Core {
     }
 
     template<class ScalarType, size_t NumReplica, class RandomPoolType, BaroType Type>
-    void SCRBaro<ScalarType, NumReplica, RandomPoolType, Type>::swap(SCRBaro& __restrict obj) noexcept {
-        assert(this != &obj && "[Error]: Self swap is likely a bug");
-        compressRate.swap(obj.compressRate);
-        tempT.swap(obj.tempT);
-        targetP.swap(obj.targetP);
-        lastStress.swap(obj.lastStress);
-    }
-
-    template<class ScalarType, size_t NumReplica, class RandomPoolType, BaroType Type>
-    typename SCRBaro<ScalarType, NumReplica, RandomPoolType, Type>::LatticeMatrix
-    SCRBaro<ScalarType, NumReplica, RandomPoolType, Type>::makeDecayMatrix(ScalarType pressPerDOF) const {
-        LatticeMatrix result = lastStress;
-        const ScalarType centerTargetP = targetP - pressPerDOF;
-        if constexpr (Type == BaroType::Anisotropic) {
-            for (size_t i = 0; i < Dim; ++i)
-                result(i, i) -= centerTargetP;
-        }
-        else {
-            for (size_t i = 0; i < 2; ++i)
-                result(i, i) -= centerTargetP;
-            auto col = result.col(2);
-            col = ScalarType(0);
-            auto row = result.row(2);
-            row = ScalarType(0);
-        }
-        result *= compressRate / ScalarType(Dim);
-        return result;
-    }
-    
-    template<class ScalarType, size_t NumReplica, class RandomPoolType, BaroType Type>
     typename SCRBaro<ScalarType, NumReplica, RandomPoolType, Type>::LatticeMatrix
     SCRBaro<ScalarType, NumReplica, RandomPoolType, Type>::makeDiffuseMatrix(ScalarType pressPerDOF) const {
-        const ScalarType diffuseFactor = sqrt(ScalarType(2.0 / Dim) * compressRate * pressPerDOF);
+        const ScalarType diffuseFactor = sqrt(ScalarType(2.0 / Dim) * Base::compressRate * pressPerDOF);
         auto& gen = RandomPoolType::getGen();
         LatticeMatrix result(Dim, Dim, 0);
         if constexpr (Type == BaroType::Anisotropic) {
@@ -166,8 +122,8 @@ namespace Physica::Core {
     template<class ScalarType, size_t NumReplica, class RandomPoolType, BaroType Type>
     typename SCRBaro<ScalarType, NumReplica, RandomPoolType, Type>::LatticeMatrix
     SCRBaro<ScalarType, NumReplica, RandomPoolType, Type>::makeDeltaLattice(MDType& rpmd, ScalarType deltaT) const {
-        const ScalarType pressPerDOF = (tempT * PhyConst<AU>::boltzmannK) / rpmd.getVolume();
-        const auto decayMatrix = makeDecayMatrix(pressPerDOF);
+        const ScalarType pressPerDOF = (Base::tempT * PhyConst<AU>::boltzmannK) / rpmd.getVolume();
+        const auto decayMatrix = Base::makeDecayMatrix(pressPerDOF);
         const auto diffuseMatrix = makeDiffuseMatrix(pressPerDOF);
         const auto& lattice = rpmd.getLattice();
         LatticeMatrix result(Dim, Dim, 0);
@@ -195,21 +151,6 @@ namespace Physica::Core {
             for (size_t r = 0; r < 2; ++r)
                 for (size_t c = 0; c < 2; ++c)
                     integrateKernel(r, c);
-        }
-        return result;
-    }
-
-    template<class ScalarType, size_t NumReplica, class RandomPoolType, BaroType Type>
-    typename SCRBaro<ScalarType, NumReplica, RandomPoolType, Type>::LatticeMatrix
-    SCRBaro<ScalarType, NumReplica, RandomPoolType, Type>::makeScaleMatrix(
-            const MDType& rpmd, const LatticeMatrix& deltaLattice) const {
-        LatticeMatrix result;
-        if constexpr (Type == BaroType::Anisotropic)
-            result = deltaLattice * rpmd.getInvLattice();
-        else {
-            result = deltaLattice * rpmd.getInvLattice();
-            auto col = result.col(2);
-            col = ScalarType(0);
         }
         return result;
     }
