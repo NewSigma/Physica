@@ -68,22 +68,24 @@ int main(int argc, char** argv) {
     KineticModel kineticModel(0, 1);
     FireModel<ScalarType, 3> fire(timeStep, 10 * timeStep);
 
-    VectorType energy(100);
-    for (size_t i = 0; i < 100; ++i) {
+    VectorType f2norm(2000);
+    for (size_t i = 0; i < f2norm.getLength(); ++i) {
         rpmd.fire_vstep<KineticModel, ForceModel, SequentialExecutor>(fire, kineticModel, forceModel);
-        energy[i] = forceModel.potentialEnergy(rpmd.phaseToCell(0));
+        f2norm[i] = fire.getForceNorm();
     }
 
+    const VectorType logNorm = ln(f2norm) * reciprocal(ln(ScalarType(10)));
+
     QApplication app(argc, argv);
-    Plot* plot = new Plot(0, 100, -0.1, 0.7, 20, 0.2);
+    Plot* plot = new Plot(0, 2000, -16, 0, 500, 5);
     plot->chart()->legend()->setVisible(false);
     auto* axisX = plot->getAxisX();
     auto* axisY = plot->getAxisY();
     axisX->setTitleText("Step");
     axisX->setLabelFormat("%d");
-    axisY->setTitleText("Energy/Hartree");
-    axisY->setLabelFormat("%.1f");
-    plot->line(energy);
+    axisY->setTitleText("Force/a.u.");
+    axisY->setLabelFormat("10<sup>%d</sup>");
+    plot->line(logNorm);
     plot->show();
     return QApplication::exec();
 }
