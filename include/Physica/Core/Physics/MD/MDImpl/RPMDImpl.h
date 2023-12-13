@@ -250,7 +250,12 @@ namespace Physica::Core {
         for (uint64_t _ = 0; _ < step; ++_)
             npt_step<Thermostat, RandomPoolType, Barostat, KineticModel, ForceModel, Executor>(thermostat, barostat, kineticModel, forceModel);
     }
-
+    /**
+     * Euler Semi-implicit integrator as introduced in [1]
+     * 
+     * Reference:
+     * [1] Comput. Mater. Sci. 175, 109584 (2020); https://doi.org/10.1016/j.commatsci.2020.109584
+     */
     template<class ScalarType, unsigned int Dim, size_t NumReplica, class ForceMatrixAllocator>
     template<class KineticModel, class ForceModel, class Executor>
     void RPMD<ScalarType, Dim, NumReplica, ForceMatrixAllocator>::fire_vstep(
@@ -261,9 +266,10 @@ namespace Physica::Core {
         static_assert(NumReplica == 1, "[Error]: Relaxing using PIMD makes no sence, NumReplica = 1 shall be enough");
         static_assert(!Internal::is_empty_force_model<ForceModel>::value, "[Error]: Relax a empty model does nothing");
 
-        fire.forceStep(*this);
         kineticModel.nve_step(ringPolymer, timeStep);
         updateForce<ForceModel, Executor>(forceModel);
+        forceStep(fire.getTimeStep());
+        fire.mixingStep(*this);
     }
 
     template<class ScalarType, unsigned int Dim, size_t NumReplica, class ForceMatrixAllocator>

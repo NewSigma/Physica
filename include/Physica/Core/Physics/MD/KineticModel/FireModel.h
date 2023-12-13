@@ -20,7 +20,7 @@
 
 namespace Physica::Core {
     /**
-     * Fast inertial relaxation engine(FIRE) as introduced in [1]
+     * Fast inertial relaxation engine(FIRE) as introduced in [1, 2]
      * 
      * Reference:
      * [1] Phys. Rev. Lett. 97, 170201 (2006); https://doi.org/10.1103/PhysRevLett.97.170201
@@ -38,6 +38,8 @@ namespace Physica::Core {
         ScalarType mixAlpha;
         ScalarType alphaDecFactor;
         unsigned int numLasyStep;
+
+        ScalarType normF;
         unsigned int numStep;
     public:
         FireModel(ScalarType timeStep_,
@@ -53,10 +55,11 @@ namespace Physica::Core {
         /* Operators */
         FireModel& operator=(FireModel obj) noexcept { swap(obj); return *this; }
         /* Operations */
-        void forceStep(MDType& rpmd);
+        void mixingStep(MDType& rpmd);
         void swap(FireModel& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] ScalarType getTimeStep() const noexcept { return timeStep; }
+        [[nodiscard]] ScalarType getForceNorm() const noexcept { return normF; } //Use force norm as convergence criteria as suggested by [2]
     };
     /**
      * Default param provided in [1]
@@ -89,14 +92,14 @@ namespace Physica::Core {
     }
 
     template<class ScalarType, unsigned int Dim>
-    void FireModel<ScalarType, Dim>::forceStep(MDType& rpmd) {
+    void FireModel<ScalarType, Dim>::mixingStep(MDType& rpmd) {
         const auto force = rpmd.getForce().col(0);
         auto phase = rpmd.getPhaseMatrix().col(0);
         auto momentum = phase.head(rpmd.getDOF());
 
         const ScalarType normP = momentum.norm();
-        const ScalarType normF = force.norm();
-        momentum = (ScalarType(1) - mixAlpha) * momentum + (timeStep + mixAlpha * normP / normF) * force.asVector();
+        normF = force.norm();
+        momentum = (ScalarType(1) - mixAlpha) * momentum + (mixAlpha * normP / normF) * force.asVector();
         const ScalarType power = force.asVector() * momentum; //Assuming unit mass
         if (power.isPositive()) {
             if (numStep > numLasyStep) {
@@ -124,6 +127,8 @@ namespace Physica::Core {
         mixAlpha.swap(obj.mixAlpha);
         alphaDecFactor.swap(obj.alphaDecFactor);
         std::swap(numLasyStep, obj.numLasyStep);
+
+        normF.swap(obj.normF);
         std::swap(numStep, obj.numStep);
     }
 }
