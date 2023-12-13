@@ -50,6 +50,8 @@ namespace Physica::Core {
         template<class OtherScalar>
         MDCell(CrystalCell<OtherScalar> cell);
         template<class OtherScalar>
+        MDCell(PeriodicCell<OtherScalar, Dim> cell, MassVector massVec_);
+        template<class OtherScalar>
         MDCell(Poscar<OtherScalar> poscar);
         MDCell(LatticeMatrix lattice, PositionMatrix pos, MassVector massVec_);
         /* Operations */
@@ -99,6 +101,15 @@ namespace Physica::Core {
             const auto atomicNum = cell.getAtomicNumber(i);
             massVec[i] = PhyConst<AU>::atomMass(atomicNum);
         }
+    }
+
+    template<class ScalarType, unsigned int Dim>
+    template<class OtherScalar>
+    MDCell<ScalarType, Dim>::MDCell(PeriodicCell<OtherScalar, Dim> cell, MassVector massVec_) : massVec(std::move(massVec_)) {
+        if (cell.getType() == Type::Direct)
+            cell.toCartesian();
+        Base::operator=(Base(cell.getLattice(), cell.getPos(), Type::Cartesian));
+        invLattice = Base::makeInvLattice();
     }
 
     template<class ScalarType, unsigned int Dim>

@@ -24,11 +24,13 @@ namespace Physica::Core {
     template<class ScalarType, bool IsSmallCell = false> class LJModel1;
 
     namespace Internal {
-        template<class T, bool IsSmallCell>
-        class Traits<LJModel1<T, IsSmallCell>> : public Traits<PairModel<LJModel1<T>, IsSmallCell>> {
+        template<class T, bool B>
+        class Traits<LJModel1<T, B>> : public Traits<PairModel<LJModel1<T, B>>> {
         public:
             using ScalarType = T;
+            constexpr static double IsSmallCell = B;
             constexpr static bool IsPotDependOnAtomIndex = false;
+            constexpr static bool IsLatticeDependent = false;
         };
     }
     /**

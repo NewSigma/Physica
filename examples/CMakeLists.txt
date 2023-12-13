@@ -2,6 +2,8 @@ include(../cmake/Modules/PhysicaAddExample.cmake)
 
 if(${PHYSICA_GUI})
     physica_add_example(CrossSection CrossSection/CrossSection.cpp)
+    physica_add_example(RDF RPMD/Analyser/RDF.cpp)
+    physica_add_example(FireModel RPMD/KineticModel/FireModel.cpp)
     physica_add_example(TodaModel RPMD/ForceModel/TodaModel.cpp)
     if(NOT ${CMAKE_BUILD_TYPE} MATCHES "Debug") # nvcc 12.2 internal compiler error in debug mode
         physica_add_example(HardCore_cuda RPMD/HardCore.cu)
