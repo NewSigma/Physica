@@ -26,10 +26,10 @@
 
 namespace Physica::Core {
     namespace Internal {
-        template<class T, bool IsSmallCell>
+        template<class T>
         __global__ void PairModel_forceKernel(Physica::PlainStruct<Core::device_obj<T>> pair) {
             static_assert(std::is_base_of<PairModel<T>, T>::value, "[Error]: It is expected the param is a PairModel");
-            pair.getDerived().template forceKernelImpl<IsSmallCell>();
+            pair.getDerived().forceKernelImpl();
         }
 
         template<class T>
@@ -72,26 +72,26 @@ namespace Physica::Core {
     }
 
     template<class Derived>
-    template<class Executor, bool IsSmallCell>
+    template<class Executor>
     Vector<typename device_obj<PairModel<Derived>>::ScalarType>
     device_obj<PairModel<Derived>>::force(
             const LatticeMatrix& lattice,
             const InvLatticeMatrix& invLattice,
             const PositionMatrix& cartesianPos) {
-        forceAsync<PageLockedVector, Executor, IsSmallCell>(lattice, invLattice, cartesianPos, swapBuffer);
+        forceAsync<PageLockedVector, Executor>(lattice, invLattice, cartesianPos, swapBuffer);
         StreamPool::getStream().wait();
         return swapBuffer;
     }
 
     template<class Derived>
-    template<class Executor, bool IsSmallCell>
+    template<class Executor>
     inline Vector<typename device_obj<PairModel<Derived>>::ScalarType>
     device_obj<PairModel<Derived>>::force(const MDCellType& hostCell) {
-        return force<Executor, IsSmallCell>(hostCell.getLattice(), hostCell.getInvLattice(), hostCell.getPos());
+        return force<Executor>(hostCell.getLattice(), hostCell.getInvLattice(), hostCell.getPos());
     }
 
     template<class Derived>
-    template<class VectorType, class Executor, bool IsSmallCell>
+    template<class VectorType, class Executor>
     void device_obj<PairModel<Derived>>::forceAsync(
             const LatticeMatrix& lattice,
             const InvLatticeMatrix& invLattice,
@@ -100,7 +100,7 @@ namespace Physica::Core {
         static_assert(std::is_same<Executor, CudaExecutor>::value, "[Error]: Incorrect type of executor");
         dim3 gridDims;
         size_t numThread;
-        preParallel<IsSmallCell>(lattice, invLattice, cartesianPos, gridDims, numThread);
+        preParallel(lattice, invLattice, cartesianPos, gridDims, numThread);
         if constexpr (IsSmallCell) {
             const auto numCell = cellList.getNumCell();
             if (numCell != forceBuffer.getColumn())
@@ -111,7 +111,7 @@ namespace Physica::Core {
                 forceBuffer.resize(cell.getDOF(), 1);
         }
 
-        Internal::PairModel_forceKernel<Derived, IsSmallCell>
+        Internal::PairModel_forceKernel<Derived>
                 <<<gridDims, numThread, numThread * sizeof(Vector3D), StreamPool::getStream()>>>(asStruct(Base::getDerived()));
         if constexpr (IsSmallCell)
             Internal::PairModel_postForceKernel<Derived><<<gridDims.x, numThread, 0, StreamPool::getStream()>>>(asStruct(Base::getDerived()));
@@ -119,28 +119,16 @@ namespace Physica::Core {
     }
 
     template<class Derived>
-    template<class VectorType, class Executor, bool IsSmallCell>
-    inline void device_obj<PairModel<Derived>>::forceAsync(const MDCellType& hostCell, ContinuousVector<VectorType>& result) {
-        forceAsync<VectorType, Executor, IsSmallCell>(hostCell.getLattice(), hostCell.getInvLattice(), hostCell.getPos(), result);
-    }
-
-    template<class Derived>
     template<class VectorType, class Executor>
     inline void device_obj<PairModel<Derived>>::forceAsync(const MDCellType& cell, ContinuousVector<VectorType>& result) {
-        if (isSmallCell(cell))
-            return forceAsync<VectorType, Executor, true>(cell, result);
-        else
-            return forceAsync<VectorType, Executor, false>(cell, result);
+        forceAsync<VectorType, Executor>(cell.getLattice(), cell.getInvLattice(), cell.getPos(), result);
     }
 
     template<class Derived>
     template<class Executor>
     inline Vector<typename device_obj<PairModel<Derived>>::ScalarType>
     device_obj<PairModel<Derived>>::force_short(const MDCellType& cell) {
-        if (isSmallCell(cell))
-            return force<Executor, true>(cell);
-        else
-            return force<Executor, false>(cell);
+        return force<Executor>(cell);
     }
 
     template<class Derived>
@@ -155,10 +143,10 @@ namespace Physica::Core {
             const LatticeMatrix& lattice,
             const InvLatticeMatrix& invLattice,
             const PositionMatrix& cartesianPos) {
-        constexpr bool IsSmallCell = false;
+        static_assert(!IsSmallCell, "[Error]: Not implemented for small cell");
         dim3 gridDims;
         size_t numThread;
-        preParallel<IsSmallCell>(lattice, invLattice, cartesianPos, gridDims, numThread);
+        preParallel(lattice, invLattice, cartesianPos, gridDims, numThread);
         const size_t numParticle = cartesianPos.getRow();
         virialBuffer.resize(NumVirialElem, numParticle);
 
@@ -196,14 +184,13 @@ namespace Physica::Core {
     }
 
     template<class Derived>
-    template<bool IsSmallCell>
     __device__ void device_obj<PairModel<Derived>>::forceKernelImpl() {
         Vector3D atomForce(3, 0);
         auto kernel = [this, &atomForce](size_t i, size_t j, Vector3D r, ScalarType norm1, ScalarType norm2) {
             const ScalarType f_norm = force_functor(i, j, norm1, norm2);
             atomForce -= r * (f_norm / norm1);
         };
-        const size_t atom1 = forPairInCutoff<IsSmallCell, decltype(kernel)>(kernel);
+        const size_t atom1 = forPairInCutoff(kernel);
 
         for (int i = 0; i < Dim; ++i) {
             const size_t index = atom1 * Dim + i;
@@ -236,7 +223,7 @@ namespace Physica::Core {
             const Vector3D f = r * (f_norm / norm1);
             atomVirial += f * r.transpose();
         };
-        const size_t atom1 = forPairInCutoff<false, decltype(kernel)>(kernel);
+        const size_t atom1 = forPairInCutoff(kernel);
         for (int i = 0; i < Dim; ++i) {
             for (int j = 0; j < Dim; ++j) {
                 const int index = i * Dim + j;
@@ -265,7 +252,6 @@ namespace Physica::Core {
     }
 
     template<class Derived>
-    template<bool IsSmallCell>
     void device_obj<PairModel<Derived>>::preParallel(
             const LatticeMatrix& lattice,
             const InvLatticeMatrix& invLattice,
@@ -311,7 +297,7 @@ namespace Physica::Core {
     }
 
     template<class Derived>
-    template<bool IsSmallCell, class Functor>
+    template<class Functor>
     __device__ size_t device_obj<PairModel<Derived>>::forPairInCutoff(Functor func) const {
         extern __shared__ Vector3D posBuffer[];
         const auto& pos = cell.getPos();

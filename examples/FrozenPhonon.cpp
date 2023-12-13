@@ -49,10 +49,9 @@ class ForceModel : private Q_TIP4P<ScalarType, Ewald<ScalarType>> {
 public:
     using Base::Base;
     /* Operations */
-    template<class Executor, bool IsSmallCell = true>
+    template<class Executor>
     [[nodiscard]] Vector<ScalarType> force(const MDCellType& cell) const {
-        static_assert(IsSmallCell);
-        return Base::force_unsort<Executor, true>(cell);
+        return Base::force_unsort<Executor>(cell);
     }
     ScalarType potentialEnergy(const MDCellType& cell) const {
         Base base(*this);

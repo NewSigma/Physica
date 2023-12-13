@@ -28,9 +28,9 @@ namespace Physica::Core {
      * [1] SIAM J. Sci. Comput. 43, B937-B960 (2021); https://doi.org/10.1137/20M1371385
      */
     template<class ScalarType, class RandomPoolType>
-    class RandomBatchEwald : private RSpaceEwald<ScalarType> {
+    class RandomBatchEwald : private RSpaceEwald<ScalarType, false> {
         using This = RandomBatchEwald<ScalarType, RandomPoolType>;
-        using Base = RSpaceEwald<ScalarType>;
+        using Base = RSpaceEwald<ScalarType, false>;
         using Base::Dim;
         using typename Base::PlainScalar;
         using typename Base::LatticeMatrix;

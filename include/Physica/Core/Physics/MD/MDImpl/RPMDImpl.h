@@ -60,7 +60,7 @@ namespace Physica::Core {
      * [1] T. E. Markland, D. E. Manolopoulos. An efficient ring polymer contraction scheme for imaginary time path integral simulations[J]. J. Chem. Phys. 129, 024105 (2008)
      */
     template<class ScalarType, unsigned int Dim, size_t NumReplica, class ForceMatrixAllocator>
-    template<class ForceModel, class Executor, bool IsSmallCell>
+    template<class ForceModel, class Executor>
     void RPMD<ScalarType, Dim, NumReplica, ForceMatrixAllocator>::updateForce(ForceModel& model) {
         constexpr bool IsPeriodBoundary = Internal::Traits<ForceModel>::IsPeriodBoundary;
         constexpr bool isCudaEnabled = Internal::Traits<Executor>::isCudaEnabled;
@@ -74,7 +74,7 @@ namespace Physica::Core {
                     if constexpr (IsPeriodBoundary)
                         cell.normalize();
                     auto saveTo = forceBuffer.col(replica);
-                    saveTo = model.template force_short<Executor, IsSmallCell>(std::move(cell));
+                    saveTo = model.template force_short<Executor>(std::move(cell));
                 }
             };
             auto future_short = Executor::parallel_for(kernel_short, Executor::getNumThread());
@@ -103,7 +103,7 @@ namespace Physica::Core {
                     cell.normalize();
                 auto saveTo = forceBuffer.col(replica);
                 using VectorType = typename decltype(saveTo)::VectorBase;
-                model.template forceAsync<VectorType, Executor, IsSmallCell>(std::move(cell), saveTo);
+                model.template forceAsync<VectorType, Executor>(std::move(cell), saveTo);
             };
             auto future = Executor::parallel_for(kernel, getNumReplica());
             Executor::auto_wait(future);
@@ -126,7 +126,7 @@ namespace Physica::Core {
         else {
             forceStep(timeStep * PlainScalar(0.5));
             kineticModel.nve_step(ringPolymer, timeStep);
-            updateForce<ForceModel, Executor, false>(forceModel);
+            updateForce<ForceModel, Executor>(forceModel);
             forceStep(timeStep * PlainScalar(0.5));
         }
     }
@@ -173,7 +173,7 @@ namespace Physica::Core {
             kineticModel.nve_step(ringPolymer, timeStep * 0.5);
             thermostat.template step<RandomPoolType, NoRandExecutor>(ringPolymer, timeStep);
             kineticModel.nve_step(ringPolymer, timeStep * 0.5);
-            updateForce<ForceModel, Executor, false>(forceModel);
+            updateForce<ForceModel, Executor>(forceModel);
             forceStep(timeStep * 0.5);
         }
     }
@@ -220,7 +220,7 @@ namespace Physica::Core {
             kineticModel.npt_step(*this, barostat, timeStep * 0.5);
             thermostat.template step<RandomPoolType, NoRandExecutor>(ringPolymer, timeStep);
             kineticModel.npt_step(*this, barostat, timeStep * 0.5);
-            updateForce<ForceModel, Executor, false>(forceModel);
+            updateForce<ForceModel, Executor>(forceModel);
             barostat.forceStep(*this, forceModel, timeStep * 0.5);
         }
         else {
@@ -233,7 +233,7 @@ namespace Physica::Core {
             kineticModel.nve_step(ringPolymer, timeStep * 0.5);
             if constexpr (Internal::Traits<ForceModel>::IsLatticeDependent)
                 forceModel.setLattice(getLattice());
-            updateForce<ForceModel, Executor, false>(forceModel);
+            updateForce<ForceModel, Executor>(forceModel);
             forceStep(timeStep * 0.5);
         }
     }
@@ -252,7 +252,7 @@ namespace Physica::Core {
     }
 
     template<class ScalarType, unsigned int Dim, size_t NumReplica, class ForceMatrixAllocator>
-    template<class KineticModel, class ForceModel, class Executor, bool IsSmallCell>
+    template<class KineticModel, class ForceModel, class Executor>
     void RPMD<ScalarType, Dim, NumReplica, ForceMatrixAllocator>::fire_vstep(
             FireModelType& fire, KineticModel& kineticModel, ForceModel& forceModel) {
         constexpr bool IsPeriodBoundary1 = Internal::Traits<KineticModel>::IsPeriodBoundary;
@@ -263,7 +263,7 @@ namespace Physica::Core {
 
         fire.forceStep(*this);
         kineticModel.nve_step(ringPolymer, timeStep);
-        updateForce<ForceModel, Executor, IsSmallCell>(forceModel);
+        updateForce<ForceModel, Executor>(forceModel);
     }
 
     template<class ScalarType, unsigned int Dim, size_t NumReplica, class ForceMatrixAllocator>

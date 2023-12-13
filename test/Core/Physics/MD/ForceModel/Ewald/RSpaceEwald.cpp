@@ -45,7 +45,7 @@ namespace Physica {
             Vector<ScalarType> charges(cell.getNumParticle(), 1.0);
             auto tail = charges.tail(cell.getNumParticle() / 2);
             tail = ScalarType(-1);
-            RSpaceEwald<ScalarType> ewald(cell.getLattice(), std::move(charges));
+            RSpaceEwald<ScalarType, false> ewald(cell.getLattice(), std::move(charges));
             {
                 const AutoDiffGuard<PlainScalar> guard1{};
                 ewald.potentialEnergy(pos).reverse();

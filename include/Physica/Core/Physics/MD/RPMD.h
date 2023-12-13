@@ -85,7 +85,7 @@ namespace Physica::Core {
         /* Operators */
         RPMD& operator=(RPMD obj) noexcept;
         /* Operations */
-        template<class ForceModel, class Executor, bool IsSmallCell> void updateForce(ForceModel& model);
+        template<class ForceModel, class Executor> void updateForce(ForceModel& model);
         template<class KineticModel,
                  class ForceModel,
                  class Executor>
@@ -123,9 +123,9 @@ namespace Physica::Core {
                  class Executor>
         void npt_step_for(ScalarType duration, const Thermostat& thermostat, Barostat& barostat, KineticModel& kineticModel, ForceModel& forceModel);
 
-        template<class KineticModel, class ForceModel, class Executor, bool IsSmallCell>
+        template<class KineticModel, class ForceModel, class Executor>
         void fire_vstep(FireModelType& fire, KineticModel& kineticModel, ForceModel& forceModel);
-        template<class KineticModel, class ForceModel, class Executor, bool IsSmallCell>
+        template<class KineticModel, class ForceModel, class Executor>
         void fire_pstep(FireModelType& fire, KineticModel& kineticModel, ForceModel& forceModel);
 
         template<class RandomGenerator> void initMomentum(RandomGenerator& gen);

@@ -36,9 +36,9 @@ namespace Physica::Core {
         /* Operators */
         FPUModel& operator=(FPUModel obj) noexcept { swap(obj); return *this; }
         /* Operations */
-        template<class Executor, bool IsSmallCell = false>
+        template<class Executor>
         [[nodiscard]] Vector<ScalarType> force(const MDCellType& cell) const;
-        template<class VectorType, class Executor, bool IsSmallCell = false>
+        template<class VectorType, class Executor>
         void forceAsync(const MDCellType& cell, ContinuousVector<VectorType>& result) const;
         template<class Executor>
         [[nodiscard]] Vector<ScalarType> force_short(const MDCellType& cell) const { return force<Executor>(cell); }
@@ -50,15 +50,15 @@ namespace Physica::Core {
     };
 
     template<class ScalarType, bool IsPeriodBoundary, unsigned int Dim>
-    template<class Executor, bool IsSmallCell>
+    template<class Executor>
     Vector<ScalarType> FPUModel<ScalarType, IsPeriodBoundary, Dim>::force(const MDCellType& cell) const {
         Vector<ScalarType> result(cell.getNumParticle());
-        forceAsync<Vector<ScalarType>, Executor, IsSmallCell>(cell, result);
+        forceAsync<Vector<ScalarType>, Executor>(cell, result);
         return result;
     }
 
     template<class ScalarType, bool IsPeriodBoundary, unsigned int Dim>
-    template<class VectorType, class Executor, bool IsSmallCell>
+    template<class VectorType, class Executor>
     void FPUModel<ScalarType, IsPeriodBoundary, Dim>::forceAsync(const MDCellType& cell, ContinuousVector<VectorType>& result) const {
         static_assert(std::is_same<Executor, SequentialExecutor>::value, "[Error]: Parallelization not implemented");
         const size_t numParticle = cell.getNumParticle();

@@ -69,7 +69,7 @@ bool testDriftMomentum(double precision) {
 
 bool testCalcKinetic(double precision) {
     using ScalarType = Scalar<Double>;
-    using ForceModel = SilveraGoldman<ScalarType, true>;
+    using ForceModel = SilveraGoldman<ScalarType, true, false>;
 
     auto& gen = RandomPoolType::getGen();
     auto rpmd = makeSystem<ScalarType>(gen);
@@ -89,7 +89,7 @@ bool testCalcKinetic(double precision) {
  */
 void testMDRun() {
     using ScalarType = Scalar<Double>;
-    using ForceModel = SilveraGoldman<ScalarType, true>;
+    using ForceModel = SilveraGoldman<ScalarType, true, false>;
     using ThermostatType = DoubleThermo<ScalarType>;
     using KineticModel = FreeModel<ScalarType, 3, Dynamic, RPMDIntegrator::Exact>;
     ScalarType mean = 0;

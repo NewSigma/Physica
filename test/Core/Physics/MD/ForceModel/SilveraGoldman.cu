@@ -28,7 +28,7 @@
 
 using namespace Physica::Core;
 using ScalarType = Scalar<Float>;
-using HostForceModel = SilveraGoldman<ScalarType, true>;
+using HostForceModel = SilveraGoldman<ScalarType, true, true>;
 using DeviceForceModel = device_obj<HostForceModel>;
 using RandomPoolType = RandomPool<std::mt19937, 10000>;
 constexpr size_t numReplica = 24;
@@ -64,8 +64,8 @@ int main() {
     for (size_t numMolecular : {108, 160}) {
         DeviceForceModel deviceModel(numMolecular, pair_cutoff);
         RPMD<ScalarType> rpmd = makeSystem(numMolecular, gen);
-        const auto f0 = hostModel.template force<SequentialExecutor, true>(rpmd.phaseToCell(0));
-        const auto f1 = deviceModel.template force<CudaExecutor, true>(rpmd.phaseToCell(0));
+        const auto f0 = hostModel.template force<SequentialExecutor>(rpmd.phaseToCell(0));
+        const auto f1 = deviceModel.template force<CudaExecutor>(rpmd.phaseToCell(0));
         if (!vectorNear(f0, f1, 1E-3))
             return 1;
     }
@@ -73,8 +73,8 @@ int main() {
         constexpr unsigned int numMolecular = 108;
         DeviceForceModel deviceModel(numMolecular, pair_cutoff);
         RPMD<ScalarType> rpmd = makeSystem(numMolecular, gen);
-        const auto f0 = hostModel.template force<SequentialExecutor, true>(rpmd.phaseToCell(0));
-        const auto f1 = deviceModel.template force<CudaExecutor, false>(rpmd.phaseToCell(0));
+        const auto f0 = hostModel.template force<SequentialExecutor>(rpmd.phaseToCell(0));
+        const auto f1 = deviceModel.template force<CudaExecutor>(rpmd.phaseToCell(0));
         if (!vectorNear(f0, f1, 1E-4))
             return 1;
     }

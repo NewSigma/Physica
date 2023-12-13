@@ -34,6 +34,7 @@ namespace Physica::Core {
         using TraitType = Internal::Traits<Derived>;
 
         constexpr static bool IsPotDependOnAtomIndex = TraitType::IsPotDependOnAtomIndex;
+        constexpr static bool IsSmallCell = TraitType::IsSmallCell;
     public:
         using ScalarType = typename TraitType::ScalarType;
         constexpr static int Dim = host_obj::Dim;
@@ -69,22 +70,20 @@ namespace Physica::Core {
 
         [[nodiscard]] ScalarType potentialEnergy(const MDCellType& hostCell) const;
 
-        template<class Executor, bool IsSmallCell = false>
+        template<class Executor>
         [[nodiscard]] Vector<ScalarType> force(
                 const LatticeMatrix& lattice,
                 const InvLatticeMatrix& invLattice,
                 const PositionMatrix& cartesianPos);
-        template<class Executor, bool IsSmallCell = false>
+        template<class Executor>
         [[nodiscard]] inline Vector<ScalarType> force(const MDCellType& hostCell);
 
-        template<class VectorType, class Executor, bool IsSmallCell>
+        template<class VectorType, class Executor>
         void forceAsync(
                 const LatticeMatrix& lattice,
                 const InvLatticeMatrix& invLattice,
                 const PositionMatrix& cartesianPos,
                 ContinuousVector<VectorType>& result);
-        template<class VectorType, class Executor, bool IsSmallCell>
-        inline void forceAsync(const MDCellType& hostCell, ContinuousVector<VectorType>& result);
         template<class VectorType, class Executor>
         inline void forceAsync(const MDCellType& cell, ContinuousVector<VectorType>& result);
         template<class Executor>
@@ -99,7 +98,6 @@ namespace Physica::Core {
         [[nodiscard]] inline LatticeMatrix virial(const MDCellType& hostCell);
         void swap(device_obj& __restrict obj) noexcept;
 
-        template<bool IsSmallCell>
         __device__ void forceKernelImpl();
         __device__ void postForceKernelImpl();
         __device__ void virialKernelImpl();
@@ -108,7 +106,6 @@ namespace Physica::Core {
         [[nodiscard]] __host__ __device__ const ScalarType& getCutoff() const noexcept { return cutoff; }
         [[nodiscard]] __host__ __device__ const ScalarType& getSquaredCutoff() const noexcept { return squared_cutoff; }
         [[nodiscard]] __device__ const DeviceMDCell& getCell() const noexcept { return cell; }
-        [[nodiscard]] bool isSmallCell(const MDCellType& cell) const noexcept { return Base::getDerived().isSmallCell(cell); }
         /* Setters */
         void setCutoff(ScalarType cutoff_);
     protected:
@@ -119,14 +116,13 @@ namespace Physica::Core {
         /* Operators */
         device_obj& operator=(device_obj obj) noexcept { swap(obj); return *this; }
         /* Operations */
-        template<bool IsSmallCell>
         void preParallel(
                 const LatticeMatrix& lattice,
                 const InvLatticeMatrix& invLattice,
                 const PositionMatrix& cartesianPos,
                 dim3& gridDims,
                 size_t& numThread);
-        template<bool IsSmallCell, class Functor>
+        template<class Functor>
         [[nodiscard]] __device__ size_t forPairInCutoff(Functor func) const;
     };
 }

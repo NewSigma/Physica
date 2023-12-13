@@ -27,7 +27,7 @@
 using namespace Physica::Core;
 using ScalarType = Scalar<Double>;
 using ThermostatType = DoubleThermo<ScalarType>;
-using ForceModel = Q_TIP4P<ScalarType, Ewald<ScalarType>>;
+using ForceModel = Q_TIP4P<ScalarType, Ewald<ScalarType>, false>;
 using KineticModel = FreeModel<ScalarType, 3, Dynamic, RPMDIntegrator::Exact>;
 using RandomPoolType = RandomPool<std::mt19937, 12989825518855205292UL>;
 constexpr size_t numReplica = 32;

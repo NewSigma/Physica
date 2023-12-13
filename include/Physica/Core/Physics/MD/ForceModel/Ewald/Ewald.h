@@ -30,7 +30,7 @@ namespace Physica::Core {
      * [1] Martin,Richard M. Electronic structure : basic theory and practical methods[M].Beijing: World publishing corporation; Cambridge: Cambridge University Press, 2017:499-503
      * [2] Toukmaji A Y, Board J A. Ewald summation techniques in perspective: a survey[J]. Computer Physics Communications, 1996, 95(2-3):73-92.
      */
-    template<class ScalarType, class REwaldType = RSpaceEwald<ScalarType>>
+    template<class ScalarType, class REwaldType = RSpaceEwald<ScalarType, false>>
     class Ewald : private REwaldType {
         using Base = REwaldType;
         using Base::Dim;

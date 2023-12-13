@@ -21,20 +21,21 @@
 #include "PairModel.h"
 
 namespace Physica::Core {
-    template<class ScalarType> class LJModel;
+    template<class ScalarType, bool IsSmallCell = false> class LJModel;
 
     namespace Internal {
-        template<class T>
-        class Traits<LJModel<T>> : public Traits<PairModel<LJModel<T>>> {
+        template<class T, bool B>
+        class Traits<LJModel<T, B>> : public Traits<PairModel<LJModel<T, B>>> {
         public:
             using ScalarType = T;
             constexpr static bool IsPotDependOnAtomIndex = false;
+            constexpr static bool IsSmallCell = B;
         };
     }
 
-    template<class ScalarType>
-    class LJModel : public PairModel<LJModel<ScalarType>> {
-        using This = LJModel<ScalarType>;
+    template<class ScalarType, bool IsSmallCell>
+    class LJModel : public PairModel<LJModel<ScalarType, IsSmallCell>> {
+        using This = LJModel<ScalarType, IsSmallCell>;
         using Base = PairModel<This>;
         using typename Base::PlainScalar;
 
@@ -54,21 +55,21 @@ namespace Physica::Core {
         [[nodiscard]] inline ScalarType force_functor(size_t i, size_t j, ScalarType r, ScalarType r2) const;
     };
 
-    template<class ScalarType>
-    LJModel<ScalarType>::LJModel(ScalarType sigma_, PlainScalar cutoff)
+    template<class ScalarType, bool IsSmallCell>
+    LJModel<ScalarType, IsSmallCell>::LJModel(ScalarType sigma_, PlainScalar cutoff)
             : Base(), sigma(std::move(sigma_)) {
         sigma1 = PlainScalar(6) / sigma;
         Base::setCutoff(std::move(cutoff));
     }
 
-    template<class ScalarType>
-    LJModel<ScalarType>& LJModel<ScalarType>::operator=(LJModel obj) noexcept {
+    template<class ScalarType, bool IsSmallCell>
+    LJModel<ScalarType, IsSmallCell>& LJModel<ScalarType, IsSmallCell>::operator=(LJModel obj) noexcept {
         swap(obj);
         return *this;
     }
 
-    template<class ScalarType>
-    inline ScalarType LJModel<ScalarType>::pot_functor(
+    template<class ScalarType, bool IsSmallCell>
+    inline ScalarType LJModel<ScalarType, IsSmallCell>::pot_functor(
             [[maybe_unused]] size_t i, [[maybe_unused]] size_t j, [[maybe_unused]] ScalarType r, ScalarType r2) const {
         const ScalarType rep_r2 = ScalarType(sigma * sigma) / r2;
         const ScalarType rep_r4 = square(rep_r2);
@@ -77,8 +78,8 @@ namespace Physica::Core {
         return rep_r12 - rep_r6;
     }
 
-    template<class ScalarType>
-    inline ScalarType LJModel<ScalarType>::force_functor(
+    template<class ScalarType, bool IsSmallCell>
+    inline ScalarType LJModel<ScalarType, IsSmallCell>::force_functor(
             [[maybe_unused]] size_t i, [[maybe_unused]] size_t j, ScalarType r, [[maybe_unused]] ScalarType r2) const {
         const ScalarType rep_r = sigma / r;
         const ScalarType rep_r2 = square(rep_r);
@@ -89,8 +90,8 @@ namespace Physica::Core {
         return (rep_r13 * PlainScalar(2) - rep_r7) * sigma1;
     }
 
-    template<class ScalarType>
-    void LJModel<ScalarType>::swap(LJModel& __restrict obj) noexcept {
+    template<class ScalarType, bool IsSmallCell>
+    void LJModel<ScalarType, IsSmallCell>::swap(LJModel& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         Base::swap(obj);
         sigma.swap(obj.sigma);

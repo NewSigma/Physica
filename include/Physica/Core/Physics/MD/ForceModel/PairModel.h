@@ -45,6 +45,7 @@ namespace Physica::Core {
         using TraitType = Internal::Traits<Derived>;
 
         constexpr static bool IsPotDependOnAtomIndex = TraitType::IsPotDependOnAtomIndex;
+        constexpr static bool IsSmallCell = TraitType::IsSmallCell;
     public:
         using ScalarType = typename TraitType::ScalarType;
         constexpr static unsigned int Dim = 3;
@@ -71,13 +72,13 @@ namespace Physica::Core {
         [[nodiscard]] ScalarType potentialEnergy(const LatticeMatrix& lattice, const PositionMatrix& cartesianPos) const;
         [[nodiscard]] inline ScalarType potentialEnergy(const MDCellType& cell) const;
 
-        template<class Executor, bool IsSmallCell = false>
+        template<class Executor>
         [[nodiscard]] Vector<ScalarType> force(const LatticeMatrix& lattice, const PositionMatrix& cartesianPos) const;
-        template<class Executor, bool IsSmallCell = false>
+        template<class Executor>
         [[nodiscard]] inline Vector<ScalarType> force(const MDCellType& cell) const;
-        template<class VectorType, class Executor, bool IsSmallCell = false>
+        template<class VectorType, class Executor>
         inline void forceAsync(const LatticeMatrix& lattice, const PositionMatrix& cartesianPos, ContinuousVector<VectorType>& result) const;
-        template<class VectorType, class Executor, bool IsSmallCell = false>
+        template<class VectorType, class Executor>
         inline void forceAsync(const MDCellType& cell, ContinuousVector<VectorType>& result) const;
         template<class Executor>
         [[nodiscard]] Vector<ScalarType> force_short(const MDCellType& cell) const { return force<Executor>(cell); }
@@ -103,7 +104,7 @@ namespace Physica::Core {
         /* Operators */
         PairModel& operator=(PairModel pair) noexcept;
         /* Operations */
-        template<bool IsSmallCell, class Functor>
+        template<class Functor>
         void forPairInCutoff(const LatticeMatrix& lattice, const PositionMatrix& cartesianPos, Functor func) const;
     private:
         [[nodiscard]] ScalarType forceConstImpl(const MDCellType& cell, size_t dof1, size_t dof2) const;
@@ -121,17 +122,20 @@ namespace Physica::Core {
     }
 
     template<class Derived>
-    inline typename PairModel<Derived>::ScalarType PairModel<Derived>::pot_functor(size_t i, size_t j, ScalarType r, ScalarType r2) const {
+    inline typename PairModel<Derived>::ScalarType
+    PairModel<Derived>::pot_functor(size_t i, size_t j, ScalarType r, ScalarType r2) const {
         return Base::getDerived().pot_functor(i, j, r, r2);
     }
 
     template<class Derived>
-    inline typename PairModel<Derived>::ScalarType PairModel<Derived>::force_functor(size_t i, size_t j, ScalarType r, ScalarType r2) const {
+    inline typename PairModel<Derived>::ScalarType
+    PairModel<Derived>::force_functor(size_t i, size_t j, ScalarType r, ScalarType r2) const {
         return Base::getDerived().force_functor(i, j, r, r2);
     }
 
     template<class Derived>
-    inline typename PairModel<Derived>::ScalarType PairModel<Derived>::forceConst_functor(ScalarType r, ScalarType r2) const {
+    inline typename PairModel<Derived>::ScalarType
+    PairModel<Derived>::forceConst_functor(ScalarType r, ScalarType r2) const {
         return Base::getDerived().forceConst_functor(r, r2);
     }
 
@@ -171,23 +175,23 @@ namespace Physica::Core {
     }
 
     template<class Derived>
-    template<class Executor, bool IsSmallCell>
+    template<class Executor>
     Vector<typename PairModel<Derived>::ScalarType> PairModel<Derived>::force(
             const LatticeMatrix& lattice, const PositionMatrix& cartesianPos) const {
         const size_t DOF = cartesianPos.getRow() * cartesianPos.getColumn();
         Vector<ScalarType> result(DOF);
-        forceAsync<Vector<ScalarType>, Executor, IsSmallCell>(lattice, cartesianPos, result);
+        forceAsync<Vector<ScalarType>, Executor>(lattice, cartesianPos, result);
         return result;
     }
 
     template<class Derived>
-    template<class Executor, bool IsSmallCell>
+    template<class Executor>
     inline Vector<typename PairModel<Derived>::ScalarType> PairModel<Derived>::force(const MDCellType& cell) const {
-        return force<Executor, IsSmallCell>(cell.getLattice(), cell.getPos());
+        return force<Executor>(cell.getLattice(), cell.getPos());
     }
 
     template<class Derived>
-    template<class VectorType, class Executor, bool IsSmallCell>
+    template<class VectorType, class Executor>
     inline void PairModel<Derived>::forceAsync(
             const LatticeMatrix& lattice, const PositionMatrix& cartesianPos, ContinuousVector<VectorType>& result) const {
         static_assert(!Internal::Traits<Executor>::isCudaEnabled, "[Error]: Cuda is not supported");
@@ -200,15 +204,15 @@ namespace Physica::Core {
             force_i -= r;
             force_j += r;
         };
-        forPairInCutoff<IsSmallCell, decltype(kernel)>(lattice, cartesianPos, kernel);
+        forPairInCutoff(lattice, cartesianPos, kernel);
         if constexpr (ScalarType::isReverseDiff)
             result.makeContinuous();
     }
 
     template<class Derived>
-    template<class VectorType, class Executor, bool IsSmallCell>
+    template<class VectorType, class Executor>
     inline void PairModel<Derived>::forceAsync(const MDCellType& cell, ContinuousVector<VectorType>& result) const {
-        forceAsync<VectorType, Executor, IsSmallCell>(cell.getLattice(), cell.getPos(), result);
+        forceAsync<VectorType, Executor>(cell.getLattice(), cell.getPos(), result);
     }
 
     template<class Derived>
@@ -268,13 +272,14 @@ namespace Physica::Core {
     template<class Derived>
     typename PairModel<Derived>::LatticeMatrix
     PairModel<Derived>::virial(const LatticeMatrix& lattice, const PositionMatrix& pos) const {        
+        static_assert(!IsSmallCell, "[Error]: Not implemented for small cell");
         LatticeMatrix result(Dim, Dim, 0);
         auto kernel = [this, &result](size_t i, size_t j, Vector3D r, ScalarType norm1, ScalarType norm2) {
             const ScalarType f_norm = force_functor(i, j, norm1, norm2);
             const Vector3D f = r * (f_norm / norm1);
             result += f * r.transpose();
         };
-        forPairInCutoff<false, decltype(kernel)>(lattice, pos, kernel);
+        forPairInCutoff(lattice, pos, kernel);
         result *= reciprocal(MDCellType::getVolume(lattice));
         return result;
     }
@@ -298,7 +303,7 @@ namespace Physica::Core {
     }
 
     template<class Derived>
-    template<bool IsSmallCell, class Functor>
+    template<class Functor>
     void PairModel<Derived>::forPairInCutoff(const LatticeMatrix& lattice, const PositionMatrix& cartesianPos, Functor func) const {
         const auto& pos = cartesianPos;
         if constexpr (IsSmallCell) {

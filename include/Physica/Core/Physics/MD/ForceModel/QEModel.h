@@ -43,7 +43,7 @@ namespace Physica::Core {
         /* Operators */
         QEModel& operator=(QEModel obj) noexcept;
         /* Operations */
-        template<class Executor, bool IsSmallCell = true>
+        template<class Executor>
         [[nodiscard]] Vector<ScalarType> force(const MDCellType& cell) const;
         void swap(QEModel& __restrict obj) noexcept;
         /* Getters */
@@ -70,7 +70,7 @@ namespace Physica::Core {
     }
 
     template<class ScalarType>
-    template<class Executor, bool IsSmallCell>
+    template<class Executor>
     Vector<ScalarType> QEModel<ScalarType>::force(const MDCellType& cell) const {
         assert(cell.getNumParticle() == getNumAtom());
         try {

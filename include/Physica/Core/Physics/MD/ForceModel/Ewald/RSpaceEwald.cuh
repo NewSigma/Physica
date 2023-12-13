@@ -22,9 +22,10 @@
 #include "Physica/Core/Physics/MD/ForceModel/PairModel.cuh"
 
 namespace Physica::Core {
-    template<class ScalarType>
-    class device_obj<RSpaceEwald<ScalarType>> : public device_obj<PairModel<RSpaceEwald<ScalarType>>> {
-        using host_obj = RSpaceEwald<ScalarType>;
+    template<class ScalarType, bool IsSmallCell>
+    class device_obj<RSpaceEwald<ScalarType, IsSmallCell>> : public device_obj<PairModel<RSpaceEwald<ScalarType, IsSmallCell>>> {
+        static_assert(!IsSmallCell, "[Error]: Small cell does not apply to ewald because self interaction");
+        using host_obj = RSpaceEwald<ScalarType, IsSmallCell>;
         using This = device_obj<host_obj>;
         using Base = device_obj<PairModel<host_obj>>;
         using DeviceVector = device_obj<Vector<ScalarType>>;
@@ -62,7 +63,7 @@ namespace Physica::Core {
         /* Operator */
         device_obj& operator=(device_obj obj) noexcept { swap(obj); return *this; }
         /* Operations */
-        template<class Executor, bool IsSmallCell = false>
+        template<class Executor>
         [[nodiscard]] inline Vector<ScalarType> force_short(const PositionMatrix& pos);
 
         [[nodiscard]] inline LatticeMatrix virial(const PositionMatrix& pos);
@@ -95,29 +96,29 @@ namespace Physica::Core {
         friend class device_obj<PairModel<host_obj>>;
     };
 
-    template<class ScalarType>
-    device_obj<RSpaceEwald<ScalarType>>::device_obj(const LatticeMatrix& lattice_, const Vector<ScalarType>& charges_)
+    template<class ScalarType, bool IsSmallCell>
+    device_obj<RSpaceEwald<ScalarType, IsSmallCell>>::device_obj(const LatticeMatrix& lattice_, const Vector<ScalarType>& charges_)
             : Base(charges_.getLength()), charges(charges_), erfc_table(ErfcTableSize + 1) {
         setLattice(lattice_);
     }
 
-    template<class ScalarType>
-    template<class Executor, bool IsSmallCell>
-    inline Vector<ScalarType> device_obj<RSpaceEwald<ScalarType>>::force_short(const PositionMatrix& pos) {
+    template<class ScalarType, bool IsSmallCell>
+    template<class Executor>
+    inline Vector<ScalarType> device_obj<RSpaceEwald<ScalarType, IsSmallCell>>::force_short(const PositionMatrix& pos) {
         static_assert(std::is_same<Executor, CudaExecutor>::value, "[Error]: Invalid executor");
         static_assert(!IsSmallCell, "[Error]: Small cell does not apply to ewald because self interaction");
-        const Vector<ScalarType> rSpaceSum = Base::template force<CudaExecutor, false>(lattice.toHost(), invLatt, pos);
+        const Vector<ScalarType> rSpaceSum = Base::template force<CudaExecutor>(lattice.toHost(), invLatt, pos);
         return rSpaceSum;
     }
 
-    template<class ScalarType>
-    inline typename device_obj<RSpaceEwald<ScalarType>>::LatticeMatrix
-    device_obj<RSpaceEwald<ScalarType>>::virial(const PositionMatrix& pos) {
+    template<class ScalarType, bool IsSmallCell>
+    inline typename device_obj<RSpaceEwald<ScalarType, IsSmallCell>>::LatticeMatrix
+    device_obj<RSpaceEwald<ScalarType, IsSmallCell>>::virial(const PositionMatrix& pos) {
         return Base::virial(lattice.toHost(), invLatt, pos);
     }
 
-    template<class ScalarType>
-    void device_obj<RSpaceEwald<ScalarType>>::swap(device_obj& __restrict obj) noexcept {
+    template<class ScalarType, bool IsSmallCell>
+    void device_obj<RSpaceEwald<ScalarType, IsSmallCell>>::swap(device_obj& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         Base::swap(obj);
         lattice.swap(obj.lattice);
@@ -135,8 +136,8 @@ namespace Physica::Core {
         kSpaceSumRange.swap(obj.kSpaceSumRange);
     }
 
-    template<class ScalarType>
-    void device_obj<RSpaceEwald<ScalarType>>::setLattice(const LatticeMatrix& lattice_) {
+    template<class ScalarType, bool IsSmallCell>
+    void device_obj<RSpaceEwald<ScalarType, IsSmallCell>>::setLattice(const LatticeMatrix& lattice_) {
         assert(charges.getLength() != 0 && "[Error]: Charges should be initialized before lattice update");
         lattice = lattice_;
         repLatt = PeriodicCell<ScalarType, Dim>::makeRepLattice(lattice_);
@@ -149,8 +150,8 @@ namespace Physica::Core {
         setIntegralLimit(estimate);
     }
 
-    template<class ScalarType>
-    void device_obj<RSpaceEwald<ScalarType>>::setIntegralLimit(ScalarType integralLimit_) {
+    template<class ScalarType, bool IsSmallCell>
+    void device_obj<RSpaceEwald<ScalarType, IsSmallCell>>::setIntegralLimit(ScalarType integralLimit_) {
         const auto hostRepLatt = repLatt.toHost();
         const ScalarType heightX_2Pi = reciprocal(hostRepLatt.row(0).norm());
         const ScalarType heightY_2Pi = reciprocal(hostRepLatt.row(1).norm());
@@ -167,20 +168,20 @@ namespace Physica::Core {
         Base::setCutoff(rSpaceCutoff);
     }
 
-    template<class ScalarType>
-    inline ScalarType device_obj<RSpaceEwald<ScalarType>>::calcSelfE() const {
+    template<class ScalarType, bool IsSmallCell>
+    inline ScalarType device_obj<RSpaceEwald<ScalarType, IsSmallCell>>::calcSelfE() const {
         return square(charges.toHost()).sum() * integralLimit / sqrt(PlainScalar(M_PI));
     }
 
-    template<class ScalarType>
-    inline ScalarType device_obj<RSpaceEwald<ScalarType>>::calcGammaPointE() const {
+    template<class ScalarType, bool IsSmallCell>
+    inline ScalarType device_obj<RSpaceEwald<ScalarType, IsSmallCell>>::calcGammaPointE() const {
         return square(charges.toHost().sum()) * PlainScalar(-M_PI) / (PlainScalar(2) * square(integralLimit)) * inv_volume;
     }
     /**
      * Optimize: make use of x1, x2, x3 are equal distance
      */
-    template<class ScalarType>
-    __device__ inline ScalarType device_obj<RSpaceEwald<ScalarType>>::pot_functor(
+    template<class ScalarType, bool IsSmallCell>
+    __device__ inline ScalarType device_obj<RSpaceEwald<ScalarType, IsSmallCell>>::pot_functor(
             size_t i, size_t j, ScalarType r, [[maybe_unused]] ScalarType r2) const {
         const ScalarType temp = r * repErfcStep + PlainScalar(0.5);
         const int index = temp.getTrivial();
@@ -190,8 +191,8 @@ namespace Physica::Core {
         return charges[i] * charges[j] * interp;
     }
 
-    template<class ScalarType>
-    __device__ inline ScalarType device_obj<RSpaceEwald<ScalarType>>::force_functor(
+    template<class ScalarType, bool IsSmallCell>
+    __device__ inline ScalarType device_obj<RSpaceEwald<ScalarType, IsSmallCell>>::force_functor(
             size_t i, size_t j, ScalarType r, [[maybe_unused]] ScalarType r2) const {
         const ScalarType temp = r * repErfcStep + PlainScalar(0.5);
         const int index = temp.getTrivial();
@@ -200,8 +201,8 @@ namespace Physica::Core {
         return -charges[i] * charges[j] * Internal::quadraticInterpolate_diff1<ScalarType>(repDoubleSquareStep, erfcStep, x1, y[0], y[1], y[2], r);
     }
 
-    template<class ScalarType>
-    void device_obj<RSpaceEwald<ScalarType>>::makeTables() {
+    template<class ScalarType, bool IsSmallCell>
+    void device_obj<RSpaceEwald<ScalarType, IsSmallCell>>::makeTables() {
         Vector<ScalarType> hostErfcTable(erfc_table.getLength());
         for (size_t i = 2; i < hostErfcTable.getLength(); ++i) {
             const auto x = PlainScalar((i - 1) * ErfcTableStep);

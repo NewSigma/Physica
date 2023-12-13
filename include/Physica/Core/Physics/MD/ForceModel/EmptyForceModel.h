@@ -51,13 +51,10 @@ namespace Physica::Core {
     public:
         /* Operations */
         [[nodiscard]] ScalarType potentialEnergy([[maybe_unused]] const MDCellType& cell) const { return 0; }
-        /**
-         * \tparam IsSmallCell
-         * Suitable for small cell. Using this force in dynamics may be problematic.
-         */
-        template<class Executor, bool IsSmallCell = false>
+
+        template<class Executor>
         [[nodiscard]] Vector<ScalarType> force(const MDCellType& cell) const { return Vector<ScalarType>(cell.getDOF(), 0); }
-        template<class VectorType, class Executor, bool IsSmallCell = false>
+        template<class VectorType, class Executor>
         void forceAsync([[maybe_unused]] const MDCellType& cell, ContinuousVector<VectorType>& result) const;
         template<class Executor>
         [[nodiscard]] Vector<ScalarType> force_short(const MDCellType& cell) const { return force<Executor>(cell); }
@@ -71,7 +68,7 @@ namespace Physica::Core {
     };
 
     template<class ScalarType, unsigned int Dim>
-    template<class VectorType, class Executor, bool IsSmallCell>
+    template<class VectorType, class Executor>
     void EmptyForceModel<ScalarType, Dim>::forceAsync(
             [[maybe_unused]] const MDCellType& cell, ContinuousVector<VectorType>& result) const {
         assert(result.getLength() == cell.getDOF() && "[Error]: Array length does not match");
