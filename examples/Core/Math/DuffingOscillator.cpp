@@ -62,24 +62,36 @@ int main(int argc, char** argv) {
         Plot* t_x = new Plot(0, 200, -1.5, 1.5, 50, 1);
         t_x->spline(t, x);
         t_x->chart()->legend()->hide();
-        t_x->getAxisX()->setTitleText("t");
-        t_x->getAxisY()->setTitleText("x");
+        auto* axisX = t_x->getAxisX();
+        auto* axisY = t_x->getAxisY();
+        axisX->setTitleText("t");
+        axisX->setLabelFormat("%d");
+        axisY->setTitleText("x");
+        axisY->setLabelFormat("%d");
         t_x->show();
     }
     /* t-p */ {
         Plot* t_p = new Plot(0, 200, -2.5, 2, 50, 1);
         t_p->spline(t, p);
         t_p->chart()->legend()->hide();
-        t_p->getAxisX()->setTitleText("t");
-        t_p->getAxisY()->setTitleText("p");
+        auto* axisX = t_p->getAxisX();
+        auto* axisY = t_p->getAxisY();
+        axisX->setTitleText("t");
+        axisX->setLabelFormat("%d");
+        axisY->setTitleText("p");
+        axisY->setLabelFormat("%d");
         t_p->show();
     }
     /* x-p */ {
         Plot* x_p = new Plot(-1.5, 1.5, -2.5, 2, 1, 1);
         x_p->spline(x, p);
         x_p->chart()->legend()->hide();
-        x_p->getAxisX()->setTitleText("x");
-        x_p->getAxisY()->setTitleText("p");
+        auto* axisX = x_p->getAxisX();
+        auto* axisY = x_p->getAxisY();
+        axisX->setTitleText("x");
+        axisX->setLabelFormat("%d");
+        axisY->setTitleText("p");
+        axisY->setLabelFormat("%d");
         x_p->show();
     }
     return QApplication::exec();
