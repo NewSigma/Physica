@@ -23,10 +23,10 @@
 namespace Physica::Core {
     template<class T, size_t Dim>
     class ODESolver {
-    protected:
+    public:
         using VectorType = Vector<T, Dim>;
         using SolutionType = DenseMatrix<T, MatrixOption::Column | MatrixOption::Vector, Dim>;
-
+    protected:
         Vector<T> x;
         SolutionType solution;
         T stepSize;
@@ -45,9 +45,8 @@ namespace Physica::Core {
         [[nodiscard]] size_t getNumStep() const noexcept { return x.getLength(); }
         /* Static members */
         [[nodiscard]] static size_t getNumStep(T start, T end, T stepSize);
-    private:
         template<class Function>
-        VectorType RungeKuttaDy(size_t step, const VectorType& dy_dx, Function func);
+        static VectorType rungeKutta4_step(T stepSize, T x, const VectorType& sol, Function func);
     };
 
     template<class T, size_t Dim>
@@ -75,8 +74,7 @@ namespace Physica::Core {
         const size_t column_1 = solution.getColumn() - 1;
         for (size_t i = 0; i < column_1; ++i) {
             const T& x_i = x[i];
-            VectorType dy_dx = func(x_i, solution.asArray()[i]);
-            solution.asArray()[i + 1] = RungeKuttaDy(i, dy_dx, func);
+            solution.asArray()[i + 1] = rungeKutta4_step(stepSize, x_i, solution.asArray()[i], func);
             x[i + 1] = x_i + stepSize;
         }
     }
@@ -87,15 +85,15 @@ namespace Physica::Core {
      */
     template<class T, size_t Dim>
     template<class Function>
-    typename ODESolver<T, Dim>::VectorType ODESolver<T, Dim>::RungeKuttaDy (
-            size_t step, const VectorType& dy_dx, Function func) {
-        const VectorType k1 = T(0.5) * stepSize * dy_dx;
-        const T temp = x[step] + stepSize * T(0.5);
-        auto y = solution.col(step);
-        const VectorType k2 = stepSize * func(temp, y + k1);
-        const VectorType k3 = stepSize * func(temp, y + k2 * T(0.5));
-        const VectorType k4 = T(0.5) * stepSize * func(x[step] + stepSize, y + k3);
-        return y + (k1 + k2 + k3 + k4) / T(3);
+    typename ODESolver<T, Dim>::VectorType
+    ODESolver<T, Dim>::rungeKutta4_step(T stepSize, T x, const VectorType& sol, Function func) {
+        const VectorType k1 = T(0.5) * stepSize * func(x, sol);
+        const T x1 = x + stepSize;
+        const T temp = x1 * T(0.5);
+        const VectorType k2 = stepSize * func(temp, sol + k1);
+        const VectorType k3 = stepSize * func(temp, sol + k2 * T(0.5));
+        const VectorType k4 = T(0.5) * stepSize * func(x1, sol + k3);
+        return sol + (k1 + k2 + k3 + k4) / T(3);
     }
     /**
      * Solve the second order ODE that has form: y''(x) = f(x, y(x)).

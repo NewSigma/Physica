@@ -19,6 +19,7 @@
 #pragma once
 
 #include "Berendsen.h"
+#include "Physica/Core/Math/Calculus/ODE/SRK2.h"
 
 namespace Physica::Core {
     template<class ScalarType, size_t NumReplica, class RandomPoolType, BaroType Type> class SCRBaro;

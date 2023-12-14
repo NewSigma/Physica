@@ -19,7 +19,7 @@
 #pragma once
 
 #include "Physica/Core/Physics/MD/RPMD.h"
-#include "Physica/Core/Math/Calculus/ODE/SRK2.h"
+#include "Physica/Core/Math/Calculus/ODE/ODESolver.h"
 #include "BaroType.h"
 
 namespace Physica::Core {
@@ -166,7 +166,13 @@ namespace Physica::Core {
         const auto& lattice = rpmd.getLattice();
         LatticeMatrix result(Dim, Dim, 0);
         auto integrateKernel = [&, deltaT](size_t r, size_t c) {
-            result(r, c) = (decayMatrix * lattice).calc(r, c) * deltaT;
+            using Integrator = ODESolver<ScalarType, 1>;
+            using VectorType = typename Integrator::VectorType;
+            const VectorType y{result(r, c)};
+            result(r, c) = Integrator::rungeKutta4_step(deltaT, 0, y,
+                [&lattice, &decayMatrix, r, c]([[maybe_unused]] ScalarType x, [[maybe_unused]] const VectorType& y) -> VectorType {
+                    return {(decayMatrix * lattice).calc(r, c)};
+                })[0];
         };
 
         if constexpr (Type == BaroType::Anisotropic) {

@@ -59,7 +59,11 @@ namespace Physica::Core {
         /* Static members */
         [[nodiscard]] inline static Range splitJob(unsigned int loopCount, unsigned int core, unsigned int part);
     };
-
+    /**
+     * Return value are declared as [[nodiscard]] to warn user pay attention to
+     * 1. asynchronous return value
+     * 2. exception stored in std::future, which is usually ignored
+     */
     template<class Functor, class... Args>
     typename ThreadExecutor::FutureType ThreadExecutor::schedule(Functor func, Args&&... args) {
         return ThreadPool::getInstance().schedule(std::move(func), std::forward<Args>(args)...);

@@ -55,6 +55,7 @@ namespace Physica::Core {
         /* Operators */
         FireModel& operator=(FireModel obj) noexcept { swap(obj); return *this; }
         /* Operations */
+        void paramStep(MDType& rpmd);
         void mixingStep(MDType& rpmd);
         void swap(FireModel& __restrict obj) noexcept;
         /* Getters */
@@ -92,14 +93,10 @@ namespace Physica::Core {
     }
 
     template<class ScalarType, unsigned int Dim>
-    void FireModel<ScalarType, Dim>::mixingStep(MDType& rpmd) {
+    void FireModel<ScalarType, Dim>::paramStep(MDType& rpmd) {
         const auto force = rpmd.getForce().col(0);
         auto phase = rpmd.getPhaseMatrix().col(0);
         auto momentum = phase.head(rpmd.getDOF());
-
-        const ScalarType normP = momentum.norm();
-        normF = force.norm();
-        momentum = (ScalarType(1) - mixAlpha) * momentum + (mixAlpha * normP / normF) * force.asVector();
         const ScalarType power = force.asVector() * momentum; //Assuming unit mass
         if (power.isPositive()) {
             if (numStep > numLasyStep) {
@@ -114,6 +111,17 @@ namespace Physica::Core {
             mixAlpha = mixAlpha0;
             numStep = 0;
         }
+    }
+
+    template<class ScalarType, unsigned int Dim>
+    void FireModel<ScalarType, Dim>::mixingStep(MDType& rpmd) {
+        const auto force = rpmd.getForce().col(0);
+        auto phase = rpmd.getPhaseMatrix().col(0);
+        auto momentum = phase.head(rpmd.getDOF());
+
+        const ScalarType normP = momentum.norm();
+        normF = force.norm();
+        momentum = (ScalarType(1) - mixAlpha) * momentum + (mixAlpha * normP / normF) * force.asVector();
     }
 
     template<class ScalarType, unsigned int Dim>

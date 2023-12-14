@@ -268,6 +268,29 @@ namespace Physica::Core {
 
         kineticModel.nve_step(ringPolymer, timeStep);
         updateForce<ForceModel, Executor>(forceModel);
+        fire.paramStep(*this);
+        forceStep(fire.getTimeStep());
+        fire.mixingStep(*this);
+    }
+
+    template<class ScalarType, unsigned int Dim, size_t NumReplica, class ForceMatrixAllocator>
+    template<BaroType Type, class KineticModel, class ForceModel, class Executor>
+    void RPMD<ScalarType, Dim, NumReplica, ForceMatrixAllocator>::fire_pstep(
+            FireModelType& fire,
+            Berendsen<ScalarType, NumReplica, Type>& barostat,
+            KineticModel& kineticModel,
+            ForceModel& forceModel) {
+        constexpr bool IsPeriodBoundary1 = Internal::Traits<KineticModel>::IsPeriodBoundary;
+        constexpr bool IsPeriodBoundary2 = Internal::Traits<ForceModel>::IsPeriodBoundary;
+        static_assert(IsPeriodBoundary1 == IsPeriodBoundary2, "[Error]: Inconsistent boundary condition");
+        static_assert(NumReplica == 1, "[Error]: Relaxing using PIMD makes no sence, NumReplica = 1 shall be enough");
+        static_assert(!Internal::is_empty_force_model<ForceModel>::value, "[Error]: Relax a empty model does nothing");
+
+        kineticModel.nve_step(ringPolymer, timeStep);
+        updateForce<ForceModel, Executor>(forceModel);
+        const LatticeMatrix stress = forceModel.virial(phaseToCell(0));
+        barostat.template npt_step<ForceModel>(*this, stress, timeStep);
+        fire.paramStep(*this);
         forceStep(fire.getTimeStep());
         fire.mixingStep(*this);
     }

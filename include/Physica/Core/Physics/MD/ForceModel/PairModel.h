@@ -272,7 +272,6 @@ namespace Physica::Core {
     template<class Derived>
     typename PairModel<Derived>::LatticeMatrix
     PairModel<Derived>::virial(const LatticeMatrix& lattice, const PositionMatrix& pos) const {        
-        static_assert(!IsSmallCell, "[Error]: Not implemented for small cell");
         LatticeMatrix result(Dim, Dim, 0);
         auto kernel = [this, &result](size_t i, size_t j, Vector3D r, ScalarType norm1, ScalarType norm2) {
             const ScalarType f_norm = force_functor(i, j, norm1, norm2);

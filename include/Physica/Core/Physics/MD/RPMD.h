@@ -24,9 +24,11 @@
 #include "Physica/Core/Parallel/Executor/SequentialExecutor.h"
 #include "MDCell.h"
 #include "MDImpl/RingPolymer.h"
+#include "Barostat/BaroType.h"
 
 namespace Physica::Core {
     template<class ScalarType, unsigned int Dim> class FireModel;
+    template<class ScalarType, size_t NumReplica, BaroType Type> class Berendsen;
 
     template<class ScalarType>
     class RPMDBase {        
@@ -125,8 +127,12 @@ namespace Physica::Core {
 
         template<class KineticModel, class ForceModel, class Executor>
         void fire_vstep(FireModelType& fire, KineticModel& kineticModel, ForceModel& forceModel);
-        template<class KineticModel, class ForceModel, class Executor>
-        void fire_pstep(FireModelType& fire, KineticModel& kineticModel, ForceModel& forceModel);
+        template<BaroType Type, class KineticModel, class ForceModel, class Executor>
+        void fire_pstep(
+            FireModelType& fire,
+            Berendsen<ScalarType, NumReplica, Type>& barostat,
+            KineticModel& kineticModel,
+            ForceModel& forceModel);
 
         template<class RandomGenerator> void initMomentum(RandomGenerator& gen);
         void scaleVelocity();
