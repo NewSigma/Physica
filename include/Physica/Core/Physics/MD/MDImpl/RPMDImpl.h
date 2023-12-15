@@ -48,6 +48,24 @@ namespace Physica::Core {
     }
 
     template<class ScalarType, unsigned int Dim, size_t NumReplica, class ForceMatrixAllocator>
+    void RPMD<ScalarType, Dim, NumReplica, ForceMatrixAllocator>::read(const H5Location& loc, const char* name) {
+        const auto group = loc.openGroup(name);
+        LatticeMatrix temp{};
+        temp.read(group, "lattice");
+        setLattice(std::move(temp));
+        getPhaseMatrix().read(group, "phase");
+        forceBuffer.read(group, "force");
+    }
+    
+    template<class ScalarType, unsigned int Dim, size_t NumReplica, class ForceMatrixAllocator>
+    void RPMD<ScalarType, Dim, NumReplica, ForceMatrixAllocator>::write(H5Location& loc, const char* name) const {
+        auto group = loc.createGroup(name);
+        getLattice().write(group, "lattice");
+        getPhaseMatrix().write(group, "phase");
+        forceBuffer.write(group, "force");
+    }
+
+    template<class ScalarType, unsigned int Dim, size_t NumReplica, class ForceMatrixAllocator>
     RPMD<ScalarType, Dim, NumReplica, ForceMatrixAllocator>&
     RPMD<ScalarType, Dim, NumReplica, ForceMatrixAllocator>::operator=(
             RPMD<ScalarType, Dim, NumReplica, ForceMatrixAllocator> obj) noexcept {

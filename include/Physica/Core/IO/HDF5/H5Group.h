@@ -18,12 +18,17 @@
  */
 #pragma once
 
-#ifdef PHYSICA_HDF5
-    #include <H5Cpp.h>
-
-    #include "H5DataSet.h"
-    #include "H5DataSpace.h"
-    #include "H5Location.h"
-    #include "H5File.h"
-    #include "H5Group.h"
-#endif
+namespace Physica::Core {
+    class H5Group : public H5::Group, public H5Location {
+        using Base = H5::Group;
+        using Location = Core::H5Location;
+    public:
+        H5Group(H5::Group group) : Base(group) {}
+        H5Group(const H5Group&) = default;
+        H5Group(H5Group&&) noexcept = delete;
+        ~H5Group() = default;
+        /* Operators */
+        H5Group& operator=(H5Group& obj) = default;
+        H5Group& operator=(H5Group&&) noexcept = delete;
+    };
+}

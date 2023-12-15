@@ -21,7 +21,7 @@
 #include "Physica/Core/Exception/IOException.h"
 
 namespace Physica::Core {
-    template<size_t Dim> class H5DataSet;
+    class H5Group;
 
     class H5Location {
     public:
@@ -42,6 +42,9 @@ namespace Physica::Core {
         [[nodiscard]] H5DataSet<Dim> openDataSet(const char* name);
         template<size_t Dim>
         [[nodiscard]] const H5DataSet<Dim> openDataSet(const char* name) const;
+
+        [[nodiscard]] H5Group createGroup(const char* name, size_t size_hint = 0) const;
+        [[nodiscard]] H5Group openGroup(const char* name) const;
     protected:
         H5Location() = default;
         H5Location(const H5Location&) = default;

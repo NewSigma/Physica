@@ -18,7 +18,6 @@
  */
 #pragma once
 
-#include "Physica/Utils/Container/Array/Array.h"
 #include "DataSpaceImpl/DataSpaceBase.h"
 #include "DataSpaceImpl/SubDataSpace.h"
 

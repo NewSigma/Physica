@@ -268,7 +268,7 @@ namespace Physica::Core {
         if (h5f.exists(name))
             dataset = h5f.openDataSet<1>(name);
         else
-            dataset = h5f.createDataSet(name, ScalarType::getH5DataType(), space);
+            dataset = h5f.createDataSet<1>(name, ScalarType::getH5DataType(), space);
         dataset.write(data(), ScalarType::getH5DataType(), space, space, xfer_plist);
     }
 

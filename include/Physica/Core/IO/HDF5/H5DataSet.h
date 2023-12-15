@@ -19,8 +19,11 @@
 #pragma once
 
 #include <fstream>
+#include "Physica/Utils/Container/Array/Array.h"
 
 namespace Physica::Core {
+    template<size_t Dim> class H5DataSpace;
+
     template<size_t Dim>
     class H5DataSet : public H5::DataSet {
         using Base = H5::DataSet;

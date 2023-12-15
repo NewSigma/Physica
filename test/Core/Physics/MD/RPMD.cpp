@@ -116,6 +116,8 @@ void testMDRun() {
             }
             toNextVariance(var, mean, i, temp);
         }
+        H5File h5f("data.h5", H5File::ReadWrite | H5File::Creat);
+        rpmd.write(h5f, "md");
     }
     constexpr double answer = 61.8;
     const ScalarType energyPerMol = PhyConst<AU>::temperatureToK(double(mean) / numMolecular);

@@ -16,14 +16,14 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#pragma once
+#include "Physica/Core/IO/HDF5/HDF5.h"
 
-#ifdef PHYSICA_HDF5
-    #include <H5Cpp.h>
+namespace Physica::Core {
+    H5Group H5Location::createGroup(const char* name, size_t size_hint) const {
+        return getDerived().createGroup(name, size_hint);
+    }
 
-    #include "H5DataSet.h"
-    #include "H5DataSpace.h"
-    #include "H5Location.h"
-    #include "H5File.h"
-    #include "H5Group.h"
-#endif
+    H5Group H5Location::openGroup(const char* name) const {
+        return getDerived().openGroup(name);
+    }
+}
