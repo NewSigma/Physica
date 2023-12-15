@@ -305,9 +305,11 @@ namespace Physica::Core {
         static_assert(!Internal::is_empty_force_model<ForceModel>::value, "[Error]: Relax a empty model does nothing");
 
         kineticModel.nve_step(ringPolymer, timeStep);
-        updateForce<ForceModel, Executor>(forceModel);
         const LatticeMatrix stress = forceModel.virial(phaseToCell(0));
         barostat.template npt_step<ForceModel>(*this, stress, timeStep);
+        if constexpr (Internal::Traits<ForceModel>::IsLatticeDependent)
+            forceModel.setLattice(getLattice());
+        updateForce<ForceModel, Executor>(forceModel);
         fire.paramStep(*this);
         forceStep(fire.getTimeStep());
         fire.mixingStep(*this);
