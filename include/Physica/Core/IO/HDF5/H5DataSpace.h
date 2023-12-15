@@ -46,6 +46,7 @@ namespace Physica::Core {
         SizeArray selectedCount;
         SizeArray selectedStart;
     public:
+        explicit H5DataSpace(hsize_t size);
         explicit H5DataSpace(const SizeArray& dims);
         explicit H5DataSpace(std::initializer_list<SizeType> dims);
         H5DataSpace(const SizeArray& dims, const SizeArray& maxdims);
@@ -67,9 +68,15 @@ namespace Physica::Core {
         [[nodiscard]] inline size_t getSize(size_t dim) const noexcept;
         [[nodiscard]] const SizeArray& getSelectedCount() const noexcept { return selectedCount; }
         [[nodiscard]] const SizeArray& getSelectedStart() const noexcept { return selectedStart; }
+        [[nodiscard]] bool isValid() const noexcept { return ImplType::isValid(ImplType::getId()); }
         /* Setters */
         void setSize(size_t dim, hsize_t newSize);
     };
+
+    template<size_t Dim>
+    H5DataSpace<Dim>::H5DataSpace(hsize_t size) : H5DataSpace({size}) {
+        static_assert(Dim == 1, "[Error]: This constructor applies to 1 dim only");
+    }
 
     template<size_t Dim>
     H5DataSpace<Dim>::H5DataSpace(const SizeArray& dims)

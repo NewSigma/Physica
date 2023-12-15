@@ -32,12 +32,10 @@ int main() {
 
         TempFile tmp("/tmp/tmpXXXXXX");
         H5File h5f(tmp.getName(), H5File::OpenFlag(H5File::OpenFlag::ReadWrite | H5File::OpenFlag::Creat));
-        auto space = H5DataSpace<2>({data.getRow(), data.getColumn()});
-        auto dataset = h5f.createDataSet("/set", T::getH5DataType(), space);
-        data.write(dataset, space);
+        data.write(h5f, "/set");
 
         MatrixType buffer(data.getRow(), data.getColumn());
-        buffer.read(dataset, space);
+        buffer.read(h5f, "/set");
         if (data != buffer)
             exit(EXIT_FAILURE);
     }
@@ -48,12 +46,10 @@ int main() {
 
         TempFile tmp("/tmp/tmpXXXXXX");
         H5File h5f(tmp.getName(), H5File::OpenFlag(H5File::OpenFlag::ReadWrite | H5File::OpenFlag::Creat));
-        auto space = H5DataSpace<2>({data.getRow(), data.getColumn()});
-        auto dataset = h5f.createDataSet("/set", T::getH5DataType(), space);
-        data.write(dataset, space);
+        data.write(h5f, "/set");
 
         MatrixType buffer(data.getRow(), data.getColumn());
-        buffer.read(dataset, space);
+        buffer.read(h5f, "/set");
         if (data != buffer)
             exit(EXIT_FAILURE);
     }
@@ -64,12 +60,10 @@ int main() {
 
         TempFile tmp("/tmp/tmpXXXXXX");
         H5File h5f(tmp.getName(), H5File::OpenFlag(H5File::OpenFlag::ReadWrite | H5File::OpenFlag::Creat));
-        auto space = H5DataSpace<2>({data.getRow(), data.getColumn()});
-        auto dataset = h5f.createDataSet("/set", T::getH5DataType(), space);
-        data.write(dataset, space);
+        data.write(h5f, "/set");
 
         MatrixType buffer(data.getRow(), data.getColumn());
-        buffer.read(dataset, space);
+        buffer.read(h5f, "/set");
         if (data != buffer)
             exit(EXIT_FAILURE);
     }

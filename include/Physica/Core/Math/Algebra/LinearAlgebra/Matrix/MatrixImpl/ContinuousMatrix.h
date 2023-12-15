@@ -102,9 +102,7 @@ namespace Physica::Core {
         template<size_t Row = Dynamic, size_t Column = Dynamic>
         [[nodiscard]] inline const ContinuousMatrixBlock<Derived, Row, Column> block(size_t fromRow, size_t rowCount, size_t fromCol, size_t colCount) const;
 
-        [[nodiscard]] ContinuousFlatten<Derived> flatten() { return {*this}; }
-        [[nodiscard]] const ContinuousFlatten<Derived> flatten() const { return {*this}; }
-
+        void resize(size_t r, size_t c) { Base::getDerived().resize(r, c); }
         inline void makeContinuous();
         [[nodiscard]] bool checkContinuous() const;
         template<class RandomGenerator>
@@ -113,6 +111,14 @@ namespace Physica::Core {
         void random_normal(RandomGenerator& gen);
         template<class Distribution, class RandomGenerator>
         void random_any(Distribution& dist, RandomGenerator& gen);
+
+        void read(const H5Location& loc, const char* name, const H5::DSetMemXferPropList& xfer_plist = H5::DSetMemXferPropList::DEFAULT);
+        void write(H5Location& loc, const char* name, const H5::DSetMemXferPropList& xfer_plist = H5::DSetMemXferPropList::DEFAULT) const;
+        /* Getters */
+        [[nodiscard]] __host__ __device__ ScalarType* data() { return Base::getDerived().data_ptr(0, 0); }
+        [[nodiscard]] __host__ __device__ const ScalarType* data() const { return Base::getDerived().data_ptr(0, 0); }
+        [[nodiscard]] ContinuousFlatten<Derived> flatten() { return {*this}; }
+        [[nodiscard]] const ContinuousFlatten<Derived> flatten() const { return {*this}; }
     protected:
         ContinuousMatrix() = default;
         ContinuousMatrix(const ContinuousMatrix&) = default;

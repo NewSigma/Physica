@@ -18,13 +18,10 @@
  */
 #pragma once
 
-#include "Physica/Core/Exception/IOException.h"
-
 namespace Physica::Core {
-    template<size_t Dim> class H5DataSet;
-
-    class H5File : public H5::H5File {
+    class H5File : public H5::H5File, public H5Location {
         using Base = H5::H5File;
+        using Location = Core::H5Location;
     public:
         enum OpenFlag : unsigned int {
             ReadOnly = 0x0000U,
@@ -47,25 +44,9 @@ namespace Physica::Core {
         H5File& operator=(H5File& obj);
         H5File& operator=(H5File&&) noexcept = delete;
         /* Operations */
-        using Base::createDataSet;
+        using Location::exists;
+        using Location::createDataSet;
+        using Location::openDataSet;
         H5DataSet<1> createDataSet(const char* filepath, const char* name);
-        template<size_t Dim>
-        [[nodiscard]] H5DataSet<Dim> openDataSet(const char* name);
-        template<size_t Dim>
-        [[nodiscard]] const H5DataSet<Dim> openDataSet(const char* name) const;
     };
-
-    template<size_t Dim>
-    H5DataSet<Dim> H5File::openDataSet(const char* name) {
-        if (!exists(name))
-            throw IOException("[Error]: Dataset not found");
-        return Base::openDataSet(name);
-    }
-
-    template<size_t Dim>
-    const H5DataSet<Dim> H5File::openDataSet(const char* name) const {
-        if (!exists(name))
-            throw IOException("[Error]: Dataset not found");
-        return Base::openDataSet(name);
-    }
 }

@@ -45,7 +45,6 @@ namespace Physica::Core {
         template<class PacketType> [[nodiscard]] inline PacketType packetPartial(size_t index, size_t count) const;
         template<class PacketType> inline void writePacket(size_t index, const PacketType packet);
         template<class PacketType> inline void writePacketPartial(size_t index, size_t count, const PacketType packet);
-        void resize(size_t length) { Base::getDerived().resize(length); }
 
         template<class OtherDerived> void toDevice(device_obj<ContinuousVector<OtherDerived>>& obj) const;
         template<class OtherDerived> void toDeviceAsync(device_obj<ContinuousVector<OtherDerived>>& obj) const;
@@ -57,6 +56,7 @@ namespace Physica::Core {
         template<size_t Length = Dynamic> inline ContinuousVectorBlock<Derived, Length> segment(size_t from, size_t to);
         template<size_t Length = Dynamic> inline const ContinuousVectorBlock<Derived, Length> segment(size_t from, size_t to) const;
 
+        void resize(size_t length) { Base::getDerived().resize(length); }
         inline void makeContinuous();
         [[nodiscard]] bool checkContinuous() const;
         template<class RandomGenerator>
@@ -68,13 +68,13 @@ namespace Physica::Core {
 
         void read(const H5File& h5f, const char* name, const H5::DSetMemXferPropList& xfer_plist = H5::DSetMemXferPropList::DEFAULT);
         template<class SpaceType>
-        void read(const H5::DataSet& dataset,
+        void read(const H5DataSet<1>& dataset,
                   const DataSpaceBase<SpaceType>& file_space,
                   const H5::DSetMemXferPropList& xfer_plist = H5::DSetMemXferPropList::DEFAULT);
         
         void write(H5File& h5f, const char* name, const H5::DSetMemXferPropList& xfer_plist = H5::DSetMemXferPropList::DEFAULT) const;
         template<class SpaceType>
-        void write(H5::DataSet& dataset, 
+        void write(H5DataSet<1>& dataset, 
                    const DataSpaceBase<SpaceType>& file_space,
                    const H5::DSetMemXferPropList& xfer_plist = H5::DSetMemXferPropList::DEFAULT) const;
         /* Getters */

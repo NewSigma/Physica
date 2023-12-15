@@ -41,7 +41,7 @@ void hdfTest() {
         TempFile tmp("/tmp/tmpXXXXXX");
         H5File h5f(tmp.getName(), H5File::OpenFlag(H5File::OpenFlag::ReadWrite | H5File::OpenFlag::Creat));
         auto space = H5DataSpace<1>({data.getLength()});
-        auto dataset = h5f.createDataSet("/set", T::getH5DataType(), space);
+        auto dataset = h5f.createDataSet<1>("/set", T::getH5DataType(), space);
         data.write(dataset, space);
 
         Vector<T> buffer(data.getLength());
@@ -56,7 +56,7 @@ void hdfTest() {
         TempFile tmp("/tmp/tmpXXXXXX");
         H5File h5f(tmp.getName(), H5File::OpenFlag(H5File::OpenFlag::ReadWrite | H5File::OpenFlag::Creat));
         auto space = H5DataSpace<1>({data.getLength()});
-        auto dataset = h5f.createDataSet("/set", T::getH5DataType(), space);
+        auto dataset = h5f.createDataSet<1>("/set", T::getH5DataType(), space);
         data.write(dataset, space);
 
         Vector<T> buffer(data.getLength());

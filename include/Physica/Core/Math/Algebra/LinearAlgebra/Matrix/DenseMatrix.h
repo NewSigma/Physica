@@ -109,15 +109,6 @@ namespace Physica::Core {
         [[nodiscard]] DenseMatrix copy() const;
         [[nodiscard]] inline device_obj<This> toDevice() const;
         void toDevice(device_obj<This>& obj) const;
-
-        template<class SpaceType>
-        void read(const H5::DataSet& dataset,
-                  DataSpaceBase<SpaceType>& file_space,
-                  const H5::DSetMemXferPropList& xfer_plist = H5::DSetMemXferPropList::DEFAULT);
-        template<class SpaceType>
-        void write(H5::DataSet& dataset,
-                   DataSpaceBase<SpaceType>& file_space,
-                   const H5::DSetMemXferPropList& xfer_plist = H5::DSetMemXferPropList::DEFAULT) const;
         void swap(DenseMatrix& __restrict m) noexcept;
         /* Getters */
         using Dim::getRow;

@@ -30,7 +30,7 @@ int main() {
     const auto dataspace = H5DataSpace<1>({strlen(str)});
     {
         H5File h5f(temp.getName(), H5File::ReadWrite | H5File::Creat);
-        auto dataset = h5f.createDataSet("/data", H5::PredType::NATIVE_CHAR, dataspace);
+        auto dataset = h5f.createDataSet<1>("/data", H5::PredType::NATIVE_CHAR, dataspace);
         dataset.write(str, H5::PredType::NATIVE_CHAR);
     }
     {

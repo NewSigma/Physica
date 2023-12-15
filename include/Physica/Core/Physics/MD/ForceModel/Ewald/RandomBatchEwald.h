@@ -61,6 +61,7 @@ namespace Physica::Core {
         void swap(RandomBatchEwald& __restrict obj) noexcept;
         /* Getters */
         using Base::getNumParticle;
+        using Base::getLattice;
         [[nodiscard]] size_t getSamplePoolSize() const noexcept { return samplePool.getRow(); }
         /* Setters */
         void setLattice(LatticeMatrix lattice);
