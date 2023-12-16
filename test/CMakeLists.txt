@@ -79,6 +79,7 @@ physica_add_test(IceGenerator Core/Physics/IceGenerator.cpp)
 physica_add_test(RHFSolver Core/Physics/RHFSolver.cpp)
 ### MD
 physica_add_test(RSpaceEwald Core/Physics/MD/ForceModel/Ewald/RSpaceEwald.cpp)
+physica_add_test(BKSModel Core/Physics/MD/ForceModel/BKSModel.cpp)
 physica_add_test(PairModel Core/Physics/MD/ForceModel/PairModel.cpp)
 physica_add_test(SilveraGoldman Core/Physics/MD/ForceModel/SilveraGoldman.cpp)
 physica_add_test(TodaModel Core/Physics/MD/ForceModel/TodaModel.cpp)
