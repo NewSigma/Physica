@@ -16,10 +16,8 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include "Physica/Core/Math/Calculus/Differential.h"
 #include "Physica/Core/Physics/MD/ForceModel/Ewald/Ewald.h"
 #include "Physica/Core/Physics/MD/ForceModel/Q_TIP4P.h"
-#include "Physica/Core/Physics/PhyConst.h"
 #include "Physica/Core/MultiPrecision/AutoDiffGuard.h"
 #include "Physica/Core/Parallel/Executor/SequentialExecutor.h"
 
@@ -56,7 +54,6 @@ namespace Physica {
             /* Test press */ {
                 const PlainScalar press_diff = -volume.getGrad() / PlainScalar(cellSize * cellSize * cellSize);
                 const PlainScalar press = (forceModel.virial(cell).trace() / ScalarType(3)).getValue();
-                std::cout << press << ' ' << press_diff << std::endl;
                 if (!scalarNear(press_diff, press, 1E-12))
                     exit(EXIT_FAILURE);
             }
