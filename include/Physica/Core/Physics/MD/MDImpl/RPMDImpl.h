@@ -340,7 +340,7 @@ namespace Physica::Core {
             const Vector<ScalarType, Dim> delta = ScalarType(integer - elem.isNegative()) * cell.getLattice().row(component).asVector();
             for (size_t i = 0; i < Dim; ++i) {
                 auto row = getPhaseMatrix().row(atom_start + i);
-                row -= delta[i];
+                row.asVector() -= delta[i];
             }
             ++index;
         }

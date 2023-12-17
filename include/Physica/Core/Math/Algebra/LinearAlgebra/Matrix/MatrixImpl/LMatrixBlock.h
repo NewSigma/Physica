@@ -138,15 +138,15 @@ namespace Physica::Core {
         LMatrixBlock(LMatrixBlock&&) noexcept = default;
         ~LMatrixBlock() = default;
         /* Operators */
-        template<class T> This& operator=(const ScalarBase<T>& s) { VectorBase::operator=(s); return *this; }
+        This& operator=(const ScalarType& s) { VectorBase::operator=(s); return *this; }
         using Base::operator=;
         using VectorBase::operator=;
         [[nodiscard]] ScalarType& operator()([[maybe_unused]] size_t row, size_t col) { assert(row == 0); return VectorBase::operator[](col); }
         [[nodiscard]] const ScalarType& operator()([[maybe_unused]] size_t row, size_t col) const { assert(row == 0); return VectorBase::operator[](col); }
-        template<class T> void operator+=(const ScalarBase<T>& s) { VectorBase::operator+=(s); }
-        template<class T> void operator-=(const ScalarBase<T>& s) { VectorBase::operator-=(s); }
-        template<class T> void operator*=(const ScalarBase<T>& s) { VectorBase::operator*=(s); }
-        template<class T> void operator/=(const ScalarBase<T>& s) { VectorBase::operator/=(s); }
+        void operator+=(const ScalarType& s) { VectorBase::operator+=(s); }
+        void operator-=(const ScalarType& s) { VectorBase::operator-=(s); }
+        void operator*=(const ScalarType& s) { VectorBase::operator*=(s); }
+        void operator/=(const ScalarType& s) { VectorBase::operator/=(s); }
         /* Operations */
         using Base::assignTo;
         using VectorBase::assignTo;
@@ -184,13 +184,13 @@ namespace Physica::Core {
         LMatrixBlock(LMatrixBlock&&) noexcept = default;
         ~LMatrixBlock() = default;
         /* Operators */
-        template<class T> This& operator=(const ScalarBase<T>& s) { VectorBase::operator=(s); return *this; }
+        This& operator=(const ScalarType& s) { VectorBase::operator=(s); return *this; }
         using Base::operator=;
         using VectorBase::operator=;
-        template<class T> void operator+=(const ScalarBase<T>& s) { VectorBase::operator+=(s); }
-        template<class T> void operator-=(const ScalarBase<T>& s) { VectorBase::operator-=(s); }
-        template<class T> void operator*=(const ScalarBase<T>& s) { VectorBase::operator*=(s); }
-        template<class T> void operator/=(const ScalarBase<T>& s) { VectorBase::operator/=(s); }
+        void operator+=(const ScalarType& s) { VectorBase::operator+=(s); }
+        void operator-=(const ScalarType& s) { VectorBase::operator-=(s); }
+        void operator*=(const ScalarType& s) { VectorBase::operator*=(s); }
+        void operator/=(const ScalarType& s) { VectorBase::operator/=(s); }
         /* Operations */
         using Base::assignTo;
         using VectorBase::assignTo;
