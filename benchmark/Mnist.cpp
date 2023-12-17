@@ -10,7 +10,7 @@
 #include "Physica/Core/AI/NeuralNetwork/NetBase.h"
 #include "Physica/Core/AI/NeuralNetwork/Loss.h"
 #include "Physica/Core/Math/Random/RandomPool.h"
-#include "Physica/Core/Math/Optimization/SGD.h"
+#include "Physica/Core/Math/Optimization/Stochastic/SGD.h"
 #include "Physica/Core/Parallel/Executor/ThreadExecutor.h"
 
 using namespace Physica::Core;

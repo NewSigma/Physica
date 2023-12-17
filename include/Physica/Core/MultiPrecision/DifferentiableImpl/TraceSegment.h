@@ -49,6 +49,8 @@ namespace Physica::Core {
         ~TraceSegment() = default;
         /* Operators */
         TraceSegment& operator=(TraceSegment obj) noexcept { swap(obj); return *this; }
+        [[nodiscard]] inline DiffScalar operator[](size_t index);
+        [[nodiscard]] inline const DiffScalar operator[](size_t index) const;
         /* Operations */
         inline void reverse();
         void reverse(DiffScalar from);
@@ -64,6 +66,7 @@ namespace Physica::Core {
         [[nodiscard]] bool empty() const noexcept { return records.empty(); }
         [[nodiscard]] bool full() const noexcept { return records.full(); }
         [[nodiscard]] bool isFound(DiffScalar s) const noexcept { return find(s) < getLength(); }
+        [[nodiscard]] size_t find(DiffScalar s) const noexcept;
         /* Static members */
         [[nodiscard]] constexpr static unsigned int numOperand(ExpressionType type);
     private:
@@ -71,8 +74,6 @@ namespace Physica::Core {
         void reverse(size_t fromIndex, size_t toIndex);
         template<size_t Size>
         void reverseMulAdd(DiffScalar firstOpX, DiffScalar firstOpY, DiffScalar firstOpZ, size_t traceId);
-        /* Getters */
-        [[nodiscard]] size_t find(DiffScalar s) const noexcept;
     };
 
     template<class ScalarType>
@@ -85,6 +86,16 @@ namespace Physica::Core {
         operands.reserve(3 * size); //MulAdd operation is 3-operand
         values.reserve(size);
         grads.reserve(size);
+    }
+
+    template<class ScalarType>
+    inline typename TraceSegment<ScalarType>::DiffScalar TraceSegment<ScalarType>::operator[](size_t index) {
+        return DiffScalar(values.data_ptr(index), grads.data_ptr(index));
+    }
+
+    template<class ScalarType>
+    inline const typename TraceSegment<ScalarType>::DiffScalar TraceSegment<ScalarType>::operator[](size_t index) const {
+        return DiffScalar(const_cast<ScalarType*>(values.data_ptr(index)), const_cast<ScalarType*>(grads.data_ptr(index)));
     }
 
     template<class ScalarType>
@@ -180,6 +191,19 @@ namespace Physica::Core {
         operands.swap(obj.operands);
         values.swap(obj.values);
         grads.swap(obj.grads);
+    }
+
+    template<class ScalarType>
+    size_t TraceSegment<ScalarType>::find(DiffScalar s) const noexcept {
+        const auto* pValue = values.data();
+        const auto* pValue1 = s.value_ptr();
+        if (pValue1 < pValue)
+            return values.getLength();
+        const size_t index = pValue1 - pValue;
+        [[maybe_unused]] const bool isValueFound = index < getLength();
+        [[maybe_unused]] const bool isGradFound = s.grad_ptr() == grads.data() + index;
+        assert((!isValueFound || (isValueFound && isGradFound)) && "[Error]: Bad DiffScalar");
+        return index;
     }
 
     template<class ScalarType>
@@ -350,18 +374,5 @@ namespace Physica::Core {
         valueY.store(firstOpY.value_ptr());
         gradX.store(firstOpX.grad_ptr());
         gradY.store(firstOpY.grad_ptr());
-    }
-
-    template<class ScalarType>
-    size_t TraceSegment<ScalarType>::find(DiffScalar s) const noexcept {
-        const auto* pValue = values.data();
-        const auto* pValue1 = s.value_ptr();
-        if (pValue1 < pValue)
-            return values.getLength();
-        const size_t index = pValue1 - pValue;
-        [[maybe_unused]] const bool isValueFound = index < getLength();
-        [[maybe_unused]] const bool isGradFound = s.grad_ptr() == grads.data() + index;
-        assert((!isValueFound || (isValueFound && isGradFound)) && "[Error]: Bad DiffScalar");
-        return index;
     }
 }

@@ -43,7 +43,7 @@ namespace Physica::Core {
         template<size_t Dim>
         [[nodiscard]] const H5DataSet<Dim> openDataSet(const char* name) const;
 
-        [[nodiscard]] H5Group createGroup(const char* name, size_t size_hint = 0) const;
+        H5Group createGroup(const char* name, size_t size_hint = 0) const;
         [[nodiscard]] H5Group openGroup(const char* name) const;
     protected:
         H5Location() = default;

@@ -153,6 +153,10 @@ namespace Physica::Core {
         [[nodiscard]] inline static Differentiable random_normal(RandomGenerator& gen);
         template<class Distribution, class RandomGenerator>
         [[nodiscard]] inline static Differentiable random_any(Distribution& dist, RandomGenerator& gen);
+
+        [[nodiscard]] static size_t distance(const This& from, const This& to);
+        template<class Functor>
+        static void forNode(const This& from, const This& to, Functor func);
     };
     ////////////////////////////////////////////////////////////
     template<class ScalarType, DiffMode Mode, class OtherScalar>

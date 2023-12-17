@@ -155,6 +155,95 @@ namespace Physica::Core {
     Differentiable<ScalarType, DiffMode::Reverse>::random_any(Distribution& dist, RandomGenerator& gen) {
         return Differentiable(ScalarType::random_any(dist, gen));
     }
+
+    template<class ScalarType>
+    size_t Differentiable<ScalarType, DiffMode::Reverse>::distance(const This& from, const This& to) {
+        if (&from == &to)
+            return 0;
+
+        const auto& traceList = DiffTracer<ScalarType>::getInstance().getTraceList();
+        bool fromFound = false;
+        bool toFound = false;
+        size_t result = 0;
+        for (const auto& segment : traceList) {
+            const size_t length = segment.getLength();
+            if (!fromFound) {
+                const size_t fromIndex = segment.find(from);
+                fromFound = fromIndex < segment.getLength();
+                if (!fromFound)
+                    continue;
+
+                assert(!toFound && "[Error]: This is impossible");
+                const size_t toIndex = segment.find(to);
+                toFound = toIndex < length;
+                if (toFound) {
+                    result = toIndex - fromIndex - 1;
+                    break;
+                }
+                else {
+                    result += length - fromIndex - 1;
+                    continue;
+                }
+            }
+
+            const size_t toIndex = segment.find(to);
+            toFound = toIndex < length;
+            if (toFound) {
+                result += toIndex;
+                break;
+            }
+            else
+                result += length;
+        }
+        assert(fromFound && "[Error]: From node not found");
+        assert(toFound && "[Error]: To node not found");
+        return result;
+    }
+
+    template<class ScalarType>
+    template<class Functor>
+    void Differentiable<ScalarType, DiffMode::Reverse>::forNode(const This& from, const This& to, Functor func) {
+        if (&from == &to) [[unlikely]]
+            return;
+
+        const auto& traceList = DiffTracer<ScalarType>::getInstance().getTraceList();
+        bool fromFound = false;
+        bool toFound = false;
+        for (const auto& segment : traceList) {
+            const size_t length = segment.getLength();
+            if (!fromFound) {
+                const size_t fromIndex = segment.find(from);
+                fromFound = fromIndex < length;
+                if (!fromFound)
+                    continue;
+
+                assert(!toFound && "[Error]: This is impossible");
+                const size_t toIndex = segment.find(to);
+                toFound = toIndex < length;
+                if (toFound) {
+                    for (size_t i = fromIndex + 1; i < toIndex; ++i)
+                        func(segment[i]);
+                    break;
+                }
+                else {
+                    for (size_t i = fromIndex + 1; i < length; ++i)
+                        func(segment[i]);
+                    continue;
+                }
+            }
+
+            const size_t toIndex = segment.find(to);
+            toFound = toIndex < length;
+            if (toFound) {
+                for (size_t i = 0; i < toIndex; ++i)
+                    func(segment[i]);
+                break;
+            }
+            else
+                for (size_t i = 0; i < length; ++i)
+                    func(segment[i]);
+        }
+    }
     ////////////////////////////////////////////////////////////
     template<class ScalarType, DiffMode Mode, class OtherScalar>
     [[nodiscard]] inline typename Internal::BinaryScalarOpReturnType<Differentiable<ScalarType, Mode>, OtherScalar>::Type

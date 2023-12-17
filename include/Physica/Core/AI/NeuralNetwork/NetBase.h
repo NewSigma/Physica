@@ -44,9 +44,9 @@ namespace Physica::Core {
         NetBase& operator=(NetBase&&) noexcept = delete;
         /* Operations */
         template<class Dataset, class Optimizer, class RandomPoolType, class Executor>
-        void train_step(const Dataset& dataset, const Optimizer& opt);
+        void train_step(const Dataset& dataset, Optimizer& opt);
         template<class Optimizer>
-        void opt_step(const Optimizer& opt) { Base::getDerived().opt_step(opt); }
+        void opt_step(Optimizer& opt) { Base::getDerived().opt_step(opt); }
 
         [[nodiscard]] ScalarType loss(const SampleType& sample, const LabelType& label) const { return Base::getDerived().loss(sample, label); }
         template<class Dataset>
@@ -73,7 +73,7 @@ namespace Physica::Core {
 
     template<class Derived>
     template<class Dataset, class Optimizer, class RandomPoolType, class Executor>
-    void NetBase<Derived>::train_step(const Dataset& dataset, const Optimizer& opt) {
+    void NetBase<Derived>::train_step(const Dataset& dataset, Optimizer& opt) {
         constexpr bool isTrainMode = Base::isTrainMode();
         static_assert(isTrainMode, "[Error]: train_step must be called under training mode");
         if constexpr (std::is_same<Executor, SequentialExecutor>::value) {

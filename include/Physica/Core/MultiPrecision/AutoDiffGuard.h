@@ -25,6 +25,7 @@ namespace Physica::Core {
     class AutoDiffGuard {
         static_assert(!PlainScalar::isDifferentiable, "[Error]: Differentiable<> pack is not necessary");
         using ScalarType = Differentiable<PlainScalar, DiffMode::Reverse>;
+        using This = AutoDiffGuard<PlainScalar>;
 
         ScalarType node;
     public:

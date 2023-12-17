@@ -17,7 +17,7 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include "Functions.h"
-#include "Physica/Core/Math/Optimization/Adam.h"
+#include "Physica/Core/Math/Optimization/Stochastic/Adam.h"
 
 using namespace Physica::Utils;
 

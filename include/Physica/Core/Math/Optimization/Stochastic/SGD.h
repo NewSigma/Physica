@@ -2,7 +2,7 @@
  * Copyright 2023 WeiBo He.
  *
  * This file is part of Physica.
-
+ *
  * Physica is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
@@ -45,7 +45,8 @@ namespace Physica::Core {
         template<class MatrixType> void step(LValueMatrix<MatrixType>& target) const;
         void swap(SGD& __restrict obj) noexcept;
         /* Getters */
-        [[nodiscard]] const ScalarType& getLearnRate() const noexcept { return learnRate; }
+        [[nodiscard]] ScalarType getLearnRate() const noexcept { return learnRate; }
+        [[nodiscard]] ScalarType getMeanLearnRate() const noexcept { return meanLearnRate; }
         [[nodiscard]] unsigned int getBatchSize() const noexcept { return batchSize; }
         /* Setters */
         void setLearnRate(ScalarType lr);

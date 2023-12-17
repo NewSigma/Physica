@@ -47,6 +47,8 @@ namespace Physica::Core {
         using Location::exists;
         using Location::createDataSet;
         using Location::openDataSet;
+        using Location::createGroup;
+        using Location::openGroup;
         H5DataSet<1> createDataSet(const char* filepath, const char* name);
     };
 }
