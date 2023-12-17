@@ -1,6 +1,6 @@
 # Physica
 
-Physica is a high-performance and scalable template library for computational physics, dedicated to providing a rapid iteration platform for new algorithms. It is not a textbook or a ready-to-use solution. Rather, it is expected that users will write their own codes and implement ideas in less than 200 lines of code.
+Physica is a high-performance and scalable template library for computational physics, dedicated to providing a rapid iteration platform for new algorithms. It is not a textbook or a ready-to-use solution. Physica is the code that generates code. It helps users write their own codes and implement ideas in less than 200 lines of code.
 
 ## Table of Contents
 
@@ -24,13 +24,33 @@ Physica is a high-performance and scalable template library for computational ph
 
 Requirements:  
 
+[CMake](https://cmake.org/) 3.19 and above  
+[GCC](https://gcc.gnu.org/) 9.4.0  
 [fftw](http://www.fftw.org)  3.3.10  
 [HDF5](https://www.hdfgroup.org/solutions/hdf5/) 1.14.1  
 [Qt](https://www.qt.io/)  6.2.1  (Optional, Plotting support)  
 [CUDA](https://developer.nvidia.com/cuda-downloads)  12.0  (Optional)  
-[oneMKL](https://www.intel.com/) 2023.2.0 (Optional)
+[oneMKL](https://www.intel.com/) 2023.2.0 (Optional)  
 
-To use Physica, simply compile and link Physica as a part of your project.
+Compile Physica using the following command:  
+
+```
+mkdir -p /path/to/Physica/build
+cd /path/to/Physica/build
+cmake -DCMAKE_INSTALL_PREFIX=/path/to/install -DCMAKE_BUILD_TYPE=Release ../ # Note: Set CMake options as you need, see CMakeLists.txt for a full list of options
+make install -j<N>
+```
+
+Test Physica using the following command:  
+
+```
+cd /path/to/Physica/build/test
+ctest -j<N>
+```
+
+Do not use Physica if any test were failed.  
+
+To use Physica, examples that under /path/to/install/Physica/examples are ready to use. Link Physica as a part of your project for production use.
 
 ## Maintainers
 
