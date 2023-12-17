@@ -198,7 +198,7 @@ namespace Physica {
 
             MassVector massVec(numMolecularUnitCell, 1);
             MDCellType cell(std::move(lattice), std::move(pos), std::move(massVec));
-            cell.toSuperCell<ExtendCellOption::DOFMajor>({cellSize, cellSize, cellSize});
+            cell.toSuperCell<ExtendCellOption::AtomMajor>({cellSize, cellSize, cellSize});
             return cell;
         }
     };

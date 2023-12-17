@@ -35,7 +35,7 @@ namespace Physica::Core {
     }
 
     enum class ExtendCellOption {
-        DOFMajor,
+        AtomMajor,
         CellMajor
     };
 
@@ -572,7 +572,7 @@ namespace Physica::Core {
         const size_t newNumParticle = x * y * z * numParticle;
         PositionMatrix new_pos(newNumParticle, Dim);
         size_t index = 0;
-        if constexpr (Option == ExtendCellOption::DOFMajor) {
+        if constexpr (Option == ExtendCellOption::AtomMajor) {
             for (size_t i = 0; i < numParticle; ++i) {
                 for (unsigned int x_ = 0; x_ < x; ++x_) {
                     for (unsigned int y_ = 0; y_ < y; ++y_) {

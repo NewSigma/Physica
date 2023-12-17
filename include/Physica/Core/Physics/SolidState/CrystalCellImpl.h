@@ -53,7 +53,7 @@ namespace Physica::Core {
     template<class ScalarType>
     void CrystalCell<ScalarType>::toSuperCell(unsigned int x, unsigned int y, unsigned int z) {
         const size_t numAtom = getAtomCount();
-        Base::template toSuperCell<ExtendCellOption::DOFMajor>(x, y, z);
+        Base::template toSuperCell<ExtendCellOption::AtomMajor>(x, y, z);
         
         const size_t newNumAtom = getAtomCount();
         AtomicArray new_atomic(newNumAtom);
