@@ -26,13 +26,10 @@ namespace Physica::Core {
     class MomentumSGD : public SGD<PlainScalar> {
         static_assert(!PlainScalar::isDifferentiable, "[Error]: Differentiable<> pack is not necessary");
         using Base = SGD<PlainScalar>;
-        using ScalarType = Differentiable<PlainScalar, DiffMode::Reverse>;
-        constexpr static int AnyValue = 0;
+        using typename Base::ScalarType;
 
         Vector<PlainScalar> lastGrad;
         PlainScalar momentum;
-        ScalarType from;
-        ScalarType to;
     public:
         MomentumSGD(PlainScalar momentum_, PlainScalar learnRate, unsigned int batchSize);
         MomentumSGD(const MomentumSGD&) = default;
@@ -41,7 +38,6 @@ namespace Physica::Core {
         /* Operators */
         MomentumSGD& operator=(MomentumSGD obj) noexcept { swap(obj); return *this; }
         /* Operations */
-        void recordBegin();
         void recordEnd();
         void step();
         void swap(MomentumSGD& __restrict obj) noexcept;
@@ -56,11 +52,6 @@ namespace Physica::Core {
         assert(momentum.isPositive() && "[Error]: Invalid momentum");
     }
 
-    template<class PlainScalar>
-    void MomentumSGD<PlainScalar>::recordBegin() {
-        from = ScalarType(AnyValue);
-    }
-    
     template<class PlainScalar>
     void MomentumSGD<PlainScalar>::recordEnd() {
         to = ScalarType(AnyValue);
@@ -82,7 +73,5 @@ namespace Physica::Core {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         Base::swap(obj);
         momentum.swap(obj.momentum);
-        from.swap(obj.from);
-        to.swap(obj.to);
     }
 }

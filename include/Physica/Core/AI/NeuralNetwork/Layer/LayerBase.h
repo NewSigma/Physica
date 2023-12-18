@@ -37,8 +37,6 @@ namespace Physica::Core {
         ~LayerBase() = default;
         /* Operations */
         [[nodiscard]] VectorType forward(const VectorType& x) const { return Base::getDerived().forward(x); }
-        template<class Optimizer>
-        void opt_step(const Optimizer& opt) { Base::getDerived().opt_step(opt); }
         [[nodiscard]] Derived copy() const { return Base::getDerived().copy(); }
         /* Getters */
         [[nodiscard]] constexpr static bool isTrainMode() { return Internal::Traits<ScalarType>::isDifferentiable; }

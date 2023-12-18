@@ -45,8 +45,6 @@ namespace Physica::Core {
         /* Operations */
         template<class Dataset, class Optimizer, class RandomPoolType, class Executor>
         void train_step(const Dataset& dataset, Optimizer& opt);
-        template<class Optimizer>
-        void opt_step(Optimizer& opt) { Base::getDerived().opt_step(opt); }
 
         [[nodiscard]] ScalarType loss(const SampleType& sample, const LabelType& label) const { return Base::getDerived().loss(sample, label); }
         template<class Dataset>
@@ -107,7 +105,7 @@ namespace Physica::Core {
                 tracer.reverse(); // TODO: reverse on net_tracer should lock mutex of net_tracer
             }, Executor::getNumThread(), Executor::getNumThread()).wait();
         }
-        opt_step(opt);
+        opt.step();
         DiffTracer<PlainScalar>::getInstance().zero_grad(net_guard->getNode());
     }
 
@@ -125,13 +123,15 @@ namespace Physica::Core {
 
     template<class Derived>
     size_t NetBase<Derived>::classify(const VectorType& input) const {
-        const VectorType prob = softmax(forward(input));
+        constexpr bool isTrainMode = Base::isTrainMode();
+        static_assert(!isTrainMode, "[Error]: It is suggested using eval mode to reduce memory use");
+        const VectorType prob = softmax(Base::forward(input));
         PlainScalar max = 0;
         size_t index = 0;
         for (size_t i = 0; i < prob.getLength(); ++i) {
             if (prob[i] > max) {
                 index = i;
-                max = prob[i];
+                max = prob[i].getValue();
             }
         }
         return index;

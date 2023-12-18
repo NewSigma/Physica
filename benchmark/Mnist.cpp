@@ -65,13 +65,6 @@ public:
         return result;
     }
 
-    template<class Optimizer>
-    void opt_step(const Optimizer& opt) {
-        layer1.opt_step(opt);
-        layer2.opt_step(opt);
-        layer3.opt_step(opt);
-    }
-
     [[nodiscard]] ScalarType loss(const SampleType& sample, LabelType label) const {
         return Loss<ScalarType>::crossEntropy(forward(sample), label);
     }
@@ -89,9 +82,9 @@ public:
 
     template<class Dataset>
     PlainScalar calcAccuracy(const Dataset& dataset) const {
-        const auto& testSamples = dataset.getTestDatas();
-        const auto& testLabels = dataset.getTestLabels();
-        const size_t numTestData = dataset.getNumTestData();
+        const auto& testSamples = dataset.getSamples();
+        const auto& testLabels = dataset.getLabels();
+        const size_t numTestData = dataset.getSize();
         size_t count = 0;
         for (const auto& sample : testSamples)
             count += testLabels[Base::classify(VectorType(sample))] == 1;
@@ -132,8 +125,10 @@ int main() {
 
     auto& gen = RandomPoolType::getGen();
     const auto dataset = makeDataset();
-    auto nn = MnistNet<ScalarType>(512, 512, gen);
     auto opt = Optimizer(0.01, batchSize);
+    opt.recordBegin();
+    auto nn = MnistNet<ScalarType>(512, 512, gen);
+    opt.recordEnd();
 
     nn.train_step<Dataset, Optimizer, RandomPoolType, SequentialExecutor>(dataset, opt);
     return 0;
