@@ -21,6 +21,16 @@
 #include "RSpaceEwald.h"
 
 namespace Physica::Core {
+    template<class ScalarType, class RandomPoolType> class RandomBatchEwald;
+
+    namespace Internal {
+        template<class T1, class T2>
+        class Traits<RandomBatchEwald<T1, T2>> {
+        public:
+            using ScalarType = T1;
+            using REwaldType = RSpaceEwald<ScalarType, false>;
+        };
+    }
     /**
      * TODO: Anisotropic condition
      * 

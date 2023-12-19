@@ -82,13 +82,13 @@ namespace Physica::Core {
 
         [[nodiscard]] inline ScalarType potentialEnergy(const MDCellType& cell) const;
 
-        template<class Executor> [[nodiscard]] Vector<ScalarType> force(const MDCellType& cell) const;
+        template<class Executor> [[nodiscard]] Vector<ScalarType> force(const MDCellType& cell);
         template<class VectorType, class Executor>
-        void forceAsync(const MDCellType& cell, ContinuousVector<VectorType>& result) const;
+        void forceAsync(const MDCellType& cell, ContinuousVector<VectorType>& result);
         template<class Executor> [[nodiscard]] Vector<ScalarType> force_short(const MDCellType& cell) const;
-        template<class Executor> [[nodiscard]] inline Vector<ScalarType> force_long(const MDCellType& cell) const;
+        template<class Executor> [[nodiscard]] inline Vector<ScalarType> force_long(const MDCellType& cell);
 
-        [[nodiscard]] inline LatticeMatrix virial(const MDCellType& cell) const;
+        [[nodiscard]] inline LatticeMatrix virial(const MDCellType& cell);
         void swap(BKSModel& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] size_t getNumMolecule() const noexcept { return getNumParticle() / 3; }
@@ -151,7 +151,7 @@ namespace Physica::Core {
 
     template<class ScalarType, class EwaldType, bool IsSmallCell>
     template<class Executor>
-    Vector<ScalarType> BKSModel<ScalarType, EwaldType, IsSmallCell>::force(const MDCellType& cell) const {
+    Vector<ScalarType> BKSModel<ScalarType, EwaldType, IsSmallCell>::force(const MDCellType& cell) {
         Vector<ScalarType> result;
         forceAsync<Vector<ScalarType>, Executor>(cell, result);
         return result;
@@ -159,7 +159,7 @@ namespace Physica::Core {
 
     template<class ScalarType, class EwaldType, bool IsSmallCell>
     template<class VectorType, class Executor>
-    void BKSModel<ScalarType, EwaldType, IsSmallCell>::forceAsync(const MDCellType& cell, ContinuousVector<VectorType>& result) const {
+    void BKSModel<ScalarType, EwaldType, IsSmallCell>::forceAsync(const MDCellType& cell, ContinuousVector<VectorType>& result) {
         static_assert(!Internal::Traits<Executor>::isCudaEnabled, "[Error]: Cuda is not supported");
         assert(cell.getNumParticle() % 3 == 0);
         auto future = Executor::schedule([this, &cell, &result]() {
@@ -179,13 +179,13 @@ namespace Physica::Core {
 
     template<class ScalarType, class EwaldType, bool IsSmallCell>
     template<class Executor>
-    inline Vector<ScalarType> BKSModel<ScalarType, EwaldType, IsSmallCell>::force_long(const MDCellType& cell) const {
+    inline Vector<ScalarType> BKSModel<ScalarType, EwaldType, IsSmallCell>::force_long(const MDCellType& cell) {
         return ewald.template force<Executor>(cell.getPos());
     }
 
     template<class ScalarType, class EwaldType, bool IsSmallCell>
     typename BKSModel<ScalarType, EwaldType, IsSmallCell>::LatticeMatrix
-    inline BKSModel<ScalarType, EwaldType, IsSmallCell>::virial(const MDCellType& cell) const {
+    inline BKSModel<ScalarType, EwaldType, IsSmallCell>::virial(const MDCellType& cell) {
         return Base::virial(cell) + ewald.virial(cell.getPos());
     }
 

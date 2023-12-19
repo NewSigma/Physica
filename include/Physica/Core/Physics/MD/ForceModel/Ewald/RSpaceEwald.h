@@ -142,7 +142,6 @@ namespace Physica::Core {
     template<class ScalarType, bool IsSmallCell>
     template<class Executor> 
     inline Vector<ScalarType> RSpaceEwald<ScalarType, IsSmallCell>::force_short(const PositionMatrix& pos) const {
-        static_assert(std::is_same<Executor, SequentialExecutor>::value, "[Error]: Parallelization is not implemented");
         const Vector<ScalarType> rSpaceSum = Base::template force<SequentialExecutor>(lattice, pos);
         return rSpaceSum;
     }

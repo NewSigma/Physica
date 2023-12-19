@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 WeiBo He.
+ * Copyright 2022-2023 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -19,27 +19,26 @@
 #include <iostream>
 #include <gperftools/profiler.h>
 #include "Physica/Core/Physics/MD/ForceModel/Q_TIP4P.h"
-//#include "Physica/Core/Physics/MD/ForceModel/Ewald/RSpaceEwald.cuh"
+#include "Physica/Core/Physics/MD/ForceModel/Ewald/RSpaceEwald.cuh"
 #include "Physica/Core/Physics/MD/ForceModel/Ewald/Ewald.h"
 #include "Physica/Core/Physics/SolidState/CrystalCell.h"
 #include "Physica/Core/Physics/MD/RPMD.h"
 #include "Physica/Core/Physics/MD/KineticModel/FreeModel.h"
 #include "Physica/Core/Physics/MD/Thermostat/DoubleThermo.h"
 #include "Physica/Core/Physics/MD/Barostat/SCRBaro.h"
-#include "Physica/Core/Parallel/Executor/ThreadExecutor.h"
+#include "Physica/Core/Parallel/Executor/CudaExecutor.cuh"
 #include "Physica/Utils/BenchmarkHelper.h"
 
 using namespace Physica::Core;
 using namespace Physica::Utils;
-using ScalarType = Scalar<Double>;
+using ScalarType = Scalar<Float>;
 using RandomPoolType = RandomPool<std::mt19937>;
-using KineticModel = FreeModel<ScalarType, 3, Dynamic, RPMDIntegrator::Exact>;
-//using EwaldType = Ewald<ScalarType, device_obj<RSpaceEwald<ScalarType>>;
-using EwaldType = Ewald<ScalarType>;
+using EwaldType = Ewald<ScalarType, Physica::Core::device_obj<RSpaceEwald<ScalarType>>>;
 using ForceModel = Q_TIP4P<ScalarType, EwaldType, false>;
-using ThermostatType = DoubleThermo<ScalarType>;
-using BarostatType = SCRBaro<ScalarType, Dynamic, RandomPoolType, BaroType::XY>;
-constexpr size_t numReplica = 32;
+using MDType = RPMD<ScalarType, 3, 1, Physica::Utils::PageLockedAllocator<ScalarType>>;
+using KineticModel = FreeModel<ScalarType, 3, 1, RPMDIntegrator::Exact>;
+using ThermostatType = DoubleThermo<ScalarType, 3, 1>;
+using BarostatType = SCRBaro<ScalarType, 1, RandomPoolType, BaroType::XY>;
 constexpr double temperatureT = PhyConst<AU>::kToTemperature(100);
 constexpr double thermostatTime = PhyConst<AU>::secondToTime(100 * 1E-15);
 constexpr double compressRate = 10;
@@ -81,28 +80,23 @@ int main() {
     auto& gen = RandomPoolType::getGen();
     auto cell = makeSystem(5);
     ForceModel::sortPosition(cell);
-    RPMD<ScalarType> rpmd(std::move(cell), numReplica, 16, temperatureT, timeStep);
+    MDType rpmd(std::move(cell), 1, 1, temperatureT, timeStep);
     rpmd.initMomentum(gen);
     
-    KineticModel kineticModel(temperatureT, numReplica);
-    ForceModel forceModel(rpmd.phaseToCell(0), pair_cutoff, {});
+    KineticModel kineticModel(temperatureT, 1);
+    ForceModel forceModel(rpmd.phaseToCell(0), pair_cutoff, EwaldType{});
     ThermostatType thermo(temperatureT, thermostatTime);
     BarostatType barostat(compressRate, temperatureT, 0.0 / PhyConst<AU>::pressToGPa(1));
     {
-        ThreadPool::numThreadRequired = 4;
-        ThreadPool& pool = ThreadPool::getInstance();
-        ProfilerStart("profiler.dat");
         auto timeuse = Benchmark::run([&]() {
-            rpmd.npt_step_for<ThermostatType, RandomPoolType, BarostatType, KineticModel, decltype(forceModel), ThreadExecutor>(
+            rpmd.npt_step_for<ThermostatType, RandomPoolType, BarostatType, KineticModel, decltype(forceModel), CudaExecutor>(
                 PhyConst<AU>::secondToTime(1 * 1E-15),
                 thermo,
                 barostat,
                 kineticModel,
                 forceModel);
         }, 8, 20);
-        ProfilerStop();
-        std::cout << "4 Threads time use: " << timeuse.first << '(' << timeuse.second << ")\n";
-        pool.shouldExit();
+        std::cout << "Time use: " << timeuse.first << '(' << timeuse.second << ")\n";
     }
     return 0;
 }

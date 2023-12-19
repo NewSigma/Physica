@@ -109,6 +109,7 @@ namespace Physica::Core {
         /* Setters */
         void setCutoff(ScalarType cutoff_);
     protected:
+        device_obj() = default;
         device_obj(size_t numParticle);
         device_obj(size_t numParticle, ScalarType cutoff_);
         device_obj(const device_obj&) = default;

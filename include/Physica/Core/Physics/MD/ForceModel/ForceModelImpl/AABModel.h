@@ -125,12 +125,12 @@ namespace Physica::Core {
         const size_t minIndexO = maxIndexH;
         const size_t maxIndexO = minIndexO + numParticle / 3;
         for (size_t i = 0; i < maxIndexH; ++i) {
-            const bool isHydrogen = cell.getMass(i).getValue() == PhyConst<AU>::atomMass(1);
+            const bool isHydrogen = cell.getMass(i).getValue() == PhyConst<AU>::atomMass(atomicNum1);
             if (!isHydrogen)
                 return false;
         }
         for (size_t i = minIndexO; i < maxIndexO; ++i) {
-            const bool isOxygen = cell.getMass(i).getValue() == PhyConst<AU>::atomMass(8);
+            const bool isOxygen = cell.getMass(i).getValue() == PhyConst<AU>::atomMass(atomicNum2);
             if (!isOxygen)
                 return false;
         }

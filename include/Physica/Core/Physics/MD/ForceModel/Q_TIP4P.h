@@ -46,6 +46,7 @@ namespace Physica::Core {
         using This = Q_TIP4P<ScalarType, EwaldType, IsSmallCell>;
         using Base = AABModel<ScalarType>;
         using PlainScalar = typename ScalarType::PlainScalar;
+        using REwaldType = typename Internal::Traits<EwaldType>::REwaldType;
         using LJModelType = LJModel<ScalarType, IsSmallCell>;
         using Vector3D = Vector<ScalarType, Dim>;
     public:
@@ -77,19 +78,19 @@ namespace Physica::Core {
         [[nodiscard]] ScalarType potentialEnergy(const MDCellType& cell) const;
         [[nodiscard]] ScalarType potentialEnergy_unsort(const MDCellType& cell) const;
 
-        template<class Executor> [[nodiscard]] Vector<ScalarType> force(const MDCellType& cell) const;
-        template<class Executor> [[nodiscard]] Vector<ScalarType> force_unsort(const MDCellType& cell) const;
+        template<class Executor> [[nodiscard]] Vector<ScalarType> force(const MDCellType& cell);
+        template<class Executor> [[nodiscard]] Vector<ScalarType> force_unsort(const MDCellType& cell);
         template<class VectorType, class Executor>
-        void forceAsync(const MDCellType& cell, ContinuousVector<VectorType>& result) const;
+        void forceAsync(const MDCellType& cell, ContinuousVector<VectorType>& result);
         template<class Executor> [[nodiscard]] Vector<ScalarType> force_short(const MDCellType& cell) const;
         template<class Executor> [[nodiscard]] Vector<ScalarType> force_short_unsort(const MDCellType& cell) const;
-        template<class Executor> [[nodiscard]] Vector<ScalarType> force_long(const MDCellType& cell) const;
-        template<class Executor> [[nodiscard]] Vector<ScalarType> force_long_unsort(const MDCellType& cell) const;
+        template<class Executor> [[nodiscard]] Vector<ScalarType> force_long(const MDCellType& cell);
+        template<class Executor> [[nodiscard]] Vector<ScalarType> force_long_unsort(const MDCellType& cell);
 
-        [[nodiscard]] LatticeMatrix virial(const MDCellType& cell) const;
+        [[nodiscard]] LatticeMatrix virial(const MDCellType& cell);
         [[nodiscard]] LatticeMatrix virial_morse(const MDCellType& cell) const;
         template<class Executor, bool UseDynamicPolar>
-        [[nodiscard]] PositionMatrix makeInducedDipole(const MDCellType& cell) const;
+        [[nodiscard]] PositionMatrix makeInducedDipole(const MDCellType& cell);
         void swap(Q_TIP4P& __restrict model) noexcept;
         /* Getters */
         [[nodiscard]] size_t getNumMolecule() const noexcept { return getNumParticle() / 3; }
@@ -104,7 +105,7 @@ namespace Physica::Core {
     private:
         PositionMatrix makeChargePos(const MDCellType& cell) const;
         void force_short_intraMolecule(const MDCellType& cell, Vector<ScalarType>& shortForce) const;
-        template<class Executor> [[nodiscard]] Vector<ScalarType> force_long_PartialChargeRepr(const MDCellType& cell) const;
+        template<class Executor> [[nodiscard]] Vector<ScalarType> force_long_PartialChargeRepr(const MDCellType& cell);
 
         ScalarType potentialEnergyWithoutEwald(const MDCellType& cell) const;
         ScalarType ewaldEnergy(const MDCellType& cell) const;
@@ -121,7 +122,7 @@ namespace Physica::Core {
             , lj_model(lj_sigma, cutoff.getValue()) {
         assert(refer_cell.getNumParticle() % 3 == 0 && "[Error]: This is not a cell of water");
         const size_t numMolecule = refer_cell.getNumParticle() / 3;
-        ewald = RSpaceEwald<ScalarType, IsSmallCell>(refer_cell.getLattice(), Base::makeCharges(numMolecule, charge * 0.5, -charge));
+        ewald = REwaldType(refer_cell.getLattice(), Base::makeCharges(numMolecule, charge * 0.5, -charge));
     }
 
     template<class ScalarType, class EwaldType, bool IsSmallCell>
@@ -146,7 +147,7 @@ namespace Physica::Core {
 
     template<class ScalarType, class EwaldType, bool IsSmallCell>
     template<class Executor>
-    Vector<ScalarType> Q_TIP4P<ScalarType, EwaldType, IsSmallCell>::force(const MDCellType& cell) const {
+    Vector<ScalarType> Q_TIP4P<ScalarType, EwaldType, IsSmallCell>::force(const MDCellType& cell) {
         Vector<ScalarType> result;
         forceAsync<Vector<ScalarType>, Executor>(cell, result);
         return result;
@@ -154,7 +155,7 @@ namespace Physica::Core {
 
     template<class ScalarType, class EwaldType, bool IsSmallCell>
     template<class Executor>
-    Vector<ScalarType> Q_TIP4P<ScalarType, EwaldType, IsSmallCell>::force_unsort(const MDCellType& cell) const {
+    Vector<ScalarType> Q_TIP4P<ScalarType, EwaldType, IsSmallCell>::force_unsort(const MDCellType& cell) {
         MDCellType copy = cell;
         const auto permute = sortPosition(copy);
         const Vector<ScalarType> sort_f = force<Executor>(copy);
@@ -164,8 +165,7 @@ namespace Physica::Core {
 
     template<class ScalarType, class EwaldType, bool IsSmallCell>
     template<class VectorType, class Executor>
-    void Q_TIP4P<ScalarType, EwaldType, IsSmallCell>::forceAsync(const MDCellType& cell, ContinuousVector<VectorType>& result) const {
-        static_assert(!Internal::Traits<Executor>::isCudaEnabled, "[Error]: Cuda is not supported");
+    void Q_TIP4P<ScalarType, EwaldType, IsSmallCell>::forceAsync(const MDCellType& cell, ContinuousVector<VectorType>& result) {
         assert(cell.getNumParticle() % 3 == 0);
         auto future = Executor::schedule([this, &cell, &result]() {
             result = force_short<Executor>(cell);
@@ -201,7 +201,7 @@ namespace Physica::Core {
 
     template<class ScalarType, class EwaldType, bool IsSmallCell>
     template<class Executor>
-    Vector<ScalarType> Q_TIP4P<ScalarType, EwaldType, IsSmallCell>::force_long(const MDCellType& cell) const {
+    Vector<ScalarType> Q_TIP4P<ScalarType, EwaldType, IsSmallCell>::force_long(const MDCellType& cell) {
         Vector<ScalarType> coulomb = force_long_PartialChargeRepr<Executor>(cell);
         const size_t numMolecule = getNumMolecule();
         const size_t minIndexO = 2 * numMolecule;
@@ -224,7 +224,7 @@ namespace Physica::Core {
 
     template<class ScalarType, class EwaldType, bool IsSmallCell>
     template<class Executor>
-    Vector<ScalarType> Q_TIP4P<ScalarType, EwaldType, IsSmallCell>::force_long_unsort(const MDCellType& cell) const {
+    Vector<ScalarType> Q_TIP4P<ScalarType, EwaldType, IsSmallCell>::force_long_unsort(const MDCellType& cell) {
         MDCellType copy = cell;
         const auto permute = sortPosition(copy);
         const Vector<ScalarType> sort_f = force_long<Executor>(copy);
@@ -233,7 +233,8 @@ namespace Physica::Core {
     }
 
     template<class ScalarType, class EwaldType, bool IsSmallCell>
-    typename Q_TIP4P<ScalarType, EwaldType, IsSmallCell>::LatticeMatrix Q_TIP4P<ScalarType, EwaldType, IsSmallCell>::virial(const MDCellType& cell) const {
+    typename Q_TIP4P<ScalarType, EwaldType, IsSmallCell>::LatticeMatrix
+    Q_TIP4P<ScalarType, EwaldType, IsSmallCell>::virial(const MDCellType& cell) {
         LatticeMatrix result(Dim, Dim, 0);
         const size_t numMolecule = getNumMolecule();
         const size_t offset = 2 * numMolecule;
@@ -311,7 +312,7 @@ namespace Physica::Core {
     template<class ScalarType, class EwaldType, bool IsSmallCell>
     template<class Executor, bool UseDynamicPolar>
     typename Q_TIP4P<ScalarType, EwaldType, IsSmallCell>::PositionMatrix
-    Q_TIP4P<ScalarType, EwaldType, IsSmallCell>::makeInducedDipole(const MDCellType& cell) const {
+    Q_TIP4P<ScalarType, EwaldType, IsSmallCell>::makeInducedDipole(const MDCellType& cell) {
         assert(cell.getNumParticle() % 3 == 0 && "[Error]: This is not cell for water");
         const size_t numMolecule = cell.getNumParticle() / 3;
         const Vector<ScalarType> coulomb = force_long_PartialChargeRepr<Executor>(cell);
@@ -451,7 +452,7 @@ namespace Physica::Core {
 
     template<class ScalarType, class EwaldType, bool IsSmallCell>
     template<class Executor>
-    Vector<ScalarType> Q_TIP4P<ScalarType, EwaldType, IsSmallCell>::force_long_PartialChargeRepr(const MDCellType& cell) const {
+    Vector<ScalarType> Q_TIP4P<ScalarType, EwaldType, IsSmallCell>::force_long_PartialChargeRepr(const MDCellType& cell) {
         assert(cell.getNumParticle() % 3 == 0);
         assert(isCellOrdered(cell));
         assert(ewald.getLattice() == cell.getLattice() && "[Error]: Lattice is not updated");

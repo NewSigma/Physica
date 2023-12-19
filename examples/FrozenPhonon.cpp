@@ -50,7 +50,7 @@ public:
     using Base::Base;
     /* Operations */
     template<class Executor>
-    [[nodiscard]] Vector<ScalarType> force(const MDCellType& cell) const {
+    [[nodiscard]] Vector<ScalarType> force(const MDCellType& cell) {
         return Base::force_unsort<Executor>(cell);
     }
     ScalarType potentialEnergy(const MDCellType& cell) const {

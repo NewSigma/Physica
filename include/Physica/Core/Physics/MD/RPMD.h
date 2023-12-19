@@ -53,12 +53,13 @@ namespace Physica::Core {
              size_t NumReplica = Dynamic,
              class ForceMatrixAllocator = Utils::HostAllocator<ScalarType>>
     class RPMD final : public RPMDBase<ScalarType> {
+        using This = RPMD<ScalarType, Dim, NumReplica, ForceMatrixAllocator>;
         using Base = RPMDBase<ScalarType>;
         using typename Base::PlainScalar;
     public:
         using RingPolymerType = RingPolymer<ScalarType, Dim, NumReplica>;
         using PhaseMatrix = typename RingPolymerType::PhaseMatrix;
-        using ForceMatrix = DenseMatrix<ScalarType, MatrixOption::Column | MatrixOption::Vector, Dynamic, NumReplica, Dynamic, NumReplica, ForceMatrixAllocator>;
+        using ForceMatrix = DenseMatrix<ScalarType, MatrixOption::Column | MatrixOption::Vector, Dynamic, Dynamic, Dynamic, Dynamic, ForceMatrixAllocator>;
         using MDCellType = typename RingPolymerType::MDCellType;
         using LatticeMatrix = typename MDCellType::LatticeMatrix;
         using PositionMatrix = typename MDCellType::PositionMatrix;
@@ -155,16 +156,16 @@ namespace Physica::Core {
 
         [[nodiscard]] ScalarType calcTemperature() const { return getRingPolymer().calcTemperature(); }
         template<class ForceModel, class Executor>
-        [[nodiscard]] ScalarType calcPressThermo(const ForceModel& model) const;
+        [[nodiscard]] ScalarType calcPressThermo(ForceModel& model) const;
 
         template<class ForceModel, class Executor>
-        [[nodiscard]] LatticeMatrix makeStressPrim(const ForceModel& model) const;
+        [[nodiscard]] LatticeMatrix makeStressPrim(ForceModel& model) const;
         template<class ForceModel, class Executor>
-        [[nodiscard]] LatticeMatrix makeStressCentroid(const ForceModel& model) const;
+        [[nodiscard]] LatticeMatrix makeStressCentroid(ForceModel& model) const;
         template<class ForceModel, class Executor>
-        [[nodiscard]] LatticeMatrix makeStressVirial(const ForceModel& model) const;
+        [[nodiscard]] LatticeMatrix makeStressVirial(ForceModel& model) const;
         template<class ForceModel, class Executor>
-        [[nodiscard]] LatticeMatrix makeStressClassical(const ForceModel& model) const;
+        [[nodiscard]] LatticeMatrix makeStressClassical(ForceModel& model) const;
 
         void read(const H5Location& loc, const char* name);
         void write(H5Location& loc, const char* name) const;

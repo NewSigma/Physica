@@ -23,6 +23,16 @@
 #include "RSpaceEwald.h"
 
 namespace Physica::Core {
+    template<class ScalarType, class REwaldType = RSpaceEwald<ScalarType, false>> class Ewald;
+
+    namespace Internal {
+        template<class T1, class T2>
+        class Traits<Ewald<T1, T2>> {
+        public:
+            using ScalarType = T1;
+            using REwaldType = T2;
+        };
+    }
     /**
      * \tparam REwaldType: R(Space)EwaldType
      * 
@@ -30,20 +40,25 @@ namespace Physica::Core {
      * [1] Martin,Richard M. Electronic structure : basic theory and practical methods[M].Beijing: World publishing corporation; Cambridge: Cambridge University Press, 2017:499-503
      * [2] Toukmaji A Y, Board J A. Ewald summation techniques in perspective: a survey[J]. Computer Physics Communications, 1996, 95(2-3):73-92.
      */
-    template<class ScalarType, class REwaldType = RSpaceEwald<ScalarType, false>>
+    template<class ScalarType, class REwaldType>
     class Ewald : private REwaldType {
+        constexpr static bool IsDeviceREwald = Utils::is_device_obj<REwaldType>::value;
+        using This = Ewald<ScalarType, REwaldType>;
         using Base = REwaldType;
         using Base::Dim;
-        using typename Base::ComplexType;
         using typename Base::PlainScalar;
         using typename Base::LatticeMatrix;
         using typename Base::PositionMatrix;
-        using typename Base::Vector3D;
+        using ComplexType = ComplexScalar<ScalarType>;
         using CellListType = CellList<ScalarType>;
         using Index3D = typename CellListType::Index3D;
+        using Vector3D = Vector<ScalarType, 3>;
+        using LatticeReturnType = typename std::conditional<IsDeviceREwald, LatticeMatrix, const LatticeMatrix&>::type;
+        using HostChargeVector = typename std::conditional<IsDeviceREwald, Vector<ScalarType>, PlainStruct<void>>::type;
 
         ScalarType selfE;
         ScalarType gammaPointE;
+        HostChargeVector hostCharges;
     public:
         Ewald() = default;
         Ewald(LatticeMatrix lattice, Vector<ScalarType> charges);
@@ -57,20 +72,20 @@ namespace Physica::Core {
         [[nodiscard]] ScalarType potentialEnergy(const PositionMatrix& pos) const;
 
         template<class Executor>
-        [[nodiscard]] Vector<ScalarType> force(const PositionMatrix& pos) const;
+        [[nodiscard]] Vector<ScalarType> force(const PositionMatrix& pos);
         template<class Executor>
         [[nodiscard]] Vector<ScalarType> force_long(const PositionMatrix& pos) const;
 
         [[nodiscard]] ComplexType forceConst(const PositionMatrix& pos, Vector3D qPoint, size_t dof1, size_t dof2) const;
 
-        [[nodiscard]] LatticeMatrix virial(const PositionMatrix& pos) const;
+        [[nodiscard]] LatticeMatrix virial(const PositionMatrix& pos);
         void swap(Ewald& __restrict obj) noexcept;
         /* Getters */
+        [[nodiscard]] inline LatticeReturnType getLattice() const noexcept;
+        [[nodiscard]] inline LatticeReturnType getRepLattice() const noexcept;
+        [[nodiscard]] inline const Vector<ScalarType>& getCharges() const noexcept;
         using Base::getNumParticle;
-        using Base::getLattice;
         using Base::getVolume;
-        using Base::getRepLattice;
-        using Base::getCharges;
         using Base::getIntegralLimit;
         using Base::getKSpaceSumRange;
         [[nodiscard]] ScalarType getSelfE() const noexcept { return selfE; }
@@ -86,10 +101,11 @@ namespace Physica::Core {
 
     template<class ScalarType, class REwaldType>
     Ewald<ScalarType, REwaldType>::Ewald(LatticeMatrix lattice, Vector<ScalarType> charges)
-            : Base(std::move(lattice)
-            , std::move(charges)) {
+            : Base(std::move(lattice), std::move(charges)) {
         selfE = Base::calcSelfE();
         gammaPointE = Base::calcGammaPointE();
+        if constexpr (IsDeviceREwald)
+            hostCharges = std::move(charges);
     }
 
     template<class ScalarType, class REwaldType>
@@ -97,6 +113,8 @@ namespace Physica::Core {
         Base::swap(base);
         selfE = Base::calcSelfE();
         gammaPointE = Base::calcGammaPointE();
+        if constexpr (IsDeviceREwald)
+            Base::getCharges().toHost(hostCharges);
         return *this;
     }
     /**
@@ -131,12 +149,12 @@ namespace Physica::Core {
 
     template<class ScalarType, class REwaldType>
     template<class Executor>
-    Vector<ScalarType> Ewald<ScalarType, REwaldType>::force(const PositionMatrix& pos) const {
+    Vector<ScalarType> Ewald<ScalarType, REwaldType>::force(const PositionMatrix& pos) {
         Vector<ScalarType> result;
         auto kSpaceFuture = Executor::schedule([this, pos, &result]() {
             result = force_long<SequentialExecutor>(pos);
         });
-        const Vector<ScalarType> rSpaceSum = Base::template force_short<SequentialExecutor>(pos);
+        const Vector<ScalarType> rSpaceSum = Base::template force_short<Executor>(pos);
         Executor::auto_wait(kSpaceFuture);
         result += rSpaceSum;
         return result;
@@ -191,7 +209,7 @@ namespace Physica::Core {
     }
 
     template<class ScalarType, class REwaldType>
-    typename Ewald<ScalarType, REwaldType>::LatticeMatrix Ewald<ScalarType, REwaldType>::virial(const PositionMatrix& pos) const {
+    typename Ewald<ScalarType, REwaldType>::LatticeMatrix Ewald<ScalarType, REwaldType>::virial(const PositionMatrix& pos) {
         const ScalarType factor = reciprocal(square(PlainScalar(2) * getIntegralLimit()));
         const size_t numParticle = getNumParticle();
         Vector<ScalarType> dots(numParticle);
@@ -233,6 +251,32 @@ namespace Physica::Core {
         Base::swap(obj);
         selfE.swap(obj.selfE);
         gammaPointE.swap(obj.gammaPointE);
+        if constexpr (IsDeviceREwald)
+            hostCharges.swap(obj.hostCharges);
+    }
+
+    template<class ScalarType, class REwaldType>
+    inline typename Ewald<ScalarType, REwaldType>::LatticeReturnType Ewald<ScalarType, REwaldType>::getLattice() const noexcept {
+        if constexpr (IsDeviceREwald)
+            return Base::getLattice().toHost();
+        else
+            return Base::getLattice();
+    }
+
+    template<class ScalarType, class REwaldType>
+    inline typename Ewald<ScalarType, REwaldType>::LatticeReturnType Ewald<ScalarType, REwaldType>::getRepLattice() const noexcept {
+        if constexpr (IsDeviceREwald)
+            return Base::getRepLattice().toHost();
+        else
+            return Base::getRepLattice();
+    }
+
+    template<class ScalarType, class REwaldType>
+    inline const Vector<ScalarType>& Ewald<ScalarType, REwaldType>::getCharges() const noexcept {
+        if constexpr (IsDeviceREwald)
+            return hostCharges;
+        else
+            return Base::getCharges();
     }
 
     template<class ScalarType, class REwaldType>

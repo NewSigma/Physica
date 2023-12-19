@@ -69,12 +69,17 @@ namespace Physica::Core {
         [[nodiscard]] inline LatticeMatrix virial(const PositionMatrix& pos);
         void swap(device_obj& __restrict obj) noexcept;
         /* Getters */
+        [[nodiscard]] const DeviceLattice& getLattice() const noexcept { return lattice; }
+        [[nodiscard]] const DeviceLattice& getRepLattice() const noexcept { return repLatt; }
+        [[nodiscard]] const DeviceVector& getCharges() const noexcept { return charges; }
         [[nodiscard]] __host__ __device__ size_t getNumParticle() const noexcept { return charges.getLength(); }
         [[nodiscard]] __host__ __device__ ScalarType getVolume() const noexcept { return volume; }
         [[nodiscard]] __host__ __device__ ScalarType getInvVolume() const noexcept { return inv_volume; }
         [[nodiscard]] __host__ __device__ ScalarType getIntegralLimit() const noexcept { return integralLimit; }
         [[nodiscard]] __host__ __device__ ScalarType getRSpaceCutoff() const noexcept { return Base::getCutoff(); }
         [[nodiscard]] __host__ __device__ ScalarType getSquaredRSpaceCutoff() const noexcept { return Base::getSquaredCutoff(); }
+        [[nodiscard]] const SearchRangeType& getRSpaceSumRange() const noexcept { return rSpaceSumRange; }
+        [[nodiscard]] const SearchRangeType& getKSpaceSumRange() const noexcept { return kSpaceSumRange; }
         /* Setters */
         void setLattice(const LatticeMatrix& lattice_);
         void setIntegralLimit(ScalarType integralLimit_);

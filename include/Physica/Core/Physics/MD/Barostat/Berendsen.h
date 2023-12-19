@@ -42,8 +42,9 @@ namespace Physica::Core {
     class Berendsen {
     public:
         constexpr static unsigned int Dim = 3;
-        using MDType = RPMD<ScalarType, Dim, NumReplica>;
-        using LatticeMatrix = typename MDType::MDCellType::LatticeMatrix;
+        using MDCellType = MDCell<ScalarType, Dim>;
+        using LatticeMatrix = typename MDCellType::LatticeMatrix;
+        using InvLatticeMatrix = typename MDCellType::InvLatticeMatrix;
         using Vector3D = Vector<ScalarType, Dim>;
     protected:
         ScalarType compressRate;
@@ -59,7 +60,7 @@ namespace Physica::Core {
         /* Operators */
         Berendsen& operator=(Berendsen obj) noexcept { swap(obj); return *this; }
         /* Operations */
-        template<class ForceModel>
+        template<class MDType, class ForceModel>
         void npt_step(MDType& rpmd, const LatticeMatrix& stress, ScalarType deltaT);
         void swap(Berendsen& __restrict obj) noexcept;
         /* Getters */
@@ -68,9 +69,9 @@ namespace Physica::Core {
         void setTemperature(ScalarType tempT_) { tempT = std::move(tempT_); }
     protected:
         [[nodiscard]] LatticeMatrix makeDecayMatrix(ScalarType pressPerDOF) const;
-        [[nodiscard]] LatticeMatrix makeScaleMatrix(const MDType& rpmd, const LatticeMatrix& deltaLattice) const;
+        [[nodiscard]] LatticeMatrix makeScaleMatrix(const InvLatticeMatrix& invLatt, const LatticeMatrix& deltaLattice) const;
     private:
-        [[nodiscard]] LatticeMatrix makeDeltaLattice(MDType& rpmd, ScalarType deltaT) const;
+        [[nodiscard]] LatticeMatrix makeDeltaLattice(const LatticeMatrix& lattice, ScalarType volume, ScalarType deltaT) const;
     };
 
     template<class ScalarType, size_t NumReplica, BaroType Type>
@@ -84,17 +85,16 @@ namespace Physica::Core {
     }
 
     template<class ScalarType, size_t NumReplica, BaroType Type>
-    template<class ForceModel>
-    void Berendsen<ScalarType, NumReplica, Type>::npt_step(
-            MDType& rpmd, const LatticeMatrix& stress, ScalarType deltaT) {
+    template<class MDType, class ForceModel>
+    void Berendsen<ScalarType, NumReplica, Type>::npt_step(MDType& rpmd, const LatticeMatrix& stress, ScalarType deltaT) {
         lastStress = stress;
 
         const size_t numReplica = rpmd.getNumReplica();
         const size_t numParticle = rpmd.getNumParticle();
         const size_t dof = rpmd.getDOF();
         auto& phase = rpmd.getPhaseMatrix();
-        const auto deltaLattice = makeDeltaLattice(rpmd, deltaT);
-        const LatticeMatrix scaleMatrix = makeScaleMatrix(rpmd, deltaLattice);
+        const auto deltaLattice = makeDeltaLattice(rpmd.getLattice(), rpmd.getVolume(), deltaT);
+        const LatticeMatrix scaleMatrix = makeScaleMatrix(rpmd.getInvLattice(), deltaLattice);
         for (size_t i = 0; i < numReplica; ++i) {
             auto col = phase.col(i);
             auto momentum = col.head(dof);
@@ -146,12 +146,12 @@ namespace Physica::Core {
     template<class ScalarType, size_t NumReplica, BaroType Type>
     typename Berendsen<ScalarType, NumReplica, Type>::LatticeMatrix
     Berendsen<ScalarType, NumReplica, Type>::makeScaleMatrix(
-            const MDType& rpmd, const LatticeMatrix& deltaLattice) const {
+            const InvLatticeMatrix& invLatt, const LatticeMatrix& deltaLattice) const {
         LatticeMatrix result;
         if constexpr (Type == BaroType::Anisotropic)
-            result = deltaLattice * rpmd.getInvLattice();
+            result = deltaLattice * invLatt;
         else {
-            result = deltaLattice * rpmd.getInvLattice();
+            result = deltaLattice * invLatt;
             auto col = result.col(2);
             col = ScalarType(0);
         }
@@ -160,10 +160,9 @@ namespace Physica::Core {
 
     template<class ScalarType, size_t NumReplica, BaroType Type>
     typename Berendsen<ScalarType, NumReplica, Type>::LatticeMatrix
-    Berendsen<ScalarType, NumReplica, Type>::makeDeltaLattice(MDType& rpmd, ScalarType deltaT) const {
-        const ScalarType pressPerDOF = (tempT * PhyConst<AU>::boltzmannK) / rpmd.getVolume();
+    Berendsen<ScalarType, NumReplica, Type>::makeDeltaLattice(const LatticeMatrix& lattice, ScalarType volume, ScalarType deltaT) const {
+        const ScalarType pressPerDOF = (tempT * PhyConst<AU>::boltzmannK) / volume;
         const auto decayMatrix = makeDecayMatrix(pressPerDOF);
-        const auto& lattice = rpmd.getLattice();
         LatticeMatrix result(Dim, Dim, 0);
         auto integrateKernel = [&, deltaT](size_t r, size_t c) {
             using Integrator = ODESolver<ScalarType, 1>;

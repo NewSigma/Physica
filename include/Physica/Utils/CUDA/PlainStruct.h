@@ -19,6 +19,8 @@
 #pragma once
 
 namespace Physica {
+    template<class Derived> class PlainStruct;
+    template<> class PlainStruct<void> {};
     /**
      * \class PlainStruct pass objects to cuda kernel ignoring constructors and destructors because resource control is cpu's duty.
      */

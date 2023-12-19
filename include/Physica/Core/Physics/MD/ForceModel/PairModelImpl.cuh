@@ -175,8 +175,8 @@ namespace Physica::Core {
     void device_obj<PairModel<Derived>>::swap(device_obj& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         cutoff.swap(obj.cutoff);
-        squared_cutoff.swap(squared_cutoff);
-        pot_shift.swap(pot_shift);
+        squared_cutoff.swap(obj.squared_cutoff);
+        pot_shift.swap(obj.pot_shift);
         cell.swap(obj.cell);
         forceBuffer.swap(obj.forceBuffer);
         virialBuffer.swap(obj.virialBuffer);

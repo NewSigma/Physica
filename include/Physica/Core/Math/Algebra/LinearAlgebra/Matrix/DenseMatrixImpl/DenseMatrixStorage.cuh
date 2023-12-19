@@ -243,7 +243,7 @@ namespace Physica::Core {
     template<class Derived>
     inline void device_obj<DenseMatrixStorage<Derived, MatrixOption::Column | MatrixOption::Vector>>::swap(device_obj& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
-        array.swap(obj);
+        array.swap(obj.array);
         std::swap(r, obj.r);
     }
 
@@ -332,7 +332,7 @@ namespace Physica::Core {
     template<class Derived>
     inline void device_obj<DenseMatrixStorage<Derived, MatrixOption::Row | MatrixOption::Vector>>::swap(device_obj& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
-        array.swap(obj);
+        array.swap(obj.array);
         std::swap(c, obj.c);
     }
 

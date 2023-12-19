@@ -58,7 +58,7 @@ namespace Physica::Core {
         FrozenPhonon& operator=(FrozenPhonon obj) noexcept;
         /* Operations */
         template<class ForceModel>
-        [[nodiscard]] MatrixGrid makeForceConstants(const ForceModel& model) const;
+        [[nodiscard]] MatrixGrid makeForceConstants(ForceModel& model) const;
         template<class ForceModel>
         void optimize(const ForceModel& unitCellModel,
                       const ForceModel& superCellModel,
@@ -93,8 +93,7 @@ namespace Physica::Core {
     template<class ScalarType>
     template<class ForceModel>
     typename FrozenPhonon<ScalarType>::MatrixGrid
-    FrozenPhonon<ScalarType>::makeForceConstants(
-            const ForceModel& model) const {
+    FrozenPhonon<ScalarType>::makeForceConstants(ForceModel& model) const {
         const size_t unitCellDOF = getUnitCellDOF();
         const ScalarType factor = -reciprocal(displace);
         const Index3D superSize = Base::getSuperSize();

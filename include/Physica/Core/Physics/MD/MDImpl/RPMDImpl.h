@@ -245,9 +245,9 @@ namespace Physica::Core {
             const LatticeMatrix stress = makeStressPrim<ForceModel, Executor>(forceModel);
             forceStep(timeStep * 0.5);
             kineticModel.nve_step(ringPolymer, timeStep * 0.5);
-            barostat.template npt_step<ForceModel>(*this, stress, timeStep * 0.5);
+            barostat.template npt_step<This, ForceModel>(*this, stress, timeStep * 0.5);
             thermostat.template step<RandomPoolType, NoRandExecutor>(ringPolymer, timeStep);
-            barostat.template npt_step<ForceModel>(*this, stress, timeStep * 0.5);
+            barostat.template npt_step<This, ForceModel>(*this, stress, timeStep * 0.5);
             kineticModel.nve_step(ringPolymer, timeStep * 0.5);
             if constexpr (Internal::Traits<ForceModel>::IsLatticeDependent)
                 forceModel.setLattice(getLattice());
@@ -480,7 +480,7 @@ namespace Physica::Core {
 
     template<class ScalarType, unsigned int Dim, size_t NumReplica, class ForceMatrixAllocator>
     template<class ForceModel, class Executor>
-    ScalarType RPMD<ScalarType, Dim, NumReplica, ForceMatrixAllocator>::calcPressThermo(const ForceModel& model) const {
+    ScalarType RPMD<ScalarType, Dim, NumReplica, ForceMatrixAllocator>::calcPressThermo(ForceModel& model) const {
         constexpr bool isFreeModel = Internal::is_empty_force_model<ForceModel>::value;
         constexpr bool IsPeriodBoundary = Internal::Traits<ForceModel>::IsPeriodBoundary;
         ScalarType result = calcKinetic() / (getVolume() * (Dim * 0.5));
@@ -501,7 +501,7 @@ namespace Physica::Core {
     template<class ScalarType, unsigned int Dim, size_t NumReplica, class ForceMatrixAllocator>
     template<class ForceModel, class Executor>
     typename RPMD<ScalarType, Dim, NumReplica, ForceMatrixAllocator>::LatticeMatrix
-    RPMD<ScalarType, Dim, NumReplica, ForceMatrixAllocator>::makeStressPrim(const ForceModel& model) const {
+    RPMD<ScalarType, Dim, NumReplica, ForceMatrixAllocator>::makeStressPrim(ForceModel& model) const {
         constexpr bool isFreeModel = Internal::is_empty_force_model<ForceModel>::value;
         if constexpr (NumReplica == 1)
             return makeStressClassical<ForceModel, Executor>(model);
@@ -556,7 +556,7 @@ namespace Physica::Core {
     template<class ScalarType, unsigned int Dim, size_t NumReplica, class ForceMatrixAllocator>
     template<class ForceModel, class Executor>
     typename RPMD<ScalarType, Dim, NumReplica, ForceMatrixAllocator>::LatticeMatrix
-    RPMD<ScalarType, Dim, NumReplica, ForceMatrixAllocator>::makeStressCentroid(const ForceModel& model) const {
+    RPMD<ScalarType, Dim, NumReplica, ForceMatrixAllocator>::makeStressCentroid(ForceModel& model) const {
         constexpr bool isFreeModel = Internal::is_empty_force_model<ForceModel>::value;
         static_assert(!isFreeModel, "[Error]: This function does not apply to ideal gas model");
         if constexpr (NumReplica == 1)
@@ -610,7 +610,7 @@ namespace Physica::Core {
     template<class ScalarType, unsigned int Dim, size_t NumReplica, class ForceMatrixAllocator>
     template<class ForceModel, class Executor>
     typename RPMD<ScalarType, Dim, NumReplica, ForceMatrixAllocator>::LatticeMatrix
-    RPMD<ScalarType, Dim, NumReplica, ForceMatrixAllocator>::makeStressVirial(const ForceModel& model) const {
+    RPMD<ScalarType, Dim, NumReplica, ForceMatrixAllocator>::makeStressVirial(ForceModel& model) const {
         constexpr bool isFreeModel = Internal::is_empty_force_model<ForceModel>::value;
         static_assert(!isFreeModel, "[Error]: This function does not apply to ideal gas model");
         if constexpr (NumReplica == 1)
@@ -671,7 +671,7 @@ namespace Physica::Core {
     template<class ScalarType, unsigned int Dim, size_t NumReplica, class ForceMatrixAllocator>
     template<class ForceModel, class Executor>
     typename RPMD<ScalarType, Dim, NumReplica, ForceMatrixAllocator>::LatticeMatrix
-    RPMD<ScalarType, Dim, NumReplica, ForceMatrixAllocator>::makeStressClassical(const ForceModel& model) const {
+    RPMD<ScalarType, Dim, NumReplica, ForceMatrixAllocator>::makeStressClassical(ForceModel& model) const {
         constexpr bool isFreeModel = Internal::is_empty_force_model<ForceModel>::value;
         constexpr bool IsPeriodBoundary = Internal::Traits<ForceModel>::IsPeriodBoundary;
         LatticeMatrix result(Dim, Dim, 0);

@@ -51,7 +51,7 @@ namespace Physica::Core {
         using Storage::operator[];
         /* Opporations */
         [[nodiscard]] inline host_obj toHost() const;
-        inline void toHost(host_obj& obj);
+        inline void toHost(host_obj& obj) const;
         using Base::toHost;
         using Storage::resize;
         using Storage::swap;
@@ -82,7 +82,7 @@ namespace Physica::Core {
     }
 
     template<class T, size_t Length, size_t MaxLength>
-    inline void device_obj<Vector<T, Length, MaxLength>>::toHost(host_obj& obj) {
+    inline void device_obj<Vector<T, Length, MaxLength>>::toHost(host_obj& obj) const {
         Storage::toHost(obj);
     }
 
