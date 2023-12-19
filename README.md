@@ -1,6 +1,8 @@
 # Physica
 
-Physica is a high-performance and scalable template library for computational physics, dedicated to providing a rapid iteration platform for new algorithms. It is not a textbook or a ready-to-use solution. Physica is the code that generates code. It helps users write their own codes and implement ideas in less than 200 lines of code.
+Physica is a high-performance and scalable template library for computational physics, dedicated to providing a rapid iteration platform for new algorithms. It is not a textbook or a ready-to-use solution. Physica provides several basic components and does not restrict creativity. It helps users implement ideas in less than 200 lines of code.
+
+Physica is also an open source platform that maintains scientific code written in Physica and related data. We expect Physica, as a platform and not just a software, to promote the reproducibility of scientific results. The open source community continuously ensures that the results remain readable, reproducible, and accurate.
 
 ## Table of Contents
 
@@ -66,9 +68,9 @@ Feel free to dive in! Open an issue or submit PRs.
 
 2.Tell us new features you want.  
 
-3.Provide a better implementation of algorithms.  
+3.Fix bugs, add new features, tests and examples.  
 
-4.Fix bugs, add new features, tests and examples.  
+4.Reproduce papers and contribute your results to the community  
 
 5.Improve the documentation.  
 
