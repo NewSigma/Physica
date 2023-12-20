@@ -29,6 +29,7 @@ namespace Physica::Core {
      */
     template<class ScalarType>
     class AABModel {
+    public:
         constexpr static unsigned int Dim = 3;
         using PlainScalar = typename ScalarType::PlainScalar;
         using MDCellType = MDCell<ScalarType, Dim>;

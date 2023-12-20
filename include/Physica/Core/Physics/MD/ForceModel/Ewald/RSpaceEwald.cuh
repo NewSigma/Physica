@@ -22,6 +22,11 @@
 #include "Physica/Core/Physics/MD/ForceModel/PairModel.cuh"
 
 namespace Physica::Core {
+    namespace Internal {
+        template<class ScalarType, bool IsSmallCell>
+        class Traits<device_obj<RSpaceEwald<ScalarType, IsSmallCell>>> : public Traits<RSpaceEwald<ScalarType, IsSmallCell>> {};
+    }
+
     template<class ScalarType, bool IsSmallCell>
     class device_obj<RSpaceEwald<ScalarType, IsSmallCell>> : public device_obj<PairModel<RSpaceEwald<ScalarType, IsSmallCell>>> {
         static_assert(!IsSmallCell, "[Error]: Small cell does not apply to ewald because self interaction");

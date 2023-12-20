@@ -34,7 +34,7 @@ using namespace Physica::Utils;
 using ScalarType = Scalar<Float>;
 using RandomPoolType = RandomPool<std::mt19937>;
 using EwaldType = Ewald<ScalarType, Physica::Core::device_obj<RSpaceEwald<ScalarType>>>;
-using ForceModel = Q_TIP4P<ScalarType, EwaldType, false>;
+using ForceModel = Q_TIP4P<ScalarType, EwaldType>;
 using MDType = RPMD<ScalarType, 3, 1, Physica::Utils::PageLockedAllocator<ScalarType>>;
 using KineticModel = FreeModel<ScalarType, 3, 1, RPMDIntegrator::Exact>;
 using ThermostatType = DoubleThermo<ScalarType, 3, 1>;

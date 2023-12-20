@@ -19,7 +19,7 @@ using ScalarType = Scalar<Double>;
 using VectorType = Vector<ScalarType>;
 using RandomPoolType = RandomPool<std::mt19937, 10002>;
 using KineticModel = FreeModel<ScalarType, 3, 1, RPMDIntegrator::Exact>;
-using ForceModel = Q_TIP4P<ScalarType, Ewald<ScalarType, RSpaceEwald<ScalarType, true>>, true>;
+using ForceModel = Q_TIP4P<ScalarType, Ewald<ScalarType, RSpaceEwald<ScalarType, true>>>;
 constexpr double timeStep = PhyConst<AU>::secondToTime(1E-15) * 0.5;
 constexpr double pair_cutoff = PhyConst<AU>::angstormToBohr(9);
 

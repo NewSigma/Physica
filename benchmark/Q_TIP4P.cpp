@@ -32,7 +32,7 @@ using namespace Physica::Utils;
 using ScalarType = Scalar<Double>;
 using ThermostatType = DoubleThermo<ScalarType>;
 using KineticModel = FreeModel<ScalarType, 3, Dynamic, RPMDIntegrator::Exact>;
-using ForceModel = Q_TIP4P<ScalarType, Ewald<ScalarType>, false>;
+using ForceModel = Q_TIP4P<ScalarType, Ewald<ScalarType>>;
 using RandomPoolType = RandomPool<std::mt19937>;
 constexpr size_t numReplica = 32;
 constexpr size_t numContract = 8;
