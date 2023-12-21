@@ -1,11 +1,14 @@
 # ParaH
 
-测试项目: ParaH, ParaH_cuda, ParaH_auto
+Items: ParaH, ParaH_cuda, ParaH_auto
 
-## 平台1
+## Platform 1
 
-测试环境: Ubuntu20.04 + Intel(R) Core(TM) i7-9750H CPU @ 2.60GHz + 16G + NVIDIA GeForce GTX 1660 Ti Mobile
-测试时间: 2023-12-21
+OS: Ubuntu20.04
+Compiler: GCC 9.4.0 + NVCC 12.2.91
+Hardware: Intel(R) Core(TM) i7-9750H CPU @ 2.60GHz + 16G + NVIDIA GeForce GTX 1660 Ti Mobile
+Time: 2023-12-21
+Responsibility: WeiBo He (NewSigma@163.com)
 
 $$\begin{matrix}
 \mathrm{Platform} && \mathrm{CPU/s} && \mathrm{GPU/s} && \mathrm{CPU + GPU/s} \\
@@ -15,10 +18,13 @@ $$\begin{matrix}
 864\ \mathrm{Atom} && 0.86(2) && 0.565(9) && 0.396(4) \\
 \end{matrix}$$
 
-## 平台2
+## Platform 2
 
-测试环境: Ubuntu20.04 + Intel(R) Xeon(R) CPU E3-1231 v3 @ 3.40GHz + 16G + GeForce GTX 960
-测试时间: 2023-10-27
+OS: Ubuntu20.04
+Compiler: GCC 9.4.0 + NVCC 12.2.91
+Hardware: Intel(R) Xeon(R) CPU E3-1231 v3 @ 3.40GHz + 16G + GeForce GTX 960
+Time: 2023-10-27
+Responsibility: WeiBo He (NewSigma@163.com)
 
 $$\begin{matrix}
 \mathrm{Platform} && \mathrm{CPU/s} && \mathrm{GPU/s} && \mathrm{CPU + GPU/s} \\
