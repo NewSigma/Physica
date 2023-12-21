@@ -41,13 +41,13 @@ constexpr double pair_cutoff = 15;
 constexpr double molarVolume = 31.7;
 constexpr double mass = PhyConst<AU>::atomMass(1) * 2;
 
-class ForceModel {
-    using HostModelType = SilveraGoldman<ScalarType, true>;
-    using DeviceModelType = device_obj<HostModelType>;
-    HostModelType hostModel;
+template<bool IsSmallCell>
+class MixedModel {
+    using DeviceModelType = device_obj<SilveraGoldman<ScalarType, true, IsSmallCell>>;
+    SilveraGoldman<ScalarType, true, false> hostModel;
     Physica::Utils::Array<DeviceModelType> deviceModels;
 public:
-    ForceModel(size_t numParticle, ScalarType cutoff, size_t numCudaThread)
+    MixedModel(size_t numParticle, ScalarType cutoff, size_t numCudaThread)
         : hostModel(cutoff)
         , deviceModels(numCudaThread, numParticle, cutoff) {
         assert(numCudaThread < ThreadPool::getInstance().getNumThreads());
@@ -87,8 +87,8 @@ private:
 };
 
 namespace Physica::Core::Internal {
-    template<>
-    class Traits<ForceModel> {
+    template<bool IsSmallCell>
+    class Traits<MixedModel<IsSmallCell>> {
     public:
         constexpr static bool IsPeriodBoundary = true;
     };
@@ -118,6 +118,7 @@ int main() {
     auto& gen = RandomPoolType::getGen();
     KineticModel kineticModel(temperatureT, numReplica);
     {
+        using ForceModel = MixedModel<true>;
         constexpr size_t numMolecular = 108;
         MDType rpmd = makeSystem(numMolecular, gen);
         rpmd.initMomentum(gen);
@@ -128,6 +129,7 @@ int main() {
         std::cout << "108 atom time use: " << timeuse.first << '(' << timeuse.second << ")\n";
     }
     {
+        using ForceModel = MixedModel<true>;
         constexpr size_t numMolecular = 256;
         MDType rpmd = makeSystem(numMolecular, gen);
         rpmd.initMomentum(gen);
@@ -138,6 +140,7 @@ int main() {
         std::cout << "256 atom time use: " << timeuse.first << '(' << timeuse.second << ")\n";
     }
     {
+        using ForceModel = MixedModel<true>;
         constexpr size_t numMolecular = 500;
         MDType rpmd = makeSystem(numMolecular, gen);
         rpmd.initMomentum(gen);
@@ -148,6 +151,7 @@ int main() {
         std::cout << "500 atom time use: " << timeuse.first << '(' << timeuse.second << ")\n";
     }
     {
+        using ForceModel = MixedModel<false>;
         constexpr size_t numMolecular = 864;
         MDType rpmd = makeSystem(numMolecular, gen);
         rpmd.initMomentum(gen);

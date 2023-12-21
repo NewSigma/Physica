@@ -64,6 +64,17 @@ namespace Physica::Core {
     }
 
     template<class MatrixType, class VectorType>
+    template<class OtherDerived>
+    inline void MatrixVectorProduct<MatrixType, VectorType>::assignTo(LValueVector<OtherDerived>& target) const {
+        for (size_t i = 0; i < getLength(); ++i)
+            target[i] = calc(i);
+        
+        constexpr bool isContinuous = std::is_base_of<ContinuousVector<OtherDerived>, OtherDerived>::value;
+        if constexpr (isContinuous && Base::isReverseDiff)
+            target.getDerived().makeContinuous();
+    }
+
+    template<class MatrixType, class VectorType>
     inline typename MatrixVectorProduct<MatrixType, VectorType>::ScalarType MatrixVectorProduct<MatrixType, VectorType>::calc(size_t index) const {
         return mat.row(index) * vec;
     }

@@ -154,6 +154,9 @@ namespace Physica::Core {
                 : mat(mat_.getDerived()), vec(vec_.getDerived()) {
             assert(mat.getColumn() == vec.getLength());
         }
+        /* Operations */
+        template<class OtherDerived>
+        inline void assignTo(LValueVector<OtherDerived>& target) const;
         /* Getters */
         [[nodiscard]] inline ScalarType calc(size_t index) const;
         [[nodiscard]] __host__ __device__ size_t getLength() const { return mat.getRow(); }

@@ -29,7 +29,6 @@
 
 using namespace Physica::Core;
 using ScalarType = Scalar<Float>;
-using ForceModel = device_obj<SilveraGoldman<ScalarType, true>>;
 using KineticModel = FreeModel<ScalarType, 3, Dynamic, RPMDIntegrator::Exact>;
 using RandomPoolType = RandomPool<std::mt19937, 10000>;
 using MDType = RPMD<ScalarType, 3, Physica::Utils::Dynamic, Physica::Utils::PageLockedAllocator<ScalarType>>;
@@ -64,6 +63,7 @@ int main() {
     auto& gen = RandomPoolType::getGen();
     KineticModel kineticModel(temperatureT, numReplica);
     {
+        using ForceModel = device_obj<SilveraGoldman<ScalarType, true, true>>;
         constexpr size_t numMolecular = 108;
         MDType rpmd = makeSystem(numMolecular, gen);
         rpmd.initMomentum(gen);
@@ -74,6 +74,7 @@ int main() {
         std::cout << "108 atom time use: " << timeuse.first << '(' << timeuse.second << ")\n";
     }
     {
+        using ForceModel = device_obj<SilveraGoldman<ScalarType, true, true>>;
         constexpr size_t numMolecular = 256;
         MDType rpmd = makeSystem(numMolecular, gen);
         rpmd.initMomentum(gen);
@@ -84,6 +85,7 @@ int main() {
         std::cout << "256 atom time use: " << timeuse.first << '(' << timeuse.second << ")\n";
     }
     {
+        using ForceModel = device_obj<SilveraGoldman<ScalarType, true, true>>;
         constexpr size_t numMolecular = 500;
         MDType rpmd = makeSystem(numMolecular, gen);
         rpmd.initMomentum(gen);
@@ -94,6 +96,7 @@ int main() {
         std::cout << "500 atom time use: " << timeuse.first << '(' << timeuse.second << ")\n";
     }
     {
+        using ForceModel = device_obj<SilveraGoldman<ScalarType, true>>;
         constexpr size_t numMolecular = 864;
         MDType rpmd = makeSystem(numMolecular, gen);
         rpmd.initMomentum(gen);

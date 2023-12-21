@@ -26,6 +26,9 @@
 #include "RVectorBlock.h"
 
 namespace Physica::Core {
+    template<class Derived> class LValueVector;
+    template<class Derived> class ContinuousVector;
+    template<class T, int Option, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn, class Allocator> class DenseMatrix;
     template<class VectorType> class TransposeVector;
     template<class VectorType> class ConjugateVector;
     template<class VectorType, int MatrixMajor, size_t Row, size_t Column> class ReshapedVector;
@@ -46,10 +49,6 @@ namespace Physica::Core {
             constexpr static bool value = isSameScalar && BestPacket<ScalarType, VectorType1::SizeAtCompile>::Size > 1;
         };
     }
-
-    template<class T, int Option, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn, class Allocator> class DenseMatrix;
-
-    template<class Derived> class LValueVector;
     /**
      * \class RValueVector is base class of vectors that can be assigned to \class LValueVector
      * but other vectors cannot be assigned to this class.
