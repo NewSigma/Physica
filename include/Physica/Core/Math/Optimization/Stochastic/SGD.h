@@ -32,7 +32,7 @@ namespace Physica::Core {
         using ScalarType = Differentiable<PlainScalar, DiffMode::Reverse>;
     private:
         constexpr static int AnyValue = 0;
-
+    protected:
         PlainScalar learnRate;
         PlainScalar meanLearnRate;
         unsigned int batchSize;

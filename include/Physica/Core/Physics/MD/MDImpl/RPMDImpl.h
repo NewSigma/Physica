@@ -306,7 +306,7 @@ namespace Physica::Core {
 
         kineticModel.nve_step(ringPolymer, timeStep);
         const LatticeMatrix stress = forceModel.virial(phaseToCell(0));
-        barostat.template npt_step<ForceModel>(*this, stress, timeStep);
+        barostat.template npt_step<This, ForceModel>(*this, stress, timeStep);
         if constexpr (Internal::Traits<ForceModel>::IsLatticeDependent)
             forceModel.setLattice(getLattice());
         updateForce<ForceModel, Executor>(forceModel);

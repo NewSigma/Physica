@@ -28,6 +28,8 @@ namespace Physica::Core {
         using Base = SGD<PlainScalar>;
         using typename Base::ScalarType;
 
+        using Base::from;
+        using Base::to;
         Vector<PlainScalar> lastGrad;
         PlainScalar momentum;
     public:
@@ -54,7 +56,7 @@ namespace Physica::Core {
 
     template<class PlainScalar>
     void MomentumSGD<PlainScalar>::recordEnd() {
-        to = ScalarType(AnyValue);
+        Base::recordEnd();
         lastGrad.resize(ScalarType::distance(from, to), PlainScalar(0));
     }
 
