@@ -125,19 +125,26 @@ namespace Physica::Core {
     template<class ScalarType, size_t NumReplica, BaroType Type>
     typename Berendsen<ScalarType, NumReplica, Type>::LatticeMatrix
     Berendsen<ScalarType, NumReplica, Type>::makeDecayMatrix(ScalarType pressPerDOF) const {
-        LatticeMatrix result = lastStress;
+        LatticeMatrix result{};
+        result = ScalarType(0);
         const ScalarType centerTargetP = targetP - pressPerDOF;
         if constexpr (Type == BaroType::Anisotropic) {
+            result = lastStress;
             for (size_t i = 0; i < Dim; ++i)
                 result(i, i) -= centerTargetP;
         }
-        else {
+        else if constexpr (Type == BaroType::XY) {
+            auto corner = result.topLeftCorner(2);
+            corner = lastStress.topLeftCorner(2);
             for (size_t i = 0; i < 2; ++i)
                 result(i, i) -= centerTargetP;
-            auto col = result.col(2);
-            col = ScalarType(0);
-            auto row = result.row(2);
-            row = ScalarType(0);
+        }
+        else if constexpr (Type == BaroType::Z) {
+            result(2, 2) = lastStress(2, 2) - centerTargetP;
+        }
+        else {
+            constexpr bool Unreachable = Type == BaroType::Anisotropic;
+            static_assert(Unreachable, "[Error]: Not implemented");
         }
         result *= compressRate / ScalarType(Dim);
         return result;

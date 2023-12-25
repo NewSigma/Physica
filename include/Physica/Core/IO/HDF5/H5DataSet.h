@@ -47,6 +47,7 @@ namespace Physica::Core {
         [[nodiscard]] size_t getSize(size_t dim) const noexcept;
         [[nodiscard]] bool empty() const noexcept { return getSize(0) == 0; }
     private:
+        using Base::flush;
         using Base::getSpace;
     };
 

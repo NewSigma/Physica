@@ -111,12 +111,19 @@ namespace Physica::Core {
             const auto rand = LatticeMatrix::random_normal(Dim, Dim, gen);
             result = (rand + rand.transpose()) * (diffuseFactor * ScalarType(0.5));
         }
-        else {
+        else if constexpr (Type == BaroType::XY) {
             result(0, 0) = ScalarType::random_normal(gen);
             result(1, 1) = ScalarType::random_normal(gen);
             result(0, 1) = result(1, 0) = ScalarType::random_normal(gen) * ScalarType(M_SQRT1_2);
             auto corner = result.topLeftCorner(2);
             corner *= diffuseFactor;
+        }
+        else if constexpr (Type == BaroType::Z) {
+            result(2, 2) = ScalarType::random_normal(gen) * diffuseFactor;
+        }
+        else {
+            constexpr bool Unreachable = Type == BaroType::Anisotropic;
+            static_assert(Unreachable, "[Error]: Not implemented");
         }
         return result;
     }
