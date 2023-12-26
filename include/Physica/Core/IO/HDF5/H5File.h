@@ -32,9 +32,11 @@ namespace Physica::Core {
             SingleWriteMultiRead_Write = 0x0020U,
             SingleWriteMultiRead_Read = 0x0040U
         };
+    private:
+        unsigned int openflag;
     public:
         H5File(const char* name,
-               unsigned int openflag,
+               unsigned int openflag_,
                const H5::FileCreatPropList& create_plist = H5::FileCreatPropList::DEFAULT,
                const H5::FileAccPropList& access_plist = H5::FileAccPropList::DEFAULT);
         H5File(const H5File& obj);
@@ -50,5 +52,8 @@ namespace Physica::Core {
         using Location::createGroup;
         using Location::openGroup;
         H5DataSet<1> createDataSet(const char* filepath, const char* name);
+        /* Getters */
+        [[nodiscard]] unsigned int getOpenflag() const noexcept { return openflag; }
+        [[nodiscard]] bool isReadOnly() const noexcept { return (openflag & ReadWrite) == 0; }
     };
 }

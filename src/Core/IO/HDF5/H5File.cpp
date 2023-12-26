@@ -22,14 +22,15 @@
 namespace Physica::Core {
     H5File::H5File(
             const char* name,
-            unsigned int openflag,
+            unsigned int openflag_,
             const H5::FileCreatPropList& create_plist,
-            const H5::FileAccPropList& access_plist) : Base(name, openflag, create_plist, access_plist) {}
+            const H5::FileAccPropList& access_plist) : Base(name, openflag_, create_plist, access_plist), openflag(openflag_) {}
     
-    H5File::H5File(const H5File& obj) : Base(obj) {}
+    H5File::H5File(const H5File& obj) : Base(obj), openflag(obj.openflag) {}
 
     H5File& H5File::operator=(H5File& obj) {
         Base::operator=(obj);
+        openflag = obj.openflag;
         return *this;
     }
 
