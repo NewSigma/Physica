@@ -125,13 +125,13 @@ namespace Physica::Core {
     size_t NetBase<Derived>::classify(const VectorType& input) const {
         constexpr bool isTrainMode = Base::isTrainMode();
         static_assert(!isTrainMode, "[Error]: It is suggested using eval mode to reduce memory use");
-        const VectorType prob = softmax(Base::forward(input));
-        PlainScalar max = 0;
+        const VectorType output = Base::forward(input);
+        PlainScalar max = output[0];
         size_t index = 0;
-        for (size_t i = 0; i < prob.getLength(); ++i) {
-            if (prob[i] > max) {
+        for (size_t i = 1; i < output.getLength(); ++i) {
+            if (output[i] > max) {
                 index = i;
-                max = prob[i].getValue();
+                max = output[i].getValue();
             }
         }
         return index;
