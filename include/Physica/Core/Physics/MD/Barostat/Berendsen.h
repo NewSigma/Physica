@@ -186,10 +186,17 @@ namespace Physica::Core {
                 for (size_t c = 0; c < Dim; ++c)
                     integrateKernel(r, c);
         }
-        else {
+        else if constexpr (Type == BaroType::XY) {
             for (size_t r = 0; r < 2; ++r)
                 for (size_t c = 0; c < 2; ++c)
                     integrateKernel(r, c);
+        }
+        else if constexpr (Type == BaroType::Z) {
+            integrateKernel(2, 2);
+        }
+        else {
+            constexpr bool Unreachable = Type == BaroType::Anisotropic;
+            static_assert(Unreachable, "[Error]: Not implemented");
         }
         return result;
     }

@@ -60,6 +60,7 @@ namespace Physica::Core {
         void swap(FireModel& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] ScalarType getTimeStep() const noexcept { return timeStep; }
+        [[nodiscard]] ScalarType getMixAlpha() const noexcept { return mixAlpha; }
         [[nodiscard]] ScalarType getForceNorm() const noexcept { return normF; } //Use force norm as convergence criteria as suggested by [2]
     };
     /**
