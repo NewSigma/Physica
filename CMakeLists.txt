@@ -77,11 +77,6 @@ if(${PHYSICA_CUDA})
         ${CMAKE_CXX_FLAGS}")
 endif()
 
-#FIXME: Define macro __FILENAME__, using builtin function of GNU make, may lead to problem on other platform.
-set(CMAKE_CXX_FLAGS "\
-${CMAKE_CXX_FLAGS} \
--D__FILENAME__='\"$(basename $(notdir $(abspath $<)))\"'")
-
 if(${RUN_CHECKS})
     add_subdirectory(config)
 endif()

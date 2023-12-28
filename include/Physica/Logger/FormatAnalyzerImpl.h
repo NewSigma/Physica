@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 WeiBo He.
+ * Copyright 2020-2023 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -16,10 +16,10 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef PHYSICA_FORMATANALYZERIMPL_H
-#define PHYSICA_FORMATANALYZERIMPL_H
+#pragma once
 
 #include <utility>
+#include <cstring>
 
 namespace Physica::Logger {
     /*!
@@ -174,6 +174,11 @@ namespace Physica::Logger {
     constexpr std::array<ArgType, ArgCount> analyzeFormatString(const char(&format)[N]) {
         return analyzeFormatStringHelper(format, std::make_index_sequence<ArgCount>{});
     }
-}
 
-#endif
+    constexpr const char* getFileName(std::string_view file) {
+        auto p = file.find_last_of('/');
+        if(p == std::string_view::npos)
+            return file.data();
+        return std::string_view(file.data() + p + 1).data();
+    }
+}

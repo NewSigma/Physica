@@ -124,7 +124,7 @@ namespace Physica::Logger {
                 constexpr LogInfo info{                                                             \
                         LoggerRuntime::levelString[static_cast<int>(LogLevel::severity)],           \
                         format,                                                                     \
-                        __FILENAME__,                                                               \
+                        getFileName(__FILE__),                                                      \
                         __LINE__,                                                                   \
                         argArray.data(),                                                            \
                         argCount};                                                                  \

@@ -94,7 +94,7 @@ namespace Physica::Logger {
                     case 'o':
                     case 'x':
                     case 'X':
-                        printf("[%s:%d|Fatal]: Logger not completely implemented.", __FILENAME__, __LINE__);
+                        printf("[%s:%d|Fatal]: Logger not completely implemented.", getFileName(__FILE__), __LINE__);
                         exit(EXIT_FAILURE);
                     case 'u': {
                         unsigned int temp;
@@ -118,7 +118,7 @@ namespace Physica::Logger {
                     case 'A':
                     case 'g':
                     case 'G':
-                        printf("[%s:%d|Fatal]: Logger not completely implemented.", __FILENAME__, __LINE__);
+                        printf("[%s:%d|Fatal]: Logger not completely implemented.", getFileName(__FILE__), __LINE__);
                         exit(EXIT_FAILURE);
                     case 'p':
                         void* p;
@@ -128,7 +128,7 @@ namespace Physica::Logger {
                     default:
                         //The format should have been checked by the format analyzer.
                         printf("[%s:%d|Fatal]: The code should not execute this sentence, please check your code."
-                                , __FILENAME__, __LINE__);
+                                , getFileName(__FILE__), __LINE__);
                         exit(EXIT_FAILURE);
                 }
                 ++pos;
@@ -172,7 +172,7 @@ namespace Physica::Logger {
                     case 'A':
                     case 'g':
                     case 'G':
-                        printf("[%s:%d|Fatal]: Logger not completely implemented.", __FILENAME__, __LINE__);
+                        printf("[%s:%d|Fatal]: Logger not completely implemented.", getFileName(__FILE__), __LINE__);
                         exit(EXIT_FAILURE);
                     case 'p':
                         result += sizeof(void*);
@@ -180,7 +180,7 @@ namespace Physica::Logger {
                     default:
                         //The format should have been checked be format analyzer.
                         printf("[%s:%d|Fatal]: The code should not execute this sentence, please check your code."
-                                , __FILENAME__, __LINE__);
+                                , getFileName(__FILE__), __LINE__);
                         exit(EXIT_FAILURE);
                 }
                 ++pos;
