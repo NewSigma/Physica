@@ -269,7 +269,9 @@ namespace Physica::Core {
             npt_step<Thermostat, RandomPoolType, Barostat, KineticModel, ForceModel, Executor>(thermostat, barostat, kineticModel, forceModel);
     }
     /**
-     * Euler Semi-implicit integrator as introduced in [1]
+     * fire_vstep is fire_v(olume)step
+     * 
+     * Using euler semi-implicit integrator as introduced in [1]
      * 
      * Reference:
      * [1] Comput. Mater. Sci. 175, 109584 (2020); https://doi.org/10.1016/j.commatsci.2020.109584
@@ -290,12 +292,13 @@ namespace Physica::Core {
         forceStep(fire.getTimeStep());
         fire.mixingStep(*this);
     }
-
+    /**
+     * fire_pstep is fire_p(ress)step
+     */
     template<class ScalarType, unsigned int Dim, size_t NumReplica, class ForceMatrixAllocator>
     template<BaroType Type, class KineticModel, class ForceModel, class Executor>
     void RPMD<ScalarType, Dim, NumReplica, ForceMatrixAllocator>::fire_pstep(
-            FireModelType& fire,
-            Berendsen<ScalarType, NumReplica, Type>& barostat,
+            CFireModel<ScalarType, Dim, Type>& cfire,
             KineticModel& kineticModel,
             ForceModel& forceModel) {
         constexpr bool IsPeriodBoundary1 = Internal::Traits<KineticModel>::IsPeriodBoundary;
@@ -305,14 +308,15 @@ namespace Physica::Core {
         static_assert(!Internal::is_empty_force_model<ForceModel>::value, "[Error]: Relax a empty model does nothing");
 
         kineticModel.nve_step(ringPolymer, timeStep);
-        const LatticeMatrix stress = forceModel.virial(phaseToCell(0));
-        barostat.template npt_step<This, ForceModel>(*this, stress, timeStep);
+        cfire.nve_step(*this);
         if constexpr (Internal::Traits<ForceModel>::IsLatticeDependent)
             forceModel.setLattice(getLattice());
         updateForce<ForceModel, Executor>(forceModel);
-        fire.paramStep(*this);
-        forceStep(fire.getTimeStep());
-        fire.mixingStep(*this);
+        const LatticeMatrix stress = forceModel.virial(phaseToCell(0));
+        cfire.paramStep(*this);
+        forceStep(cfire.getTimeStep());
+        cfire.forceStep(*this, std::move(stress));
+        cfire.mixingStep(*this);
     }
 
     template<class ScalarType, unsigned int Dim, size_t NumReplica, class ForceMatrixAllocator>

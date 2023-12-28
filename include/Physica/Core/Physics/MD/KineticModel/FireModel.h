@@ -28,8 +28,9 @@ namespace Physica::Core {
      */
     template<class ScalarType, unsigned int Dim>
     class FireModel {
+    public:
         using MDType = RPMD<ScalarType, Dim, 1>;
-
+    private:
         ScalarType timeStep;
         ScalarType maxTimeStep;
         ScalarType stepIncFactor;

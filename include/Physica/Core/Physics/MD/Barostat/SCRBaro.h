@@ -56,7 +56,7 @@ namespace Physica::Core {
         SCRBaro& operator=(SCRBaro obj) noexcept { swap(obj); return *this; }
         /* Operations */
         template<class MDType, class ForceModel>
-        void npt_step(MDType& rpmd, const LatticeMatrix& stress, ScalarType deltaT);
+        inline void npt_step(MDType& rpmd, const LatticeMatrix& stress, ScalarType deltaT);
         using Base::swap;
         /* Getters */
         using Base::getLastStress;
@@ -64,7 +64,6 @@ namespace Physica::Core {
         using Base::setTemperature;
     private:
         [[nodiscard]] LatticeMatrix makeDiffuseMatrix(ScalarType pressPerDOF) const;
-        [[nodiscard]] LatticeMatrix makeDeltaLattice(const LatticeMatrix& lattice, ScalarType volume, ScalarType deltaT) const;
     };
 
     template<class ScalarType, size_t NumReplica, class RandomPoolType, BaroType Type>
@@ -73,32 +72,25 @@ namespace Physica::Core {
 
     template<class ScalarType, size_t NumReplica, class RandomPoolType, BaroType Type>
     template<class MDType, class ForceModel>
-    void SCRBaro<ScalarType, NumReplica, RandomPoolType, Type>::npt_step(
+    inline void SCRBaro<ScalarType, NumReplica, RandomPoolType, Type>::npt_step(
             MDType& rpmd, const LatticeMatrix& stress, ScalarType deltaT) {
-        Base::lastStress = stress;
-
-        const size_t numReplica = rpmd.getNumReplica();
-        const size_t numParticle = rpmd.getNumParticle();
-        const size_t dof = rpmd.getDOF();
-        auto& phase = rpmd.getPhaseMatrix();
-        const auto deltaLattice = makeDeltaLattice(rpmd.getLattice(), rpmd.getVolume(), deltaT);
-        const LatticeMatrix scaleMatrix = Base::makeScaleMatrix(rpmd.getInvLattice(), deltaLattice);
-        for (size_t i = 0; i < numReplica; ++i) {
-            auto col = phase.col(i);
-            auto momentum = col.head(dof);
-            for (size_t j = 0; j < numParticle; ++j) {
-                auto momentum_j = momentum.segment(j * Dim, (j + 1) * Dim);
-                const Vector3D delta = scaleMatrix * momentum_j;
-                momentum_j -= delta;
-            }
-            auto pos = col.tail(dof);
-            for (size_t j = 0; j < numParticle; ++j) {
-                auto pos_j = pos.segment(j * Dim, (j + 1) * Dim);
-                const Vector3D delta = scaleMatrix * pos_j;
-                pos_j += delta;
-            }
-        }
-        rpmd.setLattice(rpmd.getLattice() + deltaLattice);
+        const ScalarType pressPerDOF = (Base::tempT * PhyConst<AU>::boltzmannK) / rpmd.getVolume();
+        const auto decayMatrix = Base::makeDecayMatrix(stress, pressPerDOF);
+        const auto diffuseMatrix = makeDiffuseMatrix(pressPerDOF);
+        Base::scaleRPMD(rpmd, Base::makeDeltaLattice([&, deltaT](size_t r, size_t c) -> ScalarType {
+                using Integrator = SRK2<ScalarType, 1>;
+                using VectorType = typename Integrator::VectorType;
+                [[maybe_unused]] ScalarType unused = 0;
+                VectorType sol{ScalarType(0)};
+                Integrator::step(deltaT, unused, sol,
+                    [&, r, c]([[maybe_unused]] ScalarType x, [[maybe_unused]] VectorType sol) -> VectorType {
+                        return {(decayMatrix * rpmd.getLattice()).calc(r, c)};
+                    },
+                    [&, r, c]([[maybe_unused]] ScalarType x, [[maybe_unused]] VectorType sol) -> VectorType {
+                        return {(diffuseMatrix * rpmd.getLattice()).calc(r, c)};
+                    });
+                return sol[0];
+            }));
     }
 
     template<class ScalarType, size_t NumReplica, class RandomPoolType, BaroType Type>
@@ -120,49 +112,6 @@ namespace Physica::Core {
         }
         else if constexpr (Type == BaroType::Z) {
             result(2, 2) = ScalarType::random_normal(gen) * diffuseFactor;
-        }
-        else {
-            constexpr bool Unreachable = Type == BaroType::Anisotropic;
-            static_assert(Unreachable, "[Error]: Not implemented");
-        }
-        return result;
-    }
-
-    template<class ScalarType, size_t NumReplica, class RandomPoolType, BaroType Type>
-    typename SCRBaro<ScalarType, NumReplica, RandomPoolType, Type>::LatticeMatrix
-    SCRBaro<ScalarType, NumReplica, RandomPoolType, Type>::makeDeltaLattice(
-            const LatticeMatrix& lattice, ScalarType volume, ScalarType deltaT) const {
-        const ScalarType pressPerDOF = (Base::tempT * PhyConst<AU>::boltzmannK) / volume;
-        const auto decayMatrix = Base::makeDecayMatrix(pressPerDOF);
-        const auto diffuseMatrix = makeDiffuseMatrix(pressPerDOF);
-        LatticeMatrix result(Dim, Dim, 0);
-        auto integrateKernel = [&, deltaT](size_t r, size_t c) {
-            using Integrator = SRK2<ScalarType, 1>;
-            using VectorType = typename Integrator::VectorType;
-            [[maybe_unused]] ScalarType unused = 0;
-            VectorType sol{ScalarType(0)};
-            Integrator::step(deltaT, unused, sol,
-                [&lattice, &decayMatrix, r, c]([[maybe_unused]] ScalarType x, [[maybe_unused]] VectorType sol) -> VectorType {
-                    return {(decayMatrix * lattice).calc(r, c)};
-                },
-                [&lattice, &diffuseMatrix, r, c]([[maybe_unused]] ScalarType x, [[maybe_unused]] VectorType sol) -> VectorType {
-                    return {(diffuseMatrix * lattice).calc(r, c)};
-                });
-            result(r, c) = sol[0];
-        };
-
-        if constexpr (Type == BaroType::Anisotropic) {
-            for (size_t r = 0; r < Dim; ++r)
-                for (size_t c = 0; c < Dim; ++c)
-                    integrateKernel(r, c);
-        }
-        else if constexpr (Type == BaroType::XY) {
-            for (size_t r = 0; r < 2; ++r)
-                for (size_t c = 0; c < 2; ++c)
-                    integrateKernel(r, c);
-        }
-        else if constexpr (Type == BaroType::Z) {
-            integrateKernel(2, 2);
         }
         else {
             constexpr bool Unreachable = Type == BaroType::Anisotropic;

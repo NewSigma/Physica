@@ -28,7 +28,7 @@
 
 namespace Physica::Core {
     template<class ScalarType, unsigned int Dim> class FireModel;
-    template<class ScalarType, size_t NumReplica, BaroType Type> class Berendsen;
+    template<class ScalarType, unsigned int Dim, BaroType Type> class CFireModel;
 
     template<class ScalarType>
     class RPMDBase {        
@@ -129,11 +129,7 @@ namespace Physica::Core {
         template<class KineticModel, class ForceModel, class Executor>
         void fire_vstep(FireModelType& fire, KineticModel& kineticModel, ForceModel& forceModel);
         template<BaroType Type, class KineticModel, class ForceModel, class Executor>
-        void fire_pstep(
-            FireModelType& fire,
-            Berendsen<ScalarType, NumReplica, Type>& barostat,
-            KineticModel& kineticModel,
-            ForceModel& forceModel);
+        void fire_pstep(CFireModel<ScalarType, Dim, Type>& cfire, KineticModel& kineticModel, ForceModel& forceModel);
 
         template<class RandomGenerator> void initMomentum(RandomGenerator& gen);
         void scaleVelocity();
