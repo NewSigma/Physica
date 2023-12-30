@@ -23,17 +23,17 @@
 #include "PairModel.h"
 
 namespace Physica::Core {
-    template<class ScalarType, class EwaldType, bool IsSmallCell> class BKSModel;
+    template<class ScalarType, class EwaldType> class BKSModel;
 
     namespace Internal {
-        template<class T, class EwaldType, bool B>
-        class Traits<BKSModel<T, EwaldType, B>> {
+        template<class T, class EwaldType>
+        class Traits<BKSModel<T, EwaldType>> {
         public:
             using ScalarType = T;
             constexpr static bool IsPeriodBoundary = true;
             constexpr static bool IsLatticeDependent = true;
             constexpr static bool IsPotDependOnAtomIndex = true;
-            constexpr static bool IsSmallCell = B;
+            constexpr static bool IsSmallCell = Traits<EwaldType>::IsSmallCell;
         };
     }
     /**
@@ -42,11 +42,12 @@ namespace Physica::Core {
      * Reference:
      * [1] Phys. Rev. Lett. 64, 1955 (1990); https://doi.org/10.1103/PhysRevLett.64.1955
      */
-    template<class ScalarType, class EwaldType, bool IsSmallCell>
-    class BKSModel : public PairModel<BKSModel<ScalarType, EwaldType, IsSmallCell>> {
-        using This = BKSModel<ScalarType, EwaldType, IsSmallCell>;
+    template<class ScalarType, class EwaldType>
+    class BKSModel : public PairModel<BKSModel<ScalarType, EwaldType>> {
+        using This = BKSModel<ScalarType, EwaldType>;
         using Base = PairModel<This>;
         using AABModelType = AABModel<ScalarType>;
+        using REwaldType = typename Internal::Traits<EwaldType>::REwaldType;
     public:
         using typename Base::PlainScalar;
         using typename Base::MDCellType;
@@ -103,17 +104,17 @@ namespace Physica::Core {
         [[nodiscard]] inline static bool isCellOrdered(const MDCellType& cell);
     };
 
-    template<class ScalarType, class EwaldType, bool IsSmallCell>
-    BKSModel<ScalarType, EwaldType, IsSmallCell>::BKSModel(const MDCellType& refer_cell, PlainScalar cutoff, EwaldType ewald_)
+    template<class ScalarType, class EwaldType>
+    BKSModel<ScalarType, EwaldType>::BKSModel(const MDCellType& refer_cell, PlainScalar cutoff, EwaldType ewald_)
             : Base(cutoff)
             , ewald(std::move(ewald_)) {
         assert(refer_cell.getNumParticle() % 3 == 0 && "[Error]: This is not a cell of SiO2");
         const size_t numMolecule = refer_cell.getNumParticle() / 3;
-        ewald = RSpaceEwald<ScalarType, IsSmallCell>(refer_cell.getLattice(), AABModelType::makeCharges(numMolecule, chargeO, chargeSi));
+        ewald = REwaldType(refer_cell.getLattice(), AABModelType::makeCharges(numMolecule, chargeO, chargeSi));
     }
 
-    template<class ScalarType, class EwaldType, bool IsSmallCell>
-    ScalarType BKSModel<ScalarType, EwaldType, IsSmallCell>::pot_functor(size_t i, size_t j, ScalarType r, ScalarType r2) const {
+    template<class ScalarType, class EwaldType>
+    ScalarType BKSModel<ScalarType, EwaldType>::pot_functor(size_t i, size_t j, ScalarType r, ScalarType r2) const {
         const size_t numMolecule = getNumMolecule();
         if (i > j)
             std::swap(i, j);
@@ -128,8 +129,8 @@ namespace Physica::Core {
         return ScalarType(A) * exp(ScalarType(-b) * r) - ScalarType(c) / (r2 * r4);
     }
 
-    template<class ScalarType, class EwaldType, bool IsSmallCell>
-    ScalarType BKSModel<ScalarType, EwaldType, IsSmallCell>::force_functor(size_t i, size_t j, ScalarType r, ScalarType r2) const {
+    template<class ScalarType, class EwaldType>
+    ScalarType BKSModel<ScalarType, EwaldType>::force_functor(size_t i, size_t j, ScalarType r, ScalarType r2) const {
         const size_t numMolecule = getNumMolecule();
         if (i > j)
             std::swap(i, j);
@@ -144,22 +145,22 @@ namespace Physica::Core {
         return ScalarType(A * b) * exp(ScalarType(-b) * r) - ScalarType(6 * c) / (r * r2 * r4);
     }
 
-    template<class ScalarType, class EwaldType, bool IsSmallCell>
-    inline ScalarType BKSModel<ScalarType, EwaldType, IsSmallCell>::potentialEnergy(const MDCellType& cell) const {
+    template<class ScalarType, class EwaldType>
+    inline ScalarType BKSModel<ScalarType, EwaldType>::potentialEnergy(const MDCellType& cell) const {
         return Base::potentialEnergy(cell) + ewald.potentialEnergy(cell.getPos());
     }
 
-    template<class ScalarType, class EwaldType, bool IsSmallCell>
+    template<class ScalarType, class EwaldType>
     template<class Executor>
-    Vector<ScalarType> BKSModel<ScalarType, EwaldType, IsSmallCell>::force(const MDCellType& cell) {
+    Vector<ScalarType> BKSModel<ScalarType, EwaldType>::force(const MDCellType& cell) {
         Vector<ScalarType> result;
         forceAsync<Vector<ScalarType>, Executor>(cell, result);
         return result;
     }
 
-    template<class ScalarType, class EwaldType, bool IsSmallCell>
+    template<class ScalarType, class EwaldType>
     template<class VectorType, class Executor>
-    void BKSModel<ScalarType, EwaldType, IsSmallCell>::forceAsync(const MDCellType& cell, ContinuousVector<VectorType>& result) {
+    void BKSModel<ScalarType, EwaldType>::forceAsync(const MDCellType& cell, ContinuousVector<VectorType>& result) {
         static_assert(!Internal::Traits<Executor>::isCudaEnabled, "[Error]: Cuda is not supported");
         assert(cell.getNumParticle() % 3 == 0);
         auto future = Executor::schedule([this, &cell, &result]() {
@@ -171,42 +172,42 @@ namespace Physica::Core {
         result += coulomb;
     }
 
-    template<class ScalarType, class EwaldType, bool IsSmallCell>
+    template<class ScalarType, class EwaldType>
     template<class Executor>
-    Vector<ScalarType> BKSModel<ScalarType, EwaldType, IsSmallCell>::force_short(const MDCellType& cell) const {
+    Vector<ScalarType> BKSModel<ScalarType, EwaldType>::force_short(const MDCellType& cell) const {
         return Base::template force_short<Executor>(cell);
     }
 
-    template<class ScalarType, class EwaldType, bool IsSmallCell>
+    template<class ScalarType, class EwaldType>
     template<class Executor>
-    inline Vector<ScalarType> BKSModel<ScalarType, EwaldType, IsSmallCell>::force_long(const MDCellType& cell) {
+    inline Vector<ScalarType> BKSModel<ScalarType, EwaldType>::force_long(const MDCellType& cell) {
         return ewald.template force<Executor>(cell.getPos());
     }
 
-    template<class ScalarType, class EwaldType, bool IsSmallCell>
-    typename BKSModel<ScalarType, EwaldType, IsSmallCell>::LatticeMatrix
-    inline BKSModel<ScalarType, EwaldType, IsSmallCell>::virial(const MDCellType& cell) {
+    template<class ScalarType, class EwaldType>
+    typename BKSModel<ScalarType, EwaldType>::LatticeMatrix
+    inline BKSModel<ScalarType, EwaldType>::virial(const MDCellType& cell) {
         return Base::virial(cell) + ewald.virial(cell.getPos());
     }
 
-    template<class ScalarType, class EwaldType, bool IsSmallCell>
-    void BKSModel<ScalarType, EwaldType, IsSmallCell>::swap(BKSModel& __restrict obj) noexcept {
+    template<class ScalarType, class EwaldType>
+    void BKSModel<ScalarType, EwaldType>::swap(BKSModel& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         ewald.swap(obj.ewald);
     }
 
-    template<class ScalarType, class EwaldType, bool IsSmallCell>
-    inline void BKSModel<ScalarType, EwaldType, IsSmallCell>::setLattice(LatticeMatrix lattice) {
+    template<class ScalarType, class EwaldType>
+    inline void BKSModel<ScalarType, EwaldType>::setLattice(LatticeMatrix lattice) {
         ewald.setLattice(std::move(lattice));
     }
 
-    template<class ScalarType, class EwaldType, bool IsSmallCell>
-    inline PermutationMatrix<ScalarType> BKSModel<ScalarType, EwaldType, IsSmallCell>::sortPosition(MDCellType& cell) {
+    template<class ScalarType, class EwaldType>
+    inline PermutationMatrix<ScalarType> BKSModel<ScalarType, EwaldType>::sortPosition(MDCellType& cell) {
         return AABModelType::sortPosition(cell, 8, 14);
     }
 
-    template<class ScalarType, class EwaldType, bool IsSmallCell>
-    inline bool BKSModel<ScalarType, EwaldType, IsSmallCell>::isCellOrdered(const MDCellType& cell) {
+    template<class ScalarType, class EwaldType>
+    inline bool BKSModel<ScalarType, EwaldType>::isCellOrdered(const MDCellType& cell) {
         return AABModelType::isCellOrdered(cell, 8, 14);
     }
 }

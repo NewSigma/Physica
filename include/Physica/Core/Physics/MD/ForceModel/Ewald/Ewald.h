@@ -28,7 +28,7 @@ namespace Physica::Core {
 
     namespace Internal {
         template<class T1, class T2>
-        class Traits<Ewald<T1, T2>> {
+        class Traits<Ewald<T1, T2>> : public Traits<T2> {
         public:
             using ScalarType = T1;
             using REwaldType = T2;

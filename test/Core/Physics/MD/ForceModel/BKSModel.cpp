@@ -34,7 +34,7 @@ namespace Physica {
         using LatticeMatrix = typename MDCellType::LatticeMatrix;
         using PositionMatrix = typename MDCellType::PositionMatrix;
         using MassVector = typename MDCellType::MassVector;
-        using ForceModel = BKSModel<ScalarType, Ewald<ScalarType>, false>;
+        using ForceModel = BKSModel<ScalarType, Ewald<ScalarType>>;
         constexpr static size_t MoleculePerCell = 4;
         constexpr static double pair_cutoff = PhyConst<AU>::angstormToBohr(5);
     public:
