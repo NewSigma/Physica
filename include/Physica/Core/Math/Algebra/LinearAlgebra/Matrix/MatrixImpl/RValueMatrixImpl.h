@@ -309,15 +309,12 @@ namespace Physica::Core {
     std::ostream& operator<<(std::ostream& os, const RValueMatrix<Derived>& m) {
         const auto row = m.getRow();
         const auto column = m.getColumn();
-        //10 is the max precision of double.
-        os << std::setprecision(10);
         for(size_t i = 0; i < row; ++i) {
             for(size_t j = 0; j < column; ++j)
                 os << m.calc(i, j) << '\t';
             os << '\n';
         }
-        //6 is the default precision.
-        return os << std::setprecision(6);
+        return os;
     }
 
     template<class Derived>

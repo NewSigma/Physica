@@ -34,7 +34,7 @@ namespace Physica::Core {
     }
     /**
      * Reference:
-     * [1] Phys. Rev. Lett. 98, 146401; https://doi.org/10.1103/PhysRevLett.98.146401
+     * [1] Phys. Rev. Lett. 98, 146401 (2007); https://doi.org/10.1103/PhysRevLett.98.146401
      */
     template<class ScalarType, bool IsSmallCell>
     class GaussKernel : protected PairModel<GaussKernel<ScalarType, IsSmallCell>> {

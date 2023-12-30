@@ -174,9 +174,12 @@ namespace Physica::Core {
 
     template<ScalarOption Option>
     std::ostream& operator<<(std::ostream& os, const Scalar<Option>& s) {
-        return os << std::setprecision(10) //10 is the max precision of double.
+        constexpr int FloatPrec = 7;
+        constexpr int DoublePrec = 16;
+        const auto lastPrec = os.precision();
+        return os << std::setprecision(Option == Float ? FloatPrec : DoublePrec)
                   << double(s)
-                  << std::setprecision(6); //6 is the default precision.
+                  << std::setprecision(lastPrec);
     }
 
     template<class ScalarType>

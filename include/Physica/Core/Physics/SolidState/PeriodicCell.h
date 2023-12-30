@@ -19,6 +19,7 @@
 #pragma once
 
 #include <iostream>
+#include "Physica/Core/Exception/BadConvergenceException.h"
 #include "Physica/Core/MultiPrecision/Scalar.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/CrossProduct.h"
@@ -74,6 +75,8 @@ namespace Physica::Core {
         [[nodiscard]] VectorType minDistVector(VectorType from, size_t id_to) const;
         void normalize();
         void scale(ScalarType factor);
+        void niggliReduce(double precision, unsigned int maxIteration);
+        void niggliReduce2D(unsigned int maxIteration);
         [[nodiscard]] inline LatticeMatrix makeRepLattice() const;
 
         void toDirect() { toDirect(makeInvLattice()); }
@@ -98,8 +101,22 @@ namespace Physica::Core {
         /* Helper */
         void swap(PeriodicCell& __restrict cell) noexcept;
         /* Static members */
-        [[nodiscard]] static ScalarType getVolume(const LatticeMatrix& lattice);
+        [[nodiscard]] static LatticeMatrix makeLattice(
+                ScalarType normA,
+                ScalarType normB,
+                ScalarType normC,
+                ScalarType alpha,
+                ScalarType beta,
+                ScalarType gamma);
+        [[nodiscard]] static LatticeMatrix makeLattice2D(
+                ScalarType normA,
+                ScalarType normB,
+                ScalarType normC,
+                ScalarType gamma);
+        [[nodiscard]] static LatticeMatrix makeNiggliLattice(const LatticeMatrix& lattice, double precision, unsigned int maxIteration);
+        [[nodiscard]] static LatticeMatrix makeNiggliLattice2D(const LatticeMatrix& lattice, unsigned int maxIteration);
         [[nodiscard]] static LatticeMatrix makeRepLattice(const LatticeMatrix& lattice);
+        [[nodiscard]] static ScalarType getVolume(const LatticeMatrix& lattice);
         static void toDirect(PositionMatrix& target, const LatticeMatrix& lattice);
         static void toCartesian(PositionMatrix& target, const LatticeMatrix& lattice);
         [[nodiscard]] static SearchRangeType estimateRange(const LatticeMatrix& cell, PlainScalar cutoff);
@@ -294,6 +311,28 @@ namespace Physica::Core {
     }
 
     template<class ScalarType, unsigned int Dim>
+    void PeriodicCell<ScalarType, Dim>::niggliReduce(double precision, unsigned int maxIteration) {
+        if (type == Type::Direct)
+            toCartesian();
+        setLattice(makeNiggliLattice(lattice, precision, maxIteration));
+        toDirect();
+        normalize_direct();
+        if (type == Type::Cartesian)
+            toCartesian();
+    }
+
+    template<class ScalarType, unsigned int Dim>
+    void PeriodicCell<ScalarType, Dim>::niggliReduce2D(unsigned int maxIteration) {
+        if (type == Type::Direct)
+            toCartesian();
+        setLattice(makeNiggliLattice2D(lattice, maxIteration));
+        toDirect();
+        normalize_direct();
+        if (type == Type::Cartesian)
+            toCartesian();
+    }
+
+    template<class ScalarType, unsigned int Dim>
     inline typename PeriodicCell<ScalarType, Dim>::LatticeMatrix PeriodicCell<ScalarType, Dim>::makeRepLattice() const {
         return makeRepLattice(lattice);
     }
@@ -353,13 +392,187 @@ namespace Physica::Core {
     }
 
     template<class ScalarType, unsigned int Dim>
-    ScalarType PeriodicCell<ScalarType, Dim>::getVolume(const LatticeMatrix& lattice) {
-        if constexpr (Dim == 1)
-            return abs(lattice(0, 0));
-        else if constexpr (Dim == 2)
-            return (lattice.row(0).crossProduct(lattice.row(1))).compute().norm();
-        else
-            return abs(VectorType(lattice.row(0).crossProduct(lattice.row(1))) * lattice.row(2).asVector());
+    typename PeriodicCell<ScalarType, Dim>::LatticeMatrix PeriodicCell<ScalarType, Dim>::makeLattice(
+            ScalarType normA,
+            ScalarType normB,
+            ScalarType normC,
+            ScalarType alpha,
+            ScalarType beta,
+            ScalarType gamma) {
+        LatticeMatrix result{};
+		result(0, 0) = normA;
+		result(0, 1) = ScalarType(0);
+		result(0, 2) = ScalarType(0);
+		result(1, 0) = normB * cos(gamma);
+		result(1, 1) = normB * sin(gamma);
+		result(1, 2) = ScalarType(0);
+		result(2, 0) = normC * cos(beta);
+		result(2, 1) = normC * (cos(alpha) - cos(beta) * cos(gamma)) / sin(gamma);
+		result(2, 2) = sqrt(square(normC) - square(result(2, 0)) - square(result(2, 1)));
+		return result;
+    }
+
+    template<class ScalarType, unsigned int Dim>
+    typename PeriodicCell<ScalarType, Dim>::LatticeMatrix PeriodicCell<ScalarType, Dim>::makeLattice2D(
+            ScalarType normA,
+            ScalarType normB,
+            ScalarType normC,
+            ScalarType gamma) {
+        LatticeMatrix result{};
+		result(0, 0) = normA;
+		result(0, 1) = ScalarType(0);
+		result(0, 2) = ScalarType(0);
+		result(1, 0) = normB * cos(gamma);
+		result(1, 1) = normB * sin(gamma);
+		result(1, 2) = ScalarType(0);
+		result(2, 0) = ScalarType(0);
+		result(2, 1) = ScalarType(0);
+		result(2, 2) = normC;
+		return result;
+    }
+    /**
+     * Step 1-8 referenced from [1]
+     * 
+     * Reference:
+     * [1] Acta Cryst. A32, 297 (1976); https://doi.org/10.1107/S0567739476000636
+     */
+    template<class ScalarType, unsigned int Dim>
+    typename PeriodicCell<ScalarType, Dim>::LatticeMatrix PeriodicCell<ScalarType, Dim>::makeNiggliLattice(
+            const LatticeMatrix& lattice, double precision, unsigned int maxIteration) {
+        assert(precision > 0 && "[Error]: Precision should be positive");
+        assert(maxIteration > 0 && "[Error]: Set maxIteration = 0 does nothing");
+        ScalarType squaredNormA = lattice.row(0).squaredNorm();
+        ScalarType squaredNormB = lattice.row(1).squaredNorm();
+        ScalarType squaredNormC = lattice.row(2).squaredNorm();
+        ScalarType dot1 = ScalarType(2) * (lattice.row(1).asVector() * lattice.row(2).asVector());
+        ScalarType dot2 = ScalarType(2) * (lattice.row(0).asVector() * lattice.row(2).asVector());
+        ScalarType dot3 = ScalarType(2) * (lattice.row(0).asVector() * lattice.row(1).asVector());
+        unsigned int iteration = 0;
+        do {
+            if (iteration == maxIteration) [[unlikely]]
+                throw BadConvergenceException("[Error]: Cannot reduce to niggli cell within required iterations");
+            iteration += 1;
+            /* Step 1 */ {
+                const bool changeAB1 = squaredNormA > squaredNormB;
+                const bool changeAB2 = scalarNear(squaredNormA, squaredNormB, precision) && (abs(dot1) > abs(dot2));
+                if (changeAB1 || changeAB2) {
+                    squaredNormA.swap(squaredNormB);
+                    dot1.swap(dot2);
+                }
+            }
+            /* Step 2 */ {
+                const bool changeBC1 = squaredNormB > squaredNormC;
+                const bool changeBC2 = scalarNear(squaredNormB, squaredNormC, precision) && (abs(dot2) > abs(dot3));
+                if (changeBC1 || changeBC2) {
+                    squaredNormB.swap(squaredNormA);
+                    dot2.swap(dot3);
+                    continue;
+                }
+            }
+            /* Step 3 and 4 */ {
+                const ScalarType temp = dot1 * dot2 * dot3;
+                if (temp.isPositive()) {
+                    dot1 = abs(dot1);
+                    dot2 = abs(dot2);
+                    dot3 = abs(dot3);
+                }
+                else {
+                    dot1 = -abs(dot1);
+                    dot2 = -abs(dot2);
+                    dot3 = -abs(dot3);
+                }
+            }
+            /* Step 5 */ {
+                const bool cond1 = abs(dot1) > squaredNormB;
+                const bool cond2 = scalarNear(dot1, squaredNormB, precision) && (ScalarType(2) * dot2 < dot3);
+                const bool cond3 = scalarNear(dot1, -squaredNormB, precision) && dot3.isNegative();
+                if (cond1 || cond2 || cond3) {
+                    assert(!dot1.isZero() && "[Error]: Condition 1~3 shall ensure dot1 is not zero");
+                    const ScalarType unit = dot1.unit();
+                    squaredNormC += squaredNormB - abs(dot1);
+                    dot2 -= dot3 * unit;
+                    dot1 -= ScalarType(2) * squaredNormB * unit;
+                    continue;
+                }
+            }
+            /* Step 6 */ {
+                const bool cond1 = abs(dot2) > squaredNormA;
+                const bool cond2 = scalarNear(dot2, squaredNormA, precision) && (ScalarType(2) * dot1 < dot3);
+                const bool cond3 = scalarNear(dot2, -squaredNormA, precision) && dot3.isNegative();
+                if (cond1 || cond2 || cond3) {
+                    assert(!dot2.isZero() && "[Error]: Condition 1~3 shall ensure dot2 is not zero");
+                    const ScalarType unit = dot2.unit();
+                    squaredNormC += squaredNormA - abs(dot2);
+                    dot1 -= dot3 * unit;
+                    dot2 -= ScalarType(2) * squaredNormA * unit;
+                    continue;
+                }
+            }
+            /* Step 7 */ {
+                const bool cond1 = abs(dot3) > squaredNormA;
+                const bool cond2 = scalarNear(dot3, squaredNormA, precision) && (ScalarType(2) * dot1 < dot2);
+                const bool cond3 = scalarNear(dot3, -squaredNormA, precision) && dot2.isNegative();
+                if (cond1 || cond2 || cond3) {
+                    assert(!dot3.isZero() && "[Error]: Condition 1~3 shall ensure dot3 is not zero");
+                    const ScalarType unit = dot3.unit();
+                    squaredNormB += squaredNormA - abs(dot3);
+                    dot1 -= dot2 * unit;
+                    dot3 -= ScalarType(2) * squaredNormA * unit;
+                    continue;
+                }
+            }
+            /* Step 8 */ {
+                const ScalarType temp = dot1 + dot2 + dot3 + squaredNormA + squaredNormB;
+                const bool cond1 = temp.isNegative();
+                const bool cond2 = scalarNear(temp, ScalarType(0), precision) && (ScalarType(2) * (squaredNormA + dot2) + dot3).isPositive();
+                if (cond1 || cond2) {
+                    squaredNormC += temp;
+                    dot1 += ScalarType(2) * squaredNormB + dot3;
+                    dot2 += ScalarType(2) * squaredNormA + dot3;
+                    continue;
+                }
+            }
+        } while(false);
+        const ScalarType normA = sqrt(squaredNormA);
+        const ScalarType normB = sqrt(squaredNormB);
+        const ScalarType normC = sqrt(squaredNormC);
+        const ScalarType alpha = arccos(dot1 / (ScalarType(2) * normB * normC));
+        const ScalarType beta = arccos(dot2 / (ScalarType(2) * normA * normC));
+        const ScalarType gamma = arccos(dot3 / (ScalarType(2) * normA * normB));
+        return makeLattice(normA, normB, normC, alpha, beta, gamma);
+    }
+    /**
+     * A directly simplified version of above function
+     */
+    template<class ScalarType, unsigned int Dim>
+    typename PeriodicCell<ScalarType, Dim>::LatticeMatrix PeriodicCell<ScalarType, Dim>::makeNiggliLattice2D(
+            const LatticeMatrix& lattice, unsigned int maxIteration) {
+        assert(maxIteration > 0 && "[Error]: Set maxIteration = 0 does nothing");
+        ScalarType squaredNormA = lattice.row(0).squaredNorm();
+        ScalarType squaredNormB = lattice.row(1).squaredNorm();
+        ScalarType dot = ScalarType(2) * (lattice.row(0).asVector() * lattice.row(1).asVector());
+        unsigned int iteration = 0;
+        do {
+            if (iteration == maxIteration) [[unlikely]]
+                throw BadConvergenceException("[Error]: Cannot reduce to niggli cell within required iterations");
+            iteration += 1;
+
+            if (squaredNormA > squaredNormB)
+                squaredNormA.swap(squaredNormB);
+            dot = -abs(dot);
+
+            if (abs(dot) > squaredNormA) {
+                assert(!dot.isZero() && "[Error]: Condition 1~3 shall ensure dot is not zero");
+                const ScalarType unit = dot.unit();
+                squaredNormB += squaredNormA - abs(dot);
+                dot -= ScalarType(2) * squaredNormA * unit;
+                continue;
+            }
+        } while(false);
+        const ScalarType normA = sqrt(squaredNormA);
+        const ScalarType normB = sqrt(squaredNormB);
+        const ScalarType gamma = arccos(dot / (ScalarType(2) * normA * normB));
+        return makeLattice2D(normA, normB, lattice(2, 2), gamma);
     }
 
     template<class ScalarType, unsigned int Dim>
@@ -371,6 +584,16 @@ namespace Physica::Core {
         const ScalarType factor = ScalarType(2 * M_PI) / (lattice.row(0) * result.row(0).asVector());
         result *= factor;
         return result;
+    }
+
+    template<class ScalarType, unsigned int Dim>
+    ScalarType PeriodicCell<ScalarType, Dim>::getVolume(const LatticeMatrix& lattice) {
+        if constexpr (Dim == 1)
+            return abs(lattice(0, 0));
+        else if constexpr (Dim == 2)
+            return (lattice.row(0).crossProduct(lattice.row(1))).compute().norm();
+        else
+            return abs(VectorType(lattice.row(0).crossProduct(lattice.row(1))) * lattice.row(2).asVector());
     }
 
     template<class ScalarType, unsigned int Dim>
