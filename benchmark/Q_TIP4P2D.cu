@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2023 WeiBo He.
+ * Copyright 2022-2024 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -90,7 +90,7 @@ int main() {
     {
         auto timeuse = Benchmark::run([&]() {
             rpmd.npt_step_for<ThermostatType, RandomPoolType, BarostatType, KineticModel, decltype(forceModel), CudaExecutor>(
-                PhyConst<AU>::secondToTime(1 * 1E-15),
+                PhyConst<AU>::secondToTime(1 * 1E-13),
                 thermo,
                 barostat,
                 kineticModel,

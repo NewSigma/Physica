@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 WeiBo He.
+ * Copyright 2023-2024 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -97,7 +97,6 @@ namespace Physica::Core {
         /* Operations */
         void makeTables();
         using Base::potentialEnergy;
-        using Base::force_short;
         using Base::virial;
         /* Getters */
         using Base::getCutoff;

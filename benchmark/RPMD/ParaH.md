@@ -7,8 +7,8 @@ Items: ParaH, ParaH_cuda, ParaH_auto
 OS: Ubuntu20.04
 Compiler: GCC 9.4.0 + NVCC 12.2.91
 Hardware: Intel(R) Core(TM) i7-9750H CPU @ 2.60GHz + 16G + NVIDIA GeForce GTX 1660 Ti Mobile
-Time: 2023-12-21
-Responsibility: WeiBo He (NewSigma@163.com)
+Date: 2023-12-21
+Responsibility: Weibo He (NewSigma@163.com)
 
 $$\begin{matrix}
 \mathrm{Platform} && \mathrm{CPU/s} && \mathrm{GPU/s} && \mathrm{CPU + GPU/s} \\
@@ -23,8 +23,8 @@ $$\begin{matrix}
 OS: Ubuntu20.04
 Compiler: GCC 9.4.0 + NVCC 12.2.91
 Hardware: Intel(R) Xeon(R) CPU E3-1231 v3 @ 3.40GHz + 16G + GeForce GTX 960
-Time: 2023-10-27
-Responsibility: WeiBo He (NewSigma@163.com)
+Date: 2023-10-27
+Responsibility: Weibo He (NewSigma@163.com)
 
 $$\begin{matrix}
 \mathrm{Platform} && \mathrm{CPU/s} && \mathrm{GPU/s} && \mathrm{CPU + GPU/s} \\

@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 WeiBo He.
+ * Copyright 2023-2024 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -64,6 +64,7 @@ namespace Physica::Core {
         /* Operations */
         template<class Executor>
         [[nodiscard]] Vector<ScalarType> force(const PositionMatrix& pos) const;
+        using Base::force_short;
         template<class Executor>
         [[nodiscard]] Vector<ScalarType> force_long(const PositionMatrix& pos) const;
 
@@ -125,7 +126,6 @@ namespace Physica::Core {
     template<class ScalarType, class RandomPoolType>
     template<class Executor>
     Vector<ScalarType> RandomBatchEwald<ScalarType, RandomPoolType>::force_long(const PositionMatrix& pos) const {
-        static_assert(std::is_same<Executor, SequentialExecutor>::value, "[Error]: Parallelization is not implemented");
         const size_t numParticle = getNumParticle();
         Vector<ScalarType> kSpaceSum(numParticle * Dim, 0);
         Vector<ScalarType> dots(numParticle);

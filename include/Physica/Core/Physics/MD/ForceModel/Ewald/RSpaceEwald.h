@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2023 WeiBo He.
+ * Copyright 2021-2024 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -115,7 +115,6 @@ namespace Physica::Core {
         [[nodiscard]] ScalarType rSpaceForceConstImpl1(ScalarType r) const;
         [[nodiscard]] ScalarType rSpaceForceConstImpl2(ScalarType r) const;
         using Base::potentialEnergy;
-        using Base::force_short;
         using Base::forceConst;
         /* Getters */
         using Base::getCutoff;

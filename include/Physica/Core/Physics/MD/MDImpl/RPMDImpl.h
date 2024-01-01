@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2023 WeiBo He.
+ * Copyright 2022-2024 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -123,8 +123,13 @@ namespace Physica::Core {
                 using VectorType = typename decltype(saveTo)::VectorBase;
                 model.template forceAsync<VectorType, Executor>(std::move(cell), saveTo);
             };
-            auto future = Executor::parallel_for(kernel, getNumReplica());
-            Executor::auto_wait(future);
+
+            if constexpr (NumReplica == 1)
+                kernel(0);
+            else {
+                auto future = Executor::parallel_for(kernel, getNumReplica());
+                Executor::auto_wait(future);
+            }
             Executor::wait();
         }
     }

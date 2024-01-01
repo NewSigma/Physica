@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2023 WeiBo He.
+ * Copyright 2021-2024 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -74,6 +74,7 @@ namespace Physica::Core {
 
         template<class Executor>
         [[nodiscard]] Vector<ScalarType> force(const PositionMatrix& pos);
+        using Base::force_short;
         template<class Executor>
         [[nodiscard]] Vector<ScalarType> force_long(const PositionMatrix& pos) const;
 
@@ -164,7 +165,6 @@ namespace Physica::Core {
     template<class ScalarType, class REwaldType>
     template<class Executor>
     Vector<ScalarType> Ewald<ScalarType, REwaldType>::force_long(const PositionMatrix& pos) const {
-        static_assert(std::is_same<Executor, SequentialExecutor>::value, "[Error]: Parallelization is not implemented");
         const size_t numParticle = getNumParticle();
         Vector<ScalarType> kSpaceSum(numParticle * Dim, 0);
         Vector<ScalarType> dots(numParticle);

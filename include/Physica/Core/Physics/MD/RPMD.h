@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2023 WeiBo He.
+ * Copyright 2022-2024 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -182,7 +182,7 @@ namespace Physica::Core {
         [[nodiscard]] size_t getKSpaceSize() const noexcept { return ringPolymer.getKSpaceSize(); }
         [[nodiscard]] const ForceMatrix& getForce() const noexcept { return forceBuffer; }
         [[nodiscard]] size_t getNumContract() const noexcept { return fftContract.getRSpaceSize(); }
-        [[nodiscard]] bool isContractEnabled() const noexcept { return getNumReplica() != getNumContract(); }
+        [[nodiscard]] bool isContractEnabled() const noexcept { return (NumReplica != 1) && (getNumReplica() != getNumContract()); }
         [[nodiscard]] ScalarType getTemperature() const noexcept { return temperatureT; }
         /* Setters */
         void setLattice(LatticeMatrix lattice) { cell.setLattice(std::move(lattice)); }
