@@ -186,7 +186,8 @@ namespace Physica::Core {
         [[nodiscard]] ScalarType getTemperature() const noexcept { return temperatureT; }
         /* Setters */
         void setLattice(LatticeMatrix lattice) { cell.setLattice(std::move(lattice)); }
-        void setTemperature(ScalarType temperature);
+        inline void setTemperature(ScalarType temperature);
+        void setTimeStep(ScalarType timeStep_);
     private:
         void toContractBeadRepr(size_t posID);
         void forceToNormRepr(size_t posID);

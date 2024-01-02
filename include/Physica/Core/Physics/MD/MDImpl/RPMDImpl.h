@@ -754,9 +754,15 @@ namespace Physica::Core {
     }
 
     template<class ScalarType, unsigned int Dim, size_t NumReplica, class ForceMatrixAllocator>
-    void RPMD<ScalarType, Dim, NumReplica, ForceMatrixAllocator>::setTemperature(ScalarType temperature) {
+    inline void RPMD<ScalarType, Dim, NumReplica, ForceMatrixAllocator>::setTemperature(ScalarType temperature) {
         assert(!temperature.isNegative() && "[Error]: Negative temperature is not physical");
         temperatureT = temperature;
+    }
+
+    template<class ScalarType, unsigned int Dim, size_t NumReplica, class ForceMatrixAllocator>
+    void RPMD<ScalarType, Dim, NumReplica, ForceMatrixAllocator>::setTimeStep(ScalarType timeStep_) {
+        timeStep = timeStep_;
+        checkParam();
     }
 
     template<class ScalarType, unsigned int Dim, size_t NumReplica, class ForceMatrixAllocator>

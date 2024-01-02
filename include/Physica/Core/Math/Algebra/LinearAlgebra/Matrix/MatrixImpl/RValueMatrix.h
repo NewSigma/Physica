@@ -40,6 +40,8 @@ namespace Physica::Core {
      */
     template<class Derived>
     class RValueMatrix : public Utils::CRTPBase<Derived> {
+        static_assert(!std::is_const<Derived>::value, "[Error]: A common mistake, const is unnecessary");
+        static_assert(!std::is_volatile<Derived>::value, "[Error]: A common mistake, volatile is unnecessary");
         using Base = Utils::CRTPBase<Derived>;
         using BlockType = RMatrixBlock<Derived>;
     public:

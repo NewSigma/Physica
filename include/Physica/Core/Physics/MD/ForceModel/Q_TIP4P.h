@@ -172,7 +172,7 @@ namespace Physica::Core {
     template<class VectorType, class Executor>
     void Q_TIP4P<ScalarType, EwaldType>::forceAsync(const MDCellType& cell, ContinuousVector<VectorType>& result) {
         assert(cell.getNumParticle() % 3 == 0);
-        Vector<ScalarType> temp(result.getLength(), 0);
+        Vector<ScalarType> temp(getNumParticle() * 3, 0);
         auto future = Executor::schedule([this, &cell, &temp]() {
             force_short_interMolecule<Executor>(cell, temp);
             force_short_intraMolecule(cell, temp);
