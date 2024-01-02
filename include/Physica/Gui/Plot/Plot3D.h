@@ -27,19 +27,32 @@
 namespace Physica::Gui {
     class Plot3D : public QWidget {
         QVBoxLayout* vLayout;
+    protected:
+        Q3DSurface* surface;
     public:
         Plot3D(QWidget* parent = nullptr);
         /* Operations */
         template<class MatrixType>
-        Q3DSurface& surf(const Core::LValueMatrix<MatrixType>& x,
-                         const Core::LValueMatrix<MatrixType>& y,
-                         const Core::LValueMatrix<MatrixType>& z);
+        QSurface3DSeries& surf(const Core::LValueMatrix<MatrixType>& x,
+                               const Core::LValueMatrix<MatrixType>& y,
+                               const Core::LValueMatrix<MatrixType>& z);
+        /* Getters */
+        [[nodiscard]] QValue3DAxis* getAxisX() const noexcept { return surface->axisX(); }
+        [[nodiscard]] QValue3DAxis* getAxisY() const noexcept { return surface->axisZ(); }
+        [[nodiscard]] QValue3DAxis* getAxisZ() const noexcept { return surface->axisY(); }
+        [[nodiscard]] float getMinZ() const noexcept { return getAxisZ()->min(); }
+        [[nodiscard]] float getMaxZ() const noexcept { return getAxisZ()->max(); }
+        /* Setters */
+        void setMinZ(float value) { getAxisZ()->setMin(value); }
+        void setMaxZ(float value) { getAxisZ()->setMax(value); }
+        /* Static member */
+        [[nodiscard]] static QLinearGradient makeDefaultGrad();
     };
 
     template<class MatrixType>
-    Q3DSurface& Plot3D::surf(const Core::LValueMatrix<MatrixType>& x,
-                             const Core::LValueMatrix<MatrixType>& y,
-                             const Core::LValueMatrix<MatrixType>& z) {
+    QSurface3DSeries& Plot3D::surf(const Core::LValueMatrix<MatrixType>& x,
+                                   const Core::LValueMatrix<MatrixType>& y,
+                                   const Core::LValueMatrix<MatrixType>& z) {
         assert(x.getColumn() == y.getColumn() && x.getRow() == y.getRow());
         assert(y.getColumn() == z.getColumn() && y.getRow() == z.getRow());
         auto* series = new QSurface3DSeries(new QSurfaceDataProxy());
@@ -55,16 +68,7 @@ namespace Physica::Gui {
             *dataArray << dataRow;
         }
         series->dataProxy()->resetArray(dataArray);
-
-        auto* surface = new Q3DSurface();
         surface->addSeries(series);
-        surface->axisX()->setLabelAutoRotation(30);
-        surface->axisY()->setLabelAutoRotation(90);
-        surface->axisZ()->setLabelAutoRotation(30);
-
-        auto* widget = QWidget::createWindowContainer(surface, this);
-        widget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-        layout()->addWidget(widget);
-        return *surface;
+        return *series;
     }
 }

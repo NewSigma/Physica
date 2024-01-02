@@ -88,19 +88,8 @@ int main(int argc, char** argv) {
     QApplication app(argc, argv);
     Plot3D* plot3d = new Plot3D();
     auto& surf = plot3d->surf(grid.first, grid.second, z);
-    surf.activeTheme()->setType(Q3DTheme::ThemePrimaryColors);
-    {
-        QLinearGradient gr;
-        gr.setColorAt(0.0, Qt::blue);
-        gr.setColorAt(0.35, Qt::cyan);
-        gr.setColorAt(0.5, Qt::green);
-        gr.setColorAt(0.65, Qt::yellow);
-        gr.setColorAt(1.0, Qt::red);
-
-        surf.seriesList().at(0)->setBaseGradient(gr);
-        surf.seriesList().at(0)->setColorStyle(Q3DTheme::ColorStyleRangeGradient);
-    }
+    surf.setBaseGradient(Plot3D::makeDefaultGrad());
+    surf.setColorStyle(Q3DTheme::ColorStyleRangeGradient);
     plot3d->show();
-
     return QApplication::exec();
 }

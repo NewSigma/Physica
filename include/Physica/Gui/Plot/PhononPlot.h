@@ -55,6 +55,13 @@ namespace Physica::Gui {
         [[nodiscard]] QCategoryAxis* getAxisX() const noexcept { return reinterpret_cast<QCategoryAxis*>(Plot::getAxisX()); }
         [[nodiscard]] ScalarType getMaxFreqInAU() const noexcept { return getMaxY() / ScalarType(Core::PhyConst<Core::AU>::freqToTHz(1)); }
         [[nodiscard]] ScalarType getMinFreqInAU() const noexcept { return getMinY() / ScalarType(Core::PhyConst<Core::AU>::freqToTHz(1)); }
+    private:
+        Core::DenseMatrix<ScalarType> calcPaths(
+            const PhononType& phonon,
+            const MatrixGrid& forceConstants,
+            const VectorType& factors,
+            Vector3D from,
+            Vector3D to);
     };
 
     template<class ScalarType>
@@ -80,41 +87,23 @@ namespace Physica::Gui {
             Vector3D to,
             size_t numPoint,
             const char* label) {
-        using namespace Physica::Core;
-        const size_t numBranch = phonon.getUnitCellDOF();
         const auto factors = VectorType::linspace(0, 1, numPoint);
         const ScalarType deltaX = (to - from).norm();
         const VectorType x = currentX + factors * deltaX;
+        currentX += deltaX;
+        Plot::setMaxX(double(currentX));
 
-        DenseMatrix<ScalarType> buffer(numBranch, numPoint);
-        ScalarType minFreq = Plot::getMinY();
-        ScalarType maxFreq = Plot::getMaxY();
-        for (size_t i = 0; i < numPoint; ++i) {
-            const ScalarType factor = factors[i];
-            const Vector3D qPoint = from * (ScalarType(1) - factor) + to * factor;
-            auto fcMatrix = phonon.interpolatePoint(qPoint, forceConstants);
-            phonon.toDynamicMatrix(fcMatrix);
-            const auto eigen = PhononType::diagonalize(fcMatrix);
-            auto freq = phonon.makeFreq(eigen);
-            freq *= ScalarType(PhyConst<AU>::freqToTHz(1));
-            buffer.col(i) = freq;
-            minFreq = std::min(minFreq, freq.min());
-            maxFreq = std::max(maxFreq, freq.max());
-        }
-
-        for (size_t i = 0; i < numBranch; ++i) {
-            auto& scatter = Plot::scatter(x, buffer.row(i));
+        const auto paths = calcPaths(phonon, forceConstants, factors, from, to);
+        for (size_t i = 0; i < phonon.getNumBand(); ++i) {
+            const auto freq = paths.row(i);
+            auto& scatter = Plot::scatter(x, freq);
             auto pen = scatter.pen();
             pen.setColor(Qt::black);
             scatter.setPen(pen);
             scatter.setMarkerSize(2);
             scatter.setColor(Qt::black);
         }
-        Plot::setMinY(double(minFreq));
-        Plot::setMaxY(double(maxFreq));
-        currentX += deltaX;
-        Plot::setMaxX(double(currentX));
-        static_cast<QCategoryAxis*>(Plot::getAxisX())->append(label, double(currentX));
+        getAxisX()->append(label, double(currentX));
     }
     /**
      * Estimating path connection algorithm from phonopy[1]
@@ -129,13 +118,31 @@ namespace Physica::Gui {
             Vector3D to,
             size_t numPoint,
             const char* label) {
-        using namespace Physica::Core;
-        const size_t numBranch = phonon.getUnitCellDOF();
         const auto factors = VectorType::linspace(0, 1, numPoint);
         const ScalarType deltaX = (to - from).norm();
         const VectorType x = currentX + factors * deltaX;
+        currentX += deltaX;
+        Plot::setMaxX(double(currentX));
 
-        DenseMatrix<ScalarType> buffer(numBranch, numPoint);
+        const auto paths = calcPaths(phonon, forceConstants, factors, from, to);
+        for (size_t i = 0; i < phonon.getNumBand(); ++i) {
+            const auto freq = paths.row(i);
+            auto& line = Plot::line(x, freq);
+            line.setColor(Qt::black);
+        }
+        getAxisX()->append(label, double(currentX));
+    }
+
+    template<class ScalarType>
+    Core::DenseMatrix<ScalarType> PhononPlot<ScalarType>::calcPaths(
+            const PhononType& phonon,
+            const MatrixGrid& forceConstants,
+            const VectorType& factors,
+            Vector3D from,
+            Vector3D to) {
+        using namespace Physica::Core;
+        const size_t numPoint = factors.getLength();
+        DenseMatrix<ScalarType> result(phonon.getNumBand(), numPoint);
         ScalarType minFreq = Plot::getMinY();
         ScalarType maxFreq = Plot::getMaxY();
         for (size_t i = 0; i < numPoint; ++i) {
@@ -146,20 +153,13 @@ namespace Physica::Gui {
             auto eigen = PhononType::diagonalize(fcMatrix);
             auto freq = phonon.makeFreq(eigen);
             freq *= ScalarType(PhyConst<AU>::freqToTHz(1));
-            auto bufferCol = buffer.col(i);
-            bufferCol = freq;
+            auto col = result.col(i);
+            col = freq;
             minFreq = std::min(minFreq, freq.min());
             maxFreq = std::max(maxFreq, freq.max());
         }
-
-        for (size_t i = 0; i < numBranch; ++i) {
-            auto& line = Plot::line(x, buffer.row(i));
-            line.setColor(Qt::black);
-        }
         Plot::setMinY(double(minFreq));
         Plot::setMaxY(double(maxFreq));
-        currentX += deltaX;
-        Plot::setMaxX(double(currentX));
-        static_cast<QCategoryAxis*>(Plot::getAxisX())->append(label, double(currentX));
+        return result;
     }
 }
