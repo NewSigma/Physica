@@ -24,8 +24,11 @@
 namespace Physica::Core {
     class PWscfOut {
         using ScalarType = Scalar<Double>;
+        constexpr static size_t DefaultBufferSize = 1024; //1024 shall be enough
 
+        std::ifstream fin;
         Vector<ScalarType> force;
+        Utils::Array<char> buffer;
     public:
         PWscfOut(const char* path, size_t numAtom);
         PWscfOut(const PWscfOut&) = default;
@@ -34,11 +37,12 @@ namespace Physica::Core {
         /* Operators */
         PWscfOut& operator=(PWscfOut obj) noexcept;
         /* Operations */
+        [[nodiscard]] Vector<ScalarType> makeTotalForces();
         void swap(PWscfOut& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] size_t getNumAtom() const noexcept { return force.getLength() / 3; }
         [[nodiscard]] const Vector<ScalarType>& getForce() const noexcept { return force; }
     private:
-        void readForce(std::ifstream& fin, Utils::Array<char>& buffer);
+        void readForce();
     };
 }

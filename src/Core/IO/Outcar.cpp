@@ -61,7 +61,7 @@ namespace Physica::Core {
                 }
                 break;
             }
-        } while(bool(fin));
+        } while(fin.good());
 
         if (!fin)
             throw BadFileFormatException("[Error]: Failed to read force");
@@ -83,7 +83,7 @@ namespace Physica::Core {
                 internalEnergy = std::stod(str, nullptr);
                 break;
             }
-        } while(bool(fin));
+        } while(fin.good());
 
         if (!fin)
             throw BadFileFormatException("[Error]: Failed to read energy");

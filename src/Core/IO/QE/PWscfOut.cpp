@@ -22,16 +22,8 @@
 #include "Physica/Core/Physics/PhyConst.h"
 
 namespace Physica::Core {
-    PWscfOut::PWscfOut(const char* path, size_t numAtom) : force(3 * numAtom) {
-        std::ifstream fin(path);
-        if (!fin)
-            throw IOException("[Error]: No QE output file found");
-        fin.seekg(0, std::ios::end);
-        const auto size = fin.tellg();
-        fin.seekg(0, std::ios::beg);
-        Utils::Array<char> buffer(size);
-
-        readForce(fin, buffer);
+    PWscfOut::PWscfOut(const char* path, size_t numAtom) : fin(path), force(3 * numAtom), buffer(DefaultBufferSize) {
+        readForce();
     }
 
     PWscfOut& PWscfOut::operator=(PWscfOut obj) noexcept {
@@ -39,16 +31,50 @@ namespace Physica::Core {
         return *this;
     }
 
-    void PWscfOut::swap(PWscfOut& __restrict obj) noexcept {
-        assert(this != &obj && "[Error]: Self swap is likely a bug");
-        force.swap(obj.force);
-    }
+    Vector<typename PWscfOut::ScalarType> PWscfOut::makeTotalForces() {
+        fin.seekg(std::ios::beg);
 
-    void PWscfOut::readForce(std::ifstream& fin, Utils::Array<char>& buffer) {
+        Vector<ScalarType> result{};
         std::string str{};
         do {
             fin.getline(buffer.data(), buffer.getLength());
             str = buffer.data();
+            assert(str.size() < DefaultBufferSize && "[Error]: Unexpected log length per line");
+            const bool success = str.find("Total force") != std::string::npos;
+            if (success) {
+                /* Back */
+                const size_t count = fin.gcount();
+                for (size_t i = 0; i < count; ++i)
+                    fin.unget();
+                /* Forward */
+                fin.getline(buffer.data(), buffer.getLength(), '=');
+                ScalarType temp{};
+                fin >> temp;
+                result.append(temp);
+                fin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+            }
+        } while(fin.good());
+
+        if (!fin.eof())
+            throw BadFileFormatException("[Error]: Failed to read force");
+
+        constexpr double convertFactor = PhyConst<AU>::planck / PhyConst<QE>::planck;
+        force *= ScalarType(convertFactor);
+        return result;
+    }
+
+    void PWscfOut::swap(PWscfOut& __restrict obj) noexcept {
+        assert(this != &obj && "[Error]: Self swap is likely a bug");
+        fin.swap(obj.fin);
+        force.swap(obj.force);
+    }
+
+    void PWscfOut::readForce() {
+        std::string str{};
+        do {
+            fin.getline(buffer.data(), buffer.getLength());
+            str = buffer.data();
+            assert(str.size() < DefaultBufferSize && "[Error]: Unexpected log length per line");
             const bool success = str.find("Forces acting on atoms") != std::string::npos;
             if (success) {
                 fin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
@@ -59,7 +85,7 @@ namespace Physica::Core {
                 }
                 break;
             }
-        } while(bool(fin));
+        } while(fin.good());
 
         if (!fin)
             throw BadFileFormatException("[Error]: Failed to read force");
