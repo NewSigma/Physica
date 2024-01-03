@@ -165,17 +165,18 @@ namespace Physica::Core {
         const Vector3D qVector = unitCell.makeRepLattice().transpose() * qPoint;
         const size_t unitCellDOF = getUnitCellDOF();
         FFT3D fft(superSize, {1, 1, 1}, PlanFlag::Estimate);
-        auto& rSpace = fft.getRSpace();
-        auto& kSpace = fft.getKSpace();
         MatrixType result(unitCellDOF, unitCellDOF);
-        for (size_t r = 0; r < unitCellDOF; ++r) {
-            for (size_t c = 0; c < unitCellDOF; ++c) {
-                kSpace.forIndexInGrid([r, c, &kSpace, &forceConstants](Index3D index) {
-                    kSpace(index) = forceConstants(index)(r, c);
+        for (size_t major = 0; major < unitCellDOF; ++major) {
+            for (size_t minor = 0; minor < unitCellDOF; ++minor) {
+                auto& kSpace = fft.getKSpace();
+                kSpace.forIndexInGrid([major, minor, &kSpace, &forceConstants](Index3D index) {
+                    kSpace(index) = forceConstants(index).calcFromMajorMinor(major, minor);
                 });
                 fft.invTransform();
+
                 ComplexType elem = 0;
-                rSpace.forIndexInGrid([this, r, c, qVector, &rSpace, &elem](Index3D index) {
+                auto& rSpace = fft.getRSpace();
+                rSpace.forIndexInGrid([this, qVector, &rSpace, &elem](Index3D index) {
                     const auto& lattice = unitCell.getLattice();
                     const Index3D rSpaceDim = rSpace.getDim();
                     ScalarType phase = 0;
@@ -183,19 +184,20 @@ namespace Physica::Core {
                     for (unsigned int i = 0; i < Dim; ++i) {
                         const ssize_t index_i = index[i];
                         const ssize_t dim_i = rSpaceDim[i];
-                        const bool isDimOdd = dim_i % 2 != 0;
-                        const bool isOnWignerSeitzBoundary = index_i == dim_i;
                         const ScalarType factor = ScalarType(index_i > dim_i / 2 ? index_i - dim_i : (index_i));
                         const ScalarType phase_i = qVector * lattice.row(i).asVector() * factor;
-                        if (isDimOdd || !isOnWignerSeitzBoundary)
-                            phase += phase_i;
+                        const bool isOnWignerSeitzBoundary = (dim_i % 2 == 0) && (index_i == dim_i / 2);
+                        if (isOnWignerSeitzBoundary)
+                            coeff *= ScalarType(0.5);
                         else
-                            coeff *= cos(phase_i);
+                            phase += phase_i;
                     }
                     const auto factor = ComplexType::fromPhase(phase);
-                    elem += rSpace(index) * factor * coeff;
+                    elem += rSpace(index) * coeff * factor;
                 });
-                result(r, c) = elem;
+                result.refFromMajorMinor(major, minor) = elem;
+                if (major != minor) [[likely]]
+                    result.refFromMajorMinor(minor, major) = elem.conjugate();
             }
         }
         return result;
