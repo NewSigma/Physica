@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 WeiBo He.
+ * Copyright 2021-2024 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -88,11 +88,10 @@ namespace Physica::Core {
     typename ODESolver<T, Dim>::VectorType
     ODESolver<T, Dim>::rungeKutta4_step(T stepSize, T x, const VectorType& sol, Function func) {
         const VectorType k1 = T(0.5) * stepSize * func(x, sol);
-        const T x1 = x + stepSize;
-        const T temp = x1 * T(0.5);
+        const T temp = x + stepSize * T(0.5);
         const VectorType k2 = stepSize * func(temp, sol + k1);
         const VectorType k3 = stepSize * func(temp, sol + k2 * T(0.5));
-        const VectorType k4 = T(0.5) * stepSize * func(x1, sol + k3);
+        const VectorType k4 = T(0.5) * stepSize * func(x + stepSize, sol + k3);
         return sol + (k1 + k2 + k3 + k4) / T(3);
     }
     /**

@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 WeiBo He.
+ * Copyright 2021-2024 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -34,9 +34,9 @@ int main() {
         const auto& x = solver.getX();
         const auto& solution = solver.getSolution();
         for (size_t i = 0; i < solution.getColumn(); ++i) {
-            const auto solVector = solution.col(i);
-            const auto answer = exp(x[i].getTrivial());
-            if (fabs(solVector[0].getTrivial() - answer) > 1E-11 * fabs(answer))
+            const T result = solution.col(i)[0];
+            const T answer = exp(x[i]);
+            if (!scalarNear(result, answer, 1E-11))
                 return 1;
         }
     }
@@ -52,11 +52,11 @@ int main() {
         for (size_t i = 0; i < solution.getColumn(); ++i) {
             const auto& x_i = x[i];
             const auto solVector = solution.col(i);
-            const auto answer1 = sin(x_i.getTrivial());
-            if (fabs(solVector[0].getTrivial() - answer1) > 1E-10 * fabs(answer1))
+            const auto answer1 = sin(x_i);
+            if (!scalarNear(solVector[0], answer1, 1E-10))
                 return 1;
-            const auto answer2 = cos(x_i.getTrivial());
-            if (fabs(solVector[1].getTrivial() - answer2) > 1E-7 * fabs(answer2))
+            const auto answer2 = cos(x_i);
+            if (!scalarNear(solVector[1], answer2, 1E-7))
                 return 1;
         }
     }
@@ -71,8 +71,8 @@ int main() {
         const auto& solution = solver.getSolution();
         for (size_t i = 0; i < solution.getColumn(); ++i) {
             const auto solVector = solution.col(i);
-            const auto answer = exp(x[i].getTrivial());
-            if (fabs(solVector[0].getTrivial() - answer) > 1E-9 * fabs(answer))
+            const auto answer = exp(x[i]);
+            if (!scalarNear(solVector[0], answer, 1E-9))
                 return 1;
         }
     }
@@ -88,8 +88,8 @@ int main() {
         for (size_t i = 0; i < solution.getColumn(); ++i) {
             const auto& x_i = x[i];
             const auto solVector = solution.col(i);
-            const auto answer = sin(x_i.getTrivial());
-            if (fabs(solVector[0].getTrivial() - answer) > 1E-9 * fabs(answer))
+            const auto answer = sin(x_i);
+            if (!scalarNear(solVector[0], answer, 1E-9))
                 return 1;
         }
     }
@@ -109,8 +109,8 @@ int main() {
         for (size_t i = 0; i < solution.getColumn(); ++i) {
             const auto& x_i = x[i];
             const auto solVector = solution.col(i);
-            const auto answer = (x_i * exp(-square(x_i) / 2)).getTrivial();
-            if (fabs(solVector[0].getTrivial() - answer) > 1E-8 * fabs(answer))
+            const auto answer = x_i * exp(-square(x_i) / 2);
+            if (!scalarNear(solVector[0], answer, 1E-8))
                 return 1;
         }
     }
