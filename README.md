@@ -8,11 +8,12 @@ Physica is also an open source platform that maintains scientific code written i
 
 - [Design philosophy](#philosophy)
 - [Usage](#usage)
+- [Source structure](#structure)
 - [Maintainers](#maintainers)
 - [Contributing](#contributing)
 - [License](#license)
 
-## Design philosophy
+## Design philosophy <a id="philosophy"></a>
 
 1. Optimal performance and scalability: Balancing between performance, scalability and ease of use is a trade-off. Physica targets on performance and scalability, taking ease of use as a secondary concern if necessary.
 
@@ -33,6 +34,7 @@ Requirements:
 [Qt](https://www.qt.io/)  6.2.1  (Optional, Plotting support)  
 [CUDA](https://developer.nvidia.com/cuda-downloads)  12.0  (Optional)  
 [oneMKL](https://www.intel.com/) 2023.2.0 (Optional)  
+[vectorclass](https://github.com/vectorclass/version2) 2.01.03 (Bundled)  
 
 Compile Physica using the following command:  
 
@@ -53,6 +55,13 @@ ctest -j<N>
 Do not use Physica if any test were failed.  
 
 To use Physica, examples that under /path/to/install/Physica/examples are ready to use. Link Physica as a part of your project for production use.
+
+## Source structure <a id="structure"></a>
+
+**Core**: Contains implementation of core functionality for computational physics  
+**Gui**: Provides 2D and 3D plotting using Qt as its background  
+**Logging**: Log library  
+**Utils**: Basic data structures, allocators and misc  
 
 ## Maintainers
 
