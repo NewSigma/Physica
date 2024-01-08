@@ -30,7 +30,7 @@ namespace Physica::Gui {
         using Vector3D = Core::Vector<ScalarType, 3>;
         using VectorType = Core::Vector<ScalarType>;
         using PhononType = Core::FrozenPhonon<ScalarType>;
-        using MatrixGrid = typename PhononType::MatrixGrid;
+        using KSpaceFCGrid = typename PhononType::KSpaceFCGrid;
         using Index3D = typename Core::GridBase::Index3D;
     private:
         ScalarType currentX;
@@ -39,14 +39,14 @@ namespace Physica::Gui {
         /* Operations */
         void plotPathScatter(
             const PhononType& phonon,
-            const MatrixGrid& forceConstants,
+            const KSpaceFCGrid& forceConstants,
             Vector3D from,
             Vector3D to,
             size_t numPoint,
             const char* label);
         void plotPathLine(
             const PhononType& phonon,
-            const MatrixGrid& forceConstants,
+            const KSpaceFCGrid& forceConstants,
             Vector3D from,
             Vector3D to,
             size_t numPoint,
@@ -58,7 +58,7 @@ namespace Physica::Gui {
     private:
         Core::DenseMatrix<ScalarType> calcPaths(
             const PhononType& phonon,
-            const MatrixGrid& forceConstants,
+            const KSpaceFCGrid& forceConstants,
             const VectorType& factors,
             Vector3D from,
             Vector3D to);
@@ -82,7 +82,7 @@ namespace Physica::Gui {
     template<class ScalarType>
     void PhononPlot<ScalarType>::plotPathScatter(
             const PhononType& phonon,
-            const MatrixGrid& forceConstants,
+            const KSpaceFCGrid& forceConstants,
             Vector3D from,
             Vector3D to,
             size_t numPoint,
@@ -113,7 +113,7 @@ namespace Physica::Gui {
     template<class ScalarType>
     void PhononPlot<ScalarType>::plotPathLine(
             const PhononType& phonon,
-            const MatrixGrid& forceConstants,
+            const KSpaceFCGrid& forceConstants,
             Vector3D from,
             Vector3D to,
             size_t numPoint,
@@ -136,7 +136,7 @@ namespace Physica::Gui {
     template<class ScalarType>
     Core::DenseMatrix<ScalarType> PhononPlot<ScalarType>::calcPaths(
             const PhononType& phonon,
-            const MatrixGrid& forceConstants,
+            const KSpaceFCGrid& forceConstants,
             const VectorType& factors,
             Vector3D from,
             Vector3D to) {

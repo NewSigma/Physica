@@ -81,6 +81,7 @@ namespace Physica::Core {
 
         void toDirect() { toDirect(makeInvLattice()); }
         void toCartesian();
+        void toCartesian(PositionMatrix& target) const { toCartesian(target, lattice); }
         template<ExtendCellOption Option>
         void toSuperCell(unsigned int x, unsigned int y, unsigned int z);
         void toUnitCell(unsigned int x, unsigned int y, unsigned int z);

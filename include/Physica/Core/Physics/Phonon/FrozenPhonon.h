@@ -44,8 +44,7 @@ namespace Physica::Core {
         using typename Base::FFT3D;
         using typename Base::MDCellType;
         using typename Base::PositionMatrix;
-        using typename Base::MatrixType;
-        using typename Base::MatrixGrid;
+        using typename Base::RSpaceFCGrid;
         constexpr static unsigned int Dim = Base::Dim;
 
         ScalarType displace;
@@ -58,7 +57,7 @@ namespace Physica::Core {
         FrozenPhonon& operator=(FrozenPhonon obj) noexcept;
         /* Operations */
         template<class ForceModel>
-        [[nodiscard]] MatrixGrid makeForceConstants(ForceModel& model) const;
+        [[nodiscard]] RSpaceFCGrid makeForceConstants(ForceModel& model) const;
         template<class ForceModel>
         void optimize(const ForceModel& unitCellModel,
                       const ForceModel& superCellModel,
@@ -70,9 +69,7 @@ namespace Physica::Core {
         using Base::getUnitCell;
         using Base::getNumUnitCellAtom;
         using Base::getUnitCellDOF;
-        using Base::getSuperCellDOF;
         using Base::getSuperSize;
-        using Base::getForceConstantsGridSize;
         using Base::getNumCell;
     private:
         PositionMatrix makeWignerSeitzRadius() const;
@@ -92,41 +89,27 @@ namespace Physica::Core {
 
     template<class ScalarType>
     template<class ForceModel>
-    typename FrozenPhonon<ScalarType>::MatrixGrid
+    typename FrozenPhonon<ScalarType>::RSpaceFCGrid
     FrozenPhonon<ScalarType>::makeForceConstants(ForceModel& model) const {
         const size_t unitCellDOF = getUnitCellDOF();
         const ScalarType factor = -reciprocal(displace);
         const Index3D superSize = Base::getSuperSize();
         const MDCellType superCell = Base::getUnitCell().template makeSuperCell<ExtendCellOption::CellMajor>(superSize);
 
-        MatrixGrid result(getForceConstantsGridSize(), unitCellDOF, unitCellDOF, ScalarType(0));
-        auto& fcMatrixes = result.asArray();
-        FFT3D fft(superSize, {1, 1, 1}, PlanFlag::Estimate);
-        auto rSpace = fft.getRSpace().flatten();
-        auto kSpace = fft.getKSpace().flatten();
-        /* Make symmetrize force constants matrix */ {
-            PositionMatrix pos = superCell.getPos();
-            for (size_t row = 0; row < unitCellDOF; ++row) {
-                ScalarType& toDisplace = pos(row / Dim, row % Dim);
-                const ScalarType copy = toDisplace;
-                toDisplace += displace;
-                Vector<ScalarType> forceConst =
-                        model.template force<SequentialExecutor>(MDCellType(superCell.getLattice(), pos, superCell.getMassVec())) * factor;
-                toDisplace = copy;
+        RSpaceFCGrid result(getSuperSize(), unitCellDOF, unitCellDOF, ScalarType(0));
+        PositionMatrix pos = superCell.getPos();
+        for (size_t major = 0; major < unitCellDOF; ++major) {
+            ScalarType& toDisplace = pos(major / Dim, major % Dim);
+            const ScalarType copy = toDisplace;
+            toDisplace += displace;
+            Vector<ScalarType> forceConst =
+                    model.template force<SequentialExecutor>(MDCellType(superCell.getLattice(), pos, superCell.getMassVec())) * factor;
+            toDisplace = copy;
 
-                for (size_t col = 0; col < unitCellDOF; ++col) {
-                    const size_t shift = unitCellDOF;
-                    for (size_t cell = 0; cell < getNumCell(); ++cell)
-                        rSpace[cell] = forceConst[col + cell * shift];
-                    fft.transform();
-
-                    for (size_t i = 0; i < fcMatrixes.getLength(); ++i) {
-                        auto& fcMatrix = fcMatrixes[i];
-                        const ComplexType elem = kSpace[i] * ScalarType(0.5);
-                        fcMatrix(row, col) += elem;
-                        fcMatrix(col, row) += elem.conjugate();
-                    }
-                }
+            for (size_t cell = 0; cell < getNumCell(); ++cell) {
+                const Index3D index = PeriodIndex3D(cell, superSize);
+                for (size_t minor = 0; minor < unitCellDOF; ++minor)
+                    result(index).refFromMajorMinor(major, minor) = forceConst[cell * unitCellDOF + minor];
             }
         }
         return result;

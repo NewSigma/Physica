@@ -31,7 +31,7 @@ namespace Physica::Core {
         using Vector3D = typename SolverType::Vector3D;
         using CoeffVector = Vector<ScalarType, ElementType::DegreeOfFreedom>;
         using MDCellType = typename SolverType::MDCellType;
-        using MatrixGrid = typename SolverType::MatrixGrid;
+        using KSpaceFCGrid = typename SolverType::KSpaceFCGrid;
         using EigenValueGrid = GridStorage<Vector<ScalarType>>;
         constexpr static unsigned int Dim = Internal::Traits<MDCellType>::Dim;
     private:
@@ -41,7 +41,7 @@ namespace Physica::Core {
         CoeffVector diffCoeffY;
         CoeffVector diffCoeffZ;
     public:
-        PhononDOS(MDCellType unitCell, Index3D superSize, const MatrixGrid& forceConstants, Index3D gridDim_);
+        PhononDOS(MDCellType unitCell, Index3D superSize, const KSpaceFCGrid& forceConstants, Index3D gridDim_);
         PhononDOS(const PhononDOS&) = default;
         PhononDOS(PhononDOS&&) noexcept = default;
         ~PhononDOS() = default;
@@ -58,7 +58,7 @@ namespace Physica::Core {
 
     template<class ScalarType>
     PhononDOS<ScalarType>::PhononDOS(
-            MDCellType unitCell, Index3D superSize, const MatrixGrid& forceConstants, Index3D gridDim)
+            MDCellType unitCell, Index3D superSize, const KSpaceFCGrid& forceConstants, Index3D gridDim)
             : solver(std::move(unitCell), superSize), eigenvalues(gridDim) {
         eigenvalues.forIndexInGrid([this, &forceConstants](Index3D index) {
             const Index3D gridDim = eigenvalues.getDim();

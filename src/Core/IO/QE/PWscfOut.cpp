@@ -23,6 +23,8 @@
 
 namespace Physica::Core {
     PWscfOut::PWscfOut(const char* path, size_t numAtom) : fin(path), force(3 * numAtom), buffer(DefaultBufferSize) {
+        if (!fin)
+            throw IOException("[Error]: File not found");
         readForce();
     }
 

@@ -26,8 +26,8 @@ namespace Physica::Core {
      * Algorithm introduced in [1] and its erratum [2]
      * 
      * Reference:
-     * [1] G. Gilat and L. J. Raubenheimer, Phys. Rev. 144, 390(1966) (DOI: 10.1103/PhysRev.144.390)
-     * [2] G. Gilat and L. J. Raubenheimer, Phys. Rev. 147, 670(1966) (DOI: 10.1103/PhysRev.147.670.2)
+     * [1] Phys. Rev. 144, 390 (1966); https://doi.org/10.1103/PhysRev.144.390
+     * [2] Phys. Rev. 147, 670 (1966); https://doi.org/10.1103/PhysRev.147.670.2
      */
     template<class ScalarType>
     class CubeCross {

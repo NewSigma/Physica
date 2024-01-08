@@ -89,6 +89,8 @@ if(${PHYSICA_CUDA})
     physica_add_test(SilveraGoldman_cuda Core/Physics/MD/ForceModel/SilveraGoldman.cu)
     physica_add_test(HardCore_cuda Core/Physics/MD/HardCore.cu)
 endif()
+### Phonon
+physica_add_test(FCSwapVector Core/Physics/Phonon/FCSwapVector.cpp)
 ### SolidState
 physica_add_test(BrillouInterpolate Core/Physics/SolidState/BrillouInterpolate.cpp)
 physica_add_test(CrystalCell Core/Physics/SolidState/CrystalCell.cpp)

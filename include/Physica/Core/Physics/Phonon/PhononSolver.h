@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 WeiBo He.
+ * Copyright 2023-2024 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -20,6 +20,7 @@
 
 #include "Physica/Core/Physics/MD/MDCell.h"
 #include "Physica/Core/Physics/MD/ForceModel/Ewald/Ewald.h"
+#include "PhononSolverImpl/FCProjector.h"
 
 namespace Physica::Core {
     template<class ScalarType>
@@ -27,14 +28,17 @@ namespace Physica::Core {
         using This = PhononSolver<ScalarType>;
     public:
         using ComplexType = ComplexScalar<ScalarType>;
-        using Index3D = Utils::Array<size_t, 3>;
         using Vector3D = Vector<ScalarType, 3>;
         using FFT3D = FFT<ScalarType, 3>;
         using MDCellType = MDCell<ScalarType>;
-        using MatrixType = DenseMatrix<ComplexType>;
         using PositionMatrix = typename MDCellType::PositionMatrix;
-        using MatrixGrid = GridStorage<MatrixType>;
-        using EigenSolverType = EigenSolver<MatrixType>;
+        using ProjectorType = FCProjector<ScalarType>;
+        using Index3D = typename ProjectorType::Index3D;
+        using RSpaceFCMat = typename ProjectorType::RSpaceFCMat;
+        using RSpaceFCGrid = typename ProjectorType::RSpaceFCGrid;
+        using KSpaceFCMat = DenseMatrix<ComplexType>;
+        using KSpaceFCGrid = GridStorage<KSpaceFCMat>;
+        using EigenSolverType = EigenSolver<KSpaceFCMat>;
         using QPointGrid = GridStorage<EigenSolverType>;
         constexpr static unsigned int Dim = Internal::Traits<MDCellType>::Dim;
     private:
@@ -50,11 +54,14 @@ namespace Physica::Core {
         /* Operators */
         PhononSolver& operator=(PhononSolver obj) noexcept { swap(obj); return *this; }
         /* Operations */
-        void applyTranslate(MatrixGrid& forceConstants, ScalarType translationPrec, size_t maxIteration);
-        void applyEwald(const EwaldType& ewald, Vector3D qPoint, MatrixType& fcMatrix);
-        [[nodiscard]] MatrixType interpolatePoint(Vector3D qPoint, const MatrixGrid& forceConstants) const;
-        void toDynamicMatrix(MatrixType& forceConstant) const;
-        void toDynamicMatrix(MatrixGrid& forceConstants) const;
+        void removeTrans(KSpaceFCGrid& forceConstants, ScalarType translationPrec, size_t maxIteration) const;
+        void projectTrans(RSpaceFCGrid& fcGrid) const;
+        void projectTransRot(RSpaceFCGrid& fcGrid) const;
+
+        [[nodiscard]] KSpaceFCMat interpolatePoint(Vector3D qPoint, const KSpaceFCGrid& forceConstants) const;
+        KSpaceFCGrid toKSpace(const RSpaceFCGrid& rSpaceGrid) const;
+        void toDynamicMatrix(KSpaceFCMat& forceConstant) const;
+        void toDynamicMatrix(KSpaceFCGrid& forceConstants) const;
         [[nodiscard]] Vector<ScalarType> makeFreq(const EigenSolverType& eigen) const;
         [[nodiscard]] inline Vector<ScalarType> makeFreq(const QPointGrid& qPoints, Index3D qIndex) const;
         [[nodiscard]] DenseMatrix<ScalarType> makeEigenVectors(const EigenSolverType& eigen) const;
@@ -74,8 +81,8 @@ namespace Physica::Core {
         /* Setters */
         void setUnitCell(MDCellType unitCell_) { unitCell = std::move(unitCell_); }
         /* Static members */
-        [[nodiscard]] static EigenSolverType diagonalize(const MatrixType& dynamicMatrix);
-        [[nodiscard]] static QPointGrid diagonalize(const MatrixGrid& dynamicMatrixes);
+        [[nodiscard]] static EigenSolverType diagonalize(const KSpaceFCMat& dynamicMatrix);
+        [[nodiscard]] static QPointGrid diagonalize(const KSpaceFCGrid& dynamicMatrixes);
     private:
         ScalarType removeDriftForce(Vector<ScalarType>& force) const;
     };
@@ -85,16 +92,16 @@ namespace Physica::Core {
             : unitCell(std::move(unitCell_))
             , superSize(superSize_) {}
     /**
-     * Use iteration method to apply translational invariance and while keep force constant matrix symmetric as introduced in [1].
+     * Utilizing the iteration method to incorporate translational invariance while keep force constant matrix symmetric as introduced in [1].
      * 
      * References:
      * [1] Comput. Phys. Commun., 2009, 180(12), 2622-2633; https://doi.org/10.1016/j.cpc.2009.03.010
      */
     template<class ScalarType>
-    void PhononSolver<ScalarType>::applyTranslate(
-            MatrixGrid& forceConstants,
+    void PhononSolver<ScalarType>::removeTrans(
+            KSpaceFCGrid& forceConstants,
             ScalarType translationPrec,
-            size_t maxIteration) {
+            size_t maxIteration) const {
         const size_t unitCellDOF = getUnitCellDOF();
         auto& fcMatrixes = forceConstants.asArray();
         FFT3D fft(superSize, {1, 1, 1}, PlanFlag::Estimate);
@@ -102,7 +109,7 @@ namespace Physica::Core {
         auto kSpace = fft.getKSpace().flatten();
 
         Vector<ScalarType> forceConst(getSuperCellDOF());
-        MatrixType temp;
+        KSpaceFCMat temp;
         ScalarType averageDrift = std::numeric_limits<ScalarType>::max();
         size_t iteration = 0;
         while (averageDrift > translationPrec) {
@@ -146,26 +153,31 @@ namespace Physica::Core {
     }
 
     template<class ScalarType>
-    void PhononSolver<ScalarType>::applyEwald(const EwaldType& ewald, Vector3D qPoint, MatrixType& fcMatrix) {
-        assert(fcMatrix.getRow() == fcMatrix.getColumn() && "[Error]: Force constant matrix must be square");
-        const size_t size = fcMatrix.getColumn();
-        for (size_t c = 0; c < size; ++c) {
-            for (size_t r = c; r < size; ++r) {
-                const ComplexType temp = ewald.forceConst(unitCell.getPos(), qPoint, r, c);
-                fcMatrix(r, c) += temp;
-                if (r != c)
-                    fcMatrix(c, r) += temp.conjugate();
-            }
-        }
+    void PhononSolver<ScalarType>::projectTrans(RSpaceFCGrid& fcGrid) const {
+        const ProjectorType projector(superSize, getUnitCellDOF());
+        auto fcVector = projector.toVector(fcGrid);
+        projector.projectSwap(fcVector);
+        projector.projectTrans(fcVector);
+        projector.toGrid(fcVector, fcGrid);
     }
 
     template<class ScalarType>
-    typename PhononSolver<ScalarType>::MatrixType PhononSolver<ScalarType>::interpolatePoint(
-            Vector3D qPoint, const MatrixGrid& forceConstants) const {
+    void PhononSolver<ScalarType>::projectTransRot(RSpaceFCGrid& fcGrid) const {
+        const ProjectorType projector(superSize, getUnitCellDOF(), unitCell.getPos());
+        auto fcVector = projector.toVector(fcGrid);
+        projector.projectSwap(fcVector);
+        projector.projectTrans(fcVector);
+        projector.projectRot(fcVector);
+        projector.toGrid(fcVector, fcGrid);
+    }
+
+    template<class ScalarType>
+    typename PhononSolver<ScalarType>::KSpaceFCMat PhononSolver<ScalarType>::interpolatePoint(
+            Vector3D qPoint, const KSpaceFCGrid& forceConstants) const {
         const Vector3D qVector = unitCell.makeRepLattice().transpose() * qPoint;
         const size_t unitCellDOF = getUnitCellDOF();
         FFT3D fft(superSize, {1, 1, 1}, PlanFlag::Estimate);
-        MatrixType result(unitCellDOF, unitCellDOF);
+        KSpaceFCMat result(unitCellDOF, unitCellDOF);
         for (size_t major = 0; major < unitCellDOF; ++major) {
             for (size_t minor = 0; minor < unitCellDOF; ++minor) {
                 auto& kSpace = fft.getKSpace();
@@ -204,7 +216,31 @@ namespace Physica::Core {
     }
 
     template<class ScalarType>
-    void PhononSolver<ScalarType>::toDynamicMatrix(MatrixType& forceConstant) const {
+    typename PhononSolver<ScalarType>::KSpaceFCGrid PhononSolver<ScalarType>::toKSpace(const RSpaceFCGrid& rSpaceGrid) const {
+        assert(superSize == rSpaceGrid.getDim() && "[Error]: Super sizes do not match");
+        assert(getUnitCellDOF() == rSpaceGrid(0, 0, 0).getRow() && "[Error]: DOF do not match");
+        const size_t unitCellDOF = getUnitCellDOF();
+        KSpaceFCGrid kSpaceGrid(getForceConstantsGridSize(), unitCellDOF, unitCellDOF);
+        FFT3D fft(superSize, {1, 1, 1}, PlanFlag::Estimate);
+        for (size_t major = 0; major < unitCellDOF; ++major) {
+            for (size_t minor = 0; minor < unitCellDOF; ++minor) {
+                auto& rSpaceFFT = fft.getRSpace();
+                rSpaceFFT.forIndexInGrid([major, minor, &rSpaceGrid, &rSpaceFFT](Index3D index) {
+                    rSpaceFFT(index) = rSpaceGrid(index).calcFromMajorMinor(major, minor);
+                });
+                fft.transform();
+
+                const auto& kSpaceFFT = fft.getKSpace();
+                kSpaceFFT.forIndexInGrid([major, minor, &kSpaceGrid, &kSpaceFFT](Index3D index) {
+                    kSpaceGrid(index).refFromMajorMinor(major, minor) = kSpaceFFT(index);
+                });
+            }
+        }
+        return kSpaceGrid;
+    }
+
+    template<class ScalarType>
+    void PhononSolver<ScalarType>::toDynamicMatrix(KSpaceFCMat& forceConstant) const {
         const size_t unitCellDOF = getUnitCellDOF();
         for (size_t row = 0; row < unitCellDOF; ++row) {
             const size_t atom1 = row / Dim;
@@ -219,7 +255,7 @@ namespace Physica::Core {
     }
 
     template<class ScalarType>
-    void PhononSolver<ScalarType>::toDynamicMatrix(MatrixGrid& forceConstants) const {
+    void PhononSolver<ScalarType>::toDynamicMatrix(KSpaceFCGrid& forceConstants) const {
         const size_t unitCellDOF = getUnitCellDOF();
         auto& fcMatrixes = forceConstants.flatten();
         for (size_t row = 0; row < unitCellDOF; ++row) {
@@ -292,7 +328,7 @@ namespace Physica::Core {
 
     template<class ScalarType>
     typename PhononSolver<ScalarType>::EigenSolverType
-    PhononSolver<ScalarType>::diagonalize(const MatrixType& dynamicMatrix) {
+    PhononSolver<ScalarType>::diagonalize(const KSpaceFCMat& dynamicMatrix) {
         const size_t unitCellDOF = dynamicMatrix.getRow();
         auto eigen = EigenSolverType(unitCellDOF);
         eigen.compute(dynamicMatrix, true);
@@ -302,7 +338,7 @@ namespace Physica::Core {
 
     template<class ScalarType>
     typename PhononSolver<ScalarType>::QPointGrid PhononSolver<ScalarType>::diagonalize(
-            const MatrixGrid& dynamicMatrixes) {
+            const KSpaceFCGrid& dynamicMatrixes) {
         const auto& matrixes = dynamicMatrixes.flatten();
         const size_t unitCellDOF = matrixes[0].getRow();
         QPointGrid qPoints(dynamicMatrixes.getDim(), unitCellDOF);
