@@ -26,10 +26,20 @@
 #include "Physica/Utils/Unix/TempFile.h"
 
 namespace Physica::Core {
+    template<class ScalarType> class QEModel;
+
+    namespace Internal {
+        template<class ScalarType>
+        class Traits<QEModel<ScalarType>> {
+        public:
+            constexpr static bool IsPeriodBoundary = true;
+        };
+    }
+
     template<class ScalarType>
     class QEModel {
         using MDCellType = MDCell<ScalarType>;
-        using ElementTypeArray = typename Poscar::ElementTypeArray;
+        using ElementTypeArray = typename Poscar<ScalarType>::ElementTypeArray;
 
         std::string pathToPW;
         Utils::Array<char> input;
@@ -45,6 +55,12 @@ namespace Physica::Core {
         /* Operations */
         template<class Executor>
         [[nodiscard]] Vector<ScalarType> force(const MDCellType& cell) const;
+        template<class VectorType, class Executor>
+        void forceAsync(const MDCellType& cell, ContinuousVector<VectorType>& result) const;
+        template<class Executor>
+        [[nodiscard]] Vector<ScalarType> force_short(const MDCellType& cell) const { return force<Executor>(cell); }
+        template<class Executor>
+        [[nodiscard]] Vector<ScalarType> force_long(const MDCellType& cell) const { return Vector<ScalarType>(cell.getDOF(), 0); }
         void swap(QEModel& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] size_t getNumAtom() const noexcept { return elementTypes.getLength(); }
@@ -72,6 +88,14 @@ namespace Physica::Core {
     template<class ScalarType>
     template<class Executor>
     Vector<ScalarType> QEModel<ScalarType>::force(const MDCellType& cell) const {
+        Vector<ScalarType> result(cell.getNumParticle());
+        forceAsync<Vector<ScalarType>, Executor>(cell, result);
+        return result;
+    }
+
+    template<class ScalarType>
+    template<class VectorType, class Executor>
+    void QEModel<ScalarType>::forceAsync(const MDCellType& cell, ContinuousVector<VectorType>& result) const {
         assert(cell.getNumParticle() == getNumAtom());
         try {
             auto inputTmp = Utils::TempFile("/tmp/tmpXXXXXX");
@@ -92,7 +116,7 @@ namespace Physica::Core {
             auto outputTmp = Utils::TempFile("/tmp/tmpXXXXXX");
             run_qe(inputTmp, outputTmp).wait("[Error]: QE finished with non zero exit code");
             PWscfOut out_scf(outputTmp.getName(), getNumAtom());
-            return out_scf.getForce();
+            result.getDerived() = out_scf.getForce();
         }
         catch (std::exception& e) { throw e; }
     }
