@@ -34,17 +34,14 @@ namespace Physica::Core {
         using VectorType = Vector<ScalarType>;
         using RSpaceFCMat = DenseMatrix<ScalarType>;
         using RSpaceFCGrid = GridStorage<RSpaceFCMat>;
-        using MDCellType = MDCell<ScalarType>;
-        using PositionMatrix = typename MDCellType::PositionMatrix;
         using Index3D = typename RSpaceFCGrid::Index3D;
-    private:
+    protected:
         Index3D superSize;
         size_t numDOF;
         Utils::Array<VectorType> transBases;
-        Utils::Array<VectorType> rotBases;
     public:
+        FCProjector() = default;
         FCProjector(Index3D superSize_, size_t numDOF_);
-        FCProjector(Index3D superSize_, size_t numDOF_, const PositionMatrix& pos);
         FCProjector(const FCProjector&) = default;
         FCProjector(FCProjector&&) noexcept = default;
         ~FCProjector() = default;
@@ -53,7 +50,6 @@ namespace Physica::Core {
         /* Operations */
         void projectSwap(VectorType& v) const;
         void projectTrans(VectorType& v) const;
-        void projectRot(VectorType& v) const;
         VectorType toVector(const RSpaceFCGrid& fcGrid) const;
         void toGrid(const VectorType& fcVector, RSpaceFCGrid& fcGrid) const;
         void swap(FCProjector& __restrict obj) noexcept;
@@ -64,9 +60,8 @@ namespace Physica::Core {
         [[nodiscard]] size_t getNumUnitCellAtom() const noexcept { return numDOF / Dim; }
         [[nodiscard]] size_t getNumSuperCellAtom() const noexcept { return getNumUnitCellAtom() * getNumCell(); }
         [[nodiscard]] inline size_t getNumForceConsts() const noexcept;
-    private:
+    protected:
         VectorType makeFCTransVector(size_t dof, unsigned int direction) const;
-        VectorType makeFCRotVector(size_t dof, unsigned int direction, const PositionMatrix& superPos) const;
     };
 
     template<class ScalarType>
@@ -93,50 +88,6 @@ namespace Physica::Core {
     }
 
     template<class ScalarType>
-    FCProjector<ScalarType>::FCProjector(Index3D superSize_, size_t numDOF_, const PositionMatrix& pos)
-            : superSize(std::move(superSize_)), numDOF(numDOF_) {
-        assert(pos.getRow() == getNumUnitCellAtom() && "[Error]: Invalid pos");
-        const size_t numBase = numDOF * Dim;
-        transBases.reserve(numBase);
-        rotBases.reserve(numBase);
-        for (size_t i = 0; i < numBase; ++i) {
-            VectorType transBase = makeFCTransVector(i / Dim, i % Dim);
-            projectSwap(transBase);
-            transBases.grow(std::move(transBase));
-
-            VectorType rotBase = makeFCRotVector(i / Dim, i % Dim, pos);
-            rotBase.toUnit();
-            projectSwap(rotBase);
-            rotBases.grow(std::move(rotBase));
-        }
-
-        for (size_t i = 0; i < transBases.getLength(); ++i) {
-            auto& base_i = transBases[i];
-            assert(!base_i.norm().isZero() && "[Error]: Unexpected base degenerate");
-            base_i.toUnit();
-
-            for (size_t j = i + 1; j < transBases.getLength(); ++j) {
-                auto& base_j = transBases[j];
-                base_j -= (base_i * base_j) * base_i;
-            }
-
-            for (auto& rotBase : rotBases)
-                rotBase -= (rotBase * base_i) * base_i;
-        }
-
-        for (size_t i = 0; i < rotBases.getLength(); ++i) {
-            auto& base_i = rotBases[i];
-            assert(!base_i.norm().isZero() && "[Error]: Unexpected base degenerate");
-            base_i.toUnit();
-
-            for (size_t j = i + 1; j < rotBases.getLength(); ++j) {
-                auto& base_j = rotBases[j];
-                base_j -= (base_i * base_j) * base_i;
-            }
-        }
-    }
-
-    template<class ScalarType>
     void FCProjector<ScalarType>::projectSwap(VectorType& v) const {
         GridBase::forIndexInGrid(superSize, [this, &v](Index3D index) {
             for (size_t i = 0; i < numDOF; ++i) {
@@ -156,12 +107,6 @@ namespace Physica::Core {
     void FCProjector<ScalarType>::projectTrans(VectorType& v) const {
         for (const auto& transBase : transBases)
             v -= (transBase * v) * transBase;
-    }
-
-    template<class ScalarType>
-    void FCProjector<ScalarType>::projectRot(VectorType& v) const {
-        for (const auto& rotBase : rotBases)
-            v -= (rotBase * v) * rotBase;
     }
 
     template<class ScalarType>
@@ -194,6 +139,7 @@ namespace Physica::Core {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         superSize.swap(obj.superSize);
         std::swap(numDOF, obj.numDOF);
+        transBases.swap(obj.transBases);
     }
 
     template<class ScalarType>
@@ -208,26 +154,6 @@ namespace Physica::Core {
             const auto index5D = FCSwapVector<ScalarType>::index1DTo5D(numDOF, superSize, i);
             if ((index5D[3] == dof) && (index5D[4] % Dim == direction))
                 result[i] = ScalarType(1);
-        }
-        return result;
-    }
-
-    template<class ScalarType>
-    typename FCProjector<ScalarType>::VectorType FCProjector<ScalarType>::makeFCRotVector(
-            size_t dof, unsigned int direction, const PositionMatrix& pos) const {
-        const unsigned int dir1 = (direction + 1) % Dim;
-        const unsigned int dir2 = (direction + 2) % Dim;
-        VectorType result(getNumForceConsts(), 0);
-        for (size_t i = 0; i < result.getLength(); ++i) {
-            const auto index5D = FCSwapVector<ScalarType>::index1DTo5D(numDOF, superSize, i);
-            if (index5D[3] == dof) {
-                const size_t atom = index5D[4] / Dim;
-                const unsigned int dir = index5D[4] % Dim;
-                if (dir == dir1)
-                    result[i] = -pos(atom, dir2);
-                else if (dir == dir2)
-                    result[i] = pos(atom, dir1);
-            }
         }
         return result;
     }

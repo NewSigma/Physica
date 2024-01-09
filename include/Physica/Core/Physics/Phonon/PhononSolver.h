@@ -20,7 +20,7 @@
 
 #include "Physica/Core/Physics/MD/MDCell.h"
 #include "Physica/Core/Physics/MD/ForceModel/Ewald/Ewald.h"
-#include "PhononSolverImpl/FCProjector.h"
+#include "PhononSolverImpl/BHProjector.h"
 
 namespace Physica::Core {
     template<class ScalarType>
@@ -32,10 +32,9 @@ namespace Physica::Core {
         using FFT3D = FFT<ScalarType, 3>;
         using MDCellType = MDCell<ScalarType>;
         using PositionMatrix = typename MDCellType::PositionMatrix;
-        using ProjectorType = FCProjector<ScalarType>;
-        using Index3D = typename ProjectorType::Index3D;
-        using RSpaceFCMat = typename ProjectorType::RSpaceFCMat;
-        using RSpaceFCGrid = typename ProjectorType::RSpaceFCGrid;
+        using Index3D = typename FCProjector<ScalarType>::Index3D;
+        using RSpaceFCMat = typename FCProjector<ScalarType>::RSpaceFCMat;
+        using RSpaceFCGrid = typename FCProjector<ScalarType>::RSpaceFCGrid;
         using KSpaceFCMat = DenseMatrix<ComplexType>;
         using KSpaceFCGrid = GridStorage<KSpaceFCMat>;
         using EigenSolverType = EigenSolver<KSpaceFCMat>;
@@ -154,7 +153,7 @@ namespace Physica::Core {
 
     template<class ScalarType>
     void PhononSolver<ScalarType>::projectTrans(RSpaceFCGrid& fcGrid) const {
-        const ProjectorType projector(superSize, getUnitCellDOF());
+        const FCProjector<ScalarType> projector(superSize, getUnitCellDOF());
         auto fcVector = projector.toVector(fcGrid);
         projector.projectSwap(fcVector);
         projector.projectTrans(fcVector);
@@ -163,7 +162,7 @@ namespace Physica::Core {
 
     template<class ScalarType>
     void PhononSolver<ScalarType>::projectTransRot(RSpaceFCGrid& fcGrid) const {
-        const ProjectorType projector(superSize, getUnitCellDOF(), unitCell.getPos());
+        const BHProjector<ScalarType> projector(superSize, getUnitCellDOF(), unitCell);
         auto fcVector = projector.toVector(fcGrid);
         projector.projectSwap(fcVector);
         projector.projectTrans(fcVector);
@@ -179,7 +178,7 @@ namespace Physica::Core {
         FFT3D fft(superSize, {1, 1, 1}, PlanFlag::Estimate);
         KSpaceFCMat result(unitCellDOF, unitCellDOF);
         for (size_t major = 0; major < unitCellDOF; ++major) {
-            for (size_t minor = 0; minor < unitCellDOF; ++minor) {
+            for (size_t minor = major; minor < unitCellDOF; ++minor) {
                 auto& kSpace = fft.getKSpace();
                 kSpace.forIndexInGrid([major, minor, &kSpace, &forceConstants](Index3D index) {
                     kSpace(index) = forceConstants(index).calcFromMajorMinor(major, minor);
@@ -196,13 +195,14 @@ namespace Physica::Core {
                     for (unsigned int i = 0; i < Dim; ++i) {
                         const ssize_t index_i = index[i];
                         const ssize_t dim_i = rSpaceDim[i];
-                        const ScalarType factor = ScalarType(index_i > dim_i / 2 ? index_i - dim_i : (index_i));
-                        const ScalarType phase_i = qVector * lattice.row(i).asVector() * factor;
                         const bool isOnWignerSeitzBoundary = (dim_i % 2 == 0) && (index_i == dim_i / 2);
                         if (isOnWignerSeitzBoundary)
                             coeff *= ScalarType(0.5);
-                        else
+                        else {
+                            const ScalarType factor = ScalarType(index_i > dim_i / 2 ? index_i - dim_i : (index_i));
+                            const ScalarType phase_i = qVector * lattice.row(i).asVector() * factor;
                             phase += phase_i;
+                        }
                     }
                     const auto factor = ComplexType::fromPhase(phase);
                     elem += rSpace(index) * coeff * factor;
