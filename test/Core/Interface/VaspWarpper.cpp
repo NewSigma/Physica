@@ -26,9 +26,10 @@ extern const char* outcar;
 
 namespace Physica::Core {
     struct Test {
-        static VaspWarpper init() {
+        constexpr static const char* OutPath = "/tmp/OUTCAR";
+        VaspWarpper init() {
             {
-                std::ofstream fout("/tmp/OUTCAR");
+                std::ofstream fout(OutPath);
                 fout << outcar;
             }
 
@@ -55,13 +56,18 @@ namespace Physica::Core {
             future.finished = future.isValid = true;
             return future;
         }
+
+        ~Test() {
+            unlink(OutPath);
+        }
     };
 }
 
 
 
 int main() {
-    VaspWarpper vasp = Physica::Core::Test::init();
+    Test test{};
+    VaspWarpper vasp = test.init();
     const auto outcar = vasp.getOutcar();
     const auto& force = outcar.getForce();
     const Vector<ScalarType> answer{1.168281, -4.245817, -0.080442, -0.735246, 1.188434, 0.171096, 0.238719, 0.022373, -0.258197, 0.595000, 0.266135, 0.121868, -0.209437, 0.968435, -0.291308, -0.990043, 1.383871, 0.212539, -0.192415, 0.419208, 0.024764, 0.125140, -0.002640, 0.099680};

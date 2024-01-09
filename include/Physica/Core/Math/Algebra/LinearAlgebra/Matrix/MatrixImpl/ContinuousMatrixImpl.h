@@ -326,7 +326,7 @@ namespace Physica::Core {
     }
 
     template<class Derived>
-    void ContinuousMatrix<Derived>::read(const H5Location& loc, const char* name, const H5::DSetMemXferPropList& xfer_plist) {
+    const H5DataSet<2> ContinuousMatrix<Derived>::read(const H5Location& loc, const char* name, const H5::DSetMemXferPropList& xfer_plist) {
         const auto dataset = loc.openDataSet<2>(name);
         const size_t maxMajor = dataset.getSize(0);
         const size_t maxMinor = dataset.getSize(1);
@@ -341,10 +341,11 @@ namespace Physica::Core {
             else
                 dataset.read(row(major).data(), ScalarType::getH5DataType(), memSpace, fileSpace, xfer_plist);
         }
+        return dataset;
     }
 
     template<class Derived>
-    void ContinuousMatrix<Derived>::write(H5Location& loc, const char* name, const H5::DSetMemXferPropList& xfer_plist) const {
+    H5DataSet<2> ContinuousMatrix<Derived>::write(H5Location& loc, const char* name, const H5::DSetMemXferPropList& xfer_plist) const {
         const size_t maxMajor = Base::getMaxMajor();
         const size_t maxMinor = Base::getMaxMinor();
         const auto space = H5DataSpace<2>({maxMajor, maxMinor});
@@ -363,5 +364,6 @@ namespace Physica::Core {
             else
                 dataset.write(row(major).data(), ScalarType::getH5DataType(), memSpace, fileSpace, xfer_plist);
         }
+        return dataset;
     }
 }

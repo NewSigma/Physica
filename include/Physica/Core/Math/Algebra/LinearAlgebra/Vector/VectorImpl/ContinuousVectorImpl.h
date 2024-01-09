@@ -242,12 +242,13 @@ namespace Physica::Core {
     }
 
     template<class Derived>
-    void ContinuousVector<Derived>::read(const H5File& h5f, const char* name, const H5::DSetMemXferPropList& xfer_plist) {
+    const H5DataSet<1> ContinuousVector<Derived>::read(const H5File& h5f, const char* name, const H5::DSetMemXferPropList& xfer_plist) {
         const auto dataset = h5f.openDataSet<1>(name);
         const size_t length = dataset.getSize(0);
         resize(length);
         const auto space = H5DataSpace<1>({length});
         dataset.read(data(), ScalarType::getH5DataType(), space, space, xfer_plist);
+        return dataset;
     }
 
     template<class Derived>
@@ -262,7 +263,7 @@ namespace Physica::Core {
     }
 
     template<class Derived>
-    void ContinuousVector<Derived>::write(H5File& h5f, const char* name, const H5::DSetMemXferPropList& xfer_plist) const {
+    H5DataSet<1> ContinuousVector<Derived>::write(H5File& h5f, const char* name, const H5::DSetMemXferPropList& xfer_plist) const {
         const auto space = H5DataSpace<1>({Base::getLength()});
         H5DataSet<1> dataset;
         if (h5f.exists(name))
@@ -270,6 +271,7 @@ namespace Physica::Core {
         else
             dataset = h5f.createDataSet<1>(name, ScalarType::getH5DataType(), space);
         dataset.write(data(), ScalarType::getH5DataType(), space, space, xfer_plist);
+        return dataset;
     }
 
     template<class Derived>

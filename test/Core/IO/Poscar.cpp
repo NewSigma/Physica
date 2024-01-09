@@ -120,6 +120,21 @@ int main() {
         const auto& numOfEachType = poscar.getNumOfEachType();
         if (numOfEachType[0] != 8 || numOfEachType[1] != 4)
             return 1;
+        
+        auto tmp = TempFile("/tmp/tmpXXXXXX");
+        {
+            H5File h5f(tmp.getName(), H5File::ReadWrite | H5File::Creat);
+            poscar.write(h5f, "poscar");
+        }
+        {
+            Poscar<ScalarType> poscar1{};
+            H5File h5f(tmp.getName(), H5File::ReadOnly);
+            poscar1.read(h5f, "poscar");
+            if (!matrixNear(poscar.getLattice(), poscar1.getLattice(), 1E-15))
+                return 1;
+            if (!matrixNear(poscar.getPos(), poscar1.getPos(), 1E-15))
+                return 1;
+        }
     }
     return 0;
 }

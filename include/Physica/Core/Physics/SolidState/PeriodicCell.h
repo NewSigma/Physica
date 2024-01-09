@@ -88,6 +88,10 @@ namespace Physica::Core {
         template<ExtendCellOption Option>
         [[nodiscard]] PeriodicCell makeSuperCell(unsigned int x, unsigned int y, unsigned int z) const;
         [[nodiscard]] PeriodicCell makeUnitCell(unsigned int x, unsigned int y, unsigned int z) const;
+
+        void read(const H5Location& loc, const char* name);
+        H5Group write(H5Location& loc, const char* name) const;
+        void swap(PeriodicCell& __restrict cell) noexcept;
         /* Getters */
         [[nodiscard]] constexpr static unsigned int getDim() { return Dim; }
         [[nodiscard]] const LatticeMatrix& getLattice() const noexcept { return lattice; }
@@ -99,8 +103,6 @@ namespace Physica::Core {
         void setLattice(LatticeMatrix new_lattice) { lattice = new_lattice; }
         void setPos(PositionMatrix new_pos) noexcept { pos = std::move(new_pos); }
         void swapPos(PositionMatrix& __restrict new_pos) noexcept { pos.swap(new_pos); }
-        /* Helper */
-        void swap(PeriodicCell& __restrict cell) noexcept;
         /* Static members */
         [[nodiscard]] static LatticeMatrix makeLattice(
                 ScalarType normA,
@@ -377,11 +379,22 @@ namespace Physica::Core {
     }
 
     template<class ScalarType, unsigned int Dim>
-    void PeriodicCell<ScalarType, Dim>::toCartesian() {
-        if (type == Type::Direct) {
-            pos *= lattice;
-            type = Type::Cartesian;
-        }
+    void PeriodicCell<ScalarType, Dim>::read(const H5Location& loc, const char* name) {
+        const auto group = loc.openGroup(name);
+        lattice.read(group, "lattice");
+        const auto posDataset = pos.read(group, "pos");
+        const auto typeAttr = posDataset.openAttribute("Type");
+        typeAttr.read(H5::PredType::NATIVE_INT8, &type);
+    }
+
+    template<class ScalarType, unsigned int Dim>
+    H5Group PeriodicCell<ScalarType, Dim>::write(H5Location& loc, const char* name) const {
+        auto group = loc.createGroup(name);
+        lattice.write(group, "lattice");
+        auto posDataset = pos.write(group, "pos");
+        auto typeAttr = posDataset.createAttribute("Type", H5::PredType::NATIVE_INT8, H5DataSpace<1>(1));
+        typeAttr.write(H5::PredType::NATIVE_INT8, &type);
+        return group;
     }
 
     template<class ScalarType, unsigned int Dim>
@@ -390,6 +403,14 @@ namespace Physica::Core {
         lattice.swap(cell.lattice);
         pos.swap(cell.pos);
         std::swap(type, cell.type);
+    }
+
+    template<class ScalarType, unsigned int Dim>
+    void PeriodicCell<ScalarType, Dim>::toCartesian() {
+        if (type == Type::Direct) {
+            pos *= lattice;
+            type = Type::Cartesian;
+        }
     }
 
     template<class ScalarType, unsigned int Dim>
@@ -810,7 +831,7 @@ namespace Physica::Core {
                 }
             }
         }
-        else {
+        else if constexpr (Option == ExtendCellOption::CellMajor) {
             for (unsigned int x_ = 0; x_ < x; ++x_) {
                 for (unsigned int y_ = 0; y_ < y; ++y_) {
                     for (unsigned int z_ = 0; z_ < z; ++z_) {
@@ -824,6 +845,8 @@ namespace Physica::Core {
                 }
             }
         }
+        else
+            static_assert(Option == ExtendCellOption::AtomMajor, "[Error]: Invalid option");
         target.swap(new_pos);
         if constexpr (ScalarType::isReverseDiff)
             target.makeContinuous();
