@@ -195,14 +195,13 @@ namespace Physica::Core {
                     for (unsigned int i = 0; i < Dim; ++i) {
                         const ssize_t index_i = index[i];
                         const ssize_t dim_i = rSpaceDim[i];
+                        const ScalarType factor = ScalarType(index_i > dim_i / 2 ? index_i - dim_i : (index_i));
+                        const ScalarType phase_i = qVector * lattice.row(i).asVector() * factor;
                         const bool isOnWignerSeitzBoundary = (dim_i % 2 == 0) && (index_i == dim_i / 2);
                         if (isOnWignerSeitzBoundary)
-                            coeff *= ScalarType(0.5);
-                        else {
-                            const ScalarType factor = ScalarType(index_i > dim_i / 2 ? index_i - dim_i : (index_i));
-                            const ScalarType phase_i = qVector * lattice.row(i).asVector() * factor;
+                            coeff *= cos(phase_i);
+                        else
                             phase += phase_i;
-                        }
                     }
                     const auto factor = ComplexType::fromPhase(phase);
                     elem += rSpace(index) * coeff * factor;
