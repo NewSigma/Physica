@@ -13,7 +13,7 @@ option(PHYSICA_PROFILE "Build with profiling support" OFF)
 option(PHYSICA_GUI "Enable GUI support" OFF)
 option(PHYSICA_MKL "Enable MKL support" OFF)
 option(PHYSICA_CUDA "Enable CUDA support" OFF)
-option(PHYSICA_HDF5 "Enable HDF5 support" OFF)
+option(PHYSICA_PYTHON "Enable python suppert" OFF)
 option(PHYSICA_OPTIMIZE "Enable aggressive optimizations" ON)
 set(UseASM 1 CACHE STRING "Enable inline assembly code")
 
@@ -83,14 +83,19 @@ endif()
 ##############################################Libs################################################
 set(CMAKE_INSTALL_RPATH ${CMAKE_INSTALL_PREFIX}/lib)
 set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
-include_directories(${CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES})
+# vectorclass
 include_directories(3rdparty)
-
+# FFTW3
 find_package(FFTW3 REQUIRED)
 find_package(FFTW3f REQUIRED)
 link_directories(${FFTW3_LIBRARY_DIRS})
 link_directories(${FFTW3f_LIBRARY_DIRS})
 include_directories(${FFTW3_INCLUDE_DIRS})
+# HDF5
+find_package(HDF5 NAMES hdf5 REQUIRED COMPONENTS CXX shared)
+include_directories(${HDF5_INCLUDE_DIR})
+add_definitions(-DPHYSICA_HDF5 -DH5_NO_DEPRECATED_SYMBOLS)
+string(REPLACE include lib HDF5_LIBRARY_DIR ${HDF5_INCLUDE_DIR}) # Cmake file of HDF5-1.14.1 seems do not provide HDF5_LIBRARY_DIR
 
 if(${PHYSICA_GUI})
     find_package(Qt6 COMPONENTS Core Widgets REQUIRED)
@@ -111,11 +116,15 @@ if(${PHYSICA_MKL})
     include_directories(${MKL_INCLUDE})
 endif()
 
-if(${PHYSICA_HDF5})
-    find_package(HDF5 NAMES hdf5 REQUIRED COMPONENTS CXX shared)
-    include_directories(${HDF5_INCLUDE_DIR})
-    add_definitions(-DPHYSICA_HDF5 -DH5_NO_DEPRECATED_SYMBOLS)
-    string(REPLACE include lib HDF5_LIBRARY_DIR ${HDF5_INCLUDE_DIR}) # Cmake file of HDF5-1.14.1 seems do not provide HDF5_LIBRARY_DIR
+if(${PHYSICA_CUDA})
+    include_directories(${CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES})
+endif()
+
+if(${PHYSICA_PYTHON})
+    set(PYBIND11_FINDPYTHON ON)
+    add_subdirectory(3rdparty/pybind11)
+    include_directories(${pybind11_INCLUDE_DIRS})
+    add_definitions(-DPHYSICA_PYTHON)
 endif()
 #############################################Project##############################################
 include_directories(./include)

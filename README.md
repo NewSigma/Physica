@@ -33,7 +33,8 @@ Requirements:
 [HDF5](https://www.hdfgroup.org/solutions/hdf5/) 1.14.1  
 [Qt](https://www.qt.io/)  6.2.1  (Optional, Plotting support)  
 [CUDA](https://developer.nvidia.com/cuda-downloads)  12.0  (Optional)  
-[oneMKL](https://www.intel.com/) 2023.2.0 (Optional)  
+[oneMKL](https://www.intel.com/) 2023.2.0 (Optional, Experimental)  
+[pybind11](https://github.com/pybind/pybind11) 2.11 (Optional, Experimental)  
 [vectorclass](https://github.com/vectorclass/version2) 2.01.03 (Bundled)  
 
 Compile Physica using the following command:  
