@@ -154,10 +154,7 @@ if(${PHYSICA_GUI})
 
     install(TARGETS Physica DESTINATION bin)
     #############################################Options##############################################
-    target_link_libraries(Physica PhysicaCore PhysicaGui Qt6::Core Qt6::Widgets)
-    if(${PHYSICA_HDF5})
-        target_link_libraries(Physica ${HDF5_CXX_SHARED_LIBRARY})
-    endif()
+    target_link_libraries(Physica PhysicaCore PhysicaGui Qt6::Core Qt6::Widgets ${HDF5_CXX_SHARED_LIBRARY})
 endif()
 install(DIRECTORY ${CMAKE_SOURCE_DIR}/cmake DESTINATION share)
 install(DIRECTORY ${CMAKE_SOURCE_DIR}/3rdparty/vectorclass DESTINATION include)
