@@ -19,9 +19,10 @@
 #pragma once
 
 #include <exception>
+#include "Physica/Macro.h"
 
 namespace Physica::Core {
-    class IOException : public std::exception {
+    class PHYSICA_API IOException : public std::exception {
         const char* msg;
     public:
         IOException(const char* msg_) : msg(msg_) {}

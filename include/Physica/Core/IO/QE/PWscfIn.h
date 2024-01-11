@@ -27,7 +27,7 @@ namespace Physica::Core {
      * Reference:
      * [1] https://www.quantum-espresso.org/Doc/INPUT_PW.html
      */
-    class PWscfIn {
+    class PHYSICA_API PWscfIn {
         using ScalarType = Scalar<Double>;
         constexpr static size_t BufferSize = 1024;
     public:
@@ -54,8 +54,8 @@ namespace Physica::Core {
         ~PWscfIn() = default;
         /* Operators */
         PWscfIn& operator=(PWscfIn obj) noexcept;
-        friend std::ostream& operator<<(std::ostream& os, const PWscfIn& input);
-        friend std::istream& operator>>(std::istream& is, PWscfIn& input);
+        PHYSICA_API friend std::ostream& operator<<(std::ostream& os, const PWscfIn& input);
+        PHYSICA_API friend std::istream& operator>>(std::istream& is, PWscfIn& input);
         /* Operations */
         void swap(PWscfIn& __restrict obj) noexcept;
         /* Static members */

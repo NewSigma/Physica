@@ -33,7 +33,7 @@ namespace Physica::Core {
             ThreadGuardFFTW& operator=(const ThreadGuardFFTW&) = delete;
             ThreadGuardFFTW& operator=(ThreadGuardFFTW&&) noexcept = delete;
             /* Static members */
-            [[nodiscard]] static ThreadGuardFFTW& getInstance();
+            [[nodiscard]] PHYSICA_API static ThreadGuardFFTW& getInstance();
         private:
             ThreadGuardFFTW() = default;
         };

@@ -19,9 +19,10 @@
 #pragma once
 
 #include "IOException.h"
+#include "Physica/Macro.h"
 
 namespace Physica::Core {
-    class BadFileFormatException : public IOException {
+    class PHYSICA_API BadFileFormatException : public IOException {
     public:
         BadFileFormatException(const char* msg) : IOException(msg) {}
         ~BadFileFormatException() noexcept override = default;

@@ -25,7 +25,7 @@
 #include "Physica/Core/Parallel/Executor/ProcessExecutor.h"
 
 namespace Physica::Core {
-    class VaspWarpper final {
+    class PHYSICA_API VaspWarpper final {
         using ScalarType = Scalar<Float>;
         static const char* errorMsg;
     private:

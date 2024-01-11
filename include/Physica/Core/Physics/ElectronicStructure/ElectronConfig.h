@@ -18,10 +18,11 @@
  */
 #pragma once
 
+#include "Physica/Macro.h"
 #include "Physica/Utils/Container/Array/Array.h"
 
 namespace Physica::Core::Physics {
-    class ElectronConfig {
+    class PHYSICA_API ElectronConfig {
     public:
         enum OrbitState {
             NoOccupacy,

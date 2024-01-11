@@ -23,7 +23,7 @@
 namespace Physica::Core {
     class H5Group;
 
-    class H5Location {
+    class PHYSICA_API H5Location {
     public:
         ~H5Location() = default;
         /* Operations */

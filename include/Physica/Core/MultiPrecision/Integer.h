@@ -23,7 +23,7 @@
 #include "MultiPrecisionType.h"
 
 namespace Physica::Core {
-    class Integer {
+    class PHYSICA_API Integer {
         //Store effective digits using little endian standard.
         MPUnit* __restrict byte;
         /*

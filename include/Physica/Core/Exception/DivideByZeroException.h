@@ -20,9 +20,10 @@
 #define PHYSICA_DIVIDEBYZEROEXCEPTION_H
 
 #include <exception>
+#include "Physica/Macro.h"
 
 namespace Physica::Core {
-    class DivideByZeroException : public std::exception {
+    class PHYSICA_API DivideByZeroException : public std::exception {
     public:
         ~DivideByZeroException() noexcept override = default;
         const char* what() const noexcept override { return "[Error]: Scalar is divided by zero."; }

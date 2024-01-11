@@ -24,6 +24,6 @@ namespace Physica::Core {
     class StreamPool {
         static_assert(sizeof(cudaStream_t) == 8, "[Error]: cudaStream_t is assumed to be a pointer");
     public:
-        [[nodiscard]] static CudaStream& getStream();
+        [[nodiscard]] PHYSICA_API static CudaStream& getStream();
     };
 }

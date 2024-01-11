@@ -32,7 +32,7 @@
 using Physica::Core::MultiScalar;
 
 namespace Physica::Gui {
-    class Plot : public QChartView {
+    class PHYSICA_API Plot : public QChartView {
         using Base = QChartView;
 
         QValueAxis* axisX;

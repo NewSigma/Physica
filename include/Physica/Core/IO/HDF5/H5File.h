@@ -19,7 +19,7 @@
 #pragma once
 
 namespace Physica::Core {
-    class H5File : public H5::H5File, public H5Location {
+    class PHYSICA_API H5File : public H5::H5File, public H5Location {
         using Base = H5::H5File;
         using Location = Core::H5Location;
     public:

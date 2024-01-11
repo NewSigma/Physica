@@ -21,9 +21,10 @@
 #include <errno.h>
 #include <cstring>
 #include <exception>
+#include "Physica/Macro.h"
 
 namespace Physica::Core {
-    class SyscallException : public std::exception {
+    class PHYSICA_API SyscallException : public std::exception {
     public:
         ~SyscallException() noexcept override = default;
         const char* what() const noexcept override { return strerror(errno); }

@@ -23,7 +23,7 @@
 #include "Poscar.h"
 
 namespace Physica::Core {
-    class Xdatcar {
+    class PHYSICA_API Xdatcar {
         using ScalarType = Scalar<Double>;
     private:
         Poscar<ScalarType> data;

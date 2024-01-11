@@ -28,6 +28,7 @@
 #include <future>
 #include <sys/sysinfo.h>
 #include "PackagedTask.h"
+#include "Physica/Macro.h"
 #include "Physica/Utils/Container/Array/Array.h"
 
 namespace Physica::Core {
@@ -35,7 +36,7 @@ namespace Physica::Core {
      * Reference:
      * Eigen https://eigen.tuxfamily.org/
      */
-    class ThreadPool final {
+    class PHYSICA_API ThreadPool final {
         constexpr static size_t MainThreadID = std::numeric_limits<size_t>::max();
     public:
         struct ThreadData {

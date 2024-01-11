@@ -59,7 +59,6 @@ namespace Physica::Core {
 
     template<class ScalarType>
     BHProjector<ScalarType>::BHProjector(Index3D superSize_, size_t numDOF_, const MDCellType& unitCell) {
-        assert(pos.getRow() == getNumSuperCellAtom() && "[Error]: Invalid pos");
         superSize = std::move(superSize_);
         numDOF = numDOF_;
         const size_t numBase = numDOF * Dim;

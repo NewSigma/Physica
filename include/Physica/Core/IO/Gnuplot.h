@@ -21,7 +21,7 @@
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/Vector.h"
 
 namespace Physica::Core {
-    class Gnuplot {
+    class PHYSICA_API Gnuplot {
     public:
         using VectorType = Vector<Scalar<Double>>;
         using DataArray = Utils::Array<Vector<Scalar<Double>>>;
@@ -36,8 +36,8 @@ namespace Physica::Core {
         /* Operators */
         Gnuplot& operator=(const Gnuplot&) = default;
         Gnuplot& operator=(Gnuplot&&) noexcept = default;
-        friend std::ostream& operator<<(std::ostream& os, const Gnuplot& poscar);
-        friend std::istream& operator>>(std::istream& is, Gnuplot& poscar);
+        PHYSICA_API friend std::ostream& operator<<(std::ostream& os, const Gnuplot& poscar);
+        PHYSICA_API friend std::istream& operator>>(std::istream& is, Gnuplot& poscar);
         /* Getters */
         [[nodiscard]] const DataArray& getXDatas() const noexcept { return xDatas; }
         [[nodiscard]] const DataArray& getYDatas() const noexcept { return yDatas; }

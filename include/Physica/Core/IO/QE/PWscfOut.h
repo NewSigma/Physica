@@ -22,7 +22,7 @@
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/Vector.h"
 
 namespace Physica::Core {
-    class PWscfOut {
+    class PHYSICA_API PWscfOut {
         using ScalarType = Scalar<Double>;
         constexpr static size_t DefaultBufferSize = 1024; //1024 shall be enough
 

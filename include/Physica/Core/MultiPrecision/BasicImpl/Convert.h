@@ -18,7 +18,7 @@
  */
 #pragma once
 
-#include "Physica/SystemBits.h"
+#include "Physica/Macro.h"
 #include "Physica/Core/MultiPrecision/MultiPrecisionType.h"
 
 namespace Physica::Core::Internal {

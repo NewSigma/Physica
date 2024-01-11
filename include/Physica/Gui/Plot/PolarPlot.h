@@ -24,7 +24,7 @@
 #include <Physica/Core/Math/Algebra/LinearAlgebra/Vector/VectorImpl/RValueVector.h>
 
 namespace Physica::Gui {
-    class PolarPlot : public QChartView {
+    class PHYSICA_API PolarPlot : public QChartView {
         using Base = QChartView;
     public:
         PolarPlot(QWidget* parent = nullptr);

@@ -25,7 +25,7 @@
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/MatrixImpl/LValueMatrix.h"
 
 namespace Physica::Gui {
-    class Plot3D : public QWidget {
+    class PHYSICA_API Plot3D : public QWidget {
         QVBoxLayout* vLayout;
     protected:
         Q3DSurface* surface;

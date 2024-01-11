@@ -18,9 +18,10 @@
  */
 #include <vector>
 #include <memory>
+#include "Physica/Macro.h"
 
 namespace Physica::Utils {
-    class DirStack {
+    class PHYSICA_API DirStack {
         std::vector<const char*> dirs;
     public:
         DirStack(const char* path);

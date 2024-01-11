@@ -21,6 +21,7 @@
 #ifdef PHYSICA_HDF5
     #include <H5Cpp.h>
 
+    #include "Physica/Macro.h"
     #include "H5DataSet.h"
     #include "H5DataSpace.h"
     #include "H5Location.h"

@@ -19,10 +19,11 @@
 #pragma once
 
 #include <cuda_runtime.h>
+#include "Physica/Macro.h"
 #include "Physica/Utils/CUDA/DebugUtil.cuh"
 
 namespace Physica::Core {
-    class CudaEvent {
+    class PHYSICA_API CudaEvent {
         cudaEvent_t event;
     public:
         CudaEvent();

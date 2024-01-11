@@ -19,7 +19,7 @@
 #pragma once
 
 #include <cstdint>
-#include "Physica/SystemBits.h"
+#include "Physica/Macro.h"
 /**
  * This header contains some types and definitions used by package MultiPrecision.
  * Here MP stands for MultiPrecision.

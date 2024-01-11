@@ -21,7 +21,7 @@
 #include "Plot.h"
 
 namespace Physica::Gui {
-    class GaussPlot : public Plot {
+    class PHYSICA_API GaussPlot : public Plot {
         using Base = Plot;
     public:
         GaussPlot(double maxX, double maxY, double deltaX, double deltaY, unsigned int numSigma);

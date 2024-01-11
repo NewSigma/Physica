@@ -18,5 +18,7 @@
  */
 #pragma once
 
-void initPhysica();
-void deInitPhysica();
+#include "Physica/Macro.h"
+
+PHYSICA_API void initPhysica();
+PHYSICA_API void deInitPhysica();

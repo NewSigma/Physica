@@ -43,7 +43,7 @@ namespace Physica::Logger {
      * References:
      * [1] Yang. Stephen,Park. Seo Jin,Ousterhout. John. NanoLog: A nanosecond scale logging system[J]. Proceedings of the 2018 USENIX Annual Technical Conference, USENIX ATC 2018:335-349
      */
-    class LoggerRuntime {
+    class PHYSICA_API LoggerRuntime {
     public:
         constexpr static const char* __restrict levelString[4] = { "Fatal", "Warning", "Info", "Debug" };
         constexpr static size_t unassignedLogID = 0;

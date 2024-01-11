@@ -18,13 +18,14 @@
  */
 #pragma once
 
+#include "Physica/Macro.h"
 #include "Physica/Utils/Container/Array/Array.h"
 
 namespace Physica::Core {
     /**
      * Target on OpenPBS(https://github.com/openpbs/openpbs)
      */
-    class PBSWarpper {
+    class PHYSICA_API PBSWarpper {
         constexpr static size_t hostLength = 64; //64 is enough to hold ipv6
 
         unsigned int jobCore;

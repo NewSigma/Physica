@@ -69,7 +69,7 @@ namespace Physica::Core {
     }
     /////////////////////////////////////////////MultiPrecision////////////////////////////////////////////////
     template<>
-    class Scalar<MultiPrecision> : public ScalarBase<Scalar<MultiPrecision>> {
+    class PHYSICA_API Scalar<MultiPrecision> : public ScalarBase<Scalar<MultiPrecision>> {
     public:
         using ScalarType = Scalar<MultiPrecision>;
     private:
@@ -202,7 +202,7 @@ namespace Physica::Core {
         __host__ __device__ bool operator>(const Scalar& s) const { return f > s.f; }
         __host__ __device__ bool operator<(const Scalar& s) const { return f < s.f; }
         __host__ __device__ bool operator==(const Scalar& s) const { return f == s.f; }
-        friend std::istream& operator>>(std::istream& is, Scalar& scalar);
+        PHYSICA_API friend std::istream& operator>>(std::istream& is, Scalar& scalar);
         /* Helpers */
         Scalar& toOpposite() noexcept { f = -f; return *this; }
         __host__ __device__ Scalar& toAbs() noexcept { *this = abs(*this); return *this; }
@@ -266,7 +266,7 @@ namespace Physica::Core {
         __host__ __device__ bool operator>(const Scalar& s) const { return d > s.d; }
         __host__ __device__ bool operator<(const Scalar& s) const { return d < s.d; }
         __host__ __device__ bool operator==(const Scalar& s) const { return d == s.d; }
-        friend std::istream& operator>>(std::istream& is, Scalar& scalar);
+        PHYSICA_API friend std::istream& operator>>(std::istream& is, Scalar& scalar);
         /* Helpers */
         Scalar& toOpposite() noexcept { d = -d; return *this; }
         __host__ __device__ Scalar& toAbs() noexcept { *this = abs(*this); return *this; }

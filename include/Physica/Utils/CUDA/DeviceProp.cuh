@@ -18,6 +18,7 @@
  */
 #pragma once
 
+#include "Physica/Macro.h"
 #include "Physica/Utils/Container/Array/Array.h"
 
 namespace Physica::Utils {
@@ -27,7 +28,7 @@ namespace Physica::Utils {
      * Reference:
      * [1] https://docs.nvidia.com/cuda/cuda-c-programming-guide/index.html#compute-capabilities
      */
-    class DeviceProp {
+    class PHYSICA_API DeviceProp {
     public:
         constexpr static unsigned int MaxThreadsPerBlock = 1024;
         constexpr static unsigned int WarpSize = 32;

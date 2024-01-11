@@ -30,9 +30,4 @@ namespace Physica::Core {
         }
         future.get();
     }
-
-    void ThreadExecutor::auto_wait(FutureGroup<FutureType>& group) {
-        for (auto& future : group.getFutures())
-            auto_wait(future);
-    }
 }

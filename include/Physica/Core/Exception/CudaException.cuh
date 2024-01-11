@@ -20,9 +20,10 @@
 
 #include <exception>
 #include <cuda_runtime.h>
+#include "Physica/Macro.h"
 
 namespace Physica::Core {
-    class CudaException : public std::exception {
+    class PHYSICA_API CudaException : public std::exception {
         cudaError_t code;
     public:
         CudaException(cudaError_t code_) : code(code_) {}

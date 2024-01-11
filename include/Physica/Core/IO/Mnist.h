@@ -29,7 +29,7 @@ namespace Physica::Core {
      * Reference:
      * [1] http://yann.lecun.com/exdb/mnist/
      */
-    class Mnist {
+    class PHYSICA_API Mnist {
     public:
         constexpr static size_t ImageSize = 28;
         constexpr static size_t NumPixelInImage = ImageSize * ImageSize;

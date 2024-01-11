@@ -31,7 +31,7 @@ namespace Physica::Logger {
      * Abstract father class for all loggers.
      */
     class AbstractLogger {
-        static LogLevel globalLevel;
+        PHYSICA_API static LogLevel globalLevel;
     public:
         LogLevel localLevel;
     public:

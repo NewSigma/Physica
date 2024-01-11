@@ -19,10 +19,11 @@
 #pragma once
 
 #include <sys/types.h>
+#include "Physica/Macro.h"
 #include "FutureGroup.h"
 
 namespace Physica::Core {
-    class ProcessFuture {
+    class PHYSICA_API ProcessFuture {
         pid_t pid;
         bool finished;
         bool isValid;

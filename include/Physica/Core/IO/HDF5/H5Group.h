@@ -19,7 +19,7 @@
 #pragma once
 
 namespace Physica::Core {
-    class H5Group : public H5::Group, public H5Location {
+    class PHYSICA_API H5Group : public H5::Group, public H5Location {
         using Base = H5::Group;
         using Location = Core::H5Location;
     public:

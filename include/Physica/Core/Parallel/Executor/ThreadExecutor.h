@@ -51,8 +51,8 @@ namespace Physica::Core {
         [[nodiscard]] static FutureGroup<FutureType> parallel_for(Functor func, unsigned int loopCount);
         template<class Functor>
         [[nodiscard]] static FutureGroup<FutureType> parallel_for(Functor func, unsigned int loopCount, unsigned int core);
-        static void auto_wait(FutureType& future);
-        static void auto_wait(FutureGroup<FutureType>& group);
+        PHYSICA_API static void auto_wait(FutureType& future);
+        inline static void auto_wait(FutureGroup<FutureType>& group);
         static void wait() {}
         /* Getters */
         [[nodiscard]] static unsigned int getNumThread() { return ThreadPool::getInstance().getNumThreads(); }
@@ -96,6 +96,11 @@ namespace Physica::Core {
             }));
         }
         return result;
+    }
+
+    inline void ThreadExecutor::auto_wait(FutureGroup<FutureType>& group) {
+        for (auto& future : group.getFutures())
+            auto_wait(future);
     }
 
     inline typename ThreadExecutor::Range ThreadExecutor::splitJob(unsigned int loopCount, unsigned int core, unsigned int part) {

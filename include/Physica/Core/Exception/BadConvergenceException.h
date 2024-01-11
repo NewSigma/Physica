@@ -19,9 +19,10 @@
 #pragma once
 
 #include <exception>
+#include "Physica/Macro.h"
 
 namespace Physica::Core {
-    class BadConvergenceException : public std::exception {
+    class PHYSICA_API BadConvergenceException : public std::exception {
         const char* msg;
     public:
         BadConvergenceException(const char* msg_) : msg(msg_) {}

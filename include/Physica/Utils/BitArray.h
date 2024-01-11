@@ -19,12 +19,13 @@
 #pragma once
 
 #include <cstddef>
+#include "Physica/Macro.h"
 
 namespace Physica::Utils {
     /*!
      * BitArray is similar to bool[] but it has a better use of space.
      */
-    class BitArray {
+    class PHYSICA_API BitArray {
         //Every bit of arr stands for a bool.
         unsigned char* __restrict__ arr;
         size_t bitCount;

@@ -20,6 +20,7 @@
 #define PHYSICA_CYCLER_H
 
 #include <cstdint>
+#include "Physica/Macro.h"
 
 namespace Physica::Utils {
     /**
@@ -40,7 +41,7 @@ namespace Physica::Utils {
      * architectures. Intel Corporation, September 123 (2010).
      * [2] NanoLog (https://github.com/PlatformLab/NanoLog)
      */
-    class Cycler {
+    class PHYSICA_API Cycler {
     public:
         /* Static Members */
         /**

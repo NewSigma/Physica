@@ -23,7 +23,7 @@
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/Vector.h"
 
 namespace Physica::Core {
-    class CsvFile {
+    class PHYSICA_API CsvFile {
     public:
         enum DataType {
             CHAR,

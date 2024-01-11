@@ -31,7 +31,7 @@ namespace Physica::Core {
     //!RelativeError is the stop criteria of iterate method that uses Scalar<Float> or Scalar<Double>.
     constexpr double RelativeError = 1e-5;
 
-    class BasicConst {
+    class PHYSICA_API BasicConst {
     public:
         double ln_2;
         double ln_10;
@@ -63,7 +63,7 @@ namespace Physica::Core {
         BasicConst();
     };
 
-    class MathConst {
+    class PHYSICA_API MathConst {
     public:
         MultiScalar PI;
         MultiScalar E;

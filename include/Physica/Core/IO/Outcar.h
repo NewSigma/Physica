@@ -22,7 +22,7 @@
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/Vector.h"
 
 namespace Physica::Core {
-    class Outcar {
+    class PHYSICA_API Outcar {
         using ScalarType = Scalar<Double>;
 
         Vector<ScalarType> force;

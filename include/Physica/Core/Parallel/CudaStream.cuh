@@ -19,11 +19,12 @@
 #pragma once
 
 #include <cuda_runtime.h>
+#include "Physica/Macro.h"
 
 namespace Physica::Core {
     class StreamPool;
 
-    class CudaStream {
+    class PHYSICA_API CudaStream {
         cudaStream_t stream;
     public:
         CudaStream();

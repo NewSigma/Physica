@@ -28,7 +28,7 @@ namespace Physica::Core {
      * several times but in extremely rare conditions it can not return anything.
      */
     class RandomSeed {
-        static int retryLimit;
+        PHYSICA_API static int retryLimit;
     public:
         static void rdrand(uint16_t& integer) {
             for(int i = 0; i < retryLimit; ++i) {

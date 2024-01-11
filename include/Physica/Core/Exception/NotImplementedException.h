@@ -19,9 +19,10 @@
 #pragma once
 
 #include <exception>
+#include "Physica/Macro.h"
 
 namespace Physica::Core {
-    class NotImplementedException : public std::exception {
+    class PHYSICA_API NotImplementedException : public std::exception {
         constexpr static const char* DefaultMsg = "[Error]: Not implemented";
         const char* msg;
     public:

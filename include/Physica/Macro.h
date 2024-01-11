@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 WeiBo He.
+ * Copyright 2019-2024 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -16,8 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef PHYSICA_SYSTEMBITS_H
-#define PHYSICA_SYSTEMBITS_H
+#pragma once
 
 #include <climits>
 #include "Physica/Config.h"
@@ -74,4 +73,4 @@
     };
 #endif
 
-#endif
+#define PHYSICA_API __attribute__ ((visibility ("default")))

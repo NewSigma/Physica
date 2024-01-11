@@ -22,7 +22,7 @@
 #include "Integer.h"
 
 namespace Physica::Core {
-    class Rational {
+    class PHYSICA_API Rational {
         Integer numerator;
         //Always positive integer.
         Integer denominator;
