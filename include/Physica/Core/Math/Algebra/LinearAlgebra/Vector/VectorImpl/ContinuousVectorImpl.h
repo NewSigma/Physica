@@ -271,7 +271,7 @@ namespace Physica::Core {
         else
             dataset = h5f.createDataSet<1>(name, ScalarType::getH5DataType(), space);
         dataset.write(data(), ScalarType::getH5DataType(), space, space, xfer_plist);
-        return dataset;
+        return std::cref(dataset);
     }
 
     template<class Derived>

@@ -41,7 +41,7 @@ namespace Physica::Core {
     public:
         using FutureType = ProcessFuture;
     public:
-        static int nice_incr;
+        PHYSICA_API static int nice_incr;
     public:
         /* Operations */
         template<class Functor, class... Args>

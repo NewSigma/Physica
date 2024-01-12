@@ -31,7 +31,7 @@ namespace Physica::Gui {
         using MeshType = std::pair<MatrixType, MatrixType>;
         using BandArray = Utils::Array<MatrixType>;
         using PhononType = Core::FrozenPhonon<ScalarType>;
-        using MatrixGrid = typename PhononType::MatrixGrid;
+        using KSpaceFCGrid = typename PhononType::KSpaceFCGrid;
     public:
         PhononPlot3D() = default;
         PhononPlot3D(const PhononPlot3D&) = default;
@@ -41,14 +41,14 @@ namespace Physica::Gui {
         PhononPlot3D& operator=(const PhononPlot3D&) = default;
         PhononPlot3D& operator=(PhononPlot3D&&) noexcept = default;
         /* Operations */
-        QList<QSurface3DSeries*> plotBand(const PhononType& ph, const MatrixGrid& forceConstants, size_t numPointX, size_t numPointY);
+        QList<QSurface3DSeries*> plotBand(const PhononType& ph, const KSpaceFCGrid& forceConstants, size_t numPointX, size_t numPointY);
     private:
-        BandArray calcBands(const PhononType& ph, const MatrixGrid& forceConstants, const MeshType& mesh);
+        BandArray calcBands(const PhononType& ph, const KSpaceFCGrid& forceConstants, const MeshType& mesh);
     };
 
     template<class ScalarType>
     QList<QSurface3DSeries*> PhononPlot3D<ScalarType>::plotBand(
-            const PhononType& ph, const MatrixGrid& forceConstants, size_t numPointX, size_t numPointY) {
+            const PhononType& ph, const KSpaceFCGrid& forceConstants, size_t numPointX, size_t numPointY) {
         const auto x = VectorType::linspace(0, 1, numPointX);
         const auto y = VectorType::linspace(0, 1, numPointY);
         const MeshType mesh = MatrixType::meshgrid(x, y);
@@ -81,7 +81,7 @@ namespace Physica::Gui {
 
     template<class ScalarType>
     typename PhononPlot3D<ScalarType>::BandArray PhononPlot3D<ScalarType>::calcBands(
-            const PhononType& ph, const MatrixGrid& forceConstants, const MeshType& mesh) {
+            const PhononType& ph, const KSpaceFCGrid& forceConstants, const MeshType& mesh) {
         using namespace Physica::Core;
         const MatrixType& meshX = mesh.first;
         const MatrixType& meshY = mesh.second;

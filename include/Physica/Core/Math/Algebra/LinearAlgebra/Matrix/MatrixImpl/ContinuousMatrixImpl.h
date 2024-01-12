@@ -364,6 +364,6 @@ namespace Physica::Core {
             else
                 dataset.write(row(major).data(), ScalarType::getH5DataType(), memSpace, fileSpace, xfer_plist);
         }
-        return dataset;
+        return std::cref(dataset);
     }
 }

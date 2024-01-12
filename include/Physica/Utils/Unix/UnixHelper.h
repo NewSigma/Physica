@@ -23,15 +23,15 @@
 #include "Physica/Utils/Container/Array/Array.h"
 
 namespace Physica::Utils {
-    void statCheck(const char* __restrict file, struct stat* __restrict buf);
-    int forceRemoveDir(const char* dirPath);
-    long getMaxPathLength();
-    Array<char> getPathBuffer();
-    Array<char> makePath(const char* format, ...);
-    bool fileExists(const char* path);
-    void ensureNotExist(const char* path);
-    pid_t waitCheck(const char* message);
-    void copyFile(const char* from, const char* to);
-    void copyFileFromDir(const char* fromDirPath, const char* toDirPath);
-    void mkdirCheck(const char* path, mode_t mode);
+    PHYSICA_API void statCheck(const char* __restrict file, struct stat* __restrict buf);
+    PHYSICA_API int forceRemoveDir(const char* dirPath);
+    PHYSICA_API long getMaxPathLength();
+    PHYSICA_API Array<char> getPathBuffer();
+    PHYSICA_API Array<char> makePath(const char* format, ...);
+    PHYSICA_API bool fileExists(const char* path);
+    PHYSICA_API void ensureNotExist(const char* path);
+    PHYSICA_API pid_t waitCheck(const char* message);
+    PHYSICA_API void copyFile(const char* from, const char* to);
+    PHYSICA_API void copyFileFromDir(const char* fromDirPath, const char* toDirPath);
+    PHYSICA_API void mkdirCheck(const char* path, mode_t mode);
 }

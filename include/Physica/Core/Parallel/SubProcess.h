@@ -23,7 +23,7 @@
 #include "Physica/Core/Parallel/Future/ProcessFuture.h"
 
 namespace Physica::Core {
-    class SubProcess {
+    class PHYSICA_API SubProcess {
     private:
         std::function<void()> task;
         pid_t pid;
