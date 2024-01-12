@@ -25,6 +25,7 @@
 namespace Physica::Core {
     template<class ScalarType>
     class PhononDOS {
+    public:
         using SolverType = PhononSolver<ScalarType>;
         using ElementType = CuboidLinear<ScalarType>;
         using Index3D = typename SolverType::Index3D;
@@ -34,14 +35,15 @@ namespace Physica::Core {
         using KSpaceFCGrid = typename SolverType::KSpaceFCGrid;
         using EigenValueGrid = GridStorage<Vector<ScalarType>>;
         constexpr static unsigned int Dim = Internal::Traits<MDCellType>::Dim;
-    private:
+        constexpr static unsigned int ElementVolume = 8;
+    protected:
         SolverType solver;
         EigenValueGrid eigenvalues;
         CoeffVector diffCoeffX;
         CoeffVector diffCoeffY;
         CoeffVector diffCoeffZ;
     public:
-        PhononDOS(MDCellType unitCell, Index3D superSize, const KSpaceFCGrid& forceConstants, Index3D gridDim_);
+        PhononDOS(MDCellType unitCell, Index3D superSize, const KSpaceFCGrid& forceConstants, Index3D gridDim);
         PhononDOS(const PhononDOS&) = default;
         PhononDOS(PhononDOS&&) noexcept = default;
         ~PhononDOS() = default;
@@ -54,12 +56,18 @@ namespace Physica::Core {
         [[nodiscard]] ScalarType calcDiffHelmholtzF(ScalarType omegaW, ScalarType temperatureT);
         [[nodiscard]] ScalarType calcDiffEntropyS(ScalarType omegaW, ScalarType temperatureT);
         void swap(PhononDOS& __restrict obj) noexcept;
+        /* Getter */
+        [[nodiscard]] size_t getUnitCellDOF() const noexcept { return solver.getUnitCellDOF(); }
+    protected:
+        PhononDOS(MDCellType unitCell, Index3D superSize, Index3D gridDim);
+        /* Operations */
+        [[nodiscard]] ScalarType calcElemDOS(ScalarType freq, size_t band, Index3D index) const;
     };
 
     template<class ScalarType>
     PhononDOS<ScalarType>::PhononDOS(
             MDCellType unitCell, Index3D superSize, const KSpaceFCGrid& forceConstants, Index3D gridDim)
-            : solver(std::move(unitCell), superSize), eigenvalues(gridDim) {
+            : PhononDOS(std::move(unitCell), std::move(superSize), std::move(gridDim)) {
         eigenvalues.forIndexInGrid([this, &forceConstants](Index3D index) {
             const Index3D gridDim = eigenvalues.getDim();
             Vector3D qPoint{};
@@ -67,10 +75,14 @@ namespace Physica::Core {
                 qPoint[i] = ScalarType(index[i]) / ScalarType(gridDim[i]);
             auto fcMatrix = solver.interpolatePoint(qPoint, forceConstants);
             solver.toDynamicMatrix(fcMatrix);
-            auto eigen = SolverType::diagonalize(fcMatrix);
+            const auto eigen = SolverType::diagonalize(fcMatrix);
             eigenvalues(index) = solver.makeFreq(eigen);
         });
+    }
 
+    template<class ScalarType>
+    PhononDOS<ScalarType>::PhononDOS(MDCellType unitCell, Index3D superSize, Index3D gridDim)
+            : solver(std::move(unitCell), superSize), eigenvalues(gridDim) {
         for (unsigned i = 0; i < CoeffVector::SizeAtCompile; ++i) {
             diffCoeffX[i] = ElementType::dBase_dr(i);
             diffCoeffY[i] = ElementType::dBase_ds(i);
@@ -88,33 +100,11 @@ namespace Physica::Core {
 
     template<class ScalarType>
     ScalarType PhononDOS<ScalarType>::calcDOS(ScalarType freq, size_t band) const {
-        const ScalarType elementVolume = 8;
-        const ScalarType factor = reciprocal(ScalarType(eigenvalues.getSize()) * elementVolume);
         ScalarType result = 0;
         eigenvalues.forIndexInGrid([this, freq, band, &result](Index3D index) {
-            const Index3D gridDim = eigenvalues.getDim();
-            Index3D index1{};
-            for (unsigned int i = 0; i < Dim; ++i)
-                index1[i] = (index[i] + 1) % gridDim[i];
-
-            CoeffVector cornerFreq{};
-            cornerFreq[0] = eigenvalues(index)[band];
-            cornerFreq[1] = eigenvalues(index[0], index[1], index1[2])[band];
-            cornerFreq[2] = eigenvalues(index[0], index1[1], index[2])[band];
-            cornerFreq[3] = eigenvalues(index[0], index1[1], index1[2])[band];
-            cornerFreq[4] = eigenvalues(index1[0], index[1], index[2])[band];
-            cornerFreq[5] = eigenvalues(index1[0], index[1], index1[2])[band];
-            cornerFreq[6] = eigenvalues(index1[0], index1[1], index[2])[band];
-            cornerFreq[7] = eigenvalues(index1)[band];
-
-            using Vector4D = Vector<ScalarType, 4>;
-            const Vector4D plane{cornerFreq * diffCoeffX, cornerFreq * diffCoeffY, cornerFreq * diffCoeffZ, freq - mean(cornerFreq)};
-            const auto head = plane.head(3);
-            const auto cross = CubeCross<ScalarType>(plane);
-            const ScalarType norm = head.norm();
-            result += cross.getArea() / norm;
+            result += calcElemDOS(freq, band, index);
         });
-        result *= factor;
+        result /= ScalarType(eigenvalues.getSize() * ElementVolume);
         return result;
     }
 
@@ -152,5 +142,30 @@ namespace Physica::Core {
         diffCoeffX.swap(obj.diffCoeffX);
         diffCoeffY.swap(obj.diffCoeffY);
         diffCoeffZ.swap(obj.diffCoeffZ);
+    }
+
+    template<class ScalarType>
+    ScalarType PhononDOS<ScalarType>::calcElemDOS(ScalarType freq, size_t band, Index3D index) const {
+        const Index3D gridDim = eigenvalues.getDim();
+        Index3D index1{};
+        for (unsigned int i = 0; i < Dim; ++i)
+            index1[i] = (index[i] + 1) % gridDim[i];
+
+        CoeffVector cornerFreq{};
+        cornerFreq[0] = eigenvalues(index)[band];
+        cornerFreq[1] = eigenvalues(index[0], index[1], index1[2])[band];
+        cornerFreq[2] = eigenvalues(index[0], index1[1], index[2])[band];
+        cornerFreq[3] = eigenvalues(index[0], index1[1], index1[2])[band];
+        cornerFreq[4] = eigenvalues(index1[0], index[1], index[2])[band];
+        cornerFreq[5] = eigenvalues(index1[0], index[1], index1[2])[band];
+        cornerFreq[6] = eigenvalues(index1[0], index1[1], index[2])[band];
+        cornerFreq[7] = eigenvalues(index1)[band];
+
+        using Vector4D = Vector<ScalarType, 4>;
+        const Vector4D plane{cornerFreq * diffCoeffX, cornerFreq * diffCoeffY, cornerFreq * diffCoeffZ, freq - mean(cornerFreq)};
+        const auto head = plane.head(3);
+        const auto cross = CubeCross<ScalarType>(plane);
+        const ScalarType norm = head.norm();
+        return cross.getArea() / norm;
     }
 }
