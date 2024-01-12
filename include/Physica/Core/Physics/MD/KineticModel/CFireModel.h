@@ -69,7 +69,7 @@ namespace Physica::Core {
 
     template<class ScalarType, unsigned int Dim, BaroType Type>
     void CFireModel<ScalarType, Dim, Type>::nve_step(MDType& rpmd) const {
-        const LatticeMatrix deltaLattice = lattMomentum * reciprocal(lattMass);
+        const LatticeMatrix deltaLattice = lattMomentum * (rpmd.getTimeStep() / lattMass);
         BerendsenType::scaleRPMD(rpmd, deltaLattice);
     }
 

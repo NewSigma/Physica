@@ -76,6 +76,7 @@ namespace Physica::Core {
         /* Setters */
         void setLattice(const MDCell& cell);
         void setLattice(LatticeMatrix new_lattice);
+        inline void setMass(size_t atom, ScalarType value);
     protected:
         void toDirect() { Base::toDirect(invLattice); }
     private:
@@ -198,5 +199,12 @@ namespace Physica::Core {
     void MDCell<ScalarType, Dim>::setLattice(LatticeMatrix new_lattice) {
         Base::setLattice(new_lattice);
         invLattice = Base::makeInvLattice();
+    }
+
+    template<class ScalarType, unsigned int Dim>
+    inline void MDCell<ScalarType, Dim>::setMass(size_t atom, ScalarType value) {
+        assert(atom < getNumParticle && "[Error]: Index out of range");
+        assert(value.isPositive() && "[Error]: Mass must be positive");
+        massVec[atom] = value;
     }
 }

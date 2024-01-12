@@ -184,6 +184,7 @@ namespace Physica::Core {
         [[nodiscard]] size_t getNumContract() const noexcept { return fftContract.getRSpaceSize(); }
         [[nodiscard]] bool isContractEnabled() const noexcept { return (NumReplica != 1) && (getNumReplica() != getNumContract()); }
         [[nodiscard]] ScalarType getTemperature() const noexcept { return temperatureT; }
+        [[nodiscard]] ScalarType getTimeStep() const noexcept { return timeStep; }
         /* Setters */
         void setLattice(LatticeMatrix lattice) { cell.setLattice(std::move(lattice)); }
         inline void setTemperature(ScalarType temperature);

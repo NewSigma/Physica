@@ -68,7 +68,7 @@ namespace Physica::Core {
                 const bool isHydrogen = cell.getMass(i).getValue() == PhyConst<AU>::atomMass(atomicNum1);
                 const size_t index = isHydrogen ? indexH : indexO;
                 new_pos.row(index) = source.row(i);
-                new_mass[i] = i < numH ? PhyConst<AU>::atomMass(1) : PhyConst<AU>::atomMass(atomicNum2);
+                new_mass[i] = i < numH ? PhyConst<AU>::atomMass(atomicNum1) : PhyConst<AU>::atomMass(atomicNum2);
                 orderStage1[index] = i;
                 indexH += isHydrogen;
                 indexO += !isHydrogen;
