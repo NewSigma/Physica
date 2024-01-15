@@ -20,6 +20,7 @@
 
 #include <memory>
 #include <dirent.h>
+#include "Physica/Macro.h"
 #include "Physica/Utils/Container/Array/Array.h"
 
 namespace Physica::Utils {

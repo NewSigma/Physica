@@ -26,7 +26,7 @@ namespace Physica::Logger {
     /**
      * This class handle conversion between cycle at initialize and Unix time.
      */
-    class LoggerTimer {
+    class PHYSICA_API LoggerTimer {
         timeval startTime;
         uint64_t startCycle;
     public:

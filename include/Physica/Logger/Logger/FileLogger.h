@@ -21,7 +21,7 @@
 #include "AbstractLogger.h"
 
 namespace Physica::Logger {
-    class FileLogger final : public AbstractLogger {
+    class PHYSICA_API FileLogger final : public AbstractLogger {
         int fd;
     public:
         FileLogger(const char* filename, bool trunc);

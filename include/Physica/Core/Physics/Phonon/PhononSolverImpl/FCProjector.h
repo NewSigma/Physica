@@ -61,7 +61,7 @@ namespace Physica::Core {
         [[nodiscard]] size_t getNumSuperCellAtom() const noexcept { return getNumUnitCellAtom() * getNumCell(); }
         [[nodiscard]] inline size_t getNumForceConsts() const noexcept;
     protected:
-        VectorType makeFCTransVector(size_t dof, unsigned int direction) const;
+        VectorType makeTransBase(size_t dof, unsigned int direction) const;
     };
 
     template<class ScalarType>
@@ -70,7 +70,7 @@ namespace Physica::Core {
         const size_t numBase = numDOF * Dim;
         transBases.reserve(numBase);
         for (size_t i = 0; i < numBase; ++i) {
-            VectorType transBase = makeFCTransVector(i / Dim, i % Dim);
+            VectorType transBase = makeTransBase(i / Dim, i % Dim);
             projectSwap(transBase);
             transBases.grow(std::move(transBase));
         }
@@ -148,7 +148,7 @@ namespace Physica::Core {
     }
 
     template<class ScalarType>
-    typename FCProjector<ScalarType>::VectorType FCProjector<ScalarType>::makeFCTransVector(size_t dof, unsigned int direction) const {
+    typename FCProjector<ScalarType>::VectorType FCProjector<ScalarType>::makeTransBase(size_t dof, unsigned int direction) const {
         VectorType result(getNumForceConsts(), 0);
         for (size_t i = 0; i < result.getLength(); ++i) {
             const auto index5D = FCSwapVector<ScalarType>::index1DTo5D(numDOF, superSize, i);
