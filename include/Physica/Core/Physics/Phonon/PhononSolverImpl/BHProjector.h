@@ -51,8 +51,8 @@ namespace Physica::Core {
         BHProjector& operator=(BHProjector obj) noexcept { swap(obj); return obj; }
         /* Operations */
         using Base::projectSwap;
-        void projectRot(VectorType& v) const;
-        void projectHuang(VectorType& v) const;
+        ScalarType projectRot(VectorType& v) const;
+        ScalarType projectHuang(VectorType& v) const;
         void swap(BHProjector& __restrict obj) noexcept;
         /* Getters */
         using Base::getNumForceConsts;
@@ -71,52 +71,36 @@ namespace Physica::Core {
         rotBases.reserve(numBase);
         for (size_t i = 0; i < numBase; ++i) {
             VectorType transBase = Base::makeTransBase(i / Dim, i % Dim);
-            projectSwap(transBase);
+            transBase.toUnit();
             transBases.grow(std::move(transBase));
 
             VectorType rotBase = makeRotBase(i / Dim, i % Dim, unitCell);
             rotBase.toUnit();
-            projectSwap(rotBase);
             rotBases.grow(std::move(rotBase));
-        }
-
-        for (size_t i = 0; i < transBases.getLength(); ++i) {
-            auto& base_i = transBases[i];
-            assert(!base_i.norm().isZero() && "[Error]: Unexpected base degenerate");
-            base_i.toUnit();
-
-            for (size_t j = i + 1; j < transBases.getLength(); ++j) {
-                auto& base_j = transBases[j];
-                base_j -= (base_i * base_j) * base_i;
-            }
-
-            for (auto& rotBase : rotBases)
-                rotBase -= (rotBase * base_i) * base_i;
-        }
-
-        for (size_t i = 0; i < rotBases.getLength(); ++i) {
-            auto& base_i = rotBases[i];
-            assert(!base_i.norm().isZero() && "[Error]: Unexpected base degenerate");
-            base_i.toUnit();
-
-            for (size_t j = i + 1; j < rotBases.getLength(); ++j) {
-                auto& base_j = rotBases[j];
-                base_j -= (base_i * base_j) * base_i;
-            }
         }
         initHuangBases(unitCell);
     }
 
     template<class ScalarType>
-    void BHProjector<ScalarType>::projectRot(VectorType& v) const {
-        for (const auto& rotBase : rotBases)
-            v -= (rotBase * v) * rotBase;
+    ScalarType BHProjector<ScalarType>::projectRot(VectorType& v) const {
+        ScalarType maxAbsDot = 0;
+        for (const auto& rotBase : rotBases) {
+            const ScalarType dot = rotBase * v;
+            maxAbsDot = std::max(maxAbsDot, abs(dot));
+            v -= dot * rotBase;
+        }
+        return maxAbsDot;
     }
 
     template<class ScalarType>
-    void BHProjector<ScalarType>::projectHuang(VectorType& v) const {
-        for (const auto& huangBase : huangBases)
-            v -= (huangBase * v) * huangBase;
+    ScalarType BHProjector<ScalarType>::projectHuang(VectorType& v) const {
+        ScalarType maxAbsDot = 0;
+        for (const auto& huangBase : huangBases) {
+            const ScalarType dot = huangBase * v;
+            maxAbsDot = std::max(maxAbsDot, abs(dot));
+            v -= dot * huangBase;
+        }
+        return maxAbsDot;
     }
 
     template<class ScalarType>
@@ -169,8 +153,15 @@ namespace Physica::Core {
             const unsigned int dir2 = index5D[4] % Dim;
             const Vector<ScalarType, 3> pos1 = pos.row(index5D[3] / Dim);
             Vector<ScalarType, 3> pos2 = pos.row(index5D[4] / Dim);
-            for (size_t dim = 0; dim < Dim; ++dim)
-                pos2 += lattice.row(dim).asVector() * ScalarType(index5D[dim]);
+            for (unsigned int j = 0; j < Dim; ++j) {
+                const ssize_t index_j = index5D[j];
+                const ssize_t superSize_j = superSize[j];
+                const bool isOnWignerSeitzBoundary = (superSize_j % 2 == 0) && (index_j == superSize_j / 2);
+                if (!isOnWignerSeitzBoundary) {
+                    const ScalarType factor = ScalarType(index_j > superSize_j / 2 ? index_j - superSize_j : index_j);
+                    pos2 += lattice.row(j).asVector() * factor;
+                }
+            }
 
             ScalarType elem = 0;
             if (dir1 == alpha && dir2 == beta)

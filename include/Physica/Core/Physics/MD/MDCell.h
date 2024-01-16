@@ -203,7 +203,7 @@ namespace Physica::Core {
 
     template<class ScalarType, unsigned int Dim>
     inline void MDCell<ScalarType, Dim>::setMass(size_t atom, ScalarType value) {
-        assert(atom < getNumParticle && "[Error]: Index out of range");
+        assert(atom < Base::getNumParticle() && "[Error]: Index out of range");
         assert(value.isPositive() && "[Error]: Mass must be positive");
         massVec[atom] = value;
     }

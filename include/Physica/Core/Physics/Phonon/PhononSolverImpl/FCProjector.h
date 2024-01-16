@@ -48,8 +48,8 @@ namespace Physica::Core {
         /* Operators */
         FCProjector& operator=(FCProjector obj) noexcept { swap(obj); return obj; }
         /* Operations */
-        void projectSwap(VectorType& v) const;
-        void projectTrans(VectorType& v) const;
+        ScalarType projectSwap(VectorType& v) const;
+        ScalarType projectTrans(VectorType& v) const;
         VectorType toVector(const RSpaceFCGrid& fcGrid) const;
         void toGrid(const VectorType& fcVector, RSpaceFCGrid& fcGrid) const;
         void swap(FCProjector& __restrict obj) noexcept;
@@ -71,25 +71,16 @@ namespace Physica::Core {
         transBases.reserve(numBase);
         for (size_t i = 0; i < numBase; ++i) {
             VectorType transBase = makeTransBase(i / Dim, i % Dim);
-            projectSwap(transBase);
+            transBase.toUnit();
             transBases.grow(std::move(transBase));
-        }
-
-        for (size_t i = 0; i < numBase; ++i) {
-            auto& base_i = transBases[i];
-            assert(!base_i.norm().isZero() && "[Error]: Unexpected base degenerate");
-            base_i.toUnit();
-
-            for (size_t j = i + 1; j < numBase; ++j) {
-                auto& base_j = transBases[j];
-                base_j -= (base_i * base_j) * base_i;
-            }
         }
     }
 
     template<class ScalarType>
-    void FCProjector<ScalarType>::projectSwap(VectorType& v) const {
-        GridBase::forIndexInGrid(superSize, [this, &v](Index3D index) {
+    ScalarType FCProjector<ScalarType>::projectSwap(VectorType& v) const {
+        ScalarType maxAbsDot = 0;
+        GridBase::forIndexInGrid(superSize, [this, &v, &maxAbsDot](Index3D index) {
+            ScalarType maxAbsDotInner = 0;
             for (size_t i = 0; i < numDOF; ++i) {
                 for (size_t j = i; j < numDOF; ++j) {
                     const bool isSelf = i == j && index[0] == 0 && index[1] == 0 && index[2] == 0;
@@ -97,16 +88,25 @@ namespace Physica::Core {
                         continue;
 
                     const FCSwapVector<ScalarType> swapBase(getSuperSize(), index, numDOF, i, j);
-                    v -= (swapBase * v) * swapBase;
+                    const ScalarType dot = swapBase * v;
+                    maxAbsDotInner = std::max(maxAbsDotInner, abs(dot));
+                    v -= dot * swapBase;
                 }
             }
+            maxAbsDot = std::max(maxAbsDot, maxAbsDotInner);
         });
+        return maxAbsDot;
     }
 
     template<class ScalarType>
-    void FCProjector<ScalarType>::projectTrans(VectorType& v) const {
-        for (const auto& transBase : transBases)
-            v -= (transBase * v) * transBase;
+    ScalarType FCProjector<ScalarType>::projectTrans(VectorType& v) const {
+        ScalarType maxAbsDot = 0;
+        for (const auto& transBase : transBases) {
+            const ScalarType dot = transBase * v;
+            maxAbsDot = std::max(maxAbsDot, abs(dot));
+            v -= dot * transBase;
+        }
+        return maxAbsDot;
     }
 
     template<class ScalarType>

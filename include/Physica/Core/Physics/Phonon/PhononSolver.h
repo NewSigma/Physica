@@ -54,8 +54,9 @@ namespace Physica::Core {
         PhononSolver& operator=(PhononSolver obj) noexcept { swap(obj); return *this; }
         /* Operations */
         void removeTrans(KSpaceFCGrid& forceConstants, ScalarType translationPrec, size_t maxIteration) const;
-        void projectTrans(RSpaceFCGrid& fcGrid) const;
-        void projectTransRot(RSpaceFCGrid& fcGrid) const;
+        void projectTrans(RSpaceFCGrid& fcGrid, ScalarType maxAbsDot, size_t maxIteration) const;
+        void projectTransRot(RSpaceFCGrid& fcGrid, ScalarType maxAbsDot, size_t maxIteration) const;
+        void projectTransRotH(RSpaceFCGrid& fcGrid, ScalarType maxAbsDot, size_t maxIteration) const;
 
         [[nodiscard]] KSpaceFCMat interpolatePoint(Vector3D qPoint, const KSpaceFCGrid& forceConstants) const;
         KSpaceFCGrid toKSpace(const RSpaceFCGrid& rSpaceGrid) const;
@@ -101,6 +102,8 @@ namespace Physica::Core {
             KSpaceFCGrid& forceConstants,
             ScalarType translationPrec,
             size_t maxIteration) const {
+        assert(maxAbsDot.isPositive() && "[Error]: Invalid param");
+        assert(maxIteration > 0 && "[Error]: Zero max iteration does nothing");
         const size_t unitCellDOF = getUnitCellDOF();
         auto& fcMatrixes = forceConstants.asArray();
         FFT3D fft(superSize, {1, 1, 1}, PlanFlag::Estimate);
@@ -113,7 +116,7 @@ namespace Physica::Core {
         size_t iteration = 0;
         while (averageDrift > translationPrec) {
             if (iteration == maxIteration) [[unlikely]]
-                throw BadConvergenceException("[Error]: Failed to apply translational invariance in the given steps");
+                throw BadConvergenceException("[Error]: Failed to apply phonon invariance in the given steps");
             iteration += 1;
 
             for (size_t row = 0; row < unitCellDOF; ++row) {
@@ -152,21 +155,59 @@ namespace Physica::Core {
     }
 
     template<class ScalarType>
-    void PhononSolver<ScalarType>::projectTrans(RSpaceFCGrid& fcGrid) const {
+    void PhononSolver<ScalarType>::projectTrans(RSpaceFCGrid& fcGrid, ScalarType maxAbsDot, size_t maxIteration) const {
+        assert(maxAbsDot.isPositive() && "[Error]: Invalid param");
+        assert(maxIteration > 0 && "[Error]: Zero max iteration does nothing");
         const FCProjector<ScalarType> projector(superSize, getUnitCellDOF());
         auto fcVector = projector.toVector(fcGrid);
-        projector.projectSwap(fcVector);
-        projector.projectTrans(fcVector);
+        ScalarType absDot = std::numeric_limits<ScalarType>::max();
+        size_t iteration = 0;
+        while (absDot > maxAbsDot) {
+            if (iteration == maxIteration) [[unlikely]]
+                throw BadConvergenceException("[Error]: Failed to apply phonon invariance in the given steps");
+            iteration += 1;
+            absDot = projector.projectSwap(fcVector);
+            absDot = std::max(projector.projectTrans(fcVector), absDot);
+        }
         projector.toGrid(fcVector, fcGrid);
     }
 
     template<class ScalarType>
-    void PhononSolver<ScalarType>::projectTransRot(RSpaceFCGrid& fcGrid) const {
+    void PhononSolver<ScalarType>::projectTransRot(RSpaceFCGrid& fcGrid, ScalarType maxAbsDot, size_t maxIteration) const {
+        assert(maxAbsDot.isPositive() && "[Error]: Invalid param");
+        assert(maxIteration > 0 && "[Error]: Zero max iteration does nothing");
         const BHProjector<ScalarType> projector(superSize, getUnitCellDOF(), unitCell);
         auto fcVector = projector.toVector(fcGrid);
-        projector.projectSwap(fcVector);
-        projector.projectTrans(fcVector);
-        projector.projectRot(fcVector);
+        ScalarType absDot = std::numeric_limits<ScalarType>::max();
+        size_t iteration = 0;
+        while (absDot > maxAbsDot) {
+            if (iteration == maxIteration) [[unlikely]]
+                throw BadConvergenceException("[Error]: Failed to apply phonon invariance in the given steps");
+            iteration += 1;
+            absDot = projector.projectSwap(fcVector);
+            absDot = std::max(projector.projectTrans(fcVector), absDot);
+            absDot = std::max(projector.projectRot(fcVector), absDot);
+        }
+        projector.toGrid(fcVector, fcGrid);
+    }
+
+    template<class ScalarType>
+    void PhononSolver<ScalarType>::projectTransRotH(RSpaceFCGrid& fcGrid, ScalarType maxAbsDot, size_t maxIteration) const {
+        assert(maxAbsDot.isPositive() && "[Error]: Invalid param");
+        assert(maxIteration > 0 && "[Error]: Zero max iteration does nothing");
+        const BHProjector<ScalarType> projector(superSize, getUnitCellDOF(), unitCell);
+        auto fcVector = projector.toVector(fcGrid);
+        ScalarType absDot = std::numeric_limits<ScalarType>::max();
+        size_t iteration = 0;
+        while (absDot > maxAbsDot) {
+            if (iteration == maxIteration) [[unlikely]]
+                throw BadConvergenceException("[Error]: Failed to apply phonon invariance in the given steps");
+            iteration += 1;
+            absDot = projector.projectSwap(fcVector);
+            absDot = std::max(projector.projectTrans(fcVector), absDot);
+            absDot = std::max(projector.projectRot(fcVector), absDot);
+            absDot = std::max(projector.projectHuang(fcVector), absDot);
+        }
         projector.toGrid(fcVector, fcGrid);
     }
 
