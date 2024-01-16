@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 WeiBo He.
+ * Copyright 2019-2024 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -22,7 +22,7 @@ using namespace Physica::Core;
 
 namespace Physica::Gui {
     Plot::Plot(double minX, double maxX, double minY, double maxY, double deltaX, double deltaY, QWidget* parent)
-            : QChartView(parent)
+            : ChartView(parent)
             , axisX(new QValueAxis())
             , axisY(new QValueAxis())
             , axisTop(new QValueAxis())
@@ -33,7 +33,7 @@ namespace Physica::Gui {
         setRenderHint(QPainter::Antialiasing);
         setBackgroundRole(QPalette::Light);
 
-        auto& chart = *Base::chart();
+        auto& chart = *Base::getChart();
         QFont font = chart.legend()->font();
         font.setPointSize(15);
         chart.legend()->setFont(font);

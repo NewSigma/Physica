@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 WeiBo He.
+ * Copyright 2019-2024 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -18,7 +18,6 @@
  */
 #pragma once
 
-#include <QtCharts/QChartView>
 #include <QtCharts/QValueAxis>
 #include <QtCharts/QLineSeries>
 #include <QtCharts/QSplineSeries>
@@ -27,13 +26,14 @@
 #include <QtCharts/QBoxPlotSeries>
 #include <Physica/Core/MultiPrecision/Scalar.h>
 #include <Physica/Core/Math/Algebra/LinearAlgebra/Vector/Vector.h>
+#include "PlotImpl/ChartView.h"
 #include "ContourSeries.h"
 
 using Physica::Core::MultiScalar;
 
 namespace Physica::Gui {
-    class PHYSICA_API Plot : public QChartView {
-        using Base = QChartView;
+    class PHYSICA_API Plot : public ChartView {
+        using Base = ChartView;
 
         QValueAxis* axisX;
         QValueAxis* axisY;
@@ -125,7 +125,7 @@ namespace Physica::Gui {
         QLineSeries* series = new QLineSeries();
         for (size_t i = 0; i < x.getLength(); ++i)
             *series << QPointF(double(x.calc(i)), double(y.calc(i)));
-        chart()->addSeries(series);
+        getChart()->addSeries(series);
         series->attachAxis(axisX);
         series->attachAxis(axisY);
 
@@ -145,7 +145,7 @@ namespace Physica::Gui {
         QSplineSeries* series = new QSplineSeries();
         for (size_t i = 0; i < x.getLength(); ++i)
             *series << QPointF(double(x[i]), double(y[i]));
-        chart()->addSeries(series);
+        getChart()->addSeries(series);
         series->attachAxis(axisX);
         series->attachAxis(axisY);
 
@@ -165,7 +165,7 @@ namespace Physica::Gui {
         QScatterSeries* series = new QScatterSeries();
         for (size_t i = 0; i < x.getLength(); ++i)
             *series << QPointF(double(x.calc(i)), double(y.calc(i)));
-        chart()->addSeries(series);
+        getChart()->addSeries(series);
         series->attachAxis(axisX);
         series->attachAxis(axisY);
 
@@ -227,7 +227,7 @@ namespace Physica::Gui {
 
         QAreaSeries* series = new QAreaSeries(upper_series, lower_series);
 
-        chart()->addSeries(series);
+        getChart()->addSeries(series);
         series->attachAxis(axisX);
         series->attachAxis(axisY);
 
@@ -249,7 +249,7 @@ namespace Physica::Gui {
             *upper_series << QPointF(x_i, double(upper[i]));
         }
         QAreaSeries* series = new QAreaSeries(upper_series, lower_series);
-        chart()->addSeries(series);
+        getChart()->addSeries(series);
         series->attachAxis(axisX);
         series->attachAxis(axisY);
         update();
@@ -271,7 +271,7 @@ namespace Physica::Gui {
                                              const Core::LValueMatrix<MatrixType>& z,
                                              Utils::Array<double> levels) {
         auto* series = new ContourSeries<MatrixType>(x, y, z, std::move(levels));
-        series->attachTo(*chart());
+        series->attachTo(*getChart());
         series->attachAxis(axisX);
         series->attachAxis(axisY);
         update();
@@ -287,7 +287,7 @@ namespace Physica::Gui {
             set->setX(double(std::move(x[i])));
             series->append(set);
         }
-        chart()->addSeries(series);
+        getChart()->addSeries(series);
         series->attachAxis(axisX);
         series->attachAxis(axisY);
         update();
@@ -321,7 +321,7 @@ namespace Physica::Gui {
             set->setX(double(std::move(x[i])));
             series->append(set);
         }
-        chart()->addSeries(series);
+        getChart()->addSeries(series);
         series->attachAxis(axisX);
         series->attachAxis(axisY);
         update();
@@ -357,28 +357,28 @@ namespace Physica::Gui {
     }
 
     inline void Plot::setAxisX(QValueAxis* axis) {
-        auto* chart = Base::chart();
+        auto* chart = Base::getChart();
         chart->removeAxis(axisX);
         chart->addAxis(axis, Qt::AlignBottom);
         axisX = axis;
     }
 
     inline void Plot::setAxisY(QValueAxis* axis) {
-        auto* chart = Base::chart();
+        auto* chart = Base::getChart();
         chart->removeAxis(axisY);
         chart->addAxis(axis, Qt::AlignLeft);
         axisY = axis;
     }
 
     inline void Plot::setAxisTop(QValueAxis* axis) {
-        auto* chart = Base::chart();
+        auto* chart = Base::getChart();
         chart->removeAxis(axisTop);
         chart->addAxis(axis, Qt::AlignTop);
         axisTop = axis;
     }
 
     inline void Plot::setAxisRight(QValueAxis* axis) {
-        auto* chart = Base::chart();
+        auto* chart = Base::getChart();
         chart->removeAxis(axisRight);
         chart->addAxis(axis, Qt::AlignRight);
         axisRight = axis;
