@@ -24,25 +24,25 @@
 namespace Physica::Core {
     Mnist::Mnist(const char* folder) {
         Utils::DirStack dir(folder);
-        dir.push("train-images-idx3-ubyte");
+        dir.push("train-images.idx3-ubyte");
         trainSamples = readDatas(dir.toPath());
         if (trainSamples.getLength() != 60000)
             throw BadFileFormatException("[Error]: Bad data file");
         dir.pop();
 
-        dir.push("t10k-images-idx3-ubyte");
+        dir.push("t10k-images.idx3-ubyte");
         testSamples = readDatas(dir.toPath());
         if (testSamples.getLength() != 10000)
             throw BadFileFormatException("[Error]: Bad data file");
         dir.pop();
 
-        dir.push("train-labels-idx1-ubyte");
+        dir.push("train-labels.idx1-ubyte");
         trainLabels = readLabels(dir.toPath());
         if (trainLabels.getLength() != 60000)
             throw BadFileFormatException("[Error]: Bad label file");
         dir.pop();
 
-        dir.push("t10k-labels-idx1-ubyte");
+        dir.push("t10k-labels.idx1-ubyte");
         testLabels = readLabels(dir.toPath());
         if (testLabels.getLength() != 10000)
             throw BadFileFormatException("[Error]: Bad label file");
