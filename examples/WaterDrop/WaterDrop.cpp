@@ -110,7 +110,7 @@ int WaterDropSolver::output() {
         z *= T(1E3);
         Plot* r_z = new Plot(-0.1, 0.001, 0, 0.05, 0.02, 0.02);
         r_z->spline(scaled_r, z);
-        r_z->chart()->legend()->hide();
+        r_z->getChart()->legend()->hide();
         r_z->getAxisX()->setTitleText("r/mm");
         r_z->getAxisY()->setTitleText("z/mm");
         r_z->show();
@@ -208,7 +208,7 @@ int main(int argc, char** argv) {
     /* Plot lambda */ {
         Plot* r_lambda = new Plot(0, 5, -1.2, 0.1, 1, 0.25);
         r_lambda->spline(scaled_r, lambda_arr);
-        r_lambda->chart()->legend()->hide();
+        r_lambda->getChart()->legend()->hide();
         r_lambda->getAxisX()->setLabelFormat("%d");
         r_lambda->getAxisX()->setTitleText("r/mm");
         r_lambda->getAxisY()->setTitleText("&lambda;");
@@ -218,7 +218,7 @@ int main(int argc, char** argv) {
         const Vector<T> scaled_v = volume_arr * T(1E9);
         Plot* r_volume = new Plot(0, 5, 0, 12, 1, 5);
         r_volume->spline(scaled_r, scaled_v);
-        r_volume->chart()->legend()->hide();
+        r_volume->getChart()->legend()->hide();
         r_volume->getAxisX()->setLabelFormat("%d");
         r_volume->getAxisY()->setLabelFormat("%d");
         r_volume->getAxisX()->setTitleText("r/mm");

@@ -129,7 +129,7 @@ void plotPWBaseWave(double energy, double radialNum) {
         waveFunc[i] = solution(0, i) / (h[i] * args.rho);
     waveFunc *= reciprocal(waveFunc.max());
     Plot* plot = new Plot(0.6, 6.8, -0.2, 1.1, 1, 0.25);
-    plot->chart()->legend()->hide();
+    plot->getChart()->legend()->hide();
     plot->spline(h, waveFunc);
     plot->getAxisX()->setLabelFormat("%d");
     plot->getAxisX()->setTitleText("h");
@@ -161,7 +161,7 @@ int main(int argc, char** argv) {
     QApplication app(argc, argv);
 
     Plot* plot = new Plot(0.2, 3.5, -10, 180, 1, 50);
-    plot->chart()->legend()->hide();
+    plot->getChart()->legend()->hide();
     plot->spline(energyArr, crossSectionArr);
     plot->getAxisX()->setLabelFormat("%d");
     plot->getAxisY()->setLabelFormat("%d");

@@ -26,15 +26,15 @@ namespace Physica::Core {
      * \class RandomPool Provides per-thread, reusable random generator support.
      * 
      * \tparam FixedSeed:
-     * Multi-threads will break reproducibility even though random seed is fixed.
+     * Multi-threads will break reproducibility and fixing random seed is not enough.
      * So \tparam FixedSeed is declared as a template param,
-     * making it possible to change program's behavier at compiling time to ensure reproducibility.
+     * making it possible for other parts of the program to check whether the seed is fixed at compiling time.
      * 
      * Note:
      * If you use random numbers in a single thread code, construct a generator by hand is prefered.
      */
     template<class RandomGenerator, typename RandomGenerator::result_type FixedSeed = Physica::Utils::Dynamic>
-    class RandomPool {
+    class PHYSICA_API RandomPool {
     public:
         using SeedType = typename RandomGenerator::result_type;
         using GeneratorType = RandomGenerator;
@@ -43,31 +43,26 @@ namespace Physica::Core {
         [[nodiscard]] constexpr static bool isSeedFixed() { return FixedSeed != Utils::Dynamic; }
         [[nodiscard]] static RandomGenerator& getGen();
         [[nodiscard]] static SeedType getThreadSpecificSeed();
-    private:
-        static RandomGenerator makeGenerator();
     };
 
     template<class RandomGenerator, typename RandomGenerator::result_type FixedSeed>
     RandomGenerator& RandomPool<RandomGenerator, FixedSeed>::getGen() {
-        thread_local static RandomGenerator gen = makeGenerator();
+        thread_local static RandomGenerator gen = RandomGenerator(getThreadSpecificSeed());
         return gen;
     }
 
     template<class RandomGenerator, typename RandomGenerator::result_type FixedSeed>
     typename RandomPool<RandomGenerator, FixedSeed>::SeedType RandomPool<RandomGenerator, FixedSeed>::getThreadSpecificSeed() {
-        if (!isSeedFixed())
-            return Utils::Dynamic;
-        const auto threadId = ThreadPool::getThreadInfo().id;
-        return FixedSeed + threadId;
-    }
-
-    template<class RandomGenerator, typename RandomGenerator::result_type FixedSeed>
-    RandomGenerator RandomPool<RandomGenerator, FixedSeed>::makeGenerator() {
-        SeedType seed;
-        if constexpr (isSeedFixed())
-            seed = getThreadSpecificSeed();
-        else
-            RandomSeed::rdrand(seed);
-        return RandomGenerator(seed);
+        thread_local static SeedType seed = FixedSeed;
+        if (isSeedFixed()) {
+            const auto threadId = ThreadPool::getThreadInfo().id;
+            return seed + threadId;
+        }
+        else {
+            const bool isUninitialized = seed == Utils::Dynamic;
+            if (isUninitialized)
+                RandomSeed::rdrand(seed);
+            return seed;
+        }
     }
 }

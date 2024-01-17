@@ -93,7 +93,7 @@ int main(int argc, char** argv) {
 
     QApplication app(argc, argv);
     GaussPlot* plot = new GaussPlot(0.25, 0.5, 0.25, 0.25, 2);
-    plot->chart()->legend()->hide();
+    plot->getChart()->legend()->hide();
     {
         VectorType moved = meanKinetic - ScalarType(temperatureT * 0.5);
         auto& scatter = plot->scatter(moved, deviaKinetic);

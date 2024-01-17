@@ -57,15 +57,15 @@ public:
 
         QApplication app(argc, argv);
         Plot* numerical = new Plot(-1, 1, -1.2, 1.2, 0.5, 0.5);
-        numerical->chart()->setTitle("Numerical solution");
-        numerical->chart()->legend()->setAlignment(Qt::AlignRight);
+        numerical->getChart()->setTitle("Numerical solution");
+        numerical->getChart()->legend()->setAlignment(Qt::AlignRight);
         for (size_t i = 0; i < 8; ++i)
             plotWave(*numerical, solver, i);
         numerical->show();
 
         Plot* analytical = new Plot(-1, 1, -1.2, 1.2, 0.5, 0.5);
-        analytical->chart()->setTitle("Analytical solution");
-        analytical->chart()->legend()->setAlignment(Qt::AlignRight);
+        analytical->getChart()->setTitle("Analytical solution");
+        analytical->getChart()->legend()->setAlignment(Qt::AlignRight);
         for (size_t i = 0; i < 8; ++i)
             plotReferenceWave(*analytical, i);
         analytical->show();

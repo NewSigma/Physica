@@ -149,7 +149,7 @@ RDF<ScalarType> calcRDF(size_t numReplica) {
 int main(int argc, char** argv) {
     QApplication app(argc, argv);
     Plot* plot = new Plot(0, 7, 0, 3, 2, 1);
-    auto* legend = plot->chart()->legend();
+    auto* legend = plot->getChart()->legend();
     legend->setVisible(true);
     legend->setAlignment(Qt::AlignTop);
     legend->setMarkerShape(QLegend::MarkerShapeFromSeries);

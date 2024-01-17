@@ -36,7 +36,7 @@ namespace Physica::Core {
                 if (code == 1)
                     return;
             }
-            throw Core::RdrandException();
+            throw RdrandException();
         }
 
         static void rdrand(uint32_t& integer) {
@@ -45,7 +45,7 @@ namespace Physica::Core {
                 if (code == 1)
                     return;
             }
-            throw Core::RdrandException();
+            throw RdrandException();
         }
 
         static void rdrand(uint64_t& integer) {
@@ -54,7 +54,7 @@ namespace Physica::Core {
                 if (code == 1)
                     return;
             }
-            throw Core::RdrandException();
+            throw RdrandException();
         }
     };
 }

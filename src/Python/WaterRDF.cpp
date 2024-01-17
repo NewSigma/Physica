@@ -152,7 +152,7 @@ void run(double temperatureT_, double thermostatTime_, double timeStep_) {
     int argc = 0;
     QApplication app(argc, nullptr);
     Plot* plot = new Plot(0, 7, 0, 3, 2, 1);
-    auto* legend = plot->chart()->legend();
+    auto* legend = plot->getChart()->legend();
     legend->setVisible(true);
     legend->setAlignment(Qt::AlignTop);
     legend->setMarkerShape(QLegend::MarkerShapeFromSeries);

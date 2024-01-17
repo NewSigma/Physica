@@ -78,7 +78,7 @@ int main(int argc, char** argv) {
 
     QApplication app(argc, argv);
     Plot* plot = new Plot(0, 2000, -16, 0, 500, 5);
-    plot->chart()->legend()->setVisible(false);
+    plot->getChart()->legend()->setVisible(false);
     auto* axisX = plot->getAxisX();
     auto* axisY = plot->getAxisY();
     axisX->setTitleText("Step");

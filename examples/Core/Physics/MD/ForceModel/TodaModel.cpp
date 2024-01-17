@@ -95,7 +95,7 @@ void plotPress(const VectorType& lattices, const VectorType& density) {
 
     QFont font;
     Plot* plot = new Plot(0.6, 1.4, -0.5, 0.5, 0.4, 0.5);
-    plot->chart()->legend()->setVisible(false);
+    plot->getChart()->legend()->setVisible(false);
     plot->getAxisX()->setLabelFormat("%.1f");
     plot->getAxisY()->setLabelFormat("%.1f");
     plot->getAxisX()->setTitleText("&rho;");
@@ -132,7 +132,7 @@ void plotDeltaFreeEnergy(const VectorType& lattices, const VectorType& density) 
     }
     QFont font;
     Plot* plot = new Plot(0.6, 0.4, -0.11, 0.01, 0.4, 0.02);
-    plot->chart()->legend()->setVisible(false);
+    plot->getChart()->legend()->setVisible(false);
     plot->getAxisX()->setLabelFormat("%.1f");
     plot->getAxisY()->setLabelFormat("%.2f");
     plot->getAxisX()->setTitleText("&rho;");

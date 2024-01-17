@@ -106,7 +106,7 @@ int main(int argc, char** argv) {
     plot->spline(r, potentialEnergy).setName("E<sub>nuclear</sub>");
     plot->spline(r, totalEnergy).setName("E<sub>electron</sub> + E<sub>nuclear</sub>");
 
-    auto& chart = *plot->chart();
+    auto& chart = *plot->getChart();
     chart.setTitle("Dissociation curve of H<sub>2</sub>");
     auto* legend = chart.legend();
     legend->setAlignment(Qt::AlignTop);

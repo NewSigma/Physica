@@ -61,7 +61,7 @@ int main(int argc, char** argv) {
     /* t-x */ {
         Plot* t_x = new Plot(0, 200, -1.5, 1.5, 50, 1);
         t_x->spline(t, x);
-        t_x->chart()->legend()->hide();
+        t_x->getChart()->legend()->hide();
         auto* axisX = t_x->getAxisX();
         auto* axisY = t_x->getAxisY();
         axisX->setTitleText("t");
@@ -73,7 +73,7 @@ int main(int argc, char** argv) {
     /* t-p */ {
         Plot* t_p = new Plot(0, 200, -2.5, 2, 50, 1);
         t_p->spline(t, p);
-        t_p->chart()->legend()->hide();
+        t_p->getChart()->legend()->hide();
         auto* axisX = t_p->getAxisX();
         auto* axisY = t_p->getAxisY();
         axisX->setTitleText("t");
@@ -85,7 +85,7 @@ int main(int argc, char** argv) {
     /* x-p */ {
         Plot* x_p = new Plot(-1.5, 1.5, -2.5, 2, 1, 1);
         x_p->spline(x, p);
-        x_p->chart()->legend()->hide();
+        x_p->getChart()->legend()->hide();
         auto* axisX = x_p->getAxisX();
         auto* axisY = x_p->getAxisY();
         axisX->setTitleText("x");

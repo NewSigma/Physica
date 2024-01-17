@@ -80,7 +80,7 @@ int main(int argc, char** argv) {
     constexpr double minX = 0;
     constexpr double maxX = 10.1;
     Plot* plot = new Plot(minX, maxX, 0 - 5, 20 + 5, 2, 5);
-    auto& chart = *plot->chart();
+    auto& chart = *plot->getChart();
     chart.legend()->setVisible(false);
     plot->getAxisX()->setLabelFormat("%d");
     plot->getAxisY()->setLabelFormat("%d");

@@ -129,7 +129,7 @@ int main(int argc, char** argv) {
 
     QApplication app(argc, argv);
     Plot* plot = new Plot(0, 3.001, -3, 1, 1, 1);
-    auto& chart = *plot->chart();
+    auto& chart = *plot->getChart();
     chart.legend()->setVisible(true);
     chart.legend()->setAlignment(Qt::AlignTop);
     chart.legend()->setMarkerShape(QLegend::MarkerShapeFromSeries);
