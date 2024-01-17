@@ -24,6 +24,9 @@ namespace Physica::Core {
     template<class SampleType, class LabelType>
     class SimpleDataset {
         static_assert(!SampleType::ScalarType::isDifferentiable, "[Error]: Data in a dataset must not be differentiable");
+        using This = SimpleDataset<SampleType, LabelType>;
+        using SplitResultType = std::pair<This, This>;
+        using DataType = std::pair<SampleType, LabelType>;
     public:
         using SampleArray = Utils::Array<SampleType>;
         using LabelArray = Utils::Array<LabelType>;
@@ -31,13 +34,19 @@ namespace Physica::Core {
         Utils::Array<SampleType> samples;
         Utils::Array<LabelType> labels;
     public:
+        SimpleDataset() = default;
         SimpleDataset(SampleArray samples_, LabelArray labels_);
         SimpleDataset(const SimpleDataset&) = default;
         SimpleDataset(SimpleDataset&&) noexcept = default;
         ~SimpleDataset() = default;
         /* Operators */
         SimpleDataset& operator=(SimpleDataset obj) noexcept { swap(obj); return *this; }
+        [[nodiscard]] inline DataType operator[](size_t index) const;
         /* Operations */
+        inline void reserve(size_t size);
+        inline void append(DataType data);
+        template<class RandomGenerator>
+        SplitResultType randomSplit(size_t firstSize, RandomGenerator& gen) const;
         void swap(SimpleDataset& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] SampleArray& getSamples() noexcept { return samples; }
@@ -51,6 +60,57 @@ namespace Physica::Core {
     SimpleDataset<SampleType, LabelType>::SimpleDataset(SampleArray samples_, LabelArray labels_)
             : samples(std::move(samples_)), labels(std::move(labels_)) {
         assert(samples.getLength() == labels.getLength() && "[Error]: Length of samples and labels do not match");
+    }
+
+    template<class SampleType, class LabelType>
+    inline typename SimpleDataset<SampleType, LabelType>::DataType
+    SimpleDataset<SampleType, LabelType>::operator[](size_t index) const {
+        assert(index < getSize() && "[Error]: Index overflow");
+        return std::make_pair(samples[index], labels[index]);
+    }
+
+    template<class SampleType, class LabelType>
+    inline void SimpleDataset<SampleType, LabelType>::reserve(size_t size) {
+        samples.reserve(size);
+        labels.reserve(size);
+    }
+
+    template<class SampleType, class LabelType>
+    inline void SimpleDataset<SampleType, LabelType>::append(DataType data) {
+        samples.append(std::move(data.first));
+        labels.append(std::move(data.second));
+    }
+
+    template<class SampleType, class LabelType>
+    template<class RandomGenerator>
+    typename SimpleDataset<SampleType, LabelType>::SplitResultType
+    SimpleDataset<SampleType, LabelType>::randomSplit(size_t firstSize, RandomGenerator& gen) const {
+        assert(firstSize > 0 && "[Error]: Spliting a zero size dataset does nothing");
+        assert(firstSize < getSize() && "[Error]: Split a dataset whose size is larger than original");
+        const size_t secondSize = getSize() - firstSize;
+        const bool isFirstLarger = firstSize >= secondSize;
+        const size_t largeSize = isFirstLarger ? firstSize : secondSize;
+        const size_t smallSize = isFirstLarger ? secondSize : firstSize;
+        This large{}, small{};
+        large.reserve(largeSize);
+        small.reserve(smallSize);
+
+        Utils::Array<size_t> permutation(getSize());
+        for (size_t i = 0; i < getSize(); ++i)
+            permutation[i] = i;
+
+        for (size_t i = 0; i < smallSize; ++i) {
+            std::uniform_int_distribution<size_t> dist(i, getSize() - 1);
+            const size_t j = dist(gen);
+            std::swap(permutation[i], permutation[j]);
+            small.append((*this)[j]);
+        }
+        for (size_t i = smallSize; i < getSize(); ++i)
+            large.append((*this)[permutation[i]]);
+
+        if (isFirstLarger)
+            std::make_pair(std::move(large), std::move(small));
+        return std::make_pair(std::move(small), std::move(large));
     }
 
     template<class SampleType, class LabelType>
