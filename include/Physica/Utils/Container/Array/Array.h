@@ -129,8 +129,8 @@ namespace Physica::Utils {
         template<class... Args>
         explicit Array(size_t length_, Args&&... args);
         Array(std::initializer_list<T> list);
-        Array(const Array& array);
-        Array(Array&& array) noexcept;
+        Array(const Array& array) = default;
+        Array(Array&& array) noexcept = default;
         template<size_t OtherLength, size_t OtherCapacity>
         explicit Array(const Array<T, OtherLength, OtherCapacity, Allocator>& array);
         template<size_t OtherLength, size_t OtherCapacity>
@@ -185,7 +185,7 @@ namespace Physica::Utils {
         template<class... Args>
         explicit Array(size_t length_, Args&&... args);
         Array(std::initializer_list<T> list);
-        Array(const Array& array);
+        Array(const Array& array) = default;
         Array(Array&& array) noexcept;
         template<size_t OtherLength, size_t OtherCapacity>
         explicit Array(const Array<T, OtherLength, OtherCapacity, Allocator>& array);

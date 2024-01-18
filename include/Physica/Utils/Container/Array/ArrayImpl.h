@@ -105,14 +105,6 @@ namespace Physica::Utils {
             alloc.construct(arr + i, *ite);
         Base::setLength(length);
     }
-
-    template<class T, size_t Capacity, class Allocator>
-    Array<T, Dynamic, Capacity, Allocator>::Array(const Array<T, Dynamic, Capacity, Allocator>& array)
-            : Base(array) {}
-
-    template<class T, size_t Capacity, class Allocator>
-    Array<T, Dynamic, Capacity, Allocator>::Array(Array<T, Dynamic, Capacity, Allocator>&& array) noexcept
-            : Base(std::move(array)) {}
     /**
      * Return the sub array of current array. \from is included and \to is excluded.
      */
@@ -227,10 +219,6 @@ namespace Physica::Utils {
             alloc.construct(arr + i, *ite);
         Base::setLength(list.size());
     }
-
-    template<class T, class Allocator>
-    Array<T, Dynamic, Dynamic, Allocator>::Array(const Array& array)
-            : Base(array), capacity(array.capacity) {}
 
     template<class T, class Allocator>
     Array<T, Dynamic, Dynamic, Allocator>::Array(Array<T, Dynamic, Dynamic, Allocator>&& array) noexcept

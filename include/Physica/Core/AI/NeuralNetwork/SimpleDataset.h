@@ -109,7 +109,7 @@ namespace Physica::Core {
             large.append((*this)[permutation[i]]);
 
         if (isFirstLarger)
-            std::make_pair(std::move(large), std::move(small));
+            return std::make_pair(std::move(large), std::move(small));
         return std::make_pair(std::move(small), std::move(large));
     }
 

@@ -102,7 +102,7 @@ namespace Physica::Core {
             KSpaceFCGrid& forceConstants,
             ScalarType translationPrec,
             size_t maxIteration) const {
-        assert(maxAbsDot.isPositive() && "[Error]: Invalid param");
+        assert(translationPrec.isPositive() && "[Error]: Invalid param");
         assert(maxIteration > 0 && "[Error]: Zero max iteration does nothing");
         const size_t unitCellDOF = getUnitCellDOF();
         auto& fcMatrixes = forceConstants.asArray();
