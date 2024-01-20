@@ -35,6 +35,7 @@ namespace Physica::Core {
     template<class ScalarType>
     class LinearLayer : public LayerBase<LinearLayer<ScalarType>> {
         using Base = LayerBase<LinearLayer<ScalarType>>;
+        using PlainScalar = typename ScalarType::PlainScalar;
         using VectorType = typename Base::VectorType;
         using MatrixType = DenseMatrix<ScalarType, MatrixOption::Row | MatrixOption::Vector>;
 
@@ -56,6 +57,10 @@ namespace Physica::Core {
 
         template<class RandomGenerator>
         void random_normal(RandomGenerator& gen);
+        template<class RandomGenerator>
+        void random_xavier_uniform(PlainScalar gain, RandomGenerator& gen);
+        template<class RandomGenerator>
+        void random_xavier_normal(PlainScalar gain, RandomGenerator& gen);
         template<class Distribution, class RandomGenerator>
         void random_any(Distribution& dist, RandomGenerator& gen);
         void swap(LinearLayer& __restrict obj) noexcept;
@@ -93,6 +98,26 @@ namespace Physica::Core {
     void LinearLayer<ScalarType>::random_normal(RandomGenerator& gen) {
         weights.random_normal(gen);
         bias.random_normal(gen);
+    }
+
+    template<class ScalarType>
+    template<class RandomGenerator>
+    void LinearLayer<ScalarType>::random_xavier_uniform(PlainScalar gain, RandomGenerator& gen) {
+        using TrivialType = typename ScalarType::TrivialType;
+        const TrivialType factor = gain * sqrt(PlainScalar(6) / PlainScalar(getInputDim() + getOutputDim()));
+        std::uniform_real_distribution<TrivialType> dist(-factor, factor);
+        weights.random_any(dist, gen);
+        bias.random_any(dist, gen);
+    }
+
+    template<class ScalarType>
+    template<class RandomGenerator>
+    void LinearLayer<ScalarType>::random_xavier_normal(PlainScalar gain, RandomGenerator& gen) {
+        using TrivialType = typename ScalarType::TrivialType;
+        const TrivialType deviation = gain * sqrt(PlainScalar(2) / PlainScalar(getInputDim() + getOutputDim()));
+        std::normal_distribution<TrivialType> dist(0, deviation);
+        weights.random_any(dist, gen);
+        bias.random_any(dist, gen);
     }
 
     template<class ScalarType>
