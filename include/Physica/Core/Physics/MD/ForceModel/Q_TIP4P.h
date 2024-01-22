@@ -47,6 +47,7 @@ namespace Physica::Core {
         using Base::Dim;
         using PlainScalar = typename ScalarType::PlainScalar;
         using REwaldType = typename Internal::Traits<EwaldType>::REwaldType;
+        using BornChargeArray = typename REwaldType::BornChargeArray;
         constexpr static bool IsSmallCell = Internal::Traits<REwaldType>::IsSmallCell;
         using LJModelType = LJModel<ScalarType, IsSmallCell>;
         using Vector3D = Vector<ScalarType, Dim>;
@@ -90,6 +91,7 @@ namespace Physica::Core {
 
         [[nodiscard]] LatticeMatrix virial(const MDCellType& cell);
         [[nodiscard]] LatticeMatrix virial_morse(const MDCellType& cell) const;
+        [[nodiscard]] BornChargeArray calcBornCharge() const;
         template<class Executor, bool UseDynamicPolar>
         [[nodiscard]] PositionMatrix makeInducedDipole(const MDCellType& cell);
         void swap(Q_TIP4P& __restrict model) noexcept;
@@ -301,6 +303,16 @@ namespace Physica::Core {
             result += (vecOH2 * (modifiedMorseForce(r2) / r2)) * vecOH2.transpose();
         }
         result *= reciprocal(ewald.getVolume());
+        return result;
+    }
+
+    template<class ScalarType, class EwaldType>
+    typename Q_TIP4P<ScalarType, EwaldType>::BornChargeArray Q_TIP4P<ScalarType, EwaldType>::calcBornCharge() const {
+        BornChargeArray result = ewald.calcBornCharge();
+        for (size_t i = 0; i < result.getLength(); ++i) {
+            auto diag = result[i].diag;
+            diag *= ScalarType(gamma);
+        }
         return result;
     }
 

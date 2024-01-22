@@ -53,6 +53,8 @@ namespace Physica::Core {
         using typename Base::Vector3D;
         using typename Base::ForceConstMatrix;
         using SearchRangeType = typename PeriodicCell<ScalarType, Dim>::SearchRangeType;
+        using Matrix3D = DenseMatrix<ScalarType, MatrixOption::Column | MatrixOption::Vector, 3, 3>;
+        using BornChargeArray = Utils::Array<Matrix3D>;
         constexpr static size_t ErfcTableSize = 4096 + 512 + 2;
         constexpr static double ErfcTableStep = 0.001;
         constexpr static double SumPrec = (ErfcTableSize - 2) * ErfcTableStep; // Referenced from [1], minus 2 to avoid overflow
@@ -86,6 +88,7 @@ namespace Physica::Core {
         [[nodiscard]] ComplexType forceConst(const PositionMatrix& pos, const Vector3D& waveQ, size_t dof1, size_t dof2) const;
 
         [[nodiscard]] inline LatticeMatrix virial(const PositionMatrix& pos) const;
+        [[nodiscard]] BornChargeArray calcBornCharge() const;
         void swap(RSpaceEwald& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] const LatticeMatrix& getLattice() const noexcept { return lattice; }
@@ -198,8 +201,19 @@ namespace Physica::Core {
     }
 
     template<class ScalarType, bool IsSmallCell>
-    inline typename RSpaceEwald<ScalarType, IsSmallCell>::LatticeMatrix RSpaceEwald<ScalarType, IsSmallCell>::virial(const PositionMatrix& pos) const {
+    inline typename RSpaceEwald<ScalarType, IsSmallCell>::LatticeMatrix
+    RSpaceEwald<ScalarType, IsSmallCell>::virial(const PositionMatrix& pos) const {
         return Base::virial(lattice, pos);
+    }
+
+    template<class ScalarType, bool IsSmallCell>
+    typename RSpaceEwald<ScalarType, IsSmallCell>::BornChargeArray RSpaceEwald<ScalarType, IsSmallCell>::calcBornCharge() const {
+        BornChargeArray result(getNumParticle(), Matrix3D(3, 3, ScalarType(0)));
+        for (size_t i = 0; i < result.getLength(); ++i) {
+            auto diag = result[i].diag();
+            diag = charges[i];
+        }
+        return result;
     }
 
     template<class ScalarType, bool IsSmallCell>

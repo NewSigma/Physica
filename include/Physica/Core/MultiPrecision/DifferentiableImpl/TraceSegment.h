@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 WeiBo He.
+ * Copyright 2023-2024 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -22,6 +22,7 @@
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/Vector.h"
 
 namespace Physica::Core {
+    template<class ScalarType> class DiffTracer;
     /**
      * \class TraceSegment provides a segment of continuous memory to record compute graph
      */
@@ -36,14 +37,13 @@ namespace Physica::Core {
             size_t idFirstOperand;
             ExpressionType source;
         };
-
+    private:
         Utils::Array<DiffRecord> records;
         Utils::Array<DiffScalar> operands;
         VectorType values;
         VectorType grads;
     public:
-        TraceSegment();
-        TraceSegment(size_t size);
+        explicit TraceSegment(size_t size = DefaultSize);
         TraceSegment(const TraceSegment&) = default;
         TraceSegment(TraceSegment&&) noexcept = default;
         ~TraceSegment() = default;
@@ -67,6 +67,8 @@ namespace Physica::Core {
         [[nodiscard]] bool full() const noexcept { return records.full(); }
         [[nodiscard]] bool isFound(DiffScalar s) const noexcept { return find(s) < getLength(); }
         [[nodiscard]] size_t find(DiffScalar s) const noexcept;
+        [[nodiscard]] const VectorType& getValues() const noexcept { return values; }
+        [[nodiscard]] const VectorType& getGrads() const noexcept { return grads; }
         /* Static members */
         [[nodiscard]] constexpr static unsigned int numOperand(ExpressionType type);
     private:
@@ -74,10 +76,9 @@ namespace Physica::Core {
         void reverse(size_t fromIndex, size_t toIndex);
         template<size_t Size>
         void reverseMulAdd(DiffScalar firstOpX, DiffScalar firstOpY, DiffScalar firstOpZ, size_t traceId);
+        /* Friends */
+        friend class DiffTracer<ScalarType>;
     };
-
-    template<class ScalarType>
-    TraceSegment<ScalarType>::TraceSegment() : TraceSegment(DefaultSize) {}
 
     template<class ScalarType>
     TraceSegment<ScalarType>::TraceSegment(size_t size) {

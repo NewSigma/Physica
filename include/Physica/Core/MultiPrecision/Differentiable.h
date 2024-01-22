@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 WeiBo He.
+ * Copyright 2023-2024 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -25,7 +25,7 @@ namespace Physica::Core {
     namespace Internal {
         template<class T, DiffMode M>
         class Traits<Differentiable<T, M>> {
-            static_assert(!Traits<T>::isDifferentiable, "[Error]: Nested Differentiable<> is not allowed");
+            static_assert(!T::isDifferentiable, "[Error]: Nested Differentiable<> is not allowed");
             using RealT = typename T::RealType;
             using ComplexT = typename T::ComplexType;
         public:

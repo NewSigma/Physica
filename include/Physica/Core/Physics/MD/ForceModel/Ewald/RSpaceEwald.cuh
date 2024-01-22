@@ -42,6 +42,7 @@ namespace Physica::Core {
         using typename Base::PositionMatrix;
         using DeviceLattice = device_obj<LatticeMatrix>;
         using SearchRangeType = typename device_obj<PeriodicCell<ScalarType, Dim>>::SearchRangeType;
+        using BornChargeArray = typename host_obj::BornChargeArray;
         constexpr static size_t ErfcTableSize = host_obj::ErfcTableSize;
         constexpr static double ErfcTableStep = host_obj::ErfcTableStep;
         constexpr static double SumPrec = host_obj::SumPrec;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 WeiBo He.
+ * Copyright 2023-2024 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -45,6 +45,9 @@ namespace Physica::Core {
         template<size_t Size>
         [[nodiscard]] DiffScalar pushOperation(const SIMD<ScalarType, Size>& simd, ExpressionType source);
 
+        template<class... Args>
+        SegmentType& pushSegment(Args&&... args);
+
         void reverse();
         void reverse(DiffScalar from);
         void reverse(DiffScalar from, DiffScalar to);
@@ -72,7 +75,6 @@ namespace Physica::Core {
         template<class... Args>
         inline void pushOperandImpl(DiffScalar* p, DiffScalar operand, Args... args);
         void pushOperandImpl([[maybe_unused]] DiffScalar* p) {}
-        void pushSegment(SegmentType segment);
         [[nodiscard]] static DiffRecord makeSetOpNode(const Utils::Array<DiffRecord>& records);
     };
 
@@ -113,7 +115,7 @@ namespace Physica::Core {
     DiffTracer<ScalarType>::pushOperation(ScalarType value, ExpressionType source) {
         assert(checkLastOpDone() && "[Error]: New record cannot begin unless last record is done");
         if (traceList.empty() || traceList.back().full())
-            pushSegment(SegmentType{});
+            pushSegment();
         auto& segment = traceList.back();
         auto& records = segment.records;
         if (source == ExpressionType::Set)
@@ -137,11 +139,11 @@ namespace Physica::Core {
         assert(checkLastOpDone() && "[Error]: New record cannot begin unless last record is done");
         /* Allocate */ {
             if (traceList.empty())
-                pushSegment(SegmentType{});
+                pushSegment();
             auto& segment = traceList.back();
             const bool isSpaceEnough = segment.getLength() + Size <= segment.getCapacity();
             if (!isSpaceEnough)
-                pushSegment(SegmentType{});
+                pushSegment();
         }
 
         auto& segment = traceList.back();
@@ -175,6 +177,14 @@ namespace Physica::Core {
         empty.store(pGrad);
         grads.setLength(newNumRecord);
         return DiffScalar(pValue, pGrad);
+    }
+
+    template<class ScalarType>
+    template<class... Args>
+    typename DiffTracer<ScalarType>::SegmentType& DiffTracer<ScalarType>::pushSegment(Args&&... args) {
+        if (!traceList.empty())
+            traceList.back().squeeze();
+        return traceList.emplace_back(SegmentType(std::forward<Args>(args)...));
     }
 
     template<class ScalarType>
@@ -282,9 +292,9 @@ namespace Physica::Core {
         
         const bool isSmallSize = size < SegmentType::DefaultSize;
         if (isSmallSize)
-            pushSegment(SegmentType{});
+            pushSegment();
         else
-            pushSegment(SegmentType(size));
+            pushSegment(size);
     }
 
     template<class ScalarType>
@@ -329,13 +339,6 @@ namespace Physica::Core {
     DiffTracer<ScalarType>& DiffTracer<ScalarType>::getInstance() noexcept {
         thread_local static DiffTracer<ScalarType> instance{};
         return instance;
-    }
-
-    template<class ScalarType>
-    void DiffTracer<ScalarType>::pushSegment(SegmentType segment) {
-        if (!traceList.empty())
-            traceList.back().squeeze();
-        traceList.emplace_back(std::move(segment));
     }
 
     template<class ScalarType>
