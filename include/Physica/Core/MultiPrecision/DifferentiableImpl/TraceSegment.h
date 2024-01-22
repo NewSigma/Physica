@@ -44,6 +44,7 @@ namespace Physica::Core {
         VectorType grads;
     public:
         explicit TraceSegment(size_t size = DefaultSize);
+        TraceSegment(VectorType values_);
         TraceSegment(const TraceSegment&) = default;
         TraceSegment(TraceSegment&&) noexcept = default;
         ~TraceSegment() = default;
@@ -87,6 +88,13 @@ namespace Physica::Core {
         operands.reserve(3 * size); //MulAdd operation is 3-operand
         values.reserve(size);
         grads.reserve(size);
+    }
+
+    template<class ScalarType>
+    TraceSegment<ScalarType>::TraceSegment(VectorType values_) : values(std::move(values_)) {
+        const size_t length = values.getLength();
+        records.resize(length, DiffRecord{0, ExpressionType::Set});
+        grads.resize(length, ScalarType(0));
     }
 
     template<class ScalarType>

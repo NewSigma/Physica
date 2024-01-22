@@ -146,6 +146,16 @@ namespace Physica::Core {
     }
 
     template<class T, int Option, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn, class Allocator>
+    template<class Distribution, class RandomGenerator>
+    inline DenseMatrix<T, Option, Row, Column, MaxRow, MaxColumn, Allocator>
+    DenseMatrix<T, Option, Row, Column, MaxRow, MaxColumn, Allocator>::random_any(
+            size_t row, size_t column, Distribution& dist, RandomGenerator& gen) {
+        DenseMatrix result(row, column);
+        result.random_any(dist, gen);
+        return result;
+    }
+
+    template<class T, int Option, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn, class Allocator>
     template<class VectorType>
     std::pair<DenseMatrix<T, Option, Row, Column, MaxRow, MaxColumn, Allocator>, DenseMatrix<T, Option, Row, Column, MaxRow, MaxColumn, Allocator>>
     DenseMatrix<T, Option, Row, Column, MaxRow, MaxColumn, Allocator>::meshgrid(

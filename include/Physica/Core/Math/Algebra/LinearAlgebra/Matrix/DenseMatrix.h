@@ -124,6 +124,8 @@ namespace Physica::Core {
         [[nodiscard]] inline static DenseMatrix random_uniform(size_t row, size_t column, RandomGenerator& gen);
         template<class RandomGenerator>
         [[nodiscard]] inline static DenseMatrix random_normal(size_t row, size_t column, RandomGenerator& gen);
+        template<class Distribution, class RandomGenerator>
+        [[nodiscard]] inline static DenseMatrix random_any(size_t row, size_t column, Distribution& dist, RandomGenerator& gen);
         template<class VectorType>
         [[nodiscard]] static std::pair<DenseMatrix, DenseMatrix> meshgrid(const LValueVector<VectorType>& vecInCols, const LValueVector<VectorType>& vecInRows);
     private:
