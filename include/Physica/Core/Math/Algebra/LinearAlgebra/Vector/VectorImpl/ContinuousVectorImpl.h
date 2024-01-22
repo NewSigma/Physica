@@ -192,10 +192,13 @@ namespace Physica::Core {
     bool ContinuousVector<Derived>::checkContinuous() const {
         if constexpr (isReverseDiff) {
             const ScalarType i0 = (*this)[0];
+            const auto* pValue = i0.value_ptr();
+            const auto* pGrad = i0.grad_ptr();
             for (size_t i = 1; i < Base::getLength(); ++i) {
-                if ((*this)[i].value_ptr() != i0.value_ptr() + i)
+                const ScalarType& elem = (*this)[i];
+                if (elem.value_ptr() != pValue + i)
                     return false;
-                if ((*this)[i].grad_ptr() != i0.grad_ptr() + i)
+                if (elem.grad_ptr() != pGrad + i)
                     return false;
             }
         }

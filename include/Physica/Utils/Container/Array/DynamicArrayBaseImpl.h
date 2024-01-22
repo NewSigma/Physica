@@ -115,6 +115,17 @@ namespace Physica::Utils::Internal {
             alloc.destroy(arr + i);
         length = 0;
     }
+    /**
+     * Low level api. Designed for performance. Elements between old length and \param size have not allocated. DO NOT try to visit them.
+     */
+    template<class Derived, class Allocator>
+    inline void DynamicArrayBase<Derived, Allocator>::setLength(size_t size) {
+        assert(size <= Base::getDerived().getCapacity() && "[Error]: Requiring more elements than the array have");
+        if constexpr (!std::is_trivial<ValueType>::value) {
+            assert(length <= size && "[Error]: setLength() cannot destruct unused elements, memory leak is expected");
+        }
+        length = size;
+    }
 
     template<class Derived, class Allocator>
     void DynamicArrayBase<Derived, Allocator>::swap(DynamicArrayBase& __restrict array) noexcept {

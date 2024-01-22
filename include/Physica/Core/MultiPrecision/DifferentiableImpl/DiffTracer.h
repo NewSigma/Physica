@@ -48,11 +48,14 @@ namespace Physica::Core {
         template<class... Args>
         SegmentType& pushSegment(Args&&... args);
 
-        void reverse();
-        void reverse(DiffScalar from);
         void reverse(DiffScalar from, DiffScalar to);
-        inline void zero_grad(DiffScalar from);
+        void reverse_from(DiffScalar from);
+        void reverse_to(DiffScalar to);
+        void reverse();
         void zero_grad(DiffScalar from, DiffScalar to);
+        inline void zero_grad_from(DiffScalar from);
+        inline void zero_grad_to(DiffScalar to);
+        void zero_grad();
         void forget(DiffScalar from);
         void reserve(size_t size);
         inline void clear();
@@ -188,30 +191,6 @@ namespace Physica::Core {
     }
 
     template<class ScalarType>
-    void DiffTracer<ScalarType>::reverse() {
-        assert(!traceList.empty() && "[Error]: No record found");
-        const auto rend = traceList.rend();
-        for (auto ite = traceList.rbegin(); ite != rend; ++ite)
-            (*ite).reverse();
-    }
-
-    template<class ScalarType>
-    void DiffTracer<ScalarType>::reverse(DiffScalar from) {
-        assert(!traceList.empty() && "[Error]: No record found");
-        bool foundBeginSegment = false;
-        const auto rend = traceList.rend();
-        for (auto ite = traceList.rbegin(); ite != rend; ++ite) {
-            auto& segment = *ite;
-            foundBeginSegment |= segment.isFound(from);
-            if (!foundBeginSegment)
-                continue;
-
-            segment.reverse(from);
-        }
-        assert(foundBeginSegment && "[Error]: Cannot find begin record, maybe it is on another thread?");
-    }
-
-    template<class ScalarType>
     void DiffTracer<ScalarType>::reverse(DiffScalar from, DiffScalar to) {
         assert(!traceList.empty() && "[Error]: No record found");
         bool foundBeginSegment = false, foundFinalSegment = false;
@@ -232,26 +211,50 @@ namespace Physica::Core {
     }
 
     template<class ScalarType>
-    inline void DiffTracer<ScalarType>::zero_grad(DiffScalar from) {
+    void DiffTracer<ScalarType>::reverse_from(DiffScalar from) {
         assert(!traceList.empty() && "[Error]: No record found");
         bool foundBeginSegment = false;
-        const auto end = traceList.end();
-        for (auto ite = traceList.begin(); ite != end; ++ite) {
+        const auto rend = traceList.rend();
+        for (auto ite = traceList.rbegin(); ite != rend; ++ite) {
             auto& segment = *ite;
             foundBeginSegment |= segment.isFound(from);
             if (!foundBeginSegment)
                 continue;
-            segment.zero_grad(from);
+
+            segment.reverse_from(from);
         }
         assert(foundBeginSegment && "[Error]: Cannot find begin record, maybe it is on another thread?");
+    }
+
+    template<class ScalarType>
+    void DiffTracer<ScalarType>::reverse_to(DiffScalar to) {
+        assert(!traceList.empty() && "[Error]: No record found");
+        bool foundFinalSegment = false;
+        const auto rend = traceList.rend();
+        for (auto ite = traceList.rbegin(); ite != rend; ++ite) {
+            auto& segment = *ite;
+            foundFinalSegment |= segment.isFound(to);
+            segment.reverse_to(to);
+            if (foundFinalSegment)
+                break;
+        }
+        assert(foundFinalSegment && "[Error]: Cannot find final record, maybe it is on another thread?");
+    }
+
+    template<class ScalarType>
+    void DiffTracer<ScalarType>::reverse() {
+        assert(!traceList.empty() && "[Error]: No record found");
+        const auto rend = traceList.rend();
+        for (auto ite = traceList.rbegin(); ite != rend; ++ite)
+            (*ite).reverse();
     }
 
     template<class ScalarType>
     void DiffTracer<ScalarType>::zero_grad(DiffScalar from, DiffScalar to) {
         assert(!traceList.empty() && "[Error]: No record found");
         bool foundBeginSegment = false, foundFinalSegment = false;
-        const auto end = traceList.end();
-        for (auto ite = traceList.begin(); ite != end; ++ite) {
+        const auto rend = traceList.rend();
+        for (auto ite = traceList.rbegin(); ite != rend; ++ite) {
             auto& segment = *ite;
             foundBeginSegment |= segment.isFound(from);
             if (!foundBeginSegment)
@@ -264,6 +267,44 @@ namespace Physica::Core {
         }
         assert(foundBeginSegment && "[Error]: Cannot find begin record, maybe it is on another thread?");
         assert(foundFinalSegment && "[Error]: Cannot find final record, maybe it is on another thread?");
+    }
+
+    template<class ScalarType>
+    inline void DiffTracer<ScalarType>::zero_grad_from(DiffScalar from) {
+        assert(!traceList.empty() && "[Error]: No record found");
+        bool foundBeginSegment = false;
+        const auto rend = traceList.rend();
+        for (auto ite = traceList.rbegin(); ite != rend; ++ite) {
+            auto& segment = *ite;
+            foundBeginSegment |= segment.isFound(from);
+            if (!foundBeginSegment)
+                continue;
+            segment.zero_grad_from(from);
+        }
+        assert(foundBeginSegment && "[Error]: Cannot find begin record, maybe it is on another thread?");
+    }
+
+    template<class ScalarType>
+    inline void DiffTracer<ScalarType>::zero_grad_to(DiffScalar to) {
+        assert(!traceList.empty() && "[Error]: No record found");
+        bool foundFinalSegment = false;
+        const auto rend = traceList.rend();
+        for (auto ite = traceList.rbegin(); ite != rend; ++ite) {
+            auto& segment = *ite;
+            foundFinalSegment |= segment.isFound(to);
+            segment.zero_grad_to(to);
+            if (foundFinalSegment)
+                break;
+        }
+        assert(foundFinalSegment && "[Error]: Cannot find final record, maybe it is on another thread?");
+    }
+
+    template<class ScalarType>
+    void DiffTracer<ScalarType>::zero_grad() {
+        assert(!traceList.empty() && "[Error]: No record found");
+        const auto rend = traceList.rend();
+        for (auto ite = traceList.rbegin(); ite != rend; ++ite)
+            (*ite).zero_grad();
     }
 
     template<class ScalarType>

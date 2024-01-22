@@ -51,12 +51,7 @@ namespace Physica::Utils::Internal {
         void removeAt(size_t index);
         void clear() noexcept;
         /* Setters */
-        /**
-         * Low level api. Designed for performance.
-         * \size must larger than current length. Because we can not delete the elements we do not need if not.
-         * Elements between old length and \size have not allocated. DO NOT try to visit them.
-         */
-        void setLength(size_t size) { assert(length <= size && size <= Base::getDerived().getCapacity()); length = size; }
+        inline void setLength(size_t size);
         /* Getters */
         [[nodiscard]] __host__ __device__ pointer data() noexcept { return arr; }
         [[nodiscard]] __host__ __device__ const_pointer data() const noexcept { return arr; }

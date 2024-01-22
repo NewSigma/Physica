@@ -86,10 +86,10 @@ namespace Physica::Core {
             }
         }
         else {
-            const size_t batchSizePerThread = opt.getBatchSize() / Executor::getNumThread();
-            auto& net_tracer = DiffTracer<PlainScalar>::getInstance();
+            const size_t numThread = Executor::getNumThread();
+            const size_t batchSizePerThread = (opt.getBatchSize() + numThread - 1) / numThread;
             std::mutex mutex{};
-            Executor::parallel_for([this, batchSizePerThread, &mutex, &net_tracer, &dataset](unsigned int) {
+            Executor::parallel_for([this, batchSizePerThread, &mutex, &dataset](unsigned int) {
                 Derived tempNet = copy();
                 auto dist = std::uniform_int_distribution<size_t>(0, dataset.getSize() - 1);
                 auto& gen = RandomPoolType::getGen();
@@ -98,15 +98,15 @@ namespace Physica::Core {
                 for (size_t _ = 0; _ < batchSizePerThread; ++_) {
                     AutoDiffGuard<PlainScalar> guard{};
                     const size_t index = dist(gen);
-                    tempNet.loss(samples[index], labels[index]).reverse(guard.getNode());
+                    tempNet.loss(samples[index], labels[index]).reverse_to(guard.getNode());
                 }
                 auto& tracer = DiffTracer<PlainScalar>::getInstance();
                 std::lock_guard locker(mutex);
                 tracer.reverse(); // TODO: reverse on net_tracer should lock mutex of net_tracer
-            }, Executor::getNumThread(), Executor::getNumThread()).wait();
+            }, numThread, numThread).wait();
         }
         opt.step();
-        DiffTracer<PlainScalar>::getInstance().zero_grad(net_guard->getNode());
+        DiffTracer<PlainScalar>::getInstance().zero_grad_to(net_guard->getNode());
     }
 
     template<class Derived>

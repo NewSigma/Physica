@@ -53,11 +53,14 @@ namespace Physica::Core {
         [[nodiscard]] inline DiffScalar operator[](size_t index);
         [[nodiscard]] inline const DiffScalar operator[](size_t index) const;
         /* Operations */
+        inline void reverse(DiffScalar from, DiffScalar to);
+        void reverse_from(DiffScalar from) { reverse(makeFromIndex(from), 0); }
+        void reverse_to(DiffScalar to) { reverse(getLength() - 1, makeToIndex(to)); }
         inline void reverse();
-        void reverse(DiffScalar from);
-        void reverse(DiffScalar from, DiffScalar to);
-        void zero_grad(DiffScalar from);
         void zero_grad(DiffScalar from, DiffScalar to);
+        inline void zero_grad_from(DiffScalar from);
+        inline void zero_grad_to(DiffScalar to);
+        inline void zero_grad() { grads = ScalarType(0); }
         void forget(DiffScalar from);
         void squeeze();
         void swap(TraceSegment& __restrict obj) noexcept;
@@ -77,6 +80,8 @@ namespace Physica::Core {
         void reverse(size_t fromIndex, size_t toIndex);
         template<size_t Size>
         void reverseMulAdd(DiffScalar firstOpX, DiffScalar firstOpY, DiffScalar firstOpZ, size_t traceId);
+        [[nodiscard]] size_t makeFromIndex(DiffScalar from);
+        [[nodiscard]] size_t makeToIndex(DiffScalar to);
         /* Friends */
         friend class DiffTracer<ScalarType>;
     };
@@ -108,60 +113,35 @@ namespace Physica::Core {
     }
 
     template<class ScalarType>
+    inline void TraceSegment<ScalarType>::reverse(DiffScalar from, DiffScalar to) {
+        assert(!empty());
+        reverse(makeFromIndex(from), makeToIndex(to));
+    }
+
+    template<class ScalarType>
     inline void TraceSegment<ScalarType>::reverse() {
         assert(!empty());
         reverse(getLength() - 1, 0);
     }
 
     template<class ScalarType>
-    void TraceSegment<ScalarType>::reverse(DiffScalar from) {
-        assert(!empty());
-        size_t fromIndex = find(from);
-        const bool isFromNotFound = fromIndex >= getLength();
-        if (isFromNotFound)
-            fromIndex = getLength() - 1;
-        reverse(fromIndex, 0);
-    }
-
-    template<class ScalarType>
-    void TraceSegment<ScalarType>::reverse(DiffScalar from, DiffScalar to) {
-        assert(!empty());
-        size_t fromIndex = find(from);
-        const bool isFromNotFound = fromIndex >= getLength();
-        if (isFromNotFound)
-            fromIndex = getLength() - 1;
-
-        size_t toIndex = find(to);
-        const bool isToNotFound = toIndex >= getLength();
-        if (isToNotFound)
-            toIndex = 0;
-
-        reverse(fromIndex, toIndex);
-    }
-
-    template<class ScalarType>
-    void TraceSegment<ScalarType>::zero_grad(DiffScalar from) {
-        size_t fromIndex = find(from);
-        const bool isFromNotFound = fromIndex >= getLength();
-        if (isFromNotFound)
-            fromIndex = 0;
-        auto segment = grads.segment(fromIndex, getLength());
+    void TraceSegment<ScalarType>::zero_grad(DiffScalar from, DiffScalar to) {
+        const size_t fromIndex = makeFromIndex(from);
+        const size_t toIndex = makeToIndex(to);
+        assert(toIndex <= fromIndex && "[Error]: Invalid range");
+        auto segment = grads.segment(toIndex, fromIndex + 1);
         segment = ScalarType(0);
     }
 
     template<class ScalarType>
-    void TraceSegment<ScalarType>::zero_grad(DiffScalar from, DiffScalar to) {
-        size_t fromIndex = find(from);
-        const bool isFromNotFound = fromIndex >= getLength();
-        if (isFromNotFound)
-            fromIndex = 0;
+    inline void TraceSegment<ScalarType>::zero_grad_from(DiffScalar from) {
+        auto segment = grads.segment(0, makeFromIndex(from) + 1);
+        segment = ScalarType(0);
+    }
 
-        size_t toIndex = find(to);
-        const bool isToNotFound = toIndex >= getLength();
-        if (isToNotFound)
-            toIndex = getLength();
-        assert(fromIndex < toIndex && "[Error]: Invalid range");
-        auto segment = grads.segment(fromIndex, toIndex);
+    template<class ScalarType>
+    inline void TraceSegment<ScalarType>::zero_grad_to(DiffScalar to) {
+        auto segment = grads.segment(makeToIndex(to), getLength());
         segment = ScalarType(0);
     }
 
@@ -249,8 +229,8 @@ namespace Physica::Core {
 
     template<class ScalarType>
     void TraceSegment<ScalarType>::reverse(size_t fromIndex, size_t toIndex) {
-        assert(toIndex <= fromIndex && "[Error]: Unexpected index");
-        for (size_t i = fromIndex; i >= toIndex && i <= fromIndex; --i) {
+        assert(toIndex <= fromIndex && "[Error]: Invalid index");
+        for (size_t i = fromIndex; toIndex <= i && i <= fromIndex; --i) {
             const DiffRecord record = records[i];
             if (record.source == ExpressionType::Set) {
                 i = record.idFirstOperand;
@@ -330,7 +310,7 @@ namespace Physica::Core {
                         if constexpr (ScalarType::Option == Double) {
                             DiffScalar operandZ = operands[idFirstOperand + 2];
                             i -= 1;
-                            [[maybe_unused]] const bool isInRange = i >= toIndex && i <= fromIndex;
+                            [[maybe_unused]] const bool isInRange = toIndex <= i && i <= fromIndex;
                             assert(isInRange && "[Error]: Unexpected id");
                             reverseMulAdd<2>(operandX, operandY, operandZ, i);
                         }
@@ -341,7 +321,7 @@ namespace Physica::Core {
                     case ExpressionType::MulAdd4: {
                         DiffScalar operandZ = operands[idFirstOperand + 2];
                         i -= 3;
-                        [[maybe_unused]] const bool isInRange = i >= toIndex && i <= fromIndex;
+                        [[maybe_unused]] const bool isInRange = toIndex <= i && i <= fromIndex;
                         assert(isInRange && "[Error]: Unexpected id");
                         reverseMulAdd<4>(operandX, operandY, operandZ, i);
                         continue;
@@ -349,7 +329,7 @@ namespace Physica::Core {
                     case ExpressionType::MulAdd8: {
                         DiffScalar operandZ = operands[idFirstOperand + 2];
                         i -= 7;
-                        [[maybe_unused]] const bool isInRange = i >= toIndex && i <= fromIndex;
+                        [[maybe_unused]] const bool isInRange = toIndex <= i && i <= fromIndex;
                         assert(isInRange && "[Error]: Unexpected id");
                         reverseMulAdd<8>(operandX, operandY, operandZ, i);
                         continue;
@@ -383,5 +363,23 @@ namespace Physica::Core {
         valueY.store(firstOpY.value_ptr());
         gradX.store(firstOpX.grad_ptr());
         gradY.store(firstOpY.grad_ptr());
+    }
+
+    template<class ScalarType>
+    size_t TraceSegment<ScalarType>::makeFromIndex(DiffScalar from) {
+        size_t fromIndex = find(from);
+        const bool isFromNotFound = fromIndex >= getLength();
+        if (isFromNotFound)
+            fromIndex = getLength() - 1;
+        return fromIndex;
+    }
+
+    template<class ScalarType>
+    size_t TraceSegment<ScalarType>::makeToIndex(DiffScalar to) {
+        size_t toIndex = find(to);
+        const bool isToNotFound = toIndex >= getLength();
+        if (isToNotFound)
+            toIndex = 0;
+        return toIndex;
     }
 }
