@@ -171,10 +171,11 @@ namespace Physica::Gui {
             if (method == BandConnectMethod::Predict) {
                 const bool isLastFreqReady = i != 0;
                 if (isLastFreqReady != 0) {
-                    const VectorType predictFreq = lastFreq + lastDeltaFreq;
                     const bool isLastDeltaFreqReady = i > 1;
-                    if (isLastDeltaFreqReady)
+                    if (isLastDeltaFreqReady) {
+                        const VectorType predictFreq = lastFreq + lastDeltaFreq;
                         sortFreq(freq, predictFreq);
+                    }
                     lastDeltaFreq = freq - lastFreq;
                 }
                 lastFreq = freq;

@@ -56,7 +56,7 @@ namespace Physica::Core {
         template<class Executor>
         [[nodiscard]] Vector<ScalarType> force(const MDCellType& cell) const;
         template<class VectorType, class Executor>
-        void forceAsync(const MDCellType& cell, ContinuousVector<VectorType>& result) const;
+        void forceAsync(const MDCellType& cell, ContinuousVector<VectorType>& result) const noexcept;
         template<class Executor>
         [[nodiscard]] Vector<ScalarType> force_short(const MDCellType& cell) const { return force<Executor>(cell); }
         template<class Executor>
@@ -95,7 +95,7 @@ namespace Physica::Core {
 
     template<class ScalarType>
     template<class VectorType, class Executor>
-    void QEModel<ScalarType>::forceAsync(const MDCellType& cell, ContinuousVector<VectorType>& result) const {
+    void QEModel<ScalarType>::forceAsync(const MDCellType& cell, ContinuousVector<VectorType>& result) const noexcept {
         assert(cell.getNumParticle() == getNumAtom());
         try {
             auto inputTmp = Utils::TempFile("/tmp/tmpXXXXXX");
@@ -118,7 +118,10 @@ namespace Physica::Core {
             PWscfOut out_scf(outputTmp.getName(), getNumAtom());
             result.getDerived() = out_scf.getForce();
         }
-        catch (std::exception& e) { throw e; }
+        catch (std::exception& e) {
+            fprintf(stderr, "%s\n", e.what());
+            exit(EXIT_FAILURE);
+        }
     }
 
     template<class ScalarType>

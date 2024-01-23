@@ -22,30 +22,33 @@
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h"
 
 namespace Physica::Core {
-    template<class ScalarType> class LinearLayer;
+    template<class ScalarType, bool WithBias = true> class LinearLayer;
 
     namespace Internal {
-        template<class T>
-        class Traits<LinearLayer<T>> {
+        template<class T, bool B>
+        class Traits<LinearLayer<T, B>> {
         public:
             using ScalarType = T;
+            constexpr static bool WithBias = B;
         };
     }
 
-    template<class ScalarType>
-    class LinearLayer : public LayerBase<LinearLayer<ScalarType>> {
-        using Base = LayerBase<LinearLayer<ScalarType>>;
+    template<class ScalarType, bool WithBias>
+    class LinearLayer : public LayerBase<LinearLayer<ScalarType, WithBias>> {
+        using This = LinearLayer<ScalarType, WithBias>;
+        using Base = LayerBase<This>;
         using PlainScalar = typename ScalarType::PlainScalar;
         using VectorType = typename Base::VectorType;
         using MatrixType = DenseMatrix<ScalarType, MatrixOption::Row | MatrixOption::Vector>;
+        using BiasType = typename std::conditional<WithBias, VectorType, PlainStruct<void>>::type;
 
         MatrixType weights;
-        VectorType bias;
+        BiasType bias;
     public:
         LinearLayer() = default;
         LinearLayer(size_t inputDim, size_t outputDim);
         template<class OtherScalar>
-        LinearLayer(const LinearLayer<OtherScalar>& layer);
+        LinearLayer(const LinearLayer<OtherScalar, WithBias>& layer);
         LinearLayer(const LinearLayer&) = default;
         LinearLayer(LinearLayer&&) noexcept = default;
         ~LinearLayer() = default;
@@ -68,69 +71,82 @@ namespace Physica::Core {
         [[nodiscard]] size_t getInputDim() const noexcept { return weights.getColumn(); }
         [[nodiscard]] size_t getOutputDim() const noexcept { return weights.getRow(); }
         [[nodiscard]] const MatrixType& getWeights() const noexcept { return weights; }
-        [[nodiscard]] const VectorType& getBias() const noexcept { return bias; }
+        [[nodiscard]] const BiasType& getBias() const noexcept { return bias; }
     };
 
-    template<class ScalarType>
-    LinearLayer<ScalarType>::LinearLayer(size_t inputDim, size_t outputDim) : weights(outputDim, inputDim), bias(outputDim) {}
-
-    template<class ScalarType>
-    template<class OtherScalar>
-    LinearLayer<ScalarType>::LinearLayer(const LinearLayer<OtherScalar>& layer)
-            : weights(layer.getWeights()), bias(layer.getBias()) {}
-
-    template<class ScalarType>
-    inline typename LinearLayer<ScalarType>::VectorType LinearLayer<ScalarType>::forward(const VectorType& x) const {
-        assert(x.getLength() == getInputDim() && "[Error]: Data dim and required input dim must be equal");
-        return weights * x + bias;
+    template<class ScalarType, bool WithBias>
+    LinearLayer<ScalarType, WithBias>::LinearLayer(size_t inputDim, size_t outputDim)
+            : weights(outputDim, inputDim) {
+        if constexpr (WithBias)
+            bias.resize(outputDim);
     }
 
-    template<class ScalarType>
-    LinearLayer<ScalarType> LinearLayer<ScalarType>::copy() const {
+    template<class ScalarType, bool WithBias>
+    template<class OtherScalar>
+    LinearLayer<ScalarType, WithBias>::LinearLayer(const LinearLayer<OtherScalar, WithBias>& layer)
+            : weights(layer.getWeights()), bias(layer.getBias()) {}
+
+    template<class ScalarType, bool WithBias>
+    inline typename LinearLayer<ScalarType, WithBias>::VectorType LinearLayer<ScalarType, WithBias>::forward(const VectorType& x) const {
+        assert(x.getLength() == getInputDim() && "[Error]: Data dim and required input dim must be equal");
+        if constexpr (WithBias)
+            return weights * x + bias;
+        else
+            return weights * x;
+    }
+
+    template<class ScalarType, bool WithBias>
+    LinearLayer<ScalarType, WithBias> LinearLayer<ScalarType, WithBias>::copy() const {
         LinearLayer result{};
         result.weights = weights.copy();
-        result.bias = bias.copy();
+        if constexpr (WithBias)
+            result.bias = bias.copy();
         return result;
     }
 
-    template<class ScalarType>
+    template<class ScalarType, bool WithBias>
     template<class RandomGenerator>
-    void LinearLayer<ScalarType>::random_normal(RandomGenerator& gen) {
+    void LinearLayer<ScalarType, WithBias>::random_normal(RandomGenerator& gen) {
         weights.random_normal(gen);
-        bias.random_normal(gen);
+        if constexpr (WithBias)
+            bias.random_normal(gen);
     }
 
-    template<class ScalarType>
+    template<class ScalarType, bool WithBias>
     template<class RandomGenerator>
-    void LinearLayer<ScalarType>::random_xavier_uniform(PlainScalar gain, RandomGenerator& gen) {
+    void LinearLayer<ScalarType, WithBias>::random_xavier_uniform(PlainScalar gain, RandomGenerator& gen) {
         using TrivialType = typename ScalarType::TrivialType;
         const TrivialType factor = gain * sqrt(PlainScalar(6) / PlainScalar(getInputDim() + getOutputDim()));
         std::uniform_real_distribution<TrivialType> dist(-factor, factor);
         weights.random_any(dist, gen);
-        bias.random_any(dist, gen);
+        if constexpr (WithBias)
+            bias.random_any(dist, gen);
     }
 
-    template<class ScalarType>
+    template<class ScalarType, bool WithBias>
     template<class RandomGenerator>
-    void LinearLayer<ScalarType>::random_xavier_normal(PlainScalar gain, RandomGenerator& gen) {
+    void LinearLayer<ScalarType, WithBias>::random_xavier_normal(PlainScalar gain, RandomGenerator& gen) {
         using TrivialType = typename ScalarType::TrivialType;
         const TrivialType deviation = gain * sqrt(PlainScalar(2) / PlainScalar(getInputDim() + getOutputDim()));
         std::normal_distribution<TrivialType> dist(0, deviation);
         weights.random_any(dist, gen);
-        bias.random_any(dist, gen);
+        if constexpr (WithBias)
+            bias.random_any(dist, gen);
     }
 
-    template<class ScalarType>
+    template<class ScalarType, bool WithBias>
     template<class Distribution, class RandomGenerator>
-    void LinearLayer<ScalarType>::random_any(Distribution& dist, RandomGenerator& gen) {
+    void LinearLayer<ScalarType, WithBias>::random_any(Distribution& dist, RandomGenerator& gen) {
         weights.random_any(dist, gen);
-        bias.random_any(dist, gen);
+        if constexpr (WithBias)
+            bias.random_any(dist, gen);
     }
 
-    template<class ScalarType>
-    void LinearLayer<ScalarType>::swap(LinearLayer& __restrict obj) noexcept {
+    template<class ScalarType, bool WithBias>
+    void LinearLayer<ScalarType, WithBias>::swap(LinearLayer& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         weights.swap(obj.weights);
-        bias.swap(obj.bias);
+        if constexpr (WithBias)
+            bias.swap(obj.bias);
     }
 }
