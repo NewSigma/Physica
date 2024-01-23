@@ -71,6 +71,9 @@ namespace Physica::Core {
         using Base::getUnitCellDOF;
         using Base::getSuperSize;
         using Base::getNumCell;
+        /* Static members */
+        static void read(RSpaceFCGrid& rSpaceFC, const H5Location& loc, const char* name);
+        static void write(const RSpaceFCGrid& rSpaceFC, H5Location& loc, const char* name);
     private:
         PositionMatrix makeWignerSeitzRadius() const;
         GridStorage<DenseMatrix<ScalarType>> makeWignerSeitzWeights() const;
@@ -177,6 +180,44 @@ namespace Physica::Core {
         }
         assert(index == ResultSize && "[Error]: Wrong result");
         return wignerSeitzRadius;
+    }
+
+    template<class ScalarType>
+    void FrozenPhonon<ScalarType>::read(RSpaceFCGrid& rSpaceFC, const H5Location& loc, const char* name) {
+        const auto group = loc.openGroup(name);
+        unsigned char superSize[Dim];
+        auto attr = group.openAttribute("SuperSize");
+        attr.read(H5::PredType::NATIVE_UCHAR, superSize);
+        const auto gridDim = Index3D{superSize[0], superSize[1], superSize[2]};
+        rSpaceFC.resize(gridDim);
+
+        rSpaceFC.forIndexInGrid([&group, &rSpaceFC](Index3D index) {
+            char name[64]; // 64 shall be enough
+            sprintf(name, "%zu_%zu_%zu", index[0], index[1], index[2]);
+            rSpaceFC(index).read(group, name);
+        });
+    }
+
+    template<class ScalarType>
+    void FrozenPhonon<ScalarType>::write(const RSpaceFCGrid& rSpaceFC, H5Location& loc, const char* name) {
+        auto group = loc.createGroup(name);
+        const auto gridDim = rSpaceFC.getDim();
+        /* Write superSize */ {
+            unsigned char superSize[Dim];
+            for (unsigned int i = 0; i < Dim; ++i) {
+                assert(gridDim[i] <= std::numeric_limits<unsigned char>::max() && "[Error]: Unexpected large super cell");
+                superSize[i] = gridDim[i];
+            }
+            const auto space = H5DataSpace<1>(Dim);
+            auto attr = group.createAttribute("SuperSize", H5::PredType::NATIVE_UCHAR, space);
+            attr.write(H5::PredType::NATIVE_UCHAR, superSize);
+        }
+
+        rSpaceFC.forIndexInGrid([&group, &rSpaceFC](Index3D index) {
+            char name[64]; // 64 shall be enough
+            sprintf(name, "%zu_%zu_%zu", index[0], index[1], index[2]);
+            rSpaceFC(index).write(group, name);
+        });
     }
 
     template<class ScalarType>
