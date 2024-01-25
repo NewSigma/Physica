@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 WeiBo He.
+ * Copyright 2023-2024 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -67,9 +67,9 @@ int main() {
     Vector<ScalarType> corr_var(CorrStep, 0);
     {
         constexpr double factor = 1.0 / (numMolecular * mass * mass) * (PhyConst<AU>::bohrToAngstorm(1) * PhyConst<AU>::bohrToAngstorm(1)) / (PhyConst<AU>::timeToSecond(1) * 1E12 * PhyConst<AU>::timeToSecond(1) * 1E12);
-        auto& gen = RandomPoolType::getGen();
-        RPMD<ScalarType> rpmd = makeSystem(gen);
-        rpmd.initMomentum(gen);
+        auto& pool = RandomPoolType::getInstance();
+        RPMD<ScalarType> rpmd = makeSystem(pool.getGen());
+        rpmd.initMomentum(pool.getGen());
 
         ForceModel forceModel(pair_cutoff);
         KineticModel kineticModel(temperatureT, numReplica);
@@ -80,11 +80,13 @@ int main() {
         for (unsigned int i = 0; i < 6; ++i) {
             temp = ScalarType(0);
             for (unsigned int j = 0; j < 100; ++j) {
-                rpmd.nvt_step_for<ThermostatType, RandomPoolType, KineticModel, ForceModel, ThreadExecutor>(PhyConst<AU>::secondToTime(2 * 1E-12), thermo, kineticModel, forceModel);
+                rpmd.nvt_step_for<ThermostatType, RandomPoolType, KineticModel, ForceModel, ThreadExecutor>(
+                        PhyConst<AU>::secondToTime(2 * 1E-12), thermo, pool, kineticModel, forceModel);
                 const auto p0 = ringPolymer.makeCentroidMomentum();
                 for (unsigned int k = 0; k < CorrStep; ++k) {
                     toNextMean(temp[k], j, hadamard(ringPolymer.makeCentroidMomentum(), p0).sum() * factor);
-                    rpmd.nvt_step<ThermostatType, RandomPoolType, KineticModel, ForceModel, ThreadExecutor>(thermo, kineticModel, forceModel);
+                    rpmd.nvt_step<ThermostatType, RandomPoolType, KineticModel, ForceModel, ThreadExecutor>(
+                            thermo, pool, kineticModel, forceModel);
                 }
             }
             toNextVariance(corr_var, corr, i, temp);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 WeiBo He.
+ * Copyright 2023-2024 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -70,14 +70,15 @@ std::pair<ScalarType, ScalarType> calcPress(size_t numSystem, size_t numStep, Sc
     ForceModel forceModel(1.0);
     KineticModel kineticModel(latticeSize, collideFactor, temperatureT, numMolecular, 1, 100);
     kineticModel.updateMass(rpmd.getRingPolymer());
-    rpmd.initMomentum(RandomPoolType::getGen());
+    auto& pool = RandomPoolType::getInstance();
+    rpmd.initMomentum(pool.getGen());
 
     ScalarType mean = 0, variance = 0;
     for (size_t sys = 0; sys < numSystem; ++sys) {
         ScalarType temp = 0;
         for (size_t i = 0; i < numStep; ++i) {
             rpmd.nvt_step<ThermostatType, RandomPoolType, KineticModel, ForceModel, SequentialExecutor>(
-                    thermo, kineticModel, forceModel);
+                    thermo, pool, kineticModel, forceModel);
             toNextMean(temp, i, rpmd.makeStressClassical<ForceModel, SequentialExecutor>(forceModel)(0, 0));
         }
         toNextVariance(variance, mean, sys, temp);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 WeiBo He. All rights reserved.
+ * Copyright 2023-2024 WeiBo He. All rights reserved.
  *
  * This file is part of PhysicaNotes.
  */
@@ -123,7 +123,7 @@ Dataset makeDataset() {
 int main() {
     ThreadPool::numThreadRequired = 4;
 
-    auto& gen = RandomPoolType::getGen();
+    auto& gen = RandomPoolType::getInstance().getGen();
     const auto dataset = makeDataset();
     auto opt = Optimizer(0.01, batchSize);
     opt.recordBegin();

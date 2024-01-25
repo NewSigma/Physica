@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 WeiBo He.
+ * Copyright 2022-2024 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -107,7 +107,7 @@ MDCell<ScalarType> makeSystem(unsigned int cellSize, RandomGenerator& gen) {
 }
 
 int main() {
-    auto& gen = RandomPoolType::getGen();
+    auto& gen = RandomPoolType::getInstance().getGen();
     auto cell = makeSystem(2, gen);
     ForceModel::sortPosition(cell);
     ForceModel forceModel(cell, pair_cutoff, {});

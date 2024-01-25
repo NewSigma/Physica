@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 WeiBo He.
+ * Copyright 2023-2024 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -65,12 +65,12 @@ MDCellType makeSystem(std::mt19937& gen) {
 
 int main() {
     const double timeStep = timeStepLambda * (latticeSize / numMolecular) * std::sqrt(unitMassM / temperatureT);
-    auto& gen = RandomPoolType::getGen();
+    auto& pool = RandomPoolType::getInstance();
     KineticModel kineticModel(latticeSize, collideFactor, temperatureT, numMolecular, numReplica, maxHandleNum);
     ThermostatType thermo(temperatureT, thermostatTime);
 
-    MDType rpmd = MDType(makeSystem(gen), numReplica, numReplica, temperatureT, timeStep);
-    rpmd.initMomentum(gen);
+    MDType rpmd = MDType(makeSystem(pool.getGen()), numReplica, numReplica, temperatureT, timeStep);
+    rpmd.initMomentum(pool.getGen());
     kineticModel.updateMass(rpmd.getRingPolymer());
 
     MatrixType meanCorr(numMolecular, numReplica);
@@ -84,7 +84,7 @@ int main() {
         ScalarType temperature_sample = 0;
         for (size_t i = 0; i < numStep; ++i) {
             ForceModel forceModel{};
-            rpmd.nvt_step<ThermostatType, RandomPoolType, KineticModel, ForceModel, SequentialExecutor>(thermo, kineticModel, forceModel);
+            rpmd.nvt_step<ThermostatType, RandomPoolType, KineticModel, ForceModel, SequentialExecutor>(thermo, pool, kineticModel, forceModel);
             auto momentum = rpmd.getRingPolymer().asMatrix().topRows(numMolecular);
             for (size_t replica = 0; replica < numReplica; ++replica) {
                 auto col = temp.col(replica);

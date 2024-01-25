@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2023 WeiBo He.
+ * Copyright 2022-2024 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -106,12 +106,12 @@ MDCell<ScalarType> makeSystem(unsigned int cellSize, RandomGenerator& gen) {
  * [1] S. Habershon, T. E. Markland, and D. E. Manolopoulosa, J. Chem. Phys. 131, 024501(2009)
  */
 int main() {
-    auto& gen = RandomPoolType::getGen();
-    auto cell = makeSystem(2, gen);
+    auto& pool = RandomPoolType::getInstance();
+    auto cell = makeSystem(2, pool.getGen());
     ForceModel::sortPosition(cell);
     ForceModel forceModel(cell, pair_cutoff, RandomBatchEwald<ScalarType, RandomPoolType>(1000, 100));
     RPMD<ScalarType> rpmd(std::move(cell), numReplica, numContract, temperatureT, timeStep);
-    rpmd.initMomentum(gen);
+    rpmd.initMomentum(pool.getGen());
 
     constexpr double answer = PhyConst<AU>::angstormToBohr(0.978);
     ScalarType bond = 0;
@@ -123,6 +123,7 @@ int main() {
         rpmd.nvt_step_for<ThermostatType, RandomPoolType, KineticModel, decltype(forceModel), SequentialExecutor>(
             PhyConst<AU>::secondToTime(1 * 1E-12),
             thermo,
+            pool,
             kineticModel,
             forceModel);
         for (size_t i = 0; i < 100; ++i) {
@@ -135,7 +136,7 @@ int main() {
                 toNextMean(temp, 2 * j + 1, cell.minDistVector(numH + j, 2 * j + 1).norm());
             }
             toNextMean(bond, i, temp);
-            rpmd.nvt_step<ThermostatType, RandomPoolType, KineticModel, decltype(forceModel), SequentialExecutor>(thermo, kineticModel, forceModel);
+            rpmd.nvt_step<ThermostatType, RandomPoolType, KineticModel, decltype(forceModel), SequentialExecutor>(thermo, pool, kineticModel, forceModel);
         }
     }
     ThreadPool::getInstance().shouldExit();

@@ -103,13 +103,13 @@ namespace Physica::Core {
                  class KineticModel,
                  class ForceModel,
                  class Executor>
-        void nvt_step(const Thermostat& thermostat, KineticModel& kineticModel, ForceModel& forceModel);
+        void nvt_step(const Thermostat& thermostat, RandomPoolType& pool, KineticModel& kineticModel, ForceModel& forceModel);
         template<class Thermostat,
                  class RandomPoolType,
                  class KineticModel,
                  class ForceModel,
                  class Executor>
-        void nvt_step_for(ScalarType duration, const Thermostat& thermostat, KineticModel& kineticModel, ForceModel& forceModel);
+        void nvt_step_for(ScalarType duration, const Thermostat& thermostat, RandomPoolType& pool, KineticModel& kineticModel, ForceModel& forceModel);
 
         template<class Thermostat,
                  class RandomPoolType,
@@ -117,14 +117,14 @@ namespace Physica::Core {
                  class KineticModel,
                  class ForceModel,
                  class Executor>
-        void npt_step(const Thermostat& thermostat, Barostat& barostat, KineticModel& kineticModel, ForceModel& forceModel);
+        void npt_step(const Thermostat& thermostat, RandomPoolType& pool, Barostat& barostat, KineticModel& kineticModel, ForceModel& forceModel);
         template<class Thermostat,
                  class RandomPoolType,
                  class Barostat,
                  class KineticModel,
                  class ForceModel,
                  class Executor>
-        void npt_step_for(ScalarType duration, const Thermostat& thermostat, Barostat& barostat, KineticModel& kineticModel, ForceModel& forceModel);
+        void npt_step_for(ScalarType duration, const Thermostat& thermostat, RandomPoolType& pool, Barostat& barostat, KineticModel& kineticModel, ForceModel& forceModel);
 
         template<class KineticModel, class ForceModel, class Executor>
         void fire_vstep(FireModelType& fire, KineticModel& kineticModel, ForceModel& forceModel);

@@ -228,8 +228,8 @@ namespace Physica::Core {
             ScalarType deviation,
             ScalarType factor,
             ScalarType propAtZero) const {
-        auto& gen = RandomPoolType::getGen();
-        const ScalarType rand = ScalarType::random_normal(gen);
+        auto& pool = RandomPoolType::getInstance();
+        const ScalarType rand = ScalarType::random_normal(pool);
         const ScalarType x0 = rand * deviation + ScalarType(rand.isPositive() ? 0.5 : -0.5);
         const int sample_new = double(x0);
         const ScalarType x1 = ScalarType(sample_new);
@@ -247,8 +247,7 @@ namespace Physica::Core {
             prop_last = prop_new;
         }
         else {
-            std::uniform_real_distribution<double> dist{};
-            const ScalarType temp = dist(gen);
+            const ScalarType temp = ScalarType::random_uniform(pool);
             if (prop_new / prop_last > temp) {
                 sample = sample_new;
                 prop_last = prop_new;
@@ -259,7 +258,7 @@ namespace Physica::Core {
     template<class ScalarType, class RandomPoolType>
     typename RandomBatchEwald<ScalarType, RandomPoolType>::Vector3D RandomBatchEwald<ScalarType, RandomPoolType>::randWaveG() const {
         auto dist = std::uniform_int_distribution<size_t>(0, getSamplePoolSize() - 1);
-        auto& gen = RandomPoolType::getGen();
+        auto& gen = RandomPoolType::getInstance().getGen();
         Vector3D result{};
         for (size_t i = 0; i < Dim; ++i)
             result[i] = samplePool(dist(gen), i);

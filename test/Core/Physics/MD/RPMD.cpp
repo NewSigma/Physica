@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2023 WeiBo He.
+ * Copyright 2022-2024 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -54,7 +54,7 @@ RPMD<ScalarType> makeSystem(RandomGenerator& gen) {
 
 bool testDriftMomentum(double precision) {
     using ScalarType = Scalar<Double>;
-    auto& gen = RandomPoolType::getGen();
+    auto& gen = RandomPoolType::getInstance().getGen();
     auto rpmd = makeSystem<ScalarType>(gen);
     rpmd.initMomentum(gen);
     for (int i = 0; i < 3; ++i) {
@@ -71,7 +71,7 @@ bool testCalcKinetic(double precision) {
     using ScalarType = Scalar<Double>;
     using ForceModel = SilveraGoldman<ScalarType, true, false>;
 
-    auto& gen = RandomPoolType::getGen();
+    auto& gen = RandomPoolType::getInstance().getGen();
     auto rpmd = makeSystem<ScalarType>(gen);
     rpmd.initMomentum(gen);
     ForceModel forceModel(pair_cutoff);
@@ -98,20 +98,21 @@ void testMDRun() {
         const ThermostatType thermo(temperatureT, thermostatTime);
         KineticModel kineticModel(temperatureT, numReplica);
         ForceModel forceModel(pair_cutoff);
-        RandomGenerator& gen = RandomPoolType::getGen();
-        auto rpmd = makeSystem<ScalarType>(gen);
-        rpmd.initMomentum(gen);
+        auto& pool = RandomPoolType::getInstance();
+        auto rpmd = makeSystem<ScalarType>(pool.getGen());
+        rpmd.initMomentum(pool.getGen());
 
         for (unsigned int i = 0; i < 6; ++i) {
             ScalarType temp = 0;
             rpmd.nvt_step_for<ThermostatType, RandomPoolType, KineticModel, ForceModel, ThreadExecutor>(
                 PhyConst<AU>::secondToTime(2 * 1E-12),
                 thermo,
+                pool,
                 kineticModel,
                 forceModel);
 
             for (unsigned int j = 0; j < 100; ++j) {
-                rpmd.nvt_step<ThermostatType, RandomPoolType, KineticModel, ForceModel, ThreadExecutor>(thermo, kineticModel, forceModel);
+                rpmd.nvt_step<ThermostatType, RandomPoolType, KineticModel, ForceModel, ThreadExecutor>(thermo, pool, kineticModel, forceModel);
                 toNextMean(temp, j, rpmd.calcKinetic());
             }
             toNextVariance(var, mean, i, temp);

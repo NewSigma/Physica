@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 WeiBo He.
+ * Copyright 2023-2024 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -62,7 +62,7 @@ int main() {
     ThreadPool::numThreadRequired = 4;
     ThreadPool& pool = ThreadPool::getInstance();
 
-    auto& gen = RandomPoolType::getGen();
+    auto& gen = RandomPoolType::getInstance().getGen();
     KineticModel kineticModel(temperatureT, numReplica);
     ForceModel forceModel(pair_cutoff);
     {

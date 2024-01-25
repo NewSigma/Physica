@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 WeiBo He.
+ * Copyright 2023-2024 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -47,14 +47,14 @@ namespace Physica::Core {
         DoubleThermo& operator=(DoubleThermo obj) noexcept;
         /* Operations */
         template<class RandomPoolType, class Executor>
-        void step(RingPolymerType& ringPolymer, ScalarType deltaT) const;
+        void step(RingPolymerType& ringPolymer, ScalarType deltaT, RandomPoolType& pool) const;
         void swap(DoubleThermo& __restrict obj) noexcept;
         /* Setters */
         void setTemperature(ScalarType temperatureT_) { temperatureT = temperatureT_; }
         void setThermostatTime(ScalarType time) { thermostatTime = time; }
     private:
         template<class RandomPoolType>
-        ScalarType makeTranslationalFactor(const RingPolymerType& ringPolymer, ScalarType deltaT) const;
+        ScalarType makeTranslationalFactor(const RingPolymerType& ringPolymer, ScalarType deltaT, RandomPoolType& pool) const;
     };
 
     template<class ScalarType, unsigned int Dim, size_t NumReplica>
@@ -72,35 +72,36 @@ namespace Physica::Core {
     template<class ScalarType, unsigned int Dim, size_t NumReplica>
     template<class RandomPoolType, class Executor>
     void DoubleThermo<ScalarType, Dim, NumReplica>::step(
-            RingPolymerType& ringPolymer, ScalarType deltaT) const {
+            RingPolymerType& ringPolymer, ScalarType deltaT, RandomPoolType& pool) const {
         const size_t dof = ringPolymer.getDOF();
-        const ScalarType factor_translational = makeTranslationalFactor<RandomPoolType>(ringPolymer, deltaT);
+        const ScalarType factor_translational = makeTranslationalFactor<RandomPoolType>(ringPolymer, deltaT, pool);
         if constexpr (NumReplica != 1) {
             const ScalarType repBeta = ringPolymer.calcRepBeta(temperatureT);
             const ScalarType omegaW = ringPolymer.calcOmegaW(temperatureT);
-            auto future = Executor::parallel_for([this, factor_translational, repBeta, omegaW, deltaT, &ringPolymer](unsigned int i) {
-                const size_t numReplica = ringPolymer.getNumReplica();
-                const auto& massVec = ringPolymer.getMassVec();
+            auto future = Executor::parallel_for(
+                [this, factor_translational, repBeta, omegaW, deltaT, &ringPolymer, &pool](unsigned int i) {
+                    const size_t numReplica = ringPolymer.getNumReplica();
+                    const auto& massVec = ringPolymer.getMassVec();
 
-                const auto mass = massVec[i / Dim];
-                const ScalarType factor = sqrt(repBeta * mass);
-                auto fft = FFT<ScalarType, 1>::makeEmptyFFT(numReplica, 1);
-                BufferType buffer(2, ringPolymer.getKSpaceSize());
+                    const auto mass = massVec[i / Dim];
+                    const ScalarType factor = sqrt(repBeta * mass);
+                    auto fft = FFT<ScalarType, 1>::makeEmptyFFT(numReplica, 1);
+                    BufferType buffer(2, ringPolymer.getKSpaceSize());
 
-                ringPolymer.toNormalRepr(i, ringPolymer.asMatrix(), buffer, fft);
-                fft.getRSpace().random_normal(RandomPoolType::getGen());
-                FFT<ScalarType, 1>::transform(ringPolymer.getFFT(), fft);
-                /* Translational mode */ {
-                    buffer(0, 0) *= factor_translational;
-                }
-                for (size_t j = 1; j < buffer.getColumn(); ++j) {
-                    const ScalarType phase = M_PI * j / numReplica;
-                    const ScalarType viscosityY = sin(phase) * omegaW;
-                    Langevin<ScalarType, Dim>::langevinImpl(
-                            buffer(0, j), deltaT, viscosityY, factor, fft.getKSpace()[j]);
-                }
-                ringPolymer.toBeadRepr(i, ringPolymer.asMatrix(), buffer, fft);
-            }, dof, Executor::getNumThread());
+                    ringPolymer.toNormalRepr(i, ringPolymer.asMatrix(), buffer, fft);
+                    fft.getRSpace().random_normal(pool);
+                    FFT<ScalarType, 1>::transform(ringPolymer.getFFT(), fft);
+                    /* Translational mode */ {
+                        buffer(0, 0) *= factor_translational;
+                    }
+                    for (size_t j = 1; j < buffer.getColumn(); ++j) {
+                        const ScalarType phase = M_PI * j / numReplica;
+                        const ScalarType viscosityY = sin(phase) * omegaW;
+                        Langevin<ScalarType, Dim>::langevinImpl(
+                                buffer(0, j), deltaT, viscosityY, factor, fft.getKSpace()[j]);
+                    }
+                    ringPolymer.toBeadRepr(i, ringPolymer.asMatrix(), buffer, fft);
+                }, dof, Executor::getNumThread());
             Executor::auto_wait(future);
         }
         else {
@@ -120,7 +121,7 @@ namespace Physica::Core {
     template<class ScalarType, unsigned int Dim, size_t NumReplica>
     template<class RandomPoolType>
     ScalarType DoubleThermo<ScalarType, Dim, NumReplica>::makeTranslationalFactor(
-            const RingPolymerType& ringPolymer, ScalarType deltaT) const {
+            const RingPolymerType& ringPolymer, ScalarType deltaT, RandomPoolType& pool) const {
         using Integrator = SRK2<ScalarType, 1>;
         using VectorType = typename Integrator::VectorType;
 
@@ -134,10 +135,9 @@ namespace Physica::Core {
                             [this]([[maybe_unused]] ScalarType x, VectorType sol) -> VectorType {
                                 return {(temperatureT - sol[0]) / thermostatTime};
                             },
-                            [this, dof]([[maybe_unused]] ScalarType x, VectorType sol) -> VectorType {
-                                std::normal_distribution dist{};
-                                auto& gen = RandomPoolType::getGen();
-                                return {sqrt((temperatureT * sol[0]) / (thermostatTime * dof)) * 2 * dist(gen)};
+                            [this, dof, &pool]([[maybe_unused]] ScalarType x, VectorType sol) -> VectorType {
+                                const ScalarType rand = ScalarType::random_normal(pool);
+                                return {sqrt((temperatureT * sol[0]) / (thermostatTime * dof)) * 2 * rand};
                             });
         if (!sol[0].isPositive()) [[unlikely]]
             throw std::invalid_argument("[Error]: Number of particle is too small that negative probability is encountered");

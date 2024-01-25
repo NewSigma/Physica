@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 WeiBo He.
+ * Copyright 2023-2024 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -86,7 +86,7 @@ int main(int argc, char** argv) {
     if constexpr (IsComputeMode) {
         ThreadPool::numThreadRequired = record.getColumn();
         ThreadExecutor::parallel_for([&record](unsigned int sys) {
-            auto& gen = RandomPool<RandomGenerator>::getGen();
+            auto& gen = RandomPool<RandomGenerator>::getInstance().getGen();
             MDType rpmd = MDType(makeSystem(gen), 1, 1, temperatureT, timeStep);
             KineticModel kineticModel(latticeSize, collideFactor, temperatureT, numMolecular, 100);
             kineticModel.updateMass(rpmd.getRingPolymer());

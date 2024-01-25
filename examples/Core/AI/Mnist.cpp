@@ -140,7 +140,7 @@ std::pair<Dataset, Dataset> makeDataset(RandomGenerator& gen) {
 
 int main(int argc, char** argv) {
     ThreadPool::numThreadRequired = 4;
-    auto& gen = RandomPoolType::getGen();
+    auto& gen = RandomPoolType::getInstance().getGen();
     const auto dataset = makeDataset(gen);
     const size_t itePerEpoch = (dataset.first.getSize() + batchSize - 1) / batchSize;
 

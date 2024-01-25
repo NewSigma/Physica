@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 WeiBo He.
+ * Copyright 2023-2024 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -51,7 +51,7 @@ template<bool IsPeriodBoundary>
 void forceConstTest() {
     using ForceModel = TodaModel<ScalarType, IsPeriodBoundary>;
     ForceModel model(1.0);
-    const auto cell = makeSystem(RandomPoolType::getGen());
+    const auto cell = makeSystem(RandomPoolType::getInstance().getGen());
     const auto fc = model.forceConst(cell);
     if constexpr (IsPeriodBoundary) {
         for (size_t i = 0; i < fc.getRow(); ++i)

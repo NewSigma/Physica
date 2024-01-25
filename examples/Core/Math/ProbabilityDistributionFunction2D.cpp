@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 WeiBo He.
+ * Copyright 2023-2024 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -68,10 +68,10 @@ MDCellType makeSystem(std::mt19937& gen) {
 
 int main(int argc, char** argv) {
     const double timeStep = timeStepLambda * (latticeSize / numMolecular) * std::sqrt(unitMassM / temperatureT);
-    auto& gen = RandomPoolType::getGen();
+    auto& pool = RandomPoolType::getInstance();
 
-    MDType rpmd = MDType(makeSystem(gen), 1, 1, temperatureT, timeStep);
-    rpmd.initMomentum(gen);
+    MDType rpmd = MDType(makeSystem(pool.getGen()), 1, 1, temperatureT, timeStep);
+    rpmd.initMomentum(pool.getGen());
     KineticModel kineticModel(latticeSize, collideFactor, temperatureT, numMolecular, 1, maxHandleNum);
     kineticModel.updateMass(rpmd.getRingPolymer());
     ThermostatType thermo(temperatureT, thermostatTime);
@@ -79,7 +79,7 @@ int main(int argc, char** argv) {
     ProbabilityDistributionFunction2D<ScalarType> pdf(-10, 10, -10, 10, 100, 100);
     for (size_t i = 0; i < numStep; ++i) {
         ForceModel forceModel{};
-        rpmd.nvt_step<ThermostatType, RandomPoolType, KineticModel, ForceModel, SequentialExecutor>(thermo, kineticModel, forceModel);
+        rpmd.nvt_step<ThermostatType, RandomPoolType, KineticModel, ForceModel, SequentialExecutor>(thermo, pool, kineticModel, forceModel);
         pdf.sample(rpmd.getRingPolymer().asMatrix()(0, 0), rpmd.getRingPolymer().asMatrix()(1, 0));
     }
     const auto grid = pdf.makePosition();

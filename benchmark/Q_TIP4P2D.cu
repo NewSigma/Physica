@@ -77,11 +77,11 @@ MDCell<ScalarType> makeSystem(unsigned int cellSize) {
 }
 
 int main() {
-    auto& gen = RandomPoolType::getGen();
+    auto& pool = RandomPoolType::getInstance();
     auto cell = makeSystem(5);
     ForceModel::sortPosition(cell);
     MDType rpmd(std::move(cell), 1, 1, temperatureT, timeStep);
-    rpmd.initMomentum(gen);
+    rpmd.initMomentum(pool.getGen());
     
     KineticModel kineticModel(temperatureT, 1);
     ForceModel forceModel(rpmd.phaseToCell(0), pair_cutoff, EwaldType{});
@@ -92,6 +92,7 @@ int main() {
             rpmd.npt_step_for<ThermostatType, RandomPoolType, BarostatType, KineticModel, decltype(forceModel), CudaExecutor>(
                 PhyConst<AU>::secondToTime(1 * 1E-13),
                 thermo,
+                pool,
                 barostat,
                 kineticModel,
                 forceModel);

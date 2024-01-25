@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2023 WeiBo He.
+ * Copyright 2020-2024 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -107,10 +107,20 @@ namespace Physica::Core {
         return Scalar(dist(gen));
     }
 
+    template<class RandomGenerator, typename RandomGenerator::result_type FixedSeed>
+    inline Scalar<Float> Scalar<Float>::random_uniform(RandomPool<RandomGenerator, FixedSeed>& pool) {
+        return random_uniform<RandomGenerator>(pool.getGen());
+    }
+
     template<class RandomGenerator>
     inline Scalar<Float> Scalar<Float>::random_normal(RandomGenerator& gen) {
         std::normal_distribution<float> dist{};
         return Scalar(dist(gen));
+    }
+
+    template<class RandomGenerator, typename RandomGenerator::result_type FixedSeed>
+    inline Scalar<Float> Scalar<Float>::random_normal(RandomPool<RandomGenerator, FixedSeed>& pool) {
+        return random_normal<RandomGenerator>(pool.getGen());
     }
 
     template<class Distribution, class RandomGenerator>
@@ -149,10 +159,20 @@ namespace Physica::Core {
         return Scalar(dist(gen));
     }
 
+    template<class RandomGenerator, typename RandomGenerator::result_type FixedSeed>
+    inline Scalar<Double> Scalar<Double>::random_uniform(RandomPool<RandomGenerator, FixedSeed>& pool) {
+        return random_uniform<RandomGenerator>(pool.getGen());
+    }
+
     template<class RandomGenerator>
     inline Scalar<Double> Scalar<Double>::random_normal(RandomGenerator& gen) {
         std::normal_distribution<double> dist{};
         return Scalar(dist(gen));
+    }
+
+    template<class RandomGenerator, typename RandomGenerator::result_type FixedSeed>
+    inline Scalar<Double> Scalar<Double>::random_normal(RandomPool<RandomGenerator, FixedSeed>& pool) {
+        return random_normal<RandomGenerator>(pool.getGen());
     }
 
     template<class Distribution, class RandomGenerator>

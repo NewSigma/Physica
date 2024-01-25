@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 WeiBo He.
+ * Copyright 2023-2024 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -115,7 +115,7 @@ MDType makeSystem(size_t numMolecular, RandomGenerator& gen) {
  */
 int main() {
     ThreadPool::numThreadRequired = 8;
-    auto& gen = RandomPoolType::getGen();
+    auto& gen = RandomPoolType::getInstance().getGen();
     KineticModel kineticModel(temperatureT, numReplica);
     {
         using ForceModel = MixedModel<true>;

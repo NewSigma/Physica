@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 WeiBo He.
+ * Copyright 2019-2024 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -33,6 +33,8 @@
 namespace Physica::Core {
     //Forward declarations
     template<class AnyScalar> class ComplexScalar;
+    template<class RandomGenerator, typename RandomGenerator::result_type FixedSeed> class RandomPool;
+    template<class ScalarType, class RandomPoolType> class GaussRandomPool;
     template<ScalarOption Option> __host__ __device__ inline Scalar<Option> abs(const Scalar<Option>& s);
     template<ScalarOption Option> __host__ __device__ inline Scalar<Option> square(const Scalar<Option>& s);
     template<ScalarOption Option> __host__ __device__ inline Scalar<Option> sqrt(const Scalar<Option>& s);
@@ -169,9 +171,10 @@ namespace Physica::Core {
     /////////////////////////////////////////////Float////////////////////////////////////////////////
     template<>
     class Scalar<Float> : public ScalarBase<Scalar<Float>> {
-        using Base = ScalarBase<Scalar<Float>>;
+        using This = Scalar<Float>;
+        using Base = ScalarBase<This>;
     public:
-        using ScalarType = Scalar<Float>;
+        using ScalarType = This;
         using device_obj_type = device_obj<ScalarType>;
     private:
         float f;
@@ -219,8 +222,14 @@ namespace Physica::Core {
         static inline bool matchSign(const Scalar& s1, const Scalar& s2) { return (s1.f > 0 && s2.f > 0) || (s1.f < 0 && s2.f < 0); }
         template<class RandomGenerator>
         [[nodiscard]] inline static Scalar random_uniform(RandomGenerator& gen);
+        template<class RandomGenerator, typename RandomGenerator::result_type FixedSeed>
+        [[nodiscard]] inline static Scalar random_uniform(RandomPool<RandomGenerator, FixedSeed>& pool);
         template<class RandomGenerator>
         [[nodiscard]] inline static Scalar random_normal(RandomGenerator& gen);
+        template<class RandomGenerator, typename RandomGenerator::result_type FixedSeed>
+        [[nodiscard]] inline static Scalar random_normal(RandomPool<RandomGenerator, FixedSeed>& pool);
+        template<class RandomPoolType>
+        [[nodiscard]] static Scalar random_normal(GaussRandomPool<This, RandomPoolType>& pool) { return pool(); }
         template<class Distribution, class RandomGenerator>
         [[nodiscard]] inline static Scalar random_any(Distribution& dist, RandomGenerator& gen);
         [[nodiscard]] static const H5::DataType& getH5DataType() { return H5::PredType::NATIVE_FLOAT; }
@@ -233,9 +242,10 @@ namespace Physica::Core {
     /////////////////////////////////////////////Double////////////////////////////////////////////////
     template<>
     class Scalar<Double> : public ScalarBase<Scalar<Double>> {
-        using Base = ScalarBase<Scalar<Double>>;
+        using This = Scalar<Double>;
+        using Base = ScalarBase<This>;
     public:
-        using ScalarType = Scalar<Double>;
+        using ScalarType = This;
         using device_obj_type = device_obj<ScalarType>;
     private:
         double d;
@@ -283,8 +293,14 @@ namespace Physica::Core {
         static inline bool matchSign(const Scalar& s1, const Scalar& s2) { return (s1.d > 0 && s2.d > 0) || (s1.d < 0 && s2.d < 0); }
         template<class RandomGenerator>
         [[nodiscard]] inline static Scalar random_uniform(RandomGenerator& gen);
+        template<class RandomGenerator, typename RandomGenerator::result_type FixedSeed>
+        [[nodiscard]] inline static Scalar random_uniform(RandomPool<RandomGenerator, FixedSeed>& pool);
         template<class RandomGenerator>
         [[nodiscard]] inline static Scalar random_normal(RandomGenerator& gen);
+        template<class RandomGenerator, typename RandomGenerator::result_type FixedSeed>
+        [[nodiscard]] inline static Scalar random_normal(RandomPool<RandomGenerator, FixedSeed>& pool);
+        template<class RandomPoolType>
+        [[nodiscard]] static Scalar random_normal(GaussRandomPool<This, RandomPoolType>& pool) { return pool(); }
         template<class Distribution, class RandomGenerator>
         [[nodiscard]] inline static Scalar random_any(Distribution& dist, RandomGenerator& gen);
         [[nodiscard]] static const H5::DataType& getH5DataType() { return H5::PredType::NATIVE_DOUBLE; }

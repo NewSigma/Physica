@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 WeiBo He.
+ * Copyright 2023-2024 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -41,8 +41,7 @@ MDCellType makeSystem(size_t numMolecular, RandomGenerator& gen) {
 }
 
 int main() {
-    auto& gen = RandomPoolType::getGen();
-    const auto cell = makeSystem(108, gen);
+    const auto cell = makeSystem(108, RandomPoolType::getInstance().getGen());
     const auto& pos = cell.getPos();
     Vector<ScalarType> charges(cell.getNumParticle(), 1.0);
     auto tail = charges.tail(cell.getNumParticle() / 2);

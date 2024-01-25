@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 WeiBo He.
+ * Copyright 2024 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -66,20 +66,21 @@ void testMDRun() {
         const ThermostatType thermo(temperatureT, thermostatTime);
         KineticModel kineticModel(temperatureT, numReplica);
         ForceModel forceModel(numMolecular, pair_cutoff);
-        RandomGenerator& gen = RandomPoolType::getGen();
-        auto rpmd = makeSystem(gen);
-        rpmd.initMomentum(gen);
+        auto& pool = RandomPoolType::getInstance();
+        auto rpmd = makeSystem(pool.getGen());
+        rpmd.initMomentum(pool.getGen());
 
         for (unsigned int i = 0; i < 6; ++i) {
             ScalarType temp = 0;
             rpmd.nvt_step_for<ThermostatType, RandomPoolType, KineticModel, ForceModel, CudaExecutor>(
                 PhyConst<AU>::secondToTime(2 * 1E-12),
                 thermo,
+                pool,
                 kineticModel,
                 forceModel);
 
             for (unsigned int j = 0; j < 100; ++j) {
-                rpmd.nvt_step<ThermostatType, RandomPoolType, KineticModel, ForceModel, CudaExecutor>(thermo, kineticModel, forceModel);
+                rpmd.nvt_step<ThermostatType, RandomPoolType, KineticModel, ForceModel, CudaExecutor>(thermo, pool, kineticModel, forceModel);
                 toNextMean(temp, j, rpmd.calcKinetic());
             }
             toNextVariance(var, mean, i, temp);

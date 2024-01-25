@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 WeiBo He. All rights reserved.
+ * Copyright 2023-2024 WeiBo He. All rights reserved.
  *
  * This file is part of PhysicaNotes.
  */
@@ -53,7 +53,7 @@ MDCell<ScalarType> makeSystem() {
     ForceModel::sortPosition(cell1);
 
     pos = cell1.getPos();
-    auto& gen = RandomPoolType::getGen();
+    auto& gen = RandomPoolType::getInstance().getGen();
     std::normal_distribution<double> dist(0, 0.5);
     for (auto& elem : pos)
         elem += ScalarType::random_any(dist, gen); //Perturbation

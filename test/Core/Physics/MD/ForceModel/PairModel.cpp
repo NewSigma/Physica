@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 WeiBo He.
+ * Copyright 2023-2024 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -40,7 +40,7 @@ class ForceConstTest {
 public:
     static void run() {
         SilveraGoldman<ScalarType, true> sg(pair_cutoff);
-        auto& gen = RandomPoolType::getGen();
+        auto& gen = RandomPoolType::getInstance().getGen();
         const auto cell = makeSystem(gen);
         const auto fc = sg.forceConst(cell);
         for (size_t i = 0; i < cell.getDOF(); ++i) {

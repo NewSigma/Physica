@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 WeiBo He.
+ * Copyright 2023-2024 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -76,7 +76,7 @@ namespace Physica::Core {
         static_assert(isTrainMode, "[Error]: train_step must be called under training mode");
         if constexpr (std::is_same<Executor, SequentialExecutor>::value) {
             auto dist = std::uniform_int_distribution<size_t>(0, dataset.getSize() - 1);
-            auto& gen = RandomPoolType::getGen();
+            auto& gen = RandomPoolType::getInstance().getGen();
             const auto& samples = dataset.getSamples();
             const auto& labels = dataset.getLabels();
             for (unsigned int _ = 0; _ < opt.getBatchSize(); ++_) {
@@ -92,7 +92,7 @@ namespace Physica::Core {
             Executor::parallel_for([this, batchSizePerThread, &mutex, &dataset](unsigned int) {
                 Derived tempNet = copy();
                 auto dist = std::uniform_int_distribution<size_t>(0, dataset.getSize() - 1);
-                auto& gen = RandomPoolType::getGen();
+                auto& gen = RandomPoolType::getInstance().getGen();
                 const auto& samples = dataset.getSamples();
                 const auto& labels = dataset.getLabels();
                 for (size_t _ = 0; _ < batchSizePerThread; ++_) {

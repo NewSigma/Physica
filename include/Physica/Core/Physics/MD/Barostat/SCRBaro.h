@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 WeiBo He.
+ * Copyright 2023-2024 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -97,7 +97,7 @@ namespace Physica::Core {
     typename SCRBaro<ScalarType, NumReplica, RandomPoolType, Type>::LatticeMatrix
     SCRBaro<ScalarType, NumReplica, RandomPoolType, Type>::makeDiffuseMatrix(ScalarType pressPerDOF) const {
         const ScalarType diffuseFactor = sqrt(ScalarType(2.0 / Dim) * Base::compressRate * pressPerDOF);
-        auto& gen = RandomPoolType::getGen();
+        auto& gen = RandomPoolType::getInstance().getGen();
         LatticeMatrix result(Dim, Dim, 0);
         if constexpr (Type == BaroType::Anisotropic) {
             const auto rand = LatticeMatrix::random_normal(Dim, Dim, gen);

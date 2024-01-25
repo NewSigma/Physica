@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 WeiBo He.
+ * Copyright 2023-2024 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -60,7 +60,7 @@ MDType makeSystem(size_t numMolecular, RandomGenerator& gen) {
  * [1] Miller TF, Manolopoulos DE. 2005. Quantum diffusion in liquid para-hydrogen from ring polymer molecular dynamics. J. Chem. Phys. 122:184503
  */
 int main() {
-    auto& gen = RandomPoolType::getGen();
+    auto& gen = RandomPoolType::getInstance().getGen();
     KineticModel kineticModel(temperatureT, numReplica);
     {
         using ForceModel = device_obj<SilveraGoldman<ScalarType, true, true>>;
