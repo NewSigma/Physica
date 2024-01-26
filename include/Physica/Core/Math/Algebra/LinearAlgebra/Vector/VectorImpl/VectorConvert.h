@@ -21,6 +21,7 @@
 namespace Physica::Core {
     template<class VectorType> class RealVector;
     template<class VectorType> class ImagVector;
+    template<class VectorType> class SquaredNormVector;
     template<class VectorType> class NormVector;
     template<class VectorType> class ValueVector;
     template<class VectorType> class GradVector;
@@ -39,8 +40,11 @@ namespace Physica::Core {
         class Traits<ImagVector<VectorType>> : public Traits<RealVector<VectorType>> {};
 
         template<class VectorType>
-        class Traits<NormVector<VectorType>> : public Traits<RealVector<VectorType>> {};
+        class Traits<SquaredNormVector<VectorType>> : public Traits<RealVector<VectorType>> {};
 
+
+        template<class VectorType>
+        class Traits<NormVector<VectorType>> : public Traits<RealVector<VectorType>> {};
         template<class VectorType>
         class Traits<ValueVector<VectorType>> {
             using T = typename VectorType::ScalarType;
@@ -75,6 +79,17 @@ namespace Physica::Core {
         explicit ImagVector(const RValueVector<VectorType>& v_) : v(v_.getDerived()) {}
 
         typename Base::ScalarType calc(size_t s) const { return v.calc(s).getImag(); }
+        [[nodiscard]] size_t getLength() const { return v.getLength(); }
+    };
+
+    template<class VectorType>
+    class SquaredNormVector : public RValueVector<SquaredNormVector<VectorType>> {
+        using Base = RValueVector<SquaredNormVector<VectorType>>;
+        const VectorType& v;
+    public:
+        explicit SquaredNormVector(const RValueVector<VectorType>& v_) : v(v_.getDerived()) {}
+
+        typename Base::ScalarType calc(size_t s) const { return v.calc(s).squaredNorm(); }
         [[nodiscard]] size_t getLength() const { return v.getLength(); }
     };
 
@@ -119,6 +134,11 @@ namespace Physica::Core {
     template<class VectorType>
     [[nodiscard]] inline ImagVector<VectorType> toImagVector(const RValueVector<VectorType>& v) {
         return ImagVector<VectorType>{v};
+    }
+
+    template<class VectorType>
+    [[nodiscard]] inline SquaredNormVector<VectorType> toSquaredNormVector(const RValueVector<VectorType>& v) {
+        return SquaredNormVector<VectorType>{v};
     }
 
     template<class VectorType>

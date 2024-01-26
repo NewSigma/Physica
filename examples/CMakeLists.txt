@@ -5,6 +5,7 @@ if(${PHYSICA_GUI})
     physica_add_example(DuffingOscillator Core/Math/DuffingOscillator.cpp)
     physica_add_example(ProbabilityDistributionFunction2D Core/Math/ProbabilityDistributionFunction2D.cpp)
     physica_add_example(HF Core/Physics/ElectronicStructure/HF.cpp)
+    physica_add_example(Correlation Core/Physics/MD/Analyser/Correlation.cpp)
     physica_add_example(RDF Core/Physics/MD/Analyser/RDF.cpp)
     physica_add_example(FireModel Core/Physics/MD/KineticModel/FireModel.cpp)
     physica_add_example(TodaModel Core/Physics/MD/ForceModel/TodaModel.cpp)
@@ -24,4 +25,3 @@ endif()
 
 # Core
 physica_add_example(DecisionTree Core/AI/DecisionTree.cpp)
-physica_add_example(Correlation Core/Physics/MD/Correlation.cpp)

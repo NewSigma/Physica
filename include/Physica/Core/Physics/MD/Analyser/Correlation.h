@@ -33,7 +33,9 @@ namespace Physica::Core {
 
         FFT<ScalarType, 1> fft;
         VectorType corr;
+        ScalarType expected;
         size_t numSample;
+        size_t step;
     public:
         Correlation(size_t numStep);
         Correlation(const Correlation&) = default;
@@ -42,11 +44,11 @@ namespace Physica::Core {
         /* Operators */
         Correlation& operator=(Correlation obj) noexcept { swap(obj); return *this; }
         /* Operations */
-        void sample(const VectorType& v);
+        void sample(ScalarType data);
+        [[nodiscard]] VectorType makeCorr(bool removeDrift) const;
         void swap(Correlation& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] size_t getNumStep() const noexcept { return corr.getLength(); }
-        [[nodiscard]] const VectorType& getCorr() const noexcept { return corr; }
         [[nodiscard]] size_t getNumSample() const noexcept { return numSample; }
     };
 
@@ -54,27 +56,45 @@ namespace Physica::Core {
     Correlation<ScalarType>::Correlation(size_t numStep)
             : fft(numStep * 2, 1, PlanFlag::Estimate)
             , corr(numStep, 0)
-            , numSample(0) {}
+            , numSample(0)
+            , step(0) {
+        assert(numStep > 1 && "[Error]: Invalid step number");
+    }
 
     template<class ScalarType>
-    void Correlation<ScalarType>::sample(const VectorType& v) {
+    void Correlation<ScalarType>::sample(ScalarType data) {
         const size_t numStep = getNumStep();
+        assert(v.getLength() == numStep && "[Error]: Invalid sample");
         auto& rSpace = fft.getRSpace();
         auto head = rSpace.head(numStep);
-        auto tail = rSpace.tail(numStep);
-        head = v;
-        tail = ScalarType(0);
+        head[step] = data;
+        step += 1;
+        
+        const bool isDataEnough = step == numStep;
+        if (isDataEnough) {
+            auto tail = rSpace.tail(numStep);
+            tail = ScalarType(0);
 
-        fft.transform();
-        auto& kSpace = fft.getKSpace();
-        kSpace = toNormVector(kSpace);
-        fft.invTransform();
+            fft.transform();
+            auto& kSpace = fft.getKSpace();
+            toNextMean(expected, numSample, kSpace[0].getReal() / ScalarType(numStep));
+            kSpace = toSquaredNormVector(kSpace);
+            fft.invTransform();
 
-        const ScalarType factor = reciprocal(ScalarType(fft.getRSpaceSize()));
-        auto head = rSpace.head(numStep);
-        head *= factor;
-        toNextMean(corr, numSample, head);
-        numSample += 1;
+            const ScalarType factor = reciprocal(ScalarType(fft.getRSpaceSize()));
+            head *= factor;
+            toNextMean(corr, numSample, head);
+            numSample += 1;
+            step = 0;
+        }
+    }
+
+    template<class ScalarType>
+    typename Correlation<ScalarType>::VectorType Correlation<ScalarType>::makeCorr(bool removeDrift) const {
+        VectorType result = corr;
+        if (removeDrift)
+            result -= square(expected);
+        return result;
     }
 
     template<class ScalarType>
@@ -82,5 +102,8 @@ namespace Physica::Core {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         fft.swap(obj.fft);
         corr.swap(obj.corr);
+        expected.swap(obj.expected);
+        std::swap(numSample, obj.numSample);
+        std::swap(step, obj.step);
     }
 }

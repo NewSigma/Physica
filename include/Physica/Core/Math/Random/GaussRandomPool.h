@@ -31,6 +31,9 @@ namespace Physica::Core {
 
     template<class ScalarType, class RandomPoolType>
     class GaussRandomPool {
+    public:
+        using GeneratorType = typename RandomPoolType::GeneratorType;
+    private:
         Vector<ScalarType> rands;
     public:
         GaussRandomPool(size_t size);
@@ -46,6 +49,8 @@ namespace Physica::Core {
         inline void swap(GaussRandomPool& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] size_t getSize() const noexcept { return rands.getLength(); }
+        /* Static member */
+        [[nodiscard]] static GeneratorType& getGen() noexcept { return RandomPoolType::getInstance().getGen(); }
     };
 
     template<class ScalarType, class RandomPoolType>
