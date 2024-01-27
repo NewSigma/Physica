@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 WeiBo He.
+ * Copyright 2022-2024 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -56,6 +56,8 @@ namespace Physica::Core {
         MatrixType& mat;
     public:
         explicit DiagVector(MatrixType& mat_) : mat(mat_) {}
+        /* Operators */
+        using Base::operator=;
         /* Operations */
         void resize([[maybe_unused]] size_t size) { assert(getLength() == size); }
         /* Getters */

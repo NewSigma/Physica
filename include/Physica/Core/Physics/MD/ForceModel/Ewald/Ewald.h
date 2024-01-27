@@ -81,6 +81,7 @@ namespace Physica::Core {
         [[nodiscard]] ComplexType forceConst(const PositionMatrix& pos, Vector3D qPoint, size_t dof1, size_t dof2) const;
 
         [[nodiscard]] LatticeMatrix virial(const PositionMatrix& pos);
+        using Base::calcBornCharge;
         void swap(Ewald& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] inline LatticeReturnType getLattice() const noexcept;

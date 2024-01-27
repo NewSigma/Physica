@@ -58,8 +58,9 @@ namespace Physica::Core {
         void projectTransRot(RSpaceFCGrid& fcGrid, ScalarType maxAbsDot, size_t maxIteration) const;
         void projectTransRotH(RSpaceFCGrid& fcGrid, ScalarType maxAbsDot, size_t maxIteration) const;
 
+        [[nodiscard]] KSpaceFCGrid toKSpace(const RSpaceFCGrid& rSpaceGrid) const;
         [[nodiscard]] KSpaceFCMat interpolatePoint(Vector3D qPoint, const KSpaceFCGrid& forceConstants) const;
-        KSpaceFCGrid toKSpace(const RSpaceFCGrid& rSpaceGrid) const;
+
         void toDynamicMatrix(KSpaceFCMat& forceConstant) const;
         void toDynamicMatrix(KSpaceFCGrid& forceConstants) const;
         [[nodiscard]] Vector<ScalarType> makeFreq(const EigenSolverType& eigen) const;
@@ -212,6 +213,30 @@ namespace Physica::Core {
     }
 
     template<class ScalarType>
+    typename PhononSolver<ScalarType>::KSpaceFCGrid PhononSolver<ScalarType>::toKSpace(const RSpaceFCGrid& rSpaceGrid) const {
+        assert(superSize == rSpaceGrid.getDim() && "[Error]: Super sizes do not match");
+        assert(getUnitCellDOF() == rSpaceGrid(0, 0, 0).getRow() && "[Error]: DOF do not match");
+        const size_t unitCellDOF = getUnitCellDOF();
+        KSpaceFCGrid kSpaceGrid(getForceConstantsGridSize(), unitCellDOF, unitCellDOF);
+        FFT3D fft(superSize, {1, 1, 1}, PlanFlag::Estimate);
+        for (size_t major = 0; major < unitCellDOF; ++major) {
+            for (size_t minor = 0; minor < unitCellDOF; ++minor) {
+                auto& rSpaceFFT = fft.getRSpace();
+                rSpaceFFT.forIndexInGrid([major, minor, &rSpaceGrid, &rSpaceFFT](Index3D index) {
+                    rSpaceFFT(index) = rSpaceGrid(index).calcFromMajorMinor(major, minor);
+                });
+                fft.transform();
+
+                const auto& kSpaceFFT = fft.getKSpace();
+                kSpaceFFT.forIndexInGrid([major, minor, &kSpaceGrid, &kSpaceFFT](Index3D index) {
+                    kSpaceGrid(index).refFromMajorMinor(major, minor) = kSpaceFFT(index);
+                });
+            }
+        }
+        return kSpaceGrid;
+    }
+
+    template<class ScalarType>
     typename PhononSolver<ScalarType>::KSpaceFCMat PhononSolver<ScalarType>::interpolatePoint(
             Vector3D qPoint, const KSpaceFCGrid& forceConstants) const {
         const Vector3D qVector = unitCell.makeRepLattice().transpose() * qPoint;
@@ -253,30 +278,6 @@ namespace Physica::Core {
             }
         }
         return result;
-    }
-
-    template<class ScalarType>
-    typename PhononSolver<ScalarType>::KSpaceFCGrid PhononSolver<ScalarType>::toKSpace(const RSpaceFCGrid& rSpaceGrid) const {
-        assert(superSize == rSpaceGrid.getDim() && "[Error]: Super sizes do not match");
-        assert(getUnitCellDOF() == rSpaceGrid(0, 0, 0).getRow() && "[Error]: DOF do not match");
-        const size_t unitCellDOF = getUnitCellDOF();
-        KSpaceFCGrid kSpaceGrid(getForceConstantsGridSize(), unitCellDOF, unitCellDOF);
-        FFT3D fft(superSize, {1, 1, 1}, PlanFlag::Estimate);
-        for (size_t major = 0; major < unitCellDOF; ++major) {
-            for (size_t minor = 0; minor < unitCellDOF; ++minor) {
-                auto& rSpaceFFT = fft.getRSpace();
-                rSpaceFFT.forIndexInGrid([major, minor, &rSpaceGrid, &rSpaceFFT](Index3D index) {
-                    rSpaceFFT(index) = rSpaceGrid(index).calcFromMajorMinor(major, minor);
-                });
-                fft.transform();
-
-                const auto& kSpaceFFT = fft.getKSpace();
-                kSpaceFFT.forIndexInGrid([major, minor, &kSpaceGrid, &kSpaceFFT](Index3D index) {
-                    kSpaceGrid(index).refFromMajorMinor(major, minor) = kSpaceFFT(index);
-                });
-            }
-        }
-        return kSpaceGrid;
     }
 
     template<class ScalarType>

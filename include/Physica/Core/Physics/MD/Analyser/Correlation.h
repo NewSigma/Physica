@@ -81,8 +81,8 @@ namespace Physica::Core {
             kSpace = toSquaredNormVector(kSpace);
             fft.invTransform();
 
-            const ScalarType factor = reciprocal(ScalarType(fft.getRSpaceSize()));
-            head *= factor;
+            for (size_t i = 0; i < numStep; ++i)
+                head[i] /= ScalarType(numStep - i);
             toNextMean(corr, numSample, head);
             numSample += 1;
             step = 0;

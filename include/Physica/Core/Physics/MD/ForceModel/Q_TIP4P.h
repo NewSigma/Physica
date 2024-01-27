@@ -310,7 +310,7 @@ namespace Physica::Core {
     typename Q_TIP4P<ScalarType, EwaldType>::BornChargeArray Q_TIP4P<ScalarType, EwaldType>::calcBornCharge() const {
         BornChargeArray result = ewald.calcBornCharge();
         for (size_t i = 0; i < result.getLength(); ++i) {
-            auto diag = result[i].diag;
+            auto diag = result[i].diag();
             diag *= ScalarType(gamma);
         }
         return result;

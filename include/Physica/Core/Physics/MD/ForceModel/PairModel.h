@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2023 WeiBo He.
+ * Copyright 2022-2024 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -198,8 +198,8 @@ namespace Physica::Core {
         auto kernel = [this, &result](size_t i, size_t j, Vector3D r, ScalarType norm1, ScalarType norm2) {
             const ScalarType f_norm = force_functor(i, j, norm1, norm2);
             r *= f_norm / norm1;
-            auto force_i = result.template segment<3>(3 * i, 3 * i + 3);
-            auto force_j = result.template segment<3>(3 * j, 3 * j + 3);
+            auto force_i = result.template segment<Dim>(Dim * i, Dim * i + Dim);
+            auto force_j = result.template segment<Dim>(Dim * j, Dim * j + Dim);
             force_i -= r;
             force_j += r;
         };
@@ -224,7 +224,7 @@ namespace Physica::Core {
             for (size_t i = 0; i < cell.getNumParticle(); ++i) {
                 if (i == atom2)
                     continue;
-                const size_t dof_i = 3 * i + dir2;
+                const size_t dof_i = Dim * i + dir2;
                 result += forceConstImpl(cell, dof1, dof_i);
             }
             return result;
@@ -238,19 +238,19 @@ namespace Physica::Core {
         const size_t dof = cell.getDOF();
         ForceConstMatrix result(dof);
         for (size_t atom_r = 0; atom_r < numParticle; ++atom_r) {
-            for (size_t dim_r = 0; dim_r < 3; ++dim_r) {
-                const size_t r = atom_r * 3 + dim_r;
+            for (size_t dim_r = 0; dim_r < Dim; ++dim_r) {
+                const size_t r = atom_r * Dim + dim_r;
                 for (size_t c = (atom_r + 1) * Dim; c < dof; ++c)
                     result(r, c) = forceConst(cell, r, c);
 
                 //Handle self interaction
-                for (size_t dim_c = dim_r; dim_c < 3; ++dim_c) {
-                    const size_t c = atom_r * 3 + dim_c;
+                for (size_t dim_c = dim_r; dim_c < Dim; ++dim_c) {
+                    const size_t c = atom_r * Dim + dim_c;
                     ScalarType temp = 0;
                     for (size_t atom_c = 0; atom_c < numParticle; ++atom_c) {
                         if (atom_r == atom_c)
                             continue;
-                        temp += result(r, atom_c * 3 + dim_c);
+                        temp += result(r, atom_c * Dim + dim_c);
                     }
                     result(r, c) = -temp;
                 }
@@ -358,7 +358,7 @@ namespace Physica::Core {
 
                     for (const size_t atom1 : arr1) {
                         const Vector3D from = pos.row(atom1) - translate;
-                        Vector3D r, f(3, 0);
+                        Vector3D r, f(Dim, 0);
                         for (const size_t atom2 : arr2) {
                             const auto to = pos.row(atom2);
                             r = to.asVector() - from;
