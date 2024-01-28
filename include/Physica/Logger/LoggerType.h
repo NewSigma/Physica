@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2021 WeiBo He.
+ * Copyright 2020-2024 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -46,11 +46,11 @@ namespace Physica::Logger {
     };
 
     enum class LogLevel {
+        Off,
         Fatal,
         Warning,
         Info,
         Debug,
-        Off,
         Global //Use global level instead.
     };
 

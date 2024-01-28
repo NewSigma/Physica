@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2023 WeiBo He.
+ * Copyright 2020-2024 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -48,24 +48,18 @@ namespace Physica::Utils {
         RingBuffer(RingBuffer&& ring) noexcept;
         ~RingBuffer();
         /* Operators */
-        RingBuffer& operator=(RingBuffer ring) noexcept;
+        RingBuffer& operator=(RingBuffer obj) noexcept { swap(obj); return *this; }
         /* Operations */
-        void swap(RingBuffer& __restrict ring) noexcept;
-        template<typename T>
-        inline void write(T t);
-
-        template<typename T>
-        inline void read(T* t);
-
-        template<typename T>
-        inline void cread(T* t, size_t bias) const;
-        /* Getters */
-        [[nodiscard]] bool isEmpty() const noexcept { return bufferReader == bufferWriter; }
-        [[nodiscard]] size_t getSize() const noexcept { return size; }
-    private:
+        template<typename T> inline void write(T t);
+        template<typename T> inline void read(T* t);
+        template<typename T> inline void cread(T* t, size_t bias) const;
         void writeBytes(const char* src, size_t bytes);
         void readBytes(char* dest, size_t bytes);
         void creadBytes(char* dest, size_t bytes, size_t bias) const;
+        void swap(RingBuffer& __restrict ring) noexcept;
+        /* Getters */
+        [[nodiscard]] bool isEmpty() const noexcept { return bufferReader == bufferWriter; }
+        [[nodiscard]] size_t getSize() const noexcept { return size; }
     };
     /*!
      * Write T to the buffer.

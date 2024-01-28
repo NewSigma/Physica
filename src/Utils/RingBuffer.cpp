@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2023 WeiBo He.
+ * Copyright 2020-2024 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -44,19 +44,6 @@ namespace Physica::Utils {
             , bufferReader(ring.bufferReader)
             , bufferWriter(ring.bufferWriter) {
         ring.buffer = nullptr;
-    }
-
-    RingBuffer& RingBuffer::operator=(RingBuffer ring) noexcept {
-        swap(ring);
-        return *this;
-    }
-
-    void RingBuffer::swap(RingBuffer& __restrict ring) noexcept {
-        assert(this != &ring && "[Error]: Self swap is likely a bug");
-        std::swap(buffer, ring.buffer);
-        std::swap(size, ring.size);
-        std::swap(bufferReader, ring.bufferReader);
-        std::swap(bufferWriter, ring.bufferWriter);
     }
     /*!
      * Read data from src and write bytes bytes to the buffer.
@@ -127,5 +114,13 @@ namespace Physica::Utils {
             memcpy(dest, startPos, leftSpace);
             memcpy(dest + leftSpace, buffer, leftBytes);
         }
+    }
+
+    void RingBuffer::swap(RingBuffer& __restrict ring) noexcept {
+        assert(this != &ring && "[Error]: Self swap is likely a bug");
+        std::swap(buffer, ring.buffer);
+        std::swap(size, ring.size);
+        std::swap(bufferReader, ring.bufferReader);
+        std::swap(bufferWriter, ring.bufferWriter);
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 WeiBo He.
+ * Copyright 2020-2024 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -23,6 +23,7 @@
 #include "Physica/Logger/Logger/StdLogger.h"
 
 namespace Physica::Logger {
+    LogLevel LoggerRuntime::globalLevel = LogLevel::Info;
     thread_local LogBuffer* LoggerRuntime::threadLogBuffer = nullptr;
 
     LoggerRuntime::LoggerRuntime()
@@ -41,8 +42,7 @@ namespace Physica::Logger {
     }
 
     LoggerRuntime::~LoggerRuntime() {
-        if (logThread.joinable())
-            logThread.join();
+        waitExit();
         for (auto& logger : loggerList)
             delete logger;
         for (LogBuffer* buffer : bufferList)
@@ -90,7 +90,10 @@ namespace Physica::Logger {
                 findNextBufferToLog();
             }
 
+            bufferListMutex.lock();
             LogBuffer& buffer = *bufferList[processingBufferID];
+            bufferListMutex.unlock();
+
             while (!buffer.isEmpty()) {
                 size_t loggerID;
                 buffer.read(&loggerID);
@@ -101,6 +104,7 @@ namespace Physica::Logger {
     }
 
     void LoggerRuntime::findNextBufferToLog() noexcept {
+        std::unique_lock<std::mutex> lock(bufferListMutex);
         std::vector<LogBuffer*> newBufferList{};
         newBufferList.reserve(bufferList.size());
         for (auto ite = bufferList.begin(); ite != bufferList.end(); ++ite) {

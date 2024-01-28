@@ -65,7 +65,6 @@ namespace Physica::Core {
     template<class ScalarType>
     void Correlation<ScalarType>::sample(ScalarType data) {
         const size_t numStep = getNumStep();
-        assert(v.getLength() == numStep && "[Error]: Invalid sample");
         auto& rSpace = fft.getRSpace();
         auto head = rSpace.head(numStep);
         head[step] = data;

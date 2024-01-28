@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 WeiBo He.
+ * Copyright 2020-2024 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -16,8 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef PHYSICA_LOGGERRUNTIMEIMPL_H
-#define PHYSICA_LOGGERRUNTIMEIMPL_H
+#pragma once
 
 #include <cstring>
 #include "Physica/Utils/Cycler.h"
@@ -41,8 +40,7 @@ namespace Physica::Logger {
         if(*p_args == ArgType::s) {
             size_t strLength = std::strlen(head);
             buffer.write(strLength);
-            for(size_t i = 0; i < strLength; ++i)
-                buffer.write(head[i]);
+            buffer.writeBytes(head, strLength);
         }
         else {
             buffer.write(head);
@@ -63,11 +61,10 @@ namespace Physica::Logger {
      */
     template<typename... Ts>
     void log(const ArgType* p_args, size_t logID, Ts... args) {
+        assert(logID <= LoggerRuntime::getInstance().getNextLogID() && "[Error]: The log ID is not registered");
         size_t time = Utils::Cycler::now();
         writeArgs(p_args, logID);
         writeArgs(p_args, time);
         writeArgs(p_args, args...);
     }
 }
-
-#endif

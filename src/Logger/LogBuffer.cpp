@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2023 WeiBo He.
+ * Copyright 2021-2024 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -77,9 +77,7 @@ namespace Physica::Logger {
                         size_t strLength;
                         read(&strLength);
                         char* str = new char[strLength + 1];
-                        char* p = str;
-                        for(size_t i = 0; i < strLength; ++i)
-                            read(p++);
+                        readBytes(str, strLength);
                         str[strLength] = '\0';
                         logString << str;
                         delete[] str;

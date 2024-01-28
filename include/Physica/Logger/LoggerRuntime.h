@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2021 WeiBo He.
+ * Copyright 2020-2024 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -28,10 +28,11 @@
 #include <unistd.h>
 #include "LogBuffer.h"
 #include "LoggerType.h"
-#include "Physica/Logger/Logger/AbstractLogger.h"
 #include "LoggerTimer.h"
+#include "FormatAnalyzer.h"
 
 namespace Physica::Logger {
+    class AbstractLogger;
     /**
      * Three loggers will be created after initialized: std::clog, std::cout, std::cerr,
      * whose ids are 0, 1 and 2.
@@ -47,6 +48,7 @@ namespace Physica::Logger {
     public:
         constexpr static const char* __restrict levelString[4] = { "Fatal", "Warning", "Info", "Debug" };
         constexpr static size_t unassignedLogID = 0;
+        static LogLevel globalLevel;
     private:
         constexpr static size_t DefaultBufferSize = 1U << 20U;
         thread_local static LogBuffer* threadLogBuffer;
@@ -108,6 +110,7 @@ namespace Physica::Logger {
 }
 
 #include "LoggerRuntimeImpl.h"
+#include "Logger/AbstractLogger.h"
 
 #define Log(loggerID, severity, format, ...)                                                        \
     do {                                                                                            \
@@ -122,7 +125,7 @@ namespace Physica::Logger {
                                                                                                     \
             if(logID == LoggerRuntime::unassignedLogID) {                                           \
                 constexpr LogInfo info{                                                             \
-                        LoggerRuntime::levelString[static_cast<int>(LogLevel::severity)],           \
+                        LoggerRuntime::levelString[static_cast<int>(LogLevel::severity) - 1],       \
                         format,                                                                     \
                         getFileName(__FILE__),                                                      \
                         __LINE__,                                                                   \
