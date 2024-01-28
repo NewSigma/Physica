@@ -43,9 +43,9 @@ namespace Physica::Core {
     class Vector : public ContinuousVector<Vector<T, Length, MaxLength, Allocator>>, public Utils::Array<T, Length, MaxLength, Allocator> {
         static_assert(Length == Dynamic || Length == MaxLength, "MaxLength of fixed vector must equals to its length.");
         using This = Vector<T, Length, MaxLength, Allocator>;
-        using Storage = Utils::Array<T, Length, MaxLength, Allocator>;
     public:
         using Base = ContinuousVector<This>;
+        using Storage = Utils::Array<T, Length, MaxLength, Allocator>;
         using device_obj_type = device_obj<This>;
         using typename Base::ScalarType;
         using typename Base::PlainScalar;
