@@ -7,11 +7,11 @@
 #include <fstream>
 #include <gperftools/profiler.h>
 #include <QApplication>
+#include "Physica/Core/Math/Statistics/Correlation.h"
 #include "Physica/Core/Physics/MD/RPMD.h"
 #include "Physica/Core/Physics/MD/Thermostat/DoubleThermo.h"
 #include "Physica/Core/Physics/MD/KineticModel/FreeModel.h"
 #include "Physica/Core/Physics/MD/ForceModel/LJModel1.h"
-#include "Physica/Core/Physics/MD/Analyser/Correlation.h"
 #include "Physica/Core/Parallel/Executor/ThreadExecutor.h"
 #include "Physica/Gui/Plot/Plot.h"
 

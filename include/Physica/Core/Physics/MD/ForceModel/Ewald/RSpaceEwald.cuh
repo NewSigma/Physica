@@ -73,6 +73,7 @@ namespace Physica::Core {
         [[nodiscard]] inline Vector<ScalarType> force_short(const PositionMatrix& pos);
 
         [[nodiscard]] inline LatticeMatrix virial(const PositionMatrix& pos);
+        [[nodiscard]] BornChargeArray calcBornCharge() const { return host_obj::makeBornCharge(charges); }
         void swap(device_obj& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] const DeviceLattice& getLattice() const noexcept { return lattice; }

@@ -116,11 +116,7 @@ namespace Physica::Gui {
         }
         getAxisX()->append(label, double(currentX));
     }
-    /**
-     * Estimating path connection algorithm from phonopy[1]
-     * Reference:
-     * [1] https://github.com/phonopy/phonopy
-     */
+
     template<class ScalarType>
     void PhononPlot<ScalarType>::plotPathLine(
             const PhononType& phonon,

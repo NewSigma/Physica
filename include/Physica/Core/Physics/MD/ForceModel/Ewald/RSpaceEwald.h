@@ -88,7 +88,7 @@ namespace Physica::Core {
         [[nodiscard]] ComplexType forceConst(const PositionMatrix& pos, const Vector3D& waveQ, size_t dof1, size_t dof2) const;
 
         [[nodiscard]] inline LatticeMatrix virial(const PositionMatrix& pos) const;
-        [[nodiscard]] BornChargeArray calcBornCharge() const;
+        [[nodiscard]] BornChargeArray calcBornCharge() const { return makeBornCharge(charges); }
         void swap(RSpaceEwald& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] const LatticeMatrix& getLattice() const noexcept { return lattice; }
@@ -122,6 +122,8 @@ namespace Physica::Core {
         /* Getters */
         using Base::getCutoff;
         using Base::getSquaredCutoff;
+        /* Static members */
+        [[nodiscard]] static BornChargeArray makeBornCharge(const Vector<ScalarType>& charges);
         /* Friends */
         friend class PairModel<RSpaceEwald<ScalarType, IsSmallCell>>;
         friend class device_obj<This>;
@@ -204,16 +206,6 @@ namespace Physica::Core {
     inline typename RSpaceEwald<ScalarType, IsSmallCell>::LatticeMatrix
     RSpaceEwald<ScalarType, IsSmallCell>::virial(const PositionMatrix& pos) const {
         return Base::virial(lattice, pos);
-    }
-
-    template<class ScalarType, bool IsSmallCell>
-    typename RSpaceEwald<ScalarType, IsSmallCell>::BornChargeArray RSpaceEwald<ScalarType, IsSmallCell>::calcBornCharge() const {
-        BornChargeArray result(getNumParticle(), Matrix3D(3, 3, ScalarType(0)));
-        for (size_t i = 0; i < result.getLength(); ++i) {
-            auto diag = result[i].diag();
-            diag = charges[i];
-        }
-        return result;
     }
 
     template<class ScalarType, bool IsSmallCell>
@@ -339,5 +331,16 @@ namespace Physica::Core {
         const ScalarType term1 = erfc(x);
         const ScalarType term2 = ScalarType(M_2_SQRTPI) * x / exp(square(x));
         return -(term1 + term2) / (square(r) * r);
+    }
+
+    template<class ScalarType, bool IsSmallCell>
+    typename RSpaceEwald<ScalarType, IsSmallCell>::BornChargeArray
+    RSpaceEwald<ScalarType, IsSmallCell>::makeBornCharge(const Vector<ScalarType>& charges) {
+        BornChargeArray result(charges.getLength(), Matrix3D(3, 3, ScalarType(0)));
+        for (size_t i = 0; i < result.getLength(); ++i) {
+            auto diag = result[i].diag();
+            diag = charges[i];
+        }
+        return result;
     }
 }

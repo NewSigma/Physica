@@ -33,7 +33,7 @@ namespace Physica::Core {
 
         FFT<ScalarType, 1> fft;
         VectorType corr;
-        ScalarType expected;
+        ScalarType mean;
         size_t numSample;
         size_t step;
     public:
@@ -49,6 +49,7 @@ namespace Physica::Core {
         void swap(Correlation& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] size_t getNumStep() const noexcept { return corr.getLength(); }
+        [[nodiscard]] ScalarType getMean() const noexcept { return mean; }
         [[nodiscard]] size_t getNumSample() const noexcept { return numSample; }
     };
 
@@ -77,7 +78,7 @@ namespace Physica::Core {
 
             fft.transform();
             auto& kSpace = fft.getKSpace();
-            toNextMean(expected, numSample, kSpace[0].getReal() / ScalarType(numStep));
+            toNextMean(mean, numSample, kSpace[0].getReal() / ScalarType(numStep));
             kSpace = toSquaredNormVector(kSpace);
             fft.invTransform();
 
@@ -93,7 +94,7 @@ namespace Physica::Core {
     typename Correlation<ScalarType>::VectorType Correlation<ScalarType>::makeCorr(bool removeDrift) const {
         VectorType result = corr;
         if (removeDrift)
-            result -= square(expected);
+            result -= square(mean);
         return result;
     }
 
@@ -102,7 +103,7 @@ namespace Physica::Core {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         fft.swap(obj.fft);
         corr.swap(obj.corr);
-        expected.swap(obj.expected);
+        mean.swap(obj.mean);
         std::swap(numSample, obj.numSample);
         std::swap(step, obj.step);
     }
