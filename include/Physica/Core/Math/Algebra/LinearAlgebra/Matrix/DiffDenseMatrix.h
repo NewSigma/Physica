@@ -23,10 +23,10 @@
 
 namespace Physica::Core {
     namespace Internal {
-        template<class PlainScalar, int Option>
-        class Traits<Differentiable<DenseMatrix<PlainScalar, Option>, DiffMode::Reverse>> : public Traits<DenseMatrix<PlainScalar, Option>> {
+        template<class T, int Option>
+        class Traits<Differentiable<DenseMatrix<T, Option>, DiffMode::Reverse>> : public Traits<DenseMatrix<T, Option>> {
         public:
-            using ScalarType = Differentiable<PlainScalar, DiffMode::Reverse>;
+            using ScalarType = Differentiable<T, DiffMode::Reverse>;
         };
     }
 
@@ -54,6 +54,8 @@ namespace Physica::Core {
         /* Operators */
         Differentiable& operator=(const Differentiable&) = default;
         Differentiable& operator=(Differentiable&&) noexcept = default;
+        /* Operations */
+        void swap(Differentiable& obj) noexcept { std::swap(*this, obj); }
         /* Getters */
         using Dim::getRow;
         using Dim::getColumn;

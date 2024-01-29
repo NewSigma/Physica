@@ -39,7 +39,8 @@ namespace Physica::Core {
         using Base = LayerBase<This>;
         using PlainScalar = typename ScalarType::PlainScalar;
         using VectorType = typename Base::VectorType;
-        using MatrixType = DenseMatrix<ScalarType, MatrixOption::Row | MatrixOption::Vector>;
+        constexpr static int Option = MatrixOption::Row | MatrixOption::Vector;
+        using MatrixType = DenseMatrix<ScalarType, Option>;
         using BiasType = typename std::conditional<WithBias, VectorType, PlainStruct<void>>::type;
 
         MatrixType weights;
@@ -72,6 +73,8 @@ namespace Physica::Core {
         [[nodiscard]] size_t getOutputDim() const noexcept { return weights.getRow(); }
         [[nodiscard]] const MatrixType& getWeights() const noexcept { return weights; }
         [[nodiscard]] const BiasType& getBias() const noexcept { return bias; }
+    private:
+        friend class device_obj<This>;
     };
 
     template<class ScalarType, bool WithBias>

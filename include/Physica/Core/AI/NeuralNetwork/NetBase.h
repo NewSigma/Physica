@@ -35,6 +35,7 @@ namespace Physica::Core {
         using typename Base::VectorType;
         using SampleType = typename DerivedTraits::SampleType;
         using LabelType = typename DerivedTraits::LabelType;
+        using Base::IsTrainMode;
     private:
         std::unique_ptr<AutoDiffGuard<PlainScalar>> net_guard;
     public:
@@ -62,7 +63,7 @@ namespace Physica::Core {
 
     template<class Derived>
     NetBase<Derived>::NetBase() {
-        if constexpr (Base::isTrainMode())
+        if constexpr (IsTrainMode)
             net_guard = std::make_unique<AutoDiffGuard<PlainScalar>>();
     }
 
@@ -72,8 +73,7 @@ namespace Physica::Core {
     template<class Derived>
     template<class Dataset, class Optimizer, class RandomPoolType, class Executor>
     void NetBase<Derived>::train_step(const Dataset& dataset, Optimizer& opt) {
-        constexpr bool isTrainMode = Base::isTrainMode();
-        static_assert(isTrainMode, "[Error]: train_step must be called under training mode");
+        static_assert(IsTrainMode, "[Error]: train_step must be called under training mode");
         if constexpr (std::is_same<Executor, SequentialExecutor>::value) {
             auto dist = std::uniform_int_distribution<size_t>(0, dataset.getSize() - 1);
             auto& gen = RandomPoolType::getInstance().getGen();
@@ -123,8 +123,7 @@ namespace Physica::Core {
 
     template<class Derived>
     size_t NetBase<Derived>::classify(const VectorType& input) const {
-        constexpr bool isTrainMode = Base::isTrainMode();
-        static_assert(!isTrainMode, "[Error]: It is suggested using eval mode to reduce memory use");
+        static_assert(!IsTrainMode, "[Error]: It is suggested using eval mode to reduce memory use");
         const VectorType output = Base::forward(input);
         PlainScalar max = output[0];
         size_t index = 0;

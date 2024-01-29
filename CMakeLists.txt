@@ -134,6 +134,9 @@ file(GLOB_RECURSE HEADERS include/*.h include/*.cuh)
 add_subdirectory(src)
 #Enable examples
 if(${BUILD_EXAMPLES})
+    if(NOT ${PHYSICA_GUI})
+        message(FATAL_ERROR "To use Physica examples, you should enable PHYSICA_GUI.")
+    endif()
     add_subdirectory(examples)
 endif()
 #Enable Tests

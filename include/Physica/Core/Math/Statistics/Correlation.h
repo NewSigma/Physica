@@ -45,6 +45,7 @@ namespace Physica::Core {
         Correlation& operator=(Correlation obj) noexcept { swap(obj); return *this; }
         /* Operations */
         void sample(ScalarType data);
+        void resample() noexcept { step = 0; }
         [[nodiscard]] VectorType makeCorr(bool removeDrift) const;
         void swap(Correlation& __restrict obj) noexcept;
         /* Getters */

@@ -53,6 +53,8 @@ namespace Physica::Core {
         /* Operators */
         Differentiable& operator=(const Differentiable&) = default;
         Differentiable& operator=(Differentiable&&) noexcept = default;
+        /* Operations */
+        void swap(Differentiable& obj) noexcept { std::swap(*this, obj); }
         /* Getters */
         [[nodiscard]] inline ScalarType calc(size_t index) const;
         [[nodiscard]] size_t getLength() const noexcept { return traceSeg.getLength(); }
@@ -65,6 +67,8 @@ namespace Physica::Core {
         inline static This random_normal(size_t len, RandomGenerator& gen);
         template<class Distribution, class RandomGenerator>
         inline static This random_any(size_t len, Distribution& dist, RandomGenerator& gen);
+        /* Friends */
+        friend class device_obj<This>;
     };
 
     template<class PlainScalar>
