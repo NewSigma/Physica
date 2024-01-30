@@ -22,15 +22,38 @@
 #include "Differentiable.h"
 
 namespace Physica::Core {
+    namespace Internal {
+        template<class T, DiffMode M>
+        class Traits<device_obj<Differentiable<T, M>>> {
+            static_assert(!T::isDifferentiable, "[Error]: Nested Differentiable<> is not allowed");
+            static_assert(!Utils::is_device_obj<T>::value, "[Error]: Nested device_obj<> is not allowed");
+            using RealT = typename T::RealType;
+            using ComplexT = typename T::ComplexType;
+        public:
+            using ScalarType = device_obj<Differentiable<T, M>>;
+            using RealType = device_obj<Differentiable<RealT, M>>;
+            using ComplexType = device_obj<Differentiable<ComplexT, M>>;
+            using TrivialType = typename T::TrivialType;
+            using PlainScalar = T;
+            constexpr static ScalarOption Option = T::Option;
+            constexpr static bool isComplex = T::isComplex;
+            constexpr static bool isDifferentiable = true;
+            constexpr static DiffMode Mode = M;
+        };
+    }
+
     template<class ScalarType>
-    class device_obj<Differentiable<ScalarType, DiffMode::Reverse>> {
+    class device_obj<Differentiable<ScalarType, DiffMode::Reverse>>
+            : public ScalarBase<device_obj<Differentiable<ScalarType, DiffMode::Reverse>>> {
         using host_obj = Differentiable<ScalarType, DiffMode::Reverse>;
         using This = device_obj<host_obj>;
+        using Base = ScalarBase<This>;
 
         ScalarType* __restrict pValue;
         ScalarType* __restrict pGrad;
     public:
         device_obj() = default;
+        __device__ device_obj(ScalarType* pValue_, ScalarType* pGrad_);
         device_obj(const device_obj&) = default;
         device_obj(device_obj&&) noexcept = default;
         ~device_obj() = default;
@@ -53,8 +76,12 @@ namespace Physica::Core {
         [[nodiscard]] __host__ __device__ bool isPositive() const { return getValue().isPositive(); }
         [[nodiscard]] __host__ __device__ bool isNegative() const { return getValue().isNegative(); }
         /* Setters */
-        __deivce__ void setValue(const ScalarType& x) { *pValue = x; }
+        __device__ void setValue(const ScalarType& x) { *pValue = x; }
     };
+
+    template<class ScalarType>
+    __device__ device_obj<Differentiable<ScalarType, DiffMode::Reverse>>::device_obj(ScalarType* pValue_, ScalarType* pGrad_)
+            : pValue(pValue_), pGrad(pGrad_) {}
 
     template<class ScalarType>
     __host__ __device__ inline bool device_obj<Differentiable<ScalarType, DiffMode::Reverse>>::operator==(const This& other) const {

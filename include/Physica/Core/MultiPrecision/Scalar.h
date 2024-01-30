@@ -28,7 +28,6 @@
 #include "ScalarImpl/ScalarBase.h"
 #include "Physica/Core/Exception/NotImplementedException.h"
 #include "Physica/Core/IO/HDF5/HDF5.h"
-#include "Physica/Utils/CUDA/device_obj.cuh"
 
 namespace Physica::Core {
     //Forward declarations
@@ -174,8 +173,7 @@ namespace Physica::Core {
         using This = Scalar<Float>;
         using Base = ScalarBase<This>;
     public:
-        using ScalarType = This;
-        using device_obj_type = device_obj<ScalarType>;
+        using device_obj_type = This;
     private:
         float f;
     public:
@@ -245,8 +243,7 @@ namespace Physica::Core {
         using This = Scalar<Double>;
         using Base = ScalarBase<This>;
     public:
-        using ScalarType = This;
-        using device_obj_type = device_obj<ScalarType>;
+        using device_obj_type = This;
     private:
         double d;
     public:

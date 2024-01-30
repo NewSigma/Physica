@@ -119,7 +119,7 @@ namespace Physica::Core {
     template<class RandomGenerator>
     void LinearLayer<ScalarType, WithBias>::random_xavier_uniform(PlainScalar gain, RandomGenerator& gen) {
         using TrivialType = typename ScalarType::TrivialType;
-        const TrivialType factor = gain * sqrt(PlainScalar(6) / PlainScalar(getInputDim() + getOutputDim()));
+        const auto factor = (gain * sqrt(PlainScalar(6) / PlainScalar(getInputDim() + getOutputDim()))).getTrivial();
         std::uniform_real_distribution<TrivialType> dist(-factor, factor);
         weights.random_any(dist, gen);
         if constexpr (WithBias)
@@ -130,7 +130,7 @@ namespace Physica::Core {
     template<class RandomGenerator>
     void LinearLayer<ScalarType, WithBias>::random_xavier_normal(PlainScalar gain, RandomGenerator& gen) {
         using TrivialType = typename ScalarType::TrivialType;
-        const TrivialType deviation = gain * sqrt(PlainScalar(2) / PlainScalar(getInputDim() + getOutputDim()));
+        const auto deviation = (gain * sqrt(PlainScalar(2) / PlainScalar(getInputDim() + getOutputDim()))).getTrivial();
         std::normal_distribution<TrivialType> dist(0, deviation);
         weights.random_any(dist, gen);
         if constexpr (WithBias)

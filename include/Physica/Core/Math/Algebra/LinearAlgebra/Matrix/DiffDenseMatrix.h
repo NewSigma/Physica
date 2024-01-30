@@ -35,19 +35,21 @@ namespace Physica::Core {
             : public RValueMatrix<Differentiable<DenseMatrix<PlainScalar, Option>, DiffMode::Reverse>>
             , public DenseMatrixDim<Differentiable<DenseMatrix<PlainScalar, Option>, DiffMode::Reverse>, Dynamic, Dynamic, Dynamic, Dynamic> {
         static_assert(!PlainScalar::isDifferentiable, "[Error]: Nested Differentiable<> is not allowed");
-        using MatrixType = DenseMatrix<PlainScalar, Option>;
-        using This = Differentiable<MatrixType, DiffMode::Reverse>;
+        using PlainMatrix = DenseMatrix<PlainScalar, Option>;
+        using This = Differentiable<PlainMatrix, DiffMode::Reverse>;
         using Base = RValueMatrix<This>;
         using Dim = DenseMatrixDim<This, Dynamic, Dynamic, Dynamic, Dynamic>;
         using TracerType = DiffTracer<PlainScalar>;
         using SegmentType = TraceSegment<PlainScalar>;
     public:
+        using device_obj_type = device_obj<This>;
         using ScalarType = typename Base::ScalarType;
     private:
         SegmentType& traceSeg;
     public:
         Differentiable();
-        Differentiable(MatrixType values);
+        Differentiable(size_t row, size_t column);
+        Differentiable(PlainMatrix values);
         Differentiable(const Differentiable&) = default;
         Differentiable(Differentiable&&) noexcept = default;
         ~Differentiable() = default;
@@ -55,6 +57,10 @@ namespace Physica::Core {
         Differentiable& operator=(const Differentiable&) = default;
         Differentiable& operator=(Differentiable&&) noexcept = default;
         /* Operations */
+        template<class RandomGenerator> inline void random_uniform(RandomGenerator& gen);
+        template<class RandomGenerator> inline void random_normal(RandomGenerator& gen);
+        template<class Distribution, class RandomGenerator>
+        inline void random_any(Distribution& dist, RandomGenerator& gen);
         void swap(Differentiable& obj) noexcept { std::swap(*this, obj); }
         /* Getters */
         using Dim::getRow;
@@ -67,6 +73,8 @@ namespace Physica::Core {
         [[nodiscard]] inline static This random_normal(size_t row, size_t column, RandomGenerator& gen);
         template<class Distribution, class RandomGenerator>
         [[nodiscard]] inline static This random_any(size_t row, size_t column, Distribution& dist, RandomGenerator& gen);
+    private:
+        friend class device_obj<This>;
     };
 
     template<class PlainScalar, int Option>
@@ -74,15 +82,37 @@ namespace Physica::Core {
             : traceSeg(TracerType::getInstance().pushSegment()) {}
 
     template<class PlainScalar, int Option>
-    Differentiable<DenseMatrix<PlainScalar, Option>, DiffMode::Reverse>::Differentiable(MatrixType values)
+    Differentiable<DenseMatrix<PlainScalar, Option>, DiffMode::Reverse>::Differentiable(size_t row, size_t column)
+            : traceSeg(TracerType::getInstance().pushSegment(row * column)) {}
+
+    template<class PlainScalar, int Option>
+    Differentiable<DenseMatrix<PlainScalar, Option>, DiffMode::Reverse>::Differentiable(PlainMatrix values)
             : traceSeg(TracerType::getInstance().pushSegment(values.flatten())) {}
+
+    template<class PlainScalar, int Option>
+    template<class RandomGenerator>
+    inline void Differentiable<DenseMatrix<PlainScalar, Option>, DiffMode::Reverse>::random_uniform(RandomGenerator& gen) {
+        *this = random_uniform(getRow(), getColumn(), gen);
+    }
+
+    template<class PlainScalar, int Option>
+    template<class RandomGenerator>
+    inline void Differentiable<DenseMatrix<PlainScalar, Option>, DiffMode::Reverse>::random_normal(RandomGenerator& gen) {
+        *this = random_normal(getRow(), getColumn(), gen);
+    }
+
+    template<class PlainScalar, int Option>
+    template<class Distribution, class RandomGenerator>
+    inline void Differentiable<DenseMatrix<PlainScalar, Option>, DiffMode::Reverse>::random_any(Distribution& dist, RandomGenerator& gen) {
+        *this = random_any(getRow(), getColumn(), dist, gen);
+    }
 
     template<class PlainScalar, int Option>
     template<class RandomGenerator>
     inline Differentiable<DenseMatrix<PlainScalar, Option>, DiffMode::Reverse>
     Differentiable<DenseMatrix<PlainScalar, Option>, DiffMode::Reverse>::random_uniform(
             size_t row, size_t column, RandomGenerator& gen) {
-        return This(MatrixType::random_uniform(row, column, gen));
+        return This(PlainMatrix::random_uniform(row, column, gen));
     }
 
     template<class PlainScalar, int Option>
@@ -90,7 +120,7 @@ namespace Physica::Core {
     inline Differentiable<DenseMatrix<PlainScalar, Option>, DiffMode::Reverse>
     Differentiable<DenseMatrix<PlainScalar, Option>, DiffMode::Reverse>::random_normal(
             size_t row, size_t column, RandomGenerator& gen) {
-        return This(MatrixType::random_normal(row, column, gen));
+        return This(PlainMatrix::random_normal(row, column, gen));
     }
 
     template<class PlainScalar, int Option>
@@ -98,6 +128,6 @@ namespace Physica::Core {
     inline Differentiable<DenseMatrix<PlainScalar, Option>, DiffMode::Reverse>
     Differentiable<DenseMatrix<PlainScalar, Option>, DiffMode::Reverse>::random_any(
             size_t row, size_t column, Distribution& dist, RandomGenerator& gen) {
-        return This(MatrixType::random_any(row, column, dist, gen));
+        return This(PlainMatrix::random_any(row, column, dist, gen));
     }
 }

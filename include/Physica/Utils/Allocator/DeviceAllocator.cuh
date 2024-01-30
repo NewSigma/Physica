@@ -25,6 +25,18 @@
 #include "Allocator.h"
 
 namespace Physica::Utils {
+    namespace Internal {
+        template<class T, bool IsClass>
+        struct DeviceAllocatorValueType {
+            using Type = typename T::device_obj_type;
+        };
+
+        template<class T>
+        struct DeviceAllocatorValueType<T, false> {
+            using Type = T;
+        };
+    }
+
     template<class T> class DeviceAllocator;
 
     template<class From, class To>
@@ -38,7 +50,7 @@ namespace std {
     struct allocator_traits<Physica::Utils::DeviceAllocator<T>> {
     public:
         using allocator_type = Physica::Utils::DeviceAllocator<T>;
-        using value_type = typename Physica::Utils::add_device_obj<T>::Type;
+        using value_type = typename Physica::Utils::Internal::DeviceAllocatorValueType<T, std::is_class<T>::value>::Type;
         using pointer = value_type*;
         using const_pointer = const value_type*;
         using void_pointer = void*;

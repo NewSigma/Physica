@@ -108,7 +108,9 @@ namespace Physica::Core {
     class Differentiable<ScalarType, DiffMode::Reverse> : public ScalarBase<Differentiable<ScalarType, DiffMode::Reverse>> {
         using This = Differentiable<ScalarType, DiffMode::Reverse>;
         using DiffTracerType = DiffTracer<ScalarType>;
-
+    public:
+        using device_obj_type = device_obj<This>;
+    private:
         ScalarType* __restrict pValue;
         ScalarType* __restrict pGrad;
     public:

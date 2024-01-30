@@ -20,12 +20,19 @@
 
 #include "LinearLayer.h"
 #include "LayerBase.cuh"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.cuh"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DiffDenseMatrix.cuh"
 
 namespace Physica::Core {
+    namespace Internal {
+        template<class ScalarType, bool WithBias>
+        class Traits<device_obj<LinearLayer<ScalarType, WithBias>>> : public Traits<LinearLayer<ScalarType, WithBias>> {};
+    }
+
     template<class ScalarType, bool WithBias>
-    class device_obj<Linear<ScalarType, WithBias>> : device_obj<LayerBase<Linear<ScalarType, WithBias>>> {
-        using host_obj = Linear<ScalarType, WithBias>;
+    class device_obj<LinearLayer<ScalarType, WithBias>> : public device_obj<LayerBase<LinearLayer<ScalarType, WithBias>>> {
+        static_assert(!Utils::is_device_obj<ScalarType>::value, "[Error]: Nested device_obj<> is not allowed");
+        using host_obj = LinearLayer<ScalarType, WithBias>;
         using This = device_obj<host_obj>;
         using Base = device_obj<LayerBase<host_obj>>;
         using MatrixType = typename host_obj::MatrixType;
@@ -48,24 +55,33 @@ namespace Physica::Core {
         /* Operators */
         device_obj& operator=(device_obj obj) noexcept { swap(obj); return *this; }
         /* Operations */
-        [[nodiscard]] VectorType forward(const VectorType& input) const;
+        [[nodiscard]] VectorType forward(const VectorType& x) const;
         [[nodiscard]] device_obj copy() const;
+
+        template<class RandomGenerator>
+        void random_normal(RandomGenerator& gen);
+        template<class RandomGenerator>
+        void random_xavier_uniform(PlainScalar gain, RandomGenerator& gen);
+        template<class RandomGenerator>
+        void random_xavier_normal(PlainScalar gain, RandomGenerator& gen);
+        template<class Distribution, class RandomGenerator>
+        void random_any(Distribution& dist, RandomGenerator& gen);
         void swap(device_obj& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] __host__ __device__ size_t getInputDim() const noexcept { return weights.getColumn(); }
         [[nodiscard]] __host__ __device__ size_t getOutputDim() const noexcept { return weights.getRow(); }
-    }
+    };
 
     template<class ScalarType, bool WithBias>
-    device_obj<Linear<ScalarType, WithBias>>::device_obj(size_t inputDim, size_t outputDim)
+    device_obj<LinearLayer<ScalarType, WithBias>>::device_obj(size_t inputDim, size_t outputDim)
             : weights(inputDim, outputDim) {
         if constexpr (WithBias)
             bias = BiasType(outputDim);
     }
 
     template<class ScalarType, bool WithBias>
-    typename device_obj<Linear<ScalarType, WithBias>>::VectorType
-    device_obj<Linear<ScalarType, WithBias>>::forward(const VectorType& input) const {
+    typename device_obj<LinearLayer<ScalarType, WithBias>>::VectorType
+    device_obj<LinearLayer<ScalarType, WithBias>>::forward(const VectorType& x) const {
         assert(x.getLength() == getInputDim() && "[Error]: Data dim and required input dim must be equal");
         if constexpr (WithBias)
             return weights * x + bias;
@@ -74,7 +90,7 @@ namespace Physica::Core {
     }
 
     template<class ScalarType, bool WithBias>
-    device_obj<Linear<ScalarType, WithBias>> device_obj<Linear<ScalarType, WithBias>>::copy() const {
+    device_obj<LinearLayer<ScalarType, WithBias>> device_obj<LinearLayer<ScalarType, WithBias>>::copy() const {
         This result{};
         result.weights = weights.copy();
         if constexpr (WithBias)
@@ -83,7 +99,45 @@ namespace Physica::Core {
     }
 
     template<class ScalarType, bool WithBias>
-    void device_obj<Linear<ScalarType, WithBias>>::swap(device_obj& __restrict obj) noexcept {
+    template<class RandomGenerator>
+    void device_obj<LinearLayer<ScalarType, WithBias>>::random_normal(RandomGenerator& gen) {
+        weights.random_normal(gen);
+        if constexpr (WithBias)
+            bias.random_normal(gen);
+    }
+    
+    template<class ScalarType, bool WithBias>
+    template<class RandomGenerator>
+    void device_obj<LinearLayer<ScalarType, WithBias>>::random_xavier_uniform(PlainScalar gain, RandomGenerator& gen) {
+        using TrivialType = typename ScalarType::TrivialType;
+        const auto factor = (gain * sqrt(PlainScalar(6) / PlainScalar(getInputDim() + getOutputDim()))).getTrivial();
+        std::uniform_real_distribution<TrivialType> dist(-factor, factor);
+        weights.random_any(dist, gen);
+        if constexpr (WithBias)
+            bias.random_any(dist, gen);
+    }
+    
+    template<class ScalarType, bool WithBias>
+    template<class RandomGenerator>
+    void device_obj<LinearLayer<ScalarType, WithBias>>::random_xavier_normal(PlainScalar gain, RandomGenerator& gen) {
+        using TrivialType = typename ScalarType::TrivialType;
+        const auto deviation = (gain * sqrt(PlainScalar(2) / PlainScalar(getInputDim() + getOutputDim()))).getTrivial();
+        std::normal_distribution<TrivialType> dist(0, deviation);
+        weights.random_any(dist, gen);
+        if constexpr (WithBias)
+            bias.random_any(dist, gen);
+    }
+    
+    template<class ScalarType, bool WithBias>
+    template<class Distribution, class RandomGenerator>
+    void device_obj<LinearLayer<ScalarType, WithBias>>::random_any(Distribution& dist, RandomGenerator& gen) {
+        weights.random_any(dist, gen);
+        if constexpr (WithBias)
+            bias.random_any(dist, gen);
+    }
+
+    template<class ScalarType, bool WithBias>
+    void device_obj<LinearLayer<ScalarType, WithBias>>::swap(device_obj& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         weights.swap(obj.weights);
         if constexpr (WithBias)

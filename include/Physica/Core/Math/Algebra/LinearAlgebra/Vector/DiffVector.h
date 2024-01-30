@@ -46,6 +46,7 @@ namespace Physica::Core {
         SegmentType& traceSeg;
     public:
         Differentiable();
+        Differentiable(size_t length);
         Differentiable(VectorType values);
         Differentiable(const Differentiable&) = default;
         Differentiable(Differentiable&&) noexcept = default;
@@ -54,6 +55,10 @@ namespace Physica::Core {
         Differentiable& operator=(const Differentiable&) = default;
         Differentiable& operator=(Differentiable&&) noexcept = default;
         /* Operations */
+        template<class RandomGenerator> inline void random_uniform(RandomGenerator& gen);
+        template<class RandomGenerator> inline void random_normal(RandomGenerator& gen);
+        template<class Distribution, class RandomGenerator>
+        inline void random_any(Distribution& dist, RandomGenerator& gen);
         void swap(Differentiable& obj) noexcept { std::swap(*this, obj); }
         /* Getters */
         [[nodiscard]] inline ScalarType calc(size_t index) const;
@@ -62,21 +67,44 @@ namespace Physica::Core {
         [[nodiscard]] const VectorType& getGrad() const noexcept { return traceSeg.getGrads(); }
         /* Static members */
         template<class RandomGenerator>
-        inline static This random_uniform(size_t len, RandomGenerator& gen);
+        [[nodiscard]] inline static This random_uniform(size_t len, RandomGenerator& gen);
         template<class RandomGenerator>
-        inline static This random_normal(size_t len, RandomGenerator& gen);
+        [[nodiscard]] inline static This random_normal(size_t len, RandomGenerator& gen);
         template<class Distribution, class RandomGenerator>
-        inline static This random_any(size_t len, Distribution& dist, RandomGenerator& gen);
+        [[nodiscard]] inline static This random_any(size_t len, Distribution& dist, RandomGenerator& gen);
         /* Friends */
         friend class device_obj<This>;
     };
 
     template<class PlainScalar>
-    Differentiable<Vector<PlainScalar>, DiffMode::Reverse>::Differentiable() : traceSeg(TracerType::getInstance().pushSegment()) {}
+    Differentiable<Vector<PlainScalar>, DiffMode::Reverse>::Differentiable()
+            : traceSeg(TracerType::getInstance().pushSegment()) {}
+
+    template<class PlainScalar>
+    Differentiable<Vector<PlainScalar>, DiffMode::Reverse>::Differentiable(size_t length)
+            : traceSeg(TracerType::getInstance().pushSegment(length)) {}
 
     template<class PlainScalar>
     Differentiable<Vector<PlainScalar>, DiffMode::Reverse>::Differentiable(VectorType values)
             : traceSeg(TracerType::getInstance().pushSegment(std::move(values))) {}
+
+    template<class PlainScalar>
+    template<class RandomGenerator>
+    inline void Differentiable<Vector<PlainScalar>, DiffMode::Reverse>::random_uniform(RandomGenerator& gen) {
+        *this = random_uniform(getLength(), gen);
+    }
+
+    template<class PlainScalar>
+    template<class RandomGenerator>
+    inline void Differentiable<Vector<PlainScalar>, DiffMode::Reverse>::random_normal(RandomGenerator& gen) {
+        *this = random_normal(getLength(), gen);
+    }
+
+    template<class PlainScalar>
+    template<class Distribution, class RandomGenerator>
+    inline void Differentiable<Vector<PlainScalar>, DiffMode::Reverse>::random_any(Distribution& dist, RandomGenerator& gen) {
+        *this = random_any(getLength(), dist, gen);
+    }
 
     template<class PlainScalar>
     inline typename Differentiable<Vector<PlainScalar>, DiffMode::Reverse>::ScalarType

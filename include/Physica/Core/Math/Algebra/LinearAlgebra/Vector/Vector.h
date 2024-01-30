@@ -83,16 +83,16 @@ namespace Physica::Core {
         [[nodiscard]] __host__ __device__ inline const ScalarType* data_ptr(size_t index) const { return data() + index; }
         /* Helpers */
         using Storage::swap;
-        static Vector Zeros(size_t len);
+        [[nodiscard]] static Vector Zeros(size_t len);
         template<class RandomGenerator>
-        static Vector random_uniform(size_t len, RandomGenerator& gen);
+        [[nodiscard]] static Vector random_uniform(size_t len, RandomGenerator& gen);
         template<class RandomGenerator>
-        static Vector random_uniform(const Vector& v1, const Vector& v2, RandomGenerator& gen);
+        [[nodiscard]] static Vector random_uniform(const Vector& v1, const Vector& v2, RandomGenerator& gen);
         template<class RandomGenerator>
-        static Vector random_normal(size_t len, RandomGenerator& gen);
+        [[nodiscard]] static Vector random_normal(size_t len, RandomGenerator& gen);
         template<class Distribution, class RandomGenerator>
-        static Vector random_any(size_t len, Distribution& dist, RandomGenerator& gen);
-        static Vector linspace(T from, T to, size_t count);
+        [[nodiscard]] static Vector random_any(size_t len, Distribution& dist, RandomGenerator& gen);
+        [[nodiscard]] static Vector linspace(T from, T to, size_t count);
     };
 
     template<class T, size_t Length, size_t MaxLength>

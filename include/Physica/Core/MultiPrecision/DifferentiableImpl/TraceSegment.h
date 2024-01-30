@@ -34,6 +34,8 @@ namespace Physica::Core {
         using DiffScalar = Differentiable<ScalarType, DiffMode::Reverse>;
         using VectorType = Vector<ScalarType>;
         struct DiffRecord {
+            using device_obj_type = DiffRecord;
+
             size_t idFirstOperand;
             ExpressionType source;
         };
@@ -71,7 +73,9 @@ namespace Physica::Core {
         [[nodiscard]] bool full() const noexcept { return records.full(); }
         [[nodiscard]] bool isFound(DiffScalar s) const noexcept { return find(s) < getLength(); }
         [[nodiscard]] size_t find(DiffScalar s) const noexcept;
+        [[nodiscard]] VectorType& getValues() noexcept { return values; }
         [[nodiscard]] const VectorType& getValues() const noexcept { return values; }
+        [[nodiscard]] VectorType& getGrads() noexcept { return grads; }
         [[nodiscard]] const VectorType& getGrads() const noexcept { return grads; }
         /* Static members */
         [[nodiscard]] constexpr static unsigned int numOperand(ExpressionType type);

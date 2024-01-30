@@ -27,7 +27,8 @@ namespace Physica::Core {
         static_assert(!ScalarType::isDifferentiable, "[Error]: Differentiable<> pack is not necessary");
         using host_obj = DiffTracer<ScalarType>;
         using This = device_obj<host_obj>;
-        using SegmentType = device_obj<host_obj::SegmentType>;
+    public:
+        using SegmentType = device_obj<typename host_obj::SegmentType>;
     private:
         std::list<SegmentType> traceList;
     public:
@@ -49,8 +50,6 @@ namespace Physica::Core {
     template<class ScalarType>
     template<class... Args>
     typename device_obj<DiffTracer<ScalarType>>::SegmentType& device_obj<DiffTracer<ScalarType>>::pushSegment(Args&&... args) {
-        if (!traceList.empty())
-            traceList.back().squeeze();
         return traceList.emplace_back(SegmentType(std::forward<Args>(args)...));
     }
 

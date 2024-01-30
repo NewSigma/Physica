@@ -19,6 +19,8 @@
 #pragma once
 
 #include "TraceSegment.h"
+#include "Physica/Core/Parallel/StreamPool.cuh"
+#include "Physica/Core/Parallel/Future/StreamFuture.cuh"
 #include "Physica/Core/MultiPrecision/Differentiable.cuh"
 
 namespace Physica::Core {
@@ -26,15 +28,16 @@ namespace Physica::Core {
     class device_obj<TraceSegment<ScalarType>> {
         static_assert(!ScalarType::isDifferentiable, "[Error]: Differentiable<> pack is not necessary");
         using host_obj = TraceSegment<ScalarType>;
-        using This = device_obj<This>;
+        using This = device_obj<host_obj>;
         using DiffRecord = typename host_obj::DiffRecord;
-        using DiffScalar = device_obj<typename host_obj::DiffScalar>;
+        using HostDiffScalar = typename host_obj::DiffScalar;
+        using DiffScalar = device_obj<HostDiffScalar>;
         using VectorType = typename host_obj::VectorType;
         using DeviceVector = device_obj<VectorType>;
         constexpr static size_t DefaultSize = host_obj::DefaultSize;
     private:
-        device_obj<Utils::Array<DiffRecord>> records;
-        device_obj<Utils::Array<DiffScalar>> operands;
+        Utils::device_obj<Utils::Array<DiffRecord>> records;
+        Utils::device_obj<Utils::Array<HostDiffScalar>> operands;
         DeviceVector values;
         DeviceVector grads;
     public:
@@ -48,53 +51,16 @@ namespace Physica::Core {
         [[nodiscard]] __host__ __device__ inline DiffScalar operator[](size_t index);
         [[nodiscard]] __host__ __device__ inline const DiffScalar operator[](size_t index) const;
         /* Operations */
+        [[nodiscard]] This copy() const;
         void swap(device_obj& __restrict obj) noexcept;
+
+        __device__ void copyKernelImpl(This& target) const;
         /* Getters */
         [[nodiscard]] __host__ __device__ size_t getLength() const noexcept { return records.getLength(); }
         [[nodiscard]] __host__ __device__ size_t getCapacity() const noexcept { return records.getCapacity(); }
         [[nodiscard]] __host__ __device__ bool empty() const noexcept { return records.empty(); }
         [[nodiscard]] __host__ __device__ bool full() const noexcept { return records.full(); }
     };
-
-    template<class ScalarType>
-    device_obj<TraceSegment<ScalarType>>::device_obj(size_t size) {
-        assert(size >= DefaultSize && "[Error]: Allocate a small segment maybe bad to performance");
-        records.reserve(size);
-        operands.reserve(3 * size); //MulAdd operation is 3-operand
-        values.reserve(size);
-        grads.reserve(size);
-    }
-
-    template<class ScalarType>
-    device_obj<TraceSegment<ScalarType>>::device_obj(const VectorType& values_)
-            : records(values_.getLength())
-            , values(values_.getLength())
-            , grads(values_.getLength()) {
-        values_.toDeviceAsync(values);
-        auto future = StreamFuture::makeFuture();
-        cudaMemsetAsync(records.data(), 0, getLength() * sizeof(DiffRecord), &StreamPool::getStream());
-        cudaMemsetAsync(grads.data_ptr(), 0, getLength() * sizeof(DiffScalar), &StreamPool::getStream());
-        future->wait();
-    }
-
-    template<class ScalarType>
-    __host__ __device__ inline typename device_obj<TraceSegment<ScalarType>>::DiffScalar
-    device_obj<TraceSegment<ScalarType>>::operator[](size_t index) {
-        return DiffScalar(values.data_ptr(index), grads.data_ptr(index));
-    }
-
-    template<class ScalarType>
-    __host__ __device__ inline const typename device_obj<TraceSegment<ScalarType>>::DiffScalar
-    device_obj<TraceSegment<ScalarType>>::operator[](size_t index) const {
-        return DiffScalar(const_cast<ScalarType*>(values.data_ptr(index)), const_cast<ScalarType*>(grads.data_ptr(index)));
-    }
-
-    template<class ScalarType>
-    void device_obj<TraceSegment<ScalarType>>::swap(device_obj& __restrict obj) noexcept {
-        assert(this != &obj && "[Error]: Self swap is likely a bug");
-        records.swap(obj.records);
-        operands.swap(obj.operands);
-        values.swap(obj.values);
-        grads.swap(obj.grads);
-    }
 }
+
+#include "TraceSegmentImpl.cuh"

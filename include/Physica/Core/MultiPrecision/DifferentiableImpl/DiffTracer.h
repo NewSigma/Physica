@@ -27,8 +27,8 @@ namespace Physica::Core {
      */
     template<class ScalarType>
     class DiffTracer {
-        using SegmentType = TraceSegment<ScalarType>;
     public:
+        using SegmentType = TraceSegment<ScalarType>;
         using DiffScalar = typename SegmentType::DiffScalar;
         using DiffRecord = typename SegmentType::DiffRecord;
     private:
