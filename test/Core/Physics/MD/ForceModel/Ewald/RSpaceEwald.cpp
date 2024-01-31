@@ -39,7 +39,7 @@ namespace Physica {
         static void run() {
             const ScalarType volume = 125;
             const size_t cellSize = 3;
-            const AutoDiffGuard<PlainScalar> guard{};
+            const AutoDiffGuard<ScalarType> guard{};
             const auto cell = makeSystem(volume, cellSize);
             const auto& pos = cell.getPos();
             Vector<ScalarType> charges(cell.getNumParticle(), 1.0);
@@ -47,7 +47,7 @@ namespace Physica {
             tail = ScalarType(-1);
             RSpaceEwald<ScalarType, false> ewald(cell.getLattice(), std::move(charges));
             {
-                const AutoDiffGuard<PlainScalar> guard1{};
+                const AutoDiffGuard<ScalarType> guard1{};
                 ewald.potentialEnergy(pos).reverse();
             }
             /* Test press */ {

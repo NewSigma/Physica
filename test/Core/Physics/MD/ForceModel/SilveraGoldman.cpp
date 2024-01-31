@@ -37,7 +37,7 @@ class PressTest {
     constexpr static double pair_cutoff = 15;
 public:
     static void run() {
-        const AutoDiffGuard<PlainScalar> guard{};
+        const AutoDiffGuard<ScalarType> guard{};
         RandomGenerator gen{};
         const ScalarType volume = 8000;
         const auto cell = makeSystem(gen, volume);
@@ -66,7 +66,7 @@ private:
 int main() {
     SilveraGoldman<ScalarType, true> sg(1.0);
     {
-        const AutoDiffGuard<PlainScalar> guard{};
+        const AutoDiffGuard<ScalarType> guard{};
         ScalarType r = 2.0;
         const ScalarType r2 = square(r);
         sg.pot_functor(0, 0, r, r2).reverse();
@@ -76,7 +76,7 @@ int main() {
             return 1;
     }
     {
-        const AutoDiffGuard<PlainScalar> guard{};
+        const AutoDiffGuard<ScalarType> guard{};
         ScalarType r = 2.0;
         const ScalarType r2 = square(r);
         sg.force_functor(0, 0, r, r2).reverse();

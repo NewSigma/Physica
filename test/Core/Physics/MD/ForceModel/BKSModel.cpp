@@ -41,12 +41,12 @@ namespace Physica {
         static void run() {
             const ScalarType volume = 125;
             const unsigned int cellSize = 3;
-            const AutoDiffGuard<PlainScalar> guard{};
+            const AutoDiffGuard<ScalarType> guard{};
             RandomGenerator gen{};
             auto cell = makeSystem(cellSize, volume, gen);
             ForceModel forceModel(cell, pair_cutoff, Ewald<ScalarType>{});
             {
-                const AutoDiffGuard<PlainScalar> guard1{};
+                const AutoDiffGuard<ScalarType> guard1{};
                 forceModel.potentialEnergy(cell).reverse();
             }
             /* Test press */ {

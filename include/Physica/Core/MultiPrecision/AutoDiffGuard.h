@@ -21,11 +21,11 @@
 #include "Differentiable.h"
 
 namespace Physica::Core {
-    template<class PlainScalar>
+    template<class ScalarType>
     class AutoDiffGuard {
-        static_assert(!PlainScalar::isDifferentiable, "[Error]: Differentiable<> pack is not necessary");
-        using ScalarType = Differentiable<PlainScalar, DiffMode::Reverse>;
-        using This = AutoDiffGuard<PlainScalar>;
+        static_assert(ScalarType::isDifferentiable, "[Error]: ScalarType must be differentiable");
+        static_assert(!Utils::is_device_obj<ScalarType>::value, "[Error]: Include AutoDiffGuard.cuh to use the diff guard for CUDA");
+        using This = AutoDiffGuard<ScalarType>;
 
         ScalarType node;
     public:
@@ -36,19 +36,20 @@ namespace Physica::Core {
         /* Operators */
         AutoDiffGuard& operator=(AutoDiffGuard obj) noexcept { swap(obj); return *this; }
         /* Operations */
-        void swap(AutoDiffGuard& __restrict obj) noexcept { std::swap(node, obj.node); }
+        void swap(AutoDiffGuard& __restrict obj) noexcept { node.swap(obj.node); }
         /* Getters */
         [[nodiscard]] ScalarType getNode() const noexcept { return node; }
     };
 
-    template<class PlainScalar>
-    AutoDiffGuard<PlainScalar>::AutoDiffGuard() {
+    template<class ScalarType>
+    AutoDiffGuard<ScalarType>::AutoDiffGuard() {
         const ScalarType anyNewNode = ScalarType(0);
         node = anyNewNode;
     }
 
-    template<class PlainScalar>
-    AutoDiffGuard<PlainScalar>::~AutoDiffGuard() {
+    template<class ScalarType>
+    AutoDiffGuard<ScalarType>::~AutoDiffGuard() {
+        using PlainScalar = typename ScalarType::PlainScalar;
         DiffTracer<PlainScalar>::getInstance().forget(node);
     }
 }

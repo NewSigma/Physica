@@ -37,12 +37,11 @@ namespace Physica::Core {
         using LabelType = typename DerivedTraits::LabelType;
         using Base::IsTrainMode;
     private:
-        std::unique_ptr<AutoDiffGuard<PlainScalar>> net_guard;
+        using NetGuardType = typename std::conditional<IsTrainMode, AutoDiffGuard<ScalarType>, PlainStruct<void>>::type;
+
+        NetGuardType net_guard;
     public:
         ~NetBase() = default;
-        /* Operators */
-        NetBase& operator=(const NetBase&) = delete;
-        NetBase& operator=(NetBase&&) noexcept = delete;
         /* Operations */
         template<class Dataset, class Optimizer, class RandomPoolType, class Executor>
         void train_step(const Dataset& dataset, Optimizer& opt);
@@ -54,18 +53,14 @@ namespace Physica::Core {
 
         [[nodiscard]] Derived copy() const { return Base::getDerived().copy(); }
     protected:
-        NetBase();
+        NetBase() = default;
         NetBase(const NetBase&);
         NetBase(NetBase&&) noexcept = default;
+        /* Operators */
+        NetBase& operator=(NetBase obj) noexcept { swap(obj); return *this; }
         /* Operations */
         inline void swap(NetBase& __restrict obj) noexcept;
     };
-
-    template<class Derived>
-    NetBase<Derived>::NetBase() {
-        if constexpr (IsTrainMode)
-            net_guard = std::make_unique<AutoDiffGuard<PlainScalar>>();
-    }
 
     template<class Derived>
     NetBase<Derived>::NetBase(const NetBase&) : NetBase() {}
@@ -80,7 +75,7 @@ namespace Physica::Core {
             const auto& samples = dataset.getSamples();
             const auto& labels = dataset.getLabels();
             for (unsigned int _ = 0; _ < opt.getBatchSize(); ++_) {
-                AutoDiffGuard<PlainScalar> guard{};
+                AutoDiffGuard<ScalarType> guard{};
                 const size_t index = dist(gen);
                 loss(samples[index], labels[index]).reverse();
             }
@@ -96,7 +91,7 @@ namespace Physica::Core {
                 const auto& samples = dataset.getSamples();
                 const auto& labels = dataset.getLabels();
                 for (size_t _ = 0; _ < batchSizePerThread; ++_) {
-                    AutoDiffGuard<PlainScalar> guard{};
+                    AutoDiffGuard<ScalarType> guard{};
                     const size_t index = dist(gen);
                     tempNet.loss(samples[index], labels[index]).reverse_to(guard.getNode());
                 }
@@ -106,7 +101,8 @@ namespace Physica::Core {
             }, numThread, numThread).wait();
         }
         opt.step();
-        DiffTracer<PlainScalar>::getInstance().zero_grad_to(net_guard->getNode());
+        if constexpr (IsTrainMode)
+            DiffTracer<PlainScalar>::getInstance().zero_grad_to(net_guard.getNode());
     }
 
     template<class Derived>
@@ -139,6 +135,7 @@ namespace Physica::Core {
     template<class Derived>
     inline void NetBase<Derived>::swap(NetBase& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
-        net_guard.swap(obj.net_guard);
+        if constexpr (IsTrainMode)
+            net_guard.swap(obj.net_guard);
     }
 }

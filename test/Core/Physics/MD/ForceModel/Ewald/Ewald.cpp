@@ -133,7 +133,7 @@ namespace Physica {
         };
         /* Operations */
         void functorTest() {
-            const AutoDiffGuard<Scalar<Double>> guard{};
+            const AutoDiffGuard<ScalarType> guard{};
             const ScalarType r = 2;
             const ScalarType r2 = square(r);
             ewald.pot_functor(0, 1, r, r2).reverse();
@@ -144,10 +144,10 @@ namespace Physica {
 
         void forceTest() {
             {
-                const AutoDiffGuard<Scalar<Double>> guard{};
+                const AutoDiffGuard<ScalarType> guard{};
                 ewald.potentialEnergy(pos).reverse();
             }
-            const AutoDiffGuard<Scalar<Double>> guard{};
+            const AutoDiffGuard<ScalarType> guard{};
             const Vector<ScalarType> force = ewald.force<SequentialExecutor>(pos);
             PositionMatrix force_diff(pos.getRow(), pos.getColumn());
             for (size_t i = 0; i < pos.getRow(); ++i)
@@ -176,7 +176,7 @@ namespace Physica {
             tail = ScalarType(-1);
             EwaldType ewald(cell.getLattice(), std::move(charges));
             {
-                AutoDiffGuard<PlainScalar> guard{};
+                AutoDiffGuard<ScalarType> guard{};
                 ewald.potentialEnergy(cell.getPos()).reverse();
             }
             const PlainScalar press_diff = -volume.getGrad() / PlainScalar(cellSize * cellSize * cellSize);

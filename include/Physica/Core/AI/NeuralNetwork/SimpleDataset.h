@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 WeiBo He.
+ * Copyright 2023-2024 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -26,13 +26,14 @@ namespace Physica::Core {
         static_assert(!SampleType::ScalarType::isDifferentiable, "[Error]: Data in a dataset must not be differentiable");
         using This = SimpleDataset<SampleType, LabelType>;
         using SplitResultType = std::pair<This, This>;
-        using DataType = std::pair<SampleType, LabelType>;
     public:
+        using device_obj_type = device_obj<This>;
         using SampleArray = Utils::Array<SampleType>;
         using LabelArray = Utils::Array<LabelType>;
+        using DataType = std::pair<SampleType, LabelType>;
     private:
-        Utils::Array<SampleType> samples;
-        Utils::Array<LabelType> labels;
+        SampleArray samples;
+        LabelArray labels;
     public:
         SimpleDataset() = default;
         SimpleDataset(SampleArray samples_, LabelArray labels_);
@@ -47,6 +48,9 @@ namespace Physica::Core {
         inline void append(DataType data);
         template<class RandomGenerator>
         SplitResultType randomSplit(size_t firstSize, RandomGenerator& gen) const;
+
+        [[nodiscard]] device_obj_type toDevice() const;
+        void toDevice(device_obj_type& obj) const;
         void swap(SimpleDataset& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] SampleArray& getSamples() noexcept { return samples; }
@@ -54,6 +58,8 @@ namespace Physica::Core {
         [[nodiscard]] LabelArray& getLabels() noexcept { return labels; }
         [[nodiscard]] const LabelArray& getLabels() const noexcept { return labels; }
         [[nodiscard]] size_t getSize() const noexcept { return samples.getLength(); }
+    private:
+        friend class device_obj<This>;
     };
 
     template<class SampleType, class LabelType>

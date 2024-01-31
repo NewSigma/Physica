@@ -42,13 +42,13 @@ namespace Physica {
         static void run() {
             const ScalarType volume = ((MoleculePerCell * massMoleculeInSI * 1000 / 0.997) * 1E-6) / (PhyConst<SI>::bohrRadius * PhyConst<SI>::bohrRadius * PhyConst<SI>::bohrRadius);
             const unsigned int cellSize = 3;
-            const AutoDiffGuard<PlainScalar> guard{};
+            const AutoDiffGuard<ScalarType> guard{};
             RandomGenerator gen{};
             auto cell = makeSystem(cellSize, volume, gen);
             ForceModel::sortPosition(cell);
             ForceModel forceModel(cell, pair_cutoff, Ewald<ScalarType>{});
             {
-                const AutoDiffGuard<PlainScalar> guard1{};
+                const AutoDiffGuard<ScalarType> guard1{};
                 forceModel.potentialEnergy(cell).reverse();
             }
             /* Test press */ {
