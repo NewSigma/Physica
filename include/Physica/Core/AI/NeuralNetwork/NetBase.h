@@ -28,13 +28,12 @@ namespace Physica::Core {
     class NetBase : public LayerBase<Derived> {
         using This = NetBase<Derived>;
         using Base = LayerBase<Derived>;
-        using DerivedTraits = typename Internal::Traits<Derived>;
+        using TraitsType = typename Internal::Traits<Derived>;
     public:
         using typename Base::ScalarType;
         using typename Base::PlainScalar;
-        using typename Base::VectorType;
-        using SampleType = typename DerivedTraits::SampleType;
-        using LabelType = typename DerivedTraits::LabelType;
+        using typename Base::InputType;
+        using typename Base::OutputType;
         using Base::IsTrainMode;
     private:
         using NetGuardType = typename std::conditional<IsTrainMode, AutoDiffGuard<ScalarType>, PlainStruct<void>>::type;
@@ -46,10 +45,11 @@ namespace Physica::Core {
         template<class Dataset, class Optimizer, class RandomPoolType, class Executor>
         void train_step(const Dataset& dataset, Optimizer& opt);
 
-        [[nodiscard]] ScalarType loss(const SampleType& sample, const LabelType& label) const { return Base::getDerived().loss(sample, label); }
+        template<class Dataset>
+        [[nodiscard]] ScalarType loss(const Dataset& dataset, size_t index) const { return Base::getDerived().loss(dataset, index); }
         template<class Dataset>
         [[nodiscard]] ScalarType loss(const Dataset& dataset) const;
-        [[nodiscard]] size_t classify(const VectorType& input) const;
+        [[nodiscard]] size_t classify(const InputType& input) const;
 
         [[nodiscard]] Derived copy() const { return Base::getDerived().copy(); }
     protected:
@@ -72,12 +72,10 @@ namespace Physica::Core {
         if constexpr (std::is_same<Executor, SequentialExecutor>::value) {
             auto dist = std::uniform_int_distribution<size_t>(0, dataset.getSize() - 1);
             auto& gen = RandomPoolType::getInstance().getGen();
-            const auto& samples = dataset.getSamples();
-            const auto& labels = dataset.getLabels();
             for (unsigned int _ = 0; _ < opt.getBatchSize(); ++_) {
                 AutoDiffGuard<ScalarType> guard{};
                 const size_t index = dist(gen);
-                loss(samples[index], labels[index]).reverse();
+                loss<Dataset>(dataset, index).reverse();
             }
         }
         else {
@@ -88,12 +86,10 @@ namespace Physica::Core {
                 Derived tempNet = copy();
                 auto dist = std::uniform_int_distribution<size_t>(0, dataset.getSize() - 1);
                 auto& gen = RandomPoolType::getInstance().getGen();
-                const auto& samples = dataset.getSamples();
-                const auto& labels = dataset.getLabels();
                 for (size_t _ = 0; _ < batchSizePerThread; ++_) {
                     AutoDiffGuard<ScalarType> guard{};
                     const size_t index = dist(gen);
-                    tempNet.loss(samples[index], labels[index]).reverse_to(guard.getNode());
+                    tempNet.template loss<Dataset>(dataset, index).reverse_to(guard.getNode());
                 }
                 auto& tracer = DiffTracer<PlainScalar>::getInstance();
                 std::lock_guard locker(mutex);
@@ -101,26 +97,24 @@ namespace Physica::Core {
             }, numThread, numThread).wait();
         }
         opt.step();
-        if constexpr (IsTrainMode)
-            DiffTracer<PlainScalar>::getInstance().zero_grad_to(net_guard.getNode());
+        DiffTracer<PlainScalar>::getInstance().zero_grad_to(net_guard.getNode());
     }
 
     template<class Derived>
     template<class Dataset>
     [[nodiscard]] typename NetBase<Derived>::ScalarType NetBase<Derived>::loss(const Dataset& dataset) const {
-        const size_t numSample = dataset.getSize();
-        const auto& samples = dataset.getSamples();
-        const auto& labels = dataset.getLabels();
+        static_assert(!IsTrainMode, "[Error]: It is suggested using eval mode to reduce memory use");
+        const size_t size = dataset.getSize();
         ScalarType result = 0;
-        for (size_t i = 0; i < numSample; ++i)
-            toNextMean(result, i, loss(samples[i], labels[i]));
+        for (size_t i = 0; i < size; ++i)
+            toNextMean(result, i, loss(dataset, i));
         return result;
     }
 
     template<class Derived>
-    size_t NetBase<Derived>::classify(const VectorType& input) const {
+    size_t NetBase<Derived>::classify(const InputType& input) const {
         static_assert(!IsTrainMode, "[Error]: It is suggested using eval mode to reduce memory use");
-        const VectorType output = Base::forward(input);
+        const OutputType output = Base::forward(input);
         PlainScalar max = output[0];
         size_t index = 0;
         for (size_t i = 1; i < output.getLength(); ++i) {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 WeiBo He.
+ * Copyright 2023-2024 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -24,8 +24,10 @@ namespace Physica::Core {
     template<class ScalarType>
     class AutoDiffGuard {
         static_assert(ScalarType::isDifferentiable, "[Error]: ScalarType must be differentiable");
-        static_assert(!Utils::is_device_obj<ScalarType>::value, "[Error]: Include AutoDiffGuard.cuh to use the diff guard for CUDA");
+        constexpr static bool isDeviceSide = Utils::is_device_obj<ScalarType>::value;
         using This = AutoDiffGuard<ScalarType>;
+        using PlainScalar = typename ScalarType::PlainScalar;
+        using TracerType = typename std::conditional<isDeviceSide, device_obj<DiffTracer<PlainScalar>>, DiffTracer<PlainScalar>>::type;
 
         ScalarType node;
     public:
@@ -43,13 +45,17 @@ namespace Physica::Core {
 
     template<class ScalarType>
     AutoDiffGuard<ScalarType>::AutoDiffGuard() {
-        const ScalarType anyNewNode = ScalarType(0);
-        node = anyNewNode;
+        if constexpr (isDeviceSide) {
+            node = TracerType::makeSingleNode();
+        }
+        else {
+            const ScalarType anyNewNode = ScalarType(0);
+            node = anyNewNode;
+        }
     }
 
     template<class ScalarType>
     AutoDiffGuard<ScalarType>::~AutoDiffGuard() {
-        using PlainScalar = typename ScalarType::PlainScalar;
-        DiffTracer<PlainScalar>::getInstance().forget(node);
+        TracerType::getInstance().forget(node);
     }
 }

@@ -67,7 +67,6 @@ namespace Physica::Core {
     template<class ScalarType>
     class Differentiable<ScalarType, DiffMode::Forward> : public ScalarBase<Differentiable<ScalarType, DiffMode::Forward>> {
         using This = Differentiable<ScalarType, DiffMode::Forward>;
-        using DiffTracerType = DiffTracer<ScalarType>;
 
         ScalarType value;
         ScalarType grad;
@@ -107,7 +106,6 @@ namespace Physica::Core {
     template<class ScalarType>
     class Differentiable<ScalarType, DiffMode::Reverse> : public ScalarBase<Differentiable<ScalarType, DiffMode::Reverse>> {
         using This = Differentiable<ScalarType, DiffMode::Reverse>;
-        using DiffTracerType = DiffTracer<ScalarType>;
     public:
         using device_obj_type = device_obj<This>;
     private:
@@ -155,10 +153,9 @@ namespace Physica::Core {
         [[nodiscard]] inline static Differentiable random_normal(RandomGenerator& gen);
         template<class Distribution, class RandomGenerator>
         [[nodiscard]] inline static Differentiable random_any(Distribution& dist, RandomGenerator& gen);
-
-        [[nodiscard]] static size_t distance(const This& from, const This& to);
-        template<class Functor>
-        static void forNode(const This& from, const This& to, Functor func);
+    private:
+        /* Friends */
+        friend class device_obj<This>;
     };
     ////////////////////////////////////////////////////////////
     template<class ScalarType, DiffMode Mode, class OtherScalar>

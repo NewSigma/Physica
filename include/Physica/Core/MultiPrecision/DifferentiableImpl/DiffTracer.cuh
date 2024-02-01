@@ -29,6 +29,7 @@ namespace Physica::Core {
         using This = device_obj<host_obj>;
     public:
         using SegmentType = device_obj<typename host_obj::SegmentType>;
+        using DiffScalar = typename SegmentType::DiffScalar;
     private:
         std::list<SegmentType> traceList;
     public:
@@ -36,8 +37,13 @@ namespace Physica::Core {
         /* Operations */
         template<class... Args>
         SegmentType& pushSegment(Args&&... args);
+        /* Getters */
+        [[nodiscard]] const std::list<SegmentType>& getTraceList() const noexcept { return traceList; }
+        [[nodiscard]] size_t getNumRecord() const noexcept;
         /* Static members */
         [[nodiscard]] static This& getInstance() noexcept;
+        [[nodiscard]] static DiffScalar makeSingleNode();
+        [[nodiscard]] static size_t distance(DiffScalar from, DiffScalar to);
     private:
         device_obj() = default;
         device_obj(const device_obj&) = default;
@@ -54,8 +60,35 @@ namespace Physica::Core {
     }
 
     template<class ScalarType>
+    size_t device_obj<DiffTracer<ScalarType>>::getNumRecord() const noexcept {
+        size_t result = 0;
+        for (auto ite = traceList.cbegin(); ite != traceList.cend(); ++ite)
+            result += (*ite).getLength();
+        return result;
+    }
+
+    template<class ScalarType>
     device_obj<DiffTracer<ScalarType>>& device_obj<DiffTracer<ScalarType>>::getInstance() noexcept {
         thread_local static This instance{};
         return instance;
+    }
+
+    template<class ScalarType>
+    typename device_obj<DiffTracer<ScalarType>>::DiffScalar device_obj<DiffTracer<ScalarType>>::makeSingleNode() {
+        auto& seg = pushSegment(SegmentType::makeSingleNode());
+        return DiffScalar(seg.getValues().data(), seg.getGrads().data());
+    }
+
+    template<class ScalarType>
+    size_t device_obj<DiffTracer<ScalarType>>::distance(DiffScalar from, DiffScalar to) {
+        if (&from == &to)
+            return 0;
+
+        const auto& tracer = getInstance();
+        size_t result = 0;
+        tracer.forSegmentInRange(from, to, [from, to, &result](const SegmentType& segment) {
+            result += segment.makeFromIndex(from) - segment.makeToIndex(to) + 1;
+        });
+        return result;
     }
 }

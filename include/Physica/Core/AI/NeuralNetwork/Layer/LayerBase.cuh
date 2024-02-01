@@ -27,16 +27,14 @@ namespace Physica::Core {
         using host_obj = LayerBase<Derived>;
         using This = device_obj<host_obj>;
         using Base = Utils::CRTPBase<device_obj<Derived>>;
+        using TraitsType = Internal::Traits<device_obj<Derived>>;
     public:
-        using ScalarType = typename Internal::Traits<Derived>::ScalarType;
+        using ScalarType = typename TraitsType::ScalarType;
         using PlainScalar = typename ScalarType::PlainScalar;
-        using VectorType = Vector<ScalarType>;
-        using DiffVector = Differentiable<Vector<PlainScalar>, DiffMode::Reverse>;
-
+        using InputType = typename TraitsType::InputType;
+        using OutputType = typename TraitsType::OutputType;
+        constexpr static bool IsTrainMode = TraitsType::IsTrainMode;
         static_assert(!Utils::is_device_obj<ScalarType>::value, "[Error]: Nested device_obj<> is not allowed");
-        constexpr static bool IsTrainMode = host_obj::IsTrainMode;
-        using InputType = device_obj<typename std::conditional<IsTrainMode, DiffVector, VectorType>::type>;
-        using OutputType = InputType;
     public:
         ~device_obj() = default;
         /* Operations */

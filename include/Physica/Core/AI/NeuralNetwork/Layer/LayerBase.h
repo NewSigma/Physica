@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 WeiBo He.
+ * Copyright 2023-2024 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -29,15 +29,17 @@ namespace Physica::Core {
     template<class Derived>
     class LayerBase : public Utils::CRTPBase<Derived> {
         using Base = Utils::CRTPBase<Derived>;
+        using TraitsType = Internal::Traits<Derived>;
     public:
-        using ScalarType = typename Internal::Traits<Derived>::ScalarType;
+        using ScalarType = typename TraitsType::ScalarType;
         using PlainScalar = typename ScalarType::PlainScalar;
-        using VectorType = Vector<ScalarType>;
-        constexpr static bool IsTrainMode = Internal::Traits<ScalarType>::isDifferentiable;
+        using InputType = typename TraitsType::InputType;
+        using OutputType = typename TraitsType::OutputType;
+        constexpr static bool IsTrainMode = TraitsType::IsTrainMode;
     public:
         ~LayerBase() = default;
         /* Operations */
-        [[nodiscard]] VectorType forward(const VectorType& x) const { return Base::getDerived().forward(x); }
+        [[nodiscard]] OutputType forward(const InputType& x) const { return Base::getDerived().forward(x); }
         [[nodiscard]] Derived copy() const { return Base::getDerived().copy(); }
     protected:
         LayerBase() = default;

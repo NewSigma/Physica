@@ -53,7 +53,7 @@ namespace Physica::Core {
         ScalarType* __restrict pGrad;
     public:
         device_obj() = default;
-        __device__ device_obj(ScalarType* pValue_, ScalarType* pGrad_);
+        __host__ __device__ device_obj(ScalarType* pValue_, ScalarType* pGrad_);
         device_obj(const device_obj&) = default;
         device_obj(device_obj&&) noexcept = default;
         ~device_obj() = default;
@@ -80,7 +80,7 @@ namespace Physica::Core {
     };
 
     template<class ScalarType>
-    __device__ device_obj<Differentiable<ScalarType, DiffMode::Reverse>>::device_obj(ScalarType* pValue_, ScalarType* pGrad_)
+    __host__ __device__ device_obj<Differentiable<ScalarType, DiffMode::Reverse>>::device_obj(ScalarType* pValue_, ScalarType* pGrad_)
             : pValue(pValue_), pGrad(pGrad_) {}
 
     template<class ScalarType>

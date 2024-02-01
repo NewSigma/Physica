@@ -27,6 +27,7 @@ namespace Physica::Core {
      */
     template<class ScalarType>
     class DiffTracer {
+        using This = DiffTracer<ScalarType>;
     public:
         using SegmentType = TraceSegment<ScalarType>;
         using DiffScalar = typename SegmentType::DiffScalar;
@@ -48,11 +49,11 @@ namespace Physica::Core {
         template<class... Args>
         SegmentType& pushSegment(Args&&... args);
 
-        void reverse(DiffScalar from, DiffScalar to);
+        inline void reverse(DiffScalar from, DiffScalar to);
         void reverse_from(DiffScalar from);
         void reverse_to(DiffScalar to);
         void reverse();
-        void zero_grad(DiffScalar from, DiffScalar to);
+        inline void zero_grad(DiffScalar from, DiffScalar to);
         inline void zero_grad_from(DiffScalar from);
         inline void zero_grad_to(DiffScalar to);
         void zero_grad();
@@ -60,6 +61,8 @@ namespace Physica::Core {
         void reserve(size_t size);
         inline void clear();
 
+        template<class Functor> void forSegmentInRange(DiffScalar from, DiffScalar to, Functor func);
+        template<class Functor> void forSegmentInRange(DiffScalar from, DiffScalar to, Functor func) const;
         [[nodiscard]] inline bool checkLastOpDone() const;
         /* Getters */
         [[nodiscard]] const std::list<SegmentType>& getTraceList() const noexcept { return traceList; }
@@ -67,6 +70,7 @@ namespace Physica::Core {
         [[nodiscard]] ExpressionType getSource(DiffScalar s) const noexcept;
         /* Static members */
         [[nodiscard]] static DiffTracer& getInstance() noexcept;
+        [[nodiscard]] static size_t distance(DiffScalar from, DiffScalar to);
     private:
         DiffTracer() = default;
         DiffTracer(const DiffTracer&) = default;
@@ -78,6 +82,7 @@ namespace Physica::Core {
         template<class... Args>
         inline void pushOperandImpl(DiffScalar* p, DiffScalar operand, Args... args);
         void pushOperandImpl([[maybe_unused]] DiffScalar* p) {}
+        /* Static members */
         [[nodiscard]] static DiffRecord makeSetOpNode(const Utils::Array<DiffRecord>& records);
     };
 
@@ -191,23 +196,10 @@ namespace Physica::Core {
     }
 
     template<class ScalarType>
-    void DiffTracer<ScalarType>::reverse(DiffScalar from, DiffScalar to) {
-        assert(!traceList.empty() && "[Error]: No record found");
-        bool foundBeginSegment = false, foundFinalSegment = false;
-        const auto rend = traceList.rend();
-        for (auto ite = traceList.rbegin(); ite != rend; ++ite) {
-            auto& segment = *ite;
-            foundBeginSegment |= segment.isFound(from);
-            if (!foundBeginSegment)
-                continue;
-
-            foundFinalSegment |= segment.isFound(to);
+    inline void DiffTracer<ScalarType>::reverse(DiffScalar from, DiffScalar to) {
+        forSegmentInRange(from, to, [from, to](SegmentType& segment) {
             segment.reverse(from, to);
-            if (foundFinalSegment)
-                break;
-        }
-        assert(foundBeginSegment && "[Error]: Cannot find begin record, maybe it is on another thread?");
-        assert(foundFinalSegment && "[Error]: Cannot find final record, maybe it is on another thread?");
+        });
     }
 
     template<class ScalarType>
@@ -251,22 +243,9 @@ namespace Physica::Core {
 
     template<class ScalarType>
     void DiffTracer<ScalarType>::zero_grad(DiffScalar from, DiffScalar to) {
-        assert(!traceList.empty() && "[Error]: No record found");
-        bool foundBeginSegment = false, foundFinalSegment = false;
-        const auto rend = traceList.rend();
-        for (auto ite = traceList.rbegin(); ite != rend; ++ite) {
-            auto& segment = *ite;
-            foundBeginSegment |= segment.isFound(from);
-            if (!foundBeginSegment)
-                continue;
-
-            foundFinalSegment |= segment.isFound(to);
+        forSegmentInRange(from, to, [from, to](SegmentType& segment) {
             segment.zero_grad(from, to);
-            if (foundFinalSegment)
-                break;
-        }
-        assert(foundBeginSegment && "[Error]: Cannot find begin record, maybe it is on another thread?");
-        assert(foundFinalSegment && "[Error]: Cannot find final record, maybe it is on another thread?");
+        });
     }
 
     template<class ScalarType>
@@ -344,6 +323,33 @@ namespace Physica::Core {
     }
 
     template<class ScalarType>
+    template<class Functor>
+    void DiffTracer<ScalarType>::forSegmentInRange(DiffScalar from, DiffScalar to, Functor func) {
+        assert(!traceList.empty() && "[Error]: No record found");
+        bool foundBeginSegment = false, foundFinalSegment = false;
+        const auto rend = traceList.rend();
+        for (auto ite = traceList.rbegin(); ite != rend; ++ite) {
+            auto& segment = *ite;
+            foundBeginSegment |= segment.isFound(from);
+            if (!foundBeginSegment)
+                continue;
+
+            foundFinalSegment |= segment.isFound(to);
+            func(std::ref(segment));
+            if (foundFinalSegment)
+                break;
+        }
+        assert(foundBeginSegment && "[Error]: Cannot find begin record, maybe it is on another thread?");
+        assert(foundFinalSegment && "[Error]: Cannot find final record, maybe it is on another thread?");
+    }
+
+    template<class ScalarType>
+    template<class Functor>
+    void DiffTracer<ScalarType>::forSegmentInRange(DiffScalar from, DiffScalar to, Functor func) const {
+        const_cast<This*>(this)->forSegmentInRange(from, to, func);
+    }
+
+    template<class ScalarType>
     inline bool DiffTracer<ScalarType>::checkLastOpDone() const {
         if (traceList.empty() || traceList.back().empty())
             return true;
@@ -380,6 +386,19 @@ namespace Physica::Core {
     DiffTracer<ScalarType>& DiffTracer<ScalarType>::getInstance() noexcept {
         thread_local static DiffTracer<ScalarType> instance{};
         return instance;
+    }
+
+    template<class ScalarType>
+    size_t DiffTracer<ScalarType>::distance(DiffScalar from, DiffScalar to) {
+        if (&from == &to)
+            return 0;
+
+        const auto& tracer = getInstance();
+        size_t result = 0;
+        tracer.forSegmentInRange(from, to, [from, to, &result](const SegmentType& segment) {
+            result += segment.makeFromIndex(from) - segment.makeToIndex(to) + 1;
+        });
+        return result;
     }
 
     template<class ScalarType>

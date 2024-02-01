@@ -34,22 +34,16 @@ template<class ScalarType> class MnistNet;
 
 namespace Physica::Core::Internal {
     template<class T>
-    class Traits<MnistNet<T>> {
-    public:
-        using ScalarType = T;
-        using SampleType = Vector<T>;
-        using LabelType = unsigned char;
-    };
+    class Traits<MnistNet<T>> : public Traits<LinearLayer<T>> {};
 }
 
 template<class ScalarType>
 class MnistNet : public NetBase<MnistNet<ScalarType>> {
     using Base = NetBase<MnistNet<ScalarType>>;
     using typename Base::PlainScalar;
-    using typename Base::VectorType;
-    using typename Base::SampleType;
-    using typename Base::LabelType;
-
+    using typename Base::InputType;
+    using typename Base::OutputType;
+private:
     LinearLayer<ScalarType> layer1;
     LinearLayer<ScalarType, false> layer2;
 public:
@@ -76,14 +70,15 @@ public:
     /* Operators */
     MnistNet& operator=(MnistNet& obj) noexcept { swap(obj); return *this; }
     /* Operations */
-    [[nodiscard]] VectorType forward(const VectorType& x) const {
-        VectorType result = relu(layer1.forward(x));
+    [[nodiscard]] OutputType forward(const InputType& x) const {
+        OutputType result = relu(layer1.forward(x));
         result = layer2.forward(result);
         return result;
     }
 
-    [[nodiscard]] ScalarType loss(const SampleType& sample, LabelType label) const {
-        return Loss<ScalarType>::crossEntropy(forward(sample), label);
+    template<class Dataset>
+    [[nodiscard]] ScalarType loss(const Dataset& dataset, size_t index) const {
+        return Loss<ScalarType>::crossEntropy(forward(dataset.getSamples()[index]), dataset.getLabels()[index]);
     }
 
     template<class Dataset>
@@ -103,7 +98,7 @@ public:
         const size_t numTestData = dataset.getSize();
         size_t count = 0;
         for (size_t i = 0; i < numTestData; ++i)
-            count += testLabels[i] == Base::classify(VectorType(testSamples[i]));
+            count += testLabels[i] == Base::classify(InputType(testSamples[i]));
         return PlainScalar(count) / PlainScalar(numTestData);
     }
 
@@ -120,7 +115,7 @@ private:
 using PlainScalar = Scalar<Float>;
 using ScalarType = Differentiable<PlainScalar, DiffMode::Reverse>;
 using Dataset = typename Mnist::DatasetType<PlainScalar>;
-using Optimizer = MomentumSGD<PlainScalar>;
+using Optimizer = MomentumSGD<ScalarType>;
 using RandomGenerator = std::mt19937;
 using RandomPoolType = RandomPool<RandomGenerator>;
 constexpr size_t numEpoch = 50;

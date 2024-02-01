@@ -34,6 +34,7 @@ namespace Physica::Core {
         using DiffScalar = device_obj<HostDiffScalar>;
         using VectorType = typename host_obj::VectorType;
         using DeviceVector = device_obj<VectorType>;
+    public:
         constexpr static size_t DefaultSize = host_obj::DefaultSize;
     private:
         Utils::device_obj<Utils::Array<DiffRecord>> records;
@@ -41,7 +42,8 @@ namespace Physica::Core {
         DeviceVector values;
         DeviceVector grads;
     public:
-        explicit device_obj(size_t size = DefaultSize);
+        device_obj() = default;
+        explicit device_obj(size_t size);
         device_obj(const VectorType& values_);
         device_obj(const device_obj&) = default;
         device_obj(device_obj&&) noexcept = default;
@@ -60,6 +62,12 @@ namespace Physica::Core {
         [[nodiscard]] __host__ __device__ size_t getCapacity() const noexcept { return records.getCapacity(); }
         [[nodiscard]] __host__ __device__ bool empty() const noexcept { return records.empty(); }
         [[nodiscard]] __host__ __device__ bool full() const noexcept { return records.full(); }
+        [[nodiscard]] __host__ __device__ bool isFound(DiffScalar s) const noexcept { return find(s) < getLength(); }
+        [[nodiscard]] __host__ __device__ size_t find(DiffScalar s) const noexcept;
+        /* Static members */
+        [[nodiscard]] static device_obj<TraceSegment<ScalarType>> makeSingleNode();
+    private:
+        friend class device_obj<DiffTracer<ScalarType>>;
     };
 }
 

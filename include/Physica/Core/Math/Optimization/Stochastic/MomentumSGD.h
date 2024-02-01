@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 WeiBo He.
+ * Copyright 2023-2024 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -22,12 +22,14 @@
 #include "SGD.h"
 
 namespace Physica::Core {
-    template<class PlainScalar>
-    class MomentumSGD : public SGD<PlainScalar> {
-        static_assert(!PlainScalar::isDifferentiable, "[Error]: Differentiable<> pack is not necessary");
-        using Base = SGD<PlainScalar>;
-        using typename Base::ScalarType;
-
+    template<class ScalarType>
+    class MomentumSGD : public SGD<ScalarType> {
+        static_assert(ScalarType::isDifferentiable, "[Error]: ScalarType must be differentiable");
+        static_assert(!Utils::is_device_obj<ScalarType>::value, "[Error]: Not implemented");
+        using Base = SGD<ScalarType>;
+        using typename Base::PlainScalar;
+        using TracerType = DiffTracer<PlainScalar>;
+    private:
         using Base::from;
         using Base::to;
         Vector<PlainScalar> lastGrad;
@@ -47,31 +49,36 @@ namespace Physica::Core {
         using Base::step;
     };
 
-    template<class PlainScalar>
-    MomentumSGD<PlainScalar>::MomentumSGD(PlainScalar momentum_, PlainScalar learnRate, unsigned int batchSize)
+    template<class ScalarType>
+    MomentumSGD<ScalarType>::MomentumSGD(PlainScalar momentum_, PlainScalar learnRate, unsigned int batchSize)
             : Base(std::move(learnRate), batchSize)
             , momentum(std::move(momentum_)) {
         assert(momentum.isPositive() && "[Error]: Invalid momentum");
     }
 
-    template<class PlainScalar>
-    void MomentumSGD<PlainScalar>::recordEnd() {
+    template<class ScalarType>
+    void MomentumSGD<ScalarType>::recordEnd() {
         Base::recordEnd();
-        lastGrad.resize(ScalarType::distance(from, to), PlainScalar(0));
+        lastGrad.resize(TracerType::distance(from, to), PlainScalar(0));
     }
 
-    template<class PlainScalar>
-    void MomentumSGD<PlainScalar>::step() {
+    template<class ScalarType>
+    void MomentumSGD<ScalarType>::step() {
+        using SegmentType = typename TracerType::SegmentType;
+        using DiffScalar = typename TracerType::DiffScalar;
+        auto& tracer = TracerType::getInstance();
         size_t i = 0;
-        ScalarType::forNode(from, to, [this, &i](ScalarType s) {
-            lastGrad[i] = momentum * lastGrad[i] + s.getGrad();
-            s.setValue(s.getValue() - Base::getMeanLearnRate() * lastGrad[i]);
-            i += 1;
+        tracer.forSegmentInRange(from, to, [this, &i](SegmentType& segment) {
+            segment.forNodeInRange(from, to, [this, &i](DiffScalar s) {
+                lastGrad[i] = momentum * lastGrad[i] + s.getGrad();
+                s.setValue(s.getValue() - Base::getMeanLearnRate() * lastGrad[i]);
+                i += 1;
+            });
         });
     }
 
-    template<class PlainScalar>
-    void MomentumSGD<PlainScalar>::swap(MomentumSGD& __restrict obj) noexcept {
+    template<class ScalarType>
+    void MomentumSGD<ScalarType>::swap(MomentumSGD& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         Base::swap(obj);
         momentum.swap(obj.momentum);

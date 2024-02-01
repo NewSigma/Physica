@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 WeiBo He.
+ * Copyright 2023-2024 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -30,6 +30,10 @@ namespace Physica::Core {
         public:
             using ScalarType = T;
             constexpr static bool WithBias = B;
+            using PlainScalar = typename ScalarType::PlainScalar;
+            using InputType = Vector<ScalarType>;
+            using OutputType = InputType;
+            constexpr static bool IsTrainMode = ScalarType::isDifferentiable;
         };
     }
 
@@ -37,11 +41,12 @@ namespace Physica::Core {
     class LinearLayer : public LayerBase<LinearLayer<ScalarType, WithBias>> {
         using This = LinearLayer<ScalarType, WithBias>;
         using Base = LayerBase<This>;
-        using PlainScalar = typename ScalarType::PlainScalar;
-        using VectorType = typename Base::VectorType;
+        using typename Base::PlainScalar;
+        using typename Base::InputType;
+        using typename Base::OutputType;
         constexpr static int Option = MatrixOption::Row | MatrixOption::Vector;
         using MatrixType = DenseMatrix<ScalarType, Option>;
-        using BiasType = typename std::conditional<WithBias, VectorType, PlainStruct<void>>::type;
+        using BiasType = typename std::conditional<WithBias, InputType, PlainStruct<void>>::type;
 
         MatrixType weights;
         BiasType bias;
@@ -56,7 +61,7 @@ namespace Physica::Core {
         /* Operators */
         LinearLayer& operator=(LinearLayer obj) noexcept { swap(obj); return *this; }
         /* Operations */
-        [[nodiscard]] inline VectorType forward(const VectorType& x) const;
+        [[nodiscard]] inline OutputType forward(const InputType& x) const;
         [[nodiscard]] LinearLayer copy() const;
 
         template<class RandomGenerator>
@@ -90,7 +95,7 @@ namespace Physica::Core {
             : weights(layer.getWeights()), bias(layer.getBias()) {}
 
     template<class ScalarType, bool WithBias>
-    inline typename LinearLayer<ScalarType, WithBias>::VectorType LinearLayer<ScalarType, WithBias>::forward(const VectorType& x) const {
+    inline typename LinearLayer<ScalarType, WithBias>::OutputType LinearLayer<ScalarType, WithBias>::forward(const InputType& x) const {
         assert(x.getLength() == getInputDim() && "[Error]: Data dim and required input dim must be equal");
         if constexpr (WithBias)
             return weights * x + bias;

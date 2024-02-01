@@ -26,7 +26,14 @@
 namespace Physica::Core {
     namespace Internal {
         template<class ScalarType, bool WithBias>
-        class Traits<device_obj<LinearLayer<ScalarType, WithBias>>> : public Traits<LinearLayer<ScalarType, WithBias>> {};
+        class Traits<device_obj<LinearLayer<ScalarType, WithBias>>> : public Traits<LinearLayer<ScalarType, WithBias>> {
+            using Base = Traits<LinearLayer<ScalarType, WithBias>>;
+            using VectorType = Vector<typename Base::ScalarType>;
+            using DiffVector = Differentiable<Vector<typename Base::PlainScalar>, DiffMode::Reverse>;
+        public:
+            using InputType = device_obj<typename std::conditional<Base::IsTrainMode, DiffVector, VectorType>::type>;
+            using OutputType = InputType;
+        };
     }
 
     template<class ScalarType, bool WithBias>
@@ -38,11 +45,12 @@ namespace Physica::Core {
         using MatrixType = typename host_obj::MatrixType;
     public:
         using Base::IsTrainMode;
-        using typename Base::VectorType;
         using typename Base::PlainScalar;
+        using typename Base::InputType;
+        using typename Base::OutputType;
         using DiffMatrix = Differentiable<DenseMatrix<PlainScalar, host_obj::Option>, DiffMode::Reverse>;
         using DeviceMatrix = device_obj<typename std::conditional<IsTrainMode, DiffMatrix, MatrixType>::type>;
-        using BiasType = typename std::conditional<WithBias, VectorType, PlainStruct<void>>::type;
+        using BiasType = typename std::conditional<WithBias, InputType, PlainStruct<void>>::type;
     private:
         DeviceMatrix weights;
         BiasType bias;
@@ -55,7 +63,7 @@ namespace Physica::Core {
         /* Operators */
         device_obj& operator=(device_obj obj) noexcept { swap(obj); return *this; }
         /* Operations */
-        [[nodiscard]] VectorType forward(const VectorType& x) const;
+        [[nodiscard]] OutputType forward(const InputType& x) const;
         [[nodiscard]] device_obj copy() const;
 
         template<class RandomGenerator>
@@ -80,8 +88,8 @@ namespace Physica::Core {
     }
 
     template<class ScalarType, bool WithBias>
-    typename device_obj<LinearLayer<ScalarType, WithBias>>::VectorType
-    device_obj<LinearLayer<ScalarType, WithBias>>::forward(const VectorType& x) const {
+    typename device_obj<LinearLayer<ScalarType, WithBias>>::OutputType
+    device_obj<LinearLayer<ScalarType, WithBias>>::forward(const InputType& x) const {
         assert(x.getLength() == getInputDim() && "[Error]: Data dim and required input dim must be equal");
         if constexpr (WithBias)
             return weights * x + bias;

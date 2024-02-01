@@ -43,7 +43,7 @@ namespace Physica::Core {
         /* Operations */
         [[nodiscard]] host_obj toHost() const;
         void toHost(host_obj& obj) const;
-        void swap(SimpleDataset& __restrict obj) noexcept;
+        void swap(device_obj& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] __device__ SampleArray& getSamples() noexcept { return samples; }
         [[nodiscard]] __device__ const SampleArray& getSamples() const noexcept { return samples; }
@@ -70,7 +70,7 @@ namespace Physica::Core {
     }
 
     template<class SampleType, class LabelType>
-    void device_obj<SimpleDataset<SampleType, LabelType>>::swap(SimpleDataset& __restrict obj) noexcept {
+    void device_obj<SimpleDataset<SampleType, LabelType>>::swap(device_obj& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         samples.swap(obj.samples);
         labels.swap(obj.labels);

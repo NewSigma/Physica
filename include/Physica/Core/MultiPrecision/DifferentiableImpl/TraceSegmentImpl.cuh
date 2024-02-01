@@ -30,7 +30,6 @@ namespace Physica::Core {
 
     template<class ScalarType>
     device_obj<TraceSegment<ScalarType>>::device_obj(size_t size) {
-        assert(size >= DefaultSize && "[Error]: Allocate a small segment maybe bad to performance");
         records.reserve(size);
         operands.reserve(3 * size); //MulAdd operation is 3-operand
         values.reserve(size);
@@ -92,5 +91,23 @@ namespace Physica::Core {
             target.operands[index] = DiffScalar(const_cast<ScalarType*>(values.data() + index),
                                                 const_cast<ScalarType*>(grads.data() + index));
         }
+    }
+
+    template<class ScalarType>
+    __host__ __device__ size_t device_obj<TraceSegment<ScalarType>>::find(DiffScalar s) const noexcept {
+        return host_obj::findImpl(values, grads, s);
+    }
+
+    template<class ScalarType>
+    device_obj<TraceSegment<ScalarType>> device_obj<TraceSegment<ScalarType>>::makeSingleNode() {
+        This result{};
+        result.records.reserve(1);
+        result.values.reserve(1);
+        result.grads.reserve(1);
+
+        auto future = StreamFuture::makeFuture();
+        cudaMemsetAsync((void*)result.records.data(), 0, sizeof(DiffRecord), StreamPool::getStream());
+        future->wait();
+        return result;
     }
 }

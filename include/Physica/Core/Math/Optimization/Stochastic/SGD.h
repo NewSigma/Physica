@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 WeiBo He.
+ * Copyright 2023-2024 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -25,11 +25,12 @@ namespace Physica::Core {
     /**
      * \class SGD Stochastic gradient descent using auto diff
      */
-    template<class PlainScalar>
+    template<class ScalarType>
     class SGD {
-        static_assert(!PlainScalar::isDifferentiable, "[Error]: Differentiable<> pack is not necessary");
+        static_assert(ScalarType::isDifferentiable, "[Error]: ScalarType must be differentiable");
+        static_assert(!Utils::is_device_obj<ScalarType>::value, "[Error]: Include *.cuh file to enable the CUDA version");
     public:
-        using ScalarType = Differentiable<PlainScalar, DiffMode::Reverse>;
+        using PlainScalar = typename ScalarType::PlainScalar;
     private:
         constexpr static int AnyValue = 0;
     protected:
@@ -58,32 +59,38 @@ namespace Physica::Core {
         void setLearnRate(PlainScalar lr);
     };
 
-    template<class PlainScalar>
-    SGD<PlainScalar>::SGD(PlainScalar learnRate_, unsigned int batchSize_) : batchSize(batchSize_) {
+    template<class ScalarType>
+    SGD<ScalarType>::SGD(PlainScalar learnRate_, unsigned int batchSize_) : batchSize(batchSize_) {
         setLearnRate(learnRate_);
     }
 
-    template<class PlainScalar>
-    inline void SGD<PlainScalar>::recordBegin() {
-        from = ScalarType(AnyValue);
-    }
-    
-    template<class PlainScalar>
-    inline void SGD<PlainScalar>::recordEnd() {
+    template<class ScalarType>
+    inline void SGD<ScalarType>::recordBegin() {
         to = ScalarType(AnyValue);
     }
+    
+    template<class ScalarType>
+    inline void SGD<ScalarType>::recordEnd() {
+        from = ScalarType(AnyValue);
+    }
 
-    template<class PlainScalar>
-    void SGD<PlainScalar>::step() {
+    template<class ScalarType>
+    void SGD<ScalarType>::step() {
+        using TracerType = DiffTracer<PlainScalar>;
+        using SegmentType = typename TracerType::SegmentType;
+        using DiffScalar = typename TracerType::DiffScalar;
+        auto& tracer = TracerType::getInstance();
         size_t i = 0;
-        ScalarType::forNode(from, to, [this, &i](ScalarType s) {
-            s.setValue(s.getValue() - meanLearnRate * s.getGrad());
-            i += 1;
+        tracer.forSegmentInRange(from, to, [this, &i](SegmentType& segment) {
+            segment.forNodeInRange(from, to, [this, &i](DiffScalar s) {
+                s.setValue(s.getValue() - meanLearnRate * s.getGrad());
+                i += 1;
+            });
         });
     }
 
-    template<class PlainScalar>
-    void SGD<PlainScalar>::swap(SGD& __restrict obj) noexcept {
+    template<class ScalarType>
+    void SGD<ScalarType>::swap(SGD& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         learnRate.swap(obj.learnRate);
         meanLearnRate.swap(obj.meanLearnRate);
