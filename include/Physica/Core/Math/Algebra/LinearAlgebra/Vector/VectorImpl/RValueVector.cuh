@@ -55,6 +55,9 @@ namespace Physica::Core {
         device_obj() = default;
         device_obj(const device_obj&) = default;
         device_obj(device_obj&&) noexcept = default;
+        /* Operators */
+        device_obj& operator=(const device_obj&) = default;
+        device_obj& operator=(device_obj&&) noexcept = default;
     };
 
     template<class VectorType1, class VectorType2>

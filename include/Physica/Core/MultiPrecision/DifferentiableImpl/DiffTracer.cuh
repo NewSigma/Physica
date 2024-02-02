@@ -75,7 +75,7 @@ namespace Physica::Core {
 
     template<class ScalarType>
     typename device_obj<DiffTracer<ScalarType>>::DiffScalar device_obj<DiffTracer<ScalarType>>::makeSingleNode() {
-        auto& seg = pushSegment(SegmentType::makeSingleNode());
+        auto& seg = getInstance().pushSegment(SegmentType::makeSingleNode());
         return DiffScalar(seg.getValues().data(), seg.getGrads().data());
     }
 

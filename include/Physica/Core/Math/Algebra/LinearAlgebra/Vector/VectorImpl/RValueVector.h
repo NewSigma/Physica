@@ -72,6 +72,7 @@ namespace Physica::Core {
         using RealType = typename ScalarType::RealType;
         constexpr static bool isExpression = !std::is_base_of<LValueVector<Derived>, Derived>::value;
     public:
+        ~RValueVector() = default;
         /* Operations */
         template<class OtherDerived, class Executor = SequentialExecutor>
         inline void assignTo(LValueVector<OtherDerived>& v) const;
@@ -110,6 +111,13 @@ namespace Physica::Core {
         ReshapedVector<Derived, MatrixOption::Column, Row, Column> reshape_col(size_t row, size_t col) const;
         template<size_t Row = Dynamic, size_t Column = Dynamic>
         ReshapedVector<Derived, MatrixOption::Row, Row, Column> reshape_row(size_t row, size_t col) const;
+    protected:
+        RValueVector() = default;
+        RValueVector(const RValueVector&) = default;
+        RValueVector(RValueVector&&) noexcept = default;
+        /* Operators */
+        RValueVector& operator=(const RValueVector&) = default;
+        RValueVector& operator=(RValueVector&&) noexcept = default;
     };
 
     template<class VectorType1, class VectorType2>

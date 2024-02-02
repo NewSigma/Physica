@@ -59,3 +59,5 @@ namespace Physica::Core {
         void setLearnRate(PlainScalar lr);
     };
 }
+
+#include "SGDImpl.cuh"

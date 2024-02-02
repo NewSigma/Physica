@@ -64,6 +64,8 @@ namespace Physica::Core {
         [[nodiscard]] __device__ explicit operator double() const { return double(getValue()); }
         [[nodiscard]] __host__ __device__ inline bool operator==(const This& other) const;
         /* Operations */
+        void toHostAsync_value(ScalarType& value) const;
+        void toHostAsync_grad(ScalarType& grad) const;
         __host__ __device__ inline void swap(device_obj& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] __host__ __device__ ScalarType* value_ptr() const noexcept { return pValue; }
@@ -88,6 +90,16 @@ namespace Physica::Core {
         const bool result = pValue == other.pValue;
         assert(result == (pGrad == other.pGrad) && "[Error]: Bad scalar");
         return result;
+    }
+
+    template<class ScalarType>
+    void device_obj<Differentiable<ScalarType, DiffMode::Reverse>>::toHostAsync_value(ScalarType& value) const {
+        cudaCheck(cudaMemcpyAsync(&value, pValue, sizeof(ScalarType), cudaMemcpyKind::cudaMemcpyDeviceToHost, StreamPool::getStream()));
+    }
+
+    template<class ScalarType>
+    void device_obj<Differentiable<ScalarType, DiffMode::Reverse>>::toHostAsync_grad(ScalarType& grad) const {
+        cudaCheck(cudaMemcpyAsync(&grad, pGrad, sizeof(ScalarType), cudaMemcpyKind::cudaMemcpyDeviceToHost, StreamPool::getStream()));
     }
 
     template<class ScalarType>

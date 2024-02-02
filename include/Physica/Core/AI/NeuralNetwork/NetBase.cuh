@@ -26,7 +26,7 @@ namespace Physica::Core {
         using host_obj = NetBase<Derived>;
         using This = device_obj<host_obj>;
         using Base = device_obj<LayerBase<Derived>>;
-        using TraitsType = Internal::Traits<device_obj<Derived>>;
+        using typename Base::TraitsType;
     public:
         using LossType = typename TraitsType::LossType;
         using typename Base::ScalarType;
@@ -50,7 +50,7 @@ namespace Physica::Core {
         [[nodiscard]] LossType loss(const Dataset& dataset) const;
         [[nodiscard]] size_t classify(const InputType& input) const;
         [[nodiscard]] Derived copy() const { return Base::getDerived().copy(); }
-    private:
+    protected:
         device_obj() = default;
         device_obj(const device_obj&);
         device_obj(device_obj&&) noexcept = default;

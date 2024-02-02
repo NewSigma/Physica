@@ -44,14 +44,13 @@ namespace Physica::Core {
         device_obj(const device_obj&) = default;
         device_obj(device_obj&&) noexcept = default;
         ~device_obj() = default;
-        /* Opporators */
+        /* Operators */
         device_obj<Vector<T, Length, MaxLength>>& operator=(device_obj<Vector<T, Length, MaxLength>> obj) noexcept;
         using Base::operator=;
         using Storage::operator=;
         using Storage::operator[];
-        /* Opporations */
+        /* Operations */
         [[nodiscard]] inline host_obj toHost() const;
-        inline void toHost(host_obj& obj) const;
         using Base::toHost;
         using Storage::resize;
         using Storage::swap;
@@ -81,18 +80,8 @@ namespace Physica::Core {
         return host_obj(Storage::toHost());
     }
 
-    template<class T, size_t Length, size_t MaxLength>
-    inline void device_obj<Vector<T, Length, MaxLength>>::toHost(host_obj& obj) const {
-        Storage::toHost(obj);
-    }
-
     template<class T, size_t Length, size_t MaxLength, class Allocator>
     inline device_obj<Vector<T, Length, MaxLength, Allocator>> Vector<T, Length, MaxLength, Allocator>::toDevice() const {
         return device_obj<Vector<T, Length, MaxLength>>(*this);
-    }
-
-    template<class T, size_t Length, size_t MaxLength, class Allocator>
-    inline void Vector<T, Length, MaxLength, Allocator>::toDevice(device_obj<This>& obj) const {
-        Storage::toDevice(obj);
     }
 }

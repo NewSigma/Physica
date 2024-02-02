@@ -75,7 +75,7 @@ namespace Physica::Core {
         Vector& toOpposite();
         [[nodiscard]] Vector copy() const;
         [[nodiscard]] inline device_obj<This> toDevice() const;
-        inline void toDevice(device_obj<This>& obj) const;
+        using Base::toDevice;
         /* Getters */
         using Storage::getLength;
         using Storage::data;

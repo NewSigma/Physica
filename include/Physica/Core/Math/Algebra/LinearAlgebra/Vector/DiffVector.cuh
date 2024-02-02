@@ -74,7 +74,8 @@ namespace Physica::Core {
         template<class Distribution, class RandomGenerator>
         [[nodiscard]] inline static This random_any(size_t len, Distribution& dist, RandomGenerator& gen);
     private:
-        [[nodiscard]] SegmentType& getTraceSegment() noexcept { return traceSeg.getDerived(); }
+        [[nodiscard]] __host__ __device__ SegmentType& getTraceSegment() noexcept { return traceSeg.getDerived(); }
+        [[nodiscard]] __host__ __device__ const SegmentType& getTraceSegment() const noexcept { return traceSeg.getDerived(); }
     };
 
     template<class PlainScalar>

@@ -30,6 +30,8 @@ namespace Physica::Core {
         public:
             using ScalarType = T;
             constexpr static bool WithBias = B;
+            using device_obj_type = Core::device_obj<LinearLayer<ScalarType, WithBias>>;
+
             using PlainScalar = typename ScalarType::PlainScalar;
             using InputType = Vector<ScalarType>;
             using OutputType = InputType;

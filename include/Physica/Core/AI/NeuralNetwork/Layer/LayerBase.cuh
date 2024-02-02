@@ -23,11 +23,13 @@
 
 namespace Physica::Core {
     template<class Derived>
-    class device_obj<LayerBase<Derived>> : public Utils::CRTPBase<device_obj<Derived>> {
+    class device_obj<LayerBase<Derived>> : public Utils::CRTPBase<typename Internal::Traits<Derived>::device_obj_type> {
         using host_obj = LayerBase<Derived>;
         using This = device_obj<host_obj>;
-        using Base = Utils::CRTPBase<device_obj<Derived>>;
-        using TraitsType = Internal::Traits<device_obj<Derived>>;
+        using device_obj_type = typename Internal::Traits<Derived>::device_obj_type;
+        using Base = Utils::CRTPBase<device_obj_type>;
+    protected:
+        using TraitsType = Internal::Traits<device_obj_type>;
     public:
         using ScalarType = typename TraitsType::ScalarType;
         using PlainScalar = typename ScalarType::PlainScalar;
@@ -39,7 +41,7 @@ namespace Physica::Core {
         ~device_obj() = default;
         /* Operations */
         [[nodiscard]] OutputType forward(const InputType& x) const { return Base::getDerived().forward(x); }
-        [[nodiscard]] device_obj<Derived> copy() const { return Base::getDerived().copy(); }
+        [[nodiscard]] device_obj_type copy() const { return Base::getDerived().copy(); }
     protected:
         device_obj() = default;
         device_obj(const device_obj&) = default;

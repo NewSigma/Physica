@@ -134,8 +134,8 @@ namespace Physica::Core {
         [[nodiscard]] Differentiable copy() const;
         inline void swap(Differentiable& __restrict obj) noexcept;
         /* Getters */
-        [[nodiscard]] ScalarType* value_ptr() const noexcept { return pValue; }
-        [[nodiscard]] ScalarType* grad_ptr() const noexcept { return pGrad; }
+        [[nodiscard]] __host__ __device__ ScalarType* value_ptr() const noexcept { return pValue; }
+        [[nodiscard]] __host__ __device__ ScalarType* grad_ptr() const noexcept { return pGrad; }
         [[nodiscard]] ScalarType& getValue() noexcept { return *pValue; }
         [[nodiscard]] ScalarType& getGrad() noexcept { return *pGrad; }
         [[nodiscard]] const ScalarType& getValue() const noexcept { return *pValue; }

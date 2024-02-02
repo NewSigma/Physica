@@ -64,6 +64,10 @@ namespace Physica::Core {
         [[nodiscard]] __host__ __device__ bool full() const noexcept { return records.full(); }
         [[nodiscard]] __host__ __device__ bool isFound(DiffScalar s) const noexcept { return find(s) < getLength(); }
         [[nodiscard]] __host__ __device__ size_t find(DiffScalar s) const noexcept;
+        [[nodiscard]] __host__ __device__ DeviceVector& getValues() noexcept { return values; }
+        [[nodiscard]] __host__ __device__ const DeviceVector& getValues() const noexcept { return values; }
+        [[nodiscard]] __host__ __device__ DeviceVector& getGrads() noexcept { return grads; }
+        [[nodiscard]] __host__ __device__ const DeviceVector& getGrads() const noexcept { return grads; }
         /* Static members */
         [[nodiscard]] static device_obj<TraceSegment<ScalarType>> makeSingleNode();
     private:
