@@ -29,7 +29,9 @@ namespace Physica::Core {
     //Forward declaration
     using Utils::Dynamic;
     /**
-     * \class VectorExpression represents \param T1 \param type \param T2. e.g. vector + scalar, expression * expression
+     * \class VectorExpression implements template expression for vectors, which will reduce temporary objects.
+     * 
+     * Operations defined as \tparam T1 \tparam type \tparam T2. e.g. vector + scalar, expression * expression
      */
     template<ExpressionType type, class T1, class T2 = T1>
     class VectorExpression;

@@ -32,18 +32,21 @@ namespace Physica::Core {
         using DiffRecord = typename host_obj::DiffRecord;
         using HostDiffScalar = typename host_obj::DiffScalar;
         using DiffScalar = device_obj<HostDiffScalar>;
+        using RecordArray = Utils::device_obj<Utils::Array<DiffRecord>>;
+        using OperandArray = Utils::device_obj<Utils::Array<HostDiffScalar>>;
         using VectorType = typename host_obj::VectorType;
         using DeviceVector = device_obj<VectorType>;
     public:
         constexpr static size_t DefaultSize = host_obj::DefaultSize;
     private:
-        Utils::device_obj<Utils::Array<DiffRecord>> records;
-        Utils::device_obj<Utils::Array<HostDiffScalar>> operands;
+        RecordArray records;
+        OperandArray operands;
         DeviceVector values;
         DeviceVector grads;
     public:
         device_obj() = default;
         explicit device_obj(size_t size);
+        explicit device_obj(ExpressionType type);
         device_obj(const VectorType& values_);
         device_obj(const device_obj&) = default;
         device_obj(device_obj&&) noexcept = default;
@@ -58,6 +61,8 @@ namespace Physica::Core {
 
         __device__ void copyKernelImpl(This& target) const;
         /* Getters */
+        [[nodiscard]] __device__ RecordArray& getRecords() noexcept { return records; }
+        [[nodiscard]] __device__ OperandArray& getOperands() noexcept { return operands; }
         [[nodiscard]] __host__ __device__ size_t getLength() const noexcept { return records.getLength(); }
         [[nodiscard]] __host__ __device__ size_t getCapacity() const noexcept { return records.getCapacity(); }
         [[nodiscard]] __host__ __device__ bool empty() const noexcept { return records.empty(); }
@@ -68,8 +73,6 @@ namespace Physica::Core {
         [[nodiscard]] __host__ __device__ const DeviceVector& getValues() const noexcept { return values; }
         [[nodiscard]] __host__ __device__ DeviceVector& getGrads() noexcept { return grads; }
         [[nodiscard]] __host__ __device__ const DeviceVector& getGrads() const noexcept { return grads; }
-        /* Static members */
-        [[nodiscard]] static device_obj<TraceSegment<ScalarType>> makeSingleNode();
     private:
         friend class device_obj<DiffTracer<ScalarType>>;
     };

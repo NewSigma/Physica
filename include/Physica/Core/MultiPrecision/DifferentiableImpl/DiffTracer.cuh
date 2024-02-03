@@ -42,7 +42,6 @@ namespace Physica::Core {
         [[nodiscard]] size_t getNumRecord() const noexcept;
         /* Static members */
         [[nodiscard]] static This& getInstance() noexcept;
-        [[nodiscard]] static DiffScalar makeSingleNode();
         [[nodiscard]] static size_t distance(DiffScalar from, DiffScalar to);
     private:
         device_obj() = default;
@@ -71,12 +70,6 @@ namespace Physica::Core {
     device_obj<DiffTracer<ScalarType>>& device_obj<DiffTracer<ScalarType>>::getInstance() noexcept {
         thread_local static This instance{};
         return instance;
-    }
-
-    template<class ScalarType>
-    typename device_obj<DiffTracer<ScalarType>>::DiffScalar device_obj<DiffTracer<ScalarType>>::makeSingleNode() {
-        auto& seg = getInstance().pushSegment(SegmentType::makeSingleNode());
-        return DiffScalar(seg.getValues().data(), seg.getGrads().data());
     }
 
     template<class ScalarType>

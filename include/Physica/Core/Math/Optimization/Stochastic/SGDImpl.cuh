@@ -33,12 +33,14 @@ namespace Physica::Core {
 
     template<class ScalarType>
     inline void SGD<device_obj<ScalarType>>::recordBegin() {
-        to = device_obj<DiffTracer<PlainScalar>>::makeSingleNode();
+        auto& segment = TracerType::getInstance().pushSegment(ExpressionType::Set);
+        to = DeviceScalar(segment.getValues().data(), segment.getGrads().data());
     }
     
     template<class ScalarType>
     inline void SGD<device_obj<ScalarType>>::recordEnd() {
-        from = device_obj<DiffTracer<PlainScalar>>::makeSingleNode();
+        auto& segment = TracerType::getInstance().pushSegment(ExpressionType::Set);
+        from = DeviceScalar(segment.getValues().data(), segment.getGrads().data());
     }
 
     template<class ScalarType>

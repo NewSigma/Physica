@@ -63,9 +63,14 @@ namespace Physica::Core {
 
         [[nodiscard]] This copy() const;
         void swap(device_obj& obj) noexcept { std::swap(*this, obj); }
+
+        template<bool ComputeMax>
+        __device__ void minmaxKernelImpl(SegmentType& resultTrace) const;
         /* Getters */
         [[nodiscard]] __host__ __device__ inline ScalarType calc(size_t index) const;
         [[nodiscard]] __host__ __device__ size_t getLength() const noexcept { return getTraceSegment().getLength(); }
+        [[nodiscard]] ScalarType max() const noexcept;
+        [[nodiscard]] ScalarType min() const noexcept;
         /* Static members */
         template<class RandomGenerator>
         [[nodiscard]] inline static This random_uniform(size_t len, RandomGenerator& gen);
@@ -77,67 +82,6 @@ namespace Physica::Core {
         [[nodiscard]] __host__ __device__ SegmentType& getTraceSegment() noexcept { return traceSeg.getDerived(); }
         [[nodiscard]] __host__ __device__ const SegmentType& getTraceSegment() const noexcept { return traceSeg.getDerived(); }
     };
-
-    template<class PlainScalar>
-    device_obj<Differentiable<Vector<PlainScalar>, DiffMode::Reverse>>::device_obj(size_t length)
-            : traceSeg(asStruct(TracerType::getInstance().pushSegment(length))) {}
-
-    template<class PlainScalar>
-    device_obj<Differentiable<Vector<PlainScalar>, DiffMode::Reverse>>::device_obj(const PlainVector& values)
-            : traceSeg(asStruct(TracerType::getInstance().pushSegment(values))) {}
-
-    template<class PlainScalar>
-    template<class RandomGenerator>
-    inline void device_obj<Differentiable<Vector<PlainScalar>, DiffMode::Reverse>>::random_uniform(RandomGenerator& gen) {
-        *this = random_uniform(getLength(), gen);
-    }
-
-    template<class PlainScalar>
-    template<class RandomGenerator>
-    inline void device_obj<Differentiable<Vector<PlainScalar>, DiffMode::Reverse>>::random_normal(RandomGenerator& gen) {
-        *this = random_normal(getLength(), gen);
-    }
-
-    template<class PlainScalar>
-    template<class Distribution, class RandomGenerator>
-    inline void device_obj<Differentiable<Vector<PlainScalar>, DiffMode::Reverse>>::random_any(Distribution& dist, RandomGenerator& gen) {
-        *this = random_any(getLength(), dist, gen);
-    }
-
-    template<class PlainScalar>
-    __host__ __device__ inline typename device_obj<Differentiable<Vector<PlainScalar>, DiffMode::Reverse>>::ScalarType
-    device_obj<Differentiable<Vector<PlainScalar>, DiffMode::Reverse>>::calc(size_t index) const {
-        assert(index < getLength() && "[Error]: Index out of range");
-        return getTraceSegment()[index];
-    }
-
-    template<class PlainScalar>
-    device_obj<Differentiable<Vector<PlainScalar>, DiffMode::Reverse>>
-    device_obj<Differentiable<Vector<PlainScalar>, DiffMode::Reverse>>::copy() const {
-        This result{};
-        const auto& newTrace = TracerType::getInstance().pushSegment(getTraceSegment().copy());
-        result.traceSeg = asStruct(newTrace);
-        return result;
-    }
-
-    template<class PlainScalar>
-    template<class RandomGenerator>
-    inline device_obj<Differentiable<Vector<PlainScalar>, DiffMode::Reverse>>
-    device_obj<Differentiable<Vector<PlainScalar>, DiffMode::Reverse>>::random_uniform(size_t len, RandomGenerator& gen) {
-        return This(PlainVector::random_uniform(len, gen));
-    }
-
-    template<class PlainScalar>
-    template<class RandomGenerator>
-    inline device_obj<Differentiable<Vector<PlainScalar>, DiffMode::Reverse>>
-    device_obj<Differentiable<Vector<PlainScalar>, DiffMode::Reverse>>::random_normal(size_t len, RandomGenerator& gen) {
-        return This(PlainVector::random_normal(len, gen));
-    }
-
-    template<class PlainScalar>
-    template<class Distribution, class RandomGenerator>
-    inline device_obj<Differentiable<Vector<PlainScalar>, DiffMode::Reverse>>
-    device_obj<Differentiable<Vector<PlainScalar>, DiffMode::Reverse>>::random_any(size_t len, Distribution& dist, RandomGenerator& gen) {
-        return This(PlainVector::random_any(len, dist, gen));
-    }
 }
+
+#include "DiffVectorImpl/DiffVectorImpl.cuh"

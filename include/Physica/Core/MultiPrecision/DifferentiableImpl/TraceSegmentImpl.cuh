@@ -35,6 +35,14 @@ namespace Physica::Core {
         values.reserve(size);
         grads.reserve(size);
     }
+
+    template<class ScalarType>
+    device_obj<TraceSegment<ScalarType>>::device_obj(ExpressionType type) {
+        records.reserve(1);
+        operands.reserve(host_obj::numOperand(type));
+        values.reserve(1);
+        grads.reserve(1);
+    }
     /**
      * Optimize: Allocate \param values_ using pinned memory shall improve performance
      */
@@ -96,18 +104,5 @@ namespace Physica::Core {
     template<class ScalarType>
     __host__ __device__ size_t device_obj<TraceSegment<ScalarType>>::find(DiffScalar s) const noexcept {
         return host_obj::findImpl(values, grads, s);
-    }
-
-    template<class ScalarType>
-    device_obj<TraceSegment<ScalarType>> device_obj<TraceSegment<ScalarType>>::makeSingleNode() {
-        This result{};
-        result.records.reserve(1);
-        result.values.reserve(1);
-        result.grads.reserve(1);
-
-        auto future = StreamFuture::makeFuture();
-        cudaMemsetAsync((void*)result.records.data(), 0, sizeof(DiffRecord), StreamPool::getStream());
-        future->wait();
-        return result;
     }
 }

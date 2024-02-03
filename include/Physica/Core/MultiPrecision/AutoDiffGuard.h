@@ -46,7 +46,8 @@ namespace Physica::Core {
     template<class ScalarType>
     AutoDiffGuard<ScalarType>::AutoDiffGuard() {
         if constexpr (isDeviceSide) {
-            node = TracerType::makeSingleNode();
+            auto& segment = TracerType::getInstance().pushSegment(ExpressionType::Set);
+            node = ScalarType(segment.getValues().data(), segment.getGrads().data());
         }
         else {
             const ScalarType anyNewNode = ScalarType(0);
