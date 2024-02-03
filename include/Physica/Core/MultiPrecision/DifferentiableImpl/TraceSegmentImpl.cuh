@@ -22,7 +22,7 @@ namespace Physica::Core {
     namespace Internal {
         template<class ScalarType>
         __global__ void TraceSegment_copyKernel(
-                Physica::PlainStruct<Core::device_obj<TraceSegment<ScalarType>>> source,
+                Physica::PlainStruct<const Core::device_obj<TraceSegment<ScalarType>>> source,
                 Physica::PlainStruct<Core::device_obj<TraceSegment<ScalarType>>> target) {
             source.getDerived().copyKernelImpl(target.getDerived());
         }

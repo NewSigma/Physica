@@ -21,7 +21,7 @@
 namespace Physica::Core {
     namespace Internal {
         template<class This, class SegmentType>
-        __global__ void SGD_stepKernel(This sgd, SegmentType segment) {
+        __global__ void SGD_stepKernel(Physica::PlainStruct<const This> sgd, SegmentType segment) {
             sgd.getDerived().stepKernelImpl(segment.getDerived());
         }
     }

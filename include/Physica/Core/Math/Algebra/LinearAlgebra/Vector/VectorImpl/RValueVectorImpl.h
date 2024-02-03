@@ -237,7 +237,7 @@ namespace Physica::Core {
 
     template<class Derived>
     inline const ReverseVector<Derived> RValueVector<Derived>::reverse() const {
-        return ReverseVector<Derived>(Base::getConstDerived());
+        return ReverseVector<Derived>(Base::getDerived());
     }
 
     template<class VectorType1, class VectorType2>

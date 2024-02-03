@@ -25,7 +25,7 @@ namespace Physica::Core {
     namespace Internal {
         template<class Derived, class OtherDerived>
         __global__ void RValueVector_assignToKernel(
-                Physica::PlainStruct<Derived> source,
+                Physica::PlainStruct<const Derived> source,
                 Physica::PlainStruct<OtherDerived> target) {
             using namespace Physica::Core;
             using HostDerived = typename Derived::host_obj;

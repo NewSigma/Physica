@@ -25,25 +25,28 @@ namespace Physica {
      * \class PlainStruct pass objects to cuda kernel ignoring constructors and destructors because resource control is cpu's duty.
      */
     template<class Derived>
-    class alignas(Derived) PlainStruct {
+    class alignas(Derived) PlainStruct<const Derived> {
         char anonymous[sizeof(Derived)];
     public:
-        PlainStruct() = default;
-        PlainStruct(const PlainStruct&) = default;
-        PlainStruct(PlainStruct&&) noexcept = default;
-        //~PlainStruct() = default;  /* Dynamic parallelism of CUDA 12.1 does not recognize that PlainStruct is trivial */
-        /* Operators */
-        PlainStruct& operator=(const PlainStruct&) = default;
-        PlainStruct& operator=(PlainStruct&&) noexcept = default;
-        /* Getters */
-        [[nodiscard]] __device__ Derived& getDerived() noexcept { return *reinterpret_cast<Derived*>(this); }
         [[nodiscard]] __host__ __device__ const Derived& getDerived() const noexcept { return *reinterpret_cast<const Derived*>(this); }
-        [[nodiscard]] __host__ __device__ const Derived& getConstDerived() const noexcept { return *reinterpret_cast<const Derived*>(this); }
         [[nodiscard]] __host__ __device__ Derived& getConstCastDerived() const noexcept { return *reinterpret_cast<Derived*>(const_cast<PlainStruct*>(this)); }
     };
 
+    template<class Derived>
+    class alignas(Derived) PlainStruct : public PlainStruct<const Derived> {
+        using Base = PlainStruct<const Derived>;
+    public:
+        using Base::getDerived;
+        [[nodiscard]] __device__ Derived& getDerived() noexcept { return *reinterpret_cast<Derived*>(this); }
+    };
+
     template<class T>
-    __host__ __device__ inline PlainStruct<T> asStruct(const T& obj) {
-        return PlainStruct<T>(reinterpret_cast<const PlainStruct<T>&>(obj));
+    __host__ __device__ inline PlainStruct<const T> asStruct(const T& obj) noexcept {
+        return PlainStruct<const T>(reinterpret_cast<const PlainStruct<const T>&>(obj));
+    }
+
+    template<class T>
+    __host__ __device__ inline PlainStruct<T> asStruct(T& obj) noexcept {
+        return PlainStruct<T>(reinterpret_cast<PlainStruct<T>&>(obj));
     }
 }

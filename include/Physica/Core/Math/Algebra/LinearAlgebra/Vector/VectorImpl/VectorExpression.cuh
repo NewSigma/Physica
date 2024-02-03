@@ -30,8 +30,8 @@ namespace Physica::Core {
         using Base = device_obj<RValueVector<host_obj>>;
         using typename Base::ScalarType;
     private:
-        Physica::PlainStruct<DeviceVector1> v1;
-        Physica::PlainStruct<DeviceVector2> v2;
+        Physica::PlainStruct<const DeviceVector1> v1;
+        Physica::PlainStruct<const DeviceVector2> v2;
     public:
         __host__ __device__ device_obj(const device_obj<RValueVector<VectorType1>>& v1_, const device_obj<RValueVector<VectorType2>>& v2_)
                 : v1(asStruct(v1_.getDerived())), v2(asStruct(v2_.getDerived())) {
@@ -54,8 +54,8 @@ namespace Physica::Core {
         using Base = device_obj<RValueVector<host_obj>>;
         using typename Base::ScalarType;
     private:
-        Physica::PlainStruct<DeviceVector1> v1;
-        Physica::PlainStruct<DeviceVector2> v2;
+        Physica::PlainStruct<const DeviceVector1> v1;
+        Physica::PlainStruct<const DeviceVector2> v2;
     public:
         __host__ __device__ device_obj(const device_obj<RValueVector<VectorType1>>& v1_, const device_obj<RValueVector<VectorType2>>& v2_)
                 : v1(asStruct(v1_.getDerived())), v2(asStruct(v2_.getDerived())) {
@@ -78,7 +78,7 @@ namespace Physica::Core {
         using Base = device_obj<RValueVector<host_obj>>;
         using typename Base::ScalarType;
     private:
-        Physica::PlainStruct<DeviceVector> v;
+        Physica::PlainStruct<const DeviceVector> v;
         AnyScalar s;
     public:
         __host__ __device__ device_obj(const device_obj<RValueVector<VectorType>>& v_, AnyScalar s_)
@@ -104,8 +104,8 @@ namespace Physica::Core {
         using Base = device_obj<RValueVector<host_obj>>;
         using typename Base::ScalarType;
     private:
-        Physica::PlainStruct<DeviceVector1> v1;
-        Physica::PlainStruct<DeviceVector2> v2;
+        Physica::PlainStruct<const DeviceVector1> v1;
+        Physica::PlainStruct<const DeviceVector2> v2;
     public:
         __host__ __device__ device_obj(const device_obj<RValueVector<VectorType1>>& v1_, const device_obj<RValueVector<VectorType2>>& v2_)
                 : v1(asStruct(v1_.getDerived())), v2(asStruct(v2_.getDerived())) {
@@ -132,7 +132,7 @@ namespace Physica::Core {
         using Base = device_obj<RValueVector<host_obj>>;
         using typename Base::ScalarType;
     private:
-        Physica::PlainStruct<DeviceVector> v;
+        Physica::PlainStruct<const DeviceVector> v;
         AnyScalar s;
     public:
         __host__ __device__ device_obj(const device_obj<RValueVector<VectorType>>& v_, AnyScalar s_)
@@ -157,7 +157,7 @@ namespace Physica::Core {
         using Base = device_obj<RValueVector<host_obj>>;
         using DeviceVector = device_obj<VectorType>;
         
-        Physica::PlainStruct<DeviceVector> exp;
+        Physica::PlainStruct<const DeviceVector> exp;
     public:
         device_obj(const device_obj<RValueVector<VectorType>>& exp_) : exp(asStruct(exp_.getDerived())) {}
         device_obj(const device_obj&) = default;

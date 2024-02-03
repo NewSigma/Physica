@@ -26,7 +26,7 @@
 namespace Physica::Core {
     namespace Internal {
         template<class Derived, class OtherDerived>
-        __global__ void RValueMatrix_assignToKernel(device_obj<RValueMatrix<Derived>> source, device_obj<LValueMatrix<OtherDerived>> target) {
+        __global__ void RValueMatrix_assignToKernel(device_obj<RValueMatrix<const Derived>> source, device_obj<LValueMatrix<OtherDerived>> target) {
             const size_t major = blockIdx.y;
             const size_t minor = blockIdx.x * blockDim.x + threadIdx.x;
             if (minor < source.getMaxMinor())

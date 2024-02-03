@@ -22,7 +22,7 @@ namespace Physica::Core {
     namespace Internal {
         template<class This, class SegmentType, bool ComputeMax>
         __global__ void DiffVector_minmaxKernel(
-                const Physica::PlainStruct<This> v,
+                const Physica::PlainStruct<const This> v,
                 Physica::PlainStruct<SegmentType> resultTrace) {
             v.getDerived().template minmaxKernelImpl<ComputeMax>(resultTrace.getDerived());
         }
