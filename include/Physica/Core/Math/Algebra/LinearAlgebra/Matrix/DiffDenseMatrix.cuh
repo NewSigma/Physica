@@ -48,7 +48,7 @@ namespace Physica::Core {
         PlainStruct<SegmentType> traceSeg;
     public:
         device_obj() = default;
-        device_obj(size_t row, size_t column);
+        device_obj(size_t row, size_t column, ExpressionType type);
         device_obj(const PlainMatrix& values);
         device_obj(const device_obj&) = default;
         device_obj(device_obj&&) noexcept = default;
@@ -82,8 +82,8 @@ namespace Physica::Core {
     };
 
     template<class PlainScalar, int Option>
-    device_obj<Differentiable<DenseMatrix<PlainScalar, Option>, DiffMode::Reverse>>::device_obj(size_t row, size_t column)
-            : traceSeg(asStruct(TracerType::getInstance().pushSegment(row * column))) {}
+    device_obj<Differentiable<DenseMatrix<PlainScalar, Option>, DiffMode::Reverse>>::device_obj(size_t row, size_t column, ExpressionType type)
+            : traceSeg(asStruct(TracerType::getInstance().pushSegment(row * column, type))) {}
 
     template<class PlainScalar, int Option>
     device_obj<Differentiable<DenseMatrix<PlainScalar, Option>, DiffMode::Reverse>>::device_obj(const PlainMatrix& values)

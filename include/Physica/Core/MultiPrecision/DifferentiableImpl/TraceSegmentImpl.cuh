@@ -29,19 +29,11 @@ namespace Physica::Core {
     }
 
     template<class ScalarType>
-    device_obj<TraceSegment<ScalarType>>::device_obj(size_t size) {
+    device_obj<TraceSegment<ScalarType>>::device_obj(size_t size, ExpressionType type) {
         records.reserve(size);
-        operands.reserve(3 * size); //MulAdd operation is 3-operand
+        operands.reserve(host_obj::numOperand(type) * size);
         values.reserve(size);
         grads.reserve(size);
-    }
-
-    template<class ScalarType>
-    device_obj<TraceSegment<ScalarType>>::device_obj(ExpressionType type) {
-        records.reserve(1);
-        operands.reserve(host_obj::numOperand(type));
-        values.reserve(1);
-        grads.reserve(1);
     }
     /**
      * Optimize: Allocate \param values_ using pinned memory shall improve performance

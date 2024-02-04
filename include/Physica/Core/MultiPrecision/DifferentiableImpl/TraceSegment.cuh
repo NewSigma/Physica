@@ -29,14 +29,14 @@ namespace Physica::Core {
         static_assert(!ScalarType::isDifferentiable, "[Error]: Differentiable<> pack is not necessary");
         using host_obj = TraceSegment<ScalarType>;
         using This = device_obj<host_obj>;
-        using DiffRecord = typename host_obj::DiffRecord;
         using HostDiffScalar = typename host_obj::DiffScalar;
+        using VectorType = typename host_obj::VectorType;
+    public:
         using DiffScalar = device_obj<HostDiffScalar>;
+        using DiffRecord = typename host_obj::DiffRecord;
         using RecordArray = Utils::device_obj<Utils::Array<DiffRecord>>;
         using OperandArray = Utils::device_obj<Utils::Array<HostDiffScalar>>;
-        using VectorType = typename host_obj::VectorType;
         using DeviceVector = device_obj<VectorType>;
-    public:
         constexpr static size_t DefaultSize = host_obj::DefaultSize;
     private:
         RecordArray records;
@@ -45,8 +45,7 @@ namespace Physica::Core {
         DeviceVector grads;
     public:
         device_obj() = default;
-        explicit device_obj(size_t size);
-        explicit device_obj(ExpressionType type);
+        device_obj(size_t size, ExpressionType type);
         device_obj(const VectorType& values_);
         device_obj(const device_obj&) = default;
         device_obj(device_obj&&) noexcept = default;

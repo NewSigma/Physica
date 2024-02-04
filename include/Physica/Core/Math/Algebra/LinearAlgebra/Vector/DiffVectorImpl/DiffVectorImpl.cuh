@@ -29,8 +29,8 @@ namespace Physica::Core {
     }
 
     template<class PlainScalar>
-    device_obj<Differentiable<Vector<PlainScalar>, DiffMode::Reverse>>::device_obj(size_t length)
-            : traceSeg(asStruct(TracerType::getInstance().pushSegment(length))) {}
+    device_obj<Differentiable<Vector<PlainScalar>, DiffMode::Reverse>>::device_obj(size_t length, ExpressionType type)
+            : traceSeg(asStruct(TracerType::getInstance().pushSegment(length, type))) {}
 
     template<class PlainScalar>
     device_obj<Differentiable<Vector<PlainScalar>, DiffMode::Reverse>>::device_obj(const PlainVector& values)
@@ -125,9 +125,21 @@ namespace Physica::Core {
     }
 
     template<class PlainScalar>
+    __host__ __device__ inline typename device_obj<Differentiable<Vector<PlainScalar>, DiffMode::Reverse>>::PlainScalar*
+    device_obj<Differentiable<Vector<PlainScalar>, DiffMode::Reverse>>::value_ptr(size_t index) const noexcept {
+        return calc(index).value_ptr();
+    }
+
+    template<class PlainScalar>
+    __host__ __device__ inline typename device_obj<Differentiable<Vector<PlainScalar>, DiffMode::Reverse>>::PlainScalar*
+    device_obj<Differentiable<Vector<PlainScalar>, DiffMode::Reverse>>::grad_ptr(size_t index) const noexcept {
+        return calc(index).grad_ptr(index);
+    }
+
+    template<class PlainScalar>
     typename device_obj<Differentiable<Vector<PlainScalar>, DiffMode::Reverse>>::ScalarType
     device_obj<Differentiable<Vector<PlainScalar>, DiffMode::Reverse>>::max() const noexcept {
-        auto& trace = TracerType::getInstance().pushSegment(ExpressionType::Assign);
+        auto& trace = TracerType::getInstance().pushSegment(1, ExpressionType::Assign);
         const size_t length = getLength();
         const size_t numThread = length > MaxThreadPerBlock ? MaxThreadPerBlock : length;
         Internal::DiffVector_minmaxKernel<This, SegmentType, true>
@@ -138,7 +150,7 @@ namespace Physica::Core {
     template<class PlainScalar>
     typename device_obj<Differentiable<Vector<PlainScalar>, DiffMode::Reverse>>::ScalarType
     device_obj<Differentiable<Vector<PlainScalar>, DiffMode::Reverse>>::min() const noexcept {
-        auto& trace = TracerType::getInstance().pushSegment(ExpressionType::Assign);
+        auto& trace = TracerType::getInstance().pushSegment(1, ExpressionType::Assign);
         const size_t length = getLength();
         const size_t numThread = length > MaxThreadPerBlock ? MaxThreadPerBlock : length;
         Internal::DiffVector_minmaxKernel<This, SegmentType, false>

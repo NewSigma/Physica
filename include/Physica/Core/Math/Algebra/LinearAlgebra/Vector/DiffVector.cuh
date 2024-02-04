@@ -41,13 +41,18 @@ namespace Physica::Core {
         using Base = device_obj<RValueVector<host_obj>>;
         using TracerType = device_obj<typename host_obj::TracerType>;
         using SegmentType = device_obj<typename host_obj::SegmentType>;
+        using RecordArray = typename SegmentType::RecordArray;
+        using OperandArray = typename SegmentType::OperandArray;
+        using DeviceVector = typename SegmentType::DeviceVector;
     public:
         using ScalarType = typename Base::ScalarType;
+        using DiffScalar = typename SegmentType::DiffScalar;
+        using DiffRecord = typename SegmentType::DiffRecord;
     private:
         PlainStruct<SegmentType> traceSeg;
     public:
         device_obj() = default;
-        device_obj(size_t length);
+        device_obj(size_t length, ExpressionType type);
         device_obj(const PlainVector& values);
         device_obj(const device_obj&) = default;
         device_obj(device_obj&&) noexcept = default;
@@ -69,6 +74,12 @@ namespace Physica::Core {
         /* Getters */
         [[nodiscard]] __host__ __device__ inline ScalarType calc(size_t index) const;
         [[nodiscard]] __host__ __device__ size_t getLength() const noexcept { return getTraceSegment().getLength(); }
+        [[nodiscard]] __host__ __device__ inline PlainScalar* value_ptr(size_t index) const noexcept;
+        [[nodiscard]] __host__ __device__ inline PlainScalar* grad_ptr(size_t index) const noexcept;
+        [[nodiscard]] __device__ RecordArray& getRecords() noexcept { return getTraceSegment().getRecords(); }
+        [[nodiscard]] __device__ OperandArray& getOperands() noexcept { return getTraceSegment().getOperands(); }
+        [[nodiscard]] __device__ DeviceVector& getValues() noexcept { return values; }
+        [[nodiscard]] __device__ DeviceVector& getGrads() noexcept { return grads; }
         [[nodiscard]] ScalarType max() const noexcept;
         [[nodiscard]] ScalarType min() const noexcept;
         /* Static members */
