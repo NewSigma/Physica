@@ -26,7 +26,28 @@ namespace Physica::Core {
 
     namespace Internal {
         template<ExpressionType Type, class VectorType>
-        __global__ void DiffVectorExpression_calcKernel(
+        __global__ void DiffVectorExpression_unitaryOpKernel(
+                Physica::PlainStruct<VectorType> result_,
+                Physica::PlainStruct<const VectorType> v_) {
+            using DiffScalar = typename VectorType::DiffScalar;
+            using DiffRecord = typename VectorType::DiffRecord;
+            const VectorType& v = v_.getDerived();
+            VectorType& result = result_.getDerived();
+            const size_t index = blockIdx.x * blockDim.x + threadIdx.x;
+            const size_t length = result.getLength();
+            if (index >= length)
+                return;
+            result.getRecords()[index] = DiffRecord(index, Type);
+            result.getOperands()[index] = DiffScalar(v.value_ptr(index), v.grad_ptr(index));
+            if constexpr (Type == ExpressionType::Exp)
+                result.getValues()[index] = exp(v[index].getValue());
+            else
+                static_assert(false, "[Error]: Not implemented");
+            result.getGrads()[index] = 0;
+        }
+
+        template<ExpressionType Type, class VectorType>
+        __global__ void DiffVectorExpression_binaryOpKernel(
                 Physica::PlainStruct<VectorType> result_,
                 Physica::PlainStruct<const VectorType> v_,
                 Physica::PlainStruct<const typename VectorType::DiffScalar> s_) {
@@ -56,7 +77,7 @@ namespace Physica::Core {
         }
 
         template<ExpressionType Type, class VectorType>
-        __global__ void DiffVectorExpression_calcKernel(
+        __global__ void DiffVectorExpression_binaryOpKernel(
                 Physica::PlainStruct<VectorType> result_,
                 Physica::PlainStruct<const VectorType> v1_,
                 Physica::PlainStruct<const VectorType> v2_) {
@@ -86,6 +107,22 @@ namespace Physica::Core {
         }
     }
 
+    template<class PlainScalar>
+    class DiffVectorExpression<ExpressionType::Exp, Vector<PlainScalar>> {
+        using VectorType = device_obj<Differentiable<Vector<PlainScalar>, DiffMode::Reverse>>;
+        constexpr static ExpressionType Type = ExpressionType::Exp;
+    public:
+        [[nodiscard]] static VectorType calc(const VectorType& v) {
+            const size_t length = v.getLength();
+            VectorType result(length, Type);
+            const size_t numThread = length > VectorType::MaxThreadPerBlock ? VectorType::MaxThreadPerBlock : length;
+            const size_t numBlock = (length + numThread - 1) / numThread;
+            Internal::DiffVectorExpression_unitaryOpKernel<Type, VectorType>
+                    <<<numBlock, numThread, 0, StreamPool::getStream()>>>(asStruct(result), asStruct(v));
+            return result;
+        }
+    };
+
     template<ExpressionType Type, class PlainScalar>
     class DiffVectorExpression<Type, Vector<PlainScalar>, PlainScalar> {
         using VectorType = device_obj<Differentiable<Vector<PlainScalar>, DiffMode::Reverse>>;
@@ -96,7 +133,7 @@ namespace Physica::Core {
             VectorType result(length, Type);
             const size_t numThread = length > VectorType::MaxThreadPerBlock ? VectorType::MaxThreadPerBlock : length;
             const size_t numBlock = (length + numThread - 1) / numThread;
-            Internal::DiffVectorExpression_calcKernel<Type, VectorType>
+            Internal::DiffVectorExpression_binaryOpKernel<Type, VectorType>
                     <<<numBlock, numThread, 0, StreamPool::getStream()>>>(asStruct(result), asStruct(v), asStruct(s));
             return result;
         }
@@ -112,7 +149,7 @@ namespace Physica::Core {
             VectorType result(length, Type);
             const size_t numThread = length > VectorType::MaxThreadPerBlock ? VectorType::MaxThreadPerBlock : length;
             const size_t numBlock = (length + numThread - 1) / numThread;
-            Internal::DiffVectorExpression_calcKernel<Type, VectorType>
+            Internal::DiffVectorExpression_binaryOpKernel<Type, VectorType>
                     <<<numBlock, numThread, 0, StreamPool::getStream()>>>(asStruct(result), asStruct(v1), asStruct(v2));
             return result;
         }
@@ -191,4 +228,16 @@ namespace Physica::Core {
     }
     //////////////////////////////////////Compare//////////////////////////////////////
     ////////////////////////////////////////Elementary Functions////////////////////////////////////////////
+    template<class PlainScalar>
+    auto exp(const device_obj<Differentiable<Vector<PlainScalar>, DiffMode::Reverse>>& v) {
+        return DiffVectorExpression<ExpressionType::Exp, Vector<PlainScalar>, Vector<PlainScalar>>::calc(v);
+    }
+
+    template<class PlainScalar>
+    auto softmax(const device_obj<Differentiable<Vector<PlainScalar>, DiffMode::Reverse>>& v) {
+        using VectorType = device_obj<Differentiable<Vector<PlainScalar>, DiffMode::Reverse>>;
+        const auto maximum = v.max();
+        const auto temp = exp(v - maximum);
+        return temp / temp.sum();
+    }
 }

@@ -46,7 +46,8 @@ namespace Physica::Core {
     public:
         device_obj() = default;
         device_obj(size_t size, ExpressionType type);
-        device_obj(const VectorType& values_);
+        explicit device_obj(ScalarType value);
+        explicit device_obj(const VectorType& values_);
         device_obj(const device_obj&) = default;
         device_obj(device_obj&&) noexcept = default;
         ~device_obj() = default;

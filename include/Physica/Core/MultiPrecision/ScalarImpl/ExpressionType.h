@@ -30,6 +30,7 @@ namespace Physica::Core {
         Sub,
         Mul,
         Div,
+        Sum,
         MulAdd2,
         MulAdd4,
         MulAdd8,
@@ -59,6 +60,7 @@ namespace Physica::Core {
             case ExpressionType::Sub: return "Sub";
             case ExpressionType::Mul: return "Mul";
             case ExpressionType::Div: return "Div";
+            case ExpressionType::Sum: return "Sum";
             case ExpressionType::MulAdd2: return "MulAdd2";
             case ExpressionType::MulAdd4: return "MulAdd4";
             case ExpressionType::MulAdd8: return "MulAdd8";

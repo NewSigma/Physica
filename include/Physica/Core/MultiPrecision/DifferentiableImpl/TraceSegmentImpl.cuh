@@ -21,6 +21,16 @@
 namespace Physica::Core {
     namespace Internal {
         template<class ScalarType>
+        __global__ void __launch_bounds__(1, 1) TraceSegment_setKernel(
+                Physica::PlainStruct<Core::device_obj<TraceSegment<ScalarType>>> segment_, ScalarType value) {
+            using DiffRecord = typename Core::device_obj<TraceSegment<ScalarType>>::DiffRecord;
+            auto& segment = segment_.getDerived();
+            segment.getRecords() = DiffRecord(0, ExpressionType::Set);
+            segment.getValues()[0] = value;
+            segment.getGrads()[0] = 0;
+        }
+
+        template<class ScalarType>
         __global__ void TraceSegment_copyKernel(
                 Physica::PlainStruct<const Core::device_obj<TraceSegment<ScalarType>>> source,
                 Physica::PlainStruct<Core::device_obj<TraceSegment<ScalarType>>> target) {
@@ -29,20 +39,23 @@ namespace Physica::Core {
     }
 
     template<class ScalarType>
-    device_obj<TraceSegment<ScalarType>>::device_obj(size_t size, ExpressionType type) {
-        records.reserve(size);
-        operands.reserve(host_obj::numOperand(type) * size);
-        values.reserve(size);
-        grads.reserve(size);
+    device_obj<TraceSegment<ScalarType>>::device_obj(size_t size, ExpressionType type)
+            : records(size)
+            , operands(host_obj::numOperand(type) * size)
+            , values(size)
+            , grads(size) {}
+
+    template<class ScalarType>
+    device_obj<TraceSegment<ScalarType>>::device_obj(ScalarType value)
+            : device_obj(1, ExpressionType::Set) {
+        Internal::TraceSegment_setKernel<<<1, 1, 0, StreamPool::getStream()>>>(asStruct(*this), value);
     }
     /**
      * Optimize: Allocate \param values_ using pinned memory shall improve performance
      */
     template<class ScalarType>
     device_obj<TraceSegment<ScalarType>>::device_obj(const VectorType& values_)
-            : records(values_.getLength())
-            , values(values_.getLength())
-            , grads(values_.getLength()) {
+            : device_obj(values_.getLength(), ExpressionType::Set) {
         values_.toDeviceAsync(values);
         auto future = StreamFuture::makeFuture();
         cudaMemsetAsync((void*)records.data(), 0, getLength() * sizeof(DiffRecord), StreamPool::getStream());

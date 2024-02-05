@@ -48,11 +48,14 @@ namespace Physica::Core {
         using host_obj = Differentiable<ScalarType, DiffMode::Reverse>;
         using This = device_obj<host_obj>;
         using Base = ScalarBase<This>;
+        using TracerType = device_obj<DiffTracer<ScalarType>>;
 
         ScalarType* __restrict pValue;
         ScalarType* __restrict pGrad;
     public:
         device_obj() = default;
+        device_obj(double d) : device_obj(ScalarType(d)) {}
+        device_obj(ScalarType s);
         __host__ __device__ device_obj(ScalarType* pValue_, ScalarType* pGrad_);
         device_obj(const device_obj&) = default;
         device_obj(device_obj&&) noexcept = default;
@@ -80,32 +83,26 @@ namespace Physica::Core {
         /* Setters */
         __device__ void setValue(const ScalarType& x) { *pValue = x; }
     };
+    ////////////////////////////////////////////////////////////
+    template<class ScalarType>
+    [[nodiscard]] inline device_obj<Differentiable<ScalarType, DiffMode::Reverse>>
+    operator+(const device_obj<Differentiable<ScalarType, DiffMode::Reverse>>& s1,
+              const device_obj<Differentiable<ScalarType, DiffMode::Reverse>>& s2);
 
     template<class ScalarType>
-    __host__ __device__ device_obj<Differentiable<ScalarType, DiffMode::Reverse>>::device_obj(ScalarType* pValue_, ScalarType* pGrad_)
-            : pValue(pValue_), pGrad(pGrad_) {}
+    [[nodiscard]] inline device_obj<Differentiable<ScalarType, DiffMode::Reverse>>
+    operator-(const device_obj<Differentiable<ScalarType, DiffMode::Reverse>>& s1,
+              const device_obj<Differentiable<ScalarType, DiffMode::Reverse>>& s2);
 
     template<class ScalarType>
-    __host__ __device__ inline bool device_obj<Differentiable<ScalarType, DiffMode::Reverse>>::operator==(const This& other) const {
-        const bool result = pValue == other.pValue;
-        assert(result == (pGrad == other.pGrad) && "[Error]: Bad scalar");
-        return result;
-    }
+    [[nodiscard]] inline device_obj<Differentiable<ScalarType, DiffMode::Reverse>>
+    operator*(const device_obj<Differentiable<ScalarType, DiffMode::Reverse>>& s1,
+              const device_obj<Differentiable<ScalarType, DiffMode::Reverse>>& s2);
 
     template<class ScalarType>
-    void device_obj<Differentiable<ScalarType, DiffMode::Reverse>>::toHostAsync_value(ScalarType& value) const {
-        cudaCheck(cudaMemcpyAsync(&value, pValue, sizeof(ScalarType), cudaMemcpyKind::cudaMemcpyDeviceToHost, StreamPool::getStream()));
-    }
-
-    template<class ScalarType>
-    void device_obj<Differentiable<ScalarType, DiffMode::Reverse>>::toHostAsync_grad(ScalarType& grad) const {
-        cudaCheck(cudaMemcpyAsync(&grad, pGrad, sizeof(ScalarType), cudaMemcpyKind::cudaMemcpyDeviceToHost, StreamPool::getStream()));
-    }
-
-    template<class ScalarType>
-    __host__ __device__ inline void device_obj<Differentiable<ScalarType, DiffMode::Reverse>>::swap(device_obj& __restrict obj) noexcept {
-        assert(this != &obj && "[Error]: Self swap is likely a bug");
-        std::swap(pValue, obj.pValue);
-        std::swap(pGrad, obj.pGrad);
-    }
+    [[nodiscard]] inline device_obj<Differentiable<ScalarType, DiffMode::Reverse>>
+    operator/(const device_obj<Differentiable<ScalarType, DiffMode::Reverse>>& s1,
+              const device_obj<Differentiable<ScalarType, DiffMode::Reverse>>& s2);
 }
+
+#include "DifferentiableImpl/DifferentiableImpl.cuh"

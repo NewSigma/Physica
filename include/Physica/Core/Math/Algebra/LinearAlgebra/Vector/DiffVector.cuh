@@ -70,7 +70,8 @@ namespace Physica::Core {
         void swap(device_obj& obj) noexcept { std::swap(*this, obj); }
 
         template<bool ComputeMax>
-        __device__ void minmaxKernelImpl(SegmentType& resultTrace) const;
+        __device__ void minmaxKernelImpl(SegmentType& result) const;
+        __device__ void sumKernelImpl(SegmentType& result) const;
         /* Getters */
         [[nodiscard]] __host__ __device__ inline ScalarType calc(size_t index) const;
         [[nodiscard]] __host__ __device__ size_t getLength() const noexcept { return getTraceSegment().getLength(); }
@@ -80,8 +81,9 @@ namespace Physica::Core {
         [[nodiscard]] __device__ OperandArray& getOperands() noexcept { return getTraceSegment().getOperands(); }
         [[nodiscard]] __device__ DeviceVector& getValues() noexcept { return values; }
         [[nodiscard]] __device__ DeviceVector& getGrads() noexcept { return grads; }
-        [[nodiscard]] ScalarType max() const noexcept;
-        [[nodiscard]] ScalarType min() const noexcept;
+        [[nodiscard]] ScalarType max() const;
+        [[nodiscard]] ScalarType min() const;
+        [[nodiscard]] ScalarType sum() const;
         /* Static members */
         template<class RandomGenerator>
         [[nodiscard]] inline static This random_uniform(size_t len, RandomGenerator& gen);

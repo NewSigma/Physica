@@ -19,25 +19,28 @@
 #pragma once
 
 namespace Physica {
-    template<class Derived> class PlainStruct;
+    template<class T> class PlainStruct;
     template<> class PlainStruct<void> {};
     /**
      * \class PlainStruct pass objects to cuda kernel ignoring constructors and destructors because resource control is cpu's duty.
      */
-    template<class Derived>
-    class alignas(Derived) PlainStruct<const Derived> {
-        char anonymous[sizeof(Derived)];
+    template<class T>
+    class alignas(T) PlainStruct<const T> {
     public:
-        [[nodiscard]] __host__ __device__ const Derived& getDerived() const noexcept { return *reinterpret_cast<const Derived*>(this); }
-        [[nodiscard]] __host__ __device__ Derived& getConstCastDerived() const noexcept { return *reinterpret_cast<Derived*>(const_cast<PlainStruct*>(this)); }
+        using Derived = T;
+    private:
+        char anonymous[sizeof(T)];
+    public:
+        [[nodiscard]] __host__ __device__ const T& getDerived() const noexcept { return *reinterpret_cast<const T*>(this); }
+        [[nodiscard]] __host__ __device__ T& getConstCastDerived() const noexcept { return *reinterpret_cast<T*>(const_cast<PlainStruct*>(this)); }
     };
 
-    template<class Derived>
-    class alignas(Derived) PlainStruct : public PlainStruct<const Derived> {
-        using Base = PlainStruct<const Derived>;
+    template<class T>
+    class alignas(T) PlainStruct : public PlainStruct<const T> {
+        using Base = PlainStruct<const T>;
     public:
         using Base::getDerived;
-        [[nodiscard]] __device__ Derived& getDerived() noexcept { return *reinterpret_cast<Derived*>(this); }
+        [[nodiscard]] __device__ T& getDerived() noexcept { return *reinterpret_cast<T*>(this); }
     };
 
     template<class T>

@@ -218,6 +218,7 @@ namespace Physica::Core {
             case ExpressionType::Sub: return 2;
             case ExpressionType::Mul: return 2;
             case ExpressionType::Div: return 2;
+            case ExpressionType::Sum: return 2;
             case ExpressionType::MulAdd2: [[fallthrough]];
             case ExpressionType::MulAdd4: [[fallthrough]];
             case ExpressionType::MulAdd8: return 3;

@@ -23,8 +23,15 @@ namespace Physica::Core {
         template<class This, class SegmentType, bool ComputeMax>
         __global__ void DiffVector_minmaxKernel(
                 const Physica::PlainStruct<const This> v,
-                Physica::PlainStruct<SegmentType> resultTrace) {
-            v.getDerived().template minmaxKernelImpl<ComputeMax>(resultTrace.getDerived());
+                Physica::PlainStruct<SegmentType> result) {
+            v.getDerived().template minmaxKernelImpl<ComputeMax>(result.getDerived());
+        }
+
+        template<class This, class SegmentType>
+        __global__ void DiffVector_sumKernel(
+                const Physica::PlainStruct<const This> v,
+                Physica::PlainStruct<SegmentType> result) {
+            v.getDerived().sumKernelImpl(result.getDerived());
         }
     }
 
@@ -72,7 +79,7 @@ namespace Physica::Core {
 
     template<class PlainScalar>
     template<bool ComputeMax>
-    __device__ void device_obj<Differentiable<Vector<PlainScalar>, DiffMode::Reverse>>::minmaxKernelImpl(SegmentType& resultTrace) const {
+    __device__ void device_obj<Differentiable<Vector<PlainScalar>, DiffMode::Reverse>>::minmaxKernelImpl(SegmentType& result) const {
         extern __shared__ PlainScalar buffer[];
         const size_t length = getLength();
         const size_t index = threadIdx.x;
@@ -89,39 +96,62 @@ namespace Physica::Core {
         }
         buffer[index] = value;
 
-        for (int i = length / 2; i > 1; i /= 2) {
+        int i0 = length;
+        int i = (i0 + 1) / 2;
+        while (index + i < i0) {
             __syncthreads();
-            if (index < i) {
-                const int index1 = index + i;
-                const PlainScalar temp = buffer[index1];
-                const bool flag = ComputeMax ? (temp > value) : (temp < value);
-                if (flag) {
-                    value = temp;
-                    valueIndex = index1;
-                    buffer[index] = value;
-                }
-            }
-            else
-                return;
-        }
-
-        assert(index == 0 && "[Error]: Other thread should have exited");
-        const bool isSpecialCase = blockDim.x % 2 != 0;
-        if (isSpecialCase) {
-            const int index1 = blockDim.x - 1;
+            const int index1 = index + i;
             const PlainScalar temp = buffer[index1];
             const bool flag = ComputeMax ? (temp > value) : (temp < value);
             if (flag) {
                 value = temp;
                 valueIndex = index1;
+                buffer[index] = value;
             }
+            i0 = i;
+            i = (i0 + 1) / 2;
         }
 
+        if (index != 0)
+            return;
         const auto& trace = getTraceSegment();
-        resultTrace.getRecords()[0] = {0, ExpressionType::Assign};
-        resultTrace.getOperands()[0] = {trace.getValues().data_ptr(valueIndex), trace.getGrads().data_ptr(valueIndex)};
-        resultTrace.getValues()[0] = value;
-        resultTrace.getGrads()[0] = 0;
+        result.getRecords()[0] = {0, ExpressionType::Assign};
+        result.getOperands()[0] = {trace.getValues().data_ptr(valueIndex), trace.getGrads().data_ptr(valueIndex)};
+        result.getValues()[0] = value;
+        result.getGrads()[0] = 0;
+    }
+
+    template<class PlainScalar>
+    __device__ void device_obj<Differentiable<Vector<PlainScalar>, DiffMode::Reverse>>::sumKernelImpl(SegmentType& result) const {
+        extern __shared__ PlainScalar buffer[];
+        const size_t length = getLength();
+        const size_t index = threadIdx.x;
+
+        PlainScalar threadSum = 0;
+        for (int i = index; i < length; i += blockDim.x)
+            threadSum += calc(i).getValue();
+        buffer[index] = threadSum;
+
+        int i0 = length;
+        int i = (i0 + 1) / 2;
+        while (index + i < i0) {
+            __syncthreads();
+            threadSum += buffer[index + i];
+            buffer[index] = threadSum;
+            i0 = i;
+            i = (i0 + 1) / 2;
+        }
+
+        if (index != 0)
+            return;
+        const auto& trace = getTraceSegment();
+        result.getRecords()[0] = {0, ExpressionType::Sum};
+        const auto* pValue = trace.getValues().data();
+        const auto* pGrad = trace.getGrads().data();
+        result.getOperands()[0] = {pValue, pGrad};
+        result.getOperands()[1] = {pValue + length, pGrad + length};
+        result.getValues()[0] = threadSum;
+        result.getGrads()[0] = 0;
     }
 
     template<class PlainScalar>
@@ -138,23 +168,34 @@ namespace Physica::Core {
 
     template<class PlainScalar>
     typename device_obj<Differentiable<Vector<PlainScalar>, DiffMode::Reverse>>::ScalarType
-    device_obj<Differentiable<Vector<PlainScalar>, DiffMode::Reverse>>::max() const noexcept {
+    device_obj<Differentiable<Vector<PlainScalar>, DiffMode::Reverse>>::max() const {
         auto& trace = TracerType::getInstance().pushSegment(1, ExpressionType::Assign);
         const size_t length = getLength();
         const size_t numThread = length > MaxThreadPerBlock ? MaxThreadPerBlock : length;
         Internal::DiffVector_minmaxKernel<This, SegmentType, true>
-                <<<1, numThread, length * sizeof(PlainScalar), StreamPool::getStream()>>>(asStruct(*this), asStruct(trace));
+                <<<1, numThread, numThread * sizeof(PlainScalar), StreamPool::getStream()>>>(asStruct(*this), asStruct(trace));
         return ScalarType(trace.getValues().data(), trace.getGrads().data());
     }
 
     template<class PlainScalar>
     typename device_obj<Differentiable<Vector<PlainScalar>, DiffMode::Reverse>>::ScalarType
-    device_obj<Differentiable<Vector<PlainScalar>, DiffMode::Reverse>>::min() const noexcept {
+    device_obj<Differentiable<Vector<PlainScalar>, DiffMode::Reverse>>::min() const {
         auto& trace = TracerType::getInstance().pushSegment(1, ExpressionType::Assign);
         const size_t length = getLength();
         const size_t numThread = length > MaxThreadPerBlock ? MaxThreadPerBlock : length;
         Internal::DiffVector_minmaxKernel<This, SegmentType, false>
-                <<<1, numThread, length * sizeof(PlainScalar), StreamPool::getStream()>>>(asStruct(*this), asStruct(trace));
+                <<<1, numThread, numThread * sizeof(PlainScalar), StreamPool::getStream()>>>(asStruct(*this), asStruct(trace));
+        return ScalarType(trace.getValues().data(), trace.getGrads().data());
+    }
+
+    template<class PlainScalar>
+    typename device_obj<Differentiable<Vector<PlainScalar>, DiffMode::Reverse>>::ScalarType
+    device_obj<Differentiable<Vector<PlainScalar>, DiffMode::Reverse>>::sum() const {
+        auto& trace = TracerType::getInstance().pushSegment(1, ExpressionType::Sum);
+        const size_t length = getLength();
+        const size_t numThread = length > MaxThreadPerBlock ? MaxThreadPerBlock : length;
+        Internal::DiffVector_sumKernel<This, SegmentType>
+                <<<1, numThread, numThread * sizeof(PlainScalar), StreamPool::getStream()>>>(asStruct(*this), asStruct(trace));
         return ScalarType(trace.getValues().data(), trace.getGrads().data());
     }
 
