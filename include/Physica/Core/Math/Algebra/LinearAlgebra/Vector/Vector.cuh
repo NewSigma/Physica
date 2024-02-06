@@ -57,8 +57,8 @@ namespace Physica::Core {
         /* Getters */
         using Storage::getLength;
         using Storage::data;
-        [[nodiscard]] __host__ __device__ inline ScalarType* data_ptr(size_t index) { return data() + index; }
-        [[nodiscard]] __host__ __device__ inline const ScalarType* data_ptr(size_t index) const { return data() + index; }
+        [[nodiscard]] __host__ __device__ ScalarType* data_ptr(size_t index) { return data() + index; }
+        [[nodiscard]] __host__ __device__ const ScalarType* data_ptr(size_t index) const { return data() + index; }
     };
 
     template<class T, size_t Length, size_t MaxLength>

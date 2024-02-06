@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 WeiBo He.
+ * Copyright 2023-2024 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -19,6 +19,10 @@
 #pragma once
 
 namespace Physica::Core {
+    namespace Internal {
+        template<ExpressionType Type, class Exp1, class Exp2>
+        class Traits<device_obj<VectorExpression<Type, Exp1, Exp2>>> : public Traits<VectorExpression<Type, Exp1, Exp2>> {};
+    }
     //////////////////////////////////////Add//////////////////////////////////////
     template<class VectorType1, class VectorType2>
     class device_obj<VectorExpression<ExpressionType::Add, VectorType1, VectorType2>>

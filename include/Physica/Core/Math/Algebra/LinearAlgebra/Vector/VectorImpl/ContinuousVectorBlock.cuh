@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 WeiBo He.
+ * Copyright 2023-2024 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -19,6 +19,11 @@
 #pragma once
 
 namespace Physica::Core {
+    namespace Internal {
+        template<class VectorType, size_t Length>
+        class Traits<device_obj<ContinuousVectorBlock<VectorType, Length>>> : public Traits<ContinuousVectorBlock<VectorType, Length>> {};
+    }
+
     template<class VectorType, size_t Length>
     class device_obj<ContinuousVectorBlock<VectorType, Length>> : public device_obj<ContinuousVector<ContinuousVectorBlock<VectorType, Length>>> {
         using DeviceVector = device_obj<VectorType>;

@@ -155,15 +155,15 @@ namespace Physica::Core {
     }
 
     template<class PlainScalar>
-    __host__ __device__ inline typename device_obj<Differentiable<Vector<PlainScalar>, DiffMode::Reverse>>::PlainScalar*
+    __host__ __device__ inline PlainScalar*
     device_obj<Differentiable<Vector<PlainScalar>, DiffMode::Reverse>>::value_ptr(size_t index) const noexcept {
         return calc(index).value_ptr();
     }
 
     template<class PlainScalar>
-    __host__ __device__ inline typename device_obj<Differentiable<Vector<PlainScalar>, DiffMode::Reverse>>::PlainScalar*
+    __host__ __device__ inline PlainScalar*
     device_obj<Differentiable<Vector<PlainScalar>, DiffMode::Reverse>>::grad_ptr(size_t index) const noexcept {
-        return calc(index).grad_ptr(index);
+        return calc(index).grad_ptr();
     }
 
     template<class PlainScalar>

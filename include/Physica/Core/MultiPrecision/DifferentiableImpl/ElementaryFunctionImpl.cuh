@@ -24,16 +24,16 @@ namespace Physica::Core {
         __global__ void __launch_bounds__(1, 1) ElementaryFunction_calcKernel(
                 Physica::PlainStruct<device_obj<TraceSegment<ScalarType>>> segment_,
                 Physica::PlainStruct<const device_obj<Differentiable<ScalarType, DiffMode::Reverse>>> s_) {
-            using SegmentType = typename decltype(s)::Derived;
+            using SegmentType = device_obj<TraceSegment<ScalarType>>;
             using DiffRecord = typename SegmentType::DiffRecord;
             auto& segment = segment_.getDerived();
-            segment.getRecords()[0] = DiffRecord(0, Type);
+            segment.getRecords()[0] = DiffRecord{0, Type};
             const auto& s = s_.getDerived();
-            segment.getOperands()[0] = s1;
+            segment.getOperands()[0] = s;
             if constexpr (Type == ExpressionType::Ln)
                 segment.getValues()[0] = ln(s.getValue());
             else
-                static_assert(false, "[Error]: Not implemented");
+                static_assert(Type == ExpressionType::Ln, "[Error]: Not implemented");
             segment.getGrads()[0] = 0;
         }
     }

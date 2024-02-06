@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 WeiBo He.
+ * Copyright 2023-2024 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -23,6 +23,7 @@
 namespace Physica::Core {
     template<class ScalarType>
     class Loss {
+        static_assert(!Utils::is_device_obj<ScalarType>::value, "[Error]: Include corresponding *.cuh file to enable CUDA support");
         using PlainScalar = typename ScalarType::PlainScalar;
         using VectorType = Vector<ScalarType>;
     public:

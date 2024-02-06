@@ -20,15 +20,29 @@
 
 namespace Physica::Core {
     namespace Internal {
-        template<class ScalarType, ExpressionType Type>
-        __global__ void __launch_bound__(1, 1) Differentiable_calcKernel(
+        template<class ScalarType>
+        __global__ void __launch_bounds__(1, 1) Differentiable_minusKernel(
                 Physica::PlainStruct<device_obj<TraceSegment<ScalarType>>> segment_,
-                Physica::PlainStruct<const device_obj<Differentiable<ScalarType, DiffMode::Reverse>>> s1_,
-                Physica::PlainStruct<const device_obj<Differentiable<ScalarType, DiffMode::Reverse>>> s2_>) {
-            using SegmentType = typename decltype(s)::Derived;
+                Physica::PlainStruct<const device_obj<Differentiable<ScalarType, DiffMode::Reverse>>> s_) {
+            using SegmentType = device_obj<TraceSegment<ScalarType>>;
             using DiffRecord = typename SegmentType::DiffRecord;
             auto& segment = segment_.getDerived();
-            segment.getRecords()[0] = DiffRecord(0, Type);
+            segment.getRecords()[0] = DiffRecord{0, ExpressionType::Minus};
+            const auto& s = s_.getDerived();
+            segment.getOperands()[0] = s;
+            segment.getValues()[0] = -s.getValue();
+            segment.getGrads()[0] = 0;
+        }
+
+        template<class ScalarType, ExpressionType Type>
+        __global__ void __launch_bounds__(1, 1) Differentiable_calcKernel(
+                Physica::PlainStruct<device_obj<TraceSegment<ScalarType>>> segment_,
+                Physica::PlainStruct<const device_obj<Differentiable<ScalarType, DiffMode::Reverse>>> s1_,
+                Physica::PlainStruct<const device_obj<Differentiable<ScalarType, DiffMode::Reverse>>> s2_) {
+            using SegmentType = device_obj<TraceSegment<ScalarType>>;
+            using DiffRecord = typename SegmentType::DiffRecord;
+            auto& segment = segment_.getDerived();
+            segment.getRecords()[0] = DiffRecord{0, Type};
             const auto& s1 = s1_.getDerived();
             const auto& s2 = s2_.getDerived();
             segment.getOperands()[0] = s1;
@@ -42,7 +56,7 @@ namespace Physica::Core {
             else if constexpr (Type == ExpressionType::Div)
                 segment.getValues()[0] = s1.getValue() / s2.getValue();
             else
-                static_assert(false, "[Error]: Not implemented");
+                static_assert(Type == ExpressionType::Add, "[Error]: Not implemented");
             segment.getGrads()[0] = 0;
         }
     }
@@ -52,14 +66,23 @@ namespace Physica::Core {
             : device_obj(TracerType::getInstance().pushSegment(s)[0]) {}
 
     template<class ScalarType>
-    __host__ __device__ device_obj<Differentiable<ScalarType, DiffMode::Reverse>>::device_obj(ScalarType* pValue_, ScalarType* pGrad_)
-            : pValue(pValue_), pGrad(pGrad_) {}
+    __host__ __device__ device_obj<Differentiable<ScalarType, DiffMode::Reverse>>::device_obj(
+            const ScalarType* pValue_, const ScalarType* pGrad_)
+            : pValue(const_cast<ScalarType*>(pValue_)), pGrad(const_cast<ScalarType*>(pGrad_)) {}
 
     template<class ScalarType>
     __host__ __device__ inline bool device_obj<Differentiable<ScalarType, DiffMode::Reverse>>::operator==(const This& other) const {
         const bool result = pValue == other.pValue;
         assert(result == (pGrad == other.pGrad) && "[Error]: Bad scalar");
         return result;
+    }
+
+    template<class ScalarType>
+    inline device_obj<Differentiable<ScalarType, DiffMode::Reverse>>
+    device_obj<Differentiable<ScalarType, DiffMode::Reverse>>::operator-() const {
+        auto& segment = TracerType::getInstance().pushSegment(1, ExpressionType::Minus);
+        Internal::Differentiable_minusKernel<ScalarType><<<1, 1, 0, StreamPool::getStream()>>>(asStruct(segment), asStruct(*this));
+        return segment[0];
     }
 
     template<class ScalarType>

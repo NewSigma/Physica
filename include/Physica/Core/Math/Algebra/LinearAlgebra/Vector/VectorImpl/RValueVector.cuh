@@ -26,10 +26,11 @@ namespace Physica::Core {
     template<class Derived>
     class device_obj<RValueVector<Derived>> : public Utils::CRTPBase<device_obj<Derived>> {
         using Base = Utils::CRTPBase<device_obj<Derived>>;
+        using TraitsType = Internal::Traits<device_obj<Derived>>;
     public:
-        using ScalarType = typename Internal::Traits<Derived>::ScalarType;
-        constexpr static size_t SizeAtCompile = Internal::Traits<Derived>::SizeAtCompile;
-        constexpr static size_t MaxSizeAtCompile = Internal::Traits<Derived>::MaxSizeAtCompile;
+        using ScalarType = typename TraitsType::ScalarType;
+        constexpr static size_t SizeAtCompile = TraitsType::SizeAtCompile;
+        constexpr static size_t MaxSizeAtCompile = TraitsType::MaxSizeAtCompile;
         constexpr static bool isComplex = ScalarType::isComplex;
         constexpr static size_t MaxThreadPerBlock = 256;
     private:

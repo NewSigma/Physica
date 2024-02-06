@@ -25,7 +25,7 @@ namespace Physica::Core {
                 Physica::PlainStruct<Core::device_obj<TraceSegment<ScalarType>>> segment_, ScalarType value) {
             using DiffRecord = typename Core::device_obj<TraceSegment<ScalarType>>::DiffRecord;
             auto& segment = segment_.getDerived();
-            segment.getRecords() = DiffRecord(0, ExpressionType::Set);
+            segment.getRecords()[0] = DiffRecord{0, ExpressionType::Set};
             segment.getValues()[0] = value;
             segment.getGrads()[0] = 0;
         }

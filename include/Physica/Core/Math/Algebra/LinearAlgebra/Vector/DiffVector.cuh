@@ -48,6 +48,7 @@ namespace Physica::Core {
         using ScalarType = typename Base::ScalarType;
         using DiffScalar = typename SegmentType::DiffScalar;
         using DiffRecord = typename SegmentType::DiffRecord;
+        using Base::MaxThreadPerBlock;
     private:
         PlainStruct<SegmentType> traceSeg;
     public:
@@ -79,8 +80,8 @@ namespace Physica::Core {
         [[nodiscard]] __host__ __device__ inline PlainScalar* grad_ptr(size_t index) const noexcept;
         [[nodiscard]] __device__ RecordArray& getRecords() noexcept { return getTraceSegment().getRecords(); }
         [[nodiscard]] __device__ OperandArray& getOperands() noexcept { return getTraceSegment().getOperands(); }
-        [[nodiscard]] __device__ DeviceVector& getValues() noexcept { return values; }
-        [[nodiscard]] __device__ DeviceVector& getGrads() noexcept { return grads; }
+        [[nodiscard]] __device__ DeviceVector& getValues() noexcept { return getTraceSegment().getValues(); }
+        [[nodiscard]] __device__ DeviceVector& getGrads() noexcept { return getTraceSegment().getGrads(); }
         [[nodiscard]] ScalarType max() const;
         [[nodiscard]] ScalarType min() const;
         [[nodiscard]] ScalarType sum() const;
@@ -98,3 +99,4 @@ namespace Physica::Core {
 }
 
 #include "DiffVectorImpl/DiffVectorImpl.cuh"
+#include "DiffVectorImpl/DiffVectorExpression.cuh"

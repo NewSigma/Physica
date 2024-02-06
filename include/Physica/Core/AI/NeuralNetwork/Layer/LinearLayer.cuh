@@ -43,6 +43,7 @@ namespace Physica::Core {
         using This = device_obj<host_obj>;
         using Base = device_obj<LayerBase<host_obj>>;
         using MatrixType = typename host_obj::MatrixType;
+        using TrivialType = typename ScalarType::TrivialType;
     public:
         using Base::IsTrainMode;
         using typename Base::PlainScalar;
@@ -56,7 +57,6 @@ namespace Physica::Core {
         BiasType bias;
     public:
         device_obj() = default;
-        device_obj(size_t inputDim, size_t outputDim);
         device_obj(const device_obj&) = default;
         device_obj(device_obj&&) = default;
         ~device_obj() = default;
@@ -78,14 +78,14 @@ namespace Physica::Core {
         /* Getters */
         [[nodiscard]] __host__ __device__ size_t getInputDim() const noexcept { return weights.getColumn(); }
         [[nodiscard]] __host__ __device__ size_t getOutputDim() const noexcept { return weights.getRow(); }
+        /* Static members */
+        template<class RandomGenerator>
+        [[nodiscard]] static This random_normal(size_t inputDim, size_t outputDim, RandomGenerator& gen);
+        template<class RandomGenerator>
+        [[nodiscard]] static This random_xavier_uniform(size_t inputDim, size_t outputDim, PlainScalar gain, RandomGenerator& gen);
+        template<class RandomGenerator>
+        [[nodiscard]] static This random_xavier_normal(size_t inputDim, size_t outputDim, PlainScalar gain, RandomGenerator& gen);
     };
-
-    template<class ScalarType, bool WithBias>
-    device_obj<LinearLayer<ScalarType, WithBias>>::device_obj(size_t inputDim, size_t outputDim)
-            : weights(inputDim, outputDim) {
-        if constexpr (WithBias)
-            bias = BiasType(outputDim);
-    }
 
     template<class ScalarType, bool WithBias>
     typename device_obj<LinearLayer<ScalarType, WithBias>>::OutputType
@@ -128,7 +128,6 @@ namespace Physica::Core {
     template<class ScalarType, bool WithBias>
     template<class RandomGenerator>
     void device_obj<LinearLayer<ScalarType, WithBias>>::random_xavier_normal(PlainScalar gain, RandomGenerator& gen) {
-        using TrivialType = typename ScalarType::TrivialType;
         const auto deviation = (gain * sqrt(PlainScalar(2) / PlainScalar(getInputDim() + getOutputDim()))).getTrivial();
         std::normal_distribution<TrivialType> dist(0, deviation);
         weights.random_any(dist, gen);
@@ -150,5 +149,42 @@ namespace Physica::Core {
         weights.swap(obj.weights);
         if constexpr (WithBias)
             bias.swap(obj.bias);
+    }
+
+    template<class ScalarType, bool WithBias>
+    template<class RandomGenerator>
+    device_obj<LinearLayer<ScalarType, WithBias>> device_obj<LinearLayer<ScalarType, WithBias>>::random_normal(
+            size_t inputDim, size_t outputDim, RandomGenerator& gen) {
+        This result{};
+        result.weights = DeviceMatrix::random_normal(inputDim, outputDim, gen);
+        if constexpr (WithBias)
+            result.bias = BiasType::random_normal(outputDim, gen);
+        return result;
+    }
+    
+    template<class ScalarType, bool WithBias>
+    template<class RandomGenerator>
+    device_obj<LinearLayer<ScalarType, WithBias>> device_obj<LinearLayer<ScalarType, WithBias>>::random_xavier_uniform(
+            size_t inputDim, size_t outputDim, PlainScalar gain, RandomGenerator& gen) {
+        This result{};
+        const auto factor = (gain * sqrt(PlainScalar(6) / PlainScalar(inputDim + outputDim))).getTrivial();
+        std::uniform_real_distribution<TrivialType> dist(-factor, factor);
+        result.weights = DeviceMatrix::random_any(inputDim, outputDim, dist, gen);
+        if constexpr (WithBias)
+            result.bias = BiasType::random_any(outputDim, dist, gen);
+        return result;
+    }
+    
+    template<class ScalarType, bool WithBias>
+    template<class RandomGenerator>
+    device_obj<LinearLayer<ScalarType, WithBias>> device_obj<LinearLayer<ScalarType, WithBias>>::random_xavier_normal(
+            size_t inputDim, size_t outputDim, PlainScalar gain, RandomGenerator& gen) {
+        This result{};
+        const auto deviation = (gain * sqrt(PlainScalar(2) / PlainScalar(inputDim + outputDim))).getTrivial();
+        std::normal_distribution<TrivialType> dist(0, deviation);
+        result.weights = DeviceMatrix::random_any(inputDim, outputDim, dist, gen);
+        if constexpr (WithBias)
+            result.bias = BiasType::random_any(outputDim, dist, gen);
+        return result;
     }
 }

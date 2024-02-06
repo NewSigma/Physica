@@ -37,12 +37,12 @@ namespace Physica::Core {
             const size_t length = result.getLength();
             if (index >= length)
                 return;
-            result.getRecords()[index] = DiffRecord(index, Type);
+            result.getRecords()[index] = DiffRecord{index, Type};
             result.getOperands()[index] = DiffScalar(v.value_ptr(index), v.grad_ptr(index));
             if constexpr (Type == ExpressionType::Exp)
-                result.getValues()[index] = exp(v[index].getValue());
+                result.getValues()[index] = exp(v.calc(index).getValue());
             else
-                static_assert(false, "[Error]: Not implemented");
+                static_assert(Type == ExpressionType::Exp, "[Error]: Not implemented");
             result.getGrads()[index] = 0;
         }
 
@@ -60,19 +60,19 @@ namespace Physica::Core {
             const size_t length = result.getLength();
             if (index >= length)
                 return;
-            result.getRecords()[index] = DiffRecord(index * 2, Type);
+            result.getRecords()[index] = DiffRecord{index * 2, Type};
             result.getOperands()[index] = DiffScalar(v.value_ptr(index * 2), v.grad_ptr(index * 2));
             result.getOperands()[index + 1] = DiffScalar(s.value_ptr(), s.grad_ptr());
             if constexpr (Type == ExpressionType::Add)
-                result.getValues()[index] = v[index].getValue() + s.getValue();
+                result.getValues()[index] = v.calc(index).getValue() + s.getValue();
             else if constexpr (Type == ExpressionType::Sub)
-                result.getValues()[index] = v[index].getValue() - s.getValue();
+                result.getValues()[index] = v.calc(index).getValue() - s.getValue();
             else if constexpr (Type == ExpressionType::Mul)
-                result.getValues()[index] = v[index].getValue() * s.getValue();
+                result.getValues()[index] = v.calc(index).getValue() * s.getValue();
             else if constexpr (Type == ExpressionType::Div)
-                result.getValues()[index] = v[index].getValue() / s.getValue();
+                result.getValues()[index] = v.calc(index).getValue() / s.getValue();
             else
-                static_assert(false, "[Error]: Not implemented");
+                static_assert(Type == ExpressionType::Add, "[Error]: Not implemented");
             result.getGrads()[index] = 0;
         }
 
@@ -102,7 +102,7 @@ namespace Physica::Core {
             else if constexpr (Type == ExpressionType::Div)
                 result.getValues()[index] = v1[index].getValue() / v2[index].getValue();
             else
-                static_assert(false, "[Error]: Not implemented");
+                static_assert(Type == ExpressionType::Add, "[Error]: Not implemented");
             result.getGrads()[index] = 0;
         }
     }
@@ -144,7 +144,7 @@ namespace Physica::Core {
         using VectorType = device_obj<Differentiable<Vector<PlainScalar>, DiffMode::Reverse>>;
     public:
         [[nodiscard]] static VectorType calc(const VectorType& v1, const VectorType& v2) {
-            const size_t length = v.getLength();
+            const size_t length = v1.getLength();
             assert(length == v2.getLength() && "[Error]: Vector lengths do not match");
             VectorType result(length, Type);
             const size_t numThread = length > VectorType::MaxThreadPerBlock ? VectorType::MaxThreadPerBlock : length;
@@ -161,7 +161,7 @@ namespace Physica::Core {
     inline auto operator+(
             const device_obj<Differentiable<Vector<PlainScalar>, DiffMode::Reverse>>& v,
             const device_obj<Differentiable<PlainScalar, DiffMode::Reverse>>& s) {
-        return DiffVectorExpression<ExpressionType::Add, PlainScalar, ScalarBase<PlainScalar>>::calc(v, s);
+        return DiffVectorExpression<ExpressionType::Add, Vector<PlainScalar>, PlainScalar>::calc(v, s);
     }
 
     template<class PlainScalar>
@@ -182,7 +182,7 @@ namespace Physica::Core {
     inline auto operator-(
             const device_obj<Differentiable<Vector<PlainScalar>, DiffMode::Reverse>>& v,
             const device_obj<Differentiable<PlainScalar, DiffMode::Reverse>>& s) {
-        return DiffVectorExpression<ExpressionType::Sub, Vector<PlainScalar>, ScalarBase<PlainScalar>>::calc(v, s);
+        return DiffVectorExpression<ExpressionType::Sub, Vector<PlainScalar>, PlainScalar>::calc(v, s);
     }
 
     template<class PlainScalar>
@@ -196,7 +196,7 @@ namespace Physica::Core {
     inline auto operator*(
             const device_obj<Differentiable<Vector<PlainScalar>, DiffMode::Reverse>>& v,
             const device_obj<Differentiable<PlainScalar, DiffMode::Reverse>>& s) {
-        return DiffVectorExpression<ExpressionType::Mul, Vector<PlainScalar>, ScalarBase<PlainScalar>>::calc(v, s);
+        return DiffVectorExpression<ExpressionType::Mul, Vector<PlainScalar>, PlainScalar>::calc(v, s);
     }
 
     template<class PlainScalar>
@@ -217,7 +217,7 @@ namespace Physica::Core {
     inline auto operator/(
             const device_obj<Differentiable<Vector<PlainScalar>, DiffMode::Reverse>>& v,
             const device_obj<Differentiable<PlainScalar, DiffMode::Reverse>>& s) {
-        return DiffVectorExpression<ExpressionType::Div, Vector<PlainScalar>, ScalarBase<PlainScalar>>::calc(v, s);
+        return DiffVectorExpression<ExpressionType::Div, Vector<PlainScalar>, PlainScalar>::calc(v, s);
     }
 
     template<class PlainScalar>

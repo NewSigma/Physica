@@ -56,7 +56,7 @@ namespace Physica::Core {
         device_obj() = default;
         device_obj(double d) : device_obj(ScalarType(d)) {}
         device_obj(ScalarType s);
-        __host__ __device__ device_obj(ScalarType* pValue_, ScalarType* pGrad_);
+        __host__ __device__ device_obj(const ScalarType* pValue_, const ScalarType* pGrad_);
         device_obj(const device_obj&) = default;
         device_obj(device_obj&&) noexcept = default;
         ~device_obj() = default;
@@ -66,6 +66,7 @@ namespace Physica::Core {
         [[nodiscard]] __device__ explicit operator float() const { return float(getValue()); }
         [[nodiscard]] __device__ explicit operator double() const { return double(getValue()); }
         [[nodiscard]] __host__ __device__ inline bool operator==(const This& other) const;
+        [[nodiscard]] inline device_obj operator-() const;
         /* Operations */
         void toHostAsync_value(ScalarType& value) const;
         void toHostAsync_grad(ScalarType& grad) const;
@@ -106,3 +107,4 @@ namespace Physica::Core {
 }
 
 #include "DifferentiableImpl/DifferentiableImpl.cuh"
+#include "DifferentiableImpl/ElementaryFunction.cuh"
