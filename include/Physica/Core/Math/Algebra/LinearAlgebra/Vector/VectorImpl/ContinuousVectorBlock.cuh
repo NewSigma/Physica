@@ -21,7 +21,7 @@
 namespace Physica::Core {
     namespace Internal {
         template<class VectorType, size_t Length>
-        class Traits<device_obj<ContinuousVectorBlock<VectorType, Length>>> : public Traits<ContinuousVectorBlock<VectorType, Length>> {};
+        class Traits<Core::device_obj<ContinuousVectorBlock<VectorType, Length>>> : public Traits<ContinuousVectorBlock<VectorType, Length>> {};
     }
 
     template<class VectorType, size_t Length>

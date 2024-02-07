@@ -25,7 +25,7 @@
 namespace Physica::Utils {
     namespace Internal {
         template<class T, size_t Length, size_t Capacity, class Allocator>
-        class Traits<device_obj<Array<T, Length, Capacity, Allocator>>> {
+        class Traits<Utils::device_obj<Array<T, Length, Capacity, Allocator>>> {
         public:
             constexpr static size_t ArrayLength = Length;
             constexpr static size_t ArrayCapacity = Capacity;

@@ -167,6 +167,36 @@ namespace Physica::Core {
     }
 
     template<class PlainScalar>
+    __device__ inline typename device_obj<Differentiable<Vector<PlainScalar>, DiffMode::Reverse>>::DiffRecord&
+    device_obj<Differentiable<Vector<PlainScalar>, DiffMode::Reverse>>::getRecord(size_t index) {
+        return getTraceSegment().getRecords()[index];
+    }
+
+    template<class PlainScalar>
+    __device__ inline PlainScalar&
+    device_obj<Differentiable<Vector<PlainScalar>, DiffMode::Reverse>>::getValue(size_t index) {
+        return getTraceSegment().getValues()[index];
+    }
+
+    template<class PlainScalar>
+    __device__ inline const PlainScalar&
+    device_obj<Differentiable<Vector<PlainScalar>, DiffMode::Reverse>>::getValue(size_t index) const {
+        return getTraceSegment().getValues()[index];
+    }
+
+    template<class PlainScalar>
+    __device__ inline PlainScalar&
+    device_obj<Differentiable<Vector<PlainScalar>, DiffMode::Reverse>>::getGrad(size_t index) {
+        return getTraceSegment().getGrads()[index];
+    }
+
+    template<class PlainScalar>
+    __device__ inline const PlainScalar&
+    device_obj<Differentiable<Vector<PlainScalar>, DiffMode::Reverse>>::getGrad(size_t index) const {
+        return getTraceSegment().getGrads()[index];
+    }
+
+    template<class PlainScalar>
     typename device_obj<Differentiable<Vector<PlainScalar>, DiffMode::Reverse>>::ScalarType
     device_obj<Differentiable<Vector<PlainScalar>, DiffMode::Reverse>>::max() const {
         auto& trace = TracerType::getInstance().pushSegment(1, ExpressionType::Assign);

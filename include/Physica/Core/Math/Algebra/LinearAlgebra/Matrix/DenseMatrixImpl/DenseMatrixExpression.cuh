@@ -23,7 +23,7 @@
 namespace Physica::Core {
     namespace Internal {
         template<ExpressionType type, class T1, class T2, class ResultType>
-        class Traits<device_obj<DenseMatrixExpression<type, T1, T2, ResultType>>>
+        class Traits<Core::device_obj<DenseMatrixExpression<type, T1, T2, ResultType>>>
                 : public Traits<DenseMatrixExpression<type, T1, T2, ResultType>> {};
     }
     //////////////////////////////////////Add//////////////////////////////////////

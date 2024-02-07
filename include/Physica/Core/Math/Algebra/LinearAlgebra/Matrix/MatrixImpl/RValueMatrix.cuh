@@ -26,18 +26,19 @@ namespace Physica::Core {
         static_assert(!Utils::is_device_obj<Derived>::value, "[Error]: Nested device_obj is unnecessary");
         using Base = Utils::CRTPBase<device_obj<Derived>>;
         using host_obj = RValueMatrix<Derived>;
+        using TraitsType = Internal::Traits<device_obj<Derived>>;
         using BlockType = device_obj<RMatrixBlock<Derived>>;
     public:
-        using ScalarType = typename host_obj::ScalarType;
+        using ScalarType = typename TraitsType::ScalarType;
         using RowVector = device_obj<RMatrixBlock<Derived, 1, Dynamic>>;
         using ColVector = device_obj<RMatrixBlock<Derived, Dynamic, 1>>;
-        constexpr static int Option = host_obj::Option;
-        constexpr static size_t RowAtCompile = host_obj::RowAtCompile;
-        constexpr static size_t ColumnAtCompile = host_obj::ColumnAtCompile;
-        constexpr static size_t MaxRowAtCompile = host_obj::MaxRowAtCompile;
-        constexpr static size_t MaxColumnAtCompile = host_obj::MaxColumnAtCompile;
-        constexpr static size_t SizeAtCompile = host_obj::SizeAtCompile;
-        constexpr static size_t MaxSizeAtCompile = host_obj::MaxSizeAtCompile;
+        constexpr static int Option = TraitsType::Option;
+        constexpr static size_t RowAtCompile = TraitsType::RowAtCompile;
+        constexpr static size_t ColumnAtCompile = TraitsType::ColumnAtCompile;
+        constexpr static size_t MaxRowAtCompile = TraitsType::MaxRowAtCompile;
+        constexpr static size_t MaxColumnAtCompile = TraitsType::MaxColumnAtCompile;
+        constexpr static size_t SizeAtCompile = TraitsType::SizeAtCompile;
+        constexpr static size_t MaxSizeAtCompile = TraitsType::MaxSizeAtCompile;
 
         constexpr static bool isColumnMatrix = host_obj::isColumnMatrix;
         constexpr static bool isRowMatrix = host_obj::isRowMatrix;

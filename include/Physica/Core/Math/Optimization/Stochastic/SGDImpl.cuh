@@ -50,7 +50,7 @@ namespace Physica::Core {
             const size_t length = segment.getLength();
             const size_t numThread = length <= MaxNumThreadPerBlock ? length : MaxNumThreadPerBlock;
             const size_t numBlock = (length + MaxNumThreadPerBlock - 1) / MaxNumThreadPerBlock;
-            Internal::SGD_stepKernel(asStruct(*this));
+            Internal::SGD_stepKernel<This, SegmentType><<<numThread, numBlock, 0, StreamPool::getStream()>>>(asStruct(*this), asStruct(segment));
         });
     }
 

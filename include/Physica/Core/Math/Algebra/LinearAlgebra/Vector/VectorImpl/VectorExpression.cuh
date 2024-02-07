@@ -21,7 +21,7 @@
 namespace Physica::Core {
     namespace Internal {
         template<ExpressionType Type, class Exp1, class Exp2>
-        class Traits<device_obj<VectorExpression<Type, Exp1, Exp2>>> : public Traits<VectorExpression<Type, Exp1, Exp2>> {};
+        class Traits<Core::device_obj<VectorExpression<Type, Exp1, Exp2>>> : public Traits<VectorExpression<Type, Exp1, Exp2>> {};
     }
     //////////////////////////////////////Add//////////////////////////////////////
     template<class VectorType1, class VectorType2>

@@ -23,7 +23,7 @@ namespace Physica::Core {
         template<class T> class Traits;
 
         template<class MatrixType>
-        class Traits<device_obj<ContinuousFlatten<MatrixType>>> : public Traits<ContinuousFlatten<MatrixType>> {};
+        class Traits<Core::device_obj<ContinuousFlatten<MatrixType>>> : public Traits<ContinuousFlatten<MatrixType>> {};
     }
 
     template<class MatrixType>

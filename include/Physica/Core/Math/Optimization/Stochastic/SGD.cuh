@@ -24,6 +24,7 @@ namespace Physica::Core {
     template<class ScalarType>
     class SGD<device_obj<ScalarType>> {
         static_assert(ScalarType::isDifferentiable, "[Error]: ScalarType must be differentiable");
+        using This = SGD<device_obj<ScalarType>>;
         using DeviceScalar = device_obj<ScalarType>;
     public:
         using PlainScalar = typename ScalarType::PlainScalar;

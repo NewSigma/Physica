@@ -25,7 +25,7 @@
 namespace Physica::Core {
     namespace Internal {
         template<class T>
-        class Traits<device_obj<Differentiable<Vector<T>, DiffMode::Reverse>>> : public Traits<Vector<T>> {
+        class Traits<Core::device_obj<Differentiable<Vector<T>, DiffMode::Reverse>>> : public Traits<Vector<T>> {
         public:
             using ScalarType = device_obj<Differentiable<T, DiffMode::Reverse>>;
         };
@@ -42,12 +42,11 @@ namespace Physica::Core {
         using TracerType = device_obj<typename host_obj::TracerType>;
         using SegmentType = device_obj<typename host_obj::SegmentType>;
         using RecordArray = typename SegmentType::RecordArray;
-        using OperandArray = typename SegmentType::OperandArray;
         using DeviceVector = typename SegmentType::DeviceVector;
     public:
         using ScalarType = typename Base::ScalarType;
-        using DiffScalar = typename SegmentType::DiffScalar;
         using DiffRecord = typename SegmentType::DiffRecord;
+        using OperandArray = typename SegmentType::OperandArray;
         using Base::MaxThreadPerBlock;
     private:
         PlainStruct<SegmentType> traceSeg;
@@ -78,10 +77,12 @@ namespace Physica::Core {
         [[nodiscard]] __host__ __device__ size_t getLength() const noexcept { return getTraceSegment().getLength(); }
         [[nodiscard]] __host__ __device__ inline PlainScalar* value_ptr(size_t index) const noexcept;
         [[nodiscard]] __host__ __device__ inline PlainScalar* grad_ptr(size_t index) const noexcept;
-        [[nodiscard]] __device__ RecordArray& getRecords() noexcept { return getTraceSegment().getRecords(); }
+        [[nodiscard]] __device__ inline DiffRecord& getRecord(size_t index);
         [[nodiscard]] __device__ OperandArray& getOperands() noexcept { return getTraceSegment().getOperands(); }
-        [[nodiscard]] __device__ DeviceVector& getValues() noexcept { return getTraceSegment().getValues(); }
-        [[nodiscard]] __device__ DeviceVector& getGrads() noexcept { return getTraceSegment().getGrads(); }
+        [[nodiscard]] __device__ inline PlainScalar& getValue(size_t index);
+        [[nodiscard]] __device__ inline const PlainScalar& getValue(size_t index) const;
+        [[nodiscard]] __device__ inline PlainScalar& getGrad(size_t index);
+        [[nodiscard]] __device__ inline const PlainScalar& getGrad(size_t index) const;
         [[nodiscard]] ScalarType max() const;
         [[nodiscard]] ScalarType min() const;
         [[nodiscard]] ScalarType sum() const;

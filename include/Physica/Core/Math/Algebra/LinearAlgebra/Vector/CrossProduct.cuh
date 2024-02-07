@@ -23,7 +23,7 @@
 namespace Physica::Core {
     namespace Internal {
         template<class AnyVector1, class AnyVector2>
-        class Traits<device_obj<CrossProduct<AnyVector1, AnyVector2>>> : public Traits<CrossProduct<AnyVector1, AnyVector2>> {};
+        class Traits<Core::device_obj<CrossProduct<AnyVector1, AnyVector2>>> : public Traits<CrossProduct<AnyVector1, AnyVector2>> {};
     }
 
     template<class AnyVector1, class AnyVector2>

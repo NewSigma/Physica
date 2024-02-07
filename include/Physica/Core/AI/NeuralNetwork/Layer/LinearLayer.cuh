@@ -26,7 +26,7 @@
 namespace Physica::Core {
     namespace Internal {
         template<class ScalarType, bool WithBias>
-        class Traits<device_obj<LinearLayer<ScalarType, WithBias>>> : public Traits<LinearLayer<ScalarType, WithBias>> {
+        class Traits<Core::device_obj<LinearLayer<ScalarType, WithBias>>> : public Traits<LinearLayer<ScalarType, WithBias>> {
             using Base = Traits<LinearLayer<ScalarType, WithBias>>;
             using VectorType = Vector<typename Base::ScalarType>;
             using DiffVector = Differentiable<Vector<typename Base::PlainScalar>, DiffMode::Reverse>;

@@ -22,14 +22,15 @@
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/VectorImpl/VectorExpression.cuh"
 
 namespace Physica::Core {
-    template<ExpressionType type, class T1, class T2 = T1> class DiffVectorExpression;
+    template<ExpressionType type, class T1> class DiffVectorExpressionUnitary;
+    template<ExpressionType type, class T1, class T2 = T1> class DiffVectorExpressionBinary;
 
     namespace Internal {
         template<ExpressionType Type, class VectorType>
         __global__ void DiffVectorExpression_unitaryOpKernel(
                 Physica::PlainStruct<VectorType> result_,
                 Physica::PlainStruct<const VectorType> v_) {
-            using DiffScalar = typename VectorType::DiffScalar;
+            using ScalarType = typename VectorType::ScalarType;
             using DiffRecord = typename VectorType::DiffRecord;
             const VectorType& v = v_.getDerived();
             VectorType& result = result_.getDerived();
@@ -37,43 +38,45 @@ namespace Physica::Core {
             const size_t length = result.getLength();
             if (index >= length)
                 return;
-            result.getRecords()[index] = DiffRecord{index, Type};
-            result.getOperands()[index] = DiffScalar(v.value_ptr(index), v.grad_ptr(index));
-            if constexpr (Type == ExpressionType::Exp)
-                result.getValues()[index] = exp(v.calc(index).getValue());
+            result.getRecord(index) = DiffRecord{index, Type};
+            result.getOperands()[index] = v.calc(index);
+            if constexpr (Type == ExpressionType::Relu)
+                result.getValue(index) = relu(v.getValue(index));
+            else if constexpr (Type == ExpressionType::Exp)
+                result.getValue(index) = exp(v.getValue(index));
             else
                 static_assert(Type == ExpressionType::Exp, "[Error]: Not implemented");
-            result.getGrads()[index] = 0;
+            result.getGrad(index) = 0;
         }
 
         template<ExpressionType Type, class VectorType>
         __global__ void DiffVectorExpression_binaryOpKernel(
                 Physica::PlainStruct<VectorType> result_,
                 Physica::PlainStruct<const VectorType> v_,
-                Physica::PlainStruct<const typename VectorType::DiffScalar> s_) {
-            using DiffScalar = typename VectorType::DiffScalar;
+                Physica::PlainStruct<const typename VectorType::ScalarType> s_) {
+            using ScalarType = typename VectorType::ScalarType;
             using DiffRecord = typename VectorType::DiffRecord;
             const VectorType& v = v_.getDerived();
-            const DiffScalar& s = s_.getDerived();
+            const ScalarType& s = s_.getDerived();
             VectorType& result = result_.getDerived();
             const size_t index = blockIdx.x * blockDim.x + threadIdx.x;
             const size_t length = result.getLength();
             if (index >= length)
                 return;
-            result.getRecords()[index] = DiffRecord{index * 2, Type};
-            result.getOperands()[index] = DiffScalar(v.value_ptr(index * 2), v.grad_ptr(index * 2));
-            result.getOperands()[index + 1] = DiffScalar(s.value_ptr(), s.grad_ptr());
+            result.getRecord(index) = DiffRecord{index * 2, Type};
+            result.getOperands()[index] = v.calc(index * 2);
+            result.getOperands()[index + 1] = s;
             if constexpr (Type == ExpressionType::Add)
-                result.getValues()[index] = v.calc(index).getValue() + s.getValue();
+                result.getValue(index) = v.getValue(index) + s.getValue();
             else if constexpr (Type == ExpressionType::Sub)
-                result.getValues()[index] = v.calc(index).getValue() - s.getValue();
+                result.getValue(index) = v.getValue(index) - s.getValue();
             else if constexpr (Type == ExpressionType::Mul)
-                result.getValues()[index] = v.calc(index).getValue() * s.getValue();
+                result.getValue(index) = v.getValue(index) * s.getValue();
             else if constexpr (Type == ExpressionType::Div)
-                result.getValues()[index] = v.calc(index).getValue() / s.getValue();
+                result.getValue(index) = v.getValue(index) / s.getValue();
             else
                 static_assert(Type == ExpressionType::Add, "[Error]: Not implemented");
-            result.getGrads()[index] = 0;
+            result.getGrad(index) = 0;
         }
 
         template<ExpressionType Type, class VectorType>
@@ -81,7 +84,7 @@ namespace Physica::Core {
                 Physica::PlainStruct<VectorType> result_,
                 Physica::PlainStruct<const VectorType> v1_,
                 Physica::PlainStruct<const VectorType> v2_) {
-            using DiffScalar = typename VectorType::DiffScalar;
+            using ScalarType = typename VectorType::ScalarType;
             using DiffRecord = typename VectorType::DiffRecord;
             const VectorType& v1 = v1_.getDerived();
             const VectorType& v2 = v2_.getDerived();
@@ -90,27 +93,26 @@ namespace Physica::Core {
             const size_t length = result.getLength();
             if (index >= length)
                 return;
-            result.getRecords()[index] = DiffRecord(index * 2, Type);
-            result.getOperands()[index] = DiffScalar(v1.value_ptr(index * 2), v1.grad_ptr(index * 2));
-            result.getOperands()[index + 1] = DiffScalar(v2.value_ptr(index * 2 + 1), v2.grad_ptr(index * 2 + 1));
+            result.getRecord(index) = DiffRecord{index * 2, Type};
+            result.getOperands()[index * 2] = v1.calc(index);
+            result.getOperands()[index * 2 + 1] = v2.calc(index);
             if constexpr (Type == ExpressionType::Add)
-                result.getValues()[index] = v1[index].getValue() + v2[index].getValue();
+                result.getValue(index) = v1.getValue(index) + v2.getValue(index);
             else if constexpr (Type == ExpressionType::Sub)
-                result.getValues()[index] = v1[index].getValue() - v2[index].getValue();
+                result.getValue(index) = v1.getValue(index) - v2.getValue(index);
             else if constexpr (Type == ExpressionType::Mul)
-                result.getValues()[index] = v1[index].getValue() * v2[index].getValue();
+                result.getValue(index) = v1.getValue(index) * v2.getValue(index);
             else if constexpr (Type == ExpressionType::Div)
-                result.getValues()[index] = v1[index].getValue() / v2[index].getValue();
+                result.getValue(index) = v1.getValue(index) / v2.getValue(index);
             else
                 static_assert(Type == ExpressionType::Add, "[Error]: Not implemented");
-            result.getGrads()[index] = 0;
+            result.getGrad(index) = 0;
         }
     }
 
-    template<class PlainScalar>
-    class DiffVectorExpression<ExpressionType::Exp, Vector<PlainScalar>> {
+    template<ExpressionType Type, class PlainScalar>
+    class DiffVectorExpressionUnitary<Type, Vector<PlainScalar>> {
         using VectorType = device_obj<Differentiable<Vector<PlainScalar>, DiffMode::Reverse>>;
-        constexpr static ExpressionType Type = ExpressionType::Exp;
     public:
         [[nodiscard]] static VectorType calc(const VectorType& v) {
             const size_t length = v.getLength();
@@ -124,11 +126,11 @@ namespace Physica::Core {
     };
 
     template<ExpressionType Type, class PlainScalar>
-    class DiffVectorExpression<Type, Vector<PlainScalar>, PlainScalar> {
+    class DiffVectorExpressionBinary<Type, Vector<PlainScalar>, PlainScalar> {
         using VectorType = device_obj<Differentiable<Vector<PlainScalar>, DiffMode::Reverse>>;
-        using DiffScalar = typename VectorType::DiffScalar;
+        using ScalarType = typename VectorType::ScalarType;
     public:
-        [[nodiscard]] static VectorType calc(const VectorType& v, const DiffScalar& s) {
+        [[nodiscard]] static VectorType calc(const VectorType& v, const ScalarType& s) {
             const size_t length = v.getLength();
             VectorType result(length, Type);
             const size_t numThread = length > VectorType::MaxThreadPerBlock ? VectorType::MaxThreadPerBlock : length;
@@ -140,7 +142,7 @@ namespace Physica::Core {
     };
 
     template<ExpressionType Type, class PlainScalar>
-    class DiffVectorExpression<Type, Vector<PlainScalar>> {
+    class DiffVectorExpressionBinary<Type, Vector<PlainScalar>> {
         using VectorType = device_obj<Differentiable<Vector<PlainScalar>, DiffMode::Reverse>>;
     public:
         [[nodiscard]] static VectorType calc(const VectorType& v1, const VectorType& v2) {
@@ -161,7 +163,7 @@ namespace Physica::Core {
     inline auto operator+(
             const device_obj<Differentiable<Vector<PlainScalar>, DiffMode::Reverse>>& v,
             const device_obj<Differentiable<PlainScalar, DiffMode::Reverse>>& s) {
-        return DiffVectorExpression<ExpressionType::Add, Vector<PlainScalar>, PlainScalar>::calc(v, s);
+        return DiffVectorExpressionBinary<ExpressionType::Add, Vector<PlainScalar>, PlainScalar>::calc(v, s);
     }
 
     template<class PlainScalar>
@@ -175,28 +177,28 @@ namespace Physica::Core {
     inline auto operator+(
             const device_obj<Differentiable<Vector<PlainScalar>, DiffMode::Reverse>>& v1,
             const device_obj<Differentiable<Vector<PlainScalar>, DiffMode::Reverse>>& v2) {
-        return DiffVectorExpression<ExpressionType::Add, Vector<PlainScalar>, Vector<PlainScalar>>::calc(v1, v2);
+        return DiffVectorExpressionBinary<ExpressionType::Add, Vector<PlainScalar>, Vector<PlainScalar>>::calc(v1, v2);
     }
     //////////////////////////////////////Sub//////////////////////////////////////
     template<class PlainScalar>
     inline auto operator-(
             const device_obj<Differentiable<Vector<PlainScalar>, DiffMode::Reverse>>& v,
             const device_obj<Differentiable<PlainScalar, DiffMode::Reverse>>& s) {
-        return DiffVectorExpression<ExpressionType::Sub, Vector<PlainScalar>, PlainScalar>::calc(v, s);
+        return DiffVectorExpressionBinary<ExpressionType::Sub, Vector<PlainScalar>, PlainScalar>::calc(v, s);
     }
 
     template<class PlainScalar>
     inline auto operator-(
             const device_obj<Differentiable<Vector<PlainScalar>, DiffMode::Reverse>>& v1,
             const device_obj<Differentiable<Vector<PlainScalar>, DiffMode::Reverse>>& v2) {
-        return DiffVectorExpression<ExpressionType::Sub, Vector<PlainScalar>, Vector<PlainScalar>>::calc(v1, v2);
+        return DiffVectorExpressionBinary<ExpressionType::Sub, Vector<PlainScalar>, Vector<PlainScalar>>::calc(v1, v2);
     }
     //////////////////////////////////////Mul//////////////////////////////////////
     template<class PlainScalar>
     inline auto operator*(
             const device_obj<Differentiable<Vector<PlainScalar>, DiffMode::Reverse>>& v,
             const device_obj<Differentiable<PlainScalar, DiffMode::Reverse>>& s) {
-        return DiffVectorExpression<ExpressionType::Mul, Vector<PlainScalar>, PlainScalar>::calc(v, s);
+        return DiffVectorExpressionBinary<ExpressionType::Mul, Vector<PlainScalar>, PlainScalar>::calc(v, s);
     }
 
     template<class PlainScalar>
@@ -210,27 +212,32 @@ namespace Physica::Core {
     inline auto hadamard(
             const device_obj<Differentiable<Vector<PlainScalar>, DiffMode::Reverse>>& v1,
             const device_obj<Differentiable<Vector<PlainScalar>, DiffMode::Reverse>>& v2) {
-        return DiffVectorExpression<ExpressionType::Mul, Vector<PlainScalar>, Vector<PlainScalar>>::calc(v1, v2);
+        return DiffVectorExpressionBinary<ExpressionType::Mul, Vector<PlainScalar>, Vector<PlainScalar>>::calc(v1, v2);
     }
     //////////////////////////////////////Div//////////////////////////////////////
     template<class PlainScalar>
     inline auto operator/(
             const device_obj<Differentiable<Vector<PlainScalar>, DiffMode::Reverse>>& v,
             const device_obj<Differentiable<PlainScalar, DiffMode::Reverse>>& s) {
-        return DiffVectorExpression<ExpressionType::Div, Vector<PlainScalar>, PlainScalar>::calc(v, s);
+        return DiffVectorExpressionBinary<ExpressionType::Div, Vector<PlainScalar>, PlainScalar>::calc(v, s);
     }
 
     template<class PlainScalar>
     inline auto devide(
             const device_obj<Differentiable<Vector<PlainScalar>, DiffMode::Reverse>>& v1,
             const device_obj<Differentiable<Vector<PlainScalar>, DiffMode::Reverse>>& v2) {
-        return DiffVectorExpression<ExpressionType::Div, Vector<PlainScalar>, Vector<PlainScalar>>::calc(v1, v2);
+        return DiffVectorExpressionBinary<ExpressionType::Div, Vector<PlainScalar>, Vector<PlainScalar>>::calc(v1, v2);
     }
     //////////////////////////////////////Compare//////////////////////////////////////
     ////////////////////////////////////////Elementary Functions////////////////////////////////////////////
     template<class PlainScalar>
+    auto relu(const device_obj<Differentiable<Vector<PlainScalar>, DiffMode::Reverse>>& v) {
+        return DiffVectorExpressionUnitary<ExpressionType::Relu, Vector<PlainScalar>>::calc(v);
+    }
+
+    template<class PlainScalar>
     auto exp(const device_obj<Differentiable<Vector<PlainScalar>, DiffMode::Reverse>>& v) {
-        return DiffVectorExpression<ExpressionType::Exp, Vector<PlainScalar>, Vector<PlainScalar>>::calc(v);
+        return DiffVectorExpressionUnitary<ExpressionType::Exp, Vector<PlainScalar>>::calc(v);
     }
 
     template<class PlainScalar>

@@ -24,7 +24,7 @@
 namespace Physica::Core {
     namespace Internal {
         template<class T, size_t Length, size_t MaxLength>
-        class Traits<device_obj<Vector<T, Length, MaxLength>>> : public Traits<Vector<T, Length, MaxLength>> {};
+        class Traits<Core::device_obj<Vector<T, Length, MaxLength>>> : public Traits<Vector<T, Length, MaxLength>> {};
     }
 
     template<class T, size_t Length, size_t MaxLength>

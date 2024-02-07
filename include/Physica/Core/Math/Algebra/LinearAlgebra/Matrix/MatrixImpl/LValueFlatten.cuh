@@ -25,7 +25,7 @@ namespace Physica::Core {
         template<class T> class Traits;
 
         template<class MatrixType>
-        class Traits<device_obj<LValueFlatten<MatrixType>>> : public Traits<LValueFlatten<MatrixType>> {};
+        class Traits<Core::device_obj<LValueFlatten<MatrixType>>> : public Traits<LValueFlatten<MatrixType>> {};
     }
 
     template<class MatrixType>

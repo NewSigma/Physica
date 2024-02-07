@@ -24,7 +24,7 @@
 namespace Physica::Core {
     namespace Internal {
         template<class ScalarType, bool IsSmallCell>
-        class Traits<device_obj<RSpaceEwald<ScalarType, IsSmallCell>>> : public Traits<RSpaceEwald<ScalarType, IsSmallCell>> {};
+        class Traits<Core::device_obj<RSpaceEwald<ScalarType, IsSmallCell>>> : public Traits<RSpaceEwald<ScalarType, IsSmallCell>> {};
     }
 
     template<class ScalarType, bool IsSmallCell>

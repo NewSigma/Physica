@@ -23,13 +23,13 @@
 namespace Physica::Core {
     namespace Internal {
         template<class MatrixType>
-        class Traits<device_obj<RowRVector<MatrixType>>> : public Traits<RowRVector<MatrixType>> {};
+        class Traits<Core::device_obj<RowRVector<MatrixType>>> : public Traits<RowRVector<MatrixType>> {};
 
         template<class MatrixType>
-        class Traits<device_obj<ColRVector<MatrixType>>> : public Traits<ColRVector<MatrixType>> {};
+        class Traits<Core::device_obj<ColRVector<MatrixType>>> : public Traits<ColRVector<MatrixType>> {};
 
         template<class MatrixType, size_t Row, size_t Column>
-        class Traits<device_obj<RMatrixBlock<MatrixType, Row, Column>>> : public Traits<RMatrixBlock<MatrixType, Row, Column>> {};
+        class Traits<Core::device_obj<RMatrixBlock<MatrixType, Row, Column>>> : public Traits<RMatrixBlock<MatrixType, Row, Column>> {};
     }
 
     template<class MatrixType>
