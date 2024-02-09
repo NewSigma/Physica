@@ -48,6 +48,32 @@ namespace Physica::Core {
         [[nodiscard]] __host__ __device__ size_t getLength() const { return v1.getDerived().getLength(); }
     };
     //////////////////////////////////////Sub//////////////////////////////////////
+    template<class VectorType, class AnyScalar>
+    class device_obj<VectorExpression<ExpressionType::Sub, VectorType, ScalarBase<AnyScalar>>>
+            : public device_obj<RValueVector<VectorExpression<ExpressionType::Sub, VectorType, ScalarBase<AnyScalar>>>> {
+        static_assert(is_scalar<AnyScalar>::value, "[Error]: This is not a scalar type");
+        using DeviceVector = device_obj<VectorType>;
+    public:
+        using host_obj = VectorExpression<ExpressionType::Sub, VectorType, ScalarBase<AnyScalar>>;
+        using Base = device_obj<RValueVector<host_obj>>;
+        using typename Base::ScalarType;
+    private:
+        Physica::PlainStruct<const DeviceVector> v;
+        AnyScalar s;
+    public:
+        __host__ __device__ device_obj(const device_obj<RValueVector<VectorType>>& v_, AnyScalar s_)
+                : v(asStruct(v_.getDerived())), s(s_) {}
+        device_obj(const device_obj&) = default;
+        device_obj(device_obj&&) noexcept = default;
+        ~device_obj() = default;
+        /* Operators */
+        device_obj& operator=(const device_obj&) = delete;
+        device_obj& operator=(device_obj&&) noexcept = delete;
+        /* Getters */
+        [[nodiscard]] __device__ ScalarType calc(size_t index) const { return ScalarType(v.getDerived().calc(index)) - ScalarType(s); }
+        [[nodiscard]] __host__ __device__ size_t getLength() const { return v.getDerived().getLength(); }
+    };
+
     template<class VectorType1, class VectorType2>
     class device_obj<VectorExpression<ExpressionType::Sub, VectorType1, VectorType2>>
             : public device_obj<RValueVector<VectorExpression<ExpressionType::Sub, VectorType1, VectorType2>>> {
@@ -125,7 +151,7 @@ namespace Physica::Core {
         [[nodiscard]] __device__ ScalarType calc(size_t index) const { return v1.getDerived().calc(index) * v2.getDerived().calc(index); }
         [[nodiscard]] __host__ __device__ size_t getLength() const { return v1.getDerived().getLength(); }
     };
-    //////////////////////////////////////Mul//////////////////////////////////////
+    //////////////////////////////////////Div//////////////////////////////////////
     template<class VectorType, class AnyScalar>
     class device_obj<VectorExpression<ExpressionType::Div, VectorType, ScalarBase<AnyScalar>>>
             : public device_obj<RValueVector<VectorExpression<ExpressionType::Div, VectorType, ScalarBase<AnyScalar>>>> {
@@ -179,7 +205,81 @@ namespace Physica::Core {
         }
     };
 
+    template<class VectorType>
+    class device_obj<VectorExpression<ExpressionType::Relu, VectorType>>
+            : public device_obj<RValueVector<VectorExpression<ExpressionType::Relu, VectorType>>> {
+    public:
+        using host_obj = VectorExpression<ExpressionType::Relu, VectorType>;
+    private:
+        using Base = device_obj<RValueVector<host_obj>>;
+        using DeviceVector = device_obj<VectorType>;
+        
+        Physica::PlainStruct<const DeviceVector> exp;
+    public:
+        device_obj(const device_obj<RValueVector<VectorType>>& exp_) : exp(asStruct(exp_.getDerived())) {}
+        device_obj(const device_obj&) = default;
+        device_obj(device_obj&&) noexcept = default;
+        ~device_obj() = default;
+        /* Operators */
+        device_obj& operator=(const device_obj&) = delete;
+        device_obj& operator=(device_obj&&) noexcept = delete;
+        /* Getters */
+        [[nodiscard]] __device__ typename Base::ScalarType calc(size_t index) const {
+            return relu(exp.getDerived().calc(index));
+        }
+        [[nodiscard]] __host__ __device__ size_t getLength() const {
+            return exp.getDerived().getLength();
+        }
+    };
 
+    template<class VectorType>
+    class device_obj<VectorExpression<ExpressionType::Exp, VectorType>>
+            : public device_obj<RValueVector<VectorExpression<ExpressionType::Exp, VectorType>>> {
+    public:
+        using host_obj = VectorExpression<ExpressionType::Exp, VectorType>;
+    private:
+        using Base = device_obj<RValueVector<host_obj>>;
+        using DeviceVector = device_obj<VectorType>;
+        
+        Physica::PlainStruct<const DeviceVector> v;
+    public:
+        device_obj(const device_obj<RValueVector<VectorType>>& v_) : v(asStruct(v_.getDerived())) {}
+        device_obj(const device_obj&) = default;
+        device_obj(device_obj&&) noexcept = default;
+        ~device_obj() = default;
+        /* Operators */
+        device_obj& operator=(const device_obj&) = delete;
+        device_obj& operator=(device_obj&&) noexcept = delete;
+        /* Getters */
+        [[nodiscard]] __device__ typename Base::ScalarType calc(size_t index) const {
+            return exp(v.getDerived().calc(index));
+        }
+        [[nodiscard]] __host__ __device__ size_t getLength() const {
+            return v.getDerived().getLength();
+        }
+    };
+
+    template<class VectorType>
+    class device_obj<VectorExpression<ExpressionType::Softmax, VectorType>>
+            : public device_obj<RValueVector<VectorExpression<ExpressionType::Softmax, VectorType>>> {
+    public:
+        using host_obj = RValueVector<VectorExpression<ExpressionType::Softmax, VectorType>>;
+        using Base = device_obj<host_obj>;
+        using DeviceVector = device_obj<VectorType>;
+        using typename Base::ScalarType;
+    private:
+        const DeviceVector& v;
+        ScalarType factor;
+        ScalarType maximum;
+    public:
+        device_obj(const device_obj<RValueVector<VectorType>>& v_) : v(v_.getDerived()) {
+            maximum = v.max();
+            factor = reciprocal(exp(v - maximum).sum());
+        }
+
+        [[nodiscard]] ScalarType calc(size_t i) const { return exp(v.calc(i) - maximum) * factor; }
+        [[nodiscard]] __host__ __device__ size_t getLength() const { return v.getLength(); }
+    };
     //////////////////////////////////////Operators//////////////////////////////////////
     //////////////////////////////////////Add//////////////////////////////////////
     template<class Derived, class OtherDerived>
@@ -188,6 +288,12 @@ namespace Physica::Core {
         return {v1.getDerived(), v2.getDerived()};
     }
     //////////////////////////////////////Sub//////////////////////////////////////
+    template<class VectorType, class ScalarType>
+    __host__ __device__ inline device_obj<VectorExpression<ExpressionType::Sub, VectorType, ScalarBase<ScalarType>>>
+    operator-(const device_obj<RValueVector<VectorType>>& v, const ScalarBase<ScalarType>& s) {
+        return {v.getDerived(), s.getDerived()};
+    }
+
     template<class Derived, class OtherDerived>
     inline __host__ __device__ device_obj<VectorExpression<ExpressionType::Sub, Derived, OtherDerived>>
             operator-(const device_obj<RValueVector<Derived>>& v1, const device_obj<RValueVector<OtherDerived>>& v2) {
@@ -219,8 +325,22 @@ namespace Physica::Core {
     }
     ////////////////////////////////////////Elementary Functions////////////////////////////////////////////
     template<class VectorType>
-    inline device_obj<VectorExpression<ExpressionType::Reciprocal, VectorType>>
-    reciprocal(const device_obj<RValueVector<VectorType>>& v) {
-        return v;
+    inline auto reciprocal(const device_obj<RValueVector<VectorType>>& v) {
+        return device_obj<VectorExpression<ExpressionType::Reciprocal, VectorType>>(v);
+    }
+
+    template<class VectorType>
+    inline auto relu(const device_obj<RValueVector<VectorType>>& v) {
+        return device_obj<VectorExpression<ExpressionType::Relu, VectorType>>(v);
+    }
+
+    template<class VectorType>
+    inline auto exp(const device_obj<RValueVector<VectorType>>& v) {
+        return device_obj<VectorExpression<ExpressionType::Exp, VectorType>>(v);
+    }
+
+    template<class VectorType>
+    inline auto softmax(const device_obj<RValueVector<VectorType>>& v) {
+        return device_obj<VectorExpression<ExpressionType::Softmax, VectorType>>(v);
     }
 }

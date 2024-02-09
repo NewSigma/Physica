@@ -18,10 +18,11 @@
  */
 #pragma once
 
-#include "Layer/LayerBase.h"
 #include "Physica/Core/Math/Statistics/NumCharacter.h"
 #include "Physica/Core/MultiPrecision/AutoDiffGuard.h"
 #include "Physica/Core/Parallel/Executor/ThreadExecutor.h"
+#include "Layer/LayerBase.h"
+#include "Loss.h"
 
 namespace Physica::Core {
     template<class Derived>
@@ -35,6 +36,7 @@ namespace Physica::Core {
         using typename Base::InputType;
         using typename Base::OutputType;
         using Base::IsTrainMode;
+        using LossType = typename Loss<ScalarType>::LossType;
     private:
         using NetGuardType = typename std::conditional<IsTrainMode, AutoDiffGuard<ScalarType>, PlainStruct<void>>::type;
 

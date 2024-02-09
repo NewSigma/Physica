@@ -48,5 +48,20 @@ namespace Physica {
         struct is_device_obj<Physica::Core::device_obj<T>> {
             constexpr static bool value = true;
         };
+
+        template<class T>
+        struct remove_device_obj {
+            using Type = T;
+        };
+
+        template<class T>
+        struct remove_device_obj<device_obj<T>> {
+            using Type = T;
+        };
+
+        template<class T>
+        struct remove_device_obj<Physica::Core::device_obj<T>> {
+            using Type = T;
+        };
     }
 }

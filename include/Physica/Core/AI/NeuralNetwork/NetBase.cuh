@@ -19,6 +19,7 @@
 #pragma once
 
 #include "NetBase.h"
+#include "Loss.cuh"
 
 namespace Physica::Core {
     template<class Derived>
@@ -26,14 +27,13 @@ namespace Physica::Core {
         using host_obj = NetBase<Derived>;
         using This = device_obj<host_obj>;
         using Base = device_obj<LayerBase<Derived>>;
-        using typename Base::TraitsType;
     public:
-        using LossType = typename TraitsType::LossType;
-        using typename Base::ScalarType;
         using typename Base::PlainScalar;
+        using typename Base::ScalarType;
         using typename Base::InputType;
         using typename Base::OutputType;
         using Base::IsTrainMode;
+        using LossType = typename device_obj<Loss<ScalarType>>::LossType;
     private:
         using NetGuardType = typename std::conditional<IsTrainMode, AutoDiffGuard<ScalarType>, PlainStruct<void>>::type;
 
@@ -66,7 +66,6 @@ namespace Physica::Core {
     template<class Derived>
     template<class Dataset, class Optimizer, class RandomPoolType>
     void device_obj<NetBase<Derived>>::train_step(const Dataset& dataset, Optimizer& opt) {
-        static_assert(Utils::is_device_obj<Dataset>::value, "[Error]: Data must be passed to device before training");
         static_assert(IsTrainMode, "[Error]: train_step must be called under training mode");
 
         auto dist = std::uniform_int_distribution<size_t>(0, dataset.getSize() - 1);
@@ -85,7 +84,7 @@ namespace Physica::Core {
     typename device_obj<NetBase<Derived>>::LossType device_obj<NetBase<Derived>>::loss(const Dataset& dataset) const {
         static_assert(!IsTrainMode, "[Error]: It is suggested using eval mode to reduce memory use");
         const size_t size = dataset.getSize();
-        ScalarType result = 0;
+        LossType result = 0;
         for (size_t i = 0; i < size; ++i)
             toNextMean(result, i, loss(dataset, i));
         return result;

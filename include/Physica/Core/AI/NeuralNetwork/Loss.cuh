@@ -22,19 +22,23 @@
 
 namespace Physica::Core {
     template<class ScalarType>
-    class Loss<device_obj<ScalarType>> {
-        static_assert(ScalarType::isDifferentiable, "[Error]: Unexpected indifferentiable device scalar");
-        using PlainScalar = typename ScalarType::PlainScalar;
-        using DiffScalar = device_obj<Differentiable<PlainScalar, DiffMode::Reverse>>;
-        using VectorType = device_obj<Differentiable<Vector<PlainScalar>, DiffMode::Reverse>>;
+    class device_obj<Loss<ScalarType>> {
+        static_assert(!Utils::is_device_obj<ScalarType>::value, "[Error]: Nested device_obj<> is not allowed");
     public:
-        [[nodiscard]] static DiffScalar crossEntropy(const VectorType& result, size_t label);
+        constexpr static bool IsTrainMode = ScalarType::isDifferentiable;
+        using PlainScalar = typename ScalarType::PlainScalar;
+        using LossType = typename std::conditional<IsTrainMode, device_obj<ScalarType>, ScalarType>::type;
+    private:
+        using PlainVector = Vector<PlainScalar>;
+        using VectorType = device_obj<typename std::conditional<IsTrainMode, Differentiable<PlainVector, DiffMode::Reverse>, PlainVector>::type>;
+    public:
+        [[nodiscard]] static LossType crossEntropy(const VectorType& result, size_t label);
     };
 
     template<class ScalarType>
-    typename Loss<device_obj<ScalarType>>::DiffScalar
-    Loss<device_obj<ScalarType>>::crossEntropy(const VectorType& result, size_t label) {
+    typename device_obj<Loss<ScalarType>>::LossType
+    device_obj<Loss<ScalarType>>::crossEntropy(const VectorType& result, size_t label) {
         assert(label < result.getLength() && "[Error]: The label is not exist");
-        return -ln(softmax(result).calc(label) + DiffScalar(std::numeric_limits<PlainScalar>::min())); //Add minimum to avoid ln(0)
+        return -ln(softmax(result).calc(label) + LossType(std::numeric_limits<PlainScalar>::min())); //Add minimum to avoid ln(0)
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2023 WeiBo He.
+ * Copyright 2022-2024 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -47,11 +47,12 @@ namespace Physica::Core {
         const size_t numBlockX = (maxMinor + maxThreadsPerBlock) / maxThreadsPerBlock;
         Internal::RValueMatrix_assignToKernel<<<{numBlockX, maxMajor}, numThread, 0, StreamPool::getStream()>>>(Base::getDerived(), target.getDerived());
     #else
+        using OtherScalar = typename OtherDerived::ScalarType;
         for (size_t major = 0; major < maxMajor; ++major) {
             for (size_t minor = 0; minor < maxMinor; ++minor) {
                 const size_t r = target.rowFromMajorMinor(major, minor);
                 const size_t c = target.columnFromMajorMinor(major, minor);
-                target.refFromMajorMinor(major, minor) = calc(r, c);
+                target.refFromMajorMinor(major, minor) = OtherScalar(calc(r, c));
             }
         }
     #endif

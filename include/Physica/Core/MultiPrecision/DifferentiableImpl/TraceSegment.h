@@ -95,6 +95,7 @@ namespace Physica::Core {
         [[nodiscard]] __host__ __device__ static size_t findImpl(const VectorType1& values, const VectorType1& grads, DiffScalar1 s);
         /* Friends */
         friend class DiffTracer<ScalarType>;
+        friend class device_obj<This>;
     };
 
     template<class ScalarType>

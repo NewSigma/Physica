@@ -21,7 +21,7 @@
 namespace Physica::Core {
     namespace Internal {
         template<class This, class SegmentType>
-        __global__ void SGD_stepKernel(Physica::PlainStruct<const This> sgd, SegmentType segment) {
+        __global__ void SGD_stepKernel(Physica::PlainStruct<const This> sgd, Physica::PlainStruct<SegmentType> segment) {
             sgd.getDerived().stepKernelImpl(segment.getDerived());
         }
     }
@@ -69,7 +69,7 @@ namespace Physica::Core {
         using DiffScalar = typename SegmentType::DiffScalar;
         const unsigned int index = blockIdx.x * blockDim.x + threadIdx.x;
         if (index < segment.getLength()) {
-            DiffScalar& s = segment[index];
+            DiffScalar s = segment[index];
             s.setValue(s.getValue() - meanLearnRate * s.getGrad());
         }
     }

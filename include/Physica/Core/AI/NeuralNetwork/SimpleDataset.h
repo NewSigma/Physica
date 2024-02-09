@@ -23,7 +23,6 @@
 namespace Physica::Core {
     template<class SampleType, class LabelType>
     class SimpleDataset {
-        static_assert(!SampleType::ScalarType::isDifferentiable, "[Error]: Data in a dataset must not be differentiable");
         using This = SimpleDataset<SampleType, LabelType>;
         using SplitResultType = std::pair<This, This>;
     public:
@@ -37,6 +36,8 @@ namespace Physica::Core {
     public:
         SimpleDataset() = default;
         SimpleDataset(SampleArray samples_, LabelArray labels_);
+        template<class OtherSample, class OtherLabel>
+        SimpleDataset(const SimpleDataset<OtherSample, OtherLabel>& other);
         SimpleDataset(const SimpleDataset&) = default;
         SimpleDataset(SimpleDataset&&) noexcept = default;
         ~SimpleDataset() = default;
@@ -48,9 +49,6 @@ namespace Physica::Core {
         inline void append(DataType data);
         template<class RandomGenerator>
         SplitResultType randomSplit(size_t firstSize, RandomGenerator& gen) const;
-
-        [[nodiscard]] device_obj_type toDevice() const;
-        void toDevice(device_obj_type& obj) const;
         void swap(SimpleDataset& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] SampleArray& getSamples() noexcept { return samples; }
@@ -66,6 +64,17 @@ namespace Physica::Core {
     SimpleDataset<SampleType, LabelType>::SimpleDataset(SampleArray samples_, LabelArray labels_)
             : samples(std::move(samples_)), labels(std::move(labels_)) {
         assert(samples.getLength() == labels.getLength() && "[Error]: Length of samples and labels do not match");
+    }
+
+    template<class SampleType, class LabelType>
+    template<class OtherSample, class OtherLabel>
+    SimpleDataset<SampleType, LabelType>::SimpleDataset(const SimpleDataset<OtherSample, OtherLabel>& other) {
+        const size_t size = other.getSize();
+        reserve(size);
+        for (size_t i = 0; i < size; ++i) {
+            auto pair = other[i];
+            append(std::make_pair(OtherSample(std::move(pair.first)), OtherLabel(std::move(pair.second))));
+        }
     }
 
     template<class SampleType, class LabelType>

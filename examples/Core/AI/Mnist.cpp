@@ -21,7 +21,6 @@
 #include "Physica/Core/IO/Mnist.h"
 #include "Physica/Core/AI/NeuralNetwork/Layer/LinearLayer.h"
 #include "Physica/Core/AI/NeuralNetwork/NetBase.h"
-#include "Physica/Core/AI/NeuralNetwork/Loss.h"
 #include "Physica/Core/Math/Random/RandomPool.h"
 #include "Physica/Core/Math/Optimization/Stochastic/MomentumSGD.h"
 #include "Physica/Core/Parallel/Executor/ThreadExecutor.h"
@@ -114,7 +113,7 @@ private:
 
 using PlainScalar = Scalar<Float>;
 using ScalarType = Differentiable<PlainScalar, DiffMode::Reverse>;
-using Dataset = typename Mnist::DatasetType<PlainScalar>;
+using Dataset = typename Mnist::DatasetType<Vector<PlainScalar>>;
 using Optimizer = MomentumSGD<ScalarType>;
 using RandomGenerator = std::mt19937;
 using RandomPoolType = RandomPool<RandomGenerator>;
@@ -125,7 +124,7 @@ constexpr double learnRate = 0.05;
 
 std::pair<Dataset, Dataset> makeDataset(RandomGenerator& gen) {
     const Mnist mnist("/home/sigma/Documents/data");
-    auto dataset = mnist.makeTrainDataset<PlainScalar>();
+    auto dataset = mnist.makeTrainDataset<Vector<PlainScalar>>();
     for (size_t i = 0; i < dataset.getSize(); ++i) {
         auto& sample = dataset.getSamples()[i];
         sample = sample * PlainScalar(1.0 / 128) - PlainScalar(1);

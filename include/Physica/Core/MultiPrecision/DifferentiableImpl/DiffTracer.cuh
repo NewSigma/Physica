@@ -37,6 +37,11 @@ namespace Physica::Core {
         /* Operations */
         template<class... Args>
         SegmentType& pushSegment(Args&&... args);
+
+        void forget(DiffScalar from);
+
+        template<class Functor> void forSegmentInRange(DiffScalar from, DiffScalar to, Functor func);
+        template<class Functor> void forSegmentInRange(DiffScalar from, DiffScalar to, Functor func) const;
         /* Getters */
         [[nodiscard]] const std::list<SegmentType>& getTraceList() const noexcept { return traceList; }
         [[nodiscard]] size_t getNumRecord() const noexcept;
@@ -56,6 +61,48 @@ namespace Physica::Core {
     template<class... Args>
     typename device_obj<DiffTracer<ScalarType>>::SegmentType& device_obj<DiffTracer<ScalarType>>::pushSegment(Args&&... args) {
         return traceList.emplace_back(SegmentType(std::forward<Args>(args)...));
+    }
+
+    template<class ScalarType>
+    void device_obj<DiffTracer<ScalarType>>::forget(DiffScalar from) {
+        assert(!traceList.empty() && "[Error]: No record found");
+        const auto end = traceList.end();
+        for (auto ite = traceList.begin(); ite != end; ++ite) {
+            auto& segment = *ite;
+            if (segment.isFound(from)) {
+                assert(segment.getLength() == 1 && "[Error]: Forget part of a segment is not supported");
+                traceList.erase(ite, end);
+                return;
+            }
+        }
+        assert(false && "[Error]: Cannot find begin record, maybe it is on another thread?");
+    }
+
+    template<class ScalarType>
+    template<class Functor>
+    void device_obj<DiffTracer<ScalarType>>::forSegmentInRange(DiffScalar from, DiffScalar to, Functor func) {
+        assert(!traceList.empty() && "[Error]: No record found");
+        bool foundBeginSegment = false, foundFinalSegment = false;
+        const auto rend = traceList.rend();
+        for (auto ite = traceList.rbegin(); ite != rend; ++ite) {
+            auto& segment = *ite;
+            foundBeginSegment |= segment.isFound(from);
+            if (!foundBeginSegment)
+                continue;
+
+            foundFinalSegment |= segment.isFound(to);
+            func(std::ref(segment));
+            if (foundFinalSegment)
+                break;
+        }
+        assert(foundBeginSegment && "[Error]: Cannot find begin record, maybe it is on another thread?");
+        assert(foundFinalSegment && "[Error]: Cannot find final record, maybe it is on another thread?");
+    }
+
+    template<class ScalarType>
+    template<class Functor>
+    void device_obj<DiffTracer<ScalarType>>::forSegmentInRange(DiffScalar from, DiffScalar to, Functor func) const {
+        const_cast<This*>(this)->forSegmentInRange(from, to, func);
     }
 
     template<class ScalarType>

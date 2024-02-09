@@ -37,11 +37,10 @@ namespace Physica::Core {
         struct ImageType {
             unsigned char pixels[NumPixelInImage];
             /* Operations */
-            template<class ScalarType>
-            [[nodiscard]] Vector<ScalarType> asVector() const;
+            template<class VectorType>
+            [[nodiscard]] VectorType asVector() const;
         };
-        template<class ScalarType>
-        using DatasetType = SimpleDataset<Vector<ScalarType>, unsigned char>;
+        template<class VectorType> using DatasetType = SimpleDataset<VectorType, unsigned char>;
     private:
         union IntDecomp {
             char c[4];
@@ -63,8 +62,8 @@ namespace Physica::Core {
         /* Operators */
         Mnist& operator=(Mnist obj) noexcept { swap(obj); return *this; }
         /* Operations */
-        template<class ScalarType> DatasetType<ScalarType> makeTrainDataset() const;
-        template<class ScalarType> DatasetType<ScalarType> makeTestDataset() const;
+        template<class VectorType> DatasetType<VectorType> makeTrainDataset() const;
+        template<class VectorType> DatasetType<VectorType> makeTestDataset() const;
         void swap(Mnist& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] const DataArray& getTrainSamples() const noexcept { return trainSamples; }
@@ -79,30 +78,32 @@ namespace Physica::Core {
         [[nodiscard]] static int32_t readInt(std::ifstream& fin);
     };
 
-    template<class ScalarType>
-    typename Mnist::DatasetType<ScalarType> Mnist::makeTrainDataset() const {
-        static_assert(!ScalarType::isDifferentiable, "[Error]: Dataset is const and should not be differentiable");
-        using SampleArray = typename DatasetType<ScalarType>::SampleArray;
+    template<class VectorType>
+    typename Mnist::DatasetType<VectorType> Mnist::makeTrainDataset() const {
+        static_assert(Internal::is_vector<VectorType>::value, "[Error]: This is not a vector");
+        using SampleArray = typename DatasetType<VectorType>::SampleArray;
         const size_t numSample = getNumTrainSample();
         SampleArray samples(numSample);
         for (size_t i = 0; i < numSample; ++i)
-            samples[i] = trainSamples[i].asVector<ScalarType>();
-        return DatasetType<ScalarType>(std::move(samples), trainLabels);
+            samples[i] = trainSamples[i].asVector<VectorType>();
+        return DatasetType<VectorType>(std::move(samples), trainLabels);
     }
 
-    template<class ScalarType>
-    typename Mnist::DatasetType<ScalarType> Mnist::makeTestDataset() const {
-        static_assert(!ScalarType::isDifferentiable, "[Error]: Dataset is const and should not be differentiable");
-        using SampleArray = typename DatasetType<ScalarType>::SampleArray;
+    template<class VectorType>
+    typename Mnist::DatasetType<VectorType> Mnist::makeTestDataset() const {
+        static_assert(Internal::is_vector<VectorType>::value, "[Error]: This is not a vector");
+        using SampleArray = typename DatasetType<VectorType>::SampleArray;
         const size_t numSample = getNumTestSample();
         SampleArray samples(numSample);
         for (size_t i = 0; i < numSample; ++i)
-            samples[i] = testSamples[i].asVector<ScalarType>();
-        return DatasetType<ScalarType>(std::move(samples), testLabels);
+            samples[i] = testSamples[i].asVector<VectorType>();
+        return DatasetType<VectorType>(std::move(samples), testLabels);
     }
 
-    template<class ScalarType>
-    Vector<ScalarType> Mnist::ImageType::asVector() const {
+    template<class VectorType>
+    VectorType Mnist::ImageType::asVector() const {
+        static_assert(Internal::is_vector<VectorType>::value, "[Error]: This is not a vector");
+        using ScalarType = typename VectorType::ScalarType::PlainScalar;
         Vector<ScalarType> result(NumPixelInImage);
         for (size_t i = 0; i < NumPixelInImage; ++i)
             result[i] = ScalarType(pixels[i]);

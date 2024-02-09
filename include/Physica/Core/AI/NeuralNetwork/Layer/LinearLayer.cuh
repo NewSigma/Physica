@@ -25,9 +25,9 @@
 
 namespace Physica::Core {
     namespace Internal {
-        template<class ScalarType, bool WithBias>
-        class Traits<Core::device_obj<LinearLayer<ScalarType, WithBias>>> : public Traits<LinearLayer<ScalarType, WithBias>> {
-            using Base = Traits<LinearLayer<ScalarType, WithBias>>;
+        template<class T, bool WithBias>
+        class Traits<Core::device_obj<LinearLayer<T, WithBias>>> : public Traits<LinearLayer<T, WithBias>> {
+            using Base = Traits<LinearLayer<T, WithBias>>;
             using VectorType = Vector<typename Base::ScalarType>;
             using DiffVector = Differentiable<Vector<typename Base::PlainScalar>, DiffMode::Reverse>;
         public:
@@ -57,6 +57,8 @@ namespace Physica::Core {
         BiasType bias;
     public:
         device_obj() = default;
+        template<class OtherScalar>
+        device_obj(const device_obj<LinearLayer<OtherScalar, WithBias>>& layer);
         device_obj(const device_obj&) = default;
         device_obj(device_obj&&) = default;
         ~device_obj() = default;
@@ -78,6 +80,8 @@ namespace Physica::Core {
         /* Getters */
         [[nodiscard]] __host__ __device__ size_t getInputDim() const noexcept { return weights.getColumn(); }
         [[nodiscard]] __host__ __device__ size_t getOutputDim() const noexcept { return weights.getRow(); }
+        [[nodiscard]] const DeviceMatrix& getWeights() const noexcept { return weights; }
+        [[nodiscard]] const BiasType& getBias() const noexcept { return bias; }
         /* Static members */
         template<class RandomGenerator>
         [[nodiscard]] static This random_normal(size_t inputDim, size_t outputDim, RandomGenerator& gen);
@@ -86,6 +90,12 @@ namespace Physica::Core {
         template<class RandomGenerator>
         [[nodiscard]] static This random_xavier_normal(size_t inputDim, size_t outputDim, PlainScalar gain, RandomGenerator& gen);
     };
+
+    template<class ScalarType, bool WithBias>
+    template<class OtherScalar>
+    device_obj<LinearLayer<ScalarType, WithBias>>::device_obj(const device_obj<LinearLayer<OtherScalar, WithBias>>& layer)
+            : weights(layer.getWeights())
+            , bias(layer.getBias()) {}
 
     template<class ScalarType, bool WithBias>
     typename device_obj<LinearLayer<ScalarType, WithBias>>::OutputType

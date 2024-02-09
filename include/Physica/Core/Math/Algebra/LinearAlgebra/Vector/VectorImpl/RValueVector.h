@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2023 WeiBo He.
+ * Copyright 2021-2024 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -47,6 +47,11 @@ namespace Physica::Core {
             constexpr static bool isSameScalar = std::is_same<ScalarType, typename VectorType2::ScalarType>::value;
         public:
             constexpr static bool value = isSameScalar && BestPacket<ScalarType, VectorType1::SizeAtCompile>::Size > 1;
+        };
+
+        template<class T>
+        struct is_vector {
+            constexpr static bool value = std::is_base_of<RValueVector<T>, T>::value;
         };
     }
     /**

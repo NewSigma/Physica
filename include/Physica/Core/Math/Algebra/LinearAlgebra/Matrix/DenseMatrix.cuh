@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2023 WeiBo He.
+ * Copyright 2022-2024 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -46,6 +46,8 @@ namespace Physica::Core {
         __host__ __device__ device_obj(size_t row, size_t column);
         __host__ __device__ device_obj(size_t row, size_t column, T value);
         device_obj(const host_obj& mat);
+        template<class OtherMatrix>
+        device_obj(const device_obj<RValueMatrix<OtherMatrix>>& mat);
         device_obj(const device_obj&) = default;
         device_obj(device_obj&&) noexcept = default;
         ~device_obj() = default;
@@ -76,6 +78,13 @@ namespace Physica::Core {
     template<class T, int Option, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn, class Allocator>
     device_obj<DenseMatrix<T, Option, Row, Column, MaxRow, MaxColumn, Allocator>>::device_obj(const host_obj& mat)
             : Storage(static_cast<const host_storage&>(mat).toDevice()), Dim(mat.getRow(), mat.getColumn()) {}
+
+    template<class T, int Option, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn, class Allocator>
+    template<class OtherMatrix>
+    device_obj<DenseMatrix<T, Option, Row, Column, MaxRow, MaxColumn, Allocator>>::device_obj(
+            const device_obj<RValueMatrix<OtherMatrix>>& mat) : device_obj(mat.getRow(), mat.getColumn()) {
+        mat.getDerived().assignTo(*this);
+    }
 
     template<class T, int Option, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn, class Allocator>
     inline void device_obj<DenseMatrix<T, Option, Row, Column, MaxRow, MaxColumn, Allocator>>::resize(size_t row, size_t column) {

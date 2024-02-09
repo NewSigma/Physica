@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2023 WeiBo He.
+ * Copyright 2022-2024 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -23,6 +23,11 @@
 #include "Physica/Utils/CUDA/DeviceProp.cuh"
 
 namespace Physica::Core {
+    namespace Internal {
+        template<class T>
+        struct is_vector<device_obj<T>> : public is_vector<T> {};
+    }
+
     template<class Derived>
     class device_obj<RValueVector<Derived>> : public Utils::CRTPBase<device_obj<Derived>> {
         using Base = Utils::CRTPBase<device_obj<Derived>>;

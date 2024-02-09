@@ -28,11 +28,10 @@ namespace Physica::Core {
         using This = device_obj<host_obj>;
         using device_obj_type = typename Internal::Traits<Derived>::device_obj_type;
         using Base = Utils::CRTPBase<device_obj_type>;
-    protected:
         using TraitsType = Internal::Traits<device_obj_type>;
     public:
+        using PlainScalar = typename TraitsType::PlainScalar;
         using ScalarType = typename TraitsType::ScalarType;
-        using PlainScalar = typename ScalarType::PlainScalar;
         using InputType = typename TraitsType::InputType;
         using OutputType = typename TraitsType::OutputType;
         constexpr static bool IsTrainMode = TraitsType::IsTrainMode;

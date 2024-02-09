@@ -27,18 +27,18 @@ namespace Physica::Core {
         __global__ void RValueVector_assignToKernel(
                 Physica::PlainStruct<const Derived> source,
                 Physica::PlainStruct<OtherDerived> target) {
+            static_assert(is_vector<Derived>::value, "[Error]: Invalid source vector type");
+            static_assert(is_vector<OtherDerived>::value, "[Error]: Invalid target vector type");
             using namespace Physica::Core;
-            using HostDerived = typename Derived::host_obj;
-            using HostOtherDerived = typename OtherDerived::host_obj;
-            static_assert(std::is_base_of<RValueVector<HostDerived>, HostDerived>::value, "[Error]: Invalid source vector type");
-            static_assert(std::is_base_of<LValueVector<HostOtherDerived>, HostOtherDerived>::value, "[Error]: Invalid target vector type");
+            using ScalarType = typename OtherDerived::ScalarType;
+
             const unsigned int delta = gridDim.x * blockDim.x;
             const unsigned int id = blockIdx.x * blockDim.x + threadIdx.x;
             const size_t length = source.getDerived().getLength();
             for (unsigned int shift = 0; shift < length; shift += delta) {
                 const unsigned int index = id + shift;
                 if (index < length)
-                    target.getDerived()[index] = source.getDerived().calc(index);
+                    target.getDerived()[index] = ScalarType(source.getDerived().calc(index));
             }
         }
     }

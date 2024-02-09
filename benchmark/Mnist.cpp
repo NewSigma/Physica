@@ -99,7 +99,7 @@ private:
 
 using PlainScalar = Scalar<Float>;
 using ScalarType = Differentiable<PlainScalar, DiffMode::Reverse>;
-using Dataset = typename Mnist::DatasetType<PlainScalar>;
+using Dataset = typename Mnist::DatasetType<Vector<PlainScalar>>;
 using Optimizer = SGD<ScalarType>;
 using RandomPoolType = RandomPool<std::mt19937>;
 constexpr size_t numEpoch = 10;
@@ -107,7 +107,7 @@ constexpr size_t batchSize = 9000;
 
 Dataset makeDataset() {
     const Mnist mnist("/home/sigma/Documents/data");
-    auto dataset = mnist.makeTrainDataset<PlainScalar>();
+    auto dataset = mnist.makeTrainDataset<Vector<PlainScalar>>();
     for (size_t i = 0; i < dataset.getSize(); ++i) {
         auto& sample = dataset.getSamples()[i];
         sample = sample * PlainScalar(1.0 / 128) - PlainScalar(1);
