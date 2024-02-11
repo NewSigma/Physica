@@ -30,9 +30,13 @@ namespace Physica::Gui {
         using ComplexType = Core::ComplexScalar<ScalarType>;
         using Vector3D = Core::Vector<ScalarType, 3>;
         using VectorType = Core::Vector<ScalarType>;
+        using MatrixType = Core::DenseMatrix<ScalarType>;
+        using ComplexMatrix = Core::DenseMatrix<ComplexType>;
         using PhononType = Core::FrozenPhonon<ScalarType>;
         using KSpaceFCGrid = typename PhononType::KSpaceFCGrid;
+        using EigenSolverType = typename PhononType::EigenSolverType;
         using Index3D = typename Core::GridBase::Index3D;
+        using ColorArray = Utils::Array<QColor>;
 
         enum BandConnectMethod {
             Direct,
@@ -40,6 +44,7 @@ namespace Physica::Gui {
         };
     private:
         ScalarType currentX;
+        ColorArray colors;
     public:
         PhononPlot();
         /* Operations */
@@ -58,6 +63,14 @@ namespace Physica::Gui {
             size_t numPoint,
             const char* label,
             BandConnectMethod method = BandConnectMethod::Predict);
+        void plotBandLine(
+            const PhononType& phonon,
+            const KSpaceFCGrid& forceConstants,
+            Vector3D from,
+            Vector3D to,
+            size_t numPoint,
+            const char* label,
+            BandConnectMethod method = BandConnectMethod::Predict);
         /* Getters */
         [[nodiscard]] QCategoryAxis* getAxisX() const noexcept { return reinterpret_cast<QCategoryAxis*>(Plot::getAxisX()); }
         [[nodiscard]] ScalarType getMaxFreqInAU() const noexcept { return getMaxY() / ScalarType(Core::PhyConst<Core::AU>::freqToTHz(1)); }
@@ -65,14 +78,27 @@ namespace Physica::Gui {
         /* Setters */
         void resetCurrentX() { currentX = ScalarType(0); }
     private:
-        Core::DenseMatrix<ScalarType> calcPaths(
+        EigenSolverType diagonalize(
+            const PhononType& phonon,
+            const KSpaceFCGrid& forceConstants,
+            ScalarType factor,
+            Vector3D from,
+            Vector3D to);
+        VectorType makeFreq(const EigenSolverType& eigen);
+        MatrixType calcPaths(
             const PhononType& phonon,
             const KSpaceFCGrid& forceConstants,
             const VectorType& factors,
             Vector3D from,
             Vector3D to,
             BandConnectMethod method);
-        void sortFreq(VectorType& freq, const VectorType& predictFreq) const;
+        void predictConnect(
+            size_t point,
+            VectorType& freq,
+            ComplexMatrix* eigenvector,
+            const VectorType& lastFreq,
+            VectorType& lastDeltaFreq);
+        void sortFreq(VectorType& freq, ComplexMatrix* eigenvector, const VectorType& predictFreq) const;
     };
 
     template<class ScalarType>
@@ -101,9 +127,6 @@ namespace Physica::Gui {
         const auto factors = VectorType::linspace(0, 1, numPoint);
         const ScalarType deltaX = (to - from).norm();
         const VectorType x = currentX + factors * deltaX;
-        currentX += deltaX;
-        Plot::setMaxX(double(currentX));
-
         const auto paths = calcPaths(phonon, forceConstants, factors, from, to, BandConnectMethod::Direct);
         for (size_t i = 0; i < phonon.getNumBand(); ++i) {
             const auto freq = paths.row(i);
@@ -114,6 +137,8 @@ namespace Physica::Gui {
             scatter.setMarkerSize(2);
             scatter.setColor(Qt::black);
         }
+        currentX += deltaX;
+        Plot::setMaxX(double(currentX));
         getAxisX()->append(label, double(currentX));
     }
 
@@ -129,65 +154,165 @@ namespace Physica::Gui {
         const auto factors = VectorType::linspace(0, 1, numPoint);
         const ScalarType deltaX = (to - from).norm();
         const VectorType x = currentX + factors * deltaX;
-        currentX += deltaX;
-        Plot::setMaxX(double(currentX));
-
         const auto paths = calcPaths(phonon, forceConstants, factors, from, to, method);
         for (size_t i = 0; i < phonon.getNumBand(); ++i) {
             const auto freq = paths.row(i);
             auto& line = Plot::line(x, freq);
             line.setColor(Qt::black);
         }
+        currentX += deltaX;
+        Plot::setMaxX(double(currentX));
         getAxisX()->append(label, double(currentX));
     }
 
     template<class ScalarType>
-    Core::DenseMatrix<ScalarType> PhononPlot<ScalarType>::calcPaths(
+    void PhononPlot<ScalarType>::plotBandLine(
+            const PhononType& phonon,
+            const KSpaceFCGrid& forceConstants,
+            Vector3D from,
+            Vector3D to,
+            size_t numPoint,
+            const char* label,
+            BandConnectMethod method) {
+        const auto factors = VectorType::linspace(0, 1, numPoint);
+        const ScalarType deltaX = (to - from).norm();
+        const VectorType x = currentX + factors * deltaX;
+        const size_t numBand = phonon.getNumBand();
+        colors.resize(numBand);
+
+        VectorType freq{}, lastFreq{}, lastDeltaFreq{}, bufferX{}, bufferY{};
+        ComplexMatrix eigenvector{}, lastEigenvector{};
+        ColorArray colorBuffer = colors;
+        for (size_t p = 0; p < numPoint; ++p) {
+            lastFreq.swap(freq);
+            lastEigenvector.swap(eigenvector);
+
+            const auto eigen = diagonalize(phonon, forceConstants, factors[p], from, to);
+            freq = makeFreq(eigen);
+            eigenvector = eigen.getEigenvectors();
+            if (method == BandConnectMethod::Predict)
+                predictConnect(p, freq, &eigenvector, lastFreq, lastDeltaFreq);
+            const bool isLastFreqReady = p > 0;
+            if (!isLastFreqReady)
+                continue;
+
+            for (size_t band = 0; band < numBand; ++band) {
+                bufferX.append(x[p - 1]);
+                bufferY.append(lastFreq[band]);
+                for (size_t otherBand = 0; otherBand < numBand; ++otherBand) {
+                    if (band == otherBand)
+                        continue;
+                    const ScalarType deltaFreq1 = lastFreq[band] - lastFreq[otherBand];
+                    const ScalarType deltaFreq2 = freq[band] - freq[otherBand];
+                    const bool noCross = (deltaFreq1 * deltaFreq2).isPositive();
+                    if (noCross)
+                        continue;
+
+                    const ScalarType dot11 = (lastEigenvector.col(band).conjugate() * eigenvector.col(band)).norm();
+                    const ScalarType dot12 = (lastEigenvector.col(band).conjugate() * eigenvector.col(otherBand)).norm();
+                    const ScalarType dot21 = (lastEigenvector.col(otherBand).conjugate() * eigenvector.col(band)).norm();
+                    const ScalarType dot22 = (lastEigenvector.col(otherBand).conjugate() * eigenvector.col(otherBand)).norm();
+                    const bool isReversion = (dot12 > dot11) && (dot21 > dot22);
+                    if (isReversion) {
+                        const ScalarType deltaFreq3 = lastFreq[band] - freq[band];
+                        const ScalarType deltaFreq4 = lastFreq[otherBand] - freq[otherBand];
+                        const ScalarType factor = reciprocal(deltaFreq3 - deltaFreq4);
+                        const ScalarType crossX = (-deltaFreq2 * x[p - 1] + deltaFreq1 * x[p]) * factor;
+                        const ScalarType crossY = (lastFreq[band] * freq[otherBand] - lastFreq[otherBand] * freq[band]) * factor;
+                        bufferX.append(crossX);
+                        bufferY.append(crossY);
+                        bufferX.append(x[p]);
+                        bufferY.append(freq[otherBand]);
+                        if (band < otherBand)
+                            std::swap(colorBuffer[band], colorBuffer[otherBand]);
+                        goto done;
+                    }
+                }
+                bufferX.append(x[p]);
+                bufferY.append(freq[band]);
+
+            done:
+                auto& line = Plot::line(bufferX, bufferY);
+                if (currentX.isZero() && p == 1)
+                    colorBuffer[band] = line.color();
+                else
+                    line.setColor(colors[band]);
+                bufferX.clear();
+                bufferY.clear();
+            }
+            colors = colorBuffer;
+        }
+        currentX += deltaX;
+        Plot::setMaxX(double(currentX));
+        getAxisX()->append(label, double(currentX));
+    }
+
+    template<class ScalarType>
+    typename PhononPlot<ScalarType>::EigenSolverType PhononPlot<ScalarType>::diagonalize(
+            const PhononType& phonon,
+            const KSpaceFCGrid& forceConstants,
+            ScalarType factor,
+            Vector3D from,
+            Vector3D to) {
+        const Vector3D qPoint = from * (ScalarType(1) - factor) + to * factor;
+        auto fcMatrix = phonon.interpolatePoint(qPoint, forceConstants);
+        phonon.toDynamicMatrix(fcMatrix);
+        return PhononType::diagonalize(fcMatrix);
+    }
+
+    template<class ScalarType>
+    typename PhononPlot<ScalarType>::VectorType
+    PhononPlot<ScalarType>::makeFreq(const EigenSolverType& eigen) {
+        using namespace Physica::Core;
+        auto freq = PhononType::makeFreq(eigen);
+        freq *= ScalarType(Core::PhyConst<AU>::freqToTHz(1));
+        Plot::setMinY(std::min(Plot::getMinY(), double(freq.min())));
+        Plot::setMaxY(std::max(Plot::getMaxY(), double(freq.max())));
+        return freq;
+    }
+
+    template<class ScalarType>
+    typename PhononPlot<ScalarType>::MatrixType PhononPlot<ScalarType>::calcPaths(
             const PhononType& phonon,
             const KSpaceFCGrid& forceConstants,
             const VectorType& factors,
             Vector3D from,
             Vector3D to,
             BandConnectMethod method) {
-        using namespace Physica::Core;
         const size_t numPoint = factors.getLength();
-        DenseMatrix<ScalarType> result(phonon.getNumBand(), numPoint);
-        ScalarType minFreq = Plot::getMinY();
-        ScalarType maxFreq = Plot::getMaxY();
-
-        VectorType lastFreq, lastDeltaFreq;
+        MatrixType result(phonon.getNumBand(), numPoint);
+        VectorType lastDeltaFreq;
         for (size_t i = 0; i < numPoint; ++i) {
-            const ScalarType factor = factors[i];
-            const Vector3D qPoint = from * (ScalarType(1) - factor) + to * factor;
-            auto fcMatrix = phonon.interpolatePoint(qPoint, forceConstants);
-            phonon.toDynamicMatrix(fcMatrix);
-            auto eigen = PhononType::diagonalize(fcMatrix);
-            auto freq = phonon.makeFreq(eigen);
-            freq *= ScalarType(PhyConst<AU>::freqToTHz(1));
-            if (method == BandConnectMethod::Predict) {
-                const bool isLastFreqReady = i != 0;
-                if (isLastFreqReady != 0) {
-                    const bool isLastDeltaFreqReady = i > 1;
-                    if (isLastDeltaFreqReady) {
-                        const VectorType predictFreq = lastFreq + lastDeltaFreq;
-                        sortFreq(freq, predictFreq);
-                    }
-                    lastDeltaFreq = freq - lastFreq;
-                }
-                lastFreq = freq;
-            }
+            const auto eigen = diagonalize(phonon, forceConstants, factors[i], from, to);
+            auto freq = makeFreq(eigen);
+            if (method == BandConnectMethod::Predict)
+                predictConnect(i, freq, nullptr, result.asArray()[i == 0 ? 0 : (i - 1)], lastDeltaFreq);
             auto col = result.col(i);
             col = freq;
-            minFreq = std::min(minFreq, freq.min());
-            maxFreq = std::max(maxFreq, freq.max());
         }
-        Plot::setMinY(double(minFreq));
-        Plot::setMaxY(double(maxFreq));
         return result;
     }
 
     template<class ScalarType>
-    void PhononPlot<ScalarType>::sortFreq(VectorType& freq, const VectorType& predictFreq) const {
+    void PhononPlot<ScalarType>::predictConnect(
+            size_t point,
+            VectorType& freq,
+            ComplexMatrix* eigenvector,
+            const VectorType& lastFreq,
+            VectorType& lastDeltaFreq) {
+        const bool isLastFreqReady = point != 0;
+        if (isLastFreqReady) {
+            const bool isLastDeltaFreqReady = point > 1;
+            if (isLastDeltaFreqReady) {
+                const VectorType predictFreq = lastFreq + lastDeltaFreq;
+                sortFreq(freq, eigenvector, predictFreq);
+            }
+            lastDeltaFreq = freq - lastFreq;
+        }
+    }
+
+    template<class ScalarType>
+    void PhononPlot<ScalarType>::sortFreq(VectorType& freq, ComplexMatrix* eigenvector, const VectorType& predictFreq) const {
         const size_t numBand = predictFreq.getLength();
         for (size_t band = 0; band < numBand - 1; ++band) {
             ScalarType minDelta = std::numeric_limits<ScalarType>::max();
@@ -199,8 +324,13 @@ namespace Physica::Gui {
                     index = otherBand;
                 }
             }
-            if (index != band)
+            if (index != band) {
                 freq[index].swap(freq[band]);
+                if (eigenvector != nullptr) {
+                    auto& arr = (*eigenvector).asArray();
+                    arr[index].swap(arr[band]);
+                }
+            }
         }
     }
 }

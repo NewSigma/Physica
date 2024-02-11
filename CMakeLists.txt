@@ -16,41 +16,21 @@ option(PHYSICA_CUDA "Enable CUDA support" OFF)
 option(PHYSICA_PYTHON "Enable python suppert" OFF)
 option(PHYSICA_OPTIMIZE "Enable aggressive optimizations" ON)
 set(UseASM 1 CACHE STRING "Enable inline assembly code")
-
-message(STATUS "Running under ${CMAKE_BUILD_TYPE} mode.")
 # Policies
 cmake_policy(SET CMP0074 NEW)
 
+message(STATUS "Running under ${CMAKE_BUILD_TYPE} mode.")
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED TRUE)
-
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fvisibility=hidden")
 set(CMAKE_VISIBILITY_INLINES_HIDDEN TRUE)
-if(${CMAKE_BUILD_TYPE} MATCHES "Debug")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O0")
-    set(CMAKE_CUDA_FLAGS "${CMAKE_CUDA_FLAGS} -G")
-else()
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} \
-                         -O2 \
-                         -fno-math-errno \
-                         -fno-signaling-nans \
-                         -fno-trapping-math")
-    set(CMAKE_CUDA_FLAGS "${CMAKE_CUDA_FLAGS} -O2 -DNDEBUG")
-    if (${CMAKE_BUILD_TYPE} MATCHES "RelWithDebInfo")
-        set(CMAKE_CUDA_FLAGS "${CMAKE_CUDA_FLAGS} -g -G -dopt=on")
-    endif()
-endif()
 
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fvisibility=hidden -Wall -Wextra -fPIC -mrdrnd")
 if(${PHYSICA_OPTIMIZE})
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=native")
 endif()
-
-set(CMAKE_CXX_FLAGS "\
-${CMAKE_CXX_FLAGS} \
--Wall \
--Wextra \
--fPIC \
--mrdrnd")
+if(NOT ${CMAKE_BUILD_TYPE} MATCHES "Debug")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-math-errno -fno-signaling-nans -fno-trapping-math")
+endif()
 
 if(${PHYSICA_CUDA})
     if(NOT DEFINED PHYSICA_CUDA_ARCHITECTURES)
@@ -59,10 +39,13 @@ if(${PHYSICA_CUDA})
     add_definitions(-DPHYSICA_CUDA)
     find_package(CUDAToolkit REQUIRED)
     enable_language(CUDA)
-    set(CMAKE_CUDA_STANDARD 17)
-    set(CMAKE_CUDA_STANDARD_REQUIRED TRUE)
+    set(CMAKE_CUDA_STANDARD ${CMAKE_CXX_STANDARD})
+    set(CMAKE_CUDA_STANDARD_REQUIRED ${CMAKE_CXX_STANDARD_REQUIRED})
     set(CMAKE_CUDA_SEPARABLE_COMPILATION ON)
     set(CMAKE_CUDA_ARCHITECTURES ${PHYSICA_CUDA_ARCHITECTURES})
+
+    set(CMAKE_CUDA_FLAGS_DEBUG "${CMAKE_CUDA_FLAGS_DEBUG} -G")
+    set(CMAKE_CUDA_FLAGS_RELWITHDEBINFO "${CMAKE_CUDA_FLAGS_RELWITHDEBINFO} -G -dopt=on")
     # --diag-suppress 186: Comparation between unsigned int and 0 in InverseMatrix does not exist
     set(CMAKE_CUDA_FLAGS "\
         ${CMAKE_CUDA_FLAGS} \

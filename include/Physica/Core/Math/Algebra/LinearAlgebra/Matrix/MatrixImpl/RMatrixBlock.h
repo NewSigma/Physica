@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 WeiBo He.
+ * Copyright 2022-2024 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -126,6 +126,7 @@ namespace Physica::Core {
         using VectorBase::assignTo;
         /* Getters */
         using VectorBase::calc;
+        using VectorBase::conjugate;
         using VectorBase::max;
         using VectorBase::min;
         using VectorBase::sum;
@@ -158,6 +159,7 @@ namespace Physica::Core {
         using VectorBase::assignTo;
         /* Getters */
         using VectorBase::calc;
+        using VectorBase::conjugate;
         using VectorBase::max;
         using VectorBase::min;
         using VectorBase::sum;

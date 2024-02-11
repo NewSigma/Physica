@@ -63,8 +63,6 @@ namespace Physica::Core {
 
         void toDynamicMatrix(KSpaceFCMat& forceConstant) const;
         void toDynamicMatrix(KSpaceFCGrid& forceConstants) const;
-        [[nodiscard]] Vector<ScalarType> makeFreq(const EigenSolverType& eigen) const;
-        [[nodiscard]] inline Vector<ScalarType> makeFreq(const QPointGrid& qPoints, Index3D qIndex) const;
         [[nodiscard]] DenseMatrix<ScalarType> makeEigenVectors(const EigenSolverType& eigen) const;
         [[nodiscard]] inline DenseMatrix<ScalarType> makeEigenVectors(const QPointGrid& qPoints, Index3D qIndex) const;
         [[nodiscard]] MDCellType shiftAtom(const Vector<ScalarType>& eigenVector, ScalarType distance);
@@ -84,6 +82,8 @@ namespace Physica::Core {
         /* Static members */
         [[nodiscard]] static EigenSolverType diagonalize(const KSpaceFCMat& dynamicMatrix);
         [[nodiscard]] static QPointGrid diagonalize(const KSpaceFCGrid& dynamicMatrixes);
+        [[nodiscard]] static Vector<ScalarType> makeFreq(const EigenSolverType& eigen);
+        [[nodiscard]] static inline Vector<ScalarType> makeFreq(const QPointGrid& qPoints, Index3D qIndex);
     private:
         ScalarType removeDriftForce(Vector<ScalarType>& force) const;
     };
@@ -316,22 +316,6 @@ namespace Physica::Core {
     }
 
     template<class ScalarType>
-    Vector<ScalarType> PhononSolver<ScalarType>::makeFreq(const EigenSolverType& eigen) const {
-        Vector<ScalarType> result(getUnitCellDOF());
-        const Vector<ScalarType> eigenvalues = toRealVector(eigen.getEigenvalues());
-        for (size_t i = 0; i < getUnitCellDOF(); ++i)
-            result[i] = eigenvalues[i].isNegative() ? -1 : 1;
-        result = hadamard(result, sqrt(abs(eigenvalues)));
-        result *= ScalarType(1 / (2 * M_PI));
-        return result;
-    }
-
-    template<class ScalarType>
-    inline Vector<ScalarType> PhononSolver<ScalarType>::makeFreq(const QPointGrid& qPoints, Index3D qIndex) const {
-        return makeFreq(qPoints(qIndex));
-    }
-
-    template<class ScalarType>
     DenseMatrix<ScalarType> PhononSolver<ScalarType>::makeEigenVectors(const EigenSolverType& eigen) const {
         DenseMatrix<ScalarType> result(getUnitCellDOF(), getUnitCellDOF());
         for (size_t i = 0; i < result.getColumn(); ++i) {
@@ -389,6 +373,23 @@ namespace Physica::Core {
             eigen.sort();
         }
         return qPoints;
+    }
+
+    template<class ScalarType>
+    Vector<ScalarType> PhononSolver<ScalarType>::makeFreq(const EigenSolverType& eigen) {
+        const size_t unitCellDOF = eigen.getSize();
+        Vector<ScalarType> result(unitCellDOF);
+        const Vector<ScalarType> eigenvalues = toRealVector(eigen.getEigenvalues());
+        for (size_t i = 0; i < unitCellDOF; ++i)
+            result[i] = eigenvalues[i].isNegative() ? -1 : 1;
+        result = hadamard(result, sqrt(abs(eigenvalues)));
+        result *= ScalarType(1 / (2 * M_PI));
+        return result;
+    }
+
+    template<class ScalarType>
+    inline Vector<ScalarType> PhononSolver<ScalarType>::makeFreq(const QPointGrid& qPoints, Index3D qIndex) {
+        return makeFreq(qPoints(qIndex));
     }
 
     template<class ScalarType>

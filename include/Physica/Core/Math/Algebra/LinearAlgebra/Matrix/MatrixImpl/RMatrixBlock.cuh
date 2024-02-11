@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 WeiBo He.
+ * Copyright 2023-2024 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -102,8 +102,10 @@ namespace Physica::Core {
         using VectorBase::calc;
         [[nodiscard]] __host__ __device__ constexpr static size_t getRow() noexcept { return 1; }
         [[nodiscard]] __host__ __device__ size_t getColumn() const noexcept { return VectorBase::getLength(); }
+        //using VectorBase::conjugate;  // Not implemented
         using VectorBase::max;
         using VectorBase::min;
+        using VectorBase::sum;
         /**
          * There are some common functions shared by vector and matrix, it is necessary to decide which function to call explicitly.
          */
@@ -135,8 +137,10 @@ namespace Physica::Core {
         using VectorBase::calc;
         [[nodiscard]] __host__ __device__ size_t getRow() const noexcept { return VectorBase::getLength(); }
         [[nodiscard]] __host__ __device__ constexpr static size_t getColumn() noexcept { return 1; }
+        //using VectorBase::conjugate;  // Not implemented
         using VectorBase::max;
         using VectorBase::min;
+        using VectorBase::sum;
         /**
          * There are some common functions shared by vector and matrix, it is necessary to decide which function to call explicitly.
          */

@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 WeiBo He.
+ * Copyright 2023-2024 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -242,6 +242,7 @@ namespace Physica::Core {
         /* Getters */
         using Base::calc;
         using VectorBase::calc;
+        using VectorBase::conjugate;
         using VectorBase::max;
         using VectorBase::min;
         using VectorBase::sum;
@@ -285,8 +286,10 @@ namespace Physica::Core {
         /* Getters */
         using Base::calc;
         using VectorBase::calc;
+        using VectorBase::conjugate;
         using VectorBase::max;
         using VectorBase::min;
+        using VectorBase::sum;
         [[nodiscard]] __host__ __device__ constexpr static size_t getRow() noexcept { return 1; }
         [[nodiscard]] __host__ __device__ constexpr static size_t getColumn() noexcept { return 1; }
         [[nodiscard]] __host__ __device__ ScalarType* data_ptr([[maybe_unused]] size_t row, [[maybe_unused]] size_t col) {
