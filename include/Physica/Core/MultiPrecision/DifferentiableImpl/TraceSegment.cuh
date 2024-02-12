@@ -56,6 +56,7 @@ namespace Physica::Core {
         [[nodiscard]] __host__ __device__ inline DiffScalar operator[](size_t index);
         [[nodiscard]] __host__ __device__ inline const DiffScalar operator[](size_t index) const;
         /* Operations */
+        void zero_grad();
         [[nodiscard]] This copy() const;
         void swap(device_obj& __restrict obj) noexcept;
 

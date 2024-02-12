@@ -59,7 +59,7 @@ namespace Physica::Core {
         values_.toDeviceAsync(values);
         auto future = StreamFuture::makeFuture();
         cudaMemsetAsync((void*)records.data(), 0, getLength() * sizeof(DiffRecord), StreamPool::getStream());
-        cudaMemsetAsync((void*)grads.data(), 0, getLength() * sizeof(DiffScalar), StreamPool::getStream());
+        zero_grad();
         future->wait();
     }
 
@@ -76,6 +76,11 @@ namespace Physica::Core {
     }
 
     template<class ScalarType>
+    void device_obj<TraceSegment<ScalarType>>::zero_grad() {
+        cudaMemsetAsync((void*)grads.data(), 0, getLength() * sizeof(ScalarType), StreamPool::getStream());
+    }
+
+    template<class ScalarType>
     device_obj<TraceSegment<ScalarType>> device_obj<TraceSegment<ScalarType>>::copy() const {
         constexpr size_t MaxThreadPerBlock = 256;
         This result(getLength());
@@ -83,7 +88,7 @@ namespace Physica::Core {
         const size_t numBlock = (getLength() + numThread - 1) / numThread;
         Internal::TraceSegment_copyKernel<<<numThread, numBlock, 0, StreamPool::getStream()>>>(asStruct(*this), asStruct(result));
         result.values = values;
-        cudaMemsetAsync((void*)grads.data(), 0, getLength() * sizeof(DiffScalar), StreamPool::getStream());
+        zero_grad();
         return result;
     }
 

@@ -102,16 +102,14 @@ namespace Physica::Core {
 
     template<class ScalarType>
     inline void Differentiable<ScalarType, DiffMode::Reverse>::reverse() {
-        auto& tracer = DiffTracer<ScalarType>::getInstance();
         *pGrad = ScalarType(1);
-        tracer.reverse_from(*this);
+        DiffTracer<ScalarType>::getInstance().reverse_from(*this);
     }
 
     template<class ScalarType>
     inline void Differentiable<ScalarType, DiffMode::Reverse>::reverse_to(Differentiable to) {
-        auto& tracer = DiffTracer<ScalarType>::getInstance();
         *pGrad = ScalarType(1);
-        tracer.reverse(*this, to);
+        DiffTracer<ScalarType>::getInstance().reverse(*this, to);
     }
 
     template<class ScalarType>

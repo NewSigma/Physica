@@ -26,9 +26,10 @@ namespace Physica::Core {
         static_assert(ScalarType::isDifferentiable, "[Error]: ScalarType must be differentiable");
         constexpr static bool isDeviceSide = Utils::is_device_obj<ScalarType>::value;
         using This = AutoDiffGuard<ScalarType>;
+    public:
         using PlainScalar = typename ScalarType::PlainScalar;
         using TracerType = typename std::conditional<isDeviceSide, device_obj<DiffTracer<PlainScalar>>, DiffTracer<PlainScalar>>::type;
-
+    private:
         ScalarType node;
     public:
         AutoDiffGuard();

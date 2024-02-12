@@ -35,7 +35,7 @@ namespace Physica::Core {
         using Base::IsTrainMode;
         using LossType = typename device_obj<Loss<ScalarType>>::LossType;
     private:
-        using NetGuardType = typename std::conditional<IsTrainMode, AutoDiffGuard<ScalarType>, PlainStruct<void>>::type;
+        using NetGuardType = typename std::conditional<IsTrainMode, AutoDiffGuard<device_obj<ScalarType>>, PlainStruct<void>>::type;
 
         NetGuardType net_guard;
     public:

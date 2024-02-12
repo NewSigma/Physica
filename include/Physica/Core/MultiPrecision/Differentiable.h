@@ -129,8 +129,8 @@ namespace Physica::Core {
         [[nodiscard]] inline Differentiable operator-() const;
         /* Operations */
         inline Differentiable& toAbs();
-        void reverse();
-        void reverse_to(Differentiable to);
+        inline void reverse();
+        inline void reverse_to(Differentiable to);
         [[nodiscard]] Differentiable copy() const;
         inline void swap(Differentiable& __restrict obj) noexcept;
         /* Getters */

@@ -54,8 +54,8 @@ namespace Physica::Core {
         void reverse_to(DiffScalar to);
         void reverse();
         inline void zero_grad(DiffScalar from, DiffScalar to);
-        inline void zero_grad_from(DiffScalar from);
-        inline void zero_grad_to(DiffScalar to);
+        void zero_grad_from(DiffScalar from);
+        void zero_grad_to(DiffScalar to);
         void zero_grad();
         void forget(DiffScalar from);
         void reserve(size_t size);
@@ -249,7 +249,7 @@ namespace Physica::Core {
     }
 
     template<class ScalarType>
-    inline void DiffTracer<ScalarType>::zero_grad_from(DiffScalar from) {
+    void DiffTracer<ScalarType>::zero_grad_from(DiffScalar from) {
         assert(!traceList.empty() && "[Error]: No record found");
         bool foundBeginSegment = false;
         const auto rend = traceList.rend();
@@ -264,7 +264,7 @@ namespace Physica::Core {
     }
 
     template<class ScalarType>
-    inline void DiffTracer<ScalarType>::zero_grad_to(DiffScalar to) {
+    void DiffTracer<ScalarType>::zero_grad_to(DiffScalar to) {
         assert(!traceList.empty() && "[Error]: No record found");
         bool foundFinalSegment = false;
         const auto rend = traceList.rend();
