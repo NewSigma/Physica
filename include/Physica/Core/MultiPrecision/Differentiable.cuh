@@ -68,6 +68,8 @@ namespace Physica::Core {
         [[nodiscard]] __host__ __device__ inline bool operator==(const This& other) const;
         [[nodiscard]] inline device_obj operator-() const;
         /* Operations */
+        void reverse();
+        void reverse_to(This to);
         void toHostAsync_value(ScalarType& value) const;
         void toHostAsync_grad(ScalarType& grad) const;
         __host__ __device__ inline void swap(device_obj& __restrict obj) noexcept;
@@ -82,7 +84,8 @@ namespace Physica::Core {
         [[nodiscard]] __host__ __device__ bool isPositive() const { return getValue().isPositive(); }
         [[nodiscard]] __host__ __device__ bool isNegative() const { return getValue().isNegative(); }
         /* Setters */
-        __device__ void setValue(const ScalarType& x) { *pValue = x; }
+        __device__ void setValue(ScalarType value) { *pValue = value; }
+        __device__ void setGrad(ScalarType grad) { *pGrad = grad; }
     };
     ////////////////////////////////////////////////////////////
     template<class ScalarType>

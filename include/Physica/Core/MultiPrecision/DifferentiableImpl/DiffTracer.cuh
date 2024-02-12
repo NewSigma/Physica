@@ -38,6 +38,10 @@ namespace Physica::Core {
         template<class... Args>
         SegmentType& pushSegment(Args&&... args);
 
+        inline void reverse(DiffScalar from, DiffScalar to);
+        void reverse_from(DiffScalar from);
+        void reverse_to(DiffScalar to);
+        void reverse();
         inline void zero_grad(DiffScalar from, DiffScalar to);
         void zero_grad_from(DiffScalar from);
         void zero_grad_to(DiffScalar to);
@@ -64,6 +68,52 @@ namespace Physica::Core {
     template<class... Args>
     typename device_obj<DiffTracer<ScalarType>>::SegmentType& device_obj<DiffTracer<ScalarType>>::pushSegment(Args&&... args) {
         return traceList.emplace_back(SegmentType(std::forward<Args>(args)...));
+    }
+
+    template<class ScalarType>
+    inline void device_obj<DiffTracer<ScalarType>>::reverse(DiffScalar from, DiffScalar to) {
+        forSegmentInRange(from, to, [](SegmentType& segment) {
+            segment.reverse();
+        });
+    }
+
+    template<class ScalarType>
+    void device_obj<DiffTracer<ScalarType>>::reverse_from(DiffScalar from) {
+        assert(!traceList.empty() && "[Error]: No record found");
+        bool foundBeginSegment = false;
+        const auto rend = traceList.rend();
+        for (auto ite = traceList.rbegin(); ite != rend; ++ite) {
+            auto& segment = *ite;
+            foundBeginSegment |= segment.isFound(from);
+            if (!foundBeginSegment)
+                continue;
+
+            segment.reverse();
+        }
+        assert(foundBeginSegment && "[Error]: Cannot find begin record, maybe it is on another thread?");
+    }
+
+    template<class ScalarType>
+    void device_obj<DiffTracer<ScalarType>>::reverse_to(DiffScalar to) {
+        assert(!traceList.empty() && "[Error]: No record found");
+        bool foundFinalSegment = false;
+        const auto rend = traceList.rend();
+        for (auto ite = traceList.rbegin(); ite != rend; ++ite) {
+            auto& segment = *ite;
+            foundFinalSegment |= segment.isFound(to);
+            segment.reverse();
+            if (foundFinalSegment)
+                break;
+        }
+        assert(foundFinalSegment && "[Error]: Cannot find final record, maybe it is on another thread?");
+    }
+
+    template<class ScalarType>
+    void device_obj<DiffTracer<ScalarType>>::reverse() {
+        assert(!traceList.empty() && "[Error]: No record found");
+        const auto rend = traceList.rend();
+        for (auto ite = traceList.rbegin(); ite != rend; ++ite)
+            (*ite).reverse();
     }
 
     template<class ScalarType>

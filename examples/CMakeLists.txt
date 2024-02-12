@@ -4,7 +4,7 @@ include(../cmake/Modules/PhysicaAddExample.cmake)
 ## AI
 physica_add_example(DecisionTree Core/AI/DecisionTree.cpp)
 physica_add_example(Mnist Core/AI/Mnist.cpp)
-
+physica_add_example(Mnist_cuda Core/AI/Mnist.cu)
 ## Math
 physica_add_example(DuffingOscillator Core/Math/DuffingOscillator.cpp)
 physica_add_example(ProbabilityDistributionFunction2D Core/Math/ProbabilityDistributionFunction2D.cpp)

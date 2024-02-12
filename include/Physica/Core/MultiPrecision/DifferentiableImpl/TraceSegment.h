@@ -251,11 +251,11 @@ namespace Physica::Core {
                 i = record.idFirstOperand;
                 continue;
             }
-            const ScalarType& grad = grads[i];
+            const ScalarType grad = grads[i];
             if (grad.isZero())
                 continue;
             
-            const ScalarType& value = values[i];
+            const ScalarType value = values[i];
             const size_t idFirstOperand = record.idFirstOperand;
             const ExpressionType source = record.source;
             DiffScalar operandX = operands[idFirstOperand];

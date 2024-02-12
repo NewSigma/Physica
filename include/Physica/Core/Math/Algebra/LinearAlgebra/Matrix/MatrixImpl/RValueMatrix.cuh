@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2023 WeiBo He.
+ * Copyright 2022-2024 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -42,6 +42,7 @@ namespace Physica::Core {
 
         constexpr static bool isColumnMatrix = host_obj::isColumnMatrix;
         constexpr static bool isRowMatrix = host_obj::isRowMatrix;
+        constexpr static size_t MaxThreadPerBlock = 256;
     public:
         /* Operations */
         template<class OtherDerived>
@@ -92,6 +93,4 @@ namespace Physica::Core {
     };
 }
 
-#ifdef __CUDA_ARCH__
-    #include "RValueMatrixImpl.cuh"
-#endif
+#include "RValueMatrixImpl.cuh"

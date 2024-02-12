@@ -87,17 +87,22 @@ namespace Physica::Core {
         template<class Distribution, class RandomGenerator>
         [[nodiscard]] inline static This random_any(size_t row, size_t column, Distribution& dist, RandomGenerator& gen);
     private:
+        /* Operations */
+        using Dim::resize;
+        /* Getters */
         [[nodiscard]] __host__ __device__ SegmentType& getTraceSegment() noexcept { return traceSeg.getDerived(); }
         [[nodiscard]] __host__ __device__ const SegmentType& getTraceSegment() const noexcept { return traceSeg.getDerived(); }
     };
 
     template<class PlainScalar, int Option>
     device_obj<Differentiable<DenseMatrix<PlainScalar, Option>, DiffMode::Reverse>>::device_obj(size_t row, size_t column, ExpressionType type)
-            : traceSeg(asStruct(TracerType::getInstance().pushSegment(row * column, type))) {}
+            : Dim(row, column)
+            , traceSeg(asStruct(TracerType::getInstance().pushSegment(row * column, type))) {}
 
     template<class PlainScalar, int Option>
     device_obj<Differentiable<DenseMatrix<PlainScalar, Option>, DiffMode::Reverse>>::device_obj(const PlainMatrix& values)
-            : traceSeg(asStruct(TracerType::getInstance().pushSegment(values.flatten()))) {}
+            : Dim(values.getRow(), values.getColumn())
+            , traceSeg(asStruct(TracerType::getInstance().pushSegment(values.flatten()))) {}
 
     template<class PlainScalar, int Option>
     template<class RandomGenerator>

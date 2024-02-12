@@ -31,6 +31,14 @@ namespace Physica::Core {
         }
 
         template<class ScalarType>
+        __global__ void __launch_bounds__(256, 1)
+        TraceSegment_reverseKernel(Physica::PlainStruct<Core::device_obj<TraceSegment<ScalarType>>> segment) {
+            static_assert(Core::device_obj<TraceSegment<ScalarType>>::MaxThreadPerBlock == 256,
+                    "[Error]: Keep MaxThreadPerBlock and __launch_bounds__ consistent");
+            segment.getDerived().reverseKernelImpl();
+        }
+
+        template<class ScalarType>
         __global__ void TraceSegment_copyKernel(
                 Physica::PlainStruct<const Core::device_obj<TraceSegment<ScalarType>>> source,
                 Physica::PlainStruct<Core::device_obj<TraceSegment<ScalarType>>> target) {
@@ -76,6 +84,14 @@ namespace Physica::Core {
     }
 
     template<class ScalarType>
+    void device_obj<TraceSegment<ScalarType>>::reverse() {
+        assert(!empty());
+        const size_t numThread = getLength() < MaxThreadPerBlock ? getLength() : MaxThreadPerBlock;
+        const size_t numBlock = (getLength() + numThread - 1) / numThread;
+        Internal::TraceSegment_reverseKernel<<<numThread, numBlock, 0, StreamPool::getStream()>>>(asStruct(*this));
+    }
+
+    template<class ScalarType>
     void device_obj<TraceSegment<ScalarType>>::zero_grad() {
         cudaMemsetAsync((void*)grads.data(), 0, getLength() * sizeof(ScalarType), StreamPool::getStream());
     }
@@ -99,6 +115,92 @@ namespace Physica::Core {
         operands.swap(obj.operands);
         values.swap(obj.values);
         grads.swap(obj.grads);
+    }
+
+    template<class ScalarType>
+    __device__ void device_obj<TraceSegment<ScalarType>>::reverseKernelImpl() {
+        const int index = blockIdx.x * blockDim.x + threadIdx.x;
+        if (index >= getLength())
+            return;
+
+        const DiffRecord record = records[index];
+        if (record.source == ExpressionType::Set)
+            return;
+
+        const ScalarType grad = grads[index];
+        if (grad.isZero())
+            return;
+            
+        const ScalarType value = values[index];
+        const size_t idFirstOperand = record.idFirstOperand;
+        const ExpressionType source = record.source;
+        DiffScalar operandX = operands[idFirstOperand];
+        ScalarType& gradX = operandX.getGrad();
+        /* Unitary Operations */ {
+            switch (source) {
+                case ExpressionType::Assign:
+                case ExpressionType::Minus:
+                    gradX += grad * ScalarType(source == ExpressionType::Assign ? 1.0 : -1.0);
+                    return;
+                case ExpressionType::Reciprocal:
+                    gradX -= grad * square(value);
+                    return;
+                case ExpressionType::Sqrt:
+                    gradX += grad / value * ScalarType(0.5);
+                    return;
+                case ExpressionType::Cbrt:
+                    gradX += grad / (square(value) * ScalarType(3));
+                    return;
+                case ExpressionType::Abs:
+                    gradX += operandX.getValue().isPositive() ? grad : -grad;
+                    return;
+                case ExpressionType::Relu:
+                    gradX += operandX.getValue().isPositive() ? grad : ScalarType(0);
+                    return;
+                case ExpressionType::Square:
+                    gradX += grad * operandX.getValue() * ScalarType(2);
+                    return;
+                case ExpressionType::Ln:
+                    gradX += grad / operandX.getValue();
+                    return;
+                case ExpressionType::Exp:
+                    gradX += grad * value;
+                    return;
+                case ExpressionType::Sin:
+                    gradX += grad * cos(operandX.getValue());
+                    return;
+                case ExpressionType::Cos:
+                    gradX -= grad * sin(operandX.getValue());
+                    return;
+                case ExpressionType::ArcCos:
+                    gradX -= grad / sqrt(ScalarType(1) - square(operandX.getValue()));
+                    return;
+                default:;
+            }
+        }
+        /* Binary Operations */ {
+            DiffScalar operandY = operands[idFirstOperand + 1];
+            ScalarType& gradY = operandY.getGrad();
+            switch (source) {
+                case ExpressionType::Add:
+                case ExpressionType::Sub:
+                    gradX += grad;
+                    gradY += grad * ScalarType(source == ExpressionType::Add ? 1.0 : -1.0);
+                    return;
+                case ExpressionType::Mul:
+                    gradX += grad * operandY.getValue();
+                    gradY += grad * operandX.getValue();
+                    return;
+                case ExpressionType::Div: {
+                    const ScalarType dx = grad * reciprocal(operandY.getValue());
+                    gradX += dx;
+                    gradY -= dx * value;
+                    return;
+                }
+                default:;
+            }
+        }
+        assert(false && "[Error]: Undefined operator for back propagation");
     }
 
     template<class ScalarType>

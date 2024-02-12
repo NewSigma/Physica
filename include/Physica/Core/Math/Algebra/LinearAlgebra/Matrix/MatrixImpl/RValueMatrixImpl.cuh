@@ -26,11 +26,14 @@
 namespace Physica::Core {
     namespace Internal {
         template<class Derived, class OtherDerived>
-        __global__ void RValueMatrix_assignToKernel(device_obj<RValueMatrix<const Derived>> source, device_obj<LValueMatrix<OtherDerived>> target) {
+        __global__ void RValueMatrix_assignToKernel(
+                Physica::PlainStruct<const device_obj<Derived>> source_, Physica::PlainStruct<device_obj<OtherDerived>> target_) {
             const size_t major = blockIdx.y;
             const size_t minor = blockIdx.x * blockDim.x + threadIdx.x;
+            const auto& source = source_.getDerived();
+            auto& target = target_.getDerived();
             if (minor < source.getMaxMinor())
-                target.refFromMajorMinor(major, minor) = source.calc(target.rowFromMajorMinor(i, j), target.columnFromMajorMinor(i, j));
+                target.refFromMajorMinor(major, minor) = source.calc(target.rowFromMajorMinor(major, minor), target.columnFromMajorMinor(major, minor));
         }
     }
 
@@ -40,12 +43,11 @@ namespace Physica::Core {
         const size_t maxMajor = target.getMaxMajor();
         const size_t maxMinor = target.getMaxMinor();
     #ifndef __CUDA_ARCH__
-        int device;
-        cudaGetDevice(&device);
-        const int maxThreadsPerBlock = Utils::DeviceProp::getInstance().getProperty(device).maxThreadsPerBlock;
-        const size_t numThread = maxMinor > maxThreadsPerBlock ? maxThreadsPerBlock : maxMinor;
-        const size_t numBlockX = (maxMinor + maxThreadsPerBlock) / maxThreadsPerBlock;
-        Internal::RValueMatrix_assignToKernel<<<{numBlockX, maxMajor}, numThread, 0, StreamPool::getStream()>>>(Base::getDerived(), target.getDerived());
+        const unsigned int numThread = maxMinor > MaxThreadPerBlock ? MaxThreadPerBlock : maxMinor;
+        const unsigned int numBlockX = (maxMinor + numThread - 1) / numThread;
+        const unsigned int numBlockY = maxMajor;
+        Internal::RValueMatrix_assignToKernel<Derived, OtherDerived>
+                <<<{numBlockX, numBlockY}, numThread, 0, StreamPool::getStream()>>>(asStruct(Base::getDerived()), asStruct(target.getDerived()));
     #else
         using OtherScalar = typename OtherDerived::ScalarType;
         for (size_t major = 0; major < maxMajor; ++major) {

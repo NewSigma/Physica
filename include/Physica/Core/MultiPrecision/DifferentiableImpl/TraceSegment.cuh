@@ -38,6 +38,7 @@ namespace Physica::Core {
         using OperandArray = Utils::device_obj<Utils::Array<HostDiffScalar>>;
         using DeviceVector = device_obj<VectorType>;
         constexpr static size_t DefaultSize = host_obj::DefaultSize;
+        constexpr static size_t MaxThreadPerBlock = DeviceVector::MaxThreadPerBlock;
     private:
         RecordArray records;
         OperandArray operands;
@@ -56,10 +57,12 @@ namespace Physica::Core {
         [[nodiscard]] __host__ __device__ inline DiffScalar operator[](size_t index);
         [[nodiscard]] __host__ __device__ inline const DiffScalar operator[](size_t index) const;
         /* Operations */
+        void reverse();
         void zero_grad();
         [[nodiscard]] This copy() const;
         void swap(device_obj& __restrict obj) noexcept;
 
+        __device__ void reverseKernelImpl();
         __device__ void copyKernelImpl(This& target) const;
         /* Getters */
         [[nodiscard]] __device__ RecordArray& getRecords() noexcept { return records; }

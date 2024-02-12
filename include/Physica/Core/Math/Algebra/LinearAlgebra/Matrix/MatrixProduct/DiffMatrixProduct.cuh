@@ -77,6 +77,8 @@ namespace Physica::Core {
             const device_obj<Differentiable<Vector<PlainScalar>, DiffMode::Reverse>>& v) {
         using MatrixType = device_obj<Differentiable<DenseMatrix<PlainScalar, Option>, DiffMode::Reverse>>;
         using VectorType = device_obj<Differentiable<Vector<PlainScalar>, DiffMode::Reverse>>;
+        assert(m.getRow() > 0 && "[Error]: This is a empty matrix");
+        assert(m.getColumn() == v.getLength() && "[Error]: Dims do not match");
         MatrixType dots(m.getRow(), m.getColumn(), ExpressionType::Mul);
         VectorType result(m.getRow(), ExpressionType::Sum);
         const size_t numThread = m.getColumn() > VectorType::MaxThreadPerBlock ? VectorType::MaxThreadPerBlock : m.getColumn();

@@ -59,6 +59,12 @@ namespace Physica::Core {
                 static_assert(Type == ExpressionType::Add, "[Error]: Not implemented");
             segment.getGrads()[0] = 0;
         }
+
+        template<class ScalarType>
+        __global__ void __launch_bounds__(1, 1) Differentiable_reverseKernel(
+                Physica::PlainStruct<device_obj<Differentiable<ScalarType, DiffMode::Reverse>>> s) {
+            s.getDerived().setGrad(0);
+        }
     }
 
     template<class ScalarType>
@@ -83,6 +89,18 @@ namespace Physica::Core {
         auto& segment = TracerType::getInstance().pushSegment(1, ExpressionType::Minus);
         Internal::Differentiable_minusKernel<ScalarType><<<1, 1, 0, StreamPool::getStream()>>>(asStruct(segment), asStruct(*this));
         return segment[0];
+    }
+
+    template<class ScalarType>
+    inline void device_obj<Differentiable<ScalarType, DiffMode::Reverse>>::reverse() {
+        Internal::Differentiable_reverseKernel<ScalarType><<<1, 1, 0, StreamPool::getStream()>>>(asStruct(*this));
+        TracerType::getInstance().reverse_from(*this);
+    }
+
+    template<class ScalarType>
+    inline void device_obj<Differentiable<ScalarType, DiffMode::Reverse>>::reverse_to(This to) {
+        Internal::Differentiable_reverseKernel<ScalarType><<<1, 1, 0, StreamPool::getStream()>>>(asStruct(*this));
+        TracerType::getInstance().reverse(*this, to);
     }
 
     template<class ScalarType>

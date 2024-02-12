@@ -20,9 +20,10 @@
 
 #include <mutex>
 #include <condition_variable>
+#include "Physica/Macro.h"
 
 namespace Physica::Core {
-    class StreamFuture {
+    class PHYSICA_API StreamFuture {
         bool isDone;
         std::mutex mutex;
         std::condition_variable cond;

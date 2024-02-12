@@ -116,6 +116,7 @@ namespace Physica::Core {
     public:
         [[nodiscard]] static VectorType calc(const VectorType& v) {
             const size_t length = v.getLength();
+            assert(length > 0 && "[Error]: A empty vector does nothing");
             VectorType result(length, Type);
             const size_t numThread = length > VectorType::MaxThreadPerBlock ? VectorType::MaxThreadPerBlock : length;
             const size_t numBlock = (length + numThread - 1) / numThread;
@@ -132,6 +133,7 @@ namespace Physica::Core {
     public:
         [[nodiscard]] static VectorType calc(const VectorType& v, const ScalarType& s) {
             const size_t length = v.getLength();
+            assert(length > 0 && "[Error]: A empty vector does nothing");
             VectorType result(length, Type);
             const size_t numThread = length > VectorType::MaxThreadPerBlock ? VectorType::MaxThreadPerBlock : length;
             const size_t numBlock = (length + numThread - 1) / numThread;
@@ -147,6 +149,7 @@ namespace Physica::Core {
     public:
         [[nodiscard]] static VectorType calc(const VectorType& v1, const VectorType& v2) {
             const size_t length = v1.getLength();
+            assert(length > 0 && "[Error]: A empty vector does nothing");
             assert(length == v2.getLength() && "[Error]: Vector lengths do not match");
             VectorType result(length, Type);
             const size_t numThread = length > VectorType::MaxThreadPerBlock ? VectorType::MaxThreadPerBlock : length;

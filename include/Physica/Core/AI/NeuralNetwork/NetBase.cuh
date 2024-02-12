@@ -35,9 +35,9 @@ namespace Physica::Core {
         using Base::IsTrainMode;
         using LossType = typename device_obj<Loss<ScalarType>>::LossType;
     private:
-        using NetGuardType = typename std::conditional<IsTrainMode, AutoDiffGuard<device_obj<ScalarType>>, PlainStruct<void>>::type;
+        using DiffGuardType = typename std::conditional<IsTrainMode, AutoDiffGuard<device_obj<ScalarType>>, PlainStruct<void>>::type;
 
-        NetGuardType net_guard;
+        DiffGuardType net_guard;
     public:
         ~device_obj() = default;
         /* Operations */
@@ -71,9 +71,9 @@ namespace Physica::Core {
         auto dist = std::uniform_int_distribution<size_t>(0, dataset.getSize() - 1);
         auto& gen = RandomPoolType::getInstance().getGen();
         for (unsigned int _ = 0; _ < opt.getBatchSize(); ++_) {
-            AutoDiffGuard<ScalarType> guard{};
+            DiffGuardType guard{};
             const size_t index = dist(gen);
-            loss<Dataset>(dataset, index).reverse();
+            loss<Dataset>(dataset, index).reverse_to(guard.getNode());
         }
         opt.step();
         device_obj<DiffTracer<PlainScalar>>::getInstance().zero_grad_to(net_guard.getNode());
