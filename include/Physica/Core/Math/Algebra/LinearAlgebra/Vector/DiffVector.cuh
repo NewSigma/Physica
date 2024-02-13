@@ -83,6 +83,8 @@ namespace Physica::Core {
         [[nodiscard]] __device__ inline const PlainScalar& getValue(size_t index) const;
         [[nodiscard]] __device__ inline PlainScalar& getGrad(size_t index);
         [[nodiscard]] __device__ inline const PlainScalar& getGrad(size_t index) const;
+        [[nodiscard]] const DeviceVector& getValues() const noexcept { return getTraceSegment().getValues(); }
+        [[nodiscard]] const DeviceVector& getGrads() const noexcept { return getTraceSegment().getGrads(); }
         [[nodiscard]] ScalarType max() const;
         [[nodiscard]] ScalarType min() const;
         [[nodiscard]] ScalarType sum() const;

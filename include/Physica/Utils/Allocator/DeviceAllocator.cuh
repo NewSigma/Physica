@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2023 WeiBo He.
+ * Copyright 2021-2024 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -20,6 +20,7 @@
 
 #include <cstdlib>
 #include <memory>
+#include "Physica/Core/Parallel/StreamPool.cuh"
 #include "Physica/Utils/CUDA/DebugUtil.cuh"
 #include "Physica/Utils/CUDA/device_obj.cuh"
 #include "Allocator.h"
@@ -129,12 +130,12 @@ namespace Physica::Utils {
     template<class T>
     __host__ __device__ typename DeviceAllocator<T>::pointer DeviceAllocator<T>::allocate(size_t n) {
     #ifdef __CUDA_ARCH__
-        auto* p = reinterpret_cast<T*>(malloc(n * sizeof(value_type)));
+        auto* p = reinterpret_cast<pointer>(malloc(n * sizeof(value_type)));
     #else
-        value_type* p;
-        cudaCheck(cudaMalloc(&p, n * sizeof(value_type)));
+        pointer p;
+        cudaCheck(cudaMallocAsync(&p, n * sizeof(value_type), Core::StreamPool::getStream()));
     #endif
-        return pointer(p);
+        return p;
     }
 
     template<class T>
@@ -142,7 +143,7 @@ namespace Physica::Utils {
     #ifdef __CUDA_ARCH__
         free(p);
     #else
-        cudaFree(p);
+        cudaFreeAsync(p, Core::StreamPool::getStream());
     #endif
     }
 
@@ -161,6 +162,8 @@ namespace Physica::Utils {
 
     template<class T>
     __host__ __device__ void DeviceAllocator<T>::destroy(pointer p) {
+        if constexpr (std::is_trivial<value_type>::value)
+            return;
     #ifdef __CUDA_ARCH__
         p->~value_type();
     #else

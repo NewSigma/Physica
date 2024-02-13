@@ -30,10 +30,11 @@ namespace Physica::Core {
         using This = DiffTracer<ScalarType>;
     public:
         using SegmentType = TraceSegment<ScalarType>;
+        using TraceListType = std::list<SegmentType>; //TODO: use forward_list instread of list
         using DiffScalar = typename SegmentType::DiffScalar;
         using DiffRecord = typename SegmentType::DiffRecord;
     private:
-        std::list<SegmentType> traceList;
+        TraceListType traceList;
     public:
         ~DiffTracer() = default;
         /* Operations */
@@ -57,7 +58,7 @@ namespace Physica::Core {
         void zero_grad_from(DiffScalar from);
         void zero_grad_to(DiffScalar to);
         void zero_grad();
-        void forget(DiffScalar from);
+        void forget(DiffScalar to);
         void reserve(size_t size);
         inline void clear();
 
@@ -65,7 +66,7 @@ namespace Physica::Core {
         template<class Functor> void forSegmentInRange(DiffScalar from, DiffScalar to, Functor func) const;
         [[nodiscard]] inline bool checkLastOpDone() const;
         /* Getters */
-        [[nodiscard]] const std::list<SegmentType>& getTraceList() const noexcept { return traceList; }
+        [[nodiscard]] const TraceListType& getTraceList() const noexcept { return traceList; }
         [[nodiscard]] size_t getNumRecord() const noexcept;
         [[nodiscard]] ExpressionType getSource(DiffScalar s) const noexcept;
         /* Static members */
@@ -287,16 +288,17 @@ namespace Physica::Core {
     }
 
     template<class ScalarType>
-    void DiffTracer<ScalarType>::forget(DiffScalar from) {
+    void DiffTracer<ScalarType>::forget(DiffScalar to) {
         assert(!traceList.empty() && "[Error]: No record found");
-        const auto end = traceList.end();
-        for (auto ite = traceList.begin(); ite != end; ++ite) {
+        const auto rend = traceList.rend();
+        for (auto ite = traceList.rbegin(); ite != rend; ite = traceList.rbegin()) {
             auto& segment = *ite;
-            if (segment.isFound(from)) {
-                segment.forget(from);
-                traceList.erase(++ite, end);
+            const bool isFound = segment.isFound(to);
+            if (isFound) {
+                segment.forget(to);
                 return;
             }
+            traceList.pop_back();
         }
         assert(false && "[Error]: Cannot find begin record, maybe it is on another thread?");
     }

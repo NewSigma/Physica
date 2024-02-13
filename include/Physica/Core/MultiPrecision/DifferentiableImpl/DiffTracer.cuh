@@ -29,9 +29,10 @@ namespace Physica::Core {
         using This = device_obj<host_obj>;
     public:
         using SegmentType = device_obj<typename host_obj::SegmentType>;
+        using TraceListType = std::list<SegmentType>;
         using DiffScalar = typename SegmentType::DiffScalar;
     private:
-        std::list<SegmentType> traceList;
+        TraceListType traceList;
     public:
         ~device_obj() = default;
         /* Operations */
@@ -45,12 +46,12 @@ namespace Physica::Core {
         inline void zero_grad(DiffScalar from, DiffScalar to);
         void zero_grad_from(DiffScalar from);
         void zero_grad_to(DiffScalar to);
-        void forget(DiffScalar from);
+        void forget(DiffScalar to);
 
         template<class Functor> void forSegmentInRange(DiffScalar from, DiffScalar to, Functor func);
         template<class Functor> void forSegmentInRange(DiffScalar from, DiffScalar to, Functor func) const;
         /* Getters */
-        [[nodiscard]] const std::list<SegmentType>& getTraceList() const noexcept { return traceList; }
+        [[nodiscard]] const TraceListType& getTraceList() const noexcept { return traceList; }
         [[nodiscard]] size_t getNumRecord() const noexcept;
         /* Static members */
         [[nodiscard]] static This& getInstance() noexcept;
@@ -154,16 +155,16 @@ namespace Physica::Core {
     }
 
     template<class ScalarType>
-    void device_obj<DiffTracer<ScalarType>>::forget(DiffScalar from) {
+    void device_obj<DiffTracer<ScalarType>>::forget(DiffScalar to) {
         assert(!traceList.empty() && "[Error]: No record found");
-        const auto end = traceList.end();
-        for (auto ite = traceList.begin(); ite != end; ++ite) {
+        const auto rend = traceList.rend();
+        for (auto ite = traceList.rbegin(); ite != rend; ite = traceList.rbegin()) {
             auto& segment = *ite;
-            if (segment.isFound(from)) {
-                assert(segment.getLength() == 1 && "[Error]: Forget part of a segment is not supported");
-                traceList.erase(ite, end);
+            const bool isFound = segment.isFound(to);
+            assert((!isFound || (segment.getLength() == 1)) && "[Error]: Forget part of a segment is not supported");
+            traceList.pop_back();
+            if (isFound)
                 return;
-            }
         }
         assert(false && "[Error]: Cannot find begin record, maybe it is on another thread?");
     }

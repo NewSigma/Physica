@@ -37,7 +37,7 @@ namespace Physica::Core {
         /* Operations */
         void wait();
         /* Static members */
-        static std::unique_ptr<StreamFuture> makeFuture();
+        [[nodiscard]] static std::unique_ptr<StreamFuture> makeFuture(); //[Warning]: Discard a future may leak exceptions
     private:
         StreamFuture();
         static void taskDoneCallback(void* p_future);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 WeiBo He.
+ * Copyright 2023-2024 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -26,13 +26,16 @@ namespace Physica::Core {
     }
 
     StreamFuture::~StreamFuture() {
-        if (!isDone)
-            wait();
+        if (!isDone) {
+            std::unique_lock locker(mutex);
+            cond.wait(locker, [=]() { return isDone; });
+        }
     }
 
     void StreamFuture::wait() {
         std::unique_lock locker(mutex);
         cond.wait(locker, [=]() { return isDone; });
+        cudaCheck(cudaGetLastError());
     }
 
     std::unique_ptr<StreamFuture> StreamFuture::makeFuture() {

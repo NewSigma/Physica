@@ -64,7 +64,7 @@ namespace Physica::Core {
         inline void zero_grad_from(DiffScalar from);
         inline void zero_grad_to(DiffScalar to);
         inline void zero_grad() { grads = ScalarType(0); }
-        void forget(DiffScalar from);
+        void forget(DiffScalar to);
         void squeeze();
 
         template<class Functor> inline void forNodeInRange(DiffScalar from, DiffScalar to, Functor func);
@@ -158,9 +158,9 @@ namespace Physica::Core {
     }
 
     template<class ScalarType>
-    void TraceSegment<ScalarType>::forget(DiffScalar from) {
-        assert(isFound(from) && "[Error]: forgeting a non existent, this may be a bug");
-        const size_t index = find(from);
+    void TraceSegment<ScalarType>::forget(DiffScalar to) {
+        assert(isFound(to) && "[Error]: forgeting a non existent, this may be a bug");
+        const size_t index = find(to);
         const auto& record = records[index];
         if (record.source == ExpressionType::Set) {
             size_t idLastOperand = 0;
