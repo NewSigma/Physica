@@ -48,8 +48,8 @@ namespace Physica::Core {
         auto& tracer = TracerType::getInstance();
         tracer.forSegmentInRange(from, to, [this](SegmentType& segment) {
             const size_t length = segment.getLength();
-            const size_t numThread = length <= MaxNumThreadPerBlock ? length : MaxNumThreadPerBlock;
-            const size_t numBlock = (length + MaxNumThreadPerBlock - 1) / MaxNumThreadPerBlock;
+            const size_t numThread = length < MaxNumThreadPerBlock ? length : MaxNumThreadPerBlock;
+            const size_t numBlock = (length + numThread - 1) / numThread;
             Internal::SGD_stepKernel<This, SegmentType><<<numThread, numBlock, 0, StreamPool::getStream()>>>(asStruct(*this), asStruct(segment));
         });
     }

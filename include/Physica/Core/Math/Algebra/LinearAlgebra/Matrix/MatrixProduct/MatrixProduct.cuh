@@ -42,25 +42,23 @@ namespace Physica::Core {
     public:
         using typename Base::ScalarType;
     private:
-        const device_obj<VectorType>& vec;
-        const device_obj<MatrixType>& mat;
+        Physica::PlainStruct<const device_obj<VectorType>> vec;
+        Physica::PlainStruct<const device_obj<MatrixType>> mat;
     public:
         __host__ __device__ device_obj(const device_obj<RValueVector<VectorType>>& vec_, const device_obj<RValueMatrix<MatrixType>>& mat_)
-                : vec(vec_.getDerived()), mat(mat_.getDerived()) {
-            assert(mat.getRow() == 1);
+                : vec(asStruct(vec_.getDerived())), mat(asStruct(mat_.getDerived())) {
+            assert(mat.getDerived().getRow() == 1);
         }
         /* Getters */
         [[nodiscard]] __device__ ScalarType calc(size_t row, size_t column) const;
-        [[nodiscard]] __host__ __device__ size_t getRow() const { return vec.getLength(); }
-        [[nodiscard]] __host__ __device__ size_t getColumn() const { return mat.getColumn(); }
-        [[nodiscard]] const VectorType& getLHS() const noexcept { return vec; }
-        [[nodiscard]] const MatrixType& getRHS() const noexcept { return mat; }
+        [[nodiscard]] __host__ __device__ size_t getRow() const { return vec.getDerived().getLength(); }
+        [[nodiscard]] __host__ __device__ size_t getColumn() const { return mat.getDerived().getColumn(); }
     };
 
     template<class VectorType, class MatrixType>
     __device__ typename device_obj<VectorMatrixProduct<VectorType, MatrixType>>::ScalarType
     device_obj<VectorMatrixProduct<VectorType, MatrixType>>::calc(size_t row, size_t column) const {
-        return vec.calc(row) * mat.calc(0, column);
+        return vec.getDerived().calc(row) * mat.getDerived().calc(0, column);
     }
 
     template<class MatrixType, class VectorType>
@@ -76,34 +74,22 @@ namespace Physica::Core {
         using typename Base::ScalarType;
     private:
         using This = device_obj<host_obj>;
-        const device_obj<MatrixType>& mat;
-        const device_obj<VectorType>& vec;
+        Physica::PlainStruct<const device_obj<MatrixType>> mat;
+        Physica::PlainStruct<const device_obj<VectorType>> vec;
     public:
         __host__ __device__ device_obj(const device_obj<RValueMatrix<MatrixType>>& mat_, const device_obj<RValueVector<VectorType>>& vec_)
-                : mat(mat_.getDerived()), vec(vec_.getDerived()) {
-            assert(mat.getColumn() == vec.getLength());
+                : mat(asStruct(mat_.getDerived())), vec(asStruct(vec_.getDerived())) {
+            assert(mat.getDerived().getColumn() == vec.getDerived().getLength());
         }
-        /* Operations */
-        template<class OtherDerived>
-        __host__ __device__ inline void assignTo(device_obj<LValueVector<OtherDerived>>& target) const;
         /* Getters */
         [[nodiscard]] __device__ inline ScalarType calc(size_t index) const;
-        [[nodiscard]] __host__ __device__ size_t getLength() const { return mat.getRow(); }
-        [[nodiscard]] __host__ __device__ const MatrixType& getLHS() const noexcept { return mat; }
-        [[nodiscard]] __host__ __device__ const VectorType& getRHS() const noexcept { return vec; }
+        [[nodiscard]] __host__ __device__ size_t getLength() const { return mat.getDerived().getRow(); }
     };
-
-    template<class MatrixType, class VectorType>
-    template<class OtherDerived>
-    __host__ __device__ inline void device_obj<MatrixVectorProduct<MatrixType, VectorType>>::assignTo(device_obj<LValueVector<OtherDerived>>& target) const {
-        for (size_t i = 0; i < getLength(); ++i)
-            target[i] = calc(i);
-    }
 
     template<class MatrixType, class VectorType>
     __device__ inline typename device_obj<MatrixVectorProduct<MatrixType, VectorType>>::ScalarType
     device_obj<MatrixVectorProduct<MatrixType, VectorType>>::calc(size_t index) const {
-        return mat.row(index) * vec;
+        return mat.getDerived().row(index) * vec.getDerived();
     }
 
     template<class VectorType, class MatrixType>

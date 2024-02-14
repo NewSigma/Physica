@@ -104,6 +104,22 @@ namespace Physica::Core {
     }
 
     template<class ScalarType>
+    ScalarType device_obj<Differentiable<ScalarType, DiffMode::Reverse>>::toHost_value() const {
+        ScalarType result;
+        toHostAsync_value(result);
+        StreamPool::getStream().wait();
+        return result;
+    }
+
+    template<class ScalarType>
+    ScalarType device_obj<Differentiable<ScalarType, DiffMode::Reverse>>::toHost_grad() const {
+        ScalarType result;
+        toHostAsync_grad(result);
+        StreamPool::getStream().wait();
+        return result;
+    }
+
+    template<class ScalarType>
     void device_obj<Differentiable<ScalarType, DiffMode::Reverse>>::toHostAsync_value(ScalarType& value) const {
         cudaCheck(cudaMemcpyAsync(&value, pValue, sizeof(ScalarType), cudaMemcpyKind::cudaMemcpyDeviceToHost, StreamPool::getStream()));
     }

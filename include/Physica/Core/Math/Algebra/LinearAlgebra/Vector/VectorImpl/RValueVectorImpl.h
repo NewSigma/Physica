@@ -99,7 +99,7 @@ namespace Physica::Core {
         constexpr size_t OtherSize = Internal::Traits<OtherDerived>::SizeAtCompile;
         static_assert(SizeAtCompile == Dynamic || OtherSize == Dynamic || SizeAtCompile == OtherSize,
                 "[Error]: Size mismatch between two vector");
-        assert(v.getLength() == getLength());
+        assert(v.getLength() == getLength() && "[Error]: Size mismatch between two vector");
         Internal::AssignImpl<Derived, OtherDerived, Internal::EnableSIMD<Derived, OtherDerived>::value, Executor>::run(*this, v);
     }
 

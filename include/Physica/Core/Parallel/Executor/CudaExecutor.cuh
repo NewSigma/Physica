@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 WeiBo He.
+ * Copyright 2023-2024 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -19,6 +19,7 @@
 #pragma once
 
 #include "Physica/Core/Parallel/StreamPool.cuh"
+#include "Physica/Utils/CUDA/DebugUtil.cuh"
 #include "SequentialExecutor.h"
 
 namespace Physica::Core {

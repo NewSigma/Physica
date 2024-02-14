@@ -47,8 +47,7 @@ namespace Physica::Core {
         Pow,
         Sin,
         Cos,
-        ArcCos,
-        Softmax
+        ArcCos
     };
 
     constexpr const char* expressionTypeToStr(ExpressionType type) {
@@ -78,7 +77,6 @@ namespace Physica::Core {
             case ExpressionType::Sin: return "Sin";
             case ExpressionType::Cos: return "Cos";
             case ExpressionType::ArcCos: return "ArcCos";
-            case ExpressionType::Softmax: return "Softmax";
             default: [[unlikely]]
                 return "Unknown";
         }

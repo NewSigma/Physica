@@ -28,12 +28,17 @@ namespace Physica::Core {
         template<class Derived, class OtherDerived>
         __global__ void RValueMatrix_assignToKernel(
                 Physica::PlainStruct<const device_obj<Derived>> source_, Physica::PlainStruct<device_obj<OtherDerived>> target_) {
-            const size_t major = blockIdx.y;
-            const size_t minor = blockIdx.x * blockDim.x + threadIdx.x;
+            using ScalarType = typename device_obj<OtherDerived>::ScalarType;
             const auto& source = source_.getDerived();
             auto& target = target_.getDerived();
-            if (minor < source.getMaxMinor())
-                target.refFromMajorMinor(major, minor) = source.calc(target.rowFromMajorMinor(major, minor), target.columnFromMajorMinor(major, minor));
+            const size_t maxMinor = source.getMaxMinor();
+            const size_t major = blockIdx.y;
+            const size_t minor = blockIdx.x * blockDim.x + threadIdx.x;
+            if (minor < maxMinor) {
+                const size_t row = target.rowFromMajorMinor(major, minor);
+                const size_t column = target.columnFromMajorMinor(major, minor);
+                target.refFromMajorMinor(major, minor) = ScalarType(source.calc(row, column));
+            }
         }
     }
 
@@ -42,12 +47,12 @@ namespace Physica::Core {
     __host__ __device__ void device_obj<RValueMatrix<Derived>>::assignTo(device_obj<LValueMatrix<OtherDerived>>& target) const {
         const size_t maxMajor = target.getMaxMajor();
         const size_t maxMinor = target.getMaxMinor();
+        [[maybe_unused]] const auto kernel = Internal::RValueMatrix_assignToKernel<Derived, OtherDerived>;
     #ifndef __CUDA_ARCH__
-        const unsigned int numThread = maxMinor > MaxThreadPerBlock ? MaxThreadPerBlock : maxMinor;
+        const unsigned int numThread = std::min(maxMinor, MaxThreadPerBlock);
         const unsigned int numBlockX = (maxMinor + numThread - 1) / numThread;
         const unsigned int numBlockY = maxMajor;
-        Internal::RValueMatrix_assignToKernel<Derived, OtherDerived>
-                <<<{numBlockX, numBlockY}, numThread, 0, StreamPool::getStream()>>>(asStruct(Base::getDerived()), asStruct(target.getDerived()));
+        kernel<<<{numBlockX, numBlockY}, numThread, 0, StreamPool::getStream()>>>(asStruct(Base::getDerived()), asStruct(target.getDerived()));
     #else
         using OtherScalar = typename OtherDerived::ScalarType;
         for (size_t major = 0; major < maxMajor; ++major) {

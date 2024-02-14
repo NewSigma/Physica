@@ -258,28 +258,6 @@ namespace Physica::Core {
             return v.getDerived().getLength();
         }
     };
-
-    template<class VectorType>
-    class device_obj<VectorExpression<ExpressionType::Softmax, VectorType>>
-            : public device_obj<RValueVector<VectorExpression<ExpressionType::Softmax, VectorType>>> {
-    public:
-        using host_obj = RValueVector<VectorExpression<ExpressionType::Softmax, VectorType>>;
-        using Base = device_obj<host_obj>;
-        using DeviceVector = device_obj<VectorType>;
-        using typename Base::ScalarType;
-    private:
-        const DeviceVector& v;
-        ScalarType factor;
-        ScalarType maximum;
-    public:
-        device_obj(const device_obj<RValueVector<VectorType>>& v_) : v(v_.getDerived()) {
-            maximum = v.max();
-            factor = reciprocal(exp(v - maximum).sum());
-        }
-
-        [[nodiscard]] ScalarType calc(size_t i) const { return exp(v.calc(i) - maximum) * factor; }
-        [[nodiscard]] __host__ __device__ size_t getLength() const { return v.getLength(); }
-    };
     //////////////////////////////////////Operators//////////////////////////////////////
     //////////////////////////////////////Add//////////////////////////////////////
     template<class Derived, class OtherDerived>
@@ -337,10 +315,5 @@ namespace Physica::Core {
     template<class VectorType>
     inline auto exp(const device_obj<RValueVector<VectorType>>& v) {
         return device_obj<VectorExpression<ExpressionType::Exp, VectorType>>(v);
-    }
-
-    template<class VectorType>
-    inline auto softmax(const device_obj<RValueVector<VectorType>>& v) {
-        return device_obj<VectorExpression<ExpressionType::Softmax, VectorType>>(v);
     }
 }

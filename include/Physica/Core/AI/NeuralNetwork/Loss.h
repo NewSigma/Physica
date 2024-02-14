@@ -31,15 +31,23 @@ namespace Physica::Core {
     private:
         using VectorType = Vector<ScalarType>;
     public:
-        [[nodiscard]] static ScalarType crossEntropy(const VectorType& result, size_t label);
+        [[nodiscard]] static ScalarType softmax(const VectorType& v, size_t label);
+        [[nodiscard]] static ScalarType crossEntropy(const VectorType& v, size_t label);
         [[nodiscard]] static ScalarType polar_rate(ScalarType train_loss, ScalarType valid_loss);
         [[nodiscard]] static ScalarType mixed_loss(ScalarType train_loss, ScalarType valid_loss);
     };
 
     template<class ScalarType>
-    ScalarType Loss<ScalarType>::crossEntropy(const VectorType& result, size_t label) {
-        assert(label < result.getLength() && "[Error]: The label is not exist");
-        return -ln(softmax(result).calc(label) + ScalarType(std::numeric_limits<PlainScalar>::min())); //Add minimum to avoid ln(0)
+    ScalarType Loss<ScalarType>::softmax(const VectorType& v, size_t label) {
+        const ScalarType maximum = v.max();
+        const ScalarType factor = reciprocal(exp(v - maximum).sum());
+        return exp(v.calc(label) - maximum) * factor;
+    }
+
+    template<class ScalarType>
+    ScalarType Loss<ScalarType>::crossEntropy(const VectorType& v, size_t label) {
+        assert(label < v.getLength() && "[Error]: The label is not exist");
+        return -ln(softmax(v, label) + ScalarType(std::numeric_limits<PlainScalar>::min())); //Add minimum to avoid ln(0)
     }
     /**
      * \returns polarization rate, the lower the better, minus value means overfitting

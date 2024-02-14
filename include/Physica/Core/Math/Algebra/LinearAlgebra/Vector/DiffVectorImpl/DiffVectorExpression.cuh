@@ -64,8 +64,8 @@ namespace Physica::Core {
             if (index >= length)
                 return;
             result.getRecord(index) = DiffRecord{index * 2, Type};
-            result.getOperands()[index] = v.calc(index * 2);
-            result.getOperands()[index + 1] = s;
+            result.getOperands()[index * 2] = v.calc(index);
+            result.getOperands()[index * 2 + 1] = s;
             if constexpr (Type == ExpressionType::Add)
                 result.getValue(index) = v.getValue(index) + s.getValue();
             else if constexpr (Type == ExpressionType::Sub)
@@ -118,7 +118,7 @@ namespace Physica::Core {
             const size_t length = v.getLength();
             assert(length > 0 && "[Error]: A empty vector does nothing");
             VectorType result(length, Type);
-            const size_t numThread = length > VectorType::MaxThreadPerBlock ? VectorType::MaxThreadPerBlock : length;
+            const size_t numThread = std::min(length, VectorType::MaxThreadPerBlock);
             const size_t numBlock = (length + numThread - 1) / numThread;
             Internal::DiffVectorExpression_unitaryOpKernel<Type, VectorType>
                     <<<numBlock, numThread, 0, StreamPool::getStream()>>>(asStruct(result), asStruct(v));
@@ -135,7 +135,7 @@ namespace Physica::Core {
             const size_t length = v.getLength();
             assert(length > 0 && "[Error]: A empty vector does nothing");
             VectorType result(length, Type);
-            const size_t numThread = length > VectorType::MaxThreadPerBlock ? VectorType::MaxThreadPerBlock : length;
+            const size_t numThread = std::min(length, VectorType::MaxThreadPerBlock);
             const size_t numBlock = (length + numThread - 1) / numThread;
             Internal::DiffVectorExpression_binaryOpKernel<Type, VectorType>
                     <<<numBlock, numThread, 0, StreamPool::getStream()>>>(asStruct(result), asStruct(v), asStruct(s));
@@ -152,7 +152,7 @@ namespace Physica::Core {
             assert(length > 0 && "[Error]: A empty vector does nothing");
             assert(length == v2.getLength() && "[Error]: Vector lengths do not match");
             VectorType result(length, Type);
-            const size_t numThread = length > VectorType::MaxThreadPerBlock ? VectorType::MaxThreadPerBlock : length;
+            const size_t numThread = std::min(length, VectorType::MaxThreadPerBlock);
             const size_t numBlock = (length + numThread - 1) / numThread;
             Internal::DiffVectorExpression_binaryOpKernel<Type, VectorType>
                     <<<numBlock, numThread, 0, StreamPool::getStream()>>>(asStruct(result), asStruct(v1), asStruct(v2));
@@ -241,13 +241,5 @@ namespace Physica::Core {
     template<class PlainScalar>
     auto exp(const device_obj<Differentiable<Vector<PlainScalar>, DiffMode::Reverse>>& v) {
         return DiffVectorExpressionUnitary<ExpressionType::Exp, Vector<PlainScalar>>::calc(v);
-    }
-
-    template<class PlainScalar>
-    auto softmax(const device_obj<Differentiable<Vector<PlainScalar>, DiffMode::Reverse>>& v) {
-        using VectorType = device_obj<Differentiable<Vector<PlainScalar>, DiffMode::Reverse>>;
-        const auto maximum = v.max();
-        const auto temp = exp(v - maximum);
-        return temp / temp.sum();
     }
 }

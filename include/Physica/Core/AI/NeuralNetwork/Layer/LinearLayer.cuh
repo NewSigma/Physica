@@ -166,7 +166,7 @@ namespace Physica::Core {
     device_obj<LinearLayer<ScalarType, WithBias>> device_obj<LinearLayer<ScalarType, WithBias>>::random_normal(
             size_t inputDim, size_t outputDim, RandomGenerator& gen) {
         This result{};
-        result.weights = DeviceMatrix::random_normal(inputDim, outputDim, gen);
+        result.weights = DeviceMatrix::random_normal(outputDim, inputDim, gen);
         if constexpr (WithBias)
             result.bias = BiasType::random_normal(outputDim, gen);
         return result;
@@ -179,7 +179,7 @@ namespace Physica::Core {
         This result{};
         const auto factor = (gain * sqrt(PlainScalar(6) / PlainScalar(inputDim + outputDim))).getTrivial();
         std::uniform_real_distribution<TrivialType> dist(-factor, factor);
-        result.weights = DeviceMatrix::random_any(inputDim, outputDim, dist, gen);
+        result.weights = DeviceMatrix::random_any(outputDim, inputDim, dist, gen);
         if constexpr (WithBias)
             result.bias = BiasType::random_any(outputDim, dist, gen);
         return result;
@@ -192,7 +192,7 @@ namespace Physica::Core {
         This result{};
         const auto deviation = (gain * sqrt(PlainScalar(2) / PlainScalar(inputDim + outputDim))).getTrivial();
         std::normal_distribution<TrivialType> dist(0, deviation);
-        result.weights = DeviceMatrix::random_any(inputDim, outputDim, dist, gen);
+        result.weights = DeviceMatrix::random_any(outputDim, inputDim, dist, gen);
         if constexpr (WithBias)
             result.bias = BiasType::random_any(outputDim, dist, gen);
         return result;

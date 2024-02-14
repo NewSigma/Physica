@@ -48,6 +48,7 @@ class MnistNet : public Physica::Core::device_obj<NetBase<MnistNet<ScalarType>>>
     using typename Base::InputType;
     using typename Base::OutputType;
     using typename Base::LossType;
+    using Base::IsTrainMode;
 public:
     using device_obj_type = This;
 private:
@@ -75,7 +76,12 @@ public:
 
     template<class Dataset>
     [[nodiscard]] LossType loss(const Dataset& dataset, size_t index) const {
-        return device_obj<Loss<ScalarType>>::crossEntropy(forward(dataset.getSamples()[index]), dataset.getLabels()[index]);
+        OutputType output;
+        if constexpr (IsTrainMode)
+            output = forward(dataset.getSamples()[index]);
+        else
+            output = forward(dataset.getSamples()[index].getValues());
+        return device_obj<Loss<ScalarType>>::crossEntropy(output, dataset.getLabels()[index]);
     }
 
     template<class Dataset>
@@ -116,7 +122,7 @@ using Dataset = typename Mnist::DatasetType<DeviceVector>;
 using Optimizer = SGD<device_obj<ScalarType>>;
 using RandomGenerator = std::mt19937;
 using RandomPoolType = RandomPool<RandomGenerator>;
-constexpr size_t numEpoch = 50;
+constexpr size_t numEpoch = 10;
 constexpr size_t batchSize = 64;
 constexpr double learnRate = 0.05;
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2023 WeiBo He.
+ * Copyright 2022-2024 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -25,21 +25,19 @@ namespace Physica::Core {
     namespace Internal {
         template<class Derived, class OtherDerived>
         __global__ void RValueVector_assignToKernel(
-                Physica::PlainStruct<const Derived> source,
-                Physica::PlainStruct<OtherDerived> target) {
+                Physica::PlainStruct<const Derived> source_,
+                Physica::PlainStruct<OtherDerived> target_) {
             static_assert(is_vector<Derived>::value, "[Error]: Invalid source vector type");
             static_assert(is_vector<OtherDerived>::value, "[Error]: Invalid target vector type");
             using namespace Physica::Core;
             using ScalarType = typename OtherDerived::ScalarType;
 
-            const unsigned int delta = gridDim.x * blockDim.x;
-            const unsigned int id = blockIdx.x * blockDim.x + threadIdx.x;
-            const size_t length = source.getDerived().getLength();
-            for (unsigned int shift = 0; shift < length; shift += delta) {
-                const unsigned int index = id + shift;
-                if (index < length)
-                    target.getDerived()[index] = ScalarType(source.getDerived().calc(index));
-            }
+            const auto& source = source_.getDerived();
+            auto& target = target_.getDerived();
+            const size_t length = source.getLength();
+            const unsigned int index = blockIdx.x * blockDim.x + threadIdx.x;
+            if (index < length)
+                target[index] = ScalarType(source.calc(index));
         }
     }
 
@@ -50,13 +48,14 @@ namespace Physica::Core {
         constexpr size_t OtherSize = Internal::Traits<OtherDerived>::SizeAtCompile;
         static_assert(SizeAtCompile == Dynamic || OtherSize == Dynamic || SizeAtCompile == OtherSize,
                 "[Error]: Size mismatch between two vector");
-        [[maybe_unused]] const auto _ = Internal::RValueVector_assignToKernel<device_obj<Derived>, device_obj<OtherDerived>>;
+        assert(target.getLength() == getLength() && "[Error]: Size mismatch between two vector");
+        [[maybe_unused]] const auto kernel = Internal::RValueVector_assignToKernel<device_obj<Derived>, device_obj<OtherDerived>>;
     #ifndef  __CUDA_ARCH__
         using namespace Physica;
-        constexpr unsigned int WarpSize = Utils::DeviceProp::WarpSize;
-        const int numBlock = (getLength() + WarpSize - 1) / WarpSize;
-        const int numThread = WarpSize;
-        Internal::RValueVector_assignToKernel<<<numBlock, numThread, 0, StreamPool::getStream()>>>(asStruct(Base::getDerived()), asStruct(target.getDerived()));
+        const size_t length = getLength();
+        const unsigned int numThread = std::min(length, MaxThreadPerBlock);
+        const unsigned int numBlock = (length + numThread - 1) / numThread;
+        kernel<<<numBlock, numThread, 0, StreamPool::getStream()>>>(asStruct(Base::getDerived()), asStruct(target.getDerived()));
     #else
         assignToImpl(target.getDerived());
     #endif

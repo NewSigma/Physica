@@ -36,10 +36,10 @@ namespace Physica::Core {
         __host__ __device__ device_obj<Derived>& operator=(const device_obj<RValueVector<OtherDerived>>& v);
         template<class AnyScalar>
         inline device_obj<Derived>& operator=(const ScalarBase<AnyScalar>& s);
-        [[nodiscard]] __device__ ScalarType& operator[](size_t index) { return Base::getDerived()[index]; }
-        [[nodiscard]] __device__ const ScalarType& operator[](size_t index) const { return Base::getDerived()[index]; }
+        [[nodiscard]] __device__ ScalarType& operator[](size_t index) { return *data_ptr(index); }
+        [[nodiscard]] __device__ const ScalarType& operator[](size_t index) const { return *data_ptr(index); }
         /* Operations */
-        [[nodiscard]] __device__ ScalarType calc(size_t index) const { return (*this)[index]; }
+        [[nodiscard]] __device__ ScalarType calc(size_t index) const { return *data_ptr(index); }
         /* Getters */
         [[nodiscard]] __host__ __device__ inline ScalarType* data_ptr(size_t index);
         [[nodiscard]] __host__ __device__ inline const ScalarType* data_ptr(size_t index) const;

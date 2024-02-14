@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2023 WeiBo He.
+ * Copyright 2022-2024 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -40,7 +40,7 @@ namespace Physica::Core {
         device_obj() = default;
         using Storage::Storage;
         template<class Derived>
-        __device__ device_obj(const device_obj<RValueVector<Derived>>& v);
+        device_obj(const device_obj<RValueVector<Derived>>& v);
         device_obj(const device_obj&) = default;
         device_obj(device_obj&&) noexcept = default;
         ~device_obj() = default;
@@ -63,7 +63,7 @@ namespace Physica::Core {
 
     template<class T, size_t Length, size_t MaxLength>
     template<class Derived>
-    __device__ device_obj<Vector<T, Length, MaxLength>>::device_obj(const device_obj<RValueVector<Derived>>& v) : Storage(v.getLength()) {
+    device_obj<Vector<T, Length, MaxLength>>::device_obj(const device_obj<RValueVector<Derived>>& v) : Storage(v.getLength()) {
         v.getDerived().assignTo(*this);
     }
 

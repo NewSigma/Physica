@@ -24,6 +24,7 @@ namespace Physica::Core {
     template<class ScalarType>
     class device_obj<Loss<ScalarType>> {
         static_assert(!Utils::is_device_obj<ScalarType>::value, "[Error]: Nested device_obj<> is not allowed");
+        using host_obj = Loss<ScalarType>;
     public:
         constexpr static bool IsTrainMode = ScalarType::isDifferentiable;
         using PlainScalar = typename ScalarType::PlainScalar;
@@ -32,13 +33,26 @@ namespace Physica::Core {
         using PlainVector = Vector<PlainScalar>;
         using VectorType = device_obj<typename std::conditional<IsTrainMode, Differentiable<PlainVector, DiffMode::Reverse>, PlainVector>::type>;
     public:
-        [[nodiscard]] static LossType crossEntropy(const VectorType& result, size_t label);
+        [[nodiscard]] static LossType softmax(const VectorType& v, size_t label);
+        [[nodiscard]] static LossType crossEntropy(const VectorType& v, size_t label);
     };
 
     template<class ScalarType>
     typename device_obj<Loss<ScalarType>>::LossType
-    device_obj<Loss<ScalarType>>::crossEntropy(const VectorType& result, size_t label) {
-        assert(label < result.getLength() && "[Error]: The label is not exist");
-        return -ln(softmax(result).calc(label) + LossType(std::numeric_limits<PlainScalar>::min())); //Add minimum to avoid ln(0)
+    device_obj<Loss<ScalarType>>::softmax(const VectorType& v, size_t label) {
+        if constexpr (IsTrainMode) {
+            const auto maximum = v.max();
+            const auto temp = exp(v - maximum);
+            return temp.calc(label) / temp.sum();
+        }
+        else
+            return host_obj::softmax(v.toHost(), label);
+    }
+
+    template<class ScalarType>
+    typename device_obj<Loss<ScalarType>>::LossType
+    device_obj<Loss<ScalarType>>::crossEntropy(const VectorType& v, size_t label) {
+        assert(label < v.getLength() && "[Error]: The label is not exist");
+        return -ln(softmax(v, label) + LossType(std::numeric_limits<PlainScalar>::min())); //Add minimum to avoid ln(0)
     }
 }

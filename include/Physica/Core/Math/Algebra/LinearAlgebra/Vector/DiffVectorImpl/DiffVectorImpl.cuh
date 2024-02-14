@@ -96,7 +96,7 @@ namespace Physica::Core {
         }
         buffer[index] = value;
 
-        int i0 = length;
+        int i0 = blockDim.x;
         int i = (i0 + 1) / 2;
         while (index + i < i0) {
             __syncthreads();
@@ -132,7 +132,7 @@ namespace Physica::Core {
             threadSum += calc(i).getValue();
         buffer[index] = threadSum;
 
-        int i0 = length;
+        int i0 = blockDim.x;
         int i = (i0 + 1) / 2;
         while (index + i < i0) {
             __syncthreads();

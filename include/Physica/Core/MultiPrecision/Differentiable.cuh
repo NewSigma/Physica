@@ -70,6 +70,8 @@ namespace Physica::Core {
         /* Operations */
         void reverse();
         void reverse_to(This to);
+        [[nodiscard]] ScalarType toHost_value() const;
+        [[nodiscard]] ScalarType toHost_grad() const;
         void toHostAsync_value(ScalarType& value) const;
         void toHostAsync_grad(ScalarType& grad) const;
         __host__ __device__ inline void swap(device_obj& __restrict obj) noexcept;

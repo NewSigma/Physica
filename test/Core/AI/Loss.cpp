@@ -35,9 +35,11 @@ void testSelectProperty() {
 
 void testOverFlow() {
     const Vector<ScalarType> result{555.321167, 364.9577942, 355.3863831, -594.8062134};
-    const ScalarType s = softmax(result).sum();
-    if (!std::isfinite(double(s)))
-        exit(EXIT_FAILURE);
+    for (size_t i = 0; i < result.getLength(); ++i) {
+        const ScalarType s = Loss<ScalarType>::softmax(result, i);
+        if (!std::isfinite(double(s)))
+            exit(EXIT_FAILURE);
+    }
 }
 
 int main() {

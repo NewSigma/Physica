@@ -556,26 +556,6 @@ namespace Physica::Core {
         [[nodiscard]] ScalarType calc(size_t i) const { return relu(v.calc(i)); }
         [[nodiscard]] __host__ __device__ size_t getLength() const { return v.getLength(); }
     };
-
-    template<class VectorType>
-    class VectorExpression<ExpressionType::Softmax, VectorType>
-            : public RValueVector<VectorExpression<ExpressionType::Softmax, VectorType>> {
-        using Base = RValueVector<VectorExpression<ExpressionType::Softmax, VectorType>>;
-    public:
-        using typename Base::ScalarType;
-    private:
-        const VectorType& v;
-        ScalarType factor;
-        ScalarType maximum;
-    public:
-        VectorExpression(const RValueVector<VectorType>& v_) : v(v_.getDerived()) {
-            maximum = v.max();
-            factor = reciprocal(exp(v - maximum).sum());
-        }
-
-        [[nodiscard]] ScalarType calc(size_t i) const { return exp(v.calc(i) - maximum) * factor; }
-        [[nodiscard]] __host__ __device__ size_t getLength() const { return v.getLength(); }
-    };
     //////////////////////////////////////Operators//////////////////////////////////////
     //////////////////////////////////////Minus//////////////////////////////////////
     template<class Derived>
@@ -731,11 +711,5 @@ namespace Physica::Core {
     inline VectorExpression<ExpressionType::Cos, VectorType> cos(
             const RValueVector<VectorType>& v) {
         return VectorExpression<ExpressionType::Cos, VectorType>(v);
-    }
-
-    template<class VectorType>
-    inline VectorExpression<ExpressionType::Softmax, VectorType> softmax(
-            const RValueVector<VectorType>& v) {
-        return VectorExpression<ExpressionType::Softmax, VectorType>(v);
     }
 }

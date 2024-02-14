@@ -50,7 +50,7 @@ namespace Physica::Core {
             }
             buffer[index] = threadSum;
 
-            int i0 = column;
+            int i0 = blockDim.x;
             int i = (i0 + 1) / 2;
             while (index + i < i0) {
                 __syncthreads();
@@ -81,7 +81,7 @@ namespace Physica::Core {
         assert(m.getColumn() == v.getLength() && "[Error]: Dims do not match");
         MatrixType dots(m.getRow(), m.getColumn(), ExpressionType::Mul);
         VectorType result(m.getRow(), ExpressionType::Sum);
-        const size_t numThread = m.getColumn() > VectorType::MaxThreadPerBlock ? VectorType::MaxThreadPerBlock : m.getColumn();
+        const size_t numThread = std::min(m.getColumn(), VectorType::MaxThreadPerBlock);
         Internal::DiffMatrixProduct_gemvKernel<MatrixType, VectorType>
                 <<<m.getRow(), numThread, numThread * sizeof(PlainScalar), StreamPool::getStream()>>>(asStruct(m), asStruct(v), asStruct(dots), asStruct(result));
         return result;
