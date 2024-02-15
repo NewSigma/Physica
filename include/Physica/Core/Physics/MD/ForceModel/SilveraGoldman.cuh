@@ -57,6 +57,7 @@ namespace Physica::Core {
         using typename Base::MDCellType;
     public:
         device_obj(size_t numParticle, ScalarType cutoff_);
+        device_obj(const host_obj& obj, size_t numParticle);
         device_obj(const device_obj&) = default;
         device_obj(device_obj&&) noexcept = default;
         ~device_obj() = default;
@@ -71,6 +72,10 @@ namespace Physica::Core {
     template<class ScalarType, bool IsPeriodBoundary, bool IsSmallCell>
     device_obj<SilveraGoldman<ScalarType, IsPeriodBoundary, IsSmallCell>>::device_obj(size_t numParticle, ScalarType cutoff_)
             : Base(numParticle, cutoff_) {}
+
+    template<class ScalarType, bool IsPeriodBoundary, bool IsSmallCell>
+    device_obj<SilveraGoldman<ScalarType, IsPeriodBoundary, IsSmallCell>>::device_obj(const host_obj& obj, size_t numParticle)
+            : device_obj(numParticle, obj.getCutoff()) {}
 
     template<class ScalarType, bool IsPeriodBoundary, bool IsSmallCell>
     void device_obj<SilveraGoldman<ScalarType, IsPeriodBoundary, IsSmallCell>>::swap(device_obj& __restrict obj) noexcept {
