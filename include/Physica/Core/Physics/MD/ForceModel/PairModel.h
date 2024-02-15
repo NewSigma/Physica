@@ -31,6 +31,7 @@ namespace Physica::Core {
         class Traits<PairModel<Derived>> {
         public:
             constexpr static bool IsPeriodBoundary = true;
+            constexpr static bool IsContractable = false;
         };
     }
     /**

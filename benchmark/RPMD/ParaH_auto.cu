@@ -91,6 +91,7 @@ namespace Physica::Core::Internal {
     class Traits<MixedModel<IsSmallCell>> {
     public:
         constexpr static bool IsPeriodBoundary = true;
+        constexpr static bool IsContractable = false;
     };
 }
 

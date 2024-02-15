@@ -56,7 +56,9 @@ namespace Physica::Core {
         using Vector3D = Vector<ScalarType, 3>;
         using LatticeReturnType = typename std::conditional<IsDeviceREwald, LatticeMatrix, const LatticeMatrix&>::type;
         using HostChargeVector = typename std::conditional<IsDeviceREwald, Vector<ScalarType>, PlainStruct<void>>::type;
-
+    public:
+        using typename Base::BornChargeArray;
+    private:
         ScalarType selfE;
         ScalarType gammaPointE;
         HostChargeVector hostCharges;

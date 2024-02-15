@@ -33,6 +33,7 @@ namespace Physica::Core {
         public:
             constexpr static bool IsPeriodBoundary = true;
             constexpr static bool IsLatticeDependent = true;
+            constexpr static bool IsContractable = true;
         };
     }
     /**
@@ -88,6 +89,9 @@ namespace Physica::Core {
         template<class Executor> [[nodiscard]] Vector<ScalarType> force_short_unsort(const MDCellType& cell);
         template<class Executor> [[nodiscard]] Vector<ScalarType> force_long(const MDCellType& cell);
         template<class Executor> [[nodiscard]] Vector<ScalarType> force_long_unsort(const MDCellType& cell);
+
+        template<class Executor> [[nodiscard]] Vector<ScalarType> force_contract(const MDCellType& cell);
+        template<class Executor> [[nodiscard]] Vector<ScalarType> force_uncontract(const MDCellType& cell);
 
         [[nodiscard]] LatticeMatrix virial(const MDCellType& cell);
         [[nodiscard]] LatticeMatrix virial_morse(const MDCellType& cell) const;
@@ -193,8 +197,8 @@ namespace Physica::Core {
     inline Vector<ScalarType> Q_TIP4P<ScalarType, EwaldType>::force_short(const MDCellType& cell) {
         assert(cell.getNumParticle() % 3 == 0);
         assert(isCellOrdered(cell));
-        const size_t numMolecule = getNumMolecule();
-        Vector<ScalarType> result(3 * numMolecule * Dim, 0);
+        Vector<ScalarType> result = force_short_PartialChargeRepr<Executor>(makeChargePos(cell));
+        changeRepr(result);
         force_short_interMolecule<Executor>(cell, result);
         force_short_intraMolecule(cell, result);
         return result;
@@ -214,7 +218,6 @@ namespace Physica::Core {
     template<class Executor>
     Vector<ScalarType> Q_TIP4P<ScalarType, EwaldType>::force_long(const MDCellType& cell) {
         auto result = force_long_PartialChargeRepr<Executor>(makeChargePos(cell));
-        result += force_short_PartialChargeRepr<Executor>(makeChargePos(cell));
         changeRepr(result);
         return result;
     }
@@ -227,6 +230,29 @@ namespace Physica::Core {
         const Vector<ScalarType> sort_f = force_long<Executor>(copy);
         const PositionMatrix unsort_f = permute.inverse() * sort_f.reshape(cell.getPos());
         return unsort_f.flatten();
+    }
+    /**
+     * Contract strategy as [1] used
+     * 
+     * Reference:
+     * [1] J. Chem. Phys. 129, 024105 (2008); https://doi.org/10.1063/1.2953308
+     */
+    template<class ScalarType, class EwaldType>
+    template<class Executor>
+    Vector<ScalarType> Q_TIP4P<ScalarType, EwaldType>::force_contract(const MDCellType& cell) {
+        auto result = force_long_PartialChargeRepr<Executor>(makeChargePos(cell));
+        result += force_short_PartialChargeRepr<Executor>(makeChargePos(cell));
+        changeRepr(result);
+        force_short_interMolecule<Executor>(cell, result);
+        return result;
+    }
+
+    template<class ScalarType, class EwaldType>
+    template<class Executor>
+    Vector<ScalarType> Q_TIP4P<ScalarType, EwaldType>::force_uncontract(const MDCellType& cell) {
+        Vector<ScalarType> result(3 * getNumMolecule() * Dim, 0);
+        force_short_intraMolecule(cell, result);
+        return result;
     }
 
     template<class ScalarType, class EwaldType>

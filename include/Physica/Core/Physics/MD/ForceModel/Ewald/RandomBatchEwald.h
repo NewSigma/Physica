@@ -47,7 +47,9 @@ namespace Physica::Core {
         using typename Base::PositionMatrix;
         using typename Base::Vector3D;
         using SamplePool = DenseMatrix<ScalarType, MatrixOption::Column | MatrixOption::Element, Dynamic, Dim>;
-
+    public:
+        using typename Base::BornChargeArray;
+    private:
         ScalarType sumGauss;
         SamplePool samplePool;
         size_t batchSize;

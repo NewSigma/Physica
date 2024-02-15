@@ -73,9 +73,10 @@ namespace Physica::Core {
         return *this;
     }
     /**
-     * Contract method to improve performance in [1]
+     * Contract method to improve performance introduced in [1]
+     * 
      * Reference:
-     * [1] T. E. Markland, D. E. Manolopoulos. An efficient ring polymer contraction scheme for imaginary time path integral simulations[J]. J. Chem. Phys. 129, 024105 (2008)
+     * [1] J. Chem. Phys. 129, 024105 (2008); https://doi.org/10.1063/1.2953308
      */
     template<class ScalarType, unsigned int Dim, size_t NumReplica, class ForceMatrixAllocator>
     template<class ForceModel, class Executor>
@@ -84,37 +85,7 @@ namespace Physica::Core {
         constexpr bool isCudaEnabled = Internal::Traits<Executor>::isCudaEnabled;
         static_assert(!isCudaEnabled || std::allocator_traits<ForceMatrixAllocator>::isPageLocked
                 , "[Error]: Allocator is not page locked, performance will decrease");
-        if (isContractEnabled()) {
-            auto kernel_short = [&](unsigned int thread) {
-                const auto range = Executor::splitJob(getNumReplica(), Executor::getNumThread(), thread);
-                for (size_t replica = range.first; replica < range.second; ++replica) {
-                    MDCellType cell = phaseToCell(replica);
-                    if constexpr (IsPeriodBoundary)
-                        cell.normalize();
-                    auto saveTo = forceBuffer.col(replica);
-                    saveTo = model.template force_short<Executor>(std::move(cell));
-                }
-            };
-            auto future_short = Executor::parallel_for(kernel_short, Executor::getNumThread());
-
-            contract();
-            auto kernel_long = [&](unsigned int thread) {
-                const auto range = Executor::splitJob(getNumContract(), Executor::getNumThread(), thread);
-                for (size_t contract = range.first; contract < range.second; ++contract) {
-                    MDCellType cell = contractToCell(contract);
-                    if constexpr (IsPeriodBoundary)
-                        cell.normalize();
-                    auto saveTo = forceContract.col(contract);
-                    saveTo = model.template force_long<Executor>(std::move(cell));
-                }
-            };
-            auto future_long = Executor::parallel_for(kernel_long, Executor::getNumThread());
-
-            Executor::auto_wait(future_long);
-            decontract();
-            Executor::auto_wait(future_short);
-        }
-        else {
+        if (!isContractEnabled()) {
             auto kernel = [this, &model](unsigned int replica) {
                 MDCellType cell = phaseToCell(replica);
                 if constexpr (IsPeriodBoundary)
@@ -131,7 +102,42 @@ namespace Physica::Core {
                 Executor::auto_wait(future);
             }
             Executor::wait();
+            return;
         }
+
+        constexpr bool IsContractable = Internal::Traits<ForceModel>::IsContractable;
+        if constexpr (IsContractable) {
+            auto kernel_uncontract = [&](unsigned int thread) {
+                const auto range = Executor::splitJob(getNumReplica(), Executor::getNumThread(), thread);
+                for (size_t replica = range.first; replica < range.second; ++replica) {
+                    MDCellType cell = phaseToCell(replica);
+                    if constexpr (IsPeriodBoundary)
+                        cell.normalize();
+                    auto saveTo = forceBuffer.col(replica);
+                    saveTo = model.template force_uncontract<Executor>(std::move(cell));
+                }
+            };
+            auto future_uncontract = Executor::parallel_for(kernel_uncontract, Executor::getNumThread());
+
+            contract();
+            auto kernel_contract = [&](unsigned int thread) {
+                const auto range = Executor::splitJob(getNumContract(), Executor::getNumThread(), thread);
+                for (size_t contract = range.first; contract < range.second; ++contract) {
+                    MDCellType cell = contractToCell(contract);
+                    if constexpr (IsPeriodBoundary)
+                        cell.normalize();
+                    auto saveTo = forceContract.col(contract);
+                    saveTo = model.template force_contract<Executor>(std::move(cell));
+                }
+            };
+            auto future_contract = Executor::parallel_for(kernel_contract, Executor::getNumThread());
+
+            Executor::auto_wait(future_contract);
+            decontract();
+            Executor::auto_wait(future_uncontract);
+        }
+        else
+            throw NotImplementedException("[Error]: Force contract is not implemented");
     }
 
     template<class ScalarType, unsigned int Dim, size_t NumReplica, class ForceMatrixAllocator>

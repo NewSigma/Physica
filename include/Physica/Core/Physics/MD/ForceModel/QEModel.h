@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 WeiBo He.
+ * Copyright 2023-2024 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -33,6 +33,7 @@ namespace Physica::Core {
         class Traits<QEModel<ScalarType>> {
         public:
             constexpr static bool IsPeriodBoundary = true;
+            constexpr static bool IsContractable = false;
         };
     }
 

@@ -39,6 +39,7 @@ namespace Physica::Core {
         using KSpaceFCGrid = GridStorage<KSpaceFCMat>;
         using EigenSolverType = EigenSolver<KSpaceFCMat>;
         using QPointGrid = GridStorage<EigenSolverType>;
+        using BornChargeArray = typename RSpaceEwald<ScalarType, true>::BornChargeArray;
         constexpr static unsigned int Dim = Internal::Traits<MDCellType>::Dim;
     private:
         using EwaldType = Ewald<ScalarType>;
@@ -60,6 +61,8 @@ namespace Physica::Core {
 
         [[nodiscard]] KSpaceFCGrid toKSpace(const RSpaceFCGrid& rSpaceGrid) const;
         [[nodiscard]] KSpaceFCMat interpolatePoint(Vector3D qPoint, const KSpaceFCGrid& forceConstants) const;
+
+        void applyNAC(RSpaceFCGrid& rSpaceGrid, const BornChargeArray& born) const;
 
         void toDynamicMatrix(KSpaceFCMat& forceConstant) const;
         void toDynamicMatrix(KSpaceFCGrid& forceConstants) const;
@@ -278,6 +281,42 @@ namespace Physica::Core {
             }
         }
         return result;
+    }
+
+    template<class ScalarType>
+    void PhononSolver<ScalarType>::applyNAC(RSpaceFCGrid& rSpaceGrid, const BornChargeArray& born) const {
+        const ScalarType factor = reciprocal(unitCell.getVolume() * ScalarType(getNumCell() * PhyConst<AU>::vacuumDielectric));
+        const auto repLatt = unitCell.makeRepLattice();
+        rSpaceGrid.forIndexInGrid([this, factor, &repLatt, &rSpaceGrid, &born](Index3D index) {
+            const bool isGammaPoint = index[0] == 0 && index[1] == 0 && index[2] == 0;
+            Vector3D qVector{};
+            if (isGammaPoint)
+                qVector = {1, 0, 0};
+            else {
+                Vector3D qPoint{};
+                for (unsigned int i = 0; i < Dim; ++i)
+                    qPoint[i] = ScalarType(index[i]) / ScalarType(superSize[i]);
+                qVector = repLatt.transpose() * qPoint;
+                qVector.toUnit();
+            }
+
+            auto& rSpaceFC = rSpaceGrid(index);
+            const size_t unitCellDOF = getUnitCellDOF();
+            for (size_t major = 0; major < unitCellDOF; ++major) {
+                const size_t atom1 = major / Dim;
+                const size_t dir1 = major % Dim;
+                const ScalarType projCharge1 = (born[atom1] * qVector).calc(dir1);
+                for (size_t minor = major; minor < unitCellDOF; ++minor) {
+                    const size_t atom2 = minor / Dim;
+                    const size_t dir2 = minor % Dim;
+                    const ScalarType projCharge2 = (born[atom2] * qVector).calc(dir2);
+                    const ScalarType correction = factor * (projCharge1 * projCharge2);
+                    rSpaceFC.refFromMajorMinor(major, minor) += correction;
+                    if (minor != major)
+                        rSpaceFC.refFromMajorMinor(minor, major) += correction;
+                }
+            }
+        });
     }
 
     template<class ScalarType>

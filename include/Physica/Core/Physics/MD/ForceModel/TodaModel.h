@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 WeiBo He.
+ * Copyright 2023-2024 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -29,6 +29,7 @@ namespace Physica::Core {
         public:
             using ScalarType = T;
             constexpr static bool IsPeriodBoundary = B;
+            constexpr static bool IsContractable = false;
         };
     }
     /**

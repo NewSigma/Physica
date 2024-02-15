@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 WeiBo He.
+ * Copyright 2023-2024 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -34,6 +34,7 @@ namespace Physica::Core {
             constexpr static bool IsLatticeDependent = true;
             constexpr static bool IsPotDependOnAtomIndex = true;
             constexpr static bool IsSmallCell = Traits<EwaldType>::IsSmallCell;
+            constexpr static bool IsContractable = false;
         };
     }
     /**

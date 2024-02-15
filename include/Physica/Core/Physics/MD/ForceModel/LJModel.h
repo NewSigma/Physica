@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 WeiBo He.
+ * Copyright 2023-2024 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -30,6 +30,7 @@ namespace Physica::Core {
             using ScalarType = T;
             constexpr static bool IsPotDependOnAtomIndex = false;
             constexpr static bool IsSmallCell = B;
+            constexpr static bool IsContractable = false;
         };
     }
 
