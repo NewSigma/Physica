@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 WeiBo He.
+ * Copyright 2023-2024 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -20,8 +20,5 @@
 #include "Physica/Core/Parallel/ThreadPool.h"
 
 namespace Physica::Core {
-    CudaStream& StreamPool::getStream() {
-        thread_local static auto stream = CudaStream::makeStream();
-        return stream;
-    }
+    thread_local CudaStream StreamPool::stream = CudaStream();
 }

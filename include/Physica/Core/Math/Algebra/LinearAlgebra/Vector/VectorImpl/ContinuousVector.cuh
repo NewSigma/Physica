@@ -73,8 +73,8 @@ namespace Physica::Core {
     template<class Derived>
     template<class OtherDerived>
     void device_obj<ContinuousVector<Derived>>::toHost(ContinuousVector<OtherDerived>& obj) const {
-        obj.resize(Base::getLength());
-        cudaCheck(cudaMemcpy(obj.data(), data(), Base::getLength() * sizeof(ScalarType), cudaMemcpyKind::cudaMemcpyDeviceToHost));
+        toHostAsync(obj);
+        StreamPool::getStream().wait();
     }
 
     template<class Derived>
@@ -129,9 +129,8 @@ namespace Physica::Core {
     template<class Derived>
     template<class OtherDerived>
     void ContinuousVector<Derived>::toDevice(device_obj<ContinuousVector<OtherDerived>>& obj) const {
-        obj.resize(Base::getLength());
-        const device_obj<ContinuousVector<OtherDerived>>& const_obj = obj;
-        cudaCheck(cudaMemcpy((void*)const_obj.data(), data(), Base::getLength() * sizeof(ScalarType), cudaMemcpyKind::cudaMemcpyHostToDevice));
+        toDeviceAsync(obj);
+        StreamPool::getStream().wait();
     }
 
     template<class Derived>

@@ -41,8 +41,8 @@ namespace Physica::Core {
             for (int i = index; i < column; i += blockDim.x) {
                 const size_t offset = dots.calcOffset(r, i);
                 dots.getRecord(r, i) = DiffRecord{offset * 2, ExpressionType::Mul};
-                dots.getOperands()[offset] = m.calc(r, i);
-                dots.getOperands()[offset + 1] = v.calc(i);
+                dots.getOperands()[2 * offset] = m.calc(r, i);
+                dots.getOperands()[2 * offset + 1] = v.calc(i);
                 PlainScalar value = m.getValue(r, i) * v.getValue(i);
                 threadSum += value;
                 dots.getValue(r, i) = value;

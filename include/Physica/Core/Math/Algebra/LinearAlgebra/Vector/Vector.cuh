@@ -36,11 +36,13 @@ namespace Physica::Core {
         using host_obj = Vector<T, Length, MaxLength>;
         using Base = device_obj<ContinuousVector<host_obj>>;
         using typename Base::ScalarType;
+    private:
+        using This = device_obj<host_obj>;
     public:
         device_obj() = default;
         using Storage::Storage;
         template<class Derived>
-        device_obj(const device_obj<RValueVector<Derived>>& v);
+        __host__ __device__ device_obj(const device_obj<RValueVector<Derived>>& v);
         device_obj(const device_obj&) = default;
         device_obj(device_obj&&) noexcept = default;
         ~device_obj() = default;
@@ -59,11 +61,18 @@ namespace Physica::Core {
         using Storage::data;
         [[nodiscard]] __host__ __device__ ScalarType* data_ptr(size_t index) { return data() + index; }
         [[nodiscard]] __host__ __device__ const ScalarType* data_ptr(size_t index) const { return data() + index; }
+        /* Static members */
+        template<class RandomGenerator>
+        [[nodiscard]] inline static This random_uniform(size_t len, RandomGenerator& gen);
+        template<class RandomGenerator>
+        [[nodiscard]] inline static This random_normal(size_t len, RandomGenerator& gen);
+        template<class Distribution, class RandomGenerator>
+        [[nodiscard]] inline static This random_any(size_t len, Distribution& dist, RandomGenerator& gen);
     };
 
     template<class T, size_t Length, size_t MaxLength>
     template<class Derived>
-    device_obj<Vector<T, Length, MaxLength>>::device_obj(const device_obj<RValueVector<Derived>>& v) : Storage(v.getLength()) {
+    __host__ __device__ device_obj<Vector<T, Length, MaxLength>>::device_obj(const device_obj<RValueVector<Derived>>& v) : Storage(v.getLength()) {
         v.getDerived().assignTo(*this);
     }
 
@@ -78,6 +87,27 @@ namespace Physica::Core {
     inline typename device_obj<Vector<T, Length, MaxLength>>::host_obj
     device_obj<Vector<T, Length, MaxLength>>::toHost() const {
         return host_obj(Storage::toHost());
+    }
+
+    template<class T, size_t Length, size_t MaxLength>
+    template<class RandomGenerator>
+    inline device_obj<Vector<T, Length, MaxLength>> device_obj<Vector<T, Length, MaxLength>>::random_uniform(
+            size_t len, RandomGenerator& gen) {
+        return host_obj::random_uniform(len, gen).toDevice();
+    }
+
+    template<class T, size_t Length, size_t MaxLength>
+    template<class RandomGenerator>
+    inline device_obj<Vector<T, Length, MaxLength>> device_obj<Vector<T, Length, MaxLength>>::random_normal(
+            size_t len, RandomGenerator& gen) {
+        return host_obj::random_normal(len, gen).toDevice();
+    }
+
+    template<class T, size_t Length, size_t MaxLength>
+    template<class Distribution, class RandomGenerator>
+    inline device_obj<Vector<T, Length, MaxLength>> device_obj<Vector<T, Length, MaxLength>>::random_any(
+            size_t len, Distribution& dist, RandomGenerator& gen) {
+        return host_obj::random_any(len, dist, gen).toDevice();
     }
 
     template<class T, size_t Length, size_t MaxLength, class Allocator>

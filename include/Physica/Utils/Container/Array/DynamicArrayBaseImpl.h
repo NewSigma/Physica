@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2021 WeiBo He.
+ * Copyright 2020-2024 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -43,20 +43,8 @@ namespace Physica::Utils::Internal {
         if constexpr (!std::is_trivial<ValueType>::value)
             for(size_t i = 0; i < length; ++i)
                 alloc.construct(arr + i, array[i]);
-        else {
-        #ifdef PHYSICA_CUDA
-            #ifdef __CUDA_ARCH__
-                memcpy(arr, array.arr, length * sizeof(ValueType));
-            #else
-                if constexpr (std::is_same<allocator_type, DeviceAllocator<ValueType>>::value)
-                    cudaMemcpy(arr.get(), array.arr.get(), length * sizeof(ValueType), cudaMemcpyDeviceToDevice);
-                else
-                    memcpy(arr, array.arr, length * sizeof(ValueType));
-            #endif
-        #else
+        else
             memcpy(arr, array.arr, length * sizeof(ValueType));
-        #endif
-        }
     }
     
     template<class Derived, class Allocator>

@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 WeiBo He.
+ * Copyright 2023-2024 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -26,8 +26,6 @@ namespace Physica::Core {
         cudaStreamCreate(&stream);
     }
 
-    CudaStream::CudaStream(cudaStream_t stream_) : stream(stream_) {}
-
     CudaStream::CudaStream(CudaStream&& obj) noexcept : stream(obj.stream) {
         obj.stream = nullptr;
     }
@@ -37,29 +35,16 @@ namespace Physica::Core {
         stream = nullptr;
     }
 
-    CudaStream& CudaStream::operator=(CudaStream obj) noexcept {
-        swap(obj);
-        return *this;
-    }
-
     cudaError_t CudaStream::query() const {
         return cudaStreamQuery(stream);
     }
 
     void CudaStream::wait() const {
-        while (query() == cudaErrorNotReady)
-            std::this_thread::yield();
-        cudaCheck(cudaGetLastError());
+        cudaCheck(cudaStreamSynchronize(stream));
     }
 
     void CudaStream::swap(CudaStream& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         std::swap(stream, obj.stream);
-    }
-
-    CudaStream CudaStream::makeStream() {
-        cudaStream_t stream = nullptr;
-        cudaStreamCreate(&stream);
-        return CudaStream(stream);
     }
 }

@@ -88,7 +88,7 @@ namespace Physica::Core {
         assert(!empty());
         const size_t numThread = getLength() < MaxThreadPerBlock ? getLength() : MaxThreadPerBlock;
         const size_t numBlock = (getLength() + numThread - 1) / numThread;
-        Internal::TraceSegment_reverseKernel<<<numThread, numBlock, 0, StreamPool::getStream()>>>(asStruct(*this));
+        Internal::TraceSegment_reverseKernel<<<numBlock, numThread, 0, StreamPool::getStream()>>>(asStruct(*this));
     }
 
     template<class ScalarType>
@@ -102,7 +102,7 @@ namespace Physica::Core {
         This result(getLength());
         const size_t numThread = getLength() < MaxThreadPerBlock ? getLength() : MaxThreadPerBlock;
         const size_t numBlock = (getLength() + numThread - 1) / numThread;
-        Internal::TraceSegment_copyKernel<<<numThread, numBlock, 0, StreamPool::getStream()>>>(asStruct(*this), asStruct(result));
+        Internal::TraceSegment_copyKernel<<<numBlock, numThread, 0, StreamPool::getStream()>>>(asStruct(*this), asStruct(result));
         result.values = values;
         zero_grad();
         return result;
@@ -195,6 +195,12 @@ namespace Physica::Core {
                     const ScalarType dx = grad * reciprocal(operandY.getValue());
                     gradX += dx;
                     gradY -= dx * value;
+                    return;
+                }
+                case ExpressionType::Sum: {
+                    ScalarType* const pGradY = &gradY;
+                    for (auto* pGradX = &gradX; pGradX <= pGradY; pGradX += 1)
+                        *pGradX += grad;
                     return;
                 }
                 default:;

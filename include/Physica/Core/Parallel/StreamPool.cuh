@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 WeiBo He.
+ * Copyright 2023-2024 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -21,9 +21,11 @@
 #include "CudaStream.cuh"
 
 namespace Physica::Core {
-    class StreamPool {
+    class PHYSICA_API StreamPool {
         static_assert(sizeof(cudaStream_t) == 8, "[Error]: cudaStream_t is assumed to be a pointer");
+
+        thread_local static CudaStream stream;
     public:
-        [[nodiscard]] PHYSICA_API static CudaStream& getStream();
+        [[nodiscard]] static CudaStream& getStream() { return stream; }
     };
 }

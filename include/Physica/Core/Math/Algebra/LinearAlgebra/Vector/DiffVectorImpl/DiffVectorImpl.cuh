@@ -116,7 +116,7 @@ namespace Physica::Core {
             return;
         const auto& trace = getTraceSegment();
         result.getRecords()[0] = {0, ExpressionType::Assign};
-        result.getOperands()[0] = {trace.getValues().data_ptr(valueIndex), trace.getGrads().data_ptr(valueIndex)};
+        result.getOperands()[0] = trace[valueIndex];
         result.getValues()[0] = value;
         result.getGrads()[0] = 0;
     }
@@ -146,10 +146,8 @@ namespace Physica::Core {
             return;
         const auto& trace = getTraceSegment();
         result.getRecords()[0] = {0, ExpressionType::Sum};
-        const auto* pValue = trace.getValues().data();
-        const auto* pGrad = trace.getGrads().data();
-        result.getOperands()[0] = {pValue, pGrad};
-        result.getOperands()[1] = {pValue + length, pGrad + length};
+        result.getOperands()[0] = trace[0];
+        result.getOperands()[1] = trace[length - 1];
         result.getValues()[0] = threadSum;
         result.getGrads()[0] = 0;
     }

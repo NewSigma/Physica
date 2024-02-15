@@ -87,14 +87,14 @@ namespace Physica::Utils::Internal {
     template<class Derived, class Allocator>
     __host__ __device__ inline typename ArrayBase<Derived, Allocator>::lvalue_reference
     ArrayBase<Derived, Allocator>::operator[](size_t index) {
-        assert(index < getLength());
+        assert(index < getLength() && "[Error]: Index overflow");
         return data()[index];
     }
 
     template<class Derived, class Allocator>
     __host__ __device__ inline typename ArrayBase<Derived, Allocator>::const_lvalue_reference
     ArrayBase<Derived, Allocator>::operator[](size_t index) const {
-        assert(index < getLength());
+        assert(index < getLength() && "[Error]: Index overflow");
         return data()[index];
     }
 

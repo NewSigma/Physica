@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 WeiBo He.
+ * Copyright 2023-2024 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -32,17 +32,11 @@ namespace Physica::Core {
         CudaStream(CudaStream&& obj) noexcept;
         ~CudaStream();
         /* Operators */
-        CudaStream& operator=(CudaStream obj) noexcept;
+        CudaStream& operator=(CudaStream obj) noexcept { swap(obj); return *this; }
         [[nodiscard]] operator cudaStream_t() const noexcept { return stream; }
         /* Operations */
         [[nodiscard]] cudaError_t query() const;
         void wait() const;
         void swap(CudaStream& __restrict obj) noexcept;
-        /* Static members */
-        [[nodiscard]] static CudaStream makeStream();
-    private:
-        CudaStream(cudaStream_t stream_);
-
-        friend class StreamPool;
     };
 }

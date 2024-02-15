@@ -63,7 +63,7 @@ namespace Physica::Core {
         template<class ScalarType>
         __global__ void __launch_bounds__(1, 1) Differentiable_reverseKernel(
                 Physica::PlainStruct<device_obj<Differentiable<ScalarType, DiffMode::Reverse>>> s) {
-            s.getDerived().setGrad(0);
+            s.getDerived().setGrad(1);
         }
     }
 
