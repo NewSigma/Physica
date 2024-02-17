@@ -18,7 +18,7 @@
 # -- Project information -----------------------------------------------------
 
 project = 'Physica'
-copyright = '2021, WeiBo He'
+copyright = '2021-2024, WeiBo He'
 author = 'WeiBo He'
 
 # The full version, including alpha/beta/rc tags

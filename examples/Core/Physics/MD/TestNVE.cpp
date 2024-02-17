@@ -1,7 +1,20 @@
 /*
- * Copyright 2024 WeiBo He. All rights reserved.
+ * Copyright 2024 WeiBo He.
  *
- * This file is part of PhysicaNotes.
+ * This file is part of Physica.
+ *
+ * Physica is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Physica is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include <QApplication>
 #include "Physica/Core/IO/Poscar.h"
@@ -24,7 +37,6 @@ using ForceModel = BKSModel<ScalarType, Ewald<ScalarType, RSpaceEwald<ScalarType
 constexpr double timeStep = PhyConst<AU>::secondToTime(1E-15);
 constexpr double pair_cutoff = PhyConst<AU>::angstormToBohr(10);
 constexpr double temperatureT = PhyConst<AU>::kToTemperature(100);
-constexpr size_t numStep = 1000;
 /**
  * Initial structure from [1], modifying lattice according to [2]
  * Reference:

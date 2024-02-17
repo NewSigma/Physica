@@ -68,6 +68,7 @@ namespace Physica::Core {
         void swap(Hamonic& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] size_t getNumParticle() const noexcept { return sites.getRow(); }
+        [[nodiscard]] const Vector<ScalarType>& getSpringCoeffs() const noexcept { return springCoeffs; }
     };
 
     template<class ScalarType, unsigned int Dim>
