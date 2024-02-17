@@ -48,24 +48,6 @@ namespace Physica::Core {
     }
 
     template<class ScalarType, unsigned int Dim, size_t NumReplica, class ForceMatrixAllocator>
-    void RPMD<ScalarType, Dim, NumReplica, ForceMatrixAllocator>::read(const H5Location& loc, const char* name) {
-        const auto group = loc.openGroup(name);
-        LatticeMatrix temp{};
-        temp.read(group, "lattice");
-        setLattice(std::move(temp));
-        getPhaseMatrix().read(group, "phase");
-        forceBuffer.read(group, "force");
-    }
-    
-    template<class ScalarType, unsigned int Dim, size_t NumReplica, class ForceMatrixAllocator>
-    void RPMD<ScalarType, Dim, NumReplica, ForceMatrixAllocator>::write(H5Location& loc, const char* name) const {
-        auto group = loc.createGroup(name);
-        getLattice().write(group, "lattice");
-        getPhaseMatrix().write(group, "phase");
-        forceBuffer.write(group, "force");
-    }
-
-    template<class ScalarType, unsigned int Dim, size_t NumReplica, class ForceMatrixAllocator>
     RPMD<ScalarType, Dim, NumReplica, ForceMatrixAllocator>&
     RPMD<ScalarType, Dim, NumReplica, ForceMatrixAllocator>::operator=(
             RPMD<ScalarType, Dim, NumReplica, ForceMatrixAllocator> obj) noexcept {
@@ -746,6 +728,39 @@ namespace Physica::Core {
                 toNextMean(result, i, buffer[i]);
         }
         return result;
+    }
+
+    template<class ScalarType, unsigned int Dim, size_t NumReplica, class ForceMatrixAllocator>
+    template<class KineticModel, class ForceModel, class Executor>
+    Vector<ScalarType> RPMD<ScalarType, Dim, NumReplica, ForceMatrixAllocator>::testNVE(
+            ScalarType duration, KineticModel& kineticModel, ForceModel& forceModel) const {
+        This rpmd = *this;
+        const uint64_t step = Base::durationToStep(duration, timeStep);
+        Vector<ScalarType> pot(step);
+        for (uint64_t i = 0; i < step; ++i) {
+            rpmd.nve_step<KineticModel, ForceModel, Executor>(kineticModel, forceModel);
+            pot[i] = rpmd.calcKinetic() + rpmd.calcPotential<ForceModel, Executor>(forceModel);
+        }
+        pot -= ScalarType(pot[0]);
+        return pot;
+    }
+
+    template<class ScalarType, unsigned int Dim, size_t NumReplica, class ForceMatrixAllocator>
+    void RPMD<ScalarType, Dim, NumReplica, ForceMatrixAllocator>::read(const H5Location& loc, const char* name) {
+        const auto group = loc.openGroup(name);
+        LatticeMatrix temp{};
+        temp.read(group, "lattice");
+        setLattice(std::move(temp));
+        getPhaseMatrix().read(group, "phase");
+        forceBuffer.read(group, "force");
+    }
+    
+    template<class ScalarType, unsigned int Dim, size_t NumReplica, class ForceMatrixAllocator>
+    void RPMD<ScalarType, Dim, NumReplica, ForceMatrixAllocator>::write(H5Location& loc, const char* name) const {
+        auto group = loc.createGroup(name);
+        getLattice().write(group, "lattice");
+        getPhaseMatrix().write(group, "phase");
+        forceBuffer.write(group, "force");
     }
 
     template<class ScalarType, unsigned int Dim, size_t NumReplica, class ForceMatrixAllocator>

@@ -18,6 +18,7 @@ if(NOT ${CMAKE_BUILD_TYPE} MATCHES "Debug") # nvcc 12.2 internal compiler error 
     physica_add_example(HardCore_cuda Core/Physics/MD/HardCore.cu)
 endif()
 physica_add_example(HardCore Core/Physics/MD/HardCore.cpp)
+physica_add_example(TestNVE Core/Physics/MD/TestNVE.cpp)
 # Gui
 physica_add_example(DensityPlot Gui/DensityPlot.cpp)
 physica_add_example(GaussPlot Gui/GaussPlot.cpp)

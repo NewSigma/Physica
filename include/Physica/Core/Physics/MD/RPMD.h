@@ -163,6 +163,9 @@ namespace Physica::Core {
         template<class ForceModel, class Executor>
         [[nodiscard]] LatticeMatrix makeStressClassical(ForceModel& model) const;
 
+        template<class KineticModel, class ForceModel, class Executor>
+        Vector<ScalarType> testNVE(ScalarType duration, KineticModel& kineticModel, ForceModel& forceModel) const;
+
         void read(const H5Location& loc, const char* name);
         void write(H5Location& loc, const char* name) const;
         void swap(RPMD& __restrict obj) noexcept;
