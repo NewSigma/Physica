@@ -63,49 +63,50 @@ int main() {
     ThreadPool::numThreadRequired = 8;
     auto& gen = RandomPoolType::getInstance().getGen();
     KineticModel kineticModel(temperatureT, numReplica);
+    using HostModel = SilveraGoldman<ScalarType, true, false>;
     {
-        using HostModel = SilveraGoldman<ScalarType, true, true>;
-        using ForceModel = CPUGPUModel<HostModel>;
+        using DeviceModel = SilveraGoldman<ScalarType, true, true>;
+        using ForceModel = CPUGPUModel<HostModel, DeviceModel>;
         constexpr size_t numMolecular = 108;
         MDType rpmd = makeSystem(numMolecular, gen);
         rpmd.initMomentum(gen);
-        ForceModel forceModel(4, HostModel(pair_cutoff), numMolecular);
+        ForceModel forceModel(4, HostModel(pair_cutoff), numMolecular, pair_cutoff);
         auto timeuse = Physica::Utils::Benchmark::run([&]() {
             rpmd.nve_step_for<KineticModel, ForceModel, AutoExecutor>(PhyConst<AU>::secondToTime(2 * 1E-13), kineticModel, forceModel);
         }, 8, 20);
         std::cout << "108 atom time use: " << timeuse.first << '(' << timeuse.second << ")\n";
     }
     {
-        using HostModel = SilveraGoldman<ScalarType, true, true>;
-        using ForceModel = CPUGPUModel<HostModel>;
+        using DeviceModel = SilveraGoldman<ScalarType, true, true>;
+        using ForceModel = CPUGPUModel<HostModel, DeviceModel>;
         constexpr size_t numMolecular = 256;
         MDType rpmd = makeSystem(numMolecular, gen);
         rpmd.initMomentum(gen);
-        ForceModel forceModel(4, HostModel(pair_cutoff), numMolecular);
+        ForceModel forceModel(4, HostModel(pair_cutoff), numMolecular, pair_cutoff);
         auto timeuse = Physica::Utils::Benchmark::run([&]() {
             rpmd.nve_step_for<KineticModel, ForceModel, AutoExecutor>(PhyConst<AU>::secondToTime(2 * 1E-13), kineticModel, forceModel);
         }, 8, 20);
         std::cout << "256 atom time use: " << timeuse.first << '(' << timeuse.second << ")\n";
     }
     {
-        using HostModel = SilveraGoldman<ScalarType, true, true>;
-        using ForceModel = CPUGPUModel<HostModel>;
+        using DeviceModel = SilveraGoldman<ScalarType, true, true>;
+        using ForceModel = CPUGPUModel<HostModel, DeviceModel>;
         constexpr size_t numMolecular = 500;
         MDType rpmd = makeSystem(numMolecular, gen);
         rpmd.initMomentum(gen);
-        ForceModel forceModel(4, HostModel(pair_cutoff), numMolecular);
+        ForceModel forceModel(4, HostModel(pair_cutoff), numMolecular, pair_cutoff);
         auto timeuse = Physica::Utils::Benchmark::run([&]() {
             rpmd.nve_step_for<KineticModel, ForceModel, AutoExecutor>(PhyConst<AU>::secondToTime(1 * 1E-13), kineticModel, forceModel);
         }, 8, 20);
         std::cout << "500 atom time use: " << timeuse.first << '(' << timeuse.second << ")\n";
     }
     {
-        using HostModel = SilveraGoldman<ScalarType, true, false>;
-        using ForceModel = CPUGPUModel<HostModel>;
+        using DeviceModel = SilveraGoldman<ScalarType, true, false>;
+        using ForceModel = CPUGPUModel<HostModel, DeviceModel>;
         constexpr size_t numMolecular = 864;
         MDType rpmd = makeSystem(numMolecular, gen);
         rpmd.initMomentum(gen);
-        ForceModel forceModel(4, HostModel(pair_cutoff), numMolecular);
+        ForceModel forceModel(4, HostModel(pair_cutoff), numMolecular, pair_cutoff);
         auto timeuse = Physica::Utils::Benchmark::run([&]() {
             rpmd.nve_step_for<KineticModel, ForceModel, AutoExecutor>(PhyConst<AU>::secondToTime(5 * 1E-14), kineticModel, forceModel);
         }, 8, 20);

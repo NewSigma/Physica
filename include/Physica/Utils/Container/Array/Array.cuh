@@ -161,16 +161,16 @@ namespace Physica::Utils {
         d_data = alloc.allocate(capacity);
         array.toDevice(*this);
     }
-
+    /**
+     * Do not launch kernel before copy is finished, so memcpy is async.
+     */
     template<class T, class Allocator>
     device_obj<Array<T, Dynamic, Dynamic, Allocator>>::device_obj(const device_obj<Array<T, Dynamic, Dynamic, Allocator>>& obj)
             : length(obj.getLength()), capacity(obj.getCapacity()), alloc(obj.alloc) {
         d_data = alloc.allocate(capacity);
         auto& stream = Core::StreamPool::getStream();
-        if constexpr (isTrivial) {
+        if constexpr (isTrivial)
             cudaMemcpyAsync(d_data, obj.d_data, length * sizeof(T), cudaMemcpyKind::cudaMemcpyDeviceToDevice, stream);
-            stream.wait();
-        }
         else {
             Array<ValueType, Dynamic, Dynamic> buffer(length);
             cudaMemcpyAsync(buffer.data(), obj.d_data, length * sizeof(ValueType), cudaMemcpyKind::cudaMemcpyDeviceToHost, stream);
@@ -209,29 +209,27 @@ namespace Physica::Utils {
         swap(obj);
         return *this;
     }
-
+    /**
+     * Synchronization is expected before this, copy is async to task stream
+     */
     template<class T, class Allocator>
     typename device_obj<Array<T, Dynamic, Dynamic, Allocator>>::PlainHostObj
     device_obj<Array<T, Dynamic, Dynamic, Allocator>>::toPlainHost() const {
         PlainHostObj result(getLength());
-        auto& stream = Core::StreamPool::getStream();
-        cudaMemcpyAsync(result.data(), (void*)d_data, getLength() * sizeof(ValueType), cudaMemcpyKind::cudaMemcpyDeviceToHost, stream);
-        stream.wait();
+        cudaCheck(cudaMemcpy(result.data(), (void*)d_data, getLength() * sizeof(ValueType), cudaMemcpyKind::cudaMemcpyDeviceToHost));
         return result;
     }
-
+    /**
+     * Synchronization is expected before this, copy is async to task stream
+     */
     template<class T, class Allocator>
     Array<T, Dynamic, Dynamic, Allocator> device_obj<Array<T, Dynamic, Dynamic, Allocator>>::toHost() const {
         host_obj result(length);
-        auto& stream = Core::StreamPool::getStream();
-        if constexpr (isTrivial) {
-            cudaMemcpyAsync(result.data(), d_data, length * sizeof(ValueType), cudaMemcpyKind::cudaMemcpyDeviceToHost, stream);
-            stream.wait();
-        }
+        if constexpr (isTrivial)
+            cudaCheck(cudaMemcpy(result.data(), d_data, length * sizeof(ValueType), cudaMemcpyKind::cudaMemcpyDeviceToHost));
         else {
             Array<ValueType, Dynamic, Dynamic> buffer(length);
-            cudaMemcpyAsync(buffer.data(), d_data, length * sizeof(ValueType), cudaMemcpyKind::cudaMemcpyDeviceToHost, stream);
-            stream.wait();
+            cudaCheck(cudaMemcpy(buffer.data(), d_data, length * sizeof(ValueType), cudaMemcpyKind::cudaMemcpyDeviceToHost));
             for (size_t i = 0; i < length; ++i)
                 result[i] = buffer[i].toHost();
             buffer.get_allocator().deallocate(buffer.release(), length);
@@ -243,22 +241,24 @@ namespace Physica::Utils {
     inline void device_obj<Array<T, Dynamic, Dynamic, Allocator>>::toHost(host_obj& obj) const {
         obj = toHost();
     }
-
+    /**
+     * Synchronization is expected before this, copy is async to task stream
+     */
     template<class T, class Allocator>
     void device_obj<Array<T, Dynamic, Dynamic, Allocator>>::reserve(size_t size) {
         assert(size > getCapacity());
-        auto& stream = Core::StreamPool::getStream();
         Array<ValueType, Dynamic, Dynamic> buffer(getLength());
-        cudaMemcpyAsync(buffer.data(), d_data, getLength() * sizeof(ValueType), cudaMemcpyKind::cudaMemcpyDeviceToHost, stream);
-        stream.wait();
+        cudaCheck(cudaMemcpy(buffer.data(), d_data, getLength() * sizeof(ValueType), cudaMemcpyKind::cudaMemcpyDeviceToHost));
         alloc.deallocate(d_data, capacity);
         d_data = alloc.allocate(size);
-        cudaMemcpyAsync(d_data, buffer.data(), getLength() * sizeof(ValueType), cudaMemcpyKind::cudaMemcpyHostToDevice, stream);
-        stream.wait();
+        cudaCheck(cudaMemcpy(d_data, buffer.data(), getLength() * sizeof(ValueType), cudaMemcpyKind::cudaMemcpyHostToDevice));
         buffer.get_allocator().deallocate(buffer.release(), length);
         capacity = size;
+        cudaCheck(cudaStreamSynchronize(nullptr));
     }
-
+    /**
+     * Synchronization is expected before this, copy is async to task stream
+     */
     template<class T, class Allocator>
     template<class... Args>
     void device_obj<Array<T, Dynamic, Dynamic, Allocator>>::resize(size_t size, Args&&... args) {
@@ -267,15 +267,13 @@ namespace Physica::Utils {
         if (capacity < size)
             reserve(size);
 
-        auto& stream = Core::StreamPool::getStream();
         if (length > size) {
             if constexpr (!isTrivial) {
                 const size_t delta = length - size;
                 Array<ValueType, Dynamic, Dynamic> buffer{};
                 buffer.reserve(delta);
-                cudaMemcpyAsync(buffer.data(), d_data + size, delta * sizeof(ValueType), cudaMemcpyKind::cudaMemcpyDeviceToHost, stream);
+                cudaCheck(cudaMemcpy(buffer.data(), d_data + size, delta * sizeof(ValueType), cudaMemcpyKind::cudaMemcpyDeviceToHost));
                 buffer.setLength(delta);
-                stream.wait();
             }
         }
         else {
@@ -283,9 +281,9 @@ namespace Physica::Utils {
             Array<ValueType, Dynamic, Dynamic> buffer(delta);
             for (size_t i = 0; i < delta; ++i)
                 buffer.get_allocator().construct(buffer.data() + i, std::forward<Args>(args)...);
-            cudaMemcpyAsync(d_data + length, buffer.data(), delta * sizeof(ValueType), cudaMemcpyKind::cudaMemcpyHostToDevice, stream);
-            stream.wait();
+            cudaCheck(cudaMemcpy(d_data + length, buffer.data(), delta * sizeof(ValueType), cudaMemcpyKind::cudaMemcpyHostToDevice));
             buffer.get_allocator().deallocate(buffer.release(), delta);
+            cudaCheck(cudaStreamSynchronize(nullptr));
         }
         length = size;
     }

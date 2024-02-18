@@ -7,15 +7,15 @@ Items: ParaH, ParaH_cuda, ParaH_auto
 OS: Ubuntu20.04
 Compiler: GCC 9.4.0 + NVCC 12.2.91
 Hardware: Intel(R) Core(TM) i7-9750H CPU @ 2.60GHz + 16G + NVIDIA GeForce GTX 1660 Ti Mobile
-Date: 2023-12-21
+Date: 2024-2-18
 Responsibility: Weibo He (NewSigma@163.com)
 
 $$\begin{matrix}
 \mathrm{Platform} && \mathrm{CPU/s} && \mathrm{GPU/s} && \mathrm{CPU + GPU/s} \\
-108\ \mathrm{Atom} && 0.47(3) && 0.432(4) && 0.26(2) \\
-256\ \mathrm{Atom} && 1.36(5) && 0.82(1) && 0.47(1) \\
-500\ \mathrm{Atom} && 1.06(3) && 0.742(4) && 0.39(1) \\
-864\ \mathrm{Atom} && 0.86(2) && 0.565(9) && 0.396(4) \\
+108\ \mathrm{Atom} && 0.42(1) && 0.42(2) && 0.24(2) \\
+256\ \mathrm{Atom} && 1.21(1) && 0.795(1) && 0.453(9) \\
+500\ \mathrm{Atom} && 0.98(5) && 0.727(2) && 0.356(4) \\
+864\ \mathrm{Atom} && 0.78(2) && 0.494(7) && 0.37(1) \\
 \end{matrix}$$
 
 ## Platform 2

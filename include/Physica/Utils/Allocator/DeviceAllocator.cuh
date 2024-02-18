@@ -133,7 +133,7 @@ namespace Physica::Utils {
         auto* p = reinterpret_cast<pointer>(malloc(n * sizeof(value_type)));
     #else
         pointer p;
-        cudaCheck(cudaMallocAsync(&p, n * sizeof(value_type), Core::StreamPool::getStream()));
+        cudaMallocAsync(&p, n * sizeof(value_type), Core::StreamPool::getStream());
     #endif
         return p;
     }
@@ -143,7 +143,7 @@ namespace Physica::Utils {
     #ifdef __CUDA_ARCH__
         free(p);
     #else
-        cudaFreeAsync(p, Core::StreamPool::getStream());
+        cudaFreeAsync(p, Core::StreamPool::getStream()); //Do not free before task stream is cleared
     #endif
     }
 
@@ -154,7 +154,7 @@ namespace Physica::Utils {
         ::new (static_cast<void*>(p.get())) value_type(std::forward<Args>(args)...);
     #else
         value_type temp(std::forward<Args>(args)...);
-        cudaMemcpyAsync(p.get(), &temp, sizeof(value_type), cudaMemcpyHostToDevice, Core::StreamPool::getStream());
+        cudaCheck(cudaMemcpy(p.get(), &temp, sizeof(value_type), cudaMemcpyHostToDevice));
         if constexpr (!std::is_trivial<value_type>::value)
             temp.release(); //Ownership has been given to device
     #endif

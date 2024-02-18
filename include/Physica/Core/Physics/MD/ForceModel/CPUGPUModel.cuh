@@ -23,25 +23,25 @@
 #include "Physica/Utils/CUDA/device_obj.cuh"
 
 namespace Physica::Core {
-    template<class HostModel> class CPUGPUModel;
+    template<class HostModel, class DeviceModel> class CPUGPUModel;
 
     namespace Internal {
         template<class T> class Traits;
 
-        template<class HostModel>
-        class Traits<CPUGPUModel<HostModel>> : public Traits<HostModel> {};
+        template<class HostModel, class DeviceModel>
+        class Traits<CPUGPUModel<HostModel, DeviceModel>> : public Traits<HostModel> {};
     }
     /**
      * Given \tparam HostModel, \class CPUGPUModel enables collaborative computing on both CPU and GPU.
      */
-    template<class HostModel>
+    template<class HostModel, class DeviceModel>
     class CPUGPUModel {
-        static_assert(!Utils::is_device_obj<HostModel>::value, "[Error]: device_obj<> is unnecessary");
+        static_assert(!Utils::is_device_obj<HostModel>::value, "[Error]: Host model must not be device object");
+        static_assert(!Utils::is_device_obj<DeviceModel>::value, "[Error]: device_obj<> is unnecessary");
         using ScalarType = typename HostModel::ScalarType;
         using MDCellType = typename HostModel::MDCellType;
-        using DeviceModelType = device_obj<HostModel>;
         HostModel hostModel;
-        Physica::Utils::Array<DeviceModelType> deviceModels;
+        Physica::Utils::Array<device_obj<DeviceModel>> deviceModels;
     public:
         template<class... Args>
         CPUGPUModel(size_t numCudaThread, HostModel hostModel_, Args&&... deviceArgs);
@@ -59,26 +59,26 @@ namespace Physica::Core {
         [[nodiscard]] size_t getNumCudaThread() const noexcept { return deviceModels.getLength(); }
     };
 
-    template<class HostModel>
+    template<class HostModel, class DeviceModel>
     template<class... Args>
-    CPUGPUModel<HostModel>::CPUGPUModel(size_t numCudaThread, HostModel hostModel_, Args&&... deviceArgs)
+    CPUGPUModel<HostModel, DeviceModel>::CPUGPUModel(size_t numCudaThread, HostModel hostModel_, Args&&... deviceArgs)
             : hostModel(std::move(hostModel_)) {
         assert(numCudaThread < ThreadPool::getInstance().getNumThreads());
-        deviceModels.resize(numCudaThread, std::cref(hostModel), std::forward<Args>(deviceArgs)...);
+        deviceModels.resize(numCudaThread, std::forward<Args>(deviceArgs)...);
     }
 
-    template<class HostModel>
+    template<class HostModel, class DeviceModel>
     template<class Executor>
-    Vector<typename CPUGPUModel<HostModel>::ScalarType> CPUGPUModel<HostModel>::force(const MDCellType& cell) {
+    Vector<typename CPUGPUModel<HostModel, DeviceModel>::ScalarType> CPUGPUModel<HostModel, DeviceModel>::force(const MDCellType& cell) {
         Vector<ScalarType> result(cell.getDOF());
         forceAsync<Vector<ScalarType>, Executor>(cell, result);
         StreamPool::getStream().wait();
         return result;
     }
 
-    template<class HostModel>
+    template<class HostModel, class DeviceModel>
     template<class VectorType, class Executor>
-    void CPUGPUModel<HostModel>::forceAsync(const MDCellType& cell, ContinuousVector<VectorType>& result) {
+    void CPUGPUModel<HostModel, DeviceModel>::forceAsync(const MDCellType& cell, ContinuousVector<VectorType>& result) {
         static_assert(Internal::Traits<Executor>::isCudaEnabled, "[Error]: Invalid executor");
         const auto threadId = ThreadPool::getThreadInfo().id;
         const bool useCPU = ThreadPool::isMainThread() || threadId >= getNumCudaThread();
