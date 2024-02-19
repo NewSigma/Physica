@@ -71,13 +71,20 @@ namespace Physica::Core {
         [[nodiscard]] __host__ __device__ size_t getCapacity() const noexcept { return records.getCapacity(); }
         [[nodiscard]] __host__ __device__ bool empty() const noexcept { return records.empty(); }
         [[nodiscard]] __host__ __device__ bool full() const noexcept { return records.full(); }
+        [[nodiscard]] size_t getNumOperands() const noexcept { return operands.getLength(); }
         [[nodiscard]] __host__ __device__ bool isFound(DiffScalar s) const noexcept { return find(s) < getLength(); }
         [[nodiscard]] __host__ __device__ size_t find(DiffScalar s) const noexcept;
         [[nodiscard]] __host__ __device__ DeviceVector& getValues() noexcept { return values; }
         [[nodiscard]] __host__ __device__ const DeviceVector& getValues() const noexcept { return values; }
         [[nodiscard]] __host__ __device__ DeviceVector& getGrads() noexcept { return grads; }
         [[nodiscard]] __host__ __device__ const DeviceVector& getGrads() const noexcept { return grads; }
+        /* Static members */
+        [[nodiscard]] constexpr static unsigned int numOperand(ExpressionType type) { return host_obj::numOperand(type); }
     private:
+        /* Operations */
+        inline void init(ScalarType value);
+        void init(const VectorType& values_);
+        /* Friends */
         friend class device_obj<DiffTracer<ScalarType>>;
     };
 }

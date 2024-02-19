@@ -143,7 +143,8 @@ namespace Physica::Utils {
     #ifdef __CUDA_ARCH__
         free(p);
     #else
-        cudaFreeAsync(p, Core::StreamPool::getStream()); //Do not free before task stream is cleared
+        if (p != nullptr) // No unnecessary cuda api call to make profiler output cleaner
+            cudaFreeAsync(p, Core::StreamPool::getStream());
     #endif
     }
 

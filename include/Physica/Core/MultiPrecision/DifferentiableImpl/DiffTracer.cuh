@@ -32,12 +32,16 @@ namespace Physica::Core {
         using TraceListType = std::forward_list<SegmentType>;
         using DiffScalar = typename SegmentType::DiffScalar;
     private:
-        TraceListType traceList;
+        using VectorType = typename SegmentType::VectorType;
+
+        TraceListType traceList; //forward_list is FILO
+        std::list<SegmentType> reserveList; //list is FIFO
     public:
         ~device_obj() = default;
         /* Operations */
-        template<class... Args>
-        SegmentType& pushSegment(Args&&... args);
+        SegmentType& pushSegment(size_t size, ExpressionType type);
+        SegmentType& pushSegment(ScalarType value);
+        SegmentType& pushSegment(const VectorType& value);
 
         inline void reverse(DiffScalar from, DiffScalar to);
         void reverse_from(DiffScalar from);
@@ -66,9 +70,42 @@ namespace Physica::Core {
     };
 
     template<class ScalarType>
-    template<class... Args>
-    typename device_obj<DiffTracer<ScalarType>>::SegmentType& device_obj<DiffTracer<ScalarType>>::pushSegment(Args&&... args) {
-        return traceList.emplace_front(SegmentType(std::forward<Args>(args)...));
+    typename device_obj<DiffTracer<ScalarType>>::SegmentType& device_obj<DiffTracer<ScalarType>>::pushSegment(size_t size, ExpressionType type) {
+        const auto end = reserveList.end();
+        for (auto ite = reserveList.begin(); ite != end; ++ite) {
+            auto& segment = *ite;
+            const bool isSizeMatch = segment.getLength() == size;
+            const bool isNumOperandMatch = segment.getNumOperands() == size * SegmentType::numOperand(type);
+            if (isSizeMatch && isNumOperandMatch) {
+                traceList.push_front(std::move(segment));
+                reserveList.erase(ite);
+                return traceList.front();
+            }
+        }
+
+        try {
+            return traceList.emplace_front(size, type);
+        }
+        catch (CudaException& e) {
+            if (e.getCode() != cudaErrorMemoryAllocation)
+                throw e;
+        }
+        reserveList.clear();
+        return traceList.emplace_front(size, type);
+    }
+
+    template<class ScalarType>
+    typename device_obj<DiffTracer<ScalarType>>::SegmentType& device_obj<DiffTracer<ScalarType>>::pushSegment(ScalarType value) {
+        auto& result = pushSegment(1, ExpressionType::Set);
+        result.init(value);
+        return result;
+    }
+
+    template<class ScalarType>
+    typename device_obj<DiffTracer<ScalarType>>::SegmentType& device_obj<DiffTracer<ScalarType>>::pushSegment(const VectorType& value) {
+        auto& result = pushSegment(value.getLength(), ExpressionType::Set);
+        result.init(value);
+        return result;
     }
 
     template<class ScalarType>
@@ -162,6 +199,7 @@ namespace Physica::Core {
             auto& segment = *ite;
             const bool isFound = segment.isFound(to);
             assert((!isFound || (segment.getLength() == 1)) && "[Error]: Forget part of a segment is not supported");
+            reserveList.push_back(std::move(segment));
             traceList.pop_front();
             if (isFound)
                 return;

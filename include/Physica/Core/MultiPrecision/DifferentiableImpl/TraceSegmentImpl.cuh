@@ -49,14 +49,14 @@ namespace Physica::Core {
     template<class ScalarType>
     device_obj<TraceSegment<ScalarType>>::device_obj(size_t size, ExpressionType type)
             : records(size)
-            , operands(host_obj::numOperand(type) * size)
+            , operands(size * numOperand(type))
             , values(size)
             , grads(size) {}
 
     template<class ScalarType>
     device_obj<TraceSegment<ScalarType>>::device_obj(ScalarType value)
             : device_obj(1, ExpressionType::Set) {
-        Internal::TraceSegment_setKernel<<<1, 1, 0, StreamPool::getStream()>>>(asStruct(*this), value);
+        init(value);
     }
     /**
      * Optimize: Allocate \param values_ using pinned memory shall improve performance
@@ -64,11 +64,7 @@ namespace Physica::Core {
     template<class ScalarType>
     device_obj<TraceSegment<ScalarType>>::device_obj(const VectorType& values_)
             : device_obj(values_.getLength(), ExpressionType::Set) {
-        values_.toDeviceAsync(values);
-        auto future = StreamFuture::makeFuture();
-        cudaMemsetAsync((void*)records.data(), 0, getLength() * sizeof(DiffRecord), StreamPool::getStream());
-        zero_grad();
-        future->wait();
+        init(values_);
     }
 
     template<class ScalarType>
@@ -222,5 +218,19 @@ namespace Physica::Core {
     template<class ScalarType>
     __host__ __device__ size_t device_obj<TraceSegment<ScalarType>>::find(DiffScalar s) const noexcept {
         return host_obj::findImpl(values, grads, s);
+    }
+
+    template<class ScalarType>
+    inline void device_obj<TraceSegment<ScalarType>>::init(ScalarType value) {
+        Internal::TraceSegment_setKernel<<<1, 1, 0, StreamPool::getStream()>>>(asStruct(*this), value);
+    }
+
+    template<class ScalarType>
+    inline void device_obj<TraceSegment<ScalarType>>::init(const VectorType& values_) {
+        values_.toDeviceAsync(values);
+        auto future = StreamFuture::makeFuture();
+        cudaMemsetAsync((void*)records.data(), 0, getLength() * sizeof(DiffRecord), StreamPool::getStream());
+        zero_grad();
+        future->wait();
     }
 }

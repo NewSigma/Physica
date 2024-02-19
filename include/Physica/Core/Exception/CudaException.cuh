@@ -28,6 +28,8 @@ namespace Physica::Core {
     public:
         CudaException(cudaError_t code_) : code(code_) {}
         ~CudaException() noexcept override = default;
-        const char* what() const noexcept override { return cudaGetErrorString(code); }
+        /* Getters */
+        [[nodiscard]] const char* what() const noexcept override { return cudaGetErrorString(code); }
+        [[nodiscard]] cudaError_t getCode() const noexcept { return code; }
     };
 }
