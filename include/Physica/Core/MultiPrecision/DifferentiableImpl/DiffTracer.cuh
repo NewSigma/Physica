@@ -29,7 +29,7 @@ namespace Physica::Core {
         using This = device_obj<host_obj>;
     public:
         using SegmentType = device_obj<typename host_obj::SegmentType>;
-        using TraceListType = std::list<SegmentType>;
+        using TraceListType = std::forward_list<SegmentType>;
         using DiffScalar = typename SegmentType::DiffScalar;
     private:
         TraceListType traceList;
@@ -68,7 +68,7 @@ namespace Physica::Core {
     template<class ScalarType>
     template<class... Args>
     typename device_obj<DiffTracer<ScalarType>>::SegmentType& device_obj<DiffTracer<ScalarType>>::pushSegment(Args&&... args) {
-        return traceList.emplace_back(SegmentType(std::forward<Args>(args)...));
+        return traceList.emplace_front(SegmentType(std::forward<Args>(args)...));
     }
 
     template<class ScalarType>
@@ -82,8 +82,8 @@ namespace Physica::Core {
     void device_obj<DiffTracer<ScalarType>>::reverse_from(DiffScalar from) {
         assert(!traceList.empty() && "[Error]: No record found");
         bool foundBeginSegment = false;
-        const auto rend = traceList.rend();
-        for (auto ite = traceList.rbegin(); ite != rend; ++ite) {
+        const auto end = traceList.end();
+        for (auto ite = traceList.begin(); ite != end; ++ite) {
             auto& segment = *ite;
             foundBeginSegment |= segment.isFound(from);
             if (!foundBeginSegment)
@@ -98,8 +98,8 @@ namespace Physica::Core {
     void device_obj<DiffTracer<ScalarType>>::reverse_to(DiffScalar to) {
         assert(!traceList.empty() && "[Error]: No record found");
         bool foundFinalSegment = false;
-        const auto rend = traceList.rend();
-        for (auto ite = traceList.rbegin(); ite != rend; ++ite) {
+        const auto end = traceList.end();
+        for (auto ite = traceList.begin(); ite != end; ++ite) {
             auto& segment = *ite;
             foundFinalSegment |= segment.isFound(to);
             segment.reverse();
@@ -112,8 +112,8 @@ namespace Physica::Core {
     template<class ScalarType>
     void device_obj<DiffTracer<ScalarType>>::reverse() {
         assert(!traceList.empty() && "[Error]: No record found");
-        const auto rend = traceList.rend();
-        for (auto ite = traceList.rbegin(); ite != rend; ++ite)
+        const auto end = traceList.end();
+        for (auto ite = traceList.begin(); ite != end; ++ite)
             (*ite).reverse();
     }
 
@@ -128,8 +128,8 @@ namespace Physica::Core {
     void device_obj<DiffTracer<ScalarType>>::zero_grad_from(DiffScalar from) {
         assert(!traceList.empty() && "[Error]: No record found");
         bool foundBeginSegment = false;
-        const auto rend = traceList.rend();
-        for (auto ite = traceList.rbegin(); ite != rend; ++ite) {
+        const auto end = traceList.end();
+        for (auto ite = traceList.begin(); ite != end; ++ite) {
             auto& segment = *ite;
             foundBeginSegment |= segment.isFound(from);
             if (!foundBeginSegment)
@@ -143,8 +143,8 @@ namespace Physica::Core {
     void device_obj<DiffTracer<ScalarType>>::zero_grad_to(DiffScalar to) {
         assert(!traceList.empty() && "[Error]: No record found");
         bool foundFinalSegment = false;
-        const auto rend = traceList.rend();
-        for (auto ite = traceList.rbegin(); ite != rend; ++ite) {
+        const auto end = traceList.end();
+        for (auto ite = traceList.begin(); ite != end; ++ite) {
             auto& segment = *ite;
             foundFinalSegment |= segment.isFound(to);
             segment.zero_grad();
@@ -157,12 +157,12 @@ namespace Physica::Core {
     template<class ScalarType>
     void device_obj<DiffTracer<ScalarType>>::forget(DiffScalar to) {
         assert(!traceList.empty() && "[Error]: No record found");
-        const auto rend = traceList.rend();
-        for (auto ite = traceList.rbegin(); ite != rend; ite = traceList.rbegin()) {
+        const auto end = traceList.end();
+        for (auto ite = traceList.begin(); ite != end; ite = traceList.begin()) {
             auto& segment = *ite;
             const bool isFound = segment.isFound(to);
             assert((!isFound || (segment.getLength() == 1)) && "[Error]: Forget part of a segment is not supported");
-            traceList.pop_back();
+            traceList.pop_front();
             if (isFound)
                 return;
         }
@@ -174,8 +174,8 @@ namespace Physica::Core {
     void device_obj<DiffTracer<ScalarType>>::forSegmentInRange(DiffScalar from, DiffScalar to, Functor func) {
         assert(!traceList.empty() && "[Error]: No record found");
         bool foundBeginSegment = false, foundFinalSegment = false;
-        const auto rend = traceList.rend();
-        for (auto ite = traceList.rbegin(); ite != rend; ++ite) {
+        const auto end = traceList.end();
+        for (auto ite = traceList.begin(); ite != end; ++ite) {
             auto& segment = *ite;
             foundBeginSegment |= segment.isFound(from);
             if (!foundBeginSegment)
