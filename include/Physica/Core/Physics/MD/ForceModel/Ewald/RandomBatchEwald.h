@@ -24,10 +24,9 @@ namespace Physica::Core {
     template<class ScalarType, class RandomPoolType> class RandomBatchEwald;
 
     namespace Internal {
-        template<class T1, class T2>
-        class Traits<RandomBatchEwald<T1, T2>> {
+        template<class ScalarType, class RandomPoolType>
+        class Traits<RandomBatchEwald<ScalarType, RandomPoolType>> : public Traits<RSpaceEwald<ScalarType, false>> {
         public:
-            using ScalarType = T1;
             using REwaldType = RSpaceEwald<ScalarType, false>;
         };
     }
