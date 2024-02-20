@@ -29,8 +29,12 @@ namespace Physica::Core {
      * Reference:
      * [1] G, Bussi, D. Donadio and M. Parrinello, J. Chem. Phys. 126, 014101 (2007).
      */
-    template<class ScalarType, unsigned int Dim = 3, size_t NumReplica = Dynamic>
+    template<class KineticModel>
     class DoubleThermo {
+        using TraitsType = Internal::Traits<KineticModel>;
+        using ScalarType = typename TraitsType::ScalarType;
+        constexpr static unsigned int Dim = TraitsType::Dim;
+        constexpr static size_t NumReplica = TraitsType::NumReplica;
         using MDCellType = MDCell<ScalarType, Dim>;
         using MassVector = typename MDCellType::MassVector;
         using RingPolymerType = RingPolymer<ScalarType, Dim, NumReplica>;
@@ -44,7 +48,7 @@ namespace Physica::Core {
         DoubleThermo(DoubleThermo&&) noexcept = default;
         ~DoubleThermo() = default;
         /* Operators */
-        DoubleThermo& operator=(DoubleThermo obj) noexcept;
+        DoubleThermo& operator=(DoubleThermo obj) noexcept { swap(obj); return *this; }
         /* Operations */
         template<class RandomPoolType, class Executor>
         void step(RingPolymerType& ringPolymer, ScalarType deltaT, RandomPoolType& pool) const;
@@ -57,21 +61,14 @@ namespace Physica::Core {
         ScalarType makeTranslationalFactor(const RingPolymerType& ringPolymer, ScalarType deltaT, RandomPoolType& pool) const;
     };
 
-    template<class ScalarType, unsigned int Dim, size_t NumReplica>
-    DoubleThermo<ScalarType, Dim, NumReplica>::DoubleThermo(ScalarType temperatureT_, ScalarType thermostatTime_)
+    template<class KineticModel>
+    DoubleThermo<KineticModel>::DoubleThermo(ScalarType temperatureT_, ScalarType thermostatTime_)
             : temperatureT(temperatureT_)
             , thermostatTime(thermostatTime_) {}
 
-    template<class ScalarType, unsigned int Dim, size_t NumReplica>
-    DoubleThermo<ScalarType, Dim, NumReplica>&
-    DoubleThermo<ScalarType, Dim, NumReplica>::operator=(DoubleThermo<ScalarType, Dim, NumReplica> obj) noexcept {
-        swap(obj);
-        return *this;
-    }
-
-    template<class ScalarType, unsigned int Dim, size_t NumReplica>
+    template<class KineticModel>
     template<class RandomPoolType, class Executor>
-    void DoubleThermo<ScalarType, Dim, NumReplica>::step(
+    void DoubleThermo<KineticModel>::step(
             RingPolymerType& ringPolymer, ScalarType deltaT, RandomPoolType& pool) const {
         const size_t dof = ringPolymer.getDOF();
         const ScalarType factor_translational = makeTranslationalFactor<RandomPoolType>(ringPolymer, deltaT, pool);
@@ -111,16 +108,16 @@ namespace Physica::Core {
         }
     }
 
-    template<class ScalarType, unsigned int Dim, size_t NumReplica>
-    void DoubleThermo<ScalarType, Dim, NumReplica>::swap(DoubleThermo& __restrict obj) noexcept {
+    template<class KineticModel>
+    void DoubleThermo<KineticModel>::swap(DoubleThermo& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         temperatureT.swap(obj.temperatureT);
         thermostatTime.swap(obj.thermostatTime);
     }
 
-    template<class ScalarType, unsigned int Dim, size_t NumReplica>
+    template<class KineticModel>
     template<class RandomPoolType>
-    ScalarType DoubleThermo<ScalarType, Dim, NumReplica>::makeTranslationalFactor(
+    typename DoubleThermo<KineticModel>::ScalarType DoubleThermo<KineticModel>::makeTranslationalFactor(
             const RingPolymerType& ringPolymer, ScalarType deltaT, RandomPoolType& pool) const {
         using Integrator = SRK2<ScalarType, 1>;
         using VectorType = typename Integrator::VectorType;
@@ -129,7 +126,7 @@ namespace Physica::Core {
             return 0;
         const size_t dof = ringPolymer.getDOF();
         [[maybe_unused]] ScalarType unused = 0;
-        const ScalarType nowT = ringPolymer.calcTemperature();
+        const ScalarType nowT = ringPolymer.template calcTemperature<KineticModel>();
         VectorType sol{nowT};
         Integrator::step(deltaT, unused, sol,
                             [this]([[maybe_unused]] ScalarType x, VectorType sol) -> VectorType {

@@ -68,7 +68,7 @@ int main() {
     const double timeStep = timeStepLambda * (latticeSize / numMolecular) * std::sqrt(unitMassM / temperatureT);
     std::mt19937 gen{};
     MDType rpmd = MDType(makeSystem(gen), numReplica, numReplica, temperatureT, timeStep);
-    rpmd.initMomentum(gen);
+    rpmd.initMomentum<KineticModel, decltype(gen)>(gen);
     KineticModel kineticModel(latticeSize, collideFactor, temperatureT, numMolecular, numReplica, maxHandleNum);
     kineticModel.updateMass(rpmd.getRingPolymer());
 

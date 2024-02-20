@@ -131,17 +131,17 @@ namespace Physica::Core {
         template<BaroType Type, class KineticModel, class ForceModel, class Executor>
         void fire_pstep(CFireModel<ScalarType, Dim, Type>& cfire, KineticModel& kineticModel, ForceModel& forceModel);
 
-        template<class RandomGenerator> inline void initMomentum(RandomGenerator& gen);
-        inline void scaleVelocity();
+        template<class KineticModel, class RandomGenerator> inline void initMomentum(RandomGenerator& gen);
+        template<class KineticModel> inline void scaleVelocity();
         void normalizeCentroid();
         [[nodiscard]] MDCellType phaseToCell(size_t replica) const;
         [[nodiscard]] MDCellType contractToCell(size_t contract) const;
         [[nodiscard]] MDCellType makeAverageCell() const;
 
-        [[nodiscard]] ScalarType calcKinetic() const;
-        [[nodiscard]] ScalarType calcKinetic(size_t dofIndex) const;
-        [[nodiscard]] ScalarType calcKineticPrim() const;
-        [[nodiscard]] ScalarType calcKineticPrim(size_t dofIndex) const;
+        template<class KineticModel> [[nodiscard]] ScalarType calcKinetic() const;
+        template<class KineticModel> [[nodiscard]] ScalarType calcKinetic(size_t dofIndex) const;
+        template<class KineticModel> [[nodiscard]] ScalarType calcKineticPrim() const;
+        template<class KineticModel> [[nodiscard]] ScalarType calcKineticPrim(size_t dofIndex) const;
         [[nodiscard]] inline ScalarType calcKineticClassical() const;
 
         template<class ForceModel, class Executor> [[nodiscard]] ScalarType calcPotential(const ForceModel& model) const;
@@ -150,8 +150,8 @@ namespace Physica::Core {
         [[nodiscard]] ScalarType calcClassicalElastic() const;
         template<class ForceModel> [[nodiscard]] ScalarType calcClassicalInternalEnergy(const ForceModel& model) const;
 
-        [[nodiscard]] ScalarType calcTemperature() const { return getRingPolymer().calcTemperature(); }
-        template<class ForceModel, class Executor>
+        template<class KineticModel> [[nodiscard]] ScalarType calcTemperature() const;
+        template<class KineticModel, class ForceModel, class Executor>
         [[nodiscard]] ScalarType calcPressThermo(ForceModel& model) const;
 
         template<class ForceModel, class Executor>

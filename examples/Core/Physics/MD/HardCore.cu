@@ -90,7 +90,7 @@ int main(int argc, char** argv) {
             MDType rpmd = MDType(makeSystem(gen), 1, 1, temperatureT, timeStep);
             KineticModel kineticModel(latticeSize, collideFactor, temperatureT, numMolecular, 100);
             kineticModel.updateMass(rpmd.getRingPolymer());
-            rpmd.initMomentum(gen);
+            rpmd.initMomentum<KineticModel, decltype(gen)>(gen);
 
             Vector<ScalarType> mean(record.getRow(), 0);
             for (size_t sample = 0; sample < numSample; ++sample) {

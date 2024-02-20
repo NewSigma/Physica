@@ -66,7 +66,7 @@ int main(int argc, char** argv) {
     std::mt19937 gen(seed);
 
     MDType rpmd = MDType(makeSystem(gen), 1, 1, temperatureT, timeStep);
-    rpmd.initMomentum(gen);
+    rpmd.initMomentum<KineticModel, decltype(gen)>(gen);
     KineticModel kineticModel(latticeSize, collideFactor, temperatureT, numMolecular, 1, 1000);
     kineticModel.updateMass(rpmd.getRingPolymer());
 

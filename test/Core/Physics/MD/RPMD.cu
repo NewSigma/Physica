@@ -26,8 +26,8 @@
 using namespace Physica::Core;
 using ScalarType = Scalar<Float>;
 using ForceModel = device_obj<SilveraGoldman<ScalarType, true>>;
-using ThermostatType = DoubleThermo<ScalarType>;
 using KineticModel = FreeModel<ScalarType, 3, Dynamic, RPMDIntegrator::Exact>;
+using ThermoType = DoubleThermo<KineticModel>;
 using MDType = RPMD<ScalarType, 3, Physica::Utils::Dynamic, Physica::Utils::PageLockedAllocator<ScalarType>>;
 using RandomGenerator = std::mt19937;
 using RandomPoolType = RandomPool<RandomGenerator, 3438603950906262893>;
@@ -63,16 +63,17 @@ void testMDRun() {
     ScalarType mean = 0;
     ScalarType var = 0;
     {
-        const ThermostatType thermo(temperatureT, thermostatTime);
+        const ThermoType thermo(temperatureT, thermostatTime);
         KineticModel kineticModel(temperatureT, numReplica);
         ForceModel forceModel(numMolecular, pair_cutoff);
         auto& pool = RandomPoolType::getInstance();
-        auto rpmd = makeSystem(pool.getGen());
-        rpmd.initMomentum(pool.getGen());
+        auto& gen = pool.getGen();
+        auto rpmd = makeSystem(gen);
+        rpmd.initMomentum<KineticModel, decltype(gen)>(gen);
 
         for (unsigned int i = 0; i < 6; ++i) {
             ScalarType temp = 0;
-            rpmd.nvt_step_for<ThermostatType, RandomPoolType, KineticModel, ForceModel, CudaExecutor>(
+            rpmd.nvt_step_for<ThermoType, RandomPoolType, KineticModel, ForceModel, CudaExecutor>(
                 PhyConst<AU>::secondToTime(2 * 1E-12),
                 thermo,
                 pool,
@@ -80,8 +81,8 @@ void testMDRun() {
                 forceModel);
 
             for (unsigned int j = 0; j < 100; ++j) {
-                rpmd.nvt_step<ThermostatType, RandomPoolType, KineticModel, ForceModel, CudaExecutor>(thermo, pool, kineticModel, forceModel);
-                toNextMean(temp, j, rpmd.calcKinetic());
+                rpmd.nvt_step<ThermoType, RandomPoolType, KineticModel, ForceModel, CudaExecutor>(thermo, pool, kineticModel, forceModel);
+                toNextMean(temp, j, rpmd.calcKinetic<KineticModel>());
             }
             toNextVariance(var, mean, i, temp);
         }

@@ -45,8 +45,8 @@ namespace Physica::Core {
         /* Operators */
         RingPolymer& operator=(RingPolymer obj) noexcept;
         /* Operations */
-        template<class RandomGenerator> void initMomentum(ScalarType temperatureT, RandomGenerator& gen);
-        void scaleVelocity(ScalarType temperatureT);
+        template<class KineticModel, class RandomGenerator> void initMomentum(ScalarType temperatureT, RandomGenerator& gen);
+        template<class KineticModel> void scaleVelocity(ScalarType temperatureT);
         [[nodiscard]] Vector<ScalarType, Dim> makeDriftMomentum() const;
         void removeDrift();
         inline void toNormalRepr(size_t posID);
@@ -61,6 +61,7 @@ namespace Physica::Core {
         [[nodiscard]] PositionMatrix makeCentroidMomentum() const;
 
         [[nodiscard]] ScalarType calcKineticClassical() const;
+        template<class KineticModel>
         [[nodiscard]] ScalarType calcTemperature() const;
         void swap(RingPolymer& __restrict obj) noexcept;
         /* Getters */
@@ -119,7 +120,7 @@ namespace Physica::Core {
     }
 
     template<class ScalarType, unsigned int Dim, size_t NumReplica>
-    template<class RandomGenerator>
+    template<class KineticModel, class RandomGenerator>
     void RingPolymer<ScalarType, Dim, NumReplica>::initMomentum(ScalarType temperatureT, RandomGenerator& gen) {
         const size_t dof = getDOF();
         [[unlikely]] if (temperatureT.isZero()) {
@@ -147,12 +148,13 @@ namespace Physica::Core {
             auto row = phase.row(i);
             row.asVector() -= driftMomentum[i % Dim];
         }
-        scaleVelocity(temperatureT);
+        scaleVelocity<KineticModel>(temperatureT);
     }
 
     template<class ScalarType, unsigned int Dim, size_t NumReplica>
+    template<class KineticModel>
     void RingPolymer<ScalarType, Dim, NumReplica>::scaleVelocity(ScalarType temperatureT) {
-        const ScalarType temperatureNow = calcTemperature();
+        const ScalarType temperatureNow = calcTemperature<KineticModel>();
         assert(!temperatureNow.isZero() && "[Error]: Velocity-scaling fails at 0K");
         const size_t dof = getDOF();
         const ScalarType factor = sqrt(temperatureT / temperatureNow);
@@ -312,8 +314,13 @@ namespace Physica::Core {
     }
 
     template<class ScalarType, unsigned int Dim, size_t NumReplica>
+    template<class KineticModel>
     ScalarType RingPolymer<ScalarType, Dim, NumReplica>::calcTemperature() const {
-        return calcKineticClassical() * PlainScalar((2 / (Dim * PhyConst<AU>::boltzmannK)) / (getNumParticle() * getNumReplica() * getNumReplica()));
+        constexpr bool IsPeriodBoundary = Internal::Traits<KineticModel>::IsPeriodBoundary;
+        constexpr size_t NumConstraint = IsPeriodBoundary ? 1 : 0;
+        const auto factor1 = PlainScalar(2 / (Dim * PhyConst<AU>::boltzmannK));
+        const auto factor2 = factor1 / PlainScalar((getNumParticle() * getNumReplica() - NumConstraint) * getNumReplica());
+        return calcKineticClassical() * factor2;
     }
 
     template<class ScalarType, unsigned int Dim, size_t NumReplica>

@@ -80,7 +80,8 @@ MDCell<ScalarType> makeSystem() {
 int main(int argc, char** argv) {
     ThreadPool::numThreadRequired = 4;
     MDType rpmd(makeSystem(), 1, 1, temperatureT, timeStep);
-    rpmd.initMomentum(RandomPoolType::getInstance().getGen());
+    auto& gen = RandomPoolType::getInstance().getGen();
+    rpmd.initMomentum<KineticModel, decltype(gen)>(gen);
     KineticModel kineticModel(temperatureT, 1);
     ForceModel forceModel(rpmd.phaseToCell(0), pair_cutoff, {});
     const VectorType energy1 = rpmd.testNVE<KineticModel, ForceModel, ThreadExecutor>(

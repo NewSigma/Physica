@@ -27,9 +27,9 @@
 using namespace Physica::Core;
 using ScalarType = Scalar<Double>;
 using RandomPoolType = RandomPool<std::mt19937, 12989825518855205292UL>;
-using ThermostatType = DoubleThermo<ScalarType>;
 using ForceModel = Q_TIP4P<ScalarType, RandomBatchEwald<ScalarType, RandomPoolType>>;
 using KineticModel = FreeModel<ScalarType, 3, Dynamic, RPMDIntegrator::Exact>;
+using ThermoType = DoubleThermo<KineticModel>;
 constexpr size_t numReplica = 32;
 constexpr size_t numContract = 8;
 constexpr double temperatureT = PhyConst<AU>::kToTemperature(298);
@@ -107,20 +107,21 @@ MDCell<ScalarType> makeSystem(unsigned int cellSize, RandomGenerator& gen) {
  */
 int main() {
     auto& pool = RandomPoolType::getInstance();
-    auto cell = makeSystem(2, pool.getGen());
+    auto& gen = pool.getGen();
+    auto cell = makeSystem(2, gen);
     ForceModel::sortPosition(cell);
-    ForceModel forceModel(cell, pair_cutoff, RandomBatchEwald<ScalarType, RandomPoolType>(1000, 100));
+    ForceModel forceModel(cell, pair_cutoff, RandomBatchEwald<ScalarType, RandomPoolType>(1000, 200));
     RPMD<ScalarType> rpmd(std::move(cell), numReplica, numContract, temperatureT, timeStep);
-    rpmd.initMomentum(pool.getGen());
+    rpmd.initMomentum<KineticModel, decltype(gen)>(gen);
 
     constexpr double answer = PhyConst<AU>::angstormToBohr(0.978);
     ScalarType bond = 0;
 
     ThreadPool::numThreadRequired = 4;
     {
-        const ThermostatType thermo(temperatureT, thermostatTime);
+        const ThermoType thermo(temperatureT, thermostatTime);
         KineticModel kineticModel(temperatureT, numReplica);
-        rpmd.nvt_step_for<ThermostatType, RandomPoolType, KineticModel, decltype(forceModel), SequentialExecutor>(
+        rpmd.nvt_step_for<ThermoType, RandomPoolType, KineticModel, decltype(forceModel), SequentialExecutor>(
             PhyConst<AU>::secondToTime(1 * 1E-12),
             thermo,
             pool,
@@ -136,7 +137,7 @@ int main() {
                 toNextMean(temp, 2 * j + 1, cell.minDistVector(numH + j, 2 * j + 1).norm());
             }
             toNextMean(bond, i, temp);
-            rpmd.nvt_step<ThermostatType, RandomPoolType, KineticModel, decltype(forceModel), SequentialExecutor>(thermo, pool, kineticModel, forceModel);
+            rpmd.nvt_step<ThermoType, RandomPoolType, KineticModel, decltype(forceModel), SequentialExecutor>(thermo, pool, kineticModel, forceModel);
         }
     }
     ThreadPool::getInstance().shouldExit();

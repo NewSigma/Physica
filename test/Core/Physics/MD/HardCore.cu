@@ -82,7 +82,7 @@ void testMergeStep() {
     MDType rpmd = MDType(makeSystem(gen), 1, 1, temperatureT, timeStep);
     KineticModel kineticModel(latticeSize, collideFactor, temperatureT, numMolecular, 100);
     kineticModel.updateMass(rpmd.getRingPolymer());
-    rpmd.initMomentum(gen);
+    rpmd.initMomentum<KineticModel, decltype(gen)>(gen);
 
     const MatrixType origin = rpmd.getPhaseMatrix();
     kineticModel.nve_step(rpmd.getRingPolymer(), timeStep);
@@ -111,7 +111,7 @@ void testCpuGpuCompare() {
         MDType rpmd = MDType(makeSystem(gen), 1, 1, temperatureT, timeStep);
         KineticModel kineticModel(latticeSize, collideFactor, temperatureT, numMolecular, 1, 100);
         kineticModel.updateMass(rpmd.getRingPolymer());
-        rpmd.initMomentum(gen);
+        rpmd.initMomentum<KineticModel, decltype(gen)>(gen);
 
         ForceModel forceModel{};
         rpmd.nve_step<KineticModel, ForceModel, SequentialExecutor>(kineticModel, forceModel);
@@ -130,7 +130,7 @@ void testCpuGpuCompare() {
         MDType rpmd = MDType(makeSystem(gen), 1, 1, temperatureT, timeStep);
         KineticModel kineticModel(latticeSize, collideFactor, temperatureT, numMolecular, 100);
         kineticModel.updateMass(rpmd.getRingPolymer());
-        rpmd.initMomentum(gen);
+        rpmd.initMomentum<KineticModel, decltype(gen)>(gen);
 
         kineticModel.nve_step(rpmd.getRingPolymer(), timeStep);
         gpu_data[0] = calcThermoFlux(rpmd);

@@ -30,10 +30,11 @@
 using namespace Physica::Core;
 using namespace Physica::Utils;
 using ScalarType = Scalar<Double>;
-using ThermostatType = DoubleThermo<ScalarType>;
 using KineticModel = FreeModel<ScalarType, 3, Dynamic, RPMDIntegrator::Exact>;
 using ForceModel = Q_TIP4P<ScalarType, Ewald<ScalarType>>;
-using RandomPoolType = RandomPool<std::mt19937>;
+using ThermoType = DoubleThermo<KineticModel>;
+using RandomGenerator = std::mt19937;
+using RandomPoolType = RandomPool<RandomGenerator>;
 constexpr size_t numReplica = 32;
 constexpr size_t numContract = 8;
 constexpr double temperatureT = PhyConst<AU>::kToTemperature(298);
@@ -112,9 +113,9 @@ int main() {
     ForceModel::sortPosition(cell);
     ForceModel forceModel(cell, pair_cutoff, {});
     KineticModel kineticModel(temperatureT, numReplica);
-    const ThermostatType thermo(temperatureT, thermostatTime);
+    const ThermoType thermo(temperatureT, thermostatTime);
     RPMD<ScalarType> rpmd(std::move(cell), numReplica, numContract, temperatureT, timeStep);
-    rpmd.initMomentum(gen);
+    rpmd.initMomentum<KineticModel, RandomGenerator>(gen);
     {
         auto timeuse = Benchmark::run([&]() {
             rpmd.nve_step_for<KineticModel, ForceModel, SequentialExecutor>(

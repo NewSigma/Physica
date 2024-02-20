@@ -69,7 +69,7 @@ int main() {
         using ForceModel = CPUGPUModel<HostModel, DeviceModel>;
         constexpr size_t numMolecular = 108;
         MDType rpmd = makeSystem(numMolecular, gen);
-        rpmd.initMomentum(gen);
+        rpmd.initMomentum<KineticModel, decltype(gen)>(gen);
         ForceModel forceModel(4, HostModel(pair_cutoff), numMolecular, pair_cutoff);
         auto timeuse = Physica::Utils::Benchmark::run([&]() {
             rpmd.nve_step_for<KineticModel, ForceModel, AutoExecutor>(PhyConst<AU>::secondToTime(2 * 1E-13), kineticModel, forceModel);
@@ -81,7 +81,7 @@ int main() {
         using ForceModel = CPUGPUModel<HostModel, DeviceModel>;
         constexpr size_t numMolecular = 256;
         MDType rpmd = makeSystem(numMolecular, gen);
-        rpmd.initMomentum(gen);
+        rpmd.initMomentum<KineticModel, decltype(gen)>(gen);
         ForceModel forceModel(4, HostModel(pair_cutoff), numMolecular, pair_cutoff);
         auto timeuse = Physica::Utils::Benchmark::run([&]() {
             rpmd.nve_step_for<KineticModel, ForceModel, AutoExecutor>(PhyConst<AU>::secondToTime(2 * 1E-13), kineticModel, forceModel);
@@ -93,7 +93,7 @@ int main() {
         using ForceModel = CPUGPUModel<HostModel, DeviceModel>;
         constexpr size_t numMolecular = 500;
         MDType rpmd = makeSystem(numMolecular, gen);
-        rpmd.initMomentum(gen);
+        rpmd.initMomentum<KineticModel, decltype(gen)>(gen);
         ForceModel forceModel(4, HostModel(pair_cutoff), numMolecular, pair_cutoff);
         auto timeuse = Physica::Utils::Benchmark::run([&]() {
             rpmd.nve_step_for<KineticModel, ForceModel, AutoExecutor>(PhyConst<AU>::secondToTime(1 * 1E-13), kineticModel, forceModel);
@@ -105,7 +105,7 @@ int main() {
         using ForceModel = CPUGPUModel<HostModel, DeviceModel>;
         constexpr size_t numMolecular = 864;
         MDType rpmd = makeSystem(numMolecular, gen);
-        rpmd.initMomentum(gen);
+        rpmd.initMomentum<KineticModel, decltype(gen)>(gen);
         ForceModel forceModel(4, HostModel(pair_cutoff), numMolecular, pair_cutoff);
         auto timeuse = Physica::Utils::Benchmark::run([&]() {
             rpmd.nve_step_for<KineticModel, ForceModel, AutoExecutor>(PhyConst<AU>::secondToTime(5 * 1E-14), kineticModel, forceModel);

@@ -65,7 +65,7 @@ MDType makeSystem(RandomGenerator& gen) {
 int main() {
     auto& gen = RandomPoolType::getInstance().getGen();
     MDType rpmd = makeSystem(gen);
-    rpmd.initMomentum(gen);
+    rpmd.initMomentum<KineticModel, decltype(gen)>(gen);
 
     KineticModel kineticModel(temperatureT, numReplica);
     ForceModel forceModel(numMolecular, pair_cutoff);

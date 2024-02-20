@@ -19,8 +19,8 @@ using namespace Physica::Core;
 using namespace Physica::Gui;
 using ScalarType = Scalar<Double>;
 using VectorType = Vector<ScalarType>;
-using ThermostatType = DoubleThermo<ScalarType, 3, 1>;
 using KineticModel = FreeModel<ScalarType, 3, 1, RPMDIntegrator::Exact>;
+using ThermoType = DoubleThermo<KineticModel>;
 using MDType = RPMD<ScalarType, 3, 1>;
 using RandomPoolType = RandomPool<std::mt19937>;
 constexpr double thermostatTime = PhyConst<AU>::secondToTime(0.1 * 1E-12);
@@ -102,22 +102,23 @@ int main(int argc, char** argv) {
         ThreadExecutor::parallel_for([&](unsigned int) {
             auto& pool = RandomPoolType::getInstance();
             auto rpmd = MDType(makeSystem(), numReplica, numReplica, temperatureT, timeStep);
-            rpmd.initMomentum(pool.getGen());
+            auto& gen = pool.getGen();
+            rpmd.initMomentum<KineticModel, decltype(gen)>(gen);
 
             ForceModel forceModel{};
             KineticModel kineticModel(temperatureT, numReplica);
-            ThermostatType thermo(temperatureT, thermostatTime);
+            ThermoType thermo(temperatureT, thermostatTime);
 
             auto& ringPolymer = rpmd.getRingPolymer();
             Correlation<ScalarType> sampler(numStep);
             VectorType corr_dir_sample(numStep, 0);
             for (size_t sample = 0; sample < numSample; ++sample) {
-                rpmd.nvt_step_for<ThermostatType, RandomPoolType, KineticModel, ForceModel, SequentialExecutor>(
+                rpmd.nvt_step_for<ThermoType, RandomPoolType, KineticModel, ForceModel, SequentialExecutor>(
                         PhyConst<AU>::secondToTime(2 * 1E-12), thermo, pool, kineticModel, forceModel);
                 const ScalarType p0 = ringPolymer.makeCentroidMomentum()(0, 0);
                 for (unsigned int step = 0; step < numStep; ++step) {
                     const ScalarType p1 = ringPolymer.makeCentroidMomentum()(0, 0);
-                    rpmd.nvt_step<ThermostatType, RandomPoolType, KineticModel, ForceModel, SequentialExecutor>(
+                    rpmd.nvt_step<ThermoType, RandomPoolType, KineticModel, ForceModel, SequentialExecutor>(
                             thermo, pool, kineticModel, forceModel);
                     sampler.sample(p1);
                     toNextMean(corr_dir_sample[step], sample, p0 * p1);

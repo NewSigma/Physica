@@ -36,7 +36,7 @@ using namespace Physica::Gui;
 using ScalarType = Scalar<Double>;
 using VectorType = Vector<ScalarType>;
 using MatrixType = DenseMatrix<ScalarType>;
-using ThermostatType = Langevin<ScalarType, 1, 1>;
+using ThermoType = Langevin<ScalarType, 1, 1>;
 using KineticModel = HardCore<ScalarType, false, 1, RPMDIntegrator::Exact>;
 using ForceModel = TodaModel<ScalarType, true>;
 using MDType = RPMD<ScalarType, 1, 1>;
@@ -66,18 +66,19 @@ MDCellType makeSystem(ScalarType latticeSize) {
 
 std::pair<ScalarType, ScalarType> calcPress(size_t numSystem, size_t numStep, ScalarType latticeSize) {
     auto rpmd = MDType(makeSystem(latticeSize), numReplica, numReplica, temperatureT, timeStep);
-    const ThermostatType thermo(temperatureT, thermostatTime, true);
+    const ThermoType thermo(temperatureT, thermostatTime, true);
     ForceModel forceModel(1.0);
     KineticModel kineticModel(latticeSize, collideFactor, temperatureT, numMolecular, 1, 100);
     kineticModel.updateMass(rpmd.getRingPolymer());
     auto& pool = RandomPoolType::getInstance();
-    rpmd.initMomentum(pool.getGen());
+    auto& gen = pool.getGen();
+    rpmd.initMomentum<KineticModel, decltype(gen)>(gen);
 
     ScalarType mean = 0, variance = 0;
     for (size_t sys = 0; sys < numSystem; ++sys) {
         ScalarType temp = 0;
         for (size_t i = 0; i < numStep; ++i) {
-            rpmd.nvt_step<ThermostatType, RandomPoolType, KineticModel, ForceModel, SequentialExecutor>(
+            rpmd.nvt_step<ThermoType, RandomPoolType, KineticModel, ForceModel, SequentialExecutor>(
                     thermo, pool, kineticModel, forceModel);
             toNextMean(temp, i, rpmd.makeStressClassical<ForceModel, SequentialExecutor>(forceModel)(0, 0));
         }

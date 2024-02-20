@@ -32,12 +32,13 @@
 using namespace Physica::Core;
 using namespace Physica::Utils;
 using ScalarType = Scalar<Float>;
-using RandomPoolType = RandomPool<std::mt19937>;
+using RandomGenerator = std::mt19937;
+using RandomPoolType = RandomPool<RandomGenerator>;
 using EwaldType = Ewald<ScalarType, Physica::Core::device_obj<RSpaceEwald<ScalarType>>>;
 using ForceModel = Q_TIP4P<ScalarType, EwaldType>;
 using MDType = RPMD<ScalarType, 3, 1, Physica::Utils::PageLockedAllocator<ScalarType>>;
 using KineticModel = FreeModel<ScalarType, 3, 1, RPMDIntegrator::Exact>;
-using ThermostatType = DoubleThermo<ScalarType, 3, 1>;
+using ThermoType = DoubleThermo<KineticModel>;
 using BarostatType = SCRBaro<ScalarType, 1, RandomPoolType, BaroType::XY>;
 constexpr double temperatureT = PhyConst<AU>::kToTemperature(100);
 constexpr double thermostatTime = PhyConst<AU>::secondToTime(100 * 1E-15);
@@ -81,15 +82,15 @@ int main() {
     auto cell = makeSystem(5);
     ForceModel::sortPosition(cell);
     MDType rpmd(std::move(cell), 1, 1, temperatureT, timeStep);
-    rpmd.initMomentum(pool.getGen());
+    rpmd.initMomentum<KineticModel, RandomGenerator>(pool.getGen());
     
     KineticModel kineticModel(temperatureT, 1);
     ForceModel forceModel(rpmd.phaseToCell(0), pair_cutoff, EwaldType{});
-    ThermostatType thermo(temperatureT, thermostatTime);
+    ThermoType thermo(temperatureT, thermostatTime);
     BarostatType barostat(compressRate, temperatureT, 0.0 / PhyConst<AU>::pressToGPa(1));
     {
         auto timeuse = Benchmark::run([&]() {
-            rpmd.npt_step_for<ThermostatType, RandomPoolType, BarostatType, KineticModel, decltype(forceModel), CudaExecutor>(
+            rpmd.npt_step_for<ThermoType, RandomPoolType, BarostatType, KineticModel, decltype(forceModel), CudaExecutor>(
                 PhyConst<AU>::secondToTime(1 * 1E-13),
                 thermo,
                 pool,

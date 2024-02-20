@@ -36,9 +36,12 @@ namespace Physica::Core {
     template<class ScalarType, unsigned int Dim, size_t NumReplica, RPMDIntegrator Integrator> class FreeModel;
 
     namespace Internal {
-        template<class ScalarType, unsigned int Dim, size_t NumReplica, RPMDIntegrator Integrator>
-        class Traits<FreeModel<ScalarType, Dim, NumReplica, Integrator>> {
+        template<class T1, unsigned int T2, size_t T3, RPMDIntegrator Integrator>
+        class Traits<FreeModel<T1, T2, T3, Integrator>> {
         public:
+            using ScalarType = T1;
+            constexpr static unsigned int Dim = T2;
+            constexpr static size_t NumReplica = T3;
             constexpr static bool IsPeriodBoundary = true;
         };
     }

@@ -30,7 +30,7 @@ using MatrixType = DenseMatrix<ScalarType>;
 using MDType = RPMD<ScalarType, 1, Dynamic>;
 using MDCellType = typename MDType::MDCellType;
 using ForceModel = EmptyForceModel<ScalarType, 1>;
-using ThermostatType = Langevin<ScalarType, 1, Dynamic>;
+using ThermoType = Langevin<ScalarType, 1, Dynamic>;
 using KineticModel = HardCore<ScalarType, true, Dynamic, RPMDIntegrator::Exact>;
 using RandomPoolType = RandomPool<std::mt19937, 15502868121535481991UL>;
 constexpr double timeStepLambda = 0.01;
@@ -67,10 +67,11 @@ int main() {
     const double timeStep = timeStepLambda * (latticeSize / numMolecular) * std::sqrt(unitMassM / temperatureT);
     auto& pool = RandomPoolType::getInstance();
     KineticModel kineticModel(latticeSize, collideFactor, temperatureT, numMolecular, numReplica, maxHandleNum);
-    ThermostatType thermo(temperatureT, thermostatTime, false);
+    ThermoType thermo(temperatureT, thermostatTime, false);
 
-    MDType rpmd = MDType(makeSystem(pool.getGen()), numReplica, numReplica, temperatureT, timeStep);
-    rpmd.initMomentum(pool.getGen());
+    auto& gen = pool.getGen();
+    MDType rpmd = MDType(makeSystem(gen), numReplica, numReplica, temperatureT, timeStep);
+    rpmd.initMomentum<KineticModel, decltype(gen)>(gen);
     kineticModel.updateMass(rpmd.getRingPolymer());
 
     MatrixType meanCorr(numMolecular, numReplica);
@@ -84,14 +85,14 @@ int main() {
         ScalarType temperature_sample = 0;
         for (size_t i = 0; i < numStep; ++i) {
             ForceModel forceModel{};
-            rpmd.nvt_step<ThermostatType, RandomPoolType, KineticModel, ForceModel, SequentialExecutor>(thermo, pool, kineticModel, forceModel);
+            rpmd.nvt_step<ThermoType, RandomPoolType, KineticModel, ForceModel, SequentialExecutor>(thermo, pool, kineticModel, forceModel);
             auto momentum = rpmd.getRingPolymer().asMatrix().topRows(numMolecular);
             for (size_t replica = 0; replica < numReplica; ++replica) {
                 auto col = temp.col(replica);
                 col = hadamard(hadamard(momentum.col(replica).asVector(), momentum.col((replica + 1) % numReplica).asVector()), kineticModel.getRepMass()) * factor;
             }
             toNextMean(buffer, i, temp);
-            toNextMean(temperature_sample, i, rpmd.calcTemperature());
+            toNextMean(temperature_sample, i, rpmd.calcTemperature<KineticModel>());
         }
         toNextVariance(varCorr, meanCorr, sys, buffer);
         toNextVariance(varTemperature, meanTemperature, sys, temperature_sample);

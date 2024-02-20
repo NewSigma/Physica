@@ -317,14 +317,15 @@ namespace Physica::Core {
     }
 
     template<class ScalarType, unsigned int Dim, size_t NumReplica, class ForceMatrixAllocator>
-    template<class RandomGenerator>
+    template<class KineticModel, class RandomGenerator>
     inline void RPMD<ScalarType, Dim, NumReplica, ForceMatrixAllocator>::initMomentum(RandomGenerator& gen) {
-        return ringPolymer.initMomentum(temperatureT, gen);
+        return ringPolymer.template initMomentum<KineticModel, RandomGenerator>(temperatureT, gen);
     }
 
     template<class ScalarType, unsigned int Dim, size_t NumReplica, class ForceMatrixAllocator>
+    template<class KineticModel>
     inline void RPMD<ScalarType, Dim, NumReplica, ForceMatrixAllocator>::scaleVelocity() {
-        ringPolymer.scaleVelocity(temperatureT);
+        ringPolymer.template scaleVelocity<KineticModel>(temperatureT);
     }
     /**
      * Carrying out this function every several steps may stable the simulation.
@@ -380,8 +381,9 @@ namespace Physica::Core {
      * [1] M. F. Herman, E. J. Bruskin, and B. J. Berne, J. Chem. Phys. 76, 5150(1982).
      */
     template<class ScalarType, unsigned int Dim, size_t NumReplica, class ForceMatrixAllocator>
+    template<class KineticModel>
     ScalarType RPMD<ScalarType, Dim, NumReplica, ForceMatrixAllocator>::calcKinetic() const {
-        const ScalarType repBeta = ringPolymer.calcRepBeta(ringPolymer.calcTemperature());
+        const ScalarType repBeta = ringPolymer.calcRepBeta(calcTemperature<KineticModel>());
         const size_t dof = getDOF();
         const auto centroidPos = ringPolymer.makeCentroidPos();
 
@@ -396,8 +398,9 @@ namespace Physica::Core {
     }
 
     template<class ScalarType, unsigned int Dim, size_t NumReplica, class ForceMatrixAllocator>
+    template<class KineticModel>
     ScalarType RPMD<ScalarType, Dim, NumReplica, ForceMatrixAllocator>::calcKinetic(size_t dofIndex) const {
-        const ScalarType repBeta = ringPolymer.calcRepBeta(ringPolymer.calcTemperature());
+        const ScalarType repBeta = ringPolymer.calcRepBeta(calcTemperature<KineticModel>());
         const auto pos = getPhaseMatrix().row(getDOF() + dofIndex);
         const ScalarType centroidPos = mean(pos);
 
@@ -413,16 +416,18 @@ namespace Physica::Core {
      * [1] M. F. Herman, E. J. Bruskin, and B. J. Berne, J. Chem. Phys. 76, 5150 (1982); https://doi.org/10.1063/1.442815
      */
     template<class ScalarType, unsigned int Dim, size_t NumReplica, class ForceMatrixAllocator>
+    template<class KineticModel>
     ScalarType RPMD<ScalarType, Dim, NumReplica, ForceMatrixAllocator>::calcKineticPrim() const {
         ScalarType kinetic = 0;
         for (size_t i = 0; i < getDOF(); ++i)
-            kinetic += calcKineticPrim(i);
+            kinetic += calcKineticPrim<KineticModel>(i);
         return kinetic;
     }
 
     template<class ScalarType, unsigned int Dim, size_t NumReplica, class ForceMatrixAllocator>
+    template<class KineticModel>
     ScalarType RPMD<ScalarType, Dim, NumReplica, ForceMatrixAllocator>::calcKineticPrim(size_t dofIndex) const {
-        const ScalarType repBeta = ringPolymer.calcRepBeta(ringPolymer.calcTemperature());
+        const ScalarType repBeta = ringPolymer.calcRepBeta(calcTemperature<KineticModel>());
         const ScalarType omegaW = ringPolymer.calcOmegaW(temperatureT);
         const auto pos = getPhaseMatrix().row(getDOF() + dofIndex);
 
@@ -480,11 +485,17 @@ namespace Physica::Core {
     }
 
     template<class ScalarType, unsigned int Dim, size_t NumReplica, class ForceMatrixAllocator>
-    template<class ForceModel, class Executor>
+    template<class KineticModel>
+    ScalarType RPMD<ScalarType, Dim, NumReplica, ForceMatrixAllocator>::calcTemperature() const {
+        return ringPolymer.template calcTemperature<KineticModel>();
+    }
+
+    template<class ScalarType, unsigned int Dim, size_t NumReplica, class ForceMatrixAllocator>
+    template<class KineticModel, class ForceModel, class Executor>
     ScalarType RPMD<ScalarType, Dim, NumReplica, ForceMatrixAllocator>::calcPressThermo(ForceModel& model) const {
         constexpr bool isFreeModel = Internal::is_empty_force_model<ForceModel>::value;
         constexpr bool IsPeriodBoundary = Internal::Traits<ForceModel>::IsPeriodBoundary;
-        ScalarType result = calcKinetic() / (getVolume() * (Dim * 0.5));
+        ScalarType result = calcKinetic<KineticModel>() / (getVolume() * (Dim * 0.5));
         if constexpr (!isFreeModel) {
             const size_t numReplica = getNumReplica();
             ScalarType temp = 0;
@@ -739,7 +750,7 @@ namespace Physica::Core {
         Vector<ScalarType> pot(step);
         for (uint64_t i = 0; i < step; ++i) {
             rpmd.nve_step<KineticModel, ForceModel, Executor>(kineticModel, forceModel);
-            pot[i] = rpmd.calcKinetic() + rpmd.calcPotential<ForceModel, Executor>(forceModel);
+            pot[i] = rpmd.calcKinetic<KineticModel>() + rpmd.calcPotential<ForceModel, Executor>(forceModel);
         }
         pot -= ScalarType(pot[0]);
         return pot;

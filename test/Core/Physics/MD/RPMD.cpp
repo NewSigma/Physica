@@ -26,6 +26,8 @@
 using namespace Physica::Core;
 using RandomGenerator = std::mt19937;
 using RandomPoolType = RandomPool<RandomGenerator, 3438603950906262893>;
+using ScalarType = Scalar<Double>;
+using KineticModel = FreeModel<ScalarType, 3, Dynamic, RPMDIntegrator::Exact>;
 constexpr size_t numReplica = 24;
 constexpr double temperatureT = PhyConst<AU>::kToTemperature(25);
 constexpr double thermostatTime = PhyConst<AU>::secondToTime(100 * 1E-15);
@@ -35,7 +37,6 @@ constexpr double pair_cutoff = 15;
 constexpr double molarVolume = 31.7;
 constexpr double mass = PhyConst<AU>::atomMass(1) * 2;
 
-template<class ScalarType>
 RPMD<ScalarType> makeSystem(RandomGenerator& gen) {
     using MDCellType = typename RPMD<ScalarType>::MDCellType;
     typename MDCellType::LatticeMatrix lattice = MDCellType::LatticeMatrix::unitMatrix(3);
@@ -53,10 +54,9 @@ RPMD<ScalarType> makeSystem(RandomGenerator& gen) {
 }
 
 bool testDriftMomentum(double precision) {
-    using ScalarType = Scalar<Double>;
     auto& gen = RandomPoolType::getInstance().getGen();
-    auto rpmd = makeSystem<ScalarType>(gen);
-    rpmd.initMomentum(gen);
+    auto rpmd = makeSystem(gen);
+    rpmd.initMomentum<KineticModel, decltype(gen)>(gen);
     for (int i = 0; i < 3; ++i) {
         ScalarType sum = 0;
         for (size_t j = i; j < rpmd.getDOF(); j += 3)
@@ -68,19 +68,18 @@ bool testDriftMomentum(double precision) {
 }
 
 bool testCalcKinetic(double precision) {
-    using ScalarType = Scalar<Double>;
     using ForceModel = SilveraGoldman<ScalarType, true, false>;
 
     auto& gen = RandomPoolType::getInstance().getGen();
-    auto rpmd = makeSystem<ScalarType>(gen);
-    rpmd.initMomentum(gen);
+    auto rpmd = makeSystem(gen);
+    rpmd.initMomentum<KineticModel, decltype(gen)>(gen);
     ForceModel forceModel(pair_cutoff);
     rpmd.updateForce<ForceModel, ThreadExecutor>(forceModel);
 
-    const ScalarType kinetic1 = rpmd.calcKinetic();
+    const ScalarType kinetic1 = rpmd.calcKinetic<KineticModel>();
     ScalarType kinetic2 = 0;
     for (size_t i = 0; i < rpmd.getDOF(); ++i)
-        kinetic2 += rpmd.calcKinetic(i);
+        kinetic2 += rpmd.calcKinetic<KineticModel>(i);
     return scalarNear(kinetic1, kinetic2, precision);
 }
 /**
@@ -88,23 +87,22 @@ bool testCalcKinetic(double precision) {
  * [1] Miller TF, Manolopoulos DE. 2005. Quantum diffusion in liquid para-hydrogen from ring polymer molecular dynamics. J. Chem. Phys. 122:184503
  */
 void testMDRun() {
-    using ScalarType = Scalar<Double>;
     using ForceModel = SilveraGoldman<ScalarType, true, false>;
-    using ThermostatType = DoubleThermo<ScalarType>;
-    using KineticModel = FreeModel<ScalarType, 3, Dynamic, RPMDIntegrator::Exact>;
+    using ThermoType = DoubleThermo<KineticModel>;
     ScalarType mean = 0;
     ScalarType var = 0;
     {
-        const ThermostatType thermo(temperatureT, thermostatTime);
+        const ThermoType thermo(temperatureT, thermostatTime);
         KineticModel kineticModel(temperatureT, numReplica);
         ForceModel forceModel(pair_cutoff);
         auto& pool = RandomPoolType::getInstance();
-        auto rpmd = makeSystem<ScalarType>(pool.getGen());
-        rpmd.initMomentum(pool.getGen());
+        auto& gen = pool.getGen();
+        auto rpmd = makeSystem(gen);
+        rpmd.initMomentum<KineticModel, decltype(gen)>(gen);
 
         for (unsigned int i = 0; i < 6; ++i) {
             ScalarType temp = 0;
-            rpmd.nvt_step_for<ThermostatType, RandomPoolType, KineticModel, ForceModel, ThreadExecutor>(
+            rpmd.nvt_step_for<ThermoType, RandomPoolType, KineticModel, ForceModel, ThreadExecutor>(
                 PhyConst<AU>::secondToTime(2 * 1E-12),
                 thermo,
                 pool,
@@ -112,8 +110,8 @@ void testMDRun() {
                 forceModel);
 
             for (unsigned int j = 0; j < 100; ++j) {
-                rpmd.nvt_step<ThermostatType, RandomPoolType, KineticModel, ForceModel, ThreadExecutor>(thermo, pool, kineticModel, forceModel);
-                toNextMean(temp, j, rpmd.calcKinetic());
+                rpmd.nvt_step<ThermoType, RandomPoolType, KineticModel, ForceModel, ThreadExecutor>(thermo, pool, kineticModel, forceModel);
+                toNextMean(temp, j, rpmd.calcKinetic<KineticModel>());
             }
             toNextVariance(var, mean, i, temp);
         }

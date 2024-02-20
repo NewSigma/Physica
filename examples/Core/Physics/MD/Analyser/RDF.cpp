@@ -109,14 +109,15 @@ MDCell<ScalarType> makeSystem(unsigned int cellSize, RandomGenerator& gen) {
 
 template<size_t NumReplica>
 RDF<ScalarType> calcRDF(size_t numReplica) {
-    using ThermostatType = DoubleThermo<ScalarType, 3, NumReplica>;
     using KineticModel = FreeModel<ScalarType, 3, NumReplica, RPMDIntegrator::Exact>;
+    using ThermoType = DoubleThermo<KineticModel>;
     auto& pool = RandomPoolType::getInstance();
-    auto cell = makeSystem(3, pool.getGen());
+    auto& gen = pool.getGen();
+    auto cell = makeSystem(3, gen);
     ForceModel::sortPosition(cell);
-    const ThermostatType thermo(temperatureT, thermostatTime);
+    const ThermoType thermo(temperatureT, thermostatTime);
     RPMD<ScalarType, 3, NumReplica> rpmd(std::move(cell), numReplica, numReplica, temperatureT, timeStep);
-    rpmd.initMomentum(pool.getGen());
+    rpmd.template initMomentum<KineticModel, decltype(gen)>(gen);
     ForceModel forceModel(rpmd.phaseToCell(0), pair_cutoff, EwaldType(1000, 100));
     KineticModel kineticModel(temperatureT, numReplica);
 
@@ -134,10 +135,10 @@ RDF<ScalarType> calcRDF(size_t numReplica) {
 
     ThreadPool::numThreadRequired = 4;
     {
-        rpmd.template nvt_step_for<ThermostatType, RandomPoolType, KineticModel, ForceModel, ThreadExecutor>(
+        rpmd.template nvt_step_for<ThermoType, RandomPoolType, KineticModel, ForceModel, ThreadExecutor>(
             PhyConst<AU>::secondToTime(2 * 1E-12), thermo, pool, kineticModel, forceModel);
         for (size_t i = 0; i < 1000; ++i) {
-            rpmd.template nvt_step<ThermostatType, RandomPoolType, KineticModel, ForceModel, ThreadExecutor>(
+            rpmd.template nvt_step<ThermoType, RandomPoolType, KineticModel, ForceModel, ThreadExecutor>(
                 thermo, pool, kineticModel, forceModel);
             for (size_t j = 0; j < numReplica; ++j)
                 rdf.sample(rpmd.phaseToCell(j));
