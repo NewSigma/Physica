@@ -24,6 +24,14 @@
 #include "RSpaceEwald.h"
 
 namespace Physica::Core {
+    /**
+     * \tparam REwaldType: R(Space)EwaldType.
+     * May be device side or host side, small cell version or large cell version, so it cannot be simplified to a single bool.
+     * 
+     * Reference:
+     * [1] Martin, Richard M. Electronic structure: basic theory and practical methods[M].Beijing: World publishing corporation; Cambridge: Cambridge University Press, 2017:499-503
+     * [2] Comput. Phys. Commun. 95(2-3), 73-92 (1996); https://doi.org/10.1016/0010-4655(96)00016-1
+     */
     template<class ScalarType, class REwaldType = RSpaceEwald<ScalarType, false>> class Ewald;
 
     namespace Internal {
@@ -34,13 +42,7 @@ namespace Physica::Core {
             using REwaldType = T2;
         };
     }
-    /**
-     * \tparam REwaldType: R(Space)EwaldType
-     * 
-     * Reference:
-     * [1] Martin,Richard M. Electronic structure : basic theory and practical methods[M].Beijing: World publishing corporation; Cambridge: Cambridge University Press, 2017:499-503
-     * [2] Toukmaji A Y, Board J A. Ewald summation techniques in perspective: a survey[J]. Computer Physics Communications, 1996, 95(2-3):73-92.
-     */
+
     template<class ScalarType, class REwaldType>
     class Ewald : private REwaldType {
         constexpr static bool IsDeviceREwald = Utils::is_device_obj<REwaldType>::value;

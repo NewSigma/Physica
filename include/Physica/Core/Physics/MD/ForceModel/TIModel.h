@@ -22,6 +22,12 @@
 #include "Hamonic.h"
 
 namespace Physica::Core {
+    template<class ForceModel> class TIModel;
+
+    namespace Internal {
+        template<class ForceModel>
+        class Traits<TIModel<ForceModel>> : public Traits<ForceModel> {};
+    }
     /**
      * \class TIModel provides support to thermodynamic integration(TI).
      * 
@@ -39,6 +45,7 @@ namespace Physica::Core {
         HamonicType hamonic;
         Vector<ScalarType> mass;
         ScalarType temperatureT;
+        ScalarType refPotentialV;
         ScalarType refHelmholtzF;
 
         ScalarType lambda;
@@ -54,9 +61,9 @@ namespace Physica::Core {
         [[nodiscard]] ScalarType deltaPotentialV(const MDCellType& cell) const;
 
         template<class Executor>
-        [[nodiscard]] Vector<ScalarType> force(const MDCellType& cell) const { return Vector<ScalarType>(cell.getDOF(), 0); }
+        [[nodiscard]] Vector<ScalarType> force(const MDCellType& cell) const;
         template<class VectorType, class Executor>
-        void forceAsync(const MDCellType& cell, ContinuousVector<VectorType>& result) const;
+        void forceAsync(const MDCellType& cell, ContinuousVector<VectorType>& result);
 
         void swap(TIModel& __restrict obj) noexcept;
         /* Getters */
@@ -64,9 +71,7 @@ namespace Physica::Core {
         /* Setters */
         void setLambda(ScalarType lambda_);
         /* Static members */
-        [[nodiscard]] static Vector<ScalarType> makeSpringCoeffs(
-                const VectorType<ScalarType>& msd,
-                ScalarType temperatureT);
+        [[nodiscard]] static Vector<ScalarType> makeSpringCoeffs(const Vector<ScalarType>& msd, ScalarType temperatureT);
     private:
         void updateRef();
     };
@@ -79,10 +84,11 @@ namespace Physica::Core {
             , temperatureT(temperatureT_)
             , lambda(0) {
         updateRef();
+        refPotentialV = original.potentialEnergy(refCell);
     }
     
     template<class ForceModel>
-    TIModel<ForceModel>::ScalarType TIModel<ForceModel>::potentialEnergy(const MDCellType& cell) const {
+    typename TIModel<ForceModel>::ScalarType TIModel<ForceModel>::potentialEnergy(const MDCellType& cell) const {
         const ScalarType hamonicV = hamonic.potentialEnergy(cell);
         if (lambda.isZero())
             return hamonicV;
@@ -90,8 +96,8 @@ namespace Physica::Core {
     }
 
     template<class ForceModel>
-    TIModel<ForceModel>::ScalarType TIModel<ForceModel>::deltaPotentialV(const MDCellType& cell) const {
-        return original.potentialEnergy(cell) - hamonic.potentialEnergy(cell);
+    typename TIModel<ForceModel>::ScalarType TIModel<ForceModel>::deltaPotentialV(const MDCellType& cell) const {
+        return (original.potentialEnergy(cell) - refPotentialV) - hamonic.potentialEnergy(cell);
     }
 
     template<class ForceModel>
@@ -100,17 +106,17 @@ namespace Physica::Core {
         const Vector<ScalarType> hamonicF = hamonic.force(cell);
         if (lambda.isZero())
             return hamonicF;
-        return lambda * original.force<Executor>(cell) + (ScalarType(1) - lambda) * hamonicF;
+        return lambda * original.template force<Executor>(cell) + (ScalarType(1) - lambda) * hamonicF;
     }
 
     template<class ForceModel>
     template<class VectorType, class Executor>
-    void TIModel<ForceModel>::forceAsync(const MDCellType& cell, ContinuousVector<VectorType>& result) const {
+    void TIModel<ForceModel>::forceAsync(const MDCellType& cell, ContinuousVector<VectorType>& result) {
         if (!lambda.isZero())
-            original.forceAsync<VectorType, Executor>(cell, result);
-        const Vector<ScalarType> hamonicF = hamonic.force(cell);
+            original.template forceAsync<VectorType, Executor>(cell, result);
+        const Vector<ScalarType> hamonicF = hamonic.template force<Executor>(cell);
         Executor::wait();
-        result += hamonicF; 
+        result = lambda * result + (ScalarType(1) - lambda) * hamonicF;
     }
 
     template<class ForceModel>
@@ -120,6 +126,7 @@ namespace Physica::Core {
         hamonic.swap(obj.hamonic);
         mass.swap(obj.mass);
         temperatureT.swap(obj.temperatureT);
+        refPotentialV.swap(obj.refPotentialV);
         refHelmholtzF.swap(obj.refHelmholtzF);
         lambda.swap(obj.lambda);
     }
@@ -136,8 +143,8 @@ namespace Physica::Core {
      * [1] Comput. Mater. Sci. 112, 333-341 (2016); https://doi.org/10.1016/j.commatsci.2015.10.050
      */
     template<class ForceModel>
-    Vector<typename TIModel<ForceModel>:ScalarType> TIModel<ForceModel>::makeSpringCoeffs(
-            const VectorType<ScalarType>& msd, ScalarType temperatureT) {
+    Vector<typename TIModel<ForceModel>::ScalarType> TIModel<ForceModel>::makeSpringCoeffs(
+            const Vector<ScalarType>& msd, ScalarType temperatureT) {
         const ScalarType factor = ScalarType(3 * PhyConst<AU>::boltzmannK) * temperatureT;
         return reciprocal(msd) * factor;
     }
