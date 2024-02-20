@@ -66,7 +66,7 @@ MDCellType makeSystem(ScalarType latticeSize) {
 
 std::pair<ScalarType, ScalarType> calcPress(size_t numSystem, size_t numStep, ScalarType latticeSize) {
     auto rpmd = MDType(makeSystem(latticeSize), numReplica, numReplica, temperatureT, timeStep);
-    const ThermostatType thermo(temperatureT, thermostatTime);
+    const ThermostatType thermo(temperatureT, thermostatTime, true);
     ForceModel forceModel(1.0);
     KineticModel kineticModel(latticeSize, collideFactor, temperatureT, numMolecular, 1, 100);
     kineticModel.updateMass(rpmd.getRingPolymer());
@@ -86,7 +86,7 @@ std::pair<ScalarType, ScalarType> calcPress(size_t numSystem, size_t numStep, Sc
     return std::make_pair(mean, sqrt(variance));
 }
 
-void plotPress(const VectorType& lattices, const VectorType& density) {
+Plot& plotPress(const VectorType& lattices, const VectorType& density) {
     VectorType meanPress(lattices.getLength()), deviaPress(lattices.getLength());
     ThreadExecutor::parallel_for([&meanPress, &deviaPress, &lattices](unsigned int i) {
         auto pair = calcPress(8, 100000, lattices[i]);
@@ -110,10 +110,10 @@ void plotPress(const VectorType& lattices, const VectorType& density) {
         color.setAlpha(75);
         area.setColor(color);
     }
-    plot->show();
+    return *plot;
 }
 
-void plotDeltaFreeEnergy(const VectorType& lattices, const VectorType& density) {
+Plot& plotDeltaFreeEnergy(const VectorType& lattices, const VectorType& density) {
     VectorType deltaFreeEnergy(lattices.getLength());
     {
         deltaFreeEnergy[lattices.getLength() - 1] = 0;
@@ -139,7 +139,7 @@ void plotDeltaFreeEnergy(const VectorType& lattices, const VectorType& density) 
     plot->getAxisX()->setTitleText("&rho;");
     plot->getAxisY()->setTitleText("&Delta;f");
     plot->line(density, deltaFreeEnergy);
-    plot->show();
+    return *plot;
 }
 /**
  * Reference:
@@ -150,7 +150,9 @@ int main(int argc, char** argv) {
     QApplication app(argc, argv);
     const auto lattices = VectorType::linspace(0.75 * latticeSize0, 1.5 * latticeSize0, 100);
     const VectorType density = reciprocal(lattices * reciprocal(ScalarType(latticeSize0)));
-    plotPress(lattices, density);
-    plotDeltaFreeEnergy(lattices, density);
+    auto& plot1 = plotPress(lattices, density);
+    auto& plot2 = plotDeltaFreeEnergy(lattices, density);
+    plot1.show();
+    plot2.show();
     return QApplication::exec();
 }

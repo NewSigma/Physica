@@ -67,7 +67,7 @@ int main() {
     const double timeStep = timeStepLambda * (latticeSize / numMolecular) * std::sqrt(unitMassM / temperatureT);
     auto& pool = RandomPoolType::getInstance();
     KineticModel kineticModel(latticeSize, collideFactor, temperatureT, numMolecular, numReplica, maxHandleNum);
-    ThermostatType thermo(temperatureT, thermostatTime);
+    ThermostatType thermo(temperatureT, thermostatTime, false);
 
     MDType rpmd = MDType(makeSystem(pool.getGen()), numReplica, numReplica, temperatureT, timeStep);
     rpmd.initMomentum(pool.getGen());
@@ -91,7 +91,7 @@ int main() {
                 col = hadamard(hadamard(momentum.col(replica).asVector(), momentum.col((replica + 1) % numReplica).asVector()), kineticModel.getRepMass()) * factor;
             }
             toNextMean(buffer, i, temp);
-            toNextMean(temperature_sample, i, rpmd.getRingPolymer().calcTemperature());
+            toNextMean(temperature_sample, i, rpmd.calcTemperature());
         }
         toNextVariance(varCorr, meanCorr, sys, buffer);
         toNextVariance(varTemperature, meanTemperature, sys, temperature_sample);

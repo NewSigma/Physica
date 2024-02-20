@@ -74,7 +74,7 @@ int main(int argc, char** argv) {
     rpmd.initMomentum(pool.getGen());
     KineticModel kineticModel(latticeSize, collideFactor, temperatureT, numMolecular, 1, maxHandleNum);
     kineticModel.updateMass(rpmd.getRingPolymer());
-    ThermostatType thermo(temperatureT, thermostatTime);
+    ThermostatType thermo(temperatureT, thermostatTime, true);
 
     ProbabilityDistributionFunction2D<ScalarType> pdf(-10, 10, -10, 10, 100, 100);
     for (size_t i = 0; i < numStep; ++i) {

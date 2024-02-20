@@ -318,12 +318,12 @@ namespace Physica::Core {
 
     template<class ScalarType, unsigned int Dim, size_t NumReplica, class ForceMatrixAllocator>
     template<class RandomGenerator>
-    void RPMD<ScalarType, Dim, NumReplica, ForceMatrixAllocator>::initMomentum(RandomGenerator& gen) {
+    inline void RPMD<ScalarType, Dim, NumReplica, ForceMatrixAllocator>::initMomentum(RandomGenerator& gen) {
         return ringPolymer.initMomentum(temperatureT, gen);
     }
 
     template<class ScalarType, unsigned int Dim, size_t NumReplica, class ForceMatrixAllocator>
-    void RPMD<ScalarType, Dim, NumReplica, ForceMatrixAllocator>::scaleVelocity() {
+    inline void RPMD<ScalarType, Dim, NumReplica, ForceMatrixAllocator>::scaleVelocity() {
         ringPolymer.scaleVelocity(temperatureT);
     }
     /**

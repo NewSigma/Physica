@@ -35,8 +35,9 @@ namespace Physica::Core {
 
         ScalarType temperatureT;
         ScalarType thermostatTime;
+        bool removeDrift;
     public:
-        Langevin(ScalarType temperatureT_, ScalarType thermostatTime_);
+        Langevin(ScalarType temperatureT_, ScalarType thermostatTime_, bool removeDrift_);
         Langevin(const Langevin&) = default;
         Langevin(Langevin&&) noexcept = default;
         ~Langevin() = default;
@@ -60,9 +61,10 @@ namespace Physica::Core {
     };
 
     template<class ScalarType, unsigned int Dim, size_t NumReplica>
-    Langevin<ScalarType, Dim, NumReplica>::Langevin(ScalarType temperatureT_, ScalarType thermostatTime_)
+    Langevin<ScalarType, Dim, NumReplica>::Langevin(ScalarType temperatureT_, ScalarType thermostatTime_, bool removeDrift_)
             : temperatureT(temperatureT_)
-            , thermostatTime(thermostatTime_) {}
+            , thermostatTime(thermostatTime_)
+            , removeDrift(removeDrift_) {}
 
     template<class ScalarType, unsigned int Dim, size_t NumReplica>
     Langevin<ScalarType, Dim, NumReplica>&
@@ -111,6 +113,9 @@ namespace Physica::Core {
                 langevinImpl(ringPolymer.asMatrix()(i, 0), deltaT, momentumViscosityY, factor, ScalarType::random_normal(pool));
             }
         }
+
+        if (removeDrift)
+            ringPolymer.removeDrift();
     }
 
     template<class ScalarType, unsigned int Dim, size_t NumReplica>
@@ -131,5 +136,6 @@ namespace Physica::Core {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         temperatureT.swap(obj.temperatureT);
         thermostatTime.swap(obj.thermostatTime);
+        std::swap(removeDrift, obj.removeDrift);
     }
 }

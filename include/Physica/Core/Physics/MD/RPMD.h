@@ -131,8 +131,8 @@ namespace Physica::Core {
         template<BaroType Type, class KineticModel, class ForceModel, class Executor>
         void fire_pstep(CFireModel<ScalarType, Dim, Type>& cfire, KineticModel& kineticModel, ForceModel& forceModel);
 
-        template<class RandomGenerator> void initMomentum(RandomGenerator& gen);
-        void scaleVelocity();
+        template<class RandomGenerator> inline void initMomentum(RandomGenerator& gen);
+        inline void scaleVelocity();
         void normalizeCentroid();
         [[nodiscard]] MDCellType phaseToCell(size_t replica) const;
         [[nodiscard]] MDCellType contractToCell(size_t contract) const;
