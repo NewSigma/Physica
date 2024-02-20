@@ -7,6 +7,7 @@ Physica is also an open source platform that maintains scientific code written i
 ## Table of Contents
 
 - [Design philosophy](#philosophy)
+- [Features](#feature)
 - [Usage](#usage)
 - [Source structure](#structure)
 - [Maintainers](#maintainers)
@@ -19,9 +20,17 @@ Physica is also an open source platform that maintains scientific code written i
 
 2. Zero overhead abstraction: Users shall not pay for what they do not need. Physica is primarily composed of several sets of header files. Codes that are not required by users will not be compiled.
 
-3. Template meta algorithm: No separate input file is required. Simulation parameters are declared as compile-time constants. The program automatically selects the best algorithm and parallelism strategy at compile time, leveraging powerful C++ templates.
+3. Self explaination: Minimizing documentation and comments. Documentation and comments often lag behind code updates. The Physica API is designed to align with users' intuition.
 
-4. Self explaination: Minimizing documentation and comments. Documentation and comments often lag behind code updates. The Physica API is designed to align with users' intuition.
+## Features <a id="feature"></a>
+
+- A powerful, multiprecision, automatic differential available linear algebra library with GPU support
+- A math library providing essential functionality
+- Classical molecular dynamics(MD), path integral molecular dynamics(PIMD) simulations using NVE, NVT and NPT ensembles
+- Multithreads and CUDA parallel support
+- 2D and 3D plotting support
+- Template meta algorithm: compiling time optimal algorithm and parallelism strategy selection
+- Useful components that help construct computational physics programs
 
 ## Usage
 
