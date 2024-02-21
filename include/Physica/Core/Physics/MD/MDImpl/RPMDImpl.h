@@ -441,7 +441,7 @@ namespace Physica::Core {
 
     template<class ScalarType, unsigned int Dim, size_t NumReplica, class ForceMatrixAllocator>
     inline ScalarType RPMD<ScalarType, Dim, NumReplica, ForceMatrixAllocator>::calcKineticClassical() const {
-        return ringPolymer.calcKineticClassical() / square(ScalarType(getNumReplica()));
+        return ringPolymer.calcKineticClassical();
     }
 
     template<class ScalarType, unsigned int Dim, size_t NumReplica, class ForceMatrixAllocator>

@@ -1,4 +1,22 @@
-# Note on normal transformation
+# RPMD
+
+## 动能计算
+
+(1) RPMD::calcKineticPrim计算动能的Primitive估计值
+
+$$T_{\mathrm{prim}} = \frac{1}{n} \sum_i^N \sum_j^n \frac{[p_i^{(j)}]^2}{2m_i} - \frac{1}{2n} \sum_i^N \sum_j^n m_i \omega_n^2 (x_i^{(j)} - x_i^{(j + 1)})^2 = T_p - T_q$$
+
+(2) RPMD::calcKinetic计算动能的Virial估计值
+
+$$T_v = \frac{1}{n^2} \sum_i^N \sum_j^n \frac{|\mathbf{p}_i^{(j)}|^2}{2m_i} - \frac{1}{2n} \sum_i^N \sum_j^n (\mathbf{x}_i^{(j)} - \overline{\mathbf{x}}_i) \cdot \mathbf{F}_i^{(j)} = T_p - T_q$$
+
+(3) RPMD::calcKineticClassical计算经典动能估计值
+
+$$T_c = \sum_i^N \sum_j^n \frac{[p_i^{(j)}]^2}{2m_i} + \frac{1}{2} \sum_i^N \sum_j^n m_i \omega_n^2 (x_i^{(j)} - x_i^{(j + 1)})^2$$
+
+一般$T_c \neq nT_{\mathrm{prim}}$，NVE系综中的守恒量为$T_c$加上经典势能贡献
+
+## 关于正则变换
 
 In [1], the normal transformation is base on real fourier series, which is unusual in FFT libraries. Here we shall derive complex version of normal transformation.
 
@@ -28,5 +46,6 @@ $$n^2 H = \sum_{\alpha} \frac{1}{2m} |\tilde{p}_\alpha|^2 + \frac{1}{2} m \omega
 
 where $\omega_\alpha = 2 \omega \sin(\frac{\pi}{n} \alpha))$
 
-# Reference
-[1] M. Ceriotti, M. Parrinello, T. E. Markland and D. E. Manolopoulos, J. Chem. Phys. 133, 124104 (2010).
+## Reference
+
+[1] J. Chem. Phys. 133, 124104 (2010); https://doi.org/10.1063/1.3489925
