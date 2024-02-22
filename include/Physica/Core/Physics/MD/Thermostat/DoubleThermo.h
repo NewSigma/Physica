@@ -23,6 +23,15 @@
 #include "Langevin.h"
 
 namespace Physica::Core {
+    template<class KineticModel> class DoubleThermo;
+
+    namespace Internal {
+        template<class KineticModel>
+        class Traits<DoubleThermo<KineticModel>> {
+        public:
+            constexpr static bool IsCentroidCoupled = false;
+        };
+    }
     /**
      * Note: Velocity rescaling algorithm[1] may give a negative probability at small number of particles condition.
      * 

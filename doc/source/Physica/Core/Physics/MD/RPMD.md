@@ -1,5 +1,17 @@
 # RPMD
 
+一维体系的RPMD哈密顿量为
+
+$$H_n = \sum_i^N \sum_j^n [\frac{[p_i^{(j)}]^2}{2m_i} + \frac{1}{2} m_i \omega_n^2 (q_i^{(j)} - q_i^{(j + 1)})^2] + \sum_j^n V(\mathbf{q}^{(j)})$$
+
+正则系综固定边界条件下的配分函数为
+
+$$Q = \frac{1}{(2\pi \hbar)^{Nn}} \int e^{-\beta_n H_n(\mathbf{p}, \mathbf{q})} \mathrm{d} \mathbf{p} \mathrm{d} \mathbf{q}$$
+
+正则系综周期性边界条件下的配分函数为
+
+$$Q = \frac{1}{(2\pi \hbar)^{Nn}} \int e^{-\beta_n H_n(\mathbf{p}, \mathbf{q})} \delta(\sum_{ij} p_i^{(j)}) \mathrm{d} \mathbf{p} \mathrm{d} \mathbf{q}$$
+
 ## 动能计算
 
 (1) RPMD::calcKineticPrim计算动能的Primitive估计值

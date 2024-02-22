@@ -20,13 +20,22 @@
 
 namespace Physica::Core {
     template<class ScalarType, unsigned int Dim, size_t NumReplica> class RingPolymer;
+    template<class ScalarType, unsigned int Dim = 3, size_t NumReplica = Dynamic> class Langevin;
+
+    namespace Internal {
+        template<class ScalarType, unsigned int Dim, size_t NumReplica>
+        class Traits<Langevin<ScalarType, Dim, NumReplica>> {
+        public:
+            constexpr static bool IsCentroidCoupled = true;
+        };
+    }
     /**
      * PILE thermostat as introduced in [1]
      * 
      * Reference:
      * [1] J. Chem. Phys. 133, 124104 (2010); https://doi.org/10.1063/1.3489925
      */
-    template<class ScalarType, unsigned int Dim = 3, size_t NumReplica = Dynamic>
+    template<class ScalarType, unsigned int Dim, size_t NumReplica>
     class Langevin {
         using MDCellType = MDCell<ScalarType, Dim>;
         using MassVector = typename MDCellType::MassVector;
@@ -47,6 +56,8 @@ namespace Physica::Core {
         template<class RandomPoolType, class Executor>
         void step(RingPolymerType& ringPolymer, ScalarType deltaT, RandomPoolType& pool) const;
         void swap(Langevin& __restrict obj) noexcept;
+        /* Getters */
+        [[nodiscard]] bool isRemoveDriftEnabled() const noexcept { return removeDrift; }
         /* Setters */
         void setTemperature(ScalarType temperatureT_) { temperatureT = temperatureT_; }
         void setThermostatTime(ScalarType time) { thermostatTime = time; }

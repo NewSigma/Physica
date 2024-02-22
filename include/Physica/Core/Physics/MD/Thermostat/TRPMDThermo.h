@@ -21,11 +21,20 @@
 #include "Langevin.h"
 
 namespace Physica::Core {
+    template<class ScalarType, unsigned int Dim = 3, size_t NumReplica = Dynamic> class TRPMDThermo;
+
+    namespace Internal {
+        template<class ScalarType, unsigned int Dim, size_t NumReplica>
+        class Traits<TRPMDThermo<ScalarType, Dim, NumReplica>> {
+        public:
+            constexpr static bool IsCentroidCoupled = false;
+        };
+    }
     /**
      * Reference:
      * [1] Rossi M, Ceriotti M, Manolopoulos D E. How to remove the spurious resonances from ring polymer molecular dynamics[J]. J. Chem. Phys, 2014, 140(23):5106.
      */
-    template<class ScalarType, unsigned int Dim = 3, size_t NumReplica = Dynamic>
+    template<class ScalarType, unsigned int Dim, size_t NumReplica>
     class TRPMDThermo {
         using MDCellType = MDCell<ScalarType, Dim>;
         using MassVector = typename MDCellType::MassVector;

@@ -169,13 +169,19 @@ namespace Physica::Core {
             RandomPoolType& pool,
             KineticModel& kineticModel,
             ForceModel& forceModel) {
-        constexpr bool isSeedFixed = Internal::Traits<RandomPoolType>::IsSeedFixed;
         constexpr bool isFreeModel = Internal::is_empty_force_model<ForceModel>::value;
         constexpr bool IsPeriodBoundary1 = Internal::Traits<KineticModel>::IsPeriodBoundary;
         constexpr bool IsPeriodBoundary2 = Internal::Traits<ForceModel>::IsPeriodBoundary;
         static_assert(isFreeModel || (IsPeriodBoundary1 == IsPeriodBoundary2), "[Error]: Inconsistent boundary condition");
+
+        constexpr bool isSeedFixed = Internal::Traits<RandomPoolType>::IsSeedFixed;
         using NoRandExecutor = typename std::conditional<isSeedFixed, SequentialExecutor, Executor>::type;
-        if (isFreeModel) {
+
+        constexpr bool IsCentroidCoupled = Internal::Traits<Thermostat>::IsCentroidCoupled;
+        if constexpr (IsCentroidCoupled && IsPeriodBoundary1)
+            assert(thermostat.isRemoveDriftEnabled() && "[Error]: Because the KineticModel has period boundary, thermostat should remove its effect on centroid");
+
+        if constexpr (isFreeModel) {
             kineticModel.nve_step(ringPolymer, timeStep * 0.5);
             thermostat.template step<RandomPoolType, NoRandExecutor>(ringPolymer, timeStep, pool);
             kineticModel.nve_step(ringPolymer, timeStep * 0.5);
@@ -227,8 +233,14 @@ namespace Physica::Core {
 
         constexpr unsigned int BarostatOrder = Internal::Traits<Barostat>::Order;
         static_assert(BarostatOrder == 2 || BarostatOrder == 1, "[Error]: Invalid barostat");
+
         constexpr bool isSeedFixed = Internal::Traits<RandomPoolType>::IsSeedFixed;
         using NoRandExecutor = typename std::conditional<isSeedFixed, SequentialExecutor, Executor>::type;
+
+        constexpr bool IsCentroidCoupled = Internal::Traits<Thermostat>::IsCentroidCoupled;
+        if constexpr (IsCentroidCoupled && IsPeriodBoundary1)
+            assert(thermostat.isRemoveDriftEnabled() && "[Error]: Because the KineticModel has period boundary, thermostat should remove its effect on centroid");
+
         if constexpr (BarostatOrder == 2) {
             barostat.forceStep(*this, forceModel, timeStep * 0.5);
             kineticModel.npt_step(*this, barostat, timeStep * 0.5);
@@ -873,8 +885,6 @@ namespace Physica::Core {
     template<class ScalarType, unsigned int Dim, size_t NumReplica, class ForceMatrixAllocator>
     void RPMD<ScalarType, Dim, NumReplica, ForceMatrixAllocator>::checkParam() const {
         if constexpr (NumReplica != 1) {
-            if (getNumReplica() == 1)
-                throw std::invalid_argument("[Warning]: Set tparam NumReplica = 1 may gain better performance");
             const ScalarType cycle = PlainScalar(2 * M_PI) / ringPolymer.calcOmegaW(temperatureT);
             bool isSmallEnough = timeStep < cycle / PlainScalar(4);
             if (!isSmallEnough)

@@ -63,7 +63,7 @@ namespace Physica::Core {
         HardCore& operator=(HardCore obj) noexcept;
         /* Operations */
         void nve_step(RingPolymerType& ringPolymer, ScalarType deltaT);
-        void updateMass(RingPolymerType& ringPolymer);
+        void updateMass(const RingPolymerType& ringPolymer);
         void swap(HardCore& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] size_t getNumParticle() const noexcept { return repMass.getLength(); }
@@ -197,7 +197,7 @@ namespace Physica::Core {
     }
 
     template<class ScalarType, bool IsFixedBoundary, size_t NumReplica, RPMDIntegrator Integrator, class Executor>
-    void HardCore<ScalarType, IsFixedBoundary, NumReplica, Integrator, Executor>::updateMass(RingPolymerType& ringPolymer) {
+    void HardCore<ScalarType, IsFixedBoundary, NumReplica, Integrator, Executor>::updateMass(const RingPolymerType& ringPolymer) {
         repMass = reciprocal(ringPolymer.getMassVec());
     }
 
