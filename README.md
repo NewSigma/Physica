@@ -24,13 +24,13 @@ Physica is also an open source platform that maintains scientific code written i
 
 ## Features <a id="feature"></a>
 
-- A powerful, multiprecision, automatic differential available linear algebra library with GPU support
+- A linear algebra library that leverages SIMD and GPU acceleration, offers automatic differentiation support and multiprecision capabilities
 - A math library providing essential functionality
 - Classical molecular dynamics(MD), path integral molecular dynamics(PIMD) simulations using NVE, NVT and NPT ensembles
 - Multithreads and CUDA parallel support
 - 2D and 3D plotting support
-- Template meta algorithm: compiling time optimal algorithm and parallelism strategy selection
-- Useful components that help construct computational physics programs
+- Template meta algorithm: optimal algorithm and parallelism strategy selection at compiling time
+- Useful components that facilitate the construction of efficient computational physics programs
 
 ## Usage
 
