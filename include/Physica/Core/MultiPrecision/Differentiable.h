@@ -23,50 +23,56 @@
 
 namespace Physica::Core {
     namespace Internal {
-        template<class T, DiffMode M>
-        class Traits<Differentiable<T, M>> {
+        template<class T, DiffMode M, unsigned int Order_>
+        class Traits<Differentiable<T, M, Order_>> {
             static_assert(!T::isDifferentiable, "[Error]: Nested Differentiable<> is not allowed");
+            static_assert(Order_ > 0, "[Error]: Use plain type instead of 0 order differentiable");
             using RealT = typename T::RealType;
             using ComplexT = typename T::ComplexType;
         public:
-            using ScalarType = Differentiable<T, M>;
-            using RealType = Differentiable<RealT, M>;
-            using ComplexType = Differentiable<ComplexT, M>;
-            using TrivialType = typename T::TrivialType;
             using PlainScalar = T;
+            constexpr static DiffMode Mode = M;
+            constexpr static unsigned int Order = Order_;
+            using ScalarType = Differentiable<T, M, Order>;
+            using RealType = Differentiable<RealT, M, Order>;
+            using ComplexType = Differentiable<ComplexT, M, Order>;
+            using TrivialType = typename T::TrivialType;
             constexpr static ScalarOption Option = T::Option;
             constexpr static bool isComplex = T::isComplex;
             constexpr static bool isDifferentiable = true;
-            constexpr static DiffMode Mode = M;
+            constexpr static bool isForwardDiff = Mode == DiffMode::Forward;
+            constexpr static bool isReverseDiff = Mode == DiffMode::Reverse;
             /* SIMD */
             using BoolSIMDType = BoolSIMD<ScalarType, 1>;
         };
 
-        template<class ScalarType, DiffMode Mode, class OtherScalar>
-        class BinaryScalarOpReturnType<Differentiable<ScalarType, Mode>, OtherScalar> {
+        template<class ScalarType, DiffMode Mode, unsigned int Order, class OtherScalar>
+        class BinaryScalarOpReturnType<Differentiable<ScalarType, Mode, Order>, OtherScalar> {
         public:
-            using Type = Differentiable<typename BinaryScalarOpReturnType<ScalarType, OtherScalar>::Type, Mode>;
+            using Type = Differentiable<typename BinaryScalarOpReturnType<ScalarType, OtherScalar>::Type, Mode, Order>;
         };
 
-        template<class ScalarType, DiffMode Mode, class OtherScalar>
-        class BinaryScalarOpReturnType<OtherScalar, Differentiable<ScalarType, Mode>> {
+        template<class ScalarType, DiffMode Mode, unsigned int Order, class OtherScalar>
+        class BinaryScalarOpReturnType<OtherScalar, Differentiable<ScalarType, Mode, Order>> {
         public:
-            using Type = typename BinaryScalarOpReturnType<Differentiable<ScalarType, Mode>, OtherScalar>::Type;
+            using Type = typename BinaryScalarOpReturnType<Differentiable<ScalarType, Mode, Order>, OtherScalar>::Type;
         };
 
-        template<class ScalarType, DiffMode Mode, class OtherScalar, DiffMode OtherMode>
-        class BinaryScalarOpReturnType<Differentiable<ScalarType, Mode>, Differentiable<OtherScalar, OtherMode>> {
-            static_assert(Mode == OtherMode, "[Error]: DiffMode do not match");
+        template<class ScalarType, DiffMode Mode, unsigned int Order, class OtherScalar, DiffMode OtherMode, unsigned int OtherOrder>
+        class BinaryScalarOpReturnType<Differentiable<ScalarType, Mode, Order>, Differentiable<OtherScalar, OtherMode, OtherOrder>> {
+            static_assert(Mode == OtherMode, "[Error]: Operation between differentiable scalars with different mode is not well defined");
+            static_assert(Order == OtherOrder, "[Error]: Operation between differentiable scalars with different order is not well defined");
         public:
-            using Type = Differentiable<typename BinaryScalarOpReturnType<ScalarType, OtherScalar>::Type, Mode>;
+            using Type = Differentiable<typename BinaryScalarOpReturnType<ScalarType, OtherScalar>::Type, Mode, Order>;
         };
     }
     /**
      * \class Differentiable provides auto differential support for scalars
      */
-    template<class ScalarType>
-    class Differentiable<ScalarType, DiffMode::Forward> : public ScalarBase<Differentiable<ScalarType, DiffMode::Forward>> {
-        using This = Differentiable<ScalarType, DiffMode::Forward>;
+    template<class ScalarType, unsigned int Order>
+    class Differentiable<ScalarType, DiffMode::Forward, Order> : public ScalarBase<Differentiable<ScalarType, DiffMode::Forward, Order>> {
+        static_assert(Order == 1, "[Error]: High order autodiff is not implemented");
+        using This = Differentiable<ScalarType, DiffMode::Forward, Order>;
 
         ScalarType value;
         ScalarType grad;
@@ -103,11 +109,13 @@ namespace Physica::Core {
         [[nodiscard]] inline static Differentiable random_any(Distribution& dist, RandomGenerator& gen);
     };
     ////////////////////////////////////////////////////////////
-    template<class ScalarType>
-    class Differentiable<ScalarType, DiffMode::Reverse> : public ScalarBase<Differentiable<ScalarType, DiffMode::Reverse>> {
-        using This = Differentiable<ScalarType, DiffMode::Reverse>;
+    template<class ScalarType, unsigned int Order>
+    class Differentiable<ScalarType, DiffMode::Reverse, Order> : public ScalarBase<Differentiable<ScalarType, DiffMode::Reverse, Order>> {
+        static_assert(Order == 1, "[Error]: High order autodiff is not implemented");
+        using This = Differentiable<ScalarType, DiffMode::Reverse, Order>;
     public:
         using device_obj_type = device_obj<This>;
+        using TracerType = DiffTracer<ScalarType, Order>;
     private:
         ScalarType* __restrict pValue;
         ScalarType* __restrict pGrad;
@@ -159,46 +167,46 @@ namespace Physica::Core {
     };
     ////////////////////////////////////////////////////////////
     template<class ScalarType, DiffMode Mode, class OtherScalar>
-    [[nodiscard]] inline typename Internal::BinaryScalarOpReturnType<Differentiable<ScalarType, Mode>, OtherScalar>::Type
-    operator+(const Differentiable<ScalarType, Mode>& s1, const ScalarBase<OtherScalar>& s2);
+    [[nodiscard]] inline typename Internal::BinaryScalarOpReturnType<Differentiable<ScalarType, Mode, 1>, OtherScalar>::Type
+    operator+(const Differentiable<ScalarType, Mode, 1>& s1, const ScalarBase<OtherScalar>& s2);
 
     template<class ScalarType, DiffMode Mode, class OtherScalar>
-    [[nodiscard]] inline typename std::enable_if<!OtherScalar::isDifferentiable, typename Internal::BinaryScalarOpReturnType<Differentiable<ScalarType, Mode>, OtherScalar>::Type>::type
-    operator+(const ScalarBase<OtherScalar>& s1, const Differentiable<ScalarType, Mode>& s2);
+    [[nodiscard]] inline typename std::enable_if<!OtherScalar::isDifferentiable, typename Internal::BinaryScalarOpReturnType<Differentiable<ScalarType, Mode, 1>, OtherScalar>::Type>::type
+    operator+(const ScalarBase<OtherScalar>& s1, const Differentiable<ScalarType, Mode, 1>& s2);
 
     template<class ScalarType, DiffMode Mode, class OtherScalar>
-    [[nodiscard]] inline typename Internal::BinaryScalarOpReturnType<Differentiable<ScalarType, Mode>, OtherScalar>::Type
-    operator-(const Differentiable<ScalarType, Mode>& s1, const ScalarBase<OtherScalar>& s2);
+    [[nodiscard]] inline typename Internal::BinaryScalarOpReturnType<Differentiable<ScalarType, Mode, 1>, OtherScalar>::Type
+    operator-(const Differentiable<ScalarType, Mode, 1>& s1, const ScalarBase<OtherScalar>& s2);
 
     template<class ScalarType, DiffMode Mode, class OtherScalar>
-    [[nodiscard]] inline typename std::enable_if<!OtherScalar::isDifferentiable, typename Internal::BinaryScalarOpReturnType<Differentiable<ScalarType, Mode>, OtherScalar>::Type>::type
-    operator-(const ScalarBase<OtherScalar>& s1, const Differentiable<ScalarType, Mode>& s2);
+    [[nodiscard]] inline typename std::enable_if<!OtherScalar::isDifferentiable, typename Internal::BinaryScalarOpReturnType<Differentiable<ScalarType, Mode, 1>, OtherScalar>::Type>::type
+    operator-(const ScalarBase<OtherScalar>& s1, const Differentiable<ScalarType, Mode, 1>& s2);
 
     template<class ScalarType, DiffMode Mode, class OtherScalar>
-    [[nodiscard]] inline typename Internal::BinaryScalarOpReturnType<Differentiable<ScalarType, Mode>, OtherScalar>::Type
-    operator*(const Differentiable<ScalarType, Mode>& s1, const ScalarBase<OtherScalar>& s2);
+    [[nodiscard]] inline typename Internal::BinaryScalarOpReturnType<Differentiable<ScalarType, Mode, 1>, OtherScalar>::Type
+    operator*(const Differentiable<ScalarType, Mode, 1>& s1, const ScalarBase<OtherScalar>& s2);
 
     template<class ScalarType, DiffMode Mode, class OtherScalar>
-    [[nodiscard]] inline typename std::enable_if<!OtherScalar::isDifferentiable, typename Internal::BinaryScalarOpReturnType<Differentiable<ScalarType, Mode>, OtherScalar>::Type>::type
-    operator*(const ScalarBase<OtherScalar>& s1, const Differentiable<ScalarType, Mode>& s2);
+    [[nodiscard]] inline typename std::enable_if<!OtherScalar::isDifferentiable, typename Internal::BinaryScalarOpReturnType<Differentiable<ScalarType, Mode, 1>, OtherScalar>::Type>::type
+    operator*(const ScalarBase<OtherScalar>& s1, const Differentiable<ScalarType, Mode, 1>& s2);
     
     template<class ScalarType, DiffMode Mode, class OtherScalar>
-    [[nodiscard]] inline typename Internal::BinaryScalarOpReturnType<Differentiable<ScalarType, Mode>, OtherScalar>::Type
-    operator/(const Differentiable<ScalarType, Mode>& s1, const ScalarBase<OtherScalar>& s2);
+    [[nodiscard]] inline typename Internal::BinaryScalarOpReturnType<Differentiable<ScalarType, Mode, 1>, OtherScalar>::Type
+    operator/(const Differentiable<ScalarType, Mode, 1>& s1, const ScalarBase<OtherScalar>& s2);
 
     template<class ScalarType, DiffMode Mode, class OtherScalar>
-    [[nodiscard]] inline typename std::enable_if<!OtherScalar::isDifferentiable, typename Internal::BinaryScalarOpReturnType<Differentiable<ScalarType, Mode>, OtherScalar>::Type>::type
-    operator/(const ScalarBase<OtherScalar>& s1, const Differentiable<ScalarType, Mode>& s2);
+    [[nodiscard]] inline typename std::enable_if<!OtherScalar::isDifferentiable, typename Internal::BinaryScalarOpReturnType<Differentiable<ScalarType, Mode, 1>, OtherScalar>::Type>::type
+    operator/(const ScalarBase<OtherScalar>& s1, const Differentiable<ScalarType, Mode, 1>& s2);
 
-    template<class ScalarType, DiffMode Mode>
-    inline std::ostream& operator<<(std::ostream& os, const Differentiable<ScalarType, Mode>& obj) {
+    template<class ScalarType, DiffMode Mode, unsigned int Order>
+    inline std::ostream& operator<<(std::ostream& os, const Differentiable<ScalarType, Mode, Order>& obj) {
         return os << obj.getValue();
     }
 }
 
 namespace std {
-    template<class ScalarType, Physica::Core::DiffMode Mode>
-    struct numeric_limits<Physica::Core::Differentiable<ScalarType, Mode>> : public numeric_limits<ScalarType> {};
+    template<class ScalarType, Physica::Core::DiffMode Mode, unsigned int Order>
+    struct numeric_limits<Physica::Core::Differentiable<ScalarType, Mode, Order>> : public numeric_limits<ScalarType> {};
 }
 
 #include "DifferentiableImpl/DifferentiableImpl.h"

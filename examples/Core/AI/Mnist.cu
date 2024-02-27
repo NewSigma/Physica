@@ -116,8 +116,8 @@ private:
 };
 
 using PlainScalar = Scalar<Float>;
-using ScalarType = Differentiable<PlainScalar, DiffMode::Reverse>;
-using DeviceVector = Physica::Core::device_obj<Differentiable<Vector<PlainScalar>, DiffMode::Reverse>>;
+using ScalarType = Differentiable<PlainScalar, DiffMode::Reverse, 1>;
+using DeviceVector = Physica::Core::device_obj<Differentiable<Vector<PlainScalar>, DiffMode::Reverse, 1>>;
 using Dataset = typename Mnist::DatasetType<DeviceVector>;
 using Optimizer = SGD<device_obj<ScalarType>>;
 using RandomGenerator = std::mt19937;

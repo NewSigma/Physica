@@ -89,7 +89,8 @@ namespace Physica::Core {
     inline Derived& ContinuousVector<Derived>::operator=(const ScalarType& s) {
         const size_t length = Base::getLength();
         if constexpr (isReverseDiff) {
-            DiffTracer<PlainScalar>::getInstance().reserve(length);
+            using TracerType = typename ScalarType::TracerType;
+            TracerType::getInstance().reserve(length);
             for (size_t i = 0; i < length; ++i)
                 (*this)[i] = s.copy();
         }
@@ -209,8 +210,9 @@ namespace Physica::Core {
     template<class RandomGenerator>
     inline void ContinuousVector<Derived>::random_uniform(RandomGenerator& gen) {
         if constexpr (isReverseDiff) {
+            using TracerType = typename ScalarType::TracerType;
             const size_t length = Base::getLength();
-            DiffTracer<PlainScalar>::getInstance().reserve(length);
+            TracerType::getInstance().reserve(length);
             for (size_t i = 0; i < length; ++i)
                 this->operator[](i) = ScalarType::random_uniform(gen);
         }
@@ -222,8 +224,9 @@ namespace Physica::Core {
     template<class RandomGenerator>
     inline void ContinuousVector<Derived>::random_normal(RandomGenerator& gen) {
         if constexpr (isReverseDiff) {
+            using TracerType = typename ScalarType::TracerType;
             const size_t length = Base::getLength();
-            DiffTracer<PlainScalar>::getInstance().reserve(length);
+            TracerType::getInstance().reserve(length);
             for (size_t i = 0; i < length; ++i)
                 this->operator[](i) = ScalarType::random_normal(gen);
         }
@@ -235,8 +238,9 @@ namespace Physica::Core {
     template<class Distribution, class RandomGenerator>
     inline void ContinuousVector<Derived>::random_any(Distribution& dist, RandomGenerator& gen) {
         if constexpr (isReverseDiff) {
+            using TracerType = typename ScalarType::TracerType;
             const size_t length = Base::getLength();
-            DiffTracer<PlainScalar>::getInstance().reserve(length);
+            TracerType::getInstance().reserve(length);
             for (size_t i = 0; i < length; ++i)
                 this->operator[](i) = ScalarType::random_any(dist, gen);
         }

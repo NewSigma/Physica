@@ -98,7 +98,7 @@ void madelungTest() {
 
 namespace Physica {
     class Test {
-        using ScalarType = Differentiable<Scalar<Double>, DiffMode::Reverse>;
+        using ScalarType = Differentiable<Scalar<Double>, DiffMode::Reverse, 1>;
         using CrystalCellType = CrystalCell<ScalarType>;
         using LatticeMatrix = typename CrystalCellType::LatticeMatrix;
         using PositionMatrix = typename CrystalCellType::PositionMatrix;
@@ -160,7 +160,7 @@ namespace Physica {
 
     class PressTest {
         using PlainScalar = Scalar<Double>;
-        using ScalarType = Differentiable<PlainScalar, DiffMode::Reverse>;
+        using ScalarType = Differentiable<PlainScalar, DiffMode::Reverse, 1>;
         using MDCellType = MDCell<ScalarType>;
         using LatticeMatrix = typename MDCellType::LatticeMatrix;
         using PositionMatrix = typename MDCellType::PositionMatrix;

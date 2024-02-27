@@ -28,7 +28,7 @@ namespace Physica::Core {
         static_assert(!Utils::is_device_obj<ScalarType>::value, "[Error]: Not implemented");
         using Base = SGD<ScalarType>;
         using typename Base::PlainScalar;
-        using TracerType = DiffTracer<PlainScalar>;
+        using TracerType = typename ScalarType::TracerType;
     private:
         using Base::from;
         using Base::to;

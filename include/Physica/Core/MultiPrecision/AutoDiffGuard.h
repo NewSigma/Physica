@@ -28,7 +28,7 @@ namespace Physica::Core {
         using This = AutoDiffGuard<ScalarType>;
     public:
         using PlainScalar = typename ScalarType::PlainScalar;
-        using TracerType = typename std::conditional<isDeviceSide, device_obj<DiffTracer<PlainScalar>>, DiffTracer<PlainScalar>>::type;
+        using TracerType = typename ScalarType::TracerType;
     private:
         ScalarType node;
     public:

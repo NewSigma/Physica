@@ -30,7 +30,7 @@ T func(T x, T y) {
 int main() {
     using PlainScalar = Scalar<Double>;
     {
-        using ScalarType = Differentiable<PlainScalar, DiffMode::Forward>;
+        using ScalarType = Differentiable<PlainScalar, DiffMode::Forward, 1>;
         const PlainScalar x = 3;
         const PlainScalar y = 4;
         const ScalarType result = func(ScalarType(x, 1), ScalarType(y, 1));
@@ -39,7 +39,7 @@ int main() {
             return 1;
     }
     {
-        using ScalarType = Differentiable<PlainScalar, DiffMode::Reverse>;
+        using ScalarType = Differentiable<PlainScalar, DiffMode::Reverse, 1>;
         ScalarType x(3);
         ScalarType y(4);
         ScalarType result = func(x, y);

@@ -36,7 +36,8 @@ namespace Physica::Core {
         const size_t maxMajor = Base::getMaxMajor();
         const size_t maxMinor = Base::getMaxMinor();
         if constexpr (isReverseDiff) {
-            DiffTracer<PlainScalar>::getInstance().reserve(maxMajor * maxMinor);
+            using TracerType = typename ScalarType::TracerType;
+            TracerType::getInstance().reserve(maxMajor * maxMinor);
             for (size_t i = 0; i < maxMajor; ++i)
                 for (size_t j = 0; j < maxMinor; ++j)
                     Base::refFromMajorMinor(i, j) = s.copy();
@@ -284,9 +285,10 @@ namespace Physica::Core {
     template<class RandomGenerator>
     void ContinuousMatrix<Derived>::random_uniform(RandomGenerator& gen) {
         if constexpr (isReverseDiff) {
+            using TracerType = typename ScalarType::TracerType;
             const size_t maxMajor = Base::getMaxMajor();
             const size_t maxMinor = Base::getMaxMinor();
-            DiffTracer<PlainScalar>::getInstance().reserve(maxMajor * maxMinor);
+            TracerType::getInstance().reserve(maxMajor * maxMinor);
             for (size_t major = 0; major < maxMajor; ++major)
                 for (size_t minor = 0; minor < maxMinor; ++minor)
                     Base::refFromMajorMinor(major, minor) = ScalarType::random_uniform(gen);
@@ -299,9 +301,10 @@ namespace Physica::Core {
     template<class RandomGenerator>
     void ContinuousMatrix<Derived>::random_normal(RandomGenerator& gen) {
         if constexpr (isReverseDiff) {
+            using TracerType = typename ScalarType::TracerType;
             const size_t maxMajor = Base::getMaxMajor();
             const size_t maxMinor = Base::getMaxMinor();
-            DiffTracer<PlainScalar>::getInstance().reserve(maxMajor * maxMinor);
+            TracerType::getInstance().reserve(maxMajor * maxMinor);
             for (size_t major = 0; major < maxMajor; ++major)
                 for (size_t minor = 0; minor < maxMinor; ++minor)
                     Base::refFromMajorMinor(major, minor) = ScalarType::random_normal(gen);
@@ -314,9 +317,10 @@ namespace Physica::Core {
     template<class Distribution, class RandomGenerator>
     void ContinuousMatrix<Derived>::random_any(Distribution& dist, RandomGenerator& gen) {
         if constexpr (isReverseDiff) {
+            using TracerType = typename ScalarType::TracerType;
             const size_t maxMajor = Base::getMaxMajor();
             const size_t maxMinor = Base::getMaxMinor();
-            DiffTracer<PlainScalar>::getInstance().reserve(maxMajor * maxMinor);
+            TracerType::getInstance().reserve(maxMajor * maxMinor);
             for (size_t major = 0; major < maxMajor; ++major)
                 for (size_t minor = 0; minor < maxMinor; ++minor)
                     Base::refFromMajorMinor(major, minor) = ScalarType::random_any(dist, gen);

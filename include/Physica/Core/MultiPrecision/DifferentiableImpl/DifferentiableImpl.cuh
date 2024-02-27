@@ -20,11 +20,11 @@
 
 namespace Physica::Core {
     namespace Internal {
-        template<class ScalarType>
+        template<class ScalarType, unsigned int Order>
         __global__ void __launch_bounds__(1, 1) Differentiable_minusKernel(
-                Physica::PlainStruct<device_obj<TraceSegment<ScalarType>>> segment_,
-                Physica::PlainStruct<const device_obj<Differentiable<ScalarType, DiffMode::Reverse>>> s_) {
-            using SegmentType = device_obj<TraceSegment<ScalarType>>;
+                Physica::PlainStruct<device_obj<TraceSegment<ScalarType, Order>>> segment_,
+                Physica::PlainStruct<const device_obj<Differentiable<ScalarType, DiffMode::Reverse, Order>>> s_) {
+            using SegmentType = device_obj<TraceSegment<ScalarType, Order>>;
             using DiffRecord = typename SegmentType::DiffRecord;
             auto& segment = segment_.getDerived();
             segment.getRecords()[0] = DiffRecord{0, ExpressionType::Minus};
@@ -34,12 +34,12 @@ namespace Physica::Core {
             segment.getGrads()[0] = 0;
         }
 
-        template<class ScalarType, ExpressionType Type>
+        template<class ScalarType, unsigned int Order, ExpressionType Type>
         __global__ void __launch_bounds__(1, 1) Differentiable_calcKernel(
-                Physica::PlainStruct<device_obj<TraceSegment<ScalarType>>> segment_,
-                Physica::PlainStruct<const device_obj<Differentiable<ScalarType, DiffMode::Reverse>>> s1_,
-                Physica::PlainStruct<const device_obj<Differentiable<ScalarType, DiffMode::Reverse>>> s2_) {
-            using SegmentType = device_obj<TraceSegment<ScalarType>>;
+                Physica::PlainStruct<device_obj<TraceSegment<ScalarType, Order>>> segment_,
+                Physica::PlainStruct<const device_obj<Differentiable<ScalarType, DiffMode::Reverse, Order>>> s1_,
+                Physica::PlainStruct<const device_obj<Differentiable<ScalarType, DiffMode::Reverse, Order>>> s2_) {
+            using SegmentType = device_obj<TraceSegment<ScalarType, Order>>;
             using DiffRecord = typename SegmentType::DiffRecord;
             auto& segment = segment_.getDerived();
             segment.getRecords()[0] = DiffRecord{0, Type};
@@ -60,122 +60,122 @@ namespace Physica::Core {
             segment.getGrads()[0] = 0;
         }
 
-        template<class ScalarType>
+        template<class ScalarType, unsigned int Order>
         __global__ void __launch_bounds__(1, 1) Differentiable_reverseKernel(
-                Physica::PlainStruct<device_obj<Differentiable<ScalarType, DiffMode::Reverse>>> s) {
+                Physica::PlainStruct<device_obj<Differentiable<ScalarType, DiffMode::Reverse, Order>>> s) {
             s.getDerived().setGrad(1);
         }
     }
 
-    template<class ScalarType>
-    device_obj<Differentiable<ScalarType, DiffMode::Reverse>>::device_obj(ScalarType s)
+    template<class ScalarType, unsigned int Order>
+    device_obj<Differentiable<ScalarType, DiffMode::Reverse, Order>>::device_obj(ScalarType s)
             : device_obj(TracerType::getInstance().pushSegment(s)[0]) {}
 
-    template<class ScalarType>
-    __host__ __device__ device_obj<Differentiable<ScalarType, DiffMode::Reverse>>::device_obj(
+    template<class ScalarType, unsigned int Order>
+    __host__ __device__ device_obj<Differentiable<ScalarType, DiffMode::Reverse, Order>>::device_obj(
             const ScalarType* pValue_, const ScalarType* pGrad_)
             : pValue(const_cast<ScalarType*>(pValue_)), pGrad(const_cast<ScalarType*>(pGrad_)) {}
 
-    template<class ScalarType>
-    __host__ __device__ inline bool device_obj<Differentiable<ScalarType, DiffMode::Reverse>>::operator==(const This& other) const {
+    template<class ScalarType, unsigned int Order>
+    __host__ __device__ inline bool device_obj<Differentiable<ScalarType, DiffMode::Reverse, Order>>::operator==(const This& other) const {
         const bool result = pValue == other.pValue;
         assert(result == (pGrad == other.pGrad) && "[Error]: Bad scalar");
         return result;
     }
 
-    template<class ScalarType>
-    inline device_obj<Differentiable<ScalarType, DiffMode::Reverse>>
-    device_obj<Differentiable<ScalarType, DiffMode::Reverse>>::operator-() const {
+    template<class ScalarType, unsigned int Order>
+    inline device_obj<Differentiable<ScalarType, DiffMode::Reverse, Order>>
+    device_obj<Differentiable<ScalarType, DiffMode::Reverse, Order>>::operator-() const {
         auto& segment = TracerType::getInstance().pushSegment(1, ExpressionType::Minus);
-        Internal::Differentiable_minusKernel<ScalarType><<<1, 1, 0, StreamPool::getStream()>>>(asStruct(segment), asStruct(*this));
+        Internal::Differentiable_minusKernel<ScalarType, Order><<<1, 1, 0, StreamPool::getStream()>>>(asStruct(segment), asStruct(*this));
         return segment[0];
     }
 
-    template<class ScalarType>
-    inline void device_obj<Differentiable<ScalarType, DiffMode::Reverse>>::reverse() {
-        Internal::Differentiable_reverseKernel<ScalarType><<<1, 1, 0, StreamPool::getStream()>>>(asStruct(*this));
+    template<class ScalarType, unsigned int Order>
+    inline void device_obj<Differentiable<ScalarType, DiffMode::Reverse, Order>>::reverse() {
+        Internal::Differentiable_reverseKernel<ScalarType, Order><<<1, 1, 0, StreamPool::getStream()>>>(asStruct(*this));
         TracerType::getInstance().reverse_from(*this);
     }
 
-    template<class ScalarType>
-    inline void device_obj<Differentiable<ScalarType, DiffMode::Reverse>>::reverse_to(This to) {
-        Internal::Differentiable_reverseKernel<ScalarType><<<1, 1, 0, StreamPool::getStream()>>>(asStruct(*this));
+    template<class ScalarType, unsigned int Order>
+    inline void device_obj<Differentiable<ScalarType, DiffMode::Reverse, Order>>::reverse_to(This to) {
+        Internal::Differentiable_reverseKernel<ScalarType, Order><<<1, 1, 0, StreamPool::getStream()>>>(asStruct(*this));
         TracerType::getInstance().reverse(*this, to);
     }
 
-    template<class ScalarType>
-    ScalarType device_obj<Differentiable<ScalarType, DiffMode::Reverse>>::toHost_value() const {
+    template<class ScalarType, unsigned int Order>
+    ScalarType device_obj<Differentiable<ScalarType, DiffMode::Reverse, Order>>::toHost_value() const {
         ScalarType result;
         toHostAsync_value(result);
         StreamPool::getStream().wait();
         return result;
     }
 
-    template<class ScalarType>
-    ScalarType device_obj<Differentiable<ScalarType, DiffMode::Reverse>>::toHost_grad() const {
+    template<class ScalarType, unsigned int Order>
+    ScalarType device_obj<Differentiable<ScalarType, DiffMode::Reverse, Order>>::toHost_grad() const {
         ScalarType result;
         toHostAsync_grad(result);
         StreamPool::getStream().wait();
         return result;
     }
 
-    template<class ScalarType>
-    void device_obj<Differentiable<ScalarType, DiffMode::Reverse>>::toHostAsync_value(ScalarType& value) const {
+    template<class ScalarType, unsigned int Order>
+    void device_obj<Differentiable<ScalarType, DiffMode::Reverse, Order>>::toHostAsync_value(ScalarType& value) const {
         cudaCheck(cudaMemcpyAsync(&value, pValue, sizeof(ScalarType), cudaMemcpyKind::cudaMemcpyDeviceToHost, StreamPool::getStream()));
     }
 
-    template<class ScalarType>
-    void device_obj<Differentiable<ScalarType, DiffMode::Reverse>>::toHostAsync_grad(ScalarType& grad) const {
+    template<class ScalarType, unsigned int Order>
+    void device_obj<Differentiable<ScalarType, DiffMode::Reverse, Order>>::toHostAsync_grad(ScalarType& grad) const {
         cudaCheck(cudaMemcpyAsync(&grad, pGrad, sizeof(ScalarType), cudaMemcpyKind::cudaMemcpyDeviceToHost, StreamPool::getStream()));
     }
 
-    template<class ScalarType>
-    __host__ __device__ inline void device_obj<Differentiable<ScalarType, DiffMode::Reverse>>::swap(device_obj& __restrict obj) noexcept {
+    template<class ScalarType, unsigned int Order>
+    __host__ __device__ inline void device_obj<Differentiable<ScalarType, DiffMode::Reverse, Order>>::swap(device_obj& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         std::swap(pValue, obj.pValue);
         std::swap(pGrad, obj.pGrad);
     }
     ////////////////////////////////////////////////////////////
-    template<class ScalarType>
-    [[nodiscard]] inline device_obj<Differentiable<ScalarType, DiffMode::Reverse>>
-    operator+(const device_obj<Differentiable<ScalarType, DiffMode::Reverse>>& s1,
-              const device_obj<Differentiable<ScalarType, DiffMode::Reverse>>& s2) {
-        using TracerType = device_obj<DiffTracer<ScalarType>>;
+    template<class ScalarType, unsigned int Order>
+    [[nodiscard]] inline device_obj<Differentiable<ScalarType, DiffMode::Reverse, Order>>
+    operator+(const device_obj<Differentiable<ScalarType, DiffMode::Reverse, Order>>& s1,
+              const device_obj<Differentiable<ScalarType, DiffMode::Reverse, Order>>& s2) {
+        using TracerType = device_obj<DiffTracer<ScalarType, Order>>;
         auto& segment = TracerType::getInstance().pushSegment(1, ExpressionType::Add);
-        Internal::Differentiable_calcKernel<ScalarType, ExpressionType::Add>
+        Internal::Differentiable_calcKernel<ScalarType, Order, ExpressionType::Add>
                 <<<1, 1, 0, StreamPool::getStream()>>>(asStruct(segment), asStruct(s1), asStruct(s2));
         return segment[0];
     }
 
-    template<class ScalarType>
-    [[nodiscard]] inline device_obj<Differentiable<ScalarType, DiffMode::Reverse>>
-    operator-(const device_obj<Differentiable<ScalarType, DiffMode::Reverse>>& s1,
-              const device_obj<Differentiable<ScalarType, DiffMode::Reverse>>& s2) {
-        using TracerType = device_obj<DiffTracer<ScalarType>>;
+    template<class ScalarType, unsigned int Order>
+    [[nodiscard]] inline device_obj<Differentiable<ScalarType, DiffMode::Reverse, Order>>
+    operator-(const device_obj<Differentiable<ScalarType, DiffMode::Reverse, Order>>& s1,
+              const device_obj<Differentiable<ScalarType, DiffMode::Reverse, Order>>& s2) {
+        using TracerType = device_obj<DiffTracer<ScalarType, Order>>;
         auto& segment = TracerType::getInstance().pushSegment(1, ExpressionType::Sub);
-        Internal::Differentiable_calcKernel<ScalarType, ExpressionType::Sub>
+        Internal::Differentiable_calcKernel<ScalarType, Order, ExpressionType::Sub>
                 <<<1, 1, 0, StreamPool::getStream()>>>(asStruct(segment), asStruct(s1), asStruct(s2));
         return segment[0];
     }
 
-    template<class ScalarType>
-    [[nodiscard]] inline device_obj<Differentiable<ScalarType, DiffMode::Reverse>>
-    operator*(const device_obj<Differentiable<ScalarType, DiffMode::Reverse>>& s1,
-              const device_obj<Differentiable<ScalarType, DiffMode::Reverse>>& s2) {
-        using TracerType = device_obj<DiffTracer<ScalarType>>;
+    template<class ScalarType, unsigned int Order>
+    [[nodiscard]] inline device_obj<Differentiable<ScalarType, DiffMode::Reverse, Order>>
+    operator*(const device_obj<Differentiable<ScalarType, DiffMode::Reverse, Order>>& s1,
+              const device_obj<Differentiable<ScalarType, DiffMode::Reverse, Order>>& s2) {
+        using TracerType = device_obj<DiffTracer<ScalarType, Order>>;
         auto& segment = TracerType::getInstance().pushSegment(1, ExpressionType::Mul);
-        Internal::Differentiable_calcKernel<ScalarType, ExpressionType::Mul>
+        Internal::Differentiable_calcKernel<ScalarType, Order, ExpressionType::Mul>
                 <<<1, 1, 0, StreamPool::getStream()>>>(asStruct(segment), asStruct(s1), asStruct(s2));
         return segment[0];
     }
 
-    template<class ScalarType>
-    [[nodiscard]] inline device_obj<Differentiable<ScalarType, DiffMode::Reverse>>
-    operator/(const device_obj<Differentiable<ScalarType, DiffMode::Reverse>>& s1,
-              const device_obj<Differentiable<ScalarType, DiffMode::Reverse>>& s2) {
-        using TracerType = device_obj<DiffTracer<ScalarType>>;
+    template<class ScalarType, unsigned int Order>
+    [[nodiscard]] inline device_obj<Differentiable<ScalarType, DiffMode::Reverse, Order>>
+    operator/(const device_obj<Differentiable<ScalarType, DiffMode::Reverse, Order>>& s1,
+              const device_obj<Differentiable<ScalarType, DiffMode::Reverse, Order>>& s2) {
+        using TracerType = device_obj<DiffTracer<ScalarType, Order>>;
         auto& segment = TracerType::getInstance().pushSegment(1, ExpressionType::Div);
-        Internal::Differentiable_calcKernel<ScalarType, ExpressionType::Div>
+        Internal::Differentiable_calcKernel<ScalarType, Order, ExpressionType::Div>
                 <<<1, 1, 0, StreamPool::getStream()>>>(asStruct(segment), asStruct(s1), asStruct(s2));
         return segment[0];
     }

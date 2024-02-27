@@ -32,7 +32,7 @@
 namespace Physica::Core {
     template<class T, size_t Size> class SIMD;
     template<class T, size_t Size> class BoolSIMD;
-    template<class ScalarType> class DiffTracer;
+    template<class ScalarType, unsigned int Order> class DiffTracer;
 
     namespace Internal {
         template<class T, size_t Size>
@@ -41,7 +41,7 @@ namespace Physica::Core {
             using ScalarType = T;
         private:
             using PlainScalar = typename ScalarType::PlainScalar;
-            constexpr static bool isForward = std::is_same<ScalarType, Differentiable<PlainScalar, DiffMode::Forward>>::value;
+            constexpr static bool isForward = ScalarType::isForwardDiff;
             static_assert(ScalarType::Option == Float || ScalarType::Option == Double, "[Error]: Unsupported float type");
             static_assert(!ScalarType::isComplex, "[Error]: The main template targets on real scalar");
             static_assert(!isForward, "[Error]: SIMD for forward autodiff is not implemented");
@@ -67,7 +67,7 @@ namespace Physica::Core {
             using PlainScalar = typename ScalarType::PlainScalar;
             constexpr static bool isSinglePrec = ScalarType::Option == Float;
             constexpr static bool isComplex = ScalarType::isComplex;
-            constexpr static bool isForward = std::is_same<ScalarType, Differentiable<PlainScalar, DiffMode::Forward>>::value;
+            constexpr static bool isForward = ScalarType::isForwardDiff;
             constexpr static bool isDynamic = Length == Utils::Dynamic;
             constexpr static size_t size128 = (isSinglePrec ? 4 : 2) / (isComplex ? 2 : 1) / (isForward ? 2 : 1);
             constexpr static size_t size256 = (isSinglePrec ? 8 : 4) / (isComplex ? 2 : 1) / (isForward ? 2 : 1);
@@ -98,7 +98,7 @@ namespace Physica::Core {
         using BoolSIMDType = typename Traits::BoolSIMDType;
         using PlainScalar = typename ScalarType::PlainScalar;
         using TrivialType = typename PlainScalar::TrivialType;
-        constexpr static bool isForward = std::is_same<ScalarType, Differentiable<PlainScalar, DiffMode::Forward>>::value;
+        constexpr static bool isForward = ScalarType::isForwardDiff;
     public:
         using Base = typename Traits::BaseType;
         using PlainPacket = This;
@@ -142,17 +142,17 @@ namespace Physica::Core {
     };
 
     template<class PlainScalar, size_t Size>
-    class SIMD<Differentiable<PlainScalar, DiffMode::Reverse>, Size> : public SIMD<PlainScalar, Size> {
+    class SIMD<Differentiable<PlainScalar, DiffMode::Reverse, 1>, Size> : public SIMD<PlainScalar, Size> {
         static_assert(!PlainScalar::isDifferentiable, "[Error]: Invalid template param");
-        using ScalarType = Differentiable<PlainScalar, DiffMode::Reverse>;
+        using ScalarType = Differentiable<PlainScalar, DiffMode::Reverse, 1>;
         using This = SIMD<ScalarType, Size>;
         using Base = SIMD<PlainScalar, Size>;
         using Traits = Internal::Traits<This>;
         using BoolSIMDType = typename Traits::BoolSIMDType;
         using TrivialType = typename PlainScalar::TrivialType;
-        using DiffTracerType = DiffTracer<PlainScalar>;
     public:
         using PlainPacket = Base;
+        using DiffTracerType = DiffTracer<PlainScalar, 1>;
     private:
         ScalarType headNode;
     public:

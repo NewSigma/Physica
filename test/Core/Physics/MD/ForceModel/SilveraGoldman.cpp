@@ -24,7 +24,7 @@
 using namespace Physica::Core;
 
 using PlainScalar = Scalar<Double>;
-using ScalarType = Differentiable<PlainScalar, DiffMode::Reverse>;
+using ScalarType = Differentiable<PlainScalar, DiffMode::Reverse, 1>;
 
 class PressTest {
     using RandomGenerator = std::mt19937;

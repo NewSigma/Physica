@@ -76,7 +76,7 @@ namespace Physica::Core {
 
     template<class ScalarType>
     void SGD<ScalarType>::step() {
-        using TracerType = DiffTracer<PlainScalar>;
+        using TracerType = typename ScalarType::TracerType;
         using SegmentType = typename TracerType::SegmentType;
         using DiffScalar = typename TracerType::DiffScalar;
         auto& tracer = TracerType::getInstance();

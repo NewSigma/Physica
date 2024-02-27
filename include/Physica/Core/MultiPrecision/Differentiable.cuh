@@ -23,33 +23,38 @@
 
 namespace Physica::Core {
     namespace Internal {
-        template<class T, DiffMode M>
-        class Traits<Core::device_obj<Differentiable<T, M>>> {
+        template<class T, DiffMode M, unsigned int Order_>
+        class Traits<Core::device_obj<Differentiable<T, M, Order_>>> {
             static_assert(!T::isDifferentiable, "[Error]: Nested Differentiable<> is not allowed");
             static_assert(!Utils::is_device_obj<T>::value, "[Error]: Nested device_obj<> is not allowed");
             using RealT = typename T::RealType;
             using ComplexT = typename T::ComplexType;
         public:
-            using ScalarType = device_obj<Differentiable<T, M>>;
-            using RealType = device_obj<Differentiable<RealT, M>>;
-            using ComplexType = device_obj<Differentiable<ComplexT, M>>;
-            using TrivialType = typename T::TrivialType;
             using PlainScalar = T;
+            constexpr static DiffMode Mode = M;
+            constexpr static unsigned int Order = Order_;
+            using ScalarType = device_obj<Differentiable<T, M, Order>>;
+            using RealType = device_obj<Differentiable<RealT, M, Order>>;
+            using ComplexType = device_obj<Differentiable<ComplexT, M, Order>>;
+            using TrivialType = typename T::TrivialType;
             constexpr static ScalarOption Option = T::Option;
             constexpr static bool isComplex = T::isComplex;
             constexpr static bool isDifferentiable = true;
-            constexpr static DiffMode Mode = M;
+            constexpr static bool isForwardDiff = false;
+            constexpr static bool isReverseDiff = true;
         };
     }
 
-    template<class ScalarType>
-    class device_obj<Differentiable<ScalarType, DiffMode::Reverse>>
-            : public ScalarBase<device_obj<Differentiable<ScalarType, DiffMode::Reverse>>> {
-        using host_obj = Differentiable<ScalarType, DiffMode::Reverse>;
+    template<class ScalarType, unsigned int Order>
+    class device_obj<Differentiable<ScalarType, DiffMode::Reverse, Order>>
+            : public ScalarBase<device_obj<Differentiable<ScalarType, DiffMode::Reverse, Order>>> {
+        static_assert(Order == 1, "[Error]: High order autodiff is not implemented");
+        using host_obj = Differentiable<ScalarType, DiffMode::Reverse, Order>;
         using This = device_obj<host_obj>;
         using Base = ScalarBase<This>;
-        using TracerType = device_obj<DiffTracer<ScalarType>>;
-
+    public:
+        using TracerType = device_obj<typename host_obj::TracerType>;
+    private:
         ScalarType* __restrict pValue;
         ScalarType* __restrict pGrad;
     public:
@@ -90,25 +95,25 @@ namespace Physica::Core {
         __device__ void setGrad(ScalarType grad) { *pGrad = grad; }
     };
     ////////////////////////////////////////////////////////////
-    template<class ScalarType>
-    [[nodiscard]] inline device_obj<Differentiable<ScalarType, DiffMode::Reverse>>
-    operator+(const device_obj<Differentiable<ScalarType, DiffMode::Reverse>>& s1,
-              const device_obj<Differentiable<ScalarType, DiffMode::Reverse>>& s2);
+    template<class ScalarType, unsigned int Order>
+    [[nodiscard]] inline device_obj<Differentiable<ScalarType, DiffMode::Reverse, Order>>
+    operator+(const device_obj<Differentiable<ScalarType, DiffMode::Reverse, Order>>& s1,
+              const device_obj<Differentiable<ScalarType, DiffMode::Reverse, Order>>& s2);
 
-    template<class ScalarType>
-    [[nodiscard]] inline device_obj<Differentiable<ScalarType, DiffMode::Reverse>>
-    operator-(const device_obj<Differentiable<ScalarType, DiffMode::Reverse>>& s1,
-              const device_obj<Differentiable<ScalarType, DiffMode::Reverse>>& s2);
+    template<class ScalarType, unsigned int Order>
+    [[nodiscard]] inline device_obj<Differentiable<ScalarType, DiffMode::Reverse, Order>>
+    operator-(const device_obj<Differentiable<ScalarType, DiffMode::Reverse, Order>>& s1,
+              const device_obj<Differentiable<ScalarType, DiffMode::Reverse, Order>>& s2);
 
-    template<class ScalarType>
-    [[nodiscard]] inline device_obj<Differentiable<ScalarType, DiffMode::Reverse>>
-    operator*(const device_obj<Differentiable<ScalarType, DiffMode::Reverse>>& s1,
-              const device_obj<Differentiable<ScalarType, DiffMode::Reverse>>& s2);
+    template<class ScalarType, unsigned int Order>
+    [[nodiscard]] inline device_obj<Differentiable<ScalarType, DiffMode::Reverse, Order>>
+    operator*(const device_obj<Differentiable<ScalarType, DiffMode::Reverse, Order>>& s1,
+              const device_obj<Differentiable<ScalarType, DiffMode::Reverse, Order>>& s2);
 
-    template<class ScalarType>
-    [[nodiscard]] inline device_obj<Differentiable<ScalarType, DiffMode::Reverse>>
-    operator/(const device_obj<Differentiable<ScalarType, DiffMode::Reverse>>& s1,
-              const device_obj<Differentiable<ScalarType, DiffMode::Reverse>>& s2);
+    template<class ScalarType, unsigned int Order>
+    [[nodiscard]] inline device_obj<Differentiable<ScalarType, DiffMode::Reverse, Order>>
+    operator/(const device_obj<Differentiable<ScalarType, DiffMode::Reverse, Order>>& s1,
+              const device_obj<Differentiable<ScalarType, DiffMode::Reverse, Order>>& s2);
 }
 
 #include "DifferentiableImpl/DifferentiableImpl.cuh"

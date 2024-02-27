@@ -35,51 +35,51 @@ namespace Physica::Core {
         }
     }
 
-    template<class PlainScalar>
-    device_obj<Differentiable<Vector<PlainScalar>, DiffMode::Reverse>>::device_obj(size_t length, ExpressionType type)
+    template<class PlainScalar, unsigned Order>
+    device_obj<Differentiable<Vector<PlainScalar>, DiffMode::Reverse, Order>>::device_obj(size_t length, ExpressionType type)
             : traceSeg(asStruct(TracerType::getInstance().pushSegment(length, type))) {}
 
-    template<class PlainScalar>
-    device_obj<Differentiable<Vector<PlainScalar>, DiffMode::Reverse>>::device_obj(const PlainVector& values)
+    template<class PlainScalar, unsigned Order>
+    device_obj<Differentiable<Vector<PlainScalar>, DiffMode::Reverse, Order>>::device_obj(const PlainVector& values)
             : traceSeg(asStruct(TracerType::getInstance().pushSegment(values))) {}
 
-    template<class PlainScalar>
+    template<class PlainScalar, unsigned Order>
     template<class RandomGenerator>
-    inline void device_obj<Differentiable<Vector<PlainScalar>, DiffMode::Reverse>>::random_uniform(RandomGenerator& gen) {
+    inline void device_obj<Differentiable<Vector<PlainScalar>, DiffMode::Reverse, Order>>::random_uniform(RandomGenerator& gen) {
         *this = random_uniform(getLength(), gen);
     }
 
-    template<class PlainScalar>
+    template<class PlainScalar, unsigned Order>
     template<class RandomGenerator>
-    inline void device_obj<Differentiable<Vector<PlainScalar>, DiffMode::Reverse>>::random_normal(RandomGenerator& gen) {
+    inline void device_obj<Differentiable<Vector<PlainScalar>, DiffMode::Reverse, Order>>::random_normal(RandomGenerator& gen) {
         *this = random_normal(getLength(), gen);
     }
 
-    template<class PlainScalar>
+    template<class PlainScalar, unsigned Order>
     template<class Distribution, class RandomGenerator>
-    inline void device_obj<Differentiable<Vector<PlainScalar>, DiffMode::Reverse>>::random_any(Distribution& dist, RandomGenerator& gen) {
+    inline void device_obj<Differentiable<Vector<PlainScalar>, DiffMode::Reverse, Order>>::random_any(Distribution& dist, RandomGenerator& gen) {
         *this = random_any(getLength(), dist, gen);
     }
 
-    template<class PlainScalar>
-    __host__ __device__ inline typename device_obj<Differentiable<Vector<PlainScalar>, DiffMode::Reverse>>::ScalarType
-    device_obj<Differentiable<Vector<PlainScalar>, DiffMode::Reverse>>::calc(size_t index) const {
+    template<class PlainScalar, unsigned Order>
+    __host__ __device__ inline typename device_obj<Differentiable<Vector<PlainScalar>, DiffMode::Reverse, Order>>::ScalarType
+    device_obj<Differentiable<Vector<PlainScalar>, DiffMode::Reverse, Order>>::calc(size_t index) const {
         assert(index < getLength() && "[Error]: Index out of range");
         return getTraceSegment()[index];
     }
 
-    template<class PlainScalar>
-    device_obj<Differentiable<Vector<PlainScalar>, DiffMode::Reverse>>
-    device_obj<Differentiable<Vector<PlainScalar>, DiffMode::Reverse>>::copy() const {
+    template<class PlainScalar, unsigned Order>
+    device_obj<Differentiable<Vector<PlainScalar>, DiffMode::Reverse, Order>>
+    device_obj<Differentiable<Vector<PlainScalar>, DiffMode::Reverse, Order>>::copy() const {
         This result{};
         const auto& newTrace = TracerType::getInstance().pushSegment(getTraceSegment().copy());
         result.traceSeg = asStruct(newTrace);
         return result;
     }
 
-    template<class PlainScalar>
+    template<class PlainScalar, unsigned Order>
     template<bool ComputeMax>
-    __device__ void device_obj<Differentiable<Vector<PlainScalar>, DiffMode::Reverse>>::minmaxKernelImpl(SegmentType& result) const {
+    __device__ void device_obj<Differentiable<Vector<PlainScalar>, DiffMode::Reverse, Order>>::minmaxKernelImpl(SegmentType& result) const {
         extern __shared__ PlainScalar buffer[];
         const size_t length = getLength();
         const size_t index = threadIdx.x;
@@ -121,8 +121,8 @@ namespace Physica::Core {
         result.getGrads()[0] = 0;
     }
 
-    template<class PlainScalar>
-    __device__ void device_obj<Differentiable<Vector<PlainScalar>, DiffMode::Reverse>>::sumKernelImpl(SegmentType& result) const {
+    template<class PlainScalar, unsigned Order>
+    __device__ void device_obj<Differentiable<Vector<PlainScalar>, DiffMode::Reverse, Order>>::sumKernelImpl(SegmentType& result) const {
         extern __shared__ PlainScalar buffer[];
         const size_t length = getLength();
         const size_t index = threadIdx.x;
@@ -152,51 +152,51 @@ namespace Physica::Core {
         result.getGrads()[0] = 0;
     }
 
-    template<class PlainScalar>
+    template<class PlainScalar, unsigned Order>
     __host__ __device__ inline PlainScalar*
-    device_obj<Differentiable<Vector<PlainScalar>, DiffMode::Reverse>>::value_ptr(size_t index) const noexcept {
+    device_obj<Differentiable<Vector<PlainScalar>, DiffMode::Reverse, Order>>::value_ptr(size_t index) const noexcept {
         return calc(index).value_ptr();
     }
 
-    template<class PlainScalar>
+    template<class PlainScalar, unsigned Order>
     __host__ __device__ inline PlainScalar*
-    device_obj<Differentiable<Vector<PlainScalar>, DiffMode::Reverse>>::grad_ptr(size_t index) const noexcept {
+    device_obj<Differentiable<Vector<PlainScalar>, DiffMode::Reverse, Order>>::grad_ptr(size_t index) const noexcept {
         return calc(index).grad_ptr();
     }
 
-    template<class PlainScalar>
-    __device__ inline typename device_obj<Differentiable<Vector<PlainScalar>, DiffMode::Reverse>>::DiffRecord&
-    device_obj<Differentiable<Vector<PlainScalar>, DiffMode::Reverse>>::getRecord(size_t index) {
+    template<class PlainScalar, unsigned Order>
+    __device__ inline typename device_obj<Differentiable<Vector<PlainScalar>, DiffMode::Reverse, Order>>::DiffRecord&
+    device_obj<Differentiable<Vector<PlainScalar>, DiffMode::Reverse, Order>>::getRecord(size_t index) {
         return getTraceSegment().getRecords()[index];
     }
 
-    template<class PlainScalar>
+    template<class PlainScalar, unsigned Order>
     __device__ inline PlainScalar&
-    device_obj<Differentiable<Vector<PlainScalar>, DiffMode::Reverse>>::getValue(size_t index) {
+    device_obj<Differentiable<Vector<PlainScalar>, DiffMode::Reverse, Order>>::getValue(size_t index) {
         return getTraceSegment().getValues()[index];
     }
 
-    template<class PlainScalar>
+    template<class PlainScalar, unsigned Order>
     __device__ inline const PlainScalar&
-    device_obj<Differentiable<Vector<PlainScalar>, DiffMode::Reverse>>::getValue(size_t index) const {
+    device_obj<Differentiable<Vector<PlainScalar>, DiffMode::Reverse, Order>>::getValue(size_t index) const {
         return getTraceSegment().getValues()[index];
     }
 
-    template<class PlainScalar>
+    template<class PlainScalar, unsigned Order>
     __device__ inline PlainScalar&
-    device_obj<Differentiable<Vector<PlainScalar>, DiffMode::Reverse>>::getGrad(size_t index) {
+    device_obj<Differentiable<Vector<PlainScalar>, DiffMode::Reverse, Order>>::getGrad(size_t index) {
         return getTraceSegment().getGrads()[index];
     }
 
-    template<class PlainScalar>
+    template<class PlainScalar, unsigned Order>
     __device__ inline const PlainScalar&
-    device_obj<Differentiable<Vector<PlainScalar>, DiffMode::Reverse>>::getGrad(size_t index) const {
+    device_obj<Differentiable<Vector<PlainScalar>, DiffMode::Reverse, Order>>::getGrad(size_t index) const {
         return getTraceSegment().getGrads()[index];
     }
 
-    template<class PlainScalar>
-    typename device_obj<Differentiable<Vector<PlainScalar>, DiffMode::Reverse>>::ScalarType
-    device_obj<Differentiable<Vector<PlainScalar>, DiffMode::Reverse>>::max() const {
+    template<class PlainScalar, unsigned Order>
+    typename device_obj<Differentiable<Vector<PlainScalar>, DiffMode::Reverse, Order>>::ScalarType
+    device_obj<Differentiable<Vector<PlainScalar>, DiffMode::Reverse, Order>>::max() const {
         auto& trace = TracerType::getInstance().pushSegment(1, ExpressionType::Assign);
         const size_t length = getLength();
         const size_t numThread = length > MaxThreadPerBlock ? MaxThreadPerBlock : length;
@@ -205,9 +205,9 @@ namespace Physica::Core {
         return ScalarType(trace.getValues().data(), trace.getGrads().data());
     }
 
-    template<class PlainScalar>
-    typename device_obj<Differentiable<Vector<PlainScalar>, DiffMode::Reverse>>::ScalarType
-    device_obj<Differentiable<Vector<PlainScalar>, DiffMode::Reverse>>::min() const {
+    template<class PlainScalar, unsigned Order>
+    typename device_obj<Differentiable<Vector<PlainScalar>, DiffMode::Reverse, Order>>::ScalarType
+    device_obj<Differentiable<Vector<PlainScalar>, DiffMode::Reverse, Order>>::min() const {
         auto& trace = TracerType::getInstance().pushSegment(1, ExpressionType::Assign);
         const size_t length = getLength();
         const size_t numThread = length > MaxThreadPerBlock ? MaxThreadPerBlock : length;
@@ -216,9 +216,9 @@ namespace Physica::Core {
         return ScalarType(trace.getValues().data(), trace.getGrads().data());
     }
 
-    template<class PlainScalar>
-    typename device_obj<Differentiable<Vector<PlainScalar>, DiffMode::Reverse>>::ScalarType
-    device_obj<Differentiable<Vector<PlainScalar>, DiffMode::Reverse>>::sum() const {
+    template<class PlainScalar, unsigned Order>
+    typename device_obj<Differentiable<Vector<PlainScalar>, DiffMode::Reverse, Order>>::ScalarType
+    device_obj<Differentiable<Vector<PlainScalar>, DiffMode::Reverse, Order>>::sum() const {
         auto& trace = TracerType::getInstance().pushSegment(1, ExpressionType::Sum);
         const size_t length = getLength();
         const size_t numThread = length > MaxThreadPerBlock ? MaxThreadPerBlock : length;
@@ -227,24 +227,24 @@ namespace Physica::Core {
         return ScalarType(trace.getValues().data(), trace.getGrads().data());
     }
 
-    template<class PlainScalar>
+    template<class PlainScalar, unsigned Order>
     template<class RandomGenerator>
-    inline device_obj<Differentiable<Vector<PlainScalar>, DiffMode::Reverse>>
-    device_obj<Differentiable<Vector<PlainScalar>, DiffMode::Reverse>>::random_uniform(size_t len, RandomGenerator& gen) {
+    inline device_obj<Differentiable<Vector<PlainScalar>, DiffMode::Reverse, Order>>
+    device_obj<Differentiable<Vector<PlainScalar>, DiffMode::Reverse, Order>>::random_uniform(size_t len, RandomGenerator& gen) {
         return This(PlainVector::random_uniform(len, gen));
     }
 
-    template<class PlainScalar>
+    template<class PlainScalar, unsigned Order>
     template<class RandomGenerator>
-    inline device_obj<Differentiable<Vector<PlainScalar>, DiffMode::Reverse>>
-    device_obj<Differentiable<Vector<PlainScalar>, DiffMode::Reverse>>::random_normal(size_t len, RandomGenerator& gen) {
+    inline device_obj<Differentiable<Vector<PlainScalar>, DiffMode::Reverse, Order>>
+    device_obj<Differentiable<Vector<PlainScalar>, DiffMode::Reverse, Order>>::random_normal(size_t len, RandomGenerator& gen) {
         return This(PlainVector::random_normal(len, gen));
     }
 
-    template<class PlainScalar>
+    template<class PlainScalar, unsigned Order>
     template<class Distribution, class RandomGenerator>
-    inline device_obj<Differentiable<Vector<PlainScalar>, DiffMode::Reverse>>
-    device_obj<Differentiable<Vector<PlainScalar>, DiffMode::Reverse>>::random_any(size_t len, Distribution& dist, RandomGenerator& gen) {
+    inline device_obj<Differentiable<Vector<PlainScalar>, DiffMode::Reverse, Order>>
+    device_obj<Differentiable<Vector<PlainScalar>, DiffMode::Reverse, Order>>::random_any(size_t len, Distribution& dist, RandomGenerator& gen) {
         return This(PlainVector::random_any(len, dist, gen));
     }
 }

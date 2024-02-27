@@ -31,7 +31,7 @@ namespace Physica::Core {
         Utils::Array<char> buffer;
     public:
         PWscfOut(const char* path, size_t numAtom);
-        PWscfOut(const PWscfOut&) = default;
+        PWscfOut(const PWscfOut&) = delete;
         PWscfOut(PWscfOut&&) noexcept = default;
         ~PWscfOut() = default;
         /* Operators */

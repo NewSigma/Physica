@@ -36,7 +36,7 @@ namespace Physica::Core {
         DeviceScalar from;
         DeviceScalar to;
     private:
-        using TracerType = device_obj<DiffTracer<PlainScalar>>;
+        using TracerType = typename DeviceScalar::TracerType;
         using SegmentType = typename TracerType::SegmentType;
     public:
         SGD(PlainScalar learnRate_, unsigned int batchSize_);

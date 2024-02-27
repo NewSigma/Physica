@@ -20,7 +20,7 @@
 
 using namespace Physica::Core;
 using ScalarType = Scalar<Double>;
-using MatrixType = Differentiable<DenseMatrix<ScalarType>, DiffMode::Reverse>;
+using MatrixType = Differentiable<DenseMatrix<ScalarType>, DiffMode::Reverse, 1>;
 using RandomGenerator = std::mt19937;
 
 int main() {

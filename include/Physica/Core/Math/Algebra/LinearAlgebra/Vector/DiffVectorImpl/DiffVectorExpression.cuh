@@ -22,8 +22,8 @@
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/VectorImpl/VectorExpression.cuh"
 
 namespace Physica::Core {
-    template<ExpressionType type, class T1> class DiffVectorExpressionUnitary;
-    template<ExpressionType type, class T1, class T2 = T1> class DiffVectorExpressionBinary;
+    template<ExpressionType type, unsigned int Order, class T1> class DiffVectorExpressionUnitary;
+    template<ExpressionType type, unsigned int Order, class T1, class T2 = T1> class DiffVectorExpressionBinary;
 
     namespace Internal {
         template<ExpressionType Type, class VectorType>
@@ -110,9 +110,9 @@ namespace Physica::Core {
         }
     }
 
-    template<ExpressionType Type, class PlainScalar>
-    class DiffVectorExpressionUnitary<Type, Vector<PlainScalar>> {
-        using VectorType = device_obj<Differentiable<Vector<PlainScalar>, DiffMode::Reverse>>;
+    template<ExpressionType Type, unsigned int Order, class PlainScalar>
+    class DiffVectorExpressionUnitary<Type, Order, Vector<PlainScalar>> {
+        using VectorType = device_obj<Differentiable<Vector<PlainScalar>, DiffMode::Reverse, Order>>;
     public:
         [[nodiscard]] static VectorType calc(const VectorType& v) {
             const size_t length = v.getLength();
@@ -126,9 +126,9 @@ namespace Physica::Core {
         }
     };
 
-    template<ExpressionType Type, class PlainScalar>
-    class DiffVectorExpressionBinary<Type, Vector<PlainScalar>, PlainScalar> {
-        using VectorType = device_obj<Differentiable<Vector<PlainScalar>, DiffMode::Reverse>>;
+    template<ExpressionType Type, unsigned int Order, class PlainScalar>
+    class DiffVectorExpressionBinary<Type, Order, Vector<PlainScalar>, PlainScalar> {
+        using VectorType = device_obj<Differentiable<Vector<PlainScalar>, DiffMode::Reverse, Order>>;
         using ScalarType = typename VectorType::ScalarType;
     public:
         [[nodiscard]] static VectorType calc(const VectorType& v, const ScalarType& s) {
@@ -143,9 +143,9 @@ namespace Physica::Core {
         }
     };
 
-    template<ExpressionType Type, class PlainScalar>
-    class DiffVectorExpressionBinary<Type, Vector<PlainScalar>> {
-        using VectorType = device_obj<Differentiable<Vector<PlainScalar>, DiffMode::Reverse>>;
+    template<ExpressionType Type, unsigned int Order, class PlainScalar>
+    class DiffVectorExpressionBinary<Type, Order, Vector<PlainScalar>> {
+        using VectorType = device_obj<Differentiable<Vector<PlainScalar>, DiffMode::Reverse, Order>>;
     public:
         [[nodiscard]] static VectorType calc(const VectorType& v1, const VectorType& v2) {
             const size_t length = v1.getLength();
@@ -162,84 +162,84 @@ namespace Physica::Core {
     //////////////////////////////////////Operators//////////////////////////////////////
     //////////////////////////////////////Minus//////////////////////////////////////
     //////////////////////////////////////Add//////////////////////////////////////
-    template<class PlainScalar>
+    template<class PlainScalar, unsigned int Order>
     inline auto operator+(
-            const device_obj<Differentiable<Vector<PlainScalar>, DiffMode::Reverse>>& v,
-            const device_obj<Differentiable<PlainScalar, DiffMode::Reverse>>& s) {
-        return DiffVectorExpressionBinary<ExpressionType::Add, Vector<PlainScalar>, PlainScalar>::calc(v, s);
+            const device_obj<Differentiable<Vector<PlainScalar>, DiffMode::Reverse, Order>>& v,
+            const device_obj<Differentiable<PlainScalar, DiffMode::Reverse, Order>>& s) {
+        return DiffVectorExpressionBinary<ExpressionType::Add, Order, Vector<PlainScalar>, PlainScalar>::calc(v, s);
     }
 
-    template<class PlainScalar>
+    template<class PlainScalar, unsigned int Order>
     inline auto operator+(
-            const device_obj<Differentiable<PlainScalar, DiffMode::Reverse>>& s,
-            const device_obj<Differentiable<Vector<PlainScalar>, DiffMode::Reverse>>& v) {
+            const device_obj<Differentiable<PlainScalar, DiffMode::Reverse, Order>>& s,
+            const device_obj<Differentiable<Vector<PlainScalar>, DiffMode::Reverse, Order>>& v) {
         return v + s;
     }
 
-    template<class PlainScalar>
+    template<class PlainScalar, unsigned int Order>
     inline auto operator+(
-            const device_obj<Differentiable<Vector<PlainScalar>, DiffMode::Reverse>>& v1,
-            const device_obj<Differentiable<Vector<PlainScalar>, DiffMode::Reverse>>& v2) {
-        return DiffVectorExpressionBinary<ExpressionType::Add, Vector<PlainScalar>, Vector<PlainScalar>>::calc(v1, v2);
+            const device_obj<Differentiable<Vector<PlainScalar>, DiffMode::Reverse, Order>>& v1,
+            const device_obj<Differentiable<Vector<PlainScalar>, DiffMode::Reverse, Order>>& v2) {
+        return DiffVectorExpressionBinary<ExpressionType::Add, Order, Vector<PlainScalar>, Vector<PlainScalar>>::calc(v1, v2);
     }
     //////////////////////////////////////Sub//////////////////////////////////////
-    template<class PlainScalar>
+    template<class PlainScalar, unsigned int Order>
     inline auto operator-(
-            const device_obj<Differentiable<Vector<PlainScalar>, DiffMode::Reverse>>& v,
-            const device_obj<Differentiable<PlainScalar, DiffMode::Reverse>>& s) {
-        return DiffVectorExpressionBinary<ExpressionType::Sub, Vector<PlainScalar>, PlainScalar>::calc(v, s);
+            const device_obj<Differentiable<Vector<PlainScalar>, DiffMode::Reverse, Order>>& v,
+            const device_obj<Differentiable<PlainScalar, DiffMode::Reverse, Order>>& s) {
+        return DiffVectorExpressionBinary<ExpressionType::Sub, Order, Vector<PlainScalar>, PlainScalar>::calc(v, s);
     }
 
-    template<class PlainScalar>
+    template<class PlainScalar, unsigned int Order>
     inline auto operator-(
-            const device_obj<Differentiable<Vector<PlainScalar>, DiffMode::Reverse>>& v1,
-            const device_obj<Differentiable<Vector<PlainScalar>, DiffMode::Reverse>>& v2) {
-        return DiffVectorExpressionBinary<ExpressionType::Sub, Vector<PlainScalar>, Vector<PlainScalar>>::calc(v1, v2);
+            const device_obj<Differentiable<Vector<PlainScalar>, DiffMode::Reverse, Order>>& v1,
+            const device_obj<Differentiable<Vector<PlainScalar>, DiffMode::Reverse, Order>>& v2) {
+        return DiffVectorExpressionBinary<ExpressionType::Sub, Order, Vector<PlainScalar>, Vector<PlainScalar>>::calc(v1, v2);
     }
     //////////////////////////////////////Mul//////////////////////////////////////
-    template<class PlainScalar>
+    template<class PlainScalar, unsigned int Order>
     inline auto operator*(
-            const device_obj<Differentiable<Vector<PlainScalar>, DiffMode::Reverse>>& v,
-            const device_obj<Differentiable<PlainScalar, DiffMode::Reverse>>& s) {
-        return DiffVectorExpressionBinary<ExpressionType::Mul, Vector<PlainScalar>, PlainScalar>::calc(v, s);
+            const device_obj<Differentiable<Vector<PlainScalar>, DiffMode::Reverse, Order>>& v,
+            const device_obj<Differentiable<PlainScalar, DiffMode::Reverse, Order>>& s) {
+        return DiffVectorExpressionBinary<ExpressionType::Mul, Order, Vector<PlainScalar>, PlainScalar>::calc(v, s);
     }
 
-    template<class PlainScalar>
+    template<class PlainScalar, unsigned int Order>
     inline auto operator*(
-            const device_obj<Differentiable<PlainScalar, DiffMode::Reverse>>& s,
-            const device_obj<Differentiable<Vector<PlainScalar>, DiffMode::Reverse>>& v) {
+            const device_obj<Differentiable<PlainScalar, DiffMode::Reverse, Order>>& s,
+            const device_obj<Differentiable<Vector<PlainScalar>, DiffMode::Reverse, Order>>& v) {
         return v * s;
     }
 
-    template<class PlainScalar>
+    template<class PlainScalar, unsigned int Order>
     inline auto hadamard(
-            const device_obj<Differentiable<Vector<PlainScalar>, DiffMode::Reverse>>& v1,
-            const device_obj<Differentiable<Vector<PlainScalar>, DiffMode::Reverse>>& v2) {
-        return DiffVectorExpressionBinary<ExpressionType::Mul, Vector<PlainScalar>, Vector<PlainScalar>>::calc(v1, v2);
+            const device_obj<Differentiable<Vector<PlainScalar>, DiffMode::Reverse, Order>>& v1,
+            const device_obj<Differentiable<Vector<PlainScalar>, DiffMode::Reverse, Order>>& v2) {
+        return DiffVectorExpressionBinary<ExpressionType::Mul, Order, Vector<PlainScalar>, Vector<PlainScalar>>::calc(v1, v2);
     }
     //////////////////////////////////////Div//////////////////////////////////////
-    template<class PlainScalar>
+    template<class PlainScalar, unsigned int Order>
     inline auto operator/(
-            const device_obj<Differentiable<Vector<PlainScalar>, DiffMode::Reverse>>& v,
-            const device_obj<Differentiable<PlainScalar, DiffMode::Reverse>>& s) {
-        return DiffVectorExpressionBinary<ExpressionType::Div, Vector<PlainScalar>, PlainScalar>::calc(v, s);
+            const device_obj<Differentiable<Vector<PlainScalar>, DiffMode::Reverse, Order>>& v,
+            const device_obj<Differentiable<PlainScalar, DiffMode::Reverse, Order>>& s) {
+        return DiffVectorExpressionBinary<ExpressionType::Div, Order, Vector<PlainScalar>, PlainScalar>::calc(v, s);
     }
 
-    template<class PlainScalar>
+    template<class PlainScalar, unsigned int Order>
     inline auto devide(
-            const device_obj<Differentiable<Vector<PlainScalar>, DiffMode::Reverse>>& v1,
-            const device_obj<Differentiable<Vector<PlainScalar>, DiffMode::Reverse>>& v2) {
-        return DiffVectorExpressionBinary<ExpressionType::Div, Vector<PlainScalar>, Vector<PlainScalar>>::calc(v1, v2);
+            const device_obj<Differentiable<Vector<PlainScalar>, DiffMode::Reverse, Order>>& v1,
+            const device_obj<Differentiable<Vector<PlainScalar>, DiffMode::Reverse, Order>>& v2) {
+        return DiffVectorExpressionBinary<ExpressionType::Div, Order, Vector<PlainScalar>, Vector<PlainScalar>>::calc(v1, v2);
     }
     //////////////////////////////////////Compare//////////////////////////////////////
     ////////////////////////////////////////Elementary Functions////////////////////////////////////////////
-    template<class PlainScalar>
-    auto relu(const device_obj<Differentiable<Vector<PlainScalar>, DiffMode::Reverse>>& v) {
-        return DiffVectorExpressionUnitary<ExpressionType::Relu, Vector<PlainScalar>>::calc(v);
+    template<class PlainScalar, unsigned int Order>
+    auto relu(const device_obj<Differentiable<Vector<PlainScalar>, DiffMode::Reverse, Order>>& v) {
+        return DiffVectorExpressionUnitary<ExpressionType::Relu, Order, Vector<PlainScalar>>::calc(v);
     }
 
-    template<class PlainScalar>
-    auto exp(const device_obj<Differentiable<Vector<PlainScalar>, DiffMode::Reverse>>& v) {
-        return DiffVectorExpressionUnitary<ExpressionType::Exp, Vector<PlainScalar>>::calc(v);
+    template<class PlainScalar, unsigned int Order>
+    auto exp(const device_obj<Differentiable<Vector<PlainScalar>, DiffMode::Reverse, Order>>& v) {
+        return DiffVectorExpressionUnitary<ExpressionType::Exp, Order, Vector<PlainScalar>>::calc(v);
     }
 }

@@ -63,8 +63,9 @@ namespace Physica::Core {
     template<class T, size_t Length, size_t MaxLength, class Allocator>
     Vector<T, Length, MaxLength, Allocator> Vector<T, Length, MaxLength, Allocator>::copy() const {
         if constexpr (isReverseDiff) {
+            using TracerType = typename T::TracerType;
             const size_t length = Base::getLength();
-            DiffTracer<PlainScalar>::getInstance().reserve(length);
+            TracerType::getInstance().reserve(length);
             This result(length);
             for (size_t i = 0; i < length; ++i)
                 result[i] = Base::operator[](i).copy();

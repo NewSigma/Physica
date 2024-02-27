@@ -71,6 +71,7 @@ namespace Physica::Core {
     template<class Dataset, class Optimizer, class RandomPoolType, class Executor>
     void NetBase<Derived>::train_step(const Dataset& dataset, Optimizer& opt) {
         static_assert(IsTrainMode, "[Error]: train_step must be called under training mode");
+        using TracerType = typename ScalarType::TracerType;
         if constexpr (std::is_same<Executor, SequentialExecutor>::value) {
             auto dist = std::uniform_int_distribution<size_t>(0, dataset.getSize() - 1);
             auto& gen = RandomPoolType::getInstance().getGen();
@@ -93,13 +94,13 @@ namespace Physica::Core {
                     const size_t index = dist(gen);
                     tempNet.template loss<Dataset>(dataset, index).reverse_to(guard.getNode());
                 }
-                auto& tracer = DiffTracer<PlainScalar>::getInstance();
+                auto& tracer = TracerType::getInstance();
                 std::lock_guard locker(mutex);
                 tracer.reverse(); // TODO: reverse on net_tracer should lock mutex of net_tracer
             }, numThread, numThread).wait();
         }
         opt.step();
-        DiffTracer<PlainScalar>::getInstance().zero_grad_to(net_guard.getNode());
+        TracerType::getInstance().zero_grad_to(net_guard.getNode());
     }
 
     template<class Derived>

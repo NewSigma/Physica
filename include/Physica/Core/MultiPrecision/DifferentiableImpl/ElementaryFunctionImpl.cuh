@@ -22,9 +22,9 @@ namespace Physica::Core {
     namespace Internal {
         template<class ScalarType, ExpressionType Type>
         __global__ void __launch_bounds__(1, 1) ElementaryFunction_calcKernel(
-                Physica::PlainStruct<device_obj<TraceSegment<ScalarType>>> segment_,
-                Physica::PlainStruct<const device_obj<Differentiable<ScalarType, DiffMode::Reverse>>> s_) {
-            using SegmentType = device_obj<TraceSegment<ScalarType>>;
+                Physica::PlainStruct<device_obj<TraceSegment<ScalarType, 1>>> segment_,
+                Physica::PlainStruct<const device_obj<Differentiable<ScalarType, DiffMode::Reverse, 1>>> s_) {
+            using SegmentType = device_obj<TraceSegment<ScalarType, 1>>;
             using DiffRecord = typename SegmentType::DiffRecord;
             auto& segment = segment_.getDerived();
             segment.getRecords()[0] = DiffRecord{0, Type};
@@ -39,8 +39,8 @@ namespace Physica::Core {
     }
 
     template<class ScalarType>
-    device_obj<Differentiable<ScalarType, DiffMode::Reverse>> ln(const device_obj<Differentiable<ScalarType, DiffMode::Reverse>>& s) {
-        using TracerType = device_obj<DiffTracer<ScalarType>>;
+    device_obj<Differentiable<ScalarType, DiffMode::Reverse, 1>> ln(const device_obj<Differentiable<ScalarType, DiffMode::Reverse, 1>>& s) {
+        using TracerType = device_obj<DiffTracer<ScalarType, 1>>;
         auto& segment = TracerType::getInstance().pushSegment(1, ExpressionType::Ln);
         Internal::ElementaryFunction_calcKernel<ScalarType, ExpressionType::Ln>
                 <<<1, 1, 0, StreamPool::getStream()>>>(asStruct(segment), asStruct(s));

@@ -21,113 +21,113 @@
 namespace Physica::Core {
 /*
     template<class ScalarType>
-    inline device_obj<Differentiable<ScalarType, DiffMode::Reverse>> abs(const device_obj<Differentiable<ScalarType, DiffMode::Reverse>>& s);
+    inline device_obj<Differentiable<ScalarType, DiffMode::Reverse, 1>> abs(const device_obj<Differentiable<ScalarType, DiffMode::Reverse, 1>>& s);
 
     template<class ScalarType>
-    inline device_obj<Differentiable<ScalarType, DiffMode::Reverse>> relu(const device_obj<Differentiable<ScalarType, DiffMode::Reverse>>& s);
+    inline device_obj<Differentiable<ScalarType, DiffMode::Reverse, 1>> relu(const device_obj<Differentiable<ScalarType, DiffMode::Reverse, 1>>& s);
 
     template<class ScalarType>
-    inline device_obj<Differentiable<ScalarType, DiffMode::Reverse>> square(const device_obj<Differentiable<ScalarType, DiffMode::Reverse>>& s);
+    inline device_obj<Differentiable<ScalarType, DiffMode::Reverse, 1>> square(const device_obj<Differentiable<ScalarType, DiffMode::Reverse, 1>>& s);
 
     template<class ScalarType>
-    inline device_obj<Differentiable<ScalarType, DiffMode::Reverse>> reciprocal(const device_obj<Differentiable<ScalarType, DiffMode::Reverse>>& s);
+    inline device_obj<Differentiable<ScalarType, DiffMode::Reverse, 1>> reciprocal(const device_obj<Differentiable<ScalarType, DiffMode::Reverse, 1>>& s);
 
     template<class ScalarType>
-    device_obj<Differentiable<ScalarType, DiffMode::Reverse>> sqrt(const device_obj<Differentiable<ScalarType, DiffMode::Reverse>>& s);
+    device_obj<Differentiable<ScalarType, DiffMode::Reverse, 1>> sqrt(const device_obj<Differentiable<ScalarType, DiffMode::Reverse, 1>>& s);
 
     template<class ScalarType>
-    device_obj<Differentiable<ScalarType, DiffMode::Reverse>> cbrt(const device_obj<Differentiable<ScalarType, DiffMode::Reverse>>& s);
+    device_obj<Differentiable<ScalarType, DiffMode::Reverse, 1>> cbrt(const device_obj<Differentiable<ScalarType, DiffMode::Reverse, 1>>& s);
 */
     template<class ScalarType>
-    device_obj<Differentiable<ScalarType, DiffMode::Reverse>> ln(const device_obj<Differentiable<ScalarType, DiffMode::Reverse>>& s);
+    device_obj<Differentiable<ScalarType, DiffMode::Reverse, 1>> ln(const device_obj<Differentiable<ScalarType, DiffMode::Reverse, 1>>& s);
 /*
     template<class ScalarType>
-    device_obj<Differentiable<ScalarType, DiffMode::Reverse>> log(const device_obj<Differentiable<ScalarType, DiffMode::Reverse>>& s, const device_obj<Differentiable<ScalarType, DiffMode::Reverse>>& a);
+    device_obj<Differentiable<ScalarType, DiffMode::Reverse, 1>> log(const device_obj<Differentiable<ScalarType, DiffMode::Reverse, 1>>& s, const device_obj<Differentiable<ScalarType, DiffMode::Reverse, 1>>& a);
 
     template<class ScalarType>
-    device_obj<Differentiable<ScalarType, DiffMode::Reverse>> exp(const device_obj<Differentiable<ScalarType, DiffMode::Reverse>>& s);
+    device_obj<Differentiable<ScalarType, DiffMode::Reverse, 1>> exp(const device_obj<Differentiable<ScalarType, DiffMode::Reverse, 1>>& s);
 
     template<class ScalarType>
-    device_obj<Differentiable<ScalarType, DiffMode::Reverse>> pow(const device_obj<Differentiable<ScalarType, DiffMode::Reverse>>& s, const device_obj<Differentiable<ScalarType, DiffMode::Reverse>>& n);
+    device_obj<Differentiable<ScalarType, DiffMode::Reverse, 1>> pow(const device_obj<Differentiable<ScalarType, DiffMode::Reverse, 1>>& s, const device_obj<Differentiable<ScalarType, DiffMode::Reverse, 1>>& n);
 
     template<class ScalarType>
-    device_obj<Differentiable<ScalarType, DiffMode::Reverse>> factorial(const device_obj<Differentiable<ScalarType, DiffMode::Reverse>>& s);
+    device_obj<Differentiable<ScalarType, DiffMode::Reverse, 1>> factorial(const device_obj<Differentiable<ScalarType, DiffMode::Reverse, 1>>& s);
 
     template<class ScalarType>
-    device_obj<Differentiable<ScalarType, DiffMode::Reverse>> cos(const device_obj<Differentiable<ScalarType, DiffMode::Reverse>>& s);
+    device_obj<Differentiable<ScalarType, DiffMode::Reverse, 1>> cos(const device_obj<Differentiable<ScalarType, DiffMode::Reverse, 1>>& s);
 
     template<class ScalarType>
-    device_obj<Differentiable<ScalarType, DiffMode::Reverse>> sin(const device_obj<Differentiable<ScalarType, DiffMode::Reverse>>& s);
+    device_obj<Differentiable<ScalarType, DiffMode::Reverse, 1>> sin(const device_obj<Differentiable<ScalarType, DiffMode::Reverse, 1>>& s);
 
     template<class ScalarType>
-    void sincos(device_obj<Differentiable<ScalarType, DiffMode::Reverse>> s, device_obj<Differentiable<ScalarType, DiffMode::Reverse>>& sin_result, device_obj<Differentiable<ScalarType, DiffMode::Reverse>>& cos_result);
+    void sincos(device_obj<Differentiable<ScalarType, DiffMode::Reverse, 1>> s, device_obj<Differentiable<ScalarType, DiffMode::Reverse, 1>>& sin_result, device_obj<Differentiable<ScalarType, DiffMode::Reverse, 1>>& cos_result);
 
     template<class ScalarType>
-    device_obj<Differentiable<ScalarType, DiffMode::Reverse>> tan(const device_obj<Differentiable<ScalarType, DiffMode::Reverse>>& s);
+    device_obj<Differentiable<ScalarType, DiffMode::Reverse, 1>> tan(const device_obj<Differentiable<ScalarType, DiffMode::Reverse, 1>>& s);
 
     template<class ScalarType>
-    device_obj<Differentiable<ScalarType, DiffMode::Reverse>> sec(const device_obj<Differentiable<ScalarType, DiffMode::Reverse>>& s);
+    device_obj<Differentiable<ScalarType, DiffMode::Reverse, 1>> sec(const device_obj<Differentiable<ScalarType, DiffMode::Reverse, 1>>& s);
 
     template<class ScalarType>
-    device_obj<Differentiable<ScalarType, DiffMode::Reverse>> csc(const device_obj<Differentiable<ScalarType, DiffMode::Reverse>>& s);
+    device_obj<Differentiable<ScalarType, DiffMode::Reverse, 1>> csc(const device_obj<Differentiable<ScalarType, DiffMode::Reverse, 1>>& s);
 
     template<class ScalarType>
-    device_obj<Differentiable<ScalarType, DiffMode::Reverse>> cot(const device_obj<Differentiable<ScalarType, DiffMode::Reverse>>& s);
+    device_obj<Differentiable<ScalarType, DiffMode::Reverse, 1>> cot(const device_obj<Differentiable<ScalarType, DiffMode::Reverse, 1>>& s);
 
     template<class ScalarType>
-    device_obj<Differentiable<ScalarType, DiffMode::Reverse>> arccos(const device_obj<Differentiable<ScalarType, DiffMode::Reverse>>& s);
+    device_obj<Differentiable<ScalarType, DiffMode::Reverse, 1>> arccos(const device_obj<Differentiable<ScalarType, DiffMode::Reverse, 1>>& s);
 
     //!Domain of definition: [-Pi / 2, Pi / 2]
     template<class ScalarType>
-    device_obj<Differentiable<ScalarType, DiffMode::Reverse>> arcsin(const device_obj<Differentiable<ScalarType, DiffMode::Reverse>>& s);
+    device_obj<Differentiable<ScalarType, DiffMode::Reverse, 1>> arcsin(const device_obj<Differentiable<ScalarType, DiffMode::Reverse, 1>>& s);
     //!Domain of definition: [-Pi / 2, Pi / 2]
     template<class ScalarType>
-    device_obj<Differentiable<ScalarType, DiffMode::Reverse>> arctan(const device_obj<Differentiable<ScalarType, DiffMode::Reverse>>& s);
+    device_obj<Differentiable<ScalarType, DiffMode::Reverse, 1>> arctan(const device_obj<Differentiable<ScalarType, DiffMode::Reverse, 1>>& s);
 
     template<class ScalarType>
-    device_obj<Differentiable<ScalarType, DiffMode::Reverse>> arcsec(const device_obj<Differentiable<ScalarType, DiffMode::Reverse>>& s);
+    device_obj<Differentiable<ScalarType, DiffMode::Reverse, 1>> arcsec(const device_obj<Differentiable<ScalarType, DiffMode::Reverse, 1>>& s);
 
     template<class ScalarType>
-    device_obj<Differentiable<ScalarType, DiffMode::Reverse>> arccsc(const device_obj<Differentiable<ScalarType, DiffMode::Reverse>>& s);
+    device_obj<Differentiable<ScalarType, DiffMode::Reverse, 1>> arccsc(const device_obj<Differentiable<ScalarType, DiffMode::Reverse, 1>>& s);
 
     template<class ScalarType>
-    device_obj<Differentiable<ScalarType, DiffMode::Reverse>> arccot(const device_obj<Differentiable<ScalarType, DiffMode::Reverse>>& s);
+    device_obj<Differentiable<ScalarType, DiffMode::Reverse, 1>> arccot(const device_obj<Differentiable<ScalarType, DiffMode::Reverse, 1>>& s);
 
     template<class ScalarType>
-    device_obj<Differentiable<ScalarType, DiffMode::Reverse>> cosh(const device_obj<Differentiable<ScalarType, DiffMode::Reverse>>& s);
+    device_obj<Differentiable<ScalarType, DiffMode::Reverse, 1>> cosh(const device_obj<Differentiable<ScalarType, DiffMode::Reverse, 1>>& s);
 
     template<class ScalarType>
-    device_obj<Differentiable<ScalarType, DiffMode::Reverse>> sinh(const device_obj<Differentiable<ScalarType, DiffMode::Reverse>>& s);
+    device_obj<Differentiable<ScalarType, DiffMode::Reverse, 1>> sinh(const device_obj<Differentiable<ScalarType, DiffMode::Reverse, 1>>& s);
 
     template<class ScalarType>
-    device_obj<Differentiable<ScalarType, DiffMode::Reverse>> tanh(const device_obj<Differentiable<ScalarType, DiffMode::Reverse>>& s);
+    device_obj<Differentiable<ScalarType, DiffMode::Reverse, 1>> tanh(const device_obj<Differentiable<ScalarType, DiffMode::Reverse, 1>>& s);
 
     template<class ScalarType>
-    device_obj<Differentiable<ScalarType, DiffMode::Reverse>> sech(const device_obj<Differentiable<ScalarType, DiffMode::Reverse>>& s);
+    device_obj<Differentiable<ScalarType, DiffMode::Reverse, 1>> sech(const device_obj<Differentiable<ScalarType, DiffMode::Reverse, 1>>& s);
 
     template<class ScalarType>
-    device_obj<Differentiable<ScalarType, DiffMode::Reverse>> csch(const device_obj<Differentiable<ScalarType, DiffMode::Reverse>>& s);
+    device_obj<Differentiable<ScalarType, DiffMode::Reverse, 1>> csch(const device_obj<Differentiable<ScalarType, DiffMode::Reverse, 1>>& s);
 
     template<class ScalarType>
-    device_obj<Differentiable<ScalarType, DiffMode::Reverse>> coth(const device_obj<Differentiable<ScalarType, DiffMode::Reverse>>& s);
+    device_obj<Differentiable<ScalarType, DiffMode::Reverse, 1>> coth(const device_obj<Differentiable<ScalarType, DiffMode::Reverse, 1>>& s);
 
     template<class ScalarType>
-    device_obj<Differentiable<ScalarType, DiffMode::Reverse>> arccosh(const device_obj<Differentiable<ScalarType, DiffMode::Reverse>>& s);
+    device_obj<Differentiable<ScalarType, DiffMode::Reverse, 1>> arccosh(const device_obj<Differentiable<ScalarType, DiffMode::Reverse, 1>>& s);
 
     template<class ScalarType>
-    device_obj<Differentiable<ScalarType, DiffMode::Reverse>> arcsinh(const device_obj<Differentiable<ScalarType, DiffMode::Reverse>>& s);
+    device_obj<Differentiable<ScalarType, DiffMode::Reverse, 1>> arcsinh(const device_obj<Differentiable<ScalarType, DiffMode::Reverse, 1>>& s);
 
     template<class ScalarType>
-    device_obj<Differentiable<ScalarType, DiffMode::Reverse>> arctanh(const device_obj<Differentiable<ScalarType, DiffMode::Reverse>>& s);
+    device_obj<Differentiable<ScalarType, DiffMode::Reverse, 1>> arctanh(const device_obj<Differentiable<ScalarType, DiffMode::Reverse, 1>>& s);
 
     template<class ScalarType>
-    device_obj<Differentiable<ScalarType, DiffMode::Reverse>> arcsech(const device_obj<Differentiable<ScalarType, DiffMode::Reverse>>& s);
+    device_obj<Differentiable<ScalarType, DiffMode::Reverse, 1>> arcsech(const device_obj<Differentiable<ScalarType, DiffMode::Reverse, 1>>& s);
 
     template<class ScalarType>
-    device_obj<Differentiable<ScalarType, DiffMode::Reverse>> arccsch(const device_obj<Differentiable<ScalarType, DiffMode::Reverse>>& s);
+    device_obj<Differentiable<ScalarType, DiffMode::Reverse, 1>> arccsch(const device_obj<Differentiable<ScalarType, DiffMode::Reverse, 1>>& s);
 
     template<class ScalarType>
-    device_obj<Differentiable<ScalarType, DiffMode::Reverse>> arccoth(const device_obj<Differentiable<ScalarType, DiffMode::Reverse>>& s);
+    device_obj<Differentiable<ScalarType, DiffMode::Reverse, 1>> arccoth(const device_obj<Differentiable<ScalarType, DiffMode::Reverse, 1>>& s);
 */
 }
 

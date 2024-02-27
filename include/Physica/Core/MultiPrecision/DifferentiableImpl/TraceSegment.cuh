@@ -24,10 +24,10 @@
 #include "Physica/Core/MultiPrecision/Differentiable.cuh"
 
 namespace Physica::Core {
-    template<class ScalarType>
-    class device_obj<TraceSegment<ScalarType>> {
+    template<class ScalarType, unsigned int Order>
+    class device_obj<TraceSegment<ScalarType, Order>> {
         static_assert(!ScalarType::isDifferentiable, "[Error]: Differentiable<> pack is not necessary");
-        using host_obj = TraceSegment<ScalarType>;
+        using host_obj = TraceSegment<ScalarType, Order>;
         using This = device_obj<host_obj>;
         using HostDiffScalar = typename host_obj::DiffScalar;
         using VectorType = typename host_obj::VectorType;
@@ -85,7 +85,7 @@ namespace Physica::Core {
         inline void init(ScalarType value);
         void init(const VectorType& values_);
         /* Friends */
-        friend class device_obj<DiffTracer<ScalarType>>;
+        friend class device_obj<DiffTracer<ScalarType, Order>>;
     };
 }
 

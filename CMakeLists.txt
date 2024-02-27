@@ -32,6 +32,10 @@ if(NOT ${CMAKE_BUILD_TYPE} MATCHES "Debug")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-math-errno -fno-signaling-nans -fno-trapping-math")
 endif()
 
+if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-ignored-optimization-argument -Wno-unknown-warning-option")
+endif()
+
 if(${PHYSICA_CUDA})
     if(NOT DEFINED PHYSICA_CUDA_ARCHITECTURES)
         message(FATAL_ERROR "To use CUDA, you should define PHYSICA_CUDA_ARCHITECTURES.")

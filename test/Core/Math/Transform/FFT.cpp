@@ -28,8 +28,8 @@ using ComplexType = ComplexScalar<RealType>;
 void test_differentiable() {
     using PlainScalar = Scalar<Double>;
     using ComplexPlainScalar = ComplexScalar<PlainScalar>;
-    using ScalarType = Differentiable<PlainScalar, DiffMode::Forward>;
-    using ComplexType = Differentiable<ComplexPlainScalar, DiffMode::Forward>;
+    using ScalarType = Differentiable<PlainScalar, DiffMode::Forward, 1>;
+    using ComplexType = Differentiable<ComplexPlainScalar, DiffMode::Forward, 1>;
     const size_t N = 100;
     constexpr double freq1 = 3;
     constexpr double freq2 = 4;

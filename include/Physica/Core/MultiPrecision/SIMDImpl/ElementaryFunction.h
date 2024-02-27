@@ -24,8 +24,8 @@ namespace Physica::Core {
         if constexpr (!ScalarType::isDifferentiable)
             return SIMD<ScalarType, Size>(abs(x.getImpl()));
         else {
-            using PlainScalar = typename ScalarType::PlainScalar;
-            auto& tracer = DiffTracer<PlainScalar>::getInstance();
+            using TracerType = typename ScalarType::TracerType;
+            auto& tracer = TracerType::getInstance();
             const auto temp = abs(x.getImpl());
             const ScalarType newHeadNode = tracer.pushOperation(temp, ExpressionType::Abs);
             for (size_t i = 0; i < Size; ++i)
@@ -39,8 +39,8 @@ namespace Physica::Core {
         if constexpr (!ScalarType::isDifferentiable)
             return x * x;
         else {
-            using PlainScalar = typename ScalarType::PlainScalar;
-            auto& tracer = DiffTracer<PlainScalar>::getInstance();
+            using TracerType = typename ScalarType::TracerType;
+            auto& tracer = TracerType::getInstance();
             const auto temp = square(x.getImpl());
             const size_t newHeadNode = tracer.pushOperation(temp, ExpressionType::Square);
             for (size_t i = 0; i < Size; ++i)
@@ -54,8 +54,8 @@ namespace Physica::Core {
         if constexpr (!ScalarType::isDifferentiable)
             return SIMD<ScalarType, Size>(sqrt(x.getImpl()));
         else {
-            using PlainScalar = typename ScalarType::PlainScalar;
-            auto& tracer = DiffTracer<PlainScalar>::getInstance();
+            using TracerType = typename ScalarType::TracerType;
+            auto& tracer = TracerType::getInstance();
             const auto temp = sqrt(x.getImpl());
             const size_t newHeadNode = tracer.pushOperation(temp, ExpressionType::Sqrt);
             for (size_t i = 0; i < Size; ++i)
@@ -69,8 +69,8 @@ namespace Physica::Core {
         if constexpr (!ScalarType::isDifferentiable)
             return SIMD<ScalarType, Size>(cbrt(x.getImpl()));
         else {
-            using PlainScalar = typename ScalarType::PlainScalar;
-            auto& tracer = DiffTracer<PlainScalar>::getInstance();
+            using TracerType = typename ScalarType::TracerType;
+            auto& tracer = TracerType::getInstance();
             const auto temp = cbrt(x.getImpl());
             const size_t newHeadNode = tracer.pushOperation(temp, ExpressionType::Cbrt);
             for (size_t i = 0; i < Size; ++i)
@@ -83,8 +83,8 @@ namespace Physica::Core {
     inline static void sincos(const SIMD<ScalarType, Size>& x, SIMD<ScalarType, Size>& s, SIMD<ScalarType, Size>& c) {
         sincos(x.getImpl(), s.getImpl(), c.getImpl());
         if constexpr (ScalarType::isDifferentiable) {
-            using PlainScalar = typename ScalarType::PlainScalar;
-            auto& tracer = DiffTracer<PlainScalar>::getInstance();
+            using TracerType = typename ScalarType::TracerType;
+            auto& tracer = TracerType::getInstance();
             const ScalarType sinHeadNode = tracer.pushOperation(s, ExpressionType::Sin);
             for (size_t i = 0; i < Size; ++i)
                 tracer.pushOperand(ScalarType(x.value_ptr() + i, x.grad_ptr() + i));

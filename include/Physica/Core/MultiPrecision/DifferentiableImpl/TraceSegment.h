@@ -22,17 +22,18 @@
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/Vector.h"
 
 namespace Physica::Core {
-    template<class ScalarType> class DiffTracer;
+    template<class ScalarType, unsigned int Order> class DiffTracer;
     /**
      * \class TraceSegment provides a segment of continuous memory to record compute graph
      */
-    template<class ScalarType>
+    template<class ScalarType, unsigned int Order>
     class TraceSegment {
         static_assert(!ScalarType::isDifferentiable, "[Error]: Differentiable<> pack is not necessary");
-        using This = TraceSegment<ScalarType>;
+        static_assert(Order > 0, "[Error]: 0 order is not differentiable");
+        using This = TraceSegment<ScalarType, Order>;
     public:
         constexpr static size_t DefaultSize = 4096; // I guess it is not a bad choice
-        using DiffScalar = Differentiable<ScalarType, DiffMode::Reverse>;
+        using DiffScalar = Differentiable<ScalarType, DiffMode::Reverse, Order>;
         using VectorType = Vector<ScalarType>;
         struct DiffRecord {
             using device_obj_type = DiffRecord;
@@ -94,12 +95,12 @@ namespace Physica::Core {
         template<class VectorType1, class DiffScalar1>
         [[nodiscard]] __host__ __device__ static size_t findImpl(const VectorType1& values, const VectorType1& grads, DiffScalar1 s);
         /* Friends */
-        friend class DiffTracer<ScalarType>;
+        friend class DiffTracer<ScalarType, Order>;
         friend class device_obj<This>;
     };
 
-    template<class ScalarType>
-    TraceSegment<ScalarType>::TraceSegment(size_t size) {
+    template<class ScalarType, unsigned int Order>
+    TraceSegment<ScalarType, Order>::TraceSegment(size_t size) {
         assert(size >= DefaultSize && "[Error]: Allocate a small segment maybe bad to performance");
         records.reserve(size);
         operands.reserve(3 * size); //MulAdd operation is 3-operand
@@ -107,37 +108,37 @@ namespace Physica::Core {
         grads.reserve(size);
     }
 
-    template<class ScalarType>
-    TraceSegment<ScalarType>::TraceSegment(VectorType values_) : values(std::move(values_)) {
+    template<class ScalarType, unsigned int Order>
+    TraceSegment<ScalarType, Order>::TraceSegment(VectorType values_) : values(std::move(values_)) {
         const size_t length = values.getLength();
         records.resize(length, DiffRecord{0, ExpressionType::Set});
         grads.resize(length, ScalarType(0));
     }
 
-    template<class ScalarType>
-    inline typename TraceSegment<ScalarType>::DiffScalar TraceSegment<ScalarType>::operator[](size_t index) {
+    template<class ScalarType, unsigned int Order>
+    inline typename TraceSegment<ScalarType, Order>::DiffScalar TraceSegment<ScalarType, Order>::operator[](size_t index) {
         return DiffScalar(values.data_ptr(index), grads.data_ptr(index));
     }
 
-    template<class ScalarType>
-    inline const typename TraceSegment<ScalarType>::DiffScalar TraceSegment<ScalarType>::operator[](size_t index) const {
+    template<class ScalarType, unsigned int Order>
+    inline const typename TraceSegment<ScalarType, Order>::DiffScalar TraceSegment<ScalarType, Order>::operator[](size_t index) const {
         return DiffScalar(const_cast<ScalarType*>(values.data_ptr(index)), const_cast<ScalarType*>(grads.data_ptr(index)));
     }
 
-    template<class ScalarType>
-    inline void TraceSegment<ScalarType>::reverse(DiffScalar from, DiffScalar to) {
+    template<class ScalarType, unsigned int Order>
+    inline void TraceSegment<ScalarType, Order>::reverse(DiffScalar from, DiffScalar to) {
         assert(!empty());
         reverse(makeFromIndex(from), makeToIndex(to));
     }
 
-    template<class ScalarType>
-    inline void TraceSegment<ScalarType>::reverse() {
+    template<class ScalarType, unsigned int Order>
+    inline void TraceSegment<ScalarType, Order>::reverse() {
         assert(!empty());
         reverse(getLength() - 1, 0);
     }
 
-    template<class ScalarType>
-    void TraceSegment<ScalarType>::zero_grad(DiffScalar from, DiffScalar to) {
+    template<class ScalarType, unsigned int Order>
+    void TraceSegment<ScalarType, Order>::zero_grad(DiffScalar from, DiffScalar to) {
         const size_t fromIndex = makeFromIndex(from);
         const size_t toIndex = makeToIndex(to);
         assert(toIndex <= fromIndex && "[Error]: Invalid range");
@@ -145,20 +146,20 @@ namespace Physica::Core {
         segment = ScalarType(0);
     }
 
-    template<class ScalarType>
-    inline void TraceSegment<ScalarType>::zero_grad_from(DiffScalar from) {
+    template<class ScalarType, unsigned int Order>
+    inline void TraceSegment<ScalarType, Order>::zero_grad_from(DiffScalar from) {
         auto segment = grads.segment(0, makeFromIndex(from) + 1);
         segment = ScalarType(0);
     }
 
-    template<class ScalarType>
-    inline void TraceSegment<ScalarType>::zero_grad_to(DiffScalar to) {
+    template<class ScalarType, unsigned int Order>
+    inline void TraceSegment<ScalarType, Order>::zero_grad_to(DiffScalar to) {
         auto segment = grads.segment(makeToIndex(to), getLength());
         segment = ScalarType(0);
     }
 
-    template<class ScalarType>
-    void TraceSegment<ScalarType>::forget(DiffScalar to) {
+    template<class ScalarType, unsigned int Order>
+    void TraceSegment<ScalarType, Order>::forget(DiffScalar to) {
         assert(isFound(to) && "[Error]: forgeting a non existent, this may be a bug");
         const size_t index = find(to);
         const auto& record = records[index];
@@ -179,29 +180,29 @@ namespace Physica::Core {
     /**
      * FIXME: squeeze values and grads may invalidate pointers, so the unused memory cannot be freed
      */
-    template<class ScalarType>
-    void TraceSegment<ScalarType>::squeeze() {
+    template<class ScalarType, unsigned int Order>
+    void TraceSegment<ScalarType, Order>::squeeze() {
         records.squeeze();
         operands.squeeze();
     }
 
-    template<class ScalarType>
+    template<class ScalarType, unsigned int Order>
     template<class Functor>
-    inline void TraceSegment<ScalarType>::forNodeInRange(DiffScalar from, DiffScalar to, Functor func) {
+    inline void TraceSegment<ScalarType, Order>::forNodeInRange(DiffScalar from, DiffScalar to, Functor func) {
         const size_t to_i = makeToIndex(to);
         const size_t from_i = makeFromIndex(from) + 1;
         for (size_t i = to_i; i < from_i; ++i)
             func(this->operator[](i));
     }
 
-    template<class ScalarType>
+    template<class ScalarType, unsigned int Order>
     template<class Functor>
-    inline void TraceSegment<ScalarType>::forNodeInRange(DiffScalar from, DiffScalar to, Functor func) const {
+    inline void TraceSegment<ScalarType, Order>::forNodeInRange(DiffScalar from, DiffScalar to, Functor func) const {
         const_cast<This*>(this)->forNodeInRange(from, to, func);
     }
 
-    template<class ScalarType>
-    void TraceSegment<ScalarType>::swap(TraceSegment& __restrict obj) noexcept {
+    template<class ScalarType, unsigned int Order>
+    void TraceSegment<ScalarType, Order>::swap(TraceSegment& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         records.swap(obj.records);
         operands.swap(obj.operands);
@@ -209,8 +210,8 @@ namespace Physica::Core {
         grads.swap(obj.grads);
     }
 
-    template<class ScalarType>
-    constexpr unsigned int TraceSegment<ScalarType>::numOperand(ExpressionType type) {
+    template<class ScalarType, unsigned int Order>
+    constexpr unsigned int TraceSegment<ScalarType, Order>::numOperand(ExpressionType type) {
         switch (type) {
             case ExpressionType::Set: return 0;
             case ExpressionType::Assign: return 1;
@@ -242,8 +243,8 @@ namespace Physica::Core {
         }
     }
 
-    template<class ScalarType>
-    void TraceSegment<ScalarType>::reverse(size_t fromIndex, size_t toIndex) {
+    template<class ScalarType, unsigned int Order>
+    void TraceSegment<ScalarType, Order>::reverse(size_t fromIndex, size_t toIndex) {
         assert(toIndex <= fromIndex && "[Error]: Invalid index");
         for (size_t i = fromIndex; toIndex <= i && i <= fromIndex; --i) {
             const DiffRecord record = records[i];
@@ -356,9 +357,9 @@ namespace Physica::Core {
         }
     }
 
-    template<class ScalarType>
+    template<class ScalarType, unsigned int Order>
     template<size_t Size>
-    void TraceSegment<ScalarType>::reverseMulAdd(DiffScalar firstOpX, DiffScalar firstOpY, DiffScalar firstOpZ, size_t traceId) {
+    void TraceSegment<ScalarType, Order>::reverseMulAdd(DiffScalar firstOpX, DiffScalar firstOpY, DiffScalar firstOpZ, size_t traceId) {
         using PacketType = SIMD<ScalarType, Size>;
         const PacketType grad = grads.template packet<PacketType>(traceId);
         PacketType gradZ{};
@@ -380,8 +381,8 @@ namespace Physica::Core {
         gradY.store(firstOpY.grad_ptr());
     }
 
-    template<class ScalarType>
-    size_t TraceSegment<ScalarType>::makeFromIndex(DiffScalar from) const noexcept {
+    template<class ScalarType, unsigned int Order>
+    size_t TraceSegment<ScalarType, Order>::makeFromIndex(DiffScalar from) const noexcept {
         size_t fromIndex = find(from);
         const bool isFromNotFound = fromIndex >= getLength();
         if (isFromNotFound)
@@ -389,8 +390,8 @@ namespace Physica::Core {
         return fromIndex;
     }
 
-    template<class ScalarType>
-    size_t TraceSegment<ScalarType>::makeToIndex(DiffScalar to) const noexcept {
+    template<class ScalarType, unsigned int Order>
+    size_t TraceSegment<ScalarType, Order>::makeToIndex(DiffScalar to) const noexcept {
         size_t toIndex = find(to);
         const bool isToNotFound = toIndex >= getLength();
         if (isToNotFound)
@@ -398,9 +399,9 @@ namespace Physica::Core {
         return toIndex;
     }
 
-    template<class ScalarType>
+    template<class ScalarType, unsigned int Order>
     template<class VectorType1, class DiffScalar1>
-    __host__ __device__ size_t TraceSegment<ScalarType>::findImpl(const VectorType1& values, const VectorType1& grads, DiffScalar1 s) {
+    __host__ __device__ size_t TraceSegment<ScalarType, Order>::findImpl(const VectorType1& values, const VectorType1& grads, DiffScalar1 s) {
         assert(values.getLength() == grads.getLength() && "[Error]: Invalid param");
         const auto* pValue = values.data();
         const auto* pValue1 = s.value_ptr();

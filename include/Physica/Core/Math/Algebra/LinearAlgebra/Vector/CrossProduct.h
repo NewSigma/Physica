@@ -42,8 +42,8 @@ namespace Physica::Core {
     class CrossProduct : public RValueVector<CrossProduct<AnyVector1, AnyVector2>> {
         using This = CrossProduct<AnyVector1, AnyVector2>;
         using Base = RValueVector<This>;
-        using typename Base::PlainScalar;
         using Base::isReverseDiff;
+        using typename Base::ScalarType;
     private:
         const AnyVector1& v1;
         const AnyVector2& v2;
@@ -60,7 +60,8 @@ namespace Physica::Core {
             v[1] = v1[2] * v2[0] - v1[0] * v2[2];
             v[2] = v1[0] * v2[1] - v1[1] * v2[0];
             if constexpr (isReverseDiff) {
-                DiffTracer<PlainScalar>::getInstance().reserve(3);
+                using TracerType = typename ScalarType::TracerType;
+                TracerType::getInstance().reserve(3);
                 for (int i = 0; i < 3; ++i)
                     v[i] = v[i].copy();
             }

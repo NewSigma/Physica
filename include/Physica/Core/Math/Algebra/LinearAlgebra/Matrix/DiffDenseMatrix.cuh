@@ -23,20 +23,21 @@
 
 namespace Physica::Core {
     namespace Internal {
-        template<class T, int Option>
-        class Traits<Core::device_obj<Differentiable<DenseMatrix<T, Option>, DiffMode::Reverse>>> : public Traits<DenseMatrix<T, Option>> {
+        template<class T, int Option, unsigned int Order>
+        class Traits<Core::device_obj<Differentiable<DenseMatrix<T, Option>, DiffMode::Reverse, Order>>>
+                : public Traits<DenseMatrix<T, Option>> {
         public:
-            using ScalarType = device_obj<Differentiable<T, DiffMode::Reverse>>;
+            using ScalarType = device_obj<Differentiable<T, DiffMode::Reverse, Order>>;
         };
     }
 
-    template<class PlainScalar, int Option>
-    class device_obj<Differentiable<DenseMatrix<PlainScalar, Option>, DiffMode::Reverse>>
-            : public device_obj<RValueMatrix<Differentiable<DenseMatrix<PlainScalar, Option>, DiffMode::Reverse>>>
-            , public DenseMatrixDim<device_obj<Differentiable<DenseMatrix<PlainScalar, Option>, DiffMode::Reverse>>, Dynamic, Dynamic, Dynamic, Dynamic> {
+    template<class PlainScalar, int Option, unsigned int Order>
+    class device_obj<Differentiable<DenseMatrix<PlainScalar, Option>, DiffMode::Reverse, Order>>
+            : public device_obj<RValueMatrix<Differentiable<DenseMatrix<PlainScalar, Option>, DiffMode::Reverse, Order>>>
+            , public DenseMatrixDim<device_obj<Differentiable<DenseMatrix<PlainScalar, Option>, DiffMode::Reverse, Order>>, Dynamic, Dynamic, Dynamic, Dynamic> {
         static_assert(!PlainScalar::isDifferentiable, "[Error]: Nested Differentiable<> is not allowed");
         using PlainMatrix = DenseMatrix<PlainScalar, Option>;
-        using host_obj = Differentiable<PlainMatrix, DiffMode::Reverse>;
+        using host_obj = Differentiable<PlainMatrix, DiffMode::Reverse, Order>;
         using This = device_obj<host_obj>;
         using Base = device_obj<RValueMatrix<host_obj>>;
         using Dim = DenseMatrixDim<This, Dynamic, Dynamic, Dynamic, Dynamic>;
@@ -94,108 +95,108 @@ namespace Physica::Core {
         [[nodiscard]] __host__ __device__ const SegmentType& getTraceSegment() const noexcept { return traceSeg.getDerived(); }
     };
 
-    template<class PlainScalar, int Option>
-    device_obj<Differentiable<DenseMatrix<PlainScalar, Option>, DiffMode::Reverse>>::device_obj(size_t row, size_t column, ExpressionType type)
+    template<class PlainScalar, int Option, unsigned int Order>
+    device_obj<Differentiable<DenseMatrix<PlainScalar, Option>, DiffMode::Reverse, Order>>::device_obj(size_t row, size_t column, ExpressionType type)
             : Dim(row, column)
             , traceSeg(asStruct(TracerType::getInstance().pushSegment(row * column, type))) {}
 
-    template<class PlainScalar, int Option>
-    device_obj<Differentiable<DenseMatrix<PlainScalar, Option>, DiffMode::Reverse>>::device_obj(const PlainMatrix& values)
+    template<class PlainScalar, int Option, unsigned int Order>
+    device_obj<Differentiable<DenseMatrix<PlainScalar, Option>, DiffMode::Reverse, Order>>::device_obj(const PlainMatrix& values)
             : Dim(values.getRow(), values.getColumn())
             , traceSeg(asStruct(TracerType::getInstance().pushSegment(values.flatten()))) {}
 
-    template<class PlainScalar, int Option>
+    template<class PlainScalar, int Option, unsigned int Order>
     template<class RandomGenerator>
-    inline void device_obj<Differentiable<DenseMatrix<PlainScalar, Option>, DiffMode::Reverse>>::random_uniform(RandomGenerator& gen) {
+    inline void device_obj<Differentiable<DenseMatrix<PlainScalar, Option>, DiffMode::Reverse, Order>>::random_uniform(RandomGenerator& gen) {
         *this = random_uniform(getRow(), getColumn(), gen);
     }
 
-    template<class PlainScalar, int Option>
+    template<class PlainScalar, int Option, unsigned int Order>
     template<class RandomGenerator>
-    inline void device_obj<Differentiable<DenseMatrix<PlainScalar, Option>, DiffMode::Reverse>>::random_normal(RandomGenerator& gen) {
+    inline void device_obj<Differentiable<DenseMatrix<PlainScalar, Option>, DiffMode::Reverse, Order>>::random_normal(RandomGenerator& gen) {
         *this = random_normal(getRow(), getColumn(), gen);
     }
 
-    template<class PlainScalar, int Option>
+    template<class PlainScalar, int Option, unsigned int Order>
     template<class Distribution, class RandomGenerator>
-    inline void device_obj<Differentiable<DenseMatrix<PlainScalar, Option>, DiffMode::Reverse>>::random_any(Distribution& dist, RandomGenerator& gen) {
+    inline void device_obj<Differentiable<DenseMatrix<PlainScalar, Option>, DiffMode::Reverse, Order>>::random_any(Distribution& dist, RandomGenerator& gen) {
         *this = random_any(getRow(), getColumn(), dist, gen);
     }
 
-    template<class PlainScalar, int Option>
-    device_obj<Differentiable<DenseMatrix<PlainScalar, Option>, DiffMode::Reverse>>
-    device_obj<Differentiable<DenseMatrix<PlainScalar, Option>, DiffMode::Reverse>>::copy() const {
+    template<class PlainScalar, int Option, unsigned int Order>
+    device_obj<Differentiable<DenseMatrix<PlainScalar, Option>, DiffMode::Reverse, Order>>
+    device_obj<Differentiable<DenseMatrix<PlainScalar, Option>, DiffMode::Reverse, Order>>::copy() const {
         This result{};
         const auto& newTrace = TracerType::getInstance().pushSegment(getTraceSegment().copy());
         result.traceSeg = asStruct(newTrace);
         return result;
     }
 
-    template<class PlainScalar, int Option>
+    template<class PlainScalar, int Option, unsigned int Order>
     __device__ inline size_t
-    device_obj<Differentiable<DenseMatrix<PlainScalar, Option>, DiffMode::Reverse>>::calcOffset(size_t row, size_t col) const {
+    device_obj<Differentiable<DenseMatrix<PlainScalar, Option>, DiffMode::Reverse, Order>>::calcOffset(size_t row, size_t col) const {
         if constexpr (Base::isRowMatrix)
             return row * getColumn() + col;
         else
             return col * getRow() + row;
     }
 
-    template<class PlainScalar, int Option>
-    __device__ inline typename device_obj<Differentiable<DenseMatrix<PlainScalar, Option>, DiffMode::Reverse>>::ScalarType
-    device_obj<Differentiable<DenseMatrix<PlainScalar, Option>, DiffMode::Reverse>>::calc(size_t row, size_t col) const {
+    template<class PlainScalar, int Option, unsigned int Order>
+    __device__ inline typename device_obj<Differentiable<DenseMatrix<PlainScalar, Option>, DiffMode::Reverse, Order>>::ScalarType
+    device_obj<Differentiable<DenseMatrix<PlainScalar, Option>, DiffMode::Reverse, Order>>::calc(size_t row, size_t col) const {
         return getTraceSegment()[calcOffset(row, col)];
     }
 
-    template<class PlainScalar, int Option>
-    __device__ inline typename device_obj<Differentiable<DenseMatrix<PlainScalar, Option>, DiffMode::Reverse>>::DiffRecord&
-    device_obj<Differentiable<DenseMatrix<PlainScalar, Option>, DiffMode::Reverse>>::getRecord(size_t row, size_t col) {
+    template<class PlainScalar, int Option, unsigned int Order>
+    __device__ inline typename device_obj<Differentiable<DenseMatrix<PlainScalar, Option>, DiffMode::Reverse, Order>>::DiffRecord&
+    device_obj<Differentiable<DenseMatrix<PlainScalar, Option>, DiffMode::Reverse, Order>>::getRecord(size_t row, size_t col) {
         return getTraceSegment().getRecords()[calcOffset(row, col)];
     }
 
-    template<class PlainScalar, int Option>
+    template<class PlainScalar, int Option, unsigned int Order>
     __device__ inline PlainScalar&
-    device_obj<Differentiable<DenseMatrix<PlainScalar, Option>, DiffMode::Reverse>>::getValue(size_t row, size_t col) {
+    device_obj<Differentiable<DenseMatrix<PlainScalar, Option>, DiffMode::Reverse, Order>>::getValue(size_t row, size_t col) {
         return getTraceSegment().getValues()[calcOffset(row, col)];
     }
 
-    template<class PlainScalar, int Option>
+    template<class PlainScalar, int Option, unsigned int Order>
     __device__ inline const PlainScalar&
-    device_obj<Differentiable<DenseMatrix<PlainScalar, Option>, DiffMode::Reverse>>::getValue(size_t row, size_t col) const {
+    device_obj<Differentiable<DenseMatrix<PlainScalar, Option>, DiffMode::Reverse, Order>>::getValue(size_t row, size_t col) const {
         return getTraceSegment().getValues()[calcOffset(row, col)];
     }
 
-    template<class PlainScalar, int Option>
+    template<class PlainScalar, int Option, unsigned int Order>
     __device__ inline PlainScalar&
-    device_obj<Differentiable<DenseMatrix<PlainScalar, Option>, DiffMode::Reverse>>::getGrad(size_t row, size_t col) {
+    device_obj<Differentiable<DenseMatrix<PlainScalar, Option>, DiffMode::Reverse, Order>>::getGrad(size_t row, size_t col) {
         return getTraceSegment().getGrads()[calcOffset(row, col)];
     }
 
-    template<class PlainScalar, int Option>
+    template<class PlainScalar, int Option, unsigned int Order>
     __device__ inline const PlainScalar&
-    device_obj<Differentiable<DenseMatrix<PlainScalar, Option>, DiffMode::Reverse>>::getGrad(size_t row, size_t col) const {
+    device_obj<Differentiable<DenseMatrix<PlainScalar, Option>, DiffMode::Reverse, Order>>::getGrad(size_t row, size_t col) const {
         return getTraceSegment().getGrads()[calcOffset(row, col)];
     }
 
-    template<class PlainScalar, int Option>
+    template<class PlainScalar, int Option, unsigned int Order>
     template<class RandomGenerator>
-    inline device_obj<Differentiable<DenseMatrix<PlainScalar, Option>, DiffMode::Reverse>>
-    device_obj<Differentiable<DenseMatrix<PlainScalar, Option>, DiffMode::Reverse>>::random_uniform(
+    inline device_obj<Differentiable<DenseMatrix<PlainScalar, Option>, DiffMode::Reverse, Order>>
+    device_obj<Differentiable<DenseMatrix<PlainScalar, Option>, DiffMode::Reverse, Order>>::random_uniform(
             size_t row, size_t column, RandomGenerator& gen) {
         return This(PlainMatrix::random_uniform(row, column, gen));
     }
 
-    template<class PlainScalar, int Option>
+    template<class PlainScalar, int Option, unsigned int Order>
     template<class RandomGenerator>
-    inline device_obj<Differentiable<DenseMatrix<PlainScalar, Option>, DiffMode::Reverse>>
-    device_obj<Differentiable<DenseMatrix<PlainScalar, Option>, DiffMode::Reverse>>::random_normal(
+    inline device_obj<Differentiable<DenseMatrix<PlainScalar, Option>, DiffMode::Reverse, Order>>
+    device_obj<Differentiable<DenseMatrix<PlainScalar, Option>, DiffMode::Reverse, Order>>::random_normal(
             size_t row, size_t column, RandomGenerator& gen) {
         return This(PlainMatrix::random_normal(row, column, gen));
     }
 
-    template<class PlainScalar, int Option>
+    template<class PlainScalar, int Option, unsigned int Order>
     template<class Distribution, class RandomGenerator>
-    inline device_obj<Differentiable<DenseMatrix<PlainScalar, Option>, DiffMode::Reverse>>
-    device_obj<Differentiable<DenseMatrix<PlainScalar, Option>, DiffMode::Reverse>>::random_any(
+    inline device_obj<Differentiable<DenseMatrix<PlainScalar, Option>, DiffMode::Reverse, Order>>
+    device_obj<Differentiable<DenseMatrix<PlainScalar, Option>, DiffMode::Reverse, Order>>::random_any(
             size_t row, size_t column, Distribution& dist, RandomGenerator& gen) {
         return This(PlainMatrix::random_any(row, column, dist, gen));
     }

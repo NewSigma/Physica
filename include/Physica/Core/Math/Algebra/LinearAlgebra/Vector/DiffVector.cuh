@@ -24,19 +24,19 @@
 
 namespace Physica::Core {
     namespace Internal {
-        template<class T>
-        class Traits<Core::device_obj<Differentiable<Vector<T>, DiffMode::Reverse>>> : public Traits<Vector<T>> {
+        template<class T, unsigned int Order>
+        class Traits<Core::device_obj<Differentiable<Vector<T>, DiffMode::Reverse, Order>>> : public Traits<Vector<T>> {
         public:
-            using ScalarType = device_obj<Differentiable<T, DiffMode::Reverse>>;
+            using ScalarType = device_obj<Differentiable<T, DiffMode::Reverse, Order>>;
         };
     }
 
-    template<class PlainScalar>
-    class device_obj<Differentiable<Vector<PlainScalar>, DiffMode::Reverse>>
-            : public device_obj<RValueVector<Differentiable<Vector<PlainScalar>, DiffMode::Reverse>>> {
+    template<class PlainScalar, unsigned Order>
+    class device_obj<Differentiable<Vector<PlainScalar>, DiffMode::Reverse, Order>>
+            : public device_obj<RValueVector<Differentiable<Vector<PlainScalar>, DiffMode::Reverse, Order>>> {
         static_assert(!PlainScalar::isDifferentiable, "[Error]: Nested Differentiable<> is not allowed");
         using PlainVector = Vector<PlainScalar>;
-        using host_obj = Differentiable<PlainVector, DiffMode::Reverse>;
+        using host_obj = Differentiable<PlainVector, DiffMode::Reverse, Order>;
         using This = device_obj<host_obj>;
         using Base = device_obj<RValueVector<host_obj>>;
         using TracerType = device_obj<typename host_obj::TracerType>;

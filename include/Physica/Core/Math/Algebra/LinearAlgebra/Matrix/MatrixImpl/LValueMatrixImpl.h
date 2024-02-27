@@ -29,7 +29,7 @@ namespace Physica::Core {
         template<class Derived, size_t rank>
         class DeterminateImpl {
         public:
-            static typename Derived::ScalarType run(const Derived& m) {
+            static typename Derived::ScalarType run([[maybe_unused]] const Derived& m) {
                 //TODO
                 assert(false);
             }

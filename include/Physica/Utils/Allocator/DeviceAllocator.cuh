@@ -89,7 +89,7 @@ namespace std {
             a.destroy(p);
         }
 
-         __host__ __device__ static constexpr size_type max_size(const allocator_type& a) noexcept {
+         __host__ __device__ static constexpr size_type max_size([[maybe_unused]] const allocator_type& a) noexcept {
             return std::numeric_limits<size_type>::max() / sizeof(value_type);
         }
 

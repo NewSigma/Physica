@@ -20,80 +20,80 @@
 
 namespace Physica::Core {
     namespace Internal {
-        template<class ScalarType>
+        template<class ScalarType, unsigned int Order>
         __global__ void __launch_bounds__(1, 1) TraceSegment_setKernel(
-                Physica::PlainStruct<Core::device_obj<TraceSegment<ScalarType>>> segment_, ScalarType value) {
-            using DiffRecord = typename Core::device_obj<TraceSegment<ScalarType>>::DiffRecord;
+                Physica::PlainStruct<Core::device_obj<TraceSegment<ScalarType, Order>>> segment_, ScalarType value) {
+            using DiffRecord = typename Core::device_obj<TraceSegment<ScalarType, Order>>::DiffRecord;
             auto& segment = segment_.getDerived();
             segment.getRecords()[0] = DiffRecord{0, ExpressionType::Set};
             segment.getValues()[0] = value;
             segment.getGrads()[0] = 0;
         }
 
-        template<class ScalarType>
+        template<class ScalarType, unsigned int Order>
         __global__ void __launch_bounds__(256, 1)
-        TraceSegment_reverseKernel(Physica::PlainStruct<Core::device_obj<TraceSegment<ScalarType>>> segment) {
-            static_assert(Core::device_obj<TraceSegment<ScalarType>>::MaxThreadPerBlock == 256,
+        TraceSegment_reverseKernel(Physica::PlainStruct<Core::device_obj<TraceSegment<ScalarType, Order>>> segment) {
+            static_assert(Core::device_obj<TraceSegment<ScalarType, Order>>::MaxThreadPerBlock == 256,
                     "[Error]: Keep MaxThreadPerBlock and __launch_bounds__ consistent");
             segment.getDerived().reverseKernelImpl();
         }
 
-        template<class ScalarType>
+        template<class ScalarType, unsigned int Order>
         __global__ void TraceSegment_copyKernel(
-                Physica::PlainStruct<const Core::device_obj<TraceSegment<ScalarType>>> source,
-                Physica::PlainStruct<Core::device_obj<TraceSegment<ScalarType>>> target) {
+                Physica::PlainStruct<const Core::device_obj<TraceSegment<ScalarType, Order>>> source,
+                Physica::PlainStruct<Core::device_obj<TraceSegment<ScalarType, Order>>> target) {
             source.getDerived().copyKernelImpl(target.getDerived());
         }
     }
 
-    template<class ScalarType>
-    device_obj<TraceSegment<ScalarType>>::device_obj(size_t size, ExpressionType type)
+    template<class ScalarType, unsigned int Order>
+    device_obj<TraceSegment<ScalarType, Order>>::device_obj(size_t size, ExpressionType type)
             : records(size)
             , operands(size * numOperand(type))
             , values(size)
             , grads(size) {}
 
-    template<class ScalarType>
-    device_obj<TraceSegment<ScalarType>>::device_obj(ScalarType value)
+    template<class ScalarType, unsigned int Order>
+    device_obj<TraceSegment<ScalarType, Order>>::device_obj(ScalarType value)
             : device_obj(1, ExpressionType::Set) {
         init(value);
     }
     /**
      * Optimize: Allocate \param values_ using pinned memory shall improve performance
      */
-    template<class ScalarType>
-    device_obj<TraceSegment<ScalarType>>::device_obj(const VectorType& values_)
+    template<class ScalarType, unsigned int Order>
+    device_obj<TraceSegment<ScalarType, Order>>::device_obj(const VectorType& values_)
             : device_obj(values_.getLength(), ExpressionType::Set) {
         init(values_);
     }
 
-    template<class ScalarType>
-    __host__ __device__ inline typename device_obj<TraceSegment<ScalarType>>::DiffScalar
-    device_obj<TraceSegment<ScalarType>>::operator[](size_t index) {
+    template<class ScalarType, unsigned int Order>
+    __host__ __device__ inline typename device_obj<TraceSegment<ScalarType, Order>>::DiffScalar
+    device_obj<TraceSegment<ScalarType, Order>>::operator[](size_t index) {
         return DiffScalar(values.data_ptr(index), grads.data_ptr(index));
     }
 
-    template<class ScalarType>
-    __host__ __device__ inline const typename device_obj<TraceSegment<ScalarType>>::DiffScalar
-    device_obj<TraceSegment<ScalarType>>::operator[](size_t index) const {
+    template<class ScalarType, unsigned int Order>
+    __host__ __device__ inline const typename device_obj<TraceSegment<ScalarType, Order>>::DiffScalar
+    device_obj<TraceSegment<ScalarType, Order>>::operator[](size_t index) const {
         return DiffScalar(const_cast<ScalarType*>(values.data_ptr(index)), const_cast<ScalarType*>(grads.data_ptr(index)));
     }
 
-    template<class ScalarType>
-    void device_obj<TraceSegment<ScalarType>>::reverse() {
+    template<class ScalarType, unsigned int Order>
+    void device_obj<TraceSegment<ScalarType, Order>>::reverse() {
         assert(!empty());
         const size_t numThread = getLength() < MaxThreadPerBlock ? getLength() : MaxThreadPerBlock;
         const size_t numBlock = (getLength() + numThread - 1) / numThread;
         Internal::TraceSegment_reverseKernel<<<numBlock, numThread, 0, StreamPool::getStream()>>>(asStruct(*this));
     }
 
-    template<class ScalarType>
-    void device_obj<TraceSegment<ScalarType>>::zero_grad() {
+    template<class ScalarType, unsigned int Order>
+    void device_obj<TraceSegment<ScalarType, Order>>::zero_grad() {
         cudaMemsetAsync((void*)grads.data(), 0, getLength() * sizeof(ScalarType), StreamPool::getStream());
     }
 
-    template<class ScalarType>
-    device_obj<TraceSegment<ScalarType>> device_obj<TraceSegment<ScalarType>>::copy() const {
+    template<class ScalarType, unsigned int Order>
+    device_obj<TraceSegment<ScalarType, Order>> device_obj<TraceSegment<ScalarType, Order>>::copy() const {
         constexpr size_t MaxThreadPerBlock = 256;
         This result(getLength());
         const size_t numThread = getLength() < MaxThreadPerBlock ? getLength() : MaxThreadPerBlock;
@@ -104,8 +104,8 @@ namespace Physica::Core {
         return result;
     }
 
-    template<class ScalarType>
-    void device_obj<TraceSegment<ScalarType>>::swap(device_obj& __restrict obj) noexcept {
+    template<class ScalarType, unsigned int Order>
+    void device_obj<TraceSegment<ScalarType, Order>>::swap(device_obj& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         records.swap(obj.records);
         operands.swap(obj.operands);
@@ -113,8 +113,8 @@ namespace Physica::Core {
         grads.swap(obj.grads);
     }
 
-    template<class ScalarType>
-    __device__ void device_obj<TraceSegment<ScalarType>>::reverseKernelImpl() {
+    template<class ScalarType, unsigned int Order>
+    __device__ void device_obj<TraceSegment<ScalarType, Order>>::reverseKernelImpl() {
         const int index = blockIdx.x * blockDim.x + threadIdx.x;
         if (index >= getLength())
             return;
@@ -205,8 +205,8 @@ namespace Physica::Core {
         assert(false && "[Error]: Undefined operator for back propagation");
     }
 
-    template<class ScalarType>
-    __device__ void device_obj<TraceSegment<ScalarType>>::copyKernelImpl(This& target) const {
+    template<class ScalarType, unsigned int Order>
+    __device__ void device_obj<TraceSegment<ScalarType, Order>>::copyKernelImpl(This& target) const {
         const size_t index = blockIdx.x * blockDim.x + threadIdx.x;
         if (index < getLength()) {
             target.records[index] = DiffRecord{index, ExpressionType::Assign};
@@ -215,18 +215,18 @@ namespace Physica::Core {
         }
     }
 
-    template<class ScalarType>
-    __host__ __device__ size_t device_obj<TraceSegment<ScalarType>>::find(DiffScalar s) const noexcept {
+    template<class ScalarType, unsigned int Order>
+    __host__ __device__ size_t device_obj<TraceSegment<ScalarType, Order>>::find(DiffScalar s) const noexcept {
         return host_obj::findImpl(values, grads, s);
     }
 
-    template<class ScalarType>
-    inline void device_obj<TraceSegment<ScalarType>>::init(ScalarType value) {
+    template<class ScalarType, unsigned int Order>
+    inline void device_obj<TraceSegment<ScalarType, Order>>::init(ScalarType value) {
         Internal::TraceSegment_setKernel<<<1, 1, 0, StreamPool::getStream()>>>(asStruct(*this), value);
     }
 
-    template<class ScalarType>
-    inline void device_obj<TraceSegment<ScalarType>>::init(const VectorType& values_) {
+    template<class ScalarType, unsigned int Order>
+    inline void device_obj<TraceSegment<ScalarType, Order>>::init(const VectorType& values_) {
         values_.toDeviceAsync(values);
         auto future = StreamFuture::makeFuture();
         cudaMemsetAsync((void*)records.data(), 0, getLength() * sizeof(DiffRecord), StreamPool::getStream());

@@ -83,6 +83,6 @@ namespace Physica::Utils {
         const size_t dirLength_1 = dirLength - 1;
         memcpy(dir, path + startPos, dirLength_1);
         dir[dirLength_1] = '\0';
-        dirs.push_back(dir);
+        dirs.push_back(static_cast<char*>(dir));
     }
 }

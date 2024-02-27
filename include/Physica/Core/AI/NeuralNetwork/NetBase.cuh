@@ -67,6 +67,7 @@ namespace Physica::Core {
     template<class Dataset, class Optimizer, class RandomPoolType>
     void device_obj<NetBase<Derived>>::train_step(const Dataset& dataset, Optimizer& opt) {
         static_assert(IsTrainMode, "[Error]: train_step must be called under training mode");
+        using TracerType = typename device_obj<ScalarType>::TracerType;
 
         auto dist = std::uniform_int_distribution<size_t>(0, dataset.getSize() - 1);
         auto& gen = RandomPoolType::getInstance().getGen();
@@ -76,7 +77,7 @@ namespace Physica::Core {
             loss<Dataset>(dataset, index).reverse_to(guard.getNode());
         }
         opt.step();
-        device_obj<DiffTracer<PlainScalar>>::getInstance().zero_grad_to(net_guard.getNode());
+        TracerType::getInstance().zero_grad_to(net_guard.getNode());
     }
 
     template<class Derived>

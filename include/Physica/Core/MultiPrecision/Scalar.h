@@ -49,9 +49,12 @@ namespace Physica::Core {
             using ComplexType = ComplexScalar<ScalarType>;
             using TrivialType = typename std::conditional<option_ == MultiPrecision, Scalar<option_>, Helper>::type;
             using PlainScalar = ScalarType;
-            static constexpr ScalarOption Option = option_;
-            static constexpr bool isComplex = false;
-            static constexpr bool isDifferentiable = false;
+            constexpr static ScalarOption Option = option_;
+            constexpr static bool isComplex = false;
+            constexpr static bool isDifferentiable = false;
+            constexpr static bool isForwardDiff = false;
+            constexpr static bool isReverseDiff = false;
+            constexpr static unsigned int Order = 0;
         };
         /**
          * This class return a type that can exactly represent the two input scalars.

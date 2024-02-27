@@ -32,10 +32,13 @@ namespace Physica::Core {
             using ComplexType = ComplexScalar<T>;
             using TrivialType = typename T::TrivialType;
             using PlainScalar = ScalarType;
-            static constexpr ScalarOption Option = Traits<T>::Option;
-            static constexpr bool errorTrack = Traits<T>::errorTrack;
-            static constexpr bool isComplex = true;
-            static constexpr bool isDifferentiable = false;
+            constexpr static ScalarOption Option = Traits<T>::Option;
+            constexpr static bool errorTrack = Traits<T>::errorTrack;
+            constexpr static bool isComplex = true;
+            constexpr static bool isDifferentiable = false;
+            constexpr static bool isForwardDiff = false;
+            constexpr static bool isReverseDiff = false;
+            constexpr static unsigned int Order = 0;
         };
 
         template<class AnyScalar1, class AnyScalar2>

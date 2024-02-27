@@ -175,7 +175,7 @@ namespace Physica::Utils {
      * For the convenience of implementing templates.
      */
     template<class T, size_t Capacity, class Allocator>
-    void Array<T, Dynamic, Capacity, Allocator>::reserve(size_t size) {
+    void Array<T, Dynamic, Capacity, Allocator>::reserve([[maybe_unused]] size_t size) {
         assert(size == Capacity);
     }
 

@@ -91,7 +91,8 @@ namespace Physica::Core {
     DenseMatrix<T, Option, Row, Column, MaxRow, MaxColumn, Allocator>
     DenseMatrix<T, Option, Row, Column, MaxRow, MaxColumn, Allocator>::copy() const {
         if constexpr (isReverseDiff) {
-            DiffTracer<PlainScalar>::getInstance().reserve(Storage::getSize());
+            using TracerType = typename ScalarType::TracerType;
+            TracerType::getInstance().reserve(Storage::getSize());
             This result(Base::getRow(), Base::getColumn());
             for (size_t major = 0; major < Base::getMaxMajor(); ++major)
                 for (size_t minor = 0; minor < Base::getMaxMinor(); ++minor)

@@ -27,7 +27,7 @@ namespace Physica::Core {
         Reverse
     };
     template<class Derived> class ScalarBase;
-    template<class ScalarType, DiffMode Mode> class Differentiable;
+    template<class T, DiffMode Mode, unsigned int Order> class Differentiable;
 
     template<class T>
     struct is_scalar : public std::is_base_of<ScalarBase<T>, T> {};
@@ -47,9 +47,15 @@ namespace Physica::Core {
         constexpr static ScalarOption Option = Internal::Traits<Derived>::Option;
         constexpr static bool isComplex = Internal::Traits<Derived>::isComplex;
         constexpr static bool isDifferentiable = Internal::Traits<Derived>::isDifferentiable;
-        constexpr static bool isReverseDiff = std::is_same<ScalarType, Differentiable<PlainScalar, DiffMode::Reverse>>::value;
-
+        constexpr static bool isForwardDiff = Internal::Traits<Derived>::isForwardDiff;
+        constexpr static bool isReverseDiff = Internal::Traits<Derived>::isReverseDiff;
+        constexpr static unsigned int Order = Internal::Traits<Derived>::Order;
+    private:
+        constexpr static bool isConsistent1 = isDifferentiable && (isForwardDiff != isReverseDiff) && (Order > 0);
+        constexpr static bool isConsistent2 = !isDifferentiable && !isForwardDiff && !isReverseDiff && (Order == 0);
+        static_assert(isConsistent1 || isConsistent2, "[Error]: DiffMode is not self consistent");
         static_assert(std::is_same<Derived, ScalarType>::value, "[Error]: Inconsistence type between traits and inherit class");
+    public:
         /* Operators */
         template<class T>
         __host__ __device__ inline bool operator>(const ScalarBase<T>& s) const {

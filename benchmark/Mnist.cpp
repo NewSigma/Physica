@@ -98,7 +98,7 @@ private:
 };
 
 using PlainScalar = Scalar<Float>;
-using ScalarType = Differentiable<PlainScalar, DiffMode::Reverse>;
+using ScalarType = Differentiable<PlainScalar, DiffMode::Reverse, 1>;
 using Dataset = typename Mnist::DatasetType<Vector<PlainScalar>>;
 using Optimizer = SGD<ScalarType>;
 using RandomPoolType = RandomPool<std::mt19937>;
