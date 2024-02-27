@@ -91,9 +91,9 @@ namespace Physica::Core {
         const ScalarType factorX2 = (pos[0] - x1) / deltaX;
         const ScalarType factorY2 = (pos[1] - y1) / deltaY;
         const ScalarType factorZ2 = (pos[2] - z1) / deltaZ;
-        const ScalarType factorX1 = ScalarType(1) - factorX1;
-        const ScalarType factorY1 = ScalarType(1) - factorY1;
-        const ScalarType factorZ1 = ScalarType(1) - factorZ1;
+        const ScalarType factorX1 = ScalarType(1) - factorX2;
+        const ScalarType factorY1 = ScalarType(1) - factorY2;
+        const ScalarType factorZ1 = ScalarType(1) - factorZ2;
         const auto& grid = densityPair[spin];
         return grid(nx1, ny1, nz1) * (factorX1 * factorY1 * factorZ1)
              + grid(nx2, ny1, nz1) * (factorX2 * factorY1 * factorZ1)

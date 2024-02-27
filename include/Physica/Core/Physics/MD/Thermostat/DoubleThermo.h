@@ -85,7 +85,7 @@ namespace Physica::Core {
             const ScalarType repBeta = ringPolymer.calcRepBeta(temperatureT);
             const ScalarType omegaW = ringPolymer.calcOmegaW(temperatureT);
             auto future = Executor::parallel_for(
-                [this, factor_translational, repBeta, omegaW, deltaT, &ringPolymer, &pool](unsigned int i) {
+                [factor_translational, repBeta, omegaW, deltaT, &ringPolymer, &pool](unsigned int i) {
                     const size_t numReplica = ringPolymer.getNumReplica();
                     const auto& massVec = ringPolymer.getMassVec();
 

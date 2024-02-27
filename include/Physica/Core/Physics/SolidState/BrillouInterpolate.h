@@ -102,8 +102,10 @@ namespace Physica::Core {
                 else
                     result += (baseCoeff(pIndex.toReducedK()).conjugate() * factor).getReal();
             }
-            else
+            else {
+                (void)baseDim;
                 result += baseCoeff(index) * factor;
+            }
         });
         return result;
     }

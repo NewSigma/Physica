@@ -25,7 +25,8 @@ using PoscarType = Poscar<ScalarType>;
 extern const char* outcar;
 
 namespace Physica::Core {
-    struct Test {
+    class Test {
+    public:
         constexpr static const char* OutPath = "/tmp/OUTCAR";
         VaspWarpper init() {
             {

@@ -40,8 +40,8 @@ namespace Physica::Core::Internal {
         HalfDenseMatrixStorage() : Base(), order(MaxOrder) {}
         HalfDenseMatrixStorage(size_t order_) : Base(order_ * (order_ + 1) / 2), order(order_) {}
         HalfDenseMatrixStorage(size_t order_, const T& t) : Base(order_ * (order_ + 1) / 2, t), order(order_) {}
-        HalfDenseMatrixStorage(size_t row, [[maybe_unused]] size_t column) : HalfDenseMatrixStorage(row) { assert(row == column); }
-        HalfDenseMatrixStorage(size_t row, size_t column, const T& t) : HalfDenseMatrixStorage(row, t) { assert(row == column); }
+        HalfDenseMatrixStorage(size_t row, size_t column);
+        HalfDenseMatrixStorage(size_t row, size_t column, const T& t);
         HalfDenseMatrixStorage(std::initializer_list<T> list) : Base(list) {}
         /* Operations */
         void resize(size_t order_) { Base::resize(order_ * (order_ + 1) / 2); order = order_; }
@@ -56,6 +56,18 @@ namespace Physica::Core::Internal {
         [[nodiscard]] size_t accessingIndex(size_t r, size_t c) const noexcept;
         void swap(HalfDenseMatrixStorage& __restrict storage) noexcept;
     };
+
+    template<class T, size_t Order, size_t MaxOrder>
+    HalfDenseMatrixStorage<T, Order, MaxOrder>::HalfDenseMatrixStorage(size_t row, [[maybe_unused]] size_t column)
+            : HalfDenseMatrixStorage(row) {
+        assert(row == column);
+    }
+
+    template<class T, size_t Order, size_t MaxOrder>
+    HalfDenseMatrixStorage<T, Order, MaxOrder>::HalfDenseMatrixStorage(size_t row, [[maybe_unused]] size_t column, const T& t)
+            : HalfDenseMatrixStorage(row, t) {
+        assert(row == column);
+    }
 
     template<class T, size_t Order, size_t MaxOrder>
     void HalfDenseMatrixStorage<T, Order, MaxOrder>::swap(HalfDenseMatrixStorage<T, Order, MaxOrder>& __restrict storage) noexcept {

@@ -132,7 +132,6 @@ namespace Physica::Core {
         }
         const size_t order = working.getColumn();
         size_t upper = order - 1;
-        size_t iter = 0;
         size_t total_iter = 0;
         const size_t max_iter = Decouplable::maxItePerCol * order;
         while (1 <= upper && upper < order) {
@@ -154,12 +153,10 @@ namespace Physica::Core {
 
             if (lower == upper) {
                 upper -= 1;
-                iter = 0;
             }
             else {
                 const size_t sub_order = upper - lower + 1;
                 stepSVD(lower, sub_order);
-                ++iter;
                 ++total_iter;
             }
 

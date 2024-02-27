@@ -37,6 +37,13 @@ namespace Physica::Core {
         using Base::isColumnMatrix;
         using Base::isRowMatrix;
         using Base::isReverseDiff;
+        using RowVector = ContinuousMatrixBlock<Derived, 1, ColumnAtCompile>;
+        using ColVector = ContinuousMatrixBlock<Derived, RowAtCompile, 1>;
+    private:
+        template<size_t Row>
+        using RowBlock = ContinuousMatrixBlock<Derived, Row, ColumnAtCompile>;
+        template<size_t Column>
+        using ColBlock = ContinuousMatrixBlock<Derived, RowAtCompile, Column>;
     public:
         ~ContinuousMatrix() = default;
         /* Operators */
@@ -45,34 +52,34 @@ namespace Physica::Core {
         Derived& operator=(const ScalarType& s);
         using Base::operator=;
         /* Operations */
-        [[nodiscard]] inline ContinuousMatrixBlock<Derived, 1, ColumnAtCompile> row(size_t r);
-        [[nodiscard]] inline const ContinuousMatrixBlock<Derived, 1, ColumnAtCompile> row(size_t r) const;
-        [[nodiscard]] inline ContinuousMatrixBlock<Derived, RowAtCompile, 1> col(size_t c);
-        [[nodiscard]] inline const ContinuousMatrixBlock<Derived, RowAtCompile, 1> col(size_t c) const;
+        [[nodiscard]] inline RowVector row(size_t r);
+        [[nodiscard]] inline const RowVector row(size_t r) const;
+        [[nodiscard]] inline ColVector col(size_t c);
+        [[nodiscard]] inline const ColVector col(size_t c) const;
         template<size_t Row = Dynamic>
-        [[nodiscard]] inline ContinuousMatrixBlock<Derived, Row, ColumnAtCompile> rows(size_t fromRow, size_t rowCount);
+        [[nodiscard]] inline RowBlock<Row> rows(size_t fromRow, size_t rowCount);
         template<size_t Row = Dynamic>
-        [[nodiscard]] inline const ContinuousMatrixBlock<Derived, Row, ColumnAtCompile> rows(size_t fromRow, size_t rowCount) const;
+        [[nodiscard]] inline const RowBlock<Row> rows(size_t fromRow, size_t rowCount) const;
         template<size_t Row = Dynamic>
-        [[nodiscard]] inline ContinuousMatrixBlock<Derived, Row, ColumnAtCompile> topRows(size_t to);
+        [[nodiscard]] inline RowBlock<Row> topRows(size_t to);
         template<size_t Row = Dynamic>
-        [[nodiscard]] inline const ContinuousMatrixBlock<Derived, Row, ColumnAtCompile> topRows(size_t to) const;
+        [[nodiscard]] inline const RowBlock<Row> topRows(size_t to) const;
         template<size_t Row = Dynamic>
-        [[nodiscard]] inline ContinuousMatrixBlock<Derived, Row, ColumnAtCompile> bottomRows(size_t from);
+        [[nodiscard]] inline RowBlock<Row> bottomRows(size_t from);
         template<size_t Row = Dynamic>
-        [[nodiscard]] inline const ContinuousMatrixBlock<Derived, Row, ColumnAtCompile> bottomRows(size_t from) const;
+        [[nodiscard]] inline const RowBlock<Row> bottomRows(size_t from) const;
         template<size_t Column = Dynamic>
-        [[nodiscard]] inline ContinuousMatrixBlock<Derived, RowAtCompile, Column> cols(size_t fromCol, size_t colCount);
+        [[nodiscard]] inline ColBlock<Column> cols(size_t fromCol, size_t colCount);
         template<size_t Column = Dynamic>
-        [[nodiscard]] inline const ContinuousMatrixBlock<Derived, RowAtCompile, Column> cols(size_t fromCol, size_t colCount) const;
+        [[nodiscard]] inline const ColBlock<Column> cols(size_t fromCol, size_t colCount) const;
         template<size_t Column = Dynamic>
-        [[nodiscard]] inline ContinuousMatrixBlock<Derived, RowAtCompile, Column> leftCols(size_t to);
+        [[nodiscard]] inline ColBlock<Column> leftCols(size_t to);
         template<size_t Column = Dynamic>
-        [[nodiscard]] inline const ContinuousMatrixBlock<Derived, RowAtCompile, Column> leftCols(size_t to) const;
+        [[nodiscard]] inline const ColBlock<Column> leftCols(size_t to) const;
         template<size_t Column = Dynamic>
-        [[nodiscard]] inline ContinuousMatrixBlock<Derived, RowAtCompile, Column> rightCols(size_t from);
+        [[nodiscard]] inline ColBlock<Column> rightCols(size_t from);
         template<size_t Column = Dynamic>
-        [[nodiscard]] inline const ContinuousMatrixBlock<Derived, RowAtCompile, Column> rightCols(size_t from) const;
+        [[nodiscard]] inline const ColBlock<Column> rightCols(size_t from) const;
         template<size_t Row = Dynamic, size_t Column = Dynamic>
         [[nodiscard]] inline ContinuousMatrixBlock<Derived, Row, Column> topLeftCorner(size_t toRow, size_t toCol);
         template<size_t Row = Dynamic, size_t Column = Dynamic>

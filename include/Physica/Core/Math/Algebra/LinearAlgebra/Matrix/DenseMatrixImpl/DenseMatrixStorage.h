@@ -65,9 +65,6 @@ namespace Physica::Core {
         }
         /* Operations */
         void resize(size_t row, size_t column) { Base::resize(row * column); }
-        template<size_t Length, size_t MaxLength>
-        void appendRow(const Vector<T, Length, MaxLength>& v);
-        void removeColumnAt(size_t index);
         void rowSwap(size_t r1, size_t r2);
         void columnSwap(size_t c1, size_t r1);
         [[nodiscard]] inline device_obj<This> toDevice() const;
@@ -120,9 +117,6 @@ namespace Physica::Core {
         }
         /* Operations */
         void resize(size_t row, size_t column) { Base::resize(row * column); }
-        template<size_t Length, size_t MaxLength>
-        void appendRow(const Vector<T, Length, MaxLength>& v);
-        void removeColumnAt(size_t index);
         void rowSwap(size_t r1, size_t r2);
         void columnSwap(size_t c1, size_t r1);
         [[nodiscard]] inline device_obj<This> toDevice() const;
@@ -176,8 +170,6 @@ namespace Physica::Core {
         }
         /* Operations */
         void resize(size_t row, size_t column);
-        template<size_t Length, size_t MaxLength>
-        void appendRow(const Vector<T, Length, MaxLength>& v);
         void rowSwap(size_t r1, size_t r2);
         void columnSwap(size_t c1, size_t r1);
         [[nodiscard]] device_obj<This> toDevice() const;
@@ -230,8 +222,6 @@ namespace Physica::Core {
         }
         /* Operations */
         void resize(size_t row, size_t column);
-        template<size_t Length, size_t MaxLength>
-        void appendRow(const Vector<T, Length, MaxLength>& v);
         void rowSwap(size_t r1, size_t r2);
         void columnSwap(size_t c1, size_t r1);
         [[nodiscard]] device_obj<This> toDevice() const;

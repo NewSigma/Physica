@@ -34,6 +34,7 @@ endif()
 
 if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-ignored-optimization-argument -Wno-unknown-warning-option")
+    add_link_options(-lstdc++) # Add this if you prefer libstdc++
 endif()
 
 if(${PHYSICA_CUDA})

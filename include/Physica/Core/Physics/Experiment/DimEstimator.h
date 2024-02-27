@@ -41,7 +41,7 @@ namespace Physica::Core {
         DimEstimator(size_t sampleNum, const Utils::Array<size_t>& intrinsicDim_, const LValueVector<VectorType>& radius, RandomGenerator& gen);
         /* Operations */
         template<class MatrixType, class VectorType>
-        ScalarType intrinDim(const LValueMatrix<MatrixType>& data, const LValueVector<VectorType>& radius);
+        ScalarType intrinDim(const LValueMatrix<MatrixType>& data, const LValueVector<VectorType>& radius) const;
         template<class MatrixType, class VectorType>
         static ScalarType corrDimen(const LValueMatrix<MatrixType>& data, const LValueVector<VectorType>& radius);
         template<class VectorType>
@@ -69,8 +69,8 @@ namespace Physica::Core {
 
     template<class MatrixType, class VectorType>
     typename DimEstimator::ScalarType
-    DimEstimator::intrinDim(const LValueMatrix<MatrixType>& data, const LValueVector<VectorType>& radius) {
-        return lagrange(intrinDim, correlateDim, corrDimen(data, radius));
+    DimEstimator::intrinDim(const LValueMatrix<MatrixType>& data, const LValueVector<VectorType>& radius) const {
+        return lagrange(intrinsicDim, correlateDim, corrDimen(data, radius));
     }
     /**
      * \param data

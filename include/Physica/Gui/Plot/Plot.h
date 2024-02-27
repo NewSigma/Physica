@@ -41,8 +41,8 @@ namespace Physica::Gui {
         QValueAxis* axisRight;
     public:
         Plot(double minX, double maxX, double minY, double maxY, double deltaX, double deltaY, QWidget* parent = nullptr);
-        Plot(const Plot&) = default;
-        Plot(Plot&&) noexcept = default;
+        Plot(const Plot&) = delete;
+        Plot(Plot&&) noexcept = delete;
         ~Plot() = default;
         /* Operators */
         Plot& operator=(const Plot&) = delete;

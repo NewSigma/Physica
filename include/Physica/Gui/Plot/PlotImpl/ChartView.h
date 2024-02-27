@@ -33,7 +33,12 @@ namespace Physica::Gui {
     public:
         explicit ChartView(QWidget* parent = nullptr) : ChartView(nullptr, parent) {}
         explicit ChartView(QChart* chart_, QWidget* parent = nullptr);
+        ChartView(const ChartView&) = delete;
+        ChartView(ChartView&&) noexcept = delete;
         ~ChartView() = default;
+        /* Operators */
+        ChartView& operator=(const ChartView&) = delete;
+        ChartView& operator=(ChartView&&) noexcept = delete;
         /* Getters */
         [[nodiscard]] QChart* getChart() const { return chart; }
         /* Setters */
@@ -45,11 +50,6 @@ namespace Physica::Gui {
         void mouseMoveEvent(QMouseEvent* event) override;
         void mouseReleaseEvent(QMouseEvent* event) override;
     private:
-        ChartView(const ChartView&) = default;
-        ChartView(ChartView&&) noexcept = default;
-        /* Operators */
-        ChartView& operator=(const ChartView&) = default;
-        ChartView& operator=(ChartView&&) noexcept = default;
         /* Operations */
         void resize();
     };

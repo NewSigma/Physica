@@ -60,7 +60,7 @@ namespace Physica::Core {
         HardCore(HardCore&&) noexcept = default;
         ~HardCore() = default;
         /* Operators */
-        HardCore& operator=(HardCore obj) noexcept;
+        HardCore& operator=(HardCore obj) noexcept { swap(obj); return *this; }
         /* Operations */
         void nve_step(RingPolymerType& ringPolymer, ScalarType deltaT);
         void updateMass(const RingPolymerType& ringPolymer);
@@ -94,13 +94,6 @@ namespace Physica::Core {
             , buffer(numParticle * 2, numReplica)
             , maxHandleNum(maxHandleNum_) {
         checkParam(collideFactor, numReplica);
-    }
-
-    template<class ScalarType, bool IsFixedBoundary, size_t NumReplica, RPMDIntegrator Integrator, class Executor>
-    HardCore<ScalarType, IsFixedBoundary, NumReplica, Integrator, Executor>&
-    HardCore<ScalarType, IsFixedBoundary, NumReplica, Integrator, Executor>::operator=(HardCore<ScalarType, IsFixedBoundary, NumReplica, Integrator, Executor> obj) noexcept {
-        swap(*this);
-        return *this;
     }
 
     template<class ScalarType, bool IsFixedBoundary, size_t NumReplica, RPMDIntegrator Integrator, class Executor>

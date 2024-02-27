@@ -61,6 +61,9 @@ namespace Physica::Core {
         device_obj& operator=(const device_obj&) = default;
         device_obj& operator=(device_obj&&) noexcept = default;
         /* Operations */
+        [[nodiscard]] __device__ inline size_t calcOffset(size_t row, size_t col) const;
+        [[nodiscard]] __device__ inline ScalarType calc(size_t row, size_t col) const;
+
         template<class RandomGenerator> inline void random_uniform(RandomGenerator& gen);
         template<class RandomGenerator> inline void random_normal(RandomGenerator& gen);
         template<class Distribution, class RandomGenerator>
@@ -71,8 +74,6 @@ namespace Physica::Core {
         /* Getters */
         using Dim::getRow;
         using Dim::getColumn;
-        [[nodiscard]] __device__ inline size_t calcOffset(size_t row, size_t col) const;
-        [[nodiscard]] __device__ inline ScalarType calc(size_t row, size_t col) const;
         [[nodiscard]] __host__ __device__ size_t getSize() const noexcept { return getTraceSegment().getLength(); }
         [[nodiscard]] __device__ inline DiffRecord& getRecord(size_t row, size_t col);
         [[nodiscard]] __device__ OperandArray& getOperands() { return getTraceSegment().getOperands(); }
@@ -106,6 +107,21 @@ namespace Physica::Core {
             , traceSeg(asStruct(TracerType::getInstance().pushSegment(values.flatten()))) {}
 
     template<class PlainScalar, int Option, unsigned int Order>
+    __device__ inline size_t
+    device_obj<Differentiable<DenseMatrix<PlainScalar, Option>, DiffMode::Reverse, Order>>::calcOffset(size_t row, size_t col) const {
+        if constexpr (Base::isRowMatrix)
+            return row * getColumn() + col;
+        else
+            return col * getRow() + row;
+    }
+
+    template<class PlainScalar, int Option, unsigned int Order>
+    __device__ inline typename device_obj<Differentiable<DenseMatrix<PlainScalar, Option>, DiffMode::Reverse, Order>>::ScalarType
+    device_obj<Differentiable<DenseMatrix<PlainScalar, Option>, DiffMode::Reverse, Order>>::calc(size_t row, size_t col) const {
+        return getTraceSegment()[calcOffset(row, col)];
+    }
+
+    template<class PlainScalar, int Option, unsigned int Order>
     template<class RandomGenerator>
     inline void device_obj<Differentiable<DenseMatrix<PlainScalar, Option>, DiffMode::Reverse, Order>>::random_uniform(RandomGenerator& gen) {
         *this = random_uniform(getRow(), getColumn(), gen);
@@ -130,21 +146,6 @@ namespace Physica::Core {
         const auto& newTrace = TracerType::getInstance().pushSegment(getTraceSegment().copy());
         result.traceSeg = asStruct(newTrace);
         return result;
-    }
-
-    template<class PlainScalar, int Option, unsigned int Order>
-    __device__ inline size_t
-    device_obj<Differentiable<DenseMatrix<PlainScalar, Option>, DiffMode::Reverse, Order>>::calcOffset(size_t row, size_t col) const {
-        if constexpr (Base::isRowMatrix)
-            return row * getColumn() + col;
-        else
-            return col * getRow() + row;
-    }
-
-    template<class PlainScalar, int Option, unsigned int Order>
-    __device__ inline typename device_obj<Differentiable<DenseMatrix<PlainScalar, Option>, DiffMode::Reverse, Order>>::ScalarType
-    device_obj<Differentiable<DenseMatrix<PlainScalar, Option>, DiffMode::Reverse, Order>>::calc(size_t row, size_t col) const {
-        return getTraceSegment()[calcOffset(row, col)];
     }
 
     template<class PlainScalar, int Option, unsigned int Order>

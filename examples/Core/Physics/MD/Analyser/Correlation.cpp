@@ -27,7 +27,6 @@ constexpr double thermostatTime = PhyConst<AU>::secondToTime(0.1 * 1E-12);
 constexpr double timeStep = PhyConst<AU>::secondToTime(1E-14);
 constexpr double latticeConst = PhyConst<AU>::angstormToBohr(5.67);
 constexpr double temperatureT = PhyConst<AU>::kToTemperature(186);
-constexpr double mass = PhyConst<AU>::atomMass(36);
 constexpr size_t cellSize = 3;
 constexpr size_t numReplica = 1;
 constexpr size_t numSample = 300;

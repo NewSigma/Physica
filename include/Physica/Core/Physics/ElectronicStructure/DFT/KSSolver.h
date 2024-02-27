@@ -136,7 +136,6 @@ namespace Physica::Core {
         for (auto& kPoint : band.getKPointGrid()) {
             iteration = 0;
             while (true) {
-                const Vector3D k = kPoint.getPos();
                 hamiltonH.makeHamiltonWithXC(xcPot[SpinState::Up], density, kPoint.getPos());
                 /* Solve band */ {
                     {

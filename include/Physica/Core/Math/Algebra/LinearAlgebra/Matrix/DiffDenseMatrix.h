@@ -57,6 +57,8 @@ namespace Physica::Core {
         Differentiable& operator=(const Differentiable&) = default;
         Differentiable& operator=(Differentiable&&) noexcept = default;
         /* Operations */
+        [[nodiscard]] inline ScalarType calc(size_t row, size_t col) const;
+
         template<class RandomGenerator> inline void random_uniform(RandomGenerator& gen);
         template<class RandomGenerator> inline void random_normal(RandomGenerator& gen);
         template<class Distribution, class RandomGenerator>
@@ -88,6 +90,15 @@ namespace Physica::Core {
     template<class PlainScalar, int Option, unsigned int Order>
     Differentiable<DenseMatrix<PlainScalar, Option>, DiffMode::Reverse, Order>::Differentiable(PlainMatrix values)
             : traceSeg(TracerType::getInstance().pushSegment(values.flatten())) {}
+
+    template<class PlainScalar, int Option, unsigned int Order>
+    inline typename Differentiable<DenseMatrix<PlainScalar, Option>, DiffMode::Reverse, Order>::ScalarType
+    Differentiable<DenseMatrix<PlainScalar, Option>, DiffMode::Reverse, Order>::calc(size_t row, size_t col) const {
+        if constexpr (Base::isRowMatrix)
+            return traceSeg[row * getColumn() + col];
+        else
+            return traceSeg[col * getRow() + row];
+    }
 
     template<class PlainScalar, int Option, unsigned int Order>
     template<class RandomGenerator>

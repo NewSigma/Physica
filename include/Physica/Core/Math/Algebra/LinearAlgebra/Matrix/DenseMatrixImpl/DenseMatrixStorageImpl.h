@@ -21,44 +21,6 @@
 namespace Physica::Core {
     //////////////////////////////////////////////Column-Element//////////////////////////////////////////////
     template<class Derived>
-    template<size_t Length, size_t MaxLength>
-    void DenseMatrixStorage<Derived, MatrixOption::Column | MatrixOption::Element>::appendRow(
-            const Vector<T, Length, MaxLength>& v) {
-        constexpr size_t MaxRowAtCompile = Internal::Traits<Derived>::MaxRowAtCompile;
-        static_assert(Internal::Traits<Derived>::RowAtCompile == Dynamic);
-        assert(MaxRowAtCompile == Dynamic || MaxRowAtCompile > getDerived().getRow());
-        assert(v.getLength() == getDerived().getColumn());
-
-        const size_t column = getDerived().getColumn();
-        const size_t newSize = Base::getLength() + column;
-        if (newSize > Base::getCapacity())
-            Base::reserve(newSize);
-        
-        const size_t row = getDerived().getRow();
-        /* Move elements */ {
-            T* data = Base::data();
-            const size_t row_1 = row + 1;
-            for (size_t i = column - 1; i > 1; --i)
-                memmove(row_1 * i, row * i, row * sizeof(T));
-        }
-        /* Insert elements */ {
-            size_t index = row; //Insert first element to position row.
-            const size_t newRow = row + 1;
-            for (auto ite = v.begin(); ite != v.end(); ++ite) {
-                Base::init(*ite, index);
-                index += newRow;
-            }
-            Base::setLength(newSize);
-        }
-    }
-
-    template<class Derived>
-    void DenseMatrixStorage<Derived, MatrixOption::Column | MatrixOption::Element>::removeColumnAt(size_t index) {
-        Derived& matrix = getDerived();
-        assert(index < matrix.getColumn());
-    }
-
-    template<class Derived>
     void DenseMatrixStorage<Derived, MatrixOption::Column | MatrixOption::Element>::rowSwap(size_t r1, size_t r2) {
         Derived& matrix = getDerived();
         const size_t row = matrix.getRow();
@@ -80,33 +42,6 @@ namespace Physica::Core {
             matrix[offset1 + i].swap(matrix[offset2 + i]);
     }
     //////////////////////////////////////////////Row-Element//////////////////////////////////////////////
-    template<class Derived>
-    template<size_t Length, size_t MaxLength>
-    void DenseMatrixStorage<Derived, MatrixOption::Row | MatrixOption::Element>::appendRow(
-            const Vector<T, Length, MaxLength>& v) {
-        constexpr size_t MaxRowAtCompile = Internal::Traits<Derived>::MaxRowAtCompile;
-        static_assert(Internal::Traits<Derived>::RowAtCompile == Dynamic);
-        assert(MaxRowAtCompile == Dynamic || MaxRowAtCompile > getDerived().getRow());
-        assert(v.getLength() == getDerived().getColumn());
-
-        const size_t column = getDerived().getColumn();
-        const size_t length = Base::getLength();
-        const size_t newSize = length + column;
-        if (newSize > Base::getCapacity())
-            Base::reserve(newSize);
-        /* Insert elements */ {
-            for (size_t i = length, j = 0; i < newSize; ++i, ++j)
-                Base::init(v[j], j);
-            Base::setLength(newSize);
-        }
-    }
-
-    template<class Derived>
-    void DenseMatrixStorage<Derived, MatrixOption::Row | MatrixOption::Element>::removeColumnAt(size_t index) {
-        Derived& matrix = getDerived();
-        assert(index < matrix.getColumn());
-    }
-
     template<class Derived>
     void DenseMatrixStorage<Derived, MatrixOption::Row | MatrixOption::Element>::rowSwap(size_t r1, size_t r2) {
         Derived& matrix = getDerived();
@@ -137,22 +72,6 @@ namespace Physica::Core {
     }
 
     template<class Derived>
-    template<size_t Length, size_t MaxLength>
-    void DenseMatrixStorage<Derived, MatrixOption::Column | MatrixOption::Vector>::appendRow(
-            const Vector<T, Length, MaxLength>& v) {
-        constexpr size_t MaxRowAtCompile = Internal::Traits<Derived>::MaxRowAtCompile;
-        static_assert(Internal::Traits<Derived>::RowAtCompile == Dynamic);
-        assert(MaxRowAtCompile == Dynamic || MaxRowAtCompile > Base::getDerived().getRow());
-        assert(v.getLength() == Base::getDerived().getColumn());
-
-        const auto end = array.end();
-        auto ite = array.begin();
-        auto ite1 = v.begin();
-        for (; ite != end(); ++ite, ++ite1)
-            (*ite).append(*ite1);
-    }
-
-    template<class Derived>
     void DenseMatrixStorage<Derived, MatrixOption::Column | MatrixOption::Vector>::rowSwap(size_t r1, size_t r2) {
         [[maybe_unused]] const size_t row = Base::getDerived().getRow();
         assert(r1 < row && r2 < row);
@@ -175,18 +94,6 @@ namespace Physica::Core {
     }
 
     template<class Derived>
-    template<size_t Length, size_t MaxLength>
-    void DenseMatrixStorage<Derived, MatrixOption::Row | MatrixOption::Vector>::appendRow(
-            const Vector<T, Length, MaxLength>& v) {
-        [[maybe_unused]] constexpr size_t MaxRowAtCompile = Internal::Traits<Derived>::MaxRowAtCompile;
-        static_assert(Internal::Traits<Derived>::RowAtCompile == Dynamic);
-        assert(MaxRowAtCompile == Dynamic || MaxRowAtCompile > Base::getDerived().getRow());
-        assert(v.getLength() == Base::getDerived().getColumn());
-
-        array.append(v);
-    }
-
-    template<class Derived>
     void DenseMatrixStorage<Derived, MatrixOption::Row | MatrixOption::Vector>::rowSwap(size_t r1, size_t r2) {
         [[maybe_unused]] const size_t row = Base::getDerived().getRow();
         assert(r1 < row && r2 < row);
@@ -195,7 +102,7 @@ namespace Physica::Core {
 
     template<class Derived>
     void DenseMatrixStorage<Derived, MatrixOption::Row | MatrixOption::Vector>::columnSwap(size_t c1, size_t c2) {
-        const size_t column = Base::getDerived().getColumn();
+        [[maybe_unused]] const size_t column = Base::getDerived().getColumn();
         assert(c1 < column && c2 < column);
         for (auto& rowVector : array)
             rowVector[c1].swap(rowVector[c2]);

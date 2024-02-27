@@ -32,7 +32,6 @@ using ForceModel = SilveraGoldman<ScalarType, true>;
 using RandomPoolType = RandomPool<std::mt19937, 3438603950906262893>;
 constexpr size_t numReplica = 24;
 constexpr double temperatureT = PhyConst<AU>::kToTemperature(25);
-constexpr double thermostatTime = PhyConst<AU>::secondToTime(100 * 1E-15);
 constexpr double timeStep = PhyConst<AU>::secondToTime(1E-15) * 0.5;
 constexpr double pair_cutoff = 15;
 constexpr double molarVolume = 31.7;

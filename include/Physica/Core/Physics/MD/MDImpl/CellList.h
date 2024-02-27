@@ -203,10 +203,6 @@ namespace Physica::Core {
     template<class ScalarType>
     template<class Functor>
     void CellList<ScalarType>::forReducedNeighInRange(Index3D centerCell, Functor func) const {
-        auto a1 = lattice.row(0);
-        auto a2 = lattice.row(1);
-        auto a3 = lattice.row(2);
-
         Index3D index{};
         const size_t centerX = centerCell[0];
         for (int deltaX = 0; deltaX <= 1; ++deltaX) {

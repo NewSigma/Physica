@@ -394,7 +394,7 @@ namespace Physica::Core {
         auto posDataset = pos.write(group, "pos");
         auto typeAttr = posDataset.createAttribute("Type", H5::PredType::NATIVE_INT8, H5DataSpace<1>(1));
         typeAttr.write(H5::PredType::NATIVE_INT8, &type);
-        return group;
+        return H5Group(group);
     }
 
     template<class ScalarType, unsigned int Dim>

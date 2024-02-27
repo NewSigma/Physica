@@ -36,8 +36,14 @@ Physica is also an open source platform that maintains scientific code written i
 
 Requirements:  
 
-[CMake](https://cmake.org/) 3.19 and above  
+A C++ compiler that support C++ 17, the following compilers are tested:
+
 [GCC](https://gcc.gnu.org/) 9.4.0  
+[clang](https://clang.llvm.org/) 17.0.6  
+
+External libraries:
+
+[CMake](https://cmake.org/) 3.19 and above  
 [fftw](http://www.fftw.org)  3.3.10  
 [HDF5](https://www.hdfgroup.org/solutions/hdf5/) 1.14.1  
 [Qt](https://www.qt.io/)  6.2.1  (Optional, Plotting support)  

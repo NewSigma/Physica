@@ -32,7 +32,7 @@ namespace Physica::Core {
         bool init;
     public:
         Xdatcar(std::ifstream fin_);
-        Xdatcar(const Xdatcar&) = default;
+        Xdatcar(const Xdatcar&) = delete;
         Xdatcar(Xdatcar&&) noexcept = default;
         ~Xdatcar() = default;
         /* Operators */

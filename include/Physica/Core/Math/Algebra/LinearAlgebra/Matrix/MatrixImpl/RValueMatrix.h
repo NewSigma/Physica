@@ -47,8 +47,6 @@ namespace Physica::Core {
     public:
         using ScalarType = typename Internal::Traits<Derived>::ScalarType;
         using PlainScalar = typename ScalarType::PlainScalar;
-        using RowVector = RMatrixBlock<Derived, 1, Dynamic>;
-        using ColVector = RMatrixBlock<Derived, Dynamic, 1>;
         constexpr static int Option = Internal::Traits<Derived>::Option;
         constexpr static size_t RowAtCompile = Internal::Traits<Derived>::RowAtCompile;
         constexpr static size_t ColumnAtCompile = Internal::Traits<Derived>::ColumnAtCompile;
@@ -61,6 +59,8 @@ namespace Physica::Core {
 
         constexpr static bool isColumnMatrix = MatrixOption::isColumnMatrix<Derived>();
         constexpr static bool isRowMatrix = MatrixOption::isRowMatrix<Derived>();
+        using RowVector = RMatrixBlock<Derived, 1, Dynamic>;
+        using ColVector = RMatrixBlock<Derived, Dynamic, 1>;
     public:
         /* Operations */
         template<class OtherDerived>

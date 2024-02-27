@@ -137,7 +137,7 @@ namespace Physica::Core {
         Vector<ScalarType> sin_vec(numParticle);
         Vector<ScalarType> cos_vec(numParticle);
         PeriodicCell<ScalarType, Dim>::forReducedCellInRange( // Reduce cell using time reversal symmetry
-            getKSpaceSumRange(), getRepLattice(), [this, numParticle, factor, &pos, &kSpaceSum, &dots, &sin_vec, &cos_vec](Vector3D delta) {
+            getKSpaceSumRange(), getRepLattice(), [this, factor, &pos, &kSpaceSum, &dots, &sin_vec, &cos_vec](Vector3D delta) {
                 const auto& charges = getCharges();
                 const ScalarType squaredNorm = delta.squaredNorm();
                 const bool isNotGammaPoint = ScalarType(std::numeric_limits<ScalarType>::min()) < squaredNorm;

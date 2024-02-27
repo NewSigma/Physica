@@ -102,7 +102,6 @@ using ScalarType = Differentiable<PlainScalar, DiffMode::Reverse, 1>;
 using Dataset = typename Mnist::DatasetType<Vector<PlainScalar>>;
 using Optimizer = SGD<ScalarType>;
 using RandomPoolType = RandomPool<std::mt19937>;
-constexpr size_t numEpoch = 10;
 constexpr size_t batchSize = 9000;
 
 Dataset makeDataset() {
