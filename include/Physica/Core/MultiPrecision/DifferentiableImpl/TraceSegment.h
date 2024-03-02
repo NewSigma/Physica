@@ -31,10 +31,12 @@ namespace Physica::Core {
         static_assert(!ScalarType::isDifferentiable, "[Error]: Differentiable<> pack is not necessary");
         static_assert(Order > 0, "[Error]: 0 order is not differentiable");
         using This = TraceSegment<ScalarType, Order>;
+        using GradType = typename std::conditional<Order == 1, ScalarType, Differentiable<ScalarType, DiffMode::Reverse, Order - 1>>::type;
     public:
         constexpr static size_t DefaultSize = 4096; // I guess it is not a bad choice
         using DiffScalar = Differentiable<ScalarType, DiffMode::Reverse, Order>;
-        using VectorType = Vector<ScalarType>;
+        using ValueVector = Vector<ScalarType>;
+        using GradVector = Vector<GradType>;
         struct DiffRecord {
             using device_obj_type = DiffRecord;
 
@@ -44,11 +46,11 @@ namespace Physica::Core {
     private:
         Utils::Array<DiffRecord> records;
         Utils::Array<DiffScalar> operands;
-        VectorType values;
-        VectorType grads;
+        ValueVector values;
+        GradVector grads;
     public:
         explicit TraceSegment(size_t size = DefaultSize);
-        TraceSegment(VectorType values_);
+        TraceSegment(ValueVector values_);
         TraceSegment(const TraceSegment&) = default;
         TraceSegment(TraceSegment&&) noexcept = default;
         ~TraceSegment() = default;
@@ -56,6 +58,8 @@ namespace Physica::Core {
         TraceSegment& operator=(TraceSegment obj) noexcept { swap(obj); return *this; }
         [[nodiscard]] inline DiffScalar operator[](size_t index);
         [[nodiscard]] inline const DiffScalar operator[](size_t index) const;
+        template<class AnyScalar, unsigned int AnyOrder>
+        friend std::ostream& operator<<(std::ostream& os, const TraceSegment<AnyScalar, AnyOrder>& segment);
         /* Operations */
         inline void reverse(DiffScalar from, DiffScalar to);
         void reverse_from(DiffScalar from) { reverse(makeFromIndex(from), 0); }
@@ -64,7 +68,7 @@ namespace Physica::Core {
         void zero_grad(DiffScalar from, DiffScalar to);
         inline void zero_grad_from(DiffScalar from);
         inline void zero_grad_to(DiffScalar to);
-        inline void zero_grad() { grads = ScalarType(0); }
+        inline void zero_grad();
         void forget(DiffScalar to);
         void squeeze();
 
@@ -77,11 +81,11 @@ namespace Physica::Core {
         [[nodiscard]] bool empty() const noexcept { return records.empty(); }
         [[nodiscard]] bool full() const noexcept { return records.full(); }
         [[nodiscard]] bool isFound(DiffScalar s) const noexcept { return find(s) < getLength(); }
-        [[nodiscard]] size_t find(DiffScalar s) const noexcept { return findImpl(values, grads, s); }
-        [[nodiscard]] VectorType& getValues() noexcept { return values; }
-        [[nodiscard]] const VectorType& getValues() const noexcept { return values; }
-        [[nodiscard]] VectorType& getGrads() noexcept { return grads; }
-        [[nodiscard]] const VectorType& getGrads() const noexcept { return grads; }
+        [[nodiscard]] size_t find(DiffScalar s) const noexcept;
+        [[nodiscard]] ValueVector& getValues() noexcept { return values; }
+        [[nodiscard]] const ValueVector& getValues() const noexcept { return values; }
+        [[nodiscard]] GradVector& getGrads() noexcept { return grads; }
+        [[nodiscard]] const GradVector& getGrads() const noexcept { return grads; }
         /* Static members */
         [[nodiscard]] constexpr static unsigned int numOperand(ExpressionType type);
     private:
@@ -92,8 +96,7 @@ namespace Physica::Core {
         [[nodiscard]] size_t makeFromIndex(DiffScalar from) const noexcept;
         [[nodiscard]] size_t makeToIndex(DiffScalar to) const noexcept;
         /* Static members */
-        template<class VectorType1, class DiffScalar1>
-        [[nodiscard]] __host__ __device__ static size_t findImpl(const VectorType1& values, const VectorType1& grads, DiffScalar1 s);
+        inline static void updateGrad(GradType& target, GradType deltaGrad);
         /* Friends */
         friend class DiffTracer<ScalarType, Order>;
         friend class device_obj<This>;
@@ -109,7 +112,7 @@ namespace Physica::Core {
     }
 
     template<class ScalarType, unsigned int Order>
-    TraceSegment<ScalarType, Order>::TraceSegment(VectorType values_) : values(std::move(values_)) {
+    TraceSegment<ScalarType, Order>::TraceSegment(ValueVector values_) : values(std::move(values_)) {
         const size_t length = values.getLength();
         records.resize(length, DiffRecord{0, ExpressionType::Set});
         grads.resize(length, ScalarType(0));
@@ -117,12 +120,42 @@ namespace Physica::Core {
 
     template<class ScalarType, unsigned int Order>
     inline typename TraceSegment<ScalarType, Order>::DiffScalar TraceSegment<ScalarType, Order>::operator[](size_t index) {
-        return DiffScalar(values.data_ptr(index), grads.data_ptr(index));
+        if constexpr (Order == 1)
+            return DiffScalar(values.data_ptr(index), grads.data_ptr(index));
+        else
+            return DiffScalar(values.data_ptr(index), grads[index]);
     }
 
     template<class ScalarType, unsigned int Order>
     inline const typename TraceSegment<ScalarType, Order>::DiffScalar TraceSegment<ScalarType, Order>::operator[](size_t index) const {
-        return DiffScalar(const_cast<ScalarType*>(values.data_ptr(index)), const_cast<ScalarType*>(grads.data_ptr(index)));
+        return const_cast<This&>(*this).operator[](index);
+    }
+
+    template<class AnyScalar, unsigned int AnyOrder>
+    std::ostream& operator<<(std::ostream& os, const TraceSegment<AnyScalar, AnyOrder>& segment) {
+        const size_t length = segment.getLength();
+        for (size_t i = 0; i < length; ++i) {
+            const auto source = segment.records[i].source;
+            const auto width = os.width();
+            os << std::setw(4) << i << std::setw(width) << ": ";
+            os << std::setw(10) << expressionTypeToStr(source) << std::setw(width) << ' ';
+            os << segment.values[i] << ' ' << segment.grads[i] << ' ';
+            os << "Op: ";
+            const size_t idFirstOperand = segment.records[i].idFirstOperand;
+            const size_t num = TraceSegment<AnyScalar, AnyOrder>::numOperand(source);
+            for (size_t j = 0; j < num; ++j) {
+                const auto& op = segment.operands[idFirstOperand + j];
+                const size_t index = segment.find(op);
+                const bool found = index < length;
+                if (found)
+                    os << index;
+                else
+                    os << op.value_ptr();
+                os << ' ';
+            }
+            os << '\n';
+        }
+        return os;
     }
 
     template<class ScalarType, unsigned int Order>
@@ -143,19 +176,44 @@ namespace Physica::Core {
         const size_t toIndex = makeToIndex(to);
         assert(toIndex <= fromIndex && "[Error]: Invalid range");
         auto segment = grads.segment(toIndex, fromIndex + 1);
-        segment = ScalarType(0);
+        if constexpr (Order == 1)
+            segment = ScalarType(0);
+        else {
+            for (size_t i = 0; i < segment.getLength(); ++i)
+                segment[i].setValue(0);
+        }
     }
 
     template<class ScalarType, unsigned int Order>
     inline void TraceSegment<ScalarType, Order>::zero_grad_from(DiffScalar from) {
         auto segment = grads.segment(0, makeFromIndex(from) + 1);
-        segment = ScalarType(0);
+        if constexpr (Order == 1)
+            segment = ScalarType(0);
+        else {
+            for (size_t i = 0; i < segment.getLength(); ++i)
+                segment[i].setValue(0);
+        }
     }
 
     template<class ScalarType, unsigned int Order>
     inline void TraceSegment<ScalarType, Order>::zero_grad_to(DiffScalar to) {
         auto segment = grads.segment(makeToIndex(to), getLength());
-        segment = ScalarType(0);
+        if constexpr (Order == 1)
+            segment = ScalarType(0);
+        else {
+            for (size_t i = 0; i < segment.getLength(); ++i)
+                segment[i].setValue(0);
+        }
+    }
+
+    template<class ScalarType, unsigned int Order>
+    inline void TraceSegment<ScalarType, Order>::zero_grad() {
+        if constexpr (Order == 1)
+            grads = ScalarType(0);
+        else {
+            for (auto& grad : grads)
+                grad.setValue(0);
+        }
     }
 
     template<class ScalarType, unsigned int Order>
@@ -211,10 +269,25 @@ namespace Physica::Core {
     }
 
     template<class ScalarType, unsigned int Order>
+    size_t TraceSegment<ScalarType, Order>::find(DiffScalar s) const noexcept {
+        assert(values.getLength() == grads.getLength() && "[Error]: Invalid param");
+        const auto* pValue = values.data();
+        const auto* pValue1 = s.value_ptr();
+        const size_t length = values.getLength();
+        if (pValue1 < pValue)
+            return length;
+        const size_t index = pValue1 - pValue;
+        [[maybe_unused]] const bool isValueFound = index < length;
+        assert((!isValueFound || (s == this->operator[](index))) && "[Error]: Bad DiffScalar");
+        return index;
+    }
+
+    template<class ScalarType, unsigned int Order>
     constexpr unsigned int TraceSegment<ScalarType, Order>::numOperand(ExpressionType type) {
         switch (type) {
             case ExpressionType::Set: return 0;
             case ExpressionType::Assign: return 1;
+            case ExpressionType::Diff: return 1;
             case ExpressionType::Minus: return 1;
             case ExpressionType::Add: return 2;
             case ExpressionType::Sub: return 2;
@@ -248,106 +321,135 @@ namespace Physica::Core {
         assert(toIndex <= fromIndex && "[Error]: Invalid index");
         for (size_t i = fromIndex; toIndex <= i && i <= fromIndex; --i) {
             const DiffRecord record = records[i];
-            if (record.source == ExpressionType::Set) {
-                i = record.idFirstOperand;
-                continue;
-            }
-            const ScalarType grad = grads[i];
-            if (grad.isZero())
-                continue;
-            
-            const ScalarType value = values[i];
             const size_t idFirstOperand = record.idFirstOperand;
             const ExpressionType source = record.source;
+            if (source == ExpressionType::Set) {
+                i = idFirstOperand;
+                continue;
+            }
+
+            DiffScalar currentNode = (*this)[i];
             DiffScalar operandX = operands[idFirstOperand];
-            ScalarType& gradX = operandX.getGrad();
+            GradType& gradX = operandX.getGrad();
+            if (source == ExpressionType::Diff) {
+                auto& grad = currentNode.getGrad();
+                if constexpr (Order == 1)
+                    grad += gradX;
+                else
+                    grad.setValue(ScalarType(grad) + ScalarType(gradX));
+                continue;
+            }
+
+            GradType grad;
+            if constexpr (Order == 1)
+                grad = currentNode.getGrad();
+            else
+                grad = *currentNode.getGrad().getFirstOperand();
+
+            if (grad.isZero())
+                continue;
             /* Unitary Operations */ {
                 switch (source) {
                     case ExpressionType::Assign:
                     case ExpressionType::Minus:
-                        gradX += grad * ScalarType(source == ExpressionType::Assign ? 1.0 : -1.0);
+                        updateGrad(gradX, grad * GradType(source == ExpressionType::Assign ? 1.0 : -1.0));
                         continue;
                     case ExpressionType::Reciprocal:
-                        gradX -= grad * square(value);
+                        updateGrad(gradX, -grad * square(GradType(currentNode)));
                         continue;
                     case ExpressionType::Sqrt:
-                        gradX += grad / value * ScalarType(0.5);
+                        updateGrad(gradX, grad / GradType(currentNode) * GradType(0.5));
                         continue;
                     case ExpressionType::Cbrt:
-                        gradX += grad / (square(value) * ScalarType(3));
+                        updateGrad(gradX, grad / (square(GradType(currentNode)) * GradType(3)));
                         continue;
                     case ExpressionType::Abs:
-                        gradX += operandX.getValue().isPositive() ? grad : -grad;
+                        updateGrad(gradX, operandX.getValue().isPositive() ? grad : -grad);
                         continue;
                     case ExpressionType::Relu:
-                        gradX += operandX.getValue().isPositive() ? grad : ScalarType(0);
+                        updateGrad(gradX, operandX.getValue().isPositive() ? grad : GradType(0));
                         continue;
                     case ExpressionType::Square:
-                        gradX += grad * operandX.getValue() * ScalarType(2);
+                        updateGrad(gradX, grad * GradType(operandX) * GradType(2));
                         continue;
                     case ExpressionType::Ln:
-                        gradX += grad / operandX.getValue();
+                        updateGrad(gradX, grad / GradType(operandX));
                         continue;
                     case ExpressionType::Exp:
-                        gradX += grad * value;
+                        updateGrad(gradX, grad * GradType(currentNode));
                         continue;
                     case ExpressionType::Sin:
-                        gradX += grad * cos(operandX.getValue());
+                        updateGrad(gradX, grad * cos(GradType(operandX)));
                         continue;
                     case ExpressionType::Cos:
-                        gradX -= grad * sin(operandX.getValue());
+                        updateGrad(gradX, -grad * sin(GradType(operandX)));
                         continue;
                     case ExpressionType::ArcCos:
-                        gradX -= grad / sqrt(ScalarType(1) - square(operandX.getValue()));
+                        updateGrad(gradX, -grad / sqrt(GradType(1) - square(GradType(operandX))));
                         continue;
                     default:;
                 }
             }
             /* Binary Operations */ {
                 DiffScalar operandY = operands[idFirstOperand + 1];
-                ScalarType& gradY = operandY.getGrad();
+                GradType& gradY = operandY.getGrad();
                 switch (source) {
                     case ExpressionType::Add:
                     case ExpressionType::Sub:
-                        gradX += grad;
-                        gradY += grad * ScalarType(source == ExpressionType::Add ? 1.0 : -1.0);
+                        updateGrad(gradX, grad);
+                        updateGrad(gradY, grad * GradType(source == ExpressionType::Add ? 1.0 : -1.0));
                         continue;
                     case ExpressionType::Mul:
-                        gradX += grad * operandY.getValue();
-                        gradY += grad * operandX.getValue();
+                        updateGrad(gradX, grad * GradType(operandY));
+                        updateGrad(gradY, grad * GradType(operandX));
                         continue;
                     case ExpressionType::Div: {
-                        const ScalarType dx = grad * reciprocal(operandY.getValue());
-                        gradX += dx;
-                        gradY -= dx * value;
+                        const GradType dx = grad * reciprocal(GradType(operandY));
+                        updateGrad(gradX, dx);
+                        updateGrad(gradY, -dx * GradType(currentNode));
                         continue;
                     }
                     case ExpressionType::MulAdd2:
-                        if constexpr (ScalarType::Option == Double) {
-                            DiffScalar operandZ = operands[idFirstOperand + 2];
-                            i -= 1;
-                            [[maybe_unused]] const bool isInRange = toIndex <= i && i <= fromIndex;
-                            assert(isInRange && "[Error]: Unexpected id");
-                            reverseMulAdd<2>(operandX, operandY, operandZ, i);
+                        if constexpr (Order == 1) {
+                            if constexpr (ScalarType::Option == Double) {
+                                DiffScalar operandZ = operands[idFirstOperand + 2];
+                                i -= 1;
+                                [[maybe_unused]] const bool isInRange = toIndex <= i && i <= fromIndex;
+                                assert(isInRange && "[Error]: Unexpected id");
+                                reverseMulAdd<2>(operandX, operandY, operandZ, i);
+                            }
+                            else {
+                                assert(false && "[Error]: MulAdd2 apply to double type only, you should not arrive here");
+                            }
                         }
                         else {
-                            assert(false && "[Error]: MulAdd2 apply to double type only, you should not arrive here");
+                            assert(false && "[Error]: MulAdd2 for high order autodiff not implemented");
                         }
                         continue;
                     case ExpressionType::MulAdd4: {
-                        DiffScalar operandZ = operands[idFirstOperand + 2];
-                        i -= 3;
-                        [[maybe_unused]] const bool isInRange = toIndex <= i && i <= fromIndex;
-                        assert(isInRange && "[Error]: Unexpected id");
-                        reverseMulAdd<4>(operandX, operandY, operandZ, i);
+                        if constexpr (Order == 1) {
+                            DiffScalar operandZ = operands[idFirstOperand + 2];
+                            i -= 3;
+                            [[maybe_unused]] const bool isInRange = toIndex <= i && i <= fromIndex;
+                            assert(isInRange && "[Error]: Unexpected id");
+                            reverseMulAdd<4>(operandX, operandY, operandZ, i);
+                        }
+                        else {
+                            assert(false && "[Error]: MulAdd4 for high order autodiff not implemented");
+                        }
                         continue;
                     }
                     case ExpressionType::MulAdd8: {
-                        DiffScalar operandZ = operands[idFirstOperand + 2];
-                        i -= 7;
-                        [[maybe_unused]] const bool isInRange = toIndex <= i && i <= fromIndex;
-                        assert(isInRange && "[Error]: Unexpected id");
-                        reverseMulAdd<8>(operandX, operandY, operandZ, i);
+                        if constexpr (Order == 1) {
+                            DiffScalar operandZ = operands[idFirstOperand + 2];
+                            i -= 7;
+                            [[maybe_unused]] const bool isInRange = toIndex <= i && i <= fromIndex;
+                            assert(isInRange && "[Error]: Unexpected id");
+                            reverseMulAdd<8>(operandX, operandY, operandZ, i);
+                        }
+                        else {
+                            assert(false && "[Error]: MulAdd8 for high order autodiff not implemented");
+                        }
                         continue;
                     }
                     default:;
@@ -400,18 +502,14 @@ namespace Physica::Core {
     }
 
     template<class ScalarType, unsigned int Order>
-    template<class VectorType1, class DiffScalar1>
-    __host__ __device__ size_t TraceSegment<ScalarType, Order>::findImpl(const VectorType1& values, const VectorType1& grads, DiffScalar1 s) {
-        assert(values.getLength() == grads.getLength() && "[Error]: Invalid param");
-        const auto* pValue = values.data();
-        const auto* pValue1 = s.value_ptr();
-        const size_t length = values.getLength();
-        if (pValue1 < pValue)
-            return length;
-        const size_t index = pValue1 - pValue;
-        [[maybe_unused]] const bool isValueFound = index < length;
-        [[maybe_unused]] const bool isGradFound = s.grad_ptr() == grads.data() + index;
-        assert((!isValueFound || (isValueFound && isGradFound)) && "[Error]: Bad DiffScalar");
-        return index;
+    inline void TraceSegment<ScalarType, Order>::updateGrad(GradType& target, GradType deltaGrad) {
+        if constexpr (Order == 1)
+            target += deltaGrad;
+        else {
+            assert(target.getSource() == ExpressionType::Diff);
+            const GradType temp = target + deltaGrad;
+            *target.getFirstOperand() = temp;
+            target.setValue(ScalarType(temp));
+        }
     }
 }

@@ -49,5 +49,32 @@ int main() {
         if (!scalarNear(y.getGrad(), (y.getValue() - 2.0) * 2.0, 1E-15))
             return 1;
     }
+    {
+        using ScalarType = Differentiable<PlainScalar, DiffMode::Reverse, 2>;
+        ScalarType x(3);
+        ScalarType result = square(x);
+        result.reverse();
+        if (!scalarNear(PlainScalar(x.getGrad<1>()), PlainScalar(6), 1E-15))
+            return 1;
+        x.getGrad().reverse();
+        if (!scalarNear(x.getGrad<2>(), PlainScalar(2), 1E-15))
+            return 1;
+    }
+    {
+        using ScalarType = Differentiable<PlainScalar, DiffMode::Reverse, 2>;
+        ScalarType x(3);
+        ScalarType y(4);
+        ScalarType result = func(x, y);
+        result.reverse();
+        if (!scalarNear(PlainScalar(x.getGrad<1>()), PlainScalar(4), 1E-15))
+            return 1;
+        if (!scalarNear(PlainScalar(y.getGrad<1>()), PlainScalar(4), 1E-15))
+            return 1;
+        x.getGrad().reverse();
+        if (!scalarNear(PlainScalar(x.getGrad<2>()), PlainScalar(2), 1E-15))
+            return 1;
+        if (!scalarNear(PlainScalar(y.getGrad<2>()), PlainScalar(0), 1E-15))
+            return 1;
+    }
     return 0;
 }

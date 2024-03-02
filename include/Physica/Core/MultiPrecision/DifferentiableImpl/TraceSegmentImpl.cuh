@@ -62,7 +62,7 @@ namespace Physica::Core {
      * Optimize: Allocate \param values_ using pinned memory shall improve performance
      */
     template<class ScalarType, unsigned int Order>
-    device_obj<TraceSegment<ScalarType, Order>>::device_obj(const VectorType& values_)
+    device_obj<TraceSegment<ScalarType, Order>>::device_obj(const HostValueVector& values_)
             : device_obj(values_.getLength(), ExpressionType::Set) {
         init(values_);
     }
@@ -76,7 +76,7 @@ namespace Physica::Core {
     template<class ScalarType, unsigned int Order>
     __host__ __device__ inline const typename device_obj<TraceSegment<ScalarType, Order>>::DiffScalar
     device_obj<TraceSegment<ScalarType, Order>>::operator[](size_t index) const {
-        return DiffScalar(const_cast<ScalarType*>(values.data_ptr(index)), const_cast<ScalarType*>(grads.data_ptr(index)));
+        return const_cast<This&>(*this).operator[](index);
     }
 
     template<class ScalarType, unsigned int Order>
@@ -217,7 +217,16 @@ namespace Physica::Core {
 
     template<class ScalarType, unsigned int Order>
     __host__ __device__ size_t device_obj<TraceSegment<ScalarType, Order>>::find(DiffScalar s) const noexcept {
-        return host_obj::findImpl(values, grads, s);
+        assert(values.getLength() == grads.getLength() && "[Error]: Invalid param");
+        const auto* pValue = values.data();
+        const auto* pValue1 = s.value_ptr();
+        const size_t length = values.getLength();
+        if (pValue1 < pValue)
+            return length;
+        const size_t index = pValue1 - pValue;
+        [[maybe_unused]] const bool isValueFound = index < length;
+        assert((!isValueFound || (s == this->operator[](index))) && "[Error]: Bad DiffScalar");
+        return index;
     }
 
     template<class ScalarType, unsigned int Order>
@@ -226,7 +235,7 @@ namespace Physica::Core {
     }
 
     template<class ScalarType, unsigned int Order>
-    inline void device_obj<TraceSegment<ScalarType, Order>>::init(const VectorType& values_) {
+    inline void device_obj<TraceSegment<ScalarType, Order>>::init(const HostValueVector& values_) {
         values_.toDeviceAsync(values);
         auto future = StreamFuture::makeFuture();
         cudaMemsetAsync((void*)records.data(), 0, getLength() * sizeof(DiffRecord), StreamPool::getStream());

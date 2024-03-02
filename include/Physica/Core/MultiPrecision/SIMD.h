@@ -152,7 +152,7 @@ namespace Physica::Core {
         using TrivialType = typename PlainScalar::TrivialType;
     public:
         using PlainPacket = Base;
-        using DiffTracerType = DiffTracer<PlainScalar, 1>;
+        using TracerType = DiffTracer<PlainScalar, 1>;
     private:
         ScalarType headNode;
     public:

@@ -19,114 +19,114 @@
 #pragma once
 
 namespace Physica::Core {
-    template<class ScalarType, DiffMode Mode>
-    __host__ __device__ inline Differentiable<ScalarType, Mode, 1> abs(const Differentiable<ScalarType, Mode, 1>& s);
+    template<class ScalarType, DiffMode Mode, unsigned int Order>
+    __host__ __device__ inline Differentiable<ScalarType, Mode, Order> abs(const Differentiable<ScalarType, Mode, Order>& s);
 
-    template<class ScalarType, DiffMode Mode>
-    inline Differentiable<ScalarType, Mode, 1> relu(const Differentiable<ScalarType, Mode, 1>& s);
+    template<class ScalarType, DiffMode Mode, unsigned int Order>
+    inline Differentiable<ScalarType, Mode, Order> relu(const Differentiable<ScalarType, Mode, Order>& s);
 
-    template<class ScalarType, DiffMode Mode>
-    __host__ __device__ inline Differentiable<ScalarType, Mode, 1> square(const Differentiable<ScalarType, Mode, 1>& s);
+    template<class ScalarType, DiffMode Mode, unsigned int Order>
+    __host__ __device__ inline Differentiable<ScalarType, Mode, Order> square(const Differentiable<ScalarType, Mode, Order>& s);
 
-    template<class ScalarType, DiffMode Mode>
-    __host__ __device__ inline Differentiable<ScalarType, Mode, 1> reciprocal(const Differentiable<ScalarType, Mode, 1>& s);
+    template<class ScalarType, DiffMode Mode, unsigned int Order>
+    __host__ __device__ inline Differentiable<ScalarType, Mode, Order> reciprocal(const Differentiable<ScalarType, Mode, Order>& s);
 
-    template<class ScalarType, DiffMode Mode>
-    __host__ __device__ Differentiable<ScalarType, Mode, 1> sqrt(const Differentiable<ScalarType, Mode, 1>& s);
+    template<class ScalarType, DiffMode Mode, unsigned int Order>
+    __host__ __device__ Differentiable<ScalarType, Mode, Order> sqrt(const Differentiable<ScalarType, Mode, Order>& s);
 
-    template<class ScalarType, DiffMode Mode>
-    Differentiable<ScalarType, Mode, 1> cbrt(const Differentiable<ScalarType, Mode, 1>& s);
+    template<class ScalarType, DiffMode Mode, unsigned int Order>
+    Differentiable<ScalarType, Mode, Order> cbrt(const Differentiable<ScalarType, Mode, Order>& s);
 
-    template<class ScalarType, DiffMode Mode>
-    Differentiable<ScalarType, Mode, 1> ln(const Differentiable<ScalarType, Mode, 1>& s);
+    template<class ScalarType, DiffMode Mode, unsigned int Order>
+    Differentiable<ScalarType, Mode, Order> ln(const Differentiable<ScalarType, Mode, Order>& s);
 /*
-    template<class ScalarType, DiffMode Mode>
-    Differentiable<ScalarType, Mode, 1> log(const Differentiable<ScalarType, Mode, 1>& s, const Differentiable<ScalarType, Mode, 1>& a);
+    template<class ScalarType, DiffMode Mode, unsigned int Order>
+    Differentiable<ScalarType, Mode, Order> log(const Differentiable<ScalarType, Mode, Order>& s, const Differentiable<ScalarType, Mode, Order>& a);
 */
-    template<class ScalarType, DiffMode Mode>
-    Differentiable<ScalarType, Mode, 1> exp(const Differentiable<ScalarType, Mode, 1>& s);
+    template<class ScalarType, DiffMode Mode, unsigned int Order>
+    Differentiable<ScalarType, Mode, Order> exp(const Differentiable<ScalarType, Mode, Order>& s);
 /*
-    template<class ScalarType, DiffMode Mode>
-    Differentiable<ScalarType, Mode, 1> pow(const Differentiable<ScalarType, Mode, 1>& s, const Differentiable<ScalarType, Mode, 1>& n);
+    template<class ScalarType, DiffMode Mode, unsigned int Order>
+    Differentiable<ScalarType, Mode, Order> pow(const Differentiable<ScalarType, Mode, Order>& s, const Differentiable<ScalarType, Mode, Order>& n);
 
-    template<class ScalarType, DiffMode Mode>
-    Differentiable<ScalarType, Mode, 1> factorial(const Differentiable<ScalarType, Mode, 1>& s);
+    template<class ScalarType, DiffMode Mode, unsigned int Order>
+    Differentiable<ScalarType, Mode, Order> factorial(const Differentiable<ScalarType, Mode, Order>& s);
 */
-    template<class ScalarType, DiffMode Mode>
-    Differentiable<ScalarType, Mode, 1> cos(const Differentiable<ScalarType, Mode, 1>& s);
+    template<class ScalarType, DiffMode Mode, unsigned int Order>
+    Differentiable<ScalarType, Mode, Order> cos(const Differentiable<ScalarType, Mode, Order>& s);
 
-    template<class ScalarType, DiffMode Mode>
-    Differentiable<ScalarType, Mode, 1> sin(const Differentiable<ScalarType, Mode, 1>& s);
+    template<class ScalarType, DiffMode Mode, unsigned int Order>
+    Differentiable<ScalarType, Mode, Order> sin(const Differentiable<ScalarType, Mode, Order>& s);
 
-    template<class ScalarType, DiffMode Mode>
-    void sincos(Differentiable<ScalarType, Mode, 1> s, Differentiable<ScalarType, Mode, 1>& sin_result, Differentiable<ScalarType, Mode, 1>& cos_result);
+    template<class ScalarType, DiffMode Mode, unsigned int Order>
+    void sincos(Differentiable<ScalarType, Mode, Order> s, Differentiable<ScalarType, Mode, Order>& sin_result, Differentiable<ScalarType, Mode, Order>& cos_result);
 /*
-    template<class ScalarType, DiffMode Mode>
-    Differentiable<ScalarType, Mode, 1> tan(const Differentiable<ScalarType, Mode, 1>& s);
+    template<class ScalarType, DiffMode Mode, unsigned int Order>
+    Differentiable<ScalarType, Mode, Order> tan(const Differentiable<ScalarType, Mode, Order>& s);
 
-    template<class ScalarType, DiffMode Mode>
-    Differentiable<ScalarType, Mode, 1> sec(const Differentiable<ScalarType, Mode, 1>& s);
+    template<class ScalarType, DiffMode Mode, unsigned int Order>
+    Differentiable<ScalarType, Mode, Order> sec(const Differentiable<ScalarType, Mode, Order>& s);
 
-    template<class ScalarType, DiffMode Mode>
-    Differentiable<ScalarType, Mode, 1> csc(const Differentiable<ScalarType, Mode, 1>& s);
+    template<class ScalarType, DiffMode Mode, unsigned int Order>
+    Differentiable<ScalarType, Mode, Order> csc(const Differentiable<ScalarType, Mode, Order>& s);
 
-    template<class ScalarType, DiffMode Mode>
-    Differentiable<ScalarType, Mode, 1> cot(const Differentiable<ScalarType, Mode, 1>& s);
+    template<class ScalarType, DiffMode Mode, unsigned int Order>
+    Differentiable<ScalarType, Mode, Order> cot(const Differentiable<ScalarType, Mode, Order>& s);
 */
-    template<class ScalarType, DiffMode Mode>
-    Differentiable<ScalarType, Mode, 1> arccos(const Differentiable<ScalarType, Mode, 1>& s);
+    template<class ScalarType, DiffMode Mode, unsigned int Order>
+    Differentiable<ScalarType, Mode, Order> arccos(const Differentiable<ScalarType, Mode, Order>& s);
 /*
     //!Domain of definition: [-Pi / 2, Pi / 2]
-    template<class ScalarType, DiffMode Mode>
-    Differentiable<ScalarType, Mode, 1> arcsin(const Differentiable<ScalarType, Mode, 1>& s);
+    template<class ScalarType, DiffMode Mode, unsigned int Order>
+    Differentiable<ScalarType, Mode, Order> arcsin(const Differentiable<ScalarType, Mode, Order>& s);
     //!Domain of definition: [-Pi / 2, Pi / 2]
-    template<class ScalarType, DiffMode Mode>
-    Differentiable<ScalarType, Mode, 1> arctan(const Differentiable<ScalarType, Mode, 1>& s);
+    template<class ScalarType, DiffMode Mode, unsigned int Order>
+    Differentiable<ScalarType, Mode, Order> arctan(const Differentiable<ScalarType, Mode, Order>& s);
 
-    template<class ScalarType, DiffMode Mode>
-    Differentiable<ScalarType, Mode, 1> arcsec(const Differentiable<ScalarType, Mode, 1>& s);
+    template<class ScalarType, DiffMode Mode, unsigned int Order>
+    Differentiable<ScalarType, Mode, Order> arcsec(const Differentiable<ScalarType, Mode, Order>& s);
 
-    template<class ScalarType, DiffMode Mode>
-    Differentiable<ScalarType, Mode, 1> arccsc(const Differentiable<ScalarType, Mode, 1>& s);
+    template<class ScalarType, DiffMode Mode, unsigned int Order>
+    Differentiable<ScalarType, Mode, Order> arccsc(const Differentiable<ScalarType, Mode, Order>& s);
 
-    template<class ScalarType, DiffMode Mode>
-    Differentiable<ScalarType, Mode, 1> arccot(const Differentiable<ScalarType, Mode, 1>& s);
+    template<class ScalarType, DiffMode Mode, unsigned int Order>
+    Differentiable<ScalarType, Mode, Order> arccot(const Differentiable<ScalarType, Mode, Order>& s);
 
-    template<class ScalarType, DiffMode Mode>
-    Differentiable<ScalarType, Mode, 1> cosh(const Differentiable<ScalarType, Mode, 1>& s);
+    template<class ScalarType, DiffMode Mode, unsigned int Order>
+    Differentiable<ScalarType, Mode, Order> cosh(const Differentiable<ScalarType, Mode, Order>& s);
 
-    template<class ScalarType, DiffMode Mode>
-    Differentiable<ScalarType, Mode, 1> sinh(const Differentiable<ScalarType, Mode, 1>& s);
+    template<class ScalarType, DiffMode Mode, unsigned int Order>
+    Differentiable<ScalarType, Mode, Order> sinh(const Differentiable<ScalarType, Mode, Order>& s);
 
-    template<class ScalarType, DiffMode Mode>
-    Differentiable<ScalarType, Mode, 1> tanh(const Differentiable<ScalarType, Mode, 1>& s);
+    template<class ScalarType, DiffMode Mode, unsigned int Order>
+    Differentiable<ScalarType, Mode, Order> tanh(const Differentiable<ScalarType, Mode, Order>& s);
 
-    template<class ScalarType, DiffMode Mode>
-    Differentiable<ScalarType, Mode, 1> sech(const Differentiable<ScalarType, Mode, 1>& s);
+    template<class ScalarType, DiffMode Mode, unsigned int Order>
+    Differentiable<ScalarType, Mode, Order> sech(const Differentiable<ScalarType, Mode, Order>& s);
 
-    template<class ScalarType, DiffMode Mode>
-    Differentiable<ScalarType, Mode, 1> csch(const Differentiable<ScalarType, Mode, 1>& s);
+    template<class ScalarType, DiffMode Mode, unsigned int Order>
+    Differentiable<ScalarType, Mode, Order> csch(const Differentiable<ScalarType, Mode, Order>& s);
 
-    template<class ScalarType, DiffMode Mode>
-    Differentiable<ScalarType, Mode, 1> coth(const Differentiable<ScalarType, Mode, 1>& s);
+    template<class ScalarType, DiffMode Mode, unsigned int Order>
+    Differentiable<ScalarType, Mode, Order> coth(const Differentiable<ScalarType, Mode, Order>& s);
 
-    template<class ScalarType, DiffMode Mode>
-    Differentiable<ScalarType, Mode, 1> arccosh(const Differentiable<ScalarType, Mode, 1>& s);
+    template<class ScalarType, DiffMode Mode, unsigned int Order>
+    Differentiable<ScalarType, Mode, Order> arccosh(const Differentiable<ScalarType, Mode, Order>& s);
 
-    template<class ScalarType, DiffMode Mode>
-    Differentiable<ScalarType, Mode, 1> arcsinh(const Differentiable<ScalarType, Mode, 1>& s);
+    template<class ScalarType, DiffMode Mode, unsigned int Order>
+    Differentiable<ScalarType, Mode, Order> arcsinh(const Differentiable<ScalarType, Mode, Order>& s);
 
-    template<class ScalarType, DiffMode Mode>
-    Differentiable<ScalarType, Mode, 1> arctanh(const Differentiable<ScalarType, Mode, 1>& s);
+    template<class ScalarType, DiffMode Mode, unsigned int Order>
+    Differentiable<ScalarType, Mode, Order> arctanh(const Differentiable<ScalarType, Mode, Order>& s);
 
-    template<class ScalarType, DiffMode Mode>
-    Differentiable<ScalarType, Mode, 1> arcsech(const Differentiable<ScalarType, Mode, 1>& s);
+    template<class ScalarType, DiffMode Mode, unsigned int Order>
+    Differentiable<ScalarType, Mode, Order> arcsech(const Differentiable<ScalarType, Mode, Order>& s);
 
-    template<class ScalarType, DiffMode Mode>
-    Differentiable<ScalarType, Mode, 1> arccsch(const Differentiable<ScalarType, Mode, 1>& s);
+    template<class ScalarType, DiffMode Mode, unsigned int Order>
+    Differentiable<ScalarType, Mode, Order> arccsch(const Differentiable<ScalarType, Mode, Order>& s);
 
-    template<class ScalarType, DiffMode Mode>
-    Differentiable<ScalarType, Mode, 1> arccoth(const Differentiable<ScalarType, Mode, 1>& s);
+    template<class ScalarType, DiffMode Mode, unsigned int Order>
+    Differentiable<ScalarType, Mode, Order> arccoth(const Differentiable<ScalarType, Mode, Order>& s);
 */
 }
 

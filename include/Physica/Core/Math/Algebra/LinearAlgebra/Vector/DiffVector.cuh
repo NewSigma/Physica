@@ -42,7 +42,8 @@ namespace Physica::Core {
         using TracerType = device_obj<typename host_obj::TracerType>;
         using SegmentType = device_obj<typename host_obj::SegmentType>;
         using RecordArray = typename SegmentType::RecordArray;
-        using DeviceVector = typename SegmentType::DeviceVector;
+        using ValueVector = typename SegmentType::ValueVector;
+        using GradVector = typename SegmentType::GradVector;
     public:
         using ScalarType = typename Base::ScalarType;
         using DiffRecord = typename SegmentType::DiffRecord;
@@ -83,8 +84,8 @@ namespace Physica::Core {
         [[nodiscard]] __device__ inline const PlainScalar& getValue(size_t index) const;
         [[nodiscard]] __device__ inline PlainScalar& getGrad(size_t index);
         [[nodiscard]] __device__ inline const PlainScalar& getGrad(size_t index) const;
-        [[nodiscard]] const DeviceVector& getValues() const noexcept { return getTraceSegment().getValues(); }
-        [[nodiscard]] const DeviceVector& getGrads() const noexcept { return getTraceSegment().getGrads(); }
+        [[nodiscard]] const ValueVector& getValues() const noexcept { return getTraceSegment().getValues(); }
+        [[nodiscard]] const GradVector& getGrads() const noexcept { return getTraceSegment().getGrads(); }
         [[nodiscard]] ScalarType max() const;
         [[nodiscard]] ScalarType min() const;
         [[nodiscard]] ScalarType sum() const;

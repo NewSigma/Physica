@@ -24,7 +24,8 @@ namespace Physica::Core {
      */
     enum class ExpressionType : char {
         Set,
-        Assign,
+        Assign, //Cherry pick a node at forward pass, collect grads at backward pass
+        Diff, //Declare a differential at forward pass, jump to the grad node at backward pass
         Minus,
         Add,
         Sub,
@@ -54,6 +55,7 @@ namespace Physica::Core {
         switch (type) {
             case ExpressionType::Set: return "Set";
             case ExpressionType::Assign: return "Assign";
+            case ExpressionType::Diff: return "Diff";
             case ExpressionType::Minus: return "Minus";
             case ExpressionType::Add: return "Add";
             case ExpressionType::Sub: return "Sub";

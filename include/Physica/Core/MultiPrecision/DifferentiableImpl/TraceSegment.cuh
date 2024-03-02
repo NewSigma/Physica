@@ -27,28 +27,31 @@ namespace Physica::Core {
     template<class ScalarType, unsigned int Order>
     class device_obj<TraceSegment<ScalarType, Order>> {
         static_assert(!ScalarType::isDifferentiable, "[Error]: Differentiable<> pack is not necessary");
+        static_assert(Order > 0, "[Error]: 0 order is not differentiable");
         using host_obj = TraceSegment<ScalarType, Order>;
         using This = device_obj<host_obj>;
         using HostDiffScalar = typename host_obj::DiffScalar;
-        using VectorType = typename host_obj::VectorType;
+        using HostValueVector = typename host_obj::ValueVector;
+        using HostGradVector = typename host_obj::GradVector;
     public:
         using DiffScalar = device_obj<HostDiffScalar>;
         using DiffRecord = typename host_obj::DiffRecord;
         using RecordArray = Utils::device_obj<Utils::Array<DiffRecord>>;
         using OperandArray = Utils::device_obj<Utils::Array<HostDiffScalar>>;
-        using DeviceVector = device_obj<VectorType>;
+        using ValueVector = device_obj<HostValueVector>;
+        using GradVector = device_obj<HostGradVector>;
         constexpr static size_t DefaultSize = host_obj::DefaultSize;
-        constexpr static size_t MaxThreadPerBlock = DeviceVector::MaxThreadPerBlock;
+        constexpr static size_t MaxThreadPerBlock = ValueVector::MaxThreadPerBlock;
     private:
         RecordArray records;
         OperandArray operands;
-        DeviceVector values;
-        DeviceVector grads;
+        ValueVector values;
+        GradVector grads;
     public:
         device_obj() = default;
         device_obj(size_t size, ExpressionType type);
         explicit device_obj(ScalarType value);
-        explicit device_obj(const VectorType& values_);
+        explicit device_obj(const HostValueVector& values_);
         device_obj(const device_obj&) = default;
         device_obj(device_obj&&) noexcept = default;
         ~device_obj() = default;
@@ -74,16 +77,16 @@ namespace Physica::Core {
         [[nodiscard]] size_t getNumOperands() const noexcept { return operands.getLength(); }
         [[nodiscard]] __host__ __device__ bool isFound(DiffScalar s) const noexcept { return find(s) < getLength(); }
         [[nodiscard]] __host__ __device__ size_t find(DiffScalar s) const noexcept;
-        [[nodiscard]] __host__ __device__ DeviceVector& getValues() noexcept { return values; }
-        [[nodiscard]] __host__ __device__ const DeviceVector& getValues() const noexcept { return values; }
-        [[nodiscard]] __host__ __device__ DeviceVector& getGrads() noexcept { return grads; }
-        [[nodiscard]] __host__ __device__ const DeviceVector& getGrads() const noexcept { return grads; }
+        [[nodiscard]] __host__ __device__ ValueVector& getValues() noexcept { return values; }
+        [[nodiscard]] __host__ __device__ const ValueVector& getValues() const noexcept { return values; }
+        [[nodiscard]] __host__ __device__ GradVector& getGrads() noexcept { return grads; }
+        [[nodiscard]] __host__ __device__ const GradVector& getGrads() const noexcept { return grads; }
         /* Static members */
         [[nodiscard]] constexpr static unsigned int numOperand(ExpressionType type) { return host_obj::numOperand(type); }
     private:
         /* Operations */
         inline void init(ScalarType value);
-        void init(const VectorType& values_);
+        void init(const HostValueVector& values_);
         /* Friends */
         friend class device_obj<DiffTracer<ScalarType, Order>>;
     };
