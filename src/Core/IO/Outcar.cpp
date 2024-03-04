@@ -19,6 +19,7 @@
 #include "Physica/Core/IO/Outcar.h"
 #include "Physica/Core/Exception/IOException.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h"
+#include "Physica/Core/Physics/PhyConst.h"
 
 namespace Physica::Core {
     Outcar::Outcar(const char* path, unsigned int numAtom) : force(numAtom * 3) {
@@ -65,6 +66,7 @@ namespace Physica::Core {
 
         if (!fin)
             throw BadFileFormatException("[Error]: Failed to read force");
+        force *= ScalarType(PhyConst<AU>::eVToHartree(1) * PhyConst<AU>::bohrToAngstorm(1));
     }
 
     void Outcar::readEnergy(std::ifstream& fin, Utils::Array<char>& buffer) {
@@ -87,5 +89,6 @@ namespace Physica::Core {
 
         if (!fin)
             throw BadFileFormatException("[Error]: Failed to read energy");
+        internalEnergy *= ScalarType(PhyConst<AU>::eVToHartree(1));
     }
 }

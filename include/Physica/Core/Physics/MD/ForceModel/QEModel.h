@@ -64,7 +64,7 @@ namespace Physica::Core {
         [[nodiscard]] Vector<ScalarType> force_long(const MDCellType& cell) const { return Vector<ScalarType>(cell.getDOF(), 0); }
         void swap(QEModel& __restrict obj) noexcept;
         /* Getters */
-        [[nodiscard]] size_t getNumAtom() const noexcept { return elementTypes.getLength(); }
+        [[nodiscard]] size_t getNumParticle() const noexcept { return elementTypes.getLength(); }
         [[nodiscard]] unsigned int getNumMPIProcess() const noexcept { return numMPIProcess; }
     private:
         template<size_t N> ProcessFuture run_qe(Utils::TempFile<N>& __restrict input, Utils::TempFile<N>& __restrict output) const;
@@ -97,7 +97,7 @@ namespace Physica::Core {
     template<class ScalarType>
     template<class VectorType, class Executor>
     void QEModel<ScalarType>::forceAsync(const MDCellType& cell, ContinuousVector<VectorType>& result) const noexcept {
-        assert(cell.getNumParticle() == getNumAtom());
+        assert(cell.getNumParticle() == getNumParticle());
         try {
             auto inputTmp = Utils::TempFile("/tmp/tmpXXXXXX");
             /* Make input */ {
@@ -106,7 +106,7 @@ namespace Physica::Core {
                 os << "CELL_PARAMETERS bohr\n";
                 os << cell.getLattice() << '\n';
                 os << "ATOMIC_POSITIONS bohr\n";
-                for (size_t i = 0; i < getNumAtom(); ++i) {
+                for (size_t i = 0; i < getNumParticle(); ++i) {
                     const auto row = cell.getPos().row(i);
                     os << PhyConst<SI>::elementSymbol[elementTypes[i]] << ' '
                     << row[0] << ' '
@@ -116,7 +116,7 @@ namespace Physica::Core {
             }
             auto outputTmp = Utils::TempFile("/tmp/tmpXXXXXX");
             run_qe(inputTmp, outputTmp).wait("[Error]: QE finished with non zero exit code");
-            PWscfOut out_scf(outputTmp.getName(), getNumAtom());
+            PWscfOut out_scf(outputTmp.getName(), getNumParticle());
             result.getDerived() = out_scf.getForce();
         }
         catch (std::exception& e) {
@@ -160,11 +160,13 @@ namespace Physica::Core {
                 throw SyscallException();
             close(fd[0]);
             /* Execute */ {
-                char numProcess[16]; // 16 is enough for unsigned int
-                sprintf(numProcess, "%d", getNumMPIProcess());
+                constexpr int bufferLength = 16; // 16 is enough for unsigned int
+                char numProcess[bufferLength];
+                [[maybe_unused]] const int = sprintf(numProcess, "%d", getNumMPIProcess());
+                assert(0 <= count && count < bufferLength && "[Error]: Unexpected bad printf");
                 execlp("mpirun", "mpirun", "-n", numProcess, pathToPW.c_str(), "-n", numProcess, "-nk", numProcess, nullptr);
             }
-            dup2(standardErr, 2);
+            dup2(standardErr, STDERR_FILENO);
             perror("[Error]: Failed to execute QE");
             _exit(EXIT_FAILURE);
         });

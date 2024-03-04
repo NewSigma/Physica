@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 WeiBo He.
+ * Copyright 2022-2024 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -17,59 +17,20 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include <fstream>
-#include "Physica/Core/Interface/VaspWarpper.h"
+#include "Physica/Core/IO/Outcar.h"
+#include "Physica/Utils/Unix/TempFile.h"
 
 using namespace Physica::Core;
-using ScalarType = Scalar<Float>;
-using PoscarType = Poscar<ScalarType>;
-extern const char* outcar;
-
-namespace Physica::Core {
-    class Test {
-    public:
-        constexpr static const char* OutPath = "/tmp/OUTCAR";
-        VaspWarpper init() {
-            {
-                std::ofstream fout(OutPath);
-                fout << outcar;
-            }
-
-            typename PoscarType::LatticeMatrix lattice{3.063970000, 0.000000000, 0.000000000,
-                                                       1.355640000, 5.017130000, 0.000000000,
-                                                       0.305250000,-1.140470000, 5.195960000};
-            typename PoscarType::PositionMatrix pos{0.019030000, 0.733400000, 0.307890000,
-                                                    0.885690000, 0.173690000, 0.053420000,
-                                                    0.637770000, 0.665250000, 0.810840000,
-                                                    0.325570000, 0.191560000, 0.558340000,
-                                                    0.042760000, 0.898360000, 0.689770000,
-                                                    0.297330000, 0.406950000, 0.941480000,
-                                                    0.734410000, 0.424230000, 0.428290000,
-                                                    0.456810000, 0.939370000, 0.176470000};
-            VaspWarpper vasp{};
-            vasp.vaspWorkingDir = "/tmp";
-            vasp.poscar = PoscarType({std::move(lattice), std::move(pos), PoscarType::Type::Direct}, {20, 8}, {2, 6});
-            vasp.future = Test::makeDummyFuture();
-            return vasp;
-        }
-
-        static ProcessFuture makeDummyFuture() {
-            ProcessFuture future{};
-            future.finished = future.isValid = true;
-            return future;
-        }
-
-        ~Test() {
-            unlink(OutPath);
-        }
-    };
-}
-
-
+using namespace Physica::Utils;
+using ScalarType = Scalar<Double>;
+extern const char* outcar_data;
 
 int main() {
-    Test test{};
-    VaspWarpper vasp = test.init();
-    const auto outcar = vasp.getOutcar();
+    TempFile tmp("/tmp/tmpXXXXXX");
+    std::ofstream fout(tmp.getName());
+    fout << outcar_data;
+
+    const Outcar outcar(tmp.getName(), 8);
     const auto& force = outcar.getForce();
     const Vector<ScalarType> answer{1.168281, -4.245817, -0.080442, -0.735246, 1.188434, 0.171096, 0.238719, 0.022373, -0.258197, 0.595000, 0.266135, 0.121868, -0.209437, 0.968435, -0.291308, -0.990043, 1.383871, 0.212539, -0.192415, 0.419208, 0.024764, 0.125140, -0.002640, 0.099680};
     if (!vectorNear(force, answer, std::numeric_limits<ScalarType>::epsilon()))
@@ -79,7 +40,7 @@ int main() {
     return 0;
 }
 
-const char* outcar = " vasp.6.1.0 28Jan20 (build Oct 14 2020 17:24:59) complex                         \n\
+const char* outcar_data = " vasp.6.1.0 28Jan20 (build Oct 14 2020 17:24:59) complex                         \n\
    \n\
  executed on             LinuxIFC date 2021.03.18  21:31:16 \n\
  running on   16 total cores \n\

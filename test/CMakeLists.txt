@@ -7,11 +7,10 @@ message(STATUS "Configuring tests.")
 ## AI
 physica_add_test(AP Core/AI/AP.cpp)
 physica_add_test(Loss Core/AI/Loss.cpp)
-## Interface
-physica_add_test(VaspWarpper Core/Interface/VaspWarpper.cpp)
 ## IO
 physica_add_test(Gnuplot Core/IO/Gnuplot.cpp)
 physica_add_test(HDF5 Core/IO/HDF5.cpp)
+physica_add_test(Outcar Core/IO/Outcar.cpp)
 physica_add_test(Poscar Core/IO/Poscar.cpp)
 physica_add_test(PWscfIn Core/IO/PWscfIn.cpp)
 ## Math

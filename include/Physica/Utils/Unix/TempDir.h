@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 WeiBo He.
+ * Copyright 2024 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -20,56 +20,55 @@
 
 #include <cstdlib>
 #include <unistd.h>
+#include "UnixHelper.h"
 #include "Physica/Core/Exception/SyscallException.h"
 
 namespace Physica::Utils {
     template<size_t N>
-    class TempFile {
+    class TempDir {
         char name[N];
-        int fd;
+        const char* pName;
     public:
-        TempFile(const char (&name_template)[N]);
-        TempFile(const TempFile&) = delete;
-        TempFile(TempFile&& obj) noexcept;
-        ~TempFile();
+        TempDir(const char (&name_template)[N]);
+        TempDir(const TempDir&) = delete;
+        TempDir(TempDir&& obj) noexcept;
+        ~TempDir();
         /* Operators */
-        TempFile& operator=(TempFile obj) noexcept { swap(obj); return *this; }
+        TempDir& operator=(TempDir obj) noexcept { swap(obj); return *this; }
         /* Operations */
-        void swap(TempFile& __restrict obj) noexcept;
+        void swap(TempDir& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] const char* getName() const noexcept { return name; }
-        [[nodiscard]] int getFd() const noexcept { return fd; }
     };
 
     template<size_t N>
-    TempFile<N>::TempFile(const char (&name_template)[N]) {
+    TempDir<N>::TempDir(const char (&name_template)[N]) {
         for (size_t i = 0; i < N; ++i)
             name[i] = name_template[i];
-        fd = mkstemp(name);
-        if (fd == -1) [[unlikely]]
+        pName = mkdtemp(name);
+        if (pName == nullptr) [[unlikely]]
             throw Core::SyscallException();
     }
 
     template<size_t N>
-    TempFile<N>::TempFile(TempFile&& obj) noexcept : fd(obj.fd) {
+    TempDir<N>::TempDir(TempDir&& obj) noexcept : pName(obj.pName) {
         for (size_t i = 0; i < N; ++i)
             name[i] = obj.name[i];
-        obj.fd = -1;
+        obj.pName = nullptr;
     }
 
     template<size_t N>
-    TempFile<N>::~TempFile() {
-        if (fd != -1) {
-            close(fd);
-            unlink(name);
-            fd = -1;
+    TempDir<N>::~TempDir() {
+        if (pName != nullptr) {
+            forceRemoveDir(pName);
+            pName = nullptr;
         }
     }
 
     template<size_t N>
-    void TempFile<N>::swap(TempFile& __restrict obj) noexcept {
+    void TempDir<N>::swap(TempDir& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         std::swap(name, obj.name);
-        std::swap(fd, obj.fd);
+        std::swap(pName, obj.pName);
     }
 }
