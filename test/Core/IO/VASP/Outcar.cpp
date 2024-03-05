@@ -17,7 +17,8 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include <fstream>
-#include "Physica/Core/IO/Outcar.h"
+#include "Physica/Core/IO/VASP/Outcar.h"
+#include "Physica/Core/Physics/PhyConst.h"
 #include "Physica/Utils/Unix/TempFile.h"
 
 using namespace Physica::Core;
@@ -32,10 +33,11 @@ int main() {
 
     const Outcar outcar(tmp.getName(), 8);
     const auto& force = outcar.getForce();
-    const Vector<ScalarType> answer{1.168281, -4.245817, -0.080442, -0.735246, 1.188434, 0.171096, 0.238719, 0.022373, -0.258197, 0.595000, 0.266135, 0.121868, -0.209437, 0.968435, -0.291308, -0.990043, 1.383871, 0.212539, -0.192415, 0.419208, 0.024764, 0.125140, -0.002640, 0.099680};
+    Vector<ScalarType> answer{1.168281, -4.245817, -0.080442, -0.735246, 1.188434, 0.171096, 0.238719, 0.022373, -0.258197, 0.595000, 0.266135, 0.121868, -0.209437, 0.968435, -0.291308, -0.990043, 1.383871, 0.212539, -0.192415, 0.419208, 0.024764, 0.125140, -0.002640, 0.099680};
+    answer *= PhyConst<AU>::eVToHartree(1) / PhyConst<AU>::angstormToBohr(1);
     if (!vectorNear(force, answer, std::numeric_limits<ScalarType>::epsilon()))
         return 1;
-    if (!scalarNear(outcar.getInternalEnergy(), Scalar<Double>(-43.76513486), 1E-8))
+    if (!scalarNear(outcar.getInternalEnergy(), Scalar<Double>(PhyConst<AU>::eVToHartree(-43.76513486)), 1E-8))
       return 1;
     return 0;
 }

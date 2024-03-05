@@ -20,7 +20,7 @@
 
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/CrossProduct.h"
 #include "Physica/Core/Physics/SolidState/CrystalCell.h"
-#include "Physica/Core/IO/Poscar.h"
+#include "Physica/Core/IO/VASP/Poscar.h"
 
 namespace Physica::Core {
     template<class ScalarType>

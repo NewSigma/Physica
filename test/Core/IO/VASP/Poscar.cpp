@@ -18,7 +18,7 @@
  */
 #include <iostream>
 #include <fstream>
-#include "Physica/Core/IO/Poscar.h"
+#include "Physica/Core/IO/VASP/Poscar.h"
 #include "Physica/Core/Physics/SolidState/CrystalCell.h"
 #include "Physica/Utils/Unix/TempFile.h"
 

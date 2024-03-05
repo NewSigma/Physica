@@ -19,7 +19,7 @@
 #pragma once
 
 #include <fcntl.h>
-#include "Physica/Core/IO/Poscar.h"
+#include "Physica/Core/IO/VASP/Poscar.h"
 #include "Physica/Core/IO/Outcar.h"
 #include "Physica/Core/Parallel/Executor/ProcessExecutor.h"
 #include "Physica/Core/Physics/MD/MDCell.h"

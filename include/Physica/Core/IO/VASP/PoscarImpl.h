@@ -22,7 +22,6 @@
 #include <algorithm>
 #include "Physica/Core/Exception/BadFileFormatException.h"
 #include "Physica/Core/Exception/NotImplementedException.h"
-#include "Physica/Core/IO/Poscar.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/Householder.h"
 #include "Physica/Core/Physics/PhyConst.h"
 

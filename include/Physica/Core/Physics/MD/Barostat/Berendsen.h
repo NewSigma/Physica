@@ -81,7 +81,8 @@ namespace Physica::Core {
             ScalarType compressRate_, ScalarType tempT_, ScalarType targetP_)
             : compressRate(compressRate_)
             , tempT(tempT_)
-            , targetP(targetP_) {
+            , targetP(targetP_)
+            , lastStress() {
         assert(compressRate.isPositive() && "[Error]: Compress rate must be positive");
         assert(!tempT.isNegative() && "[Error]: Temperature must not be negative");
     }

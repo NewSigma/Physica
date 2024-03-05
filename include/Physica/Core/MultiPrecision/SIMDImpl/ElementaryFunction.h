@@ -24,13 +24,14 @@ namespace Physica::Core {
         if constexpr (!ScalarType::isDifferentiable)
             return SIMD<ScalarType, Size>(abs(x.getImpl()));
         else {
+            using PlainSIMD = SIMD<typename ScalarType::PlainScalar, Size>;
             using TracerType = typename ScalarType::TracerType;
             auto& tracer = TracerType::getInstance();
-            const auto temp = abs(x.getImpl());
-            const ScalarType newHeadNode = tracer.pushOperation(temp, ExpressionType::Abs);
+            const PlainSIMD values(abs(x.getImpl()));
+            const ScalarType newHeadNode = tracer.pushOperation(values, ExpressionType::Abs);
             for (size_t i = 0; i < Size; ++i)
                 tracer.pushOperand(ScalarType(x.value_ptr() + i, x.grad_ptr() + i));
-            return {temp, newHeadNode};
+            return {values, newHeadNode};
         }
     }
 
@@ -39,13 +40,14 @@ namespace Physica::Core {
         if constexpr (!ScalarType::isDifferentiable)
             return x * x;
         else {
+            using PlainSIMD = SIMD<typename ScalarType::PlainScalar, Size>;
             using TracerType = typename ScalarType::TracerType;
             auto& tracer = TracerType::getInstance();
-            const auto temp = square(x.getImpl());
-            const size_t newHeadNode = tracer.pushOperation(temp, ExpressionType::Square);
+            const PlainSIMD values(square(x.getImpl()));
+            const size_t newHeadNode = tracer.pushOperation(values, ExpressionType::Square);
             for (size_t i = 0; i < Size; ++i)
                 tracer.pushOperand(ScalarType(x.value_ptr() + i, x.grad_ptr() + i));
-            return {temp, newHeadNode};
+            return {values, newHeadNode};
         }
     }
 
@@ -54,13 +56,14 @@ namespace Physica::Core {
         if constexpr (!ScalarType::isDifferentiable)
             return SIMD<ScalarType, Size>(sqrt(x.getImpl()));
         else {
+            using PlainSIMD = SIMD<typename ScalarType::PlainScalar, Size>;
             using TracerType = typename ScalarType::TracerType;
             auto& tracer = TracerType::getInstance();
-            const auto temp = sqrt(x.getImpl());
-            const size_t newHeadNode = tracer.pushOperation(temp, ExpressionType::Sqrt);
+            const PlainSIMD values(sqrt(x.getImpl()));
+            const size_t newHeadNode = tracer.pushOperation(values, ExpressionType::Sqrt);
             for (size_t i = 0; i < Size; ++i)
                 tracer.pushOperand(ScalarType(x.value_ptr() + i, x.grad_ptr() + i));
-            return {temp, newHeadNode};
+            return {values, newHeadNode};
         }
     }
 
@@ -69,13 +72,14 @@ namespace Physica::Core {
         if constexpr (!ScalarType::isDifferentiable)
             return SIMD<ScalarType, Size>(cbrt(x.getImpl()));
         else {
+            using PlainSIMD = SIMD<typename ScalarType::PlainScalar, Size>;
             using TracerType = typename ScalarType::TracerType;
             auto& tracer = TracerType::getInstance();
-            const auto temp = cbrt(x.getImpl());
-            const size_t newHeadNode = tracer.pushOperation(temp, ExpressionType::Cbrt);
+            const PlainSIMD values(cbrt(x.getImpl()));
+            const size_t newHeadNode = tracer.pushOperation(values, ExpressionType::Cbrt);
             for (size_t i = 0; i < Size; ++i)
                 tracer.pushOperand(ScalarType(x.value_ptr() + i, x.grad_ptr() + i));
-            return {temp, newHeadNode};
+            return {values, newHeadNode};
         }
     }
 

@@ -18,7 +18,7 @@
  */
 #pragma once
 
-#include "Physica/Core/IO/Poscar.h"
+#include "Physica/Core/IO/VASP/Poscar.h"
 #include "Physica/Core/IO/QE/PWscfOut.h"
 #include "Physica/Core/Exception/SyscallException.h"
 #include "Physica/Core/Parallel/Executor/ProcessExecutor.h"
@@ -162,7 +162,7 @@ namespace Physica::Core {
             /* Execute */ {
                 constexpr int bufferLength = 16; // 16 is enough for unsigned int
                 char numProcess[bufferLength];
-                [[maybe_unused]] const int = sprintf(numProcess, "%d", getNumMPIProcess());
+                [[maybe_unused]] const int count = sprintf(numProcess, "%d", getNumMPIProcess());
                 assert(0 <= count && count < bufferLength && "[Error]: Unexpected bad printf");
                 execlp("mpirun", "mpirun", "-n", numProcess, pathToPW.c_str(), "-n", numProcess, "-nk", numProcess, nullptr);
             }
