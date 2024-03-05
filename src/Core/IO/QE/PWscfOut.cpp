@@ -40,8 +40,9 @@ namespace Physica::Core {
         std::string str{};
         do {
             fin.getline(buffer.data(), buffer.getLength());
+            if (!fin) [[unlikely]]
+                break;
             str = buffer.data();
-            assert(str.size() < DefaultBufferSize && "[Error]: Unexpected log length per line");
             const bool success = str.find("Total force") != std::string::npos;
             if (success) {
                 /* Back */
