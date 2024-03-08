@@ -18,19 +18,32 @@
  */
 #pragma once
 
-#include "Physica/Core/MultiPrecision/Scalar.h"
-
-using namespace Physica::Core;
+#include <exception>
+#include "llvm/Support/Error.h"
 
 namespace Physica::Python {
-    template<ScalarOption option>
-    class Class<Scalar<option>> {
-        using BindType = Scalar<option>;
-        constexpr static const char* BindName = option == Float ? "Scalar<Float>" : "Scalar<Double>";
+    class LLVMException : public std::exception {
+        std::string msg;
     public:
-        inline static void pybind(::pybind11::module_& m) noexcept {
-            py::class_<BindType>(m, BindName)
-                .def("__float__", &BindType::getTrivial);
-        }
+        LLVMException(llvm::Error err) : msg(llvm::toString(std::move(err))) {}
+        ~LLVMException() noexcept override = default;
+        const char* what() const noexcept override { return msg.c_str(); }
     };
+
+    inline void llvmCheck(llvm::Error err) {
+        if (err) [[unlikely]]
+            throw LLVMException(std::move(err));
+    }
+
+    template<typename T>
+    inline T llvmCheck(llvm::Expected<T>&& E) {
+        llvmCheck(E.takeError());
+        return T(std::move(*E));
+    }
+
+    template<typename T>
+    inline T& llvmCheck(llvm::Expected<T&>&& E) {
+        llvmCheck(E.takeError());
+        return *E;
+    }
 }

@@ -16,20 +16,17 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#pragma once
-
-#include "Physica/Utils/Container/Array/Array.h"
+#include "llvm/Support/TargetSelect.h"
+#include "Physica/Python/LLVM/LLVM.h"
 
 namespace Physica::Python {
+    LLVM::LLVM() {
+        llvm::InitializeNativeTarget();
+        llvm::InitializeNativeTargetAsmPrinter();
+    }
 
-    template<class T, size_t Length, size_t Capacity, class Allocator>
-    class Class<Physica::Utils::Array<T, Length, Capacity, Allocator>> {
-        using BindType = Physica::Utils::Array<T, Length, Capacity, Allocator>;
-    public:
-        inline static void pybind(::pybind11::module_& m) noexcept {
-            py::class_<BindType>(m, "Array")
-                .def("__getitem__", py::overload_cast<size_t>(&BindType::operator[], py::const_))
-                .def("getLength", &BindType::getLength);
-        }
-    };
+    LLVM& LLVM::getInstance() noexcept {
+        static LLVM llvm{};
+        return llvm;
+    }
 }

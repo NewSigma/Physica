@@ -18,20 +18,27 @@
  */
 #pragma once
 
-#include <pybind11/pybind11.h>
-
-namespace py = pybind11;
+#include "clang/Frontend/CompilerInstance.h"
 
 namespace Physica::Python {
-    template<class T> class Class {};
+    class Clang {
+        using CompilerInstance = clang::CompilerInstance;
+        constexpr static const char* DummyFile = "<<< inputs >>>";
 
-    namespace Internal {
-        template<class T> class Traits;
-
-        template<class T>
-        class Traits<Class<T>> {
-        public:
-            using BindType = T;
-        };
-    }
+        CompilerInstance ci;
+    public:
+        Clang();
+        Clang(const Clang&) = delete;
+        Clang(Clang&&) noexcept = delete;
+        ~Clang() = default;
+        /* Operators */
+        Clang& operator=(const Clang&) = delete;
+        Clang& operator=(Clang&&) noexcept = delete;
+        /* Getters */
+        [[nodiscard]] CompilerInstance& getCI() noexcept { return ci; }
+    private:
+        /* Operations */
+        void makeInvocation();
+        void makeOptions();
+    };
 }

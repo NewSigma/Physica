@@ -16,16 +16,29 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include "Physica/Python/PythonMain.h"
-#include "Physica/Python/Core/Algebra/Vector.h"
-#include "Physica/Python/Core/MultiPrecision/Scalar.h"
-#include "Physica/Python/Utils/Array.h"
+#include <pybind11/pybind11.h>
+#include "Physica/Python/PhysicaPython.h"
+#include "Physica/Python/LLVM/LLVM.h"
+#include "Physica/Python/LLVM/Clang.h"
+
+using namespace Physica::Python;
+namespace py = pybind11;
 
 PYBIND11_MODULE(PhysicaPython, m) {
-    using namespace Physica::Python;
-    m.doc() = "Python interface of Physica";
+    m.doc() = "PhysicaPython is a python interface to Physica";
+
+    py::enum_<ScalarOption>(m, "ScalarOption", py::arithmetic())
+        .value("Float", ScalarOption::Float)
+        .value("Double", ScalarOption::Double)
+        .value("MultiPrecision", ScalarOption::MultiPrecision)
+        .export_values();
+
     Class<Scalar<Float>>::pybind(m);
     Class<Scalar<Double>>::pybind(m);
     Class<Physica::Utils::Array<Scalar<Double>>>::pybind(m);
     Class<Vector<Scalar<Double>>>::pybind(m);
+    m.def("runKernel", []() -> py::bytes {
+        return py::bytes();
+    });
+    m.def("initLLVM", []() { [[maybe_unused]] auto& llvm = LLVM::getInstance(); });
 }
