@@ -20,6 +20,7 @@
 
 #include <forward_list>
 #include "TraceSegment.h"
+#include "Print/ColorfulTracer.h"
 
 namespace Physica::Core {
     /**
@@ -36,6 +37,8 @@ namespace Physica::Core {
         using DiffScalar = typename SegmentType::DiffScalar;
         using DiffRecord = typename SegmentType::DiffRecord;
     private:
+        using ColorfulType = ColorfulTracer<ScalarType, Order>;
+
         TraceListType traceList;
     public:
         ~DiffTracer() = default;
@@ -68,6 +71,8 @@ namespace Physica::Core {
         void reserve(size_t size);
         inline void clear();
 
+        [[nodiscard]] ColorfulType color() const noexcept { return ColorfulType(*this); }
+
         template<class Functor> void forSegmentInRange(DiffScalar from, DiffScalar to, Functor func);
         template<class Functor> void forSegmentInRange(DiffScalar from, DiffScalar to, Functor func) const;
         [[nodiscard]] inline bool checkLastOpDone() const;
@@ -99,7 +104,7 @@ namespace Physica::Core {
         const auto& list = tracer.traceList;
         for (auto ite = list.cbegin(); ite != list.cend(); ++ite) {
             const auto& segment = *ite;
-            os << "Trace(" << segment.getValues().data() << "):\n";
+            os << "Trace " << segment.getValues().data() << ":\n";
             os << segment << '\n';
         }
         return os;

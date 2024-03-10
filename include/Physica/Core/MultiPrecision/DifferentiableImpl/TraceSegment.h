@@ -20,6 +20,7 @@
 
 #include "Physica/Core/MultiPrecision/ScalarImpl/ExpressionType.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/Vector.h"
+#include "Print/ColorfulTraceSegment.h"
 
 namespace Physica::Core {
     template<class ScalarType, unsigned int Order> class DiffTracer;
@@ -44,6 +45,8 @@ namespace Physica::Core {
             ExpressionType source;
         };
     private:
+        using ColorfulType = ColorfulTraceSegment<ScalarType, Order>;
+
         Utils::Array<DiffRecord> records;
         Utils::Array<DiffScalar> operands;
         ValueVector values;
@@ -72,6 +75,8 @@ namespace Physica::Core {
         void forget(DiffScalar to);
         void squeeze();
 
+        [[nodiscard]] ColorfulType color() const noexcept { return ColorfulType(*this); }
+
         template<class Functor> inline void forNodeInRange(DiffScalar from, DiffScalar to, Functor func);
         template<class Functor> inline void forNodeInRange(DiffScalar from, DiffScalar to, Functor func) const;
         void swap(TraceSegment& __restrict obj) noexcept;
@@ -82,6 +87,8 @@ namespace Physica::Core {
         [[nodiscard]] bool full() const noexcept { return records.full(); }
         [[nodiscard]] bool isFound(DiffScalar s) const noexcept { return find(s) < getLength(); }
         [[nodiscard]] size_t find(DiffScalar s) const noexcept;
+        [[nodiscard]] const Utils::Array<DiffRecord>& getRecords() const noexcept { return records; }
+        [[nodiscard]] const Utils::Array<DiffScalar>& getOperands() const noexcept { return operands; }
         [[nodiscard]] ValueVector& getValues() noexcept { return values; }
         [[nodiscard]] const ValueVector& getValues() const noexcept { return values; }
         [[nodiscard]] GradVector& getGrads() noexcept { return grads; }

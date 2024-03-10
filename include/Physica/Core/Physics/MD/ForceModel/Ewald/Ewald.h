@@ -83,6 +83,9 @@ namespace Physica::Core {
         [[nodiscard]] Vector<ScalarType> force_long(const PositionMatrix& pos) const;
 
         [[nodiscard]] ComplexType forceConst(const PositionMatrix& pos, Vector3D qPoint, size_t dof1, size_t dof2) const;
+        [[nodiscard]] ComplexType kSpaceForceConst(const PositionMatrix& pos, Vector3D qPoint, size_t dof1, size_t dof2) const;
+        [[nodiscard]] ComplexType rSpaceForceConst(const PositionMatrix& pos, Vector3D qPoint, size_t dof1, size_t dof2) const;
+
 
         [[nodiscard]] LatticeMatrix virial(const PositionMatrix& pos);
         using Base::calcBornCharge;
@@ -101,7 +104,8 @@ namespace Physica::Core {
         void setLattice(LatticeMatrix lattice);
     private:
         /* Operations */
-        [[nodiscard]] ComplexType kSpaceForceConst(const PositionMatrix& pos, const Vector3D& waveQ, size_t dof1, size_t dof2) const;
+        [[nodiscard]] ComplexType kSpaceForceConstImpl(const PositionMatrix& pos, const Vector3D& waveQ, size_t dof1, size_t dof2) const;
+        [[nodiscard]] inline ComplexType rSpaceForceConstImpl(const PositionMatrix& pos, const Vector3D& waveQ, size_t dof1, size_t dof2) const;
         /* Friends */
         friend class ::Physica::Test;
     };
@@ -188,7 +192,7 @@ namespace Physica::Core {
                     const ScalarType sum_sin = sin_vec * charges;
                     const ScalarType factor2 = reciprocal(squaredNorm * exp(squaredNorm * factor1));
                     for (size_t i = 0; i < numParticle; ++i) {
-                        auto force_i = kSpaceSum.template segment<3>(i * Dim, (i + 1) * Dim);
+                        auto force_i = kSpaceSum.template segment<Dim>(i * Dim, (i + 1) * Dim);
                         const ScalarType temp = (sin_vec[i] * sum_cos - cos_vec[i] * sum_sin) * (factor2 * charges[i]);
                         force_i[0] += temp * delta[0];
                         force_i[1] += temp * delta[1];
@@ -209,9 +213,21 @@ namespace Physica::Core {
     typename Ewald<ScalarType, REwaldType>::ComplexType
     Ewald<ScalarType, REwaldType>::forceConst(const PositionMatrix& pos, Vector3D qPoint, size_t dof1, size_t dof2) const {
         const Vector3D waveQ = getRepLattice().transpose() * qPoint;
-        const ComplexType kSpaceSum = kSpaceForceConst(pos, waveQ, dof1, dof2);
-        const ComplexType rSpaceSum = Base::forceConst(pos, waveQ, dof1, dof2);
-        return kSpaceSum + rSpaceSum;
+        return kSpaceForceConstImpl(pos, waveQ, dof1, dof2) + rSpaceForceConstImpl(pos, waveQ, dof1, dof2);
+    }
+
+    template<class ScalarType, class REwaldType>
+    typename Ewald<ScalarType, REwaldType>::ComplexType
+    Ewald<ScalarType, REwaldType>::kSpaceForceConst(const PositionMatrix& pos, Vector3D qPoint, size_t dof1, size_t dof2) const {
+        const Vector3D waveQ = getRepLattice().transpose() * qPoint;
+        return kSpaceForceConstImpl(pos, waveQ, dof1, dof2);
+    }
+
+    template<class ScalarType, class REwaldType>
+    typename Ewald<ScalarType, REwaldType>::ComplexType
+    Ewald<ScalarType, REwaldType>::rSpaceForceConst(const PositionMatrix& pos, Vector3D qPoint, size_t dof1, size_t dof2) const {
+        const Vector3D waveQ = getRepLattice().transpose() * qPoint;
+        return rSpaceForceConstImpl(pos, waveQ, dof1, dof2);
     }
 
     template<class ScalarType, class REwaldType>
@@ -294,11 +310,11 @@ namespace Physica::Core {
 
     template<class ScalarType, class REwaldType>
     typename Ewald<ScalarType, REwaldType>::ComplexType
-    Ewald<ScalarType, REwaldType>::kSpaceForceConst(const PositionMatrix& pos, const Vector3D& waveQ, size_t dof1, size_t dof2) const {
-        const size_t atom1 = dof1 / 3;
-        const size_t atom2 = dof2 / 3;
-        const size_t direction1 = dof1 % 3U;
-        const size_t direction2 = dof2 % 3U;
+    Ewald<ScalarType, REwaldType>::kSpaceForceConstImpl(const PositionMatrix& pos, const Vector3D& waveQ, size_t dof1, size_t dof2) const {
+        const size_t atom1 = dof1 / Dim;
+        const size_t atom2 = dof2 / Dim;
+        const size_t direction1 = dof1 % Dim;
+        const size_t direction2 = dof2 % Dim;
         const auto& charges = getCharges();
         const ScalarType charge1 = charges[atom1];
         const ScalarType charge2 = charges[atom2];
@@ -344,5 +360,11 @@ namespace Physica::Core {
             });
         kSpaceSum *= PlainScalar(4 * M_PI) * Base::getInvVolume();
         return kSpaceSum;
+    }
+
+    template<class ScalarType, class REwaldType>
+    inline typename Ewald<ScalarType, REwaldType>::ComplexType
+    Ewald<ScalarType, REwaldType>::rSpaceForceConstImpl(const PositionMatrix& pos, const Vector3D& waveQ, size_t dof1, size_t dof2) const {
+        return Base::forceConst(pos, waveQ, dof1, dof2);
     }
 }
