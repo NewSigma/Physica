@@ -18,29 +18,26 @@
  */
 #pragma once
 
-#include "llvm/ExecutionEngine/Orc/ThreadSafeModule.h"
-#include "llvm/Support/ManagedStatic.h"
+#include "llvm/IR/LLVMContext.h"
+#include "clang/Frontend/FrontendAction.h"
 
 namespace Physica::Python {
-    class LLVM {
+    class IncrementalAction : public clang::WrapperFrontendAction {
+        using Base = clang::WrapperFrontendAction;
+        using CompilerInstance = clang::CompilerInstance;
         using LLVMContext = llvm::LLVMContext;
-        using ThreadSafeContext = llvm::orc::ThreadSafeContext;
 
-        llvm::llvm_shutdown_obj shutDownGuard;
-        ThreadSafeContext threadSafeContext;
+        bool isTerminating;
     public:
-        ~LLVM() = default;
+        IncrementalAction(CompilerInstance& ci, llvm::LLVMContext& context);
+        /* Operations */
+        void ExecuteAction() override;
+        void EndSourceFile() override;
+        void finalizeAction();
         /* Getters */
-        [[nodiscard]] ThreadSafeContext& getThreadSafeContext() noexcept { return threadSafeContext; }
-        [[nodiscard]] LLVMContext& getContext() noexcept { return *threadSafeContext.getContext(); }
-        /* Static members */
-        [[nodiscard]] static LLVM& getInstance() noexcept;
+        [[nodiscard]] clang::FrontendAction* getWrapped() const { return WrappedAction.get(); }
+        [[nodiscard]] clang::TranslationUnitKind getTranslationUnitKind() override { return clang::TU_Incremental; }
     private:
-        LLVM();
-        LLVM(const LLVM&) = default;
-        LLVM(LLVM&&) noexcept = default;
-        /* Operators */
-        LLVM& operator=(const LLVM&) = default;
-        LLVM& operator=(LLVM&&) noexcept = default;
+        static std::unique_ptr<clang::FrontendAction> makeAction(CompilerInstance& ci, llvm::LLVMContext& context);
     };
 }

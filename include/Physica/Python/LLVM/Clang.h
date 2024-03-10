@@ -18,27 +18,51 @@
  */
 #pragma once
 
+#include <forward_list>
 #include "clang/Frontend/CompilerInstance.h"
+#include "clang/CodeGen/ModuleBuilder.h"
+#include "clang/Parse/Parser.h"
+#include "ClangImpl/IncrementalAction.h"
 
 namespace Physica::Python {
+    /**
+     * Reference:
+     * [1] clang-repl; https://clang.llvm.org/docs/ClangRepl.html
+     */
     class Clang {
         using CompilerInstance = clang::CompilerInstance;
-        constexpr static const char* DummyFile = "<<< inputs >>>";
+        using CodeGenerator = clang::CodeGenerator;
+        using Parser = clang::Parser;
+        constexpr static const char* DummyFile = "Unknown";
 
+        struct PartialTranslationUnit {
+            clang::TranslationUnitDecl* unitDecl;
+            std::unique_ptr<llvm::Module> unitModule;
+        };
+    private:
+        size_t id;
         CompilerInstance ci;
+        std::unique_ptr<IncrementalAction> action;
+        std::unique_ptr<Parser> parser;
+        std::forward_list<PartialTranslationUnit> partialUnitList;
     public:
         Clang();
         Clang(const Clang&) = delete;
         Clang(Clang&&) noexcept = delete;
-        ~Clang() = default;
+        ~Clang();
         /* Operators */
         Clang& operator=(const Clang&) = delete;
         Clang& operator=(Clang&&) noexcept = delete;
+        /* Operations */
+        PartialTranslationUnit& include(const char* path);
         /* Getters */
         [[nodiscard]] CompilerInstance& getCI() noexcept { return ci; }
+        [[nodiscard]] CodeGenerator* getCodeGen() noexcept;
     private:
         /* Operations */
         void makeInvocation();
         void makeOptions();
+        void parse();
+        void cleanUnit(PartialTranslationUnit& unit);
     };
 }

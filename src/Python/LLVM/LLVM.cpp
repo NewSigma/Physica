@@ -20,7 +20,7 @@
 #include "Physica/Python/LLVM/LLVM.h"
 
 namespace Physica::Python {
-    LLVM::LLVM() {
+    LLVM::LLVM() : threadSafeContext(std::make_unique<LLVMContext>()) {
         llvm::InitializeNativeTarget();
         llvm::InitializeNativeTargetAsmPrinter();
     }

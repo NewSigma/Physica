@@ -18,7 +18,7 @@ set(LLVM_INCLUDE_DIR "${LLVM_INSTALL_PREFIX}/lib/clang/${LLVM_VERSION_MAJOR}/inc
 set(PHYSICA_INCLUDE_DIR "${CMAKE_INSTALL_PREFIX}/include")
 target_include_directories(PhysicaPython SYSTEM PRIVATE ${LLVM_INCLUDE_DIRS})
 target_compile_definitions(PhysicaPython PRIVATE ${LLVM_DEFINITIONS})
-target_compile_definitions(PhysicaPython PRIVATE -DLLVM_INCLUDE_DIR="-I${LLVM_INCLUDE_DIR}")
+target_compile_definitions(PhysicaPython PRIVATE -DLLVM_RESOURCE_DIR="-resource-dir=${LLVM_LIBRARY_DIR}/clang/${LLVM_VERSION_MAJOR}")
 target_compile_definitions(PhysicaPython PRIVATE -DPHYSICA_INCLUDE_DIR="-I${PHYSICA_INCLUDE_DIR}")
 target_compile_definitions(PhysicaPython PRIVATE -DPHYSICA_CUDA_ARCHITECTURES="--offload-arch=sm_${PHYSICA_CUDA_ARCHITECTURES}")
 
