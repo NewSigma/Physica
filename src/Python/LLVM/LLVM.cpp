@@ -16,22 +16,17 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#pragma once
-
-#include <pybind11/pybind11.h>
-
-namespace py = pybind11;
+#include "llvm/Support/TargetSelect.h"
+#include "Physica/Python/LLVM/LLVM.h"
 
 namespace Physica::Python {
-    template<class T> class Class {};
+    LLVM::LLVM() : threadSafeContext(std::make_unique<LLVMContext>()) {
+        llvm::InitializeNativeTarget();
+        llvm::InitializeNativeTargetAsmPrinter();
+    }
 
-    namespace Internal {
-        template<class T> class Traits;
-
-        template<class T>
-        class Traits<Class<T>> {
-        public:
-            using BindType = T;
-        };
+    LLVM& LLVM::getInstance() noexcept {
+        static LLVM llvm{};
+        return llvm;
     }
 }

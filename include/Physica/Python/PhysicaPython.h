@@ -16,16 +16,20 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include "Physica/Python/PythonMain.h"
-#include "Physica/Python/Core/Algebra/Vector.h"
-#include "Physica/Python/Core/MultiPrecision/Scalar.h"
-#include "Physica/Python/Utils/Array.h"
+#pragma once
 
-PYBIND11_MODULE(PhysicaPython, m) {
-    using namespace Physica::Python;
-    m.doc() = "Python interface of Physica";
-    Class<Scalar<Float>>::pybind(m);
-    Class<Scalar<Double>>::pybind(m);
-    Class<Physica::Utils::Array<Scalar<Double>>>::pybind(m);
-    Class<Vector<Scalar<Double>>>::pybind(m);
+#include "Physica/Utils/CUDA/PlainStruct.h"
+
+namespace Physica::Python {
+    template<class T> class Class {};
+
+    namespace Internal {
+        template<class T> class Traits;
+
+        template<class T>
+        class Traits<Class<T>> {
+        public:
+            using BindType = T;
+        };
+    }
 }

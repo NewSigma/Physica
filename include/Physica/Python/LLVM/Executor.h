@@ -18,19 +18,24 @@
  */
 #pragma once
 
-#include "Physica/Core/MultiPrecision/Scalar.h"
-
-using namespace Physica::Core;
+#include "llvm/ExecutionEngine/Orc/LLJIT.h"
+#include "clang/Basic/TargetInfo.h"
 
 namespace Physica::Python {
-    template<ScalarOption option>
-    class Class<Scalar<option>> {
-        using BindType = Scalar<option>;
-        constexpr static const char* BindName = option == Float ? "Scalar<Float>" : "Scalar<Double>";
+    class Executor {
+        using LLJIT = llvm::orc::LLJIT;
+
+        std::unique_ptr<LLJIT> jit;
     public:
-        inline static void pybind(::pybind11::module_& m) noexcept {
-            py::class_<BindType>(m, BindName)
-                .def("__float__", &BindType::getTrivial);
-        }
+        Executor(const clang::TargetInfo& targetInfo);
+        Executor(const Executor&) = delete;
+        Executor(Executor&&) noexcept = delete;
+        ~Executor() = default;
+        /* Operators */
+        Executor& operator=(const Executor&) = delete;
+        Executor& operator=(Executor&&) noexcept = delete;
+        /* Operations */
+        /* Getters */
+        [[nodiscard]] LLJIT& getJIT() noexcept { return *jit; }
     };
 }

@@ -18,18 +18,32 @@
  */
 #pragma once
 
-#include "Physica/Utils/Container/Array/Array.h"
+#include <exception>
+#include "llvm/Support/Error.h"
 
 namespace Physica::Python {
-
-    template<class T, size_t Length, size_t Capacity, class Allocator>
-    class Class<Physica::Utils::Array<T, Length, Capacity, Allocator>> {
-        using BindType = Physica::Utils::Array<T, Length, Capacity, Allocator>;
+    class LLVMException : public std::exception {
+        std::string msg;
     public:
-        inline static void pybind(::pybind11::module_& m) noexcept {
-            py::class_<BindType>(m, "Array")
-                .def("__getitem__", py::overload_cast<size_t>(&BindType::operator[], py::const_))
-                .def("getLength", &BindType::getLength);
-        }
+        LLVMException(llvm::Error err) : msg(llvm::toString(std::move(err))) {}
+        ~LLVMException() noexcept override = default;
+        const char* what() const noexcept override { return msg.c_str(); }
     };
+
+    inline void llvmCheck(llvm::Error err) {
+        if (err) [[unlikely]]
+            throw LLVMException(std::move(err));
+    }
+
+    template<typename T>
+    inline T llvmCheck(llvm::Expected<T>&& E) {
+        llvmCheck(E.takeError());
+        return T(std::move(*E));
+    }
+
+    template<typename T>
+    inline T& llvmCheck(llvm::Expected<T&>&& E) {
+        llvmCheck(E.takeError());
+        return *E;
+    }
 }

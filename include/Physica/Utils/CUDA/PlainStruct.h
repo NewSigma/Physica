@@ -18,6 +18,8 @@
  */
 #pragma once
 
+#include "Physica/Config.h"
+
 namespace Physica {
     template<class T> class PlainStruct;
     template<> class PlainStruct<void> {};

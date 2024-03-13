@@ -1,0 +1,43 @@
+/*
+ * Copyright 2024 WeiBo He.
+ *
+ * This file is part of Physica.
+ *
+ * Physica is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Physica is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
+ */
+#pragma once
+
+#include "llvm/IR/LLVMContext.h"
+#include "clang/Frontend/FrontendAction.h"
+
+namespace Physica::Python {
+    class IncrementalAction : public clang::WrapperFrontendAction {
+        using Base = clang::WrapperFrontendAction;
+        using CompilerInstance = clang::CompilerInstance;
+        using LLVMContext = llvm::LLVMContext;
+
+        bool isTerminating;
+    public:
+        IncrementalAction(CompilerInstance& ci, llvm::LLVMContext& context);
+        /* Operations */
+        void ExecuteAction() override;
+        void EndSourceFile() override;
+        void finalizeAction();
+        /* Getters */
+        [[nodiscard]] clang::FrontendAction* getWrapped() const { return WrappedAction.get(); }
+        [[nodiscard]] clang::TranslationUnitKind getTranslationUnitKind() override { return clang::TU_Incremental; }
+    private:
+        static std::unique_ptr<clang::FrontendAction> makeAction(CompilerInstance& ci, llvm::LLVMContext& context);
+    };
+}
