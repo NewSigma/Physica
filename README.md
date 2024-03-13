@@ -76,7 +76,7 @@ To use Physica, examples that under /path/to/install/Physica/examples are ready 
 
 **Core**: Contains implementation of core functionality for computational physics  
 **Gui**: Provides 2D and 3D plotting using Qt as its background  
-**Logging**: Log library  
+**Logging**: High performance log library based on [NanoLog](https://github.com/PlatformLab/NanoLog)  
 **Utils**: Basic data structures, allocators and misc  
 **Python** Physica python interface  
 
