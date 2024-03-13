@@ -22,6 +22,7 @@
 #include "clang/Frontend/CompilerInstance.h"
 #include "clang/CodeGen/ModuleBuilder.h"
 #include "clang/Parse/Parser.h"
+#include "llvm/Support/CrashRecoveryContext.h"
 #include "ClangImpl/IncrementalAction.h"
 
 namespace Physica::Python {
@@ -55,6 +56,9 @@ namespace Physica::Python {
         Clang& operator=(Clang&&) noexcept = delete;
         /* Operations */
         PartialTranslationUnit& include(const char* path);
+
+        template<class Functor>
+        [[nodiscard]] PartialTranslationUnit& makePLU(const char* name, Functor func);
         /* Getters */
         [[nodiscard]] CompilerInstance& getCI() noexcept { return ci; }
         [[nodiscard]] CodeGenerator* getCodeGen() noexcept;
@@ -63,6 +67,36 @@ namespace Physica::Python {
         void makeInvocation();
         void makeOptions();
         void parse();
-        void cleanUnit(PartialTranslationUnit& unit);
+        void cleanLastUnit() noexcept;
     };
+
+    template<class Functor>
+    Clang::PartialTranslationUnit& Clang::makePLU(const char* name, Functor func) {
+        using namespace clang;
+        Sema& sema = ci.getSema();
+        llvm::CrashRecoveryContextCleanupRegistrar<Sema> recoverGuard(&sema);
+        Sema::GlobalEagerInstantiationScope GlobalInstantiations(sema, true);
+        Sema::LocalEagerInstantiationScope LocalInstantiations(sema);
+
+        PartialTranslationUnit unit{};
+        ASTContext& astContext = sema.getASTContext();
+        astContext.addTranslationUnitDecl();
+        unit.unitDecl = astContext.getTranslationUnitDecl();
+
+        func();
+
+        LocalInstantiations.perform();
+        GlobalInstantiations.perform();
+        ci.getASTConsumer().HandleTranslationUnit(astContext);
+
+        CodeGenerator* codeGen = getCodeGen();
+        if (codeGen != nullptr) {
+            auto* unitModule = codeGen->ReleaseModule();
+            unitModule->setModuleIdentifier(name);
+            unit.unitModule.reset(unitModule);
+            codeGen->StartModule(DummyFile, unitModule->getContext());
+        }
+        partialUnitList.push_front(std::move(unit));
+        return partialUnitList.front();
+    }
 }

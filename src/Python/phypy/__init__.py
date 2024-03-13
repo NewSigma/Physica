@@ -19,6 +19,20 @@ along with Physica.  If not, see <https://www.gnu.org/licenses/>.
 import sys
 import os
 
-sys.path.append(os.getcwd() + '/build/src/Python')
+sys.path.append(os.path.abspath('../../build/src/Python'))
+"""
+LLVM-17 uses dlsym() to locate symbols, and it is necessary import the symbols to python using os.RTLD_GLOBAL
 
-import PhysicaPython as physica
+Reference:
+[1] https://github.com/apache/arrow/issues/39695
+"""
+def importPhysica():
+    dlflags = sys.getdlopenflags()
+    sys.setdlopenflags(dlflags + os.RTLD_GLOBAL)
+    try:
+        import PhysicaPython as physica
+    finally:
+        sys.setdlopenflags(dlflags)
+    return physica
+
+physica = importPhysica()

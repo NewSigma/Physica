@@ -23,6 +23,5 @@ target_compile_definitions(PhysicaPython PRIVATE -DPHYSICA_INCLUDE_DIR="-I${PHYS
 target_compile_definitions(PhysicaPython PRIVATE -DPHYSICA_CUDA_ARCHITECTURES="--offload-arch=sm_${PHYSICA_CUDA_ARCHITECTURES}")
 
 target_link_libraries(PhysicaPython PRIVATE PhysicaCore PRIVATE clang-cpp)
-set_target_properties(PhysicaPython PROPERTIES ENABLE_EXPORTS 1)
 
 install(TARGETS PhysicaPython DESTINATION lib)

@@ -34,7 +34,7 @@ namespace Physica::Python {
         [[nodiscard]] ThreadSafeContext& getThreadSafeContext() noexcept { return threadSafeContext; }
         [[nodiscard]] LLVMContext& getContext() noexcept { return *threadSafeContext.getContext(); }
         /* Static members */
-        [[nodiscard]] static LLVM& getInstance() noexcept;
+        static LLVM& getInstance() noexcept;
     private:
         LLVM();
         LLVM(const LLVM&) = default;

@@ -32,7 +32,6 @@
 #include "clang/Sema/Sema.h"
 #include "llvm/TargetParser/Host.h"
 #include "llvm/IR/Module.h"
-#include "llvm/Support/CrashRecoveryContext.h"
 #include "Physica/Python/LLVM/LLVM.h"
 #include "Physica/Python/LLVM/Clang.h"
 #include "Physica/Python/Exception/LLVMException.h"
@@ -88,21 +87,7 @@ namespace Physica::Python {
         FileID FID = SM.createFileID(std::move(memBuf), SrcMgr::C_User, 0, 0, NewLoc);
         if (pp.EnterSourceFile(FID, nullptr, NewLoc))
             throw LLVMException(llvm::make_error<llvm::StringError>("[Error]: Enter source file failed", std::error_code()));
-
-        parse();
-
-        Token AssertTok;
-        pp.Lex(AssertTok);
-        assert(AssertTok.is(tok::annot_repl_input_end) && "[Error]: Lexer must be EOF when starting incremental parse");
- 
-        CodeGenerator* codeGen = getCodeGen();
-        if (codeGen != nullptr) {
-            auto* unitModule = codeGen->ReleaseModule();
-            unitModule->setModuleIdentifier(path);
-            partialUnitList.front().unitModule.reset(unitModule);
-            codeGen->StartModule(DummyFile, unitModule->getContext());
-        }
-        return partialUnitList.front();
+        return makePLU(path, [this]() { parse(); });
     }
 
     clang::CodeGenerator* Clang::getCodeGen() noexcept {
@@ -179,15 +164,6 @@ namespace Physica::Python {
     void Clang::parse() {
         using namespace clang;
         Sema& sema = ci.getSema();
-        llvm::CrashRecoveryContextCleanupRegistrar<Sema> recoverGuard(&sema);
-        Sema::GlobalEagerInstantiationScope GlobalInstantiations(sema, true);
-        Sema::LocalEagerInstantiationScope LocalInstantiations(sema);
-
-        PartialTranslationUnit unit{};
-        ASTContext& astContext = sema.getASTContext();
-        astContext.addTranslationUnitDecl();
-        unit.unitDecl = astContext.getTranslationUnitDecl();
-
         // Skip previous eof due to last incremental input.
         const bool skipEOF = parser->getCurToken().is(tok::annot_repl_input_end);
         if (skipEOF) {
@@ -198,28 +174,31 @@ namespace Physica::Python {
             sema.ActOnTranslationUnitScope(parser->getCurScope());
         }
 
-        Parser::DeclGroupPtrTy ADecl;
-        Sema::ModuleImportState ImportState;
-        bool atEOF = parser->ParseFirstTopLevelDecl(ADecl, ImportState);
-        do {
-            atEOF = parser->ParseTopLevelDecl(ADecl, ImportState);
-        } while(!atEOF);
-
+        {
+            auto& consumer = ci.getASTConsumer();
+            Parser::DeclGroupPtrTy declGroup;
+            Sema::ModuleImportState state;
+            bool isDone = parser->ParseFirstTopLevelDecl(declGroup, state);
+            for (; !isDone; isDone = parser->ParseTopLevelDecl(declGroup, state)) {
+                if (declGroup && !consumer.HandleTopLevelDecl(declGroup.get()))
+                    throw LLVMException(llvm::make_error<llvm::StringError>("[Error]: Consumer rejected the decl", std::error_code()));
+            }
+        }
         DiagnosticsEngine& Diags = getCI().getDiagnostics();
         if (Diags.hasErrorOccurred()) {
-            cleanUnit(unit);
+            cleanLastUnit();
             Diags.Reset(true);
             Diags.getClient()->clear();
             throw LLVMException(llvm::make_error<llvm::StringError>("[Error]: Parsing failed", std::error_code()));
         }
-        LocalInstantiations.perform();
-        GlobalInstantiations.perform();
-        partialUnitList.push_front(std::move(unit));
+        Token check;
+        getCI().getPreprocessor().Lex(check);
+        assert(check.is(tok::annot_repl_input_end) && "[Error]: Lexer must be EOF when starting incremental parse");
     }
 
-    void Clang::cleanUnit(PartialTranslationUnit& unit) {
+    void Clang::cleanLastUnit() noexcept {
         using namespace clang;
-        TranslationUnitDecl* unitDecl = unit.unitDecl;
+        auto* unitDecl = ci.getSema().getASTContext().getTranslationUnitDecl();
         TranslationUnitDecl* FirstTU = unitDecl->getFirstDecl();
         if (StoredDeclsMap* map = FirstTU->getPrimaryContext()->getLookupPtr()) {
             for (auto ite = map->begin(); ite != map->end(); ++ite) {
