@@ -1,6 +1,18 @@
-# 通用编程规范
+# Physica C++编程规范
 
-参考[1]中的swap函数原型，进一步规定不可与自身发生交换，即任意对象T的swap函数的一般实现为
+如无明确指出，本规范遵循Google C++编程规范$^{[1]}$。本规范与[1]均未指出的，应与已有的多数代码一致。目前使用的C++版本应不低于C++17。
+
+## 头文件
+
+规定头文件拓展名为.h，源文件拓展名为.cpp
+
+### Header guard
+
+所有头文件应使用#pragma once以避免多重include，禁止使用#define
+
+## swap函数原型
+
+参考[2]中的swap函数原型，进一步规定不可与自身发生交换，即任意对象T的swap函数的一般实现为
 
 void T::swap(T& __restrict obj) noexcept {
     assert(this != &obj && "[Error]: Self swap is likely a bug");
@@ -9,6 +21,15 @@ void T::swap(T& __restrict obj) noexcept {
 
 实践中发现Self swap常导致Bug，通过添加__restrict帮助编译器优化和提供编译期Self swap警告
 
+## Run-Time Type Information (RTTI)
+
+不得使用
+
+## 单元测试
+
+单元测试用时一般不超过1 min，合理情况下可适当延长，任何情况下都不应超过10 min。
+
 ## Reference
 
-[1] Scott Meyers 著，侯捷 译. Effective C++：改善程序与设计的55个具体做法[M]. 北京: 电子工业出版社, 2011
+[1] Google C++ Style Guide; https://google.github.io/styleguide/cppguide.html
+[2] Scott Meyers 著，侯捷 译. Effective C++：改善程序与设计的55个具体做法[M]. 北京: 电子工业出版社, 2011

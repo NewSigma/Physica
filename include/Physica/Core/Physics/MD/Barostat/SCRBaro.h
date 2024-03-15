@@ -89,6 +89,8 @@ namespace Physica::Core {
                     [&, r, c]([[maybe_unused]] ScalarType x, [[maybe_unused]] VectorType sol) -> VectorType {
                         return {(diffuseMatrix * rpmd.getLattice()).calc(r, c)};
                     });
+                if (abs(sol[0]) > abs(rpmd.getLattice()(r, c))) [[unlikely]]
+                    throw std::runtime_error("[Error]: Unexpected large delta lattice");
                 return sol[0];
             }));
     }

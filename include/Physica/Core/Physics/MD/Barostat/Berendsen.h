@@ -125,10 +125,13 @@ namespace Physica::Core {
                 using Integrator = ODESolver<ScalarType, 1>;
                 using VectorType = typename Integrator::VectorType;
                 const VectorType y{ScalarType(0)};
-                return Integrator::rungeKutta4_step(deltaT, 0, y,
+                const ScalarType deltaElem = Integrator::rungeKutta4_step(deltaT, 0, y,
                     [&, r, c]([[maybe_unused]] ScalarType x, [[maybe_unused]] const VectorType& y) -> VectorType {
                         return {(decayMatrix * rpmd.getLattice()).calc(r, c)};
                     })[0];
+                if (abs(deltaElem) > abs(rpmd.getLattice()(r, c))) [[unlikely]]
+                    throw std::runtime_error("[Error]: Unexpected large delta lattice");
+                return deltaElem;
             }));
     }
 
