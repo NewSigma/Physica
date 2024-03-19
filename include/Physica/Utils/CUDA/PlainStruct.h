@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 WeiBo He.
+ * Copyright 2023-2024 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -22,7 +22,12 @@
 
 namespace Physica {
     template<class T> class PlainStruct;
-    template<> class PlainStruct<void> {};
+
+    template<>
+    class PlainStruct<void> {
+    public:
+        void swap(PlainStruct<void>&) {}
+    };
     /**
      * \class PlainStruct pass objects to cuda kernel ignoring constructors and destructors because resource control is cpu's duty.
      */

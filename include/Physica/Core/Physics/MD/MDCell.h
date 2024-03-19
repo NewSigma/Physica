@@ -18,6 +18,8 @@
  */
 #pragma once
 
+#include <set>
+#include <unordered_map>
 #include "Physica/Core/Physics/SolidState/CrystalCell.h"
 #include "Physica/Core/Physics/PhyConst.h"
 
@@ -42,6 +44,8 @@ namespace Physica::Core {
         using typename Base::PositionMatrix;
         using typename Base::Type;
         using MassVector = Vector<ScalarType>;
+        using ParticleType = unsigned char; // unsigned char should be enough to hold the periodic table
+        using MassTypeMap = std::unordered_map<ScalarType, ParticleType>;
     private:
         MassVector massVec;
         InvLatticeMatrix invLattice;
@@ -67,6 +71,8 @@ namespace Physica::Core {
         MDCell makeSuperCell(unsigned int x, unsigned int y, unsigned int z) const;
         template<ExtendCellOption Option>
         MDCell makeSuperCell(Utils::Array<size_t, 3> size) const { return makeSuperCell<Option>(size[0], size[1], size[2]); }
+
+        [[nodiscard]] MassTypeMap makeMassTypeMap() const;
         /* Getters */
         [[nodiscard]] size_t getDOF() const noexcept { return Dim * Base::getNumParticle(); }
         [[nodiscard]] const MassVector& getMassVec() const { return massVec; }
@@ -187,6 +193,21 @@ namespace Physica::Core {
         MDCell result = *this;
         result.toSuperCell<Option>(x, y, z);
         return result;
+    }
+
+    template<class ScalarType, unsigned int Dim>
+    typename MDCell<ScalarType, Dim>::MassTypeMap MDCell<ScalarType, Dim>::makeMassTypeMap() const {
+        ParticleType nextType = 0;
+        std::unordered_map<ScalarType, ParticleType> massToType{};
+        std::set<ScalarType> massSet{};
+        for (auto mass : massVec)
+            massSet.insert(mass);
+
+        for (ScalarType mass : massSet) {
+            massToType.insert(std::make_pair(mass, nextType));
+            nextType += 1;
+        }
+        return massToType;
     }
 
     template<class ScalarType, unsigned int Dim>

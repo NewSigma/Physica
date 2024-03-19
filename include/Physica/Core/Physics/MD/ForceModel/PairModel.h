@@ -217,6 +217,7 @@ namespace Physica::Core {
 
     template<class Derived>
     typename PairModel<Derived>::ScalarType PairModel<Derived>::forceConst(const MDCellType& cell, size_t dof1, size_t dof2) const {
+        static_assert(TraitType::IsPeriodBoundary, "[Error]: Fixed boundary is not implemented");
         const size_t atom1 = dof1 / 3U;
         const size_t atom2 = dof2 / 3U;
         [[unlikely]] if (atom1 == atom2) {

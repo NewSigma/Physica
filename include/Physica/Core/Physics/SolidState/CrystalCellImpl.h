@@ -52,10 +52,10 @@ namespace Physica::Core {
 
     template<class ScalarType>
     void CrystalCell<ScalarType>::toSuperCell(unsigned int x, unsigned int y, unsigned int z) {
-        const size_t numAtom = getAtomCount();
+        const size_t numAtom = Base::getNumParticle();
         Base::template toSuperCell<ExtendCellOption::AtomMajor>(x, y, z);
         
-        const size_t newNumAtom = getAtomCount();
+        const size_t newNumAtom = Base::getNumParticle();
         AtomicArray new_atomic(newNumAtom);
         size_t index = 0;
         for (size_t atom = 0; atom < numAtom; ++atom) {
@@ -76,6 +76,34 @@ namespace Physica::Core {
     }
 
     template<class ScalarType>
+    H5Group CrystalCell<ScalarType>::read(const H5Location& loc, const char* name) {
+        const auto group = Base::read(loc, name);
+        const auto dataset = group.template openDataSet<1>("AtomicNumber");
+        const size_t numParticle = dataset.getSize(0);
+        if (numParticle != Base::getNumParticle()) [[unlikely]]
+            throw BadFileFormatException("[Error]: Bad CrystalCell");
+        atomicNumbers.resize(numParticle);
+        dataset.read(atomicNumbers.data(), H5::PredType::NATIVE_UCHAR);
+        return H5Group(group);
+    }
+
+    template<class ScalarType>
+    H5Group CrystalCell<ScalarType>::write(H5Location& loc, const char* name) const {
+        auto group = Base::write(loc, name);
+        const auto space = H5DataSpace<1>({Base::getNumParticle()});
+        auto dataset = group.template createDataSet<1>(name, H5::PredType::NATIVE_UCHAR, space);
+        dataset.write(atomicNumbers.data(), H5::PredType::NATIVE_UCHAR);
+        return group;
+    }
+
+    template<class ScalarType>
+    void CrystalCell<ScalarType>::swap(CrystalCell& __restrict cell) noexcept {
+        assert(this != &cell && "[Error]: Self swap is likely a bug");
+        Base::swap(cell);
+        atomicNumbers.swap(cell.atomicNumbers);
+    }
+
+    template<class ScalarType>
     std::unordered_set<uint16_t> CrystalCell<ScalarType>::getSpecies() const noexcept {
         std::unordered_set<uint16_t> set{};
         for (size_t i = 0; i < atomicNumbers.getLength(); ++i)
@@ -85,17 +113,11 @@ namespace Physica::Core {
 
     template<class ScalarType>
     size_t CrystalCell<ScalarType>::getElectronCount() const {
+        const size_t numParticle = Base::getNumParticle();
         size_t result = 0;
-        for (size_t i = 0; i < getAtomCount(); ++i)
+        for (size_t i = 0; i < numParticle; ++i)
             result += getAtomicNumber(i);
         return result;
-    }
-
-    template<class ScalarType>
-    void CrystalCell<ScalarType>::swap(CrystalCell& __restrict cell) noexcept {
-        assert(this != &cell && "[Error]: Self swap is likely a bug");
-        Base::swap(cell);
-        atomicNumbers.swap(cell.atomicNumbers);
     }
 }
 

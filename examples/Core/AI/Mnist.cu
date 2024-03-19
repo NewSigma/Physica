@@ -20,7 +20,7 @@
 #include <QApplication>
 #include "Physica/Core/IO/Mnist.h"
 #include "Physica/Core/AI/NeuralNetwork/Layer/LinearLayer.cuh"
-#include "Physica/Core/AI/NeuralNetwork/NetBase.cuh"
+#include "Physica/Core/AI/NeuralNetwork/SimpleNet.cuh"
 #include "Physica/Core/AI/NeuralNetwork/SimpleDataset.h"
 #include "Physica/Core/Math/Random/RandomPool.h"
 #include "Physica/Core/Math/Optimization/Stochastic/SGD.cuh"
@@ -41,9 +41,9 @@ namespace Physica::Core::Internal {
 }
 
 template<class ScalarType>
-class MnistNet : public Physica::Core::device_obj<NetBase<MnistNet<ScalarType>>> {
+class MnistNet : public Physica::Core::device_obj<SimpleNet<MnistNet<ScalarType>>> {
     using This = MnistNet<ScalarType>;
-    using Base = Physica::Core::device_obj<NetBase<This>>;
+    using Base = Physica::Core::device_obj<SimpleNet<This>>;
     using typename Base::PlainScalar;
     using typename Base::InputType;
     using typename Base::OutputType;

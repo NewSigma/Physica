@@ -89,7 +89,7 @@ namespace Physica::Core {
         [[nodiscard]] PeriodicCell makeSuperCell(unsigned int x, unsigned int y, unsigned int z) const;
         [[nodiscard]] PeriodicCell makeUnitCell(unsigned int x, unsigned int y, unsigned int z) const;
 
-        void read(const H5Location& loc, const char* name);
+        H5Group read(const H5Location& loc, const char* name);
         H5Group write(H5Location& loc, const char* name) const;
         void swap(PeriodicCell& __restrict cell) noexcept;
         /* Getters */
@@ -379,12 +379,13 @@ namespace Physica::Core {
     }
 
     template<class ScalarType, unsigned int Dim>
-    void PeriodicCell<ScalarType, Dim>::read(const H5Location& loc, const char* name) {
+    H5Group PeriodicCell<ScalarType, Dim>::read(const H5Location& loc, const char* name) {
         const auto group = loc.openGroup(name);
         lattice.read(group, "lattice");
         const auto posDataset = pos.read(group, "pos");
         const auto typeAttr = posDataset.openAttribute("Type");
         typeAttr.read(H5::PredType::NATIVE_INT8, &type);
+        return H5Group(group);
     }
 
     template<class ScalarType, unsigned int Dim>

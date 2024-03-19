@@ -26,8 +26,8 @@
 
 namespace Physica::Core {
     template<class Derived>
-    class NetBase : public LayerBase<Derived> {
-        using This = NetBase<Derived>;
+    class SimpleNet : public LayerBase<Derived> {
+        using This = SimpleNet<Derived>;
         using Base = LayerBase<Derived>;
         using TraitsType = typename Internal::Traits<Derived>;
     public:
@@ -38,11 +38,12 @@ namespace Physica::Core {
         using Base::IsTrainMode;
         using LossType = typename Loss<ScalarType>::LossType;
     private:
-        using NetGuardType = typename std::conditional<IsTrainMode, AutoDiffGuard<ScalarType>, PlainStruct<void>>::type;
+        using DiffGuard = typename std::conditional<IsTrainMode, AutoDiffGuard<ScalarType>, PlainStruct<void>>::type;
 
-        NetGuardType net_guard;
+        DiffGuard diffGuard;
     public:
-        ~NetBase() = default;
+        SimpleNet(const SimpleNet&) = delete;
+        ~SimpleNet() = default;
         /* Operations */
         template<class Dataset, class Optimizer, class RandomPoolType, class Executor>
         void train_step(const Dataset& dataset, Optimizer& opt);
@@ -55,21 +56,17 @@ namespace Physica::Core {
 
         [[nodiscard]] Derived copy() const { return Base::getDerived().copy(); }
     protected:
-        NetBase() = default;
-        NetBase(const NetBase&);
-        NetBase(NetBase&&) noexcept = default;
+        SimpleNet() = default;
+        SimpleNet(SimpleNet&&) noexcept = default;
         /* Operators */
-        NetBase& operator=(NetBase obj) noexcept { swap(obj); return *this; }
+        SimpleNet& operator=(SimpleNet obj) noexcept { swap(obj); return *this; }
         /* Operations */
-        inline void swap(NetBase& __restrict obj) noexcept;
+        inline void swap(SimpleNet& __restrict obj) noexcept;
     };
 
     template<class Derived>
-    NetBase<Derived>::NetBase(const NetBase&) : NetBase() {}
-
-    template<class Derived>
     template<class Dataset, class Optimizer, class RandomPoolType, class Executor>
-    void NetBase<Derived>::train_step(const Dataset& dataset, Optimizer& opt) {
+    void SimpleNet<Derived>::train_step(const Dataset& dataset, Optimizer& opt) {
         static_assert(IsTrainMode, "[Error]: train_step must be called under training mode");
         using TracerType = typename ScalarType::TracerType;
         if constexpr (std::is_same<Executor, SequentialExecutor>::value) {
@@ -100,12 +97,12 @@ namespace Physica::Core {
             }, numThread, numThread).wait();
         }
         opt.step();
-        TracerType::getInstance().zero_grad_to(net_guard.getNode());
+        TracerType::getInstance().zero_grad_to(diffGuard.getNode());
     }
 
     template<class Derived>
     template<class Dataset>
-    [[nodiscard]] typename NetBase<Derived>::ScalarType NetBase<Derived>::loss(const Dataset& dataset) const {
+    [[nodiscard]] typename SimpleNet<Derived>::ScalarType SimpleNet<Derived>::loss(const Dataset& dataset) const {
         static_assert(!IsTrainMode, "[Error]: It is suggested using eval mode to reduce memory use");
         const size_t size = dataset.getSize();
         ScalarType result = 0;
@@ -115,7 +112,7 @@ namespace Physica::Core {
     }
 
     template<class Derived>
-    size_t NetBase<Derived>::classify(const InputType& input) const {
+    size_t SimpleNet<Derived>::classify(const InputType& input) const {
         static_assert(!IsTrainMode, "[Error]: It is suggested using eval mode to reduce memory use");
         const OutputType output = Base::forward(input);
         PlainScalar max = output[0];
@@ -130,9 +127,9 @@ namespace Physica::Core {
     }
 
     template<class Derived>
-    inline void NetBase<Derived>::swap(NetBase& __restrict obj) noexcept {
+    inline void SimpleNet<Derived>::swap(SimpleNet& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         if constexpr (IsTrainMode)
-            net_guard.swap(obj.net_guard);
+            diffGuard.swap(obj.diffGuard);
     }
 }

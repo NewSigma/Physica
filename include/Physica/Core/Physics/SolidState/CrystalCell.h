@@ -46,15 +46,15 @@ namespace Physica::Core {
         /* Operations */
         void toSuperCell(unsigned int x, unsigned int y, unsigned int z);
         [[nodiscard]] CrystalCell makeSuperCell(unsigned int x, unsigned int y, unsigned int z) const;
+        H5Group read(const H5Location& loc, const char* name);
+        H5Group write(H5Location& loc, const char* name) const;
+        void swap(CrystalCell& __restrict cell) noexcept;
         /* Getters */
         using Base::getType;
         [[nodiscard]] const AtomicArray& getAtomicNumbers() const noexcept { return atomicNumbers; }
-        [[nodiscard]] size_t getAtomCount() const noexcept { return Base::pos.getRow(); }
         [[nodiscard]] uint16_t getAtomicNumber(size_t ionIndex) const { return atomicNumbers[ionIndex]; }
         [[nodiscard]] std::unordered_set<uint16_t> getSpecies() const noexcept;
         [[nodiscard]] size_t getElectronCount() const;
-        /* Helpers */
-        void swap(CrystalCell& __restrict cell) noexcept;
     private:
         using Base::toSuperCell;
     };
