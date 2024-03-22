@@ -157,8 +157,6 @@ namespace Physica::Core {
         template<class ForceModel, class Executor>
         [[nodiscard]] LatticeMatrix makeStressPrim(ForceModel& model) const;
         template<class ForceModel, class Executor>
-        [[nodiscard]] LatticeMatrix makeStressCentroid(ForceModel& model) const;
-        template<class ForceModel, class Executor>
         [[nodiscard]] LatticeMatrix makeStressVirial(ForceModel& model) const;
         template<class ForceModel, class Executor>
         [[nodiscard]] LatticeMatrix makeStressClassical(ForceModel& model) const;
