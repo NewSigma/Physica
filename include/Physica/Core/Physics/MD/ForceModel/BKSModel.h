@@ -88,7 +88,7 @@ namespace Physica::Core {
         [[nodiscard]] ScalarType pot_functor(size_t i, size_t j, ScalarType r, ScalarType r2) const;
         [[nodiscard]] ScalarType force_functor(size_t i, size_t j, ScalarType r, ScalarType r2) const;
 
-        [[nodiscard]] inline ScalarType potentialEnergy(const MDCellType& cell) const;
+        [[nodiscard]] inline ScalarType potentialV(const MDCellType& cell) const;
 
         template<class Executor> [[nodiscard]] Vector<ScalarType> force(const MDCellType& cell);
         template<class VectorType, class Executor>
@@ -170,8 +170,8 @@ namespace Physica::Core {
     }
 
     template<class ScalarType, class EwaldType, bool AvoidTooNear>
-    inline ScalarType BKSModel<ScalarType, EwaldType, AvoidTooNear>::potentialEnergy(const MDCellType& cell) const {
-        return Base::potentialEnergy(cell) + ewald.potentialEnergy(cell.getPos());
+    inline ScalarType BKSModel<ScalarType, EwaldType, AvoidTooNear>::potentialV(const MDCellType& cell) const {
+        return Base::potentialV(cell) + ewald.potentialV(cell.getPos());
     }
 
     template<class ScalarType, class EwaldType, bool AvoidTooNear>

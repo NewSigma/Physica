@@ -35,7 +35,7 @@ void VASPTest() {
     const double lengthInBohr = PhyConst<AU>::angstormToBohr(3);
     CrystalCell<ScalarType> cell({{lengthInBohr, 0, 0, 0, lengthInBohr, 0, 0, 0, lengthInBohr}, {0.5, 0.5, 0.5}, CrystalCell<ScalarType>::Type::Direct}, {14});
     Ewald<ScalarType> ewald(cell.getLattice(), {4});
-    const auto energy = ewald.potentialEnergy(cell.getPos());
+    const auto energy = ewald.potentialV(cell.getPos());
     if (!scalarNear(energy, ScalarType(PhyConst<AU>::eVToHartree(-108.95061336198556)), prec))
         exit(EXIT_FAILURE);
 }
@@ -61,7 +61,7 @@ void madelungTest() {
                         }, CrystalCell<ScalarType>::Type::Direct}, {1, 1, 1, 1, 1, 1, 1, 1});
         NaCl.toCartesian();
         EwaldType ewald(NaCl.getLattice(), {1, 1, 1, 1, -1, -1, -1, -1});
-        const auto energy = ewald.potentialEnergy(NaCl.getPos());
+        const auto energy = ewald.potentialV(NaCl.getPos());
         const auto madelung = -(energy / 4) * (lengthInBohr / 2); //We have 4x unit cell so energy is divided by 4
         constexpr double prec = isFloat ? 1E-6 : 1E-7;
         if (!scalarNear(madelung, ScalarType(1.7475645946331822), prec))
@@ -74,7 +74,7 @@ void madelungTest() {
                             0.5, 0.5, 0.5,
                          }, CrystalCell<ScalarType>::Type::Cartesian}, {1, 1});
         EwaldType ewald(CsCl.getLattice(), {1, -1});
-        const auto energy = ewald.potentialEnergy(CsCl.getPos());
+        const auto energy = ewald.potentialV(CsCl.getPos());
         const auto madelung = -energy * (lengthInBohr * 0.5 * std::sqrt(3.0));
         constexpr double prec = isFloat ? 1E-5 : 1E-9;
         if (!scalarNear(madelung, ScalarType(1.76267477307099), prec))
@@ -88,7 +88,7 @@ void madelungTest() {
                         }, CrystalCell<ScalarType>::Type::Direct}, {1, 1});
         ZnS.toCartesian();
         EwaldType ewald(ZnS.getLattice(), {1, -1});
-        const auto energy = ewald.potentialEnergy(ZnS.getPos());
+        const auto energy = ewald.potentialV(ZnS.getPos());
         const auto madelung = -energy * (lengthInBohr * 0.5 * std::sqrt(3.0));
         constexpr double prec = isFloat ? 1E-5 : 1E-9;
         if (!scalarNear(madelung, ScalarType(1.63805505338879), prec))
@@ -145,7 +145,7 @@ namespace Physica {
         void forceTest() {
             {
                 const AutoDiffGuard<ScalarType> guard{};
-                ewald.potentialEnergy(pos).reverse();
+                ewald.potentialV(pos).reverse();
             }
             const AutoDiffGuard<ScalarType> guard{};
             const Vector<ScalarType> force = ewald.force<SequentialExecutor>(pos);
@@ -177,7 +177,7 @@ namespace Physica {
             EwaldType ewald(cell.getLattice(), std::move(charges));
             {
                 AutoDiffGuard<ScalarType> guard{};
-                ewald.potentialEnergy(cell.getPos()).reverse();
+                ewald.potentialV(cell.getPos()).reverse();
             }
             const PlainScalar press_diff = -volume.getGrad() / PlainScalar(cellSize * cellSize * cellSize);
             const PlainScalar press = (ewald.virial(cell.getPos()).trace() / ScalarType(3)).getValue();

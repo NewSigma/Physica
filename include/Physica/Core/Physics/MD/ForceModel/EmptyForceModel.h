@@ -51,7 +51,7 @@ namespace Physica::Core {
         using ForceConstMatrix = DenseSymmMatrix<ScalarType>;
     public:
         /* Operations */
-        [[nodiscard]] ScalarType potentialEnergy([[maybe_unused]] const MDCellType& cell) const { return 0; }
+        [[nodiscard]] ScalarType potentialV([[maybe_unused]] const MDCellType& cell) const { return 0; }
 
         template<class Executor>
         [[nodiscard]] Vector<ScalarType> force(const MDCellType& cell) const { return Vector<ScalarType>(cell.getDOF(), 0); }

@@ -51,7 +51,7 @@ namespace Physica::Core {
         /* Operators */
         Hamonic& operator=(Hamonic obj) noexcept { swap(obj); return *this; }
         /* Operations */
-        [[nodiscard]] ScalarType potentialEnergy(const MDCellType& cell) const;
+        [[nodiscard]] ScalarType potentialV(const MDCellType& cell) const;
 
         template<class Executor>
         [[nodiscard]] Vector<ScalarType> force(const MDCellType& cell) const;
@@ -79,7 +79,7 @@ namespace Physica::Core {
     }
 
     template<class ScalarType, unsigned int Dim>
-    ScalarType Hamonic<ScalarType, Dim>::potentialEnergy(const MDCellType& cell) const {
+    ScalarType Hamonic<ScalarType, Dim>::potentialV(const MDCellType& cell) const {
         assert(cell.getNumParticle() == getNumParticle() && "[Error]: Number of particles is not consistent");
         ScalarType result = 0;
         for (size_t i = 0; i < getNumParticle(); ++i)

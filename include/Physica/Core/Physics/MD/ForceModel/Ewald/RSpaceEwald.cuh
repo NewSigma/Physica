@@ -98,7 +98,7 @@ namespace Physica::Core {
     private:
         /* Operations */
         void makeTables();
-        using Base::potentialEnergy;
+        using Base::potentialV;
         using Base::virial;
         /* Getters */
         using Base::getCutoff;

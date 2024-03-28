@@ -68,7 +68,7 @@ namespace Physica::Core {
         [[nodiscard]] __host__ __device__ inline ScalarType pot_functor(size_t i, size_t j, ScalarType r, ScalarType r2) const;
         [[nodiscard]] __host__ __device__ inline ScalarType force_functor(size_t i, size_t j, ScalarType r, ScalarType r2) const;
 
-        [[nodiscard]] ScalarType potentialEnergy(const MDCellType& hostCell) const;
+        [[nodiscard]] ScalarType potentialV(const MDCellType& hostCell) const;
 
         template<class Executor>
         [[nodiscard]] Vector<ScalarType> force(

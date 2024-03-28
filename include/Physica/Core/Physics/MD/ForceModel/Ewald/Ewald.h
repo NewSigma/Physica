@@ -74,7 +74,7 @@ namespace Physica::Core {
         Ewald& operator=(Ewald obj) noexcept { swap(obj); return *this; }
         Ewald& operator=(Base base) noexcept;
         /* Operations */
-        [[nodiscard]] ScalarType potentialEnergy(const PositionMatrix& pos) const;
+        [[nodiscard]] ScalarType potentialV(const PositionMatrix& pos) const;
 
         template<class Executor>
         [[nodiscard]] Vector<ScalarType> force(const PositionMatrix& pos);
@@ -132,9 +132,9 @@ namespace Physica::Core {
      * \param pos must be in cartesian convension
      */
     template<class ScalarType, class REwaldType>
-    ScalarType Ewald<ScalarType, REwaldType>::potentialEnergy(const PositionMatrix& pos) const {
+    ScalarType Ewald<ScalarType, REwaldType>::potentialV(const PositionMatrix& pos) const {
         const size_t numParticle = getNumParticle();
-        const ScalarType rSpaceSum = Base::potentialEnergy(pos);
+        const ScalarType rSpaceSum = Base::potentialV(pos);
         ScalarType kSpaceSum = 0;
         const ScalarType factor = reciprocal(square(PlainScalar(2) * getIntegralLimit()));
         Vector<ScalarType> dots(numParticle);

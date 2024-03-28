@@ -70,8 +70,8 @@ namespace Physica::Core {
         [[nodiscard]] inline ScalarType force_functor(size_t i, size_t j, ScalarType r, ScalarType r2) const;
         [[nodiscard]] inline ScalarType forceConst_functor(ScalarType r, ScalarType r2) const;
 
-        [[nodiscard]] ScalarType potentialEnergy(const LatticeMatrix& lattice, const PositionMatrix& cartesianPos) const;
-        [[nodiscard]] inline ScalarType potentialEnergy(const MDCellType& cell) const;
+        [[nodiscard]] ScalarType potentialV(const LatticeMatrix& lattice, const PositionMatrix& cartesianPos) const;
+        [[nodiscard]] inline ScalarType potentialV(const MDCellType& cell) const;
 
         template<class Executor>
         [[nodiscard]] Vector<ScalarType> force(const LatticeMatrix& lattice, const PositionMatrix& cartesianPos) const;
@@ -141,7 +141,7 @@ namespace Physica::Core {
     }
 
     template<class Derived>
-    typename PairModel<Derived>::ScalarType PairModel<Derived>::potentialEnergy(
+    typename PairModel<Derived>::ScalarType PairModel<Derived>::potentialV(
             const LatticeMatrix& lattice, const PositionMatrix& cartesianPos) const {
         const auto& pos = cartesianPos;
         const auto range = MDCellType::estimateRange(lattice, cutoff);
@@ -171,8 +171,8 @@ namespace Physica::Core {
     }
 
     template<class Derived>
-    inline typename PairModel<Derived>::ScalarType PairModel<Derived>::potentialEnergy(const MDCellType& cell) const {
-        return potentialEnergy(cell.getLattice(), cell.getPos());
+    inline typename PairModel<Derived>::ScalarType PairModel<Derived>::potentialV(const MDCellType& cell) const {
+        return potentialV(cell.getLattice(), cell.getPos());
     }
 
     template<class Derived>

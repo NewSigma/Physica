@@ -72,7 +72,7 @@ namespace Physica::Core {
         }
         cell.swapPos(buffer);
 
-        const ScalarType energy = forceModel.potentialEnergy(cell);
+        const ScalarType energy = forceModel.potentialV(cell);
         
         if (energy < lastEnergy) {
             lastEnergy = energy;

@@ -80,7 +80,7 @@ namespace Physica::Core {
         /* Operator */
         RSpaceEwald& operator=(RSpaceEwald obj) noexcept { swap(obj); return *this; }
         /* Operations */
-        [[nodiscard]] inline ScalarType potentialEnergy(const PositionMatrix& pos) const;
+        [[nodiscard]] inline ScalarType potentialV(const PositionMatrix& pos) const;
 
         template<class Executor>
         [[nodiscard]] inline Vector<ScalarType> force_short(const PositionMatrix& pos) const;
@@ -117,7 +117,7 @@ namespace Physica::Core {
         [[nodiscard]] inline ScalarType force_functor_slow(size_t i, size_t j, ScalarType r, ScalarType r2) const;
         [[nodiscard]] ScalarType rSpaceForceConstImpl1(ScalarType r) const;
         [[nodiscard]] ScalarType rSpaceForceConstImpl2(ScalarType r) const;
-        using Base::potentialEnergy;
+        using Base::potentialV;
         using Base::forceConst;
         /* Getters */
         using Base::getCutoff;
@@ -139,8 +139,8 @@ namespace Physica::Core {
      * \param pos must be in cartesian convension
      */
     template<class ScalarType, bool IsSmallCell>
-    inline ScalarType RSpaceEwald<ScalarType, IsSmallCell>::potentialEnergy(const PositionMatrix& pos) const {
-        return Base::potentialEnergy(lattice, pos);
+    inline ScalarType RSpaceEwald<ScalarType, IsSmallCell>::potentialV(const PositionMatrix& pos) const {
+        return Base::potentialV(lattice, pos);
     }
 
     template<class ScalarType, bool IsSmallCell>

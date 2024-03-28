@@ -49,7 +49,7 @@ namespace Physica {
             ForceModel forceModel(cell, pair_cutoff, Ewald<ScalarType>{});
             {
                 const AutoDiffGuard<ScalarType> guard1{};
-                forceModel.potentialEnergy(cell).reverse();
+                forceModel.potentialV(cell).reverse();
             }
             /* Test press */ {
                 const PlainScalar press_diff = -volume.getGrad() / PlainScalar(cellSize * cellSize * cellSize);

@@ -51,7 +51,7 @@ namespace Physica::Core {
         /* Operators */
         TodaModel& operator=(TodaModel obj) noexcept { swap(obj); return *this; }
         /* Operations */
-        [[nodiscard]] ScalarType potentialEnergy(const MDCellType& cell) const;
+        [[nodiscard]] ScalarType potentialV(const MDCellType& cell) const;
 
         template<class Executor>
         [[nodiscard]] Vector<ScalarType> force(const MDCellType& cell) const;
@@ -70,7 +70,7 @@ namespace Physica::Core {
     };
 
     template<class ScalarType, bool IsPeriodBoundary>
-    ScalarType TodaModel<ScalarType, IsPeriodBoundary>::potentialEnergy(const MDCellType& cell) const {
+    ScalarType TodaModel<ScalarType, IsPeriodBoundary>::potentialV(const MDCellType& cell) const {
         const size_t numParticle = cell.getNumParticle();
         const auto& pos = cell.getPos();
         ScalarType energy = 0;

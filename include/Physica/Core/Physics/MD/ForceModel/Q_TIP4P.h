@@ -78,8 +78,8 @@ namespace Physica::Core {
         /* Operators */
         Q_TIP4P& operator=(Q_TIP4P model) noexcept;
         /* Operations */
-        [[nodiscard]] ScalarType potentialEnergy(const MDCellType& cell) const;
-        [[nodiscard]] ScalarType potentialEnergy_unsort(const MDCellType& cell) const;
+        [[nodiscard]] ScalarType potentialV(const MDCellType& cell) const;
+        [[nodiscard]] ScalarType potentialV_unsort(const MDCellType& cell) const;
 
         template<class Executor> [[nodiscard]] Vector<ScalarType> force(const MDCellType& cell);
         template<class Executor> [[nodiscard]] Vector<ScalarType> force_unsort(const MDCellType& cell);
@@ -112,7 +112,7 @@ namespace Physica::Core {
     private:
         PositionMatrix makeChargePos(const MDCellType& cell) const;
 
-        ScalarType potentialEnergyWithoutEwald(const MDCellType& cell) const;
+        ScalarType potentialVWithoutEwald(const MDCellType& cell) const;
         ScalarType ewaldEnergy(const MDCellType& cell) const;
 
         template<class Executor> void force_short_interMolecule(const MDCellType& cell, Vector<ScalarType>& shortForce) const;
@@ -143,17 +143,17 @@ namespace Physica::Core {
     }
 
     template<class ScalarType, class EwaldType>
-    ScalarType Q_TIP4P<ScalarType, EwaldType>::potentialEnergy(const MDCellType& cell) const {
+    ScalarType Q_TIP4P<ScalarType, EwaldType>::potentialV(const MDCellType& cell) const {
         assert(cell.getNumParticle() == getNumParticle() && "[Error]: Inconsistent atom number");
         assert(isCellOrdered(cell));
-        return potentialEnergyWithoutEwald(cell) + ewaldEnergy(cell);
+        return potentialVWithoutEwald(cell) + ewaldEnergy(cell);
     }
 
     template<class ScalarType, class EwaldType>
-    ScalarType Q_TIP4P<ScalarType, EwaldType>::potentialEnergy_unsort(const MDCellType& cell) const {
+    ScalarType Q_TIP4P<ScalarType, EwaldType>::potentialV_unsort(const MDCellType& cell) const {
         MDCellType copy = cell;
         const auto permute = sortPosition(copy);
-        return potentialEnergy(cell);
+        return potentialV(cell);
     }
 
     template<class ScalarType, class EwaldType>
@@ -432,11 +432,11 @@ namespace Physica::Core {
     }
 
     template<class ScalarType, class EwaldType>
-    ScalarType Q_TIP4P<ScalarType, EwaldType>::potentialEnergyWithoutEwald(const MDCellType& cell) const {
+    ScalarType Q_TIP4P<ScalarType, EwaldType>::potentialVWithoutEwald(const MDCellType& cell) const {
         using Vector3D = Vector<ScalarType, Dim>;
         const size_t numMolecule = getNumMolecule();
 
-        const ScalarType interMoleculeEnergy = lj_model.potentialEnergy(makeCellWithoutH(cell)) * ScalarType(epsilon4);
+        const ScalarType interMoleculeEnergy = lj_model.potentialV(makeCellWithoutH(cell)) * ScalarType(epsilon4);
         ScalarType intraMoleculeEnergy = 0;
         /* Intra molecule */ {
             Vector3D vecOH1, vecOH2;
@@ -472,7 +472,7 @@ namespace Physica::Core {
                 selfCoulomb += ScalarType(charge * charge * 0.25) / chargeCell.minDistVector(indexH1, indexH2).norm();
             }
         }
-        return ewald.potentialEnergy(chargePos) - selfCoulomb;
+        return ewald.potentialV(chargePos) - selfCoulomb;
     }
 
     template<class ScalarType, class EwaldType>

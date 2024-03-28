@@ -57,7 +57,7 @@ namespace Physica::Core {
         /* Operators */
         TIModel& operator=(TIModel obj) noexcept { swap(obj); return *this; }
         /* Operations */
-        [[nodiscard]] ScalarType potentialEnergy(const MDCellType& cell) const;
+        [[nodiscard]] ScalarType potentialV(const MDCellType& cell) const;
         [[nodiscard]] ScalarType deltaPotentialV(const MDCellType& cell) const;
 
         template<class Executor>
@@ -84,20 +84,20 @@ namespace Physica::Core {
             , temperatureT(temperatureT_)
             , lambda(0) {
         updateRef();
-        refPotentialV = original.potentialEnergy(refCell);
+        refPotentialV = original.potentialV(refCell);
     }
     
     template<class ForceModel>
-    typename TIModel<ForceModel>::ScalarType TIModel<ForceModel>::potentialEnergy(const MDCellType& cell) const {
-        const ScalarType hamonicV = hamonic.potentialEnergy(cell);
+    typename TIModel<ForceModel>::ScalarType TIModel<ForceModel>::potentialV(const MDCellType& cell) const {
+        const ScalarType hamonicV = hamonic.potentialV(cell);
         if (lambda.isZero())
             return hamonicV;
-        return lambda * original.potentialEnergy(cell) + (ScalarType(1) - lambda) * hamonicV;
+        return lambda * original.potentialV(cell) + (ScalarType(1) - lambda) * hamonicV;
     }
 
     template<class ForceModel>
     typename TIModel<ForceModel>::ScalarType TIModel<ForceModel>::deltaPotentialV(const MDCellType& cell) const {
-        return (original.potentialEnergy(cell) - refPotentialV) - hamonic.potentialEnergy(cell);
+        return (original.potentialV(cell) - refPotentialV) - hamonic.potentialV(cell);
     }
 
     template<class ForceModel>

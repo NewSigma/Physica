@@ -128,7 +128,7 @@ namespace Physica::Core {
     auto EnergyMinimizer<ScalarType, Dim>::makePosStepFunc(const ForceModel& model) {
         auto func = [this, &model](const VectorType& v) -> ScalarType {
             const auto temp = MDCellType(cell.getLattice(), v.reshape(cell.getPos()), cell.getMassVec());
-            return model.potentialEnergy(temp);
+            return model.potentialV(temp);
         };
         return func;
     }
@@ -152,7 +152,7 @@ namespace Physica::Core {
             lattice(1, 0) = v[1];
             lattice(1, 1) = v[2];
             const auto temp = MDCellType(std::move(lattice), cell.getPos(), cell.getMassVec());
-            return model.potentialEnergy(temp);
+            return model.potentialV(temp);
         };
         return func;
     }

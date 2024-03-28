@@ -138,13 +138,13 @@ namespace Physica::Core {
                 return;
 
             const auto eigenvectors = Base::makeEigenVectors(eigen);
-            const ScalarType e0 = unitCellModel.potentialEnergy(Base::getUnitCell());
-            const ScalarType e1 = unitCellModel.potentialEnergy(Base::shiftAtom(eigenvectors.col(0), displace));
-            const ScalarType e2 = unitCellModel.potentialEnergy(Base::shiftAtom(eigenvectors.col(0), -displace));
+            const ScalarType e0 = unitCellModel.potentialV(Base::getUnitCell());
+            const ScalarType e1 = unitCellModel.potentialV(Base::shiftAtom(eigenvectors.col(0), displace));
+            const ScalarType e2 = unitCellModel.potentialV(Base::shiftAtom(eigenvectors.col(0), -displace));
             QuadraticSearch<ScalarType> optimizer({0, displace, -displace}, {e0, e1, e2});
             for (unsigned int i = 0; i < numInterpolateStep; ++i) {
                 optimizer.step([this, &unitCellModel, &eigenvectors](ScalarType dist) {
-                    return unitCellModel.potentialEnergy(Base::shiftAtom(eigenvectors.col(0), dist));
+                    return unitCellModel.potentialV(Base::shiftAtom(eigenvectors.col(0), dist));
                 });
             }
             Base::setUnitCell(Base::shiftAtom(eigenvectors.col(0), optimizer.getOptimizedX()));

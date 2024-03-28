@@ -461,7 +461,7 @@ namespace Physica::Core {
     ScalarType RPMD<ScalarType, Dim, NumReplica, ForceMatrixAllocator>::calcPotential(const ForceModel& model) const {
         Vector<ScalarType> temp(getNumReplica());
         auto kernel = [this, model, &temp](unsigned int replica) {
-            temp[replica] = model.potentialEnergy(phaseToCell(replica));
+            temp[replica] = model.potentialV(phaseToCell(replica));
         };
         Executor::parallel_for(kernel, getNumReplica(), Executor::getNumThread()).wait();
         return mean(temp);
@@ -472,7 +472,7 @@ namespace Physica::Core {
     ScalarType RPMD<ScalarType, Dim, NumReplica, ForceMatrixAllocator>::calcPotentialClassical(const ForceModel& model) const {
         ScalarType result = 0;
         for (size_t i = 0; i < getNumReplica(); ++i)
-            result += model.potentialEnergy(phaseToCell(i));
+            result += model.potentialV(phaseToCell(i));
         return result;
     }
 

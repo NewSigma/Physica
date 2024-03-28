@@ -42,7 +42,7 @@ public:
         const ScalarType volume = 8000;
         const auto cell = makeSystem(gen, volume);
         SilveraGoldman<ScalarType, true> sg(pair_cutoff);
-        sg.potentialEnergy(cell).reverse();
+        sg.potentialV(cell).reverse();
         const ScalarType press_diff = -volume.getGrad();
         const ScalarType press = sg.virial(cell).trace() / ScalarType(3);
         if (!scalarNear(press_diff.getValue(), press.getValue(), 1E-15))

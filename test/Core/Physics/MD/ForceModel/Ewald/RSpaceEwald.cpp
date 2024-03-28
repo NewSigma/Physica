@@ -48,7 +48,7 @@ namespace Physica {
             RSpaceEwald<ScalarType, false> ewald(cell.getLattice(), std::move(charges));
             {
                 const AutoDiffGuard<ScalarType> guard1{};
-                ewald.potentialEnergy(pos).reverse();
+                ewald.potentialV(pos).reverse();
             }
             /* Test press */ {
                 const PlainScalar press_diff = -volume.getGrad() / PlainScalar(cellSize * cellSize * cellSize);
