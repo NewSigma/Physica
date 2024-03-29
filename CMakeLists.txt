@@ -3,7 +3,6 @@ cmake_minimum_required(VERSION 3.19)
 project(Physica VERSION 0.0.1 LANGUAGES C CXX)
 #include all macros
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake/Modules)
-include(PhysicaCheck)
 #############################################Settings#############################################
 option(BUILD_EXAMPLES "Build examples" ON)
 option(BUILD_TESTS "Build tests" ON)

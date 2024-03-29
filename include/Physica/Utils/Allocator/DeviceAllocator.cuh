@@ -133,7 +133,10 @@ namespace Physica::Utils {
         auto* p = reinterpret_cast<pointer>(malloc(n * sizeof(value_type)));
     #else
         pointer p;
-        cudaMallocAsync(&p, n * sizeof(value_type), Core::StreamPool::getStream());
+        if constexpr (CUDADevAttr::MemoryPoolsSupported)
+            cudaMallocAsync(&p, n * sizeof(value_type), Core::StreamPool::getStream());
+        else
+            cudaMalloc(&p, n * sizeof(value_type));
     #endif
         return p;
     }
@@ -143,8 +146,12 @@ namespace Physica::Utils {
     #ifdef __CUDA_ARCH__
         free(p);
     #else
-        if (p != nullptr) // No unnecessary cuda api call to make profiler output cleaner
-            cudaFreeAsync(p, Core::StreamPool::getStream());
+        if (p != nullptr) { // No unnecessary cuda api call to make profiler output cleaner
+            if constexpr (CUDADevAttr::MemoryPoolsSupported)
+                cudaFreeAsync(p, Core::StreamPool::getStream());
+            else
+                cudaFree(p);
+        }
     #endif
     }
 

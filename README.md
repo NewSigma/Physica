@@ -105,4 +105,4 @@ Feel free to dive in! Open an issue or submit PRs.
 
 ## License
 
-[GPLv3](LICENSE) © WeiBo He
+[GPLv3](LICENSE) © Weibo He
