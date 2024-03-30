@@ -18,7 +18,6 @@
  */
 #include <iostream>
 #include <fstream>
-#include <gperftools/profiler.h>
 #include "Physica/Core/Physics/MD/RPMD.h"
 #include "Physica/Core/Physics/MD/Thermostat/TRPMDThermo.h"
 #include "Physica/Core/Physics/MD/KineticModel/FreeModel.h"

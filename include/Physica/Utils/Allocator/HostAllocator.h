@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2023 WeiBo He.
+ * Copyright 2021-2024 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -21,6 +21,7 @@
 #include <cstdlib>
 #include <new>
 #include <memory>
+#include <limits>
 #include "Allocator.h"
 
 namespace Physica::Utils {

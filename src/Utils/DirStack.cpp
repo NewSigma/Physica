@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 WeiBo He.
+ * Copyright 2021-2024 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -16,9 +16,10 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include "Physica/Utils/DirStack.h"
 #include <cstring>
 #include <cassert>
+#include <stdexcept>
+#include "Physica/Utils/DirStack.h"
 
 namespace Physica::Utils {
     DirStack::DirStack(const char* path) {
@@ -79,10 +80,10 @@ namespace Physica::Utils {
     void DirStack::cutPath(const char* path, size_t startPos, size_t endPos) {
         assert(startPos < endPos);
         const size_t dirLength = endPos - startPos + 1;
-        char* __restrict dir = new char[dirLength];
+        auto* dir = new char[dirLength];
         const size_t dirLength_1 = dirLength - 1;
         memcpy(dir, path + startPos, dirLength_1);
         dir[dirLength_1] = '\0';
-        dirs.push_back(static_cast<char*>(dir));
+        dirs.push_back(dir);
     }
 }

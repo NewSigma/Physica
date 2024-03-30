@@ -81,10 +81,10 @@ find_package(FFTW3 REQUIRED)
 find_package(FFTW3f REQUIRED)
 link_directories(${FFTW3_LIBRARY_DIRS})
 link_directories(${FFTW3f_LIBRARY_DIRS})
-include_directories(${FFTW3_INCLUDE_DIRS})
+include_directories(SYSTEM ${FFTW3_INCLUDE_DIRS})
 # HDF5
 find_package(HDF5 NAMES hdf5 REQUIRED COMPONENTS CXX shared)
-include_directories(${HDF5_INCLUDE_DIR})
+include_directories(SYSTEM ${HDF5_INCLUDE_DIR})
 add_definitions(-DPHYSICA_HDF5 -DH5_NO_DEPRECATED_SYMBOLS)
 string(REPLACE include lib HDF5_LIBRARY_DIR ${HDF5_INCLUDE_DIR}) # Cmake file of HDF5-1.14.1 seems do not provide HDF5_LIBRARY_DIR
 
@@ -94,7 +94,7 @@ endif()
 
 if(${PHYSICA_PROFILE})
     find_package(GPerfTools REQUIRED)
-    include_directories(${GPerfTools_INCLUDE_DIR})
+    include_directories(SYSTEM ${GPerfTools_INCLUDE_DIR})
 endif()
 
 if(${PHYSICA_MKL})
@@ -104,11 +104,11 @@ if(${PHYSICA_MKL})
     set(MKL_INTERFACE_FULL intel_ilp64)
     find_package(MKL REQUIRED)
     add_definitions(-DPHYSICA_MKL)
-    include_directories(${MKL_INCLUDE})
+    include_directories(SYSTEM ${MKL_INCLUDE})
 endif()
 
 if(${PHYSICA_CUDA})
-    include_directories(${CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES})
+    include_directories(SYSTEM ${CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES})
 endif()
 
 if(${PHYSICA_PYTHON})

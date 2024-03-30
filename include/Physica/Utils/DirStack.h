@@ -18,6 +18,7 @@
  */
 #include <vector>
 #include <memory>
+#include <string>
 #include "Physica/Macro.h"
 
 namespace Physica::Utils {
