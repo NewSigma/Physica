@@ -30,5 +30,22 @@ namespace Physica::Core {
         /* Operators */
         H5Group& operator=(H5Group& obj) = default;
         H5Group& operator=(H5Group&&) noexcept = delete;
+        /* Operations */
+        using Location::createDataSet;
+        using Location::openDataSet;
+
+        inline H5Group createGroup(const char* name, size_t size_hint = 0) const;
+        [[nodiscard]] inline H5Group openGroup(const char* name) const;
+    private:
+        using Base::createDataSet;
+        using Base::openDataSet;
     };
+
+    inline H5Group H5Group::createGroup(const char* name, size_t size_hint) const {
+        return Base::createGroup(name, size_hint);
+    }
+
+    inline H5Group H5Group::openGroup(const char* name) const {
+        return Base::openGroup(name);
+    }
 }

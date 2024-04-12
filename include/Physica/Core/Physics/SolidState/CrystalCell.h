@@ -27,7 +27,8 @@ namespace Physica::Core {
     template<class ScalarType>
     class CrystalCell final : public PeriodicCell<ScalarType, 3> {
     public:
-        using Base = PeriodicCell<ScalarType, 3>;
+        constexpr static unsigned int Dim = 3;
+        using Base = PeriodicCell<ScalarType, Dim>;
         using ComplexType = ComplexScalar<ScalarType>;
         using AtomicArray = Utils::Array<uint16_t>;
         using typename Base::Type;

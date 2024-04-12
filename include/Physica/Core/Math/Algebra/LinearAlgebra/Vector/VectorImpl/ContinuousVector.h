@@ -66,13 +66,13 @@ namespace Physica::Core {
         template<class Distribution, class RandomGenerator>
         inline void random_any(Distribution& dist, RandomGenerator& gen);
 
-        const H5DataSet<1> read(const H5File& h5f, const char* name, const H5::DSetMemXferPropList& xfer_plist = H5::DSetMemXferPropList::DEFAULT);
+        const H5DataSet<1> read(const H5Location& loc, const char* name, const H5::DSetMemXferPropList& xfer_plist = H5::DSetMemXferPropList::DEFAULT);
         template<class SpaceType>
         void read(const H5DataSet<1>& dataset,
                   const DataSpaceBase<SpaceType>& file_space,
                   const H5::DSetMemXferPropList& xfer_plist = H5::DSetMemXferPropList::DEFAULT);
         
-        H5DataSet<1> write(H5File& h5f, const char* name, const H5::DSetMemXferPropList& xfer_plist = H5::DSetMemXferPropList::DEFAULT) const;
+        H5DataSet<1> write(H5Location& loc, const char* name, const H5::DSetMemXferPropList& xfer_plist = H5::DSetMemXferPropList::DEFAULT) const;
         template<class SpaceType>
         void write(H5DataSet<1>& dataset, 
                    const DataSpaceBase<SpaceType>& file_space,

@@ -83,7 +83,7 @@ namespace Physica::Core {
         if (numParticle != Base::getNumParticle()) [[unlikely]]
             throw BadFileFormatException("[Error]: Bad CrystalCell");
         atomicNumbers.resize(numParticle);
-        dataset.read(atomicNumbers.data(), H5::PredType::NATIVE_UCHAR);
+        dataset.read(atomicNumbers.data(), H5::PredType::NATIVE_UINT16);
         return H5Group(group);
     }
 
@@ -91,8 +91,8 @@ namespace Physica::Core {
     H5Group CrystalCell<ScalarType>::write(H5Location& loc, const char* name) const {
         auto group = Base::write(loc, name);
         const auto space = H5DataSpace<1>({Base::getNumParticle()});
-        auto dataset = group.template createDataSet<1>(name, H5::PredType::NATIVE_UCHAR, space);
-        dataset.write(atomicNumbers.data(), H5::PredType::NATIVE_UCHAR);
+        auto dataset = group.template createDataSet<1>("AtomicNumber", H5::PredType::NATIVE_UINT16, space);
+        dataset.write(atomicNumbers.data(), H5::PredType::NATIVE_UINT16);
         return group;
     }
 

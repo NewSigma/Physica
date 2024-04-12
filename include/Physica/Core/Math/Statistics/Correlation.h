@@ -37,6 +37,7 @@ namespace Physica::Core {
         size_t numSample;
         size_t step;
     public:
+        Correlation() = default;
         Correlation(size_t numStep);
         Correlation(const Correlation&) = default;
         Correlation(Correlation&&) noexcept = default;
