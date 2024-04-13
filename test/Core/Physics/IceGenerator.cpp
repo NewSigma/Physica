@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include "Physica/Core/Physics/IceGenerator.h"
+#include "Physica/Core/Physics/SolidState/IceGenerator.h"
 
 using namespace Physica;
 using namespace Physica::Core;

@@ -1,7 +1,5 @@
 # Core
 ## Math
-### Calculus
-physica_add_test(FokkerPlanck Core/Math/Calculus/PDE/FEM/FokkerPlanck.cpp)
 ### Optimization
 physica_add_test(Adam Core/Math/Optimization/AdamTest.cpp)
 ## Physics

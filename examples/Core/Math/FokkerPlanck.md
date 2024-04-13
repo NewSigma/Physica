@@ -1,0 +1,15 @@
+# FokkerPlanck
+
+本示例演示如何使用有限元方法求解有阻尼的谐振子的Fokker-Planck方程$^{[1]}$:
+
+$$\frac{\partial W(x, p, t)}{\partial t} = [-\frac{p}{m} \frac{\partial}{\partial x} + \frac{\partial}{\partial p} (x + \gamma p) + \frac{\partial^2}{\partial p^2} D] W(x, p, t)$$
+
+其中谐振子质量为$m$。$x$和$p$分别为谐振子的位置和动量。$\gamma$为阻尼系数，$D$为扩散系数。$W$为系统的概率密度分布。
+
+![](out.gif)
+
+**图1** 概率密度$W(x, p, t)$随时间演化。x轴表示位置，y轴表示动量。
+
+## Reference
+
+[1] Nonlinear Dyn. 4, 357–372 (1993); https://doi.org/10.1007/BF00120671

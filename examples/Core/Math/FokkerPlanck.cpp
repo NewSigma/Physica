@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 WeiBo He.
+ * Copyright 2022-2024 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -73,10 +73,21 @@ int main() {
     FokkerPlanckModel model(std::move(mesh), force, diffuseD, d_diffuseD, 1E-3, massM);
     model.setInitialCond(initial);
 
-    for (int i = 0; i < 100000; ++i)
+    for (int i = 0; i < 10000; ++i) {
+        if (i % 250 == 0) {
+            char buffer[16]; //16 is enough
+            sprintf(buffer, "FP_%d.vtk", i / 250);
+            std::ofstream fout(buffer);
+            fout << VTKFile<ElementType>(model.getMesh(), "FokkerPlanck");
+        }
         model.step();
+    }
 
-    if (!scalarNear(model({0, 0}), theory_stationary({0, 0}), 1E-3))
-        return 1;
+    /* Test stationary */ {
+        for (int i = 0; i < 90000; ++i)
+            model.step();
+        if (!scalarNear(model({0, 0}), theory_stationary({0, 0}), 1E-3))
+            return 1;
+    }
     return 0;
 }

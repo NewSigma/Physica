@@ -19,7 +19,7 @@
 #pragma once
 
 #include <algorithm>
-#include "Physica/Core/Physics/IceGenerator.h"
+#include "IceGenerator.h"
 #include "Physica/Core/Physics/PhyConst.h"
 
 namespace Physica::Core {
