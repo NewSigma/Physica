@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2022 WeiBo He.
+ * Copyright 2021-2024 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -116,6 +116,18 @@ namespace Physica::Core {
         template<class Matrix>
         [[nodiscard]] __host__ __device__ constexpr static size_t columnFromMajorMinor(size_t major, size_t minor) noexcept {
             return isColumnMatrix<Matrix>() ? major : minor;
+        }
+
+        template<class Matrix>
+        [[nodiscard]] __host__ __device__ constexpr static bool isSymmMatrix() noexcept {
+            using TransposeType = typename std::invoke_result<decltype(&Matrix::transpose), Matrix*>::type;
+            return std::is_same<TransposeType, const Matrix&>::value;
+        }
+
+        template<class Matrix>
+        [[nodiscard]] __host__ __device__ constexpr static bool isHermiteMatrix() noexcept {
+            using HermiteType = typename std::invoke_result<decltype(&Matrix::hermite), Matrix*>::type;
+            return std::is_same<HermiteType, const Matrix&>::value;
         }
     private:
         MatrixOption();

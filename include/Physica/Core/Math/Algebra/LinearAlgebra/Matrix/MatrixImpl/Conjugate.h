@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2023 WeiBo He.
+ * Copyright 2022-2024 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -35,31 +35,34 @@ namespace Physica::Core {
 
     template<class MatrixType>
     class Conjugate : public RValueMatrix<Conjugate<MatrixType>> {
-        const MatrixType& matrix;
     public:
         using Base = RValueMatrix<Conjugate<MatrixType>>;
         using typename Base::ScalarType;
+    private:
+        const MatrixType& matrix;
     public:
         Conjugate(const RValueMatrix<MatrixType>& matrix_) : matrix(matrix_.getDerived()) {}
         /* Getters */
         [[nodiscard]] ScalarType calc(size_t row, size_t col) const { return matrix.calc(row, col).conjugate(); }
-        [[nodiscard]] size_t getRow() const noexcept { return matrix.getRow(); }
-        [[nodiscard]] size_t getColumn() const noexcept { return matrix.getColumn(); }
+        [[nodiscard]] __host__ __device__ size_t getRow() const noexcept { return matrix.getRow(); }
+        [[nodiscard]] __host__ __device__ size_t getColumn() const noexcept { return matrix.getColumn(); }
     };
 
     template<class VectorType>
     class ConjugateVector : public RValueVector<ConjugateVector<VectorType>> {
-        const VectorType& vec;
     public:
         using Base = RValueVector<ConjugateVector<VectorType>>;
         using typename Base::ScalarType;
+    private:
+        const VectorType& vec;
     public:
         explicit ConjugateVector(const RValueVector<VectorType>& vec_) : vec(vec_.getDerived()) {}
+        /* Operations */
         template<class OtherVector>
         void assignTo(LValueVector<OtherVector>& target) const;
         /* Getters */
         [[nodiscard]] ScalarType calc(size_t index) const { return vec.calc(index).conjugate(); }
-        [[nodiscard]] size_t getLength() const noexcept { return vec.getLength(); }
+        [[nodiscard]] __host__ __device__ size_t getLength() const noexcept { return vec.getLength(); }
     };
 
     template<class VectorType>

@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2023 WeiBo He.
+ * Copyright 2021-2024 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -25,6 +25,7 @@ namespace Physica::Core {
     template<class Derived> class ContinuousMatrix;
     template<class MatrixType> class Transpose;
     template<class MatrixType> class Conjugate;
+    template<class MatrixType> class Hermite;
     template<class MatrixType> class RValueFlatten;
     template<class MatrixType, bool isLValueMatrix> class DiagVector;
     /**
@@ -103,8 +104,9 @@ namespace Physica::Core {
         [[nodiscard]] ScalarType max() const;
         [[nodiscard]] ScalarType min() const;
         [[nodiscard]] ScalarType trace() const;
-        [[nodiscard]] Transpose<Derived> transpose() const noexcept;
-        [[nodiscard]] Conjugate<Derived> conjugate() const noexcept;
+        [[nodiscard]] inline Transpose<Derived> transpose() const noexcept;
+        [[nodiscard]] inline Conjugate<Derived> conjugate() const noexcept;
+        [[nodiscard]] inline Hermite<Derived> hermite() const noexcept;
         [[nodiscard]] RValueFlatten<Derived> flatten() const noexcept;
         [[nodiscard]] ScalarType sum() const;
         /* Getters */
@@ -133,5 +135,6 @@ namespace Physica::Core {
 #include "RValueMatrixImpl.h"
 #include "Transpose.h"
 #include "Conjugate.h"
+#include "Hermite.h"
 #include "RValueFlatten.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DiagVector.h"

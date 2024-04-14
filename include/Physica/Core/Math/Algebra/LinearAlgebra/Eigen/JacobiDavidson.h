@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 WeiBo He.
+ * Copyright 2022-2024 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -29,9 +29,9 @@
 namespace Physica::Core {
     /**
      * References:
-     * [1] M.E. Hochstenbach and Y. Notay, The Jacobi–Davidson method (https://doi.org/10.1002/gamm.201490038)
-     * [2] Gerard L. G. Sleijpen and Henk A. Van der Vorst, A Jacobi-Davidson Iteration Method for Linear Eigenvalue Problems (https://doi.org/10.1137/S0036144599363084)
-     * [3] Y. Notay, Combination of Jacobi–Davidson and conjugate gradients for the partial symmetric eigenproblem (https://doi.org/10.1002/nla.246)
+     * [1] GAMM-Mitteilungen 29(2), 368-382 (2006); https://doi.org/10.1002/gamm.201490038
+     * [2] SIAM Review 42(2), 267–293 (2000); https://doi.org/10.1137/S0036144599363084
+     * [3] Numerical Linear Algebra with Applications 9(1), 21-44 (2001); https://doi.org/10.1002/nla.246
      */
     template<class ScalarType>
     class JacobiDavidson {
@@ -127,9 +127,11 @@ namespace Physica::Core {
     template<class ScalarType>
     template<class MatrixType>
     void JacobiDavidson<ScalarType>::compute(const RValueMatrix<MatrixType>& source, VectorType initial, ScalarType eigenGoal) {
-        static_assert(std::is_same<MatrixType, DenseHermiteMatrix<ScalarType>>::value || std::is_same<MatrixType, DenseSymmMatrix<ScalarType>>::value, "[Error]: Not implemented");
-        assert(source.getRow() == source.getColumn());
-        assert(source.getRow() == initial.getLength());
+        constexpr bool isHermite = MatrixOption::isHermiteMatrix<MatrixType>();
+        constexpr bool isRealSymm = !ScalarType::isComplex && MatrixOption::isSymmMatrix<MatrixType>();
+        static_assert(isHermite || isRealSymm, "[Error]: Support for complex eigen problems is not implemented");
+        assert(source.getRow() == source.getColumn() && "[Error]: Matrix should be square");
+        assert(source.getRow() == initial.getLength() && "[Error]: Dimensions do not match");
 
         VectorType residule(initial.getLength());
         VectorType buffer(initial.getLength());
@@ -195,12 +197,12 @@ namespace Physica::Core {
                     linearSolver.solve_functor([this, i, eigenGoal, &buffer, &source](const VectorType& v, VectorType& dot) {
                         auto orthogonalSpace = eigenvectors.leftCols(i + 1);
                         auto head1 = dot.head(i + 1);
-                        head1 = orthogonalSpace.transpose().conjugate() * v;
+                        head1 = orthogonalSpace.hermite() * v;
                         buffer = v - orthogonalSpace * head1;
 
                         dot = source.getDerived() * buffer - eigenGoal * buffer;
                         auto head2 = buffer.head(i + 1);
-                        head2 = orthogonalSpace.transpose().conjugate() * dot;
+                        head2 = orthogonalSpace.hermite() * dot;
                         dot -= orthogonalSpace * head2;
                     }, new_direction);
 
@@ -345,7 +347,7 @@ namespace Physica::Core {
                 auto leftCols = dotSpace.leftCols(i);
                 auto col = projectSearchSpace.col(i);
                 auto head1 = col.head(i);
-                head1 = leftCols.transpose().conjugate() * new_direction;
+                head1 = leftCols.hermite() * new_direction;
                 auto row = projectSearchSpace.row(i);
                 auto head2 = row.head(i);
                 head2 = head1.conjugate();
@@ -355,7 +357,7 @@ namespace Physica::Core {
                 auto leftCols = dotSpace.leftCols(i);
                 auto col = projectDotSpace.col(i);
                 auto head1 = col.head(i);
-                head1 = leftCols.transpose().conjugate() * new_dot;
+                head1 = leftCols.hermite() * new_dot;
                 auto row = projectDotSpace.row(i);
                 auto head2 = row.head(i);
                 head2 = head1.conjugate();
@@ -370,6 +372,7 @@ namespace Physica::Core {
 
     template<class ScalarType>
     void JacobiDavidson<ScalarType>::ordinarySearch(size_t numSearchDim) {
+        assert(numSearchDim > 1 && "[Error]: No need to search if dim = 1");
         auto corner = projectSearchSpace.topLeftCorner(numSearchDim);
         eigenSolver.resize(numSearchDim);
         eigenSolver.compute(corner, true);
@@ -384,7 +387,7 @@ namespace Physica::Core {
         auto corner1 = projectSearchSpace.topLeftCorner(numSearchDim);
         auto corner2 = projectDotSpace.topLeftCorner(numSearchDim);
         auto corner = projectSpace.topLeftCorner(numSearchDim);
-        corner = eigenGoal * corner1 + eigenGoal.conjugate() * corner1.transpose().conjugate();
+        corner = eigenGoal * corner1 + eigenGoal.conjugate() * corner1.hermite();
         corner -= corner2;
 
         eigenSolver.resize(numSearchDim);

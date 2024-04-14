@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 WeiBo He.
+ * Copyright 2022-2024 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -26,7 +26,7 @@ bool doTest(const MatrixType& source, double tolerance) {
     Tridiagonalization tri(source);
     MatrixType T = tri.getMatrixT();
     MatrixType Q = tri.getMatrixQ();
-    MatrixType A = (Q * T).compute() * Q.transpose().conjugate();
+    MatrixType A = (Q * T).compute() * Q.hermite();
     if (!matrixNear(A, source, tolerance))
         return false;
     return true;
@@ -44,7 +44,7 @@ int main() {
     /* Complex case */ {
         using MatrixType = DenseMatrix<ComplexScalar<RealType>, MatrixOption::Column | MatrixOption::Vector, 3, 3>;
         const MatrixType temp{{{2, 1}, {-3, 6}, {12, 7}}, {{-50, -9}, {2, 180}, {-9, -6}}, {{-7, 8}, {546, 0}, {0, -25}}};
-        const MatrixType mat = temp + temp.conjugate().transpose();
+        const MatrixType mat = temp + temp.hermite();
         if (!doTest(mat, 1E-12))
             return 1;
     }

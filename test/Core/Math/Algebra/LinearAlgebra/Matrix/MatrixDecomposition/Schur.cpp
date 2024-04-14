@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 WeiBo He.
+ * Copyright 2021-2024 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -71,7 +71,7 @@ bool schurTest(const LValueMatrix<MatrixType>& mat, double precision) {
     Schur<MatrixType> schur(mat, true);
     if (!isUpperTriangle(schur.getMatrixT()))
         return false;
-    MatrixType A = schur.getMatrixU() * (schur.getMatrixT() * schur.getMatrixU().transpose().conjugate()).compute();
+    MatrixType A = schur.getMatrixU() * (schur.getMatrixT() * schur.getMatrixU().hermite()).compute();
     if (!matrixNear(A, mat, precision))
         return false;
     return true;

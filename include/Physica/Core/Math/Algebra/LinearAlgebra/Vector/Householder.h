@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2023 WeiBo He.
+ * Copyright 2020-2024 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -76,7 +76,7 @@ namespace Physica::Core {
         auto temp = ScalarType(1);
         swap(temp, copy[0]);
         const T temp1 = copy * temp;
-        mat -= temp1 * (copy.transpose().conjugate() * mat).compute();
+        mat -= temp1 * (copy.hermite() * mat).compute();
     }
 
     template<class MatrixType, class VectorType>
@@ -89,6 +89,6 @@ namespace Physica::Core {
         swap(temp, copy[0]);
         using ProductType = decltype(mat * copy);
         using T1 = Vector<ScalarType, ProductType::SizeAtCompile, ProductType::MaxSizeAtCompile>;
-        mat -= T1(mat * copy) * (copy.conjugate().transpose() * temp);
+        mat -= T1(mat * copy) * (copy.hermite() * temp);
     }
 }

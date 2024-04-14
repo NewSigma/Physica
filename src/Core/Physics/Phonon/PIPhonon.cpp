@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 WeiBo He.
+ * Copyright 2022-2024 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -101,7 +101,7 @@ namespace Physica::Core {
                         base.col(i).asVector() = ScalarType(0);
                 }
             }
-            buffer = base.transpose().conjugate() * kSpaceForceCorr[qPointId];
+            buffer = base.hermite() * kSpaceForceCorr[qPointId];
             buffer *= base;
             
             solver.compute(buffer, true);

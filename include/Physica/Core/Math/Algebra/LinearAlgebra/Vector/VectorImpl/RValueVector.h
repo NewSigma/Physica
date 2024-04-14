@@ -31,6 +31,7 @@ namespace Physica::Core {
     template<class T, int Option, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn, class Allocator> class DenseMatrix;
     template<class VectorType> class TransposeVector;
     template<class VectorType> class ConjugateVector;
+    template<class VectorType> class HermiteVector;
     template<class VectorType, int MatrixMajor, size_t Row, size_t Column> class ReshapedVector;
     template<class VectorType> class FormatedVector;
     template<class VectorType> class ReverseVector;
@@ -90,6 +91,7 @@ namespace Physica::Core {
         [[nodiscard]] inline PacketType packetPartial(size_t index, size_t count) const;
         [[nodiscard]] TransposeVector<Derived> transpose() const noexcept { return TransposeVector<Derived>(*this); }
         [[nodiscard]] ConjugateVector<Derived> conjugate() const noexcept { return ConjugateVector<Derived>(*this); }
+        [[nodiscard]] HermiteVector<Derived> hermite() const noexcept { return HermiteVector<Derived>(*this); }
         [[nodiscard]] size_t getLength() const noexcept { return Base::getDerived().getLength(); }
         [[nodiscard]] inline RealType norm() const;
         [[nodiscard]] inline RealType squaredNorm() const;

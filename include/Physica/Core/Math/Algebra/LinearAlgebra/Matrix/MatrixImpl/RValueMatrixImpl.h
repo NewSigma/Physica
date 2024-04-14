@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2023 WeiBo He.
+ * Copyright 2021-2024 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -271,13 +271,18 @@ namespace Physica::Core {
     }
 
     template<class Derived>
-    Transpose<Derived> RValueMatrix<Derived>::transpose() const noexcept {
+    inline Transpose<Derived> RValueMatrix<Derived>::transpose() const noexcept {
         return Transpose<Derived>(Base::getDerived());
     }
 
     template<class Derived>
-    Conjugate<Derived> RValueMatrix<Derived>::conjugate() const noexcept {
+    inline Conjugate<Derived> RValueMatrix<Derived>::conjugate() const noexcept {
         return Conjugate<Derived>(Base::getDerived());
+    }
+
+    template<class Derived>
+    inline Hermite<Derived> RValueMatrix<Derived>::hermite() const noexcept {
+        return Hermite<Derived>(Base::getDerived());
     }
 
     template<class Derived>

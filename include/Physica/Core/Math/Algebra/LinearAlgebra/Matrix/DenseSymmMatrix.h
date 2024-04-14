@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2022 WeiBo He.
+ * Copyright 2020-2024 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -44,11 +44,12 @@ namespace Physica::Core {
     template<class ScalarType, size_t Order, size_t MaxOrder>
     class DenseSymmMatrix : public LValueMatrix<DenseSymmMatrix<ScalarType, Order, MaxOrder>>
                           , private Internal::HalfDenseMatrixStorage<ScalarType, Order, MaxOrder> {
-        using Base = LValueMatrix<DenseSymmMatrix<ScalarType, Order, MaxOrder>>;
+        using This = DenseSymmMatrix<ScalarType, Order, MaxOrder>;
+        using Base = LValueMatrix<This>;
         using Storage = Internal::HalfDenseMatrixStorage<ScalarType, Order, MaxOrder>;
     public:
-        using ColMatrix = DenseSymmMatrix<ScalarType, Order, MaxOrder>;
-        using RowMatrix = DenseSymmMatrix<ScalarType, Order, MaxOrder>;
+        using ColMatrix = This;
+        using RowMatrix = This;
         using RealMatrix = DenseSymmMatrix<typename ScalarType::RealType, Order, MaxOrder>;
     public:
         template<class OtherMatrix>
@@ -62,6 +63,7 @@ namespace Physica::Core {
         using Base::operator=;
         /* Operations */
         using Storage::resize;
+        [[nodiscard]] const This& transpose() const noexcept { return *this; }
         /* Getters */
         using Storage::getOrder;
         using Storage::getRow;

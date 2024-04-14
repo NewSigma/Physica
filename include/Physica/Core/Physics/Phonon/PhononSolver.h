@@ -152,7 +152,7 @@ namespace Physica::Core {
 
             for (size_t i = 0; i < fcMatrixes.getLength(); ++i) {
                 auto& fcMatrix = fcMatrixes[i];
-                temp = (fcMatrix + fcMatrix.transpose().conjugate()) * ScalarType(0.5);
+                temp = (fcMatrix + fcMatrix.hermite()) * ScalarType(0.5);
                 fcMatrix = temp;
             }
         }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2023 WeiBo He.
+ * Copyright 2021-2024 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -44,7 +44,7 @@ bool hessTest(const MatrixType& source, double tolerance) {
     if (!isHessenburgMatrix(H))
         return false;
     MatrixType Q = hess.getMatrixQ();
-    MatrixType A = (Q * H).compute() * Q.transpose().conjugate();
+    MatrixType A = (Q * H).compute() * Q.hermite();
     if (!matrixNear(A, source, tolerance))
         return false;
     return true;

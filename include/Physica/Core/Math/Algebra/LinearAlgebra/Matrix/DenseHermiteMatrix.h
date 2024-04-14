@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2023 WeiBo He.
+ * Copyright 2022-2024 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -45,13 +45,13 @@ namespace Physica::Core {
     template<class ScalarType, size_t Order, size_t MaxOrder>
     class DenseHermiteMatrix : public RValueMatrix<DenseHermiteMatrix<ScalarType, Order, MaxOrder>>
                              , private Internal::HalfDenseMatrixStorage<ScalarType, Order, MaxOrder> {
-        static_assert(ScalarType::isComplex);
-
+        static_assert(ScalarType::isComplex, "[Error]: Using a symmetric matrix is preferred for real numbers");
+        using This = DenseHermiteMatrix<ScalarType, Order, MaxOrder>;
         using Storage = Internal::HalfDenseMatrixStorage<ScalarType, Order, MaxOrder>;
         using RealType = typename ScalarType::RealType;
     public:
-        using ColMatrix = DenseHermiteMatrix<ScalarType, Order, MaxOrder>;
-        using RowMatrix = DenseHermiteMatrix<ScalarType, Order, MaxOrder>;
+        using ColMatrix = This;
+        using RowMatrix = This;
         using RealMatrix = DenseSymmMatrix<typename ScalarType::RealType, Order, MaxOrder>;
         constexpr static bool isComplex = true;
     public:
@@ -69,6 +69,7 @@ namespace Physica::Core {
         [[nodiscard]] ScalarType calc(size_t row, size_t col) const;
         /* Operations */
         using Storage::resize;
+        [[nodiscard]] const This& hermite() const noexcept { return *this; }
         /* Getters */
         using Storage::getRow;
         using Storage::getColumn;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2024 WeiBo He.
+ * Copyright 2024 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -21,15 +21,15 @@
 #include "RValueMatrix.h"
 
 namespace Physica::Core {
-    template<class MatrixType> class Transpose;
+    template<class MatrixType> class Hermite;
 
-    template<class VectorType> class TransposeVector;
+    template<class VectorType> class HermiteVector;
 
     namespace Internal {
         template<class T> class Traits;
 
         template<class MatrixType>
-        class Traits<Transpose<MatrixType>> {
+        class Traits<Hermite<MatrixType>> {
         private:
             constexpr static int OtherMajor = MatrixOption::isColumnMatrix<MatrixType>() ? MatrixOption::Row : MatrixOption::Column;
             constexpr static int Major = MatrixOption::isAnyMajor<MatrixType>() ? MatrixOption::AnyMajor : OtherMajor;
@@ -46,7 +46,7 @@ namespace Physica::Core {
         };
 
         template<class VectorType>
-        class Traits<TransposeVector<VectorType>> {
+        class Traits<HermiteVector<VectorType>> {
         public:
             using ScalarType = typename VectorType::ScalarType;
             constexpr static int Option = MatrixOption::Row | MatrixOption::Vector;
@@ -60,42 +60,41 @@ namespace Physica::Core {
     }
 
     template<class MatrixType>
-    class Transpose : public RValueMatrix<Transpose<MatrixType>> {
-        using Base = RValueMatrix<Transpose<MatrixType>>;
-
-        const MatrixType& matrix;
-    public:        
-        using typename Base::ScalarType;
+    class Hermite : public RValueMatrix<Hermite<MatrixType>> {
     public:
-        Transpose(const RValueMatrix<MatrixType>& matrix_) : matrix(matrix_.getDerived()) {}
+        using Base = RValueMatrix<Hermite<MatrixType>>;
+        using typename Base::ScalarType;
+    private:
+        const MatrixType& matrix;
+    public:
+        Hermite(const RValueMatrix<MatrixType>& matrix_) : matrix(matrix_.getDerived()) {}
         /* Getters */
-        [[nodiscard]] ScalarType calc(size_t row, size_t col) const { return matrix.calc(col, row); }
+        [[nodiscard]] ScalarType calc(size_t row, size_t col) const { return matrix.calc(col, row).conjugate(); }
         [[nodiscard]] __host__ __device__ size_t getRow() const noexcept { return matrix.getColumn(); }
         [[nodiscard]] __host__ __device__ size_t getColumn() const noexcept { return matrix.getRow(); }
     };
 
     template<class VectorType>
-    class TransposeVector : public RValueMatrix<TransposeVector<VectorType>> {
-        using This = TransposeVector<VectorType>;
+    class HermiteVector : public RValueMatrix<HermiteVector<VectorType>> {
     public:
-        using Base = RValueMatrix<This>;
+        using Base = RValueMatrix<HermiteVector<VectorType>>;
         using typename Base::ScalarType;
     private:
         const VectorType& vec;
     public:
-        explicit TransposeVector(const RValueVector<VectorType>& vec_) : vec(vec_.getDerived()) {}
+        explicit HermiteVector(const RValueVector<VectorType>& vec_) : vec(vec_.getDerived()) {}
         /* Operations */
         template<class OtherMatrix>
         void assignTo(LValueMatrix<OtherMatrix>& target) const;
         /* Getters */
-        [[nodiscard]] ScalarType calc([[maybe_unused]] size_t row, size_t col) const { assert(row == 0); return vec.calc(col); }
+        [[nodiscard]] ScalarType calc([[maybe_unused]] size_t row, size_t col) const { assert(row == 0); return vec.calc(col).conjugate(); }
         [[nodiscard]] __host__ __device__ constexpr static size_t getRow() noexcept { return 1; }
         [[nodiscard]] __host__ __device__ size_t getColumn() const noexcept { return vec.getLength(); }
     };
 
     template<class VectorType>
     template<class OtherMatrix>
-    void TransposeVector<VectorType>::assignTo(LValueMatrix<OtherMatrix>& target) const {
+    void HermiteVector<VectorType>::assignTo(LValueMatrix<OtherMatrix>& target) const {
         using TargetType = LValueMatrix<OtherMatrix>;
         for (size_t i = 0; i < vec.getLength(); ++i)
             target.refFromMajorMinor(0, i) = calc(TargetType::rowFromMajorMinor(0, i), TargetType::columnFromMajorMinor(0, i));

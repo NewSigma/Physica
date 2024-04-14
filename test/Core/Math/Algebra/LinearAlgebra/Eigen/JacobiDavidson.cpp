@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 WeiBo He.
+ * Copyright 2022-2024 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -26,7 +26,7 @@ int main() {
     using MatrixType = DenseMatrix<ComplexType, MatrixOption::Row | MatrixOption::Vector>;
     std::mt19937 gen{};
     const MatrixType data = MatrixType::random_uniform(64, gen);
-    const DenseHermiteMatrix<ComplexType> hermite = data + data.transpose().conjugate();
+    const DenseHermiteMatrix<ComplexType> hermite = data + data.hermite();
 
     EigenSolver<MatrixType> eig(hermite, false);
     eig.sort();
