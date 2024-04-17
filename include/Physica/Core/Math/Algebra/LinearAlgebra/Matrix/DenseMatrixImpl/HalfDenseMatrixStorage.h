@@ -43,6 +43,11 @@ namespace Physica::Core::Internal {
         HalfDenseMatrixStorage(size_t row, size_t column);
         HalfDenseMatrixStorage(size_t row, size_t column, const T& t);
         HalfDenseMatrixStorage(std::initializer_list<T> list) : Base(list) {}
+        HalfDenseMatrixStorage(const This&) = default;
+        HalfDenseMatrixStorage(This&&) noexcept = default;
+        ~HalfDenseMatrixStorage() = default;
+        /* Operators */
+        HalfDenseMatrixStorage& operator=(This obj) noexcept { swap(obj); return *this; }
         /* Operations */
         void resize(size_t order_) { Base::resize(order_ * (order_ + 1) / 2); order = order_; }
         void resize(size_t row, [[maybe_unused]] size_t column) { assert(row == column); resize(row); order = row; } //Necessary to CRTP

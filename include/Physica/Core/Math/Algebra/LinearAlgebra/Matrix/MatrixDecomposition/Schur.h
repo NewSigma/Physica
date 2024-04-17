@@ -33,6 +33,7 @@ namespace Physica::Core {
      */
     template<class MatrixType>
     class Schur : public Decouplable {
+        constexpr static const char* BadConvergenceMessage = "Exceed max iteration of Schur";
     public:
         using ScalarType = typename MatrixType::ScalarType;
         using RealType = typename ScalarType::RealType;
@@ -93,6 +94,9 @@ namespace Physica::Core {
                     iter = 0;
                 }
                 else {
+                    if (total_iter == max_iter) [[unlikely]]
+                        throw BadConvergenceException(BadConvergenceMessage);
+
                     if constexpr (ScalarType::isComplex) {
                         complexQR(lower, upper, complexShift(upper, iter));
                         ++iter;
@@ -112,9 +116,6 @@ namespace Physica::Core {
                         }
                     }
                 }
-
-                if (total_iter == max_iter)
-                    throw BadConvergenceException("Exceed max iteration of Schur");
             }
             matrixT *= factor;
 
@@ -127,10 +128,10 @@ namespace Physica::Core {
             matrixT = normalized;
             if constexpr (ScalarType::isComplex) {
                 while (activeWindowDownDiag(matrixT, 1) != 1) {
+                    if (iter == Decouplable::maxItePerCol) [[unlikely]]
+                        throw BadConvergenceException(BadConvergenceMessage);
                     complexQR(0, 1, complexShift(1, iter));
                     iter += 1;
-                    if (iter == Decouplable::maxItePerCol)
-                        throw BadConvergenceException("Exceed iteration of schur");
                 }
             }
             else {
@@ -169,10 +170,10 @@ namespace Physica::Core {
     void Schur<MatrixType>::francisQR(size_t lower, size_t sub_order) {
         auto subBlock = matrixT.block(lower, sub_order, lower, sub_order);
         const ScalarType s = subBlock(sub_order - 1, sub_order - 1) + subBlock(sub_order - 2, sub_order - 2);
-        const ScalarType t = subBlock(sub_order - 1, sub_order - 1) * subBlock(sub_order - 2, sub_order - 2)
-                           - subBlock(sub_order - 1, sub_order - 2) * subBlock(sub_order - 2, sub_order - 1);
+        const ScalarType t1 = subBlock(sub_order - 1, sub_order - 1) * subBlock(sub_order - 2, sub_order - 2);
+        const ScalarType t2 = subBlock(sub_order - 1, sub_order - 2) * subBlock(sub_order - 2, sub_order - 1);
         Vector<ScalarType, 3> col_1_M{};
-        col_1_M[0] = square(subBlock(0, 0)) + subBlock(0, 1) * subBlock(1, 0) - s * subBlock(0, 0) + t;
+        col_1_M[0] = (subBlock(0, 0) - s) * subBlock(0, 0) + t1 + (subBlock(0, 1) * subBlock(1, 0) - t2);
         col_1_M[1] = subBlock(1, 0) * (subBlock(0, 0) + subBlock(1, 1) - s);
 
         if (sub_order != 2) {

@@ -77,7 +77,7 @@ namespace Physica::Core {
         JacobiDavidson& operator=(JacobiDavidson obj) noexcept;
         /* Operations */
         template<class MatrixType>
-        void compute(const RValueMatrix<MatrixType>& source,
+        void compute(const RValueMatrix<MatrixType>& source_,
                      VectorType initial,
                      ScalarType eigenGoal = ScalarType(InvalidGoal));
         void sort();
@@ -92,7 +92,7 @@ namespace Physica::Core {
         void setError(RealType error_);
     private:
         template<class MatrixType>
-        size_t initSearchSpace(const RValueMatrix<MatrixType>& source,
+        size_t initSearchSpace(const RValueMatrix<MatrixType>& source_,
                                 VectorType& initial,
                                 size_t eigenIndex);
         void assembleProjects(size_t numSearchDim);
@@ -126,10 +126,11 @@ namespace Physica::Core {
 
     template<class ScalarType>
     template<class MatrixType>
-    void JacobiDavidson<ScalarType>::compute(const RValueMatrix<MatrixType>& source, VectorType initial, ScalarType eigenGoal) {
+    void JacobiDavidson<ScalarType>::compute(const RValueMatrix<MatrixType>& source_, VectorType initial, ScalarType eigenGoal) {
         constexpr bool isHermite = MatrixOption::isHermiteMatrix<MatrixType>();
         constexpr bool isRealSymm = !ScalarType::isComplex && MatrixOption::isSymmMatrix<MatrixType>();
-        static_assert(isHermite || isRealSymm, "[Error]: Support for complex eigen problems is not implemented");
+        static_assert(isHermite || isRealSymm, "[Error]: Support for complex eigenvalues is not implemented");
+        const auto& source = source_.getDerived();
         assert(source.getRow() == source.getColumn() && "[Error]: Matrix should be square");
         assert(source.getRow() == initial.getLength() && "[Error]: Dimensions do not match");
 
@@ -158,7 +159,7 @@ namespace Physica::Core {
                 else {
                     if (i == 0) {
                         ordinarySearch(numSearchDim);
-                        eigenvalue = eigenSolver.getEigenvalues()[0];
+                        eigenvalue = eigenSolver.getEigenvalues()[0].getReal();
                         residule = source * eigenvector.asVector() - eigenvalue * eigenvector.asVector();
                     }
                     else {
@@ -244,8 +245,8 @@ namespace Physica::Core {
 
     template<class ScalarType>
     void JacobiDavidson<ScalarType>::resize(size_t size, size_t numRequired) {
-        assert(numRequired < size);
-        assert(size > MaxSearchDim);
+        assert(numRequired <= size && "[Error]: Requiring more eigen pairs than matrix size");
+        assert(size > MaxSearchDim && "[Error]: Use dense eigen solver is prefered");
         const size_t ite = calcInnerIteration(size);
         eigenvalues.resize(numRequired);
         eigenvectors.resize(size, numRequired);
@@ -284,9 +285,10 @@ namespace Physica::Core {
     template<class ScalarType>
     template<class MatrixType>
     size_t JacobiDavidson<ScalarType>::initSearchSpace(
-            const RValueMatrix<MatrixType>& source,
+            const RValueMatrix<MatrixType>& source_,
             VectorType& initial,
             size_t eigenIndex) {
+        const auto& source = source_.getDerived();
         if (eigenIndex == 0) {
             /* dim = 0 */ {
                 initial.toUnit();

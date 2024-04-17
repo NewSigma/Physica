@@ -47,6 +47,7 @@ namespace Physica::Core {
                              , private Internal::HalfDenseMatrixStorage<ScalarType, Order, MaxOrder> {
         static_assert(ScalarType::isComplex, "[Error]: Using a symmetric matrix is preferred for real numbers");
         using This = DenseHermiteMatrix<ScalarType, Order, MaxOrder>;
+        using Base = RValueMatrix<This>;
         using Storage = Internal::HalfDenseMatrixStorage<ScalarType, Order, MaxOrder>;
         using RealType = typename ScalarType::RealType;
     public:
@@ -71,6 +72,7 @@ namespace Physica::Core {
         using Storage::resize;
         [[nodiscard]] const This& hermite() const noexcept { return *this; }
         /* Getters */
+        using Base::getDerived;
         using Storage::getRow;
         using Storage::getColumn;
         /* Helpers */

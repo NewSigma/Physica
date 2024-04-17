@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 WeiBo He.
+ * Copyright 2019-2024 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -16,22 +16,21 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef PHYSICA_BITWISE_H
-#define PHYSICA_BITWISE_H
+#pragma once
 
 #include "Physica/Macro.h"
 
 namespace Physica::Core {
     //Possibly use asm to speed up.
-    inline unsigned int countLeadingZeros(MPUnit n) {
+    inline unsigned int countLeadingZeros(MPUnit n) noexcept {
         if(n == 0)
             return MPUnitWidth;
         MPUnit count;
     #if UseASM
         asm volatile (
-                "bsrq %1, %0\n\t"
-                : "=r" (count)
-                : "rm" (n)
+            "bsrq %1, %0\n\t"
+            : "=r" (count)
+            : "rm" (n)
         );
         (count) ^= 63U;
     #else
@@ -44,15 +43,15 @@ namespace Physica::Core {
         return count;
     }
 
-    inline unsigned int countBackZeros(unsigned long n) {
+    inline unsigned int countBackZeros(unsigned long n) noexcept {
         if(n == 0)
             return MPUnitWidth;
         MPUnit count;
     #if UseASM
         asm volatile (
-        "bsfq %1, %0\n\t"
-        : "=r" (count)
-        : "rm" (n)
+            "bsfq %1, %0\n\t"
+            : "=r" (count)
+            : "rm" (n)
         );
     #else
         count = 0;
@@ -63,6 +62,13 @@ namespace Physica::Core {
     #endif
         return count;
     }
-}
 
-#endif
+    inline unsigned int countOnes(MPUnit n) noexcept {
+        unsigned int count=0 ;
+        while(n != 0) {
+            n &= (n - 1);
+            count += 1;
+        }
+        return count;
+    }
+}
