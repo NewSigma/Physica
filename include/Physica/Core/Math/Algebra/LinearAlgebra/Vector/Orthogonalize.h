@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 WeiBo He.
+ * Copyright 2022-2024 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -27,7 +27,8 @@ namespace Physica::Core {
      * [1] Golub, GeneH. Matrix computations = 矩阵计算 / 4th edition[M]. 人民邮电出版社, 2014.254-255
      */
     template<class MatrixType, class VectorType>
-    void gramSchmidt(const RValueMatrix<MatrixType>& base, LValueVector<VectorType>& v) {
+    void gramSchmidt(const RValueMatrix<MatrixType>& base_, LValueVector<VectorType>& v) {
+        const auto& base = base_.getDerived();
         assert(base.getRow() > base.getColumn());
         for (size_t i = 0; i < base.getColumn(); ++i) {
             auto col = base.col(i);
@@ -38,7 +39,8 @@ namespace Physica::Core {
     }
 
     template<class MatrixType>
-    void gramSchmidt(LValueMatrix<MatrixType>& m) {
+    void gramSchmidt(LValueMatrix<MatrixType>& m_) {
+        auto& m = m_.getDerived();
         assert(m.getRow() >= m.getColumn());
         for (size_t i = 0; i < m.getColumn(); ++i) {
             auto col1 = m.col(i);

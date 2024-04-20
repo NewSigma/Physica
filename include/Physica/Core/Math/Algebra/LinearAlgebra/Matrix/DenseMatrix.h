@@ -134,9 +134,6 @@ namespace Physica::Core {
     };
 
     template<class T, int Option, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn, class Allocator>
-    std::ostream& operator<<(std::ostream& os, const DenseMatrix<T, Option, Row, Column, MaxRow, MaxColumn, Allocator>& mat);
-
-    template<class T, int Option, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn, class Allocator>
     std::istream& operator>>(std::istream& is, DenseMatrix<T, Option, Row, Column, MaxRow, MaxColumn, Allocator>& mat);
 
     template<class T, int Option, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn, class Allocator>

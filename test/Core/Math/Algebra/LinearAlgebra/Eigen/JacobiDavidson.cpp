@@ -16,6 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
+#include <iostream>
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Eigen/JacobiDavidson.h"
 
 using namespace Physica::Core;
@@ -30,7 +31,7 @@ int main() {
 
     EigenSolver<MatrixType> eig(hermite, false);
     eig.sort();
-    JacobiDavidson<ComplexType> jd(hermite.getRow(), 4);
+    JacobiDavidson<ComplexType> jd(hermite.getRow(), 61);
     jd.compute(hermite, Vector<ComplexType>::random_uniform(data.getRow(), gen));
     jd.sort();
 

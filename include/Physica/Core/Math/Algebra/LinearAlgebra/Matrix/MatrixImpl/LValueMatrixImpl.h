@@ -386,7 +386,7 @@ namespace Physica::Core {
         const size_t order = Base::getRow();
         for (size_t i = 0; i < order; ++i)
             for (size_t j = 0; j < order; ++j)
-                refFromMajorMinor(i, j) = i == j ? ScalarType(1) : ScalarType(0);
+                refFromMajorMinor(i, j) = ScalarType(i == j ? 1 : 0);
     }
 
     template<class Derived>

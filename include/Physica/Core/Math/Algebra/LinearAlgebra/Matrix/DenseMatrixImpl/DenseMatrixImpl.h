@@ -168,33 +168,6 @@ namespace Physica::Core {
     }
 
     template<class T, int Option, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn, class Allocator>
-    std::ostream& operator<<(std::ostream& os, const DenseMatrix<T, Option, Row, Column, MaxRow, MaxColumn, Allocator>& mat) {
-        const size_t column = mat.getColumn();
-        const size_t row = mat.getRow();
-        size_t width = 0;
-        /* Get max width */ {
-            for (size_t c = 0; c < column; ++c) {
-                for (size_t r = 0; r < row; ++ r) {
-                    std::stringstream stream{};
-                    stream.copyfmt(os);
-                    stream << mat(r, c).getReal();
-                    width = std::max(width, stream.str().length());
-                }
-            }
-        }
-        /* Output */ {
-            for (size_t r = 0; r < row; ++r) {
-                for (size_t c = 0; c < column; ++c) {
-                    os.width(width);
-                    os << mat(r, c) << ' ';
-                }
-                os << '\n';
-            }
-        }
-        return os;
-    }
-
-    template<class T, int Option, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn, class Allocator>
     std::istream& operator>>(std::istream& is, DenseMatrix<T, Option, Row, Column, MaxRow, MaxColumn, Allocator>& mat) {
         const size_t column = mat.getColumn();
         const size_t row = mat.getRow();

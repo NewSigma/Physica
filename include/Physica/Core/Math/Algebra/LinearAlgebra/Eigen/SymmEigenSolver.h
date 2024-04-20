@@ -62,7 +62,7 @@ namespace Physica::Core {
         void sort();
         /* Getters */
         [[nodiscard]] const EigenvalueVector& getEigenvalues() const noexcept { return eigenvalues; }
-        [[nodiscard]] EigenvectorMatrix getEigenvectors() const noexcept { return eigenvectors; }
+        [[nodiscard]] inline EigenvectorMatrix getEigenvectors() const noexcept;
         /* Helpers */
         void swap(SymmEigenSolver& __restrict solver) noexcept;
     private:
@@ -148,6 +148,12 @@ namespace Physica::Core {
             if (computeEigenvectors)
                 eigenvectors.asArray()[i].swap(eigenvectors.asArray()[index_min]);
         }
+    }
+
+    template<class MatrixType>
+    inline typename SymmEigenSolver<MatrixType>::EigenvectorMatrix SymmEigenSolver<MatrixType>::getEigenvectors() const noexcept {
+        assert(computeEigenvectors && "[Error]: Eigenvectors are not ready");
+        return eigenvectors;
     }
 
     template<class MatrixType>

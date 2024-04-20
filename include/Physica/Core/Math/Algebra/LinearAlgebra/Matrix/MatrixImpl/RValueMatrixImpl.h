@@ -312,12 +312,27 @@ namespace Physica::Core {
 
     template<class Derived>
     std::ostream& operator<<(std::ostream& os, const RValueMatrix<Derived>& m) {
-        const auto row = m.getRow();
-        const auto column = m.getColumn();
-        for(size_t i = 0; i < row; ++i) {
-            for(size_t j = 0; j < column; ++j)
-                os << m.calc(i, j) << '\t';
-            os << '\n';
+        const size_t column = m.getColumn();
+        const size_t row = m.getRow();
+        size_t width = 0;
+        /* Get max width */ {
+            for (size_t c = 0; c < column; ++c) {
+                for (size_t r = 0; r < row; ++ r) {
+                    std::stringstream stream{};
+                    stream.copyfmt(os);
+                    stream << m.calc(r, c).getReal();
+                    width = std::max(width, stream.str().length());
+                }
+            }
+        }
+        /* Output */ {
+            for (size_t r = 0; r < row; ++r) {
+                for (size_t c = 0; c < column; ++c) {
+                    os.width(width);
+                    os << m.calc(r, c) << ' ';
+                }
+                os << '\n';
+            }
         }
         return os;
     }

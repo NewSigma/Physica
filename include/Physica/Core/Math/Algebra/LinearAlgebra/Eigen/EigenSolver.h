@@ -219,6 +219,7 @@ namespace Physica::Core {
 
     template<class MatrixType>
     typename EigenSolver<MatrixType>::EigenvectorMatrix EigenSolver<MatrixType>::getEigenvectors() const {
+        assert(computeEigenvectors && "[Error]: Eigenvectors are not ready");
         if constexpr (isComplex)
             return rawEigenvectors;
         else {
