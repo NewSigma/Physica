@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2022 WeiBo He.
+ * Copyright 2021-2024 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -156,12 +156,14 @@ namespace Physica::Core {
                 if (eigenvalues[j].getReal() < eigenvalues[index_min].getReal())
                     index_min = j;
             }
+
             const bool shouldSwap = i != index_min;
-            if (shouldSwap) {
-                eigenvalues[i].swap(eigenvalues[index_min]);
-                if (computeEigenvectors)
-                    rawEigenvectors.asArray()[i].swap(rawEigenvectors.asArray()[index_min]);
-            }
+            if (!shouldSwap)
+                continue;
+
+            eigenvalues[i].swap(eigenvalues[index_min]);
+            if (computeEigenvectors)
+                rawEigenvectors.asArray()[i].swap(rawEigenvectors.asArray()[index_min]);
         }
     }
 

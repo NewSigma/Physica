@@ -52,7 +52,7 @@ namespace Physica::Core {
         constexpr static size_t MaxBufferSize = 1024 * 1024 * 1024 / sizeof(ScalarType);
         constexpr static size_t MaxLinearSolverIteration = 64;
         constexpr static double LinearSolverPrecision = 1E-4;
-        constexpr static double DefaultStableThreshold = 0.1; //Refer to [3]
+        constexpr static double DefaultStableThreshold = 1E-5;
         constexpr static double NearConvergeThreshold = 1E-3;
     public:
         constexpr static double InvalidGoal = std::numeric_limits<ScalarType>::max();
@@ -172,7 +172,7 @@ namespace Physica::Core {
                         residule -= eigenvalue * eigenvector.asVector();
                     }
                     squaredRes = residule.squaredNorm();
-                    isConverged = squaredRes < error && numSearchDim >= MinSearchDim;
+                    isConverged = squaredRes < error;
                     const bool shouldRestart = numSearchDim == searchSpace.getColumn();
                     if (isConverged || shouldRestart)
                         break;
@@ -189,7 +189,9 @@ namespace Physica::Core {
                         const bool nearConverge = squaredRes < square(deltaEigen);
                         const bool deltaEigenStable = abs(deltaEigen - lastDeltaEigen) < stableThreshold * lastDeltaEigen;
                         const bool goodDeltaEigen = lastDeltaEigen > std::numeric_limits<ScalarType>::epsilon();
-                        if (!goodDeltaEigen || (deltaEigenStable && nearConverge))
+                        const bool increaseGoal = !goodDeltaEigen || (deltaEigenStable && nearConverge);
+                        const bool decreaseGoal = eigenvalue.getReal() < eigenGoal.getReal();
+                        if (increaseGoal || decreaseGoal)
                             eigenGoal = eigenvalue;
                         lastDeltaEigen = deltaEigen;
                     }
@@ -210,6 +212,8 @@ namespace Physica::Core {
                         head2 = orthogonalSpace.hermite() * dot;
                         dot -= orthogonalSpace * head2;
                     }, new_direction);
+
+                    new_direction.toUnit();
                     gramSchmidt(searchSpace.leftCols(numSearchDim), new_direction);
                     assembleProjects(source, numSearchDim, true);
                     numSearchDim += 1;
@@ -239,11 +243,13 @@ namespace Physica::Core {
                 if (eigenvalues[j].getReal() < eigenvalues[index_min].getReal())
                     index_min = j;
             }
+
             const bool shouldSwap = i != index_min;
-            if (shouldSwap) {
-                eigenvalues[i].swap(eigenvalues[index_min]);
-                eigenvectors.asArray()[i].swap(eigenvectors.asArray()[index_min]);
-            }
+            if (!shouldSwap)
+                continue;
+
+            eigenvalues[i].swap(eigenvalues[index_min]);
+            eigenvectors.asArray()[i].swap(eigenvectors.asArray()[index_min]);
         }
     }
 

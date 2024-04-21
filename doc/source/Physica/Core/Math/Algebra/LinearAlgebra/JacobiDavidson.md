@@ -6,7 +6,12 @@ JacobiDavidson方法通过求解修正方程
 
 $$\mathbf{(I - UU^H)}(\mathbf A - \tilde \lambda \mathbf I) \mathbf{(I - UU^H)t = Bt = -r}$$
 
-逐渐改善近似的特征向量。实现上应保持$\mathbf r \perp \mathbf U$，否则矩阵$\mathbf B$将是刚性的并导致数值不稳定。由于新的特征向量将在子空间$\{ \mathbf{U, t} \}$中搜索，上式中$\mathbf r$的符号不重要。
+逐渐改善近似的特征向量。
+
+**注意**:
+
+1. 实现上应保持$\mathbf r \perp \mathbf U$，否则矩阵$\mathbf B$将是刚性的并导致数值不稳定。即解向量的模过大导致正交化失效，直观上将出现伪简并现象。
+2. 由于新的特征向量将在子空间$\{ \mathbf{U, t} \}$中搜索，上式中$\mathbf r$的符号不重要。
 
 ## refinedSearch()的实现
 

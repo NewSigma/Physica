@@ -11,6 +11,7 @@ physica_add_example(FokkerPlanck Core/Math/FokkerPlanck.cpp)
 physica_add_example(ProbabilityDistributionFunction2D Core/Math/ProbabilityDistributionFunction2D.cpp)
 ## Physics
 physica_add_example(HF Core/Physics/ElectronicStructure/HF.cpp)
+physica_add_example(ExactDiag Core/Physics/ManyBody/ExactDiag.cpp)
 physica_add_example(Correlation Core/Physics/MD/Analyser/Correlation.cpp)
 physica_add_example(RDF Core/Physics/MD/Analyser/RDF.cpp)
 physica_add_example(FireModel Core/Physics/MD/KineticModel/FireModel.cpp)

@@ -21,7 +21,17 @@
 #include "SpinlessElectron.h"
 
 namespace Physica::Core {
-    class SpinElectron {
+    class SpinElectron;
+
+    namespace Internal {
+        template<>
+        class Traits<SpinElectron> {
+        public:
+            constexpr static unsigned int SiteDOF = 4;
+        };
+    }
+
+    class SpinElectron : public State<SpinElectron> {
         SpinlessElectron spinUp;
         SpinlessElectron spinDown;
     public:

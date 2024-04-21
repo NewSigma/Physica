@@ -29,8 +29,8 @@ namespace Physica::Core {
         class Traits<Hubbard1D<T>> : public Traits<LatticeHamilton<Hubbard1D<T>>> {
         public:
             using ScalarType = T;
+            using StateType = SpinElectron;
             constexpr static unsigned int Dim = 1;
-            constexpr static unsigned int SiteDOF = 4;
         };
     }
     /**
@@ -41,13 +41,16 @@ namespace Physica::Core {
     class Hubbard1D : public LatticeHamilton<Hubbard1D<ScalarType>> {
         using This = Hubbard1D<ScalarType>;
         using Base = LatticeHamilton<This>;
-        using LatticeType = typename Base::LatticeType;
-        using StateType = SpinElectron;
+        using typename Base::LatticeType;
+        using typename Base::StateType;
+        using StateArray = Utils::Array<SpinlessElectron>;
     private:
         ScalarType hoppingT;
         ScalarType repelU;
         unsigned int numSpinUp;
         unsigned int numSpinDown;
+        StateArray upStates;
+        StateArray downStates;
     public:
         Hubbard1D(LatticeType lattice, ScalarType hoppingT_, ScalarType repelU_, unsigned int numSpinUp_, unsigned int numSpinDown_);
         Hubbard1D(const Hubbard1D&) = default;
@@ -58,13 +61,15 @@ namespace Physica::Core {
         template<class VectorType>
         [[nodiscard]] Vector<ScalarType> operator*(const RValueVector<VectorType>& v) const;
         /* Operations */
+        [[nodiscard]] size_t stateToIndex(StateType state) const noexcept;
+        [[nodiscard]] StateType indexToState(size_t index) const noexcept;
         [[nodiscard]] ScalarType calc(size_t row, size_t col) const;
         void swap(Hubbard1D& __restrict obj) noexcept;
         /* Getters */
+        [[nodiscard]] size_t getNumState() const noexcept { return upStates.getLength() * downStates.getLength(); }
         [[nodiscard]] size_t getNumSuperCellSite() const noexcept { return Base::getLattice().getNumSuperCellSite(); }
     private:
-        [[nodiscard]] size_t stateToIndex(StateType state) const noexcept;
-        [[nodiscard]] StateType indexToState(size_t index) const noexcept;
+        [[nodiscard]] Utils::Array<SpinlessElectron> makeSpinlessStates(size_t numElectron) const noexcept;
         void stateAdd(Vector<ScalarType>& target, StateType state, ScalarType value) const noexcept;
         void checkState(StateType state) const noexcept;
     };

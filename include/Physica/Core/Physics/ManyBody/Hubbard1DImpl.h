@@ -21,7 +21,14 @@
 namespace Physica::Core {
     template<class ScalarType>
     Hubbard1D<ScalarType>::Hubbard1D(LatticeType lattice, ScalarType hoppingT_, ScalarType repelU_, unsigned int numSpinUp_, unsigned int numSpinDown_)
-            : Base(std::move(lattice)), hoppingT(hoppingT_), repelU(repelU_), numSpinUp(numSpinUp_), numSpinDown(numSpinDown_) {}
+            : Base(std::move(lattice))
+            , hoppingT(hoppingT_)
+            , repelU(repelU_)
+            , numSpinUp(numSpinUp_)
+            , numSpinDown(numSpinDown_) {
+        upStates = makeSpinlessStates(numSpinUp);
+        downStates = makeSpinlessStates(numSpinDown);
+    }
 
     template<class ScalarType>
     template<class VectorType>
@@ -31,7 +38,7 @@ namespace Physica::Core {
         assert(Base::getColumn() == length && "[Error]: Dimensions do not match");
         Vector<ScalarType> result(length, 0);
         for (size_t i = 0; i < length; ++i) {
-            const ScalarType hoppingElem = v.calc(i) * hoppingT;
+            const ScalarType hoppingElem = -v.calc(i) * hoppingT;
             const auto state = indexToState(i);
             int numRepel = 0;
             for (unsigned int site = 0; site < numSite; ++site) {
@@ -48,10 +55,33 @@ namespace Physica::Core {
     }
 
     template<class ScalarType>
-    ScalarType Hubbard1D<ScalarType>::calc(size_t row, size_t col) const {
-        if (row == 0 || col == 0) //TODO: Implement particle num converve and remove this
-            return ScalarType(0);
+    size_t Hubbard1D<ScalarType>::stateToIndex(StateType state) const noexcept {
+        checkState(state);
+        size_t upIndex = 0;
+        for (; upIndex < upStates.getLength(); ++upIndex)
+            if (state.getSpinUp() == upStates[upIndex])
+                break;
+        size_t downIndex = 0;
+        for (; downIndex < downStates.getLength(); ++downIndex)
+            if (state.getSpinDown() == downStates[downIndex])
+                break;
+        const size_t index = upIndex * upStates.getLength() + downIndex;
+        assert(index < getNumState() && "[Error]: Index out of range");
+        return index;
+    }
 
+    template<class ScalarType>
+    typename Hubbard1D<ScalarType>::StateType Hubbard1D<ScalarType>::indexToState(size_t index) const noexcept {
+        assert(index < getNumState() && "[Error]: Index out of range");
+        const size_t upIndex = index / upStates.getLength();
+        const size_t downIndex = index % upStates.getLength();
+        StateType result(upStates[upIndex], downStates[downIndex]);
+        checkState(result);
+        return result;
+    }
+
+    template<class ScalarType>
+    ScalarType Hubbard1D<ScalarType>::calc(size_t row, size_t col) const {
         const auto colState = indexToState(col);
         const auto numSite = getNumSuperCellSite();
         if (row == col) {
@@ -80,23 +110,22 @@ namespace Physica::Core {
         repelU.swap(obj.repelU);
         std::swap(numSpinUp, obj.numSpinUp);
         std::swap(numSpinDown, obj.numSpinDown);
+        upStates.swap(obj.upStates);
+        downStates.swap(obj.downStates);
     }
 
     template<class ScalarType>
-    size_t Hubbard1D<ScalarType>::stateToIndex(StateType state) const noexcept {
-        checkState(state);
-        const size_t index = state.getSpinUp().getOccupyBits() | (state.getSpinDown().getOccupyBits() << getNumSuperCellSite());
-        assert(index < Base::getNumState() && "[Error]: Index out of range");
-        return index;
-    }
-
-    template<class ScalarType>
-    typename Hubbard1D<ScalarType>::StateType Hubbard1D<ScalarType>::indexToState(size_t index) const noexcept {
-        assert(index < Base::getNumState() && "[Error]: Index out of range");
-        const size_t spinDownBits = index >> getNumSuperCellSite();
-        const size_t spinUpBits = index ^ (spinDownBits << getNumSuperCellSite());
-        StateType result(spinUpBits, spinDownBits);
-        checkState(result);
+    Utils::Array<SpinlessElectron> Hubbard1D<ScalarType>::makeSpinlessStates(size_t numElectron) const noexcept {
+        const size_t numSpinlessState = SpinlessElectron::calcFullNumState(getNumSuperCellSite());
+        Utils::Array<SpinlessElectron> result{};
+        result.reserve(numSpinlessState);
+        for (size_t i = 0; i < numSpinlessState; ++i) {
+            const SpinlessElectron state(i);
+            if (state.getNumElectron() != numElectron)
+                continue;
+            result.append(state);
+        }
+        result.squeeze();
         return result;
     }
 
@@ -110,7 +139,7 @@ namespace Physica::Core {
 
     template<class ScalarType>
     void Hubbard1D<ScalarType>::checkState([[maybe_unused]] StateType state) const noexcept {
-        //assert(state.getNumSpinUpElectron() == numSpinUp && "[Error]: Unexpected state");
-        //assert(state.getNumSpinDownElectron() == numSpinDown && "[Error]: Unexpected state");
+        assert(state.getNumSpinUpElectron() == numSpinUp && "[Error]: Unexpected state");
+        assert(state.getNumSpinDownElectron() == numSpinDown && "[Error]: Unexpected state");
     }
 }

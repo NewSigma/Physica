@@ -18,13 +18,20 @@
  */
 #pragma once
 
-#include <cassert>
-#include <utility>
-#include <stdint.h>
-#include "Physica/Core/MultiPrecision/BasicImpl/Util/Bitwise.h"
+#include "State.h"
 
 namespace Physica::Core {
-    class SpinlessElectron {
+    class SpinlessElectron;
+
+    namespace Internal {
+        template<>
+        class Traits<SpinlessElectron> {
+        public:
+            constexpr static unsigned int SiteDOF = 2;
+        };
+    }
+
+    class SpinlessElectron : public State<SpinlessElectron> {
         uint64_t occupyBits;
     public:
         SpinlessElectron() : occupyBits(0) {}

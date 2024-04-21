@@ -45,13 +45,12 @@ namespace Physica::Core {
         using Base = RValueMatrix<Derived>;
         using DerivedTraits = Internal::Traits<Derived>;
         constexpr static unsigned int Dim = DerivedTraits::Dim;
-        constexpr static unsigned int SiteDOF = DerivedTraits::SiteDOF;
     public:
         using ScalarType = typename DerivedTraits::ScalarType;
+        using StateType = typename DerivedTraits::StateType;
         using LatticeType = PeriodicLattice<Dim>;
     private:
         LatticeType lattice;
-        size_t numState;
     public:
         LatticeHamilton(LatticeType lattice_);
         LatticeHamilton(const LatticeHamilton&) = default;
@@ -62,21 +61,19 @@ namespace Physica::Core {
         template<class VectorType>
         [[nodiscard]] Vector<ScalarType> operator*(const RValueVector<VectorType>& v) const;
         /* Operations */
+        [[nodiscard]] size_t stateToIndex(StateType state) const noexcept { return Base::getDerived().stateToIndex(state); }
+        [[nodiscard]] StateType indexToState(size_t index) const noexcept { return Base::getDerived().indexToState(index); }
         [[nodiscard]] const This& hermite() const noexcept { return *this; }
         void swap(LatticeHamilton& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] const LatticeType& getLattice() const noexcept { return lattice; }
-        [[nodiscard]] size_t getNumState() const noexcept { return numState; }
-        [[nodiscard]] size_t getRow() const noexcept { return numState; }
-        [[nodiscard]] size_t getColumn() const noexcept { return numState; }
-    private:
-        void updateNumState();
+        [[nodiscard]] size_t getNumState() const noexcept { return Base::getDerived().getNumState(); }
+        [[nodiscard]] size_t getRow() const noexcept { return getNumState(); }
+        [[nodiscard]] size_t getColumn() const noexcept { return getNumState(); }
     };
 
     template<class Derived>
-    LatticeHamilton<Derived>::LatticeHamilton(LatticeType lattice_) : lattice(std::move(lattice_)) {
-        updateNumState();
-    }
+    LatticeHamilton<Derived>::LatticeHamilton(LatticeType lattice_) : lattice(std::move(lattice_)) {}
 
     template<class Derived>
     template<class VectorType>
@@ -89,13 +86,5 @@ namespace Physica::Core {
     void LatticeHamilton<Derived>::swap(LatticeHamilton& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         lattice.swap(obj.lattice);
-        std::swap(numState, obj.numState);
-    }
-
-    template<class Derived>
-    void LatticeHamilton<Derived>::updateNumState() {
-        numState = 1;
-        for (unsigned int i = 0; i < lattice.getNumSuperCellSite(); ++i)
-            numState *= SiteDOF;
     }
 }

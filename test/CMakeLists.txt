@@ -78,6 +78,8 @@ physica_add_test(ThreadPool Core/Parallel/ThreadPool.cpp)
 physica_add_test(GaussBase Core/Physics/GaussBase.cpp)
 physica_add_test(IceGenerator Core/Physics/IceGenerator.cpp)
 physica_add_test(RHFSolver Core/Physics/RHFSolver.cpp)
+### ManyBody
+physica_add_test(Hubbard1D Core/Physics/ManyBody/Hubbard1D.cpp)
 ### MD
 physica_add_test(RSpaceEwald Core/Physics/MD/ForceModel/Ewald/RSpaceEwald.cpp)
 physica_add_test(BKSModel Core/Physics/MD/ForceModel/BKSModel.cpp)
