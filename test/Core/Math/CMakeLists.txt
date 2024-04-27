@@ -1,0 +1,22 @@
+add_subdirectory(Algebra)
+# Calculus
+physica_add_test(ODESolver Calculus/ODE/ODESolver.cpp)
+physica_add_test(SRK2 Calculus/ODE/SRK2.cpp)
+physica_add_test(PoissonFEM Calculus/PDE/FEM/PoissonFEM.cpp)
+physica_add_test(Chebyshev Calculus/ChebyshevTest.cpp)
+physica_add_test(Differential Calculus/Differential.cpp)
+physica_add_test(Integrate Calculus/IntegrateTest.cpp)
+physica_add_test(Interpolation Calculus/Interpolation.cpp)
+physica_add_test(SpetialFunctions Calculus/SpetialFunctionsTest.cpp)
+# Geometry
+physica_add_test(GeoBase Geometry/GeoBase.cpp)
+physica_add_test(CubeCross Geometry/CubeCross.cpp)
+# Optimization
+physica_add_test(ConjugateGradient Optimization/ConjugateGradient.cpp)
+physica_add_test(EqualityQuadraticProgramming Optimization/EqualityQuadraticProgramming.cpp)
+physica_add_test(QuadraticProgramming Optimization/QuadraticProgramming.cpp)
+physica_add_test(SteepestDescent Optimization/SteepestDescent.cpp)
+# Statistics
+physica_add_test(NumCharacter Statistics/NumCharacter.cpp)
+# Transform
+physica_add_test(FFT Transform/FFT.cpp)

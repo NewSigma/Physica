@@ -6,10 +6,11 @@ $$\frac{\partial W(x, p, t)}{\partial t} = [-\frac{p}{m} \frac{\partial}{\partia
 
 其中谐振子质量为$m$。$x$和$p$分别为谐振子的位置和动量。$\gamma$为阻尼系数，$D$为扩散系数。$W$为系统的概率密度分布。
 
-![](out.gif)
+![](FokkerPlanck.gif)
 
-**图1** 概率密度$W(x, p, t)$随时间演化。x轴表示位置，y轴表示动量。
+**图1** 概率密度$W(x, p, t)$随时间演化。x轴表示位置，y轴表示动量。可视化使用Paraview$^{[2]}$完成
 
 ## Reference
 
 [1] Nonlinear Dyn. 4, 357–372 (1993); https://doi.org/10.1007/BF00120671
+[2] Paraview; https://www.paraview.org/
