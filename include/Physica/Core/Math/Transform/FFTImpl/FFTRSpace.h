@@ -64,8 +64,7 @@ namespace Physica::Core {
         using VectorBase = ContinuousVector<This>;
     public:
         using typename VectorBase::ScalarType;
-    private:
-        static constexpr bool isComplex = ScalarType::isComplex;
+        using VectorBase::isComplex;
     public:
         ~FFTRSpace() = default;
         /* Operators */
@@ -140,8 +139,7 @@ namespace Physica::Core {
         using MatrixBase = ContinuousMatrix<This>;
     public:
         using typename MatrixBase::ScalarType;
-    private:
-        static constexpr bool isComplex = ScalarType::isComplex;
+        using MatrixBase::isComplex;
     public:
         ~FFTRSpace() = default;
         /* Operators */
@@ -208,8 +206,7 @@ namespace Physica::Core {
     public:
         using typename GridBase::ScalarType;
         using Index3D = typename GridBase::Index3D;
-    private:
-        static constexpr bool isComplex = ScalarType::isComplex;
+        using GridBase::isComplex;
     public:
         ~FFTRSpace() = default;
         /* Operators */

@@ -26,7 +26,7 @@ namespace Physica::Core {
                        size_t superSizeX_,
                        size_t superSizeY_,
                        size_t superSizeZ_)
-            : fft({superSizeX_, superSizeY_, superSizeZ_}, {1, 1, 1}, PlanFlag::Estimate)
+            : fft({superSizeX_, superSizeY_, superSizeZ_}, PlanFlag::Estimate)
             , numAtomUnitCell(numAtomUnitCell_)
             , superSizeX(superSizeX_)
             , superSizeY(superSizeY_)

@@ -119,7 +119,7 @@ namespace Physica::Core {
         constexpr bool isComplex = ScalarType::isComplex;
 
         const size_t rSpaceSize = data.getLength();
-        FFT<ScalarType, 1> fft(rSpaceSize, 1, PlanFlag::Estimate);
+        FFT<ScalarType, 1> fft(rSpaceSize, PlanFlag::Estimate);
         fft.getRSpace() = data;
         fft.transform();
         const size_t kSpaceSize = fft.getKSpaceSize();
@@ -161,7 +161,7 @@ namespace Physica::Core {
         constexpr bool isComplex = ScalarType::isComplex;
 
         const size_t rSpaceSize = data.getLength();
-        FFT<ScalarType, 1> fft(rSpaceSize, 1, PlanFlag::Estimate);
+        FFT<ScalarType, 1> fft(rSpaceSize, PlanFlag::Estimate);
         fft.getRSpace() = data;
         fft.transform();
         const size_t kSpaceSize = fft.getKSpaceSize();
@@ -201,7 +201,7 @@ namespace Physica::Core {
         constexpr size_t Dim = 3;
         constexpr bool isComplex = ScalarType::isComplex;
 
-        auto fft = FFT<ScalarType, 3>(data.getDim(), {1, 1, 1}, PlanFlag::Estimate);
+        auto fft = FFT<ScalarType, 3>(data.getDim(), PlanFlag::Estimate);
         fft.getRSpace() = data;
         fft.transform();
 
@@ -252,7 +252,7 @@ namespace Physica::Core {
         constexpr size_t Dim = 3;
         constexpr bool isComplex = ScalarType::isComplex;
         
-        auto fft = FFT<ScalarType, 3>(data.getDim(), {1, 1, 1}, PlanFlag::Estimate);
+        auto fft = FFT<ScalarType, 3>(data.getDim(), PlanFlag::Estimate);
         fft.getRSpace() = data;
         fft.transform();
         const auto& kSpace = fft.getKSpace();

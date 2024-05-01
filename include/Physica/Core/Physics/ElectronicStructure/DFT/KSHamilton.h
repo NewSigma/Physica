@@ -87,8 +87,8 @@ namespace Physica::Core {
         repLatt = cell.makeRepLattice();
         basisDim = BasisType::makeGridDim(cutEnergyPsi, repLatt);
         const Index3D fftDim = BasisType::makeGridDim(cutEnergyRho, repLatt);
-        fft_rho = FFT3D(fftDim, {1, 1, 1}, PlanFlag::Estimate);
-        fft_xc = FFT3D(fftDim, {1, 1, 1}, PlanFlag::Estimate);
+        fft_rho = FFT3D(fftDim, PlanFlag::Estimate);
+        fft_xc = FFT3D(fftDim, PlanFlag::Estimate);
         makeKSpaceIonCoulomb();
     }
 

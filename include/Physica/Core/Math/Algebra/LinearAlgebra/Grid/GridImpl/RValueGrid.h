@@ -29,6 +29,7 @@ namespace Physica::Core {
         using Base = Utils::CRTPBase<Derived>;
     public:
         using ScalarType = typename Internal::Traits<Derived>::ScalarType;
+        constexpr static bool isComplex = ScalarType::isComplex;
     public:
         /* Operations */
         template<class OtherDerived>

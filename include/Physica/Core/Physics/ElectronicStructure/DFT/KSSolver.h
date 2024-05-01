@@ -118,7 +118,7 @@ namespace Physica::Core {
         const auto rSpaceSize = hamiltonH.getFFTRSpaceSize();
         density.resize(rSpaceSize);
 
-        fft = FFT3D(rSpaceSize, {1, 1, 1}, PlanFlag::Estimate);
+        fft = FFT3D(rSpaceSize, PlanFlag::Estimate);
 
         chargeMixer = ChargeMixer<ScalarType, IsSpinPolarized>(getRepLattice(), rSpaceSize);
         xcPot = PotType(rSpaceSize);

@@ -133,7 +133,7 @@ namespace Physica::Core {
         const bool useNormalFFT = dataDim[0] == getBaseDim()[0] && dataDim[1] == getBaseDim()[1] && dataDim[2] == getBaseDim()[2];
         if (useNormalFFT) {
             dataDim = data.getDim();
-            FFT<ComplexType, 3> fft(dataDim, {1, 1, 1}, PlanFlag::Estimate);
+            FFT<ComplexType, 3> fft(dataDim, PlanFlag::Estimate);
             fft.getKSpace() = data;
             fft.invTransform();
             baseCoeff = fft.getRSpace();
@@ -149,7 +149,7 @@ namespace Physica::Core {
             const auto v1 = solver.solve(data.flatten());
             const ComplexType average = v1.sum() / solverBuffer.sum();
 
-            FFT<ComplexType, 3> fft(dataDim, {1, 1, 1}, PlanFlag::Estimate);
+            FFT<ComplexType, 3> fft(dataDim, PlanFlag::Estimate);
             auto lambdas = fft.getKSpace().flatten();
             lambdas = v1 - solverBuffer * average;
             fft.rawInvTransform();

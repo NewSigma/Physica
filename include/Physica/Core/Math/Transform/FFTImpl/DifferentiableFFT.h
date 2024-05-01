@@ -42,8 +42,8 @@ namespace Physica::Core {
         Utils::Array<ComplexType> buffer;
     public:
         FFT();
-        FFT(size_t rSpaceSize, PlainRealType rSpaceDelta, PlanFlag planFlag);
-        FFT(const Vector<ScalarType>& data, PlainRealType rSpaceDelta, PlanFlag planFlag);
+        FFT(size_t rSpaceSize, PlanFlag planFlag);
+        FFT(const Vector<ScalarType>& data, PlanFlag planFlag);
         FFT(const FFT& fft) = default;
         FFT(FFT&& fft) noexcept = default;
         ~FFT() = default;
@@ -66,13 +66,13 @@ namespace Physica::Core {
         [[nodiscard]] const RSpaceType& getRSpace() const { return *this; }
         [[nodiscard]] const KSpaceType& getKSpace() const { return *this; }
         /* Static members */
-        [[nodiscard]] inline static This makeEmptyFFT(size_t rSpaceSize, PlainRealType rSpaceDelta);
+        [[nodiscard]] inline static This makeEmptyFFT(size_t rSpaceSize);
         template<class IndexType>
         [[nodiscard]] inline static IndexType rSizeToKSize(IndexType rSize) noexcept { return FFTType::rSizeToKSize(rSize); }
         inline static void transform(const This& planProvider, This& bufferProvider);
         inline static void invTransform(const This& planProvider, This& bufferProvider);
     private:
-        FFT(size_t rSpaceSize, PlainRealType rSpaceDelta);
+        FFT(size_t rSpaceSize);
         /* Getters */
         [[nodiscard]] RealType* asRealBuffer() { return reinterpret_cast<RealType*>(buffer.data()); }
         [[nodiscard]] const RealType* asRealBuffer() const { return reinterpret_cast<const RealType*>(buffer.data()); }
@@ -87,20 +87,20 @@ namespace Physica::Core {
     FFT<Differentiable<PlainScalar, Mode, 1>, 1>::FFT() : fft_impl(), buffer() {}
 
     template<class PlainScalar, DiffMode Mode>
-    FFT<Differentiable<PlainScalar, Mode, 1>, 1>::FFT(size_t rSpaceSize, PlainRealType rSpaceDelta, PlanFlag planFlag)
-            : fft_impl(rSpaceSize, rSpaceDelta, planFlag) {
+    FFT<Differentiable<PlainScalar, Mode, 1>, 1>::FFT(size_t rSpaceSize, PlanFlag planFlag)
+            : fft_impl(rSpaceSize, planFlag) {
         buffer.resize(getKSpaceSize());
     }
 
     template<class PlainScalar, DiffMode Mode>
-    FFT<Differentiable<PlainScalar, Mode, 1>, 1>::FFT(const Vector<ScalarType>& data, PlainRealType rSpaceDelta, PlanFlag planFlag)
-            : FFT(data.getLength(), rSpaceDelta, planFlag) {
+    FFT<Differentiable<PlainScalar, Mode, 1>, 1>::FFT(const Vector<ScalarType>& data, PlanFlag planFlag)
+            : FFT(data.getLength(), planFlag) {
         RSpaceType::transform(data);
     }
 
     template<class PlainScalar, DiffMode Mode>
-    FFT<Differentiable<PlainScalar, Mode, 1>, 1>::FFT(size_t rSpaceSize, PlainRealType rSpaceDelta)
-            : fft_impl(FFTType::makeEmptyFFT(rSpaceSize, rSpaceDelta)) {
+    FFT<Differentiable<PlainScalar, Mode, 1>, 1>::FFT(size_t rSpaceSize)
+            : fft_impl(FFTType::makeEmptyFFT(rSpaceSize)) {
         buffer.resize(getKSpaceSize());
     }
 
@@ -120,8 +120,8 @@ namespace Physica::Core {
 
     template<class PlainScalar, DiffMode Mode>
     inline FFT<Differentiable<PlainScalar, Mode, 1>, 1>
-    FFT<Differentiable<PlainScalar, Mode, 1>, 1>::makeEmptyFFT(size_t rSpaceSize, PlainRealType rSpaceDelta) {
-        return This(rSpaceSize, rSpaceDelta);
+    FFT<Differentiable<PlainScalar, Mode, 1>, 1>::makeEmptyFFT(size_t rSpaceSize) {
+        return This(rSpaceSize);
     }
 
     template<class PlainScalar, DiffMode Mode>

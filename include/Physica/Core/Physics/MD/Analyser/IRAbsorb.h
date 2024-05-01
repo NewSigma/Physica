@@ -54,7 +54,8 @@ namespace Physica::Core {
         void swap(IRAbsorb& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] size_t getDataLength() const noexcept { return dipoleCorr.getLength(); }
-        [[nodiscard]] ScalarType getDeltaOmegaW() const noexcept { return fft.getKSpaceDelta(); }
+        [[nodiscard]] ScalarType getDeltaT() const noexcept { return filter.getDelta(); }
+        [[nodiscard]] ScalarType getDeltaOmegaW() const noexcept { return fft.getKSpaceDelta(getDeltaT()); }
         [[nodiscard]] ScalarType getDeltaWaveNum() const noexcept { return getDeltaOmegaW() / ScalarType(2 * M_PI * PhyConst<AU>::speedOfLight); }
     };
 
@@ -66,7 +67,7 @@ namespace Physica::Core {
                                    unsigned char filterRange,
                                    size_t filterOrder)
             : dipoleCorr(std::move(dipoleCorr_))
-            , fft(dipoleCorr.getLength(), deltaT, PlanFlag::Estimate)
+            , fft(dipoleCorr.getLength(), PlanFlag::Estimate)
             , factor(1 / (6 * PhyConst<AU>::vacuumDielectric * PhyConst<AU>::speedOfLight * double(volume) * PhyConst<AU>::boltzmannK * double(temperatureT)))
             , filter(filterRange, filterRange, filterOrder, deltaT) {}
 

@@ -91,7 +91,7 @@ namespace Physica::Core {
     RingPolymer<ScalarType, Dim, NumReplica>::RingPolymer(const MDCellType& cell, size_t numReplica)
             : phase(2 * cell.getDOF(), numReplica)
             , massVec(cell.getMassVec())
-            , fft(numReplica, 1, PlanFlag::Estimate) {
+            , fft(numReplica, PlanFlag::Estimate) {
         assert(NumReplica == Dynamic || NumReplica == numReplica);
         const size_t dof = getDOF();
         buffer.resize(2, fft.getKSpaceSize());

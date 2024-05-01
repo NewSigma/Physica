@@ -45,7 +45,7 @@ void test_differentiable() {
     }
     Vector<ComplexType> answer{};
     /* Make answer */ {
-        FFT<PlainScalar> fft(N, 1, PlanFlag::Estimate);
+        FFT<PlainScalar> fft(N, PlanFlag::Estimate);
         fft.getRSpace() = values;
         fft.transform();
         Vector<ComplexPlainScalar> k_values = fft.getKSpace();
@@ -59,7 +59,7 @@ void test_differentiable() {
         for (size_t i = 0; i < answer.getLength(); ++i)
             answer[i] = ComplexType(k_values[i], k_grads[i]);
     }
-    FFT<ScalarType> fft(N, 1, PlanFlag::Estimate);
+    FFT<ScalarType> fft(N, PlanFlag::Estimate);
     /* Test transform */ {
         fft.getRSpace() = data;
         fft.transform();
@@ -93,7 +93,7 @@ int main() {
                 data[i] = sin(RealType(2 * M_PI * freq1) * x) + sin(RealType(2 * M_PI * freq2) * x) * 2;
             }
         }
-        FFT<RealType> fft(data, RealType(t_max / N), PlanFlag::Measure);
+        FFT<RealType> fft(data, PlanFlag::Measure);
         const Vector<RealType> intense = toNormVector(fft.getKSpace());
 
         /* Parseval theorem */ {
@@ -103,7 +103,7 @@ int main() {
                 return 1;
         }
         /* Test freq */ {
-            const double deltaFreq = double(fft.getKSpaceDelta()) / (2 * M_PI);
+            const double deltaFreq = double(fft.getKSpaceDelta(RealType(t_max / N))) / (2 * M_PI);
             const RealType freq1_power = intense[freq1 / deltaFreq];
             const RealType freq2_power = intense[freq2 / deltaFreq];
             if (!scalarNear(freq2_power / freq1_power, RealType(2), 1E-14))
@@ -134,7 +134,7 @@ int main() {
                 data[i] = sin(RealType(2 * M_PI * freq1) * x) + sin(RealType(2 * M_PI * freq2) * x) * 2;
             }
         }
-        FFT<ComplexType> fft(data, RealType(t_max / N), PlanFlag::Estimate);
+        FFT<ComplexType> fft(data, PlanFlag::Estimate);
         Vector<ComplexType> trans(N);
         for (size_t i = 0; i < N; ++i) {
             ComplexType temp(0);
@@ -161,11 +161,11 @@ int main() {
             for (size_t j = 0; j < N2; ++j)
                 data(i, j) = RealType(std::sin(2 * M_PI * freq1 * i * deltaX) + 2 * std::cos(2 * M_PI * freq2 * j * deltaY));
 
-        FFT<RealType, 2> fft({N1, N2}, {deltaX, deltaY}, PlanFlag::Estimate);
+        FFT<RealType, 2> fft({N1, N2}, PlanFlag::Estimate);
         fft.transform(data);
         /* Test freq */ {
-            const double deltaFreq1 = double(fft.getKSpaceDelta(0)) / (2 * M_PI);
-            const double deltaFreq2 = double(fft.getKSpaceDelta(1)) / (2 * M_PI);
+            const double deltaFreq1 = double(fft.getKSpaceDelta(deltaX, 0)) / (2 * M_PI);
+            const double deltaFreq2 = double(fft.getKSpaceDelta(deltaY, 1)) / (2 * M_PI);
             const Vector<RealType> intense = toNormVector(fft.getKSpace().flatten());
             const RealType freq1_power = intense[size_t(freq1 / deltaFreq1) * fft.getKSpaceSize()[1]];
             const RealType freq1_power_conj = intense[(N1 - size_t(freq1 / deltaFreq1)) * fft.getKSpaceSize()[1]];

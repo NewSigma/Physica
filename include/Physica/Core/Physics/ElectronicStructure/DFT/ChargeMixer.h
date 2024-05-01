@@ -66,7 +66,7 @@ namespace Physica::Core {
             : repLatt(std::move(repLatt_))
             , oldDensities(DIISBufferSize, dim)
             , residules(DIISBufferSize, dim)
-            , fft(dim, {1, 1, 1}, PlanFlag::Estimate)
+            , fft(dim, PlanFlag::Estimate)
             , mixIteration(0) {}
 
     template<class ScalarType, bool isSpinPolarized>

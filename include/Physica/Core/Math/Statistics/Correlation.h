@@ -57,7 +57,7 @@ namespace Physica::Core {
 
     template<class ScalarType>
     Correlation<ScalarType>::Correlation(size_t numStep)
-            : fft(numStep * 2, 1, PlanFlag::Estimate)
+            : fft(numStep * 2, PlanFlag::Estimate)
             , corr(numStep, 0)
             , numSample(0)
             , step(0) {

@@ -44,12 +44,14 @@ namespace Physica::Core {
         [[nodiscard]] bool operator==(SpinlessElectron other) const noexcept { return occupyBits == other.occupyBits; }
         /* Operations */
         [[nodiscard]] inline SpinlessElectron hop(unsigned char from, unsigned char to) const;
+        [[nodiscard]] inline SpinlessElectron transReduce(unsigned char numSite) const;
         inline void swap(SpinlessElectron& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] uint64_t getOccupyBits() const noexcept { return occupyBits; }
         [[nodiscard]] bool isVacuum() const noexcept { return occupyBits == 0; }
         [[nodiscard]] inline bool isOccupy(unsigned char site) const noexcept;
         [[nodiscard]] unsigned int getNumElectron() const noexcept { return countOnes(occupyBits); }
+        [[nodiscard]] inline bool isTransIrreducible(unsigned char numSite) const noexcept;
     };
 
     inline SpinlessElectron SpinlessElectron::hop(unsigned char from, unsigned char to) const {
@@ -61,14 +63,40 @@ namespace Physica::Core {
         return SpinlessElectron((occupyBits ^ fromMask) | toMask);
     }
 
+    inline SpinlessElectron SpinlessElectron::transReduce(unsigned char numSite) const {
+        assert((1 < numSite) && (numSite < sizeof(occupyBits) * CHAR_BIT) && "[Error]: Invalid param");
+        uint64_t result = occupyBits;
+        const uint64_t fullMask = (static_cast<uint64_t>(1) << numSite) - 1;
+        if (isVacuum() || result == fullMask)
+            return result;
+
+        const uint64_t highMask = (static_cast<uint64_t>(1) << (numSite - 1));
+        while ((result & highMask) != 0) {
+            result = (result << 1U) + 1U;
+            result &= fullMask;
+        }
+
+        while (result % 2U == 0U)
+            result >>= 1U;
+        return result;
+    }
+
     inline void SpinlessElectron::swap(SpinlessElectron& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         std::swap(occupyBits, obj.occupyBits);
     }
 
     inline bool SpinlessElectron::isOccupy(unsigned char site) const noexcept {
-        assert(site < sizeof(occupyBits) * 8 && "[Error]: Invalid site");
+        assert(site < sizeof(occupyBits) * CHAR_BIT && "[Error]: Invalid site");
         const uint64_t mask = 1UL << site;
         return (occupyBits & mask) != 0;
+    }
+
+    inline bool SpinlessElectron::isTransIrreducible(unsigned char numSite) const noexcept {
+        assert((1 < numSite) && (numSite < sizeof(occupyBits) * CHAR_BIT) && "[Error]: Invalid param");
+        const bool isOdd = occupyBits % 2U == 1U;
+        const bool isLowerHalf = static_cast<uint64_t>(1) << (numSite - 1);
+        const bool isFullOccupy = (static_cast<uint64_t>(1) << numSite) - 1 == occupyBits;
+        return (isOdd && isLowerHalf) || isFullOccupy;
     }
 }

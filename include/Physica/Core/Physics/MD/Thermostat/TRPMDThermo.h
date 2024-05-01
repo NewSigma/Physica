@@ -87,7 +87,7 @@ namespace Physica::Core {
 
                     const auto mass = massVec[i / Dim];
                     const ScalarType factor = sqrt(repBeta * mass);
-                    auto fft = FFT<ScalarType, 1>::makeEmptyFFT(numReplica, 1);
+                    auto fft = FFT<ScalarType, 1>::makeEmptyFFT(numReplica);
                     BufferType buffer(2, ringPolymer.getKSpaceSize());
 
                     ringPolymer.toNormalRepr(i, ringPolymer.asMatrix(), buffer, fft);

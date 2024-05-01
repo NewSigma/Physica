@@ -110,7 +110,7 @@ namespace Physica::Core {
         assert(maxIteration > 0 && "[Error]: Zero max iteration does nothing");
         const size_t unitCellDOF = getUnitCellDOF();
         auto& fcMatrixes = forceConstants.asArray();
-        FFT3D fft(superSize, {1, 1, 1}, PlanFlag::Estimate);
+        FFT3D fft(superSize, PlanFlag::Estimate);
         auto rSpace = fft.getRSpace().flatten();
         auto kSpace = fft.getKSpace().flatten();
 
@@ -221,7 +221,7 @@ namespace Physica::Core {
         assert(getUnitCellDOF() == rSpaceGrid(0, 0, 0).getRow() && "[Error]: DOF do not match");
         const size_t unitCellDOF = getUnitCellDOF();
         KSpaceFCGrid kSpaceGrid(getForceConstantsGridSize(), unitCellDOF, unitCellDOF);
-        FFT3D fft(superSize, {1, 1, 1}, PlanFlag::Estimate);
+        FFT3D fft(superSize, PlanFlag::Estimate);
         for (size_t major = 0; major < unitCellDOF; ++major) {
             for (size_t minor = 0; minor < unitCellDOF; ++minor) {
                 auto& rSpaceFFT = fft.getRSpace();
@@ -244,7 +244,7 @@ namespace Physica::Core {
             Vector3D qPoint, const KSpaceFCGrid& forceConstants) const {
         const Vector3D qVector = unitCell.makeRepLattice().transpose() * qPoint;
         const size_t unitCellDOF = getUnitCellDOF();
-        FFT3D fft(superSize, {1, 1, 1}, PlanFlag::Estimate);
+        FFT3D fft(superSize, PlanFlag::Estimate);
         KSpaceFCMat result(unitCellDOF, unitCellDOF);
         for (size_t major = 0; major < unitCellDOF; ++major) {
             for (size_t minor = major; minor < unitCellDOF; ++minor) {
