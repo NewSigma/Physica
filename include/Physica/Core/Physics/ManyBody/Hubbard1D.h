@@ -52,6 +52,7 @@ namespace Physica::Core {
         StateArray upStates;
         StateArray downStates;
     public:
+        Hubbard1D() = default;
         Hubbard1D(LatticeType lattice, ScalarType hoppingT_, ScalarType repelU_, unsigned int numSpinUp_, unsigned int numSpinDown_);
         Hubbard1D(const Hubbard1D&) = default;
         Hubbard1D(Hubbard1D&&) noexcept = default;
@@ -66,11 +67,12 @@ namespace Physica::Core {
         [[nodiscard]] ScalarType calc(size_t row, size_t col) const;
         void swap(Hubbard1D& __restrict obj) noexcept;
         /* Getters */
+        [[nodiscard]] ScalarType getHoppingT() const noexcept { return hoppingT; }
+        [[nodiscard]] ScalarType getRepelU() const noexcept { return repelU; }
         [[nodiscard]] size_t getNumState() const noexcept { return upStates.getLength() * downStates.getLength(); }
         [[nodiscard]] size_t getNumSuperCellSite() const noexcept { return Base::getLattice().getNumSuperCellSite(); }
     private:
         [[nodiscard]] Utils::Array<SpinlessElectron> makeSpinlessStates(size_t numElectron) const noexcept;
-        void stateAdd(Vector<ScalarType>& target, StateType state, ScalarType value) const noexcept;
         void checkState(StateType state) const noexcept;
     };
 }

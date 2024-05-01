@@ -43,10 +43,10 @@ namespace Physica::Core {
             int numRepel = 0;
             for (unsigned int site = 0; site < numSite; ++site) {
                 const auto site1 = (site + 1) % numSite;
-                stateAdd(result, state.hopUp(site, site1), hoppingElem);
-                stateAdd(result, state.hopUp(site1, site), hoppingElem);
-                stateAdd(result, state.hopDown(site, site1), hoppingElem);
-                stateAdd(result, state.hopDown(site1, site), hoppingElem);
+                Base::stateAdd(result, state.hopUp(site, site1), hoppingElem);
+                Base::stateAdd(result, state.hopUp(site1, site), hoppingElem);
+                Base::stateAdd(result, state.hopDown(site, site1), hoppingElem);
+                Base::stateAdd(result, state.hopDown(site1, site), hoppingElem);
                 numRepel += state.isUpOccupy(site) && state.isDownOccupy(site);
             }
             result[i] += v.calc(i) * repelU * ScalarType(numRepel);
@@ -105,7 +105,7 @@ namespace Physica::Core {
 
     template<class ScalarType>
     void Hubbard1D<ScalarType>::swap(Hubbard1D& __restrict obj) noexcept {
-        assert(this != &obj && "[Error]: Self swap is likely a bug");
+        Base::swap(obj);
         hoppingT.swap(obj.hoppingT);
         repelU.swap(obj.repelU);
         std::swap(numSpinUp, obj.numSpinUp);
@@ -127,14 +127,6 @@ namespace Physica::Core {
         }
         result.squeeze();
         return result;
-    }
-
-    template<class ScalarType>
-    void Hubbard1D<ScalarType>::stateAdd(Vector<ScalarType>& target, StateType state, ScalarType value) const noexcept {
-        if (state.isVacuum())
-            return;
-        const auto index = stateToIndex(state);
-        target[index] += value;
     }
 
     template<class ScalarType>

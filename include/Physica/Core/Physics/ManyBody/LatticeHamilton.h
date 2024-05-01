@@ -52,6 +52,7 @@ namespace Physica::Core {
     private:
         LatticeType lattice;
     public:
+        LatticeHamilton() = default;
         LatticeHamilton(LatticeType lattice_);
         LatticeHamilton(const LatticeHamilton&) = default;
         LatticeHamilton(LatticeHamilton&&) noexcept = default;
@@ -63,6 +64,8 @@ namespace Physica::Core {
         /* Operations */
         [[nodiscard]] size_t stateToIndex(StateType state) const noexcept { return Base::getDerived().stateToIndex(state); }
         [[nodiscard]] StateType indexToState(size_t index) const noexcept { return Base::getDerived().indexToState(index); }
+        void stateAdd(Vector<ScalarType>& target, StateType state, ScalarType value) const noexcept;
+
         [[nodiscard]] const This& hermite() const noexcept { return *this; }
         void swap(LatticeHamilton& __restrict obj) noexcept;
         /* Getters */
@@ -80,6 +83,14 @@ namespace Physica::Core {
     Vector<typename LatticeHamilton<Derived>::ScalarType> LatticeHamilton<Derived>::operator*(const RValueVector<VectorType>& v) const {
         assert(getColumn() == v.getLength() && "[Error]: Dimensions do not match");
         return Base::getDerived() * v;
+    }
+
+    template<class Derived>
+    void LatticeHamilton<Derived>::stateAdd(Vector<ScalarType>& target, StateType state, ScalarType value) const noexcept {
+        if (state.isVacuum())
+            return;
+        const auto index = stateToIndex(state);
+        target[index] += value;
     }
 
     template<class Derived>

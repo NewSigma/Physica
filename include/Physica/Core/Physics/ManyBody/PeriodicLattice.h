@@ -31,6 +31,7 @@ namespace Physica::Core {
         DimArray dims;
         unsigned int numSite;
     public:
+        PeriodicLattice() = default;
         PeriodicLattice(DimArray dims_, unsigned int numSite_);
         PeriodicLattice(const PeriodicLattice&) = default;
         PeriodicLattice(PeriodicLattice&&) noexcept = default;

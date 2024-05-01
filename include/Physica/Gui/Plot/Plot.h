@@ -85,6 +85,7 @@ namespace Physica::Gui {
 
         [[nodiscard]] QImage toImage() { return Base::grab().toImage(); }
         /* Getters */
+        [[nodiscard]] QLegend& getLegend() const noexcept { return *getChart()->legend(); }
         [[nodiscard]] QValueAxis* getAxisX() const noexcept { return axisX; }
         [[nodiscard]] QValueAxis* getAxisY() const noexcept { return axisY; }
         [[nodiscard]] QValueAxis* getAxisTop() const noexcept { return axisTop; }

@@ -34,9 +34,12 @@ namespace Physica::Gui {
         setBackgroundRole(QPalette::Light);
 
         auto& chart = *Base::getChart();
-        QFont font = chart.legend()->font();
+        auto* legend = chart.legend();
+        QFont font = legend->font();
         font.setPointSize(15);
-        chart.legend()->setFont(font);
+        legend->setFont(font);
+        legend->setAlignment(Qt::AlignTop);
+        legend->setMarkerShape(QLegend::MarkerShapeFromSeries);
         chart.setTitleFont(font);
         chart.setBackgroundVisible(false);
         {
