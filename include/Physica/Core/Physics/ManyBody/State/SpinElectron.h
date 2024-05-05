@@ -31,12 +31,12 @@ namespace Physica::Core {
         };
     }
 
-    class SpinElectron : public State<SpinElectron> {
+    class PHYSICA_API SpinElectron : public State<SpinElectron> {
         SpinlessElectron spinUp;
         SpinlessElectron spinDown;
     public:
         SpinElectron() = default;
-        SpinElectron(SpinlessElectron spinUp_, SpinlessElectron spinDown_);
+        inline SpinElectron(SpinlessElectron spinUp_, SpinlessElectron spinDown_);
         SpinElectron(const SpinElectron&) = default;
         SpinElectron(SpinElectron&&) noexcept = default;
         ~SpinElectron() = default;
@@ -47,7 +47,7 @@ namespace Physica::Core {
         [[nodiscard]] SpinElectron hopUp(unsigned char from, unsigned char to) const;
         [[nodiscard]] SpinElectron hopDown(unsigned char from, unsigned char to) const;
         [[nodiscard]] inline SpinElectron transReduce(unsigned char numSite) const;
-        void swap(SpinElectron& __restrict obj) noexcept;
+        inline void swap(SpinElectron& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] SpinlessElectron getSpinUp() const noexcept { return spinUp; }
         [[nodiscard]] SpinlessElectron getSpinDown() const noexcept { return spinDown; }
@@ -56,34 +56,27 @@ namespace Physica::Core {
         [[nodiscard]] bool isDownOccupy(unsigned char site) const noexcept { return spinDown.isOccupy(site); }
         [[nodiscard]] unsigned int getNumSpinUpElectron() const noexcept { return spinUp.getNumElectron(); }
         [[nodiscard]] unsigned int getNumSpinDownElectron() const noexcept { return spinDown.getNumElectron(); }
+        [[nodiscard]] inline unsigned int getNumPairedElectron() const noexcept;
     };
 
-    SpinElectron::SpinElectron(SpinlessElectron spinUp_, SpinlessElectron spinDown_)
+    inline SpinElectron::SpinElectron(SpinlessElectron spinUp_, SpinlessElectron spinDown_)
             : spinUp(spinUp_), spinDown(spinDown_) {}
-
-    SpinElectron SpinElectron::hopUp(unsigned char from, unsigned char to) const {
-        auto newSpinUp = spinUp.hop(from, to);
-        const bool hopFailed = newSpinUp.isVacuum() && !spinUp.isVacuum();
-        if (hopFailed)
-            return SpinElectron();
-        return SpinElectron(std::move(newSpinUp), spinDown);
-    }
-
-    SpinElectron SpinElectron::hopDown(unsigned char from, unsigned char to) const {
-        auto newSpinDown = spinDown.hop(from, to);
-        const bool hopFailed = newSpinDown.isVacuum() && !spinDown.isVacuum();
-        if (hopFailed)
-            return SpinElectron();
-        return SpinElectron(spinUp, std::move(newSpinDown));
-    }
 
     inline SpinElectron SpinElectron::transReduce(unsigned char numSite) const {
         return SpinElectron(spinUp.transReduce(numSite), spinDown);
     }
 
-    void SpinElectron::swap(SpinElectron& __restrict obj) noexcept {
+    inline void SpinElectron::swap(SpinElectron& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         spinUp.swap(obj.spinUp);
         spinDown.swap(obj.spinDown);
+    }
+
+    inline unsigned int SpinElectron::getNumPairedElectron() const noexcept {
+        return countOnes(spinUp.getOccupyBits() & spinDown.getOccupyBits());
+    }
+
+    inline std::ostream& operator<<(std::ostream& os, SpinElectron e) {
+        return os << e.getSpinUp() << ' ' << e.getSpinDown();
     }
 }

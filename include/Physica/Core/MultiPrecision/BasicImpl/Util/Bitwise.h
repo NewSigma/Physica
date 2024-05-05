@@ -18,10 +18,9 @@
  */
 #pragma once
 
-#include "Physica/Macro.h"
+#include "Physica/Core/MultiPrecision/MultiPrecisionType.h"
 
 namespace Physica::Core {
-    //Possibly use asm to speed up.
     inline unsigned int countLeadingZeros(MPUnit n) noexcept {
         if(n == 0)
             return MPUnitWidth;

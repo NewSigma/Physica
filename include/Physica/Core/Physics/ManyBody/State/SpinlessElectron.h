@@ -18,6 +18,7 @@
  */
 #pragma once
 
+#include <iosfwd>
 #include "State.h"
 
 namespace Physica::Core {
@@ -98,5 +99,9 @@ namespace Physica::Core {
         const bool isLowerHalf = static_cast<uint64_t>(1) << (numSite - 1);
         const bool isFullOccupy = (static_cast<uint64_t>(1) << numSite) - 1 == occupyBits;
         return (isOdd && isLowerHalf) || isFullOccupy;
+    }
+
+    inline std::ostream& operator<<(std::ostream& os, SpinlessElectron e) {
+        return os << e.getOccupyBits();
     }
 }
