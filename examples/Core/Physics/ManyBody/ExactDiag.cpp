@@ -34,22 +34,24 @@ constexpr unsigned int NumSite = 8;
 constexpr unsigned int NumSpinUp = NumSite / 2;
 constexpr unsigned int NumSpinDown = NumSite / 2;
 constexpr double HoppingT = 1.0;
+using Hubbard1DType = Hubbard1D<ScalarType, NumSpinUp == NumSpinDown>;
 
 namespace Physica::Core {
     class HubbardS;
 
     namespace Internal {
         template<>
-        class Traits<HubbardS> : public Traits<Hubbard1D<ScalarType>> {};
+        class Traits<HubbardS> : public Traits<Hubbard1DType> {};
     }
 
     class HubbardS : public LatticeHamilton<HubbardS> {
         using Base = LatticeHamilton<HubbardS>;
         using typename Base::ScalarType;
         
-        Hubbard1D<ScalarType> impl;
+        Hubbard1DType impl;
+        ScalarType magneticH;
     public:
-        HubbardS(Hubbard1D<ScalarType> impl_) : Base(impl_.getLattice()) {
+        HubbardS(Hubbard1DType impl_, ScalarType magneticH_) : Base(impl_.getLattice()), magneticH(magneticH_) {
             impl = std::move(impl_);
         }
         /* Operators */
@@ -63,16 +65,19 @@ namespace Physica::Core {
                 const ScalarType hoppingElem = -v.calc(i) * impl.getHoppingT();
                 const auto state = indexToState(i);
                 int numRepel = 0;
+                int numPolar = 0;
                 for (unsigned int site = 0; site < numSite; ++site) {
                     const auto site1 = (site + 1) % numSite;
                     Base::stateAdd(result, state.hopUp(site, site1), hoppingElem);
                     Base::stateAdd(result, state.hopUp(site1, site), hoppingElem);
                     Base::stateAdd(result, state.hopDown(site, site1), hoppingElem);
                     Base::stateAdd(result, state.hopDown(site1, site), hoppingElem);
-                    if (site % 2U == 0U)
-                        numRepel += state.isUpOccupy(site) && state.isDownOccupy(site);
+                    const auto upOccupy = state.isUpOccupy(site);
+                    const auto downOccupy = state.isDownOccupy(site);
+                    numRepel += (site % 2U == 0U) && upOccupy && downOccupy;
+                    numPolar += int(upOccupy) - int(downOccupy);
                 }
-                result[i] += v.calc(i) * impl.getRepelU() * ScalarType(numRepel);
+                result[i] += v.calc(i) * (impl.getRepelU() * ScalarType(numRepel) - magneticH * ScalarType(numPolar));
             }
             return result;
         }
@@ -90,7 +95,7 @@ int main(int argc, char** argv) {
     VectorType localMoments0(repelUs.getLength());
     VectorType localMoments1(repelUs.getLength());
     ThreadExecutor::parallel_for([&repelUs, &localMoments0, &localMoments1](unsigned int i) {
-        HubbardS model(Hubbard1D<ScalarType>({{NumSite}, 1}, HoppingT, repelUs[i], NumSpinUp, NumSpinDown));
+        HubbardS model(Hubbard1DType({{NumSite}, 1}, HoppingT, repelUs[i], NumSpinUp, NumSpinDown), ScalarType(0));
         const size_t numState = model.getNumState();
 
         JacobiDavidson<ScalarType> jd(numState, 4);

@@ -29,19 +29,41 @@ namespace Physica::Core {
     template<class MatrixType, class VectorType>
     void gramSchmidt(const RValueMatrix<MatrixType>& base_, LValueVector<VectorType>& v) {
         const auto& base = base_.getDerived();
-        assert(base.getRow() > base.getColumn());
+        assert(base.getRow() > base.getColumn() && "[Error]: base is over complete");
         for (size_t i = 0; i < base.getColumn(); ++i) {
-            auto col = base.col(i);
-            auto dot = col.asVector().conjugate() * v.getDerived();
+            const auto col = base.col(i);
+            const auto dot = col.asVector().conjugate() * v.getDerived();
             v -= dot * col.asVector();
         }
         v.toUnit();
+    }
+    /**
+     * normGramSchmidt can run faster than gramSchmidt if \param base_ are normalized.
+     */
+    template<class MatrixType, class VectorType>
+    void normGramSchmidt(
+            const RValueMatrix<MatrixType>& base_,
+            LValueVector<VectorType>& v,
+            typename VectorType::ScalarType::RealType squaredNorm = 1) {
+        using ScalarType = typename VectorType::ScalarType;
+        const auto& base = base_.getDerived();
+        [[maybe_unused]] const double epsilon = std::numeric_limits<ScalarType>::epsilon();
+        assert(base.getRow() > base.getColumn() && "[Error]: base is over complete");
+        assert(scalarNear(v.squaredNorm(), ScalarType(1), epsilon) && "[Error]: Invalid param");
+        for (size_t i = 0; i < base.getColumn(); ++i) {
+            const auto col = base.col(i);
+            assert(scalarNear(col.squaredNorm(), ScalarType(1), epsilon) && "[Error]: Invalid param");
+            const auto dot = col.asVector().conjugate() * v.getDerived();
+            v -= dot * col.asVector();
+            squaredNorm -= dot.squaredNorm();
+        }
+        v *= reciprocal(sqrt(squaredNorm));
     }
 
     template<class MatrixType>
     void gramSchmidt(LValueMatrix<MatrixType>& m_) {
         auto& m = m_.getDerived();
-        assert(m.getRow() >= m.getColumn());
+        assert(m.getRow() >= m.getColumn() && "[Error]: base is over complete");
         for (size_t i = 0; i < m.getColumn(); ++i) {
             auto col1 = m.col(i);
             col1.toUnit();

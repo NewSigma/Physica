@@ -22,11 +22,11 @@
 #include "State/SpinElectron.h"
 
 namespace Physica::Core {
-    template<class ScalarType> class Hubbard1D;
+    template<class ScalarType, bool UseInversionSymm> class Hubbard1D;
 
     namespace Internal {
-        template<class T>
-        class Traits<Hubbard1D<T>> : public Traits<LatticeHamilton<Hubbard1D<T>>> {
+        template<class T, bool UseInversionSymm>
+        class Traits<Hubbard1D<T, UseInversionSymm>> : public Traits<LatticeHamilton<Hubbard1D<T, UseInversionSymm>>> {
         public:
             using ScalarType = T;
             using StateType = SpinElectron;
@@ -34,23 +34,26 @@ namespace Physica::Core {
         };
     }
     /**
+     * Refer to [1] for applied symmetries
+     * 
      * Reference:
      * [1] Computers in Physics 7, 400 (1993); https://doi.org/10.1063/1.4823192
      */
-    template<class ScalarType>
-    class Hubbard1D : public LatticeHamilton<Hubbard1D<ScalarType>> {
-        using This = Hubbard1D<ScalarType>;
+    template<class ScalarType, bool UseInversionSymm>
+    class Hubbard1D : public LatticeHamilton<Hubbard1D<ScalarType, UseInversionSymm>> {
+        using This = Hubbard1D<ScalarType, UseInversionSymm>;
         using Base = LatticeHamilton<This>;
         using typename Base::LatticeType;
         using typename Base::StateType;
         using StateArray = Utils::Array<SpinlessElectron>;
+        using DownStateArray = typename std::conditional<UseInversionSymm, PlainStruct<void>, StateArray>::type;
     private:
         ScalarType hoppingT;
         ScalarType repelU;
         unsigned int numSpinUp;
         unsigned int numSpinDown;
         StateArray upStates;
-        StateArray downStates;
+        DownStateArray downStates;
     public:
         Hubbard1D() = default;
         Hubbard1D(LatticeType lattice, ScalarType hoppingT_, ScalarType repelU_, unsigned int numSpinUp_, unsigned int numSpinDown_);
@@ -69,7 +72,7 @@ namespace Physica::Core {
         /* Getters */
         [[nodiscard]] ScalarType getHoppingT() const noexcept { return hoppingT; }
         [[nodiscard]] ScalarType getRepelU() const noexcept { return repelU; }
-        [[nodiscard]] size_t getNumState() const noexcept { return upStates.getLength() * downStates.getLength(); }
+        [[nodiscard]] inline size_t getNumState() const noexcept;
         [[nodiscard]] size_t getNumSuperCellSite() const noexcept { return Base::getLattice().getNumSuperCellSite(); }
     private:
         [[nodiscard]] Utils::Array<SpinlessElectron> makeSpinlessStates(size_t numElectron) const noexcept;

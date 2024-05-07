@@ -200,21 +200,21 @@ namespace Physica::Core {
                     const auto orthogonalSpace = eigenvectors.leftCols(i + 1);
                     auto new_direction = searchSpace.col(numSearchDim);
                     new_direction = residule;
-                    gramSchmidt(orthogonalSpace, new_direction);
+                    normGramSchmidt(orthogonalSpace, new_direction, squaredRes);
                     linearSolver.solve_functor([this, i, eigenGoal, &buffer, &source](const VectorType& v, VectorType& dot) {
                         const auto orthogonalSpace = eigenvectors.leftCols(i + 1);
                         auto head1 = dot.head(i + 1);
                         head1 = orthogonalSpace.hermite() * v;
                         buffer = v - orthogonalSpace * head1;
 
-                        dot = source.getDerived() * buffer - eigenGoal * buffer;
+                        dot = source * buffer - eigenGoal * buffer;
                         auto head2 = buffer.head(i + 1);
                         head2 = orthogonalSpace.hermite() * dot;
                         dot -= orthogonalSpace * head2;
                     }, new_direction);
 
                     new_direction.toUnit();
-                    gramSchmidt(searchSpace.leftCols(numSearchDim), new_direction);
+                    normGramSchmidt(searchSpace.leftCols(numSearchDim), new_direction);
                     assembleProjects(source, numSearchDim, true);
                     numSearchDim += 1;
                 }
@@ -312,8 +312,8 @@ namespace Physica::Core {
         }
         for (size_t dim = 1; dim < MinSearchDim; ++dim) {
             auto col = searchSpace.col(dim);
-            col = source.getDerived() * initial;
-            gramSchmidt(searchSpace.leftCols(dim), col);
+            col = source * initial;
+            normGramSchmidt(searchSpace.leftCols(dim), col, col.squaredNorm());
             initial = col;
             assembleProjects(source_, dim, true);
         }
@@ -327,18 +327,18 @@ namespace Physica::Core {
     size_t JacobiDavidson<ScalarType>::projSearchSpace(const RValueMatrix<MatrixType>& source_, size_t eigenIndex) {
         const auto& source = source_.getDerived();
         const auto lastEigenvector = eigenvectors.col(eigenIndex - 1);
-        /* dim = 0 */ {
-            auto col = searchSpace.col(0);
-            col -= (lastEigenvector.asVector().conjugate() * col.asVector()) * lastEigenvector.asVector();
-            col.toUnit();
-            auto dot = dotSpace.col(0);
-            dot = source.getDerived() * col.asVector();
-            assembleProjects(source_, 0, true);
-        }
-        for (size_t dim = 1; dim < MinSearchDim; ++dim) {
+        for (size_t dim = 0; dim < MinSearchDim; ++dim) {
             auto col = searchSpace.col(dim);
-            col -= (lastEigenvector.asVector().conjugate() * col.asVector()) * lastEigenvector.asVector();
-            gramSchmidt(searchSpace.leftCols(dim), col);
+            const ScalarType dot1 = lastEigenvector.asVector().conjugate() * col.asVector();
+            const RealType normalizer = reciprocal(sqrt(RealType(1) - dot1.squaredNorm()));
+            col -= dot1 * lastEigenvector.asVector();
+            col *= normalizer;
+            if (dim == 0) {
+                auto dot2 = dotSpace.col(0);
+                dot2 = source * col.asVector();
+            }
+            else
+                gramSchmidt(searchSpace.leftCols(dim), col);
             assembleProjects(source_, dim, true);
         }
         return MinSearchDim;
