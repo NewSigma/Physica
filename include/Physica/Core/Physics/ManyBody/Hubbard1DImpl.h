@@ -19,30 +19,24 @@
 #pragma once
 
 namespace Physica::Core {
-    template<class ScalarType, bool UseInversionSymm>
-    Hubbard1D<ScalarType, UseInversionSymm>::Hubbard1D(
-            LatticeType lattice, ScalarType hoppingT_, ScalarType repelU_, unsigned int numSpinUp_, unsigned int numSpinDown_)
+    template<class ScalarType, class ReprType>
+    Hubbard1D<ScalarType, ReprType>::Hubbard1D(
+            LatticeType lattice, ReprType repr_, ScalarType hoppingT_, ScalarType repelU_)
             : Base(std::move(lattice))
+            , repr(std::move(repr_))
             , hoppingT(hoppingT_)
-            , repelU(repelU_)
-            , numSpinUp(numSpinUp_)
-            , numSpinDown(numSpinDown_) {
-        assert(!((numSpinUp == numSpinDown) ^ UseInversionSymm) && "[Error]: Inconsistent inversion symmetry");
-        upStates = makeSpinlessStates(numSpinUp);
-        if constexpr (!UseInversionSymm)
-            downStates = makeSpinlessStates(numSpinDown);
-    }
+            , repelU(repelU_) {}
 
-    template<class ScalarType, bool UseInversionSymm>
+    template<class ScalarType, class ReprType>
     template<class VectorType>
-    Vector<ScalarType> Hubbard1D<ScalarType, UseInversionSymm>::operator*(const RValueVector<VectorType>& v) const {
+    Vector<ScalarType> Hubbard1D<ScalarType, ReprType>::operator*(const RValueVector<VectorType>& v) const {
         const size_t length = v.getLength();
         const auto numSite = getNumSuperCellSite();
         assert(Base::getColumn() == length && "[Error]: Dimensions do not match");
         Vector<ScalarType> result(length, 0);
         for (size_t i = 0; i < length; ++i) {
             const ScalarType hoppingElem = -v.calc(i) * hoppingT;
-            const auto state = indexToState(i);
+            const auto state = repr[i];
             int numRepel = 0;
             for (unsigned int site = 0; site < numSite; ++site) {
                 const auto site1 = (site + 1) % numSite;
@@ -57,48 +51,9 @@ namespace Physica::Core {
         return result;
     }
 
-    template<class ScalarType, bool UseInversionSymm>
-    size_t Hubbard1D<ScalarType, UseInversionSymm>::stateToIndex(StateType state) const noexcept {
-        checkState(state);
-        size_t upIndex = 0;
-        for (; upIndex < upStates.getLength(); ++upIndex)
-            if (state.getSpinUp() == upStates[upIndex])
-                break;
-
-        size_t downIndex = 0;
-        if constexpr (UseInversionSymm) {
-            for (; downIndex < upStates.getLength(); ++downIndex)
-                if (state.getSpinDown() == upStates[downIndex])
-                    break;
-        }
-        else {
-            for (; downIndex < downStates.getLength(); ++downIndex)
-                if (state.getSpinDown() == downStates[downIndex])
-                    break;
-        }
-
-        const size_t index = upIndex * upStates.getLength() + downIndex;
-        assert(index < getNumState() && "[Error]: Index out of range");
-        return index;
-    }
-
-    template<class ScalarType, bool UseInversionSymm>
-    typename Hubbard1D<ScalarType, UseInversionSymm>::StateType Hubbard1D<ScalarType, UseInversionSymm>::indexToState(size_t index) const noexcept {
-        assert(index < getNumState() && "[Error]: Index out of range");
-        const size_t upIndex = index / upStates.getLength();
-        const size_t downIndex = index % upStates.getLength();
-        StateType result;
-        if constexpr (UseInversionSymm)
-            result = StateType(upStates[upIndex], upStates[downIndex]);
-        else
-            result = StateType(upStates[upIndex], downStates[downIndex]);
-        checkState(result);
-        return result;
-    }
-
-    template<class ScalarType, bool UseInversionSymm>
-    ScalarType Hubbard1D<ScalarType, UseInversionSymm>::calc(size_t row, size_t col) const {
-        const auto colState = indexToState(col);
+    template<class ScalarType, class ReprType>
+    ScalarType Hubbard1D<ScalarType, ReprType>::calc(size_t row, size_t col) const {
+        const auto colState = repr[col];
         const auto numSite = getNumSuperCellSite();
         if (row == col) {
             int numRepel = 0;
@@ -107,7 +62,7 @@ namespace Physica::Core {
             return repelU * ScalarType(numRepel);
         }
 
-        const auto rowState = indexToState(row);
+        const auto rowState = repr[row];
         for (unsigned int site = 0; site < numSite; ++site) {
             const auto site1 = (site + 1) % numSite;
             if (rowState == colState.hopUp(site, site1)
@@ -119,44 +74,11 @@ namespace Physica::Core {
         return ScalarType(0);
     }
 
-    template<class ScalarType, bool UseInversionSymm>
-    void Hubbard1D<ScalarType, UseInversionSymm>::swap(Hubbard1D& __restrict obj) noexcept {
+    template<class ScalarType, class ReprType>
+    void Hubbard1D<ScalarType, ReprType>::swap(Hubbard1D& __restrict obj) noexcept {
         Base::swap(obj);
+        repr.swap(obj.repr);
         hoppingT.swap(obj.hoppingT);
         repelU.swap(obj.repelU);
-        std::swap(numSpinUp, obj.numSpinUp);
-        std::swap(numSpinDown, obj.numSpinDown);
-        upStates.swap(obj.upStates);
-        downStates.swap(obj.downStates);
-    }
-
-    template<class ScalarType, bool UseInversionSymm>
-    inline size_t Hubbard1D<ScalarType, UseInversionSymm>::getNumState() const noexcept {
-        const size_t numUpStates = upStates.getLength();
-        if constexpr (UseInversionSymm)
-            return numUpStates * numUpStates;
-        else
-            return numUpStates * downStates.getLength();
-    }
-
-    template<class ScalarType, bool UseInversionSymm>
-    Utils::Array<SpinlessElectron> Hubbard1D<ScalarType, UseInversionSymm>::makeSpinlessStates(size_t numElectron) const noexcept {
-        const size_t numSpinlessState = SpinlessElectron::calcFullNumState(getNumSuperCellSite());
-        Utils::Array<SpinlessElectron> result{};
-        result.reserve(numSpinlessState);
-        for (size_t i = 0; i < numSpinlessState; ++i) {
-            const SpinlessElectron state(i);
-            if (state.getNumElectron() != numElectron)
-                continue;
-            result.append(state);
-        }
-        result.squeeze();
-        return result;
-    }
-
-    template<class ScalarType, bool UseInversionSymm>
-    void Hubbard1D<ScalarType, UseInversionSymm>::checkState([[maybe_unused]] StateType state) const noexcept {
-        assert(state.getNumSpinUpElectron() == numSpinUp && "[Error]: Unexpected state");
-        assert(state.getNumSpinDownElectron() == numSpinDown && "[Error]: Unexpected state");
     }
 }

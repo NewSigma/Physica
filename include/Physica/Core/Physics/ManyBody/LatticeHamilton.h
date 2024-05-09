@@ -44,10 +44,12 @@ namespace Physica::Core {
         using This = LatticeHamilton<Derived>;
         using Base = RValueMatrix<Derived>;
         using DerivedTraits = Internal::Traits<Derived>;
-        constexpr static unsigned int Dim = DerivedTraits::Dim;
     public:
         using ScalarType = typename DerivedTraits::ScalarType;
-        using StateType = typename DerivedTraits::StateType;
+        using ReprType = typename DerivedTraits::ReprType;
+        using StateType = typename ReprType::StateType;
+
+        constexpr static unsigned int Dim = ReprType::Dim;
         using LatticeType = PeriodicLattice<Dim>;
     private:
         LatticeType lattice;
@@ -62,17 +64,16 @@ namespace Physica::Core {
         template<class VectorType>
         [[nodiscard]] Vector<ScalarType> operator*(const RValueVector<VectorType>& v) const;
         /* Operations */
-        [[nodiscard]] size_t stateToIndex(StateType state) const noexcept { return Base::getDerived().stateToIndex(state); }
-        [[nodiscard]] StateType indexToState(size_t index) const noexcept { return Base::getDerived().indexToState(index); }
         void stateAdd(Vector<ScalarType>& target, StateType state, ScalarType value) const noexcept;
 
         [[nodiscard]] const This& hermite() const noexcept { return *this; }
         void swap(LatticeHamilton& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] const LatticeType& getLattice() const noexcept { return lattice; }
-        [[nodiscard]] size_t getNumState() const noexcept { return Base::getDerived().getNumState(); }
-        [[nodiscard]] size_t getRow() const noexcept { return getNumState(); }
-        [[nodiscard]] size_t getColumn() const noexcept { return getNumState(); }
+        [[nodiscard]] const ReprType& getRepr() const noexcept { return Base::getDerived().getRepr(); }
+        [[nodiscard]] size_t getSize() const noexcept { return Base::getDerived().getSize(); }
+        [[nodiscard]] size_t getRow() const noexcept { return getSize(); }
+        [[nodiscard]] size_t getColumn() const noexcept { return getSize(); }
     };
 
     template<class Derived>
@@ -89,7 +90,7 @@ namespace Physica::Core {
     void LatticeHamilton<Derived>::stateAdd(Vector<ScalarType>& target, StateType state, ScalarType value) const noexcept {
         if (state.isVacuum())
             return;
-        const auto index = stateToIndex(state);
+        const auto index = getRepr()[state];
         target[index] += value;
     }
 

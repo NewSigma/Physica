@@ -25,6 +25,7 @@ using namespace Physica::Core;
 using ScalarType = Scalar<Double>;
 using VectorType = Vector<ScalarType>;
 using MatrixType = DenseMatrix<ScalarType>;
+using ReprType = SpinRepr<false>;
 constexpr unsigned int NumSite = 3;
 constexpr unsigned int NumSpinUp = 1;
 constexpr unsigned int NumSpinDown = 1;
@@ -32,8 +33,9 @@ constexpr double HoppingT = 1.0;
 constexpr double RepelU = 2;
 
 int main() {
-    const Hubbard1D<ScalarType> model({{NumSite}, 1}, HoppingT, RepelU, NumSpinUp, NumSpinDown);
-    const size_t numState = model.getNumState();
+    ReprType repr(NumSite, NumSpinUp, NumSpinDown);
+    const Hubbard1D<ScalarType, ReprType> model({{NumSite}, 1}, std::move(repr), HoppingT, RepelU);
+    const size_t numState = model.getSize();
     MatrixType mat(numState, numState);
     for (size_t i = 0; i < numState; ++i) {
         VectorType temp(numState, 0);

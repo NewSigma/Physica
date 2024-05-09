@@ -46,7 +46,7 @@ namespace Physica::Core {
         /* Operations */
         [[nodiscard]] SpinElectron hopUp(unsigned char from, unsigned char to) const;
         [[nodiscard]] SpinElectron hopDown(unsigned char from, unsigned char to) const;
-        [[nodiscard]] inline SpinElectron transReduce(unsigned char numSite) const;
+        [[nodiscard]] inline SpinElectron transReduce() const;
         inline void swap(SpinElectron& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] SpinlessElectron getSpinUp() const noexcept { return spinUp; }
@@ -62,8 +62,8 @@ namespace Physica::Core {
     inline SpinElectron::SpinElectron(SpinlessElectron spinUp_, SpinlessElectron spinDown_)
             : spinUp(spinUp_), spinDown(spinDown_) {}
 
-    inline SpinElectron SpinElectron::transReduce(unsigned char numSite) const {
-        return SpinElectron(spinUp.transReduce(numSite), spinDown);
+    inline SpinElectron SpinElectron::transReduce() const {
+        return SpinElectron(spinUp.transReduce(), spinDown);
     }
 
     inline void SpinElectron::swap(SpinElectron& __restrict obj) noexcept {

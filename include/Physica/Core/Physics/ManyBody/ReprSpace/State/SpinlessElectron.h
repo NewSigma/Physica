@@ -18,7 +18,7 @@
  */
 #pragma once
 
-#include <iosfwd>
+#include <iostream>
 #include "State.h"
 
 namespace Physica::Core {
@@ -32,27 +32,38 @@ namespace Physica::Core {
         };
     }
 
-    class SpinlessElectron : public State<SpinlessElectron> {
+    class PHYSICA_API SpinlessElectron : public State<SpinlessElectron> {
+        using This = SpinlessElectron;
+
         uint64_t occupyBits;
+        int numSite;
     public:
-        SpinlessElectron() : occupyBits(0) {}
-        SpinlessElectron(uint64_t occupyBits_) : occupyBits(occupyBits_) {}
+        SpinlessElectron() = default;
+        SpinlessElectron(uint64_t occupyBits_, int numSite_);
         SpinlessElectron(const SpinlessElectron&) = default;
         SpinlessElectron(SpinlessElectron&&) noexcept = default;
         ~SpinlessElectron() = default;
         /* Operators */
         SpinlessElectron& operator=(SpinlessElectron obj) noexcept { swap(obj); return *this; }
         [[nodiscard]] bool operator==(SpinlessElectron other) const noexcept { return occupyBits == other.occupyBits; }
+        [[nodiscard]] This operator<<(int shift) const;
+        [[nodiscard]] This operator>>(int shift) const;
+        void operator<<=(int shift) { (*this) = (*this) << shift; }
+        void operator>>=(int shift) { (*this) = (*this) >> shift; }
         /* Operations */
         [[nodiscard]] inline SpinlessElectron hop(unsigned char from, unsigned char to) const;
-        [[nodiscard]] inline SpinlessElectron transReduce(unsigned char numSite) const;
+        [[nodiscard]] SpinlessElectron transReduce() const;
+        [[nodiscard]] int calcPeriod() const;
         inline void swap(SpinlessElectron& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] uint64_t getOccupyBits() const noexcept { return occupyBits; }
         [[nodiscard]] bool isVacuum() const noexcept { return occupyBits == 0; }
         [[nodiscard]] inline bool isOccupy(unsigned char site) const noexcept;
         [[nodiscard]] unsigned int getNumElectron() const noexcept { return countOnes(occupyBits); }
-        [[nodiscard]] inline bool isTransIrreducible(unsigned char numSite) const noexcept;
+        [[nodiscard]] inline bool isTransIrreducible() const noexcept;
+    private:
+        [[nodiscard]] inline uint64_t makeFullMask() const noexcept;
+        [[nodiscard]] inline uint64_t makeHighMask() const noexcept;
     };
 
     inline SpinlessElectron SpinlessElectron::hop(unsigned char from, unsigned char to) const {
@@ -61,30 +72,13 @@ namespace Physica::Core {
             return SpinlessElectron();
         const uint64_t fromMask = 1UL << from;
         const uint64_t toMask = 1UL << to;
-        return SpinlessElectron((occupyBits ^ fromMask) | toMask);
-    }
-
-    inline SpinlessElectron SpinlessElectron::transReduce(unsigned char numSite) const {
-        assert((1 < numSite) && (numSite < sizeof(occupyBits) * CHAR_BIT) && "[Error]: Invalid param");
-        uint64_t result = occupyBits;
-        const uint64_t fullMask = (static_cast<uint64_t>(1) << numSite) - 1;
-        if (isVacuum() || result == fullMask)
-            return result;
-
-        const uint64_t highMask = (static_cast<uint64_t>(1) << (numSite - 1));
-        while ((result & highMask) != 0) {
-            result = (result << 1U) + 1U;
-            result &= fullMask;
-        }
-
-        while (result % 2U == 0U)
-            result >>= 1U;
-        return result;
+        return SpinlessElectron((occupyBits ^ fromMask) | toMask, numSite);
     }
 
     inline void SpinlessElectron::swap(SpinlessElectron& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         std::swap(occupyBits, obj.occupyBits);
+        std::swap(numSite, obj.numSite);
     }
 
     inline bool SpinlessElectron::isOccupy(unsigned char site) const noexcept {
@@ -93,12 +87,19 @@ namespace Physica::Core {
         return (occupyBits & mask) != 0;
     }
 
-    inline bool SpinlessElectron::isTransIrreducible(unsigned char numSite) const noexcept {
-        assert((1 < numSite) && (numSite < sizeof(occupyBits) * CHAR_BIT) && "[Error]: Invalid param");
+    inline bool SpinlessElectron::isTransIrreducible() const noexcept {
         const bool isOdd = occupyBits % 2U == 1U;
         const bool isLowerHalf = static_cast<uint64_t>(1) << (numSite - 1);
         const bool isFullOccupy = (static_cast<uint64_t>(1) << numSite) - 1 == occupyBits;
         return (isOdd && isLowerHalf) || isFullOccupy;
+    }
+
+    inline uint64_t SpinlessElectron::makeFullMask() const noexcept {
+        return (static_cast<uint64_t>(1) << numSite) - 1;
+    }
+
+    inline uint64_t SpinlessElectron::makeHighMask() const noexcept {
+        return (static_cast<uint64_t>(1) << (numSite - 1));
     }
 
     inline std::ostream& operator<<(std::ostream& os, SpinlessElectron e) {

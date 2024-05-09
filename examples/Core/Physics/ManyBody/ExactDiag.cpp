@@ -34,24 +34,25 @@ constexpr unsigned int NumSite = 8;
 constexpr unsigned int NumSpinUp = NumSite / 2;
 constexpr unsigned int NumSpinDown = NumSite / 2;
 constexpr double HoppingT = 1.0;
-using Hubbard1DType = Hubbard1D<ScalarType, NumSpinUp == NumSpinDown>;
+using ReprType = SpinRepr<NumSpinUp == NumSpinDown>;
+using HubbardType = Hubbard1D<ScalarType, ReprType>;
 
 namespace Physica::Core {
-    class HubbardS;
+    class Hamilton;
 
     namespace Internal {
         template<>
-        class Traits<HubbardS> : public Traits<Hubbard1DType> {};
+        class Traits<Hamilton> : public Traits<Hubbard1D<ScalarType, ReprType>> {};
     }
 
-    class HubbardS : public LatticeHamilton<HubbardS> {
-        using Base = LatticeHamilton<HubbardS>;
+    class Hamilton : public LatticeHamilton<Hamilton> {
+        using Base = LatticeHamilton<Hamilton>;
         using typename Base::ScalarType;
         
-        Hubbard1DType impl;
+        HubbardType impl;
         ScalarType magneticH;
     public:
-        HubbardS(Hubbard1DType impl_, ScalarType magneticH_) : Base(impl_.getLattice()), magneticH(magneticH_) {
+        Hamilton(HubbardType impl_, ScalarType magneticH_) : Base(impl_.getLattice()), magneticH(magneticH_) {
             impl = std::move(impl_);
         }
         /* Operators */
@@ -63,7 +64,7 @@ namespace Physica::Core {
             Vector<ScalarType> result(length, 0);
             for (size_t i = 0; i < length; ++i) {
                 const ScalarType hoppingElem = -v.calc(i) * impl.getHoppingT();
-                const auto state = indexToState(i);
+                const auto state = impl.getRepr()[i];
                 int numRepel = 0;
                 int numPolar = 0;
                 for (unsigned int site = 0; site < numSite; ++site) {
@@ -81,11 +82,9 @@ namespace Physica::Core {
             }
             return result;
         }
-        /* Operations */
-        [[nodiscard]] size_t stateToIndex(StateType state) const noexcept { return impl.stateToIndex(state); }
-        [[nodiscard]] StateType indexToState(size_t index) const noexcept { return impl.indexToState(index); }
         /* Getters */
-        [[nodiscard]] size_t getNumState() const noexcept { return impl.getNumState(); }
+        [[nodiscard]] const ReprType& getRepr() const noexcept { return impl.getRepr(); }
+        [[nodiscard]] size_t getSize() const noexcept { return impl.getSize(); }
     };
 }
 
@@ -95,8 +94,9 @@ int main(int argc, char** argv) {
     VectorType localMoments0(repelUs.getLength());
     VectorType localMoments1(repelUs.getLength());
     ThreadExecutor::parallel_for([&repelUs, &localMoments0, &localMoments1](unsigned int i) {
-        HubbardS model(Hubbard1DType({{NumSite}, 1}, HoppingT, repelUs[i], NumSpinUp, NumSpinDown), ScalarType(0));
-        const size_t numState = model.getNumState();
+        ReprType repr(NumSite, NumSpinUp, NumSpinDown);
+        Hamilton model(HubbardType({{NumSite}, 1}, std::move(repr), HoppingT, repelUs[i]), ScalarType(0));
+        const size_t numState = model.getSize();
 
         JacobiDavidson<ScalarType> jd(numState, 4);
         jd.compute(model, VectorType::random_uniform(numState, RandomPoolType::getInstance().getGen()));
@@ -105,7 +105,7 @@ int main(int argc, char** argv) {
         const auto col = jd.getEigenvectors().col(0);
         ScalarType localMoment0 = 0, localMoment1 = 0;
         for (size_t i = 0; i < col.getLength(); ++i) {
-            const auto state = model.indexToState(i);
+            const auto state = model.getRepr()[i];
             localMoment0 += square(col[i] * ScalarType(state.isUpOccupy(0) - state.isDownOccupy(0)));
             localMoment1 += square(col[i] * ScalarType(state.isUpOccupy(1) - state.isDownOccupy(1)));
         }
