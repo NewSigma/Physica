@@ -84,7 +84,7 @@ namespace Physica::Core {
         }
         /* Getters */
         [[nodiscard]] const ReprType& getRepr() const noexcept { return impl.getRepr(); }
-        [[nodiscard]] size_t getSize() const noexcept { return impl.getSize(); }
+        [[nodiscard]] size_t getNumState() const noexcept { return impl.getNumState(); }
     };
 }
 
@@ -96,8 +96,8 @@ int main(int argc, char** argv) {
     ThreadExecutor::parallel_for([&repelUs, &localMoments0, &localMoments1](unsigned int i) {
         ReprType repr(NumSite, NumSpinUp, NumSpinDown);
         Hamilton model(HubbardType({{NumSite}, 1}, std::move(repr), HoppingT, repelUs[i]), ScalarType(0));
-        const size_t numState = model.getSize();
 
+        const size_t numState = model.getNumState();
         JacobiDavidson<ScalarType> jd(numState, 4);
         jd.compute(model, VectorType::random_uniform(numState, RandomPoolType::getInstance().getGen()));
         jd.sort();

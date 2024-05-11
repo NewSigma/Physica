@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 WeiBo He.
+ * Copyright 2021-2024 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -88,9 +88,9 @@ namespace Physica::Core {
             denominator = 1;
             return;
         }
-        Integer gcd = GCD::run(numerator, denominator, GCD::Euclidean);
-        numerator /= gcd;
-        denominator /= gcd;
+        Integer i = gcd<Integer, true>(numerator, denominator);
+        numerator /= i;
+        denominator /= i;
     }
 
     void Rational::swap(Rational& __restrict r) noexcept {

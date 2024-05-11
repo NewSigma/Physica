@@ -19,6 +19,7 @@
 #pragma once
 
 #include "SpinlessElectron.h"
+#include "Physica/Core/Math/NumberTheory/NumberTheory.h"
 
 namespace Physica::Core {
     class SpinElectron;
@@ -47,10 +48,12 @@ namespace Physica::Core {
         [[nodiscard]] SpinElectron hopUp(unsigned char from, unsigned char to) const;
         [[nodiscard]] SpinElectron hopDown(unsigned char from, unsigned char to) const;
         [[nodiscard]] inline SpinElectron transReduce() const;
+        [[nodiscard]] inline int calcPeriod() const noexcept;
         inline void swap(SpinElectron& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] SpinlessElectron getSpinUp() const noexcept { return spinUp; }
         [[nodiscard]] SpinlessElectron getSpinDown() const noexcept { return spinDown; }
+        [[nodiscard]] int getNumSite() const noexcept { return spinUp.getNumSite(); }
         [[nodiscard]] bool isVacuum() const noexcept { return spinUp.isVacuum() && spinDown.isVacuum(); }
         [[nodiscard]] bool isUpOccupy(unsigned char site) const noexcept { return spinUp.isOccupy(site); }
         [[nodiscard]] bool isDownOccupy(unsigned char site) const noexcept { return spinDown.isOccupy(site); }
@@ -63,7 +66,13 @@ namespace Physica::Core {
             : spinUp(spinUp_), spinDown(spinDown_) {}
 
     inline SpinElectron SpinElectron::transReduce() const {
-        return SpinElectron(spinUp.transReduce(), spinDown);
+        return SpinElectron(spinUp.transReduce(), spinDown.transReduce(spinUp.calcPeriod()));
+    }
+
+    inline int SpinElectron::calcPeriod() const noexcept {
+        const int result = lcm<int, false>(spinUp.calcPeriod(), spinDown.calcPeriod());
+        assert(0 < result && result <= getNumSite() && "[Error]: Unexpected period, this is a bug");
+        return result;
     }
 
     inline void SpinElectron::swap(SpinElectron& __restrict obj) noexcept {

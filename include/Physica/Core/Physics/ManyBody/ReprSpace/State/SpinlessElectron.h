@@ -44,23 +44,25 @@ namespace Physica::Core {
         SpinlessElectron(SpinlessElectron&&) noexcept = default;
         ~SpinlessElectron() = default;
         /* Operators */
-        SpinlessElectron& operator=(SpinlessElectron obj) noexcept { swap(obj); return *this; }
-        [[nodiscard]] bool operator==(SpinlessElectron other) const noexcept { return occupyBits == other.occupyBits; }
+        This& operator=(This obj) noexcept { swap(obj); return *this; }
+        [[nodiscard]] bool operator==(This other) const noexcept { return occupyBits == other.occupyBits; }
+        [[nodiscard]] bool operator!=(This other) const noexcept { return !(*this == other); }
         [[nodiscard]] This operator<<(int shift) const;
         [[nodiscard]] This operator>>(int shift) const;
         void operator<<=(int shift) { (*this) = (*this) << shift; }
         void operator>>=(int shift) { (*this) = (*this) >> shift; }
         /* Operations */
         [[nodiscard]] inline SpinlessElectron hop(unsigned char from, unsigned char to) const;
-        [[nodiscard]] SpinlessElectron transReduce() const;
+        [[nodiscard]] SpinlessElectron transReduce(int period = 1) const;
         [[nodiscard]] int calcPeriod() const;
         inline void swap(SpinlessElectron& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] uint64_t getOccupyBits() const noexcept { return occupyBits; }
+        [[nodiscard]] int getNumSite() const noexcept { return numSite; }
         [[nodiscard]] bool isVacuum() const noexcept { return occupyBits == 0; }
         [[nodiscard]] inline bool isOccupy(unsigned char site) const noexcept;
         [[nodiscard]] unsigned int getNumElectron() const noexcept { return countOnes(occupyBits); }
-        [[nodiscard]] inline bool isTransIrreducible() const noexcept;
+        [[nodiscard]] inline bool isTransReducible(int period = 1) const noexcept;
     private:
         [[nodiscard]] inline uint64_t makeFullMask() const noexcept;
         [[nodiscard]] inline uint64_t makeHighMask() const noexcept;
@@ -87,11 +89,8 @@ namespace Physica::Core {
         return (occupyBits & mask) != 0;
     }
 
-    inline bool SpinlessElectron::isTransIrreducible() const noexcept {
-        const bool isOdd = occupyBits % 2U == 1U;
-        const bool isLowerHalf = static_cast<uint64_t>(1) << (numSite - 1);
-        const bool isFullOccupy = (static_cast<uint64_t>(1) << numSite) - 1 == occupyBits;
-        return (isOdd && isLowerHalf) || isFullOccupy;
+    inline bool SpinlessElectron::isTransReducible(int period) const noexcept {
+        return transReduce(period) != (*this);
     }
 
     inline uint64_t SpinlessElectron::makeFullMask() const noexcept {

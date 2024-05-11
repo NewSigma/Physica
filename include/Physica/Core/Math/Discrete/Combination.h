@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 WeiBo He.
+ * Copyright 2021-2024 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -19,10 +19,45 @@
 #pragma once
 
 #include <cassert>
-#include "Physica/Core/MultiPrecision/Integer.h"
+#include <climits>
 
 namespace Physica::Core {
-    Integer arrangement(const Integer& i1, const Integer& i2);
+    /**
+     * Calculate the number of arrangement $A_i1^i2$.
+     * Using the definition, may be possible to optimize.
+     */
+    template<class IntType>
+    IntType arrangement(const IntType& i1, const IntType& i2) {
+        static_assert(std::numeric_limits<IntType>::is_integer, "[Error]: Invalid IntType");
+        assert(i1 > i2);
+        const IntType critical = i1 - i2;
+        IntType temp(i1);
+        IntType result = 1;
+        while(temp > critical) {
+            result *= temp;
+            --temp;
+        }
+        return result;
+    }
+    /**
+     * Calculate the number of combination $C_i1^i2$.
+     * Using the definition, may be possible to optimize.
+     */
+    template<class IntType>
+    IntType combination(const IntType& i1, const IntType& i2) {
+        static_assert(std::numeric_limits<IntType>::is_integer, "[Error]: Invalid IntType");
+        assert(i1 > i2);
+        const IntType critical = i1 - i2;
+        IntType result = 1;
+        const bool flag = critical > i2;
+        const IntType& great = flag ? critical : i1;
+        const IntType& small = flag ? i2 : critical;
 
-    Integer combination(const Integer& i1, const Integer& i2);
+        IntType temp(i1);
+        while(temp > great) {
+            result *= temp;
+            --temp;
+        }
+        return result / factorial(small);
+    }
 }

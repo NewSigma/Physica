@@ -37,7 +37,7 @@ namespace Physica::Core {
         [[nodiscard]] StateType operator[](size_t index) const noexcept { return Base::getDerived()[index]; }
         [[nodiscard]] size_t operator[](StateType state) const noexcept { return Base::getDerived()[state]; }
         /* Getters */
-        [[nodiscard]] size_t getSize() const noexcept { return Base::getDerived().getSize(); }
+        [[nodiscard]] size_t getNumState() const noexcept { return Base::getDerived().getSize(); }
     protected:
         ReprBasis() = default;
         ReprBasis(const ReprBasis&) = default;

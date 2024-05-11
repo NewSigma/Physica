@@ -109,6 +109,11 @@ namespace Physica::Core {
 
 namespace std {
     template<>
+    struct numeric_limits<Physica::Core::Integer> {
+        constexpr static bool is_integer = true;
+    };
+
+    template<>
     inline void swap<Physica::Core::Integer>(
             Physica::Core::Integer& __restrict i1, Physica::Core::Integer& __restrict i2) noexcept {
         i1.swap(i2);

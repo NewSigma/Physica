@@ -65,7 +65,7 @@ namespace Physica::Core {
         void swap(Hubbard1D& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] const ReprType& getRepr() const noexcept { return repr; }
-        [[nodiscard]] size_t getSize() const noexcept { return repr.getSize(); }
+        [[nodiscard]] size_t getNumState() const noexcept { return repr.getNumState(); }
         [[nodiscard]] ScalarType getHoppingT() const noexcept { return hoppingT; }
         [[nodiscard]] ScalarType getRepelU() const noexcept { return repelU; }
         [[nodiscard]] size_t getNumSuperCellSite() const noexcept { return Base::getLattice().getNumSuperCellSite(); }

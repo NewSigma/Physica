@@ -65,7 +65,7 @@ namespace Physica::Core {
         [[nodiscard]] unsigned int getNumSite() const noexcept { return numSite; }
         [[nodiscard]] const StateArray& getUpStates() const noexcept { return upStates; }
         [[nodiscard]] inline const StateArray& getDownStates() const noexcept;
-        [[nodiscard]] inline size_t getSize() const noexcept;
+        [[nodiscard]] inline size_t getNumState() const noexcept;
     private:
         [[nodiscard]] StateArray makeSpinlessStates(size_t numElectron) const noexcept;
         void checkState(StateType state) const noexcept;
@@ -138,7 +138,7 @@ namespace Physica::Core {
     }
 
     template<bool UseInversionSymm>
-    inline size_t SpinRepr<UseInversionSymm>::getSize() const noexcept {
+    inline size_t SpinRepr<UseInversionSymm>::getNumState() const noexcept {
         const size_t numUpStates = upStates.getLength();
         if constexpr (UseInversionSymm)
             return numUpStates * numUpStates;

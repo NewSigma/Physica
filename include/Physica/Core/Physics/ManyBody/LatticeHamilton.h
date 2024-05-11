@@ -71,9 +71,9 @@ namespace Physica::Core {
         /* Getters */
         [[nodiscard]] const LatticeType& getLattice() const noexcept { return lattice; }
         [[nodiscard]] const ReprType& getRepr() const noexcept { return Base::getDerived().getRepr(); }
-        [[nodiscard]] size_t getSize() const noexcept { return Base::getDerived().getSize(); }
-        [[nodiscard]] size_t getRow() const noexcept { return getSize(); }
-        [[nodiscard]] size_t getColumn() const noexcept { return getSize(); }
+        [[nodiscard]] size_t getNumState() const noexcept { return Base::getDerived().getNumState(); }
+        [[nodiscard]] size_t getRow() const noexcept { return getNumState(); }
+        [[nodiscard]] size_t getColumn() const noexcept { return getNumState(); }
     };
 
     template<class Derived>

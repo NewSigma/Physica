@@ -47,20 +47,16 @@ namespace Physica::Core {
         return (*this) >> (shift - 1);
     }
 
-    SpinlessElectron SpinlessElectron::transReduce() const {
+    SpinlessElectron SpinlessElectron::transReduce(int period) const {
+        assert(numSite % period == 0 && "[Error]: Invalid period");
+        assert(0 < period && period < numSite && "[Error]: Invalid period");
+        const int numTrans = numSite / period - 1;
         uint64_t result = occupyBits;
-        const uint64_t fullMask = makeFullMask();
-        if (isVacuum() || result == fullMask)
-            return SpinlessElectron(result, numSite);
-
-        const uint64_t highMask = makeHighMask();
-        while ((result & highMask) != 0) {
-            result = (result << 1U) + 1U;
-            result &= fullMask;
+        This temp = *this;
+        for (int i = 0; i < numTrans; ++i) {
+            temp <<= period;
+            result = std::min(result, temp.occupyBits);
         }
-
-        while (result % 2U == 0U)
-            result >>= 1U;
         return SpinlessElectron(result, numSite);
     }
 
