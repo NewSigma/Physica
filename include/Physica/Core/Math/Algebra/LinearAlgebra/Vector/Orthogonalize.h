@@ -46,13 +46,15 @@ namespace Physica::Core {
             LValueVector<VectorType>& v,
             typename VectorType::ScalarType::RealType squaredNorm = 1) {
         using ScalarType = typename VectorType::ScalarType;
+        using RealType = typename ScalarType::RealType;
+        [[maybe_unused]] constexpr double epsilon = 1E-3;
         const auto& base = base_.getDerived();
-        [[maybe_unused]] const double epsilon = std::numeric_limits<ScalarType>::epsilon();
         assert(base.getRow() > base.getColumn() && "[Error]: base is over complete");
-        assert(scalarNear(v.squaredNorm(), ScalarType(1), epsilon) && "[Error]: Invalid param");
+        assert(scalarNear(v.squaredNorm(), squaredNorm, epsilon) && "[Error]: Invalid param");
         for (size_t i = 0; i < base.getColumn(); ++i) {
             const auto col = base.col(i);
-            assert(scalarNear(col.squaredNorm(), ScalarType(1), epsilon) && "[Error]: Invalid param");
+            [[maybe_unused]] const RealType temp = col.squaredNorm();
+            assert(scalarNear(temp, RealType(1), epsilon) && "[Error]: Invalid param");
             const auto dot = col.asVector().conjugate() * v.getDerived();
             v -= dot * col.asVector();
             squaredNorm -= dot.squaredNorm();

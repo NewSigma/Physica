@@ -1,0 +1,105 @@
+/*
+ * Copyright 2024 WeiBo He.
+ *
+ * This file is part of Physica.
+ *
+ * Physica is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Physica is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
+ */
+#pragma once
+
+#include "MatrixImpl/RValueMatrix.h"
+
+namespace Physica::Core {
+    /**
+     * \class FormatedMatrix convert a matrix to text, either readable to human, or other softwares.
+     */
+    template<class MatrixType>
+    class FormatedMatrix {
+        using ScalarType = typename MatrixType::ScalarType;
+
+        const RValueMatrix<MatrixType>& data;
+        std::string rowPrefix;
+        std::string rowSuffix;
+        std::string separator;
+    public:
+        FormatedMatrix(const RValueMatrix<MatrixType>& data_);
+        /* Operators */
+        template<class T>
+        friend std::ostream& operator<<(std::ostream& os, const FormatedMatrix<T>& m);
+        /* Setters */
+        FormatedMatrix& setRowPrefix(std::string rowPrefix_);
+        FormatedMatrix& setRowSuffix(std::string rowSuffix_);
+        FormatedMatrix& setSeparator(std::string separator_);
+        /* Getters */
+        [[nodiscard]] ScalarType calc(size_t row, size_t col) const { return data.calc(row, col); }
+        [[nodiscard]] size_t getRow() const noexcept { return data.getRow(); }
+        [[nodiscard]] size_t getColumn() const noexcept { return data.getColumn(); }
+    };
+
+    template<class MatrixType>
+    FormatedMatrix<MatrixType>::FormatedMatrix(const RValueMatrix<MatrixType>& data_)
+            : data(data_)
+            , rowPrefix("")
+            , rowSuffix("")
+            , separator(" ") {}
+
+    template<class MatrixType>
+    std::ostream& operator<<(std::ostream& os, const FormatedMatrix<MatrixType>& m) {
+        const size_t column = m.getColumn();
+        const size_t row = m.getRow();
+        size_t width = 0;
+        /* Get max width */ {
+            for (size_t c = 0; c < column; ++c) {
+                for (size_t r = 0; r < row; ++ r) {
+                    std::stringstream stream{};
+                    stream.copyfmt(os);
+                    stream << m.calc(r, c).getReal();
+                    width = std::max(width, stream.str().length());
+                }
+            }
+        }
+        /* Output */ {
+            for (size_t r = 0; r < row; ++r) {
+                os << m.rowPrefix;
+                for (size_t c = 0; c < column; ++c) {
+                    os.width(width);
+                    os << m.calc(r, c);
+                    const bool isLast = c + 1 == column;
+                    if (!isLast)
+                        os << m.separator;
+                }
+                os << m.rowSuffix << '\n';
+            }
+        }
+        return os;
+    }
+
+    template<class MatrixType>
+    FormatedMatrix<MatrixType>& FormatedMatrix<MatrixType>::setRowPrefix(std::string rowPrefix_) {
+        rowPrefix = std::move(rowPrefix_);
+        return *this;
+    }
+
+    template<class MatrixType>
+    FormatedMatrix<MatrixType>& FormatedMatrix<MatrixType>::setRowSuffix(std::string rowSuffix_) {
+        rowSuffix = std::move(rowSuffix_);
+        return *this;
+    }
+
+    template<class MatrixType>
+    FormatedMatrix<MatrixType>& FormatedMatrix<MatrixType>::setSeparator(std::string separator_) {
+        separator = std::move(separator_);
+        return *this;
+    }
+}

@@ -21,27 +21,31 @@
 namespace Physica::Core {
     SpinlessElectron::SpinlessElectron(uint64_t occupyBits_, int numSite_)
             : occupyBits(occupyBits_), numSite(numSite_) {
-        assert((1 < numSite) && (numSite < sizeof(occupyBits) * CHAR_BIT) && "[Error]: Invalid param");
+        assert((1 < numSite) && (static_cast<unsigned int>(numSite) < sizeof(occupyBits) * CHAR_BIT) && "[Error]: Invalid param");
     }
 
     SpinlessElectron SpinlessElectron::operator<<(int shift) const {
-        assert(0 < shift && shift < numSite && "[Error]: Invalid shift");
+        assert(0 <= shift && shift < numSite && "[Error]: Invalid shift");
+        if (shift == 0)
+            return *this;
         if (shift == 1) {
             auto bits = occupyBits;
             const bool highBit = (bits & makeHighMask()) != 0;
-            bits = (bits << 1) + highBit;
+            bits = (bits << 1) | highBit;
             return SpinlessElectron(bits & makeFullMask(), numSite);
         }
         return (*this) << (shift - 1);
     }
 
     SpinlessElectron SpinlessElectron::operator>>(int shift) const {
-        assert(0 < shift && shift < numSite && "[Error]: Invalid shift");
+        assert(0 <= shift && shift < numSite && "[Error]: Invalid shift");
+        if (shift == 0)
+            return *this;
         if (shift == 1) {
             auto bits = occupyBits;
             const bool lowBit = (bits & static_cast<uint64_t>(1)) != 0;
             bits >>= 1;
-            bits += lowBit ? makeHighMask() : 0;
+            bits |= lowBit ? makeHighMask() : 0;
             return SpinlessElectron(bits, numSite);
         }
         return (*this) >> (shift - 1);
@@ -49,7 +53,9 @@ namespace Physica::Core {
 
     SpinlessElectron SpinlessElectron::transReduce(int period) const {
         assert(numSite % period == 0 && "[Error]: Invalid period");
-        assert(0 < period && period < numSite && "[Error]: Invalid period");
+        assert(0 < period && period <= numSite && "[Error]: Invalid period");
+        if (period == numSite)
+            return *this;
         const int numTrans = numSite / period - 1;
         uint64_t result = occupyBits;
         This temp = *this;
@@ -62,13 +68,13 @@ namespace Physica::Core {
 
     int SpinlessElectron::calcPeriod() const {
         This copy = *this;
-        int i = 0;
-        for (; i < numSite; ++i) {
+        int i = 1;
+        for (; i <= numSite; ++i) {
             copy <<= 1;
             if (copy == *this)
                 break;
         }
-        assert(i <= numSite && "[Error]: Impossible, this is a bug");
+        assert(i <= numSite && (numSite % i == 0) && "[Error]: Impossible, this is a bug");
         return i;
     }
 }

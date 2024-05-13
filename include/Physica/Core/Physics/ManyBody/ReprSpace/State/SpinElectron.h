@@ -33,6 +33,8 @@ namespace Physica::Core {
     }
 
     class PHYSICA_API SpinElectron : public State<SpinElectron> {
+        using This = SpinElectron;
+
         SpinlessElectron spinUp;
         SpinlessElectron spinDown;
     public:
@@ -42,8 +44,13 @@ namespace Physica::Core {
         SpinElectron(SpinElectron&&) noexcept = default;
         ~SpinElectron() = default;
         /* Operators */
-        SpinElectron& operator=(SpinElectron obj) noexcept { swap(obj); return *this; }
-        [[nodiscard]] bool operator==(SpinElectron other) const noexcept { return spinUp == other.spinUp && spinDown == other.spinDown; }
+        This& operator=(This obj) noexcept { swap(obj); return *this; }
+        [[nodiscard]] bool operator==(This other) const noexcept { return spinUp == other.spinUp && spinDown == other.spinDown; }
+        [[nodiscard]] bool operator!=(This other) const noexcept { return !(*this == other); }
+        [[nodiscard]] This operator<<(int shift) const { return SpinElectron(spinUp << shift, spinDown << shift); }
+        [[nodiscard]] This operator>>(int shift) const { return SpinElectron(spinUp >> shift, spinDown >> shift); }
+        void operator<<=(int shift) { (*this) = (*this) << shift; }
+        void operator>>=(int shift) { (*this) = (*this) >> shift; }
         /* Operations */
         [[nodiscard]] SpinElectron hopUp(unsigned char from, unsigned char to) const;
         [[nodiscard]] SpinElectron hopDown(unsigned char from, unsigned char to) const;

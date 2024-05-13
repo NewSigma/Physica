@@ -104,7 +104,7 @@ namespace Physica::Core {
     }
 
     template<class Derived>
-    FormatedVector<Derived> RValueVector<Derived>::format() const {
+    inline FormatedVector<Derived> RValueVector<Derived>::format() const {
         return FormatedVector<Derived>(*this);
     }
 

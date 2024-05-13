@@ -61,8 +61,6 @@ namespace Physica::Core {
         ~LatticeHamilton() = default;
         /* Operators */
         LatticeHamilton& operator=(LatticeHamilton obj) noexcept { swap(obj); return *this; }
-        template<class VectorType>
-        [[nodiscard]] Vector<ScalarType> operator*(const RValueVector<VectorType>& v) const;
         /* Operations */
         void stateAdd(Vector<ScalarType>& target, StateType state, ScalarType value) const noexcept;
 
@@ -78,13 +76,6 @@ namespace Physica::Core {
 
     template<class Derived>
     LatticeHamilton<Derived>::LatticeHamilton(LatticeType lattice_) : lattice(std::move(lattice_)) {}
-
-    template<class Derived>
-    template<class VectorType>
-    Vector<typename LatticeHamilton<Derived>::ScalarType> LatticeHamilton<Derived>::operator*(const RValueVector<VectorType>& v) const {
-        assert(getColumn() == v.getLength() && "[Error]: Dimensions do not match");
-        return Base::getDerived() * v;
-    }
 
     template<class Derived>
     void LatticeHamilton<Derived>::stateAdd(Vector<ScalarType>& target, StateType state, ScalarType value) const noexcept {

@@ -45,7 +45,7 @@ namespace Physica::Core {
         ~SpinlessElectron() = default;
         /* Operators */
         This& operator=(This obj) noexcept { swap(obj); return *this; }
-        [[nodiscard]] bool operator==(This other) const noexcept { return occupyBits == other.occupyBits; }
+        [[nodiscard]] inline bool operator==(This other) const noexcept;
         [[nodiscard]] bool operator!=(This other) const noexcept { return !(*this == other); }
         [[nodiscard]] This operator<<(int shift) const;
         [[nodiscard]] This operator>>(int shift) const;
@@ -67,6 +67,10 @@ namespace Physica::Core {
         [[nodiscard]] inline uint64_t makeFullMask() const noexcept;
         [[nodiscard]] inline uint64_t makeHighMask() const noexcept;
     };
+
+    inline bool SpinlessElectron::operator==(This other) const noexcept {
+        return (occupyBits == other.occupyBits) && (numSite == other.numSite);
+    }
 
     inline SpinlessElectron SpinlessElectron::hop(unsigned char from, unsigned char to) const {
         const bool canHop = isOccupy(from) && !isOccupy(to);

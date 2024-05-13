@@ -31,6 +31,7 @@ namespace Physica::Core {
         public:
             using StateType = SpinElectron;
             constexpr static unsigned int Dim = 1;
+            constexpr static bool IsTransInvariant = false;
         };
     }
 

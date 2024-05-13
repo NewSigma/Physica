@@ -27,6 +27,7 @@ namespace Physica::Core {
     template<class MatrixType> class Conjugate;
     template<class MatrixType> class Hermite;
     template<class MatrixType> class RValueFlatten;
+    template<class MatrixType> class FormatedMatrix;
     template<class MatrixType, bool isLValueMatrix> class DiagVector;
     /**
      * \class RValueMatrix is base class of matrixes that can be assigned to \class LValueMatrix
@@ -101,6 +102,7 @@ namespace Physica::Core {
 
         [[nodiscard]] ScalarType calc(size_t row, size_t col) const { return Base::getDerived().calc(row, col); }
         [[nodiscard]] inline ScalarType calcFromMajorMinor(size_t major, size_t minor) const;
+        [[nodiscard]] inline FormatedMatrix<Derived> format() const;
         [[nodiscard]] ScalarType max() const;
         [[nodiscard]] ScalarType min() const;
         [[nodiscard]] ScalarType trace() const;
@@ -121,9 +123,6 @@ namespace Physica::Core {
 
     template<class MatrixType, class MatrixType2>
     bool matrixNear(const RValueMatrix<MatrixType>& m1, const RValueMatrix<MatrixType2>& m2, double precision);
-
-    template<class Derived>
-    std::ostream& operator<<(std::ostream& os, const RValueMatrix<Derived>& m);
 
     template<class Derived>
     bool operator==(const RValueMatrix<Derived>& m1, const RValueMatrix<Derived>& m2);

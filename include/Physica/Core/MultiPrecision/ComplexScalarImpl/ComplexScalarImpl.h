@@ -137,8 +137,9 @@ namespace Physica::Core {
     template<class T>
     std::ostream& operator<<(std::ostream& os, const ComplexScalar<T>& c) {
         const auto& imagine = c.getImag();
-        return os << std::setprecision(10) << double(c.getReal())
-                  << (imagine.isNegative() ? " - " : " + " ) << fabs(double(imagine)) << 'i' << std::setprecision(6);
+        return os << c.getReal()
+                  << (imagine.isNegative() ? " - " : " + " )
+                  << abs(imagine) << 'i';
     }
 
     template<class T>

@@ -35,7 +35,7 @@ constexpr double RepelU = 2;
 int main() {
     ReprType repr(NumSite, NumSpinUp, NumSpinDown);
     const Hubbard1D<ScalarType, ReprType> model({{NumSite}, 1}, std::move(repr), HoppingT, RepelU);
-    const size_t numState = model.getSize();
+    const size_t numState = model.getNumState();
     MatrixType mat(numState, numState);
     for (size_t i = 0; i < numState; ++i) {
         VectorType temp(numState, 0);

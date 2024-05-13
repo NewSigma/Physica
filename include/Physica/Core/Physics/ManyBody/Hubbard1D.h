@@ -20,6 +20,7 @@
 
 #include "LatticeHamilton.h"
 #include "ReprSpace/SpinRepr.h"
+#include "Physica/Core/Math/Transform/FFT.h"
 
 namespace Physica::Core {
     template<class ScalarType, class ReprType> class Hubbard1D;
@@ -41,18 +42,23 @@ namespace Physica::Core {
      */
     template<class ScalarType, class ReprType>
     class Hubbard1D : public LatticeHamilton<Hubbard1D<ScalarType, ReprType>> {
-        static_assert(std::is_base_of<ReprBasis<ReprType>, ReprType>::value, "[Error]: Invalid representation");
         using This = Hubbard1D<ScalarType, ReprType>;
         using Base = LatticeHamilton<This>;
+        using RealType = typename ScalarType::RealType;
+        using FFTType = FFT<RealType, 1>;
         using typename Base::LatticeType;
         using typename Base::StateType;
+        constexpr static bool IsTransInvariant = Internal::Traits<ReprType>::IsTransInvariant;
+        static_assert(std::is_base_of<ReprBasis<ReprType>, ReprType>::value, "[Error]: Invalid representation");
+        static_assert((IsTransInvariant && Base::isComplex) || !IsTransInvariant, "[Error]: Use complex scalar if translational invariance is enabled");
     private:
         ReprType repr;
-        ScalarType hoppingT;
-        ScalarType repelU;
+        RealType hoppingT;
+        RealType repelU;
+        FFTType planProvider;
     public:
         Hubbard1D() = default;
-        Hubbard1D(LatticeType lattice, ReprType repr_, ScalarType hoppingT_, ScalarType repelU_);
+        Hubbard1D(LatticeType lattice, ReprType repr_, RealType hoppingT_, RealType repelU_);
         Hubbard1D(const Hubbard1D&) = default;
         Hubbard1D(Hubbard1D&&) noexcept = default;
         ~Hubbard1D() = default;
@@ -66,9 +72,12 @@ namespace Physica::Core {
         /* Getters */
         [[nodiscard]] const ReprType& getRepr() const noexcept { return repr; }
         [[nodiscard]] size_t getNumState() const noexcept { return repr.getNumState(); }
-        [[nodiscard]] ScalarType getHoppingT() const noexcept { return hoppingT; }
-        [[nodiscard]] ScalarType getRepelU() const noexcept { return repelU; }
+        [[nodiscard]] RealType getHoppingT() const noexcept { return hoppingT; }
+        [[nodiscard]] RealType getRepelU() const noexcept { return repelU; }
         [[nodiscard]] size_t getNumSuperCellSite() const noexcept { return Base::getLattice().getNumSuperCellSite(); }
+    private:
+        RealType repelElem(StateType psi) const;
+        RealType hoppingElem(StateType rowPsi, StateType colPsi) const;
     };
 }
 
