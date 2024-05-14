@@ -18,6 +18,7 @@
  */
 #pragma once
 
+#include <utility>
 #include "Physica/Core/Math/Discrete/Combination.h"
 
 namespace Physica::Core {
@@ -73,7 +74,8 @@ namespace Physica::Core {
 
             while(i2 != IntType(0)) {
                 i1 = i1 - i2;
-                std::swap(i1, i2);
+                if (i1 < i2)
+                    std::swap(i1, i2);
             }
             i1 = i1 << shift;
         }

@@ -18,6 +18,7 @@
  */
 #pragma once
 
+#include "Physica/Utils/Container/Array/Array.h"
 #include "ReprImpl/ReprSpace.h"
 #include "State/SpinElectron.h"
 

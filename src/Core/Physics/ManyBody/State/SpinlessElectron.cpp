@@ -26,29 +26,25 @@ namespace Physica::Core {
 
     SpinlessElectron SpinlessElectron::operator<<(int shift) const {
         assert(0 <= shift && shift < numSite && "[Error]: Invalid shift");
-        if (shift == 0)
-            return *this;
-        if (shift == 1) {
-            auto bits = occupyBits;
-            const bool highBit = (bits & makeHighMask()) != 0;
+        const auto highMask = makeHighMask();
+        auto bits = occupyBits;
+        for (int i = 0; i < shift; ++i) {
+            const bool highBit = (bits & highMask) != 0;
             bits = (bits << 1) | highBit;
-            return SpinlessElectron(bits & makeFullMask(), numSite);
         }
-        return (*this) << (shift - 1);
+        return SpinlessElectron(bits & makeFullMask(), numSite);
     }
 
     SpinlessElectron SpinlessElectron::operator>>(int shift) const {
         assert(0 <= shift && shift < numSite && "[Error]: Invalid shift");
-        if (shift == 0)
-            return *this;
-        if (shift == 1) {
-            auto bits = occupyBits;
+        const auto highMask = makeHighMask();
+        auto bits = occupyBits;
+        for (int i = 0; i < shift; ++i) {
             const bool lowBit = (bits & static_cast<uint64_t>(1)) != 0;
             bits >>= 1;
-            bits |= lowBit ? makeHighMask() : 0;
-            return SpinlessElectron(bits, numSite);
+            bits |= lowBit ? highMask : 0;
         }
-        return (*this) >> (shift - 1);
+        return SpinlessElectron(bits, numSite);
     }
 
     SpinlessElectron SpinlessElectron::transReduce(int period) const {
@@ -56,7 +52,7 @@ namespace Physica::Core {
         assert(0 < period && period <= numSite && "[Error]: Invalid period");
         if (period == numSite)
             return *this;
-        const int numTrans = numSite / period - 1;
+        const int numTrans = numSite / period;
         uint64_t result = occupyBits;
         This temp = *this;
         for (int i = 0; i < numTrans; ++i) {

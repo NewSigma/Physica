@@ -20,6 +20,7 @@
 
 #include <cassert>
 #include <climits>
+#include <limits>
 
 namespace Physica::Core {
     /**

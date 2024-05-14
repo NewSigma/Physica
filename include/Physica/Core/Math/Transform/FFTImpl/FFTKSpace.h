@@ -75,12 +75,14 @@ namespace Physica::Core {
         [[nodiscard]] __host__ __device__ inline ScalarType& operator[](size_t index);
         [[nodiscard]] __host__ __device__ inline const ScalarType& operator[](size_t index) const;
         /* Operations */
+        [[nodiscard]] ScalarType calc(size_t index) const;
         template<class VectorType>
         inline void invTransform(const RValueVector<VectorType>& data);
         void resize([[maybe_unused]] size_t length) { assert(length == getLength()); }
         /* Getters */
         [[nodiscard]] __host__ __device__ size_t getLength() const noexcept { return Derived::rSizeToKSize(Base::getDerived().getRSpaceSize()); }
         [[nodiscard]] __host__ __device__ size_t getSize() const noexcept { return getLength(); }
+        [[nodiscard]] __host__ __device__ size_t getRSpaceSize() const noexcept { return Base::getDerived().getRSpaceSize(); }
         [[nodiscard]] __host__ __device__ inline ScalarType* data_ptr(size_t index);
         [[nodiscard]] __host__ __device__ inline const ScalarType* data_ptr(size_t index) const;
     protected:
@@ -105,6 +107,14 @@ namespace Physica::Core {
     inline const typename FFTKSpace<Derived, 1>::ScalarType& FFTKSpace<Derived, 1>::operator[](size_t index) const {
         assert(index < getLength());
         return Base::getDerived().asComplexBuffer()[index];
+    }
+
+    template<class Derived>
+    typename FFTKSpace<Derived, 1>::ScalarType FFTKSpace<Derived, 1>::calc(size_t index) const {
+        assert(index < getRSpaceSize());
+        if (index < getLength())
+            return (*this)[index];
+        return (*this)[getRSpaceSize() - index].conjugate();
     }
 
     template<class Derived>

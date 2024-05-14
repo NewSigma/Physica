@@ -4,6 +4,8 @@ physica_add_test(IceGenerator IceGenerator.cpp)
 physica_add_test(RHFSolver RHFSolver.cpp)
 ### ManyBody
 physica_add_test(Hubbard1D ManyBody/Hubbard1D.cpp)
+physica_add_test(KSpinRepr ManyBody/KSpinRepr.cpp)
+physica_add_test(SpinlessElectron ManyBody/SpinlessElectron.cpp)
 ### MD
 physica_add_test(RSpaceEwald MD/ForceModel/Ewald/RSpaceEwald.cpp)
 physica_add_test(BKSModel MD/ForceModel/BKSModel.cpp)
@@ -22,3 +24,7 @@ physica_add_test(FCSwapVector Phonon/FCSwapVector.cpp)
 ### SolidState
 physica_add_test(BrillouInterpolate SolidState/BrillouInterpolate.cpp)
 physica_add_test(CrystalCell SolidState/CrystalCell.cpp)
+
+if(NOT ${CMAKE_BUILD_TYPE} MATCHES "Debug")
+    include(SlowTests.cmake)
+endif()

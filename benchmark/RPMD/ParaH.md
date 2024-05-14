@@ -4,11 +4,11 @@ Items: ParaH, ParaH_cuda, ParaH_auto
 
 ## Platform 1
 
-OS: Ubuntu20.04
-Compiler: GCC 9.4.0 + NVCC 12.2.91
-Hardware: Intel(R) Core(TM) i7-9750H CPU @ 2.60GHz + 16G + NVIDIA GeForce GTX 1660 Ti Mobile
-Date: 2024-2-18
-Responsibility: Weibo He (NewSigma@163.com)
+OS: Ubuntu20.04  
+Compiler: GCC 9.4.0 + NVCC 12.2.91  
+Hardware: Intel(R) Core(TM) i7-9750H CPU @ 2.60GHz + 16G + NVIDIA GeForce GTX 1660 Ti Mobile  
+Date: 2024-2-18  
+Responsibility: Weibo He (NewSigma@163.com)  
 
 $$\begin{matrix}
 \mathrm{Platform} && \mathrm{CPU/s} && \mathrm{GPU/s} && \mathrm{CPU + GPU/s} \\
@@ -20,11 +20,11 @@ $$\begin{matrix}
 
 ## Platform 2
 
-OS: Ubuntu20.04
-Compiler: GCC 9.4.0 + NVCC 12.2.91
-Hardware: Intel(R) Xeon(R) CPU E3-1231 v3 @ 3.40GHz + 16G + GeForce GTX 960
-Date: 2023-10-27
-Responsibility: Weibo He (NewSigma@163.com)
+OS: Ubuntu20.04  
+Compiler: GCC 9.4.0 + NVCC 12.2.91  
+Hardware: Intel(R) Xeon(R) CPU E3-1231 v3 @ 3.40GHz + 16G + GeForce GTX 960  
+Date: 2023-10-27  
+Responsibility: Weibo He (NewSigma@163.com)  
 
 $$\begin{matrix}
 \mathrm{Platform} && \mathrm{CPU/s} && \mathrm{GPU/s} && \mathrm{CPU + GPU/s} \\

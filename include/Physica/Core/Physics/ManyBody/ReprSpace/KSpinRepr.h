@@ -77,7 +77,7 @@ namespace Physica::Core {
             for (auto psiDown : rSpin.getDownStates()) {
                 if (psiDown.isTransReducible(periodUp))
                     continue;
-                const int period = periodUp * psiDown.calcPeriod();
+                const int period = lcm<int, false>(periodUp, psiDown.calcPeriod());
                 const bool isZero = (kIndex * period) % numSite != 0;
                 if (isZero)
                     continue;

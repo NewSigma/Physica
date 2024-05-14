@@ -219,6 +219,11 @@ namespace Physica::Core {
     }
 
     template<class Derived>
+    inline FormatedMatrix<Derived> RValueMatrix<Derived>::format() const {
+        return FormatedMatrix<Derived>(*this);
+    }
+
+    template<class Derived>
     typename RValueMatrix<Derived>::ScalarType RValueMatrix<Derived>::max() const {
         ScalarType result;
         if constexpr (isColumnMatrix) {

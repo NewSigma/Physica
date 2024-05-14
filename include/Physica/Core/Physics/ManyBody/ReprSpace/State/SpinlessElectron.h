@@ -51,6 +51,7 @@ namespace Physica::Core {
         [[nodiscard]] This operator>>(int shift) const;
         void operator<<=(int shift) { (*this) = (*this) << shift; }
         void operator>>=(int shift) { (*this) = (*this) >> shift; }
+        friend std::ostream& operator<<(std::ostream& os, SpinlessElectron e);
         /* Operations */
         [[nodiscard]] inline SpinlessElectron hop(unsigned char from, unsigned char to) const;
         [[nodiscard]] SpinlessElectron transReduce(int period = 1) const;
@@ -106,6 +107,12 @@ namespace Physica::Core {
     }
 
     inline std::ostream& operator<<(std::ostream& os, SpinlessElectron e) {
-        return os << e.getOccupyBits();
+        auto mask = e.makeHighMask();
+        for (int i = 0; i < e.getNumSite(); ++i) {
+            const bool flag = (e.getOccupyBits() & mask) == 0;
+            os << (flag ? '0' : '1');
+            mask >>= 1;
+        }
+        return os;
     }
 }
