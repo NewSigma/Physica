@@ -74,3 +74,36 @@
 #endif
 
 #define PHYSICA_API __attribute__ ((visibility ("default")))
+
+#ifndef PHYSICA_CUDA
+    #define __host__
+    #define __device__
+#else
+    #include <cuda_runtime_api.h>
+#endif
+
+namespace Physica {
+    constexpr static bool IsHDF5Enabled() {
+    #ifdef PHYSICA_HDF5
+        return true;
+    #else
+        return false;
+    #endif
+    }
+
+    constexpr static bool IsMKLEnabled() {
+    #ifdef PHYSICA_MKL
+        return true;
+    #else
+        return false;
+    #endif
+    }
+
+    constexpr static bool IsCUDAEnabled() {
+    #ifdef PHYSICA_CUDA
+        return true;
+    #else
+        return false;
+    #endif
+    }
+}

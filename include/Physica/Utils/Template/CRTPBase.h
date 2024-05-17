@@ -19,7 +19,7 @@
 #pragma once
 
 #include <cstddef>
-#include "Physica/Config.h"
+#include "Physica/Macro.h"
 
 namespace Physica::Utils {
     /**

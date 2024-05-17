@@ -110,6 +110,6 @@ namespace Physica::Core {
         const auto kSize = FFT<Scalar<>, 1>::rSizeToKSize(getNumSite());
         if (kIndex < kSize)
             return kIndex;
-        return kSize - kIndex;
+        return getNumSite() - kIndex;
     }
 }

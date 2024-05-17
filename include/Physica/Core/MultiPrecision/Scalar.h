@@ -233,7 +233,9 @@ namespace Physica::Core {
         [[nodiscard]] static Scalar random_normal(GaussRandomPool<This, RandomPoolType>& pool) { return pool(); }
         template<class Distribution, class RandomGenerator>
         [[nodiscard]] inline static Scalar random_any(Distribution& dist, RandomGenerator& gen);
+    #ifdef PHYSICA_HDF5
         [[nodiscard]] static const H5::DataType& getH5DataType() { return H5::PredType::NATIVE_FLOAT; }
+    #endif
     };
 
     inline Scalar<Float>& operator++(Scalar<Float>& s);
@@ -303,7 +305,9 @@ namespace Physica::Core {
         [[nodiscard]] static Scalar random_normal(GaussRandomPool<This, RandomPoolType>& pool) { return pool(); }
         template<class Distribution, class RandomGenerator>
         [[nodiscard]] inline static Scalar random_any(Distribution& dist, RandomGenerator& gen);
+    #ifdef PHYSICA_HDF5
         [[nodiscard]] static const H5::DataType& getH5DataType() { return H5::PredType::NATIVE_DOUBLE; }
+    #endif
     };
 
     inline Scalar<Double>& operator++(Scalar<Double>& s);

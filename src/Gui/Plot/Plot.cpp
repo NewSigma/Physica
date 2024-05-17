@@ -42,6 +42,7 @@ namespace Physica::Gui {
         legend->setMarkerShape(QLegend::MarkerShapeFromSeries);
         chart.setTitleFont(font);
         chart.setBackgroundVisible(false);
+        chart.setMargins(QMargins{});
         {
             axisX->setTickAnchor(0);
             axisX->setTickInterval(deltaX);

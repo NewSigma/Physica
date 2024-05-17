@@ -38,24 +38,16 @@
 #include "Physica/Macro.h"
 
 namespace Physica::Python {
-    Clang::Clang() : id(0), ci() {
+    Clang::Clang() : ci() {
         using namespace clang;
         {
             auto& PCHOps = *ci.getPCHContainerOperations();
             PCHOps.registerWriter(std::make_unique<ObjectFilePCHContainerWriter>());
             PCHOps.registerReader(std::make_unique<ObjectFilePCHContainerReader>());
         }
-        {
-            auto* diagOptions = new DiagnosticOptions();
-            auto* diagBuffer = new TextDiagnosticPrinter(llvm::outs(), diagOptions);
-            auto* diag = new DiagnosticsEngine(new DiagnosticIDs(), diagOptions, diagBuffer, true);
-            ci.setDiagnostics(diag);
-            makeInvocation();
-        }
-        auto* memBuffer = llvm::MemoryBuffer::getMemBuffer("").release();
-        ci.getPreprocessorOpts().addRemappedFile(DummyFile, memBuffer);
+        makeInvocation();
         makeOptions();
-
+        ci.createDiagnostics();
         ci.LoadRequestedPlugins();
 
         action = std::make_unique<IncrementalAction>(ci, LLVM::getInstance().getContext());
@@ -114,8 +106,14 @@ namespace Physica::Python {
             args.push_back("-fincremental-extensions");
             args.push_back("--compile");
             args.push_back(DummyFile);
+            args.push_back("-resource-dir");
             args.push_back(LLVM_RESOURCE_DIR);
+            args.push_back("-I");
             args.push_back(PHYSICA_INCLUDE_DIR);
+            if constexpr (IsHDF5Enabled()) {
+                args.push_back("-I");
+                args.push_back(HDF5_INCLUDE_DIR);
+            }
         }
         using namespace clang;
         auto pDiagOpts = CreateAndPopulateDiagOpts(args);
@@ -139,13 +137,18 @@ namespace Physica::Python {
         if (strcmp("clang", cmd->getCreator().getName()) != 0)
             throw LLVMException(llvm::createStringError(llvm::errc::not_supported, "[Error]: Driver initialization failed"));
 
-        const bool success = CompilerInvocation::CreateFromArgs(ci.getInvocation(), cmd->getArguments(), ci.getDiagnostics());
+        auto* diagOptions = new DiagnosticOptions();
+        auto* diagBuffer1 = new TextDiagnosticPrinter(llvm::outs(), diagOptions);
+        auto* diag = new DiagnosticsEngine(new DiagnosticIDs(), diagOptions, diagBuffer1, true);
+        const bool success = CompilerInvocation::CreateFromArgs(ci.getInvocation(), cmd->getArguments(), *diag);
         if (!success)
             throw LLVMException(llvm::createStringError(llvm::errc::not_supported, "[Error]: Failed to create compiler invocation"));
     }
 
     void Clang::makeOptions() {
         using namespace clang;
+        auto* memBuffer = llvm::MemoryBuffer::getMemBuffer("").release();
+        ci.getPreprocessorOpts().addRemappedFile(DummyFile, memBuffer);
         /* Make target */ {
             auto* target = TargetInfo::CreateTargetInfo(ci.getDiagnostics(), ci.getInvocation().TargetOpts);
             if (target == nullptr)
@@ -205,7 +208,7 @@ namespace Physica::Python {
                 StoredDeclsList& list = ite->second;
                 DeclContextLookupResult R = list.getLookupResult();
                 for (NamedDecl* D : R)
-                    if (D->getTranslationUnitDecl() == unitDecl)
+                    if (D != nullptr && D->getTranslationUnitDecl() == unitDecl)
                         list.remove(D);
 
                 if (list.isNull())

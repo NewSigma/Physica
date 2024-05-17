@@ -18,18 +18,28 @@
  */
 #pragma once
 
-#include "Physica/Utils/CUDA/PlainStruct.h"
+#include "Physica/Python/LLVM/Clang.h"
+#include "Physica/Python/LLVM/Executor.h"
 
 namespace Physica::Python {
-    template<class T> class Class {};
+    class PhysicaPython final {
+        using This = PhysicaPython;
 
-    namespace Internal {
-        template<class T> class Traits;
-
-        template<class T>
-        class Traits<Class<T>> {
-        public:
-            using BindType = T;
-        };
-    }
+        Clang clang;
+        Executor exec;
+    public:
+        ~PhysicaPython() = default;
+        /* Getters */
+        [[nodiscard]] Clang& getClang() noexcept { return clang; }
+        [[nodiscard]] Executor& getExec() noexcept { return exec; }
+        /* Static members */
+        [[nodiscard]] static This& getInstance() noexcept;
+    private:
+        PhysicaPython();
+        PhysicaPython(const This&) = default;
+        PhysicaPython(This&&) noexcept = default;
+        /* Operators */
+        This& operator=(const This&) = default;
+        This& operator=(This&&) noexcept = default;
+    };
 }

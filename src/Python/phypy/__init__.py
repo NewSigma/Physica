@@ -36,3 +36,6 @@ def importPhysica():
     return physica
 
 physica = importPhysica()
+
+del sys
+del os

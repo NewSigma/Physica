@@ -35,13 +35,12 @@ namespace Physica::Python {
         using CodeGenerator = clang::CodeGenerator;
         using Parser = clang::Parser;
         constexpr static const char* DummyFile = "Unknown";
-
+    public:
         struct PartialTranslationUnit {
             clang::TranslationUnitDecl* unitDecl;
             std::unique_ptr<llvm::Module> unitModule;
         };
     private:
-        size_t id;
         CompilerInstance ci;
         std::unique_ptr<IncrementalAction> action;
         std::unique_ptr<Parser> parser;

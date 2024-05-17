@@ -27,13 +27,14 @@ namespace Physica::Python {
 
         std::unique_ptr<LLJIT> jit;
     public:
+        Executor() = default;
         Executor(const clang::TargetInfo& targetInfo);
         Executor(const Executor&) = delete;
-        Executor(Executor&&) noexcept = delete;
+        Executor(Executor&&) noexcept = default;
         ~Executor() = default;
         /* Operators */
         Executor& operator=(const Executor&) = delete;
-        Executor& operator=(Executor&&) noexcept = delete;
+        Executor& operator=(Executor&&) noexcept = default;
         /* Operations */
         /* Getters */
         [[nodiscard]] LLJIT& getJIT() noexcept { return *jit; }
