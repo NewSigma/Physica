@@ -18,9 +18,10 @@
  */
 #pragma once
 
-#include "Physica/Utils/Container/Array/Array.h"
 #include "ReprImpl/ReprSpace.h"
 #include "State/SpinElectron.h"
+#include "Physica/Utils/Container/Array/Array.h"
+#include "Physica/Utils/CUDA/PlainStruct.h"
 
 namespace Physica::Core {
     template<bool UseInversionSymm>

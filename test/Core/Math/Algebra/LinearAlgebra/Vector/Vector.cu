@@ -36,21 +36,28 @@ __global__ void test_kernel(
 }
 
 int main() {
-    VectorType a{1, 2, 3, 4};
+    const VectorType a{1, 2, 3, 4};
     auto d_a = a.toDevice();
-    device_obj<VectorType> d_b(4);
-    d_b = d_a;
-    VectorType b = d_b.toHost();
-    if (a != b)
-        return 1;
+    {
+        device_obj<VectorType> d_b(4);
+        d_b = d_a;
+        StreamPool::getStream().wait();
+        const VectorType b = d_b.toHost();
+        if (a != b) {
+            std::cout << "[Error]: Copy failed\n";
+            return 1;
+        }
+    }
     {
         const VectorType answer = reciprocal(a);
-        d_b = reciprocal(d_b);
+        d_a = reciprocal(d_a);
         VectorType result;
         CudaExecutor::wait();
-        d_b.toHost(result);
-        if (!vectorNear(result, answer, 1E-15))
+        d_a.toHost(result);
+        if (!vectorNear(result, answer, 1E-15)) {
+            std::cout << "[Error]: Reciprocal failed\n";
             return 1;
+        }
     }
     {
         constexpr size_t len = 32;
@@ -66,8 +73,10 @@ int main() {
         test_kernel<<<1, len, 0, StreamPool::getStream()>>>(asStruct(d_a), asStruct(d_b), asStruct(d_result), factor);
         d_result.toHostAsync(result);
         CudaExecutor::wait();
-        if (!vectorNear(result, answer, 1E-7))
+        if (!vectorNear(result, answer, 1E-7)) {
+            std::cout << "[Error]: Kernel failed\n";
             return 1;
+        }
     }
     return 0;
 }
