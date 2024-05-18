@@ -59,24 +59,27 @@ namespace Physica::Core {
     template<class ScalarType, class ReprType>
     ScalarType Hubbard1D<ScalarType, ReprType>::calc(size_t row, size_t col) const {
         if constexpr (IsTransInvariant) {
-            const size_t numSite = getNumSuperCellSite();
+            const int numSite = getNumSuperCellSite();
+            const auto& periods = repr.getPeriods();
+            const auto psi1 = repr[row];
+            if (row == col) {
+                const bool flag = (repr.getKIndex() == 0) || (periods[row] == numSite);
+                return flag ? repelElem(psi1) : RealType(0);
+            }
+
             auto fft = FFTType::makeEmptyFFT(numSite);
             {
                 auto& rSpace = fft.getRSpace();
-                const auto state1 = repr[row];
-                auto state2 = repr[col];
-                for (size_t i = 0; i < numSite; ++i) {
+                auto psi2 = repr[col];
+                for (int i = 0; i < numSite; ++i) {
                     RealType elem = 0;
-                    if (state1 == state2)
-                        elem = repelElem(state1);
-                    else
-                        elem = hoppingElem(state1, state2);
+                    if (psi1 != psi2)
+                        elem = hoppingElem(psi1, psi2);
                     rSpace[i] = elem;
-                    state2 <<= 1;
+                    psi2 <<= 1;
                 }
             }
             FFTType::transform(planProvider, fft);
-            const auto& periods = repr.getPeriods();
             const RealType normalizer = sqrt(RealType(periods[row] * periods[col])) / RealType(numSite);
             return fft.getKSpace()[repr.getReducedK()] * normalizer;
         }

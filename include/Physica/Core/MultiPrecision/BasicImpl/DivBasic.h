@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 WeiBo He.
+ * Copyright 2019-2024 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -28,35 +28,35 @@ namespace Physica::Core {
      */
     inline MPUnit getInverse(MPUnit unit) {
         unsigned long unit0 = unit & 1U;
-    #ifdef PHYSICA_64BIT
-        unsigned long unit9 = unit >> 55U;
-        unsigned long unit40 = (unit >> 24U) + 1;
-        unsigned long unit63 = (unit >> 1U) + unit0;
-        unsigned long v0 = ((static_cast<unsigned long>(1) << 19U) - 3 * (static_cast<unsigned long>(1) << 8U)) / unit9;
-        unsigned long v1 = (static_cast<unsigned long>(1) << 11U) * v0 - ((v0 * v0 * unit40) >> 40U) - 1;
-        unsigned long v2 = (static_cast<unsigned long>(1) << 13U) * v1
-                           + ((((static_cast<unsigned long>(1) << 60U) - v1 * unit40) * v1) >> 47U);
-        unsigned long e = (v2 >> 1U) * unit0 - v2 * unit63;
-        unsigned long v3 = (static_cast<unsigned long>(1) << 31U) * v2 + (mulWordByWordHigh(v2, e) >> 1U);
-        unsigned long high, low;
-        mulWordByWord(high, low, v3, unit);
-        unsigned long v4 = v3 - unit - high - (low + unit < low);
-        return v4;
-    #endif
-    #ifdef PHYSICA_32BIT
-        unsigned long unit10 = unit >> 22U;
-        unsigned long unit21 = (unit >> 11U) + 1;
-        unsigned long unit31 = (unit >> 1U) + unit10;
-        unsigned long v0 = ((static_cast<unsigned long>(1) << 24U) - (static_cast<unsigned long>(1) << 14U)
-                + (static_cast<unsigned long>(1) << 9U)) / unit10;
-        unsigned long v1 = (static_cast<unsigned long>(1) << 4U) * v0 - mulWordByWordHigh(v0 * v0, unit21) - 1;
-        unsigned long e = (v1 >> 1U) * unit0 - v1 * unit31;
-        unsigned long v2 = (static_cast<unsigned long>(1) << 15U) * v1 - (mulWordByWordHigh(v1, e) >> 1U);
-        unsigned long high, low;
-        mulWordByWord(high, low, v2, unit);
-        unsigned long v3 = v2 - unit - high - (low + unit < low);
-        return v3;
-    #endif
+        if constexpr (PhysicaWordSize == 64) {
+            unsigned long unit9 = unit >> 55U;
+            unsigned long unit40 = (unit >> 24U) + 1;
+            unsigned long unit63 = (unit >> 1U) + unit0;
+            unsigned long v0 = ((static_cast<unsigned long>(1) << 19U) - 3 * (static_cast<unsigned long>(1) << 8U)) / unit9;
+            unsigned long v1 = (static_cast<unsigned long>(1) << 11U) * v0 - ((v0 * v0 * unit40) >> 40U) - 1;
+            unsigned long v2 = (static_cast<unsigned long>(1) << 13U) * v1
+                            + ((((static_cast<unsigned long>(1) << 60U) - v1 * unit40) * v1) >> 47U);
+            unsigned long e = (v2 >> 1U) * unit0 - v2 * unit63;
+            unsigned long v3 = (static_cast<unsigned long>(1) << 31U) * v2 + (mulWordByWordHigh(v2, e) >> 1U);
+            unsigned long high, low;
+            mulWordByWord(high, low, v3, unit);
+            unsigned long v4 = v3 - unit - high - (low + unit < low);
+            return v4;
+        }
+        else {
+            unsigned long unit10 = unit >> 22U;
+            unsigned long unit21 = (unit >> 11U) + 1;
+            unsigned long unit31 = (unit >> 1U) + unit10;
+            unsigned long v0 = ((static_cast<unsigned long>(1) << 24U) - (static_cast<unsigned long>(1) << 14U)
+                    + (static_cast<unsigned long>(1) << 9U)) / unit10;
+            unsigned long v1 = (static_cast<unsigned long>(1) << 4U) * v0 - mulWordByWordHigh(v0 * v0, unit21) - 1;
+            unsigned long e = (v1 >> 1U) * unit0 - v1 * unit31;
+            unsigned long v2 = (static_cast<unsigned long>(1) << 15U) * v1 - (mulWordByWordHigh(v1, e) >> 1U);
+            unsigned long high, low;
+            mulWordByWord(high, low, v2, unit);
+            unsigned long v3 = v2 - unit - high - (low + unit < low);
+            return v3;
+        }
     }
     /*
      * Calculate (high, low) / divisor.
@@ -69,7 +69,7 @@ namespace Physica::Core {
     inline void div2WordByFullWord(MPUnit& quotient, MPUnit& remainder
             , MPUnit high, MPUnit low, MPUnit divisor) {
         assert(high < divisor);
-        assert(divisor & (static_cast<MPUnit>(1) << (PhysicaWordSize - 1U)));
+        assert(divisor & MPUnitHighestBitMask);
         MPUnit quotient2;
         mulWordByWord(quotient, quotient2, high, getInverse(divisor));
 
@@ -91,7 +91,7 @@ namespace Physica::Core {
      */
     inline MPUnit div2WordByFullWordQ(MPUnit high, MPUnit low, MPUnit divisor) {
         assert(high < divisor);
-        assert(divisor & (static_cast<MPUnit>(1) << (PhysicaWordSize - 1U)));
+        assert(divisor & MPUnitHighestBitMask);
         MPUnit quotient, quotient2;
         mulWordByWord(quotient, quotient2, high, getInverse(divisor));
 
@@ -112,7 +112,7 @@ namespace Physica::Core {
      */
     inline MPUnit div2WordByFullWordR(MPUnit high, MPUnit low, MPUnit divisor) {
         assert(high < divisor);
-        assert(divisor & (static_cast<MPUnit>(1) << (PhysicaWordSize - 1U)));
+        assert(divisor & MPUnitHighestBitMask);
         MPUnit quotient, quotient2;
         mulWordByWord(quotient, quotient2, high, getInverse(divisor));
 

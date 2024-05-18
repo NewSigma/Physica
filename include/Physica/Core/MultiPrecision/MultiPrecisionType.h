@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2021 WeiBo He.
+ * Copyright 2020-2024 WeiBo He.
  *
  * This file is part of Physica.
 
@@ -24,24 +24,14 @@
  * This header contains some types and definitions used by package MultiPrecision.
  * Here MP stands for MultiPrecision.
  */
-#ifdef PHYSICA_64BIT
-    #define MPUnitWidth (64U)
-    using MPUnit = uint64_t;
-    using SignedMPUnit = int64_t;
-    #define MPUnitMax INT64_MAX
-#endif
-
-#ifdef PHYSICA_32BIT
-    #define MPUnitWidth (32U)
-    using MPUnit = uint32_t;
-    using SignedMPUnit = int32_t;
-    #define MPUnitMax INT32_MAX
-#endif
-
-#define MPUnitHighestBitMask ((MPUnit)1 << (MPUnitWidth - 1))
-#define MPUnitLowerMask (MPUnitMax >> (MPUnitWidth / 2))
-
 namespace Physica::Core {
+    using MPUnit = typename std::conditional<PhysicaWordSize == 64, uint64_t, uint32_t>::type;
+    using SignedMPUnit = typename std::conditional<PhysicaWordSize == 64, int64_t, int32_t>::type;
+    constexpr static unsigned int MPUnitWidth = PhysicaWordSize;
+    constexpr static MPUnit MPUnitMax = std::numeric_limits<MPUnit>::max();
+    constexpr static MPUnit MPUnitHighestBitMask = static_cast<MPUnit>(1) << (MPUnitWidth - 1);
+    constexpr static MPUnit MPUnitLowerMask = MPUnitMax >> (MPUnitWidth / 2);
+
     enum ScalarOption {
         Float = 0,
         Double = 1,
@@ -49,8 +39,7 @@ namespace Physica::Core {
     };
 
     /**
-     * \class Scalar is a advanced float type that supports multiple precision and error track,
-     * which is also compatible with float and double.
+     * \class Scalar is a advanced float type that supports multiple precision
      */
     template<ScalarOption Option = Double> class Scalar;
 }

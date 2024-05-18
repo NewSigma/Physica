@@ -41,7 +41,7 @@ namespace Physica::Core {
     public:
         using typename Base::StateType;
     private:
-        Utils::Array<SpinElectron> states;
+        Utils::Array<SpinElectron> states; //Optimize: Each spin up state might pair with several spin down states
         PeriodArray periods;
         RSpinType rSpin;
         unsigned int kIndex;

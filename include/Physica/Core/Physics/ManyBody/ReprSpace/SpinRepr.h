@@ -68,7 +68,9 @@ namespace Physica::Core {
         [[nodiscard]] unsigned int getNumSite() const noexcept { return numSite; }
         [[nodiscard]] const StateArray& getUpStates() const noexcept { return upStates; }
         [[nodiscard]] inline const StateArray& getDownStates() const noexcept;
-        [[nodiscard]] inline size_t getNumState() const noexcept;
+        [[nodiscard]] size_t getNumState() const noexcept { return getNumUpStates() * getNumDownStates(); }
+        [[nodiscard]] size_t getNumUpStates() const noexcept { return getUpStates().getLength(); }
+        [[nodiscard]] size_t getNumDownStates() const noexcept { return getDownStates().getLength(); }
     private:
         [[nodiscard]] StateArray makeSpinlessStates(size_t numElectron) const noexcept;
         void checkState(StateType state) const noexcept;
@@ -87,13 +89,10 @@ namespace Physica::Core {
     typename SpinRepr<UseInversionSymm>::StateType
     SpinRepr<UseInversionSymm>::operator[](size_t index) const noexcept {
         assert(index < getNumState() && "[Error]: Index out of range");
-        const size_t upIndex = index / upStates.getLength();
-        const size_t downIndex = index % upStates.getLength();
-        StateType result;
-        if constexpr (UseInversionSymm)
-            result = StateType(upStates[upIndex], upStates[downIndex]);
-        else
-            result = StateType(upStates[upIndex], downStates[downIndex]);
+        const size_t numDownStates = getNumDownStates();
+        const size_t upIndex = index / numDownStates;
+        const size_t downIndex = index % numDownStates;
+        StateType result = StateType(upStates[upIndex], getDownStates()[downIndex]);
         checkState(result);
         return result;
     }
@@ -105,20 +104,16 @@ namespace Physica::Core {
         for (; upIndex < upStates.getLength(); ++upIndex)
             if (state.getSpinUp() == upStates[upIndex])
                 break;
+        assert(upIndex < upStates.getLength() && "[Error]: Unexpected missing state");
 
+        const size_t numDownStates = getNumDownStates();
         size_t downIndex = 0;
-        if constexpr (UseInversionSymm) {
-            for (; downIndex < upStates.getLength(); ++downIndex)
-                if (state.getSpinDown() == upStates[downIndex])
-                    break;
-        }
-        else {
-            for (; downIndex < downStates.getLength(); ++downIndex)
-                if (state.getSpinDown() == downStates[downIndex])
-                    break;
-        }
+        for (; downIndex < numDownStates; ++downIndex)
+            if (state.getSpinDown() == getDownStates()[downIndex])
+                break;
+        assert(downIndex < numDownStates && "[Error]: Unexpected missing state");
 
-        const size_t index = upIndex * upStates.getLength() + downIndex;
+        const size_t index = upIndex * getNumDownStates() + downIndex;
         assert(index < getNumState() && "[Error]: Index out of range");
         return index;
     }
@@ -138,15 +133,6 @@ namespace Physica::Core {
             return upStates;
         else
             return downStates;
-    }
-
-    template<bool UseInversionSymm>
-    inline size_t SpinRepr<UseInversionSymm>::getNumState() const noexcept {
-        const size_t numUpStates = upStates.getLength();
-        if constexpr (UseInversionSymm)
-            return numUpStates * numUpStates;
-        else
-            return numUpStates * downStates.getLength();
     }
 
     template<bool UseInversionSymm>

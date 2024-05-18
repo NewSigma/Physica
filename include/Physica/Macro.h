@@ -20,14 +20,7 @@
 
 #include <climits>
 #include "Physica/Config.h"
-
-#if PhysicaWordSize == 64
-    #define PHYSICA_64BIT
-#elif PhysicaWordSize == 32;
-    #define PHYSICA_32BIT
-#endif
-
-/*!
+/**
  * Improve: Platform dependent, may be wrong on some spatial platforms, add a test before compile.
  * Note: Use of double_extract may cause several warnings in valgrind.
  */

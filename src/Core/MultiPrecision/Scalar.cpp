@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 WeiBo He.
+ * Copyright 2019-2024 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -55,59 +55,60 @@ namespace Physica::Core {
         if(quotient < 0)
             --power;
         unsigned int remainder = quotient - power * __WORDSIZE;
-    #ifdef PHYSICA_64BIT
-        if(remainder < 52) {
-            length = 2;
-            byte = reinterpret_cast<MPUnit*>(malloc(length * sizeof(MPUnit)));
-            //Hidden bit
-            byte[1] = 1;
-            byte[1] <<= remainder;
-            if(remainder <= 20) {
-                byte[1] += static_cast<MPUnit>(extract.high) >> (20 - remainder);
-                byte[0] = static_cast<MPUnit>(extract.high) << (44 + remainder);
-                byte[0] += static_cast<MPUnit>(extract.low) << (32 - (20 - remainder));
+        if constexpr (PhysicaWordSize == 64) {
+            if(remainder < 52) {
+                length = 2;
+                byte = reinterpret_cast<MPUnit*>(malloc(length * sizeof(MPUnit)));
+                //Hidden bit
+                byte[1] = 1;
+                byte[1] <<= remainder;
+                if(remainder <= 20) {
+                    byte[1] += static_cast<MPUnit>(extract.high) >> (20 - remainder);
+                    byte[0] = static_cast<MPUnit>(extract.high) << (44 + remainder);
+                    byte[0] += static_cast<MPUnit>(extract.low) << (32 - (20 - remainder));
+                }
+                else {
+                    byte[1] += static_cast<MPUnit>(extract.high) << (remainder - 20);
+                    byte[1] += static_cast<MPUnit>(extract.low) >> (32 - (remainder - 20));
+                    byte[0] = static_cast<MPUnit>(extract.low) << (32 + (remainder - 20));
+                }
             }
             else {
-                byte[1] += static_cast<MPUnit>(extract.high) << (remainder - 20);
-                byte[1] += static_cast<MPUnit>(extract.low) >> (32 - (remainder - 20));
-                byte[0] = static_cast<MPUnit>(extract.low) << (32 + (remainder - 20));
+                length = 1;
+                byte = reinterpret_cast<MPUnit*>(malloc(sizeof(MPUnit)));
+                //Hidden bit
+                byte[0] = 1;
+                byte[0] <<= 20U;
+                byte[0] += static_cast<MPUnit>(extract.high);
+                byte[0] <<= 32U;
+                byte[0] += static_cast<MPUnit>(extract.low);
+                byte[0] <<= remainder - 52;
             }
         }
         else {
-            length = 1;
-            byte = reinterpret_cast<MPUnit*>(malloc(sizeof(MPUnit)));
-            //Hidden bit
-            byte[0] = 1;
-            byte[0] <<= 20U;
-            byte[0] += static_cast<MPUnit>(extract.high);
-            byte[0] <<= 32U;
-            byte[0] += static_cast<MPUnit>(extract.low);
-            byte[0] <<= remainder - 52;
+            if(remainder < 20) {
+                length = 3;
+                byte = reinterpret_cast<MPUnit*>(malloc(length * sizeof(MPUnit)));
+                //Hidden bit
+                byte[2] = 1;
+                byte[2] <<= remainder;
+                byte[2] += static_cast<MPUnit>(extract.high) >> (20 - remainder);
+                byte[1] = static_cast<MPUnit>(extract.high) << (32 - (20 - remainder));
+                byte[1] +=  static_cast<MPUnit>(extract.low) >> (20 - remainder);
+                byte[0] = static_cast<MPUnit>(extract.low) << remainder;
+            }
+            else {
+                length = 2;
+                byte = reinterpret_cast<MPUnit*>(malloc(length * sizeof(MPUnit)));
+                //Hidden bit
+                byte[1] = 1;
+                byte[1] <<= remainder;
+                byte[1] += static_cast<MPUnit>(extract.high) << (remainder - 20);
+                byte[1] += static_cast<MPUnit>(extract.low) >> (32 - (remainder - 20));
+                byte[0] = static_cast<MPUnit>(extract.low) << (remainder - 20);
+            }
         }
-    #endif
-    #ifdef PHYSICA_32BIT
-        if(remainder < 20) {
-            length = 3;
-            byte = reinterpret_cast<MPUnit*>(malloc(length * sizeof(MPUnit)));
-            //Hidden bit
-            byte[2] = 1;
-            byte[2] <<= remainder;
-            byte[2] += static_cast<MPUnit>(extract.high) >> (20 - remainder);
-            byte[1] = static_cast<MPUnit>(extract.high) << (32 - (20 - remainder));
-            byte[1] +=  static_cast<MPUnit>(extract.low) >> (20 - remainder);
-            byte[0] = static_cast<MPUnit>(extract.low) << remainder;
-        }
-        else {
-            length = 2;
-            byte = reinterpret_cast<MPUnit*>(malloc(length * sizeof(MPUnit)));
-            //Hidden bit
-            byte[1] = 1;
-            byte[1] <<= remainder;
-            byte[1] += static_cast<MPUnit>(extract.high) << (remainder - 20);
-            byte[1] += static_cast<MPUnit>(extract.low) >> (32 - (remainder - 20));
-            byte[0] = static_cast<MPUnit>(extract.low) << (remainder - 20);
-        }
-    #endif
+
         if(extract.sign)
             length = -length;
     }

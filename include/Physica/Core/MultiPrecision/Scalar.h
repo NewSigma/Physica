@@ -331,7 +331,7 @@ namespace std {
         using T = Physica::Core::Scalar<Physica::Core::MultiPrecision>;
     public:
         static T epsilon() noexcept {
-            auto result = T(static_cast<SignedMPUnit>(1));
+            auto result = T(static_cast<Physica::Core::SignedMPUnit>(1));
             result.setPower(1 - Physica::Core::GlobalPrecision);
             return result;
         }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 WeiBo He.
+ * Copyright 2019-2024 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -29,7 +29,7 @@ namespace Physica::Core {
     inline MPUnit mulWordByWordHigh(MPUnit n1, MPUnit n2) {
     #if UseASM
         MPUnit result;
-        #ifdef PHYSICA_64BIT
+        if constexpr (PhysicaWordSize == 64) {
             asm (
                     "mulq %2\n\t"
                     "movq %%rdx, %0"
@@ -37,13 +37,14 @@ namespace Physica::Core {
                     : "a"(n1), "rm"(n2)
                     : "%rdx"
             );
-        #else
+        }
+        else {
             asm (
                     "mull %2"
                     : "=d"(result)
                     : "a"(n1), "rm"(n2)
             );
-        #endif
+        }
         return result;
     #else
         unsigned long n1_low = n1 & MPUnitLowerMask;
@@ -69,19 +70,20 @@ namespace Physica::Core {
      */
     inline void mulWordByWord(MPUnit& high, MPUnit& low, MPUnit n1, MPUnit n2) {
     #if UseASM
-        #ifdef PHYSICA_64BIT
+        if constexpr (PhysicaWordSize == 64) {
             asm (
                     "mulq %3"
                     : "=d"(high), "=a"(low)
                     : "a"(n1), "rm"(n2)
             );
-        #else
+        }
+        else {
             asm (
                     "mull %3"
                     : "=d"(high), "=a"(low)
                     : "a"(n1), "rm"(n2)
             );
-        #endif
+        }
     #else
         MPUnit n1_low = n1 & MPUnitLowerMask;
         MPUnit n1_high = n1 >> (MPUnitWidth / 2U);
