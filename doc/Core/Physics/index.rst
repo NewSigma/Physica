@@ -1,8 +1,8 @@
-Core
+Physics
 ===================================
 
 .. toctree::
    :maxdepth: 1
 
-   PIPhonon
+   MD/index.rst
    RHFSolver

@@ -6,4 +6,6 @@ LinearAlgebra
 
    EigenSolver
    HouseHolder
+   IterateSolver
+   JacobiDavidson
    Schur

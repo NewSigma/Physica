@@ -7,6 +7,7 @@ list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake/Modules)
 option(BUILD_EXAMPLES "Build examples" ON)
 option(BUILD_TESTS "Build tests" ON)
 option(BUILD_BENCHMARKS "Build benchmarks" OFF)
+option(BUILD_DOC "Build documentation" OFF)
 option(RUN_CHECKS "Run Checks" ON)
 option(PHYSICA_PROFILE "Build with profiling support" OFF)
 option(PHYSICA_GUI "Enable GUI support" OFF)
@@ -116,6 +117,10 @@ if(${PHYSICA_PYTHON})
     include_directories(${pybind11_INCLUDE_DIRS})
     add_definitions(-DPHYSICA_PYTHON)
 endif()
+
+if(${BUILD_DOC})
+    find_package(Sphinx REQUIRED)
+endif()
 #############################################Project##############################################
 include_directories(./include)
 file(GLOB_RECURSE HEADERS include/*.h include/*.cuh)
@@ -147,6 +152,14 @@ if(${PHYSICA_GUI})
     #############################################Options##############################################
     target_link_libraries(Physica PhysicaCore PhysicaGui Qt6::Core Qt6::Widgets ${HDF5_CXX_SHARED_LIBRARY})
 endif()
+
+if(${BUILD_DOC})
+    add_custom_target(Sphinx
+                      COMMAND ${SPHINX_EXEC} -b html ${CMAKE_SOURCE_DIR}/doc ${CMAKE_BINARY_DIR}/sphinx
+                      WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+                      COMMENT "Generating documentation with Sphinx")
+endif()
+
 install(DIRECTORY ${CMAKE_SOURCE_DIR}/cmake DESTINATION share)
 install(DIRECTORY ${CMAKE_SOURCE_DIR}/3rdparty/vectorclass DESTINATION include)
 install(FILES include/Physica/Config.h DESTINATION include/Physica)
