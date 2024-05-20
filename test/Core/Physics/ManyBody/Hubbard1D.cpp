@@ -20,19 +20,21 @@
 #include "Physica/Core/Math/Random/RandomPool.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Eigen/JacobiDavidson.h"
 #include "Physica/Core/Physics/ManyBody/Hubbard1D.h"
+#include "Physica/Core/Physics/ManyBody/ReprSpace/KSpinRepr.h"
 
 using namespace Physica::Core;
-using ScalarType = Scalar<Double>;
-using VectorType = Vector<ScalarType>;
-using MatrixType = DenseMatrix<ScalarType>;
-using ReprType = SpinRepr<false>;
-constexpr unsigned int NumSite = 3;
-constexpr unsigned int NumSpinUp = 2;
-constexpr unsigned int NumSpinDown = 1;
 constexpr double HoppingT = 1.0;
 constexpr double RepelU = 2;
 
-int main() {
+void testRSpinMatrix() {
+    using ScalarType = Scalar<Double>;
+    using VectorType = Vector<ScalarType>;
+    using MatrixType = DenseMatrix<ScalarType>;
+    using ReprType = SpinRepr<false>;
+    constexpr unsigned int NumSite = 3;
+    constexpr unsigned int NumSpinUp = 2;
+    constexpr unsigned int NumSpinDown = 1;
+
     ReprType repr(NumSite, NumSpinUp, NumSpinDown);
     const Hubbard1D<ScalarType, ReprType> model({{NumSite}, 1}, std::move(repr), HoppingT, RepelU);
     const size_t numState = model.getNumState();
@@ -45,6 +47,34 @@ int main() {
     }
 
     if (!matrixNear(model, mat, 1E-15))
-        return 1;
+        exit(EXIT_FAILURE);
+}
+
+void testKSpinMatrix() {
+    using ScalarType = ComplexScalar<Scalar<Double>>;
+    using VectorType = Vector<ScalarType>;
+    using MatrixType = DenseMatrix<ScalarType>;
+    using ReprType = KSpinRepr<true>;
+    constexpr unsigned int NumSite = 4;
+    constexpr unsigned int NumParticle = NumSite / 2;
+
+    ReprType repr({NumSite, NumParticle, NumParticle}, 0);
+    Hubbard1D<ScalarType, ReprType> model({{NumSite}, 1}, std::move(repr), HoppingT, 4);
+    const size_t numState = model.getNumState();
+    MatrixType mat(numState, numState);
+    for (size_t i = 0; i < numState; ++i) {
+        VectorType temp(numState, 0);
+        temp[i] = ScalarType(1);
+        auto col = mat.col(i);
+        col = model * temp;
+    }
+
+    if (!matrixNear(model, mat, 1E-15))
+        exit(EXIT_FAILURE);
+}
+
+int main() {
+    testRSpinMatrix();
+    testKSpinMatrix();
     return 0;
 }

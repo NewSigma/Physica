@@ -29,31 +29,33 @@ namespace Physica::Core {
             , planProvider(getNumSuperCellSite(), PlanFlag::Estimate) {}
 
     template<class ScalarType, class ReprType>
-    template<class VectorType>
-    Vector<ScalarType> Hubbard1D<ScalarType, ReprType>::operator*(const RValueVector<VectorType>& v) const {
-        if constexpr (IsTransInvariant)
-            return static_cast<const Base&>(*this) * v;
-        else {
-            const size_t length = v.getLength();
-            const auto numSite = getNumSuperCellSite();
-            assert(Base::getColumn() == length && "[Error]: Dimensions do not match");
-            Vector<ScalarType> result(length, 0);
-            for (size_t i = 0; i < length; ++i) {
-                const ScalarType hop = -v.calc(i) * hoppingT;
-                const auto state = repr[i];
-                int numRepel = 0;
-                for (unsigned int site = 0; site < numSite; ++site) {
-                    const auto site1 = (site + 1) % numSite;
-                    Base::stateAdd(result, state.hopUp(site, site1), hop);
-                    Base::stateAdd(result, state.hopUp(site1, site), hop);
-                    Base::stateAdd(result, state.hopDown(site, site1), hop);
-                    Base::stateAdd(result, state.hopDown(site1, site), hop);
-                    numRepel += state.isUpOccupy(site) && state.isDownOccupy(site);
-                }
-                result[i] += v.calc(i) * (repelU * RealType(numRepel));
+    template<class AnyVector>
+    Vector<ScalarType> Hubbard1D<ScalarType, ReprType>::operator*(const RValueVector<AnyVector>& v) const {
+        const auto numSite = getNumSuperCellSite();
+        const size_t length = v.getLength();
+        assert(Base::getColumn() == length && "[Error]: Dimensions do not match");
+        Vector<ScalarType> result(length, 0);
+        for (size_t i = 0; i < length; ++i) {
+            const ScalarType factor = v.calc(i);
+            ScalarType hop = -factor * hoppingT;
+            if constexpr (IsTransInvariant) {
+                const RealType normalizer = sqrt(RealType(repr.getPeriods()[i])) / RealType(numSite);
+                hop *= normalizer;
             }
-            return result;
+
+            const auto state = repr[i];
+            int numRepel = 0;
+            for (unsigned int site = 0; site < numSite; ++site) {
+                const auto site1 = (site + 1) % numSite;
+                sumHop(result, state.hopUp(site, site1), hop);
+                sumHop(result, state.hopUp(site1, site), hop);
+                sumHop(result, state.hopDown(site, site1), hop);
+                sumHop(result, state.hopDown(site1, site), hop);
+                numRepel += state.isUpOccupy(site) && state.isDownOccupy(site);
+            }
+            result[i] += factor * (repelU * RealType(numRepel));
         }
+        return result;
     }
 
     template<class ScalarType, class ReprType>
@@ -123,5 +125,26 @@ namespace Physica::Core {
                 return -hoppingT;
         }
         return RealType(0);
+    }
+
+    template<class ScalarType, class ReprType>
+    void Hubbard1D<ScalarType, ReprType>::sumHop(VectorType& target, StateType psi, ScalarType factor) const {
+        if constexpr (IsTransInvariant) {
+            if (psi.isVacuum())
+                return;
+            const auto numSite = getNumSuperCellSite();
+            const auto reducedPsi = psi.transReduce();
+            const size_t index = repr[reducedPsi];
+            auto fft = FFTType::makeEmptyFFT(numSite);
+            auto& rSpace = fft.getRSpace();
+            for (size_t i = 0; i < numSite; ++i) {
+                rSpace[i] = RealType(reducedPsi == psi ? 1.0 : 0.0);
+                psi <<= 1;
+            }
+            FFTType::transform(planProvider, fft);
+            target[index] += fft.getKSpace()[repr.getReducedK()] * sqrt(RealType(repr.getPeriods()[index])) * factor;
+        }
+        else
+            Base::stateAdd(target, psi, factor);
     }
 }

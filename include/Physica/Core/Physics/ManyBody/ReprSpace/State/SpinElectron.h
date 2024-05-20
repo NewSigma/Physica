@@ -54,7 +54,7 @@ namespace Physica::Core {
         /* Operations */
         [[nodiscard]] SpinElectron hopUp(unsigned char from, unsigned char to) const;
         [[nodiscard]] SpinElectron hopDown(unsigned char from, unsigned char to) const;
-        [[nodiscard]] inline SpinElectron transReduce() const;
+        [[nodiscard]] SpinElectron transReduce() const;
         [[nodiscard]] inline int calcPeriod() const noexcept;
         inline void swap(SpinElectron& __restrict obj) noexcept;
         /* Getters */
@@ -71,10 +71,6 @@ namespace Physica::Core {
 
     inline SpinElectron::SpinElectron(SpinlessElectron spinUp_, SpinlessElectron spinDown_)
             : spinUp(spinUp_), spinDown(spinDown_) {}
-
-    inline SpinElectron SpinElectron::transReduce() const {
-        return SpinElectron(spinUp.transReduce(), spinDown.transReduce(spinUp.calcPeriod()));
-    }
 
     inline int SpinElectron::calcPeriod() const noexcept {
         const int result = lcm<int, false>(spinUp.calcPeriod(), spinDown.calcPeriod());

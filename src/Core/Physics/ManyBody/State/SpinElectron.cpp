@@ -34,4 +34,16 @@ namespace Physica::Core {
             return SpinElectron();
         return SpinElectron(spinUp, std::move(newSpinDown));
     }
+
+    SpinElectron SpinElectron::transReduce() const {
+        const int numSite = getNumSite();
+        This result = *this, temp = *this;
+        for (int i = 0; i < numSite; ++i) {
+            temp <<= 1;
+            if (temp.getSpinUp().getOccupyBits() < result.getSpinUp().getOccupyBits())
+                result = temp;
+        }
+        result.spinDown = result.spinDown.transReduce(result.spinUp.calcPeriod());
+        return result;
+    }
 }

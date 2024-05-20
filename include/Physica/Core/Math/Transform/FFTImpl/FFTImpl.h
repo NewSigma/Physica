@@ -152,7 +152,7 @@ namespace Physica::Core {
     void FFT<ScalarType, 1>::transform(const This& planProvider, This& bufferProvider) {
         const auto forward_plan = planProvider.forward_plan;
         const auto buffer = bufferProvider.buffer;
-        assert(forward_plan != nullptr);
+        assert(forward_plan != nullptr && "[Error]: Bad plan provider or working on a empry fft");
         assert(planProvider.getRSpaceSize() == bufferProvider.getRSpaceSize());
         assert(planProvider.getKSpaceSize() == bufferProvider.getKSpaceSize());
         if constexpr (isSinglePrec) {
@@ -360,7 +360,7 @@ namespace Physica::Core {
     inline void FFT<ScalarType, Dim>::transform(const This& planProvider, This& bufferProvider) {
         const auto forward_plan = planProvider.forward_plan;
         const auto buffer = bufferProvider.buffer;
-        assert(forward_plan != nullptr);
+        assert(forward_plan != nullptr && "[Error]: Bad plan provider or working on a empry fft");
         assert(planProvider.getRSpaceSize() == bufferProvider.getRSpaceSize());
         assert(planProvider.getKSpaceSize() == bufferProvider.getKSpaceSize());
         if constexpr (isSinglePrec) {

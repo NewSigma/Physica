@@ -45,6 +45,7 @@ namespace Physica::Core {
         using This = Hubbard1D<ScalarType, ReprType>;
         using Base = LatticeHamilton<This>;
         using RealType = typename ScalarType::RealType;
+        using VectorType = Vector<ScalarType>;
         using FFTType = FFT<RealType, 1>;
         using typename Base::LatticeType;
         using typename Base::StateType;
@@ -64,8 +65,8 @@ namespace Physica::Core {
         ~Hubbard1D() = default;
         /* Operators */
         Hubbard1D& operator=(Hubbard1D obj) noexcept { swap(obj); return *this; }
-        template<class VectorType>
-        [[nodiscard]] Vector<ScalarType> operator*(const RValueVector<VectorType>& v) const;
+        template<class AnyVector>
+        [[nodiscard]] Vector<ScalarType> operator*(const RValueVector<AnyVector>& v) const;
         /* Operations */
         [[nodiscard]] ScalarType calc(size_t row, size_t col) const;
         void swap(Hubbard1D& __restrict obj) noexcept;
@@ -78,6 +79,7 @@ namespace Physica::Core {
     private:
         RealType repelElem(StateType psi) const;
         RealType hoppingElem(StateType rowPsi, StateType colPsi) const;
+        void sumHop(VectorType& target, StateType psi, ScalarType factor) const;
     };
 }
 
