@@ -45,12 +45,16 @@ namespace Physica::Core {
         ~SpinElectron() = default;
         /* Operators */
         This& operator=(This obj) noexcept { swap(obj); return *this; }
-        [[nodiscard]] bool operator==(This other) const noexcept { return spinUp == other.spinUp && spinDown == other.spinDown; }
-        [[nodiscard]] bool operator!=(This other) const noexcept { return !(*this == other); }
-        [[nodiscard]] This operator<<(int shift) const { return SpinElectron(spinUp << shift, spinDown << shift); }
-        [[nodiscard]] This operator>>(int shift) const { return SpinElectron(spinUp >> shift, spinDown >> shift); }
-        void operator<<=(int shift) { (*this) = (*this) << shift; }
-        void operator>>=(int shift) { (*this) = (*this) >> shift; }
+        [[nodiscard]] bool operator==(const This& other) const noexcept { return spinUp == other.spinUp && spinDown == other.spinDown; }
+        [[nodiscard]] bool operator!=(const This& other) const noexcept { return !(*this == other); }
+        [[nodiscard]] inline bool operator>(const This& other) const noexcept;
+        [[nodiscard]] inline bool operator<(const This& other) const noexcept;
+        [[nodiscard]] bool operator>=(const This& other) const noexcept { return !((*this) < other); }
+        [[nodiscard]] bool operator<=(const This& other) const noexcept { return !((*this) > other); }
+        [[nodiscard]] This operator<<(int shift) const noexcept { return SpinElectron(spinUp << shift, spinDown << shift); }
+        [[nodiscard]] This operator>>(int shift) const noexcept { return SpinElectron(spinUp >> shift, spinDown >> shift); }
+        void operator<<=(int shift) noexcept { (*this) = (*this) << shift; }
+        void operator>>=(int shift) noexcept { (*this) = (*this) >> shift; }
         /* Operations */
         [[nodiscard]] SpinElectron hopUp(unsigned char from, unsigned char to) const;
         [[nodiscard]] SpinElectron hopDown(unsigned char from, unsigned char to) const;
@@ -71,6 +75,22 @@ namespace Physica::Core {
 
     inline SpinElectron::SpinElectron(SpinlessElectron spinUp_, SpinlessElectron spinDown_)
             : spinUp(spinUp_), spinDown(spinDown_) {}
+
+    inline bool SpinElectron::operator>(const This& other) const noexcept {
+        if (spinUp > other.spinUp)
+            return true;
+        if (spinUp == other.spinUp)
+            return spinDown > other.spinDown;
+        return false;
+    }
+
+    inline bool SpinElectron::operator<(const This& other) const noexcept {
+        if (spinUp < other.spinUp)
+            return true;
+        if (spinUp == other.spinUp)
+            return spinDown < other.spinDown;
+        return false;
+    }
 
     inline int SpinElectron::calcPeriod() const noexcept {
         const int result = lcm<int, false>(spinUp.calcPeriod(), spinDown.calcPeriod());

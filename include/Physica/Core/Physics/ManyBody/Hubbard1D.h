@@ -79,7 +79,8 @@ namespace Physica::Core {
     private:
         RealType repelElem(StateType psi) const;
         RealType hoppingElem(StateType rowPsi, StateType colPsi) const;
-        void sumHop(VectorType& target, StateType psi, ScalarType factor) const;
+        void sumHopping(VectorType& target, ScalarType value, StateType state) const noexcept;
+        void sumHopping(VectorType& target, FFTType& fft, ScalarType factor, StateType psi) const;
     };
 }
 

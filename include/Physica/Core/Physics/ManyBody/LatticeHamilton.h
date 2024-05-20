@@ -62,8 +62,6 @@ namespace Physica::Core {
         /* Operators */
         LatticeHamilton& operator=(LatticeHamilton obj) noexcept { swap(obj); return *this; }
         /* Operations */
-        void stateAdd(Vector<ScalarType>& target, StateType state, ScalarType value) const noexcept;
-
         [[nodiscard]] const This& hermite() const noexcept { return *this; }
         void swap(LatticeHamilton& __restrict obj) noexcept;
         /* Getters */
@@ -76,14 +74,6 @@ namespace Physica::Core {
 
     template<class Derived>
     LatticeHamilton<Derived>::LatticeHamilton(LatticeType lattice_) : lattice(std::move(lattice_)) {}
-
-    template<class Derived>
-    void LatticeHamilton<Derived>::stateAdd(Vector<ScalarType>& target, StateType state, ScalarType value) const noexcept {
-        if (state.isVacuum())
-            return;
-        const auto index = getRepr()[state];
-        target[index] += value;
-    }
 
     template<class Derived>
     void LatticeHamilton<Derived>::swap(LatticeHamilton& __restrict obj) noexcept {

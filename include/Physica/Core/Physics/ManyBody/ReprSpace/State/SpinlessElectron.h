@@ -39,18 +39,22 @@ namespace Physica::Core {
         int numSite;
     public:
         SpinlessElectron() = default;
-        SpinlessElectron(uint64_t occupyBits_, int numSite_);
+        inline SpinlessElectron(uint64_t occupyBits_, int numSite_);
         SpinlessElectron(const SpinlessElectron&) = default;
         SpinlessElectron(SpinlessElectron&&) noexcept = default;
         ~SpinlessElectron() = default;
         /* Operators */
         This& operator=(This obj) noexcept { swap(obj); return *this; }
-        [[nodiscard]] inline bool operator==(This other) const noexcept;
-        [[nodiscard]] bool operator!=(This other) const noexcept { return !(*this == other); }
-        [[nodiscard]] This operator<<(int shift) const;
-        [[nodiscard]] This operator>>(int shift) const;
-        void operator<<=(int shift) { (*this) = (*this) << shift; }
-        void operator>>=(int shift) { (*this) = (*this) >> shift; }
+        [[nodiscard]] inline bool operator==(const This& other) const noexcept;
+        [[nodiscard]] bool operator!=(const This& other) const noexcept { return !(*this == other); }
+        [[nodiscard]] bool operator>(const This& other) const noexcept { return occupyBits > other.occupyBits; }
+        [[nodiscard]] bool operator<(const This& other) const noexcept { return occupyBits < other.occupyBits; }
+        [[nodiscard]] bool operator>=(const This& other) const noexcept { return occupyBits >= other.occupyBits; }
+        [[nodiscard]] bool operator<=(const This& other) const noexcept { return occupyBits <= other.occupyBits; }
+        [[nodiscard]] inline This operator<<(int shift) const noexcept;
+        [[nodiscard]] inline This operator>>(int shift) const noexcept;
+        void operator<<=(int shift) noexcept { (*this) = (*this) << shift; }
+        void operator>>=(int shift) noexcept { (*this) = (*this) >> shift; }
         friend std::ostream& operator<<(std::ostream& os, SpinlessElectron e);
         /* Operations */
         [[nodiscard]] inline SpinlessElectron hop(unsigned char from, unsigned char to) const;
@@ -69,8 +73,27 @@ namespace Physica::Core {
         [[nodiscard]] inline uint64_t makeHighMask() const noexcept;
     };
 
-    inline bool SpinlessElectron::operator==(This other) const noexcept {
+    inline SpinlessElectron::SpinlessElectron(uint64_t occupyBits_, int numSite_)
+            : occupyBits(occupyBits_), numSite(numSite_) {
+        assert((1 < numSite) && (static_cast<unsigned int>(numSite) < sizeof(occupyBits) * CHAR_BIT) && "[Error]: Invalid param");
+    }
+
+    inline bool SpinlessElectron::operator==(const This& other) const noexcept {
         return (occupyBits == other.occupyBits) && (numSite == other.numSite);
+    }
+
+    inline SpinlessElectron SpinlessElectron::operator<<(int shift) const noexcept {
+        assert(0 <= shift && shift < numSite && "[Error]: Invalid shift");
+        const auto highBits = occupyBits << shift;
+        const auto lowBits = occupyBits >> (numSite - shift);
+        return SpinlessElectron((highBits | lowBits) & makeFullMask(), numSite);
+    }
+
+    inline SpinlessElectron SpinlessElectron::operator>>(int shift) const noexcept {
+        assert(0 <= shift && shift < numSite && "[Error]: Invalid shift");
+        const auto highBits = occupyBits << (numSite - shift);
+        const auto lowBits = occupyBits >> shift;
+        return SpinlessElectron((highBits | lowBits) & makeFullMask(), numSite);
     }
 
     inline SpinlessElectron SpinlessElectron::hop(unsigned char from, unsigned char to) const {

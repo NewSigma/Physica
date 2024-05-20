@@ -45,13 +45,26 @@ namespace Physica::Core {
 
             const auto state = repr[i];
             int numRepel = 0;
-            for (unsigned int site = 0; site < numSite; ++site) {
-                const auto site1 = (site + 1) % numSite;
-                sumHop(result, state.hopUp(site, site1), hop);
-                sumHop(result, state.hopUp(site1, site), hop);
-                sumHop(result, state.hopDown(site, site1), hop);
-                sumHop(result, state.hopDown(site1, site), hop);
-                numRepel += state.isUpOccupy(site) && state.isDownOccupy(site);
+            if constexpr (IsTransInvariant) {
+                auto fft = FFTType::makeEmptyFFT(numSite);
+                for (unsigned int site = 0; site < numSite; ++site) {
+                    const auto site1 = (site + 1) % numSite;
+                    sumHopping(result, fft, hop, state.hopUp(site, site1));
+                    sumHopping(result, fft, hop, state.hopUp(site1, site));
+                    sumHopping(result, fft, hop, state.hopDown(site, site1));
+                    sumHopping(result, fft, hop, state.hopDown(site1, site));
+                    numRepel += state.isUpOccupy(site) && state.isDownOccupy(site);
+                }
+            }
+            else {
+                for (unsigned int site = 0; site < numSite; ++site) {
+                    const auto site1 = (site + 1) % numSite;
+                    sumHopping(result, hop, state.hopUp(site, site1));
+                    sumHopping(result, hop, state.hopUp(site1, site));
+                    sumHopping(result, hop, state.hopDown(site, site1));
+                    sumHopping(result, hop, state.hopDown(site1, site));
+                    numRepel += state.isUpOccupy(site) && state.isDownOccupy(site);
+                }
             }
             result[i] += factor * (repelU * RealType(numRepel));
         }
@@ -128,23 +141,26 @@ namespace Physica::Core {
     }
 
     template<class ScalarType, class ReprType>
-    void Hubbard1D<ScalarType, ReprType>::sumHop(VectorType& target, StateType psi, ScalarType factor) const {
-        if constexpr (IsTransInvariant) {
-            if (psi.isVacuum())
-                return;
-            const auto numSite = getNumSuperCellSite();
-            const auto reducedPsi = psi.transReduce();
-            const size_t index = repr[reducedPsi];
-            auto fft = FFTType::makeEmptyFFT(numSite);
-            auto& rSpace = fft.getRSpace();
-            for (size_t i = 0; i < numSite; ++i) {
-                rSpace[i] = RealType(reducedPsi == psi ? 1.0 : 0.0);
-                psi <<= 1;
-            }
-            FFTType::transform(planProvider, fft);
-            target[index] += fft.getKSpace()[repr.getReducedK()] * sqrt(RealType(repr.getPeriods()[index])) * factor;
+    void Hubbard1D<ScalarType, ReprType>::sumHopping(Vector<ScalarType>& target, ScalarType value, StateType psi) const noexcept {
+        if (psi.isVacuum())
+            return;
+        const auto index = getRepr()[psi];
+        target[index] += value;
+    }
+
+    template<class ScalarType, class ReprType>
+    void Hubbard1D<ScalarType, ReprType>::sumHopping(VectorType& target, FFTType& fft, ScalarType factor, StateType psi) const {
+        if (psi.isVacuum())
+            return;
+        const auto numSite = getNumSuperCellSite();
+        const auto reducedPsi = psi.transReduce();
+        const size_t index = repr[reducedPsi];
+        auto& rSpace = fft.getRSpace();
+        for (size_t i = 0; i < numSite; ++i) {
+            rSpace[i] = RealType(reducedPsi == psi ? 1.0 : 0.0);
+            psi <<= 1;
         }
-        else
-            Base::stateAdd(target, psi, factor);
+        FFTType::transform(planProvider, fft);
+        target[index] += fft.getKSpace()[repr.getReducedK()] * sqrt(RealType(repr.getPeriods()[index])) * factor;
     }
 }

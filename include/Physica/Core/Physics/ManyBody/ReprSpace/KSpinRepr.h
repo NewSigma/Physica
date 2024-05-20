@@ -54,7 +54,7 @@ namespace Physica::Core {
         /* Operators */
         KSpinRepr& operator=(This obj) noexcept { swap(obj); return *this; }
         [[nodiscard]] StateType operator[](size_t index) const noexcept { return states[index]; }
-        [[nodiscard]] size_t operator[](StateType state) const noexcept;
+        [[nodiscard]] size_t operator[](StateType psi) const noexcept;
         /* Operations */
         void swap(This& __restrict obj) noexcept;
         /* Getters */
@@ -88,12 +88,19 @@ namespace Physica::Core {
     }
 
     template<bool UseInversionSymm>
-    size_t KSpinRepr<UseInversionSymm>::operator[](StateType state) const noexcept {
-        for (size_t i = 0; i < getNumState(); ++i)
-            if (state == states[i])
-                return i;
-        assert(false && "[Error]: Invalid state");
-        return 0;
+    size_t KSpinRepr<UseInversionSymm>::operator[](StateType psi) const noexcept {
+        size_t left = 0, right = getNumState() - 1;  
+        while (left < right) {
+            const size_t mid = left + (right - left) / 2;
+            const auto& psi0 = states[mid];
+            if (psi0 == psi)
+                return mid;
+            if (psi0 < psi)
+                left = mid + 1;
+            else
+                right = mid - 1;
+        }
+        return left;
     }
 
     template<bool UseInversionSymm>
