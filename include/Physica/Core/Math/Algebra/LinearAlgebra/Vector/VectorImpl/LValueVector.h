@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2022 WeiBo He.
+ * Copyright 2021-2024 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -66,7 +66,6 @@ namespace Physica::Core {
         template<class Distribution, class RandomGenerator>
         inline void random_any(Distribution& dist, RandomGenerator& gen);
         /* Getters */
-        [[nodiscard]] bool isZero() const;
         [[nodiscard]] __host__ __device__ inline ScalarType* data_ptr(size_t index);
         [[nodiscard]] __host__ __device__ inline const ScalarType* data_ptr(size_t index) const;
     protected:

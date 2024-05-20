@@ -29,13 +29,13 @@ bool isUpperQuasiTriangle(const LValueMatrix<MatrixType>& m) {
     for (size_t i = 0; i < m.getRow() - 1; ++i) {
         if (m(i + 1, i).isZero()) {
             auto col = m.col(i);
-            if (!col.tail(i + 1).isZero())
+            if (!col.tail(i + 1).isZeros())
                 return false;
         }
         else if(i < m.getRow() - 2) {
             auto col1 = m.col(i);
             auto col2 = m.col(i + 1);
-            if (!col1.tail(i + 2).isZero() || !col2.tail(i + 2).isZero())
+            if (!col1.tail(i + 2).isZeros() || !col2.tail(i + 2).isZeros())
                 return false;
             ++i;
         }
@@ -49,7 +49,7 @@ bool isUpperTriangle(const LValueMatrix<MatrixType>& m) {
         return false;
     for (size_t i = 0; i < m.getRow() - 1; ++i) {
         auto col = m.col(i);
-        if (!col.tail(i + 1).isZero())
+        if (!col.tail(i + 1).isZeros())
             return false;
     }
     return true;

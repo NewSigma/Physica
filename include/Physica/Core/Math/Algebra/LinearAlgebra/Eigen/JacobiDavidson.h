@@ -200,7 +200,7 @@ namespace Physica::Core {
                     const auto orthogonalSpace = eigenvectors.leftCols(i + 1);
                     auto new_direction = searchSpace.col(numSearchDim);
                     new_direction = residule;
-                    normGramSchmidt(orthogonalSpace, new_direction, squaredRes);
+                    gramSchmidt(orthogonalSpace, new_direction);
                     linearSolver.solve_functor([this, i, eigenGoal, &buffer, &source](const VectorType& v, VectorType& dot) {
                         const auto orthogonalSpace = eigenvectors.leftCols(i + 1);
                         auto head1 = dot.head(i + 1);
@@ -214,7 +214,7 @@ namespace Physica::Core {
                     }, new_direction);
 
                     new_direction.toUnit();
-                    normGramSchmidt(searchSpace.leftCols(numSearchDim), new_direction);
+                    gramSchmidt(searchSpace.leftCols(numSearchDim), new_direction);
                     assembleProjects(source, numSearchDim, true);
                     numSearchDim += 1;
                 }

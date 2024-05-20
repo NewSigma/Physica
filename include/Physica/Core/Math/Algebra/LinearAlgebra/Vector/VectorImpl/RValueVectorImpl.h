@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2023 WeiBo He.
+ * Copyright 2022-2024 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -186,6 +186,14 @@ namespace Physica::Core {
         for(size_t i = 0; i < getLength(); ++i)
             result += calc(i);
         return result;
+    }
+
+    template<class Derived>
+    bool RValueVector<Derived>::isZeros() const {
+        for(size_t i = 0; i < getLength(); ++i)
+            if (!calc(i).isZero())
+                return false;
+        return true;
     }
 
     template<class Derived>

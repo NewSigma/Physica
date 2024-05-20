@@ -98,6 +98,7 @@ namespace Physica::Core {
         [[nodiscard]] ScalarType max() const;
         [[nodiscard]] ScalarType min() const;
         [[nodiscard]] ScalarType sum() const;
+        [[nodiscard]] bool isZeros() const;
         template<class OtherDerived>
         [[nodiscard]] inline CrossProduct<Derived, OtherDerived> crossProduct(const RValueVector<OtherDerived>& v) const noexcept;
         template<class OtherDerived>

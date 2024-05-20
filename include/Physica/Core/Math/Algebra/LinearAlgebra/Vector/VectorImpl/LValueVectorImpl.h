@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2023 WeiBo He.
+ * Copyright 2022-2024 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -116,14 +116,6 @@ namespace Physica::Core {
     inline void LValueVector<Derived>::random_any(Distribution& dist, RandomGenerator& gen) {
         for (size_t i = 0; i < this->getLength(); ++i)
             this->operator[](i) = ScalarType::random_any(dist, gen);
-    }
-
-    template<class Derived>
-    bool LValueVector<Derived>::isZero() const {
-        for(size_t i = 0; i < Base::getLength(); ++i)
-            if (!(*this)[i].isZero())
-                return false;
-        return true;
     }
     /**
      * Add this function because we cannot simply return &(*this)[index], it is invalid to dereference a device pointer on host.

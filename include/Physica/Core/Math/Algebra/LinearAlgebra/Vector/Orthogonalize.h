@@ -39,6 +39,8 @@ namespace Physica::Core {
     }
     /**
      * normGramSchmidt can run faster than gramSchmidt if \param base_ are normalized.
+     * 
+     * This method is vulnerable to numerical roundness.
      */
     template<class MatrixType, class VectorType>
     void normGramSchmidt(
