@@ -26,21 +26,16 @@
 #include "Physica/Core/Exception/SyscallException.h"
 
 namespace Physica::Core {
-    ProcessFuture::ProcessFuture() : isValid(false) {}
+    ProcessFuture::ProcessFuture() : error(-1), isValid(false) {}
 
-    ProcessFuture::ProcessFuture(pid_t pid_) : pid(pid_), finished(false), isValid(true) {}
+    ProcessFuture::ProcessFuture(pid_t pid_) : pid(pid_), error(-1), finished(false), isValid(true) {}
 
-    ProcessFuture& ProcessFuture::operator=(ProcessFuture future) noexcept {
-        swap(future);
-        return *this;
-    }
-
-    void ProcessFuture::wait(const char* errorMsg) {
+    int ProcessFuture::wait() {
         if (!isValid)
             throw std::future_error(std::future_errc::no_state);
 
         if (finished)
-            return;
+            return error;
 
         int status;
         pid_t endPid = waitpid(pid, &status, 0);
@@ -50,17 +45,16 @@ namespace Physica::Core {
         }
         finished = true;
 
-        int error = -1;
         if (WIFEXITED(status))
             error = WEXITSTATUS(status);
-        if (error != 0)
-            throw std::runtime_error(errorMsg);
+        return error;
     }
 
-    void ProcessFuture::swap(ProcessFuture& __restrict future) noexcept {
-        assert(this != &future && "[Error]: Self swap is likely a bug");
-        std::swap(pid, future.pid);
-        std::swap(finished, future.finished);
-        std::swap(isValid, future.isValid);
+    void ProcessFuture::swap(ProcessFuture& __restrict obj) noexcept {
+        assert(this != &obj && "[Error]: Self swap is likely a bug");
+        std::swap(pid, obj.pid);
+        std::swap(error, obj.error);
+        std::swap(finished, obj.finished);
+        std::swap(isValid, obj.isValid);
     }
 }

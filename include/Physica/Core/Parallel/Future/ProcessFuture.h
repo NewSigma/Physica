@@ -25,6 +25,7 @@
 namespace Physica::Core {
     class PHYSICA_API ProcessFuture {
         pid_t pid;
+        int error;
         bool finished;
         bool isValid;
     public:
@@ -34,9 +35,9 @@ namespace Physica::Core {
         ProcessFuture(ProcessFuture&&) noexcept = default;
         ~ProcessFuture() = default;
         /* Operators */
-        ProcessFuture& operator=(ProcessFuture future) noexcept;
+        ProcessFuture& operator=(ProcessFuture future) noexcept { swap(future); return *this; }
         /* Operations */
-        void wait(const char* errorMsg);
+        [[nodiscard]] int wait();
         /* Getters */
         [[nodiscard]] pid_t getPID() const noexcept { return pid; }
         [[nodiscard]] bool valid() const noexcept { return isValid; }

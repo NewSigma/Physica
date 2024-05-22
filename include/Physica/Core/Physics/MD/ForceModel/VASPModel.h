@@ -128,7 +128,9 @@ namespace Physica::Core {
                 os << "\nCartesian\n";
                 os << cell.getPos();
             }
-            run_vasp().wait("[Error]: VASP finished with non zero exit code");
+            const int error = run_vasp().wait();
+            if (error != 0) [[unlikely]]
+                throw std::runtime_error("[Error]: VASP finished with non zero exit code");
             const auto path = Utils::makePath("%s/OUTCAR", workingDir.getName());
             const Outcar outcar(path.data(), getNumParticle());
             result.getDerived() = outcar.getForce();

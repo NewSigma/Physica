@@ -115,7 +115,12 @@ namespace Physica::Core {
                 }
             }
             auto outputTmp = Utils::TempFile("/tmp/tmpXXXXXX");
-            run_qe(inputTmp, outputTmp).wait("[Error]: QE finished with non zero exit code");
+            const int err = run_qe(inputTmp, outputTmp).wait();
+            [[unlikely]] if (err != 0) {
+                inputTmp.release();
+                outputTmp.release();
+                throw std::runtime_error("[Error]: QE finished with non zero exit code");
+            }
             PWscfOut out_scf(outputTmp.getName(), getNumParticle());
             result.getDerived() = out_scf.getForce();
         }
