@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 WeiBo He.
+ * Copyright 2019-2024 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -18,7 +18,6 @@
  */
 #include <random>
 #include <iostream>
-#include <Physica/Core/PhysicaInit.h>
 #include <Physica/Core/MultiPrecision/Scalar.h>
 
 using namespace Physica::Core;
@@ -154,11 +153,9 @@ bool numericalDivTest(unsigned int loop) {
 }
 
 int main() {
-    initPhysica();
     bool result = numericalAddTest(iterateCount)
-            && numericalSubTest(iterateCount)
-            && numericalMulTest(iterateCount)
-            && numericalDivTest(iterateCount);
-    deInitPhysica();
+               && numericalSubTest(iterateCount)
+               && numericalMulTest(iterateCount)
+               && numericalDivTest(iterateCount);
     return !result;
 }

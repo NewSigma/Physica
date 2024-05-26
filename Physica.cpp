@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 WeiBo He.
+ * Copyright 2019-2024 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -17,11 +17,10 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include <QApplication>
-#include "Physica/Core/PhysicaInit.h"
-
+/**
+ * This file is empty, you can include Physica headers to test your code.
+ */
 int main(int argc, char** argv) {
-    initPhysica();
-
     QApplication::setApplicationName("Physica");
     QApplication::setApplicationVersion("0.0.1");
     QApplication::setOrganizationName("NewSigma@163.com");

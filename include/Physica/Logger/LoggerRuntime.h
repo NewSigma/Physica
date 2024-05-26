@@ -77,8 +77,8 @@ namespace Physica::Logger {
         /* Operations */
         size_t registerLogger(std::unique_ptr<AbstractLogger>&& logger);
         void registerLogInfo(const LogInfo& info) { logInfos.push_back(info); }
-        void loggerShouldExit() { shouldExit = true; }
-        void waitExit();
+        void loggerShouldExit() noexcept { shouldExit = true; }
+        void waitExit() noexcept;
         /* Getters */
         [[nodiscard]] const LoggerTimer& getTimer() const noexcept { return timer; }
         [[nodiscard]] AbstractLogger& getLogger(size_t index) const { assert(index < loggerList.size()); return *loggerList[index]; }
@@ -91,9 +91,11 @@ namespace Physica::Logger {
         static inline LoggerRuntime& getInstance();
     private:
         LoggerRuntime();
-
+        /* Operations */
         void logThreadMain();
         void findNextBufferToLog() noexcept;
+        /* Static members */
+        [[noreturn]] static void abort_handler(int sig) noexcept;
     };
 
     inline AbstractLogger& getLogger(size_t index) {

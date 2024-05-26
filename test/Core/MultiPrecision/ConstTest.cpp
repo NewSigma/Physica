@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 WeiBo He.
+ * Copyright 2019-2024 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -17,7 +17,6 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include <iostream>
-#include <Physica/Core/PhysicaInit.h>
 #include <Physica/Core/MultiPrecision/Scalar.h>
 
 using namespace Physica::Core;
@@ -29,7 +28,6 @@ void printElements(const MultiScalar& n) {
 }
 
 int main() {
-    initPhysica();
     /* test Pi */ {
         auto Pi = MathConst::getInstance().PI;
         if(!(Pi.getSize() == 5
@@ -57,6 +55,5 @@ int main() {
             return 1;
         }
     }
-    deInitPhysica();
     return 0;
 }

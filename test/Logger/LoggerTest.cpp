@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 WeiBo He.
+ * Copyright 2020-2024 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -16,19 +16,13 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include "Physica/Core/PhysicaInit.h"
 #include "Physica/Logger/Logger/AbstractLogger.h"
 #include "Physica/Logger/LoggerRuntime.h"
 #include <unistd.h>
 
 using namespace Physica::Logger;
 
-int main(int argc, char** argv) {
-    (void)argc;
-    (void)argv;
-
-    initPhysica();
-
+int main() {
     Info(STDOUT_FILENO, "Test begin.");
     Warning(STDERR_FILENO, "This is %c %s%c", 'a', "Logger", '.');
 

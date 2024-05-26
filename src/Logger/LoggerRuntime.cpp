@@ -18,6 +18,7 @@
  */
 #include <iostream>
 #include <cstring>
+#include <csignal>
 #include <unistd.h>
 #include "Physica/Logger/LoggerRuntime.h"
 #include "Physica/Logger/Logger/StdLogger.h"
@@ -39,6 +40,10 @@ namespace Physica::Logger {
         [[maybe_unused]] auto& buffer = getBuffer();
 
         logThread = std::thread(&LoggerRuntime::logThreadMain, this);
+
+        if (std::signal(SIGABRT, abort_handler) == SIG_ERR) {
+            Debug(STDERR_FILENO, "Implementation forbid us from handling SIGABRT");
+        }
     }
 
     LoggerRuntime::~LoggerRuntime() {
@@ -61,7 +66,7 @@ namespace Physica::Logger {
         return nextID;
     }
 
-    void LoggerRuntime::waitExit() {
+    void LoggerRuntime::waitExit() noexcept {
         loggerShouldExit();
         if (logThread.joinable())
             logThread.join();
@@ -122,5 +127,10 @@ namespace Physica::Logger {
                 return;
         }
         processingBufferID = -1;
+    }
+
+    void LoggerRuntime::abort_handler(int) noexcept {
+        getInstance().~LoggerRuntime();
+        std::_Exit(EXIT_FAILURE);
     }
 }
