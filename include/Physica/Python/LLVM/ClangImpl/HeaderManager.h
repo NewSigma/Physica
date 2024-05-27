@@ -31,11 +31,13 @@ namespace Physica::Python {
         using FileID = clang::FileID;
         using StringRef = llvm::StringRef;
         using CharacteristicKind = clang::SrcMgr::CharacteristicKind;
-        using HeaderUnitMap = std::unordered_map<std::string, clang::TranslationUnitDecl*>;
+        using DeclContext = clang::DeclContext;
+        using ClassDecl = clang::NamedDecl; //Either CXXRecordDecl or ClassTemplateDecl
+        using HeaderClassMap = std::unordered_map<std::string, ClassDecl*>;
         using typename Base::LexedFileChangeReason;
 
         Clang& compiler;
-        HeaderUnitMap loadedHeaders;
+        HeaderClassMap loadedHeaders;
     public:
         HeaderManager(Clang& compiler_) : compiler(compiler_) {}
         HeaderManager(const This&) = delete;
@@ -52,8 +54,11 @@ namespace Physica::Python {
                 FileID PrevFID,
                 clang::SourceLocation Loc) override;
         /* Getters */
-        [[nodiscard]] const HeaderUnitMap& getLoadedHeaders() const noexcept { return loadedHeaders; }
+        [[nodiscard]] const HeaderClassMap& getLoadedHeaders() const noexcept { return loadedHeaders; }
     private:
+        /* Getters */
         [[nodiscard]] const clang::Preprocessor& getPreprocessor() const noexcept;
+        /* Static members */
+        [[nodiscard]] static ClassDecl* findClassDecl(DeclContext& tree, StringRef className);
     };
 }

@@ -48,13 +48,49 @@ namespace Physica::Python {
         if (isImpl)
             return;
 
+        StringRef className;
+        /* Make class name */ {
+            const size_t end = includeName.rfind('.');
+            assert(end != StringRef::npos && "[Error]: Unexpected includeName");
+            className = includeName.slice(includeName.rfind('/') + 1, end);
+        }
         auto& ctx = compiler.getCI().getASTContext();
         compiler.getCI().getASTConsumer().HandleTranslationUnit(ctx);
-        loadedHeaders[includeName.str()] = ctx.getTranslationUnitDecl();
-        ctx.addTranslationUnitDecl();
+        auto* pClass = findClassDecl(*ctx.getTranslationUnitDecl(), className);
+        loadedHeaders[includeName.str()] = pClass;
     }
 
     const clang::Preprocessor& HeaderManager::getPreprocessor() const noexcept {
         return compiler.getCI().getPreprocessor();
+    }
+
+    typename HeaderManager::ClassDecl* HeaderManager::findClassDecl(DeclContext& tree, StringRef className) {
+        assert(!className.empty() && "[Error]: Invalid class name");
+        using namespace clang;
+        for (clang::Decl* pDecl : tree.decls()) {
+            if (!llvm::isa<NamedDecl>(*pDecl))
+                continue;
+
+            NamedDecl& decl = static_cast<NamedDecl&>(*pDecl);
+            if (!decl.getDeclName().isIdentifier())
+                continue;
+
+            const auto declName = decl.getName();
+            if (llvm::isa<NamespaceDecl>(decl)) {
+                const bool isNotPhysicaNamespace = declName.empty() || std::islower(declName.front());
+                if (isNotPhysicaNamespace)
+                    continue;
+
+                auto* result = findClassDecl(static_cast<NamespaceDecl&>(decl), className);
+                if (result != nullptr)
+                    return result;
+            }
+            else if (llvm::isa<CXXRecordDecl>(decl) || llvm::isa<ClassTemplateDecl>(decl)) {
+                const bool found = className.compare(declName) == 0;
+                if (found)
+                    return &decl;
+            }
+        }
+        return nullptr;
     }
 }

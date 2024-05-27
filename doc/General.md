@@ -1,6 +1,10 @@
 # Physica C++编程规范
 
-如无明确指出，本规范遵循Google C++编程规范$^{[1]}$。本规范与[1]均未指出的，应与已有的多数代码一致。目前使用的C++版本应不低于C++17。
+如本规范未明确指出，默认遵循Google C++编程规范$^{[1]}$。本规范与[1]均未指出的，应与已有的多数代码一致。
+
+## C++版本
+
+目前使用的C++版本应不低于C++17。
 
 ## 头文件
 
@@ -10,20 +14,28 @@
 
 所有头文件应使用#pragma once以避免多重include，禁止使用#define
 
-## swap函数原型
+## Class
 
-参考[2]中的swap函数原型，进一步规定不可与自身发生交换，即任意对象T的swap函数的一般实现为
+### swap函数原型
 
-void T::swap(T& __restrict obj) noexcept {
-    assert(this != &obj && "[Error]: Self swap is likely a bug");
-    /* Details */
-}
+参考[2]中的swap函数原型，进一步规定swap不可与自身发生交换，即任意对象T的swap函数的一般实现为
+
+void T::swap(T& __restrict obj) noexcept {  
+    assert(this != &obj && "[Error]: Self swap is likely a bug");  
+    /* Details */  
+}  
 
 实践中发现Self swap常导致Bug，通过添加__restrict帮助编译器优化和提供编译期Self swap警告
 
-## Run-Time Type Information (RTTI)
+## 其他C++特性
+
+### Run-Time Type Information (RTTI)
 
 不得使用
+
+## 命名
+
+Namespace: 大驼峰式
 
 ## 单元测试
 
@@ -31,5 +43,5 @@ void T::swap(T& __restrict obj) noexcept {
 
 ## Reference
 
-[1] Google C++ Style Guide; https://google.github.io/styleguide/cppguide.html
-[2] Scott Meyers 著，侯捷 译. Effective C++：改善程序与设计的55个具体做法[M]. 北京: 电子工业出版社, 2011
+[1] Google C++ Style Guide; https://google.github.io/styleguide/cppguide.html  
+[2] Scott Meyers 著，侯捷 译. Effective C++：改善程序与设计的55个具体做法[M]. 北京: 电子工业出版社, 2011  

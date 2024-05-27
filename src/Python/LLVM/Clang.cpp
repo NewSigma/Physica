@@ -55,7 +55,8 @@ namespace Physica::Python {
         ci.ExecuteAction(*action);
 
         auto& pp = ci.getPreprocessor();
-        pp.addPPCallbacks(std::unique_ptr<PPCallbacks>(new HeaderManager(*this)));
+        pHeaderManager = new HeaderManager(*this);
+        pp.addPPCallbacks(std::unique_ptr<PPCallbacks>(pHeaderManager));
         parser = std::make_unique<Parser>(pp, ci.getSema(), false);
         parser->Initialize();
     }
@@ -64,31 +65,33 @@ namespace Physica::Python {
         action->finalizeAction();
     }
 
-    const typename Clang::TranslationUnitDecl* Clang::include(const char* includeName) {
+    const clang::NamedDecl* Clang::include(const char* includeName) {
         const auto& headers = getHeaderManager().getLoadedHeaders();
-        const auto ite = headers.find(includeName);
-        if (ite != headers.cend())
-            return ite->second;
+        auto ite = headers.find(std::string(includeName));
+        const bool isNotFound = ite == headers.cend();
+        if (isNotFound) {
+            using namespace clang;
+            std::unique_ptr<llvm::WritableMemoryBuffer> memBuf;
+            /* Make memBuf */ {
+                std::ostringstream ss{};
+                ss << "#include \"Physica/" << includeName << "\"\n";
+                const std::string source = ss.str();
+                memBuf = llvm::WritableMemoryBuffer::getNewUninitMemBuffer(source.length(), includeName);
+                memcpy(memBuf->getBufferStart(), source.data(), source.length());
+            }
+            SourceManager& manager = getCI().getSourceManager();
+            SourceLocation loc = manager.getLocForStartOfFile(manager.getMainFileID());
+            FileID fid = manager.createFileID(std::move(memBuf), SrcMgr::C_User, 0, 0, loc);
 
-        using namespace clang;
-        std::unique_ptr<llvm::WritableMemoryBuffer> memBuf;
-        /* Make memBuf */ {
-            std::ostringstream ss{};
-            ss << "#include \"Physica/" << includeName << "\"\n";
-            const std::string source = ss.str();
-            memBuf = llvm::WritableMemoryBuffer::getNewUninitMemBuffer(source.length(), includeName);
-            memcpy(memBuf->getBufferStart(), source.data(), source.length());
+            Preprocessor& pp = getCI().getPreprocessor();
+            assert(pp.isIncrementalProcessingEnabled() && "[Error]: Unexpected clang state");
+            const bool failed = pp.EnterSourceFile(std::move(fid), nullptr, std::move(loc));
+            if (failed)
+                throw LLVMException("[Error]: Enter source file failed");
+            parse();
+            ite = headers.find(std::string(includeName));
         }
-        SourceManager& manager = getCI().getSourceManager();
-        SourceLocation loc = manager.getLocForStartOfFile(manager.getMainFileID());
-        FileID fid = manager.createFileID(std::move(memBuf), SrcMgr::C_User, 0, 0, loc);
-
-        Preprocessor& pp = getCI().getPreprocessor();
-        assert(pp.isIncrementalProcessingEnabled() && "[Error]: Unexpected clang state");
-        const bool failed = pp.EnterSourceFile(std::move(fid), nullptr, std::move(loc));
-        if (failed)
-            throw LLVMException("[Error]: Enter source file failed");
-        return makePTU(includeName).unitDecl;
+        return (*ite).second;
     }
 
     Clang::PartialTranslationUnit& Clang::makePTU(const char* moduleName) {
@@ -127,10 +130,6 @@ namespace Physica::Python {
         return static_cast<clang::CodeGenAction*>(frontendAction)->getCodeGenerator();
     }
 
-    const HeaderManager& Clang::getHeaderManager() const noexcept {
-        return static_cast<HeaderManager&>(*ci.getPreprocessor().getPPCallbacks());
-    }
-
     void Clang::makeInvocation() {
         const std::string mainExecutableName = llvm::sys::fs::getMainExecutable(nullptr, nullptr);
         std::vector<const char*> args{};
@@ -159,8 +158,9 @@ namespace Physica::Python {
         using namespace clang;
         auto pDiagOpts = CreateAndPopulateDiagOpts(args);
         auto& diagBuffer = *new TextDiagnosticPrinter(llvm::outs(), pDiagOpts.get());
-        DiagnosticsEngine diags(new DiagnosticIDs(), pDiagOpts.release(), &diagBuffer);
-        driver::Driver llvmDirver("", llvm::sys::getProcessTriple(), diags);
+        auto* diagEngine = new DiagnosticsEngine(new DiagnosticIDs(), pDiagOpts.release(), &diagBuffer);
+        auto llvmDirver = driver::Driver("", llvm::sys::getProcessTriple(), *diagEngine);
+        ci.setDiagnostics(diagEngine);
         std::unique_ptr<driver::Compilation> compilation;
         /* Make compilation */ {
             llvmDirver.setCheckInputsExist(false);

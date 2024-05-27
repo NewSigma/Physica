@@ -48,6 +48,7 @@ namespace Physica::Python {
         std::unique_ptr<IncrementalAction> action;
         std::unique_ptr<Parser> parser;
         std::forward_list<PartialTranslationUnit> partialUnitList;
+        HeaderManager* pHeaderManager;
     public:
         Clang();
         Clang(const Clang&) = delete;
@@ -57,13 +58,13 @@ namespace Physica::Python {
         Clang& operator=(const Clang&) = delete;
         Clang& operator=(Clang&&) noexcept = delete;
         /* Operations */
-        const TranslationUnitDecl* include(const char* includeName);
+        const clang::NamedDecl* include(const char* includeName);
         [[nodiscard]] PartialTranslationUnit& makePTU(const char* moduleName);
         /* Getters */
         [[nodiscard]] CompilerInstance& getCI() noexcept { return ci; }
         [[nodiscard]] CodeGenerator* getCodeGen() noexcept;
-        [[nodiscard]] const Parser& getParser() const noexcept { return *parser; }
-        [[nodiscard]] const HeaderManager& getHeaderManager() const noexcept;
+        [[nodiscard]] Parser& getParser() noexcept { return *parser; }
+        [[nodiscard]] const HeaderManager& getHeaderManager() const noexcept { return *pHeaderManager; }
     private:
         /* Operations */
         void makeInvocation();
