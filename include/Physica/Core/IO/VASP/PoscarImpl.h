@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 WeiBo He.
+ * Copyright 2023-2024 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -148,6 +148,24 @@ namespace Physica::Core {
         Base::toUnitCell(x, y, z);
         for (size_t& num : numOfEachType)
             num /= (x * y * z);
+    }
+
+    template<class ScalarType>
+    void Poscar<ScalarType>::toQECell(std::ostream& os) const {
+        os << "CELL_PARAMETERS (angstrom)\n";
+        os << lattice << '\n';
+
+        os << "ATOMIC_POSITIONS (angstrom)\n";
+        size_t atomIndex = 0;
+        for (size_t i = 0; i < elementTypes.getLength(); ++i) {
+            const char* symbol = PhyConst<SI>::elementSymbol[elementTypes[i]];
+            for (size_t j = 0; j < numOfEachType[i]; ++j) {
+                os << symbol << ' ';
+                os << pos.row(atomIndex).format().setPrefix("").setSuffix("").setSeperator(" ");
+                os << '\n';
+                atomIndex += 1;
+            }
+        }
     }
 
     template<class ScalarType>

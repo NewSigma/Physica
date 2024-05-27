@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 WeiBo He.
+ * Copyright 2021-2024 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -60,6 +60,7 @@ namespace Physica::Core {
         void standrizeLattice();
         void extendInZ(ScalarType factor);
         void toUnitCell(unsigned int x, unsigned int y, unsigned int z);
+        void toQECell(std::ostream& os) const;
         /* Getters */
         [[nodiscard]] const Utils::Array<uint8_t> getElementTypes() const noexcept { return elementTypes; }
         [[nodiscard]] bool isElementTypeInitialized() const noexcept { return !elementTypes.empty(); }
