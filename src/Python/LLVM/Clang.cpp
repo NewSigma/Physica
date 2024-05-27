@@ -34,6 +34,7 @@
 #include "llvm/IR/Module.h"
 #include "Physica/Python/LLVM/LLVM.h"
 #include "Physica/Python/LLVM/Clang.h"
+#include "Physica/Python/LLVM/ClangImpl/HeaderManager.h"
 #include "Physica/Python/Exception/LLVMException.h"
 #include "Physica/Macro.h"
 
@@ -53,7 +54,9 @@ namespace Physica::Python {
         action = std::make_unique<IncrementalAction>(ci, LLVM::getInstance().getContext());
         ci.ExecuteAction(*action);
 
-        parser = std::make_unique<Parser>(ci.getPreprocessor(), ci.getSema(), false);
+        auto& pp = ci.getPreprocessor();
+        pp.addPPCallbacks(std::unique_ptr<PPCallbacks>(new HeaderManager(*this)));
+        parser = std::make_unique<Parser>(pp, ci.getSema(), false);
         parser->Initialize();
     }
 
@@ -61,25 +64,59 @@ namespace Physica::Python {
         action->finalizeAction();
     }
 
-    Clang::PartialTranslationUnit& Clang::include(const char* path) {
+    const typename Clang::TranslationUnitDecl* Clang::include(const char* includeName) {
+        const auto& headers = getHeaderManager().getLoadedHeaders();
+        const auto ite = headers.find(includeName);
+        if (ite != headers.cend())
+            return ite->second;
+
         using namespace clang;
+        std::unique_ptr<llvm::WritableMemoryBuffer> memBuf;
+        /* Make memBuf */ {
+            std::ostringstream ss{};
+            ss << "#include \"Physica/" << includeName << "\"\n";
+            const std::string source = ss.str();
+            memBuf = llvm::WritableMemoryBuffer::getNewUninitMemBuffer(source.length(), includeName);
+            memcpy(memBuf->getBufferStart(), source.data(), source.length());
+        }
+        SourceManager& manager = getCI().getSourceManager();
+        SourceLocation loc = manager.getLocForStartOfFile(manager.getMainFileID());
+        FileID fid = manager.createFileID(std::move(memBuf), SrcMgr::C_User, 0, 0, loc);
+
         Preprocessor& pp = getCI().getPreprocessor();
         assert(pp.isIncrementalProcessingEnabled() && "[Error]: Unexpected clang state");
+        const bool failed = pp.EnterSourceFile(std::move(fid), nullptr, std::move(loc));
+        if (failed)
+            throw LLVMException("[Error]: Enter source file failed");
+        return makePTU(includeName).unitDecl;
+    }
 
-        std::ostringstream ss{};
-        ss << "#include \"" << path << "\"\n";
+    Clang::PartialTranslationUnit& Clang::makePTU(const char* moduleName) {
+        using namespace clang;
+        Sema& sema = ci.getSema();
+        llvm::CrashRecoveryContextCleanupRegistrar<Sema> recoverGuard(&sema);
+        Sema::GlobalEagerInstantiationScope GlobalInstantiations(sema, true);
+        Sema::LocalEagerInstantiationScope LocalInstantiations(sema);
 
-        const std::string source = ss.str();
-        auto memBuf = llvm::WritableMemoryBuffer::getNewUninitMemBuffer(source.length(), path);
-        char* memBufStart = memBuf->getBufferStart();
-        memcpy(memBufStart, source.data(), source.length());
+        auto& ctx = sema.getASTContext();
+        ctx.addTranslationUnitDecl();
+        parse();
 
-        SourceManager& SM = getCI().getSourceManager();
-        SourceLocation NewLoc = SM.getLocForStartOfFile(SM.getMainFileID());
-        FileID FID = SM.createFileID(std::move(memBuf), SrcMgr::C_User, 0, 0, NewLoc);
-        if (pp.EnterSourceFile(FID, nullptr, NewLoc))
-            throw LLVMException(llvm::make_error<llvm::StringError>("[Error]: Enter source file failed", std::error_code()));
-        return makePLU(path, [this]() { parse(); });
+        LocalInstantiations.perform();
+        GlobalInstantiations.perform();
+        ci.getASTConsumer().HandleTranslationUnit(ctx);
+
+        PartialTranslationUnit unit{};
+        unit.unitDecl = ctx.getTranslationUnitDecl();
+        CodeGenerator* codeGen = getCodeGen();
+        if (codeGen != nullptr) {
+            auto* unitModule = codeGen->ReleaseModule();
+            unitModule->setModuleIdentifier(moduleName);
+            unit.unitModule.reset(unitModule);
+            codeGen->StartModule(DummyFile, unitModule->getContext());
+        }
+        partialUnitList.push_front(std::move(unit));
+        return partialUnitList.front();
     }
 
     clang::CodeGenerator* Clang::getCodeGen() noexcept {
@@ -88,6 +125,10 @@ namespace Physica::Python {
         if (!isCodeGenAction)
             return nullptr;
         return static_cast<clang::CodeGenAction*>(frontendAction)->getCodeGenerator();
+    }
+
+    const HeaderManager& Clang::getHeaderManager() const noexcept {
+        return static_cast<HeaderManager&>(*ci.getPreprocessor().getPPCallbacks());
     }
 
     void Clang::makeInvocation() {
@@ -182,9 +223,10 @@ namespace Physica::Python {
             Parser::DeclGroupPtrTy declGroup;
             Sema::ModuleImportState state;
             bool isDone = parser->ParseFirstTopLevelDecl(declGroup, state);
-            for (; !isDone; isDone = parser->ParseTopLevelDecl(declGroup, state)) {
+            while (!isDone) {
                 if (declGroup && !consumer.HandleTopLevelDecl(declGroup.get()))
-                    throw LLVMException(llvm::make_error<llvm::StringError>("[Error]: Consumer rejected the decl", std::error_code()));
+                    throw LLVMException("[Error]: Consumer rejected the decl");
+                isDone = parser->ParseTopLevelDecl(declGroup, state);
             }
         }
         DiagnosticsEngine& Diags = getCI().getDiagnostics();
@@ -192,7 +234,7 @@ namespace Physica::Python {
             cleanLastUnit();
             Diags.Reset(true);
             Diags.getClient()->clear();
-            throw LLVMException(llvm::make_error<llvm::StringError>("[Error]: Parsing failed", std::error_code()));
+            throw LLVMException("[Error]: Parsing failed");
         }
         Token check;
         getCI().getPreprocessor().Lex(check);

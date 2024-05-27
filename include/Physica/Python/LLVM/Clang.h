@@ -19,13 +19,15 @@
 #pragma once
 
 #include <forward_list>
+#include <llvm/IR/Module.h>
+#include "llvm/Support/CrashRecoveryContext.h"
 #include "clang/Frontend/CompilerInstance.h"
 #include "clang/CodeGen/ModuleBuilder.h"
 #include "clang/Parse/Parser.h"
-#include "llvm/Support/CrashRecoveryContext.h"
 #include "ClangImpl/IncrementalAction.h"
 
 namespace Physica::Python {
+    class HeaderManager;
     /**
      * Reference:
      * [1] clang-repl; https://clang.llvm.org/docs/ClangRepl.html
@@ -34,10 +36,11 @@ namespace Physica::Python {
         using CompilerInstance = clang::CompilerInstance;
         using CodeGenerator = clang::CodeGenerator;
         using Parser = clang::Parser;
+        using TranslationUnitDecl = clang::TranslationUnitDecl;
         constexpr static const char* DummyFile = "Unknown";
     public:
         struct PartialTranslationUnit {
-            clang::TranslationUnitDecl* unitDecl;
+            TranslationUnitDecl* unitDecl;
             std::unique_ptr<llvm::Module> unitModule;
         };
     private:
@@ -54,13 +57,13 @@ namespace Physica::Python {
         Clang& operator=(const Clang&) = delete;
         Clang& operator=(Clang&&) noexcept = delete;
         /* Operations */
-        PartialTranslationUnit& include(const char* path);
-
-        template<class Functor>
-        [[nodiscard]] PartialTranslationUnit& makePLU(const char* name, Functor func);
+        const TranslationUnitDecl* include(const char* includeName);
+        [[nodiscard]] PartialTranslationUnit& makePTU(const char* moduleName);
         /* Getters */
         [[nodiscard]] CompilerInstance& getCI() noexcept { return ci; }
         [[nodiscard]] CodeGenerator* getCodeGen() noexcept;
+        [[nodiscard]] const Parser& getParser() const noexcept { return *parser; }
+        [[nodiscard]] const HeaderManager& getHeaderManager() const noexcept;
     private:
         /* Operations */
         void makeInvocation();
@@ -68,34 +71,4 @@ namespace Physica::Python {
         void parse();
         void cleanLastUnit() noexcept;
     };
-
-    template<class Functor>
-    Clang::PartialTranslationUnit& Clang::makePLU(const char* name, Functor func) {
-        using namespace clang;
-        Sema& sema = ci.getSema();
-        llvm::CrashRecoveryContextCleanupRegistrar<Sema> recoverGuard(&sema);
-        Sema::GlobalEagerInstantiationScope GlobalInstantiations(sema, true);
-        Sema::LocalEagerInstantiationScope LocalInstantiations(sema);
-
-        PartialTranslationUnit unit{};
-        ASTContext& astContext = sema.getASTContext();
-        astContext.addTranslationUnitDecl();
-        unit.unitDecl = astContext.getTranslationUnitDecl();
-
-        func();
-
-        LocalInstantiations.perform();
-        GlobalInstantiations.perform();
-        ci.getASTConsumer().HandleTranslationUnit(astContext);
-
-        CodeGenerator* codeGen = getCodeGen();
-        if (codeGen != nullptr) {
-            auto* unitModule = codeGen->ReleaseModule();
-            unitModule->setModuleIdentifier(name);
-            unit.unitModule.reset(unitModule);
-            codeGen->StartModule(DummyFile, unitModule->getContext());
-        }
-        partialUnitList.push_front(std::move(unit));
-        return partialUnitList.front();
-    }
 }

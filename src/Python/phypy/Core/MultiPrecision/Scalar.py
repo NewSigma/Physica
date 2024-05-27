@@ -17,21 +17,24 @@ You should have received a copy of the GNU General Public License
 along with Physica.  If not, see <https://www.gnu.org/licenses/>.
 """
 from enum import Enum
+from phypy import CXXObj
 
 class ScalarOption(Enum):
     Float = 0
     Double = 1
     MultiPrecision = 2
 
-class Scalar:
-    __ptu = None
+class Scalar(CXXObj):
+    __pDecl = None
 
-    def __init__(self, Option: ScalarOption, value) -> None:
+    def __init__(self, Option: ScalarOption) -> None:
         self.__Option = Option
-        self.__value = value
 
     def __float__(self):
-        return float(self.__value)
+        return float(self.call(float, 'getTrivial'))
+
+    def __repr__(self):
+        return repr(float(self))
 
     @property
     def Option(self):
@@ -39,8 +42,8 @@ class Scalar:
 
     @staticmethod
     def getPTU():
-        ptu = Scalar.__ptu
-        if (ptu is None):
+        pDecl = Scalar.__pDecl
+        if (pDecl is None):
             from phypy import physica
-            ptu = physica.include('Physica/Core/MultiPrecision/Scalar.h')
-        return ptu
+            pDecl = physica.include('Core/MultiPrecision/Scalar.h')
+        return pDecl

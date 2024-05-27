@@ -18,19 +18,23 @@
  */
 #pragma once
 
-#include <type_traits>
-#include <typeinfo>
 #include <utility>
+#include <pybind11/pybind11.h>
+
+namespace py = pybind11;
+
+namespace clang {
+    class CXXRecordDecl;
+}
 
 namespace Physica::Python {
     class CXXObj {
         using This = CXXObj;
-
-        const char* typeName;
+    private:
+        const clang::CXXRecordDecl* decl;
         void* pObj;
     public:
-        template<class T>
-        CXXObj(T&& obj) noexcept;
+        CXXObj() = default;
         CXXObj(const CXXObj&) = delete;
         CXXObj(CXXObj&&) noexcept;
         ~CXXObj();
@@ -38,24 +42,20 @@ namespace Physica::Python {
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
         /* Operations */
+        py::object call(py::handle type, const char* name);
+
         template<class T>
         [[nodiscard]] T& getDerived() noexcept { return *reinterpret_cast<T*>(pObj); }
         template<class T>
         [[nodiscard]] const T& getDerived() const noexcept { return const_cast<This&>(*this).getDerived<T>(); }
-        /* Getter */
-        [[nodiscard]] const char* getTypeName() const noexcept { return typeName; }
+        void swap(CXXObj& __restrict obj) noexcept;
+    private:
+        clang::FunctionDecl* makeDestructorAST();
     };
 
-    template<class T>
-    CXXObj::CXXObj(T&& obj) noexcept {
-        using T1 = typename std::remove_cv<T>::type;
-        using T2 = typename std::remove_reference<T1>::type;
-        typeName = typeid(T2).name();
-        pObj = reinterpret_cast<void*>(new T(std::move(obj)));
-    }
-    
-    template<class T>
-    inline CXXObj toPython(T&& obj) noexcept {
-        return CXXObj(std::move(obj));
+    inline void CXXObj::swap(CXXObj& __restrict obj) noexcept {
+        assert(this != &obj && "[Error]: Self swap is likely a bug");
+        std::swap(decl, obj.decl);
+        std::swap(pObj, obj.pObj);
     }
 }

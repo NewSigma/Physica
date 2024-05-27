@@ -18,20 +18,28 @@
  */
 #pragma once
 
+#include <unordered_map>
 #include "Physica/Python/LLVM/Clang.h"
 #include "Physica/Python/LLVM/Executor.h"
+#include "clang/AST/DeclCXX.h"
 
 namespace Physica::Python {
     class PhysicaPython final {
         using This = PhysicaPython;
+        using ExecutorAddr = llvm::orc::ExecutorAddr;
+        using ClassDeclMap = std::unordered_map<const char*, clang::CXXRecordDecl*>;
 
         Clang clang;
         Executor exec;
+        ClassDeclMap classDeclMap;
     public:
         ~PhysicaPython() = default;
+        /* Operations */
+        [[nodiscard]] ExecutorAddr emit(const clang::FunctionDecl& func);
         /* Getters */
         [[nodiscard]] Clang& getClang() noexcept { return clang; }
         [[nodiscard]] Executor& getExec() noexcept { return exec; }
+        [[nodiscard]] const ClassDeclMap& getClassDeclMap() const noexcept { return classDeclMap; }
         /* Static members */
         [[nodiscard]] static This& getInstance() noexcept;
     private:

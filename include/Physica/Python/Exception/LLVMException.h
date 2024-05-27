@@ -25,7 +25,8 @@ namespace Physica::Python {
     class LLVMException : public std::exception {
         std::string msg;
     public:
-        LLVMException(llvm::Error err) : msg(llvm::toString(std::move(err))) {}
+        explicit LLVMException(const char* err) : msg(err) {}
+        explicit LLVMException(llvm::Error err) : msg(llvm::toString(std::move(err))) {}
         ~LLVMException() noexcept override = default;
         const char* what() const noexcept override { return msg.c_str(); }
     };

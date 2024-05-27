@@ -17,7 +17,6 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include <iostream>
-#include <pybind11/pybind11.h>
 #include "llvm/IR/IRBuilder.h"
 #include "clang/AST/GlobalDecl.h"
 #include "Physica/Core/MultiPrecision/Scalar.h"
@@ -27,13 +26,22 @@
 #include "Physica/Python/Exception/LLVMException.h"
 
 namespace Physica::Python {
+    PhysicaPython::PhysicaPython() {
+        exec = Executor(clang.getCI().getTarget());
+    }
+
+    typename PhysicaPython::ExecutorAddr PhysicaPython::emit(const clang::FunctionDecl& func) {
+        auto& jit = PhysicaPython::getInstance().getExec().getJIT();
+        auto& ptu = clang.makePTU("Del");
+        llvmCheck(jit.addIRModule(llvm::orc::ThreadSafeModule(std::move(ptu.unitModule), LLVM::getInstance().getThreadSafeContext())));
+        auto decl = clang::GlobalDecl(&func);
+        const std::string symbol = clang.getCodeGen()->GetMangledName(std::move(decl)).str();
+        return llvmCheck(jit.lookup(symbol));
+    }
+
     PhysicaPython& PhysicaPython::getInstance() noexcept {
         static PhysicaPython instance{};
         return instance;
-    }
-
-    PhysicaPython::PhysicaPython() {
-        exec = Executor(clang.getCI().getTarget());
     }
 }
 
@@ -77,40 +85,31 @@ clang::FunctionDecl* makeAST(clang::CompilerInstance& ci) {
     }
     (*body->body_begin()) = rtnStmt;
     if (!ci.getASTConsumer().HandleTopLevelDecl(DeclGroupRef(add1))) [[unlikely]]
-        throw Physica::Python::LLVMException(llvm::make_error<llvm::StringError>("[Error]: Consumer rejected the decl", std::error_code()));
+        throw Physica::Python::LLVMException("[Error]: Consumer rejected the decl");
     return add1;
 }
 
 PYBIND11_MODULE(PhysicaPython, m) {
     using namespace Physica::Python;
-    namespace py = pybind11;
 
     m.doc() = "PhysicaPython is a python interface to Physica";
     py::register_exception<LLVMException>(m, "LLVMException");
 
     py::class_<CXXObj>(m, "CXXObj")
-        .def("typename", &CXXObj::getTypeName)
-        .def("__del__", [](CXXObj& obj) { obj.~CXXObj(); });
+        .def("__del__", [](CXXObj& obj) { obj.~CXXObj(); })
+        .def("call", &CXXObj::call, py::return_value_policy::move);
+
     py::class_<Clang::PartialTranslationUnit>(m, "PartialTranslationUnit");
 
-    m.def("include", [](const char* path) -> Clang::PartialTranslationUnit& {
-        return PhysicaPython::getInstance().getClang().include(path);
-    }, py::return_value_policy::reference);
+    m.def("include", [](const char* includeName) {
+        const void* pUnit = PhysicaPython::getInstance().getClang().include(includeName);
+        return pUnit;
+    });
 
-    m.def("runKernel", []() -> CXXObj {
+    m.def("runKernel", []() {
         auto& clang = PhysicaPython::getInstance().getClang();
-        std::string funcSym;
-        auto& plu = clang.makePLU("test", [&]() {
-            auto* funcDecl = makeAST(clang.getCI());
-            funcSym = clang.getCodeGen()->GetMangledName(clang::GlobalDecl(funcDecl)).str();
-        });
-
-        auto& jit = PhysicaPython::getInstance().getExec().getJIT();
-        llvmCheck(jit.addIRModule(llvm::orc::ThreadSafeModule(std::move(plu.unitModule), LLVM::getInstance().getThreadSafeContext())));
-        auto pAdd1 = llvmCheck(jit.lookup(funcSym));
-        int (*add1)(int) = pAdd1.toPtr<int(int)>();
-        int result = add1(42);
+        auto pAdd1 = PhysicaPython::getInstance().emit(*makeAST(clang.getCI()));
+        const int result = pAdd1.toPtr<int(int)>()(42);
         std::cout << "add1(42) = " << result << "\n";
-        return toPython(Physica::Core::Scalar<Physica::Core::Double>(result));
-    }, py::return_value_policy::move);
+    });
 }

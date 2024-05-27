@@ -22,7 +22,7 @@
 #include "llvm/Support/ManagedStatic.h"
 
 namespace Physica::Python {
-    class LLVM {
+    class LLVM final {
         using LLVMContext = llvm::LLVMContext;
         using ThreadSafeContext = llvm::orc::ThreadSafeContext;
 
