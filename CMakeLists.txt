@@ -137,20 +137,12 @@ if(${BUILD_TESTS})
     add_subdirectory(test)
 endif()
 
-if(NOT ${CMAKE_BUILD_TYPE} MATCHES "Debug")
-    if(${BUILD_BENCHMARKS})
+if(${BUILD_BENCHMARKS})
+    if(${CMAKE_BUILD_TYPE} MATCHES "Debug")
+        message(WARNING "Running benchmark under debug mode is not what you usually want, ignoring")
+    else()
         add_subdirectory(benchmark)
     endif()
-endif()
-
-if(${PHYSICA_GUI})
-    set(CMAKE_AUTOMOC ON) #target Physica needs MOC also, we put it after other targets to avoid unnecessary targets.(e.g. xxx_autogen)
-    add_executable(Physica Physica.cpp ${HEADERS})
-    target_link_libraries(Physica ${GPerfTools_LIBRARY})
-
-    install(TARGETS Physica DESTINATION bin)
-    #############################################Options##############################################
-    target_link_libraries(Physica PhysicaCore PhysicaGui Qt6::Core Qt6::Widgets ${HDF5_CXX_SHARED_LIBRARY})
 endif()
 
 if(${BUILD_DOC})
