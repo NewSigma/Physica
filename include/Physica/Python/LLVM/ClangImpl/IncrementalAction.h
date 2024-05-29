@@ -23,17 +23,21 @@
 
 namespace Physica::Python {
     class IncrementalAction : public clang::WrapperFrontendAction {
+        using This = IncrementalAction;
         using Base = clang::WrapperFrontendAction;
         using CompilerInstance = clang::CompilerInstance;
         using LLVMContext = llvm::LLVMContext;
-
-        bool isTerminating;
     public:
         IncrementalAction(CompilerInstance& ci, llvm::LLVMContext& context);
+        IncrementalAction(const This&) = delete;
+        IncrementalAction(This&&) = delete;
+        ~IncrementalAction() override;
+        /* Operators */
+        This& operator=(const This&) = delete;
+        This& operator=(This&&) noexcept = delete;
         /* Operations */
         void ExecuteAction() override;
         void EndSourceFile() override;
-        void finalizeAction();
         /* Getters */
         [[nodiscard]] clang::FrontendAction* getWrapped() const { return WrappedAction.get(); }
         [[nodiscard]] clang::TranslationUnitKind getTranslationUnitKind() override { return clang::TU_Incremental; }

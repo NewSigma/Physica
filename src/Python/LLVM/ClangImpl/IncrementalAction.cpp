@@ -25,35 +25,21 @@
 
 namespace Physica::Python {
     IncrementalAction::IncrementalAction(CompilerInstance& ci, llvm::LLVMContext& context)
-            : Base(makeAction(ci, context)), isTerminating(false) {}
+            : Base(makeAction(ci, context)) {}
+
+    IncrementalAction::~IncrementalAction() {
+        Base::EndSourceFile();
+    }
 
     void IncrementalAction::ExecuteAction() {
         CompilerInstance& ci = getCompilerInstance();
         assert(ci.hasPreprocessor() && "[Error]: Invalid CI");
-        if (hasCodeCompletionSupport() && !ci.getFrontendOpts().CodeCompletionAt.FileName.empty())
-            ci.createCodeCompletionConsumer();
-
         ci.getPreprocessor().EnterMainSourceFile();
-        if (!ci.hasSema()) {
-            clang::CodeCompleteConsumer* completeConsumer = nullptr;
-            if (ci.hasCodeCompletionConsumer())
-                completeConsumer = &ci.getCodeCompletionConsumer();
-            ci.createSema(getTranslationUnitKind(), completeConsumer);
-        }
+        if (!ci.hasSema())
+            ci.createSema(getTranslationUnitKind(), nullptr);
     }
 
-    void IncrementalAction::EndSourceFile() {
-        if (isTerminating && (getWrapped() != nullptr))
-            Base::EndSourceFile();
-    }
-
-    void IncrementalAction::finalizeAction() {
-        assert(!isTerminating && "[Error]: Double finalized");
-        if (isTerminating) [[unlikely]]
-            return;
-        isTerminating = true;
-        EndSourceFile();
-    }
+    void IncrementalAction::EndSourceFile() {}
 
     std::unique_ptr<clang::FrontendAction> IncrementalAction::makeAction(CompilerInstance& ci, llvm::LLVMContext& context) {
         using namespace clang::frontend;

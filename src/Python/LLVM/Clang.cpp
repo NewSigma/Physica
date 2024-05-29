@@ -59,10 +59,8 @@ namespace Physica::Python {
         pp.addPPCallbacks(std::unique_ptr<PPCallbacks>(pHeaderManager));
         parser = std::make_unique<Parser>(pp, ci.getSema(), false);
         parser->Initialize();
-    }
 
-    Clang::~Clang() {
-        action->finalizeAction();
+        pUsedAttr = clang::UsedAttr::Create(getASTContext());
     }
 
     const clang::NamedDecl* Clang::include(const char* includeName) {
@@ -111,23 +109,25 @@ namespace Physica::Python {
 
         PartialTranslationUnit unit{};
         unit.unitDecl = ctx.getTranslationUnitDecl();
-        CodeGenerator* codeGen = getCodeGen();
-        if (codeGen != nullptr) {
-            auto* unitModule = codeGen->ReleaseModule();
+        /* Make module */ {
+            CodeGenerator& codeGen = getCodeGen();
+            auto* unitModule = codeGen.ReleaseModule();
             unitModule->setModuleIdentifier(moduleName);
             unit.unitModule.reset(unitModule);
-            codeGen->StartModule(DummyFile, unitModule->getContext());
+            codeGen.StartModule(DummyFile, unitModule->getContext());
         }
         partialUnitList.push_front(std::move(unit));
         return partialUnitList.front();
     }
 
-    clang::CodeGenerator* Clang::getCodeGen() noexcept {
+    const clang::CodeGenerator& Clang::getCodeGen() const noexcept {
+        return const_cast<This&>(*this).getCodeGen();
+    }
+
+    clang::CodeGenerator& Clang::getCodeGen() noexcept {
         auto* frontendAction = action->getWrapped();
-        const bool isCodeGenAction = frontendAction->hasIRSupport();
-        if (!isCodeGenAction)
-            return nullptr;
-        return static_cast<clang::CodeGenAction*>(frontendAction)->getCodeGenerator();
+        assert(frontendAction->hasIRSupport() && "[Error]: No CodeGen because it is not CodeGenAction");
+        return *static_cast<clang::CodeGenAction*>(frontendAction)->getCodeGenerator();
     }
 
     void Clang::makeInvocation() {
@@ -220,13 +220,19 @@ namespace Physica::Python {
 
         {
             auto& consumer = ci.getASTConsumer();
-            Parser::DeclGroupPtrTy declGroup;
+            Parser::DeclGroupPtrTy pDeclGroup;
             Sema::ModuleImportState state;
-            bool isDone = parser->ParseFirstTopLevelDecl(declGroup, state);
+            bool isDone = parser->ParseFirstTopLevelDecl(pDeclGroup, state);
             while (!isDone) {
-                if (declGroup && !consumer.HandleTopLevelDecl(declGroup.get()))
-                    throw LLVMException("[Error]: Consumer rejected the decl");
-                isDone = parser->ParseTopLevelDecl(declGroup, state);
+                if (pDeclGroup) {
+                    auto declGroup = pDeclGroup.get();
+                    for (auto* pDecl : declGroup)
+                        handleDecl(*pDecl);
+
+                    if (!consumer.HandleTopLevelDecl(declGroup))
+                        throw LLVMException("[Error]: Consumer rejected the decl");
+                }
+                isDone = parser->ParseTopLevelDecl(pDeclGroup, state);
             }
         }
         DiagnosticsEngine& Diags = getCI().getDiagnostics();
@@ -239,6 +245,33 @@ namespace Physica::Python {
         Token check;
         getCI().getPreprocessor().Lex(check);
         assert(check.is(tok::annot_repl_input_end) && "[Error]: Lexer must be EOF when starting incremental parse");
+    }
+
+    void Clang::handleDecl(clang::Decl& decl) {
+        using namespace clang;
+        if (!llvm::isa<NamedDecl>(decl))
+            return;
+
+        auto& namedDecl = static_cast<NamedDecl&>(decl);
+        if (!namedDecl.getDeclName().isIdentifier())
+            return;
+
+        if (llvm::isa<NamespaceDecl>(decl)) {
+            const auto declName = namedDecl.getName();
+            const bool isNotPhysicaNamespace = declName.empty() || std::islower(declName.front());
+            if (isNotPhysicaNamespace)
+                return;
+
+            auto& ctx = static_cast<NamespaceDecl&>(decl);
+            for (Decl* pDecl : ctx.decls())
+                handleDecl(*pDecl);
+        }
+        else if (llvm::isa<CXXRecordDecl>(decl)) {
+            auto& classDecl = static_cast<CXXRecordDecl&>(decl);
+            auto* pDestructor = classDecl.getDestructor();
+            if (pDestructor)
+                pDestructor->addAttr(pUsedAttr);
+        }
     }
 
     void Clang::cleanLastUnit() noexcept {

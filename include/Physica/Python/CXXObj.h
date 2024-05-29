@@ -30,11 +30,13 @@ namespace clang {
 namespace Physica::Python {
     class CXXObj {
         using This = CXXObj;
+        using CXXRecordDecl = clang::CXXRecordDecl;
     private:
-        const clang::CXXRecordDecl* decl;
+        const CXXRecordDecl* pDecl;
         void* pObj;
     public:
         CXXObj() = default;
+        CXXObj(const CXXRecordDecl* pDecl_, void* pObj_);
         CXXObj(const CXXObj&) = delete;
         CXXObj(CXXObj&&) noexcept;
         ~CXXObj();
@@ -42,20 +44,18 @@ namespace Physica::Python {
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
         /* Operations */
-        py::object call(py::handle type, const char* name);
-
+        [[nodiscard]] py::object call(py::handle type, const char* name);
+        inline void swap(CXXObj& __restrict obj) noexcept;
+        /* Getters */
         template<class T>
         [[nodiscard]] T& getDerived() noexcept { return *reinterpret_cast<T*>(pObj); }
         template<class T>
         [[nodiscard]] const T& getDerived() const noexcept { return const_cast<This&>(*this).getDerived<T>(); }
-        void swap(CXXObj& __restrict obj) noexcept;
-    private:
-        clang::FunctionDecl* makeDestructorAST();
     };
 
     inline void CXXObj::swap(CXXObj& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
-        std::swap(decl, obj.decl);
+        std::swap(pDecl, obj.pDecl);
         std::swap(pObj, obj.pObj);
     }
 }

@@ -23,8 +23,9 @@
 
 namespace Physica::Python {
     class Executor {
+    public:
         using LLJIT = llvm::orc::LLJIT;
-
+    private:
         std::unique_ptr<LLJIT> jit;
     public:
         Executor() = default;
@@ -37,6 +38,7 @@ namespace Physica::Python {
         Executor& operator=(Executor&&) noexcept = default;
         /* Operations */
         /* Getters */
+        [[nodiscard]] const LLJIT& getJIT() const noexcept { return *jit; }
         [[nodiscard]] LLJIT& getJIT() noexcept { return *jit; }
     };
 }

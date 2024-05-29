@@ -33,6 +33,7 @@ namespace Physica::Python {
      * [1] clang-repl; https://clang.llvm.org/docs/ClangRepl.html
      */
     class Clang {
+        using This = Clang;
         using CompilerInstance = clang::CompilerInstance;
         using CodeGenerator = clang::CodeGenerator;
         using Parser = clang::Parser;
@@ -49,11 +50,13 @@ namespace Physica::Python {
         std::unique_ptr<Parser> parser;
         std::forward_list<PartialTranslationUnit> partialUnitList;
         HeaderManager* pHeaderManager;
+
+        clang::UsedAttr* pUsedAttr;
     public:
         Clang();
         Clang(const Clang&) = delete;
         Clang(Clang&&) noexcept = delete;
-        ~Clang();
+        ~Clang() = default;
         /* Operators */
         Clang& operator=(const Clang&) = delete;
         Clang& operator=(Clang&&) noexcept = delete;
@@ -62,7 +65,9 @@ namespace Physica::Python {
         [[nodiscard]] PartialTranslationUnit& makePTU(const char* moduleName);
         /* Getters */
         [[nodiscard]] CompilerInstance& getCI() noexcept { return ci; }
-        [[nodiscard]] CodeGenerator* getCodeGen() noexcept;
+        [[nodiscard]] clang::ASTContext& getASTContext() noexcept { return ci.getASTContext(); }
+        [[nodiscard]] const CodeGenerator& getCodeGen() const noexcept;
+        [[nodiscard]] CodeGenerator& getCodeGen() noexcept;
         [[nodiscard]] Parser& getParser() noexcept { return *parser; }
         [[nodiscard]] const HeaderManager& getHeaderManager() const noexcept { return *pHeaderManager; }
     private:
@@ -70,6 +75,7 @@ namespace Physica::Python {
         void makeInvocation();
         void makeOptions();
         void parse();
+        void handleDecl(clang::Decl& decl);
         void cleanLastUnit() noexcept;
     };
 }

@@ -31,11 +31,11 @@ namespace Physica::Python {
     }
 
     typename PhysicaPython::ExecutorAddr PhysicaPython::emit(const clang::FunctionDecl& func) {
-        auto& jit = PhysicaPython::getInstance().getExec().getJIT();
+        auto& jit = getJIT();
         auto& ptu = clang.makePTU("Del");
         llvmCheck(jit.addIRModule(llvm::orc::ThreadSafeModule(std::move(ptu.unitModule), LLVM::getInstance().getThreadSafeContext())));
         auto decl = clang::GlobalDecl(&func);
-        const std::string symbol = clang.getCodeGen()->GetMangledName(std::move(decl)).str();
+        const std::string symbol = clang.getCodeGen().GetMangledName(std::move(decl)).str();
         return llvmCheck(jit.lookup(symbol));
     }
 
@@ -102,8 +102,8 @@ PYBIND11_MODULE(PhysicaPython, m) {
     py::class_<Clang::PartialTranslationUnit>(m, "PartialTranslationUnit");
 
     m.def("include", [](const char* includeName) {
-        const void* pUnit = PhysicaPython::getInstance().getClang().include(includeName);
-        return pUnit;
+        const void* pClass = PhysicaPython::getInstance().getClang().include(includeName);
+        return pClass;
     });
 
     m.def("runKernel", []() {

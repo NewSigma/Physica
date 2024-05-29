@@ -28,6 +28,7 @@ namespace Physica::Python {
         using This = PhysicaPython;
         using ExecutorAddr = llvm::orc::ExecutorAddr;
         using ClassDeclMap = std::unordered_map<const char*, clang::CXXRecordDecl*>;
+        using LLJIT = typename Executor::LLJIT;
 
         Clang clang;
         Executor exec;
@@ -37,8 +38,12 @@ namespace Physica::Python {
         /* Operations */
         [[nodiscard]] ExecutorAddr emit(const clang::FunctionDecl& func);
         /* Getters */
+        [[nodiscard]] const Clang& getClang() const noexcept { return clang; }
         [[nodiscard]] Clang& getClang() noexcept { return clang; }
+        [[nodiscard]] const Executor& getExec() const noexcept { return exec; }
         [[nodiscard]] Executor& getExec() noexcept { return exec; }
+        [[nodiscard]] const LLJIT& getJIT() const noexcept { return exec.getJIT(); }
+        [[nodiscard]] LLJIT& getJIT() noexcept { return exec.getJIT(); }
         [[nodiscard]] const ClassDeclMap& getClassDeclMap() const noexcept { return classDeclMap; }
         /* Static members */
         [[nodiscard]] static This& getInstance() noexcept;
