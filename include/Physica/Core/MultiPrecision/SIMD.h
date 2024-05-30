@@ -18,15 +18,9 @@
  */
 #pragma once
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wuninitialized"
-    #include "vectorclass/vectorclass.h"
-#pragma GCC diagnostic pop
-#pragma GCC diagnostic pop
+#include <vectorclass/vectorclass.h>
+#include <Physica/Utils/Container/Array/Array.h>
 #include "Scalar.h"
-#include "Physica/Utils/Container/Array/Array.h"
 #include "SIMDImpl/Instruset.h"
 
 namespace Physica::Core {

@@ -18,9 +18,9 @@
  */
 #pragma once
 
+#include <Physica/Core/Math/Transform/FFT.h>
 #include "LatticeHamilton.h"
 #include "ReprSpace/SpinRepr.h"
-#include "Physica/Core/Math/Transform/FFT.h"
 
 namespace Physica::Core {
     template<class ScalarType, class ReprType> class Hubbard1D;
@@ -76,10 +76,10 @@ namespace Physica::Core {
         [[nodiscard]] RealType getHoppingT() const noexcept { return hoppingT; }
         [[nodiscard]] RealType getRepelU() const noexcept { return repelU; }
         [[nodiscard]] size_t getNumSuperCellSite() const noexcept { return Base::getLattice().getNumSuperCellSite(); }
-    private:
+    protected:
         RealType repelElem(StateType psi) const;
         RealType hoppingElem(StateType rowPsi, StateType colPsi) const;
-        void sumHopping(VectorType& target, ScalarType value, StateType state) const noexcept;
+        void sumHopping(VectorType& target, ScalarType value, StateType psi) const noexcept;
         void sumHopping(VectorType& target, FFTType& fft, ScalarType factor, StateType psi) const;
     };
 }

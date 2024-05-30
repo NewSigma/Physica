@@ -67,10 +67,7 @@ namespace Physica::Utils {
 
     template<class T>
     [[nodiscard]] T* HostAllocator<T>::allocate(size_t n) {
-    #pragma GCC diagnostic push
-    #pragma GCC diagnostic ignored "-Walloc-size-larger-than="
         auto* p = reinterpret_cast<T*>(malloc(n * sizeof(T)));
-    #pragma GCC diagnostic pop
         if (!p)
             throw std::bad_alloc();
         return p;

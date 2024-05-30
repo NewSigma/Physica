@@ -4,7 +4,7 @@ project(Physica VERSION 0.0.1 LANGUAGES C CXX)
 #include all macros
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake/Modules)
 #############################################Settings#############################################
-option(BUILD_EXAMPLES "Build examples" ON)
+option(BUILD_EXAMPLES "Build examples" OFF)
 option(BUILD_TESTS "Build tests" ON)
 option(BUILD_BENCHMARKS "Build benchmarks" OFF)
 option(BUILD_DOC "Build documentation" OFF)
@@ -76,7 +76,7 @@ endif()
 set(CMAKE_INSTALL_RPATH ${CMAKE_INSTALL_PREFIX}/lib)
 set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 # vectorclass
-include_directories(3rdparty)
+include_directories(SYSTEM 3rdparty)
 # FFTW3
 find_package(FFTW3 REQUIRED)
 find_package(FFTW3f REQUIRED)

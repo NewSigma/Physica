@@ -17,9 +17,7 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include <iostream>
-#include "llvm/IR/IRBuilder.h"
 #include "clang/AST/GlobalDecl.h"
-#include "Physica/Core/MultiPrecision/Scalar.h"
 #include "Physica/Python/PhysicaPython.h"
 #include "Physica/Python/CXXObj.h"
 #include "Physica/Python/LLVM/LLVM.h"
@@ -45,50 +43,6 @@ namespace Physica::Python {
     }
 }
 
-clang::FunctionDecl* makeAST(clang::CompilerInstance& ci) {
-    using namespace clang;
-    auto& pp = ci.getPreprocessor();
-    auto& idTable = pp.getIdentifierTable();
-    auto& astContext = ci.getSema().getASTContext();
-    astContext.addTranslationUnitDecl();
-    auto* unitDecl = astContext.getTranslationUnitDecl();
-
-    const QualType paramType = astContext.IntTy;
-    const QualType funcType = astContext.getFunctionType(paramType, {paramType}, FunctionProtoType::ExtProtoInfo());
-    auto* add1 = FunctionDecl::Create(astContext, unitDecl, {}, {}, &idTable.getOwn("add1")
-                                    , funcType, astContext.CreateTypeSourceInfo(funcType), clang::SC_None);
-    unitDecl->addDecl(add1);
-
-    auto* i = ParmVarDecl::Create(astContext, unitDecl, {}, {}, &idTable.getOwn("i"),
-                             paramType, astContext.CreateTypeSourceInfo(paramType),
-                             clang::SC_None, nullptr);
-    add1->setParams({i});
-
-    auto* body = CompoundStmt::CreateEmpty(astContext, 1, false);
-    add1->setBody(body);
-
-    auto* rtnStmt = ReturnStmt::Create(astContext, {}, nullptr, nullptr);
-    {
-        auto* binaryOp = BinaryOperator::CreateEmpty(astContext, false);
-        {
-            auto* op = DeclRefExpr::Create(astContext, {}, {}, i, false, SourceLocation{}, paramType, ExprValueKind::VK_LValue);
-            auto* lhs = ImplicitCastExpr::Create(astContext, astContext.IntTy, CastKind::CK_LValueToRValue, op, nullptr, ExprValueKind::VK_PRValue, {});
-            binaryOp->setLHS(lhs);
-        }
-        auto* rhs = IntegerLiteral::Create(astContext, llvm::APInt(sizeof(int) * 8, 1, true), astContext.IntTy, {});
-        binaryOp->setRHS(rhs);
-        binaryOp->setOpcode(BinaryOperator::Opcode::BO_Add);
-        binaryOp->setType(astContext.IntTy);
-        binaryOp->setValueKind(ExprValueKind::VK_PRValue);
-        binaryOp->setObjectKind(ExprObjectKind::OK_Ordinary);
-        rtnStmt->setRetValue(binaryOp);
-    }
-    (*body->body_begin()) = rtnStmt;
-    if (!ci.getASTConsumer().HandleTopLevelDecl(DeclGroupRef(add1))) [[unlikely]]
-        throw Physica::Python::LLVMException("[Error]: Consumer rejected the decl");
-    return add1;
-}
-
 PYBIND11_MODULE(PhysicaPython, m) {
     using namespace Physica::Python;
 
@@ -99,17 +53,8 @@ PYBIND11_MODULE(PhysicaPython, m) {
         .def("__del__", [](CXXObj& obj) { obj.~CXXObj(); })
         .def("call", &CXXObj::call, py::return_value_policy::move);
 
-    py::class_<Clang::PartialTranslationUnit>(m, "PartialTranslationUnit");
-
     m.def("include", [](const char* includeName) {
         const void* pClass = PhysicaPython::getInstance().getClang().include(includeName);
         return pClass;
-    });
-
-    m.def("runKernel", []() {
-        auto& clang = PhysicaPython::getInstance().getClang();
-        auto pAdd1 = PhysicaPython::getInstance().emit(*makeAST(clang.getCI()));
-        const int result = pAdd1.toPtr<int(int)>()(42);
-        std::cout << "add1(42) = " << result << "\n";
     });
 }

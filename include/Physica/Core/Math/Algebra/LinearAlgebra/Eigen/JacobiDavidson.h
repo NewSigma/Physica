@@ -18,12 +18,12 @@
  */
 #pragma once
 
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h"
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseSymmMatrix.h"
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseHermiteMatrix.h"
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DiagVector.h"
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/Orthogonalize.h"
-#include "Physica/Core/Math/Algebra/LinearAlgebra/LinearEquations/IterateSolver.h"
+#include <Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h>
+#include <Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseSymmMatrix.h>
+#include <Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseHermiteMatrix.h>
+#include <Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DiagVector.h>
+#include <Physica/Core/Math/Algebra/LinearAlgebra/Vector/Orthogonalize.h>
+#include <Physica/Core/Math/Algebra/LinearAlgebra/LinearEquations/IterateSolver.h>
 #include "EigenSolver.h"
 
 namespace Physica::Core {
@@ -144,7 +144,7 @@ namespace Physica::Core {
         for (size_t i = 0; i < getNumRequired(); ++i) {
             const bool useDefaultGoal = i == 0 && eigenGoal == ScalarType(InvalidGoal);
             RealType lastDeltaEigen = std::numeric_limits<ScalarType>::max();
-            size_t numSearchDim = i == 0 ? initSearchSpace(source, initial) : projSearchSpace(source, i);
+            size_t numSearchDim = i == 0 ? initSearchSpace<MatrixType>(source, initial) : projSearchSpace<MatrixType>(source, i);
 
             ScalarType& eigenvalue = eigenvalues[i];
             auto eigenvector = eigenvectors.col(i);
@@ -215,7 +215,7 @@ namespace Physica::Core {
 
                     new_direction.toUnit();
                     gramSchmidt(searchSpace.leftCols(numSearchDim), new_direction);
-                    assembleProjects(source, numSearchDim, true);
+                    assembleProjects<MatrixType>(source, numSearchDim, true);
                     numSearchDim += 1;
                 }
             }
@@ -228,7 +228,7 @@ namespace Physica::Core {
                 residule = source * eigenvector.asVector();
                 eigenvalue = eigenvector.asVector().conjugate() * residule;
                 eigenGoal = eigenvalue;
-                numSearchDim = initSearchSpace(source_, initial);
+                numSearchDim = initSearchSpace<MatrixType>(source_, initial);
                 goto restart;
             }
         }
@@ -300,7 +300,7 @@ namespace Physica::Core {
             initial.toUnit();
             auto col = searchSpace.col(0);
             col = initial;
-            assembleProjects(source_, 0, true);
+            assembleProjects<MatrixType>(source_, 0, true);
 
             const auto dot = dotSpace.col(0);
             auto buffer = searchSpace.col(1);
@@ -315,7 +315,7 @@ namespace Physica::Core {
             col = source * initial;
             normGramSchmidt(searchSpace.leftCols(dim), col, col.squaredNorm());
             initial = col;
-            assembleProjects(source_, dim, true);
+            assembleProjects<MatrixType>(source_, dim, true);
         }
         return MinSearchDim;
     }
@@ -339,7 +339,7 @@ namespace Physica::Core {
             }
             else
                 gramSchmidt(searchSpace.leftCols(dim), col);
-            assembleProjects(source_, dim, true);
+            assembleProjects<MatrixType>(source_, dim, true);
         }
         return MinSearchDim;
     }

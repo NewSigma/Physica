@@ -18,12 +18,12 @@
  */
 #include <iostream>
 #include <QApplication>
-#include "Physica/Core/Math/Random/RandomPool.h"
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Eigen/JacobiDavidson.h"
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Eigen/SymmEigenSolver.h"
-#include "Physica/Core/Physics/ManyBody/Hubbard1D.h"
-#include "Physica/Core/Parallel/Executor/ThreadExecutor.h"
-#include "Physica/Gui/Plot/Plot.h"
+#include <Physica/Core/Math/Random/RandomPool.h>
+#include <Physica/Core/Math/Algebra/LinearAlgebra/Eigen/JacobiDavidson.h>
+#include <Physica/Core/Math/Algebra/LinearAlgebra/Eigen/SymmEigenSolver.h>
+#include <Physica/Core/Physics/ManyBody/Hubbard1D.h>
+#include <Physica/Core/Parallel/Executor/ThreadExecutor.h>
+#include <Physica/Gui/Plot/Plot.h>
 
 using namespace Physica::Core;
 using namespace Physica::Gui;
@@ -45,46 +45,49 @@ namespace Physica::Core {
         class Traits<Hamilton> : public Traits<Hubbard1D<ScalarType, ReprType>> {};
     }
 
-    class Hamilton : public LatticeHamilton<Hamilton> {
-        using Base = LatticeHamilton<Hamilton>;
+    class Hamilton : public RValueMatrix<Hamilton>, private HubbardType {
+        using Base = RValueMatrix<Hamilton>;
+        using ModelBase = HubbardType;
         using typename Base::ScalarType;
-        
-        HubbardType impl;
+
         ScalarType magneticH;
     public:
-        Hamilton(HubbardType impl_, ScalarType magneticH_) : Base(impl_.getLattice()), magneticH(magneticH_) {
-            impl = std::move(impl_);
-        }
+        Hamilton(HubbardType base, ScalarType magneticH_) : ModelBase(std::move(base)), magneticH(magneticH_) {}
         /* Operators */
         template<class VectorType>
         Vector<ScalarType> operator*(const RValueVector<VectorType>& v) const {
             const size_t length = v.getLength();
-            const auto numSite = impl.getNumSuperCellSite();
-            assert(Base::getColumn() == length && "[Error]: Dimensions do not match");
+            const auto numSite = ModelBase::getNumSuperCellSite();
+            assert(getColumn() == length && "[Error]: Dimensions do not match");
             Vector<ScalarType> result(length, 0);
             for (size_t i = 0; i < length; ++i) {
-                const ScalarType hoppingElem = -v.calc(i) * impl.getHoppingT();
-                const auto state = impl.getRepr()[i];
+                const ScalarType hoppingElem = -v.calc(i) * ModelBase::getHoppingT();
+                const auto state = getRepr()[i];
                 int numRepel = 0;
                 int numPolar = 0;
                 for (unsigned int site = 0; site < numSite; ++site) {
                     const auto site1 = (site + 1) % numSite;
-                    Base::stateAdd(result, state.hopUp(site, site1), hoppingElem);
-                    Base::stateAdd(result, state.hopUp(site1, site), hoppingElem);
-                    Base::stateAdd(result, state.hopDown(site, site1), hoppingElem);
-                    Base::stateAdd(result, state.hopDown(site1, site), hoppingElem);
+                    sumHopping(result, hoppingElem, state.hopUp(site, site1));
+                    sumHopping(result, hoppingElem, state.hopUp(site1, site));
+                    sumHopping(result, hoppingElem, state.hopDown(site, site1));
+                    sumHopping(result, hoppingElem, state.hopDown(site1, site));
                     const auto upOccupy = state.isUpOccupy(site);
                     const auto downOccupy = state.isDownOccupy(site);
                     numRepel += (site % 2U == 0U) && upOccupy && downOccupy;
                     numPolar += int(upOccupy) - int(downOccupy);
                 }
-                result[i] += v.calc(i) * (impl.getRepelU() * ScalarType(numRepel) - magneticH * ScalarType(numPolar));
+                result[i] += v.calc(i) * (ModelBase::getRepelU() * ScalarType(numRepel) - magneticH * ScalarType(numPolar));
             }
             return result;
         }
+        /* Operations */
+        using Base::transpose;
+        [[nodiscard]] const Hamilton& hermite() const noexcept { return *this; }
         /* Getters */
-        [[nodiscard]] const ReprType& getRepr() const noexcept { return impl.getRepr(); }
-        [[nodiscard]] size_t getNumState() const noexcept { return impl.getNumState(); }
+        using ModelBase::getRow;
+        using ModelBase::getColumn;
+        using ModelBase::getRepr;
+        using ModelBase::getNumState;
     };
 }
 
@@ -99,7 +102,7 @@ int main(int argc, char** argv) {
 
         const size_t numState = model.getNumState();
         JacobiDavidson<ScalarType> jd(numState, 4);
-        jd.compute(model, VectorType::random_uniform(numState, RandomPoolType::getInstance().getGen()));
+        jd.template compute<Hamilton>(model, VectorType::random_uniform(numState, RandomPoolType::getInstance().getGen()));
         jd.sort();
 
         const auto col = jd.getEigenvectors().col(0);

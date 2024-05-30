@@ -18,6 +18,7 @@
  */
 #pragma once
 
+#include <type_traits>
 #include <utility>
 #include <pybind11/pybind11.h>
 
@@ -36,6 +37,8 @@ namespace Physica::Python {
         void* pObj;
     public:
         CXXObj() = default;
+        template<class T>
+        explicit CXXObj(T&& obj);
         CXXObj(const CXXRecordDecl* pDecl_, void* pObj_);
         CXXObj(const CXXObj&) = delete;
         CXXObj(CXXObj&&) noexcept;
@@ -52,6 +55,11 @@ namespace Physica::Python {
         template<class T>
         [[nodiscard]] const T& getDerived() const noexcept { return const_cast<This&>(*this).getDerived<T>(); }
     };
+
+    template<class T>
+    CXXObj::CXXObj(T&& obj) : pDecl(nullptr) {
+        pObj = reinterpret_cast<void*>(new T(std::move(obj)));
+    }
 
     inline void CXXObj::swap(CXXObj& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
