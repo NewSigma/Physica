@@ -70,7 +70,7 @@ if(${PHYSICA_CUDA})
 endif()
 
 if(${RUN_CHECKS})
-    add_subdirectory(config)
+    add_subdirectory(cmake/config)
 endif()
 ##############################################Libs################################################
 set(CMAKE_INSTALL_RPATH ${CMAKE_INSTALL_PREFIX}/lib)
@@ -152,7 +152,7 @@ if(${BUILD_DOC})
                       COMMENT "Generating documentation with Sphinx")
 endif()
 
-install(DIRECTORY ${CMAKE_SOURCE_DIR}/cmake DESTINATION share)
+install(DIRECTORY ${CMAKE_SOURCE_DIR}/cmake/Modules DESTINATION share/cmake)
 install(DIRECTORY ${CMAKE_SOURCE_DIR}/3rdparty/vectorclass DESTINATION include)
 install(FILES include/Physica/Config.h DESTINATION include/Physica)
 install(FILES include/Physica/Macro.h DESTINATION include/Physica)
