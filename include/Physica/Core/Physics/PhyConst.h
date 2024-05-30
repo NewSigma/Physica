@@ -30,7 +30,7 @@ namespace Physica::Core {
 
     template<UnitSystem unitSystem = SI> class PhyConst;
     /**
-     * Physical constants are from [1]
+     * Physical constants are from [1], which updates every 4 years.
      * Relative atom mass are from [2]
      * 
      * Note:
@@ -38,25 +38,30 @@ namespace Physica::Core {
      * a particular isotope, modifications are necessary.
      * 
      * Reference:
-     * [1] Physical constants, SI (NIST 2018) http://physics.nist.gov/constants
+     * [1] Physical constants, SI (NIST 2022) http://physics.nist.gov/constants
      * [2] Standard Atomic Weights 2021 https://www.ciaaw.org/atomic-weights.htm
      */
     template<>
     class PhyConst<SI> {
         constexpr static double calorieInJoule = 4.184; // Reference: http://simple.wikipedia.org/wiki/Calorie
     public:
+        /* Universal */
+        constexpr static double gravitationG = 6.67430E-11;
         constexpr static double planck = 6.62607015E-34;
         constexpr static double reducedPlanck = planck / (2 * M_PI);
-        constexpr static double electronMass = 9.1093837015E-31;
-        constexpr static double unitCharge = 1.602176634E-19;
-        constexpr static double bohrRadius = 0.529177210903E-10;
-        constexpr static double protonMass = 1.67262192369E-27;
-        constexpr static double neutronMass = 1.67492749804E-27;
-        constexpr static double vacuumDielectric = 8.8541878128E-12;
-        constexpr static double boltzmannK = 1.380649E-23;
-        constexpr static double avogadroNa = 6.02214076E23;
         constexpr static double speedOfLight = 299792458;
-        constexpr static double atomicMassConst = 1.66053906660E-27;
+        constexpr static double vacuumDielectric = 8.8541878188E-12;
+        /* Electromagnetic */
+        constexpr static double unitCharge = 1.602176634E-19;
+        /* Atomic and nuclear */
+        constexpr static double bohrRadius = 0.529177210544E-10;
+        constexpr static double electronMass = 9.1093837139E-31;
+        constexpr static double protonMass = 1.67262192595E-27;
+        constexpr static double neutronMass = 1.67492750056E-27;
+        /* Physico-chemical */
+        constexpr static double atomicMassConst = 1.66053906892E-27;
+        constexpr static double avogadroNa = 6.02214076E23;
+        constexpr static double boltzmannK = 1.380649E-23;
         /**
          * The first element is a space holder
          */
@@ -76,12 +81,15 @@ namespace Physica::Core {
         [[nodiscard]] constexpr static double waveNumToTHz(double waveNum) { return waveNum * speedOfLight * 1E-10; }
     };
     /**
-     * Hartree atomic units
+     * Hartree atomic units. \param hartreeInEv referenced from [1]
+     * 
+     * Reference:
+     * [1] Physical constants, SI (NIST 2022) http://physics.nist.gov/constants
      */
     template<>
     class PhyConst<AU> {
     private:
-        constexpr static double hartreeInEv = 27.211386245988;
+        constexpr static double hartreeInEv = 27.211386245981;
         constexpr static double rydbergInEv = hartreeInEv * 0.5;
         constexpr static double bohrInAngstorm = PhyConst<SI>::bohrRadius * 1E10;
         constexpr static double hartreeInJoule = PhyConst<SI>::unitCharge * hartreeInEv;
@@ -90,16 +98,20 @@ namespace Physica::Core {
         constexpr static double temperatureInK = 1 / (PhyConst<SI>::boltzmannK * jouleInHartree);
         constexpr static double pressInGPa = hartreeInJoule / (PhyConst<SI>::bohrRadius * PhyConst<SI>::bohrRadius * PhyConst<SI>::bohrRadius) * 1E-9;
     public:
+        /* Universal */
         constexpr static double planck = M_PI * 2;
         constexpr static double reducedPlanck = 1;
-        constexpr static double electronMass = 1;
+        constexpr static double speedOfLight = PhyConst<SI>::speedOfLight / PhyConst<SI>::bohrRadius * timeInSecond;
+        constexpr static double vacuumDielectric = (PhyConst<SI>::vacuumDielectric * PhyConst<SI>::bohrRadius) / (jouleInHartree * PhyConst<SI>::unitCharge * PhyConst<SI>::unitCharge);
+        /* Electromagnetic */
         constexpr static double unitCharge = 1;
+        /* Atomic and nuclear */
         constexpr static double bohrRadius = 1;
+        constexpr static double electronMass = 1;
         constexpr static double protonMass = PhyConst<SI>::protonMass / PhyConst<SI>::electronMass;
         constexpr static double neutronMass = PhyConst<SI>::neutronMass / PhyConst<SI>::electronMass;
-        constexpr static double vacuumDielectric = (PhyConst<SI>::vacuumDielectric * PhyConst<SI>::bohrRadius) / (jouleInHartree * PhyConst<SI>::unitCharge * PhyConst<SI>::unitCharge);
+        /* Physico-chemical */
         constexpr static double boltzmannK = 1;
-        constexpr static double speedOfLight = PhyConst<SI>::speedOfLight / PhyConst<SI>::bohrRadius * timeInSecond;
 
         [[nodiscard]] constexpr static double hartreeToEv(double hartree) { return hartree * hartreeInEv; }
         [[nodiscard]] constexpr static double eVToHartree(double ev) { return ev * (1.0 / hartreeInEv); }
