@@ -46,7 +46,7 @@ namespace Physica::Gui {
 
     void DensityPlot::appendPoint(int x, int y, int radius, unsigned char alpha) {
         if(x < 0 || y < 0 || radius < 0 || x >= width() || y >= height())
-            Warning(0, "Encountered invalid argument.");
+            Warn(0, "Encountered invalid argument.");
 
         QPainter painter(&dataImage);
         painter.setPen(Qt::transparent);

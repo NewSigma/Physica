@@ -105,7 +105,7 @@ namespace Physica::Core {
         assert(getNumReplica() == ringPolymer.getNumReplica());
         assert(checkRepMass() && "[Error]: Mass is not initialized");
         assert(checkStepSize(latticeSize, temperatureT, collideStep, ringPolymer.getMassVec().max())
-            && "[Warning]: Stepsize is too small, add precision or adjust params is recommanded");
+            && "[Warn]: Stepsize is too small, add precision or adjust params is recommanded");
 
         buffer = phase;
         ScalarType lStep = 0;

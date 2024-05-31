@@ -70,7 +70,7 @@ namespace Physica::Core {
     class DenseMatrix : public ContinuousMatrix<DenseMatrix<T, Option, Row, Column, MaxRow, MaxColumn, Allocator>>
                       , public DenseMatrixStorage<DenseMatrix<T, Option, Row, Column, MaxRow, MaxColumn, Allocator>, Option>
                       , public DenseMatrixDim<DenseMatrix<T, Option, Row, Column, MaxRow, MaxColumn, Allocator>, Row, Column, MaxRow, MaxColumn> {
-        static_assert(MaxRow * MaxColumn * sizeof(T) <= 2048, "[Warning]: It is suggested declare large fixed size matrix as dynamic matrix");
+        static_assert(MaxRow * MaxColumn * sizeof(T) <= 2048, "[Warn]: It is suggested declare large fixed size matrix as dynamic matrix");
         using This = DenseMatrix<T, Option, Row, Column, MaxRow, MaxColumn, Allocator>;
         using Base = ContinuousMatrix<This>;
         using Storage = DenseMatrixStorage<This, Option>;

@@ -46,7 +46,7 @@ namespace Physica::Logger {
      */
     class PHYSICA_API LoggerRuntime {
     public:
-        constexpr static const char* __restrict levelString[4] = { "Fatal", "Warning", "Info", "Debug" };
+        constexpr static const char* __restrict levelString[4] = { "Fatal", "Warn", "Info", "Debug" };
         constexpr static size_t unassignedLogID = 0;
         static LogLevel globalLevel;
     private:
@@ -149,7 +149,7 @@ namespace Physica::Logger {
 
 #define Info(loggerID, format, ...) Log(loggerID, Info, format, ##__VA_ARGS__)
 
-#define Warning(loggerID, format, ...) Log(loggerID, Warning, format, ##__VA_ARGS__)
+#define Warn(loggerID, format, ...) Log(loggerID, Warn, format, ##__VA_ARGS__)
 
 #define Fatal(loggerID, format, ...)                    \
     do {                                                \

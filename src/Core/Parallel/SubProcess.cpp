@@ -44,7 +44,7 @@ namespace Physica::Core {
                 errno = 0;
                 const int code = nice(nice_incr);
                 if (code == -1 && errno != 0)
-                    perror("[Warning]: Failed to process priority");
+                    perror("[Warn]: Failed to process priority");
             }
             task();
             _exit(EXIT_SUCCESS);

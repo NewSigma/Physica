@@ -24,7 +24,7 @@ using namespace Physica::Logger;
 
 int main() {
     Info(STDOUT_FILENO, "Test begin.");
-    Warning(STDERR_FILENO, "This is %c %s%c", 'a', "Logger", '.');
+    Warn(STDERR_FILENO, "This is %c %s%c", 'a', "Logger", '.');
 
     char str[] = "This is a dynamic string.";
     Info(STDOUT_FILENO, "%s", str);

@@ -48,7 +48,7 @@ namespace Physica::Logger {
     enum class LogLevel {
         Off,
         Fatal,
-        Warning,
+        Warn,
         Info,
         Debug,
         Global //Use global level instead.

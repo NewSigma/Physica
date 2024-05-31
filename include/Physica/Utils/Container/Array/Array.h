@@ -58,7 +58,7 @@ namespace Physica::Utils {
     template<class T, size_t Length, size_t Capacity, class Allocator>
     class Array : public Internal::ArrayBase<Array<T, Length, Capacity, Allocator>, Allocator> {
         static_assert(Length == Capacity, "[Error]: Capacity of fixed array must equals to Length.");
-        static_assert(sizeof(T) * Length <= (1U << 16U), "[Warning]: Allocate large fixed array on stack is not recommanded");
+        static_assert(sizeof(T) * Length <= (1U << 16U), "[Warn]: Allocate large fixed array on stack is not recommanded");
         static_assert(!std::is_same_v<Allocator, PageLockedAllocator<T>>, "[Error]: Page locked array can not have fixed size");
         using This = Array<T, Length, Capacity, Allocator>;
     public:
