@@ -25,16 +25,19 @@ namespace Physica::Core::Internal {
 
     template<class T, size_t Order, size_t MaxOrder>
     class Traits<HalfDenseMatrixStorage<T, Order, MaxOrder>> {
+        constexpr static bool IsScalar = is_scalar<T>::value;
         constexpr static size_t Size = Order * (Order + 1) / 2;
         constexpr static size_t MaxSize = MaxOrder * (MaxOrder + 1) / 2;
     public:
-        using Base = Utils::Array<T, Size, MaxSize>;
+        using Base = typename std::conditional<IsScalar, Vector<T, Size, MaxSize>, Utils::Array<T, Size, MaxSize>>::type;
     };
 
     template<class T, size_t Order, size_t MaxOrder>
     class HalfDenseMatrixStorage : public Traits<HalfDenseMatrixStorage<T, Order, MaxOrder>>::Base {
         using This = HalfDenseMatrixStorage<T, Order, MaxOrder>;
+    public:
         using Base = typename Traits<This>::Base;
+    private:
         size_t order;
     public:
         HalfDenseMatrixStorage() : Base(), order(MaxOrder) {}
@@ -51,15 +54,14 @@ namespace Physica::Core::Internal {
         /* Operations */
         void resize(size_t order_) { Base::resize(order_ * (order_ + 1) / 2); order = order_; }
         void resize(size_t row, [[maybe_unused]] size_t column) { assert(row == column); resize(row); order = row; } //Necessary to CRTP
+        void swap(HalfDenseMatrixStorage& __restrict storage) noexcept;
         /* Getters */
         [[nodiscard]] size_t getOrder() const noexcept { return order; }
         [[nodiscard]] size_t getRow() const noexcept { return getOrder(); }
         [[nodiscard]] size_t getColumn() const noexcept { return getOrder(); }
-        [[nodiscard]] __host__ __device__ inline T* data_ptr(size_t row, size_t column);
-        [[nodiscard]] __host__ __device__ inline const T* data_ptr(size_t row, size_t column) const;
-        /* Helpers */
-        [[nodiscard]] size_t accessingIndex(size_t r, size_t c) const noexcept;
-        void swap(HalfDenseMatrixStorage& __restrict storage) noexcept;
+        [[nodiscard]] __host__ __device__ inline T* data_ptr(size_t row, size_t column) noexcept;
+        [[nodiscard]] __host__ __device__ inline const T* data_ptr(size_t row, size_t column) const noexcept;
+        [[nodiscard]] size_t toIndex1D(size_t r, size_t c) const noexcept;
     };
 
     template<class T, size_t Order, size_t MaxOrder>
@@ -82,17 +84,17 @@ namespace Physica::Core::Internal {
     }
 
     template<class T, size_t Order, size_t MaxOrder>
-    __host__ __device__ inline T* HalfDenseMatrixStorage<T, Order, MaxOrder>::data_ptr(size_t row, size_t column) {
-        return Base::data() + accessingIndex(row, column);
+    __host__ __device__ inline T* HalfDenseMatrixStorage<T, Order, MaxOrder>::data_ptr(size_t row, size_t column) noexcept {
+        return Base::data() + toIndex1D(row, column);
     }
 
     template<class T, size_t Order, size_t MaxOrder>
-    __host__ __device__ inline const T* HalfDenseMatrixStorage<T, Order, MaxOrder>::data_ptr(size_t row, size_t column) const {
-        return Base::data() + accessingIndex(row, column);
+    __host__ __device__ inline const T* HalfDenseMatrixStorage<T, Order, MaxOrder>::data_ptr(size_t row, size_t column) const noexcept {
+        return Base::data() + toIndex1D(row, column);
     }
 
     template<class T, size_t Order, size_t MaxOrder>
-    size_t HalfDenseMatrixStorage<T, Order, MaxOrder>::accessingIndex(size_t r, size_t c) const noexcept {
+    size_t HalfDenseMatrixStorage<T, Order, MaxOrder>::toIndex1D(size_t r, size_t c) const noexcept {
         const size_t order = getOrder();
         assert(r < order && c < order);
         const bool exchange = c < r;

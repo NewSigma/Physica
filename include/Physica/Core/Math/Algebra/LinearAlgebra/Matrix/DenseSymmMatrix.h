@@ -22,7 +22,7 @@
 #include "DenseMatrixImpl/HalfDenseMatrixStorage.h"
 
 namespace Physica::Core {
-    template<class ScalarType, size_t Order = Dynamic, size_t MaxOrder = Order> class DenseSymmMatrix;
+    template<class T, size_t Order = Dynamic, size_t MaxOrder = Order> class DenseSymmMatrix;
 
     namespace Internal {
         template<class T> class Traits;
@@ -41,13 +41,14 @@ namespace Physica::Core {
         };
     }
 
-    template<class ScalarType, size_t Order, size_t MaxOrder>
-    class DenseSymmMatrix : public LValueMatrix<DenseSymmMatrix<ScalarType, Order, MaxOrder>>
-                          , private Internal::HalfDenseMatrixStorage<ScalarType, Order, MaxOrder> {
-        using This = DenseSymmMatrix<ScalarType, Order, MaxOrder>;
+    template<class T, size_t Order, size_t MaxOrder>
+    class DenseSymmMatrix : public LValueMatrix<DenseSymmMatrix<T, Order, MaxOrder>>
+                          , private Internal::HalfDenseMatrixStorage<T, Order, MaxOrder> {
+        using This = DenseSymmMatrix<T, Order, MaxOrder>;
         using Base = LValueMatrix<This>;
-        using Storage = Internal::HalfDenseMatrixStorage<ScalarType, Order, MaxOrder>;
+        using Storage = Internal::HalfDenseMatrixStorage<T, Order, MaxOrder>;
     public:
+        using typename Base::ScalarType;
         using ColMatrix = This;
         using RowMatrix = This;
         using RealMatrix = DenseSymmMatrix<typename ScalarType::RealType, Order, MaxOrder>;
@@ -59,9 +60,14 @@ namespace Physica::Core {
         DenseSymmMatrix(DenseSymmMatrix&&) noexcept = default;
         ~DenseSymmMatrix() = default;
         /* Operators */
-        DenseSymmMatrix& operator=(DenseSymmMatrix m) noexcept;
         using Base::operator=;
+        DenseSymmMatrix& operator=(DenseSymmMatrix m) noexcept;
+        template<class VectorType>
+        [[nodiscard]] inline MatrixVectorProduct<This, VectorType> operator*(const RValueVector<VectorType>& vec) const noexcept;
         /* Operations */
+        using Base::assignTo;
+        using Base::calc;
+        using Base::hermite;
         using Storage::resize;
         [[nodiscard]] const This& transpose() const noexcept { return *this; }
         /* Getters */
@@ -77,9 +83,9 @@ namespace Physica::Core {
     /**
      * Assuming mat is a symmetric matrix, if it is not the case, only half of the elements is saved correctly
      */
-    template<class ScalarType, size_t Order, size_t MaxOrder>
+    template<class T, size_t Order, size_t MaxOrder>
     template<class OtherMatrix>
-    DenseSymmMatrix<ScalarType, Order, MaxOrder>::DenseSymmMatrix(const RValueMatrix<OtherMatrix>& mat)
+    DenseSymmMatrix<T, Order, MaxOrder>::DenseSymmMatrix(const RValueMatrix<OtherMatrix>& mat)
             : DenseSymmMatrix(mat.getRow()) {
         assert(mat.getRow() == mat.getColumn());
         for (size_t i = 0; i < mat.getRow(); ++i)
@@ -87,29 +93,36 @@ namespace Physica::Core {
                 Base::operator()(i, j) = mat.calc(i, j);
     }
 
-    template<class ScalarType, size_t Order, size_t MaxOrder>
-    DenseSymmMatrix<ScalarType, Order, MaxOrder>&
-    DenseSymmMatrix<ScalarType, Order, MaxOrder>::operator=(DenseSymmMatrix m) noexcept {
+    template<class T, size_t Order, size_t MaxOrder>
+    DenseSymmMatrix<T, Order, MaxOrder>&
+    DenseSymmMatrix<T, Order, MaxOrder>::operator=(DenseSymmMatrix m) noexcept {
         swap(m);
         return *this;
     }
 
-    template<class ScalarType, size_t Order, size_t MaxOrder>
-    void DenseSymmMatrix<ScalarType, Order, MaxOrder>::swap(DenseSymmMatrix& __restrict m) noexcept {
+    template<class T, size_t Order, size_t MaxOrder>
+    template<class VectorType>
+    inline MatrixVectorProduct<DenseSymmMatrix<T, Order, MaxOrder>, VectorType>
+    DenseSymmMatrix<T, Order, MaxOrder>::operator*(const RValueVector<VectorType>& vec) const noexcept {
+        return static_cast<const Base&>(*this) * vec;
+    }
+
+    template<class T, size_t Order, size_t MaxOrder>
+    void DenseSymmMatrix<T, Order, MaxOrder>::swap(DenseSymmMatrix& __restrict m) noexcept {
         assert(this != &m && "[Error]: Self swap is likely a bug");
         Storage::swap(m);
     }
 
-    template<class ScalarType, size_t Order, size_t MaxOrder>
-    DenseSymmMatrix<ScalarType, Order, MaxOrder> DenseSymmMatrix<ScalarType, Order, MaxOrder>::unitMatrix(size_t order) {
-        DenseSymmMatrix<ScalarType, Order, MaxOrder> result(order);
+    template<class T, size_t Order, size_t MaxOrder>
+    DenseSymmMatrix<T, Order, MaxOrder> DenseSymmMatrix<T, Order, MaxOrder>::unitMatrix(size_t order) {
+        DenseSymmMatrix<T, Order, MaxOrder> result(order);
         result.toUnitMatrix();
         return result;
     }
 
-    template<class ScalarType, size_t Order, size_t MaxOrder>
-    inline void swap(Physica::Core::DenseSymmMatrix<ScalarType, Order, MaxOrder>& __restrict m1,
-                     Physica::Core::DenseSymmMatrix<ScalarType, Order, MaxOrder>& __restrict m2) noexcept {
+    template<class T, size_t Order, size_t MaxOrder>
+    inline void swap(Physica::Core::DenseSymmMatrix<T, Order, MaxOrder>& __restrict m1,
+                     Physica::Core::DenseSymmMatrix<T, Order, MaxOrder>& __restrict m2) noexcept {
         m1.swap(m2);
     }
 }

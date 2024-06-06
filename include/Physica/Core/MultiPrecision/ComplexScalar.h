@@ -101,12 +101,11 @@ namespace Physica::Core {
         [[nodiscard]] T phase() const;
         [[nodiscard]] ComplexScalar unit() const;
         [[nodiscard]] ComplexScalar conjugate() const noexcept { return ComplexScalar(real, -imag); }
-        [[nodiscard]] const T& getReal() const { return real; }
-        [[nodiscard]] const T& getImag() const { return imag; }
-        [[nodiscard]] bool isZero() const { return real.isZero() && imag.isZero(); }
-        /* Setters */
-        void setReal(const T& s) { real = s; }
-        void setImag(const T& s) { imag = s; }
+        [[nodiscard]] T& getReal() noexcept { return real; }
+        [[nodiscard]] const T& getReal() const noexcept { return real; }
+        [[nodiscard]] T& getImag() noexcept { return imag; }
+        [[nodiscard]] const T& getImag() const noexcept { return imag; }
+        [[nodiscard]] bool isZero() const noexcept { return real.isZero() && imag.isZero(); }
         /* Static Members */
         [[nodiscard]] inline static ComplexScalar fromPhase(T phase);
         template<class RandomGenerator>

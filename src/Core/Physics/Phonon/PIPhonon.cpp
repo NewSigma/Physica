@@ -54,7 +54,7 @@ namespace Physica::Core {
     std::ostream& operator<<(std::ostream& os, const PIPhonon& phonon) {
         for (size_t r = 0; r < phonon.getUnitCellDOF(); ++r) {
             for (size_t c = r; c < phonon.getUnitCellDOF(); ++c) {
-                const size_t offset = phonon.force_corr.accessingIndex(r, c);
+                const size_t offset = phonon.force_corr.toIndex1D(r, c);
                 os << phonon.force_corr[offset] << phonon.momentum_corr[offset];
             }
         }
@@ -64,7 +64,7 @@ namespace Physica::Core {
     std::istream& operator>>(std::istream& is, PIPhonon& phonon) {
         for (size_t r = 0; r < phonon.getUnitCellDOF(); ++r) {
             for (size_t c = r; c < phonon.getUnitCellDOF(); ++c) {
-                const size_t offset = phonon.force_corr.accessingIndex(r, c);
+                const size_t offset = phonon.force_corr.toIndex1D(r, c);
                 is >> phonon.force_corr[offset] >> phonon.momentum_corr[offset];
             }
         }
@@ -101,7 +101,7 @@ namespace Physica::Core {
                         base.col(i).asVector() = ScalarType(0);
                 }
             }
-            buffer = base.hermite() * kSpaceForceCorr[qPointId];
+            buffer = base.hermite() * kSpaceForceCorr[qPointId].asMatrix();
             buffer *= base;
             
             solver.compute(buffer, true);
@@ -131,7 +131,7 @@ namespace Physica::Core {
         const size_t dof = getUnitCellDOF();
         for (size_t r = 0; r < dof; ++r) {
             for (size_t c = r; c < dof; ++c) {
-                const size_t offset_corr = force_corr.accessingIndex(r, c);
+                const size_t offset_corr = force_corr.toIndex1D(r, c);
                 fft.getRSpace().flatten() = force_corr[offset_corr];
                 fft.transform();
                 for (size_t cell = 0; cell < getNumCell(); ++cell)

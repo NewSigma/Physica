@@ -165,10 +165,10 @@ namespace Physica::Core {
     };
 
     template<class MatrixType1, class MatrixType2>
-    inline typename std::enable_if<(MatrixType1::ColumnAtCompile != 1 && MatrixType2::ColumnAtCompile != 1) ||
-                                   (MatrixType1::ColumnAtCompile == 1 && MatrixType2::ColumnAtCompile == 1),
-                                   MatrixProduct<MatrixType1, MatrixType2>>::type
-    operator*(const RValueMatrix<MatrixType1>& mat1, const RValueMatrix<MatrixType2>& mat2) {
+    [[nodiscard]] inline typename std::enable_if<(MatrixType1::ColumnAtCompile != 1 && MatrixType2::ColumnAtCompile != 1) ||
+                                                 (MatrixType1::ColumnAtCompile == 1 && MatrixType2::ColumnAtCompile == 1),
+                                                  MatrixProduct<MatrixType1, MatrixType2>>::type
+    operator*(const RValueMatrix<MatrixType1>& mat1, const RValueMatrix<MatrixType2>& mat2) noexcept {
         assert(mat1.getColumn() == mat2.getRow());
         return MatrixProduct(mat1, mat2);
     }
@@ -177,23 +177,23 @@ namespace Physica::Core {
      * To compute row vector * matrix, users should converted it to matrix^T * column vector.
      */
     template<class VectorType, class MatrixType>
-    inline typename std::enable_if<MatrixType::RowAtCompile == 1, VectorMatrixProduct<VectorType, MatrixType>>::type
-    operator*(const RValueVector<VectorType>& vec, const RValueMatrix<MatrixType>& mat) {
+    [[nodiscard]] inline typename std::enable_if<MatrixType::RowAtCompile == 1, VectorMatrixProduct<VectorType, MatrixType>>::type
+    operator*(const RValueVector<VectorType>& vec, const RValueMatrix<MatrixType>& mat) noexcept {
         assert(mat.getRow() == 1);
         return VectorMatrixProduct(vec, mat);
     }
 
     template<class MatrixType, class VectorType>
-    inline typename std::enable_if<MatrixType::RowAtCompile != 1, MatrixVectorProduct<MatrixType, VectorType>>::type
-    operator*(const RValueMatrix<MatrixType>& mat, const RValueVector<VectorType>& vec) {
+    [[nodiscard]] inline typename std::enable_if<MatrixType::RowAtCompile != 1, MatrixVectorProduct<MatrixType, VectorType>>::type
+    operator*(const RValueMatrix<MatrixType>& mat, const RValueVector<VectorType>& vec) noexcept {
         assert(mat.getColumn() == vec.getLength());
         return MatrixVectorProduct(mat.getDerived(), vec.getDerived());
     }
 
     template<class MatrixType, class VectorType>
-    inline typename std::enable_if<MatrixType::RowAtCompile == 1 && MatrixType::ColumnAtCompile == 1,
-                                   typename Internal::BinaryScalarOpReturnType<typename MatrixType::ScalarType,
-                                                                               typename VectorType::ScalarType>::Type>::type
+    [[nodiscard]] inline typename std::enable_if<MatrixType::RowAtCompile == 1 && MatrixType::ColumnAtCompile == 1,
+                                                 typename Internal::BinaryScalarOpReturnType<typename MatrixType::ScalarType,
+                                                                                             typename VectorType::ScalarType>::Type>::type
     operator*(const RValueMatrix<MatrixType>& mat, const RValueVector<VectorType>& vec) {
         assert(mat.getColumn() == vec.getLength());
         return mat.row(0) * vec;
