@@ -41,11 +41,10 @@ class Scalar(CXXObj):
         return self.__Option
 
     @staticmethod
-    def include():
-        pDecl = Scalar.__pDecl
-        if (pDecl is None):
+    def include() -> None:
+        if (Scalar.__pDecl is None):
             from phypy import physica
-            pDecl = physica.include('Core/MultiPrecision/Scalar.h')
+            Scalar.__pDecl = physica.include('Core/MultiPrecision/Scalar.h')
 
 Scalar.include()
 

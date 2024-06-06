@@ -39,7 +39,7 @@ namespace Physica::Python {
         CXXObj() = default;
         template<class T>
         explicit CXXObj(T&& obj);
-        CXXObj(const CXXRecordDecl* pDecl_, void* pObj_);
+        CXXObj(const CXXRecordDecl* pDecl_, void* pObj_) noexcept;
         CXXObj(const CXXObj&) = delete;
         CXXObj(CXXObj&&) noexcept;
         ~CXXObj();
@@ -54,6 +54,10 @@ namespace Physica::Python {
         [[nodiscard]] T& getDerived() noexcept { return *reinterpret_cast<T*>(pObj); }
         template<class T>
         [[nodiscard]] const T& getDerived() const noexcept { return const_cast<This&>(*this).getDerived<T>(); }
+        /* Static members */
+        [[nodiscard]] static This create(const CXXRecordDecl* pDecl);
+    private:
+        static void* allocateObj(const CXXRecordDecl* pDecl);
     };
 
     template<class T>

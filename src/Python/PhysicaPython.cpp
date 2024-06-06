@@ -17,24 +17,16 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include <iostream>
-#include "clang/AST/GlobalDecl.h"
-#include "Physica/Python/PhysicaPython.h"
-#include "Physica/Python/CXXObj.h"
-#include "Physica/Python/LLVM/LLVM.h"
-#include "Physica/Python/Exception/LLVMException.h"
+#include <clang/AST/GlobalDecl.h>
+#include <Physica/Python/PhysicaPython.h>
+#include <Physica/Python/CXXPtr.h>
+#include <Physica/Python/CXXObj.h>
+#include <Physica/Python/LLVM/LLVM.h>
+#include <Physica/Python/Exception/LLVMException.h>
 
 namespace Physica::Python {
     PhysicaPython::PhysicaPython() {
         exec = Executor(clang.getCI().getTarget());
-    }
-
-    typename PhysicaPython::ExecutorAddr PhysicaPython::emit(const clang::FunctionDecl& func) {
-        auto& jit = getJIT();
-        auto& ptu = clang.makePTU("Del");
-        llvmCheck(jit.addIRModule(llvm::orc::ThreadSafeModule(std::move(ptu.unitModule), LLVM::getInstance().getThreadSafeContext())));
-        auto decl = clang::GlobalDecl(&func);
-        const std::string symbol = clang.getCodeGen().GetMangledName(std::move(decl)).str();
-        return llvmCheck(jit.lookup(symbol));
     }
 
     PhysicaPython& PhysicaPython::getInstance() noexcept {
@@ -45,16 +37,32 @@ namespace Physica::Python {
 
 PYBIND11_MODULE(PhysicaPython, m) {
     using namespace Physica::Python;
+    using NamedDecl = clang::NamedDecl;
 
     m.doc() = "PhysicaPython is a python interface to Physica";
     py::register_exception<LLVMException>(m, "LLVMException");
 
+    py::class_<CXXPtr>(m, "CXXPtr")
+        .def("__repr__", &CXXPtr::toString);
+
     py::class_<CXXObj>(m, "CXXObj")
+        .def(py::init([](CXXPtr pClass) { return CXXObj::create(pClass.getDerived<clang::CXXRecordDecl>()); }))
         .def("__del__", [](CXXObj& obj) { obj.~CXXObj(); })
         .def("call", &CXXObj::call, py::return_value_policy::move);
 
-    m.def("include", [](const char* includeName) {
-        const void* pClass = PhysicaPython::getInstance().getClang().include(includeName);
-        return pClass;
+    py::class_<NamedDecl>(m, "NamedDecl");
+
+    m.def("include", [](const char* includeName) -> CXXPtr {
+        return (void*)PhysicaPython::getInstance().getClang().include(includeName);
+    }, py::return_value_policy::move);
+
+    m.def("compile", [](const char* moduleName) {
+        auto& pp = PhysicaPython::getInstance();
+        auto* unit = pp.getClang().compile(moduleName);
+        if (unit == nullptr)
+            return false;
+        auto& jit = pp.getJIT();
+        llvmCheck(jit.addIRModule(llvm::orc::ThreadSafeModule(std::move(unit->unitModule), LLVM::getInstance().getThreadSafeContext())));
+        return true;
     });
 }

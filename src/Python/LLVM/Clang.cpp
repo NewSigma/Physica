@@ -92,14 +92,18 @@ namespace Physica::Python {
         return (*ite).second;
     }
 
-    Clang::PartialTranslationUnit& Clang::makePTU(const char* moduleName) {
+    Clang::PartialTranslationUnit* Clang::compile(const char* moduleName) {
         using namespace clang;
         Sema& sema = ci.getSema();
+        auto& ctx = sema.getASTContext();
+        const bool isEmpty = ctx.getTranslationUnitDecl()->decls_empty();
+        if (isEmpty)
+            return nullptr;
+
         llvm::CrashRecoveryContextCleanupRegistrar<Sema> recoverGuard(&sema);
         Sema::GlobalEagerInstantiationScope GlobalInstantiations(sema, true);
         Sema::LocalEagerInstantiationScope LocalInstantiations(sema);
 
-        auto& ctx = sema.getASTContext();
         ctx.addTranslationUnitDecl();
         parse();
 
@@ -117,7 +121,7 @@ namespace Physica::Python {
             codeGen.StartModule(DummyFile, unitModule->getContext());
         }
         partialUnitList.push_front(std::move(unit));
-        return partialUnitList.front();
+        return &partialUnitList.front();
     }
 
     const clang::CodeGenerator& Clang::getCodeGen() const noexcept {
@@ -268,9 +272,13 @@ namespace Physica::Python {
         }
         else if (llvm::isa<CXXRecordDecl>(decl)) {
             auto& classDecl = static_cast<CXXRecordDecl&>(decl);
-            auto* pDestructor = classDecl.getDestructor();
-            if (pDestructor)
-                pDestructor->addAttr(pUsedAttr);
+
+            for (auto ctor : classDecl.ctors())
+                ctor->addAttr(pUsedAttr);
+
+            auto* pDtor = classDecl.getDestructor();
+            if (pDtor)
+                pDtor->addAttr(pUsedAttr);
         }
     }
 

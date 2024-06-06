@@ -35,8 +35,6 @@ namespace Physica::Python {
         ClassDeclMap classDeclMap;
     public:
         ~PhysicaPython() = default;
-        /* Operations */
-        [[nodiscard]] ExecutorAddr emit(const clang::FunctionDecl& func);
         /* Getters */
         [[nodiscard]] const Clang& getClang() const noexcept { return clang; }
         [[nodiscard]] Clang& getClang() noexcept { return clang; }

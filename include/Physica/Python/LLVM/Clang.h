@@ -62,9 +62,10 @@ namespace Physica::Python {
         Clang& operator=(Clang&&) noexcept = delete;
         /* Operations */
         const clang::NamedDecl* include(const char* includeName);
-        [[nodiscard]] PartialTranslationUnit& makePTU(const char* moduleName);
+        PartialTranslationUnit* compile(const char* moduleName);
         /* Getters */
         [[nodiscard]] CompilerInstance& getCI() noexcept { return ci; }
+        [[nodiscard]] const clang::ASTContext& getASTContext() const noexcept { return ci.getASTContext(); }
         [[nodiscard]] clang::ASTContext& getASTContext() noexcept { return ci.getASTContext(); }
         [[nodiscard]] const CodeGenerator& getCodeGen() const noexcept;
         [[nodiscard]] CodeGenerator& getCodeGen() noexcept;
