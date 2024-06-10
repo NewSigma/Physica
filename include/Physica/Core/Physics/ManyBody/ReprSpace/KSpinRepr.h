@@ -41,7 +41,7 @@ namespace Physica::Core {
     public:
         using typename Base::StateType;
     private:
-        Utils::Array<SpinElectron> states; //Optimize: Each spin up state might pair with several spin down states
+        Utils::Array<SpinFermion> states; //Optimize: Each spin up state might pair with several spin down states
         PeriodArray periods;
         RSpinType rSpin;
         unsigned int kIndex;
@@ -81,7 +81,7 @@ namespace Physica::Core {
                 const bool isZero = (kIndex * period) % numSite != 0;
                 if (isZero)
                     continue;
-                states.append(SpinElectron(psiUp, psiDown));
+                states.append(SpinFermion(psiUp, psiDown));
                 periods.append(period);
             }
         }

@@ -209,7 +209,9 @@ namespace Physica::Core {
                     return false;
         return true;
     }
+}
 
+namespace std {
     template<class T, size_t Order, size_t MaxOrder>
     inline void swap(
             Physica::Core::DenseHermiteMatrix<T, Order, MaxOrder>& __restrict m1,

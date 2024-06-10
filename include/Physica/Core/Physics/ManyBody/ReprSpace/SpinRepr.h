@@ -19,7 +19,7 @@
 #pragma once
 
 #include "ReprImpl/ReprSpace.h"
-#include "State/SpinElectron.h"
+#include "State/SpinFermion.h"
 #include "Physica/Utils/Container/Array/Array.h"
 #include "Physica/Utils/CUDA/PlainStruct.h"
 
@@ -31,7 +31,7 @@ namespace Physica::Core {
         template<bool UseInversionSymm>
         class Traits<SpinRepr<UseInversionSymm>> {
         public:
-            using StateType = SpinElectron;
+            using StateType = SpinFermion;
             constexpr static unsigned int Dim = 1;
             constexpr static bool IsTransInvariant = false;
         };
@@ -44,7 +44,7 @@ namespace Physica::Core {
     public:
         using typename Base::StateType;
     private:
-        using StateArray = Utils::Array<SpinlessElectron>;
+        using StateArray = Utils::Array<SpinlessFermion>;
         using DownStateArray = typename std::conditional<UseInversionSymm, PlainStruct<void>, StateArray>::type;
 
         unsigned int numSite;
@@ -138,11 +138,11 @@ namespace Physica::Core {
     template<bool UseInversionSymm>
     typename SpinRepr<UseInversionSymm>::StateArray
     SpinRepr<UseInversionSymm>::makeSpinlessStates(size_t numElectron) const noexcept {
-        const size_t numSpinlessState = SpinlessElectron::calcFullNumState(numSite);
+        const size_t numSpinlessState = SpinlessFermion::calcFullNumState(numSite);
         StateArray result{};
         result.reserve(numSpinlessState);
         for (size_t i = 0; i < numSpinlessState; ++i) {
-            const SpinlessElectron state(i, numSite);
+            const SpinlessFermion state(i, numSite);
             if (state.getNumElectron() != numElectron)
                 continue;
             result.append(state);

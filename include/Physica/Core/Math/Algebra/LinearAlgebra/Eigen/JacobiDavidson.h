@@ -421,9 +421,13 @@ namespace Physica::Core {
             return MinSearchDim;
         return result;
     }
+}
 
+namespace std {
     template<class ScalarType>
-    inline void swap(JacobiDavidson<ScalarType>& __restrict obj1, JacobiDavidson<ScalarType>& __restrict obj2) noexcept {
+    inline void swap(
+            Physica::Core::JacobiDavidson<ScalarType>& __restrict obj1,
+            Physica::Core::JacobiDavidson<ScalarType>& __restrict obj2) noexcept {
         obj1.swap(obj2);
     }
 }

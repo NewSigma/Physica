@@ -16,10 +16,10 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include "Physica/Core/Physics/ManyBody/ReprSpace/State/SpinlessElectron.h"
+#include "Physica/Core/Physics/ManyBody/ReprSpace/State/SpinlessFermion.h"
 
 namespace Physica::Core {
-    SpinlessElectron SpinlessElectron::transReduce(int period) const {
+    SpinlessFermion SpinlessFermion::transReduce(int period) const {
         assert(numSite % period == 0 && "[Error]: Invalid period");
         assert(0 < period && period <= numSite && "[Error]: Invalid period");
         if (period == numSite)
@@ -31,10 +31,10 @@ namespace Physica::Core {
             temp <<= period;
             result = std::min(result, temp.occupyBits);
         }
-        return SpinlessElectron(result, numSite);
+        return SpinlessFermion(result, numSite);
     }
 
-    int SpinlessElectron::calcPeriod() const {
+    int SpinlessFermion::calcPeriod() const {
         This copy = *this;
         int i = 1;
         for (; i <= numSite; ++i) {

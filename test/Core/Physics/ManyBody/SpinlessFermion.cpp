@@ -17,12 +17,12 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include <iostream>
-#include "Physica/Core/Physics/ManyBody/ReprSpace/State/SpinlessElectron.h"
+#include "Physica/Core/Physics/ManyBody/ReprSpace/State/SpinlessFermion.h"
 
 using namespace Physica::Core;
 
 int main() {
-    const SpinlessElectron psi(0b011010, 6);
+    const SpinlessFermion psi(0b011010, 6);
     const auto psi1 = psi << 2;
     if (psi1.getOccupyBits() != 0b101001)
         return 1;

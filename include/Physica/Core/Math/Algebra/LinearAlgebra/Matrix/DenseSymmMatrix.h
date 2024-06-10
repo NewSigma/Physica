@@ -47,6 +47,7 @@ namespace Physica::Core {
         using This = DenseSymmMatrix<T, Order, MaxOrder>;
         using Base = LValueMatrix<This>;
         using Storage = Internal::HalfDenseMatrixStorage<T, Order, MaxOrder>;
+        using VectorBase = typename Storage::Base;
     public:
         using typename Base::ScalarType;
         using ColMatrix = This;
@@ -68,15 +69,24 @@ namespace Physica::Core {
         using Base::assignTo;
         using Base::calc;
         using Base::hermite;
+        using Storage::max;
+        using Storage::min;
         using Storage::resize;
         [[nodiscard]] const This& transpose() const noexcept { return *this; }
+        void swap(DenseSymmMatrix& __restrict m) noexcept;
+
+        using Storage::random_uniform;
+        using Storage::random_normal;
+        using Storage::random_any;
         /* Getters */
         using Storage::getOrder;
         using Storage::getRow;
         using Storage::getColumn;
         using Storage::data_ptr;
-        /* Helpers */
-        void swap(DenseSymmMatrix& __restrict m) noexcept;
+        [[nodiscard]] Base& asMatrix() noexcept { return *this; }
+        [[nodiscard]] const Base& asMatrix() const noexcept { return *this; }
+        [[nodiscard]] VectorBase& asVector() noexcept { return *this; }
+        [[nodiscard]] const VectorBase& asVector() const noexcept { return *this; }
         /* Static members */
         [[nodiscard]] static DenseSymmMatrix unitMatrix(size_t order);
     };
@@ -119,7 +129,9 @@ namespace Physica::Core {
         result.toUnitMatrix();
         return result;
     }
+}
 
+namespace std {
     template<class T, size_t Order, size_t MaxOrder>
     inline void swap(Physica::Core::DenseSymmMatrix<T, Order, MaxOrder>& __restrict m1,
                      Physica::Core::DenseSymmMatrix<T, Order, MaxOrder>& __restrict m2) noexcept {

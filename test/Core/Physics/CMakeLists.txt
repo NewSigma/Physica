@@ -5,7 +5,7 @@ physica_add_test(RHFSolver RHFSolver.cpp)
 ### ManyBody
 physica_add_test(Hubbard1D ManyBody/Hubbard1D.cpp)
 physica_add_test(KSpinRepr ManyBody/KSpinRepr.cpp)
-physica_add_test(SpinlessElectron ManyBody/SpinlessElectron.cpp)
+physica_add_test(SpinlessFermion ManyBody/SpinlessFermion.cpp)
 ### MD
 physica_add_test(RSpaceEwald MD/ForceModel/Ewald/RSpaceEwald.cpp)
 physica_add_test(BKSModel MD/ForceModel/BKSModel.cpp)

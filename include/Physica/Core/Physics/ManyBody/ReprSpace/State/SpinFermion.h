@@ -18,31 +18,31 @@
  */
 #pragma once
 
-#include "SpinlessElectron.h"
+#include "SpinlessFermion.h"
 #include "Physica/Core/Math/NumberTheory/NumberTheory.h"
 
 namespace Physica::Core {
-    class SpinElectron;
+    class SpinFermion;
 
     namespace Internal {
         template<>
-        class Traits<SpinElectron> {
+        class Traits<SpinFermion> {
         public:
             constexpr static unsigned int SiteDOF = 4;
         };
     }
 
-    class PHYSICA_API SpinElectron : public State<SpinElectron> {
-        using This = SpinElectron;
+    class PHYSICA_API SpinFermion : public State<SpinFermion> {
+        using This = SpinFermion;
 
-        SpinlessElectron spinUp;
-        SpinlessElectron spinDown;
+        SpinlessFermion spinUp;
+        SpinlessFermion spinDown;
     public:
-        SpinElectron() = default;
-        inline SpinElectron(SpinlessElectron spinUp_, SpinlessElectron spinDown_);
-        SpinElectron(const SpinElectron&) = default;
-        SpinElectron(SpinElectron&&) noexcept = default;
-        ~SpinElectron() = default;
+        SpinFermion() = default;
+        inline SpinFermion(SpinlessFermion spinUp_, SpinlessFermion spinDown_);
+        SpinFermion(const This&) = default;
+        SpinFermion(This&&) noexcept = default;
+        ~SpinFermion() = default;
         /* Operators */
         This& operator=(This obj) noexcept { swap(obj); return *this; }
         [[nodiscard]] bool operator==(const This& other) const noexcept { return spinUp == other.spinUp && spinDown == other.spinDown; }
@@ -51,19 +51,19 @@ namespace Physica::Core {
         [[nodiscard]] inline bool operator<(const This& other) const noexcept;
         [[nodiscard]] bool operator>=(const This& other) const noexcept { return !((*this) < other); }
         [[nodiscard]] bool operator<=(const This& other) const noexcept { return !((*this) > other); }
-        [[nodiscard]] This operator<<(int shift) const noexcept { return SpinElectron(spinUp << shift, spinDown << shift); }
-        [[nodiscard]] This operator>>(int shift) const noexcept { return SpinElectron(spinUp >> shift, spinDown >> shift); }
+        [[nodiscard]] This operator<<(int shift) const noexcept { return SpinFermion(spinUp << shift, spinDown << shift); }
+        [[nodiscard]] This operator>>(int shift) const noexcept { return SpinFermion(spinUp >> shift, spinDown >> shift); }
         void operator<<=(int shift) noexcept { (*this) = (*this) << shift; }
         void operator>>=(int shift) noexcept { (*this) = (*this) >> shift; }
         /* Operations */
-        [[nodiscard]] SpinElectron hopUp(unsigned char from, unsigned char to) const;
-        [[nodiscard]] SpinElectron hopDown(unsigned char from, unsigned char to) const;
-        [[nodiscard]] SpinElectron transReduce() const;
+        [[nodiscard]] SpinFermion hopUp(unsigned char from, unsigned char to) const;
+        [[nodiscard]] SpinFermion hopDown(unsigned char from, unsigned char to) const;
+        [[nodiscard]] SpinFermion transReduce() const;
         [[nodiscard]] inline int calcPeriod() const noexcept;
-        inline void swap(SpinElectron& __restrict obj) noexcept;
+        inline void swap(SpinFermion& __restrict obj) noexcept;
         /* Getters */
-        [[nodiscard]] SpinlessElectron getSpinUp() const noexcept { return spinUp; }
-        [[nodiscard]] SpinlessElectron getSpinDown() const noexcept { return spinDown; }
+        [[nodiscard]] SpinlessFermion getSpinUp() const noexcept { return spinUp; }
+        [[nodiscard]] SpinlessFermion getSpinDown() const noexcept { return spinDown; }
         [[nodiscard]] int getNumSite() const noexcept { return spinUp.getNumSite(); }
         [[nodiscard]] bool isVacuum() const noexcept { return spinUp.isVacuum() && spinDown.isVacuum(); }
         [[nodiscard]] bool isUpOccupy(unsigned char site) const noexcept { return spinUp.isOccupy(site); }
@@ -73,10 +73,10 @@ namespace Physica::Core {
         [[nodiscard]] inline unsigned int getNumPairedElectron() const noexcept;
     };
 
-    inline SpinElectron::SpinElectron(SpinlessElectron spinUp_, SpinlessElectron spinDown_)
+    inline SpinFermion::SpinFermion(SpinlessFermion spinUp_, SpinlessFermion spinDown_)
             : spinUp(spinUp_), spinDown(spinDown_) {}
 
-    inline bool SpinElectron::operator>(const This& other) const noexcept {
+    inline bool SpinFermion::operator>(const This& other) const noexcept {
         if (spinUp > other.spinUp)
             return true;
         if (spinUp == other.spinUp)
@@ -84,7 +84,7 @@ namespace Physica::Core {
         return false;
     }
 
-    inline bool SpinElectron::operator<(const This& other) const noexcept {
+    inline bool SpinFermion::operator<(const This& other) const noexcept {
         if (spinUp < other.spinUp)
             return true;
         if (spinUp == other.spinUp)
@@ -92,23 +92,23 @@ namespace Physica::Core {
         return false;
     }
 
-    inline int SpinElectron::calcPeriod() const noexcept {
+    inline int SpinFermion::calcPeriod() const noexcept {
         const int result = lcm<int, false>(spinUp.calcPeriod(), spinDown.calcPeriod());
         assert(0 < result && result <= getNumSite() && "[Error]: Unexpected period, this is a bug");
         return result;
     }
 
-    inline void SpinElectron::swap(SpinElectron& __restrict obj) noexcept {
+    inline void SpinFermion::swap(SpinFermion& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         spinUp.swap(obj.spinUp);
         spinDown.swap(obj.spinDown);
     }
 
-    inline unsigned int SpinElectron::getNumPairedElectron() const noexcept {
+    inline unsigned int SpinFermion::getNumPairedElectron() const noexcept {
         return countOnes(spinUp.getOccupyBits() & spinDown.getOccupyBits());
     }
 
-    inline std::ostream& operator<<(std::ostream& os, SpinElectron e) {
+    inline std::ostream& operator<<(std::ostream& os, SpinFermion e) {
         return os << e.getSpinUp() << ' ' << e.getSpinDown();
     }
 }

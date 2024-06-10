@@ -16,26 +16,26 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include "Physica/Core/Physics/ManyBody/ReprSpace/State/SpinElectron.h"
+#include "Physica/Core/Physics/ManyBody/ReprSpace/State/SpinFermion.h"
 
 namespace Physica::Core {
-    SpinElectron SpinElectron::hopUp(unsigned char from, unsigned char to) const {
+    SpinFermion SpinFermion::hopUp(unsigned char from, unsigned char to) const {
         auto newSpinUp = spinUp.hop(from, to);
         const bool hopFailed = newSpinUp.isVacuum() && !spinUp.isVacuum();
         if (hopFailed)
-            return SpinElectron();
-        return SpinElectron(std::move(newSpinUp), spinDown);
+            return SpinFermion();
+        return SpinFermion(std::move(newSpinUp), spinDown);
     }
 
-    SpinElectron SpinElectron::hopDown(unsigned char from, unsigned char to) const {
+    SpinFermion SpinFermion::hopDown(unsigned char from, unsigned char to) const {
         auto newSpinDown = spinDown.hop(from, to);
         const bool hopFailed = newSpinDown.isVacuum() && !spinDown.isVacuum();
         if (hopFailed)
-            return SpinElectron();
-        return SpinElectron(spinUp, std::move(newSpinDown));
+            return SpinFermion();
+        return SpinFermion(spinUp, std::move(newSpinDown));
     }
 
-    SpinElectron SpinElectron::transReduce() const {
+    SpinFermion SpinFermion::transReduce() const {
         const int numSite = getNumSite();
         This result = *this, temp = *this;
         for (int i = 0; i < numSite; ++i) {
