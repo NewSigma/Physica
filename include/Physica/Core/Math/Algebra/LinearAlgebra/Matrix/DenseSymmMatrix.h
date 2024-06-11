@@ -89,6 +89,12 @@ namespace Physica::Core {
         [[nodiscard]] const VectorBase& asVector() const noexcept { return *this; }
         /* Static members */
         [[nodiscard]] static DenseSymmMatrix unitMatrix(size_t order);
+        template<class RandomGenerator>
+        [[nodiscard]] inline static This random_uniform(size_t order, RandomGenerator& gen);
+        template<class RandomGenerator>
+        [[nodiscard]] inline static This random_normal(size_t order, RandomGenerator& gen);
+        template<class Distribution, class RandomGenerator>
+        [[nodiscard]] inline static This random_any(size_t order, Distribution& dist, RandomGenerator& gen);
     };
     /**
      * Assuming mat is a symmetric matrix, if it is not the case, only half of the elements is saved correctly
@@ -127,6 +133,33 @@ namespace Physica::Core {
     DenseSymmMatrix<T, Order, MaxOrder> DenseSymmMatrix<T, Order, MaxOrder>::unitMatrix(size_t order) {
         DenseSymmMatrix<T, Order, MaxOrder> result(order);
         result.toUnitMatrix();
+        return result;
+    }
+
+    template<class T, size_t Order, size_t MaxOrder>
+    template<class RandomGenerator>
+    [[nodiscard]] inline DenseSymmMatrix<T, Order, MaxOrder>
+    DenseSymmMatrix<T, Order, MaxOrder>::random_uniform(size_t order, RandomGenerator& gen) {
+        This result(order);
+        result.random_uniform(gen);
+        return result;
+    }
+
+    template<class T, size_t Order, size_t MaxOrder>
+    template<class RandomGenerator>
+    [[nodiscard]] inline DenseSymmMatrix<T, Order, MaxOrder>
+    DenseSymmMatrix<T, Order, MaxOrder>::random_normal(size_t order, RandomGenerator& gen) {
+        This result(order);
+        result.random_normal(gen);
+        return result;
+    }
+
+    template<class T, size_t Order, size_t MaxOrder>
+    template<class Distribution, class RandomGenerator>
+    [[nodiscard]] inline DenseSymmMatrix<T, Order, MaxOrder>
+    DenseSymmMatrix<T, Order, MaxOrder>::random_any(size_t order, Distribution& dist, RandomGenerator& gen) {
+        This result(order);
+        result.random_any(dist, gen);
         return result;
     }
 }

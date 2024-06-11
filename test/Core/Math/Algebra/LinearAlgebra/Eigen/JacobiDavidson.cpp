@@ -17,7 +17,7 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include <iostream>
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Eigen/JacobiDavidson.h"
+#include <Physica/Core/Math/Algebra/LinearAlgebra/Eigen/JacobiDavidson.h>
 
 using namespace Physica::Core;
 using ScalarType = Scalar<Double>;

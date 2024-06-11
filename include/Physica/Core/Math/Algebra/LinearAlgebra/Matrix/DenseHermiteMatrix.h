@@ -95,6 +95,12 @@ namespace Physica::Core {
         [[nodiscard]] const VectorBase& asVector() const noexcept { return *this; }
         /* Static members */
         [[nodiscard]] static This unitMatrix(size_t order);
+        template<class RandomGenerator>
+        [[nodiscard]] inline static This random_uniform(size_t order, RandomGenerator& gen);
+        template<class RandomGenerator>
+        [[nodiscard]] inline static This random_normal(size_t order, RandomGenerator& gen);
+        template<class Distribution, class RandomGenerator>
+        [[nodiscard]] inline static This random_any(size_t order, Distribution& dist, RandomGenerator& gen);
         template<class MatrixType>
         [[nodiscard]] bool isHermiteMatrix(const RValueMatrix<MatrixType>& mat, double precision);
     };
@@ -194,6 +200,33 @@ namespace Physica::Core {
     DenseHermiteMatrix<T, Order, MaxOrder> DenseHermiteMatrix<T, Order, MaxOrder>::unitMatrix(size_t order) {
         DenseHermiteMatrix<T, Order, MaxOrder> result(order);
         result.toUnitMatrix();
+        return result;
+    }
+
+    template<class T, size_t Order, size_t MaxOrder>
+    template<class RandomGenerator>
+    [[nodiscard]] inline DenseHermiteMatrix<T, Order, MaxOrder>
+    DenseHermiteMatrix<T, Order, MaxOrder>::random_uniform(size_t order, RandomGenerator& gen) {
+        This result(order);
+        result.random_uniform(gen);
+        return result;
+    }
+
+    template<class T, size_t Order, size_t MaxOrder>
+    template<class RandomGenerator>
+    [[nodiscard]] inline DenseHermiteMatrix<T, Order, MaxOrder>
+    DenseHermiteMatrix<T, Order, MaxOrder>::random_normal(size_t order, RandomGenerator& gen) {
+        This result(order);
+        result.random_normal(gen);
+        return result;
+    }
+
+    template<class T, size_t Order, size_t MaxOrder>
+    template<class Distribution, class RandomGenerator>
+    [[nodiscard]] inline DenseHermiteMatrix<T, Order, MaxOrder>
+    DenseHermiteMatrix<T, Order, MaxOrder>::random_any(size_t order, Distribution& dist, RandomGenerator& gen) {
+        This result(order);
+        result.random_any(dist, gen);
         return result;
     }
 
