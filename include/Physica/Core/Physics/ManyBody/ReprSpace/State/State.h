@@ -30,6 +30,8 @@ namespace Physica::Core {
 
     template<class Derived>
     class State {
+    public:
+        constexpr static unsigned int Dim = Internal::Traits<Derived>::Dim;
         constexpr static unsigned int SiteDOF = Internal::Traits<Derived>::SiteDOF;
     public:
         static size_t calcFullNumState(size_t numSite) noexcept;

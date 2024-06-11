@@ -22,26 +22,26 @@
 #include "Physica/Core/Math/Transform/FFT.h"
 
 namespace Physica::Core {
-    template<bool UseInversionSymm> class KSpinRepr;
+    template<unsigned int Dim, bool UseInversionSymm> class KSpinRepr;
 
     namespace Internal {
-        template<bool UseInversionSymm>
-        class Traits<KSpinRepr<UseInversionSymm>> : public SpinRepr<UseInversionSymm> {
+        template<unsigned int Dim, bool UseInversionSymm>
+        class Traits<KSpinRepr<Dim, UseInversionSymm>> : public SpinRepr<Dim, UseInversionSymm> {
         public:
             constexpr static bool IsTransInvariant = true;
         };
     }
 
-    template<bool UseInversionSymm>
-    class KSpinRepr : public ReprBasis<KSpinRepr<UseInversionSymm>> {
-        using This = KSpinRepr<UseInversionSymm>;
+    template<unsigned int Dim, bool UseInversionSymm>
+    class KSpinRepr : public ReprBasis<KSpinRepr<Dim, UseInversionSymm>> {
+        using This = KSpinRepr<Dim, UseInversionSymm>;
         using Base = ReprBasis<This>;
-        using RSpinType = SpinRepr<UseInversionSymm>;
+        using RSpinType = SpinRepr<Dim, UseInversionSymm>;
         using PeriodArray = Utils::Array<int>;
     public:
         using typename Base::StateType;
     private:
-        Utils::Array<SpinFermion> states; //Optimize: Each spin up state might pair with several spin down states
+        Utils::Array<StateType> states; //Optimize: Each spin up state might pair with several spin down states
         PeriodArray periods;
         RSpinType rSpin;
         unsigned int kIndex;
@@ -65,8 +65,8 @@ namespace Physica::Core {
         [[nodiscard]] inline unsigned int getReducedK() const noexcept;
     };
 
-    template<bool UseInversionSymm>
-    KSpinRepr<UseInversionSymm>::KSpinRepr(RSpinType rSpin_, unsigned int kIndex_) : rSpin(std::move(rSpin_)), kIndex(kIndex_) {
+    template<unsigned int Dim, bool UseInversionSymm>
+    KSpinRepr<Dim, UseInversionSymm>::KSpinRepr(RSpinType rSpin_, unsigned int kIndex_) : rSpin(std::move(rSpin_)), kIndex(kIndex_) {
         assert(kIndex < getNumSite() && "[Error]: Momentum index out of range");
         const size_t numSite = getNumSite();
         for (auto psiUp : rSpin.getUpStates()) {
@@ -81,14 +81,14 @@ namespace Physica::Core {
                 const bool isZero = (kIndex * period) % numSite != 0;
                 if (isZero)
                     continue;
-                states.append(SpinFermion(psiUp, psiDown));
+                states.append(StateType(psiUp, psiDown));
                 periods.append(period);
             }
         }
     }
 
-    template<bool UseInversionSymm>
-    size_t KSpinRepr<UseInversionSymm>::operator[](StateType psi) const noexcept {
+    template<unsigned int Dim, bool UseInversionSymm>
+    size_t KSpinRepr<Dim, UseInversionSymm>::operator[](StateType psi) const noexcept {
         size_t left = 0, right = getNumState() - 1;  
         while (left < right) {
             const size_t mid = left + (right - left) / 2;
@@ -103,8 +103,8 @@ namespace Physica::Core {
         return left;
     }
 
-    template<bool UseInversionSymm>
-    void KSpinRepr<UseInversionSymm>::swap(This& __restrict obj) noexcept {
+    template<unsigned int Dim, bool UseInversionSymm>
+    void KSpinRepr<Dim, UseInversionSymm>::swap(This& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         states.swap(obj.states);
         periods.swap(obj.periods);
@@ -112,8 +112,8 @@ namespace Physica::Core {
         std::swap(kIndex, obj.kIndex);
     }
 
-    template<bool UseInversionSymm>
-    inline unsigned int KSpinRepr<UseInversionSymm>::getReducedK() const noexcept {
+    template<unsigned int Dim, bool UseInversionSymm>
+    inline unsigned int KSpinRepr<Dim, UseInversionSymm>::getReducedK() const noexcept {
         const auto kSize = FFT<Scalar<>, 1>::rSizeToKSize(getNumSite());
         if (kIndex < kSize)
             return kIndex;

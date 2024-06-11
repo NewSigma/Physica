@@ -23,12 +23,12 @@
 #include "ReprSpace/SpinRepr.h"
 
 namespace Physica::Core {
-    template<class ScalarType, class ReprType> class Hubbard1D;
+    template<class ScalarType, class ReprType> class Hubbard;
 
     namespace Internal {
         template<class T, class U>
-        class Traits<Hubbard1D<T, U>>
-                : public Traits<LatticeHamilton<Hubbard1D<T, U>>> {
+        class Traits<Hubbard<T, U>>
+                : public Traits<LatticeHamilton<Hubbard<T, U>>> {
         public:
             using ScalarType = T;
             using ReprType = U;
@@ -41,8 +41,8 @@ namespace Physica::Core {
      * [1] Computers in Physics 7, 400 (1993); https://doi.org/10.1063/1.4823192
      */
     template<class ScalarType, class ReprType>
-    class Hubbard1D : public LatticeHamilton<Hubbard1D<ScalarType, ReprType>> {
-        using This = Hubbard1D<ScalarType, ReprType>;
+    class Hubbard : public LatticeHamilton<Hubbard<ScalarType, ReprType>> {
+        using This = Hubbard<ScalarType, ReprType>;
         using Base = LatticeHamilton<This>;
         using RealType = typename ScalarType::RealType;
         using VectorType = Vector<ScalarType>;
@@ -58,18 +58,18 @@ namespace Physica::Core {
         RealType repelU;
         FFTType planProvider;
     public:
-        Hubbard1D() = default;
-        Hubbard1D(LatticeType lattice, ReprType repr_, RealType hoppingT_, RealType repelU_);
-        Hubbard1D(const Hubbard1D&) = default;
-        Hubbard1D(Hubbard1D&&) noexcept = default;
-        ~Hubbard1D() = default;
+        Hubbard() = default;
+        Hubbard(LatticeType lattice, ReprType repr_, RealType hoppingT_, RealType repelU_);
+        Hubbard(const This&) = default;
+        Hubbard(This&&) noexcept = default;
+        ~Hubbard() = default;
         /* Operators */
-        Hubbard1D& operator=(Hubbard1D obj) noexcept { swap(obj); return *this; }
+        This& operator=(This obj) noexcept { swap(obj); return *this; }
         template<class AnyVector>
         [[nodiscard]] Vector<ScalarType> operator*(const RValueVector<AnyVector>& v) const;
         /* Operations */
         [[nodiscard]] ScalarType calc(size_t row, size_t col) const;
-        void swap(Hubbard1D& __restrict obj) noexcept;
+        void swap(This& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] const ReprType& getRepr() const noexcept { return repr; }
         [[nodiscard]] size_t getNumState() const noexcept { return repr.getNumState(); }
@@ -84,4 +84,4 @@ namespace Physica::Core {
     };
 }
 
-#include "Hubbard1DImpl.h"
+#include "HubbardImpl.h"

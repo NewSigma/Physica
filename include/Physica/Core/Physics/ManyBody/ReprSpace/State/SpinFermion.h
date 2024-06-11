@@ -22,24 +22,27 @@
 #include "Physica/Core/Math/NumberTheory/NumberTheory.h"
 
 namespace Physica::Core {
-    class SpinFermion;
+    template<unsigned int Dim> class SpinFermion;
 
     namespace Internal {
-        template<>
-        class Traits<SpinFermion> {
+        template<unsigned int I>
+        class Traits<SpinFermion<I>> {
         public:
+            constexpr static unsigned int Dim = I;
             constexpr static unsigned int SiteDOF = 4;
         };
     }
 
-    class PHYSICA_API SpinFermion : public State<SpinFermion> {
-        using This = SpinFermion;
+    template<unsigned int Dim>
+    class SpinFermion : public State<SpinFermion<Dim>> {
+        using This = SpinFermion<Dim>;
+        using SpinlessType = SpinlessFermion<Dim>;
 
-        SpinlessFermion spinUp;
-        SpinlessFermion spinDown;
+        SpinlessType spinUp;
+        SpinlessType spinDown;
     public:
         SpinFermion() = default;
-        inline SpinFermion(SpinlessFermion spinUp_, SpinlessFermion spinDown_);
+        inline SpinFermion(SpinlessType spinUp_, SpinlessType spinDown_);
         SpinFermion(const This&) = default;
         SpinFermion(This&&) noexcept = default;
         ~SpinFermion() = default;
@@ -62,8 +65,8 @@ namespace Physica::Core {
         [[nodiscard]] inline int calcPeriod() const noexcept;
         inline void swap(SpinFermion& __restrict obj) noexcept;
         /* Getters */
-        [[nodiscard]] SpinlessFermion getSpinUp() const noexcept { return spinUp; }
-        [[nodiscard]] SpinlessFermion getSpinDown() const noexcept { return spinDown; }
+        [[nodiscard]] SpinlessType getSpinUp() const noexcept { return spinUp; }
+        [[nodiscard]] SpinlessType getSpinDown() const noexcept { return spinDown; }
         [[nodiscard]] int getNumSite() const noexcept { return spinUp.getNumSite(); }
         [[nodiscard]] bool isVacuum() const noexcept { return spinUp.isVacuum() && spinDown.isVacuum(); }
         [[nodiscard]] bool isUpOccupy(unsigned char site) const noexcept { return spinUp.isOccupy(site); }
@@ -73,42 +76,10 @@ namespace Physica::Core {
         [[nodiscard]] inline unsigned int getNumPairedElectron() const noexcept;
     };
 
-    inline SpinFermion::SpinFermion(SpinlessFermion spinUp_, SpinlessFermion spinDown_)
-            : spinUp(spinUp_), spinDown(spinDown_) {}
-
-    inline bool SpinFermion::operator>(const This& other) const noexcept {
-        if (spinUp > other.spinUp)
-            return true;
-        if (spinUp == other.spinUp)
-            return spinDown > other.spinDown;
-        return false;
-    }
-
-    inline bool SpinFermion::operator<(const This& other) const noexcept {
-        if (spinUp < other.spinUp)
-            return true;
-        if (spinUp == other.spinUp)
-            return spinDown < other.spinDown;
-        return false;
-    }
-
-    inline int SpinFermion::calcPeriod() const noexcept {
-        const int result = lcm<int, false>(spinUp.calcPeriod(), spinDown.calcPeriod());
-        assert(0 < result && result <= getNumSite() && "[Error]: Unexpected period, this is a bug");
-        return result;
-    }
-
-    inline void SpinFermion::swap(SpinFermion& __restrict obj) noexcept {
-        assert(this != &obj && "[Error]: Self swap is likely a bug");
-        spinUp.swap(obj.spinUp);
-        spinDown.swap(obj.spinDown);
-    }
-
-    inline unsigned int SpinFermion::getNumPairedElectron() const noexcept {
-        return countOnes(spinUp.getOccupyBits() & spinDown.getOccupyBits());
-    }
-
-    inline std::ostream& operator<<(std::ostream& os, SpinFermion e) {
+    template<unsigned int Dim>
+    inline std::ostream& operator<<(std::ostream& os, SpinFermion<Dim> e) {
         return os << e.getSpinUp() << ' ' << e.getSpinDown();
     }
 }
+
+#include "StateImpl/SpinFermionImpl.h"

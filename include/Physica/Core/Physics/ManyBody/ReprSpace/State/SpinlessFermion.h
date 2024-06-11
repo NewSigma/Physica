@@ -22,18 +22,21 @@
 #include "State.h"
 
 namespace Physica::Core {
-    class SpinlessFermion;
+    template<unsigned int Dim> class SpinlessFermion;
 
     namespace Internal {
-        template<>
-        class Traits<SpinlessFermion> {
+        template<unsigned int I>
+        class Traits<SpinlessFermion<I>> {
         public:
+            constexpr static unsigned int Dim = I;
             constexpr static unsigned int SiteDOF = 2;
         };
     }
 
-    class PHYSICA_API SpinlessFermion : public State<SpinlessFermion> {
-        using This = SpinlessFermion;
+    template<unsigned int Dim>
+    class SpinlessFermion : public State<SpinlessFermion<Dim>> {
+        static_assert(Dim == 1, "[Error]: Not implemented");
+        using This = SpinlessFermion<Dim>;
 
         uint64_t occupyBits;
         int numSite;
@@ -55,7 +58,6 @@ namespace Physica::Core {
         [[nodiscard]] inline This operator>>(int shift) const noexcept;
         void operator<<=(int shift) noexcept { (*this) = (*this) << shift; }
         void operator>>=(int shift) noexcept { (*this) = (*this) >> shift; }
-        friend std::ostream& operator<<(std::ostream& os, SpinlessFermion e);
         /* Operations */
         [[nodiscard]] inline SpinlessFermion hop(unsigned char from, unsigned char to) const;
         [[nodiscard]] SpinlessFermion transReduce(int period = 1) const;
@@ -73,63 +75,8 @@ namespace Physica::Core {
         [[nodiscard]] inline uint64_t makeHighMask() const noexcept;
     };
 
-    inline SpinlessFermion::SpinlessFermion(uint64_t occupyBits_, int numSite_)
-            : occupyBits(occupyBits_), numSite(numSite_) {
-        assert((1 < numSite) && (static_cast<unsigned int>(numSite) < sizeof(occupyBits) * CHAR_BIT) && "[Error]: Invalid param");
-    }
-
-    inline bool SpinlessFermion::operator==(const This& other) const noexcept {
-        return (occupyBits == other.occupyBits) && (numSite == other.numSite);
-    }
-
-    inline SpinlessFermion SpinlessFermion::operator<<(int shift) const noexcept {
-        assert(0 <= shift && shift < numSite && "[Error]: Invalid shift");
-        const auto highBits = occupyBits << shift;
-        const auto lowBits = occupyBits >> (numSite - shift);
-        return SpinlessFermion((highBits | lowBits) & makeFullMask(), numSite);
-    }
-
-    inline SpinlessFermion SpinlessFermion::operator>>(int shift) const noexcept {
-        assert(0 <= shift && shift < numSite && "[Error]: Invalid shift");
-        const auto highBits = occupyBits << (numSite - shift);
-        const auto lowBits = occupyBits >> shift;
-        return SpinlessFermion((highBits | lowBits) & makeFullMask(), numSite);
-    }
-
-    inline SpinlessFermion SpinlessFermion::hop(unsigned char from, unsigned char to) const {
-        const bool canHop = isOccupy(from) && !isOccupy(to);
-        if (!canHop)
-            return SpinlessFermion();
-        const uint64_t fromMask = 1UL << from;
-        const uint64_t toMask = 1UL << to;
-        return SpinlessFermion((occupyBits ^ fromMask) | toMask, numSite);
-    }
-
-    inline void SpinlessFermion::swap(SpinlessFermion& __restrict obj) noexcept {
-        assert(this != &obj && "[Error]: Self swap is likely a bug");
-        std::swap(occupyBits, obj.occupyBits);
-        std::swap(numSite, obj.numSite);
-    }
-
-    inline bool SpinlessFermion::isOccupy(unsigned char site) const noexcept {
-        assert(site < sizeof(occupyBits) * CHAR_BIT && "[Error]: Invalid site");
-        const uint64_t mask = 1UL << site;
-        return (occupyBits & mask) != 0;
-    }
-
-    inline bool SpinlessFermion::isTransReducible(int period) const noexcept {
-        return transReduce(period) != (*this);
-    }
-
-    inline uint64_t SpinlessFermion::makeFullMask() const noexcept {
-        return (static_cast<uint64_t>(1) << numSite) - 1;
-    }
-
-    inline uint64_t SpinlessFermion::makeHighMask() const noexcept {
-        return (static_cast<uint64_t>(1) << (numSite - 1));
-    }
-
-    inline std::ostream& operator<<(std::ostream& os, SpinlessFermion e) {
+    template<unsigned int Dim>
+    std::ostream& operator<<(std::ostream& os, SpinlessFermion<Dim> e) {
         auto mask = e.makeHighMask();
         for (int i = 0; i < e.getNumSite(); ++i) {
             const bool flag = (e.getOccupyBits() & mask) == 0;
@@ -139,3 +86,5 @@ namespace Physica::Core {
         return os;
     }
 }
+
+#include "StateImpl/SpinlessFermionImpl.h"

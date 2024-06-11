@@ -20,7 +20,7 @@
 
 namespace Physica::Core {
     template<class ScalarType, class ReprType>
-    Hubbard1D<ScalarType, ReprType>::Hubbard1D(
+    Hubbard<ScalarType, ReprType>::Hubbard(
             LatticeType lattice, ReprType repr_, RealType hoppingT_, RealType repelU_)
             : Base(std::move(lattice))
             , repr(std::move(repr_))
@@ -30,7 +30,7 @@ namespace Physica::Core {
 
     template<class ScalarType, class ReprType>
     template<class AnyVector>
-    Vector<ScalarType> Hubbard1D<ScalarType, ReprType>::operator*(const RValueVector<AnyVector>& v) const {
+    Vector<ScalarType> Hubbard<ScalarType, ReprType>::operator*(const RValueVector<AnyVector>& v) const {
         const auto numSite = getNumSuperCellSite();
         const size_t length = v.getLength();
         assert(Base::getColumn() == length && "[Error]: Dimensions do not match");
@@ -72,7 +72,7 @@ namespace Physica::Core {
     }
 
     template<class ScalarType, class ReprType>
-    ScalarType Hubbard1D<ScalarType, ReprType>::calc(size_t row, size_t col) const {
+    ScalarType Hubbard<ScalarType, ReprType>::calc(size_t row, size_t col) const {
         if constexpr (IsTransInvariant) {
             const int numSite = getNumSuperCellSite();
             const auto& periods = repr.getPeriods();
@@ -107,7 +107,7 @@ namespace Physica::Core {
     }
 
     template<class ScalarType, class ReprType>
-    void Hubbard1D<ScalarType, ReprType>::swap(Hubbard1D& __restrict obj) noexcept {
+    void Hubbard<ScalarType, ReprType>::swap(Hubbard& __restrict obj) noexcept {
         Base::swap(obj);
         repr.swap(obj.repr);
         hoppingT.swap(obj.hoppingT);
@@ -116,8 +116,8 @@ namespace Physica::Core {
     }
 
     template<class ScalarType, class ReprType>
-    typename Hubbard1D<ScalarType, ReprType>::RealType
-    Hubbard1D<ScalarType, ReprType>::repelElem(StateType psi) const {
+    typename Hubbard<ScalarType, ReprType>::RealType
+    Hubbard<ScalarType, ReprType>::repelElem(StateType psi) const {
         const auto numSite = getNumSuperCellSite();
         int numRepel = 0;
         for (unsigned int site = 0; site < numSite; ++site)
@@ -126,8 +126,8 @@ namespace Physica::Core {
     }
 
     template<class ScalarType, class ReprType>
-    typename Hubbard1D<ScalarType, ReprType>::RealType
-    Hubbard1D<ScalarType, ReprType>::hoppingElem(StateType rowPsi, StateType colPsi) const {
+    typename Hubbard<ScalarType, ReprType>::RealType
+    Hubbard<ScalarType, ReprType>::hoppingElem(StateType rowPsi, StateType colPsi) const {
         const auto numSite = getNumSuperCellSite();
         for (unsigned int site = 0; site < numSite; ++site) {
             const auto site1 = (site + 1) % numSite;
@@ -141,7 +141,7 @@ namespace Physica::Core {
     }
 
     template<class ScalarType, class ReprType>
-    void Hubbard1D<ScalarType, ReprType>::sumHopping(Vector<ScalarType>& target, ScalarType value, StateType psi) const noexcept {
+    void Hubbard<ScalarType, ReprType>::sumHopping(Vector<ScalarType>& target, ScalarType value, StateType psi) const noexcept {
         if (psi.isVacuum())
             return;
         const auto index = getRepr()[psi];
@@ -149,7 +149,7 @@ namespace Physica::Core {
     }
 
     template<class ScalarType, class ReprType>
-    void Hubbard1D<ScalarType, ReprType>::sumHopping(VectorType& target, FFTType& fft, ScalarType factor, StateType psi) const {
+    void Hubbard<ScalarType, ReprType>::sumHopping(VectorType& target, FFTType& fft, ScalarType factor, StateType psi) const {
         if (psi.isVacuum())
             return;
         const auto numSite = getNumSuperCellSite();

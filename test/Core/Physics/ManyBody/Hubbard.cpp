@@ -19,7 +19,7 @@
 #include <iostream>
 #include "Physica/Core/Math/Random/RandomPool.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Eigen/JacobiDavidson.h"
-#include "Physica/Core/Physics/ManyBody/Hubbard1D.h"
+#include "Physica/Core/Physics/ManyBody/Hubbard.h"
 #include "Physica/Core/Physics/ManyBody/ReprSpace/KSpinRepr.h"
 
 using namespace Physica::Core;
@@ -30,13 +30,13 @@ void testRSpinMatrix() {
     using ScalarType = Scalar<Double>;
     using VectorType = Vector<ScalarType>;
     using MatrixType = DenseMatrix<ScalarType>;
-    using ReprType = SpinRepr<false>;
+    using ReprType = SpinRepr<1, false>;
     constexpr unsigned int NumSite = 3;
     constexpr unsigned int NumSpinUp = 2;
     constexpr unsigned int NumSpinDown = 1;
 
     ReprType repr(NumSite, NumSpinUp, NumSpinDown);
-    const Hubbard1D<ScalarType, ReprType> model({{NumSite}, 1}, std::move(repr), HoppingT, RepelU);
+    const Hubbard<ScalarType, ReprType> model({{NumSite}, 1}, std::move(repr), HoppingT, RepelU);
     const size_t numState = model.getNumState();
     MatrixType mat(numState, numState);
     for (size_t i = 0; i < numState; ++i) {
@@ -54,12 +54,12 @@ void testKSpinMatrix() {
     using ScalarType = ComplexScalar<Scalar<Double>>;
     using VectorType = Vector<ScalarType>;
     using MatrixType = DenseMatrix<ScalarType>;
-    using ReprType = KSpinRepr<true>;
+    using ReprType = KSpinRepr<1, true>;
     constexpr unsigned int NumSite = 4;
     constexpr unsigned int NumParticle = NumSite / 2;
 
     ReprType repr({NumSite, NumParticle, NumParticle}, 0);
-    Hubbard1D<ScalarType, ReprType> model({{NumSite}, 1}, std::move(repr), HoppingT, 4);
+    Hubbard<ScalarType, ReprType> model({{NumSite}, 1}, std::move(repr), HoppingT, 4);
     const size_t numState = model.getNumState();
     MatrixType mat(numState, numState);
     for (size_t i = 0; i < numState; ++i) {

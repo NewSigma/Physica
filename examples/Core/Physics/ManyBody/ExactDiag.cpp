@@ -21,7 +21,7 @@
 #include <Physica/Core/Math/Random/RandomPool.h>
 #include <Physica/Core/Math/Algebra/LinearAlgebra/Eigen/JacobiDavidson.h>
 #include <Physica/Core/Math/Algebra/LinearAlgebra/Eigen/SymmEigenSolver.h>
-#include <Physica/Core/Physics/ManyBody/Hubbard1D.h>
+#include <Physica/Core/Physics/ManyBody/Hubbard.h>
 #include <Physica/Core/Parallel/Executor/ThreadExecutor.h>
 #include <Physica/Gui/Plot/Plot.h>
 
@@ -35,14 +35,14 @@ constexpr unsigned int NumSpinUp = NumSite / 2;
 constexpr unsigned int NumSpinDown = NumSite / 2;
 constexpr double HoppingT = 1.0;
 using ReprType = SpinRepr<NumSpinUp == NumSpinDown>;
-using HubbardType = Hubbard1D<ScalarType, ReprType>;
+using HubbardType = Hubbard<ScalarType, ReprType>;
 
 namespace Physica::Core {
     class Hamilton;
 
     namespace Internal {
         template<>
-        class Traits<Hamilton> : public Traits<Hubbard1D<ScalarType, ReprType>> {};
+        class Traits<Hamilton> : public Traits<Hubbard<ScalarType, ReprType>> {};
     }
 
     class Hamilton : public RValueMatrix<Hamilton>, private HubbardType {

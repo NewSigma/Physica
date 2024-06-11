@@ -20,7 +20,7 @@
 #include <gperftools/profiler.h>
 #include "Physica/Core/Math/Random/RandomPool.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Eigen/JacobiDavidson.h"
-#include "Physica/Core/Physics/ManyBody/Hubbard1D.h"
+#include "Physica/Core/Physics/ManyBody/Hubbard.h"
 #include "Physica/Core/Physics/ManyBody/ReprSpace/KSpinRepr.h"
 #include "Physica/Core/Parallel/Executor/ThreadExecutor.h"
 #include "Physica/Utils/Cycler.h"
@@ -42,7 +42,7 @@ int main() {
     for (unsigned int kIndex = 0; kIndex < kSize; ++kIndex) {
         using ReprType = KSpinRepr<true>;
         ReprType repr({NumSite, NumParticle, NumParticle}, kIndex);
-        const Hubbard1D<ScalarType, ReprType> model({{NumSite}, 1}, std::move(repr), HoppingT, RepelU);
+        const Hubbard<ScalarType, ReprType> model({{NumSite}, 1}, std::move(repr), HoppingT, RepelU);
 
         const size_t numState = model.getNumState();
         JacobiDavidson<ScalarType> jd(numState, 4);
