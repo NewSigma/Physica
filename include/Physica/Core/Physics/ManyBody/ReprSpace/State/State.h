@@ -21,7 +21,8 @@
 #include <cassert>
 #include <utility>
 #include <stdint.h>
-#include "Physica/Core/MultiPrecision/BasicImpl/Util/Bitwise.h"
+#include <Physica/Core/MultiPrecision/BasicImpl/Util/Bitwise.h>
+#include <Physica/Core/Physics/ManyBody/SiteIndex.h>
 
 namespace Physica::Core {
     namespace Internal {
@@ -32,15 +33,17 @@ namespace Physica::Core {
     class State {
     public:
         constexpr static unsigned int Dim = Internal::Traits<Derived>::Dim;
+        constexpr static unsigned int NumSite = Internal::Traits<Derived>::NumSite;
         constexpr static unsigned int SiteDOF = Internal::Traits<Derived>::SiteDOF;
+        using IndexType = SiteIndex<Dim>;
     public:
-        static size_t calcFullNumState(size_t numSite) noexcept;
+        constexpr static size_t calcFullNumState() noexcept;
     };
 
     template<class Derived>
-    size_t State<Derived>::calcFullNumState(size_t numSite) noexcept {
+    constexpr size_t State<Derived>::calcFullNumState() noexcept {
         size_t result = 1;
-        for (unsigned int i = 0; i < numSite; ++i)
+        for (unsigned int i = 0; i < NumSite; ++i)
             result *= SiteDOF;
         return result;
     }

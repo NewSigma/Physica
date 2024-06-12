@@ -27,16 +27,16 @@ constexpr double HoppingT = 1.0;
 constexpr double RepelU = 2;
 
 void testRSpinMatrix() {
-    using ScalarType = Scalar<Double>;
-    using VectorType = Vector<ScalarType>;
-    using MatrixType = DenseMatrix<ScalarType>;
-    using ReprType = SpinRepr<1, false>;
     constexpr unsigned int NumSite = 3;
     constexpr unsigned int NumSpinUp = 2;
     constexpr unsigned int NumSpinDown = 1;
+    using ScalarType = Scalar<Double>;
+    using VectorType = Vector<ScalarType>;
+    using MatrixType = DenseMatrix<ScalarType>;
+    using ReprType = SpinRepr<1, NumSite, false>;
 
-    ReprType repr(NumSite, NumSpinUp, NumSpinDown);
-    const Hubbard<ScalarType, ReprType> model({{NumSite}, 1}, std::move(repr), HoppingT, RepelU);
+    ReprType repr(NumSpinUp, NumSpinDown);
+    const Hubbard<ScalarType, ReprType> model({NumSite}, 1, std::move(repr), HoppingT, RepelU);
     const size_t numState = model.getNumState();
     MatrixType mat(numState, numState);
     for (size_t i = 0; i < numState; ++i) {
@@ -51,15 +51,15 @@ void testRSpinMatrix() {
 }
 
 void testKSpinMatrix() {
+    constexpr unsigned int NumSite = 4;
+    constexpr unsigned int NumParticle = NumSite / 2;
     using ScalarType = ComplexScalar<Scalar<Double>>;
     using VectorType = Vector<ScalarType>;
     using MatrixType = DenseMatrix<ScalarType>;
-    using ReprType = KSpinRepr<1, true>;
-    constexpr unsigned int NumSite = 4;
-    constexpr unsigned int NumParticle = NumSite / 2;
+    using ReprType = KSpinRepr<1, NumSite, true>;
 
-    ReprType repr({NumSite, NumParticle, NumParticle}, 0);
-    Hubbard<ScalarType, ReprType> model({{NumSite}, 1}, std::move(repr), HoppingT, 4);
+    ReprType repr({NumParticle, NumParticle}, 0);
+    Hubbard<ScalarType, ReprType> model({NumSite}, 1, std::move(repr), HoppingT, 4);
     const size_t numState = model.getNumState();
     MatrixType mat(numState, numState);
     for (size_t i = 0; i < numState; ++i) {

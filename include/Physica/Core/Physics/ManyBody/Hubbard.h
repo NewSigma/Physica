@@ -47,11 +47,16 @@ namespace Physica::Core {
         using RealType = typename ScalarType::RealType;
         using VectorType = Vector<ScalarType>;
         using FFTType = FFT<RealType, 1>;
-        using typename Base::LatticeType;
         using typename Base::StateType;
+        using typename Base::IndexType;
+
         constexpr static bool IsTransInvariant = Internal::Traits<ReprType>::IsTransInvariant;
-        static_assert(std::is_base_of<ReprBasis<ReprType>, ReprType>::value, "[Error]: Invalid representation");
+        static_assert(std::is_base_of<ReprBasis<ReprType>, ReprType>::value, "[Error]: ReprType is not a representation");
         static_assert((IsTransInvariant && Base::isComplex) || !IsTransInvariant, "[Error]: Use complex scalar if translational invariance is enabled");
+    public:
+        using typename Base::DimArray;
+        using Base::Dim;
+        using Base::NumSite;
     private:
         ReprType repr;
         RealType hoppingT;
@@ -59,7 +64,7 @@ namespace Physica::Core {
         FFTType planProvider;
     public:
         Hubbard() = default;
-        Hubbard(LatticeType lattice, ReprType repr_, RealType hoppingT_, RealType repelU_);
+        Hubbard(DimArray superSize, unsigned int numUnitCellSite, ReprType repr_, RealType hoppingT_, RealType repelU_);
         Hubbard(const This&) = default;
         Hubbard(This&&) noexcept = default;
         ~Hubbard() = default;
@@ -75,12 +80,14 @@ namespace Physica::Core {
         [[nodiscard]] size_t getNumState() const noexcept { return repr.getNumState(); }
         [[nodiscard]] RealType getHoppingT() const noexcept { return hoppingT; }
         [[nodiscard]] RealType getRepelU() const noexcept { return repelU; }
-        [[nodiscard]] size_t getNumSuperCellSite() const noexcept { return Base::getLattice().getNumSuperCellSite(); }
     protected:
         RealType repelElem(StateType psi) const;
         RealType hoppingElem(StateType rowPsi, StateType colPsi) const;
         void sumHopping(VectorType& target, ScalarType value, StateType psi) const noexcept;
         void sumHopping(VectorType& target, FFTType& fft, ScalarType factor, StateType psi) const;
+    private:
+        void dotImpl1D(Vector<ScalarType>& result, ScalarType factor, size_t index) const;
+        void dotImplND(Vector<ScalarType>& result, ScalarType factor, size_t index) const;
     };
 }
 

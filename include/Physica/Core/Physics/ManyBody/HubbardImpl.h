@@ -21,52 +21,24 @@
 namespace Physica::Core {
     template<class ScalarType, class ReprType>
     Hubbard<ScalarType, ReprType>::Hubbard(
-            LatticeType lattice, ReprType repr_, RealType hoppingT_, RealType repelU_)
-            : Base(std::move(lattice))
+            DimArray superSize, unsigned int numUnitCellSite, ReprType repr_, RealType hoppingT_, RealType repelU_)
+            : Base(std::move(superSize), numUnitCellSite)
             , repr(std::move(repr_))
             , hoppingT(hoppingT_)
             , repelU(repelU_)
-            , planProvider(getNumSuperCellSite(), PlanFlag::Estimate) {}
+            , planProvider(NumSite, PlanFlag::Estimate) {}
 
     template<class ScalarType, class ReprType>
     template<class AnyVector>
     Vector<ScalarType> Hubbard<ScalarType, ReprType>::operator*(const RValueVector<AnyVector>& v) const {
-        const auto numSite = getNumSuperCellSite();
         const size_t length = v.getLength();
         assert(Base::getColumn() == length && "[Error]: Dimensions do not match");
         Vector<ScalarType> result(length, 0);
         for (size_t i = 0; i < length; ++i) {
-            const ScalarType factor = v.calc(i);
-            ScalarType hop = -factor * hoppingT;
-            if constexpr (IsTransInvariant) {
-                const RealType normalizer = sqrt(RealType(repr.getPeriods()[i])) / RealType(numSite);
-                hop *= normalizer;
-            }
-
-            const auto state = repr[i];
-            int numRepel = 0;
-            if constexpr (IsTransInvariant) {
-                auto fft = FFTType::makeEmptyFFT(numSite);
-                for (unsigned int site = 0; site < numSite; ++site) {
-                    const auto site1 = (site + 1) % numSite;
-                    sumHopping(result, fft, hop, state.hopUp(site, site1));
-                    sumHopping(result, fft, hop, state.hopUp(site1, site));
-                    sumHopping(result, fft, hop, state.hopDown(site, site1));
-                    sumHopping(result, fft, hop, state.hopDown(site1, site));
-                    numRepel += state.isUpOccupy(site) && state.isDownOccupy(site);
-                }
-            }
-            else {
-                for (unsigned int site = 0; site < numSite; ++site) {
-                    const auto site1 = (site + 1) % numSite;
-                    sumHopping(result, hop, state.hopUp(site, site1));
-                    sumHopping(result, hop, state.hopUp(site1, site));
-                    sumHopping(result, hop, state.hopDown(site, site1));
-                    sumHopping(result, hop, state.hopDown(site1, site));
-                    numRepel += state.isUpOccupy(site) && state.isDownOccupy(site);
-                }
-            }
-            result[i] += factor * (repelU * RealType(numRepel));
+            if constexpr (Dim == 1)
+                dotImpl1D(result, v.calc(i), i);
+            else
+                dotImplND(result, v.calc(i), i);
         }
         return result;
     }
@@ -74,19 +46,18 @@ namespace Physica::Core {
     template<class ScalarType, class ReprType>
     ScalarType Hubbard<ScalarType, ReprType>::calc(size_t row, size_t col) const {
         if constexpr (IsTransInvariant) {
-            const int numSite = getNumSuperCellSite();
             const auto& periods = repr.getPeriods();
             const auto psi1 = repr[row];
             if (row == col) {
-                const bool flag = (repr.getKIndex() == 0) || (periods[row] == numSite);
+                const bool flag = (repr.getKIndex() == 0) || (periods[row] == NumSite);
                 return flag ? repelElem(psi1) : RealType(0);
             }
 
-            auto fft = FFTType::makeEmptyFFT(numSite);
+            auto fft = FFTType::makeEmptyFFT(NumSite);
             {
                 auto& rSpace = fft.getRSpace();
                 auto psi2 = repr[col];
-                for (int i = 0; i < numSite; ++i) {
+                for (int i = 0; i < NumSite; ++i) {
                     RealType elem = 0;
                     if (psi1 != psi2)
                         elem = hoppingElem(psi1, psi2);
@@ -95,7 +66,7 @@ namespace Physica::Core {
                 }
             }
             FFTType::transform(planProvider, fft);
-            const RealType normalizer = sqrt(RealType(periods[row] * periods[col])) / RealType(numSite);
+            const RealType normalizer = sqrt(RealType(periods[row] * periods[col])) / RealType(NumSite);
             return fft.getKSpace()[repr.getReducedK()] * normalizer;
         }
         else {
@@ -118,9 +89,8 @@ namespace Physica::Core {
     template<class ScalarType, class ReprType>
     typename Hubbard<ScalarType, ReprType>::RealType
     Hubbard<ScalarType, ReprType>::repelElem(StateType psi) const {
-        const auto numSite = getNumSuperCellSite();
         int numRepel = 0;
-        for (unsigned int site = 0; site < numSite; ++site)
+        for (unsigned int site = 0; site < NumSite; ++site)
             numRepel += psi.isUpOccupy(site) && psi.isDownOccupy(site);
         return repelU * RealType(numRepel);
     }
@@ -128,9 +98,8 @@ namespace Physica::Core {
     template<class ScalarType, class ReprType>
     typename Hubbard<ScalarType, ReprType>::RealType
     Hubbard<ScalarType, ReprType>::hoppingElem(StateType rowPsi, StateType colPsi) const {
-        const auto numSite = getNumSuperCellSite();
-        for (unsigned int site = 0; site < numSite; ++site) {
-            const auto site1 = (site + 1) % numSite;
+        for (unsigned int site = 0; site < NumSite; ++site) {
+            const auto site1 = (site + 1) % NumSite;
             if (rowPsi == colPsi.hopUp(site, site1)
              || rowPsi == colPsi.hopUp(site1, site)
              || rowPsi == colPsi.hopDown(site, site1)
@@ -152,15 +121,68 @@ namespace Physica::Core {
     void Hubbard<ScalarType, ReprType>::sumHopping(VectorType& target, FFTType& fft, ScalarType factor, StateType psi) const {
         if (psi.isVacuum())
             return;
-        const auto numSite = getNumSuperCellSite();
         const auto reducedPsi = psi.transReduce();
         const size_t index = repr[reducedPsi];
         auto& rSpace = fft.getRSpace();
-        for (size_t i = 0; i < numSite; ++i) {
+        for (size_t i = 0; i < NumSite; ++i) {
             rSpace[i] = RealType(reducedPsi == psi ? 1.0 : 0.0);
             psi <<= 1;
         }
         FFTType::transform(planProvider, fft);
         target[index] += fft.getKSpace()[repr.getReducedK()] * sqrt(RealType(repr.getPeriods()[index])) * factor;
+    }
+
+    template<class ScalarType, class ReprType>
+    void Hubbard<ScalarType, ReprType>::dotImpl1D(Vector<ScalarType>& result, ScalarType factor, size_t index) const {
+        ScalarType hop = -factor * hoppingT;
+        if constexpr (IsTransInvariant) {
+            const RealType normalizer = sqrt(RealType(repr.getPeriods()[index])) / RealType(NumSite);
+            hop *= normalizer;
+        }
+
+        const auto state = repr[index];
+        int numRepel = 0;
+        if constexpr (IsTransInvariant) {
+            auto fft = FFTType::makeEmptyFFT(NumSite);
+            for (unsigned int site = 0; site < NumSite; ++site) {
+                const auto site1 = (site + 1) % NumSite;
+                sumHopping(result, fft, hop, state.hopUp(site, site1));
+                sumHopping(result, fft, hop, state.hopUp(site1, site));
+                sumHopping(result, fft, hop, state.hopDown(site, site1));
+                sumHopping(result, fft, hop, state.hopDown(site1, site));
+                numRepel += state.isUpOccupy(site) && state.isDownOccupy(site);
+            }
+        }
+        else {
+            for (unsigned int site = 0; site < NumSite; ++site) {
+                const auto site1 = (site + 1) % NumSite;
+                sumHopping(result, hop, state.hopUp(site, site1));
+                sumHopping(result, hop, state.hopUp(site1, site));
+                sumHopping(result, hop, state.hopDown(site, site1));
+                sumHopping(result, hop, state.hopDown(site1, site));
+                numRepel += state.isUpOccupy(site) && state.isDownOccupy(site);
+            }
+        }
+        result[index] += factor * (repelU * RealType(numRepel));
+    }
+
+    template<class ScalarType, class ReprType>
+    void Hubbard<ScalarType, ReprType>::dotImplND(Vector<ScalarType>& result, ScalarType factor, size_t index) const {
+        static_assert(!IsTransInvariant && "[Error]: Not implemented");
+        const ScalarType hop = -factor * hoppingT;
+        const auto state = repr[index];
+        unsigned char numRepel = 0;
+        Base::forSiteInLattice([this, &result, &state, &numRepel, hop](IndexType site) {
+            for (unsigned int dim = 0; dim < Dim; ++dim) {
+                SiteIndex site1 = site;
+                site1[dim] = (site1[dim] + 1) % Base::getSuperSize()[dim];
+                sumHopping(result, hop, state.hopUp(site, site1));
+                sumHopping(result, hop, state.hopUp(site1, site));
+                sumHopping(result, hop, state.hopDown(site, site1));
+                sumHopping(result, hop, state.hopDown(site1, site));
+            }
+            numRepel += state.isUpOccupy(site) && state.isDownOccupy(site);
+        });
+        result[index] += factor * (repelU * RealType(numRepel));
     }
 }

@@ -19,12 +19,12 @@
 #pragma once
 
 namespace Physica::Core {
-    template<unsigned int Dim>
-    inline SpinFermion<Dim>::SpinFermion(SpinlessType spinUp_, SpinlessType spinDown_)
+    template<unsigned int Dim, unsigned int NumSite>
+    inline SpinFermion<Dim, NumSite>::SpinFermion(SpinlessType spinUp_, SpinlessType spinDown_)
             : spinUp(spinUp_), spinDown(spinDown_) {}
 
-    template<unsigned int Dim>
-    inline bool SpinFermion<Dim>::operator>(const This& other) const noexcept {
+    template<unsigned int Dim, unsigned int NumSite>
+    inline bool SpinFermion<Dim, NumSite>::operator>(const This& other) const noexcept {
         if (spinUp > other.spinUp)
             return true;
         if (spinUp == other.spinUp)
@@ -32,8 +32,8 @@ namespace Physica::Core {
         return false;
     }
 
-    template<unsigned int Dim>
-    inline bool SpinFermion<Dim>::operator<(const This& other) const noexcept {
+    template<unsigned int Dim, unsigned int NumSite>
+    inline bool SpinFermion<Dim, NumSite>::operator<(const This& other) const noexcept {
         if (spinUp < other.spinUp)
             return true;
         if (spinUp == other.spinUp)
@@ -41,8 +41,8 @@ namespace Physica::Core {
         return false;
     }
 
-    template<unsigned int Dim>
-    SpinFermion<Dim> SpinFermion<Dim>::hopUp(unsigned char from, unsigned char to) const {
+    template<unsigned int Dim, unsigned int NumSite>
+    SpinFermion<Dim, NumSite> SpinFermion<Dim, NumSite>::hopUp(unsigned char from, unsigned char to) const {
         auto newSpinUp = spinUp.hop(from, to);
         const bool hopFailed = newSpinUp.isVacuum() && !spinUp.isVacuum();
         if (hopFailed)
@@ -50,8 +50,13 @@ namespace Physica::Core {
         return SpinFermion(std::move(newSpinUp), spinDown);
     }
 
-    template<unsigned int Dim>
-    SpinFermion<Dim> SpinFermion<Dim>::hopDown(unsigned char from, unsigned char to) const {
+    template<unsigned int Dim, unsigned int NumSite>
+    SpinFermion<Dim, NumSite> SpinFermion<Dim, NumSite>::hopUp(IndexType dims, IndexType from, IndexType to) const {
+        return hopUp(IndexType::toIndex1D(dims, from), IndexType::toIndex1D(dims, to));
+    }
+
+    template<unsigned int Dim, unsigned int NumSite>
+    SpinFermion<Dim, NumSite> SpinFermion<Dim, NumSite>::hopDown(unsigned char from, unsigned char to) const {
         auto newSpinDown = spinDown.hop(from, to);
         const bool hopFailed = newSpinDown.isVacuum() && !spinDown.isVacuum();
         if (hopFailed)
@@ -59,11 +64,17 @@ namespace Physica::Core {
         return SpinFermion(spinUp, std::move(newSpinDown));
     }
 
-    template<unsigned int Dim>
-    SpinFermion<Dim> SpinFermion<Dim>::transReduce() const {
-        const int numSite = getNumSite();
+    template<unsigned int Dim, unsigned int NumSite>
+    SpinFermion<Dim, NumSite> SpinFermion<Dim, NumSite>::hopDown(IndexType dims, IndexType from, IndexType to) const {
+        return hopDown(IndexType::toIndex1D(dims, from), IndexType::toIndex1D(dims, to));
+    }
+
+    template<unsigned int Dim, unsigned int NumSite>
+    SpinFermion<Dim, NumSite> SpinFermion<Dim, NumSite>::transReduce() const {
+        if constexpr (Dim != 1)
+            throw NotImplementedException();
         This result = *this, temp = *this;
-        for (int i = 0; i < numSite; ++i) {
+        for (unsigned int i = 0; i < NumSite; ++i) {
             temp <<= 1;
             if (temp.getSpinUp().getOccupyBits() < result.getSpinUp().getOccupyBits())
                 result = temp;
@@ -72,22 +83,24 @@ namespace Physica::Core {
         return result;
     }
 
-    template<unsigned int Dim>
-    inline int SpinFermion<Dim>::calcPeriod() const noexcept {
+    template<unsigned int Dim, unsigned int NumSite>
+    inline int SpinFermion<Dim, NumSite>::calcPeriod() const noexcept {
+        if constexpr (Dim != 1)
+            throw NotImplementedException();
         const int result = lcm<int, false>(spinUp.calcPeriod(), spinDown.calcPeriod());
-        assert(0 < result && result <= getNumSite() && "[Error]: Unexpected period, this is a bug");
+        assert(0 < result && result <= NumSite && "[Error]: Unexpected period, this is a bug");
         return result;
     }
 
-    template<unsigned int Dim>
-    inline void SpinFermion<Dim>::swap(SpinFermion& __restrict obj) noexcept {
+    template<unsigned int Dim, unsigned int NumSite>
+    inline void SpinFermion<Dim, NumSite>::swap(SpinFermion& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         spinUp.swap(obj.spinUp);
         spinDown.swap(obj.spinDown);
     }
 
-    template<unsigned int Dim>
-    inline unsigned int SpinFermion<Dim>::getNumPairedElectron() const noexcept {
+    template<unsigned int Dim, unsigned int NumSite>
+    inline unsigned int SpinFermion<Dim, NumSite>::getNumPairedElectron() const noexcept {
         return countOnes(spinUp.getOccupyBits() & spinDown.getOccupyBits());
     }
 }

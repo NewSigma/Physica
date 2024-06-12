@@ -78,7 +78,7 @@ namespace Physica::Utils {
     public:
         Array() = default;
         template<class... Args>
-        explicit __host__ __device__ Array(size_t length_, Args&&... args);
+        __host__ __device__ explicit Array(size_t length_, Args&&... args);
         __host__ __device__ Array(std::initializer_list<T> list);
         Array(const Array&) = default;
         Array(Array&&) noexcept = default;

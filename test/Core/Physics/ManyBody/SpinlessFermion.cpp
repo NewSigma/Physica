@@ -22,7 +22,7 @@
 using namespace Physica::Core;
 
 int main() {
-    const SpinlessFermion<1> psi(0b011010, 6);
+    const SpinlessFermion<1, 6> psi(0b011010);
     const auto psi1 = psi << 2;
     if (psi1.getOccupyBits() != 0b101001)
         return 1;

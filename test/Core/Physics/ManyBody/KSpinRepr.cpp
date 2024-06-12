@@ -33,11 +33,11 @@ constexpr unsigned int NumParticle = NumSite / 2;
 constexpr double HoppingT = 1.0;
 
 void testComplete() {
-    const SpinRepr<1, true> rRepr(NumSite, NumParticle, NumParticle);
+    const SpinRepr<1, NumSite, true> rRepr(NumParticle, NumParticle);
     const size_t rNumState = rRepr.getNumState();
     size_t kNumState = 0;
     for (unsigned int i = 0; i < NumSite; ++i) {
-        const size_t temp = KSpinRepr<1, true>(rRepr, i).getNumState();
+        const size_t temp = KSpinRepr<1, NumSite, true>(rRepr, i).getNumState();
         kNumState += temp;
     }
     if (rNumState != kNumState)
@@ -47,9 +47,9 @@ void testComplete() {
 void testEigen() {
     RealType answer;
     {
-        using ReprType = SpinRepr<1, true>;
-        ReprType repr(NumSite, NumParticle, NumParticle);
-        Hubbard<RealType, ReprType> model({{NumSite}, 1}, std::move(repr), HoppingT, 4);
+        using ReprType = SpinRepr<1, NumSite, true>;
+        ReprType repr(NumParticle, NumParticle);
+        Hubbard<RealType, ReprType> model({NumSite}, 1, std::move(repr), HoppingT, 4);
 
         const size_t numState = model.getNumState();
         JacobiDavidson<RealType> jd(numState, 4);
@@ -59,9 +59,9 @@ void testEigen() {
     }
     RealType result;
     {
-        using ReprType = KSpinRepr<1, true>;
-        ReprType repr({NumSite, NumParticle, NumParticle}, 0);
-        Hubbard<ScalarType, ReprType> model({{NumSite}, 1}, std::move(repr), HoppingT, 4);
+        using ReprType = KSpinRepr<1, NumSite, true>;
+        ReprType repr({NumParticle, NumParticle}, 0);
+        Hubbard<ScalarType, ReprType> model({NumSite}, 1, std::move(repr), HoppingT, 4);
 
         const size_t numState = model.getNumState();
         JacobiDavidson<ScalarType> jd(numState, 4);

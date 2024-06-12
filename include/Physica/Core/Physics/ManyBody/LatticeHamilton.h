@@ -18,9 +18,8 @@
  */
 #pragma once
 
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/MatrixImpl/RValueMatrix.h"
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/Vector.h"
-#include "PeriodicLattice.h"
+#include <Physica/Core/Math/Algebra/LinearAlgebra/Matrix/MatrixImpl/RValueMatrix.h>
+#include <Physica/Core/Math/Algebra/LinearAlgebra/Vector/Vector.h>
 
 namespace Physica::Core {
     template<class Derived> class LatticeHamilton;
@@ -48,36 +47,80 @@ namespace Physica::Core {
         using ScalarType = typename DerivedTraits::ScalarType;
         using ReprType = typename DerivedTraits::ReprType;
         using StateType = typename ReprType::StateType;
+        using IndexType = typename StateType::IndexType;
 
         constexpr static unsigned int Dim = ReprType::Dim;
-        using LatticeType = PeriodicLattice<Dim>;
+        constexpr static unsigned int NumSite = StateType::NumSite;
+        using DimArray = Utils::Array<unsigned int, Dim>;
     private:
-        LatticeType lattice;
+        DimArray superSize;
+        unsigned int numUnitCellSite;
     public:
-        LatticeHamilton() = default;
-        LatticeHamilton(LatticeType lattice_);
-        LatticeHamilton(const LatticeHamilton&) = default;
-        LatticeHamilton(LatticeHamilton&&) noexcept = default;
         ~LatticeHamilton() = default;
-        /* Operators */
-        LatticeHamilton& operator=(LatticeHamilton obj) noexcept { swap(obj); return *this; }
         /* Operations */
         [[nodiscard]] const This& hermite() const noexcept { return *this; }
         void swap(LatticeHamilton& __restrict obj) noexcept;
+
+        template<class Functor> void forSiteInLattice(Functor func);
         /* Getters */
-        [[nodiscard]] const LatticeType& getLattice() const noexcept { return lattice; }
+        [[nodiscard]] const DimArray& getSuperSize() const noexcept { return superSize; }
+        [[nodiscard]] unsigned int getNumUnitCellSite() const noexcept { return numUnitCellSite; }
         [[nodiscard]] const ReprType& getRepr() const noexcept { return Base::getDerived().getRepr(); }
         [[nodiscard]] size_t getNumState() const noexcept { return Base::getDerived().getNumState(); }
         [[nodiscard]] size_t getRow() const noexcept { return getNumState(); }
         [[nodiscard]] size_t getColumn() const noexcept { return getNumState(); }
+    protected:
+        LatticeHamilton() = default;
+        LatticeHamilton(DimArray superSize_, unsigned int numSitePerCell_);
+        LatticeHamilton(const LatticeHamilton&) = default;
+        LatticeHamilton(LatticeHamilton&&) noexcept = default;
+        /* Operators */
+        LatticeHamilton& operator=(LatticeHamilton obj) noexcept { swap(obj); return *this; }
+    private:
+        [[nodiscard]] bool checkNumSite() const noexcept;
     };
 
     template<class Derived>
-    LatticeHamilton<Derived>::LatticeHamilton(LatticeType lattice_) : lattice(std::move(lattice_)) {}
+    LatticeHamilton<Derived>::LatticeHamilton(DimArray superSize_, unsigned int numSitePerCell_)
+            : superSize(std::move(superSize_)), numUnitCellSite(numSitePerCell_) {
+        assert(checkNumSite() && "[Error]: Inconsistent site number");
+    }
 
     template<class Derived>
     void LatticeHamilton<Derived>::swap(LatticeHamilton& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
-        lattice.swap(obj.lattice);
+        superSize.swap(obj.superSize);
+        std::swap(numUnitCellSite, obj.numUnitCellSite);
+    }
+
+    template<class Derived>
+    template<class Functor>
+    void LatticeHamilton<Derived>::forSiteInLattice(Functor func) {
+        if constexpr (Dim == 1) {
+            for (unsigned char x = 0; x < superSize[0]; ++x)
+                for (unsigned char site = 0; site < numUnitCellSite; ++site)
+                    func(IndexType{x, site});
+        }
+        if constexpr (Dim == 2) {
+            for (unsigned char x = 0; x < superSize[0]; ++x)
+                for (unsigned char y = 0; y < superSize[1]; ++y)
+                    for (unsigned char site = 0; site < numUnitCellSite; ++site)
+                        func(IndexType{x, y, site});
+        }
+        if constexpr (Dim == 3) {
+            for (unsigned char x = 0; x < superSize[0]; ++x)
+                for (unsigned char y = 0; y < superSize[1]; ++y)
+                    for (unsigned char z = 0; z < superSize[2]; ++z)
+                        for (unsigned char site = 0; site < numUnitCellSite; ++site)
+                            func(IndexType{x, y, z, site});
+        }
+    }
+
+    template<class Derived>
+    bool LatticeHamilton<Derived>::checkNumSite() const noexcept {
+        unsigned char numSite = getNumUnitCellSite();
+        for (auto size : superSize)
+            numSite *= size;
+        return numSite == NumSite;
     }
 }

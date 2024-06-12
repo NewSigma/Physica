@@ -22,22 +22,26 @@
 #include "Physica/Core/Math/NumberTheory/NumberTheory.h"
 
 namespace Physica::Core {
-    template<unsigned int Dim> class SpinFermion;
+    template<unsigned int Dim, unsigned int NumSite> class SpinFermion;
 
     namespace Internal {
-        template<unsigned int I>
-        class Traits<SpinFermion<I>> {
+        template<unsigned int I1, unsigned int I2>
+        class Traits<SpinFermion<I1, I2>> {
         public:
-            constexpr static unsigned int Dim = I;
+            constexpr static unsigned int Dim = I1;
+            constexpr static unsigned int NumSite = I2;
             constexpr static unsigned int SiteDOF = 4;
         };
     }
 
-    template<unsigned int Dim>
-    class SpinFermion : public State<SpinFermion<Dim>> {
-        using This = SpinFermion<Dim>;
-        using SpinlessType = SpinlessFermion<Dim>;
-
+    template<unsigned int Dim, unsigned int NumSite>
+    class SpinFermion : public State<SpinFermion<Dim, NumSite>> {
+        using This = SpinFermion<Dim, NumSite>;
+        using Base = State<This>;
+        using SpinlessType = SpinlessFermion<Dim, NumSite>;
+    public:
+        using typename Base::IndexType;
+    private:
         SpinlessType spinUp;
         SpinlessType spinDown;
     public:
@@ -48,7 +52,7 @@ namespace Physica::Core {
         ~SpinFermion() = default;
         /* Operators */
         This& operator=(This obj) noexcept { swap(obj); return *this; }
-        [[nodiscard]] bool operator==(const This& other) const noexcept { return spinUp == other.spinUp && spinDown == other.spinDown; }
+        [[nodiscard]] bool operator==(const This& other) const noexcept { return (spinUp == other.spinUp) && (spinDown == other.spinDown); }
         [[nodiscard]] bool operator!=(const This& other) const noexcept { return !(*this == other); }
         [[nodiscard]] inline bool operator>(const This& other) const noexcept;
         [[nodiscard]] inline bool operator<(const This& other) const noexcept;
@@ -60,7 +64,9 @@ namespace Physica::Core {
         void operator>>=(int shift) noexcept { (*this) = (*this) >> shift; }
         /* Operations */
         [[nodiscard]] SpinFermion hopUp(unsigned char from, unsigned char to) const;
+        [[nodiscard]] SpinFermion hopUp(IndexType dims, IndexType from, IndexType to) const;
         [[nodiscard]] SpinFermion hopDown(unsigned char from, unsigned char to) const;
+        [[nodiscard]] SpinFermion hopDown(IndexType dims, IndexType from, IndexType to) const;
         [[nodiscard]] SpinFermion transReduce() const;
         [[nodiscard]] inline int calcPeriod() const noexcept;
         inline void swap(SpinFermion& __restrict obj) noexcept;
@@ -76,8 +82,8 @@ namespace Physica::Core {
         [[nodiscard]] inline unsigned int getNumPairedElectron() const noexcept;
     };
 
-    template<unsigned int Dim>
-    inline std::ostream& operator<<(std::ostream& os, SpinFermion<Dim> e) {
+    template<unsigned int Dim, unsigned int NumSite>
+    inline std::ostream& operator<<(std::ostream& os, SpinFermion<Dim, NumSite> e) {
         return os << e.getSpinUp() << ' ' << e.getSpinDown();
     }
 }

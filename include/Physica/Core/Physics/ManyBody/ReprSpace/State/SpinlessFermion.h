@@ -22,27 +22,33 @@
 #include "State.h"
 
 namespace Physica::Core {
-    template<unsigned int Dim> class SpinlessFermion;
+    template<unsigned int Dim, unsigned int NumSite> class SpinlessFermion;
 
     namespace Internal {
-        template<unsigned int I>
-        class Traits<SpinlessFermion<I>> {
+        template<unsigned int I1, unsigned int I2>
+        class Traits<SpinlessFermion<I1, I2>> {
         public:
-            constexpr static unsigned int Dim = I;
+            constexpr static unsigned int Dim = I1;
+            constexpr static unsigned int NumSite = I2;
             constexpr static unsigned int SiteDOF = 2;
         };
     }
 
-    template<unsigned int Dim>
-    class SpinlessFermion : public State<SpinlessFermion<Dim>> {
-        static_assert(Dim == 1, "[Error]: Not implemented");
-        using This = SpinlessFermion<Dim>;
-
+    template<unsigned int Dim, unsigned int NumSite>
+    class SpinlessFermion : public State<SpinlessFermion<Dim, NumSite>> {
+        static_assert(1 <= Dim && Dim <= 3, "[Error]: Invalid Dim");
+        static_assert(NumSite > 0, "[Error]: Invalid site number");
+        using This = SpinlessFermion<Dim, NumSite>;
+        using Base = State<This>;
+    public:
+        using typename Base::IndexType;
+    private:
         uint64_t occupyBits;
-        int numSite;
+
+        static_assert(NumSite < sizeof(occupyBits) * CHAR_BIT, "[Error]: Unexpected large site number");
     public:
         SpinlessFermion() = default;
-        inline SpinlessFermion(uint64_t occupyBits_, int numSite_);
+        inline SpinlessFermion(uint64_t occupyBits_);
         SpinlessFermion(const This&) = default;
         SpinlessFermion(This&&) noexcept = default;
         ~SpinlessFermion() = default;
@@ -60,12 +66,12 @@ namespace Physica::Core {
         void operator>>=(int shift) noexcept { (*this) = (*this) >> shift; }
         /* Operations */
         [[nodiscard]] inline SpinlessFermion hop(unsigned char from, unsigned char to) const;
+        [[nodiscard]] inline SpinlessFermion hop(IndexType dims, IndexType from, IndexType to) const;
         [[nodiscard]] SpinlessFermion transReduce(int period = 1) const;
         [[nodiscard]] int calcPeriod() const;
         inline void swap(This& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] uint64_t getOccupyBits() const noexcept { return occupyBits; }
-        [[nodiscard]] int getNumSite() const noexcept { return numSite; }
         [[nodiscard]] bool isVacuum() const noexcept { return occupyBits == 0; }
         [[nodiscard]] inline bool isOccupy(unsigned char site) const noexcept;
         [[nodiscard]] unsigned int getNumElectron() const noexcept { return countOnes(occupyBits); }
@@ -75,8 +81,8 @@ namespace Physica::Core {
         [[nodiscard]] inline uint64_t makeHighMask() const noexcept;
     };
 
-    template<unsigned int Dim>
-    std::ostream& operator<<(std::ostream& os, SpinlessFermion<Dim> e) {
+    template<unsigned int Dim, unsigned int NumSite>
+    std::ostream& operator<<(std::ostream& os, SpinlessFermion<Dim, NumSite> e) {
         auto mask = e.makeHighMask();
         for (int i = 0; i < e.getNumSite(); ++i) {
             const bool flag = (e.getOccupyBits() & mask) == 0;

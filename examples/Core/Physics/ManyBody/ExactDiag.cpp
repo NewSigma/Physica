@@ -34,7 +34,7 @@ constexpr unsigned int NumSite = 8;
 constexpr unsigned int NumSpinUp = NumSite / 2;
 constexpr unsigned int NumSpinDown = NumSite / 2;
 constexpr double HoppingT = 1.0;
-using ReprType = SpinRepr<NumSpinUp == NumSpinDown>;
+using ReprType = SpinRepr<1, NumSite, NumSpinUp == NumSpinDown>;
 using HubbardType = Hubbard<ScalarType, ReprType>;
 
 namespace Physica::Core {
@@ -57,7 +57,6 @@ namespace Physica::Core {
         template<class VectorType>
         Vector<ScalarType> operator*(const RValueVector<VectorType>& v) const {
             const size_t length = v.getLength();
-            const auto numSite = ModelBase::getNumSuperCellSite();
             assert(getColumn() == length && "[Error]: Dimensions do not match");
             Vector<ScalarType> result(length, 0);
             for (size_t i = 0; i < length; ++i) {
@@ -65,8 +64,8 @@ namespace Physica::Core {
                 const auto state = getRepr()[i];
                 int numRepel = 0;
                 int numPolar = 0;
-                for (unsigned int site = 0; site < numSite; ++site) {
-                    const auto site1 = (site + 1) % numSite;
+                for (unsigned int site = 0; site < NumSite; ++site) {
+                    const auto site1 = (site + 1) % NumSite;
                     sumHopping(result, hoppingElem, state.hopUp(site, site1));
                     sumHopping(result, hoppingElem, state.hopUp(site1, site));
                     sumHopping(result, hoppingElem, state.hopDown(site, site1));
@@ -97,8 +96,8 @@ int main(int argc, char** argv) {
     VectorType localMoments0(repelUs.getLength());
     VectorType localMoments1(repelUs.getLength());
     ThreadExecutor::parallel_for([&repelUs, &localMoments0, &localMoments1](unsigned int i) {
-        ReprType repr(NumSite, NumSpinUp, NumSpinDown);
-        Hamilton model(HubbardType({{NumSite}, 1}, std::move(repr), HoppingT, repelUs[i]), ScalarType(0));
+        ReprType repr(NumSpinUp, NumSpinDown);
+        Hamilton model(HubbardType({NumSite}, 1, std::move(repr), HoppingT, repelUs[i]), ScalarType(0));
 
         const size_t numState = model.getNumState();
         JacobiDavidson<ScalarType> jd(numState, 4);

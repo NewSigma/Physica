@@ -18,99 +18,106 @@
  */
 #pragma once
 
+#include <Physica/Core/Exception/NotImplementedException.h>
+
 namespace Physica::Core {
-    template<unsigned int Dim>
-    inline SpinlessFermion<Dim>::SpinlessFermion(uint64_t occupyBits_, int numSite_)
-            : occupyBits(occupyBits_), numSite(numSite_) {
-        assert((1 < numSite) && (static_cast<unsigned int>(numSite) < sizeof(occupyBits) * CHAR_BIT) && "[Error]: Invalid param");
+    template<unsigned int Dim, unsigned int NumSite>
+    inline SpinlessFermion<Dim, NumSite>::SpinlessFermion(uint64_t occupyBits_) : occupyBits(occupyBits_) {}
+
+    template<unsigned int Dim, unsigned int NumSite>
+    inline bool SpinlessFermion<Dim, NumSite>::operator==(const This& other) const noexcept {
+        return occupyBits == other.occupyBits;
     }
 
-    template<unsigned int Dim>
-    inline bool SpinlessFermion<Dim>::operator==(const This& other) const noexcept {
-        return (occupyBits == other.occupyBits) && (numSite == other.numSite);
-    }
-
-    template<unsigned int Dim>
-    inline SpinlessFermion<Dim> SpinlessFermion<Dim>::operator<<(int shift) const noexcept {
-        assert(0 <= shift && shift < numSite && "[Error]: Invalid shift");
+    template<unsigned int Dim, unsigned int NumSite>
+    inline SpinlessFermion<Dim, NumSite> SpinlessFermion<Dim, NumSite>::operator<<(int shift) const noexcept {
+        assert(0 <= shift && shift < NumSite && "[Error]: Invalid shift");
         const auto highBits = occupyBits << shift;
-        const auto lowBits = occupyBits >> (numSite - shift);
-        return SpinlessFermion((highBits | lowBits) & makeFullMask(), numSite);
+        const auto lowBits = occupyBits >> (NumSite - shift);
+        return SpinlessFermion((highBits | lowBits) & makeFullMask());
     }
 
-    template<unsigned int Dim>
-    inline SpinlessFermion<Dim> SpinlessFermion<Dim>::operator>>(int shift) const noexcept {
-        assert(0 <= shift && shift < numSite && "[Error]: Invalid shift");
-        const auto highBits = occupyBits << (numSite - shift);
+    template<unsigned int Dim, unsigned int NumSite>
+    inline SpinlessFermion<Dim, NumSite> SpinlessFermion<Dim, NumSite>::operator>>(int shift) const noexcept {
+        assert(0 <= shift && shift < NumSite && "[Error]: Invalid shift");
+        const auto highBits = occupyBits << (NumSite - shift);
         const auto lowBits = occupyBits >> shift;
-        return SpinlessFermion((highBits | lowBits) & makeFullMask(), numSite);
+        return SpinlessFermion((highBits | lowBits) & makeFullMask());
     }
 
-    template<unsigned int Dim>
-    inline SpinlessFermion<Dim> SpinlessFermion<Dim>::hop(unsigned char from, unsigned char to) const {
+    template<unsigned int Dim, unsigned int NumSite>
+    inline SpinlessFermion<Dim, NumSite> SpinlessFermion<Dim, NumSite>::hop(unsigned char from, unsigned char to) const {
         const bool canHop = isOccupy(from) && !isOccupy(to);
         if (!canHop)
             return SpinlessFermion();
         const uint64_t fromMask = 1UL << from;
         const uint64_t toMask = 1UL << to;
-        return SpinlessFermion((occupyBits ^ fromMask) | toMask, numSite);
+        return SpinlessFermion((occupyBits ^ fromMask) | toMask);
     }
 
-    template<unsigned int Dim>
-    SpinlessFermion<Dim> SpinlessFermion<Dim>::transReduce(int period) const {
-        assert(numSite % period == 0 && "[Error]: Invalid period");
-        assert(0 < period && period <= numSite && "[Error]: Invalid period");
-        if (period == numSite)
+    template<unsigned int Dim, unsigned int NumSite>
+    inline SpinlessFermion<Dim, NumSite> SpinlessFermion<Dim, NumSite>::hop(IndexType dims, IndexType from, IndexType to) const {
+        return hop(IndexType::toIndex1D(dims, from), IndexType::toIndex1D(dims, to));
+    }
+
+    template<unsigned int Dim, unsigned int NumSite>
+    SpinlessFermion<Dim, NumSite> SpinlessFermion<Dim, NumSite>::transReduce(int period) const {
+        if constexpr (Dim != 1)
+            throw NotImplementedException();
+        assert(NumSite % period == 0 && "[Error]: Invalid period");
+        assert(0 < period && period <= NumSite && "[Error]: Invalid period");
+        if (period == NumSite)
             return *this;
-        const int numTrans = numSite / period;
+        const int numTrans = NumSite / period;
         uint64_t result = occupyBits;
         This temp = *this;
         for (int i = 0; i < numTrans; ++i) {
             temp <<= period;
             result = std::min(result, temp.occupyBits);
         }
-        return SpinlessFermion(result, numSite);
+        return SpinlessFermion(result);
     }
 
-    template<unsigned int Dim>
-    int SpinlessFermion<Dim>::calcPeriod() const {
+    template<unsigned int Dim, unsigned int NumSite>
+    int SpinlessFermion<Dim, NumSite>::calcPeriod() const {
+        if constexpr (Dim != 1)
+            throw NotImplementedException();
         This copy = *this;
-        int i = 1;
-        for (; i <= numSite; ++i) {
+        unsigned int i = 1;
+        for (; i <= NumSite; ++i) {
             copy <<= 1;
             if (copy == *this)
                 break;
         }
-        assert(i <= numSite && (numSite % i == 0) && "[Error]: Impossible, this is a bug");
+        assert(i <= NumSite && (NumSite % i == 0) && "[Error]: Impossible, this is a bug");
         return i;
     }
 
-    template<unsigned int Dim>
-    inline void SpinlessFermion<Dim>::swap(SpinlessFermion& __restrict obj) noexcept {
+    template<unsigned int Dim, unsigned int NumSite>
+    inline void SpinlessFermion<Dim, NumSite>::swap(SpinlessFermion& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         std::swap(occupyBits, obj.occupyBits);
-        std::swap(numSite, obj.numSite);
     }
 
-    template<unsigned int Dim>
-    inline bool SpinlessFermion<Dim>::isOccupy(unsigned char site) const noexcept {
+    template<unsigned int Dim, unsigned int NumSite>
+    inline bool SpinlessFermion<Dim, NumSite>::isOccupy(unsigned char site) const noexcept {
         assert(site < sizeof(occupyBits) * CHAR_BIT && "[Error]: Invalid site");
         const uint64_t mask = 1UL << site;
         return (occupyBits & mask) != 0;
     }
 
-    template<unsigned int Dim>
-    inline bool SpinlessFermion<Dim>::isTransReducible(int period) const noexcept {
+    template<unsigned int Dim, unsigned int NumSite>
+    inline bool SpinlessFermion<Dim, NumSite>::isTransReducible(int period) const noexcept {
         return transReduce(period) != (*this);
     }
 
-    template<unsigned int Dim>
-    inline uint64_t SpinlessFermion<Dim>::makeFullMask() const noexcept {
-        return (static_cast<uint64_t>(1) << numSite) - 1;
+    template<unsigned int Dim, unsigned int NumSite>
+    inline uint64_t SpinlessFermion<Dim, NumSite>::makeFullMask() const noexcept {
+        return (static_cast<uint64_t>(1) << NumSite) - 1;
     }
 
-    template<unsigned int Dim>
-    inline uint64_t SpinlessFermion<Dim>::makeHighMask() const noexcept {
-        return (static_cast<uint64_t>(1) << (numSite - 1));
+    template<unsigned int Dim, unsigned int NumSite>
+    inline uint64_t SpinlessFermion<Dim, NumSite>::makeHighMask() const noexcept {
+        return (static_cast<uint64_t>(1) << (NumSite - 1));
     }
 }
