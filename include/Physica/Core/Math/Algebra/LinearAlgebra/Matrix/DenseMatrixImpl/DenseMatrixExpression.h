@@ -417,44 +417,44 @@ namespace Physica::Core {
     ////////////////////////////////////////Elementary Functions////////////////////////////////////////////
     template<class MatrixType>
     DenseMatrixExpression<ExpressionType::Reciprocal, MatrixType, MatrixType, typename MatrixType::ScalarType::RealType>
-    reciprocal(const RValueMatrix<MatrixType>& m) {
+    reciprocal_elem(const RValueMatrix<MatrixType>& m) {
         return DenseMatrixExpression<ExpressionType::Reciprocal, MatrixType, MatrixType, typename MatrixType::ScalarType::RealType>(m);
     }
 
     template<class MatrixType>
     DenseMatrixExpression<ExpressionType::Sqrt, MatrixType, MatrixType, typename MatrixType::ScalarType::RealType>
-    sqrt(const RValueMatrix<MatrixType>& m) {
+    sqrt_elem(const RValueMatrix<MatrixType>& m) {
         return {m};
     }
 
     template<class MatrixType>
     DenseMatrixExpression<ExpressionType::Abs, MatrixType, MatrixType, typename MatrixType::ScalarType::RealType>
-    abs(const RValueMatrix<MatrixType>& m) {
+    abs_elem(const RValueMatrix<MatrixType>& m) {
         return DenseMatrixExpression<ExpressionType::Abs, MatrixType, MatrixType, typename MatrixType::ScalarType::RealType>(m);
     }
 
     template<class MatrixType>
-    DenseMatrixExpression<ExpressionType::Square, MatrixType> square(const RValueMatrix<MatrixType>& m) {
+    DenseMatrixExpression<ExpressionType::Square, MatrixType> square_elem(const RValueMatrix<MatrixType>& m) {
         return DenseMatrixExpression<ExpressionType::Square, MatrixType>(m);
     }
 
     template<class MatrixType>
-    DenseMatrixExpression<ExpressionType::Ln, MatrixType> ln(const RValueMatrix<MatrixType>& m) {
+    DenseMatrixExpression<ExpressionType::Ln, MatrixType> ln_elem(const RValueMatrix<MatrixType>& m) {
         return DenseMatrixExpression<ExpressionType::Ln, MatrixType>(m);
     }
 
     template<class MatrixType>
-    DenseMatrixExpression<ExpressionType::Exp, MatrixType> exp(const RValueMatrix<MatrixType>& m) {
+    DenseMatrixExpression<ExpressionType::Exp, MatrixType> exp_elem(const RValueMatrix<MatrixType>& m) {
         return DenseMatrixExpression<ExpressionType::Exp, MatrixType>(m);
     }
 
     template<class MatrixType>
-    DenseMatrixExpression<ExpressionType::Sin, MatrixType> sin(const RValueMatrix<MatrixType>& m) {
+    DenseMatrixExpression<ExpressionType::Sin, MatrixType> sin_elem(const RValueMatrix<MatrixType>& m) {
         return DenseMatrixExpression<ExpressionType::Sin, MatrixType>(m);
     }
 
     template<class MatrixType>
-    DenseMatrixExpression<ExpressionType::Cos, MatrixType> cos(const RValueMatrix<MatrixType>& m) {
+    DenseMatrixExpression<ExpressionType::Cos, MatrixType> cos_elem(const RValueMatrix<MatrixType>& m) {
         return DenseMatrixExpression<ExpressionType::Cos, MatrixType>(m);
     }
 }

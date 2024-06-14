@@ -57,7 +57,7 @@ namespace Physica::Core {
             {
                 auto& rSpace = fft.getRSpace();
                 auto psi2 = repr[col];
-                for (int i = 0; i < NumSite; ++i) {
+                for (int i = 0; i < static_cast<int>(NumSite); ++i) {
                     RealType elem = 0;
                     if (psi1 != psi2)
                         elem = hoppingElem(psi1, psi2);

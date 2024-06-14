@@ -99,7 +99,7 @@ namespace Physica::Core {
         assert(source.getRow() == eigenvalues.getLength());
         computeEigenvectors = computeEigenvectors_;
         
-        typename MatrixType::RealMatrix buffer = abs(source);
+        typename MatrixType::RealMatrix buffer = abs_elem(source);
         const RealType factor = buffer.max();
         if (factor < std::numeric_limits<ScalarType>::min()) {
             eigenvalues = RealType(0);

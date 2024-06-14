@@ -93,8 +93,13 @@ namespace Physica::Core {
         [[nodiscard]] ConjugateVector<Derived> conjugate() const noexcept { return ConjugateVector<Derived>(*this); }
         [[nodiscard]] HermiteVector<Derived> hermite() const noexcept { return HermiteVector<Derived>(*this); }
         [[nodiscard]] size_t getLength() const noexcept { return Base::getDerived().getLength(); }
+
+        [[nodiscard]] inline RealType norm1() const;
+        [[nodiscard]] inline RealType norm2() const;
         [[nodiscard]] inline RealType norm() const;
         [[nodiscard]] inline RealType squaredNorm() const;
+        [[nodiscard]] inline RealType normInf() const;
+
         [[nodiscard]] ScalarType max() const;
         [[nodiscard]] ScalarType min() const;
         [[nodiscard]] ScalarType sum() const;

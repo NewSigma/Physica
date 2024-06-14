@@ -111,7 +111,7 @@ int main() {
     for (size_t i = 0; i < 300; ++i) {
         rpmd.fire_vstep<KineticModel, ForceModel, SequentialExecutor>(fire, kineticModel, forceModel);
         f2norm.append(fire.getForceNorm());
-        const ScalarType maxForce = abs(rpmd.getForce()).max();
+        const ScalarType maxForce = abs_elem(rpmd.getForce()).max();
         if (maxForce < ScalarType(1E-5 * PhyConst<QE>::planck / PhyConst<AU>::planck))
             break;
     }

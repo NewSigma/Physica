@@ -97,7 +97,7 @@ int main() {
         toNextVariance(varCorr, meanCorr, sys, buffer);
         toNextVariance(varTemperature, meanTemperature, sys, temperature_sample);
     }
-    const MatrixType deviaCorr = sqrt(varCorr);
+    const MatrixType deviaCorr = sqrt_elem(varCorr);
 
     for (size_t i = 0; i < numReplica; ++i)
         for (size_t j = 0; j < numMolecular; ++j)

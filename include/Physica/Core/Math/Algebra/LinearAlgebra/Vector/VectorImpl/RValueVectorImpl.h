@@ -143,6 +143,16 @@ namespace Physica::Core {
     }
 
     template<class Derived>
+    inline typename RValueVector<Derived>::RealType RValueVector<Derived>::norm1() const {
+        return abs(Base::getDerived()).sum();
+    }
+
+    template<class Derived>
+    inline typename RValueVector<Derived>::RealType RValueVector<Derived>::norm2() const {
+        return norm();
+    }
+
+    template<class Derived>
     inline typename RValueVector<Derived>::RealType RValueVector<Derived>::norm() const {
         return sqrt(Base::getDerived().squaredNorm());
     }
@@ -153,6 +163,11 @@ namespace Physica::Core {
         for(size_t i = 0; i < getLength(); ++i)
             result += calc(i).squaredNorm();
         return result;
+    }
+
+    template<class Derived>
+    inline typename RValueVector<Derived>::RealType RValueVector<Derived>::normInf() const {
+        return abs(Base::getDerived()).max();
     }
 
     template<class Derived>

@@ -118,7 +118,7 @@ namespace Physica::Core {
         const auto& sample = sample_.getDerived();
         const ScalarType factor1 = ScalarType(lastNumSample);
         const ScalarType factor2 = reciprocal(ScalarType(lastNumSample + 1));
-        var = (var + square(mean - sample) * factor2) * (factor1 * factor2);
+        var = (var + square_elem(mean - sample) * factor2) * (factor1 * factor2);
         toNextMean(mean, lastNumSample, sample);
     }
     /**

@@ -69,7 +69,7 @@ namespace Physica::Core {
         if (computeMatrixU)
             matrixU = WorkingMatrix::unitMatrix(source.getRow());
 
-        typename MatrixType::RealMatrix buffer = abs(source);
+        typename MatrixType::RealMatrix buffer = abs_elem(source);
         const RealType factor = buffer.max();
         if (factor < std::numeric_limits<ScalarType>::min()) {
             matrixT = RealType(0);
