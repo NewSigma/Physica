@@ -556,6 +556,21 @@ namespace Physica::Core {
         [[nodiscard]] ScalarType calc(size_t i) const { return relu(v.calc(i)); }
         [[nodiscard]] __host__ __device__ size_t getLength() const { return v.getLength(); }
     };
+
+    template<class VectorType>
+    class VectorExpression<ExpressionType::Unit, VectorType>
+            : public RValueVector<VectorExpression<ExpressionType::Unit, VectorType>> {
+        using Base = RValueVector<VectorExpression<ExpressionType::Unit, VectorType>>;
+    public:
+        using typename Base::ScalarType;
+    private:
+        const VectorType& v;
+    public:
+        VectorExpression(const RValueVector<VectorType>& v_) : v(v_.getDerived()) {}
+
+        [[nodiscard]] ScalarType calc(size_t i) const { return v.calc(i).unit(); }
+        [[nodiscard]] __host__ __device__ size_t getLength() const { return v.getLength(); }
+    };
     //////////////////////////////////////Operators//////////////////////////////////////
     //////////////////////////////////////Minus//////////////////////////////////////
     template<class Derived>
@@ -677,6 +692,11 @@ namespace Physica::Core {
     inline VectorExpression<ExpressionType::Relu, VectorType> relu(
             const RValueVector<VectorType>& v) {
         return VectorExpression<ExpressionType::Relu, VectorType>(v);
+    }
+
+    template<class VectorType>
+    inline VectorExpression<ExpressionType::Unit, VectorType> unit(const RValueVector<VectorType>& v) {
+        return VectorExpression<ExpressionType::Unit, VectorType>(v);
     }
 
     template<class VectorType>

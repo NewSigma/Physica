@@ -49,6 +49,7 @@ namespace Physica::Core {
     public:
         using ScalarType = typename Internal::Traits<Derived>::ScalarType;
         using PlainScalar = typename ScalarType::PlainScalar;
+        using RealType = typename ScalarType::RealType;
         constexpr static int Option = Internal::Traits<Derived>::Option;
         constexpr static size_t RowAtCompile = Internal::Traits<Derived>::RowAtCompile;
         constexpr static size_t ColumnAtCompile = Internal::Traits<Derived>::ColumnAtCompile;
@@ -103,6 +104,10 @@ namespace Physica::Core {
         [[nodiscard]] ScalarType calc(size_t row, size_t col) const { return Base::getDerived().calc(row, col); }
         [[nodiscard]] inline ScalarType calcFromMajorMinor(size_t major, size_t minor) const;
         [[nodiscard]] inline FormatedMatrix<Derived> format() const;
+
+        [[nodiscard]] RealType norm1() const;
+        [[nodiscard]] RealType norm1_power(unsigned int maxIteration) const;
+
         [[nodiscard]] ScalarType max() const;
         [[nodiscard]] ScalarType min() const;
         [[nodiscard]] ScalarType trace() const;
@@ -137,3 +142,4 @@ namespace Physica::Core {
 #include "Hermite.h"
 #include "RValueFlatten.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DiagVector.h"
+#include "MatrixNorm.h"

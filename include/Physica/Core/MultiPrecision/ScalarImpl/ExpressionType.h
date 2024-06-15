@@ -42,6 +42,7 @@ namespace Physica::Core {
         Cbrt,
         Abs,
         Relu,
+        Unit,
         Square,
         Ln,
         Exp,
