@@ -55,4 +55,11 @@ int main() {
         if (!eigenTest(mat, 1E-14))
             return 1;
     }
+    {
+        using MatrixType = DenseSymmMatrix<RealType>;
+        std::mt19937 gen{};
+        const auto mat = MatrixType::random_uniform(8, gen);
+        if (!eigenTest(mat, 1E-14))
+            return 1;
+    }
 }

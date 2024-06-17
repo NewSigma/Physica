@@ -68,6 +68,7 @@ namespace Physica::Core {
         /* Operations */
         using Base::assignTo;
         using Base::calc;
+        using Base::format;
         using Base::hermite;
         using Storage::max;
         using Storage::min;

@@ -82,8 +82,9 @@ namespace Physica::Core {
                       MatrixType1::ColumnAtCompile == Dynamic ||
                       MatrixType2::RowAtCompile == Dynamic,
                       "[Error]: Row and column do not match in matrix-vector product");
+        using This = MatrixProduct<MatrixType1, MatrixType2>;
     public:
-        using Base = RValueMatrix<MatrixProduct<MatrixType1, MatrixType2>>;
+        using Base = RValueMatrix<This>;
         using Base::isReverseDiff;
         using typename Base::ScalarType;
         using DefaultType = DenseMatrix<ScalarType,
@@ -101,6 +102,12 @@ namespace Physica::Core {
                 : mat1(mat1_.getDerived()), mat2(mat2_.getDerived()) {
             assert(mat1.getColumn() == mat2.getRow());
         }
+        MatrixProduct(const This&) = delete;
+        MatrixProduct(This&&) noexcept = delete;
+        ~MatrixProduct() = default;
+        /* Operators */
+        This& operator=(const This&) = delete;
+        This& operator=(This&&) noexcept = delete;
         /* Operations */
         template<class OtherDerived>
         void assignTo(LValueMatrix<OtherDerived>& target) const;
@@ -117,8 +124,9 @@ namespace Physica::Core {
     class VectorMatrixProduct : public RValueMatrix<VectorMatrixProduct<VectorType, MatrixType>> {
         static_assert(MatrixType::RowAtCompile == 1 || MatrixType::RowAtCompile == Dynamic,
                       "Row and column do not match in matrix product");
+        using This = VectorMatrixProduct<VectorType, MatrixType>;
     public:
-        using Base = RValueMatrix<VectorMatrixProduct<VectorType, MatrixType>>;
+        using Base = RValueMatrix<This>;
         using Base::isReverseDiff;
         using typename Base::ScalarType;
     private:
@@ -129,6 +137,12 @@ namespace Physica::Core {
                 : vec(vec_.getDerived()), mat(mat_.getDerived()) {
             assert(mat.getRow() == 1);
         }
+        VectorMatrixProduct(const This&) = delete;
+        VectorMatrixProduct(This&&) noexcept = delete;
+        ~VectorMatrixProduct() = default;
+        /* Operators */
+        This& operator=(const This&) = delete;
+        This& operator=(This&&) noexcept = delete;
         /* Getters */
         [[nodiscard]] ScalarType calc(size_t row, size_t column) const;
         [[nodiscard]] __host__ __device__ size_t getRow() const { return vec.getLength(); }
@@ -143,8 +157,9 @@ namespace Physica::Core {
                       MatrixType::ColumnAtCompile == Dynamic ||
                       VectorType::SizeAtCompile == Dynamic,
                       "Row and column do not match in matrix product");
+        using This = MatrixVectorProduct<MatrixType, VectorType>;
     public:
-        using Base = RValueVector<MatrixVectorProduct<MatrixType, VectorType>>;
+        using Base = RValueVector<This>;
         using typename Base::ScalarType;
     private:
         const MatrixType& mat;
@@ -154,6 +169,12 @@ namespace Physica::Core {
                 : mat(mat_.getDerived()), vec(vec_.getDerived()) {
             assert(mat.getColumn() == vec.getLength());
         }
+        MatrixVectorProduct(const This&) = delete;
+        MatrixVectorProduct(This&&) noexcept = delete;
+        ~MatrixVectorProduct() = default;
+        /* Operators */
+        This& operator=(const This&) = delete;
+        This& operator=(This&&) noexcept = delete;
         /* Operations */
         template<class OtherDerived>
         inline void assignTo(LValueVector<OtherDerived>& target) const;

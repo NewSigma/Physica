@@ -31,7 +31,7 @@ namespace Physica::Core {
 
     template<unsigned int Dim, unsigned int NumSite>
     inline SpinlessFermion<Dim, NumSite> SpinlessFermion<Dim, NumSite>::operator<<(int shift) const noexcept {
-        assert(0 <= shift && shift < NumSite && "[Error]: Invalid shift");
+        assert(0 <= shift && shift < int(NumSite) && "[Error]: Invalid shift");
         const auto highBits = occupyBits << shift;
         const auto lowBits = occupyBits >> (NumSite - shift);
         return SpinlessFermion((highBits | lowBits) & makeFullMask());
@@ -39,7 +39,7 @@ namespace Physica::Core {
 
     template<unsigned int Dim, unsigned int NumSite>
     inline SpinlessFermion<Dim, NumSite> SpinlessFermion<Dim, NumSite>::operator>>(int shift) const noexcept {
-        assert(0 <= shift && shift < NumSite && "[Error]: Invalid shift");
+        assert(0 <= shift && shift < int(NumSite) && "[Error]: Invalid shift");
         const auto highBits = occupyBits << (NumSite - shift);
         const auto lowBits = occupyBits >> shift;
         return SpinlessFermion((highBits | lowBits) & makeFullMask());
@@ -65,7 +65,7 @@ namespace Physica::Core {
         if constexpr (Dim != 1)
             throw NotImplementedException();
         assert(NumSite % period == 0 && "[Error]: Invalid period");
-        assert(0 < period && period <= NumSite && "[Error]: Invalid period");
+        assert(0 < period && period <= int(NumSite) && "[Error]: Invalid period");
         if (period == NumSite)
             return *this;
         const int numTrans = NumSite / period;

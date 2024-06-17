@@ -32,6 +32,8 @@ namespace Physica::Core {
         /* Operators */
         template<class T>
         friend std::ostream& operator<<(std::ostream& os, const FormatedVector<T>& v);
+        /* Operations */
+        FormatedVector& toFormatMMA();
         /* Setters */
         FormatedVector& setPrefix(std::string prefix_);
         FormatedVector& setSuffix(std::string suffix_);
@@ -58,6 +60,14 @@ namespace Physica::Core {
         }
         os << v.suffix;
         return os;
+    }
+
+    template<class VectorType>
+    FormatedVector<VectorType>& FormatedVector<VectorType>::toFormatMMA() {
+        setPrefix("{");
+        setSuffix("}");
+        setSeparator(",");
+        return *this;
     }
 
     template<class VectorType>

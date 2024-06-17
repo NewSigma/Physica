@@ -41,6 +41,7 @@ namespace Physica::Core {
      */
     template<class Derived>
     typename RValueMatrix<Derived>::RealType RValueMatrix<Derived>::norm1_power(unsigned int maxIteration) const {
+        assert(getRow() == getColumn() && "[Error]: norm1_power only applies to square matrix");
         assert(maxIteration > 0 && "[Error]: Invalid max iteration");
         using VectorType = Vector<ScalarType>;
         const Derived& m = Base::getDerived();
@@ -59,7 +60,8 @@ namespace Physica::Core {
                     VectorType v = VectorType::linspace(0, 1, length) + ScalarType(1);
                     for (size_t i = 0; i < length; i += 2)
                         v[i] = -v[i];
-                    const RealType pick = (m * v).norm1() / v.norm1();
+                    x = m * v;
+                    const RealType pick = x.norm1() / v.norm1();
                     return std::max(y.norm1(), pick);
                 }
             }

@@ -18,6 +18,7 @@
  */
 #include <iostream>
 #include <Physica/Core/Math/Algebra/LinearAlgebra/Eigen/JacobiDavidson.h>
+#include <Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseHermiteMatrix.h>
 
 using namespace Physica::Core;
 using ScalarType = Scalar<Double>;

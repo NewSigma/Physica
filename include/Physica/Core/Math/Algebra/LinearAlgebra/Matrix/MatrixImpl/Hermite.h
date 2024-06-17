@@ -22,8 +22,27 @@
 
 namespace Physica::Core {
     template<class MatrixType> class Hermite;
-
     template<class VectorType> class HermiteVector;
+
+    template<class T>
+    struct remove_hermite {
+        using Type = T;
+    };
+
+    template<class MatrixType>
+    struct remove_hermite<Hermite<MatrixType>> {
+        using Type = MatrixType;
+    };
+
+    template<class VectorType>
+    struct remove_hermite<HermiteVector<VectorType>> {
+        using Type = VectorType;
+    };
+
+    template<class T>
+    struct is_hermite {
+        constexpr static bool value = std::is_same<T, typename remove_hermite<T>::Type>::value;
+    };
 
     namespace Internal {
         template<class T> class Traits;

@@ -73,6 +73,7 @@ namespace Physica::Core {
         template<class VectorType>
         [[nodiscard]] inline MatrixVectorProduct<This, VectorType> operator*(const RValueVector<VectorType>& vec) const noexcept;
         /* Operations */
+        using Base::format;
         using Base::transpose;
         using Storage::resize;
         [[nodiscard]] ScalarType calc(size_t row, size_t col) const;

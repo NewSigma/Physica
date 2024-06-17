@@ -23,6 +23,9 @@
 
 namespace Physica::Core {
     /**
+     * A = XTX^{-1}
+     * where X is matrix of eigenvectors
+     * 
      * References:
      * [1] Golub, GeneH. Matrix computations = 矩阵计算 / 4th edition[M]. 人民邮电出版社, 2014.
      */
@@ -185,7 +188,7 @@ namespace Physica::Core {
         givens_vec[1].toOpposite();
         applyGivens(subBlock, givens_vec, 0, 1);
         if (computeEigenvectors)
-            applyGivens(eigenvectors, givens_vec, 0, 1);
+            applyGivens(eigenvectors, givens_vec, lower, lower + 1);
         for (size_t i = 1; i < sub_order - 1; ++i) {
             buffer[0] = subBlock(i, i - 1);
             buffer[1] = subBlock(i + 1, i - 1);
@@ -194,7 +197,7 @@ namespace Physica::Core {
             givens_vec[1].toOpposite();
             applyGivens(subBlock, givens_vec, i, i + 1);
             if (computeEigenvectors)
-                applyGivens(eigenvectors, givens_vec, i, i + 1);
+                applyGivens(eigenvectors, givens_vec, lower + i, lower + i + 1);
         }
     }
 

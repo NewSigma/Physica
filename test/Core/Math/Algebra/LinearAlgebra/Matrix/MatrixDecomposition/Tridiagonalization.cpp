@@ -23,10 +23,12 @@ using namespace Physica::Core;
 
 template<class MatrixType>
 bool doTest(const MatrixType& source, double tolerance) {
+    using ScalarType = typename MatrixType::ScalarType;
+    using GeneralMatrix = DenseMatrix<ScalarType>;
     Tridiagonalization tri(source);
-    MatrixType T = tri.getMatrixT();
-    MatrixType Q = tri.getMatrixQ();
-    MatrixType A = (Q * T).compute() * Q.hermite();
+    GeneralMatrix T = tri.getMatrixT();
+    GeneralMatrix Q = tri.getMatrixQ();
+    GeneralMatrix A = (Q * T).compute() * Q.hermite();
     if (!matrixNear(A, source, tolerance))
         return false;
     return true;
@@ -39,6 +41,13 @@ int main() {
         const MatrixType temp{{1, 2, 3, 4}, {5, 6, 7, 8}, {9, 10, 11, 12}, {13, 14, 15, 16}};
         const MatrixType mat = temp + temp.transpose();
         if (!doTest(mat, 1E-14))
+            return 1;
+    }
+    {
+        using MatrixType = DenseSymmMatrix<RealType>;
+        std::mt19937 gen{};
+        const auto mat = MatrixType::random_uniform(8, gen);
+        if (!doTest(mat, 1E-12))
             return 1;
     }
     /* Complex case */ {

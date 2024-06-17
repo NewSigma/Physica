@@ -82,8 +82,9 @@ namespace Physica::Core {
         /* Operations */
         template<class OtherDerived, class Executor = SequentialExecutor>
         inline void assignTo(LValueVector<OtherDerived>& v) const;
-        /* Getters */
+
         [[nodiscard]] ScalarType calc(size_t index) const { return Base::getDerived().calc(index); }
+        /* Getters */
         [[nodiscard]] inline FormatedVector<Derived> format() const;
         template<class PacketType>
         [[nodiscard]] inline PacketType packet(size_t index) const;

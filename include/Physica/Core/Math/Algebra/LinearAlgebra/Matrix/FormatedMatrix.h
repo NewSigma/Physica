@@ -29,29 +29,40 @@ namespace Physica::Core {
         using ScalarType = typename MatrixType::ScalarType;
 
         const RValueMatrix<MatrixType>& data;
+        std::string matPrefix;
+        std::string matSuffix;
         std::string rowPrefix;
         std::string rowSuffix;
+        std::string rowSeparator;
         std::string separator;
     public:
         FormatedMatrix(const RValueMatrix<MatrixType>& data_);
         /* Operators */
         template<class T>
         friend std::ostream& operator<<(std::ostream& os, const FormatedMatrix<T>& m);
-        /* Setters */
-        FormatedMatrix& setRowPrefix(std::string rowPrefix_);
-        FormatedMatrix& setRowSuffix(std::string rowSuffix_);
-        FormatedMatrix& setSeparator(std::string separator_);
+        /* Operations */
+        FormatedMatrix& toFormatMMA();
         /* Getters */
         [[nodiscard]] ScalarType calc(size_t row, size_t col) const { return data.calc(row, col); }
         [[nodiscard]] size_t getRow() const noexcept { return data.getRow(); }
         [[nodiscard]] size_t getColumn() const noexcept { return data.getColumn(); }
+        /* Setters */
+        FormatedMatrix& setMatPrefix(std::string matPrefix_);
+        FormatedMatrix& setMatSuffix(std::string matSuffix_);
+        FormatedMatrix& setRowPrefix(std::string rowPrefix_);
+        FormatedMatrix& setRowSuffix(std::string rowSuffix_);
+        FormatedMatrix& setRowSeparator(std::string rowSeparator_);
+        FormatedMatrix& setSeparator(std::string separator_);
     };
 
     template<class MatrixType>
     FormatedMatrix<MatrixType>::FormatedMatrix(const RValueMatrix<MatrixType>& data_)
             : data(data_)
+            , matPrefix("")
+            , matSuffix("")
             , rowPrefix("")
             , rowSuffix("")
+            , rowSeparator("")
             , separator(" ") {}
 
     template<class MatrixType>
@@ -70,19 +81,48 @@ namespace Physica::Core {
             }
         }
         /* Output */ {
+            os << m.matPrefix;
             for (size_t r = 0; r < row; ++r) {
                 os << m.rowPrefix;
                 for (size_t c = 0; c < column; ++c) {
                     os.width(width);
                     os << m.calc(r, c);
-                    const bool isLast = c + 1 == column;
-                    if (!isLast)
+                    const bool isLastElem = c + 1 == column;
+                    if (!isLastElem)
                         os << m.separator;
                 }
                 os << m.rowSuffix << '\n';
+
+                const bool isLastRow = r + 1 == row;
+                if (!isLastRow)
+                    os << m.rowSeparator;
             }
+            os << m.matSuffix;
         }
         return os;
+    }
+
+    template<class MatrixType>
+    FormatedMatrix<MatrixType>& FormatedMatrix<MatrixType>::toFormatMMA() {
+        setMatPrefix("{");
+        setMatSuffix("}");
+        setRowPrefix("{");
+        setRowSuffix("}");
+        setRowSeparator(",");
+        setSeparator(",");
+        return *this;
+    }
+
+    template<class MatrixType>
+    FormatedMatrix<MatrixType>& FormatedMatrix<MatrixType>::setMatPrefix(std::string matPrefix_) {
+        matPrefix = std::move(matPrefix_);
+        return *this;
+    }
+
+    template<class MatrixType>
+    FormatedMatrix<MatrixType>& FormatedMatrix<MatrixType>::setMatSuffix(std::string matSuffix_) {
+        matSuffix = std::move(matSuffix_);
+        return *this;
     }
 
     template<class MatrixType>
@@ -94,6 +134,12 @@ namespace Physica::Core {
     template<class MatrixType>
     FormatedMatrix<MatrixType>& FormatedMatrix<MatrixType>::setRowSuffix(std::string rowSuffix_) {
         rowSuffix = std::move(rowSuffix_);
+        return *this;
+    }
+
+    template<class MatrixType>
+    FormatedMatrix<MatrixType>& FormatedMatrix<MatrixType>::setRowSeparator(std::string rowSeparator_) {
+        rowSeparator = std::move(rowSeparator_);
         return *this;
     }
 
