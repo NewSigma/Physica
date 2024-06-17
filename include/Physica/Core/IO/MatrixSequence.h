@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 WeiBo He.
+ * Copyright 2022-2024 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -38,11 +38,10 @@ namespace Physica::Core {
         MatrixSequence& operator=(MatrixSequence obj) noexcept;
         /* Operations */
         bool step();
+        void swap(MatrixSequence& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] const MatrixType& getCurrent() const noexcept { return mat; }
         [[nodiscard]] uint64_t getStep() const noexcept { return stepNum; }
-        /* Helpers */
-        void swap(MatrixSequence& __restrict obj) noexcept;
     };
 
     template<class ScalarType>

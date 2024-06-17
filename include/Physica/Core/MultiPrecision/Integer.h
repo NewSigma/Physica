@@ -73,12 +73,10 @@ namespace Physica::Core {
         Integer operator++(int);
         Integer operator--(int);
         explicit operator double() const;
-        /* Helpers */
+        /* Operations */
         Integer& toOpposite() noexcept { length = -length; return *this; }
         Integer& toAbs() noexcept { length = getSize(); return *this; }
         void swap(Integer& __restrict i) noexcept;
-        static inline bool matchSign(const Integer& i1, const Integer& i2);
-        static bool absCompare(const Integer& i1, const Integer& i2);
         /* Getters */
         [[nodiscard]] const MPUnit* getByte() const noexcept { return byte; }
         [[nodiscard]] int getLength() const noexcept { return length; }
@@ -91,6 +89,9 @@ namespace Physica::Core {
         /* Setters */
         void setSign(bool sign) noexcept { length = sign ? length : -length; }
         void setByte(unsigned int index, MPUnit value) { assert(index < static_cast<unsigned int>(getSize())); byte[index] = value; }
+        /* Static members */
+        static inline bool matchSign(const Integer& i1, const Integer& i2);
+        static bool absCompare(const Integer& i1, const Integer& i2);
     protected:
         /**
          * Degigned for performance,
@@ -100,8 +101,9 @@ namespace Physica::Core {
          * byte must be allocated by malloc()
          */
         Integer(MPUnit* byte_, int length_) : byte(byte_), length(length_) {}
-        /* Helpers */
+        /* Operations */
         void cutZero();
+        /* Static members */
         static inline Integer integerAddImpl(const Integer& i1, const Integer& i2);
         static inline Integer integerSubImpl(const Integer& i1, const Integer& i2);
     };

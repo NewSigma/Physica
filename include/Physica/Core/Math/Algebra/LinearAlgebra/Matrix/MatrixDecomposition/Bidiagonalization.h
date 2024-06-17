@@ -63,12 +63,11 @@ namespace Physica::Core {
         /* Operations */
         template<class OtherMatrix>
         void compute(const RValueMatrix<OtherMatrix>& source);
+        void swap(Bidiagonalization& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] BiDiagMatrixB<MatrixType> getMatrixB() const noexcept { return BiDiagMatrixB(*this); }
         [[nodiscard]] HouseholderSequence<WorkingMatrix> getMatrixU() const;
         [[nodiscard]] HouseholderSequence<WorkingMatrix, false> getMatrixV() const;
-        /* Helpers */
-        void swap(Bidiagonalization& __restrict obj) noexcept;
     private:
         void householderOnCol(size_t colIndex);
         friend class BiDiagMatrixB<MatrixType>;
@@ -130,6 +129,14 @@ namespace Physica::Core {
     }
 
     template<class MatrixType>
+    void Bidiagonalization<MatrixType>::swap(Bidiagonalization& __restrict obj) noexcept {
+        assert(this != &obj && "[Error]: Self swap is likely a bug");
+        working.swap(obj.working);
+        mainDiag.swap(obj.mainDiag);
+        subDiag.swap(obj.subDiag);
+    }
+
+    template<class MatrixType>
     HouseholderSequence<typename Bidiagonalization<MatrixType>::WorkingMatrix>
     Bidiagonalization<MatrixType>::getMatrixU() const {
         HouseholderSequence result(working);
@@ -144,14 +151,6 @@ namespace Physica::Core {
         result.setSize(working.getColumn() - 2);
         result.setShift(1);
         return result;
-    }
-
-    template<class MatrixType>
-    void Bidiagonalization<MatrixType>::swap(Bidiagonalization& __restrict obj) noexcept {
-        assert(this != &obj && "[Error]: Self swap is likely a bug");
-        working.swap(obj.working);
-        mainDiag.swap(obj.mainDiag);
-        subDiag.swap(obj.subDiag);
     }
 
     template<class MatrixType>

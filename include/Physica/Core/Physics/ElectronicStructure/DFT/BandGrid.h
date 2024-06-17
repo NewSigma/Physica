@@ -40,7 +40,9 @@ namespace Physica::Core {
         BandGrid(BandGrid&&) noexcept = default;
         ~BandGrid() = default;
         /* Operators */
-        BandGrid& operator=(BandGrid band) noexcept;
+        BandGrid& operator=(BandGrid band) noexcept { swap(band); return *this; }
+        /* Operations */
+        void swap(BandGrid& __restrict band) noexcept;
         /* Getters */
         [[nodiscard]] KPointGrid& getKPointGrid() { return kPointGrid; }
         [[nodiscard]] const KPointGrid& getKPointGrid() const noexcept { return kPointGrid; }
@@ -48,8 +50,6 @@ namespace Physica::Core {
         [[nodiscard]] ScalarType getTotalEnergy() const noexcept;
         template<class VectorType>
         [[nodiscard]] VectorType getDensityOfStates(const LValueVector<VectorType>& atEnergy) const;
-        /* Helpers */
-        void swap(BandGrid& __restrict band) noexcept;
     private:
         [[nodiscard]] Vector<ScalarType, 3> gradEnergy(size_t kPointId) const;
     };
@@ -93,6 +93,13 @@ namespace Physica::Core {
             }
             kx += stepX;
         }
+    }
+
+    template<class ScalarType, bool isSpinPolarized>
+    void BandGrid<ScalarType, isSpinPolarized>::swap(BandGrid& __restrict band) noexcept {
+        assert(this != &band && "[Error]: Self swap is likely a bug");
+        swap(kPointGrid, band.kPointGrid);
+        swap(electronCount, band.electronCount);
     }
 
     template<class ScalarType, bool isSpinPolarized>
@@ -142,19 +149,6 @@ namespace Physica::Core {
             dos[i] = density;
         }
         return dos;
-    }
-
-    template<class ScalarType, bool isSpinPolarized>
-    BandGrid<ScalarType, isSpinPolarized>& BandGrid<ScalarType, isSpinPolarized>::operator=(BandGrid band) noexcept {
-        swap(band);
-        return *this;
-    }
-
-    template<class ScalarType, bool isSpinPolarized>
-    void BandGrid<ScalarType, isSpinPolarized>::swap(BandGrid& __restrict band) noexcept {
-        assert(this != &band && "[Error]: Self swap is likely a bug");
-        swap(kPointGrid, band.kPointGrid);
-        swap(electronCount, band.electronCount);
     }
 
     template<class ScalarType, bool isSpinPolarized>

@@ -63,14 +63,13 @@ namespace Physica::Core {
         template<class MatrixType>
         void sample(const RValueMatrix<MatrixType>& force, const RValueMatrix<MatrixType>& momentum);
         void compute();
+        void swap(PIPhonon& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] size_t getNumAtomUnitCell() const noexcept { return numAtomUnitCell; }
         [[nodiscard]] size_t getUnitCellDOF() const noexcept { return 3 * getNumAtomUnitCell(); }
         [[nodiscard]] size_t getSuperCellDOF() const noexcept { return getUnitCellDOF() * getNumCell(); }
         [[nodiscard]] size_t getNumCell() const noexcept { return superSizeX * superSizeY * superSizeZ; }
         [[nodiscard]] Index3D getSuperSize() const noexcept { return {superSizeX, superSizeY, superSizeZ}; }
-        /* Helpers */
-        void swap(PIPhonon& __restrict obj) noexcept;
     private:
         void toKSpace();
         void applyTranslationInvariance(DenseHermiteMatrix<ComplexType>& target);

@@ -38,12 +38,11 @@ namespace Physica::Core {
         ProcessFuture& operator=(ProcessFuture future) noexcept { swap(future); return *this; }
         /* Operations */
         [[nodiscard]] int wait();
+        void swap(ProcessFuture& __restrict future) noexcept;
         /* Getters */
         [[nodiscard]] pid_t getPID() const noexcept { return pid; }
         [[nodiscard]] bool valid() const noexcept { return isValid; }
-        /* Helpers */
-        void swap(ProcessFuture& __restrict future) noexcept;
-
+        /* Friends */
         friend class Test;
     };
 }

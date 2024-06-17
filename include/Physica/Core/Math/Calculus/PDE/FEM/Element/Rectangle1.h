@@ -62,6 +62,8 @@ namespace Physica::Core {
         ~Rectangle1() = default;
         /* Operators */
         Rectangle1& operator=(Rectangle1 elem) noexcept;
+        /* Operations */
+        void swap(Rectangle1& __restrict elem) noexcept;
         /* Getters */
         [[nodiscard]] MatrixType jacobi([[maybe_unused]] VectorType localPos) const;
         [[nodiscard]] MatrixType inv_jacobi([[maybe_unused]] VectorType globalPos) const;
@@ -69,8 +71,6 @@ namespace Physica::Core {
         [[nodiscard]] VectorType getNodePos(size_t localNode) const;
         [[nodiscard]] VectorType toLocalPos(VectorType globalPos) const;
         [[nodiscard]] VectorType toGlobalPos(VectorType localPos) const;
-        /* Helpers */
-        void swap(Rectangle1& __restrict elem) noexcept;
         /* Static members */
         [[nodiscard]] static ScalarType baseFunc(size_t localNode, VectorType p);
         [[nodiscard]] static ScalarType dBase_dr(size_t localNode, [[maybe_unused]] VectorType p);

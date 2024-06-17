@@ -41,7 +41,6 @@ namespace Physica::Core {
         template<class Functor, class AnyVector>
         void solve_functor(Functor dot_functor, LValueVector<AnyVector>& b);
         void resize([[maybe_unused]] size_t size) {}
-        /* Helpers */
         void swap(IterateSolver& __restrict solver) noexcept;
         /* Setters */
         void setMaxIteration(size_t iteration) noexcept { maxIteration = iteration; }

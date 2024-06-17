@@ -38,9 +38,8 @@ namespace Physica::Core {
         SubProcess& operator=(SubProcess process) noexcept;
         /* Operations */
         ProcessFuture execute();
+        void swap(SubProcess& __restrict process) noexcept;
         /* Getters */
         [[nodiscard]] pid_t getPid() const noexcept { return pid; }
-        /* Helpers */
-        void swap(SubProcess& __restrict process) noexcept;
     };
 }

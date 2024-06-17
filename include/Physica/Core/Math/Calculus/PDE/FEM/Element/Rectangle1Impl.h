@@ -81,6 +81,14 @@ namespace Physica::Core {
     }
 
     template<class ScalarType>
+    void Rectangle1<ScalarType>::swap(Rectangle1& __restrict obj) noexcept {
+        assert(this != &obj && "[Error]: Self swap is likely a bug");
+        Base::swap(obj);
+        bottomLeft.swap(obj.bottomLeft);
+        topRight.swap(obj.topRight);
+    }
+
+    template<class ScalarType>
     typename Rectangle1<ScalarType>::MatrixType Rectangle1<ScalarType>::jacobi([[maybe_unused]] VectorType localPos) const {
         return MatrixType{(topRight[0] - bottomLeft[0]) * 0.5, 0, 0, (topRight[1] - bottomLeft[1]) * 0.5};
     }
@@ -121,14 +129,6 @@ namespace Physica::Core {
     template<class ScalarType>
     typename Rectangle1<ScalarType>::VectorType Rectangle1<ScalarType>::toGlobalPos(VectorType localPos) const {
         return (bottomLeft + topRight - hadamard(topRight - bottomLeft, localPos)) * ScalarType(0.5);
-    }
-
-    template<class ScalarType>
-    void Rectangle1<ScalarType>::swap(Rectangle1& __restrict obj) noexcept {
-        assert(this != &obj && "[Error]: Self swap is likely a bug");
-        Base::swap(obj);
-        bottomLeft.swap(obj.bottomLeft);
-        topRight.swap(obj.topRight);
     }
 
     template<class ScalarType>

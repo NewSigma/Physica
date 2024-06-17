@@ -149,11 +149,6 @@ namespace Physica::Core {
         power = temp.power;
     }
 
-    Scalar<MultiPrecision>& Scalar<MultiPrecision>::operator=(Scalar<MultiPrecision> s) noexcept {
-        swap(s);
-        return *this;
-    }
-
     MPUnit Scalar<MultiPrecision>::operator[](unsigned int index) const {
         assert(index < static_cast<unsigned int>(getSize()));
         return byte[index];

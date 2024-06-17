@@ -41,6 +41,8 @@ namespace Physica::Core {
         ~KPoint() = default;
         /* Operators */
         KPoint& operator=(KPoint k) noexcept;
+        /* Operations */
+        void swap(KPoint& __restrict kPoint) noexcept;
         /* Getters */
         [[nodiscard]] const Vector3D& getPos() const noexcept { return pos; }
         [[nodiscard]] const ScalarType& getWeight() const noexcept { return weight; }
@@ -48,8 +50,6 @@ namespace Physica::Core {
         /* Setters */
         template<class VectorType>
         void setBandEnergy(SpinState spin, const RValueVector<VectorType>& v);
-        /* Helpers */
-        void swap(KPoint& __restrict kPoint) noexcept;
     };
 
     template<class ScalarType, size_t NumBand, bool isSpinPolarized>
@@ -60,6 +60,14 @@ namespace Physica::Core {
     KPoint<ScalarType, NumBand, isSpinPolarized>& KPoint<ScalarType, NumBand, isSpinPolarized>::operator=(KPoint k) noexcept {
         swap(k);
         return *this;
+    }
+
+    template<class ScalarType, size_t NumBand, bool isSpinPolarized>
+    void KPoint<ScalarType, NumBand, isSpinPolarized>::swap(KPoint& __restrict kPoint) noexcept {
+        assert(this != &kPoint && "[Error]: Self swap is likely a bug");
+        pos.swap(kPoint.pos);
+        weight.swap(kPoint.weight);
+        bandE.swap(kPoint.bandE);
     }
 
     template<class ScalarType, size_t NumBand, bool isSpinPolarized>
@@ -75,13 +83,5 @@ namespace Physica::Core {
         const size_t length = energy.getLength();
         for (size_t i = 0; i < length; ++i)
             energy[i] = v.calc(i);
-    }
-
-    template<class ScalarType, size_t NumBand, bool isSpinPolarized>
-    void KPoint<ScalarType, NumBand, isSpinPolarized>::swap(KPoint& __restrict kPoint) noexcept {
-        assert(this != &kPoint && "[Error]: Self swap is likely a bug");
-        pos.swap(kPoint.pos);
-        weight.swap(kPoint.weight);
-        bandE.swap(kPoint.bandE);
     }
 }

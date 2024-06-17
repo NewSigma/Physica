@@ -69,6 +69,7 @@ namespace Physica::Core {
         void resize(size_t size);
         MatrixType reconstruct() const;
         MatrixType reconstruct_hermite() const;
+        void swap(EigenSolver& __restrict solver) noexcept;
         /* Getters */
         [[nodiscard]] size_t getSize() const noexcept { return eigenvalues.getLength(); }
         [[nodiscard]] const EigenvalueVector& getEigenvalues() const noexcept { return eigenvalues; }
@@ -77,8 +78,6 @@ namespace Physica::Core {
          * It is faster if all eigenvalues are real.
          */
         [[nodiscard]] const RawEigenvectorType& getRawEigenvectors() const noexcept { return rawEigenvectors; }
-        /* Helpers */
-        void swap(EigenSolver& __restrict solver) noexcept;
     private:
         void computeRealMatEigenvalues(const WorkingMatrix& matrixT);
         void computeRealMatEigenvectors(WorkingMatrix& matrixT);
@@ -217,6 +216,14 @@ namespace Physica::Core {
             }
             return toRealMatrix(result);
         }
+    }
+
+    template<class MatrixType>
+    void EigenSolver<MatrixType>::swap(EigenSolver<MatrixType>& __restrict solver) noexcept {
+        assert(this != &solver && "[Error]: Self swap is likely a bug");
+        eigenvalues.swap(solver.eigenvalues);
+        rawEigenvectors.swap(solver.rawEigenvectors);
+        std::swap(computeEigenvectors, solver.computeEigenvectors);
     }
 
     template<class MatrixType>
@@ -390,14 +397,6 @@ namespace Physica::Core {
                 col[j] = (col.tail(j + 1) * row.tail(j + 1)) / (eigenvalues[i] - eigenvalues[j]);
             }
         }
-    }
-
-    template<class MatrixType>
-    void EigenSolver<MatrixType>::swap(EigenSolver<MatrixType>& __restrict solver) noexcept {
-        assert(this != &solver && "[Error]: Self swap is likely a bug");
-        eigenvalues.swap(solver.eigenvalues);
-        rawEigenvectors.swap(solver.rawEigenvectors);
-        std::swap(computeEigenvectors, solver.computeEigenvectors);
     }
 
     template<class MatrixType>

@@ -53,7 +53,7 @@ namespace Physica::Core {
         SpinPair& operator=(SpinPair pair) noexcept { swap(pair); return *this; }
         [[nodiscard]] T& operator[](SpinState spin) { return Base::operator[](IsSpinPolarized ? int(spin) : 0); }
         [[nodiscard]] const T& operator[](SpinState spin) const { return Base::operator[](IsSpinPolarized ? int(spin) : 0); }
-        /* Helpers */
+        /* Operations */
         void swap(SpinPair& __restrict pair) noexcept { Base::swap(pair); }
     private:
         using Base::operator[];

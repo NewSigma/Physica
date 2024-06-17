@@ -53,6 +53,8 @@ namespace Physica::Core {
         ~Triangle1() = default;
         /* Operators */
         Triangle1& operator=(Triangle1 elem) noexcept;
+        /* Operations */
+        void swap(Triangle1& __restrict elem) noexcept;
         /* Getters */
         [[nodiscard]] MatrixType jacobi([[maybe_unused]] VectorType localPos) const;
         [[nodiscard]] MatrixType inv_jacobi([[maybe_unused]] VectorType globalPos) const;
@@ -60,8 +62,6 @@ namespace Physica::Core {
         [[nodiscard]] VectorType getNodePos(size_t localNode) const;
         [[nodiscard]] VectorType toLocalPos(VectorType globalPos) const;
         [[nodiscard]] VectorType toGlobalPos(VectorType localPos) const;
-        /* Helpers */
-        void swap(Triangle1& __restrict elem) noexcept;
         /* Static members */
         [[nodiscard]] static ScalarType baseFunc(size_t localNode, VectorType p);
         [[nodiscard]] static ScalarType dBase_dr(size_t localNode, [[maybe_unused]] VectorType p);

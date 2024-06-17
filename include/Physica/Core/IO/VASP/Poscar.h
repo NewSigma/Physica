@@ -61,13 +61,12 @@ namespace Physica::Core {
         void extendInZ(ScalarType factor);
         void toUnitCell(unsigned int x, unsigned int y, unsigned int z);
         void toQECell(std::ostream& os) const;
+        void swap(Poscar& __restrict poscar) noexcept;
         /* Getters */
         [[nodiscard]] const Utils::Array<uint8_t> getElementTypes() const noexcept { return elementTypes; }
         [[nodiscard]] bool isElementTypeInitialized() const noexcept { return !elementTypes.empty(); }
         [[nodiscard]] const Utils::Array<size_t>& getNumOfEachType() const noexcept { return numOfEachType; }
         [[nodiscard]] CrystalSystem getCrystalSystem(double precision) const noexcept;
-        /* Helpers */
-        void swap(Poscar& __restrict poscar) noexcept;
     private:
         using Base::toUnitCell;
         void readTypesAndNumber(std::istream& is);

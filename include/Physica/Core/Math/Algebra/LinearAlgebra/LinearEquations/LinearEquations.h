@@ -49,11 +49,10 @@ namespace Physica::Core {
         void gaussJordanComplete();
         void gaussEliminationPartial();
         void gaussEliminationComplete();
+        void swap(LinearEquations& __restrict equ) noexcept;
         /* Getters */
         [[nodiscard]] const DenseMatrix<T, type, maxRow, maxColumn>& getWorking() const noexcept { return working; }
         [[nodiscard]] auto getSolution() { return working.col(working.getColumn() - 1); }
-        /* Helpers */
-        void swap(LinearEquations& __restrict equ) noexcept;
     };
 
     template<class T, int type, size_t maxRow, size_t maxColumn>

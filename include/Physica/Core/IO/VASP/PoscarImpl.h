@@ -169,6 +169,14 @@ namespace Physica::Core {
     }
 
     template<class ScalarType>
+    void Poscar<ScalarType>::swap(Poscar& __restrict poscar) noexcept {
+        assert(this != &poscar && "[Error]: Self swap is likely a bug");
+        Base::swap(poscar);
+        elementTypes.swap(poscar.elementTypes);
+        numOfEachType.swap(poscar.numOfEachType);
+    }
+
+    template<class ScalarType>
     typename Poscar<ScalarType>::CrystalSystem Poscar<ScalarType>::getCrystalSystem(double precision) const noexcept {
         using namespace Utils;
         const ScalarType norm_list[3]{lattice.row(0).squaredNorm(),
@@ -213,14 +221,6 @@ namespace Physica::Core {
             }
         }
         return Triclinic;
-    }
-
-    template<class ScalarType>
-    void Poscar<ScalarType>::swap(Poscar& __restrict poscar) noexcept {
-        assert(this != &poscar && "[Error]: Self swap is likely a bug");
-        Base::swap(poscar);
-        elementTypes.swap(poscar.elementTypes);
-        numOfEachType.swap(poscar.numOfEachType);
     }
 
     template<class ScalarType>

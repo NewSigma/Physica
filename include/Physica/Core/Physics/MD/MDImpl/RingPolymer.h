@@ -63,6 +63,9 @@ namespace Physica::Core {
         [[nodiscard]] ScalarType calcKineticClassical() const;
         template<class KineticModel>
         [[nodiscard]] ScalarType calcTemperature() const;
+
+        [[nodiscard]] ScalarType calcRepBeta(ScalarType temperatureT) const noexcept;
+        [[nodiscard]] ScalarType calcOmegaW(ScalarType temperatureT) const noexcept;
         void swap(RingPolymer& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] constexpr unsigned int getDim() const noexcept { return Dim; }
@@ -79,9 +82,6 @@ namespace Physica::Core {
         [[nodiscard]] const BufferType& getBuffer() const noexcept { return buffer; }
         [[nodiscard]] BufferType& getBuffer() noexcept { return buffer; }
         [[nodiscard]] size_t getKSpaceSize() const noexcept { return buffer.getColumn(); }
-        /* Helpers */
-        [[nodiscard]] ScalarType calcRepBeta(ScalarType temperatureT) const noexcept;
-        [[nodiscard]] ScalarType calcOmegaW(ScalarType temperatureT) const noexcept;
         /* Static members */
         [[nodiscard]] static ScalarType calcRepBeta(ScalarType temperatureT, size_t numReplica) noexcept;
         [[nodiscard]] static ScalarType calcOmegaW(ScalarType temperatureT, size_t numReplica) noexcept;
@@ -324,15 +324,6 @@ namespace Physica::Core {
     }
 
     template<class ScalarType, unsigned int Dim, size_t NumReplica>
-    void RingPolymer<ScalarType, Dim, NumReplica>::swap(RingPolymer& __restrict obj) noexcept {
-        assert(this != &obj && "[Error]: Self swap is likely a bug");
-        phase.swap(obj.phase);
-        massVec.swap(obj.massVec);
-        fft.swap(obj.fft);
-        buffer.swap(obj.buffer);
-    }
-
-    template<class ScalarType, unsigned int Dim, size_t NumReplica>
     ScalarType RingPolymer<ScalarType, Dim, NumReplica>::calcRepBeta(ScalarType temperatureT) const noexcept {
         return calcRepBeta(temperatureT, getNumReplica());
     }
@@ -340,6 +331,15 @@ namespace Physica::Core {
     template<class ScalarType, unsigned int Dim, size_t NumReplica>
     ScalarType RingPolymer<ScalarType, Dim, NumReplica>::calcOmegaW(ScalarType temperatureT) const noexcept {
         return calcOmegaW(temperatureT, getNumReplica());
+    }
+
+    template<class ScalarType, unsigned int Dim, size_t NumReplica>
+    void RingPolymer<ScalarType, Dim, NumReplica>::swap(RingPolymer& __restrict obj) noexcept {
+        assert(this != &obj && "[Error]: Self swap is likely a bug");
+        phase.swap(obj.phase);
+        massVec.swap(obj.massVec);
+        fft.swap(obj.fft);
+        buffer.swap(obj.buffer);
     }
 
     template<class ScalarType, unsigned int Dim, size_t NumReplica>

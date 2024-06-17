@@ -108,7 +108,7 @@ namespace Physica::Core {
         Scalar(Scalar&& s) noexcept;
         ~Scalar();
         /* Operators */
-        Scalar& operator=(Scalar s) noexcept;
+        Scalar& operator=(Scalar s) noexcept { swap(s); return *this; }
         [[nodiscard]] MPUnit operator[](unsigned int index) const;
         [[nodiscard]] explicit operator double() const;
         [[nodiscard]] Scalar operator+(const Scalar& s) const;
@@ -119,10 +119,9 @@ namespace Physica::Core {
         [[nodiscard]] Scalar operator>>(int bits) const;
         [[nodiscard]] Scalar operator-() const;
         /* Operations */
-        void swap(Scalar& __restrict obj) noexcept;
-        /* Helpers */
         Scalar& toOpposite() noexcept { length = -length; return *this; }
         Scalar& toAbs() noexcept { length = getSize(); return *this; }
+        void swap(Scalar& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] constexpr static ScalarOption getOption() { return MultiPrecision; }
         [[nodiscard]] int getLength() const noexcept { return length; }
@@ -207,7 +206,7 @@ namespace Physica::Core {
         __host__ __device__ bool operator<(const Scalar& s) const { return f < s.f; }
         __host__ __device__ bool operator==(const Scalar& s) const { return f == s.f; }
         PHYSICA_API friend std::istream& operator>>(std::istream& is, Scalar& scalar);
-        /* Helpers */
+        /* Operations */
         Scalar& toOpposite() noexcept { f = -f; return *this; }
         __host__ __device__ Scalar& toAbs() noexcept { *this = abs(*this); return *this; }
         void swap(Scalar& __restrict s) noexcept { std::swap(f, s.f); }
@@ -279,7 +278,7 @@ namespace Physica::Core {
         __host__ __device__ bool operator<(const Scalar& s) const { return d < s.d; }
         __host__ __device__ bool operator==(const Scalar& s) const { return d == s.d; }
         PHYSICA_API friend std::istream& operator>>(std::istream& is, Scalar& scalar);
-        /* Helpers */
+        /* Operations */
         Scalar& toOpposite() noexcept { d = -d; return *this; }
         __host__ __device__ Scalar& toAbs() noexcept { *this = abs(*this); return *this; }
         void swap(Scalar& __restrict s) noexcept { std::swap(d, s.d); }

@@ -63,10 +63,9 @@ namespace Physica::Core {
         LDA& operator=(LDA lda) noexcept;
         /* Operations */
         void fill(const DensityType& density, PotType& xc);
+        void swap(LDA& __restrict lda) noexcept;
         /* Getters */
         [[nodiscard]] size_t getBufferSize() const noexcept { return buffer.getLength(); }
-        /* Helpers */
-        void swap(LDA& __restrict lda) noexcept;
     private:
         void fillExchange(const DensityType& density, PotType& xc);
         void addCorreclation(const DensityType& density, PotType& xc);
@@ -178,10 +177,9 @@ namespace Physica::Core {
         LDA& operator=(LDA lda) noexcept;
         /* Operations */
         void fill(const DensityType& density, PotType& xc);
+        void swap(LDA& __restrict lda) noexcept;
         /* Getters */
         [[nodiscard]] size_t getBufferSize() const noexcept { return buffer.getLength(); }
-        /* Helpers */
-        void swap(LDA& __restrict lda) noexcept;
     private:
         void fillExchange(const DensityType& density, PotType& xc);
         void addCorreclation(const DensityType& density, PotType& xc);

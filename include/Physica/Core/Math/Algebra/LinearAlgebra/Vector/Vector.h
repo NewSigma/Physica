@@ -76,13 +76,13 @@ namespace Physica::Core {
         [[nodiscard]] Vector copy() const;
         [[nodiscard]] inline device_obj<This> toDevice() const;
         using Base::toDevice;
+        using Storage::swap;
         /* Getters */
         using Storage::getLength;
         using Storage::data;
         [[nodiscard]] __host__ __device__ ScalarType* data_ptr(size_t index) { return data() + index; }
         [[nodiscard]] __host__ __device__ const ScalarType* data_ptr(size_t index) const { return data() + index; }
-        /* Helpers */
-        using Storage::swap;
+        /* Static members */
         [[nodiscard]] static Vector Zeros(size_t len);
         template<class RandomGenerator>
         [[nodiscard]] static Vector random_uniform(size_t len, RandomGenerator& gen);

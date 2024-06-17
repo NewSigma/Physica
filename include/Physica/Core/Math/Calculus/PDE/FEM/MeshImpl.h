@@ -75,6 +75,14 @@ namespace Physica::Core {
     }
 
     template<class T>
+    void Mesh<T>::swap(Mesh& __restrict mesh) noexcept {
+        assert(this != &mesh && "[Error]: Self swap is likely a bug");
+        elements.swap(mesh.elements);
+        coeffs.swap(mesh.coeffs);
+        nodeTypes.swap(nodeTypes);
+    }
+
+    template<class T>
     size_t Mesh<T>::getNumFreeNodes() const {
         size_t num = 0;
         for (auto type : nodeTypes)
@@ -98,13 +106,5 @@ namespace Physica::Core {
             }
         }
         return result;
-    }
-
-    template<class T>
-    void Mesh<T>::swap(Mesh& __restrict mesh) noexcept {
-        assert(this != &mesh && "[Error]: Self swap is likely a bug");
-        elements.swap(mesh.elements);
-        coeffs.swap(mesh.coeffs);
-        nodeTypes.swap(nodeTypes);
     }
 }

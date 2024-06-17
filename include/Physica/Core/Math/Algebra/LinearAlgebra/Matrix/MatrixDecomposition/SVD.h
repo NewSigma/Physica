@@ -72,12 +72,11 @@ namespace Physica::Core {
         template<class OtherMatrix>
         void compute(const RValueMatrix<OtherMatrix>& source);
         void sort();
+        void swap(SVD& __restrict svd) noexcept;
         /* Getters */
         [[nodiscard]] const SingularValueVector& getSingulars() const noexcept { return singulars; }
         [[nodiscard]] const LSingularMatrix& getMatrixU() const noexcept { return lSingularMat; }
         [[nodiscard]] const RSingularMatrix& getMatrixV() const noexcept { return rSingularMat; }
-        /* Helpers */
-        void swap(SVD& __restrict svd) noexcept;
     private:
         void stepSVD(size_t lower, size_t sub_order);
         ScalarType computeShift(size_t lower, size_t sub_order);

@@ -44,8 +44,10 @@ namespace Physica::Core {
         /* Operators */
         Mesh& operator=(Mesh mesh) noexcept;
         [[nodiscard]] ScalarType operator()(VectorType p) const;
+        /* Operations */
         template<class Detector, class Conditioner>
         void addDirichletBoundary(Detector detector, Conditioner conditioner);
+        void swap(Mesh& __restrict mesh) noexcept;
         /* Getters */
         [[nodiscard]] size_t getNumElems() const { return elements.getLength(); }
         [[nodiscard]] size_t getNumNodes() const { return coeffs.getLength(); }
@@ -57,8 +59,6 @@ namespace Physica::Core {
         [[nodiscard]] Utils::Array<VectorType> getNodes() const;
         /* Setters */
         void setElem(ElementType elem, size_t index);
-        /* Helpers */
-        void swap(Mesh& __restrict mesh) noexcept;
     };
 
     template<class T>

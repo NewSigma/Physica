@@ -63,11 +63,10 @@ namespace Physica::Core {
         template<class OtherMatrix>
         void compute(const RValueMatrix<OtherMatrix>& source, bool computeEigenvectors_);
         void sort();
+        void swap(SymmEigenSolver& __restrict solver) noexcept;
         /* Getters */
         [[nodiscard]] const EigenvalueVector& getEigenvalues() const noexcept { return eigenvalues; }
         [[nodiscard]] inline EigenvectorMatrix getEigenvectors() const noexcept;
-        /* Helpers */
-        void swap(SymmEigenSolver& __restrict solver) noexcept;
     private:
         void stepQR(WorkingMatrix& working, size_t lower, size_t sub_order);
     };
@@ -159,17 +158,17 @@ namespace Physica::Core {
     }
 
     template<class MatrixType>
-    inline typename SymmEigenSolver<MatrixType>::EigenvectorMatrix SymmEigenSolver<MatrixType>::getEigenvectors() const noexcept {
-        assert(computeEigenvectors && "[Error]: Eigenvectors are not ready");
-        return eigenvectors;
-    }
-
-    template<class MatrixType>
     void SymmEigenSolver<MatrixType>::swap(SymmEigenSolver<MatrixType>& __restrict solver) noexcept {
         assert(this != &solver && "[Error]: Self swap is likely a bug");
         eigenvalues.swap(solver.eigenvalues);
         std::swap(eigenvectors, solver.eigenvectors);
         std::swap(computeEigenvectors, solver.computeEigenvectors);
+    }
+
+    template<class MatrixType>
+    inline typename SymmEigenSolver<MatrixType>::EigenvectorMatrix SymmEigenSolver<MatrixType>::getEigenvectors() const noexcept {
+        assert(computeEigenvectors && "[Error]: Eigenvectors are not ready");
+        return eigenvectors;
     }
     /**
      * Use wilkinson shift
