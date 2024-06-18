@@ -47,7 +47,7 @@ namespace Physica::Core {
         using This = DenseSymmMatrix<T, Order, MaxOrder>;
         using Base = LValueMatrix<This>;
         using Storage = Internal::HalfDenseMatrixStorage<T, Order, MaxOrder>;
-        using VectorBase = typename Storage::Base;
+        using VectorBase = typename Storage::ArrayType;
     public:
         using typename Base::ScalarType;
         using ColMatrix = This;
@@ -70,15 +70,18 @@ namespace Physica::Core {
         using Base::calc;
         using Base::format;
         using Base::hermite;
-        using Storage::max;
-        using Storage::min;
         using Storage::resize;
+        [[nodiscard]] ScalarType max() const { return asVector().max(); }
+        [[nodiscard]] ScalarType min() const { return asVector().min(); }
         [[nodiscard]] const This& transpose() const noexcept { return *this; }
         void swap(DenseSymmMatrix& __restrict m) noexcept;
 
-        using Storage::random_uniform;
-        using Storage::random_normal;
-        using Storage::random_any;
+        template<class RandomGenerator>
+        void random_uniform(RandomGenerator& gen) { asVector().random_uniform(gen); }
+        template<class RandomGenerator>
+        void random_normal(RandomGenerator& gen) { asVector().random_normal(gen); }
+        template<class Distribution, class RandomGenerator>
+        void random_any(Distribution& dist, RandomGenerator& gen) { asVector().random_any(dist, gen); }
         /* Getters */
         using Storage::getOrder;
         using Storage::getRow;
@@ -86,8 +89,8 @@ namespace Physica::Core {
         using Storage::data_ptr;
         [[nodiscard]] Base& asMatrix() noexcept { return *this; }
         [[nodiscard]] const Base& asMatrix() const noexcept { return *this; }
-        [[nodiscard]] VectorBase& asVector() noexcept { return *this; }
-        [[nodiscard]] const VectorBase& asVector() const noexcept { return *this; }
+        [[nodiscard]] VectorBase& asVector() noexcept { return Storage::getArray(); }
+        [[nodiscard]] const VectorBase& asVector() const noexcept { return Storage::getArray(); }
         /* Static members */
         [[nodiscard]] static DenseSymmMatrix unitMatrix(size_t order);
         template<class RandomGenerator>

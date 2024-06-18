@@ -67,8 +67,9 @@ namespace Physica::Core {
     Derived& LValueMatrix<Derived>::operator=(const RValueMatrix<OtherMatrix>& m) {
         static_assert(RowAtCompile == Dynamic || OtherMatrix::RowAtCompile == Dynamic || RowAtCompile == OtherMatrix::RowAtCompile, "[Error]: Incompatible row number");
         static_assert(ColumnAtCompile == Dynamic || OtherMatrix::ColumnAtCompile == Dynamic || ColumnAtCompile == OtherMatrix::ColumnAtCompile, "[Error]: Incompatible column number");
+        static_assert(!(!isComplex && OtherMatrix::isComplex), "[Error]: Cannot assign a complex matrix to real matrix");
         Base::getDerived().resize(m.getRow(), m.getColumn());
-        m.getDerived().assignTo(*this);
+        m.getDerived().assignTo(Base::getDerived());
         return Base::getDerived();
     }
     

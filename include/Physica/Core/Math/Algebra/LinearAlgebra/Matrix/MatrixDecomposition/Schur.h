@@ -31,21 +31,22 @@ namespace Physica::Core {
      * [1] Golub, GeneH. Matrix computations = 矩阵计算 / 4th edition[M]. 人民邮电出版社, 2014.
      * [2] Eigen https://eigen.tuxfamily.org/
      */
-    template<class MatrixType>
+    template<class ScalarType, size_t Order = Dynamic>
     class Schur : public Decouplable {
+        static_assert(is_scalar<ScalarType>::value, "[Error]: Invalid ScalarType");
         constexpr static const char* BadConvergenceMessage = "Exceed max iteration of Schur";
+        using HessenburgType = Hessenburg<ScalarType, Order>;
     public:
-        using ScalarType = typename MatrixType::ScalarType;
         using RealType = typename ScalarType::RealType;
         using ComplexType = ComplexScalar<RealType>;
-        using WorkingMatrix = typename MatrixType::ColMatrix;
+        using WorkingMatrix = typename HessenburgType::WorkingMatrix;
     private:
         WorkingMatrix matrixT;
         WorkingMatrix matrixU;
         bool computeMatrixU;
     public:
-        template<class OtherMatrix>
-        Schur(const RValueMatrix<OtherMatrix>& source, bool computeMatrixU_ = false);
+        template<class MatrixType>
+        Schur(const RValueMatrix<MatrixType>& source_, bool computeMatrixU_ = false);
         /* Getters */
         [[nodiscard]] WorkingMatrix& getMatrixT() noexcept { return matrixT; }
         [[nodiscard]] WorkingMatrix& getMatrixU() noexcept { assert(computeMatrixU); return matrixU; }
@@ -59,29 +60,30 @@ namespace Physica::Core {
         void complexQR(size_t lower, size_t upper, ComplexType shift);
     };
 
+    template<class ScalarType, size_t Order>
     template<class MatrixType>
-    template<class OtherMatrix>
-    Schur<MatrixType>::Schur(const RValueMatrix<OtherMatrix>& source, bool computeMatrixU_)
-            : matrixT(source.getRow(), source.getColumn())
+    Schur<ScalarType, Order>::Schur(const RValueMatrix<MatrixType>& source_, bool computeMatrixU_)
+            : matrixT(source_.getRow(), source_.getColumn())
             , matrixU()
             , computeMatrixU(computeMatrixU_) {
+        static_assert(std::is_same<ScalarType, typename MatrixType::ScalarType>::value, "[Error]: Inconsistent ScalarType");
+        const auto& source = source_.getDerived();
         assert(source.getRow() == source.getColumn());
         if (computeMatrixU)
             matrixU = WorkingMatrix::unitMatrix(source.getRow());
 
-        typename MatrixType::RealMatrix buffer = abs_elem(source);
-        const RealType factor = buffer.max();
+        const RealType factor = abs_elem(source).max();
         if (factor < std::numeric_limits<ScalarType>::min()) {
             matrixT = RealType(0);
             return;
         }
         const RealType inv_factor = reciprocal(factor);
-        const MatrixType normalized = source * inv_factor; //Referenced from eigen, to avoid under/overflow in householder, but will lost relative accuracy(from 10^-15 to 10^-14)
+        const auto normalized = source * inv_factor; //Referenced from eigen, to avoid under/overflow in householder, but will lost relative accuracy(from 10^-15 to 10^-14)
 
-        const size_t order = normalized.getRow();
+        const size_t order = source.getRow();
         size_t iter = 0;
         if (order != 2) {
-            const Hessenburg hess(normalized);
+            const Hessenburg<ScalarType, Order> hess(normalized);
             matrixT = hess.getMatrixH();
 
             size_t upper = order - 1;
@@ -144,8 +146,8 @@ namespace Physica::Core {
     /**
      * Upper triangulize submatrix of \param mat, whose columns have index \param index and \param index + 1.
      */
-    template<class MatrixType>
-    void Schur<MatrixType>::splitOffTwoRows(size_t index) {
+    template<class ScalarType, size_t Order>
+    void Schur<ScalarType, Order>::splitOffTwoRows(size_t index) {
         const size_t index_1 = index + 1;
         const ScalarType p = ScalarType(0.5) * (matrixT(index, index) - matrixT(index_1, index_1));
         const ScalarType q = square(p) + matrixT(index, index_1) * matrixT(index_1, index);
@@ -166,8 +168,8 @@ namespace Physica::Core {
         }
     }
 
-    template<class MatrixType>
-    void Schur<MatrixType>::francisQR(size_t lower, size_t sub_order) {
+    template<class ScalarType, size_t Order>
+    void Schur<ScalarType, Order>::francisQR(size_t lower, size_t sub_order) {
         auto subBlock = matrixT.block(lower, sub_order, lower, sub_order);
         const ScalarType s = subBlock(sub_order - 1, sub_order - 1) + subBlock(sub_order - 2, sub_order - 2);
         const ScalarType t1 = subBlock(sub_order - 1, sub_order - 1) * subBlock(sub_order - 2, sub_order - 2);
@@ -218,8 +220,8 @@ namespace Physica::Core {
     /**
      * A special designed Hessenburg decomposition for francis QR algorithm
      */
-    template<class MatrixType>
-    void Schur<MatrixType>::specialHessenburg(size_t lower, size_t sub_order) {
+    template<class ScalarType, size_t Order>
+    void Schur<ScalarType, Order>::specialHessenburg(size_t lower, size_t sub_order) {
         assert(sub_order > 2);
         Vector<ScalarType, 3> householderVector3D{};
         for (size_t i = 0; i < sub_order - 3; ++i) {
@@ -265,8 +267,8 @@ namespace Physica::Core {
         }
     }
 
-    template<class MatrixType>
-    typename Schur<MatrixType>::ComplexType Schur<MatrixType>::complexShift(size_t upper, size_t iter) {
+    template<class ScalarType, size_t Order>
+    typename Schur<ScalarType, Order>::ComplexType Schur<ScalarType, Order>::complexShift(size_t upper, size_t iter) {
         using Matrix2D = DenseMatrix<ScalarType, MatrixOption::Column | MatrixOption::Element, 2, 2>;
         if ((iter == 10 || iter == 20) && upper > 1) {
             // exceptional shift, taken from http://www.netlib.org/eispack/comqr.f
@@ -297,8 +299,8 @@ namespace Physica::Core {
         return t_norm * (firstEigenValueCloserToDiagonal ? eival1 : eival2);
     }
 
-    template<class MatrixType>
-    void Schur<MatrixType>::complexQR(size_t lower, size_t upper, ComplexType shift) {
+    template<class ScalarType, size_t Order>
+    void Schur<ScalarType, Order>::complexQR(size_t lower, size_t upper, ComplexType shift) {
         using Vector2D = Vector<ScalarType, 2, 2>;
         {
             auto givensVec = givens(Vector2D{matrixT(lower, lower) - shift, matrixT(lower + 1, lower)}, 0, 1);

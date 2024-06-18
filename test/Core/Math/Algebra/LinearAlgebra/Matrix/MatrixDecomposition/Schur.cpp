@@ -57,7 +57,7 @@ bool isUpperTriangle(const LValueMatrix<MatrixType>& m) {
 
 template<class MatrixType>
 bool realSchurTest(const LValueMatrix<MatrixType>& mat, double precision) {
-    Schur<MatrixType> schur(mat, true);
+    Schur<typename MatrixType::ScalarType> schur(mat, true);
     if (!isUpperQuasiTriangle(schur.getMatrixT()))
         return false;
     MatrixType A = schur.getMatrixU() * (schur.getMatrixT() * schur.getMatrixU().transpose()).compute();
@@ -68,7 +68,7 @@ bool realSchurTest(const LValueMatrix<MatrixType>& mat, double precision) {
 
 template<class MatrixType>
 bool schurTest(const LValueMatrix<MatrixType>& mat, double precision) {
-    Schur<MatrixType> schur(mat, true);
+    Schur<typename MatrixType::ScalarType> schur(mat, true);
     if (!isUpperTriangle(schur.getMatrixT()))
         return false;
     MatrixType A = schur.getMatrixU() * (schur.getMatrixT() * schur.getMatrixU().hermite()).compute();

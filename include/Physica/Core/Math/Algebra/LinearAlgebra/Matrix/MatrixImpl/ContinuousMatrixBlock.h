@@ -149,6 +149,7 @@ namespace Physica::Core {
         using This = ContinuousMatrixBlock<MatrixType, 1, Column>;
     public:
         using Base = LValueMatrix<This>;
+        using Base::isComplex;
         using VectorBase = typename Internal::Traits<This>::VectorBase;
         using ScalarType = typename MatrixType::ScalarType;
     public:
@@ -207,6 +208,7 @@ namespace Physica::Core {
         using This = ContinuousMatrixBlock<MatrixType, Row, 1>;
     public:
         using Base = LValueMatrix<This>;
+        using Base::isComplex;
         using VectorBase = typename Internal::Traits<This>::VectorBase;
         using ScalarType = typename MatrixType::ScalarType;
     public:
@@ -266,6 +268,7 @@ namespace Physica::Core {
         using This = ContinuousMatrixBlock<MatrixType, 1, 1>;
     public:
         using Base = LValueMatrix<This>;
+        using Base::isComplex;
         using VectorBase = typename Internal::Traits<This>::VectorBase;
         using ScalarType = typename MatrixType::ScalarType;
     public:
@@ -314,6 +317,7 @@ namespace Physica::Core {
     public:
         using This = ContinuousMatrixBlock<MatrixType, Row, Column>;
         using Base = LValueMatrix<This>;
+        using Base::isComplex;
         using typename Base::ScalarType;
     private:
         MatrixType& mat;

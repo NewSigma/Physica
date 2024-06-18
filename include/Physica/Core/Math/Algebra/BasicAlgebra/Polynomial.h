@@ -84,7 +84,7 @@ namespace Physica::Core {
         auto col = companion.col(power - 1);
         col = -poly.getCoeffVector();
 
-        EigenSolver<MatrixType> solver(companion, false);
+        EigenSolver<ScalarType, Power> solver(companion, false);
         return solver.getEigenvalues();
     }
 }

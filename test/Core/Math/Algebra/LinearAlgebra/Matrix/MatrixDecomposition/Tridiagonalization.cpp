@@ -25,7 +25,7 @@ template<class MatrixType>
 bool doTest(const MatrixType& source, double tolerance) {
     using ScalarType = typename MatrixType::ScalarType;
     using GeneralMatrix = DenseMatrix<ScalarType>;
-    Tridiagonalization tri(source);
+    Tridiagonalization<ScalarType> tri(source);
     GeneralMatrix T = tri.getMatrixT();
     GeneralMatrix Q = tri.getMatrixQ();
     GeneralMatrix A = (Q * T).compute() * Q.hermite();

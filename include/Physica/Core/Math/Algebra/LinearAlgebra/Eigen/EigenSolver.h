@@ -30,23 +30,17 @@ namespace Physica::Core {
      * [1] Golub, GeneH. Matrix computations = 矩阵计算 / 4th edition[M]. 人民邮电出版社, 2014.
      * [2] Eigen https://eigen.tuxfamily.org/
      */
-    template<class MatrixType>
+    template<class ScalarType, size_t Order = Dynamic>
     class EigenSolver {
-    public:
-        using ScalarType = typename MatrixType::ScalarType;
-        using RealType = typename ScalarType::RealType;
-        using EigenvalueVector = Vector<ComplexScalar<RealType>, MatrixType::RowAtCompile, MatrixType::MaxRowAtCompile>;
-        using EigenvectorMatrix = DenseMatrix<ComplexScalar<RealType>,
-                                              MatrixOption::Column | MatrixOption::Vector,
-                                              MatrixType::RowAtCompile,
-                                              MatrixType::RowAtCompile>;
-        using RawEigenvectorType = DenseMatrix<ScalarType,
-                                               MatrixOption::Column | MatrixOption::Vector,
-                                               MatrixType::RowAtCompile,
-                                               MatrixType::RowAtCompile>;
+        using This = EigenSolver<ScalarType, Order>;
         constexpr static bool isComplex = ScalarType::isComplex;
+    public:
+        using RealType = typename ScalarType::RealType;
+        using EigenvalueVector = Vector<ComplexScalar<RealType>, Order>;
+        using EigenvectorMatrix = DenseMatrix<ComplexScalar<RealType>, MatrixOption::Column | MatrixOption::Vector, Order, Order>;
+        using RawEigenvectorType = DenseMatrix<ScalarType, MatrixOption::Column | MatrixOption::Vector, Order, Order>;
     private:
-        using WorkingMatrix = typename Schur<MatrixType>::WorkingMatrix;
+        using WorkingMatrix = typename Schur<ScalarType, Order>::WorkingMatrix;
 
         EigenvalueVector eigenvalues;
         RawEigenvectorType rawEigenvectors;
@@ -54,22 +48,22 @@ namespace Physica::Core {
     public:
         EigenSolver();
         EigenSolver(size_t size);
-        template<class OtherMatrix>
-        EigenSolver(const RValueMatrix<OtherMatrix>& source, bool computeEigenvectors_);
+        template<class MatrixType>
+        EigenSolver(const RValueMatrix<MatrixType>& source, bool computeEigenvectors_);
         EigenSolver(EigenvalueVector eigenvalues_, RawEigenvectorType rawEigenvectors_);
-        EigenSolver(const EigenSolver&) = default;
-        EigenSolver(EigenSolver&& solver) noexcept = default;
+        EigenSolver(const This&) = default;
+        EigenSolver(This&& solver) noexcept = default;
         ~EigenSolver() = default;
         /* Operators */
-        EigenSolver& operator=(EigenSolver solver) noexcept;
+        This& operator=(This obj) noexcept { swap(obj); return *this; }
         /* Operations */
-        template<class OtherMatrix>
-        void compute(const RValueMatrix<OtherMatrix>& source, bool computeEigenvectors_);
+        template<class MatrixType>
+        void compute(const RValueMatrix<MatrixType>& source, bool computeEigenvectors_);
         void sort();
         void resize(size_t size);
-        MatrixType reconstruct() const;
-        MatrixType reconstruct_hermite() const;
-        void swap(EigenSolver& __restrict solver) noexcept;
+        [[nodiscard]] auto reconstruct() const;
+        [[nodiscard]] auto reconstruct_hermite() const;
+        void swap(This& __restrict solver) noexcept;
         /* Getters */
         [[nodiscard]] size_t getSize() const noexcept { return eigenvalues.getLength(); }
         [[nodiscard]] const EigenvalueVector& getEigenvalues() const noexcept { return eigenvalues; }
@@ -84,17 +78,17 @@ namespace Physica::Core {
         void computeComplexMatEigenvectors(WorkingMatrix& matrixT);
     };
 
-    template<class MatrixType>
-    EigenSolver<MatrixType>::EigenSolver() : eigenvalues(), rawEigenvectors(), computeEigenvectors(false) {}
+    template<class ScalarType, size_t Order>
+    EigenSolver<ScalarType, Order>::EigenSolver() : eigenvalues(), rawEigenvectors(), computeEigenvectors(false) {}
 
-    template<class MatrixType>
-    EigenSolver<MatrixType>::EigenSolver(size_t size) {
+    template<class ScalarType, size_t Order>
+    EigenSolver<ScalarType, Order>::EigenSolver(size_t size) {
         resize(size);
     }
 
+    template<class ScalarType, size_t Order>
     template<class MatrixType>
-    template<class OtherMatrix>
-    EigenSolver<MatrixType>::EigenSolver(const RValueMatrix<OtherMatrix>& source, bool computeEigenvectors_)
+    EigenSolver<ScalarType, Order>::EigenSolver(const RValueMatrix<MatrixType>& source, bool computeEigenvectors_)
             : computeEigenvectors(computeEigenvectors_) {
         resize(source.getRow());
         compute(source, computeEigenvectors);
@@ -102,25 +96,20 @@ namespace Physica::Core {
     /**
      * Reconstruct a matrix from its eigen decomposition
      */
-    template<class MatrixType>
-    EigenSolver<MatrixType>::EigenSolver(EigenvalueVector eigenvalues_, RawEigenvectorType rawEigenvectors_)
+    template<class ScalarType, size_t Order>
+    EigenSolver<ScalarType, Order>::EigenSolver(EigenvalueVector eigenvalues_, RawEigenvectorType rawEigenvectors_)
             : eigenvalues(std::move(eigenvalues_))
             , rawEigenvectors(std::move(rawEigenvectors_))
             , computeEigenvectors(true) {}
 
+    template<class ScalarType, size_t Order>
     template<class MatrixType>
-    EigenSolver<MatrixType>& EigenSolver<MatrixType>::operator=(EigenSolver<MatrixType> solver) noexcept {
-        swap(solver);
-        return *this;
-    }
-
-    template<class MatrixType>
-    template<class OtherMatrix>
-    void EigenSolver<MatrixType>::compute(const RValueMatrix<OtherMatrix>& source, bool computeEigenvectors_) {
+    void EigenSolver<ScalarType, Order>::compute(const RValueMatrix<MatrixType>& source, bool computeEigenvectors_) {
+        static_assert(std::is_same<ScalarType, typename MatrixType::ScalarType>::value, "[Error]: Inconsistent ScalarType");
         assert(source.getRow() == source.getColumn());
         assert(source.getRow() == eigenvalues.getLength());
         computeEigenvectors = computeEigenvectors_;
-        auto schur = Schur<MatrixType>(source, computeEigenvectors);
+        auto schur = Schur<ScalarType, Order>(source, computeEigenvectors);
 
         WorkingMatrix& matrixT = schur.getMatrixT();
         const size_t order = source.getRow();
@@ -146,8 +135,8 @@ namespace Physica::Core {
         }
     }
 
-    template<class MatrixType>
-    void EigenSolver<MatrixType>::sort() {
+    template<class ScalarType, size_t Order>
+    void EigenSolver<ScalarType, Order>::sort() {
         const size_t order = eigenvalues.getLength();
         for (size_t i = 0; i < order - 1; ++i) {
             size_t index_min = i;
@@ -166,14 +155,14 @@ namespace Physica::Core {
         }
     }
 
-    template<class MatrixType>
-    void EigenSolver<MatrixType>::resize(size_t size) {
+    template<class ScalarType, size_t Order>
+    void EigenSolver<ScalarType, Order>::resize(size_t size) {
         eigenvalues.resize(size);
         rawEigenvectors.resize(size, size);
     }
 
-    template<class MatrixType>
-    MatrixType EigenSolver<MatrixType>::reconstruct() const {
+    template<class ScalarType, size_t Order>
+    auto EigenSolver<ScalarType, Order>::reconstruct() const {
         const size_t size = getSize();
         EigenvectorMatrix result(size, size);
         if constexpr (isComplex) {
@@ -191,14 +180,14 @@ namespace Physica::Core {
                 auto col = result.col(i);
                 col = eigenvectors * hadamard(eigenvalues, inv.col(i));
             }
-            return toRealMatrix(result);
+            return RawEigenvectorType(toRealMatrix(result));
         }
     }
     /**
      * Faster because no inverse matrix
      */
-    template<class MatrixType>
-    MatrixType EigenSolver<MatrixType>::reconstruct_hermite() const {
+    template<class ScalarType, size_t Order>
+    auto EigenSolver<ScalarType, Order>::reconstruct_hermite() const {
         const size_t size = getSize();
         EigenvectorMatrix result(size, size);
         if constexpr (isComplex) {
@@ -214,20 +203,20 @@ namespace Physica::Core {
                 auto col = result.col(i);
                 col = eigenvectors * hadamard(eigenvalues, eigenvectors.conjugate().row(i));
             }
-            return toRealMatrix(result);
+            return RawEigenvectorType(toRealMatrix(result));
         }
     }
 
-    template<class MatrixType>
-    void EigenSolver<MatrixType>::swap(EigenSolver<MatrixType>& __restrict solver) noexcept {
+    template<class ScalarType, size_t Order>
+    void EigenSolver<ScalarType, Order>::swap(This& __restrict solver) noexcept {
         assert(this != &solver && "[Error]: Self swap is likely a bug");
         eigenvalues.swap(solver.eigenvalues);
         rawEigenvectors.swap(solver.rawEigenvectors);
         std::swap(computeEigenvectors, solver.computeEigenvectors);
     }
 
-    template<class MatrixType>
-    typename EigenSolver<MatrixType>::EigenvectorMatrix EigenSolver<MatrixType>::getEigenvectors() const {
+    template<class ScalarType, size_t Order>
+    typename EigenSolver<ScalarType, Order>::EigenvectorMatrix EigenSolver<ScalarType, Order>::getEigenvectors() const {
         assert(computeEigenvectors && "[Error]: Eigenvectors are not ready");
         if constexpr (isComplex)
             return rawEigenvectors;
@@ -258,8 +247,8 @@ namespace Physica::Core {
         }
     }
 
-    template<class MatrixType>
-    void EigenSolver<MatrixType>::computeRealMatEigenvalues(const WorkingMatrix& matrixT) {
+    template<class ScalarType, size_t Order>
+    void EigenSolver<ScalarType, Order>::computeRealMatEigenvalues(const WorkingMatrix& matrixT) {
         const size_t order = matrixT.getRow();
         for (size_t i = 0; i < order;) {
             if (i == order - 1 || matrixT(i + 1, i).isZero()) {
@@ -287,8 +276,8 @@ namespace Physica::Core {
         }
     }
 
-    template<class MatrixType>
-    void EigenSolver<MatrixType>::computeRealMatEigenvectors(WorkingMatrix& matrixT) {
+    template<class ScalarType, size_t Order>
+    void EigenSolver<ScalarType, Order>::computeRealMatEigenvectors(WorkingMatrix& matrixT) {
         const size_t order = matrixT.getRow();
         for (size_t i = order - 1; i < order; --i) {
             auto block = matrixT.topLeftCorner(i + 1, i + 1);
@@ -384,8 +373,8 @@ namespace Physica::Core {
         }
     }
 
-    template<class MatrixType>
-    void EigenSolver<MatrixType>::computeComplexMatEigenvectors(WorkingMatrix& matrixT) {
+    template<class ScalarType, size_t Order>
+    void EigenSolver<ScalarType, Order>::computeComplexMatEigenvectors(WorkingMatrix& matrixT) {
         const size_t order = matrixT.getRow();
         for (size_t i = order - 1; i < order; --i) {
             auto block = matrixT.topLeftCorner(i + 1, i + 1);
@@ -398,10 +387,12 @@ namespace Physica::Core {
             }
         }
     }
+}
 
-    template<class MatrixType>
-    inline void swap(Physica::Core::EigenSolver<MatrixType>& __restrict solver1,
-                     Physica::Core::EigenSolver<MatrixType>& __restrict solver2) noexcept {
+namespace std {
+    template<class ScalarType, size_t Order>
+    inline void swap(Physica::Core::EigenSolver<ScalarType, Order>& __restrict solver1,
+                     Physica::Core::EigenSolver<ScalarType, Order>& __restrict solver2) noexcept {
         solver1.swap(solver2);
     }
 }

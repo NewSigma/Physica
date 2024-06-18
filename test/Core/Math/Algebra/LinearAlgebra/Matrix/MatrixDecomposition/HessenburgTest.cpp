@@ -39,7 +39,7 @@ bool isHessenburgMatrix(const MatrixType& m) {
 
 template<class MatrixType>
 bool hessTest(const MatrixType& source, double tolerance) {
-    Hessenburg hess(source);
+    Hessenburg<typename MatrixType::ScalarType> hess(source);
     MatrixType H = hess.getMatrixH();
     if (!isHessenburgMatrix(H))
         return false;

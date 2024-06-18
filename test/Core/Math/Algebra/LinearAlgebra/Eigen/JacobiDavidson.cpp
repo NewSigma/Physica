@@ -30,7 +30,7 @@ int main() {
     const MatrixType data = MatrixType::random_uniform(64, gen);
     const DenseHermiteMatrix<ComplexType> hermite = data + data.hermite();
 
-    EigenSolver<MatrixType> eig(hermite, false);
+    EigenSolver<ComplexType> eig(hermite, false);
     eig.sort();
     JacobiDavidson<ComplexType> jd(hermite.getRow(), 61);
     jd.compute(hermite, Vector<ComplexType>::random_uniform(data.getRow(), gen));

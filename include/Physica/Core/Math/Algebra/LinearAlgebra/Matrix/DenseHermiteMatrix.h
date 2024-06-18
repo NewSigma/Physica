@@ -50,7 +50,7 @@ namespace Physica::Core {
         using This = DenseHermiteMatrix<T, Order, MaxOrder>;
         using Base = RValueMatrix<This>;
         using Storage = Internal::HalfDenseMatrixStorage<T, Order, MaxOrder>;
-        using VectorBase = typename Storage::Base;
+        using VectorBase = typename Storage::ArrayType;
     public:
         using typename Base::ScalarType;
         using RealType = typename ScalarType::RealType;

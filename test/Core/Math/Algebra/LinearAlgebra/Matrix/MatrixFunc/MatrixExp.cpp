@@ -31,7 +31,7 @@ int main() {
     const auto mat = MatrixType::random_uniform(16, gen);
     const VectorType v = VectorType::random_uniform(16, gen);
 
-    const auto solver = SymmEigenSolver<MatrixType>(mat, true);
+    const auto solver = SymmEigenSolver<ScalarType>(mat, true);
     const VectorType eigenvalues = exp(solver.getEigenvalues());
     const DenseMatrix<ScalarType> eigenvectors = toRealMatrix(solver.getEigenvectors());
     VectorType v1 = eigenvectors.transpose() * v;

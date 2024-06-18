@@ -26,9 +26,9 @@ bool eigenTest(const MatrixType& mat, double precision) {
     using ScalarType = typename MatrixType::ScalarType;
     using RealType = typename ScalarType::RealType;
     using ComplexVector = Vector<ComplexScalar<RealType>, MatrixType::RowAtCompile, MatrixType::MaxRowAtCompile>;
-    using EigenvectorMatrix = typename SymmEigenSolver<MatrixType>::EigenvectorMatrix;
+    using EigenvectorMatrix = typename SymmEigenSolver<ScalarType>::EigenvectorMatrix;
 
-    SymmEigenSolver<MatrixType> solver = SymmEigenSolver<MatrixType>(mat, true);
+    auto solver = SymmEigenSolver<ScalarType>(mat, true);
     solver.sort();
 
     const size_t order = mat.getRow();

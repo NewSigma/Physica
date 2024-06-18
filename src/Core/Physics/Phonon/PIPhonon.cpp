@@ -78,11 +78,12 @@ namespace Physica::Core {
 
         DenseMatrix<ComplexType> buffer(getUnitCellDOF(), getUnitCellDOF());
         DenseMatrix<ComplexType> base(getUnitCellDOF(), getUnitCellDOF());
-        EigenSolver<DenseMatrix<ComplexType>> solver(buffer.getRow());
+        EigenSolver<ComplexType> solver(buffer.getRow());
         for (size_t qPointId = 0; qPointId < kSpaceForceCorr.getLength(); ++qPointId) {
             const bool isGammaPoint = qPointId == 0;
             if (isGammaPoint) {
-                const Schur<DenseMatrix<ScalarType>> schur(toRealMatrix(kSpaceMomentumCorr[qPointId]), true);
+                const DenseSymmMatrix<ScalarType> m = toRealMatrix(kSpaceMomentumCorr[qPointId]);
+                const Schur<ScalarType> schur(m, true);
                 for (size_t i = 0; i < base.getColumn(); ++i) {
                     const ScalarType eigenvalue = schur.getMatrixT().diag().calc(i);
                     if (eigenvalue > ScalarType(ConsiderAsZeroThrehold))
@@ -92,7 +93,7 @@ namespace Physica::Core {
                 }
             }
             else {
-                const Schur<DenseMatrix<ComplexType>> schur(kSpaceMomentumCorr[qPointId], true);
+                const Schur<ComplexType> schur(kSpaceMomentumCorr[qPointId], true);
                 for (size_t i = 0; i < base.getColumn(); ++i) {
                     const ScalarType eigenvalue = schur.getMatrixT().diag().calc(i).getReal();
                     if (eigenvalue > ScalarType(ConsiderAsZeroThrehold))

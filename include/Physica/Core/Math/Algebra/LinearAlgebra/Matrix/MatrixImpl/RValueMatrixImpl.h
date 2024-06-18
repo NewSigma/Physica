@@ -25,11 +25,12 @@ namespace Physica::Core {
     template<class Derived>
     template<class OtherDerived>
     void RValueMatrix<Derived>::assignTo(LValueMatrix<OtherDerived>& target) const {
+        using OtherScalar = typename OtherDerived::ScalarType;
         constexpr size_t OtherRow = OtherDerived::RowAtCompile;
         constexpr size_t OtherColumn = OtherDerived::ColumnAtCompile;
-        static_assert(RowAtCompile == OtherRow || RowAtCompile == Dynamic || OtherRow == Dynamic, "Row mismatch between two matrix");
-        static_assert(ColumnAtCompile == OtherColumn || ColumnAtCompile == Dynamic || OtherColumn == Dynamic, "Column mismatch between two matrix");
-        using OtherScalar = typename OtherDerived::ScalarType;
+        static_assert(RowAtCompile == OtherRow || RowAtCompile == Dynamic || OtherRow == Dynamic, "[Error]: Row mismatch between two matrix");
+        static_assert(ColumnAtCompile == OtherColumn || ColumnAtCompile == Dynamic || OtherColumn == Dynamic, "[Error]: Column mismatch between two matrix");
+        static_assert(!(isComplex && !OtherDerived::isComplex), "[Error]: Cannot assign a complex matrix to real matrix");
         assert(getRow() == target.getRow());
         assert(getColumn() == target.getColumn());
         const size_t maxMajor = target.getMaxMajor();

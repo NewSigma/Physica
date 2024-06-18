@@ -41,7 +41,6 @@ namespace Physica::Core {
         using WorkingMatrix = DenseMatrix<ScalarType>;
         using VectorType = Vector<ScalarType>;
         using LinearSolverType = IterateSolver<ScalarType>;
-        using EigenSolverType = EigenSolver<DenseMatrix<ScalarType>>;
 
         constexpr static bool isComplex = ScalarType::isComplex;
         constexpr static size_t MaxIterationPerEigen = 4;
@@ -56,7 +55,7 @@ namespace Physica::Core {
         constexpr static double InvalidGoal = std::numeric_limits<ScalarType>::max();
     private:
         LinearSolverType linearSolver;
-        EigenSolverType eigenSolver;
+        EigenSolver<ScalarType> eigenSolver;
         DenseMatrix<ScalarType> searchSpace;
         DenseMatrix<ScalarType> dotSpace;
         DenseMatrix<ScalarType> searchSpaceProj;

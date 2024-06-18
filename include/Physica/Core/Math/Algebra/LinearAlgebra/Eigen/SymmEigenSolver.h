@@ -29,22 +29,17 @@ namespace Physica::Core {
      * References:
      * [1] Golub, GeneH. Matrix computations = 矩阵计算 / 4th edition[M]. 人民邮电出版社, 2014.
      */
-    template<class MatrixType>
+    template<class ScalarType, size_t Order = Dynamic>
     class SymmEigenSolver : public Decouplable {
-        using ScalarType = typename MatrixType::ScalarType;
+        static_assert(is_scalar<ScalarType>::value, "[Error]: Invalid ScalarType");
+        using This = SymmEigenSolver<ScalarType, Order>;
         using RealType = typename ScalarType::RealType;
         constexpr static bool isComplex = ScalarType::isComplex;
-        static_assert(!isComplex, "Complex matrix is not supported");
+        static_assert(!isComplex, "[Error]: Complex matrix is not supported");
     public:
-        using EigenvalueVector = Vector<RealType, MatrixType::RowAtCompile, MatrixType::MaxRowAtCompile>;
-        using EigenvectorMatrix = DenseMatrix<ComplexScalar<RealType>,
-                                              MatrixOption::Column | MatrixOption::Vector,
-                                              MatrixType::RowAtCompile,
-                                              MatrixType::RowAtCompile>;
-        using WorkingMatrix = DenseMatrix<ScalarType,
-                                          MatrixOption::Column | MatrixOption::Vector,
-                                          MatrixType::RowAtCompile,
-                                          MatrixType::RowAtCompile>; //Optimize: Use tridiagonal matrix is better
+        using EigenvalueVector = Vector<RealType, Order>;
+        using EigenvectorMatrix = DenseMatrix<ComplexScalar<RealType>, MatrixOption::Column | MatrixOption::Vector, Order, Order>;
+        using WorkingMatrix = DenseMatrix<ScalarType, MatrixOption::Column | MatrixOption::Vector, Order, Order>; //Optimize: Use tridiagonal matrix is better
     private:
         EigenvalueVector eigenvalues;
         EigenvectorMatrix eigenvectors;
@@ -52,18 +47,18 @@ namespace Physica::Core {
     public:
         SymmEigenSolver();
         SymmEigenSolver(size_t size);
-        template<class OtherMatrix>
-        SymmEigenSolver(const RValueMatrix<OtherMatrix>& source, bool computeEigenvectors_);
-        SymmEigenSolver(const SymmEigenSolver&) = default;
-        SymmEigenSolver(SymmEigenSolver&& solver) noexcept = default;
+        template<class MatrixType>
+        SymmEigenSolver(const RValueMatrix<MatrixType>& source, bool computeEigenvectors_);
+        SymmEigenSolver(const This&) = default;
+        SymmEigenSolver(This&& solver) noexcept = default;
         ~SymmEigenSolver() = default;
         /* Operators */
-        SymmEigenSolver& operator=(SymmEigenSolver solver) noexcept;
+        This& operator=(This obj) noexcept { swap(obj); return *this; }
         /* Operations */
-        template<class OtherMatrix>
-        void compute(const RValueMatrix<OtherMatrix>& source, bool computeEigenvectors_);
+        template<class MatrixType>
+        void compute(const RValueMatrix<MatrixType>& source, bool computeEigenvectors_);
         void sort();
-        void swap(SymmEigenSolver& __restrict solver) noexcept;
+        void swap(This& __restrict solver) noexcept;
         /* Getters */
         [[nodiscard]] const EigenvalueVector& getEigenvalues() const noexcept { return eigenvalues; }
         [[nodiscard]] inline EigenvectorMatrix getEigenvectors() const noexcept;
@@ -71,45 +66,38 @@ namespace Physica::Core {
         void stepQR(WorkingMatrix& working, size_t lower, size_t sub_order);
     };
 
-    template<class MatrixType>
-    SymmEigenSolver<MatrixType>::SymmEigenSolver() : eigenvalues(), eigenvectors(), computeEigenvectors(false) {}
+    template<class ScalarType, size_t Order>
+    SymmEigenSolver<ScalarType, Order>::SymmEigenSolver() : eigenvalues(), eigenvectors(), computeEigenvectors(false) {}
 
-    template<class MatrixType>
-    SymmEigenSolver<MatrixType>::SymmEigenSolver(size_t size)
+    template<class ScalarType, size_t Order>
+    SymmEigenSolver<ScalarType, Order>::SymmEigenSolver(size_t size)
             : eigenvalues(size)
-            , eigenvectors(size, size) {}
-
-    template<class MatrixType>
-    template<class OtherMatrix>
-    SymmEigenSolver<MatrixType>::SymmEigenSolver(const RValueMatrix<OtherMatrix>& source, bool computeEigenvectors_)
-            : eigenvalues(source.getRow())
-            , eigenvectors(source.getRow(), source.getRow())
-            , computeEigenvectors(computeEigenvectors_) {
-        compute(source, computeEigenvectors);
+            , eigenvectors(size, size) {
+        assert((Order == Dynamic || Order == size) && "[Error]: size is not consistent");
     }
 
+    template<class ScalarType, size_t Order>
     template<class MatrixType>
-    SymmEigenSolver<MatrixType>& SymmEigenSolver<MatrixType>::operator=(SymmEigenSolver<MatrixType> solver) noexcept {
-        swap(solver);
-        return *this;
+    SymmEigenSolver<ScalarType, Order>::SymmEigenSolver(const RValueMatrix<MatrixType>& source, bool computeEigenvectors_)
+            : SymmEigenSolver(source.getRow()) {
+        compute(source, computeEigenvectors_);
     }
 
+    template<class ScalarType, size_t Order>
     template<class MatrixType>
-    template<class OtherMatrix>
-    void SymmEigenSolver<MatrixType>::compute(const RValueMatrix<OtherMatrix>& source, bool computeEigenvectors_) {
-        assert(source.getRow() == source.getColumn());
+    void SymmEigenSolver<ScalarType, Order>::compute(const RValueMatrix<MatrixType>& source, bool computeEigenvectors_) {
+        assert(source.getRow() == source.getColumn() && "[Error]: Square matrix is required");
         assert(source.getRow() == eigenvalues.getLength());
         computeEigenvectors = computeEigenvectors_;
-        
-        typename MatrixType::RealMatrix buffer = abs_elem(source);
-        const RealType factor = buffer.max();
+
+        const RealType factor = abs_elem(source).max();
         if (factor < std::numeric_limits<ScalarType>::min()) {
             eigenvalues = RealType(0);
             return;
         }
         const RealType inv_factor = reciprocal(factor);
-        const MatrixType normalized = source * inv_factor; //Referenced from eigen, to avoid under/overflow in householder
-        auto tridiagonal = Tridiagonalization<MatrixType>(normalized);
+        const WorkingMatrix normalized = source * inv_factor; //Referenced from eigen, to avoid under/overflow in householder
+        auto tridiagonal = Tridiagonalization<ScalarType, Order>(normalized);
         WorkingMatrix working = tridiagonal.getMatrixT();
         if (computeEigenvectors)
             eigenvectors = tridiagonal.getMatrixQ();
@@ -137,8 +125,8 @@ namespace Physica::Core {
             eigenvalues[i] = working(i, i) * factor;
     }
 
-    template<class MatrixType>
-    void SymmEigenSolver<MatrixType>::sort() {
+    template<class ScalarType, size_t Order>
+    void SymmEigenSolver<ScalarType, Order>::sort() {
         const size_t order = eigenvalues.getLength();
         for (size_t i = 0; i < order - 1; ++i) {
             size_t index_min = i;
@@ -157,24 +145,24 @@ namespace Physica::Core {
         }
     }
 
-    template<class MatrixType>
-    void SymmEigenSolver<MatrixType>::swap(SymmEigenSolver<MatrixType>& __restrict solver) noexcept {
+    template<class ScalarType, size_t Order>
+    void SymmEigenSolver<ScalarType, Order>::swap(This& __restrict solver) noexcept {
         assert(this != &solver && "[Error]: Self swap is likely a bug");
         eigenvalues.swap(solver.eigenvalues);
         std::swap(eigenvectors, solver.eigenvectors);
         std::swap(computeEigenvectors, solver.computeEigenvectors);
     }
 
-    template<class MatrixType>
-    inline typename SymmEigenSolver<MatrixType>::EigenvectorMatrix SymmEigenSolver<MatrixType>::getEigenvectors() const noexcept {
+    template<class ScalarType, size_t Order>
+    inline typename SymmEigenSolver<ScalarType, Order>::EigenvectorMatrix SymmEigenSolver<ScalarType, Order>::getEigenvectors() const noexcept {
         assert(computeEigenvectors && "[Error]: Eigenvectors are not ready");
         return eigenvectors;
     }
     /**
      * Use wilkinson shift
      */
-    template<class MatrixType>
-    void SymmEigenSolver<MatrixType>::stepQR(WorkingMatrix& working, size_t lower, size_t sub_order) {
+    template<class ScalarType, size_t Order>
+    void SymmEigenSolver<ScalarType, Order>::stepQR(WorkingMatrix& working, size_t lower, size_t sub_order) {
         auto subBlock = working.block(lower, sub_order, lower, sub_order);
         const RealType factor = (subBlock(sub_order - 2, sub_order - 2).getReal() - subBlock(sub_order - 1, sub_order - 1).getReal()) * 0.5;
         const RealType factor2 = square(subBlock(sub_order - 1, sub_order - 2));
@@ -199,10 +187,12 @@ namespace Physica::Core {
                 applyGivens(eigenvectors, givens_vec, lower + i, lower + i + 1);
         }
     }
+}
 
-    template<class MatrixType>
-    inline void swap(Physica::Core::SymmEigenSolver<MatrixType>& __restrict solver1,
-                     Physica::Core::SymmEigenSolver<MatrixType>& __restrict solver2) noexcept {
+namespace std {
+    template<class ScalarType, size_t Order>
+    inline void swap(Physica::Core::SymmEigenSolver<ScalarType, Order>& __restrict solver1,
+                     Physica::Core::SymmEigenSolver<ScalarType, Order>& __restrict solver2) noexcept {
         solver1.swap(solver2);
     }
 }

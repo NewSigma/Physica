@@ -61,7 +61,7 @@ namespace Physica::Core::Physics {
         Utils::Array<BaseSetType> baseSet;
         ScalarType selfConsistentEnergy;
         MatrixType wave;
-        EigenSolver<MatrixType> eigenSolver;
+        EigenSolver<ScalarType> eigenSolver;
         size_t iteration;
     public:
         RHFSolver(const Molecular<ScalarType>& m, const ElectronConfig& electronConfig_, size_t baseSetSize);

@@ -33,9 +33,10 @@ bool vectorNearZero(const LValueVector<VectorType>& v, double precision) {
 
 template<class MatrixType>
 bool eigenTest(const MatrixType& mat, double precision) {
-    EigenSolver<MatrixType> solver = EigenSolver<MatrixType>(mat, true);
-    using ComplexVector = typename EigenSolver<MatrixType>::EigenvalueVector;
-    using ComplexMatrix = typename EigenSolver<MatrixType>::EigenvectorMatrix;
+    using ScalarType = typename MatrixType::ScalarType;
+    auto solver = EigenSolver<ScalarType>(mat, true);
+    using ComplexVector = typename EigenSolver<ScalarType>::EigenvalueVector;
+    using ComplexMatrix = typename EigenSolver<ScalarType>::EigenvectorMatrix;
     const size_t order = mat.getRow();
     auto eigenvectors = solver.getEigenvectors();
     for (size_t i = 0; i < order; ++i) {
@@ -58,7 +59,8 @@ bool eigenTest(const MatrixType& mat, double precision) {
 
 template<class MatrixType, bool IsHermite>
 bool reconstructTest(const MatrixType& mat, double precision) {
-    EigenSolver<MatrixType> solver = EigenSolver<MatrixType>(mat, true);
+    using ScalarType = typename MatrixType::ScalarType;
+    auto solver = EigenSolver<ScalarType>(mat, true);
     const MatrixType result = IsHermite ? solver.reconstruct_hermite() : solver.reconstruct();
     if (!matrixNear(result, mat, precision))
         return false;

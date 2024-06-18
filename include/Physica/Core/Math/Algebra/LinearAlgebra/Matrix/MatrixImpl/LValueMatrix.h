@@ -41,6 +41,7 @@ namespace Physica::Core {
         using typename Base::ScalarType;
         using Base::RowAtCompile;
         using Base::ColumnAtCompile;
+        using Base::isComplex;
         using Base::isColumnMatrix;
         using Base::isRowMatrix;
         using RowVector = LMatrixBlock<Derived, 1, Dynamic>;
