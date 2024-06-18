@@ -70,17 +70,17 @@ namespace Physica::Core {
                 b += ScalarType(2);
                 d = an * d + b;
                 ScalarType copy_d(d);
-                if (copy_d.toAbs() < floatMin)
+                if (abs(copy_d) < floatMin)
                     d = floatMin;
 
                 c = an / c + b;
                 ScalarType copy_c(c);
-                if (copy_c.toAbs() < floatMin)
+                if (abs(copy_c) < floatMin)
                     c = floatMin;
                 d = reciprocal(d);
                 temp = c * d;
                 h *= temp; 
-            } while (ScalarType(temp - ScalarType(1)).toAbs() >= epsilon);
+            } while (abs(temp - ScalarType(1)) >= epsilon);
             return h * exp(ScalarType(-x + a * ln(x) - lnGamma(a)));
         }
     }

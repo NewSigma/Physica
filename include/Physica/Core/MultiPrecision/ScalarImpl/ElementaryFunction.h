@@ -23,112 +23,112 @@
  */
 namespace Physica::Core {
     template<ScalarOption Option>
-    __host__ __device__ inline Scalar<Option> abs(const Scalar<Option>& s);
+    __host__ __device__ inline Scalar<Option> abs(const Scalar<Option>& s) noexcept;
 
     template<ScalarOption Option>
-    __host__ __device__ inline Scalar<Option> relu(const Scalar<Option>& s);
+    __host__ __device__ inline Scalar<Option> relu(const Scalar<Option>& s) noexcept;
 
     template<ScalarOption Option>
-    __host__ __device__ inline Scalar<Option> square(const Scalar<Option>& s);
+    __host__ __device__ inline Scalar<Option> square(const Scalar<Option>& s) noexcept;
 
     template<ScalarOption Option>
-    __host__ __device__ inline Scalar<Option> reciprocal(const Scalar<Option>& s);
+    __host__ __device__ inline Scalar<Option> reciprocal(const Scalar<Option>& s) noexcept;
 
     template<ScalarOption Option>
-    __host__ __device__ inline Scalar<Option> sqrt(const Scalar<Option>& s);
+    __host__ __device__ inline Scalar<Option> sqrt(const Scalar<Option>& s) noexcept;
 
     template<ScalarOption Option>
-    __host__ __device__ inline Scalar<Option> cbrt(const Scalar<Option>& s);
+    __host__ __device__ inline Scalar<Option> cbrt(const Scalar<Option>& s) noexcept;
 
     template<ScalarOption Option>
-    __host__ __device__ inline Scalar<Option> ln(const Scalar<Option>& s);
+    __host__ __device__ inline Scalar<Option> ln(const Scalar<Option>& s) noexcept;
 
     template<ScalarOption Option>
-    __host__ __device__ inline Scalar<Option> log(const Scalar<Option>& s, const Scalar<Option>& a);
+    __host__ __device__ inline Scalar<Option> log(const Scalar<Option>& s, const Scalar<Option>& a) noexcept;
 
     template<ScalarOption Option>
-    __host__ __device__ inline Scalar<Option> exp(const Scalar<Option>& s);
+    __host__ __device__ inline Scalar<Option> exp(const Scalar<Option>& s) noexcept;
 
     template<ScalarOption Option>
-    Scalar<Option> pow(const Scalar<Option>& s, const Scalar<Option>& n);
+    Scalar<Option> pow(const Scalar<Option>& s, const Scalar<Option>& n) noexcept;
 
     template<ScalarOption Option>
-    Scalar<Option> factorial(const Scalar<Option>& s);
+    Scalar<Option> factorial(const Scalar<Option>& s) noexcept;
 
     template<ScalarOption Option>
-    __host__ __device__ inline Scalar<Option> cos(const Scalar<Option>& s);
+    __host__ __device__ inline Scalar<Option> cos(const Scalar<Option>& s) noexcept;
 
     template<ScalarOption Option>
-    __host__ __device__ inline Scalar<Option> sin(const Scalar<Option>& s);
+    __host__ __device__ inline Scalar<Option> sin(const Scalar<Option>& s) noexcept;
 
     template<ScalarOption Option>
-    __host__ __device__ inline void sincos(Scalar<Option> s, Scalar<Option>& sin_result, Scalar<Option>& cos_result);
+    __host__ __device__ inline void sincos(Scalar<Option> s, Scalar<Option>& sin_result, Scalar<Option>& cos_result) noexcept;
 
     template<ScalarOption Option>
-    __host__ __device__ inline Scalar<Option> tan(const Scalar<Option>& s);
+    __host__ __device__ inline Scalar<Option> tan(const Scalar<Option>& s) noexcept;
 
     template<ScalarOption Option>
-    Scalar<Option> sec(const Scalar<Option>& s);
+    Scalar<Option> sec(const Scalar<Option>& s) noexcept;
 
     template<ScalarOption Option>
-    Scalar<Option> csc(const Scalar<Option>& s);
+    Scalar<Option> csc(const Scalar<Option>& s) noexcept;
 
     template<ScalarOption Option>
-    Scalar<Option> cot(const Scalar<Option>& s);
+    Scalar<Option> cot(const Scalar<Option>& s) noexcept;
     //!Domain of definition: [0, Pi]
     template<ScalarOption Option>
-    Scalar<Option> arccos(const Scalar<Option>& s);
+    Scalar<Option> arccos(const Scalar<Option>& s) noexcept;
     //!Domain of definition: [-Pi / 2, Pi / 2]
     template<ScalarOption Option>
-    Scalar<Option> arcsin(const Scalar<Option>& s);
+    Scalar<Option> arcsin(const Scalar<Option>& s) noexcept;
     //!Domain of definition: [-Pi / 2, Pi / 2]
     template<ScalarOption Option>
-    Scalar<Option> arctan(const Scalar<Option>& s);
+    Scalar<Option> arctan(const Scalar<Option>& s) noexcept;
 
     template<ScalarOption Option>
-    Scalar<Option> arcsec(const Scalar<Option>& s);
+    Scalar<Option> arcsec(const Scalar<Option>& s) noexcept;
 
     template<ScalarOption Option>
-    Scalar<Option> arccsc(const Scalar<Option>& s);
+    Scalar<Option> arccsc(const Scalar<Option>& s) noexcept;
 
     template<ScalarOption Option>
-    Scalar<Option> arccot(const Scalar<Option>& s);
+    Scalar<Option> arccot(const Scalar<Option>& s) noexcept;
 
     template<ScalarOption Option>
-    Scalar<Option> cosh(const Scalar<Option>& s);
+    Scalar<Option> cosh(const Scalar<Option>& s) noexcept;
 
     template<ScalarOption Option>
-    Scalar<Option> sinh(const Scalar<Option>& s);
+    Scalar<Option> sinh(const Scalar<Option>& s) noexcept;
 
     template<ScalarOption Option>
-    Scalar<Option> tanh(const Scalar<Option>& s);
+    Scalar<Option> tanh(const Scalar<Option>& s) noexcept;
 
     template<ScalarOption Option>
-    Scalar<Option> sech(const Scalar<Option>& s);
+    Scalar<Option> sech(const Scalar<Option>& s) noexcept;
 
     template<ScalarOption Option>
-    Scalar<Option> csch(const Scalar<Option>& s);
+    Scalar<Option> csch(const Scalar<Option>& s) noexcept;
 
     template<ScalarOption Option>
-    Scalar<Option> coth(const Scalar<Option>& s);
+    Scalar<Option> coth(const Scalar<Option>& s) noexcept;
 
     template<ScalarOption Option>
-    Scalar<Option> arccosh(const Scalar<Option>& s);
+    Scalar<Option> arccosh(const Scalar<Option>& s) noexcept;
 
     template<ScalarOption Option>
-    Scalar<Option> arcsinh(const Scalar<Option>& s);
+    Scalar<Option> arcsinh(const Scalar<Option>& s) noexcept;
 
     template<ScalarOption Option>
-    Scalar<Option> arctanh(const Scalar<Option>& s);
+    Scalar<Option> arctanh(const Scalar<Option>& s) noexcept;
 
     template<ScalarOption Option>
-    Scalar<Option> arcsech(const Scalar<Option>& s);
+    Scalar<Option> arcsech(const Scalar<Option>& s) noexcept;
 
     template<ScalarOption Option>
-    Scalar<Option> arccsch(const Scalar<Option>& s);
+    Scalar<Option> arccsch(const Scalar<Option>& s) noexcept;
 
     template<ScalarOption Option>
-    Scalar<Option> arccoth(const Scalar<Option>& s);
+    Scalar<Option> arccoth(const Scalar<Option>& s) noexcept;
 }
 
 #include "FunctionImpl/ElementaryImpl.h"

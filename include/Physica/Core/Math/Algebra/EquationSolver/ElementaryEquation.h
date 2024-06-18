@@ -52,7 +52,7 @@ namespace Physica::Core {
         ScalarType result = (x1 + x2) * half;
         ScalarType y_result(1);
 
-        ScalarType error = ScalarType(x1 - x2).toAbs() * half;
+        ScalarType error = abs(x1 - x2) * half;
         ScalarType x_left(x1);
         ScalarType x_right(x2);
         ScalarType y_left(y1);

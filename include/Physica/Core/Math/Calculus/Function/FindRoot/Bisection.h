@@ -32,8 +32,7 @@ namespace Physica::Core {
 
         T result = (x1 + x2) / T(2);
 
-        T error = (x1 - x2) / T(2);
-        error.toAbs();
+        T error = abs((x1 - x2) * T(0.5));
         T x_left(x1);
         T x_right(x2);
         T y_left(y1);

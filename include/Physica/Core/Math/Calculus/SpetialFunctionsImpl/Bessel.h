@@ -29,8 +29,7 @@ namespace Physica::Core {
     template<ScalarOption Option>
     Scalar<Option> besselJ0(const Scalar<Option>& x) {
         using T = Scalar<Option>;
-        T ax = x;
-        ax.toAbs();
+        T ax = abs(x);
         T y, ans1, ans2;
         if (ax < T(8)) {
             y = square(ax);
@@ -56,8 +55,7 @@ namespace Physica::Core {
     template<ScalarOption Option>
     Scalar<Option> besselJ1(const Scalar<Option>& x) {
         using T = Scalar<Option>;
-        T ax = x;
-        ax.toAbs();
+        T ax = abs(x);
         T y, ans1, ans2;
         if (ax < T(8)) {
             y = square(ax);
@@ -88,7 +86,7 @@ namespace Physica::Core {
         constexpr int acc = 160;
 
         assert(n > 1);
-        const T ax = T(x).toAbs();
+        const T ax = abs(x);
         const T square_ax = square(ax);
         if (square_ax < T(8 * std::numeric_limits<typename T::TrivialType>::min()))
             return T(0);

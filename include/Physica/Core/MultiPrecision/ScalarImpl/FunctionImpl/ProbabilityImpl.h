@@ -20,7 +20,7 @@
 
 namespace Physica::Core {
     template<ScalarOption Option>
-    Scalar<Option> floor(const Scalar<Option>& s) {
+    Scalar<Option> floor(const Scalar<Option>& s) noexcept {
         if constexpr (Option == Float)
             return Scalar<Option>(::floorf(s.getTrivial()));
         else
@@ -28,10 +28,10 @@ namespace Physica::Core {
     }
 
     template<>
-    Scalar<MultiPrecision> floor(const Scalar<MultiPrecision>& s);
+    Scalar<MultiPrecision> floor(const Scalar<MultiPrecision>& s) noexcept;
 
     template<ScalarOption Option>
-    __host__ __device__ inline Scalar<Option> ceil(const Scalar<Option>& s) {
+    __host__ __device__ inline Scalar<Option> ceil(const Scalar<Option>& s) noexcept {
         if constexpr (Option == Float)
             return Scalar<Option>(::ceilf(s.getTrivial()));
         else

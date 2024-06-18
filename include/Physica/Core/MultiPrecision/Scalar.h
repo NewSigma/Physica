@@ -34,10 +34,10 @@ namespace Physica::Core {
     template<class AnyScalar> class ComplexScalar;
     template<class RandomGenerator, typename RandomGenerator::result_type FixedSeed> class RandomPool;
     template<class ScalarType, class RandomPoolType> class GaussRandomPool;
-    template<ScalarOption Option> __host__ __device__ inline Scalar<Option> abs(const Scalar<Option>& s);
-    template<ScalarOption Option> __host__ __device__ inline Scalar<Option> square(const Scalar<Option>& s);
-    template<ScalarOption Option> __host__ __device__ inline Scalar<Option> sqrt(const Scalar<Option>& s);
-    template<ScalarOption Option> __host__ __device__ inline Scalar<Option> ln(const Scalar<Option>& s);
+    template<ScalarOption Option> __host__ __device__ inline Scalar<Option> abs(const Scalar<Option>& s) noexcept;
+    template<ScalarOption Option> __host__ __device__ inline Scalar<Option> square(const Scalar<Option>& s) noexcept;
+    template<ScalarOption Option> __host__ __device__ inline Scalar<Option> sqrt(const Scalar<Option>& s) noexcept;
+    template<ScalarOption Option> __host__ __device__ inline Scalar<Option> ln(const Scalar<Option>& s) noexcept;
 
     namespace Internal {
         template<ScalarOption option_>
@@ -149,9 +149,9 @@ namespace Physica::Core {
         inline void cutZero();
         /* Friends */
         friend class Integer;
-        template<ScalarOption Option> __host__ __device__ friend Scalar<Option> square(const Scalar<Option>& s);
-        template<ScalarOption Option> __host__ __device__ friend Scalar<Option> sqrt(const Scalar<Option>& s);
-        template<ScalarOption Option> friend Scalar<Option> ln(const Scalar<Option>& s);
+        template<ScalarOption Option> __host__ __device__ friend Scalar<Option> square(const Scalar<Option>& s) noexcept;
+        template<ScalarOption Option> __host__ __device__ friend Scalar<Option> sqrt(const Scalar<Option>& s) noexcept;
+        template<ScalarOption Option> friend Scalar<Option> ln(const Scalar<Option>& s) noexcept;
         /* Static members */
         inline static Scalar<MultiPrecision> add(const Scalar& s1, const Scalar& s2);
         inline static Scalar<MultiPrecision> sub(const Scalar& s1, const Scalar& s2);

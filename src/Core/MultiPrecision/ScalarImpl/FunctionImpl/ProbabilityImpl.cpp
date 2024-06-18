@@ -19,7 +19,7 @@
 #include "Physica/Core/MultiPrecision/Scalar.h"
 
 namespace Physica::Core {
-    Scalar<MultiPrecision> floor(const Scalar<MultiPrecision>& s) {
+    Scalar<MultiPrecision> floor(const Scalar<MultiPrecision>& s) noexcept {
         if(s.isInteger())
             return Scalar(s);
         const auto size = s.getSize();

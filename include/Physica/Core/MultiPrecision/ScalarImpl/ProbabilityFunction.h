@@ -20,10 +20,10 @@
 
 namespace Physica::Core {
     template<ScalarOption Option>
-    __host__ __device__ inline Scalar<Option> floor(const Scalar<Option>& s);
+    __host__ __device__ inline Scalar<Option> floor(const Scalar<Option>& s) noexcept;
     
     template<ScalarOption Option>
-    __host__ __device__ inline Scalar<Option> ceil(const Scalar<Option>& s);
+    __host__ __device__ inline Scalar<Option> ceil(const Scalar<Option>& s) noexcept;
 
     template<ScalarOption Option>
     Scalar<Option> arrangement(const Scalar<Option>& s1, const Scalar<Option>& s2);

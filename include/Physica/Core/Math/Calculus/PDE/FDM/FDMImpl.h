@@ -57,7 +57,7 @@ namespace Physica::Core {
                         copy = std::move(temp);
                         temp = (data(j, i - 1) + data(j, i + 1)
                                 + data(j - 1, i) + data(j + 1, i)) >> 2;
-                        keep |= (copy - temp).toAbs() > limit;
+                        keep |= abs(copy - temp) > limit;
                     }
                 }
             }

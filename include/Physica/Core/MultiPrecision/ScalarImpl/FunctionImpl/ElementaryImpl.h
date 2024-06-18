@@ -25,7 +25,7 @@
  */
 namespace Physica::Core {
     template<ScalarOption Option>
-    __host__ __device__ inline Scalar<Option> abs(const Scalar<Option>& s) {
+    __host__ __device__ inline Scalar<Option> abs(const Scalar<Option>& s) noexcept {
         if constexpr (Option == Float)
             return Scalar<Option>(::fabsf(s.getTrivial()));
         else
@@ -33,15 +33,15 @@ namespace Physica::Core {
     }
 
     template<>
-    Scalar<MultiPrecision> abs(const Scalar<MultiPrecision>& s);
+    Scalar<MultiPrecision> abs(const Scalar<MultiPrecision>& s) noexcept;
 
     template<ScalarOption Option>
-    __host__ __device__ inline Scalar<Option> relu(const Scalar<Option>& s) {
+    __host__ __device__ inline Scalar<Option> relu(const Scalar<Option>& s) noexcept {
         return s.isPositive() ? s : Scalar<Option>(0);
     }
 
     template<ScalarOption Option>
-    __host__ __device__ inline Scalar<Option> square(const Scalar<Option>& s) {
+    __host__ __device__ inline Scalar<Option> square(const Scalar<Option>& s) noexcept {
         return s * s;
     }
     /**
@@ -50,15 +50,15 @@ namespace Physica::Core {
      * Reference: GMP Doc BaseCase Multiplication
      */
     template<>
-    Scalar<MultiPrecision> square(const Scalar<MultiPrecision>& s);
+    Scalar<MultiPrecision> square(const Scalar<MultiPrecision>& s) noexcept;
 
     template<ScalarOption Option>
-    __host__ __device__ inline Scalar<Option> reciprocal(const Scalar<Option>& s) {
+    __host__ __device__ inline Scalar<Option> reciprocal(const Scalar<Option>& s) noexcept {
         return Scalar<Option>(1) / s;
     }
 
     template<ScalarOption Option>
-    __host__ __device__ inline Scalar<Option> sqrt(const Scalar<Option>& s) {
+    __host__ __device__ inline Scalar<Option> sqrt(const Scalar<Option>& s) noexcept {
         if constexpr (Option == Float)
             return Scalar<Option>(::sqrtf(s.getTrivial()));
         else
@@ -66,10 +66,10 @@ namespace Physica::Core {
     }
 
     template<>
-    Scalar<MultiPrecision> sqrt(const Scalar<MultiPrecision>& s);
+    Scalar<MultiPrecision> sqrt(const Scalar<MultiPrecision>& s) noexcept;
 
     template<ScalarOption Option>
-    __host__ __device__ inline Scalar<Option> cbrt(const Scalar<Option>& s) {
+    __host__ __device__ inline Scalar<Option> cbrt(const Scalar<Option>& s) noexcept {
         if constexpr (Option == Float)
             return Scalar<Option>(::cbrtf(s.getTrivial()));
         else
@@ -77,7 +77,7 @@ namespace Physica::Core {
     }
 
     template<ScalarOption Option>
-    __host__ __device__ inline Scalar<Option> ln(const Scalar<Option>& s) {
+    __host__ __device__ inline Scalar<Option> ln(const Scalar<Option>& s) noexcept {
         if constexpr (Option == Float)
             return Scalar<Option>(::logf(s.getTrivial()));
         else
@@ -85,17 +85,17 @@ namespace Physica::Core {
     }
 
     template<>
-    Scalar<MultiPrecision> ln(const Scalar<MultiPrecision>& s);
+    Scalar<MultiPrecision> ln(const Scalar<MultiPrecision>& s) noexcept;
     /**
      * \return log_a n
      */
     template<ScalarOption Option>
-    __host__ __device__ inline Scalar<Option> log(const Scalar<Option>& s, const Scalar<Option>& a) {
+    __host__ __device__ inline Scalar<Option> log(const Scalar<Option>& s, const Scalar<Option>& a) noexcept {
         return ln(s) / ln(a);
     }
 
     template<ScalarOption Option>
-    __host__ __device__ inline Scalar<Option> exp(const Scalar<Option>& s) {
+    __host__ __device__ inline Scalar<Option> exp(const Scalar<Option>& s) noexcept {
         if constexpr (Option == Float)
             return Scalar<Option>(::expf(s.getTrivial()));
         else
@@ -103,10 +103,10 @@ namespace Physica::Core {
     }
 
     template<>
-    Scalar<MultiPrecision> exp(const Scalar<MultiPrecision>& s);
+    Scalar<MultiPrecision> exp(const Scalar<MultiPrecision>& s) noexcept;
 
     template<ScalarOption Option>
-    Scalar<Option> pow(const Scalar<Option>& s, const Scalar<Option>& n) {
+    Scalar<Option> pow(const Scalar<Option>& s, const Scalar<Option>& n) noexcept {
         if constexpr (Option == MultiPrecision)
             return exp(n * ln(s));
         else if constexpr (Option == Float)
@@ -121,7 +121,7 @@ namespace Physica::Core {
      * Fix: Easily overflow.
      */
     template<ScalarOption Option>
-    Scalar<Option> factorial(const Scalar<Option>& s) {
+    Scalar<Option> factorial(const Scalar<Option>& s) noexcept {
         if constexpr (Option == MultiPrecision) {
             //Optimize: Unnecessary copy during floor() if s is a integer itself.
             const Scalar<MultiPrecision> integer = floor(s);
@@ -146,10 +146,10 @@ namespace Physica::Core {
     }
 
     template<>
-    Scalar<MultiPrecision> factorial(const Scalar<MultiPrecision>& s);
+    Scalar<MultiPrecision> factorial(const Scalar<MultiPrecision>& s) noexcept;
 
     template<ScalarOption Option>
-    __host__ __device__ inline Scalar<Option> cos(const Scalar<Option>& s) {
+    __host__ __device__ inline Scalar<Option> cos(const Scalar<Option>& s) noexcept {
         if constexpr (Option == Float)
             return Scalar<Option>(::cosf(s.getTrivial()));
         else
@@ -157,10 +157,10 @@ namespace Physica::Core {
     }
 
     template<>
-    Scalar<MultiPrecision> cos(const Scalar<MultiPrecision>& s);
+    Scalar<MultiPrecision> cos(const Scalar<MultiPrecision>& s) noexcept;
 
     template<ScalarOption Option>
-    __host__ __device__ inline Scalar<Option> sin(const Scalar<Option>& s) {
+    __host__ __device__ inline Scalar<Option> sin(const Scalar<Option>& s) noexcept {
         if constexpr (Option == Float)
             return Scalar<Option>(::sinf(s.getTrivial()));
         else
@@ -168,10 +168,10 @@ namespace Physica::Core {
     }
 
     template<>
-    Scalar<MultiPrecision> sin(const Scalar<MultiPrecision>& s);
+    Scalar<MultiPrecision> sin(const Scalar<MultiPrecision>& s) noexcept;
 
     template<ScalarOption Option>
-    __host__ __device__ inline void sincos(Scalar<Option> s, Scalar<Option>& sin_result, Scalar<Option>& cos_result) {
+    __host__ __device__ inline void sincos(Scalar<Option> s, Scalar<Option>& sin_result, Scalar<Option>& cos_result) noexcept {
         using TrivialType = typename Scalar<Option>::TrivialType;
         TrivialType sin_temp, cos_temp;
         if constexpr (Option == Double)
@@ -183,7 +183,7 @@ namespace Physica::Core {
     }
 
     template<ScalarOption Option>
-    __host__ __device__ inline Scalar<Option> tan(const Scalar<Option>& s) {
+    __host__ __device__ inline Scalar<Option> tan(const Scalar<Option>& s) noexcept {
         if constexpr (Option == Float)
             return Scalar<Option>(::tanf(s.getTrivial()));
         else
@@ -191,147 +191,147 @@ namespace Physica::Core {
     }
 
     template<ScalarOption Option>
-    Scalar<Option> sec(const Scalar<Option>& s) {
+    Scalar<Option> sec(const Scalar<Option>& s) noexcept {
         return reciprocal(cos(s));
     }
 
     template<ScalarOption Option>
-    Scalar<Option> csc(const Scalar<Option>& s) {
+    Scalar<Option> csc(const Scalar<Option>& s) noexcept {
         return reciprocal(sin(s));
     }
 
     template<ScalarOption Option>
-    Scalar<Option> cot(const Scalar<Option>& s) {
+    Scalar<Option> cot(const Scalar<Option>& s) noexcept {
         return cos(s) / sin(s);
     }
 
     template<ScalarOption Option>
-    Scalar<Option> arccos(const Scalar<Option>& s) {
+    Scalar<Option> arccos(const Scalar<Option>& s) noexcept {
         return Scalar<Option>(std::acos(s.getTrivial()));
     }
 
     template<>
-    Scalar<MultiPrecision> arccos(const Scalar<MultiPrecision>& s);
+    Scalar<MultiPrecision> arccos(const Scalar<MultiPrecision>& s) noexcept;
 
     template<ScalarOption Option>
-    Scalar<Option> arcsin(const Scalar<Option>& s) {
+    Scalar<Option> arcsin(const Scalar<Option>& s) noexcept {
         return Scalar<Option>(std::asin(s.getTrivial()));
     }
 
     template<>
-    Scalar<MultiPrecision> arcsin(const Scalar<MultiPrecision>& s);
+    Scalar<MultiPrecision> arcsin(const Scalar<MultiPrecision>& s) noexcept;
 
     template<ScalarOption Option>
-    Scalar<Option> arctan(const Scalar<Option>& s) {
+    Scalar<Option> arctan(const Scalar<Option>& s) noexcept {
         return Scalar<Option>(std::atan(s.getTrivial()));
     }
 
     template<>
-    Scalar<MultiPrecision> arctan(const Scalar<MultiPrecision>& s);
+    Scalar<MultiPrecision> arctan(const Scalar<MultiPrecision>& s) noexcept;
 
     template<ScalarOption Option>
-    Scalar<Option> arcsec(const Scalar<Option>& s) {
+    Scalar<Option> arcsec(const Scalar<Option>& s) noexcept {
         return arccos(reciprocal(s));
     }
 
     template<ScalarOption Option>
-    Scalar<Option> arccsc(const Scalar<Option>& s) {
+    Scalar<Option> arccsc(const Scalar<Option>& s) noexcept {
         return arcsin(reciprocal(s));
     }
 
     template<ScalarOption Option>
-    Scalar<Option> arccot(const Scalar<Option>& s) {
+    Scalar<Option> arccot(const Scalar<Option>& s) noexcept {
         return arctan(reciprocal(s));
     }
 
     template<ScalarOption Option>
-    Scalar<Option> cosh(const Scalar<Option>& s) {
+    Scalar<Option> cosh(const Scalar<Option>& s) noexcept {
         return Scalar<Option>(std::cosh(s.getTrivial()));
     }
 
     template<>
-    Scalar<MultiPrecision> cosh(const Scalar<MultiPrecision>& s);
+    Scalar<MultiPrecision> cosh(const Scalar<MultiPrecision>& s) noexcept;
 
     template<ScalarOption Option>
-    Scalar<Option> sinh(const Scalar<Option>& s) {
+    Scalar<Option> sinh(const Scalar<Option>& s) noexcept {
         return Scalar<Option>(std::sinh(s.getTrivial()));
     }
 
     template<>
-    Scalar<MultiPrecision> sinh(const Scalar<MultiPrecision>& s);
+    Scalar<MultiPrecision> sinh(const Scalar<MultiPrecision>& s) noexcept;
 
     template<ScalarOption Option>
-    Scalar<Option> tanh(const Scalar<Option>& s) {
+    Scalar<Option> tanh(const Scalar<Option>& s) noexcept {
         return Scalar<Option>(std::tanh(s.getTrivial()));
     }
 
     template<>
-    Scalar<MultiPrecision> tanh(const Scalar<MultiPrecision>& s);
+    Scalar<MultiPrecision> tanh(const Scalar<MultiPrecision>& s) noexcept;
 
     template<ScalarOption Option>
-    Scalar<Option> sech(const Scalar<Option>& s) {
+    Scalar<Option> sech(const Scalar<Option>& s) noexcept {
         return Scalar<Option>(1 / std::cosh(s.getTrivial()));
     }
 
     template<>
-    Scalar<MultiPrecision> sech(const Scalar<MultiPrecision>& s);
+    Scalar<MultiPrecision> sech(const Scalar<MultiPrecision>& s) noexcept;
 
     template<ScalarOption Option>
-    Scalar<Option> csch(const Scalar<Option>& s) {
+    Scalar<Option> csch(const Scalar<Option>& s) noexcept {
         return Scalar<Option>(1 / std::sinh(s.getTrivial()));
     }
 
     template<>
-    Scalar<MultiPrecision> csch(const Scalar<MultiPrecision>& s);
+    Scalar<MultiPrecision> csch(const Scalar<MultiPrecision>& s) noexcept;
 
     template<ScalarOption Option>
-    Scalar<Option> coth(const Scalar<Option>& s) {
+    Scalar<Option> coth(const Scalar<Option>& s) noexcept {
         return Scalar<Option>(1 / std::tanh(s.getTrivial()));
     }
 
     template<>
-    Scalar<MultiPrecision> coth(const Scalar<MultiPrecision>& s);
+    Scalar<MultiPrecision> coth(const Scalar<MultiPrecision>& s) noexcept;
 
     template<ScalarOption Option>
-    Scalar<Option> arccosh(const Scalar<Option>& s) {
+    Scalar<Option> arccosh(const Scalar<Option>& s) noexcept {
         return Scalar<Option>(std::acosh(s.getTrivial()));
     }
 
     template<>
-    Scalar<MultiPrecision> arccosh(const Scalar<MultiPrecision>& s);
+    Scalar<MultiPrecision> arccosh(const Scalar<MultiPrecision>& s) noexcept;
 
     template<ScalarOption Option>
-    Scalar<Option> arcsinh(const Scalar<Option>& s) {
+    Scalar<Option> arcsinh(const Scalar<Option>& s) noexcept {
         return Scalar<Option>(std::asinh(s.getTrivial()));
     }
 
     template<>
-    Scalar<MultiPrecision> arcsinh(const Scalar<MultiPrecision>& s);
+    Scalar<MultiPrecision> arcsinh(const Scalar<MultiPrecision>& s) noexcept;
 
     template<ScalarOption Option>
-    Scalar<Option> arctanh(const Scalar<Option>& s) {
+    Scalar<Option> arctanh(const Scalar<Option>& s) noexcept {
         return Scalar<Option>(std::atanh(s.getTrivial()));
     }
 
     template<>
-    Scalar<MultiPrecision> arctanh(const Scalar<MultiPrecision>& s);
+    Scalar<MultiPrecision> arctanh(const Scalar<MultiPrecision>& s) noexcept;
 
     template<ScalarOption Option>
-    Scalar<Option> arcsech(const Scalar<Option>& s) {
+    Scalar<Option> arcsech(const Scalar<Option>& s) noexcept {
         return arccosh(reciprocal(s));
     }
 
     template<ScalarOption Option>
-    Scalar<Option> arccsch(const Scalar<Option>& s) {
+    Scalar<Option> arccsch(const Scalar<Option>& s) noexcept {
         return arcsinh(reciprocal(s));
     }
 
     template<ScalarOption Option>
-    Scalar<Option> arccoth(const Scalar<Option>& s) {
+    Scalar<Option> arccoth(const Scalar<Option>& s) noexcept {
         auto trivial = s.getTrivial();
         return Scalar<Option>(std::log((trivial + 1) / (trivial - 1)) / 2);
     }
 
     template<>
-    Scalar<MultiPrecision> arccoth(const Scalar<MultiPrecision>& s);
+    Scalar<MultiPrecision> arccoth(const Scalar<MultiPrecision>& s) noexcept;
 }
