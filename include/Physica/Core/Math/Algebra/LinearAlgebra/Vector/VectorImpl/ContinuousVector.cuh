@@ -20,7 +20,7 @@
 
 #include "ContinuousVector.h"
 #include "LValueVector.cuh"
-#include "ContinuousVectorBlock.cuh"
+#include "ContinuousVectorImpl/ContinuousVectorBlock.cuh"
 
 namespace Physica::Core {
     template<class Derived>

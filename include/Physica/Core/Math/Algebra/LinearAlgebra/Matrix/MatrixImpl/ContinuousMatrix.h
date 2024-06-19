@@ -19,8 +19,8 @@
 #pragma once
 
 #include "LValueMatrix.h"
-#include "ContinuousMatrixBlock.h"
-#include "ContinuousFlatten.h"
+#include "ContinuousMatrixImpl/ContinuousMatrixBlock.h"
+#include "ContinuousMatrixImpl/ContinuousFlatten.h"
 
 namespace Physica::Core {
     /**
@@ -133,4 +133,4 @@ namespace Physica::Core {
     };
 }
 
-#include "ContinuousMatrixImpl.h"
+#include "ContinuousMatrixImpl/ContinuousMatrixImpl.h"

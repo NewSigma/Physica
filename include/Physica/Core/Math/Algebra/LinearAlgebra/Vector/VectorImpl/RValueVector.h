@@ -23,7 +23,7 @@
 #include "Physica/Core/MultiPrecision/ComplexScalar.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/MatrixOption.h"
 #include "Physica/Core/Parallel/Executor/SequentialExecutor.h"
-#include "RVectorBlock.h"
+#include "RValueVectorImpl/RVectorBlock.h"
 
 namespace Physica::Core {
     template<class Derived> class LValueVector;
@@ -138,8 +138,8 @@ namespace Physica::Core {
     bool vectorNear(const RValueVector<VectorType1>& v1, const RValueVector<VectorType2>& v2, double precision);
 }
 
-#include "RValueVectorImpl.h"
+#include "RValueVectorImpl/RValueVectorImpl.h"
+#include "RValueVectorImpl/ReverseVector.h"
 #include "InnerDot.h"
 #include "VectorExpression.h"
 #include "VectorConvert.h"
-#include "ReverseVector.h"

@@ -19,7 +19,6 @@
 #pragma once
 
 #include "RValueMatrix.cuh"
-#include "LValueFlatten.cuh"
 
 namespace Physica::Core {
     template<class Derived>
@@ -86,3 +85,5 @@ namespace Physica::Core {
         return Base::getDerived()(r, c);
     }
 }
+
+#include "LValueMatrixImpl/LValueFlatten.cuh"

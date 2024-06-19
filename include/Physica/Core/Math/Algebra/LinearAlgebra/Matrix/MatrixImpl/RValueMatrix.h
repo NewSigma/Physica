@@ -18,7 +18,7 @@
  */
 #pragma once
 
-#include "RMatrixBlock.h"
+#include "RValueMatrixImpl/RMatrixBlock.h"
 
 namespace Physica::Core {
     template<class Derived> class LValueMatrix;
@@ -136,10 +136,10 @@ namespace Physica::Core {
     inline bool operator!=(const RValueMatrix<Derived>& m1, const RValueMatrix<Derived>& m2) { return !(m1 == m2); }
 }
 
-#include "RValueMatrixImpl.h"
+#include <Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DiagVector.h>
+#include "RValueMatrixImpl/RValueMatrixImpl.h"
+#include "RValueMatrixImpl/RValueFlatten.h"
 #include "Transpose.h"
 #include "Conjugate.h"
 #include "Hermite.h"
-#include "RValueFlatten.h"
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DiagVector.h"
 #include "MatrixNorm.h"

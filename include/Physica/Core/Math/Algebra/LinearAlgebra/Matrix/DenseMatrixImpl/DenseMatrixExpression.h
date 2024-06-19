@@ -459,4 +459,4 @@ namespace Physica::Core {
     }
 }
 
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/MatrixImpl/RealMatrix.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/MatrixImpl/MatrixConvert.h"

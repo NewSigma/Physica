@@ -18,9 +18,9 @@
  */
 #pragma once
 
+#include <Physica/Core/IO/HDF5/HDF5.h>
 #include "LValueVector.h"
-#include "ContinuousVectorBlock.h"
-#include "Physica/Core/IO/HDF5/HDF5.h"
+#include "ContinuousVectorImpl/ContinuousVectorBlock.h"
 
 namespace Physica::Core {
     /**
@@ -102,4 +102,4 @@ namespace Physica::Core {
     void operator+=(ContinuousVector<Derived>& v1, const RValueVector<OtherDerived>& v2);
 }
 
-#include "ContinuousVectorImpl.h"
+#include "ContinuousVectorImpl/ContinuousVectorImpl.h"

@@ -19,7 +19,7 @@
 #pragma once
 
 #include "RValueVector.h"
-#include "LVectorBlock.h"
+#include "LValueVectorImpl/LVectorBlock.h"
 
 namespace Physica::Core {
     /**
@@ -81,5 +81,5 @@ namespace Physica::Core {
     inline void operator-=(LValueVector<Derived>& v1, const RValueVector<OtherDerived>& v2);
 }
 
-#include "LValueVectorImpl.h"
+#include "LValueVectorImpl/LValueVectorImpl.h"
 #include "Sincos.h"

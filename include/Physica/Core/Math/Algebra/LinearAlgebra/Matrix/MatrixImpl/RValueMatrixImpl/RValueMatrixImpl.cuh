@@ -20,7 +20,6 @@
 
 #include "Physica/Core/Parallel/StreamPool.cuh"
 #include "Physica/Utils/CUDA/DeviceProp.cuh"
-#include "Transpose.cuh"
 #include "RValueFlatten.cuh"
 
 namespace Physica::Core {

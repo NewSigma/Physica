@@ -72,6 +72,6 @@ namespace Physica::Core {
     operator*(const device_obj<RValueVector<VectorType1>>& v1, const device_obj<RValueVector<VectorType2>>& v2);
 }
 
-#include "RValueVectorImpl.cuh"
+#include "RValueVectorImpl/RValueVectorImpl.cuh"
 #include "VectorExpression.cuh"
 

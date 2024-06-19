@@ -20,8 +20,7 @@
 
 #include "ContinuousMatrix.h"
 #include "LValueMatrix.cuh"
-#include "ContinuousMatrixBlock.cuh"
-#include "ContinuousFlatten.cuh"
+#include "ContinuousMatrixImpl/ContinuousMatrixBlock.cuh"
 
 namespace Physica::Core {
     template<class Derived>
@@ -105,4 +104,5 @@ namespace Physica::Core {
     };
 }
 
-#include "ContinuousMatrixImpl.cuh"
+#include "ContinuousMatrixImpl/ContinuousMatrixImpl.cuh"
+#include "ContinuousMatrixImpl/ContinuousFlatten.cuh"

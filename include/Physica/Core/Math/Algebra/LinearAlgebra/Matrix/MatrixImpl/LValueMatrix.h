@@ -19,7 +19,7 @@
 #pragma once
 
 #include "RValueMatrix.h"
-#include "LMatrixBlock.h"
+#include "LValueMatrixImpl/LMatrixBlock.h"
 
 namespace Physica::Core {
     template<class MatrixType> class InverseMatrix;
@@ -128,4 +128,4 @@ namespace Physica::Core {
     };
 }
 
-#include "LValueMatrixImpl.h"
+#include "LValueMatrixImpl/LValueMatrixImpl.h"

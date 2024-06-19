@@ -18,7 +18,7 @@
  */
 #pragma once
 
-#include "RMatrixBlock.cuh"
+#include "RValueMatrixImpl/RMatrixBlock.cuh"
 
 namespace Physica::Core {
     template<class Derived>
@@ -93,4 +93,5 @@ namespace Physica::Core {
     };
 }
 
-#include "RValueMatrixImpl.cuh"
+#include "RValueMatrixImpl/RValueMatrixImpl.cuh"
+#include "Transpose.cuh"
