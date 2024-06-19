@@ -136,10 +136,10 @@ namespace Physica::Core {
     inline bool operator!=(const RValueMatrix<Derived>& m1, const RValueMatrix<Derived>& m2) { return !(m1 == m2); }
 }
 
-#include <Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DiagVector.h>
 #include "RValueMatrixImpl/RValueMatrixImpl.h"
 #include "RValueMatrixImpl/RValueFlatten.h"
 #include "Transpose.h"
 #include "Conjugate.h"
 #include "Hermite.h"
+#include "DiagVector.h"
 #include "MatrixNorm.h"

@@ -18,7 +18,6 @@
  */
 #include "Physica/Core/Physics/Phonon/PIPhonon.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Eigen/EigenSolver.h"
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DiagVector.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseSymmMatrix.h"
 
 namespace Physica::Core {

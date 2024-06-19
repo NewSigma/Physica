@@ -1,0 +1,119 @@
+/*
+ * Copyright 2024 WeiBo He.
+ *
+ * This file is part of Physica.
+ *
+ * Physica is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Physica is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
+ */
+#pragma once
+
+#include <Physica/Utils/Unreachable.h>
+#include "MatrixImpl/RValueMatrix.h"
+
+namespace Physica::Core {
+    template<class MatrixType> class BlockMatrix;
+
+    namespace Internal {
+        template<class MatrixType>
+        class Traits<BlockMatrix<MatrixType>> {
+        public:
+            using ScalarType = typename MatrixType::ScalarType;
+            constexpr static int Option = MatrixType::Option;
+            constexpr static size_t RowAtCompile = Dynamic;
+            constexpr static size_t ColumnAtCompile = Dynamic;
+            constexpr static size_t MaxRowAtCompile = Dynamic;
+            constexpr static size_t MaxColumnAtCompile = Dynamic;
+            constexpr static size_t SizeAtCompile = RowAtCompile * ColumnAtCompile;
+            constexpr static size_t MaxSizeAtCompile = MaxRowAtCompile * MaxColumnAtCompile;
+        };
+    }
+
+    template<class MatrixType>
+    class BlockMatrix : public RValueMatrix<BlockMatrix<MatrixType>> {
+        using This = BlockMatrix<MatrixType>;
+        using Base = RValueMatrix<This>;
+        using BlockArray = Utils::Array<MatrixType>;
+    public:
+        using typename Base::ScalarType;
+    private:
+        BlockArray blocks;
+        Utils::Array<size_t> indexEnds;
+    public:
+        BlockMatrix(BlockArray blocks_);
+        BlockMatrix(const This&) = default;
+        BlockMatrix(This&&) noexcept = default;
+        ~BlockMatrix() = default;
+        /* Operators */
+        This& operator=(This obj) noexcept { swap(obj); return *this; }
+        /* Operations */
+        [[nodiscard]] ScalarType calc(size_t row, size_t col) const;
+        void swap(This& __restrict obj) noexcept;
+        /* Getters */
+        [[nodiscard]] const BlockArray& getBlocks() const noexcept { return blocks; }
+        [[nodiscard]] size_t getNumBlock() const noexcept { return blocks.getLength(); }
+        [[nodiscard]] const Utils::Array<size_t>& getIndexEnds() const noexcept { return indexEnds; }
+        [[nodiscard]] __host__ __device__ size_t getRow() const noexcept { return indexEnds[getNumBlock() - 1]; }
+        [[nodiscard]] __host__ __device__ size_t getColumn() const noexcept { return getRow(); }
+    private:
+        void updateEnds();
+        size_t findBlock(size_t globalIndex) const;
+    };
+
+    template<class MatrixType>
+    BlockMatrix<MatrixType>::BlockMatrix(BlockArray blocks_) : blocks(std::move(blocks_)) {
+        assert(getNumBlock() != 0 && "[Error]: Empty blocks does nothing");
+        updateEnds();
+    }
+
+    template<class MatrixType>
+    typename BlockMatrix<MatrixType>::ScalarType BlockMatrix<MatrixType>::calc(size_t row, size_t col) const {
+        const size_t indexR = findBlock(row);
+        const size_t indexC = findBlock(col);
+        if (indexR != indexC)
+            return ScalarType(0);
+        const size_t shift = indexR == 0 ? static_cast<size_t>(0) : indexEnds[indexR - 1];
+        return blocks[indexR].calc(row - shift, col - shift);
+    }
+
+    template<class MatrixType>
+    void BlockMatrix<MatrixType>::swap(This& __restrict obj) noexcept {
+        assert(this != &obj && "[Error]: Self swap is likely a bug");
+        blocks.swap(obj.blocks);
+        indexEnds.swap(obj.indexEnds);
+    }
+
+    template<class MatrixType>
+    void BlockMatrix<MatrixType>::updateEnds() {
+        const size_t numBlock = getNumBlock();
+        indexEnds.resize(numBlock);
+        size_t end = 0;
+        for (size_t i = 0; i < numBlock; ++i) {
+            end += blocks[i].getRow();
+            indexEnds[i] = end;
+        }
+    }
+
+    template<class MatrixType>
+    size_t BlockMatrix<MatrixType>::findBlock(size_t globalIndex) const {
+        assert(globalIndex < getRow() && "[Error]: Index out of range");
+        for (size_t i = 0; i < getNumBlock(); ++i) {
+            const bool inTheBlock = globalIndex < indexEnds[i];
+            if (inTheBlock)
+                return i;
+        }
+        Utils::unreachable();
+    }
+}
+
+#include "BlockMatrixImpl/MatrixVectorProduct.h"
