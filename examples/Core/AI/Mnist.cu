@@ -147,23 +147,25 @@ int main(int argc, char** argv) {
     auto nn = MnistNet<ScalarType>(32, gen);
     opt.recordEnd();
 
-    Vector<PlainScalar> loss_train(numEpoch), loss_valid(numEpoch), err_train(numEpoch), err_valid(numEpoch);
+    Vector<PlainScalar> loss_train(numEpoch), loss_valid(numEpoch), acc_train(numEpoch), acc_valid(numEpoch);
     for (size_t epoch = 0; epoch < numEpoch; ++epoch) {
-        for (size_t i = 0; i < itePerEpoch; ++i)
-            nn.train_step<Dataset, Optimizer, RandomPoolType>(dataset.first, opt);
+        if (epoch != 0) {
+            for (size_t i = 0; i < itePerEpoch; ++i)
+                nn.train_step<Dataset, Optimizer, RandomPoolType>(dataset.first, opt);
+        }
 
         using VectorType = Vector<PlainScalar>;
         const auto nn_infer = MnistNet<PlainScalar>(nn);
         loss_train[epoch] = nn_infer.loss(dataset.first);
         loss_valid[epoch] = nn_infer.loss(dataset.second);
-        err_train[epoch] = PlainScalar(1) - nn_infer.calcAccuracy(dataset.first);
-        err_valid[epoch] = PlainScalar(1) - nn_infer.calcAccuracy(dataset.second);
+        acc_train[epoch] = nn_infer.calcAccuracy(dataset.first);
+        acc_valid[epoch] = nn_infer.calcAccuracy(dataset.second);
     }
 
     QApplication app(argc, argv);
-    Plot* plot = new Plot(-0.5, numEpoch - 0.5, 0, 0.35, 20, 0.1);
+    Plot* plot = new Plot(-0.5, numEpoch - 0.5, 0, 3, 2, 1);
     auto* legend = plot->getChart()->legend();
-    legend->setAlignment(Qt::AlignTop);
+    legend->setAlignment(Qt::AlignRight);
     legend->setMarkerShape(QLegend::MarkerShapeFromSeries);
     auto* axisX = plot->getAxisX();
     auto* axisY = plot->getAxisY();
@@ -171,41 +173,43 @@ int main(int argc, char** argv) {
     axisX->setTitleText("Epoch");
     axisX->setLabelFormat("%d");
     axisY->setTitleText("Loss");
-    axisY->setLabelFormat("%.1f");
-    axisRight->setTitleText("Error rate");
+    axisY->setLabelFormat("%d");
+    axisRight->setTitleText("Accuracy");
     axisRight->setLabelsVisible(true);
     axisRight->setLabelFormat("%.1f");
+    axisRight->setRange(0, 1);
+    axisRight->setTickInterval(0.2);
     {
         auto& line = plot->line(loss_train);
         auto pen = line.pen();
         pen.setColor(Qt::black);
         line.setPen(pen);
-        line.setName("loss_train");
+        line.setName("Loss(train)");
     }
     {
         auto& line = plot->line(loss_valid);
         auto pen = line.pen();
         pen.setColor(Qt::red);
         line.setPen(pen);
-        line.setName("loss_valid");
+        line.setName("Loss(valid)");
     }
     {
-        auto& line = plot->line(err_train);
+        auto& line = plot->line(acc_train);
         auto pen = line.pen();
         pen.setColor(Qt::black);
         pen.setStyle(Qt::DashLine);
         line.setPen(pen);
-        line.setName("err_train");
+        line.setName("Acc(train)");
         line.detachAxis(axisY);
         line.attachAxis(axisRight);
     }
     {
-        auto& line = plot->line(err_valid);
+        auto& line = plot->line(acc_valid);
         auto pen = line.pen();
         pen.setColor(Qt::red);
         pen.setStyle(Qt::DashLine);
         line.setPen(pen);
-        line.setName("err_valid");
+        line.setName("Acc(valid)");
         line.detachAxis(axisY);
         line.attachAxis(axisRight);
     }
