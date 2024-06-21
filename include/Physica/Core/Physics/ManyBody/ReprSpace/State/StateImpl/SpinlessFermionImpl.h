@@ -96,6 +96,15 @@ namespace Physica::Core {
     }
 
     template<unsigned int Dim, unsigned int NumSite>
+    int SpinlessFermion<Dim, NumSite>::lShiftSign() const {
+        const This other = (*this) << 1;
+        const bool noExchange = (*this) > other;
+        if (noExchange)
+            return 1;
+        return (getNumElectron() % 2U != 0) ? 1 : -1;
+    }
+
+    template<unsigned int Dim, unsigned int NumSite>
     int SpinlessFermion<Dim, NumSite>::calcPeriod() const {
         if constexpr (Dim != 1)
             throw NotImplementedException();

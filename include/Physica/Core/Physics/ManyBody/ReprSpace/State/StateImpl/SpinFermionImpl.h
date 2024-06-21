@@ -104,6 +104,11 @@ namespace Physica::Core {
     }
 
     template<unsigned int Dim, unsigned int NumSite>
+    inline int SpinFermion<Dim, NumSite>::lShiftSign() const {
+        return spinUp.lShiftSign() * spinDown.lShiftSign();
+    }
+
+    template<unsigned int Dim, unsigned int NumSite>
     inline int SpinFermion<Dim, NumSite>::calcPeriod() const noexcept {
         if constexpr (Dim != 1)
             throw NotImplementedException();

@@ -70,6 +70,7 @@ namespace Physica::Core {
         [[nodiscard]] int hopSign(unsigned char from, unsigned char to) const;
         [[nodiscard]] int hopSign(IndexType dims, IndexType from, IndexType to) const;
         [[nodiscard]] SpinlessFermion transReduce(int period = 1) const;
+        [[nodiscard]] int lShiftSign() const;
         [[nodiscard]] int calcPeriod() const;
         inline void swap(This& __restrict obj) noexcept;
         /* Getters */

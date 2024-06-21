@@ -66,7 +66,7 @@ namespace Physica::Core {
     std::ostream& operator<<(std::ostream& os, const Poscar<AnyScalar>& poscar) {
         os << '\n';
         os << 1.0 << '\n';
-        os << poscar.lattice;
+        os << poscar.lattice.format();
         if (!poscar.elementTypes.empty()) {
             for (auto type : poscar.elementTypes)
                 os << ' ' << PhyConst<SI>::elementSymbol[type];
@@ -76,7 +76,7 @@ namespace Physica::Core {
             os << ' ' << poscar.numOfEachType[i];
         os << '\n';
         os << ((poscar.type == Poscar<AnyScalar>::Type::Direct) ? "Direct\n" : "Cartesian\n");
-        os << poscar.pos;
+        os << poscar.pos.format();
         return os;
     }
 

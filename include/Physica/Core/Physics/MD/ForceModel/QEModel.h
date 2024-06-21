@@ -104,7 +104,7 @@ namespace Physica::Core {
                 std::ofstream os(inputTmp.getName());
                 os << input.data() << '\n';
                 os << "CELL_PARAMETERS bohr\n";
-                os << cell.getLattice() << '\n';
+                os << cell.getLattice().format() << '\n';
                 os << "ATOMIC_POSITIONS bohr\n";
                 for (size_t i = 0; i < getNumParticle(); ++i) {
                     const auto row = cell.getPos().row(i);

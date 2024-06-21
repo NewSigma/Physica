@@ -57,11 +57,14 @@ namespace Physica::Core {
             {
                 auto& rSpace = fft.getRSpace();
                 auto psi2 = repr[col];
+                int sign = 1;
                 for (int i = 0; i < static_cast<int>(NumSite); ++i) {
                     RealType elem = 0;
                     if (psi1 != psi2)
-                        elem = hoppingElem(psi1, psi2);
+                        elem = hoppingElem(psi1, psi2) * RealType(sign);
                     rSpace[i] = elem;
+
+                    sign *= psi2.lShiftSign();
                     psi2 <<= 1;
                 }
             }
@@ -128,8 +131,10 @@ namespace Physica::Core {
             return;
         const auto reducedPsi = psi.transReduce();
         auto& rSpace = fft.getRSpace();
+        int sign = 1;
         for (size_t i = 0; i < NumSite; ++i) {
-            rSpace[i] = RealType(reducedPsi == psi ? 1.0 : 0.0);
+            rSpace[i] = RealType(reducedPsi == psi ? sign : 0);
+            sign *= psi.lShiftSign();
             psi <<= 1;
         }
         FFTType::transform(planProvider, fft);
@@ -151,10 +156,12 @@ namespace Physica::Core {
             auto fft = FFTType::makeEmptyFFT(NumSite);
             for (unsigned int site = 0; site < NumSite; ++site) {
                 const auto site1 = (site + 1) % NumSite;
-                sumHopping(result, fft, hop, state.hopUp(site, site1));
-                sumHopping(result, fft, hop, state.hopUp(site1, site));
-                sumHopping(result, fft, hop, state.hopDown(site, site1));
-                sumHopping(result, fft, hop, state.hopDown(site1, site));
+                const ScalarType hopUp = hop * RealType(state.hopUpSign(site, site1));
+                const ScalarType hopDown = hop * RealType(state.hopDownSign(site, site1));
+                sumHopping(result, fft, hopUp, state.hopUp(site, site1));
+                sumHopping(result, fft, -hopUp, state.hopUp(site1, site));
+                sumHopping(result, fft, hopDown, state.hopDown(site, site1));
+                sumHopping(result, fft, -hopDown, state.hopDown(site1, site));
                 numRepel += state.isUpOccupy(site) && state.isDownOccupy(site);
             }
         }

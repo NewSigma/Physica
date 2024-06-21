@@ -53,6 +53,7 @@ namespace Physica::Core {
         constexpr static bool IsTransInvariant = Internal::Traits<ReprType>::IsTransInvariant;
         static_assert(std::is_base_of<ReprBasis<ReprType>, ReprType>::value, "[Error]: ReprType is not a representation");
         static_assert((IsTransInvariant && Base::isComplex) || !IsTransInvariant, "[Error]: Use complex scalar if translational invariance is enabled");
+        static_assert(!IsTransInvariant || (Base::Dim == 1), "[Error]: Trans invariantce is not implemented in high dimension");
     public:
         using typename Base::DimArray;
         using Base::Dim;
