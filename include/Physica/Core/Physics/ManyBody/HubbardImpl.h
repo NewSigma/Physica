@@ -98,15 +98,20 @@ namespace Physica::Core {
     template<class ScalarType, class ReprType>
     typename Hubbard<ScalarType, ReprType>::RealType
     Hubbard<ScalarType, ReprType>::hoppingElem(StateType rowPsi, StateType colPsi) const {
+        int count = 0;
         for (unsigned int site = 0; site < NumSite; ++site) {
             const auto site1 = (site + 1) % NumSite;
-            if (rowPsi == colPsi.hopUp(site, site1)
-             || rowPsi == colPsi.hopUp(site1, site)
-             || rowPsi == colPsi.hopDown(site, site1)
-             || rowPsi == colPsi.hopDown(site1, site))
-                return -hoppingT;
+            const int signUp = colPsi.hopUpSign(site, site1);
+            const int signDown = colPsi.hopDownSign(site, site1);
+            int n1 = 0;
+            n1 += rowPsi == colPsi.hopUp(site, site1);
+            n1 -= rowPsi == colPsi.hopUp(site1, site);
+            int n2 = 0;
+            n2 += rowPsi == colPsi.hopDown(site, site1);
+            n2 -= rowPsi == colPsi.hopDown(site1, site);
+            count += n1 * signUp + n2 * signDown;
         }
-        return RealType(0);
+        return RealType(-count) * hoppingT;
     }
 
     template<class ScalarType, class ReprType>
@@ -122,13 +127,13 @@ namespace Physica::Core {
         if (psi.isVacuum())
             return;
         const auto reducedPsi = psi.transReduce();
-        const size_t index = repr[reducedPsi];
         auto& rSpace = fft.getRSpace();
         for (size_t i = 0; i < NumSite; ++i) {
             rSpace[i] = RealType(reducedPsi == psi ? 1.0 : 0.0);
             psi <<= 1;
         }
         FFTType::transform(planProvider, fft);
+        const size_t index = repr[reducedPsi];
         target[index] += fft.getKSpace()[repr.getReducedK()] * sqrt(RealType(repr.getPeriods()[index])) * factor;
     }
 
@@ -156,10 +161,12 @@ namespace Physica::Core {
         else {
             for (unsigned int site = 0; site < NumSite; ++site) {
                 const auto site1 = (site + 1) % NumSite;
-                sumHopping(result, hop, state.hopUp(site, site1));
-                sumHopping(result, hop, state.hopUp(site1, site));
-                sumHopping(result, hop, state.hopDown(site, site1));
-                sumHopping(result, hop, state.hopDown(site1, site));
+                const ScalarType hopUp = hop * RealType(state.hopUpSign(site, site1));
+                const ScalarType hopDown = hop * RealType(state.hopDownSign(site, site1));
+                sumHopping(result, hopUp, state.hopUp(site, site1));
+                sumHopping(result, -hopUp, state.hopUp(site1, site));
+                sumHopping(result, hopDown, state.hopDown(site, site1));
+                sumHopping(result, -hopDown, state.hopDown(site1, site));
                 numRepel += state.isUpOccupy(site) && state.isDownOccupy(site);
             }
         }
@@ -176,10 +183,12 @@ namespace Physica::Core {
             for (unsigned int dim = 0; dim < Dim; ++dim) {
                 SiteIndex site1 = site;
                 site1[dim] = (site1[dim] + 1) % Base::getSuperSize()[dim];
-                sumHopping(result, hop, state.hopUp(site, site1));
-                sumHopping(result, hop, state.hopUp(site1, site));
-                sumHopping(result, hop, state.hopDown(site, site1));
-                sumHopping(result, hop, state.hopDown(site1, site));
+                const ScalarType hopUp = hop * RealType(state.hopUpSign(site, site1));
+                const ScalarType hopDown = hop * RealType(state.hopDownSign(site, site1));
+                sumHopping(result, hopUp, state.hopUp(site, site1));
+                sumHopping(result, -hopUp, state.hopUp(site1, site));
+                sumHopping(result, hopDown, state.hopDown(site, site1));
+                sumHopping(result, -hopDown, state.hopDown(site1, site));
             }
             numRepel += state.isUpOccupy(site) && state.isDownOccupy(site);
         });

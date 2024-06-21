@@ -38,7 +38,7 @@ namespace Physica::Core {
      * Refer to [1] for applied symmetries
      * 
      * Reference:
-     * [1] Computers in Physics 7, 400 (1993); https://doi.org/10.1063/1.4823192
+     * [1] J. Korean Phys. Soc. 76, 670–683 (2020); https://doi.org/10.3938/jkps.76.670
      */
     template<class ScalarType, class ReprType>
     class Hubbard : public LatticeHamilton<Hubbard<ScalarType, ReprType>> {

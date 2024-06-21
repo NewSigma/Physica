@@ -318,33 +318,6 @@ namespace Physica::Core {
     }
 
     template<class Derived>
-    std::ostream& operator<<(std::ostream& os, const RValueMatrix<Derived>& m) {
-        const size_t column = m.getColumn();
-        const size_t row = m.getRow();
-        size_t width = 0;
-        /* Get max width */ {
-            for (size_t c = 0; c < column; ++c) {
-                for (size_t r = 0; r < row; ++ r) {
-                    std::stringstream stream{};
-                    stream.copyfmt(os);
-                    stream << m.calc(r, c).getReal();
-                    width = std::max(width, stream.str().length());
-                }
-            }
-        }
-        /* Output */ {
-            for (size_t r = 0; r < row; ++r) {
-                for (size_t c = 0; c < column; ++c) {
-                    os.width(width);
-                    os << m.calc(r, c) << ' ';
-                }
-                os << '\n';
-            }
-        }
-        return os;
-    }
-
-    template<class Derived>
     bool operator==(const RValueMatrix<Derived>& m1, const RValueMatrix<Derived>& m2) {
         if (m1.getRow() != m2.getRow())
             return false;

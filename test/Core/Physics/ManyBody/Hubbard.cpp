@@ -26,14 +26,12 @@ using namespace Physica::Core;
 constexpr double HoppingT = 1.0;
 constexpr double RepelU = 2;
 
+template<unsigned int NumSite, unsigned int NumSpinUp, unsigned int NumSpinDown>
 void testRSpinMatrix() {
-    constexpr unsigned int NumSite = 3;
-    constexpr unsigned int NumSpinUp = 2;
-    constexpr unsigned int NumSpinDown = 1;
     using ScalarType = Scalar<Double>;
     using VectorType = Vector<ScalarType>;
     using MatrixType = DenseMatrix<ScalarType>;
-    using ReprType = SpinRepr<1, NumSite, false>;
+    using ReprType = SpinRepr<1, NumSite, NumSpinUp == NumSpinDown>;
 
     ReprType repr(NumSpinUp, NumSpinDown);
     const Hubbard<ScalarType, ReprType> model({NumSite}, 1, std::move(repr), HoppingT, RepelU);
@@ -74,7 +72,8 @@ void testKSpinMatrix() {
 }
 
 int main() {
-    testRSpinMatrix();
+    testRSpinMatrix<3, 2, 1>();
+    testRSpinMatrix<2, 1, 1>();
     testKSpinMatrix();
     return 0;
 }

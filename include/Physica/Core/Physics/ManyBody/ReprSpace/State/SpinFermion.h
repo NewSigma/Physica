@@ -67,6 +67,10 @@ namespace Physica::Core {
         [[nodiscard]] SpinFermion hopUp(IndexType dims, IndexType from, IndexType to) const;
         [[nodiscard]] SpinFermion hopDown(unsigned char from, unsigned char to) const;
         [[nodiscard]] SpinFermion hopDown(IndexType dims, IndexType from, IndexType to) const;
+        [[nodiscard]] inline int hopUpSign(unsigned char from, unsigned char to) const;
+        [[nodiscard]] inline int hopUpSign(IndexType dims, IndexType from, IndexType to) const;
+        [[nodiscard]] inline int hopDownSign(unsigned char from, unsigned char to) const;
+        [[nodiscard]] inline int hopDownSign(IndexType dims, IndexType from, IndexType to) const;
         [[nodiscard]] SpinFermion transReduce() const;
         [[nodiscard]] inline int calcPeriod() const noexcept;
         inline void swap(SpinFermion& __restrict obj) noexcept;

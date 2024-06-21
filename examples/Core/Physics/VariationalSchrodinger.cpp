@@ -42,7 +42,7 @@ public:
         MatrixType inv_cholesky = cholesky.inverse();
         MatrixType hamilton = getHamiltonMatrix();
         MatrixType hamilton_mod = (inv_cholesky * hamilton).compute() * inv_cholesky.transpose();
-        EigenSolver<MatrixType> solver(hamilton_mod, true);
+        EigenSolver<ScalarType> solver(hamilton_mod, true);
         const auto& eigenvalues = solver.getEigenvalues();
         std::cout << "\tNumerical\tAnalytical\n";
         std::array<double, baseSetCount> energy{};
@@ -103,8 +103,7 @@ private:
         return pow(s, ScalarType(n)) * (square(s) - ScalarType(1));
     }
 
-    template<class MatrixType>
-    void plotWave(Plot& plot, const EigenSolver<MatrixType>& solver, size_t n) {
+    void plotWave(Plot& plot, const EigenSolver<ScalarType>& solver, size_t n) {
         constexpr size_t sampleCount = 100;
         Vector<ScalarType, sampleCount> x{};
         Vector<ScalarType, sampleCount> y{};
@@ -165,7 +164,7 @@ public:
         MatrixType inv_cholesky = cholesky.inverse();
         MatrixType hamilton = getHamiltonMatrix();
         MatrixType hamilton_mod = (inv_cholesky * hamilton).compute() * inv_cholesky.transpose();
-        EigenSolver<MatrixType> solver(hamilton_mod, true);
+        EigenSolver<ScalarType> solver(hamilton_mod, true);
         const auto& eigenvalues = solver.getEigenvalues();
         size_t groundStateIndex = 0;
         for (size_t i = 0; i < baseSetCount; ++i) {
@@ -272,7 +271,7 @@ public:
         do {
             MatrixType hamilton = getHamiltonMatrix(trial_solution);
             MatrixType hamilton_mod = (inv_cholesky * hamilton).compute() * inv_cholesky.transpose();
-            EigenSolver<MatrixType> solver(hamilton_mod, true);
+            EigenSolver<ScalarType> solver(hamilton_mod, true);
             auto eigenvalues = solver.getEigenvalues();
             size_t groundStateIndex = 0;
             for (size_t i = 0; i < baseSetCount; ++i) {

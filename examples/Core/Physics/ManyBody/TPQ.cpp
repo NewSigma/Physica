@@ -43,10 +43,9 @@ using Hamilton = Hubbard<ScalarType, ReprType>;
 
 std::pair<VectorType, ScalarType> energyFullDiag(const Hamilton& hamilton, const VectorType& betas) {
     SymmEigenSolver<ScalarType> solver(hamilton.getNumState());
-    solver.compute(hamilton, true);
+    solver.compute(hamilton, false);
     solver.sort();
     const auto& eigenvalues = solver.getEigenvalues();
-    const auto eigenvectors = solver.getEigenvectors();
 
     VectorType energys(NumBeta);
     for (size_t i = 0; i < NumBeta; ++i) {

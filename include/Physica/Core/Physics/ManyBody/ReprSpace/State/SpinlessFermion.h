@@ -67,6 +67,8 @@ namespace Physica::Core {
         /* Operations */
         [[nodiscard]] inline SpinlessFermion hop(unsigned char from, unsigned char to) const;
         [[nodiscard]] inline SpinlessFermion hop(IndexType dims, IndexType from, IndexType to) const;
+        [[nodiscard]] int hopSign(unsigned char from, unsigned char to) const;
+        [[nodiscard]] int hopSign(IndexType dims, IndexType from, IndexType to) const;
         [[nodiscard]] SpinlessFermion transReduce(int period = 1) const;
         [[nodiscard]] int calcPeriod() const;
         inline void swap(This& __restrict obj) noexcept;
@@ -76,7 +78,6 @@ namespace Physica::Core {
         [[nodiscard]] inline bool isOccupy(unsigned char site) const noexcept;
         [[nodiscard]] unsigned int getNumElectron() const noexcept { return countOnes(occupyBits); }
         [[nodiscard]] inline bool isTransReducible(int period = 1) const noexcept;
-    private:
         [[nodiscard]] inline uint64_t makeFullMask() const noexcept;
         [[nodiscard]] inline uint64_t makeHighMask() const noexcept;
     };
@@ -84,7 +85,7 @@ namespace Physica::Core {
     template<unsigned int Dim, unsigned int NumSite>
     std::ostream& operator<<(std::ostream& os, SpinlessFermion<Dim, NumSite> e) {
         auto mask = e.makeHighMask();
-        for (int i = 0; i < e.getNumSite(); ++i) {
+        for (int i = 0; i < int(NumSite); ++i) {
             const bool flag = (e.getOccupyBits() & mask) == 0;
             os << (flag ? '0' : '1');
             mask >>= 1;
