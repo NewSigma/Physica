@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2023 WeiBo He.
+ * Copyright 2022-2024 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -48,10 +48,10 @@ namespace Physica::Core {
         size_t lower = upper;
         size_t lower_1 = upper - 1;
         for (; lower_1 < lower; --lower, --lower_1) { //Make use of overflow
+            const RealType epsilon = std::numeric_limits<RealType>::epsilon();
             RealType temp = abs(mat(lower, lower)) + abs(mat(lower_1, lower_1));
-            temp = std::max(abs(temp * std::numeric_limits<RealType>::epsilon()),
-                            RealType(std::numeric_limits<RealType>::epsilon() * std::numeric_limits<RealType>::epsilon()));
-            if (abs(mat(lower, lower_1)) < temp) {
+            temp = std::max(temp, epsilon);
+            if (abs(mat(lower, lower_1)) < temp * epsilon) {
                 mat(lower, lower_1) = ScalarType(0);
                 break;
             }

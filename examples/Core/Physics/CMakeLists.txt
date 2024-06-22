@@ -1,5 +1,4 @@
 physica_add_example(HF ElectronicStructure/HF.cpp)
-physica_add_example(ExactDiag ManyBody/ExactDiag.cpp)
 physica_add_example(TPQ ManyBody/TPQ.cpp)
 add_subdirectory(MD)
 # Annoymous
