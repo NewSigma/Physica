@@ -28,7 +28,7 @@
 #include "DenseMatrixImpl/DenseMatrixDim.h"
 
 namespace Physica::Core {
-    template<class T = MultiScalar,
+    template<class T,
              int Option = MatrixOption::Column | MatrixOption::Vector,
              size_t Row = Dynamic,
              size_t Column = Dynamic,
@@ -55,9 +55,6 @@ namespace Physica::Core {
             using AllocatorType = Allocator;
         };
     }
-
-    template<class T, int Option, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn, class Allocator>
-    std::ostream& operator<<(std::ostream& os, const DenseMatrix<T, Option, Row, Column, MaxRow, MaxColumn>& mat);
     /**
      * DenseMatrix class
      * A matrix can be either fixed matrix, which have its max size defined,

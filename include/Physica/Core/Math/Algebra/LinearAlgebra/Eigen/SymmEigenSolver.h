@@ -58,6 +58,7 @@ namespace Physica::Core {
         template<class MatrixType>
         void compute(const RValueMatrix<MatrixType>& source, bool computeEigenvectors_);
         void sort();
+        void resize(size_t size);
         void swap(This& __restrict solver) noexcept;
         /* Getters */
         [[nodiscard]] const EigenvalueVector& getEigenvalues() const noexcept { return eigenvalues; }
@@ -70,10 +71,8 @@ namespace Physica::Core {
     SymmEigenSolver<ScalarType, Order>::SymmEigenSolver() : eigenvalues(), eigenvectors(), computeEigenvectors(false) {}
 
     template<class ScalarType, size_t Order>
-    SymmEigenSolver<ScalarType, Order>::SymmEigenSolver(size_t size)
-            : eigenvalues(size)
-            , eigenvectors(size, size) {
-        assert((Order == Dynamic || Order == size) && "[Error]: size is not consistent");
+    SymmEigenSolver<ScalarType, Order>::SymmEigenSolver(size_t size) : SymmEigenSolver() {
+        resize(size);
     }
 
     template<class ScalarType, size_t Order>
@@ -89,6 +88,11 @@ namespace Physica::Core {
         assert(source.getRow() == source.getColumn() && "[Error]: Square matrix is required");
         assert(source.getRow() == eigenvalues.getLength());
         computeEigenvectors = computeEigenvectors_;
+        [[unlikely]] if (source.getRow() == 1) {
+            eigenvalues[0] = source.calc(0, 0);
+            eigenvectors(0, 0) = ScalarType(1);
+            return;
+        }
 
         const RealType factor = abs_elem(source).max();
         if (factor < std::numeric_limits<ScalarType>::min()) {
@@ -143,6 +147,13 @@ namespace Physica::Core {
             if (computeEigenvectors)
                 eigenvectors.asArray()[i].swap(eigenvectors.asArray()[index_min]);
         }
+    }
+
+    template<class ScalarType, size_t Order>
+    void SymmEigenSolver<ScalarType, Order>::resize(size_t size) {
+        assert((Order == Dynamic || Order == size) && "[Error]: size is not consistent");
+        eigenvalues.resize(size);
+        eigenvectors.resize(size, size);
     }
 
     template<class ScalarType, size_t Order>

@@ -20,25 +20,29 @@
 
 #include "DenseMatrixStorage.h"
 
-namespace Physica::Core::Internal {
-    template<class T, size_t Order, size_t MaxOrder> class HalfDenseMatrixStorage;
+namespace Physica::Core {
+    template<class T, size_t Order = Dynamic, size_t MaxOrder = Order> class HalfDenseMatrixStorage;
 
-    template<class T, size_t Order, size_t MaxOrder>
-    class Traits<HalfDenseMatrixStorage<T, Order, MaxOrder>> {
-        constexpr static bool IsScalar = is_scalar<T>::value;
-        constexpr static size_t Size = Order * (Order + 1) / 2;
-        constexpr static size_t MaxSize = MaxOrder * (MaxOrder + 1) / 2;
-    public:
-        using ArrayType = typename std::conditional<IsScalar, Vector<T, Size, MaxSize>, Utils::Array<T, Size, MaxSize>>::type;
-    };
+    namespace Internal {
+        template<class T, size_t Order, size_t MaxOrder>
+        class Traits<HalfDenseMatrixStorage<T, Order, MaxOrder>> {
+            constexpr static bool IsScalar = is_scalar<T>::value;
+            constexpr static size_t Size = Order * (Order + 1) / 2;
+            constexpr static size_t MaxSize = MaxOrder * (MaxOrder + 1) / 2;
+        public:
+            using ArrayType = typename std::conditional<IsScalar, Vector<T, Size, MaxSize>, Utils::Array<T, Size, MaxSize>>::type;
+        };
+    }
     /**
+     * \class HalfDenseMatrixStorage stores half of the elements of a matrix, while the other half may be symmetric, hermitian, or etc.
+     * 
      * TODO: This class should extends ArrayBase after merging Core and Utils
      */
     template<class T, size_t Order, size_t MaxOrder>
     class HalfDenseMatrixStorage {
         using This = HalfDenseMatrixStorage<T, Order, MaxOrder>;
     public:
-        using ArrayType = typename Traits<This>::ArrayType;
+        using ArrayType = typename Internal::Traits<This>::ArrayType;
         using pointer = typename ArrayType::pointer;
         using const_pointer = typename ArrayType::const_pointer;
         using lvalue_reference = typename ArrayType::lvalue_reference;
@@ -60,6 +64,8 @@ namespace Physica::Core::Internal {
         HalfDenseMatrixStorage& operator=(This obj) noexcept { swap(obj); return *this; }
         [[nodiscard]] __host__ __device__ lvalue_reference operator[](size_t index) { return arr[index]; }
         [[nodiscard]] __host__ __device__ const_lvalue_reference operator[](size_t index) const { return arr[index]; }
+        [[nodiscard]] __host__ __device__ inline lvalue_reference operator()(size_t row, size_t col);
+        [[nodiscard]] __host__ __device__ inline const_lvalue_reference operator()(size_t row, size_t col) const;
         /* Operations */
         void resize(size_t order_) { arr.resize(order_ * (order_ + 1) / 2); order = order_; }
         void resize(size_t row, [[maybe_unused]] size_t column) { assert(row == column); resize(row); order = row; } //Necessary to CRTP
@@ -91,6 +97,14 @@ namespace Physica::Core::Internal {
             : HalfDenseMatrixStorage(row, t) {
         assert(row == column);
     }
+
+    template<class T, size_t Order, size_t MaxOrder>
+    __host__ __device__ inline typename HalfDenseMatrixStorage<T, Order, MaxOrder>::lvalue_reference
+    HalfDenseMatrixStorage<T, Order, MaxOrder>::operator()(size_t row, size_t col) { return (*this)[toIndex1D(row, col)]; }
+
+    template<class T, size_t Order, size_t MaxOrder>
+    __host__ __device__ inline typename HalfDenseMatrixStorage<T, Order, MaxOrder>::const_lvalue_reference
+    HalfDenseMatrixStorage<T, Order, MaxOrder>::operator()(size_t row, size_t col) const { return (*this)[toIndex1D(row, col)]; }
 
     template<class T, size_t Order, size_t MaxOrder>
     void HalfDenseMatrixStorage<T, Order, MaxOrder>::swap(HalfDenseMatrixStorage<T, Order, MaxOrder>& __restrict storage) noexcept {

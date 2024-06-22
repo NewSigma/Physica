@@ -72,7 +72,7 @@ namespace Physica::Core {
         [[nodiscard]] size_t getNumUpStates() const noexcept { return getUpStates().getLength(); }
         [[nodiscard]] size_t getNumDownStates() const noexcept { return getDownStates().getLength(); }
     private:
-        [[nodiscard]] StateArray makeSpinlessStates(size_t numElectron) const noexcept;
+        [[nodiscard]] StateArray makeSpinlessStates(size_t numParticle) const noexcept;
         void checkState(StateType state) const noexcept;
     };
 
@@ -138,13 +138,13 @@ namespace Physica::Core {
 
     template<unsigned int Dim, unsigned int NumSite, bool UseInversionSymm>
     typename SpinRepr<Dim, NumSite, UseInversionSymm>::StateArray
-    SpinRepr<Dim, NumSite, UseInversionSymm>::makeSpinlessStates(size_t numElectron) const noexcept {
+    SpinRepr<Dim, NumSite, UseInversionSymm>::makeSpinlessStates(size_t numParticle) const noexcept {
         constexpr size_t numSpinlessState = SpinlessState::calcFullNumState();
         StateArray result{};
         result.reserve(numSpinlessState);
         for (size_t i = 0; i < numSpinlessState; ++i) {
             const SpinlessState state(i);
-            if (state.getNumElectron() != numElectron)
+            if (state.getNumParticle() != numParticle)
                 continue;
             result.append(state);
         }
@@ -154,7 +154,7 @@ namespace Physica::Core {
 
     template<unsigned int Dim, unsigned int NumSite, bool UseInversionSymm>
     void SpinRepr<Dim, NumSite, UseInversionSymm>::checkState([[maybe_unused]] StateType state) const noexcept {
-        assert(state.getNumSpinUpElectron() == numSpinUp && "[Error]: Unexpected state");
-        assert(state.getNumSpinDownElectron() == numSpinDown && "[Error]: Unexpected state");
+        assert(state.getNumSpinUpParticle() == numSpinUp && "[Error]: Unexpected state");
+        assert(state.getNumSpinDownParticle() == numSpinDown && "[Error]: Unexpected state");
     }
 }

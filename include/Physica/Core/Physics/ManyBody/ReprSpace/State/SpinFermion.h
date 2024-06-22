@@ -82,9 +82,10 @@ namespace Physica::Core {
         [[nodiscard]] bool isVacuum() const noexcept { return spinUp.isVacuum() && spinDown.isVacuum(); }
         [[nodiscard]] bool isUpOccupy(unsigned char site) const noexcept { return spinUp.isOccupy(site); }
         [[nodiscard]] bool isDownOccupy(unsigned char site) const noexcept { return spinDown.isOccupy(site); }
-        [[nodiscard]] unsigned int getNumSpinUpElectron() const noexcept { return spinUp.getNumElectron(); }
-        [[nodiscard]] unsigned int getNumSpinDownElectron() const noexcept { return spinDown.getNumElectron(); }
-        [[nodiscard]] inline unsigned int getNumPairedElectron() const noexcept;
+        [[nodiscard]] unsigned int getNumParticle() const noexcept { return getNumSpinUpParticle() + getNumSpinDownParticle(); }
+        [[nodiscard]] unsigned int getNumSpinUpParticle() const noexcept { return spinUp.getNumParticle(); }
+        [[nodiscard]] unsigned int getNumSpinDownParticle() const noexcept { return spinDown.getNumParticle(); }
+        [[nodiscard]] inline unsigned int getNumPairedParticle() const noexcept;
     };
 
     template<unsigned int Dim, unsigned int NumSite>

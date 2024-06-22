@@ -48,7 +48,7 @@ namespace Physica::Core {
         template<class ModelType>
         void nvt_step(const LatticeHamilton<ModelType>& hamiltonH, RealType deltaBeta);
 
-        [[nodiscard]] RealType calcPartition(unsigned int siteDOF, unsigned int numParticle) const;
+        [[nodiscard]] inline RealType calcPartition() const;
         void swap(This& __restrict obj) noexcept;
         /* Static members */
         template<class RandomGenerator>
@@ -75,8 +75,8 @@ namespace Physica::Core {
     }
 
     template<class ScalarType>
-    typename TPQ<ScalarType>::RealType TPQ<ScalarType>::calcPartition(unsigned int siteDOF, unsigned int numParticle) const {
-        return pow(RealType(siteDOF), RealType(numParticle)) * Base::squaredNorm();
+    inline typename TPQ<ScalarType>::RealType TPQ<ScalarType>::calcPartition() const {
+        return Base::squaredNorm() * RealType(Base::getLength());
     }
 
     template<class ScalarType>

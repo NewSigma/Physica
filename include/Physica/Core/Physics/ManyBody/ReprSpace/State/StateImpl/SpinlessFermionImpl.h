@@ -101,7 +101,7 @@ namespace Physica::Core {
         const bool noExchange = (*this) > other;
         if (noExchange)
             return 1;
-        return (getNumElectron() % 2U != 0) ? 1 : -1;
+        return (getNumParticle() % 2U != 0) ? 1 : -1;
     }
 
     template<unsigned int Dim, unsigned int NumSite>

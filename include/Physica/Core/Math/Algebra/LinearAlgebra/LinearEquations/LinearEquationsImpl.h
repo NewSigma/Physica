@@ -22,20 +22,20 @@
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/MatrixDecomposition/PLUDecomposition.h"
 
 namespace Physica::Core {
-    template<class T, int type, size_t maxRow, size_t maxColumn>
-    LinearEquations<T, type, maxRow, maxColumn>::LinearEquations(DenseMatrix<T, type, maxRow, maxColumn> working_)
+    template<class T, int Type, size_t MaxRow, size_t MaxColumn>
+    LinearEquations<T, Type, MaxRow, MaxColumn>::LinearEquations(DenseMatrix<T, Type, MaxRow, MaxColumn> working_)
             : working(std::move(working_)) {
         assert(working.getRow() + 1 == working.getColumn());
     }
 
-    template<class T, int type, size_t maxRow, size_t maxColumn>
-    LinearEquations<T, type, maxRow, maxColumn>&
-    LinearEquations<T, type, maxRow, maxColumn>::operator=(LinearEquations l) noexcept {
+    template<class T, int Type, size_t MaxRow, size_t MaxColumn>
+    LinearEquations<T, Type, MaxRow, MaxColumn>&
+    LinearEquations<T, Type, MaxRow, MaxColumn>::operator=(LinearEquations l) noexcept {
         swap(l);
     }
 
-    template<class T, int type, size_t maxRow, size_t maxColumn>
-    void LinearEquations<T, type, maxRow, maxColumn>::gaussJordanPartial() {
+    template<class T, int Type, size_t MaxRow, size_t MaxColumn>
+    void LinearEquations<T, Type, MaxRow, MaxColumn>::gaussJordanPartial() {
         const auto rank = working.getRow();
         for (size_t i = 0; i < rank; ++i) {
             Operation::partialPivoting(working, i);
@@ -46,8 +46,8 @@ namespace Physica::Core {
             working(i, rank) /= working(i, i);
     }
 
-    template<class T, int type, size_t maxRow, size_t maxColumn>
-    void LinearEquations<T, type, maxRow, maxColumn>::gaussJordanComplete() {
+    template<class T, int Type, size_t MaxRow, size_t MaxColumn>
+    void LinearEquations<T, Type, MaxRow, MaxColumn>::gaussJordanComplete() {
         const auto rank = working.getRow();
         for (size_t i = 0; i < rank; ++i) {
             Operation::completePivoting(working, i);
@@ -58,8 +58,8 @@ namespace Physica::Core {
             working(i, rank) /= working(i, i);
     }
 
-    template<class T, int type, size_t maxRow, size_t maxColumn>
-    void LinearEquations<T, type, maxRow, maxColumn>::gaussEliminationPartial() {
+    template<class T, int Type, size_t MaxRow, size_t MaxColumn>
+    void LinearEquations<T, Type, MaxRow, MaxColumn>::gaussEliminationPartial() {
         const auto rank = working.getRow();
         for (size_t i = 0; i < rank; ++i) {
             Operation::partialPivoting(working, i);
@@ -73,8 +73,8 @@ namespace Physica::Core {
         working(0, rank) /= working(0, 0);
     }
 
-    template<class T, int type, size_t maxRow, size_t maxColumn>
-    void LinearEquations<T, type, maxRow, maxColumn>::gaussEliminationComplete() {
+    template<class T, int Type, size_t MaxRow, size_t MaxColumn>
+    void LinearEquations<T, Type, MaxRow, MaxColumn>::gaussEliminationComplete() {
         const auto rank = working.getRow();
         for (size_t i = 0; i < rank; ++i) {
             Operation::completePivoting(working, i);
@@ -88,8 +88,8 @@ namespace Physica::Core {
         working(0, rank) /= working(0, 0);
     }
 
-    template<class T, int type, size_t maxRow, size_t maxColumn>
-    void LinearEquations<T, type, maxRow, maxColumn>::swap(LinearEquations& __restrict equ) noexcept {
+    template<class T, int Type, size_t MaxRow, size_t MaxColumn>
+    void LinearEquations<T, Type, MaxRow, MaxColumn>::swap(LinearEquations& __restrict equ) noexcept {
         assert(this != &equ && "[Error]: Self swap is likely a bug");
         working.swap(equ.working);
     }

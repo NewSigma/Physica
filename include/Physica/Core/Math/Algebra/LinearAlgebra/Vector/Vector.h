@@ -25,7 +25,7 @@
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/MatrixOption.h"
 
 namespace Physica::Core {
-    template<class T = MultiScalar, size_t Length = Dynamic, size_t MaxLength = Length, class Allocator = Utils::HostAllocator<T>>
+    template<class T, size_t Length = Dynamic, size_t MaxLength = Length, class Allocator = Utils::HostAllocator<T>>
     class Vector;
 
     namespace Internal {

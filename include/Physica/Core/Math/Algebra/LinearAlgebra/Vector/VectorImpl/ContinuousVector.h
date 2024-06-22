@@ -99,7 +99,7 @@ namespace Physica::Core {
     std::istream& operator>>(std::istream& is, ContinuousVector<Derived>& v);
 
     template<class Derived, class OtherDerived>
-    void operator+=(ContinuousVector<Derived>& v1, const RValueVector<OtherDerived>& v2);
+    inline void operator+=(ContinuousVector<Derived>& v1, const RValueVector<OtherDerived>& v2);
 }
 
 #include "ContinuousVectorImpl/ContinuousVectorImpl.h"

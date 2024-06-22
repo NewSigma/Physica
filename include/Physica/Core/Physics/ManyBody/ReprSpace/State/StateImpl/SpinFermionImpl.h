@@ -125,7 +125,7 @@ namespace Physica::Core {
     }
 
     template<unsigned int Dim, unsigned int NumSite>
-    inline unsigned int SpinFermion<Dim, NumSite>::getNumPairedElectron() const noexcept {
+    inline unsigned int SpinFermion<Dim, NumSite>::getNumPairedParticle() const noexcept {
         return countOnes(spinUp.getOccupyBits() & spinDown.getOccupyBits());
     }
 }

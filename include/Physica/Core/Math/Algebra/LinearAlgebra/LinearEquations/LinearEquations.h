@@ -31,14 +31,14 @@ namespace Physica::Core {
      * [1] H.Press, William, A.Teukolsky, Saul, Vetterling, William T., Flannery, Brian P..
      * C++数值算法[M].北京: Publishing House of Electronics Industry, 2009
      */
-    template<class T = MultiScalar, int type = MatrixOption::Column | MatrixOption::Vector
-            , size_t maxRow = Utils::Dynamic, size_t maxColumn = Utils::Dynamic>
+    template<class T, int Type = MatrixOption::Column | MatrixOption::Vector
+            , size_t MaxRow = Utils::Dynamic, size_t MaxColumn = Utils::Dynamic>
     class LinearEquations {
-        using Operation = MatrixOperation<T, type, maxRow, maxColumn>;
+        using Operation = MatrixOperation<T, Type, MaxRow, MaxColumn>;
 
-        DenseMatrix<T, type, maxRow, maxColumn> working;
+        DenseMatrix<T, Type, MaxRow, MaxColumn> working;
     public:
-        explicit LinearEquations(DenseMatrix<T, type, maxRow, maxColumn> working_);
+        explicit LinearEquations(DenseMatrix<T, Type, MaxRow, MaxColumn> working_);
         LinearEquations(const LinearEquations& l) = default;
         LinearEquations(LinearEquations&& l) noexcept = default;
         ~LinearEquations() = default;
@@ -51,13 +51,15 @@ namespace Physica::Core {
         void gaussEliminationComplete();
         void swap(LinearEquations& __restrict equ) noexcept;
         /* Getters */
-        [[nodiscard]] const DenseMatrix<T, type, maxRow, maxColumn>& getWorking() const noexcept { return working; }
+        [[nodiscard]] const DenseMatrix<T, Type, MaxRow, MaxColumn>& getWorking() const noexcept { return working; }
         [[nodiscard]] auto getSolution() { return working.col(working.getColumn() - 1); }
     };
+}
 
-    template<class T, int type, size_t maxRow, size_t maxColumn>
-    inline void swap(LinearEquations<T, type, maxRow, maxColumn>& __restrict equ1,
-                     LinearEquations<T, type, maxRow, maxColumn>& __restrict equ2) noexcept {
+namespace std {
+    template<class T, int Type, size_t MaxRow, size_t MaxColumn>
+    inline void swap(Physica::Core::LinearEquations<T, Type, MaxRow, MaxColumn>& __restrict equ1,
+                     Physica::Core::LinearEquations<T, Type, MaxRow, MaxColumn>& __restrict equ2) noexcept {
         equ1.swap(equ2);
     }
 }

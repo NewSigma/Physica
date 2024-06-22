@@ -45,11 +45,11 @@ namespace Physica::Core {
 
     template<class T, size_t Order, size_t MaxOrder>
     class DenseHermiteMatrix : public RValueMatrix<DenseHermiteMatrix<T, Order, MaxOrder>>
-                             , private Internal::HalfDenseMatrixStorage<T, Order, MaxOrder> {
+                             , private HalfDenseMatrixStorage<T, Order, MaxOrder> {
         static_assert(T::isComplex, "[Error]: Using a symmetric matrix is preferred for real numbers");
         using This = DenseHermiteMatrix<T, Order, MaxOrder>;
         using Base = RValueMatrix<This>;
-        using Storage = Internal::HalfDenseMatrixStorage<T, Order, MaxOrder>;
+        using Storage = HalfDenseMatrixStorage<T, Order, MaxOrder>;
         using VectorBase = typename Storage::ArrayType;
     public:
         using typename Base::ScalarType;

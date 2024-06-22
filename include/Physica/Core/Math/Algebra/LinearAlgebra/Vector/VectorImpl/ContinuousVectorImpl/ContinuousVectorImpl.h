@@ -305,7 +305,10 @@ namespace Physica::Core {
     }
 
     template<class Derived, class OtherDerived>
-    void operator+=(ContinuousVector<Derived>& v1, const RValueVector<OtherDerived>& v2) {
+    inline void operator+=(ContinuousVector<Derived>& v1, const RValueVector<OtherDerived>& v2) {
+        constexpr size_t Size1 = Internal::Traits<Derived>::SizeAtCompile;
+        constexpr size_t Size2 = Internal::Traits<OtherDerived>::SizeAtCompile;
+        static_assert(Size1 == Dynamic || Size2 == Dynamic || Size1 == Size2, "[Error]: Size mismatch between two vector");
         assert(v1.getLength() == v2.getLength());
         Internal::AddAssignImpl<Derived, OtherDerived, Internal::EnableSIMD<Derived, OtherDerived>::value>::run(v1, v2);
     }

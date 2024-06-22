@@ -82,7 +82,7 @@ namespace Physica::Core {
     EigenSolver<ScalarType, Order>::EigenSolver() : eigenvalues(), rawEigenvectors(), computeEigenvectors(false) {}
 
     template<class ScalarType, size_t Order>
-    EigenSolver<ScalarType, Order>::EigenSolver(size_t size) {
+    EigenSolver<ScalarType, Order>::EigenSolver(size_t size) : EigenSolver() {
         resize(size);
     }
 
@@ -109,8 +109,13 @@ namespace Physica::Core {
         assert(source.getRow() == source.getColumn());
         assert(source.getRow() == eigenvalues.getLength());
         computeEigenvectors = computeEigenvectors_;
-        auto schur = Schur<ScalarType, Order>(source, computeEigenvectors);
+        [[unlikely]] if (source.getRow() == 1) {
+            eigenvalues[0] = source.calc(0, 0);
+            rawEigenvectors(0, 0) = ScalarType(1);
+            return;
+        }
 
+        auto schur = Schur<ScalarType, Order>(source, computeEigenvectors);
         WorkingMatrix& matrixT = schur.getMatrixT();
         const size_t order = source.getRow();
         if constexpr (isComplex)
@@ -157,6 +162,7 @@ namespace Physica::Core {
 
     template<class ScalarType, size_t Order>
     void EigenSolver<ScalarType, Order>::resize(size_t size) {
+        assert((Order == Dynamic || Order == size) && "[Error]: size is not consistent");
         eigenvalues.resize(size);
         rawEigenvectors.resize(size, size);
     }

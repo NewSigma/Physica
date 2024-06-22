@@ -43,10 +43,10 @@ namespace Physica::Core {
 
     template<class T, size_t Order, size_t MaxOrder>
     class DenseSymmMatrix : public LValueMatrix<DenseSymmMatrix<T, Order, MaxOrder>>
-                          , private Internal::HalfDenseMatrixStorage<T, Order, MaxOrder> {
+                          , private HalfDenseMatrixStorage<T, Order, MaxOrder> {
         using This = DenseSymmMatrix<T, Order, MaxOrder>;
         using Base = LValueMatrix<This>;
-        using Storage = Internal::HalfDenseMatrixStorage<T, Order, MaxOrder>;
+        using Storage = HalfDenseMatrixStorage<T, Order, MaxOrder>;
         using VectorBase = typename Storage::ArrayType;
     public:
         using typename Base::ScalarType;
@@ -62,6 +62,7 @@ namespace Physica::Core {
         ~DenseSymmMatrix() = default;
         /* Operators */
         using Base::operator=;
+        using Base::operator();
         DenseSymmMatrix& operator=(DenseSymmMatrix m) noexcept;
         template<class VectorType>
         [[nodiscard]] inline MatrixVectorProduct<This, VectorType> operator*(const RValueVector<VectorType>& vec) const noexcept;

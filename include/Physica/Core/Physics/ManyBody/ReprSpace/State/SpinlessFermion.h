@@ -77,7 +77,7 @@ namespace Physica::Core {
         [[nodiscard]] uint64_t getOccupyBits() const noexcept { return occupyBits; }
         [[nodiscard]] bool isVacuum() const noexcept { return occupyBits == 0; }
         [[nodiscard]] inline bool isOccupy(unsigned char site) const noexcept;
-        [[nodiscard]] unsigned int getNumElectron() const noexcept { return countOnes(occupyBits); }
+        [[nodiscard]] unsigned int getNumParticle() const noexcept { return countOnes(occupyBits); }
         [[nodiscard]] inline bool isTransReducible(int period = 1) const noexcept;
         [[nodiscard]] inline uint64_t makeFullMask() const noexcept;
         [[nodiscard]] inline uint64_t makeHighMask() const noexcept;
