@@ -48,6 +48,12 @@ namespace Physica::Core {
     public:
         SparseVectorExpression(const RSparseVector<VectorType>& v_, const ScalarBase<AnyScalar>& s_)
                 : v(v_.getDerived()), s(s_.getDerived()) {}
+        SparseVectorExpression(const This&) = delete;
+        SparseVectorExpression(This&&) noexcept = delete;
+        ~SparseVectorExpression() = default;
+        /* Operators */
+        This& operator=(const This&) = delete;
+        This& operator=(This&&) noexcept = delete;
         /* Getters */
         [[nodiscard]] ScalarType calc(size_t index) const { return v.calc(index) * s; }
         [[nodiscard]] NonZeroPair calcNonZero(size_t index) const {
@@ -60,14 +66,14 @@ namespace Physica::Core {
     //////////////////////////////////////Operators//////////////////////////////////////
     //////////////////////////////////////Mul//////////////////////////////////////
     template<class VectorType, class ScalarType>
-    inline SparseVectorExpression<ExpressionType::Mul, VectorType, ScalarType>
-    operator*(const RSparseVector<VectorType>& v, const ScalarBase<ScalarType>& s) {
+    [[nodiscard]] inline SparseVectorExpression<ExpressionType::Mul, VectorType, ScalarType>
+    operator*(const RSparseVector<VectorType>& v, const ScalarBase<ScalarType>& s) noexcept {
         return SparseVectorExpression<ExpressionType::Mul, VectorType, ScalarType>(v.getDerived(), s.getDerived());
     }
 
     template<class ScalarType, class VectorType>
-    inline SparseVectorExpression<ExpressionType::Mul, VectorType, ScalarType>
-    operator*(const ScalarBase<ScalarType>& s, const RSparseVector<VectorType>& v) {
+    [[nodiscard]] inline SparseVectorExpression<ExpressionType::Mul, VectorType, ScalarType>
+    operator*(const ScalarBase<ScalarType>& s, const RSparseVector<VectorType>& v) noexcept {
         return v * s;
     }
 }

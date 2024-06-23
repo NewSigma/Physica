@@ -35,6 +35,9 @@ namespace Physica::Core {
         using Base = RValueMatrix<This>;
         using PlainMatrix = typename remove_hermite<MatrixType>::Type;
         using HermiteType = MatrixPow<Hermite<MatrixType>>;
+
+        constexpr static bool IsHermite = is_hermite<MatrixType>::value;
+        using MatrixRtnType = typename std::conditional<IsHermite, Hermite<MatrixType>, const PlainMatrix&>::type;
     public:
         using typename Base::ScalarType;
     private:
@@ -53,7 +56,7 @@ namespace Physica::Core {
 
         [[nodiscard]] inline HermiteType hermite() const noexcept;
         /* Getters */
-        [[nodiscard]] auto getMatrix() const noexcept;
+        [[nodiscard]] MatrixRtnType getMatrix() const noexcept;
         [[nodiscard]] __host__ __device__ size_t getRow() const noexcept { return m.getRow(); }
         [[nodiscard]] __host__ __device__ size_t getColumn() const noexcept { return m.getColumn(); }
         [[nodiscard]] int getPower() const noexcept { return power; }
@@ -68,8 +71,8 @@ namespace Physica::Core {
     }
 
     template<class MatrixType>
-    auto MatrixPow<MatrixType>::getMatrix() const noexcept {
-        if constexpr (is_hermite<MatrixType>::value)
+    typename MatrixPow<MatrixType>::MatrixRtnType MatrixPow<MatrixType>::getMatrix() const noexcept {
+        if constexpr (IsHermite)
             return m.hermite();
         else
             return m;

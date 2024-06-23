@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 WeiBo He.
+ * Copyright 2023-2024 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -41,7 +41,13 @@ namespace Physica::Core {
     public:
         __device__ device_obj(const device_obj<RValueMatrix<MatrixType1>>& exp1_, const device_obj<RValueMatrix<MatrixType2>>& exp2_)
                 : exp1(exp1_.getDerived()), exp2(exp2_.getDerived()) {}
-
+        device_obj(const device_obj&) = delete;
+        device_obj(device_obj&&) noexcept = delete;
+        ~device_obj() = default;
+        /* Operators */
+        device_obj& operator=(const device_obj&) = delete;
+        device_obj& operator=(device_obj&&) noexcept = delete;
+        /* Operations */
         [[nodiscard]] __device__ ScalarType calc(size_t row, size_t col) const {
             return ScalarType(exp1.calc(row, col)) + ScalarType(exp2.calc(row, col));
         }
@@ -63,7 +69,12 @@ namespace Physica::Core {
     public:
         __device__ device_obj(const device_obj<RValueMatrix<MatrixType>>& exp_, const ScalarBase<AnyScalar>& base)
                 : exp(exp_.getDerived()), scalar(base.getDerived()) {}
-
+        device_obj(const device_obj&) = delete;
+        device_obj(device_obj&&) noexcept = delete;
+        ~device_obj() = default;
+        /* Operators */
+        device_obj& operator=(const device_obj&) = delete;
+        device_obj& operator=(device_obj&&) noexcept = delete;
         [[nodiscard]] __device__ ScalarType calc(size_t row, size_t col) const {
             return ScalarType(exp.calc(row, col)) + ScalarType(scalar);
         }
@@ -85,7 +96,12 @@ namespace Physica::Core {
     public:
         __device__ device_obj(const device_obj<RValueMatrix<MatrixType>>& exp_, const ScalarBase<AnyScalar>& base)
                 : exp(exp_.getDerived()), scalar(base.getDerived()) {}
-
+        device_obj(const device_obj&) = delete;
+        device_obj(device_obj&&) noexcept = delete;
+        ~device_obj() = default;
+        /* Operators */
+        device_obj& operator=(const device_obj&) = delete;
+        device_obj& operator=(device_obj&&) noexcept = delete;
         [[nodiscard]] __device__ ScalarType calc(size_t row, size_t col) const {
             return ScalarType(exp.calc(row, col)) * ScalarType(scalar);
         }
@@ -95,26 +111,26 @@ namespace Physica::Core {
     //////////////////////////////////////Operators//////////////////////////////////////
     //////////////////////////////////////Add//////////////////////////////////////
     template<class MatrixType1, class MatrixType2>
-    __device__ inline device_obj<DenseMatrixExpression<ExpressionType::Add, MatrixType1, MatrixType2>>
-    operator+(const device_obj<RValueMatrix<MatrixType1>>& mat1, const device_obj<RValueMatrix<MatrixType2>>& mat2) {
+    [[nodiscard]] __device__ inline device_obj<DenseMatrixExpression<ExpressionType::Add, MatrixType1, MatrixType2>>
+    operator+(const device_obj<RValueMatrix<MatrixType1>>& mat1, const device_obj<RValueMatrix<MatrixType2>>& mat2) noexcept {
         return {mat1, mat2};
     }
 
     template<class MatrixType, class ScalarType>
-    __device__ inline device_obj<DenseMatrixExpression<ExpressionType::Add, MatrixType, ScalarBase<ScalarType>>>
-    operator+(const device_obj<RValueMatrix<MatrixType>>& mat, const ScalarBase<ScalarType>& s) {
+    [[nodiscard]] __device__ inline device_obj<DenseMatrixExpression<ExpressionType::Add, MatrixType, ScalarBase<ScalarType>>>
+    operator+(const device_obj<RValueMatrix<MatrixType>>& mat, const ScalarBase<ScalarType>& s) noexcept {
         return {mat, s};
     }
     //////////////////////////////////////Mul//////////////////////////////////////
     template<class MatrixType, class ScalarType>
-    __device__ inline device_obj<DenseMatrixExpression<ExpressionType::Mul, MatrixType, ScalarBase<ScalarType>>>
-    operator*(const ScalarBase<ScalarType>& s, const device_obj<RValueMatrix<MatrixType>>& m) {
+    [[nodiscard]] __device__ inline device_obj<DenseMatrixExpression<ExpressionType::Mul, MatrixType, ScalarBase<ScalarType>>>
+    operator*(const ScalarBase<ScalarType>& s, const device_obj<RValueMatrix<MatrixType>>& m) noexcept {
         return {m, s};
     }
 
     template<class MatrixType, class ScalarType>
-    __device__ inline device_obj<DenseMatrixExpression<ExpressionType::Mul, MatrixType, ScalarBase<ScalarType>>>
-    operator*(const device_obj<RValueMatrix<MatrixType>>& m, const ScalarBase<ScalarType>& s) {
+    [[nodiscard]] __device__ inline device_obj<DenseMatrixExpression<ExpressionType::Mul, MatrixType, ScalarBase<ScalarType>>>
+    operator*(const device_obj<RValueMatrix<MatrixType>>& m, const ScalarBase<ScalarType>& s) noexcept {
         return {m, s};
     }
 }

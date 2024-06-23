@@ -70,11 +70,10 @@ namespace Physica::Core {
         if (power == 0)
             target = v;
 
-        const auto m = mpow.getMatrix();
-        OtherVector buffer = m * v;
+        OtherVector buffer = mpow.getMatrix() * v;
         for (int i = 1; i < power; ++i) {
             buffer.swap(target);
-            buffer = m * target;
+            buffer = mpow.getMatrix() * target;
         }
         buffer.swap(target);
     }

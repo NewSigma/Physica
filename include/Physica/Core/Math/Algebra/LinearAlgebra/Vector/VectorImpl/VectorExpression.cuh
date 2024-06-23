@@ -41,6 +41,12 @@ namespace Physica::Core {
                 : v1(asStruct(v1_.getDerived())), v2(asStruct(v2_.getDerived())) {
             assert(v1_.getLength() == v2_.getLength());
         }
+        device_obj(const device_obj&) = default;
+        device_obj(device_obj&&) noexcept = default;
+        ~device_obj() = default;
+        /* Operators */
+        device_obj& operator=(const device_obj&) = delete;
+        device_obj& operator=(device_obj&&) noexcept = delete;
         /* Getters */
         [[nodiscard]] __device__ ScalarType calc(size_t index) const {
             return ScalarType(v1.getDerived().calc(index)) + ScalarType(v2.getDerived().calc(index));
@@ -91,6 +97,12 @@ namespace Physica::Core {
                 : v1(asStruct(v1_.getDerived())), v2(asStruct(v2_.getDerived())) {
             assert(v1_.getLength() == v2_.getLength());
         }
+        device_obj(const device_obj&) = default;
+        device_obj(device_obj&&) noexcept = default;
+        ~device_obj() = default;
+        /* Operators */
+        device_obj& operator=(const device_obj&) = delete;
+        device_obj& operator=(device_obj&&) noexcept = delete;
         /* Getters */
         [[nodiscard]] __device__ ScalarType calc(size_t index) const {
             return ScalarType(v1.getDerived().calc(index)) - ScalarType(v2.getDerived().calc(index));
@@ -261,59 +273,59 @@ namespace Physica::Core {
     //////////////////////////////////////Operators//////////////////////////////////////
     //////////////////////////////////////Add//////////////////////////////////////
     template<class Derived, class OtherDerived>
-    inline __host__ __device__ device_obj<VectorExpression<ExpressionType::Add, Derived, OtherDerived>>
-            operator+(const device_obj<RValueVector<Derived>>& v1, const device_obj<RValueVector<OtherDerived>>& v2) {
+    [[nodiscard]] inline __host__ __device__ device_obj<VectorExpression<ExpressionType::Add, Derived, OtherDerived>>
+            operator+(const device_obj<RValueVector<Derived>>& v1, const device_obj<RValueVector<OtherDerived>>& v2) noexcept {
         return {v1.getDerived(), v2.getDerived()};
     }
     //////////////////////////////////////Sub//////////////////////////////////////
     template<class VectorType, class ScalarType>
-    __host__ __device__ inline device_obj<VectorExpression<ExpressionType::Sub, VectorType, ScalarBase<ScalarType>>>
-    operator-(const device_obj<RValueVector<VectorType>>& v, const ScalarBase<ScalarType>& s) {
+    [[nodiscard]] __host__ __device__ inline device_obj<VectorExpression<ExpressionType::Sub, VectorType, ScalarBase<ScalarType>>>
+    operator-(const device_obj<RValueVector<VectorType>>& v, const ScalarBase<ScalarType>& s) noexcept {
         return {v.getDerived(), s.getDerived()};
     }
 
     template<class Derived, class OtherDerived>
-    inline __host__ __device__ device_obj<VectorExpression<ExpressionType::Sub, Derived, OtherDerived>>
-            operator-(const device_obj<RValueVector<Derived>>& v1, const device_obj<RValueVector<OtherDerived>>& v2) {
+    [[nodiscard]] inline __host__ __device__ device_obj<VectorExpression<ExpressionType::Sub, Derived, OtherDerived>>
+            operator-(const device_obj<RValueVector<Derived>>& v1, const device_obj<RValueVector<OtherDerived>>& v2) noexcept {
         return {v1.getDerived(), v2.getDerived()};
     }
     //////////////////////////////////////Mul//////////////////////////////////////
     template<class VectorType, class ScalarType>
-    __host__ __device__ inline device_obj<VectorExpression<ExpressionType::Mul, VectorType, ScalarBase<ScalarType>>>
-    operator*(const device_obj<RValueVector<VectorType>>& v, const ScalarBase<ScalarType>& s) {
+    [[nodiscard]] __host__ __device__ inline device_obj<VectorExpression<ExpressionType::Mul, VectorType, ScalarBase<ScalarType>>>
+    operator*(const device_obj<RValueVector<VectorType>>& v, const ScalarBase<ScalarType>& s) noexcept {
         return {v.getDerived(), s.getDerived()};
     }
 
     template<class ScalarType, class VectorType>
-    __host__ __device__ inline device_obj<VectorExpression<ExpressionType::Mul, VectorType, ScalarBase<ScalarType>>>
-    operator*(const ScalarBase<ScalarType>& s, const device_obj<RValueVector<VectorType>>& v) {
+    [[nodiscard]] __host__ __device__ inline device_obj<VectorExpression<ExpressionType::Mul, VectorType, ScalarBase<ScalarType>>>
+    operator*(const ScalarBase<ScalarType>& s, const device_obj<RValueVector<VectorType>>& v) noexcept {
         return v * s.getDerived();
     }
     
     template<class VectorType1, class VectorType2>
-    __host__ __device__ inline device_obj<VectorExpression<ExpressionType::Mul, VectorType1, VectorType2>>
-    hadamard(const device_obj<RValueVector<VectorType1>>& v1, const device_obj<RValueVector<VectorType2>>& v2) {
+    [[nodiscard]] __host__ __device__ inline device_obj<VectorExpression<ExpressionType::Mul, VectorType1, VectorType2>>
+    hadamard(const device_obj<RValueVector<VectorType1>>& v1, const device_obj<RValueVector<VectorType2>>& v2) noexcept {
         return {v1.getDerived(), v2.getDerived()};
     }
     //////////////////////////////////////Div//////////////////////////////////////
     template<class VectorType, class ScalarType>
-    __host__ __device__ inline device_obj<VectorExpression<ExpressionType::Div, VectorType, ScalarBase<ScalarType>>>
-    operator/(const device_obj<RValueVector<VectorType>>& v, const ScalarBase<ScalarType>& s) {
+    [[nodiscard]] __host__ __device__ inline device_obj<VectorExpression<ExpressionType::Div, VectorType, ScalarBase<ScalarType>>>
+    operator/(const device_obj<RValueVector<VectorType>>& v, const ScalarBase<ScalarType>& s) noexcept {
         return {v.getDerived(), s.getDerived()};
     }
     ////////////////////////////////////////Elementary Functions////////////////////////////////////////////
     template<class VectorType>
-    inline auto reciprocal(const device_obj<RValueVector<VectorType>>& v) {
+    [[nodiscard]] inline auto reciprocal(const device_obj<RValueVector<VectorType>>& v) noexcept {
         return device_obj<VectorExpression<ExpressionType::Reciprocal, VectorType>>(v);
     }
 
     template<class VectorType>
-    inline auto relu(const device_obj<RValueVector<VectorType>>& v) {
+    [[nodiscard]] inline auto relu(const device_obj<RValueVector<VectorType>>& v) noexcept {
         return device_obj<VectorExpression<ExpressionType::Relu, VectorType>>(v);
     }
 
     template<class VectorType>
-    inline auto exp(const device_obj<RValueVector<VectorType>>& v) {
+    inline auto exp(const device_obj<RValueVector<VectorType>>& v) noexcept {
         return device_obj<VectorExpression<ExpressionType::Exp, VectorType>>(v);
     }
 }
