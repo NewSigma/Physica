@@ -42,14 +42,14 @@ namespace Physica::Core {
         [[nodiscard]] unsigned char getY() const noexcept { return (*this)[1]; }
         [[nodiscard]] unsigned char getZ() const noexcept { return (*this)[2]; }
         /* Static members */
-        [[nodiscard]] static unsigned char toIndex1D(This dims, This index) noexcept;
+        [[nodiscard]] static unsigned char toIndex1D(This dims, This index) noexcept { return index.toIndex1D(dims); }
     };
 
     template<unsigned int Dim>
-    unsigned char toIndex1D(SiteIndex<Dim> dims, SiteIndex<Dim> index) noexcept {
-        unsigned char result = index[0];
+    unsigned char SiteIndex<Dim>::toIndex1D(SiteIndex<Dim> dims) const noexcept {
+        unsigned char result = (*this)[0];
         for (unsigned int dim = 1; dim <= Dim; ++dim)
-            result = result * dims[dim] + index[dim];
+            result = result * dims[dim] + (*this)[dim];
         return result;
     }
 }

@@ -99,6 +99,7 @@ namespace Physica::Core {
         [[nodiscard]] inline RealType norm2() const;
         [[nodiscard]] inline RealType norm() const;
         [[nodiscard]] inline RealType squaredNorm() const;
+        [[nodiscard]] RealType lnSquaredNorm() const;
         [[nodiscard]] inline RealType normInf() const;
 
         [[nodiscard]] ScalarType max() const;

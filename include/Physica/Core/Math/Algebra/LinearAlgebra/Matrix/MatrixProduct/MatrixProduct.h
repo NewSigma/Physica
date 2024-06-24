@@ -40,6 +40,10 @@ namespace Physica::Core {
 
         template<class MatrixType1, class MatrixType2>
         class Traits<MatrixProduct<MatrixType1, MatrixType2>> {
+            static_assert(MatrixType1::ColumnAtCompile == MatrixType2::RowAtCompile ||
+                          MatrixType1::ColumnAtCompile == Dynamic ||
+                          MatrixType2::RowAtCompile == Dynamic,
+                          "[Error]: Row and column do not match in matrix-vector product");
         public:
             using ScalarType = typename Internal::BinaryScalarOpReturnType<typename MatrixType1::ScalarType,
                                                                            typename MatrixType2::ScalarType>::Type;
@@ -53,6 +57,8 @@ namespace Physica::Core {
 
         template<class VectorType, class MatrixType>
         class Traits<VectorMatrixProduct<VectorType, MatrixType>> {
+            static_assert(MatrixType::RowAtCompile == 1 || MatrixType::RowAtCompile == Dynamic,
+                          "Row and column do not match in matrix product");
         public:
             using ScalarType = typename Internal::BinaryScalarOpReturnType<typename VectorType::ScalarType,
                                                                            typename MatrixType::ScalarType>::Type;
@@ -67,6 +73,10 @@ namespace Physica::Core {
 
         template<class MatrixType, class VectorType>
         class Traits<MatrixVectorProduct<MatrixType, VectorType>> {
+            static_assert(MatrixType::ColumnAtCompile == VectorType::SizeAtCompile ||
+                          MatrixType::ColumnAtCompile == Dynamic ||
+                          VectorType::SizeAtCompile == Dynamic,
+                          "Row and column do not match in matrix product");
         public:
             using ScalarType = typename Internal::BinaryScalarOpReturnType<typename MatrixType::ScalarType,
                                                                            typename VectorType::ScalarType>::Type;
@@ -78,10 +88,6 @@ namespace Physica::Core {
 
     template<class MatrixType1, class MatrixType2>
     class MatrixProduct : public RValueMatrix<MatrixProduct<MatrixType1, MatrixType2>> {
-        static_assert(MatrixType1::ColumnAtCompile == MatrixType2::RowAtCompile ||
-                      MatrixType1::ColumnAtCompile == Dynamic ||
-                      MatrixType2::RowAtCompile == Dynamic,
-                      "[Error]: Row and column do not match in matrix-vector product");
         using This = MatrixProduct<MatrixType1, MatrixType2>;
     public:
         using Base = RValueMatrix<This>;
@@ -122,8 +128,6 @@ namespace Physica::Core {
 
     template<class VectorType, class MatrixType>
     class VectorMatrixProduct : public RValueMatrix<VectorMatrixProduct<VectorType, MatrixType>> {
-        static_assert(MatrixType::RowAtCompile == 1 || MatrixType::RowAtCompile == Dynamic,
-                      "Row and column do not match in matrix product");
         using This = VectorMatrixProduct<VectorType, MatrixType>;
     public:
         using Base = RValueMatrix<This>;
@@ -153,10 +157,6 @@ namespace Physica::Core {
 
     template<class MatrixType, class VectorType>
     class MatrixVectorProduct : public RValueVector<MatrixVectorProduct<MatrixType, VectorType>> {
-        static_assert(MatrixType::ColumnAtCompile == VectorType::SizeAtCompile ||
-                      MatrixType::ColumnAtCompile == Dynamic ||
-                      VectorType::SizeAtCompile == Dynamic,
-                      "Row and column do not match in matrix product");
         using This = MatrixVectorProduct<MatrixType, VectorType>;
     public:
         using Base = RValueVector<This>;

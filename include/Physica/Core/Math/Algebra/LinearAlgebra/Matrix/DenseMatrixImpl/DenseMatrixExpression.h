@@ -24,15 +24,15 @@ namespace Physica::Core {
     /**
      * \class DenseMatrixExpression represents \param T1 \param type \param T2. e.g. matrix + scalar, expression * expression
      */
-    template<ExpressionType type,
+    template<ExpressionType Type,
              class T1,
              class T2 = T1,
              class ResultType = typename Internal::BinaryScalarOpReturnType<typename T1::ScalarType, typename T2::ScalarType>::Type>
     class DenseMatrixExpression;
 
     namespace Internal {
-        template<ExpressionType type, class T1, class T2, class ResultType>
-        class Traits<DenseMatrixExpression<type, T1, T2, ResultType>> {
+        template<ExpressionType Type, class T1, class T2, class ResultType>
+        class Traits<DenseMatrixExpression<Type, T1, T2, ResultType>> {
             constexpr static bool SameMajor = MatrixOption::isSameMajor<T1, T2>();
             constexpr static int Major = SameMajor ? MatrixOption::getMajor<T1>()
                                                    : int(MatrixOption::AnyMajor);
@@ -51,8 +51,8 @@ namespace Physica::Core {
             constexpr static size_t MaxSizeAtCompile = T1::MaxSizeAtCompile;
         };
 
-        template<ExpressionType type, class T1, class T2, class ResultType>
-        class Traits<DenseMatrixExpression<type, T1, ScalarBase<T2>, ResultType>> {
+        template<ExpressionType Type, class T1, class T2, class ResultType>
+        class Traits<DenseMatrixExpression<Type, T1, ScalarBase<T2>, ResultType>> {
         public:
             using ScalarType = ResultType;
             constexpr static int Option = T1::Option;
@@ -84,6 +84,7 @@ namespace Physica::Core {
         This& operator=(This&&) noexcept = delete;
         /* Operations */
         [[nodiscard]] ScalarType calc(size_t row, size_t col) const { return -exp.calc(row, col); }
+        /* Getters */
         [[nodiscard]] __host__ __device__ size_t getRow() const { return exp.getRow(); }
         [[nodiscard]] __host__ __device__ size_t getColumn() const { return exp.getColumn(); }
     };
@@ -111,6 +112,7 @@ namespace Physica::Core {
         [[nodiscard]] ScalarType calc(size_t row, size_t col) const {
             return ScalarType(exp1.calc(row, col)) + ScalarType(exp2.calc(row, col));
         }
+        /* Getters */
         [[nodiscard]] __host__ __device__ size_t getRow() const { return exp1.getRow(); }
         [[nodiscard]] __host__ __device__ size_t getColumn() const { return exp1.getColumn(); }
     };
@@ -138,6 +140,7 @@ namespace Physica::Core {
         [[nodiscard]] ScalarType calc(size_t row, size_t col) const {
             return ScalarType(exp.calc(row, col)) + ScalarType(scalar);
         }
+        /* Getters */
         [[nodiscard]] __host__ __device__ size_t getRow() const { return exp.getRow(); }
         [[nodiscard]] __host__ __device__ size_t getColumn() const { return exp.getColumn(); }
     };
@@ -165,6 +168,7 @@ namespace Physica::Core {
         [[nodiscard]] ScalarType calc(size_t row, size_t col) const {
             return ScalarType(exp1.calc(row, col)) - ScalarType(exp2.calc(row, col));
         }
+        /* Getters */
         [[nodiscard]] __host__ __device__ size_t getRow() const { return exp1.getRow(); }
         [[nodiscard]] __host__ __device__ size_t getColumn() const { return exp1.getColumn(); }
     };
@@ -190,6 +194,7 @@ namespace Physica::Core {
         This& operator=(This&&) noexcept = delete;
         /* Operations */
         [[nodiscard]] ScalarType calc(size_t row, size_t col) const { return ScalarType(exp.calc(row, col)) - ScalarType(scalar); }
+        /* Getters */
         [[nodiscard]] __host__ __device__ size_t getRow() const { return exp.getRow(); }
         [[nodiscard]] __host__ __device__ size_t getColumn() const { return exp.getColumn(); }
     };
@@ -217,6 +222,7 @@ namespace Physica::Core {
         [[nodiscard]] ScalarType calc(size_t row, size_t col) const {
             return mat1.calc(row, col) * mat2.calc(row, col);
         }
+        /* Getters */
         [[nodiscard]] __host__ __device__ size_t getRow() const { return mat1.getRow(); }
         [[nodiscard]] __host__ __device__ size_t getColumn() const { return mat1.getColumn(); }
     };
@@ -244,8 +250,11 @@ namespace Physica::Core {
         [[nodiscard]] ScalarType calc(size_t row, size_t col) const {
             return ScalarType(exp.calc(row, col)) * ScalarType(scalar);
         }
+        /* Getters */
         [[nodiscard]] __host__ __device__ size_t getRow() const { return exp.getRow(); }
         [[nodiscard]] __host__ __device__ size_t getColumn() const { return exp.getColumn(); }
+        [[nodiscard]] const MatrixType& getMatrix() const noexcept { return exp; }
+        [[nodiscard]] const AnyScalar& getScalar() const noexcept { return scalar; }
     };
     //////////////////////////////////////Div//////////////////////////////////////
     template<class MatrixType, class AnyScalar>
@@ -269,6 +278,7 @@ namespace Physica::Core {
         This& operator=(This&&) noexcept = delete;
         /* Operations */
         [[nodiscard]] ScalarType calc(size_t row, size_t col) const { return ScalarType(exp.calc(row, col)) / ScalarType(scalar); }
+        /* Getters */
         [[nodiscard]] __host__ __device__ size_t getRow() const { return exp.getRow(); }
         [[nodiscard]] __host__ __device__ size_t getColumn() const { return exp.getColumn(); }
     };
@@ -295,6 +305,7 @@ namespace Physica::Core {
         This& operator=(This&&) noexcept = delete;
         /* Operations */
         [[nodiscard]] ScalarType calc(size_t row, size_t col) const { return reciprocal(mat.calc(row, col)); }
+        /* Getters */
         [[nodiscard]] __host__ __device__ size_t getRow() const { return mat.getRow(); }
         [[nodiscard]] __host__ __device__ size_t getColumn() const { return mat.getColumn(); }
     };
@@ -321,6 +332,7 @@ namespace Physica::Core {
         This& operator=(This&&) noexcept = delete;
         /* Operations */
         [[nodiscard]] ScalarType calc(size_t row, size_t col) const { return sqrt(mat.calc(row, col)); }
+        /* Getters */
         [[nodiscard]] __host__ __device__ size_t getRow() const { return mat.getRow(); }
         [[nodiscard]] __host__ __device__ size_t getColumn() const { return mat.getColumn(); }
     };
@@ -347,6 +359,7 @@ namespace Physica::Core {
         This& operator=(This&&) noexcept = delete;
         /* Operations */
         [[nodiscard]] ScalarType calc(size_t row, size_t col) const { return abs(mat.calc(row, col)); }
+        /* Getters */
         [[nodiscard]] __host__ __device__ size_t getRow() const { return mat.getRow(); }
         [[nodiscard]] __host__ __device__ size_t getColumn() const { return mat.getColumn(); }
     };
@@ -370,6 +383,7 @@ namespace Physica::Core {
         This& operator=(This&&) noexcept = delete;
         /* Operations */
         [[nodiscard]] ScalarType calc(size_t row, size_t col) const { return square(mat.calc(row, col)); }
+        /* Getters */
         [[nodiscard]] __host__ __device__ size_t getRow() const { return mat.getRow(); }
         [[nodiscard]] __host__ __device__ size_t getColumn() const { return mat.getColumn(); }
     };
@@ -393,6 +407,7 @@ namespace Physica::Core {
         This& operator=(This&&) noexcept = delete;
         /* Operations */
         [[nodiscard]] ScalarType calc(size_t row, size_t col) const { return ln(mat.calc(row, col)); }
+        /* Getters */
         [[nodiscard]] __host__ __device__ size_t getRow() const { return mat.getRow(); }
         [[nodiscard]] __host__ __device__ size_t getColumn() const { return mat.getColumn(); }
     };
@@ -416,6 +431,7 @@ namespace Physica::Core {
         This& operator=(This&&) noexcept = delete;
         /* Operations */
         [[nodiscard]] ScalarType calc(size_t row, size_t col) const { return exp(mat.calc(row, col)); }
+        /* Getters */
         [[nodiscard]] __host__ __device__ size_t getRow() const { return mat.getRow(); }
         [[nodiscard]] __host__ __device__ size_t getColumn() const { return mat.getColumn(); }
     };
@@ -439,6 +455,7 @@ namespace Physica::Core {
         This& operator=(This&&) noexcept = delete;
         /* Operations */
         [[nodiscard]] ScalarType calc(size_t row, size_t col) const { return sin(mat.calc(row, col)); }
+        /* Getters */
         [[nodiscard]] __host__ __device__ size_t getRow() const { return mat.getRow(); }
         [[nodiscard]] __host__ __device__ size_t getColumn() const { return mat.getColumn(); }
     };
@@ -462,6 +479,7 @@ namespace Physica::Core {
         This& operator=(This&&) noexcept = delete;
         /* Operations */
         [[nodiscard]] ScalarType calc(size_t row, size_t col) const { return cos(mat.calc(row, col)); }
+        /* Getters */
         [[nodiscard]] __host__ __device__ size_t getRow() const { return mat.getRow(); }
         [[nodiscard]] __host__ __device__ size_t getColumn() const { return mat.getColumn(); }
     };
@@ -471,12 +489,6 @@ namespace Physica::Core {
     [[nodiscard]] inline DenseMatrixExpression<ExpressionType::Minus, Derived>
     operator-(const RValueMatrix<Derived>& mat) noexcept {
         return DenseMatrixExpression<ExpressionType::Minus, Derived>(mat.getDerived());
-    }
-
-    template<ExpressionType type, class T1, class T2>
-    [[nodiscard]] inline DenseMatrixExpression<ExpressionType::Minus, DenseMatrixExpression<type, T1, T2>>
-    operator-(const DenseMatrixExpression<type, T1, T2>& exp) noexcept {
-        return DenseMatrixExpression<ExpressionType::Minus, DenseMatrixExpression<type, T1, T2>>(exp);
     }
     //////////////////////////////////////Add//////////////////////////////////////
     template<class MatrixType1, class MatrixType2>
@@ -571,4 +583,5 @@ namespace Physica::Core {
     }
 }
 
+#include "ExprVecProduct.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/MatrixImpl/MatrixConvert.h"

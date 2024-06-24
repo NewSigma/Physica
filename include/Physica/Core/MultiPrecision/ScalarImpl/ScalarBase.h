@@ -32,6 +32,11 @@ namespace Physica::Core {
     template<class T>
     struct is_scalar : public std::is_base_of<ScalarBase<T>, T> {};
 
+    template<class T>
+    struct is_scalar<ScalarBase<T>> {
+        constexpr static bool value = true;
+    };
+
     namespace Internal {
         template<class T> class Traits;
     }

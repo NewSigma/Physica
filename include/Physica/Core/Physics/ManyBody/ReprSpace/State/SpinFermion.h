@@ -39,8 +39,6 @@ namespace Physica::Core {
         using This = SpinFermion<Dim, NumSite>;
         using Base = State<This>;
         using SpinlessType = SpinlessFermion<Dim, NumSite>;
-    public:
-        using typename Base::IndexType;
     private:
         SpinlessType spinUp;
         SpinlessType spinDown;
@@ -64,13 +62,9 @@ namespace Physica::Core {
         void operator>>=(int shift) noexcept { (*this) = (*this) >> shift; }
         /* Operations */
         [[nodiscard]] SpinFermion hopUp(unsigned char from, unsigned char to) const;
-        [[nodiscard]] SpinFermion hopUp(IndexType dims, IndexType from, IndexType to) const;
         [[nodiscard]] SpinFermion hopDown(unsigned char from, unsigned char to) const;
-        [[nodiscard]] SpinFermion hopDown(IndexType dims, IndexType from, IndexType to) const;
         [[nodiscard]] inline int hopUpSign(unsigned char from, unsigned char to) const;
-        [[nodiscard]] inline int hopUpSign(IndexType dims, IndexType from, IndexType to) const;
         [[nodiscard]] inline int hopDownSign(unsigned char from, unsigned char to) const;
-        [[nodiscard]] inline int hopDownSign(IndexType dims, IndexType from, IndexType to) const;
         [[nodiscard]] SpinFermion transReduce() const;
         [[nodiscard]] inline int lShiftSign() const;
         [[nodiscard]] inline int calcPeriod() const noexcept;

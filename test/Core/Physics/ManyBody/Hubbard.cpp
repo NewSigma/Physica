@@ -27,7 +27,7 @@ constexpr double HoppingT = 1.0;
 constexpr double RepelU = 2;
 
 template<unsigned int NumSite, unsigned int NumSpinUp, unsigned int NumSpinDown>
-void testRSpinMatrix() {
+void testRSpinMatrix1D() {
     using ScalarType = Scalar<Double>;
     using VectorType = Vector<ScalarType>;
     using MatrixType = DenseMatrix<ScalarType>;
@@ -35,6 +35,28 @@ void testRSpinMatrix() {
 
     ReprType repr(NumSpinUp, NumSpinDown);
     const Hubbard<ScalarType, ReprType> model({NumSite}, 1, std::move(repr), HoppingT, RepelU);
+    const size_t numState = model.getNumState();
+    MatrixType mat(numState, numState);
+    for (size_t i = 0; i < numState; ++i) {
+        VectorType temp(numState, 0);
+        temp[i] = ScalarType(1);
+        auto col = mat.col(i);
+        col = model * temp;
+    }
+
+    if (!matrixNear(model, mat, 1E-15))
+        exit(EXIT_FAILURE);
+}
+
+template<unsigned int NumSiteX, unsigned int NumSiteY, unsigned int NumSpinUp, unsigned int NumSpinDown>
+void testRSpinMatrix2D() {
+    using ScalarType = Scalar<Double>;
+    using VectorType = Vector<ScalarType>;
+    using MatrixType = DenseMatrix<ScalarType>;
+    using ReprType = SpinRepr<2, NumSiteX * NumSiteY, NumSpinUp == NumSpinDown>;
+
+    ReprType repr(NumSpinUp, NumSpinDown);
+    const Hubbard<ScalarType, ReprType> model({NumSiteX, NumSiteY}, 1, std::move(repr), HoppingT, RepelU);
     const size_t numState = model.getNumState();
     MatrixType mat(numState, numState);
     for (size_t i = 0; i < numState; ++i) {
@@ -72,8 +94,9 @@ void testKSpinMatrix() {
 }
 
 int main() {
-    testRSpinMatrix<3, 2, 1>();
-    testRSpinMatrix<2, 1, 1>();
+    testRSpinMatrix1D<3, 2, 1>();
+    testRSpinMatrix1D<2, 1, 1>();
+    testRSpinMatrix2D<2, 3, 2, 3>();
     testKSpinMatrix();
     return 0;
 }

@@ -40,8 +40,6 @@ namespace Physica::Core {
         static_assert(NumSite > 0, "[Error]: Invalid site number");
         using This = SpinlessFermion<Dim, NumSite>;
         using Base = State<This>;
-    public:
-        using typename Base::IndexType;
     private:
         uint64_t occupyBits;
 
@@ -66,9 +64,7 @@ namespace Physica::Core {
         void operator>>=(int shift) noexcept { (*this) = (*this) >> shift; }
         /* Operations */
         [[nodiscard]] inline SpinlessFermion hop(unsigned char from, unsigned char to) const;
-        [[nodiscard]] inline SpinlessFermion hop(IndexType dims, IndexType from, IndexType to) const;
-        [[nodiscard]] int hopSign(unsigned char from, unsigned char to) const;
-        [[nodiscard]] int hopSign(IndexType dims, IndexType from, IndexType to) const;
+        [[nodiscard]] inline int hopSign(unsigned char from, unsigned char to) const;
         [[nodiscard]] SpinlessFermion transReduce(int period = 1) const;
         [[nodiscard]] int lShiftSign() const;
         [[nodiscard]] int calcPeriod() const;

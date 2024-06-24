@@ -166,6 +166,14 @@ namespace Physica::Core {
     }
 
     template<class Derived>
+    typename RValueVector<Derived>::RealType RValueVector<Derived>::lnSquaredNorm() const {
+        const auto& derived = Base::getDerived();
+        const RealType maxabs = abs(derived).max();
+        const RealType factor = reciprocal(maxabs);
+        return ln((derived * factor).squaredNorm()) + RealType(2) * ln(maxabs);
+    }
+
+    template<class Derived>
     inline typename RValueVector<Derived>::RealType RValueVector<Derived>::normInf() const {
         return abs(Base::getDerived()).max();
     }

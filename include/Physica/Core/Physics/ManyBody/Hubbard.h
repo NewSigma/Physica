@@ -82,7 +82,7 @@ namespace Physica::Core {
         [[nodiscard]] RealType getHoppingT() const noexcept { return hoppingT; }
         [[nodiscard]] RealType getRepelU() const noexcept { return repelU; }
     protected:
-        RealType repelElem(StateType psi) const;
+        inline RealType repelElem(StateType psi) const;
         RealType hoppingElem(StateType rowPsi, StateType colPsi) const;
         void sumHopping(VectorType& target, ScalarType value, StateType psi) const noexcept;
         void sumHopping(VectorType& target, FFTType& fft, ScalarType factor, StateType psi) const;

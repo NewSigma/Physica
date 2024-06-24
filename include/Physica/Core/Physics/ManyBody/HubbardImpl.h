@@ -90,29 +90,48 @@ namespace Physica::Core {
     }
 
     template<class ScalarType, class ReprType>
-    typename Hubbard<ScalarType, ReprType>::RealType
-    Hubbard<ScalarType, ReprType>::repelElem(StateType psi) const {
-        int numRepel = 0;
-        for (unsigned int site = 0; site < NumSite; ++site)
-            numRepel += psi.isUpOccupy(site) && psi.isDownOccupy(site);
-        return repelU * RealType(numRepel);
+    inline typename Hubbard<ScalarType, ReprType>::RealType Hubbard<ScalarType, ReprType>::repelElem(StateType psi) const {
+        return repelU * RealType(psi.getNumPairedParticle());
     }
 
     template<class ScalarType, class ReprType>
     typename Hubbard<ScalarType, ReprType>::RealType
     Hubbard<ScalarType, ReprType>::hoppingElem(StateType rowPsi, StateType colPsi) const {
         int count = 0;
-        for (unsigned int site = 0; site < NumSite; ++site) {
-            const auto site1 = (site + 1) % NumSite;
-            const int signUp = colPsi.hopUpSign(site, site1);
-            const int signDown = colPsi.hopDownSign(site, site1);
-            int n1 = 0;
-            n1 += rowPsi == colPsi.hopUp(site, site1);
-            n1 -= rowPsi == colPsi.hopUp(site1, site);
-            int n2 = 0;
-            n2 += rowPsi == colPsi.hopDown(site, site1);
-            n2 -= rowPsi == colPsi.hopDown(site1, site);
-            count += n1 * signUp + n2 * signDown;
+        if constexpr (Dim == 1) {
+            for (unsigned int site = 0; site < NumSite; ++site) {
+                const auto site1 = (site + 1) % NumSite;
+                const int signUp = colPsi.hopUpSign(site, site1);
+                const int signDown = colPsi.hopDownSign(site, site1);
+                int n1 = 0;
+                n1 += rowPsi == colPsi.hopUp(site, site1);
+                n1 -= rowPsi == colPsi.hopUp(site1, site);
+                int n2 = 0;
+                n2 += rowPsi == colPsi.hopDown(site, site1);
+                n2 -= rowPsi == colPsi.hopDown(site1, site);
+                count += n1 * signUp + n2 * signDown;
+            }
+        }
+        else {
+            Base::forSiteInLattice([this, &count, rowPsi, colPsi](IndexType index) {
+                const auto& dims = Base::getDims();
+                const int site = IndexType::toIndex1D(dims, index);
+                for (unsigned int dim = 0; dim < Dim; ++dim) {
+                    IndexType index1 = index;
+                    index1[dim] = (index1[dim] + 1) % Base::getSuperSize()[dim];
+
+                    const int site1 = IndexType::toIndex1D(dims, index1);
+                    const int signUp = colPsi.hopUpSign(site, site1);
+                    const int signDown = colPsi.hopDownSign(site, site1);
+                    int n1 = 0;
+                    n1 += rowPsi == colPsi.hopUp(site, site1);
+                    n1 -= rowPsi == colPsi.hopUp(site1, site);
+                    int n2 = 0;
+                    n2 += rowPsi == colPsi.hopDown(site, site1);
+                    n2 -= rowPsi == colPsi.hopDown(site1, site);
+                    count += n1 * signUp + n2 * signDown;
+                }
+            });
         }
         return RealType(-count) * hoppingT;
     }
@@ -185,11 +204,14 @@ namespace Physica::Core {
         static_assert(!IsTransInvariant && "[Error]: Not implemented");
         const ScalarType hop = -factor * hoppingT;
         const auto state = repr[index];
-        unsigned char numRepel = 0;
-        Base::forSiteInLattice([this, &result, &state, &numRepel, hop](IndexType site) {
+        int numRepel = 0;
+        Base::forSiteInLattice([this, &result, &numRepel, state, hop](IndexType index) {
+            const auto& dims = Base::getDims();
+            const int site = IndexType::toIndex1D(dims, index);
             for (unsigned int dim = 0; dim < Dim; ++dim) {
-                SiteIndex site1 = site;
-                site1[dim] = (site1[dim] + 1) % Base::getSuperSize()[dim];
+                IndexType index1 = index;
+                index1[dim] = (index1[dim] + 1) % Base::getSuperSize()[dim];
+                const int site1 = IndexType::toIndex1D(dims, index1);
                 const ScalarType hopUp = hop * RealType(state.hopUpSign(site, site1));
                 const ScalarType hopDown = hop * RealType(state.hopDownSign(site, site1));
                 sumHopping(result, hopUp, state.hopUp(site, site1));

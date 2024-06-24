@@ -54,24 +54,25 @@ namespace Physica::Core {
         using DimArray = Utils::Array<unsigned int, Dim>;
     private:
         DimArray superSize;
-        unsigned int numUnitCellSite;
+        unsigned char numUnitCellSite;
     public:
         ~LatticeHamilton() = default;
         /* Operations */
         [[nodiscard]] const This& hermite() const noexcept { return *this; }
         void swap(LatticeHamilton& __restrict obj) noexcept;
 
-        template<class Functor> void forSiteInLattice(Functor func);
+        template<class Functor> void forSiteInLattice(Functor func) const;
         /* Getters */
         [[nodiscard]] const DimArray& getSuperSize() const noexcept { return superSize; }
-        [[nodiscard]] unsigned int getNumUnitCellSite() const noexcept { return numUnitCellSite; }
+        [[nodiscard]] unsigned char getNumUnitCellSite() const noexcept { return numUnitCellSite; }
+        [[nodiscard]] IndexType getDims() const noexcept;
         [[nodiscard]] const ReprType& getRepr() const noexcept { return Base::getDerived().getRepr(); }
         [[nodiscard]] size_t getNumState() const noexcept { return Base::getDerived().getNumState(); }
         [[nodiscard]] size_t getRow() const noexcept { return getNumState(); }
         [[nodiscard]] size_t getColumn() const noexcept { return getNumState(); }
     protected:
         LatticeHamilton() = default;
-        LatticeHamilton(DimArray superSize_, unsigned int numSitePerCell_);
+        LatticeHamilton(DimArray superSize_, unsigned char numSitePerCell_);
         LatticeHamilton(const LatticeHamilton&) = default;
         LatticeHamilton(LatticeHamilton&&) noexcept = default;
         /* Operators */
@@ -81,7 +82,7 @@ namespace Physica::Core {
     };
 
     template<class Derived>
-    LatticeHamilton<Derived>::LatticeHamilton(DimArray superSize_, unsigned int numSitePerCell_)
+    LatticeHamilton<Derived>::LatticeHamilton(DimArray superSize_, unsigned char numSitePerCell_)
             : superSize(std::move(superSize_)), numUnitCellSite(numSitePerCell_) {
         assert(checkNumSite() && "[Error]: Inconsistent site number");
     }
@@ -95,7 +96,7 @@ namespace Physica::Core {
 
     template<class Derived>
     template<class Functor>
-    void LatticeHamilton<Derived>::forSiteInLattice(Functor func) {
+    void LatticeHamilton<Derived>::forSiteInLattice(Functor func) const {
         if constexpr (Dim == 1) {
             for (unsigned char x = 0; x < superSize[0]; ++x)
                 for (unsigned char site = 0; site < numUnitCellSite; ++site)
@@ -117,8 +118,18 @@ namespace Physica::Core {
     }
 
     template<class Derived>
+    typename LatticeHamilton<Derived>::IndexType LatticeHamilton<Derived>::getDims() const noexcept {
+        if constexpr (Dim == 1)
+            return IndexType{(unsigned char)superSize[0], numUnitCellSite};
+        if constexpr (Dim == 2)
+            return IndexType{(unsigned char)superSize[0], (unsigned char)superSize[1], numUnitCellSite};
+        if constexpr (Dim == 3)
+            return IndexType{(unsigned char)superSize[0], (unsigned char)superSize[1], (unsigned char)superSize[2], numUnitCellSite};
+    }
+
+    template<class Derived>
     bool LatticeHamilton<Derived>::checkNumSite() const noexcept {
-        unsigned char numSite = getNumUnitCellSite();
+        unsigned int numSite = getNumUnitCellSite();
         for (auto size : superSize)
             numSite *= size;
         return numSite == NumSite;

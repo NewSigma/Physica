@@ -57,12 +57,7 @@ namespace Physica::Core {
     }
 
     template<unsigned int Dim, unsigned int NumSite>
-    inline SpinlessFermion<Dim, NumSite> SpinlessFermion<Dim, NumSite>::hop(IndexType dims, IndexType from, IndexType to) const {
-        return hop(IndexType::toIndex1D(dims, from), IndexType::toIndex1D(dims, to));
-    }
-
-    template<unsigned int Dim, unsigned int NumSite>
-    int SpinlessFermion<Dim, NumSite>::hopSign(unsigned char from, unsigned char to) const {
+    inline int SpinlessFermion<Dim, NumSite>::hopSign(unsigned char from, unsigned char to) const {
         const bool flag = from < to;
         const int sign1 = flag ? 1 : -1;
         if (!flag)
@@ -70,11 +65,6 @@ namespace Physica::Core {
         const unsigned int numElectron = countOnes(occupyBits >> (from + 1)) - countOnes(occupyBits >> (to + 1));
         const int sign2 = (numElectron % 2U == 0U) ? 1 : -1;
         return sign1 * sign2;
-    }
-
-    template<unsigned int Dim, unsigned int NumSite>
-    int SpinlessFermion<Dim, NumSite>::hopSign(IndexType dims, IndexType from, IndexType to) const {
-        return hopSign(IndexType::toIndex1D(dims, from), IndexType::toIndex1D(dims, to));
     }
 
     template<unsigned int Dim, unsigned int NumSite>
