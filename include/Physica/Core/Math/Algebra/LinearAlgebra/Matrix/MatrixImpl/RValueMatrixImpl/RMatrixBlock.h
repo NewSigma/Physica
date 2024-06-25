@@ -33,7 +33,9 @@ namespace Physica::Core {
             using ScalarType = typename MatrixType::ScalarType;
             constexpr static size_t SizeAtCompile = Traits<MatrixType>::ColumnAtCompile;
             constexpr static size_t MaxSizeAtCompile = Traits<MatrixType>::MaxColumnAtCompile;
+
             using PacketType = typename Internal::BestPacket<ScalarType, SizeAtCompile>::Type;
+            constexpr static bool FastAssign = false;
         };
 
         template<class MatrixType>
@@ -42,7 +44,9 @@ namespace Physica::Core {
             using ScalarType = typename MatrixType::ScalarType;
             constexpr static size_t SizeAtCompile = Traits<MatrixType>::RowAtCompile;
             constexpr static size_t MaxSizeAtCompile = Traits<MatrixType>::MaxRowAtCompile;
+
             using PacketType = typename Internal::BestPacket<ScalarType, SizeAtCompile>::Type;
+            constexpr static bool FastAssign = false;
         };
 
         template<class MatrixType, size_t Row, size_t Column>

@@ -35,7 +35,9 @@ namespace Physica::Core {
             using ScalarType = T;
             constexpr static size_t SizeAtCompile = Length;
             constexpr static size_t MaxSizeAtCompile = MaxLength;
+
             using PacketType = typename Internal::BestPacket<ScalarType, SizeAtCompile>::Type;
+            constexpr static bool FastAssign = false;
         };
     }
 

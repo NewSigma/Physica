@@ -32,6 +32,8 @@ namespace Physica::Core {
             using ScalarType = typename GridType::ScalarType;
             constexpr static size_t SizeAtCompile = Dynamic;
             constexpr static size_t MaxSizeAtCompile = Dynamic;
+
+            constexpr static bool FastAssign = false;
         };
     }
 

@@ -31,7 +31,9 @@ namespace Physica::Core {
             using ScalarType = typename MatrixType::ScalarType;
             constexpr static size_t SizeAtCompile = Length;
             constexpr static size_t MaxSizeAtCompile = Length;
+
             using PacketType = typename Internal::BestPacket<ScalarType, SizeAtCompile>::Type;
+            constexpr static bool FastAssign = false;
         };
 
         template<class MatrixType, size_t Length>
@@ -40,7 +42,9 @@ namespace Physica::Core {
             using ScalarType = typename MatrixType::ScalarType;
             constexpr static size_t SizeAtCompile = Length;
             constexpr static size_t MaxSizeAtCompile = Length;
+
             using PacketType = typename Internal::BestPacket<ScalarType, SizeAtCompile>::Type;
+            constexpr static bool FastAssign = false;
         };
 
         template<class MatrixType, size_t Row, size_t Column>
@@ -178,6 +182,9 @@ namespace Physica::Core {
         void resize([[maybe_unused]] size_t row, [[maybe_unused]] size_t col) { assert(row == 1 && col == getColumn()); }
 
         using Base::row;
+        using Base::transpose;
+        using Base::conjugate;
+        using Base::hermite;
 
         using VectorBase::random_uniform;
         using VectorBase::random_normal;
@@ -237,6 +244,9 @@ namespace Physica::Core {
         void resize([[maybe_unused]] size_t row, [[maybe_unused]] size_t col) { assert(row == getRow() && col == 1); }
 
         using Base::col;
+        using Base::transpose;
+        using Base::conjugate;
+        using Base::hermite;
 
         using VectorBase::random_uniform;
         using VectorBase::random_normal;

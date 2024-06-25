@@ -104,11 +104,6 @@ namespace Physica::Core {
     }
 
     template<class Derived>
-    inline FormatedVector<Derived> RValueVector<Derived>::format() const {
-        return FormatedVector<Derived>(*this);
-    }
-
-    template<class Derived>
     template<class PacketType>
     inline PacketType RValueVector<Derived>::packet(size_t index) const {
         ScalarType buffer[PacketType::size()];
@@ -140,6 +135,11 @@ namespace Physica::Core {
         PacketType packet{};
         packet.load_partial(count, buffer);
         return packet;
+    }
+
+    template<class Derived>
+    inline FormatedVector<Derived> RValueVector<Derived>::format() const {
+        return FormatedVector<Derived>(*this);
     }
 
     template<class Derived>

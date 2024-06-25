@@ -38,7 +38,7 @@ namespace Physica::Core {
         inline LValueVector& operator=(const LValueVector& v);
         inline LValueVector& operator=(LValueVector&& v) noexcept;
         template<class OtherVector>
-        inline Derived& operator=(const RValueVector<OtherVector>& v);
+        inline Derived& operator=(const RValueVector<OtherVector>& v_);
         inline Derived& operator=(const ScalarType& s);
         [[nodiscard]] ScalarType& operator[](size_t index) { return *data_ptr(index); }
         [[nodiscard]] const ScalarType& operator[](size_t index) const { return *data_ptr(index); }

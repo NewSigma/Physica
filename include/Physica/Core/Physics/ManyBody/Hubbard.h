@@ -27,8 +27,7 @@ namespace Physica::Core {
 
     namespace Internal {
         template<class T, class U>
-        class Traits<Hubbard<T, U>>
-                : public Traits<LatticeHamilton<Hubbard<T, U>>> {
+        class Traits<Hubbard<T, U>> : public Traits<LatticeHamilton<Hubbard<T, U>>> {
         public:
             using ScalarType = T;
             using ReprType = U;
@@ -71,9 +70,10 @@ namespace Physica::Core {
         ~Hubbard() = default;
         /* Operators */
         This& operator=(This obj) noexcept { swap(obj); return *this; }
-        template<class AnyVector>
-        [[nodiscard]] Vector<ScalarType> operator*(const RValueVector<AnyVector>& v) const;
         /* Operations */
+        template<class SourceVector, class TargetVector>
+        void dot(const SourceVector& source, TargetVector& target) const;
+
         [[nodiscard]] ScalarType calc(size_t row, size_t col) const;
         void swap(This& __restrict obj) noexcept;
         /* Getters */
@@ -84,12 +84,17 @@ namespace Physica::Core {
     protected:
         inline RealType repelElem(StateType psi) const;
         RealType hoppingElem(StateType rowPsi, StateType colPsi) const;
-        void sumHopping(VectorType& target, ScalarType value, StateType psi) const noexcept;
-        void sumHopping(VectorType& target, FFTType& fft, ScalarType factor, StateType psi) const;
+        template<class TargetVector>
+        void sumHopping(TargetVector& target, ScalarType value, StateType psi) const noexcept;
+        template<class TargetVector>
+        void sumHopping(TargetVector& target, FFTType& fft, ScalarType factor, StateType psi) const;
     private:
-        void dotImpl1D(Vector<ScalarType>& result, ScalarType factor, size_t index) const;
-        void dotImplND(Vector<ScalarType>& result, ScalarType factor, size_t index) const;
+        template<class TargetVector>
+        void dotImpl1D(TargetVector& result, ScalarType factor, size_t index) const;
+        template<class TargetVector>
+        void dotImplND(TargetVector& result, ScalarType factor, size_t index) const;
     };
 }
 
 #include "HubbardImpl.h"
+#include "HubbardVecProduct.h"

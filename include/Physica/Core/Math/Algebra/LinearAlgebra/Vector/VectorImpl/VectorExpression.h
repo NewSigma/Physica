@@ -22,45 +22,51 @@
 #include "Physica/Core/MultiPrecision/Scalar.h"
 #include "Physica/Core/MultiPrecision/ScalarImpl/ExpressionType.h"
 #include "Physica/Utils/Template/CRTPBase.h"
-/**
- * Optimize: Add compile time length check, length of two vectors must be equal.
- */
+
 namespace Physica::Core {
     //Forward declaration
     using Utils::Dynamic;
     /**
      * \class VectorExpression implements template expression for vectors, which will reduce temporary objects.
      * 
-     * Operations defined as \tparam T1 \tparam type \tparam T2. e.g. vector + scalar, expression * expression
+     * Operations defined as \tparam T1 \tparam Type \tparam T2. e.g. vector + scalar, expression * expression
      */
-    template<ExpressionType type, class T1, class T2 = T1>
+    template<ExpressionType Type, class T1, class T2 = T1>
     class VectorExpression;
 
     namespace Internal {
         template<class T>
         class Traits;
 
-        template<ExpressionType type, class Exp1, class Exp2>
-        class Traits<VectorExpression<type, Exp1, Exp2>> {
-            static_assert(Exp1::SizeAtCompile == Dynamic || Exp2::SizeAtCompile == Dynamic || (Exp1::SizeAtCompile == Exp2::SizeAtCompile)
+        template<ExpressionType Type, class Expr1, class Expr2>
+        class Traits<VectorExpression<Type, Expr1, Expr2>> {
+            static_assert(Expr1::SizeAtCompile == Dynamic || Expr2::SizeAtCompile == Dynamic || (Expr1::SizeAtCompile == Expr2::SizeAtCompile)
                          , "[Error]: Vector dimentions do not match");
-            using ScalarType1 = typename Exp1::ScalarType;
+            using ScalarType1 = typename Expr1::ScalarType;
             using RealType = typename ScalarType1::RealType;
-            using BinaryScalarType = typename BinaryScalarOpReturnType<ScalarType1, typename Exp2::ScalarType>::Type;
+            using BinaryScalarType = typename BinaryScalarOpReturnType<ScalarType1, typename Expr2::ScalarType>::Type;
+            constexpr static bool FastAssign1 = Traits<Expr1>::FastAssign;
+            constexpr static bool FastAssign2 = Traits<Expr2>::FastAssign;
+            constexpr static bool IsAddOrSub = Type == ExpressionType::Add || Type == ExpressionType::Sub;
         public:
-            using ScalarType = typename std::conditional<type == ExpressionType::Abs, RealType, BinaryScalarType>::type;
-            constexpr static size_t SizeAtCompile = Exp1::SizeAtCompile > Exp2::SizeAtCompile ? Exp1::SizeAtCompile : Exp2::SizeAtCompile;
-            constexpr static size_t MaxSizeAtCompile = Exp1::MaxSizeAtCompile > Exp2::MaxSizeAtCompile ? Exp1::MaxSizeAtCompile : Exp2::MaxSizeAtCompile;
-            using PacketType = typename Internal::BestPacket<ScalarType, SizeAtCompile>::Type;
+            using ScalarType = typename std::conditional<Type == ExpressionType::Abs, RealType, BinaryScalarType>::type;
+            constexpr static size_t SizeAtCompile = Expr1::SizeAtCompile > Expr2::SizeAtCompile ? Expr1::SizeAtCompile : Expr2::SizeAtCompile;
+            constexpr static size_t MaxSizeAtCompile = Expr1::MaxSizeAtCompile > Expr2::MaxSizeAtCompile ? Expr1::MaxSizeAtCompile : Expr2::MaxSizeAtCompile;
+
+            using PacketType = typename BestPacket<ScalarType, SizeAtCompile>::Type;
+            constexpr static bool FastAssign = IsAddOrSub && (FastAssign1 || FastAssign2);
         };
 
-        template<ExpressionType type, class Exp, class AnyScalar>
-        class Traits<VectorExpression<type, Exp, ScalarBase<AnyScalar>>> {
+        template<ExpressionType Type, class Expr, class AnyScalar>
+        class Traits<VectorExpression<Type, Expr, ScalarBase<AnyScalar>>> {
+            static_assert(is_scalar<AnyScalar>::value, "[Error]: This is not a scalar type");
         public:
-            using ScalarType = typename BinaryScalarOpReturnType<typename Exp::ScalarType, AnyScalar>::Type;
-            constexpr static size_t SizeAtCompile = Exp::SizeAtCompile;
-            constexpr static size_t MaxSizeAtCompile = Exp::MaxSizeAtCompile;
-            using PacketType = typename Internal::BestPacket<ScalarType, SizeAtCompile>::Type;
+            using ScalarType = typename BinaryScalarOpReturnType<typename Expr::ScalarType, AnyScalar>::Type;
+            constexpr static size_t SizeAtCompile = Expr::SizeAtCompile;
+            constexpr static size_t MaxSizeAtCompile = Expr::MaxSizeAtCompile;
+
+            using PacketType = typename BestPacket<ScalarType, SizeAtCompile>::Type;
+            constexpr static bool FastAssign = Traits<Expr>::FastAssign;
         };
     }
     //////////////////////////////////////Minus//////////////////////////////////////
@@ -86,205 +92,10 @@ namespace Physica::Core {
         [[nodiscard]] PacketType packetPartial(size_t index, size_t count) const { return -exp.template packetPartial<PacketType>(index, count); }
         [[nodiscard]] __host__ __device__ size_t getLength() const { return exp.getLength(); }
     };
-    //////////////////////////////////////Add//////////////////////////////////////
-    template<class VectorType1, class VectorType2>
-    class VectorExpression<ExpressionType::Add, VectorType1, VectorType2>
-            : public RValueVector<VectorExpression<ExpressionType::Add, VectorType1, VectorType2>> {
-        using This = VectorExpression<ExpressionType::Add, VectorType1, VectorType2>;
-        using Base = RValueVector<This>;
-    public:
-        using typename Base::ScalarType;
-    private:
-        const VectorType1& exp1;
-        const VectorType2& exp2;
-    public:
-        VectorExpression(const RValueVector<VectorType1>& exp1_, const RValueVector<VectorType2>& exp2_)
-                : exp1(exp1_.getDerived()), exp2(exp2_.getDerived()) {
-            assert(exp1.getLength() == exp2.getLength());
-        }
-        VectorExpression(const This&) = delete;
-        VectorExpression(This&&) noexcept = delete;
-        ~VectorExpression() = default;
-        /* Operators */
-        This& operator=(const This&) = delete;
-        This& operator=(This&&) noexcept = delete;
-        /* Operations */
-        [[nodiscard]] ScalarType calc(size_t s) const { return ScalarType(exp1.calc(s)) + ScalarType(exp2.calc(s)); }
-        template<class PacketType>
-        [[nodiscard]] PacketType packet(size_t index) const {
-            return exp1.template packet<PacketType>(index) + exp2.template packet<PacketType>(index);
-        }
-        template<class PacketType>
-        [[nodiscard]] PacketType packetPartial(size_t index, size_t count) const {
-            return exp1.template packetPartial<PacketType>(index, count) + exp2.template packetPartial<PacketType>(index, count);
-        }
-        [[nodiscard]] __host__ __device__ size_t getLength() const { return exp1.getLength(); }
-    };
-
-    template<class VectorType, class AnyScalar>
-    class VectorExpression<ExpressionType::Add, VectorType, ScalarBase<AnyScalar>>
-            : public RValueVector<VectorExpression<ExpressionType::Add, VectorType, ScalarBase<AnyScalar>>> {
-        static_assert(is_scalar<AnyScalar>::value, "[Error]: This is not a scalar type");
-        using This = VectorExpression<ExpressionType::Add, VectorType, ScalarBase<AnyScalar>>;
-        using Base = RValueVector<This>;
-        const VectorType& exp;
-        const AnyScalar& scalar;
-    public:
-        using typename Base::ScalarType;
-    public:
-        VectorExpression(const RValueVector<VectorType>& exp_, const AnyScalar& scalar_)
-                : exp(exp_.getDerived()), scalar(scalar_) {}
-        VectorExpression(const This&) = delete;
-        VectorExpression(This&&) noexcept = delete;
-        ~VectorExpression() = default;
-        /* Operators */
-        This& operator=(const This&) = delete;
-        This& operator=(This&&) noexcept = delete;
-        /* Operations */
-        [[nodiscard]] ScalarType calc(size_t s) const { return ScalarType(exp.calc(s)) + ScalarType(scalar); }
-        template<class PacketType>
-        [[nodiscard]] PacketType packet(size_t index) const {
-            return exp.template packet<PacketType>(index) + PacketType(scalar);
-        }
-        template<class PacketType>
-        [[nodiscard]] PacketType packetPartial(size_t index, size_t count) const {
-            return exp.template packetPartial<PacketType>(index, count) + PacketType(scalar);
-        }
-        [[nodiscard]] __host__ __device__ size_t getLength() const { return exp.getLength(); }
-    };
-    //////////////////////////////////////Sub//////////////////////////////////////
-    template<class VectorType1, class VectorType2>
-    class VectorExpression<ExpressionType::Sub, VectorType1, VectorType2>
-            : public RValueVector<VectorExpression<ExpressionType::Sub, VectorType1, VectorType2>> {
-        using This = VectorExpression<ExpressionType::Sub, VectorType1, VectorType2>;
-    public:
-        using Base = RValueVector<This>;
-        using typename Base::ScalarType;
-    private:
-        const VectorType1& exp1;
-        const VectorType2& exp2;
-    public:
-        VectorExpression(const RValueVector<VectorType1>& exp1_, const RValueVector<VectorType2>& exp2_)
-                : exp1(exp1_.getDerived()), exp2(exp2_.getDerived()) {
-            assert(exp1.getLength() == exp2.getLength());
-        }
-        VectorExpression(const This&) = delete;
-        VectorExpression(This&&) noexcept = delete;
-        ~VectorExpression() = default;
-        /* Operators */
-        This& operator=(const This&) = delete;
-        This& operator=(This&&) noexcept = delete;
-        /* Operations */
-        [[nodiscard]] typename Base::ScalarType calc(size_t s) const { return ScalarType(exp1.calc(s)) - ScalarType(exp2.calc(s)); }
-        template<class PacketType>
-        [[nodiscard]] PacketType packet(size_t index) const {
-            return exp1.template packet<PacketType>(index) - exp2.template packet<PacketType>(index);
-        }
-        template<class PacketType>
-        [[nodiscard]] PacketType packetPartial(size_t index, size_t count) const {
-            return exp1.template packetPartial<PacketType>(index, count) - exp2.template packetPartial<PacketType>(index, count);
-        }
-        [[nodiscard]] __host__ __device__ size_t getLength() const { return exp1.getLength(); }
-    };
-
-    template<class VectorType, class AnyScalar>
-    class VectorExpression<ExpressionType::Sub, VectorType, ScalarBase<AnyScalar>>
-            : public RValueVector<VectorExpression<ExpressionType::Sub, VectorType, ScalarBase<AnyScalar>>> {
-        static_assert(is_scalar<AnyScalar>::value, "[Error]: This is not a scalar type");
-        using This = VectorExpression<ExpressionType::Sub, VectorType, ScalarBase<AnyScalar>>;
-        using Base = RValueVector<This>;
-        const VectorType& exp;
-        const AnyScalar& scalar;
-    public:
-        VectorExpression(const RValueVector<VectorType>& exp_, const AnyScalar& scalar_)
-                : exp(exp_.getDerived()), scalar(scalar_) {}
-        VectorExpression(const This&) = delete;
-        VectorExpression(This&&) noexcept = delete;
-        ~VectorExpression() = default;
-        /* Operators */
-        This& operator=(const This&) = delete;
-        This& operator=(This&&) noexcept = delete;
-        /* Operations */
-        [[nodiscard]] typename Base::ScalarType calc(size_t s) const { return exp.calc(s) - scalar; }
-        template<class PacketType>
-        [[nodiscard]] PacketType packet(size_t index) const {
-            return exp.template packet<PacketType>(index) - PacketType(scalar);
-        }
-        template<class PacketType>
-        [[nodiscard]] PacketType packetPartial(size_t index, size_t count) const {
-            return exp.template packetPartial<PacketType>(index, count) - PacketType(scalar);
-        }
-        [[nodiscard]] __host__ __device__ size_t getLength() const { return exp.getLength(); }
-    };
-    //////////////////////////////////////Mul//////////////////////////////////////
-    template<class VectorType, class AnyScalar>
-    class VectorExpression<ExpressionType::Mul, VectorType, ScalarBase<AnyScalar>>
-            : public RValueVector<VectorExpression<ExpressionType::Mul, VectorType, ScalarBase<AnyScalar>>> {
-        static_assert(is_scalar<AnyScalar>::value, "[Error]: This is not a scalar type");
-        using This = VectorExpression<ExpressionType::Mul, VectorType, ScalarBase<AnyScalar>>;
-        using Base = RValueVector<This>;
-    public:
-        using typename Base::ScalarType;
-    private:
-        const VectorType& exp;
-        const AnyScalar& s;
-    public:
-        VectorExpression(const RValueVector<VectorType>& exp_, const AnyScalar& s_)
-                : exp(exp_.getDerived()), s(s_) {}
-        VectorExpression(const This&) = delete;
-        VectorExpression(This&&) noexcept = delete;
-        ~VectorExpression() = default;
-        /* Operators */
-        This& operator=(const This&) = delete;
-        This& operator=(This&&) noexcept = delete;
-        /* Operations */
-        [[nodiscard]] ScalarType calc(size_t index) const { return ScalarType(exp.calc(index)) * ScalarType(s); }
-        template<class PacketType>
-        [[nodiscard]] PacketType packet(size_t index) const {
-            return exp.template packet<PacketType>(index) * PacketType(s);
-        }
-        template<class PacketType>
-        [[nodiscard]] PacketType packetPartial(size_t index, size_t count) const {
-            return exp.template packetPartial<PacketType>(index, count) * PacketType(s);
-        }
-        [[nodiscard]] __host__ __device__ size_t getLength() const { return exp.getLength(); }
-    };
-
-    template<class VectorType1, class VectorType2>
-    class VectorExpression<ExpressionType::Mul, VectorType1, VectorType2>
-            : public RValueVector<VectorExpression<ExpressionType::Mul, VectorType1, VectorType2>> {
-        using This = VectorExpression<ExpressionType::Mul, VectorType1, VectorType2>;
-        using Base = RValueVector<This>;
-        const VectorType1& v1;
-        const VectorType2& v2;
-    public:
-        VectorExpression(const RValueVector<VectorType1>& v1_, const RValueVector<VectorType2>& v2_)
-                : v1(v1_.getDerived()), v2(v2_.getDerived()) {
-            assert(v1.getLength() == v2.getLength());
-        }
-        VectorExpression(const This&) = delete;
-        VectorExpression(This&&) noexcept = delete;
-        ~VectorExpression() = default;
-        /* Operators */
-        This& operator=(const This&) = delete;
-        This& operator=(This&&) noexcept = delete;
-        /* Operations */
-        [[nodiscard]] typename Base::ScalarType calc(size_t index) const { return v1.calc(index) * v2.calc(index); }
-        template<class PacketType>
-        [[nodiscard]] PacketType packet(size_t index) const {
-            return v1.template packet<PacketType>(index) * v2.template packet<PacketType>(index);
-        }
-        template<class PacketType>
-        [[nodiscard]] PacketType packetPartial(size_t index, size_t count) const {
-            return v1.template packetPartial<PacketType>(index, count) * v2.template packetPartial<PacketType>(index, count);
-        }
-        [[nodiscard]] __host__ __device__ size_t getLength() const { return v1.getLength(); }
-    };
     //////////////////////////////////////Div//////////////////////////////////////
     template<class VectorType, class AnyScalar>
     class VectorExpression<ExpressionType::Div, VectorType, ScalarBase<AnyScalar>>
             : public RValueVector<VectorExpression<ExpressionType::Div, VectorType, ScalarBase<AnyScalar>>> {
-        static_assert(is_scalar<AnyScalar>::value, "[Error]: This is not a scalar type");
         using This = VectorExpression<ExpressionType::Div, VectorType, ScalarBase<AnyScalar>>;
         using Base = RValueVector<This>;
         const VectorType& exp;
@@ -378,7 +189,6 @@ namespace Physica::Core {
     template<class VectorType, class AnyScalar>
     class VectorExpression<ExpressionType::More, VectorType, ScalarBase<AnyScalar>>
             : public RValueVector<VectorExpression<ExpressionType::More, VectorType, ScalarBase<AnyScalar>>> {
-        static_assert(is_scalar<AnyScalar>::value, "[Error]: This is not a scalar type");
         using This = VectorExpression<ExpressionType::More, VectorType, ScalarBase<AnyScalar>>;
         using Base = RValueVector<This>;
         const VectorType& exp;
@@ -443,7 +253,6 @@ namespace Physica::Core {
     template<class VectorType, class AnyScalar>
     class VectorExpression<ExpressionType::MoreEq, VectorType, ScalarBase<AnyScalar>>
             : public RValueVector<VectorExpression<ExpressionType::MoreEq, VectorType, ScalarBase<AnyScalar>>> {
-        static_assert(is_scalar<AnyScalar>::value, "[Error]: This is not a scalar type");
         using This = VectorExpression<ExpressionType::MoreEq, VectorType, ScalarBase<AnyScalar>>;
         using Base = RValueVector<This>;
         const VectorType& exp;
@@ -752,55 +561,6 @@ namespace Physica::Core {
     [[nodiscard]] inline VectorExpression<ExpressionType::Minus, Derived> operator-(const RValueVector<Derived>& v) noexcept {
         return VectorExpression<ExpressionType::Minus, Derived>(v.getDerived());
     }
-    //////////////////////////////////////Add//////////////////////////////////////
-    template<class Derived, class OtherDerived>
-    [[nodiscard]] inline VectorExpression<ExpressionType::Add, Derived, OtherDerived>
-    operator+(const RValueVector<Derived>& v1, const RValueVector<OtherDerived>& v2) noexcept {
-        return VectorExpression<ExpressionType::Add, Derived, OtherDerived>(v1.getDerived(), v2.getDerived());
-    }
-
-    template<class VectorType, class ScalarType>
-    [[nodiscard]] inline VectorExpression<ExpressionType::Add, VectorType, ScalarBase<ScalarType>>
-    operator+(const RValueVector<VectorType>& v, const ScalarBase<ScalarType>& s) noexcept {
-        return VectorExpression<ExpressionType::Add, VectorType, ScalarBase<ScalarType>>(v.getDerived(), s.getDerived());
-    }
-
-    template<class ScalarType, class VectorType>
-    [[nodiscard]] inline VectorExpression<ExpressionType::Add, VectorType, ScalarBase<ScalarType>>
-    operator+(const ScalarBase<ScalarType>& s, const RValueVector<VectorType>& v) noexcept {
-        return v + s;
-    }
-    //////////////////////////////////////Sub//////////////////////////////////////
-    template<class Derived, class OtherDerived>
-    [[nodiscard]] inline VectorExpression<ExpressionType::Sub, Derived, OtherDerived>
-    operator-(const RValueVector<Derived>& v1, const RValueVector<OtherDerived>& v2) noexcept {
-        return VectorExpression<ExpressionType::Sub, Derived, OtherDerived>(v1.getDerived(), v2.getDerived());
-    }
-
-    template<class VectorType, class ScalarType>
-    [[nodiscard]] inline VectorExpression<ExpressionType::Sub, VectorType, ScalarBase<ScalarType>>
-    operator-(const RValueVector<VectorType>& v, const ScalarBase<ScalarType>& s) noexcept {
-        return VectorExpression<ExpressionType::Sub, VectorType, ScalarBase<ScalarType>>(v.getDerived(), s.getDerived());
-    }
-    //////////////////////////////////////Mul//////////////////////////////////////
-    template<class VectorType, class ScalarType>
-    [[nodiscard]] inline VectorExpression<ExpressionType::Mul, VectorType, ScalarBase<ScalarType>>
-    operator*(const RValueVector<VectorType>& v, const ScalarBase<ScalarType>& s) noexcept {
-        return VectorExpression<ExpressionType::Mul, VectorType, ScalarBase<ScalarType>>(v.getDerived(), s.getDerived());
-    }
-
-    template<class ScalarType, class VectorType>
-    [[nodiscard]] inline VectorExpression<ExpressionType::Mul, VectorType, ScalarBase<ScalarType>>
-    operator*(const ScalarBase<ScalarType>& s, const RValueVector<VectorType>& v) noexcept {
-        return v * s;
-    }
-    
-    template<class VectorType1, class VectorType2>
-    [[nodiscard]] inline VectorExpression<ExpressionType::Mul, VectorType1, VectorType2> hadamard(
-            const RValueVector<VectorType1>& v1,
-            const RValueVector<VectorType2>& v2) noexcept {
-        return VectorExpression<ExpressionType::Mul, VectorType1, VectorType2>(v1.getDerived(), v2.getDerived());
-    }
     //////////////////////////////////////Div//////////////////////////////////////
     template<class VectorType, class ScalarType>
     [[nodiscard]] inline VectorExpression<ExpressionType::Div, VectorType, ScalarBase<ScalarType>>
@@ -916,3 +676,7 @@ namespace Physica::Core {
         return VectorExpression<ExpressionType::Cos, VectorType>(v);
     }
 }
+
+#include "VectorExprImpl/VectorAdd.h"
+#include "VectorExprImpl/VectorSub.h"
+#include "VectorExprImpl/VectorMul.h"

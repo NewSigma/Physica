@@ -67,8 +67,10 @@ namespace Physica::Core {
     inline void MatrixVectorProduct<MatrixPow<MatrixType>, VectorType>::assignTo(LValueVector<OtherVector>& target_) const {
         const int power = mpow.getPower();
         auto& target = target_.getDerived();
-        if (power == 0)
+        if (power == 0) {
             target = v;
+            return;
+        }
 
         OtherVector buffer = mpow.getMatrix() * v;
         for (int i = 1; i < power; ++i) {

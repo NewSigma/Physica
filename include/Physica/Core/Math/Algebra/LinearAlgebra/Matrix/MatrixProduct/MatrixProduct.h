@@ -45,8 +45,8 @@ namespace Physica::Core {
                           MatrixType2::RowAtCompile == Dynamic,
                           "[Error]: Row and column do not match in matrix-vector product");
         public:
-            using ScalarType = typename Internal::BinaryScalarOpReturnType<typename MatrixType1::ScalarType,
-                                                                           typename MatrixType2::ScalarType>::Type;
+            using ScalarType = typename BinaryScalarOpReturnType<typename MatrixType1::ScalarType,
+                                                                 typename MatrixType2::ScalarType>::Type;
             constexpr static size_t RowAtCompile = MatrixType1::RowAtCompile;
             constexpr static size_t ColumnAtCompile = MatrixType2::ColumnAtCompile;
             constexpr static size_t MaxRowAtCompile = MatrixType1::MaxRowAtCompile;
@@ -60,8 +60,8 @@ namespace Physica::Core {
             static_assert(MatrixType::RowAtCompile == 1 || MatrixType::RowAtCompile == Dynamic,
                           "Row and column do not match in matrix product");
         public:
-            using ScalarType = typename Internal::BinaryScalarOpReturnType<typename VectorType::ScalarType,
-                                                                           typename MatrixType::ScalarType>::Type;
+            using ScalarType = typename BinaryScalarOpReturnType<typename VectorType::ScalarType,
+                                                                 typename MatrixType::ScalarType>::Type;
             constexpr static int Option = MatrixOption::AnyMajor | MatrixOption::AnyStorage;
             constexpr static size_t RowAtCompile = VectorType::SizeAtCompile;
             constexpr static size_t ColumnAtCompile = MatrixType::ColumnAtCompile;
@@ -78,11 +78,13 @@ namespace Physica::Core {
                           VectorType::SizeAtCompile == Dynamic,
                           "Row and column do not match in matrix product");
         public:
-            using ScalarType = typename Internal::BinaryScalarOpReturnType<typename MatrixType::ScalarType,
-                                                                           typename VectorType::ScalarType>::Type;
+            using ScalarType = typename BinaryScalarOpReturnType<typename MatrixType::ScalarType,
+                                                                 typename VectorType::ScalarType>::Type;
             constexpr static size_t SizeAtCompile = MatrixType::RowAtCompile;
             constexpr static size_t MaxSizeAtCompile = MatrixType::MaxRowAtCompile;
-            using PacketType = typename Internal::BestPacket<ScalarType, SizeAtCompile>::Type;
+
+            using PacketType = typename BestPacket<ScalarType, SizeAtCompile>::Type;
+            constexpr static bool FastAssign = false;
         };
     }
 

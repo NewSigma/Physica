@@ -33,18 +33,18 @@ namespace Physica::Core {
     class MatrixPow : public RValueMatrix<MatrixPow<MatrixType>> {
         using This = MatrixPow<MatrixType>;
         using Base = RValueMatrix<This>;
-        using PlainMatrix = typename remove_hermite<MatrixType>::Type;
-        using HermiteType = MatrixPow<Hermite<MatrixType>>;
 
-        constexpr static bool IsHermite = is_hermite<MatrixType>::value;
-        using MatrixRtnType = typename std::conditional<IsHermite, Hermite<MatrixType>, const PlainMatrix&>::type;
+        constexpr static bool IsSymm = MatrixOption::isSymmMatrix<MatrixType>();
+        constexpr static bool IsHermite = MatrixOption::isHermiteMatrix<MatrixType>();
+        using TransposeRtnTy = typename std::conditional<IsSymm, const This&, Transpose<This>>::type;
+        using HermiteRtnTy = typename std::conditional<IsHermite, const This&, Hermite<This>>::type;
     public:
         using typename Base::ScalarType;
     private:
-        const PlainMatrix& m;
+        const MatrixType& m;
         int power;
     public:
-        MatrixPow(const RValueMatrix<PlainMatrix>& m_, int power_);
+        MatrixPow(const RValueMatrix<MatrixType>& m_, int power_);
         MatrixPow(const This&) = delete;
         MatrixPow(This&&) = delete;
         ~MatrixPow() = default;
@@ -54,29 +54,17 @@ namespace Physica::Core {
         /* Operations */
         [[nodiscard]] ScalarType calc(size_t, size_t) const { throw NotImplementedException(); }
 
-        [[nodiscard]] inline HermiteType hermite() const noexcept;
+        [[nodiscard]] TransposeRtnTy transpose() const noexcept { return TransposeRtnTy(*this); }
+        [[nodiscard]] HermiteRtnTy hermite() const noexcept { return HermiteRtnTy(*this); }
         /* Getters */
-        [[nodiscard]] MatrixRtnType getMatrix() const noexcept;
+        [[nodiscard]] const MatrixType& getMatrix() const noexcept { return m; }
         [[nodiscard]] __host__ __device__ size_t getRow() const noexcept { return m.getRow(); }
         [[nodiscard]] __host__ __device__ size_t getColumn() const noexcept { return m.getColumn(); }
         [[nodiscard]] int getPower() const noexcept { return power; }
     };
 
     template<class MatrixType>
-    MatrixPow<MatrixType>::MatrixPow(const RValueMatrix<PlainMatrix>& m_, int power_) : m(m_.getDerived()), power(power_) {}
-
-    template<class MatrixType>
-    inline typename MatrixPow<MatrixType>::HermiteType MatrixPow<MatrixType>::hermite() const noexcept {
-        return HermiteType(m, power);
-    }
-
-    template<class MatrixType>
-    typename MatrixPow<MatrixType>::MatrixRtnType MatrixPow<MatrixType>::getMatrix() const noexcept {
-        if constexpr (IsHermite)
-            return m.hermite();
-        else
-            return m;
-    }
+    MatrixPow<MatrixType>::MatrixPow(const RValueMatrix<MatrixType>& m_, int power_) : m(m_.getDerived()), power(power_) {}
 
     template<class MatrixType>
     [[nodiscard]] inline MatrixPow<MatrixType> pow(const RValueMatrix<MatrixType>& m, int power) noexcept {

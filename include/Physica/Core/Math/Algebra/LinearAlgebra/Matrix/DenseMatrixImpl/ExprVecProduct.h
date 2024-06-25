@@ -21,6 +21,41 @@
 namespace Physica::Core {
     template<class MatrixType, class VectorType> class MatrixVectorProduct;
 
+    namespace Internal {
+        template<ExpressionType Type, class T1, class T2, class ResultType, class VectorType>
+        class Traits<MatrixVectorProduct<DenseMatrixExpression<Type, T1, T2, ResultType>, VectorType>> {
+            using MatrixType = DenseMatrixExpression<Type, T1, T2, ResultType>;
+            static_assert(MatrixType::ColumnAtCompile == VectorType::SizeAtCompile ||
+                          MatrixType::ColumnAtCompile == Dynamic ||
+                          VectorType::SizeAtCompile == Dynamic,
+                          "Row and column do not match in matrix product");
+
+            constexpr static bool calcFastAssign() {
+                constexpr bool isScalarT2 = is_scalar<T2>::value;
+                if constexpr (Type == ExpressionType::Add || Type == ExpressionType::Sub) {
+                    if constexpr (!isScalarT2) {
+                        using LHS = decltype(std::declval<T1>() * std::declval<VectorType>());
+                        using RHS = decltype(std::declval<T2>() * std::declval<VectorType>());
+                        using ExprType = decltype(std::declval<LHS>() + std::declval<RHS>());
+                        return Traits<ExprType>::FastAssign;
+                    }
+                    return false;
+                }
+                if constexpr (Type == ExpressionType::Mul) {
+                    return isScalarT2;
+                }
+                return false;
+            }
+        public:
+            using ScalarType = ResultType;
+            constexpr static size_t SizeAtCompile = MatrixType::RowAtCompile;
+            constexpr static size_t MaxSizeAtCompile = MatrixType::MaxRowAtCompile;
+
+            using PacketType = typename BestPacket<ScalarType, SizeAtCompile>::Type;
+            constexpr static bool FastAssign = calcFastAssign();
+        };
+    }
+
     template<ExpressionType Type, class T1, class T2, class ResultType, class VectorType>
     class MatrixVectorProduct<DenseMatrixExpression<Type, T1, T2, ResultType>, VectorType>
             : public RValueVector<MatrixVectorProduct<DenseMatrixExpression<Type, T1, T2, ResultType>, VectorType>> {
@@ -51,30 +86,44 @@ namespace Physica::Core {
         [[nodiscard]] __host__ __device__ size_t getLength() const { return expr.getRow(); }
         [[nodiscard]] const MatrixType& getLHS() const noexcept { return expr; }
         [[nodiscard]] const VectorType& getRHS() const noexcept { return vec; }
+    private:
+        template<class OtherDerived>
+        inline void generalImpl(OtherDerived& target_) const;
     };
 
     template<ExpressionType Type, class T1, class T2, class ResultType, class VectorType>
     template<class OtherDerived>
     inline void MatrixVectorProduct<DenseMatrixExpression<Type, T1, T2, ResultType>, VectorType>::assignTo(
             LValueVector<OtherDerived>& target_) const {
-        constexpr bool isScalarT2 = is_scalar<T2>::value;
+        constexpr bool FastAssign = Internal::Traits<This>::FastAssign;
         auto& target = target_.getDerived();
-        if constexpr (Type == ExpressionType::Mul && isScalarT2) {
+        if constexpr (!FastAssign)
+            generalImpl(target);
+        else if constexpr (Type == ExpressionType::Add)
+            target = expr.getLHS() * vec + expr.getRHS() * vec;
+        else if constexpr (Type == ExpressionType::Sub)
+            target = expr.getLHS() * vec - expr.getRHS() * vec;
+        else if constexpr (Type == ExpressionType::Mul)
             target = (expr.getMatrix() * vec) * expr.getScalar();
-        }
-        else {
-            for (size_t i = 0; i < getLength(); ++i)
-                target[i] = calc(i);
-            
-            constexpr bool isContinuous = std::is_base_of<ContinuousVector<OtherDerived>, OtherDerived>::value;
-            if constexpr (isContinuous && Base::isReverseDiff)
-                target.getDerived().makeContinuous();
-        }
+        else
+            static_assert(!FastAssign, "[Error]: assignTo is not implemented");
+
     }
 
     template<ExpressionType Type, class T1, class T2, class ResultType, class VectorType>
     inline typename MatrixVectorProduct<DenseMatrixExpression<Type, T1, T2, ResultType>, VectorType>::ScalarType
     MatrixVectorProduct<DenseMatrixExpression<Type, T1, T2, ResultType>, VectorType>::calc(size_t index) const {
         return expr.row(index) * vec;
+    }
+
+    template<ExpressionType Type, class T1, class T2, class ResultType, class VectorType>
+    template<class OtherDerived>
+    inline void MatrixVectorProduct<DenseMatrixExpression<Type, T1, T2, ResultType>, VectorType>::generalImpl(OtherDerived& target) const {
+        for (size_t i = 0; i < getLength(); ++i)
+            target[i] = calc(i);
+
+        constexpr bool isContinuous = std::is_base_of<ContinuousVector<OtherDerived>, OtherDerived>::value;
+        if constexpr (isContinuous && Base::isReverseDiff)
+            target.getDerived().makeContinuous();
     }
 }

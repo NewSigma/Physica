@@ -53,6 +53,10 @@ namespace Physica::Core {
         This& operator=(This obj) noexcept { swap(obj); return *this; }
         /* Operations */
         [[nodiscard]] ScalarType calc(size_t row, size_t col) const { return ScalarType(row == col ? 1 : 0); }
+
+        [[nodiscard]] const This& transpose() const noexcept { return *this; }
+        [[nodiscard]] const This& conjugate() const noexcept { return *this; }
+        [[nodiscard]] const This& hermite() const noexcept { return *this; }
         inline void swap(This& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] __host__ __device__ size_t getRow() const noexcept { return order; }
@@ -68,5 +72,12 @@ namespace Physica::Core {
     inline void UnitMatrix<ScalarType, Order>::swap(This& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         std::swap(order, obj.order);
+    }
+
+    template<class ScalarType, size_t Order, class VectorType>
+    [[nodiscard]] inline const VectorType&
+    operator*([[maybe_unused]] const UnitMatrix<ScalarType, Order>& mat, const RValueVector<VectorType>& vec) noexcept {
+        assert(mat.getColumn() == vec.getLength());
+        return vec.getDerived();
     }
 }

@@ -93,15 +93,19 @@ namespace Physica::Core {
     class DenseMatrixExpression<ExpressionType::Add, MatrixType1, MatrixType2>
             : public RValueMatrix<DenseMatrixExpression<ExpressionType::Add, MatrixType1, MatrixType2>> {
         using This = DenseMatrixExpression<ExpressionType::Add, MatrixType1, MatrixType2>;
+        constexpr static bool IsSymm = MatrixOption::isSymmMatrix<MatrixType1>() && MatrixOption::isSymmMatrix<MatrixType2>();
+        constexpr static bool IsHermite = MatrixOption::isHermiteMatrix<MatrixType1>() && MatrixOption::isHermiteMatrix<MatrixType2>();
+        using TransposeRtnTy = typename std::conditional<IsSymm, const This&, Transpose<This>>::type;
+        using HermiteRtnTy = typename std::conditional<IsHermite, const This&, Hermite<This>>::type;
     public:
         using Base = RValueMatrix<This>;
         using typename Base::ScalarType;
     private:
-        const MatrixType1& exp1;
-        const MatrixType2& exp2;
+        const MatrixType1& mat1;
+        const MatrixType2& mat2;
     public:
-        DenseMatrixExpression(const RValueMatrix<MatrixType1>& exp1_, const RValueMatrix<MatrixType2>& exp2_)
-                : exp1(exp1_.getDerived()), exp2(exp2_.getDerived()) {}
+        DenseMatrixExpression(const RValueMatrix<MatrixType1>& mat1_, const RValueMatrix<MatrixType2>& mat2_)
+                : mat1(mat1_.getDerived()), mat2(mat2_.getDerived()) {}
         DenseMatrixExpression(const This&) = delete;
         DenseMatrixExpression(This&&) noexcept = delete;
         ~DenseMatrixExpression() = default;
@@ -110,11 +114,16 @@ namespace Physica::Core {
         This& operator=(This&&) noexcept = delete;
         /* Operations */
         [[nodiscard]] ScalarType calc(size_t row, size_t col) const {
-            return ScalarType(exp1.calc(row, col)) + ScalarType(exp2.calc(row, col));
+            return ScalarType(mat1.calc(row, col)) + ScalarType(mat2.calc(row, col));
         }
+
+        [[nodiscard]] TransposeRtnTy transpose() const noexcept { return TransposeRtnTy(*this); }
+        [[nodiscard]] HermiteRtnTy hermite() const noexcept { return HermiteRtnTy(*this); }
         /* Getters */
-        [[nodiscard]] __host__ __device__ size_t getRow() const { return exp1.getRow(); }
-        [[nodiscard]] __host__ __device__ size_t getColumn() const { return exp1.getColumn(); }
+        [[nodiscard]] __host__ __device__ size_t getRow() const { return mat1.getRow(); }
+        [[nodiscard]] __host__ __device__ size_t getColumn() const { return mat2.getColumn(); }
+        [[nodiscard]] const MatrixType1& getLHS() const noexcept { return mat1; }
+        [[nodiscard]] const MatrixType2& getRHS() const noexcept { return mat2; }
     };
 
     template<class MatrixType, class AnyScalar>
@@ -149,15 +158,19 @@ namespace Physica::Core {
     class DenseMatrixExpression<ExpressionType::Sub, MatrixType1, MatrixType2>
             : public RValueMatrix<DenseMatrixExpression<ExpressionType::Sub, MatrixType1, MatrixType2>> {
         using This = DenseMatrixExpression<ExpressionType::Sub, MatrixType1, MatrixType2>;
+        constexpr static bool IsSymm = MatrixOption::isSymmMatrix<MatrixType1>() && MatrixOption::isSymmMatrix<MatrixType2>();
+        constexpr static bool IsHermite = MatrixOption::isHermiteMatrix<MatrixType1>() && MatrixOption::isHermiteMatrix<MatrixType2>();
+        using TransposeRtnTy = typename std::conditional<IsSymm, const This&, Transpose<This>>::type;
+        using HermiteRtnTy = typename std::conditional<IsHermite, const This&, Hermite<This>>::type;
     public:
         using Base = RValueMatrix<This>;
         using typename Base::ScalarType;
     private:
-        const MatrixType1& exp1;
-        const MatrixType2& exp2;
+        const MatrixType1& mat1;
+        const MatrixType2& mat2;
     public:
-        DenseMatrixExpression(const RValueMatrix<MatrixType1>& exp1_, const RValueMatrix<MatrixType2>& exp2_)
-                : exp1(exp1_.getDerived()), exp2(exp2_.getDerived()) {}
+        DenseMatrixExpression(const RValueMatrix<MatrixType1>& mat1_, const RValueMatrix<MatrixType2>& mat2_)
+                : mat1(mat1_.getDerived()), mat2(mat2_.getDerived()) {}
         DenseMatrixExpression(const This&) = delete;
         DenseMatrixExpression(This&&) noexcept = delete;
         ~DenseMatrixExpression() = default;
@@ -166,11 +179,16 @@ namespace Physica::Core {
         This& operator=(This&&) noexcept = delete;
         /* Operations */
         [[nodiscard]] ScalarType calc(size_t row, size_t col) const {
-            return ScalarType(exp1.calc(row, col)) - ScalarType(exp2.calc(row, col));
+            return ScalarType(mat1.calc(row, col)) - ScalarType(mat2.calc(row, col));
         }
+
+        [[nodiscard]] TransposeRtnTy transpose() const noexcept { return TransposeRtnTy(*this); }
+        [[nodiscard]] HermiteRtnTy hermite() const noexcept { return HermiteRtnTy(*this); }
         /* Getters */
-        [[nodiscard]] __host__ __device__ size_t getRow() const { return exp1.getRow(); }
-        [[nodiscard]] __host__ __device__ size_t getColumn() const { return exp1.getColumn(); }
+        [[nodiscard]] __host__ __device__ size_t getRow() const { return mat1.getRow(); }
+        [[nodiscard]] __host__ __device__ size_t getColumn() const { return mat1.getColumn(); }
+        [[nodiscard]] const MatrixType1& getLHS() const noexcept { return mat1; }
+        [[nodiscard]] const MatrixType2& getRHS() const noexcept { return mat2; }
     };
 
     template<class MatrixType, class AnyScalar>
@@ -231,6 +249,10 @@ namespace Physica::Core {
     class DenseMatrixExpression<ExpressionType::Mul, MatrixType, ScalarBase<AnyScalar>>
             : public RValueMatrix<DenseMatrixExpression<ExpressionType::Mul, MatrixType, ScalarBase<AnyScalar>>> {
         using This = DenseMatrixExpression<ExpressionType::Mul, MatrixType, ScalarBase<AnyScalar>>;
+        constexpr static bool IsSymm = MatrixOption::isSymmMatrix<MatrixType>();
+        constexpr static bool IsHermite = MatrixOption::isHermiteMatrix<MatrixType>();
+        using TransposeRtnTy = typename std::conditional<IsSymm, const This&, Transpose<This>>::type;
+        using HermiteRtnTy = typename std::conditional<IsHermite, const This&, Hermite<This>>::type;
     public:
         using Base = RValueMatrix<This>;
         using typename Base::ScalarType;
@@ -250,6 +272,9 @@ namespace Physica::Core {
         [[nodiscard]] ScalarType calc(size_t row, size_t col) const {
             return ScalarType(exp.calc(row, col)) * ScalarType(scalar);
         }
+
+        [[nodiscard]] TransposeRtnTy transpose() const noexcept { return TransposeRtnTy(*this); }
+        [[nodiscard]] HermiteRtnTy hermite() const noexcept { return HermiteRtnTy(*this); }
         /* Getters */
         [[nodiscard]] __host__ __device__ size_t getRow() const { return exp.getRow(); }
         [[nodiscard]] __host__ __device__ size_t getColumn() const { return exp.getColumn(); }
