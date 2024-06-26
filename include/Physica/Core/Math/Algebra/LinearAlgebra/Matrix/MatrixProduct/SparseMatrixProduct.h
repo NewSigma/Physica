@@ -39,7 +39,7 @@ namespace Physica::Core {
             assert(mat.getColumn() == vec.getLength());
         }
         /* Operations */
-        template<class OtherDerived>
+        template<class OtherDerived, class Executor = SequentialExecutor>
         void assignTo(LValueVector<OtherDerived>& target) const;
         /* Getters */
         [[nodiscard]] ScalarType calc(size_t index) const;
@@ -49,7 +49,7 @@ namespace Physica::Core {
     };
 
     template<class T, int Option, class VectorType>
-    template<class OtherDerived>
+    template<class OtherDerived, class Executor>
     void MatrixVectorProduct<SparseMatrix<T, Option>, VectorType>::assignTo(LValueVector<OtherDerived>& target) const {
         const auto& elements = mat.getElements();
         const auto& minorIndexes = mat.getMinorIndexes();

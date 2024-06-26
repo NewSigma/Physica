@@ -21,9 +21,11 @@
 #include <Physica/Core/Math/Transform/FFT.h>
 #include "LatticeHamilton.h"
 #include "ReprSpace/SpinRepr.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/SparseVector.h"
 
 namespace Physica::Core {
     template<class ScalarType, class ReprType> class Hubbard;
+    class ThreadExecutor;
 
     namespace Internal {
         template<class T, class U>
@@ -45,9 +47,11 @@ namespace Physica::Core {
         using Base = LatticeHamilton<This>;
         using RealType = typename ScalarType::RealType;
         using VectorType = Vector<ScalarType>;
+        using SparseType = SparseVector<ScalarType>;
         using FFTType = FFT<RealType, 1>;
-        using typename Base::StateType;
         using typename Base::IndexType;
+        using typename Base::StateType;
+        constexpr static unsigned int SiteDOF = StateType::SiteDOF;
 
         constexpr static bool IsTransInvariant = Internal::Traits<ReprType>::IsTransInvariant;
         static_assert(std::is_base_of<ReprBasis<ReprType>, ReprType>::value, "[Error]: ReprType is not a representation");
@@ -84,15 +88,11 @@ namespace Physica::Core {
     protected:
         inline RealType repelElem(StateType psi) const;
         RealType hoppingElem(StateType rowPsi, StateType colPsi) const;
-        template<class TargetVector>
-        void sumHopping(TargetVector& target, ScalarType value, StateType psi) const noexcept;
-        template<class TargetVector>
-        void sumHopping(TargetVector& target, FFTType& fft, ScalarType factor, StateType psi) const;
+        void sumHopping(SparseType& buffer, ScalarType value, StateType psi) const noexcept;
+        void sumHopping(SparseType& buffer, FFTType& fft, ScalarType factor, StateType psi) const;
     private:
-        template<class TargetVector>
-        void dotImpl1D(TargetVector& result, ScalarType factor, size_t index) const;
-        template<class TargetVector>
-        void dotImplND(TargetVector& result, ScalarType factor, size_t index) const;
+        void dotImpl1D(SparseType& buffer, ScalarType factor, size_t index) const;
+        void dotImplND(SparseType& buffer, ScalarType factor, size_t index) const;
     };
 }
 

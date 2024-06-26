@@ -37,11 +37,15 @@ namespace Physica::Core {
         assert(source.getLength() == length && "[Error]: Dimensions do not match");
         assert(source.getLength() == target.getLength() && "[Error]: Dimensions do not match");
         target = RealType(0);
+
+        SparseType buffer(getNumState(), NumSite * SiteDOF);
         for (size_t i = 0; i < length; ++i) {
             if constexpr (Dim == 1)
-                dotImpl1D(target, source.calc(i), i);
+                dotImpl1D(buffer, source.calc(i), i);
             else
-                dotImplND(target, source.calc(i), i);
+                dotImplND(buffer, source.calc(i), i);
+            target += buffer;
+            buffer.clear();
         }
     }
 
@@ -139,17 +143,15 @@ namespace Physica::Core {
     }
 
     template<class ScalarType, class ReprType>
-    template<class TargetVector>
-    void Hubbard<ScalarType, ReprType>::sumHopping(TargetVector& target, ScalarType value, StateType psi) const noexcept {
+    void Hubbard<ScalarType, ReprType>::sumHopping(SparseType& buffer, ScalarType value, StateType psi) const noexcept {
         if (psi.isVacuum())
             return;
         const auto index = getRepr()[psi];
-        target[index] += value;
+        buffer[index] += value;
     }
 
     template<class ScalarType, class ReprType>
-    template<class TargetVector>
-    void Hubbard<ScalarType, ReprType>::sumHopping(TargetVector& target, FFTType& fft, ScalarType factor, StateType psi) const {
+    void Hubbard<ScalarType, ReprType>::sumHopping(SparseType& buffer, FFTType& fft, ScalarType factor, StateType psi) const {
         if (psi.isVacuum())
             return;
         const auto reducedPsi = psi.transReduce();
@@ -162,12 +164,11 @@ namespace Physica::Core {
         }
         FFTType::transform(planProvider, fft);
         const size_t index = repr[reducedPsi];
-        target[index] += fft.getKSpace()[repr.getReducedK()] * sqrt(RealType(repr.getPeriods()[index])) * factor;
+        buffer[index] += fft.getKSpace()[repr.getReducedK()] * sqrt(RealType(repr.getPeriods()[index])) * factor;
     }
 
     template<class ScalarType, class ReprType>
-    template<class TargetVector>
-    void Hubbard<ScalarType, ReprType>::dotImpl1D(TargetVector& target, ScalarType factor, size_t index) const {
+    void Hubbard<ScalarType, ReprType>::dotImpl1D(SparseType& buffer, ScalarType factor, size_t index) const {
         ScalarType hop = -factor * hoppingT;
         if constexpr (IsTransInvariant) {
             const RealType normalizer = sqrt(RealType(repr.getPeriods()[index])) / RealType(NumSite);
@@ -182,10 +183,10 @@ namespace Physica::Core {
                 const auto site1 = (site + 1) % NumSite;
                 const ScalarType hopUp = hop * RealType(state.hopUpSign(site, site1));
                 const ScalarType hopDown = hop * RealType(state.hopDownSign(site, site1));
-                sumHopping(target, fft, hopUp, state.hopUp(site, site1));
-                sumHopping(target, fft, -hopUp, state.hopUp(site1, site));
-                sumHopping(target, fft, hopDown, state.hopDown(site, site1));
-                sumHopping(target, fft, -hopDown, state.hopDown(site1, site));
+                sumHopping(buffer, fft, hopUp, state.hopUp(site, site1));
+                sumHopping(buffer, fft, -hopUp, state.hopUp(site1, site));
+                sumHopping(buffer, fft, hopDown, state.hopDown(site, site1));
+                sumHopping(buffer, fft, -hopDown, state.hopDown(site1, site));
                 numRepel += state.isUpOccupy(site) && state.isDownOccupy(site);
             }
         }
@@ -194,24 +195,23 @@ namespace Physica::Core {
                 const auto site1 = (site + 1) % NumSite;
                 const ScalarType hopUp = hop * RealType(state.hopUpSign(site, site1));
                 const ScalarType hopDown = hop * RealType(state.hopDownSign(site, site1));
-                sumHopping(target, hopUp, state.hopUp(site, site1));
-                sumHopping(target, -hopUp, state.hopUp(site1, site));
-                sumHopping(target, hopDown, state.hopDown(site, site1));
-                sumHopping(target, -hopDown, state.hopDown(site1, site));
+                sumHopping(buffer, hopUp, state.hopUp(site, site1));
+                sumHopping(buffer, -hopUp, state.hopUp(site1, site));
+                sumHopping(buffer, hopDown, state.hopDown(site, site1));
+                sumHopping(buffer, -hopDown, state.hopDown(site1, site));
                 numRepel += state.isUpOccupy(site) && state.isDownOccupy(site);
             }
         }
-        target[index] += factor * (repelU * RealType(numRepel));
+        buffer[index] += factor * (repelU * RealType(numRepel));
     }
 
     template<class ScalarType, class ReprType>
-    template<class TargetVector>
-    void Hubbard<ScalarType, ReprType>::dotImplND(TargetVector& target, ScalarType factor, size_t index) const {
+    void Hubbard<ScalarType, ReprType>::dotImplND(SparseType& buffer, ScalarType factor, size_t index) const {
         static_assert(!IsTransInvariant && "[Error]: Not implemented");
         const ScalarType hop = -factor * hoppingT;
         const auto state = repr[index];
         int numRepel = 0;
-        Base::forSiteInLattice([this, &target, &numRepel, state, hop](IndexType index) {
+        Base::forSiteInLattice([this, &buffer, &numRepel, state, hop](IndexType index) {
             const auto& dims = Base::getDims();
             const int site = IndexType::toIndex1D(dims, index);
             for (unsigned int dim = 0; dim < Dim; ++dim) {
@@ -220,13 +220,13 @@ namespace Physica::Core {
                 const int site1 = IndexType::toIndex1D(dims, index1);
                 const ScalarType hopUp = hop * RealType(state.hopUpSign(site, site1));
                 const ScalarType hopDown = hop * RealType(state.hopDownSign(site, site1));
-                sumHopping(target, hopUp, state.hopUp(site, site1));
-                sumHopping(target, -hopUp, state.hopUp(site1, site));
-                sumHopping(target, hopDown, state.hopDown(site, site1));
-                sumHopping(target, -hopDown, state.hopDown(site1, site));
+                sumHopping(buffer, hopUp, state.hopUp(site, site1));
+                sumHopping(buffer, -hopUp, state.hopUp(site1, site));
+                sumHopping(buffer, hopDown, state.hopDown(site, site1));
+                sumHopping(buffer, -hopDown, state.hopDown(site1, site));
             }
             numRepel += state.isUpOccupy(site) && state.isDownOccupy(site);
         });
-        target[index] += factor * (repelU * RealType(numRepel));
+        buffer[index] += factor * (repelU * RealType(numRepel));
     }
 }

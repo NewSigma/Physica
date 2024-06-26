@@ -73,6 +73,7 @@ namespace Physica::Core {
         [[nodiscard]] size_t getNumDownStates() const noexcept { return getDownStates().getLength(); }
     private:
         [[nodiscard]] StateArray makeSpinlessStates(size_t numParticle) const noexcept;
+        [[nodiscard]] size_t findStateIndex(const StateArray& arr, SpinlessState psi) const;
         void checkState(StateType state) const noexcept;
     };
 
@@ -100,19 +101,8 @@ namespace Physica::Core {
     template<unsigned int Dim, unsigned int NumSite, bool UseInversionSymm>
     size_t SpinRepr<Dim, NumSite, UseInversionSymm>::operator[](StateType state) const noexcept {
         checkState(state);
-        size_t upIndex = 0;
-        for (; upIndex < upStates.getLength(); ++upIndex)
-            if (state.getSpinUp() == upStates[upIndex])
-                break;
-        assert(upIndex < upStates.getLength() && "[Error]: Unexpected missing state");
-
-        const size_t numDownStates = getNumDownStates();
-        size_t downIndex = 0;
-        for (; downIndex < numDownStates; ++downIndex)
-            if (state.getSpinDown() == getDownStates()[downIndex])
-                break;
-        assert(downIndex < numDownStates && "[Error]: Unexpected missing state");
-
+        const size_t upIndex = findStateIndex(upStates, state.getSpinUp());
+        const size_t downIndex = findStateIndex(getDownStates(), state.getSpinDown());
         const size_t index = upIndex * getNumDownStates() + downIndex;
         assert(index < getNumState() && "[Error]: Index out of range");
         return index;
@@ -150,6 +140,23 @@ namespace Physica::Core {
         }
         result.squeeze();
         return result;
+    }
+
+    template<unsigned int Dim, unsigned int NumSite, bool UseInversionSymm>
+    size_t SpinRepr<Dim, NumSite, UseInversionSymm>::findStateIndex(const StateArray& arr, SpinlessState psi) const {
+        size_t left = 0, right = arr.getLength() - 1;  
+        while (left < right) {
+            const size_t mid = left + (right - left) / 2;
+            const auto& psi0 = arr[mid];
+            if (psi0 == psi)
+                return mid;
+            if (psi0 < psi)
+                left = mid + 1;
+            else
+                right = mid - 1;
+        }
+        assert(psi == arr[left] && "[Error]: Unexpected missing state");
+        return left;
     }
 
     template<unsigned int Dim, unsigned int NumSite, bool UseInversionSymm>

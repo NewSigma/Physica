@@ -66,8 +66,18 @@ namespace Physica::Core {
         using ResultType = typename Derived::ScalarType;
         for (size_t i = 0; i < v2.getNumNonZero(); ++i) {
             const auto pair = v2.calcNonZero(i);
-            v1[pair.first] -= ResultType(pair.second);
+            v1.getDerived()[pair.first] -= ResultType(pair.second);
         }
+    }
+
+    template<class Derived, class VectorType>
+    inline void operator+=(ContinuousVector<Derived>& v1, const RSparseVector<VectorType>& v2) {
+        static_cast<LValueVector<Derived>&>(v1) += v2;
+    }
+
+    template<class Derived, class VectorType>
+    inline void operator-=(ContinuousVector<Derived>& v1, const RSparseVector<VectorType>& v2) {
+        static_cast<LValueVector<Derived>&>(v1) -= v2;
     }
 }
 

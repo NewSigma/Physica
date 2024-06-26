@@ -58,7 +58,7 @@ namespace Physica::Core {
     public:
         explicit ConjugateVector(const RValueVector<VectorType>& vec_) : vec(vec_.getDerived()) {}
         /* Operations */
-        template<class OtherVector>
+        template<class OtherVector, class Executor = SequentialExecutor>
         void assignTo(LValueVector<OtherVector>& target) const;
         /* Getters */
         [[nodiscard]] ScalarType calc(size_t index) const { return vec.calc(index).conjugate(); }
@@ -66,7 +66,7 @@ namespace Physica::Core {
     };
 
     template<class VectorType>
-    template<class OtherVector>
+    template<class OtherVector, class Executor>
     void ConjugateVector<VectorType>::assignTo(LValueVector<OtherVector>& target) const {
         for (size_t i = 0; i < vec.getLength(); ++i)
             target[i] = calc(i);

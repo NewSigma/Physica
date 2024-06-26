@@ -22,6 +22,7 @@
 
 namespace Physica::Core {
     template<class ScalarType> class SparseVector;
+    template<class ScalarType> class SparseReference;
 
     namespace Internal {
         template<class T>
@@ -38,10 +39,12 @@ namespace Physica::Core {
     class SparseVector : public RSparseVector<SparseVector<ScalarType>> {
         using This = SparseVector<ScalarType>;
         using Base = RSparseVector<This>;
+        using SparseRef = SparseReference<ScalarType>;
+        using typename Base::NonZeroPair;
+    public:
         using IndexArray = Utils::Array<size_t>;
         using ElemArray = Utils::Array<ScalarType>;
-        using typename Base::NonZeroPair;
-
+    private:
         size_t length;
         IndexArray indexes;
         ElemArray elems;
@@ -54,18 +57,21 @@ namespace Physica::Core {
         ~SparseVector() = default;
         /* Operators */
         SparseVector& operator=(SparseVector obj) noexcept { swap(obj); return *this; }
+        [[nodiscard]] SparseRef operator[](size_t index) { return SparseRef(*this, index); }
         /* Operations */
         template<class OtherDerived>
         void assignTo_sparse(LValueVector<OtherDerived>& v) const;
-        void insert(size_t index, ScalarType value);
         void resize(size_t newLength);
         void reserve(size_t numNonZero);
+        inline void clear();
         void swap(SparseVector& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] ScalarType calc(size_t index) const;
         [[nodiscard]] NonZeroPair calcNonZero(size_t index) const { return std::make_pair(indexes[index], elems[index]); }
         [[nodiscard]] size_t getLength() const noexcept { return length; }
         [[nodiscard]] size_t getNumNonZero() const noexcept { return elems.getLength(); }
+        /* Friends */
+        friend class SparseReference<ScalarType>;
     };
 
     template<class ScalarType>
@@ -85,19 +91,6 @@ namespace Physica::Core {
     void SparseVector<ScalarType>::assignTo_sparse(LValueVector<OtherDerived>& v) const {
         for (size_t i = 0; i < getNumNonZero(); ++i)
             v[indexes[i]] = elems[i];
-    }
-
-    template<class ScalarType>
-    void SparseVector<ScalarType>::insert(size_t index, ScalarType value) {
-        assert(index < getLength() && "[Error]: Index out of range");
-        for (size_t i = 0; i < indexes.getLength(); ++i) {
-            if (index == indexes[i]) {
-                elems[i] = value;
-                return;
-            }
-        }
-        indexes.append(index);
-        elems.append(std::move(value));
     }
 
     template<class ScalarType>
@@ -127,6 +120,12 @@ namespace Physica::Core {
     }
 
     template<class ScalarType>
+    inline void SparseVector<ScalarType>::clear() {
+        indexes.clear();
+        elems.clear();
+    }
+
+    template<class ScalarType>
     void SparseVector<ScalarType>::swap(SparseVector& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         std::swap(length, obj.length);
@@ -144,3 +143,5 @@ namespace Physica::Core {
         return ScalarType(0);
     }
 }
+
+#include "SparseVectorImpl/SparseReference.h"
