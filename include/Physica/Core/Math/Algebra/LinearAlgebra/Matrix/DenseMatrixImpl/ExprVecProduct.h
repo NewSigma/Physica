@@ -79,7 +79,7 @@ namespace Physica::Core {
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
         /* Operations */
-        template<class OtherDerived>
+        template<class OtherDerived, class Executor = SequentialExecutor>
         inline void assignTo(LValueVector<OtherDerived>& target_) const;
         /* Getters */
         [[nodiscard]] inline ScalarType calc(size_t index) const;
@@ -92,19 +92,25 @@ namespace Physica::Core {
     };
 
     template<ExpressionType Type, class T1, class T2, class ResultType, class VectorType>
-    template<class OtherDerived>
+    template<class OtherDerived, class Executor>
     inline void MatrixVectorProduct<DenseMatrixExpression<Type, T1, T2, ResultType>, VectorType>::assignTo(
             LValueVector<OtherDerived>& target_) const {
         constexpr bool FastAssign = Internal::Traits<This>::FastAssign;
         auto& target = target_.getDerived();
         if constexpr (!FastAssign)
             generalImpl(target);
-        else if constexpr (Type == ExpressionType::Add)
-            target = expr.getLHS() * vec + expr.getRHS() * vec;
-        else if constexpr (Type == ExpressionType::Sub)
-            target = expr.getLHS() * vec - expr.getRHS() * vec;
-        else if constexpr (Type == ExpressionType::Mul)
-            target = (expr.getMatrix() * vec) * expr.getScalar();
+        else if constexpr (Type == ExpressionType::Add) {
+            using ExprType = decltype(expr.getLHS() * vec + expr.getRHS() * vec);
+            target.template operator=<ExprType, Executor>(expr.getLHS() * vec + expr.getRHS() * vec);
+        }
+        else if constexpr (Type == ExpressionType::Sub) {
+            using ExprType = decltype(expr.getLHS() * vec - expr.getRHS() * vec);
+            target.template operator=<ExprType, Executor>(expr.getLHS() * vec - expr.getRHS() * vec);
+        }
+        else if constexpr (Type == ExpressionType::Mul) {
+            using ExprType = decltype((expr.getMatrix() * vec) * expr.getScalar());
+            target.template operator=<ExprType, Executor>((expr.getMatrix() * vec) * expr.getScalar());
+        }
         else
             static_assert(!FastAssign, "[Error]: assignTo is not implemented");
 

@@ -40,6 +40,7 @@ namespace Physica::Core {
      * [1] SIAM J. Sci. Stat. Comput. 11, 804–809 (1990); https://doi.org/10.1137/0911047
      */
     template<class Derived>
+    template<class Executor>
     typename RValueMatrix<Derived>::RealType RValueMatrix<Derived>::norm1_power(unsigned int maxIteration) const {
         assert(getRow() == getColumn() && "[Error]: norm1_power only applies to square matrix");
         assert(maxIteration > 0 && "[Error]: Invalid max iteration");
@@ -51,8 +52,11 @@ namespace Physica::Core {
         VectorType z(length);
         unsigned int iteration = 0;
         while (iteration < maxIteration) {
-            y = m * x;
-            z = m.hermite() * unit(y);
+            y.template operator=<decltype(m * x), Executor>(m * x);
+
+            using ExprType = decltype(m.hermite() * unit(y));
+            z.template operator=<ExprType, Executor>(m.hermite() * unit(y));
+
             if (z.normInf() <= (toRealVector(z) * x)) {
                 if constexpr (isComplex)
                     return y.norm1();

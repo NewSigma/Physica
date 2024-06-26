@@ -178,7 +178,7 @@ namespace Physica::Core {
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
         /* Operations */
-        template<class OtherDerived>
+        template<class OtherDerived, class Executor = SequentialExecutor>
         inline void assignTo(LValueVector<OtherDerived>& target) const;
         /* Getters */
         [[nodiscard]] inline ScalarType calc(size_t index) const;

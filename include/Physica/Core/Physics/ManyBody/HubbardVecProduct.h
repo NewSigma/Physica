@@ -57,7 +57,7 @@ namespace Physica::Core {
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
         /* Operations */
-        template<class OtherDerived>
+        template<class OtherDerived, class Executor>
         inline void assignTo(OtherDerived& target) const;
         /* Getters */
         [[nodiscard]] inline ScalarType calc(size_t) const { throw NotImplementedException(); }
@@ -67,9 +67,9 @@ namespace Physica::Core {
     };
 
     template<class ScalarType, class ReprType, class VectorType>
-    template<class OtherDerived>
+    template<class OtherDerived, class Executor>
     inline void MatrixVectorProduct<Hubbard<ScalarType, ReprType>, VectorType>::assignTo(OtherDerived& target) const {
         static_assert(std::is_base_of<LValueVector<OtherDerived>, OtherDerived>::value, "[Error]: Invalid target type");
-        mat.dot(vec, target);
+        mat.template dot<VectorType, OtherDerived, Executor>(vec, target);
     }
 }

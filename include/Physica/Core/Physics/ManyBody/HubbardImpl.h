@@ -29,7 +29,7 @@ namespace Physica::Core {
             , planProvider(NumSite, PlanFlag::Estimate) {}
 
     template<class ScalarType, class ReprType>
-    template<class SourceVector, class TargetVector>
+    template<class SourceVector, class TargetVector, class Executor>
     void Hubbard<ScalarType, ReprType>::dot(const SourceVector& source, TargetVector& target) const {
         static_assert(std::is_base_of<RValueVector<SourceVector>, SourceVector>::value, "[Error]: Invalid source type");
         static_assert(std::is_base_of<LValueVector<TargetVector>, TargetVector>::value, "[Error]: Invalid target type");

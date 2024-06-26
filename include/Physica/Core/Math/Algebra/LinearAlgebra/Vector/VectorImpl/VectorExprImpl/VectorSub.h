@@ -65,22 +65,23 @@ namespace Physica::Core {
         auto& v = v_.getDerived();
         if constexpr (FastAssign1) {
             if constexpr (FastAssign2) {
-                expr1.assignTo(v);
-                const OtherDerived buffer = expr2;
+                expr1.template assignTo<OtherDerived, Executor>(v);
+                OtherDerived buffer;
+                buffer.template operator=<VectorType2, Executor>(expr2);
                 v -= buffer;
             }
             else {
-                expr1.assignTo(v);
+                expr1.template assignTo<OtherDerived, Executor>(v);
                 v -= expr2;
             }
         }
         else {
             if constexpr (FastAssign2) {
-                (-expr2).assignTo(v);
+                (-expr2).template assignTo<OtherDerived, Executor>(v);
                 v += expr1;
             }
             else
-                Base::assignTo(v);
+                Base::template assignTo<OtherDerived, Executor>(v);
         }
     }
 

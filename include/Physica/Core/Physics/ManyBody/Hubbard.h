@@ -71,7 +71,7 @@ namespace Physica::Core {
         /* Operators */
         This& operator=(This obj) noexcept { swap(obj); return *this; }
         /* Operations */
-        template<class SourceVector, class TargetVector>
+        template<class SourceVector, class TargetVector, class Executor>
         void dot(const SourceVector& source, TargetVector& target) const;
 
         [[nodiscard]] ScalarType calc(size_t row, size_t col) const;

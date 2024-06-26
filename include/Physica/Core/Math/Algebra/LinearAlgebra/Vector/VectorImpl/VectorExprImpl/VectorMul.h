@@ -60,7 +60,7 @@ namespace Physica::Core {
     inline void VectorExpression<ExpressionType::Mul, VectorType, ScalarBase<AnyScalar>>::assignTo(LValueVector<OtherDerived>& v) const {
         constexpr bool FastAssign = Internal::Traits<VectorType>::FastAssign;
         if constexpr (FastAssign) {
-            expr.assignTo(v.getDerived());
+            expr.template assignTo<OtherDerived, Executor>(v.getDerived());
             v.getDerived() *= s;
         }
         else

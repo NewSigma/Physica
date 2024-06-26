@@ -106,6 +106,7 @@ namespace Physica::Core {
         [[nodiscard]] inline FormatedMatrix<Derived> format() const;
 
         [[nodiscard]] RealType norm1() const;
+        template<class Executor = SequentialExecutor>
         [[nodiscard]] RealType norm1_power(unsigned int maxIteration) const;
 
         [[nodiscard]] ScalarType max() const;

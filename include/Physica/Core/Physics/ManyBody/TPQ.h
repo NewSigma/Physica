@@ -45,7 +45,7 @@ namespace Physica::Core {
         /* Operators */
         This& operator=(This obj) noexcept { swap(obj); return *this; }
         /* Operations */
-        template<class ModelType>
+        template<class ModelType, class Executor = SequentialExecutor>
         void nvt_step(const LatticeHamilton<ModelType>& hamiltonH, RealType deltaBeta);
 
         [[nodiscard]] inline RealType calcPartitionZ() const;
@@ -68,11 +68,13 @@ namespace Physica::Core {
     }
 
     template<class ScalarType>
-    template<class ModelType>
+    template<class ModelType, class Executor>
     void TPQ<ScalarType>::nvt_step(const LatticeHamilton<ModelType>& hamiltonH, RealType deltaBeta) {
         if (deltaBeta.isZero())
             return;
-        Vector<ScalarType> dot = exp((-deltaBeta * 0.5) * hamiltonH.getDerived()) * (*this);
+        using ExprType = decltype(exp(RealType() * hamiltonH.getDerived()) * (*this));
+        Vector<ScalarType> dot;
+        dot.template operator=<ExprType, Executor>(exp((-deltaBeta * 0.5) * hamiltonH.getDerived()) * (*this));
         Base::swap(dot);
         beta += deltaBeta;
     }

@@ -30,12 +30,12 @@ namespace Physica::Core {
     }
 
     template<class Derived>
-    template<class OtherVector>
+    template<class OtherVector, class Executor>
     inline Derived& LValueVector<Derived>::operator=(const RValueVector<OtherVector>& v_) {
         Derived& v1 = Base::getDerived();
         const auto& v = v_.getDerived();
         v1.resize(v.getLength());
-        v.assignTo(v1);
+        v.template assignTo<Derived, Executor>(v1);
         return v1;
     }
 

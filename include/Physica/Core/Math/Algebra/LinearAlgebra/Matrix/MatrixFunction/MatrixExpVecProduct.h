@@ -73,8 +73,8 @@ namespace Physica::Core {
         [[nodiscard]] const VectorType& getRHS() const noexcept { return v; }
     private:
         constexpr static TrivialType calcTheta(int numTaylorTerm);
-        std::pair<int, int> calcParam(RealType traceMu) const;
-        inline RealType calcPowerNorm(RealType traceMu, int order) const;
+        template<class Executor> std::pair<int, int> calcParam(RealType traceMu) const;
+        template<class Executor> inline RealType calcPowerNorm(RealType traceMu, int order) const;
     };
 
     template<class MatrixType, class VectorType>
@@ -96,7 +96,7 @@ namespace Physica::Core {
         assert(trace.getImag().isZero() && "[Error]: Not implemented");
         const RealType traceMu = trace.getReal() / RealType(length);
 
-        const auto pair = calcParam(traceMu);
+        const auto pair = calcParam<Executor>(traceMu);
         const int numTaylorTerm = pair.first;
         const int numSplit = pair.second;
         const RealType factor = exp(trace.getReal() / RealType(length * numSplit));
@@ -107,8 +107,9 @@ namespace Physica::Core {
             term = target;
             RealType norm1 = term.normInf();
             for (int n = 1; n <= numTaylorTerm; ++n) {
+                using ExprType = decltype(mat * term - traceMu * term);
                 term *= reciprocal(RealType(numSplit * n));
-                buffer = mat * term - traceMu * term;
+                buffer.template operator=<ExprType, Executor>(mat * term - traceMu * term);
                 buffer.swap(term);
                 const RealType norm2 = term.normInf();
                 target += term;
@@ -129,9 +130,11 @@ namespace Physica::Core {
     }
 
     template<class MatrixType, class VectorType>
+    template<class Executor>
     std::pair<int, int> MatrixVectorProduct<MatrixExp<MatrixType>, VectorType>::calcParam(RealType traceMu) const {
         constexpr static TrivialType NormLimit = ((2 * MaxNormOrder * (MaxNormOrder + 3)) * calcTheta(MaxNumTaylorTerm)) / MaxNumTaylorTerm;
-        const TrivialType norm1 = (mexp.getMatrix() - UnitMatrix<ScalarType>(getLength()) * traceMu).norm1_power(MaxNormIteration);
+        const auto unit = UnitMatrix<ScalarType>(getLength());
+        const TrivialType norm1 = (mexp.getMatrix() - unit * traceMu).template norm1_power<Executor>(MaxNormIteration);
         const bool isSmallNorm = norm1 <= NormLimit;
         int cost = std::numeric_limits<int>::max();
         int numMinCostTerm = 0;
@@ -151,7 +154,7 @@ namespace Physica::Core {
 
         RealType powerNorms[MaxNormOrder];
         for (int order = 2; order <= MaxNormOrder + 1; ++order)
-            powerNorms[order - 2] = calcPowerNorm(traceMu, order);
+            powerNorms[order - 2] = calcPowerNorm<Executor>(traceMu, order);
 
         for (int order = 2; order <= MaxNormOrder; ++order) {
             const TrivialType powerNorm = std::max(powerNorms[order - 2], powerNorms[order - 1]);
@@ -167,9 +170,11 @@ namespace Physica::Core {
     }
 
     template<class MatrixType, class VectorType>
+    template<class Executor>
     inline typename MatrixVectorProduct<MatrixExp<MatrixType>, VectorType>::RealType
     MatrixVectorProduct<MatrixExp<MatrixType>, VectorType>::calcPowerNorm(RealType traceMu, int order) const {
-        const RealType norm1 = pow(mexp.getMatrix() - traceMu * UnitMatrix<ScalarType>(getLength()), order).norm1_power(MaxNormIteration);
+        const auto unit = UnitMatrix<ScalarType>(getLength());
+        const RealType norm1 = pow(mexp.getMatrix() - traceMu * unit, order).template norm1_power<Executor>(MaxNormIteration);
         return pow(norm1, reciprocal(RealType(order)));
     }
 }

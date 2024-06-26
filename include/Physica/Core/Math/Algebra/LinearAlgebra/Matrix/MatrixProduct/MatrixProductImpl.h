@@ -64,7 +64,7 @@ namespace Physica::Core {
     }
 
     template<class MatrixType, class VectorType>
-    template<class OtherDerived>
+    template<class OtherDerived, class Executor>
     inline void MatrixVectorProduct<MatrixType, VectorType>::assignTo(LValueVector<OtherDerived>& target) const {
         for (size_t i = 0; i < getLength(); ++i)
             target[i] = calc(i);
