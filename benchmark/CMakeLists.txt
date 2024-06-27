@@ -1,5 +1,6 @@
 include(../cmake/Modules/PhysicaAddBenchmark.cmake)
 
+add_subdirectory(ManyBody)
 # RPMD
 physica_add_benchmark(HardCore RPMD/HardCore.cpp)
 physica_add_benchmark(ParaH RPMD/ParaH.cpp)
@@ -11,8 +12,9 @@ if(${PHYSICA_CUDA})
     endif()
 endif()
 # Anonymous
-physica_add_benchmark(Hubbard Hubbard.cpp)
 physica_add_benchmark(KSSolver KSSolver.cpp)
 physica_add_benchmark(Mnist Mnist.cpp)
 physica_add_benchmark(Q_TIP4P Q_TIP4P.cpp)
-physica_add_benchmark(Q_TIP4P2D_cuda Q_TIP4P2D.cu)
+if(${PHYSICA_CUDA})
+    physica_add_benchmark(Q_TIP4P2D_cuda Q_TIP4P2D.cu)
+endif()

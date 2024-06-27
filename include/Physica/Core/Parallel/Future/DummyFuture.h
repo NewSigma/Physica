@@ -24,6 +24,7 @@ namespace Physica::Core {
     class DummyFuture {
     public:
         void wait() {}
+        void get() {}
     };
 
     template<>
@@ -32,6 +33,7 @@ namespace Physica::Core {
     public:
         /* Operations */
         void wait() {}
+        void get() {}
         void append([[maybe_unused]] FutureType future) {}
     };
 }

@@ -32,7 +32,7 @@ namespace Physica::Utils {
         using ScalarType = Core::Scalar<Core::Double>;
     public:
         template<class Functor>
-        static std::pair<ScalarType, ScalarType> run(Functor func, unsigned int numTest, unsigned int numSample) {
+        [[nodiscard]] static std::pair<ScalarType, ScalarType> run(Functor func, unsigned int numTest, unsigned int numSample) {
             ScalarType mean = 0, var = 0;
             for (size_t i = 0; i < numTest; ++i) {
                 ScalarType temp = 0;

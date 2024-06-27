@@ -37,16 +37,18 @@ namespace Physica::Core {
     template<unsigned int Dim, unsigned int NumSite>
     class SpinlessFermion : public State<SpinlessFermion<Dim, NumSite>> {
         static_assert(1 <= Dim && Dim <= 3, "[Error]: Invalid Dim");
-        static_assert(NumSite > 0, "[Error]: Invalid site number");
+        static_assert(0 < NumSite && NumSite < 64, "[Error]: Invalid site number");
         using This = SpinlessFermion<Dim, NumSite>;
         using Base = State<This>;
+    public:
+        using IntType = int64_t;
     private:
-        uint64_t occupyBits;
+        IntType occupyBits;
 
         static_assert(NumSite < sizeof(occupyBits) * CHAR_BIT, "[Error]: Unexpected large site number");
     public:
         SpinlessFermion() = default;
-        inline SpinlessFermion(uint64_t occupyBits_);
+        inline SpinlessFermion(IntType occupyBits_);
         SpinlessFermion(const This&) = default;
         SpinlessFermion(This&&) noexcept = default;
         ~SpinlessFermion() = default;
@@ -70,13 +72,13 @@ namespace Physica::Core {
         [[nodiscard]] int calcPeriod() const;
         inline void swap(This& __restrict obj) noexcept;
         /* Getters */
-        [[nodiscard]] uint64_t getOccupyBits() const noexcept { return occupyBits; }
+        [[nodiscard]] IntType getOccupyBits() const noexcept { return occupyBits; }
         [[nodiscard]] bool isVacuum() const noexcept { return occupyBits == 0; }
         [[nodiscard]] inline bool isOccupy(unsigned char site) const noexcept;
         [[nodiscard]] unsigned int getNumParticle() const noexcept { return countOnes(occupyBits); }
         [[nodiscard]] inline bool isTransReducible(int period = 1) const noexcept;
-        [[nodiscard]] inline uint64_t makeFullMask() const noexcept;
-        [[nodiscard]] inline uint64_t makeHighMask() const noexcept;
+        [[nodiscard]] inline IntType makeFullMask() const noexcept;
+        [[nodiscard]] inline IntType makeHighMask() const noexcept;
     };
 
     template<unsigned int Dim, unsigned int NumSite>
@@ -89,6 +91,16 @@ namespace Physica::Core {
         }
         return os;
     }
+}
+
+namespace std {
+    template<unsigned int Dim, unsigned int NumSite>
+    struct hash<Physica::Core::SpinlessFermion<Dim, NumSite>> {
+        using T = Physica::Core::SpinlessFermion<Dim, NumSite>;
+        std::size_t operator()(const T& psi) const noexcept {
+            return std::hash<typename T::IntType>{}(psi.getOccupyBits());
+        }
+    };
 }
 
 #include "StateImpl/SpinlessFermionImpl.h"

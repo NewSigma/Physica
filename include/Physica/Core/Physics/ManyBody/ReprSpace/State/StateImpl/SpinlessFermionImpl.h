@@ -22,7 +22,7 @@
 
 namespace Physica::Core {
     template<unsigned int Dim, unsigned int NumSite>
-    inline SpinlessFermion<Dim, NumSite>::SpinlessFermion(uint64_t occupyBits_) : occupyBits(occupyBits_) {}
+    inline SpinlessFermion<Dim, NumSite>::SpinlessFermion(IntType occupyBits_) : occupyBits(occupyBits_) {}
 
     template<unsigned int Dim, unsigned int NumSite>
     inline bool SpinlessFermion<Dim, NumSite>::operator==(const This& other) const noexcept {
@@ -51,8 +51,8 @@ namespace Physica::Core {
         const bool canHop = isOccupy(from) && !isOccupy(to);
         if (!canHop)
             return SpinlessFermion();
-        const uint64_t fromMask = 1UL << from;
-        const uint64_t toMask = 1UL << to;
+        const IntType fromMask = 1UL << from;
+        const IntType toMask = 1UL << to;
         return SpinlessFermion((occupyBits ^ fromMask) | toMask);
     }
 
@@ -76,7 +76,7 @@ namespace Physica::Core {
         if (period == NumSite)
             return *this;
         const int numTrans = NumSite / period;
-        uint64_t result = occupyBits;
+        IntType result = occupyBits;
         This temp = *this;
         for (int i = 0; i < numTrans; ++i) {
             temp <<= period;
@@ -118,7 +118,7 @@ namespace Physica::Core {
     template<unsigned int Dim, unsigned int NumSite>
     inline bool SpinlessFermion<Dim, NumSite>::isOccupy(unsigned char site) const noexcept {
         assert(site < sizeof(occupyBits) * CHAR_BIT && "[Error]: Invalid site");
-        const uint64_t mask = 1UL << site;
+        const IntType mask = 1UL << site;
         return (occupyBits & mask) != 0;
     }
 
@@ -128,12 +128,12 @@ namespace Physica::Core {
     }
 
     template<unsigned int Dim, unsigned int NumSite>
-    inline uint64_t SpinlessFermion<Dim, NumSite>::makeFullMask() const noexcept {
-        return (static_cast<uint64_t>(1) << NumSite) - 1;
+    inline typename SpinlessFermion<Dim, NumSite>::IntType SpinlessFermion<Dim, NumSite>::makeFullMask() const noexcept {
+        return (static_cast<IntType>(1) << NumSite) - 1;
     }
 
     template<unsigned int Dim, unsigned int NumSite>
-    inline uint64_t SpinlessFermion<Dim, NumSite>::makeHighMask() const noexcept {
-        return (static_cast<uint64_t>(1) << (NumSite - 1));
+    inline typename SpinlessFermion<Dim, NumSite>::IntType SpinlessFermion<Dim, NumSite>::makeHighMask() const noexcept {
+        return (static_cast<IntType>(1) << (NumSite - 1));
     }
 }

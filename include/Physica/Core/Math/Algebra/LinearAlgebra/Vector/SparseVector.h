@@ -82,7 +82,7 @@ namespace Physica::Core {
 
     template<class ScalarType>
     SparseVector<ScalarType>::SparseVector(size_t length_, size_t numNonZero) : SparseVector(length_) {
-        assert(numNonZero < length && "[Error]: Too many non zero elements");
+        assert(numNonZero <= length && "[Error]: Too many non zero elements");
         reserve(numNonZero);
     }
 

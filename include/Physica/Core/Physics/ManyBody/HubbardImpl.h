@@ -36,16 +36,37 @@ namespace Physica::Core {
         const size_t length = Base::getColumn();
         assert(source.getLength() == length && "[Error]: Dimensions do not match");
         assert(source.getLength() == target.getLength() && "[Error]: Dimensions do not match");
-        target = RealType(0);
 
-        SparseType buffer(getNumState(), NumSite * SiteDOF);
-        for (size_t i = 0; i < length; ++i) {
-            if constexpr (Dim == 1)
-                dotImpl1D(buffer, source.calc(i), i);
-            else
-                dotImplND(buffer, source.calc(i), i);
-            target += buffer;
-            buffer.clear();
+        target = RealType(0);
+        if constexpr (std::is_same<Executor, ThreadExecutor>::value) {
+            std::mutex mutex{};
+            auto future = Executor::parallel_for([&, length](unsigned int thread) {
+                VectorType local(length, 0);
+                SparseType buffer(length, std::min(size_t(NumSite * SiteDOF), length));
+                const auto range = Executor::splitJob(length, Executor::getNumThread(), thread);
+                for (unsigned int i = range.first; i < range.second; ++i) {
+                    if constexpr (Dim == 1)
+                        dotImpl1D(buffer, source.calc(i), i);
+                    else
+                        dotImplND(buffer, source.calc(i), i);
+                    local += buffer;
+                    buffer.clear();
+                }
+                std::unique_lock locker(mutex);
+                target += local;
+            }, Executor::getNumThread());
+            Executor::auto_wait(future);
+        }
+        else {
+            SparseType buffer(length, std::min(size_t(NumSite * SiteDOF), length));
+            for (size_t i = 0; i < length; ++i) {
+                if constexpr (Dim == 1)
+                    dotImpl1D(buffer, source.calc(i), i);
+                else
+                    dotImplND(buffer, source.calc(i), i);
+                target += buffer;
+                buffer.clear();
+            }
         }
     }
 

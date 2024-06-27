@@ -1,0 +1,51 @@
+/*
+ * Copyright 2024 WeiBo He.
+ *
+ * This file is part of Physica.
+ *
+ * Physica is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Physica is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
+ */
+#include <iostream>
+#include <gperftools/profiler.h>
+#include <Physica/Core/Math/Random/RandomPool.h>
+#include <Physica/Core/Physics/ManyBody/Hubbard.h>
+#include <Physica/Core/Physics/ManyBody/TPQ.h>
+#include <Physica/Utils/BenchmarkHelper.h>
+
+using namespace Physica::Core;
+using ScalarType = Scalar<Double>;
+using VectorType = Vector<ScalarType>;
+using RandomPoolType = RandomPool<std::mt19937>;
+constexpr unsigned int NumSiteX = 4;
+constexpr unsigned int NumSiteY = 2;
+constexpr unsigned int NumSite = NumSiteX * NumSiteY;
+constexpr double HoppingT = 1;
+constexpr double RepelU = 8;
+constexpr double Beta = 16;
+
+int main() {
+    using namespace Physica::Utils;
+    const auto pair = Benchmark::run([]() {
+        using ReprType = SpinRepr<2, NumSite, true>;
+        using Hamilton = Hubbard<ScalarType, ReprType>;
+
+        const Hamilton hamilton({NumSiteX, NumSiteY}, 1, ReprType(4, 4), HoppingT, RepelU);
+        auto& gen = RandomPoolType::getInstance().getGen();
+        auto psi = TPQ<ScalarType>::random_normal(hamilton.getNumState(), gen);
+        psi.template nvt_step<Hamilton, SequentialExecutor>(hamilton, Beta);
+        return psi.lnPartitionZ();
+    }, 6, 8);
+    std::cout << pair.first << ' ' << pair.second << std::endl;
+    return 0;
+}
