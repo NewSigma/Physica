@@ -86,6 +86,9 @@ namespace Physica::Core {
         void random_normal(RandomGenerator& gen);
         template<class Distribution, class RandomGenerator>
         void random_any(Distribution& dist, RandomGenerator& gen);
+
+        inline const H5DataSet<1> read(const H5Location& loc, const char* name, const H5::DSetMemXferPropList& xfer_plist = H5::DSetMemXferPropList::DEFAULT);
+        inline H5DataSet<1> write(H5Location& loc, const char* name, const H5::DSetMemXferPropList& xfer_plist = H5::DSetMemXferPropList::DEFAULT) const;
         /* Getters */
         using Base::getDerived;
         using Storage::getRow;
@@ -229,6 +232,18 @@ namespace Physica::Core {
         This result(order);
         result.random_any(dist, gen);
         return result;
+    }
+
+    template<class T, size_t Order, size_t MaxOrder>
+    inline const H5DataSet<1> DenseHermiteMatrix<T, Order, MaxOrder>::read(
+            const H5Location& loc, const char* name, const H5::DSetMemXferPropList& xfer_plist) {
+        return asVector().read(loc, name, xfer_plist);
+    }
+
+    template<class T, size_t Order, size_t MaxOrder>
+    inline H5DataSet<1> DenseHermiteMatrix<T, Order, MaxOrder>::write(
+            H5Location& loc, const char* name, const H5::DSetMemXferPropList& xfer_plist) const {
+        return asVector().write(loc, name, xfer_plist);
     }
 
     template<class T, size_t Order, size_t MaxOrder>
