@@ -103,4 +103,4 @@ namespace Physica::Core {
 }
 
 #include "DiffVectorImpl/DiffVectorImpl.cuh"
-#include "DiffVectorImpl/DiffVectorExpression.cuh"
+#include "DiffVectorImpl/DiffVectorExpr.cuh"

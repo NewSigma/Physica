@@ -21,16 +21,16 @@
 namespace Physica::Core {
     namespace Internal {
         template<ExpressionType Type, class Exp1, class Exp2>
-        class Traits<Core::device_obj<VectorExpression<Type, Exp1, Exp2>>> : public Traits<VectorExpression<Type, Exp1, Exp2>> {};
+        class Traits<Core::device_obj<VectorExpr<Type, Exp1, Exp2>>> : public Traits<VectorExpr<Type, Exp1, Exp2>> {};
     }
     //////////////////////////////////////Add//////////////////////////////////////
     template<class VectorType1, class VectorType2>
-    class device_obj<VectorExpression<ExpressionType::Add, VectorType1, VectorType2>>
-            : public device_obj<RValueVector<VectorExpression<ExpressionType::Add, VectorType1, VectorType2>>> {
+    class device_obj<VectorExpr<ExpressionType::Add, VectorType1, VectorType2>>
+            : public device_obj<RValueVector<VectorExpr<ExpressionType::Add, VectorType1, VectorType2>>> {
         using DeviceVector1 = device_obj<VectorType1>;
         using DeviceVector2 = device_obj<VectorType2>;
     public:
-        using host_obj = VectorExpression<ExpressionType::Add, VectorType1, VectorType2>;
+        using host_obj = VectorExpr<ExpressionType::Add, VectorType1, VectorType2>;
         using Base = device_obj<RValueVector<host_obj>>;
         using typename Base::ScalarType;
     private:
@@ -55,12 +55,12 @@ namespace Physica::Core {
     };
     //////////////////////////////////////Sub//////////////////////////////////////
     template<class VectorType, class AnyScalar>
-    class device_obj<VectorExpression<ExpressionType::Sub, VectorType, ScalarBase<AnyScalar>>>
-            : public device_obj<RValueVector<VectorExpression<ExpressionType::Sub, VectorType, ScalarBase<AnyScalar>>>> {
+    class device_obj<VectorExpr<ExpressionType::Sub, VectorType, ScalarBase<AnyScalar>>>
+            : public device_obj<RValueVector<VectorExpr<ExpressionType::Sub, VectorType, ScalarBase<AnyScalar>>>> {
         static_assert(is_scalar<AnyScalar>::value, "[Error]: This is not a scalar type");
         using DeviceVector = device_obj<VectorType>;
     public:
-        using host_obj = VectorExpression<ExpressionType::Sub, VectorType, ScalarBase<AnyScalar>>;
+        using host_obj = VectorExpr<ExpressionType::Sub, VectorType, ScalarBase<AnyScalar>>;
         using Base = device_obj<RValueVector<host_obj>>;
         using typename Base::ScalarType;
     private:
@@ -81,12 +81,12 @@ namespace Physica::Core {
     };
 
     template<class VectorType1, class VectorType2>
-    class device_obj<VectorExpression<ExpressionType::Sub, VectorType1, VectorType2>>
-            : public device_obj<RValueVector<VectorExpression<ExpressionType::Sub, VectorType1, VectorType2>>> {
+    class device_obj<VectorExpr<ExpressionType::Sub, VectorType1, VectorType2>>
+            : public device_obj<RValueVector<VectorExpr<ExpressionType::Sub, VectorType1, VectorType2>>> {
         using DeviceVector1 = device_obj<VectorType1>;
         using DeviceVector2 = device_obj<VectorType2>;
     public:
-        using host_obj = VectorExpression<ExpressionType::Sub, VectorType1, VectorType2>;
+        using host_obj = VectorExpr<ExpressionType::Sub, VectorType1, VectorType2>;
         using Base = device_obj<RValueVector<host_obj>>;
         using typename Base::ScalarType;
     private:
@@ -111,12 +111,12 @@ namespace Physica::Core {
     };
     //////////////////////////////////////Mul//////////////////////////////////////
     template<class VectorType, class AnyScalar>
-    class device_obj<VectorExpression<ExpressionType::Mul, VectorType, ScalarBase<AnyScalar>>>
-            : public device_obj<RValueVector<VectorExpression<ExpressionType::Mul, VectorType, ScalarBase<AnyScalar>>>> {
+    class device_obj<VectorExpr<ExpressionType::Mul, VectorType, ScalarBase<AnyScalar>>>
+            : public device_obj<RValueVector<VectorExpr<ExpressionType::Mul, VectorType, ScalarBase<AnyScalar>>>> {
         static_assert(is_scalar<AnyScalar>::value, "[Error]: This is not a scalar type");
         using DeviceVector = device_obj<VectorType>;
     public:
-        using host_obj = VectorExpression<ExpressionType::Mul, VectorType, ScalarBase<AnyScalar>>;
+        using host_obj = VectorExpr<ExpressionType::Mul, VectorType, ScalarBase<AnyScalar>>;
         using Base = device_obj<RValueVector<host_obj>>;
         using typename Base::ScalarType;
     private:
@@ -137,12 +137,12 @@ namespace Physica::Core {
     };
 
     template<class VectorType1, class VectorType2>
-    class device_obj<VectorExpression<ExpressionType::Mul, VectorType1, VectorType2>>
-            : public device_obj<RValueVector<VectorExpression<ExpressionType::Mul, VectorType1, VectorType2>>> {
+    class device_obj<VectorExpr<ExpressionType::Mul, VectorType1, VectorType2>>
+            : public device_obj<RValueVector<VectorExpr<ExpressionType::Mul, VectorType1, VectorType2>>> {
         using DeviceVector1 = device_obj<VectorType1>;
         using DeviceVector2 = device_obj<VectorType2>;
     public:
-        using host_obj = VectorExpression<ExpressionType::Mul, VectorType1, VectorType2>;
+        using host_obj = VectorExpr<ExpressionType::Mul, VectorType1, VectorType2>;
         using Base = device_obj<RValueVector<host_obj>>;
         using typename Base::ScalarType;
     private:
@@ -165,12 +165,12 @@ namespace Physica::Core {
     };
     //////////////////////////////////////Div//////////////////////////////////////
     template<class VectorType, class AnyScalar>
-    class device_obj<VectorExpression<ExpressionType::Div, VectorType, ScalarBase<AnyScalar>>>
-            : public device_obj<RValueVector<VectorExpression<ExpressionType::Div, VectorType, ScalarBase<AnyScalar>>>> {
+    class device_obj<VectorExpr<ExpressionType::Div, VectorType, ScalarBase<AnyScalar>>>
+            : public device_obj<RValueVector<VectorExpr<ExpressionType::Div, VectorType, ScalarBase<AnyScalar>>>> {
         static_assert(is_scalar<AnyScalar>::value, "[Error]: This is not a scalar type");
         using DeviceVector = device_obj<VectorType>;
     public:
-        using host_obj = VectorExpression<ExpressionType::Div, VectorType, ScalarBase<AnyScalar>>;
+        using host_obj = VectorExpr<ExpressionType::Div, VectorType, ScalarBase<AnyScalar>>;
         using Base = device_obj<RValueVector<host_obj>>;
         using typename Base::ScalarType;
     private:
@@ -191,10 +191,10 @@ namespace Physica::Core {
     };
     ////////////////////////////////////////Elementary Functions////////////////////////////////////////////
     template<class VectorType>
-    class device_obj<VectorExpression<ExpressionType::Reciprocal, VectorType>>
-            : public device_obj<RValueVector<VectorExpression<ExpressionType::Reciprocal, VectorType>>> {
+    class device_obj<VectorExpr<ExpressionType::Reciprocal, VectorType>>
+            : public device_obj<RValueVector<VectorExpr<ExpressionType::Reciprocal, VectorType>>> {
     public:
-        using host_obj = VectorExpression<ExpressionType::Reciprocal, VectorType>;
+        using host_obj = VectorExpr<ExpressionType::Reciprocal, VectorType>;
     private:
         using Base = device_obj<RValueVector<host_obj>>;
         using DeviceVector = device_obj<VectorType>;
@@ -218,10 +218,10 @@ namespace Physica::Core {
     };
 
     template<class VectorType>
-    class device_obj<VectorExpression<ExpressionType::Relu, VectorType>>
-            : public device_obj<RValueVector<VectorExpression<ExpressionType::Relu, VectorType>>> {
+    class device_obj<VectorExpr<ExpressionType::Relu, VectorType>>
+            : public device_obj<RValueVector<VectorExpr<ExpressionType::Relu, VectorType>>> {
     public:
-        using host_obj = VectorExpression<ExpressionType::Relu, VectorType>;
+        using host_obj = VectorExpr<ExpressionType::Relu, VectorType>;
     private:
         using Base = device_obj<RValueVector<host_obj>>;
         using DeviceVector = device_obj<VectorType>;
@@ -245,10 +245,10 @@ namespace Physica::Core {
     };
 
     template<class VectorType>
-    class device_obj<VectorExpression<ExpressionType::Exp, VectorType>>
-            : public device_obj<RValueVector<VectorExpression<ExpressionType::Exp, VectorType>>> {
+    class device_obj<VectorExpr<ExpressionType::Exp, VectorType>>
+            : public device_obj<RValueVector<VectorExpr<ExpressionType::Exp, VectorType>>> {
     public:
-        using host_obj = VectorExpression<ExpressionType::Exp, VectorType>;
+        using host_obj = VectorExpr<ExpressionType::Exp, VectorType>;
     private:
         using Base = device_obj<RValueVector<host_obj>>;
         using DeviceVector = device_obj<VectorType>;
@@ -273,59 +273,59 @@ namespace Physica::Core {
     //////////////////////////////////////Operators//////////////////////////////////////
     //////////////////////////////////////Add//////////////////////////////////////
     template<class Derived, class OtherDerived>
-    [[nodiscard]] inline __host__ __device__ device_obj<VectorExpression<ExpressionType::Add, Derived, OtherDerived>>
+    [[nodiscard]] inline __host__ __device__ device_obj<VectorExpr<ExpressionType::Add, Derived, OtherDerived>>
             operator+(const device_obj<RValueVector<Derived>>& v1, const device_obj<RValueVector<OtherDerived>>& v2) noexcept {
         return {v1.getDerived(), v2.getDerived()};
     }
     //////////////////////////////////////Sub//////////////////////////////////////
     template<class VectorType, class ScalarType>
-    [[nodiscard]] __host__ __device__ inline device_obj<VectorExpression<ExpressionType::Sub, VectorType, ScalarBase<ScalarType>>>
+    [[nodiscard]] __host__ __device__ inline device_obj<VectorExpr<ExpressionType::Sub, VectorType, ScalarBase<ScalarType>>>
     operator-(const device_obj<RValueVector<VectorType>>& v, const ScalarBase<ScalarType>& s) noexcept {
         return {v.getDerived(), s.getDerived()};
     }
 
     template<class Derived, class OtherDerived>
-    [[nodiscard]] inline __host__ __device__ device_obj<VectorExpression<ExpressionType::Sub, Derived, OtherDerived>>
+    [[nodiscard]] inline __host__ __device__ device_obj<VectorExpr<ExpressionType::Sub, Derived, OtherDerived>>
             operator-(const device_obj<RValueVector<Derived>>& v1, const device_obj<RValueVector<OtherDerived>>& v2) noexcept {
         return {v1.getDerived(), v2.getDerived()};
     }
     //////////////////////////////////////Mul//////////////////////////////////////
     template<class VectorType, class ScalarType>
-    [[nodiscard]] __host__ __device__ inline device_obj<VectorExpression<ExpressionType::Mul, VectorType, ScalarBase<ScalarType>>>
+    [[nodiscard]] __host__ __device__ inline device_obj<VectorExpr<ExpressionType::Mul, VectorType, ScalarBase<ScalarType>>>
     operator*(const device_obj<RValueVector<VectorType>>& v, const ScalarBase<ScalarType>& s) noexcept {
         return {v.getDerived(), s.getDerived()};
     }
 
     template<class ScalarType, class VectorType>
-    [[nodiscard]] __host__ __device__ inline device_obj<VectorExpression<ExpressionType::Mul, VectorType, ScalarBase<ScalarType>>>
+    [[nodiscard]] __host__ __device__ inline device_obj<VectorExpr<ExpressionType::Mul, VectorType, ScalarBase<ScalarType>>>
     operator*(const ScalarBase<ScalarType>& s, const device_obj<RValueVector<VectorType>>& v) noexcept {
         return v * s.getDerived();
     }
     
     template<class VectorType1, class VectorType2>
-    [[nodiscard]] __host__ __device__ inline device_obj<VectorExpression<ExpressionType::Mul, VectorType1, VectorType2>>
+    [[nodiscard]] __host__ __device__ inline device_obj<VectorExpr<ExpressionType::Mul, VectorType1, VectorType2>>
     hadamard(const device_obj<RValueVector<VectorType1>>& v1, const device_obj<RValueVector<VectorType2>>& v2) noexcept {
         return {v1.getDerived(), v2.getDerived()};
     }
     //////////////////////////////////////Div//////////////////////////////////////
     template<class VectorType, class ScalarType>
-    [[nodiscard]] __host__ __device__ inline device_obj<VectorExpression<ExpressionType::Div, VectorType, ScalarBase<ScalarType>>>
+    [[nodiscard]] __host__ __device__ inline device_obj<VectorExpr<ExpressionType::Div, VectorType, ScalarBase<ScalarType>>>
     operator/(const device_obj<RValueVector<VectorType>>& v, const ScalarBase<ScalarType>& s) noexcept {
         return {v.getDerived(), s.getDerived()};
     }
     ////////////////////////////////////////Elementary Functions////////////////////////////////////////////
     template<class VectorType>
     [[nodiscard]] inline auto reciprocal(const device_obj<RValueVector<VectorType>>& v) noexcept {
-        return device_obj<VectorExpression<ExpressionType::Reciprocal, VectorType>>(v);
+        return device_obj<VectorExpr<ExpressionType::Reciprocal, VectorType>>(v);
     }
 
     template<class VectorType>
     [[nodiscard]] inline auto relu(const device_obj<RValueVector<VectorType>>& v) noexcept {
-        return device_obj<VectorExpression<ExpressionType::Relu, VectorType>>(v);
+        return device_obj<VectorExpr<ExpressionType::Relu, VectorType>>(v);
     }
 
     template<class VectorType>
     inline auto exp(const device_obj<RValueVector<VectorType>>& v) noexcept {
-        return device_obj<VectorExpression<ExpressionType::Exp, VectorType>>(v);
+        return device_obj<VectorExpr<ExpressionType::Exp, VectorType>>(v);
     }
 }

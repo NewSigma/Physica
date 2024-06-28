@@ -20,9 +20,9 @@
 
 namespace Physica::Core {
     template<class VectorType1, class VectorType2>
-    class VectorExpression<ExpressionType::Sub, VectorType1, VectorType2>
-            : public RValueVector<VectorExpression<ExpressionType::Sub, VectorType1, VectorType2>> {
-        using This = VectorExpression<ExpressionType::Sub, VectorType1, VectorType2>;
+    class VectorExpr<ExpressionType::Sub, VectorType1, VectorType2>
+            : public RValueVector<VectorExpr<ExpressionType::Sub, VectorType1, VectorType2>> {
+        using This = VectorExpr<ExpressionType::Sub, VectorType1, VectorType2>;
     public:
         using Base = RValueVector<This>;
         using typename Base::ScalarType;
@@ -30,13 +30,13 @@ namespace Physica::Core {
         const VectorType1& expr1;
         const VectorType2& expr2;
     public:
-        VectorExpression(const RValueVector<VectorType1>& expr1_, const RValueVector<VectorType2>& expr2_)
+        VectorExpr(const RValueVector<VectorType1>& expr1_, const RValueVector<VectorType2>& expr2_)
                 : expr1(expr1_.getDerived()), expr2(expr2_.getDerived()) {
             assert(expr1.getLength() == expr2.getLength());
         }
-        VectorExpression(const This&) = delete;
-        VectorExpression(This&&) noexcept = delete;
-        ~VectorExpression() = default;
+        VectorExpr(const This&) = delete;
+        VectorExpr(This&&) noexcept = delete;
+        ~VectorExpr() = default;
         /* Operators */
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
@@ -59,7 +59,7 @@ namespace Physica::Core {
 
     template<class VectorType1, class VectorType2>
     template<class OtherDerived, class Executor>
-    inline void VectorExpression<ExpressionType::Sub, VectorType1, VectorType2>::assignTo(LValueVector<OtherDerived>& v_) const {
+    inline void VectorExpr<ExpressionType::Sub, VectorType1, VectorType2>::assignTo(LValueVector<OtherDerived>& v_) const {
         constexpr bool FastAssign1 = Internal::Traits<VectorType1>::FastAssign;
         constexpr bool FastAssign2 = Internal::Traits<VectorType2>::FastAssign;
         auto& v = v_.getDerived();
@@ -86,19 +86,19 @@ namespace Physica::Core {
     }
 
     template<class VectorType, class AnyScalar>
-    class VectorExpression<ExpressionType::Sub, VectorType, ScalarBase<AnyScalar>>
-            : public RValueVector<VectorExpression<ExpressionType::Sub, VectorType, ScalarBase<AnyScalar>>> {
+    class VectorExpr<ExpressionType::Sub, VectorType, ScalarBase<AnyScalar>>
+            : public RValueVector<VectorExpr<ExpressionType::Sub, VectorType, ScalarBase<AnyScalar>>> {
         static_assert(is_scalar<AnyScalar>::value, "[Error]: This is not a scalar type");
-        using This = VectorExpression<ExpressionType::Sub, VectorType, ScalarBase<AnyScalar>>;
+        using This = VectorExpr<ExpressionType::Sub, VectorType, ScalarBase<AnyScalar>>;
         using Base = RValueVector<This>;
         const VectorType& exp;
         const AnyScalar& scalar;
     public:
-        VectorExpression(const RValueVector<VectorType>& exp_, const AnyScalar& scalar_)
+        VectorExpr(const RValueVector<VectorType>& exp_, const AnyScalar& scalar_)
                 : exp(exp_.getDerived()), scalar(scalar_) {}
-        VectorExpression(const This&) = delete;
-        VectorExpression(This&&) noexcept = delete;
-        ~VectorExpression() = default;
+        VectorExpr(const This&) = delete;
+        VectorExpr(This&&) noexcept = delete;
+        ~VectorExpr() = default;
         /* Operators */
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
@@ -116,14 +116,14 @@ namespace Physica::Core {
     };
 
     template<class Derived, class OtherDerived>
-    [[nodiscard]] inline VectorExpression<ExpressionType::Sub, Derived, OtherDerived>
+    [[nodiscard]] inline VectorExpr<ExpressionType::Sub, Derived, OtherDerived>
     operator-(const RValueVector<Derived>& v1, const RValueVector<OtherDerived>& v2) noexcept {
-        return VectorExpression<ExpressionType::Sub, Derived, OtherDerived>(v1.getDerived(), v2.getDerived());
+        return VectorExpr<ExpressionType::Sub, Derived, OtherDerived>(v1.getDerived(), v2.getDerived());
     }
 
     template<class VectorType, class ScalarType>
-    [[nodiscard]] inline VectorExpression<ExpressionType::Sub, VectorType, ScalarBase<ScalarType>>
+    [[nodiscard]] inline VectorExpr<ExpressionType::Sub, VectorType, ScalarBase<ScalarType>>
     operator-(const RValueVector<VectorType>& v, const ScalarBase<ScalarType>& s) noexcept {
-        return VectorExpression<ExpressionType::Sub, VectorType, ScalarBase<ScalarType>>(v.getDerived(), s.getDerived());
+        return VectorExpr<ExpressionType::Sub, VectorType, ScalarBase<ScalarType>>(v.getDerived(), s.getDerived());
     }
 }

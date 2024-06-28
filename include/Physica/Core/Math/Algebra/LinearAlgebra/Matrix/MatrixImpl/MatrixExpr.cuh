@@ -18,19 +18,19 @@
  */
 #pragma once
 
-#include "DenseMatrixExpression.h"
+#include "MatrixExpr.h"
 
 namespace Physica::Core {
     namespace Internal {
         template<ExpressionType type, class T1, class T2, class ResultType>
-        class Traits<Core::device_obj<DenseMatrixExpression<type, T1, T2, ResultType>>>
-                : public Traits<DenseMatrixExpression<type, T1, T2, ResultType>> {};
+        class Traits<Core::device_obj<MatrixExpr<type, T1, T2, ResultType>>>
+                : public Traits<MatrixExpr<type, T1, T2, ResultType>> {};
     }
     //////////////////////////////////////Add//////////////////////////////////////
     template<class MatrixType1, class MatrixType2>
-    class device_obj<DenseMatrixExpression<ExpressionType::Add, MatrixType1, MatrixType2>>
-            : public device_obj<RValueMatrix<DenseMatrixExpression<ExpressionType::Add, MatrixType1, MatrixType2>>> {
-        using host_obj = DenseMatrixExpression<ExpressionType::Add, MatrixType1, MatrixType2>;
+    class device_obj<MatrixExpr<ExpressionType::Add, MatrixType1, MatrixType2>>
+            : public device_obj<RValueMatrix<MatrixExpr<ExpressionType::Add, MatrixType1, MatrixType2>>> {
+        using host_obj = MatrixExpr<ExpressionType::Add, MatrixType1, MatrixType2>;
         using This = device_obj<host_obj>;
     public:
         using Base = device_obj<RValueMatrix<host_obj>>;
@@ -56,9 +56,9 @@ namespace Physica::Core {
     };
 
     template<class MatrixType, class AnyScalar>
-    class device_obj<DenseMatrixExpression<ExpressionType::Add, MatrixType, ScalarBase<AnyScalar>>>
-            : public RValueMatrix<DenseMatrixExpression<ExpressionType::Add, MatrixType, ScalarBase<AnyScalar>>> {
-        using host_obj = DenseMatrixExpression<ExpressionType::Add, MatrixType, ScalarBase<AnyScalar>>;
+    class device_obj<MatrixExpr<ExpressionType::Add, MatrixType, ScalarBase<AnyScalar>>>
+            : public RValueMatrix<MatrixExpr<ExpressionType::Add, MatrixType, ScalarBase<AnyScalar>>> {
+        using host_obj = MatrixExpr<ExpressionType::Add, MatrixType, ScalarBase<AnyScalar>>;
         using This = device_obj<host_obj>;
     public:
         using Base = device_obj<RValueMatrix<host_obj>>;
@@ -83,9 +83,9 @@ namespace Physica::Core {
     };
     //////////////////////////////////////Mul//////////////////////////////////////
     template<class MatrixType, class AnyScalar>
-    class device_obj<DenseMatrixExpression<ExpressionType::Mul, MatrixType, ScalarBase<AnyScalar>>>
-            : public device_obj<RValueMatrix<DenseMatrixExpression<ExpressionType::Mul, MatrixType, ScalarBase<AnyScalar>>>> {
-        using host_obj = DenseMatrixExpression<ExpressionType::Mul, MatrixType, ScalarBase<AnyScalar>>;
+    class device_obj<MatrixExpr<ExpressionType::Mul, MatrixType, ScalarBase<AnyScalar>>>
+            : public device_obj<RValueMatrix<MatrixExpr<ExpressionType::Mul, MatrixType, ScalarBase<AnyScalar>>>> {
+        using host_obj = MatrixExpr<ExpressionType::Mul, MatrixType, ScalarBase<AnyScalar>>;
         using This = device_obj<host_obj>;
     public:
         using Base = device_obj<RValueMatrix<host_obj>>;
@@ -111,25 +111,25 @@ namespace Physica::Core {
     //////////////////////////////////////Operators//////////////////////////////////////
     //////////////////////////////////////Add//////////////////////////////////////
     template<class MatrixType1, class MatrixType2>
-    [[nodiscard]] __device__ inline device_obj<DenseMatrixExpression<ExpressionType::Add, MatrixType1, MatrixType2>>
+    [[nodiscard]] __device__ inline device_obj<MatrixExpr<ExpressionType::Add, MatrixType1, MatrixType2>>
     operator+(const device_obj<RValueMatrix<MatrixType1>>& mat1, const device_obj<RValueMatrix<MatrixType2>>& mat2) noexcept {
         return {mat1, mat2};
     }
 
     template<class MatrixType, class ScalarType>
-    [[nodiscard]] __device__ inline device_obj<DenseMatrixExpression<ExpressionType::Add, MatrixType, ScalarBase<ScalarType>>>
+    [[nodiscard]] __device__ inline device_obj<MatrixExpr<ExpressionType::Add, MatrixType, ScalarBase<ScalarType>>>
     operator+(const device_obj<RValueMatrix<MatrixType>>& mat, const ScalarBase<ScalarType>& s) noexcept {
         return {mat, s};
     }
     //////////////////////////////////////Mul//////////////////////////////////////
     template<class MatrixType, class ScalarType>
-    [[nodiscard]] __device__ inline device_obj<DenseMatrixExpression<ExpressionType::Mul, MatrixType, ScalarBase<ScalarType>>>
+    [[nodiscard]] __device__ inline device_obj<MatrixExpr<ExpressionType::Mul, MatrixType, ScalarBase<ScalarType>>>
     operator*(const ScalarBase<ScalarType>& s, const device_obj<RValueMatrix<MatrixType>>& m) noexcept {
         return {m, s};
     }
 
     template<class MatrixType, class ScalarType>
-    [[nodiscard]] __device__ inline device_obj<DenseMatrixExpression<ExpressionType::Mul, MatrixType, ScalarBase<ScalarType>>>
+    [[nodiscard]] __device__ inline device_obj<MatrixExpr<ExpressionType::Mul, MatrixType, ScalarBase<ScalarType>>>
     operator*(const device_obj<RValueMatrix<MatrixType>>& m, const ScalarBase<ScalarType>& s) noexcept {
         return {m, s};
     }

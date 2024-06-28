@@ -18,16 +18,16 @@
  */
 #pragma once
 
-#include "DiffVectorExpression.h"
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/VectorImpl/VectorExpression.cuh"
+#include "DiffVectorExpr.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/VectorImpl/VectorExpr.cuh"
 
 namespace Physica::Core {
-    template<ExpressionType type, unsigned int Order, class T1> class DiffVectorExpressionUnitary;
-    template<ExpressionType type, unsigned int Order, class T1, class T2 = T1> class DiffVectorExpressionBinary;
+    template<ExpressionType type, unsigned int Order, class T1> class DiffVectorExprUnitary;
+    template<ExpressionType type, unsigned int Order, class T1, class T2 = T1> class DiffVectorExprBinary;
 
     namespace Internal {
         template<ExpressionType Type, class VectorType>
-        __global__ void DiffVectorExpression_unitaryOpKernel(
+        __global__ void DiffVectorExpr_unitaryOpKernel(
                 Physica::PlainStruct<VectorType> result_,
                 Physica::PlainStruct<const VectorType> v_) {
             using ScalarType = typename VectorType::ScalarType;
@@ -50,7 +50,7 @@ namespace Physica::Core {
         }
 
         template<ExpressionType Type, class VectorType>
-        __global__ void DiffVectorExpression_binaryOpKernel(
+        __global__ void DiffVectorExpr_binaryOpKernel(
                 Physica::PlainStruct<VectorType> result_,
                 Physica::PlainStruct<const VectorType> v_,
                 Physica::PlainStruct<const typename VectorType::ScalarType> s_) {
@@ -80,7 +80,7 @@ namespace Physica::Core {
         }
 
         template<ExpressionType Type, class VectorType>
-        __global__ void DiffVectorExpression_binaryOpKernel(
+        __global__ void DiffVectorExpr_binaryOpKernel(
                 Physica::PlainStruct<VectorType> result_,
                 Physica::PlainStruct<const VectorType> v1_,
                 Physica::PlainStruct<const VectorType> v2_) {
@@ -111,7 +111,7 @@ namespace Physica::Core {
     }
 
     template<ExpressionType Type, unsigned int Order, class PlainScalar>
-    class DiffVectorExpressionUnitary<Type, Order, Vector<PlainScalar>> {
+    class DiffVectorExprUnitary<Type, Order, Vector<PlainScalar>> {
         using VectorType = device_obj<Differentiable<Vector<PlainScalar>, DiffMode::Reverse, Order>>;
     public:
         [[nodiscard]] static VectorType calc(const VectorType& v) {
@@ -120,14 +120,14 @@ namespace Physica::Core {
             VectorType result(length, Type);
             const size_t numThread = std::min(length, VectorType::MaxThreadPerBlock);
             const size_t numBlock = (length + numThread - 1) / numThread;
-            Internal::DiffVectorExpression_unitaryOpKernel<Type, VectorType>
+            Internal::DiffVectorExpr_unitaryOpKernel<Type, VectorType>
                     <<<numBlock, numThread, 0, StreamPool::getStream()>>>(asStruct(result), asStruct(v));
             return result;
         }
     };
 
     template<ExpressionType Type, unsigned int Order, class PlainScalar>
-    class DiffVectorExpressionBinary<Type, Order, Vector<PlainScalar>, PlainScalar> {
+    class DiffVectorExprBinary<Type, Order, Vector<PlainScalar>, PlainScalar> {
         using VectorType = device_obj<Differentiable<Vector<PlainScalar>, DiffMode::Reverse, Order>>;
         using ScalarType = typename VectorType::ScalarType;
     public:
@@ -137,14 +137,14 @@ namespace Physica::Core {
             VectorType result(length, Type);
             const size_t numThread = std::min(length, VectorType::MaxThreadPerBlock);
             const size_t numBlock = (length + numThread - 1) / numThread;
-            Internal::DiffVectorExpression_binaryOpKernel<Type, VectorType>
+            Internal::DiffVectorExpr_binaryOpKernel<Type, VectorType>
                     <<<numBlock, numThread, 0, StreamPool::getStream()>>>(asStruct(result), asStruct(v), asStruct(s));
             return result;
         }
     };
 
     template<ExpressionType Type, unsigned int Order, class PlainScalar>
-    class DiffVectorExpressionBinary<Type, Order, Vector<PlainScalar>> {
+    class DiffVectorExprBinary<Type, Order, Vector<PlainScalar>> {
         using VectorType = device_obj<Differentiable<Vector<PlainScalar>, DiffMode::Reverse, Order>>;
     public:
         [[nodiscard]] static VectorType calc(const VectorType& v1, const VectorType& v2) {
@@ -154,7 +154,7 @@ namespace Physica::Core {
             VectorType result(length, Type);
             const size_t numThread = std::min(length, VectorType::MaxThreadPerBlock);
             const size_t numBlock = (length + numThread - 1) / numThread;
-            Internal::DiffVectorExpression_binaryOpKernel<Type, VectorType>
+            Internal::DiffVectorExpr_binaryOpKernel<Type, VectorType>
                     <<<numBlock, numThread, 0, StreamPool::getStream()>>>(asStruct(result), asStruct(v1), asStruct(v2));
             return result;
         }
@@ -166,7 +166,7 @@ namespace Physica::Core {
     inline auto operator+(
             const device_obj<Differentiable<Vector<PlainScalar>, DiffMode::Reverse, Order>>& v,
             const device_obj<Differentiable<PlainScalar, DiffMode::Reverse, Order>>& s) {
-        return DiffVectorExpressionBinary<ExpressionType::Add, Order, Vector<PlainScalar>, PlainScalar>::calc(v, s);
+        return DiffVectorExprBinary<ExpressionType::Add, Order, Vector<PlainScalar>, PlainScalar>::calc(v, s);
     }
 
     template<class PlainScalar, unsigned int Order>
@@ -180,28 +180,28 @@ namespace Physica::Core {
     inline auto operator+(
             const device_obj<Differentiable<Vector<PlainScalar>, DiffMode::Reverse, Order>>& v1,
             const device_obj<Differentiable<Vector<PlainScalar>, DiffMode::Reverse, Order>>& v2) {
-        return DiffVectorExpressionBinary<ExpressionType::Add, Order, Vector<PlainScalar>, Vector<PlainScalar>>::calc(v1, v2);
+        return DiffVectorExprBinary<ExpressionType::Add, Order, Vector<PlainScalar>, Vector<PlainScalar>>::calc(v1, v2);
     }
     //////////////////////////////////////Sub//////////////////////////////////////
     template<class PlainScalar, unsigned int Order>
     inline auto operator-(
             const device_obj<Differentiable<Vector<PlainScalar>, DiffMode::Reverse, Order>>& v,
             const device_obj<Differentiable<PlainScalar, DiffMode::Reverse, Order>>& s) {
-        return DiffVectorExpressionBinary<ExpressionType::Sub, Order, Vector<PlainScalar>, PlainScalar>::calc(v, s);
+        return DiffVectorExprBinary<ExpressionType::Sub, Order, Vector<PlainScalar>, PlainScalar>::calc(v, s);
     }
 
     template<class PlainScalar, unsigned int Order>
     inline auto operator-(
             const device_obj<Differentiable<Vector<PlainScalar>, DiffMode::Reverse, Order>>& v1,
             const device_obj<Differentiable<Vector<PlainScalar>, DiffMode::Reverse, Order>>& v2) {
-        return DiffVectorExpressionBinary<ExpressionType::Sub, Order, Vector<PlainScalar>, Vector<PlainScalar>>::calc(v1, v2);
+        return DiffVectorExprBinary<ExpressionType::Sub, Order, Vector<PlainScalar>, Vector<PlainScalar>>::calc(v1, v2);
     }
     //////////////////////////////////////Mul//////////////////////////////////////
     template<class PlainScalar, unsigned int Order>
     inline auto operator*(
             const device_obj<Differentiable<Vector<PlainScalar>, DiffMode::Reverse, Order>>& v,
             const device_obj<Differentiable<PlainScalar, DiffMode::Reverse, Order>>& s) {
-        return DiffVectorExpressionBinary<ExpressionType::Mul, Order, Vector<PlainScalar>, PlainScalar>::calc(v, s);
+        return DiffVectorExprBinary<ExpressionType::Mul, Order, Vector<PlainScalar>, PlainScalar>::calc(v, s);
     }
 
     template<class PlainScalar, unsigned int Order>
@@ -215,31 +215,31 @@ namespace Physica::Core {
     inline auto hadamard(
             const device_obj<Differentiable<Vector<PlainScalar>, DiffMode::Reverse, Order>>& v1,
             const device_obj<Differentiable<Vector<PlainScalar>, DiffMode::Reverse, Order>>& v2) {
-        return DiffVectorExpressionBinary<ExpressionType::Mul, Order, Vector<PlainScalar>, Vector<PlainScalar>>::calc(v1, v2);
+        return DiffVectorExprBinary<ExpressionType::Mul, Order, Vector<PlainScalar>, Vector<PlainScalar>>::calc(v1, v2);
     }
     //////////////////////////////////////Div//////////////////////////////////////
     template<class PlainScalar, unsigned int Order>
     inline auto operator/(
             const device_obj<Differentiable<Vector<PlainScalar>, DiffMode::Reverse, Order>>& v,
             const device_obj<Differentiable<PlainScalar, DiffMode::Reverse, Order>>& s) {
-        return DiffVectorExpressionBinary<ExpressionType::Div, Order, Vector<PlainScalar>, PlainScalar>::calc(v, s);
+        return DiffVectorExprBinary<ExpressionType::Div, Order, Vector<PlainScalar>, PlainScalar>::calc(v, s);
     }
 
     template<class PlainScalar, unsigned int Order>
     inline auto devide(
             const device_obj<Differentiable<Vector<PlainScalar>, DiffMode::Reverse, Order>>& v1,
             const device_obj<Differentiable<Vector<PlainScalar>, DiffMode::Reverse, Order>>& v2) {
-        return DiffVectorExpressionBinary<ExpressionType::Div, Order, Vector<PlainScalar>, Vector<PlainScalar>>::calc(v1, v2);
+        return DiffVectorExprBinary<ExpressionType::Div, Order, Vector<PlainScalar>, Vector<PlainScalar>>::calc(v1, v2);
     }
     //////////////////////////////////////Compare//////////////////////////////////////
     ////////////////////////////////////////Elementary Functions////////////////////////////////////////////
     template<class PlainScalar, unsigned int Order>
     auto relu(const device_obj<Differentiable<Vector<PlainScalar>, DiffMode::Reverse, Order>>& v) {
-        return DiffVectorExpressionUnitary<ExpressionType::Relu, Order, Vector<PlainScalar>>::calc(v);
+        return DiffVectorExprUnitary<ExpressionType::Relu, Order, Vector<PlainScalar>>::calc(v);
     }
 
     template<class PlainScalar, unsigned int Order>
     auto exp(const device_obj<Differentiable<Vector<PlainScalar>, DiffMode::Reverse, Order>>& v) {
-        return DiffVectorExpressionUnitary<ExpressionType::Exp, Order, Vector<PlainScalar>>::calc(v);
+        return DiffVectorExprUnitary<ExpressionType::Exp, Order, Vector<PlainScalar>>::calc(v);
     }
 }

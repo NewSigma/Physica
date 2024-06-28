@@ -144,3 +144,4 @@ namespace Physica::Core {
 #include "Hermite.h"
 #include "DiagVector.h"
 #include "MatrixNorm.h"
+#include "MatrixExpr.h"

@@ -21,11 +21,11 @@
 #include "RSparseVector.h"
 
 namespace Physica::Core {
-    template<ExpressionType type, class T1, class T2 = T1> class SparseVectorExpression;
+    template<ExpressionType type, class T1, class T2 = T1> class SparseVectorExpr;
 
     namespace Internal {
         template<ExpressionType type, class Exp, class AnyScalar>
-        class Traits<SparseVectorExpression<type, Exp, AnyScalar>> {
+        class Traits<SparseVectorExpr<type, Exp, AnyScalar>> {
             static_assert(is_scalar<AnyScalar>::value, "[Error]: Invalid scalar type");
         public:
             using ScalarType = typename BinaryScalarOpReturnType<typename Exp::ScalarType, AnyScalar>::Type;
@@ -36,9 +36,9 @@ namespace Physica::Core {
     }
 
     template<class VectorType, class AnyScalar>
-    class SparseVectorExpression<ExpressionType::Mul, VectorType, AnyScalar>
-            : public RSparseVector<SparseVectorExpression<ExpressionType::Mul, VectorType, AnyScalar>> {
-        using This = SparseVectorExpression<ExpressionType::Mul, VectorType, AnyScalar>;
+    class SparseVectorExpr<ExpressionType::Mul, VectorType, AnyScalar>
+            : public RSparseVector<SparseVectorExpr<ExpressionType::Mul, VectorType, AnyScalar>> {
+        using This = SparseVectorExpr<ExpressionType::Mul, VectorType, AnyScalar>;
         using Base = RSparseVector<This>;
         using typename Base::ScalarType;
         using typename Base::NonZeroPair;
@@ -46,11 +46,11 @@ namespace Physica::Core {
         const VectorType& v;
         const AnyScalar& s;
     public:
-        SparseVectorExpression(const RSparseVector<VectorType>& v_, const ScalarBase<AnyScalar>& s_)
+        SparseVectorExpr(const RSparseVector<VectorType>& v_, const ScalarBase<AnyScalar>& s_)
                 : v(v_.getDerived()), s(s_.getDerived()) {}
-        SparseVectorExpression(const This&) = delete;
-        SparseVectorExpression(This&&) noexcept = delete;
-        ~SparseVectorExpression() = default;
+        SparseVectorExpr(const This&) = delete;
+        SparseVectorExpr(This&&) noexcept = delete;
+        ~SparseVectorExpr() = default;
         /* Operators */
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
@@ -66,13 +66,13 @@ namespace Physica::Core {
     //////////////////////////////////////Operators//////////////////////////////////////
     //////////////////////////////////////Mul//////////////////////////////////////
     template<class VectorType, class ScalarType>
-    [[nodiscard]] inline SparseVectorExpression<ExpressionType::Mul, VectorType, ScalarType>
+    [[nodiscard]] inline SparseVectorExpr<ExpressionType::Mul, VectorType, ScalarType>
     operator*(const RSparseVector<VectorType>& v, const ScalarBase<ScalarType>& s) noexcept {
-        return SparseVectorExpression<ExpressionType::Mul, VectorType, ScalarType>(v.getDerived(), s.getDerived());
+        return SparseVectorExpr<ExpressionType::Mul, VectorType, ScalarType>(v.getDerived(), s.getDerived());
     }
 
     template<class ScalarType, class VectorType>
-    [[nodiscard]] inline SparseVectorExpression<ExpressionType::Mul, VectorType, ScalarType>
+    [[nodiscard]] inline SparseVectorExpr<ExpressionType::Mul, VectorType, ScalarType>
     operator*(const ScalarBase<ScalarType>& s, const RSparseVector<VectorType>& v) noexcept {
         return v * s;
     }

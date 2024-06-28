@@ -95,3 +95,4 @@ namespace Physica::Core {
 
 #include "RValueMatrixImpl/RValueMatrixImpl.cuh"
 #include "Transpose.cuh"
+#include "MatrixExpr.cuh"

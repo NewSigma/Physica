@@ -18,7 +18,7 @@
  */
 #pragma once
 
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/VectorImpl/VectorExpression.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/VectorImpl/VectorExpr.h"
 /**
  * Operation between differentiable vectors shall save procedural info, so template expression does not apply to it.
  */

@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2023 WeiBo He.
+ * Copyright 2020-2024 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -20,7 +20,6 @@
 
 #include <memory>
 #include "MatrixImpl/ContinuousMatrix.h"
-#include "DenseMatrixImpl/DenseMatrixExpression.h"
 #include "MatrixProduct/MatrixProduct.h"
 #include "InverseMatrix.h"
 #include "MatrixDecomposition/LUDecomposition.h"

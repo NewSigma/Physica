@@ -19,6 +19,7 @@
 #pragma once
 
 #include "LayerBase.h"
+#include "Physica/Utils/CUDA/PlainStruct.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h"
 
 namespace Physica::Core {

@@ -22,17 +22,17 @@
 
 namespace Physica::Core {
     /**
-     * \class DenseMatrixExpression represents \param T1 \param type \param T2. e.g. matrix + scalar, expression * expression
+     * \class MatrixExpr represents \param T1 \param type \param T2. e.g. matrix + scalar, expression * expression
      */
     template<ExpressionType Type,
              class T1,
              class T2 = T1,
              class ResultType = typename Internal::BinaryScalarOpReturnType<typename T1::ScalarType, typename T2::ScalarType>::Type>
-    class DenseMatrixExpression;
+    class MatrixExpr;
 
     namespace Internal {
         template<ExpressionType Type, class T1, class T2, class ResultType>
-        class Traits<DenseMatrixExpression<Type, T1, T2, ResultType>> {
+        class Traits<MatrixExpr<Type, T1, T2, ResultType>> {
             constexpr static bool SameMajor = MatrixOption::isSameMajor<T1, T2>();
             constexpr static int Major = SameMajor ? MatrixOption::getMajor<T1>()
                                                    : int(MatrixOption::AnyMajor);
@@ -52,7 +52,7 @@ namespace Physica::Core {
         };
 
         template<ExpressionType Type, class T1, class T2, class ResultType>
-        class Traits<DenseMatrixExpression<Type, T1, ScalarBase<T2>, ResultType>> {
+        class Traits<MatrixExpr<Type, T1, ScalarBase<T2>, ResultType>> {
         public:
             using ScalarType = ResultType;
             constexpr static int Option = T1::Option;
@@ -66,19 +66,19 @@ namespace Physica::Core {
     }
     //////////////////////////////////////Minus//////////////////////////////////////
     template<class MatrixType>
-    class DenseMatrixExpression<ExpressionType::Minus, MatrixType>
-            : public RValueMatrix<DenseMatrixExpression<ExpressionType::Minus, MatrixType>> {
-        using This = DenseMatrixExpression<ExpressionType::Minus, MatrixType>;
+    class MatrixExpr<ExpressionType::Minus, MatrixType>
+            : public RValueMatrix<MatrixExpr<ExpressionType::Minus, MatrixType>> {
+        using This = MatrixExpr<ExpressionType::Minus, MatrixType>;
     public:
         using Base = RValueMatrix<This>;
         using typename Base::ScalarType;
     private:
         const MatrixType& exp;
     public:
-        DenseMatrixExpression(const RValueMatrix<MatrixType>& exp_) : exp(exp_.getDerived()) {}
-        DenseMatrixExpression(const This&) = delete;
-        DenseMatrixExpression(This&&) noexcept = delete;
-        ~DenseMatrixExpression() = default;
+        MatrixExpr(const RValueMatrix<MatrixType>& exp_) : exp(exp_.getDerived()) {}
+        MatrixExpr(const This&) = delete;
+        MatrixExpr(This&&) noexcept = delete;
+        ~MatrixExpr() = default;
         /* Operators */
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
@@ -90,9 +90,9 @@ namespace Physica::Core {
     };
     //////////////////////////////////////Add//////////////////////////////////////
     template<class MatrixType1, class MatrixType2>
-    class DenseMatrixExpression<ExpressionType::Add, MatrixType1, MatrixType2>
-            : public RValueMatrix<DenseMatrixExpression<ExpressionType::Add, MatrixType1, MatrixType2>> {
-        using This = DenseMatrixExpression<ExpressionType::Add, MatrixType1, MatrixType2>;
+    class MatrixExpr<ExpressionType::Add, MatrixType1, MatrixType2>
+            : public RValueMatrix<MatrixExpr<ExpressionType::Add, MatrixType1, MatrixType2>> {
+        using This = MatrixExpr<ExpressionType::Add, MatrixType1, MatrixType2>;
         constexpr static bool IsSymm = MatrixOption::isSymmMatrix<MatrixType1>() && MatrixOption::isSymmMatrix<MatrixType2>();
         constexpr static bool IsHermite = MatrixOption::isHermiteMatrix<MatrixType1>() && MatrixOption::isHermiteMatrix<MatrixType2>();
         using TransposeRtnTy = typename std::conditional<IsSymm, const This&, Transpose<This>>::type;
@@ -104,11 +104,11 @@ namespace Physica::Core {
         const MatrixType1& mat1;
         const MatrixType2& mat2;
     public:
-        DenseMatrixExpression(const RValueMatrix<MatrixType1>& mat1_, const RValueMatrix<MatrixType2>& mat2_)
+        MatrixExpr(const RValueMatrix<MatrixType1>& mat1_, const RValueMatrix<MatrixType2>& mat2_)
                 : mat1(mat1_.getDerived()), mat2(mat2_.getDerived()) {}
-        DenseMatrixExpression(const This&) = delete;
-        DenseMatrixExpression(This&&) noexcept = delete;
-        ~DenseMatrixExpression() = default;
+        MatrixExpr(const This&) = delete;
+        MatrixExpr(This&&) noexcept = delete;
+        ~MatrixExpr() = default;
         /* Operators */
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
@@ -127,9 +127,9 @@ namespace Physica::Core {
     };
 
     template<class MatrixType, class AnyScalar>
-    class DenseMatrixExpression<ExpressionType::Add, MatrixType, ScalarBase<AnyScalar>>
-            : public RValueMatrix<DenseMatrixExpression<ExpressionType::Add, MatrixType, ScalarBase<AnyScalar>>> {
-        using This = DenseMatrixExpression<ExpressionType::Add, MatrixType, ScalarBase<AnyScalar>>;
+    class MatrixExpr<ExpressionType::Add, MatrixType, ScalarBase<AnyScalar>>
+            : public RValueMatrix<MatrixExpr<ExpressionType::Add, MatrixType, ScalarBase<AnyScalar>>> {
+        using This = MatrixExpr<ExpressionType::Add, MatrixType, ScalarBase<AnyScalar>>;
     public:
         using Base = RValueMatrix<This>;
         using typename Base::ScalarType;
@@ -137,11 +137,11 @@ namespace Physica::Core {
         const MatrixType& exp;
         const AnyScalar& scalar;
     public:
-        DenseMatrixExpression(const RValueMatrix<MatrixType>& exp_, const ScalarBase<AnyScalar>& base)
+        MatrixExpr(const RValueMatrix<MatrixType>& exp_, const ScalarBase<AnyScalar>& base)
                 : exp(exp_.getDerived()), scalar(base.getDerived()) {}
-        DenseMatrixExpression(const This&) = delete;
-        DenseMatrixExpression(This&&) noexcept = delete;
-        ~DenseMatrixExpression() = default;
+        MatrixExpr(const This&) = delete;
+        MatrixExpr(This&&) noexcept = delete;
+        ~MatrixExpr() = default;
         /* Operators */
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
@@ -155,9 +155,9 @@ namespace Physica::Core {
     };
     //////////////////////////////////////Minus//////////////////////////////////////
     template<class MatrixType1, class MatrixType2>
-    class DenseMatrixExpression<ExpressionType::Sub, MatrixType1, MatrixType2>
-            : public RValueMatrix<DenseMatrixExpression<ExpressionType::Sub, MatrixType1, MatrixType2>> {
-        using This = DenseMatrixExpression<ExpressionType::Sub, MatrixType1, MatrixType2>;
+    class MatrixExpr<ExpressionType::Sub, MatrixType1, MatrixType2>
+            : public RValueMatrix<MatrixExpr<ExpressionType::Sub, MatrixType1, MatrixType2>> {
+        using This = MatrixExpr<ExpressionType::Sub, MatrixType1, MatrixType2>;
         constexpr static bool IsSymm = MatrixOption::isSymmMatrix<MatrixType1>() && MatrixOption::isSymmMatrix<MatrixType2>();
         constexpr static bool IsHermite = MatrixOption::isHermiteMatrix<MatrixType1>() && MatrixOption::isHermiteMatrix<MatrixType2>();
         using TransposeRtnTy = typename std::conditional<IsSymm, const This&, Transpose<This>>::type;
@@ -169,11 +169,11 @@ namespace Physica::Core {
         const MatrixType1& mat1;
         const MatrixType2& mat2;
     public:
-        DenseMatrixExpression(const RValueMatrix<MatrixType1>& mat1_, const RValueMatrix<MatrixType2>& mat2_)
+        MatrixExpr(const RValueMatrix<MatrixType1>& mat1_, const RValueMatrix<MatrixType2>& mat2_)
                 : mat1(mat1_.getDerived()), mat2(mat2_.getDerived()) {}
-        DenseMatrixExpression(const This&) = delete;
-        DenseMatrixExpression(This&&) noexcept = delete;
-        ~DenseMatrixExpression() = default;
+        MatrixExpr(const This&) = delete;
+        MatrixExpr(This&&) noexcept = delete;
+        ~MatrixExpr() = default;
         /* Operators */
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
@@ -192,9 +192,9 @@ namespace Physica::Core {
     };
 
     template<class MatrixType, class AnyScalar>
-    class DenseMatrixExpression<ExpressionType::Sub, MatrixType, ScalarBase<AnyScalar>>
-            : public RValueMatrix<DenseMatrixExpression<ExpressionType::Sub, MatrixType, ScalarBase<AnyScalar>>> {
-        using This = DenseMatrixExpression<ExpressionType::Sub, MatrixType, ScalarBase<AnyScalar>>;
+    class MatrixExpr<ExpressionType::Sub, MatrixType, ScalarBase<AnyScalar>>
+            : public RValueMatrix<MatrixExpr<ExpressionType::Sub, MatrixType, ScalarBase<AnyScalar>>> {
+        using This = MatrixExpr<ExpressionType::Sub, MatrixType, ScalarBase<AnyScalar>>;
     public:
         using Base = RValueMatrix<This>;
         using typename Base::ScalarType;
@@ -202,11 +202,11 @@ namespace Physica::Core {
         const MatrixType& exp;
         const AnyScalar& scalar;
     public:
-        DenseMatrixExpression(const RValueMatrix<MatrixType>& exp_, const ScalarBase<AnyScalar>& base)
+        MatrixExpr(const RValueMatrix<MatrixType>& exp_, const ScalarBase<AnyScalar>& base)
                 : exp(exp_.getDerived()), scalar(base.getDerived()) {}
-        DenseMatrixExpression(const This&) = delete;
-        DenseMatrixExpression(This&&) noexcept = delete;
-        ~DenseMatrixExpression() = default;
+        MatrixExpr(const This&) = delete;
+        MatrixExpr(This&&) noexcept = delete;
+        ~MatrixExpr() = default;
         /* Operators */
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
@@ -218,9 +218,9 @@ namespace Physica::Core {
     };
     //////////////////////////////////////Mul//////////////////////////////////////
     template<class MatrixType1, class MatrixType2>
-    class DenseMatrixExpression<ExpressionType::Mul, MatrixType1, MatrixType2>
-            : public RValueMatrix<DenseMatrixExpression<ExpressionType::Mul, MatrixType1, MatrixType2>> {
-        using This = DenseMatrixExpression<ExpressionType::Mul, MatrixType1, MatrixType2>;
+    class MatrixExpr<ExpressionType::Mul, MatrixType1, MatrixType2>
+            : public RValueMatrix<MatrixExpr<ExpressionType::Mul, MatrixType1, MatrixType2>> {
+        using This = MatrixExpr<ExpressionType::Mul, MatrixType1, MatrixType2>;
     public:
         using Base = RValueMatrix<This>;
         using typename Base::ScalarType;
@@ -228,11 +228,11 @@ namespace Physica::Core {
         const MatrixType1& mat1;
         const MatrixType2& mat2;
     public:
-        DenseMatrixExpression(const RValueMatrix<MatrixType1>& mat1_, const RValueMatrix<MatrixType2>& mat2_)
+        MatrixExpr(const RValueMatrix<MatrixType1>& mat1_, const RValueMatrix<MatrixType2>& mat2_)
                 : mat1(mat1_.getDerived()), mat2(mat2_.getDerived()) {}
-        DenseMatrixExpression(const This&) = delete;
-        DenseMatrixExpression(This&&) noexcept = delete;
-        ~DenseMatrixExpression() = default;
+        MatrixExpr(const This&) = delete;
+        MatrixExpr(This&&) noexcept = delete;
+        ~MatrixExpr() = default;
         /* Operators */
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
@@ -246,9 +246,9 @@ namespace Physica::Core {
     };
 
     template<class MatrixType, class AnyScalar>
-    class DenseMatrixExpression<ExpressionType::Mul, MatrixType, ScalarBase<AnyScalar>>
-            : public RValueMatrix<DenseMatrixExpression<ExpressionType::Mul, MatrixType, ScalarBase<AnyScalar>>> {
-        using This = DenseMatrixExpression<ExpressionType::Mul, MatrixType, ScalarBase<AnyScalar>>;
+    class MatrixExpr<ExpressionType::Mul, MatrixType, ScalarBase<AnyScalar>>
+            : public RValueMatrix<MatrixExpr<ExpressionType::Mul, MatrixType, ScalarBase<AnyScalar>>> {
+        using This = MatrixExpr<ExpressionType::Mul, MatrixType, ScalarBase<AnyScalar>>;
         constexpr static bool IsSymm = MatrixOption::isSymmMatrix<MatrixType>();
         constexpr static bool IsHermite = MatrixOption::isHermiteMatrix<MatrixType>();
         using TransposeRtnTy = typename std::conditional<IsSymm, const This&, Transpose<This>>::type;
@@ -260,11 +260,11 @@ namespace Physica::Core {
         const MatrixType& exp;
         const AnyScalar& scalar;
     public:
-        DenseMatrixExpression(const RValueMatrix<MatrixType>& exp_, const ScalarBase<AnyScalar>& base)
+        MatrixExpr(const RValueMatrix<MatrixType>& exp_, const ScalarBase<AnyScalar>& base)
                 : exp(exp_.getDerived()), scalar(base.getDerived()) {}
-        DenseMatrixExpression(const This&) = delete;
-        DenseMatrixExpression(This&&) noexcept = delete;
-        ~DenseMatrixExpression() = default;
+        MatrixExpr(const This&) = delete;
+        MatrixExpr(This&&) noexcept = delete;
+        ~MatrixExpr() = default;
         /* Operators */
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
@@ -283,9 +283,9 @@ namespace Physica::Core {
     };
     //////////////////////////////////////Div//////////////////////////////////////
     template<class MatrixType, class AnyScalar>
-    class DenseMatrixExpression<ExpressionType::Div, MatrixType, AnyScalar>
-            : public RValueMatrix<DenseMatrixExpression<ExpressionType::Div, MatrixType, AnyScalar>> {
-        using This = DenseMatrixExpression<ExpressionType::Div, MatrixType, AnyScalar>;
+    class MatrixExpr<ExpressionType::Div, MatrixType, AnyScalar>
+            : public RValueMatrix<MatrixExpr<ExpressionType::Div, MatrixType, AnyScalar>> {
+        using This = MatrixExpr<ExpressionType::Div, MatrixType, AnyScalar>;
     public:
         using Base = RValueMatrix<This>;
         using typename Base::ScalarType;
@@ -293,11 +293,11 @@ namespace Physica::Core {
         const MatrixType& exp;
         const AnyScalar& scalar;
     public:
-        DenseMatrixExpression(const RValueMatrix<MatrixType>& exp_, const ScalarBase<AnyScalar>& base)
+        MatrixExpr(const RValueMatrix<MatrixType>& exp_, const ScalarBase<AnyScalar>& base)
                 : exp(exp_.getDerived()), scalar(base.getDerived()) {}
-        DenseMatrixExpression(const This&) = delete;
-        DenseMatrixExpression(This&&) noexcept = delete;
-        ~DenseMatrixExpression() = default;
+        MatrixExpr(const This&) = delete;
+        MatrixExpr(This&&) noexcept = delete;
+        ~MatrixExpr() = default;
         /* Operators */
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
@@ -309,22 +309,22 @@ namespace Physica::Core {
     };
     ////////////////////////////////////////Elementary Functions////////////////////////////////////////////
     template<class MatrixType>
-    class DenseMatrixExpression<ExpressionType::Reciprocal, MatrixType, MatrixType, typename MatrixType::ScalarType::RealType>
-            : public RValueMatrix<DenseMatrixExpression<ExpressionType::Reciprocal,
+    class MatrixExpr<ExpressionType::Reciprocal, MatrixType, MatrixType, typename MatrixType::ScalarType::RealType>
+            : public RValueMatrix<MatrixExpr<ExpressionType::Reciprocal,
                                                                                MatrixType,
                                                                                MatrixType,
                                                                                typename MatrixType::ScalarType::RealType>> {
-        using This = DenseMatrixExpression<ExpressionType::Reciprocal, MatrixType, MatrixType, typename MatrixType::ScalarType::RealType>;
+        using This = MatrixExpr<ExpressionType::Reciprocal, MatrixType, MatrixType, typename MatrixType::ScalarType::RealType>;
     public:
         using Base = RValueMatrix<This>;
         using typename Base::ScalarType;
     private:
         const MatrixType& mat;
     public:
-        DenseMatrixExpression(const RValueMatrix<MatrixType>& mat_) : mat(mat_.getDerived()) {}
-        DenseMatrixExpression(const This&) = delete;
-        DenseMatrixExpression(This&&) noexcept = delete;
-        ~DenseMatrixExpression() = default;
+        MatrixExpr(const RValueMatrix<MatrixType>& mat_) : mat(mat_.getDerived()) {}
+        MatrixExpr(const This&) = delete;
+        MatrixExpr(This&&) noexcept = delete;
+        ~MatrixExpr() = default;
         /* Operators */
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
@@ -336,22 +336,22 @@ namespace Physica::Core {
     };
 
     template<class MatrixType>
-    class DenseMatrixExpression<ExpressionType::Sqrt, MatrixType, MatrixType, typename MatrixType::ScalarType::RealType>
-            : public RValueMatrix<DenseMatrixExpression<ExpressionType::Sqrt,
+    class MatrixExpr<ExpressionType::Sqrt, MatrixType, MatrixType, typename MatrixType::ScalarType::RealType>
+            : public RValueMatrix<MatrixExpr<ExpressionType::Sqrt,
                                                                                MatrixType,
                                                                                MatrixType,
                                                                                typename MatrixType::ScalarType::RealType>> {
-        using This = DenseMatrixExpression<ExpressionType::Sqrt, MatrixType, MatrixType, typename MatrixType::ScalarType::RealType>;
+        using This = MatrixExpr<ExpressionType::Sqrt, MatrixType, MatrixType, typename MatrixType::ScalarType::RealType>;
     public:
         using Base = RValueMatrix<This>;
         using typename Base::ScalarType;
     private:
         const MatrixType& mat;
     public:
-        DenseMatrixExpression(const RValueMatrix<MatrixType>& mat_) : mat(mat_.getDerived()) {}
-        DenseMatrixExpression(const This&) = delete;
-        DenseMatrixExpression(This&&) noexcept = delete;
-        ~DenseMatrixExpression() = default;
+        MatrixExpr(const RValueMatrix<MatrixType>& mat_) : mat(mat_.getDerived()) {}
+        MatrixExpr(const This&) = delete;
+        MatrixExpr(This&&) noexcept = delete;
+        ~MatrixExpr() = default;
         /* Operators */
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
@@ -363,22 +363,22 @@ namespace Physica::Core {
     };
 
     template<class MatrixType>
-    class DenseMatrixExpression<ExpressionType::Abs, MatrixType, MatrixType, typename MatrixType::ScalarType::RealType>
-            : public RValueMatrix<DenseMatrixExpression<ExpressionType::Abs,
+    class MatrixExpr<ExpressionType::Abs, MatrixType, MatrixType, typename MatrixType::ScalarType::RealType>
+            : public RValueMatrix<MatrixExpr<ExpressionType::Abs,
                                                                                MatrixType,
                                                                                MatrixType,
                                                                                typename MatrixType::ScalarType::RealType>> {
-        using This = DenseMatrixExpression<ExpressionType::Abs, MatrixType, MatrixType, typename MatrixType::ScalarType::RealType>;
+        using This = MatrixExpr<ExpressionType::Abs, MatrixType, MatrixType, typename MatrixType::ScalarType::RealType>;
     public:
         using Base = RValueMatrix<This>;
         using typename Base::ScalarType;
     private:
         const MatrixType& mat;
     public:
-        DenseMatrixExpression(const RValueMatrix<MatrixType>& mat_) : mat(mat_.getDerived()) {}
-        DenseMatrixExpression(const This&) = delete;
-        DenseMatrixExpression(This&&) noexcept = delete;
-        ~DenseMatrixExpression() = default;
+        MatrixExpr(const RValueMatrix<MatrixType>& mat_) : mat(mat_.getDerived()) {}
+        MatrixExpr(const This&) = delete;
+        MatrixExpr(This&&) noexcept = delete;
+        ~MatrixExpr() = default;
         /* Operators */
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
@@ -390,19 +390,19 @@ namespace Physica::Core {
     };
 
     template<class MatrixType>
-    class DenseMatrixExpression<ExpressionType::Square, MatrixType>
-            : public RValueMatrix<DenseMatrixExpression<ExpressionType::Square, MatrixType>> {
-        using This = DenseMatrixExpression<ExpressionType::Square, MatrixType>;
+    class MatrixExpr<ExpressionType::Square, MatrixType>
+            : public RValueMatrix<MatrixExpr<ExpressionType::Square, MatrixType>> {
+        using This = MatrixExpr<ExpressionType::Square, MatrixType>;
     public:
         using Base = RValueMatrix<This>;
         using typename Base::ScalarType;
     private:
         const MatrixType& mat;
     public:
-        DenseMatrixExpression(const RValueMatrix<MatrixType>& mat_) : mat(mat_.getDerived()) {}
-        DenseMatrixExpression(const This&) = delete;
-        DenseMatrixExpression(This&&) noexcept = delete;
-        ~DenseMatrixExpression() = default;
+        MatrixExpr(const RValueMatrix<MatrixType>& mat_) : mat(mat_.getDerived()) {}
+        MatrixExpr(const This&) = delete;
+        MatrixExpr(This&&) noexcept = delete;
+        ~MatrixExpr() = default;
         /* Operators */
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
@@ -414,19 +414,19 @@ namespace Physica::Core {
     };
 
     template<class MatrixType>
-    class DenseMatrixExpression<ExpressionType::Ln, MatrixType>
-            : public RValueMatrix<DenseMatrixExpression<ExpressionType::Ln, MatrixType>> {
-        using This = DenseMatrixExpression<ExpressionType::Ln, MatrixType>;
+    class MatrixExpr<ExpressionType::Ln, MatrixType>
+            : public RValueMatrix<MatrixExpr<ExpressionType::Ln, MatrixType>> {
+        using This = MatrixExpr<ExpressionType::Ln, MatrixType>;
     public:
         using Base = RValueMatrix<This>;
         using typename Base::ScalarType;
     private:
         const MatrixType& mat;
     public:
-        DenseMatrixExpression(const RValueMatrix<MatrixType>& mat_) : mat(mat_.getDerived()) {}
-        DenseMatrixExpression(const This&) = delete;
-        DenseMatrixExpression(This&&) noexcept = delete;
-        ~DenseMatrixExpression() = default;
+        MatrixExpr(const RValueMatrix<MatrixType>& mat_) : mat(mat_.getDerived()) {}
+        MatrixExpr(const This&) = delete;
+        MatrixExpr(This&&) noexcept = delete;
+        ~MatrixExpr() = default;
         /* Operators */
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
@@ -438,19 +438,19 @@ namespace Physica::Core {
     };
 
     template<class MatrixType>
-    class DenseMatrixExpression<ExpressionType::Exp, MatrixType>
-            : public RValueMatrix<DenseMatrixExpression<ExpressionType::Exp, MatrixType>> {
-        using This = DenseMatrixExpression<ExpressionType::Exp, MatrixType>;
+    class MatrixExpr<ExpressionType::Exp, MatrixType>
+            : public RValueMatrix<MatrixExpr<ExpressionType::Exp, MatrixType>> {
+        using This = MatrixExpr<ExpressionType::Exp, MatrixType>;
     public:
         using Base = RValueMatrix<This>;
         using typename Base::ScalarType;
     private:
         const MatrixType& mat;
     public:
-        DenseMatrixExpression(const RValueMatrix<MatrixType>& mat_) : mat(mat_.getDerived()) {}
-        DenseMatrixExpression(const This&) = delete;
-        DenseMatrixExpression(This&&) noexcept = delete;
-        ~DenseMatrixExpression() = default;
+        MatrixExpr(const RValueMatrix<MatrixType>& mat_) : mat(mat_.getDerived()) {}
+        MatrixExpr(const This&) = delete;
+        MatrixExpr(This&&) noexcept = delete;
+        ~MatrixExpr() = default;
         /* Operators */
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
@@ -462,19 +462,19 @@ namespace Physica::Core {
     };
 
     template<class MatrixType>
-    class DenseMatrixExpression<ExpressionType::Sin, MatrixType>
-            : public RValueMatrix<DenseMatrixExpression<ExpressionType::Sin, MatrixType>> {
-        using This = DenseMatrixExpression<ExpressionType::Sin, MatrixType>;
+    class MatrixExpr<ExpressionType::Sin, MatrixType>
+            : public RValueMatrix<MatrixExpr<ExpressionType::Sin, MatrixType>> {
+        using This = MatrixExpr<ExpressionType::Sin, MatrixType>;
     public:
         using Base = RValueMatrix<This>;
         using typename Base::ScalarType;
     private:
         const MatrixType& mat;
     public:
-        DenseMatrixExpression(const RValueMatrix<MatrixType>& mat_) : mat(mat_.getDerived()) {}
-        DenseMatrixExpression(const This&) = delete;
-        DenseMatrixExpression(This&&) noexcept = delete;
-        ~DenseMatrixExpression() = default;
+        MatrixExpr(const RValueMatrix<MatrixType>& mat_) : mat(mat_.getDerived()) {}
+        MatrixExpr(const This&) = delete;
+        MatrixExpr(This&&) noexcept = delete;
+        ~MatrixExpr() = default;
         /* Operators */
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
@@ -486,19 +486,19 @@ namespace Physica::Core {
     };
 
     template<class MatrixType>
-    class DenseMatrixExpression<ExpressionType::Cos, MatrixType>
-            : public RValueMatrix<DenseMatrixExpression<ExpressionType::Cos, MatrixType>> {
-        using This = DenseMatrixExpression<ExpressionType::Cos, MatrixType>;
+    class MatrixExpr<ExpressionType::Cos, MatrixType>
+            : public RValueMatrix<MatrixExpr<ExpressionType::Cos, MatrixType>> {
+        using This = MatrixExpr<ExpressionType::Cos, MatrixType>;
     public:
         using Base = RValueMatrix<This>;
         using typename Base::ScalarType;
     private:
         const MatrixType& mat;
     public:
-        DenseMatrixExpression(const RValueMatrix<MatrixType>& mat_) : mat(mat_.getDerived()) {}
-        DenseMatrixExpression(const This&) = delete;
-        DenseMatrixExpression(This&&) noexcept = delete;
-        ~DenseMatrixExpression() = default;
+        MatrixExpr(const RValueMatrix<MatrixType>& mat_) : mat(mat_.getDerived()) {}
+        MatrixExpr(const This&) = delete;
+        MatrixExpr(This&&) noexcept = delete;
+        ~MatrixExpr() = default;
         /* Operators */
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
@@ -511,102 +511,102 @@ namespace Physica::Core {
     //////////////////////////////////////Operators//////////////////////////////////////
     //////////////////////////////////////Minus//////////////////////////////////////
     template<class Derived>
-    [[nodiscard]] inline DenseMatrixExpression<ExpressionType::Minus, Derived>
+    [[nodiscard]] inline MatrixExpr<ExpressionType::Minus, Derived>
     operator-(const RValueMatrix<Derived>& mat) noexcept {
-        return DenseMatrixExpression<ExpressionType::Minus, Derived>(mat.getDerived());
+        return MatrixExpr<ExpressionType::Minus, Derived>(mat.getDerived());
     }
     //////////////////////////////////////Add//////////////////////////////////////
     template<class MatrixType1, class MatrixType2>
-    [[nodiscard]] inline DenseMatrixExpression<ExpressionType::Add, MatrixType1, MatrixType2>
+    [[nodiscard]] inline MatrixExpr<ExpressionType::Add, MatrixType1, MatrixType2>
     operator+(const RValueMatrix<MatrixType1>& mat1, const RValueMatrix<MatrixType2>& mat2) noexcept {
         return {mat1, mat2};
     }
 
     template<class MatrixType, class ScalarType>
-    [[nodiscard]] inline DenseMatrixExpression<ExpressionType::Add, MatrixType, ScalarBase<ScalarType>>
+    [[nodiscard]] inline MatrixExpr<ExpressionType::Add, MatrixType, ScalarBase<ScalarType>>
     operator+(const RValueMatrix<MatrixType>& mat, const ScalarBase<ScalarType>& s) noexcept {
         return {mat, s};
     }
     //////////////////////////////////////Sub//////////////////////////////////////
     template<class MatrixType, class ScalarType>
-    [[nodiscard]] inline DenseMatrixExpression<ExpressionType::Sub, MatrixType, ScalarBase<ScalarType>>
+    [[nodiscard]] inline MatrixExpr<ExpressionType::Sub, MatrixType, ScalarBase<ScalarType>>
     operator-(const RValueMatrix<MatrixType>& mat, const ScalarBase<ScalarType>& s) noexcept {
-        return DenseMatrixExpression<ExpressionType::Sub, MatrixType, ScalarBase<ScalarType>>(mat, s);
+        return MatrixExpr<ExpressionType::Sub, MatrixType, ScalarBase<ScalarType>>(mat, s);
     }
 
     template<class MatrixType1, class MatrixType2>
-    [[nodiscard]] inline DenseMatrixExpression<ExpressionType::Sub, MatrixType1, MatrixType2>
+    [[nodiscard]] inline MatrixExpr<ExpressionType::Sub, MatrixType1, MatrixType2>
     operator-(const RValueMatrix<MatrixType1>& mat1, const RValueMatrix<MatrixType2>& mat2) noexcept {
-        return DenseMatrixExpression<ExpressionType::Sub, MatrixType1, MatrixType2>(mat1, mat2);
+        return MatrixExpr<ExpressionType::Sub, MatrixType1, MatrixType2>(mat1, mat2);
     }
     //////////////////////////////////////Mul//////////////////////////////////////
     template<class MatrixType, class ScalarType>
-    [[nodiscard]] inline DenseMatrixExpression<ExpressionType::Mul, MatrixType, ScalarBase<ScalarType>>
+    [[nodiscard]] inline MatrixExpr<ExpressionType::Mul, MatrixType, ScalarBase<ScalarType>>
     operator*(const ScalarBase<ScalarType>& s, const RValueMatrix<MatrixType>& m) noexcept {
-        return DenseMatrixExpression<ExpressionType::Mul, MatrixType, ScalarBase<ScalarType>>(m, s);
+        return MatrixExpr<ExpressionType::Mul, MatrixType, ScalarBase<ScalarType>>(m, s);
     }
 
     template<class MatrixType, class ScalarType>
-    [[nodiscard]] inline DenseMatrixExpression<ExpressionType::Mul, MatrixType, ScalarBase<ScalarType>>
+    [[nodiscard]] inline MatrixExpr<ExpressionType::Mul, MatrixType, ScalarBase<ScalarType>>
     operator*(const RValueMatrix<MatrixType>& m, const ScalarBase<ScalarType>& s) noexcept {
-        return DenseMatrixExpression<ExpressionType::Mul, MatrixType, ScalarBase<ScalarType>>(m, s);
+        return MatrixExpr<ExpressionType::Mul, MatrixType, ScalarBase<ScalarType>>(m, s);
     }
 
     template<class MatrixType1, class MatrixType2>
-    [[nodiscard]] inline DenseMatrixExpression<ExpressionType::Mul, MatrixType1, MatrixType2>
+    [[nodiscard]] inline MatrixExpr<ExpressionType::Mul, MatrixType1, MatrixType2>
     hadamard(const RValueMatrix<MatrixType1>& mat1, const RValueMatrix<MatrixType2>& mat2) noexcept {
-        return DenseMatrixExpression<ExpressionType::Mul, MatrixType1, MatrixType2>(mat1, mat2);
+        return MatrixExpr<ExpressionType::Mul, MatrixType1, MatrixType2>(mat1, mat2);
     }
     //////////////////////////////////////Div//////////////////////////////////////
     template<class MatrixType, class ScalarType>
-    [[nodiscard]] inline DenseMatrixExpression<ExpressionType::Div, MatrixType, ScalarType>
+    [[nodiscard]] inline MatrixExpr<ExpressionType::Div, MatrixType, ScalarType>
     operator/(const RValueMatrix<MatrixType>& m, const ScalarBase<ScalarType>& s) noexcept {
-        return DenseMatrixExpression<ExpressionType::Div, MatrixType, ScalarType>(m, s);
+        return MatrixExpr<ExpressionType::Div, MatrixType, ScalarType>(m, s);
     }
     ////////////////////////////////////////Elementary Functions////////////////////////////////////////////
     template<class MatrixType>
-    [[nodiscard]] DenseMatrixExpression<ExpressionType::Reciprocal, MatrixType, MatrixType, typename MatrixType::ScalarType::RealType>
+    [[nodiscard]] MatrixExpr<ExpressionType::Reciprocal, MatrixType, MatrixType, typename MatrixType::ScalarType::RealType>
     reciprocal_elem(const RValueMatrix<MatrixType>& m) noexcept {
-        return DenseMatrixExpression<ExpressionType::Reciprocal, MatrixType, MatrixType, typename MatrixType::ScalarType::RealType>(m);
+        return MatrixExpr<ExpressionType::Reciprocal, MatrixType, MatrixType, typename MatrixType::ScalarType::RealType>(m);
     }
 
     template<class MatrixType>
-    [[nodiscard]] DenseMatrixExpression<ExpressionType::Sqrt, MatrixType, MatrixType, typename MatrixType::ScalarType::RealType>
+    [[nodiscard]] MatrixExpr<ExpressionType::Sqrt, MatrixType, MatrixType, typename MatrixType::ScalarType::RealType>
     sqrt_elem(const RValueMatrix<MatrixType>& m) noexcept {
         return {m};
     }
 
     template<class MatrixType>
-    [[nodiscard]] DenseMatrixExpression<ExpressionType::Abs, MatrixType, MatrixType, typename MatrixType::ScalarType::RealType>
+    [[nodiscard]] MatrixExpr<ExpressionType::Abs, MatrixType, MatrixType, typename MatrixType::ScalarType::RealType>
     abs_elem(const RValueMatrix<MatrixType>& m) noexcept {
-        return DenseMatrixExpression<ExpressionType::Abs, MatrixType, MatrixType, typename MatrixType::ScalarType::RealType>(m);
+        return MatrixExpr<ExpressionType::Abs, MatrixType, MatrixType, typename MatrixType::ScalarType::RealType>(m);
     }
 
     template<class MatrixType>
-    [[nodiscard]] DenseMatrixExpression<ExpressionType::Square, MatrixType> square_elem(const RValueMatrix<MatrixType>& m) noexcept {
-        return DenseMatrixExpression<ExpressionType::Square, MatrixType>(m);
+    [[nodiscard]] MatrixExpr<ExpressionType::Square, MatrixType> square_elem(const RValueMatrix<MatrixType>& m) noexcept {
+        return MatrixExpr<ExpressionType::Square, MatrixType>(m);
     }
 
     template<class MatrixType>
-    [[nodiscard]] DenseMatrixExpression<ExpressionType::Ln, MatrixType> ln_elem(const RValueMatrix<MatrixType>& m) noexcept {
-        return DenseMatrixExpression<ExpressionType::Ln, MatrixType>(m);
+    [[nodiscard]] MatrixExpr<ExpressionType::Ln, MatrixType> ln_elem(const RValueMatrix<MatrixType>& m) noexcept {
+        return MatrixExpr<ExpressionType::Ln, MatrixType>(m);
     }
 
     template<class MatrixType>
-    [[nodiscard]] DenseMatrixExpression<ExpressionType::Exp, MatrixType> exp_elem(const RValueMatrix<MatrixType>& m) noexcept {
-        return DenseMatrixExpression<ExpressionType::Exp, MatrixType>(m);
+    [[nodiscard]] MatrixExpr<ExpressionType::Exp, MatrixType> exp_elem(const RValueMatrix<MatrixType>& m) noexcept {
+        return MatrixExpr<ExpressionType::Exp, MatrixType>(m);
     }
 
     template<class MatrixType>
-    [[nodiscard]] DenseMatrixExpression<ExpressionType::Sin, MatrixType> sin_elem(const RValueMatrix<MatrixType>& m) noexcept {
-        return DenseMatrixExpression<ExpressionType::Sin, MatrixType>(m);
+    [[nodiscard]] MatrixExpr<ExpressionType::Sin, MatrixType> sin_elem(const RValueMatrix<MatrixType>& m) noexcept {
+        return MatrixExpr<ExpressionType::Sin, MatrixType>(m);
     }
 
     template<class MatrixType>
-    [[nodiscard]] DenseMatrixExpression<ExpressionType::Cos, MatrixType> cos_elem(const RValueMatrix<MatrixType>& m) noexcept {
-        return DenseMatrixExpression<ExpressionType::Cos, MatrixType>(m);
+    [[nodiscard]] MatrixExpr<ExpressionType::Cos, MatrixType> cos_elem(const RValueMatrix<MatrixType>& m) noexcept {
+        return MatrixExpr<ExpressionType::Cos, MatrixType>(m);
     }
 }
 
-#include "ExprVecProduct.h"
+#include "MatrixExprImpl/ExprVecProduct.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/MatrixImpl/MatrixConvert.h"

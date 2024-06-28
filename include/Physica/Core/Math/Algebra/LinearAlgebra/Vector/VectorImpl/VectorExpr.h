@@ -24,22 +24,21 @@
 #include "Physica/Utils/Template/CRTPBase.h"
 
 namespace Physica::Core {
-    //Forward declaration
     using Utils::Dynamic;
     /**
-     * \class VectorExpression implements template expression for vectors, which will reduce temporary objects.
+     * \class VectorExpr implements template expression for vectors, which will reduce temporary objects.
      * 
      * Operations defined as \tparam T1 \tparam Type \tparam T2. e.g. vector + scalar, expression * expression
      */
     template<ExpressionType Type, class T1, class T2 = T1>
-    class VectorExpression;
+    class VectorExpr;
 
     namespace Internal {
         template<class T>
         class Traits;
 
         template<ExpressionType Type, class Expr1, class Expr2>
-        class Traits<VectorExpression<Type, Expr1, Expr2>> {
+        class Traits<VectorExpr<Type, Expr1, Expr2>> {
             static_assert(Expr1::SizeAtCompile == Dynamic || Expr2::SizeAtCompile == Dynamic || (Expr1::SizeAtCompile == Expr2::SizeAtCompile)
                          , "[Error]: Vector dimentions do not match");
             using ScalarType1 = typename Expr1::ScalarType;
@@ -58,7 +57,7 @@ namespace Physica::Core {
         };
 
         template<ExpressionType Type, class Expr, class AnyScalar>
-        class Traits<VectorExpression<Type, Expr, ScalarBase<AnyScalar>>> {
+        class Traits<VectorExpr<Type, Expr, ScalarBase<AnyScalar>>> {
             static_assert(is_scalar<AnyScalar>::value, "[Error]: This is not a scalar type");
         public:
             using ScalarType = typename BinaryScalarOpReturnType<typename Expr::ScalarType, AnyScalar>::Type;
@@ -71,16 +70,16 @@ namespace Physica::Core {
     }
     //////////////////////////////////////Minus//////////////////////////////////////
     template<class VectorType>
-    class VectorExpression<ExpressionType::Minus, VectorType>
-            : public RValueVector<VectorExpression<ExpressionType::Minus, VectorType>> {
-        using This = VectorExpression<ExpressionType::Minus, VectorType>;
+    class VectorExpr<ExpressionType::Minus, VectorType>
+            : public RValueVector<VectorExpr<ExpressionType::Minus, VectorType>> {
+        using This = VectorExpr<ExpressionType::Minus, VectorType>;
         using Base = RValueVector<This>;
         const VectorType& exp;
     public:
-        explicit VectorExpression(const RValueVector<VectorType>& exp_) : exp(exp_.getDerived()) {}
-        VectorExpression(const This&) = delete;
-        VectorExpression(This&&) noexcept = delete;
-        ~VectorExpression() = default;
+        explicit VectorExpr(const RValueVector<VectorType>& exp_) : exp(exp_.getDerived()) {}
+        VectorExpr(const This&) = delete;
+        VectorExpr(This&&) noexcept = delete;
+        ~VectorExpr() = default;
         /* Operators */
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
@@ -94,18 +93,18 @@ namespace Physica::Core {
     };
     //////////////////////////////////////Div//////////////////////////////////////
     template<class VectorType, class AnyScalar>
-    class VectorExpression<ExpressionType::Div, VectorType, ScalarBase<AnyScalar>>
-            : public RValueVector<VectorExpression<ExpressionType::Div, VectorType, ScalarBase<AnyScalar>>> {
-        using This = VectorExpression<ExpressionType::Div, VectorType, ScalarBase<AnyScalar>>;
+    class VectorExpr<ExpressionType::Div, VectorType, ScalarBase<AnyScalar>>
+            : public RValueVector<VectorExpr<ExpressionType::Div, VectorType, ScalarBase<AnyScalar>>> {
+        using This = VectorExpr<ExpressionType::Div, VectorType, ScalarBase<AnyScalar>>;
         using Base = RValueVector<This>;
         const VectorType& exp;
         const AnyScalar& scalar;
     public:
-        VectorExpression(const RValueVector<VectorType>& exp_, const AnyScalar& scalar_)
+        VectorExpr(const RValueVector<VectorType>& exp_, const AnyScalar& scalar_)
                 : exp(exp_.getDerived()), scalar(scalar_) {}
-        VectorExpression(const This&) = delete;
-        VectorExpression(This&&) noexcept = delete;
-        ~VectorExpression() = default;
+        VectorExpr(const This&) = delete;
+        VectorExpr(This&&) noexcept = delete;
+        ~VectorExpr() = default;
         /* Operators */
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
@@ -123,20 +122,20 @@ namespace Physica::Core {
     };
 
     template<class VectorType1, class VectorType2>
-    class VectorExpression<ExpressionType::Div, VectorType1, VectorType2>
-            : public RValueVector<VectorExpression<ExpressionType::Div, VectorType1, VectorType2>> {
-        using This = VectorExpression<ExpressionType::Div, VectorType1, VectorType2>;
+    class VectorExpr<ExpressionType::Div, VectorType1, VectorType2>
+            : public RValueVector<VectorExpr<ExpressionType::Div, VectorType1, VectorType2>> {
+        using This = VectorExpr<ExpressionType::Div, VectorType1, VectorType2>;
         using Base = RValueVector<This>;
         const VectorType1& v1;
         const VectorType2& v2;
     public:
-        VectorExpression(const RValueVector<VectorType1>& v1_, const RValueVector<VectorType2>& v2_)
+        VectorExpr(const RValueVector<VectorType1>& v1_, const RValueVector<VectorType2>& v2_)
                 : v1(v1_.getDerived()), v2(v2_.getDerived()) {
             assert(v1.getLength() == v2.getLength());
         }
-        VectorExpression(const This&) = delete;
-        VectorExpression(This&&) noexcept = delete;
-        ~VectorExpression() = default;
+        VectorExpr(const This&) = delete;
+        VectorExpr(This&&) noexcept = delete;
+        ~VectorExpr() = default;
         /* Operators */
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
@@ -154,22 +153,22 @@ namespace Physica::Core {
     };
     //////////////////////////////////////Compare//////////////////////////////////////
     template<class VectorType1, class VectorType2>
-    class VectorExpression<ExpressionType::More, VectorType1, VectorType2>
-            : public RValueVector<VectorExpression<ExpressionType::More, VectorType1, VectorType2>> {
-        using This = VectorExpression<ExpressionType::More, VectorType1, VectorType2>;
+    class VectorExpr<ExpressionType::More, VectorType1, VectorType2>
+            : public RValueVector<VectorExpr<ExpressionType::More, VectorType1, VectorType2>> {
+        using This = VectorExpr<ExpressionType::More, VectorType1, VectorType2>;
         using Base = RValueVector<This>;
         const VectorType1& v1;
         const VectorType2& v2;
     public:
         using typename Base::ScalarType;
     public:
-        VectorExpression(const RValueVector<VectorType1>& v1_, const RValueVector<VectorType2>& v2_)
+        VectorExpr(const RValueVector<VectorType1>& v1_, const RValueVector<VectorType2>& v2_)
                 : v1(v1_.getDerived()), v2(v2_.getDerived()) {
             assert(v1.getLength() == v2.getLength());
         }
-        VectorExpression(const This&) = delete;
-        VectorExpression(This&&) noexcept = delete;
-        ~VectorExpression() = default;
+        VectorExpr(const This&) = delete;
+        VectorExpr(This&&) noexcept = delete;
+        ~VectorExpr() = default;
         /* Operators */
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
@@ -187,20 +186,20 @@ namespace Physica::Core {
     };
 
     template<class VectorType, class AnyScalar>
-    class VectorExpression<ExpressionType::More, VectorType, ScalarBase<AnyScalar>>
-            : public RValueVector<VectorExpression<ExpressionType::More, VectorType, ScalarBase<AnyScalar>>> {
-        using This = VectorExpression<ExpressionType::More, VectorType, ScalarBase<AnyScalar>>;
+    class VectorExpr<ExpressionType::More, VectorType, ScalarBase<AnyScalar>>
+            : public RValueVector<VectorExpr<ExpressionType::More, VectorType, ScalarBase<AnyScalar>>> {
+        using This = VectorExpr<ExpressionType::More, VectorType, ScalarBase<AnyScalar>>;
         using Base = RValueVector<This>;
         const VectorType& exp;
         const AnyScalar& scalar;
     public:
         using typename Base::ScalarType;
     public:
-        VectorExpression(const RValueVector<VectorType>& exp_, const AnyScalar& scalar_)
+        VectorExpr(const RValueVector<VectorType>& exp_, const AnyScalar& scalar_)
                 : exp(exp_.getDerived()), scalar(scalar_) {}
-        VectorExpression(const This&) = delete;
-        VectorExpression(This&&) noexcept = delete;
-        ~VectorExpression() = default;
+        VectorExpr(const This&) = delete;
+        VectorExpr(This&&) noexcept = delete;
+        ~VectorExpr() = default;
         /* Operators */
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
@@ -218,22 +217,22 @@ namespace Physica::Core {
     };
 
     template<class VectorType1, class VectorType2>
-    class VectorExpression<ExpressionType::MoreEq, VectorType1, VectorType2>
-            : public RValueVector<VectorExpression<ExpressionType::MoreEq, VectorType1, VectorType2>> {
-        using This = VectorExpression<ExpressionType::MoreEq, VectorType1, VectorType2>;
+    class VectorExpr<ExpressionType::MoreEq, VectorType1, VectorType2>
+            : public RValueVector<VectorExpr<ExpressionType::MoreEq, VectorType1, VectorType2>> {
+        using This = VectorExpr<ExpressionType::MoreEq, VectorType1, VectorType2>;
         using Base = RValueVector<This>;
         const VectorType1& v1;
         const VectorType2& v2;
     public:
         using typename Base::ScalarType;
     public:
-        VectorExpression(const RValueVector<VectorType1>& v1_, const RValueVector<VectorType2>& v2_)
+        VectorExpr(const RValueVector<VectorType1>& v1_, const RValueVector<VectorType2>& v2_)
                 : v1(v1_.getDerived()), v2(v2_.getDerived()) {
             assert(v1.getLength() == v2.getLength());
         }
-        VectorExpression(const This&) = delete;
-        VectorExpression(This&&) noexcept = delete;
-        ~VectorExpression() = default;
+        VectorExpr(const This&) = delete;
+        VectorExpr(This&&) noexcept = delete;
+        ~VectorExpr() = default;
         /* Operators */
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
@@ -251,20 +250,20 @@ namespace Physica::Core {
     };
 
     template<class VectorType, class AnyScalar>
-    class VectorExpression<ExpressionType::MoreEq, VectorType, ScalarBase<AnyScalar>>
-            : public RValueVector<VectorExpression<ExpressionType::MoreEq, VectorType, ScalarBase<AnyScalar>>> {
-        using This = VectorExpression<ExpressionType::MoreEq, VectorType, ScalarBase<AnyScalar>>;
+    class VectorExpr<ExpressionType::MoreEq, VectorType, ScalarBase<AnyScalar>>
+            : public RValueVector<VectorExpr<ExpressionType::MoreEq, VectorType, ScalarBase<AnyScalar>>> {
+        using This = VectorExpr<ExpressionType::MoreEq, VectorType, ScalarBase<AnyScalar>>;
         using Base = RValueVector<This>;
         const VectorType& exp;
         const AnyScalar& scalar;
     public:
         using typename Base::ScalarType;
     public:
-        VectorExpression(const RValueVector<VectorType>& exp_, const AnyScalar& scalar_)
+        VectorExpr(const RValueVector<VectorType>& exp_, const AnyScalar& scalar_)
                 : exp(exp_.getDerived()), scalar(scalar_) {}
-        VectorExpression(const This&) = delete;
-        VectorExpression(This&&) noexcept = delete;
-        ~VectorExpression() = default;
+        VectorExpr(const This&) = delete;
+        VectorExpr(This&&) noexcept = delete;
+        ~VectorExpr() = default;
         /* Operators */
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
@@ -282,16 +281,16 @@ namespace Physica::Core {
     };
     ////////////////////////////////////////Elementary Functions////////////////////////////////////////////
     template<class VectorType>
-    class VectorExpression<ExpressionType::Reciprocal, VectorType>
-            : public RValueVector<VectorExpression<ExpressionType::Reciprocal, VectorType>> {
-        using This = VectorExpression<ExpressionType::Reciprocal, VectorType>;
+    class VectorExpr<ExpressionType::Reciprocal, VectorType>
+            : public RValueVector<VectorExpr<ExpressionType::Reciprocal, VectorType>> {
+        using This = VectorExpr<ExpressionType::Reciprocal, VectorType>;
         using Base = RValueVector<This>;
         const VectorType& exp;
     public:
-        VectorExpression(const RValueVector<VectorType>& exp_) : exp(exp_.getDerived()) {}
-        VectorExpression(const This&) = delete;
-        VectorExpression(This&&) noexcept = delete;
-        ~VectorExpression() = default;
+        VectorExpr(const RValueVector<VectorType>& exp_) : exp(exp_.getDerived()) {}
+        VectorExpr(const This&) = delete;
+        VectorExpr(This&&) noexcept = delete;
+        ~VectorExpr() = default;
         /* Operators */
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
@@ -305,16 +304,16 @@ namespace Physica::Core {
     };
 
     template<class VectorType>
-    class VectorExpression<ExpressionType::Sqrt, VectorType>
-            : public RValueVector<VectorExpression<ExpressionType::Sqrt, VectorType>> {
-        using This = VectorExpression<ExpressionType::Sqrt, VectorType>;
+    class VectorExpr<ExpressionType::Sqrt, VectorType>
+            : public RValueVector<VectorExpr<ExpressionType::Sqrt, VectorType>> {
+        using This = VectorExpr<ExpressionType::Sqrt, VectorType>;
         using Base = RValueVector<This>;
         const VectorType& exp;
     public:
-        VectorExpression(const RValueVector<VectorType>& exp_) : exp(exp_.getDerived()) {}
-        VectorExpression(const This&) = delete;
-        VectorExpression(This&&) noexcept = delete;
-        ~VectorExpression() = default;
+        VectorExpr(const RValueVector<VectorType>& exp_) : exp(exp_.getDerived()) {}
+        VectorExpr(const This&) = delete;
+        VectorExpr(This&&) noexcept = delete;
+        ~VectorExpr() = default;
         /* Operators */
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
@@ -328,16 +327,16 @@ namespace Physica::Core {
     };
 
     template<class VectorType>
-    class VectorExpression<ExpressionType::Cbrt, VectorType>
-            : public RValueVector<VectorExpression<ExpressionType::Cbrt, VectorType>> {
-        using This = VectorExpression<ExpressionType::Cbrt, VectorType>;
+    class VectorExpr<ExpressionType::Cbrt, VectorType>
+            : public RValueVector<VectorExpr<ExpressionType::Cbrt, VectorType>> {
+        using This = VectorExpr<ExpressionType::Cbrt, VectorType>;
         using Base = RValueVector<This>;
         const VectorType& exp;
     public:
-        VectorExpression(const RValueVector<VectorType>& exp_) : exp(exp_.getDerived()) {}
-        VectorExpression(const This&) = delete;
-        VectorExpression(This&&) noexcept = delete;
-        ~VectorExpression() = default;
+        VectorExpr(const RValueVector<VectorType>& exp_) : exp(exp_.getDerived()) {}
+        VectorExpr(const This&) = delete;
+        VectorExpr(This&&) noexcept = delete;
+        ~VectorExpr() = default;
         /* Operators */
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
@@ -361,16 +360,16 @@ namespace Physica::Core {
     };
 
     template<class VectorType>
-    class VectorExpression<ExpressionType::Abs, VectorType>
-            : public RValueVector<VectorExpression<ExpressionType::Abs, VectorType>> {
-        using This = VectorExpression<ExpressionType::Abs, VectorType>;
+    class VectorExpr<ExpressionType::Abs, VectorType>
+            : public RValueVector<VectorExpr<ExpressionType::Abs, VectorType>> {
+        using This = VectorExpr<ExpressionType::Abs, VectorType>;
         using Base = RValueVector<This>;
         const VectorType& v;
     public:
-        VectorExpression(const RValueVector<VectorType>& v_) : v(v_.getDerived()) {}
-        VectorExpression(const This&) = delete;
-        VectorExpression(This&&) noexcept = delete;
-        ~VectorExpression() = default;
+        VectorExpr(const RValueVector<VectorType>& v_) : v(v_.getDerived()) {}
+        VectorExpr(const This&) = delete;
+        VectorExpr(This&&) noexcept = delete;
+        ~VectorExpr() = default;
         /* Operators */
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
@@ -384,16 +383,16 @@ namespace Physica::Core {
     };
 
     template<class VectorType>
-    class VectorExpression<ExpressionType::Square, VectorType>
-            : public RValueVector<VectorExpression<ExpressionType::Square, VectorType>> {
-        using This = VectorExpression<ExpressionType::Square, VectorType>;
+    class VectorExpr<ExpressionType::Square, VectorType>
+            : public RValueVector<VectorExpr<ExpressionType::Square, VectorType>> {
+        using This = VectorExpr<ExpressionType::Square, VectorType>;
         using Base = RValueVector<This>;
         const VectorType& v;
     public:
-        VectorExpression(const RValueVector<VectorType>& v_) : v(v_.getDerived()) {}
-        VectorExpression(const This&) = delete;
-        VectorExpression(This&&) noexcept = delete;
-        ~VectorExpression() = default;
+        VectorExpr(const RValueVector<VectorType>& v_) : v(v_.getDerived()) {}
+        VectorExpr(const This&) = delete;
+        VectorExpr(This&&) noexcept = delete;
+        ~VectorExpr() = default;
         /* Operators */
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
@@ -407,16 +406,16 @@ namespace Physica::Core {
     };
 
     template<class VectorType>
-    class VectorExpression<ExpressionType::Ln, VectorType>
-            : public RValueVector<VectorExpression<ExpressionType::Ln, VectorType>> {
-        using This = VectorExpression<ExpressionType::Ln, VectorType>;
+    class VectorExpr<ExpressionType::Ln, VectorType>
+            : public RValueVector<VectorExpr<ExpressionType::Ln, VectorType>> {
+        using This = VectorExpr<ExpressionType::Ln, VectorType>;
         using Base = RValueVector<This>;
         const VectorType& v;
     public:
-        VectorExpression(const RValueVector<VectorType>& v_) : v(v_.getDerived()) {}
-        VectorExpression(const This&) = delete;
-        VectorExpression(This&&) noexcept = delete;
-        ~VectorExpression() = default;
+        VectorExpr(const RValueVector<VectorType>& v_) : v(v_.getDerived()) {}
+        VectorExpr(const This&) = delete;
+        VectorExpr(This&&) noexcept = delete;
+        ~VectorExpr() = default;
         /* Operators */
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
@@ -426,16 +425,16 @@ namespace Physica::Core {
     };
 
     template<class VectorType>
-    class VectorExpression<ExpressionType::Exp, VectorType>
-            : public RValueVector<VectorExpression<ExpressionType::Exp, VectorType>> {
-        using This = VectorExpression<ExpressionType::Exp, VectorType>;
+    class VectorExpr<ExpressionType::Exp, VectorType>
+            : public RValueVector<VectorExpr<ExpressionType::Exp, VectorType>> {
+        using This = VectorExpr<ExpressionType::Exp, VectorType>;
         using Base = RValueVector<This>;
         const VectorType& v;
     public:
-        VectorExpression(const RValueVector<VectorType>& v_) : v(v_.getDerived()) {}
-        VectorExpression(const This&) = delete;
-        VectorExpression(This&&) noexcept = delete;
-        ~VectorExpression() = default;
+        VectorExpr(const RValueVector<VectorType>& v_) : v(v_.getDerived()) {}
+        VectorExpr(const This&) = delete;
+        VectorExpr(This&&) noexcept = delete;
+        ~VectorExpr() = default;
         /* Operators */
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
@@ -445,9 +444,9 @@ namespace Physica::Core {
     };
 
     template<class VectorType>
-    class VectorExpression<ExpressionType::Pow, VectorType>
-            : public RValueVector<VectorExpression<ExpressionType::Pow, VectorType>> {
-        using This = VectorExpression<ExpressionType::Pow, VectorType>;
+    class VectorExpr<ExpressionType::Pow, VectorType>
+            : public RValueVector<VectorExpr<ExpressionType::Pow, VectorType>> {
+        using This = VectorExpr<ExpressionType::Pow, VectorType>;
         using Base = RValueVector<This>;
     public:
         using typename Base::ScalarType;
@@ -455,11 +454,11 @@ namespace Physica::Core {
         const VectorType& v;
         const ScalarType& s;
     public:
-        VectorExpression(const RValueVector<VectorType>& v_, const ScalarBase<ScalarType>& s_)
+        VectorExpr(const RValueVector<VectorType>& v_, const ScalarBase<ScalarType>& s_)
                 : v(v_.getDerived()), s(s_.getDerived()) {}
-        VectorExpression(const This&) = delete;
-        VectorExpression(This&&) noexcept = delete;
-        ~VectorExpression() = default;
+        VectorExpr(const This&) = delete;
+        VectorExpr(This&&) noexcept = delete;
+        ~VectorExpr() = default;
         /* Operators */
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
@@ -469,19 +468,19 @@ namespace Physica::Core {
     };
 
     template<class VectorType>
-    class VectorExpression<ExpressionType::Sin, VectorType>
-            : public RValueVector<VectorExpression<ExpressionType::Sin, VectorType>> {
-        using This = VectorExpression<ExpressionType::Sin, VectorType>;
+    class VectorExpr<ExpressionType::Sin, VectorType>
+            : public RValueVector<VectorExpr<ExpressionType::Sin, VectorType>> {
+        using This = VectorExpr<ExpressionType::Sin, VectorType>;
         using Base = RValueVector<This>;
     public:
         using typename Base::ScalarType;
     private:
         const VectorType& v;
     public:
-        VectorExpression(const RValueVector<VectorType>& v_) : v(v_.getDerived()) {}
-        VectorExpression(const This&) = delete;
-        VectorExpression(This&&) noexcept = delete;
-        ~VectorExpression() = default;
+        VectorExpr(const RValueVector<VectorType>& v_) : v(v_.getDerived()) {}
+        VectorExpr(const This&) = delete;
+        VectorExpr(This&&) noexcept = delete;
+        ~VectorExpr() = default;
         /* Operators */
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
@@ -491,19 +490,19 @@ namespace Physica::Core {
     };
 
     template<class VectorType>
-    class VectorExpression<ExpressionType::Cos, VectorType>
-            : public RValueVector<VectorExpression<ExpressionType::Cos, VectorType>> {
-        using This = VectorExpression<ExpressionType::Cos, VectorType>;
+    class VectorExpr<ExpressionType::Cos, VectorType>
+            : public RValueVector<VectorExpr<ExpressionType::Cos, VectorType>> {
+        using This = VectorExpr<ExpressionType::Cos, VectorType>;
         using Base = RValueVector<This>;
     public:
         using typename Base::ScalarType;
     private:
         const VectorType& v;
     public:
-        VectorExpression(const RValueVector<VectorType>& v_) : v(v_.getDerived()) {}
-        VectorExpression(const This&) = delete;
-        VectorExpression(This&&) noexcept = delete;
-        ~VectorExpression() = default;
+        VectorExpr(const RValueVector<VectorType>& v_) : v(v_.getDerived()) {}
+        VectorExpr(const This&) = delete;
+        VectorExpr(This&&) noexcept = delete;
+        ~VectorExpr() = default;
         /* Operators */
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
@@ -513,19 +512,19 @@ namespace Physica::Core {
     };
 
     template<class VectorType>
-    class VectorExpression<ExpressionType::Relu, VectorType>
-            : public RValueVector<VectorExpression<ExpressionType::Relu, VectorType>> {
-        using This = VectorExpression<ExpressionType::Relu, VectorType>;
+    class VectorExpr<ExpressionType::Relu, VectorType>
+            : public RValueVector<VectorExpr<ExpressionType::Relu, VectorType>> {
+        using This = VectorExpr<ExpressionType::Relu, VectorType>;
         using Base = RValueVector<This>;
     public:
         using typename Base::ScalarType;
     private:
         const VectorType& v;
     public:
-        VectorExpression(const RValueVector<VectorType>& v_) : v(v_.getDerived()) {}
-        VectorExpression(const This&) = delete;
-        VectorExpression(This&&) noexcept = delete;
-        ~VectorExpression() = default;
+        VectorExpr(const RValueVector<VectorType>& v_) : v(v_.getDerived()) {}
+        VectorExpr(const This&) = delete;
+        VectorExpr(This&&) noexcept = delete;
+        ~VectorExpr() = default;
         /* Operators */
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
@@ -535,19 +534,19 @@ namespace Physica::Core {
     };
 
     template<class VectorType>
-    class VectorExpression<ExpressionType::Unit, VectorType>
-            : public RValueVector<VectorExpression<ExpressionType::Unit, VectorType>> {
-        using This = VectorExpression<ExpressionType::Unit, VectorType>;
+    class VectorExpr<ExpressionType::Unit, VectorType>
+            : public RValueVector<VectorExpr<ExpressionType::Unit, VectorType>> {
+        using This = VectorExpr<ExpressionType::Unit, VectorType>;
         using Base = RValueVector<This>;
     public:
         using typename Base::ScalarType;
     private:
         const VectorType& v;
     public:
-        VectorExpression(const RValueVector<VectorType>& v_) : v(v_.getDerived()) {}
-        VectorExpression(const This&) = delete;
-        VectorExpression(This&&) noexcept = delete;
-        ~VectorExpression() = default;
+        VectorExpr(const RValueVector<VectorType>& v_) : v(v_.getDerived()) {}
+        VectorExpr(const This&) = delete;
+        VectorExpr(This&&) noexcept = delete;
+        ~VectorExpr() = default;
         /* Operators */
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
@@ -558,122 +557,122 @@ namespace Physica::Core {
     //////////////////////////////////////Operators//////////////////////////////////////
     //////////////////////////////////////Minus//////////////////////////////////////
     template<class Derived>
-    [[nodiscard]] inline VectorExpression<ExpressionType::Minus, Derived> operator-(const RValueVector<Derived>& v) noexcept {
-        return VectorExpression<ExpressionType::Minus, Derived>(v.getDerived());
+    [[nodiscard]] inline VectorExpr<ExpressionType::Minus, Derived> operator-(const RValueVector<Derived>& v) noexcept {
+        return VectorExpr<ExpressionType::Minus, Derived>(v.getDerived());
     }
     //////////////////////////////////////Div//////////////////////////////////////
     template<class VectorType, class ScalarType>
-    [[nodiscard]] inline VectorExpression<ExpressionType::Div, VectorType, ScalarBase<ScalarType>>
+    [[nodiscard]] inline VectorExpr<ExpressionType::Div, VectorType, ScalarBase<ScalarType>>
     operator/(const RValueVector<VectorType>& v, const ScalarBase<ScalarType>& s) noexcept {
-        return VectorExpression<ExpressionType::Div, VectorType, ScalarBase<ScalarType>>(v.getDerived(), s.getDerived());
+        return VectorExpr<ExpressionType::Div, VectorType, ScalarBase<ScalarType>>(v.getDerived(), s.getDerived());
     }
 
     template<class VectorType1, class VectorType2>
-    [[nodiscard]] inline VectorExpression<ExpressionType::Div, VectorType1, VectorType2>
+    [[nodiscard]] inline VectorExpr<ExpressionType::Div, VectorType1, VectorType2>
     divide(const RValueVector<VectorType1>& v1, const RValueVector<VectorType2>& v2) noexcept {
-        return VectorExpression<ExpressionType::Div, VectorType1, VectorType2>(v1.getDerived(), v2.getDerived());
+        return VectorExpr<ExpressionType::Div, VectorType1, VectorType2>(v1.getDerived(), v2.getDerived());
     }
     //////////////////////////////////////Compare//////////////////////////////////////
     template<class VectorType1, class VectorType2>
-    [[nodiscard]] inline VectorExpression<ExpressionType::More, VectorType1, VectorType2>
+    [[nodiscard]] inline VectorExpr<ExpressionType::More, VectorType1, VectorType2>
     operator>(const RValueVector<VectorType1>& v1, const RValueVector<VectorType2>& v2) noexcept {
-        return VectorExpression<ExpressionType::More, VectorType1, VectorType2>(v1.getDerived(), v2.getDerived());
+        return VectorExpr<ExpressionType::More, VectorType1, VectorType2>(v1.getDerived(), v2.getDerived());
     }
 
     template<class VectorType1, class VectorType2>
-    [[nodiscard]] inline VectorExpression<ExpressionType::MoreEq, VectorType1, VectorType2>
+    [[nodiscard]] inline VectorExpr<ExpressionType::MoreEq, VectorType1, VectorType2>
     operator>=(const RValueVector<VectorType1>& v1, const RValueVector<VectorType2>& v2) noexcept {
-        return VectorExpression<ExpressionType::MoreEq, VectorType1, VectorType2>(v1.getDerived(), v2.getDerived());
+        return VectorExpr<ExpressionType::MoreEq, VectorType1, VectorType2>(v1.getDerived(), v2.getDerived());
     }
 
     template<class VectorType, class ScalarType>
-    [[nodiscard]] inline VectorExpression<ExpressionType::MoreEq, VectorType, ScalarBase<ScalarType>>
+    [[nodiscard]] inline VectorExpr<ExpressionType::MoreEq, VectorType, ScalarBase<ScalarType>>
     operator>=(const RValueVector<VectorType>& v, const ScalarBase<ScalarType>& s) noexcept {
-        return VectorExpression<ExpressionType::MoreEq, VectorType, ScalarBase<ScalarType>>(v.getDerived(), s.getDerived());
+        return VectorExpr<ExpressionType::MoreEq, VectorType, ScalarBase<ScalarType>>(v.getDerived(), s.getDerived());
     }
 
     template<class VectorType1, class VectorType2>
-    [[nodiscard]] inline VectorExpression<ExpressionType::More, VectorType2, VectorType1>
+    [[nodiscard]] inline VectorExpr<ExpressionType::More, VectorType2, VectorType1>
     operator<(const RValueVector<VectorType1>& v1, const RValueVector<VectorType2>& v2) noexcept {
-        return VectorExpression<ExpressionType::More, VectorType2, VectorType1>(v2.getDerived(), v1.getDerived());
+        return VectorExpr<ExpressionType::More, VectorType2, VectorType1>(v2.getDerived(), v1.getDerived());
     }
 
     template<class VectorType1, class VectorType2>
-    [[nodiscard]] inline VectorExpression<ExpressionType::MoreEq, VectorType2, VectorType1>
+    [[nodiscard]] inline VectorExpr<ExpressionType::MoreEq, VectorType2, VectorType1>
     operator<=(const RValueVector<VectorType1>& v1, const RValueVector<VectorType2>& v2) noexcept {
-        return VectorExpression<ExpressionType::MoreEq, VectorType2, VectorType1>(v2.getDerived(), v1.getDerived());
+        return VectorExpr<ExpressionType::MoreEq, VectorType2, VectorType1>(v2.getDerived(), v1.getDerived());
     }
 
     template<class VectorType, class ScalarType>
-    [[nodiscard]] inline VectorExpression<ExpressionType::MoreEq, VectorType, ScalarBase<ScalarType>>
+    [[nodiscard]] inline VectorExpr<ExpressionType::MoreEq, VectorType, ScalarBase<ScalarType>>
     operator<=(const ScalarBase<ScalarType>& s, const RValueVector<VectorType>& v) noexcept {
-        return VectorExpression<ExpressionType::MoreEq, VectorType, ScalarBase<ScalarType>>(v.getDerived(), s.getDerived());
+        return VectorExpr<ExpressionType::MoreEq, VectorType, ScalarBase<ScalarType>>(v.getDerived(), s.getDerived());
     }
     ////////////////////////////////////////Elementary Functions////////////////////////////////////////////
     template<class VectorType>
-    [[nodiscard]] inline VectorExpression<ExpressionType::Reciprocal, VectorType>
+    [[nodiscard]] inline VectorExpr<ExpressionType::Reciprocal, VectorType>
     reciprocal(const RValueVector<VectorType>& v) noexcept {
-        return VectorExpression<ExpressionType::Reciprocal, VectorType>(v);
+        return VectorExpr<ExpressionType::Reciprocal, VectorType>(v);
     }
 
     template<class VectorType>
-    [[nodiscard]] inline VectorExpression<ExpressionType::Sqrt, VectorType> sqrt(const RValueVector<VectorType>& v) noexcept {
-        return VectorExpression<ExpressionType::Sqrt, VectorType>(v);
+    [[nodiscard]] inline VectorExpr<ExpressionType::Sqrt, VectorType> sqrt(const RValueVector<VectorType>& v) noexcept {
+        return VectorExpr<ExpressionType::Sqrt, VectorType>(v);
     }
 
     template<class VectorType>
-    [[nodiscard]] inline VectorExpression<ExpressionType::Cbrt, VectorType> cbrt(const RValueVector<VectorType>& v) noexcept {
-        return VectorExpression<ExpressionType::Cbrt, VectorType>(v);
+    [[nodiscard]] inline VectorExpr<ExpressionType::Cbrt, VectorType> cbrt(const RValueVector<VectorType>& v) noexcept {
+        return VectorExpr<ExpressionType::Cbrt, VectorType>(v);
     }
 
     template<class VectorType>
-    [[nodiscard]] inline VectorExpression<ExpressionType::Abs, VectorType> abs(const RValueVector<VectorType>& v) noexcept {
-        return VectorExpression<ExpressionType::Abs, VectorType>(v);
+    [[nodiscard]] inline VectorExpr<ExpressionType::Abs, VectorType> abs(const RValueVector<VectorType>& v) noexcept {
+        return VectorExpr<ExpressionType::Abs, VectorType>(v);
     }
 
     template<class VectorType>
-    [[nodiscard]] inline VectorExpression<ExpressionType::Relu, VectorType> relu(
+    [[nodiscard]] inline VectorExpr<ExpressionType::Relu, VectorType> relu(
             const RValueVector<VectorType>& v) noexcept {
-        return VectorExpression<ExpressionType::Relu, VectorType>(v);
+        return VectorExpr<ExpressionType::Relu, VectorType>(v);
     }
 
     template<class VectorType>
-    [[nodiscard]] inline VectorExpression<ExpressionType::Unit, VectorType> unit(const RValueVector<VectorType>& v) noexcept {
-        return VectorExpression<ExpressionType::Unit, VectorType>(v);
+    [[nodiscard]] inline VectorExpr<ExpressionType::Unit, VectorType> unit(const RValueVector<VectorType>& v) noexcept {
+        return VectorExpr<ExpressionType::Unit, VectorType>(v);
     }
 
     template<class VectorType>
-    [[nodiscard]] inline VectorExpression<ExpressionType::Square, VectorType> square(const RValueVector<VectorType>& v) noexcept {
-        return VectorExpression<ExpressionType::Square, VectorType>(v);
+    [[nodiscard]] inline VectorExpr<ExpressionType::Square, VectorType> square(const RValueVector<VectorType>& v) noexcept {
+        return VectorExpr<ExpressionType::Square, VectorType>(v);
     }
 
     template<class VectorType>
-    [[nodiscard]] inline VectorExpression<ExpressionType::Ln, VectorType> ln(const RValueVector<VectorType>& v) noexcept {
-        return VectorExpression<ExpressionType::Ln, VectorType>(v);
+    [[nodiscard]] inline VectorExpr<ExpressionType::Ln, VectorType> ln(const RValueVector<VectorType>& v) noexcept {
+        return VectorExpr<ExpressionType::Ln, VectorType>(v);
     }
 
     template<class VectorType>
-    [[nodiscard]] inline VectorExpression<ExpressionType::Exp, VectorType> exp(const RValueVector<VectorType>& v) noexcept {
-        return VectorExpression<ExpressionType::Exp, VectorType>(v);
+    [[nodiscard]] inline VectorExpr<ExpressionType::Exp, VectorType> exp(const RValueVector<VectorType>& v) noexcept {
+        return VectorExpr<ExpressionType::Exp, VectorType>(v);
     }
 
     template<class VectorType>
-    [[nodiscard]] inline VectorExpression<ExpressionType::Pow, VectorType> pow(
+    [[nodiscard]] inline VectorExpr<ExpressionType::Pow, VectorType> pow(
             const RValueVector<VectorType>& v,
             const ScalarBase<typename VectorType::ScalarType>& s) noexcept {
-        return VectorExpression<ExpressionType::Pow, VectorType>(v, s);
+        return VectorExpr<ExpressionType::Pow, VectorType>(v, s);
     }
 
     template<class VectorType>
-    [[nodiscard]] inline VectorExpression<ExpressionType::Sin, VectorType> sin(
+    [[nodiscard]] inline VectorExpr<ExpressionType::Sin, VectorType> sin(
             const RValueVector<VectorType>& v) noexcept {
-        return VectorExpression<ExpressionType::Sin, VectorType>(v);
+        return VectorExpr<ExpressionType::Sin, VectorType>(v);
     }
 
     template<class VectorType>
-    [[nodiscard]] inline VectorExpression<ExpressionType::Cos, VectorType> cos(
+    [[nodiscard]] inline VectorExpr<ExpressionType::Cos, VectorType> cos(
             const RValueVector<VectorType>& v) noexcept {
-        return VectorExpression<ExpressionType::Cos, VectorType>(v);
+        return VectorExpr<ExpressionType::Cos, VectorType>(v);
     }
 }
 

@@ -40,9 +40,9 @@ int main() {
     const size_t kSize = FFT<RealType, 1>::rSizeToKSize(NumSite);
     //ProfilerStart("profiler.dat");
     for (unsigned int kIndex = 0; kIndex < kSize; ++kIndex) {
-        using ReprType = KSpinRepr<true>;
-        ReprType repr({NumSite, NumParticle, NumParticle}, kIndex);
-        const Hubbard<ScalarType, ReprType> model({{NumSite}, 1}, std::move(repr), HoppingT, RepelU);
+        using ReprType = KSpinRepr<1, NumSite, true>;
+        ReprType repr({NumParticle, NumParticle}, kIndex);
+        const Hubbard<ScalarType, ReprType> model({NumSite}, 1, std::move(repr), HoppingT, RepelU);
 
         const size_t numState = model.getNumState();
         JacobiDavidson<ScalarType> jd(numState, 4);

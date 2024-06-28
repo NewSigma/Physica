@@ -23,8 +23,8 @@ namespace Physica::Core {
 
     namespace Internal {
         template<ExpressionType Type, class T1, class T2, class ResultType, class VectorType>
-        class Traits<MatrixVectorProduct<DenseMatrixExpression<Type, T1, T2, ResultType>, VectorType>> {
-            using MatrixType = DenseMatrixExpression<Type, T1, T2, ResultType>;
+        class Traits<MatrixVectorProduct<MatrixExpr<Type, T1, T2, ResultType>, VectorType>> {
+            using MatrixType = MatrixExpr<Type, T1, T2, ResultType>;
             static_assert(MatrixType::ColumnAtCompile == VectorType::SizeAtCompile ||
                           MatrixType::ColumnAtCompile == Dynamic ||
                           VectorType::SizeAtCompile == Dynamic,
@@ -57,9 +57,9 @@ namespace Physica::Core {
     }
 
     template<ExpressionType Type, class T1, class T2, class ResultType, class VectorType>
-    class MatrixVectorProduct<DenseMatrixExpression<Type, T1, T2, ResultType>, VectorType>
-            : public RValueVector<MatrixVectorProduct<DenseMatrixExpression<Type, T1, T2, ResultType>, VectorType>> {
-        using MatrixType = DenseMatrixExpression<Type, T1, T2, ResultType>;
+    class MatrixVectorProduct<MatrixExpr<Type, T1, T2, ResultType>, VectorType>
+            : public RValueVector<MatrixVectorProduct<MatrixExpr<Type, T1, T2, ResultType>, VectorType>> {
+        using MatrixType = MatrixExpr<Type, T1, T2, ResultType>;
         using This = MatrixVectorProduct<MatrixType, VectorType>;
     public:
         using Base = RValueVector<This>;
@@ -93,7 +93,7 @@ namespace Physica::Core {
 
     template<ExpressionType Type, class T1, class T2, class ResultType, class VectorType>
     template<class OtherDerived, class Executor>
-    inline void MatrixVectorProduct<DenseMatrixExpression<Type, T1, T2, ResultType>, VectorType>::assignTo(
+    inline void MatrixVectorProduct<MatrixExpr<Type, T1, T2, ResultType>, VectorType>::assignTo(
             LValueVector<OtherDerived>& target_) const {
         constexpr bool FastAssign = Internal::Traits<This>::FastAssign;
         auto& target = target_.getDerived();
@@ -117,14 +117,14 @@ namespace Physica::Core {
     }
 
     template<ExpressionType Type, class T1, class T2, class ResultType, class VectorType>
-    inline typename MatrixVectorProduct<DenseMatrixExpression<Type, T1, T2, ResultType>, VectorType>::ScalarType
-    MatrixVectorProduct<DenseMatrixExpression<Type, T1, T2, ResultType>, VectorType>::calc(size_t index) const {
+    inline typename MatrixVectorProduct<MatrixExpr<Type, T1, T2, ResultType>, VectorType>::ScalarType
+    MatrixVectorProduct<MatrixExpr<Type, T1, T2, ResultType>, VectorType>::calc(size_t index) const {
         return expr.row(index) * vec;
     }
 
     template<ExpressionType Type, class T1, class T2, class ResultType, class VectorType>
     template<class OtherDerived>
-    inline void MatrixVectorProduct<DenseMatrixExpression<Type, T1, T2, ResultType>, VectorType>::generalImpl(OtherDerived& target) const {
+    inline void MatrixVectorProduct<MatrixExpr<Type, T1, T2, ResultType>, VectorType>::generalImpl(OtherDerived& target) const {
         for (size_t i = 0; i < getLength(); ++i)
             target[i] = calc(i);
 

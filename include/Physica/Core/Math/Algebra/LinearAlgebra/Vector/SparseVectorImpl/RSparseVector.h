@@ -81,4 +81,4 @@ namespace Physica::Core {
     }
 }
 
-#include "SparseVectorExpression.h"
+#include "SparseVectorExpr.h"

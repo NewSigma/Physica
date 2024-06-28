@@ -73,5 +73,5 @@ namespace Physica::Core {
 }
 
 #include "RValueVectorImpl/RValueVectorImpl.cuh"
-#include "VectorExpression.cuh"
+#include "VectorExpr.cuh"
 

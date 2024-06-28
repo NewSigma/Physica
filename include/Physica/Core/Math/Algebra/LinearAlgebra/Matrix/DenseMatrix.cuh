@@ -19,7 +19,6 @@
 #pragma once
 
 #include "MatrixImpl/ContinuousMatrix.cuh"
-#include "DenseMatrixImpl/DenseMatrixExpression.cuh"
 #include "DenseMatrixImpl/DenseMatrixStorage.cuh"
 #include "MatrixProduct/MatrixProduct.cuh"
 
