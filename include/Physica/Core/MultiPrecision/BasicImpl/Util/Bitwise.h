@@ -62,8 +62,8 @@ namespace Physica::Core {
         return count;
     }
 
-    inline unsigned int countOnes(MPUnit n) noexcept {
-        unsigned int count=0 ;
+    inline int countOnes(MPUnit n) noexcept {
+        int count=0 ;
         while(n != 0) {
             n &= (n - 1);
             count += 1;

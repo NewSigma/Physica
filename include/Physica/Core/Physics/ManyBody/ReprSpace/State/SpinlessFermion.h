@@ -20,6 +20,7 @@
 
 #include <iostream>
 #include "State.h"
+#include "Physica/Core/Math/Discrete/Combination.h"
 
 namespace Physica::Core {
     template<unsigned int Dim, unsigned int NumSite> class SpinlessFermion;
@@ -97,8 +98,29 @@ namespace std {
     template<unsigned int Dim, unsigned int NumSite>
     struct hash<Physica::Core::SpinlessFermion<Dim, NumSite>> {
         using T = Physica::Core::SpinlessFermion<Dim, NumSite>;
+
         std::size_t operator()(const T& psi) const noexcept {
             return std::hash<typename T::IntType>{}(psi.getOccupyBits());
+        }
+        /**
+         * Reference:
+         * [1] Comput. Phys. Commun. 92(1), 11-15 (1995); https://doi.org/10.1016/0010-4655(95)00108-R
+         * [2] Comput. Phys. Commun. 224, 81-89 (2018); https://doi.org/10.1016/j.cpc.2017.11.011
+         */
+        std::size_t perfect_hash(const T& psi) const noexcept {
+            auto bits = psi.getOccupyBits();
+            int i = 0;
+            size_t result = 0;
+            for (int site = 0; site < int(NumSite); ++site) {
+                const bool isOccupy = bits % 2 == 1;
+                if (isOccupy) {
+                    i += 1;
+                    if (site >= i)
+                        result += Physica::Core::combination(site, i);
+                }
+                bits >>= 1;
+            }
+            return result;
         }
     };
 }

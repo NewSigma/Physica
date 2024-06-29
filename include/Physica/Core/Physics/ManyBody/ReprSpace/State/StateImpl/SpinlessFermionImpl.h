@@ -58,13 +58,10 @@ namespace Physica::Core {
 
     template<unsigned int Dim, unsigned int NumSite>
     inline int SpinlessFermion<Dim, NumSite>::hopSign(unsigned char from, unsigned char to) const {
-        const bool flag = from < to;
-        const int sign1 = flag ? 1 : -1;
-        if (!flag)
-            std::swap(from, to);
-        const unsigned int numElectron = countOnes(occupyBits >> (from + 1)) - countOnes(occupyBits >> (to + 1));
-        const int sign2 = (numElectron % 2U == 0U) ? 1 : -1;
-        return sign1 * sign2;
+        const int numElectron = countOnes(occupyBits >> (from + 1)) - countOnes(occupyBits >> (to + 1));
+        const bool flag1 = from < to;
+        const bool flag2 = numElectron % 2 == 0;
+        return (flag1 == flag2) ? 1 : -1;
     }
 
     template<unsigned int Dim, unsigned int NumSite>

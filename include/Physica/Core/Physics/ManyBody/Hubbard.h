@@ -93,8 +93,8 @@ namespace Physica::Core {
         void sumHopping(SparseType& buffer, FFTType& fft, ScalarType factor, StateType psi) const;
     private:
         HoppingMatrix makeHoppingMatrix();
-        void dotImpl1D(SparseType& buffer, ScalarType factor, size_t index) const;
-        void dotImplND(SparseType& buffer, ScalarType factor, size_t index) const;
+        template<class TargetType> void dotImpl1D(TargetType& target, ScalarType factor, size_t index) const;
+        template<class TargetType> void dotImplND(TargetType& target, ScalarType factor, size_t index) const;
     };
 }
 
