@@ -26,7 +26,10 @@ namespace Physica::Core {
             , repr(std::move(repr_))
             , hoppingT(hoppingT_)
             , repelU(repelU_)
-            , planProvider(NumSite, PlanFlag::Estimate) {}
+            , planProvider(NumSite, PlanFlag::Estimate) {
+        if constexpr (Dim > 1)
+            hoppingMatrix = makeHoppingMatrix();
+    }
 
     template<class ScalarType, class ReprType>
     template<class SourceVector, class TargetVector, class Executor>
@@ -85,7 +88,7 @@ namespace Physica::Core {
                 auto& rSpace = fft.getRSpace();
                 auto psi2 = repr[col];
                 int sign = 1;
-                for (int i = 0; i < static_cast<int>(NumSite); ++i) {
+                for (int i = 0; i < int(NumSite); ++i) {
                     RealType elem = 0;
                     if (psi1 != psi2)
                         elem = hoppingElem(psi1, psi2) * RealType(sign);
@@ -126,7 +129,7 @@ namespace Physica::Core {
     Hubbard<ScalarType, ReprType>::hoppingElem(StateType rowPsi, StateType colPsi) const {
         int count = 0;
         if constexpr (Dim == 1) {
-            for (unsigned int site = 0; site < NumSite; ++site) {
+            for (int site = 0; site < int(NumSite); ++site) {
                 const auto site1 = (site + 1) % NumSite;
                 const int signUp = colPsi.hopUpSign(site, site1);
                 const int signDown = colPsi.hopDownSign(site, site1);
@@ -164,21 +167,13 @@ namespace Physica::Core {
     }
 
     template<class ScalarType, class ReprType>
-    void Hubbard<ScalarType, ReprType>::sumHopping(SparseType& buffer, ScalarType value, StateType psi) const noexcept {
-        if (psi.isVacuum())
-            return;
-        const auto index = getRepr()[psi];
-        buffer[index] += value;
-    }
-
-    template<class ScalarType, class ReprType>
     void Hubbard<ScalarType, ReprType>::sumHopping(SparseType& buffer, FFTType& fft, ScalarType factor, StateType psi) const {
         if (psi.isVacuum())
             return;
         const auto reducedPsi = psi.transReduce();
         auto& rSpace = fft.getRSpace();
         int sign = 1;
-        for (size_t i = 0; i < NumSite; ++i) {
+        for (int i = 0; i < int(NumSite); ++i) {
             rSpace[i] = RealType(reducedPsi == psi ? sign : 0);
             sign *= psi.lShiftSign();
             psi <<= 1;
@@ -186,6 +181,25 @@ namespace Physica::Core {
         FFTType::transform(planProvider, fft);
         const size_t index = repr[reducedPsi];
         buffer[index] += fft.getKSpace()[repr.getReducedK()] * sqrt(RealType(repr.getPeriods()[index])) * factor;
+    }
+
+    template<class ScalarType, class ReprType>
+    typename Hubbard<ScalarType, ReprType>::HoppingMatrix Hubbard<ScalarType, ReprType>::makeHoppingMatrix() {
+        HoppingMatrix result(NumSite);
+        Base::forSiteInLattice([this, &result](IndexType index) {
+            const auto& dims = Base::getDims();
+            Utils::Array<unsigned char> hopTargets{};
+            hopTargets.reserve(NumSite * Dim * 2);
+            for (unsigned int dim = 0; dim < Dim; ++dim) {
+                IndexType index1 = index;
+                index1[dim] = (index1[dim] + 1) % Base::getSuperSize()[dim];
+                hopTargets.append(IndexType::toIndex1D(dims, index1));
+            }
+            hopTargets.squeeze();
+            const auto site = IndexType::toIndex1D(dims, index);
+            result[site] = std::move(hopTargets);
+        });
+        return result;
     }
 
     template<class ScalarType, class ReprType>
@@ -200,7 +214,7 @@ namespace Physica::Core {
         int numRepel = 0;
         if constexpr (IsTransInvariant) {
             auto fft = FFTType::makeEmptyFFT(NumSite);
-            for (unsigned int site = 0; site < NumSite; ++site) {
+            for (int site = 0; site < int(NumSite); ++site) {
                 const auto site1 = (site + 1) % NumSite;
                 const ScalarType hopUp = hop * RealType(state.hopUpSign(site, site1));
                 const ScalarType hopDown = hop * RealType(state.hopDownSign(site, site1));
@@ -212,15 +226,26 @@ namespace Physica::Core {
             }
         }
         else {
-            for (unsigned int site = 0; site < NumSite; ++site) {
+            bool upOccupy1 = state.isUpOccupy(0);
+            bool downOccupy1 = state.isDownOccupy(0);
+            for (int site = 0; site < int(NumSite); ++site) {
                 const auto site1 = (site + 1) % NumSite;
-                const ScalarType hopUp = hop * RealType(state.hopUpSign(site, site1));
-                const ScalarType hopDown = hop * RealType(state.hopDownSign(site, site1));
-                sumHopping(buffer, hopUp, state.hopUp(site, site1));
-                sumHopping(buffer, -hopUp, state.hopUp(site1, site));
-                sumHopping(buffer, hopDown, state.hopDown(site, site1));
-                sumHopping(buffer, -hopDown, state.hopDown(site1, site));
-                numRepel += state.isUpOccupy(site) && state.isDownOccupy(site);
+                const bool upOccupy2 = state.isUpOccupy(site1);
+                const bool downOccupy2 = state.isDownOccupy(site1);
+                if (upOccupy1 != upOccupy2) {
+                    const ScalarType hopUp = hop * RealType(state.hopUpSign(site, site1));
+                    const size_t index = repr[upOccupy1 ? state.hopUp(site, site1) : state.hopUp(site1, site)];
+                    buffer[index] += upOccupy1 ? hopUp : -hopUp;
+                }
+
+                if (downOccupy1 != downOccupy2) {
+                    const ScalarType hopDown = hop * RealType(state.hopDownSign(site, site1));
+                    const size_t index = repr[downOccupy1 ? state.hopDown(site, site1) : state.hopDown(site1, site)];
+                    buffer[index] += downOccupy1 ? hopDown : -hopDown;
+                }
+                numRepel += upOccupy1 && downOccupy1;
+                upOccupy1 = upOccupy2;
+                downOccupy1 = downOccupy2;
             }
         }
         buffer[index] += factor * (repelU * RealType(numRepel));
@@ -232,22 +257,27 @@ namespace Physica::Core {
         const ScalarType hop = -factor * hoppingT;
         const auto state = repr[index];
         int numRepel = 0;
-        Base::forSiteInLattice([this, &buffer, &numRepel, state, hop](IndexType index) {
-            const auto& dims = Base::getDims();
-            const int site = IndexType::toIndex1D(dims, index);
-            for (unsigned int dim = 0; dim < Dim; ++dim) {
-                IndexType index1 = index;
-                index1[dim] = (index1[dim] + 1) % Base::getSuperSize()[dim];
-                const int site1 = IndexType::toIndex1D(dims, index1);
-                const ScalarType hopUp = hop * RealType(state.hopUpSign(site, site1));
-                const ScalarType hopDown = hop * RealType(state.hopDownSign(site, site1));
-                sumHopping(buffer, hopUp, state.hopUp(site, site1));
-                sumHopping(buffer, -hopUp, state.hopUp(site1, site));
-                sumHopping(buffer, hopDown, state.hopDown(site, site1));
-                sumHopping(buffer, -hopDown, state.hopDown(site1, site));
+        for (int site = 0; site < int(NumSite); ++site) {
+            const auto& hopTargets = hoppingMatrix[site];
+            const bool upOccupy1 = state.isUpOccupy(site);
+            const bool downOccupy1 = state.isDownOccupy(site);
+            for (int site1 : hopTargets) {
+                const bool upOccupy2 = state.isUpOccupy(site1);
+                const bool downOccupy2 = state.isDownOccupy(site1);
+                if (upOccupy1 != upOccupy2) {
+                    const ScalarType hopUp = hop * RealType(state.hopUpSign(site, site1));
+                    const size_t index = repr[upOccupy1 ? state.hopUp(site, site1) : state.hopUp(site1, site)];
+                    buffer[index] += upOccupy1 ? hopUp : -hopUp;
+                }
+
+                if (downOccupy1 != downOccupy2) {
+                    const ScalarType hopDown = hop * RealType(state.hopDownSign(site, site1));
+                    const size_t index = repr[downOccupy1 ? state.hopDown(site, site1) : state.hopDown(site1, site)];
+                    buffer[index] += downOccupy1 ? hopDown : -hopDown;
+                }
             }
-            numRepel += state.isUpOccupy(site) && state.isDownOccupy(site);
-        });
+            numRepel += upOccupy1 && downOccupy1;
+        }
         buffer[index] += factor * (repelU * RealType(numRepel));
     }
 }

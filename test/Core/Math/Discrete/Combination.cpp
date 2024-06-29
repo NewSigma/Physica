@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2023 WeiBo He.
+ * Copyright 2024 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -16,14 +16,21 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#pragma once
+#include <iostream>
+#include <Physica/Core/Math/Discrete/Combination.h>
 
-namespace Physica::Core {
-    template<ScalarOption Option>
-    __host__ __device__ inline Scalar<Option> floor(const Scalar<Option>& s) noexcept;
-    
-    template<ScalarOption Option>
-    __host__ __device__ inline Scalar<Option> ceil(const Scalar<Option>& s) noexcept;
+using namespace Physica::Core;
+
+int64_t combination1(int m, int n) {
+    if (n == 0 || m == n)
+        return 1;
+    return combination1(m - 1, n) + combination1(m - 1, n - 1);
 }
 
-#include "FunctionImpl/ProbabilityImpl.h"
+int main() {
+    for (int m = 0; m <= 16; ++m)
+        for (int n = 0; n <= m; ++n)
+            if (combination1(m, n) != combination(m, n))
+                return 1;
+    return 0;
+}

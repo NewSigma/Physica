@@ -126,14 +126,4 @@ namespace Physica::Core {
     inline bool SpinlessFermion<Dim, NumSite>::isTransReducible(int period) const noexcept {
         return transReduce(period) != (*this);
     }
-
-    template<unsigned int Dim, unsigned int NumSite>
-    inline typename SpinlessFermion<Dim, NumSite>::IntType SpinlessFermion<Dim, NumSite>::makeFullMask() const noexcept {
-        return (static_cast<IntType>(1) << NumSite) - 1;
-    }
-
-    template<unsigned int Dim, unsigned int NumSite>
-    inline typename SpinlessFermion<Dim, NumSite>::IntType SpinlessFermion<Dim, NumSite>::makeHighMask() const noexcept {
-        return (static_cast<IntType>(1) << (NumSite - 1));
-    }
 }

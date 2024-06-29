@@ -8,6 +8,8 @@ physica_add_test(Differential Calculus/Differential.cpp)
 physica_add_test(Integrate Calculus/IntegrateTest.cpp)
 physica_add_test(Interpolation Calculus/Interpolation.cpp)
 physica_add_test(SpetialFunctions Calculus/SpetialFunctionsTest.cpp)
+# Discrete
+physica_add_test(Combination Discrete/Combination.cpp)
 # Geometry
 physica_add_test(GeoBase Geometry/GeoBase.cpp)
 physica_add_test(CubeCross Geometry/CubeCross.cpp)

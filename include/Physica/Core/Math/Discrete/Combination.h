@@ -20,19 +20,21 @@
 
 #include <cassert>
 #include <climits>
+#include <cstdint>
 #include <limits>
+#include <algorithm>
 
 namespace Physica::Core {
     /**
-     * Calculate the number of arrangement $A_i1^i2$.
+     * Calculate the number of arrangement $A_m^n$.
      * Using the definition, may be possible to optimize.
      */
     template<class IntType>
-    IntType arrangement(const IntType& i1, const IntType& i2) {
+    IntType arrangement(IntType m, IntType n) {
         static_assert(std::numeric_limits<IntType>::is_integer, "[Error]: Invalid IntType");
-        assert(i1 > i2);
-        const IntType critical = i1 - i2;
-        IntType temp(i1);
+        assert(m >= n && "[Error]: Invalid param");
+        const IntType critical = m - n;
+        IntType temp(m);
         IntType result = 1;
         while(temp > critical) {
             result *= temp;
@@ -41,24 +43,39 @@ namespace Physica::Core {
         return result;
     }
     /**
-     * Calculate the number of combination $C_i1^i2$.
+     * Calculate the number of combination $C_m^n$.
      * Using the definition, may be possible to optimize.
      */
     template<class IntType>
-    IntType combination(const IntType& i1, const IntType& i2) {
+    IntType combination(IntType m, IntType n) {
         static_assert(std::numeric_limits<IntType>::is_integer, "[Error]: Invalid IntType");
-        assert(i1 > i2);
-        const IntType critical = i1 - i2;
-        IntType result = 1;
-        const bool flag = critical > i2;
-        const IntType& great = flag ? critical : i1;
-        const IntType& small = flag ? i2 : critical;
+        constexpr static int MaxNumberM = 16;
+        constexpr static int K = (MaxNumberM - 4) / 2 + 1;
+        constexpr static int TableLength = (MaxNumberM % 2 == 0) ? K * K : (K + 1) * K;
+        constexpr static int64_t Table[TableLength]{
+            6, // From 4
+            10,
+            15, 20,
+            21, 35,
+            28, 56, 70,
+            36, 84, 126,
+            45, 120, 210, 252,
+            55, 165, 330, 462,
+            66, 220, 495, 792, 924,
+            78, 286, 715, 1287, 1716,
+            91, 364, 1001, 2002, 3003, 3432,
+            105, 455, 1365, 3003, 5005, 6435,
+            120, 560, 1820, 4368, 8008, 11440, 12870
+        };
 
-        IntType temp(i1);
-        while(temp > great) {
-            result *= temp;
-            --temp;
-        }
-        return result / factorial(small);
+        assert(m >= n && "[Error]: Invalid param");
+        n = std::min(n, m - n);
+        if (n == 0)
+            return 1;
+        if (n == 1)
+            return m;
+        const IntType k = (m - 4) / 2 + 1;
+        const IntType rowShift = (m % 2 == 0) ? k * (k - 1) : k * k;
+        return Table[rowShift + n - 2];
     }
 }

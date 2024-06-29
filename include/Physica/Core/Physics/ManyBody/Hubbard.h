@@ -49,6 +49,7 @@ namespace Physica::Core {
         using VectorType = Vector<ScalarType>;
         using SparseType = SparseVector<ScalarType>;
         using FFTType = FFT<RealType, 1>;
+        using HoppingMatrix = Utils::Array<Utils::Array<unsigned char>>;
         using typename Base::IndexType;
         using typename Base::StateType;
         constexpr static unsigned int SiteDOF = StateType::SiteDOF;
@@ -66,6 +67,7 @@ namespace Physica::Core {
         RealType hoppingT;
         RealType repelU;
         FFTType planProvider;
+        HoppingMatrix hoppingMatrix;
     public:
         Hubbard() = default;
         Hubbard(DimArray superSize, unsigned int numUnitCellSite, ReprType repr_, RealType hoppingT_, RealType repelU_);
@@ -88,9 +90,9 @@ namespace Physica::Core {
     protected:
         inline RealType repelElem(StateType psi) const;
         RealType hoppingElem(StateType rowPsi, StateType colPsi) const;
-        void sumHopping(SparseType& buffer, ScalarType value, StateType psi) const noexcept;
         void sumHopping(SparseType& buffer, FFTType& fft, ScalarType factor, StateType psi) const;
     private:
+        HoppingMatrix makeHoppingMatrix();
         void dotImpl1D(SparseType& buffer, ScalarType factor, size_t index) const;
         void dotImplND(SparseType& buffer, ScalarType factor, size_t index) const;
     };

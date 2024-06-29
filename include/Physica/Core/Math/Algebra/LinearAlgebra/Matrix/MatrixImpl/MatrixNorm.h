@@ -47,17 +47,20 @@ namespace Physica::Core {
         using VectorType = Vector<ScalarType>;
         const Derived& m = Base::getDerived();
         const size_t length = getRow();
-        Vector<RealType> x(length, reciprocal(RealType(length)));
+        const RealType factor = reciprocal(RealType(length));
+
+        Vector<RealType> x(length, factor);
         VectorType y(length);
         VectorType z(length);
         unsigned int iteration = 0;
+        size_t index = 0;
         while (iteration < maxIteration) {
             y.template operator=<decltype(m * x), Executor>(m * x);
 
             using ExprType = decltype(m.hermite() * unit(y));
             z.template operator=<ExprType, Executor>(m.hermite() * unit(y));
-
-            if (z.normInf() <= (toRealVector(z) * x)) {
+            const RealType criteria = iteration == 0 ? (toRealVector(z).sum() * factor) : z[index].getReal();
+            if (z.normInf() <= criteria) {
                 if constexpr (isComplex)
                     return y.norm1();
                 else {
@@ -70,8 +73,12 @@ namespace Physica::Core {
                 }
             }
 
+            if (iteration == 0)
+                x = RealType(0);
+            else
+                x[index] = RealType(0);
+
             RealType maxSquaredNorm = 0;
-            size_t index = 0;
             for (size_t i = 0; i < length; ++i) {
                 const RealType temp = z.calc(i).getReal().squaredNorm();
                 if (temp > maxSquaredNorm) {
@@ -79,7 +86,6 @@ namespace Physica::Core {
                     maxSquaredNorm = temp;
                 }
             }
-            x = RealType(0);
             x[index] = RealType(1);
             iteration += 1;
         }
