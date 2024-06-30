@@ -34,6 +34,8 @@ namespace Physica::Core {
             constexpr static size_t SizeAtCompile = VectorType::SizeAtCompile;
             constexpr static size_t MaxSizeAtCompile = VectorType::MaxSizeAtCompile;
             using PacketType = typename Internal::BestPacket<ScalarType, SizeAtCompile>::Type;
+
+            constexpr static bool FastAssign = false;
         };
 
         template<class VectorType>
@@ -42,9 +44,9 @@ namespace Physica::Core {
         template<class VectorType>
         class Traits<SquaredNormVector<VectorType>> : public Traits<RealVector<VectorType>> {};
 
-
         template<class VectorType>
         class Traits<NormVector<VectorType>> : public Traits<RealVector<VectorType>> {};
+
         template<class VectorType>
         class Traits<ValueVector<VectorType>> {
             using T = typename VectorType::ScalarType;
@@ -54,6 +56,8 @@ namespace Physica::Core {
             constexpr static size_t SizeAtCompile = VectorType::SizeAtCompile;
             constexpr static size_t MaxSizeAtCompile = VectorType::MaxSizeAtCompile;
             using PacketType = typename Internal::BestPacket<ScalarType, SizeAtCompile>::Type;
+
+            constexpr static bool FastAssign = false;
         };
 
         template<class VectorType>

@@ -85,13 +85,13 @@ namespace Physica::Core {
             temp[i] = cellIndex[i];
         temp[3] = dof1;
         temp[4] = dof2;
-        Base::insert(index5DTo1D(numDOF, superSize, temp), ScalarType(M_SQRT1_2));
+        Base::operator[](index5DTo1D(numDOF, superSize, temp)) = ScalarType(M_SQRT1_2);
 
         for (int i = 0; i < 3; ++i)
             temp[i] = (superSize[i] - cellIndex[i]) % superSize[i];
         temp[3] = dof2;
         temp[4] = dof1;
-        Base::insert(index5DTo1D(numDOF, superSize, temp), ScalarType(-M_SQRT1_2));
+        Base::operator[](index5DTo1D(numDOF, superSize, temp)) = ScalarType(-M_SQRT1_2);
     }
 
     template<class ScalarType>

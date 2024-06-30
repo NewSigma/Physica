@@ -37,7 +37,7 @@ namespace Physica::Core {
         using RSpaceFCGrid = typename FCProjector<ScalarType>::RSpaceFCGrid;
         using KSpaceFCMat = DenseMatrix<ComplexType>;
         using KSpaceFCGrid = GridStorage<KSpaceFCMat>;
-        using EigenSolverType = EigenSolver<KSpaceFCMat>;
+        using EigenSolverType = EigenSolver<ComplexType>;
         using QPointGrid = GridStorage<EigenSolverType>;
         using BornChargeArray = typename RSpaceEwald<ScalarType, true>::BornChargeArray;
         constexpr static unsigned int Dim = Internal::Traits<MDCellType>::Dim;

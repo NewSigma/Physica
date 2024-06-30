@@ -30,6 +30,8 @@ namespace Physica::Core {
             using ScalarType = typename MatrixType::ScalarType;
             constexpr static size_t SizeAtCompile = MatrixType::RowAtCompile * MatrixType::ColumnAtCompile;
             constexpr static size_t MaxSizeAtCompile = MatrixType::MaxRowAtCompile * MatrixType::MaxColumnAtCompile;
+
+            constexpr static bool FastAssign = false;
         };
     }
 
