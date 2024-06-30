@@ -36,13 +36,14 @@ constexpr double Beta = 16;
 
 int main() {
     using namespace Physica::Utils;
-    const auto pair = Benchmark::run([]() {
-        using ReprType = SpinRepr<2, NumSite, true>;
-        using Hamilton = Hubbard<ScalarType, ReprType>;
-
-        const Hamilton hamilton({NumSiteX, NumSiteY}, 1, ReprType(4, 4), HoppingT, RepelU);
+    using ReprType = SpinRepr<2, NumSite, true>;
+    using Hamilton = Hubbard<ScalarType, ReprType>;
+    const Hamilton hamilton({NumSiteX, NumSiteY}, 1, ReprType(4, 4), HoppingT, RepelU);
+    auto psi = TPQ<ScalarType>::random_normal(hamilton.getNumState(), RandomPoolType::getInstance().getGen());
+    psi.pre_nvt_step(hamilton, Beta);
+    const auto pair = Benchmark::run([&]() {
         auto& gen = RandomPoolType::getInstance().getGen();
-        auto psi = TPQ<ScalarType>::random_normal(hamilton.getNumState(), gen);
+        psi.random_normal(gen);
         psi.template nvt_step<Hamilton, SequentialExecutor>(hamilton, Beta);
         return psi.lnPartitionZ();
     }, 6, 8);

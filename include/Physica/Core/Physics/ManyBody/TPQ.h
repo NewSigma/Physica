@@ -38,7 +38,10 @@ namespace Physica::Core {
         using RealType = typename ScalarType::RealType;
 
         RealType beta;
+        RealType traceMu;
+        std::pair<int, int> params;
     public:
+        TPQ(size_t length);
         TPQ(const This&) = default;
         TPQ(This&&) noexcept = default;
         ~TPQ() = default;
@@ -46,11 +49,20 @@ namespace Physica::Core {
         This& operator=(This obj) noexcept { swap(obj); return *this; }
         /* Operations */
         template<class ModelType, class Executor = SequentialExecutor>
-        void nvt_step(const LatticeHamilton<ModelType>& hamiltonH, RealType deltaBeta);
+        void pre_nvt_step(const LatticeHamilton<ModelType>& hamiltonH_, RealType deltaBeta);
+        template<class ModelType, class Executor = SequentialExecutor>
+        void nvt_step(const LatticeHamilton<ModelType>& hamiltonH_, RealType deltaBeta);
 
         [[nodiscard]] inline RealType calcPartitionZ() const;
         [[nodiscard]] inline RealType lnPartitionZ() const;
         void swap(This& __restrict obj) noexcept;
+
+        template<class RandomGenerator>
+        inline void random_uniform(RandomGenerator& gen);
+        template<class RandomGenerator>
+        inline void random_normal(RandomGenerator& gen);
+        template<class Distribution, class RandomGenerator>
+        inline void random_any(Distribution& dist, RandomGenerator& gen);
         /* Static members */
         template<class RandomGenerator>
         [[nodiscard]] static This random_uniform(size_t len, RandomGenerator& gen);
@@ -58,23 +70,46 @@ namespace Physica::Core {
         [[nodiscard]] static This random_normal(size_t len, RandomGenerator& gen);
         template<class Distribution, class RandomGenerator>
         [[nodiscard]] static This random_any(size_t len, Distribution& dist, RandomGenerator& gen);
-    private:
-        TPQ(Base v_);
     };
 
     template<class ScalarType>
-    TPQ<ScalarType>::TPQ(Base v_) : Base(std::move(v_)), beta(0) {
-        Base::toUnit();
+    TPQ<ScalarType>::TPQ(size_t length)
+            : Base(length)
+            , beta(0)
+            , traceMu(std::numeric_limits<RealType>::max())
+            , params(std::make_pair(0, 0)) {
+        assert(length > 0 && "[Error]: Invalid length");
     }
 
     template<class ScalarType>
     template<class ModelType, class Executor>
-    void TPQ<ScalarType>::nvt_step(const LatticeHamilton<ModelType>& hamiltonH, RealType deltaBeta) {
+    void TPQ<ScalarType>::pre_nvt_step(const LatticeHamilton<ModelType>& hamiltonH_, RealType deltaBeta) {
+        const RealType factor = deltaBeta * -0.5;
+        const auto& hamiltonH = hamiltonH_.getDerived();
+        const auto expr1 = factor * hamiltonH;
+        const auto expr2 = exp(expr1);
+        const auto expr3 = expr2 * (*this);
+        traceMu = expr3.calcTraceMu();
+        params = expr3.template calcParam<Executor>(traceMu);
+    }
+
+    template<class ScalarType>
+    template<class ModelType, class Executor>
+    void TPQ<ScalarType>::nvt_step(const LatticeHamilton<ModelType>& hamiltonH_, RealType deltaBeta) {
         if (deltaBeta.isZero())
             return;
-        using ExprType = decltype(exp(RealType() * hamiltonH.getDerived()) * (*this));
-        Vector<ScalarType> dot;
-        dot.template operator=<ExprType, Executor>(exp((-deltaBeta * 0.5) * hamiltonH.getDerived()) * (*this));
+        using BufferType = Vector<ScalarType>;
+        const RealType factor = deltaBeta * -0.5;
+        const auto& hamiltonH = hamiltonH_.getDerived();
+        const bool isPrepared = traceMu != RealType(std::numeric_limits<RealType>::max());
+        const auto expr1 = factor * hamiltonH;
+        const auto expr2 = exp(expr1);
+        const auto expr3 = expr2 * (*this);
+        BufferType dot(Base::getLength());
+        if (isPrepared)
+            expr3.template assignTo<BufferType, Executor>(dot, traceMu, params);
+        else
+            expr3.template assignTo<BufferType, Executor>(dot);
         Base::swap(dot);
         beta += deltaBeta;
     }
@@ -94,23 +129,52 @@ namespace Physica::Core {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         Base::swap(*this);
         beta.swap(obj.beta);
+        traceMu.swap(obj.traceMu);
+        std::swap(params, obj.params);
+    }
+
+    template<class ScalarType>
+    template<class RandomGenerator>
+    inline void TPQ<ScalarType>::random_uniform(RandomGenerator& gen) {
+        Base::random_uniform(gen);
+        Base::toUnit();
+    }
+
+    template<class ScalarType>
+    template<class RandomGenerator>
+    inline void TPQ<ScalarType>::random_normal(RandomGenerator& gen) {
+        Base::random_normal(gen);
+        Base::toUnit();
+    }
+
+    template<class ScalarType>
+    template<class Distribution, class RandomGenerator>
+    inline void TPQ<ScalarType>::random_any(Distribution& dist, RandomGenerator& gen) {
+        Base::random_any(dist, gen);
+        Base::toUnit();
     }
 
     template<class ScalarType>
     template<class RandomGenerator>
     TPQ<ScalarType> TPQ<ScalarType>::random_uniform(size_t len, RandomGenerator& gen) {
-        return This(Base::random_uniform(len, gen));
+        This result(len);
+        result.random_uniform(gen);
+        return result;
     }
 
     template<class ScalarType>
     template<class RandomGenerator>
     TPQ<ScalarType> TPQ<ScalarType>::random_normal(size_t len, RandomGenerator& gen) {
-        return This(Base::random_normal(len, gen));
+        This result(len);
+        result.random_normal(gen);
+        return result;
     }
 
     template<class ScalarType>
     template<class Distribution, class RandomGenerator>
     TPQ<ScalarType> TPQ<ScalarType>::random_any(size_t len, Distribution& dist, RandomGenerator& gen) {
-        return This(Base::random_any(len, dist, gen));
+        This result(len);
+        result.random_any(dist, gen);
+        return result;
     }
 }

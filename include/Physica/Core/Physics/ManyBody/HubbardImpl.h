@@ -164,23 +164,6 @@ namespace Physica::Core {
     }
 
     template<class ScalarType, class ReprType>
-    void Hubbard<ScalarType, ReprType>::sumHopping(SparseType& buffer, FFTType& fft, ScalarType factor, StateType psi) const {
-        if (psi.isVacuum())
-            return;
-        const auto reducedPsi = psi.transReduce();
-        auto& rSpace = fft.getRSpace();
-        int sign = 1;
-        for (int i = 0; i < int(NumSite); ++i) {
-            rSpace[i] = RealType(reducedPsi == psi ? sign : 0);
-            sign *= psi.lShiftSign();
-            psi <<= 1;
-        }
-        FFTType::transform(planProvider, fft);
-        const size_t index = repr[reducedPsi];
-        buffer[index] += fft.getKSpace()[repr.getReducedK()] * sqrt(RealType(repr.getPeriods()[index])) * factor;
-    }
-
-    template<class ScalarType, class ReprType>
     typename Hubbard<ScalarType, ReprType>::HoppingMatrix Hubbard<ScalarType, ReprType>::makeHoppingMatrix() {
         HoppingMatrix result(NumSite);
         Base::forSiteInLattice([this, &result](IndexType index) {
@@ -197,6 +180,24 @@ namespace Physica::Core {
             result[site] = std::move(hopTargets);
         });
         return result;
+    }
+
+    template<class ScalarType, class ReprType>
+    template<class TargetType>
+    void Hubbard<ScalarType, ReprType>::sumHopping(TargetType& target, FFTType& fft, ScalarType factor, StateType psi) const {
+        if (psi.isVacuum())
+            return;
+        const auto reducedPsi = psi.transReduce();
+        auto& rSpace = fft.getRSpace();
+        int sign = 1;
+        for (int i = 0; i < int(NumSite); ++i) {
+            rSpace[i] = RealType(reducedPsi == psi ? sign : 0);
+            sign *= psi.lShiftSign();
+            psi <<= 1;
+        }
+        FFTType::transform(planProvider, fft);
+        const size_t index = repr[reducedPsi];
+        target[index] += fft.getKSpace()[repr.getReducedK()] * sqrt(RealType(repr.getPeriods()[index])) * factor;
     }
 
     template<class ScalarType, class ReprType>

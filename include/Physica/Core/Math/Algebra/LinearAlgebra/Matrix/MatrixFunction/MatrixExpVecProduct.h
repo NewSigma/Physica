@@ -38,7 +38,9 @@ namespace Physica::Core {
             : public RValueVector<MatrixVectorProduct<MatrixExp<MatrixType>, VectorType>> {
         using This = MatrixVectorProduct<MatrixExp<MatrixType>, VectorType>;
         using Base = RValueVector<This>;
-
+    public:
+        using ParamPair = std::pair<int, int>;
+    private:
         constexpr static int BufferSize = 11;
         constexpr static float theta_single[BufferSize]{1.3E-1, 1, 2.2, 3.6, 4.9, 6.3, 7.7, 9.1, 11, 12, 13};
         constexpr static double theta_double[BufferSize]{2.4E-3, 1.4E-1, 6.4E-1, 1.4, 2.4, 3.5, 4.7, 6.0, 7.2, 8.5, 9.9};
@@ -64,16 +66,21 @@ namespace Physica::Core {
         This& operator=(This&&) noexcept = delete;
         /* Operations */
         template<class OtherVector, class Executor = SequentialExecutor>
-        void assignTo(LValueVector<OtherVector>& target_) const;
+        inline void assignTo(LValueVector<OtherVector>& target_) const;
+
+        template<class OtherVector, class Executor = SequentialExecutor>
+        void assignTo(LValueVector<OtherVector>& target_, RealType traceMu, ParamPair params) const;
 
         [[nodiscard]] ScalarType calc(size_t) const { throw NotImplementedException(); }
+        [[nodiscard]] RealType calcTraceMu() const;
+        template<class Executor>
+        [[nodiscard]] ParamPair calcParam(RealType traceMu) const;
         /* Getters */
         [[nodiscard]] size_t getLength() const noexcept { return v.getLength(); }
         [[nodiscard]] const MatrixExp<MatrixType>& getLHS() const noexcept { return mexp; }
         [[nodiscard]] const VectorType& getRHS() const noexcept { return v; }
     private:
         constexpr static TrivialType calcTheta(int numTaylorTerm);
-        template<class Executor> std::pair<int, int> calcParam(RealType traceMu) const;
         template<class Executor> inline RealType calcPowerNorm(RealType traceMu, int order) const;
     };
 
@@ -85,21 +92,22 @@ namespace Physica::Core {
 
     template<class MatrixType, class VectorType>
     template<class OtherVector, class Executor>
-    void MatrixVectorProduct<MatrixExp<MatrixType>, VectorType>::assignTo(LValueVector<OtherVector>& target_) const {
+    inline void MatrixVectorProduct<MatrixExp<MatrixType>, VectorType>::assignTo(LValueVector<OtherVector>& target_) const {
+        const RealType traceMu = calcTraceMu();
+        assignTo<OtherVector, Executor>(target_, traceMu, calcParam<Executor>(traceMu));
+    }
+
+    template<class MatrixType, class VectorType>
+    template<class OtherVector, class Executor>
+    void MatrixVectorProduct<MatrixExp<MatrixType>, VectorType>::assignTo(
+            LValueVector<OtherVector>& target_, RealType traceMu, ParamPair params) const {
         assert(getLength() == target_.getLength());
         const RealType epsilon = std::numeric_limits<RealType>::epsilon();
-        const size_t length = getLength();
         auto& target = target_.getDerived();
-
         const auto& mat = mexp.getMatrix();
-        const ScalarType trace = mat.trace();
-        assert(trace.getImag().isZero() && "[Error]: Not implemented");
-        const RealType traceMu = trace.getReal() / RealType(length);
-
-        const auto pair = calcParam<Executor>(traceMu);
-        const int numTaylorTerm = pair.first;
-        const int numSplit = pair.second;
-        const RealType factor = exp(trace.getReal() / RealType(length * numSplit));
+        const int numTaylorTerm = params.first;
+        const int numSplit = params.second;
+        const RealType factor = exp(traceMu / RealType(numSplit));
 
         OtherVector buffer, term;
         target = v;
@@ -122,16 +130,18 @@ namespace Physica::Core {
     }
 
     template<class MatrixType, class VectorType>
-    constexpr typename MatrixVectorProduct<MatrixExp<MatrixType>, VectorType>::TrivialType
-    MatrixVectorProduct<MatrixExp<MatrixType>, VectorType>::calcTheta(int numTaylorTerm) {
-        assert(1 <= numTaylorTerm && numTaylorTerm <= MaxNumTaylorTerm && "[Error]: Invalid param");
-        const int bufferIndex = (numTaylorTerm - 1) / 5; 
-        return IsFloat ? theta_single[bufferIndex] : theta_double[bufferIndex];
+    typename MatrixVectorProduct<MatrixExp<MatrixType>, VectorType>::RealType
+    MatrixVectorProduct<MatrixExp<MatrixType>, VectorType>::calcTraceMu() const {
+        const auto& mat = mexp.getMatrix();
+        const ScalarType trace = mat.trace();
+        assert(trace.getImag().isZero() && "[Error]: Not implemented");
+        return trace.getReal() / RealType(getLength());
     }
 
     template<class MatrixType, class VectorType>
     template<class Executor>
-    std::pair<int, int> MatrixVectorProduct<MatrixExp<MatrixType>, VectorType>::calcParam(RealType traceMu) const {
+    typename MatrixVectorProduct<MatrixExp<MatrixType>, VectorType>::ParamPair
+    MatrixVectorProduct<MatrixExp<MatrixType>, VectorType>::calcParam(RealType traceMu) const {
         constexpr static TrivialType NormLimit = ((2 * MaxNormOrder * (MaxNormOrder + 3)) * calcTheta(MaxNumTaylorTerm)) / MaxNumTaylorTerm;
         const auto unit = UnitMatrix<ScalarType>(getLength());
         const TrivialType norm1 = (mexp.getMatrix() - unit * traceMu).template norm1_power<Executor>(MaxNormIteration);
@@ -167,6 +177,14 @@ namespace Physica::Core {
             }
         }
         return std::make_pair(numMinCostTerm, std::max(cost / numMinCostTerm, 1));
+    }
+
+    template<class MatrixType, class VectorType>
+    constexpr typename MatrixVectorProduct<MatrixExp<MatrixType>, VectorType>::TrivialType
+    MatrixVectorProduct<MatrixExp<MatrixType>, VectorType>::calcTheta(int numTaylorTerm) {
+        assert(1 <= numTaylorTerm && numTaylorTerm <= MaxNumTaylorTerm && "[Error]: Invalid param");
+        const int bufferIndex = (numTaylorTerm - 1) / 5; 
+        return IsFloat ? theta_single[bufferIndex] : theta_double[bufferIndex];
     }
 
     template<class MatrixType, class VectorType>

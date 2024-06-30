@@ -91,9 +91,10 @@ namespace Physica::Core {
     protected:
         inline RealType repelElem(StateType psi) const;
         RealType hoppingElem(StateType rowPsi, StateType colPsi) const;
-        void sumHopping(SparseType& buffer, FFTType& fft, ScalarType factor, StateType psi) const;
+        
     private:
         HoppingMatrix makeHoppingMatrix();
+        template<class TargetType> void sumHopping(TargetType& target, FFTType& fft, ScalarType factor, StateType psi) const;
         template<class TargetType> void dotImpl1D(TargetType& target, ScalarType factor, size_t index) const;
         template<class TargetType> void dotImplND(TargetType& target, ScalarType factor, size_t index) const;
     };
