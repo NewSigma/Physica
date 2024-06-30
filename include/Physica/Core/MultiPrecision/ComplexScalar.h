@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2023 WeiBo He.
+ * Copyright 2020-2024 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -26,6 +26,8 @@ namespace Physica::Core {
     namespace Internal {
         template<class T>
         class Traits<ComplexScalar<T>> {
+            static_assert(!T::isComplex, "[Error]: Double complex mark is not allowed");
+            static_assert(!T::isDifferentiable, "[Error]: Differentiable mark should locate in outsite");
         public:
             using ScalarType = ComplexScalar<T>;
             using RealType = T;
@@ -65,8 +67,6 @@ namespace Physica::Core {
 
     template<class T>
     class ComplexScalar : public ScalarBase<ComplexScalar<T>> {
-        static_assert(!T::isComplex, "[Error]: Double complex mark is not allowed");
-        static_assert(!T::isDifferentiable, "[Error]: Differentiable mark should locate in outsite");
         using This = ComplexScalar<T>;
         using Base = ScalarBase<This>;
         using PacketType = typename Internal::BestPacket<T, 2>::Type;

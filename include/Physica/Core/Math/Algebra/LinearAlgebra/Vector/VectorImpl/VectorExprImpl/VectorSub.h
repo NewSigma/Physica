@@ -88,7 +88,6 @@ namespace Physica::Core {
     template<class VectorType, class AnyScalar>
     class VectorExpr<ExpressionType::Sub, VectorType, ScalarBase<AnyScalar>>
             : public RValueVector<VectorExpr<ExpressionType::Sub, VectorType, ScalarBase<AnyScalar>>> {
-        static_assert(is_scalar<AnyScalar>::value, "[Error]: This is not a scalar type");
         using This = VectorExpr<ExpressionType::Sub, VectorType, ScalarBase<AnyScalar>>;
         using Base = RValueVector<This>;
         const VectorType& exp;

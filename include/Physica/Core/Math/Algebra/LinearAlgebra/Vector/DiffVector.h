@@ -25,6 +25,7 @@ namespace Physica::Core {
     namespace Internal {
         template<class T, unsigned int Order>
         class Traits<Differentiable<Vector<T>, DiffMode::Reverse, Order>> : public Traits<Vector<T>> {
+            static_assert(!T::isDifferentiable, "[Error]: Nested Differentiable<> is not allowed");
         public:
             using ScalarType = Differentiable<T, DiffMode::Reverse, Order>;
         };
@@ -33,8 +34,6 @@ namespace Physica::Core {
     template<class PlainScalar, unsigned int Order>
     class Differentiable<Vector<PlainScalar>, DiffMode::Reverse, Order>
             : public RValueVector<Differentiable<Vector<PlainScalar>, DiffMode::Reverse, Order>> {
-        static_assert(!PlainScalar::isDifferentiable, "[Error]: Nested Differentiable<> is not allowed");
-
         using VectorType = Vector<PlainScalar>;
         using This = Differentiable<VectorType, DiffMode::Reverse, Order>;
         using Base = RValueVector<This>;

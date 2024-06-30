@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 WeiBo He.
+ * Copyright 2023-2024 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -28,6 +28,7 @@ namespace Physica::Core {
     namespace Internal {
         template<class ScalarType, bool IsFixedBoundary, size_t NumReplica, RPMDIntegrator Integrator, class Executor>
         class Traits<HardCore<ScalarType, IsFixedBoundary, NumReplica, Integrator, Executor>> {
+            static_assert(!ScalarType::isComplex);
         public:
             constexpr static bool IsPeriodBoundary = !IsFixedBoundary;
         };
@@ -35,7 +36,6 @@ namespace Physica::Core {
 
     template<class ScalarType, bool IsFixedBoundary, size_t NumReplica, RPMDIntegrator Integrator, class Executor>
     class HardCore : private FreeModel<ScalarType, 1, NumReplica, Integrator> {
-        static_assert(!ScalarType::isComplex);
         using Base = FreeModel<ScalarType, 1, NumReplica, Integrator>;
         using PlainScalar = typename ScalarType::PlainScalar;
     public:

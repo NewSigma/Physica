@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2023 WeiBo He.
+ * Copyright 2021-2024 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -30,6 +30,7 @@ namespace Physica::Core {
     namespace Internal {
         template<class T>
         class Traits<RSpaceGrid<T>> {
+            static_assert(is_scalar<T>::value, "[Error]: Invalid template param");
         public:
             using ScalarType = T;
         };
@@ -37,7 +38,6 @@ namespace Physica::Core {
 
     template<class T>
     class RSpaceGrid : public LValueGrid<RSpaceGrid<T>>, private GridStorage<T> {
-        static_assert(is_scalar<T>::value, "[Error]: Invalid template param");
         using This = RSpaceGrid<T>;
         using Base = LValueGrid<This>;
         using Storage = GridStorage<T>;

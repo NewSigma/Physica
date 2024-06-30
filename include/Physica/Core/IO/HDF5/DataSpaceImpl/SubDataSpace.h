@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 WeiBo He.
+ * Copyright 2023-2024 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -26,12 +26,12 @@ namespace Physica::Core {
         class Traits<SubDataSpace<T, S>> {
         public:
             constexpr static size_t Dim = S;
+            static_assert(Dim != Utils::Dynamic, "[Error]: Not implemented");
         };
     }
 
     template<class SpaceType, size_t Dim>
     class SubDataSpace : public DataSpaceBase<SubDataSpace<SpaceType, Dim>> {
-        static_assert(Dim != Utils::Dynamic, "[Error]: Not implemented");
         using This = SubDataSpace<SpaceType, Dim>;
         using Base = DataSpaceBase<This>;
     public:

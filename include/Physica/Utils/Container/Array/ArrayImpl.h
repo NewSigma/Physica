@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2022 WeiBo He.
+ * Copyright 2020-2024 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -98,7 +98,7 @@ namespace Physica::Utils {
     template<class T, size_t Capacity, class Allocator>
     Array<T, Dynamic, Capacity, Allocator>::Array(std::initializer_list<T> list) : Base(Capacity) {
         constexpr auto length = list.size();
-        static_assert(length <= Capacity);
+        static_assert(length <= Capacity, "[Error]: Too many elements");
         size_t i = 0;
         const auto end = list.end();
         for (auto ite = list.begin(); ite != end; ++ite, ++i)

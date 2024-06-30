@@ -42,6 +42,7 @@ namespace Physica::Core {
 
         template<class T, int Op, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn, class Allocator>
         class Traits<DenseMatrix<T, Op, Row, Column, MaxRow, MaxColumn, Allocator>> {
+            static_assert(MaxRow * MaxColumn * sizeof(T) <= 2048, "[Warn]: It is suggested declare large fixed size matrix as dynamic matrix");
         public:
             using ScalarType = T;
             constexpr static int Option = Op;
@@ -66,7 +67,6 @@ namespace Physica::Core {
     class DenseMatrix : public ContinuousMatrix<DenseMatrix<T, Option, Row, Column, MaxRow, MaxColumn, Allocator>>
                       , public DenseMatrixStorage<DenseMatrix<T, Option, Row, Column, MaxRow, MaxColumn, Allocator>, Option>
                       , public DenseMatrixDim<DenseMatrix<T, Option, Row, Column, MaxRow, MaxColumn, Allocator>, Row, Column, MaxRow, MaxColumn> {
-        static_assert(MaxRow * MaxColumn * sizeof(T) <= 2048, "[Warn]: It is suggested declare large fixed size matrix as dynamic matrix");
         using This = DenseMatrix<T, Option, Row, Column, MaxRow, MaxColumn, Allocator>;
         using Base = ContinuousMatrix<This>;
         using Storage = DenseMatrixStorage<This, Option>;

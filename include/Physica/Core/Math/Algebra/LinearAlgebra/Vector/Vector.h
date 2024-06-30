@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2023 WeiBo He.
+ * Copyright 2020-2024 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -31,6 +31,7 @@ namespace Physica::Core {
     namespace Internal {
         template<class T, size_t Length, size_t MaxLength, class Allocator>
         class Traits<Vector<T, Length, MaxLength, Allocator>> {
+            static_assert(Length == Dynamic || Length == MaxLength, "MaxLength of fixed vector must equals to its length.");
         public:
             using ScalarType = T;
             constexpr static size_t SizeAtCompile = Length;
@@ -43,7 +44,6 @@ namespace Physica::Core {
 
     template<class T, size_t Length, size_t MaxLength, class Allocator>
     class Vector : public ContinuousVector<Vector<T, Length, MaxLength, Allocator>>, public Utils::Array<T, Length, MaxLength, Allocator> {
-        static_assert(Length == Dynamic || Length == MaxLength, "MaxLength of fixed vector must equals to its length.");
         using This = Vector<T, Length, MaxLength, Allocator>;
     public:
         using Base = ContinuousVector<This>;

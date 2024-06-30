@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2023 WeiBo He.
+ * Copyright 2020-2024 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -54,6 +54,8 @@ namespace Physica::Core {
 
             static_assert(isDifferentiable || sizeof(RealType) == sizeof(TrivialType), "[Error]: Invalid ScalarType");
             static_assert(isDifferentiable || sizeof(ComplexType) == sizeof(ComplexTypeFFTW), "[Error]: Invalid ScalarType");
+            static_assert(Dim <= 3U, "[Error]: Dimension higher than 3 should be declared as dynamic");
+            static_assert(Dim != 0, "[Error]: Not implemented");
         };
     }
     /**
@@ -134,8 +136,6 @@ namespace Physica::Core {
     template<class ScalarType, size_t Dim>
     class FFT : public FFTRSpace<FFT<ScalarType, Dim>, Dim>
               , public FFTKSpace<FFT<ScalarType, Dim>, Dim> {
-        static_assert(Dim <= 3U, "[Error]: Dimension higher than 3 should be declared as dynamic");
-        static_assert(Dim != 0, "[Error]: Not implemented");
         static_assert(!ScalarType::isDifferentiable, "[Error]: Not implemented");
         using This = FFT<ScalarType, Dim>;
         using Traits = Internal::Traits<This>;

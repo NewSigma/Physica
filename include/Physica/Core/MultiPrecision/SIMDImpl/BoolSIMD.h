@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 WeiBo He.
+ * Copyright 2023-2024 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -22,6 +22,7 @@ namespace Physica::Core {
     namespace Internal {
         template<class T, size_t Size>
         class Traits<BoolSIMD<T, Size>> {
+            static_assert(is_scalar<T>::value, "[Error]: This is not a ScalarType");
         public:
             using ScalarType = T;
         private:
@@ -40,7 +41,6 @@ namespace Physica::Core {
 
     template<class ScalarType, size_t Size>
     class BoolSIMD : private Internal::Traits<BoolSIMD<ScalarType, Size>>::BaseType {
-        static_assert(is_scalar<ScalarType>::value, "[Error]: Invalid template param");
         using This = BoolSIMD<ScalarType, Size>;
         using Traits = Internal::Traits<This>;
     public:

@@ -25,6 +25,7 @@ namespace Physica::Core {
     namespace Internal {
         template<class T, int Option, unsigned int Order>
         class Traits<Differentiable<DenseMatrix<T, Option>, DiffMode::Reverse, Order>> : public Traits<DenseMatrix<T, Option>> {
+            static_assert(!T::isDifferentiable, "[Error]: Nested Differentiable<> is not allowed");
         public:
             using ScalarType = Differentiable<T, DiffMode::Reverse, Order>;
         };
@@ -34,7 +35,6 @@ namespace Physica::Core {
     class Differentiable<DenseMatrix<PlainScalar, Option>, DiffMode::Reverse, Order>
             : public RValueMatrix<Differentiable<DenseMatrix<PlainScalar, Option>, DiffMode::Reverse, Order>>
             , public DenseMatrixDim<Differentiable<DenseMatrix<PlainScalar, Option>, DiffMode::Reverse, Order>, Dynamic, Dynamic, Dynamic, Dynamic> {
-        static_assert(!PlainScalar::isDifferentiable, "[Error]: Nested Differentiable<> is not allowed");
         using PlainMatrix = DenseMatrix<PlainScalar, Option>;
         using This = Differentiable<PlainMatrix, DiffMode::Reverse, Order>;
         using Base = RValueMatrix<This>;

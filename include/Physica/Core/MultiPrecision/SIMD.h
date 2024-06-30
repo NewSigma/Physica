@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 WeiBo He.
+ * Copyright 2023-2024 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -33,15 +33,16 @@ namespace Physica::Core {
         class Traits<SIMD<T, Size>> {
         public:
             using ScalarType = T;
+
+            static_assert(ScalarType::Option == Float || ScalarType::Option == Double, "[Error]: Unsupported float type");
+            static_assert(!ScalarType::isComplex, "[Error]: The main template targets on real scalar");
+            static_assert(Size % 2 == 0 && Size <= 16, "[Error]: Invalid Size");
         private:
             using PlainScalar = typename ScalarType::PlainScalar;
             constexpr static bool isForward = ScalarType::isForwardDiff;
-            static_assert(ScalarType::Option == Float || ScalarType::Option == Double, "[Error]: Unsupported float type");
-            static_assert(!ScalarType::isComplex, "[Error]: The main template targets on real scalar");
-            static_assert(!isForward, "[Error]: SIMD for forward autodiff is not implemented");
-            static_assert(Size % 2 == 0 && Size <= 16, "[Error]: Invalid Size");
             constexpr static bool isSinglePrec = ScalarType::Option == Float;
             constexpr static size_t PlainSize = isForward ? (Size * 2) : Size;
+            static_assert(!isForward, "[Error]: SIMD for forward autodiff is not implemented");
             
             using Size2Type = typename std::conditional<isSinglePrec, void, Vec2d>::type;
             using Size4Type = typename std::conditional<isSinglePrec, Vec4f, Vec4d>::type;
@@ -86,7 +87,6 @@ namespace Physica::Core {
 
     template<class ScalarType, size_t Size>
     class SIMD : private Internal::Traits<SIMD<ScalarType, Size>>::BaseType {
-        static_assert(is_scalar<ScalarType>::value, "[Error]: Invalid template param");
         using This = SIMD<ScalarType, Size>;
         using Traits = Internal::Traits<This>;
         using BoolSIMDType = typename Traits::BoolSIMDType;

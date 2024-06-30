@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 WeiBo He.
+ * Copyright 2023-2024 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -37,6 +37,7 @@ namespace Physica::Core {
 
         template<ExpressionType type, class Exp, class AnyScalar>
         class Traits<GridExpression<type, Exp, ScalarBase<AnyScalar>>> {
+            static_assert(is_scalar<AnyScalar>::value, "[Error]: This is not a scalar type");
         public:
             using ScalarType = typename BinaryScalarOpReturnType<typename Exp::ScalarType, AnyScalar>::Type;
         };
@@ -68,7 +69,6 @@ namespace Physica::Core {
     template<class GridType, class AnyScalar>
     class GridExpression<ExpressionType::Mul, GridType, ScalarBase<AnyScalar>>
             : public RValueGrid<GridExpression<ExpressionType::Mul, GridType, ScalarBase<AnyScalar>>> {
-        static_assert(is_scalar<AnyScalar>::value, "[Error]: This is not a scalar type");
         using Base = RValueGrid<GridExpression<ExpressionType::Mul, GridType, ScalarBase<AnyScalar>>>;
     public:
         using typename Base::ScalarType;

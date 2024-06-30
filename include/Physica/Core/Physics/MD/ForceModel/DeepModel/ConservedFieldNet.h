@@ -35,6 +35,7 @@ namespace Physica::Core {
             using InputType = Vector<ScalarType>;
             using OutputType = InputType;
             constexpr static bool IsTrainMode = ScalarType::isDifferentiable;
+            static_assert(std::is_same<OutputType, ScalarType>::value, "[Error]: Output is energy, which should be a scalar");
         };
     }
 
@@ -48,7 +49,6 @@ namespace Physica::Core {
         using typename Base::PlainScalar;
         using typename Base::InputType;
         using typename Base::OutputType;
-        static_assert(std::is_same<OutputType, ScalarType>::value, "[Error]: Output is energy, which should be a scalar");
 
         constexpr static bool IsTrainMode = ScalarType::Order == 2;
         using DiffScalar1 = Differentiable<PlainScalar, DiffMode::Reverse, 1>;

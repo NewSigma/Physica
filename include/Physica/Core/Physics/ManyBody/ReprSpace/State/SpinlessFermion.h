@@ -32,21 +32,21 @@ namespace Physica::Core {
             constexpr static unsigned int Dim = I1;
             constexpr static unsigned int NumSite = I2;
             constexpr static unsigned int SiteDOF = 2;
+
+            static_assert(1 <= Dim && Dim <= 3, "[Error]: Invalid Dim");
+            static_assert(0 < NumSite && NumSite < 64, "[Error]: Invalid site number");
         };
     }
 
     template<unsigned int Dim, unsigned int NumSite>
     class SpinlessFermion : public State<SpinlessFermion<Dim, NumSite>> {
-        static_assert(1 <= Dim && Dim <= 3, "[Error]: Invalid Dim");
-        static_assert(0 < NumSite && NumSite < 64, "[Error]: Invalid site number");
         using This = SpinlessFermion<Dim, NumSite>;
         using Base = State<This>;
     public:
         using IntType = int64_t;
+        static_assert(NumSite < sizeof(IntType) * CHAR_BIT, "[Error]: Unexpected large site number");
     private:
         IntType occupyBits;
-
-        static_assert(NumSite < sizeof(occupyBits) * CHAR_BIT, "[Error]: Unexpected large site number");
     public:
         SpinlessFermion() = default;
         inline SpinlessFermion(IntType occupyBits_);

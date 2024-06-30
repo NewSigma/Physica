@@ -31,6 +31,7 @@ namespace Physica::Core {
 
         template<class T, size_t Order, size_t MaxOrder>
         class Traits<DenseHermiteMatrix<T, Order, MaxOrder>> {
+            static_assert(T::isComplex, "[Error]: Using a symmetric matrix is preferred for real numbers");
         public:
             using ScalarType = T;
             constexpr static int Option = MatrixOption::AnyMajor | MatrixOption::Element;
@@ -46,7 +47,6 @@ namespace Physica::Core {
     template<class T, size_t Order, size_t MaxOrder>
     class DenseHermiteMatrix : public RValueMatrix<DenseHermiteMatrix<T, Order, MaxOrder>>
                              , private HalfDenseMatrixStorage<T, Order, MaxOrder> {
-        static_assert(T::isComplex, "[Error]: Using a symmetric matrix is preferred for real numbers");
         using This = DenseHermiteMatrix<T, Order, MaxOrder>;
         using Base = RValueMatrix<This>;
         using Storage = HalfDenseMatrixStorage<T, Order, MaxOrder>;
