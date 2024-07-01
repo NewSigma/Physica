@@ -43,15 +43,15 @@ namespace Physica::Core {
     size_t Decouplable::activeWindowDownDiag(LValueMatrix<MatrixType>& __restrict mat, size_t upper) {
         using ScalarType = typename MatrixType::ScalarType;
         using RealType = typename ScalarType::RealType;
+        const RealType epsilon = std::numeric_limits<RealType>::epsilon();
 
         assert(upper < mat.getRow());
         size_t lower = upper;
         size_t lower_1 = upper - 1;
         for (; lower_1 < lower; --lower, --lower_1) { //Make use of overflow
-            const RealType epsilon = std::numeric_limits<RealType>::epsilon();
             RealType temp = abs(mat(lower, lower)) + abs(mat(lower_1, lower_1));
-            temp = std::max(temp, epsilon);
-            if (abs(mat(lower, lower_1)) < temp * epsilon) {
+            temp = std::max(temp, epsilon) * epsilon;
+            if (abs(mat(lower, lower_1)) < temp) {
                 mat(lower, lower_1) = ScalarType(0);
                 break;
             }

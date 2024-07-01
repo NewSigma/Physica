@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2022 WeiBo He.
+ * Copyright 2021-2024 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -29,13 +29,14 @@ namespace Physica::Core {
      * 
      * References:
      * [1] Golub, GeneH. Matrix computations = 矩阵计算 / 4th edition[M]. 人民邮电出版社, 2014.
-     * [2] Eigen https://eigen.tuxfamily.org/
+     * [2] Eigen; https://gitlab.com/libeigen/eigen
      */
     template<class ScalarType, size_t Order = Dynamic>
     class Schur : public Decouplable {
         static_assert(is_scalar<ScalarType>::value, "[Error]: Invalid ScalarType");
         constexpr static const char* BadConvergenceMessage = "Exceed max iteration of Schur";
         using HessenburgType = Hessenburg<ScalarType, Order>;
+        using Vector3D = Vector<ScalarType, 3>;
     public:
         using RealType = typename ScalarType::RealType;
         using ComplexType = ComplexScalar<RealType>;
@@ -44,6 +45,7 @@ namespace Physica::Core {
         WorkingMatrix matrixT;
         WorkingMatrix matrixU;
         bool computeMatrixU;
+        ScalarType exshift;
     public:
         template<class MatrixType>
         Schur(const RValueMatrix<MatrixType>& source_, bool computeMatrixU_ = false);
@@ -54,8 +56,10 @@ namespace Physica::Core {
         [[nodiscard]] const WorkingMatrix& getMatrixU() const noexcept { assert(computeMatrixU); return matrixU; }
     private:
         void splitOffTwoRows(size_t index);
-        void francisQR(size_t lower, size_t sub_order);
+        Vector3D realShift(size_t upper, size_t iter);
+        void francisQR(size_t lower, size_t sub_order, Vector3D shift);
         void specialHessenburg(size_t lower, size_t sub_order);
+
         ComplexType complexShift(size_t upper, size_t iter);
         void complexQR(size_t lower, size_t upper, ComplexType shift);
     };
@@ -85,6 +89,7 @@ namespace Physica::Core {
         if (order != 2) {
             const Hessenburg<ScalarType, Order> hess(normalized);
             matrixT = hess.getMatrixH();
+            exshift = 0;
 
             size_t upper = order - 1;
             size_t total_iter = 0;
@@ -92,6 +97,7 @@ namespace Physica::Core {
             while (1 <= upper && upper < order) {
                 const size_t lower = activeWindowDownDiag(matrixT, upper);
                 if (lower == upper) {
+                    matrixT(upper, upper) += exshift;
                     upper -= 1;
                     iter = 0;
                 }
@@ -100,7 +106,8 @@ namespace Physica::Core {
                         throw BadConvergenceException(BadConvergenceMessage);
 
                     if constexpr (ScalarType::isComplex) {
-                        complexQR(lower, upper, complexShift(upper, iter));
+                        const auto shift = complexShift(upper, iter);
+                        complexQR(lower, upper, shift);
                         ++iter;
                         ++total_iter;
                     }
@@ -112,14 +119,15 @@ namespace Physica::Core {
                         }
                         else {
                             const size_t sub_order = upper - lower + 1;
-                            francisQR(lower, sub_order);
+                            const auto shift = realShift(upper, iter);
+                            francisQR(lower, sub_order, shift);
                             ++iter;
                             ++total_iter;
                         }
                     }
                 }
             }
-            matrixT *= factor;
+            matrixT(0, 0) += exshift;
 
             if (computeMatrixU) {
                 WorkingMatrix temp = WorkingMatrix(hess.getMatrixQ()) * matrixU;
@@ -132,7 +140,8 @@ namespace Physica::Core {
                 while (activeWindowDownDiag(matrixT, 1) != 1) {
                     if (iter == Decouplable::maxItePerCol) [[unlikely]]
                         throw BadConvergenceException(BadConvergenceMessage);
-                    complexQR(0, 1, complexShift(1, iter));
+                    const auto shift = complexShift(1, iter);
+                    complexQR(0, 1, shift);
                     iter += 1;
                 }
             }
@@ -140,8 +149,8 @@ namespace Physica::Core {
                 if (activeWindowDownDiag(matrixT, 1) != 1)
                     splitOffTwoRows(0);
             }
-            matrixT *= factor;
         }
+        matrixT *= factor;
     }
     /**
      * Upper triangulize submatrix of \param mat, whose columns have index \param index and \param index + 1.
@@ -149,9 +158,13 @@ namespace Physica::Core {
     template<class ScalarType, size_t Order>
     void Schur<ScalarType, Order>::splitOffTwoRows(size_t index) {
         const size_t index_1 = index + 1;
+        matrixT(index, index) += exshift;
+        matrixT(index_1, index_1) += exshift;
+
         const ScalarType p = ScalarType(0.5) * (matrixT(index, index) - matrixT(index_1, index_1));
         const ScalarType q = square(p) + matrixT(index, index_1) * matrixT(index_1, index);
-        if (!q.isNegative()) {
+        const bool haveTwoRealEigenvalues = !q.isNegative();
+        if (haveTwoRealEigenvalues) {
             const ScalarType z = sqrt(q);
             Vector<ScalarType, 2> target;
             target[0] = p + (p.isPositive() ? z : -z); //Select the root that ensure numerical stable
@@ -167,19 +180,60 @@ namespace Physica::Core {
                 applyGivens(matrixU, givensVector, index, index_1);
         }
     }
+    /**
+     * Reference:
+     * [1] Eigen; https://gitlab.com/libeigen/eigen
+     */
+    template<class ScalarType, size_t Order>
+    typename Schur<ScalarType, Order>::Vector3D Schur<ScalarType, Order>::realShift(size_t upper, size_t iter) {
+        const size_t upper_1 = upper - 1;
+        ScalarType s = matrixT(upper, upper) + matrixT(upper_1, upper_1);
+        ScalarType t1 = matrixT(upper, upper) * matrixT(upper_1, upper_1);
+        ScalarType t2 = matrixT(upper, upper_1) * matrixT(upper_1, upper);
+        if (iter > 0 && iter % 16 == 0) {
+            const bool useWilkinsonShift = iter % 32 != 0;
+            if (useWilkinsonShift) {
+                const ScalarType shift = matrixT(upper, upper);
+                exshift += shift;
+                for (size_t i = 0; i <= upper; ++i)
+                    matrixT(i, i) -= shift;
+
+                const ScalarType s1 = abs(matrixT(upper, upper_1)) + abs(matrixT(upper_1, upper - 2));
+                const ScalarType s2 = square(s1);
+                s = ScalarType(0.75 + 0.75) * s1;
+                t1 = ScalarType(0.75 * 0.75) * s2;
+                t2 = ScalarType(-0.4375) * s2;
+            }
+            else { // MATLAB new ad hoc shift
+                const ScalarType s1 = (matrixT(upper_1, upper_1) - matrixT(upper, upper)) * ScalarType(0.5);
+                ScalarType shift = square(s1) + t2;
+                if (s.isPositive()) {
+                    shift = sqrt(shift);
+                    if (s1.isNegative())
+                        shift = -shift;
+                    shift += s1;
+                    shift = matrixT(upper, upper) - t2 / shift;
+                    exshift += shift;
+                    for (size_t i = 0; i <= upper; ++i)
+                        matrixT(i, i) -= shift;
+                    s = ScalarType(0.964 * 2);
+                    t1 = ScalarType(0.964 * 0.964);
+                    t2 = ScalarType(0.964);
+                }
+            }
+        }
+        return {s, t1, t2};
+    }
 
     template<class ScalarType, size_t Order>
-    void Schur<ScalarType, Order>::francisQR(size_t lower, size_t sub_order) {
+    void Schur<ScalarType, Order>::francisQR(size_t lower, size_t sub_order, Vector3D shift) {
         auto subBlock = matrixT.block(lower, sub_order, lower, sub_order);
-        const ScalarType s = subBlock(sub_order - 1, sub_order - 1) + subBlock(sub_order - 2, sub_order - 2);
-        const ScalarType t1 = subBlock(sub_order - 1, sub_order - 1) * subBlock(sub_order - 2, sub_order - 2);
-        const ScalarType t2 = subBlock(sub_order - 1, sub_order - 2) * subBlock(sub_order - 2, sub_order - 1);
-        Vector<ScalarType, 3> col_1_M{};
-        col_1_M[0] = (subBlock(0, 0) - s) * subBlock(0, 0) + t1 + (subBlock(0, 1) * subBlock(1, 0) - t2);
-        col_1_M[1] = subBlock(1, 0) * (subBlock(0, 0) + subBlock(1, 1) - s);
+        Vector3D col_1_M{};
+        col_1_M[0] = (subBlock(0, 0) - shift[0]) * subBlock(0, 0) + shift[1] + (subBlock(0, 1) * subBlock(1, 0) - shift[2]);
+        col_1_M[1] = subBlock(1, 0) * (subBlock(0, 0) + subBlock(1, 1) - shift[0]);
 
         if (sub_order != 2) {
-            Vector<ScalarType, 3> householderVector{};
+            Vector3D householderVector{};
             col_1_M[2] = subBlock(1, 0) * subBlock(2, 1);
             householder(col_1_M, householderVector);
             {
@@ -223,7 +277,7 @@ namespace Physica::Core {
     template<class ScalarType, size_t Order>
     void Schur<ScalarType, Order>::specialHessenburg(size_t lower, size_t sub_order) {
         assert(sub_order > 2);
-        Vector<ScalarType, 3> householderVector3D{};
+        Vector3D householderVector3D{};
         for (size_t i = 0; i < sub_order - 3; ++i) {
             auto block = matrixT.rows(lower + i + 1, 3);
             auto target_col = block.col(lower + i);
@@ -277,7 +331,7 @@ namespace Physica::Core {
         //compute the shift as one of the eigenvalues of t, the 2x2
         //diagonal block on the bottom of the active submatrix
         const auto activeBlock = matrixT.block(upper - 1, 2, upper - 1, 2);
-        RealType t_norm = abs(activeBlock(0, 0)) + abs(activeBlock(0, 1)) + abs(activeBlock(1, 0)) + abs(activeBlock(1, 1));
+        const RealType t_norm = abs(activeBlock(0, 0)) + abs(activeBlock(0, 1)) + abs(activeBlock(1, 0)) + abs(activeBlock(1, 1));
         const Matrix2D t = activeBlock * reciprocal(t_norm); //Normalization to avoid under/overflow
 
         const ComplexType b = t(0,1) * t(1,0);
