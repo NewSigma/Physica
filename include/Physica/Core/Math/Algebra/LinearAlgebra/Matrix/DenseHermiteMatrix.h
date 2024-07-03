@@ -18,35 +18,15 @@
  */
 #pragma once
 
-#include "MatrixImpl/RValueMatrix.h"
-#include "DenseMatrixImpl/HalfDenseMatrixStorage.h"
 #include <Physica/Core/Math/Algebra/LinearAlgebra/Matrix/MatrixProduct/MatrixProduct.h>
+#include "DenseMatrixImpl/HalfDenseMatrixStorage.h"
 
 namespace Physica::Core {
     template<class T, size_t Order, size_t MaxOrder> class DenseSymmMatrix;
-    template<class T, size_t Order = Dynamic, size_t MaxOrder = Order> class DenseHermiteMatrix;
 
-    namespace Internal {
-        template<class T> class Traits;
-
-        template<class T, size_t Order, size_t MaxOrder>
-        class Traits<DenseHermiteMatrix<T, Order, MaxOrder>> {
-            static_assert(T::isComplex, "[Error]: Using a symmetric matrix is preferred for real numbers");
-        public:
-            using ScalarType = T;
-            constexpr static int Option = MatrixOption::AnyMajor | MatrixOption::Element;
-            constexpr static size_t RowAtCompile = Order;
-            constexpr static size_t ColumnAtCompile = Order;
-            constexpr static size_t MaxRowAtCompile = MaxOrder;
-            constexpr static size_t MaxColumnAtCompile = MaxOrder;
-            constexpr static size_t SizeAtCompile = RowAtCompile * ColumnAtCompile;
-            constexpr static size_t MaxSizeAtCompile = MaxRowAtCompile * MaxColumnAtCompile;
-        };
-    }
-
-    template<class T, size_t Order, size_t MaxOrder>
+    template<class T, size_t Order = Dynamic, size_t MaxOrder = Order>
     class DenseHermiteMatrix : public RValueMatrix<DenseHermiteMatrix<T, Order, MaxOrder>>
-                             , private HalfDenseMatrixStorage<T, Order, MaxOrder> {
+            , private HalfDenseMatrixStorage<T, Order, MaxOrder> {
         using This = DenseHermiteMatrix<T, Order, MaxOrder>;
         using Base = RValueMatrix<This>;
         using Storage = HalfDenseMatrixStorage<T, Order, MaxOrder>;
@@ -91,8 +71,8 @@ namespace Physica::Core {
         inline H5DataSet<1> write(H5Location& loc, const char* name, const H5::DSetMemXferPropList& xfer_plist = H5::DSetMemXferPropList::DEFAULT) const;
         /* Getters */
         using Base::getDerived;
-        using Storage::getRow;
         using Storage::getColumn;
+        using Storage::getRow;
         [[nodiscard]] Base& asMatrix() noexcept { return *this; }
         [[nodiscard]] const Base& asMatrix() const noexcept { return *this; }
         [[nodiscard]] VectorBase& asVector() noexcept { return *this; }
@@ -144,7 +124,7 @@ namespace Physica::Core {
     template<class T, size_t Order, size_t MaxOrder>
     typename DenseHermiteMatrix<T, Order, MaxOrder>::ScalarType&
     DenseHermiteMatrix<T, Order, MaxOrder>::operator()(size_t row, size_t col) {
-        assert(row <= col); //Optimize: possible to make use of this condition
+        assert(row <= col); // Optimize: possible to make use of this condition
         const size_t index = Storage::toIndex1D(row, col);
         return Storage::operator[](index);
     }
@@ -251,13 +231,31 @@ namespace Physica::Core {
     bool DenseHermiteMatrix<T, Order, MaxOrder>::isHermiteMatrix(const RValueMatrix<MatrixType>& mat, double precision) {
         if (mat.getRow() != mat.getColumn())
             return false;
-        
+
         for (size_t i = 0; i < mat.getRow(); ++i)
             for (size_t j = 0; j < mat.getColumn(); ++j)
                 if (!scalarNear(mat.calc(i, j), mat.calc(j, i).conjugate(), precision))
                     return false;
         return true;
     }
+}
+
+namespace Physica {
+    using namespace Core;
+
+    template<class T, size_t Order, size_t MaxOrder>
+    class Traits<DenseHermiteMatrix<T, Order, MaxOrder>> {
+        static_assert(T::isComplex, "[Error]: Using a symmetric matrix is preferred for real numbers");
+    public:
+        using ScalarType = T;
+        constexpr static int Option = MatrixOption::AnyMajor | MatrixOption::Element;
+        constexpr static size_t RowAtCompile = Order;
+        constexpr static size_t ColumnAtCompile = Order;
+        constexpr static size_t MaxRowAtCompile = MaxOrder;
+        constexpr static size_t MaxColumnAtCompile = MaxOrder;
+        constexpr static size_t SizeAtCompile = RowAtCompile * ColumnAtCompile;
+        constexpr static size_t MaxSizeAtCompile = MaxRowAtCompile * MaxColumnAtCompile;
+    };
 }
 
 namespace std {

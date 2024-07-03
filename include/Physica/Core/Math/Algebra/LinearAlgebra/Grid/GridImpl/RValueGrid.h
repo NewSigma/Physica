@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 WeiBo He.
+ * Copyright 2023-2024 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -18,7 +18,7 @@
  */
 #pragma once
 
-#include "Physica/Utils/Template/CRTPBase.h"
+#include <Physica/Utils/Template/CRTPBase.h>
 #include "GridBase.h"
 
 namespace Physica::Core {
@@ -28,7 +28,7 @@ namespace Physica::Core {
     class RValueGrid : public Utils::CRTPBase<Derived>, public GridBase {
         using Base = Utils::CRTPBase<Derived>;
     public:
-        using ScalarType = typename Internal::Traits<Derived>::ScalarType;
+        using ScalarType = typename Traits<Derived>::ScalarType;
         constexpr static bool isComplex = ScalarType::isComplex;
     public:
         /* Operations */

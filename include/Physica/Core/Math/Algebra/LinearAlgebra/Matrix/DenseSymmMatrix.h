@@ -22,26 +22,7 @@
 #include "DenseMatrixImpl/HalfDenseMatrixStorage.h"
 
 namespace Physica::Core {
-    template<class T, size_t Order = Dynamic, size_t MaxOrder = Order> class DenseSymmMatrix;
-
-    namespace Internal {
-        template<class T> class Traits;
-
-        template<class T, size_t Order, size_t MaxOrder>
-        class Traits<DenseSymmMatrix<T, Order, MaxOrder>> {
-        public:
-            using ScalarType = T;
-            constexpr static int Option = MatrixOption::AnyMajor | MatrixOption::Element;
-            constexpr static size_t RowAtCompile = Order;
-            constexpr static size_t ColumnAtCompile = Order;
-            constexpr static size_t MaxRowAtCompile = MaxOrder;
-            constexpr static size_t MaxColumnAtCompile = MaxOrder;
-            constexpr static size_t SizeAtCompile = RowAtCompile * ColumnAtCompile;
-            constexpr static size_t MaxSizeAtCompile = MaxRowAtCompile * MaxColumnAtCompile;
-        };
-    }
-
-    template<class T, size_t Order, size_t MaxOrder>
+    template<class T, size_t Order = Dynamic, size_t MaxOrder = Order>
     class DenseSymmMatrix : public LValueMatrix<DenseSymmMatrix<T, Order, MaxOrder>>
                           , private HalfDenseMatrixStorage<T, Order, MaxOrder> {
         using This = DenseSymmMatrix<T, Order, MaxOrder>;
@@ -87,10 +68,10 @@ namespace Physica::Core {
         inline const H5DataSet<1> read(const H5Location& loc, const char* name, const H5::DSetMemXferPropList& xfer_plist = H5::DSetMemXferPropList::DEFAULT);
         inline H5DataSet<1> write(H5Location& loc, const char* name, const H5::DSetMemXferPropList& xfer_plist = H5::DSetMemXferPropList::DEFAULT) const;
         /* Getters */
+        using Storage::data_ptr;
+        using Storage::getColumn;
         using Storage::getOrder;
         using Storage::getRow;
-        using Storage::getColumn;
-        using Storage::data_ptr;
         [[nodiscard]] Base& asMatrix() noexcept { return *this; }
         [[nodiscard]] const Base& asMatrix() const noexcept { return *this; }
         [[nodiscard]] VectorBase& asVector() noexcept { return Storage::getArray(); }
@@ -182,6 +163,23 @@ namespace Physica::Core {
             H5Location& loc, const char* name, const H5::DSetMemXferPropList& xfer_plist) const {
         return asVector().write(loc, name, xfer_plist);
     }
+}
+
+namespace Physica {
+    using namespace Core;
+
+    template<class T, size_t Order, size_t MaxOrder>
+    class Traits<DenseSymmMatrix<T, Order, MaxOrder>> {
+    public:
+        using ScalarType = T;
+        constexpr static int Option = MatrixOption::AnyMajor | MatrixOption::Element;
+        constexpr static size_t RowAtCompile = Order;
+        constexpr static size_t ColumnAtCompile = Order;
+        constexpr static size_t MaxRowAtCompile = MaxOrder;
+        constexpr static size_t MaxColumnAtCompile = MaxOrder;
+        constexpr static size_t SizeAtCompile = RowAtCompile * ColumnAtCompile;
+        constexpr static size_t MaxSizeAtCompile = MaxRowAtCompile * MaxColumnAtCompile;
+    };
 }
 
 namespace std {

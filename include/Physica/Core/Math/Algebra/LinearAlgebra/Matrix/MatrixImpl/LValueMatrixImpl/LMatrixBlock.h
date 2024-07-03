@@ -21,49 +21,7 @@
 #include <Physica/Core/Math/Algebra/LinearAlgebra/Vector/VectorImpl/LValueVector.h>
 
 namespace Physica::Core {
-    template<class MatrixType> class RowLVector;
-    template<class MatrixType> class ColLVector;
     template<class MatrixType, size_t Row = Dynamic, size_t Column = Dynamic> class LMatrixBlock;
-
-    namespace Internal {
-        template<class MatrixType>
-        class Traits<RowLVector<MatrixType>> {
-            constexpr static bool isRowMatrix = MatrixOption::isRowMatrix<MatrixType>();
-        public:
-            using ScalarType = typename MatrixType::ScalarType;
-            constexpr static size_t SizeAtCompile = Traits<MatrixType>::ColumnAtCompile;
-            constexpr static size_t MaxSizeAtCompile = Traits<MatrixType>::MaxColumnAtCompile;
-
-            using PacketType = typename Internal::BestPacket<ScalarType, SizeAtCompile>::Type;
-            constexpr static bool FastAssign = false;
-        };
-
-        template<class MatrixType>
-        class Traits<ColLVector<MatrixType>> {
-            constexpr static bool isColumnMatrix = MatrixOption::isColumnMatrix<MatrixType>();
-        public:
-            using ScalarType = typename MatrixType::ScalarType;
-            constexpr static size_t SizeAtCompile = Traits<MatrixType>::RowAtCompile;
-            constexpr static size_t MaxSizeAtCompile = Traits<MatrixType>::MaxRowAtCompile;
-
-            using PacketType = typename Internal::BestPacket<ScalarType, SizeAtCompile>::Type;
-            constexpr static bool FastAssign = false;
-        };
-
-        template<class MatrixType, size_t Row, size_t Column>
-        class Traits<LMatrixBlock<MatrixType, Row, Column>> {
-        public:
-            using ScalarType = typename MatrixType::ScalarType;
-            constexpr static int Option = MatrixType::Option;
-            constexpr static size_t RowAtCompile = Row;
-            constexpr static size_t ColumnAtCompile = Column;
-            constexpr static size_t MaxRowAtCompile = Row;
-            constexpr static size_t MaxColumnAtCompile = Column;
-            constexpr static size_t SizeAtCompile = Row * Column;
-            constexpr static size_t MaxSizeAtCompile = SizeAtCompile;
-            using PacketType = typename Internal::BestPacket<ScalarType, SizeAtCompile>::Type;
-        };
-    }
     /**
      * \class RowLVector and \class ColLVector is designed to implement \class LMatrixBlock, and they can be used indepently.
      */
@@ -280,4 +238,46 @@ namespace Physica::Core {
         assert(col < colCount);
         return mat.data_ptr(row + fromRow, col + fromCol);
     }
+}
+
+namespace Physica {
+    using namespace Core;
+
+    template<class MatrixType>
+    class Traits<RowLVector<MatrixType>> {
+        constexpr static bool isRowMatrix = MatrixOption::isRowMatrix<MatrixType>();
+    public:
+        using ScalarType = typename MatrixType::ScalarType;
+        constexpr static size_t SizeAtCompile = Traits<MatrixType>::ColumnAtCompile;
+        constexpr static size_t MaxSizeAtCompile = Traits<MatrixType>::MaxColumnAtCompile;
+
+        using PacketType = typename Core::Internal::BestPacket<ScalarType, SizeAtCompile>::Type;
+        constexpr static bool FastAssign = false;
+    };
+
+    template<class MatrixType>
+    class Traits<ColLVector<MatrixType>> {
+        constexpr static bool isColumnMatrix = MatrixOption::isColumnMatrix<MatrixType>();
+    public:
+        using ScalarType = typename MatrixType::ScalarType;
+        constexpr static size_t SizeAtCompile = Traits<MatrixType>::RowAtCompile;
+        constexpr static size_t MaxSizeAtCompile = Traits<MatrixType>::MaxRowAtCompile;
+
+        using PacketType = typename Core::Internal::BestPacket<ScalarType, SizeAtCompile>::Type;
+        constexpr static bool FastAssign = false;
+    };
+
+    template<class MatrixType, size_t Row, size_t Column>
+    class Traits<LMatrixBlock<MatrixType, Row, Column>> {
+    public:
+        using ScalarType = typename MatrixType::ScalarType;
+        constexpr static int Option = MatrixType::Option;
+        constexpr static size_t RowAtCompile = Row;
+        constexpr static size_t ColumnAtCompile = Column;
+        constexpr static size_t MaxRowAtCompile = Row;
+        constexpr static size_t MaxColumnAtCompile = Column;
+        constexpr static size_t SizeAtCompile = Row * Column;
+        constexpr static size_t MaxSizeAtCompile = SizeAtCompile;
+        using PacketType = typename Core::Internal::BestPacket<ScalarType, SizeAtCompile>::Type;
+    };
 }

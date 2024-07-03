@@ -23,12 +23,12 @@
 
 namespace Physica::Core {
     template<class Derived>
-    class device_obj<LayerBase<Derived>> : public Utils::CRTPBase<typename Internal::Traits<Derived>::device_obj_type> {
+    class device_obj<LayerBase<Derived>> : public Utils::CRTPBase<typename Traits<Derived>::device_obj_type> {
         using host_obj = LayerBase<Derived>;
         using This = device_obj<host_obj>;
-        using device_obj_type = typename Internal::Traits<Derived>::device_obj_type;
+        using device_obj_type = typename Traits<Derived>::device_obj_type;
         using Base = Utils::CRTPBase<device_obj_type>;
-        using TraitsType = Internal::Traits<device_obj_type>;
+        using TraitsType = Traits<device_obj_type>;
     public:
         using PlainScalar = typename TraitsType::PlainScalar;
         using ScalarType = typename TraitsType::ScalarType;

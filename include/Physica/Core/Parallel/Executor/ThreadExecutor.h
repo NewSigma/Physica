@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 WeiBo He.
+ * Copyright 2022-2024 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -26,19 +26,6 @@
 #include "SequentialExecutor.h"
 
 namespace Physica::Core {
-    class ThreadExecutor;
-
-    namespace Internal {
-        template<class T> class Traits;
-
-        template<>
-        class Traits<ThreadExecutor> {
-        public:
-            constexpr static bool isCPUEnabled = true;
-            constexpr static bool isCudaEnabled = false;
-        };
-    }
-
     class ThreadExecutor {
     public:
         using FutureType = std::future<void>;
@@ -111,4 +98,13 @@ namespace Physica::Core {
         const unsigned int to = std::min(from + maxLoopPerCore, loopCount);
         return std::make_pair(from, to);
     }
+}
+
+namespace Physica {
+    template<>
+    class Traits<Core::ThreadExecutor> {
+    public:
+        constexpr static bool isCPUEnabled = true;
+        constexpr static bool isCudaEnabled = false;
+    };
 }

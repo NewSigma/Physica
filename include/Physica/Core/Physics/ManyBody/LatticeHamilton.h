@@ -22,27 +22,11 @@
 #include <Physica/Core/Math/Algebra/LinearAlgebra/Vector/Vector.h>
 
 namespace Physica::Core {
-    template<class Derived> class LatticeHamilton;
-
-    namespace Internal {
-        template<class Derived>
-        class Traits<LatticeHamilton<Derived>> {
-        public:
-            constexpr static int Option = MatrixOption::AnyMajor | MatrixOption::Element;
-            constexpr static size_t RowAtCompile = Utils::Dynamic;
-            constexpr static size_t ColumnAtCompile = Utils::Dynamic;
-            constexpr static size_t MaxRowAtCompile = Utils::Dynamic;
-            constexpr static size_t MaxColumnAtCompile = Utils::Dynamic;
-            constexpr static size_t SizeAtCompile = Utils::Dynamic;
-            constexpr static size_t MaxSizeAtCompile = Utils::Dynamic;
-        };
-    }
-
     template<class Derived>
     class LatticeHamilton : public RValueMatrix<Derived> {
         using This = LatticeHamilton<Derived>;
         using Base = RValueMatrix<Derived>;
-        using DerivedTraits = Internal::Traits<Derived>;
+        using DerivedTraits = Traits<Derived>;
     public:
         using ScalarType = typename DerivedTraits::ScalarType;
         using ReprType = typename DerivedTraits::ReprType;
@@ -134,4 +118,18 @@ namespace Physica::Core {
             numSite *= size;
         return numSite == NumSite;
     }
+}
+
+namespace Physica {
+    template<class Derived>
+    class Traits<Core::LatticeHamilton<Derived>> {
+    public:
+        constexpr static int Option = MatrixOption::AnyMajor | MatrixOption::Element;
+        constexpr static size_t RowAtCompile = Dynamic;
+        constexpr static size_t ColumnAtCompile = Dynamic;
+        constexpr static size_t MaxRowAtCompile = Dynamic;
+        constexpr static size_t MaxColumnAtCompile = Dynamic;
+        constexpr static size_t SizeAtCompile = Dynamic;
+        constexpr static size_t MaxSizeAtCompile = Dynamic;
+    };
 }

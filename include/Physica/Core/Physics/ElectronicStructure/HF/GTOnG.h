@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 WeiBo He.
+ * Copyright 2021-2024 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -20,21 +20,7 @@
 
 #include "GaussBase.h"
 
-namespace Physica::Core::Physics {
-    template<class ScalarType, size_t Size>
-    class GTOnG;
-
-    namespace Internal {
-        template<class T> class Traits;
-
-        template<class T, size_t Size>
-        class Traits<GTOnG<T, Size>> {
-        public:
-            using ScalarType = T;
-            constexpr static size_t size = Size;
-        };
-    }
-
+namespace Physica::Core {
     template<class ScalarType, size_t Size>
     class GTOnG {
         using BaseType = GaussBase<ScalarType>;
@@ -130,4 +116,13 @@ namespace Physica::Core::Physics {
 
     template<class ScalarType>
     using GTO3G = GTOnG<ScalarType, 3>;
+}
+
+namespace Physica {
+    template<class T, size_t Size>
+    class Traits<Core::GTOnG<T, Size>> {
+    public:
+        using ScalarType = T;
+        constexpr static size_t size = Size;
+    };
 }

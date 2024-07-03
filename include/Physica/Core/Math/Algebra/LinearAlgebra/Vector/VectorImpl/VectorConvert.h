@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 WeiBo He.
+ * Copyright 2023-2024 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -19,51 +19,6 @@
 #pragma once
 
 namespace Physica::Core {
-    template<class VectorType> class RealVector;
-    template<class VectorType> class ImagVector;
-    template<class VectorType> class SquaredNormVector;
-    template<class VectorType> class NormVector;
-    template<class VectorType> class ValueVector;
-    template<class VectorType> class GradVector;
-
-    namespace Internal {
-        template<class VectorType>
-        class Traits<RealVector<VectorType>> {
-        public:
-            using ScalarType = typename VectorType::ScalarType::RealType;
-            constexpr static size_t SizeAtCompile = VectorType::SizeAtCompile;
-            constexpr static size_t MaxSizeAtCompile = VectorType::MaxSizeAtCompile;
-            using PacketType = typename Internal::BestPacket<ScalarType, SizeAtCompile>::Type;
-
-            constexpr static bool FastAssign = false;
-        };
-
-        template<class VectorType>
-        class Traits<ImagVector<VectorType>> : public Traits<RealVector<VectorType>> {};
-
-        template<class VectorType>
-        class Traits<SquaredNormVector<VectorType>> : public Traits<RealVector<VectorType>> {};
-
-        template<class VectorType>
-        class Traits<NormVector<VectorType>> : public Traits<RealVector<VectorType>> {};
-
-        template<class VectorType>
-        class Traits<ValueVector<VectorType>> {
-            using T = typename VectorType::ScalarType;
-            static_assert(T::isDifferentiable, "[Error]: Unnecessary toValueVector() call or toGradVector() call");
-        public:
-            using ScalarType = typename T::PlainType;
-            constexpr static size_t SizeAtCompile = VectorType::SizeAtCompile;
-            constexpr static size_t MaxSizeAtCompile = VectorType::MaxSizeAtCompile;
-            using PacketType = typename Internal::BestPacket<ScalarType, SizeAtCompile>::Type;
-
-            constexpr static bool FastAssign = false;
-        };
-
-        template<class VectorType>
-        class Traits<GradVector<VectorType>> : public Traits<ValueVector<VectorType>> {};
-    }
-
     template<class VectorType>
     class RealVector : public RValueVector<RealVector<VectorType>> {
         using Base = RValueVector<RealVector<VectorType>>;
@@ -159,4 +114,44 @@ namespace Physica::Core {
     [[nodiscard]] inline GradVector<VectorType> toGradVector(const RValueVector<VectorType>& v) {
         return GradVector<VectorType>{v};
     }
+}
+
+namespace Physica {
+    using namespace Core;
+
+    template<class VectorType>
+    class Traits<RealVector<VectorType>> {
+    public:
+        using ScalarType = typename VectorType::ScalarType::RealType;
+        constexpr static size_t SizeAtCompile = VectorType::SizeAtCompile;
+        constexpr static size_t MaxSizeAtCompile = VectorType::MaxSizeAtCompile;
+        using PacketType = typename Core::Internal::BestPacket<ScalarType, SizeAtCompile>::Type;
+
+        constexpr static bool FastAssign = false;
+    };
+
+    template<class VectorType>
+    class Traits<ImagVector<VectorType>> : public Traits<RealVector<VectorType>> {};
+
+    template<class VectorType>
+    class Traits<SquaredNormVector<VectorType>> : public Traits<RealVector<VectorType>> {};
+
+    template<class VectorType>
+    class Traits<NormVector<VectorType>> : public Traits<RealVector<VectorType>> {};
+
+    template<class VectorType>
+    class Traits<ValueVector<VectorType>> {
+        using T = typename VectorType::ScalarType;
+        static_assert(T::isDifferentiable, "[Error]: Unnecessary toValueVector() call or toGradVector() call");
+    public:
+        using ScalarType = typename T::PlainType;
+        constexpr static size_t SizeAtCompile = VectorType::SizeAtCompile;
+        constexpr static size_t MaxSizeAtCompile = VectorType::MaxSizeAtCompile;
+        using PacketType = typename Core::Internal::BestPacket<ScalarType, SizeAtCompile>::Type;
+
+        constexpr static bool FastAssign = false;
+    };
+
+    template<class VectorType>
+    class Traits<GradVector<VectorType>> : public Traits<ValueVector<VectorType>> {};
 }

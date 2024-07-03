@@ -26,17 +26,6 @@
 #include "Physica/Utils/Unix/TempFile.h"
 
 namespace Physica::Core {
-    template<class ScalarType> class QEModel;
-
-    namespace Internal {
-        template<class ScalarType>
-        class Traits<QEModel<ScalarType>> {
-        public:
-            constexpr static bool IsPeriodBoundary = true;
-            constexpr static bool IsContractable = false;
-        };
-    }
-
     template<class ScalarType>
     class QEModel {
         using MDCellType = MDCell<ScalarType>;
@@ -190,4 +179,13 @@ namespace Physica::Core {
         close(fd[1]);
         return future;
     }
+}
+
+namespace Physica {
+    template<class ScalarType>
+    class Traits<Core::QEModel<ScalarType>> {
+    public:
+        constexpr static bool IsPeriodBoundary = true;
+        constexpr static bool IsContractable = false;
+    };
 }

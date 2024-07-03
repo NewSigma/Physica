@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 WeiBo He.
+ * Copyright 2022-2024 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -27,27 +27,13 @@ namespace Physica::Core {
 
     template<class ScalarType, LDAType type, bool IsSpinPolarized> class LDA;
 
-    namespace Internal {
-        template<class T> class Traits;
-
-        template<class ScalarType, LDAType type, bool polarized>
-        class Traits<LDA<ScalarType, type, polarized>> {
-            using GridType = RSpaceGrid<ScalarType>;
-        public:
-            constexpr static bool IsSpinPolarized = polarized;
-            constexpr static size_t NumSpin = IsSpinPolarized ? 2 : 1;
-            using DensityType = Utils::Array<GridType, NumSpin>;
-            using PotType = Utils::Array<GridType, NumSpin>;
-        };
-    }
-
     template<class ScalarType, LDAType type>
     class LDA<ScalarType, type, true> {
         using This = LDA<ScalarType, type, true>;
     public:
-        constexpr static bool IsSpinPolarized = Internal::Traits<This>::IsSpinPolarized;
-        using DensityType = typename Internal::Traits<This>::DensityType;
-        using PotType = typename Internal::Traits<This>::PotType;
+        constexpr static bool IsSpinPolarized = Traits<This>::IsSpinPolarized;
+        using DensityType = typename Traits<This>::DensityType;
+        using PotType = typename Traits<This>::PotType;
     private:
         Vector<ScalarType> buffer;
         Vector<ScalarType> buffer1;
@@ -162,9 +148,9 @@ namespace Physica::Core {
     class LDA<ScalarType, type, false> {
         using This = LDA<ScalarType, type, false>;
     public:
-        constexpr static bool IsSpinPolarized = Internal::Traits<This>::IsSpinPolarized;
-        using DensityType = typename Internal::Traits<This>::DensityType;
-        using PotType = typename Internal::Traits<This>::PotType;
+        constexpr static bool IsSpinPolarized = Traits<This>::IsSpinPolarized;
+        using DensityType = typename Traits<This>::DensityType;
+        using PotType = typename Traits<This>::PotType;
     private:
         Vector<ScalarType> buffer;
     public:
@@ -235,4 +221,18 @@ namespace Physica::Core {
         assert(this != &lda && "[Error]: Self swap is likely a bug");
         buffer.swap(lda.buffer);
     }
+}
+
+namespace Physica {
+    using namespace Core;
+
+    template<class ScalarType, LDAType type, bool polarized>
+    class Traits<LDA<ScalarType, type, polarized>> {
+        using GridType = RSpaceGrid<ScalarType>;
+    public:
+        constexpr static bool IsSpinPolarized = polarized;
+        constexpr static size_t NumSpin = IsSpinPolarized ? 2 : 1;
+        using DensityType = Utils::Array<GridType, NumSpin>;
+        using PotType = Utils::Array<GridType, NumSpin>;
+    };
 }

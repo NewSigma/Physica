@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2023 WeiBo He.
+ * Copyright 2021-2024 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -19,13 +19,10 @@
 #pragma once
 
 #include <cassert>
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/MatrixOption.h"
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/Vector.h"
+#include <Physica/Core/Math/Algebra/LinearAlgebra/Matrix/MatrixOption.h>
+#include <Physica/Core/Math/Algebra/LinearAlgebra/Vector/Vector.h>
 
 namespace Physica::Core {
-    namespace Internal {
-        template<class T> class Traits;
-    }
     /**
      * This layer handles specialization of operator().
      */
@@ -34,17 +31,17 @@ namespace Physica::Core {
 
     template<class Derived>
     class DenseMatrixStorage<Derived, MatrixOption::Column | MatrixOption::Element>
-            : public Utils::Array<typename Internal::Traits<Derived>::ScalarType,
-                                  Internal::Traits<Derived>::SizeAtCompile,
-                                  Internal::Traits<Derived>::MaxSizeAtCompile,
-                                  typename Internal::Traits<Derived>::AllocatorType>
+            : public Utils::Array<typename Traits<Derived>::ScalarType,
+                                  Traits<Derived>::SizeAtCompile,
+                                  Traits<Derived>::MaxSizeAtCompile,
+                                  typename Traits<Derived>::AllocatorType>
             , public Utils::CRTPBase<Derived, 1> {
-        static_assert(Internal::Traits<Derived>::Option == (MatrixOption::Column | MatrixOption::Element)
+        static_assert(Traits<Derived>::Option == (MatrixOption::Column | MatrixOption::Element)
                       , "Invalid Derived type.");
         using This = DenseMatrixStorage<Derived, MatrixOption::Column | MatrixOption::Element>;
-        using T = typename Internal::Traits<Derived>::ScalarType;
+        using T = typename Traits<Derived>::ScalarType;
     public:
-        using Base = Utils::Array<T, Internal::Traits<Derived>::SizeAtCompile, Internal::Traits<Derived>::MaxSizeAtCompile, typename Internal::Traits<Derived>::AllocatorType>;
+        using Base = Utils::Array<T, Traits<Derived>::SizeAtCompile, Traits<Derived>::MaxSizeAtCompile, typename Traits<Derived>::AllocatorType>;
         using InitializerType = T;
     private:
         using Utils::CRTPBase<Derived, 1>::getDerived;
@@ -86,17 +83,17 @@ namespace Physica::Core {
 
     template<class Derived>
     class DenseMatrixStorage<Derived, MatrixOption::Row | MatrixOption::Element>
-            : public Utils::Array<typename Internal::Traits<Derived>::ScalarType,
-                                  Internal::Traits<Derived>::SizeAtCompile,
-                                  Internal::Traits<Derived>::MaxSizeAtCompile,
-                                  typename Internal::Traits<Derived>::AllocatorType>
+            : public Utils::Array<typename Traits<Derived>::ScalarType,
+                                  Traits<Derived>::SizeAtCompile,
+                                  Traits<Derived>::MaxSizeAtCompile,
+                                  typename Traits<Derived>::AllocatorType>
             , public Utils::CRTPBase<Derived, 1> {
-        static_assert(Internal::Traits<Derived>::Option == (MatrixOption::Row | MatrixOption::Element)
+        static_assert(Traits<Derived>::Option == (MatrixOption::Row | MatrixOption::Element)
                       , "Invalid Derived type.");
         using This = DenseMatrixStorage<Derived, MatrixOption::Row | MatrixOption::Element>;
-        using T = typename Internal::Traits<Derived>::ScalarType;
+        using T = typename Traits<Derived>::ScalarType;
     public:
-        using Base = Utils::Array<T, Internal::Traits<Derived>::SizeAtCompile, Internal::Traits<Derived>::MaxSizeAtCompile, typename Internal::Traits<Derived>::AllocatorType>;
+        using Base = Utils::Array<T, Traits<Derived>::SizeAtCompile, Traits<Derived>::MaxSizeAtCompile, typename Traits<Derived>::AllocatorType>;
         using InitializerType = T;
     private:
         using Utils::CRTPBase<Derived, 1>::getDerived;
@@ -139,18 +136,18 @@ namespace Physica::Core {
     template<class Derived>
     class DenseMatrixStorage<Derived, MatrixOption::Column | MatrixOption::Vector>
             : public Utils::CRTPBase<Derived, 1> {
-        static_assert(Internal::Traits<Derived>::Option == (MatrixOption::Column | MatrixOption::Vector)
+        static_assert(Traits<Derived>::Option == (MatrixOption::Column | MatrixOption::Vector)
                       , "Invalid Derived type.");
         using This = DenseMatrixStorage<Derived, MatrixOption::Column | MatrixOption::Vector>;
         using Base = Utils::CRTPBase<Derived, 1>;
-        using T = typename Internal::Traits<Derived>::ScalarType;
-        using AllocatorTypeT = typename Internal::Traits<Derived>::AllocatorType;
+        using T = typename Traits<Derived>::ScalarType;
+        using AllocatorTypeT = typename Traits<Derived>::AllocatorType;
     public:
-        using VectorType = Vector<T, Internal::Traits<Derived>::RowAtCompile, Internal::Traits<Derived>::MaxRowAtCompile, AllocatorTypeT>;
+        using VectorType = Vector<T, Traits<Derived>::RowAtCompile, Traits<Derived>::MaxRowAtCompile, AllocatorTypeT>;
         using InitializerType = VectorType;
     private:
         using AllocatorTypeV = typename Utils::ChangeAllocatorValueType<AllocatorTypeT, VectorType>::Type;
-        using ArrayType = Utils::Array<VectorType, Internal::Traits<Derived>::ColumnAtCompile, Internal::Traits<Derived>::MaxColumnAtCompile, AllocatorTypeV>;
+        using ArrayType = Utils::Array<VectorType, Traits<Derived>::ColumnAtCompile, Traits<Derived>::MaxColumnAtCompile, AllocatorTypeV>;
 
         ArrayType array;
     public:
@@ -191,18 +188,18 @@ namespace Physica::Core {
     template<class Derived>
     class DenseMatrixStorage<Derived, MatrixOption::Row | MatrixOption::Vector>
             : public Utils::CRTPBase<Derived, 1> {
-        static_assert(Internal::Traits<Derived>::Option == (MatrixOption::Row | MatrixOption::Vector)
+        static_assert(Traits<Derived>::Option == (MatrixOption::Row | MatrixOption::Vector)
                       , "Invalid Derived type.");
         using This = DenseMatrixStorage<Derived, MatrixOption::Row | MatrixOption::Vector>;
         using Base = Utils::CRTPBase<Derived, 1>;
-        using T = typename Internal::Traits<Derived>::ScalarType;
-        using AllocatorTypeT = typename Internal::Traits<Derived>::AllocatorType;
+        using T = typename Traits<Derived>::ScalarType;
+        using AllocatorTypeT = typename Traits<Derived>::AllocatorType;
     public:
-        using VectorType = Vector<T, Internal::Traits<Derived>::ColumnAtCompile, Internal::Traits<Derived>::MaxColumnAtCompile, AllocatorTypeT>;
+        using VectorType = Vector<T, Traits<Derived>::ColumnAtCompile, Traits<Derived>::MaxColumnAtCompile, AllocatorTypeT>;
         using InitializerType = VectorType;
     private:
         using AllocatorTypeV = typename Utils::ChangeAllocatorValueType<AllocatorTypeT, VectorType>::Type;
-        using ArrayType = Utils::Array<VectorType, Internal::Traits<Derived>::RowAtCompile, Internal::Traits<Derived>::MaxRowAtCompile, AllocatorTypeV>;
+        using ArrayType = Utils::Array<VectorType, Traits<Derived>::RowAtCompile, Traits<Derived>::MaxRowAtCompile, AllocatorTypeV>;
         
         ArrayType array;
     public:

@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2023 WeiBo He.
+ * Copyright 2021-2024 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -21,23 +21,6 @@
 #include "Vector.h"
 
 namespace Physica::Core {
-    template<class AnyVector1, class AnyVector2> class CrossProduct;
-
-    namespace Internal {
-        template<class AnyVector1, class AnyVector2>
-        class Traits<CrossProduct<AnyVector1, AnyVector2>> {
-            static_assert((Internal::Traits<AnyVector1>::SizeAtCompile == 3 || Internal::Traits<AnyVector1>::SizeAtCompile == Dynamic) &&
-                          (Internal::Traits<AnyVector2>::SizeAtCompile == 3 || Internal::Traits<AnyVector2>::SizeAtCompile == Dynamic),
-                          "CrossProduct can apply on 3-dim vectors only");
-        public:
-            using ScalarType = typename Internal::BinaryScalarOpReturnType<typename AnyVector1::ScalarType,
-                                                                           typename AnyVector2::ScalarType>::Type;
-            constexpr static size_t SizeAtCompile = 3;
-            constexpr static size_t MaxSizeAtCompile = SizeAtCompile;
-            using PacketType = typename Internal::BestPacket<ScalarType, SizeAtCompile>::Type;
-        };
-    }
-
     template<class AnyVector1, class AnyVector2>
     class CrossProduct : public RValueVector<CrossProduct<AnyVector1, AnyVector2>> {
         using This = CrossProduct<AnyVector1, AnyVector2>;
@@ -68,5 +51,22 @@ namespace Physica::Core {
         }
         /* Getters */
         [[nodiscard]] constexpr size_t getLength() const noexcept { return 3; }
+    };
+}
+
+namespace Physica {
+    using namespace Core;
+
+    template<class AnyVector1, class AnyVector2>
+    class Traits<CrossProduct<AnyVector1, AnyVector2>> {
+        static_assert((Traits<AnyVector1>::SizeAtCompile == 3 || Traits<AnyVector1>::SizeAtCompile == Dynamic) &&
+                      (Traits<AnyVector2>::SizeAtCompile == 3 || Traits<AnyVector2>::SizeAtCompile == Dynamic),
+                      "CrossProduct can apply on 3-dim vectors only");
+    public:
+        using ScalarType = typename Core::Internal::BinaryScalarOpReturnType<typename AnyVector1::ScalarType,
+                                                                             typename AnyVector2::ScalarType>::Type;
+        constexpr static size_t SizeAtCompile = 3;
+        constexpr static size_t MaxSizeAtCompile = SizeAtCompile;
+        using PacketType = typename Core::Internal::BestPacket<ScalarType, SizeAtCompile>::Type;
     };
 }

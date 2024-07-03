@@ -18,7 +18,7 @@
  */
 #pragma once
 
-#include "Physica/Core/MultiPrecision/ScalarImpl/ExpressionType.h"
+#include <Physica/Core/MultiPrecision/ScalarImpl/ExpressionType.h>
 
 namespace Physica::Core {
     /**
@@ -29,41 +29,6 @@ namespace Physica::Core {
              class T2 = T1,
              class ResultType = typename Internal::BinaryScalarOpReturnType<typename T1::ScalarType, typename T2::ScalarType>::Type>
     class MatrixExpr;
-
-    namespace Internal {
-        template<ExpressionType Type, class T1, class T2, class ResultType>
-        class Traits<MatrixExpr<Type, T1, T2, ResultType>> {
-            constexpr static bool SameMajor = MatrixOption::isSameMajor<T1, T2>();
-            constexpr static int Major = SameMajor ? MatrixOption::getMajor<T1>()
-                                                   : int(MatrixOption::AnyMajor);
-            constexpr static bool SameStorage = MatrixOption::isSameStorage<T1, T2>();
-            constexpr static int Storage = SameStorage ? MatrixOption::getStorage<T1>()
-                                                       : int(MatrixOption::AnyStorage);
-        public:
-            using ScalarType = ResultType;
-            constexpr static int Option = Major | Storage;
-            //Optimize: T1 and T2 may not have same compiling size, for example, T1 may be fixed size and T2 may be dynamic
-            constexpr static size_t RowAtCompile = T1::RowAtCompile;
-            constexpr static size_t ColumnAtCompile = T1::ColumnAtCompile;
-            constexpr static size_t MaxRowAtCompile = T1::MaxRowAtCompile;
-            constexpr static size_t MaxColumnAtCompile = T1::MaxColumnAtCompile;
-            constexpr static size_t SizeAtCompile = T1::SizeAtCompile;
-            constexpr static size_t MaxSizeAtCompile = T1::MaxSizeAtCompile;
-        };
-
-        template<ExpressionType Type, class T1, class T2, class ResultType>
-        class Traits<MatrixExpr<Type, T1, ScalarBase<T2>, ResultType>> {
-        public:
-            using ScalarType = ResultType;
-            constexpr static int Option = T1::Option;
-            constexpr static size_t RowAtCompile = T1::RowAtCompile;
-            constexpr static size_t ColumnAtCompile = T1::ColumnAtCompile;
-            constexpr static size_t MaxRowAtCompile = T1::MaxRowAtCompile;
-            constexpr static size_t MaxColumnAtCompile = T1::MaxColumnAtCompile;
-            constexpr static size_t SizeAtCompile = T1::SizeAtCompile;
-            constexpr static size_t MaxSizeAtCompile = T1::MaxSizeAtCompile;
-        };
-    }
     //////////////////////////////////////Minus//////////////////////////////////////
     template<class MatrixType>
     class MatrixExpr<ExpressionType::Minus, MatrixType>
@@ -606,6 +571,43 @@ namespace Physica::Core {
     [[nodiscard]] MatrixExpr<ExpressionType::Cos, MatrixType> cos_elem(const RValueMatrix<MatrixType>& m) noexcept {
         return MatrixExpr<ExpressionType::Cos, MatrixType>(m);
     }
+}
+
+namespace Physica {
+    using namespace Core;
+
+    template<ExpressionType Type, class T1, class T2, class ResultType>
+    class Traits<MatrixExpr<Type, T1, T2, ResultType>> {
+        constexpr static bool SameMajor = MatrixOption::isSameMajor<T1, T2>();
+        constexpr static int Major = SameMajor ? MatrixOption::getMajor<T1>()
+                                               : int(MatrixOption::AnyMajor);
+        constexpr static bool SameStorage = MatrixOption::isSameStorage<T1, T2>();
+        constexpr static int Storage = SameStorage ? MatrixOption::getStorage<T1>()
+                                                   : int(MatrixOption::AnyStorage);
+    public:
+        using ScalarType = ResultType;
+        constexpr static int Option = Major | Storage;
+        // Optimize: T1 and T2 may not have same compiling size, for example, T1 may be fixed size and T2 may be dynamic
+        constexpr static size_t RowAtCompile = T1::RowAtCompile;
+        constexpr static size_t ColumnAtCompile = T1::ColumnAtCompile;
+        constexpr static size_t MaxRowAtCompile = T1::MaxRowAtCompile;
+        constexpr static size_t MaxColumnAtCompile = T1::MaxColumnAtCompile;
+        constexpr static size_t SizeAtCompile = T1::SizeAtCompile;
+        constexpr static size_t MaxSizeAtCompile = T1::MaxSizeAtCompile;
+    };
+
+    template<ExpressionType Type, class T1, class T2, class ResultType>
+    class Traits<MatrixExpr<Type, T1, ScalarBase<T2>, ResultType>> {
+    public:
+        using ScalarType = ResultType;
+        constexpr static int Option = T1::Option;
+        constexpr static size_t RowAtCompile = T1::RowAtCompile;
+        constexpr static size_t ColumnAtCompile = T1::ColumnAtCompile;
+        constexpr static size_t MaxRowAtCompile = T1::MaxRowAtCompile;
+        constexpr static size_t MaxColumnAtCompile = T1::MaxColumnAtCompile;
+        constexpr static size_t SizeAtCompile = T1::SizeAtCompile;
+        constexpr static size_t MaxSizeAtCompile = T1::MaxSizeAtCompile;
+    };
 }
 
 #include "MatrixExprImpl/ExprVecProduct.h"

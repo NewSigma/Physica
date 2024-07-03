@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 WeiBo He.
+ * Copyright 2023-2024 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -33,18 +33,6 @@ namespace Physica::Core {
     };
 
     template<class ScalarType, unsigned int Dim, size_t NumReplica> class RingPolymer;
-    template<class ScalarType, unsigned int Dim, size_t NumReplica, RPMDIntegrator Integrator> class FreeModel;
-
-    namespace Internal {
-        template<class T1, unsigned int T2, size_t T3, RPMDIntegrator Integrator>
-        class Traits<FreeModel<T1, T2, T3, Integrator>> {
-        public:
-            using ScalarType = T1;
-            constexpr static unsigned int Dim = T2;
-            constexpr static size_t NumReplica = T3;
-            constexpr static bool IsPeriodBoundary = true;
-        };
-    }
 
     template<class ScalarType,
              unsigned int Dim,
@@ -234,4 +222,15 @@ namespace Physica::Core {
         }
         lastTimeStep = deltaT;
     }
+}
+
+namespace Physica {
+    template<class T1, unsigned int T2, size_t T3, RPMDIntegrator Integrator>
+    class Traits<Core::FreeModel<T1, T2, T3, Integrator>> {
+    public:
+        using ScalarType = T1;
+        constexpr static unsigned int Dim = T2;
+        constexpr static size_t NumReplica = T3;
+        constexpr static bool IsPeriodBoundary = true;
+    };
 }

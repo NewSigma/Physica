@@ -29,6 +29,7 @@
 
 using namespace Physica::Core;
 using namespace Physica::Utils;
+using Physica::Dynamic;
 using ScalarType = Scalar<Float>;
 using ForceModel = Physica::Core::device_obj<SilveraGoldman<ScalarType, true>>;
 using KineticModel = FreeModel<ScalarType, 3, Dynamic, RPMDIntegrator::Exact>;

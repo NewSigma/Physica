@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2021 WeiBo He.
+ * Copyright 2020-2024 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -24,9 +24,11 @@
 #include <memory>
 #include "Physica/Utils/Template/CRTPBase.h"
 
-namespace Physica::Utils::Internal {
-    //Forward declaration
+namespace Physica {
     template<class T> class Traits;
+}
+
+namespace Physica::Utils::Internal {
     template<class Derived, class Allocator> class ArrayBase;
 
     template<class T, class Container>

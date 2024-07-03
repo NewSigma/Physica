@@ -23,21 +23,6 @@
 #include "Physica/Core/Math/Discrete/Combination.h"
 
 namespace Physica::Core {
-    template<unsigned int Dim, unsigned int NumSite> class SpinlessFermion;
-
-    namespace Internal {
-        template<unsigned int I1, unsigned int I2>
-        class Traits<SpinlessFermion<I1, I2>> {
-        public:
-            constexpr static unsigned int Dim = I1;
-            constexpr static unsigned int NumSite = I2;
-            constexpr static unsigned int SiteDOF = 2;
-
-            static_assert(1 <= Dim && Dim <= 3, "[Error]: Invalid Dim");
-            static_assert(0 < NumSite && NumSite < 64, "[Error]: Invalid site number");
-        };
-    }
-
     template<unsigned int Dim, unsigned int NumSite>
     class SpinlessFermion : public State<SpinlessFermion<Dim, NumSite>> {
         using This = SpinlessFermion<Dim, NumSite>;
@@ -92,6 +77,19 @@ namespace Physica::Core {
         }
         return os;
     }
+}
+
+namespace Physica {
+    template<unsigned int I1, unsigned int I2>
+    class Traits<Core::SpinlessFermion<I1, I2>> {
+    public:
+        constexpr static unsigned int Dim = I1;
+        constexpr static unsigned int NumSite = I2;
+        constexpr static unsigned int SiteDOF = 2;
+
+        static_assert(1 <= Dim && Dim <= 3, "[Error]: Invalid Dim");
+        static_assert(0 < NumSite && NumSite < 64, "[Error]: Invalid site number");
+    };
 }
 
 namespace std {

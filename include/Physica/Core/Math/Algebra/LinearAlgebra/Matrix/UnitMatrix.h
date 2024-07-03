@@ -21,29 +21,12 @@
 #include "MatrixImpl/RValueMatrix.h"
 
 namespace Physica::Core {
-    template<class ScalarType, size_t Order = Dynamic> class UnitMatrix;
-
-    namespace Internal {
-        template<class T, size_t Order>
-        class Traits<UnitMatrix<T, Order>> {
-        public:
-            using ScalarType = T;
-            constexpr static int Option = MatrixOption::AnyMajor | MatrixOption::AnyStorage;
-            constexpr static size_t RowAtCompile = Order;
-            constexpr static size_t ColumnAtCompile = Order;
-            constexpr static size_t MaxRowAtCompile = Order;
-            constexpr static size_t MaxColumnAtCompile = Order;
-            constexpr static size_t SizeAtCompile = RowAtCompile * ColumnAtCompile;
-            constexpr static size_t MaxSizeAtCompile = MaxRowAtCompile * MaxColumnAtCompile;
-        };
-    }
-
-    template<class ScalarType, size_t Order>
+    template<class ScalarType, size_t Order = Dynamic>
     class UnitMatrix : public RValueMatrix<UnitMatrix<ScalarType, Order>> {
         using This = UnitMatrix<ScalarType, Order>;
         using Base = RValueMatrix<This>;
 
-        size_t order; //TODO: use void if Order != Dynamic
+        size_t order; // TODO: use void if Order != Dynamic
     public:
         UnitMatrix(size_t order_);
         UnitMatrix(const This&) = default;
@@ -80,4 +63,21 @@ namespace Physica::Core {
         assert(mat.getColumn() == vec.getLength());
         return vec.getDerived();
     }
+}
+
+namespace Physica {
+    using namespace Core;
+
+    template<class T, size_t Order>
+    class Traits<UnitMatrix<T, Order>> {
+    public:
+        using ScalarType = T;
+        constexpr static int Option = MatrixOption::AnyMajor | MatrixOption::AnyStorage;
+        constexpr static size_t RowAtCompile = Order;
+        constexpr static size_t ColumnAtCompile = Order;
+        constexpr static size_t MaxRowAtCompile = Order;
+        constexpr static size_t MaxColumnAtCompile = Order;
+        constexpr static size_t SizeAtCompile = RowAtCompile * ColumnAtCompile;
+        constexpr static size_t MaxSizeAtCompile = MaxRowAtCompile * MaxColumnAtCompile;
+    };
 }

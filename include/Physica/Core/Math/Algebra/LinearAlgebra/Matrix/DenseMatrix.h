@@ -19,51 +19,29 @@
 #pragma once
 
 #include <memory>
-#include "MatrixImpl/ContinuousMatrix.h"
-#include "MatrixProduct/MatrixProduct.h"
+#include "DenseMatrixImpl/DenseMatrixDim.h"
+#include "DenseMatrixImpl/DenseMatrixStorage.h"
 #include "InverseMatrix.h"
 #include "MatrixDecomposition/LUDecomposition.h"
-#include "DenseMatrixImpl/DenseMatrixStorage.h"
-#include "DenseMatrixImpl/DenseMatrixDim.h"
+#include "MatrixImpl/ContinuousMatrix.h"
+#include "MatrixProduct/MatrixProduct.h"
 
 namespace Physica::Core {
-    template<class T,
-             int Option = MatrixOption::Column | MatrixOption::Vector,
-             size_t Row = Dynamic,
-             size_t Column = Dynamic,
-             size_t MaxRow = Row,
-             size_t MaxColumn = Column,
-             class Allocator = Utils::HostAllocator<T>>
-    class DenseMatrix;
-
-    namespace Internal {
-        template<class T>
-        class Traits;
-
-        template<class T, int Op, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn, class Allocator>
-        class Traits<DenseMatrix<T, Op, Row, Column, MaxRow, MaxColumn, Allocator>> {
-            static_assert(MaxRow * MaxColumn * sizeof(T) <= 2048, "[Warn]: It is suggested declare large fixed size matrix as dynamic matrix");
-        public:
-            using ScalarType = T;
-            constexpr static int Option = Op;
-            constexpr static size_t RowAtCompile = Row;
-            constexpr static size_t ColumnAtCompile = Column;
-            constexpr static size_t MaxRowAtCompile = MaxRow;
-            constexpr static size_t MaxColumnAtCompile = MaxColumn;
-            constexpr static size_t SizeAtCompile = RowAtCompile * ColumnAtCompile;
-            constexpr static size_t MaxSizeAtCompile = MaxRowAtCompile * MaxColumnAtCompile;
-            using AllocatorType = Allocator;
-        };
-    }
     /**
-     * DenseMatrix class
+     * \class DenseMatrix
      * A matrix can be either fixed matrix, which have its max size defined,
      * or dynamic matrix, whose size is dynamically changed.
-     * 
+     *
      * \tparam Option
      * Option is combinations of \enum MatrixOption
      */
-    template<class T, int Option, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn, class Allocator>
+    template<class T,
+            int Option = MatrixOption::Column | MatrixOption::Vector,
+            size_t Row = Dynamic,
+            size_t Column = Dynamic,
+            size_t MaxRow = Row,
+            size_t MaxColumn = Column,
+            class Allocator = Utils::HostAllocator<T>>
     class DenseMatrix : public ContinuousMatrix<DenseMatrix<T, Option, Row, Column, MaxRow, MaxColumn, Allocator>>
                       , public DenseMatrixStorage<DenseMatrix<T, Option, Row, Column, MaxRow, MaxColumn, Allocator>, Option>
                       , public DenseMatrixDim<DenseMatrix<T, Option, Row, Column, MaxRow, MaxColumn, Allocator>, Row, Column, MaxRow, MaxColumn> {
@@ -74,8 +52,8 @@ namespace Physica::Core {
         using InitializerType = typename Storage::InitializerType;
         using Base::isReverseDiff;
     public:
-        using typename Base::ScalarType;
         using typename Base::PlainScalar;
+        using typename Base::ScalarType;
         using device_obj_type = device_obj<This>;
         using ColMatrix = DenseMatrix<T, MatrixOption::getStorage<DenseMatrix>() | MatrixOption::Column, Row, Column, MaxRow, MaxColumn>;
         using RowMatrix = DenseMatrix<T, MatrixOption::getStorage<DenseMatrix>() | MatrixOption::Row, Row, Column, MaxRow, MaxColumn>;
@@ -98,17 +76,17 @@ namespace Physica::Core {
         using Base::operator=;
         using Storage::operator();
         /* Operations */
-        using Base::random_uniform;
-        using Base::random_normal;
         using Base::random_any;
+        using Base::random_normal;
+        using Base::random_uniform;
         inline void resize(size_t row, size_t column);
         [[nodiscard]] DenseMatrix copy() const;
         [[nodiscard]] inline device_obj<This> toDevice() const;
         void toDevice(device_obj<This>& obj) const;
         void swap(DenseMatrix& __restrict m) noexcept;
         /* Getters */
-        using Dim::getRow;
         using Dim::getColumn;
+        using Dim::getRow;
         using Storage::data_ptr;
         /* Static members */
         [[nodiscard]] static DenseMatrix Zeros(size_t rank) { return DenseMatrix(rank, rank, T(0)); }
@@ -131,11 +109,30 @@ namespace Physica::Core {
 
     template<class T, int Option, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn, class Allocator>
     std::istream& operator>>(std::istream& is, DenseMatrix<T, Option, Row, Column, MaxRow, MaxColumn, Allocator>& mat);
+}
 
+namespace Physica {
+    template<class T, int Op, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn, class Allocator>
+    class Traits<Core::DenseMatrix<T, Op, Row, Column, MaxRow, MaxColumn, Allocator>> {
+        static_assert(MaxRow * MaxColumn * sizeof(T) <= 2048, "[Warn]: It is suggested declare large fixed size matrix as dynamic matrix");
+    public:
+        using ScalarType = T;
+        constexpr static int Option = Op;
+        constexpr static size_t RowAtCompile = Row;
+        constexpr static size_t ColumnAtCompile = Column;
+        constexpr static size_t MaxRowAtCompile = MaxRow;
+        constexpr static size_t MaxColumnAtCompile = MaxColumn;
+        constexpr static size_t SizeAtCompile = RowAtCompile * ColumnAtCompile;
+        constexpr static size_t MaxSizeAtCompile = MaxRowAtCompile * MaxColumnAtCompile;
+        using AllocatorType = Allocator;
+    };
+}
+
+namespace std {
     template<class T, int Option, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn, class Allocator>
     inline void swap(
-            DenseMatrix<T, Option, Row, Column, MaxRow, MaxColumn, Allocator>& __restrict m1,
-            DenseMatrix<T, Option, Row, Column, MaxRow, MaxColumn, Allocator>& __restrict m2) noexcept {
+            Physica::Core::DenseMatrix<T, Option, Row, Column, MaxRow, MaxColumn, Allocator>& __restrict m1,
+            Physica::Core::DenseMatrix<T, Option, Row, Column, MaxRow, MaxColumn, Allocator>& __restrict m2) noexcept {
         m1.swap(m2);
     }
 }

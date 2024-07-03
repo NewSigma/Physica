@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2023 WeiBo He.
+ * Copyright 2021-2024 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -18,12 +18,9 @@
  */
 #pragma once
 
-namespace Physica::Core {
-    template<class Derived> class ContinuousMatrix;
-    template<class MatrixType1, class MatrixType2> class MatrixProduct;
-    template<class VectorType, class MatrixType> class VectorMatrixProduct;
-    template<class MatrixType, class VectorType> class MatrixVectorProduct;
+#include <Physica/Core/Math/Algebra/LinearAlgebra/Matrix/MatrixImpl/RValueMatrix.h>
 
+namespace Physica::Core {
     namespace Internal {
         template<class MatrixType1, class MatrixType2>
         struct ProductOption {
@@ -36,55 +33,6 @@ namespace Physica::Core {
                                          ? MatrixOption::Element
                                          : MatrixOption::Vector;
             constexpr static int Option = (Major == MatrixOption::AnyMajor ? MatrixOption::Column : Major) | Storage;
-        };
-
-        template<class MatrixType1, class MatrixType2>
-        class Traits<MatrixProduct<MatrixType1, MatrixType2>> {
-            static_assert(MatrixType1::ColumnAtCompile == MatrixType2::RowAtCompile ||
-                          MatrixType1::ColumnAtCompile == Dynamic ||
-                          MatrixType2::RowAtCompile == Dynamic,
-                          "[Error]: Row and column do not match in matrix-vector product");
-        public:
-            using ScalarType = typename BinaryScalarOpReturnType<typename MatrixType1::ScalarType,
-                                                                 typename MatrixType2::ScalarType>::Type;
-            constexpr static size_t RowAtCompile = MatrixType1::RowAtCompile;
-            constexpr static size_t ColumnAtCompile = MatrixType2::ColumnAtCompile;
-            constexpr static size_t MaxRowAtCompile = MatrixType1::MaxRowAtCompile;
-            constexpr static size_t MaxColumnAtCompile = MatrixType2::MaxColumnAtCompile;
-            constexpr static size_t SizeAtCompile = RowAtCompile * ColumnAtCompile;
-            constexpr static size_t MaxSizeAtCompile = SizeAtCompile;
-        };
-
-        template<class VectorType, class MatrixType>
-        class Traits<VectorMatrixProduct<VectorType, MatrixType>> {
-            static_assert(MatrixType::RowAtCompile == 1 || MatrixType::RowAtCompile == Dynamic,
-                          "Row and column do not match in matrix product");
-        public:
-            using ScalarType = typename BinaryScalarOpReturnType<typename VectorType::ScalarType,
-                                                                 typename MatrixType::ScalarType>::Type;
-            constexpr static int Option = MatrixOption::AnyMajor | MatrixOption::AnyStorage;
-            constexpr static size_t RowAtCompile = VectorType::SizeAtCompile;
-            constexpr static size_t ColumnAtCompile = MatrixType::ColumnAtCompile;
-            constexpr static size_t MaxRowAtCompile = VectorType::MaxSizeAtCompile;
-            constexpr static size_t MaxColumnAtCompile = MatrixType::MaxColumnAtCompile;
-            constexpr static size_t SizeAtCompile = RowAtCompile * ColumnAtCompile;
-            constexpr static size_t MaxSizeAtCompile = SizeAtCompile;
-        };
-
-        template<class MatrixType, class VectorType>
-        class Traits<MatrixVectorProduct<MatrixType, VectorType>> {
-            static_assert(MatrixType::ColumnAtCompile == VectorType::SizeAtCompile ||
-                          MatrixType::ColumnAtCompile == Dynamic ||
-                          VectorType::SizeAtCompile == Dynamic,
-                          "Row and column do not match in matrix product");
-        public:
-            using ScalarType = typename BinaryScalarOpReturnType<typename MatrixType::ScalarType,
-                                                                 typename VectorType::ScalarType>::Type;
-            constexpr static size_t SizeAtCompile = MatrixType::RowAtCompile;
-            constexpr static size_t MaxSizeAtCompile = MatrixType::MaxRowAtCompile;
-
-            using PacketType = typename BestPacket<ScalarType, SizeAtCompile>::Type;
-            constexpr static bool FastAssign = false;
         };
     }
 
@@ -221,6 +169,59 @@ namespace Physica::Core {
         assert(mat.getColumn() == vec.getLength());
         return mat.row(0) * vec;
     }
+}
+
+namespace Physica {
+    using namespace Core;
+
+    template<class MatrixType1, class MatrixType2>
+    class Traits<MatrixProduct<MatrixType1, MatrixType2>> {
+        static_assert(MatrixType1::ColumnAtCompile == MatrixType2::RowAtCompile ||
+                      MatrixType1::ColumnAtCompile == Dynamic ||
+                      MatrixType2::RowAtCompile == Dynamic,
+                      "[Error]: Row and column do not match in matrix-vector product");
+    public:
+        using ScalarType = typename Core::Internal::BinaryScalarOpReturnType<typename MatrixType1::ScalarType,
+                                                                             typename MatrixType2::ScalarType>::Type;
+        constexpr static size_t RowAtCompile = MatrixType1::RowAtCompile;
+        constexpr static size_t ColumnAtCompile = MatrixType2::ColumnAtCompile;
+        constexpr static size_t MaxRowAtCompile = MatrixType1::MaxRowAtCompile;
+        constexpr static size_t MaxColumnAtCompile = MatrixType2::MaxColumnAtCompile;
+        constexpr static size_t SizeAtCompile = RowAtCompile * ColumnAtCompile;
+        constexpr static size_t MaxSizeAtCompile = SizeAtCompile;
+    };
+
+    template<class VectorType, class MatrixType>
+    class Traits<VectorMatrixProduct<VectorType, MatrixType>> {
+        static_assert(MatrixType::RowAtCompile == 1 || MatrixType::RowAtCompile == Dynamic,
+                      "Row and column do not match in matrix product");
+    public:
+        using ScalarType = typename Core::Internal::BinaryScalarOpReturnType<typename VectorType::ScalarType,
+                                                                             typename MatrixType::ScalarType>::Type;
+        constexpr static int Option = MatrixOption::AnyMajor | MatrixOption::AnyStorage;
+        constexpr static size_t RowAtCompile = VectorType::SizeAtCompile;
+        constexpr static size_t ColumnAtCompile = MatrixType::ColumnAtCompile;
+        constexpr static size_t MaxRowAtCompile = VectorType::MaxSizeAtCompile;
+        constexpr static size_t MaxColumnAtCompile = MatrixType::MaxColumnAtCompile;
+        constexpr static size_t SizeAtCompile = RowAtCompile * ColumnAtCompile;
+        constexpr static size_t MaxSizeAtCompile = SizeAtCompile;
+    };
+
+    template<class MatrixType, class VectorType>
+    class Traits<MatrixVectorProduct<MatrixType, VectorType>> {
+        static_assert(MatrixType::ColumnAtCompile == VectorType::SizeAtCompile ||
+                      MatrixType::ColumnAtCompile == Dynamic ||
+                      VectorType::SizeAtCompile == Dynamic,
+                      "Row and column do not match in matrix product");
+    public:
+        using ScalarType = typename Core::Internal::BinaryScalarOpReturnType<typename MatrixType::ScalarType,
+                                                                             typename VectorType::ScalarType>::Type;
+        constexpr static size_t SizeAtCompile = MatrixType::RowAtCompile;
+        constexpr static size_t MaxSizeAtCompile = MatrixType::MaxRowAtCompile;
+
+        using PacketType = typename Core::Internal::BestPacket<ScalarType, SizeAtCompile>::Type;
+        constexpr static bool FastAssign = false;
+    };
 }
 
 #include "MatrixProductImpl.h"

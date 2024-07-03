@@ -19,6 +19,7 @@
 #pragma once
 
 #include <climits>
+#include <cstddef>
 #include "Physica/Config.h"
 /**
  * Improve: Platform dependent, may be wrong on some spatial platforms, add a test before compile.
@@ -76,6 +77,14 @@
 #endif
 
 namespace Physica {
+    template<class T> class Traits;
+    /**
+     * Forward declaration for friend-class-based tests
+     */
+    class Test;
+
+    constexpr size_t Dynamic = 0;
+
     constexpr static bool IsHDF5Enabled() {
     #ifdef PHYSICA_HDF5
         return true;

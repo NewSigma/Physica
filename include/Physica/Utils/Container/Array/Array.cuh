@@ -23,17 +23,6 @@
 #include "Physica/Utils/CUDA/PlainStruct.h"
 
 namespace Physica::Utils {
-    namespace Internal {
-        template<class T, size_t Length, size_t Capacity, class Allocator>
-        class Traits<Utils::device_obj<Array<T, Length, Capacity, Allocator>>> {
-        public:
-            constexpr static size_t ArrayLength = Length;
-            constexpr static size_t ArrayCapacity = Capacity;
-            using AllocatorType = DeviceAllocator<T>;
-            using ValueType = typename AllocatorType::value_type;
-        };
-    }
-
     template<class T, size_t Length, size_t Capacity, class Allocator>
     class device_obj<Array<T, Length, Capacity, Allocator>> : public Array<T, Length, Capacity, Allocator> {
         static_assert(Length != Dynamic, "[Error]: Dynamic length is not implemented");
@@ -327,4 +316,17 @@ namespace Physica::Utils {
             buffer.get_allocator().deallocate(buffer.release(), length);
         }
     }
+}
+
+namespace Physica {
+    using namespace Utils;
+
+    template<class T, size_t Length, size_t Capacity, class Allocator>
+    class Traits<Utils::device_obj<Array<T, Length, Capacity, Allocator>>> {
+    public:
+        constexpr static size_t ArrayLength = Length;
+        constexpr static size_t ArrayCapacity = Capacity;
+        using AllocatorType = DeviceAllocator<T>;
+        using ValueType = typename AllocatorType::value_type;
+    };
 }

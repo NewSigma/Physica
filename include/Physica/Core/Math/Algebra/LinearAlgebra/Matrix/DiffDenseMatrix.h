@@ -18,19 +18,10 @@
  */
 #pragma once
 
-#include "Physica/Core/MultiPrecision/Differentiable.h"
+#include <Physica/Core/MultiPrecision/Differentiable.h>
 #include "DenseMatrix.h"
 
 namespace Physica::Core {
-    namespace Internal {
-        template<class T, int Option, unsigned int Order>
-        class Traits<Differentiable<DenseMatrix<T, Option>, DiffMode::Reverse, Order>> : public Traits<DenseMatrix<T, Option>> {
-            static_assert(!T::isDifferentiable, "[Error]: Nested Differentiable<> is not allowed");
-        public:
-            using ScalarType = Differentiable<T, DiffMode::Reverse, Order>;
-        };
-    }
-
     template<class PlainScalar, int Option, unsigned int Order>
     class Differentiable<DenseMatrix<PlainScalar, Option>, DiffMode::Reverse, Order>
             : public RValueMatrix<Differentiable<DenseMatrix<PlainScalar, Option>, DiffMode::Reverse, Order>>
@@ -59,14 +50,16 @@ namespace Physica::Core {
         /* Operations */
         [[nodiscard]] inline ScalarType calc(size_t row, size_t col) const;
 
-        template<class RandomGenerator> inline void random_uniform(RandomGenerator& gen);
-        template<class RandomGenerator> inline void random_normal(RandomGenerator& gen);
+        template<class RandomGenerator>
+        inline void random_uniform(RandomGenerator& gen);
+        template<class RandomGenerator>
+        inline void random_normal(RandomGenerator& gen);
         template<class Distribution, class RandomGenerator>
         inline void random_any(Distribution& dist, RandomGenerator& gen);
         void swap(Differentiable& obj) noexcept { std::swap(*this, obj); }
         /* Getters */
-        using Dim::getRow;
         using Dim::getColumn;
+        using Dim::getRow;
         [[nodiscard]] size_t getSize() const noexcept { return traceSeg.getLength(); }
         /* Static members */
         template<class RandomGenerator>
@@ -141,4 +134,15 @@ namespace Physica::Core {
             size_t row, size_t column, Distribution& dist, RandomGenerator& gen) {
         return This(PlainMatrix::random_any(row, column, dist, gen));
     }
+}
+
+namespace Physica {
+    using namespace Core;
+
+    template<class T, int Option, unsigned int Order>
+    class Traits<Differentiable<DenseMatrix<T, Option>, DiffMode::Reverse, Order>> : public Traits<DenseMatrix<T, Option>> {
+        static_assert(!T::isDifferentiable, "[Error]: Nested Differentiable<> is not allowed");
+    public:
+        using ScalarType = Differentiable<T, DiffMode::Reverse, Order>;
+    };
 }

@@ -21,17 +21,6 @@
 #include "RMatrixBlock.h"
 
 namespace Physica::Core {
-    namespace Internal {
-        template<class MatrixType>
-        class Traits<Core::device_obj<RowRVector<MatrixType>>> : public Traits<RowRVector<MatrixType>> {};
-
-        template<class MatrixType>
-        class Traits<Core::device_obj<ColRVector<MatrixType>>> : public Traits<ColRVector<MatrixType>> {};
-
-        template<class MatrixType, size_t Row, size_t Column>
-        class Traits<Core::device_obj<RMatrixBlock<MatrixType, Row, Column>>> : public Traits<RMatrixBlock<MatrixType, Row, Column>> {};
-    }
-
     template<class MatrixType>
     class device_obj<RowRVector<MatrixType>> : public device_obj<RValueVector<RowRVector<MatrixType>>> {
     public:
@@ -191,4 +180,17 @@ namespace Physica::Core {
         assert(col < colCount);
         return mat.calc(row + fromRow, col + fromCol);
     }
+}
+
+namespace Physica {
+    using namespace Core;
+
+    template<class MatrixType>
+    class Traits<Core::device_obj<RowRVector<MatrixType>>> : public Traits<RowRVector<MatrixType>> {};
+
+    template<class MatrixType>
+    class Traits<Core::device_obj<ColRVector<MatrixType>>> : public Traits<ColRVector<MatrixType>> {};
+
+    template<class MatrixType, size_t Row, size_t Column>
+    class Traits<Core::device_obj<RMatrixBlock<MatrixType, Row, Column>>> : public Traits<RMatrixBlock<MatrixType, Row, Column>> {};
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 WeiBo He.
+ * Copyright 2022-2024 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -18,7 +18,7 @@
  */
 #pragma once
 
-#include "Physica/Core/Exception/NotImplementedException.h"
+#include <Physica/Core/Exception/NotImplementedException.h>
 
 namespace Physica::Core {
     namespace Internal {
@@ -105,7 +105,7 @@ namespace Physica::Core {
     template<class PacketType>
     inline PacketType ContinuousVector<Derived>::packet(size_t index) const {
         assert(index + PacketType::size() <= Base::getLength());
-        if constexpr (std::is_same_v<ScalarType, typename Internal::Traits<PacketType>::ScalarType>) {
+        if constexpr (std::is_same_v<ScalarType, typename Traits<PacketType>::ScalarType>) {
             PacketType packet{};
             packet.load(Base::data_ptr(index));
             return packet;
@@ -118,7 +118,7 @@ namespace Physica::Core {
     template<class PacketType>
     inline PacketType ContinuousVector<Derived>::packetPartial(size_t index, size_t count) const {
         assert(index + count <= Base::getLength());
-        if constexpr (std::is_same_v<ScalarType, typename Internal::Traits<PacketType>::ScalarType>) {
+        if constexpr (std::is_same_v<ScalarType, typename Traits<PacketType>::ScalarType>) {
             PacketType packet{};
             packet.load_partial(count, Base::data_ptr(index));
             return packet;
@@ -130,7 +130,7 @@ namespace Physica::Core {
     template<class Derived>
     template<class PacketType>
     inline void ContinuousVector<Derived>::writePacket(size_t index, const PacketType packet) {
-        constexpr bool isSameScalar = std::is_same_v<ScalarType, typename Internal::Traits<PacketType>::ScalarType>;
+        constexpr bool isSameScalar = std::is_same_v<ScalarType, typename Traits<PacketType>::ScalarType>;
         if constexpr (isSameScalar)
             packet.store(Base::data_ptr(index));
         else
@@ -140,7 +140,7 @@ namespace Physica::Core {
     template<class Derived>
     template<class PacketType>
     inline void ContinuousVector<Derived>::writePacketPartial(size_t index, size_t count, const PacketType packet) {
-        constexpr bool isSameScalar = std::is_same_v<ScalarType, typename Internal::Traits<PacketType>::ScalarType>;
+        constexpr bool isSameScalar = std::is_same_v<ScalarType, typename Traits<PacketType>::ScalarType>;
         if constexpr (isSameScalar)
             packet.store_partial(count, Base::data_ptr(index));
         else
@@ -306,8 +306,8 @@ namespace Physica::Core {
 
     template<class Derived, class OtherDerived>
     inline void operator+=(ContinuousVector<Derived>& v1, const RValueVector<OtherDerived>& v2) {
-        constexpr size_t Size1 = Internal::Traits<Derived>::SizeAtCompile;
-        constexpr size_t Size2 = Internal::Traits<OtherDerived>::SizeAtCompile;
+        constexpr size_t Size1 = Traits<Derived>::SizeAtCompile;
+        constexpr size_t Size2 = Traits<OtherDerived>::SizeAtCompile;
         static_assert(Size1 == Dynamic || Size2 == Dynamic || Size1 == Size2, "[Error]: Size mismatch between two vector");
         assert(v1.getLength() == v2.getLength());
         Internal::AddAssignImpl<Derived, OtherDerived, Internal::EnableSIMD<Derived, OtherDerived>::value>::run(v1, v2);

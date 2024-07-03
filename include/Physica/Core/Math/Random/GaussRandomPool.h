@@ -19,16 +19,9 @@
 #pragma once
 
 #include <random>
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/Vector.h"
+#include <Physica/Core/Math/Algebra/LinearAlgebra/Vector/Vector.h>
 
 namespace Physica::Core {
-    template<class ScalarType, class RandomPoolType> class GaussRandomPool;
-
-    namespace Internal {
-        template<class ScalarType, class RandomPoolType>
-        class Traits<GaussRandomPool<ScalarType, RandomPoolType>> : public Traits<RandomPoolType> {};
-    }
-
     template<class ScalarType, class RandomPoolType>
     class GaussRandomPool {
     public:
@@ -75,4 +68,9 @@ namespace Physica::Core {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         rands.swap(obj.rands);
     }
+}
+
+namespace Physica {
+    template<class ScalarType, class RandomPoolType>
+    class Traits<Core::GaussRandomPool<ScalarType, RandomPoolType>> : public Traits<RandomPoolType> {};
 }

@@ -22,16 +22,6 @@
 #include "Physica/Core/Math/Transform/FFT.h"
 
 namespace Physica::Core {
-    template<unsigned int Dim, unsigned int NumSite, bool UseInversionSymm> class KSpinRepr;
-
-    namespace Internal {
-        template<unsigned int Dim, unsigned int NumSite, bool UseInversionSymm>
-        class Traits<KSpinRepr<Dim, NumSite, UseInversionSymm>> : public SpinRepr<Dim, NumSite, UseInversionSymm> {
-        public:
-            constexpr static bool IsTransInvariant = true;
-        };
-    }
-
     template<unsigned int Dim, unsigned int NumSite, bool UseInversionSymm>
     class KSpinRepr : public ReprBasis<KSpinRepr<Dim, NumSite, UseInversionSymm>> {
         using This = KSpinRepr<Dim, NumSite, UseInversionSymm>;
@@ -119,4 +109,14 @@ namespace Physica::Core {
             return kIndex;
         return NumSite - kIndex;
     }
+}
+
+namespace Physica {
+    using namespace Core;
+
+    template<unsigned int Dim, unsigned int NumSite, bool UseInversionSymm>
+    class Traits<KSpinRepr<Dim, NumSite, UseInversionSymm>> : public SpinRepr<Dim, NumSite, UseInversionSymm> {
+    public:
+        constexpr static bool IsTransInvariant = true;
+    };
 }

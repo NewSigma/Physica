@@ -161,7 +161,7 @@ int main(int argc, char** argv) {
     axisY->setTitleText("g<sub>HH</sub>/Å<sup>-1</sup>");
     axisY->setLabelFormat("%d");
     {
-        const auto rdf = calcRDF<Dynamic>(32);
+        const auto rdf = calcRDF<Physica::Dynamic>(32);
         const VectorType dists = rdf.makeDists() * ScalarType(PhyConst<AU>::bohrToAngstorm(1));
         const VectorType rdfLine = rdf.makeRDF();
         auto& line = plot->line(dists, rdfLine);

@@ -18,8 +18,8 @@
  */
 #pragma once
 
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseSymmMatrix.h"
-#include "Physica/Core/Physics/MD/MDCell.h"
+#include <Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseSymmMatrix.h>
+#include <Physica/Core/Physics/MD/MDCell.h>
 
 namespace Physica::Core {
     template<class ScalarType, unsigned int Dim> class EmptyForceModel;
@@ -33,13 +33,6 @@ namespace Physica::Core {
         template<class ScalarType, unsigned int Dim>
         struct is_empty_force_model<EmptyForceModel<ScalarType, Dim>> {
             constexpr static bool value = true;
-        };
-
-        template<class ScalarType, unsigned int Dim>
-        class Traits<EmptyForceModel<ScalarType, Dim>> {
-        public:
-            constexpr static bool IsPeriodBoundary = true;
-            constexpr static bool IsContractable = false;
         };
     }
 
@@ -81,4 +74,13 @@ namespace Physica::Core {
     EmptyForceModel<ScalarType, Dim>::forceConst([[maybe_unused]] const MDCellType& cell) const {
         return ForceConstMatrix(cell.getDOF(), ScalarType(0));
     }
+}
+
+namespace Physica {
+    template<class ScalarType, unsigned int Dim>
+    class Traits<Core::EmptyForceModel<ScalarType, Dim>> {
+    public:
+        constexpr static bool IsPeriodBoundary = true;
+        constexpr static bool IsContractable = false;
+    };
 }

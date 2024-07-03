@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 WeiBo He.
+ * Copyright 2021-2024 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -19,24 +19,6 @@
 #pragma once
 
 namespace Physica::Core {
-    template<class MatrixType> class Cholesky;
-
-    namespace Internal {
-        template<class T> class Traits;
-
-        template<class MatrixType>
-        class Traits<Cholesky<MatrixType>> {
-        public:
-            using ScalarType = typename MatrixType::ScalarType;
-            constexpr static int Option = MatrixType::MatrixOption;
-            constexpr static size_t RowAtCompile = MatrixType::RowAtCompile;
-            constexpr static size_t ColumnAtCompile = MatrixType::ColumnAtCompile;
-            constexpr static size_t MaxRowAtCompile = MatrixType::MaxRowAtCompile;
-            constexpr static size_t MaxColumnAtCompile = MatrixType::MaxColumnAtCompile;
-            constexpr static size_t SizeAtCompile = MatrixType::SizeAtCompile;
-            constexpr static size_t MaxSizeAtCompile = MatrixType::MaxSizeAtCompile;
-        };
-    }
     /**
      * Decomposite a symmetrical, positive matrix A into LL^T.
      * If target matrix is a column matrix, return lower triangular matrix L, if row matrix, return upper triangular matrix L^T
@@ -101,4 +83,19 @@ namespace Physica::Core {
             }
         }
     }
+}
+
+namespace Physica {
+    template<class MatrixType>
+    class Traits<Cholesky<MatrixType>> {
+    public:
+        using ScalarType = typename MatrixType::ScalarType;
+        constexpr static int Option = MatrixType::MatrixOption;
+        constexpr static size_t RowAtCompile = MatrixType::RowAtCompile;
+        constexpr static size_t ColumnAtCompile = MatrixType::ColumnAtCompile;
+        constexpr static size_t MaxRowAtCompile = MatrixType::MaxRowAtCompile;
+        constexpr static size_t MaxColumnAtCompile = MatrixType::MaxColumnAtCompile;
+        constexpr static size_t SizeAtCompile = MatrixType::SizeAtCompile;
+        constexpr static size_t MaxSizeAtCompile = MatrixType::MaxSizeAtCompile;
+    };
 }

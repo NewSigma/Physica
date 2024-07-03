@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 WeiBo He.
+ * Copyright 2021-2024 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -20,13 +20,9 @@
 
 #include <cstdlib>
 #include <utility>
+#include "Physica/Macro.h"
 
 namespace Physica::Core {
-    namespace Internal {
-        template<class T>
-        class Traits;
-    }
-
     template<class Matrix>
     class LUDecomposition {
         const Matrix& matrix;
@@ -50,7 +46,7 @@ namespace Physica::Core {
     template<class Matrix>
     template<class MatrixOut>
     void LUDecomposition<Matrix>::decompositionColumn(MatrixOut& out, size_t column) {
-        using ScalarType = typename Internal::Traits<Matrix>::ScalarType;
+        using ScalarType = typename Traits<Matrix>::ScalarType;
         const auto startAlphaIndex = column + 1;
         for (size_t j = 1; j < startAlphaIndex; ++j) {
             ScalarType temp(out(j, column));

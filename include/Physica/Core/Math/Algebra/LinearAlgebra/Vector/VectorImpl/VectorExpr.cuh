@@ -19,10 +19,6 @@
 #pragma once
 
 namespace Physica::Core {
-    namespace Internal {
-        template<ExpressionType Type, class Exp1, class Exp2>
-        class Traits<Core::device_obj<VectorExpr<Type, Exp1, Exp2>>> : public Traits<VectorExpr<Type, Exp1, Exp2>> {};
-    }
     //////////////////////////////////////Add//////////////////////////////////////
     template<class VectorType1, class VectorType2>
     class device_obj<VectorExpr<ExpressionType::Add, VectorType1, VectorType2>>
@@ -328,4 +324,11 @@ namespace Physica::Core {
     inline auto exp(const device_obj<RValueVector<VectorType>>& v) noexcept {
         return device_obj<VectorExpr<ExpressionType::Exp, VectorType>>(v);
     }
+}
+
+namespace Physica {
+    using namespace Core;
+
+    template<ExpressionType Type, class Exp1, class Exp2>
+    class Traits<Core::device_obj<VectorExpr<Type, Exp1, Exp2>>> : public Traits<VectorExpr<Type, Exp1, Exp2>> {};
 }

@@ -22,18 +22,6 @@
 #include "Physica/Core/Math/NumberTheory/NumberTheory.h"
 
 namespace Physica::Core {
-    template<unsigned int Dim, unsigned int NumSite> class SpinFermion;
-
-    namespace Internal {
-        template<unsigned int I1, unsigned int I2>
-        class Traits<SpinFermion<I1, I2>> {
-        public:
-            constexpr static unsigned int Dim = I1;
-            constexpr static unsigned int NumSite = I2;
-            constexpr static unsigned int SiteDOF = 4;
-        };
-    }
-
     template<unsigned int Dim, unsigned int NumSite>
     class SpinFermion : public State<SpinFermion<Dim, NumSite>> {
         using This = SpinFermion<Dim, NumSite>;
@@ -86,6 +74,16 @@ namespace Physica::Core {
     inline std::ostream& operator<<(std::ostream& os, SpinFermion<Dim, NumSite> e) {
         return os << e.getSpinUp() << ' ' << e.getSpinDown();
     }
+}
+
+namespace Physica {
+    template<unsigned int I1, unsigned int I2>
+    class Traits<Core::SpinFermion<I1, I2>> {
+    public:
+        constexpr static unsigned int Dim = I1;
+        constexpr static unsigned int NumSite = I2;
+        constexpr static unsigned int SiteDOF = 4;
+    };
 }
 
 #include "StateImpl/SpinFermionImpl.h"

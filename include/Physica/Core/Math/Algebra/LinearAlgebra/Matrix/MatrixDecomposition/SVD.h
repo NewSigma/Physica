@@ -31,7 +31,7 @@ namespace Physica::Core {
      * References:
      * [1] Golub, GeneH. Matrix computations = 矩阵计算 / 4th edition[M]. 人民邮电出版社, 2014.488-492
      */
-    template<class ScalarType, size_t RowAtCompile = Utils::Dynamic, size_t ColumnAtCompile = Utils::Dynamic>
+    template<class ScalarType, size_t RowAtCompile = Dynamic, size_t ColumnAtCompile = Dynamic>
     class SVD : public Decouplable {
         using Base = Decouplable;
         using RealType = typename ScalarType::RealType;

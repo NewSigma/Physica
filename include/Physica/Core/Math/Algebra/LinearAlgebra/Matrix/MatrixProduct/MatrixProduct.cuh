@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 WeiBo He.
+ * Copyright 2023-2024 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -21,16 +21,6 @@
 #include "MatrixProduct.h"
 
 namespace Physica::Core {
-    namespace Internal {
-        template<class VectorType, class MatrixType>
-        class Traits<Core::device_obj<VectorMatrixProduct<VectorType, MatrixType>>>
-                : public Traits<VectorMatrixProduct<VectorType, MatrixType>> {};
-
-        template<class MatrixType, class VectorType>
-        class Traits<Core::device_obj<MatrixVectorProduct<MatrixType, VectorType>>>
-                : public Traits<MatrixVectorProduct<MatrixType, VectorType>> {};
-    }
-
     template<class VectorType, class MatrixType>
     class device_obj<VectorMatrixProduct<VectorType, MatrixType>>
             : public device_obj<RValueMatrix<VectorMatrixProduct<VectorType, MatrixType>>> {
@@ -105,4 +95,14 @@ namespace Physica::Core {
         assert(mat.getColumn() == vec.getLength());
         return {mat.getDerived(), vec.getDerived()};
     }
+}
+
+namespace Physica {
+    template<class VectorType, class MatrixType>
+    class Traits<Core::device_obj<VectorMatrixProduct<VectorType, MatrixType>>>
+            : public Traits<VectorMatrixProduct<VectorType, MatrixType>> {};
+
+    template<class MatrixType, class VectorType>
+    class Traits<Core::device_obj<MatrixVectorProduct<MatrixType, VectorType>>>
+            : public Traits<MatrixVectorProduct<MatrixType, VectorType>> {};
 }

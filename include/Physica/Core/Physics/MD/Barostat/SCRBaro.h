@@ -22,15 +22,6 @@
 #include "Physica/Core/Math/Calculus/ODE/SRK2.h"
 
 namespace Physica::Core {
-    template<class ScalarType, size_t NumReplica, class RandomPoolType, BaroType Type> class SCRBaro;
-
-    namespace Internal {
-        template<class ScalarType, size_t NumReplica, class RandomPoolType, BaroType Type>
-        class Traits<SCRBaro<ScalarType, NumReplica, RandomPoolType, Type>> {
-        public:
-            constexpr static unsigned int Order = 1;
-        };
-    }
     /**
      * Stochastic cell rescaling(SCR) barostat as introduced in [1], its anisotropic version as introduced in [2]
      * 
@@ -121,4 +112,12 @@ namespace Physica::Core {
         }
         return result;
     }
+}
+
+namespace Physica {
+    template<class ScalarType, size_t NumReplica, class RandomPoolType, BaroType Type>
+    class Traits<Core::SCRBaro<ScalarType, NumReplica, RandomPoolType, Type>> {
+    public:
+        constexpr static unsigned int Order = 1;
+    };
 }

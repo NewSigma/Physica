@@ -22,23 +22,6 @@
 #include "MatrixImpl/RValueMatrix.h"
 
 namespace Physica::Core {
-    template<class MatrixType> class BlockMatrix;
-
-    namespace Internal {
-        template<class MatrixType>
-        class Traits<BlockMatrix<MatrixType>> {
-        public:
-            using ScalarType = typename MatrixType::ScalarType;
-            constexpr static int Option = MatrixType::Option;
-            constexpr static size_t RowAtCompile = Dynamic;
-            constexpr static size_t ColumnAtCompile = Dynamic;
-            constexpr static size_t MaxRowAtCompile = Dynamic;
-            constexpr static size_t MaxColumnAtCompile = Dynamic;
-            constexpr static size_t SizeAtCompile = RowAtCompile * ColumnAtCompile;
-            constexpr static size_t MaxSizeAtCompile = MaxRowAtCompile * MaxColumnAtCompile;
-        };
-    }
-
     template<class MatrixType>
     class BlockMatrix : public RValueMatrix<BlockMatrix<MatrixType>> {
         using This = BlockMatrix<MatrixType>;
@@ -114,6 +97,21 @@ namespace Physica::Core {
         }
         Utils::unreachable();
     }
+}
+
+namespace Physica {
+    template<class MatrixType>
+    class Traits<Core::BlockMatrix<MatrixType>> {
+    public:
+        using ScalarType = typename MatrixType::ScalarType;
+        constexpr static int Option = MatrixType::Option;
+        constexpr static size_t RowAtCompile = Dynamic;
+        constexpr static size_t ColumnAtCompile = Dynamic;
+        constexpr static size_t MaxRowAtCompile = Dynamic;
+        constexpr static size_t MaxColumnAtCompile = Dynamic;
+        constexpr static size_t SizeAtCompile = RowAtCompile * ColumnAtCompile;
+        constexpr static size_t MaxSizeAtCompile = MaxRowAtCompile * MaxColumnAtCompile;
+    };
 }
 
 #include "BlockMatrixImpl/MatrixVectorProduct.h"

@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2023 WeiBo He.
+ * Copyright 2021-2024 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -18,28 +18,13 @@
  */
 #pragma once
 
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/HouseholderSequence.h"
+#include <Physica/Core/Math/Algebra/LinearAlgebra/Matrix/HouseholderSequence.h>
 
 namespace Physica::Core {
     template<class ScalarType, size_t Order> class HessenburgMatrixH;
-
-    namespace Internal {
-        template<class T, size_t Order>
-        class Traits<HessenburgMatrixH<T, Order>> {
-        public:
-            using ScalarType = T;
-            constexpr static int Option = MatrixOption::Column | (Order == Dynamic ? MatrixOption::Vector : MatrixOption::Element);
-            constexpr static size_t RowAtCompile = Order;
-            constexpr static size_t ColumnAtCompile = Order;
-            constexpr static size_t MaxRowAtCompile = Order;
-            constexpr static size_t MaxColumnAtCompile = Order;
-            constexpr static size_t SizeAtCompile = RowAtCompile * ColumnAtCompile;
-            constexpr static size_t MaxSizeAtCompile = MaxRowAtCompile * MaxColumnAtCompile;
-        };
-    }
     /**
      * Decomposite matrix A like A = QHQ^H
-     * 
+     *
      * References:
      * [1] Golub, GeneH. Matrix computations = 矩阵计算 / 4th edition[M]. 人民邮电出版社, 2014.
      * [2] Eigen https://eigen.tuxfamily.org/
@@ -52,7 +37,7 @@ namespace Physica::Core {
         using MatrixH = HessenburgMatrixH<ScalarType, Order>;
         using HouseholderNorm = Vector<ScalarType, NormVectorLength, NormVectorLength>;
     public:
-        using WorkingMatrix = DenseMatrix<ScalarType, Internal::Traits<MatrixH>::Option, Order, Order>;
+        using WorkingMatrix = DenseMatrix<ScalarType, Traits<MatrixH>::Option, Order, Order>;
     private:
         WorkingMatrix working;
         HouseholderNorm normVector;
@@ -146,4 +131,21 @@ namespace Physica::Core {
         auto copy = target.rightCols(i);
         copy = hess.working.rightCols(i);
     }
+}
+
+namespace Physica {
+    using namespace Core;
+
+    template<class T, size_t Order>
+    class Traits<HessenburgMatrixH<T, Order>> {
+    public:
+        using ScalarType = T;
+        constexpr static int Option = MatrixOption::Column | (Order == Dynamic ? MatrixOption::Vector : MatrixOption::Element);
+        constexpr static size_t RowAtCompile = Order;
+        constexpr static size_t ColumnAtCompile = Order;
+        constexpr static size_t MaxRowAtCompile = Order;
+        constexpr static size_t MaxColumnAtCompile = Order;
+        constexpr static size_t SizeAtCompile = RowAtCompile * ColumnAtCompile;
+        constexpr static size_t MaxSizeAtCompile = MaxRowAtCompile * MaxColumnAtCompile;
+    };
 }

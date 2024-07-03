@@ -42,7 +42,7 @@ int main() {
     }
     /* ContinuousMatrixBlock<Derived, 1, 1> */ {
         using ScalarType = Scalar<Double>;
-        DenseMatrix<ScalarType, MatrixOption::Column | MatrixOption::Vector, Dynamic, 1> mat(2, 1);
+        DenseMatrix<ScalarType, MatrixOption::Column | MatrixOption::Vector, Physica::Dynamic, 1> mat(2, 1);
         mat(0, 0) = 1.0;
         mat(1, 0) = 2.0;
         if (mat.row(1)[0] != ScalarType(2))

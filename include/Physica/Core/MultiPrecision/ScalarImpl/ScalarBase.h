@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 WeiBo He.
+ * Copyright 2023-2024 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -37,24 +37,20 @@ namespace Physica::Core {
         constexpr static bool value = true;
     };
 
-    namespace Internal {
-        template<class T> class Traits;
-    }
-
     template<class Derived>
     class ScalarBase : public Utils::CRTPBase<Derived> {
     public:
-        using ScalarType = typename Internal::Traits<Derived>::ScalarType;
-        using TrivialType = typename Internal::Traits<Derived>::TrivialType;
-        using RealType = typename Internal::Traits<Derived>::RealType;
-        using ComplexType = typename Internal::Traits<Derived>::ComplexType;
-        using PlainScalar = typename Internal::Traits<Derived>::PlainScalar;
-        constexpr static ScalarOption Option = Internal::Traits<Derived>::Option;
-        constexpr static bool isComplex = Internal::Traits<Derived>::isComplex;
-        constexpr static bool isDifferentiable = Internal::Traits<Derived>::isDifferentiable;
-        constexpr static bool isForwardDiff = Internal::Traits<Derived>::isForwardDiff;
-        constexpr static bool isReverseDiff = Internal::Traits<Derived>::isReverseDiff;
-        constexpr static unsigned int Order = Internal::Traits<Derived>::Order;
+        using ScalarType = typename Traits<Derived>::ScalarType;
+        using TrivialType = typename Traits<Derived>::TrivialType;
+        using RealType = typename Traits<Derived>::RealType;
+        using ComplexType = typename Traits<Derived>::ComplexType;
+        using PlainScalar = typename Traits<Derived>::PlainScalar;
+        constexpr static ScalarOption Option = Traits<Derived>::Option;
+        constexpr static bool isComplex = Traits<Derived>::isComplex;
+        constexpr static bool isDifferentiable = Traits<Derived>::isDifferentiable;
+        constexpr static bool isForwardDiff = Traits<Derived>::isForwardDiff;
+        constexpr static bool isReverseDiff = Traits<Derived>::isReverseDiff;
+        constexpr static unsigned int Order = Traits<Derived>::Order;
     private:
         constexpr static bool isConsistent1 = isDifferentiable && (isForwardDiff != isReverseDiff) && (Order > 0);
         constexpr static bool isConsistent2 = !isDifferentiable && !isForwardDiff && !isReverseDiff && (Order == 0);

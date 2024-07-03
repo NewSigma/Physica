@@ -27,7 +27,7 @@ namespace Physica::Core {
     template<size_t Dim>
     class H5DataSet : public H5::DataSet {
         using Base = H5::DataSet;
-        constexpr static auto Dynamic = Physica::Utils::Dynamic;
+        constexpr static auto Dynamic = Physica::Dynamic;
     public:
         H5DataSet() = default;
         H5DataSet(const H5::DataSet& obj);

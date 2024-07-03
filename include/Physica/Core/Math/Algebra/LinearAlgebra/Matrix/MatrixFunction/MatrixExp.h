@@ -21,16 +21,6 @@
 #include <Physica/Core/Math/Algebra/LinearAlgebra/Matrix/MatrixImpl/RValueMatrix.h>
 
 namespace Physica::Core {
-    template<class MatrixType> class MatrixExp;
-
-    namespace Internal {
-        template<class MatrixType>
-        class Traits<MatrixExp<MatrixType>> : public Traits<MatrixType> {
-        public:
-            constexpr static int Option = MatrixOption::AnyMajor | MatrixOption::AnyStorage;
-        };
-    }
-
     template<class MatrixType>
     class MatrixExp : public RValueMatrix<MatrixExp<MatrixType>> {
         using This = MatrixExp<MatrixType>;
@@ -64,6 +54,16 @@ namespace Physica::Core {
     [[nodiscard]] inline MatrixExp<MatrixType> exp(const RValueMatrix<MatrixType>& m) noexcept {
         return MatrixExp<MatrixType>(m);
     }
+}
+
+namespace Physica {
+    using namespace Core;
+
+    template<class MatrixType>
+    class Traits<MatrixExp<MatrixType>> : public Traits<MatrixType> {
+    public:
+        constexpr static int Option = MatrixOption::AnyMajor | MatrixOption::AnyStorage;
+    };
 }
 
 #include "MatrixExpVecProduct.h"

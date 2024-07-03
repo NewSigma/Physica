@@ -19,56 +19,7 @@
 #pragma once
 
 namespace Physica::Core {
-    template<class Derived> class ContinuousMatrix;
-    template<class MatrixType, size_t Length> class RowContinuousVector;
-    template<class MatrixType, size_t Length> class ColContinuousVector;
     template<class MatrixType, size_t Row = Dynamic, size_t Column = Dynamic> class ContinuousMatrixBlock;
-
-    namespace Internal {
-        template<class MatrixType, size_t Length>
-        class Traits<RowContinuousVector<MatrixType, Length>> {
-        public:
-            using ScalarType = typename MatrixType::ScalarType;
-            constexpr static size_t SizeAtCompile = Length;
-            constexpr static size_t MaxSizeAtCompile = Length;
-
-            using PacketType = typename Internal::BestPacket<ScalarType, SizeAtCompile>::Type;
-            constexpr static bool FastAssign = false;
-        };
-
-        template<class MatrixType, size_t Length>
-        class Traits<ColContinuousVector<MatrixType, Length>> {
-        public:
-            using ScalarType = typename MatrixType::ScalarType;
-            constexpr static size_t SizeAtCompile = Length;
-            constexpr static size_t MaxSizeAtCompile = Length;
-
-            using PacketType = typename Internal::BestPacket<ScalarType, SizeAtCompile>::Type;
-            constexpr static bool FastAssign = false;
-        };
-
-        template<class MatrixType, size_t Row, size_t Column>
-        class Traits<ContinuousMatrixBlock<MatrixType, Row, Column>> {
-            constexpr static bool isElementMatrix = MatrixOption::isElementMatrix<MatrixType>();
-            constexpr static bool isRowMatrix = MatrixOption::isRowMatrix<MatrixType>();
-            constexpr static bool isColMatrix = MatrixOption::isColumnMatrix<MatrixType>();
-            using RowVectorType = typename std::conditional<
-                    isRowMatrix, RowContinuousVector<MatrixType, Column>, RowLVector<MatrixType>>::type;
-            using ColVectorType = typename std::conditional<
-                    isColMatrix, ColContinuousVector<MatrixType, Row>, ColLVector<MatrixType>>::type;
-        public:
-            using ScalarType = typename MatrixType::ScalarType;
-            constexpr static int Option = MatrixType::Option;
-            constexpr static size_t RowAtCompile = Row;
-            constexpr static size_t ColumnAtCompile = Column;
-            constexpr static size_t MaxRowAtCompile = Row;
-            constexpr static size_t MaxColumnAtCompile = Column;
-            constexpr static size_t SizeAtCompile = Row * Column;
-            constexpr static size_t MaxSizeAtCompile = SizeAtCompile;
-            using PacketType = typename Internal::BestPacket<ScalarType, SizeAtCompile>::Type;
-            using VectorBase = typename std::conditional<Column == 1, ColVectorType, RowVectorType>::type;
-        };
-    }
 
     template<class MatrixType, size_t Length>
     class RowContinuousVector : public ContinuousVector<RowContinuousVector<MatrixType, Length>> {
@@ -149,12 +100,12 @@ namespace Physica::Core {
     template<class MatrixType, size_t Column>
     class ContinuousMatrixBlock<MatrixType, 1, Column>
             : public LValueMatrix<ContinuousMatrixBlock<MatrixType, 1, Column>>
-            , public Internal::Traits<ContinuousMatrixBlock<MatrixType, 1, Column>>::VectorBase {
+            , public Traits<ContinuousMatrixBlock<MatrixType, 1, Column>>::VectorBase {
         using This = ContinuousMatrixBlock<MatrixType, 1, Column>;
     public:
         using Base = LValueMatrix<This>;
         using Base::isComplex;
-        using VectorBase = typename Internal::Traits<This>::VectorBase;
+        using VectorBase = typename Traits<This>::VectorBase;
         using ScalarType = typename MatrixType::ScalarType;
     public:
         ContinuousMatrixBlock(ContinuousMatrix<MatrixType>& mat_, size_t fromRow_, [[maybe_unused]] size_t rowCount_, size_t fromCol_, size_t colCount_)
@@ -211,12 +162,12 @@ namespace Physica::Core {
     template<class MatrixType, size_t Row>
     class ContinuousMatrixBlock<MatrixType, Row, 1>
             : public LValueMatrix<ContinuousMatrixBlock<MatrixType, Row, 1>>
-            , public Internal::Traits<ContinuousMatrixBlock<MatrixType, Row, 1>>::VectorBase {
+            , public Traits<ContinuousMatrixBlock<MatrixType, Row, 1>>::VectorBase {
         using This = ContinuousMatrixBlock<MatrixType, Row, 1>;
     public:
         using Base = LValueMatrix<This>;
         using Base::isComplex;
-        using VectorBase = typename Internal::Traits<This>::VectorBase;
+        using VectorBase = typename Traits<This>::VectorBase;
         using ScalarType = typename MatrixType::ScalarType;
     public:
         ContinuousMatrixBlock(ContinuousMatrix<MatrixType>& mat_, size_t fromRow_, size_t rowCount_, size_t fromCol_, [[maybe_unused]] size_t colCount_)
@@ -274,12 +225,12 @@ namespace Physica::Core {
     template<class MatrixType>
     class ContinuousMatrixBlock<MatrixType, 1, 1>
             : public LValueMatrix<ContinuousMatrixBlock<MatrixType, 1, 1>>
-            , public Internal::Traits<ContinuousMatrixBlock<MatrixType, 1, 1>>::VectorBase {
+            , public Traits<ContinuousMatrixBlock<MatrixType, 1, 1>>::VectorBase {
         using This = ContinuousMatrixBlock<MatrixType, 1, 1>;
     public:
         using Base = LValueMatrix<This>;
         using Base::isComplex;
-        using VectorBase = typename Internal::Traits<This>::VectorBase;
+        using VectorBase = typename Traits<This>::VectorBase;
         using ScalarType = typename MatrixType::ScalarType;
     public:
         ContinuousMatrixBlock(ContinuousMatrix<MatrixType>& mat_, size_t fromRow_, size_t rowCount_, size_t col_)
@@ -382,4 +333,52 @@ namespace Physica::Core {
         assert(col < colCount);
         return mat.data_ptr(row + fromRow, col + fromCol);
     }
+}
+
+namespace Physica {
+    using namespace Core;
+
+    template<class MatrixType, size_t Length>
+    class Traits<RowContinuousVector<MatrixType, Length>> {
+    public:
+        using ScalarType = typename MatrixType::ScalarType;
+        constexpr static size_t SizeAtCompile = Length;
+        constexpr static size_t MaxSizeAtCompile = Length;
+
+        using PacketType = typename Core::Internal::BestPacket<ScalarType, SizeAtCompile>::Type;
+        constexpr static bool FastAssign = false;
+    };
+
+    template<class MatrixType, size_t Length>
+    class Traits<ColContinuousVector<MatrixType, Length>> {
+    public:
+        using ScalarType = typename MatrixType::ScalarType;
+        constexpr static size_t SizeAtCompile = Length;
+        constexpr static size_t MaxSizeAtCompile = Length;
+
+        using PacketType = typename Core::Internal::BestPacket<ScalarType, SizeAtCompile>::Type;
+        constexpr static bool FastAssign = false;
+    };
+
+    template<class MatrixType, size_t Row, size_t Column>
+    class Traits<ContinuousMatrixBlock<MatrixType, Row, Column>> {
+        constexpr static bool isElementMatrix = MatrixOption::isElementMatrix<MatrixType>();
+        constexpr static bool isRowMatrix = MatrixOption::isRowMatrix<MatrixType>();
+        constexpr static bool isColMatrix = MatrixOption::isColumnMatrix<MatrixType>();
+        using RowVectorType = typename std::conditional<
+                isRowMatrix, RowContinuousVector<MatrixType, Column>, RowLVector<MatrixType>>::type;
+        using ColVectorType = typename std::conditional<
+                isColMatrix, ColContinuousVector<MatrixType, Row>, ColLVector<MatrixType>>::type;
+    public:
+        using ScalarType = typename MatrixType::ScalarType;
+        constexpr static int Option = MatrixType::Option;
+        constexpr static size_t RowAtCompile = Row;
+        constexpr static size_t ColumnAtCompile = Column;
+        constexpr static size_t MaxRowAtCompile = Row;
+        constexpr static size_t MaxColumnAtCompile = Column;
+        constexpr static size_t SizeAtCompile = Row * Column;
+        constexpr static size_t MaxSizeAtCompile = SizeAtCompile;
+        using PacketType = typename Core::Internal::BestPacket<ScalarType, SizeAtCompile>::Type;
+        using VectorBase = typename std::conditional<Column == 1, ColVectorType, RowVectorType>::type;
+    };
 }

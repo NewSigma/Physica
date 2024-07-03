@@ -27,17 +27,6 @@
 #include "Physica/Utils/Unix/UnixHelper.h"
 
 namespace Physica::Core {
-    template<class ScalarType> class VASPModel;
-
-    namespace Internal {
-        template<class ScalarType>
-        class Traits<VASPModel<ScalarType>> {
-        public:
-            constexpr static bool IsPeriodBoundary = true;
-            constexpr static bool IsContractable = false;
-        };
-    }
-
     template<class ScalarType>
     class VASPModel {
         using MDCellType = MDCell<ScalarType>;
@@ -178,4 +167,13 @@ namespace Physica::Core {
             _exit(EXIT_FAILURE);
         });
     }
+}
+
+namespace Physica {
+    template<class ScalarType>
+    class Traits<Core::VASPModel<ScalarType>> {
+    public:
+        constexpr static bool IsPeriodBoundary = true;
+        constexpr static bool IsContractable = false;
+    };
 }

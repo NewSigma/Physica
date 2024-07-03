@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 WeiBo He.
+ * Copyright 2023-2024 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -27,15 +27,14 @@ namespace Physica::Core {
             , public FFTKSpace<FFT<Differentiable<PlainScalar, Mode, 1>, 1>, 1> {
         using ScalarType = Differentiable<PlainScalar, Mode, 1>;
         using This = FFT<ScalarType, 1>;
-        using Traits = Internal::Traits<This>;
-        using RealType = typename Traits::RealType;
-        using ComplexType = typename Traits::ComplexType;
+        using RealType = typename Traits<This>::RealType;
+        using ComplexType = typename Traits<This>::ComplexType;
         using RSpaceType = FFTRSpace<This, 1>;
         using KSpaceType = FFTKSpace<This, 1>;
     private:
         using PlainRealType = typename PlainScalar::RealType;
         using PlainComplexType = typename PlainScalar::ComplexType;
-        constexpr static bool isComplex = Traits::isComplex;
+        constexpr static bool isComplex = Traits<This>::isComplex;
         using FFTType = FFT<typename std::conditional<isComplex, PlainComplexType, PlainRealType>::type, 1>;
 
         FFTType fft_impl;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 WeiBo He.
+ * Copyright 2023-2024 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -21,13 +21,6 @@
 #include "RValueFlatten.h"
 
 namespace Physica::Core {
-    namespace Internal {
-        template<class T> class Traits;
-
-        template<class MatrixType>
-        class Traits<Core::device_obj<RValueFlatten<MatrixType>>> : public Traits<RValueFlatten<MatrixType>> {};
-    }
-
     template<class MatrixType>
     class device_obj<RValueFlatten<MatrixType>> : public device_obj<RValueVector<RValueFlatten<MatrixType>>> {
         const device_obj<MatrixType>& mat;
@@ -48,4 +41,11 @@ namespace Physica::Core {
         const size_t minor = index % mat.getMaxMinor();
         return mat.calcFromMajorMinor(major, minor);
     }
+}
+
+namespace Physica {
+    using namespace Core;
+
+    template<class MatrixType>
+    class Traits<Core::device_obj<RValueFlatten<MatrixType>>> : public Traits<RValueFlatten<MatrixType>> {};
 }

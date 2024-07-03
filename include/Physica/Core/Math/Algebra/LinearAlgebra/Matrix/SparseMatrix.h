@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 WeiBo He.
+ * Copyright 2022-2024 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -23,24 +23,6 @@
 
 namespace Physica::Core {
     template<class ScalarType, int Option = MatrixOption::Row | MatrixOption::Element>
-    class SparseMatrix;
-
-    namespace Internal {
-        template<class T, int Op>
-        class Traits<SparseMatrix<T, Op>> {
-        public:
-            using ScalarType = T;
-            constexpr static int Option = Op;
-            constexpr static size_t RowAtCompile = Utils::Dynamic;
-            constexpr static size_t ColumnAtCompile = Utils::Dynamic;
-            constexpr static size_t MaxRowAtCompile = Utils::Dynamic;
-            constexpr static size_t MaxColumnAtCompile = Utils::Dynamic;
-            constexpr static size_t SizeAtCompile = Utils::Dynamic;
-            constexpr static size_t MaxSizeAtCompile = Utils::Dynamic;
-        };
-    }
-
-    template<class ScalarType, int Option>
     class SparseMatrix : public RValueMatrix<SparseMatrix<ScalarType, Option>> {
         using This = SparseMatrix<ScalarType, Option>;
         using Base = RValueMatrix<This>;
@@ -87,7 +69,7 @@ namespace Physica::Core {
 
     template<class ScalarType, int Option>
     void SparseMatrix<ScalarType, Option>::insert(ScalarType x, size_t row, size_t col) {
-        //TODO: Inserting 0 element is useless
+        // TODO: Inserting 0 element is useless
         assert(row < getRow());
         assert(col < getColumn());
         const size_t major = MatrixOption::selectMajor<This>(row, col);
@@ -168,6 +150,21 @@ namespace Physica::Core {
     inline size_t SparseMatrix<ScalarType, Option>::getMaxMinor() const noexcept {
         return maxMinor;
     }
+}
+
+namespace Physica {
+    template<class T, int Op>
+    class Traits<Core::SparseMatrix<T, Op>> {
+    public:
+        using ScalarType = T;
+        constexpr static int Option = Op;
+        constexpr static size_t RowAtCompile = Dynamic;
+        constexpr static size_t ColumnAtCompile = Dynamic;
+        constexpr static size_t MaxRowAtCompile = Dynamic;
+        constexpr static size_t MaxColumnAtCompile = Dynamic;
+        constexpr static size_t SizeAtCompile = Dynamic;
+        constexpr static size_t MaxSizeAtCompile = Dynamic;
+    };
 }
 
 #include "MatrixProduct/SparseMatrixProduct.h"

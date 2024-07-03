@@ -24,11 +24,12 @@
 #include "Physica/Core/Parallel/Executor/CudaExecutor.cuh"
 
 using namespace Physica::Core;
+using Physica::Dynamic;
 using ScalarType = Scalar<Float>;
 using ForceModel = device_obj<SilveraGoldman<ScalarType, true>>;
 using KineticModel = FreeModel<ScalarType, 3, Dynamic, RPMDIntegrator::Exact>;
 using ThermoType = DoubleThermo<KineticModel>;
-using MDType = RPMD<ScalarType, 3, Physica::Utils::Dynamic, Physica::Utils::PageLockedAllocator<ScalarType>>;
+using MDType = RPMD<ScalarType, 3, Physica::Dynamic, Physica::Utils::PageLockedAllocator<ScalarType>>;
 using RandomGenerator = std::mt19937;
 using RandomPoolType = RandomPool<RandomGenerator, 3438603950906262893>;
 constexpr size_t numReplica = 24;

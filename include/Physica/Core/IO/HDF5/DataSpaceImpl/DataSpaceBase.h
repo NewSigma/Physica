@@ -21,15 +21,11 @@
 #include "Physica/Utils/Template/CRTPBase.h"
 
 namespace Physica::Core {
-    namespace Internal {
-        template<class T> class Traits;
-    }
-
     template<class Derived>
     class DataSpaceBase : public Utils::CRTPBase<Derived> {
         using Base = Utils::CRTPBase<Derived>;
     public:
-        constexpr static size_t Dim = Internal::Traits<Derived>::Dim;
+        constexpr static size_t Dim = Traits<Derived>::Dim;
         using SizeArray = Utils::Array<hsize_t, Dim>;
     public:
         /* Operations */

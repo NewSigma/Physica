@@ -60,8 +60,8 @@ namespace Physica::Core {
     template<class VectorType1, class VectorType2>
     template<class OtherDerived, class Executor>
     inline void VectorExpr<ExpressionType::Sub, VectorType1, VectorType2>::assignTo(LValueVector<OtherDerived>& v_) const {
-        constexpr bool FastAssign1 = Internal::Traits<VectorType1>::FastAssign;
-        constexpr bool FastAssign2 = Internal::Traits<VectorType2>::FastAssign;
+        constexpr bool FastAssign1 = Traits<VectorType1>::FastAssign;
+        constexpr bool FastAssign2 = Traits<VectorType2>::FastAssign;
         auto& v = v_.getDerived();
         if constexpr (FastAssign1) {
             if constexpr (FastAssign2) {

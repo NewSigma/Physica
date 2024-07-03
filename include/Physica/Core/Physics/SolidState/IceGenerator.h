@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2023 WeiBo He.
+ * Copyright 2022-2024 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -19,8 +19,7 @@
 #pragma once
 
 #include <algorithm>
-#include "Physica/Core/Physics/MD/MDCell.h"
-#include "Physica/Utils/TestHelper.h"
+#include <Physica/Core/Physics/MD/MDCell.h>
 
 namespace Physica::Core {
     /**

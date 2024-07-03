@@ -21,11 +21,6 @@
 #include "MatrixExpr.h"
 
 namespace Physica::Core {
-    namespace Internal {
-        template<ExpressionType type, class T1, class T2, class ResultType>
-        class Traits<Core::device_obj<MatrixExpr<type, T1, T2, ResultType>>>
-                : public Traits<MatrixExpr<type, T1, T2, ResultType>> {};
-    }
     //////////////////////////////////////Add//////////////////////////////////////
     template<class MatrixType1, class MatrixType2>
     class device_obj<MatrixExpr<ExpressionType::Add, MatrixType1, MatrixType2>>
@@ -133,4 +128,12 @@ namespace Physica::Core {
     operator*(const device_obj<RValueMatrix<MatrixType>>& m, const ScalarBase<ScalarType>& s) noexcept {
         return {m, s};
     }
+}
+
+namespace Physica {
+    using namespace Core;
+
+    template <ExpressionType type, class T1, class T2, class ResultType>
+    class Traits<Core::device_obj<MatrixExpr<type, T1, T2, ResultType>>>
+        : public Traits<MatrixExpr<type, T1, T2, ResultType>> {};
 }

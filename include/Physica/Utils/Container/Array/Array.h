@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2023 WeiBo He.
+ * Copyright 2020-2024 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -25,37 +25,19 @@
 #include "Physica/Utils/CUDA/device_obj.cuh"
 
 namespace Physica::Utils {
-    constexpr size_t Dynamic = 0;
     template<class T> class PageLockedAllocator;
     /**
      * Linear storage container.
-     * This class is designed to be a dynamic or fixed array, in detail:
+     * \class Array is designed to be a dynamic or fixed array, in detail:
      * 1.A fixed length array.(same to std::array)
      * 2.A dynamic array but its max size is fixed.
      * 3.A dynamic array whose length and max size are dynamic.(same to std::vector)
      * Arrays can be casted to each other.
      *
      * Note:
-     * If \T is a complex type, \T must have its copy and move constructors defined.
-     *
-     * Optimize:
-     * 1. Use the end pointer of arr instead of length may improve performance.
+     * If \tparam T is a complex type, \tparam T must have its copy and move constructors defined.
      */
     template<class T, size_t Length = Dynamic, size_t Capacity = Length, class Allocator = HostAllocator<T>>
-    class Array;
-
-    namespace Internal {
-        template<class T, size_t Length, size_t Capacity, class Allocator>
-        class Traits<Array<T, Length, Capacity, Allocator>> {
-        public:
-            using ValueType = T;
-            constexpr static size_t ArrayLength = Length;
-            constexpr static size_t ArrayCapacity = Capacity;
-            using AllocatorType = Allocator;
-        };
-    }
-
-    template<class T, size_t Length, size_t Capacity, class Allocator>
     class Array : public Internal::ArrayBase<Array<T, Length, Capacity, Allocator>, Allocator> {
         static_assert(Length == Capacity, "[Error]: Capacity of fixed array must equals to Length.");
         static_assert(sizeof(T) * Length <= (1U << 16U), "[Warn]: Allocate large fixed array on stack is not recommanded");
@@ -215,6 +197,17 @@ namespace Physica::Utils {
         [[nodiscard]] __host__ __device__ size_t size() const noexcept { return length; }
         [[nodiscard]] __host__ __device__ size_t getLength() const noexcept { return length; }
         [[nodiscard]] __host__ __device__ size_t getCapacity() const noexcept { return capacity; }
+    };
+}
+
+namespace Physica {
+    template<class T, size_t Length, size_t Capacity, class Allocator>
+    class Traits<Utils::Array<T, Length, Capacity, Allocator>> {
+    public:
+        using ValueType = T;
+        constexpr static size_t ArrayLength = Length;
+        constexpr static size_t ArrayCapacity = Capacity;
+        using AllocatorType = Allocator;
     };
 }
 

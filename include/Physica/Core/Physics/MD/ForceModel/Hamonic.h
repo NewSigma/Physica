@@ -21,17 +21,6 @@
 #include "EmptyForceModel.h"
 
 namespace Physica::Core {
-    template<class ScalarType, unsigned int Dim> class Hamonic;
-
-    namespace Internal {
-        template<class ScalarType, unsigned int Dim>
-        class Traits<Hamonic<ScalarType, Dim>> {
-        public:
-            constexpr static bool IsPeriodBoundary = true;
-            constexpr static bool IsContractable = false;
-        };
-    }
-
     template<class ScalarType, unsigned int Dim>
     class Hamonic : private EmptyForceModel<ScalarType, Dim> {
         using Base = EmptyForceModel<ScalarType, Dim>;
@@ -147,4 +136,13 @@ namespace Physica::Core {
         sites.swap(obj.sites);
         springCoeffs.swap(obj.springCoeffs);
     }
+}
+
+namespace Physica {
+    template<class ScalarType, unsigned int Dim>
+    class Traits<Core::Hamonic<ScalarType, Dim>> {
+    public:
+        constexpr static bool IsPeriodBoundary = true;
+        constexpr static bool IsContractable = false;
+    };
 }

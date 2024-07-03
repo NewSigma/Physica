@@ -18,11 +18,10 @@
  */
 #pragma once
 
+#include <cassert>
 #include "Physica/Utils/Template/CRTPBase.h"
 
 namespace Physica::Core {
-    using Utils::Dynamic;
-
     template<class Derived, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn>
     class DenseMatrixDim {
     public:

@@ -18,22 +18,10 @@
  */
 #pragma once
 
+#include <Physica/Core/Parallel/ThreadPool.h>
 #include "RandomSeed.h"
-#include "Physica/Core/Parallel/ThreadPool.h"
 
 namespace Physica::Core {
-    template<class RandomGenerator, typename RandomGenerator::result_type FixedSeed = Physica::Utils::Dynamic>
-    class RandomPool;
-
-    namespace Internal {
-        template<class T> class Traits;
-
-        template<class RandomGenerator, typename RandomGenerator::result_type FixedSeed>
-        class Traits<RandomPool<RandomGenerator, FixedSeed>> {
-        public:
-            constexpr static bool IsSeedFixed = FixedSeed != Utils::Dynamic;
-        };
-    }
     /**
      * \class RandomPool Provides per-thread, reusable random generator support.
      * 
@@ -45,14 +33,13 @@ namespace Physica::Core {
      * Note:
      * If you use random numbers in a single thread code, construct a generator by hand is prefered.
      */
-    template<class RandomGenerator, typename RandomGenerator::result_type FixedSeed>
+    template<class RandomGenerator, typename RandomGenerator::result_type FixedSeed = Physica::Dynamic>
     class PHYSICA_API RandomPool {
         using This = RandomPool<RandomGenerator, FixedSeed>;
-        using TraitsType = Internal::Traits<This>;
     public:
         using SeedType = typename RandomGenerator::result_type;
         using GeneratorType = RandomGenerator;
-        constexpr static bool IsSeedFixed = TraitsType::IsSeedFixed;
+        constexpr static bool IsSeedFixed = Traits<This>::IsSeedFixed;
     private:
         RandomGenerator gen;
         SeedType seed;
@@ -97,4 +84,12 @@ namespace Physica::Core {
         thread_local static This instance{};
         return instance;
     }
+}
+
+namespace Physica {
+    template<class RandomGenerator, typename RandomGenerator::result_type FixedSeed>
+    class Traits<Core::RandomPool<RandomGenerator, FixedSeed>> {
+    public:
+        constexpr static bool IsSeedFixed = FixedSeed != Dynamic;
+    };
 }

@@ -47,16 +47,16 @@ namespace Physica::Core {
         using Base = Utils::CRTPBase<Derived>;
         using BlockType = RMatrixBlock<Derived>;
     public:
-        using ScalarType = typename Internal::Traits<Derived>::ScalarType;
+        using ScalarType = typename Traits<Derived>::ScalarType;
         using PlainScalar = typename ScalarType::PlainScalar;
         using RealType = typename ScalarType::RealType;
-        constexpr static int Option = Internal::Traits<Derived>::Option;
-        constexpr static size_t RowAtCompile = Internal::Traits<Derived>::RowAtCompile;
-        constexpr static size_t ColumnAtCompile = Internal::Traits<Derived>::ColumnAtCompile;
-        constexpr static size_t MaxRowAtCompile = Internal::Traits<Derived>::MaxRowAtCompile;
-        constexpr static size_t MaxColumnAtCompile = Internal::Traits<Derived>::MaxColumnAtCompile;
-        constexpr static size_t SizeAtCompile = Internal::Traits<Derived>::SizeAtCompile;
-        constexpr static size_t MaxSizeAtCompile = Internal::Traits<Derived>::MaxSizeAtCompile;
+        constexpr static int Option = Traits<Derived>::Option;
+        constexpr static size_t RowAtCompile = Traits<Derived>::RowAtCompile;
+        constexpr static size_t ColumnAtCompile = Traits<Derived>::ColumnAtCompile;
+        constexpr static size_t MaxRowAtCompile = Traits<Derived>::MaxRowAtCompile;
+        constexpr static size_t MaxColumnAtCompile = Traits<Derived>::MaxColumnAtCompile;
+        constexpr static size_t SizeAtCompile = Traits<Derived>::SizeAtCompile;
+        constexpr static size_t MaxSizeAtCompile = Traits<Derived>::MaxSizeAtCompile;
         constexpr static bool isReverseDiff = ScalarType::isReverseDiff;
         constexpr static bool isComplex = ScalarType::isComplex;
 

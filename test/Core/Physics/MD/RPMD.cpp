@@ -27,7 +27,7 @@ using namespace Physica::Core;
 using RandomGenerator = std::mt19937;
 using RandomPoolType = RandomPool<RandomGenerator, 3438603950906262893>;
 using ScalarType = Scalar<Double>;
-using KineticModel = FreeModel<ScalarType, 3, Dynamic, RPMDIntegrator::Exact>;
+using KineticModel = FreeModel<ScalarType, 3, Physica::Dynamic, RPMDIntegrator::Exact>;
 constexpr size_t numReplica = 24;
 constexpr double temperatureT = PhyConst<AU>::kToTemperature(25);
 constexpr double thermostatTime = PhyConst<AU>::secondToTime(100 * 1E-15);

@@ -26,11 +26,12 @@ using namespace Physica;
 using namespace Physica::Core;
 using ScalarType = Scalar<Float>;
 using VectorType = Vector<ScalarType>;
+using DeviceVector = Core::device_obj<VectorType>;
 
 __global__ void test_kernel(
-        PlainStruct<device_obj<VectorType>> a,
-        PlainStruct<device_obj<VectorType>> b,
-        PlainStruct<device_obj<VectorType>> result,
+        PlainStruct<DeviceVector> a,
+        PlainStruct<DeviceVector> b,
+        PlainStruct<DeviceVector> result,
         ScalarType factor) {
     result.getDerived() = a.getDerived() + b.getDerived() * factor;
 }
@@ -39,7 +40,7 @@ int main() {
     const VectorType a{1, 2, 3, 4};
     auto d_a = a.toDevice();
     {
-        device_obj<VectorType> d_b(4);
+        DeviceVector d_b(4);
         d_b = d_a;
         StreamPool::getStream().wait();
         const VectorType b = d_b.toHost();
@@ -69,7 +70,7 @@ int main() {
         auto d_a = a.toDevice();
         auto d_b = b.toDevice();
         VectorType result(len);
-        device_obj<VectorType> d_result(len);
+        DeviceVector d_result(len);
         test_kernel<<<1, len, 0, StreamPool::getStream()>>>(asStruct(d_a), asStruct(d_b), asStruct(d_result), factor);
         d_result.toHostAsync(result);
         CudaExecutor::wait();

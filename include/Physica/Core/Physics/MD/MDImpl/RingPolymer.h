@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 WeiBo He.
+ * Copyright 2023-2024 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -316,7 +316,7 @@ namespace Physica::Core {
     template<class ScalarType, unsigned int Dim, size_t NumReplica>
     template<class KineticModel>
     ScalarType RingPolymer<ScalarType, Dim, NumReplica>::calcTemperature() const {
-        constexpr bool IsPeriodBoundary = Internal::Traits<KineticModel>::IsPeriodBoundary;
+        constexpr bool IsPeriodBoundary = Traits<KineticModel>::IsPeriodBoundary;
         constexpr size_t NumConstraint = IsPeriodBoundary ? 1 : 0;
         const auto factor1 = PlainScalar(2 / (Dim * PhyConst<AU>::boltzmannK));
         const auto factor2 = factor1 / PlainScalar((getNumParticle() * getNumReplica() - NumConstraint) * getNumReplica());

@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 WeiBo He.
+ * Copyright 2023-2024 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -21,21 +21,6 @@
 #include "Element.h"
 
 namespace Physica::Core {
-    template<class ScalarType> class CuboidLinear;
-
-    namespace Internal {
-        template<class T>
-        class Traits<CuboidLinear<T>> {
-        public:
-            constexpr static unsigned int Dim = 3;
-            constexpr static unsigned int Order = 1;
-            constexpr static unsigned int NumPoint = 8;
-            constexpr static unsigned int DegreeOfFreedom = NumPoint * Order;
-            using ScalarType = T;
-            using MatrixType = DenseMatrix<ScalarType, MatrixOption::Column | MatrixOption::Element, Dim, Dim>;
-        };
-    }
-
     template<class ScalarType>
     class CuboidLinear : public Element<CuboidLinear<ScalarType>> {
         using Base = Element<CuboidLinear<ScalarType>>;
@@ -218,4 +203,17 @@ namespace Physica::Core {
         }
         throw std::invalid_argument("[Error]: Invalid local node index");
     }
+}
+
+namespace Physica {
+    template<class T>
+    class Traits<Core::CuboidLinear<T>> {
+    public:
+        constexpr static unsigned int Dim = 3;
+        constexpr static unsigned int Order = 1;
+        constexpr static unsigned int NumPoint = 8;
+        constexpr static unsigned int DegreeOfFreedom = NumPoint * Order;
+        using ScalarType = T;
+        using MatrixType = Core::DenseMatrix<ScalarType, MatrixOption::Column | MatrixOption::Element, Dim, Dim>;
+    };
 }

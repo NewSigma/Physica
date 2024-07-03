@@ -24,20 +24,6 @@
 #include "PairModel.h"
 
 namespace Physica::Core {
-    template<class ScalarType, class EwaldType, bool AvoidTooNear> class BKSModel;
-
-    namespace Internal {
-        template<class T, class EwaldType, bool AvoidTooNear>
-        class Traits<BKSModel<T, EwaldType, AvoidTooNear>> {
-        public:
-            using ScalarType = T;
-            constexpr static bool IsPeriodBoundary = true;
-            constexpr static bool IsLatticeDependent = true;
-            constexpr static bool IsPotDependOnAtomIndex = true;
-            constexpr static bool IsSmallCell = Traits<EwaldType>::IsSmallCell;
-            constexpr static bool IsContractable = false;
-        };
-    }
     /**
      * BKS potential for SiO2 or Al-P-O, as introduced in [1]
      * 
@@ -49,7 +35,7 @@ namespace Physica::Core {
         using This = BKSModel<ScalarType, EwaldType, AvoidTooNear>;
         using Base = PairModel<This>;
         using AABModelType = AABModel<ScalarType>;
-        using REwaldType = typename Internal::Traits<EwaldType>::REwaldType;
+        using REwaldType = typename Traits<EwaldType>::REwaldType;
         using DoublePotType = typename std::conditional<AvoidTooNear, ScalarType, PlainStruct<void>>::type;
     public:
         using typename Base::PlainScalar;
@@ -185,7 +171,7 @@ namespace Physica::Core {
     template<class ScalarType, class EwaldType, bool AvoidTooNear>
     template<class VectorType, class Executor>
     void BKSModel<ScalarType, EwaldType, AvoidTooNear>::forceAsync(const MDCellType& cell, ContinuousVector<VectorType>& result) {
-        static_assert(!Internal::Traits<Executor>::isCudaEnabled, "[Error]: Cuda is not supported");
+        static_assert(!Traits<Executor>::isCudaEnabled, "[Error]: Cuda is not supported");
         assert(cell.getNumParticle() % 3 == 0);
         auto future = Executor::schedule([this, &cell, &result]() {
             result = force_short<Executor>(cell);
@@ -245,4 +231,17 @@ namespace Physica::Core {
     inline bool BKSModel<ScalarType, EwaldType, AvoidTooNear>::isCellOrdered(const MDCellType& cell) {
         return AABModelType::isCellOrdered(cell, 8, 14);
     }
+}
+
+namespace Physica {
+    template<class T, class EwaldType, bool AvoidTooNear>
+    class Traits<Core::BKSModel<T, EwaldType, AvoidTooNear>> {
+    public:
+        using ScalarType = T;
+        constexpr static bool IsPeriodBoundary = true;
+        constexpr static bool IsLatticeDependent = true;
+        constexpr static bool IsPotDependOnAtomIndex = true;
+        constexpr static bool IsSmallCell = Traits<EwaldType>::IsSmallCell;
+        constexpr static bool IsContractable = false;
+    };
 }

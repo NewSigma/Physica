@@ -18,38 +18,18 @@
  */
 #pragma once
 
-#include "Physica/Core/MultiPrecision/ScalarImpl/ExpressionType.h"
+#include <Physica/Core/MultiPrecision/ScalarImpl/ExpressionType.h>
 
 namespace Physica::Core {
     template<ExpressionType type, class T1, class T2 = T1> class GridExpression;
-
-    namespace Internal {
-        template<class T> class Traits;
-
-        template<ExpressionType type, class Exp1, class Exp2>
-        class Traits<GridExpression<type, Exp1, Exp2>> {
-            using ScalarType1 = typename Exp1::ScalarType;
-            using RealType = typename ScalarType1::RealType;
-            using BinaryScalarType = typename BinaryScalarOpReturnType<ScalarType1, typename Exp2::ScalarType>::Type;
-        public:
-            using ScalarType = typename std::conditional<type == ExpressionType::Abs, RealType, BinaryScalarType>::type;
-        };
-
-        template<ExpressionType type, class Exp, class AnyScalar>
-        class Traits<GridExpression<type, Exp, ScalarBase<AnyScalar>>> {
-            static_assert(is_scalar<AnyScalar>::value, "[Error]: This is not a scalar type");
-        public:
-            using ScalarType = typename BinaryScalarOpReturnType<typename Exp::ScalarType, AnyScalar>::Type;
-        };
-    }
     //////////////////////////////////////Add//////////////////////////////////////
     template<class GridType1, class GridType2>
     class GridExpression<ExpressionType::Add, GridType1, GridType2>
             : public RValueGrid<GridExpression<ExpressionType::Add, GridType1, GridType2>> {
         using Base = RValueGrid<GridExpression<ExpressionType::Add, GridType1, GridType2>>;
     public:
-        using typename Base::ScalarType;
         using typename Base::Index3D;
+        using typename Base::ScalarType;
     private:
         const GridType1& grid1;
         const GridType2& grid2;
@@ -71,8 +51,8 @@ namespace Physica::Core {
             : public RValueGrid<GridExpression<ExpressionType::Mul, GridType, ScalarBase<AnyScalar>>> {
         using Base = RValueGrid<GridExpression<ExpressionType::Mul, GridType, ScalarBase<AnyScalar>>>;
     public:
-        using typename Base::ScalarType;
         using typename Base::Index3D;
+        using typename Base::ScalarType;
     private:
         const GridType& grid;
         const AnyScalar& s;
@@ -91,8 +71,8 @@ namespace Physica::Core {
             : public RValueGrid<GridExpression<ExpressionType::Mul, GridType1, GridType2>> {
         using Base = RValueGrid<GridExpression<ExpressionType::Mul, GridType1, GridType2>>;
     public:
-        using typename Base::ScalarType;
         using typename Base::Index3D;
+        using typename Base::ScalarType;
     private:
         const GridType1& grid1;
         const GridType2& grid2;
@@ -133,4 +113,24 @@ namespace Physica::Core {
             const RValueGrid<GridType1>& g1, const RValueGrid<GridType2>& g2) {
         return GridExpression<ExpressionType::Mul, GridType1, GridType2>(g1.getDerived(), g2.getDerived());
     }
+}
+
+namespace Physica {
+    using namespace Core;
+
+    template<ExpressionType type, class Exp1, class Exp2>
+    class Traits<GridExpression<type, Exp1, Exp2>> {
+        using ScalarType1 = typename Exp1::ScalarType;
+        using RealType = typename ScalarType1::RealType;
+        using BinaryScalarType = typename Core::Internal::BinaryScalarOpReturnType<ScalarType1, typename Exp2::ScalarType>::Type;
+    public:
+        using ScalarType = typename std::conditional<type == ExpressionType::Abs, RealType, BinaryScalarType>::type;
+    };
+
+    template<ExpressionType type, class Exp, class AnyScalar>
+    class Traits<GridExpression<type, Exp, ScalarBase<AnyScalar>>> {
+        static_assert(is_scalar<AnyScalar>::value, "[Error]: This is not a scalar type");
+    public:
+        using ScalarType = typename Core::Internal::BinaryScalarOpReturnType<typename Exp::ScalarType, AnyScalar>::Type;
+    };
 }

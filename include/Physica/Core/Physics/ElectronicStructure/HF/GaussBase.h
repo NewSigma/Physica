@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 WeiBo He.
+ * Copyright 2021-2024 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -18,22 +18,11 @@
  */
 #pragma once
 
-#include "Physica/Core/MultiPrecision/Scalar.h"
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/Vector.h"
-#include "Physica/Core/Math/Calculus/SpetialFunctions.h"
+#include <Physica/Core/MultiPrecision/Scalar.h>
+#include <Physica/Core/Math/Algebra/LinearAlgebra/Vector/Vector.h>
+#include <Physica/Core/Math/Calculus/SpetialFunctions.h>
 
-namespace Physica::Core::Physics {
-    template<class ScalarType> class GaussBase;
-
-    namespace Internal {
-        template<class T> class Traits;
-
-        template<class T>
-        class Traits<GaussBase<T>> {
-        public:
-            using ScalarType = T;
-        };
-    }
+namespace Physica::Core {
     /**
      * Reference:
      * [1] Clementi E, Davis D R. Electronic structure of large molecular systems[J]. Journal of Computational Physics, 1966, 1(2):223-244.
@@ -113,7 +102,7 @@ namespace Physica::Core::Physics {
         [[nodiscard]] static ScalarType helper_f(size_t j, size_t l, size_t m, const ScalarType& a, const ScalarType& b);
         [[nodiscard]] static ScalarType helper_F(size_t v, const ScalarType& t);
 
-        friend class Test;
+        friend class Physica::Test;
     };
 
     template<class ScalarType>
@@ -446,4 +435,12 @@ namespace Physica::Core::Physics {
             return half / v1;
         return half * pow(t, -v1) * gamma(v1) * gammaP(v1, t);
     }
+}
+
+namespace Physica {
+    template<class T>
+    class Traits<Core::GaussBase<T>> {
+    public:
+        using ScalarType = T;
+    };
 }

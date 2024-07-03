@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2023 WeiBo He.
+ * Copyright 2022-2024 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -24,18 +24,7 @@
 #include "Physica/Core/Physics/PhyConst.h"
 
 namespace Physica::Core {
-    template<class ScalarType, unsigned int Dim = 3> class MDCell;
-
-    namespace Internal {
-        template<class T, unsigned int D>
-        class Traits<MDCell<T, D>> {
-        public:
-            using ScalarType = T;
-            constexpr static unsigned int Dim = D;
-        };
-    }
-
-    template<class ScalarType, unsigned int Dim>
+    template<class ScalarType, unsigned int Dim = 3>
     class MDCell : public PeriodicCell<ScalarType, Dim> {
     public:
         using Base = PeriodicCell<ScalarType, Dim>;
@@ -228,4 +217,13 @@ namespace Physica::Core {
         assert(value.isPositive() && "[Error]: Mass must be positive");
         massVec[atom] = value;
     }
+}
+
+namespace Physica {
+    template<class T, unsigned int D>
+    class Traits<Core::MDCell<T, D>> {
+    public:
+        using ScalarType = T;
+        constexpr static unsigned int Dim = D;
+    };
 }

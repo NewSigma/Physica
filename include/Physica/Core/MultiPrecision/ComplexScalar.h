@@ -24,25 +24,6 @@ namespace Physica::Core {
     template<class T> class ComplexScalar;
 
     namespace Internal {
-        template<class T>
-        class Traits<ComplexScalar<T>> {
-            static_assert(!T::isComplex, "[Error]: Double complex mark is not allowed");
-            static_assert(!T::isDifferentiable, "[Error]: Differentiable mark should locate in outsite");
-        public:
-            using ScalarType = ComplexScalar<T>;
-            using RealType = T;
-            using ComplexType = ComplexScalar<T>;
-            using TrivialType = typename T::TrivialType;
-            using PlainScalar = ScalarType;
-            constexpr static ScalarOption Option = Traits<T>::Option;
-            constexpr static bool errorTrack = Traits<T>::errorTrack;
-            constexpr static bool isComplex = true;
-            constexpr static bool isDifferentiable = false;
-            constexpr static bool isForwardDiff = false;
-            constexpr static bool isReverseDiff = false;
-            constexpr static unsigned int Order = 0;
-        };
-
         template<class AnyScalar1, class AnyScalar2>
         class BinaryScalarOpReturnType<ComplexScalar<AnyScalar1>, AnyScalar2> {
             static_assert(!AnyScalar1::isDifferentiable && !AnyScalar2::isDifferentiable, "[Error]: This class applies to plain scalar only");
@@ -191,6 +172,29 @@ namespace Physica::Core {
 
     template<class T, class ScalarType>
     void operator/=(ComplexScalar<T>& c, const ScalarType& t) { c = c / t; }
+}
+
+namespace Physica {
+    using namespace Core;
+
+    template<class T>
+    class Traits<ComplexScalar<T>> {
+        static_assert(!T::isComplex, "[Error]: Double complex mark is not allowed");
+        static_assert(!T::isDifferentiable, "[Error]: Differentiable mark should locate in outsite");
+    public:
+        using ScalarType = ComplexScalar<T>;
+        using RealType = T;
+        using ComplexType = ComplexScalar<T>;
+        using TrivialType = typename T::TrivialType;
+        using PlainScalar = ScalarType;
+        constexpr static ScalarOption Option = Traits<T>::Option;
+        constexpr static bool errorTrack = Traits<T>::errorTrack;
+        constexpr static bool isComplex = true;
+        constexpr static bool isDifferentiable = false;
+        constexpr static bool isForwardDiff = false;
+        constexpr static bool isReverseDiff = false;
+        constexpr static unsigned int Order = 0;
+    };
 }
 
 namespace std {

@@ -19,17 +19,6 @@
 #pragma once
 
 namespace Physica::Core {
-    template<class SpaceType, size_t Dim> class SubDataSpace;
-
-    namespace Internal {
-        template<class T, size_t S>
-        class Traits<SubDataSpace<T, S>> {
-        public:
-            constexpr static size_t Dim = S;
-            static_assert(Dim != Utils::Dynamic, "[Error]: Not implemented");
-        };
-    }
-
     template<class SpaceType, size_t Dim>
     class SubDataSpace : public DataSpaceBase<SubDataSpace<SpaceType, Dim>> {
         using This = SubDataSpace<SpaceType, Dim>;
@@ -59,7 +48,7 @@ namespace Physica::Core {
             : space(space_.getDerived())
             , fromDim(fromDim_)
             , toDim(toDim_) {
-        assert((Dim == Utils::Dynamic || (Dim == toDim - fromDim)) && "[Error]: Inconsistent between type and its param");
+        assert((Dim == Dynamic || (Dim == toDim - fromDim)) && "[Error]: Inconsistent between type and its param");
     }
 
     template<class SpaceType, size_t Dim>
@@ -77,9 +66,18 @@ namespace Physica::Core {
 
     template<class SpaceType, size_t Dim>
     inline size_t SubDataSpace<SpaceType, Dim>::getDim() const noexcept {
-        if constexpr (Dim == Utils::Dynamic)
+        if constexpr (Dim == Dynamic)
             return toDim - fromDim;
         else
             return Dim;
     }
+}
+
+namespace Physica {
+    template<class T, size_t S>
+    class Traits<Core::SubDataSpace<T, S>> {
+    public:
+        constexpr static size_t Dim = S;
+        static_assert(Dim != Dynamic, "[Error]: Not implemented");
+    };
 }

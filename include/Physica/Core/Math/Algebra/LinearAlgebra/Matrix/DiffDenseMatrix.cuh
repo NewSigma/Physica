@@ -19,18 +19,9 @@
 #pragma once
 
 #include "DiffDenseMatrix.h"
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/MatrixImpl/RValueMatrix.cuh"
+#include <Physica/Core/Math/Algebra/LinearAlgebra/Matrix/MatrixImpl/RValueMatrix.cuh>
 
 namespace Physica::Core {
-    namespace Internal {
-        template<class T, int Option, unsigned int Order>
-        class Traits<Core::device_obj<Differentiable<DenseMatrix<T, Option>, DiffMode::Reverse, Order>>>
-                : public Traits<DenseMatrix<T, Option>> {
-        public:
-            using ScalarType = device_obj<Differentiable<T, DiffMode::Reverse, Order>>;
-        };
-    }
-
     template<class PlainScalar, int Option, unsigned int Order>
     class device_obj<Differentiable<DenseMatrix<PlainScalar, Option>, DiffMode::Reverse, Order>>
             : public device_obj<RValueMatrix<Differentiable<DenseMatrix<PlainScalar, Option>, DiffMode::Reverse, Order>>>
@@ -45,7 +36,7 @@ namespace Physica::Core {
         using SegmentType = device_obj<typename host_obj::SegmentType>;
     public:
         using ScalarType = typename Base::ScalarType;
-        static_assert(Utils::is_device_obj<ScalarType>::value, "Dbug");
+        static_assert(Utils::is_device_obj<ScalarType>::value, "Invalid ScalarType");
         using DiffRecord = typename SegmentType::DiffRecord;
         using OperandArray = typename SegmentType::OperandArray;
     private:
@@ -201,6 +192,17 @@ namespace Physica::Core {
             size_t row, size_t column, Distribution& dist, RandomGenerator& gen) {
         return This(PlainMatrix::random_any(row, column, dist, gen));
     }
+}
+
+namespace Physica {
+    using namespace Core;
+
+    template<class T, int Option, unsigned int Order>
+    class Traits<Core::device_obj<Differentiable<DenseMatrix<T, Option>, DiffMode::Reverse, Order>>>
+            : public Traits<DenseMatrix<T, Option>> {
+    public:
+        using ScalarType = Core::device_obj<Differentiable<T, DiffMode::Reverse, Order>>;
+    };
 }
 
 #include "MatrixProduct/DiffMatrixProduct.cuh"

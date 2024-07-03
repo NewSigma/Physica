@@ -23,6 +23,7 @@
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h"
 #include "Physica/Core/Parallel/Executor/SequentialExecutor.h"
 
+using namespace Physica;
 using namespace Physica::Core;
 using ScalarType = Scalar<Double>;
 using VectorType = Vector<ScalarType>;

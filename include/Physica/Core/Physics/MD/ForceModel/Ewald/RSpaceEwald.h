@@ -22,25 +22,13 @@
 #include "Physica/Core/Math/Calculus/SpetialFunctions.h"
 #include "Physica/Core/Physics/MD/ForceModel/PairModel.h"
 #include "Physica/Core/Parallel/Executor/SequentialExecutor.h"
-#include "Physica/Utils/TestHelper.h"
 
 namespace Physica::Core {
-    template<class ScalarType, bool IsSmallCell = false> class RSpaceEwald;
-
-    namespace Internal {
-        template<class T, bool B>
-        class Traits<RSpaceEwald<T, B>> {
-        public:
-            using ScalarType = T;
-            constexpr static bool IsPotDependOnAtomIndex = true;
-            constexpr static bool IsSmallCell = B;
-        };
-    }
     /**
      * Reference:
      * [1] D. Frenkel and B. Smit, Understanding Molecular Simulation: From Algorithms to Applications; San Diego: Academic, 2002:304-306
      */
-    template<class ScalarType, bool IsSmallCell>
+    template<class ScalarType, bool IsSmallCell = false>
     class RSpaceEwald : public PairModel<RSpaceEwald<ScalarType, IsSmallCell>> {
         using This = RSpaceEwald<ScalarType, IsSmallCell>;
         using Base = PairModel<This>;
@@ -343,4 +331,14 @@ namespace Physica::Core {
         }
         return result;
     }
+}
+
+namespace Physica {
+    template<class T, bool B>
+    class Traits<Core::RSpaceEwald<T, B>> {
+    public:
+        using ScalarType = T;
+        constexpr static bool IsPotDependOnAtomIndex = true;
+        constexpr static bool IsSmallCell = B;
+    };
 }

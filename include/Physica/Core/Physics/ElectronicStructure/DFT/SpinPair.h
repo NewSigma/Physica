@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 WeiBo He.
+ * Copyright 2022-2024 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -21,25 +21,14 @@
 #include "Physica/Utils/Container/Array/Array.h"
 
 namespace Physica::Core {
-    template<class T, bool IsSpinPolarized> class SpinPair;
-
-    namespace Internal {
-        template<class T, bool IsSpinPolarized>
-        class Traits<SpinPair<T, IsSpinPolarized>> {
-        public:
-            constexpr static unsigned char NumSpin = IsSpinPolarized ? 2 : 1;
-            using Base = Utils::Array<T, NumSpin>;
-        };
-    }
-
     enum class SpinState {
         Up = 0,
         Down = 1
     };
 
     template<class T, bool IsSpinPolarized>
-    class SpinPair : public Internal::Traits<SpinPair<T, IsSpinPolarized>>::Base {
-        using Base = typename Internal::Traits<SpinPair<T, IsSpinPolarized>>::Base;
+    class SpinPair : public Traits<SpinPair<T, IsSpinPolarized>>::Base {
+        using Base = typename Traits<SpinPair<T, IsSpinPolarized>>::Base;
         constexpr static unsigned char NumSpin = Base::getLength();
     public:
         using ElemType = T;
@@ -62,4 +51,13 @@ namespace Physica::Core {
     template<class T, bool IsSpinPolarized>
     template<class... Args>
     SpinPair<T, IsSpinPolarized>::SpinPair(Args... args) : Base(NumSpin, std::forward<Args>(args)...) {}
+}
+
+namespace Physica {
+    template<class T, bool IsSpinPolarized>
+    class Traits<Core::SpinPair<T, IsSpinPolarized>> {
+    public:
+        constexpr static unsigned char NumSpin = IsSpinPolarized ? 2 : 1;
+        using Base = Utils::Array<T, NumSpin>;
+    };
 }

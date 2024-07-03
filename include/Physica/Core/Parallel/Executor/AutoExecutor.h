@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 WeiBo He.
+ * Copyright 2023-2024 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -24,22 +24,6 @@
 #endif
 
 namespace Physica::Core {
-    class AutoExecutor;
-
-    namespace Internal {
-        template<class T> class Traits;
-
-        template<>
-        class Traits<AutoExecutor> {
-        public:
-            constexpr static bool isCPUEnabled = true;
-        #ifdef PHYSICA_CUDA
-            constexpr static bool isCudaEnabled = true;
-        #else
-            constexpr static bool isCudaEnabled = false;
-        #endif
-        };
-    }
     /**
      * \class AutoExecutor is devoted to provide a load balancing heterogeneous computing.
      */
@@ -51,5 +35,18 @@ namespace Physica::Core {
             CudaExecutor::wait();
         #endif
         }
+    };
+}
+
+namespace Physica {
+    template<>
+    class Traits<AutoExecutor> {
+    public:
+        constexpr static bool isCPUEnabled = true;
+    #ifdef PHYSICA_CUDA
+        constexpr static bool isCudaEnabled = true;
+    #else
+        constexpr static bool isCudaEnabled = false;
+    #endif
     };
 }

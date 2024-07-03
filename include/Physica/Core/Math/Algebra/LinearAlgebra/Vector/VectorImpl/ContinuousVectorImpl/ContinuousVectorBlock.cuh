@@ -19,11 +19,6 @@
 #pragma once
 
 namespace Physica::Core {
-    namespace Internal {
-        template<class VectorType, size_t Length>
-        class Traits<Core::device_obj<ContinuousVectorBlock<VectorType, Length>>> : public Traits<ContinuousVectorBlock<VectorType, Length>> {};
-    }
-
     template<class VectorType, size_t Length>
     class device_obj<ContinuousVectorBlock<VectorType, Length>> : public device_obj<ContinuousVector<ContinuousVectorBlock<VectorType, Length>>> {
         using DeviceVector = device_obj<VectorType>;
@@ -99,4 +94,11 @@ namespace Physica::Core {
             return to - from;
         return Length;
     }
+}
+
+namespace Physica {
+    using namespace Core;
+
+    template<class VectorType, size_t Length>
+    class Traits<Core::device_obj<ContinuousVectorBlock<VectorType, Length>>> : public Traits<ContinuousVectorBlock<VectorType, Length>> {};
 }

@@ -21,45 +21,12 @@
 #include "ContinuousMatrixBlock.h"
 
 namespace Physica::Core {
-    namespace Internal {
-        template<class MatrixType, size_t Length>
-        class Traits<Core::device_obj<RowContinuousVector<MatrixType, Length>>> {
-            using VectorType = RowContinuousVector<MatrixType, Length>;
-            constexpr static bool isRowMatrix = MatrixOption::isRowMatrix<MatrixType>();
-            constexpr static bool isElementMatrix = MatrixOption::isElementMatrix<MatrixType>();
-            constexpr static bool isRowVector = isElementMatrix && MatrixType::RowAtCompile == 1;
-        public:
-            using Base = Core::device_obj<typename std::conditional<isRowMatrix || isRowVector, ContinuousVector<VectorType>, LValueVector<VectorType>>::type>;
-            using ScalarType = typename MatrixType::ScalarType;
-            constexpr static size_t SizeAtCompile = Length;
-            constexpr static size_t MaxSizeAtCompile = Length;
-            using PacketType = typename Internal::BestPacket<ScalarType, SizeAtCompile>::Type;
-        };
-
-        template<class MatrixType, size_t Length>
-        class Traits<Core::device_obj<ColContinuousVector<MatrixType, Length>>> {
-            using VectorType = ColContinuousVector<MatrixType, Length>;
-            constexpr static bool isColumnMatrix = MatrixOption::isColumnMatrix<MatrixType>();
-            constexpr static bool isElementMatrix = MatrixOption::isElementMatrix<MatrixType>();
-            constexpr static bool isColumnVector = isElementMatrix && MatrixType::ColumnAtCompile == 1;
-        public:
-            using Base = Core::device_obj<typename std::conditional<isColumnMatrix || isColumnVector, ContinuousVector<VectorType>, LValueVector<VectorType>>::type>;
-            using ScalarType = typename MatrixType::ScalarType;
-            constexpr static size_t SizeAtCompile = Length;
-            constexpr static size_t MaxSizeAtCompile = Length;
-            using PacketType = typename Internal::BestPacket<ScalarType, SizeAtCompile>::Type;
-        };
-
-        template<class MatrixType, size_t Row, size_t Column>
-        class Traits<Core::device_obj<ContinuousMatrixBlock<MatrixType, Row, Column>>> : public Traits<ContinuousMatrixBlock<MatrixType, Row, Column>> {};
-    }
-
     template<class MatrixType, size_t Length>
-    class device_obj<RowContinuousVector<MatrixType, Length>> : public Internal::Traits<device_obj<RowContinuousVector<MatrixType, Length>>>::Base {
+    class device_obj<RowContinuousVector<MatrixType, Length>> : public Traits<device_obj<RowContinuousVector<MatrixType, Length>>>::Base {
     public:
         using host_obj = RowContinuousVector<MatrixType, Length>;
         using This = device_obj<host_obj>;
-        using Base = typename Internal::Traits<This>::Base;
+        using Base = typename Traits<This>::Base;
         using ScalarType = typename MatrixType::ScalarType;
     private:
         device_obj<MatrixType>& mat;
@@ -90,11 +57,11 @@ namespace Physica::Core {
     };
 
     template<class MatrixType, size_t Length>
-    class device_obj<ColContinuousVector<MatrixType, Length>> : public Internal::Traits<device_obj<ColContinuousVector<MatrixType, Length>>>::Base {
+    class device_obj<ColContinuousVector<MatrixType, Length>> : public Traits<device_obj<ColContinuousVector<MatrixType, Length>>>::Base {
     public:
         using host_obj = ColContinuousVector<MatrixType, Length>;
         using This = device_obj<host_obj>;
-        using Base = typename Internal::Traits<This>::Base;
+        using Base = typename Traits<This>::Base;
         using ScalarType = typename MatrixType::ScalarType;
     private:
         device_obj<MatrixType>& mat;
@@ -346,4 +313,39 @@ namespace Physica::Core {
         assert(col < colCount);
         return mat(row + fromRow, col + fromCol);
     }
+}
+
+namespace Physica {
+    using namespace Core;
+
+    template<class MatrixType, size_t Length>
+    class Traits<Core::device_obj<RowContinuousVector<MatrixType, Length>>> {
+        using VectorType = RowContinuousVector<MatrixType, Length>;
+        constexpr static bool isRowMatrix = MatrixOption::isRowMatrix<MatrixType>();
+        constexpr static bool isElementMatrix = MatrixOption::isElementMatrix<MatrixType>();
+        constexpr static bool isRowVector = isElementMatrix && MatrixType::RowAtCompile == 1;
+    public:
+        using Base = Core::device_obj<typename std::conditional<isRowMatrix || isRowVector, ContinuousVector<VectorType>, LValueVector<VectorType>>::type>;
+        using ScalarType = typename MatrixType::ScalarType;
+        constexpr static size_t SizeAtCompile = Length;
+        constexpr static size_t MaxSizeAtCompile = Length;
+        using PacketType = typename Core::Internal::BestPacket<ScalarType, SizeAtCompile>::Type;
+    };
+
+    template<class MatrixType, size_t Length>
+    class Traits<Core::device_obj<ColContinuousVector<MatrixType, Length>>> {
+        using VectorType = ColContinuousVector<MatrixType, Length>;
+        constexpr static bool isColumnMatrix = MatrixOption::isColumnMatrix<MatrixType>();
+        constexpr static bool isElementMatrix = MatrixOption::isElementMatrix<MatrixType>();
+        constexpr static bool isColumnVector = isElementMatrix && MatrixType::ColumnAtCompile == 1;
+    public:
+        using Base = Core::device_obj<typename std::conditional<isColumnMatrix || isColumnVector, ContinuousVector<VectorType>, LValueVector<VectorType>>::type>;
+        using ScalarType = typename MatrixType::ScalarType;
+        constexpr static size_t SizeAtCompile = Length;
+        constexpr static size_t MaxSizeAtCompile = Length;
+        using PacketType = typename Core::Internal::BestPacket<ScalarType, SizeAtCompile>::Type;
+    };
+
+    template<class MatrixType, size_t Row, size_t Column>
+    class Traits<Core::device_obj<ContinuousMatrixBlock<MatrixType, Row, Column>>> : public Traits<ContinuousMatrixBlock<MatrixType, Row, Column>> {};
 }

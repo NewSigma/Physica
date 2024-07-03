@@ -18,19 +18,11 @@
  */
 #pragma once
 
-#include "Physica/Core/MultiPrecision/Differentiable.cuh"
+#include <Physica/Core/MultiPrecision/Differentiable.cuh>
 #include "DiffVector.h"
 #include "Vector.cuh"
 
 namespace Physica::Core {
-    namespace Internal {
-        template<class T, unsigned int Order>
-        class Traits<Core::device_obj<Differentiable<Vector<T>, DiffMode::Reverse, Order>>> : public Traits<Vector<T>> {
-        public:
-            using ScalarType = device_obj<Differentiable<T, DiffMode::Reverse, Order>>;
-        };
-    }
-
     template<class PlainScalar, unsigned Order>
     class device_obj<Differentiable<Vector<PlainScalar>, DiffMode::Reverse, Order>>
             : public device_obj<RValueVector<Differentiable<Vector<PlainScalar>, DiffMode::Reverse, Order>>> {
@@ -99,6 +91,16 @@ namespace Physica::Core {
     private:
         [[nodiscard]] __host__ __device__ SegmentType& getTraceSegment() noexcept { return traceSeg.getDerived(); }
         [[nodiscard]] __host__ __device__ const SegmentType& getTraceSegment() const noexcept { return traceSeg.getDerived(); }
+    };
+}
+
+namespace Physica {
+    using namespace Core;
+
+    template<class T, unsigned int Order>
+    class Traits<Core::device_obj<Differentiable<Vector<T>, DiffMode::Reverse, Order>>> : public Traits<Vector<T>> {
+    public:
+        using ScalarType = Core::device_obj<Differentiable<T, DiffMode::Reverse, Order>>;
     };
 }
 

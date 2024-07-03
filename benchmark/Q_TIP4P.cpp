@@ -30,7 +30,7 @@
 using namespace Physica::Core;
 using namespace Physica::Utils;
 using ScalarType = Scalar<Double>;
-using KineticModel = FreeModel<ScalarType, 3, Dynamic, RPMDIntegrator::Exact>;
+using KineticModel = FreeModel<ScalarType, 3, Physica::Dynamic, RPMDIntegrator::Exact>;
 using ForceModel = Q_TIP4P<ScalarType, Ewald<ScalarType>>;
 using ThermoType = DoubleThermo<KineticModel>;
 using RandomGenerator = std::mt19937;

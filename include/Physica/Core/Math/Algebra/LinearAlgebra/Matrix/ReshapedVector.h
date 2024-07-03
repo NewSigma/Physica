@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 WeiBo He.
+ * Copyright 2023-2024 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -21,26 +21,6 @@
 #include "MatrixImpl/RValueMatrix.h"
 
 namespace Physica::Core {
-    template<class VectorType, int MatrixMajor, size_t Row, size_t Column> class ReshapedVector;
-
-    namespace Internal {
-        template<class T> class Traits;
-
-        template<class VectorType, int MatrixMajor, size_t Row, size_t Column>
-        class Traits<ReshapedVector<VectorType, MatrixMajor, Row, Column>> {
-            static_assert(MatrixMajor == MatrixOption::Column || MatrixMajor == MatrixOption::Row, "[Error]: Invalid major");
-        public:
-            using ScalarType = typename VectorType::ScalarType;
-            constexpr static int Option = MatrixMajor | MatrixOption::AnyStorage;
-            constexpr static size_t RowAtCompile = Row;
-            constexpr static size_t ColumnAtCompile = Column;
-            constexpr static size_t MaxRowAtCompile = RowAtCompile;
-            constexpr static size_t MaxColumnAtCompile = ColumnAtCompile;
-            constexpr static size_t SizeAtCompile = VectorType::SizeAtCompile;
-            constexpr static size_t MaxSizeAtCompile = SizeAtCompile;
-        };
-    }
-
     template<class VectorType, int MatrixMajor, size_t Row, size_t Column>
     class ReshapedVector : public RValueMatrix<ReshapedVector<VectorType, MatrixMajor, Row, Column>> {
         using This = ReshapedVector<VectorType, MatrixMajor, Row, Column>;
@@ -105,4 +85,22 @@ namespace Physica::Core {
     ReshapedVector<Derived, MatrixOption::Row, Row, Column> RValueVector<Derived>::reshape_row(size_t row, size_t col) const {
         return {Base::getDerived(), row, col};
     }
+}
+
+namespace Physica {
+    using namespace Core;
+
+    template<class VectorType, int MatrixMajor, size_t Row, size_t Column>
+    class Traits<ReshapedVector<VectorType, MatrixMajor, Row, Column>> {
+        static_assert(MatrixMajor == MatrixOption::Column || MatrixMajor == MatrixOption::Row, "[Error]: Invalid major");
+    public:
+        using ScalarType = typename VectorType::ScalarType;
+        constexpr static int Option = MatrixMajor | MatrixOption::AnyStorage;
+        constexpr static size_t RowAtCompile = Row;
+        constexpr static size_t ColumnAtCompile = Column;
+        constexpr static size_t MaxRowAtCompile = RowAtCompile;
+        constexpr static size_t MaxColumnAtCompile = ColumnAtCompile;
+        constexpr static size_t SizeAtCompile = VectorType::SizeAtCompile;
+        constexpr static size_t MaxSizeAtCompile = SizeAtCompile;
+    };
 }

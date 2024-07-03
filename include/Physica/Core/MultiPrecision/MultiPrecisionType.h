@@ -42,4 +42,5 @@ namespace Physica::Core {
      * \class Scalar is a advanced float type that supports multiple precision
      */
     template<ScalarOption Option = Double> class Scalar;
+    template<class AnyScalar> class ComplexScalar;
 }

@@ -21,19 +21,6 @@
 #include "PairModel.h"
 
 namespace Physica::Core {
-    template<class ScalarType, bool IsPeriodBoundary, bool IsSmallCell> class SilveraGoldman;
-
-    namespace Internal {
-        template<class T, bool B1, bool B2>
-        class Traits<SilveraGoldman<T, B1, B2>> {
-        public:
-            using ScalarType = T;
-            constexpr static bool IsPeriodBoundary = B1;
-            constexpr static bool IsSmallCell = B2;
-            constexpr static bool IsPotDependOnAtomIndex = false;
-            constexpr static bool IsContractable = false;
-        };
-    }
     /**
      * Potential that suits para-hydrogen
      * 
@@ -169,4 +156,16 @@ namespace Physica::Core {
             result += d2_g;
         return result;
     }
+}
+
+namespace Physica {
+    template<class T, bool B1, bool B2>
+    class Traits<Core::SilveraGoldman<T, B1, B2>> {
+    public:
+        using ScalarType = T;
+        constexpr static bool IsPeriodBoundary = B1;
+        constexpr static bool IsSmallCell = B2;
+        constexpr static bool IsPotDependOnAtomIndex = false;
+        constexpr static bool IsContractable = false;
+    };
 }

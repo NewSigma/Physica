@@ -24,19 +24,7 @@
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/SparseVector.h"
 
 namespace Physica::Core {
-    template<class ScalarType, class ReprType> class Hubbard;
     class ThreadExecutor;
-
-    namespace Internal {
-        template<class T, class U>
-        class Traits<Hubbard<T, U>> : public Traits<LatticeHamilton<Hubbard<T, U>>> {
-        public:
-            using ScalarType = T;
-            using ReprType = U;
-
-            static_assert(std::is_base_of<ReprBasis<ReprType>, ReprType>::value, "[Error]: ReprType is not a representation");
-        };
-    }
     /**
      * Refer to [1] for applied symmetries
      * 
@@ -56,7 +44,7 @@ namespace Physica::Core {
         using typename Base::StateType;
         constexpr static unsigned int SiteDOF = StateType::SiteDOF;
 
-        constexpr static bool IsTransInvariant = Internal::Traits<ReprType>::IsTransInvariant;
+        constexpr static bool IsTransInvariant = Traits<ReprType>::IsTransInvariant;
         static_assert((IsTransInvariant && Base::isComplex) || !IsTransInvariant, "[Error]: Use complex scalar if translational invariance is enabled");
         static_assert(!IsTransInvariant || (Base::Dim == 1), "[Error]: Trans invariantce is not implemented in high dimension");
     public:
@@ -97,6 +85,19 @@ namespace Physica::Core {
         template<class TargetType> void sumHopping(TargetType& target, FFTType& fft, ScalarType factor, StateType psi) const;
         template<class TargetType> void dotImpl1D(TargetType& target, ScalarType factor, size_t index) const;
         template<class TargetType> void dotImplND(TargetType& target, ScalarType factor, size_t index) const;
+    };
+}
+
+namespace Physica {
+    using namespace Core;
+
+    template<class T, class U>
+    class Traits<Hubbard<T, U>> : public Traits<LatticeHamilton<Hubbard<T, U>>> {
+    public:
+        using ScalarType = T;
+        using ReprType = U;
+
+        static_assert(std::is_base_of<ReprBasis<ReprType>, ReprType>::value, "[Error]: ReprType is not a representation");
     };
 }
 

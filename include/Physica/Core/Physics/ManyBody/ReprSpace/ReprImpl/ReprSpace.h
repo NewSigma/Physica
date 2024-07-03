@@ -20,17 +20,17 @@
 
 #include "Physica/Utils/Template/CRTPBase.h"
 
-namespace Physica::Core {
-    namespace Internal {
-        template<class T> class Traits;
-    }
+namespace Physica {
+    template<class T> class Traits;
+}
 
+namespace Physica::Core {
     template<class Derived>
     class ReprBasis : public Utils::CRTPBase<Derived> {
         using Base = Utils::CRTPBase<Derived>;
     public:
-        using StateType = typename Internal::Traits<Derived>::StateType;
-        constexpr static unsigned int Dim = Internal::Traits<Derived>::Dim;
+        using StateType = typename Traits<Derived>::StateType;
+        constexpr static unsigned int Dim = Traits<Derived>::Dim;
     public:
         ~ReprBasis() = default;
         /* Operators */

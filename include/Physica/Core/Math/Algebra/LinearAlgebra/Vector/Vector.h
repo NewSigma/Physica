@@ -19,30 +19,13 @@
 #pragma once
 
 #include <iosfwd>
-#include "Physica/Core/MultiPrecision/Scalar.h"
-#include "Physica/Utils/Container/Array/Array.h"
+#include <Physica/Core/MultiPrecision/Scalar.h>
+#include <Physica/Utils/Container/Array/Array.h>
+#include <Physica/Core/Math/Algebra/LinearAlgebra/Matrix/MatrixOption.h>
 #include "VectorImpl/ContinuousVector.h"
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/MatrixOption.h"
 
 namespace Physica::Core {
     template<class T, size_t Length = Dynamic, size_t MaxLength = Length, class Allocator = Utils::HostAllocator<T>>
-    class Vector;
-
-    namespace Internal {
-        template<class T, size_t Length, size_t MaxLength, class Allocator>
-        class Traits<Vector<T, Length, MaxLength, Allocator>> {
-            static_assert(Length == Dynamic || Length == MaxLength, "MaxLength of fixed vector must equals to its length.");
-        public:
-            using ScalarType = T;
-            constexpr static size_t SizeAtCompile = Length;
-            constexpr static size_t MaxSizeAtCompile = MaxLength;
-
-            using PacketType = typename Internal::BestPacket<ScalarType, SizeAtCompile>::Type;
-            constexpr static bool FastAssign = false;
-        };
-    }
-
-    template<class T, size_t Length, size_t MaxLength, class Allocator>
     class Vector : public ContinuousVector<Vector<T, Length, MaxLength, Allocator>>, public Utils::Array<T, Length, MaxLength, Allocator> {
         using This = Vector<T, Length, MaxLength, Allocator>;
     public:
@@ -101,6 +84,22 @@ namespace Physica::Core {
     inline void swap(Vector<T, Length, MaxLength>& __restrict v1, Vector<T, Length, MaxLength>& __restrict v2) noexcept {
         v1.swap(v2);
     }
+}
+
+namespace Physica {
+    using namespace Core;
+
+    template<class T, size_t Length, size_t MaxLength, class Allocator>
+    class Traits<Vector<T, Length, MaxLength, Allocator>> {
+        static_assert(Length == Dynamic || Length == MaxLength, "MaxLength of fixed vector must equals to its length.");
+    public:
+        using ScalarType = T;
+        constexpr static size_t SizeAtCompile = Length;
+        constexpr static size_t MaxSizeAtCompile = MaxLength;
+
+        using PacketType = typename Core::Internal::BestPacket<ScalarType, SizeAtCompile>::Type;
+        constexpr static bool FastAssign = false;
+    };
 }
 
 #include "VectorImpl/VectorImpl.h"

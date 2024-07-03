@@ -21,12 +21,6 @@
 namespace Physica::Core {
     template<class MatrixType, class VectorType> class MatrixVectorProduct;
 
-    namespace Internal {
-        template<class MatrixType, class VectorType>
-        class Traits<MatrixVectorProduct<MatrixPow<MatrixType>, VectorType>>
-                : public Traits<MatrixVectorProduct<MatrixType, VectorType>> {};
-    }
-
     template<class MatrixType, class VectorType>
     class MatrixVectorProduct<MatrixPow<MatrixType>, VectorType>
             : public RValueVector<MatrixVectorProduct<MatrixPow<MatrixType>, VectorType>> {
@@ -79,4 +73,10 @@ namespace Physica::Core {
         }
         buffer.swap(target);
     }
+}
+
+namespace Physica {
+    template<class MatrixType, class VectorType>
+    class Traits<MatrixVectorProduct<MatrixPow<MatrixType>, VectorType>>
+            : public Traits<MatrixVectorProduct<MatrixType, VectorType>> {};
 }

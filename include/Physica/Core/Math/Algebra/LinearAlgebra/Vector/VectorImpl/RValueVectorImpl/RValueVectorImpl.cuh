@@ -45,7 +45,7 @@ namespace Physica::Core {
     template<class OtherDerived>
     __host__ __device__
     void device_obj<RValueVector<Derived>>::assignTo(device_obj<LValueVector<OtherDerived>>& target) const {
-        constexpr size_t OtherSize = Internal::Traits<OtherDerived>::SizeAtCompile;
+        constexpr size_t OtherSize = Traits<OtherDerived>::SizeAtCompile;
         static_assert(SizeAtCompile == Dynamic || OtherSize == Dynamic || SizeAtCompile == OtherSize,
                 "[Error]: Size mismatch between two vector");
         assert(target.getLength() == getLength() && "[Error]: Size mismatch between two vector");

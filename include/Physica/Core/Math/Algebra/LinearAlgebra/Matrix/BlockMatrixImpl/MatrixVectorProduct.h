@@ -19,19 +19,6 @@
 #pragma once
 
 namespace Physica::Core {
-    template<class MatrixType, class VectorType> class MatrixVectorProduct;
-
-    namespace Internal {
-        template<class MatrixType, class VectorType>
-        class Traits<MatrixVectorProduct<BlockMatrix<MatrixType>, VectorType>> {
-        public:
-            using ScalarType = typename MatrixType::ScalarType;
-            constexpr static size_t SizeAtCompile = Dynamic;
-            constexpr static size_t MaxSizeAtCompile = Dynamic;
-            using PacketType = typename Internal::BestPacket<ScalarType, SizeAtCompile>::Type;
-        };
-    }
-
     template<class MatrixType, class VectorType>
     class MatrixVectorProduct<BlockMatrix<MatrixType>, VectorType>
             : public RValueVector<MatrixVectorProduct<BlockMatrix<MatrixType>, VectorType>> {
@@ -81,4 +68,17 @@ namespace Physica::Core {
             from = to;
         }
     }
+}
+
+namespace Physica {
+    using namespace Core;
+
+    template<class MatrixType, class VectorType>
+    class Traits<MatrixVectorProduct<BlockMatrix<MatrixType>, VectorType>> {
+    public:
+        using ScalarType = typename MatrixType::ScalarType;
+        constexpr static size_t SizeAtCompile = Dynamic;
+        constexpr static size_t MaxSizeAtCompile = Dynamic;
+        using PacketType = typename Internal::BestPacket<ScalarType, SizeAtCompile>::Type;
+    };
 }

@@ -29,7 +29,6 @@ namespace Physica::Core {
     class SimpleNet : public LayerBase<Derived> {
         using This = SimpleNet<Derived>;
         using Base = LayerBase<Derived>;
-        using TraitsType = typename Internal::Traits<Derived>;
     public:
         using typename Base::ScalarType;
         using typename Base::PlainScalar;

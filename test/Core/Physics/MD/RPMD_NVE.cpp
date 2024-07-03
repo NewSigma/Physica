@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 WeiBo He. All rights reserved.
+ * Copyright 2023-2024 WeiBo He. All rights reserved.
  *
  * This file is part of PhysicaNotes.
  */
@@ -9,6 +9,7 @@
 #include "Physica/Core/Parallel/Executor/SequentialExecutor.h"
 #include "Physica/Core/Math/Random/RandomPool.h"
 
+using namespace Physica;
 using namespace Physica::Core;
 using ScalarType = Scalar<Double>;
 using VectorType = Vector<ScalarType>;

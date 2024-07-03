@@ -18,19 +18,10 @@
  */
 #pragma once
 
-#include "Physica/Core/MultiPrecision/Differentiable.h"
+#include <Physica/Core/MultiPrecision/Differentiable.h>
 #include "Vector.h"
 
 namespace Physica::Core {
-    namespace Internal {
-        template<class T, unsigned int Order>
-        class Traits<Differentiable<Vector<T>, DiffMode::Reverse, Order>> : public Traits<Vector<T>> {
-            static_assert(!T::isDifferentiable, "[Error]: Nested Differentiable<> is not allowed");
-        public:
-            using ScalarType = Differentiable<T, DiffMode::Reverse, Order>;
-        };
-    }
-
     template<class PlainScalar, unsigned int Order>
     class Differentiable<Vector<PlainScalar>, DiffMode::Reverse, Order>
             : public RValueVector<Differentiable<Vector<PlainScalar>, DiffMode::Reverse, Order>> {
@@ -132,4 +123,15 @@ namespace Physica::Core {
     Differentiable<Vector<PlainScalar>, DiffMode::Reverse, Order>::random_any(size_t len, Distribution& dist, RandomGenerator& gen) {
         return This(VectorType::random_any(len, dist, gen));
     }
+}
+
+namespace Physica {
+    using namespace Core;
+
+    template<class T, unsigned int Order>
+    class Traits<Differentiable<Vector<T>, DiffMode::Reverse, Order>> : public Traits<Vector<T>> {
+        static_assert(!T::isDifferentiable, "[Error]: Nested Differentiable<> is not allowed");
+    public:
+        using ScalarType = Differentiable<T, DiffMode::Reverse, Order>;
+    };
 }

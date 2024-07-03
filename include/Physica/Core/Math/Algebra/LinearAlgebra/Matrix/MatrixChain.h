@@ -35,9 +35,9 @@ namespace Physica::Core {
         ~MatrixChain();
 
         DenseMatrix<T, type, maxRow, maxColumn>*& operator[](size_t i) { assert(i < length); return chain[i]; }
-        DenseMatrix<T, type, Utils::Dynamic, Utils::Dynamic> solve();
+        DenseMatrix<T, type, Dynamic, Dynamic> solve();
     private:
-        DenseMatrix<T, type, Utils::Dynamic, Utils::Dynamic> multiply(size_t from, size_t to);
+        DenseMatrix<T, type, Dynamic, Dynamic> multiply(size_t from, size_t to);
     };
 
     /**

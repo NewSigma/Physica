@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 WeiBo He.
+ * Copyright 2022-2024 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -24,19 +24,6 @@
 #include "Physica/Core/Parallel/SubProcess.h"
 
 namespace Physica::Core {
-    class ProcessExecutor;
-
-    namespace Internal {
-        template<class T> class Traits;
-
-        template<>
-        class Traits<ProcessExecutor> {
-        public:
-            constexpr static bool isCPUEnabled = true;
-            constexpr static bool isCudaEnabled = false;
-        };
-    }
-
     class ProcessExecutor {
     public:
         using FutureType = ProcessFuture;
@@ -83,4 +70,13 @@ namespace Physica::Core {
         }
         return result;
     }
+}
+
+namespace Physica {
+    template<>
+    class Traits<Core::ProcessExecutor> {
+    public:
+        constexpr static bool isCPUEnabled = true;
+        constexpr static bool isCudaEnabled = false;
+    };
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 WeiBo He.
+ * Copyright 2022-2024 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -18,25 +18,10 @@
  */
 #pragma once
 
+#include <Physica/Core/Math/Calculus/PDE/FEM/Mesh.h>
 #include "Element.h"
-#include "Physica/Core/Math/Calculus/PDE/FEM/Mesh.h"
 
 namespace Physica::Core {
-    template<class ScalarType> class Triangle1;
-
-    namespace Internal {
-        template<class T>
-        class Traits<Triangle1<T>> {
-        public:
-            constexpr static unsigned int Dim = 2;
-            constexpr static unsigned int Order = 1;
-            constexpr static unsigned int NumPoint = 3;
-            constexpr static unsigned int DegreeOfFreedom = NumPoint * Order;
-            using ScalarType = T;
-            using MatrixType = DenseMatrix<ScalarType, MatrixOption::Column | MatrixOption::Element, Dim, Dim>;
-        };
-    }
-
     template<class ScalarType>
     class Triangle1 : public Element<Triangle1<ScalarType>> {
     public:
@@ -44,7 +29,7 @@ namespace Physica::Core {
         using typename Base::VectorType;
         using typename Base::MatrixType;
         using typename Base::IndexArray;
-        using PosArray = Utils::Array<VectorType, Internal::Traits<Triangle1<ScalarType>>::NumPoint>;
+        using PosArray = Utils::Array<VectorType, Traits<Triangle1<ScalarType>>::NumPoint>;
     private:
         PosArray pos;
     public:
@@ -71,6 +56,19 @@ namespace Physica::Core {
                                                        VectorType topRight,
                                                        size_t numSeparateX,
                                                        size_t numSeparateY);
+    };
+}
+
+namespace Physica {
+    template<class T>
+    class Traits<Core::Triangle1<T>> {
+    public:
+        constexpr static unsigned int Dim = 2;
+        constexpr static unsigned int Order = 1;
+        constexpr static unsigned int NumPoint = 3;
+        constexpr static unsigned int DegreeOfFreedom = NumPoint * Order;
+        using ScalarType = T;
+        using MatrixType = Core::DenseMatrix<ScalarType, MatrixOption::Column | MatrixOption::Element, Dim, Dim>;
     };
 }
 

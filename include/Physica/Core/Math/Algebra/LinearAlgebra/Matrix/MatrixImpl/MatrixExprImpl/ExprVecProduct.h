@@ -21,41 +21,6 @@
 namespace Physica::Core {
     template<class MatrixType, class VectorType> class MatrixVectorProduct;
 
-    namespace Internal {
-        template<ExpressionType Type, class T1, class T2, class ResultType, class VectorType>
-        class Traits<MatrixVectorProduct<MatrixExpr<Type, T1, T2, ResultType>, VectorType>> {
-            using MatrixType = MatrixExpr<Type, T1, T2, ResultType>;
-            static_assert(MatrixType::ColumnAtCompile == VectorType::SizeAtCompile ||
-                          MatrixType::ColumnAtCompile == Dynamic ||
-                          VectorType::SizeAtCompile == Dynamic,
-                          "Row and column do not match in matrix product");
-
-            constexpr static bool calcFastAssign() {
-                constexpr bool isScalarT2 = is_scalar<T2>::value;
-                if constexpr (Type == ExpressionType::Add || Type == ExpressionType::Sub) {
-                    if constexpr (!isScalarT2) {
-                        using LHS = decltype(std::declval<T1>() * std::declval<VectorType>());
-                        using RHS = decltype(std::declval<T2>() * std::declval<VectorType>());
-                        using ExprType = decltype(std::declval<LHS>() + std::declval<RHS>());
-                        return Traits<ExprType>::FastAssign;
-                    }
-                    return false;
-                }
-                if constexpr (Type == ExpressionType::Mul) {
-                    return isScalarT2;
-                }
-                return false;
-            }
-        public:
-            using ScalarType = ResultType;
-            constexpr static size_t SizeAtCompile = MatrixType::RowAtCompile;
-            constexpr static size_t MaxSizeAtCompile = MatrixType::MaxRowAtCompile;
-
-            using PacketType = typename BestPacket<ScalarType, SizeAtCompile>::Type;
-            constexpr static bool FastAssign = calcFastAssign();
-        };
-    }
-
     template<ExpressionType Type, class T1, class T2, class ResultType, class VectorType>
     class MatrixVectorProduct<MatrixExpr<Type, T1, T2, ResultType>, VectorType>
             : public RValueVector<MatrixVectorProduct<MatrixExpr<Type, T1, T2, ResultType>, VectorType>> {
@@ -95,7 +60,7 @@ namespace Physica::Core {
     template<class OtherDerived, class Executor>
     inline void MatrixVectorProduct<MatrixExpr<Type, T1, T2, ResultType>, VectorType>::assignTo(
             LValueVector<OtherDerived>& target_) const {
-        constexpr bool FastAssign = Internal::Traits<This>::FastAssign;
+        constexpr bool FastAssign = Traits<This>::FastAssign;
         auto& target = target_.getDerived();
         if constexpr (!FastAssign)
             generalImpl(target);
@@ -132,4 +97,41 @@ namespace Physica::Core {
         if constexpr (isContinuous && Base::isReverseDiff)
             target.getDerived().makeContinuous();
     }
+}
+
+namespace Physica {
+    using namespace Core;
+
+    template<ExpressionType Type, class T1, class T2, class ResultType, class VectorType>
+    class Traits<MatrixVectorProduct<MatrixExpr<Type, T1, T2, ResultType>, VectorType>> {
+        using MatrixType = MatrixExpr<Type, T1, T2, ResultType>;
+        static_assert(MatrixType::ColumnAtCompile == VectorType::SizeAtCompile ||
+                      MatrixType::ColumnAtCompile == Dynamic ||
+                      VectorType::SizeAtCompile == Dynamic,
+                      "Row and column do not match in matrix product");
+
+        constexpr static bool calcFastAssign() {
+            constexpr bool isScalarT2 = is_scalar<T2>::value;
+            if constexpr (Type == ExpressionType::Add || Type == ExpressionType::Sub) {
+                if constexpr (!isScalarT2) {
+                    using LHS = decltype(std::declval<T1>() * std::declval<VectorType>());
+                    using RHS = decltype(std::declval<T2>() * std::declval<VectorType>());
+                    using ExprType = decltype(std::declval<LHS>() + std::declval<RHS>());
+                    return Traits<ExprType>::FastAssign;
+                }
+                return false;
+            }
+            if constexpr (Type == ExpressionType::Mul) {
+                return isScalarT2;
+            }
+            return false;
+        }
+    public:
+        using ScalarType = ResultType;
+        constexpr static size_t SizeAtCompile = MatrixType::RowAtCompile;
+        constexpr static size_t MaxSizeAtCompile = MatrixType::MaxRowAtCompile;
+
+        using PacketType = typename Core::Internal::BestPacket<ScalarType, SizeAtCompile>::Type;
+        constexpr static bool FastAssign = calcFastAssign();
+    };
 }

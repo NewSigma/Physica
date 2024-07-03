@@ -24,16 +24,6 @@
 #include "EmptyForceModel.h"
 
 namespace Physica::Core {
-    template<class Derived> class PairModel;
-
-    namespace Internal {
-        template<class Derived>
-        class Traits<PairModel<Derived>> {
-        public:
-            constexpr static bool IsPeriodBoundary = true;
-            constexpr static bool IsContractable = false;
-        };
-    }
     /**
      * Member variable pot_shift is referenced from [1]
      * 
@@ -43,7 +33,7 @@ namespace Physica::Core {
     template<class Derived>
     class PairModel : public Utils::CRTPBase<Derived> {
         using Base = Utils::CRTPBase<Derived>;
-        using TraitType = Internal::Traits<Derived>;
+        using TraitType = Traits<Derived>;
 
         constexpr static bool IsPotDependOnAtomIndex = TraitType::IsPotDependOnAtomIndex;
         constexpr static bool IsSmallCell = TraitType::IsSmallCell;
@@ -395,4 +385,13 @@ namespace Physica::Core {
         const ScalarType term2 = force_functor(unused, unused, norm, squaredNorm) / norm * (ScalarType(dir1 == dir2 ? 1.0 : 0.0) - factor);
         return term1 - term2;
     }
+}
+
+namespace Physica {
+    template<class Derived>
+    class Traits<Core::PairModel<Derived>> {
+    public:
+        constexpr static bool IsPeriodBoundary = true;
+        constexpr static bool IsContractable = false;
+    };
 }

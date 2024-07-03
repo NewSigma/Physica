@@ -21,19 +21,7 @@
 #include "SparseVectorImpl/RSparseVector.h"
 
 namespace Physica::Core {
-    template<class ScalarType> class SparseVector;
     template<class ScalarType> class SparseReference;
-
-    namespace Internal {
-        template<class T>
-        class Traits<SparseVector<T>> {
-        public:
-            using ScalarType = T;
-            constexpr static size_t SizeAtCompile = Dynamic;
-            constexpr static size_t MaxSizeAtCompile = Dynamic;
-            using PacketType = typename Internal::BestPacket<ScalarType, SizeAtCompile>::Type;
-        };
-    }
 
     template<class ScalarType>
     class SparseVector : public RSparseVector<SparseVector<ScalarType>> {
@@ -142,6 +130,19 @@ namespace Physica::Core {
         }
         return ScalarType(0);
     }
+}
+
+namespace Physica {
+    using namespace Core;
+
+    template<class T>
+    class Traits<SparseVector<T>> {
+    public:
+        using ScalarType = T;
+        constexpr static size_t SizeAtCompile = Dynamic;
+        constexpr static size_t MaxSizeAtCompile = Dynamic;
+        using PacketType = typename Core::Internal::BestPacket<ScalarType, SizeAtCompile>::Type;
+    };
 }
 
 #include "SparseVectorImpl/SparseReference.h"

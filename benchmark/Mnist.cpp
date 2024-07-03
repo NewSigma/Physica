@@ -17,7 +17,7 @@ using namespace Physica::Core;
 
 template<class ScalarType> class MnistNet;
 
-namespace Physica::Core::Internal {
+namespace Physica {
     template<class T>
     class Traits<MnistNet<T>> : public Traits<LinearLayer<T>> {};
 }

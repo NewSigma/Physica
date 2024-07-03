@@ -21,20 +21,7 @@
 #include "PairModel.h"
 
 namespace Physica::Core {
-    template<class ScalarType, bool IsSmallCell = false> class LJModel;
-
-    namespace Internal {
-        template<class T, bool B>
-        class Traits<LJModel<T, B>> : public Traits<PairModel<LJModel<T, B>>> {
-        public:
-            using ScalarType = T;
-            constexpr static bool IsPotDependOnAtomIndex = false;
-            constexpr static bool IsSmallCell = B;
-            constexpr static bool IsContractable = false;
-        };
-    }
-
-    template<class ScalarType, bool IsSmallCell>
+    template<class ScalarType, bool IsSmallCell = false>
     class LJModel : public PairModel<LJModel<ScalarType, IsSmallCell>> {
         using This = LJModel<ScalarType, IsSmallCell>;
         using Base = PairModel<This>;
@@ -98,4 +85,17 @@ namespace Physica::Core {
         sigma.swap(obj.sigma);
         sigma1.swap(obj.sigma1);
     }
+}
+
+namespace Physica {
+    using namespace Core;
+
+    template<class T, bool B>
+    class Traits<LJModel<T, B>> : public Traits<PairModel<LJModel<T, B>>> {
+    public:
+        using ScalarType = T;
+        constexpr static bool IsPotDependOnAtomIndex = false;
+        constexpr static bool IsSmallCell = B;
+        constexpr static bool IsContractable = false;
+    };
 }

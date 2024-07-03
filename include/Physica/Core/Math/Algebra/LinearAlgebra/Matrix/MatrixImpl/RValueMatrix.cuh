@@ -26,7 +26,7 @@ namespace Physica::Core {
         static_assert(!Utils::is_device_obj<Derived>::value, "[Error]: Nested device_obj is unnecessary");
         using Base = Utils::CRTPBase<device_obj<Derived>>;
         using host_obj = RValueMatrix<Derived>;
-        using TraitsType = Internal::Traits<device_obj<Derived>>;
+        using TraitsType = Traits<device_obj<Derived>>;
         using BlockType = device_obj<RMatrixBlock<Derived>>;
     public:
         using ScalarType = typename TraitsType::ScalarType;

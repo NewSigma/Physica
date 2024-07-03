@@ -40,7 +40,7 @@ namespace Physica::Core {
         using EigenSolverType = EigenSolver<ComplexType>;
         using QPointGrid = GridStorage<EigenSolverType>;
         using BornChargeArray = typename RSpaceEwald<ScalarType, true>::BornChargeArray;
-        constexpr static unsigned int Dim = Internal::Traits<MDCellType>::Dim;
+        constexpr static unsigned int Dim = Traits<MDCellType>::Dim;
     private:
         using EwaldType = Ewald<ScalarType>;
 

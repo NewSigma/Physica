@@ -19,20 +19,6 @@
 #pragma once
 
 namespace Physica::Core {
-    namespace Internal {
-        template<class T, class ReprType, class VectorType>
-        class Traits<MatrixVectorProduct<Hubbard<T, ReprType>, VectorType>> {
-            using MatrixType = Hubbard<T, ReprType>;
-        public:
-            using ScalarType = T;
-            constexpr static size_t SizeAtCompile = MatrixType::RowAtCompile;
-            constexpr static size_t MaxSizeAtCompile = MatrixType::MaxRowAtCompile;
-
-            using PacketType = typename BestPacket<ScalarType, SizeAtCompile>::Type;
-            constexpr static bool FastAssign = true;
-        };
-    }
-
     template<class T, class ReprType, class VectorType>
     class MatrixVectorProduct<Hubbard<T, ReprType>, VectorType>
             : public RValueVector<MatrixVectorProduct<Hubbard<T, ReprType>, VectorType>> {
@@ -72,4 +58,20 @@ namespace Physica::Core {
         static_assert(std::is_base_of<LValueVector<OtherDerived>, OtherDerived>::value, "[Error]: Invalid target type");
         mat.template dot<VectorType, OtherDerived, Executor>(vec, target);
     }
+}
+
+namespace Physica {
+    using namespace Core;
+
+    template<class T, class ReprType, class VectorType>
+    class Traits<MatrixVectorProduct<Hubbard<T, ReprType>, VectorType>> {
+        using MatrixType = Hubbard<T, ReprType>;
+    public:
+        using ScalarType = T;
+        constexpr static size_t SizeAtCompile = MatrixType::RowAtCompile;
+        constexpr static size_t MaxSizeAtCompile = MatrixType::MaxRowAtCompile;
+
+        using PacketType = typename Core::Internal::BestPacket<ScalarType, SizeAtCompile>::Type;
+        constexpr static bool FastAssign = true;
+    };
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 WeiBo He.
+ * Copyright 2023-2024 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -21,11 +21,6 @@
 #include "CrossProduct.h"
 
 namespace Physica::Core {
-    namespace Internal {
-        template<class AnyVector1, class AnyVector2>
-        class Traits<Core::device_obj<CrossProduct<AnyVector1, AnyVector2>>> : public Traits<CrossProduct<AnyVector1, AnyVector2>> {};
-    }
-
     template<class AnyVector1, class AnyVector2>
     class device_obj<CrossProduct<AnyVector1, AnyVector2>> : public device_obj<RValueVector<CrossProduct<AnyVector1, AnyVector2>>> {
         using host_obj = CrossProduct<AnyVector1, AnyVector2>;
@@ -52,4 +47,11 @@ namespace Physica::Core {
         /* Getters */
         [[nodiscard]] __host__ __device__ constexpr size_t getLength() const noexcept { return 3; }
     };
+}
+
+namespace Physica {
+    using namespace Core;
+
+    template<class AnyVector1, class AnyVector2>
+    class Traits<Core::device_obj<CrossProduct<AnyVector1, AnyVector2>>> : public Traits<CrossProduct<AnyVector1, AnyVector2>> {};
 }

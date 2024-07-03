@@ -23,15 +23,6 @@
 #include "Langevin.h"
 
 namespace Physica::Core {
-    template<class KineticModel> class DoubleThermo;
-
-    namespace Internal {
-        template<class KineticModel>
-        class Traits<DoubleThermo<KineticModel>> {
-        public:
-            constexpr static bool IsCentroidCoupled = false;
-        };
-    }
     /**
      * Note: Velocity rescaling algorithm[1] may give a negative probability at small number of particles condition.
      * 
@@ -40,7 +31,7 @@ namespace Physica::Core {
      */
     template<class KineticModel>
     class DoubleThermo {
-        using TraitsType = Internal::Traits<KineticModel>;
+        using TraitsType = Traits<KineticModel>;
         using ScalarType = typename TraitsType::ScalarType;
         constexpr static unsigned int Dim = TraitsType::Dim;
         constexpr static size_t NumReplica = TraitsType::NumReplica;
@@ -149,4 +140,12 @@ namespace Physica::Core {
             throw std::invalid_argument("[Error]: Number of particle is too small that negative probability is encountered");
         return sqrt(temperatureT / sol[0]);
     }
+}
+
+namespace Physica {
+    template<class KineticModel>
+    class Traits<Core::DoubleThermo<KineticModel>> {
+    public:
+        constexpr static bool IsCentroidCoupled = false;
+    };
 }

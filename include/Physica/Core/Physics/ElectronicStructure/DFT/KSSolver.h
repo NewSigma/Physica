@@ -22,7 +22,6 @@
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseHermiteMatrix.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Eigen/JacobiDavidson.h"
 #include "Physica/Core/Physics/MD/ForceModel/Ewald/Ewald.h"
-#include "Physica/Utils/TestHelper.h"
 #include "Basis/PlainWaveBasis.h"
 #include "BandGrid.h"
 #include "ChargeMixer.h"

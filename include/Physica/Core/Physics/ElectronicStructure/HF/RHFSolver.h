@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2023 WeiBo He.
+ * Copyright 2021-2024 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -28,9 +28,6 @@
 #include "Physica/Core/Math/Optimization/QuadraticProgramming/QuadraticProgramming.h"
 
 namespace Physica::Core::Physics {
-    namespace Internal {
-        template<class T> class Traits;
-    }
     /**
      * Reference:
      * [1] Jos Thijssen. Computational Physics[M].London: Cambridge university press, 2013:43-88
@@ -39,7 +36,7 @@ namespace Physica::Core::Physics {
      */
     template<class BaseSetType>
     class RHFSolver {
-        using ScalarType = typename Internal::Traits<BaseSetType>::ScalarType;
+        using ScalarType = typename Traits<BaseSetType>::ScalarType;
         using MatrixType = DenseMatrix<ScalarType, MatrixOption::Column | MatrixOption::Vector>;
 
         constexpr static size_t EDIISBufferSize = 3; //Refer EDIIS from [3]
@@ -210,7 +207,7 @@ namespace Physica::Core::Physics {
     void RHFSolver<BaseSetType>::formDensityMatrix(EDIISBuffer& densityMatrices,
                                                    MatrixType& sameSpinElectronDensity) {
         for (size_t i = 0; i < densityMatrices.getLength() - 1; ++i)
-            swap(densityMatrices[i], densityMatrices[i + 1]);
+            densityMatrices[i].swap(densityMatrices[i + 1]);
 
         const size_t baseSetSize = getBaseSetSize();
         MatrixType& electronDensity = *densityMatrices.rbegin();
@@ -261,7 +258,7 @@ namespace Physica::Core::Physics {
         }
         fock += singleHamilton;
         for (size_t i = 0; i < fockMatrices.getLength() - 1; ++i)
-            swap(fockMatrices[i], fockMatrices[i + 1]);
+            fockMatrices[i].swap(fockMatrices[i + 1]);
     }
 
     template<class BaseSetType>
@@ -276,7 +273,7 @@ namespace Physica::Core::Physics {
             const MatrixType temp = term1 - term2;
             errorMatrices[0] = (inv_cholesky * temp).compute() * inv_cholesky.transpose();
             for (size_t i = 0; i < errorMatrices.getLength() - 1; ++i)
-                swap(errorMatrices[i], errorMatrices[i + 1]);
+                errorMatrices[i].swap(errorMatrices[i + 1]);
         }
         /* Construct equation */ {
             for (size_t i = 1; i < DIISMat.getRow(); ++i) {
@@ -324,9 +321,9 @@ namespace Physica::Core::Physics {
         }
 
         for (size_t i = 0; i < fockMatrices.getLength() - 1; ++i)
-            swap(fockMatrices[i], fockMatrices[i + 1]);
+            fockMatrices[i].swap(fockMatrices[i + 1]);
         for (size_t i = 0; i < densityMatrices.getLength() - 1; ++i)
-            swap(densityMatrices[i], densityMatrices[i + 1]);
+            densityMatrices[i].swap(densityMatrices[i + 1]);
         *fockMatrices.rbegin() = newFock;
         *densityMatrices.rbegin() = newDensity;
     }

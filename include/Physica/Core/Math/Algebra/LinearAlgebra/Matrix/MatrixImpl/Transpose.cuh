@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 WeiBo He.
+ * Copyright 2023-2024 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -22,14 +22,6 @@
 #include "RValueMatrix.cuh"
 
 namespace Physica::Core {
-    namespace Internal {
-        template<class MatrixType>
-        class Traits<Core::device_obj<Transpose<MatrixType>>> : public Traits<Transpose<MatrixType>> {};
-
-        template<class VectorType>
-        class Traits<Core::device_obj<TransposeVector<VectorType>>> : public Traits<TransposeVector<VectorType>> {};
-    }
-
     template<class MatrixType>
     class device_obj<Transpose<MatrixType>> : public device_obj<RValueMatrix<Transpose<MatrixType>>> {
         using host_obj = Transpose<MatrixType>;
@@ -63,4 +55,14 @@ namespace Physica::Core {
         [[nodiscard]] __host__ __device__ constexpr static size_t getRow() noexcept { return 1; }
         [[nodiscard]] __host__ __device__ size_t getColumn() const noexcept { return vec.getLength(); }
     };
+}
+
+namespace Physica {
+    using namespace Core;
+
+    template<class MatrixType>
+    class Traits<Core::device_obj<Transpose<MatrixType>>> : public Traits<Transpose<MatrixType>> {};
+
+    template<class VectorType>
+    class Traits<Core::device_obj<TransposeVector<VectorType>>> : public Traits<TransposeVector<VectorType>> {};
 }

@@ -21,29 +21,11 @@
 #include "Physica/Core/AI/NeuralNetwork/Layer/LayerBase.h"
 
 namespace Physica::Core {
-    template<class Derived> class ConservedFieldNet;
-
-    namespace Internal {
-        template<class Derived>
-        class Traits<ConservedFieldNet<Derived>> {
-        public:
-            using ScalarType = T;
-            constexpr static bool WithBias = B;
-            using device_obj_type = Core::device_obj<LinearLayer<ScalarType, WithBias>>;
-
-            using PlainScalar = typename ScalarType::PlainScalar;
-            using InputType = Vector<ScalarType>;
-            using OutputType = InputType;
-            constexpr static bool IsTrainMode = ScalarType::isDifferentiable;
-            static_assert(std::is_same<OutputType, ScalarType>::value, "[Error]: Output is energy, which should be a scalar");
-        };
-    }
-
     template<class Derived>
     class ConservedFieldNet : public LayerBase<Derived> {
         using This = ConservedFieldNet<Derived>;
         using Base = LayerBase<Derived>;
-        using TraitsType = typename Internal::Traits<Derived>;
+        using TraitsType = typename Traits<Derived>;
     public:
         using typename Base::ScalarType;
         using typename Base::PlainScalar;
@@ -85,4 +67,22 @@ namespace Physica::Core {
         if constexpr (IsTrainMode)
             diffGuard.swap(obj.diffGuard);
     }
+}
+
+namespace Physica {
+    using namespace Core;
+
+    template<class Derived>
+    class Traits<ConservedFieldNet<Derived>> {
+    public:
+        using ScalarType = T;
+        constexpr static bool WithBias = B;
+        using device_obj_type = device_obj<LinearLayer<ScalarType, WithBias>>;
+
+        using PlainScalar = typename ScalarType::PlainScalar;
+        using InputType = Vector<ScalarType>;
+        using OutputType = InputType;
+        constexpr static bool IsTrainMode = ScalarType::isDifferentiable;
+        static_assert(std::is_same<OutputType, ScalarType>::value, "[Error]: Output is energy, which should be a scalar");
+    };
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2023 WeiBo He.
+ * Copyright 2021-2024 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -25,10 +25,6 @@ namespace Physica::Core {
     template<class MatrixType> class InverseMatrix;
     template<class MatrixType> class LValueFlatten;
 
-    namespace Internal {
-        template<class Derived>
-        class Traits<LValueMatrix<Derived>> : public Traits<Derived> {};
-    }
     /**
      * \class LValueMatrix is base class of matrixes that can be assigned to \class LValueMatrix
      * and other matrixes can be assigned to this class.
@@ -126,6 +122,11 @@ namespace Physica::Core {
         LValueMatrix(const LValueMatrix&) = default;
         LValueMatrix(LValueMatrix&&) noexcept = default;
     };
+}
+
+namespace Physica {
+    template<class Derived>
+    class Traits<Core::LValueMatrix<Derived>> : public Traits<Derived> {};
 }
 
 #include "LValueMatrixImpl/LValueMatrixImpl.h"

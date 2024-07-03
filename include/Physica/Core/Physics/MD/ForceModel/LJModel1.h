@@ -21,26 +21,13 @@
 #include "PairModel.h"
 
 namespace Physica::Core {
-    template<class ScalarType, bool IsSmallCell = false> class LJModel1;
-
-    namespace Internal {
-        template<class T, bool B>
-        class Traits<LJModel1<T, B>> : public Traits<PairModel<LJModel1<T, B>>> {
-        public:
-            using ScalarType = T;
-            constexpr static double IsSmallCell = B;
-            constexpr static bool IsPotDependOnAtomIndex = false;
-            constexpr static bool IsLatticeDependent = false;
-            constexpr static bool IsContractable = false;
-        };
-    }
     /**
      * \class LJModel1 is a variation of \class LJModel
      * 
      * Reference:
      * [1] Phys. Rev. 188, 1407; https://doi.org/10.1103/PhysRev.188.1407
      */
-    template<class ScalarType, bool IsSmallCell>
+    template<class ScalarType, bool IsSmallCell = false>
     class LJModel1 : public PairModel<LJModel1<ScalarType, IsSmallCell>> {
         using This = LJModel1<ScalarType, IsSmallCell>;
         using Base = PairModel<This>;
@@ -106,4 +93,18 @@ namespace Physica::Core {
         epsilon.swap(obj.epsilon);
         factor.swap(obj.factor);
     }
+}
+
+namespace Physica {
+    using namespace Core;
+
+    template<class T, bool B>
+    class Traits<LJModel1<T, B>> : public Traits<PairModel<LJModel1<T, B>>> {
+    public:
+        using ScalarType = T;
+        constexpr static double IsSmallCell = B;
+        constexpr static bool IsPotDependOnAtomIndex = false;
+        constexpr static bool IsLatticeDependent = false;
+        constexpr static bool IsContractable = false;
+    };
 }

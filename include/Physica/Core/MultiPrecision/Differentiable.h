@@ -23,29 +23,6 @@
 
 namespace Physica::Core {
     namespace Internal {
-        template<class T, DiffMode M, unsigned int Order_>
-        class Traits<Differentiable<T, M, Order_>> {
-            static_assert(!T::isDifferentiable, "[Error]: Nested Differentiable<> is not allowed");
-            static_assert(Order_ > 0, "[Error]: Use plain type instead of 0 order differentiable");
-            using RealT = typename T::RealType;
-            using ComplexT = typename T::ComplexType;
-        public:
-            using PlainScalar = T;
-            constexpr static DiffMode Mode = M;
-            constexpr static unsigned int Order = Order_;
-            using ScalarType = Differentiable<T, M, Order>;
-            using RealType = Differentiable<RealT, M, Order>;
-            using ComplexType = Differentiable<ComplexT, M, Order>;
-            using TrivialType = typename T::TrivialType;
-            constexpr static ScalarOption Option = T::Option;
-            constexpr static bool isComplex = T::isComplex;
-            constexpr static bool isDifferentiable = true;
-            constexpr static bool isForwardDiff = Mode == DiffMode::Forward;
-            constexpr static bool isReverseDiff = Mode == DiffMode::Reverse;
-            /* SIMD */
-            using BoolSIMDType = BoolSIMD<ScalarType, 1>;
-        };
-
         template<class ScalarType, DiffMode Mode, unsigned int Order, class OtherScalar>
         class BinaryScalarOpReturnType<Differentiable<ScalarType, Mode, Order>, OtherScalar> {
         public:
@@ -214,6 +191,33 @@ namespace Physica::Core {
     inline std::ostream& operator<<(std::ostream& os, const Differentiable<ScalarType, Mode, Order>& obj) {
         return os << obj.getValue();
     }
+}
+
+namespace Physica {
+    using namespace Core;
+
+    template<class T, DiffMode M, unsigned int Order_>
+    class Traits<Differentiable<T, M, Order_>> {
+        static_assert(!T::isDifferentiable, "[Error]: Nested Differentiable<> is not allowed");
+        static_assert(Order_ > 0, "[Error]: Use plain type instead of 0 order differentiable");
+        using RealT = typename T::RealType;
+        using ComplexT = typename T::ComplexType;
+    public:
+        using PlainScalar = T;
+        constexpr static DiffMode Mode = M;
+        constexpr static unsigned int Order = Order_;
+        using ScalarType = Differentiable<T, M, Order>;
+        using RealType = Differentiable<RealT, M, Order>;
+        using ComplexType = Differentiable<ComplexT, M, Order>;
+        using TrivialType = typename T::TrivialType;
+        constexpr static ScalarOption Option = T::Option;
+        constexpr static bool isComplex = T::isComplex;
+        constexpr static bool isDifferentiable = true;
+        constexpr static bool isForwardDiff = Mode == DiffMode::Forward;
+        constexpr static bool isReverseDiff = Mode == DiffMode::Reverse;
+        /* SIMD */
+        using BoolSIMDType = BoolSIMD<ScalarType, 1>;
+    };
 }
 
 namespace std {

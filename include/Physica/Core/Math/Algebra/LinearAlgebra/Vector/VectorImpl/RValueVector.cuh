@@ -31,7 +31,7 @@ namespace Physica::Core {
     template<class Derived>
     class device_obj<RValueVector<Derived>> : public Utils::CRTPBase<device_obj<Derived>> {
         using Base = Utils::CRTPBase<device_obj<Derived>>;
-        using TraitsType = Internal::Traits<device_obj<Derived>>;
+        using TraitsType = Traits<device_obj<Derived>>;
     public:
         using ScalarType = typename TraitsType::ScalarType;
         constexpr static size_t SizeAtCompile = TraitsType::SizeAtCompile;

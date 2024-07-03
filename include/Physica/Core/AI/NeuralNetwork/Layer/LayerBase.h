@@ -22,14 +22,10 @@
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/Vector.h"
 
 namespace Physica::Core {
-    namespace Internal {
-        template<class T> class Traits;
-    }
-
     template<class Derived>
     class LayerBase : public Utils::CRTPBase<Derived> {
         using Base = Utils::CRTPBase<Derived>;
-        using TraitsType = Internal::Traits<Derived>;
+        using TraitsType = Traits<Derived>;
     public:
         using ScalarType = typename TraitsType::ScalarType;
         using PlainScalar = typename ScalarType::PlainScalar;

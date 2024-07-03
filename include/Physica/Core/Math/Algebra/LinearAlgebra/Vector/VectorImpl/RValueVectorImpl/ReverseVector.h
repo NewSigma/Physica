@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 WeiBo He.
+ * Copyright 2023-2024 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -19,13 +19,6 @@
 #pragma once
 
 namespace Physica::Core {
-    template<class VectorType> class ReverseVector;
-
-    namespace Internal {
-        template<class VectorType>
-        class Traits<ReverseVector<VectorType>> : public Traits<VectorType> {};
-    }
-
     template<class VectorType>
     class ReverseVector final : public RValueVector<ReverseVector<VectorType>> {
         using This = ReverseVector<VectorType>;
@@ -46,4 +39,9 @@ namespace Physica::Core {
         [[nodiscard]] ScalarType calc(size_t index) const { return v.calc(getLength() - index - 1); }
         [[nodiscard]] size_t getLength() const noexcept { return v.getLength(); }
     };
+}
+
+namespace Physica {
+    template<class VectorType>
+    class Traits<Core::ReverseVector<VectorType>> : public Traits<VectorType> {};
 }

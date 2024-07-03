@@ -25,17 +25,6 @@
 #include "ForceModelImpl/AABModel.h"
 
 namespace Physica::Core {
-    template<class ScalarType, class EwaldType> class Q_TIP4P;
-
-    namespace Internal {
-        template<class ScalarType, class EwaldType>
-        class Traits<Q_TIP4P<ScalarType, EwaldType>> {
-        public:
-            constexpr static bool IsPeriodBoundary = true;
-            constexpr static bool IsLatticeDependent = true;
-            constexpr static bool IsContractable = true;
-        };
-    }
     /**
      * Reference:
      * [1] J. Chem. Phys. 131, 024501 (2009); https://doi.org/10.1063/1.3167790
@@ -47,9 +36,9 @@ namespace Physica::Core {
         using Base = AABModel<ScalarType>;
         using Base::Dim;
         using PlainScalar = typename ScalarType::PlainScalar;
-        using REwaldType = typename Internal::Traits<EwaldType>::REwaldType;
+        using REwaldType = typename Traits<EwaldType>::REwaldType;
         using BornChargeArray = typename REwaldType::BornChargeArray;
-        constexpr static bool IsSmallCell = Internal::Traits<REwaldType>::IsSmallCell;
+        constexpr static bool IsSmallCell = Traits<REwaldType>::IsSmallCell;
         using LJModelType = LJModel<ScalarType, IsSmallCell>;
         using Vector3D = Vector<ScalarType, Dim>;
     public:
@@ -636,4 +625,14 @@ namespace Physica::Core {
     inline bool Q_TIP4P<ScalarType, EwaldType>::isCellOrdered(const MDCellType& cell) {
         return Base::isCellOrdered(cell, 1, 8);
     }
+}
+
+namespace Physica {
+    template<class ScalarType, class EwaldType>
+    class Traits<Core::Q_TIP4P<ScalarType, EwaldType>> {
+    public:
+        constexpr static bool IsPeriodBoundary = true;
+        constexpr static bool IsLatticeDependent = true;
+        constexpr static bool IsContractable = true;
+    };
 }

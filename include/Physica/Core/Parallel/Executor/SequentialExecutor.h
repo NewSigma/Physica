@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 WeiBo He.
+ * Copyright 2022-2024 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -23,19 +23,6 @@
 #include "Physica/Core/Parallel/Future/DummyFuture.h"
 
 namespace Physica::Core {
-    class SequentialExecutor;
-
-    namespace Internal {
-        template<class T> class Traits;
-
-        template<>
-        class Traits<SequentialExecutor> {
-        public:
-            constexpr static bool isCPUEnabled = true;
-            constexpr static bool isCudaEnabled = false;
-        };
-    }
-
     class SequentialExecutor {
     public:
         using FutureType = DummyFuture;
@@ -91,4 +78,15 @@ namespace Physica::Core {
         assert(part == 0 && core == 1 && "[Error]: SequentialExecutor do not support other param");
         return std::make_pair(0, loopCount);
     }
+}
+
+namespace Physica {
+    template<class T> class Traits;
+
+    template<>
+    class Traits<Core::SequentialExecutor> {
+    public:
+        constexpr static bool isCPUEnabled = true;
+        constexpr static bool isCudaEnabled = false;
+    };
 }

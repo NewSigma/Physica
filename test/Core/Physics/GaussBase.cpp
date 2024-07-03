@@ -19,12 +19,12 @@
 #include "Physica/Core/Physics/ElectronicStructure/HF/GaussBase.h"
 #include "Physica/Utils/Container/Array/Array.h"
 
+using namespace Physica;
 using namespace Physica::Core;
-using namespace Physica::Core::Physics;
 
 using ScalarType = Scalar<Double>;
 
-namespace Physica::Core::Physics {
+namespace Physica {
     class Test {
     public:
         [[nodiscard]] static ScalarType helper_F(size_t v, const ScalarType& t) { return GaussBase<ScalarType>::helper_F(v, t); }

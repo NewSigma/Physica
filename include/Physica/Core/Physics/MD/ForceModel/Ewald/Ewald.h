@@ -32,18 +32,7 @@ namespace Physica::Core {
      * [1] Martin, Richard M. Electronic structure: basic theory and practical methods[M].Beijing: World publishing corporation; Cambridge: Cambridge University Press, 2017:499-503
      * [2] Comput. Phys. Commun. 95(2-3), 73-92 (1996); https://doi.org/10.1016/0010-4655(96)00016-1
      */
-    template<class ScalarType, class REwaldType = RSpaceEwald<ScalarType, false>> class Ewald;
-
-    namespace Internal {
-        template<class T1, class T2>
-        class Traits<Ewald<T1, T2>> : public Traits<T2> {
-        public:
-            using ScalarType = T1;
-            using REwaldType = T2;
-        };
-    }
-
-    template<class ScalarType, class REwaldType>
+    template<class ScalarType, class REwaldType = RSpaceEwald<ScalarType, false>>
     class Ewald : private REwaldType {
         constexpr static bool IsDeviceREwald = Utils::is_device_obj<REwaldType>::value;
         using This = Ewald<ScalarType, REwaldType>;
@@ -367,4 +356,13 @@ namespace Physica::Core {
     Ewald<ScalarType, REwaldType>::rSpaceForceConstImpl(const PositionMatrix& pos, const Vector3D& waveQ, size_t dof1, size_t dof2) const {
         return Base::forceConst(pos, waveQ, dof1, dof2);
     }
+}
+
+namespace Physica {
+    template<class T1, class T2>
+    class Traits<Core::Ewald<T1, T2>> : public Traits<T2> {
+    public:
+        using ScalarType = T1;
+        using REwaldType = T2;
+    };
 }

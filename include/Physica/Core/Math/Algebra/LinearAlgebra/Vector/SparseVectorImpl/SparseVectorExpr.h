@@ -23,18 +23,6 @@
 namespace Physica::Core {
     template<ExpressionType type, class T1, class T2 = T1> class SparseVectorExpr;
 
-    namespace Internal {
-        template<ExpressionType type, class Exp, class AnyScalar>
-        class Traits<SparseVectorExpr<type, Exp, AnyScalar>> {
-            static_assert(is_scalar<AnyScalar>::value, "[Error]: Invalid scalar type");
-        public:
-            using ScalarType = typename BinaryScalarOpReturnType<typename Exp::ScalarType, AnyScalar>::Type;
-            constexpr static size_t SizeAtCompile = Exp::SizeAtCompile;
-            constexpr static size_t MaxSizeAtCompile = Exp::MaxSizeAtCompile;
-            using PacketType = typename Internal::BestPacket<ScalarType, SizeAtCompile>::Type;
-        };
-    }
-
     template<class VectorType, class AnyScalar>
     class SparseVectorExpr<ExpressionType::Mul, VectorType, AnyScalar>
             : public RSparseVector<SparseVectorExpr<ExpressionType::Mul, VectorType, AnyScalar>> {
@@ -76,4 +64,18 @@ namespace Physica::Core {
     operator*(const ScalarBase<ScalarType>& s, const RSparseVector<VectorType>& v) noexcept {
         return v * s;
     }
+}
+
+namespace Physica {
+    using namespace Core;
+
+    template<ExpressionType type, class Exp, class AnyScalar>
+    class Traits<SparseVectorExpr<type, Exp, AnyScalar>> {
+        static_assert(is_scalar<AnyScalar>::value, "[Error]: Invalid scalar type");
+    public:
+        using ScalarType = typename Core::Internal::BinaryScalarOpReturnType<typename Exp::ScalarType, AnyScalar>::Type;
+        constexpr static size_t SizeAtCompile = Exp::SizeAtCompile;
+        constexpr static size_t MaxSizeAtCompile = Exp::MaxSizeAtCompile;
+        using PacketType = typename Core::Internal::BestPacket<ScalarType, SizeAtCompile>::Type;
+    };
 }

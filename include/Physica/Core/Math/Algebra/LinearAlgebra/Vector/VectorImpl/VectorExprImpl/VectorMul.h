@@ -58,7 +58,7 @@ namespace Physica::Core {
     template<class VectorType, class AnyScalar>
     template<class OtherDerived, class Executor>
     inline void VectorExpr<ExpressionType::Mul, VectorType, ScalarBase<AnyScalar>>::assignTo(LValueVector<OtherDerived>& v) const {
-        constexpr bool FastAssign = Internal::Traits<VectorType>::FastAssign;
+        constexpr bool FastAssign = Traits<VectorType>::FastAssign;
         if constexpr (FastAssign) {
             expr.template assignTo<OtherDerived, Executor>(v.getDerived());
             v.getDerived() *= s;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 WeiBo He.
+ * Copyright 2023-2024 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -20,15 +20,6 @@
 
 namespace Physica::Core {
     template<class Derived> class LValueGrid;
-    template<class GridType> class LGridBlock;
-
-    namespace Internal {
-        template<class GridType>
-        class Traits<LGridBlock<GridType>> {
-        public:
-            using ScalarType = typename GridType::ScalarType;
-        };
-    }
 
     template<class GridType>
     class LGridBlock : public LValueGrid<LGridBlock<GridType>> {
@@ -80,4 +71,12 @@ namespace Physica::Core {
     __host__ __device__ inline const typename LGridBlock<GridType>::ScalarType* LGridBlock<GridType>::data_ptr(Index3D index) const {
         return const_cast<This&>(*this).data_ptr(index);
     }
+}
+
+namespace Physica {
+    template<class GridType>
+    class Traits<Core::LGridBlock<GridType>> {
+    public:
+        using ScalarType = typename GridType::ScalarType;
+    };
 }

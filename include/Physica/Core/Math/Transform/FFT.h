@@ -35,29 +35,6 @@ namespace Physica::Core {
         Patient = FFTW_PATIENT,
         Exhaustive = FFTW_EXHAUSTIVE
     };
-
-    namespace Internal {
-        template<class T, size_t dim>
-        class Traits<FFT<T, dim>> {
-        public :
-            using ScalarType = T;
-            using TrivialType = typename ScalarType::TrivialType;
-            using RealType = typename ScalarType::RealType;
-            using ComplexType = typename ScalarType::ComplexType;
-            constexpr static size_t Dim = dim;
-
-            constexpr static bool isComplex = T::isComplex;
-            constexpr static bool isDifferentiable = T::isDifferentiable;
-            constexpr static bool isSinglePrec = std::is_same<TrivialType, float>::value;
-            using PlanType = typename std::conditional<isSinglePrec, fftwf_plan, fftw_plan>::type;
-            using ComplexTypeFFTW = typename std::conditional<isSinglePrec, fftwf_complex, fftw_complex>::type;
-
-            static_assert(isDifferentiable || sizeof(RealType) == sizeof(TrivialType), "[Error]: Invalid ScalarType");
-            static_assert(isDifferentiable || sizeof(ComplexType) == sizeof(ComplexTypeFFTW), "[Error]: Invalid ScalarType");
-            static_assert(Dim <= 3U, "[Error]: Dimension higher than 3 should be declared as dynamic");
-            static_assert(Dim != 0, "[Error]: Not implemented");
-        };
-    }
     /**
      * A FFT transform a tensor in r-space to a tensor in k-space.
      */
@@ -66,15 +43,14 @@ namespace Physica::Core {
             : public FFTRSpace<FFT<ScalarType, 1>, 1>
             , public FFTKSpace<FFT<ScalarType, 1>, 1> {
         using This = FFT<ScalarType, 1>;
-        using Traits = Internal::Traits<This>;
-        using TrivialType = typename Traits::TrivialType;
-        using RealType = typename Traits::RealType;
-        using ComplexType = typename Traits::ComplexType;
-        using PlanType = typename Traits::PlanType;
-        using ComplexTypeFFTW = typename Traits::ComplexTypeFFTW;
-        constexpr static bool isComplex = Traits::isComplex;
-        constexpr static bool isSinglePrec = Traits::isSinglePrec;
-        static_assert(!Traits::isDifferentiable, "[Error]: Header of differentiable fft should be included");
+        using TrivialType = typename Traits<This>::TrivialType;
+        using RealType = typename Traits<This>::RealType;
+        using ComplexType = typename Traits<This>::ComplexType;
+        using PlanType = typename Traits<This>::PlanType;
+        using ComplexTypeFFTW = typename Traits<This>::ComplexTypeFFTW;
+        constexpr static bool isComplex = Traits<This>::isComplex;
+        constexpr static bool isSinglePrec = Traits<This>::isSinglePrec;
+        static_assert(!Traits<This>::isDifferentiable, "[Error]: Header of differentiable fft should be included");
     public:
         using RSpaceType = FFTRSpace<This, 1>;
         using KSpaceType = FFTKSpace<This, 1>;
@@ -138,15 +114,14 @@ namespace Physica::Core {
               , public FFTKSpace<FFT<ScalarType, Dim>, Dim> {
         static_assert(!ScalarType::isDifferentiable, "[Error]: Not implemented");
         using This = FFT<ScalarType, Dim>;
-        using Traits = Internal::Traits<This>;
-        using TrivialType = typename Traits::TrivialType;
-        using RealType = typename Traits::RealType;
-        using ComplexType = typename Traits::ComplexType;
-        using PlanType = typename Traits::PlanType;
-        using ComplexTypeFFTW = typename Traits::ComplexTypeFFTW;
+        using TrivialType = typename Traits<This>::TrivialType;
+        using RealType = typename Traits<This>::RealType;
+        using ComplexType = typename Traits<This>::ComplexType;
+        using PlanType = typename Traits<This>::PlanType;
+        using ComplexTypeFFTW = typename Traits<This>::ComplexTypeFFTW;
         using IndexArray = Utils::Array<size_t, Dim>;
-        constexpr static bool isComplex = Traits::isComplex;
-        constexpr static bool isSinglePrec = Traits::isSinglePrec;
+        constexpr static bool isComplex = Traits<This>::isComplex;
+        constexpr static bool isSinglePrec = Traits<This>::isSinglePrec;
     public:
         using RSpaceType = FFTRSpace<This, Dim>;
         using KSpaceType = FFTKSpace<This, Dim>;
@@ -212,6 +187,29 @@ namespace Physica::Core {
         /* Friends */
         friend class FFTRSpace<This, Dim>;
         friend class FFTKSpace<This, Dim>;
+    };
+}
+
+namespace Physica {
+    template<class T, size_t dim>
+    class Traits<Core::FFT<T, dim>> {
+    public :
+        using ScalarType = T;
+        using TrivialType = typename ScalarType::TrivialType;
+        using RealType = typename ScalarType::RealType;
+        using ComplexType = typename ScalarType::ComplexType;
+        constexpr static size_t Dim = dim;
+
+        constexpr static bool isComplex = T::isComplex;
+        constexpr static bool isDifferentiable = T::isDifferentiable;
+        constexpr static bool isSinglePrec = std::is_same<TrivialType, float>::value;
+        using PlanType = typename std::conditional<isSinglePrec, fftwf_plan, fftw_plan>::type;
+        using ComplexTypeFFTW = typename std::conditional<isSinglePrec, fftwf_complex, fftw_complex>::type;
+
+        static_assert(isDifferentiable || sizeof(RealType) == sizeof(TrivialType), "[Error]: Invalid ScalarType");
+        static_assert(isDifferentiable || sizeof(ComplexType) == sizeof(ComplexTypeFFTW), "[Error]: Invalid ScalarType");
+        static_assert(Dim <= 3U, "[Error]: Dimension higher than 3 should be declared as dynamic");
+        static_assert(Dim != 0, "[Error]: Not implemented");
     };
 }
 

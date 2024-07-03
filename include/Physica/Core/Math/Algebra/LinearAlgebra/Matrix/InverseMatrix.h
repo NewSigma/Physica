@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 WeiBo He.
+ * Copyright 2021-2024 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -19,6 +19,7 @@
 #pragma once
 
 #include <cassert>
+#include "MatrixImpl/LValueMatrix.h"
 
 namespace Physica::Core {
     namespace Internal {
@@ -32,7 +33,7 @@ namespace Physica::Core {
                     target.getDerived().toUnitMatrix();
                     for (size_t i = 0; i < order_1; ++i) {
                         size_t k = i;
-                        while(copy.refFromMajorMinor(k, i).isZero()) {
+                        while (copy.refFromMajorMinor(k, i).isZero()) {
                             ++k;
                             [[maybe_unused]] const bool isNotSingular = k < order;
                             assert(isNotSingular);
@@ -41,7 +42,7 @@ namespace Physica::Core {
                             copy.majorSwap(k, i);
                             target.getDerived().majorSwap(k, i);
                         }
-                        
+
                         for (size_t j = i + 1; j < order; ++j) {
                             auto factor = copy.refFromMajorMinor(j, i) / copy.refFromMajorMinor(i, i);
                             copy.majorReduce(j, i, factor);
@@ -51,7 +52,7 @@ namespace Physica::Core {
 
                     for (size_t i = order_1; i > 0; --i) {
                         size_t k = i;
-                        while(copy.refFromMajorMinor(k, i).isZero()) {
+                        while (copy.refFromMajorMinor(k, i).isZero()) {
                             --k;
                             [[maybe_unused]] const bool isNotSingular = k < order;
                             assert(isNotSingular);
@@ -60,7 +61,7 @@ namespace Physica::Core {
                             copy.majorSwap(k, i);
                             target.getDerived().majorSwap(k, i);
                         }
-                        
+
                         for (size_t j = 0; j < i; ++j) {
                             auto factor = copy.refFromMajorMinor(j, i) / copy.refFromMajorMinor(i, i);
                             copy.majorReduce(j, i, factor);
@@ -74,7 +75,7 @@ namespace Physica::Core {
                     auto temp = SourceType::unitMatrix(order);
                     for (size_t i = 0; i < order_1; ++i) {
                         size_t k = i;
-                        while(copy.refFromMajorMinor(k, i).isZero()) {
+                        while (copy.refFromMajorMinor(k, i).isZero()) {
                             ++k;
                             assert(k < order);
                         }
@@ -92,7 +93,7 @@ namespace Physica::Core {
 
                     for (size_t i = order_1; i > 0; --i) {
                         size_t k = i;
-                        while(copy.refFromMajorMinor(k, i).isZero()) {
+                        while (copy.refFromMajorMinor(k, i).isZero()) {
                             --k;
                             assert(k < order);
                         }
@@ -149,13 +150,6 @@ namespace Physica::Core {
         };
     }
 
-    template<class MatrixType> class InverseMatrix;
-
-    namespace Internal {
-        template<class MatrixType>
-        class Traits<InverseMatrix<MatrixType>> : public Traits<MatrixType> {};
-    }
-
     template<class MatrixType>
     class InverseMatrix : public RValueMatrix<InverseMatrix<MatrixType>> {
         const MatrixType& matrix;
@@ -177,4 +171,9 @@ namespace Physica::Core {
         constexpr size_t Size = MatrixType::RowAtCompile == Dynamic ? OtherMatrix::RowAtCompile : MatrixType::RowAtCompile;
         Internal::InverseImpl<MatrixType, OtherMatrix, Size>::run(matrix, target.getDerived());
     }
+}
+
+namespace Physica {
+    template<class MatrixType>
+    class Traits<Core::InverseMatrix<MatrixType>> : public Traits<MatrixType> {};
 }

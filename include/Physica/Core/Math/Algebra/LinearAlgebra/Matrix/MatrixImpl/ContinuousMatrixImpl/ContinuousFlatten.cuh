@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 WeiBo He.
+ * Copyright 2023-2024 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -19,13 +19,6 @@
 #pragma once
 
 namespace Physica::Core {
-    namespace Internal {
-        template<class T> class Traits;
-
-        template<class MatrixType>
-        class Traits<Core::device_obj<ContinuousFlatten<MatrixType>>> : public Traits<ContinuousFlatten<MatrixType>> {};
-    }
-
     template<class MatrixType>
     class device_obj<ContinuousFlatten<MatrixType>> : public device_obj<ContinuousVector<ContinuousFlatten<MatrixType>>> {
         using host_obj = ContinuousFlatten<MatrixType>;
@@ -63,4 +56,11 @@ namespace Physica::Core {
         const size_t col = MatrixOption::columnFromMajorMinor<MatrixType>(major, minor);
         return mat.data_ptr(row, col);
     }
+}
+
+namespace Physica {
+    using namespace Core;
+
+    template<class MatrixType>
+    class Traits<Core::device_obj<ContinuousFlatten<MatrixType>>> : public Traits<ContinuousFlatten<MatrixType>> {};
 }

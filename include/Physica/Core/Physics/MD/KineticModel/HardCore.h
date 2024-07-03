@@ -18,23 +18,13 @@
  */
 #pragma once
 
+#include <Physica/Core/Exception/BadConvergenceException.h>
 #include "FreeModel.h"
-#include "Physica/Core/Exception/BadConvergenceException.h"
 
 namespace Physica::Core {
     template<class ScalarType, unsigned int Dim, size_t NumReplica> class RingPolymer;
-    template<class ScalarType, bool IsFixedBoundary, size_t NumReplica, RPMDIntegrator Integrator, class Executor = SequentialExecutor> class HardCore;
 
-    namespace Internal {
-        template<class ScalarType, bool IsFixedBoundary, size_t NumReplica, RPMDIntegrator Integrator, class Executor>
-        class Traits<HardCore<ScalarType, IsFixedBoundary, NumReplica, Integrator, Executor>> {
-            static_assert(!ScalarType::isComplex);
-        public:
-            constexpr static bool IsPeriodBoundary = !IsFixedBoundary;
-        };
-    }
-
-    template<class ScalarType, bool IsFixedBoundary, size_t NumReplica, RPMDIntegrator Integrator, class Executor>
+    template<class ScalarType, bool IsFixedBoundary, size_t NumReplica, RPMDIntegrator Integrator, class Executor = SequentialExecutor>
     class HardCore : private FreeModel<ScalarType, 1, NumReplica, Integrator> {
         using Base = FreeModel<ScalarType, 1, NumReplica, Integrator>;
         using PlainScalar = typename ScalarType::PlainScalar;
@@ -232,7 +222,7 @@ namespace Physica::Core {
     bool HardCore<ScalarType, IsFixedBoundary, NumReplica, Integrator, Executor>::checkCollision(
             [[maybe_unused]] size_t id_dof, const RingPolymerType& ringPolymer) const {
         using PacketType = typename Internal::BestPacket<ScalarType, Dynamic>::Type;
-        using BoolPacketType = typename Internal::Traits<PacketType>::BoolSIMDType;
+        using BoolPacketType = typename Traits<PacketType>::BoolSIMDType;
         const size_t numParticle = getNumParticle();
         if constexpr (NumReplica == 1) {
             auto phase = ringPolymer.asMatrix().col(0);
@@ -393,4 +383,13 @@ namespace Physica::Core {
             isGood &= elem.isPositive();
         return isGood;
     }
+}
+
+namespace Physica {
+    template<class ScalarType, bool IsFixedBoundary, size_t NumReplica, RPMDIntegrator Integrator, class Executor>
+    class Traits<Core::HardCore<ScalarType, IsFixedBoundary, NumReplica, Integrator, Executor>> {
+        static_assert(!ScalarType::isComplex);
+    public:
+        constexpr static bool IsPeriodBoundary = !IsFixedBoundary;
+    };
 }

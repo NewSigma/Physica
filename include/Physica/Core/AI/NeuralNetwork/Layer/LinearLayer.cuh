@@ -20,22 +20,10 @@
 
 #include "LinearLayer.h"
 #include "LayerBase.cuh"
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.cuh"
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DiffDenseMatrix.cuh"
+#include <Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.cuh>
+#include <Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DiffDenseMatrix.cuh>
 
 namespace Physica::Core {
-    namespace Internal {
-        template<class T, bool WithBias>
-        class Traits<Core::device_obj<LinearLayer<T, WithBias>>> : public Traits<LinearLayer<T, WithBias>> {
-            using Base = Traits<LinearLayer<T, WithBias>>;
-            using VectorType = Vector<typename Base::ScalarType>;
-            using DiffVector = Differentiable<Vector<typename Base::PlainScalar>, DiffMode::Reverse, T::Order>;
-        public:
-            using InputType = device_obj<typename std::conditional<Base::IsTrainMode, DiffVector, VectorType>::type>;
-            using OutputType = InputType;
-        };
-    }
-
     template<class ScalarType, bool WithBias>
     class device_obj<LinearLayer<ScalarType, WithBias>> : public device_obj<LayerBase<LinearLayer<ScalarType, WithBias>>> {
         static_assert(!Utils::is_device_obj<ScalarType>::value, "[Error]: Nested device_obj<> is not allowed");
@@ -197,4 +185,18 @@ namespace Physica::Core {
             result.bias = BiasType::random_any(outputDim, dist, gen);
         return result;
     }
+}
+
+namespace Physica {
+    using namespace Core;
+
+    template<class T, bool WithBias>
+    class Traits<Core::device_obj<LinearLayer<T, WithBias>>> : public Traits<LinearLayer<T, WithBias>> {
+        using Base = Traits<LinearLayer<T, WithBias>>;
+        using VectorType = Vector<typename Base::ScalarType>;
+        using DiffVector = Differentiable<Vector<typename Base::PlainScalar>, DiffMode::Reverse, T::Order>;
+    public:
+        using InputType = Core::device_obj<typename std::conditional<Base::IsTrainMode, DiffVector, VectorType>::type>;
+        using OutputType = InputType;
+    };
 }

@@ -19,12 +19,9 @@
 #pragma once
 
 #include <cstdlib>
+#include <Physica/Macro.h>
 
 namespace Physica::Core {
-    namespace Internal {
-        template<class T>
-        class Traits;
-    }
     /**
      * This enum decides how the data is stored in a matrix.
      * A dense matrix can be stored as elements or vectors in rows or columns.
@@ -44,7 +41,7 @@ namespace Physica::Core {
     public:
         template<class Matrix>
         __host__ __device__ constexpr static bool isColumnMatrix() {
-            return isAnyMajor<Matrix>() || !(Internal::Traits<Matrix>::Option & Row);
+            return isAnyMajor<Matrix>() || !(Traits<Matrix>::Option & Row);
         }
 
         template<class Matrix>
@@ -54,7 +51,7 @@ namespace Physica::Core {
 
         template<class Matrix>
         __host__ __device__ constexpr static bool isAnyMajor() {
-            return Internal::Traits<Matrix>::Option & AnyMajor;
+            return Traits<Matrix>::Option & AnyMajor;
         }
 
         template<class Matrix>
@@ -64,7 +61,7 @@ namespace Physica::Core {
 
         template<class Matrix>
         __host__ __device__ constexpr static bool isElementMatrix() {
-            return isAnyStorage<Matrix>() || Internal::Traits<Matrix>::Option & Element;
+            return isAnyStorage<Matrix>() || Traits<Matrix>::Option & Element;
         }
 
         template<class Matrix>
@@ -74,7 +71,7 @@ namespace Physica::Core {
 
         template<class Matrix>
         __host__ __device__ constexpr static bool isAnyStorage() {
-            return Internal::Traits<Matrix>::Option & AnyStorage;
+            return Traits<Matrix>::Option & AnyStorage;
         }
 
         template<class Matrix>

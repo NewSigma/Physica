@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 WeiBo He.
+ * Copyright 2023-2024 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -20,22 +20,6 @@
 
 namespace Physica::Core {
     template<class Derived> class ContinuousVector;
-    template<class VectorType, size_t Length> class ContinuousVectorBlock;
-
-    namespace Internal {
-        template<class T> class Traits;
-
-        template<class VectorType, size_t Length>
-        class Traits<ContinuousVectorBlock<VectorType, Length>> {
-        public:
-            using ScalarType = typename VectorType::ScalarType;
-            constexpr static size_t SizeAtCompile = Length;
-            constexpr static size_t MaxSizeAtCompile = Length;
-
-            using PacketType = typename Internal::BestPacket<ScalarType, SizeAtCompile>::Type;
-            constexpr static bool FastAssign = false;
-        };
-    }
 
     template<class VectorType, size_t Length>
     class ContinuousVectorBlock : public ContinuousVector<ContinuousVectorBlock<VectorType, Length>> {
@@ -141,4 +125,19 @@ namespace Physica::Core {
             return to - from;
         return Length;
     }
+}
+
+namespace Physica {
+    using namespace Core;
+
+    template<class VectorType, size_t Length>
+    class Traits<ContinuousVectorBlock<VectorType, Length>> {
+    public:
+        using ScalarType = typename VectorType::ScalarType;
+        constexpr static size_t SizeAtCompile = Length;
+        constexpr static size_t MaxSizeAtCompile = Length;
+
+        using PacketType = typename Core::Internal::BestPacket<ScalarType, SizeAtCompile>::Type;
+        constexpr static bool FastAssign = false;
+    };
 }

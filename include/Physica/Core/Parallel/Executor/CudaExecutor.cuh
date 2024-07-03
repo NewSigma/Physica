@@ -23,23 +23,20 @@
 #include "SequentialExecutor.h"
 
 namespace Physica::Core {
-    class CudaExecutor;
-
-    namespace Internal {
-        template<class T> class Traits;
-
-        template<>
-        class Traits<CudaExecutor> {
-        public:
-            constexpr static bool isCPUEnabled = false;
-            constexpr static bool isCudaEnabled = true;
-        };
-    }
     /**
      * Single thread with cuda support
      */
     class CudaExecutor : public SequentialExecutor {
     public:
         static void wait() { cudaCheck(cudaDeviceSynchronize()); }
+    };
+}
+
+namespace Physica {
+    template<>
+    class Traits<Core::CudaExecutor> {
+    public:
+        constexpr static bool isCPUEnabled = false;
+        constexpr static bool isCudaEnabled = true;
     };
 }

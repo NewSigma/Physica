@@ -21,44 +21,6 @@
 #include "RValueMatrix.h"
 
 namespace Physica::Core {
-    template<class MatrixType> class Transpose;
-
-    template<class VectorType> class TransposeVector;
-
-    namespace Internal {
-        template<class T> class Traits;
-
-        template<class MatrixType>
-        class Traits<Transpose<MatrixType>> {
-        private:
-            constexpr static int OtherMajor = MatrixOption::isColumnMatrix<MatrixType>() ? MatrixOption::Row : MatrixOption::Column;
-            constexpr static int Major = MatrixOption::isAnyMajor<MatrixType>() ? MatrixOption::AnyMajor : OtherMajor;
-            constexpr static int Storage = MatrixOption::getStorage<MatrixType>();
-        public:
-            using ScalarType = typename MatrixType::ScalarType;
-            constexpr static int Option = Major | Storage;
-            constexpr static size_t RowAtCompile = MatrixType::ColumnAtCompile;
-            constexpr static size_t ColumnAtCompile = MatrixType::RowAtCompile;
-            constexpr static size_t MaxRowAtCompile = MatrixType::MaxColumnAtCompile;
-            constexpr static size_t MaxColumnAtCompile = MatrixType::MaxRowAtCompile;
-            constexpr static size_t SizeAtCompile = MatrixType::SizeAtCompile;
-            constexpr static size_t MaxSizeAtCompile = MatrixType::MaxSizeAtCompile;
-        };
-
-        template<class VectorType>
-        class Traits<TransposeVector<VectorType>> {
-        public:
-            using ScalarType = typename VectorType::ScalarType;
-            constexpr static int Option = MatrixOption::Row | MatrixOption::Vector;
-            constexpr static size_t RowAtCompile = 1;
-            constexpr static size_t ColumnAtCompile = VectorType::SizeAtCompile;
-            constexpr static size_t MaxRowAtCompile = 1;
-            constexpr static size_t MaxColumnAtCompile = VectorType::MaxSizeAtCompile;
-            constexpr static size_t SizeAtCompile = VectorType::SizeAtCompile;
-            constexpr static size_t MaxSizeAtCompile = VectorType::MaxSizeAtCompile;
-        };
-    }
-
     template<class MatrixType>
     class Transpose : public RValueMatrix<Transpose<MatrixType>> {
         using Base = RValueMatrix<Transpose<MatrixType>>;
@@ -100,4 +62,38 @@ namespace Physica::Core {
         for (size_t i = 0; i < vec.getLength(); ++i)
             target.refFromMajorMinor(0, i) = calc(TargetType::rowFromMajorMinor(0, i), TargetType::columnFromMajorMinor(0, i));
     }
+}
+
+namespace Physica {
+    using namespace Core;
+
+    template<class MatrixType>
+    class Traits<Transpose<MatrixType>> {
+    private:
+        constexpr static int OtherMajor = MatrixOption::isColumnMatrix<MatrixType>() ? MatrixOption::Row : MatrixOption::Column;
+        constexpr static int Major = MatrixOption::isAnyMajor<MatrixType>() ? MatrixOption::AnyMajor : OtherMajor;
+        constexpr static int Storage = MatrixOption::getStorage<MatrixType>();
+    public:
+        using ScalarType = typename MatrixType::ScalarType;
+        constexpr static int Option = Major | Storage;
+        constexpr static size_t RowAtCompile = MatrixType::ColumnAtCompile;
+        constexpr static size_t ColumnAtCompile = MatrixType::RowAtCompile;
+        constexpr static size_t MaxRowAtCompile = MatrixType::MaxColumnAtCompile;
+        constexpr static size_t MaxColumnAtCompile = MatrixType::MaxRowAtCompile;
+        constexpr static size_t SizeAtCompile = MatrixType::SizeAtCompile;
+        constexpr static size_t MaxSizeAtCompile = MatrixType::MaxSizeAtCompile;
+    };
+
+    template<class VectorType>
+    class Traits<TransposeVector<VectorType>> {
+    public:
+        using ScalarType = typename VectorType::ScalarType;
+        constexpr static int Option = MatrixOption::Row | MatrixOption::Vector;
+        constexpr static size_t RowAtCompile = 1;
+        constexpr static size_t ColumnAtCompile = VectorType::SizeAtCompile;
+        constexpr static size_t MaxRowAtCompile = 1;
+        constexpr static size_t MaxColumnAtCompile = VectorType::MaxSizeAtCompile;
+        constexpr static size_t SizeAtCompile = VectorType::SizeAtCompile;
+        constexpr static size_t MaxSizeAtCompile = VectorType::MaxSizeAtCompile;
+    };
 }

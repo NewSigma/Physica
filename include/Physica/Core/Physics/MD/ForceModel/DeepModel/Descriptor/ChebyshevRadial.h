@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 WeiBo He.
+ * Copyright 2023-2024 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -23,15 +23,6 @@
 #include "Physica/Core/Exception/NotImplementedException.h"
 
 namespace Physica::Core {
-    template<class ScalarType, bool IsSmallCell> class ChebyshevRadial;
-
-    namespace Internal {
-        template<class T, bool IsSmallCell>
-        class Traits<ChebyshevRadial<T, IsSmallCell>> {
-        public:
-            using ScalarType = T;
-        };
-    }
     /**
      * Chebyshev descriptor introduced in [1]
      * 
@@ -142,4 +133,12 @@ namespace Physica::Core {
         assert(normalR.isPositive() && (normalR <= ScalarType(1)) && "[Error]: Distance out of cutoff");
         return square(cos(normalR * ScalarType(M_PI_2)));
     }
+}
+
+namespace Physica {
+    template<class T, bool IsSmallCell>
+    class Traits<Core::ChebyshevRadial<T, IsSmallCell>> {
+    public:
+        using ScalarType = T;
+    };
 }

@@ -27,7 +27,7 @@ int main() {
      * [1] Grassberger, P. and Procaccia, I.: Measuring the strangeness of strange attractors, Physica, D9 (1983) 189^208.
      */
     /* logistic */ {
-        DenseMatrix<ScalarType, MatrixOption::Column | MatrixOption::Vector, Dynamic, 1> data(30000, 1);
+        DenseMatrix<ScalarType, MatrixOption::Column | MatrixOption::Vector, Physica::Dynamic, 1> data(30000, 1);
         auto col = data.col(0);
         const ScalarType factor = 3.5699456;
         col[0] = 0.5;
@@ -40,7 +40,7 @@ int main() {
             return 1;
     }
     /* Henon map */ {
-        DenseMatrix<ScalarType, MatrixOption::Column | MatrixOption::Vector, Dynamic, 2> data(15000, 2);
+        DenseMatrix<ScalarType, MatrixOption::Column | MatrixOption::Vector, Physica::Dynamic, 2> data(15000, 2);
         auto col1 = data.col(0);
         auto col2 = data.col(1);
         const ScalarType factor1 = 1.4;

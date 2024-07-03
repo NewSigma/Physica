@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 WeiBo He.
+ * Copyright 2023-2024 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -31,7 +31,7 @@ namespace Physica::Core {
         using host_obj = PairModel<Derived>;
         using This = device_obj<PairModel<Derived>>;
         using Base = Utils::CRTPBase<device_obj<Derived>>;
-        using TraitType = Internal::Traits<Derived>;
+        using TraitType = Traits<Derived>;
 
         constexpr static bool IsPotDependOnAtomIndex = TraitType::IsPotDependOnAtomIndex;
         constexpr static bool IsSmallCell = TraitType::IsSmallCell;

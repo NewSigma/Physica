@@ -19,16 +19,6 @@
 #pragma once
 
 namespace Physica::Core {
-    template<class MatrixType> class MatrixPow;
-
-    namespace Internal {
-        template<class MatrixType>
-        class Traits<MatrixPow<MatrixType>> : public Traits<MatrixType> {
-        public:
-            constexpr static int Option = MatrixOption::AnyMajor | MatrixOption::AnyStorage;
-        };
-    }
-
     template<class MatrixType>
     class MatrixPow : public RValueMatrix<MatrixPow<MatrixType>> {
         using This = MatrixPow<MatrixType>;
@@ -70,6 +60,14 @@ namespace Physica::Core {
     [[nodiscard]] inline MatrixPow<MatrixType> pow(const RValueMatrix<MatrixType>& m, int power) noexcept {
         return MatrixPow<MatrixType>(m, power);
     }
+}
+
+namespace Physica {
+    template<class MatrixType>
+    class Traits<Core::MatrixPow<MatrixType>> : public Traits<MatrixType> {
+    public:
+        constexpr static int Option = MatrixOption::AnyMajor | MatrixOption::AnyStorage;
+    };
 }
 
 #include "MatrixPowVecProduct.h"

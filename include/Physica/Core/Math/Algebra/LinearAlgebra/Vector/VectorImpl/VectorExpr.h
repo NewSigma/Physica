@@ -19,55 +19,17 @@
 #pragma once
 
 #include <cassert>
-#include "Physica/Core/MultiPrecision/Scalar.h"
-#include "Physica/Core/MultiPrecision/ScalarImpl/ExpressionType.h"
-#include "Physica/Utils/Template/CRTPBase.h"
+#include <Physica/Core/MultiPrecision/Scalar.h>
+#include <Physica/Core/MultiPrecision/ScalarImpl/ExpressionType.h>
+#include <Physica/Utils/Template/CRTPBase.h>
 
 namespace Physica::Core {
-    using Utils::Dynamic;
     /**
      * \class VectorExpr implements template expression for vectors, which will reduce temporary objects.
      * 
      * Operations defined as \tparam T1 \tparam Type \tparam T2. e.g. vector + scalar, expression * expression
      */
-    template<ExpressionType Type, class T1, class T2 = T1>
-    class VectorExpr;
-
-    namespace Internal {
-        template<class T>
-        class Traits;
-
-        template<ExpressionType Type, class Expr1, class Expr2>
-        class Traits<VectorExpr<Type, Expr1, Expr2>> {
-            static_assert(Expr1::SizeAtCompile == Dynamic || Expr2::SizeAtCompile == Dynamic || (Expr1::SizeAtCompile == Expr2::SizeAtCompile)
-                         , "[Error]: Vector dimentions do not match");
-            using ScalarType1 = typename Expr1::ScalarType;
-            using RealType = typename ScalarType1::RealType;
-            using BinaryScalarType = typename BinaryScalarOpReturnType<ScalarType1, typename Expr2::ScalarType>::Type;
-            constexpr static bool FastAssign1 = Traits<Expr1>::FastAssign;
-            constexpr static bool FastAssign2 = Traits<Expr2>::FastAssign;
-            constexpr static bool IsAddOrSub = Type == ExpressionType::Add || Type == ExpressionType::Sub;
-        public:
-            using ScalarType = typename std::conditional<Type == ExpressionType::Abs, RealType, BinaryScalarType>::type;
-            constexpr static size_t SizeAtCompile = Expr1::SizeAtCompile > Expr2::SizeAtCompile ? Expr1::SizeAtCompile : Expr2::SizeAtCompile;
-            constexpr static size_t MaxSizeAtCompile = Expr1::MaxSizeAtCompile > Expr2::MaxSizeAtCompile ? Expr1::MaxSizeAtCompile : Expr2::MaxSizeAtCompile;
-
-            using PacketType = typename BestPacket<ScalarType, SizeAtCompile>::Type;
-            constexpr static bool FastAssign = IsAddOrSub && (FastAssign1 || FastAssign2);
-        };
-
-        template<ExpressionType Type, class Expr, class AnyScalar>
-        class Traits<VectorExpr<Type, Expr, ScalarBase<AnyScalar>>> {
-            static_assert(is_scalar<AnyScalar>::value, "[Error]: This is not a scalar type");
-        public:
-            using ScalarType = typename BinaryScalarOpReturnType<typename Expr::ScalarType, AnyScalar>::Type;
-            constexpr static size_t SizeAtCompile = Expr::SizeAtCompile;
-            constexpr static size_t MaxSizeAtCompile = Expr::MaxSizeAtCompile;
-
-            using PacketType = typename BestPacket<ScalarType, SizeAtCompile>::Type;
-            constexpr static bool FastAssign = Traits<Expr>::FastAssign;
-        };
-    }
+    template<ExpressionType Type, class T1, class T2 = T1> class VectorExpr;
     //////////////////////////////////////Minus//////////////////////////////////////
     template<class VectorType>
     class VectorExpr<ExpressionType::Minus, VectorType>
@@ -674,6 +636,41 @@ namespace Physica::Core {
             const RValueVector<VectorType>& v) noexcept {
         return VectorExpr<ExpressionType::Cos, VectorType>(v);
     }
+}
+
+namespace Physica {
+    using namespace Core;
+
+    template<ExpressionType Type, class Expr1, class Expr2>
+    class Traits<VectorExpr<Type, Expr1, Expr2>> {
+        static_assert(Expr1::SizeAtCompile == Dynamic || Expr2::SizeAtCompile == Dynamic || (Expr1::SizeAtCompile == Expr2::SizeAtCompile)
+                         , "[Error]: Vector dimentions do not match");
+        using ScalarType1 = typename Expr1::ScalarType;
+        using RealType = typename ScalarType1::RealType;
+        using BinaryScalarType = typename Core::Internal::BinaryScalarOpReturnType<ScalarType1, typename Expr2::ScalarType>::Type;
+        constexpr static bool FastAssign1 = Traits<Expr1>::FastAssign;
+        constexpr static bool FastAssign2 = Traits<Expr2>::FastAssign;
+        constexpr static bool IsAddOrSub = Type == ExpressionType::Add || Type == ExpressionType::Sub;
+    public:
+        using ScalarType = typename std::conditional<Type == ExpressionType::Abs, RealType, BinaryScalarType>::type;
+        constexpr static size_t SizeAtCompile = Expr1::SizeAtCompile > Expr2::SizeAtCompile ? Expr1::SizeAtCompile : Expr2::SizeAtCompile;
+        constexpr static size_t MaxSizeAtCompile = Expr1::MaxSizeAtCompile > Expr2::MaxSizeAtCompile ? Expr1::MaxSizeAtCompile : Expr2::MaxSizeAtCompile;
+
+        using PacketType = typename Core::Internal::BestPacket<ScalarType, SizeAtCompile>::Type;
+        constexpr static bool FastAssign = IsAddOrSub && (FastAssign1 || FastAssign2);
+    };
+
+    template<ExpressionType Type, class Expr, class AnyScalar>
+    class Traits<VectorExpr<Type, Expr, ScalarBase<AnyScalar>>> {
+        static_assert(is_scalar<AnyScalar>::value, "[Error]: This is not a scalar type");
+    public:
+        using ScalarType = typename Core::Internal::BinaryScalarOpReturnType<typename Expr::ScalarType, AnyScalar>::Type;
+        constexpr static size_t SizeAtCompile = Expr::SizeAtCompile;
+        constexpr static size_t MaxSizeAtCompile = Expr::MaxSizeAtCompile;
+
+        using PacketType = typename Core::Internal::BestPacket<ScalarType, SizeAtCompile>::Type;
+        constexpr static bool FastAssign = Traits<Expr>::FastAssign;
+    };
 }
 
 #include "VectorExprImpl/VectorAdd.h"

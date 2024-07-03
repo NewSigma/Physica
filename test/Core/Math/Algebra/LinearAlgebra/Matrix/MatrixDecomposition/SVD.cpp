@@ -25,7 +25,7 @@ using MatrixType = DenseMatrix<ScalarType, MatrixOption::Column | MatrixOption::
 
 template<class MatrixType>
 bool doTest(const MatrixType& source, double tolerance) {
-    SVD<ScalarType, Dynamic, Dynamic> svd(source);
+    SVD<ScalarType, Physica::Dynamic, Physica::Dynamic> svd(source);
     MatrixType U = svd.getMatrixU();
     MatrixType V = svd.getMatrixV();
     auto v = svd.getSingulars();

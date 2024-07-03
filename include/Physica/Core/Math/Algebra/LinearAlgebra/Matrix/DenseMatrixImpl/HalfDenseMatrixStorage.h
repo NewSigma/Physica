@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2022 WeiBo He.
+ * Copyright 2021-2024 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -21,28 +21,16 @@
 #include "DenseMatrixStorage.h"
 
 namespace Physica::Core {
-    template<class T, size_t Order = Dynamic, size_t MaxOrder = Order> class HalfDenseMatrixStorage;
-
-    namespace Internal {
-        template<class T, size_t Order, size_t MaxOrder>
-        class Traits<HalfDenseMatrixStorage<T, Order, MaxOrder>> {
-            constexpr static bool IsScalar = is_scalar<T>::value;
-            constexpr static size_t Size = Order * (Order + 1) / 2;
-            constexpr static size_t MaxSize = MaxOrder * (MaxOrder + 1) / 2;
-        public:
-            using ArrayType = typename std::conditional<IsScalar, Vector<T, Size, MaxSize>, Utils::Array<T, Size, MaxSize>>::type;
-        };
-    }
     /**
      * \class HalfDenseMatrixStorage stores half of the elements of a matrix, while the other half may be symmetric, hermitian, or etc.
-     * 
+     *
      * TODO: This class should extends ArrayBase after merging Core and Utils
      */
-    template<class T, size_t Order, size_t MaxOrder>
+    template<class T, size_t Order = Dynamic, size_t MaxOrder = Order>
     class HalfDenseMatrixStorage {
         using This = HalfDenseMatrixStorage<T, Order, MaxOrder>;
     public:
-        using ArrayType = typename Internal::Traits<This>::ArrayType;
+        using ArrayType = typename Traits<This>::ArrayType;
         using pointer = typename ArrayType::pointer;
         using const_pointer = typename ArrayType::const_pointer;
         using lvalue_reference = typename ArrayType::lvalue_reference;
@@ -138,4 +126,17 @@ namespace Physica::Core {
                      HalfDenseMatrixStorage<T, Order, MaxOrder>& __restrict mat2) noexcept {
         mat1.swap(mat2);
     }
+}
+
+namespace Physica {
+    using namespace Core;
+
+    template<class T, size_t Order, size_t MaxOrder>
+    class Traits<HalfDenseMatrixStorage<T, Order, MaxOrder>> {
+        constexpr static bool IsScalar = is_scalar<T>::value;
+        constexpr static size_t Size = Order * (Order + 1) / 2;
+        constexpr static size_t MaxSize = MaxOrder * (MaxOrder + 1) / 2;
+    public:
+        using ArrayType = typename std::conditional<IsScalar, Vector<T, Size, MaxSize>, Utils::Array<T, Size, MaxSize>>::type;
+    };
 }

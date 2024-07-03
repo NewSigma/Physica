@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 WeiBo He.
+ * Copyright 2023-2024 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -20,42 +20,6 @@
 
 namespace Physica::Core {
     template<class Derived, size_t Dim> class FFTRSpace;
-
-    namespace Internal {
-        template<class Derived>
-        class Traits<FFTRSpace<Derived, 1>> {
-            static_assert(Traits<Derived>::Dim == 1, "[Error]: Inconsistent template param");
-        public:
-            using ScalarType = typename Traits<Derived>::ScalarType;
-            constexpr static size_t SizeAtCompile = Dynamic;
-            constexpr static size_t MaxSizeAtCompile = Dynamic;
-
-            using PacketType = typename Internal::BestPacket<ScalarType, SizeAtCompile>::Type;
-            constexpr static bool FastAssign = false;
-        };
-
-        template<class Derived>
-        class Traits<FFTRSpace<Derived, 2>> {
-            static_assert(Traits<Derived>::Dim == 2, "[Error]: Inconsistent template param");
-        public:
-            using ScalarType = typename Traits<Derived>::ScalarType;
-            constexpr static int Option = MatrixOption::Row | MatrixOption::Vector;
-            constexpr static size_t RowAtCompile = Dynamic;
-            constexpr static size_t ColumnAtCompile = Dynamic;
-            constexpr static size_t MaxRowAtCompile = RowAtCompile;
-            constexpr static size_t MaxColumnAtCompile = ColumnAtCompile;
-            constexpr static size_t SizeAtCompile = RowAtCompile * ColumnAtCompile;
-            constexpr static size_t MaxSizeAtCompile = MaxRowAtCompile * MaxColumnAtCompile;
-        };
-
-        template<class Derived>
-        class Traits<FFTRSpace<Derived, 3>> {
-            static_assert(Traits<Derived>::Dim == 3, "[Error]: Inconsistent template param");
-            using T = typename Traits<Derived>::ScalarType;
-        public:
-            using ScalarType = typename Traits<Derived>::ScalarType;
-        };
-    }
 
     template<class Derived>
     class FFTRSpace<Derived, 1>
@@ -274,4 +238,42 @@ namespace Physica::Core {
             return Base::getDerived().asRealBuffer() + (index[0] * getDimY() + index[1]) * shift + index[2];
         }
     }
+}
+
+namespace Physica {
+    using namespace Core;
+
+    template<class Derived>
+    class Traits<FFTRSpace<Derived, 1>> {
+        static_assert(Traits<Derived>::Dim == 1, "[Error]: Inconsistent template param");
+    public:
+        using ScalarType = typename Traits<Derived>::ScalarType;
+        constexpr static size_t SizeAtCompile = Dynamic;
+        constexpr static size_t MaxSizeAtCompile = Dynamic;
+
+        using PacketType = typename Core::Internal::BestPacket<ScalarType, SizeAtCompile>::Type;
+        constexpr static bool FastAssign = false;
+    };
+
+    template<class Derived>
+    class Traits<FFTRSpace<Derived, 2>> {
+        static_assert(Traits<Derived>::Dim == 2, "[Error]: Inconsistent template param");
+    public:
+        using ScalarType = typename Traits<Derived>::ScalarType;
+        constexpr static int Option = MatrixOption::Row | MatrixOption::Vector;
+        constexpr static size_t RowAtCompile = Dynamic;
+        constexpr static size_t ColumnAtCompile = Dynamic;
+        constexpr static size_t MaxRowAtCompile = RowAtCompile;
+        constexpr static size_t MaxColumnAtCompile = ColumnAtCompile;
+        constexpr static size_t SizeAtCompile = RowAtCompile * ColumnAtCompile;
+        constexpr static size_t MaxSizeAtCompile = MaxRowAtCompile * MaxColumnAtCompile;
+    };
+
+    template<class Derived>
+    class Traits<FFTRSpace<Derived, 3>> {
+        static_assert(Traits<Derived>::Dim == 3, "[Error]: Inconsistent template param");
+        using T = typename Traits<Derived>::ScalarType;
+    public:
+        using ScalarType = typename Traits<Derived>::ScalarType;
+    };
 }

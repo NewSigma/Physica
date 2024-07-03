@@ -21,7 +21,7 @@
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/MatrixDecomposition/PLUDecomposition.h"
 
 namespace Physica::Core {
-    template<class T, int Option, size_t Order = Utils::Dynamic>
+    template<class T, int Option, size_t Order = Dynamic>
     class LUSolver {
         using LUType = PLUDecomposition<T, Option, Order, Order>;
         using MatrixType = typename LUType::MatrixType;

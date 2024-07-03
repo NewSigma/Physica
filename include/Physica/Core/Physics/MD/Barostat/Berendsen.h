@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 WeiBo He.
+ * Copyright 2023-2024 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -23,15 +23,6 @@
 #include "BaroType.h"
 
 namespace Physica::Core {
-    template<class ScalarType, size_t NumReplica, BaroType Type> class Berendsen;
-
-    namespace Internal {
-        template<class ScalarType, size_t NumReplica, BaroType Type>
-        class Traits<Berendsen<ScalarType, NumReplica, Type>> {
-        public:
-            constexpr static unsigned int Order = 1;
-        };
-    }
     /**
      * Berendsen barostat as introduced in [1]
      * 
@@ -210,4 +201,12 @@ namespace Physica::Core {
         }
         return result;
     }
+}
+
+namespace Physica {
+    template<class ScalarType, size_t NumReplica, BaroType Type>
+    class Traits<Core::Berendsen<ScalarType, NumReplica, Type>> {
+    public:
+        constexpr static unsigned int Order = 1;
+    };
 }

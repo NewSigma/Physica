@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2022 WeiBo He.
+ * Copyright 2021-2024 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -19,32 +19,10 @@
 #pragma once
 
 namespace Physica::Core {
-    using Utils::Dynamic;
+    template<class Derived> class LValueVector;
     /**
      * Reference a part of the given vector
      */
-    template<class T>
-    class LVectorBlock;
-
-    template<class Derived>
-    class LValueVector;
-
-    namespace Internal {
-        template<class T>
-        class Traits;
-
-        template<class VectorType>
-        class Traits<LVectorBlock<VectorType>> {
-        public:
-            using ScalarType = typename VectorType::ScalarType;
-            constexpr static size_t SizeAtCompile = Dynamic;
-            constexpr static size_t MaxSizeAtCompile = Dynamic;
-
-            using PacketType = typename Internal::BestPacket<ScalarType, SizeAtCompile>::Type;
-            constexpr static bool FastAssign = false;
-        };
-    }
-
     template<class VectorType>
     class LVectorBlock : public LValueVector<LVectorBlock<VectorType>> {
         using This = LVectorBlock<VectorType>;
@@ -96,4 +74,19 @@ namespace Physica::Core {
         assert((index + from) < to);
         return vec.data_ptr(index + from);
     }
+}
+
+namespace Physica {
+    using namespace Core;
+
+    template<class VectorType>
+    class Traits<LVectorBlock<VectorType>> {
+    public:
+        using ScalarType = typename VectorType::ScalarType;
+        constexpr static size_t SizeAtCompile = Dynamic;
+        constexpr static size_t MaxSizeAtCompile = Dynamic;
+
+        using PacketType = typename Core::Internal::BestPacket<ScalarType, SizeAtCompile>::Type;
+        constexpr static bool FastAssign = false;
+    };
 }

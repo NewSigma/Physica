@@ -46,23 +46,21 @@ constexpr size_t numSample = 300;
 constexpr size_t numStep = 800;
 constexpr size_t numSystem = 8;
 
-namespace Physica::Core {
-    class ForceModel;
+namespace Physica {
+    namespace Core {
+        class ForceModel : public LJModel1<ScalarType> {
+            constexpr static double lj_sigma = PhyConst<AU>::angstormToBohr(4.13);
+            constexpr static double lj_epsilon = PhyConst<AU>::kToTemperature(165.9);
+            constexpr static double pair_cutoff = 15;
 
-    namespace Internal {
-        template<>
-        class Traits<ForceModel> : public Traits<LJModel1<ScalarType>> {};
+            using Base = LJModel1<ScalarType>;
+        public:
+            ForceModel() : Base(lj_sigma, lj_epsilon, pair_cutoff) {}
+        };
     }
 
-    class ForceModel : public LJModel1<ScalarType> {
-        constexpr static double lj_sigma = PhyConst<AU>::angstormToBohr(4.13);
-        constexpr static double lj_epsilon = PhyConst<AU>::kToTemperature(165.9);
-        constexpr static double pair_cutoff = 15;
-
-        using Base = LJModel1<ScalarType>;
-    public:
-        ForceModel() : Base(lj_sigma, lj_epsilon, pair_cutoff) {}
-    };
+    template<>
+    class Traits<Core::ForceModel> : public Traits<Core::LJModel1<ScalarType>> {};
 }
 
 MDCell<ScalarType> makeSystem() {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2023 WeiBo He.
+ * Copyright 2022-2024 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -21,25 +21,6 @@
 #include "RValueMatrix.h"
 
 namespace Physica::Core {
-    template<class MatrixType> class RealMatrix;
-
-    namespace Internal {
-        template<class T> class Traits;
-
-        template<class MatrixType>
-        class Traits<RealMatrix<MatrixType>> {
-        public:
-            using ScalarType = typename MatrixType::ScalarType::RealType;
-            constexpr static int Option = MatrixType::Option;
-            constexpr static size_t RowAtCompile = MatrixType::RowAtCompile;
-            constexpr static size_t ColumnAtCompile = MatrixType::ColumnAtCompile;
-            constexpr static size_t MaxRowAtCompile = MatrixType::MaxRowAtCompile;
-            constexpr static size_t MaxColumnAtCompile = MatrixType::MaxColumnAtCompile;
-            constexpr static size_t SizeAtCompile = MatrixType::SizeAtCompile;
-            constexpr static size_t MaxSizeAtCompile = MatrixType::MaxSizeAtCompile;
-        };
-    }
-
     template<class MatrixType>
     class RealMatrix : public RValueMatrix<RealMatrix<MatrixType>> {
     public:
@@ -59,4 +40,19 @@ namespace Physica::Core {
     [[nodiscard]] RealMatrix<MatrixType> toRealMatrix(const RValueMatrix<MatrixType>& m) {
         return RealMatrix(m);
     }
+}
+
+namespace Physica {
+    template <class MatrixType>
+    class Traits<Core::RealMatrix<MatrixType>> {
+    public:
+        using ScalarType = typename MatrixType::ScalarType::RealType;
+        constexpr static int Option = MatrixType::Option;
+        constexpr static size_t RowAtCompile = MatrixType::RowAtCompile;
+        constexpr static size_t ColumnAtCompile = MatrixType::ColumnAtCompile;
+        constexpr static size_t MaxRowAtCompile = MatrixType::MaxRowAtCompile;
+        constexpr static size_t MaxColumnAtCompile = MatrixType::MaxColumnAtCompile;
+        constexpr static size_t SizeAtCompile = MatrixType::SizeAtCompile;
+        constexpr static size_t MaxSizeAtCompile = MatrixType::MaxSizeAtCompile;
+    };
 }

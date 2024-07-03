@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 WeiBo He.
+ * Copyright 2023-2024 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -19,22 +19,6 @@
 #pragma once
 
 namespace Physica::Core {
-    template<class MatrixType> class ContinuousFlatten;
-
-    namespace Internal {
-        template<class T> class Traits;
-
-        template<class MatrixType>
-        class Traits<ContinuousFlatten<MatrixType>> {
-        public:
-            using ScalarType = typename MatrixType::ScalarType;
-            constexpr static size_t SizeAtCompile = MatrixType::RowAtCompile * MatrixType::ColumnAtCompile;
-            constexpr static size_t MaxSizeAtCompile = MatrixType::MaxRowAtCompile * MatrixType::MaxColumnAtCompile;
-
-            constexpr static bool FastAssign = false;
-        };
-    }
-
     template<class MatrixType>
     class ContinuousFlatten : public ContinuousVector<ContinuousFlatten<MatrixType>> {
         using This = ContinuousFlatten<MatrixType>;
@@ -69,4 +53,16 @@ namespace Physica::Core {
         const size_t col = MatrixOption::columnFromMajorMinor<MatrixType>(major, minor);
         return mat.data_ptr(row, col);
     }
+}
+
+namespace Physica {
+    template<class MatrixType>
+    class Traits<Core::ContinuousFlatten<MatrixType>> {
+    public:
+        using ScalarType = typename MatrixType::ScalarType;
+        constexpr static size_t SizeAtCompile = MatrixType::RowAtCompile * MatrixType::ColumnAtCompile;
+        constexpr static size_t MaxSizeAtCompile = MatrixType::MaxRowAtCompile * MatrixType::MaxColumnAtCompile;
+
+        constexpr static bool FastAssign = false;
+    };
 }

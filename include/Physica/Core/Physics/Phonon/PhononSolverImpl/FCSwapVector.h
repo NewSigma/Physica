@@ -21,18 +21,6 @@
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/SparseVector.h"
 
 namespace Physica::Core {
-    template<class ScalarType> class FCSwapVector;
-
-    namespace Internal {
-        template<class T>
-        class Traits<FCSwapVector<T>> {
-        public:
-            using ScalarType = T;
-            constexpr static size_t SizeAtCompile = Dynamic;
-            constexpr static size_t MaxSizeAtCompile = Dynamic;
-            using PacketType = typename Internal::BestPacket<ScalarType, SizeAtCompile>::Type;
-        };
-    }
     /**
      * Force constant(FC) swap vector is the constraint vector $w$ as introduced in [1].
      * 
@@ -142,4 +130,17 @@ namespace Physica::Core {
         assert(index[2] < superSize[2] && "[Error]: Cell index out of range");
         assert(index[3] < numDOF && index[4] < numDOF && "[Error]: DOF out of range");
     }
+}
+
+namespace Physica {
+    using namespace Core; 
+
+    template<class T>
+    class Traits<FCSwapVector<T>> {
+    public:
+        using ScalarType = T;
+        constexpr static size_t SizeAtCompile = Dynamic;
+        constexpr static size_t MaxSizeAtCompile = Dynamic;
+        using PacketType = typename Core::Internal::BestPacket<ScalarType, SizeAtCompile>::Type;
+    };
 }

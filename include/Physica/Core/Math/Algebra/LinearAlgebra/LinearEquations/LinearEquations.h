@@ -32,7 +32,7 @@ namespace Physica::Core {
      * C++数值算法[M].北京: Publishing House of Electronics Industry, 2009
      */
     template<class T, int Type = MatrixOption::Column | MatrixOption::Vector
-            , size_t MaxRow = Utils::Dynamic, size_t MaxColumn = Utils::Dynamic>
+            , size_t MaxRow = Dynamic, size_t MaxColumn = Dynamic>
     class LinearEquations {
         using Operation = MatrixOperation<T, Type, MaxRow, MaxColumn>;
 

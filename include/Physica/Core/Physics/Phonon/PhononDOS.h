@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 WeiBo He.
+ * Copyright 2023-2024 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -34,7 +34,7 @@ namespace Physica::Core {
         using MDCellType = typename SolverType::MDCellType;
         using KSpaceFCGrid = typename SolverType::KSpaceFCGrid;
         using EigenValueGrid = GridStorage<Vector<ScalarType>>;
-        constexpr static unsigned int Dim = Internal::Traits<MDCellType>::Dim;
+        constexpr static unsigned int Dim = Traits<MDCellType>::Dim;
         constexpr static unsigned int ElementVolume = 8;
     protected:
         SolverType solver;

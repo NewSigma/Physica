@@ -22,16 +22,6 @@
 #include "SilveraGoldman.h"
 
 namespace Physica::Core {
-    namespace Internal {
-        template<class T, bool B, bool IsSmallCell>
-        class Traits<Core::device_obj<SilveraGoldman<T, B, IsSmallCell>>> {
-        public:
-            using ScalarType = T;
-            constexpr static bool IsPeriodBoundary = B;
-            constexpr static bool IsPotDependOnAtomIndex = false;
-            constexpr static bool IsContractable = false;
-        };
-    }
     /**
      * Potential that suits para-hydrogen
      * 
@@ -128,4 +118,17 @@ namespace Physica::Core {
         }
         return result;
     }
+}
+
+namespace Physica {
+    using namespace Core;
+
+    template<class T, bool B, bool IsSmallCell>
+    class Traits<Core::device_obj<SilveraGoldman<T, B, IsSmallCell>>> {
+    public:
+        using ScalarType = T;
+        constexpr static bool IsPeriodBoundary = B;
+        constexpr static bool IsPotDependOnAtomIndex = false;
+        constexpr static bool IsContractable = false;
+    };
 }

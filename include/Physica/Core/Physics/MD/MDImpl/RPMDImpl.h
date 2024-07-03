@@ -63,8 +63,8 @@ namespace Physica::Core {
     template<class ScalarType, unsigned int Dim, size_t NumReplica, class ForceMatrixAllocator>
     template<class ForceModel, class Executor>
     void RPMD<ScalarType, Dim, NumReplica, ForceMatrixAllocator>::updateForce(ForceModel& model) {
-        constexpr bool IsPeriodBoundary = Internal::Traits<ForceModel>::IsPeriodBoundary;
-        constexpr bool isCudaEnabled = Internal::Traits<Executor>::isCudaEnabled;
+        constexpr bool IsPeriodBoundary = Traits<ForceModel>::IsPeriodBoundary;
+        constexpr bool isCudaEnabled = Traits<Executor>::isCudaEnabled;
         static_assert(!isCudaEnabled || std::allocator_traits<ForceMatrixAllocator>::isPageLocked
                 , "[Error]: Allocator is not page locked, performance will decrease");
         if (!isContractEnabled()) {
@@ -87,7 +87,7 @@ namespace Physica::Core {
             return;
         }
 
-        constexpr bool IsContractable = Internal::Traits<ForceModel>::IsContractable;
+        constexpr bool IsContractable = Traits<ForceModel>::IsContractable;
         if constexpr (IsContractable) {
             auto kernel_uncontract = [&](unsigned int thread) {
                 const auto range = Executor::splitJob(getNumReplica(), Executor::getNumThread(), thread);
@@ -128,8 +128,8 @@ namespace Physica::Core {
              class Executor>
     void RPMD<ScalarType, Dim, NumReplica, ForceMatrixAllocator>::nve_step(KineticModel& kineticModel, ForceModel& forceModel) {
         constexpr bool isFreeModel = Internal::is_empty_force_model<ForceModel>::value;
-        constexpr bool IsPeriodBoundary1 = Internal::Traits<KineticModel>::IsPeriodBoundary;
-        constexpr bool IsPeriodBoundary2 = Internal::Traits<ForceModel>::IsPeriodBoundary;
+        constexpr bool IsPeriodBoundary1 = Traits<KineticModel>::IsPeriodBoundary;
+        constexpr bool IsPeriodBoundary2 = Traits<ForceModel>::IsPeriodBoundary;
         static_assert(isFreeModel || (IsPeriodBoundary1 == IsPeriodBoundary2), "[Error]: Inconsistent boundary condition");
         if (isFreeModel) {
             kineticModel.nve_step(ringPolymer, timeStep);
@@ -170,14 +170,14 @@ namespace Physica::Core {
             KineticModel& kineticModel,
             ForceModel& forceModel) {
         constexpr bool isFreeModel = Internal::is_empty_force_model<ForceModel>::value;
-        constexpr bool IsPeriodBoundary1 = Internal::Traits<KineticModel>::IsPeriodBoundary;
-        constexpr bool IsPeriodBoundary2 = Internal::Traits<ForceModel>::IsPeriodBoundary;
+        constexpr bool IsPeriodBoundary1 = Traits<KineticModel>::IsPeriodBoundary;
+        constexpr bool IsPeriodBoundary2 = Traits<ForceModel>::IsPeriodBoundary;
         static_assert(isFreeModel || (IsPeriodBoundary1 == IsPeriodBoundary2), "[Error]: Inconsistent boundary condition");
 
-        constexpr bool isSeedFixed = Internal::Traits<RandomPoolType>::IsSeedFixed;
+        constexpr bool isSeedFixed = Traits<RandomPoolType>::IsSeedFixed;
         using NoRandExecutor = typename std::conditional<isSeedFixed, SequentialExecutor, Executor>::type;
 
-        constexpr bool IsCentroidCoupled = Internal::Traits<Thermostat>::IsCentroidCoupled;
+        constexpr bool IsCentroidCoupled = Traits<Thermostat>::IsCentroidCoupled;
         if constexpr (IsCentroidCoupled && IsPeriodBoundary1)
             assert(thermostat.isRemoveDriftEnabled() && "[Error]: Because the KineticModel has period boundary, thermostat should remove its effect on centroid");
 
@@ -227,17 +227,17 @@ namespace Physica::Core {
             KineticModel& kineticModel,
             ForceModel& forceModel) {
         constexpr bool isFreeModel = Internal::is_empty_force_model<ForceModel>::value;
-        constexpr bool IsPeriodBoundary1 = Internal::Traits<KineticModel>::IsPeriodBoundary;
-        constexpr bool IsPeriodBoundary2 = Internal::Traits<ForceModel>::IsPeriodBoundary;
+        constexpr bool IsPeriodBoundary1 = Traits<KineticModel>::IsPeriodBoundary;
+        constexpr bool IsPeriodBoundary2 = Traits<ForceModel>::IsPeriodBoundary;
         static_assert(isFreeModel || (IsPeriodBoundary1 == IsPeriodBoundary2), "[Error]: Inconsistent boundary condition");
 
-        constexpr unsigned int BarostatOrder = Internal::Traits<Barostat>::Order;
+        constexpr unsigned int BarostatOrder = Traits<Barostat>::Order;
         static_assert(BarostatOrder == 2 || BarostatOrder == 1, "[Error]: Invalid barostat");
 
-        constexpr bool isSeedFixed = Internal::Traits<RandomPoolType>::IsSeedFixed;
+        constexpr bool isSeedFixed = Traits<RandomPoolType>::IsSeedFixed;
         using NoRandExecutor = typename std::conditional<isSeedFixed, SequentialExecutor, Executor>::type;
 
-        constexpr bool IsCentroidCoupled = Internal::Traits<Thermostat>::IsCentroidCoupled;
+        constexpr bool IsCentroidCoupled = Traits<Thermostat>::IsCentroidCoupled;
         if constexpr (IsCentroidCoupled && IsPeriodBoundary1)
             assert(thermostat.isRemoveDriftEnabled() && "[Error]: Because the KineticModel has period boundary, thermostat should remove its effect on centroid");
 
@@ -257,7 +257,7 @@ namespace Physica::Core {
             thermostat.template step<RandomPoolType, NoRandExecutor>(ringPolymer, timeStep, pool);
             barostat.template npt_step<This, ForceModel>(*this, stress, timeStep * 0.5);
             kineticModel.nve_step(ringPolymer, timeStep * 0.5);
-            if constexpr (Internal::Traits<ForceModel>::IsLatticeDependent)
+            if constexpr (Traits<ForceModel>::IsLatticeDependent)
                 forceModel.setLattice(getLattice());
             updateForce<ForceModel, Executor>(forceModel);
             forceStep(timeStep * 0.5);
@@ -289,8 +289,8 @@ namespace Physica::Core {
     template<class KineticModel, class ForceModel, class Executor>
     void RPMD<ScalarType, Dim, NumReplica, ForceMatrixAllocator>::fire_vstep(
             FireModelType& fire, KineticModel& kineticModel, ForceModel& forceModel) {
-        constexpr bool IsPeriodBoundary1 = Internal::Traits<KineticModel>::IsPeriodBoundary;
-        constexpr bool IsPeriodBoundary2 = Internal::Traits<ForceModel>::IsPeriodBoundary;
+        constexpr bool IsPeriodBoundary1 = Traits<KineticModel>::IsPeriodBoundary;
+        constexpr bool IsPeriodBoundary2 = Traits<ForceModel>::IsPeriodBoundary;
         static_assert(IsPeriodBoundary1 == IsPeriodBoundary2, "[Error]: Inconsistent boundary condition");
         static_assert(NumReplica == 1, "[Error]: Relaxing using PIMD makes no sence, NumReplica = 1 shall be enough");
         static_assert(!Internal::is_empty_force_model<ForceModel>::value, "[Error]: Relax a empty model does nothing");
@@ -310,15 +310,15 @@ namespace Physica::Core {
             CFireModel<ScalarType, Dim, Type>& cfire,
             KineticModel& kineticModel,
             ForceModel& forceModel) {
-        constexpr bool IsPeriodBoundary1 = Internal::Traits<KineticModel>::IsPeriodBoundary;
-        constexpr bool IsPeriodBoundary2 = Internal::Traits<ForceModel>::IsPeriodBoundary;
+        constexpr bool IsPeriodBoundary1 = Traits<KineticModel>::IsPeriodBoundary;
+        constexpr bool IsPeriodBoundary2 = Traits<ForceModel>::IsPeriodBoundary;
         static_assert(IsPeriodBoundary1 == IsPeriodBoundary2, "[Error]: Inconsistent boundary condition");
         static_assert(NumReplica == 1, "[Error]: Relaxing using PIMD makes no sence, NumReplica = 1 shall be enough");
         static_assert(!Internal::is_empty_force_model<ForceModel>::value, "[Error]: Relax a empty model does nothing");
 
         kineticModel.nve_step(ringPolymer, timeStep);
         cfire.nve_step(*this);
-        if constexpr (Internal::Traits<ForceModel>::IsLatticeDependent)
+        if constexpr (Traits<ForceModel>::IsLatticeDependent)
             forceModel.setLattice(getLattice());
         updateForce<ForceModel, Executor>(forceModel);
         const LatticeMatrix stress = forceModel.virial(phaseToCell(0));
@@ -506,7 +506,7 @@ namespace Physica::Core {
     template<class KineticModel, class ForceModel, class Executor>
     ScalarType RPMD<ScalarType, Dim, NumReplica, ForceMatrixAllocator>::calcPressThermo(ForceModel& model) const {
         constexpr bool isFreeModel = Internal::is_empty_force_model<ForceModel>::value;
-        constexpr bool IsPeriodBoundary = Internal::Traits<ForceModel>::IsPeriodBoundary;
+        constexpr bool IsPeriodBoundary = Traits<ForceModel>::IsPeriodBoundary;
         ScalarType result = calcKinetic<KineticModel>() / (getVolume() * (Dim * 0.5));
         if constexpr (!isFreeModel) {
             const size_t numReplica = getNumReplica();
@@ -560,7 +560,7 @@ namespace Physica::Core {
             buffer[replica] = kineticStress * reciprocal(getVolume());
 
             if constexpr (!isFreeModel) {
-                constexpr bool IsPeriodBoundary = Internal::Traits<ForceModel>::IsPeriodBoundary;
+                constexpr bool IsPeriodBoundary = Traits<ForceModel>::IsPeriodBoundary;
                 MDCellType cell = phaseToCell(replica);
                 if constexpr (IsPeriodBoundary)
                     cell.normalize();
@@ -616,7 +616,7 @@ namespace Physica::Core {
             buffer[replica] = kineticStress * reciprocal(getVolume());
 
             if constexpr (!isFreeModel) {
-                constexpr bool IsPeriodBoundary = Internal::Traits<ForceModel>::IsPeriodBoundary;
+                constexpr bool IsPeriodBoundary = Traits<ForceModel>::IsPeriodBoundary;
                 auto cell = phaseToCell(replica);
                 if constexpr (IsPeriodBoundary)
                     cell.normalize();
@@ -635,7 +635,7 @@ namespace Physica::Core {
     typename RPMD<ScalarType, Dim, NumReplica, ForceMatrixAllocator>::LatticeMatrix
     RPMD<ScalarType, Dim, NumReplica, ForceMatrixAllocator>::makeStressClassical(ForceModel& model) const {
         constexpr bool isFreeModel = Internal::is_empty_force_model<ForceModel>::value;
-        constexpr bool IsPeriodBoundary = Internal::Traits<ForceModel>::IsPeriodBoundary;
+        constexpr bool IsPeriodBoundary = Traits<ForceModel>::IsPeriodBoundary;
         LatticeMatrix result(Dim, Dim, 0);
         if constexpr (NumReplica == 1) {
             const ScalarType repVolume = reciprocal(getVolume());

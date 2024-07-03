@@ -23,14 +23,6 @@
 #include "Physica/Utils/CUDA/device_obj.cuh"
 
 namespace Physica::Core {
-    template<class HostModel, class DeviceModel> class CPUGPUModel;
-
-    namespace Internal {
-        template<class T> class Traits;
-
-        template<class HostModel, class DeviceModel>
-        class Traits<CPUGPUModel<HostModel, DeviceModel>> : public Traits<HostModel> {};
-    }
     /**
      * Given \tparam HostModel, \class CPUGPUModel enables collaborative computing on both CPU and GPU.
      */
@@ -79,7 +71,7 @@ namespace Physica::Core {
     template<class HostModel, class DeviceModel>
     template<class VectorType, class Executor>
     void CPUGPUModel<HostModel, DeviceModel>::forceAsync(const MDCellType& cell, ContinuousVector<VectorType>& result) {
-        static_assert(Internal::Traits<Executor>::isCudaEnabled, "[Error]: Invalid executor");
+        static_assert(Traits<Executor>::isCudaEnabled, "[Error]: Invalid executor");
         const auto threadId = ThreadPool::getThreadInfo().id;
         const bool useCPU = ThreadPool::isMainThread() || threadId >= getNumCudaThread();
         if (useCPU)
@@ -87,4 +79,9 @@ namespace Physica::Core {
         else
             deviceModels[threadId].template forceAsync<VectorType, CudaExecutor>(cell, result);
     }
+}
+
+namespace Physica {
+    template<class HostModel, class DeviceModel>
+    class Traits<Core::CPUGPUModel<HostModel, DeviceModel>> : public Traits<HostModel> {};
 }

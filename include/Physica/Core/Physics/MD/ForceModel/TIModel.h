@@ -22,12 +22,6 @@
 #include "Hamonic.h"
 
 namespace Physica::Core {
-    template<class ForceModel> class TIModel;
-
-    namespace Internal {
-        template<class ForceModel>
-        class Traits<TIModel<ForceModel>> : public Traits<ForceModel> {};
-    }
     /**
      * \class TIModel provides support to thermodynamic integration(TI).
      * 
@@ -36,7 +30,7 @@ namespace Physica::Core {
      */
     template<class ForceModel>
     class TIModel {
-        using ScalarType = typename Internal::Traits<ForceModel>::ScalarType;
+        using ScalarType = typename Traits<ForceModel>::ScalarType;
         using HamonicType = Hamonic<ScalarType, 3>;
         using MDCellType = typename HamonicType::MDCellType;
         using PositionMatrix = typename HamonicType::PositionMatrix;
@@ -155,4 +149,9 @@ namespace Physica::Core {
         const Vector<ScalarType> omegas = sqrt(divide(hamonic.getSpringCoeffs(), mass));
         refHelmholtzF = ScalarType(3 * PhyConst<AU>::boltzmannK) * temperatureT * ln(omegas * factor).sum();
     }
+}
+
+namespace Physica {
+    template<class ForceModel>
+    class Traits<Core::TIModel<ForceModel>> : public Traits<ForceModel> {};
 }

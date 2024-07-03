@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 WeiBo He.
+ * Copyright 2022-2024 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -18,22 +18,13 @@
  */
 #pragma once
 
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/HouseholderSequence.h"
+#include <Physica/Core/Math/Algebra/LinearAlgebra/Matrix/HouseholderSequence.h>
 
 namespace Physica::Core {
     template<class MatrixType> class BiDiagMatrixB;
-
-    namespace Internal {
-        template<class MatrixType>
-        class Traits<BiDiagMatrixB<MatrixType>> : public Traits<MatrixType> {
-        private:
-            using Base = Traits<MatrixType>;
-            using Base::Option;
-        };
-    }
     /**
      * Decomposite matrix A like A = UBV^T
-     * 
+     *
      * References:
      * [1] Golub, GeneH. Matrix computations = 矩阵计算 / 4th edition[M]. 人民邮电出版社, 2014.284-285
      */
@@ -46,7 +37,7 @@ namespace Physica::Core {
                                                                             ? MatrixType::ColumnAtCompile
                                                                             : MatrixType::RowAtCompile;
         using MainDiagVector = Vector<ScalarType, NumSingularValue>;
-        using SubDiagVector = Vector<ScalarType, NumSingularValue == 0 ? Utils::Dynamic : NumSingularValue - 1>;
+        using SubDiagVector = Vector<ScalarType, NumSingularValue == 0 ? Dynamic : NumSingularValue - 1>;
     private:
         WorkingMatrix working;
         MainDiagVector mainDiag;
@@ -194,4 +185,13 @@ namespace Physica::Core {
         }
         target(col_1, col_1) = bidiag.mainDiag[col_1];
     }
+}
+
+namespace Physica {
+    template<class MatrixType>
+    class Traits<Core::BiDiagMatrixB<MatrixType>> : public Traits<MatrixType> {
+    private:
+        using Base = Traits<MatrixType>;
+        using Base::Option;
+    };
 }

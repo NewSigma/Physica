@@ -19,32 +19,11 @@
 #pragma once
 
 namespace Physica::Core {
-    namespace Internal {
-        template<class T, size_t Size>
-        class Traits<BoolSIMD<T, Size>> {
-            static_assert(is_scalar<T>::value, "[Error]: This is not a ScalarType");
-        public:
-            using ScalarType = T;
-        private:
-            constexpr static bool isSinglePrec = ScalarType::Option == Float;
-            
-            using Size2Type = typename std::conditional<isSinglePrec, void, Vec2db>::type;
-            using Size4Type = typename std::conditional<isSinglePrec, Vec4fb, Vec4db>::type;
-            using Size8Type = typename std::conditional<isSinglePrec, Vec8fb, Vec8db>::type;
-            using Size16Type = typename std::conditional<isSinglePrec, Vec16fb, void>::type;
-            using Type1 = typename std::conditional<Size == 2, Size2Type, Size4Type>::type;
-            using Type2 = typename std::conditional<Size == 8, Size8Type, Size16Type>::type;
-        public:
-            using BaseType = typename std::conditional<Size <= 4, Type1, Type2>::type;
-        };
-    }
-
     template<class ScalarType, size_t Size>
-    class BoolSIMD : private Internal::Traits<BoolSIMD<ScalarType, Size>>::BaseType {
+    class BoolSIMD : private Traits<BoolSIMD<ScalarType, Size>>::BaseType {
         using This = BoolSIMD<ScalarType, Size>;
-        using Traits = Internal::Traits<This>;
     public:
-        using Base = typename Traits::BaseType;
+        using Base = typename Traits<This>::BaseType;
     public:
         BoolSIMD() = default;
         explicit BoolSIMD(Base value) : Base(value) {}
@@ -72,9 +51,8 @@ namespace Physica::Core {
     class BoolSIMD<ScalarType, 1> {
         static_assert(is_scalar<ScalarType>::value, "[Error]: Invalid template param");
         using This = BoolSIMD<ScalarType, 1>;
-        using Traits = Internal::Traits<This>;
     public:
-        using Base = typename Traits::BaseType;
+        using Base = typename Traits<This>::BaseType;
     private:
         bool b;
     public:
@@ -90,5 +68,27 @@ namespace Physica::Core {
         /* Getters */
         [[nodiscard]] constexpr static size_t size() { return 1; }
         [[nodiscard]] constexpr static size_t getSize() { return 1; }
+    };
+}
+
+namespace Physica {
+    using namespace Core;
+
+    template<class T, size_t Size>
+    class Traits<BoolSIMD<T, Size>> {
+        static_assert(is_scalar<T>::value, "[Error]: This is not a ScalarType");
+    public:
+        using ScalarType = T;
+    private:
+        constexpr static bool isSinglePrec = ScalarType::Option == Float;
+            
+        using Size2Type = typename std::conditional<isSinglePrec, void, Vec2db>::type;
+        using Size4Type = typename std::conditional<isSinglePrec, Vec4fb, Vec4db>::type;
+        using Size8Type = typename std::conditional<isSinglePrec, Vec8fb, Vec8db>::type;
+        using Size16Type = typename std::conditional<isSinglePrec, Vec16fb, void>::type;
+        using Type1 = typename std::conditional<Size == 2, Size2Type, Size4Type>::type;
+        using Type2 = typename std::conditional<Size == 8, Size8Type, Size16Type>::type;
+    public:
+        using BaseType = typename std::conditional<Size <= 4, Type1, Type2>::type;
     };
 }

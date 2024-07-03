@@ -26,19 +26,6 @@
 
 namespace Physica::Core {
     template<unsigned int Dim, unsigned int NumSite, bool UseInversionSymm>
-    class SpinRepr;
-
-    namespace Internal {
-        template<unsigned int I1, unsigned int I2, bool UseInversionSymm>
-        class Traits<SpinRepr<I1, I2, UseInversionSymm>> {
-        public:
-            using StateType = SpinFermion<I1, I2>;
-            constexpr static unsigned int Dim = I1;
-            constexpr static bool IsTransInvariant = false;
-        };
-    }
-
-    template<unsigned int Dim, unsigned int NumSite, bool UseInversionSymm>
     class SpinRepr : public ReprBasis<SpinRepr<Dim, NumSite, UseInversionSymm>> {
         using This = SpinRepr<Dim, NumSite, UseInversionSymm>;
         using Base = ReprBasis<This>;
@@ -188,4 +175,14 @@ namespace Physica::Core {
         assert(state.getNumSpinUpParticle() == numSpinUp && "[Error]: Unexpected state");
         assert(state.getNumSpinDownParticle() == numSpinDown && "[Error]: Unexpected state");
     }
+}
+
+namespace Physica {
+    template<unsigned int I1, unsigned int I2, bool UseInversionSymm>
+    class Traits<Core::SpinRepr<I1, I2, UseInversionSymm>> {
+    public:
+        using StateType = SpinFermion<I1, I2>;
+        constexpr static unsigned int Dim = I1;
+        constexpr static bool IsTransInvariant = false;
+    };
 }

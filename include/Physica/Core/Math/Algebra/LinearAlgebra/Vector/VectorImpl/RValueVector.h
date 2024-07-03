@@ -40,8 +40,6 @@ namespace Physica::Core {
     template<class Derived> class RValueMatrix;
 
     namespace Internal {
-        template<class T> class Traits;
-
         template<class VectorType1, class VectorType2>
         class EnableSIMD {
             using ScalarType = typename VectorType1::ScalarType;
@@ -66,10 +64,10 @@ namespace Physica::Core {
         static_assert(!std::is_volatile<Derived>::value, "[Error]: A common mistake, volatile is unnecessary");
         using Base = Utils::CRTPBase<Derived>;
     public:
-        using ScalarType = typename Internal::Traits<Derived>::ScalarType;
+        using ScalarType = typename Traits<Derived>::ScalarType;
         using PlainScalar = typename ScalarType::PlainScalar;
-        constexpr static size_t SizeAtCompile = Internal::Traits<Derived>::SizeAtCompile;
-        constexpr static size_t MaxSizeAtCompile = Internal::Traits<Derived>::MaxSizeAtCompile;
+        constexpr static size_t SizeAtCompile = Traits<Derived>::SizeAtCompile;
+        constexpr static size_t MaxSizeAtCompile = Traits<Derived>::MaxSizeAtCompile;
         using ColMatrix = DenseMatrix<ScalarType, MatrixOption::Column | MatrixOption::Vector, SizeAtCompile, 1, MaxSizeAtCompile, 1, Utils::HostAllocator<ScalarType>>;
         using RowMatrix = DenseMatrix<ScalarType, MatrixOption::Row | MatrixOption::Vector, 1, SizeAtCompile, 1, MaxSizeAtCompile, Utils::HostAllocator<ScalarType>>;
         constexpr static bool isReverseDiff = ScalarType::isReverseDiff;

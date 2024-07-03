@@ -18,22 +18,9 @@
  */
 #pragma once
 
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/VectorImpl/LValueVector.h"
+#include <Physica/Core/Math/Algebra/LinearAlgebra/Vector/VectorImpl/LValueVector.h>
 
 namespace Physica::Core {
-    template<class MatrixType, bool isLValueMatrix> class DiagVector;
-
-    namespace Internal {
-        template<class MatrixType, bool isLValueMatrix>
-        class Traits<DiagVector<MatrixType, isLValueMatrix>> {
-            static_assert(std::is_convertible<MatrixType&, Core::LValueMatrix<MatrixType>&>::value == isLValueMatrix, "[Error]: Invalid LValueMatrix");
-        public:
-            using ScalarType = typename MatrixType::ScalarType;
-            constexpr static size_t SizeAtCompile = MatrixType::RowAtCompile > MatrixType::ColumnAtCompile ? MatrixType::RowAtCompile : MatrixType::ColumnAtCompile;
-            constexpr static size_t MaxSizeAtCompile = MatrixType::MaxRowAtCompile > MatrixType::MaxColumnAtCompile ? MatrixType::MaxRowAtCompile : MatrixType::MaxColumnAtCompile;
-        };
-    }
-
     template<class MatrixType, bool isLValueMatrix>
     class DiagVector : public RValueVector<DiagVector<MatrixType, isLValueMatrix>> {
         const MatrixType& mat;
@@ -64,5 +51,18 @@ namespace Physica::Core {
         [[nodiscard]] size_t getLength() const noexcept { return mat.getRow(); }
         [[nodiscard]] __host__ __device__ ScalarType* data_ptr(size_t index) { return mat.data_ptr(index, index); }
         [[nodiscard]] __host__ __device__ const ScalarType* data_ptr(size_t index) const { return mat.data_ptr(index, index); }
+    };
+}
+
+namespace Physica {
+    using namespace Core;
+
+    template<class MatrixType, bool isLValueMatrix>
+    class Traits<DiagVector<MatrixType, isLValueMatrix>> {
+        static_assert(std::is_convertible<MatrixType&, LValueMatrix<MatrixType>&>::value == isLValueMatrix, "[Error]: Invalid LValueMatrix");
+    public:
+        using ScalarType = typename MatrixType::ScalarType;
+        constexpr static size_t SizeAtCompile = MatrixType::RowAtCompile > MatrixType::ColumnAtCompile ? MatrixType::RowAtCompile : MatrixType::ColumnAtCompile;
+        constexpr static size_t MaxSizeAtCompile = MatrixType::MaxRowAtCompile > MatrixType::MaxColumnAtCompile ? MatrixType::MaxRowAtCompile : MatrixType::MaxColumnAtCompile;
     };
 }

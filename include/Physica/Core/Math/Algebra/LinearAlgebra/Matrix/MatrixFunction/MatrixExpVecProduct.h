@@ -23,12 +23,6 @@
 
 namespace Physica::Core {
     template<class MatrixType, class VectorType> class MatrixVectorProduct;
-
-    namespace Internal {
-        template<class MatrixType, class VectorType>
-        class Traits<MatrixVectorProduct<MatrixExp<MatrixType>, VectorType>>
-                : public Traits<MatrixVectorProduct<MatrixType, VectorType>> {};
-    }
     /**
      * Reference:
      * [1] SIAM J. Sci. Comput. 33(2), 488–511 (2011); https://doi.org/10.1137/100788860
@@ -195,4 +189,10 @@ namespace Physica::Core {
         const RealType norm1 = pow(mexp.getMatrix() - traceMu * unit, order).template norm1_power<Executor>(MaxNormIteration);
         return pow(norm1, reciprocal(RealType(order)));
     }
+}
+
+namespace Physica {
+    template<class MatrixType, class VectorType>
+    class Traits<Core::MatrixVectorProduct<MatrixExp<MatrixType>, VectorType>>
+            : public Traits<Core::MatrixVectorProduct<MatrixType, VectorType>> {};
 }

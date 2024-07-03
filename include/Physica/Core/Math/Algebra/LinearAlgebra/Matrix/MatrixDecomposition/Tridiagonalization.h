@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 WeiBo He.
+ * Copyright 2022-2024 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -18,27 +18,12 @@
  */
 #pragma once
 
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseSymmMatrix.h"
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseHermiteMatrix.h"
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/HouseholderSequence.h"
+#include <Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseSymmMatrix.h>
+#include <Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseHermiteMatrix.h>
+#include <Physica/Core/Math/Algebra/LinearAlgebra/Matrix/HouseholderSequence.h>
 
 namespace Physica::Core {
     template<class ScalarType, size_t Order> class TridiagonalMatrixT;
-
-    namespace Internal {
-        template<class T, size_t Order>
-        class Traits<TridiagonalMatrixT<T, Order>> {
-        public:
-            using ScalarType = T;
-            constexpr static int Option = MatrixOption::AnyMajor | MatrixOption::Element;
-            constexpr static size_t RowAtCompile = Order;
-            constexpr static size_t ColumnAtCompile = Order;
-            constexpr static size_t MaxRowAtCompile = Order;
-            constexpr static size_t MaxColumnAtCompile = Order;
-            constexpr static size_t SizeAtCompile = RowAtCompile * ColumnAtCompile;
-            constexpr static size_t MaxSizeAtCompile = MaxRowAtCompile * MaxColumnAtCompile;
-        };
-    }
     /**
      * Decomposite hermite matrix A like A = QTQ^H
      * 
@@ -195,4 +180,21 @@ namespace Physica::Core {
         target(i - 1, i) = target(i, i - 1).conjugate();
         target(i, i) = tri.working.calc(i, i);
     }
+}
+
+namespace Physica {
+    using namespace Core;
+
+    template<class T, size_t Order>
+    class Traits<TridiagonalMatrixT<T, Order>> {
+    public:
+        using ScalarType = T;
+        constexpr static int Option = MatrixOption::AnyMajor | MatrixOption::Element;
+        constexpr static size_t RowAtCompile = Order;
+        constexpr static size_t ColumnAtCompile = Order;
+        constexpr static size_t MaxRowAtCompile = Order;
+        constexpr static size_t MaxColumnAtCompile = Order;
+        constexpr static size_t SizeAtCompile = RowAtCompile * ColumnAtCompile;
+        constexpr static size_t MaxSizeAtCompile = MaxRowAtCompile * MaxColumnAtCompile;
+    };
 }

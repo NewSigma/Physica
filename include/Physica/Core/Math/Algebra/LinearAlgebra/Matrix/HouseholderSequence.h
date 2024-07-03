@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2023 WeiBo He.
+ * Copyright 2020-2024 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -18,30 +18,15 @@
  */
 #pragma once
 
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/Householder.h"
+#include <Physica/Core/Math/Algebra/LinearAlgebra/Vector/Householder.h>
 
 namespace Physica::Core {
-    template<class MatrixType, bool ColWiseRead> class HouseholderSequence;
-
-    namespace Internal {
-        template<class MatrixType, bool ColWiseRead>
-        class Traits<HouseholderSequence<MatrixType, ColWiseRead>> {
-        public:
-            using ScalarType = typename MatrixType::ScalarType;
-            constexpr static size_t RowAtCompile = Dynamic;
-            constexpr static size_t ColumnAtCompile = Dynamic;
-            constexpr static size_t MaxRowAtCompile = MatrixType::MaxRowAtCompile;
-            constexpr static size_t MaxColumnAtCompile = MaxRowAtCompile;
-            constexpr static size_t SizeAtCompile = Dynamic;
-            constexpr static size_t MaxSizeAtCompile = MaxRowAtCompile * MaxColumnAtCompile;
-        };
-    }
     /**
      * Construct using a lower triangular matrix, echo column represents a householder transformation
-     * 
+     *
      * \tparam ColWiseRead
      * Read data from columns of source, otherwise read from rows
-     * 
+     *
      * Reference:
      * [1] Eigen https://eigen.tuxfamily.org/
      */
@@ -107,4 +92,18 @@ namespace Physica::Core {
     inline void HouseholderSequence<MatrixType, ColWiseRead>::setShift(size_t shift_) {
         shift = shift_;
     }
+}
+
+namespace Physica {
+    template<class MatrixType, bool ColWiseRead>
+    class Traits<Core::HouseholderSequence<MatrixType, ColWiseRead>> {
+    public:
+        using ScalarType = typename MatrixType::ScalarType;
+        constexpr static size_t RowAtCompile = Dynamic;
+        constexpr static size_t ColumnAtCompile = Dynamic;
+        constexpr static size_t MaxRowAtCompile = MatrixType::MaxRowAtCompile;
+        constexpr static size_t MaxColumnAtCompile = MaxRowAtCompile;
+        constexpr static size_t SizeAtCompile = Dynamic;
+        constexpr static size_t MaxSizeAtCompile = MaxRowAtCompile * MaxColumnAtCompile;
+    };
 }

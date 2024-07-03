@@ -18,35 +18,18 @@
  */
 #pragma once
 
+#include <Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h>
+#include <Physica/Utils/CUDA/PlainStruct.h>
 #include "LayerBase.h"
-#include "Physica/Utils/CUDA/PlainStruct.h"
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h"
 
 namespace Physica::Core {
-    template<class ScalarType, bool WithBias = true> class LinearLayer;
-
-    namespace Internal {
-        template<class T, bool B>
-        class Traits<LinearLayer<T, B>> {
-        public:
-            using ScalarType = T;
-            constexpr static bool WithBias = B;
-            using device_obj_type = Core::device_obj<LinearLayer<ScalarType, WithBias>>;
-
-            using PlainScalar = typename ScalarType::PlainScalar;
-            using InputType = Vector<ScalarType>;
-            using OutputType = InputType;
-            constexpr static bool IsTrainMode = ScalarType::isDifferentiable;
-        };
-    }
-
-    template<class ScalarType, bool WithBias>
+    template<class ScalarType, bool WithBias = true>
     class LinearLayer : public LayerBase<LinearLayer<ScalarType, WithBias>> {
         using This = LinearLayer<ScalarType, WithBias>;
         using Base = LayerBase<This>;
-        using typename Base::PlainScalar;
         using typename Base::InputType;
         using typename Base::OutputType;
+        using typename Base::PlainScalar;
         constexpr static int Option = MatrixOption::Row | MatrixOption::Vector;
         using MatrixType = DenseMatrix<ScalarType, Option>;
         using BiasType = typename std::conditional<WithBias, InputType, PlainStruct<void>>::type;
@@ -160,4 +143,21 @@ namespace Physica::Core {
         if constexpr (WithBias)
             bias.swap(obj.bias);
     }
+}
+
+namespace Physica {
+    using namespace Core;
+
+    template<class T, bool B>
+    class Traits<LinearLayer<T, B>> {
+    public:
+        using ScalarType = T;
+        constexpr static bool WithBias = B;
+        using device_obj_type = Core::device_obj<LinearLayer<ScalarType, WithBias>>;
+
+        using PlainScalar = typename ScalarType::PlainScalar;
+        using InputType = Vector<ScalarType>;
+        using OutputType = InputType;
+        constexpr static bool IsTrainMode = ScalarType::isDifferentiable;
+    };
 }

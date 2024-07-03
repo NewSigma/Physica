@@ -29,9 +29,28 @@
 #include "Physica/Core/Exception/NotImplementedException.h"
 #include "Physica/Core/IO/HDF5/HDF5.h"
 
+namespace Physica {
+    using namespace Core;
+
+    template<ScalarOption Option_>
+    class Traits<Scalar<Option_>> {
+        using Helper = typename std::conditional<Option_ == Float, float, double>::type;
+    public:
+        using ScalarType = Scalar<Option_>;
+        using RealType = ScalarType;
+        using ComplexType = ComplexScalar<ScalarType>;
+        using TrivialType = typename std::conditional<Option_ == MultiPrecision, Scalar<Option_>, Helper>::type;
+        using PlainScalar = ScalarType;
+        constexpr static ScalarOption Option = Option_;
+        constexpr static bool isComplex = false;
+        constexpr static bool isDifferentiable = false;
+        constexpr static bool isForwardDiff = false;
+        constexpr static bool isReverseDiff = false;
+        constexpr static unsigned int Order = 0;
+    };
+}
+
 namespace Physica::Core {
-    //Forward declarations
-    template<class AnyScalar> class ComplexScalar;
     template<class RandomGenerator, typename RandomGenerator::result_type FixedSeed> class RandomPool;
     template<class ScalarType, class RandomPoolType> class GaussRandomPool;
     template<ScalarOption Option> __host__ __device__ inline Scalar<Option> abs(const Scalar<Option>& s) noexcept;
@@ -40,22 +59,6 @@ namespace Physica::Core {
     template<ScalarOption Option> __host__ __device__ inline Scalar<Option> ln(const Scalar<Option>& s) noexcept;
 
     namespace Internal {
-        template<ScalarOption option_>
-        class Traits<Scalar<option_>> {
-            using Helper = typename std::conditional<option_ == Float, float, double>::type;
-        public:
-            using ScalarType = Scalar<option_>;
-            using RealType = ScalarType;
-            using ComplexType = ComplexScalar<ScalarType>;
-            using TrivialType = typename std::conditional<option_ == MultiPrecision, Scalar<option_>, Helper>::type;
-            using PlainScalar = ScalarType;
-            constexpr static ScalarOption Option = option_;
-            constexpr static bool isComplex = false;
-            constexpr static bool isDifferentiable = false;
-            constexpr static bool isForwardDiff = false;
-            constexpr static bool isReverseDiff = false;
-            constexpr static unsigned int Order = 0;
-        };
         /**
          * This class return a type that can exactly represent the two input scalars.
          */
@@ -356,4 +359,5 @@ namespace std {
 }
 
 #include "ScalarImpl/ScalarImpl.h"
+#include "Const.h"
 #include "SIMD.h"

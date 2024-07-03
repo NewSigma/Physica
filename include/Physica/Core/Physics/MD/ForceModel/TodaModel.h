@@ -21,17 +21,6 @@
 #include "EmptyForceModel.h"
 
 namespace Physica::Core {
-    template<class ScalarType, bool IsPeriodBoundary> class TodaModel;
-
-    namespace Internal {
-        template<class T, bool B>
-        class Traits<TodaModel<T, B>> {
-        public:
-            using ScalarType = T;
-            constexpr static bool IsPeriodBoundary = B;
-            constexpr static bool IsContractable = false;
-        };
-    }
     /**
      * Reference:
      * [1] T. Hatano, Phys. Rev. E 59, R1(R) (1999); https://doi.org/10.1103/PhysRevE.59.R1
@@ -269,4 +258,14 @@ namespace Physica::Core {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         springLength.swap(obj.springLength);
     }
+}
+
+namespace Physica {
+    template<class T, bool B>
+    class Traits<Core::TodaModel<T, B>> {
+    public:
+        using ScalarType = T;
+        constexpr static bool IsPeriodBoundary = B;
+        constexpr static bool IsContractable = false;
+    };
 }

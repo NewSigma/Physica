@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 WeiBo He.
+ * Copyright 2023-2024 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -22,16 +22,6 @@
 #include "DataSpaceImpl/SubDataSpace.h"
 
 namespace Physica::Core {
-    template<size_t Dim> class H5DataSpace;
-
-    namespace Internal {
-        template<size_t S>
-        class Traits<H5DataSpace<S>> {
-        public:
-            constexpr static size_t Dim = S;
-        };
-    }
-
     template<size_t Dim>
     class H5DataSpace : public DataSpaceBase<H5DataSpace<Dim>>, public H5::DataSpace {
         using Base = DataSpaceBase<H5DataSpace<Dim>>;
@@ -58,8 +48,10 @@ namespace Physica::Core {
         H5DataSpace& operator=(H5DataSpace&&) noexcept = delete;
         /* Operations */
         void selectHyperslab(H5S_seloper_t op, const SizeArray& count, const SizeArray& start);
-        template<size_t SubDim> [[nodiscard]] inline SubDataSpace<This, SubDim> tail(size_t from);
-        template<size_t SubDim> [[nodiscard]] inline const SubDataSpace<This, SubDim> tail(size_t from) const;
+        template<size_t SubDim>
+        [[nodiscard]] inline SubDataSpace<This, SubDim> tail(size_t from);
+        template<size_t SubDim>
+        [[nodiscard]] inline const SubDataSpace<This, SubDim> tail(size_t from) const;
         /* Getters */
         [[nodiscard]] const ImplType& asH5Type() const noexcept { return *this; }
         [[nodiscard]] ImplType& asH5Type() noexcept { return *this; }
@@ -79,14 +71,14 @@ namespace Physica::Core {
 
     template<size_t Dim>
     H5DataSpace<Dim>::H5DataSpace(const SizeArray& dims)
-            : H5DataSpace(H5::DataSpace(Dim == Utils::Dynamic ? dims.getLength() : Dim, dims.data())) {}
+            : H5DataSpace(H5::DataSpace(Dim == Dynamic ? dims.getLength() : Dim, dims.data())) {}
 
     template<size_t Dim>
     H5DataSpace<Dim>::H5DataSpace(std::initializer_list<SizeType> dims) : H5DataSpace(SizeArray(std::move(dims))) {}
 
     template<size_t Dim>
     H5DataSpace<Dim>::H5DataSpace(const SizeArray& dims, const SizeArray& maxdims)
-            : H5DataSpace(H5::DataSpace(Dim == Utils::Dynamic ? dims.getLength() : Dim, dims.data(), maxdims.data())) {}
+            : H5DataSpace(H5::DataSpace(Dim == Dynamic ? dims.getLength() : Dim, dims.data(), maxdims.data())) {}
 
     template<size_t Dim>
     H5DataSpace<Dim>::H5DataSpace(const H5::DataSpace& obj) : ImplType(obj) {}
@@ -120,7 +112,7 @@ namespace Physica::Core {
 
     template<size_t Dim>
     inline size_t H5DataSpace<Dim>::getDim() const noexcept {
-        if constexpr (Dim == Utils::Dynamic)
+        if constexpr (Dim == Dynamic)
             return getSimpleExtentNdims();
         else
             return Dim;
@@ -142,4 +134,12 @@ namespace Physica::Core {
         sizes[dim] = newSize;
         setExtentSimple(sizes.getLength(), sizes.data());
     }
+}
+
+namespace Physica {
+    template<size_t S>
+    class Traits<Core::H5DataSpace<S>> {
+    public:
+        constexpr static size_t Dim = S;
+    };
 }

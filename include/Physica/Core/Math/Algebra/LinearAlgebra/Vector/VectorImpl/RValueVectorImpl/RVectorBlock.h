@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 WeiBo He.
+ * Copyright 2022-2024 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -19,32 +19,10 @@
 #pragma once
 
 namespace Physica::Core {
-    using Utils::Dynamic;
+    template<class Derived> class RValueVector;
     /**
      * Reference a part of the given vector
      */
-    template<class T>
-    class RVectorBlock;
-
-    template<class Derived>
-    class RValueVector;
-
-    namespace Internal {
-        template<class T>
-        class Traits;
-
-        template<class VectorType>
-        class Traits<RVectorBlock<VectorType>> {
-        public:
-            using ScalarType = typename VectorType::ScalarType;
-            constexpr static size_t SizeAtCompile = Dynamic;
-            constexpr static size_t MaxSizeAtCompile = Dynamic;
-
-            using PacketType = typename Internal::BestPacket<ScalarType, SizeAtCompile>::Type;
-            constexpr static bool FastAssign = false;
-        };
-    }
-
     template<class VectorType>
     class RVectorBlock : public RValueVector<RVectorBlock<VectorType>> {
     public:
@@ -75,4 +53,19 @@ namespace Physica::Core {
 
     template<class VectorType>
     RVectorBlock<VectorType>::RVectorBlock(const RValueVector<VectorType>& vec_, size_t from_) : RVectorBlock(vec_, from_, vec_.getLength()) {}
+}
+
+namespace Physica {
+    using namespace Core;
+
+    template<class VectorType>
+    class Traits<RVectorBlock<VectorType>> {
+    public:
+        using ScalarType = typename VectorType::ScalarType;
+        constexpr static size_t SizeAtCompile = Dynamic;
+        constexpr static size_t MaxSizeAtCompile = Dynamic;
+
+        using PacketType = typename Core::Internal::BestPacket<ScalarType, SizeAtCompile>::Type;
+        constexpr static bool FastAssign = false;
+    };
 }

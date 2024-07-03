@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2022 WeiBo He.
+ * Copyright 2020-2024 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -30,13 +30,13 @@ namespace Physica::Core {
     class Element : public Utils::CRTPBase<Derived> {
         using Base = Utils::CRTPBase<Derived>;
     public:
-        using ScalarType = typename Internal::Traits<Derived>::ScalarType;
-        constexpr static unsigned int Dim = Internal::Traits<Derived>::Dim;
-        constexpr static unsigned int Order = Internal::Traits<Derived>::Order;
-        constexpr static unsigned int DegreeOfFreedom = Internal::Traits<Derived>::DegreeOfFreedom;
+        using ScalarType = typename Traits<Derived>::ScalarType;
+        constexpr static unsigned int Dim = Traits<Derived>::Dim;
+        constexpr static unsigned int Order = Traits<Derived>::Order;
+        constexpr static unsigned int DegreeOfFreedom = Traits<Derived>::DegreeOfFreedom;
         using IndexArray = Utils::Array<size_t, DegreeOfFreedom>;
         using VectorType = Vector<ScalarType, Dim>;
-        using MatrixType = typename Internal::Traits<Derived>::MatrixType;
+        using MatrixType = typename Traits<Derived>::MatrixType;
         static_assert(!ScalarType::isComplex, "[Error]: Complex scalar is not allowed");
     protected:
         IndexArray globalNodes;

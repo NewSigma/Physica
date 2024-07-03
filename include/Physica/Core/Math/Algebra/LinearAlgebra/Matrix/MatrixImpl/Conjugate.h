@@ -19,20 +19,6 @@
 #pragma once
 
 namespace Physica::Core {
-    template<class MatrixType> class Conjugate;
-
-    template<class VectorType> class ConjugateVector;
-
-    namespace Internal {
-        template<class T> class Traits;
-
-        template<class MatrixType>
-        class Traits<Conjugate<MatrixType>> : public Traits<MatrixType> {};
-
-        template<class VectorType>
-        class Traits<ConjugateVector<VectorType>> : public Traits<VectorType> {};
-    }
-
     template<class MatrixType>
     class Conjugate : public RValueMatrix<Conjugate<MatrixType>> {
     public:
@@ -71,4 +57,14 @@ namespace Physica::Core {
         for (size_t i = 0; i < vec.getLength(); ++i)
             target[i] = calc(i);
     }
+}
+
+namespace Physica {
+    using namespace Core;
+
+    template<class MatrixType>
+    class Traits<Conjugate<MatrixType>> : public Traits<MatrixType> {};
+
+    template<class VectorType>
+    class Traits<ConjugateVector<VectorType>> : public Traits<VectorType> {};
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2022 WeiBo He.
+ * Copyright 2020-2024 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -18,25 +18,10 @@
  */
 #pragma once
 
+#include <Physica/Core/Math/Calculus/PDE/FEM/Mesh.h>
 #include "Element.h"
-#include "Physica/Core/Math/Calculus/PDE/FEM/Mesh.h"
 
 namespace Physica::Core {
-    template<class ScalarType> class Rectangle1;
-
-    namespace Internal {
-        template<class T>
-        class Traits<Rectangle1<T>> {
-        public:
-            constexpr static unsigned int Dim = 2;
-            constexpr static unsigned int Order = 1;
-            constexpr static unsigned int NumPoint = 4;
-            constexpr static unsigned int DegreeOfFreedom = NumPoint * Order;
-            using ScalarType = T;
-            using MatrixType = DenseMatrix<ScalarType, MatrixOption::Column | MatrixOption::Element, Dim, Dim>;
-        };
-    }
-
     template<class ScalarType>
     class Rectangle1 : public Element<Rectangle1<ScalarType>> {
     public:
@@ -80,6 +65,19 @@ namespace Physica::Core {
                                                                     VectorType topRight,
                                                                     size_t numElementX,
                                                                     size_t numElementY);
+    };
+}
+
+namespace Physica {
+    template<class T>
+    class Traits<Core::Rectangle1<T>> {
+    public:
+        constexpr static unsigned int Dim = 2;
+        constexpr static unsigned int Order = 1;
+        constexpr static unsigned int NumPoint = 4;
+        constexpr static unsigned int DegreeOfFreedom = NumPoint * Order;
+        using ScalarType = T;
+        using MatrixType = Core::DenseMatrix<ScalarType, MatrixOption::Column | MatrixOption::Element, Dim, Dim>;
     };
 }
 

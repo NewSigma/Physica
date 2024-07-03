@@ -24,17 +24,17 @@
 #include <Physica/Core/MultiPrecision/BasicImpl/Util/Bitwise.h>
 #include <Physica/Core/Physics/ManyBody/SiteIndex.h>
 
-namespace Physica::Core {
-    namespace Internal {
-        template<class T> class Traits;
-    }
+namespace Physica {
+    template<class T> class Traits;
+}
 
+namespace Physica::Core {
     template<class Derived>
     class State {
     public:
-        constexpr static unsigned int Dim = Internal::Traits<Derived>::Dim;
-        constexpr static unsigned int NumSite = Internal::Traits<Derived>::NumSite;
-        constexpr static unsigned int SiteDOF = Internal::Traits<Derived>::SiteDOF;
+        constexpr static unsigned int Dim = Traits<Derived>::Dim;
+        constexpr static unsigned int NumSite = Traits<Derived>::NumSite;
+        constexpr static unsigned int SiteDOF = Traits<Derived>::SiteDOF;
         using IndexType = SiteIndex<Dim>;
     public:
         constexpr static size_t calcFullNumState() noexcept;

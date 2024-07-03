@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 WeiBo He.
+ * Copyright 2023-2024 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -18,25 +18,9 @@
  */
 #pragma once
 
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/VectorImpl/LValueVector.h"
+#include <Physica/Core/Math/Algebra/LinearAlgebra/Vector/VectorImpl/LValueVector.h>
 
 namespace Physica::Core {
-    template<class GridType> class FlattenGrid;
-
-    namespace Internal {
-        template<class T> class Traits;
-
-        template<class GridType>
-        class Traits<FlattenGrid<GridType>> {
-        public:
-            using ScalarType = typename GridType::ScalarType;
-            constexpr static size_t SizeAtCompile = Dynamic;
-            constexpr static size_t MaxSizeAtCompile = Dynamic;
-
-            constexpr static bool FastAssign = false;
-        };
-    }
-
     template<class GridType>
     class FlattenGrid : public LValueVector<FlattenGrid<GridType>> {
         using This = FlattenGrid<GridType>;
@@ -77,4 +61,18 @@ namespace Physica::Core {
         const size_t z = index % grid.getDimZ();
         return grid.data_ptr({x, y, z});
     }
+}
+
+namespace Physica {
+    using namespace Core;
+
+    template<class GridType>
+    class Traits<FlattenGrid<GridType>> {
+    public:
+        using ScalarType = typename GridType::ScalarType;
+        constexpr static size_t SizeAtCompile = Dynamic;
+        constexpr static size_t MaxSizeAtCompile = Dynamic;
+
+        constexpr static bool FastAssign = false;
+    };
 }

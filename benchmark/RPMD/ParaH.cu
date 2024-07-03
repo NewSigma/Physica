@@ -28,10 +28,11 @@
 #include "Physica/Utils/BenchmarkHelper.h"
 
 using namespace Physica::Core;
+using Physica::Dynamic;
 using ScalarType = Scalar<Float>;
 using KineticModel = FreeModel<ScalarType, 3, Dynamic, RPMDIntegrator::Exact>;
 using RandomPoolType = RandomPool<std::mt19937, 10000>;
-using MDType = RPMD<ScalarType, 3, Physica::Utils::Dynamic, Physica::Utils::PageLockedAllocator<ScalarType>>;
+using MDType = RPMD<ScalarType, 3, Physica::Dynamic, Physica::Utils::PageLockedAllocator<ScalarType>>;
 constexpr size_t numReplica = 24;
 constexpr double temperatureT = PhyConst<AU>::kToTemperature(25);
 constexpr double timeStep = PhyConst<AU>::secondToTime(1E-15) * 0.5;

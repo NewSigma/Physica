@@ -22,47 +22,7 @@
 
 namespace Physica::Core {
     template<class Derived> class RValueMatrix;
-    template<class MatrixType> class RowRVector;
-    template<class MatrixType> class ColRVector;
     template<class MatrixType, size_t Row = Dynamic, size_t Column = Dynamic> class RMatrixBlock;
-
-    namespace Internal {
-        template<class MatrixType>
-        class Traits<RowRVector<MatrixType>> {
-        public:
-            using ScalarType = typename MatrixType::ScalarType;
-            constexpr static size_t SizeAtCompile = Traits<MatrixType>::ColumnAtCompile;
-            constexpr static size_t MaxSizeAtCompile = Traits<MatrixType>::MaxColumnAtCompile;
-
-            using PacketType = typename Internal::BestPacket<ScalarType, SizeAtCompile>::Type;
-            constexpr static bool FastAssign = false;
-        };
-
-        template<class MatrixType>
-        class Traits<ColRVector<MatrixType>> {
-        public:
-            using ScalarType = typename MatrixType::ScalarType;
-            constexpr static size_t SizeAtCompile = Traits<MatrixType>::RowAtCompile;
-            constexpr static size_t MaxSizeAtCompile = Traits<MatrixType>::MaxRowAtCompile;
-
-            using PacketType = typename Internal::BestPacket<ScalarType, SizeAtCompile>::Type;
-            constexpr static bool FastAssign = false;
-        };
-
-        template<class MatrixType, size_t Row, size_t Column>
-        class Traits<RMatrixBlock<MatrixType, Row, Column>> {
-        public:
-            using ScalarType = typename MatrixType::ScalarType;
-            constexpr static int Option = MatrixType::MatrixOption;
-            constexpr static size_t RowAtCompile = Row;
-            constexpr static size_t ColumnAtCompile = Column;
-            constexpr static size_t MaxRowAtCompile = Row;
-            constexpr static size_t MaxColumnAtCompile = Column;
-            constexpr static size_t SizeAtCompile = Row * Column;
-            constexpr static size_t MaxSizeAtCompile = SizeAtCompile;
-            using PacketType = typename Internal::BestPacket<ScalarType, SizeAtCompile>::Type;
-        };
-    }
     /**
      * \class RowRVector and \class ColRVector is designed to implement \class RMatrixBlock, and they can be used indepently.
      */
@@ -219,4 +179,44 @@ namespace Physica::Core {
         assert(col < colCount);
         return mat.calc(row + fromRow, col + fromCol);
     }
+}
+
+namespace Physica {
+    using namespace Core;
+
+    template<class MatrixType>
+    class Traits<RowRVector<MatrixType>> {
+    public:
+        using ScalarType = typename MatrixType::ScalarType;
+        constexpr static size_t SizeAtCompile = Traits<MatrixType>::ColumnAtCompile;
+        constexpr static size_t MaxSizeAtCompile = Traits<MatrixType>::MaxColumnAtCompile;
+
+        using PacketType = typename Core::Internal::BestPacket<ScalarType, SizeAtCompile>::Type;
+        constexpr static bool FastAssign = false;
+    };
+
+    template<class MatrixType>
+    class Traits<ColRVector<MatrixType>> {
+    public:
+        using ScalarType = typename MatrixType::ScalarType;
+        constexpr static size_t SizeAtCompile = Traits<MatrixType>::RowAtCompile;
+        constexpr static size_t MaxSizeAtCompile = Traits<MatrixType>::MaxRowAtCompile;
+
+        using PacketType = typename Core::Internal::BestPacket<ScalarType, SizeAtCompile>::Type;
+        constexpr static bool FastAssign = false;
+    };
+
+    template<class MatrixType, size_t Row, size_t Column>
+    class Traits<RMatrixBlock<MatrixType, Row, Column>> {
+    public:
+        using ScalarType = typename MatrixType::ScalarType;
+        constexpr static int Option = MatrixType::MatrixOption;
+        constexpr static size_t RowAtCompile = Row;
+        constexpr static size_t ColumnAtCompile = Column;
+        constexpr static size_t MaxRowAtCompile = Row;
+        constexpr static size_t MaxColumnAtCompile = Column;
+        constexpr static size_t SizeAtCompile = Row * Column;
+        constexpr static size_t MaxSizeAtCompile = SizeAtCompile;
+        using PacketType = typename Core::Internal::BestPacket<ScalarType, SizeAtCompile>::Type;
+    };
 }

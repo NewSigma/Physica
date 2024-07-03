@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2023 WeiBo He.
+ * Copyright 2022-2024 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -22,26 +22,6 @@
 #include "MatrixImpl/RValueMatrix.h"
 
 namespace Physica::Core {
-    template<class ScalarType> class PermutationMatrix;
-
-    namespace Internal {
-        template<class T>
-        class Traits;
-
-        template<class T>
-        class Traits<PermutationMatrix<T>> {
-        public:
-            using ScalarType = T;
-            constexpr static int Option = MatrixOption::AnyMajor | MatrixOption::AnyStorage;
-            constexpr static size_t RowAtCompile = Dynamic;
-            constexpr static size_t ColumnAtCompile = Dynamic;
-            constexpr static size_t MaxRowAtCompile = Dynamic;
-            constexpr static size_t MaxColumnAtCompile = Dynamic;
-            constexpr static size_t SizeAtCompile = RowAtCompile * ColumnAtCompile;
-            constexpr static size_t MaxSizeAtCompile = MaxRowAtCompile * MaxColumnAtCompile;
-        };
-    }
-
     template<class ScalarType>
     class PermutationMatrix : public RValueMatrix<PermutationMatrix<ScalarType>> {
         Utils::Array<size_t> indexes;
@@ -111,4 +91,21 @@ namespace Physica::Core {
     ScalarType PermutationMatrix<ScalarType>::calc(size_t row, size_t col) const {
         return indexes[row] == col ? ScalarType(1) : ScalarType(0);
     }
+}
+
+namespace Physica {
+    using namespace Core;
+
+    template<class T>
+    class Traits<PermutationMatrix<T>> {
+    public:
+        using ScalarType = T;
+        constexpr static int Option = MatrixOption::AnyMajor | MatrixOption::AnyStorage;
+        constexpr static size_t RowAtCompile = Dynamic;
+        constexpr static size_t ColumnAtCompile = Dynamic;
+        constexpr static size_t MaxRowAtCompile = Dynamic;
+        constexpr static size_t MaxColumnAtCompile = Dynamic;
+        constexpr static size_t SizeAtCompile = RowAtCompile * ColumnAtCompile;
+        constexpr static size_t MaxSizeAtCompile = MaxRowAtCompile * MaxColumnAtCompile;
+    };
 }
