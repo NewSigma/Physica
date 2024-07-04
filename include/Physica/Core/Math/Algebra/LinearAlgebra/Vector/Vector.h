@@ -97,7 +97,6 @@ namespace Physica {
         constexpr static size_t SizeAtCompile = Length;
         constexpr static size_t MaxSizeAtCompile = MaxLength;
 
-        using PacketType = typename Core::Internal::BestPacket<ScalarType, SizeAtCompile>::Type;
         constexpr static bool FastAssign = false;
     };
 }

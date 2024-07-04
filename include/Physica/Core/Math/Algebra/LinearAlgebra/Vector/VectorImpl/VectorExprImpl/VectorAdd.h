@@ -45,13 +45,13 @@ namespace Physica::Core {
         inline void assignTo(LValueVector<OtherDerived>& v) const;
 
         [[nodiscard]] ScalarType calc(size_t s) const { return ScalarType(expr1.calc(s)) + ScalarType(expr2.calc(s)); }
-        template<class PacketType>
-        [[nodiscard]] PacketType packet(size_t index) const {
-            return expr1.template packet<PacketType>(index) + expr2.template packet<PacketType>(index);
+        template<class AnyPacket>
+        [[nodiscard]] AnyPacket packet(size_t index) const {
+            return expr1.template packet<AnyPacket>(index) + expr2.template packet<AnyPacket>(index);
         }
-        template<class PacketType>
-        [[nodiscard]] PacketType packetPartial(size_t index, size_t count) const {
-            return expr1.template packetPartial<PacketType>(index, count) + expr2.template packetPartial<PacketType>(index, count);
+        template<class AnyPacket>
+        [[nodiscard]] AnyPacket packetPartial(size_t index, size_t count) const {
+            return expr1.template packetPartial<AnyPacket>(index, count) + expr2.template packetPartial<AnyPacket>(index, count);
         }
         /* Getters */
         [[nodiscard]] __host__ __device__ size_t getLength() const { return expr1.getLength(); }
@@ -104,13 +104,13 @@ namespace Physica::Core {
         This& operator=(This&&) noexcept = delete;
         /* Operations */
         [[nodiscard]] ScalarType calc(size_t s) const { return ScalarType(exp.calc(s)) + ScalarType(scalar); }
-        template<class PacketType>
-        [[nodiscard]] PacketType packet(size_t index) const {
-            return exp.template packet<PacketType>(index) + PacketType(scalar);
+        template<class AnyPacket>
+        [[nodiscard]] AnyPacket packet(size_t index) const {
+            return exp.template packet<AnyPacket>(index) + AnyPacket(scalar);
         }
-        template<class PacketType>
-        [[nodiscard]] PacketType packetPartial(size_t index, size_t count) const {
-            return exp.template packetPartial<PacketType>(index, count) + PacketType(scalar);
+        template<class AnyPacket>
+        [[nodiscard]] AnyPacket packetPartial(size_t index, size_t count) const {
+            return exp.template packetPartial<AnyPacket>(index, count) + AnyPacket(scalar);
         }
         [[nodiscard]] __host__ __device__ size_t getLength() const { return exp.getLength(); }
     };

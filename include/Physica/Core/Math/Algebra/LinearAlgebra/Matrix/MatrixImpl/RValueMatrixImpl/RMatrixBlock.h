@@ -191,7 +191,6 @@ namespace Physica {
         constexpr static size_t SizeAtCompile = Traits<MatrixType>::ColumnAtCompile;
         constexpr static size_t MaxSizeAtCompile = Traits<MatrixType>::MaxColumnAtCompile;
 
-        using PacketType = typename Core::Internal::BestPacket<ScalarType, SizeAtCompile>::Type;
         constexpr static bool FastAssign = false;
     };
 
@@ -202,7 +201,6 @@ namespace Physica {
         constexpr static size_t SizeAtCompile = Traits<MatrixType>::RowAtCompile;
         constexpr static size_t MaxSizeAtCompile = Traits<MatrixType>::MaxRowAtCompile;
 
-        using PacketType = typename Core::Internal::BestPacket<ScalarType, SizeAtCompile>::Type;
         constexpr static bool FastAssign = false;
     };
 
@@ -217,6 +215,5 @@ namespace Physica {
         constexpr static size_t MaxColumnAtCompile = Column;
         constexpr static size_t SizeAtCompile = Row * Column;
         constexpr static size_t MaxSizeAtCompile = SizeAtCompile;
-        using PacketType = typename Core::Internal::BestPacket<ScalarType, SizeAtCompile>::Type;
     };
 }

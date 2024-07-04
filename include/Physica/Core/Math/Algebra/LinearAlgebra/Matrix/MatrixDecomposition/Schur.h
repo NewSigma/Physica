@@ -86,10 +86,10 @@ namespace Physica::Core {
 
         const size_t order = source.getRow();
         size_t iter = 0;
+        exshift = 0;
         if (order != 2) {
             const Hessenburg<ScalarType, Order> hess(normalized);
             matrixT = hess.getMatrixH();
-            exshift = 0;
 
             size_t upper = order - 1;
             size_t total_iter = 0;

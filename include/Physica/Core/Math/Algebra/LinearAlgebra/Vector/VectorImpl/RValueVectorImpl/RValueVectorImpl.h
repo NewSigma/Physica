@@ -40,20 +40,20 @@ namespace Physica::Core {
             constexpr static bool isT2Continuous = std::is_base_of<ContinuousVector<T2>, T2>::value;
         public:
             using ScalarType = typename T1::ScalarType;
-            using PacketType = typename Internal::BestPacket<ScalarType, SizeAtCompile>::Type;
-            constexpr static size_t PacketSize = PacketType::size();
+            using AnyPacket = typename Internal::BestPacket<ScalarType, SizeAtCompile>::Type;
+            constexpr static size_t PacketSize = AnyPacket::size();
             constexpr static bool isReverseDiff = ScalarType::isReverseDiff;
 
             inline static void run(const RValueVector<T1>& v1, LValueVector<T2>& v2) { //FIXME: The function declaration is not compatible to AddAssignImpl
                 if constexpr (SizeAtCompile != Dynamic) {
                     constexpr size_t to = SizeAtCompile / PacketSize * PacketSize;
                     for (size_t i = 0; i < to; i += PacketSize)
-                        v2.getDerived().writePacket(i, v1.getDerived().template packet<PacketType>(i));
+                        v2.getDerived().writePacket(i, v1.getDerived().template packet<AnyPacket>(i));
                     
                     constexpr size_t i = SizeAtCompile - SizeAtCompile % PacketSize;
                     if constexpr (i != SizeAtCompile) {
                         constexpr size_t count = SizeAtCompile - i;
-                        v2.getDerived().writePacketPartial(i, count, v1.getDerived().template packetPartial<PacketType>(i, count));
+                        v2.getDerived().writePacketPartial(i, count, v1.getDerived().template packetPartial<AnyPacket>(i, count));
                     }
                 }
                 else {
@@ -65,23 +65,23 @@ namespace Physica::Core {
                     if constexpr (std::is_same<Executor, SequentialExecutor>::value) {
                         size_t i = 0;
                         for (; i < to; i += PacketSize)
-                            v2.getDerived().writePacket(i, v1.getDerived().template packet<PacketType>(i));
+                            v2.getDerived().writePacket(i, v1.getDerived().template packet<AnyPacket>(i));
 
                         if (to != length) {
                             const size_t count = length - i;
-                            v2.getDerived().writePacketPartial(i, count, v1.getDerived().template packetPartial<PacketType>(i, count));
+                            v2.getDerived().writePacketPartial(i, count, v1.getDerived().template packetPartial<AnyPacket>(i, count));
                         }
                     }
                     else {
                         const size_t numLoop = to / PacketSize;
                         auto future = Executor::parallel_for([&v1, &v2](size_t i) {
                             const size_t i1 = i * PacketSize;
-                            v2.getDerived().writePacket(i1, v1.getDerived().template packet<PacketType>(i1));
+                            v2.getDerived().writePacket(i1, v1.getDerived().template packet<AnyPacket>(i1));
                         }, numLoop, Executor::getNumThread());
 
                         if (to != length) {
                             const size_t count = length % PacketSize;
-                            v2.getDerived().writePacketPartial(to, count, v1.getDerived().template packetPartial<PacketType>(to, count));
+                            v2.getDerived().writePacketPartial(to, count, v1.getDerived().template packetPartial<AnyPacket>(to, count));
                         }
                         future.wait();
                     }
@@ -104,26 +104,26 @@ namespace Physica::Core {
     }
 
     template<class Derived>
-    template<class PacketType>
-    inline PacketType RValueVector<Derived>::packet(size_t index) const {
-        ScalarType buffer[PacketType::size()];
-        for (size_t i = 0; i < PacketType::size(); ++i, ++index)
+    template<class AnyPacket>
+    inline AnyPacket RValueVector<Derived>::packet(size_t index) const {
+        ScalarType buffer[AnyPacket::size()];
+        for (size_t i = 0; i < AnyPacket::size(); ++i, ++index)
             buffer[i] = calc(index);
         if constexpr (isExpression && isReverseDiff) { //Optimize: For expression such as A + B, there is no need to create new node
             using TracerType = typename ScalarType::TracerType;
-            TracerType::getInstance().reserve(PacketType::size());
+            TracerType::getInstance().reserve(AnyPacket::size());
             for (auto& elem : buffer)
                 elem = elem.copy();
         }
-        PacketType packet{};
+        AnyPacket packet{};
         packet.load(buffer);
         return packet;
     }
 
     template<class Derived>
-    template<class PacketType>
-    inline PacketType RValueVector<Derived>::packetPartial(size_t index, size_t count) const {
-        ScalarType buffer[PacketType::size()]{};
+    template<class AnyPacket>
+    inline AnyPacket RValueVector<Derived>::packetPartial(size_t index, size_t count) const {
+        ScalarType buffer[AnyPacket::size()]{};
         for (size_t i = 0; i < count; ++i, ++index)
             buffer[i] = calc(index);
         if constexpr (isExpression && isReverseDiff) {
@@ -132,7 +132,7 @@ namespace Physica::Core {
             for (size_t i = 0; i < count; ++i)
                 buffer[i] = buffer[i].copy();
         }
-        PacketType packet{};
+        AnyPacket packet{};
         packet.load_partial(count, buffer);
         return packet;
     }

@@ -68,6 +68,7 @@ namespace Physica::Core {
         using PlainScalar = typename ScalarType::PlainScalar;
         constexpr static size_t SizeAtCompile = Traits<Derived>::SizeAtCompile;
         constexpr static size_t MaxSizeAtCompile = Traits<Derived>::MaxSizeAtCompile;
+        using PacketType = typename Internal::BestPacket<ScalarType, SizeAtCompile>::Type;
         using ColMatrix = DenseMatrix<ScalarType, MatrixOption::Column | MatrixOption::Vector, SizeAtCompile, 1, MaxSizeAtCompile, 1, Utils::HostAllocator<ScalarType>>;
         using RowMatrix = DenseMatrix<ScalarType, MatrixOption::Row | MatrixOption::Vector, 1, SizeAtCompile, 1, MaxSizeAtCompile, Utils::HostAllocator<ScalarType>>;
         constexpr static bool isReverseDiff = ScalarType::isReverseDiff;
@@ -82,10 +83,10 @@ namespace Physica::Core {
         inline void assignTo(LValueVector<OtherDerived>& v) const;
 
         [[nodiscard]] ScalarType calc(size_t index) const { return Base::getDerived().calc(index); }
-        template<class PacketType>
-        [[nodiscard]] inline PacketType packet(size_t index) const;
-        template<class PacketType>
-        [[nodiscard]] inline PacketType packetPartial(size_t index, size_t count) const;
+        template<class AnyPacket>
+        [[nodiscard]] inline AnyPacket packet(size_t index) const;
+        template<class AnyPacket>
+        [[nodiscard]] inline AnyPacket packetPartial(size_t index, size_t count) const;
         /* Getters */
         [[nodiscard]] inline FormatedVector<Derived> format() const;
         [[nodiscard]] TransposeVector<Derived> transpose() const noexcept { return TransposeVector<Derived>(*this); }

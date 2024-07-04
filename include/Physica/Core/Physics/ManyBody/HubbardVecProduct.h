@@ -71,7 +71,6 @@ namespace Physica {
         constexpr static size_t SizeAtCompile = MatrixType::RowAtCompile;
         constexpr static size_t MaxSizeAtCompile = MatrixType::MaxRowAtCompile;
 
-        using PacketType = typename Core::Internal::BestPacket<ScalarType, SizeAtCompile>::Type;
         constexpr static bool FastAssign = true;
     };
 }

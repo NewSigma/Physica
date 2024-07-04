@@ -345,7 +345,6 @@ namespace Physica {
         constexpr static size_t SizeAtCompile = Length;
         constexpr static size_t MaxSizeAtCompile = Length;
 
-        using PacketType = typename Core::Internal::BestPacket<ScalarType, SizeAtCompile>::Type;
         constexpr static bool FastAssign = false;
     };
 
@@ -356,7 +355,6 @@ namespace Physica {
         constexpr static size_t SizeAtCompile = Length;
         constexpr static size_t MaxSizeAtCompile = Length;
 
-        using PacketType = typename Core::Internal::BestPacket<ScalarType, SizeAtCompile>::Type;
         constexpr static bool FastAssign = false;
     };
 
@@ -378,7 +376,6 @@ namespace Physica {
         constexpr static size_t MaxColumnAtCompile = Column;
         constexpr static size_t SizeAtCompile = Row * Column;
         constexpr static size_t MaxSizeAtCompile = SizeAtCompile;
-        using PacketType = typename Core::Internal::BestPacket<ScalarType, SizeAtCompile>::Type;
         using VectorBase = typename std::conditional<Column == 1, ColVectorType, RowVectorType>::type;
     };
 }

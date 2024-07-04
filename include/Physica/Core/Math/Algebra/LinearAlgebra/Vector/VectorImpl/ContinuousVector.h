@@ -41,10 +41,10 @@ namespace Physica::Core {
         inline ContinuousVector& operator=(ContinuousVector&& v) noexcept;
         inline Derived& operator=(const ScalarType& s);
         /* Operations */
-        template<class PacketType> [[nodiscard]] inline PacketType packet(size_t index) const;
-        template<class PacketType> [[nodiscard]] inline PacketType packetPartial(size_t index, size_t count) const;
-        template<class PacketType> inline void writePacket(size_t index, const PacketType packet);
-        template<class PacketType> inline void writePacketPartial(size_t index, size_t count, const PacketType packet);
+        template<class AnyPacket> [[nodiscard]] inline AnyPacket packet(size_t index) const;
+        template<class AnyPacket> [[nodiscard]] inline AnyPacket packetPartial(size_t index, size_t count) const;
+        template<class AnyPacket> inline void writePacket(size_t index, const AnyPacket packet);
+        template<class AnyPacket> inline void writePacketPartial(size_t index, size_t count, const AnyPacket packet);
 
         template<class OtherDerived> void toDevice(device_obj<ContinuousVector<OtherDerived>>& obj) const;
         template<class OtherDerived> void toDeviceAsync(device_obj<ContinuousVector<OtherDerived>>& obj) const;

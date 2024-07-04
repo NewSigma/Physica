@@ -67,6 +67,5 @@ namespace Physica {
                                                                              typename AnyVector2::ScalarType>::Type;
         constexpr static size_t SizeAtCompile = 3;
         constexpr static size_t MaxSizeAtCompile = SizeAtCompile;
-        using PacketType = typename Core::Internal::BestPacket<ScalarType, SizeAtCompile>::Type;
     };
 }

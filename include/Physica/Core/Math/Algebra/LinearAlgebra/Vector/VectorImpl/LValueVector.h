@@ -48,8 +48,8 @@ namespace Physica::Core {
         void operator/=(const ScalarType& s) { (*this) = (*this) / s; }
         /* Operations */
         [[nodiscard]] ScalarType calc(size_t index) const { return *data_ptr(index); }
-        template<class PacketType> void writePacket(size_t index, const PacketType packet);
-        template<class PacketType> void writePacketPartial(size_t index, size_t count, const PacketType packet);
+        template<class AnyPacket> void writePacket(size_t index, const AnyPacket packet);
+        template<class AnyPacket> void writePacketPartial(size_t index, size_t count, const AnyPacket packet);
 
         [[nodiscard]] inline LVectorBlock<Derived> head(size_t to);
         [[nodiscard]] inline const LVectorBlock<Derived> head(size_t to) const;

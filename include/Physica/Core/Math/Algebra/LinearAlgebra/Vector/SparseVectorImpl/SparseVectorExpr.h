@@ -76,6 +76,5 @@ namespace Physica {
         using ScalarType = typename Core::Internal::BinaryScalarOpReturnType<typename Exp::ScalarType, AnyScalar>::Type;
         constexpr static size_t SizeAtCompile = Exp::SizeAtCompile;
         constexpr static size_t MaxSizeAtCompile = Exp::MaxSizeAtCompile;
-        using PacketType = typename Core::Internal::BestPacket<ScalarType, SizeAtCompile>::Type;
     };
 }

@@ -141,7 +141,6 @@ namespace Physica {
         using ScalarType = T;
         constexpr static size_t SizeAtCompile = Dynamic;
         constexpr static size_t MaxSizeAtCompile = Dynamic;
-        using PacketType = typename Core::Internal::BestPacket<ScalarType, SizeAtCompile>::Type;
     };
 }
 

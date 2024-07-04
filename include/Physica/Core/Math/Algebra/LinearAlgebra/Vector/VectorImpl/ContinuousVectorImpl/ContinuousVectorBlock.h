@@ -44,10 +44,10 @@ namespace Physica::Core {
         [[nodiscard]] ScalarType& operator[](size_t index);
         [[nodiscard]] const ScalarType& operator[](size_t index) const;
         /* Operations */
-        template<class PacketType> [[nodiscard]] inline PacketType packet(size_t index) const;
-        template<class PacketType> [[nodiscard]] inline PacketType packetPartial(size_t index, size_t count) const;
-        template<class PacketType> inline void writePacket(size_t index, const PacketType packet);
-        template<class PacketType> inline void writePacketPartial(size_t index, size_t count, const PacketType packet);
+        template<class AnyPacket> [[nodiscard]] inline AnyPacket packet(size_t index) const;
+        template<class AnyPacket> [[nodiscard]] inline AnyPacket packetPartial(size_t index, size_t count) const;
+        template<class AnyPacket> inline void writePacket(size_t index, const AnyPacket packet);
+        template<class AnyPacket> inline void writePacketPartial(size_t index, size_t count, const AnyPacket packet);
         void resize([[maybe_unused]] size_t length) const { assert(length == getLength()); }
         /* Getters */
         [[nodiscard]] __host__ __device__ inline size_t getLength() const noexcept;
@@ -96,27 +96,27 @@ namespace Physica::Core {
     }
 
     template<class VectorType, size_t Length>
-    template<class PacketType>
-    inline PacketType ContinuousVectorBlock<VectorType, Length>::packet(size_t index) const {
-        return vec.template packet<PacketType>(from + index);
+    template<class AnyPacket>
+    inline AnyPacket ContinuousVectorBlock<VectorType, Length>::packet(size_t index) const {
+        return vec.template packet<AnyPacket>(from + index);
     }
 
     template<class VectorType, size_t Length>
-    template<class PacketType>
-    inline PacketType ContinuousVectorBlock<VectorType, Length>::packetPartial(size_t index, size_t count) const {
-        return vec.template packetPartial<PacketType>(from + index, count);
+    template<class AnyPacket>
+    inline AnyPacket ContinuousVectorBlock<VectorType, Length>::packetPartial(size_t index, size_t count) const {
+        return vec.template packetPartial<AnyPacket>(from + index, count);
     }
 
     template<class VectorType, size_t Length>
-    template<class PacketType>
-    inline void ContinuousVectorBlock<VectorType, Length>::writePacket(size_t index, const PacketType packet) {
-        return vec.template writePacket<PacketType>(from + index, packet);
+    template<class AnyPacket>
+    inline void ContinuousVectorBlock<VectorType, Length>::writePacket(size_t index, const AnyPacket packet) {
+        return vec.template writePacket<AnyPacket>(from + index, packet);
     }
 
     template<class VectorType, size_t Length>
-    template<class PacketType>
-    inline void ContinuousVectorBlock<VectorType, Length>::writePacketPartial(size_t index, size_t count, const PacketType packet) {
-        return vec.template writePacketPartial<PacketType>(from + index, count, packet);
+    template<class AnyPacket>
+    inline void ContinuousVectorBlock<VectorType, Length>::writePacketPartial(size_t index, size_t count, const AnyPacket packet) {
+        return vec.template writePacketPartial<AnyPacket>(from + index, count, packet);
     }
 
     template<class VectorType, size_t Length>
@@ -137,7 +137,6 @@ namespace Physica {
         constexpr static size_t SizeAtCompile = Length;
         constexpr static size_t MaxSizeAtCompile = Length;
 
-        using PacketType = typename Core::Internal::BestPacket<ScalarType, SizeAtCompile>::Type;
         constexpr static bool FastAssign = false;
     };
 }

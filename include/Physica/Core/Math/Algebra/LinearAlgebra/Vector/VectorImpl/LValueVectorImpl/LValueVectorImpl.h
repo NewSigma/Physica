@@ -47,18 +47,18 @@ namespace Physica::Core {
     }
 
     template<class Derived>
-    template<class PacketType>
-    void LValueVector<Derived>::writePacket(size_t index, const PacketType packet) {
-        ScalarType buffer[PacketType::size()];
+    template<class AnyPacket>
+    void LValueVector<Derived>::writePacket(size_t index, const AnyPacket packet) {
+        ScalarType buffer[AnyPacket::size()];
         packet.store(buffer);
-        for (size_t i = 0; i < PacketType::size(); ++i, ++index)
+        for (size_t i = 0; i < AnyPacket::size(); ++i, ++index)
             (*this)[index] = buffer[i];
     }
 
     template<class Derived>
-    template<class PacketType>
-    void LValueVector<Derived>::writePacketPartial(size_t index, size_t count, const PacketType packet) {
-        ScalarType buffer[PacketType::size()];
+    template<class AnyPacket>
+    void LValueVector<Derived>::writePacketPartial(size_t index, size_t count, const AnyPacket packet) {
+        ScalarType buffer[AnyPacket::size()];
         packet.store(buffer);
         for (size_t i = 0; i < count; ++i, ++index)
             (*this)[index] = buffer[i];

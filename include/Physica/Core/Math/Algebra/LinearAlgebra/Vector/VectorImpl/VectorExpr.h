@@ -47,10 +47,10 @@ namespace Physica::Core {
         This& operator=(This&&) noexcept = delete;
         /* Operations */
         [[nodiscard]] typename Base::ScalarType calc(size_t s) const { return -exp.calc(s); }
-        template<class PacketType>
-        [[nodiscard]] PacketType packet(size_t index) const { return -exp.template packet<PacketType>(index); }
-        template<class PacketType>
-        [[nodiscard]] PacketType packetPartial(size_t index, size_t count) const { return -exp.template packetPartial<PacketType>(index, count); }
+        template<class AnyPacket>
+        [[nodiscard]] AnyPacket packet(size_t index) const { return -exp.template packet<AnyPacket>(index); }
+        template<class AnyPacket>
+        [[nodiscard]] AnyPacket packetPartial(size_t index, size_t count) const { return -exp.template packetPartial<AnyPacket>(index, count); }
         [[nodiscard]] __host__ __device__ size_t getLength() const { return exp.getLength(); }
     };
     //////////////////////////////////////Div//////////////////////////////////////
@@ -72,13 +72,13 @@ namespace Physica::Core {
         This& operator=(This&&) noexcept = delete;
         /* Operations */
         [[nodiscard]] typename Base::ScalarType calc(size_t s) const { return exp.calc(s) / scalar; }
-        template<class PacketType>
-        [[nodiscard]] PacketType packet(size_t index) const {
-            return exp.template packet<PacketType>(index) * PacketType(reciprocal(scalar));
+        template<class AnyPacket>
+        [[nodiscard]] AnyPacket packet(size_t index) const {
+            return exp.template packet<AnyPacket>(index) * AnyPacket(reciprocal(scalar));
         }
-        template<class PacketType>
-        [[nodiscard]] PacketType packetPartial(size_t index, size_t count) const {
-            return exp.template packetPartial<PacketType>(index, count) * PacketType(reciprocal(scalar));
+        template<class AnyPacket>
+        [[nodiscard]] AnyPacket packetPartial(size_t index, size_t count) const {
+            return exp.template packetPartial<AnyPacket>(index, count) * AnyPacket(reciprocal(scalar));
         }
         [[nodiscard]] __host__ __device__ size_t getLength() const { return exp.getLength(); }
     };
@@ -103,13 +103,13 @@ namespace Physica::Core {
         This& operator=(This&&) noexcept = delete;
         /* Operations */
         [[nodiscard]] typename Base::ScalarType calc(size_t s) const { return v1.calc(s) / v2.calc(s); }
-        template<class PacketType>
-        [[nodiscard]] PacketType packet(size_t index) const {
-            return v1.template packet<PacketType>(index) / v2.template packet<PacketType>(index);
+        template<class AnyPacket>
+        [[nodiscard]] AnyPacket packet(size_t index) const {
+            return v1.template packet<AnyPacket>(index) / v2.template packet<AnyPacket>(index);
         }
-        template<class PacketType>
-        [[nodiscard]] PacketType packetPartial(size_t index, size_t count) const {
-            return v1.template packetPartial<PacketType>(index, count) / v2.template packetPartial<PacketType>(index, count);
+        template<class AnyPacket>
+        [[nodiscard]] AnyPacket packetPartial(size_t index, size_t count) const {
+            return v1.template packetPartial<AnyPacket>(index, count) / v2.template packetPartial<AnyPacket>(index, count);
         }
         [[nodiscard]] __host__ __device__ size_t getLength() const { return v1.getLength(); }
     };
@@ -136,13 +136,13 @@ namespace Physica::Core {
         This& operator=(This&&) noexcept = delete;
         /* Operations */
         [[nodiscard]] ScalarType calc(size_t s) const { return ScalarType(v1.calc(s) > v2.calc(s)); }
-        template<class PacketType>
-        [[nodiscard]] PacketType packet(size_t index) const {
-            return v1.template packet<PacketType>(index) > v2.template packet<PacketType>(index);
+        template<class AnyPacket>
+        [[nodiscard]] AnyPacket packet(size_t index) const {
+            return v1.template packet<AnyPacket>(index) > v2.template packet<AnyPacket>(index);
         }
-        template<class PacketType>
-        [[nodiscard]] PacketType packetPartial(size_t index, size_t count) const {
-            return v1.template packetPartial<PacketType>(index, count) > v2.template packetPartial<PacketType>(index, count);
+        template<class AnyPacket>
+        [[nodiscard]] AnyPacket packetPartial(size_t index, size_t count) const {
+            return v1.template packetPartial<AnyPacket>(index, count) > v2.template packetPartial<AnyPacket>(index, count);
         }
         [[nodiscard]] __host__ __device__ size_t getLength() const { return v1.getLength(); }
     };
@@ -167,13 +167,13 @@ namespace Physica::Core {
         This& operator=(This&&) noexcept = delete;
         /* Operations */
         [[nodiscard]] ScalarType calc(size_t s) const { return ScalarType(exp.calc(s) > scalar); }
-        template<class PacketType>
-        [[nodiscard]] PacketType packet(size_t index) const {
-            return exp.template packet<PacketType>(index) > PacketType(scalar);
+        template<class AnyPacket>
+        [[nodiscard]] AnyPacket packet(size_t index) const {
+            return exp.template packet<AnyPacket>(index) > AnyPacket(scalar);
         }
-        template<class PacketType>
-        [[nodiscard]] PacketType packetPartial(size_t index, size_t count) const {
-            return exp.template packetPartial<PacketType>(index, count) > PacketType(scalar);
+        template<class AnyPacket>
+        [[nodiscard]] AnyPacket packetPartial(size_t index, size_t count) const {
+            return exp.template packetPartial<AnyPacket>(index, count) > AnyPacket(scalar);
         }
         [[nodiscard]] __host__ __device__ size_t getLength() const { return exp.getLength(); }
     };
@@ -200,13 +200,13 @@ namespace Physica::Core {
         This& operator=(This&&) noexcept = delete;
         /* Operations */
         [[nodiscard]] ScalarType calc(size_t s) const { return ScalarType(v1.calc(s) >= v2.calc(s)); }
-        template<class PacketType>
-        [[nodiscard]] PacketType packet(size_t index) const {
-            return v1.template packet<PacketType>(index) >= v2.template packet<PacketType>(index);
+        template<class AnyPacket>
+        [[nodiscard]] AnyPacket packet(size_t index) const {
+            return v1.template packet<AnyPacket>(index) >= v2.template packet<AnyPacket>(index);
         }
-        template<class PacketType>
-        [[nodiscard]] PacketType packetPartial(size_t index, size_t count) const {
-            return v1.template packetPartial<PacketType>(index, count) >= v2.template packetPartial<PacketType>(index, count);
+        template<class AnyPacket>
+        [[nodiscard]] AnyPacket packetPartial(size_t index, size_t count) const {
+            return v1.template packetPartial<AnyPacket>(index, count) >= v2.template packetPartial<AnyPacket>(index, count);
         }
         [[nodiscard]] __host__ __device__ size_t getLength() const { return v1.getLength(); }
     };
@@ -231,13 +231,13 @@ namespace Physica::Core {
         This& operator=(This&&) noexcept = delete;
         /* Operations */
         [[nodiscard]] ScalarType calc(size_t s) const { return ScalarType(exp.calc(s) >= scalar); }
-        template<class PacketType>
-        [[nodiscard]] PacketType packet(size_t index) const {
-            return exp.template packet<PacketType>(index) >= PacketType(scalar);
+        template<class AnyPacket>
+        [[nodiscard]] AnyPacket packet(size_t index) const {
+            return exp.template packet<AnyPacket>(index) >= AnyPacket(scalar);
         }
-        template<class PacketType>
-        [[nodiscard]] PacketType packetPartial(size_t index, size_t count) const {
-            return exp.template packetPartial<PacketType>(index, count) >= PacketType(scalar);
+        template<class AnyPacket>
+        [[nodiscard]] AnyPacket packetPartial(size_t index, size_t count) const {
+            return exp.template packetPartial<AnyPacket>(index, count) >= AnyPacket(scalar);
         }
         [[nodiscard]] __host__ __device__ size_t getLength() const { return exp.getLength(); }
     };
@@ -258,10 +258,10 @@ namespace Physica::Core {
         This& operator=(This&&) noexcept = delete;
         /* Operations */
         [[nodiscard]] typename Base::ScalarType calc(size_t index) const { return reciprocal(exp.calc(index)); }
-        template<class PacketType>
-        [[nodiscard]] PacketType packet(size_t index) const { return PacketType(1) / exp.template packet<PacketType>(index); }
-        template<class PacketType>
-        [[nodiscard]] PacketType packetPartial(size_t index, size_t count) const { return PacketType(1) / exp.template packetPartial<PacketType>(index, count); }
+        template<class AnyPacket>
+        [[nodiscard]] AnyPacket packet(size_t index) const { return AnyPacket(1) / exp.template packet<AnyPacket>(index); }
+        template<class AnyPacket>
+        [[nodiscard]] AnyPacket packetPartial(size_t index, size_t count) const { return AnyPacket(1) / exp.template packetPartial<AnyPacket>(index, count); }
         [[nodiscard]] __host__ __device__ size_t getLength() const { return exp.getLength(); }
     };
 
@@ -281,10 +281,10 @@ namespace Physica::Core {
         This& operator=(This&&) noexcept = delete;
         /* Operations */
         [[nodiscard]] typename Base::ScalarType calc(size_t s) const { return sqrt(exp.calc(s)); }
-        template<class PacketType>
-        [[nodiscard]] PacketType packet(size_t index) const { return sqrt(exp.template packet<PacketType>(index)); }
-        template<class PacketType>
-        [[nodiscard]] PacketType packetPartial(size_t index, size_t count) const { return sqrt(exp.template packetPartial<PacketType>(index, count)); }
+        template<class AnyPacket>
+        [[nodiscard]] AnyPacket packet(size_t index) const { return sqrt(exp.template packet<AnyPacket>(index)); }
+        template<class AnyPacket>
+        [[nodiscard]] AnyPacket packetPartial(size_t index, size_t count) const { return sqrt(exp.template packetPartial<AnyPacket>(index, count)); }
         [[nodiscard]] __host__ __device__ size_t getLength() const { return exp.getLength(); }
     };
 
@@ -304,16 +304,16 @@ namespace Physica::Core {
         This& operator=(This&&) noexcept = delete;
         /* Operations */
         [[nodiscard]] typename Base::ScalarType calc(size_t s) const { return cbrt(exp.calc(s)); }
-        template<class PacketType>
-        [[nodiscard]] PacketType packet(size_t index) const {
-            PacketType result = exp.template packet<PacketType>(index);
-            for (size_t i = 0; i < static_cast<size_t>(PacketType::size()); ++i)
+        template<class AnyPacket>
+        [[nodiscard]] AnyPacket packet(size_t index) const {
+            AnyPacket result = exp.template packet<AnyPacket>(index);
+            for (size_t i = 0; i < static_cast<size_t>(AnyPacket::size()); ++i)
                 result.insert(i, cbrt(result[i]));
             return result;
         }
-        template<class PacketType>
-        [[nodiscard]] PacketType packetPartial(size_t index, size_t count) const {
-            PacketType result = exp.template packetPartial<PacketType>(index, count);
+        template<class AnyPacket>
+        [[nodiscard]] AnyPacket packetPartial(size_t index, size_t count) const {
+            AnyPacket result = exp.template packetPartial<AnyPacket>(index, count);
             for (size_t i = 0; i < count; ++i)
                 result.insert(i, cbrt(result[i]));
             return result;
@@ -337,10 +337,10 @@ namespace Physica::Core {
         This& operator=(This&&) noexcept = delete;
         /* Operations */
         [[nodiscard]] typename Base::ScalarType calc(size_t s) const { return abs(v.calc(s)); }
-        template<class PacketType>
-        [[nodiscard]] PacketType packet(size_t index) const { return abs(v.template packet<PacketType>(index)); }
-        template<class PacketType>
-        [[nodiscard]] PacketType packetPartial(size_t index, size_t count) const { return abs(v.template packetPartial<PacketType>(index, count)); }
+        template<class AnyPacket>
+        [[nodiscard]] AnyPacket packet(size_t index) const { return abs(v.template packet<AnyPacket>(index)); }
+        template<class AnyPacket>
+        [[nodiscard]] AnyPacket packetPartial(size_t index, size_t count) const { return abs(v.template packetPartial<AnyPacket>(index, count)); }
         [[nodiscard]] __host__ __device__ size_t getLength() const { return v.getLength(); }
     };
 
@@ -360,10 +360,10 @@ namespace Physica::Core {
         This& operator=(This&&) noexcept = delete;
         /* Operations */
         [[nodiscard]] typename Base::ScalarType calc(size_t s) const { return square(v.calc(s)); }
-        template<class PacketType>
-        [[nodiscard]] PacketType packet(size_t index) const { return square(v.template packet<PacketType>(index)); }
-        template<class PacketType>
-        [[nodiscard]] PacketType packetPartial(size_t index, size_t count) const { return square(v.template packetPartial<PacketType>(index, count)); }
+        template<class AnyPacket>
+        [[nodiscard]] AnyPacket packet(size_t index) const { return square(v.template packet<AnyPacket>(index)); }
+        template<class AnyPacket>
+        [[nodiscard]] AnyPacket packetPartial(size_t index, size_t count) const { return square(v.template packetPartial<AnyPacket>(index, count)); }
         [[nodiscard]] __host__ __device__ size_t getLength() const { return v.getLength(); }
     };
 
@@ -656,7 +656,6 @@ namespace Physica {
         constexpr static size_t SizeAtCompile = Expr1::SizeAtCompile > Expr2::SizeAtCompile ? Expr1::SizeAtCompile : Expr2::SizeAtCompile;
         constexpr static size_t MaxSizeAtCompile = Expr1::MaxSizeAtCompile > Expr2::MaxSizeAtCompile ? Expr1::MaxSizeAtCompile : Expr2::MaxSizeAtCompile;
 
-        using PacketType = typename Core::Internal::BestPacket<ScalarType, SizeAtCompile>::Type;
         constexpr static bool FastAssign = IsAddOrSub && (FastAssign1 || FastAssign2);
     };
 
@@ -668,7 +667,6 @@ namespace Physica {
         constexpr static size_t SizeAtCompile = Expr::SizeAtCompile;
         constexpr static size_t MaxSizeAtCompile = Expr::MaxSizeAtCompile;
 
-        using PacketType = typename Core::Internal::BestPacket<ScalarType, SizeAtCompile>::Type;
         constexpr static bool FastAssign = Traits<Expr>::FastAssign;
     };
 }

@@ -329,7 +329,6 @@ namespace Physica {
         using ScalarType = typename MatrixType::ScalarType;
         constexpr static size_t SizeAtCompile = Length;
         constexpr static size_t MaxSizeAtCompile = Length;
-        using PacketType = typename Core::Internal::BestPacket<ScalarType, SizeAtCompile>::Type;
     };
 
     template<class MatrixType, size_t Length>
@@ -343,7 +342,6 @@ namespace Physica {
         using ScalarType = typename MatrixType::ScalarType;
         constexpr static size_t SizeAtCompile = Length;
         constexpr static size_t MaxSizeAtCompile = Length;
-        using PacketType = typename Core::Internal::BestPacket<ScalarType, SizeAtCompile>::Type;
     };
 
     template<class MatrixType, size_t Row, size_t Column>
