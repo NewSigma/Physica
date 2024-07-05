@@ -20,9 +20,8 @@
 
 #include <cstdlib>
 #include <memory>
-#include "Physica/Core/Parallel/StreamPool.cuh"
-#include "Physica/Utils/CUDA/DebugUtil.cuh"
-#include "Physica/Utils/CUDA/device_obj.cuh"
+#include <Physica/Core/Parallel/StreamPool.cuh>
+#include <Physica/Utils/CUDA/device_obj.cuh>
 #include "Allocator.h"
 
 namespace Physica::Utils {

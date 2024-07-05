@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 WeiBo He.
+ * Copyright 2023-2024 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -18,7 +18,6 @@
  */
 #pragma once
 
-#include "Physica/Utils/CUDA/DebugUtil.cuh"
 #include "HostAllocator.h"
 
 namespace Physica::Utils {

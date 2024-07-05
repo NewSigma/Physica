@@ -18,8 +18,8 @@
  */
 #include <cassert>
 #include <thread>
-#include "Physica/Core/Parallel/CudaStream.cuh"
-#include "Physica/Utils/CUDA/DebugUtil.cuh"
+#include <Physica/Core/Parallel/CudaStream.cuh>
+#include <Physica/Core/Exception/CudaException.cuh>
 
 namespace Physica::Core {
     CudaStream::CudaStream() {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 WeiBo He.
+ * Copyright 2022-2024 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -18,9 +18,9 @@
  */
 #pragma once
 
-#include <exception>
 #include <cuda_runtime.h>
-#include "Physica/Macro.h"
+#include <exception>
+#include <Physica/Macro.h>
 
 namespace Physica::Core {
     class PHYSICA_API CudaException : public std::exception {
@@ -32,4 +32,11 @@ namespace Physica::Core {
         [[nodiscard]] const char* what() const noexcept override { return cudaGetErrorString(code); }
         [[nodiscard]] cudaError_t getCode() const noexcept { return code; }
     };
+}
+
+namespace Physica {
+    inline void cudaCheck(cudaError_t err) {
+        if (err != cudaSuccess) [[unlikely]]
+            throw Physica::Core::CudaException(err);
+    }
 }

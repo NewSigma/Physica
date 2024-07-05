@@ -101,6 +101,14 @@ namespace Physica {
     #endif
     }
 
+    constexpr static bool IsMPIEnabled() {
+    #ifdef PHYSICA_MPI
+        return true;
+    #else
+        return false;
+    #endif
+    }
+
     constexpr static bool IsCUDAEnabled() {
     #ifdef PHYSICA_CUDA
         return true;

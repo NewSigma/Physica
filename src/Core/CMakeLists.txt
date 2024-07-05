@@ -15,3 +15,7 @@ target_link_libraries(PhysicaCore PhysicaLogger PhysicaUtils ${FFTW3_LIBRARIES} 
 if(${PHYSICA_MKL})
     target_link_libraries(PhysicaCore MKL::MKL)
 endif()
+
+if(${PHYSICA_MPI})
+    target_link_libraries(PhysicaCore MPI::MPI_CXX)
+endif()

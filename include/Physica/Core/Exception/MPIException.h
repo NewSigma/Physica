@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2024 WeiBo He.
+ * Copyright 2024 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -18,26 +18,28 @@
  */
 #pragma once
 
-#include <Physica/Core/Exception/CudaException.cuh>
+#ifndef PHYSICA_MPI
+    #error MPI is disabled. Do not include this file.
+#endif
+
+#include <exception>
+#include <mpi/mpi.h>
+#include <Physica/Macro.h>
 
 namespace Physica::Core {
-    class PHYSICA_API CudaEvent {
-        cudaEvent_t event;
+    class PHYSICA_API MPIException : public std::exception {
+        char* msg;
     public:
-        CudaEvent();
-        CudaEvent(const CudaEvent&) = delete;
-        CudaEvent(CudaEvent&& obj) noexcept;
-        ~CudaEvent();
-        /* Operators */
-        CudaEvent& operator=(CudaEvent obj) noexcept;
-        /* Operations */
-        inline void wait();
-        void swap(CudaEvent& __restrict obj) noexcept;
-        /* Getters */
-        [[nodiscard]] cudaEvent_t getEvent() const noexcept { return event; }
+        MPIException(const char* msg_) noexcept;
+        MPIException(int err) noexcept;
+        ~MPIException() override;
+        const char* what() const noexcept override { return msg; }
     };
+}
 
-    inline void CudaEvent::wait() {
-        cudaCheck(cudaEventSynchronize(event));
+namespace Physica {
+    inline void mpiCheck(int err) {
+        if (err != MPI_SUCCESS) [[unlikely]]
+            throw Physica::Core::MPIException(err);
     }
 }

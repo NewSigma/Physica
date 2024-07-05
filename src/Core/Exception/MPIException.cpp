@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2024 WeiBo He.
+ * Copyright 2024 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -16,28 +16,27 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#pragma once
+#ifdef PHYSICA_MPI
 
-#include <Physica/Core/Exception/CudaException.cuh>
+#include <cstring>
+#include <Physica/Core/Exception/MPIException.h>
 
 namespace Physica::Core {
-    class PHYSICA_API CudaEvent {
-        cudaEvent_t event;
-    public:
-        CudaEvent();
-        CudaEvent(const CudaEvent&) = delete;
-        CudaEvent(CudaEvent&& obj) noexcept;
-        ~CudaEvent();
-        /* Operators */
-        CudaEvent& operator=(CudaEvent obj) noexcept;
-        /* Operations */
-        inline void wait();
-        void swap(CudaEvent& __restrict obj) noexcept;
-        /* Getters */
-        [[nodiscard]] cudaEvent_t getEvent() const noexcept { return event; }
-    };
+    MPIException::MPIException(const char* msg_) noexcept {
+        const size_t length = strlen(msg_);
+        msg = new char[length];
+        strcpy(msg, msg_);
+    }
 
-    inline void CudaEvent::wait() {
-        cudaCheck(cudaEventSynchronize(event));
+    MPIException::MPIException(int err) noexcept {
+        msg = new char[MPI_MAX_ERROR_STRING];
+        int resultlen;
+        MPI_Error_string(err, msg, &resultlen);
+    }
+
+    MPIException::~MPIException() {
+        delete[] msg;
     }
 }
+
+#endif

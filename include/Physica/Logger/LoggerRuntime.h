@@ -161,3 +161,15 @@ namespace Physica::Logger {
  * Use Error instead of Fatal when a system call fails.
  */
 #define Error(loggerID, message) Fatal(loggerID, "%s: %s", message, strerror(errno))
+
+// TODO: A better logger for both C++ and CUDA is required.
+#define cuDebug(x) do { printf("[] [Debug] [%s:%d]: %s\n", __FILENAME__, __LINE__, x); } while(false)
+#define cuWarning(x) do { printf("[] [Warning] [%s:%d]: %s\n", __FILENAME__, __LINE__, x); } while(false)
+#define cuCritical(x) do { printf("[] [Critical] [%s:%d]: %s\n", __FILENAME__, __LINE__, x); } while(false)
+#define cuFatal(x)                                                    \
+    do {                                                              \
+        printf("[] [Fatal] [%s:%d]: %s\n", __FILENAME__, __LINE__, x);\
+        cudaDeviceReset();                                            \
+        exit(EXIT_FAILURE);                                           \
+    } while(false)
+#define cuInfo(x) do { printf("[] [Info] [%s:%d]: %s\n", __FILENAME__, __LINE__, x); } while(false)

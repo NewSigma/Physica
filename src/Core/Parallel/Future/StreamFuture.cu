@@ -16,9 +16,9 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include "Physica/Core/Parallel/Future/StreamFuture.cuh"
-#include "Physica/Core/Parallel/StreamPool.cuh"
-#include "Physica/Utils/CUDA/DebugUtil.cuh"
+#include <Physica/Core/Parallel/Future/StreamFuture.cuh>
+#include <Physica/Core/Parallel/StreamPool.cuh>
+#include <Physica/Core/Exception/CudaException.cuh>
 
 namespace Physica::Core {
     StreamFuture::StreamFuture() : isDone(false) {

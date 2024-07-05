@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 WeiBo He.
+ * Copyright 2023-2024 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -20,7 +20,7 @@
 
 #include <mutex>
 #include <condition_variable>
-#include "Physica/Macro.h"
+#include <Physica/Macro.h>
 
 namespace Physica::Core {
     class PHYSICA_API StreamFuture {
