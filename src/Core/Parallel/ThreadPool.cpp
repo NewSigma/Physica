@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2023 WeiBo He.
+ * Copyright 2021-2024 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include "Physica/Core/Parallel/ThreadPool.h"
+#include <Physica/Core/Parallel/ThreadPool.h>
 
 namespace Physica::Core {
     unsigned int ThreadPool::numThreadRequired = 0;
@@ -24,7 +24,7 @@ namespace Physica::Core {
 
     ThreadPool::ThreadPool(unsigned int numThreads) : thread_data(numThreads), exit(false) {
         for (unsigned int i = 0; i < numThreads; ++i) {
-            thread_data[i].thread.reset(new std::thread([this, i]() { workerMainLoop(i); } ));
+            thread_data[i].thread.reset(new std::thread([this, i]() noexcept { workerMainLoop(i); } ));
         }
     }
 
@@ -67,12 +67,12 @@ namespace Physica::Core {
         }
     }
 
-    void ThreadPool::shouldExit() {
+    void ThreadPool::shouldExit() noexcept {
         exit = true;
         cond.notify_all();
     }
 
-    ThreadPool::ThreadInfo& ThreadPool::getThreadInfo() {
+    ThreadPool::ThreadInfo& ThreadPool::getThreadInfo() noexcept {
         if (info == nullptr) {
             info.reset(new ThreadInfo());
             info->id = MainThreadID;
@@ -82,37 +82,40 @@ namespace Physica::Core {
         return *info;
     }
 
-    ThreadPool& ThreadPool::getInstance() {
+    ThreadPool& ThreadPool::getInstance() noexcept {
         static ThreadPool pool(makeNumThread());
         return pool;
     }
 
-    void ThreadPool::workerMainLoop(unsigned int thread_id) {
+    void ThreadPool::workerMainLoop(unsigned int thread_id) noexcept {
         auto& threadInfo = getThreadInfo();
         threadInfo.id = thread_id;
         auto& data = thread_data[thread_id];
         auto& queue = data.queue;
         std::unique_lock locker(data.queueMutex, std::defer_lock);
         while (true) {
+            std::unique_ptr<Task> task = nullptr;
             locker.lock();
             if (!queue.empty()) {
-                std::unique_ptr<Task> task(std::move(queue.front()));
+                task = std::move(queue.front());
                 queue.pop();
                 locker.unlock();
-                task->execute();
             }
             else {
                 locker.unlock();
-                std::unique_ptr<Task> task = steal();
-                if (task != nullptr)
-                    task->execute();
-                else if (exit)
-                    return;
-                else {
-                    std::unique_lock poolLocker(poolMutex);
-                    cond.wait(poolLocker);
-                }
+                task = steal();
             }
+
+            if (task != nullptr) {
+                cond.notify_one();
+                task->execute();
+            }
+            else if (!exit) {
+                std::unique_lock poolLocker(poolMutex);
+                cond.wait(poolLocker);
+            }
+            else
+                return;
         }
     }
 }

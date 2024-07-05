@@ -34,7 +34,7 @@
 namespace Physica::Core {
     /**
      * Reference:
-     * Eigen https://eigen.tuxfamily.org/
+     * [1] Eigen; https://eigen.tuxfamily.org/
      */
     class PHYSICA_API ThreadPool final {
         constexpr static size_t MainThreadID = std::numeric_limits<size_t>::max();
@@ -70,30 +70,30 @@ namespace Physica::Core {
         ThreadPool& operator=(ThreadPool&&) noexcept = delete;
         /* Operations */
         template<class Function, class... Args>
-        std::future<typename std::invoke_result<Function, Args&&...>::type> schedule(Function func, Args&&... args);
+        std::future<typename std::invoke_result<Function, Args&&...>::type> schedule(Function func, Args&&... args) noexcept;
         std::unique_ptr<Task> steal();
         void waitExit();
         void restart();
         /* Getters */
         [[nodiscard]] unsigned int getNumThreads() const noexcept { return thread_data.getLength(); }
         /* Setters */
-        void shouldExit();
+        void shouldExit() noexcept;
         /* Static Members */
-        [[nodiscard]] static ThreadInfo& getThreadInfo();
+        [[nodiscard]] static ThreadInfo& getThreadInfo() noexcept;
         [[nodiscard]] static inline bool isMainThread() noexcept;
-        [[nodiscard]] static ThreadPool& getInstance();
+        [[nodiscard]] static ThreadPool& getInstance() noexcept;
     private:
         ThreadPool(unsigned int threadCount);
         /* Operations */
-        void workerMainLoop(unsigned int thread_id);
+        void workerMainLoop(unsigned int thread_id) noexcept;
         /* Static Members */
         [[nodiscard]] static inline unsigned int getNumProcesser() noexcept { return get_nprocs(); }
         [[nodiscard]] static inline unsigned int makeNumThread() noexcept;
-        [[nodiscard]] static inline unsigned int threadRand(uint64_t& state);
+        [[nodiscard]] static inline unsigned int threadRand(uint64_t& state) noexcept;
     };
 
     template<class Function, class... Args>
-    std::future<typename std::invoke_result<Function, Args&&...>::type> ThreadPool::schedule(Function func, Args&&... args) {
+    std::future<typename std::invoke_result<Function, Args&&...>::type> ThreadPool::schedule(Function func, Args&&... args) noexcept {
         using ResultType = typename std::invoke_result<Function, Args&&...>::type;
         unsigned int schedule_to;
         auto& info = getThreadInfo();
@@ -125,7 +125,7 @@ namespace Physica::Core {
             return numThreadRequired;
     }
 
-    inline unsigned int ThreadPool::threadRand(uint64_t& state) {
+    inline unsigned int ThreadPool::threadRand(uint64_t& state) noexcept {
         uint64_t current = state;
         state = current * 6364136223846793005ULL + 0xda3e39cb94b95bdbULL;
         // Generate the random output (using the PCG-XSH-RS scheme)
