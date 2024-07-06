@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 WeiBo He.
+ * Copyright 2021-2024 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -19,13 +19,12 @@
 #pragma once
 
 #include <cmath>
-#include "Physica/Utils/Container/Array/Array.h"
+#include <Physica/Utils/Container/Array/Array.h>
 
 namespace Physica::Core {
     /**
      * Reference:
-     * [1] H.Press, William, A.Teukolsky, Saul, Vetterling, William T., Flannery, Brian P..
-     * C++数值算法[M].北京: Publishing House of Electronics Industry, 2009:142
+     * [1] William H. Press, Saul A. Teukolsky, William T. Vetterling, Brian P. Flannery. C++数值算法(第二版)[M]. 北京: 电子工业出版社, 2005:142
      */
     template<class T, class Function>
     void chebyshev_fit(const T& from, const T& to, Utils::Array<T>& coeff, Function func) {
@@ -55,8 +54,7 @@ namespace Physica::Core {
      * Fit a even function, the performance is better than chebyshev_fit()
      * 
      * Reference:
-     * [1] H.Press, William, A.Teukolsky, Saul, Vetterling, William T., Flannery, Brian P..
-     * C++数值算法[M].北京: Publishing House of Electronics Industry, 2009:143
+     * [1] William H. Press, Saul A. Teukolsky, William T. Vetterling, Brian P. Flannery. C++数值算法(第二版)[M]. 北京: 电子工业出版社, 2005:143
      */
     template<class T, class Function>
     void chebyshev_fit_even(const T& from, const T& to, Utils::Array<T>& coeff, Function func) {
@@ -87,8 +85,7 @@ namespace Physica::Core {
      * Fit a odd function, the performance is better than chebyshev_fit()
      * 
      * Reference:
-     * [1] H.Press, William, A.Teukolsky, Saul, Vetterling, William T., Flannery, Brian P..
-     * C++数值算法[M].北京: Publishing House of Electronics Industry, 2009:143
+     * [1] William H. Press, Saul A. Teukolsky, William T. Vetterling, Brian P. Flannery. C++数值算法(第二版)[M]. 北京: 电子工业出版社, 2005:143
      */
     template<class T, class Function>
     void chebyshev_fit_odd(const T& from, const T& to, Utils::Array<T>& coeff, Function func) {
@@ -118,8 +115,7 @@ namespace Physica::Core {
     }
     /**
      * Reference:
-     * [1] H.Press, William, A.Teukolsky, Saul, Vetterling, William T., Flannery, Brian P..
-     * C++数值算法[M].北京: Publishing House of Electronics Industry, 2009:142
+     * [1] William H. Press, Saul A. Teukolsky, William T. Vetterling, Brian P. Flannery. C++数值算法(第二版)[M]. 北京: 电子工业出版社, 2005:142
      */
     template<class T>
     T chebyshev_calc(const T& from, const T& to, const Utils::Array<T>& coeff, const T& x) {
@@ -136,8 +132,7 @@ namespace Physica::Core {
     }
     /**
      * Reference:
-     * [1] H.Press, William, A.Teukolsky, Saul, Vetterling, William T., Flannery, Brian P..
-     * C++数值算法[M].北京: Publishing House of Electronics Industry, 2009:143
+     * [1] William H. Press, Saul A. Teukolsky, William T. Vetterling, Brian P. Flannery. C++数值算法(第二版)[M]. 北京: 电子工业出版社, 2005:143
      */
     template<class T>
     T chebyshev_calc_even(const T& from, const T& to, const Utils::Array<T>& coeff, const T& x) {

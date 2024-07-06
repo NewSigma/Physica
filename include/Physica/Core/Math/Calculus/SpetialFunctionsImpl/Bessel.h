@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2023 WeiBo He.
+ * Copyright 2021-2024 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -18,13 +18,12 @@
  */
 #pragma once
 
-#include "Physica/Core/Math/Calculus/Chebyshev.h"
+#include <Physica/Core/Math/Calculus/Chebyshev.h>
 
 namespace Physica::Core {
     /**
      * Reference:
-     * [1] H.Press, William, A.Teukolsky, Saul, Vetterling, William T., Flannery, Brian P..
-     * C++数值算法[M].北京: Publishing House of Electronics Industry, 2009:171
+     * [1] William H. Press, Saul A. Teukolsky, William T. Vetterling, Brian P. Flannery. C++数值算法(第二版)[M]. 北京: 电子工业出版社, 2005:171
      */
     template<ScalarOption Option>
     Scalar<Option> besselJ0(const Scalar<Option>& x) {
@@ -49,8 +48,7 @@ namespace Physica::Core {
     }
     /**
      * Reference:
-     * [1] H.Press, William, A.Teukolsky, Saul, Vetterling, William T., Flannery, Brian P..
-     * C++数值算法[M].北京: Publishing House of Electronics Industry, 2009:171
+     * [1] William H. Press, Saul A. Teukolsky, William T. Vetterling, Brian P. Flannery. C++数值算法(第二版)[M]. 北京: 电子工业出版社, 2005:171
      */
     template<ScalarOption Option>
     Scalar<Option> besselJ1(const Scalar<Option>& x) {
@@ -76,8 +74,7 @@ namespace Physica::Core {
     }
     /**
      * Reference:
-     * [1] H.Press, William, A.Teukolsky, Saul, Vetterling, William T., Flannery, Brian P..
-     * C++数值算法[M].北京: Publishing House of Electronics Industry, 2009:173
+     * [1] William H. Press, Saul A. Teukolsky, William T. Vetterling, Brian P. Flannery. C++数值算法(第二版)[M]. 北京: 电子工业出版社, 2005:173
      */
     template<ScalarOption Option>
     Scalar<Option> besselJn(const Integer& n, const Scalar<Option>& x) {
@@ -145,8 +142,7 @@ namespace Physica::Core {
     }
     /**
      * Reference:
-     * [1] H.Press, William, A.Teukolsky, Saul, Vetterling, William T., Flannery, Brian P..
-     * C++数值算法[M].北京: Publishing House of Electronics Industry, 2009:171
+     * [1] William H. Press, Saul A. Teukolsky, William T. Vetterling, Brian P. Flannery. C++数值算法(第二版)[M]. 北京: 电子工业出版社, 2005:171
      */
     template<ScalarOption Option>
     Scalar<Option> besselY0(const Scalar<Option>& x) {
@@ -170,8 +166,7 @@ namespace Physica::Core {
     }
     /**
      * Reference:
-     * [1] H.Press, William, A.Teukolsky, Saul, Vetterling, William T., Flannery, Brian P..
-     * C++数值算法[M].北京: Publishing House of Electronics Industry, 2009:172
+     * [1] William H. Press, Saul A. Teukolsky, William T. Vetterling, Brian P. Flannery. C++数值算法(第二版)[M]. 北京: 电子工业出版社, 2005:172
      */
     template<ScalarOption Option>
     Scalar<Option> besselY1(const Scalar<Option>& x) {
@@ -195,8 +190,7 @@ namespace Physica::Core {
     }
     /**
      * Reference:
-     * [1] H.Press, William, A.Teukolsky, Saul, Vetterling, William T., Flannery, Brian P..
-     * C++数值算法[M].北京: Publishing House of Electronics Industry, 2009:173
+     * [1] William H. Press, Saul A. Teukolsky, William T. Vetterling, Brian P. Flannery. C++数值算法(第二版)[M]. 北京: 电子工业出版社, 2005:173
      */
     template<ScalarOption Option>
     Scalar<Option> besselYn(const Integer& n, const Scalar<Option>& x) {
@@ -216,8 +210,7 @@ namespace Physica::Core {
     namespace Internal {
         /**
          * Reference:
-         * [1] H.Press, William, A.Teukolsky, Saul, Vetterling, William T., Flannery, Brian P..
-         * C++数值算法[M].北京: Publishing House of Electronics Industry, 2009:182
+         * [1] William H. Press, Saul A. Teukolsky, William T. Vetterling, Brian P. Flannery. C++数值算法(第二版)[M]. 北京: 电子工业出版社, 2005:182
          */
         template<ScalarOption Option>
         void besselChebyshevHelper(
@@ -244,8 +237,7 @@ namespace Physica::Core {
      * TODO: square of integers is not implemented, using (i * i) instead
      * 
      * Reference:
-     * [1] H.Press, William, A.Teukolsky, Saul, Vetterling, William T., Flannery, Brian P..
-     * C++数值算法[M].北京: Publishing House of Electronics Industry, 2009:180
+     * [1] William H. Press, Saul A. Teukolsky, William T. Vetterling, Brian P. Flannery. C++数值算法(第二版)[M]. 北京: 电子工业出版社, 2005:180
      */
     template<ScalarOption Option>
     void besselJn_Yn_dJn_dYn(

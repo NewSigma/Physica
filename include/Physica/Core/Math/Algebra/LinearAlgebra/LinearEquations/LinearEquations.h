@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2023 WeiBo He.
+ * Copyright 2020-2024 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -18,38 +18,37 @@
  */
 #pragma once
 
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h"
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/MatrixOperation.h"
+#include <Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h>
+#include <Physica/Core/Math/Algebra/LinearAlgebra/Matrix/MatrixOperation.h>
 
 namespace Physica::Core {
     /**
      * Unfinished:
      * If the equations do not have the unique solution, the program will throw a divide zero exception and stop.
      * Change the bias in LU method to solve a family of equations.
-     * 
+     *
      * References:
-     * [1] H.Press, William, A.Teukolsky, Saul, Vetterling, William T., Flannery, Brian P..
-     * C++数值算法[M].北京: Publishing House of Electronics Industry, 2009
+     * [1] William H. Press, Saul A. Teukolsky, William T. Vetterling, Brian P. Flannery. C++数值算法(第二版)[M]. 北京: 电子工业出版社, 2005
      */
-    template<class T, int Type = MatrixOption::Column | MatrixOption::Vector
-            , size_t MaxRow = Dynamic, size_t MaxColumn = Dynamic>
+    template<class T, int Type = MatrixOption::Column | MatrixOption::Vector, size_t MaxRow = Dynamic, size_t MaxColumn = Dynamic>
     class LinearEquations {
+        using This = LinearEquations<T, Type, MaxRow, MaxColumn>;
         using Operation = MatrixOperation<T, Type, MaxRow, MaxColumn>;
 
         DenseMatrix<T, Type, MaxRow, MaxColumn> working;
     public:
         explicit LinearEquations(DenseMatrix<T, Type, MaxRow, MaxColumn> working_);
-        LinearEquations(const LinearEquations& l) = default;
-        LinearEquations(LinearEquations&& l) noexcept = default;
+        LinearEquations(const This& l) = default;
+        LinearEquations(This&& l) noexcept = default;
         ~LinearEquations() = default;
         /* Operators */
-        LinearEquations& operator=(LinearEquations l) noexcept;
+        This& operator=(This obj) noexcept { swap(obj); return *this; }
         /* Operations */
         void gaussJordanPartial();
         void gaussJordanComplete();
         void gaussEliminationPartial();
         void gaussEliminationComplete();
-        void swap(LinearEquations& __restrict equ) noexcept;
+        void swap(This& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] const DenseMatrix<T, Type, MaxRow, MaxColumn>& getWorking() const noexcept { return working; }
         [[nodiscard]] auto getSolution() { return working.col(working.getColumn() - 1); }

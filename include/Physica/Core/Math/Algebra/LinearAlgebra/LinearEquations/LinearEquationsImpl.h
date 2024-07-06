@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2022 WeiBo He.
+ * Copyright 2020-2024 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -26,12 +26,6 @@ namespace Physica::Core {
     LinearEquations<T, Type, MaxRow, MaxColumn>::LinearEquations(DenseMatrix<T, Type, MaxRow, MaxColumn> working_)
             : working(std::move(working_)) {
         assert(working.getRow() + 1 == working.getColumn());
-    }
-
-    template<class T, int Type, size_t MaxRow, size_t MaxColumn>
-    LinearEquations<T, Type, MaxRow, MaxColumn>&
-    LinearEquations<T, Type, MaxRow, MaxColumn>::operator=(LinearEquations l) noexcept {
-        swap(l);
     }
 
     template<class T, int Type, size_t MaxRow, size_t MaxColumn>
@@ -89,8 +83,8 @@ namespace Physica::Core {
     }
 
     template<class T, int Type, size_t MaxRow, size_t MaxColumn>
-    void LinearEquations<T, Type, MaxRow, MaxColumn>::swap(LinearEquations& __restrict equ) noexcept {
-        assert(this != &equ && "[Error]: Self swap is likely a bug");
-        working.swap(equ.working);
+    void LinearEquations<T, Type, MaxRow, MaxColumn>::swap(This& __restrict obj) noexcept {
+        assert(this != &obj && "[Error]: Self swap is likely a bug");
+        working.swap(obj.working);
     }
 }

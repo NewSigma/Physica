@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2023 WeiBo He.
+ * Copyright 2021-2024 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -18,14 +18,13 @@
  */
 #pragma once
 
-#include "Physica/Core/Math/Calculus/Differential.h"
+#include <Physica/Core/Math/Calculus/Differential.h>
 
 namespace Physica::Core {
     namespace Internal {
         /**
          * Reference:
-         * [1] H.Press, William, A.Teukolsky, Saul, Vetterling, William T., Flannery, Brian P..
-         * C++数值算法[M].北京: Publishing House of Electronics Industry, 2009:156
+         * [1] William H. Press, Saul A. Teukolsky, William T. Vetterling, Brian P. Flannery. C++数值算法(第二版)[M]. 北京: 电子工业出版社, 2005:156
          */
         template<class ScalarType>
         ScalarType incompGammaImpl1(const ScalarBase<ScalarType>& a_, const ScalarBase<ScalarType>& x_) {
@@ -46,8 +45,7 @@ namespace Physica::Core {
         }
         /**
          * Reference:
-         * [1] H.Press, William, A.Teukolsky, Saul, Vetterling, William T., Flannery, Brian P..
-         * C++数值算法[M].北京: Publishing House of Electronics Industry, 2009:161
+         * [1] William H. Press, Saul A. Teukolsky, William T. Vetterling, Brian P. Flannery. C++数值算法(第二版)[M]. 北京: 电子工业出版社, 2005:161
          */
         template<class ScalarType>
         ScalarType incompGammaImpl2(const ScalarBase<ScalarType>& a_, const ScalarBase<ScalarType>& x_) {
@@ -88,8 +86,7 @@ namespace Physica::Core {
      * Return the logarithm of gamma(s). s must be positive.
      * 
      * Reference:
-     * [1] H.Press, William, A.Teukolsky, Saul, Vetterling, William T., Flannery, Brian P..
-     * C++数值算法[M].北京: Publishing House of Electronics Industry, 2009:156
+     * [1] William H. Press, Saul A. Teukolsky, William T. Vetterling, Brian P. Flannery. C++数值算法(第二版)[M]. 北京: 电子工业出版社, 2005:156
      * [2] Lanczos, C. 1964, SIAM Journal on Numerical Analysis, ser. B, vol. 1, pp. 86-96
      */
     template<class ScalarType>

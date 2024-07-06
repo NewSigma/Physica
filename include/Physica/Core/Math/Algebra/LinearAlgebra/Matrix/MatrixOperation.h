@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2021 WeiBo He.
+ * Copyright 2020-2024 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -16,8 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef PHYSICA_MATRIXOPERATION_H
-#define PHYSICA_MATRIXOPERATION_H
+#pragma once
 
 namespace Physica::Core {
     /*!
@@ -41,8 +40,7 @@ namespace Physica::Core {
     * Complexity: O((rank - column) ^ 2)
     *
     * Reference:
-    * [1] H.Press, William, A.Teukolsky, Saul, Vetterling, William T., Flannery, Brian P..
-    * C++数值算法[M].北京: Publishing House of Electronics Industry, 2009:35
+    * [1] William H. Press, Saul A. Teukolsky, William T. Vetterling, Brian P. Flannery. C++数值算法(第二版)[M]. 北京: 电子工业出版社, 2005:35
     */
     template<class T, int type, size_t maxRow, size_t maxColumn>
     inline size_t MatrixOperation<T, type, maxRow, maxColumn>::completePivoting(
@@ -72,8 +70,7 @@ namespace Physica::Core {
      * Complexity: O(rank - column)
      *
      * Reference:
-     * [1] H.Press, William, A.Teukolsky, Saul, Vetterling, William T., Flannery, Brian P..
-     * C++数值算法[M].北京: Publishing House of Electronics Industry, 2009:35
+     * [1] William H. Press, Saul A. Teukolsky, William T. Vetterling, Brian P. Flannery. C++数值算法(第二版)[M]. 北京: 电子工业出版社, 2005:35
      */
     template<class T, int type, size_t maxRow, size_t maxColumn>
     inline size_t MatrixOperation<T, type, maxRow, maxColumn>::partialPivoting(
@@ -100,8 +97,7 @@ namespace Physica::Core {
      * Complexity: O(rank)
      *
      * Reference:
-     * [1] H.Press, William, A.Teukolsky, Saul, Vetterling, William T., Flannery, Brian P..
-     * C++数值算法[M].北京: Publishing House of Electronics Industry, 2009:35
+     * [1] William H. Press, Saul A. Teukolsky, William T. Vetterling, Brian P. Flannery. C++数值算法(第二版)[M]. 北京: 电子工业出版社, 2005:35
      */
     template<class T, int type, size_t maxRow, size_t maxColumn>
     inline void MatrixOperation<T, type, maxRow, maxColumn>::impactPivoting(
@@ -147,5 +143,3 @@ namespace Physica::Core {
             matrix.impactPivoting(i);
     }
 }
-
-#endif
