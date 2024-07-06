@@ -39,7 +39,8 @@ namespace Physica::Core {
 
         RealType beta;
         RealType traceMu;
-        std::pair<int, int> params;
+        int numMinCostTerm;
+        int numSplit;
     public:
         TPQ(size_t length);
         TPQ(const This&) = default;
@@ -58,14 +59,14 @@ namespace Physica::Core {
         void swap(This& __restrict obj) noexcept;
 
         template<class RandomGenerator>
-        inline void random_uniform(RandomGenerator& gen);
-        template<class RandomGenerator>
         inline void random_normal(RandomGenerator& gen);
         template<class Distribution, class RandomGenerator>
         inline void random_any(Distribution& dist, RandomGenerator& gen);
+        /* Getters */
+        [[nodiscard]] RealType getTraceMu() const noexcept { return traceMu; }
+        [[nodiscard]] int getNumMinCostTerm() const noexcept { return numMinCostTerm; }
+        [[nodiscard]] int getNumSplit() const noexcept { return numSplit; }
         /* Static members */
-        template<class RandomGenerator>
-        [[nodiscard]] static This random_uniform(size_t len, RandomGenerator& gen);
         template<class RandomGenerator>
         [[nodiscard]] static This random_normal(size_t len, RandomGenerator& gen);
         template<class Distribution, class RandomGenerator>
@@ -77,7 +78,8 @@ namespace Physica::Core {
             : Base(length)
             , beta(0)
             , traceMu(std::numeric_limits<RealType>::max())
-            , params(std::make_pair(0, 0)) {
+            , numMinCostTerm(0)
+            , numSplit(0) {
         assert(length > 0 && "[Error]: Invalid length");
     }
 
@@ -90,7 +92,9 @@ namespace Physica::Core {
         const auto expr2 = exp(expr1);
         const auto expr3 = expr2 * (*this);
         traceMu = expr3.calcTraceMu();
-        params = expr3.template calcParam<Executor>(traceMu);
+        const auto params = expr3.template calcParam<Executor>(traceMu);
+        numMinCostTerm = params.first;
+        numSplit = params.second;
     }
 
     template<class ScalarType>
@@ -107,7 +111,7 @@ namespace Physica::Core {
         const auto expr3 = expr2 * (*this);
         BufferType dot(Base::getLength());
         if (isPrepared)
-            expr3.template assignTo<BufferType, Executor>(dot, traceMu, params);
+            expr3.template assignTo<BufferType, Executor>(dot, traceMu, std::make_pair(numMinCostTerm, numSplit));
         else
             expr3.template assignTo<BufferType, Executor>(dot);
         Base::swap(dot);
@@ -121,6 +125,9 @@ namespace Physica::Core {
 
     template<class ScalarType>
     inline typename TPQ<ScalarType>::RealType TPQ<ScalarType>::lnPartitionZ() const {
+        const bool isUnderflow = abs(*this).min().isZero();
+        if (isUnderflow)
+            return RealType(-std::numeric_limits<ScalarType>::max());
         return Base::lnSquaredNorm() + ln(RealType(Base::getLength()));
     }
 
@@ -130,14 +137,8 @@ namespace Physica::Core {
         Base::swap(*this);
         beta.swap(obj.beta);
         traceMu.swap(obj.traceMu);
-        std::swap(params, obj.params);
-    }
-
-    template<class ScalarType>
-    template<class RandomGenerator>
-    inline void TPQ<ScalarType>::random_uniform(RandomGenerator& gen) {
-        Base::random_uniform(gen);
-        Base::toUnit();
+        std::swap(numMinCostTerm, obj.numMinCostTerm);
+        std::swap(numSplit, obj.numSplit);
     }
 
     template<class ScalarType>
@@ -152,14 +153,6 @@ namespace Physica::Core {
     inline void TPQ<ScalarType>::random_any(Distribution& dist, RandomGenerator& gen) {
         Base::random_any(dist, gen);
         Base::toUnit();
-    }
-
-    template<class ScalarType>
-    template<class RandomGenerator>
-    TPQ<ScalarType> TPQ<ScalarType>::random_uniform(size_t len, RandomGenerator& gen) {
-        This result(len);
-        result.random_uniform(gen);
-        return result;
     }
 
     template<class ScalarType>

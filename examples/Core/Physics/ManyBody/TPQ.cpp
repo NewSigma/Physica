@@ -35,7 +35,7 @@ constexpr unsigned int NumSpinUp = NumSite / 2;
 constexpr unsigned int NumSpinDown = NumSite / 2;
 constexpr double HoppingT = 1.0;
 constexpr double repelU = 8.0;
-constexpr unsigned int NumSample = 8;
+constexpr unsigned int NumSample = 100;
 constexpr unsigned int NumSystem = 6;
 constexpr unsigned int NumBeta = 40;
 using ReprType = SpinRepr<1, NumSite, NumSpinUp == NumSpinDown>;
@@ -59,6 +59,7 @@ VectorType energyTPQ(const Hamilton& hamilton, ScalarType deltaBeta) {
     auto& gen = RandomPoolType::getInstance().getGen();
     VectorType energys(NumBeta);
     auto psi = TPQ<ScalarType>::random_normal(hamilton.getNumState(), gen);
+    psi.pre_nvt_step(hamilton, deltaBeta);
     for (size_t i = 0; i < NumBeta; ++i) {
         if (i != 0)
             psi.nvt_step(hamilton, deltaBeta);
@@ -83,7 +84,7 @@ int main(int argc, char** argv) {
     }
 
     QApplication app(argc, argv);
-    Plot* plot = new Plot(0, 4, -2, 10, 2, 4);
+    Plot* plot = new Plot(0, 4, -1.8, 9, 1, 2);
     auto* axisX = plot->getAxisX();
     auto* axisY = plot->getAxisY();
     axisX->setTitleText("&beta;");
@@ -91,7 +92,7 @@ int main(int argc, char** argv) {
     axisY->setTitleText("E");
     axisY->setLabelFormat("%d");
     {
-        const VectorType devia = sqrt(vars);
+        const VectorType devia = sqrt(vars) * ScalarType(2);
         auto& area = plot->area_center(betas, means, devia);
         const auto original = area.color();
         auto areaColor = original;
