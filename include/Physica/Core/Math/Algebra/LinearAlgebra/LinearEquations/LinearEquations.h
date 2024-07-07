@@ -19,7 +19,6 @@
 #pragma once
 
 #include <Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h>
-#include <Physica/Core/Math/Algebra/LinearAlgebra/Matrix/MatrixOperation.h>
 
 namespace Physica::Core {
     /**
@@ -33,7 +32,6 @@ namespace Physica::Core {
     template<class T, int Type = MatrixOption::Column | MatrixOption::Vector, size_t MaxRow = Dynamic, size_t MaxColumn = Dynamic>
     class LinearEquations {
         using This = LinearEquations<T, Type, MaxRow, MaxColumn>;
-        using Operation = MatrixOperation<T, Type, MaxRow, MaxColumn>;
 
         DenseMatrix<T, Type, MaxRow, MaxColumn> working;
     public:
@@ -51,7 +49,10 @@ namespace Physica::Core {
         void swap(This& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] const DenseMatrix<T, Type, MaxRow, MaxColumn>& getWorking() const noexcept { return working; }
-        [[nodiscard]] auto getSolution() { return working.col(working.getColumn() - 1); }
+        [[nodiscard]] auto getSolution() const noexcept { return working.col(working.getColumn() - 1); }
+    private:
+        void upperEliminate(size_t index);
+        void lowerEliminate(size_t index);
     };
 }
 

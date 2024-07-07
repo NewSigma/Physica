@@ -18,8 +18,6 @@
  */
 #pragma once
 
-#include <Physica/Core/Math/Algebra/LinearAlgebra/Matrix/MatrixOperation.h>
-
 namespace Physica::Core {
     template<class T, int type, size_t maxRow, size_t maxColumn>
     PLUDecomposition<T, type, maxRow, maxColumn>::PLUDecomposition(MatrixType m) {
@@ -41,7 +39,7 @@ namespace Physica::Core {
         for(size_t i = 0; i < rank; ++i)
             biasOrder[i] = i;
         for(size_t i = 0; i < rank; ++i) {
-            std::swap(biasOrder[i], biasOrder[MatrixOperation<T, type, maxRow, maxColumn>::partialPivoting(matrix, i)]);
+            std::swap(biasOrder[i], biasOrder[matrix.partialPivoting(i)]);
             decompositionColumn(i);
         }
     }

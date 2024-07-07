@@ -69,21 +69,25 @@ namespace Physica::Core {
         DenseMatrix(const RValueVector<VectorType>& mat);
         template<class MatrixIn>
         DenseMatrix(LUDecomposition<MatrixIn> lu);
-        DenseMatrix(const DenseMatrix& m);
-        DenseMatrix(DenseMatrix&& m) noexcept;
+        DenseMatrix(const This& m);
+        DenseMatrix(This&& m) noexcept;
         /* Operators */
-        DenseMatrix& operator=(DenseMatrix m) noexcept;
+        This& operator=(This obj) noexcept { swap(obj); return *this; }
         using Base::operator=;
         using Storage::operator();
         /* Operations */
-        using Base::random_any;
-        using Base::random_normal;
-        using Base::random_uniform;
+        size_t completePivoting(size_t column);
+        size_t partialPivoting(size_t column);
+
         inline void resize(size_t row, size_t column);
         [[nodiscard]] DenseMatrix copy() const;
         [[nodiscard]] inline device_obj<This> toDevice() const;
         void toDevice(device_obj<This>& obj) const;
         void swap(DenseMatrix& __restrict m) noexcept;
+
+        using Base::random_any;
+        using Base::random_normal;
+        using Base::random_uniform;
         /* Getters */
         using Dim::getColumn;
         using Dim::getRow;

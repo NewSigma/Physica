@@ -73,12 +73,55 @@ namespace Physica::Core {
 
     template<class T, int Option, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn, class Allocator>
     DenseMatrix<T, Option, Row, Column, MaxRow, MaxColumn, Allocator>::DenseMatrix(DenseMatrix&& m) noexcept : Base(), Storage(std::move(m)), Dim(m) {}
-
+    /**
+     * \returns the origin column index of the main element
+     *
+     * Reference:
+     * [1] William H. Press, Saul A. Teukolsky, William T. Vetterling, Brian P. Flannery. C++数值算法(第二版)[M]. 北京: 电子工业出版社, 2005:35
+     */
     template<class T, int Option, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn, class Allocator>
-    DenseMatrix<T, Option, Row, Column, MaxRow, MaxColumn, Allocator>&
-    DenseMatrix<T, Option, Row, Column, MaxRow, MaxColumn, Allocator>::operator=(DenseMatrix m) noexcept {
-        swap(m);
-        return *this;
+    size_t DenseMatrix<T, Option, Row, Column, MaxRow, MaxColumn, Allocator>::completePivoting(size_t column) {
+        const auto rank = getRow();
+        assert(column < rank);
+        size_t main_row_index = 0, main_column_index = 0;
+        const T zero = T(0);
+        const T* main = &zero;
+        for(size_t i = column; i < rank; ++i) {
+            for(size_t j = column; j < rank; ++j) {
+                const auto* temp = Base::data_ptr(i, j);
+                bool larger = absCompare(*main, *temp);
+                main = larger ? main : temp;
+                main_row_index = larger ? main_row_index : j;
+                main_column_index = larger ? main_column_index : i;
+            }
+        }
+
+        if (column != main_row_index)
+            Storage::rowSwap(column, main_row_index);
+        return main_column_index;
+    }
+    /**
+     * \returns the origin column index of the main element
+     *
+     * Reference:
+     * [1] William H. Press, Saul A. Teukolsky, William T. Vetterling, Brian P. Flannery. C++数值算法(第二版)[M]. 北京: 电子工业出版社, 2005:35
+     */
+    template<class T, int Option, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn, class Allocator>
+    size_t DenseMatrix<T, Option, Row, Column, MaxRow, MaxColumn, Allocator>::partialPivoting(size_t column) {
+        const auto rank = getRow();
+        assert(column < rank);
+        size_t main_col_index = column;
+        const T* main = Base::data_ptr(column, column);
+        for(size_t j = column + 1; j < rank; ++j) {
+            const auto* temp = Base::data_ptr(j, column);
+            bool larger = absCompare(*main, *temp);
+            main = larger ? main : temp;
+            main_col_index = larger ? main_col_index : j;
+        }
+
+        if (column != main_col_index)
+            Storage::rowSwap(column, main_col_index);
+        return main_col_index;
     }
 
     template<class T, int Option, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn, class Allocator>

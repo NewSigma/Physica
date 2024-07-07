@@ -18,9 +18,6 @@
  */
 #pragma once
 
-#include <iostream>
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/MatrixDecomposition/PLUDecomposition.h"
-
 namespace Physica::Core {
     template<class T, int Type, size_t MaxRow, size_t MaxColumn>
     LinearEquations<T, Type, MaxRow, MaxColumn>::LinearEquations(DenseMatrix<T, Type, MaxRow, MaxColumn> working_)
@@ -32,9 +29,9 @@ namespace Physica::Core {
     void LinearEquations<T, Type, MaxRow, MaxColumn>::gaussJordanPartial() {
         const auto rank = working.getRow();
         for (size_t i = 0; i < rank; ++i) {
-            Operation::partialPivoting(working, i);
-            Operation::upperEliminate(working, i);
-            Operation::lowerEliminate(working, i);
+            working.partialPivoting(i);
+            upperEliminate(i);
+            lowerEliminate(i);
         }
         for (size_t i = 0; i < rank; ++i)
             working(i, rank) /= working(i, i);
@@ -44,9 +41,9 @@ namespace Physica::Core {
     void LinearEquations<T, Type, MaxRow, MaxColumn>::gaussJordanComplete() {
         const auto rank = working.getRow();
         for (size_t i = 0; i < rank; ++i) {
-            Operation::completePivoting(working, i);
-            Operation::upperEliminate(working, i);
-            Operation::lowerEliminate(working, i);
+            working.completePivoting(i);
+            upperEliminate(i);
+            lowerEliminate(i);
         }
         for (size_t i = 0; i < rank; ++i)
             working(i, rank) /= working(i, i);
@@ -56,8 +53,8 @@ namespace Physica::Core {
     void LinearEquations<T, Type, MaxRow, MaxColumn>::gaussEliminationPartial() {
         const auto rank = working.getRow();
         for (size_t i = 0; i < rank; ++i) {
-            Operation::partialPivoting(working, i);
-            Operation::lowerEliminate(working, i);
+            working.partialPivoting(i);
+            lowerEliminate(i);
         }
         for (size_t i = rank - 1; i > 0; --i) {
             working(i, rank) /= working(i, i);
@@ -71,8 +68,8 @@ namespace Physica::Core {
     void LinearEquations<T, Type, MaxRow, MaxColumn>::gaussEliminationComplete() {
         const auto rank = working.getRow();
         for (size_t i = 0; i < rank; ++i) {
-            Operation::completePivoting(working, i);
-            Operation::lowerEliminate(working, i);
+            working.completePivoting(i);
+            lowerEliminate(i);
         }
         for (size_t i = rank - 1; i > 0; --i) {
             working(i, rank) /= working(i, i);
@@ -86,5 +83,20 @@ namespace Physica::Core {
     void LinearEquations<T, Type, MaxRow, MaxColumn>::swap(This& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         working.swap(obj.working);
+    }
+
+    template<class T, int Type, size_t MaxRow, size_t MaxColumn>
+    void LinearEquations<T, Type, MaxRow, MaxColumn>::upperEliminate(size_t index) {
+        assert(!working(index, index).isZero() && "[Error]: Matrix is singular");
+        for(size_t i = 0; i < index; ++i)
+            working.rowReduce(index, i, index);
+    }
+
+    template<class T, int Type, size_t MaxRow, size_t MaxColumn>
+    void LinearEquations<T, Type, MaxRow, MaxColumn>::lowerEliminate(size_t index) {
+        assert(!working(index, index).isZero() && "[Error]: Matrix is singular");
+        const auto r = working.getRow();
+        for(size_t i = index + 1; i < r; ++i)
+            working.rowReduce(index, i, index);
     }
 }
