@@ -16,10 +16,9 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef PHYSICA_MULBASIC_H
-#define PHYSICA_MULBASIC_H
+#pragma once
 
-#include "Physica/Macro.h"
+#include <Physica/Macro.h>
 
 namespace Physica::Core {
     /*!
@@ -27,80 +26,81 @@ namespace Physica::Core {
      * It is slightly faster than mulWordByWord() if we are interested in the high Unit only.
      */
     inline MPUnit mulWordByWordHigh(MPUnit n1, MPUnit n2) {
-    #if UseASM
-        MPUnit result;
-        if constexpr (PhysicaWordSize == 64) {
-            asm (
-                    "mulq %2\n\t"
-                    "movq %%rdx, %0"
-                    : "=a"(result)
-                    : "a"(n1), "rm"(n2)
-                    : "%rdx"
-            );
+        if constexpr (IsASMEnabled()) {
+            MPUnit result;
+            if constexpr (PhysicaWordSize == 64) {
+                asm (
+                        "mulq %2\n\t"
+                        "movq %%rdx, %0"
+                        : "=a"(result)
+                        : "a"(n1), "rm"(n2)
+                        : "%rdx"
+                );
+            }
+            else {
+                asm (
+                        "mull %2"
+                        : "=d"(result)
+                        : "a"(n1), "rm"(n2)
+                );
+            }
+            return result;
         }
         else {
-            asm (
-                    "mull %2"
-                    : "=d"(result)
-                    : "a"(n1), "rm"(n2)
-            );
+            unsigned long n1_low = n1 & MPUnitLowerMask;
+            unsigned long n1_high = n1 >> (64U / 2U);
+            unsigned long n2_low = n2 & MPUnitLowerMask;
+            unsigned long n2_high = n2 >> (64U / 2U);
+
+            auto ll = n1_low * n2_low;
+            auto lh = n1_low * n2_high;
+            auto hl = n1_high * n2_low;
+            auto hh = n1_high * n2_high;
+
+            lh += ll >> (64U / 2U);
+            lh += hl;
+            hh += static_cast<unsigned long>(lh < hl) << (64U / 2U);
+            return hh + (lh >> (64U / 2U));
         }
-        return result;
-    #else
-        unsigned long n1_low = n1 & MPUnitLowerMask;
-        unsigned long n1_high = n1 >> (64U / 2U);
-        unsigned long n2_low = n2 & MPUnitLowerMask;
-        unsigned long n2_high = n2 >> (64U / 2U);
-
-        auto ll = n1_low * n2_low;
-        auto lh = n1_low * n2_high;
-        auto hl = n1_high * n2_low;
-        auto hh = n1_high * n2_high;
-
-        lh += ll >> (64U / 2U);
-        lh += hl;
-        hh += static_cast<unsigned long>(lh < hl) << (64U / 2U);
-
-        return hh + (lh >> (64U / 2U));
-    #endif
     }
     /*!
      * On 64 bits machine(similar to 32 bit machine):
      * n1 * n2 = product(16 bytes) = carry(high 8 bytes) + ReturnValue(low bytes)
      */
     inline void mulWordByWord(MPUnit& high, MPUnit& low, MPUnit n1, MPUnit n2) {
-    #if UseASM
-        if constexpr (PhysicaWordSize == 64) {
-            asm (
-                    "mulq %3"
-                    : "=d"(high), "=a"(low)
-                    : "a"(n1), "rm"(n2)
-            );
+        if constexpr (IsASMEnabled()) {
+            if constexpr (PhysicaWordSize == 64) {
+                asm (
+                        "mulq %3"
+                        : "=d"(high), "=a"(low)
+                        : "a"(n1), "rm"(n2)
+                );
+            }
+            else {
+                asm (
+                        "mull %3"
+                        : "=d"(high), "=a"(low)
+                        : "a"(n1), "rm"(n2)
+                );
+            }
         }
         else {
-            asm (
-                    "mull %3"
-                    : "=d"(high), "=a"(low)
-                    : "a"(n1), "rm"(n2)
-            );
+            MPUnit n1_low = n1 & MPUnitLowerMask;
+            MPUnit n1_high = n1 >> (MPUnitWidth / 2U);
+            MPUnit n2_low = n2 & MPUnitLowerMask;
+            MPUnit n2_high = n2 >> (MPUnitWidth / 2U);
+
+            auto ll = n1_low * n2_low;
+            auto lh = n1_low * n2_high;
+            auto hl = n1_high * n2_low;
+            auto hh = n1_high * n2_high;
+
+            lh += ll >> (MPUnitWidth / 2U);
+            lh += hl;
+            hh += static_cast<MPUnit>(lh < hl) << (MPUnitWidth / 2U);
+            high = hh + (lh >> (MPUnitWidth / 2U));
+            low = (lh << (MPUnitWidth / 2U)) + (ll & MPUnitLowerMask);
         }
-    #else
-        MPUnit n1_low = n1 & MPUnitLowerMask;
-        MPUnit n1_high = n1 >> (MPUnitWidth / 2U);
-        MPUnit n2_low = n2 & MPUnitLowerMask;
-        MPUnit n2_high = n2 >> (MPUnitWidth / 2U);
-
-        auto ll = n1_low * n2_low;
-        auto lh = n1_low * n2_high;
-        auto hl = n1_high * n2_low;
-        auto hh = n1_high * n2_high;
-
-        lh += ll >> (MPUnitWidth / 2U);
-        lh += hl;
-        hh += static_cast<MPUnit>(lh < hl) << (MPUnitWidth / 2U);
-        high = hh + (lh >> (MPUnitWidth / 2U));
-        low = (lh << (MPUnitWidth / 2U)) + (ll & MPUnitLowerMask);
-    #endif
     }
     /*!
      * Multiply the array @param arr with @param n. Write the result to array @param result.
@@ -151,5 +151,3 @@ namespace Physica::Core {
         return carry;
     }
 }
-
-#endif

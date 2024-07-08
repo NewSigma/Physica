@@ -20,7 +20,10 @@
 
 #include <climits>
 #include <cstddef>
-#include "Physica/Config.h"
+#include <Physica/Config.h>
+
+//Avoid "unused parameter" warnings and note that the parameter is used in asm.
+#define USE_IN_ASM(x) (void)x
 /**
  * Improve: Platform dependent, may be wrong on some spatial platforms, add a test before compile.
  * Note: Use of double_extract may cause several warnings in valgrind.
@@ -85,7 +88,15 @@ namespace Physica {
 
     constexpr size_t Dynamic = 0;
 
-    constexpr static bool IsHDF5Enabled() {
+    constexpr inline static bool IsASMEnabled() {
+    #ifdef PHYSICA_ASM
+        return true;
+    #else
+        return false;
+    #endif
+    }
+
+    constexpr inline static bool IsHDF5Enabled() {
     #ifdef PHYSICA_HDF5
         return true;
     #else
@@ -93,7 +104,7 @@ namespace Physica {
     #endif
     }
 
-    constexpr static bool IsMKLEnabled() {
+    constexpr inline static bool IsMKLEnabled() {
     #ifdef PHYSICA_MKL
         return true;
     #else
@@ -101,7 +112,7 @@ namespace Physica {
     #endif
     }
 
-    constexpr static bool IsMPIEnabled() {
+    constexpr inline static bool IsMPIEnabled() {
     #ifdef PHYSICA_MPI
         return true;
     #else
@@ -109,7 +120,7 @@ namespace Physica {
     #endif
     }
 
-    constexpr static bool IsCUDAEnabled() {
+    constexpr inline static bool IsCUDAEnabled() {
     #ifdef PHYSICA_CUDA
         return true;
     #else

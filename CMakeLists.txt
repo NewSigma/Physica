@@ -20,7 +20,6 @@ option(PHYSICA_MPI "Enable MPI support" OFF)
 option(PHYSICA_CUDA "Enable CUDA support" OFF)
 option(PHYSICA_PYTHON "Enable python suppert" OFF)
 option(PHYSICA_OPTIMIZE "Enable aggressive optimizations" ON)
-set(UseASM 1 CACHE STRING "Enable inline assembly code")
 # Policies
 cmake_policy(SET CMP0074 NEW)
 
@@ -32,6 +31,7 @@ set(CMAKE_VISIBILITY_INLINES_HIDDEN TRUE)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -fPIC -mrdrnd")
 if(${PHYSICA_OPTIMIZE})
+    add_definitions(-DPHYSICA_ASM)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=native")
 endif()
 if(NOT ${CMAKE_BUILD_TYPE} MATCHES "Debug")

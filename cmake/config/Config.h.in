@@ -22,12 +22,6 @@
  */
 #pragma once
 
-#cmakedefine UseASM @UseASM@
-#if UseASM
-    //Avoid "unused parameter" warnings and note that the parameter is used in asm.
-    #define USE_IN_ASM(x) (void)x
-#endif
-
 #define PhysicaLittleEndian 0
 #define PhysicaBigEndian 1
 #cmakedefine PhysicaEndian @PhysicaEndian@

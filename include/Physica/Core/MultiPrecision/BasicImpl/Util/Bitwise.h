@@ -18,47 +18,51 @@
  */
 #pragma once
 
-#include "Physica/Core/MultiPrecision/MultiPrecisionType.h"
+#include <Physica/Core/MultiPrecision/MultiPrecisionType.h>
 
 namespace Physica::Core {
     inline unsigned int countLeadingZeros(MPUnit n) noexcept {
         if(n == 0)
             return MPUnitWidth;
+
         MPUnit count;
-    #if UseASM
-        asm volatile (
-            "bsrq %1, %0\n\t"
-            : "=r" (count)
-            : "rm" (n)
-        );
-        (count) ^= 63U;
-    #else
-        count = 0;
-        while((n & MPUnitHighestBitMask) == 0) {
-            ++count;
-            n <<= 1U;
+        if constexpr (IsASMEnabled()) {
+            asm volatile (
+                "bsrq %1, %0\n\t"
+                : "=r" (count)
+                : "rm" (n)
+            );
+            (count) ^= 63U;
         }
-    #endif
+        else {
+            count = 0;
+            while((n & MPUnitHighestBitMask) == 0) {
+                ++count;
+                n <<= 1U;
+            }
+        }
         return count;
     }
 
     inline unsigned int countBackZeros(unsigned long n) noexcept {
         if(n == 0)
             return MPUnitWidth;
+
         MPUnit count;
-    #if UseASM
-        asm volatile (
-            "bsfq %1, %0\n\t"
-            : "=r" (count)
-            : "rm" (n)
-        );
-    #else
-        count = 0;
-        while((n & 1U) == 0) {
-            ++count;
-            n >>= 1U;
+        if constexpr (IsASMEnabled()) {
+            asm volatile (
+                "bsfq %1, %0\n\t"
+                : "=r" (count)
+                : "rm" (n)
+            );
         }
-    #endif
+        else {
+            count = 0;
+            while((n & 1U) == 0) {
+                ++count;
+                n >>= 1U;
+            }
+        }
         return count;
     }
 
