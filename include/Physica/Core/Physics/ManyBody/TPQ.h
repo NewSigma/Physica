@@ -42,7 +42,9 @@ namespace Physica::Core {
         int numMinCostTerm;
         int numSplit;
     public:
+        TPQ() = default;
         TPQ(size_t length);
+        TPQ(size_t length, RealType traceMu_, int numMinCostTerm_, int numSplit_);
         TPQ(const This&) = default;
         TPQ(This&&) noexcept = default;
         ~TPQ() = default;
@@ -63,6 +65,7 @@ namespace Physica::Core {
         template<class Distribution, class RandomGenerator>
         inline void random_any(Distribution& dist, RandomGenerator& gen);
         /* Getters */
+        [[nodiscard]] RealType getBeta() const noexcept { return beta; }
         [[nodiscard]] RealType getTraceMu() const noexcept { return traceMu; }
         [[nodiscard]] int getNumMinCostTerm() const noexcept { return numMinCostTerm; }
         [[nodiscard]] int getNumSplit() const noexcept { return numSplit; }
@@ -71,6 +74,8 @@ namespace Physica::Core {
         [[nodiscard]] static This random_normal(size_t len, RandomGenerator& gen);
         template<class Distribution, class RandomGenerator>
         [[nodiscard]] static This random_any(size_t len, Distribution& dist, RandomGenerator& gen);
+    private:
+        [[nodiscard]] bool isPrepared() const;
     };
 
     template<class ScalarType>
@@ -81,6 +86,17 @@ namespace Physica::Core {
             , numMinCostTerm(0)
             , numSplit(0) {
         assert(length > 0 && "[Error]: Invalid length");
+    }
+
+    template<class ScalarType>
+    TPQ<ScalarType>::TPQ(size_t length, RealType traceMu_, int numMinCostTerm_, int numSplit_)
+            : Base(length)
+            , beta(0)
+            , traceMu(traceMu_)
+            , numMinCostTerm(numMinCostTerm_)
+            , numSplit(numSplit_) {
+        assert(length > 0 && "[Error]: Invalid length");
+        assert(isPrepared() && "[Error]: Invalid params");
     }
 
     template<class ScalarType>
@@ -105,12 +121,11 @@ namespace Physica::Core {
         using BufferType = Vector<ScalarType>;
         const RealType factor = deltaBeta * -0.5;
         const auto& hamiltonH = hamiltonH_.getDerived();
-        const bool isPrepared = traceMu != RealType(std::numeric_limits<RealType>::max());
         const auto expr1 = factor * hamiltonH;
         const auto expr2 = exp(expr1);
         const auto expr3 = expr2 * (*this);
         BufferType dot(Base::getLength());
-        if (isPrepared)
+        if (isPrepared())
             expr3.template assignTo<BufferType, Executor>(dot, traceMu, std::make_pair(numMinCostTerm, numSplit));
         else
             expr3.template assignTo<BufferType, Executor>(dot);
@@ -134,7 +149,7 @@ namespace Physica::Core {
     template<class ScalarType>
     void TPQ<ScalarType>::swap(This& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
-        Base::swap(*this);
+        Base::swap(obj);
         beta.swap(obj.beta);
         traceMu.swap(obj.traceMu);
         std::swap(numMinCostTerm, obj.numMinCostTerm);
@@ -169,5 +184,11 @@ namespace Physica::Core {
         This result(len);
         result.random_any(dist, gen);
         return result;
+    }
+
+    template<class ScalarType>
+    bool TPQ<ScalarType>::isPrepared() const {
+        const bool muReady = traceMu != RealType(std::numeric_limits<RealType>::max());
+        return muReady && numMinCostTerm > 0 && numSplit > 0;
     }
 }

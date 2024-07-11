@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 WeiBo He.
+ * Copyright 2021-2024 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -20,7 +20,7 @@
 
 #include "ArrayBase.h"
 
-namespace Physica::Utils::Internal {
+namespace Physica::Utils {
     template<class Derived, class Allocator>
     class DynamicArrayBase : public ArrayBase<Derived, Allocator> {
     public:

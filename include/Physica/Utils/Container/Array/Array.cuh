@@ -57,11 +57,11 @@ namespace Physica::Utils {
 
     template<class T, class Allocator>
     class device_obj<Array<T, Dynamic, Dynamic, Allocator>>
-            : public Internal::ArrayBase<device_obj<Array<T, Dynamic, Dynamic, Allocator>>, DeviceAllocator<T>> {
+            : public ArrayBase<device_obj<Array<T, Dynamic, Dynamic, Allocator>>, DeviceAllocator<T>> {
         static_assert(!is_device_obj<T>::value, "[Error]: Nested device_obj is not allowed");
         using host_obj = Array<T, Dynamic, Dynamic, Allocator>;
         using This = device_obj<host_obj>;
-        using Base = Internal::ArrayBase<device_obj<host_obj>, DeviceAllocator<T>>;
+        using Base = ArrayBase<device_obj<host_obj>, DeviceAllocator<T>>;
     public:
         constexpr static bool isTrivial = std::is_trivial<T>::value;
         using typename Base::allocator_type;

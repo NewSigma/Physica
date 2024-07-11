@@ -18,7 +18,7 @@
  */
 #pragma once
 
-namespace Physica::Utils::Internal {
+namespace Physica::Utils {
     template<class Derived, class Allocator>
     DynamicArrayBase<Derived, Allocator>::DynamicArrayBase(size_t capacity)
             : alloc(), length(0) {

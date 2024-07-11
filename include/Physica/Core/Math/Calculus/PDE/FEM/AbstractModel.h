@@ -48,7 +48,7 @@ namespace Physica::Core {
         [[nodiscard]] const MeshType& getMesh() const noexcept { return mesh; }
     protected:
         void solverToMesh();
-        void solve() { solver.solve(A, b); }
+        void solve() { solver.cg(A, b); }
         /* Getters */
         [[nodiscard]] size_t getDegreeOfFreedom() const { return map_var_node.getLength(); }
         [[nodiscard]] size_t varToNode(size_t x) const { return map_var_node[x]; }

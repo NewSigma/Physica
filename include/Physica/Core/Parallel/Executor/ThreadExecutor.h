@@ -21,8 +21,8 @@
 #include <type_traits>
 #include <future>
 #include <cassert>
-#include "Physica/Core/Parallel/Future/FutureGroup.h"
-#include "Physica/Core/Parallel/ThreadPool.h"
+#include <Physica/Core/Parallel/Future/FutureGroup.h>
+#include <Physica/Core/Parallel/ThreadPool.h>
 #include "SequentialExecutor.h"
 
 namespace Physica::Core {
@@ -33,7 +33,7 @@ namespace Physica::Core {
     public:
         /* Operations */
         template<class Functor, class... Args>
-        [[nodiscard]] static FutureType schedule(Functor func, Args&&... args);
+        [[nodiscard]] static FutureType schedule(Functor func, Args&&... args) noexcept;
         template<class Functor>
         [[nodiscard]] static FutureGroup<FutureType> parallel_for(Functor func, unsigned int loopCount);
         template<class Functor>
@@ -52,7 +52,7 @@ namespace Physica::Core {
      * 2. exception stored in std::future, which is usually ignored
      */
     template<class Functor, class... Args>
-    typename ThreadExecutor::FutureType ThreadExecutor::schedule(Functor func, Args&&... args) {
+    typename ThreadExecutor::FutureType ThreadExecutor::schedule(Functor func, Args&&... args) noexcept {
         return ThreadPool::getInstance().schedule(std::move(func), std::forward<Args>(args)...);
     }
 
@@ -63,8 +63,10 @@ namespace Physica::Core {
         static_assert(std::is_same<void, ResultType>::value, "[Error]: Invalid functor");
         assert(loopCount > 0);
         FutureGroup<FutureType> result(loopCount);
-        for (unsigned int i = 0; i < loopCount; ++i)
-            result.append(ThreadPool::getInstance().schedule([func, i]() -> void { func(i); }));
+        for (unsigned int i = 0; i < loopCount; ++i) {
+            constexpr bool isNothrow = std::is_nothrow_invocable<Functor, unsigned int>::value;
+            result.append(ThreadPool::getInstance().schedule([func, i]() noexcept(isNothrow) -> void { func(i); }));
+        }
         return result;
     }
 
@@ -76,8 +78,9 @@ namespace Physica::Core {
         assert(core > 0);
         FutureGroup<FutureType> result(core);
         for (unsigned int i = 0; i < core; ++i) {
+            constexpr bool isNothrow = std::is_nothrow_invocable<Functor, unsigned int>::value;
             const auto range = splitJob(loopCount, core, i);
-            result.append(ThreadPool::getInstance().schedule([range, func]() -> void {
+            result.append(ThreadPool::getInstance().schedule([range, func]() noexcept(isNothrow) -> void {
                 for (unsigned int loop = range.first; loop < range.second; ++loop)
                     func(loop);
             }));

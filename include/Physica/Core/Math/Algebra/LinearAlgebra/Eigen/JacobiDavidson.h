@@ -115,7 +115,7 @@ namespace Physica::Core {
 
     template<class ScalarType>
     JacobiDavidson<ScalarType>::JacobiDavidson(size_t size, size_t numRequired, RealType error_, RealType stableThreshold_)
-            : linearSolver(MaxLinearSolverIteration, LinearSolverPrecision)
+            : linearSolver(size, MaxLinearSolverIteration, LinearSolverPrecision)
             , error(error_)
             , stableThreshold(stableThreshold_) {
         resize(size, numRequired);
@@ -204,7 +204,7 @@ namespace Physica::Core {
                     auto new_direction = searchSpace.col(numSearchDim);
                     new_direction = residule;
                     gramSchmidt(orthogonalSpace, new_direction);
-                    linearSolver.solve_functor([this, i, eigenGoal, &buffer, &source](const VectorType& v, VectorType& dot) {
+                    linearSolver.cg_functor([this, i, eigenGoal, &buffer, &source](const VectorType& v, VectorType& dot) {
                         const auto orthogonalSpace = eigenvectors.leftCols(i + 1);
                         auto head1 = dot.head(i + 1);
                         head1 = orthogonalSpace.hermite() * v;
@@ -214,7 +214,7 @@ namespace Physica::Core {
                         auto head2 = buffer.head(i + 1);
                         head2 = orthogonalSpace.hermite() * dot;
                         dot -= orthogonalSpace * head2;
-                    }, new_direction);
+                    }, new_direction.asVector());
 
                     new_direction.toUnit();
                     gramSchmidt(searchSpace.leftCols(numSearchDim), new_direction);

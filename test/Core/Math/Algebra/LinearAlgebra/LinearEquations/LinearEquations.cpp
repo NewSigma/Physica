@@ -16,8 +16,8 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include "Physica/Core/Math/Algebra/LinearAlgebra/LinearEquations/LinearEquations.h"
-#include "Physica/Core/Math/Algebra/LinearAlgebra/LinearEquations/IterateSolver.h"
+#include <Physica/Core/Math/Algebra/LinearAlgebra/LinearEquations/LinearEquations.h>
+#include <Physica/Core/Math/Algebra/LinearAlgebra/LinearEquations/IterateSolver.h>
 
 using namespace Physica::Utils;
 using namespace Physica::Core;
@@ -60,7 +60,7 @@ int main() {
         const MatrixType mat = A.leftCols(4);
         Vector<ScalarType> b = A.col(4);
         IterateSolver<ScalarType> solver{};
-        solver.solve(mat, b);
+        solver.cg(mat, b);
         if (!vectorNear(b, answer, 1E-14))
             return 1;
     }

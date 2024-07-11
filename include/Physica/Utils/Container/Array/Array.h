@@ -20,9 +20,9 @@
 
 #include <cassert>
 #include <cstdlib>
+#include <Physica/Utils/Allocator/HostAllocator.h>
+#include <Physica/Utils/CUDA/device_obj.cuh>
 #include "DynamicArrayBase.h"
-#include "Physica/Utils/Allocator/HostAllocator.h"
-#include "Physica/Utils/CUDA/device_obj.cuh"
 
 namespace Physica::Utils {
     template<class T> class PageLockedAllocator;
@@ -38,13 +38,13 @@ namespace Physica::Utils {
      * If \tparam T is a complex type, \tparam T must have its copy and move constructors defined.
      */
     template<class T, size_t Length = Dynamic, size_t Capacity = Length, class Allocator = HostAllocator<T>>
-    class Array : public Internal::ArrayBase<Array<T, Length, Capacity, Allocator>, Allocator> {
+    class Array : public ArrayBase<Array<T, Length, Capacity, Allocator>, Allocator> {
         static_assert(Length == Capacity, "[Error]: Capacity of fixed array must equals to Length.");
         static_assert(sizeof(T) * Length <= (1U << 16U), "[Warn]: Allocate large fixed array on stack is not recommanded");
         static_assert(!std::is_same_v<Allocator, PageLockedAllocator<T>>, "[Error]: Page locked array can not have fixed size");
         using This = Array<T, Length, Capacity, Allocator>;
     public:
-        using Base = Internal::ArrayBase<This, Allocator>;
+        using Base = ArrayBase<This, Allocator>;
         using typename Base::allocator_type;
         using typename Base::ValueType;
         using typename Base::pointer;
@@ -90,10 +90,9 @@ namespace Physica::Utils {
     };
 
     template<class T, size_t Capacity, class Allocator>
-    class Array<T, Dynamic, Capacity, Allocator>
-        : public Internal::DynamicArrayBase<Array<T, Dynamic, Capacity, Allocator>, Allocator> {
+    class Array<T, Dynamic, Capacity, Allocator> : public DynamicArrayBase<Array<T, Dynamic, Capacity, Allocator>, Allocator> {
     public:
-        using Base = Internal::DynamicArrayBase<Array<T, Dynamic, Capacity, Allocator>, Allocator>;
+        using Base = DynamicArrayBase<Array<T, Dynamic, Capacity, Allocator>, Allocator>;
         using typename Base::ValueType;
         using typename Base::pointer;
         using typename Base::lvalue_reference;
@@ -142,11 +141,10 @@ namespace Physica::Utils {
     };
 
     template<class T, class Allocator>
-    class Array<T, Dynamic, Dynamic, Allocator>
-        : public Internal::DynamicArrayBase<Array<T, Dynamic, Dynamic, Allocator>, Allocator> {
+    class Array<T, Dynamic, Dynamic, Allocator> : public DynamicArrayBase<Array<T, Dynamic, Dynamic, Allocator>, Allocator> {
         using This = Array<T, Dynamic, Dynamic, Allocator>;
     public:
-        using Base = Internal::DynamicArrayBase<This, Allocator>;
+        using Base = DynamicArrayBase<This, Allocator>;
         using typename Base::ValueType;
         using typename Base::pointer;
         using typename Base::lvalue_reference;

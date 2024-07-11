@@ -143,8 +143,8 @@ namespace Physica::Core {
          */
         [[nodiscard]] __host__ __device__ Base& asMatrix() noexcept { return *this; }
         [[nodiscard]] __host__ __device__ const Base& asMatrix() const noexcept { return *this; }
-        [[nodiscard]] __host__ __device__ typename VectorBase::Base& asVector() noexcept { return *this; }
-        [[nodiscard]] __host__ __device__ const typename VectorBase::Base& asVector() const noexcept { return *this; }
+        [[nodiscard]] __host__ __device__ VectorBase& asVector() noexcept { return *this; }
+        [[nodiscard]] __host__ __device__ const VectorBase& asVector() const noexcept { return *this; }
     };
 
     template<class MatrixType, size_t Row>
@@ -199,8 +199,8 @@ namespace Physica::Core {
          */
         [[nodiscard]] __host__ __device__ Base& asMatrix() noexcept { return *this; }
         [[nodiscard]] __host__ __device__ const Base& asMatrix() const noexcept { return *this; }
-        [[nodiscard]] __host__ __device__ typename VectorBase::Base& asVector() noexcept { return *this; }
-        [[nodiscard]] __host__ __device__ const typename VectorBase::Base& asVector() const noexcept { return *this; }
+        [[nodiscard]] __host__ __device__ VectorBase& asVector() noexcept { return *this; }
+        [[nodiscard]] __host__ __device__ const VectorBase& asVector() const noexcept { return *this; }
     };
 
     template<class MatrixType>
@@ -248,8 +248,8 @@ namespace Physica::Core {
          */
         [[nodiscard]] __host__ __device__ Base& asMatrix() noexcept { return *this; }
         [[nodiscard]] __host__ __device__ const Base& asMatrix() const noexcept { return *this; }
-        [[nodiscard]] __host__ __device__ typename VectorBase::Base& asVector() noexcept { return *this; }
-        [[nodiscard]] __host__ __device__ const typename VectorBase::Base& asVector() const noexcept { return *this; }
+        [[nodiscard]] __host__ __device__ VectorBase& asVector() noexcept { return *this; }
+        [[nodiscard]] __host__ __device__ const VectorBase& asVector() const noexcept { return *this; }
     };
 
     template<class MatrixType, size_t Row, size_t Column>

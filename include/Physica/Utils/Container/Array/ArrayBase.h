@@ -28,7 +28,7 @@ namespace Physica {
     template<class T> class Traits;
 }
 
-namespace Physica::Utils::Internal {
+namespace Physica::Utils {
     template<class Derived, class Allocator> class ArrayBase;
 
     template<class T, class Container>

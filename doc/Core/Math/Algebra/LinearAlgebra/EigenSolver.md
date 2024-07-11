@@ -118,5 +118,5 @@ $$\left[ \begin{matrix} A_{i i - 1} & 0 & A_{ii} & -B_{ii} \\ 0 & A_{i i - 1} & 
 Solution of this equation is complex, refer to [2] for a neat numerical algorithm.
 
 ## References:
-[1] Golub, GeneH. Matrix computations = 矩阵计算 / 4th edition[M]. 人民邮电出版社, 2014.  
+[1] Gene H. Golub, Charles F. Van Loan. Matrix computations 4th edition[M]. John Hopkins University Press, 2013
 [2] Eigen https://eigen.tuxfamily.org/  

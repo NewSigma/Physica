@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2021 WeiBo He.
+ * Copyright 2020-2024 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -24,7 +24,7 @@ namespace Physica::Utils {
     template<class T> class DeviceAllocator;
 }
 
-namespace Physica::Utils::Internal {
+namespace Physica::Utils {
     template<class Pointer, class Derived, class Allocator>
     __host__ __device__ ContainerIterator<Pointer, ArrayBase<Derived, Allocator>>&
     ContainerIterator<Pointer, ArrayBase<Derived, Allocator>>::operator=(const ContainerIterator& ite) { //NOLINT Self assign is ok.
