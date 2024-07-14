@@ -21,11 +21,12 @@
 namespace Physica::Core {
     template<class ScalarType, class ReprType>
     Hubbard<ScalarType, ReprType>::Hubbard(
-            DimArray superSize, unsigned int numUnitCellSite, ReprType repr_, RealType hoppingT_, RealType repelU_)
+            DimArray superSize, unsigned int numUnitCellSite, ReprType repr_, RealType hoppingT_, RealType repelU_, RealType dotPrec_)
             : Base(std::move(superSize), numUnitCellSite)
             , repr(std::move(repr_))
             , hoppingT(hoppingT_)
             , repelU(repelU_)
+            , dotPrec(dotPrec_)
             , planProvider(NumSite, PlanFlag::Estimate) {
         if constexpr (Dim > 1)
             hoppingMatrix = makeHoppingMatrix();
@@ -40,6 +41,7 @@ namespace Physica::Core {
         assert(source.getLength() == length && "[Error]: Dimensions do not match");
         assert(source.getLength() == target.getLength() && "[Error]: Dimensions do not match");
 
+        const RealType maxAbs = abs(source).max();
         target = RealType(0);
         if constexpr (std::is_same<Executor, ThreadExecutor>::value) {
             std::mutex mutex{};
@@ -48,10 +50,14 @@ namespace Physica::Core {
                 SparseType buffer(length, std::min(size_t(NumSite * SiteDOF), length));
                 const auto range = Executor::splitJob(length, Executor::getNumThread(), thread);
                 for (unsigned int i = range.first; i < range.second; ++i) {
+                    const ScalarType factor = source.calc(i);
+                    if (abs(factor) < maxAbs * dotPrec)
+                        continue;
+
                     if constexpr (Dim == 1)
-                        dotImpl1D(buffer, source.calc(i), i);
+                        dotImpl1D(buffer, factor, i);
                     else
-                        dotImplND(buffer, source.calc(i), i);
+                        dotImplND(buffer, factor, i);
                     local += buffer;
                     buffer.clear();
                 }
@@ -62,10 +68,14 @@ namespace Physica::Core {
         }
         else {
             for (size_t i = 0; i < length; ++i) {
+                const ScalarType factor = source.calc(i);
+                if (abs(factor) < maxAbs * dotPrec)
+                    continue;
+
                 if constexpr (Dim == 1)
-                    dotImpl1D(target, source.calc(i), i);
+                    dotImpl1D(target, factor, i);
                 else
-                    dotImplND(target, source.calc(i), i);
+                    dotImplND(target, factor, i);
             }
         }
     }
@@ -113,7 +123,9 @@ namespace Physica::Core {
         repr.swap(obj.repr);
         hoppingT.swap(obj.hoppingT);
         repelU.swap(obj.repelU);
+        dotPrec.swap(obj.dotPrec);
         planProvider.swap(obj.planProvider);
+        hoppingMatrix.swap(obj.hoppingMatrix);
     }
 
     template<class ScalarType, class ReprType>

@@ -78,12 +78,12 @@ namespace Physica::Core {
             else
                 x[index] = RealType(0);
 
-            RealType maxSquaredNorm = 0;
+            RealType maxAbs = 0;
             for (size_t i = 0; i < length; ++i) {
-                const RealType temp = z.calc(i).getReal().squaredNorm();
-                if (temp > maxSquaredNorm) {
+                const RealType temp = abs(z.calc(i).getReal());
+                if (temp > maxAbs) {
                     index = i;
-                    maxSquaredNorm = temp;
+                    maxAbs = temp;
                 }
             }
             x[index] = RealType(1);

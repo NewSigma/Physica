@@ -55,11 +55,17 @@ namespace Physica::Core {
         ReprType repr;
         RealType hoppingT;
         RealType repelU;
+        RealType dotPrec;
         FFTType planProvider;
         HoppingMatrix hoppingMatrix;
     public:
         Hubbard() = default;
-        Hubbard(DimArray superSize, unsigned int numUnitCellSite, ReprType repr_, RealType hoppingT_, RealType repelU_);
+        Hubbard(DimArray superSize,
+                unsigned int numUnitCellSite,
+                ReprType repr_,
+                RealType hoppingT_,
+                RealType repelU_,
+                RealType dotPrec_ = RealType(0));
         Hubbard(const This&) = default;
         Hubbard(This&&) noexcept = default;
         ~Hubbard() = default;

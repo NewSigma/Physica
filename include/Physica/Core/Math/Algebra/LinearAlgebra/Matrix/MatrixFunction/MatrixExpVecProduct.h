@@ -75,7 +75,6 @@ namespace Physica::Core {
         [[nodiscard]] const VectorType& getRHS() const noexcept { return v; }
     private:
         constexpr static TrivialType calcTheta(int numTaylorTerm);
-        template<class Executor> inline RealType calcPowerNorm(RealType traceMu, int order) const;
     };
 
     template<class MatrixType, class VectorType>
@@ -157,8 +156,12 @@ namespace Physica::Core {
         }
 
         RealType powerNorms[MaxNormOrder];
-        for (int order = 2; order <= MaxNormOrder + 1; ++order)
-            powerNorms[order - 2] = calcPowerNorm<Executor>(traceMu, order);
+        const RealType maxAbs = abs_elem(mexp.getMatrix()).max();
+        const RealType normalizer = reciprocal(maxAbs); // pow() has the risk of overflow
+        for (int order = 2; order <= MaxNormOrder + 1; ++order) {
+            const RealType pNorm1 = pow(mexp.getMatrix() * normalizer - (traceMu * normalizer) * unit, order).template norm1_power<Executor>(MaxNormIteration);
+            powerNorms[order - 2] = pow(pNorm1, reciprocal(RealType(order))) * maxAbs;
+        }
 
         for (int order = 2; order <= MaxNormOrder; ++order) {
             const TrivialType powerNorm = std::max(powerNorms[order - 2], powerNorms[order - 1]);
@@ -179,15 +182,6 @@ namespace Physica::Core {
         assert(1 <= numTaylorTerm && numTaylorTerm <= MaxNumTaylorTerm && "[Error]: Invalid param");
         const int bufferIndex = (numTaylorTerm - 1) / 5; 
         return IsFloat ? theta_single[bufferIndex] : theta_double[bufferIndex];
-    }
-
-    template<class MatrixType, class VectorType>
-    template<class Executor>
-    inline typename MatrixVectorProduct<MatrixExp<MatrixType>, VectorType>::RealType
-    MatrixVectorProduct<MatrixExp<MatrixType>, VectorType>::calcPowerNorm(RealType traceMu, int order) const {
-        const auto unit = UnitMatrix<ScalarType>(getLength());
-        const RealType norm1 = pow(mexp.getMatrix() - traceMu * unit, order).template norm1_power<Executor>(MaxNormIteration);
-        return pow(norm1, reciprocal(RealType(order)));
     }
 }
 
