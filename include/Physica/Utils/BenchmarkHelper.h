@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 WeiBo He.
+ * Copyright 2023-2024 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -22,9 +22,9 @@
     #error Running benchmark under debug mode is not what you usually want!
 #endif
 
-#include "Physica/Core/MultiPrecision/Scalar.h"
-#include "Physica/Core/Math/Statistics/NumCharacter.h"
-#include "Physica/Core/Math/Calculus/SpetialFunctions.h"
+#include <Physica/Core/MultiPrecision/Scalar.h>
+#include <Physica/Core/Math/Statistics/NumCharacter.h>
+#include <Physica/Core/Math/Calculus/SpetialFunctions.h>
 #include "Cycler.h"
 
 namespace Physica::Utils {

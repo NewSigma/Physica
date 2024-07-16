@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2023 WeiBo He.
+ * Copyright 2020-2024 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -28,10 +28,10 @@ namespace Physica::Core {
      * several times but in extremely rare conditions it can not return anything.
      */
     class RandomSeed {
-        PHYSICA_API static int retryLimit;
+        constexpr static int RetryLimit = 8;
     public:
-        static void rdrand(uint16_t& integer) {
-            for(int i = 0; i < retryLimit; ++i) {
+        static void rdrand(uint16_t& __restrict integer) {
+            for(int i = 0; i < RetryLimit; ++i) {
                 const int code = _rdrand16_step(&integer);
                 if (code == 1)
                     return;
@@ -39,8 +39,8 @@ namespace Physica::Core {
             throw RdrandException();
         }
 
-        static void rdrand(uint32_t& integer) {
-            for(int i = 0; i < retryLimit; ++i) {
+        static void rdrand(uint32_t& __restrict integer) {
+            for(int i = 0; i < RetryLimit; ++i) {
                 const int code = _rdrand32_step(&integer);
                 if (code == 1)
                     return;
@@ -48,8 +48,8 @@ namespace Physica::Core {
             throw RdrandException();
         }
 
-        static void rdrand(uint64_t& integer) {
-            for(int i = 0; i < retryLimit; ++i) {
+        static void rdrand(uint64_t& __restrict integer) {
+            for(int i = 0; i < RetryLimit; ++i) {
                 const int code = _rdrand64_step(reinterpret_cast<unsigned long long*>(&integer));
                 if (code == 1)
                     return;

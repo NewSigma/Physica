@@ -33,13 +33,8 @@ namespace Physica::Core {
         using This = MatrixVectorProduct<MatrixExp<MatrixType>, VectorType>;
         using Base = RValueVector<This>;
     public:
-        using ParamPair = std::pair<int, int>;
-    private:
-        constexpr static int BufferSize = 11;
-        constexpr static float theta_single[BufferSize]{1.3E-1, 1, 2.2, 3.6, 4.9, 6.3, 7.7, 9.1, 11, 12, 13};
-        constexpr static double theta_double[BufferSize]{2.4E-3, 1.4E-1, 6.4E-1, 1.4, 2.4, 3.5, 4.7, 6.0, 7.2, 8.5, 9.9};
-    public:
         using typename Base::ScalarType;
+        using ParamPair = std::pair<int, int>;
     private:
         using RealType = typename ScalarType::RealType;
         using TrivialType = typename RealType::TrivialType;
@@ -47,6 +42,9 @@ namespace Physica::Core {
         constexpr static int MaxNumTaylorTerm = 55;
         constexpr static int MaxNormOrder = 8;
         constexpr static int MaxNormIteration = 16;
+        constexpr static int BufferSize = 11;
+        constexpr static float theta_single[BufferSize]{1.3E-1, 1, 2.2, 3.6, 4.9, 6.3, 7.7, 9.1, 11, 12, 13};
+        constexpr static double theta_double[BufferSize]{2.4E-3, 1.4E-1, 6.4E-1, 1.4, 2.4, 3.5, 4.7, 6.0, 7.2, 8.5, 9.9};
 
         const MatrixExp<MatrixType>& mexp;
         const VectorType& v;
@@ -137,14 +135,14 @@ namespace Physica::Core {
     MatrixVectorProduct<MatrixExp<MatrixType>, VectorType>::calcParam(RealType traceMu) const {
         constexpr static TrivialType NormLimit = ((2 * MaxNormOrder * (MaxNormOrder + 3)) * calcTheta(MaxNumTaylorTerm)) / MaxNumTaylorTerm;
         const auto unit = UnitMatrix<ScalarType>(getLength());
-        const TrivialType norm1 = (mexp.getMatrix() - unit * traceMu).template norm1_power<Executor>(MaxNormIteration);
-        const bool isSmallNorm = norm1 <= NormLimit;
+        const ScalarType norm1 = (mexp.getMatrix() - unit * traceMu).template norm1_power<Executor>(MaxNormIteration);
+        const bool isSmallNorm = TrivialType(norm1) <= NormLimit;
         int cost = std::numeric_limits<int>::max();
         int numMinCostTerm = 0;
         if (isSmallNorm) {
             int numSplit = 1;
             for (int numTerm = 1; numTerm <= MaxNumTaylorTerm; ++numTerm) {
-                const int split = int(norm1 / calcTheta(numTerm)) + 1;
+                const int split = int(TrivialType(norm1) / calcTheta(numTerm)) + 1;
                 const int temp = numTerm * split;
                 if (cost > temp) {
                     cost = temp;
@@ -156,11 +154,10 @@ namespace Physica::Core {
         }
 
         RealType powerNorms[MaxNormOrder];
-        const RealType maxAbs = abs_elem(mexp.getMatrix()).max();
-        const RealType normalizer = reciprocal(maxAbs); // pow() has the risk of overflow
+        const RealType normalizer = reciprocal(norm1); // pow() has the risk of overflow
         for (int order = 2; order <= MaxNormOrder + 1; ++order) {
             const RealType pNorm1 = pow(mexp.getMatrix() * normalizer - (traceMu * normalizer) * unit, order).template norm1_power<Executor>(MaxNormIteration);
-            powerNorms[order - 2] = pow(pNorm1, reciprocal(RealType(order))) * maxAbs;
+            powerNorms[order - 2] = pow(pNorm1, reciprocal(RealType(order))) * norm1;
         }
 
         for (int order = 2; order <= MaxNormOrder; ++order) {
