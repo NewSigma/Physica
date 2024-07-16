@@ -98,8 +98,17 @@ namespace Physica::Core {
 
     template<class ScalarType, size_t Size>
     inline ScalarType SIMD<ScalarType, Size>::horizontal_add() const {
-        using Physica::horizontal_add;
-        return horizontal_add(getImpl());
+        return Physica::horizontal_add(getImpl());
+    }
+
+    template<class ScalarType, size_t Size>
+    inline ScalarType SIMD<ScalarType, Size>::horizontal_max() const {
+        return Physica::horizontal_max(getImpl());
+    }
+
+    template<class ScalarType, size_t Size>
+    inline ScalarType SIMD<ScalarType, Size>::horizontal_min() const {
+        return Physica::horizontal_min(getImpl());
     }
     //////////////////////////////////////////////////////////////////
     template<class PlainScalar, size_t Size>

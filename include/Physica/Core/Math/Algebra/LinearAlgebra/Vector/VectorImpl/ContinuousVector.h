@@ -32,6 +32,8 @@ namespace Physica::Core {
         using Base = LValueVector<Derived>;
         using typename Base::ScalarType;
         using typename Base::PlainScalar;
+        using typename Base::PacketType;
+        using Base::SizeAtCompile;
         using Base::isReverseDiff;
     public:
         ~ContinuousVector() = default;
@@ -45,6 +47,10 @@ namespace Physica::Core {
         template<class AnyPacket> [[nodiscard]] inline AnyPacket packetPartial(size_t index, size_t count) const;
         template<class AnyPacket> inline void writePacket(size_t index, const AnyPacket packet);
         template<class AnyPacket> inline void writePacketPartial(size_t index, size_t count, const AnyPacket packet);
+
+        [[nodiscard]] ScalarType max() const;
+        [[nodiscard]] ScalarType min() const;
+        [[nodiscard]] ScalarType sum() const;
 
         template<class OtherDerived> void toDevice(device_obj<ContinuousVector<OtherDerived>>& obj) const;
         template<class OtherDerived> void toDeviceAsync(device_obj<ContinuousVector<OtherDerived>>& obj) const;

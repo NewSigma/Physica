@@ -148,6 +148,121 @@ namespace Physica::Core {
     }
 
     template<class Derived>
+    typename ContinuousVector<Derived>::ScalarType ContinuousVector<Derived>::max() const {
+        constexpr bool EnableSIMD = Internal::EnableSIMD<Derived>::value;
+        if constexpr (!EnableSIMD || isReverseDiff) // Optimize: Not implemented for reverse diff
+            return Base::max();
+        else {
+            const auto& v = Base::getDerived();
+            PacketType buffer(std::numeric_limits<ScalarType>::lowest());
+            ScalarType result;
+            if constexpr (SizeAtCompile != Dynamic) {
+                constexpr size_t to = SizeAtCompile / PacketType::size() * PacketType::size();
+                for (size_t i = 0; i < to; i += PacketType::size())
+                    buffer = std::max(v.template packet<PacketType>(i), buffer);
+                result = buffer.horizontal_max();
+
+                constexpr size_t i = SizeAtCompile - SizeAtCompile % PacketType::size();
+                if constexpr (i != SizeAtCompile) {
+                    constexpr size_t count = SizeAtCompile - i;
+                    for (size_t j = 0; j < count; ++j)
+                        result = std::max(result, v[i + j]);
+                }
+            }
+            else {
+                const size_t length = Base::getLength();
+                size_t i = 0;
+                const size_t to = length / PacketType::size() * PacketType::size();
+                for (; i < to; i += PacketType::size())
+                    buffer = std::max(v.template packet<PacketType>(i), buffer);
+                result = buffer.horizontal_max();
+
+                if (to != length) {
+                    const size_t count = length - i;
+                    for (size_t j = 0; j < count; ++j)
+                        result = std::max(result, v[i + j]);
+                }
+            }
+            return result;
+        }
+    }
+
+    template<class Derived>
+    typename ContinuousVector<Derived>::ScalarType ContinuousVector<Derived>::min() const {
+        constexpr bool EnableSIMD = Internal::EnableSIMD<Derived>::value;
+        if constexpr (!EnableSIMD || isReverseDiff) // Optimize: Not implemented for reverse diff
+            return Base::min();
+        else {
+            const auto& v = Base::getDerived();
+            PacketType buffer(std::numeric_limits<ScalarType>::max());
+            ScalarType result;
+            if constexpr (SizeAtCompile != Dynamic) {
+                constexpr size_t to = SizeAtCompile / PacketType::size() * PacketType::size();
+                for (size_t i = 0; i < to; i += PacketType::size())
+                    buffer = std::min(v.template packet<PacketType>(i), buffer);
+                result = buffer.horizontal_min();
+
+                constexpr size_t i = SizeAtCompile - SizeAtCompile % PacketType::size();
+                if constexpr (i != SizeAtCompile) {
+                    constexpr size_t count = SizeAtCompile - i;
+                    for (size_t j = 0; j < count; ++j)
+                        result = std::min(result, v[i + j]);
+                }
+            }
+            else {
+                const size_t length = Base::getLength();
+                size_t i = 0;
+                const size_t to = length / PacketType::size() * PacketType::size();
+                for (; i < to; i += PacketType::size())
+                    buffer = std::min(v.template packet<PacketType>(i), buffer);
+                result = buffer.horizontal_min();
+
+                if (to != length) {
+                    const size_t count = length - i;
+                    for (size_t j = 0; j < count; ++j)
+                        result = std::min(result, v[i + j]);
+                }
+            }
+            return result;
+        }
+    }
+
+    template<class Derived>
+    typename ContinuousVector<Derived>::ScalarType ContinuousVector<Derived>::sum() const {
+        constexpr bool EnableSIMD = Internal::EnableSIMD<Derived>::value;
+        if constexpr (!EnableSIMD || isReverseDiff) // Optimize: Not implemented for reverse diff
+            return Base::sum();
+        else {
+            const auto& v = Base::getDerived();
+            PacketType sum(0);
+            if constexpr (SizeAtCompile != Dynamic) {
+                constexpr size_t to = SizeAtCompile / PacketType::size() * PacketType::size();
+                for (size_t i = 0; i < to; i += PacketType::size())
+                    sum += v.template packet<PacketType>(i);
+
+                constexpr size_t i = SizeAtCompile - SizeAtCompile % PacketType::size();
+                if constexpr (i != SizeAtCompile) {
+                    constexpr size_t count = SizeAtCompile - i;
+                    sum += v.template packetPartial<PacketType>(i, count);
+                }
+            }
+            else {
+                const size_t length = Base::getLength();
+                size_t i = 0;
+                const size_t to = length / PacketType::size() * PacketType::size();
+                for (; i < to; i += PacketType::size())
+                    sum += v.template packet<PacketType>(i);
+
+                if (to != length) {
+                    const size_t count = length - i;
+                    sum += v.template packetPartial<PacketType>(i, count);
+                }
+            }
+            return sum.horizontal_add();
+        }
+    }
+
+    template<class Derived>
     template<size_t Length>
     inline ContinuousVectorBlock<Derived, Length> ContinuousVector<Derived>::head(size_t to) {
         return ContinuousVectorBlock<Derived, Length>(Base::getDerived(), 0, to);

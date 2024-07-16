@@ -102,6 +102,8 @@ namespace Physica::Core {
         inline void store_partial(int n, ScalarType* p) const;
         inline void insert(int index, const ScalarType& value);
         [[nodiscard]] inline ScalarType horizontal_add() const;
+        [[nodiscard]] inline ScalarType horizontal_max() const;
+        [[nodiscard]] inline ScalarType horizontal_min() const;
         void swap(SIMD& __restrict other) noexcept { std::swap(*this, other); }
         /* Getters */
         [[nodiscard]] constexpr static size_t size() { return Size; }
@@ -223,6 +225,18 @@ namespace Physica {
         using BaseType = typename std::conditional<PlainSize <= 4, Type1, Type2>::type;
         using BoolSIMDType = BoolSIMD<ScalarType, Size>;
     };
+}
+
+namespace std {
+    template<class ScalarType, size_t Size>
+    inline Physica::Core::SIMD<ScalarType, Size> max(Physica::Core::SIMD<ScalarType, Size> a, Physica::Core::SIMD<ScalarType, Size> b) {
+        return Physica::Core::SIMD<ScalarType, Size>(Physica::max(a.getImpl(), b.getImpl()));
+    }
+
+    template<class ScalarType, size_t Size>
+    inline Physica::Core::SIMD<ScalarType, Size> min(Physica::Core::SIMD<ScalarType, Size> a, Physica::Core::SIMD<ScalarType, Size> b) {
+        return Physica::Core::SIMD<ScalarType, Size>(Physica::min(a.getImpl(), b.getImpl()));
+    }
 }
 
 #include "SIMDImpl/BoolSIMD.h"

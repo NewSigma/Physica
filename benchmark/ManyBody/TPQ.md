@@ -9,6 +9,5 @@ Date: 2024-6-27
 Maintainer: Weibo He (NewSigma@163.com)  
 
 $$\begin{matrix}
-\text{IntType} && \text{int64} && \text{uint64} && \text{int32} && \text{uint32} && \text{int16} && \text{uint16} \\
-\mathrm{Time/s} && 7.865(4) && 7.93(1) && 8.01(1) && 8.043(15) && 8.126(25) && 8.05(1)
+\mathrm{Time/s} && 3.759(6)
 \end{matrix}$$

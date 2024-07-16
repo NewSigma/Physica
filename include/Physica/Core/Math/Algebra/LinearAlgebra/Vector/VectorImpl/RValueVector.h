@@ -40,7 +40,7 @@ namespace Physica::Core {
     template<class Derived> class RValueMatrix;
 
     namespace Internal {
-        template<class VectorType1, class VectorType2>
+        template<class VectorType1, class VectorType2 = VectorType1>
         class EnableSIMD {
             using ScalarType = typename VectorType1::ScalarType;
             constexpr static bool isSameScalar = std::is_same<ScalarType, typename VectorType2::ScalarType>::value;
