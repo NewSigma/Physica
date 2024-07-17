@@ -58,6 +58,8 @@ namespace Physica::Core {
         /* Operations */
         void swap(This& __restrict obj) noexcept;
         /* Getters */
+        [[nodiscard]] unsigned int getNumSpinUp() const noexcept { return numSpinUp; }
+        [[nodiscard]] unsigned int getNumSpinDown() const noexcept { return numSpinDown; }
         [[nodiscard]] unsigned int getNumParticle() const noexcept { return numSpinUp + numSpinDown; }
         [[nodiscard]] const StateArray& getUpStates() const noexcept { return upStates; }
         [[nodiscard]] inline const StateArray& getDownStates() const noexcept;

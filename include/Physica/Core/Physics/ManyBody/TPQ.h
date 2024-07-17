@@ -140,7 +140,7 @@ namespace Physica::Core {
 
     template<class ScalarType>
     inline typename TPQ<ScalarType>::RealType TPQ<ScalarType>::lnPartitionZ() const {
-        const bool isUnderflow = abs(*this).min().isZero();
+        const bool isUnderflow = abs(*this).max() < RealType(std::numeric_limits<RealType>::min());
         if (isUnderflow)
             return RealType(-std::numeric_limits<ScalarType>::max());
         return Base::lnSquaredNorm() + ln(RealType(Base::getLength()));

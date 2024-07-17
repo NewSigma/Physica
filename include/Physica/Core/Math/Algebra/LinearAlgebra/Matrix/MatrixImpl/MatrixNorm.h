@@ -53,6 +53,7 @@ namespace Physica::Core {
         VectorType y(length);
         VectorType z(length);
         unsigned int iteration = 0;
+        size_t lastIndex = 0;
         size_t index = 0;
         while (iteration < maxIteration) {
             y.template operator=<decltype(m * x), Executor>(m * x);
@@ -60,7 +61,9 @@ namespace Physica::Core {
             using ExprType = decltype(m.hermite() * unit(y));
             z.template operator=<ExprType, Executor>(m.hermite() * unit(y));
             const RealType criteria = iteration == 0 ? (toRealVector(z).sum() * factor) : z[index].getReal();
-            if (z.normInf() <= criteria) {
+            const bool isConverged = z.normInf() <= criteria * RealType(1 + std::numeric_limits<RealType>::epsilon());
+            const bool isCycling = iteration > 0 && (lastIndex == index); // Avoid cycling because unit(0) is implemented as 1
+            if (isConverged || isCycling) {
                 if constexpr (isComplex)
                     return y.norm1();
                 else {
@@ -78,14 +81,18 @@ namespace Physica::Core {
             else
                 x[index] = RealType(0);
 
+            size_t nextIndex = 0;
             RealType maxAbs = 0;
             for (size_t i = 0; i < length; ++i) {
                 const RealType temp = abs(z.calc(i).getReal());
                 if (temp > maxAbs) {
-                    index = i;
+                    nextIndex = i;
                     maxAbs = temp;
                 }
             }
+            if (lastIndex != nextIndex)
+                lastIndex = index;
+            index = nextIndex;
             x[index] = RealType(1);
             iteration += 1;
         }

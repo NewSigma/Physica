@@ -18,7 +18,7 @@
  */
 #pragma once
 
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/FormatedVector.h"
+#include <Physica/Core/Math/Algebra/LinearAlgebra/Vector/FormatedVector.h>
 
 namespace Physica::Core {
     namespace Internal {
@@ -169,6 +169,7 @@ namespace Physica::Core {
     typename RValueVector<Derived>::RealType RValueVector<Derived>::lnSquaredNorm() const {
         const auto& derived = Base::getDerived();
         const RealType maxabs = abs(derived).max();
+        assert(maxabs > RealType(std::numeric_limits<ScalarType>::min()) && "[Error]: ln(0) is not allowed");
         const RealType factor = reciprocal(maxabs);
         return ln((derived * factor).squaredNorm()) + RealType(2) * ln(maxabs);
     }
