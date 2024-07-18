@@ -21,8 +21,9 @@
 #include <Physica/Core/Math/Random/RandomPool.h>
 #include <Physica/Core/Math/Algebra/LinearAlgebra/Eigen/SymmEigenSolver.h>
 #include <Physica/Core/Math/Statistics/NumCharacter.h>
-#include <Physica/Core/Physics/ManyBody/Hubbard.h>
-#include <Physica/Core/Physics/ManyBody/TPQ.h>
+#include <Physica/Core/Physics/ManyBody/ExactDiag/Hamilton/HubbardMatrix.h>
+#include <Physica/Core/Physics/ManyBody/ExactDiag/ReprSpace/SpinRepr.h>
+#include <Physica/Core/Physics/ManyBody/ExactDiag/TPQ.h>
 #include <Physica/Gui/Plot/Plot.h>
 
 using namespace Physica::Core;
@@ -39,7 +40,7 @@ constexpr unsigned int NumSample = 100;
 constexpr unsigned int NumSystem = 6;
 constexpr unsigned int NumBeta = 40;
 using ReprType = SpinRepr<1, NumSite, NumSpinUp == NumSpinDown>;
-using Hamilton = Hubbard<ScalarType, ReprType>;
+using Hamilton = HubbardMatrix<ScalarType, ReprType>;
 
 std::pair<VectorType, ScalarType> energyFullDiag(const Hamilton& hamilton, const VectorType& betas) {
     SymmEigenSolver<ScalarType> solver(hamilton.getNumState());
@@ -69,7 +70,9 @@ VectorType energyTPQ(const Hamilton& hamilton, ScalarType deltaBeta) {
 }
 
 int main(int argc, char** argv) {
-    const Hamilton hamilton({NumSite}, 1, ReprType(NumSpinUp, NumSpinDown), HoppingT, repelU);
+    const LatticeModel<1> lattice({NumSite}, 1);
+    const Hubbard<ScalarType, 1> hubbard(lattice, HoppingT, repelU);
+    const Hamilton hamilton(hubbard, ReprType(NumSpinUp, NumSpinDown));
     const auto betas = VectorType::linspace(0, 4, NumBeta);
     const auto pair = energyFullDiag(hamilton, betas);
     const auto& energy0 = pair.first;

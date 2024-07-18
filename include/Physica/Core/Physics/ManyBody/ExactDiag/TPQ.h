@@ -56,8 +56,9 @@ namespace Physica::Core {
         template<class ModelType, class Executor = SequentialExecutor>
         void nvt_step(const HamiltonMatrix<ModelType>& hamiltonH_, RealType deltaBeta);
 
-        [[nodiscard]] inline RealType calcPartitionZ() const;
-        [[nodiscard]] inline RealType lnPartitionZ() const;
+        [[nodiscard]] inline RealType calcPartitionXi() const;
+        [[nodiscard]] inline RealType lnPartitionXi() const;
+        [[nodiscard]] RealType lnSquaredDot(const Vector<RealType>& other) const;
         void swap(This& __restrict obj) noexcept;
 
         template<class RandomGenerator>
@@ -134,16 +135,27 @@ namespace Physica::Core {
     }
 
     template<class ScalarType>
-    inline typename TPQ<ScalarType>::RealType TPQ<ScalarType>::calcPartitionZ() const {
-        return Base::squaredNorm() * RealType(Base::getLength());
+    inline typename TPQ<ScalarType>::RealType TPQ<ScalarType>::calcPartitionXi() const {
+        return Base::squaredNorm();
     }
 
     template<class ScalarType>
-    inline typename TPQ<ScalarType>::RealType TPQ<ScalarType>::lnPartitionZ() const {
+    inline typename TPQ<ScalarType>::RealType TPQ<ScalarType>::lnPartitionXi() const {
         const bool isUnderflow = abs(*this).max() < RealType(std::numeric_limits<RealType>::min());
         if (isUnderflow)
             return RealType(-std::numeric_limits<ScalarType>::max());
-        return Base::lnSquaredNorm() + ln(RealType(Base::getLength()));
+        return Base::lnSquaredNorm();
+    }
+
+    template<class ScalarType>
+    typename TPQ<ScalarType>::RealType TPQ<ScalarType>::lnSquaredDot(const Vector<RealType>& other) const {
+        assert(Base::getLength() == other.getLength() && "[Error]: Dimensions do not match");
+        const auto expr1 = toSquaredNormVector(*this);
+        const auto expr2 = hadamard(expr1, other);
+        const bool isUnderflow = abs(expr2).max() < RealType(std::numeric_limits<RealType>::min());
+        if (isUnderflow)
+            return RealType(-std::numeric_limits<ScalarType>::max());
+        return expr2.lnSquaredNorm();
     }
 
     template<class ScalarType>

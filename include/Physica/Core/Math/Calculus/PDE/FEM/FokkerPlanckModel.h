@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 WeiBo He.
+ * Copyright 2022-2024 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -29,7 +29,7 @@ namespace Physica::Core {
         using typename Base::ElementType;
     private:
         using typename Base::VectorType;
-        using BufferType = typename Base::SolverType::VectorType;
+        using BufferType = Vector<ScalarType>;
         using Base::mesh;
 
         Functor force;

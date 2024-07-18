@@ -48,7 +48,7 @@ int main() {
         auto& gen = RandomPoolType::getInstance().getGen();
         psi.random_normal(gen);
         psi.template nvt_step<Hamilton, SequentialExecutor>(hamilton, Beta);
-        return psi.lnPartitionZ();
+        return psi.lnPartitionXi();
     }, 6, 8);
     std::cout << pair.first << ' ' << pair.second << std::endl;
     return 0;

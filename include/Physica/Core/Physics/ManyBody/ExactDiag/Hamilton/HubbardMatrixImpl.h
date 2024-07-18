@@ -124,7 +124,7 @@ namespace Physica::Core {
 
     template<class ScalarType, class ReprType>
     inline typename HubbardMatrix<ScalarType, ReprType>::RealType HubbardMatrix<ScalarType, ReprType>::repelElem(StateType psi) const {
-        return getRepelU() * RealType(psi.getNumPairedParticle());
+        return getRepelU() * RealType(psi.getNumDoubleOccupy());
     }
 
     template<class ScalarType, class ReprType>

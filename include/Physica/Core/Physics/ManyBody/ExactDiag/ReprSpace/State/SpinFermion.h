@@ -67,7 +67,7 @@ namespace Physica::Core {
         [[nodiscard]] unsigned int getNumParticle() const noexcept { return getNumSpinUpParticle() + getNumSpinDownParticle(); }
         [[nodiscard]] unsigned int getNumSpinUpParticle() const noexcept { return spinUp.getNumParticle(); }
         [[nodiscard]] unsigned int getNumSpinDownParticle() const noexcept { return spinDown.getNumParticle(); }
-        [[nodiscard]] inline unsigned int getNumPairedParticle() const noexcept;
+        [[nodiscard]] inline unsigned int getNumDoubleOccupy() const noexcept;
     };
 
     template<unsigned int Dim, unsigned int NumSite>
