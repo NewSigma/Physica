@@ -19,8 +19,9 @@
 #include <iostream>
 #include <gperftools/profiler.h>
 #include <Physica/Core/Math/Random/RandomPool.h>
-#include <Physica/Core/Physics/ManyBody/Hubbard.h>
-#include <Physica/Core/Physics/ManyBody/TPQ.h>
+#include <Physica/Core/Physics/ManyBody/ExactDiag/Hamilton/HubbardMatrix.h>
+#include <Physica/Core/Physics/ManyBody/ExactDiag/ReprSpace/SpinRepr.h>
+#include <Physica/Core/Physics/ManyBody/ExactDiag/TPQ.h>
 #include <Physica/Utils/BenchmarkHelper.h>
 
 using namespace Physica::Core;
@@ -37,8 +38,10 @@ constexpr double Beta = 16;
 int main() {
     using namespace Physica::Utils;
     using ReprType = SpinRepr<2, NumSite, true>;
-    using Hamilton = Hubbard<ScalarType, ReprType>;
-    const Hamilton hamilton({NumSiteX, NumSiteY}, 1, ReprType(4, 4), HoppingT, RepelU);
+    using Hamilton = HubbardMatrix<ScalarType, ReprType>;
+    const LatticeModel<2> lattice({NumSiteX, NumSiteY}, 1);
+    const Hubbard<ScalarType, 2> hubbard(lattice, HoppingT, RepelU);
+    const Hamilton hamilton(hubbard, ReprType(4, 4));
     auto psi = TPQ<ScalarType>::random_normal(hamilton.getNumState(), RandomPoolType::getInstance().getGen());
     psi.pre_nvt_step(hamilton, Beta);
     const auto pair = Benchmark::run([&]() {

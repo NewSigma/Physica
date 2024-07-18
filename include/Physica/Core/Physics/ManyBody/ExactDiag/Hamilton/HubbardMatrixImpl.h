@@ -20,21 +20,17 @@
 
 namespace Physica::Core {
     template<class ScalarType, class ReprType>
-    Hubbard<ScalarType, ReprType>::Hubbard(
-            DimArray superSize, unsigned int numUnitCellSite, ReprType repr_, RealType hoppingT_, RealType repelU_, RealType dotPrec_)
-            : Base(std::move(superSize), numUnitCellSite)
+    HubbardMatrix<ScalarType, ReprType>::HubbardMatrix(ModelBase hubbard, ReprType repr_, RealType dotPrec_)
+            : ModelBase(std::move(hubbard))
             , repr(std::move(repr_))
-            , hoppingT(hoppingT_)
-            , repelU(repelU_)
             , dotPrec(dotPrec_)
             , planProvider(NumSite, PlanFlag::Estimate) {
-        if constexpr (Dim > 1)
-            hoppingMatrix = makeHoppingMatrix();
+        assert(ModelBase::getNumSuperCellSite() == NumSite && "[Error]: Inconsistent site number");
     }
 
     template<class ScalarType, class ReprType>
     template<class SourceVector, class TargetVector, class Executor>
-    void Hubbard<ScalarType, ReprType>::dot(const SourceVector& source, TargetVector& target) const {
+    void HubbardMatrix<ScalarType, ReprType>::dot(const SourceVector& source, TargetVector& target) const {
         static_assert(std::is_base_of<RValueVector<SourceVector>, SourceVector>::value, "[Error]: Invalid source type");
         static_assert(std::is_base_of<LValueVector<TargetVector>, TargetVector>::value, "[Error]: Invalid target type");
         const size_t length = Base::getColumn();
@@ -46,8 +42,8 @@ namespace Physica::Core {
         if constexpr (std::is_same<Executor, ThreadExecutor>::value) {
             std::mutex mutex{};
             auto future = Executor::parallel_for([&, length](unsigned int thread) {
-                VectorType local(length, 0);
-                SparseType buffer(length, std::min(size_t(NumSite * SiteDOF), length));
+                Vector<ScalarType> local(length, 0);
+                SparseVector<ScalarType> buffer(length, std::min(size_t(NumSite * SiteDOF), length));
                 const auto range = Executor::splitJob(length, Executor::getNumThread(), thread);
                 for (unsigned int i = range.first; i < range.second; ++i) {
                     const ScalarType factor = source.calc(i);
@@ -81,7 +77,7 @@ namespace Physica::Core {
     }
 
     template<class ScalarType, class ReprType>
-    ScalarType Hubbard<ScalarType, ReprType>::calc(size_t row, size_t col) const {
+    ScalarType HubbardMatrix<ScalarType, ReprType>::calc(size_t row, size_t col) const {
         if constexpr (IsTransInvariant) {
             const auto& periods = repr.getPeriods();
             const auto psi1 = repr[row];
@@ -118,24 +114,22 @@ namespace Physica::Core {
     }
 
     template<class ScalarType, class ReprType>
-    void Hubbard<ScalarType, ReprType>::swap(Hubbard& __restrict obj) noexcept {
+    void HubbardMatrix<ScalarType, ReprType>::swap(HubbardMatrix& __restrict obj) noexcept {
         Base::swap(obj);
+        ModelBase::swap(obj);
         repr.swap(obj.repr);
-        hoppingT.swap(obj.hoppingT);
-        repelU.swap(obj.repelU);
         dotPrec.swap(obj.dotPrec);
         planProvider.swap(obj.planProvider);
-        hoppingMatrix.swap(obj.hoppingMatrix);
     }
 
     template<class ScalarType, class ReprType>
-    inline typename Hubbard<ScalarType, ReprType>::RealType Hubbard<ScalarType, ReprType>::repelElem(StateType psi) const {
-        return repelU * RealType(psi.getNumPairedParticle());
+    inline typename HubbardMatrix<ScalarType, ReprType>::RealType HubbardMatrix<ScalarType, ReprType>::repelElem(StateType psi) const {
+        return getRepelU() * RealType(psi.getNumPairedParticle());
     }
 
     template<class ScalarType, class ReprType>
-    typename Hubbard<ScalarType, ReprType>::RealType
-    Hubbard<ScalarType, ReprType>::hoppingElem(StateType rowPsi, StateType colPsi) const {
+    typename HubbardMatrix<ScalarType, ReprType>::RealType
+    HubbardMatrix<ScalarType, ReprType>::hoppingElem(StateType rowPsi, StateType colPsi) const {
         int count = 0;
         if constexpr (Dim == 1) {
             for (int site = 0; site < int(NumSite); ++site) {
@@ -152,12 +146,12 @@ namespace Physica::Core {
             }
         }
         else {
-            Base::forSiteInLattice([this, &count, rowPsi, colPsi](IndexType index) {
-                const auto& dims = Base::getDims();
+            ModelBase::forSiteInLattice([this, &count, rowPsi, colPsi](IndexType index) {
+                const auto& dims = ModelBase::getDims();
                 const int site = IndexType::toIndex1D(dims, index);
                 for (unsigned int dim = 0; dim < Dim; ++dim) {
                     IndexType index1 = index;
-                    index1[dim] = (index1[dim] + 1) % Base::getSuperSize()[dim];
+                    index1[dim] = (index1[dim] + 1) % ModelBase::getSuperSize()[dim];
 
                     const int site1 = IndexType::toIndex1D(dims, index1);
                     const int signUp = colPsi.hopUpSign(site, site1);
@@ -172,31 +166,12 @@ namespace Physica::Core {
                 }
             });
         }
-        return RealType(-count) * hoppingT;
-    }
-
-    template<class ScalarType, class ReprType>
-    typename Hubbard<ScalarType, ReprType>::HoppingMatrix Hubbard<ScalarType, ReprType>::makeHoppingMatrix() {
-        HoppingMatrix result(NumSite);
-        Base::forSiteInLattice([this, &result](IndexType index) {
-            const auto& dims = Base::getDims();
-            Utils::Array<unsigned char> hopTargets{};
-            hopTargets.reserve(NumSite * Dim * 2);
-            for (unsigned int dim = 0; dim < Dim; ++dim) {
-                IndexType index1 = index;
-                index1[dim] = (index1[dim] + 1) % Base::getSuperSize()[dim];
-                hopTargets.append(IndexType::toIndex1D(dims, index1));
-            }
-            hopTargets.squeeze();
-            const auto site = IndexType::toIndex1D(dims, index);
-            result[site] = std::move(hopTargets);
-        });
-        return result;
+        return RealType(-count) * getHoppingT();
     }
 
     template<class ScalarType, class ReprType>
     template<class TargetType>
-    void Hubbard<ScalarType, ReprType>::sumHopping(TargetType& target, FFTType& fft, ScalarType factor, StateType psi) const {
+    void HubbardMatrix<ScalarType, ReprType>::sumHopping(TargetType& target, FFTType& fft, ScalarType factor, StateType psi) const {
         if (psi.isVacuum())
             return;
         const auto reducedPsi = psi.transReduce();
@@ -214,8 +189,8 @@ namespace Physica::Core {
 
     template<class ScalarType, class ReprType>
     template<class TargetVector>
-    void Hubbard<ScalarType, ReprType>::dotImpl1D(TargetVector& target, ScalarType factor, size_t index) const {
-        ScalarType hop = -factor * hoppingT;
+    void HubbardMatrix<ScalarType, ReprType>::dotImpl1D(TargetVector& target, ScalarType factor, size_t index) const {
+        ScalarType hop = -factor * getHoppingT();
         if constexpr (IsTransInvariant) {
             const RealType normalizer = sqrt(RealType(repr.getPeriods()[index])) / RealType(NumSite);
             hop *= normalizer;
@@ -259,18 +234,18 @@ namespace Physica::Core {
                 downOccupy1 = downOccupy2;
             }
         }
-        target[index] += factor * (repelU * RealType(numRepel));
+        target[index] += factor * (getRepelU() * RealType(numRepel));
     }
 
     template<class ScalarType, class ReprType>
     template<class TargetVector>
-    void Hubbard<ScalarType, ReprType>::dotImplND(TargetVector& target, ScalarType factor, size_t index) const {
+    void HubbardMatrix<ScalarType, ReprType>::dotImplND(TargetVector& target, ScalarType factor, size_t index) const {
         static_assert(!IsTransInvariant && "[Error]: Not implemented");
-        const ScalarType hop = -factor * hoppingT;
+        const ScalarType hop = -factor * getHoppingT();
         const auto state = repr[index];
         int numRepel = 0;
         for (int site = 0; site < int(NumSite); ++site) {
-            const auto& hopTargets = hoppingMatrix[site];
+            const auto& hopTargets = ModelBase::getHoppingMatrix()[site];
             const bool upOccupy1 = state.isUpOccupy(site);
             const bool downOccupy1 = state.isDownOccupy(site);
             for (int site1 : hopTargets) {
@@ -290,6 +265,6 @@ namespace Physica::Core {
             }
             numRepel += upOccupy1 && downOccupy1;
         }
-        target[index] += factor * (repelU * RealType(numRepel));
+        target[index] += factor * (getRepelU() * RealType(numRepel));
     }
 }

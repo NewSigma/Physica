@@ -19,9 +19,10 @@
 #pragma once
 
 #include <Physica/Core/Math/Transform/FFT.h>
-#include "LatticeHamilton.h"
-#include "ReprSpace/SpinRepr.h"
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/SparseVector.h"
+#include <Physica/Core/Math/Algebra/LinearAlgebra/Vector/SparseVector.h>
+#include <Physica/Core/Physics/ManyBody/ExactDiag/ReprSpace/ReprImpl/ReprSpace.h>
+#include <Physica/Core/Physics/ManyBody/Model/Hubbard.h>
+#include "HamiltonMatrix.h"
 
 namespace Physica::Core {
     class ThreadExecutor;
@@ -32,43 +33,33 @@ namespace Physica::Core {
      * [1] J. Korean Phys. Soc. 76, 670–683 (2020); https://doi.org/10.3938/jkps.76.670
      */
     template<class ScalarType, class ReprType>
-    class Hubbard : public LatticeHamilton<Hubbard<ScalarType, ReprType>> {
-        using This = Hubbard<ScalarType, ReprType>;
-        using Base = LatticeHamilton<This>;
+    class HubbardMatrix
+            : public HamiltonMatrix<HubbardMatrix<ScalarType, ReprType>>
+            , public Hubbard<typename ScalarType::RealType, ReprType::Dim> {
         using RealType = typename ScalarType::RealType;
-        using VectorType = Vector<ScalarType>;
-        using SparseType = SparseVector<ScalarType>;
+        using This = HubbardMatrix<ScalarType, ReprType>;
+        using Base = HamiltonMatrix<This>;
+        using ModelBase = Hubbard<RealType, ReprType::Dim>;
         using FFTType = FFT<RealType, 1>;
-        using HoppingMatrix = Utils::Array<Utils::Array<unsigned char>>;
-        using typename Base::IndexType;
-        using typename Base::StateType;
+        using StateType = typename ReprType::StateType;
+        using typename ModelBase::IndexType;
         constexpr static unsigned int SiteDOF = StateType::SiteDOF;
-
         constexpr static bool IsTransInvariant = Traits<ReprType>::IsTransInvariant;
-        static_assert((IsTransInvariant && Base::isComplex) || !IsTransInvariant, "[Error]: Use complex scalar if translational invariance is enabled");
-        static_assert(!IsTransInvariant || (Base::Dim == 1), "[Error]: Trans invariantce is not implemented in high dimension");
     public:
-        using typename Base::DimArray;
-        using Base::Dim;
-        using Base::NumSite;
+        constexpr static unsigned int Dim = ReprType::Dim;
+        constexpr static unsigned int NumSite = StateType::NumSite;
+        static_assert((IsTransInvariant && ScalarType::isComplex) || !IsTransInvariant, "[Error]: Use complex scalar if translational invariance is enabled");
+        static_assert(!IsTransInvariant || (Dim == 1), "[Error]: Trans invariantce is not implemented in high dimension");
     private:
         ReprType repr;
-        RealType hoppingT;
-        RealType repelU;
         RealType dotPrec;
         FFTType planProvider;
-        HoppingMatrix hoppingMatrix;
     public:
-        Hubbard() = default;
-        Hubbard(DimArray superSize,
-                unsigned int numUnitCellSite,
-                ReprType repr_,
-                RealType hoppingT_,
-                RealType repelU_,
-                RealType dotPrec_ = RealType(0));
-        Hubbard(const This&) = default;
-        Hubbard(This&&) noexcept = default;
-        ~Hubbard() = default;
+        HubbardMatrix() = default;
+        HubbardMatrix(ModelBase hubbard, ReprType repr_, RealType dotPrec_ = RealType(0));
+        HubbardMatrix(const This&) = default;
+        HubbardMatrix(This&&) noexcept = default;
+        ~HubbardMatrix() = default;
         /* Operators */
         This& operator=(This obj) noexcept { swap(obj); return *this; }
         /* Operations */
@@ -78,16 +69,14 @@ namespace Physica::Core {
         [[nodiscard]] ScalarType calc(size_t row, size_t col) const;
         void swap(This& __restrict obj) noexcept;
         /* Getters */
+        using ModelBase::getHoppingT;
+        using ModelBase::getRepelU;
         [[nodiscard]] const ReprType& getRepr() const noexcept { return repr; }
         [[nodiscard]] size_t getNumState() const noexcept { return repr.getNumState(); }
-        [[nodiscard]] RealType getHoppingT() const noexcept { return hoppingT; }
-        [[nodiscard]] RealType getRepelU() const noexcept { return repelU; }
     protected:
         inline RealType repelElem(StateType psi) const;
         RealType hoppingElem(StateType rowPsi, StateType colPsi) const;
-        
     private:
-        HoppingMatrix makeHoppingMatrix();
         template<class TargetType> void sumHopping(TargetType& target, FFTType& fft, ScalarType factor, StateType psi) const;
         template<class TargetType> void dotImpl1D(TargetType& target, ScalarType factor, size_t index) const;
         template<class TargetType> void dotImplND(TargetType& target, ScalarType factor, size_t index) const;
@@ -98,7 +87,7 @@ namespace Physica {
     using namespace Core;
 
     template<class T, class U>
-    class Traits<Hubbard<T, U>> : public Traits<LatticeHamilton<Hubbard<T, U>>> {
+    class Traits<HubbardMatrix<T, U>> : public Traits<HamiltonMatrix<HubbardMatrix<T, U>>> {
     public:
         using ScalarType = T;
         using ReprType = U;
@@ -107,5 +96,5 @@ namespace Physica {
     };
 }
 
-#include "HubbardImpl.h"
+#include "HubbardMatrixImpl.h"
 #include "HubbardVecProduct.h"

@@ -18,12 +18,12 @@
  */
 #include <iostream>
 #include <gperftools/profiler.h>
-#include "Physica/Core/Math/Random/RandomPool.h"
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Eigen/JacobiDavidson.h"
-#include "Physica/Core/Physics/ManyBody/Hubbard.h"
-#include "Physica/Core/Physics/ManyBody/ReprSpace/KSpinRepr.h"
-#include "Physica/Core/Parallel/Executor/ThreadExecutor.h"
-#include "Physica/Utils/Cycler.h"
+#include <Physica/Core/Math/Random/RandomPool.h>
+#include <Physica/Core/Math/Algebra/LinearAlgebra/Eigen/JacobiDavidson.h>
+#include <Physica/Core/Physics/ManyBody/ExactDiag/Hamilton/HubbardMatrix.h>
+#include <Physica/Core/Physics/ManyBody/ExactDiag/ReprSpace/KSpinRepr.h>
+#include <Physica/Core/Parallel/Executor/ThreadExecutor.h>
+#include <Physica/Utils/Cycler.h>
 
 using namespace Physica::Core;
 using namespace Physica::Utils;
@@ -39,10 +39,12 @@ constexpr double RepelU = 4;
 int main() {
     const size_t kSize = FFT<RealType, 1>::rSizeToKSize(NumSite);
     //ProfilerStart("profiler.dat");
+    const LatticeModel<1> lattice({NumSite}, 1);
+    const Hubbard<RealType, 1> hubbard(lattice, HoppingT, RepelU);
     for (unsigned int kIndex = 0; kIndex < kSize; ++kIndex) {
         using ReprType = KSpinRepr<1, NumSite, true>;
         ReprType repr({NumParticle, NumParticle}, kIndex);
-        const Hubbard<ScalarType, ReprType> model({NumSite}, 1, std::move(repr), HoppingT, RepelU);
+        const HubbardMatrix<ScalarType, ReprType> model(hubbard, std::move(repr));
 
         const size_t numState = model.getNumState();
         JacobiDavidson<ScalarType> jd(numState, 4);

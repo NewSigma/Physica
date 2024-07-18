@@ -67,7 +67,7 @@ namespace Physica::Core {
                 if constexpr (isComplex)
                     return y.norm1();
                 else {
-                    VectorType v = VectorType::linspace(0, 1, length) + ScalarType(1);
+                    VectorType v = VectorType::linspace(1, 2, length) + ScalarType(1);
                     for (size_t i = 0; i < length; i += 2)
                         v[i] = -v[i];
                     x = m * v;

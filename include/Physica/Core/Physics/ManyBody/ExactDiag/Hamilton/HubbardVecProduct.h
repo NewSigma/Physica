@@ -20,9 +20,9 @@
 
 namespace Physica::Core {
     template<class T, class ReprType, class VectorType>
-    class MatrixVectorProduct<Hubbard<T, ReprType>, VectorType>
-            : public RValueVector<MatrixVectorProduct<Hubbard<T, ReprType>, VectorType>> {
-        using MatrixType = Hubbard<T, ReprType>;
+    class MatrixVectorProduct<HubbardMatrix<T, ReprType>, VectorType>
+            : public RValueVector<MatrixVectorProduct<HubbardMatrix<T, ReprType>, VectorType>> {
+        using MatrixType = HubbardMatrix<T, ReprType>;
         using This = MatrixVectorProduct<MatrixType, VectorType>;
     public:
         using Base = RValueVector<This>;
@@ -54,7 +54,7 @@ namespace Physica::Core {
 
     template<class ScalarType, class ReprType, class VectorType>
     template<class OtherDerived, class Executor>
-    inline void MatrixVectorProduct<Hubbard<ScalarType, ReprType>, VectorType>::assignTo(OtherDerived& target) const {
+    inline void MatrixVectorProduct<HubbardMatrix<ScalarType, ReprType>, VectorType>::assignTo(OtherDerived& target) const {
         static_assert(std::is_base_of<LValueVector<OtherDerived>, OtherDerived>::value, "[Error]: Invalid target type");
         mat.template dot<VectorType, OtherDerived, Executor>(vec, target);
     }
@@ -64,8 +64,8 @@ namespace Physica {
     using namespace Core;
 
     template<class T, class ReprType, class VectorType>
-    class Traits<MatrixVectorProduct<Hubbard<T, ReprType>, VectorType>> {
-        using MatrixType = Hubbard<T, ReprType>;
+    class Traits<MatrixVectorProduct<HubbardMatrix<T, ReprType>, VectorType>> {
+        using MatrixType = HubbardMatrix<T, ReprType>;
     public:
         using ScalarType = T;
         constexpr static size_t SizeAtCompile = MatrixType::RowAtCompile;

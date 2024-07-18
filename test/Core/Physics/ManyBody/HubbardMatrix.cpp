@@ -19,8 +19,8 @@
 #include <iostream>
 #include "Physica/Core/Math/Random/RandomPool.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Eigen/JacobiDavidson.h"
-#include "Physica/Core/Physics/ManyBody/Hubbard.h"
-#include "Physica/Core/Physics/ManyBody/ReprSpace/KSpinRepr.h"
+#include "Physica/Core/Physics/ManyBody/ExactDiag/Hamilton/HubbardMatrix.h"
+#include "Physica/Core/Physics/ManyBody/ExactDiag/ReprSpace/KSpinRepr.h"
 
 using namespace Physica::Core;
 constexpr double HoppingT = 1.0;
@@ -34,17 +34,19 @@ void testRSpinMatrix1D() {
     using ReprType = SpinRepr<1, NumSite, NumSpinUp == NumSpinDown>;
 
     ReprType repr(NumSpinUp, NumSpinDown);
-    const Hubbard<ScalarType, ReprType> model({NumSite}, 1, std::move(repr), HoppingT, RepelU);
-    const size_t numState = model.getNumState();
+    LatticeModel<1> lattice({NumSite}, 1);
+    Hubbard<ScalarType, 1> hubbard(lattice, HoppingT, RepelU);
+    const HubbardMatrix<ScalarType, ReprType> hamilton(hubbard, std::move(repr));
+    const size_t numState = hamilton.getNumState();
     MatrixType mat(numState, numState);
     for (size_t i = 0; i < numState; ++i) {
         VectorType temp(numState, 0);
         temp[i] = ScalarType(1);
         auto col = mat.col(i);
-        col = model * temp;
+        col = hamilton * temp;
     }
 
-    if (!matrixNear(model, mat, 1E-15))
+    if (!matrixNear(hamilton, mat, 1E-15))
         exit(EXIT_FAILURE);
 }
 
@@ -56,40 +58,46 @@ void testRSpinMatrix2D() {
     using ReprType = SpinRepr<2, NumSiteX * NumSiteY, NumSpinUp == NumSpinDown>;
 
     ReprType repr(NumSpinUp, NumSpinDown);
-    const Hubbard<ScalarType, ReprType> model({NumSiteX, NumSiteY}, 1, std::move(repr), HoppingT, RepelU);
-    const size_t numState = model.getNumState();
+    LatticeModel<2> lattice({NumSiteX, NumSiteY}, 1);
+    Hubbard<ScalarType, 2> hubbard(lattice, HoppingT, RepelU);
+    const HubbardMatrix<ScalarType, ReprType> hamilton(hubbard, std::move(repr));
+    const size_t numState = hamilton.getNumState();
     MatrixType mat(numState, numState);
     for (size_t i = 0; i < numState; ++i) {
         VectorType temp(numState, 0);
         temp[i] = ScalarType(1);
         auto col = mat.col(i);
-        col = model * temp;
+        col = hamilton * temp;
     }
 
-    if (!matrixNear(model, mat, 1E-15))
+    if (!matrixNear(hamilton, mat, 1E-15))
         exit(EXIT_FAILURE);
 }
 
 void testKSpinMatrix() {
     constexpr unsigned int NumSite = 4;
     constexpr unsigned int NumParticle = NumSite / 2;
-    using ScalarType = ComplexScalar<Scalar<Double>>;
+    using RealType = Scalar<Double>;
+    using ScalarType = ComplexScalar<RealType>;
     using VectorType = Vector<ScalarType>;
     using MatrixType = DenseMatrix<ScalarType>;
     using ReprType = KSpinRepr<1, NumSite, true>;
 
     ReprType repr({NumParticle, NumParticle}, 0);
-    Hubbard<ScalarType, ReprType> model({NumSite}, 1, std::move(repr), HoppingT, 4);
-    const size_t numState = model.getNumState();
+
+    LatticeModel<1> lattice({NumSite}, 1);
+    Hubbard<RealType, 1> hubbard(lattice, HoppingT, RepelU);
+    const HubbardMatrix<ScalarType, ReprType> hamilton(hubbard, std::move(repr));
+    const size_t numState = hamilton.getNumState();
     MatrixType mat(numState, numState);
     for (size_t i = 0; i < numState; ++i) {
         VectorType temp(numState, 0);
         temp[i] = ScalarType(1);
         auto col = mat.col(i);
-        col = model * temp;
+        col = hamilton * temp;
     }
 
-    if (!matrixNear(model, mat, 1E-15))
+    if (!matrixNear(hamilton, mat, 1E-15))
         exit(EXIT_FAILURE);
 }
 

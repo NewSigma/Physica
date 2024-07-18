@@ -19,8 +19,8 @@
 #include <iostream>
 #include "Physica/Core/Math/Random/RandomPool.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Eigen/JacobiDavidson.h"
-#include "Physica/Core/Physics/ManyBody/Hubbard.h"
-#include "Physica/Core/Physics/ManyBody/ReprSpace/KSpinRepr.h"
+#include "Physica/Core/Physics/ManyBody/ExactDiag/Hamilton/HubbardMatrix.h"
+#include "Physica/Core/Physics/ManyBody/ExactDiag/ReprSpace/KSpinRepr.h"
 #include "Physica/Core/Parallel/Executor/ThreadExecutor.h"
 
 using namespace Physica::Core;
@@ -31,6 +31,7 @@ using RandomPoolType = RandomPool<std::mt19937, 10000>;
 constexpr unsigned int NumSite = 6;
 constexpr unsigned int NumParticle = NumSite / 2;
 constexpr double HoppingT = 1.0;
+constexpr double RepelU = 4.0;
 
 void testComplete() {
     const SpinRepr<1, NumSite, true> rRepr(NumParticle, NumParticle);
@@ -46,10 +47,12 @@ void testComplete() {
 
 void testEigen() {
     RealType answer;
+    LatticeModel<1> lattice({NumSite}, 1);
+    Hubbard<RealType, 1> hubbard(lattice, HoppingT, RepelU);
     {
         using ReprType = SpinRepr<1, NumSite, true>;
         ReprType repr(NumParticle, NumParticle);
-        Hubbard<RealType, ReprType> model({NumSite}, 1, std::move(repr), HoppingT, 4);
+        HubbardMatrix<RealType, ReprType> model(hubbard, std::move(repr));
 
         const size_t numState = model.getNumState();
         JacobiDavidson<RealType> jd(numState, 4);
@@ -61,7 +64,7 @@ void testEigen() {
     {
         using ReprType = KSpinRepr<1, NumSite, true>;
         ReprType repr({NumParticle, NumParticle}, 0);
-        Hubbard<ScalarType, ReprType> model({NumSite}, 1, std::move(repr), HoppingT, 4);
+        HubbardMatrix<ScalarType, ReprType> model(hubbard, std::move(repr));
 
         const size_t numState = model.getNumState();
         JacobiDavidson<ScalarType> jd(numState, 4);

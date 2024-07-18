@@ -20,7 +20,7 @@
 
 #include <Physica/Core/Math/Algebra/LinearAlgebra/Vector/Vector.h>
 #include <Physica/Core/Math/Algebra/LinearAlgebra/Matrix/MatrixFunction/MatrixExp.h>
-#include "LatticeHamilton.h"
+#include "Hamilton/HamiltonMatrix.h"
 
 namespace Physica::Core {
     /**
@@ -29,7 +29,7 @@ namespace Physica::Core {
      * 
      * Reference:
      * [1] Phys. Rev. Lett. 108, 240401 (2012); https://doi.org/10.1103/PhysRevLett.108.240401
-     * [2] Phys. Rev. Lett. 111, 010401 (2013); https://doi.org/10.1103/PhysRevLett.108.240401
+     * [2] Phys. Rev. Lett. 111, 010401 (2013); https://doi.org/10.1103/PhysRevLett.111.010401
      */
     template<class ScalarType>
     class TPQ : public Vector<ScalarType> {
@@ -52,9 +52,9 @@ namespace Physica::Core {
         This& operator=(This obj) noexcept { swap(obj); return *this; }
         /* Operations */
         template<class ModelType, class Executor = SequentialExecutor>
-        void pre_nvt_step(const LatticeHamilton<ModelType>& hamiltonH_, RealType deltaBeta);
+        void pre_nvt_step(const HamiltonMatrix<ModelType>& hamiltonH_, RealType deltaBeta);
         template<class ModelType, class Executor = SequentialExecutor>
-        void nvt_step(const LatticeHamilton<ModelType>& hamiltonH_, RealType deltaBeta);
+        void nvt_step(const HamiltonMatrix<ModelType>& hamiltonH_, RealType deltaBeta);
 
         [[nodiscard]] inline RealType calcPartitionZ() const;
         [[nodiscard]] inline RealType lnPartitionZ() const;
@@ -101,7 +101,7 @@ namespace Physica::Core {
 
     template<class ScalarType>
     template<class ModelType, class Executor>
-    void TPQ<ScalarType>::pre_nvt_step(const LatticeHamilton<ModelType>& hamiltonH_, RealType deltaBeta) {
+    void TPQ<ScalarType>::pre_nvt_step(const HamiltonMatrix<ModelType>& hamiltonH_, RealType deltaBeta) {
         const RealType factor = deltaBeta * -0.5;
         const auto& hamiltonH = hamiltonH_.getDerived();
         const auto expr1 = factor * hamiltonH;
@@ -115,7 +115,7 @@ namespace Physica::Core {
 
     template<class ScalarType>
     template<class ModelType, class Executor>
-    void TPQ<ScalarType>::nvt_step(const LatticeHamilton<ModelType>& hamiltonH_, RealType deltaBeta) {
+    void TPQ<ScalarType>::nvt_step(const HamiltonMatrix<ModelType>& hamiltonH_, RealType deltaBeta) {
         if (deltaBeta.isZero())
             return;
         using BufferType = Vector<ScalarType>;
