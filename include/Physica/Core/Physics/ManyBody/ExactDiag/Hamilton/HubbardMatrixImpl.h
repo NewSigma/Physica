@@ -114,6 +114,14 @@ namespace Physica::Core {
     }
 
     template<class ScalarType, class ReprType>
+    ScalarType HubbardMatrix<ScalarType, ReprType>::trace() const {
+        size_t numDoubleOccupy = 0;
+        for (size_t i = 0; i < getNumState(); ++i)
+            numDoubleOccupy += repr[i].getNumDoubleOccupy();
+        return getRepelU() * ScalarType(numDoubleOccupy);
+    }
+
+    template<class ScalarType, class ReprType>
     void HubbardMatrix<ScalarType, ReprType>::swap(HubbardMatrix& __restrict obj) noexcept {
         Base::swap(obj);
         ModelBase::swap(obj);

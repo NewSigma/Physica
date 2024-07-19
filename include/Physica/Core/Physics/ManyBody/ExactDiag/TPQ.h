@@ -62,9 +62,7 @@ namespace Physica::Core {
         void swap(This& __restrict obj) noexcept;
 
         template<class RandomGenerator>
-        inline void random_normal(RandomGenerator& gen);
-        template<class Distribution, class RandomGenerator>
-        inline void random_any(Distribution& dist, RandomGenerator& gen);
+        inline void random_normal(RandomGenerator& gen, RealType norm = 0);
         /* Getters */
         [[nodiscard]] RealType getBeta() const noexcept { return beta; }
         [[nodiscard]] RealType getTraceMu() const noexcept { return traceMu; }
@@ -72,10 +70,10 @@ namespace Physica::Core {
         [[nodiscard]] int getNumSplit() const noexcept { return numSplit; }
         /* Static members */
         template<class RandomGenerator>
-        [[nodiscard]] static This random_normal(size_t len, RandomGenerator& gen);
-        template<class Distribution, class RandomGenerator>
-        [[nodiscard]] static This random_any(size_t len, Distribution& dist, RandomGenerator& gen);
+        [[nodiscard]] static This random_normal(size_t len, RandomGenerator& gen, RealType norm = 0);
     private:
+        using Base::random_uniform;
+        using Base::random_any;
         [[nodiscard]] bool isPrepared() const;
     };
 
@@ -91,12 +89,10 @@ namespace Physica::Core {
 
     template<class ScalarType>
     TPQ<ScalarType>::TPQ(size_t length, RealType traceMu_, int numMinCostTerm_, int numSplit_)
-            : Base(length)
-            , beta(0)
-            , traceMu(traceMu_)
-            , numMinCostTerm(numMinCostTerm_)
-            , numSplit(numSplit_) {
-        assert(length > 0 && "[Error]: Invalid length");
+            : TPQ(length) {
+        traceMu = std::move(traceMu_);
+        numMinCostTerm = numMinCostTerm_;
+        numSplit = numSplit_;
         assert(isPrepared() && "[Error]: Invalid params");
     }
 
@@ -170,31 +166,21 @@ namespace Physica::Core {
 
     template<class ScalarType>
     template<class RandomGenerator>
-    inline void TPQ<ScalarType>::random_normal(RandomGenerator& gen) {
+    inline void TPQ<ScalarType>::random_normal(RandomGenerator& gen, RealType norm) {
+        const bool useDefault = norm.isZero();
+        if (useDefault) {
+            // We require norm as small as possible while keep all effective digits of calcPartitionXi().
+            norm = sqrt(RealType(std::numeric_limits<RealType>::min())) / RealType(std::numeric_limits<RealType>::epsilon());
+        }
         Base::random_normal(gen);
-        Base::toUnit();
-    }
-
-    template<class ScalarType>
-    template<class Distribution, class RandomGenerator>
-    inline void TPQ<ScalarType>::random_any(Distribution& dist, RandomGenerator& gen) {
-        Base::random_any(dist, gen);
-        Base::toUnit();
+        (*this) *= norm;
     }
 
     template<class ScalarType>
     template<class RandomGenerator>
-    TPQ<ScalarType> TPQ<ScalarType>::random_normal(size_t len, RandomGenerator& gen) {
+    TPQ<ScalarType> TPQ<ScalarType>::random_normal(size_t len, RandomGenerator& gen, RealType norm) {
         This result(len);
-        result.random_normal(gen);
-        return result;
-    }
-
-    template<class ScalarType>
-    template<class Distribution, class RandomGenerator>
-    TPQ<ScalarType> TPQ<ScalarType>::random_any(size_t len, Distribution& dist, RandomGenerator& gen) {
-        This result(len);
-        result.random_any(dist, gen);
+        result.random_normal(gen, norm);
         return result;
     }
 

@@ -145,3 +145,4 @@ namespace Physica::Core {
 #include "DiagVector.h"
 #include "MatrixNorm.h"
 #include "MatrixExpr.h"
+#include "MatrixConvert.h"

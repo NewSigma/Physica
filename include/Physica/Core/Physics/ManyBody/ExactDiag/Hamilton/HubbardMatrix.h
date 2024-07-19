@@ -67,6 +67,7 @@ namespace Physica::Core {
         void dot(const SourceVector& source, TargetVector& target) const;
 
         [[nodiscard]] ScalarType calc(size_t row, size_t col) const;
+        [[nodiscard]] ScalarType trace() const;
         void swap(This& __restrict obj) noexcept;
         /* Getters */
         using ModelBase::getHoppingT;
