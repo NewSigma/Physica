@@ -28,16 +28,16 @@ namespace Physica::Core::Physics {
     class Molecular {
         using PointType = Point<3, ScalarType>;
         Utils::Array<PointType> atoms;
-        Utils::Array<unsigned char> atomicNumbers;
+        Utils::Array<uint8_t> atomicNumbers;
     public:
         Molecular(size_t atomCount);
         ~Molecular() = default;
         /* Getters */
         [[nodiscard]] Utils::Array<PointType>& getAtoms() noexcept { return atoms; }
-        [[nodiscard]] Utils::Array<unsigned char>& getAtomicNumbers() noexcept { return atomicNumbers; }
+        [[nodiscard]] Utils::Array<uint8_t>& getAtomicNumbers() noexcept { return atomicNumbers; }
         [[nodiscard]] size_t getAtomCount() const noexcept { return atoms.getLength(); }
         [[nodiscard]] PointType getAtom(size_t i) const { return atoms[i]; }
-        [[nodiscard]] unsigned char getAtomicNumber(size_t i) const { return atomicNumbers[i]; }
+        [[nodiscard]] uint8_t getAtomicNumber(size_t i) const { return atomicNumbers[i]; }
         [[nodiscard]] ScalarType getPairDist(size_t i, size_t j) const;
         [[nodiscard]] ScalarType getTripleAngle(size_t i, size_t j, size_t k) const;
         [[nodiscard]] ScalarType getOutOfPlaneAngle(size_t i, size_t j, size_t k, size_t l) const;

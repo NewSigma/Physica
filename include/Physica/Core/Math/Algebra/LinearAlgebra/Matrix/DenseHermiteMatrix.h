@@ -30,7 +30,7 @@ namespace Physica::Core {
         using This = DenseHermiteMatrix<T, Order, MaxOrder>;
         using Base = RValueMatrix<This>;
         using Storage = HalfDenseMatrixStorage<T, Order, MaxOrder>;
-        using VectorBase = typename Storage::ArrayType;
+        using VectorStorage = typename Storage::ArrayType;
     public:
         using typename Base::ScalarType;
         using RealType = typename ScalarType::RealType;
@@ -39,15 +39,15 @@ namespace Physica::Core {
         using RealMatrix = DenseSymmMatrix<typename ScalarType::RealType, Order, MaxOrder>;
         constexpr static bool isComplex = true;
     public:
+        using Storage::Storage;
         template<class OtherMatrix>
         DenseHermiteMatrix(const RValueMatrix<OtherMatrix>& mat);
-        using Storage::Storage;
         DenseHermiteMatrix(const This&) = default;
         DenseHermiteMatrix(This&&) noexcept = default;
         ~DenseHermiteMatrix() = default;
         /* Operators */
-        DenseHermiteMatrix& operator=(This m) noexcept;
-        DenseHermiteMatrix& operator=(RealType r);
+        This& operator=(This obj) noexcept { swap(obj); return *this; }
+        inline This& operator=(RealType value);
         [[nodiscard]] ScalarType& operator()(size_t row, size_t col);
         [[nodiscard]] const ScalarType& operator()(size_t row, size_t col) const;
         template<class VectorType>
@@ -75,8 +75,8 @@ namespace Physica::Core {
         using Storage::getRow;
         [[nodiscard]] Base& asMatrix() noexcept { return *this; }
         [[nodiscard]] const Base& asMatrix() const noexcept { return *this; }
-        [[nodiscard]] VectorBase& asVector() noexcept { return *this; }
-        [[nodiscard]] const VectorBase& asVector() const noexcept { return *this; }
+        [[nodiscard]] VectorStorage& asVector() noexcept { return Storage::getArray(); }
+        [[nodiscard]] const VectorStorage& asVector() const noexcept { return Storage::getArray(); }
         /* Static members */
         [[nodiscard]] static This unitMatrix(size_t order);
         template<class RandomGenerator>
@@ -106,18 +106,8 @@ namespace Physica::Core {
     }
 
     template<class T, size_t Order, size_t MaxOrder>
-    DenseHermiteMatrix<T, Order, MaxOrder>&
-    DenseHermiteMatrix<T, Order, MaxOrder>::operator=(DenseHermiteMatrix m) noexcept {
-        swap(m);
-        return *this;
-    }
-
-    template<class T, size_t Order, size_t MaxOrder>
-    DenseHermiteMatrix<T, Order, MaxOrder>&
-    DenseHermiteMatrix<T, Order, MaxOrder>::operator=(RealType r) {
-        const size_t element_count = (getRow() + 1) * getRow() / 2;
-        for (size_t i = 0; i < element_count; ++i)
-            Storage::operator[](i) = r;
+    inline DenseHermiteMatrix<T, Order, MaxOrder>& DenseHermiteMatrix<T, Order, MaxOrder>::operator=(RealType value) {
+        asVector() = value;
         return *this;
     }
 

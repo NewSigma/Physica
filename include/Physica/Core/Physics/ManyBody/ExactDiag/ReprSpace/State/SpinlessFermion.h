@@ -51,8 +51,8 @@ namespace Physica::Core {
         void operator<<=(int shift) noexcept { (*this) = (*this) << shift; }
         void operator>>=(int shift) noexcept { (*this) = (*this) >> shift; }
         /* Operations */
-        [[nodiscard]] inline SpinlessFermion hop(unsigned char from, unsigned char to) const;
-        [[nodiscard]] inline int hopSign(unsigned char from, unsigned char to) const;
+        [[nodiscard]] inline SpinlessFermion hop(uint8_t from, uint8_t to) const;
+        [[nodiscard]] inline int hopSign(uint8_t from, uint8_t to) const;
         [[nodiscard]] SpinlessFermion transReduce(int period = 1) const;
         [[nodiscard]] int lShiftSign() const;
         [[nodiscard]] int calcPeriod() const;
@@ -60,7 +60,7 @@ namespace Physica::Core {
         /* Getters */
         [[nodiscard]] IntType getOccupyBits() const noexcept { return occupyBits; }
         [[nodiscard]] bool isVacuum() const noexcept { return occupyBits == 0; }
-        [[nodiscard]] inline bool isOccupy(unsigned char site) const noexcept;
+        [[nodiscard]] inline bool isOccupy(uint8_t site) const noexcept;
         [[nodiscard]] unsigned int getNumParticle() const noexcept { return countOnes(occupyBits); }
         [[nodiscard]] inline bool isTransReducible(int period = 1) const noexcept;
         [[nodiscard]] constexpr static IntType makeFullMask() noexcept { return (static_cast<IntType>(1) << NumSite) - 1; }

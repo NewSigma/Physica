@@ -26,13 +26,13 @@ namespace Physica::Core {
         static_assert(!ScalarType::isComplex, "[Error]: Model param must be real");
         using This = Hubbard<ScalarType, Dim>;
         using Base = LatticeModel<Dim>;
-        using HoppingMatrix = Utils::Array<Utils::Array<unsigned char>>;
+        using HopIndexArray = Utils::Array<Utils::Array<size_t>>;
     public:
         using typename Base::IndexType;
     private:
         ScalarType hoppingT;
         ScalarType repelU;
-        HoppingMatrix hoppingMatrix;
+        HopIndexArray hopIndexArr;
     public:
         Hubbard(Base lattice, ScalarType hoppingT_, ScalarType repelU_);
         Hubbard(const This&) = default;
@@ -45,16 +45,16 @@ namespace Physica::Core {
         /* Getters */
         [[nodiscard]] ScalarType getHoppingT() const noexcept { return hoppingT; }
         [[nodiscard]] ScalarType getRepelU() const noexcept { return repelU; }
-        [[nodiscard]] const HoppingMatrix& getHoppingMatrix() const noexcept { return hoppingMatrix; }
+        [[nodiscard]] const HopIndexArray& getHopIndexArray() const noexcept { return hopIndexArr; }
     private:
-        HoppingMatrix makeHoppingMatrix();
+        HopIndexArray makeHopIndexArray();
     };
 
     template<class ScalarType, unsigned int Dim>
     Hubbard<ScalarType, Dim>::Hubbard(Base lattice, ScalarType hoppingT_, ScalarType repelU_)
             : Base(std::move(lattice)), hoppingT(hoppingT_), repelU(repelU_) {
         if constexpr (Dim > 1)
-            hoppingMatrix = makeHoppingMatrix();
+            hopIndexArr = makeHopIndexArray();
     }
 
     template<class ScalarType, unsigned int Dim>
@@ -62,16 +62,16 @@ namespace Physica::Core {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         hoppingT.swap(obj.hoppingT);
         repelU.swap(obj.repelU);
-        hoppingMatrix.swap(obj.hoppingMatrix);
+        hopIndexArr.swap(obj.hopIndexArr);
     }
 
     template<class ScalarType, unsigned int Dim>
-    typename Hubbard<ScalarType, Dim>::HoppingMatrix Hubbard<ScalarType, Dim>::makeHoppingMatrix() {
+    typename Hubbard<ScalarType, Dim>::HopIndexArray Hubbard<ScalarType, Dim>::makeHopIndexArray() {
         const auto numSite = Base::getNumSuperCellSite();
-        HoppingMatrix result(numSite);
+        HopIndexArray result(numSite);
         Base::forSiteInLattice([this, numSite, &result](IndexType index) {
             const auto& dims = Base::getDims();
-            Utils::Array<unsigned char> hopTargets{};
+            Utils::Array<size_t> hopTargets{};
             hopTargets.reserve(numSite * Dim * 2);
             for (unsigned int dim = 0; dim < Dim; ++dim) {
                 IndexType index1 = index;

@@ -22,9 +22,9 @@
 
 namespace Physica::Core {
     template<unsigned int Dim>
-    class SiteIndex : public Utils::Array<unsigned char, Dim + 1> {
+    class SiteIndex : public Utils::Array<size_t, Dim + 1> {
         using This = SiteIndex<Dim>;
-        using Base = Utils::Array<unsigned char, Dim + 1>;
+        using Base = Utils::Array<size_t, Dim + 1>;
         static_assert(1 <= Dim && Dim <= 3, "[Error]: Invalid Dim");
     public:
         using Base::Base;
@@ -34,20 +34,20 @@ namespace Physica::Core {
         /* Operators */
         This& operator=(This obj) noexcept { swap(obj); return *this; }
         /* Operations */
-        [[nodiscard]] unsigned char toIndex1D(This dims) const noexcept;
+        [[nodiscard]] size_t toIndex1D(This dims) const noexcept;
         using Base::swap;
         /* Getters */
-        [[nodiscard]] unsigned char getSite() const noexcept { return (*this)[Dim]; }
-        [[nodiscard]] unsigned char getX() const noexcept { return (*this)[0]; }
-        [[nodiscard]] unsigned char getY() const noexcept { return (*this)[1]; }
-        [[nodiscard]] unsigned char getZ() const noexcept { return (*this)[2]; }
+        [[nodiscard]] size_t getSite() const noexcept { return (*this)[Dim]; }
+        [[nodiscard]] size_t getX() const noexcept { return (*this)[0]; }
+        [[nodiscard]] size_t getY() const noexcept { return (*this)[1]; }
+        [[nodiscard]] size_t getZ() const noexcept { return (*this)[2]; }
         /* Static members */
-        [[nodiscard]] static unsigned char toIndex1D(This dims, This index) noexcept { return index.toIndex1D(dims); }
+        [[nodiscard]] static size_t toIndex1D(This dims, This index) noexcept { return index.toIndex1D(dims); }
     };
 
     template<unsigned int Dim>
-    unsigned char SiteIndex<Dim>::toIndex1D(SiteIndex<Dim> dims) const noexcept {
-        unsigned char result = (*this)[0];
+    size_t SiteIndex<Dim>::toIndex1D(SiteIndex<Dim> dims) const noexcept {
+        size_t result = (*this)[0];
         for (unsigned int dim = 1; dim <= Dim; ++dim)
             result = result * dims[dim] + (*this)[dim];
         return result;

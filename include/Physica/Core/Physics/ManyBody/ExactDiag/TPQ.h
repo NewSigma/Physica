@@ -146,12 +146,17 @@ namespace Physica::Core {
     template<class ScalarType>
     typename TPQ<ScalarType>::RealType TPQ<ScalarType>::lnSquaredDot(const Vector<RealType>& other) const {
         assert(Base::getLength() == other.getLength() && "[Error]: Dimensions do not match");
-        const auto expr1 = toSquaredNormVector(*this);
-        const auto expr2 = hadamard(expr1, other);
-        const bool isUnderflow = abs(expr2).max() < RealType(std::numeric_limits<RealType>::min());
+        const RealType maxabs = abs(*this).max();
+        const bool isUnderflow = maxabs < RealType(std::numeric_limits<RealType>::min());
         if (isUnderflow)
             return RealType(-std::numeric_limits<ScalarType>::max());
-        return expr2.lnSquaredNorm();
+        const RealType factor = reciprocal(maxabs);
+        const auto expr1 = (*this) * factor;
+        const auto expr2 = toSquaredNormVector(expr1);
+        const RealType dot = hadamard(expr2, other).sum();
+        if (dot.isZero())
+            return RealType(-std::numeric_limits<ScalarType>::max());
+        return ln(dot) + RealType(2) * ln(maxabs);
     }
 
     template<class ScalarType>
@@ -168,10 +173,8 @@ namespace Physica::Core {
     template<class RandomGenerator>
     inline void TPQ<ScalarType>::random_normal(RandomGenerator& gen, RealType norm) {
         const bool useDefault = norm.isZero();
-        if (useDefault) {
-            // We require norm as small as possible while keep all effective digits of calcPartitionXi().
-            norm = sqrt(RealType(std::numeric_limits<RealType>::min())) / RealType(std::numeric_limits<RealType>::epsilon());
-        }
+        if (useDefault) // Default norm is as small as possible while keep all effective digits
+            norm = RealType(std::numeric_limits<RealType>::min() / std::numeric_limits<RealType>::epsilon());
         Base::random_normal(gen);
         (*this) *= norm;
     }

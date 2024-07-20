@@ -49,10 +49,10 @@ namespace Physica::Core {
         void operator<<=(int shift) noexcept { (*this) = (*this) << shift; }
         void operator>>=(int shift) noexcept { (*this) = (*this) >> shift; }
         /* Operations */
-        [[nodiscard]] SpinFermion hopUp(unsigned char from, unsigned char to) const;
-        [[nodiscard]] SpinFermion hopDown(unsigned char from, unsigned char to) const;
-        [[nodiscard]] inline int hopUpSign(unsigned char from, unsigned char to) const;
-        [[nodiscard]] inline int hopDownSign(unsigned char from, unsigned char to) const;
+        [[nodiscard]] SpinFermion hopUp(uint8_t from, uint8_t to) const;
+        [[nodiscard]] SpinFermion hopDown(uint8_t from, uint8_t to) const;
+        [[nodiscard]] inline int hopUpSign(uint8_t from, uint8_t to) const;
+        [[nodiscard]] inline int hopDownSign(uint8_t from, uint8_t to) const;
         [[nodiscard]] SpinFermion transReduce() const;
         [[nodiscard]] inline int lShiftSign() const;
         [[nodiscard]] inline int calcPeriod() const noexcept;
@@ -62,8 +62,8 @@ namespace Physica::Core {
         [[nodiscard]] SpinlessType getSpinDown() const noexcept { return spinDown; }
         [[nodiscard]] int getNumSite() const noexcept { return spinUp.getNumSite(); }
         [[nodiscard]] bool isVacuum() const noexcept { return spinUp.isVacuum() && spinDown.isVacuum(); }
-        [[nodiscard]] bool isUpOccupy(unsigned char site) const noexcept { return spinUp.isOccupy(site); }
-        [[nodiscard]] bool isDownOccupy(unsigned char site) const noexcept { return spinDown.isOccupy(site); }
+        [[nodiscard]] bool isUpOccupy(uint8_t site) const noexcept { return spinUp.isOccupy(site); }
+        [[nodiscard]] bool isDownOccupy(uint8_t site) const noexcept { return spinDown.isOccupy(site); }
         [[nodiscard]] unsigned int getNumParticle() const noexcept { return getNumSpinUpParticle() + getNumSpinDownParticle(); }
         [[nodiscard]] unsigned int getNumSpinUpParticle() const noexcept { return spinUp.getNumParticle(); }
         [[nodiscard]] unsigned int getNumSpinDownParticle() const noexcept { return spinDown.getNumParticle(); }

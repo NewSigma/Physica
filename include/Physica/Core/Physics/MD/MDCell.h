@@ -33,7 +33,7 @@ namespace Physica::Core {
         using typename Base::PositionMatrix;
         using typename Base::Type;
         using MassVector = Vector<ScalarType>;
-        using ParticleType = unsigned char; // unsigned char should be enough to hold the periodic table
+        using ParticleType = uint8_t; // uint8_t should be enough to hold the periodic table
         using MassTypeMap = std::unordered_map<ScalarType, ParticleType>;
     private:
         MassVector massVec;

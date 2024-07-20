@@ -46,7 +46,7 @@ namespace Physica::Core {
     }
 
     template<unsigned int Dim, unsigned int NumSite>
-    inline SpinlessFermion<Dim, NumSite> SpinlessFermion<Dim, NumSite>::hop(unsigned char from, unsigned char to) const {
+    inline SpinlessFermion<Dim, NumSite> SpinlessFermion<Dim, NumSite>::hop(uint8_t from, uint8_t to) const {
         assert(from != to && "[Error]: Assuming different sites");
         const bool canHop = isOccupy(from) && !isOccupy(to);
         if (!canHop)
@@ -57,7 +57,7 @@ namespace Physica::Core {
     }
 
     template<unsigned int Dim, unsigned int NumSite>
-    inline int SpinlessFermion<Dim, NumSite>::hopSign(unsigned char from, unsigned char to) const {
+    inline int SpinlessFermion<Dim, NumSite>::hopSign(uint8_t from, uint8_t to) const {
         const int numElectron = countOnes(occupyBits >> (from + 1)) - countOnes(occupyBits >> (to + 1));
         const bool flag1 = from < to;
         const bool flag2 = numElectron % 2 == 0;
@@ -113,7 +113,7 @@ namespace Physica::Core {
     }
 
     template<unsigned int Dim, unsigned int NumSite>
-    inline bool SpinlessFermion<Dim, NumSite>::isOccupy(unsigned char site) const noexcept {
+    inline bool SpinlessFermion<Dim, NumSite>::isOccupy(uint8_t site) const noexcept {
         assert(site < sizeof(occupyBits) * CHAR_BIT && "[Error]: Invalid site");
         const IntType mask = 1UL << site;
         return (occupyBits & mask) != 0;

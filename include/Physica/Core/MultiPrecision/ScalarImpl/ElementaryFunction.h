@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2023 WeiBo He.
+ * Copyright 2019-2024 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -17,10 +17,7 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 #pragma once
-/*!
- * This file is part of implementations of \Scalar.
- * Do not include this header file, include Scalar.h instead.
- */
+
 namespace Physica::Core {
     template<ScalarOption Option>
     __host__ __device__ inline Scalar<Option> abs(const Scalar<Option>& s) noexcept;
@@ -42,6 +39,9 @@ namespace Physica::Core {
 
     template<ScalarOption Option>
     __host__ __device__ inline Scalar<Option> ln(const Scalar<Option>& s) noexcept;
+
+    template<ScalarOption Option>
+    __host__ __device__ inline Scalar<Option> ln1p(const Scalar<Option>& s) noexcept;
 
     template<ScalarOption Option>
     __host__ __device__ inline Scalar<Option> log(const Scalar<Option>& s, const Scalar<Option>& a) noexcept;

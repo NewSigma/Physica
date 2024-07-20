@@ -55,9 +55,10 @@ namespace Physica::Core {
         [[nodiscard]] __host__ __device__ inline lvalue_reference operator()(size_t row, size_t col);
         [[nodiscard]] __host__ __device__ inline const_lvalue_reference operator()(size_t row, size_t col) const;
         /* Operations */
-        void resize(size_t order_) { arr.resize(order_ * (order_ + 1) / 2); order = order_; }
-        void resize(size_t row, [[maybe_unused]] size_t column) { assert(row == column); resize(row); order = row; } //Necessary to CRTP
-        void swap(HalfDenseMatrixStorage& __restrict storage) noexcept;
+        template<class... Args>
+        void resize(size_t row, size_t column, Args&&... args);
+        void resize(size_t row) { resize(row, row); }
+        void swap(This& __restrict storage) noexcept;
         /* Getters */
         [[nodiscard]] const ArrayType& getArray() const noexcept { return arr; }
         [[nodiscard]] ArrayType& getArray() noexcept { return arr; }
@@ -95,7 +96,15 @@ namespace Physica::Core {
     HalfDenseMatrixStorage<T, Order, MaxOrder>::operator()(size_t row, size_t col) const { return (*this)[toIndex1D(row, col)]; }
 
     template<class T, size_t Order, size_t MaxOrder>
-    void HalfDenseMatrixStorage<T, Order, MaxOrder>::swap(HalfDenseMatrixStorage<T, Order, MaxOrder>& __restrict storage) noexcept {
+    template<class... Args>
+    void HalfDenseMatrixStorage<T, Order, MaxOrder>::resize(size_t row, [[maybe_unused]] size_t column, Args&&... args) {
+        assert(row == column);
+        arr.resize(row * (row + 1) / 2, std::forward<Args>(args)...);
+        order = row;
+    }
+
+    template<class T, size_t Order, size_t MaxOrder>
+    void HalfDenseMatrixStorage<T, Order, MaxOrder>::swap(This& __restrict storage) noexcept {
         assert(this != &storage && "[Error]: Self swap is likely a bug");
         arr.swap(storage.arr);
         std::swap(order, storage.order);

@@ -253,7 +253,7 @@ namespace Physica::Core {
         const auto state = repr[index];
         int numRepel = 0;
         for (int site = 0; site < int(NumSite); ++site) {
-            const auto& hopTargets = ModelBase::getHoppingMatrix()[site];
+            const auto& hopTargets = ModelBase::getHopIndexArray()[site];
             const bool upOccupy1 = state.isUpOccupy(site);
             const bool downOccupy1 = state.isDownOccupy(site);
             for (int site1 : hopTargets) {

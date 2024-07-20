@@ -27,14 +27,14 @@ namespace Physica::Core {
         static_assert(1 <= Dim && Dim <= 3, "[Error]: Invalid Dim");
         using This = LatticeModel<Dim>;
     public:
-        using DimArray = Utils::Array<unsigned int, Dim>;
+        using DimArray = Utils::Array<size_t, Dim>;
         using IndexType = SiteIndex<Dim>;
     private:
         DimArray superSize;
-        unsigned char numUnitCellSite;
+        size_t numUnitCellSite;
     public:
         LatticeModel() = default;
-        LatticeModel(DimArray superSize_, unsigned char numSitePerCell_);
+        LatticeModel(DimArray superSize_, size_t numUnitCellSite_);
         LatticeModel(const This&) = default;
         LatticeModel(This&&) noexcept = default;
         ~LatticeModel() = default;
@@ -46,35 +46,35 @@ namespace Physica::Core {
         void swap(This& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] const DimArray& getSuperSize() const noexcept { return superSize; }
-        [[nodiscard]] unsigned int getNumCell() const noexcept;
-        [[nodiscard]] unsigned char getNumUnitCellSite() const noexcept { return numUnitCellSite; }
-        [[nodiscard]] unsigned int getNumSuperCellSite() const noexcept { return getNumUnitCellSite() * getNumCell(); }
+        [[nodiscard]] size_t getNumCell() const noexcept;
+        [[nodiscard]] size_t getNumUnitCellSite() const noexcept { return numUnitCellSite; }
+        [[nodiscard]] size_t getNumSuperCellSite() const noexcept { return getNumUnitCellSite() * getNumCell(); }
         [[nodiscard]] IndexType getDims() const noexcept;
     };
 
     template<unsigned int Dim>
-    LatticeModel<Dim>::LatticeModel(DimArray superSize_, unsigned char numSitePerCell_)
-            : superSize(std::move(superSize_)), numUnitCellSite(numSitePerCell_) {}
+    LatticeModel<Dim>::LatticeModel(DimArray superSize_, size_t numUnitCellSite_)
+            : superSize(std::move(superSize_)), numUnitCellSite(numUnitCellSite_) {}
 
     template<unsigned int Dim>
     template<class Functor>
     void LatticeModel<Dim>::forSiteInLattice(Functor func) const {
         if constexpr (Dim == 1) {
-            for (unsigned char x = 0; x < superSize[0]; ++x)
-                for (unsigned char site = 0; site < numUnitCellSite; ++site)
+            for (size_t x = 0; x < superSize[0]; ++x)
+                for (size_t site = 0; site < numUnitCellSite; ++site)
                     func(IndexType{x, site});
         }
         if constexpr (Dim == 2) {
-            for (unsigned char x = 0; x < superSize[0]; ++x)
-                for (unsigned char y = 0; y < superSize[1]; ++y)
-                    for (unsigned char site = 0; site < numUnitCellSite; ++site)
+            for (size_t x = 0; x < superSize[0]; ++x)
+                for (size_t y = 0; y < superSize[1]; ++y)
+                    for (size_t site = 0; site < numUnitCellSite; ++site)
                         func(IndexType{x, y, site});
         }
         if constexpr (Dim == 3) {
-            for (unsigned char x = 0; x < superSize[0]; ++x)
-                for (unsigned char y = 0; y < superSize[1]; ++y)
-                    for (unsigned char z = 0; z < superSize[2]; ++z)
-                        for (unsigned char site = 0; site < numUnitCellSite; ++site)
+            for (size_t x = 0; x < superSize[0]; ++x)
+                for (size_t y = 0; y < superSize[1]; ++y)
+                    for (size_t z = 0; z < superSize[2]; ++z)
+                        for (size_t site = 0; site < numUnitCellSite; ++site)
                             func(IndexType{x, y, z, site});
         }
     }
@@ -87,8 +87,8 @@ namespace Physica::Core {
     }
 
     template<unsigned int Dim>
-    unsigned int LatticeModel<Dim>::getNumCell() const noexcept {
-        unsigned int result = 1;
+    size_t LatticeModel<Dim>::getNumCell() const noexcept {
+        size_t result = 1;
         for (auto size : superSize)
             result *= size;
         return result;
@@ -97,10 +97,10 @@ namespace Physica::Core {
     template<unsigned int Dim>
     typename LatticeModel<Dim>::IndexType LatticeModel<Dim>::getDims() const noexcept {
         if constexpr (Dim == 1)
-            return IndexType{(unsigned char)superSize[0], numUnitCellSite};
+            return IndexType{superSize[0], numUnitCellSite};
         if constexpr (Dim == 2)
-            return IndexType{(unsigned char)superSize[0], (unsigned char)superSize[1], numUnitCellSite};
+            return IndexType{superSize[0], superSize[1], numUnitCellSite};
         if constexpr (Dim == 3)
-            return IndexType{(unsigned char)superSize[0], (unsigned char)superSize[1], (unsigned char)superSize[2], numUnitCellSite};
+            return IndexType{superSize[0], superSize[1], superSize[2], numUnitCellSite};
     }
 }

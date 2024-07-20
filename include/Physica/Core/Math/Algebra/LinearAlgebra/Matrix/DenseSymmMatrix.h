@@ -28,7 +28,7 @@ namespace Physica::Core {
         using This = DenseSymmMatrix<T, Order, MaxOrder>;
         using Base = LValueMatrix<This>;
         using Storage = HalfDenseMatrixStorage<T, Order, MaxOrder>;
-        using VectorBase = typename Storage::ArrayType;
+        using VectorStorage = typename Storage::ArrayType;
     public:
         using typename Base::ScalarType;
         using ColMatrix = This;
@@ -38,13 +38,14 @@ namespace Physica::Core {
         template<class OtherMatrix>
         DenseSymmMatrix(const RValueMatrix<OtherMatrix>& mat);
         using Storage::Storage;
-        DenseSymmMatrix(const DenseSymmMatrix&) = default;
-        DenseSymmMatrix(DenseSymmMatrix&&) noexcept = default;
+        DenseSymmMatrix(const This&) = default;
+        DenseSymmMatrix(This&&) noexcept = default;
         ~DenseSymmMatrix() = default;
         /* Operators */
         using Base::operator=;
         using Base::operator();
-        DenseSymmMatrix& operator=(DenseSymmMatrix m) noexcept;
+        This& operator=(This obj) noexcept { swap(obj); return *this; }
+        inline This& operator=(const ScalarType& value);
         template<class VectorType>
         [[nodiscard]] inline MatrixVectorProduct<This, VectorType> operator*(const RValueVector<VectorType>& vec) const noexcept;
         /* Operations */
@@ -56,7 +57,7 @@ namespace Physica::Core {
         [[nodiscard]] ScalarType max() const { return asVector().max(); }
         [[nodiscard]] ScalarType min() const { return asVector().min(); }
         [[nodiscard]] const This& transpose() const noexcept { return *this; }
-        void swap(DenseSymmMatrix& __restrict m) noexcept;
+        void swap(This& __restrict m) noexcept;
 
         template<class RandomGenerator>
         void random_uniform(RandomGenerator& gen) { asVector().random_uniform(gen); }
@@ -74,8 +75,8 @@ namespace Physica::Core {
         using Storage::getRow;
         [[nodiscard]] Base& asMatrix() noexcept { return *this; }
         [[nodiscard]] const Base& asMatrix() const noexcept { return *this; }
-        [[nodiscard]] VectorBase& asVector() noexcept { return Storage::getArray(); }
-        [[nodiscard]] const VectorBase& asVector() const noexcept { return Storage::getArray(); }
+        [[nodiscard]] VectorStorage& asVector() noexcept { return Storage::getArray(); }
+        [[nodiscard]] const VectorStorage& asVector() const noexcept { return Storage::getArray(); }
         /* Static members */
         [[nodiscard]] static DenseSymmMatrix unitMatrix(size_t order);
         template<class RandomGenerator>
@@ -99,9 +100,8 @@ namespace Physica::Core {
     }
 
     template<class T, size_t Order, size_t MaxOrder>
-    DenseSymmMatrix<T, Order, MaxOrder>&
-    DenseSymmMatrix<T, Order, MaxOrder>::operator=(DenseSymmMatrix m) noexcept {
-        swap(m);
+    inline DenseSymmMatrix<T, Order, MaxOrder>& DenseSymmMatrix<T, Order, MaxOrder>::operator=(const ScalarType& value) {
+        asVector() = value;
         return *this;
     }
 
@@ -113,7 +113,7 @@ namespace Physica::Core {
     }
 
     template<class T, size_t Order, size_t MaxOrder>
-    void DenseSymmMatrix<T, Order, MaxOrder>::swap(DenseSymmMatrix& __restrict m) noexcept {
+    void DenseSymmMatrix<T, Order, MaxOrder>::swap(This& __restrict m) noexcept {
         assert(this != &m && "[Error]: Self swap is likely a bug");
         Storage::swap(m);
     }

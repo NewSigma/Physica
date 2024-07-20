@@ -42,7 +42,7 @@ namespace Physica::Core {
     }
 
     template<unsigned int Dim, unsigned int NumSite>
-    SpinFermion<Dim, NumSite> SpinFermion<Dim, NumSite>::hopUp(unsigned char from, unsigned char to) const {
+    SpinFermion<Dim, NumSite> SpinFermion<Dim, NumSite>::hopUp(uint8_t from, uint8_t to) const {
         auto newSpinUp = spinUp.hop(from, to);
         const bool hopFailed = newSpinUp.isVacuum() && !spinUp.isVacuum();
         if (hopFailed)
@@ -51,7 +51,7 @@ namespace Physica::Core {
     }
 
     template<unsigned int Dim, unsigned int NumSite>
-    SpinFermion<Dim, NumSite> SpinFermion<Dim, NumSite>::hopDown(unsigned char from, unsigned char to) const {
+    SpinFermion<Dim, NumSite> SpinFermion<Dim, NumSite>::hopDown(uint8_t from, uint8_t to) const {
         auto newSpinDown = spinDown.hop(from, to);
         const bool hopFailed = newSpinDown.isVacuum() && !spinDown.isVacuum();
         if (hopFailed)
@@ -60,12 +60,12 @@ namespace Physica::Core {
     }
 
     template<unsigned int Dim, unsigned int NumSite>
-    inline int SpinFermion<Dim, NumSite>::hopUpSign(unsigned char from, unsigned char to) const {
+    inline int SpinFermion<Dim, NumSite>::hopUpSign(uint8_t from, uint8_t to) const {
         return spinUp.hopSign(from, to);
     }
 
     template<unsigned int Dim, unsigned int NumSite>
-    inline int SpinFermion<Dim, NumSite>::hopDownSign(unsigned char from, unsigned char to) const {
+    inline int SpinFermion<Dim, NumSite>::hopDownSign(uint8_t from, uint8_t to) const {
         return spinDown.hopSign(from, to);
     }
 

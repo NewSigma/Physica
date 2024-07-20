@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2023 WeiBo He.
+ * Copyright 2020-2024 WeiBo He.
  *
  * This file is part of Physica.
 
@@ -18,11 +18,8 @@
  */
 #pragma once
 
-#include "Physica/Core/MultiPrecision/ScalarImpl/ProbabilityFunction.h"
-/*!
- * This file is part of implementations of \Scalar.
- * Do not include this header file, include Scalar.h instead.
- */
+#include <Physica/Core/MultiPrecision/ScalarImpl/ProbabilityFunction.h>
+
 namespace Physica::Core {
     template<ScalarOption Option>
     __host__ __device__ inline Scalar<Option> abs(const Scalar<Option>& s) noexcept {
@@ -86,6 +83,14 @@ namespace Physica::Core {
 
     template<>
     Scalar<MultiPrecision> ln(const Scalar<MultiPrecision>& s) noexcept;
+
+    template<ScalarOption Option>
+    __host__ __device__ inline Scalar<Option> ln1p(const Scalar<Option>& s) noexcept {
+        if constexpr (Option == Float)
+            return Scalar<Option>(::log1pf(s.getTrivial()));
+        else
+            return Scalar<Option>(::log1p(s.getTrivial()));
+    }
     /**
      * \return log_a n
      */

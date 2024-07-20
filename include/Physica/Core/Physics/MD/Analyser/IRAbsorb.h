@@ -41,7 +41,7 @@ namespace Physica::Core {
                  ScalarType temperatureT,
                  ScalarType deltaT,
                  ScalarType volume,
-                 unsigned char filterRange,
+                 uint8_t filterRange,
                  size_t filterOrder);
         IRAbsorb(const IRAbsorb&) = default;
         IRAbsorb(IRAbsorb&&) noexcept = default;
@@ -64,7 +64,7 @@ namespace Physica::Core {
                                    ScalarType temperatureT,
                                    ScalarType deltaT,
                                    ScalarType volume,
-                                   unsigned char filterRange,
+                                   uint8_t filterRange,
                                    size_t filterOrder)
             : dipoleCorr(std::move(dipoleCorr_))
             , fft(dipoleCorr.getLength(), PlanFlag::Estimate)
