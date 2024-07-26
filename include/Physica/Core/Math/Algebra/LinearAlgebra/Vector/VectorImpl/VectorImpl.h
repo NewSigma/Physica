@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2023 WeiBo He.
+ * Copyright 2020-2024 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -221,14 +221,6 @@ namespace Physica::Core {
         size_t i = 0;
         for (auto ite = v.cbegin(); ite != v.cend(); ++ite, ++i)
             result.init(arccot(*ite), i);
-    }
-
-    template<class T, size_t Length, size_t MaxLength, class Allocator>
-    Vector<T, Length, MaxLength, Allocator> cosh(const Vector<T, Length, MaxLength, Allocator>& v) {
-        Vector<T, Length, MaxLength, Allocator> result(v.getLength());
-        size_t i = 0;
-        for (auto ite = v.cbegin(); ite != v.cend(); ++ite, ++i)
-            result.init(cosh(*ite), i);
     }
 
     template<class T, size_t Length, size_t MaxLength, class Allocator>

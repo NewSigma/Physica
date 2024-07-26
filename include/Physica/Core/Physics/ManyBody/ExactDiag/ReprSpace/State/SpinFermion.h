@@ -68,6 +68,9 @@ namespace Physica::Core {
         [[nodiscard]] unsigned int getNumSpinUpParticle() const noexcept { return spinUp.getNumParticle(); }
         [[nodiscard]] unsigned int getNumSpinDownParticle() const noexcept { return spinDown.getNumParticle(); }
         [[nodiscard]] inline unsigned int getNumDoubleOccupy() const noexcept;
+        /* Static member */
+        template<class RandomGenerator>
+        [[nodiscard]] static This random_state(RandomGenerator& gen);
     };
 
     template<unsigned int Dim, unsigned int NumSite>

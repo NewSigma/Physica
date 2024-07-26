@@ -108,4 +108,10 @@ namespace Physica::Core {
     inline unsigned int SpinFermion<Dim, NumSite>::getNumDoubleOccupy() const noexcept {
         return countOnes(spinUp.getOccupyBits() & spinDown.getOccupyBits());
     }
+
+    template<unsigned int Dim, unsigned int NumSite>
+    template<class RandomGenerator>
+    SpinFermion<Dim, NumSite> SpinFermion<Dim, NumSite>::random_state(RandomGenerator& gen) {
+        return This(SpinlessType::random_state(gen), SpinlessType::random_state(gen));
+    }
 }

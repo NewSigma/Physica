@@ -123,4 +123,12 @@ namespace Physica::Core {
     inline bool SpinlessFermion<Dim, NumSite>::isTransReducible(int period) const noexcept {
         return transReduce(period) != (*this);
     }
+
+    template<unsigned int Dim, unsigned int NumSite>
+    template<class RandomGenerator>
+    SpinlessFermion<Dim, NumSite> SpinlessFermion<Dim, NumSite>::random_state(RandomGenerator& gen) {
+        constexpr bool flag = NumSite < sizeof(typename RandomGenerator::result_type) * CHAR_BIT;
+        static_assert(flag, "[Error]: The random generator cannot provide enough random bits");
+        return gen() & makeFullMask();
+    }
 }

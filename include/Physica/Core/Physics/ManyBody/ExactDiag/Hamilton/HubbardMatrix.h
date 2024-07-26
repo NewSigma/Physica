@@ -72,6 +72,7 @@ namespace Physica::Core {
         /* Getters */
         using ModelBase::getHoppingT;
         using ModelBase::getRepelU;
+        using ModelBase::getHopIndexArray;
         [[nodiscard]] const ReprType& getRepr() const noexcept { return repr; }
         [[nodiscard]] size_t getNumState() const noexcept { return repr.getNumState(); }
     protected:

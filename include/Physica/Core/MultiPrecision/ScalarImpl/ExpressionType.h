@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2023 WeiBo He.
+ * Copyright 2021-2024 WeiBo He.
  *
  * This file is part of Physica.
  *
@@ -49,7 +49,8 @@ namespace Physica::Core {
         Pow,
         Sin,
         Cos,
-        ArcCos
+        ArcCos,
+        Cosh
     };
 
     constexpr const char* expressionTypeToStr(ExpressionType type) {
