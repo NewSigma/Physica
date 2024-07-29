@@ -20,90 +20,104 @@
 
 namespace Physica::Core {
     //////////////////////////////////////////////Column-Element//////////////////////////////////////////////
-    template<class Derived>
-    void DenseMatrixStorage<Derived, MatrixOption::Column | MatrixOption::Element>::rowSwap(size_t r1, size_t r2) {
-        Derived& matrix = getDerived();
-        const size_t row = matrix.getRow();
-        const size_t column = matrix.getColumn();
-        assert(r1 < row && r2 < row);
-        for (size_t i = 0, temp = 0; i < column; ++i, temp += row)
-            swap(matrix[temp + r1], matrix[temp + r2]);
+    template<class T, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn, class Allocator>
+    template<class... Args>
+    void DenseMatrixStorage<T, MatrixOption::Column | MatrixOption::Element, Row, Column, MaxRow, MaxColumn, Allocator>::
+            resize(size_t row, size_t column, Args&&... args) {
+        Base::resize(row * column, std::forward<Args>(args)...);
+        Dim::resize(row, column);
     }
 
-    template<class Derived>
-    void DenseMatrixStorage<Derived, MatrixOption::Column | MatrixOption::Element>::columnSwap(size_t c1, size_t c2) {
-        Derived& matrix = getDerived();
-        const size_t row = matrix.getRow();
-        [[maybe_unused]] const size_t column = matrix.getColumn();
+    template<class T, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn, class Allocator>
+    void DenseMatrixStorage<T, MatrixOption::Column | MatrixOption::Element, Row, Column, MaxRow, MaxColumn, Allocator>::rowSwap(size_t r1, size_t r2) {
+        const size_t row = getRow();
+        const size_t column = getColumn();
+        assert(r1 < row && r2 < row);
+        for (size_t i = 0, temp = 0; i < column; ++i, temp += row)
+            swap((*this)[temp + r1], (*this)[temp + r2]);
+    }
+
+    template<class T, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn, class Allocator>
+    void DenseMatrixStorage<T, MatrixOption::Column | MatrixOption::Element, Row, Column, MaxRow, MaxColumn, Allocator>::columnSwap(size_t c1, size_t c2) {
+        const size_t row = getRow();
+        [[maybe_unused]] const size_t column = getColumn();
         assert(c1 < column && c2 < column);
         const size_t offset1 = c1 * row;
         const size_t offset2 = c2 * row;
         for (size_t i = 0; i < row; ++i)
-            matrix[offset1 + i].swap(matrix[offset2 + i]);
+            (*this)[offset1 + i].swap((*this)[offset2 + i]);
     }
     //////////////////////////////////////////////Row-Element//////////////////////////////////////////////
-    template<class Derived>
-    void DenseMatrixStorage<Derived, MatrixOption::Row | MatrixOption::Element>::rowSwap(size_t r1, size_t r2) {
-        Derived& matrix = getDerived();
-        [[maybe_unused]] const size_t row = matrix.getRow();
-        const size_t column = matrix.getColumn();
+    template<class T, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn, class Allocator>
+    template<class... Args>
+    void DenseMatrixStorage<T, MatrixOption::Row | MatrixOption::Element, Row, Column, MaxRow, MaxColumn, Allocator>::
+            resize(size_t row, size_t column, Args&&... args) {
+        Base::resize(row * column, std::forward<Args>(args)...);
+        Dim::resize(row, column);
+    }
+
+    template<class T, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn, class Allocator>
+    void DenseMatrixStorage<T, MatrixOption::Row | MatrixOption::Element, Row, Column, MaxRow, MaxColumn, Allocator>::rowSwap(size_t r1, size_t r2) {
+        [[maybe_unused]] const size_t row = getRow();
+        const size_t column = getColumn();
         assert(r1 < row && r2 < row);
         const size_t offset1 = r1 * column;
         const size_t offset2 = r2 * column;
         for (size_t i = 0; i < column; ++i)
-            matrix[offset1 + i].swap(matrix[offset2 + i]);
+            (*this)[offset1 + i].swap((*this)[offset2 + i]);
     }
 
-    template<class Derived>
-    void DenseMatrixStorage<Derived, MatrixOption::Row | MatrixOption::Element>::columnSwap(size_t c1, size_t c2) {
-        Derived& matrix = getDerived();
-        const size_t row = matrix.getRow();
-        const size_t column = matrix.getColumn();
+    template<class T, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn, class Allocator>
+    void DenseMatrixStorage<T, MatrixOption::Row | MatrixOption::Element, Row, Column, MaxRow, MaxColumn, Allocator>::columnSwap(size_t c1, size_t c2) {
+        const size_t row = getRow();
+        const size_t column = getColumn();
         assert(c1 < column && c2 < column);
         for (size_t i = 0, temp = 0; i < column; ++i, temp += row)
-            swap(matrix[temp + c1], matrix[temp + c2]);
+            swap((*this)[temp + c1], (*this)[temp + c2]);
     }
     //////////////////////////////////////////////Column-Vector//////////////////////////////////////////////
-    template<class Derived>
-    void DenseMatrixStorage<Derived, MatrixOption::Column | MatrixOption::Vector>::resize(size_t row, size_t column) {
+    template<class T, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn, class Allocator>
+    template<class... Args>
+    void DenseMatrixStorage<T, MatrixOption::Column | MatrixOption::Vector, Row, Column, MaxRow, MaxColumn, Allocator>::resize(
+            size_t row, size_t column, Args&&... args) {
         array.resize(column);
         for (auto& vector : array)
-            vector.resize(row);
+            vector.resize(row, std::forward<Args>(args)...);
+        Dim::resize(row, column);
     }
 
-    template<class Derived>
-    void DenseMatrixStorage<Derived, MatrixOption::Column | MatrixOption::Vector>::rowSwap(size_t r1, size_t r2) {
-        [[maybe_unused]] const size_t row = Base::getDerived().getRow();
-        assert(r1 < row && r2 < row);
+    template<class T, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn, class Allocator>
+    void DenseMatrixStorage<T, MatrixOption::Column | MatrixOption::Vector, Row, Column, MaxRow, MaxColumn, Allocator>::rowSwap(size_t r1, size_t r2) {
+        assert(r1 < getRow() && r2 < getRow());
         for (auto& columnVector : array)
             columnVector[r1].swap(columnVector[r2]);
     }
 
-    template<class Derived>
-    void DenseMatrixStorage<Derived, MatrixOption::Column | MatrixOption::Vector>::columnSwap(size_t c1, size_t c2) {
-        [[maybe_unused]] const size_t column = Base::getDerived().getColumn();
-        assert(c1 < column && c2 < column);
+    template<class T, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn, class Allocator>
+    void DenseMatrixStorage<T, MatrixOption::Column | MatrixOption::Vector, Row, Column, MaxRow, MaxColumn, Allocator>::columnSwap(size_t c1, size_t c2) {
+        assert(c1 < getColumn() && c2 < getColumn());
         array[c1].swap(array[c2]);
     }
     //////////////////////////////////////////////Row-Vector//////////////////////////////////////////////
-    template<class Derived>
-    void DenseMatrixStorage<Derived, MatrixOption::Row | MatrixOption::Vector>::resize(size_t row, size_t column) {
+    template<class T, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn, class Allocator>
+    template<class... Args>
+    void DenseMatrixStorage<T, MatrixOption::Row | MatrixOption::Vector, Row, Column, MaxRow, MaxColumn, Allocator>::resize(
+            size_t row, size_t column, Args&&... args) {
         array.resize(row);
         for (auto& vector : array)
-            vector.resize(column);
+            vector.resize(column, std::forward<Args>(args)...);
+        Dim::resize(row, column);
     }
 
-    template<class Derived>
-    void DenseMatrixStorage<Derived, MatrixOption::Row | MatrixOption::Vector>::rowSwap(size_t r1, size_t r2) {
-        [[maybe_unused]] const size_t row = Base::getDerived().getRow();
-        assert(r1 < row && r2 < row);
+    template<class T, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn, class Allocator>
+    void DenseMatrixStorage<T, MatrixOption::Row | MatrixOption::Vector, Row, Column, MaxRow, MaxColumn, Allocator>::rowSwap(size_t r1, size_t r2) {
+        assert(r1 < getRow() && r2 < getRow());
         array[r1].swap(array[r2]);
     }
 
-    template<class Derived>
-    void DenseMatrixStorage<Derived, MatrixOption::Row | MatrixOption::Vector>::columnSwap(size_t c1, size_t c2) {
-        [[maybe_unused]] const size_t column = Base::getDerived().getColumn();
-        assert(c1 < column && c2 < column);
+    template<class T, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn, class Allocator>
+    void DenseMatrixStorage<T, MatrixOption::Row | MatrixOption::Vector, Row, Column, MaxRow, MaxColumn, Allocator>::columnSwap(size_t c1, size_t c2) {
+        assert(c1 < getColumn() && c2 < getColumn());
         for (auto& rowVector : array)
             rowVector[c1].swap(rowVector[c2]);
     }

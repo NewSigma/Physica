@@ -19,7 +19,6 @@
 #pragma once
 
 #include <memory>
-#include "DenseMatrixImpl/DenseMatrixDim.h"
 #include "DenseMatrixImpl/DenseMatrixStorage.h"
 #include "InverseMatrix.h"
 #include "MatrixDecomposition/LUDecomposition.h"
@@ -36,19 +35,17 @@ namespace Physica::Core {
      * Option is combinations of \enum MatrixOption
      */
     template<class T,
-            int Option = MatrixOption::Column | MatrixOption::Vector,
-            size_t Row = Dynamic,
-            size_t Column = Dynamic,
-            size_t MaxRow = Row,
-            size_t MaxColumn = Column,
-            class Allocator = Utils::HostAllocator<T>>
+             int Option = MatrixOption::Column | MatrixOption::Vector,
+             size_t Row = Dynamic,
+             size_t Column = Dynamic,
+             size_t MaxRow = Row,
+             size_t MaxColumn = Column,
+             class Allocator = Utils::HostAllocator<T>>
     class DenseMatrix : public ContinuousMatrix<DenseMatrix<T, Option, Row, Column, MaxRow, MaxColumn, Allocator>>
-                      , public DenseMatrixStorage<DenseMatrix<T, Option, Row, Column, MaxRow, MaxColumn, Allocator>, Option>
-                      , public DenseMatrixDim<DenseMatrix<T, Option, Row, Column, MaxRow, MaxColumn, Allocator>, Row, Column, MaxRow, MaxColumn> {
+                      , public DenseMatrixStorage<T, Option, Row, Column, MaxRow, MaxColumn, Allocator> {
         using This = DenseMatrix<T, Option, Row, Column, MaxRow, MaxColumn, Allocator>;
         using Base = ContinuousMatrix<This>;
-        using Storage = DenseMatrixStorage<This, Option>;
-        using Dim = DenseMatrixDim<This, Row, Column, MaxRow, MaxColumn>;
+        using Storage = DenseMatrixStorage<T, Option, Row, Column, MaxRow, MaxColumn, Allocator>;
         using InitializerType = typename Storage::InitializerType;
         using Base::isReverseDiff;
     public:
@@ -69,8 +66,8 @@ namespace Physica::Core {
         DenseMatrix(const RValueVector<VectorType>& mat);
         template<class MatrixIn>
         DenseMatrix(LUDecomposition<MatrixIn> lu);
-        DenseMatrix(const This& m);
-        DenseMatrix(This&& m) noexcept;
+        DenseMatrix(const This&) = default;
+        DenseMatrix(This&&) noexcept = default;
         /* Operators */
         This& operator=(This obj) noexcept { swap(obj); return *this; }
         using Base::operator=;
@@ -79,19 +76,19 @@ namespace Physica::Core {
         size_t completePivoting(size_t column);
         size_t partialPivoting(size_t column);
 
-        inline void resize(size_t row, size_t column);
+        using Storage::resize;
         [[nodiscard]] DenseMatrix copy() const;
         [[nodiscard]] inline device_obj<This> toDevice() const;
         void toDevice(device_obj<This>& obj) const;
-        void swap(DenseMatrix& __restrict m) noexcept;
+        using Storage::swap;
 
         using Base::random_any;
         using Base::random_normal;
         using Base::random_uniform;
         /* Getters */
-        using Dim::getColumn;
-        using Dim::getRow;
         using Storage::data_ptr;
+        using Storage::getColumn;
+        using Storage::getRow;
         /* Static members */
         [[nodiscard]] static DenseMatrix Zeros(size_t rank) { return DenseMatrix(rank, rank, T(0)); }
         [[nodiscard]] static DenseMatrix Zeros(size_t row, size_t column) { return DenseMatrix(row, column, T(0)); }
@@ -107,7 +104,7 @@ namespace Physica::Core {
         template<class VectorType>
         [[nodiscard]] static std::pair<DenseMatrix, DenseMatrix> meshgrid(const LValueVector<VectorType>& vecInCols, const LValueVector<VectorType>& vecInRows);
     private:
-        DenseMatrix(Storage storage, size_t row, size_t column) : Storage(std::move(storage)), Dim(row, column) {}
+        DenseMatrix(Storage storage) : Storage(std::move(storage)) {}
         friend class device_obj<This>;
     };
 

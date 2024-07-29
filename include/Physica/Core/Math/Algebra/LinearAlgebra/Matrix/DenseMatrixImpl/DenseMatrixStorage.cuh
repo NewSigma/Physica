@@ -18,345 +18,153 @@
  */
 #pragma once
 
-#include "DenseMatrixStorage.h"
 #include <Physica/Core/Math/Algebra/LinearAlgebra/Vector/Vector.cuh>
+#include "DenseMatrixStorage.h"
 
 namespace Physica::Core {
-    template<class Derived>
-    class device_obj<DenseMatrixStorage<Derived, MatrixOption::Column | MatrixOption::Element>>
-            : public Utils::device_obj<Utils::Array<typename Traits<Derived>::ScalarType,
-                                       Traits<Derived>::SizeAtCompile,
-                                       Traits<Derived>::MaxSizeAtCompile>>
-            , public Utils::CRTPBase<device_obj<Derived>, 1> {
-        constexpr static size_t SizeAtCompile = Traits<Derived>::SizeAtCompile;
-        using T = typename Traits<Derived>::ScalarType;
-        using Base = Utils::device_obj<Utils::Array<T, SizeAtCompile, Traits<Derived>::MaxSizeAtCompile>>;
-        using host_obj = DenseMatrixStorage<Derived, MatrixOption::Column | MatrixOption::Element>;
-        using Utils::CRTPBase<device_obj<Derived>, 1>::getDerived;
+    template<class T, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn, class Allocator>
+    class device_obj<DenseMatrixStorage<T, MatrixOption::Column | MatrixOption::Element, Row, Column, MaxRow, MaxColumn, Allocator>>
+            : public Utils::device_obj<Utils::Array<T, Row * Column, MaxRow * MaxColumn>>
+            , public DenseMatrixDim<device_obj<DenseMatrixStorage<T, MatrixOption::Column | MatrixOption::Element, Row, Column, MaxRow, MaxColumn, Allocator>>, Row, Column, MaxRow, MaxColumn> {
+        using host_obj = DenseMatrixStorage<T, MatrixOption::Column | MatrixOption::Element, Row, Column, MaxRow, MaxColumn, Allocator>;
+        using This = device_obj<host_obj>;
+        using Base = Utils::device_obj<Utils::Array<T, Row * Column, MaxRow * MaxColumn>>;
+        using Dim = DenseMatrixDim<This, Row, Column, MaxRow, MaxColumn>;
     public:
         device_obj() = default;
         __host__ __device__ device_obj(size_t row, size_t column);
         __host__ __device__ device_obj(size_t row, size_t column, T value);
-        device_obj(const host_obj& storage) : Base(storage) {}
-        device_obj(const device_obj&) = default;
-        device_obj(device_obj&& obj) noexcept = default;
+        device_obj(const host_obj& storage);
+        device_obj(const This&) = default;
+        device_obj(This&& obj) noexcept = default;
         ~device_obj() = default;
         /* Operators */
-        device_obj& operator=(device_obj other) noexcept { swap(other); return *this; }
+        This& operator=(This obj) noexcept { swap(obj); return *this; }
         [[nodiscard]] __device__ T& operator()(size_t r, size_t c);
         [[nodiscard]] __device__ const T& operator()(size_t r, size_t c) const;
         /* Operations */
-        [[nodiscard]] host_obj toHost() const { return host_obj(Base::toHost()); }
+        [[nodiscard]] host_obj toHost() const { return host_obj(Base::toHost(), {getRow(), getColumn()}); }
         template<class... Args>
-        __host__ __device__ void resize(size_t row, size_t column, Args&&... args) { Base::resize(row * column, std::forward<Args>(args)...); }
-        using Base::swap;
+        __host__ __device__ void resize(size_t row, size_t column, Args&&... args);
+        void swap(This& __restrict obj) noexcept;
         /* Getters */
+        using Dim::getColumn;
+        using Dim::getRow;
         [[nodiscard]] __host__ __device__ size_t getSize() const noexcept { return Base::getLength(); }
         [[nodiscard]] __host__ __device__ T* data_ptr(size_t row, size_t column) { return Base::data() + toIndex(row, column); }
         [[nodiscard]] __host__ __device__ const T* data_ptr(size_t row, size_t column) const { return Base::data() + toIndex(row, column); }
     private:
-        __host__ __device__ size_t toIndex(size_t r, size_t c) const { return getDerived().getRow() * c + r; }
+        __host__ __device__ size_t toIndex(size_t r, size_t c) const { return getRow() * c + r; }
 
         using Base::getLength;
     };
 
-    template<class Derived>
-    __host__ __device__ device_obj<DenseMatrixStorage<Derived, MatrixOption::Column | MatrixOption::Element>>::device_obj(
-            size_t row, size_t column) {
-    #ifdef __CUDA_ARCH__
-        static_assert(SizeAtCompile != Dynamic, "[Error]: Do not allocate dynamic matrix in device code");
-    #endif
-        resize(row, column);
-    }
-
-    template<class Derived>
-    __host__ __device__ device_obj<DenseMatrixStorage<Derived, MatrixOption::Column | MatrixOption::Element>>::device_obj(
-            size_t row, size_t column, T value) {
-    #ifdef __CUDA_ARCH__
-        static_assert(SizeAtCompile != Dynamic, "[Error]: Do not allocate dynamic matrix in device code");
-    #endif
-        resize(row, column, std::move(value));
-    }
-
-    template<class Derived>
-    __device__ typename device_obj<DenseMatrixStorage<Derived, MatrixOption::Column | MatrixOption::Element>>::T&
-    device_obj<DenseMatrixStorage<Derived, MatrixOption::Column | MatrixOption::Element>>::operator()(size_t r, size_t c) {
-        assert(r < getDerived().getRow() && c < getDerived().getColumn());
-        return Base::operator[](toIndex(r, c));
-    }
-
-    template<class Derived>
-    __device__ const typename device_obj<DenseMatrixStorage<Derived, MatrixOption::Column | MatrixOption::Element>>::T&
-    device_obj<DenseMatrixStorage<Derived, MatrixOption::Column | MatrixOption::Element>>::operator()(size_t r, size_t c) const {
-        assert(r < getDerived().getRow() && c < getDerived().getColumn());
-        return Base::operator[](toIndex(r, c));
-    }
-
-    template<class Derived>
-    inline device_obj<DenseMatrixStorage<Derived, MatrixOption::Column | MatrixOption::Element>>
-    DenseMatrixStorage<Derived, MatrixOption::Column | MatrixOption::Element>::toDevice() const {
-        return device_obj<This>(*this);
-    }
-
-    template<class Derived>
-    inline void DenseMatrixStorage<Derived, MatrixOption::Column | MatrixOption::Element>::toDevice(device_obj<This>& obj) const {
-        Base::toDevice(obj);
-    }
-    /////////////////////////////////////////////////////////////////////////////////
-    template<class Derived>
-    class device_obj<DenseMatrixStorage<Derived, MatrixOption::Row | MatrixOption::Element>>
-            : public Utils::device_obj<Utils::Array<typename Traits<Derived>::ScalarType,
-                                       Traits<Derived>::SizeAtCompile,
-                                       Traits<Derived>::MaxSizeAtCompile>>
-            , public Utils::CRTPBase<device_obj<Derived>, 1> {
-        constexpr static size_t SizeAtCompile = Traits<Derived>::SizeAtCompile;
-        using T = typename Traits<Derived>::ScalarType;
-        using Base = Utils::device_obj<Utils::Array<T, SizeAtCompile, Traits<Derived>::MaxSizeAtCompile>>;
-        using host_obj = DenseMatrixStorage<Derived, MatrixOption::Row | MatrixOption::Element>;
-        using Utils::CRTPBase<device_obj<Derived>, 1>::getDerived;
+    template<class T, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn, class Allocator>
+    class device_obj<DenseMatrixStorage<T, MatrixOption::Row | MatrixOption::Element, Row, Column, MaxRow, MaxColumn, Allocator>>
+            : public Utils::device_obj<Utils::Array<T, Row * Column, MaxRow * MaxColumn>>
+            , public DenseMatrixDim<device_obj<DenseMatrixStorage<T, MatrixOption::Row | MatrixOption::Element, Row, Column, MaxRow, MaxColumn, Allocator>>, Row, Column, MaxRow, MaxColumn> {
+        using host_obj = DenseMatrixStorage<T, MatrixOption::Row | MatrixOption::Element, Row, Column, MaxRow, MaxColumn, Allocator>;
+        using This = device_obj<host_obj>;
+        using Base = Utils::device_obj<Utils::Array<T, Row * Column, MaxRow * MaxColumn>>;
+        using Dim = DenseMatrixDim<This, Row, Column, MaxRow, MaxColumn>;
     public:
         device_obj() = default;
         __host__ __device__ device_obj(size_t row, size_t column);
         __host__ __device__ device_obj(size_t row, size_t column, T value);
-        device_obj(const host_obj& storage) : Base(storage) {}
-        device_obj(const device_obj&) = default;
-        device_obj(device_obj&& obj) noexcept = default;
+        device_obj(const host_obj& storage);
+        device_obj(const This&) = default;
+        device_obj(This&& obj) noexcept = default;
         ~device_obj() = default;
         /* Operators */
-        device_obj& operator=(device_obj other) noexcept { swap(other); return *this; }
+        This& operator=(This obj) noexcept { swap(obj); return *this; }
         [[nodiscard]] __device__ T& operator()(size_t r, size_t c);
         [[nodiscard]] __device__ const T& operator()(size_t r, size_t c) const;
         /* Operations */
-        [[nodiscard]] host_obj toHost() const { return host_obj(Base::toHost()); }
+        [[nodiscard]] host_obj toHost() const { return host_obj(Base::toHost(), {getRow(), getColumn()}); }
         template<class... Args>
-        __host__ __device__ void resize(size_t row, size_t column, Args&&... args) { Base::resize(row * column, std::forward<Args>(args)...); }
-        using Base::swap;
+        __host__ __device__ void resize(size_t row, size_t column, Args&&... args);
+        void swap(This& __restrict obj) noexcept;
         /* Getters */
+        using Dim::getColumn;
+        using Dim::getRow;
         [[nodiscard]] __host__ __device__ size_t getSize() const noexcept { return Base::getLength(); }
         [[nodiscard]] __host__ __device__ T* data_ptr(size_t row, size_t column) { return Base::data() + toIndex(row, column); }
         [[nodiscard]] __host__ __device__ const T* data_ptr(size_t row, size_t column) const { return Base::data() + toIndex(row, column); }
     private:
-        __host__ __device__ size_t toIndex(size_t r, size_t c) const { return getDerived().getColumn() * r + c; }
+        __host__ __device__ size_t toIndex(size_t r, size_t c) const { return getColumn() * r + c; }
 
         using Base::getLength;
     };
 
-    template<class Derived>
-    __host__ __device__ device_obj<DenseMatrixStorage<Derived, MatrixOption::Row | MatrixOption::Element>>::device_obj(
-            size_t row, size_t column) : Base(row * column) {
-    #ifdef __CUDA_ARCH__
-        static_assert(SizeAtCompile != Dynamic, "[Error]: Do not allocate dynamic matrix in device code");
-    #endif
-    }
-
-    template<class Derived>
-    __host__ __device__ device_obj<DenseMatrixStorage<Derived, MatrixOption::Row | MatrixOption::Element>>::device_obj(
-            size_t row, size_t column, T value) : Base(row * column, std::move(value)) {
-    #ifdef __CUDA_ARCH__
-        static_assert(SizeAtCompile != Dynamic, "[Error]: Do not allocate dynamic matrix in device code");
-    #endif
-    }
-
-    template<class Derived>
-    __device__ typename device_obj<DenseMatrixStorage<Derived, MatrixOption::Row | MatrixOption::Element>>::T&
-    device_obj<DenseMatrixStorage<Derived, MatrixOption::Row | MatrixOption::Element>>::operator()(size_t r, size_t c) {
-        assert(r < getDerived().getRow() && c < getDerived().getColumn());
-        return Base::operator[](toIndex(r, c));
-    }
-
-    template<class Derived>
-    __device__ const typename device_obj<DenseMatrixStorage<Derived, MatrixOption::Row | MatrixOption::Element>>::T&
-    device_obj<DenseMatrixStorage<Derived, MatrixOption::Row | MatrixOption::Element>>::operator()(size_t r, size_t c) const {
-        assert(r < getDerived().getRow() && c < getDerived().getColumn());
-        return Base::operator[](toIndex(r, c));
-    }
-
-    template<class Derived>
-    inline device_obj<DenseMatrixStorage<Derived, MatrixOption::Row | MatrixOption::Element>>
-    DenseMatrixStorage<Derived, MatrixOption::Row | MatrixOption::Element>::toDevice() const {
-        return device_obj<This>(*this);
-    }
-
-    template<class Derived>
-    inline void DenseMatrixStorage<Derived, MatrixOption::Row | MatrixOption::Element>::toDevice(device_obj<This>& obj) const {
-        Base::toDevice(obj);
-    }
-    /////////////////////////////////////////////////////////////////////////////////
-    template<class Derived>
-    class device_obj<DenseMatrixStorage<Derived, MatrixOption::Column | MatrixOption::Vector>>
-            : public Utils::CRTPBase<device_obj<Derived>, 1> {
-        using Base = Utils::CRTPBase<device_obj<Derived>, 1>;
-        using T = typename Traits<Derived>::ScalarType;
-        using host_obj = DenseMatrixStorage<Derived, MatrixOption::Column | MatrixOption::Vector>;
+    template<class T, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn, class Allocator>
+    class device_obj<DenseMatrixStorage<T, MatrixOption::Column | MatrixOption::Vector, Row, Column, MaxRow, MaxColumn, Allocator>>
+            : public DenseMatrixDim<device_obj<DenseMatrixStorage<T, MatrixOption::Column | MatrixOption::Vector, Row, Column, MaxRow, MaxColumn, Allocator>>, Row, Column, MaxRow, MaxColumn> {
+        using host_obj = DenseMatrixStorage<T, MatrixOption::Column | MatrixOption::Vector, Row, Column, MaxRow, MaxColumn, Allocator>;
         using This = device_obj<host_obj>;
+        using Dim = DenseMatrixDim<This, Row, Column, MaxRow, MaxColumn>;
         using VectorType = typename host_obj::VectorType;
         using ArrayType = Physica::Utils::device_obj<typename host_obj::ArrayType>;
 
         ArrayType array;
-        size_t r;
+        size_t size;
     public:
-        device_obj() : r(0) {}
-        device_obj(size_t row, size_t column) : array(column, row), r(row) {}
-        device_obj(size_t row, size_t column, T value) : array(column, row, std::move(value)), r(row) {}
-        device_obj(const host_obj& storage) : array(storage.array), r(storage.getDerived().getRow()) {}
-        device_obj(const device_obj&) = default;
-        device_obj(device_obj&& obj) noexcept = default;
+        device_obj() = default;
+        device_obj(size_t row, size_t column);
+        device_obj(size_t row, size_t column, T value);
+        device_obj(const host_obj& storage);
+        device_obj(const This&) = default;
+        device_obj(This&& obj) noexcept = default;
         ~device_obj() = default;
         /* Operators */
-        device_obj& operator=(device_obj other) noexcept { swap(other); return *this; }
+        This& operator=(This obj) noexcept { swap(obj); return *this; }
         [[nodiscard]] __device__ T& operator()(size_t r, size_t c);
         [[nodiscard]] __device__ const T& operator()(size_t r, size_t c) const;
         /* Operations */
-        [[nodiscard]] host_obj toHost() const { return host_obj(array.toHost()); }
+        [[nodiscard]] host_obj toHost() const { return host_obj(array.toHost(), {getRow(), getColumn()}); }
         void resize(size_t row, size_t column);
-        inline void swap(device_obj& __restrict obj) noexcept;
+        inline void swap(This& __restrict obj) noexcept;
         /* Getters */
-        [[nodiscard]] __host__ __device__ size_t getSize() const noexcept { return r * array.getLength(); }
+        using Dim::getColumn;
+        using Dim::getRow;
+        [[nodiscard]] __host__ __device__ size_t getSize() const noexcept { return size; }
         [[nodiscard]] __host__ __device__ T* data_ptr(size_t row, size_t column);
         [[nodiscard]] __host__ __device__ const T* data_ptr(size_t row, size_t column) const;
     };
 
-    template<class Derived>
-    __device__ typename device_obj<DenseMatrixStorage<Derived, MatrixOption::Column | MatrixOption::Vector>>::T&
-    device_obj<DenseMatrixStorage<Derived, MatrixOption::Column | MatrixOption::Vector>>::operator()(size_t r, size_t c) {
-        assert(r < Base::getDerived().getRow() && c < Base::getDerived().getColumn());
-        return array[c][r];
-    }
-
-    template<class Derived>
-    __device__ const typename device_obj<DenseMatrixStorage<Derived, MatrixOption::Column | MatrixOption::Vector>>::T&
-    device_obj<DenseMatrixStorage<Derived, MatrixOption::Column | MatrixOption::Vector>>::operator()(size_t r, size_t c) const {
-        assert(r < Base::getDerived().getRow() && c < Base::getDerived().getColumn());
-        return array[c][r];
-    }
-
-    template<class Derived>
-    void device_obj<DenseMatrixStorage<Derived, MatrixOption::Column | MatrixOption::Vector>>::resize(size_t row, size_t column) {
-        array.resize(column);
-        auto host_array = array.toHost();
-        for (auto& vector : host_array)
-            vector.resize(row);
-        host_array.toDevice(array);
-        r = row;
-    }
-
-    template<class Derived>
-    inline void device_obj<DenseMatrixStorage<Derived, MatrixOption::Column | MatrixOption::Vector>>::swap(device_obj& __restrict obj) noexcept {
-        assert(this != &obj && "[Error]: Self swap is likely a bug");
-        array.swap(obj.array);
-        std::swap(r, obj.r);
-    }
-
-    template<class Derived>
-    __host__ __device__ typename device_obj<DenseMatrixStorage<Derived, MatrixOption::Column | MatrixOption::Vector>>::T*
-    device_obj<DenseMatrixStorage<Derived, MatrixOption::Column | MatrixOption::Vector>>::data_ptr(size_t row, size_t column) {
-        return const_cast<T*>(const_cast<const This&>(*this).data_ptr(row, column));
-    }
-
-    template<class Derived>
-    __host__ __device__ const typename device_obj<DenseMatrixStorage<Derived, MatrixOption::Column | MatrixOption::Vector>>::T*
-    device_obj<DenseMatrixStorage<Derived, MatrixOption::Column | MatrixOption::Vector>>::data_ptr(size_t row, size_t column) const {
-    #ifdef __CUDA_ARCH__
-        return array[column].data() + row;
-    #else
-        const auto host_array = array.toPlainHost();
-        const auto* p = host_array[column].getDerived().data() + row;
-        return p;
-    #endif
-    }
-
-    template<class Derived>
-    device_obj<DenseMatrixStorage<Derived, MatrixOption::Column | MatrixOption::Vector>>
-    DenseMatrixStorage<Derived, MatrixOption::Column | MatrixOption::Vector>::toDevice() const {
-        return device_obj<This>(*this);
-    }
-    /////////////////////////////////////////////////////////////////////////////////
-    template<class Derived>
-    class device_obj<DenseMatrixStorage<Derived, MatrixOption::Row | MatrixOption::Vector>>
-            : public Utils::CRTPBase<device_obj<Derived>, 1> {
-        using Base = Utils::CRTPBase<device_obj<Derived>, 1>;
-        using T = typename Traits<Derived>::ScalarType;
-        using host_obj = DenseMatrixStorage<Derived, MatrixOption::Row | MatrixOption::Vector>;
+    template<class T, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn, class Allocator>
+    class device_obj<DenseMatrixStorage<T, MatrixOption::Row | MatrixOption::Vector, Row, Column, MaxRow, MaxColumn, Allocator>>
+            : public DenseMatrixDim<device_obj<DenseMatrixStorage<T, MatrixOption::Row | MatrixOption::Vector, Row, Column, MaxRow, MaxColumn, Allocator>>, Row, Column, MaxRow, MaxColumn> {
+        using host_obj = DenseMatrixStorage<T, MatrixOption::Row | MatrixOption::Vector, Row, Column, MaxRow, MaxColumn, Allocator>;
         using This = device_obj<host_obj>;
+        using Dim = DenseMatrixDim<This, Row, Column, MaxRow, MaxColumn>;
         using VectorType = typename host_obj::VectorType;
         using ArrayType = Physica::Utils::device_obj<typename host_obj::ArrayType>;
 
         ArrayType array;
-        size_t c;
+        size_t size;
     public:
-        device_obj() : c(0) {}
-        device_obj(size_t row, size_t column) : array(row, column), c(column) {}
-        device_obj(size_t row, size_t column, T value) : array(row, column, std::move(value)), c(column) {}
-        device_obj(const host_obj& storage) : array(storage.array), c(storage.getDerived().getColumn()) {}
-        device_obj(const device_obj&) = default;
-        device_obj(device_obj&& obj) noexcept = default;
+        device_obj() = default;
+        device_obj(size_t row, size_t column);
+        device_obj(size_t row, size_t column, T value);
+        device_obj(const host_obj& storage);
+        device_obj(const This&) = default;
+        device_obj(This&& obj) noexcept = default;
         ~device_obj() = default;
         /* Operators */
-        device_obj& operator=(device_obj other) noexcept { swap(other); return *this; }
+        This& operator=(This obj) noexcept { swap(obj); return *this; }
         [[nodiscard]] __device__ T& operator()(size_t r, size_t c);
         [[nodiscard]] __device__ const T& operator()(size_t r, size_t c) const;
         /* Operations */
-        [[nodiscard]] host_obj toHost() const { return host_obj(array.toHost()); }
+        [[nodiscard]] host_obj toHost() const { return host_obj(array.toHost(), {getRow(), getColumn()}); }
         void resize(size_t row, size_t column);
-        inline void swap(device_obj& __restrict obj) noexcept;
+        inline void swap(This& __restrict obj) noexcept;
         /* Getters */
-        [[nodiscard]] __host__ __device__ size_t getSize() const noexcept { return c * array.getLength(); }
+        using Dim::getColumn;
+        using Dim::getRow;
+        [[nodiscard]] __host__ __device__ size_t getSize() const noexcept { return size; }
         [[nodiscard]] __host__ __device__ T* data_ptr(size_t row, size_t column);
         [[nodiscard]] __host__ __device__ const T* data_ptr(size_t row, size_t column) const;
     };
-
-    template<class Derived>
-    __device__ typename device_obj<DenseMatrixStorage<Derived, MatrixOption::Row | MatrixOption::Vector>>::T&
-    device_obj<DenseMatrixStorage<Derived, MatrixOption::Row | MatrixOption::Vector>>::operator()(size_t r, size_t c) {
-        assert(r < Base::getDerived().getRow() && c < Base::getDerived().getColumn());
-        return array[r][c];
-    }
-
-    template<class Derived>
-    __device__ const typename device_obj<DenseMatrixStorage<Derived, MatrixOption::Row | MatrixOption::Vector>>::T&
-    device_obj<DenseMatrixStorage<Derived, MatrixOption::Row | MatrixOption::Vector>>::operator()(size_t r, size_t c) const {
-        assert(r < Base::getDerived().getRow() && c < Base::getDerived().getColumn());
-        return array[r][c];
-    }
-
-    template<class Derived>
-    void device_obj<DenseMatrixStorage<Derived, MatrixOption::Row | MatrixOption::Vector>>::resize(size_t row, size_t column) {
-        array.resize(row);
-        auto host_array = array.toHost();
-        for (auto& vector : host_array)
-            vector.resize(column);
-        host_array.toDevice(array);
-        c = column;
-    }
-
-    template<class Derived>
-    inline void device_obj<DenseMatrixStorage<Derived, MatrixOption::Row | MatrixOption::Vector>>::swap(device_obj& __restrict obj) noexcept {
-        assert(this != &obj && "[Error]: Self swap is likely a bug");
-        array.swap(obj.array);
-        std::swap(c, obj.c);
-    }
-
-    template<class Derived>
-    __host__ __device__ typename device_obj<DenseMatrixStorage<Derived, MatrixOption::Row | MatrixOption::Vector>>::T*
-    device_obj<DenseMatrixStorage<Derived, MatrixOption::Row | MatrixOption::Vector>>::data_ptr(size_t row, size_t column) {
-        return const_cast<T*>(const_cast<const This&>(*this).data_ptr(row, column));
-    }
-
-    template<class Derived>
-    __host__ __device__ const typename device_obj<DenseMatrixStorage<Derived, MatrixOption::Row | MatrixOption::Vector>>::T*
-    device_obj<DenseMatrixStorage<Derived, MatrixOption::Row | MatrixOption::Vector>>::data_ptr(size_t row, size_t column) const {
-    #ifdef __CUDA_ARCH__
-        return array[row].data() + column;
-    #else
-        const auto host_array = array.toPlainHost();
-        const auto* p = host_array[row].getDerived().data() + column;
-        return p;
-    #endif
-    }
-
-    template<class Derived>
-    device_obj<DenseMatrixStorage<Derived, MatrixOption::Row | MatrixOption::Vector>>
-    DenseMatrixStorage<Derived, MatrixOption::Row | MatrixOption::Vector>::toDevice() const {
-        return device_obj<This>(*this);
-    }
 }
+
+#include "DenseMatrixStorageImpl.cuh"
