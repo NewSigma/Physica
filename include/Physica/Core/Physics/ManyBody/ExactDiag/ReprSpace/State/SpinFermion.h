@@ -27,6 +27,8 @@ namespace Physica::Core {
         using This = SpinFermion<Dim, NumSite>;
         using Base = State<This>;
         using SpinlessType = SpinlessFermion<Dim, NumSite>;
+    public:
+        using IntType = typename SpinlessType::IntType;
     private:
         SpinlessType spinUp;
         SpinlessType spinDown;
@@ -71,6 +73,8 @@ namespace Physica::Core {
         /* Static member */
         template<class RandomGenerator>
         [[nodiscard]] static This random_state(RandomGenerator& gen);
+        template<class RandomGenerator>
+        [[nodiscard]] static This random_state(size_t numSpinUp, size_t numSpinDown, RandomGenerator& gen);
     };
 
     template<unsigned int Dim, unsigned int NumSite>

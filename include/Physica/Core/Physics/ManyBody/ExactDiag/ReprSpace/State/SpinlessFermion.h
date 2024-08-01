@@ -66,6 +66,8 @@ namespace Physica::Core {
         /* Static members */
         template<class RandomGenerator>
         [[nodiscard]] static This random_state(RandomGenerator& gen);
+        template<class RandomGenerator>
+        [[nodiscard]] static This random_state(size_t numParticle, RandomGenerator& gen);
         [[nodiscard]] constexpr static IntType makeFullMask() noexcept { return (static_cast<IntType>(1) << NumSite) - 1; }
         [[nodiscard]] constexpr static IntType makeHighMask() noexcept { return (static_cast<IntType>(1) << (NumSite - 1)); }
     };

@@ -114,4 +114,10 @@ namespace Physica::Core {
     SpinFermion<Dim, NumSite> SpinFermion<Dim, NumSite>::random_state(RandomGenerator& gen) {
         return This(SpinlessType::random_state(gen), SpinlessType::random_state(gen));
     }
+
+    template<unsigned int Dim, unsigned int NumSite>
+    template<class RandomGenerator>
+    SpinFermion<Dim, NumSite> SpinFermion<Dim, NumSite>::random_state(size_t numSpinUp, size_t numSpinDown, RandomGenerator& gen) {
+        return This(SpinlessType::random_state(numSpinUp, gen), SpinlessType::random_state(numSpinDown, gen));
+    }
 }

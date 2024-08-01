@@ -68,6 +68,8 @@ namespace Physica::Core {
         [[nodiscard]] RealType getTraceMu() const noexcept { return traceMu; }
         [[nodiscard]] int getNumMinCostTerm() const noexcept { return numMinCostTerm; }
         [[nodiscard]] int getNumSplit() const noexcept { return numSplit; }
+        [[nodiscard]] const Base& asVector() const noexcept { return *this; }
+        [[nodiscard]] Base& asVector() noexcept { return *this; }
         /* Static members */
         template<class RandomGenerator>
         [[nodiscard]] static This random_normal(size_t len, RandomGenerator& gen, RealType norm = 0);

@@ -131,4 +131,24 @@ namespace Physica::Core {
         static_assert(flag, "[Error]: The random generator cannot provide enough random bits");
         return gen() & makeFullMask();
     }
+
+    template<unsigned int Dim, unsigned int NumSite>
+    template<class RandomGenerator>
+    SpinlessFermion<Dim, NumSite> SpinlessFermion<Dim, NumSite>::random_state(size_t numParticle, RandomGenerator& gen) {
+        constexpr bool flag = NumSite < sizeof(typename RandomGenerator::result_type) * CHAR_BIT;
+        static_assert(flag, "[Error]: The random generator cannot provide enough random bits");
+        assert(numParticle <= NumSite);
+        char bits[NumSite];
+        memset(bits, 0, NumSite * sizeof(char));
+        for (size_t i = 0; i < numParticle; ++i)
+            bits[i] = 1;
+        std::shuffle(bits, bits + NumSite, gen);
+
+        IntType result = bits[0];
+        for (unsigned int i = 1; i < NumSite; ++i) {
+            result <<= 1U;
+            result += bits[i];
+        }
+        return This(result);
+    }
 }
