@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2024 WeiBo He. All rights reserved.
+ * Copyright 2023-2024 Weibo He. All rights reserved.
  *
  * This file is part of PhysicaNotes.
  */

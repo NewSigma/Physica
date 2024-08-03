@@ -23,7 +23,7 @@
 *****************************************************************************/
 
 /*
- * Copyright 2023 WeiBo He.
+ * Copyright 2023 Weibo He.
  *
  * This file is part of Physica.
  *

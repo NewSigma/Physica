@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 WeiBo He.
+ * Copyright 2019 Weibo He.
  *
  * This file is part of Physica.
  *

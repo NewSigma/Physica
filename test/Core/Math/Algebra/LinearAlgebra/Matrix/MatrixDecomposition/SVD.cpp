@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 WeiBo He.
+ * Copyright 2022 Weibo He.
  *
  * This file is part of Physica.
  *

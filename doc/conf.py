@@ -6,8 +6,8 @@
 
 # Project information
 project = 'Physica'
-copyright = '2021-2024, WeiBo He'
-author = 'WeiBo He'
+copyright = '2021-2024, Weibo He'
+author = 'Weibo He'
 release = '0.0.1'
 
 # General
