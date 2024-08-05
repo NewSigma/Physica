@@ -19,22 +19,25 @@
 #pragma once
 
 #include <unordered_map>
-#include "Physica/Python/LLVM/Clang.h"
-#include "Physica/Python/LLVM/Executor.h"
-#include "clang/AST/DeclCXX.h"
+#include <Physica/Python/LLVM/Clang.h>
+#include <Physica/Python/LLVM/Executor.h>
+#include "CXXType.h"
 
 namespace Physica::Python {
     class PhysicaPython final {
         using This = PhysicaPython;
         using ExecutorAddr = llvm::orc::ExecutorAddr;
-        using ClassDeclMap = std::unordered_map<const char*, clang::CXXRecordDecl*>;
+        using StrTypeMap = std::unordered_map<std::string, CXXType>;
         using LLJIT = typename Executor::LLJIT;
 
         Clang clang;
         Executor exec;
-        ClassDeclMap classDeclMap;
+        StrTypeMap strTypeMap;
     public:
         ~PhysicaPython() = default;
+        /* Operations */
+        [[nodiscard]] const CXXType& toCXXType(const std::string& typeName) const { return strTypeMap.at(typeName); }
+        [[nodiscard]] const CXXType& toCXXType(py::handle handle) const { return toCXXType(py::str(handle)); }
         /* Getters */
         [[nodiscard]] const Clang& getClang() const noexcept { return clang; }
         [[nodiscard]] Clang& getClang() noexcept { return clang; }
@@ -42,7 +45,7 @@ namespace Physica::Python {
         [[nodiscard]] Executor& getExec() noexcept { return exec; }
         [[nodiscard]] const LLJIT& getJIT() const noexcept { return exec.getJIT(); }
         [[nodiscard]] LLJIT& getJIT() noexcept { return exec.getJIT(); }
-        [[nodiscard]] const ClassDeclMap& getClassDeclMap() const noexcept { return classDeclMap; }
+        [[nodiscard]] const StrTypeMap& getStrTypeMap() const noexcept { return strTypeMap; }
         /* Static members */
         [[nodiscard]] static This& getInstance() noexcept;
     private:

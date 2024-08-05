@@ -35,9 +35,11 @@ namespace Physica::Core {
     enum ScalarOption {
         Float = 0,
         Double = 1,
-        MultiPrecision = 2
-    };
+        MultiPrecision = 2,
 
+        Float32 = Float,
+        Float64 = Double
+    };
     /**
      * \class Scalar is a advanced float type that supports multiple precision
      */

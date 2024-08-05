@@ -20,9 +20,7 @@
 
 #include <type_traits>
 #include <utility>
-#include <pybind11/pybind11.h>
-
-namespace py = pybind11;
+#include "PhysicaPython.h"
 
 namespace clang {
     class CXXRecordDecl;
@@ -36,10 +34,6 @@ namespace Physica::Python {
         const CXXRecordDecl* pDecl;
         void* pObj;
     public:
-        CXXObj() = default;
-        template<class T>
-        explicit CXXObj(T&& obj);
-        CXXObj(const CXXRecordDecl* pDecl_, void* pObj_) noexcept;
         CXXObj(const CXXObj&) = delete;
         CXXObj(CXXObj&&) noexcept;
         ~CXXObj();
@@ -47,7 +41,7 @@ namespace Physica::Python {
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
         /* Operations */
-        [[nodiscard]] py::object call(py::handle type, const char* name);
+        [[nodiscard]] py::object call(const char* rtnTyName, const char* name, py::args args);
         inline void swap(CXXObj& __restrict obj) noexcept;
         /* Getters */
         template<class T>
@@ -57,13 +51,10 @@ namespace Physica::Python {
         /* Static members */
         [[nodiscard]] static This create(const CXXRecordDecl* pDecl);
     private:
+        CXXObj(const CXXRecordDecl* pDecl_, void* pObj_) noexcept;
+
         static void* allocateObj(const CXXRecordDecl* pDecl);
     };
-
-    template<class T>
-    CXXObj::CXXObj(T&& obj) : pDecl(nullptr) {
-        pObj = reinterpret_cast<void*>(new T(std::move(obj)));
-    }
 
     inline void CXXObj::swap(CXXObj& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");

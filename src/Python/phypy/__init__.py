@@ -42,3 +42,4 @@ del sys
 del os
 
 from . import Core
+from .Core import *

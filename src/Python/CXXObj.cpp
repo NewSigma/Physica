@@ -21,7 +21,8 @@
 #include <Physica/Python/CXXObj.h>
 #include <Physica/Python/PhysicaPython.h>
 #include <Physica/Python/Exception/LLVMException.h>
-#include <Physica/Utils/Allocator/HostAllocator.h>
+#include <Physica/Python/FFI/FuncInfo.h>
+#include <Physica/Utils/Container/Array/Array.h>
 
 namespace Physica::Python {
     CXXObj::CXXObj(const CXXRecordDecl* pDecl_, void* pObj_) noexcept : pDecl(pDecl_), pObj(pObj_) {}
@@ -45,10 +46,36 @@ namespace Physica::Python {
         pObj = nullptr;
     }
 
-    py::object CXXObj::call(py::handle type, const char* name) {
-        const std::string type_str = py::str(type);
-        printf("%s|%s", type_str.c_str(), name);
-        return py::none();
+    py::object CXXObj::call(const char* rtnTyName, const char* name, py::args args) {
+        clang::GlobalDecl funcDecl;
+        for (auto pFunc : pDecl->methods()) {
+            const bool found = pFunc->getName() == llvm::StringRef(name);
+            if (found)
+                funcDecl = clang::GlobalDecl(pFunc);
+        }
+        using ForeignFunc = void (*)();
+        auto& pp = PhysicaPython::getInstance();
+        Clang& clang = pp.getClang();
+        const std::string symbol = clang.getCodeGen().GetMangledName(std::move(funcDecl)).str();
+        const auto fn = llvmCheck(pp.getJIT().lookup(symbol)).toPtr<ForeignFunc>();
+
+        const auto rtnType = pp.toCXXType(rtnTyName);
+        auto pRtn = rtnType.allocate();
+
+        const size_t numArgs = args.size();
+        Utils::Array<const ffi_type*> argTypes(numArgs + 1);
+        Utils::Array<Core::PlainPtr> pArgs(numArgs + 1);
+        argTypes[0] = &ffi_type_pointer;
+        pArgs[0] = Core::PlainPtr(&pObj);
+        for (size_t i = 1; i <= numArgs; ++i){
+            const auto argType = pp.toCXXType(args[i]);
+            argTypes[i] = argType.toFFI();
+            pArgs[i] = argType.allocate();
+        }
+        FuncInfo info(numArgs + 1, rtnType.toFFI(), argTypes.data());
+        ffi_call(const_cast<ffi_cif*>(info.cif()), fn, pRtn.get(), reinterpret_cast<void**>(pArgs.data()));
+        pArgs[0] = nullptr;
+        return rtnType.toPython(std::move(pRtn));
     }
 
     CXXObj CXXObj::create(const CXXRecordDecl* pDecl) {

@@ -27,11 +27,13 @@ class ScalarOption(Enum):
 class Scalar(CXXObj):
     __pDecl = None
 
-    def __init__(self, Option: ScalarOption) -> None:
+    def __init__(self, Option: ScalarOption = ScalarOption.Double) -> None:
+        super().__init__(Scalar.__pDecl)
         self.__Option = Option
 
     def __float__(self):
-        return float(self.call(float, 'getTrivial'))
+        typename = str(self.Option).lower()
+        return float(self.call(typename, 'getTrivial'))
 
     def __repr__(self):
         return repr(float(self))
@@ -48,3 +50,4 @@ class Scalar(CXXObj):
 
 Scalar.include()
 
+__all__ = [ScalarOption.__name__, Scalar.__name__]

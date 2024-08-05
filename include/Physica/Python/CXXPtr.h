@@ -39,9 +39,10 @@ namespace Physica::Python {
         [[nodiscard]] std::string toString() const;
         void swap(CXXPtr& obj) noexcept { std::swap(p, obj.p); }
         /* Getters */
+        [[nodiscard]] void* get() const noexcept { return p; }
         template<class T>
-        [[nodiscard]] T* getDerived() noexcept { return reinterpret_cast<T*>(p); }
+        [[nodiscard]] T* cast() noexcept { return reinterpret_cast<T*>(p); }
         template<class T>
-        [[nodiscard]] const T* getDerived() const noexcept { return const_cast<This&>(*this).getDerived<T>(); }
+        [[nodiscard]] const T* cast() const noexcept { return const_cast<This&>(*this).cast<T>(); }
     };
 }

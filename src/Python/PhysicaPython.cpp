@@ -27,6 +27,10 @@
 namespace Physica::Python {
     PhysicaPython::PhysicaPython() {
         exec = Executor(clang.getCI().getTarget());
+
+        strTypeMap["NoneType"] = CXXType(ffi_type_void);
+        strTypeMap["float"] = CXXType(ffi_type_float);
+        strTypeMap["double"] = CXXType(ffi_type_double);
     }
 
     PhysicaPython& PhysicaPython::getInstance() noexcept {
@@ -37,7 +41,6 @@ namespace Physica::Python {
 
 PYBIND11_MODULE(PhysicaPython, m) {
     using namespace Physica::Python;
-    using NamedDecl = clang::NamedDecl;
 
     m.doc() = "PhysicaPython is a python interface to Physica";
     py::register_exception<LLVMException>(m, "LLVMException");
@@ -46,11 +49,13 @@ PYBIND11_MODULE(PhysicaPython, m) {
         .def("__repr__", &CXXPtr::toString);
 
     py::class_<CXXObj>(m, "CXXObj")
-        .def(py::init([](CXXPtr pClass) { return CXXObj::create(pClass.getDerived<clang::CXXRecordDecl>()); }))
+        .def(py::init([](CXXPtr p) {
+            using namespace clang;
+            assert(llvm::isa<CXXRecordDecl>(*p.cast<int>()) && "[Error]: This is not a plain class");
+            return CXXObj::create(p.cast<CXXRecordDecl>());
+        }))
         .def("__del__", [](CXXObj& obj) { obj.~CXXObj(); })
         .def("call", &CXXObj::call, py::return_value_policy::move);
-
-    py::class_<NamedDecl>(m, "NamedDecl");
 
     m.def("include", [](const char* includeName) -> CXXPtr {
         return (void*)PhysicaPython::getInstance().getClang().include(includeName);
