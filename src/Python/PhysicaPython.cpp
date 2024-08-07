@@ -49,12 +49,9 @@ PYBIND11_MODULE(PhysicaPython, m) {
         .def("__repr__", &CXXPtr::toString);
 
     py::class_<CXXObj>(m, "CXXObj")
-        .def(py::init([](CXXPtr p) {
-            using namespace clang;
-            assert(llvm::isa<CXXRecordDecl>(*p.cast<int>()) && "[Error]: This is not a plain class");
-            return CXXObj::create(p.cast<CXXRecordDecl>());
-        }))
+        .def(py::init<CXXPtr, py::args>())
         .def("__del__", [](CXXObj& obj) { obj.~CXXObj(); })
+        .def("construct", &CXXObj::construct)
         .def("call", &CXXObj::call, py::return_value_policy::move);
 
     m.def("include", [](const char* includeName) -> CXXPtr {

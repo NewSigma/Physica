@@ -27,13 +27,17 @@ namespace clang {
 }
 
 namespace Physica::Python {
+    class CXXPtr;
+
     class CXXObj {
         using This = CXXObj;
         using CXXRecordDecl = clang::CXXRecordDecl;
+        using ClassTemplateDecl = clang::ClassTemplateDecl;
     private:
         const CXXRecordDecl* pDecl;
         void* pObj;
     public:
+        CXXObj(CXXPtr p, py::args tparams);
         CXXObj(const CXXObj&) = delete;
         CXXObj(CXXObj&&) noexcept;
         ~CXXObj();
@@ -41,6 +45,7 @@ namespace Physica::Python {
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
         /* Operations */
+        void construct(py::args args);
         [[nodiscard]] py::object call(const char* rtnTyName, const char* name, py::args args);
         inline void swap(CXXObj& __restrict obj) noexcept;
         /* Getters */
@@ -48,12 +53,12 @@ namespace Physica::Python {
         [[nodiscard]] T& getDerived() noexcept { return *reinterpret_cast<T*>(pObj); }
         template<class T>
         [[nodiscard]] const T& getDerived() const noexcept { return const_cast<This&>(*this).getDerived<T>(); }
-        /* Static members */
-        [[nodiscard]] static This create(const CXXRecordDecl* pDecl);
     private:
         CXXObj(const CXXRecordDecl* pDecl_, void* pObj_) noexcept;
 
         static void* allocateObj(const CXXRecordDecl* pDecl);
+        [[nodiscard]] static const CXXRecordDecl* findSpecialization(const ClassTemplateDecl& templateDecl, py::args tparams);
+        [[nodiscard]] static bool matchParamT(const py::handle& pyarg, const clang::TemplateArgument& targ);
     };
 
     inline void CXXObj::swap(CXXObj& __restrict obj) noexcept {

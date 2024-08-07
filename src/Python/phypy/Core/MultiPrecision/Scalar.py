@@ -28,12 +28,13 @@ class Scalar(CXXObj):
     __pDecl = None
 
     def __init__(self, Option: ScalarOption = ScalarOption.Double) -> None:
-        super().__init__(Scalar.__pDecl)
+        super().__init__(Scalar.__pDecl, Option.value)
+        super().construct()
         self.__Option = Option
 
     def __float__(self):
-        typename = str(self.Option).lower()
-        return float(self.call(typename, 'getTrivial'))
+        rtnTyName = str(self.Option).lower()
+        return float(self.call(rtnTyName, 'getTrivial'))
 
     def __repr__(self):
         return repr(float(self))

@@ -77,6 +77,7 @@ namespace Physica::Python {
         void makeOptions();
         void parse();
         void handleDecl(clang::Decl& decl);
+        void decorateClass(clang::CXXRecordDecl& decl);
         void cleanLastUnit() noexcept;
     };
 }

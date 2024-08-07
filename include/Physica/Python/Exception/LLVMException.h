@@ -19,7 +19,7 @@
 #pragma once
 
 #include <exception>
-#include "llvm/Support/Error.h"
+#include <llvm/Support/Error.h>
 
 namespace Physica::Python {
     class LLVMException : public std::exception {

@@ -270,16 +270,25 @@ namespace Physica::Python {
             for (Decl* pDecl : ctx.decls())
                 handleDecl(*pDecl);
         }
-        else if (llvm::isa<CXXRecordDecl>(decl)) {
-            auto& classDecl = static_cast<CXXRecordDecl&>(decl);
-
-            for (auto ctor : classDecl.ctors())
-                ctor->addAttr(pUsedAttr);
-
-            auto* pDtor = classDecl.getDestructor();
-            if (pDtor)
-                pDtor->addAttr(pUsedAttr);
+        else if (llvm::isa<ClassTemplateDecl>(decl)) {
+            auto& templateDecl = static_cast<ClassTemplateDecl&>(decl);
+            for (auto* pSpec : templateDecl.specializations())
+                decorateClass(*pSpec);
         }
+        else if (llvm::isa<CXXRecordDecl>(decl))
+            decorateClass(static_cast<CXXRecordDecl&>(decl));
+    }
+
+    void Clang::decorateClass(clang::CXXRecordDecl& decl) {
+        for (auto ctor : decl.ctors())
+            ctor->addAttr(pUsedAttr);
+
+        auto* pDtor = decl.getDestructor();
+        if (pDtor)
+            pDtor->addAttr(pUsedAttr);
+
+        for (auto method : decl.methods())
+            method->addAttr(pUsedAttr);
     }
 
     void Clang::cleanLastUnit() noexcept {
