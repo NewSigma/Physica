@@ -68,16 +68,13 @@ namespace Physica::Python {
         assert(pDecl != nullptr);
         assert(pObj == nullptr && "[Error]: Double construct is not allowed");
         using DefaultCtorType = void (*)(void*);
-        auto& pp = PhysicaPython::getInstance();
-        Clang& clang = pp.getClang();
         for (auto ctor : pDecl->ctors()) {
             const bool isDefaultCtor = ctor->getNumCtorInitializers() == 0;
             if (isDefaultCtor) {
-                auto defaultCtor = clang::GlobalDecl(ctor, clang::CXXCtorType::Ctor_Base);
-                const std::string symbol = clang.getCodeGen().GetMangledName(std::move(defaultCtor)).str();
-                const auto pCtor = llvmCheck(pp.getJIT().lookup(symbol));
+                auto* pFunc = lookupFunc(clang::GlobalDecl(ctor, clang::CXXCtorType::Ctor_Base));
+                auto* pCtor = reinterpret_cast<DefaultCtorType>(pFunc);
                 pObj = allocateObj(pDecl);
-                pCtor.toPtr<DefaultCtorType>()(pObj);
+                pCtor(pObj);
                 break;
             }
         }
@@ -89,16 +86,20 @@ namespace Physica::Python {
     py::object CXXObj::call(const char* rtnTyName, const char* name, py::args args) {
         clang::GlobalDecl funcDecl;
         for (auto pFunc : pDecl->methods()) {
-            const bool found = pFunc->getName() == llvm::StringRef(name);
-            if (found)
-                funcDecl = clang::GlobalDecl(pFunc);
-        }
-        using ForeignFunc = void (*)();
-        auto& pp = PhysicaPython::getInstance();
-        Clang& clang = pp.getClang();
-        const std::string symbol = clang.getCodeGen().GetMangledName(std::move(funcDecl)).str();
-        const auto fn = llvmCheck(pp.getJIT().lookup(symbol)).toPtr<ForeignFunc>();
+            using namespace llvm;
+            using namespace clang;
+            if (pFunc->getDeclName().getNameKind() != DeclarationName::NameKind::Identifier)
+                continue;
 
+            const bool found = pFunc->getName().equals(name);
+            if (found) {
+                funcDecl = clang::GlobalDecl(pFunc);
+                break;
+            }
+        }
+        const auto fn = lookupFunc(std::move(funcDecl));
+
+        auto& pp = PhysicaPython::getInstance();
         const auto rtnType = pp.toCXXType(rtnTyName);
         auto pRtn = rtnType.allocate();
 
@@ -169,5 +170,21 @@ namespace Physica::Python {
             assert(false && "[Error]: Invalid tparam type");
             Utils::unreachable();
         }
+    }
+
+    typename CXXObj::ForeignFunc CXXObj::lookupFunc(clang::GlobalDecl decl) {
+        auto& pp = PhysicaPython::getInstance();
+        auto& codeGen = pp.getClang().getCodeGen();
+        const auto symbol = codeGen.GetMangledName(decl);
+        auto execAddr = pp.getJIT().lookup(symbol);
+        const bool isFound = !bool(execAddr.takeError());
+        if (isFound)
+            return execAddr.get().toPtr<ForeignFunc>();
+
+        auto& cgm = codeGen.CGM();
+        cgm.EmitGlobalDefinition(decl);
+        pp.compile(symbol.str().c_str());
+        execAddr = pp.getJIT().lookup(symbol);
+        return llvmCheck(std::move(execAddr)).toPtr<ForeignFunc>();
     }
 }

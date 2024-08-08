@@ -59,8 +59,6 @@ namespace Physica::Python {
         pp.addPPCallbacks(std::unique_ptr<PPCallbacks>(pHeaderManager));
         parser = std::make_unique<Parser>(pp, ci.getSema(), false);
         parser->Initialize();
-
-        pUsedAttr = clang::UsedAttr::Create(getASTContext());
     }
 
     const clang::NamedDecl* Clang::include(const char* includeName) {
@@ -92,24 +90,14 @@ namespace Physica::Python {
         return (*ite).second;
     }
 
-    Clang::PartialTranslationUnit* Clang::compile(const char* moduleName) {
+    Clang::PartialTranslationUnit& Clang::compile(const char* moduleName) {
         using namespace clang;
         Sema& sema = ci.getSema();
-        auto& ctx = sema.getASTContext();
-        const bool isEmpty = ctx.getTranslationUnitDecl()->decls_empty();
-        if (isEmpty)
-            return nullptr;
-
         llvm::CrashRecoveryContextCleanupRegistrar<Sema> recoverGuard(&sema);
-        Sema::GlobalEagerInstantiationScope GlobalInstantiations(sema, true);
-        Sema::LocalEagerInstantiationScope LocalInstantiations(sema);
 
+        auto& ctx = getASTContext();
         ctx.addTranslationUnitDecl();
         parse();
-
-        LocalInstantiations.perform();
-        GlobalInstantiations.perform();
-        ci.getASTConsumer().HandleTranslationUnit(ctx);
 
         PartialTranslationUnit unit{};
         unit.unitDecl = ctx.getTranslationUnitDecl();
@@ -121,7 +109,7 @@ namespace Physica::Python {
             codeGen.StartModule(DummyFile, unitModule->getContext());
         }
         partialUnitList.push_front(std::move(unit));
-        return &partialUnitList.front();
+        return partialUnitList.front();
     }
 
     const clang::CodeGenerator& Clang::getCodeGen() const noexcept {
@@ -230,9 +218,6 @@ namespace Physica::Python {
             while (!isDone) {
                 if (pDeclGroup) {
                     auto declGroup = pDeclGroup.get();
-                    for (auto* pDecl : declGroup)
-                        handleDecl(*pDecl);
-
                     if (!consumer.HandleTopLevelDecl(declGroup))
                         throw LLVMException("[Error]: Consumer rejected the decl");
                 }
@@ -249,46 +234,6 @@ namespace Physica::Python {
         Token check;
         getCI().getPreprocessor().Lex(check);
         assert(check.is(tok::annot_repl_input_end) && "[Error]: Lexer must be EOF when starting incremental parse");
-    }
-
-    void Clang::handleDecl(clang::Decl& decl) {
-        using namespace clang;
-        if (!llvm::isa<NamedDecl>(decl))
-            return;
-
-        auto& namedDecl = static_cast<NamedDecl&>(decl);
-        if (!namedDecl.getDeclName().isIdentifier())
-            return;
-
-        if (llvm::isa<NamespaceDecl>(decl)) {
-            const auto declName = namedDecl.getName();
-            const bool isNotPhysicaNamespace = declName.empty() || std::islower(declName.front());
-            if (isNotPhysicaNamespace)
-                return;
-
-            auto& ctx = static_cast<NamespaceDecl&>(decl);
-            for (Decl* pDecl : ctx.decls())
-                handleDecl(*pDecl);
-        }
-        else if (llvm::isa<ClassTemplateDecl>(decl)) {
-            auto& templateDecl = static_cast<ClassTemplateDecl&>(decl);
-            for (auto* pSpec : templateDecl.specializations())
-                decorateClass(*pSpec);
-        }
-        else if (llvm::isa<CXXRecordDecl>(decl))
-            decorateClass(static_cast<CXXRecordDecl&>(decl));
-    }
-
-    void Clang::decorateClass(clang::CXXRecordDecl& decl) {
-        for (auto ctor : decl.ctors())
-            ctor->addAttr(pUsedAttr);
-
-        auto* pDtor = decl.getDestructor();
-        if (pDtor)
-            pDtor->addAttr(pUsedAttr);
-
-        for (auto method : decl.methods())
-            method->addAttr(pUsedAttr);
     }
 
     void Clang::cleanLastUnit() noexcept {

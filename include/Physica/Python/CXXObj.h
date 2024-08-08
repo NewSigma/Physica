@@ -31,6 +31,7 @@ namespace Physica::Python {
 
     class CXXObj {
         using This = CXXObj;
+        using ForeignFunc = void (*)();
         using CXXRecordDecl = clang::CXXRecordDecl;
         using ClassTemplateDecl = clang::ClassTemplateDecl;
     private:
@@ -59,6 +60,7 @@ namespace Physica::Python {
         static void* allocateObj(const CXXRecordDecl* pDecl);
         [[nodiscard]] static const CXXRecordDecl* findSpecialization(const ClassTemplateDecl& templateDecl, py::args tparams);
         [[nodiscard]] static bool matchParamT(const py::handle& pyarg, const clang::TemplateArgument& targ);
+        [[nodiscard]] static ForeignFunc lookupFunc(clang::GlobalDecl decl);
     };
 
     inline void CXXObj::swap(CXXObj& __restrict obj) noexcept {

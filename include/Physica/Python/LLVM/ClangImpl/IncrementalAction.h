@@ -21,6 +21,20 @@
 #include "llvm/IR/LLVMContext.h"
 #include "clang/Frontend/FrontendAction.h"
 
+namespace llvm {
+    class GlobalValue;
+}
+
+namespace clang::CodeGen {
+    /**
+     * Hack clang CodeGen
+     */
+    class CodeGenModule {
+    public:
+        void EmitGlobalDefinition(GlobalDecl D, llvm::GlobalValue *GV = nullptr);
+    };
+}
+
 namespace Physica::Python {
     class IncrementalAction : public clang::WrapperFrontendAction {
         using This = IncrementalAction;

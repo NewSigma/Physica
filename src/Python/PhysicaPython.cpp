@@ -33,6 +33,12 @@ namespace Physica::Python {
         strTypeMap["double"] = CXXType(ffi_type_double);
     }
 
+    void PhysicaPython::compile(const char* moduleName) {
+        auto& unit = clang.compile(moduleName);
+        auto& jit = getJIT();
+        llvmCheck(jit.addIRModule(llvm::orc::ThreadSafeModule(std::move(unit.unitModule), LLVM::getInstance().getThreadSafeContext())));
+    }
+
     PhysicaPython& PhysicaPython::getInstance() noexcept {
         static PhysicaPython instance{};
         return instance;
@@ -59,12 +65,6 @@ PYBIND11_MODULE(PhysicaPython, m) {
     }, py::return_value_policy::move);
 
     m.def("compile", [](const char* moduleName) {
-        auto& pp = PhysicaPython::getInstance();
-        auto* unit = pp.getClang().compile(moduleName);
-        if (unit == nullptr)
-            return false;
-        auto& jit = pp.getJIT();
-        llvmCheck(jit.addIRModule(llvm::orc::ThreadSafeModule(std::move(unit->unitModule), LLVM::getInstance().getThreadSafeContext())));
-        return true;
+        PhysicaPython::getInstance().compile(moduleName);
     });
 }

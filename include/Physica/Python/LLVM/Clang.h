@@ -50,8 +50,6 @@ namespace Physica::Python {
         std::unique_ptr<Parser> parser;
         std::forward_list<PartialTranslationUnit> partialUnitList;
         HeaderManager* pHeaderManager;
-
-        clang::UsedAttr* pUsedAttr;
     public:
         Clang();
         Clang(const Clang&) = delete;
@@ -62,7 +60,7 @@ namespace Physica::Python {
         Clang& operator=(Clang&&) noexcept = delete;
         /* Operations */
         const clang::NamedDecl* include(const char* includeName);
-        PartialTranslationUnit* compile(const char* moduleName);
+        PartialTranslationUnit& compile(const char* moduleName);
         /* Getters */
         [[nodiscard]] CompilerInstance& getCI() noexcept { return ci; }
         [[nodiscard]] const clang::ASTContext& getASTContext() const noexcept { return ci.getASTContext(); }
@@ -76,8 +74,6 @@ namespace Physica::Python {
         void makeInvocation();
         void makeOptions();
         void parse();
-        void handleDecl(clang::Decl& decl);
-        void decorateClass(clang::CXXRecordDecl& decl);
         void cleanLastUnit() noexcept;
     };
 }

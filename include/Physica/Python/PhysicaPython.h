@@ -38,6 +38,8 @@ namespace Physica::Python {
         /* Operations */
         [[nodiscard]] const CXXType& toCXXType(const std::string& typeName) const { return strTypeMap.at(typeName); }
         [[nodiscard]] const CXXType& toCXXType(py::handle handle) const { return toCXXType(py::str(handle)); }
+
+        void compile(const char* moduleName);
         /* Getters */
         [[nodiscard]] const Clang& getClang() const noexcept { return clang; }
         [[nodiscard]] Clang& getClang() noexcept { return clang; }
