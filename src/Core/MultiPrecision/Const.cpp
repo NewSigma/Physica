@@ -27,10 +27,10 @@ namespace Physica::Core {
             , ln_10(std::log(10))
             , ln_2_10(std::log(2) / std::log(10))
             , plotPoints(static_cast<SignedMPUnit>(20)) {
-        expectedRelativeError = Scalar<MultiPrecision>(1, 1 - GlobalPrecision);
+        expectedRelativeError = ScalarType(1, 1 - GlobalPrecision);
         expectedRelativeError.setByte(0, 1);
 
-        stepSize = Scalar<MultiPrecision>(1, - GlobalPrecision / 2); //(- GlobalPrecision / 2) is selected by experience.
+        stepSize = ScalarType(1, - GlobalPrecision / 2); //(- GlobalPrecision / 2) is selected by experience.
         stepSize.setByte(0, 1);
 
         R_MAX = 2147483647;
@@ -51,26 +51,26 @@ namespace Physica::Core {
      */
     MathConst::MathConst() {
         //0.31 is the big approximation of ln(2) / ln(10)
-        PI = MultiScalar(calcPI(
+        PI = ScalarType(calcPI(
                 static_cast<int>(static_cast<double>(MPUnitWidth) * GlobalPrecision * 0.31) + 1));
-        E = MultiScalar(exp(BasicConst::getInstance()._1));
+        E = ScalarType(exp(BasicConst::getInstance()._1));
 
-        PI_2 = MultiScalar(PI >> 1);
-        Minus_PI_2 = MultiScalar(-PI_2);
+        PI_2 = ScalarType(PI >> 1);
+        Minus_PI_2 = ScalarType(-PI_2);
     }
     /*!
      * precision is the number of effective digits in decimal.
      * Reference:
-     * http://www.pi314.net/eng/salamin.php
-     * https://blog.csdn.net/liangbch/article/details/78724041
+     * [1] http://www.pi314.net/eng/salamin.php
+     * [2] https://blog.csdn.net/liangbch/article/details/78724041
      */
-    MultiScalar MathConst::calcPI(int precision) {
+    typename MathConst::ScalarType MathConst::calcPI(int precision) {
         const auto& basicConst = BasicConst::getInstance();
 
-        MultiScalar a(static_cast<SignedMPUnit>(1));
-        MultiScalar x(static_cast<SignedMPUnit>(1));
-        MultiScalar b(reciprocal(sqrt(basicConst._2)));
-        MultiScalar c(reciprocal(basicConst._4));
+        ScalarType a(static_cast<SignedMPUnit>(1));
+        ScalarType x(static_cast<SignedMPUnit>(1));
+        ScalarType b(reciprocal(sqrt(basicConst._2)));
+        ScalarType c(reciprocal(basicConst._4));
 
         int goal = 1;
         while(goal < precision) {

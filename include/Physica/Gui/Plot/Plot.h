@@ -29,8 +29,6 @@
 #include "PlotImpl/ChartView.h"
 #include "ContourSeries.h"
 
-using Physica::Core::MultiScalar;
-
 namespace Physica::Gui {
     class PHYSICA_API Plot : public ChartView {
         using Base = ChartView;

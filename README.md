@@ -16,11 +16,9 @@ Physica is also an open source platform that maintains scientific code written i
 
 ## Design philosophy <a id="philosophy"></a>
 
-1. Optimal performance and scalability: Balancing between performance, scalability and ease of use is a trade-off. Physica targets on performance and scalability, taking ease of use as a secondary concern if necessary.
+1. Complex, Strict, Precision
 
-2. Zero overhead abstraction: Users shall not pay for what they do not need. Physica is primarily composed of several sets of header files. Codes that are not required by users will not be compiled.
-
-3. Self explaination: Minimizing documentation and comments. Documentation and comments often lag behind code updates. The Physica API is designed to align with users' intuition.
+2. Optimal performance and scalability: Balancing between performance, scalability and ease of use is a trade-off. Physica targets on performance and scalability, taking ease of use as a secondary concern if necessary.
 
 ## Features <a id="feature"></a>
 
@@ -34,7 +32,9 @@ Physica is also an open source platform that maintains scientific code written i
 
 ## Usage
 
-Requirements:  
+We adopt CMake as our building system:
+
+[CMake](https://cmake.org/) 3.19 and above  
 
 A C++ compiler that support C++ 17, the following compilers are tested:
 
@@ -43,7 +43,6 @@ A C++ compiler that support C++ 17, the following compilers are tested:
 
 External libraries:
 
-[CMake](https://cmake.org/) 3.19 and above  
 [fftw](http://www.fftw.org)  3.3.10  
 [HDF5](https://www.hdfgroup.org/solutions/hdf5/) 1.14.1  
 [Qt](https://www.qt.io/)  6.2.1  (Optional, Plotting support)  
@@ -59,7 +58,7 @@ Compile Physica using the following command:
 ```
 mkdir -p /path/to/Physica/build
 cd /path/to/Physica/build
-cmake -DCMAKE_INSTALL_PREFIX=/path/to/install -DCMAKE_BUILD_TYPE=Release ../ # Note: Set CMake options as you need, see CMakeLists.txt for a full list of options
+cmake -DCMAKE_INSTALL_PREFIX=/path/to/install -DCMAKE_BUILD_TYPE=Release ../ # Note: Set CMake options as you need, refer to CMakeLists.txt for a full list of options
 make install -j<N>
 ```
 
@@ -72,7 +71,7 @@ ctest -j<N>
 
 Do not use Physica if any test were failed.  
 
-To use Physica, examples that under /path/to/install/Physica/examples are ready to use. Link Physica as a part of your project for production use.
+To use Physica, examples that under /path/to/install/Physica/examples are ready to use(Note: BUILD_EXAMPLES is OFF by default). Link Physica as a part of your project for production use.
 
 ## Source structure <a id="structure"></a>
 

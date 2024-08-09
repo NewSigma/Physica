@@ -319,10 +319,6 @@ namespace Physica::Core {
 
     template<ScalarOption Option>
     inline Scalar<Option> operator^(const Scalar<Option>& s1, const Scalar<Option>& s2);
-    /* typedefs for convenience */
-    [[maybe_unused]] typedef Scalar<Float> FloatScalar;
-    [[maybe_unused]] typedef Scalar<Double> DoubleScalar;
-    [[maybe_unused]] typedef Scalar<MultiPrecision> MultiScalar;
 }
 
 #include "Const.h"

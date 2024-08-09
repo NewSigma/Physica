@@ -40,6 +40,7 @@ namespace Physica::Core {
         /* Operators */
         __host__ __device__ inline PeriodIndex3D& operator=(PeriodIndex3D obj) noexcept;
         [[nodiscard]] __host__ __device__ operator Index3D() { return index; }
+        [[nodiscard]] __host__ __device__ Index1D operator[](int i) { return index[i]; }
         [[nodiscard]] __host__ __device__ inline PeriodIndex3D operator+(const PeriodIndex3D& other) const;
         /* Operations */
         [[nodiscard]] __host__ __device__ inline Index1D toIndex1D() const;
@@ -47,6 +48,8 @@ namespace Physica::Core {
         [[nodiscard]] __host__ __device__ inline Index3D toReducedK() const;
         __host__ __device__ inline void normalize();
         __host__ __device__ inline void swap(PeriodIndex3D& __restrict obj) noexcept;
+        /* Getters */
+        [[nodiscard]] Index3D getDim() const noexcept { return dim; }
     private:
         __host__ __device__ static Index3D toIndex3D(Index1D index, Index3D dim);
     };

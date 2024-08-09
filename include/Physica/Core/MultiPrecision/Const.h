@@ -32,24 +32,25 @@ namespace Physica::Core {
     constexpr double RelativeError = 1e-5;
 
     class PHYSICA_API BasicConst {
+        using ScalarType = Scalar<MultiPrecision>;
     public:
         double ln_2;
         double ln_10;
         double ln_2_10;
-        Scalar<MultiPrecision> plotPoints;
-        Scalar<MultiPrecision> expectedRelativeError;
-        Scalar<MultiPrecision> stepSize;
-        Scalar<MultiPrecision> R_MAX;
-        Scalar<MultiPrecision> _0;
-        Scalar<MultiPrecision> _1;
-        Scalar<MultiPrecision> Minus_1;
-        Scalar<MultiPrecision> _2;
-        Scalar<MultiPrecision> Minus_2;
-        Scalar<MultiPrecision> _3;
-        Scalar<MultiPrecision> Minus_3;
-        Scalar<MultiPrecision> _4;
-        Scalar<MultiPrecision> Minus_4;
-        Scalar<MultiPrecision> _10;
+        ScalarType plotPoints;
+        ScalarType expectedRelativeError;
+        ScalarType stepSize;
+        ScalarType R_MAX;
+        ScalarType _0;
+        ScalarType _1;
+        ScalarType Minus_1;
+        ScalarType _2;
+        ScalarType Minus_2;
+        ScalarType _3;
+        ScalarType Minus_3;
+        ScalarType _4;
+        ScalarType Minus_4;
+        ScalarType _10;
     public:
         BasicConst(const BasicConst&) = delete;
         BasicConst(BasicConst&&) noexcept = delete;
@@ -64,12 +65,13 @@ namespace Physica::Core {
     };
 
     class PHYSICA_API MathConst {
+        using ScalarType = Scalar<MultiPrecision>;
     public:
-        MultiScalar PI;
-        MultiScalar E;
+        ScalarType PI;
+        ScalarType E;
         //Here PI_2 stands by PI / 2.
-        MultiScalar PI_2;
-        MultiScalar Minus_PI_2;
+        ScalarType PI_2;
+        ScalarType Minus_PI_2;
     public:
         MathConst(const MathConst&) = delete;
         MathConst(MathConst&&) noexcept = delete;
@@ -82,7 +84,7 @@ namespace Physica::Core {
     private:
         MathConst();
 
-        static MultiScalar calcPI(int precision);
+        static ScalarType calcPI(int precision);
     };
 
     inline const BasicConst& BasicConst::getInstance() {
