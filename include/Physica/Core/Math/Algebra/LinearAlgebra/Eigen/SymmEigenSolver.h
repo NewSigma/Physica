@@ -38,7 +38,7 @@ namespace Physica::Core {
         static_assert(!isComplex, "[Error]: Complex matrix is not supported");
     public:
         using EigenvalueVector = Vector<RealType, Order>;
-        using EigenvectorMatrix = DenseMatrix<ComplexScalar<RealType>, MatrixOption::Column | MatrixOption::Vector, Order, Order>;
+        using EigenvectorMatrix = DenseMatrix<ScalarType, MatrixOption::Column | MatrixOption::Vector, Order, Order>;
         using WorkingMatrix = DenseMatrix<ScalarType, MatrixOption::Column | MatrixOption::Vector, Order, Order>; //Optimize: Use tridiagonal matrix is better
     private:
         EigenvalueVector eigenvalues;
@@ -174,28 +174,40 @@ namespace Physica::Core {
      */
     template<class ScalarType, size_t Order>
     void SymmEigenSolver<ScalarType, Order>::stepQR(WorkingMatrix& working, size_t lower, size_t sub_order) {
-        auto subBlock = working.block(lower, sub_order, lower, sub_order);
-        const RealType factor = (subBlock(sub_order - 2, sub_order - 2).getReal() - subBlock(sub_order - 1, sub_order - 1).getReal()) * 0.5;
-        const RealType factor2 = square(subBlock(sub_order - 1, sub_order - 2));
-        const RealType factor3 = sqrt(square(factor) + factor2);
-        const ScalarType shift = subBlock(sub_order - 1, sub_order - 1) - factor2 / (factor + (factor.isPositive() ? factor3 : -factor3)); //TODO: why we introduce a divide operation
-        
-        Vector<ScalarType, 2> buffer{subBlock(0, 0) - shift, subBlock(1, 0)};
-        auto givens_vec = givens(buffer, 0, 1);
-        applyGivens(givens_vec, subBlock, 0, 1);
-        givens_vec[1].toOpposite();
-        applyGivens(subBlock, givens_vec, 0, 1);
-        if (computeEigenvectors)
-            applyGivens(eigenvectors, givens_vec, lower, lower + 1);
-        for (size_t i = 1; i < sub_order - 1; ++i) {
-            buffer[0] = subBlock(i, i - 1);
-            buffer[1] = subBlock(i + 1, i - 1);
-            givens_vec = givens(buffer, 0, 1);
-            applyGivens(givens_vec, subBlock, i, i + 1);
+        Vector<ScalarType, 2> buffer{};
+        /* Init buffer */ {
+            const auto subBlock = working.block(lower, sub_order, lower, sub_order);
+            const RealType factor = (subBlock(sub_order - 2, sub_order - 2).getReal() - subBlock(sub_order - 1, sub_order - 1).getReal()) * 0.5;
+            const RealType factor2 = square(subBlock(sub_order - 1, sub_order - 2));
+            const RealType factor3 = sqrt(square(factor) + factor2);
+            const ScalarType shift = subBlock(sub_order - 1, sub_order - 1) - factor2 / (factor + (factor.isPositive() ? factor3 : -factor3)); //TODO: why we introduce a divide operation
+            buffer[0] = subBlock(0, 0) - shift;
+            buffer[1] = subBlock(1, 0);
+        }
+
+        for (size_t i = 0; i < sub_order - 1; ++i) {
+            const bool isShiftStep = i == 0;
+            const size_t blockStart = lower + i + isShiftStep - 1;
+            const size_t blockSize = ((i == sub_order - 2) ? 3 : 4) - isShiftStep;
+            auto subBlock = working.block(blockStart, blockSize, blockStart, blockSize);
+            if (!isShiftStep) {
+                buffer[0] = subBlock(1, 0);
+                buffer[1] = subBlock(2, 0);
+            }
+
+            const size_t index = !isShiftStep;
+            auto givens_vec = givens(buffer, 0, 1);
+            applyGivens(givens_vec, subBlock, index, index + 1);
             givens_vec[1].toOpposite();
-            applyGivens(subBlock, givens_vec, i, i + 1);
+            applyGivens(subBlock, givens_vec, index, index + 1);
+
+            const ScalarType mean = (subBlock(1, index + index) + subBlock(index + 1, index)) * 0.5;
+            subBlock(index, index + 1) = subBlock(index + 1, index) = mean;
+
             if (computeEigenvectors)
                 applyGivens(eigenvectors, givens_vec, lower + i, lower + i + 1);
+            if (!isShiftStep)
+                subBlock(2, 0) = subBlock(0, 2) = ScalarType(0);
         }
     }
 }

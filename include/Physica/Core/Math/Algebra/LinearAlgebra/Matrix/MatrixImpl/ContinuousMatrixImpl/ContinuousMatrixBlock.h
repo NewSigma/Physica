@@ -314,6 +314,8 @@ namespace Physica::Core {
             , rowCount(rowCount_)
             , fromCol(fromCol_)
             , colCount(colCount_) {
+        assert(fromRow < mat.getRow());
+        assert(fromCol < mat.getColumn());
         assert((fromRow + rowCount) <= mat.getRow());
         assert((fromCol + colCount) <= mat.getColumn());
     }
