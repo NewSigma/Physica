@@ -16,7 +16,7 @@ Physica is also an open source platform that maintains scientific code written i
 
 ## Design philosophy <a id="philosophy"></a>
 
-1. Complex, Strict, Precision
+1. Be complex, strict, and precise
 
 2. Optimal performance and scalability: Balancing between performance, scalability and ease of use is a trade-off. Physica targets on performance and scalability, taking ease of use as a secondary concern if necessary.
 
