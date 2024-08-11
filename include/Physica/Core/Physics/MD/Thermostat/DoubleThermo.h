@@ -18,8 +18,8 @@
  */
 #pragma once
 
-#include "Physica/Core/Math/Calculus/ODE/SRK2.h"
-#include "Physica/Core/Math/Random/RandomPool.h"
+#include <Physica/Core/Math/Calculus/ODE/SRK2.h>
+#include <Physica/Core/Math/Random/RandomPool.h>
 #include "Langevin.h"
 
 namespace Physica::Core {

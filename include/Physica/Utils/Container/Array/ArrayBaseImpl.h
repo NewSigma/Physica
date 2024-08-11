@@ -109,4 +109,10 @@ namespace Physica::Utils {
                 return false;
         return true;
     }
+
+    template<class Derived, class Allocator>
+    template<class... Args>
+    __host__ __device__ constexpr bool ArrayBase<Derived, Allocator>::isTrivialDefaultConstruct() {
+        return (sizeof...(Args) == 0) && std::is_trivially_default_constructible<ValueType>::value;
+    }
 }

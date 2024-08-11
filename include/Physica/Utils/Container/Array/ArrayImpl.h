@@ -30,8 +30,10 @@ namespace Physica::Utils {
     template<class... Args>
     __host__ __device__ Array<T, Length, Capacity, Allocator>::Array([[maybe_unused]] size_t length_, Args&&... args) {
         assert(length_ == Length);
-        for (size_t i = 0; i < Length; ++i)
-            *(arr + i) = T(std::forward<Args>(args)...);
+        if constexpr (!Base::template isTrivialDefaultConstruct<Args...>()) {
+            for (size_t i = 0; i < Length; ++i)
+                *(arr + i) = T(std::forward<Args>(args)...);
+        }
     }
 
     template<class T, size_t Length, size_t Capacity, class Allocator>
@@ -91,8 +93,10 @@ namespace Physica::Utils {
     template<class... Args>
     Array<T, Dynamic, Capacity, Allocator>::Array(size_t length_, Args&&... args) : Base(length_, Capacity) {
         assert(length_ < Capacity);
-        for (size_t i = 0; i < length_; ++i)
-            alloc.construct(arr + i, std::forward<Args>(args)...);
+        if constexpr (!Base::template isTrivialDefaultConstruct<Args...>()) {
+            for (size_t i = 0; i < length_; ++i)
+                alloc.construct(arr + i, std::forward<Args>(args)...);
+        }
     }
 
     template<class T, size_t Capacity, class Allocator>
@@ -190,8 +194,13 @@ namespace Physica::Utils {
             length = size;
         }
         else {
-            for (; length < size; ++length)
-                alloc.construct(arr + length, std::forward<Args>(args)...);
+            if constexpr (Base::template isTrivialDefaultConstruct<Args...>())
+                length = size;
+            else {
+                for (; length < size; ++length)
+                    alloc.construct(arr + length, std::forward<Args>(args)...);
+            }
+                
         }
     }
 
@@ -206,8 +215,10 @@ namespace Physica::Utils {
     template<class T, class Allocator>
     template<class... Args>
     Array<T, Dynamic, Dynamic, Allocator>::Array(size_t length_, Args&&... args) : Base(length_, length_), capacity(length_) {
-        for (size_t i = 0; i < length_; ++i)
-            alloc.construct(arr + i, std::forward<Args>(args)...);
+        if constexpr (!Base::template isTrivialDefaultConstruct<Args...>()) {
+            for (size_t i = 0; i < length_; ++i)
+                alloc.construct(arr + i, std::forward<Args>(args)...);
+        }
     }
 
     template<class T, class Allocator>
@@ -264,8 +275,12 @@ namespace Physica::Utils {
             length = size;
         }
         else {
-            for (; length < size; ++length)
-                alloc.construct(arr + length, std::forward<Args>(args)...);
+            if constexpr (Base::template isTrivialDefaultConstruct<Args...>())
+                length = size;
+            else {
+                for (; length < size; ++length)
+                    alloc.construct(arr + length, std::forward<Args>(args)...);
+            }
         }
     }
 

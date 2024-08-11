@@ -88,6 +88,8 @@ namespace Physica::Core {
         /* Operations */
         using Base::assignTo;
         using VectorBase::assignTo;
+
+        using VectorBase::format;
         /* Getters */
         using VectorBase::calc;
         using VectorBase::conjugate;
@@ -121,6 +123,8 @@ namespace Physica::Core {
         /* Operations */
         using Base::assignTo;
         using VectorBase::assignTo;
+
+        using VectorBase::format;
         /* Getters */
         using VectorBase::calc;
         using VectorBase::conjugate;

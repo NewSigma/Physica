@@ -154,6 +154,9 @@ namespace Physica::Utils {
         /* Operators */
         ArrayBase& operator=(const ArrayBase&) = default;
         ArrayBase& operator=(ArrayBase&&) noexcept = default;
+        /* Static members */
+        template<class... Args>
+        __host__ __device__ constexpr static bool isTrivialDefaultConstruct();
     };
 }
 

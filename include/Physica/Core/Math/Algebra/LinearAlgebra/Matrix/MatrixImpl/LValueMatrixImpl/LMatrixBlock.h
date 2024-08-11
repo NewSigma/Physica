@@ -114,6 +114,8 @@ namespace Physica::Core {
         using VectorBase::assignTo;
         void resize([[maybe_unused]] size_t row, [[maybe_unused]] size_t col) { assert(row == 1 && col == getColumn()); }
 
+        using VectorBase::format;
+
         using Base::row;
         /* Getters */
         using Base::calc;
@@ -158,6 +160,8 @@ namespace Physica::Core {
         using Base::assignTo;
         using VectorBase::assignTo;
         void resize([[maybe_unused]] size_t row, [[maybe_unused]] size_t col) { assert(row == getRow() && col == 1); }
+
+        using VectorBase::format;
 
         using Base::col;
         /* Getters */

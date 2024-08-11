@@ -18,8 +18,8 @@
  */
 #pragma once
 
-#include "Physica/Core/Physics/MD/ForceModel/EmptyForceModel.h"
-#include "Physica/Core/Math/Random/RandomPool.h"
+#include <Physica/Core/Physics/MD/ForceModel/EmptyForceModel.h>
+#include <Physica/Core/Math/Random/RandomPool.h>
 
 namespace Physica::Core {
     template<class ScalarType, unsigned int Dim, size_t NumReplica, class ForceMatrixAllocator>
@@ -37,7 +37,7 @@ namespace Physica::Core {
         ringPolymer = RingPolymerType(cell, numReplica);
 
         const size_t dof = getDOF();
-        forceBuffer.resize(dof, numReplica);
+        forceBuffer.resize(dof, numReplica, 0);
         if (isContractEnabled()) {
             posContract.resize(dof, numContract);
             forceContract.resize(dof, numContract);
