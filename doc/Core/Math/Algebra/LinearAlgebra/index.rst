@@ -8,4 +8,5 @@ LinearAlgebra
    HouseHolder
    IterateSolver
    JacobiDavidson
+   LinearAlgebra
    Schur

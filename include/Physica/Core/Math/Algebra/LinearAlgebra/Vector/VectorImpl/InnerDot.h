@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Weibo He.
+ * Copyright 2023-2024 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -34,9 +34,9 @@ namespace Physica::Core {
             constexpr static bool isT1Continuous = std::is_base_of<ContinuousVector<T1>, T1>::value;
             constexpr static bool isT2Continuous = std::is_base_of<ContinuousVector<T2>, T2>::value;
             constexpr static bool isSameType = std::is_same<typename T1::ScalarType, typename T2::ScalarType>::value;
-            constexpr static bool isNotComplex = !T1::isComplex && !T2::isComplex;
+            constexpr static bool isComplex = T1::isComplex || T2::isComplex;
             constexpr static bool isBadPacket = std::is_same<typename T1::ScalarType, PacketType>::value;
-            constexpr static bool enableSIMD = isT1Continuous && isT2Continuous && isSameType && isNotComplex && !isBadPacket;
+            constexpr static bool enableSIMD = isT1Continuous && isT2Continuous && isSameType && !isComplex && !isBadPacket;
             constexpr static bool isReverseDiff = T1::isReverseDiff || T2::isReverseDiff;
         public:
             inline static ResultType run(const RValueVector<T1>& v1, const RValueVector<T2>& v2);
@@ -97,7 +97,7 @@ namespace Physica::Core {
     }
 
     template<class VectorType1, class VectorType2>
-    typename Internal::BinaryScalarOpReturnType<typename VectorType1::ScalarType, typename VectorType2::ScalarType>::Type
+    inline typename Internal::BinaryScalarOpReturnType<typename VectorType1::ScalarType, typename VectorType2::ScalarType>::Type
     operator*(const RValueVector<VectorType1>& v1, const RValueVector<VectorType2>& v2) {
         assert(v1.getLength() == v2.getLength());
         return Internal::InnerDotImpl<VectorType1, VectorType2>::run(v1.getDerived(), v2.getDerived());

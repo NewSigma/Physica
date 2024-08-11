@@ -345,29 +345,6 @@ namespace Physica::Core {
     };
 
     template<class VectorType>
-    class VectorExpr<ExpressionType::Square, VectorType>
-            : public RValueVector<VectorExpr<ExpressionType::Square, VectorType>> {
-        using This = VectorExpr<ExpressionType::Square, VectorType>;
-        using Base = RValueVector<This>;
-        const VectorType& v;
-    public:
-        VectorExpr(const RValueVector<VectorType>& v_) : v(v_.getDerived()) {}
-        VectorExpr(const This&) = delete;
-        VectorExpr(This&&) noexcept = delete;
-        ~VectorExpr() = default;
-        /* Operators */
-        This& operator=(const This&) = delete;
-        This& operator=(This&&) noexcept = delete;
-        /* Operations */
-        [[nodiscard]] typename Base::ScalarType calc(size_t s) const { return square(v.calc(s)); }
-        template<class AnyPacket>
-        [[nodiscard]] AnyPacket packet(size_t index) const { return square(v.template packet<AnyPacket>(index)); }
-        template<class AnyPacket>
-        [[nodiscard]] AnyPacket packetPartial(size_t index, size_t count) const { return square(v.template packetPartial<AnyPacket>(index, count)); }
-        [[nodiscard]] __host__ __device__ size_t getLength() const { return v.getLength(); }
-    };
-
-    template<class VectorType>
     class VectorExpr<ExpressionType::Ln, VectorType>
             : public RValueVector<VectorExpr<ExpressionType::Ln, VectorType>> {
         using This = VectorExpr<ExpressionType::Ln, VectorType>;
@@ -604,11 +581,6 @@ namespace Physica::Core {
     }
 
     template<class VectorType>
-    [[nodiscard]] inline VectorExpr<ExpressionType::Square, VectorType> square(const RValueVector<VectorType>& v) noexcept {
-        return VectorExpr<ExpressionType::Square, VectorType>(v);
-    }
-
-    template<class VectorType>
     [[nodiscard]] inline VectorExpr<ExpressionType::Ln, VectorType> ln(const RValueVector<VectorType>& v) noexcept {
         return VectorExpr<ExpressionType::Ln, VectorType>(v);
     }
@@ -675,3 +647,4 @@ namespace Physica {
 #include "VectorExprImpl/VectorCosh.h"
 #include "VectorExprImpl/VectorSub.h"
 #include "VectorExprImpl/VectorMul.h"
+#include "VectorExprImpl/VectorSquare.h"
