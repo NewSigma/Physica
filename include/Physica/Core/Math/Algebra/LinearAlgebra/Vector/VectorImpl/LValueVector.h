@@ -23,9 +23,8 @@
 
 namespace Physica::Core {
     /**
-     * \class LValueVector is base class of vectors that can be assigned to \class LValueVector
-     * and other vectors can be assigned to this class.
-     * In other words, you can take the address of elements in the vector.
+     * \class LValueVector is a base class for vectors. You can take the address of elements in an LValueVector.
+     * An LValueVector can be assigned to an LValueVector, and other vector classes can be assigned to an LValueVector.
      */
     template<class Derived>
     class LValueVector : public RValueVector<Derived> {

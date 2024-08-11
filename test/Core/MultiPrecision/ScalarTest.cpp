@@ -21,6 +21,7 @@
 #include <Physica/Core/MultiPrecision/Scalar.h>
 
 using namespace Physica::Core;
+using ScalarType = Scalar<MultiPrecision>;
 constexpr unsigned int iterateCount = 50;
 static std::default_random_engine engine(clock());
 /*!
@@ -31,11 +32,11 @@ bool numericalAddTest(unsigned int loop) {
     for(unsigned int i = 0; i < loop; ++i) {
         d = 1 - 1.4 * d * d;
         double d_a = d * engine();
-        MultiScalar a(d_a);
+        ScalarType a(d_a);
 
         d = 1 - 1.4 * d * d;
         double d_b = d * engine();
-        MultiScalar b(d_b);
+        ScalarType b(d_b);
 
         double_extract expect{d_a + d_b};
         double_extract result{double(a + b)};
@@ -62,11 +63,11 @@ bool numericalSubTest(unsigned int loop) {
     for(unsigned int i = 0; i < loop; ++i) {
         d = 1 - 1.4 * d * d;
         double d_a = d * engine();
-        MultiScalar a(d_a);
+        ScalarType a(d_a);
 
         d = 1 - 1.4 * d * d;
         double d_b = d * engine();
-        MultiScalar b(d_b);
+        ScalarType b(d_b);
 
         double_extract expect{d_a - d_b};
         double_extract result{double(a - b)};
@@ -93,11 +94,11 @@ bool numericalMulTest(unsigned int loop) {
     for(unsigned int i = 0; i < loop; ++i) {
         d = 1 - 1.4 * d * d;
         double d_a = d * engine();
-        MultiScalar a(d_a);
+        ScalarType a(d_a);
 
         d = 1 - 1.4 * d * d;
         double d_b = d * engine();
-        MultiScalar b(d_b);
+        ScalarType b(d_b);
 
         double_extract expect{d_a * d_b};
         double_extract result{double(a * b)};
@@ -124,7 +125,7 @@ bool numericalDivTest(unsigned int loop) {
     for(unsigned int i = 0; i < loop; ++i) {
         d = 1 - 1.4 * d * d;
         double d_a = d * engine();
-        MultiScalar a(d_a);
+        ScalarType a(d_a);
 
         d = 1 - 1.4 * d * d;
         double d_b = d * engine();
@@ -132,7 +133,7 @@ bool numericalDivTest(unsigned int loop) {
             d = 1 - 1.4 * d * d;
             d_b = d * engine();
         }
-        MultiScalar b(d_b);
+        ScalarType b(d_b);
 
         double_extract expect{d_a / d_b};
         double_extract result{double(a / b)};

@@ -18,11 +18,11 @@
  */
 #pragma once
 
-#include "Physica/Utils/Template/CRTPBase.h"
-#include "Physica/Core/MultiPrecision/Scalar.h"
-#include "Physica/Core/MultiPrecision/ComplexScalar.h"
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/MatrixOption.h"
-#include "Physica/Core/Parallel/Executor/SequentialExecutor.h"
+#include <Physica/Utils/Template/CRTPBase.h>
+#include <Physica/Core/MultiPrecision/Scalar.h>
+#include <Physica/Core/MultiPrecision/ComplexScalar.h>
+#include <Physica/Core/Math/Algebra/LinearAlgebra/Matrix/MatrixOption.h>
+#include <Physica/Core/Parallel/Executor/SequentialExecutor.h>
 #include "RValueVectorImpl/RVectorBlock.h"
 
 namespace Physica::Core {
@@ -54,9 +54,8 @@ namespace Physica::Core {
         };
     }
     /**
-     * \class RValueVector is base class of vectors that can be assigned to \class LValueVector
-     * but other vectors cannot be assigned to this class.
-     * In other words, you cannot take the address of elements in the vector.
+     * \class RValueVector is a base class for vectors. You cannot take the address of elements in an RValueVector.
+     * An RValueVector can be assigned to an LValueVector, but no other vector classes can be assigned to an RValueVector.
      */
     template<class Derived>
     class RValueVector : public Utils::CRTPBase<Derived> {

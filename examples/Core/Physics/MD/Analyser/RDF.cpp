@@ -19,16 +19,16 @@
 #include <iostream>
 #include <fstream>
 #include <QApplication>
-#include "Physica/Core/Physics/MD/ForceModel/Ewald/RandomBatchEwald.h"
-#include "Physica/Core/Physics/MD/ForceModel/Q_TIP4P.h"
-#include "Physica/Core/Physics/SolidState/CrystalCell.h"
-#include "Physica/Core/Physics/MD/RPMD.h"
-#include "Physica/Core/Physics/MD/Thermostat/DoubleThermo.h"
-#include "Physica/Core/Physics/MD/KineticModel/FreeModel.h"
-#include "Physica/Core/Parallel/Executor/ThreadExecutor.h"
-#include "Physica/Core/Physics/MD/Analyser/RDF.h"
-#include "Physica/Core/IO/VASP/Poscar.h"
-#include "Physica/Gui/Plot/Plot.h"
+#include <Physica/Core/Physics/MD/ForceModel/Ewald/RandomBatchEwald.h>
+#include <Physica/Core/Physics/MD/ForceModel/Q_TIP4P.h>
+#include <Physica/Core/Physics/SolidState/CrystalCell.h>
+#include <Physica/Core/Physics/MD/RPMD.h>
+#include <Physica/Core/Physics/MD/Thermostat/DoubleThermo.h>
+#include <Physica/Core/Physics/MD/KineticModel/FreeModel.h>
+#include <Physica/Core/Parallel/Executor/ThreadExecutor.h>
+#include <Physica/Core/Physics/MD/Analyser/RDF.h>
+#include <Physica/Core/IO/VASP/Poscar.h>
+#include <Physica/Gui/Plot/Plot.h>
 
 using namespace Physica::Core;
 using namespace Physica::Gui;
@@ -150,10 +150,6 @@ RDF<ScalarType> calcRDF(size_t numReplica) {
 int main(int argc, char** argv) {
     QApplication app(argc, argv);
     Plot* plot = new Plot(0, 7, 0, 3, 2, 1);
-    auto* legend = plot->getChart()->legend();
-    legend->setVisible(true);
-    legend->setAlignment(Qt::AlignTop);
-    legend->setMarkerShape(QLegend::MarkerShapeFromSeries);
     auto* axisX = plot->getAxisX();
     auto* axisY = plot->getAxisY();
     axisX->setTitleText("r/Å");

@@ -21,7 +21,7 @@
 
 using namespace Physica::Core;
 
-void printElements(const MultiScalar& n) {
+void printElements(const Scalar<MultiPrecision>& n) {
     int size = n.getSize();
     for(int i = 0; i < size; ++i)
         std::cout << n[i] << ' ';

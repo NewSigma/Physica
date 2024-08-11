@@ -64,6 +64,7 @@ VectorType energyTPQ(const Hamilton& hamilton, ScalarType deltaBeta) {
     for (size_t i = 0; i < NumBeta; ++i) {
         if (i != 0)
             psi.nvt_step(hamilton, deltaBeta);
+        psi *= reciprocal(psi.max());
         energys[i] = (psi * VectorType(hamilton * psi)) / psi.squaredNorm();
     }
     return energys;
