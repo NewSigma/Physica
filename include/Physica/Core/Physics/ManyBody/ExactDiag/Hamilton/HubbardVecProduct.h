@@ -72,5 +72,6 @@ namespace Physica {
         constexpr static size_t MaxSizeAtCompile = MatrixType::MaxRowAtCompile;
 
         constexpr static bool FastAssign = true;
+        constexpr static bool FastPacket = false;
     };
 }

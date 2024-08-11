@@ -22,6 +22,10 @@ assignTo具有整体性，因此FastAssign具有传播性。
 
 该选项可用于实现启发性表达式变换。
 
+**FastPacket**
+
+FastPacket = true表示可利用SIMD获得性能提升
+
 ## Reference
 
 [1] Eigen; https://eigen.tuxfamily.org/

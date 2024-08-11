@@ -256,6 +256,7 @@ namespace Physica {
         constexpr static size_t MaxSizeAtCompile = Traits<MatrixType>::MaxColumnAtCompile;
 
         constexpr static bool FastAssign = false;
+        constexpr static bool FastPacket = false;
     };
 
     template<class MatrixType>
@@ -267,6 +268,7 @@ namespace Physica {
         constexpr static size_t MaxSizeAtCompile = Traits<MatrixType>::MaxRowAtCompile;
 
         constexpr static bool FastAssign = false;
+        constexpr static bool FastPacket = false;
     };
 
     template<class MatrixType, size_t Row, size_t Column>

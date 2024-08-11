@@ -350,6 +350,7 @@ namespace Physica {
         constexpr static size_t MaxSizeAtCompile = Length;
 
         constexpr static bool FastAssign = false;
+        constexpr static bool FastPacket = true;
     };
 
     template<class MatrixType, size_t Length>
@@ -360,6 +361,7 @@ namespace Physica {
         constexpr static size_t MaxSizeAtCompile = Length;
 
         constexpr static bool FastAssign = false;
+        constexpr static bool FastPacket = true;
     };
 
     template<class MatrixType, size_t Row, size_t Column>

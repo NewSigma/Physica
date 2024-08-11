@@ -622,6 +622,8 @@ namespace Physica {
         using BinaryScalarType = typename Core::Internal::BinaryScalarOpReturnType<ScalarType1, typename Expr2::ScalarType>::Type;
         constexpr static bool FastAssign1 = Traits<Expr1>::FastAssign;
         constexpr static bool FastAssign2 = Traits<Expr2>::FastAssign;
+        constexpr static bool FastPacket1 = Traits<Expr1>::FastPacket;
+        constexpr static bool FastPacket2 = Traits<Expr2>::FastPacket;
         constexpr static bool IsAddOrSub = Type == ExpressionType::Add || Type == ExpressionType::Sub;
     public:
         using ScalarType = typename std::conditional<Type == ExpressionType::Abs, RealType, BinaryScalarType>::type;
@@ -629,6 +631,7 @@ namespace Physica {
         constexpr static size_t MaxSizeAtCompile = Expr1::MaxSizeAtCompile > Expr2::MaxSizeAtCompile ? Expr1::MaxSizeAtCompile : Expr2::MaxSizeAtCompile;
 
         constexpr static bool FastAssign = IsAddOrSub && (FastAssign1 || FastAssign2);
+        constexpr static bool FastPacket = FastPacket1 && FastPacket2;
     };
 
     template<ExpressionType Type, class Expr, class AnyScalar>
@@ -640,6 +643,7 @@ namespace Physica {
         constexpr static size_t MaxSizeAtCompile = Expr::MaxSizeAtCompile;
 
         constexpr static bool FastAssign = Traits<Expr>::FastAssign;
+        constexpr static bool FastPacket = Traits<Expr>::FastPacket;
     };
 }
 

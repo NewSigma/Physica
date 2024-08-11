@@ -31,12 +31,12 @@ namespace Physica::Core {
             constexpr static size_t SizeAtCompile = size1 > size2 ? size1 : size2;
             using PacketType = typename Internal::BestPacket<ResultType, SizeAtCompile>::Type;
 
-            constexpr static bool isT1Continuous = std::is_base_of<ContinuousVector<T1>, T1>::value;
-            constexpr static bool isT2Continuous = std::is_base_of<ContinuousVector<T2>, T2>::value;
+            constexpr static bool isFastPacket1 = Traits<T1>::FastPacket;
+            constexpr static bool isFastPacket2 = Traits<T2>::FastPacket;
             constexpr static bool isSameType = std::is_same<typename T1::ScalarType, typename T2::ScalarType>::value;
             constexpr static bool isComplex = T1::isComplex || T2::isComplex;
             constexpr static bool isBadPacket = std::is_same<typename T1::ScalarType, PacketType>::value;
-            constexpr static bool enableSIMD = isT1Continuous && isT2Continuous && isSameType && !isComplex && !isBadPacket;
+            constexpr static bool enableSIMD = isFastPacket1 && isFastPacket2 && isSameType && !isComplex && !isBadPacket;
             constexpr static bool isReverseDiff = T1::isReverseDiff || T2::isReverseDiff;
         public:
             inline static ResultType run(const RValueVector<T1>& v1, const RValueVector<T2>& v2);
