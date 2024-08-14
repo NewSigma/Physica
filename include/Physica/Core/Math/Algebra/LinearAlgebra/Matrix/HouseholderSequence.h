@@ -47,8 +47,8 @@ namespace Physica::Core {
         template<class OtherMatrix>
         void assignTo(LValueMatrix<OtherMatrix>& target) const;
         /* Getters */
-        [[nodiscard]] size_t getRow() const noexcept { return ColWiseRead ? source.getRow() : source.getColumn(); }
-        [[nodiscard]] size_t getColumn() const noexcept { return getRow(); }
+        [[nodiscard]] __host__ __device__ size_t getRow() const noexcept { return ColWiseRead ? source.getRow() : source.getColumn(); }
+        [[nodiscard]] __host__ __device__ size_t getColumn() const noexcept { return getRow(); }
         [[nodiscard]] size_t getSize() const noexcept { return size; }
         [[nodiscard]] size_t getShift() const noexcept { return shift; }
         /* Setters */

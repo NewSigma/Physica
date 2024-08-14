@@ -120,7 +120,7 @@ namespace Physica::Core {
     }
 
     template<class VectorType, size_t Length>
-    inline size_t ContinuousVectorBlock<VectorType, Length>::getLength() const noexcept {
+    __host__ __device__ inline size_t ContinuousVectorBlock<VectorType, Length>::getLength() const noexcept {
         if constexpr (Length == Dynamic)
             return to - from;
         return Length;

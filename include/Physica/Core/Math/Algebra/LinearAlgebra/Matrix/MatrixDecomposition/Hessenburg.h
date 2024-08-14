@@ -110,8 +110,8 @@ namespace Physica::Core {
         template<class OtherMatrix>
         void assignTo(LValueMatrix<OtherMatrix>& target) const;
         /* Getters */
-        [[nodiscard]] size_t getRow() const noexcept { return hess.getSize(); }
-        [[nodiscard]] size_t getColumn() const noexcept { return hess.getSize(); }
+        [[nodiscard]] __host__ __device__ size_t getRow() const noexcept { return hess.getSize(); }
+        [[nodiscard]] __host__ __device__ size_t getColumn() const noexcept { return hess.getSize(); }
     };
 
     template<class ScalarType, size_t Order>

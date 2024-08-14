@@ -132,8 +132,8 @@ namespace Physica::Core {
         using VectorBase::min;
         using VectorBase::sum;
         [[nodiscard]] ScalarType calc(size_t row, [[maybe_unused]] size_t col) const { assert(col == 0); return VectorBase::calc(row); }
-        [[nodiscard]] size_t getRow() const noexcept { return VectorBase::getLength(); }
-        [[nodiscard]] constexpr static size_t getColumn() noexcept { return 1; }
+        [[nodiscard]] __host__ __device__ size_t getRow() const noexcept { return VectorBase::getLength(); }
+        [[nodiscard]] __host__ __device__ constexpr static size_t getColumn() noexcept { return 1; }
         /**
          * There are some common functions shared by vector and matrix, it is necessary to decide which function to call explicitly.
          */

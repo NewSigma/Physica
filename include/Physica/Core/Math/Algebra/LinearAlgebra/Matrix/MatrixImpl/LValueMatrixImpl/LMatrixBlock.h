@@ -208,8 +208,8 @@ namespace Physica::Core {
         /* Operations */
         void resize([[maybe_unused]] size_t row, [[maybe_unused]] size_t col) { assert(row == rowCount && col == colCount); }
         /* Getters */
-        [[nodiscard]] size_t getRow() const noexcept { return rowCount; }
-        [[nodiscard]] size_t getColumn() const noexcept { return colCount; }
+        [[nodiscard]] __host__ __device__ size_t getRow() const noexcept { return rowCount; }
+        [[nodiscard]] __host__ __device__ size_t getColumn() const noexcept { return colCount; }
         [[nodiscard]] __host__ __device__ inline ScalarType* data_ptr(size_t row, size_t column);
         [[nodiscard]] __host__ __device__ inline const ScalarType* data_ptr(size_t row, size_t column) const;
         [[nodiscard]] This& asMatrix() noexcept { return *this; }

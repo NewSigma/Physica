@@ -147,6 +147,8 @@ namespace Physica::Utils {
         [[nodiscard]] __host__ __device__ bool full() const noexcept { return getLength() == getCapacity(); }
         [[nodiscard]] __host__ __device__ pointer data() noexcept { return Base::getDerived().data(); }
         [[nodiscard]] __host__ __device__ const_pointer data() const noexcept { return Base::getDerived().data(); }
+        [[nodiscard]] __host__ __device__ pointer data_ptr(size_t index) noexcept { return data() + index; }
+        [[nodiscard]] __host__ __device__ const_pointer data_ptr(size_t index) const noexcept { return data() + index; }
     protected:
         ArrayBase() = default;
         ArrayBase(const ArrayBase&) = default;

@@ -36,8 +36,9 @@ namespace Physica::Core {
         constexpr static bool isComplex = ScalarType::isComplex;
     public:
         using RealType = typename ScalarType::RealType;
-        using EigenvalueVector = Vector<ComplexScalar<RealType>, Order>;
-        using EigenvectorMatrix = DenseMatrix<ComplexScalar<RealType>, MatrixOption::Column | MatrixOption::Vector, Order, Order>;
+        using ComplexType = ComplexScalar<RealType>;
+        using EigenvalueVector = Vector<ComplexType, Order>;
+        using EigenvectorMatrix = DenseMatrix<ComplexType, MatrixOption::Column | MatrixOption::Vector, Order, Order>;
         using RawEigenvectorType = DenseMatrix<ScalarType, MatrixOption::Column | MatrixOption::Vector, Order, Order>;
     private:
         using WorkingMatrix = typename Schur<ScalarType, Order>::WorkingMatrix;
@@ -60,6 +61,8 @@ namespace Physica::Core {
         template<class MatrixType>
         void compute(const RValueMatrix<MatrixType>& source, bool computeEigenvectors_);
         void sort();
+        template<class Compare>
+        void sort(Compare comp);
         void resize(size_t size);
         [[nodiscard]] auto reconstruct() const;
         [[nodiscard]] auto reconstruct_hermite() const;
@@ -142,11 +145,17 @@ namespace Physica::Core {
 
     template<class ScalarType, size_t Order>
     void EigenSolver<ScalarType, Order>::sort() {
+        sort([](ComplexType a, ComplexType b) noexcept { return a.getReal() < b.getReal(); });
+    }
+
+    template<class ScalarType, size_t Order>
+    template<class Compare>
+    void EigenSolver<ScalarType, Order>::sort(Compare comp) {
         const size_t order = eigenvalues.getLength();
         for (size_t i = 0; i < order - 1; ++i) {
             size_t index_min = i;
             for (size_t j = i + 1; j < order; ++j) {
-                if (eigenvalues[j].getReal() < eigenvalues[index_min].getReal())
+                if (comp(eigenvalues[j], eigenvalues[index_min]))
                     index_min = j;
             }
 
@@ -241,8 +250,8 @@ namespace Physica::Core {
                     auto fromCol1 = rawEigenvectors.col(i);
                     auto fromCol2 = rawEigenvectors.col(i + 1);
                     for (size_t j = 0; j < order; ++j) {
-                        toCol1[j] = ComplexScalar<RealType>(fromCol1[j].getReal(), fromCol2[j].getReal());
-                        toCol2[j] = ComplexScalar<RealType>(fromCol1[j].getReal(), -fromCol2[j].getReal());
+                        toCol1[j] = ComplexType(fromCol1[j].getReal(), fromCol2[j].getReal());
+                        toCol2[j] = ComplexType(fromCol1[j].getReal(), -fromCol2[j].getReal());
                     }
                     toCol1.toUnit();
                     toCol2.toUnit();

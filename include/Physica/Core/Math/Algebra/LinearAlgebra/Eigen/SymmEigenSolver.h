@@ -58,6 +58,8 @@ namespace Physica::Core {
         template<class MatrixType>
         void compute(const RValueMatrix<MatrixType>& source, bool computeEigenvectors_);
         void sort();
+        template<class Compare>
+        void sort(Compare comp);
         void resize(size_t size);
         void swap(This& __restrict solver) noexcept;
         /* Getters */
@@ -131,11 +133,17 @@ namespace Physica::Core {
 
     template<class ScalarType, size_t Order>
     void SymmEigenSolver<ScalarType, Order>::sort() {
+        sort([](ScalarType a, ScalarType b) noexcept { return a < b; });
+    }
+
+    template<class ScalarType, size_t Order>
+    template<class Compare>
+    void SymmEigenSolver<ScalarType, Order>::sort(Compare comp) {
         const size_t order = eigenvalues.getLength();
         for (size_t i = 0; i < order - 1; ++i) {
             size_t index_min = i;
             for (size_t j = i + 1; j < order; ++j) {
-                if (eigenvalues[j] < eigenvalues[index_min])
+                if (comp(eigenvalues[j], eigenvalues[index_min]))
                     index_min = j;
             }
 

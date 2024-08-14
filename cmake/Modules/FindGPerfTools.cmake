@@ -1,12 +1,10 @@
 find_path(GPerfTools_INCLUDE_DIR gperftools/tcmalloc.h)
-find_path(GPerfTools_LIBRARY_DIR libprofiler.so PATH_SUFFIXES lib)
 find_library(GPerfTools_LIBRARY libprofiler.so)
 
-set(GPerfTools_LIBRARIES ${GPerfTools_LIBRARY})
 set(GPerfTools_INCLUDE_DIRS ${GPerfTools_INCLUDE_DIR})
-set(GPerfTools_LIBRARY_DIRS ${GPerfTools_LIBRARY_DIR})
+set(GPerfTools_LIBRARIES ${GPerfTools_LIBRARY})
 
 include(FindPackageHandleStandardArgs)
-find_package_handle_standard_args(GPerfTools DEFAULT_MSG GPerfTools_LIBRARY GPerfTools_INCLUDE_DIR GPerfTools_LIBRARY_DIR)
+find_package_handle_standard_args(GPerfTools DEFAULT_MSG GPerfTools_INCLUDE_DIR GPerfTools_LIBRARY)
 
-mark_as_advanced(GPerfTools_INCLUDE_DIR GPerfTools_LIBRARY_DIR GPerfTools_LIBRARY)
+mark_as_advanced(GPerfTools_INCLUDE_DIR GPerfTools_LIBRARY)

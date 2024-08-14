@@ -153,8 +153,8 @@ namespace Physica::Core {
         template<class OtherMatrix>
         void assignTo(LValueMatrix<OtherMatrix>& target) const;
         /* Getters */
-        [[nodiscard]] size_t getRow() const noexcept { return tri.working.getRow(); }
-        [[nodiscard]] size_t getColumn() const noexcept { return tri.working.getColumn(); }
+        [[nodiscard]] __host__ __device__ size_t getRow() const noexcept { return tri.working.getRow(); }
+        [[nodiscard]] __host__ __device__ size_t getColumn() const noexcept { return tri.working.getColumn(); }
     };
 
     template<class ScalarType, size_t Order>

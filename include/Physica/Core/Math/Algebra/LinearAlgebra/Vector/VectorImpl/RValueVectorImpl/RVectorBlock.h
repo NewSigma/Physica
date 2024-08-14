@@ -39,7 +39,7 @@ namespace Physica::Core {
         RVectorBlock(RVectorBlock&&) noexcept = delete;
         ~RVectorBlock() = default;
         /* Operators */
-        [[nodiscard]] __host__ __device__ ScalarType calc(size_t index) const { return vec.calc(index + from); }
+        [[nodiscard]] ScalarType calc(size_t index) const { return vec.calc(index + from); }
         /* Getters */
         [[nodiscard]] __host__ __device__ size_t getLength() const noexcept { return to - from; }
     };

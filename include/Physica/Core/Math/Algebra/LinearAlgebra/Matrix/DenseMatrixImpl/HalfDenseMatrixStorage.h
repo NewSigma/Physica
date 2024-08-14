@@ -62,9 +62,9 @@ namespace Physica::Core {
         /* Getters */
         [[nodiscard]] const ArrayType& getArray() const noexcept { return arr; }
         [[nodiscard]] ArrayType& getArray() noexcept { return arr; }
-        [[nodiscard]] size_t getOrder() const noexcept { return order; }
-        [[nodiscard]] size_t getRow() const noexcept { return getOrder(); }
-        [[nodiscard]] size_t getColumn() const noexcept { return getOrder(); }
+        [[nodiscard]] __host__ __device__ size_t getOrder() const noexcept { return order; }
+        [[nodiscard]] __host__ __device__ size_t getRow() const noexcept { return getOrder(); }
+        [[nodiscard]] __host__ __device__ size_t getColumn() const noexcept { return getOrder(); }
         [[nodiscard]] __host__ __device__ size_t size() const noexcept { return arr.size(); }
         [[nodiscard]] __host__ __device__ size_t getLength() const noexcept { return arr.getLength(); }
         [[nodiscard]] __host__ __device__ size_t getCapacity() const noexcept { return arr.getCapacity(); }
