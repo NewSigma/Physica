@@ -33,12 +33,14 @@ namespace Physica::Core {
     constexpr static MPUnit MPUnitLowerMask = MPUnitMax >> (MPUnitWidth / 2);
 
     enum ScalarOption {
-        Float = 0,
-        Double = 1,
-        MultiPrecision = 2,
+        Float16 = 0,
+        Float32 = 1,
+        Float64 = 2,
+        MultiPrecision = 3,
 
-        Float32 = Float,
-        Float64 = Double
+        Half = Float16,
+        Float = Float32,
+        Double = Float64
     };
     /**
      * \class Scalar is a advanced float type that supports multiple precision

@@ -27,54 +27,6 @@ namespace Physica::Core {
     }
 
     template<>
-    Scalar<MultiPrecision> square(const Scalar<MultiPrecision>& s) noexcept {
-        if(s == BasicConst::getInstance()._1)
-            return Scalar(s);
-        else {
-            const auto s_size = s.getSize();
-            //Estimate the length of result first. we will calculate it accurately later.
-            auto length = 2 * s_size;
-            Scalar<MultiPrecision> result(length, s.getPower() * 2 + 1);
-
-            memset(result.byte, 0, length * sizeof(MPUnit));
-            for(int i = 0; i < s_size - 1; ++i)
-                result.setByte(i + s_size
-                               , mulAddArrByWord(result.byte + i + i + 1, s.byte + i + 1, s_size - i - 1, s.byte[i]));
-            //Optimize: Shift count is known, possible to optimize the performance.
-            //Fix: accuracy is ignored.
-            byteLeftShiftEq(result.byte, length, 1);
-
-            MPUnit high{}, low, copy, temp;
-            bool carry = false;
-            for(int i = 0; i < s_size; ++i) {
-                mulWordByWord(high, low, s.byte[i], s.byte[i]);
-                unsigned int double_i = static_cast<unsigned int>(i) << 1U;
-                /* Handle 2 * i */ {
-                    copy = result[double_i];
-                    temp = copy + low + carry;
-                    carry = copy > temp;
-                    result.setByte(double_i, temp);
-                }
-                /* Handle 2 * i + 1 */ {
-                    copy = result[double_i + 1];
-                    temp = copy + high + carry;
-                    carry = copy > temp;
-                    result.setByte(double_i + 1, temp);
-                }
-            }
-
-            if(high + carry == 0) {
-                --result.power;
-                --length;
-                result.length = length;
-                result.byte =
-                        reinterpret_cast<MPUnit*>(realloc(result.byte, length * sizeof(MPUnit)));
-            }
-            return result;
-        }
-    }
-
-    template<>
     Scalar<MultiPrecision> sqrt(const Scalar<MultiPrecision>& s) noexcept {
         assert(!s.isNegative());
         if(s.isZero())
@@ -149,6 +101,9 @@ namespace Physica::Core {
         }
         return result;
     }
+
+    template<>
+    Scalar<MultiPrecision> pow(const Scalar<MultiPrecision>& s1, const Scalar<MultiPrecision>& s2) noexcept;
 
     template<>
     Scalar<MultiPrecision> cos(const Scalar<MultiPrecision>& s) noexcept {

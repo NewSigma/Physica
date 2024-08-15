@@ -19,6 +19,7 @@
 #pragma once
 
 #include <iomanip>
+#include <cassert>
 #include "Physica/Utils/Template/CRTPBase.h"
 
 namespace Physica::Core {

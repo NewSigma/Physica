@@ -19,6 +19,7 @@
 #pragma once
 
 #include <Physica/Core/MultiPrecision/ScalarImpl/ProbabilityFunction.h>
+#include <Physica/Core/MultiPrecision/ScalarImpl/Operation/Pow.h>
 
 namespace Physica::Core {
     template<ScalarOption Option>
@@ -41,13 +42,6 @@ namespace Physica::Core {
     __host__ __device__ inline Scalar<Option> square(const Scalar<Option>& s) noexcept {
         return s * s;
     }
-    /**
-     * Calculate @param s * @param s, while this function is faster than simply multiply.
-     *
-     * Reference: GMP Doc BaseCase Multiplication
-     */
-    template<>
-    Scalar<MultiPrecision> square(const Scalar<MultiPrecision>& s) noexcept;
 
     template<ScalarOption Option>
     __host__ __device__ inline Scalar<Option> reciprocal(const Scalar<Option>& s) noexcept {
@@ -118,6 +112,11 @@ namespace Physica::Core {
             return Scalar<Option>(::powf(s.getTrivial(), n.getTrivial()));
         else
             return Scalar<Option>(::pow(s.getTrivial(), n.getTrivial()));
+    }
+
+    template<>
+    inline Scalar<MultiPrecision> pow(const Scalar<MultiPrecision>& s1, const Scalar<MultiPrecision>& s2) noexcept {
+        return s1.isInteger() ? powScalar(s1, s2) : exp(ln(s1) * s2);
     }
     /*!
      * Ignoring error. If s is a float number, use floor() first.
