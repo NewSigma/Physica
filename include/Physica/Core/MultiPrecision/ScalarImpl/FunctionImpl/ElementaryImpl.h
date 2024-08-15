@@ -24,7 +24,9 @@
 namespace Physica::Core {
     template<ScalarOption Option>
     __host__ __device__ inline Scalar<Option> abs(const Scalar<Option>& s) noexcept {
-        if constexpr (Option == Float)
+        if constexpr (Option == Half)
+            return Scalar<Option>(::__habs(s.getTrivial()));
+        else if constexpr (Option == Float)
             return Scalar<Option>(::fabsf(s.getTrivial()));
         else
             return Scalar<Option>(::fabs(s.getTrivial()));

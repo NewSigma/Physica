@@ -141,6 +141,10 @@ namespace Physica::Core {
         [[nodiscard]] const PlainScalar& getGrad() const noexcept {
             return this->getDerived().getGrad();
         }
+        /* Static Members */
+        static inline bool matchSign(const ScalarType& s1, const ScalarType& s2) {
+            return (s1.isPositive() && s2.isPositive() > 0) || (s1.isNegative() < 0 && s2.isNegative() < 0);
+        }
     };
 
     template<class ScalarType>

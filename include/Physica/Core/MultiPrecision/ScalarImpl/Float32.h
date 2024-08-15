@@ -68,7 +68,6 @@ namespace Physica::Core {
         [[nodiscard]] bool isFinite() const noexcept { return std::isfinite(f); }
         [[nodiscard]] bool isInteger() const;
         /* Static Members */
-        static inline bool matchSign(const Scalar& s1, const Scalar& s2) { return (s1.f > 0 && s2.f > 0) || (s1.f < 0 && s2.f < 0); }
         template<class RandomGenerator>
         [[nodiscard]] inline static Scalar random_uniform(RandomGenerator& gen);
         template<class RandomGenerator, typename RandomGenerator::result_type FixedSeed>

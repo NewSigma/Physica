@@ -18,9 +18,56 @@
  */
 #pragma once
 
+#include <cuda_fp16.h>
+
 namespace Physica::Core {
     template<>
-    class Scalar<Float16> {
-
+    class Scalar<Float16> : public ScalarBase<Scalar<Float16>> {
+        using This = Scalar<Float16>;
+        using Base = ScalarBase<This>;
+    public:
+        using device_obj_type = This;
+    private:
+        __half f;
+    public:
+        Scalar() = default;
+        __host__ __device__ Scalar(int i) : f(i) {}
+        __host__ __device__ Scalar(__half f_) : f(f_) {}
+        __host__ __device__ Scalar(float f_) : f(f_) {}
+        __host__ __device__ Scalar(double d_) : f(d_) {}
+        template<class OtherScalar>
+        __host__ __device__ explicit inline Scalar(const ScalarBase<OtherScalar>& s);
+        Scalar(const This&) = default;
+        Scalar(This&&) noexcept = default;
+        //~Scalar() = default; /* Dynamic parallelism of CUDA 12.1 does not recognize that PlainStruct is trivial */
+        /* Operators */
+        using Base::operator>;
+        using Base::operator<;
+        Scalar& operator=(const Scalar& obj) = default;
+        Scalar& operator=(Scalar&& obj) noexcept = default;
+        __host__ __device__ explicit operator float() const { return f; }
+        __host__ __device__ explicit operator double() const { return f; }
+        __host__ __device__ Scalar operator+(const Scalar& s) const { return Scalar(f + s.f); }
+        __host__ __device__ Scalar operator-(const Scalar& s) const { return Scalar(f - s.f); }
+        __host__ __device__ Scalar operator*(const Scalar& s) const { return Scalar(f * s.f); }
+        __host__ __device__ Scalar operator/(const Scalar& s) const { return Scalar(f / s.f); }
+        __host__ __device__ Scalar operator-() const noexcept { return Scalar(-f); }
+        __host__ __device__ bool operator>(const Scalar& s) const { return f > s.f; }
+        __host__ __device__ bool operator<(const Scalar& s) const { return f < s.f; }
+        __host__ __device__ bool operator==(const Scalar& s) const { return f == s.f; }
+        /* Operations */
+        Scalar& toOpposite() noexcept { f = -f; return *this; }
+        __host__ __device__ Scalar& toAbs() noexcept { *this = abs(*this); return *this; }
+        void swap(Scalar& __restrict s) noexcept { std::swap(f, s.f); }
+        /* Getters */
+        [[nodiscard]] constexpr static ScalarOption getOption() { return Float16; }
+        [[nodiscard]] __host__ __device__ __half getTrivial() const noexcept { return f; }
+        [[nodiscard]] __host__ __device__ bool isZero() const noexcept { return f == __half(0); }
+        [[nodiscard]] __host__ __device__ bool isPositive() const noexcept { return f > __half(0); }
+        [[nodiscard]] __host__ __device__ bool isNegative() const noexcept { return f < __half(0); }
+        [[nodiscard]] bool isFinite() const noexcept { return __hisinf(f) == 0; }
     };
+
+    template<class OtherScalar>
+    __host__ __device__ inline Scalar<Float16>::Scalar(const ScalarBase<OtherScalar>& s) : f(s.getDerived().getTrivial()) {}
 }
