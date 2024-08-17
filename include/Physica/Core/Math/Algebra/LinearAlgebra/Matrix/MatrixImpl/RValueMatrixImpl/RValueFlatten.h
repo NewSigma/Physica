@@ -21,12 +21,20 @@
 namespace Physica::Core {
     template<class MatrixType>
     class RValueFlatten : public RValueVector<RValueFlatten<MatrixType>> {
+        using This = RValueFlatten<MatrixType>;
+
         const MatrixType& mat;
     public:
         using Base = RValueVector<RValueFlatten<MatrixType>>;
         using typename Base::ScalarType;
     public:
         RValueFlatten(const RValueMatrix<MatrixType>& mat_) : mat(mat_.getDerived()) {}
+        RValueFlatten(const This&) = delete;
+        RValueFlatten(This&&) noexcept = delete;
+        ~RValueFlatten() = default;
+        /* Operators */
+        This& operator=(const This&) = delete;
+        This& operator=(This&&) noexcept = delete;
         /* Getters */
         [[nodiscard]] ScalarType calc(size_t index) const;
         [[nodiscard]] size_t getLength() const noexcept { return mat.getRow() * mat.getColumn(); }

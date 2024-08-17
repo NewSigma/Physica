@@ -75,6 +75,10 @@ namespace Physica {
         constexpr static bool isReverseDiff = false;
         constexpr static unsigned int Order = 0;
     };
+
+    using float16 = Scalar<Float16>;
+    using float32 = Scalar<Float32>;
+    using float64 = Scalar<Float64>;
 }
 
 #include "Rational.h"

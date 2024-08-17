@@ -29,6 +29,12 @@ namespace Physica::Core {
         using typename Base::ScalarType;
     public:
         ContinuousFlatten(const ContinuousMatrix<MatrixType>& mat_) : mat(mat_.getDerived()) {}
+        ContinuousFlatten(const This&) = delete;
+        ContinuousFlatten(This&&) noexcept = delete;
+        ~ContinuousFlatten() = default;
+        /* Operators */
+        This& operator=(const This&) = delete;
+        This& operator=(This&&) noexcept = delete;
         /* Operators */
         [[nodiscard]] ScalarType& operator[](size_t index) { return *data_ptr(index); }
         [[nodiscard]] const ScalarType& operator[](size_t index) const { return *data_ptr(index); }

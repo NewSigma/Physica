@@ -1,0 +1,170 @@
+/*
+ * Copyright 2024 Weibo He.
+ *
+ * This file is part of Physica.
+ *
+ * Physica is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Physica is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
+ */
+#pragma once
+
+#include <Physica/Utils/Unreachable.h>
+
+namespace Physica::Core {
+    template<>
+    class SIMD<Scalar<Float16>, 2> : private __half2 {
+        constexpr static size_t Size = 2;
+        using ScalarType = Scalar<Float16>;
+        using This = SIMD<ScalarType, Size>;
+        using Base = __half2;
+    public:
+        using Base::Base;
+        SIMD() = default;
+        __host__ __device__ inline explicit SIMD(ScalarType v);
+        __host__ __device__ inline SIMD(ScalarType l, ScalarType h);
+        __host__ __device__ inline explicit SIMD(Base value);
+        SIMD(const SIMD&) = default;
+        SIMD(SIMD&&) noexcept = default;
+        ~SIMD() = default;
+        /* Operators */
+        SIMD& operator=(const SIMD&) = default;
+        SIMD& operator=(SIMD&&) noexcept = default;
+        [[nodiscard]] __host__ __device__ inline ScalarType operator[](int index) const noexcept;
+        [[nodiscard]] __host__ __device__ inline SIMD operator+(const SIMD& other) const noexcept;
+        [[nodiscard]] __host__ __device__ inline SIMD operator-(const SIMD& other) const noexcept;
+        [[nodiscard]] __host__ __device__ inline SIMD operator*(const SIMD& other) const noexcept;
+        [[nodiscard]] __host__ __device__ inline SIMD operator/(const SIMD& other) const noexcept;
+        [[nodiscard]] __host__ __device__ inline SIMD operator-() const noexcept;
+        __host__ __device__ void operator+=(const SIMD& other) noexcept { *this = *this + other; }
+        __host__ __device__ void operator-=(const SIMD& other) noexcept { *this = *this - other; }
+        __host__ __device__ void operator*=(const SIMD& other) noexcept { *this = *this * other; }
+        __host__ __device__ void operator/=(const SIMD& other) noexcept { *this = *this / other; }
+        //[[nodiscard]] inline BoolSIMDType operator>(const SIMD& other) const;
+        //[[nodiscard]] inline BoolSIMDType operator<(const SIMD& other) const;
+        //[[nodiscard]] inline BoolSIMDType operator>=(const SIMD& other) const { return !(*this < other); }
+        //[[nodiscard]] inline BoolSIMDType operator<=(const SIMD& other) const { return !(*this > other); }
+        /* Operations */
+        __host__ __device__ inline void load(const ScalarType* p);
+        __host__ __device__ inline void load_partial(int n, const ScalarType* p);
+        __host__ __device__ inline void store(ScalarType* p) const;
+        __host__ __device__ inline void store_partial(int n, ScalarType* p) const;
+        //inline void insert(int index, const ScalarType& value);
+        [[nodiscard]] __host__ __device__ inline ScalarType horizontal_add() const noexcept;
+        //[[nodiscard]] inline ScalarType horizontal_max() const;
+        //[[nodiscard]] inline ScalarType horizontal_min() const;
+        __host__ __device__ void swap(SIMD& __restrict other) noexcept { std::swap(*this, other); }
+        /* Getters */
+        [[nodiscard]] __host__ __device__ constexpr static size_t size() { return Size; }
+        [[nodiscard]] __host__ __device__ Base& getImpl() noexcept { return *this; }
+        [[nodiscard]] __host__ __device__ const Base& getImpl() const noexcept { return *this; }
+    };
+
+    __host__ __device__ inline SIMD<Scalar<Float16>, 2>::SIMD(ScalarType v) : Base(__half2half2(v.getTrivial())) {}
+
+    __host__ __device__ inline SIMD<Scalar<Float16>, 2>::SIMD(ScalarType l, ScalarType h)
+            : Base(make_half2(l.getTrivial(), h.getTrivial())) {}
+
+    __host__ __device__ inline SIMD<Scalar<Float16>, 2>::SIMD(Base value) : Base(value) {}
+
+    __host__ __device__ inline Scalar<Float16> SIMD<Scalar<Float16>, 2>::operator[](int index) const noexcept {
+        if (index == 0)
+            return __low2half(*this);
+        return __high2half(*this);
+    }
+
+    __host__ __device__ inline SIMD<Scalar<Float16>, 2> SIMD<Scalar<Float16>, 2>::operator+(const SIMD& other) const noexcept {
+        return This(__hadd2(getImpl(), other.getImpl()));
+    }
+
+    __host__ __device__ inline SIMD<Scalar<Float16>, 2> SIMD<Scalar<Float16>, 2>::operator-(const SIMD& other) const noexcept {
+        return This(__hsub2(getImpl(), other.getImpl()));
+    }
+
+    __host__ __device__ inline SIMD<Scalar<Float16>, 2> SIMD<Scalar<Float16>, 2>::operator*(const SIMD& other) const noexcept {
+        return This(__hmul2(getImpl(), other.getImpl()));
+    }
+
+    __host__ __device__ inline SIMD<Scalar<Float16>, 2> SIMD<Scalar<Float16>, 2>::operator/(const SIMD& other) const noexcept {
+        return This(__h2div(getImpl(), other.getImpl()));
+    }
+
+    __host__ __device__ inline SIMD<Scalar<Float16>, 2> SIMD<Scalar<Float16>, 2>::operator-() const noexcept {
+        return This(__hneg2(getImpl()));
+    }
+
+    __host__ __device__ inline void SIMD<Scalar<Float16>, 2>::load(const ScalarType* p) {
+        (*this) = SIMD(*p, *(p + 1));
+    }
+
+    __host__ __device__ inline void SIMD<Scalar<Float16>, 2>::load_partial(int n, const ScalarType* p) {
+        if (n == 1)
+            (*this) = SIMD(*p, 0);
+        else if (n == 2)
+            load(p);
+    }
+
+    __host__ __device__ inline void SIMD<Scalar<Float16>, 2>::store(ScalarType* p) const {
+        *p = operator[](0);
+        *(p + 1) = operator[](1);
+    }
+
+    __host__ __device__ inline void SIMD<Scalar<Float16>, 2>::store_partial(int n, ScalarType* p) const {
+        if (n == 1)
+            *p = operator[](0);
+        else if (n == 2)
+            store(p);
+    }
+
+    __host__ __device__ inline Scalar<Float16> SIMD<Scalar<Float16>, 2>::horizontal_add() const noexcept {
+        return operator[](0) + operator[](1);
+    }
+
+    [[nodiscard]] __device__ inline SIMD<Scalar<Float16>, 2> mul_add(
+            const SIMD<Scalar<Float16>, 2>& a, const SIMD<Scalar<Float16>, 2>& b, const SIMD<Scalar<Float16>, 2>& c) noexcept {
+    #ifdef __CUDA_ARCH__
+        return SIMD<Scalar<Float16>, 2>(__hfma2(a.getImpl(), b.getImpl(), c.getImpl()));
+    #else
+        (void)a;
+        (void)b;
+        (void)c;
+        Utils::unreachable();
+    #endif
+    }
+}
+
+namespace Physica {
+    #define T Core::Scalar<Core::Float16>
+
+    template<>
+    class Traits<Core::SIMD<T, 2>> {
+    public:
+        using ScalarType = T;
+        using BaseType = __half2;
+    };
+
+    #undef T
+}
+
+namespace std {
+    #define T Physica::Core::SIMD<Physica::Core::Scalar<Physica::Core::Float16>, 2>
+
+    __host__ __device__ inline T max(T a, T b) noexcept {
+        return T(__hmax2_nan(a.getImpl(), b.getImpl()));
+    }
+
+    __host__ __device__ inline T min(T a, T b) noexcept {
+        return T(__hmin2_nan(a.getImpl(), b.getImpl()));
+    }
+
+    #undef T
+}

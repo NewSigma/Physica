@@ -29,6 +29,12 @@ namespace Physica::Core {
         using typename Base::ScalarType;
     public:
         LValueFlatten(const LValueMatrix<MatrixType>& mat_) : mat(mat_.getDerived()) {}
+        LValueFlatten(const This&) = delete;
+        LValueFlatten(This&&) noexcept = delete;
+        ~LValueFlatten() = default;
+        /* Operators */
+        This& operator=(const This&) = delete;
+        This& operator=(This&&) noexcept = delete;
         /* Operators */
         [[nodiscard]] ScalarType& operator[](size_t index) { return *data_ptr(index); }
         [[nodiscard]] const ScalarType& operator[](size_t index) const { return *data_ptr(index); }

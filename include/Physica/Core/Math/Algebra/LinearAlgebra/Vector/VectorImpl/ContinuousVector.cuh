@@ -37,6 +37,11 @@ namespace Physica::Core {
         inline device_obj& operator=(device_obj&& obj) noexcept;
         using Base::operator=;
         /* Operations */
+        template<class AnyPacket> [[nodiscard]] __device__ inline AnyPacket packet(size_t index) const;
+        template<class AnyPacket> [[nodiscard]] __device__ inline AnyPacket packetPartial(size_t index, size_t count) const;
+        template<class AnyPacket> __device__ inline void writePacket(size_t index, const AnyPacket packet);
+        template<class AnyPacket> __device__ inline void writePacketPartial(size_t index, size_t count, const AnyPacket packet);
+
         void resize(size_t length) { Base::getDerived().resize(length); }
         template<class OtherDerived> void toHost(ContinuousVector<OtherDerived>& obj) const;
         template<class OtherDerived> void toHostAsync(ContinuousVector<OtherDerived>& obj) const;
@@ -85,6 +90,34 @@ namespace Physica::Core {
     }
 
     template<class Derived>
+    template<class AnyPacket>
+    __device__ inline AnyPacket device_obj<ContinuousVector<Derived>>::packet(size_t index) const {
+        AnyPacket packet{};
+        packet.load(Base::data_ptr(index));
+        return packet;
+    }
+
+    template<class Derived>
+    template<class AnyPacket>
+    __device__ inline AnyPacket device_obj<ContinuousVector<Derived>>::packetPartial(size_t index, size_t count) const  {
+        AnyPacket packet{};
+        packet.load_partial(count, Base::data_ptr(index));
+        return packet;
+    }
+
+    template<class Derived>
+    template<class AnyPacket>
+    __device__ inline void device_obj<ContinuousVector<Derived>>::writePacket(size_t index, const AnyPacket packet) {
+        packet.store(Base::data_ptr(index));
+    }
+
+    template<class Derived>
+    template<class AnyPacket>
+    __device__ inline void device_obj<ContinuousVector<Derived>>::writePacketPartial(size_t index, size_t count, const AnyPacket packet) {
+        packet.store_partial(count, Base::data_ptr(index));
+    }
+
+    template<class Derived>
     template<size_t Length>
     __host__ __device__ inline typename device_obj<ContinuousVector<Derived>>::template BlockType<Length>
     device_obj<ContinuousVector<Derived>>::head(size_t to) {
@@ -130,14 +163,27 @@ namespace Physica::Core {
     template<class OtherDerived>
     void ContinuousVector<Derived>::toDevice(device_obj<ContinuousVector<OtherDerived>>& obj) const {
         toDeviceAsync(obj);
-        StreamPool::getStream().wait();
+        if constexpr (!std::is_trivially_copy_constructible<OtherDerived>::value)
+            StreamPool::getStream().wait();
     }
 
     template<class Derived>
     template<class OtherDerived>
     void ContinuousVector<Derived>::toDeviceAsync(device_obj<ContinuousVector<OtherDerived>>& obj) const {
-        obj.resize(Base::getLength());
-        const device_obj<ContinuousVector<OtherDerived>>& const_obj = obj;
-        cudaCheck(cudaMemcpyAsync((void*)const_obj.data(), data(), Base::getLength() * sizeof(ScalarType), cudaMemcpyKind::cudaMemcpyHostToDevice, StreamPool::getStream()));
+        static_assert(std::is_same<ScalarType, typename OtherDerived::ScalarType>::value,
+                "[Error]: ScalarType inconsistent, additional buffer is necessary");
+        const size_t length = Base::getLength();
+        const size_t size = length * sizeof(ScalarType);
+        obj.resize(length);
+        if constexpr (std::is_trivially_copy_constructible<OtherDerived>::value)
+            memcpy(obj.data(), data(), size);
+        else {
+            /**
+             * Without it some tests fail, may be a compiler bug
+             * We are using GCC 9.4.0 + nvcc 12.6, Ubuntu 20.04
+             */
+            const device_obj<ContinuousVector<OtherDerived>>& const_obj = obj;
+            cudaCheck(cudaMemcpyAsync((void*)const_obj.data(), data(), size, cudaMemcpyKind::cudaMemcpyHostToDevice, StreamPool::getStream()));
+        }
     }
 }

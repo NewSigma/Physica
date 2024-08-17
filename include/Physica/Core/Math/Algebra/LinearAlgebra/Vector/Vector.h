@@ -45,11 +45,11 @@ namespace Physica::Core {
         Vector(Storage array) noexcept;
         template<class Derived>
         Vector(const RValueVector<Derived>& v);
-        Vector(const Vector&) = default;
-        Vector(Vector&&) noexcept = default;
+        Vector(const This&) = default;
+        Vector(This&&) noexcept = default;
         ~Vector() = default;
         /* Operators */
-        Vector& operator=(Vector v) noexcept;
+        This& operator=(This obj) noexcept { swap(obj); return *this; }
         using Base::operator=;
         using Storage::operator[];
         /* Operations */

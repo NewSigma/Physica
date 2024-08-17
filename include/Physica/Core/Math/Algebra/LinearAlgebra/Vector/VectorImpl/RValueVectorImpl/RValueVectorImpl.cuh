@@ -126,15 +126,4 @@ namespace Physica::Core {
     device_obj<RValueVector<Derived>>::crossProduct(const device_obj<RValueVector<OtherDerived>>& v) const noexcept {
         return device_obj<CrossProduct<Derived, OtherDerived>>(*this, v);
     }
-
-    template<class VectorType1, class VectorType2>
-    __device__ typename Internal::BinaryScalarOpReturnType<typename VectorType1::ScalarType, typename VectorType2::ScalarType>::Type
-    operator*(const device_obj<RValueVector<VectorType1>>& v1, const device_obj<RValueVector<VectorType2>>& v2) {
-        assert(v1.getLength() == v2.getLength());
-        using ResultType = typename Internal::BinaryScalarOpReturnType<typename VectorType1::ScalarType, typename VectorType2::ScalarType>::Type;
-        ResultType result = 0;
-        for (size_t i = 0; i < v1.getLength(); ++i)
-            result += v1.calc(i) * v2.calc(i);
-        return result;
-    }
 }

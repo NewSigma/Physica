@@ -58,6 +58,14 @@ namespace Physica::Core {
             constexpr static size_t Size = (isComplex || isForward) ? 1 : (isDynamic ? BiggestSize : Size3);
             using Type = typename std::conditional<Size == 1, ScalarType, SIMD<ScalarType, Size>>::type;
         };
+
+        template<size_t Length>
+        class BestPacket<Scalar<Float16>, Length> {
+            using ScalarType = Scalar<Float16>;
+        public:
+            constexpr static size_t Size = Length == 1 ? 1 : 2;
+            using Type = typename std::conditional<Length == 1, ScalarType, SIMD<ScalarType, 2>>::type;
+        };
     }
 
     template<class ScalarType, size_t Size>
@@ -241,4 +249,7 @@ namespace std {
 
 #include "SIMDImpl/BoolSIMD.h"
 #include "SIMDImpl/SIMDImpl.h"
+#ifdef PHYSICA_CUDA
+    #include "SIMDImpl/Half2.h"
+#endif
 #include "SIMDImpl/ElementaryFunction.h"

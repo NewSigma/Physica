@@ -67,12 +67,9 @@ namespace Physica::Core {
         device_obj& operator=(const device_obj&) = default;
         device_obj& operator=(device_obj&&) noexcept = default;
     };
-
-    template<class VectorType1, class VectorType2>
-    __device__ typename Internal::BinaryScalarOpReturnType<typename VectorType1::ScalarType, typename VectorType2::ScalarType>::Type
-    operator*(const device_obj<RValueVector<VectorType1>>& v1, const device_obj<RValueVector<VectorType2>>& v2);
 }
 
 #include "RValueVectorImpl/RValueVectorImpl.cuh"
 #include "VectorExpr.cuh"
+#include "InnerDot.cuh"
 

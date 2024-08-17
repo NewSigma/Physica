@@ -20,9 +20,13 @@
 
 namespace Physica::Core {
     template<class ScalarType, size_t Size>
-    [[nodiscard]] inline SIMD<ScalarType, Size> abs(const SIMD<ScalarType, Size>& x) {
-        if constexpr (!ScalarType::isDifferentiable)
-            return SIMD<ScalarType, Size>(abs(x.getImpl()));
+    [[nodiscard]] __host__ __device__ inline SIMD<ScalarType, Size> abs(const SIMD<ScalarType, Size>& x) {
+        if constexpr (!ScalarType::isDifferentiable) {
+            if constexpr (ScalarType::Option == Float16)
+                return SIMD<ScalarType, Size>(__habs2(x.getImpl()));
+            else
+                return SIMD<ScalarType, Size>(abs(x.getImpl()));
+        }
         else {
             using PlainSIMD = SIMD<typename ScalarType::PlainScalar, Size>;
             using TracerType = typename ScalarType::TracerType;

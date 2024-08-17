@@ -332,3 +332,5 @@ namespace Physica {
     template<ExpressionType Type, class Exp1, class Exp2>
     class Traits<Core::device_obj<VectorExpr<Type, Exp1, Exp2>>> : public Traits<VectorExpr<Type, Exp1, Exp2>> {};
 }
+
+#include "VectorExprImpl/VectorSquare.cuh"

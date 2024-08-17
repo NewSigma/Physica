@@ -86,6 +86,7 @@ namespace Physica::Core {
         using Base::random_normal;
         using Base::random_uniform;
         /* Getters */
+        using Base::data;
         using Storage::data_ptr;
         using Storage::getColumn;
         using Storage::getRow;

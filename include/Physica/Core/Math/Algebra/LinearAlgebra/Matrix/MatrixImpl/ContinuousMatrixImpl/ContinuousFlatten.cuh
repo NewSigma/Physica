@@ -30,6 +30,12 @@ namespace Physica::Core {
         using typename Base::ScalarType;
     public:
         device_obj(const device_obj<ContinuousMatrix<MatrixType>>& mat_) : mat(mat_.getDerived()) {}
+        device_obj(const This&) = delete;
+        device_obj(This&&) noexcept = delete;
+        ~device_obj() = default;
+        /* Operators */
+        This& operator=(const This&) = delete;
+        This& operator=(This&&) noexcept = delete;
         /* Operators */
         [[nodiscard]] __device__ ScalarType& operator[](size_t index) { return *data_ptr(index); }
         [[nodiscard]] __device__ const ScalarType& operator[](size_t index) const { return *data_ptr(index); }

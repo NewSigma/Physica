@@ -23,6 +23,8 @@
 namespace Physica::Core {
     template<class MatrixType>
     class device_obj<RValueFlatten<MatrixType>> : public device_obj<RValueVector<RValueFlatten<MatrixType>>> {
+        using This = device_obj<RValueFlatten<MatrixType>>;
+
         const device_obj<MatrixType>& mat;
     public:
         using host_obj = RValueFlatten<MatrixType>;
@@ -30,6 +32,12 @@ namespace Physica::Core {
         using typename Base::ScalarType;
     public:
         __host__ __device__ device_obj(const device_obj<RValueMatrix<MatrixType>>& mat_) : mat(mat_.getDerived()) {}
+        device_obj(const This&) = delete;
+        device_obj(This&&) noexcept = delete;
+        ~device_obj() = default;
+        /* Operators */
+        This& operator=(const This&) = delete;
+        This& operator=(This&&) noexcept = delete;
         /* Getters */
         [[nodiscard]] __device__ ScalarType calc(size_t index) const;
         [[nodiscard]] __host__ __device__ size_t getLength() const noexcept { return mat.getRow() * mat.getColumn(); }

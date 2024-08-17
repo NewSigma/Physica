@@ -47,12 +47,6 @@ namespace Physica::Core {
     }
 
     template<class T, size_t Length, size_t MaxLength, class Allocator>
-    Vector<T, Length, MaxLength, Allocator>& Vector<T, Length, MaxLength, Allocator>::operator=(Vector<T, Length, MaxLength, Allocator> v) noexcept {
-        swap(v);
-        return *this;
-    }
-
-    template<class T, size_t Length, size_t MaxLength, class Allocator>
     Vector<T, Length, MaxLength, Allocator>& Vector<T, Length, MaxLength, Allocator>::toOpposite() {
         const auto end = Storage::end();
         for (auto ite = Storage::begin(); ite != end; ++ite)
