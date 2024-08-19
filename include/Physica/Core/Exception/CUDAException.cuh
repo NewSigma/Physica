@@ -18,25 +18,25 @@
  */
 #pragma once
 
-#include <cuda_runtime.h>
-#include <exception>
+#include <system_error>
 #include <Physica/Macro.h>
 
 namespace Physica::Core {
-    class PHYSICA_API CudaException : public std::exception {
-        cudaError_t code;
+    class PHYSICA_API CUDAException : public std::system_error {
+        class Impl final : public std::error_category {
+        public:
+            /* Getters */
+            [[nodiscard]] const char* name() const noexcept override final { return "CUDAException"; }
+            [[nodiscard]] std::string message(int code) const override final { return cudaGetErrorString(cudaError_t(code)); }
+        };
     public:
-        CudaException(cudaError_t code_) : code(code_) {}
-        ~CudaException() noexcept override = default;
-        /* Getters */
-        [[nodiscard]] const char* what() const noexcept override { return cudaGetErrorString(code); }
-        [[nodiscard]] cudaError_t getCode() const noexcept { return code; }
+        CUDAException(cudaError_t code) noexcept : std::system_error(code, Impl()) {}
     };
 }
 
 namespace Physica {
-    inline void cudaCheck(cudaError_t err) {
+    inline void check(cudaError_t err) {
         if (err != cudaSuccess) [[unlikely]]
-            throw Physica::Core::CudaException(err);
+            throw Physica::Core::CUDAException(err);
     }
 }

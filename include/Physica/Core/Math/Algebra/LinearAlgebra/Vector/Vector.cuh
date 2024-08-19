@@ -20,6 +20,7 @@
 
 #include "Vector.h"
 #include "VectorImpl/ContinuousVector.cuh"
+#include <Physica/Utils/Container/Array/Array.cuh>
 
 namespace Physica::Core {
     template<class T, size_t Length, size_t MaxLength>

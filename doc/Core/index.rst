@@ -6,3 +6,4 @@ Core
 
    Math/index.rst
    Physics/index.rst
+   Exception

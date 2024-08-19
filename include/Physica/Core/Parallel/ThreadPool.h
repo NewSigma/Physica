@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2023 Weibo He.
+ * Copyright 2021-2024 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -27,9 +27,8 @@
 #include <vector>
 #include <future>
 #include <sys/sysinfo.h>
+#include <Physica/Utils/Container/Array/Array.h>
 #include "PackagedTask.h"
-#include "Physica/Macro.h"
-#include "Physica/Utils/Container/Array/Array.h"
 
 namespace Physica::Core {
     /**

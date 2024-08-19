@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Weibo He.
+ * Copyright 2023-2024 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -20,7 +20,7 @@
 
 #include <cstdlib>
 #include <unistd.h>
-#include "Physica/Core/Exception/SyscallException.h"
+#include "Physica/Core/Exception/SystemException.h"
 
 namespace Physica::Utils {
     template<size_t N>
@@ -48,7 +48,7 @@ namespace Physica::Utils {
             name[i] = name_template[i];
         fd = mkstemp(name);
         if (fd == -1) [[unlikely]]
-            throw Core::SyscallException();
+            throw Core::SystemException();
     }
 
     template<size_t N>

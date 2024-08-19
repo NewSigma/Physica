@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Weibo He.
+ * Copyright 2023-2024 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -21,7 +21,7 @@
 
 namespace Physica::Core {
     CudaEvent::CudaEvent() {
-        cudaCheck(cudaEventCreate(&event));
+        check(cudaEventCreate(&event));
     }
 
     CudaEvent::CudaEvent(CudaEvent&& obj) noexcept : event(obj.event) {

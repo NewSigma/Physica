@@ -20,7 +20,7 @@
 
 #include <Physica/Utils/Allocator/DeviceAllocator.cuh>
 #include <Physica/Utils/CUDA/PlainStruct.h>
-#include <Physica/Core/Exception/CudaException.cuh>
+#include <Physica/Core/Exception/CUDAException.cuh>
 
 namespace Physica::Utils {
     template<class T, size_t Length, size_t Capacity, class Allocator>
@@ -205,7 +205,7 @@ namespace Physica::Utils {
     typename device_obj<Array<T, Dynamic, Dynamic, Allocator>>::PlainHostObj
     device_obj<Array<T, Dynamic, Dynamic, Allocator>>::toPlainHost() const {
         PlainHostObj result(getLength());
-        cudaCheck(cudaMemcpy(result.data(), (void*)d_data, getLength() * sizeof(ValueType), cudaMemcpyKind::cudaMemcpyDeviceToHost));
+        check(cudaMemcpy(result.data(), (void*)d_data, getLength() * sizeof(ValueType), cudaMemcpyKind::cudaMemcpyDeviceToHost));
         return result;
     }
     /**
@@ -215,7 +215,7 @@ namespace Physica::Utils {
     Array<T, Dynamic, Dynamic, Allocator> device_obj<Array<T, Dynamic, Dynamic, Allocator>>::toHost() const {
         host_obj result(length);
         if constexpr (isTrivial)
-            cudaCheck(cudaMemcpy(result.data(), d_data, length * sizeof(ValueType), cudaMemcpyKind::cudaMemcpyDeviceToHost));
+            check(cudaMemcpy(result.data(), d_data, length * sizeof(ValueType), cudaMemcpyKind::cudaMemcpyDeviceToHost));
         else {
             const auto buffer = toPlainHost();
             for (size_t i = 0; i < length; ++i)
@@ -237,9 +237,9 @@ namespace Physica::Utils {
         const auto buffer = toPlainHost();
         alloc.deallocate(d_data, capacity);
         d_data = alloc.allocate(size);
-        cudaCheck(cudaMemcpy(d_data, buffer.data(), getLength() * sizeof(ValueType), cudaMemcpyKind::cudaMemcpyHostToDevice));
+        check(cudaMemcpy(d_data, buffer.data(), getLength() * sizeof(ValueType), cudaMemcpyKind::cudaMemcpyHostToDevice));
         capacity = size;
-        cudaCheck(cudaStreamSynchronize(nullptr));
+        check(cudaStreamSynchronize(nullptr));
     }
     /**
      * Synchronization is expected before this, copy is async to task stream
@@ -257,7 +257,7 @@ namespace Physica::Utils {
                 const size_t delta = length - size;
                 Array<ValueType, Dynamic, Dynamic> buffer{};
                 buffer.reserve(delta);
-                cudaCheck(cudaMemcpy(buffer.data(), d_data + size, delta * sizeof(ValueType), cudaMemcpyKind::cudaMemcpyDeviceToHost));
+                check(cudaMemcpy(buffer.data(), d_data + size, delta * sizeof(ValueType), cudaMemcpyKind::cudaMemcpyDeviceToHost));
                 buffer.setLength(delta);
             }
         }
@@ -266,9 +266,9 @@ namespace Physica::Utils {
             Array<ValueType, Dynamic, Dynamic> buffer(delta);
             for (size_t i = 0; i < delta; ++i)
                 buffer.get_allocator().construct(buffer.data() + i, std::forward<Args>(args)...);
-            cudaCheck(cudaMemcpy(d_data + length, buffer.data(), delta * sizeof(ValueType), cudaMemcpyKind::cudaMemcpyHostToDevice));
+            check(cudaMemcpy(d_data + length, buffer.data(), delta * sizeof(ValueType), cudaMemcpyKind::cudaMemcpyHostToDevice));
             buffer.get_allocator().deallocate(buffer.release(), delta);
-            cudaCheck(cudaStreamSynchronize(nullptr));
+            check(cudaStreamSynchronize(nullptr));
         }
         length = size;
     }

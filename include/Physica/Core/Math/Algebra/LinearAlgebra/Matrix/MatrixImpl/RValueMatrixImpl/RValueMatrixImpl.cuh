@@ -18,8 +18,9 @@
  */
 #pragma once
 
-#include "Physica/Core/Parallel/StreamPool.cuh"
-#include "Physica/Utils/CUDA/DeviceProp.cuh"
+#include <Physica/Core/Parallel/StreamPool.cuh>
+#include <Physica/Utils/CUDA/DeviceProp.cuh>
+#include <Physica/Utils/CUDA/PlainStruct.h>
 #include "RValueFlatten.cuh"
 
 namespace Physica::Core {

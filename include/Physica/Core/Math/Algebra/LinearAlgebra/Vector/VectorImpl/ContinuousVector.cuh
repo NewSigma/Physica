@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Weibo He.
+ * Copyright 2023-2024 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -18,6 +18,7 @@
  */
 #pragma once
 
+#include <Physica/Core/Exception/CUDAException.cuh>
 #include "ContinuousVector.h"
 #include "LValueVector.cuh"
 #include "ContinuousVectorImpl/ContinuousVectorBlock.cuh"
@@ -86,7 +87,7 @@ namespace Physica::Core {
     template<class OtherDerived>
     void device_obj<ContinuousVector<Derived>>::toHostAsync(ContinuousVector<OtherDerived>& obj) const {
         obj.resize(Base::getLength());
-        cudaCheck(cudaMemcpyAsync(obj.data(), data(), Base::getLength() * sizeof(ScalarType), cudaMemcpyKind::cudaMemcpyDeviceToHost, StreamPool::getStream()));
+        check(cudaMemcpyAsync(obj.data(), data(), Base::getLength() * sizeof(ScalarType), cudaMemcpyKind::cudaMemcpyDeviceToHost, StreamPool::getStream()));
     }
 
     template<class Derived>
@@ -183,7 +184,7 @@ namespace Physica::Core {
              * We are using GCC 9.4.0 + nvcc 12.6, Ubuntu 20.04
              */
             const device_obj<ContinuousVector<OtherDerived>>& const_obj = obj;
-            cudaCheck(cudaMemcpyAsync((void*)const_obj.data(), data(), size, cudaMemcpyKind::cudaMemcpyHostToDevice, StreamPool::getStream()));
+            check(cudaMemcpyAsync((void*)const_obj.data(), data(), size, cudaMemcpyKind::cudaMemcpyHostToDevice, StreamPool::getStream()));
         }
     }
 }

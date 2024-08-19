@@ -21,7 +21,7 @@
 #include <cstdlib>
 #include <unistd.h>
 #include "UnixHelper.h"
-#include "Physica/Core/Exception/SyscallException.h"
+#include "Physica/Core/Exception/SystemException.h"
 
 namespace Physica::Utils {
     template<size_t N>
@@ -47,7 +47,7 @@ namespace Physica::Utils {
             name[i] = name_template[i];
         pName = mkdtemp(name);
         if (pName == nullptr) [[unlikely]]
-            throw Core::SyscallException();
+            throw Core::SystemException();
     }
 
     template<size_t N>

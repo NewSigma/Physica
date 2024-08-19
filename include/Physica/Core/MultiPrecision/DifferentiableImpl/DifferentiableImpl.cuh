@@ -121,12 +121,12 @@ namespace Physica::Core {
 
     template<class ScalarType, unsigned int Order>
     void device_obj<Differentiable<ScalarType, DiffMode::Reverse, Order>>::toHostAsync_value(ScalarType& value) const {
-        cudaCheck(cudaMemcpyAsync(&value, pValue, sizeof(ScalarType), cudaMemcpyKind::cudaMemcpyDeviceToHost, StreamPool::getStream()));
+        check(cudaMemcpyAsync(&value, pValue, sizeof(ScalarType), cudaMemcpyKind::cudaMemcpyDeviceToHost, StreamPool::getStream()));
     }
 
     template<class ScalarType, unsigned int Order>
     void device_obj<Differentiable<ScalarType, DiffMode::Reverse, Order>>::toHostAsync_grad(ScalarType& grad) const {
-        cudaCheck(cudaMemcpyAsync(&grad, pGrad, sizeof(ScalarType), cudaMemcpyKind::cudaMemcpyDeviceToHost, StreamPool::getStream()));
+        check(cudaMemcpyAsync(&grad, pGrad, sizeof(ScalarType), cudaMemcpyKind::cudaMemcpyDeviceToHost, StreamPool::getStream()));
     }
 
     template<class ScalarType, unsigned int Order>

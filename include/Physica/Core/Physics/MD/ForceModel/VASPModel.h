@@ -84,7 +84,7 @@ namespace Physica::Core {
         auto path = makePath("%s/log", workingDir.getName());
         logFd = open(path.data(), O_WRONLY | O_TRUNC | O_CREAT, S_IRUSR | S_IWUSR);
         if (logFd == -1)
-            throw SyscallException();
+            throw SystemException();
 
         path = makePath("%s/INCAR", workingDir.getName());
         copyFile(pathToINCAR, path.data());

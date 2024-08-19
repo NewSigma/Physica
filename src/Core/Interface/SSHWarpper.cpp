@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Weibo He.
+ * Copyright 2022-2024 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -18,7 +18,7 @@
  */
 #include <utility>
 #include "Physica/Core/Interface/SSHWarpper.h"
-#include "Physica/Core/Exception/SyscallException.h"
+#include "Physica/Core/Exception/SystemException.h"
 
 namespace Physica::Core {
     SSHWarpper::SSHWarpper(std::string hostname_, std::string command_)
@@ -34,7 +34,7 @@ namespace Physica::Core {
     void SSHWarpper::execute() {
         int fd[2];
         if (pipe(fd) == -1)
-            throw SyscallException();
+            throw SystemException();
 
         future = ProcessExecutor::schedule([this, fd]() {
             const int standardErr = dup(STDERR_FILENO);
@@ -42,7 +42,7 @@ namespace Physica::Core {
             close(STDERR_FILENO);
             close(fd[1]);
             if (dup2(fd[0], STDIN_FILENO) != STDIN_FILENO)
-                throw SyscallException();
+                throw SystemException();
             close(fd[0]);
             /* Execute */ {
                 execlp("ssh", "ssh", "-tt", hostname.c_str(), nullptr);
@@ -54,7 +54,7 @@ namespace Physica::Core {
 
         close(fd[0]);
         if (write(fd[1], command.c_str(), command.size()) == -1)
-            throw SyscallException();
+            throw SystemException();
         close(fd[1]);
     }
 

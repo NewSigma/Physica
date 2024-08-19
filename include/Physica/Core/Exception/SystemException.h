@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Weibo He.
+ * Copyright 2021-2024 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -18,15 +18,12 @@
  */
 #pragma once
 
-#include <errno.h>
-#include <cstring>
-#include <exception>
-#include "Physica/Macro.h"
+#include <system_error>
+#include <Physica/Macro.h>
 
 namespace Physica::Core {
-    class PHYSICA_API SyscallException : public std::exception {
+    class PHYSICA_API SystemException : public std::system_error {
     public:
-        ~SyscallException() noexcept override = default;
-        const char* what() const noexcept override { return strerror(errno); }
+        SystemException() noexcept : std::system_error(errno, std::system_category()) {}
     };
 }

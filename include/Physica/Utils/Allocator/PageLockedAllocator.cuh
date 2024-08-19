@@ -118,7 +118,7 @@ namespace Physica::Utils {
     template<class T>
     typename PageLockedAllocator<T>::pointer PageLockedAllocator<T>::allocate(size_t n) {
         pointer p;
-        cudaCheck(cudaMallocHost(&p, n * sizeof(value_type)));
+        check(cudaMallocHost(&p, n * sizeof(value_type)));
         return p;
     }
 

@@ -18,11 +18,11 @@
  */
 #include <Physica/Core/Parallel/Future/StreamFuture.cuh>
 #include <Physica/Core/Parallel/StreamPool.cuh>
-#include <Physica/Core/Exception/CudaException.cuh>
+#include <Physica/Core/Exception/CUDAException.cuh>
 
 namespace Physica::Core {
     StreamFuture::StreamFuture() : isDone(false) {
-        cudaCheck(cudaLaunchHostFunc(StreamPool::getStream(), &StreamFuture::taskDoneCallback, this));
+        check(cudaLaunchHostFunc(StreamPool::getStream(), &StreamFuture::taskDoneCallback, this));
     }
 
     StreamFuture::~StreamFuture() {
@@ -35,7 +35,7 @@ namespace Physica::Core {
     void StreamFuture::wait() {
         std::unique_lock locker(mutex);
         cond.wait(locker, [=]() { return isDone; });
-        cudaCheck(cudaGetLastError());
+        check(cudaGetLastError());
     }
 
     std::unique_ptr<StreamFuture> StreamFuture::makeFuture() {

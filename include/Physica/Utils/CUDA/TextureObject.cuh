@@ -60,7 +60,7 @@ namespace Physica::Utils {
                 channelDesc = cudaCreateChannelDesc<double>();
             else
                 channelDesc = cudaCreateChannelDesc<T>();
-            cudaCheck(cudaMallocArray(&resDesc.res.array.array, &channelDesc, minor, major));
+            check(cudaMallocArray(&resDesc.res.array.array, &channelDesc, minor, major));
         }
 
         cudaTextureDesc texDesc;
@@ -72,7 +72,7 @@ namespace Physica::Utils {
             texDesc.readMode = cudaReadModeElementType;
             texDesc.normalizedCoords = 0;
         }
-        cudaCheck(cudaCreateTextureObject(&texObj, &resDesc, &texDesc, nullptr));
+        check(cudaCreateTextureObject(&texObj, &resDesc, &texDesc, nullptr));
         assert(texObj != 0 && "[Error]: We have assumed null is 0, but it is not the case");
     }
 
@@ -95,7 +95,7 @@ namespace Physica::Utils {
         const size_t major = m.getMaxMajor();
         const size_t minor = m.getMaxMinor();
         const size_t spitch = minor * sizeof(T);
-        cudaCheck(cudaMemcpy2DToArray(getArray(), 0, 0, m.getDerived().data(), spitch, spitch, major, cudaMemcpyHostToDevice));
+        check(cudaMemcpy2DToArray(getArray(), 0, 0, m.getDerived().data(), spitch, spitch, major, cudaMemcpyHostToDevice));
     }
 
     template<class T>

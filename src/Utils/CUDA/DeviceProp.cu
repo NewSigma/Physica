@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Weibo He.
+ * Copyright 2022-2024 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -18,7 +18,7 @@
  */
 #include <iostream>
 #include "Physica/Utils/CUDA/DeviceProp.cuh"
-#include "Physica/Core/Exception/CudaException.cuh"
+#include "Physica/Core/Exception/CUDAException.cuh"
 
 namespace Physica::Utils {
     std::ostream& DeviceProp::printDeviceProp(unsigned int device, std::ostream& os) const {
@@ -86,25 +86,14 @@ namespace Physica::Utils {
     }
 
     DeviceProp::DeviceProp() {
-        cudaError_t code;
-        code = cudaDriverGetVersion(&driverVersion);
-        if (code != cudaError_t::cudaSuccess)
-            throw Core::CudaException(code);
-
-        code = cudaRuntimeGetVersion(&runtimeVersion);
-        if (code != cudaError_t::cudaSuccess)
-            throw Core::CudaException(code);
+        check(cudaDriverGetVersion(&driverVersion));
+        check(cudaRuntimeGetVersion(&runtimeVersion));
 
         int deviceCount = 0;
-        code = cudaGetDeviceCount(&deviceCount);
-        if (code != cudaError_t::cudaSuccess)
-            throw Core::CudaException(code);
-
+        check(cudaGetDeviceCount(&deviceCount));
         propList.resize(deviceCount);
         for (size_t i = 0; i < propList.getLength(); ++i) {
-            code = cudaGetDeviceProperties(&propList[i], i);
-            if (code != cudaError_t::cudaSuccess)
-                throw Core::CudaException(code);
+            check(cudaGetDeviceProperties(&propList[i], i));
             if (getProperty(i).warpSize != WarpSize) {
                 std::cerr << "[Error]: WarpSize is not standard\n";
                 exit(EXIT_FAILURE);

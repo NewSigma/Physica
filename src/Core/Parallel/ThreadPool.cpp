@@ -68,7 +68,9 @@ namespace Physica::Core {
     }
 
     void ThreadPool::shouldExit() noexcept {
+        poolMutex.lock();
         exit = true;
+        poolMutex.unlock();
         cond.notify_all();
     }
 
@@ -110,12 +112,12 @@ namespace Physica::Core {
                 cond.notify_one();
                 task->execute();
             }
-            else if (!exit) {
+            else {
                 std::unique_lock poolLocker(poolMutex);
+                if (exit)
+                    return;
                 cond.wait(poolLocker);
             }
-            else
-                return;
         }
     }
 }

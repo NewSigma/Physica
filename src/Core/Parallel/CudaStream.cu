@@ -19,7 +19,7 @@
 #include <cassert>
 #include <thread>
 #include <Physica/Core/Parallel/CudaStream.cuh>
-#include <Physica/Core/Exception/CudaException.cuh>
+#include <Physica/Core/Exception/CUDAException.cuh>
 
 namespace Physica::Core {
     CudaStream::CudaStream() {
@@ -40,7 +40,7 @@ namespace Physica::Core {
     }
 
     void CudaStream::wait() const {
-        cudaCheck(cudaStreamSynchronize(stream));
+        check(cudaStreamSynchronize(stream));
     }
 
     void CudaStream::swap(CudaStream& __restrict obj) noexcept {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2021 Weibo He.
+ * Copyright 2020-2024 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -21,8 +21,8 @@
 #include <cstring>
 #include <iostream>
 #include <cassert>
-#include "Physica/Utils/Cycler.h"
-#include "Physica/Core/Exception/SyscallException.h"
+#include <Physica/Utils/Cycler.h>
+#include <Physica/Core/Exception/SystemException.h>
 
 namespace Physica::Utils {
     /*!
@@ -154,12 +154,12 @@ namespace Physica::Utils {
         while (true) {
             oldCycles = result;
             if (gettimeofday(&startTime, nullptr) != 0) [[unlikely]]
-                throw Core::SyscallException();
+                throw Core::SystemException();
 
             const uint64_t startCycles = now();
             while (true) {
                 if (gettimeofday(&stopTime, nullptr) != 0) [[unlikely]]
-                    throw Core::SyscallException();
+                    throw Core::SystemException();
 
                 const uint64_t stopCycles = now();
                 const uint64_t micros = (stopTime.tv_usec - startTime.tv_usec) +

@@ -18,7 +18,7 @@
  */
 #pragma once
 
-#include <Physica/Core/Exception/CudaException.cuh>
+#include <Physica/Core/Exception/CUDAException.cuh>
 
 namespace Physica::Core {
     class PHYSICA_API CudaEvent {
@@ -38,6 +38,6 @@ namespace Physica::Core {
     };
 
     inline void CudaEvent::wait() {
-        cudaCheck(cudaEventSynchronize(event));
+        check(cudaEventSynchronize(event));
     }
 }

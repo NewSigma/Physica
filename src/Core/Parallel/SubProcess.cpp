@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Weibo He.
+ * Copyright 2022-2024 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -21,8 +21,8 @@
 #include <signal.h>
 #include <sys/wait.h>
 #include <sys/prctl.h>
-#include "Physica/Core/Parallel/SubProcess.h"
-#include "Physica/Core/Exception/SyscallException.h"
+#include <Physica/Core/Parallel/SubProcess.h>
+#include <Physica/Core/Exception/SystemException.h>
 
 namespace Physica::Core {
     SubProcess::SubProcess() : task(), pid(-1), nice_incr(0) {}
@@ -37,7 +37,7 @@ namespace Physica::Core {
     ProcessFuture SubProcess::execute() {
         pid = fork();
         if (pid == -1)
-            throw SyscallException();
+            throw SystemException();
         else if (pid == 0) {
             prctl(PR_SET_PDEATHSIG, SIGTERM);
             /* Set nice */ {

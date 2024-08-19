@@ -89,8 +89,8 @@ namespace Physica::Core {
         try {
             return traceList.emplace_front(size, type);
         }
-        catch (CudaException& e) {
-            if (e.getCode() != cudaErrorMemoryAllocation)
+        catch (CUDAException& e) {
+            if (e.code() != cudaErrorMemoryAllocation)
                 throw e;
         }
         reserveList.clear();

@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Weibo He.
+ * Copyright 2022-2024 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -19,7 +19,7 @@
 #include <errno.h>
 #include <fstream>
 #include "Physica/Core/Parallel/PBSWarpper.h"
-#include "Physica/Core/Exception/SyscallException.h"
+#include "Physica/Core/Exception/SystemException.h"
 #include "Physica/Core/Exception/BadFileFormatException.h"
 
 namespace Physica::Core {

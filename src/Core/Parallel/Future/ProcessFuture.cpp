@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Weibo He.
+ * Copyright 2022-2024 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -22,8 +22,8 @@
 #include <unistd.h>
 #include <signal.h>
 #include <sys/wait.h>
-#include "Physica/Core/Parallel/Future/ProcessFuture.h"
-#include "Physica/Core/Exception/SyscallException.h"
+#include <Physica/Core/Parallel/Future/ProcessFuture.h>
+#include <Physica/Core/Exception/SystemException.h>
 
 namespace Physica::Core {
     ProcessFuture::ProcessFuture() : error(-1), isValid(false) {}
@@ -41,7 +41,7 @@ namespace Physica::Core {
         pid_t endPid = waitpid(pid, &status, 0);
         if (endPid <= 0) {
             fprintf(stderr, "[Error]: Failed to wait for chile processes.\n");
-            throw SyscallException();
+            throw SystemException();
         }
         finished = true;
 

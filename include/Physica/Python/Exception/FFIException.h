@@ -19,20 +19,35 @@
 #pragma once
 
 #include <ffi.h>
+#include <system_error>
 #include <Physica/Macro.h>
-#include <stdexcept>
 
 namespace Physica::Python {
-    class PHYSICA_API FFIException : public std::exception {
-        ffi_status status;
+    class PHYSICA_API FFIException : public std::system_error {
+        class Impl final : public std::error_category {
+        public:
+            [[nodiscard]] const char* name() const noexcept override final { return "FFIException"; }
+            [[nodiscard]] std::string message(int code) const override final {
+                switch (code) {
+                case ffi_status::FFI_OK:
+                    return "No error";
+                case ffi_status::FFI_BAD_ABI:
+                    return "Bad ABI";
+                case ffi_status::FFI_BAD_TYPEDEF:
+                    return "Bad typedef";
+                default:
+                    return "Unknown";
+                }
+            }
+        };
     public:
-        FFIException(ffi_status status_) : status(status_) {}
-        ~FFIException() noexcept override = default;
-        inline const char* what() const noexcept override;
+        FFIException(ffi_status code) : std::system_error(code, Impl()) {}
     };
+}
 
-    inline const char* FFIException::what() const noexcept {
-        constexpr static const char* msg[3]{"Bad typedef", "Bad ABI", "Bad arg type"};
-        return msg[int(status) - 1];
+namespace Physica {
+    inline void check(ffi_status err) {
+        if (err != FFI_OK) [[unlikely]]
+            throw Physica::Python::FFIException(err);
     }
 }

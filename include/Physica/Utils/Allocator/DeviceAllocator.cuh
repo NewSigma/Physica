@@ -161,7 +161,7 @@ namespace Physica::Utils {
         ::new (static_cast<void*>(p.get())) value_type(std::forward<Args>(args)...);
     #else
         value_type temp(std::forward<Args>(args)...);
-        cudaCheck(cudaMemcpy(p.get(), &temp, sizeof(value_type), cudaMemcpyHostToDevice));
+        check(cudaMemcpy(p.get(), &temp, sizeof(value_type), cudaMemcpyHostToDevice));
         if constexpr (!std::is_trivial<value_type>::value)
             temp.release(); //Ownership has been given to device
     #endif

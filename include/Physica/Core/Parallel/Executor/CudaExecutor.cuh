@@ -19,6 +19,7 @@
 #pragma once
 
 #include <Physica/Core/Parallel/StreamPool.cuh>
+#include <Physica/Core/Exception/CUDAException.cuh>
 #include "SequentialExecutor.h"
 
 namespace Physica::Core {
@@ -27,7 +28,7 @@ namespace Physica::Core {
      */
     class CudaExecutor : public SequentialExecutor {
     public:
-        static void wait() { cudaCheck(cudaDeviceSynchronize()); }
+        static void wait() { check(cudaDeviceSynchronize()); }
     };
 }
 

@@ -20,7 +20,7 @@
 
 #include "Physica/Core/IO/VASP/Poscar.h"
 #include "Physica/Core/IO/QE/PWscfOut.h"
-#include "Physica/Core/Exception/SyscallException.h"
+#include "Physica/Core/Exception/SystemException.h"
 #include "Physica/Core/Parallel/Executor/ProcessExecutor.h"
 #include "Physica/Core/Physics/MD/MDCell.h"
 #include "Physica/Utils/Unix/TempFile.h"
@@ -140,18 +140,18 @@ namespace Physica::Core {
             Utils::TempFile<N>& __restrict input, Utils::TempFile<N>& __restrict output) const {
         int fd[2];
         if (pipe(fd) == -1)
-            throw SyscallException();
+            throw SystemException();
 
         ProcessFuture future;
         future = ProcessExecutor::schedule([this, fd, &output]() {
             const int standardErr = dup(STDERR_FILENO);
             if (dup2(output.getFd(), STDOUT_FILENO) == -1) [[unlikely]]
-                throw SyscallException();
+                throw SystemException();
             if (dup2(output.getFd(), STDERR_FILENO) == -1) [[unlikely]]
-                throw SyscallException();
+                throw SystemException();
             close(fd[1]);
             if (dup2(fd[0], STDIN_FILENO) == -1) [[unlikely]]
-                throw SyscallException();
+                throw SystemException();
             close(fd[0]);
             /* Execute */ {
                 constexpr int bufferLength = 16; // 16 is enough for unsigned int
@@ -175,7 +175,7 @@ namespace Physica::Core {
         Utils::Array<char> buffer(size);
         fin.read(buffer.data(), size);
         if (write(fd[1], buffer.data(), size) == -1)
-            throw SyscallException();
+            throw SystemException();
         close(fd[1]);
         return future;
     }

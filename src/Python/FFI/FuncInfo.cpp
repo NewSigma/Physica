@@ -22,9 +22,7 @@
 
 namespace Physica::Python {
     FuncInfo::FuncInfo(unsigned int nargs, const ffi_type* rtype, const ffi_type** atypes) {
-        const auto err = ffi_prep_cif(&raw_cif, FFI_DEFAULT_ABI, nargs, const_cast<ffi_type*>(rtype), const_cast<ffi_type**>(atypes));
-        if (err != FFI_OK)
-            throw FFIException(err);
+        check(ffi_prep_cif(&raw_cif, FFI_DEFAULT_ABI, nargs, const_cast<ffi_type*>(rtype), const_cast<ffi_type**>(atypes)));
     }
 
     void FuncInfo::swap(This& __restrict obj) noexcept {

@@ -218,7 +218,3 @@ namespace std {
 }
 
 #include "ArrayImpl.h"
-
-#ifdef PHYSICA_CUDA
-    #include "Array.cuh"
-#endif
