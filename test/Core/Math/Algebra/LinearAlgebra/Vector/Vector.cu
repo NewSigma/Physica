@@ -42,7 +42,7 @@ int main() {
     {
         DeviceVector d_b(4);
         d_b = d_a;
-        StreamPool::getStream().wait();
+        CUDAContext::getInstance().wait();
         const VectorType b = d_b.toHost();
         if (a != b) {
             std::cout << "[Error]: Copy failed\n";
@@ -71,7 +71,7 @@ int main() {
         auto d_b = b.toDevice();
         VectorType result(len);
         DeviceVector d_result(len);
-        test_kernel<<<1, len, 0, StreamPool::getStream()>>>(asStruct(d_a), asStruct(d_b), asStruct(d_result), factor);
+        test_kernel<<<1, len, 0, CUDAContext::getInstance()>>>(asStruct(d_a), asStruct(d_b), asStruct(d_result), factor);
         d_result.toHostAsync(result);
         CudaExecutor::wait();
         if (!vectorNear(result, answer, 1E-7)) {

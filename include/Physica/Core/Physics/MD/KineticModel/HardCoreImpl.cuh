@@ -88,7 +88,7 @@ namespace Physica::Core {
         const size_t maxThread = Utils::DeviceProp::getInstance().getProperty(0).maxThreadsPerBlock;
         const unsigned int numThread = numParticle > maxThread ? maxThread : numParticle;
         Internal::HardCore_stepKernel<ScalarType, IsFixedBoundary, NumReplica>
-            <<<1, numThread, numThread * sizeof(ScalarType), StreamPool::getStream()>>>(asStruct(*this), deltaT, numStep);
+            <<<1, numThread, numThread * sizeof(ScalarType), CUDAContext::getInstance()>>>(asStruct(*this), deltaT, numStep);
     }
 
     template<class ScalarType, bool IsFixedBoundary, size_t NumReplica, RPMDIntegrator Integrator>
@@ -103,7 +103,7 @@ namespace Physica::Core {
         const size_t numParticle = ringPolymer.getNumParticle();
         auto phase = ringPolymer.asMatrix().col(0);
         d_phase.toHostAsync(lockedBuffer);
-        StreamPool::getStream().wait();
+        CUDAContext::getInstance().wait();
         phase = lockedBuffer;
     }
 
@@ -125,7 +125,7 @@ namespace Physica::Core {
         head = ringPolymer.getMassVec();
         head.toDeviceAsync(mass);
         repMass = reciprocal(mass);
-        StreamPool::getStream().wait();
+        CUDAContext::getInstance().wait();
     }
 
     template<class ScalarType, bool IsFixedBoundary, size_t NumReplica, RPMDIntegrator Integrator>

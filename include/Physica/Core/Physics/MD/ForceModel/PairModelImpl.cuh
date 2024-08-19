@@ -79,7 +79,7 @@ namespace Physica::Core {
             const InvLatticeMatrix& invLattice,
             const PositionMatrix& cartesianPos) {
         forceAsync<PageLockedVector, Executor>(lattice, invLattice, cartesianPos, swapBuffer);
-        StreamPool::getStream().wait();
+        CUDAContext::getInstance().wait();
         return swapBuffer;
     }
 
@@ -112,9 +112,9 @@ namespace Physica::Core {
         }
 
         Internal::PairModel_forceKernel<Derived>
-                <<<gridDims, numThread, numThread * sizeof(Vector3D), StreamPool::getStream()>>>(asStruct(Base::getDerived()));
+                <<<gridDims, numThread, numThread * sizeof(Vector3D), CUDAContext::getInstance()>>>(asStruct(Base::getDerived()));
         if constexpr (IsSmallCell)
-            Internal::PairModel_postForceKernel<Derived><<<gridDims.x, numThread, 0, StreamPool::getStream()>>>(asStruct(Base::getDerived()));
+            Internal::PairModel_postForceKernel<Derived><<<gridDims.x, numThread, 0, CUDAContext::getInstance()>>>(asStruct(Base::getDerived()));
         forceBuffer.col(0).toHostAsync(result);
     }
 
@@ -151,13 +151,13 @@ namespace Physica::Core {
         virialBuffer.resize(NumVirialElem, numParticle);
 
         Internal::PairModel_virialKernel<Derived>
-                <<<gridDims, numThread, numThread * sizeof(Vector3D), StreamPool::getStream()>>>(asStruct(Base::getDerived()));
+                <<<gridDims, numThread, numThread * sizeof(Vector3D), CUDAContext::getInstance()>>>(asStruct(Base::getDerived()));
         Internal::PairModel_postVirialKernel<Derived>
-                <<<1, NumVirialElem, 0, StreamPool::getStream()>>>(asStruct(Base::getDerived()));
+                <<<1, NumVirialElem, 0, CUDAContext::getInstance()>>>(asStruct(Base::getDerived()));
 
         auto head = swapBuffer.head(NumVirialElem);
         virialBuffer.col(0).toHostAsync(head);
-        StreamPool::getStream().wait();
+        CUDAContext::getInstance().wait();
         LatticeMatrix result(Dim, Dim);
         for (int r = 0; r < Dim; ++r)
             for (int c = 0; c < Dim; ++c)
@@ -258,7 +258,7 @@ namespace Physica::Core {
             const PositionMatrix& cartesianPos,
             dim3& gridDims,
             size_t& numThread) {
-        StreamPool::getStream().wait(); //Ensure reentrancy
+        CUDAContext::getInstance().wait(); //Ensure reentrancy
         swapBuffer = cartesianPos.flatten();
         auto flatten_pos = cell.getPos().flatten();
         swapBuffer.toDeviceAsync(flatten_pos);

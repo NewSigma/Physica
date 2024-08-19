@@ -18,10 +18,10 @@
  */
 #pragma once
 
+#include <Physica/Core/Parallel/CUDAContext.cuh>
+#include <Physica/Core/Parallel/Future/StreamFuture.cuh>
+#include <Physica/Core/MultiPrecision/Differentiable.cuh>
 #include "TraceSegment.h"
-#include "Physica/Core/Parallel/StreamPool.cuh"
-#include "Physica/Core/Parallel/Future/StreamFuture.cuh"
-#include "Physica/Core/MultiPrecision/Differentiable.cuh"
 
 namespace Physica::Core {
     template<class ScalarType, unsigned int Order>

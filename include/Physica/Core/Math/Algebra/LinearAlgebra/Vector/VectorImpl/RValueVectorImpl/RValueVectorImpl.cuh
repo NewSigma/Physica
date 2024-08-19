@@ -18,8 +18,8 @@
  */
 #pragma once
 
-#include "Physica/Utils/CUDA/PlainStruct.h"
-#include "Physica/Core/Parallel/StreamPool.cuh"
+#include <Physica/Utils/CUDA/PlainStruct.h>
+#include <Physica/Core/Parallel/CUDAContext.cuh>
 
 namespace Physica::Core {
     namespace Internal {
@@ -55,7 +55,7 @@ namespace Physica::Core {
         const size_t length = getLength();
         const unsigned int numThread = std::min(length, MaxThreadPerBlock);
         const unsigned int numBlock = (length + numThread - 1) / numThread;
-        kernel<<<numBlock, numThread, 0, StreamPool::getStream()>>>(asStruct(Base::getDerived()), asStruct(target.getDerived()));
+        kernel<<<numBlock, numThread, 0, CUDAContext::getInstance()>>>(asStruct(Base::getDerived()), asStruct(target.getDerived()));
     #else
         assignToImpl(target.getDerived());
     #endif

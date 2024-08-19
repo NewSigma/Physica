@@ -83,7 +83,7 @@ namespace Physica::Core {
         VectorType result(m.getRow(), ExpressionType::Sum);
         const size_t numThread = std::min(m.getColumn(), VectorType::MaxThreadPerBlock);
         Internal::DiffMatrixProduct_gemvKernel<MatrixType, VectorType>
-                <<<m.getRow(), numThread, numThread * sizeof(PlainScalar), StreamPool::getStream()>>>(asStruct(m), asStruct(v), asStruct(dots), asStruct(result));
+                <<<m.getRow(), numThread, numThread * sizeof(PlainScalar), CUDAContext::getInstance()>>>(asStruct(m), asStruct(v), asStruct(dots), asStruct(result));
         return result;
     }
 }

@@ -12,6 +12,10 @@ install(DIRECTORY ${CMAKE_SOURCE_DIR}/include/Physica/Core DESTINATION include/P
 #############################################Options##############################################
 target_link_libraries(PhysicaCore PhysicaLogger PhysicaUtils ${FFTW3_LIBRARIES} ${FFTW3f_LIBRARIES} ${HDF5_CXX_SHARED_LIBRARY} pthread)
 
+if(${PHYSICA_CUDA})
+    target_link_libraries(PhysicaCore CUDA::cublas)
+endif()
+
 if(${PHYSICA_MKL})
     target_link_libraries(PhysicaCore MKL::MKL)
 endif()

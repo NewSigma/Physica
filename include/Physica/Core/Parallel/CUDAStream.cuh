@@ -16,9 +16,25 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include "Physica/Core/Parallel/StreamPool.cuh"
-#include "Physica/Core/Parallel/ThreadPool.h"
+#pragma once
+
+#include <cuda_runtime.h>
+#include <Physica/Macro.h>
 
 namespace Physica::Core {
-    thread_local CudaStream StreamPool::stream = CudaStream();
+    class PHYSICA_API CUDAStream {
+        cudaStream_t stream;
+    public:
+        CUDAStream();
+        CUDAStream(const CUDAStream&) = delete;
+        CUDAStream(CUDAStream&& obj) noexcept;
+        ~CUDAStream();
+        /* Operators */
+        CUDAStream& operator=(CUDAStream obj) noexcept { swap(obj); return *this; }
+        [[nodiscard]] operator cudaStream_t() const noexcept { return stream; }
+        /* Operations */
+        [[nodiscard]] cudaError_t query() const;
+        void wait() const;
+        void swap(CUDAStream& __restrict obj) noexcept;
+    };
 }

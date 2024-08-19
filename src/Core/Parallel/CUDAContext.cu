@@ -16,27 +16,26 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#pragma once
-
-#include <cuda_runtime.h>
-#include "Physica/Macro.h"
+#include <Physica/Core/Parallel/CUDAContext.cuh>
+#include <Physica/Core/Exception/CUDA/cuBLAS.cuh>
 
 namespace Physica::Core {
-    class StreamPool;
+    CUDAContext::CUDAContext() : CUDAStream(), cublas(nullptr) {}
 
-    class PHYSICA_API CudaStream {
-        cudaStream_t stream;
-    public:
-        CudaStream();
-        CudaStream(const CudaStream&) = delete;
-        CudaStream(CudaStream&& obj) noexcept;
-        ~CudaStream();
-        /* Operators */
-        CudaStream& operator=(CudaStream obj) noexcept { swap(obj); return *this; }
-        [[nodiscard]] operator cudaStream_t() const noexcept { return stream; }
-        /* Operations */
-        [[nodiscard]] cudaError_t query() const;
-        void wait() const;
-        void swap(CudaStream& __restrict obj) noexcept;
-    };
+    CUDAContext::~CUDAContext() {
+        cublasDestroy(cublas);
+    }
+
+    CUDAContext::operator cublasContext*() {
+        if (cublas == nullptr) {
+            check(cublasCreate(&cublas));
+            check(cublasSetStream(cublas, getStream()));
+        }
+        return cublas;
+    }
+
+    CUDAContext& CUDAContext::getInstance() noexcept {
+        thread_local static CUDAContext instance{};
+        return instance;
+    }
 }

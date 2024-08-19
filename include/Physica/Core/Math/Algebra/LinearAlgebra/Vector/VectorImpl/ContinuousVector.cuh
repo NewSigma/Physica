@@ -18,7 +18,7 @@
  */
 #pragma once
 
-#include <Physica/Core/Exception/CUDAException.cuh>
+#include <Physica/Core/Exception/CUDA/CUDA.cuh>
 #include "ContinuousVector.h"
 #include "LValueVector.cuh"
 #include "ContinuousVectorImpl/ContinuousVectorBlock.cuh"
@@ -80,14 +80,14 @@ namespace Physica::Core {
     template<class OtherDerived>
     void device_obj<ContinuousVector<Derived>>::toHost(ContinuousVector<OtherDerived>& obj) const {
         toHostAsync(obj);
-        StreamPool::getStream().wait();
+        CUDAContext::getInstance().wait();
     }
 
     template<class Derived>
     template<class OtherDerived>
     void device_obj<ContinuousVector<Derived>>::toHostAsync(ContinuousVector<OtherDerived>& obj) const {
         obj.resize(Base::getLength());
-        check(cudaMemcpyAsync(obj.data(), data(), Base::getLength() * sizeof(ScalarType), cudaMemcpyKind::cudaMemcpyDeviceToHost, StreamPool::getStream()));
+        check(cudaMemcpyAsync(obj.data(), data(), Base::getLength() * sizeof(ScalarType), cudaMemcpyKind::cudaMemcpyDeviceToHost, CUDAContext::getInstance()));
     }
 
     template<class Derived>
@@ -165,7 +165,7 @@ namespace Physica::Core {
     void ContinuousVector<Derived>::toDevice(device_obj<ContinuousVector<OtherDerived>>& obj) const {
         toDeviceAsync(obj);
         if constexpr (!std::is_trivially_copy_constructible<OtherDerived>::value)
-            StreamPool::getStream().wait();
+            CUDAContext::getInstance().wait();
     }
 
     template<class Derived>
@@ -184,7 +184,7 @@ namespace Physica::Core {
              * We are using GCC 9.4.0 + nvcc 12.6, Ubuntu 20.04
              */
             const device_obj<ContinuousVector<OtherDerived>>& const_obj = obj;
-            check(cudaMemcpyAsync((void*)const_obj.data(), data(), size, cudaMemcpyKind::cudaMemcpyHostToDevice, StreamPool::getStream()));
+            check(cudaMemcpyAsync((void*)const_obj.data(), data(), size, cudaMemcpyKind::cudaMemcpyHostToDevice, CUDAContext::getInstance()));
         }
     }
 }

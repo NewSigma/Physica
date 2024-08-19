@@ -121,6 +121,10 @@ endif()
 
 if(${PHYSICA_CUDA})
     include_directories(SYSTEM ${CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES})
+    set(CUDA_MATH_INCLUDE_DIRECTORIES ${CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES}/../../../../../math_libs/include)
+    if (EXISTS ${CUDA_MATH_INCLUDE_DIRECTORIES}) # NVIDIA HPC SDK seems do not put math includes in standard location
+        include_directories(SYSTEM ${CUDA_MATH_INCLUDE_DIRECTORIES})
+    endif()
 endif()
 
 if(${PHYSICA_PYTHON})

@@ -18,32 +18,32 @@
  */
 #include <cassert>
 #include <thread>
-#include <Physica/Core/Parallel/CudaStream.cuh>
-#include <Physica/Core/Exception/CUDAException.cuh>
+#include <Physica/Core/Parallel/CUDAStream.cuh>
+#include <Physica/Core/Exception/CUDA/CUDA.cuh>
 
 namespace Physica::Core {
-    CudaStream::CudaStream() {
+    CUDAStream::CUDAStream() {
         cudaStreamCreate(&stream);
     }
 
-    CudaStream::CudaStream(CudaStream&& obj) noexcept : stream(obj.stream) {
+    CUDAStream::CUDAStream(CUDAStream&& obj) noexcept : stream(obj.stream) {
         obj.stream = nullptr;
     }
 
-    CudaStream::~CudaStream() {
+    CUDAStream::~CUDAStream() {
         cudaStreamDestroy(stream);
         stream = nullptr;
     }
 
-    cudaError_t CudaStream::query() const {
+    cudaError_t CUDAStream::query() const {
         return cudaStreamQuery(stream);
     }
 
-    void CudaStream::wait() const {
+    void CUDAStream::wait() const {
         check(cudaStreamSynchronize(stream));
     }
 
-    void CudaStream::swap(CudaStream& __restrict obj) noexcept {
+    void CUDAStream::swap(CUDAStream& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         std::swap(stream, obj.stream);
     }

@@ -84,12 +84,12 @@ namespace Physica::Core {
         assert(!empty());
         const size_t numThread = getLength() < MaxThreadPerBlock ? getLength() : MaxThreadPerBlock;
         const size_t numBlock = (getLength() + numThread - 1) / numThread;
-        Internal::TraceSegment_reverseKernel<<<numBlock, numThread, 0, StreamPool::getStream()>>>(asStruct(*this));
+        Internal::TraceSegment_reverseKernel<<<numBlock, numThread, 0, CUDAContext::getInstance()>>>(asStruct(*this));
     }
 
     template<class ScalarType, unsigned int Order>
     void device_obj<TraceSegment<ScalarType, Order>>::zero_grad() {
-        cudaMemsetAsync((void*)grads.data(), 0, getLength() * sizeof(ScalarType), StreamPool::getStream());
+        cudaMemsetAsync((void*)grads.data(), 0, getLength() * sizeof(ScalarType), CUDAContext::getInstance());
     }
 
     template<class ScalarType, unsigned int Order>
@@ -98,7 +98,7 @@ namespace Physica::Core {
         This result(getLength());
         const size_t numThread = getLength() < MaxThreadPerBlock ? getLength() : MaxThreadPerBlock;
         const size_t numBlock = (getLength() + numThread - 1) / numThread;
-        Internal::TraceSegment_copyKernel<<<numBlock, numThread, 0, StreamPool::getStream()>>>(asStruct(*this), asStruct(result));
+        Internal::TraceSegment_copyKernel<<<numBlock, numThread, 0, CUDAContext::getInstance()>>>(asStruct(*this), asStruct(result));
         result.values = values;
         zero_grad();
         return result;
@@ -231,14 +231,14 @@ namespace Physica::Core {
 
     template<class ScalarType, unsigned int Order>
     inline void device_obj<TraceSegment<ScalarType, Order>>::init(ScalarType value) {
-        Internal::TraceSegment_setKernel<<<1, 1, 0, StreamPool::getStream()>>>(asStruct(*this), value);
+        Internal::TraceSegment_setKernel<<<1, 1, 0, CUDAContext::getInstance()>>>(asStruct(*this), value);
     }
 
     template<class ScalarType, unsigned int Order>
     inline void device_obj<TraceSegment<ScalarType, Order>>::init(const HostValueVector& values_) {
         values_.toDeviceAsync(values);
         auto future = StreamFuture::makeFuture();
-        cudaMemsetAsync((void*)records.data(), 0, getLength() * sizeof(DiffRecord), StreamPool::getStream());
+        cudaMemsetAsync((void*)records.data(), 0, getLength() * sizeof(DiffRecord), CUDAContext::getInstance());
         zero_grad();
         future->wait();
     }

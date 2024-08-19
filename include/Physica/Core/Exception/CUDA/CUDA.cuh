@@ -26,7 +26,7 @@ namespace Physica::Core {
         class Impl final : public std::error_category {
         public:
             /* Getters */
-            [[nodiscard]] const char* name() const noexcept override final { return "CUDAException"; }
+            [[nodiscard]] const char* name() const noexcept override final { return "CUDA Runtime"; }
             [[nodiscard]] std::string message(int code) const override final { return cudaGetErrorString(cudaError_t(code)); }
         };
     public:

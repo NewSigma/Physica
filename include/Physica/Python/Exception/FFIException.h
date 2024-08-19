@@ -26,7 +26,7 @@ namespace Physica::Python {
     class PHYSICA_API FFIException : public std::system_error {
         class Impl final : public std::error_category {
         public:
-            [[nodiscard]] const char* name() const noexcept override final { return "FFIException"; }
+            [[nodiscard]] const char* name() const noexcept override final { return "FFI"; }
             [[nodiscard]] std::string message(int code) const override final {
                 switch (code) {
                 case ffi_status::FFI_OK:

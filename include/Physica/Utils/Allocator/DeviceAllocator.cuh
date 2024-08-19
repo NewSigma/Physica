@@ -20,7 +20,7 @@
 
 #include <cstdlib>
 #include <memory>
-#include <Physica/Core/Parallel/StreamPool.cuh>
+#include <Physica/Core/Parallel/CUDAContext.cuh>
 #include <Physica/Utils/CUDA/device_obj.cuh>
 #include "Allocator.h"
 
@@ -133,7 +133,7 @@ namespace Physica::Utils {
     #else
         pointer p;
         if constexpr (CUDADevAttr::MemoryPoolsSupported)
-            cudaMallocAsync(&p, n * sizeof(value_type), Core::StreamPool::getStream());
+            cudaMallocAsync(&p, n * sizeof(value_type), Core::CUDAContext::getInstance());
         else
             cudaMalloc(&p, n * sizeof(value_type));
     #endif
@@ -147,7 +147,7 @@ namespace Physica::Utils {
     #else
         if (p != nullptr) { // No unnecessary cuda api call to make profiler output cleaner
             if constexpr (CUDADevAttr::MemoryPoolsSupported)
-                cudaFreeAsync(p, Core::StreamPool::getStream());
+                cudaFreeAsync(p, Core::CUDAContext::getInstance());
             else
                 cudaFree(p);
         }
@@ -175,7 +175,7 @@ namespace Physica::Utils {
         p->~value_type();
     #else
         value_type temp;
-        cudaMemcpyAsync(&temp, p.get(), sizeof(value_type), cudaMemcpyDeviceToHost, Core::StreamPool::getStream());
+        cudaMemcpyAsync(&temp, p.get(), sizeof(value_type), cudaMemcpyDeviceToHost, Core::CUDAContext::getInstance());
     #endif
     }
 }

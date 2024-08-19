@@ -64,7 +64,7 @@ namespace Physica::Core {
     Vector<typename CPUGPUModel<HostModel, DeviceModel>::ScalarType> CPUGPUModel<HostModel, DeviceModel>::force(const MDCellType& cell) {
         Vector<ScalarType> result(cell.getDOF());
         forceAsync<Vector<ScalarType>, Executor>(cell, result);
-        StreamPool::getStream().wait();
+        CUDAContext::getInstance().wait();
         return result;
     }
 

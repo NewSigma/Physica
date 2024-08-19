@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2024 Weibo He.
+ * Copyright 2022-2024 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -18,25 +18,25 @@
  */
 #pragma once
 
-#include <Physica/Core/Parallel/CUDAContext.cuh>
-#include <Physica/Core/Exception/CUDA/CUDA.cuh>
-#include "SequentialExecutor.h"
+#include <system_error>
+#include <cublas_v2.h>
 
 namespace Physica::Core {
-    /**
-     * Single thread with cuda support
-     */
-    class CudaExecutor : public SequentialExecutor {
+    class PHYSICA_API cuBLASException : public std::system_error {
+        class Impl final : public std::error_category {
+        public:
+            /* Getters */
+            [[nodiscard]] const char* name() const noexcept override final { return "cuBLAS"; }
+            [[nodiscard]] std::string message(int code) const override final { return cublasGetStatusString(cublasStatus_t(code)); }
+        };
     public:
-        static void wait() { check(cudaDeviceSynchronize()); }
+        cuBLASException(cublasStatus_t code) noexcept : std::system_error(code, Impl()) {}
     };
 }
 
 namespace Physica {
-    template<>
-    class Traits<Core::CudaExecutor> {
-    public:
-        constexpr static bool isCPUEnabled = false;
-        constexpr static bool isCudaEnabled = true;
-    };
+    inline void check(cublasStatus_t err) {
+        if (err != CUBLAS_STATUS_SUCCESS) [[unlikely]]
+            throw Physica::Core::cuBLASException(err);
+    }
 }

@@ -17,8 +17,8 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include <iostream>
-#include "Physica/Utils/CUDA/DeviceProp.cuh"
-#include "Physica/Core/Exception/CUDAException.cuh"
+#include <Physica/Utils/CUDA/DeviceProp.cuh>
+#include <Physica/Core/Exception/CUDA/CUDA.cuh>
 
 namespace Physica::Utils {
     std::ostream& DeviceProp::printDeviceProp(unsigned int device, std::ostream& os) const {

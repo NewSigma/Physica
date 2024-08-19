@@ -17,12 +17,12 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include <Physica/Core/Parallel/Future/StreamFuture.cuh>
-#include <Physica/Core/Parallel/StreamPool.cuh>
-#include <Physica/Core/Exception/CUDAException.cuh>
+#include <Physica/Core/Parallel/CUDAContext.cuh>
+#include <Physica/Core/Exception/CUDA/CUDA.cuh>
 
 namespace Physica::Core {
     StreamFuture::StreamFuture() : isDone(false) {
-        check(cudaLaunchHostFunc(StreamPool::getStream(), &StreamFuture::taskDoneCallback, this));
+        check(cudaLaunchHostFunc(CUDAContext::getInstance(), &StreamFuture::taskDoneCallback, this));
     }
 
     StreamFuture::~StreamFuture() {

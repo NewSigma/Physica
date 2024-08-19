@@ -21,10 +21,10 @@
 #include <iostream>
 #include <algorithm>
 #include <fstream>
-#include "Physica/Core/Parallel/Executor/ThreadExecutor.h"
-#include "Physica/Core/Parallel/StreamPool.cuh"
-#include "Physica/Core/Physics/MD/RPMD.h"
-#include "Physica/Core/Physics/MD/KineticModel/HardCore.cuh"
+#include <Physica/Core/Parallel/Executor/ThreadExecutor.h>
+#include <Physica/Core/Parallel/CUDAContext.cuh>
+#include <Physica/Core/Physics/MD/RPMD.h>
+#include <Physica/Core/Physics/MD/KineticModel/HardCore.cuh>
 
 using namespace Physica::Core;
 using namespace Physica::Utils;

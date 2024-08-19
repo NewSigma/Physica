@@ -43,7 +43,7 @@ namespace Physica::Core {
         using TracerType = device_obj<DiffTracer<ScalarType, 1>>;
         auto& segment = TracerType::getInstance().pushSegment(1, ExpressionType::Ln);
         Internal::ElementaryFunction_calcKernel<ScalarType, ExpressionType::Ln>
-                <<<1, 1, 0, StreamPool::getStream()>>>(asStruct(segment), asStruct(s));
+                <<<1, 1, 0, CUDAContext::getInstance()>>>(asStruct(segment), asStruct(s));
         return segment[0];
     }
 }

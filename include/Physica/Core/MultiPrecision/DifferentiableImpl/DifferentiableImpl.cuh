@@ -87,19 +87,19 @@ namespace Physica::Core {
     inline device_obj<Differentiable<ScalarType, DiffMode::Reverse, Order>>
     device_obj<Differentiable<ScalarType, DiffMode::Reverse, Order>>::operator-() const {
         auto& segment = TracerType::getInstance().pushSegment(1, ExpressionType::Minus);
-        Internal::Differentiable_minusKernel<ScalarType, Order><<<1, 1, 0, StreamPool::getStream()>>>(asStruct(segment), asStruct(*this));
+        Internal::Differentiable_minusKernel<ScalarType, Order><<<1, 1, 0, CUDAContext::getInstance()>>>(asStruct(segment), asStruct(*this));
         return segment[0];
     }
 
     template<class ScalarType, unsigned int Order>
     inline void device_obj<Differentiable<ScalarType, DiffMode::Reverse, Order>>::reverse() {
-        Internal::Differentiable_reverseKernel<ScalarType, Order><<<1, 1, 0, StreamPool::getStream()>>>(asStruct(*this));
+        Internal::Differentiable_reverseKernel<ScalarType, Order><<<1, 1, 0, CUDAContext::getInstance()>>>(asStruct(*this));
         TracerType::getInstance().reverse_from(*this);
     }
 
     template<class ScalarType, unsigned int Order>
     inline void device_obj<Differentiable<ScalarType, DiffMode::Reverse, Order>>::reverse_to(This to) {
-        Internal::Differentiable_reverseKernel<ScalarType, Order><<<1, 1, 0, StreamPool::getStream()>>>(asStruct(*this));
+        Internal::Differentiable_reverseKernel<ScalarType, Order><<<1, 1, 0, CUDAContext::getInstance()>>>(asStruct(*this));
         TracerType::getInstance().reverse(*this, to);
     }
 
@@ -107,7 +107,7 @@ namespace Physica::Core {
     ScalarType device_obj<Differentiable<ScalarType, DiffMode::Reverse, Order>>::toHost_value() const {
         ScalarType result;
         toHostAsync_value(result);
-        StreamPool::getStream().wait();
+        CUDAContext::getInstance().wait();
         return result;
     }
 
@@ -115,18 +115,18 @@ namespace Physica::Core {
     ScalarType device_obj<Differentiable<ScalarType, DiffMode::Reverse, Order>>::toHost_grad() const {
         ScalarType result;
         toHostAsync_grad(result);
-        StreamPool::getStream().wait();
+        CUDAContext::getInstance().wait();
         return result;
     }
 
     template<class ScalarType, unsigned int Order>
     void device_obj<Differentiable<ScalarType, DiffMode::Reverse, Order>>::toHostAsync_value(ScalarType& value) const {
-        check(cudaMemcpyAsync(&value, pValue, sizeof(ScalarType), cudaMemcpyKind::cudaMemcpyDeviceToHost, StreamPool::getStream()));
+        check(cudaMemcpyAsync(&value, pValue, sizeof(ScalarType), cudaMemcpyKind::cudaMemcpyDeviceToHost, CUDAContext::getInstance()));
     }
 
     template<class ScalarType, unsigned int Order>
     void device_obj<Differentiable<ScalarType, DiffMode::Reverse, Order>>::toHostAsync_grad(ScalarType& grad) const {
-        check(cudaMemcpyAsync(&grad, pGrad, sizeof(ScalarType), cudaMemcpyKind::cudaMemcpyDeviceToHost, StreamPool::getStream()));
+        check(cudaMemcpyAsync(&grad, pGrad, sizeof(ScalarType), cudaMemcpyKind::cudaMemcpyDeviceToHost, CUDAContext::getInstance()));
     }
 
     template<class ScalarType, unsigned int Order>
@@ -143,7 +143,7 @@ namespace Physica::Core {
         using TracerType = device_obj<DiffTracer<ScalarType, Order>>;
         auto& segment = TracerType::getInstance().pushSegment(1, ExpressionType::Add);
         Internal::Differentiable_calcKernel<ScalarType, Order, ExpressionType::Add>
-                <<<1, 1, 0, StreamPool::getStream()>>>(asStruct(segment), asStruct(s1), asStruct(s2));
+                <<<1, 1, 0, CUDAContext::getInstance()>>>(asStruct(segment), asStruct(s1), asStruct(s2));
         return segment[0];
     }
 
@@ -154,7 +154,7 @@ namespace Physica::Core {
         using TracerType = device_obj<DiffTracer<ScalarType, Order>>;
         auto& segment = TracerType::getInstance().pushSegment(1, ExpressionType::Sub);
         Internal::Differentiable_calcKernel<ScalarType, Order, ExpressionType::Sub>
-                <<<1, 1, 0, StreamPool::getStream()>>>(asStruct(segment), asStruct(s1), asStruct(s2));
+                <<<1, 1, 0, CUDAContext::getInstance()>>>(asStruct(segment), asStruct(s1), asStruct(s2));
         return segment[0];
     }
 
@@ -165,7 +165,7 @@ namespace Physica::Core {
         using TracerType = device_obj<DiffTracer<ScalarType, Order>>;
         auto& segment = TracerType::getInstance().pushSegment(1, ExpressionType::Mul);
         Internal::Differentiable_calcKernel<ScalarType, Order, ExpressionType::Mul>
-                <<<1, 1, 0, StreamPool::getStream()>>>(asStruct(segment), asStruct(s1), asStruct(s2));
+                <<<1, 1, 0, CUDAContext::getInstance()>>>(asStruct(segment), asStruct(s1), asStruct(s2));
         return segment[0];
     }
 
@@ -176,7 +176,7 @@ namespace Physica::Core {
         using TracerType = device_obj<DiffTracer<ScalarType, Order>>;
         auto& segment = TracerType::getInstance().pushSegment(1, ExpressionType::Div);
         Internal::Differentiable_calcKernel<ScalarType, Order, ExpressionType::Div>
-                <<<1, 1, 0, StreamPool::getStream()>>>(asStruct(segment), asStruct(s1), asStruct(s2));
+                <<<1, 1, 0, CUDAContext::getInstance()>>>(asStruct(segment), asStruct(s1), asStruct(s2));
         return segment[0];
     }
 }

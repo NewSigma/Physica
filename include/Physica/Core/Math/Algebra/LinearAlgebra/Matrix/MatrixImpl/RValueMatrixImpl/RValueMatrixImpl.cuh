@@ -18,7 +18,7 @@
  */
 #pragma once
 
-#include <Physica/Core/Parallel/StreamPool.cuh>
+#include <Physica/Core/Parallel/CUDAContext.cuh>
 #include <Physica/Utils/CUDA/DeviceProp.cuh>
 #include <Physica/Utils/CUDA/PlainStruct.h>
 #include "RValueFlatten.cuh"
@@ -52,7 +52,7 @@ namespace Physica::Core {
         const unsigned int numThread = std::min(maxMinor, MaxThreadPerBlock);
         const unsigned int numBlockX = (maxMinor + numThread - 1) / numThread;
         const unsigned int numBlockY = maxMajor;
-        kernel<<<{numBlockX, numBlockY}, numThread, 0, StreamPool::getStream()>>>(asStruct(Base::getDerived()), asStruct(target.getDerived()));
+        kernel<<<{numBlockX, numBlockY}, numThread, 0, CUDAContext::getInstance()>>>(asStruct(Base::getDerived()), asStruct(target.getDerived()));
     #else
         using OtherScalar = typename OtherDerived::ScalarType;
         for (size_t major = 0; major < maxMajor; ++major) {

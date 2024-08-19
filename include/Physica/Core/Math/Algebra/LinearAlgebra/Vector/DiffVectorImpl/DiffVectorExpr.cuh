@@ -121,7 +121,7 @@ namespace Physica::Core {
             const size_t numThread = std::min(length, VectorType::MaxThreadPerBlock);
             const size_t numBlock = (length + numThread - 1) / numThread;
             Internal::DiffVectorExpr_unitaryOpKernel<Type, VectorType>
-                    <<<numBlock, numThread, 0, StreamPool::getStream()>>>(asStruct(result), asStruct(v));
+                    <<<numBlock, numThread, 0, CUDAContext::getInstance()>>>(asStruct(result), asStruct(v));
             return result;
         }
     };
@@ -138,7 +138,7 @@ namespace Physica::Core {
             const size_t numThread = std::min(length, VectorType::MaxThreadPerBlock);
             const size_t numBlock = (length + numThread - 1) / numThread;
             Internal::DiffVectorExpr_binaryOpKernel<Type, VectorType>
-                    <<<numBlock, numThread, 0, StreamPool::getStream()>>>(asStruct(result), asStruct(v), asStruct(s));
+                    <<<numBlock, numThread, 0, CUDAContext::getInstance()>>>(asStruct(result), asStruct(v), asStruct(s));
             return result;
         }
     };
@@ -155,7 +155,7 @@ namespace Physica::Core {
             const size_t numThread = std::min(length, VectorType::MaxThreadPerBlock);
             const size_t numBlock = (length + numThread - 1) / numThread;
             Internal::DiffVectorExpr_binaryOpKernel<Type, VectorType>
-                    <<<numBlock, numThread, 0, StreamPool::getStream()>>>(asStruct(result), asStruct(v1), asStruct(v2));
+                    <<<numBlock, numThread, 0, CUDAContext::getInstance()>>>(asStruct(result), asStruct(v1), asStruct(v2));
             return result;
         }
     };
