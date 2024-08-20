@@ -18,6 +18,7 @@
  */
 #pragma once
 
+#include <Physica/Utils/CUDA/PlainStruct.h>
 #include "MatrixProduct.h"
 
 namespace Physica::Core {

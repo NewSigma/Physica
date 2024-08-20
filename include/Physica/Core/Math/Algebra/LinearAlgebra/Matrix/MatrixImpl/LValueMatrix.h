@@ -130,3 +130,4 @@ namespace Physica {
 }
 
 #include "LValueMatrixImpl/LValueMatrixImpl.h"
+#include "InverseMatrix.h"

@@ -18,8 +18,8 @@
  */
 #pragma once
 
-#include <Physica/Core/Math/Algebra/LinearAlgebra/Matrix/MatrixProduct/MatrixProduct.h>
 #include "DenseMatrixImpl/HalfDenseMatrixStorage.h"
+#include "MatrixImpl/RValueMatrix.h"
 
 namespace Physica::Core {
     template<class T, size_t Order, size_t MaxOrder> class DenseSymmMatrix;

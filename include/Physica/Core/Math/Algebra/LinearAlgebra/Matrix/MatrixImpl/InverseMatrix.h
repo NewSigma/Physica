@@ -18,9 +18,6 @@
  */
 #pragma once
 
-#include <cassert>
-#include "MatrixImpl/LValueMatrix.h"
-
 namespace Physica::Core {
     namespace Internal {
         template<class SourceType, class TargetType, size_t Size>

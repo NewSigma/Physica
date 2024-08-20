@@ -167,4 +167,4 @@ namespace Physica {
     };
 }
 
-#include "MatrixProduct/SparseMatrixProduct.h"
+#include "MatrixImpl/MatrixProduct/SparseMatrixProduct.h"

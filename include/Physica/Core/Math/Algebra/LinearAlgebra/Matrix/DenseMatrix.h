@@ -18,12 +18,9 @@
  */
 #pragma once
 
-#include <memory>
 #include "DenseMatrixImpl/DenseMatrixStorage.h"
-#include "InverseMatrix.h"
 #include "MatrixDecomposition/LUDecomposition.h"
 #include "MatrixImpl/ContinuousMatrix.h"
-#include "MatrixProduct/MatrixProduct.h"
 
 namespace Physica::Core {
     /**

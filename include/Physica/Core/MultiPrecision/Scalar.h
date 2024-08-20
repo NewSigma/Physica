@@ -53,6 +53,10 @@ namespace Physica::Core {
     template<ScalarOption Option> __host__ __device__ inline Scalar<Option> square(const Scalar<Option>& s) noexcept;
     template<ScalarOption Option> __host__ __device__ inline Scalar<Option> sqrt(const Scalar<Option>& s) noexcept;
     template<ScalarOption Option> __host__ __device__ inline Scalar<Option> ln(const Scalar<Option>& s) noexcept;
+
+    using float16 = Scalar<Float16>;
+    using float32 = Scalar<Float32>;
+    using float64 = Scalar<Float64>;
 }
 
 namespace Physica {
@@ -75,10 +79,6 @@ namespace Physica {
         constexpr static bool isReverseDiff = false;
         constexpr static unsigned int Order = 0;
     };
-
-    using float16 = Scalar<Float16>;
-    using float32 = Scalar<Float32>;
-    using float64 = Scalar<Float64>;
 }
 
 #include "Rational.h"

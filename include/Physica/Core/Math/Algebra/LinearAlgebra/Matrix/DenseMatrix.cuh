@@ -20,7 +20,6 @@
 
 #include "MatrixImpl/ContinuousMatrix.cuh"
 #include "DenseMatrixImpl/DenseMatrixStorage.cuh"
-#include "MatrixProduct/MatrixProduct.cuh"
 
 namespace Physica::Core {
     template<class T, int Option, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn, class Allocator>

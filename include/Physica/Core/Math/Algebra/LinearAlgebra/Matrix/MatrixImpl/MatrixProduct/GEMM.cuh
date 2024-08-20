@@ -1,0 +1,90 @@
+/*
+ * Copyright 2024 Weibo He.
+ *
+ * This file is part of Physica.
+ *
+ * Physica is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Physica is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
+ */
+#pragma once
+
+#include <cublas_v2.h>
+#include <Physica/Utils/CUDA/PlainStruct.h>
+#include <Physica/Core/Exception/NotImplementedException.h>
+#include <Physica/Core/Math/Algebra/LinearAlgebra/Matrix/MatrixOption.h>
+
+namespace Physica::Core {
+    template<class MatrixType1, class MatrixType2>
+    class device_obj<MatrixProduct<MatrixType1, MatrixType2>> : public device_obj<RValueMatrix<MatrixProduct<MatrixType1, MatrixType2>>> {
+        using host_obj = MatrixProduct<MatrixType1, MatrixType2>;
+        using This = device_obj<host_obj>;
+        using Base = device_obj<RValueMatrix<host_obj>>;
+    public:
+        using Base::isReverseDiff;
+        using typename Base::ScalarType;
+        using DefaultType = typename host_obj::DefaultType::device_obj_type;
+    private:
+        Physica::PlainStruct<const device_obj<MatrixType1>> mat1;
+        Physica::PlainStruct<const device_obj<MatrixType2>> mat2;
+    public:
+        __host__ __device__ device_obj(const device_obj<RValueMatrix<MatrixType1>>& mat1_, const device_obj<RValueMatrix<MatrixType2>>& mat2_);
+        device_obj(const This&) = delete;
+        device_obj(This&&) noexcept = delete;
+        ~device_obj() = default;
+        /* Operators */
+        This& operator=(const This&) = delete;
+        This& operator=(This&&) noexcept = delete;
+        /* Operations */
+        template<class OtherDerived>
+        void assignTo(ContinuousMatrix<OtherDerived>& target) const;
+        [[nodiscard]] DefaultType compute() const { return DefaultType(*this); }
+        /* Getters */
+        [[nodiscard]] __device__ ScalarType calc(size_t, size_t) const { noImpl(); }
+        [[nodiscard]] __host__ __device__ size_t getRow() const { return mat1.getRow(); }
+        [[nodiscard]] __host__ __device__ size_t getColumn() const { return mat2.getColumn(); }
+        [[nodiscard]] const device_obj<MatrixType1>& getLHS() const noexcept { return mat1.getDerived(); }
+        [[nodiscard]] const device_obj<MatrixType2>& getRHS() const noexcept { return mat2.getDerived(); }
+    };
+
+    template<class MatrixType1, class MatrixType2>
+    __host__ __device__ device_obj<MatrixProduct<MatrixType1, MatrixType2>>::device_obj(
+            const device_obj<RValueMatrix<MatrixType1>>& mat1_, const device_obj<RValueMatrix<MatrixType2>>& mat2_)
+            : mat1(asStruct(mat1_.getDerived())), mat2(asStruct(mat2_.getDerived())) {
+        assert(mat1_.getColumn() == mat2_.getRow());
+    }
+
+    template<class MatrixType1, class MatrixType2>
+    template<class OtherDerived>
+    void device_obj<MatrixProduct<MatrixType1, MatrixType2>>::assignTo(ContinuousMatrix<OtherDerived>& target) const {
+        static_assert(MatrixOption::isColumnMatrix<MatrixType1>() && MatrixOption::isColumnMatrix<MatrixType2>(), "cuBLAS uses column major");
+        static_assert(MatrixOption::isElementMatrix<MatrixType1>() && MatrixOption::isElementMatrix<MatrixType2>(), "cuBLAS need element storage");
+        if constexpr (ScalarType::Option == Float16) {
+            const ScalarType alpha = 1;
+            const auto& lhs = getLHS();
+            const auto& rhs = getRHS();
+            const size_t r = getRow();
+            const size_t c = getColumn();
+            const size_t k = lhs.getColumn();
+            check(cublasHgemm_64(CUDAContext::getInstance(), CUBLAS_OP_N, CUBLAS_OP_N, r, c, k
+                    , &alpha, lhs.data(), r, rhs.data(), k, nullptr, nullptr, r));
+        }
+        else
+            Base::assignTo(target);
+    }
+
+    template<class MatrixType1, class MatrixType2>
+    [[nodiscard]] inline device_obj<MatrixProduct<MatrixType1, MatrixType2>>
+    operator*(const device_obj<RValueMatrix<MatrixType1>>& mat1, const device_obj<RValueMatrix<MatrixType2>>& mat2) noexcept {
+        return {mat1, mat2};
+    }
+}

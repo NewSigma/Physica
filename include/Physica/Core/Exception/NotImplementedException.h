@@ -18,16 +18,23 @@
  */
 #pragma once
 
-#include <exception>
+#include <stdexcept>
 #include "Physica/Macro.h"
 
 namespace Physica::Core {
-    class PHYSICA_API NotImplementedException : public std::exception {
-        constexpr static const char* DefaultMsg = "[Error]: Not implemented";
-        const char* msg;
+    class PHYSICA_API NotImplementedException : public std::runtime_error {
     public:
-        NotImplementedException(const char* msg_ = DefaultMsg) : msg(msg_) {}
-        ~NotImplementedException() noexcept override = default;
-        const char* what() const noexcept override { return msg; }
+        constexpr static const char* DefaultMsg = "[Error]: Not implemented";
+    public:
+        NotImplementedException(const char* msg = DefaultMsg) : std::runtime_error(msg) {}
     };
+
+    __host__ __device__ inline void noImpl(const char* msg = NotImplementedException::DefaultMsg) {
+    #ifdef __CUDA_ARCH__
+        printf("%s", msg);
+        __trap();
+    #else
+        throw NotImplementedException(msg);
+    #endif
+    }
 }

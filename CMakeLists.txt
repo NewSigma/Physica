@@ -59,6 +59,10 @@ if(${PHYSICA_CUDA})
 
     set(CMAKE_CUDA_FLAGS_DEBUG "${CMAKE_CUDA_FLAGS_DEBUG} -G")
     set(CMAKE_CUDA_FLAGS_RELWITHDEBINFO "${CMAKE_CUDA_FLAGS_RELWITHDEBINFO} -G -dopt=on")
+    # clangd does not work with response file
+    # Reference: https://github.com/clangd/clangd/discussions/1676
+    set(CMAKE_CUDA_USE_RESPONSE_FILE_FOR_INCLUDES 0)
+
     # --diag-suppress 186: Comparation between unsigned int and 0 in InverseMatrix does not exist
     set(CMAKE_CUDA_FLAGS "\
         ${CMAKE_CUDA_FLAGS} \
