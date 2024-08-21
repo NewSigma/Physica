@@ -27,11 +27,11 @@ namespace Physica::Core {
         using Base = Utils::CRTPBase<device_obj<Derived>>;
         using host_obj = RValueMatrix<Derived>;
         using TraitsType = Traits<device_obj<Derived>>;
+        using RowVector = device_obj<RMatrixBlock<Derived, 1, Dynamic>>;
+        using ColVector = device_obj<RMatrixBlock<Derived, Dynamic, 1>>;
         using BlockType = device_obj<RMatrixBlock<Derived>>;
     public:
         using ScalarType = typename TraitsType::ScalarType;
-        using RowVector = device_obj<RMatrixBlock<Derived, 1, Dynamic>>;
-        using ColVector = device_obj<RMatrixBlock<Derived, Dynamic, 1>>;
         constexpr static int Option = TraitsType::Option;
         constexpr static size_t RowAtCompile = TraitsType::RowAtCompile;
         constexpr static size_t ColumnAtCompile = TraitsType::ColumnAtCompile;
@@ -39,7 +39,8 @@ namespace Physica::Core {
         constexpr static size_t MaxColumnAtCompile = TraitsType::MaxColumnAtCompile;
         constexpr static size_t SizeAtCompile = TraitsType::SizeAtCompile;
         constexpr static size_t MaxSizeAtCompile = TraitsType::MaxSizeAtCompile;
-
+        constexpr static bool isReverseDiff = ScalarType::isReverseDiff;
+        constexpr static bool isComplex = ScalarType::isComplex;
         constexpr static bool isColumnMatrix = host_obj::isColumnMatrix;
         constexpr static bool isRowMatrix = host_obj::isRowMatrix;
         constexpr static size_t MaxThreadPerBlock = 256;

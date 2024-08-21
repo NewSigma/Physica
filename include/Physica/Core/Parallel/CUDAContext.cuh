@@ -19,6 +19,7 @@
 #pragma once
 
 #include "CUDAStream.cuh"
+#include "Physica/Core/Exception/CUDA/cuBLAS.cuh"
 
 struct cublasContext;
 
@@ -45,9 +46,15 @@ namespace Physica::Core {
         using Base::wait;
         /* Getters */
         [[nodiscard]] const CUDAStream& getStream() const noexcept { return *this; }
+        /* Setters */
+        void setPointerMode(bool isDeviceSide) noexcept;
         /* Static members */
         [[nodiscard]] static This& getInstance() noexcept;
     private:
         CUDAContext();
     };
+
+    inline void CUDAContext::setPointerMode(bool isDeviceSide) noexcept {
+        cublasSetPointerMode(*this, isDeviceSide ? CUBLAS_POINTER_MODE_DEVICE : CUBLAS_POINTER_MODE_HOST);
+    }
 }

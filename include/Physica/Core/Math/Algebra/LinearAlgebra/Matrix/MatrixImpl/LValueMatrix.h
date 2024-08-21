@@ -32,6 +32,8 @@ namespace Physica::Core {
      */
     template<class Derived>
     class LValueMatrix : public RValueMatrix<Derived> {
+        using RowVector = LMatrixBlock<Derived, 1, Dynamic>;
+        using ColVector = LMatrixBlock<Derived, Dynamic, 1>;
     public:
         using Base = RValueMatrix<Derived>;
         using typename Base::ScalarType;
@@ -40,8 +42,6 @@ namespace Physica::Core {
         using Base::isComplex;
         using Base::isColumnMatrix;
         using Base::isRowMatrix;
-        using RowVector = LMatrixBlock<Derived, 1, Dynamic>;
-        using ColVector = LMatrixBlock<Derived, Dynamic, 1>;
     public:
         ~LValueMatrix() = default;
         /* Operators */

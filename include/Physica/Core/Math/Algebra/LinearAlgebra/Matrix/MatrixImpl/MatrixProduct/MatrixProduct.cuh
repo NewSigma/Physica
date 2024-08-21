@@ -107,3 +107,5 @@ namespace Physica {
     class Traits<Core::device_obj<MatrixVectorProduct<MatrixType, VectorType>>>
             : public Traits<MatrixVectorProduct<MatrixType, VectorType>> {};
 }
+
+#include "GEMM.cuh"

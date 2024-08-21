@@ -29,6 +29,7 @@ namespace Physica::Core {
         using This = device_obj<host_obj>;
         using Base = device_obj<LValueMatrix<Derived>>;
     public:
+        using typename Base::ScalarType;
         using Base::RowAtCompile;
         using Base::ColumnAtCompile;
     public:
@@ -94,7 +95,9 @@ namespace Physica::Core {
         [[nodiscard]] __host__ __device__ inline device_obj<ContinuousMatrixBlock<Derived, Row, Column>> block(size_t fromRow, size_t rowCount, size_t fromCol, size_t colCount);
         template<size_t Row = Dynamic, size_t Column = Dynamic>
         [[nodiscard]] __host__ __device__ inline const device_obj<ContinuousMatrixBlock<Derived, Row, Column>> block(size_t fromRow, size_t rowCount, size_t fromCol, size_t colCount) const;
-
+        /* Getters */
+        [[nodiscard]] __host__ __device__ ScalarType* data() { return Base::getDerived().data_ptr(0, 0); }
+        [[nodiscard]] __host__ __device__ const ScalarType* data() const { return Base::getDerived().data_ptr(0, 0); }
         [[nodiscard]] device_obj<ContinuousFlatten<Derived>> flatten() { return {*this}; }
         [[nodiscard]] const device_obj<ContinuousFlatten<Derived>> flatten() const { return {*this}; }
     protected:

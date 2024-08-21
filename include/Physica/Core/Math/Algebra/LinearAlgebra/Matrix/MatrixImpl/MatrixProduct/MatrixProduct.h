@@ -21,61 +21,6 @@
 #include <Physica/Core/Math/Algebra/LinearAlgebra/Matrix/MatrixImpl/RValueMatrix.h>
 
 namespace Physica::Core {
-    namespace Internal {
-        template<class MatrixType1, class MatrixType2>
-        struct ProductOption {
-            constexpr static bool SameMajor = MatrixOption::isSameMajor<MatrixType1, MatrixType2>();
-            constexpr static bool RowMajor = MatrixOption::isRowMatrix<MatrixType1>();
-            constexpr static int Major = SameMajor ? (RowMajor ? int(MatrixOption::Column)
-                                                               : int(MatrixOption::Row))
-                                                   : int(MatrixOption::AnyMajor);
-            constexpr static int Storage = (MatrixOption::isElementMatrix<MatrixType1>() && MatrixOption::isElementMatrix<MatrixType2>())
-                                         ? MatrixOption::Element
-                                         : MatrixOption::Vector;
-            constexpr static int Option = (Major == MatrixOption::AnyMajor ? MatrixOption::Column : Major) | Storage;
-        };
-    }
-
-    template<class MatrixType1, class MatrixType2>
-    class MatrixProduct : public RValueMatrix<MatrixProduct<MatrixType1, MatrixType2>> {
-        using This = MatrixProduct<MatrixType1, MatrixType2>;
-    public:
-        using Base = RValueMatrix<This>;
-        using Base::isReverseDiff;
-        using typename Base::ScalarType;
-        using DefaultType = DenseMatrix<ScalarType,
-                                        Internal::ProductOption<MatrixType1, MatrixType2>::Option,
-                                        Base::RowAtCompile,
-                                        Base::ColumnAtCompile,
-                                        Base::MaxRowAtCompile,
-                                        Base::MaxColumnAtCompile,
-                                        Utils::HostAllocator<ScalarType>>;
-    private:
-        const MatrixType1& mat1;
-        const MatrixType2& mat2;
-    public:
-        MatrixProduct(const RValueMatrix<MatrixType1>& mat1_, const RValueMatrix<MatrixType2>& mat2_)
-                : mat1(mat1_.getDerived()), mat2(mat2_.getDerived()) {
-            assert(mat1.getColumn() == mat2.getRow());
-        }
-        MatrixProduct(const This&) = delete;
-        MatrixProduct(This&&) noexcept = delete;
-        ~MatrixProduct() = default;
-        /* Operators */
-        This& operator=(const This&) = delete;
-        This& operator=(This&&) noexcept = delete;
-        /* Operations */
-        template<class OtherDerived>
-        void assignTo(LValueMatrix<OtherDerived>& target) const;
-        [[nodiscard]] DefaultType compute() const { return DefaultType(*this); }
-        /* Getters */
-        [[nodiscard]] ScalarType calc(size_t row, size_t column) const;
-        [[nodiscard]] __host__ __device__ size_t getRow() const { return mat1.getRow(); }
-        [[nodiscard]] __host__ __device__ size_t getColumn() const { return mat2.getColumn(); }
-        [[nodiscard]] const MatrixType1& getLHS() const noexcept { return mat1; }
-        [[nodiscard]] const MatrixType2& getRHS() const noexcept { return mat2; }
-    };
-
     template<class VectorType, class MatrixType>
     class VectorMatrixProduct : public RValueMatrix<VectorMatrixProduct<VectorType, MatrixType>> {
         using This = VectorMatrixProduct<VectorType, MatrixType>;
@@ -135,14 +80,27 @@ namespace Physica::Core {
         [[nodiscard]] const VectorType& getRHS() const noexcept { return vec; }
     };
 
-    template<class MatrixType1, class MatrixType2>
-    [[nodiscard]] inline typename std::enable_if<(MatrixType1::ColumnAtCompile != 1 && MatrixType2::ColumnAtCompile != 1) ||
-                                                 (MatrixType1::ColumnAtCompile == 1 && MatrixType2::ColumnAtCompile == 1),
-                                                  MatrixProduct<MatrixType1, MatrixType2>>::type
-    operator*(const RValueMatrix<MatrixType1>& mat1, const RValueMatrix<MatrixType2>& mat2) noexcept {
-        assert(mat1.getColumn() == mat2.getRow());
-        return MatrixProduct(mat1, mat2);
+    template<class VectorType, class MatrixType>
+    typename VectorMatrixProduct<VectorType, MatrixType>::ScalarType VectorMatrixProduct<VectorType, MatrixType>::calc(size_t row, size_t column) const {
+        return vec.calc(row) * mat.calc(0, column);
     }
+
+    template<class MatrixType, class VectorType>
+    template<class OtherDerived, class Executor>
+    inline void MatrixVectorProduct<MatrixType, VectorType>::assignTo(LValueVector<OtherDerived>& target) const {
+        for (size_t i = 0; i < getLength(); ++i)
+            target[i] = calc(i);
+        
+        constexpr bool isContinuous = std::is_base_of<ContinuousVector<OtherDerived>, OtherDerived>::value;
+        if constexpr (isContinuous && Base::isReverseDiff)
+            target.getDerived().makeContinuous();
+    }
+
+    template<class MatrixType, class VectorType>
+    inline typename MatrixVectorProduct<MatrixType, VectorType>::ScalarType MatrixVectorProduct<MatrixType, VectorType>::calc(size_t index) const {
+        return mat.row(index) * vec;
+    }
+
     /**
      * \note Here we force the row of \param mat is 1, because in Physica vectors are naturally column vectors.
      * To compute row vector * matrix, users should converted it to matrix^T * column vector.
@@ -173,23 +131,6 @@ namespace Physica::Core {
 
 namespace Physica {
     using namespace Core;
-
-    template<class MatrixType1, class MatrixType2>
-    class Traits<MatrixProduct<MatrixType1, MatrixType2>> {
-        static_assert(MatrixType1::ColumnAtCompile == MatrixType2::RowAtCompile ||
-                      MatrixType1::ColumnAtCompile == Dynamic ||
-                      MatrixType2::RowAtCompile == Dynamic,
-                      "[Error]: Row and column do not match in matrix-vector product");
-    public:
-        using ScalarType = typename Core::Internal::BinaryScalarOpReturnType<typename MatrixType1::ScalarType,
-                                                                             typename MatrixType2::ScalarType>::Type;
-        constexpr static size_t RowAtCompile = MatrixType1::RowAtCompile;
-        constexpr static size_t ColumnAtCompile = MatrixType2::ColumnAtCompile;
-        constexpr static size_t MaxRowAtCompile = MatrixType1::MaxRowAtCompile;
-        constexpr static size_t MaxColumnAtCompile = MatrixType2::MaxColumnAtCompile;
-        constexpr static size_t SizeAtCompile = RowAtCompile * ColumnAtCompile;
-        constexpr static size_t MaxSizeAtCompile = SizeAtCompile;
-    };
 
     template<class VectorType, class MatrixType>
     class Traits<VectorMatrixProduct<VectorType, MatrixType>> {
@@ -224,4 +165,4 @@ namespace Physica {
     };
 }
 
-#include "MatrixProductImpl.h"
+#include "GEMM.h"

@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Weibo He.
+ * Copyright 2022-2024 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -16,19 +16,36 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h"
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.cuh"
+#include <Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h>
+#include <Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.cuh>
 
 using namespace Physica::Core;
-using ScalarType = Scalar<Float>;
-using MatrixType = DenseMatrix<ScalarType>;
 
 int main() {
-    std::mt19937 gen{};
-    const MatrixType A = MatrixType::random_uniform(16, 16, gen);
-    const auto d_A = A.toDevice();
-    const MatrixType B = d_A.toHost();
-    if (A.asArray() != B.asArray())
-        return 1;
+    {
+        using MatrixType = DenseMatrix<float32>;
+        std::mt19937 gen{};
+        const MatrixType A = MatrixType::random_uniform(16, 16, gen);
+        const auto d_A = A.toDevice();
+        const MatrixType B = d_A.toHost();
+        if (A.asArray() != B.asArray())
+            return 1;
+    }
+    {
+        using MatrixType = DenseMatrix<float32, MatrixOption::Column | MatrixOption::Element>;
+        using DeviceMatrix = typename MatrixType::device_obj_type;
+        std::mt19937 gen{};
+        const MatrixType A = MatrixType::random_uniform(3, 4, gen);
+        const MatrixType B = A.transpose();
+        const MatrixType answer = A * B;
+
+        const auto d_A = A.toDevice();
+        const auto d_B = B.toDevice();
+        const DeviceMatrix d_result = d_A * d_B;
+        CUDAContext::getInstance().wait();
+        const auto result = d_result.toHost();
+        if (!matrixNear(answer, result, 1E-7))
+            return 1;
+    }
     return 0;
 }

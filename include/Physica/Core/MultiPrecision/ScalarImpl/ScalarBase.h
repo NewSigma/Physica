@@ -143,7 +143,7 @@ namespace Physica::Core {
         }
         /* Static Members */
         static inline bool matchSign(const ScalarType& s1, const ScalarType& s2) {
-            return (s1.isPositive() && s2.isPositive() > 0) || (s1.isNegative() < 0 && s2.isNegative() < 0);
+            return (s1.isPositive() && s2.isPositive()) || (s1.isNegative() && s2.isNegative());
         }
     };
 

@@ -34,17 +34,13 @@ namespace Physica::Core {
      * and other matrixes cannot be assigned to this class.
      * In other words, you cannot take the address of elements in a RValueMatrix but can calculate its value.
      */
-    /**
-     * The \class DenseRValueMatrix provide algorithms that a matrix should support.
-     * 
-     * \tparam Derived
-     * A class that contains data structure for a matrix.
-     */
     template<class Derived>
     class RValueMatrix : public Utils::CRTPBase<Derived> {
         static_assert(!std::is_const<Derived>::value, "[Error]: A common mistake, const is unnecessary");
         static_assert(!std::is_volatile<Derived>::value, "[Error]: A common mistake, volatile is unnecessary");
         using Base = Utils::CRTPBase<Derived>;
+        using RowVector = RMatrixBlock<Derived, 1, Dynamic>;
+        using ColVector = RMatrixBlock<Derived, Dynamic, 1>;
         using BlockType = RMatrixBlock<Derived>;
     public:
         using ScalarType = typename Traits<Derived>::ScalarType;
@@ -59,11 +55,8 @@ namespace Physica::Core {
         constexpr static size_t MaxSizeAtCompile = Traits<Derived>::MaxSizeAtCompile;
         constexpr static bool isReverseDiff = ScalarType::isReverseDiff;
         constexpr static bool isComplex = ScalarType::isComplex;
-
         constexpr static bool isColumnMatrix = MatrixOption::isColumnMatrix<Derived>();
         constexpr static bool isRowMatrix = MatrixOption::isRowMatrix<Derived>();
-        using RowVector = RMatrixBlock<Derived, 1, Dynamic>;
-        using ColVector = RMatrixBlock<Derived, Dynamic, 1>;
     public:
         /* Operations */
         template<class OtherDerived>

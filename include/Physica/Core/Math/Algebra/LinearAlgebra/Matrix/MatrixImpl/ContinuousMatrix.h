@@ -37,9 +37,9 @@ namespace Physica::Core {
         using Base::isColumnMatrix;
         using Base::isRowMatrix;
         using Base::isReverseDiff;
+    private:
         using RowVector = ContinuousMatrixBlock<Derived, 1, ColumnAtCompile>;
         using ColVector = ContinuousMatrixBlock<Derived, RowAtCompile, 1>;
-    private:
         template<size_t Row>
         using RowBlock = ContinuousMatrixBlock<Derived, Row, ColumnAtCompile>;
         template<size_t Column>

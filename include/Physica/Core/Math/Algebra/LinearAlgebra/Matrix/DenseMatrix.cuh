@@ -29,7 +29,7 @@ namespace Physica::Core {
         using host_obj = DenseMatrix<T, Option, Row, Column, MaxRow, MaxColumn, Allocator>;
         using host_storage = typename host_obj::Storage;
         using This = device_obj<host_obj>;
-        using Base = device_obj<LValueMatrix<host_obj>>;
+        using Base = device_obj<ContinuousMatrix<DenseMatrix<T, Option, Row, Column, MaxRow, MaxColumn, Allocator>>>;
         using Storage = device_obj<DenseMatrixStorage<T, Option, Row, Column, MaxRow, MaxColumn, Allocator>>;
     public:
         device_obj() = default;
@@ -50,9 +50,10 @@ namespace Physica::Core {
         using Storage::resize;
         using Storage::swap;
         /* Getters */
+        using Base::data;
+        using Storage::data_ptr;
         using Storage::getRow;
         using Storage::getColumn;
-        using Storage::data_ptr;
         /* Static members */
         [[nodiscard]] static inline device_obj unitMatrix(size_t order);
         template<class RandomGenerator>

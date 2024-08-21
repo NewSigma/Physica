@@ -18,10 +18,10 @@
  */
 #pragma once
 
-#include <cublas_v2.h>
 #include <Physica/Utils/CUDA/PlainStruct.h>
 #include <Physica/Core/Exception/NotImplementedException.h>
 #include <Physica/Core/Math/Algebra/LinearAlgebra/Matrix/MatrixOption.h>
+#include <Physica/Core/Exception/CUDA/cuBLAS.cuh>
 
 namespace Physica::Core {
     template<class MatrixType1, class MatrixType2>
@@ -46,14 +46,14 @@ namespace Physica::Core {
         This& operator=(This&&) noexcept = delete;
         /* Operations */
         template<class OtherDerived>
-        void assignTo(ContinuousMatrix<OtherDerived>& target) const;
+        void assignTo(device_obj<ContinuousMatrix<OtherDerived>>& target) const;
         [[nodiscard]] DefaultType compute() const { return DefaultType(*this); }
         /* Getters */
         [[nodiscard]] __device__ ScalarType calc(size_t, size_t) const { noImpl(); }
-        [[nodiscard]] __host__ __device__ size_t getRow() const { return mat1.getRow(); }
-        [[nodiscard]] __host__ __device__ size_t getColumn() const { return mat2.getColumn(); }
-        [[nodiscard]] const device_obj<MatrixType1>& getLHS() const noexcept { return mat1.getDerived(); }
-        [[nodiscard]] const device_obj<MatrixType2>& getRHS() const noexcept { return mat2.getDerived(); }
+        [[nodiscard]] __host__ __device__ size_t getRow() const { return getLHS().getRow(); }
+        [[nodiscard]] __host__ __device__ size_t getColumn() const { return getRHS().getColumn(); }
+        [[nodiscard]] __host__ __device__ const device_obj<MatrixType1>& getLHS() const noexcept { return mat1.getDerived(); }
+        [[nodiscard]] __host__ __device__ const device_obj<MatrixType2>& getRHS() const noexcept { return mat2.getDerived(); }
     };
 
     template<class MatrixType1, class MatrixType2>
@@ -65,21 +65,36 @@ namespace Physica::Core {
 
     template<class MatrixType1, class MatrixType2>
     template<class OtherDerived>
-    void device_obj<MatrixProduct<MatrixType1, MatrixType2>>::assignTo(ContinuousMatrix<OtherDerived>& target) const {
-        static_assert(MatrixOption::isColumnMatrix<MatrixType1>() && MatrixOption::isColumnMatrix<MatrixType2>(), "cuBLAS uses column major");
-        static_assert(MatrixOption::isElementMatrix<MatrixType1>() && MatrixOption::isElementMatrix<MatrixType2>(), "cuBLAS need element storage");
+    void device_obj<MatrixProduct<MatrixType1, MatrixType2>>::assignTo(device_obj<ContinuousMatrix<OtherDerived>>& target) const {
+        static_assert(MatrixOption::isColumnMatrix<MatrixType1>() && MatrixOption::isColumnMatrix<MatrixType2>(), "[Error]: cuBLAS uses column major");
+        static_assert(MatrixOption::isElementMatrix<MatrixType1>() && MatrixOption::isElementMatrix<MatrixType2>(), "[Error]: cuBLAS need element storage");
+        constexpr bool IsDeviceMatrix = Traits<MatrixType1>::SizeAtCompile == Dynamic && Traits<MatrixType2>::SizeAtCompile == Dynamic;
+        static_assert(IsDeviceMatrix, "[Error]: Fixed matrix is on host, pass it to device before calling cuBLAS");
+
+        using T = typename ScalarType::TrivialType;
+        const auto& lhs = getLHS();
+        const auto& rhs = getRHS();
+        const size_t r = getRow();
+        const size_t c = getColumn();
+        const size_t k = lhs.getColumn();
+        const ScalarType alpha = 1;
+        const ScalarType beta = 0;
+        auto& ctx = CUDAContext::getInstance();
+        ctx.setPointerMode(false);
         if constexpr (ScalarType::Option == Float16) {
-            const ScalarType alpha = 1;
-            const auto& lhs = getLHS();
-            const auto& rhs = getRHS();
-            const size_t r = getRow();
-            const size_t c = getColumn();
-            const size_t k = lhs.getColumn();
-            check(cublasHgemm_64(CUDAContext::getInstance(), CUBLAS_OP_N, CUBLAS_OP_N, r, c, k
-                    , &alpha, lhs.data(), r, rhs.data(), k, nullptr, nullptr, r));
+            check(cublasHgemm_64(ctx, CUBLAS_OP_N, CUBLAS_OP_N, r, c, k
+                    , (T*)&alpha, (T*)lhs.data(), r, (T*)rhs.data(), k, (T*)&beta, (T*)target.data(), r));
+        }
+        else if constexpr (ScalarType::Option == Float32) {
+            check(cublasSgemm_64(ctx, CUBLAS_OP_N, CUBLAS_OP_N, r, c, k
+                    , (T*)&alpha, (T*)lhs.data(), r, (T*)rhs.data(), k, (T*)&beta, (T*)target.data(), r));
+        }
+        else if constexpr (ScalarType::Option == Float64) {
+            check(cublasDgemm_64(ctx, CUBLAS_OP_N, CUBLAS_OP_N, r, c, k
+                    , (T*)&alpha, (T*)lhs.data(), r, (T*)rhs.data(), k, (T*)&beta, (T*)target.data(), r));
         }
         else
-            Base::assignTo(target);
+            static_assert(ScalarType::Option == Float16, "[Error]: Unknown ScalarType");
     }
 
     template<class MatrixType1, class MatrixType2>
@@ -87,4 +102,10 @@ namespace Physica::Core {
     operator*(const device_obj<RValueMatrix<MatrixType1>>& mat1, const device_obj<RValueMatrix<MatrixType2>>& mat2) noexcept {
         return {mat1, mat2};
     }
+}
+
+namespace Physica {
+    template<class MatrixType1, class MatrixType2>
+    class Traits<Core::device_obj<MatrixProduct<MatrixType1, MatrixType2>>>
+            : public Traits<MatrixProduct<MatrixType1, MatrixType2>> {};
 }

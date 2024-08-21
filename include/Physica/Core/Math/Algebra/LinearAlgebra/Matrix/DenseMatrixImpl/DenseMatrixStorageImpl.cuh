@@ -23,18 +23,12 @@ namespace Physica::Core {
     template<class T, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn, class Allocator>
     __host__ __device__ device_obj<DenseMatrixStorage<T, MatrixOption::Column | MatrixOption::Element, Row, Column, MaxRow, MaxColumn, Allocator>>::
             device_obj(size_t row, size_t column) {
-    #ifdef __CUDA_ARCH__
-        static_assert(Row * Column != Dynamic, "[Error]: Do not allocate dynamic matrix in device code");
-    #endif
         resize(row, column);
     }
 
     template<class T, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn, class Allocator>
     __host__ __device__ device_obj<DenseMatrixStorage<T, MatrixOption::Column | MatrixOption::Element, Row, Column, MaxRow, MaxColumn, Allocator>>::
             device_obj(size_t row, size_t column, T value) {
-    #ifdef __CUDA_ARCH__
-        static_assert(Row * Column != Dynamic, "[Error]: Do not allocate dynamic matrix in device code");
-    #endif
         resize(row, column, std::move(value));
     }
 
@@ -61,6 +55,9 @@ namespace Physica::Core {
     template<class... Args>
     __host__ __device__ void device_obj<DenseMatrixStorage<T, MatrixOption::Column | MatrixOption::Element, Row, Column, MaxRow, MaxColumn, Allocator>>::
             resize(size_t row, size_t column, Args&&... args) {
+    #ifdef __CUDA_ARCH__
+        assert(Row * Column != Dynamic && "[Error]: Do not allocate dynamic matrix in device code");
+    #endif
         Base::resize(row * column, std::forward<Args>(args)...);
         Dim::resize(row, column);
     }
@@ -87,18 +84,14 @@ namespace Physica::Core {
     //////////////////////////////////////////////Row-Element//////////////////////////////////////////////
     template<class T, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn, class Allocator>
     __host__ __device__ device_obj<DenseMatrixStorage<T, MatrixOption::Row | MatrixOption::Element, Row, Column, MaxRow, MaxColumn, Allocator>>::
-            device_obj(size_t row, size_t column) : Base(row * column) {
-    #ifdef __CUDA_ARCH__
-        static_assert(Row * Column != Dynamic, "[Error]: Do not allocate dynamic matrix in device code");
-    #endif
+            device_obj(size_t row, size_t column) {
+        resize(row, column);
     }
 
     template<class T, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn, class Allocator>
     __host__ __device__ device_obj<DenseMatrixStorage<T, MatrixOption::Row | MatrixOption::Element, Row, Column, MaxRow, MaxColumn, Allocator>>::
-            device_obj(size_t row, size_t column, T value) : Base(row * column, std::move(value)) {
-    #ifdef __CUDA_ARCH__
-        static_assert(Row * Column != Dynamic, "[Error]: Do not allocate dynamic matrix in device code");
-    #endif
+            device_obj(size_t row, size_t column, T value) {
+        resize(row, column, std::move(value));
     }
 
     template<class T, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn, class Allocator>
@@ -125,6 +118,9 @@ namespace Physica::Core {
     template<class... Args>
     __host__ __device__ void device_obj<DenseMatrixStorage<T, MatrixOption::Row | MatrixOption::Element, Row, Column, MaxRow, MaxColumn, Allocator>>::
             resize(size_t row, size_t column, Args&&... args) {
+    #ifdef __CUDA_ARCH__
+        assert(Row * Column != Dynamic && "[Error]: Do not allocate dynamic matrix in device code");
+    #endif
         Base::resize(row * column, std::forward<Args>(args)...);
         Dim::resize(row, column);
     }
