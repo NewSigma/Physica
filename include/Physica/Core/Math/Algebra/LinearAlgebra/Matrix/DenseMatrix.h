@@ -75,8 +75,10 @@ namespace Physica::Core {
 
         using Storage::resize;
         [[nodiscard]] DenseMatrix copy() const;
-        [[nodiscard]] inline device_obj<This> toDevice() const;
+        [[nodiscard]] inline auto toDevice() const;
+        [[nodiscard]] inline auto toDeviceAsync() const;
         void toDevice(device_obj<This>& obj) const;
+        void toDeviceAsync(device_obj<This>& obj) const;
         using Storage::swap;
 
         using Base::random_any;

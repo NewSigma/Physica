@@ -76,8 +76,10 @@ namespace Physica::Utils {
         template<class... Args>
         __host__ __device__ void resize([[maybe_unused]] size_t size, [[maybe_unused]] Args&&... args) { assert(size == Length); }
         __host__ __device__ void swap(Array& __restrict array) noexcept;
-        [[nodiscard]] inline device_obj<This> toDevice() const;
+        [[nodiscard]] inline auto toDevice() const;
+        [[nodiscard]] inline auto toDeviceAsync() const;
         inline void toDevice(device_obj<This>& obj) const;
+        inline void toDeviceAsync(device_obj<This>& obj) const;
         /* Getters */
         [[nodiscard]] __host__ __device__ constexpr static size_t size() { return Length; }
         [[nodiscard]] __host__ __device__ constexpr static size_t getLength() { return Length; }
@@ -189,8 +191,10 @@ namespace Physica::Utils {
         void swap(Array& __restrict array) noexcept;
         [[nodiscard]] inline pointer release() noexcept;
         void doubleSpace() { increase(capacity * 2 + (MinDeltaSpace + sizeof(T) - 1) / sizeof(T)); }
-        [[nodiscard]] inline device_obj<This> toDevice() const;
+        [[nodiscard]] inline auto toDevice() const;
+        [[nodiscard]] inline auto toDeviceAsync() const;
         void toDevice(device_obj<This>& obj) const;
+        void toDeviceAsync(device_obj<This>& obj) const;
         /* Getters */
         [[nodiscard]] __host__ __device__ size_t size() const noexcept { return length; }
         [[nodiscard]] __host__ __device__ size_t getLength() const noexcept { return length; }

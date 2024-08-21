@@ -46,13 +46,23 @@ namespace Physica::Utils {
     };
 
     template<class T, size_t Length, size_t Capacity, class Allocator>
-    inline device_obj<Array<T, Length, Capacity, Allocator>> Array<T, Length, Capacity, Allocator>::toDevice() const {
-        return device_obj<Array<T, Length, Capacity, Allocator>>(*this);
+    inline auto Array<T, Length, Capacity, Allocator>::toDevice() const {
+        return device_obj<This>(*this);
     }
 
     template<class T, size_t Length, size_t Capacity, class Allocator>
-    inline void Array<T, Length, Capacity, Allocator>::toDevice(device_obj<Array<T, Length, Capacity, Allocator>>& obj) const {
+    inline auto Array<T, Length, Capacity, Allocator>::toDeviceAsync() const {
+        return toDevice();
+    }
+
+    template<class T, size_t Length, size_t Capacity, class Allocator>
+    inline void Array<T, Length, Capacity, Allocator>::toDevice(device_obj<This>& obj) const {
         obj = *this;
+    }
+
+    template<class T, size_t Length, size_t Capacity, class Allocator>
+    inline void Array<T, Length, Capacity, Allocator>::toDeviceAsync(device_obj<This>& obj) const {
+        toDevice(obj);
     }
 
     template<class T, class Allocator>
@@ -291,12 +301,20 @@ namespace Physica::Utils {
     }
 
     template<class T, class Allocator>
-    inline device_obj<Array<T, Dynamic, Dynamic, Allocator>> Array<T, Dynamic, Dynamic, Allocator>::toDevice() const {
-        return device_obj<Array<T, Dynamic, Dynamic, Allocator>>(*this);
+    inline auto Array<T, Dynamic, Dynamic, Allocator>::toDevice() const {
+        return device_obj<This>(*this);
     }
 
     template<class T, class Allocator>
-    void Array<T, Dynamic, Dynamic, Allocator>::toDevice(device_obj<Array<T, Dynamic, Dynamic, Allocator>>& obj) const {
+    inline auto Array<T, Dynamic, Dynamic, Allocator>::toDeviceAsync() const {
+        device_obj<This> result{};
+        result.reserve(getCapacity());
+        toDeviceAsync(result);
+        return device_obj<This>(std::move(result));
+    }
+
+    template<class T, class Allocator>
+    void Array<T, Dynamic, Dynamic, Allocator>::toDevice(device_obj<This>& obj) const {
         using ValueType = typename device_obj<This>::ValueType;
         constexpr bool isTrivial = device_obj<This>::isTrivial;
         const size_t length = getLength();
@@ -315,6 +333,17 @@ namespace Physica::Utils {
             ctx.wait();
             buffer.get_allocator().deallocate(buffer.release(), length);
         }
+    }
+
+    template<class T, class Allocator>
+    void Array<T, Dynamic, Dynamic, Allocator>::toDeviceAsync(device_obj<This>& obj) const {
+        static_assert(device_obj<This>::isTrivial, "[Error]: Do not pass non trivial elements to device asynchronously");
+        using ValueType = typename device_obj<This>::ValueType;
+        const size_t length = getLength();
+        obj.resize(length);
+
+        auto& ctx = Core::CUDAContext::getInstance();
+        cudaMemcpyAsync(obj.data(), this->data(), length * sizeof(ValueType), cudaMemcpyKind::cudaMemcpyHostToDevice, ctx);
     }
 }
 

@@ -20,6 +20,24 @@
 
 #include <cuda_fp16.h>
 
+namespace Physica {
+    template<>
+    class Traits<Core::float16> {
+    public:
+        using ScalarType = Core::float16;
+        using RealType = ScalarType;
+        using ComplexType = Core::ComplexScalar<ScalarType>;
+        using TrivialType = __half;
+        using PlainScalar = ScalarType;
+        constexpr static Core::ScalarOption Option = Core::Float16;
+        constexpr static bool isComplex = false;
+        constexpr static bool isDifferentiable = false;
+        constexpr static bool isForwardDiff = false;
+        constexpr static bool isReverseDiff = false;
+        constexpr static unsigned int Order = 0;
+    };
+}
+
 namespace Physica::Core {
     template<>
     class Scalar<Float16> : public ScalarBase<Scalar<Float16>> {

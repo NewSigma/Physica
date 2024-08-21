@@ -59,28 +59,6 @@ namespace Physica::Core {
     using float64 = Scalar<Float64>;
 }
 
-namespace Physica {
-    using namespace Core;
-
-    template<ScalarOption Option_>
-    class Traits<Scalar<Option_>> {
-        constexpr static bool isTrivial = Option_ == Float32 || Option_ == Float64;
-        using TrivialT = typename std::conditional<Option_ == Float, float, double>::type;
-    public:
-        using ScalarType = Scalar<Option_>;
-        using RealType = ScalarType;
-        using ComplexType = ComplexScalar<ScalarType>;
-        using TrivialType = typename std::conditional<isTrivial, TrivialT, Scalar<Option_>>::type;
-        using PlainScalar = ScalarType;
-        constexpr static ScalarOption Option = Option_;
-        constexpr static bool isComplex = false;
-        constexpr static bool isDifferentiable = false;
-        constexpr static bool isForwardDiff = false;
-        constexpr static bool isReverseDiff = false;
-        constexpr static unsigned int Order = 0;
-    };
-}
-
 #include "Rational.h"
 #ifdef PHYSICA_CUDA
     #include "ScalarImpl/Float16.h"

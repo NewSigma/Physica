@@ -17,27 +17,22 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include <cassert>
-#include "Physica/Core/Parallel/CudaEvent.cuh"
+#include "Physica/Core/Parallel/CUDAEvent.cuh"
 
 namespace Physica::Core {
-    CudaEvent::CudaEvent() {
+    CUDAEvent::CUDAEvent() {
         check(cudaEventCreate(&event));
     }
 
-    CudaEvent::CudaEvent(CudaEvent&& obj) noexcept : event(obj.event) {
+    CUDAEvent::CUDAEvent(CUDAEvent&& obj) noexcept : event(obj.event) {
         obj.event = nullptr;
     }
 
-    CudaEvent::~CudaEvent() {
+    CUDAEvent::~CUDAEvent() {
         cudaEventDestroy(event);
     }
 
-    CudaEvent& CudaEvent::operator=(CudaEvent obj) noexcept {
-        swap(obj);
-        return *this;
-    }
-
-    void CudaEvent::swap(CudaEvent& __restrict obj) noexcept {
+    void CUDAEvent::swap(CUDAEvent& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         std::swap(event, obj.event);
     }

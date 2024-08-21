@@ -18,6 +18,24 @@
  */
 #pragma once
 
+namespace Physica {
+    template<>
+    class Traits<Core::Scalar<Core::MultiPrecision>> {
+    public:
+        using ScalarType = Core::Scalar<Core::MultiPrecision>;
+        using RealType = ScalarType;
+        using ComplexType = Core::ComplexScalar<ScalarType>;
+        using TrivialType = ScalarType;
+        using PlainScalar = ScalarType;
+        constexpr static Core::ScalarOption Option = Core::MultiPrecision;
+        constexpr static bool isComplex = false;
+        constexpr static bool isDifferentiable = false;
+        constexpr static bool isForwardDiff = false;
+        constexpr static bool isReverseDiff = false;
+        constexpr static unsigned int Order = 0;
+    };
+}
+
 namespace Physica::Core {
     constexpr int GlobalPrecision = 4;
 

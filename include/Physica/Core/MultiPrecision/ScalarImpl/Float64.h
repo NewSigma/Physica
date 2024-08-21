@@ -18,6 +18,24 @@
  */
 #pragma once
 
+namespace Physica {
+    template<>
+    class Traits<Core::float64> {
+    public:
+        using ScalarType = Core::float64;
+        using RealType = ScalarType;
+        using ComplexType = Core::ComplexScalar<ScalarType>;
+        using TrivialType = double;
+        using PlainScalar = ScalarType;
+        constexpr static Core::ScalarOption Option = Core::Float64;
+        constexpr static bool isComplex = false;
+        constexpr static bool isDifferentiable = false;
+        constexpr static bool isForwardDiff = false;
+        constexpr static bool isReverseDiff = false;
+        constexpr static unsigned int Order = 0;
+    };
+}
+
 namespace Physica::Core {
     template<>
     class Scalar<Double> : public ScalarBase<Scalar<Double>> {

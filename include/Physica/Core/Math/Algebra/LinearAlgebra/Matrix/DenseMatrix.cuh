@@ -114,15 +114,27 @@ namespace Physica::Core {
     }
 
     template<class T, int Option, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn, class Allocator>
-    inline device_obj<DenseMatrix<T, Option, Row, Column, MaxRow, MaxColumn, Allocator>>
-    DenseMatrix<T, Option, Row, Column, MaxRow, MaxColumn, Allocator>::toDevice() const {
-        return device_obj<DenseMatrix<T, Option, Row, Column, MaxRow, MaxColumn, Allocator>>(*this);
+    inline auto DenseMatrix<T, Option, Row, Column, MaxRow, MaxColumn, Allocator>::toDevice() const {
+        return device_obj<This>(*this);
+    }
+
+    template<class T, int Option, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn, class Allocator>
+    inline auto DenseMatrix<T, Option, Row, Column, MaxRow, MaxColumn, Allocator>::toDeviceAsync() const {
+        device_obj<This> result(getRow(), getColumn());
+        toDeviceAsync(result);
+        return device_obj<This>(std::move(result));
     }
 
     template<class T, int Option, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn, class Allocator>
     void DenseMatrix<T, Option, Row, Column, MaxRow, MaxColumn, Allocator>::toDevice(device_obj<This>& obj) const {
         obj.resize(getRow(), getColumn());
         Storage::toDevice(obj);
+    }
+
+    template<class T, int Option, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn, class Allocator>
+    void DenseMatrix<T, Option, Row, Column, MaxRow, MaxColumn, Allocator>::toDeviceAsync(device_obj<This>& obj) const {
+        obj.resize(getRow(), getColumn());
+        Storage::toDeviceAsync(obj);
     }
 }
 

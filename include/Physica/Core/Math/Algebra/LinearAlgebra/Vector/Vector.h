@@ -61,6 +61,7 @@ namespace Physica::Core {
         [[nodiscard]] Vector copy() const;
         [[nodiscard]] inline device_obj<This> toDevice() const;
         using Base::toDevice;
+        using Base::toDeviceAsync;
         using Storage::swap;
         /* Getters */
         using Storage::getLength;

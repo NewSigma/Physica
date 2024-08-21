@@ -68,8 +68,10 @@ namespace Physica::Core {
         void resize(size_t row, size_t column, Args&&... args);
         void rowSwap(size_t r1, size_t r2);
         void columnSwap(size_t c1, size_t r1);
-        [[nodiscard]] inline device_obj<This> toDevice() const;
+        [[nodiscard]] inline auto toDevice() const;
+        [[nodiscard]] inline auto toDeviceAsync() const;
         inline void toDevice(device_obj<This>& obj) const;
+        inline void toDeviceAsync(device_obj<This>& obj) const;
         void swap(This& __restrict obj) noexcept {
             assert(this != &obj && "[Error]: Self swap is likely a bug");
             Base::swap(obj);
@@ -125,8 +127,10 @@ namespace Physica::Core {
         void resize(size_t row, size_t column, Args&&... args);
         void rowSwap(size_t r1, size_t r2);
         void columnSwap(size_t c1, size_t r1);
-        [[nodiscard]] inline device_obj<This> toDevice() const;
+        [[nodiscard]] inline auto toDevice() const;
+        [[nodiscard]] inline auto toDeviceAsync() const;
         inline void toDevice(device_obj<This>& obj) const;
+        inline void toDeviceAsync(device_obj<This>& obj) const;
         void swap(This& __restrict obj) noexcept {
             assert(this != &obj && "[Error]: Self swap is likely a bug");
             Base::swap(obj);
@@ -190,7 +194,7 @@ namespace Physica::Core {
         void resize(size_t row, size_t column, Args&&... args);
         void rowSwap(size_t r1, size_t r2);
         void columnSwap(size_t c1, size_t r1);
-        [[nodiscard]] device_obj<This> toDevice() const;
+        [[nodiscard]] inline auto toDevice() const;
         void swap(This& __restrict obj) noexcept {
             assert(this != &obj && "[Error]: Self swap is likely a bug");
             array.swap(obj.array);
@@ -252,7 +256,7 @@ namespace Physica::Core {
         void resize(size_t row, size_t column, Args&&... args);
         void rowSwap(size_t r1, size_t r2);
         void columnSwap(size_t c1, size_t r1);
-        [[nodiscard]] device_obj<This> toDevice() const;
+        [[nodiscard]] inline auto toDevice() const;
         void swap(This& __restrict obj) noexcept {
             assert(this != &obj && "[Error]: Self swap is likely a bug");
             array.swap(obj.array);

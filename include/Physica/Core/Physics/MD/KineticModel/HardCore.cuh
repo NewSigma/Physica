@@ -18,12 +18,11 @@
  */
 #pragma once
 
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/Vector.cuh"
-#include "Physica/Core/Parallel/Executor/CudaExecutor.cuh"
-#include "Physica/Core/Parallel/CudaEvent.cuh"
-#include "Physica/Utils/CUDA/PlainStruct.h"
-#include "Physica/Utils/CUDA/DeviceProp.cuh"
-#include "Physica/Utils/Allocator/PageLockedAllocator.cuh"
+#include <Physica/Core/Math/Algebra/LinearAlgebra/Vector/Vector.cuh>
+#include <Physica/Core/Parallel/Executor/CudaExecutor.cuh>
+#include <Physica/Utils/CUDA/PlainStruct.h>
+#include <Physica/Utils/CUDA/DeviceProp.cuh>
+#include <Physica/Utils/Allocator/PageLockedAllocator.cuh>
 #include "HardCore.h"
 
 namespace Physica::Core {

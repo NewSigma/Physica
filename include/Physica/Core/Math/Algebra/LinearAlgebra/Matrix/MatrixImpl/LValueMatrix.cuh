@@ -32,7 +32,8 @@ namespace Physica::Core {
         /* Operators */
         device_obj& operator=(const device_obj& m) = delete;
         device_obj& operator=(device_obj&& m) = delete;
-        template<class OtherMatrix> __device__ device_obj<Derived>& operator=(const device_obj<RValueMatrix<OtherMatrix>>& m);
+        template<class OtherMatrix>
+        __host__ __device__ device_obj<Derived>& operator=(const device_obj<RValueMatrix<OtherMatrix>>& m);
         __device__ Derived& operator=(const ScalarType& s);
         [[nodiscard]] __device__ ScalarType& operator()(size_t row, size_t column) { return Base::getDerived()(row, column); }
         [[nodiscard]] __device__ const ScalarType& operator()(size_t row, size_t column) const { return Base::getDerived()(row, column); }
@@ -58,13 +59,14 @@ namespace Physica::Core {
 
     template<class Derived>
     template<class OtherMatrix>
-    __device__ device_obj<Derived>& device_obj<LValueMatrix<Derived>>::operator=(const device_obj<RValueMatrix<OtherMatrix>>& m) {
+    __host__ __device__ device_obj<Derived>& device_obj<LValueMatrix<Derived>>::operator=(
+            const device_obj<RValueMatrix<OtherMatrix>>& m) {
         static_assert(RowAtCompile == Dynamic || OtherMatrix::RowAtCompile == Dynamic || RowAtCompile == OtherMatrix::RowAtCompile, "[Error]: Incompatible row number");
         static_assert(ColumnAtCompile == Dynamic || OtherMatrix::ColumnAtCompile == Dynamic || ColumnAtCompile == OtherMatrix::ColumnAtCompile, "[Error]: Incompatible column number");
-        assert(Base::getRow() == m.getRow() && "[Error]: Incompatible row number");
-        assert(Base::getColumn() == m.getColumn() && "[Error]: Incompatible column number");
-        m.getDerived().assignTo(*this);
-        return Base::getDerived();
+        auto& target = Base::getDerived();
+        target.resize(m.getRow(), m.getColumn());
+        m.getDerived().assignTo(target);
+        return target;
     }
 
     template<class Derived>

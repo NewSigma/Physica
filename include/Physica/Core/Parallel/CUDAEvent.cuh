@@ -21,23 +21,25 @@
 #include <Physica/Core/Exception/CUDA/CUDA.cuh>
 
 namespace Physica::Core {
-    class PHYSICA_API CudaEvent {
+    class PHYSICA_API CUDAEvent {
+        using This = CUDAEvent;
+
         cudaEvent_t event;
     public:
-        CudaEvent();
-        CudaEvent(const CudaEvent&) = delete;
-        CudaEvent(CudaEvent&& obj) noexcept;
-        ~CudaEvent();
+        CUDAEvent();
+        CUDAEvent(const This&) = delete;
+        CUDAEvent(This&& obj) noexcept;
+        ~CUDAEvent();
         /* Operators */
-        CudaEvent& operator=(CudaEvent obj) noexcept;
+        CUDAEvent& operator=(This obj) noexcept { swap(obj); return *this; }
         /* Operations */
         inline void wait();
-        void swap(CudaEvent& __restrict obj) noexcept;
+        void swap(CUDAEvent& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] cudaEvent_t getEvent() const noexcept { return event; }
     };
 
-    inline void CudaEvent::wait() {
+    inline void CUDAEvent::wait() {
         check(cudaEventSynchronize(event));
     }
 }
