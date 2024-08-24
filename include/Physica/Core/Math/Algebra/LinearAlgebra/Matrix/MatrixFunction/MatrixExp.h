@@ -38,7 +38,7 @@ namespace Physica::Core {
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
         /* Operations */
-        [[nodiscard]] ScalarType calc(size_t, size_t) const { throw NotImplementedException(); }
+        [[nodiscard]] ScalarType calc(size_t, size_t) const { throw NoImplException(); }
         /* Getters */
         [[nodiscard]] const MatrixType& getMatrix() const noexcept { return m; }
         [[nodiscard]] __host__ __device__ size_t getRow() const noexcept { return m.getRow(); }

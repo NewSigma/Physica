@@ -21,7 +21,7 @@
 #include <unordered_set>
 #include <algorithm>
 #include "Physica/Core/Exception/BadFileFormatException.h"
-#include "Physica/Core/Exception/NotImplementedException.h"
+#include "Physica/Core/Exception/NoImplException.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/Householder.h"
 #include "Physica/Core/Physics/PhyConst.h"
 
@@ -318,6 +318,6 @@ namespace Physica::Core {
                 return i;
             i += 1;
         }
-        throw NotImplementedException("Unrecognized element symbol");
+        throw NoImplException("Unrecognized element symbol");
     }
 }

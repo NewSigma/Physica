@@ -87,6 +87,6 @@ namespace Physica {
     class Traits<Core::SequentialExecutor> {
     public:
         constexpr static bool isCPUEnabled = true;
-        constexpr static bool isCudaEnabled = false;
+        constexpr static bool isCUDAEnabled = false;
     };
 }

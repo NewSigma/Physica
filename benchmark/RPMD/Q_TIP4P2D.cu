@@ -26,7 +26,7 @@
 #include "Physica/Core/Physics/MD/KineticModel/FreeModel.h"
 #include "Physica/Core/Physics/MD/Thermostat/DoubleThermo.h"
 #include "Physica/Core/Physics/MD/Barostat/SCRBaro.h"
-#include "Physica/Core/Parallel/Executor/CudaExecutor.cuh"
+#include "Physica/Core/Parallel/Executor/CUDAExecutor.cuh"
 #include "Physica/Utils/BenchmarkHelper.h"
 
 using namespace Physica::Core;
@@ -90,7 +90,7 @@ int main() {
     BarostatType barostat(compressRate, temperatureT, 0.0 / PhyConst<AU>::pressToGPa(1));
     {
         auto timeuse = Benchmark::run([&]() {
-            rpmd.npt_step_for<ThermoType, RandomPoolType, BarostatType, KineticModel, decltype(forceModel), CudaExecutor>(
+            rpmd.npt_step_for<ThermoType, RandomPoolType, BarostatType, KineticModel, decltype(forceModel), CUDAExecutor>(
                 PhyConst<AU>::secondToTime(1 * 1E-13),
                 thermo,
                 pool,

@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2024 Weibo He.
+ * Copyright 2021 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -18,25 +18,23 @@
  */
 #pragma once
 
-#include <Physica/Core/Parallel/CUDAContext.cuh>
-#include <Physica/Core/Exception/CUDA/CUDA.cuh>
-#include "SequentialExecutor.h"
+#include <stdexcept>
+#include <Physica/Macro.h>
 
 namespace Physica::Core {
-    /**
-     * Single thread with cuda support
-     */
-    class CudaExecutor : public SequentialExecutor {
+    class PHYSICA_API NoImplException : public std::runtime_error {
     public:
-        static void wait() { check(cudaDeviceSynchronize()); }
+        constexpr static const char* DefaultMsg = "[Error]: Not implemented";
+    public:
+        NoImplException(const char* msg = DefaultMsg) : std::runtime_error(msg) {}
     };
-}
 
-namespace Physica {
-    template<>
-    class Traits<Core::CudaExecutor> {
-    public:
-        constexpr static bool isCPUEnabled = false;
-        constexpr static bool isCudaEnabled = true;
-    };
+    __host__ __device__ inline void noImpl(const char* msg = NoImplException::DefaultMsg) {
+    #ifdef __CUDA_ARCH__
+        printf("%s", msg);
+        __trap();
+    #else
+        throw NoImplException(msg);
+    #endif
+    }
 }

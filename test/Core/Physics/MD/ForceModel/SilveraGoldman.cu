@@ -22,7 +22,7 @@
 #include "Physica/Core/Physics/MD/Thermostat/TRPMDThermo.h"
 #include "Physica/Core/Physics/MD/KineticModel/FreeModel.h"
 #include "Physica/Core/Physics/MD/ForceModel/SilveraGoldman.cuh"
-#include "Physica/Core/Parallel/Executor/CudaExecutor.cuh"
+#include "Physica/Core/Parallel/Executor/CUDAExecutor.cuh"
 #include "Physica/Core/Math/Random/RandomPool.h"
 
 using namespace Physica::Core;
@@ -64,7 +64,7 @@ int main() {
         DeviceForceModel deviceModel(numMolecular, pair_cutoff);
         RPMD<ScalarType> rpmd = makeSystem(numMolecular, gen);
         const auto f0 = hostModel.template force<SequentialExecutor>(rpmd.phaseToCell(0));
-        const auto f1 = deviceModel.template force<CudaExecutor>(rpmd.phaseToCell(0));
+        const auto f1 = deviceModel.template force<CUDAExecutor>(rpmd.phaseToCell(0));
         if (!vectorNear(f0, f1, 1E-3))
             return 1;
     }
@@ -73,7 +73,7 @@ int main() {
         DeviceForceModel deviceModel(numMolecular, pair_cutoff);
         RPMD<ScalarType> rpmd = makeSystem(numMolecular, gen);
         const auto f0 = hostModel.template force<SequentialExecutor>(rpmd.phaseToCell(0));
-        const auto f1 = deviceModel.template force<CudaExecutor>(rpmd.phaseToCell(0));
+        const auto f1 = deviceModel.template force<CUDAExecutor>(rpmd.phaseToCell(0));
         if (!vectorNear(f0, f1, 1E-4))
             return 1;
     }

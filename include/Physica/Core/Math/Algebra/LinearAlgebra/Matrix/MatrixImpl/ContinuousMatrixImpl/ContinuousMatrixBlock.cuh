@@ -132,12 +132,14 @@ namespace Physica::Core {
         /* Getters */
         using Base::calc;
         using VectorBase::calc;
-        [[nodiscard]] __host__ __device__ constexpr static size_t getRow() noexcept { return 1; }
-        [[nodiscard]] __host__ __device__ size_t getColumn() const noexcept { return Column == Dynamic ? VectorBase::getLength() : Column; }
-        //using VectorBase::conjugate; // Not implemented
         using VectorBase::max;
         using VectorBase::min;
         using VectorBase::sum;
+        using VectorBase::data_ptr;
+        [[nodiscard]] __host__ __device__ constexpr static size_t getRow() noexcept { return 1; }
+        [[nodiscard]] __host__ __device__ size_t getColumn() const noexcept { return Column == Dynamic ? VectorBase::getLength() : Column; }
+        [[nodiscard]] __host__ __device__ ScalarType* data_ptr([[maybe_unused]] size_t row, size_t column) { assert(row == 0); return VectorBase::data_ptr(column); }
+        [[nodiscard]] __host__ __device__ const ScalarType* data_ptr([[maybe_unused]] size_t row, size_t column) const { assert(row == 0); return VectorBase::data_ptr(column); }
         /**
          * There are some common functions shared by vector and matrix, it is necessary to decide which function to call explicitly.
          */
@@ -188,12 +190,14 @@ namespace Physica::Core {
         /* Getters */
         using Base::calc;
         using VectorBase::calc;
-        [[nodiscard]] __host__ __device__ size_t getRow() const noexcept { return Row == Dynamic ? VectorBase::getLength() : Row; }
-        [[nodiscard]] __host__ __device__ constexpr static size_t getColumn() noexcept { return 1; }
-        //using VectorBase::conjugate; // Not implemented
         using VectorBase::max;
         using VectorBase::min;
         using VectorBase::sum;
+        using VectorBase::data_ptr;
+        [[nodiscard]] __host__ __device__ size_t getRow() const noexcept { return Row == Dynamic ? VectorBase::getLength() : Row; }
+        [[nodiscard]] __host__ __device__ constexpr static size_t getColumn() noexcept { return 1; }
+        [[nodiscard]] __host__ __device__ ScalarType* data_ptr(size_t row, [[maybe_unused]] size_t column) { assert(column == 0); return VectorBase::data_ptr(row); }
+        [[nodiscard]] __host__ __device__ const ScalarType* data_ptr(size_t row, [[maybe_unused]] size_t column) const { assert(column == 0); return VectorBase::data_ptr(row); }
         /**
          * There are some common functions shared by vector and matrix, it is necessary to decide which function to call explicitly.
          */

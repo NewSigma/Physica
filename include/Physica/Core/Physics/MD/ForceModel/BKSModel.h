@@ -171,7 +171,7 @@ namespace Physica::Core {
     template<class ScalarType, class EwaldType, bool AvoidTooNear>
     template<class VectorType, class Executor>
     void BKSModel<ScalarType, EwaldType, AvoidTooNear>::forceAsync(const MDCellType& cell, ContinuousVector<VectorType>& result) {
-        static_assert(!Traits<Executor>::isCudaEnabled, "[Error]: Cuda is not supported");
+        static_assert(!Traits<Executor>::isCUDAEnabled, "[Error]: CUDA is not supported");
         assert(cell.getNumParticle() % 3 == 0);
         auto future = Executor::schedule([this, &cell, &result]() {
             result = force_short<Executor>(cell);

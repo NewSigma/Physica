@@ -20,7 +20,7 @@
 #include <iostream>
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/Vector.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/Vector.cuh"
-#include "Physica/Core/Parallel/Executor/CudaExecutor.cuh"
+#include "Physica/Core/Parallel/Executor/CUDAExecutor.cuh"
 
 using namespace Physica;
 using namespace Physica::Core;
@@ -53,7 +53,7 @@ int main() {
         const VectorType answer = reciprocal(a);
         d_a = reciprocal(d_a);
         VectorType result;
-        CudaExecutor::wait();
+        CUDAExecutor::wait();
         d_a.toHost(result);
         if (!vectorNear(result, answer, 1E-15)) {
             std::cout << "[Error]: Reciprocal failed\n";
@@ -73,7 +73,7 @@ int main() {
         DeviceVector d_result(len);
         test_kernel<<<1, len, 0, CUDAContext::getInstance()>>>(asStruct(d_a), asStruct(d_b), asStruct(d_result), factor);
         d_result.toHostAsync(result);
-        CudaExecutor::wait();
+        CUDAExecutor::wait();
         if (!vectorNear(result, answer, 1E-7)) {
             std::cout << "[Error]: Kernel failed\n";
             return 1;

@@ -21,7 +21,7 @@
 #include "Physica/Core/Physics/MD/Thermostat/DoubleThermo.h"
 #include "Physica/Core/Physics/MD/ForceModel/SilveraGoldman.cuh"
 #include "Physica/Core/Physics/MD/KineticModel/FreeModel.h"
-#include "Physica/Core/Parallel/Executor/CudaExecutor.cuh"
+#include "Physica/Core/Parallel/Executor/CUDAExecutor.cuh"
 
 using namespace Physica::Core;
 using Physica::Dynamic;
@@ -74,7 +74,7 @@ void testMDRun() {
 
         for (unsigned int i = 0; i < 6; ++i) {
             ScalarType temp = 0;
-            rpmd.nvt_step_for<ThermoType, RandomPoolType, KineticModel, ForceModel, CudaExecutor>(
+            rpmd.nvt_step_for<ThermoType, RandomPoolType, KineticModel, ForceModel, CUDAExecutor>(
                 PhyConst<AU>::secondToTime(2 * 1E-12),
                 thermo,
                 pool,
@@ -82,7 +82,7 @@ void testMDRun() {
                 forceModel);
 
             for (unsigned int j = 0; j < 100; ++j) {
-                rpmd.nvt_step<ThermoType, RandomPoolType, KineticModel, ForceModel, CudaExecutor>(thermo, pool, kineticModel, forceModel);
+                rpmd.nvt_step<ThermoType, RandomPoolType, KineticModel, ForceModel, CUDAExecutor>(thermo, pool, kineticModel, forceModel);
                 toNextMean(temp, j, rpmd.calcKinetic<KineticModel>());
             }
             toNextVariance(var, mean, i, temp);

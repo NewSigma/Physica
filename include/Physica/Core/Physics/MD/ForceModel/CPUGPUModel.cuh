@@ -36,7 +36,7 @@ namespace Physica::Core {
         Physica::Utils::Array<device_obj<DeviceModel>> deviceModels;
     public:
         template<class... Args>
-        CPUGPUModel(size_t numCudaThread, HostModel hostModel_, Args&&... deviceArgs);
+        CPUGPUModel(size_t numCUDAThread, HostModel hostModel_, Args&&... deviceArgs);
 
         template<class Executor>
         [[nodiscard]] Vector<ScalarType> force(const MDCellType& cell);
@@ -48,15 +48,15 @@ namespace Physica::Core {
         template<class Executor>
         [[nodiscard]] Vector<ScalarType> force_long(const MDCellType& cell) const { return Vector<ScalarType>(cell.getNumParticle() * 3, 0); }
         /* Getters */
-        [[nodiscard]] size_t getNumCudaThread() const noexcept { return deviceModels.getLength(); }
+        [[nodiscard]] size_t getNumCUDAThread() const noexcept { return deviceModels.getLength(); }
     };
 
     template<class HostModel, class DeviceModel>
     template<class... Args>
-    CPUGPUModel<HostModel, DeviceModel>::CPUGPUModel(size_t numCudaThread, HostModel hostModel_, Args&&... deviceArgs)
+    CPUGPUModel<HostModel, DeviceModel>::CPUGPUModel(size_t numCUDAThread, HostModel hostModel_, Args&&... deviceArgs)
             : hostModel(std::move(hostModel_)) {
-        assert(numCudaThread < ThreadPool::getInstance().getNumThreads());
-        deviceModels.resize(numCudaThread, std::forward<Args>(deviceArgs)...);
+        assert(numCUDAThread < ThreadPool::getInstance().getNumThreads());
+        deviceModels.resize(numCUDAThread, std::forward<Args>(deviceArgs)...);
     }
 
     template<class HostModel, class DeviceModel>
@@ -71,13 +71,13 @@ namespace Physica::Core {
     template<class HostModel, class DeviceModel>
     template<class VectorType, class Executor>
     void CPUGPUModel<HostModel, DeviceModel>::forceAsync(const MDCellType& cell, ContinuousVector<VectorType>& result) {
-        static_assert(Traits<Executor>::isCudaEnabled, "[Error]: Invalid executor");
+        static_assert(Traits<Executor>::isCUDAEnabled, "[Error]: Invalid executor");
         const auto threadId = ThreadPool::getThreadInfo().id;
-        const bool useCPU = ThreadPool::isMainThread() || threadId >= getNumCudaThread();
+        const bool useCPU = ThreadPool::isMainThread() || threadId >= getNumCUDAThread();
         if (useCPU)
             result = hostModel.template force<ThreadExecutor>(cell);
         else
-            deviceModels[threadId].template forceAsync<VectorType, CudaExecutor>(cell, result);
+            deviceModels[threadId].template forceAsync<VectorType, CUDAExecutor>(cell, result);
     }
 }
 

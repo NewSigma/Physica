@@ -19,7 +19,7 @@
 #pragma once
 
 #include <Physica/Core/Math/Algebra/LinearAlgebra/Vector/Vector.cuh>
-#include <Physica/Core/Parallel/Executor/CudaExecutor.cuh>
+#include <Physica/Core/Parallel/Executor/CUDAExecutor.cuh>
 #include <Physica/Utils/CUDA/PlainStruct.h>
 #include <Physica/Utils/CUDA/DeviceProp.cuh>
 #include <Physica/Utils/Allocator/PageLockedAllocator.cuh>
@@ -27,7 +27,7 @@
 
 namespace Physica::Core {
     template<class ScalarType, bool IsFixedBoundary, size_t NumReplica, RPMDIntegrator Integrator>
-    class HardCore<ScalarType, IsFixedBoundary, NumReplica, Integrator, CudaExecutor> {
+    class HardCore<ScalarType, IsFixedBoundary, NumReplica, Integrator, CUDAExecutor> {
         constexpr static unsigned int WarpSize = Physica::Utils::DeviceProp::WarpSize;
         static_assert(NumReplica == 1, "[Error]: PIMD is not implemented");
         static_assert(Integrator == RPMDIntegrator::Exact, "[Error]: Cayley integrator not implemented");

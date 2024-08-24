@@ -20,7 +20,7 @@
 
 #include "ThreadExecutor.h"
 #ifdef PHYSICA_CUDA
-    #include "CudaExecutor.cuh"
+    #include "CUDAExecutor.cuh"
 #endif
 
 namespace Physica::Core {
@@ -32,7 +32,7 @@ namespace Physica::Core {
     public:
         static void wait() {
         #ifdef PHYSICA_CUDA
-            CudaExecutor::wait();
+            CUDAExecutor::wait();
         #endif
         }
     };
@@ -44,9 +44,9 @@ namespace Physica {
     public:
         constexpr static bool isCPUEnabled = true;
     #ifdef PHYSICA_CUDA
-        constexpr static bool isCudaEnabled = true;
+        constexpr static bool isCUDAEnabled = true;
     #else
-        constexpr static bool isCudaEnabled = false;
+        constexpr static bool isCUDAEnabled = false;
     #endif
     };
 }

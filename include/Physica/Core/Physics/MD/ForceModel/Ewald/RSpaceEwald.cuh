@@ -111,9 +111,9 @@ namespace Physica::Core {
     template<class ScalarType, bool IsSmallCell>
     template<class Executor>
     inline Vector<ScalarType> device_obj<RSpaceEwald<ScalarType, IsSmallCell>>::force_short(const PositionMatrix& pos) {
-        static_assert(std::is_same<Executor, CudaExecutor>::value, "[Error]: Invalid executor");
+        static_assert(std::is_same<Executor, CUDAExecutor>::value, "[Error]: Invalid executor");
         static_assert(!IsSmallCell, "[Error]: Small cell does not apply to ewald because self interaction");
-        const Vector<ScalarType> rSpaceSum = Base::template force<CudaExecutor>(lattice.toHost(), invLatt, pos);
+        const Vector<ScalarType> rSpaceSum = Base::template force<CUDAExecutor>(lattice.toHost(), invLatt, pos);
         return rSpaceSum;
     }
 

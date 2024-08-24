@@ -18,7 +18,7 @@
  */
 #pragma once
 
-#include <Physica/Core/Exception/NotImplementedException.h>
+#include <Physica/Core/Exception/NoImplException.h>
 
 namespace Physica::Core {
     namespace Internal {

@@ -26,7 +26,7 @@ namespace Physica::Core {
     class DenseMatrixDim {
     public:
         DenseMatrixDim() = default;
-        __host__ __device__ DenseMatrixDim([[maybe_unused]] size_t row_, [[maybe_unused]] size_t column_) { assert(row_ == Row); }
+        __host__ __device__ DenseMatrixDim(size_t row, size_t column) { resize(row, column); }
         DenseMatrixDim(const DenseMatrixDim&) = default;
         DenseMatrixDim(DenseMatrixDim&&) noexcept = default;
         ~DenseMatrixDim() = default;
@@ -36,7 +36,9 @@ namespace Physica::Core {
         [[nodiscard]] __host__ __device__ constexpr static size_t getRow() noexcept { return Row; }
         [[nodiscard]] __host__ __device__ constexpr static size_t getColumn() noexcept { return Column; }
         /* Operations */
-        __host__ __device__ void resize([[maybe_unused]] size_t row_, [[maybe_unused]] size_t column_) { assert(row_ == Row && column_ == Column); }
+        __host__ __device__ void resize([[maybe_unused]] size_t row, [[maybe_unused]] size_t column) {
+            assert(row == Row && column == Column && "Cannot resize a fixed matrix");
+        }
         /* Helper */
         __host__ __device__ void swap([[maybe_unused]] DenseMatrixDim& dim) noexcept { /* Do nothing */ }
     };
@@ -46,7 +48,7 @@ namespace Physica::Core {
         using Base = Utils::CRTPBase<Derived, 2>;
     public:
         DenseMatrixDim() = default;
-        __host__ __device__ DenseMatrixDim([[maybe_unused]] size_t row_, [[maybe_unused]] size_t column_) { /* Do nothing */ }
+        __host__ __device__ DenseMatrixDim(size_t row, size_t column) { resize(row, column); }
         DenseMatrixDim(const DenseMatrixDim&) = default;
         DenseMatrixDim(DenseMatrixDim&&) noexcept = default;
         ~DenseMatrixDim() = default;
@@ -60,7 +62,9 @@ namespace Physica::Core {
         }
         [[nodiscard]] __host__ __device__ constexpr static size_t getColumn() noexcept { return Column; }
         /* Operations */
-        __host__ __device__ void resize([[maybe_unused]] size_t row_, [[maybe_unused]] size_t column_) { assert(column_ == Column); }
+        __host__ __device__ void resize([[maybe_unused]] size_t row, [[maybe_unused]] size_t column) {
+            assert(column == Column && "Cannot resize a fixed matrix");
+        }
         /* Helper */
         __host__ __device__ void swap([[maybe_unused]] DenseMatrixDim& dim) noexcept { /* Do nothing */ }
     };
@@ -70,7 +74,7 @@ namespace Physica::Core {
         using Base = Utils::CRTPBase<Derived, 2>;
     public:
         DenseMatrixDim() = default;
-        __host__ __device__ DenseMatrixDim([[maybe_unused]] size_t row_, [[maybe_unused]] size_t column_) { assert(row_ == Row); }
+        __host__ __device__ DenseMatrixDim(size_t row, size_t column) { resize(row, column); }
         DenseMatrixDim(const DenseMatrixDim&) = default;
         DenseMatrixDim(DenseMatrixDim&&) noexcept = default;
         ~DenseMatrixDim() = default;
@@ -84,7 +88,9 @@ namespace Physica::Core {
             return size / getRow();
         }
         /* Operations */
-        __host__ __device__ void resize([[maybe_unused]] size_t row_, [[maybe_unused]] size_t column_) { assert(row_ == Row); }
+        __host__ __device__ void resize([[maybe_unused]] size_t row, [[maybe_unused]] size_t column) {
+            assert(row == Row && "Cannot resize a fixed matrix");
+        }
         /* Helper */
         __host__ __device__ void swap([[maybe_unused]] DenseMatrixDim& dim) noexcept { /* Do nothing */ }
     };
@@ -96,7 +102,7 @@ namespace Physica::Core {
         size_t r;
     public:
         __host__ __device__ DenseMatrixDim() : r(0) {}
-        __host__ __device__ DenseMatrixDim([[maybe_unused]] size_t row_, [[maybe_unused]] size_t column_) : r(row_) {}
+        __host__ __device__ DenseMatrixDim(size_t row, size_t column) { resize(row, column); }
         DenseMatrixDim(const DenseMatrixDim&) = default;
         DenseMatrixDim(DenseMatrixDim&&) noexcept = default;
         ~DenseMatrixDim() = default;
@@ -110,7 +116,7 @@ namespace Physica::Core {
             return r == 0 ? 0 : size / getRow();
         }
         /* Operations */
-        __host__ __device__ void resize(size_t row_, [[maybe_unused]] size_t column_) { r = row_; }
+        __host__ __device__ void resize(size_t row, [[maybe_unused]] size_t column) { r = row; }
         /* Helper */
         __host__ __device__ void swap(DenseMatrixDim& __restrict dim) noexcept {
             assert(this != &dim && "[Error]: Self swap is likely a bug");

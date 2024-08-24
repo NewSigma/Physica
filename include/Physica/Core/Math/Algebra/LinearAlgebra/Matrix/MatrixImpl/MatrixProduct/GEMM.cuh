@@ -19,7 +19,7 @@
 #pragma once
 
 #include <Physica/Utils/CUDA/PlainStruct.h>
-#include <Physica/Core/Exception/NotImplementedException.h>
+#include <Physica/Core/Exception/NoImplException.h>
 #include <Physica/Core/Math/Algebra/LinearAlgebra/Matrix/MatrixOption.h>
 #include <Physica/Core/Exception/CUDA/cuBLAS.cuh>
 

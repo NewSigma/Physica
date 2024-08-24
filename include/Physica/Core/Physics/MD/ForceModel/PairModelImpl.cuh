@@ -20,7 +20,7 @@
 
 #include <cub/cub.cuh>
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Grid/PeriodIndex3D.h"
-#include "Physica/Core/Parallel/Executor/CudaExecutor.cuh"
+#include "Physica/Core/Parallel/Executor/CUDAExecutor.cuh"
 #include "Physica/Utils/CUDA/DeviceProp.cuh"
 #include "Physica/Utils/CUDA/PlainStruct.h"
 
@@ -97,7 +97,7 @@ namespace Physica::Core {
             const InvLatticeMatrix& invLattice,
             const PositionMatrix& cartesianPos,
             ContinuousVector<VectorType>& result) {
-        static_assert(std::is_same<Executor, CudaExecutor>::value, "[Error]: Incorrect type of executor");
+        static_assert(std::is_same<Executor, CUDAExecutor>::value, "[Error]: Incorrect type of executor");
         dim3 gridDims;
         size_t numThread;
         preParallel(lattice, invLattice, cartesianPos, gridDims, numThread);

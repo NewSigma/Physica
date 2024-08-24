@@ -108,6 +108,6 @@ namespace Physica {
     class Traits<Core::ThreadExecutor> {
     public:
         constexpr static bool isCPUEnabled = true;
-        constexpr static bool isCudaEnabled = false;
+        constexpr static bool isCUDAEnabled = false;
     };
 }

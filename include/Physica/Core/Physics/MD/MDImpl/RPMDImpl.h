@@ -64,8 +64,8 @@ namespace Physica::Core {
     template<class ForceModel, class Executor>
     void RPMD<ScalarType, Dim, NumReplica, ForceMatrixAllocator>::updateForce(ForceModel& model) {
         constexpr bool IsPeriodBoundary = Traits<ForceModel>::IsPeriodBoundary;
-        constexpr bool isCudaEnabled = Traits<Executor>::isCudaEnabled;
-        static_assert(!isCudaEnabled || std::allocator_traits<ForceMatrixAllocator>::isPageLocked
+        constexpr bool isCUDAEnabled = Traits<Executor>::isCUDAEnabled;
+        static_assert(!isCUDAEnabled || std::allocator_traits<ForceMatrixAllocator>::isPageLocked
                 , "[Error]: Allocator is not page locked, performance will decrease");
         if (!isContractEnabled()) {
             auto kernel = [this, &model](unsigned int replica) {
@@ -119,7 +119,7 @@ namespace Physica::Core {
             Executor::auto_wait(future_uncontract);
         }
         else
-            throw NotImplementedException("[Error]: Force contract is not implemented");
+            throw NoImplException("[Error]: Force contract is not implemented");
     }
 
     template<class ScalarType, unsigned int Dim, size_t NumReplica, class ForceMatrixAllocator>

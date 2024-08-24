@@ -18,7 +18,7 @@
  */
 #pragma once
 
-#include <Physica/Core/Exception/NotImplementedException.h>
+#include <Physica/Core/Exception/NoImplException.h>
 
 namespace Physica::Core {
     template<unsigned int Dim, unsigned int NumSite>
@@ -67,7 +67,7 @@ namespace Physica::Core {
     template<unsigned int Dim, unsigned int NumSite>
     SpinlessFermion<Dim, NumSite> SpinlessFermion<Dim, NumSite>::transReduce(int period) const {
         if constexpr (Dim != 1)
-            throw NotImplementedException();
+            throw NoImplException();
         assert(NumSite % period == 0 && "[Error]: Invalid period");
         assert(0 < period && period <= int(NumSite) && "[Error]: Invalid period");
         if (period == NumSite)
@@ -94,7 +94,7 @@ namespace Physica::Core {
     template<unsigned int Dim, unsigned int NumSite>
     int SpinlessFermion<Dim, NumSite>::calcPeriod() const {
         if constexpr (Dim != 1)
-            throw NotImplementedException();
+            throw NoImplException();
         This copy = *this;
         unsigned int i = 1;
         for (; i <= NumSite; ++i) {

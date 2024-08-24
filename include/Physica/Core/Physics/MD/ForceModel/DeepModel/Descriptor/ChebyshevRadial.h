@@ -20,7 +20,7 @@
 
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/Vector.h"
 #include "Physica/Core/Physics/MD/ForceModel/PairModel.h"
-#include "Physica/Core/Exception/NotImplementedException.h"
+#include "Physica/Core/Exception/NoImplException.h"
 
 namespace Physica::Core {
     /**
@@ -120,12 +120,12 @@ namespace Physica::Core {
 
     template<class ScalarType, bool IsSmallCell>
     inline ScalarType ChebyshevRadial<ScalarType, IsSmallCell>::pot_functor(size_t, size_t, ScalarType, ScalarType) const {
-        throw NotImplementedException("[Error]: This function is disabled");
+        throw NoImplException("[Error]: This function is disabled");
     }
 
     template<class ScalarType, bool IsSmallCell>
     inline ScalarType ChebyshevRadial<ScalarType, IsSmallCell>::force_functor(size_t, size_t, ScalarType, ScalarType) const {
-        throw NotImplementedException("[Error]: This function is disabled");
+        throw NoImplException("[Error]: This function is disabled");
     }
 
     template<class ScalarType, bool IsSmallCell>

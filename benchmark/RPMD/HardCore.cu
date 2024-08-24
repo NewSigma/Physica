@@ -23,7 +23,7 @@
 #include "Physica/Core/Physics/MD/Thermostat/TRPMDThermo.h"
 #include "Physica/Core/Physics/MD/KineticModel/FreeModel.h"
 #include "Physica/Core/Physics/MD/ForceModel/SilveraGoldman.cuh"
-#include "Physica/Core/Parallel/Executor/CudaExecutor.cuh"
+#include "Physica/Core/Parallel/Executor/CUDAExecutor.cuh"
 #include "Physica/Core/Math/Random/RandomPool.h"
 #include "Physica/Utils/BenchmarkHelper.h"
 
@@ -70,6 +70,6 @@ int main() {
 
     KineticModel kineticModel(temperatureT, numReplica);
     ForceModel forceModel(numMolecular, pair_cutoff);
-    rpmd.nve_step_for<KineticModel, ForceModel, CudaExecutor>(PhyConst<AU>::secondToTime(1 * 1E-11), kineticModel, forceModel);
+    rpmd.nve_step_for<KineticModel, ForceModel, CUDAExecutor>(PhyConst<AU>::secondToTime(1 * 1E-11), kineticModel, forceModel);
     return 0;
 }

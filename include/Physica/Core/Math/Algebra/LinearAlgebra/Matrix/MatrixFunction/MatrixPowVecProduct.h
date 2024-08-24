@@ -43,7 +43,7 @@ namespace Physica::Core {
         template<class OtherVector, class Executor = SequentialExecutor>
         inline void assignTo(LValueVector<OtherVector>& target_) const;
 
-        [[nodiscard]] ScalarType calc(size_t) const { throw NotImplementedException(); }
+        [[nodiscard]] ScalarType calc(size_t) const { throw NoImplException(); }
         /* Getters */
         [[nodiscard]] size_t getLength() const noexcept { return v.getLength(); }
         [[nodiscard]] const MatrixPow<MatrixType>& getLHS() const noexcept { return mpow; }

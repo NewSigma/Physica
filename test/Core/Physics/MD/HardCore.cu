@@ -77,7 +77,7 @@ ScalarType calcThermoFlux(MDType& rpmd) {
 }
 
 void testMergeStep() {
-    using KineticModel = HardCore<ScalarType, true, 1, RPMDIntegrator::Exact, CudaExecutor>;
+    using KineticModel = HardCore<ScalarType, true, 1, RPMDIntegrator::Exact, CUDAExecutor>;
     std::mt19937 gen{};
     MDType rpmd = MDType(makeSystem(gen), 1, 1, temperatureT, timeStep);
     KineticModel kineticModel(latticeSize, collideFactor, temperatureT, numMolecular, 100);
@@ -125,7 +125,7 @@ void testCpuGpuCompare() {
     }
     ScalarType gpu_data[NumData];
     {
-        using KineticModel = HardCore<ScalarType, IsFixedBoundary, 1, RPMDIntegrator::Exact, CudaExecutor>;
+        using KineticModel = HardCore<ScalarType, IsFixedBoundary, 1, RPMDIntegrator::Exact, CUDAExecutor>;
         std::mt19937 gen{};
         MDType rpmd = MDType(makeSystem(gen), 1, 1, temperatureT, timeStep);
         KineticModel kineticModel(latticeSize, collideFactor, temperatureT, numMolecular, 100);

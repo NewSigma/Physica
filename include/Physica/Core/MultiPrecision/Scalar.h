@@ -26,7 +26,7 @@
 #endif
 #include "MultiPrecisionType.h"
 #include "ScalarImpl/ScalarBase.h"
-#include "Physica/Core/Exception/NotImplementedException.h"
+#include "Physica/Core/Exception/NoImplException.h"
 #include "Physica/Core/IO/HDF5/HDF5.h"
 
 namespace Physica::Core {
