@@ -5,7 +5,7 @@ project(Physica
         DESCRIPTION "Modern template library for computational physics"
         HOMEPAGE_URL https://gitee.com/newsigma/Physica
         LANGUAGES C CXX)
-#include all macros
+# Include all macros
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake/Modules)
 #############################################Settings#############################################
 option(BUILD_EXAMPLES "Build examples" OFF)
@@ -34,6 +34,7 @@ if(${PHYSICA_OPTIMIZE})
     add_definitions(-DPHYSICA_ASM)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=native")
 endif()
+
 if(NOT ${CMAKE_BUILD_TYPE} MATCHES "Debug")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-math-errno -fno-signaling-nans -fno-trapping-math")
 endif()
@@ -98,13 +99,13 @@ find_package(HDF5 NAMES hdf5 REQUIRED COMPONENTS CXX shared)
 include_directories(SYSTEM ${HDF5_INCLUDE_DIR_CPP})
 add_definitions(-DPHYSICA_HDF5 -DH5_NO_DEPRECATED_SYMBOLS)
 
-if(${PHYSICA_GUI})
-    find_package(Qt6 COMPONENTS Core Widgets REQUIRED)
-endif()
-
 if(${PHYSICA_PROFILE})
     find_package(GPerfTools REQUIRED)
     include_directories(SYSTEM ${GPerfTools_INCLUDE_DIR})
+endif()
+
+if(${PHYSICA_GUI})
+    find_package(Qt6 COMPONENTS Core Widgets REQUIRED)
 endif()
 
 if(${PHYSICA_MKL})

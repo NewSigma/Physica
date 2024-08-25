@@ -139,4 +139,6 @@ namespace Physica::Core {
 #include "MatrixNorm.h"
 #include "MatrixExpr.h"
 #include "MatrixConvert.h"
-#include "MatrixProduct/MatrixProduct.h"
+#include "MatrixProduct/GEMM.h"
+#include "MatrixProduct/GEMV.h"
+#include "MatrixProduct/GEVM.h"

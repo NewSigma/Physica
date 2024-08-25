@@ -97,4 +97,6 @@ namespace Physica::Core {
 #include "RValueMatrixImpl/RValueMatrixImpl.cuh"
 #include "Transpose.cuh"
 #include "MatrixExpr.cuh"
-#include "MatrixProduct/MatrixProduct.cuh"
+#include "MatrixProduct/GEMM.cuh"
+#include "MatrixProduct/GEMV.cuh"
+#include "MatrixProduct/GEVM.cuh"

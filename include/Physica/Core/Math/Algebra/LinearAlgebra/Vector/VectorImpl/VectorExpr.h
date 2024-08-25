@@ -648,7 +648,7 @@ namespace Physica {
 }
 
 #include "VectorExprImpl/VectorAdd.h"
-#include "VectorExprImpl/VectorCosh.h"
 #include "VectorExprImpl/VectorSub.h"
 #include "VectorExprImpl/VectorMul.h"
 #include "VectorExprImpl/VectorSquare.h"
+#include "VectorExprImpl/VectorCosh.h"

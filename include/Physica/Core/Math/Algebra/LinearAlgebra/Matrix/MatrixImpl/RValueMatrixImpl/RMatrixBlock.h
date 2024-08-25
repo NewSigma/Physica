@@ -46,7 +46,7 @@ namespace Physica::Core {
         ~RowRVector() = default;
         /* Getters */
         [[nodiscard]] ScalarType calc(size_t index) const { assert(index < colCount); return mat.calc(row, fromCol + index); }
-        [[nodiscard]] size_t getLength() const noexcept { return colCount; }
+        [[nodiscard]] __host__ __device__ size_t getLength() const noexcept { return colCount; }
     };
 
     template<class MatrixType>
@@ -70,7 +70,7 @@ namespace Physica::Core {
         ~ColRVector() = default;
         /* Getters */
         [[nodiscard]] ScalarType calc(size_t index) const { assert(index < rowCount); return mat.calc(fromRow + index, col); }
-        [[nodiscard]] size_t getLength() const noexcept { return rowCount; }
+        [[nodiscard]] __host__ __device__ size_t getLength() const noexcept { return rowCount; }
     };
 
     template<class MatrixType>
@@ -97,8 +97,8 @@ namespace Physica::Core {
         using VectorBase::min;
         using VectorBase::sum;
         [[nodiscard]] ScalarType calc([[maybe_unused]] size_t row, size_t col) const { assert(row == 0); return VectorBase::calc(col); }
-        [[nodiscard]] constexpr static size_t getRow() noexcept { return 1; }
-        [[nodiscard]] size_t getColumn() const noexcept { return VectorBase::getLength(); }
+        [[nodiscard]] __host__ __device__ constexpr static size_t getRow() noexcept { return 1; }
+        [[nodiscard]] __host__ __device__ size_t getColumn() const noexcept { return VectorBase::getLength(); }
         /**
          * There are some common functions shared by vector and matrix, it is necessary to decide which function to call explicitly.
          */
@@ -161,8 +161,8 @@ namespace Physica::Core {
         ~RMatrixBlock() = default;
         /* Getters */
         [[nodiscard]] ScalarType calc(size_t row, size_t col) const;
-        [[nodiscard]] size_t getRow() const noexcept { return rowCount; }
-        [[nodiscard]] size_t getColumn() const noexcept { return colCount; }
+        [[nodiscard]] __host__ __device__ size_t getRow() const noexcept { return rowCount; }
+        [[nodiscard]] __host__ __device__ size_t getColumn() const noexcept { return colCount; }
     };
 
     template<class MatrixType>
@@ -214,7 +214,7 @@ namespace Physica {
     class Traits<RMatrixBlock<MatrixType, Row, Column>> {
     public:
         using ScalarType = typename MatrixType::ScalarType;
-        constexpr static int Option = MatrixType::MatrixOption;
+        constexpr static int Option = MatrixType::Option;
         constexpr static size_t RowAtCompile = Row;
         constexpr static size_t ColumnAtCompile = Column;
         constexpr static size_t MaxRowAtCompile = Row;

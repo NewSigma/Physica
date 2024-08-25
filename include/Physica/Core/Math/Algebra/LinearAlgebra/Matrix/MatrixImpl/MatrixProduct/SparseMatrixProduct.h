@@ -18,7 +18,7 @@
  */
 #pragma once
 
-#include "MatrixProduct.h"
+#include "GEMV.h"
 
 namespace Physica::Core {
     template<class T, int Option, class VectorType>

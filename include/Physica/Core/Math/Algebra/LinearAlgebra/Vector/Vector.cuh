@@ -39,11 +39,11 @@ namespace Physica::Core {
         using Storage::Storage;
         template<class Derived>
         __host__ __device__ device_obj(const device_obj<RValueVector<Derived>>& v);
-        device_obj(const device_obj&) = default;
-        device_obj(device_obj&&) noexcept = default;
+        device_obj(const This&) = default;
+        device_obj(This&&) noexcept = default;
         ~device_obj() = default;
         /* Operators */
-        device_obj<Vector<T, Length, MaxLength>>& operator=(device_obj<Vector<T, Length, MaxLength>> obj) noexcept;
+        __host__ __device__ This& operator=(This obj) noexcept { swap(obj); return *this; }
         using Base::operator=;
         using Storage::operator=;
         using Storage::operator[];
@@ -70,13 +70,6 @@ namespace Physica::Core {
     template<class Derived>
     __host__ __device__ device_obj<Vector<T, Length, MaxLength>>::device_obj(const device_obj<RValueVector<Derived>>& v) : Storage(v.getLength()) {
         v.getDerived().assignTo(*this);
-    }
-
-    template<class T, size_t Length, size_t MaxLength>
-    device_obj<Vector<T, Length, MaxLength>>&
-    device_obj<Vector<T, Length, MaxLength>>::operator=(device_obj<Vector<T, Length, MaxLength>> obj) noexcept {
-        swap(obj);
-        return *this;
     }
 
     template<class T, size_t Length, size_t MaxLength>

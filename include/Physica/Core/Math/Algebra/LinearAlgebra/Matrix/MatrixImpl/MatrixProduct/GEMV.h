@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2024 Weibo He.
+ * Copyright 2024 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -18,38 +18,7 @@
  */
 #pragma once
 
-#include <Physica/Core/Math/Algebra/LinearAlgebra/Matrix/MatrixImpl/RValueMatrix.h>
-
 namespace Physica::Core {
-    template<class VectorType, class MatrixType>
-    class VectorMatrixProduct : public RValueMatrix<VectorMatrixProduct<VectorType, MatrixType>> {
-        using This = VectorMatrixProduct<VectorType, MatrixType>;
-    public:
-        using Base = RValueMatrix<This>;
-        using Base::isReverseDiff;
-        using typename Base::ScalarType;
-    private:
-        const VectorType& vec;
-        const MatrixType& mat;
-    public:
-        VectorMatrixProduct(const RValueVector<VectorType>& vec_, const RValueMatrix<MatrixType>& mat_)
-                : vec(vec_.getDerived()), mat(mat_.getDerived()) {
-            assert(mat.getRow() == 1);
-        }
-        VectorMatrixProduct(const This&) = delete;
-        VectorMatrixProduct(This&&) noexcept = delete;
-        ~VectorMatrixProduct() = default;
-        /* Operators */
-        This& operator=(const This&) = delete;
-        This& operator=(This&&) noexcept = delete;
-        /* Getters */
-        [[nodiscard]] ScalarType calc(size_t row, size_t column) const;
-        [[nodiscard]] __host__ __device__ size_t getRow() const { return vec.getLength(); }
-        [[nodiscard]] __host__ __device__ size_t getColumn() const { return mat.getColumn(); }
-        [[nodiscard]] const VectorType& getLHS() const noexcept { return vec; }
-        [[nodiscard]] const MatrixType& getRHS() const noexcept { return mat; }
-    };
-
     template<class MatrixType, class VectorType>
     class MatrixVectorProduct : public RValueVector<MatrixVectorProduct<MatrixType, VectorType>> {
         using This = MatrixVectorProduct<MatrixType, VectorType>;
@@ -80,36 +49,21 @@ namespace Physica::Core {
         [[nodiscard]] const VectorType& getRHS() const noexcept { return vec; }
     };
 
-    template<class VectorType, class MatrixType>
-    typename VectorMatrixProduct<VectorType, MatrixType>::ScalarType VectorMatrixProduct<VectorType, MatrixType>::calc(size_t row, size_t column) const {
-        return vec.calc(row) * mat.calc(0, column);
-    }
-
     template<class MatrixType, class VectorType>
     template<class OtherDerived, class Executor>
     inline void MatrixVectorProduct<MatrixType, VectorType>::assignTo(LValueVector<OtherDerived>& target) const {
-        for (size_t i = 0; i < getLength(); ++i)
-            target[i] = calc(i);
-        
-        constexpr bool isContinuous = std::is_base_of<ContinuousVector<OtherDerived>, OtherDerived>::value;
-        if constexpr (isContinuous && Base::isReverseDiff)
-            target.getDerived().makeContinuous();
+        if constexpr (MatrixOption::isColumnMatrix<MatrixType>()) {
+            target = mat.col(0).asVector() * vec.calc(0);
+            for (size_t i = 1; i < vec.getLength(); ++i)
+                target += mat.col(i).asVector() * vec.calc(i);
+        }
+        else
+            Base::template assignTo<OtherDerived, Executor>(target);
     }
 
     template<class MatrixType, class VectorType>
     inline typename MatrixVectorProduct<MatrixType, VectorType>::ScalarType MatrixVectorProduct<MatrixType, VectorType>::calc(size_t index) const {
         return mat.row(index) * vec;
-    }
-
-    /**
-     * \note Here we force the row of \param mat is 1, because in Physica vectors are naturally column vectors.
-     * To compute row vector * matrix, users should converted it to matrix^T * column vector.
-     */
-    template<class VectorType, class MatrixType>
-    [[nodiscard]] inline typename std::enable_if<MatrixType::RowAtCompile == 1, VectorMatrixProduct<VectorType, MatrixType>>::type
-    operator*(const RValueVector<VectorType>& vec, const RValueMatrix<MatrixType>& mat) noexcept {
-        assert(mat.getRow() == 1);
-        return VectorMatrixProduct(vec, mat);
     }
 
     template<class MatrixType, class VectorType>
@@ -130,26 +84,8 @@ namespace Physica::Core {
 }
 
 namespace Physica {
-    using namespace Core;
-
-    template<class VectorType, class MatrixType>
-    class Traits<VectorMatrixProduct<VectorType, MatrixType>> {
-        static_assert(MatrixType::RowAtCompile == 1 || MatrixType::RowAtCompile == Dynamic,
-                      "Row and column do not match in matrix product");
-    public:
-        using ScalarType = typename Core::Internal::BinaryScalarOpReturnType<typename VectorType::ScalarType,
-                                                                             typename MatrixType::ScalarType>::Type;
-        constexpr static int Option = MatrixOption::AnyMajor | MatrixOption::AnyStorage;
-        constexpr static size_t RowAtCompile = VectorType::SizeAtCompile;
-        constexpr static size_t ColumnAtCompile = MatrixType::ColumnAtCompile;
-        constexpr static size_t MaxRowAtCompile = VectorType::MaxSizeAtCompile;
-        constexpr static size_t MaxColumnAtCompile = MatrixType::MaxColumnAtCompile;
-        constexpr static size_t SizeAtCompile = RowAtCompile * ColumnAtCompile;
-        constexpr static size_t MaxSizeAtCompile = SizeAtCompile;
-    };
-
     template<class MatrixType, class VectorType>
-    class Traits<MatrixVectorProduct<MatrixType, VectorType>> {
+    class Traits<Core::MatrixVectorProduct<MatrixType, VectorType>> {
         static_assert(MatrixType::ColumnAtCompile == VectorType::SizeAtCompile ||
                       MatrixType::ColumnAtCompile == Dynamic ||
                       VectorType::SizeAtCompile == Dynamic,
@@ -160,9 +96,7 @@ namespace Physica {
         constexpr static size_t SizeAtCompile = MatrixType::RowAtCompile;
         constexpr static size_t MaxSizeAtCompile = MatrixType::MaxRowAtCompile;
 
-        constexpr static bool FastAssign = false;
+        constexpr static bool FastAssign = Core::MatrixOption::isColumnMatrix<MatrixType>();
         constexpr static bool FastPacket = false;
     };
 }
-
-#include "GEMM.h"

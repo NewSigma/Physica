@@ -115,7 +115,6 @@ namespace Physica::Core {
 namespace Physica {
     template<class T, int Op, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn, class Allocator>
     class Traits<Core::DenseMatrix<T, Op, Row, Column, MaxRow, MaxColumn, Allocator>> {
-        static_assert(MaxRow * MaxColumn * sizeof(T) <= 2048, "[Warn]: It is suggested declare large fixed size matrix as dynamic matrix");
     public:
         using ScalarType = T;
         constexpr static int Option = Op;

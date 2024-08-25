@@ -19,7 +19,6 @@
 #pragma once
 
 #include <Physica/Utils/CUDA/PlainStruct.h>
-#include "MatrixProduct.h"
 
 namespace Physica::Core {
     template<class VectorType, class MatrixType>
@@ -52,49 +51,11 @@ namespace Physica::Core {
         return vec.getDerived().calc(row) * mat.getDerived().calc(0, column);
     }
 
-    template<class MatrixType, class VectorType>
-    class device_obj<MatrixVectorProduct<MatrixType, VectorType>>
-            : public device_obj<RValueVector<MatrixVectorProduct<MatrixType, VectorType>>> {
-        static_assert(MatrixType::ColumnAtCompile == VectorType::SizeAtCompile ||
-                      MatrixType::ColumnAtCompile == Dynamic ||
-                      VectorType::SizeAtCompile == Dynamic,
-                      "[Error]: Row and column do not match in matrix-vector product");
-    public:
-        using host_obj = MatrixVectorProduct<MatrixType, VectorType>;
-        using Base = device_obj<RValueVector<host_obj>>;
-        using typename Base::ScalarType;
-    private:
-        using This = device_obj<host_obj>;
-        Physica::PlainStruct<const device_obj<MatrixType>> mat;
-        Physica::PlainStruct<const device_obj<VectorType>> vec;
-    public:
-        __host__ __device__ device_obj(const device_obj<RValueMatrix<MatrixType>>& mat_, const device_obj<RValueVector<VectorType>>& vec_)
-                : mat(asStruct(mat_.getDerived())), vec(asStruct(vec_.getDerived())) {
-            assert(mat.getDerived().getColumn() == vec.getDerived().getLength());
-        }
-        /* Getters */
-        [[nodiscard]] __device__ inline ScalarType calc(size_t index) const;
-        [[nodiscard]] __host__ __device__ size_t getLength() const { return mat.getDerived().getRow(); }
-    };
-
-    template<class MatrixType, class VectorType>
-    __device__ inline typename device_obj<MatrixVectorProduct<MatrixType, VectorType>>::ScalarType
-    device_obj<MatrixVectorProduct<MatrixType, VectorType>>::calc(size_t index) const {
-        return mat.getDerived().row(index) * vec.getDerived();
-    }
-
     template<class VectorType, class MatrixType>
     __host__ __device__ inline typename std::enable_if<MatrixType::RowAtCompile == 1, device_obj<VectorMatrixProduct<VectorType, MatrixType>>>::type
     operator*(const device_obj<RValueVector<VectorType>>& vec, const device_obj<RValueMatrix<MatrixType>>& mat) {
         assert(mat.getRow() == 1);
         return {vec, mat};
-    }
-
-    template<class MatrixType, class VectorType>
-    __host__ __device__ inline typename std::enable_if<MatrixType::RowAtCompile != 1, device_obj<MatrixVectorProduct<MatrixType, VectorType>>>::type
-    operator*(const device_obj<RValueMatrix<MatrixType>>& mat, const device_obj<RValueVector<VectorType>>& vec) {
-        assert(mat.getColumn() == vec.getLength());
-        return {mat.getDerived(), vec.getDerived()};
     }
 }
 
@@ -102,10 +63,4 @@ namespace Physica {
     template<class VectorType, class MatrixType>
     class Traits<Core::device_obj<VectorMatrixProduct<VectorType, MatrixType>>>
             : public Traits<VectorMatrixProduct<VectorType, MatrixType>> {};
-
-    template<class MatrixType, class VectorType>
-    class Traits<Core::device_obj<MatrixVectorProduct<MatrixType, VectorType>>>
-            : public Traits<MatrixVectorProduct<MatrixType, VectorType>> {};
 }
-
-#include "GEMM.cuh"
