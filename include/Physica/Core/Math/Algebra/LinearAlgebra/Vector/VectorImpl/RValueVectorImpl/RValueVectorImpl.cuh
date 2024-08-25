@@ -22,49 +22,15 @@
 #include <Physica/Core/Parallel/CUDAContext.cuh>
 
 namespace Physica::Core {
-    namespace Internal {
-        template<class Derived, class OtherDerived>
-        __global__ void RValueVector_assignToKernel(
-                Physica::PlainStruct<const Derived> source_,
-                Physica::PlainStruct<OtherDerived> target_) {
-            static_assert(is_vector<Derived>::value, "[Error]: Invalid source vector type");
-            static_assert(is_vector<OtherDerived>::value, "[Error]: Invalid target vector type");
-            using namespace Physica::Core;
-            using ScalarType = typename OtherDerived::ScalarType;
-
-            const auto& source = source_.getDerived();
-            auto& target = target_.getDerived();
-            const size_t length = source.getLength();
-            const unsigned int index = blockIdx.x * blockDim.x + threadIdx.x;
-            if (index < length)
-                target[index] = ScalarType(source.calc(index));
-        }
-    }
-
     template<class Derived>
     template<class OtherDerived>
-    __host__ __device__
-    void device_obj<RValueVector<Derived>>::assignTo(device_obj<LValueVector<OtherDerived>>& target) const {
-        constexpr size_t OtherSize = Traits<OtherDerived>::SizeAtCompile;
-        static_assert(SizeAtCompile == Dynamic || OtherSize == Dynamic || SizeAtCompile == OtherSize,
-                "[Error]: Size mismatch between two vector");
-        assert(target.getLength() == getLength() && "[Error]: Size mismatch between two vector");
-        [[maybe_unused]] const auto kernel = Internal::RValueVector_assignToKernel<device_obj<Derived>, device_obj<OtherDerived>>;
-    #ifndef  __CUDA_ARCH__
-        using namespace Physica;
-        const size_t length = getLength();
-        const unsigned int numThread = std::min(length, MaxThreadPerBlock);
-        const unsigned int numBlock = (length + numThread - 1) / numThread;
-        kernel<<<numBlock, numThread, 0, CUDAContext::getInstance()>>>(asStruct(Base::getDerived()), asStruct(target.getDerived()));
-    #else
-        assignToImpl(target.getDerived());
-    #endif
-    }
-
-    template<class Derived>
-    template<class OtherDerived>
-    __device__ inline void device_obj<RValueVector<Derived>>::assignToImpl(OtherDerived& target) const {
+    __device__ void device_obj<RValueVector<Derived>>::assignTo(device_obj<LValueVector<OtherDerived>>& target_) const {
         using OtherScalar = typename OtherDerived::ScalarType;
+        constexpr size_t OtherSize = Traits<OtherDerived>::SizeAtCompile;
+        static_assert(SizeAtCompile == Dynamic || OtherSize == Dynamic || SizeAtCompile == OtherSize, "[Error]: Size mismatch between two vector");
+
+        auto& target = target_.getDerived();
+        assert(target.getLength() == getLength() && "[Error]: Size mismatch between two vector");
         for (size_t i = 0; i < getLength(); ++i)
             target[i] = OtherScalar(calc(i));
     }

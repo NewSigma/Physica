@@ -24,128 +24,125 @@ namespace Physica::Core {
     class device_obj<VectorExpr<ExpressionType::Div, VectorType, ScalarBase<AnyScalar>>>
             : public device_obj<RValueVector<VectorExpr<ExpressionType::Div, VectorType, ScalarBase<AnyScalar>>>> {
         static_assert(is_scalar<AnyScalar>::value, "[Error]: This is not a scalar type");
-        using DeviceVector = device_obj<VectorType>;
-    public:
         using host_obj = VectorExpr<ExpressionType::Div, VectorType, ScalarBase<AnyScalar>>;
         using Base = device_obj<RValueVector<host_obj>>;
+        using This = device_obj<host_obj>;
+        using DeviceVector = device_obj<VectorType>;
+    public:
         using typename Base::ScalarType;
     private:
-        Physica::PlainStruct<const DeviceVector> v;
+        const DeviceVector& v;
         AnyScalar s;
     public:
-        __host__ __device__ device_obj(const device_obj<RValueVector<VectorType>>& v_, AnyScalar s_)
-                : v(asStruct(v_.getDerived())), s(s_) {}
-        device_obj(const device_obj&) = default;
-        device_obj(device_obj&&) noexcept = default;
+        __device__ device_obj(const device_obj<RValueVector<VectorType>>& v_, AnyScalar s_) : v(v_.getDerived()), s(s_) {}
+        device_obj(const This&) = delete;
+        device_obj(This&&) noexcept = delete;
         ~device_obj() = default;
         /* Operators */
-        device_obj& operator=(const device_obj&) = delete;
-        device_obj& operator=(device_obj&&) noexcept = delete;
+        This& operator=(const This&) = delete;
+        This& operator=(This&&) noexcept = delete;
         /* Getters */
-        [[nodiscard]] __device__ ScalarType calc(size_t index) const { return ScalarType(v.getDerived().calc(index)) / ScalarType(s); }
-        [[nodiscard]] __host__ __device__ size_t getLength() const { return v.getDerived().getLength(); }
+        [[nodiscard]] __device__ ScalarType calc(size_t index) const { return ScalarType(v.calc(index)) / ScalarType(s); }
+        [[nodiscard]] __device__ size_t getLength() const { return v.getLength(); }
     };
     ////////////////////////////////////////Elementary Functions////////////////////////////////////////////
     template<class VectorType>
     class device_obj<VectorExpr<ExpressionType::Reciprocal, VectorType>>
             : public device_obj<RValueVector<VectorExpr<ExpressionType::Reciprocal, VectorType>>> {
-    public:
         using host_obj = VectorExpr<ExpressionType::Reciprocal, VectorType>;
-    private:
+        using This = device_obj<host_obj>;
         using Base = device_obj<RValueVector<host_obj>>;
         using DeviceVector = device_obj<VectorType>;
         
-        Physica::PlainStruct<const DeviceVector> exp;
+        const DeviceVector& exp;
     public:
-        device_obj(const device_obj<RValueVector<VectorType>>& exp_) : exp(asStruct(exp_.getDerived())) {}
-        device_obj(const device_obj&) = default;
-        device_obj(device_obj&&) noexcept = default;
+        __device__ device_obj(const device_obj<RValueVector<VectorType>>& exp_) : exp(exp_.getDerived()) {}
+        device_obj(const This&) = delete;
+        device_obj(This&&) noexcept = delete;
         ~device_obj() = default;
         /* Operators */
-        device_obj& operator=(const device_obj&) = delete;
-        device_obj& operator=(device_obj&&) noexcept = delete;
+        This& operator=(const This&) = delete;
+        This& operator=(This&&) noexcept = delete;
         /* Getters */
         [[nodiscard]] __device__ typename Base::ScalarType calc(size_t index) const {
-            return reciprocal(exp.getDerived().calc(index));
+            return reciprocal(exp.calc(index));
         }
-        [[nodiscard]] __host__ __device__ size_t getLength() const {
-            return exp.getDerived().getLength();
+        [[nodiscard]] __device__ size_t getLength() const {
+            return exp.getLength();
         }
     };
 
     template<class VectorType>
     class device_obj<VectorExpr<ExpressionType::Relu, VectorType>>
             : public device_obj<RValueVector<VectorExpr<ExpressionType::Relu, VectorType>>> {
-    public:
         using host_obj = VectorExpr<ExpressionType::Relu, VectorType>;
-    private:
+        using This = device_obj<host_obj>;
         using Base = device_obj<RValueVector<host_obj>>;
         using DeviceVector = device_obj<VectorType>;
         
-        Physica::PlainStruct<const DeviceVector> exp;
+        const DeviceVector& exp;
     public:
-        device_obj(const device_obj<RValueVector<VectorType>>& exp_) : exp(asStruct(exp_.getDerived())) {}
-        device_obj(const device_obj&) = default;
-        device_obj(device_obj&&) noexcept = default;
+        __device__ device_obj(const device_obj<RValueVector<VectorType>>& exp_) : exp(exp_.getDerived()) {}
+        device_obj(const This&) = delete;
+        device_obj(This&&) noexcept = delete;
         ~device_obj() = default;
         /* Operators */
-        device_obj& operator=(const device_obj&) = delete;
-        device_obj& operator=(device_obj&&) noexcept = delete;
+        This& operator=(const This&) = delete;
+        This& operator=(This&&) noexcept = delete;
         /* Getters */
         [[nodiscard]] __device__ typename Base::ScalarType calc(size_t index) const {
-            return relu(exp.getDerived().calc(index));
+            return relu(exp.calc(index));
         }
-        [[nodiscard]] __host__ __device__ size_t getLength() const {
-            return exp.getDerived().getLength();
+        [[nodiscard]] __device__ size_t getLength() const {
+            return exp.getLength();
         }
     };
 
     template<class VectorType>
     class device_obj<VectorExpr<ExpressionType::Exp, VectorType>>
             : public device_obj<RValueVector<VectorExpr<ExpressionType::Exp, VectorType>>> {
-    public:
         using host_obj = VectorExpr<ExpressionType::Exp, VectorType>;
-    private:
+        using This = device_obj<host_obj>;
         using Base = device_obj<RValueVector<host_obj>>;
         using DeviceVector = device_obj<VectorType>;
         
-        Physica::PlainStruct<const DeviceVector> v;
+        const DeviceVector& v;
     public:
-        device_obj(const device_obj<RValueVector<VectorType>>& v_) : v(asStruct(v_.getDerived())) {}
-        device_obj(const device_obj&) = default;
-        device_obj(device_obj&&) noexcept = default;
+        __device__ device_obj(const device_obj<RValueVector<VectorType>>& v_) : v(v_.getDerived()) {}
+        device_obj(const This&) = delete;
+        device_obj(This&&) noexcept = delete;
         ~device_obj() = default;
         /* Operators */
-        device_obj& operator=(const device_obj&) = delete;
-        device_obj& operator=(device_obj&&) noexcept = delete;
+        This& operator=(const This&) = delete;
+        This& operator=(This&&) noexcept = delete;
         /* Getters */
         [[nodiscard]] __device__ typename Base::ScalarType calc(size_t index) const {
-            return exp(v.getDerived().calc(index));
+            return exp(v.calc(index));
         }
-        [[nodiscard]] __host__ __device__ size_t getLength() const {
-            return v.getDerived().getLength();
+        [[nodiscard]] __device__ size_t getLength() const {
+            return v.getLength();
         }
     };
     //////////////////////////////////////Operators//////////////////////////////////////
     //////////////////////////////////////Div//////////////////////////////////////
     template<class VectorType, class ScalarType>
-    [[nodiscard]] __host__ __device__ inline device_obj<VectorExpr<ExpressionType::Div, VectorType, ScalarBase<ScalarType>>>
+    [[nodiscard]] __device__ inline device_obj<VectorExpr<ExpressionType::Div, VectorType, ScalarBase<ScalarType>>>
     operator/(const device_obj<RValueVector<VectorType>>& v, const ScalarBase<ScalarType>& s) noexcept {
         return {v.getDerived(), s.getDerived()};
     }
     ////////////////////////////////////////Elementary Functions////////////////////////////////////////////
     template<class VectorType>
-    [[nodiscard]] inline auto reciprocal(const device_obj<RValueVector<VectorType>>& v) noexcept {
+    [[nodiscard]] __device__ inline auto reciprocal(const device_obj<RValueVector<VectorType>>& v) noexcept {
         return device_obj<VectorExpr<ExpressionType::Reciprocal, VectorType>>(v);
     }
 
     template<class VectorType>
-    [[nodiscard]] inline auto relu(const device_obj<RValueVector<VectorType>>& v) noexcept {
+    [[nodiscard]] __device__ inline auto relu(const device_obj<RValueVector<VectorType>>& v) noexcept {
         return device_obj<VectorExpr<ExpressionType::Relu, VectorType>>(v);
     }
 
     template<class VectorType>
-    inline auto exp(const device_obj<RValueVector<VectorType>>& v) noexcept {
+    [[nodiscard]] __device__ inline auto exp(const device_obj<RValueVector<VectorType>>& v) noexcept {
         return device_obj<VectorExpr<ExpressionType::Exp, VectorType>>(v);
     }
 }

@@ -25,8 +25,6 @@ namespace Physica::Core {
                 Physica::PlainStruct<Derived> target,
                 ScalarType constant) {
             using namespace Physica::Core;
-            using HostDerived = typename Derived::host_obj;
-            static_assert(std::is_base_of<RValueVector<HostDerived>, HostDerived>::value, "[Error]: Invalid source vector type");
             const unsigned int delta = gridDim.x * blockDim.x;
             const unsigned int id = blockIdx.x * blockDim.x + threadIdx.x;
             const size_t length = target.getDerived().getLength();

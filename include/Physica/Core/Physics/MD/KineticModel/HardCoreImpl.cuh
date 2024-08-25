@@ -124,7 +124,8 @@ namespace Physica::Core {
         auto head = lockedBuffer.head(getNumParticle());
         head = ringPolymer.getMassVec();
         head.toDeviceAsync(mass);
-        repMass = reciprocal(mass);
+        Vector<ScalarType> temp = reciprocal(head);
+        temp.toDeviceAsync(repMass);
         CUDAContext::getInstance().wait();
     }
 

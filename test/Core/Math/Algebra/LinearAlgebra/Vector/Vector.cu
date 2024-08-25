@@ -50,17 +50,6 @@ int main() {
         }
     }
     {
-        const VectorType answer = reciprocal(a);
-        d_a = reciprocal(d_a);
-        VectorType result;
-        CUDAExecutor::wait();
-        d_a.toHost(result);
-        if (!vectorNear(result, answer, 1E-15)) {
-            std::cout << "[Error]: Reciprocal failed\n";
-            return 1;
-        }
-    }
-    {
         constexpr size_t len = 32;
         const ScalarType factor = 1.4;
         std::mt19937 gen{};

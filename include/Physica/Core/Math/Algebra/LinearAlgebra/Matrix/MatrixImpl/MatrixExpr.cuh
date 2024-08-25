@@ -22,34 +22,6 @@
 
 namespace Physica::Core {
     //////////////////////////////////////Add//////////////////////////////////////
-    template<class MatrixType1, class MatrixType2>
-    class device_obj<MatrixExpr<ExpressionType::Add, MatrixType1, MatrixType2>>
-            : public device_obj<RValueMatrix<MatrixExpr<ExpressionType::Add, MatrixType1, MatrixType2>>> {
-        using host_obj = MatrixExpr<ExpressionType::Add, MatrixType1, MatrixType2>;
-        using This = device_obj<host_obj>;
-    public:
-        using Base = device_obj<RValueMatrix<host_obj>>;
-        using typename Base::ScalarType;
-    private:
-        const device_obj<MatrixType1>& exp1;
-        const device_obj<MatrixType2>& exp2;
-    public:
-        __device__ device_obj(const device_obj<RValueMatrix<MatrixType1>>& exp1_, const device_obj<RValueMatrix<MatrixType2>>& exp2_)
-                : exp1(exp1_.getDerived()), exp2(exp2_.getDerived()) {}
-        device_obj(const device_obj&) = delete;
-        device_obj(device_obj&&) noexcept = delete;
-        ~device_obj() = default;
-        /* Operators */
-        device_obj& operator=(const device_obj&) = delete;
-        device_obj& operator=(device_obj&&) noexcept = delete;
-        /* Operations */
-        [[nodiscard]] __device__ ScalarType calc(size_t row, size_t col) const {
-            return ScalarType(exp1.calc(row, col)) + ScalarType(exp2.calc(row, col));
-        }
-        [[nodiscard]] __host__ __device__ size_t getRow() const { return exp1.getRow(); }
-        [[nodiscard]] __host__ __device__ size_t getColumn() const { return exp1.getColumn(); }
-    };
-
     template<class MatrixType, class AnyScalar>
     class device_obj<MatrixExpr<ExpressionType::Add, MatrixType, ScalarBase<AnyScalar>>>
             : public RValueMatrix<MatrixExpr<ExpressionType::Add, MatrixType, ScalarBase<AnyScalar>>> {
@@ -64,44 +36,48 @@ namespace Physica::Core {
     public:
         __device__ device_obj(const device_obj<RValueMatrix<MatrixType>>& exp_, const ScalarBase<AnyScalar>& base)
                 : exp(exp_.getDerived()), scalar(base.getDerived()) {}
-        device_obj(const device_obj&) = delete;
-        device_obj(device_obj&&) noexcept = delete;
+        device_obj(const This&) = delete;
+        device_obj(This&&) noexcept = delete;
         ~device_obj() = default;
         /* Operators */
-        device_obj& operator=(const device_obj&) = delete;
-        device_obj& operator=(device_obj&&) noexcept = delete;
+        This& operator=(const This&) = delete;
+        This& operator=(This&&) noexcept = delete;
+        /* Operations */
         [[nodiscard]] __device__ ScalarType calc(size_t row, size_t col) const {
             return ScalarType(exp.calc(row, col)) + ScalarType(scalar);
         }
+        /* Getters */
         [[nodiscard]] __host__ __device__ size_t getRow() const { return exp.getRow(); }
         [[nodiscard]] __host__ __device__ size_t getColumn() const { return exp.getColumn(); }
     };
-    //////////////////////////////////////Mul//////////////////////////////////////
-    template<class MatrixType, class AnyScalar>
-    class device_obj<MatrixExpr<ExpressionType::Mul, MatrixType, ScalarBase<AnyScalar>>>
-            : public device_obj<RValueMatrix<MatrixExpr<ExpressionType::Mul, MatrixType, ScalarBase<AnyScalar>>>> {
-        using host_obj = MatrixExpr<ExpressionType::Mul, MatrixType, ScalarBase<AnyScalar>>;
+
+    template<class MatrixType1, class MatrixType2>
+    class device_obj<MatrixExpr<ExpressionType::Add, MatrixType1, MatrixType2>>
+            : public device_obj<RValueMatrix<MatrixExpr<ExpressionType::Add, MatrixType1, MatrixType2>>> {
+        using host_obj = MatrixExpr<ExpressionType::Add, MatrixType1, MatrixType2>;
         using This = device_obj<host_obj>;
-    public:
         using Base = device_obj<RValueMatrix<host_obj>>;
+    public:
         using typename Base::ScalarType;
     private:
-        const device_obj<MatrixType>& exp;
-        const AnyScalar& scalar;
+        const device_obj<MatrixType1>& exp1;
+        const device_obj<MatrixType2>& exp2;
     public:
-        __device__ device_obj(const device_obj<RValueMatrix<MatrixType>>& exp_, const ScalarBase<AnyScalar>& base)
-                : exp(exp_.getDerived()), scalar(base.getDerived()) {}
-        device_obj(const device_obj&) = delete;
-        device_obj(device_obj&&) noexcept = delete;
+        __device__ device_obj(const device_obj<RValueMatrix<MatrixType1>>& exp1_, const device_obj<RValueMatrix<MatrixType2>>& exp2_)
+                : exp1(exp1_.getDerived()), exp2(exp2_.getDerived()) {}
+        device_obj(const This&) = delete;
+        device_obj(This&&) noexcept = delete;
         ~device_obj() = default;
         /* Operators */
-        device_obj& operator=(const device_obj&) = delete;
-        device_obj& operator=(device_obj&&) noexcept = delete;
+        This& operator=(const This&) = delete;
+        This& operator=(This&&) noexcept = delete;
+        /* Operations */
         [[nodiscard]] __device__ ScalarType calc(size_t row, size_t col) const {
-            return ScalarType(exp.calc(row, col)) * ScalarType(scalar);
+            return ScalarType(exp1.calc(row, col)) + ScalarType(exp2.calc(row, col));
         }
-        [[nodiscard]] __host__ __device__ size_t getRow() const { return exp.getRow(); }
-        [[nodiscard]] __host__ __device__ size_t getColumn() const { return exp.getColumn(); }
+        /* Getters */
+        [[nodiscard]] __host__ __device__ size_t getRow() const { return exp1.getRow(); }
+        [[nodiscard]] __host__ __device__ size_t getColumn() const { return exp1.getColumn(); }
     };
     //////////////////////////////////////Operators//////////////////////////////////////
     //////////////////////////////////////Add//////////////////////////////////////
@@ -116,18 +92,6 @@ namespace Physica::Core {
     operator+(const device_obj<RValueMatrix<MatrixType>>& mat, const ScalarBase<ScalarType>& s) noexcept {
         return {mat, s};
     }
-    //////////////////////////////////////Mul//////////////////////////////////////
-    template<class MatrixType, class ScalarType>
-    [[nodiscard]] __device__ inline device_obj<MatrixExpr<ExpressionType::Mul, MatrixType, ScalarBase<ScalarType>>>
-    operator*(const ScalarBase<ScalarType>& s, const device_obj<RValueMatrix<MatrixType>>& m) noexcept {
-        return {m, s};
-    }
-
-    template<class MatrixType, class ScalarType>
-    [[nodiscard]] __device__ inline device_obj<MatrixExpr<ExpressionType::Mul, MatrixType, ScalarBase<ScalarType>>>
-    operator*(const device_obj<RValueMatrix<MatrixType>>& m, const ScalarBase<ScalarType>& s) noexcept {
-        return {m, s};
-    }
 }
 
 namespace Physica {
@@ -137,3 +101,5 @@ namespace Physica {
     class Traits<Core::device_obj<MatrixExpr<type, T1, T2, ResultType>>>
         : public Traits<MatrixExpr<type, T1, T2, ResultType>> {};
 }
+
+#include "MatrixExprImpl/MatrixMul.cuh"

@@ -45,9 +45,7 @@ namespace Physica::Core {
         ~device_obj() = default;
         /* Operations */
         template<class OtherDerived>
-        __host__ __device__ void assignTo(device_obj<LValueVector<OtherDerived>>& target) const;
-        template<class OtherDerived>
-        __device__ inline void assignToImpl(OtherDerived& target) const;
+        __device__ void assignTo(device_obj<LValueVector<OtherDerived>>& target) const;
         /* Getters */
         [[nodiscard]] __device__ ScalarType calc(size_t index) const { return Base::getDerived().calc(index); }
         [[nodiscard]] __host__ __device__ inline device_obj<TransposeVector<Derived>> transpose() const noexcept;
