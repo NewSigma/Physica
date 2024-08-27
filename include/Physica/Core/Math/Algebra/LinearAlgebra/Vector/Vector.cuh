@@ -43,7 +43,7 @@ namespace Physica::Core {
         device_obj(This&&) noexcept = default;
         ~device_obj() = default;
         /* Operators */
-        __host__ __device__ This& operator=(This obj) noexcept { swap(obj); return *this; }
+        This& operator=(This obj) noexcept { swap(obj); return *this; }
         using Base::operator=;
         using Storage::operator=;
         using Storage::operator[];

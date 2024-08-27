@@ -72,7 +72,7 @@ namespace Physica::Core {
         [[nodiscard]] __host__ __device__ const_pointer data() const noexcept { return arr.data(); }
         [[nodiscard]] __host__ __device__ inline T* data_ptr(size_t row, size_t column) noexcept;
         [[nodiscard]] __host__ __device__ inline const T* data_ptr(size_t row, size_t column) const noexcept;
-        [[nodiscard]] size_t toIndex1D(size_t r, size_t c) const noexcept;
+        [[nodiscard]] __host__ __device__ size_t toIndex1D(size_t r, size_t c) const noexcept;
     };
 
     template<class T, size_t Order, size_t MaxOrder>
@@ -121,7 +121,7 @@ namespace Physica::Core {
     }
 
     template<class T, size_t Order, size_t MaxOrder>
-    size_t HalfDenseMatrixStorage<T, Order, MaxOrder>::toIndex1D(size_t r, size_t c) const noexcept {
+    __host__ __device__ size_t HalfDenseMatrixStorage<T, Order, MaxOrder>::toIndex1D(size_t r, size_t c) const noexcept {
         const size_t order = getOrder();
         assert(r < order && c < order);
         const bool exchange = c < r;

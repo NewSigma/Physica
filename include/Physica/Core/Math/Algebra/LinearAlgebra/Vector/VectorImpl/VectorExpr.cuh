@@ -157,4 +157,5 @@ namespace Physica {
 #include "VectorExprImpl/VectorAdd.cuh"
 #include "VectorExprImpl/VectorSub.cuh"
 #include "VectorExprImpl/VectorMul.cuh"
+#include "VectorExprImpl/VectorMinus.cuh"
 #include "VectorExprImpl/VectorSquare.cuh"

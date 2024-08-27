@@ -64,17 +64,14 @@ if(${PHYSICA_CUDA})
     # Reference: https://github.com/clangd/clangd/discussions/1676
     set(CMAKE_CUDA_USE_RESPONSE_FILE_FOR_INCLUDES 0)
 
-    # --diag-suppress 186: Comparation between unsigned int and 0 in InverseMatrix does not exist
     set(CMAKE_CUDA_FLAGS "\
         ${CMAKE_CUDA_FLAGS} \
-        --Werror cross-execution-space-call \
         --Wreorder \
         --Wdefault-stream-launch \
         --Wext-lambda-captures-this \
         --Wno-deprecated-declarations \
         --Wno-deprecated-gpu-targets \
         --relocatable-device-code=true \
-        --diag-suppress 186 \
         --diag-suppress 20011 \
         --default-stream per-thread \
         ${CMAKE_CXX_FLAGS}")

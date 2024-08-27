@@ -30,29 +30,6 @@ namespace Physica::Core {
      * Operations defined as \tparam T1 \tparam Type \tparam T2. e.g. vector + scalar, expression * expression
      */
     template<ExpressionType Type, class T1, class T2 = T1> class VectorExpr;
-    //////////////////////////////////////Minus//////////////////////////////////////
-    template<class VectorType>
-    class VectorExpr<ExpressionType::Minus, VectorType>
-            : public RValueVector<VectorExpr<ExpressionType::Minus, VectorType>> {
-        using This = VectorExpr<ExpressionType::Minus, VectorType>;
-        using Base = RValueVector<This>;
-        const VectorType& exp;
-    public:
-        explicit VectorExpr(const RValueVector<VectorType>& exp_) : exp(exp_.getDerived()) {}
-        VectorExpr(const This&) = delete;
-        VectorExpr(This&&) noexcept = delete;
-        ~VectorExpr() = default;
-        /* Operators */
-        This& operator=(const This&) = delete;
-        This& operator=(This&&) noexcept = delete;
-        /* Operations */
-        [[nodiscard]] typename Base::ScalarType calc(size_t s) const { return -exp.calc(s); }
-        template<class AnyPacket>
-        [[nodiscard]] AnyPacket packet(size_t index) const { return -exp.template packet<AnyPacket>(index); }
-        template<class AnyPacket>
-        [[nodiscard]] AnyPacket packetPartial(size_t index, size_t count) const { return -exp.template packetPartial<AnyPacket>(index, count); }
-        [[nodiscard]] __host__ __device__ size_t getLength() const { return exp.getLength(); }
-    };
     //////////////////////////////////////Div//////////////////////////////////////
     template<class VectorType, class AnyScalar>
     class VectorExpr<ExpressionType::Div, VectorType, ScalarBase<AnyScalar>>
@@ -494,11 +471,6 @@ namespace Physica::Core {
         [[nodiscard]] __host__ __device__ size_t getLength() const { return v.getLength(); }
     };
     //////////////////////////////////////Operators//////////////////////////////////////
-    //////////////////////////////////////Minus//////////////////////////////////////
-    template<class Derived>
-    [[nodiscard]] inline VectorExpr<ExpressionType::Minus, Derived> operator-(const RValueVector<Derived>& v) noexcept {
-        return VectorExpr<ExpressionType::Minus, Derived>(v.getDerived());
-    }
     //////////////////////////////////////Div//////////////////////////////////////
     template<class VectorType, class ScalarType>
     [[nodiscard]] inline VectorExpr<ExpressionType::Div, VectorType, ScalarBase<ScalarType>>
@@ -650,5 +622,6 @@ namespace Physica {
 #include "VectorExprImpl/VectorAdd.h"
 #include "VectorExprImpl/VectorSub.h"
 #include "VectorExprImpl/VectorMul.h"
+#include "VectorExprImpl/VectorMinus.h"
 #include "VectorExprImpl/VectorSquare.h"
 #include "VectorExprImpl/VectorCosh.h"
