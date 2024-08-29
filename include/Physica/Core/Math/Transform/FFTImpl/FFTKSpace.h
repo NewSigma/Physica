@@ -121,8 +121,8 @@ namespace Physica::Core {
         inline void invTransform(const RValueMatrix<MatrixType>& data);
         void resize([[maybe_unused]] size_t row, [[maybe_unused]] size_t col) { assert(row == getRow()); assert(col == getColumn()); }
         /* Getters */
-        [[nodiscard]] size_t getRow() const noexcept { return Base::getDerived().getKSpaceSize()[0]; }
-        [[nodiscard]] size_t getColumn() const noexcept { return Base::getDerived().getKSpaceSize()[1]; }
+        [[nodiscard]] __host__ __device__ size_t getRow() const noexcept { return Base::getDerived().getKSpaceSize()[0]; }
+        [[nodiscard]] __host__ __device__ size_t getColumn() const noexcept { return Base::getDerived().getKSpaceSize()[1]; }
         [[nodiscard]] __host__ __device__ ScalarType* data_ptr(size_t row, size_t column);
         [[nodiscard]] __host__ __device__ const ScalarType* data_ptr(size_t row, size_t column) const;
     protected:
@@ -180,9 +180,9 @@ namespace Physica::Core {
         inline void resize([[maybe_unused]] Index3D size);
         using GridBase::forIndexInGrid;
         /* Getters */
-        [[nodiscard]] size_t getDimX() const noexcept { return Base::getDerived().getKSpaceSize()[0]; }
-        [[nodiscard]] size_t getDimY() const noexcept { return Base::getDerived().getKSpaceSize()[1]; }
-        [[nodiscard]] size_t getDimZ() const noexcept { return Base::getDerived().getKSpaceSize()[2]; }
+        [[nodiscard]] __host__ __device__ size_t getDimX() const noexcept { return Base::getDerived().getKSpaceSize()[0]; }
+        [[nodiscard]] __host__ __device__ size_t getDimY() const noexcept { return Base::getDerived().getKSpaceSize()[1]; }
+        [[nodiscard]] __host__ __device__ size_t getDimZ() const noexcept { return Base::getDerived().getKSpaceSize()[2]; }
         [[nodiscard]] __host__ __device__ inline ScalarType* data_ptr(Index3D index);
         [[nodiscard]] __host__ __device__ inline const ScalarType* data_ptr(Index3D index) const;
     protected:

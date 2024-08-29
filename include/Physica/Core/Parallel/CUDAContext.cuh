@@ -18,8 +18,8 @@
  */
 #pragma once
 
+#include <Physica/Core/Exception/CUDA/cuBLAS.cuh>
 #include "CUDAStream.cuh"
-#include "Physica/Core/Exception/CUDA/cuBLAS.cuh"
 
 struct cublasContext;
 

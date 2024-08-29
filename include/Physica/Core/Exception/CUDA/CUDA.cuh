@@ -23,6 +23,8 @@
 
 namespace Physica::Core {
     class PHYSICA_API CUDAException : public std::system_error {
+        using Base = std::system_error;
+
         class Impl final : public std::error_category {
         public:
             /* Getters */
@@ -31,6 +33,8 @@ namespace Physica::Core {
         };
     public:
         CUDAException(cudaError_t code) noexcept : std::system_error(code, Impl()) {}
+        /* Getters */
+        [[nodiscard]] cudaError_t code() const noexcept { return cudaError_t(Base::code().value()); }
     };
 }
 

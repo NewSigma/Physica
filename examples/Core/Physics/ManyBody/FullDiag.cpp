@@ -21,85 +21,91 @@
 #include <Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseSymmMatrix.h>
 #include <Physica/Core/Math/Statistics/NumCharacter.h>
 #include <Physica/Core/Math/Random/RandomPool.h>
+#include <Physica/Core/Math/Algebra/LinearAlgebra/Eigen/SymmEigenSolver.h>
 #include <Physica/Core/Physics/ManyBody/ExactDiag/Hamilton/HubbardMatrix.h>
 #include <Physica/Core/Physics/ManyBody/ExactDiag/ReprSpace/SpinRepr.h>
-#include <Physica/Core/Physics/ManyBody/ExactDiag/TPQ.h>
 #include <Physica/Gui/Plot/Plot.h>
 
 using namespace Physica::Core;
 using namespace Physica::Gui;
+using Physica::Dynamic;
 using ScalarType = Scalar<Double>;
 using VectorType = Vector<ScalarType>;
-using RandomPoolType = RandomPool<std::mt19937, 10000>;
+using RandomPoolType = RandomPool<std::mt19937>;
+using VectorPair = std::pair<VectorType, VectorType>;
+using SpectrumMatrix = HalfDenseMatrixStorage<VectorPair, Dynamic, Dynamic>;
 constexpr unsigned int NumSite = 4;
 constexpr double HoppingT = 1;
 constexpr double RepelU = 8;
-constexpr unsigned int NumSample = 100;
-constexpr unsigned int NumBeta = 41;
 
 template<class ReprType>
-VectorType calcPartition(ReprType repr_, const VectorType& betas) {
+VectorPair calcPair(ReprType repr_) {
     using Hamilton = HubbardMatrix<ScalarType, ReprType>;
-    LatticeModel<1> lattice({NumSite}, 1);
-    Hubbard<ScalarType, 1> hubbard(lattice, HoppingT, RepelU);
+    const LatticeModel<1> lattice({NumSite}, 1);
+    const Hubbard<ScalarType, 1> hubbard(lattice, HoppingT, RepelU);
     const Hamilton hamilton(hubbard, std::move(repr_));
-    auto& gen = RandomPoolType::getInstance().getGen();
-    VectorType result(NumBeta);
-    const ScalarType deltaBeta = betas[1] - betas[0];
-    auto psi = TPQ<ScalarType>(hamilton.getNumState());
-    psi.pre_nvt_step(hamilton, deltaBeta);
-    for (unsigned int i = 0; i < NumSample; ++i) {
-        psi.random_normal(gen);
-        for (unsigned int j = 0; j < NumBeta; ++j) {
-            if (j != 0)
-                psi.nvt_step(hamilton, deltaBeta);
-            toNextMean(result[j], i, psi.calcPartitionXi());
-        }
-    }
-    return result;
+    const size_t numState = hamilton.getNumState();
+    SymmEigenSolver<ScalarType> solver(numState);
+    solver.compute(DenseSymmMatrix<ScalarType>(hamilton), true);
+
+    const auto eigenvectors = solver.getEigenvectors();
+    const auto& repr = hamilton.getRepr();
+    VectorType numParticles(numState);
+    for (size_t i = 0; i < numState; ++i)
+        numParticles += toSquaredNormVector(eigenvectors.row(i)) * ScalarType(repr[i].getNumParticle());
+    return std::make_pair(VectorType(solver.getEigenvalues()), std::move(numParticles));
 }
 
-HalfDenseMatrixStorage<VectorType> makePartitionMatrix(const VectorType& betas) {
-    HalfDenseMatrixStorage<VectorType> result(NumSite + 1);
+SpectrumMatrix makeSpectrum() {
+    SpectrumMatrix result(NumSite + 1, NumSite + 1, std::make_pair(VectorType{}, VectorType{}));
     for (unsigned int numSpinUp = 0; numSpinUp <= NumSite; ++numSpinUp) {
         for (unsigned int numSpinDown = numSpinUp; numSpinDown <= NumSite; ++numSpinDown) {
+            const bool isVacuum = numSpinDown == 0;
+            if (isVacuum) {
+                result(numSpinUp, numSpinDown) = std::make_pair<VectorType, VectorType>({0}, {0});
+                continue;
+            }
+
             const bool useInversionSymm = numSpinUp == numSpinDown;
-            VectorType elem;
+            VectorPair pair;
             if (useInversionSymm) {
                 using ReprType = SpinRepr<1, NumSite, true>;
-                elem = calcPartition(ReprType(numSpinUp, numSpinDown), betas);
+                pair = calcPair(ReprType(numSpinUp, numSpinDown));
             }
             else {
                 using ReprType = SpinRepr<1, NumSite, false>;
-                elem = calcPartition(ReprType(numSpinUp, numSpinDown), betas);
+                pair = calcPair(ReprType(numSpinUp, numSpinDown));
             }
-            result(numSpinUp, numSpinDown) = std::move(elem);
+            result(numSpinUp, numSpinDown) = std::move(pair);
         }
     }
     return result;
 }
 
 VectorType makeDensity(const VectorType& betas) {
-    const auto partitionMatrix = makePartitionMatrix(betas);
-    VectorType result(NumBeta);
-    for (size_t i = 0; i < NumBeta; ++i) {
-        ScalarType sumPartition = 0;
-        ScalarType numParticle = 0;
+    const auto spectrum = makeSpectrum();
+    VectorType result(betas.getLength());
+    for (size_t i = 0; i < betas.getLength(); ++i) {
+        const ScalarType beta = betas[i];
+        ScalarType numParticles = 0, partition = 0;
         for (unsigned int numSpinUp = 0; numSpinUp <= NumSite; ++numSpinUp) {
             for (unsigned int numSpinDown = numSpinUp; numSpinDown <= NumSite; ++numSpinDown) {
-                const int factor = numSpinUp == numSpinDown ? 1 : 2;
-                const ScalarType n = (numSpinUp + numSpinDown) * factor;
-                sumPartition += partitionMatrix(numSpinUp, numSpinDown)[i] * factor;
-                numParticle += partitionMatrix(numSpinUp, numSpinDown)[i] * n;
+                const VectorPair& pair = spectrum(numSpinUp, numSpinDown);
+                VectorType weights = exp(pair.first * (-beta));
+                if (numSpinDown != numSpinUp)
+                    weights *= ScalarType(2);
+                numParticles += pair.second * weights;
+                partition += weights.sum();
             }
         }
-        result[i] = numParticle / (sumPartition * ScalarType(NumSite));
+        result[i] = numParticles / partition;
     }
+    result *= reciprocal(ScalarType(NumSite));
     return result;
 }
 
 int main(int argc, char** argv) {
-    const auto betas = VectorType::linspace(0, 4, NumBeta);
+    const auto betas = VectorType::linspace(0, 4, 41);
     const auto rhos = makeDensity(betas);
 
     QApplication app(argc, argv);

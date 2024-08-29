@@ -417,8 +417,8 @@ namespace Physica::Core {
     }
 
     template<class ScalarType, size_t Dim>
-    fftw_plan FFT<ScalarType, Dim>::makeForwardPlan() {
-        fftw_plan plan;
+    typename FFT<ScalarType, Dim>::PlanType FFT<ScalarType, Dim>::makeForwardPlan() {
+        PlanType plan;
         if constexpr (Dim == 2) {
             if constexpr (isComplex) {
                 if constexpr (isSinglePrec)
@@ -465,8 +465,8 @@ namespace Physica::Core {
     }
     
     template<class ScalarType, size_t Dim>
-    fftw_plan FFT<ScalarType, Dim>::makeBackwardPlan() {
-        fftw_plan plan;
+    typename FFT<ScalarType, Dim>::PlanType FFT<ScalarType, Dim>::makeBackwardPlan() {
+        PlanType plan;
         if constexpr (Dim == 2) {
             if constexpr (isComplex) {
                 if constexpr (isSinglePrec)

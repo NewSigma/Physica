@@ -45,9 +45,9 @@ namespace Physica::Core {
     template<class Derived>
     template<class OtherDerived>
     __host__ __device__ void device_obj<RValueMatrix<Derived>>::assignTo(device_obj<LValueMatrix<OtherDerived>>& target) const {
+        [[maybe_unused]] const auto kernel = Internal::RValueMatrix_assignToKernel<Derived, OtherDerived>;
         const size_t maxMajor = target.getMaxMajor();
         const size_t maxMinor = target.getMaxMinor();
-        [[maybe_unused]] const auto kernel = Internal::RValueMatrix_assignToKernel<Derived, OtherDerived>;
     #ifndef __CUDA_ARCH__
         const unsigned int numThread = std::min(maxMinor, MaxThreadPerBlock);
         const unsigned int numBlockX = (maxMinor + numThread - 1) / numThread;

@@ -170,8 +170,8 @@ namespace Physica::Core {
         FFT(const Utils::Array<size_t, Dim>& rSpaceSize_);
         /* Operations */
         void initializePlan();
-        fftw_plan makeForwardPlan();
-        fftw_plan makeBackwardPlan();
+        PlanType makeForwardPlan();
+        PlanType makeBackwardPlan();
         size_t sumRSpaceSize(size_t from_dim) const;
         size_t sumKSpaceSize(size_t from_dim) const;
         void normalizeIndexes(Utils::Array<ssize_t, Dim>& indexes) const;

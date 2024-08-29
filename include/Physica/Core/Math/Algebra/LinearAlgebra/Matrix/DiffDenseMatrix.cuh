@@ -205,4 +205,4 @@ namespace Physica {
     };
 }
 
-#include "MatrixProduct/DiffMatrixProduct.cuh"
+#include "MatrixImpl/MatrixProduct/DiffMatrixProduct.cuh"
