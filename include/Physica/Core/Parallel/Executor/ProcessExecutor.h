@@ -76,7 +76,7 @@ namespace Physica {
     template<>
     class Traits<Core::ProcessExecutor> {
     public:
-        constexpr static bool isCPUEnabled = true;
-        constexpr static bool isCUDAEnabled = false;
+        constexpr static bool UseCPU = true;
+        constexpr static bool UseCUDA = false;
     };
 }

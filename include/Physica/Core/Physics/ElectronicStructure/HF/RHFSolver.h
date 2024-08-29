@@ -109,7 +109,7 @@ namespace Physica::Core::Physics {
             , overlap(baseSetSize, baseSetSize)
             , baseSet(baseSetSize)
             , selfConsistentEnergy()
-            , wave(MatrixType::Zeros(baseSetSize, electronConfig.getNumOccupiedOrbit()))
+            , wave(MatrixType::zeros(baseSetSize, electronConfig.getNumOccupiedOrbit()))
             , eigenSolver(baseSetSize)
             , iteration(0) {
         assert(numOccupiedOrbit <= baseSetSize);
@@ -131,7 +131,7 @@ namespace Physica::Core::Physics {
         const MatrixType inv_cholesky = cholesky.inverse();
 
         auto densityMatrices = EDIISBuffer(EDIISBufferSize, baseSetSize, baseSetSize, ScalarType(0));
-        MatrixType sameSpinElectronDensity = MatrixType::Zeros(baseSetSize);
+        auto sameSpinElectronDensity = MatrixType::zeros(baseSetSize);
         auto fockMatrices = MatrixBuffer(MatrixBufferSize, baseSetSize, baseSetSize, ScalarType(0));
         MatrixType fock;
         auto errorMatrices = DIISBuffer(DIISBufferSize - 1, baseSetSize, baseSetSize, ScalarType(0));
@@ -338,7 +338,7 @@ namespace Physica::Core::Physics {
             x = inv_A * b;
         }
 
-        MatrixType extrapolate_fock = MatrixType::Zeros(getBaseSetSize());
+        MatrixType extrapolate_fock = MatrixType::zeros(getBaseSetSize());
         constexpr size_t offset = MatrixBuffer::getLength() - DIISBuffer::getLength();
         for (size_t i = 1; i < x.getLength(); ++i)
             extrapolate_fock += fockMatrices[offset + i - 1] * x[i];

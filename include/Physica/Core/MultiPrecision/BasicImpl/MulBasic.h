@@ -26,7 +26,7 @@ namespace Physica::Core {
      * It is slightly faster than mulWordByWord() if we are interested in the high Unit only.
      */
     inline MPUnit mulWordByWordHigh(MPUnit n1, MPUnit n2) {
-        if constexpr (IsASMEnabled()) {
+        if constexpr (UseASM()) {
             MPUnit result;
             if constexpr (PhysicaWordSize == 64) {
                 asm (
@@ -68,7 +68,7 @@ namespace Physica::Core {
      * n1 * n2 = product(16 bytes) = carry(high 8 bytes) + ReturnValue(low bytes)
      */
     inline void mulWordByWord(MPUnit& high, MPUnit& low, MPUnit n1, MPUnit n2) {
-        if constexpr (IsASMEnabled()) {
+        if constexpr (UseASM()) {
             if constexpr (PhysicaWordSize == 64) {
                 asm (
                         "mulq %3"

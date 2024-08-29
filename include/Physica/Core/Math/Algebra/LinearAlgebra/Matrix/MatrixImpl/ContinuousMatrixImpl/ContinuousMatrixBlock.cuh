@@ -44,8 +44,8 @@ namespace Physica::Core {
         ~device_obj() = default;
         /* Operators */
         using Base::operator=;
-        device_obj& operator=(const device_obj& v) { v.assignTo(*this); return *this; }
-        device_obj& operator=(device_obj&& v) noexcept { return operator=(std::cref(v)); }
+        __device__ device_obj& operator=(const device_obj& v) { v.assignTo(*this); return *this; }
+        __device__ device_obj& operator=(device_obj&& v) noexcept { return operator=(std::cref(v)); }
         [[nodiscard]] __device__ ScalarType& operator[](size_t index) { assert(index < getLength()); return mat(row, fromCol + index); }
         [[nodiscard]] __device__ const ScalarType& operator[](size_t index) const { assert(index < getLength()); return mat(row, fromCol + index); }
         /* Operations */
@@ -79,8 +79,8 @@ namespace Physica::Core {
         ~device_obj() = default;
         /* Operators */
         using Base::operator=;
-        device_obj& operator=(const device_obj& v) { v.assignTo(*this); return *this; }
-        device_obj& operator=(device_obj&& v) noexcept { return operator=(std::cref(v)); }
+        __device__ device_obj& operator=(const device_obj& v) { v.assignTo(*this); return *this; }
+        __device__ device_obj& operator=(device_obj&& v) noexcept { return operator=(std::cref(v)); }
         [[nodiscard]] __device__ ScalarType& operator[](size_t index) { assert(index < getLength()); return mat(fromRow + index, col); }
         [[nodiscard]] __device__ const ScalarType& operator[](size_t index) const { assert(index < getLength()); return mat(fromRow + index, col); }
         /* Operations */
@@ -112,8 +112,8 @@ namespace Physica::Core {
         device_obj(device_obj&&) noexcept = delete;
         ~device_obj() = default;
         /* Operators */
-        device_obj& operator=(const device_obj& m) { VectorBase::operator=(m.asVector()); return *this; }
-        device_obj& operator=(device_obj&& m) noexcept { VectorBase::operator=(m.asVector()); return *this; }
+        __device__ device_obj& operator=(const device_obj& m) { VectorBase::operator=(m.asVector()); return *this; }
+        __device__ device_obj& operator=(device_obj&& m) noexcept { VectorBase::operator=(m.asVector()); return *this; }
         template<class T> This& operator=(const ScalarBase<T>& s) { VectorBase::operator=(s); return *this; }
         using Base::operator=;
         using VectorBase::operator=;
@@ -170,8 +170,8 @@ namespace Physica::Core {
         device_obj(device_obj&&) noexcept = delete;
         ~device_obj() = default;
         /* Operators */
-        device_obj& operator=(const device_obj& m) { VectorBase::operator=(m.asVector()); return *this; }
-        device_obj& operator=(device_obj&& m) noexcept { VectorBase::operator=(m.asVector()); return *this; }
+        __device__ device_obj& operator=(const device_obj& m) { VectorBase::operator=(m.asVector()); return *this; }
+        __device__ device_obj& operator=(device_obj&& m) noexcept { VectorBase::operator=(m.asVector()); return *this; }
         template<class T> This& operator=(const ScalarBase<T>& s) { VectorBase::operator=(s); return *this; }
         using Base::operator=;
         using VectorBase::operator=;
@@ -224,8 +224,8 @@ namespace Physica::Core {
         device_obj(device_obj&&) noexcept = delete;
         ~device_obj() = default;
         /* Operators */
-        device_obj& operator=(const device_obj& m) { VectorBase::operator=(m.asVector()); return *this; }
-        device_obj& operator=(device_obj&& m) noexcept { VectorBase::operator=(m.asVector()); return *this; }
+        __device__ device_obj& operator=(const device_obj& m) { VectorBase::operator=(m.asVector()); return *this; }
+        __device__ device_obj& operator=(device_obj&& m) noexcept { VectorBase::operator=(m.asVector()); return *this; }
         using Base::operator=;
         using VectorBase::operator=;
         [[nodiscard]] __device__ ScalarType& operator()([[maybe_unused]] size_t row, [[maybe_unused]] size_t col) {
@@ -277,8 +277,8 @@ namespace Physica::Core {
         ~device_obj() = default;
         /* Operators */
         using Base::operator=;
-        device_obj& operator=(const device_obj& m) { Base::operator=(static_cast<const typename Base::Base&>(m)); return *this; }
-        device_obj& operator=(device_obj&& m) noexcept { Base::operator=(static_cast<const typename Base::Base&>(m)); return *this; }
+        __device__ device_obj& operator=(const device_obj& m) { Base::operator=(static_cast<const typename Base::Base&>(m)); return *this; }
+        __device__ device_obj& operator=(device_obj&& m) noexcept { Base::operator=(static_cast<const typename Base::Base&>(m)); return *this; }
         [[nodiscard]] __device__ ScalarType& operator()(size_t row, size_t col);
         [[nodiscard]] __device__ const ScalarType& operator()(size_t row, size_t col) const;
         /* Operations */

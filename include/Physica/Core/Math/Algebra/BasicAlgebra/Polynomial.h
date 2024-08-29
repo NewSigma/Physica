@@ -78,7 +78,7 @@ namespace Physica::Core {
         using MatrixType = DenseMatrix<ScalarType, MatrixOption::Column | MatrixOption::Vector, Power, Power>;
 
         const size_t power = poly.getPower();
-        MatrixType companion = MatrixType::Zeros(power);
+        auto companion = MatrixType::zeros(power);
         for (size_t i = 0; i < power - 1; ++i)
             companion(i + 1, i) = ScalarType(1);
         auto col = companion.col(power - 1);

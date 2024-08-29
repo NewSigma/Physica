@@ -71,7 +71,7 @@ namespace Physica::Core {
     template<class HostModel, class DeviceModel>
     template<class VectorType, class Executor>
     void CPUGPUModel<HostModel, DeviceModel>::forceAsync(const MDCellType& cell, ContinuousVector<VectorType>& result) {
-        static_assert(Traits<Executor>::isCUDAEnabled, "[Error]: Invalid executor");
+        static_assert(Traits<Executor>::UseCUDA, "[Error]: Invalid executor");
         const auto threadId = ThreadPool::getThreadInfo().id;
         const bool useCPU = ThreadPool::isMainThread() || threadId >= getNumCUDAThread();
         if (useCPU)

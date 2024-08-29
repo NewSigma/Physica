@@ -19,42 +19,37 @@
 #pragma once
 
 namespace Physica::Core {
-    //////////////////////////////////////////////Column-Element//////////////////////////////////////////////
-    template<class T, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn, class Allocator>
-    __host__ __device__ device_obj<DenseMatrixStorage<T, MatrixOption::Column | MatrixOption::Element, Row, Column, MaxRow, MaxColumn, Allocator>>::
-            device_obj(size_t row, size_t column) {
+    #define tparams class T, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn, class Allocator
+    #define ColumnElementStorage DenseMatrixStorage<T, MatrixOption::Column | MatrixOption::Element, Row, Column, MaxRow, MaxColumn, Allocator>
+
+    template<tparams>
+    __host__ __device__ device_obj<ColumnElementStorage>::device_obj(size_t row, size_t column) {
         resize(row, column);
     }
 
-    template<class T, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn, class Allocator>
-    __host__ __device__ device_obj<DenseMatrixStorage<T, MatrixOption::Column | MatrixOption::Element, Row, Column, MaxRow, MaxColumn, Allocator>>::
-            device_obj(size_t row, size_t column, T value) {
+    template<tparams>
+    __host__ __device__ device_obj<ColumnElementStorage>::device_obj(size_t row, size_t column, ValueType value) {
         resize(row, column, std::move(value));
     }
 
-    template<class T, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn, class Allocator>
-    device_obj<DenseMatrixStorage<T, MatrixOption::Column | MatrixOption::Element, Row, Column, MaxRow, MaxColumn, Allocator>>::
-            device_obj(const host_obj& storage) : Base(storage), Dim(storage.getRow(), storage.getColumn()) {}
+    template<tparams>
+    device_obj<ColumnElementStorage>::device_obj(const host_obj& storage) : Base(storage), Dim(storage.getRow(), storage.getColumn()) {}
 
-    template<class T, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn, class Allocator>
-    __device__ T& device_obj<DenseMatrixStorage<T, MatrixOption::Column | MatrixOption::Element, Row, Column, MaxRow, MaxColumn, Allocator>>::
-            operator()(size_t r, size_t c) {
+    template<tparams>
+    __device__ typename device_obj<ColumnElementStorage>::ValueType& device_obj<ColumnElementStorage>::operator()(size_t r, size_t c) {
         assert(r < getRow() && c < getColumn());
         return Base::operator[](toIndex(r, c));
     }
 
-    template<class T, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn, class Allocator>
-    __device__ const T&
-    device_obj<DenseMatrixStorage<T, MatrixOption::Column | MatrixOption::Element, Row, Column, MaxRow, MaxColumn, Allocator>>::
-            operator()(size_t r, size_t c) const {
+    template<tparams>
+    __device__ const typename device_obj<ColumnElementStorage>::ValueType& device_obj<ColumnElementStorage>::operator()(size_t r, size_t c) const {
         assert(r < getRow() && c < getColumn());
         return Base::operator[](toIndex(r, c));
     }
 
-    template<class T, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn, class Allocator>
+    template<tparams>
     template<class... Args>
-    __host__ __device__ void device_obj<DenseMatrixStorage<T, MatrixOption::Column | MatrixOption::Element, Row, Column, MaxRow, MaxColumn, Allocator>>::
-            resize(size_t row, size_t column, Args&&... args) {
+    __host__ __device__ void device_obj<ColumnElementStorage>::resize(size_t row, size_t column, Args&&... args) {
     #ifdef __CUDA_ARCH__
         assert(Row * Column != Dynamic && "[Error]: Do not allocate dynamic matrix in device code");
     #endif
@@ -62,76 +57,68 @@ namespace Physica::Core {
         Dim::resize(row, column);
     }
 
-    template<class T, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn, class Allocator>
-    void device_obj<DenseMatrixStorage<T, MatrixOption::Column | MatrixOption::Element, Row, Column, MaxRow, MaxColumn, Allocator>>::
-            swap(This& __restrict obj) noexcept {
+    template<tparams>
+    void device_obj<ColumnElementStorage>::swap(This& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         Base::swap(obj);
         Dim::swap(obj);
     }
 
-    template<class T, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn, class Allocator>
-    inline auto DenseMatrixStorage<T, MatrixOption::Column | MatrixOption::Element, Row, Column, MaxRow, MaxColumn, Allocator>::
-            toDevice() const {
+    template<tparams>
+    inline auto ColumnElementStorage::toDevice() const {
         return device_obj<This>(*this);
     }
 
-    template<class T, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn, class Allocator>
-    inline auto DenseMatrixStorage<T, MatrixOption::Column | MatrixOption::Element, Row, Column, MaxRow, MaxColumn, Allocator>::
-            toDeviceAsync() const {
+    template<tparams>
+    inline auto ColumnElementStorage::toDeviceAsync() const {
         device_obj<This> result(getRow(), getColumn());
         toDeviceAsync(result);
         return device_obj<This>(std::move(result));
     }
 
-    template<class T, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn, class Allocator>
-    inline void DenseMatrixStorage<T, MatrixOption::Column | MatrixOption::Element, Row, Column, MaxRow, MaxColumn, Allocator>::
-            toDevice(device_obj<This>& obj) const {
+    template<tparams>
+    inline void ColumnElementStorage::toDevice(device_obj<This>& obj) const {
         Base::toDevice(obj);
     }
 
-    template<class T, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn, class Allocator>
-    inline void DenseMatrixStorage<T, MatrixOption::Column | MatrixOption::Element, Row, Column, MaxRow, MaxColumn, Allocator>::
-            toDeviceAsync(device_obj<This>& obj) const {
+    template<tparams>
+    inline void ColumnElementStorage::toDeviceAsync(device_obj<This>& obj) const {
         Base::toDeviceAsync(obj);
     }
-    //////////////////////////////////////////////Row-Element//////////////////////////////////////////////
-    template<class T, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn, class Allocator>
-    __host__ __device__ device_obj<DenseMatrixStorage<T, MatrixOption::Row | MatrixOption::Element, Row, Column, MaxRow, MaxColumn, Allocator>>::
-            device_obj(size_t row, size_t column) {
+
+    #undef ColumnElementStorage
+    #define RowElementStorage DenseMatrixStorage<T, MatrixOption::Row | MatrixOption::Element, Row, Column, MaxRow, MaxColumn, Allocator>
+
+    template<tparams>
+    __host__ __device__ device_obj<RowElementStorage>::device_obj(size_t row, size_t column) {
         resize(row, column);
     }
 
-    template<class T, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn, class Allocator>
-    __host__ __device__ device_obj<DenseMatrixStorage<T, MatrixOption::Row | MatrixOption::Element, Row, Column, MaxRow, MaxColumn, Allocator>>::
-            device_obj(size_t row, size_t column, T value) {
+    template<tparams>
+    __host__ __device__ device_obj<RowElementStorage>::device_obj(size_t row, size_t column, ValueType value) {
         resize(row, column, std::move(value));
     }
 
-    template<class T, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn, class Allocator>
-    device_obj<DenseMatrixStorage<T, MatrixOption::Row | MatrixOption::Element, Row, Column, MaxRow, MaxColumn, Allocator>>::
-            device_obj(const host_obj& storage): Base(storage), Dim(storage.getRow(), storage.getColumn()) {}
+    template<tparams>
+    device_obj<RowElementStorage>::device_obj(const host_obj& storage): Base(storage), Dim(storage.getRow(), storage.getColumn()) {}
 
-    template<class T, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn, class Allocator>
-    __device__ T&
-    device_obj<DenseMatrixStorage<T, MatrixOption::Row | MatrixOption::Element, Row, Column, MaxRow, MaxColumn, Allocator>>::
-            operator()(size_t r, size_t c) {
+    template<tparams>
+    __device__ typename device_obj<RowElementStorage>::ValueType&
+    device_obj<RowElementStorage>::operator()(size_t r, size_t c) {
         assert(r < getRow() && c < getColumn());
         return Base::operator[](toIndex(r, c));
     }
 
-    template<class T, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn, class Allocator>
-    __device__ const T&
-    device_obj<DenseMatrixStorage<T, MatrixOption::Row | MatrixOption::Element, Row, Column, MaxRow, MaxColumn, Allocator>>::
-            operator()(size_t r, size_t c) const {
+    template<tparams>
+    __device__ const typename device_obj<RowElementStorage>::ValueType&
+    device_obj<RowElementStorage>::operator()(size_t r, size_t c) const {
         assert(r < getRow() && c < getColumn());
         return Base::operator[](toIndex(r, c));
     }
 
-    template<class T, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn, class Allocator>
+    template<tparams>
     template<class... Args>
-    __host__ __device__ void device_obj<DenseMatrixStorage<T, MatrixOption::Row | MatrixOption::Element, Row, Column, MaxRow, MaxColumn, Allocator>>::
-            resize(size_t row, size_t column, Args&&... args) {
+    __host__ __device__ void device_obj<RowElementStorage>::resize(size_t row, size_t column, Args&&... args) {
     #ifdef __CUDA_ARCH__
         assert(Row * Column != Dynamic && "[Error]: Do not allocate dynamic matrix in device code");
     #endif
@@ -139,71 +126,66 @@ namespace Physica::Core {
         Dim::resize(row, column);
     }
 
-    template<class T, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn, class Allocator>
-    void device_obj<DenseMatrixStorage<T, MatrixOption::Row | MatrixOption::Element, Row, Column, MaxRow, MaxColumn, Allocator>>::
-            swap(This& __restrict obj) noexcept {
+    template<tparams>
+    void device_obj<RowElementStorage>::swap(This& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         Base::swap(obj);
         Dim::swap(obj);
     }
 
-    template<class T, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn, class Allocator>
-    inline auto DenseMatrixStorage<T, MatrixOption::Row | MatrixOption::Element, Row, Column, MaxRow, MaxColumn, Allocator>::
-            toDevice() const {
+    template<tparams>
+    inline auto RowElementStorage::toDevice() const {
         return device_obj<This>(*this);
     }
 
-    template<class T, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn, class Allocator>
-    inline auto DenseMatrixStorage<T, MatrixOption::Row | MatrixOption::Element, Row, Column, MaxRow, MaxColumn, Allocator>::
-            toDeviceAsync() const {
+    template<tparams>
+    inline auto RowElementStorage::toDeviceAsync() const {
         device_obj<This> result(getRow(), getColumn());
         toDeviceAsync(result);
         return device_obj<This>(std::move(result));
     }
 
-    template<class T, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn, class Allocator>
-    inline void DenseMatrixStorage<T, MatrixOption::Row | MatrixOption::Element, Row, Column, MaxRow, MaxColumn, Allocator>::
-            toDevice(device_obj<This>& obj) const {
+    template<tparams>
+    inline void RowElementStorage::toDevice(device_obj<This>& obj) const {
         Base::toDevice(obj);
     }
 
-    template<class T, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn, class Allocator>
-    inline void DenseMatrixStorage<T, MatrixOption::Row | MatrixOption::Element, Row, Column, MaxRow, MaxColumn, Allocator>::
-            toDeviceAsync(device_obj<This>& obj) const {
+    template<tparams>
+    inline void RowElementStorage::toDeviceAsync(device_obj<This>& obj) const {
         Base::toDeviceAsync(obj);
     }
-    //////////////////////////////////////////////Column-Vector//////////////////////////////////////////////
-    template<class T, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn, class Allocator>
-    device_obj<DenseMatrixStorage<T, MatrixOption::Column | MatrixOption::Vector, Row, Column, MaxRow, MaxColumn, Allocator>>::
-            device_obj(size_t row, size_t column) : Dim(row, column), array(column, row), size(row * column) {}
 
-    template<class T, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn, class Allocator>
-    device_obj<DenseMatrixStorage<T, MatrixOption::Column | MatrixOption::Vector, Row, Column, MaxRow, MaxColumn, Allocator>>::
-            device_obj(size_t row, size_t column, T value) : Dim(row, column), array(column, row, std::move(value)), size(row * column) {}
+    #undef RowElementStorage
+    #define ColumnVectorStorage DenseMatrixStorage<T, MatrixOption::Column | MatrixOption::Vector, Row, Column, MaxRow, MaxColumn, Allocator>
 
-    template<class T, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn, class Allocator>
-    device_obj<DenseMatrixStorage<T, MatrixOption::Column | MatrixOption::Vector, Row, Column, MaxRow, MaxColumn, Allocator>>::
-            device_obj(const host_obj& storage) : Dim(storage.getRow(), storage.getColumn()), array(storage.array), size(storage.getSize()) {}
+    template<tparams>
+    device_obj<ColumnVectorStorage>::device_obj(size_t row, size_t column)
+            : Dim(row, column), array(column, row), size(row * column) {}
 
-    template<class T, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn, class Allocator>
+    template<tparams>
+    device_obj<ColumnVectorStorage>::device_obj(size_t row, size_t column, T value)
+            : Dim(row, column), array(column, row, std::move(value)), size(row * column) {}
+
+    template<tparams>
+    device_obj<ColumnVectorStorage>::device_obj(const host_obj& storage)
+            : Dim(storage.getRow(), storage.getColumn()), array(storage.array), size(storage.getSize()) {}
+
+    template<tparams>
     __device__ T&
-    device_obj<DenseMatrixStorage<T, MatrixOption::Column | MatrixOption::Vector, Row, Column, MaxRow, MaxColumn, Allocator>>::
-            operator()(size_t r, size_t c) {
+    device_obj<ColumnVectorStorage>::operator()(size_t r, size_t c) {
         assert(r < getRow() && c < getColumn());
         return array[c][r];
     }
 
-    template<class T, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn, class Allocator>
+    template<tparams>
     __device__ const T&
-    device_obj<DenseMatrixStorage<T, MatrixOption::Column | MatrixOption::Vector, Row, Column, MaxRow, MaxColumn, Allocator>>::
-            operator()(size_t r, size_t c) const {
+    device_obj<ColumnVectorStorage>::operator()(size_t r, size_t c) const {
         assert(r < getRow() && c < getColumn());
         return array[c][r];
     }
 
-    template<class T, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn, class Allocator>
-    void device_obj<DenseMatrixStorage<T, MatrixOption::Column | MatrixOption::Vector, Row, Column, MaxRow, MaxColumn, Allocator>>::
-            resize(size_t row, size_t column) {
+    template<tparams>
+    void device_obj<ColumnVectorStorage>::resize(size_t row, size_t column) {
         array.resize(column);
         auto host_array = array.toHost();
         for (auto& vector : host_array)
@@ -213,26 +195,23 @@ namespace Physica::Core {
         size = row * column;
     }
 
-    template<class T, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn, class Allocator>
-    inline void device_obj<DenseMatrixStorage<T, MatrixOption::Column | MatrixOption::Vector, Row, Column, MaxRow, MaxColumn, Allocator>>::
-            swap(This& __restrict obj) noexcept {
+    template<tparams>
+    inline void device_obj<ColumnVectorStorage>::swap(This& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         Dim::swap(obj);
         array.swap(obj.array);
         std::swap(size, obj.size);
     }
 
-    template<class T, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn, class Allocator>
+    template<tparams>
     __host__ __device__ T*
-    device_obj<DenseMatrixStorage<T, MatrixOption::Column | MatrixOption::Vector, Row, Column, MaxRow, MaxColumn, Allocator>>::
-            data_ptr(size_t row, size_t column) {
+    device_obj<ColumnVectorStorage>::data_ptr(size_t row, size_t column) {
         return const_cast<T*>(const_cast<const This&>(*this).data_ptr(row, column));
     }
 
-    template<class T, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn, class Allocator>
+    template<tparams>
     __host__ __device__ const T*
-    device_obj<DenseMatrixStorage<T, MatrixOption::Column | MatrixOption::Vector, Row, Column, MaxRow, MaxColumn, Allocator>>::
-            data_ptr(size_t row, size_t column) const {
+    device_obj<ColumnVectorStorage>::data_ptr(size_t row, size_t column) const {
     #ifdef __CUDA_ARCH__
         return array[column].data() + row;
     #else
@@ -242,42 +221,42 @@ namespace Physica::Core {
     #endif
     }
 
-    template<class T, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn, class Allocator>
-    inline auto DenseMatrixStorage<T, MatrixOption::Column | MatrixOption::Vector, Row, Column, MaxRow, MaxColumn, Allocator>::toDevice() const {
+    template<tparams>
+    inline auto ColumnVectorStorage::toDevice() const {
         return device_obj<This>(*this);
     }
-    //////////////////////////////////////////////Row-Vector//////////////////////////////////////////////
-    template<class T, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn, class Allocator>
-    device_obj<DenseMatrixStorage<T, MatrixOption::Row | MatrixOption::Vector, Row, Column, MaxRow, MaxColumn, Allocator>>::
-            device_obj(size_t row, size_t column) : Dim(row, column), array(row, column), size(row * column) {}
 
-    template<class T, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn, class Allocator>
-    device_obj<DenseMatrixStorage<T, MatrixOption::Row | MatrixOption::Vector, Row, Column, MaxRow, MaxColumn, Allocator>>::
-            device_obj(size_t row, size_t column, T value) : Dim(row, column), array(row, column, std::move(value)), size(row * column) {}
+    #undef ColumnVectorStorage
+    #define RowVectorStorage DenseMatrixStorage<T, MatrixOption::Row | MatrixOption::Vector, Row, Column, MaxRow, MaxColumn, Allocator>
 
-    template<class T, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn, class Allocator>
-    device_obj<DenseMatrixStorage<T, MatrixOption::Row | MatrixOption::Vector, Row, Column, MaxRow, MaxColumn, Allocator>>::
-            device_obj(const host_obj& storage) : Dim(storage.getRow(), storage.getColumn()), array(storage.array), size(storage.getSize()) {}
+    template<tparams>
+    device_obj<RowVectorStorage>::device_obj(size_t row, size_t column)
+            : Dim(row, column), array(row, column), size(row * column) {}
 
-    template<class T, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn, class Allocator>
+    template<tparams>
+    device_obj<RowVectorStorage>::device_obj(size_t row, size_t column, T value)
+            : Dim(row, column), array(row, column, std::move(value)), size(row * column) {}
+
+    template<tparams>
+    device_obj<RowVectorStorage>::device_obj(const host_obj& storage)
+            : Dim(storage.getRow(), storage.getColumn()), array(storage.array), size(storage.getSize()) {}
+
+    template<tparams>
     __device__ T&
-    device_obj<DenseMatrixStorage<T, MatrixOption::Row | MatrixOption::Vector, Row, Column, MaxRow, MaxColumn, Allocator>>::
-            operator()(size_t r, size_t c) {
+    device_obj<RowVectorStorage>::operator()(size_t r, size_t c) {
         assert(r < getRow() && c < getColumn());
         return array[r][c];
     }
 
-    template<class T, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn, class Allocator>
+    template<tparams>
     __device__ const T&
-    device_obj<DenseMatrixStorage<T, MatrixOption::Row | MatrixOption::Vector, Row, Column, MaxRow, MaxColumn, Allocator>>::
-            operator()(size_t r, size_t c) const {
+    device_obj<RowVectorStorage>::operator()(size_t r, size_t c) const {
         assert(r < getRow() && c < getColumn());
         return array[r][c];
     }
 
-    template<class T, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn, class Allocator>
-    void device_obj<DenseMatrixStorage<T, MatrixOption::Row | MatrixOption::Vector, Row, Column, MaxRow, MaxColumn, Allocator>>::
-            resize(size_t row, size_t column) {
+    template<tparams>
+    void device_obj<RowVectorStorage>::resize(size_t row, size_t column) {
         array.resize(row);
         auto host_array = array.toHost();
         for (auto& vector : host_array)
@@ -287,26 +266,23 @@ namespace Physica::Core {
         size = row * column;
     }
 
-    template<class T, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn, class Allocator>
-    inline void device_obj<DenseMatrixStorage<T, MatrixOption::Row | MatrixOption::Vector, Row, Column, MaxRow, MaxColumn, Allocator>>::
-            swap(This& __restrict obj) noexcept {
+    template<tparams>
+    inline void device_obj<RowVectorStorage>::swap(This& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         Dim::swap(obj);
         array.swap(obj.array);
         std::swap(size, obj.size);
     }
 
-    template<class T, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn, class Allocator>
+    template<tparams>
     __host__ __device__ T*
-    device_obj<DenseMatrixStorage<T, MatrixOption::Row | MatrixOption::Vector, Row, Column, MaxRow, MaxColumn, Allocator>>::
-            data_ptr(size_t row, size_t column) {
+    device_obj<RowVectorStorage>::data_ptr(size_t row, size_t column) {
         return const_cast<T*>(const_cast<const This&>(*this).data_ptr(row, column));
     }
 
-    template<class T, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn, class Allocator>
+    template<tparams>
     __host__ __device__ const T*
-    device_obj<DenseMatrixStorage<T, MatrixOption::Row | MatrixOption::Vector, Row, Column, MaxRow, MaxColumn, Allocator>>::
-            data_ptr(size_t row, size_t column) const {
+    device_obj<RowVectorStorage>::data_ptr(size_t row, size_t column) const {
     #ifdef __CUDA_ARCH__
         return array[row].data() + column;
     #else
@@ -316,8 +292,11 @@ namespace Physica::Core {
     #endif
     }
 
-    template<class T, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn, class Allocator>
-    inline auto DenseMatrixStorage<T, MatrixOption::Row | MatrixOption::Vector, Row, Column, MaxRow, MaxColumn, Allocator>::toDevice() const {
+    template<tparams>
+    inline auto RowVectorStorage::toDevice() const {
         return device_obj<This>(*this);
     }
+
+    #undef RowVectorStorage
+    #undef tparams
 }

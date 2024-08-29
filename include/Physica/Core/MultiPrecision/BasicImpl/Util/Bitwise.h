@@ -26,7 +26,7 @@ namespace Physica::Core {
             return MPUnitWidth;
 
         MPUnit count;
-        if constexpr (IsASMEnabled()) {
+        if constexpr (UseASM()) {
             asm volatile (
                 "bsrq %1, %0\n\t"
                 : "=r" (count)
@@ -49,7 +49,7 @@ namespace Physica::Core {
             return MPUnitWidth;
 
         MPUnit count;
-        if constexpr (IsASMEnabled()) {
+        if constexpr (UseASM()) {
             asm volatile (
                 "bsfq %1, %0\n\t"
                 : "=r" (count)

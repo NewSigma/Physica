@@ -70,7 +70,7 @@ namespace Physica::Core {
     }
 
     template<class T, size_t Length, size_t MaxLength, class Allocator>
-    Vector<T, Length, MaxLength, Allocator> Vector<T, Length, MaxLength, Allocator>::Zeros(size_t len) {
+    Vector<T, Length, MaxLength, Allocator> Vector<T, Length, MaxLength, Allocator>::zeros(size_t len) {
         This result{};
         result.reserve(len);
         for(size_t i = 0; i < len; ++i)

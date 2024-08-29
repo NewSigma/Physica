@@ -70,8 +70,8 @@ namespace Physica::Core {
     template<class Function>
     void Adam<ScalarType, VectorType>::compute(Function func, const VectorType& params_, size_t maxIteration) {
         params = params_;
-        VectorType m = VectorType::Zeros(params.getLength());
-        VectorType v = VectorType::Zeros(params.getLength());
+        auto m = VectorType::zeros(params.getLength());
+        auto v = VectorType::zeros(params.getLength());
         ScalarType beta1 = args[1];
         size_t count = 0;
         VectorType temp(params.getLength());

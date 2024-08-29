@@ -88,7 +88,7 @@ namespace Physica {
 
     constexpr size_t Dynamic = 0;
 
-    constexpr inline static bool IsASMEnabled() {
+    constexpr inline static bool UseASM() {
     #ifdef PHYSICA_ASM
         return true;
     #else
@@ -96,7 +96,7 @@ namespace Physica {
     #endif
     }
 
-    constexpr inline static bool IsHDF5Enabled() {
+    constexpr inline static bool HasHDF5() {
     #ifdef PHYSICA_HDF5
         return true;
     #else
@@ -104,7 +104,7 @@ namespace Physica {
     #endif
     }
 
-    constexpr inline static bool IsMKLEnabled() {
+    constexpr inline static bool HasMKL() {
     #ifdef PHYSICA_MKL
         return true;
     #else
@@ -112,7 +112,7 @@ namespace Physica {
     #endif
     }
 
-    constexpr inline static bool IsMPIEnabled() {
+    constexpr inline static bool HasMPI() {
     #ifdef PHYSICA_MPI
         return true;
     #else
@@ -120,7 +120,7 @@ namespace Physica {
     #endif
     }
 
-    constexpr inline static bool IsCUDAEnabled() {
+    constexpr inline static bool HasCUDA() {
     #ifdef PHYSICA_CUDA
         return true;
     #else

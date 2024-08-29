@@ -103,7 +103,7 @@ namespace Physica::Core::Physics {
         using VectorType = typename PointType::VectorType;
         double totalMass = 0;
         const size_t length = atoms.getLength();
-        VectorType result = VectorType::Zeros(length);
+        auto result = VectorType::zeros(length);
         for (size_t i = 0; i < length; ++i) {
             double atomMass = PhyConst<SI>::relativeAtomMass[atomicNumbers[i]];
             totalMass += atomMass;

@@ -69,7 +69,7 @@ namespace Physica::Core {
         [[nodiscard]] __host__ __device__ ScalarType* data_ptr(size_t index) { return data() + index; }
         [[nodiscard]] __host__ __device__ const ScalarType* data_ptr(size_t index) const { return data() + index; }
         /* Static members */
-        [[nodiscard]] static Vector Zeros(size_t len);
+        [[nodiscard]] static Vector zeros(size_t len);
         template<class RandomGenerator>
         [[nodiscard]] static Vector random_uniform(size_t len, RandomGenerator& gen);
         template<class RandomGenerator>

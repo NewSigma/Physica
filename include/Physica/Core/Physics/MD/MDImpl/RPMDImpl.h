@@ -64,8 +64,8 @@ namespace Physica::Core {
     template<class ForceModel, class Executor>
     void RPMD<ScalarType, Dim, NumReplica, ForceMatrixAllocator>::updateForce(ForceModel& model) {
         constexpr bool IsPeriodBoundary = Traits<ForceModel>::IsPeriodBoundary;
-        constexpr bool isCUDAEnabled = Traits<Executor>::isCUDAEnabled;
-        static_assert(!isCUDAEnabled || std::allocator_traits<ForceMatrixAllocator>::isPageLocked
+        constexpr bool UseCUDA = Traits<Executor>::UseCUDA;
+        static_assert(!UseCUDA || std::allocator_traits<ForceMatrixAllocator>::isPageLocked
                 , "[Error]: Allocator is not page locked, performance will decrease");
         if (!isContractEnabled()) {
             auto kernel = [this, &model](unsigned int replica) {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Weibo He.
+ * Copyright 2021-2024 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -73,7 +73,7 @@ public:
     }
 private:
     MatrixType getHamiltonMatrix() {
-        MatrixType result = MatrixType::Zeros(baseSetCount, baseSetCount);
+        auto result = MatrixType::zeros(baseSetCount, baseSetCount);
         for (size_t i = 0; i < baseSetCount; ++i) {
             for (size_t j = i % 2; j < baseSetCount; j += 2) {
                 const ScalarType sum = ScalarType(i + j);
@@ -87,7 +87,7 @@ private:
     }
 
     MatrixType getOverlapMatrix() {
-        MatrixType result = MatrixType::Zeros(baseSetCount, baseSetCount);
+        auto result = MatrixType::zeros(baseSetCount, baseSetCount);
         for (size_t i = 0; i < baseSetCount; ++i) {
             for (size_t j = i % 2; j < baseSetCount; j += 2) {
                 const ScalarType sum = ScalarType(i + j);
@@ -187,7 +187,7 @@ public:
     }
 private:
     MatrixType getHamiltonMatrix() {
-        MatrixType result = MatrixType::Zeros(baseSetCount, baseSetCount);
+        auto result = MatrixType::zeros(baseSetCount, baseSetCount);
         for (size_t i = 0; i < baseSetCount; ++i) {
             for (size_t j = 0; j < baseSetCount; ++j) {
                 const ScalarType sum = ScalarType(baseSetCoeff[i] + baseSetCoeff[j]);
@@ -201,7 +201,7 @@ private:
     }
 
     MatrixType getOverlapMatrix() {
-        MatrixType result = MatrixType::Zeros(baseSetCount, baseSetCount);
+        auto result = MatrixType::zeros(baseSetCount, baseSetCount);
         for (size_t i = 0; i < baseSetCount; ++i) {
             for (size_t j = 0; j < baseSetCount; ++j) {
                 const ScalarType sum = ScalarType(baseSetCoeff[i] + baseSetCoeff[j]);
@@ -302,7 +302,7 @@ private:
     }
 
     MatrixType getHamiltonMatrix(const VectorType& trial_solution) {
-        MatrixType result = MatrixType::Zeros(baseSetCount, baseSetCount);
+        auto result = MatrixType::zeros(baseSetCount, baseSetCount);
         for (size_t i = 0; i < baseSetCount; ++i) {
             for (size_t j = 0; j < baseSetCount; ++j) {
                 ScalarType coulomb2 = ScalarType(0);
@@ -316,7 +316,7 @@ private:
     }
 
     MatrixType getOverlapMatrix() {
-        MatrixType result = MatrixType::Zeros(baseSetCount, baseSetCount);
+        auto result = MatrixType::zeros(baseSetCount, baseSetCount);
         for (size_t i = 0; i < baseSetCount; ++i) {
             for (size_t j = 0; j < baseSetCount; ++j) {
                 const ScalarType sum = ScalarType(baseSetCoeff[i] + baseSetCoeff[j]);

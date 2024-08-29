@@ -142,7 +142,7 @@ namespace Physica::Python {
             args.push_back(LLVM_RESOURCE_DIR);
             args.push_back("-I");
             args.push_back(PHYSICA_INCLUDE_DIR);
-            if constexpr (IsHDF5Enabled()) {
+            if constexpr (HasHDF5()) {
                 args.push_back("-I");
                 args.push_back(HDF5_INCLUDE_DIR);
             }

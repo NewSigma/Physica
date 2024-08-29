@@ -90,8 +90,8 @@ namespace Physica::Core {
         using Storage::getColumn;
         using Storage::getRow;
         /* Static members */
-        [[nodiscard]] static DenseMatrix Zeros(size_t rank) { return DenseMatrix(rank, rank, T(0)); }
-        [[nodiscard]] static DenseMatrix Zeros(size_t row, size_t column) { return DenseMatrix(row, column, T(0)); }
+        [[nodiscard]] static DenseMatrix zeros(size_t rank) { return DenseMatrix(rank, rank, T(0)); }
+        [[nodiscard]] static DenseMatrix zeros(size_t row, size_t column) { return DenseMatrix(row, column, T(0)); }
         [[nodiscard]] static DenseMatrix unitMatrix(size_t order);
         template<class RandomGenerator>
         [[nodiscard]] static DenseMatrix random_uniform(size_t order, RandomGenerator& gen) { return random_uniform(order, order, gen); }

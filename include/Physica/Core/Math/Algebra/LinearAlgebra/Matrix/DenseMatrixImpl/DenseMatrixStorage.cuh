@@ -30,18 +30,19 @@ namespace Physica::Core {
         using This = device_obj<host_obj>;
         using Base = Utils::device_obj<Utils::Array<T, Row * Column, MaxRow * MaxColumn, Allocator>>;
         using Dim = DenseMatrixDim<This, Row, Column, MaxRow, MaxColumn>;
+        using ValueType = typename Base::ValueType;
     public:
         device_obj() = default;
         __host__ __device__ device_obj(size_t row, size_t column);
-        __host__ __device__ device_obj(size_t row, size_t column, T value);
+        __host__ __device__ device_obj(size_t row, size_t column, ValueType value);
         device_obj(const host_obj& storage);
         device_obj(const This&) = default;
         device_obj(This&& obj) noexcept = default;
         ~device_obj() = default;
         /* Operators */
         This& operator=(This obj) noexcept { swap(obj); return *this; }
-        [[nodiscard]] __device__ T& operator()(size_t r, size_t c);
-        [[nodiscard]] __device__ const T& operator()(size_t r, size_t c) const;
+        [[nodiscard]] __device__ ValueType& operator()(size_t r, size_t c);
+        [[nodiscard]] __device__ const ValueType& operator()(size_t r, size_t c) const;
         /* Operations */
         [[nodiscard]] host_obj toHost() const { return host_obj(Base::toHost(), {getRow(), getColumn()}); }
         template<class... Args>
@@ -51,8 +52,8 @@ namespace Physica::Core {
         using Dim::getColumn;
         using Dim::getRow;
         [[nodiscard]] __host__ __device__ size_t getSize() const noexcept { return Base::getLength(); }
-        [[nodiscard]] __host__ __device__ T* data_ptr(size_t row, size_t column) { return Base::data() + toIndex(row, column); }
-        [[nodiscard]] __host__ __device__ const T* data_ptr(size_t row, size_t column) const { return Base::data() + toIndex(row, column); }
+        [[nodiscard]] __host__ __device__ ValueType* data_ptr(size_t row, size_t column) { return Base::data() + toIndex(row, column); }
+        [[nodiscard]] __host__ __device__ const ValueType* data_ptr(size_t row, size_t column) const { return Base::data() + toIndex(row, column); }
     private:
         __host__ __device__ size_t toIndex(size_t r, size_t c) const { return getRow() * c + r; }
 
@@ -67,18 +68,19 @@ namespace Physica::Core {
         using This = device_obj<host_obj>;
         using Base = Utils::device_obj<Utils::Array<T, Row * Column, MaxRow * MaxColumn, Allocator>>;
         using Dim = DenseMatrixDim<This, Row, Column, MaxRow, MaxColumn>;
+        using ValueType = typename Base::ValueType;
     public:
         device_obj() = default;
         __host__ __device__ device_obj(size_t row, size_t column);
-        __host__ __device__ device_obj(size_t row, size_t column, T value);
+        __host__ __device__ device_obj(size_t row, size_t column, ValueType value);
         device_obj(const host_obj& storage);
         device_obj(const This&) = default;
         device_obj(This&& obj) noexcept = default;
         ~device_obj() = default;
         /* Operators */
         This& operator=(This obj) noexcept { swap(obj); return *this; }
-        [[nodiscard]] __device__ T& operator()(size_t r, size_t c);
-        [[nodiscard]] __device__ const T& operator()(size_t r, size_t c) const;
+        [[nodiscard]] __device__ ValueType& operator()(size_t r, size_t c);
+        [[nodiscard]] __device__ const ValueType& operator()(size_t r, size_t c) const;
         /* Operations */
         [[nodiscard]] host_obj toHost() const { return host_obj(Base::toHost(), {getRow(), getColumn()}); }
         template<class... Args>
@@ -88,8 +90,8 @@ namespace Physica::Core {
         using Dim::getColumn;
         using Dim::getRow;
         [[nodiscard]] __host__ __device__ size_t getSize() const noexcept { return Base::getLength(); }
-        [[nodiscard]] __host__ __device__ T* data_ptr(size_t row, size_t column) { return Base::data() + toIndex(row, column); }
-        [[nodiscard]] __host__ __device__ const T* data_ptr(size_t row, size_t column) const { return Base::data() + toIndex(row, column); }
+        [[nodiscard]] __host__ __device__ ValueType* data_ptr(size_t row, size_t column) { return Base::data() + toIndex(row, column); }
+        [[nodiscard]] __host__ __device__ const ValueType* data_ptr(size_t row, size_t column) const { return Base::data() + toIndex(row, column); }
     private:
         __host__ __device__ size_t toIndex(size_t r, size_t c) const { return getColumn() * r + c; }
 

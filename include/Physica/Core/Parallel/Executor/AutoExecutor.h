@@ -42,11 +42,7 @@ namespace Physica {
     template<>
     class Traits<AutoExecutor> {
     public:
-        constexpr static bool isCPUEnabled = true;
-    #ifdef PHYSICA_CUDA
-        constexpr static bool isCUDAEnabled = true;
-    #else
-        constexpr static bool isCUDAEnabled = false;
-    #endif
+        constexpr static bool UseCPU = true;
+        constexpr static bool UseCUDA = HasCUDA();
     };
 }
