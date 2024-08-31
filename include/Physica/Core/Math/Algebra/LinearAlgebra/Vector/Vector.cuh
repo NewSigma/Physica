@@ -53,8 +53,9 @@ namespace Physica::Core {
         using Storage::resize;
         using Storage::swap;
         /* Getters */
-        using Storage::getLength;
         using Storage::data;
+        template<Side Owner = GetSide()>
+        [[nodiscard]] __host__ __device__ size_t getLength() const noexcept { return Storage::getLength(); }
         [[nodiscard]] __host__ __device__ ScalarType* data_ptr(size_t index) { return data() + index; }
         [[nodiscard]] __host__ __device__ const ScalarType* data_ptr(size_t index) const { return data() + index; }
         /* Static members */

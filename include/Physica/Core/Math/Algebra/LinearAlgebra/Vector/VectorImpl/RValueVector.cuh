@@ -18,9 +18,9 @@
  */
 #pragma once
 
+#include <Physica/Utils/CUDA/device_obj.cuh>
+#include <Physica/Utils/CUDA/DeviceProp.cuh>
 #include "RValueVector.h"
-#include "Physica/Utils/CUDA/device_obj.cuh"
-#include "Physica/Utils/CUDA/DeviceProp.cuh"
 
 namespace Physica::Core {
     namespace Internal {
@@ -45,11 +45,13 @@ namespace Physica::Core {
         ~device_obj() = default;
         /* Operations */
         template<class OtherDerived>
-        __device__ void assignTo(device_obj<LValueVector<OtherDerived>>& target) const;
+        __host__ __device__ void assignTo(device_obj<LValueVector<OtherDerived>>& target) const;
         /* Getters */
-        [[nodiscard]] __device__ ScalarType calc(size_t index) const { return Base::getDerived().calc(index); }
+        template<Side Owner = GetSide()>
+        [[nodiscard]] __device__ ScalarType calc(size_t index) const { return Base::getDerived().template calc<Owner>(index); }
         [[nodiscard]] __host__ __device__ inline device_obj<TransposeVector<Derived>> transpose() const noexcept;
-        [[nodiscard]] __host__ __device__ size_t getLength() const noexcept { return Base::getDerived().getLength(); }
+        template<Side Owner = GetSide()>
+        [[nodiscard]] __host__ __device__ size_t getLength() const noexcept { return Base::getDerived().template getLength<Owner>(); }
         [[nodiscard]] __device__ inline RealType norm() const;
         [[nodiscard]] __device__ inline RealType squaredNorm() const;
         [[nodiscard]] __device__ ScalarType max() const;

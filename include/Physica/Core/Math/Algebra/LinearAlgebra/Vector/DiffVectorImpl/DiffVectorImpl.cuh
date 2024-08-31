@@ -62,6 +62,7 @@ namespace Physica::Core {
     }
 
     template<class PlainScalar, unsigned Order>
+    template<Side Owner>
     __host__ __device__ inline typename device_obj<Differentiable<Vector<PlainScalar>, DiffMode::Reverse, Order>>::ScalarType
     device_obj<Differentiable<Vector<PlainScalar>, DiffMode::Reverse, Order>>::calc(size_t index) const {
         assert(index < getLength() && "[Error]: Index out of range");

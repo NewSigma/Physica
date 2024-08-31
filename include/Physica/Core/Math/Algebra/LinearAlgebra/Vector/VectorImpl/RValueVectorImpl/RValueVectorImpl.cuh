@@ -22,17 +22,44 @@
 #include <Physica/Core/Parallel/CUDAContext.cuh>
 
 namespace Physica::Core {
+    namespace Internal {
+        template<class Derived, class OtherDerived>
+        __global__ void RValueVector_assignToKernel(
+                Physica::PlainStruct<const Derived> source_, Physica::PlainStruct<OtherDerived> target_) {
+            using ScalarType = typename OtherDerived::ScalarType;
+
+            const auto& source = source_.getDerived();
+            auto& target = target_.getDerived();
+            const size_t length = source.template getLength<Side::Host>();
+            const unsigned int index = blockIdx.x * blockDim.x + threadIdx.x;
+            if (index < length)
+                target[index] = ScalarType(source.template calc<Side::Host>(index));
+        }
+    }
+
     template<class Derived>
     template<class OtherDerived>
-    __device__ void device_obj<RValueVector<Derived>>::assignTo(device_obj<LValueVector<OtherDerived>>& target_) const {
-        using OtherScalar = typename OtherDerived::ScalarType;
-        constexpr size_t OtherSize = Traits<OtherDerived>::SizeAtCompile;
-        static_assert(SizeAtCompile == Dynamic || OtherSize == Dynamic || SizeAtCompile == OtherSize, "[Error]: Size mismatch between two vector");
+    __host__ __device__ void device_obj<RValueVector<Derived>>::assignTo(device_obj<LValueVector<OtherDerived>>& target_) const {
+        [[maybe_unused]] const auto kernel = Internal::RValueVector_assignToKernel<device_obj<Derived>, device_obj<OtherDerived>>;
 
+        constexpr size_t OtherSize = Traits<OtherDerived>::SizeAtCompile;
+        constexpr bool SizeMatch = SizeAtCompile == Dynamic || OtherSize == Dynamic || SizeAtCompile == OtherSize;
+        static_assert(SizeMatch, "[Error]: Size mismatch between two vector");
+
+        const size_t length = getLength();
         auto& target = target_.getDerived();
-        assert(target.getLength() == getLength() && "[Error]: Size mismatch between two vector");
-        for (size_t i = 0; i < getLength(); ++i)
-            target[i] = OtherScalar(calc(i));
+        assert(length == target.getLength() && "[Error]: Size mismatch between two vector");
+        if constexpr (IsHost()) {
+            const unsigned int numThread = std::min(length, MaxThreadPerBlock);
+            const unsigned int numBlock = (length + numThread - 1) / numThread;
+            kernel<<<numBlock, numThread, 0, CUDAContext::getInstance()>>>(asStruct(Base::getDerived()), asStruct(target));
+            check(cudaGetLastError());
+        }
+        else {
+            using OtherScalar = typename OtherDerived::ScalarType;
+            for (size_t i = 0; i < length; ++i)
+                target[i] = OtherScalar(calc(i));
+        }
     }
 
     template<class Derived>

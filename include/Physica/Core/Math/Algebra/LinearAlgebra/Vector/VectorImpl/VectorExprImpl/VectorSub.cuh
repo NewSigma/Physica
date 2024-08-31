@@ -21,70 +21,45 @@
 namespace Physica::Core {
     template<class VectorType, class AnyScalar>
     class device_obj<VectorExpr<ExpressionType::Sub, VectorType, ScalarBase<AnyScalar>>>
-            : public device_obj<RValueVector<VectorExpr<ExpressionType::Sub, VectorType, ScalarBase<AnyScalar>>>> {
+            : public device_obj<BinaryVectorExpr<ExpressionType::Sub, VectorType, ScalarBase<AnyScalar>>> {
+        using Base = device_obj<BinaryVectorExpr<ExpressionType::Sub, VectorType, ScalarBase<AnyScalar>>>;
         static_assert(is_scalar<AnyScalar>::value, "[Error]: This is not a scalar type");
-        using host_obj = VectorExpr<ExpressionType::Sub, VectorType, ScalarBase<AnyScalar>>;
-        using This = device_obj<host_obj>;
-        using Base = device_obj<RValueVector<host_obj>>;
-        using DeviceVector = device_obj<VectorType>;
     public:
         using typename Base::ScalarType;
-    private:
-        const DeviceVector& v;
-        const AnyScalar& s;
     public:
-        __device__ device_obj(const device_obj<RValueVector<VectorType>>& v_, const AnyScalar& s_)
-                : v(v_.getDerived()), s(s_) {}
-        device_obj(const This&) = delete;
-        device_obj(This&&) noexcept = delete;
-        ~device_obj() = default;
-        /* Operators */
-        This& operator=(const This&) = delete;
-        This& operator=(This&&) noexcept = delete;
+        using Base::Base;
         /* Getters */
-        [[nodiscard]] __device__ ScalarType calc(size_t index) const { return ScalarType(v.calc(index)) - ScalarType(s); }
-        [[nodiscard]] __device__ size_t getLength() const { return v.getLength(); }
+        template<Side Owner = GetSide()>
+        [[nodiscard]] __device__ ScalarType calc(size_t index) const {
+            return ScalarType(Base::template getLHS<Owner>().template calc<Owner>(index)) - ScalarType(Base::template getRHS<Owner>());
+        }
+
     };
 
     template<class VectorType1, class VectorType2>
     class device_obj<VectorExpr<ExpressionType::Sub, VectorType1, VectorType2>>
-            : public device_obj<RValueVector<VectorExpr<ExpressionType::Sub, VectorType1, VectorType2>>> {
-        using host_obj = VectorExpr<ExpressionType::Sub, VectorType1, VectorType2>;
-        using This = device_obj<host_obj>;
-        using Base = device_obj<RValueVector<host_obj>>;
-        using DeviceVector1 = device_obj<VectorType1>;
-        using DeviceVector2 = device_obj<VectorType2>;
+            : public device_obj<BinaryVectorExpr<ExpressionType::Sub, VectorType1, VectorType2>> {
+        using Base = device_obj<BinaryVectorExpr<ExpressionType::Sub, VectorType1, VectorType2>>;
     public:
         using typename Base::ScalarType;
-    private:
-        const DeviceVector1& v1;
-        const DeviceVector2& v2;
     public:
-        __device__ device_obj(const device_obj<RValueVector<VectorType1>>& v1_, const device_obj<RValueVector<VectorType2>>& v2_)
-                : v1(v1_.getDerived()), v2(v2_.getDerived()) {
-            assert(v1_.getLength() == v2_.getLength());
-        }
-        device_obj(const This&) = delete;
-        device_obj(This&&) noexcept = delete;
-        ~device_obj() = default;
-        /* Operators */
-        This& operator=(const This&) = delete;
-        This& operator=(This&&) noexcept = delete;
+        using Base::Base;
         /* Getters */
+        template<Side Owner = GetSide()>
         [[nodiscard]] __device__ ScalarType calc(size_t index) const {
-            return ScalarType(v1.calc(index)) - ScalarType(v2.calc(index));
+            return ScalarType(Base::template getLHS<Owner>().template calc<Owner>(index))
+                 - ScalarType(Base::template getRHS<Owner>().template calc<Owner>(index));
         }
-        [[nodiscard]] __device__ size_t getLength() const { return v1.getLength(); }
     };
 
     template<class VectorType, class ScalarType>
-    [[nodiscard]] __device__ inline auto operator-(
+    [[nodiscard]] __host__ __device__ inline auto operator-(
             const device_obj<RValueVector<VectorType>>& v, const ScalarBase<ScalarType>& s) noexcept {
         return device_obj<VectorExpr<ExpressionType::Sub, VectorType, ScalarBase<ScalarType>>>(v.getDerived(), s.getDerived());
     }
 
     template<class Derived, class OtherDerived>
-    [[nodiscard]] __device__ inline auto operator-(
+    [[nodiscard]] __host__ __device__ inline auto operator-(
             const device_obj<RValueVector<Derived>>& v1, const device_obj<RValueVector<OtherDerived>>& v2) noexcept {
         return device_obj<VectorExpr<ExpressionType::Sub, Derived, OtherDerived>>(v1.getDerived(), v2.getDerived());
     }

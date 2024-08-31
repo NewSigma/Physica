@@ -18,6 +18,7 @@
  */
 #pragma once
 
+#include <Physica/Core/Exception/CUDA/CUDA.cuh>
 #include <Physica/Core/Parallel/CUDAContext.cuh>
 #include <Physica/Utils/CUDA/DeviceProp.cuh>
 #include <Physica/Utils/CUDA/PlainStruct.h>
@@ -48,21 +49,23 @@ namespace Physica::Core {
         [[maybe_unused]] const auto kernel = Internal::RValueMatrix_assignToKernel<Derived, OtherDerived>;
         const size_t maxMajor = target.getMaxMajor();
         const size_t maxMinor = target.getMaxMinor();
-    #ifndef __CUDA_ARCH__
-        const unsigned int numThread = std::min(maxMinor, MaxThreadPerBlock);
-        const unsigned int numBlockX = (maxMinor + numThread - 1) / numThread;
-        const unsigned int numBlockY = maxMajor;
-        kernel<<<{numBlockX, numBlockY}, numThread, 0, CUDAContext::getInstance()>>>(asStruct(Base::getDerived()), asStruct(target.getDerived()));
-    #else
-        using OtherScalar = typename OtherDerived::ScalarType;
-        for (size_t major = 0; major < maxMajor; ++major) {
-            for (size_t minor = 0; minor < maxMinor; ++minor) {
-                const size_t r = target.rowFromMajorMinor(major, minor);
-                const size_t c = target.columnFromMajorMinor(major, minor);
-                target.refFromMajorMinor(major, minor) = OtherScalar(calc(r, c));
+        if constexpr (IsHost()) {
+            const unsigned int numThread = std::min(maxMinor, MaxThreadPerBlock);
+            const unsigned int numBlockX = (maxMinor + numThread - 1) / numThread;
+            const unsigned int numBlockY = maxMajor;
+            kernel<<<{numBlockX, numBlockY}, numThread, 0, CUDAContext::getInstance()>>>(asStruct(Base::getDerived()), asStruct(target.getDerived()));
+            check(cudaGetLastError());
+        }
+        else {
+            using OtherScalar = typename OtherDerived::ScalarType;
+            for (size_t major = 0; major < maxMajor; ++major) {
+                for (size_t minor = 0; minor < maxMinor; ++minor) {
+                    const size_t r = target.rowFromMajorMinor(major, minor);
+                    const size_t c = target.columnFromMajorMinor(major, minor);
+                    target.refFromMajorMinor(major, minor) = OtherScalar(calc(r, c));
+                }
             }
         }
-    #endif
     }
 
     template<class Derived>

@@ -39,6 +39,7 @@ namespace Physica::Core {
         [[nodiscard]] __device__ ScalarType& operator[](size_t index) { return *data_ptr(index); }
         [[nodiscard]] __device__ const ScalarType& operator[](size_t index) const { return *data_ptr(index); }
         /* Operations */
+        template<Side Owner = GetSide()>
         [[nodiscard]] __device__ ScalarType calc(size_t index) const { return *data_ptr(index); }
         /* Getters */
         [[nodiscard]] __host__ __device__ inline ScalarType* data_ptr(size_t index);

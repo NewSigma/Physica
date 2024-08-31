@@ -26,48 +26,91 @@ namespace Physica::Core {
                       MatrixType::ColumnAtCompile == Dynamic ||
                       VectorType::SizeAtCompile == Dynamic,
                       "[Error]: Row and column do not match in matrix-vector product");
-    public:
         using host_obj = MatrixVectorProduct<MatrixType, VectorType>;
         using Base = device_obj<RValueVector<host_obj>>;
+        using This = device_obj<host_obj>;
+        using DeviceVector = device_obj<VectorType>;
+        using DeviceMatrix = device_obj<MatrixType>;
+    public:
         using typename Base::ScalarType;
     private:
-        using This = device_obj<host_obj>;
-        Physica::PlainStruct<const device_obj<MatrixType>> mat;
-        Physica::PlainStruct<const device_obj<VectorType>> vec;
+        union {
+            Physica::PlainStruct<const DeviceMatrix> value;
+            const DeviceMatrix* ptr;
+        } mat;
+
+        union {
+            Physica::PlainStruct<const DeviceVector> value;
+            const DeviceVector* ptr;
+        } vec;
     public:
-        __host__ __device__ device_obj(const device_obj<RValueMatrix<MatrixType>>& mat_, const device_obj<RValueVector<VectorType>>& vec_)
-                : mat(asStruct(mat_.getDerived())), vec(asStruct(vec_.getDerived())) {
-            assert(mat.getDerived().getColumn() == vec.getDerived().getLength());
-        }
+        __host__ __device__ device_obj(
+                const device_obj<RValueMatrix<MatrixType>>& mat_, const device_obj<RValueVector<VectorType>>& vec_);
         /* Operations */
         template<class OtherDerived>
-        __device__ void assignTo(device_obj<LValueVector<OtherDerived>>& target) const;
+        __host__ __device__ void assignTo(device_obj<LValueVector<OtherDerived>>& target) const;
         /* Getters */
+        template<Side Owner>
         [[nodiscard]] __device__ inline ScalarType calc(size_t index) const;
-        [[nodiscard]] __host__ __device__ size_t getLength() const { return mat.getDerived().getRow(); }
-        [[nodiscard]] __host__ __device__ const auto& getLHS() const noexcept { return mat.getDerived(); }
-        [[nodiscard]] __host__ __device__ const auto& getRHS() const noexcept { return vec.getDerived(); }
+
+        template<Side Owner = GetSide()>
+        [[nodiscard]] __host__ __device__ size_t getLength() const { return getLHS<Owner>().getRow(); }
+
+        template<Side Owner = GetSide()>
+        [[nodiscard]] __host__ __device__ const DeviceMatrix& getLHS() const noexcept {
+            if constexpr (IsHost() || Owner == Side::Host)
+                return mat.value.getDerived();
+            else
+                return *mat.ptr;
+        }
+
+        template<Side Owner = GetSide()>
+        [[nodiscard]] __host__ __device__ const DeviceVector& getRHS() const noexcept {
+            if constexpr (IsHost() || Owner == Side::Host)
+                return vec.value.getDerived();
+            else
+                return *vec.ptr;
+        }
     };
 
     template<class MatrixType, class VectorType>
+    __host__ __device__ device_obj<MatrixVectorProduct<MatrixType, VectorType>>::device_obj(
+            const device_obj<RValueMatrix<MatrixType>>& mat_, const device_obj<RValueVector<VectorType>>& vec_) {
+        assert(mat_.getColumn() == vec_.getLength());
+        if constexpr (IsHost()) {
+            mat.value = asStruct(mat_.getDerived());
+            vec.value = asStruct(vec_.getDerived());
+        }
+        else {
+            mat.ptr = &mat_.getDerived();
+            vec.ptr = &vec_.getDerived();
+        }
+    }
+
+    template<class MatrixType, class VectorType>
+    template<Side Owner>
     __device__ inline typename device_obj<MatrixVectorProduct<MatrixType, VectorType>>::ScalarType
     device_obj<MatrixVectorProduct<MatrixType, VectorType>>::calc(size_t index) const {
-        return mat.getDerived().row(index) * vec.getDerived();
+        return getLHS<Owner>().row(index) * getRHS<Owner>();
     }
 
     template<class MatrixType, class VectorType>
     template<class OtherDerived>
-    __device__ void device_obj<MatrixVectorProduct<MatrixType, VectorType>>::assignTo(
+    __host__ __device__ void device_obj<MatrixVectorProduct<MatrixType, VectorType>>::assignTo(
             device_obj<LValueVector<OtherDerived>>& target) const {
-        if constexpr (MatrixOption::isColumnMatrix<MatrixType>()) {
-            const auto& m = getLHS();
-            const auto& v = getRHS();
-            target = m.col(0).asVector() * v.calc(0);
-            for (size_t i = 1; i < v.getLength(); ++i)
-                target += m.col(i).asVector() * v.calc(i);
-        }
-        else
+        if constexpr (IsHost())
             Base::template assignTo<OtherDerived>(target);
+        else {
+            if constexpr (MatrixOption::isColumnMatrix<MatrixType>()) {
+                const auto& m = getLHS();
+                const auto& v = getRHS();
+                target = m.col(0).asVector() * v.calc(0);
+                for (size_t i = 1; i < v.getLength(); ++i)
+                    target += m.col(i).asVector() * v.calc(i);
+            }
+            else
+                Base::template assignTo<OtherDerived>(target);
+        }
     }
 
     template<class MatrixType, class VectorType>

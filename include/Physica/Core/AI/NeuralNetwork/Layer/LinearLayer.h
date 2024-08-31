@@ -41,11 +41,11 @@ namespace Physica::Core {
         LinearLayer(size_t inputDim, size_t outputDim);
         template<class OtherScalar>
         LinearLayer(const LinearLayer<OtherScalar, WithBias>& layer);
-        LinearLayer(const LinearLayer&) = default;
-        LinearLayer(LinearLayer&&) noexcept = default;
+        LinearLayer(const This&) = default;
+        LinearLayer(This&&) noexcept = default;
         ~LinearLayer() = default;
         /* Operators */
-        LinearLayer& operator=(LinearLayer obj) noexcept { swap(obj); return *this; }
+        This& operator=(This obj) noexcept { swap(obj); return *this; }
         /* Operations */
         [[nodiscard]] inline OutputType forward(const InputType& x) const;
         [[nodiscard]] LinearLayer copy() const;

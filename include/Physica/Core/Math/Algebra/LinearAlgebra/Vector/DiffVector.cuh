@@ -66,7 +66,9 @@ namespace Physica::Core {
         __device__ void minmaxKernelImpl(SegmentType& result) const;
         __device__ void sumKernelImpl(SegmentType& result) const;
         /* Getters */
+        template<Side Owner = GetSide()>
         [[nodiscard]] __host__ __device__ inline ScalarType calc(size_t index) const;
+        template<Side Owner = GetSide()>
         [[nodiscard]] __host__ __device__ size_t getLength() const noexcept { return getTraceSegment().getLength(); }
         [[nodiscard]] __host__ __device__ inline PlainScalar* value_ptr(size_t index) const noexcept;
         [[nodiscard]] __host__ __device__ inline PlainScalar* grad_ptr(size_t index) const noexcept;

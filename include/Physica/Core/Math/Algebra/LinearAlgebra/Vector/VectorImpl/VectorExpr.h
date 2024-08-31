@@ -30,6 +30,8 @@ namespace Physica::Core {
      * Operations defined as \tparam T1 \tparam Type \tparam T2. e.g. vector + scalar, expression * expression
      */
     template<ExpressionType Type, class T1, class T2 = T1> class VectorExpr;
+    template<ExpressionType ExprType, class T> class UnitaryVectorExpr;
+    template<ExpressionType ExprType, class T1, class T2> class BinaryVectorExpr;
     //////////////////////////////////////Div//////////////////////////////////////
     template<class VectorType, class AnyScalar>
     class VectorExpr<ExpressionType::Div, VectorType, ScalarBase<AnyScalar>>
@@ -220,29 +222,6 @@ namespace Physica::Core {
     };
     ////////////////////////////////////////Elementary Functions////////////////////////////////////////////
     template<class VectorType>
-    class VectorExpr<ExpressionType::Reciprocal, VectorType>
-            : public RValueVector<VectorExpr<ExpressionType::Reciprocal, VectorType>> {
-        using This = VectorExpr<ExpressionType::Reciprocal, VectorType>;
-        using Base = RValueVector<This>;
-        const VectorType& exp;
-    public:
-        VectorExpr(const RValueVector<VectorType>& exp_) : exp(exp_.getDerived()) {}
-        VectorExpr(const This&) = delete;
-        VectorExpr(This&&) noexcept = delete;
-        ~VectorExpr() = default;
-        /* Operators */
-        This& operator=(const This&) = delete;
-        This& operator=(This&&) noexcept = delete;
-        /* Operations */
-        [[nodiscard]] typename Base::ScalarType calc(size_t index) const { return reciprocal(exp.calc(index)); }
-        template<class AnyPacket>
-        [[nodiscard]] AnyPacket packet(size_t index) const { return AnyPacket(1) / exp.template packet<AnyPacket>(index); }
-        template<class AnyPacket>
-        [[nodiscard]] AnyPacket packetPartial(size_t index, size_t count) const { return AnyPacket(1) / exp.template packetPartial<AnyPacket>(index, count); }
-        [[nodiscard]] __host__ __device__ size_t getLength() const { return exp.getLength(); }
-    };
-
-    template<class VectorType>
     class VectorExpr<ExpressionType::Sqrt, VectorType>
             : public RValueVector<VectorExpr<ExpressionType::Sqrt, VectorType>> {
         using This = VectorExpr<ExpressionType::Sqrt, VectorType>;
@@ -428,28 +407,6 @@ namespace Physica::Core {
     };
 
     template<class VectorType>
-    class VectorExpr<ExpressionType::Relu, VectorType>
-            : public RValueVector<VectorExpr<ExpressionType::Relu, VectorType>> {
-        using This = VectorExpr<ExpressionType::Relu, VectorType>;
-        using Base = RValueVector<This>;
-    public:
-        using typename Base::ScalarType;
-    private:
-        const VectorType& v;
-    public:
-        VectorExpr(const RValueVector<VectorType>& v_) : v(v_.getDerived()) {}
-        VectorExpr(const This&) = delete;
-        VectorExpr(This&&) noexcept = delete;
-        ~VectorExpr() = default;
-        /* Operators */
-        This& operator=(const This&) = delete;
-        This& operator=(This&&) noexcept = delete;
-        /* Operations */
-        [[nodiscard]] ScalarType calc(size_t i) const { return relu(v.calc(i)); }
-        [[nodiscard]] __host__ __device__ size_t getLength() const { return v.getLength(); }
-    };
-
-    template<class VectorType>
     class VectorExpr<ExpressionType::Unit, VectorType>
             : public RValueVector<VectorExpr<ExpressionType::Unit, VectorType>> {
         using This = VectorExpr<ExpressionType::Unit, VectorType>;
@@ -521,12 +478,6 @@ namespace Physica::Core {
     }
     ////////////////////////////////////////Elementary Functions////////////////////////////////////////////
     template<class VectorType>
-    [[nodiscard]] inline VectorExpr<ExpressionType::Reciprocal, VectorType>
-    reciprocal(const RValueVector<VectorType>& v) noexcept {
-        return VectorExpr<ExpressionType::Reciprocal, VectorType>(v);
-    }
-
-    template<class VectorType>
     [[nodiscard]] inline VectorExpr<ExpressionType::Sqrt, VectorType> sqrt(const RValueVector<VectorType>& v) noexcept {
         return VectorExpr<ExpressionType::Sqrt, VectorType>(v);
     }
@@ -539,12 +490,6 @@ namespace Physica::Core {
     template<class VectorType>
     [[nodiscard]] inline VectorExpr<ExpressionType::Abs, VectorType> abs(const RValueVector<VectorType>& v) noexcept {
         return VectorExpr<ExpressionType::Abs, VectorType>(v);
-    }
-
-    template<class VectorType>
-    [[nodiscard]] inline VectorExpr<ExpressionType::Relu, VectorType> relu(
-            const RValueVector<VectorType>& v) noexcept {
-        return VectorExpr<ExpressionType::Relu, VectorType>(v);
     }
 
     template<class VectorType>
@@ -624,4 +569,6 @@ namespace Physica {
 #include "VectorExprImpl/VectorMul.h"
 #include "VectorExprImpl/VectorMinus.h"
 #include "VectorExprImpl/VectorSquare.h"
+#include "VectorExprImpl/Reciprocal.h"
+#include "VectorExprImpl/Relu.h"
 #include "VectorExprImpl/VectorCosh.h"

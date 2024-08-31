@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Weibo He.
+ * Copyright 2021-2024 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -17,9 +17,8 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include <iostream>
-#include "Physica/Core/Math/Calculus/Chebyshev.h"
-#include "Physica/Core/MultiPrecision/Scalar.h"
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/Vector.h"
+#include <Physica/Core/Math/Calculus/Chebyshev.h>
+#include <Physica/Core/Math/Algebra/LinearAlgebra/Vector/Vector.h>
 
 using namespace Physica::Core;
 using T = Scalar<Double>;

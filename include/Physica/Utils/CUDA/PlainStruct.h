@@ -18,7 +18,7 @@
  */
 #pragma once
 
-#include "Physica/Macro.h"
+#include <Physica/Macro.h>
 
 namespace Physica {
     template<class T> class PlainStruct;

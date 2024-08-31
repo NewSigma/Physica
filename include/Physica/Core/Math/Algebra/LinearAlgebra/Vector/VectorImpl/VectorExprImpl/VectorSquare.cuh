@@ -21,30 +21,21 @@
 namespace Physica::Core {
     template<class VectorType>
     class device_obj<VectorExpr<ExpressionType::Square, VectorType>>
-            : public device_obj<RValueVector<VectorExpr<ExpressionType::Square, VectorType>>> {
-        using host_obj = VectorExpr<ExpressionType::Square, VectorType>;
-        using This = device_obj<host_obj>;
-        using Base = device_obj<RValueVector<host_obj>>;
-        using DeviceVector = device_obj<VectorType>;
+            : public device_obj<UnitaryVectorExpr<ExpressionType::Square, VectorType>> {
+        using Base = device_obj<UnitaryVectorExpr<ExpressionType::Square, VectorType>>;
     public:
         using typename Base::ScalarType;
-    private:
-        const DeviceVector& v;
     public:
-        __device__ device_obj(const device_obj<RValueVector<VectorType>>& v_) : v(v_.getDerived()) {}
-        device_obj(const This&) = delete;
-        device_obj(This&&) noexcept = delete;
-        ~device_obj() = default;
-        /* Operators */
-        This& operator=(const This&) = delete;
-        This& operator=(This&&) noexcept = delete;
+        using Base::Base;
         /* Operations */
-        [[nodiscard]] __device__ ScalarType calc(size_t s) const { return square(v.calc(s)); }
-        [[nodiscard]] __device__ size_t getLength() const { return v.getLength(); }
+        template<Side Owner = GetSide()>
+        [[nodiscard]] __device__ ScalarType calc(size_t s) const {
+            return square(Base::template getExpr<Owner>().template calc<Owner>(s));
+        }
     };
 
     template<class VectorType>
-    [[nodiscard]] __device__ inline auto square(const device_obj<RValueVector<VectorType>>& v) noexcept {
+    [[nodiscard]] __host__ __device__ inline auto square(const device_obj<RValueVector<VectorType>>& v) noexcept {
         return device_obj<VectorExpr<ExpressionType::Square, VectorType>>(v);
     }
 }

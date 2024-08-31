@@ -88,6 +88,27 @@ namespace Physica {
 
     constexpr size_t Dynamic = 0;
 
+    enum class Side {
+        Host,
+        Device
+    };
+
+    __host__ __device__ constexpr inline static Side GetSide() {
+    #ifdef __CUDA_ARCH__
+        return Side::Device;
+    #else
+        return Side::Host;
+    #endif
+    }
+
+    __host__ __device__ constexpr inline static bool IsHost() {
+        return GetSide() == Side::Host;
+    }
+
+    __host__ __device__ constexpr inline static bool IsDevice() {
+        return GetSide() == Side::Device;
+    }
+
     constexpr inline static bool UseASM() {
     #ifdef PHYSICA_ASM
         return true;

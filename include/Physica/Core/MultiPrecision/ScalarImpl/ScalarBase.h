@@ -46,6 +46,8 @@ namespace Physica::Core {
         using RealType = typename Traits<Derived>::RealType;
         using ComplexType = typename Traits<Derived>::ComplexType;
         using PlainScalar = typename Traits<Derived>::PlainScalar;
+        using device_obj_type = Derived;
+
         constexpr static ScalarOption Option = Traits<Derived>::Option;
         constexpr static bool isComplex = Traits<Derived>::isComplex;
         constexpr static bool isDifferentiable = Traits<Derived>::isDifferentiable;

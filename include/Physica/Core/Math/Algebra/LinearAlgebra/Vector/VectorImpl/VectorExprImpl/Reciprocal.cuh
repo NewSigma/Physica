@@ -20,20 +20,22 @@
 
 namespace Physica::Core {
     template<class VectorType>
-    class device_obj<VectorExpr<ExpressionType::Minus, VectorType>>
-            : public device_obj<UnitaryVectorExpr<ExpressionType::Minus, VectorType>> {
-        using Base = device_obj<UnitaryVectorExpr<ExpressionType::Minus, VectorType>>;
+    class device_obj<VectorExpr<ExpressionType::Reciprocal, VectorType>>
+            : public device_obj<UnitaryVectorExpr<ExpressionType::Reciprocal, VectorType>> {
+        using Base = device_obj<UnitaryVectorExpr<ExpressionType::Reciprocal, VectorType>>;
     public:
         using typename Base::ScalarType;
     public:
         using Base::Base;
-        /* Operations */
+        /* Getters */
         template<Side Owner = GetSide()>
-        [[nodiscard]] __device__ ScalarType calc(size_t s) const { return -Base::template getExpr<Owner>().template calc<Owner>(s); }
+        [[nodiscard]] __device__ ScalarType calc(size_t index) const {
+            return reciprocal(Base::template getExpr<Owner>().template calc<Owner>(index));
+        }
     };
 
-    template<class Derived>
-    [[nodiscard]] __host__ __device__ inline auto operator-(const device_obj<RValueVector<Derived>>& v) noexcept {
-        return device_obj<VectorExpr<ExpressionType::Minus, Derived>>(v.getDerived());
+    template<class VectorType>
+    [[nodiscard]] __host__ __device__ inline auto reciprocal(const device_obj<RValueVector<VectorType>>& v) noexcept {
+        return device_obj<VectorExpr<ExpressionType::Reciprocal, VectorType>>(v);
     }
 }

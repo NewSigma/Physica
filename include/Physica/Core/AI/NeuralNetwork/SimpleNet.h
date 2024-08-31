@@ -92,7 +92,7 @@ namespace Physica::Core {
                 }
                 auto& tracer = TracerType::getInstance();
                 std::lock_guard locker(mutex);
-                tracer.reverse(); // TODO: reverse on net_tracer should lock mutex of net_tracer
+                tracer.reverse();
             }, numThread, numThread).wait();
         }
         opt.step();
