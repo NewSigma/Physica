@@ -19,20 +19,20 @@
 #pragma once
 
 namespace Physica::Core {
-    template<class VectorType>
-    class VectorExpr<ExpressionType::Relu, VectorType> : public UnitaryVectorExpr<ExpressionType::Relu, VectorType> {
-        using This = VectorExpr<ExpressionType::Relu, VectorType>;
-        using Base = UnitaryVectorExpr<ExpressionType::Relu, VectorType>;
+    template<class VectorType, class AnyScalar>
+    class VectorExpr<ExpressionType::Pow, VectorType, ScalarBase<AnyScalar>>
+            : public BinaryVectorExpr<ExpressionType::Pow, VectorType, ScalarBase<AnyScalar>> {
+        using Base = BinaryVectorExpr<ExpressionType::Pow, VectorType, ScalarBase<AnyScalar>>;
     public:
         using typename Base::ScalarType;
     public:
         using Base::Base;
         /* Operations */
-        [[nodiscard]] ScalarType calc(size_t index) const { return relu(Base::getExpr().calc(index)); }
+        [[nodiscard]] ScalarType calc(size_t i) const { return pow(Base::getLHS().calc(i), Base::getRHS()); }
     };
 
-    template<class VectorType>
-    [[nodiscard]] inline auto relu(const RValueVector<VectorType>& v) noexcept {
-        return VectorExpr<ExpressionType::Relu, VectorType>(v);
+    template<class VectorType, class AnyScalar>
+    [[nodiscard]] inline auto pow(const RValueVector<VectorType>& v, const ScalarBase<AnyScalar>& s) noexcept {
+        return VectorExpr<ExpressionType::Pow, VectorType, AnyScalar>(v.getDerived(), s.getDerived());
     }
 }

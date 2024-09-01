@@ -20,29 +20,25 @@
 
 namespace Physica::Core {
     template<class VectorType>
-    class VectorExpr<ExpressionType::Reciprocal, VectorType> : public UnitaryVectorExpr<ExpressionType::Reciprocal, VectorType> {
-        using This = VectorExpr<ExpressionType::Reciprocal, VectorType>;
-        using Base = UnitaryVectorExpr<ExpressionType::Reciprocal, VectorType>;
+    class VectorExpr<ExpressionType::Sqrt, VectorType> : public UnitaryVectorExpr<ExpressionType::Sqrt, VectorType> {
+        using This = VectorExpr<ExpressionType::Sqrt, VectorType>;
+        using Base = UnitaryVectorExpr<ExpressionType::Sqrt, VectorType>;
     public:
         using typename Base::ScalarType;
     public:
         using Base::Base;
         /* Operations */
-        [[nodiscard]] ScalarType calc(size_t index) const { return reciprocal(Base::getExpr().calc(index)); }
+        [[nodiscard]] ScalarType calc(size_t index) const { return relu(Base::getExpr().calc(index)); }
 
         template<class AnyPacket>
-        [[nodiscard]] AnyPacket packet(size_t index) const {
-            return AnyPacket(1) / Base::getExpr().template packet<AnyPacket>(index);
-        }
+        [[nodiscard]] AnyPacket packet(size_t index) const { return sqrt(Base::getExpr().template packet<AnyPacket>(index)); }
 
         template<class AnyPacket>
-        [[nodiscard]] AnyPacket packetPartial(size_t index, size_t count) const {
-            return AnyPacket(1) / Base::getExpr().template packetPartial<AnyPacket>(index, count);
-        }
+        [[nodiscard]] AnyPacket packetPartial(size_t index, size_t count) const { return sqrt(Base::getExpr().template packetPartial<AnyPacket>(index, count)); }
     };
 
     template<class VectorType>
-    [[nodiscard]] inline auto reciprocal(const RValueVector<VectorType>& v) noexcept {
-        return VectorExpr<ExpressionType::Reciprocal, VectorType>(v);
+    [[nodiscard]] inline auto sqrt(const RValueVector<VectorType>& v) noexcept {
+        return VectorExpr<ExpressionType::Sqrt, VectorType>(v);
     }
 }

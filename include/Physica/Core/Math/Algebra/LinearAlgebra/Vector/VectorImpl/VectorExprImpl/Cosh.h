@@ -20,29 +20,19 @@
 
 namespace Physica::Core {
     template<class VectorType>
-    class VectorExpr<ExpressionType::Cosh, VectorType> : public RValueVector<VectorExpr<ExpressionType::Cosh, VectorType>> {
+    class VectorExpr<ExpressionType::Cosh, VectorType> : public UnitaryVectorExpr<ExpressionType::Cosh, VectorType> {
         using This = VectorExpr<ExpressionType::Cosh, VectorType>;
-        using Base = RValueVector<This>;
+        using Base = UnitaryVectorExpr<ExpressionType::Cosh, VectorType>;
     public:
         using typename Base::ScalarType;
-    private:
-        const VectorType& v;
     public:
-        VectorExpr(const RValueVector<VectorType>& v_) : v(v_.getDerived()) {}
-        VectorExpr(const This&) = delete;
-        VectorExpr(This&&) noexcept = delete;
-        ~VectorExpr() = default;
-        /* Operators */
-        This& operator=(const This&) = delete;
-        This& operator=(This&&) noexcept = delete;
+        using Base::Base;
         /* Operations */
-        [[nodiscard]] ScalarType calc(size_t i) const { return cosh(v.calc(i)); }
-        [[nodiscard]] __host__ __device__ size_t getLength() const { return v.getLength(); }
+        [[nodiscard]] ScalarType calc(size_t index) const { return cosh(Base::getExpr().calc(index)); }
     };
 
     template<class VectorType>
-    [[nodiscard]] inline VectorExpr<ExpressionType::Cosh, VectorType> cosh(
-            const RValueVector<VectorType>& v) noexcept {
+    [[nodiscard]] inline auto cosh(const RValueVector<VectorType>& v) noexcept {
         return VectorExpr<ExpressionType::Cosh, VectorType>(v);
     }
 }

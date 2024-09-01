@@ -20,19 +20,22 @@
 
 namespace Physica::Core {
     template<class VectorType>
-    class VectorExpr<ExpressionType::Relu, VectorType> : public UnitaryVectorExpr<ExpressionType::Relu, VectorType> {
-        using This = VectorExpr<ExpressionType::Relu, VectorType>;
-        using Base = UnitaryVectorExpr<ExpressionType::Relu, VectorType>;
+    class device_obj<VectorExpr<ExpressionType::Exp, VectorType>>
+            : public device_obj<UnitaryVectorExpr<ExpressionType::Exp, VectorType>> {
+        using Base = device_obj<UnitaryVectorExpr<ExpressionType::Exp, VectorType>>;
     public:
         using typename Base::ScalarType;
     public:
         using Base::Base;
-        /* Operations */
-        [[nodiscard]] ScalarType calc(size_t index) const { return relu(Base::getExpr().calc(index)); }
+        /* Getters */
+        template<Side Owner = GetSide()>
+        [[nodiscard]] __device__ ScalarType calc(size_t index) const {
+            return exp(Base::template getExpr<Owner>().template calc<Owner>(index));
+        }
     };
 
     template<class VectorType>
-    [[nodiscard]] inline auto relu(const RValueVector<VectorType>& v) noexcept {
-        return VectorExpr<ExpressionType::Relu, VectorType>(v);
+    [[nodiscard]] __host__ __device__ inline auto exp(const device_obj<RValueVector<VectorType>>& v) noexcept {
+        return device_obj<VectorExpr<ExpressionType::Exp, VectorType>>(v);
     }
 }

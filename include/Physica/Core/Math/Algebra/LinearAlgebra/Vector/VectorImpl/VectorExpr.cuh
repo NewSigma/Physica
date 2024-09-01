@@ -25,8 +25,6 @@ namespace Physica::Core {
         using This = device_obj<host_obj>;
         using Base = device_obj<RValueVector<VectorExpr<ExprType, VectorType>>>;
         using DeviceVector = device_obj<VectorType>;
-    public:
-        using typename Base::ScalarType;
     private:
         union {
             PlainStruct<const DeviceVector> value;
@@ -60,37 +58,35 @@ namespace Physica::Core {
         }
     };
 
-    template<ExpressionType ExprType, class VectorType, class T>
-    class device_obj<BinaryVectorExpr<ExprType, VectorType, T>>
-            : public device_obj<RValueVector<VectorExpr<ExprType, VectorType, T>>> {
-        using host_obj = BinaryVectorExpr<ExprType, VectorType, T>;
+    template<ExpressionType ExprType, class LHS, class RHS>
+    class device_obj<BinaryVectorExpr<ExprType, LHS, RHS>>
+            : public device_obj<RValueVector<VectorExpr<ExprType, LHS, RHS>>> {
+        static_assert(Internal::is_vector<LHS>::value, "[Error]: Invalid left hand side type");
+        using host_obj = BinaryVectorExpr<ExprType, LHS, RHS>;
         using This = device_obj<host_obj>;
-        using Base = device_obj<RValueVector<VectorExpr<ExprType, VectorType, T>>>;
-        using DeviceVector = device_obj<VectorType>;
-        using DeviceType = typename std::conditional<is_scalar<T>::value, typename T::ScalarType, device_obj<T>>::type;
-    public:
-        using typename Base::ScalarType;
+        using Base = device_obj<RValueVector<VectorExpr<ExprType, LHS, RHS>>>;
+        using DeviceLHS = device_obj<LHS>;
+        using DeviceRHS = typename std::conditional<is_scalar<RHS>::value, typename RHS::ScalarType, device_obj<RHS>>::type;
     private:
         union {
-            PlainStruct<const DeviceVector> value;
-            const DeviceVector* ptr;
+            PlainStruct<const DeviceLHS> value;
+            const DeviceLHS* ptr;
         } lhs;
 
         union {
-            PlainStruct<const DeviceType> value;
-            const DeviceType* ptr;
+            PlainStruct<const DeviceRHS> value;
+            const DeviceRHS* ptr;
         } rhs;
     public:
-        __host__ __device__ inline device_obj(
-                const device_obj<RValueVector<VectorType>>& lhs_, const DeviceType& rhs_) {
-            if constexpr (!is_scalar<T>::value)
+        __host__ __device__ inline device_obj(const DeviceLHS& lhs_, const DeviceRHS& rhs_) {
+            if constexpr (Internal::is_vector<RHS>::value)
                 assert(lhs_.getLength() == rhs_.getLength());
             if constexpr (IsHost()) {
-                lhs.value = asStruct(lhs_.getDerived());
+                lhs.value = asStruct(lhs_);
                 rhs.value = asStruct(rhs_);
             }
             else {
-                lhs.ptr = &lhs_.getDerived();
+                lhs.ptr = &lhs_;
                 rhs.ptr = &rhs_;
             }
         }
@@ -105,7 +101,7 @@ namespace Physica::Core {
         [[nodiscard]] __host__ __device__ size_t getLength() const { return getLHS<Owner>().template getLength<Owner>(); }
 
         template<Side Owner = GetSide()>
-        [[nodiscard]] __host__ __device__ const DeviceVector& getLHS() const noexcept {
+        [[nodiscard]] __host__ __device__ const DeviceLHS& getLHS() const noexcept {
             if constexpr (IsHost() || Owner == Side::Host)
                 return lhs.value.getDerived();
             else
@@ -113,90 +109,26 @@ namespace Physica::Core {
         }
 
         template<Side Owner = GetSide()>
-        [[nodiscard]] __host__ __device__ const DeviceType& getRHS() const noexcept {
+        [[nodiscard]] __host__ __device__ const DeviceRHS& getRHS() const noexcept {
             if constexpr (IsHost() || Owner == Side::Host)
                 return rhs.value.getDerived();
             else
                 return *rhs.ptr;
         }
     };
-    //////////////////////////////////////Div//////////////////////////////////////
-    template<class VectorType, class AnyScalar>
-    class device_obj<VectorExpr<ExpressionType::Div, VectorType, ScalarBase<AnyScalar>>>
-            : public device_obj<RValueVector<VectorExpr<ExpressionType::Div, VectorType, ScalarBase<AnyScalar>>>> {
-        static_assert(is_scalar<AnyScalar>::value, "[Error]: This is not a scalar type");
-        using host_obj = VectorExpr<ExpressionType::Div, VectorType, ScalarBase<AnyScalar>>;
-        using Base = device_obj<RValueVector<host_obj>>;
-        using This = device_obj<host_obj>;
-        using DeviceVector = device_obj<VectorType>;
-    public:
-        using typename Base::ScalarType;
-    private:
-        const DeviceVector& v;
-        AnyScalar s;
-    public:
-        __device__ device_obj(const device_obj<RValueVector<VectorType>>& v_, AnyScalar s_) : v(v_.getDerived()), s(s_) {}
-        device_obj(const This&) = delete;
-        device_obj(This&&) noexcept = delete;
-        ~device_obj() = default;
-        /* Operators */
-        This& operator=(const This&) = delete;
-        This& operator=(This&&) noexcept = delete;
-        /* Getters */
-        [[nodiscard]] __device__ ScalarType calc(size_t index) const { return ScalarType(v.calc(index)) / ScalarType(s); }
-        [[nodiscard]] __device__ size_t getLength() const { return v.getLength(); }
-    };
-    ////////////////////////////////////////Elementary Functions////////////////////////////////////////////
-    template<class VectorType>
-    class device_obj<VectorExpr<ExpressionType::Exp, VectorType>>
-            : public device_obj<RValueVector<VectorExpr<ExpressionType::Exp, VectorType>>> {
-        using host_obj = VectorExpr<ExpressionType::Exp, VectorType>;
-        using This = device_obj<host_obj>;
-        using Base = device_obj<RValueVector<host_obj>>;
-        using DeviceVector = device_obj<VectorType>;
-        
-        const DeviceVector& v;
-    public:
-        __device__ device_obj(const device_obj<RValueVector<VectorType>>& v_) : v(v_.getDerived()) {}
-        device_obj(const This&) = delete;
-        device_obj(This&&) noexcept = delete;
-        ~device_obj() = default;
-        /* Operators */
-        This& operator=(const This&) = delete;
-        This& operator=(This&&) noexcept = delete;
-        /* Getters */
-        [[nodiscard]] __device__ typename Base::ScalarType calc(size_t index) const {
-            return exp(v.calc(index));
-        }
-        [[nodiscard]] __device__ size_t getLength() const {
-            return v.getLength();
-        }
-    };
-    //////////////////////////////////////Operators//////////////////////////////////////
-    //////////////////////////////////////Div//////////////////////////////////////
-    template<class VectorType, class ScalarType>
-    [[nodiscard]] __device__ inline device_obj<VectorExpr<ExpressionType::Div, VectorType, ScalarBase<ScalarType>>>
-    operator/(const device_obj<RValueVector<VectorType>>& v, const ScalarBase<ScalarType>& s) noexcept {
-        return {v.getDerived(), s.getDerived()};
-    }
-    ////////////////////////////////////////Elementary Functions////////////////////////////////////////////
-    template<class VectorType>
-    [[nodiscard]] __device__ inline auto exp(const device_obj<RValueVector<VectorType>>& v) noexcept {
-        return device_obj<VectorExpr<ExpressionType::Exp, VectorType>>(v);
-    }
 }
 
 namespace Physica {
-    using namespace Core;
-
     template<ExpressionType Type, class Exp1, class Exp2>
-    class Traits<Core::device_obj<VectorExpr<Type, Exp1, Exp2>>> : public Traits<VectorExpr<Type, Exp1, Exp2>> {};
+    class Traits<Core::device_obj<Core::VectorExpr<Type, Exp1, Exp2>>> : public Traits<Core::VectorExpr<Type, Exp1, Exp2>> {};
 }
 
-#include "VectorExprImpl/VectorAdd.cuh"
-#include "VectorExprImpl/VectorSub.cuh"
-#include "VectorExprImpl/VectorMul.cuh"
-#include "VectorExprImpl/VectorMinus.cuh"
+#include "VectorExprImpl/Add.cuh"
+#include "VectorExprImpl/Sub.cuh"
+#include "VectorExprImpl/Mul.cuh"
+#include "VectorExprImpl/Div.cuh"
+#include "VectorExprImpl/Minus.cuh"
 #include "VectorExprImpl/Reciprocal.cuh"
 #include "VectorExprImpl/Relu.cuh"
-#include "VectorExprImpl/VectorSquare.cuh"
+#include "VectorExprImpl/Square.cuh"
+#include "VectorExprImpl/Exp.cuh"

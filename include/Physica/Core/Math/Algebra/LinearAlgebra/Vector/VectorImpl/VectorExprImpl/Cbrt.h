@@ -20,29 +20,35 @@
 
 namespace Physica::Core {
     template<class VectorType>
-    class VectorExpr<ExpressionType::Reciprocal, VectorType> : public UnitaryVectorExpr<ExpressionType::Reciprocal, VectorType> {
-        using This = VectorExpr<ExpressionType::Reciprocal, VectorType>;
-        using Base = UnitaryVectorExpr<ExpressionType::Reciprocal, VectorType>;
+    class VectorExpr<ExpressionType::Cbrt, VectorType> : public UnitaryVectorExpr<ExpressionType::Cbrt, VectorType> {
+        using This = VectorExpr<ExpressionType::Cbrt, VectorType>;
+        using Base = UnitaryVectorExpr<ExpressionType::Cbrt, VectorType>;
     public:
         using typename Base::ScalarType;
     public:
         using Base::Base;
         /* Operations */
-        [[nodiscard]] ScalarType calc(size_t index) const { return reciprocal(Base::getExpr().calc(index)); }
+        [[nodiscard]] typename Base::ScalarType calc(size_t s) const { return cbrt(Base::getExpr().calc(s)); }
 
         template<class AnyPacket>
         [[nodiscard]] AnyPacket packet(size_t index) const {
-            return AnyPacket(1) / Base::getExpr().template packet<AnyPacket>(index);
+            AnyPacket result = Base::getExpr().template packet<AnyPacket>(index);
+            for (size_t i = 0; i < static_cast<size_t>(AnyPacket::size()); ++i)
+                result.insert(i, cbrt(result[i]));
+            return result;
         }
 
         template<class AnyPacket>
         [[nodiscard]] AnyPacket packetPartial(size_t index, size_t count) const {
-            return AnyPacket(1) / Base::getExpr().template packetPartial<AnyPacket>(index, count);
+            AnyPacket result = Base::getExpr().template packetPartial<AnyPacket>(index, count);
+            for (size_t i = 0; i < count; ++i)
+                result.insert(i, cbrt(result[i]));
+            return result;
         }
     };
 
     template<class VectorType>
-    [[nodiscard]] inline auto reciprocal(const RValueVector<VectorType>& v) noexcept {
-        return VectorExpr<ExpressionType::Reciprocal, VectorType>(v);
+    [[nodiscard]] inline auto cbrt(const RValueVector<VectorType>& v) noexcept {
+        return VectorExpr<ExpressionType::Cbrt, VectorType>(v);
     }
 }
