@@ -18,7 +18,8 @@
  */
 #pragma once
 
-#include "Physica/Core/MultiPrecision/Differentiable.h"
+#include <Physica/Core/MultiPrecision/Differentiable.h>
+#include "FFT.h"
 
 namespace Physica::Core {
     template<class PlainScalar, DiffMode Mode>

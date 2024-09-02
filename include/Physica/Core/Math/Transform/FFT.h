@@ -42,6 +42,7 @@ namespace Physica::Core {
     class FFT<ScalarType, 1>
             : public FFTRSpace<FFT<ScalarType, 1>, 1>
             , public FFTKSpace<FFT<ScalarType, 1>, 1> {
+        static_assert(!ScalarType::isDifferentiable, "[Error]: Header of differentiable fft should be included");
         using This = FFT<ScalarType, 1>;
         using TrivialType = typename Traits<This>::TrivialType;
         using RealType = typename Traits<This>::RealType;
@@ -50,7 +51,6 @@ namespace Physica::Core {
         using ComplexTypeFFTW = typename Traits<This>::ComplexTypeFFTW;
         constexpr static bool isComplex = Traits<This>::isComplex;
         constexpr static bool isSinglePrec = Traits<This>::isSinglePrec;
-        static_assert(!Traits<This>::isDifferentiable, "[Error]: Header of differentiable fft should be included");
     public:
         using RSpaceType = FFTRSpace<This, 1>;
         using KSpaceType = FFTKSpace<This, 1>;
@@ -214,4 +214,3 @@ namespace Physica {
 }
 
 #include "FFTImpl/FFTImpl.h"
-#include "FFTImpl/DifferentiableFFT.h"

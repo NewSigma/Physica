@@ -19,11 +19,12 @@
 #include <Physica/Core/Parallel/ThreadPool.h>
 
 namespace Physica::Core {
-    unsigned int ThreadPool::numThreadRequired = 0;
+    int ThreadPool::numThreadRequired = 0;
     thread_local std::unique_ptr<ThreadPool::ThreadInfo> ThreadPool::info = nullptr;
 
-    ThreadPool::ThreadPool(unsigned int numThreads) : thread_data(numThreads), exit(false) {
-        for (unsigned int i = 0; i < numThreads; ++i) {
+    ThreadPool::ThreadPool(int numThreads) : thread_data(numThreads), exit(false) {
+        assert(numThreads > 0 && "[Error]: numThreads must be positive");
+        for (int i = 0; i < numThreads; ++i) {
             thread_data[i].thread.reset(new std::thread([this, i]() noexcept { workerMainLoop(i); } ));
         }
     }
@@ -33,9 +34,9 @@ namespace Physica::Core {
     }
 
     std::unique_ptr<Task> ThreadPool::steal() {
-        const unsigned int numThreads = getNumThreads();
-        const unsigned int random = threadRand(getThreadInfo().randState);
-        for (size_t i = 0; i < numThreads; ++i) {
+        const auto random = threadRand(getThreadInfo().randState);
+        const int numThreads = getNumThreads();
+        for (int i = 0; i < numThreads; ++i) {
             ThreadData& data = thread_data[(random + i) % numThreads];
             std::unique_lock locker(data.queueMutex);
             auto& queue = data.queue;
@@ -60,9 +61,9 @@ namespace Physica::Core {
     void ThreadPool::restart() {
         waitExit();
         exit = false;
-        const unsigned int numThread = makeNumThread();
+        const int numThread = makeNumThread();
         thread_data = Utils::Array<ThreadData>(numThread);
-        for (unsigned int i = 0; i < numThread; ++i) {
+        for (int i = 0; i < numThread; ++i) {
             thread_data[i].thread.reset(new std::thread([this, i]() { workerMainLoop(i); } ));
         }
     }
@@ -89,7 +90,7 @@ namespace Physica::Core {
         return pool;
     }
 
-    void ThreadPool::workerMainLoop(unsigned int thread_id) noexcept {
+    void ThreadPool::workerMainLoop(int thread_id) noexcept {
         auto& threadInfo = getThreadInfo();
         threadInfo.id = thread_id;
         auto& data = thread_data[thread_id];

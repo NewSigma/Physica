@@ -27,7 +27,7 @@ using MatrixType = DenseMatrix<ScalarType>;
 using VectorType = Vector<ScalarType>;
 
 void func([[maybe_unused]] size_t i) {
-    printf("Thread ID: %ld\n", ThreadPool::getThreadInfo().id);
+    printf("Thread ID: %d\n", ThreadPool::getThreadInfo().id);
 }
 
 int main() {

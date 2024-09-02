@@ -24,7 +24,6 @@
 #include <queue>
 #include <functional>
 #include <condition_variable>
-#include <vector>
 #include <future>
 #include <sys/sysinfo.h>
 #include <Physica/Utils/Container/Array/Array.h>
@@ -36,7 +35,6 @@ namespace Physica::Core {
      * [1] Eigen; https://eigen.tuxfamily.org/
      */
     class PHYSICA_API ThreadPool final {
-        constexpr static size_t MainThreadID = std::numeric_limits<size_t>::max();
     public:
         struct ThreadData {
             std::unique_ptr<std::thread> thread;
@@ -47,13 +45,14 @@ namespace Physica::Core {
         };
 
         struct ThreadInfo {
-            size_t id;
-            size_t numScheduled;
+            int id;
+            uint64_t numScheduled;
             uint64_t randState;
         };
 
-        static unsigned int numThreadRequired;
+        static int numThreadRequired;
     private:
+        constexpr static size_t MainThreadID = std::numeric_limits<decltype(numThreadRequired)>::max();
         thread_local static std::unique_ptr<ThreadInfo> info;
 
         Utils::Array<ThreadData> thread_data;
@@ -74,7 +73,7 @@ namespace Physica::Core {
         void waitExit();
         void restart();
         /* Getters */
-        [[nodiscard]] unsigned int getNumThreads() const noexcept { return thread_data.getLength(); }
+        [[nodiscard]] int getNumThreads() const noexcept { return thread_data.getLength(); }
         /* Setters */
         void shouldExit() noexcept;
         /* Static Members */
@@ -82,19 +81,19 @@ namespace Physica::Core {
         [[nodiscard]] static inline bool isMainThread() noexcept;
         [[nodiscard]] static ThreadPool& getInstance() noexcept;
     private:
-        ThreadPool(unsigned int threadCount);
+        ThreadPool(int threadCount);
         /* Operations */
-        void workerMainLoop(unsigned int thread_id) noexcept;
+        void workerMainLoop(int thread_id) noexcept;
         /* Static Members */
-        [[nodiscard]] static inline unsigned int getNumProcesser() noexcept { return get_nprocs(); }
-        [[nodiscard]] static inline unsigned int makeNumThread() noexcept;
+        [[nodiscard]] static inline int getNumProcesser() noexcept { return get_nprocs(); }
+        [[nodiscard]] static inline int makeNumThread() noexcept;
         [[nodiscard]] static inline unsigned int threadRand(uint64_t& state) noexcept;
     };
 
     template<class Function, class... Args>
     std::future<typename std::invoke_result<Function, Args&&...>::type> ThreadPool::schedule(Function func, Args&&... args) noexcept {
         using ResultType = typename std::invoke_result<Function, Args&&...>::type;
-        unsigned int schedule_to;
+        int schedule_to;
         auto& info = getThreadInfo();
         if (isMainThread())
             schedule_to = info.numScheduled % getNumThreads();
@@ -116,7 +115,7 @@ namespace Physica::Core {
         return getThreadInfo().id == MainThreadID;
     }
 
-    inline unsigned int ThreadPool::makeNumThread() noexcept {
+    inline int ThreadPool::makeNumThread() noexcept {
         const auto numProcesser = getNumProcesser();
         if (numThreadRequired == 0 || numThreadRequired > numProcesser)
             return numProcesser * 3 / 4;

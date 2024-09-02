@@ -35,16 +35,16 @@ namespace Physica::Core {
         template<class Functor, class... Args>
         [[nodiscard]] static FutureType schedule(Functor func, Args&&... args) noexcept;
         template<class Functor>
-        [[nodiscard]] static FutureGroup<FutureType> parallel_for(Functor func, unsigned int loopCount);
+        [[nodiscard]] static FutureGroup<FutureType> parallel_for(Functor func, size_t loopCount);
         template<class Functor>
-        [[nodiscard]] static FutureGroup<FutureType> parallel_for(Functor func, unsigned int loopCount, unsigned int core);
+        [[nodiscard]] static FutureGroup<FutureType> parallel_for(Functor func, size_t loopCount, int core);
         PHYSICA_API static void auto_wait(FutureType& future);
         inline static void auto_wait(FutureGroup<FutureType>& group);
         static void wait() {}
         /* Getters */
-        [[nodiscard]] static unsigned int getNumThread() { return ThreadPool::getInstance().getNumThreads(); }
+        [[nodiscard]] static int getNumThread() { return ThreadPool::getInstance().getNumThreads(); }
         /* Static members */
-        [[nodiscard]] inline static Range splitJob(unsigned int loopCount, unsigned int core, unsigned int part);
+        [[nodiscard]] inline static Range splitJob(size_t loopCount, int core, int part);
     };
     /**
      * Return value are declared as [[nodiscard]] to warn user pay attention to
@@ -57,14 +57,13 @@ namespace Physica::Core {
     }
 
     template<class Functor>
-    FutureGroup<typename ThreadExecutor::FutureType> ThreadExecutor::parallel_for(
-            Functor func, unsigned int loopCount) {
-        using ResultType = typename std::invoke_result<Functor, unsigned int>::type;
+    FutureGroup<typename ThreadExecutor::FutureType> ThreadExecutor::parallel_for(Functor func, size_t loopCount) {
+        using ResultType = typename std::invoke_result<Functor, size_t>::type;
         static_assert(std::is_same<void, ResultType>::value, "[Error]: Invalid functor");
         assert(loopCount > 0);
         FutureGroup<FutureType> result(loopCount);
-        for (unsigned int i = 0; i < loopCount; ++i) {
-            constexpr bool isNothrow = std::is_nothrow_invocable<Functor, unsigned int>::value;
+        for (size_t i = 0; i < loopCount; ++i) {
+            constexpr bool isNothrow = std::is_nothrow_invocable<Functor, size_t>::value;
             result.append(ThreadPool::getInstance().schedule([func, i]() noexcept(isNothrow) -> void { func(i); }));
         }
         return result;
@@ -72,16 +71,16 @@ namespace Physica::Core {
 
     template<class Functor>
     FutureGroup<typename ThreadExecutor::FutureType> ThreadExecutor::parallel_for(
-            Functor func, unsigned int loopCount, unsigned int core) {
-        using ResultType = typename std::invoke_result<Functor, unsigned int>::type;
+            Functor func, size_t loopCount, int core) {
+        using ResultType = typename std::invoke_result<Functor, size_t>::type;
         static_assert(std::is_same<void, ResultType>::value, "[Error]: Invalid functor");
-        assert(core > 0);
+        assert(core > 0 && "[Error]: core must be a positive int");
         FutureGroup<FutureType> result(core);
-        for (unsigned int i = 0; i < core; ++i) {
-            constexpr bool isNothrow = std::is_nothrow_invocable<Functor, unsigned int>::value;
+        for (int i = 0; i < core; ++i) {
+            constexpr bool isNothrow = std::is_nothrow_invocable<Functor, size_t>::value;
             const auto range = splitJob(loopCount, core, i);
             result.append(ThreadPool::getInstance().schedule([range, func]() noexcept(isNothrow) -> void {
-                for (unsigned int loop = range.first; loop < range.second; ++loop)
+                for (size_t loop = range.first; loop < range.second; ++loop)
                     func(loop);
             }));
         }
@@ -93,12 +92,12 @@ namespace Physica::Core {
             auto_wait(future);
     }
 
-    inline typename ThreadExecutor::Range ThreadExecutor::splitJob(unsigned int loopCount, unsigned int core, unsigned int part) {
-        assert(core != 0 && "[Error]: Zero core is not allowed");
+    inline typename ThreadExecutor::Range ThreadExecutor::splitJob(size_t loopCount, int core, int part) {
+        assert(0 < part && "[Error]: part must be a positive int");
         assert(part < core && "[Error]: More partition than core number requested");
-        const unsigned int maxLoopPerCore = (loopCount + core - 1) / core;
-        const unsigned int from = part * maxLoopPerCore; 
-        const unsigned int to = std::min(from + maxLoopPerCore, loopCount);
+        const size_t maxLoopPerCore = (loopCount + core - 1) / core;
+        const size_t from = part * maxLoopPerCore; 
+        const size_t to = std::min(from + maxLoopPerCore, loopCount);
         return std::make_pair(from, to);
     }
 }
