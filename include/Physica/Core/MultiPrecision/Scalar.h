@@ -66,6 +66,6 @@ namespace Physica::Core {
 #include "ScalarImpl/Float32.h"
 #include "ScalarImpl/Float64.h"
 #include "ScalarImpl/MultiPrecision.h"
-
 #include "ScalarImpl/ElementaryFunction.h"
+
 #include "SIMD.h"

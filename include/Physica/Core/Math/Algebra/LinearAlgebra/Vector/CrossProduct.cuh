@@ -36,13 +36,13 @@ namespace Physica::Core {
         /* Operations */
         template<class OtherDerived>
         __device__ void assignTo(device_obj<LValueVector<OtherDerived>>& v) const {
-        #ifndef  __CUDA_ARCH__
-            assert(false && "[Error]: Not implemented");
-        #else
-            v[0] = v1[1] * v2[2] - v1[2] * v2[1];
-            v[1] = v1[2] * v2[0] - v1[0] * v2[2];
-            v[2] = v1[0] * v2[1] - v1[1] * v2[0];
-        #endif
+            if constexpr (IsDevice())
+                noImpl();
+            else {
+                v[0] = v1[1] * v2[2] - v1[2] * v2[1];
+                v[1] = v1[2] * v2[0] - v1[0] * v2[2];
+                v[2] = v1[0] * v2[1] - v1[1] * v2[0];
+            }
         }
         /* Getters */
         [[nodiscard]] __host__ __device__ constexpr size_t getLength() const noexcept { return 3; }

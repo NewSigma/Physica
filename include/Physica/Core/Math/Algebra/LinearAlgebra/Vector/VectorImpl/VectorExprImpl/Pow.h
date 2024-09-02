@@ -33,6 +33,6 @@ namespace Physica::Core {
 
     template<class VectorType, class AnyScalar>
     [[nodiscard]] inline auto pow(const RValueVector<VectorType>& v, const ScalarBase<AnyScalar>& s) noexcept {
-        return VectorExpr<ExpressionType::Pow, VectorType, AnyScalar>(v.getDerived(), s.getDerived());
+        return VectorExpr<ExpressionType::Pow, VectorType, ScalarBase<AnyScalar>>(v.getDerived(), s.getDerived());
     }
 }

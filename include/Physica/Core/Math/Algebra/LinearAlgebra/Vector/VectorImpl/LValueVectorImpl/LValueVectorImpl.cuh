@@ -56,9 +56,8 @@ namespace Physica::Core {
     template<class OtherDerived>
     __host__ __device__
     device_obj<Derived>& device_obj<LValueVector<Derived>>::operator=(const device_obj<RValueVector<OtherDerived>>& v) {
-    #ifndef __CUDA_ARCH__
-        Base::getDerived().resize(v.getLength());
-    #endif
+        if constexpr (IsHost())
+            Base::getDerived().resize(v.getLength());
         v.assignTo(*this);
         return Base::getDerived();
     }

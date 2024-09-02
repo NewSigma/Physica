@@ -50,9 +50,8 @@ namespace Physica::Core {
     template<tparams>
     template<class... Args>
     __host__ __device__ void device_obj<ColumnElementStorage>::resize(size_t row, size_t column, Args&&... args) {
-    #ifdef __CUDA_ARCH__
-        assert(Row * Column != Dynamic && "[Error]: Do not allocate dynamic matrix in device code");
-    #endif
+        if constexpr (IsDevice())
+            assert(Row * Column != Dynamic && "[Error]: Do not allocate dynamic matrix in device code");
         Base::resize(row * column, std::forward<Args>(args)...);
         Dim::resize(row, column);
     }
@@ -119,9 +118,8 @@ namespace Physica::Core {
     template<tparams>
     template<class... Args>
     __host__ __device__ void device_obj<RowElementStorage>::resize(size_t row, size_t column, Args&&... args) {
-    #ifdef __CUDA_ARCH__
-        assert(Row * Column != Dynamic && "[Error]: Do not allocate dynamic matrix in device code");
-    #endif
+        if constexpr (IsDevice())
+            assert(Row * Column != Dynamic && "[Error]: Do not allocate dynamic matrix in device code");
         Base::resize(row * column, std::forward<Args>(args)...);
         Dim::resize(row, column);
     }
@@ -212,13 +210,13 @@ namespace Physica::Core {
     template<tparams>
     __host__ __device__ const T*
     device_obj<ColumnVectorStorage>::data_ptr(size_t row, size_t column) const {
-    #ifdef __CUDA_ARCH__
-        return array[column].data() + row;
-    #else
-        const auto host_array = array.toPlainHost();
-        const auto* p = host_array[column].getDerived().data() + row;
-        return p;
-    #endif
+        if constexpr (IsDevice())
+            return array[column].data() + row;
+        else {
+            const auto host_array = array.toPlainHost();
+            const auto* p = host_array[column].getDerived().data() + row;
+            return p;
+        }
     }
 
     template<tparams>
@@ -283,13 +281,13 @@ namespace Physica::Core {
     template<tparams>
     __host__ __device__ const T*
     device_obj<RowVectorStorage>::data_ptr(size_t row, size_t column) const {
-    #ifdef __CUDA_ARCH__
-        return array[row].data() + column;
-    #else
-        const auto host_array = array.toPlainHost();
-        const auto* p = host_array[row].getDerived().data() + column;
-        return p;
-    #endif
+        if constexpr (IsDevice())
+            return array[row].data() + column;
+        else {
+            const auto host_array = array.toPlainHost();
+            const auto* p = host_array[row].getDerived().data() + column;
+            return p;
+        }
     }
 
     template<tparams>

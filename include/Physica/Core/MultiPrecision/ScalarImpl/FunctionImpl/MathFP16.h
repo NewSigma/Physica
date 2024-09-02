@@ -1,8 +1,8 @@
 /*
- * Copyright 2021 Weibo He.
+ * Copyright 2024 Weibo He.
  *
  * This file is part of Physica.
- *
+
  * Physica is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
@@ -18,23 +18,9 @@
  */
 #pragma once
 
-#include <stdexcept>
-#include <Physica/Macro.h>
-
 namespace Physica::Core {
-    class PHYSICA_API NoImplException : public std::runtime_error {
-    public:
-        constexpr static const char* DefaultMsg = "[Error]: Not implemented";
-    public:
-        NoImplException(const char* msg = DefaultMsg) : std::runtime_error(msg) {}
-    };
-
-    __host__ __device__ [[noreturn]] inline void noImpl(const char* msg = NoImplException::DefaultMsg) {
-    #ifdef __CUDA_ARCH__
-        printf("%s", msg);
-        __trap();
-    #else
-        throw NoImplException(msg);
-    #endif
+    template<>
+    __host__ __device__ inline Scalar<Float16> abs(const Scalar<Float16>& s) noexcept {
+        return Scalar<Float16>(::__habs(s.getTrivial()));
     }
 }

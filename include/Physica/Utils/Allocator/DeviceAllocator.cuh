@@ -128,54 +128,55 @@ namespace Physica::Utils {
 
     template<class T>
     __host__ __device__ typename DeviceAllocator<T>::pointer DeviceAllocator<T>::allocate(size_t n) {
-    #ifdef __CUDA_ARCH__
-        auto* p = reinterpret_cast<pointer>(malloc(n * sizeof(value_type)));
-    #else
         pointer p;
-        if constexpr (CUDADevAttr::MemoryPoolsSupported)
-            cudaMallocAsync(&p, n * sizeof(value_type), Core::CUDAContext::getInstance());
-        else
-            cudaMalloc(&p, n * sizeof(value_type));
-    #endif
+        if constexpr (IsDevice())
+            p = reinterpret_cast<pointer>(malloc(n * sizeof(value_type)));
+        else {
+            if constexpr (CUDADevAttr::MemoryPoolsSupported)
+                cudaMallocAsync(&p, n * sizeof(value_type), Core::CUDAContext::getInstance());
+            else
+                cudaMalloc(&p, n * sizeof(value_type));
+        }
         return p;
     }
 
     template<class T>
     __host__ __device__ void DeviceAllocator<T>::deallocate(pointer p, [[maybe_unused]] size_t n) noexcept {
-    #ifdef __CUDA_ARCH__
-        free(p);
-    #else
-        if (p != nullptr) { // No unnecessary cuda api call to make profiler output cleaner
-            if constexpr (CUDADevAttr::MemoryPoolsSupported)
-                cudaFreeAsync(p, Core::CUDAContext::getInstance());
-            else
-                cudaFree(p);
+        if constexpr (IsDevice())
+            free(p);
+        else {
+            if (p != nullptr) { // No unnecessary cuda api call to make profiler output cleaner
+                if constexpr (CUDADevAttr::MemoryPoolsSupported)
+                    cudaFreeAsync(p, Core::CUDAContext::getInstance());
+                else
+                    cudaFree(p);
+            }
         }
-    #endif
     }
 
     template<class T>
     template<class... Args>
     __host__ __device__ void DeviceAllocator<T>::construct(pointer p, Args&&... args) {
-    #ifdef __CUDA_ARCH__
-        ::new (static_cast<void*>(p.get())) value_type(std::forward<Args>(args)...);
-    #else
-        value_type temp(std::forward<Args>(args)...);
-        check(cudaMemcpy(p.get(), &temp, sizeof(value_type), cudaMemcpyHostToDevice));
-        if constexpr (!std::is_trivial<value_type>::value)
-            temp.release(); //Ownership has been given to device
-    #endif
+        if constexpr (IsDevice())
+            ::new (static_cast<void*>(p.get())) value_type(std::forward<Args>(args)...);
+        else {
+            value_type temp(std::forward<Args>(args)...);
+            check(cudaMemcpy(p.get(), &temp, sizeof(value_type), cudaMemcpyHostToDevice));
+            if constexpr (!std::is_trivial<value_type>::value)
+                temp.release(); //Ownership has been given to device
+        }
     }
 
     template<class T>
     __host__ __device__ void DeviceAllocator<T>::destroy(pointer p) {
         if constexpr (std::is_trivial<value_type>::value)
             return;
-    #ifdef __CUDA_ARCH__
-        p->~value_type();
-    #else
-        value_type temp;
-        cudaMemcpyAsync(&temp, p.get(), sizeof(value_type), cudaMemcpyDeviceToHost, Core::CUDAContext::getInstance());
-    #endif
+
+        if constexpr (IsDevice())
+            p->~value_type();
+        else {
+            value_type temp;
+            cudaMemcpyAsync(&temp, p.get(), sizeof(value_type), cudaMemcpyDeviceToHost, Core::CUDAContext::getInstance());
+        }
     }
 }

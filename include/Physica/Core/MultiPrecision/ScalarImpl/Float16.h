@@ -75,7 +75,6 @@ namespace Physica::Core {
         __host__ __device__ bool operator==(const Scalar& s) const { return f == s.f; }
         /* Operations */
         Scalar& toOpposite() noexcept { f = -f; return *this; }
-        __host__ __device__ Scalar& toAbs() noexcept { *this = abs(*this); return *this; }
         void swap(Scalar& __restrict s) noexcept { std::swap(f, s.f); }
         /* Getters */
         [[nodiscard]] constexpr static ScalarOption getOption() { return Float16; }
@@ -89,3 +88,5 @@ namespace Physica::Core {
     template<class OtherScalar>
     __host__ __device__ inline Scalar<Float16>::Scalar(const ScalarBase<OtherScalar>& s) : f(s.getDerived().getTrivial()) {}
 }
+
+#include "FunctionImpl/MathFP16.h"

@@ -666,7 +666,7 @@ namespace Physica::Core {
                 const auto momentum = col.head(dof);
                 const auto pos = col.tail(dof);
 
-                LatticeMatrix kineticStress(Dim, Dim);
+                LatticeMatrix kineticStress(Dim, Dim, 0);
                 for (size_t i = 0; i < getNumParticle(); ++i) {
                     const size_t from = i * Dim;
                     const size_t to = from + Dim;
