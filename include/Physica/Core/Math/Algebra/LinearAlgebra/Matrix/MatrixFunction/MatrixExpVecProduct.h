@@ -161,7 +161,7 @@ namespace Physica::Core {
         }
 
         for (int order = 2; order <= MaxNormOrder; ++order) {
-            const TrivialType powerNorm = std::max(powerNorms[order - 2], powerNorms[order - 1]);
+            const TrivialType powerNorm = std::max(powerNorms[order - 2], powerNorms[order - 1]).getTrivial();
             for (int numTerm = order * (order - 1) - 1; numTerm <= MaxNumTaylorTerm; ++numTerm) {
                 const int temp = numTerm * int(powerNorm / calcTheta(numTerm)) + numTerm;
                 if (cost > temp) {

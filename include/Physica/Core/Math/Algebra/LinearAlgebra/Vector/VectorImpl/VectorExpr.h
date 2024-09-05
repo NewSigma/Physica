@@ -66,7 +66,7 @@ namespace Physica::Core {
                 rhs = &rhs_.getDerived();
             else {
                 rhs = &rhs_;
-                assert(lhs.getLength() == rhs.getLength());
+                assert(lhs->getLength() == rhs->getLength());
             }
         }
         BinaryVectorExpr(const This&) = delete;

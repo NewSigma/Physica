@@ -86,9 +86,7 @@ set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 include_directories(SYSTEM 3rdparty)
 # FFTW3
 find_package(FFTW3 REQUIRED)
-find_package(FFTW3f REQUIRED)
 link_directories(${FFTW3_LIBRARY_DIRS})
-link_directories(${FFTW3f_LIBRARY_DIRS})
 include_directories(SYSTEM ${FFTW3_INCLUDE_DIRS})
 # HDF5
 find_package(HDF5 NAMES hdf5 REQUIRED COMPONENTS CXX shared)

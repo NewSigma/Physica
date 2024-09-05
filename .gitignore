@@ -1,0 +1,6 @@
+.cache
+.clangd
+.vscode
+build
+temp
+include/Physica/Config.h

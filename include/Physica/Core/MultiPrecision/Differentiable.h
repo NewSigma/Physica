@@ -68,6 +68,7 @@ namespace Physica::Core {
         [[nodiscard]] inline bool operator==(const This& other) const;
         [[nodiscard]] inline Differentiable operator-() const;
         /* Operations */
+        [[nodiscard]] This conjugate() const { noImpl(); }
         void swap(Differentiable& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] ScalarType& getValue() noexcept { return value; }
@@ -121,6 +122,7 @@ namespace Physica::Core {
         [[nodiscard]] inline bool operator==(const This& other) const;
         [[nodiscard]] inline Differentiable operator-() const;
         /* Operations */
+        [[nodiscard]] This conjugate() const { noImpl(); }
         inline Differentiable& toAbs();
         inline void reverse();
         inline void reverse_to(Differentiable to);

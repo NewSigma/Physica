@@ -93,7 +93,7 @@ namespace Physica::Core {
     }
 
     inline typename ThreadExecutor::Range ThreadExecutor::splitJob(size_t loopCount, int core, int part) {
-        assert(0 < part && "[Error]: part must be a positive int");
+        assert(0 <= part && "[Error]: part must be a positive int");
         assert(part < core && "[Error]: More partition than core number requested");
         const size_t maxLoopPerCore = (loopCount + core - 1) / core;
         const size_t from = part * maxLoopPerCore; 

@@ -19,14 +19,6 @@ if(${RUN_RESULT_VAR} MATCHES 1)
     message(STATUS "Performing CheckRightShift --Failed")
 endif()
 message(STATUS "Performing CheckRightShift --Passed")
-#CheckWordSize
-physica_check(CheckWordSize Check/CheckWordSize.cpp)
-if(NOT ${RUN_RESULT_VAR} MATCHES 64 AND NOT ${RUN_RESULT_VAR} MATCHES 32)
-    message(STATUS "Performing CheckWordSize --Failed")
-    message(FATAL_ERROR "Unsupported word length.")
-endif()
-message(STATUS "Performing CheckWordSize --${RUN_RESULT_VAR}")
-set(PhysicaWordSize ${RUN_RESULT_VAR})
 
 if(${PHYSICA_CUDA})
     # MemoryPoolsSupported

@@ -10,7 +10,7 @@ add_library(PhysicaCore SHARED ${SOURCES_CORE})
 install(TARGETS PhysicaCore DESTINATION lib)
 install(DIRECTORY ${CMAKE_SOURCE_DIR}/include/Physica/Core DESTINATION include/Physica)
 #############################################Options##############################################
-target_link_libraries(PhysicaCore PhysicaLogger PhysicaUtils ${FFTW3_LIBRARIES} ${FFTW3f_LIBRARIES} ${HDF5_CXX_SHARED_LIBRARY} pthread)
+target_link_libraries(PhysicaCore PhysicaLogger PhysicaUtils ${FFTW3_LIBRARIES} ${HDF5_CXX_SHARED_LIBRARY} pthread)
 
 if(${PHYSICA_CUDA})
     target_link_libraries(PhysicaCore CUDA::cublas)

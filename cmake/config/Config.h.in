@@ -27,9 +27,6 @@
 #cmakedefine PhysicaEndian @PhysicaEndian@
 
 namespace Physica {
-    //Equals to sizeof(void*)
-    constexpr static unsigned int PhysicaWordSize = @PhysicaWordSize@;
-
     class CUDADevAttr {
     public:
     #ifdef PHYSICA_CUDA

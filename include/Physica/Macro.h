@@ -86,6 +86,7 @@ namespace Physica {
      */
     class Test;
 
+    constexpr static unsigned int PhysicaWordSize = sizeof(void*) * CHAR_BIT;
     constexpr size_t Dynamic = 0;
 
     enum class Side {
