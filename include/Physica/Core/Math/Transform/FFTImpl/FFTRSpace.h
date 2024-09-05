@@ -249,8 +249,6 @@ namespace Physica {
     public:
         using ScalarType = typename Traits<Derived>::ScalarType;
         constexpr static size_t SizeAtCompile = Dynamic;
-        constexpr static size_t MaxSizeAtCompile = Dynamic;
-
         constexpr static bool FastAssign = false;
         constexpr static bool FastPacket = true;
     };
@@ -263,10 +261,7 @@ namespace Physica {
         constexpr static int Option = MatrixOption::Row | MatrixOption::Vector;
         constexpr static size_t RowAtCompile = Dynamic;
         constexpr static size_t ColumnAtCompile = Dynamic;
-        constexpr static size_t MaxRowAtCompile = RowAtCompile;
-        constexpr static size_t MaxColumnAtCompile = ColumnAtCompile;
         constexpr static size_t SizeAtCompile = RowAtCompile * ColumnAtCompile;
-        constexpr static size_t MaxSizeAtCompile = MaxRowAtCompile * MaxColumnAtCompile;
     };
 
     template<class Derived>

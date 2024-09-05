@@ -22,21 +22,21 @@
 #include "MatrixImpl/RValueMatrix.h"
 
 namespace Physica::Core {
-    template<class T, size_t Order, size_t MaxOrder> class DenseSymmMatrix;
+    template<class T, size_t Order> class DenseSymmMatrix;
 
-    template<class T, size_t Order = Dynamic, size_t MaxOrder = Order>
-    class DenseHermiteMatrix : public RValueMatrix<DenseHermiteMatrix<T, Order, MaxOrder>>
-            , private HalfDenseMatrixStorage<T, Order, MaxOrder> {
-        using This = DenseHermiteMatrix<T, Order, MaxOrder>;
+    template<class T, size_t Order = Dynamic>
+    class DenseHermiteMatrix : public RValueMatrix<DenseHermiteMatrix<T, Order>>
+            , private HalfDenseMatrixStorage<T, Order> {
+        using This = DenseHermiteMatrix<T, Order>;
         using Base = RValueMatrix<This>;
-        using Storage = HalfDenseMatrixStorage<T, Order, MaxOrder>;
+        using Storage = HalfDenseMatrixStorage<T, Order>;
         using VectorStorage = typename Storage::ArrayType;
     public:
         using typename Base::ScalarType;
         using RealType = typename ScalarType::RealType;
         using ColMatrix = This;
         using RowMatrix = This;
-        using RealMatrix = DenseSymmMatrix<typename ScalarType::RealType, Order, MaxOrder>;
+        using RealMatrix = DenseSymmMatrix<typename ScalarType::RealType, Order>;
         constexpr static bool isComplex = true;
     public:
         using Storage::Storage;
@@ -91,9 +91,9 @@ namespace Physica::Core {
     /**
      * Save the upper triangle part of \param mat
      */
-    template<class T, size_t Order, size_t MaxOrder>
+    template<class T, size_t Order>
     template<class OtherMatrix>
-    DenseHermiteMatrix<T, Order, MaxOrder>::DenseHermiteMatrix(const RValueMatrix<OtherMatrix>& mat)
+    DenseHermiteMatrix<T, Order>::DenseHermiteMatrix(const RValueMatrix<OtherMatrix>& mat)
             : DenseHermiteMatrix(mat.getRow()) {
         assert(mat.getRow() == mat.getColumn());
         size_t index = 0;
@@ -105,120 +105,120 @@ namespace Physica::Core {
         }
     }
 
-    template<class T, size_t Order, size_t MaxOrder>
-    inline DenseHermiteMatrix<T, Order, MaxOrder>& DenseHermiteMatrix<T, Order, MaxOrder>::operator=(RealType value) {
+    template<class T, size_t Order>
+    inline DenseHermiteMatrix<T, Order>& DenseHermiteMatrix<T, Order>::operator=(RealType value) {
         asVector() = value;
         return *this;
     }
 
-    template<class T, size_t Order, size_t MaxOrder>
-    typename DenseHermiteMatrix<T, Order, MaxOrder>::ScalarType&
-    DenseHermiteMatrix<T, Order, MaxOrder>::operator()(size_t row, size_t col) {
+    template<class T, size_t Order>
+    typename DenseHermiteMatrix<T, Order>::ScalarType&
+    DenseHermiteMatrix<T, Order>::operator()(size_t row, size_t col) {
         assert(row <= col); // Optimize: possible to make use of this condition
         const size_t index = Storage::toIndex1D(row, col);
         return Storage::operator[](index);
     }
 
-    template<class T, size_t Order, size_t MaxOrder>
-    const typename DenseHermiteMatrix<T, Order, MaxOrder>::ScalarType&
-    DenseHermiteMatrix<T, Order, MaxOrder>::operator()(size_t row, size_t col) const {
+    template<class T, size_t Order>
+    const typename DenseHermiteMatrix<T, Order>::ScalarType&
+    DenseHermiteMatrix<T, Order>::operator()(size_t row, size_t col) const {
         const size_t index = Storage::toIndex1D(row, col);
         return Storage::operator[](index);
     }
 
-    template<class T, size_t Order, size_t MaxOrder>
+    template<class T, size_t Order>
     template<class VectorType>
-    inline MatrixVectorProduct<DenseHermiteMatrix<T, Order, MaxOrder>, VectorType>
-    DenseHermiteMatrix<T, Order, MaxOrder>::operator*(const RValueVector<VectorType>& vec) const noexcept {
+    inline MatrixVectorProduct<DenseHermiteMatrix<T, Order>, VectorType>
+    DenseHermiteMatrix<T, Order>::operator*(const RValueVector<VectorType>& vec) const noexcept {
         return static_cast<const Base&>(*this) * vec;
     }
 
-    template<class T, size_t Order, size_t MaxOrder>
-    typename DenseHermiteMatrix<T, Order, MaxOrder>::ScalarType
-    DenseHermiteMatrix<T, Order, MaxOrder>::calc(size_t row, size_t col) const {
+    template<class T, size_t Order>
+    typename DenseHermiteMatrix<T, Order>::ScalarType
+    DenseHermiteMatrix<T, Order>::calc(size_t row, size_t col) const {
         const size_t index = Storage::toIndex1D(row, col);
         return col >= row ? Storage::operator[](index) : Storage::operator[](index).conjugate();
     }
 
-    template<class T, size_t Order, size_t MaxOrder>
-    void DenseHermiteMatrix<T, Order, MaxOrder>::swap(DenseHermiteMatrix& __restrict m) noexcept {
+    template<class T, size_t Order>
+    void DenseHermiteMatrix<T, Order>::swap(DenseHermiteMatrix& __restrict m) noexcept {
         assert(this != &m && "[Error]: Self swap is likely a bug");
         Storage::swap(m);
     }
 
-    template<class T, size_t Order, size_t MaxOrder>
+    template<class T, size_t Order>
     template<class RandomGenerator>
-    void DenseHermiteMatrix<T, Order, MaxOrder>::random_uniform(RandomGenerator& gen) {
+    void DenseHermiteMatrix<T, Order>::random_uniform(RandomGenerator& gen) {
         Storage::random_uniform(gen);
         for (size_t i = 0; i < getRow(); ++i)
             this->operator()(i, i).getImag() = RealType(0);
     }
 
-    template<class T, size_t Order, size_t MaxOrder>
+    template<class T, size_t Order>
     template<class RandomGenerator>
-    void DenseHermiteMatrix<T, Order, MaxOrder>::random_normal(RandomGenerator& gen) {
+    void DenseHermiteMatrix<T, Order>::random_normal(RandomGenerator& gen) {
         Storage::random_normal(gen);
         for (size_t i = 0; i < getRow(); ++i)
             this->operator()(i, i).getImag() = RealType(0);
     }
 
-    template<class T, size_t Order, size_t MaxOrder>
+    template<class T, size_t Order>
     template<class Distribution, class RandomGenerator>
-    void DenseHermiteMatrix<T, Order, MaxOrder>::random_any(Distribution& dist, RandomGenerator& gen) {
+    void DenseHermiteMatrix<T, Order>::random_any(Distribution& dist, RandomGenerator& gen) {
         Storage::random_any(dist, gen);
         for (size_t i = 0; i < getRow(); ++i)
             this->operator()(i, i).getImag() = RealType(0);
     }
 
-    template<class T, size_t Order, size_t MaxOrder>
-    DenseHermiteMatrix<T, Order, MaxOrder> DenseHermiteMatrix<T, Order, MaxOrder>::unitMatrix(size_t order) {
-        DenseHermiteMatrix<T, Order, MaxOrder> result(order);
+    template<class T, size_t Order>
+    DenseHermiteMatrix<T, Order> DenseHermiteMatrix<T, Order>::unitMatrix(size_t order) {
+        DenseHermiteMatrix<T, Order> result(order);
         result.toUnitMatrix();
         return result;
     }
 
-    template<class T, size_t Order, size_t MaxOrder>
+    template<class T, size_t Order>
     template<class RandomGenerator>
-    [[nodiscard]] inline DenseHermiteMatrix<T, Order, MaxOrder>
-    DenseHermiteMatrix<T, Order, MaxOrder>::random_uniform(size_t order, RandomGenerator& gen) {
+    [[nodiscard]] inline DenseHermiteMatrix<T, Order>
+    DenseHermiteMatrix<T, Order>::random_uniform(size_t order, RandomGenerator& gen) {
         This result(order);
         result.random_uniform(gen);
         return result;
     }
 
-    template<class T, size_t Order, size_t MaxOrder>
+    template<class T, size_t Order>
     template<class RandomGenerator>
-    [[nodiscard]] inline DenseHermiteMatrix<T, Order, MaxOrder>
-    DenseHermiteMatrix<T, Order, MaxOrder>::random_normal(size_t order, RandomGenerator& gen) {
+    [[nodiscard]] inline DenseHermiteMatrix<T, Order>
+    DenseHermiteMatrix<T, Order>::random_normal(size_t order, RandomGenerator& gen) {
         This result(order);
         result.random_normal(gen);
         return result;
     }
 
-    template<class T, size_t Order, size_t MaxOrder>
+    template<class T, size_t Order>
     template<class Distribution, class RandomGenerator>
-    [[nodiscard]] inline DenseHermiteMatrix<T, Order, MaxOrder>
-    DenseHermiteMatrix<T, Order, MaxOrder>::random_any(size_t order, Distribution& dist, RandomGenerator& gen) {
+    [[nodiscard]] inline DenseHermiteMatrix<T, Order>
+    DenseHermiteMatrix<T, Order>::random_any(size_t order, Distribution& dist, RandomGenerator& gen) {
         This result(order);
         result.random_any(dist, gen);
         return result;
     }
 
-    template<class T, size_t Order, size_t MaxOrder>
-    inline const H5DataSet<1> DenseHermiteMatrix<T, Order, MaxOrder>::read(
+    template<class T, size_t Order>
+    inline const H5DataSet<1> DenseHermiteMatrix<T, Order>::read(
             const H5Location& loc, const char* name, const H5::DSetMemXferPropList& xfer_plist) {
         return asVector().read(loc, name, xfer_plist);
     }
 
-    template<class T, size_t Order, size_t MaxOrder>
-    inline H5DataSet<1> DenseHermiteMatrix<T, Order, MaxOrder>::write(
+    template<class T, size_t Order>
+    inline H5DataSet<1> DenseHermiteMatrix<T, Order>::write(
             H5Location& loc, const char* name, const H5::DSetMemXferPropList& xfer_plist) const {
         return asVector().write(loc, name, xfer_plist);
     }
 
-    template<class T, size_t Order, size_t MaxOrder>
+    template<class T, size_t Order>
     template<class MatrixType>
-    bool DenseHermiteMatrix<T, Order, MaxOrder>::isHermiteMatrix(const RValueMatrix<MatrixType>& mat, double precision) {
+    bool DenseHermiteMatrix<T, Order>::isHermiteMatrix(const RValueMatrix<MatrixType>& mat, double precision) {
         if (mat.getRow() != mat.getColumn())
             return false;
 
@@ -233,26 +233,23 @@ namespace Physica::Core {
 namespace Physica {
     using namespace Core;
 
-    template<class T, size_t Order, size_t MaxOrder>
-    class Traits<DenseHermiteMatrix<T, Order, MaxOrder>> {
+    template<class T, size_t Order>
+    class Traits<DenseHermiteMatrix<T, Order>> {
         static_assert(T::isComplex, "[Error]: Using a symmetric matrix is preferred for real numbers");
     public:
         using ScalarType = T;
         constexpr static int Option = MatrixOption::AnyMajor | MatrixOption::Element;
         constexpr static size_t RowAtCompile = Order;
         constexpr static size_t ColumnAtCompile = Order;
-        constexpr static size_t MaxRowAtCompile = MaxOrder;
-        constexpr static size_t MaxColumnAtCompile = MaxOrder;
         constexpr static size_t SizeAtCompile = RowAtCompile * ColumnAtCompile;
-        constexpr static size_t MaxSizeAtCompile = MaxRowAtCompile * MaxColumnAtCompile;
     };
 }
 
 namespace std {
-    template<class T, size_t Order, size_t MaxOrder>
+    template<class T, size_t Order>
     inline void swap(
-            Physica::Core::DenseHermiteMatrix<T, Order, MaxOrder>& __restrict m1,
-            Physica::Core::DenseHermiteMatrix<T, Order, MaxOrder>& __restrict m2) noexcept {
+            Physica::Core::DenseHermiteMatrix<T, Order>& __restrict m1,
+            Physica::Core::DenseHermiteMatrix<T, Order>& __restrict m2) noexcept {
         m1.swap(m2);
     }
 }

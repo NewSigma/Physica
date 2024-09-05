@@ -34,7 +34,7 @@ namespace Physica::Core {
     public:
         using RingPolymerType = typename HardCore<ScalarType, IsFixedBoundary, NumReplica, Integrator>::RingPolymerType;
         using DeviceVector = device_obj<Vector<ScalarType>>;
-        using PageLockedVector = Vector<ScalarType, Dynamic, Dynamic, Utils::PageLockedAllocator<ScalarType>>;
+        using PageLockedVector = Vector<ScalarType, Dynamic, Utils::PageLockedAllocator<ScalarType>>;
     private:
         ScalarType latticeSize;
         ScalarType collideFactor;

@@ -66,6 +66,5 @@ namespace Physica {
         using ScalarType = typename Core::Internal::BinaryScalarOpReturnType<typename AnyVector1::ScalarType,
                                                                              typename AnyVector2::ScalarType>::Type;
         constexpr static size_t SizeAtCompile = 3;
-        constexpr static size_t MaxSizeAtCompile = SizeAtCompile;
     };
 }

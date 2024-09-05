@@ -50,9 +50,6 @@ namespace Physica {
         constexpr static int Option = MatrixType::Option;
         constexpr static size_t RowAtCompile = MatrixType::RowAtCompile;
         constexpr static size_t ColumnAtCompile = MatrixType::ColumnAtCompile;
-        constexpr static size_t MaxRowAtCompile = MatrixType::MaxRowAtCompile;
-        constexpr static size_t MaxColumnAtCompile = MatrixType::MaxColumnAtCompile;
         constexpr static size_t SizeAtCompile = MatrixType::SizeAtCompile;
-        constexpr static size_t MaxSizeAtCompile = MatrixType::MaxSizeAtCompile;
     };
 }

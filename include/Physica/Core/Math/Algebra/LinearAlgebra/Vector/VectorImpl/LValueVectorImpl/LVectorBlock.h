@@ -84,8 +84,6 @@ namespace Physica {
     public:
         using ScalarType = typename VectorType::ScalarType;
         constexpr static size_t SizeAtCompile = Dynamic;
-        constexpr static size_t MaxSizeAtCompile = Dynamic;
-
         constexpr static bool FastAssign = false;
         constexpr static bool FastPacket = false;
     };

@@ -18,24 +18,24 @@
  */
 #pragma once
 
-#include <iosfwd>
 #include <Physica/Core/MultiPrecision/Scalar.h>
 #include <Physica/Utils/Container/Array/Array.h>
 #include <Physica/Core/Math/Algebra/LinearAlgebra/Matrix/MatrixOption.h>
 #include "VectorImpl/ContinuousVector.h"
 
 namespace Physica::Core {
-    template<class T, size_t Length = Dynamic, size_t MaxLength = Length, class Allocator = Utils::HostAllocator<T>>
-    class Vector : public ContinuousVector<Vector<T, Length, MaxLength, Allocator>>, public Utils::Array<T, Length, MaxLength, Allocator> {
-        using This = Vector<T, Length, MaxLength, Allocator>;
+    template<class T, size_t Length = Dynamic, class Allocator = Utils::HostAllocator<T>>
+    class Vector : public ContinuousVector<Vector<T, Length, Allocator>>, public Utils::Array<T, Length, Allocator> {
+        using This = Vector<T, Length, Allocator>;
     public:
         using Base = ContinuousVector<This>;
-        using Storage = Utils::Array<T, Length, MaxLength, Allocator>;
+        using Storage = Utils::Array<T, Length, Allocator>;
         using device_obj_type = device_obj<This>;
         using typename Base::ScalarType;
         using typename Base::PlainScalar;
         using typename Base::ColMatrix;
         using typename Base::RowMatrix;
+        using Base::SizeAtCompile;
         using Base::isReverseDiff;
     public:
         Vector() = default;
@@ -80,27 +80,27 @@ namespace Physica::Core {
         [[nodiscard]] static Vector random_any(size_t len, Distribution& dist, RandomGenerator& gen);
         [[nodiscard]] static Vector linspace(T from, T to, size_t count);
     };
-
-    template<class T, size_t Length, size_t MaxLength>
-    inline void swap(Vector<T, Length, MaxLength>& __restrict v1, Vector<T, Length, MaxLength>& __restrict v2) noexcept {
-        v1.swap(v2);
-    }
 }
 
 namespace Physica {
     using namespace Core;
 
-    template<class T, size_t Length, size_t MaxLength, class Allocator>
-    class Traits<Vector<T, Length, MaxLength, Allocator>> {
-        static_assert(Length == Dynamic || Length == MaxLength, "MaxLength of fixed vector must equals to its length.");
+    template<class T, size_t Length, class Allocator>
+    class Traits<Vector<T, Length, Allocator>> {
     public:
         using ScalarType = T;
         constexpr static size_t SizeAtCompile = Length;
-        constexpr static size_t MaxSizeAtCompile = MaxLength;
 
         constexpr static bool FastAssign = false;
         constexpr static bool FastPacket = true;
     };
+}
+
+namespace std {
+    template<class T, size_t Length>
+    inline void swap(Physica::Core::Vector<T, Length>& __restrict v1, Physica::Core::Vector<T, Length>& __restrict v2) noexcept {
+        v1.swap(v2);
+    }
 }
 
 #include "VectorImpl/VectorImpl.h"

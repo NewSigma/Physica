@@ -115,8 +115,7 @@ namespace Physica::Utils {
         using ConstIterator = ContainerIterator<const ValueType, ArrayBase<Derived, Allocator>>;
         using ReverseIterator = ReverseContainerIterator<ValueType, ArrayBase<Derived, Allocator>>;
         using ConstReverseIterator = ReverseContainerIterator<const ValueType, ArrayBase<Derived, Allocator>>;
-        constexpr static size_t ArrayLength = Traits<Derived>::ArrayLength;
-        constexpr static size_t ArrayCapacity = Traits<Derived>::ArrayCapacity;
+        constexpr static size_t SizeAtCompile = Traits<Derived>::SizeAtCompile;
 
         static_assert(std::is_same<ValueType, typename Traits<Derived>::ValueType>::value, "[Error]: Declaration is not self consistent");
     public:

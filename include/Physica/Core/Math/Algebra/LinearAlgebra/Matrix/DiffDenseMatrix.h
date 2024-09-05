@@ -25,11 +25,11 @@ namespace Physica::Core {
     template<class PlainScalar, int Option, unsigned int Order>
     class Differentiable<DenseMatrix<PlainScalar, Option>, DiffMode::Reverse, Order>
             : public RValueMatrix<Differentiable<DenseMatrix<PlainScalar, Option>, DiffMode::Reverse, Order>>
-            , public DenseMatrixDim<Differentiable<DenseMatrix<PlainScalar, Option>, DiffMode::Reverse, Order>, Dynamic, Dynamic, Dynamic, Dynamic> {
+            , public DenseMatrixDim<Differentiable<DenseMatrix<PlainScalar, Option>, DiffMode::Reverse, Order>, Dynamic, Dynamic> {
         using PlainMatrix = DenseMatrix<PlainScalar, Option>;
         using This = Differentiable<PlainMatrix, DiffMode::Reverse, Order>;
         using Base = RValueMatrix<This>;
-        using Dim = DenseMatrixDim<This, Dynamic, Dynamic, Dynamic, Dynamic>;
+        using Dim = DenseMatrixDim<This, Dynamic, Dynamic>;
         using TracerType = DiffTracer<PlainScalar, Order>;
         using SegmentType = typename TracerType::SegmentType;
     public:

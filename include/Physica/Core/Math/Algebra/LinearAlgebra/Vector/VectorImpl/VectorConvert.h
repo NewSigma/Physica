@@ -124,8 +124,6 @@ namespace Physica {
     public:
         using ScalarType = typename VectorType::ScalarType::RealType;
         constexpr static size_t SizeAtCompile = VectorType::SizeAtCompile;
-        constexpr static size_t MaxSizeAtCompile = VectorType::MaxSizeAtCompile;
-
         constexpr static bool FastAssign = false;
         constexpr static bool FastPacket = Traits<VectorType>::FastPacket;
     };
@@ -146,8 +144,6 @@ namespace Physica {
     public:
         using ScalarType = typename T::PlainType;
         constexpr static size_t SizeAtCompile = VectorType::SizeAtCompile;
-        constexpr static size_t MaxSizeAtCompile = VectorType::MaxSizeAtCompile;
-
         constexpr static bool FastAssign = false;
         constexpr static bool FastPacket = false;
     };

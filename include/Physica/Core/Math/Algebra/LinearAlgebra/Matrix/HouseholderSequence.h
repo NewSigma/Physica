@@ -101,9 +101,6 @@ namespace Physica {
         using ScalarType = typename MatrixType::ScalarType;
         constexpr static size_t RowAtCompile = Dynamic;
         constexpr static size_t ColumnAtCompile = Dynamic;
-        constexpr static size_t MaxRowAtCompile = MatrixType::MaxRowAtCompile;
-        constexpr static size_t MaxColumnAtCompile = MaxRowAtCompile;
         constexpr static size_t SizeAtCompile = Dynamic;
-        constexpr static size_t MaxSizeAtCompile = MaxRowAtCompile * MaxColumnAtCompile;
     };
 }

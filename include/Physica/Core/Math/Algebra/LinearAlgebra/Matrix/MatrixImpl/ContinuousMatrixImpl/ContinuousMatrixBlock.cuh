@@ -334,7 +334,6 @@ namespace Physica {
         using Base = Core::device_obj<typename std::conditional<isRowMatrix || isRowVector, ContinuousVector<VectorType>, LValueVector<VectorType>>::type>;
         using ScalarType = typename MatrixType::ScalarType;
         constexpr static size_t SizeAtCompile = Length;
-        constexpr static size_t MaxSizeAtCompile = Length;
     };
 
     template<class MatrixType, size_t Length>
@@ -347,7 +346,6 @@ namespace Physica {
         using Base = Core::device_obj<typename std::conditional<isColumnMatrix || isColumnVector, ContinuousVector<VectorType>, LValueVector<VectorType>>::type>;
         using ScalarType = typename MatrixType::ScalarType;
         constexpr static size_t SizeAtCompile = Length;
-        constexpr static size_t MaxSizeAtCompile = Length;
     };
 
     template<class MatrixType, size_t Row, size_t Column>

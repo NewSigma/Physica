@@ -22,18 +22,18 @@
 #include "DenseMatrixImpl/HalfDenseMatrixStorage.h"
 
 namespace Physica::Core {
-    template<class T, size_t Order = Dynamic, size_t MaxOrder = Order>
-    class DenseSymmMatrix : public LValueMatrix<DenseSymmMatrix<T, Order, MaxOrder>>
-                          , private HalfDenseMatrixStorage<T, Order, MaxOrder> {
-        using This = DenseSymmMatrix<T, Order, MaxOrder>;
+    template<class T, size_t Order = Dynamic>
+    class DenseSymmMatrix : public LValueMatrix<DenseSymmMatrix<T, Order>>
+                          , private HalfDenseMatrixStorage<T, Order> {
+        using This = DenseSymmMatrix<T, Order>;
         using Base = LValueMatrix<This>;
-        using Storage = HalfDenseMatrixStorage<T, Order, MaxOrder>;
+        using Storage = HalfDenseMatrixStorage<T, Order>;
         using VectorStorage = typename Storage::ArrayType;
     public:
         using typename Base::ScalarType;
         using ColMatrix = This;
         using RowMatrix = This;
-        using RealMatrix = DenseSymmMatrix<typename ScalarType::RealType, Order, MaxOrder>;
+        using RealMatrix = DenseSymmMatrix<typename ScalarType::RealType, Order>;
     public:
         template<class OtherMatrix>
         DenseSymmMatrix(const RValueMatrix<OtherMatrix>& mat);
@@ -89,9 +89,9 @@ namespace Physica::Core {
     /**
      * Assuming mat is a symmetric matrix, if it is not the case, only half of the elements is saved correctly
      */
-    template<class T, size_t Order, size_t MaxOrder>
+    template<class T, size_t Order>
     template<class OtherMatrix>
-    DenseSymmMatrix<T, Order, MaxOrder>::DenseSymmMatrix(const RValueMatrix<OtherMatrix>& mat)
+    DenseSymmMatrix<T, Order>::DenseSymmMatrix(const RValueMatrix<OtherMatrix>& mat)
             : DenseSymmMatrix(mat.getRow()) {
         assert(mat.getRow() == mat.getColumn());
         for (size_t i = 0; i < mat.getRow(); ++i)
@@ -99,67 +99,67 @@ namespace Physica::Core {
                 Base::operator()(i, j) = mat.calc(i, j);
     }
 
-    template<class T, size_t Order, size_t MaxOrder>
-    inline DenseSymmMatrix<T, Order, MaxOrder>& DenseSymmMatrix<T, Order, MaxOrder>::operator=(const ScalarType& value) {
+    template<class T, size_t Order>
+    inline DenseSymmMatrix<T, Order>& DenseSymmMatrix<T, Order>::operator=(const ScalarType& value) {
         asVector() = value;
         return *this;
     }
 
-    template<class T, size_t Order, size_t MaxOrder>
+    template<class T, size_t Order>
     template<class VectorType>
-    inline MatrixVectorProduct<DenseSymmMatrix<T, Order, MaxOrder>, VectorType>
-    DenseSymmMatrix<T, Order, MaxOrder>::operator*(const RValueVector<VectorType>& vec) const noexcept {
+    inline MatrixVectorProduct<DenseSymmMatrix<T, Order>, VectorType>
+    DenseSymmMatrix<T, Order>::operator*(const RValueVector<VectorType>& vec) const noexcept {
         return static_cast<const Base&>(*this) * vec;
     }
 
-    template<class T, size_t Order, size_t MaxOrder>
-    void DenseSymmMatrix<T, Order, MaxOrder>::swap(This& __restrict m) noexcept {
+    template<class T, size_t Order>
+    void DenseSymmMatrix<T, Order>::swap(This& __restrict m) noexcept {
         assert(this != &m && "[Error]: Self swap is likely a bug");
         Storage::swap(m);
     }
 
-    template<class T, size_t Order, size_t MaxOrder>
-    DenseSymmMatrix<T, Order, MaxOrder> DenseSymmMatrix<T, Order, MaxOrder>::unitMatrix(size_t order) {
-        DenseSymmMatrix<T, Order, MaxOrder> result(order);
+    template<class T, size_t Order>
+    DenseSymmMatrix<T, Order> DenseSymmMatrix<T, Order>::unitMatrix(size_t order) {
+        DenseSymmMatrix<T, Order> result(order);
         result.toUnitMatrix();
         return result;
     }
 
-    template<class T, size_t Order, size_t MaxOrder>
+    template<class T, size_t Order>
     template<class RandomGenerator>
-    [[nodiscard]] inline DenseSymmMatrix<T, Order, MaxOrder>
-    DenseSymmMatrix<T, Order, MaxOrder>::random_uniform(size_t order, RandomGenerator& gen) {
+    [[nodiscard]] inline DenseSymmMatrix<T, Order>
+    DenseSymmMatrix<T, Order>::random_uniform(size_t order, RandomGenerator& gen) {
         This result(order);
         result.random_uniform(gen);
         return result;
     }
 
-    template<class T, size_t Order, size_t MaxOrder>
+    template<class T, size_t Order>
     template<class RandomGenerator>
-    [[nodiscard]] inline DenseSymmMatrix<T, Order, MaxOrder>
-    DenseSymmMatrix<T, Order, MaxOrder>::random_normal(size_t order, RandomGenerator& gen) {
+    [[nodiscard]] inline DenseSymmMatrix<T, Order>
+    DenseSymmMatrix<T, Order>::random_normal(size_t order, RandomGenerator& gen) {
         This result(order);
         result.random_normal(gen);
         return result;
     }
 
-    template<class T, size_t Order, size_t MaxOrder>
+    template<class T, size_t Order>
     template<class Distribution, class RandomGenerator>
-    [[nodiscard]] inline DenseSymmMatrix<T, Order, MaxOrder>
-    DenseSymmMatrix<T, Order, MaxOrder>::random_any(size_t order, Distribution& dist, RandomGenerator& gen) {
+    [[nodiscard]] inline DenseSymmMatrix<T, Order>
+    DenseSymmMatrix<T, Order>::random_any(size_t order, Distribution& dist, RandomGenerator& gen) {
         This result(order);
         result.random_any(dist, gen);
         return result;
     }
 
-    template<class T, size_t Order, size_t MaxOrder>
-    inline const H5DataSet<1> DenseSymmMatrix<T, Order, MaxOrder>::read(
+    template<class T, size_t Order>
+    inline const H5DataSet<1> DenseSymmMatrix<T, Order>::read(
             const H5Location& loc, const char* name, const H5::DSetMemXferPropList& xfer_plist) {
         return asVector().read(loc, name, xfer_plist);
     }
 
-    template<class T, size_t Order, size_t MaxOrder>
-    inline H5DataSet<1> DenseSymmMatrix<T, Order, MaxOrder>::write(
+    template<class T, size_t Order>
+    inline H5DataSet<1> DenseSymmMatrix<T, Order>::write(
             H5Location& loc, const char* name, const H5::DSetMemXferPropList& xfer_plist) const {
         return asVector().write(loc, name, xfer_plist);
     }
@@ -168,24 +168,21 @@ namespace Physica::Core {
 namespace Physica {
     using namespace Core;
 
-    template<class T, size_t Order, size_t MaxOrder>
-    class Traits<DenseSymmMatrix<T, Order, MaxOrder>> {
+    template<class T, size_t Order>
+    class Traits<DenseSymmMatrix<T, Order>> {
     public:
         using ScalarType = T;
         constexpr static int Option = MatrixOption::AnyMajor | MatrixOption::Element;
         constexpr static size_t RowAtCompile = Order;
         constexpr static size_t ColumnAtCompile = Order;
-        constexpr static size_t MaxRowAtCompile = MaxOrder;
-        constexpr static size_t MaxColumnAtCompile = MaxOrder;
         constexpr static size_t SizeAtCompile = RowAtCompile * ColumnAtCompile;
-        constexpr static size_t MaxSizeAtCompile = MaxRowAtCompile * MaxColumnAtCompile;
     };
 }
 
 namespace std {
-    template<class T, size_t Order, size_t MaxOrder>
-    inline void swap(Physica::Core::DenseSymmMatrix<T, Order, MaxOrder>& __restrict m1,
-                     Physica::Core::DenseSymmMatrix<T, Order, MaxOrder>& __restrict m2) noexcept {
+    template<class T, size_t Order>
+    inline void swap(Physica::Core::DenseSymmMatrix<T, Order>& __restrict m1,
+                     Physica::Core::DenseSymmMatrix<T, Order>& __restrict m2) noexcept {
         m1.swap(m2);
     }
 }

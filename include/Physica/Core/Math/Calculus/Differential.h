@@ -66,7 +66,7 @@ namespace Physica::Core {
         constexpr static double Tolerance = 2;
 
         assert(step.isPositive());
-        DenseSymmMatrix<ScalarType, TableSize, TableSize> table(TableSize);
+        DenseSymmMatrix<ScalarType, TableSize> table(TableSize);
         table(0, 0) = doublePoint(func, x, step);
         ScalarType step_now = step;
         ScalarType error = std::numeric_limits<ScalarType>::max();

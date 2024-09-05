@@ -49,10 +49,7 @@ namespace Physica::Core {
         constexpr static int Option = Traits<Derived>::Option;
         constexpr static size_t RowAtCompile = Traits<Derived>::RowAtCompile;
         constexpr static size_t ColumnAtCompile = Traits<Derived>::ColumnAtCompile;
-        constexpr static size_t MaxRowAtCompile = Traits<Derived>::MaxRowAtCompile;
-        constexpr static size_t MaxColumnAtCompile = Traits<Derived>::MaxColumnAtCompile;
         constexpr static size_t SizeAtCompile = Traits<Derived>::SizeAtCompile;
-        constexpr static size_t MaxSizeAtCompile = Traits<Derived>::MaxSizeAtCompile;
         constexpr static bool isReverseDiff = ScalarType::isReverseDiff;
         constexpr static bool isComplex = ScalarType::isComplex;
         constexpr static bool isColumnMatrix = MatrixOption::isColumnMatrix<Derived>();

@@ -140,6 +140,5 @@ namespace Physica {
     public:
         using ScalarType = T;
         constexpr static size_t SizeAtCompile = Dynamic;
-        constexpr static size_t MaxSizeAtCompile = Dynamic;
     };
 }

@@ -23,11 +23,11 @@
 #include <Physica/Core/Exception/CUDA/CUDA.cuh>
 
 namespace Physica::Utils {
-    template<class T, size_t Length, size_t Capacity, class Allocator>
-    class device_obj<Array<T, Length, Capacity, Allocator>> : public Array<T, Length, Capacity, Allocator> {
+    template<class T, size_t Length, class Allocator>
+    class device_obj<Array<T, Length, Allocator>> : public Array<T, Length, Allocator> {
         static_assert(Length != Dynamic, "[Error]: Dynamic length is not implemented");
         static_assert(std::is_trivial<T>::value, "[Error]: Fixed size array with non-trivial element is not supported, it is seldom used on cuda");
-        using host_obj = Array<T, Length, Capacity, Allocator>;
+        using host_obj = Array<T, Length, Allocator>;
         using Base = host_obj;
     public:
         using host_obj::host_obj;
@@ -45,31 +45,30 @@ namespace Physica::Utils {
         __host__ __device__ void swap(device_obj& __restrict obj) noexcept { host_obj::swap(obj); }
     };
 
-    template<class T, size_t Length, size_t Capacity, class Allocator>
-    inline auto Array<T, Length, Capacity, Allocator>::toDevice() const {
+    template<class T, size_t Length, class Allocator>
+    inline auto Array<T, Length, Allocator>::toDevice() const {
         return device_obj<This>(*this);
     }
 
-    template<class T, size_t Length, size_t Capacity, class Allocator>
-    inline auto Array<T, Length, Capacity, Allocator>::toDeviceAsync() const {
+    template<class T, size_t Length, class Allocator>
+    inline auto Array<T, Length, Allocator>::toDeviceAsync() const {
         return toDevice();
     }
 
-    template<class T, size_t Length, size_t Capacity, class Allocator>
-    inline void Array<T, Length, Capacity, Allocator>::toDevice(device_obj<This>& obj) const {
+    template<class T, size_t Length, class Allocator>
+    inline void Array<T, Length, Allocator>::toDevice(device_obj<This>& obj) const {
         obj = *this;
     }
 
-    template<class T, size_t Length, size_t Capacity, class Allocator>
-    inline void Array<T, Length, Capacity, Allocator>::toDeviceAsync(device_obj<This>& obj) const {
+    template<class T, size_t Length, class Allocator>
+    inline void Array<T, Length, Allocator>::toDeviceAsync(device_obj<This>& obj) const {
         toDevice(obj);
     }
 
     template<class T, class Allocator>
-    class device_obj<Array<T, Dynamic, Dynamic, Allocator>>
-            : public ArrayBase<device_obj<Array<T, Dynamic, Dynamic, Allocator>>, DeviceAllocator<T>> {
+    class device_obj<Array<T, Dynamic, Allocator>> : public ArrayBase<device_obj<Array<T, Dynamic, Allocator>>, DeviceAllocator<T>> {
         static_assert(!is_device_obj<T>::value, "[Error]: Nested device_obj is not allowed");
-        using host_obj = Array<T, Dynamic, Dynamic, Allocator>;
+        using host_obj = Array<T, Dynamic, Allocator>;
         using This = device_obj<host_obj>;
         using Base = ArrayBase<device_obj<host_obj>, DeviceAllocator<T>>;
     public:
@@ -87,7 +86,7 @@ namespace Physica::Utils {
         using typename Base::ConstReverseIterator;
         using PlainElemType = typename std::conditional<isTrivial, ValueType, Physica::PlainStruct<ValueType>>::type;
         using PlainElemAllocator = typename ChangeAllocatorValueType<Allocator, PlainElemType>::Type;
-        using PlainHostObj = Array<PlainElemType, Dynamic, Dynamic, PlainElemAllocator>;
+        using PlainHostObj = Array<PlainElemType, Dynamic, PlainElemAllocator>;
     private:
         pointer d_data;
         size_t length;
@@ -147,15 +146,15 @@ namespace Physica::Utils {
     };
 
     template<class T, class Allocator>
-    device_obj<Array<T, Dynamic, Dynamic, Allocator>>::device_obj() : d_data(nullptr), length(0), capacity(0) {}
+    device_obj<Array<T, Dynamic, Allocator>>::device_obj() : d_data(nullptr), length(0), capacity(0) {}
 
     template<class T, class Allocator>
     template<class... Args>
-    device_obj<Array<T, Dynamic, Dynamic, Allocator>>::device_obj(size_t length_, Args&&... args)
+    device_obj<Array<T, Dynamic, Allocator>>::device_obj(size_t length_, Args&&... args)
             : device_obj(host_obj(length_, std::forward<Args>(args)...).toDevice()) {}
 
     template<class T, class Allocator>
-    device_obj<Array<T, Dynamic, Dynamic, Allocator>>::device_obj(const host_obj& array)
+    device_obj<Array<T, Dynamic, Allocator>>::device_obj(const host_obj& array)
             : length(array.getLength()), capacity(array.getCapacity()) {
         d_data = alloc.allocate(capacity);
         array.toDevice(*this);
@@ -164,17 +163,17 @@ namespace Physica::Utils {
      * Do not launch kernel before copy is finished, so memcpy is async.
      */
     template<class T, class Allocator>
-    device_obj<Array<T, Dynamic, Dynamic, Allocator>>::device_obj(const device_obj<Array<T, Dynamic, Dynamic, Allocator>>& obj)
+    device_obj<Array<T, Dynamic, Allocator>>::device_obj(const device_obj<Array<T, Dynamic, Allocator>>& obj)
             : length(obj.getLength()), capacity(obj.getCapacity()), alloc(obj.alloc) {
         d_data = alloc.allocate(capacity);
         auto& ctx = Core::CUDAContext::getInstance();
         if constexpr (isTrivial)
             cudaMemcpyAsync(d_data, obj.d_data, length * sizeof(T), cudaMemcpyKind::cudaMemcpyDeviceToDevice, ctx);
         else {
-            Array<ValueType, Dynamic, Dynamic> buffer(length);
+            Array<ValueType, Dynamic> buffer(length);
             cudaMemcpyAsync(buffer.data(), obj.d_data, length * sizeof(ValueType), cudaMemcpyKind::cudaMemcpyDeviceToHost, ctx);
             ctx.wait();
-            Array<ValueType, Dynamic, Dynamic> buffer1 = buffer;
+            Array<ValueType, Dynamic> buffer1 = buffer;
             cudaMemcpyAsync(d_data, buffer1.data(), length * sizeof(ValueType), cudaMemcpyKind::cudaMemcpyHostToDevice, ctx);
             buffer.get_allocator().deallocate(buffer.release(), length);
             ctx.wait();
@@ -183,16 +182,16 @@ namespace Physica::Utils {
     }
 
     template<class T, class Allocator>
-    device_obj<Array<T, Dynamic, Dynamic, Allocator>>::device_obj(device_obj<Array<T, Dynamic, Dynamic, Allocator>>&& obj) noexcept
+    device_obj<Array<T, Dynamic, Allocator>>::device_obj(device_obj<Array<T, Dynamic, Allocator>>&& obj) noexcept
             : d_data(obj.d_data), length(obj.length), capacity(obj.capacity), alloc(std::move(obj.alloc)) {
         obj.d_data = nullptr;
         obj.length = obj.capacity = 0;
     }
 
     template<class T, class Allocator>
-    device_obj<Array<T, Dynamic, Dynamic, Allocator>>::~device_obj() {
+    device_obj<Array<T, Dynamic, Allocator>>::~device_obj() {
         if constexpr (!isTrivial) {
-            Array<ValueType, Dynamic, Dynamic> buffer(length);
+            Array<ValueType, Dynamic> buffer(length);
             auto& ctx = Core::CUDAContext::getInstance();
             cudaMemcpyAsync(buffer.data(), d_data, length * sizeof(ValueType), cudaMemcpyKind::cudaMemcpyDeviceToHost, ctx);
             ctx.wait();
@@ -203,8 +202,8 @@ namespace Physica::Utils {
     }
 
     template<class T, class Allocator>
-    device_obj<Array<T, Dynamic, Dynamic, Allocator>>&
-    device_obj<Array<T, Dynamic, Dynamic, Allocator>>::operator=(device_obj<Array<T, Dynamic, Dynamic, Allocator>> obj) noexcept {
+    device_obj<Array<T, Dynamic, Allocator>>&
+    device_obj<Array<T, Dynamic, Allocator>>::operator=(device_obj<Array<T, Dynamic, Allocator>> obj) noexcept {
         swap(obj);
         return *this;
     }
@@ -212,8 +211,8 @@ namespace Physica::Utils {
      * Synchronization is expected before this, copy is async to task stream
      */
     template<class T, class Allocator>
-    typename device_obj<Array<T, Dynamic, Dynamic, Allocator>>::PlainHostObj
-    device_obj<Array<T, Dynamic, Dynamic, Allocator>>::toPlainHost() const {
+    typename device_obj<Array<T, Dynamic, Allocator>>::PlainHostObj
+    device_obj<Array<T, Dynamic, Allocator>>::toPlainHost() const {
         PlainHostObj result(getLength());
         check(cudaMemcpy(result.data(), (void*)d_data, getLength() * sizeof(ValueType), cudaMemcpyKind::cudaMemcpyDeviceToHost));
         return result;
@@ -222,7 +221,7 @@ namespace Physica::Utils {
      * Synchronization is expected before this, copy is async to task stream
      */
     template<class T, class Allocator>
-    Array<T, Dynamic, Dynamic, Allocator> device_obj<Array<T, Dynamic, Dynamic, Allocator>>::toHost() const {
+    Array<T, Dynamic, Allocator> device_obj<Array<T, Dynamic, Allocator>>::toHost() const {
         host_obj result(length);
         if constexpr (isTrivial)
             check(cudaMemcpy(result.data(), d_data, length * sizeof(ValueType), cudaMemcpyKind::cudaMemcpyDeviceToHost));
@@ -235,14 +234,14 @@ namespace Physica::Utils {
     }
 
     template<class T, class Allocator>
-    inline void device_obj<Array<T, Dynamic, Dynamic, Allocator>>::toHost(host_obj& obj) const {
+    inline void device_obj<Array<T, Dynamic, Allocator>>::toHost(host_obj& obj) const {
         obj = toHost();
     }
     /**
      * Synchronization is expected before this, copy is async to task stream
      */
     template<class T, class Allocator>
-    void device_obj<Array<T, Dynamic, Dynamic, Allocator>>::reserve(size_t size) {
+    void device_obj<Array<T, Dynamic, Allocator>>::reserve(size_t size) {
         assert(size > getCapacity());
         const auto buffer = toPlainHost();
         alloc.deallocate(d_data, capacity);
@@ -256,7 +255,7 @@ namespace Physica::Utils {
      */
     template<class T, class Allocator>
     template<class... Args>
-    void device_obj<Array<T, Dynamic, Dynamic, Allocator>>::resize(size_t size, Args&&... args) {
+    void device_obj<Array<T, Dynamic, Allocator>>::resize(size_t size, Args&&... args) {
         if (size == length)
             return;
         if (capacity < size)
@@ -265,7 +264,7 @@ namespace Physica::Utils {
         if (length > size) {
             if constexpr (!isTrivial) {
                 const size_t delta = length - size;
-                Array<ValueType, Dynamic, Dynamic> buffer{};
+                Array<ValueType, Dynamic> buffer{};
                 buffer.reserve(delta);
                 check(cudaMemcpy(buffer.data(), d_data + size, delta * sizeof(ValueType), cudaMemcpyKind::cudaMemcpyDeviceToHost));
                 buffer.setLength(delta);
@@ -273,7 +272,7 @@ namespace Physica::Utils {
         }
         else {
             const size_t delta = size - length;
-            Array<ValueType, Dynamic, Dynamic> buffer(delta);
+            Array<ValueType, Dynamic> buffer(delta);
             for (size_t i = 0; i < delta; ++i)
                 buffer.get_allocator().construct(buffer.data() + i, std::forward<Args>(args)...);
             check(cudaMemcpy(d_data + length, buffer.data(), delta * sizeof(ValueType), cudaMemcpyKind::cudaMemcpyHostToDevice));
@@ -284,7 +283,7 @@ namespace Physica::Utils {
     }
 
     template<class T, class Allocator>
-    void device_obj<Array<T, Dynamic, Dynamic, Allocator>>::swap(device_obj& __restrict obj) noexcept {
+    void device_obj<Array<T, Dynamic, Allocator>>::swap(device_obj& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         std::swap(d_data, obj.d_data);
         std::swap(length, obj.length);
@@ -292,8 +291,8 @@ namespace Physica::Utils {
     }
 
     template<class T, class Allocator>
-    typename device_obj<Array<T, Dynamic, Dynamic, Allocator>>::pointer
-    device_obj<Array<T, Dynamic, Dynamic, Allocator>>::release() noexcept {
+    typename device_obj<Array<T, Dynamic, Allocator>>::pointer
+    device_obj<Array<T, Dynamic, Allocator>>::release() noexcept {
         auto* copy = d_data;
         d_data = nullptr;
         length = capacity = 0;
@@ -301,12 +300,12 @@ namespace Physica::Utils {
     }
 
     template<class T, class Allocator>
-    inline auto Array<T, Dynamic, Dynamic, Allocator>::toDevice() const {
+    inline auto Array<T, Dynamic, Allocator>::toDevice() const {
         return device_obj<This>(*this);
     }
 
     template<class T, class Allocator>
-    inline auto Array<T, Dynamic, Dynamic, Allocator>::toDeviceAsync() const {
+    inline auto Array<T, Dynamic, Allocator>::toDeviceAsync() const {
         device_obj<This> result{};
         result.reserve(getCapacity());
         toDeviceAsync(result);
@@ -314,7 +313,7 @@ namespace Physica::Utils {
     }
 
     template<class T, class Allocator>
-    void Array<T, Dynamic, Dynamic, Allocator>::toDevice(device_obj<This>& obj) const {
+    void Array<T, Dynamic, Allocator>::toDevice(device_obj<This>& obj) const {
         using ValueType = typename device_obj<This>::ValueType;
         constexpr bool isTrivial = device_obj<This>::isTrivial;
         const size_t length = getLength();
@@ -326,7 +325,7 @@ namespace Physica::Utils {
             ctx.wait();
         }
         else {
-            Array<ValueType, Dynamic, Dynamic> buffer(length);
+            Array<ValueType, Dynamic> buffer(length);
             for (size_t i = 0; i < length; ++i)
                 buffer[i] = this->operator[](i).toDevice();
             cudaMemcpyAsync(obj.data(), buffer.data(), length * sizeof(ValueType), cudaMemcpyKind::cudaMemcpyHostToDevice, ctx);
@@ -336,7 +335,7 @@ namespace Physica::Utils {
     }
 
     template<class T, class Allocator>
-    void Array<T, Dynamic, Dynamic, Allocator>::toDeviceAsync(device_obj<This>& obj) const {
+    void Array<T, Dynamic, Allocator>::toDeviceAsync(device_obj<This>& obj) const {
         static_assert(device_obj<This>::isTrivial, "[Error]: Do not pass non trivial elements to device asynchronously");
         using ValueType = typename device_obj<This>::ValueType;
         const size_t length = getLength();
@@ -350,12 +349,11 @@ namespace Physica::Utils {
 namespace Physica {
     using namespace Utils;
 
-    template<class T, size_t Length, size_t Capacity, class Allocator>
-    class Traits<Utils::device_obj<Array<T, Length, Capacity, Allocator>>> {
+    template<class T, size_t Length, class Allocator>
+    class Traits<Utils::device_obj<Array<T, Length, Allocator>>> {
     public:
-        constexpr static size_t ArrayLength = Length;
-        constexpr static size_t ArrayCapacity = Capacity;
         using AllocatorType = DeviceAllocator<T>;
         using ValueType = typename AllocatorType::value_type;
+        constexpr static size_t SizeAtCompile = Length;
     };
 }

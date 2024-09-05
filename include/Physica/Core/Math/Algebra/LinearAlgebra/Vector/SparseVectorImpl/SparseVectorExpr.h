@@ -75,6 +75,5 @@ namespace Physica {
     public:
         using ScalarType = typename Core::Internal::BinaryScalarOpReturnType<typename Exp::ScalarType, AnyScalar>::Type;
         constexpr static size_t SizeAtCompile = Exp::SizeAtCompile;
-        constexpr static size_t MaxSizeAtCompile = Exp::MaxSizeAtCompile;
     };
 }

@@ -78,10 +78,7 @@ namespace Physica {
         constexpr static int Option = Major | Storage;
         constexpr static size_t RowAtCompile = MatrixType::ColumnAtCompile;
         constexpr static size_t ColumnAtCompile = MatrixType::RowAtCompile;
-        constexpr static size_t MaxRowAtCompile = MatrixType::MaxColumnAtCompile;
-        constexpr static size_t MaxColumnAtCompile = MatrixType::MaxRowAtCompile;
         constexpr static size_t SizeAtCompile = MatrixType::SizeAtCompile;
-        constexpr static size_t MaxSizeAtCompile = MatrixType::MaxSizeAtCompile;
     };
 
     template<class VectorType>
@@ -91,9 +88,6 @@ namespace Physica {
         constexpr static int Option = MatrixOption::Row | MatrixOption::Vector;
         constexpr static size_t RowAtCompile = 1;
         constexpr static size_t ColumnAtCompile = VectorType::SizeAtCompile;
-        constexpr static size_t MaxRowAtCompile = 1;
-        constexpr static size_t MaxColumnAtCompile = VectorType::MaxSizeAtCompile;
         constexpr static size_t SizeAtCompile = VectorType::SizeAtCompile;
-        constexpr static size_t MaxSizeAtCompile = VectorType::MaxSizeAtCompile;
     };
 }

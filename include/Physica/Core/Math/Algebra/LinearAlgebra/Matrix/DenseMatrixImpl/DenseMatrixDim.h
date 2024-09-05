@@ -22,16 +22,17 @@
 #include "Physica/Utils/Template/CRTPBase.h"
 
 namespace Physica::Core {
-    template<class Derived, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn>
+    template<class Derived, size_t Row, size_t Column>
     class DenseMatrixDim {
+        using This = DenseMatrixDim<Derived, Row, Column>;
     public:
         DenseMatrixDim() = default;
         __host__ __device__ DenseMatrixDim(size_t row, size_t column) { resize(row, column); }
-        DenseMatrixDim(const DenseMatrixDim&) = default;
-        DenseMatrixDim(DenseMatrixDim&&) noexcept = default;
+        DenseMatrixDim(const This&) = default;
+        DenseMatrixDim(This&&) noexcept = default;
         ~DenseMatrixDim() = default;
         /* Operators */
-        DenseMatrixDim& operator=(DenseMatrixDim obj) noexcept { swap(obj); return *this; }
+        This& operator=(This obj) noexcept { swap(obj); return *this; }
         /* Getters */
         [[nodiscard]] __host__ __device__ constexpr static size_t getRow() noexcept { return Row; }
         [[nodiscard]] __host__ __device__ constexpr static size_t getColumn() noexcept { return Column; }
@@ -40,20 +41,21 @@ namespace Physica::Core {
             assert(row == Row && column == Column && "Cannot resize a fixed matrix");
         }
         /* Helper */
-        __host__ __device__ void swap([[maybe_unused]] DenseMatrixDim& dim) noexcept { /* Do nothing */ }
+        __host__ __device__ void swap([[maybe_unused]] This& dim) noexcept { /* Do nothing */ }
     };
 
-    template<class Derived, size_t Column, size_t MaxRow, size_t MaxColumn>
-    class DenseMatrixDim<Derived, Dynamic, Column, MaxRow, MaxColumn> : public Utils::CRTPBase<Derived, 2> {
+    template<class Derived, size_t Column>
+    class DenseMatrixDim<Derived, Dynamic, Column> : public Utils::CRTPBase<Derived, 2> {
         using Base = Utils::CRTPBase<Derived, 2>;
+        using This = DenseMatrixDim<Derived, Dynamic, Column>;
     public:
         DenseMatrixDim() = default;
         __host__ __device__ DenseMatrixDim(size_t row, size_t column) { resize(row, column); }
-        DenseMatrixDim(const DenseMatrixDim&) = default;
-        DenseMatrixDim(DenseMatrixDim&&) noexcept = default;
+        DenseMatrixDim(const This&) = default;
+        DenseMatrixDim(This&&) noexcept = default;
         ~DenseMatrixDim() = default;
         /* Operators */
-        DenseMatrixDim& operator=(DenseMatrixDim obj) noexcept { swap(obj); return *this; }
+        This& operator=(This obj) noexcept { swap(obj); return *this; }
         /* Getters */
         [[nodiscard]] __host__ __device__ size_t getRow() const noexcept {
             const size_t size = Base::getDerived().getSize();
@@ -66,20 +68,21 @@ namespace Physica::Core {
             assert(column == Column && "Cannot resize a fixed matrix");
         }
         /* Helper */
-        __host__ __device__ void swap([[maybe_unused]] DenseMatrixDim& dim) noexcept { /* Do nothing */ }
+        __host__ __device__ void swap([[maybe_unused]] This& dim) noexcept { /* Do nothing */ }
     };
 
-    template<class Derived, size_t Row, size_t MaxRow, size_t MaxColumn>
-    class DenseMatrixDim<Derived, Row, Dynamic, MaxRow, MaxColumn> : public Utils::CRTPBase<Derived, 2> {
+    template<class Derived, size_t Row>
+    class DenseMatrixDim<Derived, Row, Dynamic> : public Utils::CRTPBase<Derived, 2> {
         using Base = Utils::CRTPBase<Derived, 2>;
+        using This = DenseMatrixDim<Derived, Row, Dynamic>;
     public:
         DenseMatrixDim() = default;
         __host__ __device__ DenseMatrixDim(size_t row, size_t column) { resize(row, column); }
-        DenseMatrixDim(const DenseMatrixDim&) = default;
-        DenseMatrixDim(DenseMatrixDim&&) noexcept = default;
+        DenseMatrixDim(const This&) = default;
+        DenseMatrixDim(This&&) noexcept = default;
         ~DenseMatrixDim() = default;
         /* Operators */
-        DenseMatrixDim& operator=(DenseMatrixDim obj) noexcept { swap(obj); return *this; }
+        This& operator=(This obj) noexcept { swap(obj); return *this; }
         /* Getters */
         [[nodiscard]] __host__ __device__ constexpr static size_t getRow() noexcept { return Row; }
         [[nodiscard]] __host__ __device__ size_t getColumn() const noexcept {
@@ -92,22 +95,23 @@ namespace Physica::Core {
             assert(row == Row && "Cannot resize a fixed matrix");
         }
         /* Helper */
-        __host__ __device__ void swap([[maybe_unused]] DenseMatrixDim& dim) noexcept { /* Do nothing */ }
+        __host__ __device__ void swap([[maybe_unused]] This& dim) noexcept { /* Do nothing */ }
     };
 
-    template<class Derived, size_t MaxRow, size_t MaxColumn>
-    class DenseMatrixDim<Derived, Dynamic, Dynamic, MaxRow, MaxColumn> : public Utils::CRTPBase<Derived, 2> {
+    template<class Derived>
+    class DenseMatrixDim<Derived, Dynamic, Dynamic> : public Utils::CRTPBase<Derived, 2> {
         using Base = Utils::CRTPBase<Derived, 2>;
+        using This = DenseMatrixDim<Derived, Dynamic, Dynamic>;
     private:
         size_t r;
     public:
         __host__ __device__ DenseMatrixDim() : r(0) {}
         __host__ __device__ DenseMatrixDim(size_t row, size_t column) { resize(row, column); }
-        DenseMatrixDim(const DenseMatrixDim&) = default;
-        DenseMatrixDim(DenseMatrixDim&&) noexcept = default;
+        DenseMatrixDim(const This&) = default;
+        DenseMatrixDim(This&&) noexcept = default;
         ~DenseMatrixDim() = default;
         /* Operators */
-        DenseMatrixDim& operator=(DenseMatrixDim obj) noexcept { swap(obj); return *this; }
+        This& operator=(This obj) noexcept { swap(obj); return *this; }
         /* Getters */
         [[nodiscard]] __host__ __device__ size_t getRow() const noexcept { return r; }
         [[nodiscard]] __host__ __device__ size_t getColumn() const noexcept {
@@ -118,7 +122,7 @@ namespace Physica::Core {
         /* Operations */
         __host__ __device__ void resize(size_t row, [[maybe_unused]] size_t column) { r = row; }
         /* Helper */
-        __host__ __device__ void swap(DenseMatrixDim& __restrict dim) noexcept {
+        __host__ __device__ void swap(This& __restrict dim) noexcept {
             assert(this != &dim && "[Error]: Self swap is likely a bug");
         #ifdef __CUDA_ARCH__
             thrust::swap(r, dim.r);

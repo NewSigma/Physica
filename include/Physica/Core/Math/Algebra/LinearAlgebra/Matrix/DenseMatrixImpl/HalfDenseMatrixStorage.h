@@ -26,9 +26,9 @@ namespace Physica::Core {
      *
      * TODO: This class should extends ArrayBase after merging Core and Utils
      */
-    template<class T, size_t Order = Dynamic, size_t MaxOrder = Order>
+    template<class T, size_t Order = Dynamic>
     class HalfDenseMatrixStorage {
-        using This = HalfDenseMatrixStorage<T, Order, MaxOrder>;
+        using This = HalfDenseMatrixStorage<T, Order>;
     public:
         using ArrayType = typename Traits<This>::ArrayType;
         using pointer = typename ArrayType::pointer;
@@ -39,7 +39,7 @@ namespace Physica::Core {
         ArrayType arr;
         size_t order;
     public:
-        HalfDenseMatrixStorage() : arr(), order(MaxOrder) {}
+        HalfDenseMatrixStorage() : arr(), order(Order) {}
         HalfDenseMatrixStorage(size_t order_) : arr(order_ * (order_ + 1) / 2), order(order_) {}
         HalfDenseMatrixStorage(size_t order_, const T& t) : arr(order_ * (order_ + 1) / 2, t), order(order_) {}
         HalfDenseMatrixStorage(size_t row, size_t column);
@@ -75,53 +75,53 @@ namespace Physica::Core {
         [[nodiscard]] __host__ __device__ size_t toIndex1D(size_t r, size_t c) const noexcept;
     };
 
-    template<class T, size_t Order, size_t MaxOrder>
-    HalfDenseMatrixStorage<T, Order, MaxOrder>::HalfDenseMatrixStorage(size_t row, [[maybe_unused]] size_t column)
+    template<class T, size_t Order>
+    HalfDenseMatrixStorage<T, Order>::HalfDenseMatrixStorage(size_t row, [[maybe_unused]] size_t column)
             : HalfDenseMatrixStorage(row) {
         assert(row == column);
     }
 
-    template<class T, size_t Order, size_t MaxOrder>
-    HalfDenseMatrixStorage<T, Order, MaxOrder>::HalfDenseMatrixStorage(size_t row, [[maybe_unused]] size_t column, const T& t)
+    template<class T, size_t Order>
+    HalfDenseMatrixStorage<T, Order>::HalfDenseMatrixStorage(size_t row, [[maybe_unused]] size_t column, const T& t)
             : HalfDenseMatrixStorage(row, t) {
         assert(row == column);
     }
 
-    template<class T, size_t Order, size_t MaxOrder>
-    __host__ __device__ inline typename HalfDenseMatrixStorage<T, Order, MaxOrder>::lvalue_reference
-    HalfDenseMatrixStorage<T, Order, MaxOrder>::operator()(size_t row, size_t col) { return (*this)[toIndex1D(row, col)]; }
+    template<class T, size_t Order>
+    __host__ __device__ inline typename HalfDenseMatrixStorage<T, Order>::lvalue_reference
+    HalfDenseMatrixStorage<T, Order>::operator()(size_t row, size_t col) { return (*this)[toIndex1D(row, col)]; }
 
-    template<class T, size_t Order, size_t MaxOrder>
-    __host__ __device__ inline typename HalfDenseMatrixStorage<T, Order, MaxOrder>::const_lvalue_reference
-    HalfDenseMatrixStorage<T, Order, MaxOrder>::operator()(size_t row, size_t col) const { return (*this)[toIndex1D(row, col)]; }
+    template<class T, size_t Order>
+    __host__ __device__ inline typename HalfDenseMatrixStorage<T, Order>::const_lvalue_reference
+    HalfDenseMatrixStorage<T, Order>::operator()(size_t row, size_t col) const { return (*this)[toIndex1D(row, col)]; }
 
-    template<class T, size_t Order, size_t MaxOrder>
+    template<class T, size_t Order>
     template<class... Args>
-    void HalfDenseMatrixStorage<T, Order, MaxOrder>::resize(size_t row, [[maybe_unused]] size_t column, Args&&... args) {
+    void HalfDenseMatrixStorage<T, Order>::resize(size_t row, [[maybe_unused]] size_t column, Args&&... args) {
         assert(row == column);
         arr.resize(row * (row + 1) / 2, std::forward<Args>(args)...);
         order = row;
     }
 
-    template<class T, size_t Order, size_t MaxOrder>
-    void HalfDenseMatrixStorage<T, Order, MaxOrder>::swap(This& __restrict storage) noexcept {
+    template<class T, size_t Order>
+    void HalfDenseMatrixStorage<T, Order>::swap(This& __restrict storage) noexcept {
         assert(this != &storage && "[Error]: Self swap is likely a bug");
         arr.swap(storage.arr);
         std::swap(order, storage.order);
     }
 
-    template<class T, size_t Order, size_t MaxOrder>
-    __host__ __device__ inline T* HalfDenseMatrixStorage<T, Order, MaxOrder>::data_ptr(size_t row, size_t column) noexcept {
+    template<class T, size_t Order>
+    __host__ __device__ inline T* HalfDenseMatrixStorage<T, Order>::data_ptr(size_t row, size_t column) noexcept {
         return arr.data() + toIndex1D(row, column);
     }
 
-    template<class T, size_t Order, size_t MaxOrder>
-    __host__ __device__ inline const T* HalfDenseMatrixStorage<T, Order, MaxOrder>::data_ptr(size_t row, size_t column) const noexcept {
+    template<class T, size_t Order>
+    __host__ __device__ inline const T* HalfDenseMatrixStorage<T, Order>::data_ptr(size_t row, size_t column) const noexcept {
         return arr.data() + toIndex1D(row, column);
     }
 
-    template<class T, size_t Order, size_t MaxOrder>
-    __host__ __device__ size_t HalfDenseMatrixStorage<T, Order, MaxOrder>::toIndex1D(size_t r, size_t c) const noexcept {
+    template<class T, size_t Order>
+    __host__ __device__ size_t HalfDenseMatrixStorage<T, Order>::toIndex1D(size_t r, size_t c) const noexcept {
         const size_t order = getOrder();
         assert(r < order && c < order);
         const bool exchange = c < r;
@@ -130,9 +130,9 @@ namespace Physica::Core {
         return (order * 2U - min - 1) * min / 2U + max;
     }
 
-    template<class T, size_t Order, size_t MaxOrder>
-    inline void swap(HalfDenseMatrixStorage<T, Order, MaxOrder>& __restrict mat1,
-                     HalfDenseMatrixStorage<T, Order, MaxOrder>& __restrict mat2) noexcept {
+    template<class T, size_t Order>
+    inline void swap(HalfDenseMatrixStorage<T, Order>& __restrict mat1,
+                     HalfDenseMatrixStorage<T, Order>& __restrict mat2) noexcept {
         mat1.swap(mat2);
     }
 }
@@ -140,12 +140,11 @@ namespace Physica::Core {
 namespace Physica {
     using namespace Core;
 
-    template<class T, size_t Order, size_t MaxOrder>
-    class Traits<HalfDenseMatrixStorage<T, Order, MaxOrder>> {
+    template<class T, size_t Order>
+    class Traits<HalfDenseMatrixStorage<T, Order>> {
         constexpr static bool IsScalar = is_scalar<T>::value;
         constexpr static size_t Size = Order * (Order + 1) / 2;
-        constexpr static size_t MaxSize = MaxOrder * (MaxOrder + 1) / 2;
     public:
-        using ArrayType = typename std::conditional<IsScalar, Vector<T, Size, MaxSize>, Utils::Array<T, Size, MaxSize>>::type;
+        using ArrayType = typename std::conditional<IsScalar, Vector<T, Size>, Utils::Array<T, Size>>::type;
     };
 }

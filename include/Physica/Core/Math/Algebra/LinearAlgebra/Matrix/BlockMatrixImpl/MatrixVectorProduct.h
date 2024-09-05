@@ -78,7 +78,6 @@ namespace Physica {
     public:
         using ScalarType = typename MatrixType::ScalarType;
         constexpr static size_t SizeAtCompile = Dynamic;
-        constexpr static size_t MaxSizeAtCompile = Dynamic;
 
         constexpr static bool FastAssign = true;
         constexpr static bool FastPacket = false;

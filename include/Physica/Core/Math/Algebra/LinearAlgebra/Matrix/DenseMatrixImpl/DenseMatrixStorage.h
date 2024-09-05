@@ -28,19 +28,17 @@ namespace Physica::Core {
              int Option = MatrixOption::Column | MatrixOption::Vector,
              size_t Row = Dynamic,
              size_t Column = Dynamic,
-             size_t MaxRow = Row,
-             size_t MaxColumn = Column,
              class Allocator = Utils::HostAllocator<T>>
     class DenseMatrixStorage;
 
-    template<class T, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn, class Allocator>
-    class DenseMatrixStorage<T, MatrixOption::Column | MatrixOption::Element, Row, Column, MaxRow, MaxColumn, Allocator>
-            : public Utils::Array<T, Row * Column, MaxRow * MaxColumn, Allocator>
-            , public DenseMatrixDim<DenseMatrixStorage<T, MatrixOption::Column | MatrixOption::Element, Row, Column, MaxRow, MaxColumn, Allocator>, Row, Column, MaxRow, MaxColumn> {
-        using This = DenseMatrixStorage<T, MatrixOption::Column | MatrixOption::Element, Row, Column, MaxRow, MaxColumn, Allocator>;
-        using Dim = DenseMatrixDim<This, Row, Column, MaxRow, MaxColumn>;
+    template<class T, size_t Row, size_t Column, class Allocator>
+    class DenseMatrixStorage<T, MatrixOption::Column | MatrixOption::Element, Row, Column, Allocator>
+            : public Utils::Array<T, Row * Column, Allocator>
+            , public DenseMatrixDim<DenseMatrixStorage<T, MatrixOption::Column | MatrixOption::Element, Row, Column, Allocator>, Row, Column> {
+        using This = DenseMatrixStorage<T, MatrixOption::Column | MatrixOption::Element, Row, Column, Allocator>;
+        using Dim = DenseMatrixDim<This, Row, Column>;
     public:
-        using Base = Utils::Array<T, Row * Column, MaxRow * MaxColumn, Allocator>;
+        using Base = Utils::Array<T, Row * Column, Allocator>;
         using InitializerType = T;
     public:
         DenseMatrixStorage() = default;
@@ -94,14 +92,14 @@ namespace Physica::Core {
         friend class device_obj<This>;
     };
 
-    template<class T, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn, class Allocator>
-    class DenseMatrixStorage<T, MatrixOption::Row | MatrixOption::Element, Row, Column, MaxRow, MaxColumn, Allocator>
-            : public Utils::Array<T, Row * Column, MaxRow * MaxColumn, Allocator>
-            , public DenseMatrixDim<DenseMatrixStorage<T, MatrixOption::Row | MatrixOption::Element, Row, Column, MaxRow, MaxColumn, Allocator>, Row, Column, MaxRow, MaxColumn> {
-        using This = DenseMatrixStorage<T, MatrixOption::Row | MatrixOption::Element, Row, Column, MaxRow, MaxColumn, Allocator>;
-        using Dim = DenseMatrixDim<This, Row, Column, MaxRow, MaxColumn>;
+    template<class T, size_t Row, size_t Column, class Allocator>
+    class DenseMatrixStorage<T, MatrixOption::Row | MatrixOption::Element, Row, Column, Allocator>
+            : public Utils::Array<T, Row * Column, Allocator>
+            , public DenseMatrixDim<DenseMatrixStorage<T, MatrixOption::Row | MatrixOption::Element, Row, Column, Allocator>, Row, Column> {
+        using This = DenseMatrixStorage<T, MatrixOption::Row | MatrixOption::Element, Row, Column, Allocator>;
+        using Dim = DenseMatrixDim<This, Row, Column>;
     public:
-        using Base = Utils::Array<T, Row * Column, MaxRow * MaxColumn, Allocator>;
+        using Base = Utils::Array<T, Row * Column, Allocator>;
         using InitializerType = T;
     public:
         DenseMatrixStorage() = default;
@@ -153,17 +151,17 @@ namespace Physica::Core {
         friend class device_obj<This>;
     };
 
-    template<class T, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn, class Allocator>
-    class DenseMatrixStorage<T, MatrixOption::Column | MatrixOption::Vector, Row, Column, MaxRow, MaxColumn, Allocator>
-            : public DenseMatrixDim<DenseMatrixStorage<T, MatrixOption::Column | MatrixOption::Vector, Row, Column, MaxRow, MaxColumn, Allocator>, Row, Column, MaxRow, MaxColumn> {
-        using This = DenseMatrixStorage<T, MatrixOption::Column | MatrixOption::Vector, Row, Column, MaxRow, MaxColumn, Allocator>;
-        using Dim = DenseMatrixDim<This, Row, Column, MaxRow, MaxColumn>;
+    template<class T, size_t Row, size_t Column, class Allocator>
+    class DenseMatrixStorage<T, MatrixOption::Column | MatrixOption::Vector, Row, Column, Allocator>
+            : public DenseMatrixDim<DenseMatrixStorage<T, MatrixOption::Column | MatrixOption::Vector, Row, Column, Allocator>, Row, Column> {
+        using This = DenseMatrixStorage<T, MatrixOption::Column | MatrixOption::Vector, Row, Column, Allocator>;
+        using Dim = DenseMatrixDim<This, Row, Column>;
     public:
-        using VectorType = typename std::conditional<is_scalar<T>::value, Vector<T, Row, MaxRow, Allocator>, Utils::Array<T, Row, MaxRow, Allocator>>::type;
+        using VectorType = typename std::conditional<is_scalar<T>::value, Vector<T, Row, Allocator>, Utils::Array<T, Row, Allocator>>::type;
         using InitializerType = VectorType;
     private:
         using AllocatorV = typename Utils::ChangeAllocatorValueType<Allocator, VectorType>::Type;
-        using ArrayType = Utils::Array<VectorType, Column, MaxColumn, AllocatorV>;
+        using ArrayType = Utils::Array<VectorType, Column, AllocatorV>;
 
         ArrayType array;
     public:
@@ -215,17 +213,17 @@ namespace Physica::Core {
         friend class device_obj<This>;
     };
 
-    template<class T, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn, class Allocator>
-    class DenseMatrixStorage<T, MatrixOption::Row | MatrixOption::Vector, Row, Column, MaxRow, MaxColumn, Allocator>
-            : public DenseMatrixDim<DenseMatrixStorage<T, MatrixOption::Row | MatrixOption::Vector, Row, Column, MaxRow, MaxColumn, Allocator>, Row, Column, MaxRow, MaxColumn> {
-        using This = DenseMatrixStorage<T, MatrixOption::Row | MatrixOption::Vector, Row, Column, MaxRow, MaxColumn, Allocator>;
-        using Dim = DenseMatrixDim<This, Row, Column, MaxRow, MaxColumn>;
+    template<class T, size_t Row, size_t Column, class Allocator>
+    class DenseMatrixStorage<T, MatrixOption::Row | MatrixOption::Vector, Row, Column, Allocator>
+            : public DenseMatrixDim<DenseMatrixStorage<T, MatrixOption::Row | MatrixOption::Vector, Row, Column, Allocator>, Row, Column> {
+        using This = DenseMatrixStorage<T, MatrixOption::Row | MatrixOption::Vector, Row, Column, Allocator>;
+        using Dim = DenseMatrixDim<This, Row, Column>;
     public:
-        using VectorType = typename std::conditional<is_scalar<T>::value, Vector<T, Column, MaxColumn, Allocator>, Utils::Array<T, Column, MaxColumn, Allocator>>::type;
+        using VectorType = typename std::conditional<is_scalar<T>::value, Vector<T, Column, Allocator>, Utils::Array<T, Column, Allocator>>::type;
         using InitializerType = VectorType;
     private:
         using AllocatorV = typename Utils::ChangeAllocatorValueType<Allocator, VectorType>::Type;
-        using ArrayType = Utils::Array<VectorType, Row, MaxRow, AllocatorV>;
+        using ArrayType = Utils::Array<VectorType, Row, AllocatorV>;
 
         ArrayType array;
     public:

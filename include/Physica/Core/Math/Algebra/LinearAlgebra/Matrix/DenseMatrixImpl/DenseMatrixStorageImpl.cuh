@@ -19,8 +19,8 @@
 #pragma once
 
 namespace Physica::Core {
-    #define tparams class T, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn, class Allocator
-    #define ColumnElementStorage DenseMatrixStorage<T, MatrixOption::Column | MatrixOption::Element, Row, Column, MaxRow, MaxColumn, Allocator>
+    #define tparams class T, size_t Row, size_t Column, class Allocator
+    #define ColumnElementStorage DenseMatrixStorage<T, MatrixOption::Column | MatrixOption::Element, Row, Column, Allocator>
 
     template<tparams>
     __host__ __device__ device_obj<ColumnElementStorage>::device_obj(size_t row, size_t column) {
@@ -86,7 +86,7 @@ namespace Physica::Core {
     }
 
     #undef ColumnElementStorage
-    #define RowElementStorage DenseMatrixStorage<T, MatrixOption::Row | MatrixOption::Element, Row, Column, MaxRow, MaxColumn, Allocator>
+    #define RowElementStorage DenseMatrixStorage<T, MatrixOption::Row | MatrixOption::Element, Row, Column, Allocator>
 
     template<tparams>
     __host__ __device__ device_obj<RowElementStorage>::device_obj(size_t row, size_t column) {
@@ -154,7 +154,7 @@ namespace Physica::Core {
     }
 
     #undef RowElementStorage
-    #define ColumnVectorStorage DenseMatrixStorage<T, MatrixOption::Column | MatrixOption::Vector, Row, Column, MaxRow, MaxColumn, Allocator>
+    #define ColumnVectorStorage DenseMatrixStorage<T, MatrixOption::Column | MatrixOption::Vector, Row, Column, Allocator>
 
     template<tparams>
     device_obj<ColumnVectorStorage>::device_obj(size_t row, size_t column)
@@ -225,7 +225,7 @@ namespace Physica::Core {
     }
 
     #undef ColumnVectorStorage
-    #define RowVectorStorage DenseMatrixStorage<T, MatrixOption::Row | MatrixOption::Vector, Row, Column, MaxRow, MaxColumn, Allocator>
+    #define RowVectorStorage DenseMatrixStorage<T, MatrixOption::Row | MatrixOption::Vector, Row, Column, Allocator>
 
     template<tparams>
     device_obj<RowVectorStorage>::device_obj(size_t row, size_t column)

@@ -264,7 +264,7 @@ namespace Physica::Core {
         }
         numOfEachType.reserve(8);
         do {
-            numOfEachType << count;
+            numOfEachType.append(count);
             is >> count;
         } while(is.good());
         is.clear();

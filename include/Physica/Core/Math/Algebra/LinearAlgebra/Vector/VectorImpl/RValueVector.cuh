@@ -35,7 +35,6 @@ namespace Physica::Core {
     public:
         using ScalarType = typename TraitsType::ScalarType;
         constexpr static size_t SizeAtCompile = TraitsType::SizeAtCompile;
-        constexpr static size_t MaxSizeAtCompile = TraitsType::MaxSizeAtCompile;
         using PacketType = typename Internal::BestPacket<ScalarType, SizeAtCompile>::Type;
         constexpr static bool isComplex = ScalarType::isComplex;
         constexpr static size_t MaxThreadPerBlock = 256;

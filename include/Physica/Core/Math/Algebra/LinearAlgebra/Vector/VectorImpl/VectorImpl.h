@@ -22,40 +22,40 @@
 #include <random>
 
 namespace Physica::Core {
-    template<class T, size_t Length, size_t MaxLength, class Allocator>
-    Vector<T, Length, MaxLength, Allocator>::Vector(size_t length_) : Storage(length_) {}
+    template<class T, size_t Length, class Allocator>
+    Vector<T, Length, Allocator>::Vector(size_t length_) : Storage(length_) {}
 
-    template<class T, size_t Length, size_t MaxLength, class Allocator>
-    Vector<T, Length, MaxLength, Allocator>::Vector(size_t length_, const T& value) : Vector(length_) {
+    template<class T, size_t Length, class Allocator>
+    Vector<T, Length, Allocator>::Vector(size_t length_, const T& value) : Vector(length_) {
         *this = value;
     }
 
-    template<class T, size_t Length, size_t MaxLength, class Allocator>
-    Vector<T, Length, MaxLength, Allocator>::Vector(std::initializer_list<T> list) : Storage(std::move(list)) {
+    template<class T, size_t Length, class Allocator>
+    Vector<T, Length, Allocator>::Vector(std::initializer_list<T> list) : Storage(std::move(list)) {
         Base::makeContinuous();
     }
 
-    template<class T, size_t Length, size_t MaxLength, class Allocator>
-    Vector<T, Length, MaxLength, Allocator>::Vector(Storage array) noexcept : Storage(std::move(array)) {
+    template<class T, size_t Length, class Allocator>
+    Vector<T, Length, Allocator>::Vector(Storage array) noexcept : Storage(std::move(array)) {
         Base::makeContinuous();
     }
 
-    template<class T, size_t Length, size_t MaxLength, class Allocator>
+    template<class T, size_t Length, class Allocator>
     template<class Derived>
-    Vector<T, Length, MaxLength, Allocator>::Vector(const RValueVector<Derived>& v) : Storage(v.getLength()) {
+    Vector<T, Length, Allocator>::Vector(const RValueVector<Derived>& v) : Storage(v.getLength()) {
         v.getDerived().assignTo(*this);
     }
 
-    template<class T, size_t Length, size_t MaxLength, class Allocator>
-    Vector<T, Length, MaxLength, Allocator>& Vector<T, Length, MaxLength, Allocator>::toOpposite() {
+    template<class T, size_t Length, class Allocator>
+    Vector<T, Length, Allocator>& Vector<T, Length, Allocator>::toOpposite() {
         const auto end = Storage::end();
         for (auto ite = Storage::begin(); ite != end; ++ite)
             (*ite).toOpposite();
         return *this;
     }
 
-    template<class T, size_t Length, size_t MaxLength, class Allocator>
-    Vector<T, Length, MaxLength, Allocator> Vector<T, Length, MaxLength, Allocator>::copy() const {
+    template<class T, size_t Length, class Allocator>
+    Vector<T, Length, Allocator> Vector<T, Length, Allocator>::copy() const {
         if constexpr (isReverseDiff) {
             using TracerType = typename T::TracerType;
             const size_t length = Base::getLength();
@@ -69,8 +69,8 @@ namespace Physica::Core {
             return *this;
     }
 
-    template<class T, size_t Length, size_t MaxLength, class Allocator>
-    Vector<T, Length, MaxLength, Allocator> Vector<T, Length, MaxLength, Allocator>::zeros(size_t len) {
+    template<class T, size_t Length, class Allocator>
+    Vector<T, Length, Allocator> Vector<T, Length, Allocator>::zeros(size_t len) {
         This result{};
         result.reserve(len);
         for(size_t i = 0; i < len; ++i)
@@ -79,17 +79,17 @@ namespace Physica::Core {
         return result;
     }
 
-    template<class T, size_t Length, size_t MaxLength, class Allocator>
+    template<class T, size_t Length, class Allocator>
     template<class RandomGenerator>
-    Vector<T, Length, MaxLength, Allocator> Vector<T, Length, MaxLength, Allocator>::random_uniform(size_t len, RandomGenerator& gen) {
+    Vector<T, Length, Allocator> Vector<T, Length, Allocator>::random_uniform(size_t len, RandomGenerator& gen) {
         This result(len);
         result.random_uniform(gen);
         return result;
     }
 
-    template<class T, size_t Length, size_t MaxLength, class Allocator>
+    template<class T, size_t Length, class Allocator>
     template<class RandomGenerator>
-    Vector<T, Length, MaxLength, Allocator> Vector<T, Length, MaxLength, Allocator>::random_uniform(
+    Vector<T, Length, Allocator> Vector<T, Length, Allocator>::random_uniform(
             const Vector& v1, const Vector& v2, RandomGenerator& gen) {
         assert(v1.getLength() == v2.getLength());
         This result = random_uniform(v1.getLength(), gen);
@@ -97,17 +97,17 @@ namespace Physica::Core {
         return result;
     }
 
-    template<class T, size_t Length, size_t MaxLength, class Allocator>
+    template<class T, size_t Length, class Allocator>
     template<class RandomGenerator>
-    Vector<T, Length, MaxLength, Allocator> Vector<T, Length, MaxLength, Allocator>::random_normal(size_t len, RandomGenerator& gen) {
+    Vector<T, Length, Allocator> Vector<T, Length, Allocator>::random_normal(size_t len, RandomGenerator& gen) {
         This result(len);
         result.random_normal(gen);
         return result;
     }
 
-    template<class T, size_t Length, size_t MaxLength, class Allocator>
+    template<class T, size_t Length, class Allocator>
     template<class Distribution, class RandomGenerator>
-    Vector<T, Length, MaxLength, Allocator> Vector<T, Length, MaxLength, Allocator>::random_any(
+    Vector<T, Length, Allocator> Vector<T, Length, Allocator>::random_any(
             size_t len, Distribution& dist, RandomGenerator& gen) {
         This result(len);
         result.random_any(dist, gen);
@@ -116,8 +116,8 @@ namespace Physica::Core {
     /**
      * Both \param from and \param to are included
      */
-    template<class T, size_t Length, size_t MaxLength, class Allocator>
-    Vector<T, Length, MaxLength, Allocator> Vector<T, Length, MaxLength, Allocator>::linspace(T from, T to, size_t count) {
+    template<class T, size_t Length, class Allocator>
+    Vector<T, Length, Allocator> Vector<T, Length, Allocator>::linspace(T from, T to, size_t count) {
         assert(from < to);
         const T step = (to - from) / T(count - 1);
         Vector result = Vector(count);
@@ -126,182 +126,5 @@ namespace Physica::Core {
             from += step;
         }
         return result;
-    }
-    ////////////////////////////////////////Elementary Functions////////////////////////////////////////////
-    //Optimize: the following functions may be speed up using expression templates.
-    template<class T, size_t Length, size_t MaxLength, class Allocator>
-    Vector<T, Length, MaxLength, Allocator> factorial(const Vector<T, Length, MaxLength, Allocator>& v) {
-        Vector<T, Length, MaxLength, Allocator> result(v.getLength());
-        size_t i = 0;
-        for (auto ite = v.cbegin(); ite != v.cend(); ++ite, ++i)
-            result.init(factorial(*ite), i);
-    }
-
-    template<class T, size_t Length, size_t MaxLength, class Allocator>
-    Vector<T, Length, MaxLength, Allocator> tan(const Vector<T, Length, MaxLength, Allocator>& v) {
-        Vector<T, Length, MaxLength, Allocator> result(v.getLength());
-        size_t i = 0;
-        for (auto ite = v.cbegin(); ite != v.cend(); ++ite, ++i)
-            result.init(tan(*ite), i);
-    }
-
-    template<class T, size_t Length, size_t MaxLength, class Allocator>
-    Vector<T, Length, MaxLength, Allocator> sec(const Vector<T, Length, MaxLength, Allocator>& v) {
-        Vector<T, Length, MaxLength, Allocator> result(v.getLength());
-        size_t i = 0;
-        for (auto ite = v.cbegin(); ite != v.cend(); ++ite, ++i)
-            result.init(sec(*ite), i);
-    }
-
-    template<class T, size_t Length, size_t MaxLength, class Allocator>
-    Vector<T, Length, MaxLength, Allocator> csc(const Vector<T, Length, MaxLength, Allocator>& v) {
-        Vector<T, Length, MaxLength, Allocator> result(v.getLength());
-        size_t i = 0;
-        for (auto ite = v.cbegin(); ite != v.cend(); ++ite, ++i)
-            result.init(csc(*ite), i);
-    }
-
-    template<class T, size_t Length, size_t MaxLength, class Allocator>
-    Vector<T, Length, MaxLength, Allocator> cot(const Vector<T, Length, MaxLength, Allocator>& v) {
-        Vector<T, Length, MaxLength, Allocator> result(v.getLength());
-        size_t i = 0;
-        for (auto ite = v.cbegin(); ite != v.cend(); ++ite, ++i)
-            result.init(cot(*ite), i);
-    }
-
-    template<class T, size_t Length, size_t MaxLength, class Allocator>
-    Vector<T, Length, MaxLength, Allocator> arccos(const Vector<T, Length, MaxLength, Allocator>& v) {
-        Vector<T, Length, MaxLength, Allocator> result(v.getLength());
-        size_t i = 0;
-        for (auto ite = v.cbegin(); ite != v.cend(); ++ite, ++i)
-            result.init(arccos(*ite), i);
-    }
-
-    template<class T, size_t Length, size_t MaxLength, class Allocator>
-    Vector<T, Length, MaxLength, Allocator> arcsin(const Vector<T, Length, MaxLength, Allocator>& v) {
-        Vector<T, Length, MaxLength, Allocator> result(v.getLength());
-        size_t i = 0;
-        for (auto ite = v.cbegin(); ite != v.cend(); ++ite, ++i)
-            result.init(arcsin(*ite), i);
-    }
-
-    template<class T, size_t Length, size_t MaxLength, class Allocator>
-    Vector<T, Length, MaxLength, Allocator> arctan(const Vector<T, Length, MaxLength, Allocator>& v) {
-        Vector<T, Length, MaxLength, Allocator> result(v.getLength());
-        size_t i = 0;
-        for (auto ite = v.cbegin(); ite != v.cend(); ++ite, ++i)
-            result.init(arctan(*ite), i);
-    }
-
-    template<class T, size_t Length, size_t MaxLength, class Allocator>
-    Vector<T, Length, MaxLength, Allocator> arcsec(const Vector<T, Length, MaxLength, Allocator>& v) {
-        Vector<T, Length, MaxLength, Allocator> result(v.getLength());
-        size_t i = 0;
-        for (auto ite = v.cbegin(); ite != v.cend(); ++ite, ++i)
-            result.init(arcsec(*ite), i);
-    }
-
-    template<class T, size_t Length, size_t MaxLength, class Allocator>
-    Vector<T, Length, MaxLength, Allocator> arccsc(const Vector<T, Length, MaxLength, Allocator>& v) {
-        Vector<T, Length, MaxLength, Allocator> result(v.getLength());
-        size_t i = 0;
-        for (auto ite = v.cbegin(); ite != v.cend(); ++ite, ++i)
-            result.init(arccsc(*ite), i);
-    }
-
-    template<class T, size_t Length, size_t MaxLength, class Allocator>
-    Vector<T, Length, MaxLength, Allocator> arccot(const Vector<T, Length, MaxLength, Allocator>& v) {
-        Vector<T, Length, MaxLength, Allocator> result(v.getLength());
-        size_t i = 0;
-        for (auto ite = v.cbegin(); ite != v.cend(); ++ite, ++i)
-            result.init(arccot(*ite), i);
-    }
-
-    template<class T, size_t Length, size_t MaxLength, class Allocator>
-    Vector<T, Length, MaxLength, Allocator> sinh(const Vector<T, Length, MaxLength, Allocator>& v) {
-        Vector<T, Length, MaxLength, Allocator> result(v.getLength());
-        size_t i = 0;
-        for (auto ite = v.cbegin(); ite != v.cend(); ++ite, ++i)
-            result.init(sinh(*ite), i);
-    }
-
-    template<class T, size_t Length, size_t MaxLength, class Allocator>
-    Vector<T, Length, MaxLength, Allocator> tanh(const Vector<T, Length, MaxLength, Allocator>& v) {
-        Vector<T, Length, MaxLength, Allocator> result(v.getLength());
-        size_t i = 0;
-        for (auto ite = v.cbegin(); ite != v.cend(); ++ite, ++i)
-            result.init(tanh(*ite), i);
-    }
-
-    template<class T, size_t Length, size_t MaxLength, class Allocator>
-    Vector<T, Length, MaxLength, Allocator> sech(const Vector<T, Length, MaxLength, Allocator>& v) {
-        Vector<T, Length, MaxLength, Allocator> result(v.getLength());
-        size_t i = 0;
-        for (auto ite = v.cbegin(); ite != v.cend(); ++ite, ++i)
-            result.init(sech(*ite), i);
-    }
-
-    template<class T, size_t Length, size_t MaxLength, class Allocator>
-    Vector<T, Length, MaxLength, Allocator> csch(const Vector<T, Length, MaxLength, Allocator>& v) {
-        Vector<T, Length, MaxLength, Allocator> result(v.getLength());
-        size_t i = 0;
-        for (auto ite = v.cbegin(); ite != v.cend(); ++ite, ++i)
-            result.init(csch(*ite), i);
-    }
-
-    template<class T, size_t Length, size_t MaxLength, class Allocator>
-    Vector<T, Length, MaxLength, Allocator> coth(const Vector<T, Length, MaxLength, Allocator>& v) {
-        Vector<T, Length, MaxLength, Allocator> result(v.getLength());
-        size_t i = 0;
-        for (auto ite = v.cbegin(); ite != v.cend(); ++ite, ++i)
-            result.init(coth(*ite), i);
-    }
-
-    template<class T, size_t Length, size_t MaxLength, class Allocator>
-    Vector<T, Length, MaxLength, Allocator> arccosh(const Vector<T, Length, MaxLength, Allocator>& v) {
-        Vector<T, Length, MaxLength, Allocator> result(v.getLength());
-        size_t i = 0;
-        for (auto ite = v.cbegin(); ite != v.cend(); ++ite, ++i)
-            result.init(arccosh(*ite), i);
-    }
-
-    template<class T, size_t Length, size_t MaxLength, class Allocator>
-    Vector<T, Length, MaxLength, Allocator> arcsinh(const Vector<T, Length, MaxLength, Allocator>& v) {
-        Vector<T, Length, MaxLength, Allocator> result(v.getLength());
-        size_t i = 0;
-        for (auto ite = v.cbegin(); ite != v.cend(); ++ite, ++i)
-            result.init(arcsinh(*ite), i);
-    }
-
-    template<class T, size_t Length, size_t MaxLength, class Allocator>
-    Vector<T, Length, MaxLength, Allocator> arctanh(const Vector<T, Length, MaxLength, Allocator>& v) {
-        Vector<T, Length, MaxLength, Allocator> result(v.getLength());
-        size_t i = 0;
-        for (auto ite = v.cbegin(); ite != v.cend(); ++ite, ++i)
-            result.init(arctanh(*ite), i);
-    }
-
-    template<class T, size_t Length, size_t MaxLength, class Allocator>
-    Vector<T, Length, MaxLength, Allocator> arcsech(const Vector<T, Length, MaxLength, Allocator>& v) {
-        Vector<T, Length, MaxLength, Allocator> result(v.getLength());
-        size_t i = 0;
-        for (auto ite = v.cbegin(); ite != v.cend(); ++ite, ++i)
-            result.init(arcsech(*ite), i);
-    }
-
-    template<class T, size_t Length, size_t MaxLength, class Allocator>
-    Vector<T, Length, MaxLength, Allocator> arccsch(const Vector<T, Length, MaxLength, Allocator>& v) {
-        Vector<T, Length, MaxLength, Allocator> result(v.getLength());
-        size_t i = 0;
-        for (auto ite = v.cbegin(); ite != v.cend(); ++ite, ++i)
-            result.init(arccsch(*ite), i);
-    }
-
-    template<class T, size_t Length, size_t MaxLength, class Allocator>
-    Vector<T, Length, MaxLength, Allocator> arccoth(const Vector<T, Length, MaxLength, Allocator>& v) {
-        Vector<T, Length, MaxLength, Allocator> result(v.getLength());
-        size_t i = 0;
-        for (auto ite = v.cbegin(); ite != v.cend(); ++ite, ++i)
-            result.init(arccoth(*ite), i);
     }
 }

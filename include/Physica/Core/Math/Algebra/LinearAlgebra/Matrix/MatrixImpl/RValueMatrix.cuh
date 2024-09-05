@@ -35,10 +35,7 @@ namespace Physica::Core {
         constexpr static int Option = TraitsType::Option;
         constexpr static size_t RowAtCompile = TraitsType::RowAtCompile;
         constexpr static size_t ColumnAtCompile = TraitsType::ColumnAtCompile;
-        constexpr static size_t MaxRowAtCompile = TraitsType::MaxRowAtCompile;
-        constexpr static size_t MaxColumnAtCompile = TraitsType::MaxColumnAtCompile;
         constexpr static size_t SizeAtCompile = TraitsType::SizeAtCompile;
-        constexpr static size_t MaxSizeAtCompile = TraitsType::MaxSizeAtCompile;
         constexpr static bool isReverseDiff = ScalarType::isReverseDiff;
         constexpr static bool isComplex = ScalarType::isComplex;
         constexpr static bool isColumnMatrix = host_obj::isColumnMatrix;

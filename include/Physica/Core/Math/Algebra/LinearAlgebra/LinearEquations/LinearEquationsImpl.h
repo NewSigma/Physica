@@ -19,14 +19,20 @@
 #pragma once
 
 namespace Physica::Core {
-    template<class T, int Type, size_t MaxRow, size_t MaxColumn>
-    LinearEquations<T, Type, MaxRow, MaxColumn>::LinearEquations(DenseMatrix<T, Type, MaxRow, MaxColumn> working_)
-            : working(std::move(working_)) {
-        assert(working.getRow() + 1 == working.getColumn());
+    template<class ScalarType>
+    LinearEquations<ScalarType>::LinearEquations(WorkingMatrix&& working_) : working(std::move(working_)) {
+        assert(working.getRow() + 1 == working.getColumn() && "[Error]: Invalid working matrix");
     }
 
-    template<class T, int Type, size_t MaxRow, size_t MaxColumn>
-    void LinearEquations<T, Type, MaxRow, MaxColumn>::gaussJordanPartial() {
+    template<class ScalarType>
+    template<class MatrixType>
+    LinearEquations<ScalarType>::LinearEquations(const RValueMatrix<MatrixType>& working_)
+            : working(working_.getDerived()) {
+        assert(working.getRow() + 1 == working.getColumn() && "[Error]: Invalid working matrix");
+    }
+
+    template<class ScalarType>
+    void LinearEquations<ScalarType>::gaussJordanPartial() {
         const auto rank = working.getRow();
         for (size_t i = 0; i < rank; ++i) {
             working.partialPivoting(i);
@@ -37,8 +43,8 @@ namespace Physica::Core {
             working(i, rank) /= working(i, i);
     }
 
-    template<class T, int Type, size_t MaxRow, size_t MaxColumn>
-    void LinearEquations<T, Type, MaxRow, MaxColumn>::gaussJordanComplete() {
+    template<class ScalarType>
+    void LinearEquations<ScalarType>::gaussJordanComplete() {
         const auto rank = working.getRow();
         for (size_t i = 0; i < rank; ++i) {
             working.completePivoting(i);
@@ -49,8 +55,8 @@ namespace Physica::Core {
             working(i, rank) /= working(i, i);
     }
 
-    template<class T, int Type, size_t MaxRow, size_t MaxColumn>
-    void LinearEquations<T, Type, MaxRow, MaxColumn>::gaussEliminationPartial() {
+    template<class ScalarType>
+    void LinearEquations<ScalarType>::gaussEliminationPartial() {
         const auto rank = working.getRow();
         for (size_t i = 0; i < rank; ++i) {
             working.partialPivoting(i);
@@ -64,8 +70,8 @@ namespace Physica::Core {
         working(0, rank) /= working(0, 0);
     }
 
-    template<class T, int Type, size_t MaxRow, size_t MaxColumn>
-    void LinearEquations<T, Type, MaxRow, MaxColumn>::gaussEliminationComplete() {
+    template<class ScalarType>
+    void LinearEquations<ScalarType>::gaussEliminationComplete() {
         const auto rank = working.getRow();
         for (size_t i = 0; i < rank; ++i) {
             working.completePivoting(i);
@@ -79,21 +85,21 @@ namespace Physica::Core {
         working(0, rank) /= working(0, 0);
     }
 
-    template<class T, int Type, size_t MaxRow, size_t MaxColumn>
-    void LinearEquations<T, Type, MaxRow, MaxColumn>::swap(This& __restrict obj) noexcept {
+    template<class ScalarType>
+    void LinearEquations<ScalarType>::swap(This& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         working.swap(obj.working);
     }
 
-    template<class T, int Type, size_t MaxRow, size_t MaxColumn>
-    void LinearEquations<T, Type, MaxRow, MaxColumn>::upperEliminate(size_t index) {
+    template<class ScalarType>
+    void LinearEquations<ScalarType>::upperEliminate(size_t index) {
         assert(!working(index, index).isZero() && "[Error]: Matrix is singular");
         for(size_t i = 0; i < index; ++i)
             working.rowReduce(index, i, index);
     }
 
-    template<class T, int Type, size_t MaxRow, size_t MaxColumn>
-    void LinearEquations<T, Type, MaxRow, MaxColumn>::lowerEliminate(size_t index) {
+    template<class ScalarType>
+    void LinearEquations<ScalarType>::lowerEliminate(size_t index) {
         assert(!working(index, index).isZero() && "[Error]: Matrix is singular");
         const auto r = working.getRow();
         for(size_t i = index + 1; i < r; ++i)

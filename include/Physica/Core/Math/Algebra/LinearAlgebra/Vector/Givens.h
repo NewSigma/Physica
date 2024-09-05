@@ -25,7 +25,7 @@ namespace Physica::Core {
         template<class VectorType, bool isComplex>
         struct GivensImpl {
             using ScalarType = typename VectorType::ScalarType;
-            using ResultType = Vector<ScalarType, 2, 2>;
+            using ResultType = Vector<ScalarType, 2>;
 
             static ResultType run(const LValueVector<VectorType>& vector, size_t i, size_t j) {
                 ScalarType x_i = vector[i];
@@ -40,9 +40,9 @@ namespace Physica::Core {
         template<class VectorType>
         struct GivensImpl<VectorType, true> {
             using ScalarType = typename VectorType::ScalarType;
-            using ResultType = Vector<ScalarType, 2, 2>;
+            using ResultType = Vector<ScalarType, 2>;
             using RealType = typename ScalarType::RealType;
-            using RealResultType = Vector<RealType, 2, 2>;
+            using RealResultType = Vector<RealType, 2>;
             using RealGivens = GivensImpl<RealResultType, false>;
 
             static ResultType run(const LValueVector<VectorType>& vector, size_t i, size_t j) {
@@ -60,7 +60,7 @@ namespace Physica::Core {
      * Construct a givens transformation that eleminate the element in \param vector at index \param j
      */
     template<class VectorType>
-    Vector<typename VectorType::ScalarType, 2, 2> givens(const LValueVector<VectorType>& vector, size_t i, size_t j) {
+    Vector<typename VectorType::ScalarType, 2> givens(const LValueVector<VectorType>& vector, size_t i, size_t j) {
         using ScalarType = typename VectorType::ScalarType;
         return Internal::GivensImpl<VectorType, ScalarType::isComplex>::run(vector, i, j);
     }

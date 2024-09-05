@@ -349,7 +349,6 @@ namespace Physica {
     public:
         using ScalarType = typename MatrixType::ScalarType;
         constexpr static size_t SizeAtCompile = Length;
-        constexpr static size_t MaxSizeAtCompile = Length;
 
         constexpr static bool FastAssign = false;
         constexpr static bool FastPacket = true;
@@ -360,7 +359,6 @@ namespace Physica {
     public:
         using ScalarType = typename MatrixType::ScalarType;
         constexpr static size_t SizeAtCompile = Length;
-        constexpr static size_t MaxSizeAtCompile = Length;
 
         constexpr static bool FastAssign = false;
         constexpr static bool FastPacket = true;
@@ -380,10 +378,7 @@ namespace Physica {
         constexpr static int Option = MatrixType::Option;
         constexpr static size_t RowAtCompile = Row;
         constexpr static size_t ColumnAtCompile = Column;
-        constexpr static size_t MaxRowAtCompile = Row;
-        constexpr static size_t MaxColumnAtCompile = Column;
         constexpr static size_t SizeAtCompile = Row * Column;
-        constexpr static size_t MaxSizeAtCompile = SizeAtCompile;
         using VectorBase = typename std::conditional<Column == 1, ColVectorType, RowVectorType>::type;
     };
 }

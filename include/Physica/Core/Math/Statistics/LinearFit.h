@@ -101,7 +101,7 @@ namespace Physica::Core {
             x_r = hadamard(x, x_r);
         }
 
-        LinearEquations equs(std::move(working));
+        LinearEquations<ScalarType> equs(std::move(working));
         equs.gaussJordanPartial();
         return equs.getSolution();
     }

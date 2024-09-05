@@ -98,9 +98,6 @@ namespace Physica {
         constexpr static int Option = MatrixMajor | MatrixOption::AnyStorage;
         constexpr static size_t RowAtCompile = Row;
         constexpr static size_t ColumnAtCompile = Column;
-        constexpr static size_t MaxRowAtCompile = RowAtCompile;
-        constexpr static size_t MaxColumnAtCompile = ColumnAtCompile;
         constexpr static size_t SizeAtCompile = VectorType::SizeAtCompile;
-        constexpr static size_t MaxSizeAtCompile = SizeAtCompile;
     };
 }

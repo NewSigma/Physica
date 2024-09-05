@@ -35,7 +35,7 @@ namespace Physica::Core {
         constexpr static size_t NormVectorLength = Order == Dynamic ? Dynamic : (Order - 2);
         using RealType = typename ScalarType::RealType;
         using MatrixH = HessenburgMatrixH<ScalarType, Order>;
-        using HouseholderNorm = Vector<ScalarType, NormVectorLength, NormVectorLength>;
+        using HouseholderNorm = Vector<ScalarType, NormVectorLength>;
     public:
         using WorkingMatrix = DenseMatrix<ScalarType, Traits<MatrixH>::Option, Order, Order>;
     private:
@@ -143,9 +143,6 @@ namespace Physica {
         constexpr static int Option = MatrixOption::Column | (Order == Dynamic ? MatrixOption::Vector : MatrixOption::Element);
         constexpr static size_t RowAtCompile = Order;
         constexpr static size_t ColumnAtCompile = Order;
-        constexpr static size_t MaxRowAtCompile = Order;
-        constexpr static size_t MaxColumnAtCompile = Order;
         constexpr static size_t SizeAtCompile = RowAtCompile * ColumnAtCompile;
-        constexpr static size_t MaxSizeAtCompile = MaxRowAtCompile * MaxColumnAtCompile;
     };
 }

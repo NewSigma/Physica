@@ -114,7 +114,7 @@ namespace Physica::Gui {
 
     template<class VectorType>
     QLineSeries& Plot::line(const Core::RValueVector<VectorType>& y) {
-        using Vector = Core::Vector<typename VectorType::ScalarType, VectorType::SizeAtCompile, VectorType::MaxSizeAtCompile>;
+        using Vector = Core::Vector<typename VectorType::ScalarType, VectorType::SizeAtCompile>;
         return line(Vector::linspace(0, y.getLength() - 1, y.getLength()), y);
     }
 
@@ -134,7 +134,7 @@ namespace Physica::Gui {
 
     template<class VectorType>
     QSplineSeries& Plot::spline(const Core::LValueVector<VectorType>& y) {
-        using Vector = Core::Vector<typename VectorType::ScalarType, VectorType::SizeAtCompile, VectorType::MaxSizeAtCompile>;
+        using Vector = Core::Vector<typename VectorType::ScalarType, VectorType::SizeAtCompile>;
         return spline(Vector::linspace(0, y.getLength() - 1, y.getLength()), y);
     }
 
@@ -154,7 +154,7 @@ namespace Physica::Gui {
 
     template<class VectorType>
     QScatterSeries& Plot::scatter(const Core::RValueVector<VectorType>& y) {
-        using Vector = Core::Vector<typename VectorType::ScalarType, VectorType::SizeAtCompile, VectorType::MaxSizeAtCompile>;
+        using Vector = Core::Vector<typename VectorType::ScalarType, VectorType::SizeAtCompile>;
         return scatter(Vector::linspace(0, y.getLength() - 1, y.getLength()), y);
     }
 
@@ -329,7 +329,7 @@ namespace Physica::Gui {
 
     template<class VectorType>
     QBoxSet* Plot::setFromVector(const Core::LValueVector<VectorType>& v) {
-        using BufferType = Core::Vector<typename VectorType::ScalarType, VectorType::SizeAtCompile, VectorType::MaxSizeAtCompile>;
+        using BufferType = Core::Vector<typename VectorType::ScalarType, VectorType::SizeAtCompile>;
         BufferType buffer = v;
         std::sort(buffer.begin(), buffer.end());
         auto* result = new QBoxSet();

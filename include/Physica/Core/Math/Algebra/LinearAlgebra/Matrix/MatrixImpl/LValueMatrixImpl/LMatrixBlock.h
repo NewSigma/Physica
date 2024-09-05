@@ -253,7 +253,6 @@ namespace Physica {
     public:
         using ScalarType = typename MatrixType::ScalarType;
         constexpr static size_t SizeAtCompile = Traits<MatrixType>::ColumnAtCompile;
-        constexpr static size_t MaxSizeAtCompile = Traits<MatrixType>::MaxColumnAtCompile;
 
         constexpr static bool FastAssign = false;
         constexpr static bool FastPacket = false;
@@ -265,7 +264,6 @@ namespace Physica {
     public:
         using ScalarType = typename MatrixType::ScalarType;
         constexpr static size_t SizeAtCompile = Traits<MatrixType>::RowAtCompile;
-        constexpr static size_t MaxSizeAtCompile = Traits<MatrixType>::MaxRowAtCompile;
 
         constexpr static bool FastAssign = false;
         constexpr static bool FastPacket = false;
@@ -278,9 +276,6 @@ namespace Physica {
         constexpr static int Option = MatrixType::Option;
         constexpr static size_t RowAtCompile = Row;
         constexpr static size_t ColumnAtCompile = Column;
-        constexpr static size_t MaxRowAtCompile = Row;
-        constexpr static size_t MaxColumnAtCompile = Column;
         constexpr static size_t SizeAtCompile = Row * Column;
-        constexpr static size_t MaxSizeAtCompile = SizeAtCompile;
     };
 }

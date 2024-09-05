@@ -45,8 +45,6 @@ namespace Physica::Core {
                                         Internal::ProductOption<MatrixType1, MatrixType2>::Option,
                                         Base::RowAtCompile,
                                         Base::ColumnAtCompile,
-                                        Base::MaxRowAtCompile,
-                                        Base::MaxColumnAtCompile,
                                         Utils::HostAllocator<ScalarType>>;
     private:
         const MatrixType1& mat1;
@@ -135,9 +133,6 @@ namespace Physica {
                                                                              typename MatrixType2::ScalarType>::Type;
         constexpr static size_t RowAtCompile = MatrixType1::RowAtCompile;
         constexpr static size_t ColumnAtCompile = MatrixType2::ColumnAtCompile;
-        constexpr static size_t MaxRowAtCompile = MatrixType1::MaxRowAtCompile;
-        constexpr static size_t MaxColumnAtCompile = MatrixType2::MaxColumnAtCompile;
         constexpr static size_t SizeAtCompile = RowAtCompile * ColumnAtCompile;
-        constexpr static size_t MaxSizeAtCompile = SizeAtCompile;
     };
 }

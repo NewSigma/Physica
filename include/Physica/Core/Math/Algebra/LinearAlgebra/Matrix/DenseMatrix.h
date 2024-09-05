@@ -35,23 +35,21 @@ namespace Physica::Core {
              int Option = MatrixOption::Column | MatrixOption::Vector,
              size_t Row = Dynamic,
              size_t Column = Dynamic,
-             size_t MaxRow = Row,
-             size_t MaxColumn = Column,
              class Allocator = Utils::HostAllocator<T>>
-    class DenseMatrix : public ContinuousMatrix<DenseMatrix<T, Option, Row, Column, MaxRow, MaxColumn, Allocator>>
-                      , public DenseMatrixStorage<T, Option, Row, Column, MaxRow, MaxColumn, Allocator> {
-        using This = DenseMatrix<T, Option, Row, Column, MaxRow, MaxColumn, Allocator>;
+    class DenseMatrix : public ContinuousMatrix<DenseMatrix<T, Option, Row, Column, Allocator>>
+                      , public DenseMatrixStorage<T, Option, Row, Column, Allocator> {
+        using This = DenseMatrix<T, Option, Row, Column, Allocator>;
         using Base = ContinuousMatrix<This>;
-        using Storage = DenseMatrixStorage<T, Option, Row, Column, MaxRow, MaxColumn, Allocator>;
+        using Storage = DenseMatrixStorage<T, Option, Row, Column, Allocator>;
         using InitializerType = typename Storage::InitializerType;
         using Base::isReverseDiff;
     public:
         using typename Base::PlainScalar;
         using typename Base::ScalarType;
         using device_obj_type = device_obj<This>;
-        using ColMatrix = DenseMatrix<T, MatrixOption::getStorage<DenseMatrix>() | MatrixOption::Column, Row, Column, MaxRow, MaxColumn>;
-        using RowMatrix = DenseMatrix<T, MatrixOption::getStorage<DenseMatrix>() | MatrixOption::Row, Row, Column, MaxRow, MaxColumn>;
-        using RealMatrix = DenseMatrix<typename T::RealType, Option, Row, Column, MaxRow, MaxColumn>;
+        using ColMatrix = DenseMatrix<T, MatrixOption::getStorage<DenseMatrix>() | MatrixOption::Column, Row, Column>;
+        using RowMatrix = DenseMatrix<T, MatrixOption::getStorage<DenseMatrix>() | MatrixOption::Row, Row, Column>;
+        using RealMatrix = DenseMatrix<typename T::RealType, Option, Row, Column>;
     public:
         DenseMatrix() = default;
         DenseMatrix(size_t row, size_t column);
@@ -108,31 +106,28 @@ namespace Physica::Core {
         friend class device_obj<This>;
     };
 
-    template<class T, int Option, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn, class Allocator>
-    std::istream& operator>>(std::istream& is, DenseMatrix<T, Option, Row, Column, MaxRow, MaxColumn, Allocator>& mat);
+    template<class T, int Option, size_t Row, size_t Column, class Allocator>
+    std::istream& operator>>(std::istream& is, DenseMatrix<T, Option, Row, Column, Allocator>& mat);
 }
 
 namespace Physica {
-    template<class T, int Op, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn, class Allocator>
-    class Traits<Core::DenseMatrix<T, Op, Row, Column, MaxRow, MaxColumn, Allocator>> {
+    template<class T, int Op, size_t Row, size_t Column, class Allocator>
+    class Traits<Core::DenseMatrix<T, Op, Row, Column, Allocator>> {
     public:
         using ScalarType = T;
         constexpr static int Option = Op;
         constexpr static size_t RowAtCompile = Row;
         constexpr static size_t ColumnAtCompile = Column;
-        constexpr static size_t MaxRowAtCompile = MaxRow;
-        constexpr static size_t MaxColumnAtCompile = MaxColumn;
         constexpr static size_t SizeAtCompile = RowAtCompile * ColumnAtCompile;
-        constexpr static size_t MaxSizeAtCompile = MaxRowAtCompile * MaxColumnAtCompile;
         using AllocatorType = Allocator;
     };
 }
 
 namespace std {
-    template<class T, int Option, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn, class Allocator>
+    template<class T, int Option, size_t Row, size_t Column, class Allocator>
     inline void swap(
-            Physica::Core::DenseMatrix<T, Option, Row, Column, MaxRow, MaxColumn, Allocator>& __restrict m1,
-            Physica::Core::DenseMatrix<T, Option, Row, Column, MaxRow, MaxColumn, Allocator>& __restrict m2) noexcept {
+            Physica::Core::DenseMatrix<T, Option, Row, Column, Allocator>& __restrict m1,
+            Physica::Core::DenseMatrix<T, Option, Row, Column, Allocator>& __restrict m2) noexcept {
         m1.swap(m2);
     }
 }

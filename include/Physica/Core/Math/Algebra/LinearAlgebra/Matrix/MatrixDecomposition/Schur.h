@@ -355,7 +355,7 @@ namespace Physica::Core {
 
     template<class ScalarType, size_t Order>
     void Schur<ScalarType, Order>::complexQR(size_t lower, size_t upper, ComplexType shift) {
-        using Vector2D = Vector<ScalarType, 2, 2>;
+        using Vector2D = Vector<ScalarType, 2>;
         {
             auto givensVec = givens(Vector2D{matrixT(lower, lower) - shift, matrixT(lower + 1, lower)}, 0, 1);
             auto rightCols = matrixT.rightCols(lower);

@@ -507,10 +507,7 @@ namespace Physica {
         // Optimize: T1 and T2 may not have same compiling size, for example, T1 may be fixed size and T2 may be dynamic
         constexpr static size_t RowAtCompile = T1::RowAtCompile;
         constexpr static size_t ColumnAtCompile = T1::ColumnAtCompile;
-        constexpr static size_t MaxRowAtCompile = T1::MaxRowAtCompile;
-        constexpr static size_t MaxColumnAtCompile = T1::MaxColumnAtCompile;
         constexpr static size_t SizeAtCompile = T1::SizeAtCompile;
-        constexpr static size_t MaxSizeAtCompile = T1::MaxSizeAtCompile;
     };
 
     template<ExpressionType Type, class T1, class T2, class ResultType>
@@ -520,10 +517,7 @@ namespace Physica {
         constexpr static int Option = T1::Option;
         constexpr static size_t RowAtCompile = T1::RowAtCompile;
         constexpr static size_t ColumnAtCompile = T1::ColumnAtCompile;
-        constexpr static size_t MaxRowAtCompile = T1::MaxRowAtCompile;
-        constexpr static size_t MaxColumnAtCompile = T1::MaxColumnAtCompile;
         constexpr static size_t SizeAtCompile = T1::SizeAtCompile;
-        constexpr static size_t MaxSizeAtCompile = T1::MaxSizeAtCompile;
     };
 }
 

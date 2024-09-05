@@ -28,7 +28,7 @@
 namespace Physica::Core {
     template<class Derived> class LValueVector;
     template<class Derived> class ContinuousVector;
-    template<class T, int Option, size_t Row, size_t Column, size_t MaxRow, size_t MaxColumn, class Allocator> class DenseMatrix;
+    template<class T, int Option, size_t Row, size_t Column, class Allocator> class DenseMatrix;
     template<class VectorType> class TransposeVector;
     template<class VectorType> class ConjugateVector;
     template<class VectorType> class HermiteVector;
@@ -66,10 +66,9 @@ namespace Physica::Core {
         using ScalarType = typename Traits<Derived>::ScalarType;
         using PlainScalar = typename ScalarType::PlainScalar;
         constexpr static size_t SizeAtCompile = Traits<Derived>::SizeAtCompile;
-        constexpr static size_t MaxSizeAtCompile = Traits<Derived>::MaxSizeAtCompile;
         using PacketType = typename Internal::BestPacket<ScalarType, SizeAtCompile>::Type;
-        using ColMatrix = DenseMatrix<ScalarType, MatrixOption::Column | MatrixOption::Vector, SizeAtCompile, 1, MaxSizeAtCompile, 1, Utils::HostAllocator<ScalarType>>;
-        using RowMatrix = DenseMatrix<ScalarType, MatrixOption::Row | MatrixOption::Vector, 1, SizeAtCompile, 1, MaxSizeAtCompile, Utils::HostAllocator<ScalarType>>;
+        using ColMatrix = DenseMatrix<ScalarType, MatrixOption::Column | MatrixOption::Vector, SizeAtCompile, 1, Utils::HostAllocator<ScalarType>>;
+        using RowMatrix = DenseMatrix<ScalarType, MatrixOption::Row | MatrixOption::Vector, 1, SizeAtCompile, Utils::HostAllocator<ScalarType>>;
         constexpr static bool isReverseDiff = ScalarType::isReverseDiff;
         constexpr static bool isComplex = ScalarType::isComplex;
     private:

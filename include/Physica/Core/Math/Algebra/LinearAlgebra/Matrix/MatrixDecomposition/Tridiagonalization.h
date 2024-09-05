@@ -42,8 +42,8 @@ namespace Physica::Core {
 
         constexpr static size_t NormVectorLength = Order == Dynamic ? Dynamic : (Order - 2);
         constexpr static size_t BufferLength = Order == Dynamic ? Dynamic : (Order - 1);
-        using HouseholderNorm = Vector<ScalarType, NormVectorLength, NormVectorLength>;
-        using BufferVector = Vector<ScalarType, BufferLength, BufferLength>;
+        using HouseholderNorm = Vector<ScalarType, NormVectorLength>;
+        using BufferVector = Vector<ScalarType, BufferLength>;
     public:
         using WorkingMatrix = typename std::conditional<ScalarType::isComplex, HermiteMatrix, SymmMatrix>::type;
     private:
@@ -192,9 +192,6 @@ namespace Physica {
         constexpr static int Option = MatrixOption::AnyMajor | MatrixOption::Element;
         constexpr static size_t RowAtCompile = Order;
         constexpr static size_t ColumnAtCompile = Order;
-        constexpr static size_t MaxRowAtCompile = Order;
-        constexpr static size_t MaxColumnAtCompile = Order;
         constexpr static size_t SizeAtCompile = RowAtCompile * ColumnAtCompile;
-        constexpr static size_t MaxSizeAtCompile = MaxRowAtCompile * MaxColumnAtCompile;
     };
 }

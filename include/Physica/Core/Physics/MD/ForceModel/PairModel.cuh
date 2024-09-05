@@ -52,7 +52,7 @@ namespace Physica::Core {
         using Vector3D = device_obj<Vector<ScalarType, 3>>;
         using ForceBufferType = device_obj<DenseMatrix<ScalarType>>;
         using VirialBufferType = device_obj<DenseMatrix<ScalarType, MatrixOption::Column | MatrixOption::Element, NumVirialElem>>;
-        using PageLockedVector = Vector<ScalarType, Dynamic, Dynamic, Utils::PageLockedAllocator<ScalarType>>;
+        using PageLockedVector = Vector<ScalarType, Dynamic, Utils::PageLockedAllocator<ScalarType>>;
     private:
         ScalarType cutoff;
         ScalarType squared_cutoff;

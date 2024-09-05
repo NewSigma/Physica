@@ -94,8 +94,6 @@ namespace Physica {
         using ScalarType = typename Core::Internal::BinaryScalarOpReturnType<typename MatrixType::ScalarType,
                                                                              typename VectorType::ScalarType>::Type;
         constexpr static size_t SizeAtCompile = MatrixType::RowAtCompile;
-        constexpr static size_t MaxSizeAtCompile = MatrixType::MaxRowAtCompile;
-
         constexpr static bool FastAssign = Core::MatrixOption::isColumnMatrix<MatrixType>();
         constexpr static bool FastPacket = false;
     };

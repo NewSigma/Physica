@@ -25,13 +25,13 @@ namespace Physica::Core {
     template<class PlainScalar, int Option, unsigned int Order>
     class device_obj<Differentiable<DenseMatrix<PlainScalar, Option>, DiffMode::Reverse, Order>>
             : public device_obj<RValueMatrix<Differentiable<DenseMatrix<PlainScalar, Option>, DiffMode::Reverse, Order>>>
-            , public DenseMatrixDim<device_obj<Differentiable<DenseMatrix<PlainScalar, Option>, DiffMode::Reverse, Order>>, Dynamic, Dynamic, Dynamic, Dynamic> {
+            , public DenseMatrixDim<device_obj<Differentiable<DenseMatrix<PlainScalar, Option>, DiffMode::Reverse, Order>>, Dynamic, Dynamic> {
         static_assert(!PlainScalar::isDifferentiable, "[Error]: Nested Differentiable<> is not allowed");
         using PlainMatrix = DenseMatrix<PlainScalar, Option>;
         using host_obj = Differentiable<PlainMatrix, DiffMode::Reverse, Order>;
         using This = device_obj<host_obj>;
         using Base = device_obj<RValueMatrix<host_obj>>;
-        using Dim = DenseMatrixDim<This, Dynamic, Dynamic, Dynamic, Dynamic>;
+        using Dim = DenseMatrixDim<This, Dynamic, Dynamic>;
         using TracerType = device_obj<typename host_obj::TracerType>;
         using SegmentType = device_obj<typename host_obj::SegmentType>;
     public:
