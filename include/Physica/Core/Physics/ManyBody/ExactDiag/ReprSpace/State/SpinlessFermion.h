@@ -28,8 +28,8 @@ namespace Physica::Core {
         using This = SpinlessFermion<Dim, NumSite>;
         using Base = State<This>;
     public:
-        using IntType = int64_t;
-        static_assert(NumSite < sizeof(IntType) * CHAR_BIT, "[Error]: Unexpected large site number");
+        using IntType = uint64_t;
+        static_assert(NumSite <= sizeof(IntType) * CHAR_BIT, "[Error]: Unexpected large site number");
     private:
         IntType occupyBits;
     public:

@@ -46,7 +46,7 @@ namespace Physica::Core {
         template<class OtherDerived, class Executor = SequentialExecutor>
         inline void assignTo(OtherDerived& target) const;
         /* Getters */
-        [[nodiscard]] inline ScalarType calc(size_t) const { throw NoImplException(); }
+        [[nodiscard]] inline ScalarType calc(size_t) const { noImpl(); }
         [[nodiscard]] __host__ __device__ size_t getLength() const { return mat.getRow(); }
         [[nodiscard]] const MatrixType& getLHS() const noexcept { return mat; }
         [[nodiscard]] const VectorType& getRHS() const noexcept { return vec; }

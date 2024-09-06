@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Weibo He.
+ * Copyright 2021-2024 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -18,6 +18,7 @@
  */
 #include <iostream>
 #include <QtWidgets/QApplication>
+#include <Physica/Core/Parallel/Executor/ThreadExecutor.h>
 #include "Physica/Core/Math/Calculus/ODE/ODESolver.h"
 #include "Physica/Core/Math/Calculus/Function/FindRoot/Bisection.h"
 #include "Physica/Gui/Plot/Plot.h"
@@ -176,32 +177,28 @@ int main(int argc, char** argv) {
         const unsigned int halfTaskPerThread = taskPerThread / 2U;
         assert(length % threadCount == 0);
         assert(taskPerThread % 2 == 0);
-        std::thread threads[5];
-        for (unsigned int i = 0; i < threadCount; ++i) {
-            threads[i] = std::thread([&, i = i]() {
-                WaterDropArgs args{startRadius, sigma, rho, 1, g};
-                args.radius = startRadius + T(halfTaskPerThread * i * plotStepSize);
-                parallelSolve(args, { r_arr
-                                    , lambda_arr
-                                    , volume_arr
-                                    , i * halfTaskPerThread
-                                    , (i + 1) * halfTaskPerThread
-                                    , rmin
-                                    , solveStepSize
-                                    , plotStepSize });
-                args.radius = startRadius + T((length - (i + 1) * halfTaskPerThread) * plotStepSize);
-                parallelSolve(args, { r_arr
-                                    , lambda_arr
-                                    , volume_arr
-                                    , length - (i + 1) * halfTaskPerThread
-                                    , length - i * halfTaskPerThread
-                                    , rmin
-                                    , solveStepSize
-                                    , plotStepSize });
-            });
-        }
-        for (unsigned int i = 0; i < threadCount; ++i)
-            threads[i].join();
+        ThreadPool::numThreadRequired = threadCount;
+        ThreadExecutor::parallel_for([&](size_t i) {
+            WaterDropArgs args{startRadius, sigma, rho, 1, g};
+            args.radius = startRadius + T(halfTaskPerThread * i * plotStepSize);
+            parallelSolve(args, { r_arr
+                                , lambda_arr
+                                , volume_arr
+                                , i * halfTaskPerThread
+                                , (i + 1) * halfTaskPerThread
+                                , rmin
+                                , solveStepSize
+                                , plotStepSize });
+            args.radius = startRadius + T((length - (i + 1) * halfTaskPerThread) * plotStepSize);
+            parallelSolve(args, { r_arr
+                                , lambda_arr
+                                , volume_arr
+                                , length - (i + 1) * halfTaskPerThread
+                                , length - i * halfTaskPerThread
+                                , rmin
+                                , solveStepSize
+                                , plotStepSize });
+        }, threadCount).wait();
     }
 
     const Vector<T> scaled_r = r_arr * T(1E3);

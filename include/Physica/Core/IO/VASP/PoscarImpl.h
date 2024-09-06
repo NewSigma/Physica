@@ -318,6 +318,6 @@ namespace Physica::Core {
                 return i;
             i += 1;
         }
-        throw NoImplException("Unrecognized element symbol");
+        noImpl("Unrecognized element symbol");
     }
 }

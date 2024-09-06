@@ -120,12 +120,12 @@ namespace Physica::Core {
 
     template<class ScalarType, bool IsSmallCell>
     inline ScalarType ChebyshevRadial<ScalarType, IsSmallCell>::pot_functor(size_t, size_t, ScalarType, ScalarType) const {
-        throw NoImplException("[Error]: This function is disabled");
+        noImpl("[Error]: This function is disabled");
     }
 
     template<class ScalarType, bool IsSmallCell>
     inline ScalarType ChebyshevRadial<ScalarType, IsSmallCell>::force_functor(size_t, size_t, ScalarType, ScalarType) const {
-        throw NoImplException("[Error]: This function is disabled");
+        noImpl("[Error]: This function is disabled");
     }
 
     template<class ScalarType, bool IsSmallCell>

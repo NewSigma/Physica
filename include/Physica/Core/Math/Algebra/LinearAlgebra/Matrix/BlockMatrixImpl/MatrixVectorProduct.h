@@ -41,7 +41,7 @@ namespace Physica::Core {
         template<class OtherVector, class Executor = SequentialExecutor>
         void assignTo(LValueVector<OtherVector>& target_) const;
 
-        [[nodiscard]] ScalarType calc(size_t index) const { throw NoImplException(); }
+        [[nodiscard]] ScalarType calc(size_t index) const { noImpl(); }
         /* Getters */
         [[nodiscard]] size_t getLength() const noexcept { return v.getLength(); }
         [[nodiscard]] const BlockMatrix<MatrixType>& getLHS() const noexcept { return m; }

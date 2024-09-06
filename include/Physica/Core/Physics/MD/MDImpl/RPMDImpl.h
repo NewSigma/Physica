@@ -119,7 +119,7 @@ namespace Physica::Core {
             Executor::auto_wait(future_uncontract);
         }
         else
-            throw NoImplException("[Error]: Force contract is not implemented");
+            noImpl("[Error]: Force contract is not implemented");
     }
 
     template<class ScalarType, unsigned int Dim, size_t NumReplica, class ForceMatrixAllocator>

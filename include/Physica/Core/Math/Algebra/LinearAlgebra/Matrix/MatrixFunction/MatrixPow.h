@@ -42,7 +42,7 @@ namespace Physica::Core {
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
         /* Operations */
-        [[nodiscard]] ScalarType calc(size_t, size_t) const { throw NoImplException(); }
+        [[nodiscard]] ScalarType calc(size_t, size_t) const { noImpl(); }
 
         [[nodiscard]] TransposeRtnTy transpose() const noexcept { return TransposeRtnTy(*this); }
         [[nodiscard]] HermiteRtnTy hermite() const noexcept { return HermiteRtnTy(*this); }

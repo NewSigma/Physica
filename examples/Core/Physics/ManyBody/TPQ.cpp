@@ -49,7 +49,7 @@ VectorType calcPartition(ReprType repr_, const VectorType& betas) {
     auto psi = TPQ<ScalarType>(hamilton.getNumState());
     psi.pre_nvt_step(hamilton, deltaBeta);
     for (unsigned int i = 0; i < NumSample; ++i) {
-        psi.random_normal(gen);
+        psi.random_normal(gen, 1);
         for (unsigned int j = 0; j < NumBeta; ++j) {
             if (j != 0)
                 psi.nvt_step(hamilton, deltaBeta);
