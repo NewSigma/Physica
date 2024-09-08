@@ -35,8 +35,8 @@ namespace Physica::Core {
         template<class OtherMatrix>
         __host__ __device__ device_obj<Derived>& operator=(const device_obj<RValueMatrix<OtherMatrix>>& m);
         __device__ device_obj<Derived>& operator=(const ScalarType& s);
-        [[nodiscard]] __device__ ScalarType& operator()(size_t row, size_t column) { return Base::getDerived()(row, column); }
-        [[nodiscard]] __device__ const ScalarType& operator()(size_t row, size_t column) const { return Base::getDerived()(row, column); }
+        [[nodiscard]] __device__ ScalarType& operator()(size_t row, size_t col) { return *data_ptr(row, col); }
+        [[nodiscard]] __device__ const ScalarType& operator()(size_t row, size_t col) const { return *data_ptr(row, col); }
         __device__ void operator+=(const ScalarType& s) { (*this) = (*this) + s; }
         __device__ void operator-=(const ScalarType& s) { (*this) = (*this) - s; }
         __device__ void operator*=(const ScalarType& s) { (*this) = (*this) * s; }
@@ -44,7 +44,8 @@ namespace Physica::Core {
         template<class OtherDerived> __device__ void operator+=(const device_obj<RValueMatrix<OtherDerived>>& m) { (*this) = (*this) + m; }
         template<class OtherDerived> __device__ void operator-=(const device_obj<RValueMatrix<OtherDerived>>& m) { (*this) = (*this) - m; }
         /* Getters */
-        [[nodiscard]] __device__ ScalarType calc(size_t row, size_t col) const { return (*this)(row, col); }
+        template<Side Owner = GetSide()>
+        [[nodiscard]] __device__ ScalarType calc(size_t row, size_t col) const { return *data_ptr(row, col); }
         [[nodiscard]] __host__ __device__ ScalarType* data_ptr(size_t row, size_t column) { return Base::getDerived().data_ptr(row, column); }
         [[nodiscard]] __host__ __device__ const ScalarType* data_ptr(size_t row, size_t column) const { return Base::getDerived().data_ptr(row, column); }
         [[nodiscard]] __device__ inline ScalarType& refFromMajorMinor(size_t major, size_t minor);

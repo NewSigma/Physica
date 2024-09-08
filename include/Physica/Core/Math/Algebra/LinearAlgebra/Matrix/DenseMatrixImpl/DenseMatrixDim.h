@@ -34,7 +34,9 @@ namespace Physica::Core {
         /* Operators */
         This& operator=(This obj) noexcept { swap(obj); return *this; }
         /* Getters */
+        template<Side Owner = GetSide()>
         [[nodiscard]] __host__ __device__ constexpr static size_t getRow() noexcept { return Row; }
+        template<Side Owner = GetSide()>
         [[nodiscard]] __host__ __device__ constexpr static size_t getColumn() noexcept { return Column; }
         /* Operations */
         __host__ __device__ void resize([[maybe_unused]] size_t row, [[maybe_unused]] size_t column) {
@@ -57,11 +59,13 @@ namespace Physica::Core {
         /* Operators */
         This& operator=(This obj) noexcept { swap(obj); return *this; }
         /* Getters */
+        template<Side Owner = GetSide()>
         [[nodiscard]] __host__ __device__ size_t getRow() const noexcept {
             const size_t size = Base::getDerived().getSize();
             assert(size % getColumn() == 0);
             return size / getColumn();
         }
+        template<Side Owner = GetSide()>
         [[nodiscard]] __host__ __device__ constexpr static size_t getColumn() noexcept { return Column; }
         /* Operations */
         __host__ __device__ void resize([[maybe_unused]] size_t row, [[maybe_unused]] size_t column) {
@@ -84,7 +88,9 @@ namespace Physica::Core {
         /* Operators */
         This& operator=(This obj) noexcept { swap(obj); return *this; }
         /* Getters */
+        template<Side Owner = GetSide()>
         [[nodiscard]] __host__ __device__ constexpr static size_t getRow() noexcept { return Row; }
+        template<Side Owner = GetSide()>
         [[nodiscard]] __host__ __device__ size_t getColumn() const noexcept {
             const size_t size = Base::getDerived().getSize();
             assert(size % getRow() == 0);
@@ -113,7 +119,9 @@ namespace Physica::Core {
         /* Operators */
         This& operator=(This obj) noexcept { swap(obj); return *this; }
         /* Getters */
+        template<Side Owner = GetSide()>
         [[nodiscard]] __host__ __device__ size_t getRow() const noexcept { return r; }
+        template<Side Owner = GetSide()>
         [[nodiscard]] __host__ __device__ size_t getColumn() const noexcept {
             const size_t size = Base::getDerived().getSize();
             assert(r == 0 || size % getRow() == 0);

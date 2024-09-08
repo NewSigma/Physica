@@ -76,13 +76,16 @@ namespace Physica::Core {
         [[nodiscard]] __host__ __device__ inline BlockType block(size_t fromRow, size_t rowCount, size_t fromCol, size_t colCount);
         [[nodiscard]] __host__ __device__ inline const BlockType block(size_t fromRow, size_t rowCount, size_t fromCol, size_t colCount) const;
         /* Operations */
-        [[nodiscard]] __device__ ScalarType calc(size_t row, size_t col) const { return Base::getDerived().calc(row, col); }
+        template<Side Owner = GetSide()>
+        [[nodiscard]] __device__ ScalarType calc(size_t row, size_t col) const { return Base::getDerived().template calc<Owner>(row, col); }
         [[nodiscard]] __device__ inline ScalarType calcFromMajorMinor(size_t row, size_t col) const;
         [[nodiscard]] __host__ __device__ device_obj<Transpose<Derived>> transpose() const noexcept;
         [[nodiscard]] __host__ __device__ device_obj<RValueFlatten<Derived>> flatten() const noexcept;
         /* Getters */
-        [[nodiscard]] __host__ __device__ size_t getRow() const noexcept { return Base::getDerived().getRow(); }
-        [[nodiscard]] __host__ __device__ size_t getColumn() const noexcept { return Base::getDerived().getColumn(); }
+        template<Side Owner = GetSide()>
+        [[nodiscard]] __host__ __device__ size_t getRow() const noexcept { return Base::getDerived().template getRow<Owner>(); }
+        template<Side Owner = GetSide()>
+        [[nodiscard]] __host__ __device__ size_t getColumn() const noexcept { return Base::getDerived().template getColumn<Owner>(); }
         [[nodiscard]] __host__ __device__ size_t getMaxMajor() const noexcept { return MatrixOption::getMaxMajor<device_obj<Derived>>(Base::getDerived()); }
         [[nodiscard]] __host__ __device__ size_t getMaxMinor() const noexcept { return MatrixOption::getMaxMinor<device_obj<Derived>>(Base::getDerived()); }
         /* Static members */

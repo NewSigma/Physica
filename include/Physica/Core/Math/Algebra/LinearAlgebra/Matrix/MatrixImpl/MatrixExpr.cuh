@@ -21,85 +21,120 @@
 #include "MatrixExpr.h"
 
 namespace Physica::Core {
-    //////////////////////////////////////Add//////////////////////////////////////
-    template<class MatrixType, class AnyScalar>
-    class device_obj<MatrixExpr<ExpressionType::Add, MatrixType, ScalarBase<AnyScalar>>>
-            : public RValueMatrix<MatrixExpr<ExpressionType::Add, MatrixType, ScalarBase<AnyScalar>>> {
-        using host_obj = MatrixExpr<ExpressionType::Add, MatrixType, ScalarBase<AnyScalar>>;
+    template<ExpressionType ExprType, class MatrixType>
+    class device_obj<UnitaryMatrixExpr<ExprType, MatrixType>> : public device_obj<RValueMatrix<MatrixExpr<ExprType, MatrixType>>> {
+        using host_obj = UnitaryMatrixExpr<ExprType, MatrixType>;
         using This = device_obj<host_obj>;
-    public:
-        using Base = device_obj<RValueMatrix<host_obj>>;
-        using typename Base::ScalarType;
+        using Base = device_obj<RValueMatrix<MatrixExpr<ExprType, MatrixType>>>;
+        using DeviceMatrix = device_obj<MatrixType>;
     private:
-        const device_obj<MatrixType>& exp;
-        const AnyScalar& scalar;
+        union {
+            PlainStruct<const DeviceMatrix> value;
+            const DeviceMatrix* ptr;
+        } expr;
     public:
-        __device__ device_obj(const device_obj<RValueMatrix<MatrixType>>& exp_, const ScalarBase<AnyScalar>& base)
-                : exp(exp_.getDerived()), scalar(base.getDerived()) {}
+        __host__ __device__ inline device_obj(const device_obj<RValueMatrix<MatrixType>>& expr_) {
+            if constexpr (IsHost())
+                expr.value = asStruct(expr_.getDerived());
+            else
+                expr.ptr = &expr_.getDerived();
+        }
         device_obj(const This&) = delete;
         device_obj(This&&) noexcept = delete;
         ~device_obj() = default;
         /* Operators */
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
-        /* Operations */
-        [[nodiscard]] __device__ ScalarType calc(size_t row, size_t col) const {
-            return ScalarType(exp.calc(row, col)) + ScalarType(scalar);
-        }
         /* Getters */
-        [[nodiscard]] __host__ __device__ size_t getRow() const { return exp.getRow(); }
-        [[nodiscard]] __host__ __device__ size_t getColumn() const { return exp.getColumn(); }
+        template<Side Owner = GetSide()>
+        [[nodiscard]] __host__ __device__ size_t getRow() const {
+            return getExpr<Owner>().template getRow<Owner>();
+        }
+
+        template<Side Owner = GetSide()>
+        [[nodiscard]] __host__ __device__ size_t getColumn() const {
+            return getExpr<Owner>().template getColumn<Owner>();
+        }
+
+        template<Side Owner = GetSide()>
+        [[nodiscard]] __host__ __device__ const DeviceMatrix& getExpr() const {
+            if constexpr (IsHost() || Owner == Side::Host)
+                return expr.value.getDerived();
+            else
+                return *expr.ptr;
+        }
     };
 
-    template<class MatrixType1, class MatrixType2>
-    class device_obj<MatrixExpr<ExpressionType::Add, MatrixType1, MatrixType2>>
-            : public device_obj<RValueMatrix<MatrixExpr<ExpressionType::Add, MatrixType1, MatrixType2>>> {
-        using host_obj = MatrixExpr<ExpressionType::Add, MatrixType1, MatrixType2>;
+    template<ExpressionType ExprType, class LHS, class RHS>
+    class device_obj<BinaryMatrixExpr<ExprType, LHS, RHS>> : public device_obj<RValueMatrix<MatrixExpr<ExprType, LHS, RHS>>> {
+        static_assert(Internal::is_matrix<LHS>::value, "[Error]: Invalid left hand side type");
+        using host_obj = BinaryMatrixExpr<ExprType, LHS, RHS>;
         using This = device_obj<host_obj>;
-        using Base = device_obj<RValueMatrix<host_obj>>;
-    public:
-        using typename Base::ScalarType;
+        using Base = device_obj<RValueMatrix<MatrixExpr<ExprType, LHS, RHS>>>;
+        using DeviceLHS = device_obj<LHS>;
+        using DeviceRHS = typename std::conditional<is_scalar<RHS>::value, typename RHS::ScalarType, device_obj<RHS>>::type;
     private:
-        const device_obj<MatrixType1>& exp1;
-        const device_obj<MatrixType2>& exp2;
+        union {
+            PlainStruct<const DeviceLHS> value;
+            const DeviceLHS* ptr;
+        } lhs;
+
+        union {
+            PlainStruct<const DeviceRHS> value;
+            const DeviceRHS* ptr;
+        } rhs;
     public:
-        __device__ device_obj(const device_obj<RValueMatrix<MatrixType1>>& exp1_, const device_obj<RValueMatrix<MatrixType2>>& exp2_)
-                : exp1(exp1_.getDerived()), exp2(exp2_.getDerived()) {}
+        __host__ __device__ inline device_obj(const DeviceLHS& lhs_, const DeviceRHS& rhs_) {
+            if constexpr (Internal::is_matrix<RHS>::value)
+                assert(lhs_.getLength() == rhs_.getLength());
+            if constexpr (IsHost()) {
+                lhs.value = asStruct(lhs_);
+                rhs.value = asStruct(rhs_);
+            }
+            else {
+                lhs.ptr = &lhs_;
+                rhs.ptr = &rhs_;
+            }
+        }
         device_obj(const This&) = delete;
         device_obj(This&&) noexcept = delete;
         ~device_obj() = default;
         /* Operators */
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
-        /* Operations */
-        [[nodiscard]] __device__ ScalarType calc(size_t row, size_t col) const {
-            return ScalarType(exp1.calc(row, col)) + ScalarType(exp2.calc(row, col));
-        }
         /* Getters */
-        [[nodiscard]] __host__ __device__ size_t getRow() const { return exp1.getRow(); }
-        [[nodiscard]] __host__ __device__ size_t getColumn() const { return exp1.getColumn(); }
-    };
-    //////////////////////////////////////Operators//////////////////////////////////////
-    //////////////////////////////////////Add//////////////////////////////////////
-    template<class MatrixType1, class MatrixType2>
-    [[nodiscard]] __device__ inline device_obj<MatrixExpr<ExpressionType::Add, MatrixType1, MatrixType2>>
-    operator+(const device_obj<RValueMatrix<MatrixType1>>& mat1, const device_obj<RValueMatrix<MatrixType2>>& mat2) noexcept {
-        return {mat1, mat2};
-    }
+        template<Side Owner = GetSide()>
+        [[nodiscard]] __host__ __device__ size_t getRow() const {
+            return getLHS<Owner>().template getRow<Owner>();
+        }
 
-    template<class MatrixType, class ScalarType>
-    [[nodiscard]] __device__ inline device_obj<MatrixExpr<ExpressionType::Add, MatrixType, ScalarBase<ScalarType>>>
-    operator+(const device_obj<RValueMatrix<MatrixType>>& mat, const ScalarBase<ScalarType>& s) noexcept {
-        return {mat, s};
-    }
+        template<Side Owner = GetSide()>
+        [[nodiscard]] __host__ __device__ size_t getColumn() const {
+            return getLHS<Owner>().template getColumn<Owner>();
+        }
+
+        template<Side Owner = GetSide()>
+        [[nodiscard]] __host__ __device__ const DeviceLHS& getLHS() const noexcept {
+            if constexpr (IsHost() || Owner == Side::Host)
+                return lhs.value.getDerived();
+            else
+                return *lhs.ptr;
+        }
+
+        template<Side Owner = GetSide()>
+        [[nodiscard]] __host__ __device__ const DeviceRHS& getRHS() const noexcept {
+            if constexpr (IsHost() || Owner == Side::Host)
+                return rhs.value.getDerived();
+            else
+                return *rhs.ptr;
+        }
+    };
 }
 
 namespace Physica {
-    using namespace Core;
-
-    template <ExpressionType type, class T1, class T2, class ResultType>
-    class Traits<Core::device_obj<MatrixExpr<type, T1, T2, ResultType>>>
-        : public Traits<MatrixExpr<type, T1, T2, ResultType>> {};
+    template <ExpressionType type, class T1, class T2>
+    class Traits<Core::device_obj<Core::MatrixExpr<type, T1, T2>>> : public Traits<Core::MatrixExpr<type, T1, T2>> {};
 }
 
-#include "MatrixExprImpl/MatrixMul.cuh"
+#include "MatrixExprImpl/Add.cuh"
+#include "MatrixExprImpl/Mul.cuh"

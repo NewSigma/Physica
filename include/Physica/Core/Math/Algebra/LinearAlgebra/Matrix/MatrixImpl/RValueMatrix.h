@@ -21,6 +21,7 @@
 #include "RValueMatrixImpl/RMatrixBlock.h"
 
 namespace Physica::Core {
+    template<class Derived> class RValueMatrix;
     template<class Derived> class LValueMatrix;
     template<class Derived> class ContinuousMatrix;
     template<class MatrixType> class Transpose;
@@ -29,6 +30,14 @@ namespace Physica::Core {
     template<class MatrixType> class RValueFlatten;
     template<class MatrixType> class FormatedMatrix;
     template<class MatrixType, bool isLValueMatrix> class DiagVector;
+
+
+    namespace Internal {
+        template<class T>
+        struct is_matrix {
+            constexpr static bool value = std::is_base_of<RValueMatrix<T>, T>::value;
+        };
+    }
     /**
      * \class RValueMatrix is base class of matrixes that can be assigned to \class LValueMatrix
      * and other matrixes cannot be assigned to this class.

@@ -35,8 +35,10 @@ namespace Physica::Core {
         __host__ __device__ device_obj(const device_obj<RValueMatrix<MatrixType>>& mat_) : mat(mat_.getDerived()) {}
         /* Getters */
         [[nodiscard]] __device__ ScalarType calc(size_t row, size_t col) const { return mat.calc(col, row); }
-        [[nodiscard]] __host__ __device__ size_t getRow() const noexcept { return mat.getColumn(); }
-        [[nodiscard]] __host__ __device__ size_t getColumn() const noexcept { return mat.getRow(); }
+        template<Side Owner = GetSide()>
+        [[nodiscard]] __host__ __device__ size_t getRow() const noexcept { return mat.template getColumn<Owner>(); }
+        template<Side Owner = GetSide()>
+        [[nodiscard]] __host__ __device__ size_t getColumn() const noexcept { return mat.template getRow<Owner>(); }
     };
 
     template<class VectorType>
