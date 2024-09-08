@@ -57,7 +57,6 @@ namespace Physica::Core {
         using Base::random_uniform;
         using Base::random_normal;
         using Base::random_any;
-        Vector& toOpposite();
         [[nodiscard]] Vector copy() const;
         [[nodiscard]] inline device_obj<This> toDevice() const;
         using Base::toDevice;

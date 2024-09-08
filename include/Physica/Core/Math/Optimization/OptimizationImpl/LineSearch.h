@@ -188,7 +188,7 @@ namespace Physica::Core {
         assert(!squared_d2.isNegative());
         ScalarType d2 = sqrt(squared_d2);
         if (delta_step.isNegative())
-            d2.toOpposite();
+            d2 = -d2;
         return step1 - delta_step * (diff1 + d2 - d1) / (diff1 - diff2 + ScalarType(2) * d2);
     }
 }

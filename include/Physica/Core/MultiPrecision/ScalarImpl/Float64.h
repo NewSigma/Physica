@@ -74,8 +74,6 @@ namespace Physica::Core {
         __host__ __device__ bool operator==(const Scalar& s) const { return d == s.d; }
         PHYSICA_API friend std::istream& operator>>(std::istream& is, Scalar& scalar);
         /* Operations */
-        Scalar& toOpposite() noexcept { d = -d; return *this; }
-        __host__ __device__ Scalar& toAbs() noexcept { *this = abs(*this); return *this; }
         void swap(Scalar& __restrict s) noexcept { std::swap(d, s.d); }
         /* Getters */
         [[nodiscard]] constexpr static ScalarOption getOption() { return Double; }

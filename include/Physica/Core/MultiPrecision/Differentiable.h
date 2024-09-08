@@ -123,7 +123,6 @@ namespace Physica::Core {
         [[nodiscard]] inline Differentiable operator-() const;
         /* Operations */
         [[nodiscard]] This conjugate() const { noImpl(); }
-        inline Differentiable& toAbs();
         inline void reverse();
         inline void reverse_to(Differentiable to);
         inline void zero_grad();

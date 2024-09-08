@@ -47,14 +47,6 @@ namespace Physica::Core {
     }
 
     template<class T, size_t Length, class Allocator>
-    Vector<T, Length, Allocator>& Vector<T, Length, Allocator>::toOpposite() {
-        const auto end = Storage::end();
-        for (auto ite = Storage::begin(); ite != end; ++ite)
-            (*ite).toOpposite();
-        return *this;
-    }
-
-    template<class T, size_t Length, class Allocator>
     Vector<T, Length, Allocator> Vector<T, Length, Allocator>::copy() const {
         if constexpr (isReverseDiff) {
             using TracerType = typename T::TracerType;

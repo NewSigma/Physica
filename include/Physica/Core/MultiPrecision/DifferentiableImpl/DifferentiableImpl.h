@@ -107,12 +107,6 @@ namespace Physica::Core {
     }
 
     template<class ScalarType, unsigned int Order>
-    inline Differentiable<ScalarType, DiffMode::Reverse, Order>& Differentiable<ScalarType, DiffMode::Reverse, Order>::toAbs() {
-        (*this) = abs(*this);
-        return *this;
-    }
-
-    template<class ScalarType, unsigned int Order>
     inline void Differentiable<ScalarType, DiffMode::Reverse, Order>::reverse() {
         if (getSource() == ExpressionType::Diff) { //Optimize: Always false if no high order differential is required
             getFirstOperand()->reverse();

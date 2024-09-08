@@ -74,7 +74,6 @@ namespace Physica::Core {
         __host__ __device__ bool operator<(const Scalar& s) const { return f < s.f; }
         __host__ __device__ bool operator==(const Scalar& s) const { return f == s.f; }
         /* Operations */
-        Scalar& toOpposite() noexcept { f = -f; return *this; }
         void swap(Scalar& __restrict s) noexcept { std::swap(f, s.f); }
         /* Getters */
         [[nodiscard]] constexpr static ScalarOption getOption() { return Float16; }

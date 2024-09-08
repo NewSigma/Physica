@@ -246,7 +246,7 @@ namespace Physica::Core {
         buffer = givens(buffer, 0, 1);
         applyGivens(buffer, mat, i, i + 1);
         mat(i + 1, i) = 0;
-        buffer[1].toOpposite();
+        buffer[1] = -buffer[1];
         applyGivens(lSingularMat, buffer, i, i + 1);
     }
 
@@ -257,7 +257,7 @@ namespace Physica::Core {
             Vector<ScalarType, 2>& buffer,
             size_t i) {
         buffer = givens(buffer, 0, 1);
-        buffer[1].toOpposite();
+        buffer[1] = -buffer[1];
         applyGivens(mat, buffer, i, i + 1);
         applyGivens(rSingularMat, buffer, i, i + 1);
     }

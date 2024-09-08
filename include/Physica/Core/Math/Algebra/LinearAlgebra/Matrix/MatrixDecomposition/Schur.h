@@ -173,7 +173,7 @@ namespace Physica::Core {
             auto block1 = matrixT.rightCols(index);
             applyGivens(givensVector, block1, index, index_1);
             auto block2 = matrixT.topRows(index_1 + 1);
-            givensVector[1].toOpposite();
+            givensVector[1] = -givensVector[1];
             applyGivens(block2, givensVector, index, index_1);
             matrixT(index_1, index) = ScalarType(0);
             if (computeMatrixU)

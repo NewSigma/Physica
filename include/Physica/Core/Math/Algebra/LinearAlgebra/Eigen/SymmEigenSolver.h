@@ -206,7 +206,7 @@ namespace Physica::Core {
             const size_t index = !isShiftStep;
             auto givens_vec = givens(buffer, 0, 1);
             applyGivens(givens_vec, subBlock, index, index + 1);
-            givens_vec[1].toOpposite();
+            givens_vec[1] = -givens_vec[1];
             applyGivens(subBlock, givens_vec, index, index + 1);
 
             const ScalarType mean = (subBlock(1, index + index) + subBlock(index + 1, index)) * 0.5;
