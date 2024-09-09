@@ -63,17 +63,20 @@ if(${PHYSICA_CUDA})
     # Reference: https://github.com/clangd/clangd/discussions/1676
     set(CMAKE_CUDA_USE_RESPONSE_FILE_FOR_INCLUDES 0)
 
-    set(CMAKE_CUDA_FLAGS "\
-        ${CMAKE_CUDA_FLAGS} \
-        --Wreorder \
-        --Wdefault-stream-launch \
-        --Wext-lambda-captures-this \
-        --Wno-deprecated-declarations \
-        --Wno-deprecated-gpu-targets \
-        --relocatable-device-code=true \
-        --diag-suppress 20011 \
-        --default-stream per-thread \
-        ${CMAKE_CXX_FLAGS}")
+    # Warning 20011: Call host function from host-device function
+    # Warning 20208: Use long double in device code
+    set(CMAKE_CUDA_FLAGS 
+        ${CMAKE_CUDA_FLAGS}
+        --Wreorder
+        --Wdefault-stream-launch
+        --Wext-lambda-captures-this
+        --Wno-deprecated-declarations
+        --Wno-deprecated-gpu-targets
+        --diag-suppress 20011
+        --diag-suppress 20208
+        --default-stream per-thread
+        ${CMAKE_CXX_FLAGS})
+    string(REPLACE ";" " " CMAKE_CUDA_FLAGS "${CMAKE_CUDA_FLAGS}")
 endif()
 
 if(${RUN_CHECKS})

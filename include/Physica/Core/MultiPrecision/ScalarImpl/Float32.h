@@ -104,28 +104,6 @@ namespace Physica::Core {
     template<class OtherScalar>
     __host__ __device__ inline Scalar<Float>::Scalar(const ScalarBase<OtherScalar>& s) : f(float(s.getDerived())) {}
 
-    inline Scalar<Float>& operator++(Scalar<Float>& s) {
-        s += Scalar<Float>(1.0F);
-        return s;
-    }
-
-    inline Scalar<Float>& operator--(Scalar<Float>& s) {
-        s -= Scalar<Float>(1.0F);
-        return s;
-    }
-
-    inline Scalar<Float> operator++(Scalar<Float>& s, int) {
-        Scalar<Float> temp(s);
-        s += Scalar<Float>(1.0F);
-        return temp;
-    }
-
-    inline Scalar<Float> operator--(Scalar<Float>& s, int) {
-        Scalar<Float> temp(s);
-        s -= Scalar<Float>(1.0F);
-        return temp;
-    }
-
     template<class RandomGenerator>
     inline Scalar<Float> Scalar<Float>::random_uniform(RandomGenerator& gen) {
         std::uniform_real_distribution<float> dist{};
@@ -151,6 +129,33 @@ namespace Physica::Core {
     template<class Distribution, class RandomGenerator>
     inline Scalar<Float> Scalar<Float>::random_any(Distribution& dist, RandomGenerator& gen) {
         return Scalar(dist(gen));
+    }
+
+    inline std::ostream& operator<<(std::ostream& os, const Scalar<Float32>& s) {
+        const auto lastPrec = os.precision();
+        return os << std::setprecision(7) << float(s) << std::setprecision(lastPrec);
+    }
+
+    inline Scalar<Float>& operator++(Scalar<Float>& s) {
+        s += Scalar<Float>(1.0F);
+        return s;
+    }
+
+    inline Scalar<Float>& operator--(Scalar<Float>& s) {
+        s -= Scalar<Float>(1.0F);
+        return s;
+    }
+
+    inline Scalar<Float> operator++(Scalar<Float>& s, int) {
+        Scalar<Float> temp(s);
+        s += Scalar<Float>(1.0F);
+        return temp;
+    }
+
+    inline Scalar<Float> operator--(Scalar<Float>& s, int) {
+        Scalar<Float> temp(s);
+        s -= Scalar<Float>(1.0F);
+        return temp;
     }
 }
 

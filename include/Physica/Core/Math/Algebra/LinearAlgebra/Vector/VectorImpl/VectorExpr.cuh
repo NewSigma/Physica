@@ -119,8 +119,8 @@ namespace Physica::Core {
 }
 
 namespace Physica {
-    template<ExpressionType Type, class Exp1, class Exp2>
-    class Traits<Core::device_obj<Core::VectorExpr<Type, Exp1, Exp2>>> : public Traits<Core::VectorExpr<Type, Exp1, Exp2>> {};
+    template<ExpressionType Type, class Expr1, class Expr2>
+    class Traits<Core::device_obj<Core::VectorExpr<Type, Expr1, Expr2>>> : public Traits<Core::VectorExpr<Type, Expr1, Expr2>> {};
 }
 
 #include "VectorExprImpl/Add.cuh"

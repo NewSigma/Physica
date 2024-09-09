@@ -86,6 +86,19 @@ namespace Physica::Core {
 
     template<class OtherScalar>
     __host__ __device__ inline Scalar<Float16>::Scalar(const ScalarBase<OtherScalar>& s) : f(s.getDerived().getTrivial()) {}
+
+    inline std::ostream& operator<<(std::ostream& os, const Scalar<Float16>& s) {
+        const auto lastPrec = os.precision();
+        return os << std::setprecision(4) << float(s) << std::setprecision(lastPrec);
+    }
+
+    [[nodiscard]] __host__ __device__ inline float16 operator ""_HF(long double x) {
+        return float16(float(x));
+    }
+
+    [[nodiscard]] __host__ __device__ inline float16 operator ""_HF(unsigned long long int x) {
+        return float16(int(x));
+    }
 }
 
 #include "FunctionImpl/MathFP16.h"

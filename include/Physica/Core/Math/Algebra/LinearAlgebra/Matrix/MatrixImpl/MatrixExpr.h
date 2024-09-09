@@ -62,7 +62,8 @@ namespace Physica::Core {
                 rhs = &rhs_.getDerived();
             else {
                 rhs = &rhs_;
-                assert(lhs->getLength() == rhs->getLength());
+                assert(lhs->getRow() == rhs->getRow());
+                assert(lhs->getColumn() == rhs->getColumn());
             }
         }
         BinaryMatrixExpr(const This&) = delete;

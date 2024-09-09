@@ -19,6 +19,22 @@
 #pragma once
 
 namespace Physica::Core {
+    template<class VectorType, class AnyScalar>
+    class device_obj<VectorExpr<ExpressionType::Add, VectorType, ScalarBase<AnyScalar>>>
+            : public device_obj<BinaryVectorExpr<ExpressionType::Add, VectorType, ScalarBase<AnyScalar>>> {
+        using Base = device_obj<BinaryVectorExpr<ExpressionType::Add, VectorType, ScalarBase<AnyScalar>>>;
+    public:
+        using typename Base::ScalarType;
+    public:
+        using Base::Base;
+        /* Getters */
+        template<Side Owner = GetSide()>
+        [[nodiscard]] __device__ ScalarType calc(size_t index) const {
+            return ScalarType(Base::template getLHS<Owner>().template calc<Owner>(index))
+                 + ScalarType(Base::template getRHS<Owner>());
+        }
+    };
+
     template<class VectorType1, class VectorType2>
     class device_obj<VectorExpr<ExpressionType::Add, VectorType1, VectorType2>>
             : public device_obj<BinaryVectorExpr<ExpressionType::Add, VectorType1, VectorType2>> {
@@ -34,6 +50,12 @@ namespace Physica::Core {
                  + ScalarType(Base::template getRHS<Owner>().template calc<Owner>(index));
         }
     };
+
+    template<class VectorType, class AnyScalar>
+    [[nodiscard]] __host__ __device__ inline auto operator+(
+            const device_obj<RValueVector<VectorType>>& v, const ScalarBase<AnyScalar>& s) noexcept {
+        return device_obj<VectorExpr<ExpressionType::Add, VectorType, ScalarBase<AnyScalar>>>(v.getDerived(), s.getDerived());
+    }
 
     template<class Derived, class OtherDerived>
     [[nodiscard]] __host__ __device__ inline auto operator+(

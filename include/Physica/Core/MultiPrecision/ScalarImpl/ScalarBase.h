@@ -186,16 +186,6 @@ namespace Physica::Core {
         }
     }
 
-    template<ScalarOption Option>
-    std::ostream& operator<<(std::ostream& os, const Scalar<Option>& s) {
-        constexpr int FloatPrec = 7;
-        constexpr int DoublePrec = 16;
-        const auto lastPrec = os.precision();
-        return os << std::setprecision(Option == Float ? FloatPrec : DoublePrec)
-                  << double(s)
-                  << std::setprecision(lastPrec);
-    }
-
     template<class ScalarType>
     inline ScalarType operator+(const ScalarBase<ScalarType>& s) {
         return ScalarType(s.getDerived());

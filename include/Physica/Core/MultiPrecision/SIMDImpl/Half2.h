@@ -129,15 +129,12 @@ namespace Physica::Core {
         return operator[](0) + operator[](1);
     }
 
-    [[nodiscard]] __device__ inline SIMD<Scalar<Float16>, 2> mul_add(
+    [[nodiscard]] __host__ __device__ inline SIMD<Scalar<Float16>, 2> mul_add(
             const SIMD<Scalar<Float16>, 2>& a, const SIMD<Scalar<Float16>, 2>& b, const SIMD<Scalar<Float16>, 2>& c) noexcept {
     #ifdef __CUDA_ARCH__
         return SIMD<Scalar<Float16>, 2>(__hfma2(a.getImpl(), b.getImpl(), c.getImpl()));
     #else
-        (void)a;
-        (void)b;
-        (void)c;
-        Utils::unreachable();
+        return a * b + c;
     #endif
     }
 }

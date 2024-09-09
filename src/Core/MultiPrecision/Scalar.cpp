@@ -437,7 +437,6 @@ namespace Physica::Core {
         return exp + zeros >= 1075;
     }
     ///////////////////////////////////////////Global////////////////////////////////////////////////
-    template<>
     std::ostream& operator<<(std::ostream& os, const Scalar<MultiPrecision>& s) {
         const auto& basicConst = BasicConst::getInstance();
         const int power = s.getPower();
