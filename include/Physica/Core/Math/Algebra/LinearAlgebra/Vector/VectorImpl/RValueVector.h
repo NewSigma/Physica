@@ -66,7 +66,7 @@ namespace Physica::Core {
         using ScalarType = typename Traits<Derived>::ScalarType;
         using PlainScalar = typename ScalarType::PlainScalar;
         constexpr static size_t SizeAtCompile = Traits<Derived>::SizeAtCompile;
-        using PacketType = typename Internal::BestPacket<ScalarType, SizeAtCompile>::Type;
+        using PacketType = typename BestPacket<ScalarType, SizeAtCompile>::Type;
         using ColMatrix = DenseMatrix<ScalarType, MatrixOption::Column | MatrixOption::Vector, SizeAtCompile, 1, Utils::HostAllocator<ScalarType>>;
         using RowMatrix = DenseMatrix<ScalarType, MatrixOption::Row | MatrixOption::Vector, 1, SizeAtCompile, Utils::HostAllocator<ScalarType>>;
         constexpr static bool isReverseDiff = ScalarType::isReverseDiff;

@@ -103,7 +103,7 @@ namespace Physica::Core {
     }
 
     __host__ __device__ inline void SIMD<Scalar<Float16>, 2>::load(const ScalarType* p) {
-        (*this) = SIMD(*p, *(p + 1));
+        *reinterpret_cast<uint32_t*>(this) = *reinterpret_cast<const uint32_t*>(p);
     }
 
     __host__ __device__ inline void SIMD<Scalar<Float16>, 2>::load_partial(int n, const ScalarType* p) {
@@ -114,8 +114,7 @@ namespace Physica::Core {
     }
 
     __host__ __device__ inline void SIMD<Scalar<Float16>, 2>::store(ScalarType* p) const {
-        *p = operator[](0);
-        *(p + 1) = operator[](1);
+        *reinterpret_cast<uint32_t*>(p) = *reinterpret_cast<const uint32_t*>(this);
     }
 
     __host__ __device__ inline void SIMD<Scalar<Float16>, 2>::store_partial(int n, ScalarType* p) const {

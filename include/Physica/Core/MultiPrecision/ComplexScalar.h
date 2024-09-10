@@ -50,7 +50,7 @@ namespace Physica::Core {
     class ComplexScalar : public ScalarBase<ComplexScalar<T>> {
         using This = ComplexScalar<T>;
         using Base = ScalarBase<This>;
-        using PacketType = typename Internal::BestPacket<T, 2>::Type;
+        using PacketType = typename BestPacket<T, 2>::Type;
     public:
         using typename Base::ScalarType;
         using typename Base::TrivialType;

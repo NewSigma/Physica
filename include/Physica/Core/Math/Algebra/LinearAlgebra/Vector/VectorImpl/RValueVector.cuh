@@ -35,7 +35,7 @@ namespace Physica::Core {
     public:
         using ScalarType = typename TraitsType::ScalarType;
         constexpr static size_t SizeAtCompile = TraitsType::SizeAtCompile;
-        using PacketType = typename Internal::BestPacket<ScalarType, SizeAtCompile>::Type;
+        using PacketType = typename device_obj<BestPacket<ScalarType, SizeAtCompile>>::Type;
         constexpr static bool isComplex = ScalarType::isComplex;
         constexpr static size_t MaxThreadPerBlock = 256;
     private:
@@ -65,6 +65,9 @@ namespace Physica::Core {
         /* Operators */
         device_obj& operator=(const device_obj&) = default;
         device_obj& operator=(device_obj&&) noexcept = default;
+        /* Operations */
+        template<class OtherDerived>
+        __device__ void assignToImpl(device_obj<LValueVector<OtherDerived>>& target_) const;
     };
 }
 

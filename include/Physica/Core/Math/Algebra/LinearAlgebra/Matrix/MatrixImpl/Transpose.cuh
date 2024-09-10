@@ -54,7 +54,9 @@ namespace Physica::Core {
         __host__ __device__ explicit device_obj(const device_obj<RValueVector<VectorType>>& vec_) : vec(vec_.getDerived()) {}
         /* Getters */
         [[nodiscard]] __device__ ScalarType calc([[maybe_unused]] size_t row, size_t col) const { assert(row == 0); return vec.calc(col); }
+        template<Side Owner = GetSide()>
         [[nodiscard]] __host__ __device__ constexpr static size_t getRow() noexcept { return 1; }
+        template<Side Owner = GetSide()>
         [[nodiscard]] __host__ __device__ size_t getColumn() const noexcept { return vec.getLength(); }
     };
 }

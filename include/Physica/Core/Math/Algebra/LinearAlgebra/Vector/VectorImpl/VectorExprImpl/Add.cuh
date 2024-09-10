@@ -33,6 +33,18 @@ namespace Physica::Core {
             return ScalarType(Base::template getLHS<Owner>().template calc<Owner>(index))
                  + ScalarType(Base::template getRHS<Owner>());
         }
+
+        template<class AnyPacket, Side Owner = GetSide()>
+        [[nodiscard]] __device__ AnyPacket packet(size_t index) const {
+            return Base::template getLHS<Owner>().template packet<AnyPacket, Owner>(index)
+                 + AnyPacket(Base::template getRHS<Owner>());
+        }
+
+        template<class AnyPacket, Side Owner = GetSide()>
+        [[nodiscard]] __device__ AnyPacket packetPartial(size_t index, size_t count) const {
+            return Base::template getLHS().template packetPartial<AnyPacket, Owner>(index, count)
+                 + AnyPacket(Base::template getRHS());
+        }
     };
 
     template<class VectorType1, class VectorType2>
@@ -48,6 +60,18 @@ namespace Physica::Core {
         [[nodiscard]] __device__ ScalarType calc(size_t index) const {
             return ScalarType(Base::template getLHS<Owner>().template calc<Owner>(index))
                  + ScalarType(Base::template getRHS<Owner>().template calc<Owner>(index));
+        }
+
+        template<class AnyPacket, Side Owner = GetSide()>
+        [[nodiscard]] __device__ AnyPacket packet(size_t index) const {
+            return Base::template getLHS<Owner>().template packet<AnyPacket, Owner>(index)
+                 + Base::template getRHS<Owner>().template packet<AnyPacket, Owner>(index);
+        }
+
+        template<class AnyPacket, Side Owner = GetSide()>
+        [[nodiscard]] __device__ AnyPacket packetPartial(size_t index, size_t count) const {
+            return Base::template getLHS<Owner>().template packetPartial<AnyPacket, Owner>(index, count)
+                 + Base::template getRHS<Owner>().template packetPartial<AnyPacket, Owner>(index, count);
         }
     };
 

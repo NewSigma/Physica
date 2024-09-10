@@ -24,49 +24,8 @@
 #include "SIMDImpl/Instruset.h"
 
 namespace Physica::Core {
-    template<class T, size_t Size> class SIMD;
     template<class T, size_t Size> class BoolSIMD;
     template<class ScalarType, unsigned int Order> class DiffTracer;
-
-    namespace Internal {
-        /**
-         * Find the best packet for a linear storage
-         */
-        template<class ScalarType, size_t Length>
-        class BestPacket {
-            using PlainScalar = typename ScalarType::PlainScalar;
-            constexpr static bool isSinglePrec = ScalarType::Option == Float;
-            constexpr static bool isComplex = ScalarType::isComplex;
-            constexpr static bool isForward = ScalarType::isForwardDiff;
-            constexpr static bool isDynamic = Length == Dynamic;
-            constexpr static size_t size128 = (isSinglePrec ? 4 : 2) / (isComplex ? 2 : 1) / (isForward ? 2 : 1);
-            constexpr static size_t size256 = (isSinglePrec ? 8 : 4) / (isComplex ? 2 : 1) / (isForward ? 2 : 1);
-            constexpr static size_t size512 = (isSinglePrec ? 16 : 8) / (isComplex ? 2 : 1) / (isForward ? 2 : 1);
-            constexpr static bool support128 = INSTRSET >= 2;
-            constexpr static bool support256 = INSTRSET >= 7 && support128;
-            constexpr static bool support512 = INSTRSET >= 9 && support256;
-            constexpr static bool use128 = support128 && Length >= size128 && size128 != 0;
-            constexpr static bool use256 = support256 && Length >= size256 && size256 != 0;
-            constexpr static bool use512 = support512 && Length >= size512 && size512 != 0;
-            constexpr static size_t Size1 = use128 ? size128 : 1;
-            constexpr static size_t Size2 = use256 ? size256 : Size1;
-            constexpr static size_t Size3 = use512 ? size512 : Size2;
-            constexpr static size_t BiggestSize1 = support128 ? size128 : 1;
-            constexpr static size_t BiggestSize2 = support256 ? size256 : BiggestSize1;
-            constexpr static size_t BiggestSize = support512 ? size512 : BiggestSize2;
-        public:
-            constexpr static size_t Size = (isComplex || isForward) ? 1 : (isDynamic ? BiggestSize : Size3);
-            using Type = typename std::conditional<Size == 1, ScalarType, SIMD<ScalarType, Size>>::type;
-        };
-
-        template<size_t Length>
-        class BestPacket<Scalar<Float16>, Length> {
-            using ScalarType = Scalar<Float16>;
-        public:
-            constexpr static size_t Size = Length == 1 ? 1 : 2;
-            using Type = typename std::conditional<Length == 1, ScalarType, SIMD<ScalarType, 2>>::type;
-        };
-    }
 
     template<class ScalarType, size_t Size>
     class SIMD : private Traits<SIMD<ScalarType, Size>>::BaseType {
@@ -253,3 +212,4 @@ namespace std {
     #include "SIMDImpl/Half2.h"
 #endif
 #include "SIMDImpl/ElementaryFunction.h"
+#include "SIMDImpl/BestPacket.h"

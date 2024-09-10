@@ -17,10 +17,7 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include <random>
-#include <fstream>
-#include <iostream>
 #include <algorithm>
-#include <fstream>
 #include <Physica/Core/Parallel/Executor/ThreadExecutor.h>
 #include <Physica/Core/Parallel/CUDAContext.cuh>
 #include <Physica/Core/Physics/MD/RPMD.h>

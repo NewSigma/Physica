@@ -40,7 +40,7 @@ namespace Physica::Core {
             constexpr static bool isT2Continuous = std::is_base_of<ContinuousVector<T2>, T2>::value;
         public:
             using ScalarType = typename T1::ScalarType;
-            using AnyPacket = typename Internal::BestPacket<ScalarType, SizeAtCompile>::Type;
+            using AnyPacket = typename BestPacket<ScalarType, SizeAtCompile>::Type;
             constexpr static size_t PacketSize = AnyPacket::size();
             constexpr static bool isReverseDiff = ScalarType::isReverseDiff;
 

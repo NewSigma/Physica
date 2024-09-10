@@ -32,6 +32,16 @@ namespace Physica::Core {
         [[nodiscard]] __device__ ScalarType calc(size_t index) const {
             return reciprocal(Base::template getExpr<Owner>().template calc<Owner>(index));
         }
+
+        template<class AnyPacket, Side Owner = GetSide()>
+        [[nodiscard]] __device__ AnyPacket packet(size_t index) const {
+            return AnyPacket(1) / Base::template getExpr<Owner>().template packet<AnyPacket, Owner>(index);
+        }
+
+        template<class AnyPacket, Side Owner = GetSide()>
+        [[nodiscard]] __device__ AnyPacket packetPartial(size_t index, size_t count) const {
+            return AnyPacket(1) / Base::template getExpr<Owner>().template packetPartial<AnyPacket, Owner>(index, count);
+        }
     };
 
     template<class VectorType>

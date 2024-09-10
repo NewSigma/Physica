@@ -112,20 +112,20 @@ namespace Physica::Core {
         /* SIMD support */
         __host__ __device__ constexpr static size_t size() { return 1; }
 
-        Derived& load(const ScalarType* p) {
+        __host__ __device__ Derived& load(const ScalarType* p) {
             this->getDerived() = *p;
             return this->getDerived();
         }
 
-        void store(ScalarType* p) const { *p = this->getDerived().getValue(); }
+        __host__ __device__ void store(ScalarType* p) const { *p = this->getDerived().getValue(); }
 
-        Derived& load_partial(int n, const ScalarType* p) {
+        __host__ __device__ Derived& load_partial(int n, const ScalarType* p) {
             if (n)
                 load(p);
             return this->getDerived();
         }
 
-        void store_partial(int n, ScalarType* p) const {
+        __host__ __device__ void store_partial(int n, ScalarType* p) const {
             if (n)
                 store(p);
         }
@@ -133,14 +133,14 @@ namespace Physica::Core {
         void insert([[maybe_unused]] int index, ScalarType value) { this->getDerived() = ScalarType(value); }
         [[nodiscard]] ScalarType horizontal_add() const { return this->getDerived(); }
         /* Auto differential support */
-        [[nodiscard]] const PlainScalar& getValue() const noexcept {
+        [[nodiscard]] __host__ __device__  const PlainScalar& getValue() const noexcept {
             if constexpr (isDifferentiable)
                 return this->getDerived().getValue();
             else
                 return this->getDerived();
         }
 
-        [[nodiscard]] const PlainScalar& getGrad() const noexcept {
+        [[nodiscard]] __host__ __device__  const PlainScalar& getGrad() const noexcept {
             return this->getDerived().getGrad();
         }
         /* Static Members */

@@ -85,8 +85,11 @@ namespace Physica::Core {
         } rhs;
     public:
         __host__ __device__ inline device_obj(const DeviceLHS& lhs_, const DeviceRHS& rhs_) {
-            if constexpr (Internal::is_matrix<RHS>::value)
-                assert(lhs_.getLength() == rhs_.getLength());
+            if constexpr (Internal::is_matrix<RHS>::value) {
+                assert(lhs_.getRow() == rhs_.getRow());
+                assert(lhs_.getColumn() == rhs_.getColumn());
+            }
+
             if constexpr (IsHost()) {
                 lhs.value = asStruct(lhs_);
                 rhs.value = asStruct(rhs_);

@@ -29,7 +29,7 @@ namespace Physica::Core {
             constexpr static size_t size1 = T1::SizeAtCompile;
             constexpr static size_t size2 = T2::SizeAtCompile;
             constexpr static size_t SizeAtCompile = size1 > size2 ? size1 : size2;
-            using PacketType = typename Internal::BestPacket<ResultType, SizeAtCompile>::Type;
+            using PacketType = typename BestPacket<ResultType, SizeAtCompile>::Type;
 
             constexpr static bool isFastPacket1 = Traits<T1>::FastPacket;
             constexpr static bool isFastPacket2 = Traits<T2>::FastPacket;

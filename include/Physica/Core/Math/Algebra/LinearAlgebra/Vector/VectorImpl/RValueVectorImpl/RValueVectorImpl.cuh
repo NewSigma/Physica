@@ -55,11 +55,8 @@ namespace Physica::Core {
             kernel<<<numBlock, numThread, 0, CUDAContext::getInstance()>>>(asStruct(Base::getDerived()), asStruct(target));
             check(cudaGetLastError());
         }
-        else {
-            using OtherScalar = typename OtherDerived::ScalarType;
-            for (size_t i = 0; i < length; ++i)
-                target[i] = OtherScalar(calc(i));
-        }
+        else
+            assignToImpl<OtherDerived>(target);
     }
 
     template<class Derived>
@@ -118,5 +115,51 @@ namespace Physica::Core {
     __device__ inline device_obj<CrossProduct<Derived, OtherDerived>>
     device_obj<RValueVector<Derived>>::crossProduct(const device_obj<RValueVector<OtherDerived>>& v) const noexcept {
         return device_obj<CrossProduct<Derived, OtherDerived>>(*this, v);
+    }
+
+    template<class Derived>
+    template<class OtherDerived>
+    __device__ void device_obj<RValueVector<Derived>>::assignToImpl(device_obj<LValueVector<OtherDerived>>& target_) const {
+        constexpr bool enableSIMD = Internal::EnableSIMD<Derived, OtherDerived>::value;
+        auto& target = target_.getDerived();
+        if constexpr (enableSIMD) {
+            constexpr static size_t Size1 = Derived::SizeAtCompile;
+            constexpr static size_t Size2 = OtherDerived::SizeAtCompile;
+            constexpr static size_t VectorSize = Size1 > Size2 ? Size1 : Size2;
+            using PacketType = typename device_obj<BestPacket<ScalarType, VectorSize>>::Type;
+            constexpr static size_t PacketSize = PacketType::size();
+
+            if constexpr (VectorSize != Dynamic) {
+                constexpr size_t to = VectorSize / PacketSize * PacketSize;
+                for (size_t i = 0; i < to; i += PacketSize)
+                    target.writePacket(i, Base::getDerived().template packet<PacketType>(i));
+
+                constexpr size_t i = VectorSize - VectorSize % PacketSize;
+                if constexpr (i != VectorSize) {
+                    constexpr size_t count = VectorSize - i;
+                    target.writePacketPartial(i, count, Base::getDerived().template packetPartial<PacketType>(i, count));
+                }
+            }
+            else {
+                const size_t length = getLength();
+                if (length == 0)
+                    return;
+
+                const size_t to = length / PacketSize * PacketSize;
+                size_t i = 0;
+                for (; i < to; i += PacketSize)
+                    target.writePacket(i, Base::getDerived().template packet<PacketType>(i));
+
+                if (to != length) {
+                    const size_t count = length - i;
+                    target.writePacketPartial(i, count, Base::getDerived().template packetPartial<PacketType>(i, count));
+                }
+            }
+        }
+        else {
+            using OtherScalar = typename OtherDerived::ScalarType;
+            for (size_t i = 0; i < getLength(); ++i)
+                target[i] = ScalarType(calc(i));
+        }
     }
 }

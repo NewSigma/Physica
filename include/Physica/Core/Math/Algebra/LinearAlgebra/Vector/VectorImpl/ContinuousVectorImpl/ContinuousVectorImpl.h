@@ -38,7 +38,7 @@ namespace Physica::Core {
             constexpr static size_t size1 = T1::SizeAtCompile;
             constexpr static size_t size2 = T2::SizeAtCompile;
             constexpr static size_t SizeAtCompile = size1 > size2 ? size1 : size2;
-            using PacketType = typename Internal::BestPacket<typename T1::ScalarType, SizeAtCompile>::Type;
+            using PacketType = typename BestPacket<typename T1::ScalarType, SizeAtCompile>::Type;
         public:
             static void run(LValueVector<T1>& v1, const RValueVector<T2>& v2) {
                 if constexpr (SizeAtCompile != Dynamic) {

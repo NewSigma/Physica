@@ -221,7 +221,7 @@ namespace Physica::Core {
     template<class ScalarType, bool IsFixedBoundary, size_t NumReplica, RPMDIntegrator Integrator, class Executor>
     bool HardCore<ScalarType, IsFixedBoundary, NumReplica, Integrator, Executor>::checkCollision(
             [[maybe_unused]] size_t id_dof, const RingPolymerType& ringPolymer) const {
-        using PacketType = typename Internal::BestPacket<ScalarType, Dynamic>::Type;
+        using PacketType = typename BestPacket<ScalarType, Dynamic>::Type;
         using BoolPacketType = typename Traits<PacketType>::BoolSIMDType;
         const size_t numParticle = getNumParticle();
         if constexpr (NumReplica == 1) {
