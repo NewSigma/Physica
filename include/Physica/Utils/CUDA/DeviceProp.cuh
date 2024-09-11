@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Weibo He.
+ * Copyright 2022-2024 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -18,20 +18,11 @@
  */
 #pragma once
 
-#include "Physica/Macro.h"
-#include "Physica/Utils/Container/Array/Array.h"
+#include <Physica/Macro.h>
+#include <Physica/Utils/Container/Array/Array.h>
 
 namespace Physica::Utils {
-    /**
-     * Hard-coded device properties can be referenced from [1].
-     * 
-     * Reference:
-     * [1] https://docs.nvidia.com/cuda/cuda-c-programming-guide/index.html#compute-capabilities
-     */
     class PHYSICA_API DeviceProp {
-    public:
-        constexpr static unsigned int MaxThreadsPerBlock = 1024;
-        constexpr static unsigned int WarpSize = 32;
     private:
         int driverVersion;
         int runtimeVersion;

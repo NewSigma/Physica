@@ -25,7 +25,7 @@ namespace Physica::Core {
                 Physica::PlainStruct<Core::device_obj<TraceSegment<ScalarType, Order>>> segment_, ScalarType value) {
             using DiffRecord = typename Core::device_obj<TraceSegment<ScalarType, Order>>::DiffRecord;
             auto& segment = segment_.getDerived();
-            segment.getRecords()[0] = DiffRecord{0, ExpressionType::Set};
+            segment.getRecords()[0] = DiffRecord{0, ExprType::Set};
             segment.getValues()[0] = value;
             segment.getGrads()[0] = 0;
         }
@@ -47,7 +47,7 @@ namespace Physica::Core {
     }
 
     template<class ScalarType, unsigned int Order>
-    device_obj<TraceSegment<ScalarType, Order>>::device_obj(size_t size, ExpressionType type)
+    device_obj<TraceSegment<ScalarType, Order>>::device_obj(size_t size, ExprType type)
             : records(size)
             , operands(size * numOperand(type))
             , values(size)
@@ -55,7 +55,7 @@ namespace Physica::Core {
 
     template<class ScalarType, unsigned int Order>
     device_obj<TraceSegment<ScalarType, Order>>::device_obj(ScalarType value)
-            : device_obj(1, ExpressionType::Set) {
+            : device_obj(1, ExprType::Set) {
         init(value);
     }
     /**
@@ -63,7 +63,7 @@ namespace Physica::Core {
      */
     template<class ScalarType, unsigned int Order>
     device_obj<TraceSegment<ScalarType, Order>>::device_obj(const HostValueVector& values_)
-            : device_obj(values_.getLength(), ExpressionType::Set) {
+            : device_obj(values_.getLength(), ExprType::Set) {
         init(values_);
     }
 
@@ -120,7 +120,7 @@ namespace Physica::Core {
             return;
 
         const DiffRecord record = records[index];
-        if (record.source == ExpressionType::Set)
+        if (record.source == ExprType::Set)
             return;
 
         const ScalarType grad = grads[index];
@@ -129,46 +129,46 @@ namespace Physica::Core {
             
         const ScalarType value = values[index];
         const size_t idFirstOperand = record.idFirstOperand;
-        const ExpressionType source = record.source;
+        const ExprType source = record.source;
         DiffScalar operandX = operands[idFirstOperand];
         ScalarType& gradX = operandX.getGrad();
         /* Unitary Operations */ {
             switch (source) {
-                case ExpressionType::Assign:
-                case ExpressionType::Minus:
-                    gradX += grad * ScalarType(source == ExpressionType::Assign ? 1.0 : -1.0);
+                case ExprType::Assign:
+                case ExprType::Minus:
+                    gradX += grad * ScalarType(source == ExprType::Assign ? 1.0 : -1.0);
                     return;
-                case ExpressionType::Reciprocal:
+                case ExprType::Reciprocal:
                     gradX -= grad * square(value);
                     return;
-                case ExpressionType::Sqrt:
+                case ExprType::Sqrt:
                     gradX += grad / value * ScalarType(0.5);
                     return;
-                case ExpressionType::Cbrt:
+                case ExprType::Cbrt:
                     gradX += grad / (square(value) * ScalarType(3));
                     return;
-                case ExpressionType::Abs:
+                case ExprType::Abs:
                     gradX += operandX.getValue().isPositive() ? grad : -grad;
                     return;
-                case ExpressionType::Relu:
+                case ExprType::Relu:
                     gradX += operandX.getValue().isPositive() ? grad : ScalarType(0);
                     return;
-                case ExpressionType::Square:
+                case ExprType::Square:
                     gradX += grad * operandX.getValue() * ScalarType(2);
                     return;
-                case ExpressionType::Ln:
+                case ExprType::Ln:
                     gradX += grad / operandX.getValue();
                     return;
-                case ExpressionType::Exp:
+                case ExprType::Exp:
                     gradX += grad * value;
                     return;
-                case ExpressionType::Sin:
+                case ExprType::Sin:
                     gradX += grad * cos(operandX.getValue());
                     return;
-                case ExpressionType::Cos:
+                case ExprType::Cos:
                     gradX -= grad * sin(operandX.getValue());
                     return;
-                case ExpressionType::ArcCos:
+                case ExprType::ArcCos:
                     gradX -= grad / sqrt(ScalarType(1) - square(operandX.getValue()));
                     return;
                 default:;
@@ -178,22 +178,22 @@ namespace Physica::Core {
             DiffScalar operandY = operands[idFirstOperand + 1];
             ScalarType& gradY = operandY.getGrad();
             switch (source) {
-                case ExpressionType::Add:
-                case ExpressionType::Sub:
+                case ExprType::Add:
+                case ExprType::Sub:
                     gradX += grad;
-                    gradY += grad * ScalarType(source == ExpressionType::Add ? 1.0 : -1.0);
+                    gradY += grad * ScalarType(source == ExprType::Add ? 1.0 : -1.0);
                     return;
-                case ExpressionType::Mul:
+                case ExprType::Mul:
                     gradX += grad * operandY.getValue();
                     gradY += grad * operandX.getValue();
                     return;
-                case ExpressionType::Div: {
+                case ExprType::Div: {
                     const ScalarType dx = grad * reciprocal(operandY.getValue());
                     gradX += dx;
                     gradY -= dx * value;
                     return;
                 }
-                case ExpressionType::Sum: {
+                case ExprType::Sum: {
                     ScalarType* const pGradY = &gradY;
                     for (auto* pGradX = &gradX; pGradX <= pGradY; pGradX += 1)
                         *pGradX += grad;
@@ -209,7 +209,7 @@ namespace Physica::Core {
     __device__ void device_obj<TraceSegment<ScalarType, Order>>::copyKernelImpl(This& target) const {
         const size_t index = blockIdx.x * blockDim.x + threadIdx.x;
         if (index < getLength()) {
-            target.records[index] = DiffRecord{index, ExpressionType::Assign};
+            target.records[index] = DiffRecord{index, ExprType::Assign};
             target.operands[index] = DiffScalar(const_cast<ScalarType*>(values.data() + index),
                                                 const_cast<ScalarType*>(grads.data() + index));
         }

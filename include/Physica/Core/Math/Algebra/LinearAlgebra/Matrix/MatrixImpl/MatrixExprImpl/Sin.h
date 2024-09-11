@@ -20,9 +20,9 @@
 
 namespace Physica::Core {
     template<class MatrixType>
-    class MatrixExpr<ExpressionType::Sin, MatrixType>
-            : public UnitaryMatrixExpr<ExpressionType::Sin, MatrixType> {
-        using Base = UnitaryMatrixExpr<ExpressionType::Sin, MatrixType>;
+    class MatrixExpr<ExprType::Sin, MatrixType>
+            : public UnitaryMatrixExpr<ExprType::Sin, MatrixType> {
+        using Base = UnitaryMatrixExpr<ExprType::Sin, MatrixType>;
     public:
         using typename Base::ScalarType;
     public:
@@ -33,6 +33,6 @@ namespace Physica::Core {
 
     template<class MatrixType>
     [[nodiscard]] inline auto sin_elem(const RValueMatrix<MatrixType>& m) noexcept {
-        return MatrixExpr<ExpressionType::Sin, MatrixType>(m.getDerived());
+        return MatrixExpr<ExprType::Sin, MatrixType>(m.getDerived());
     }
 }

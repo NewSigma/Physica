@@ -20,9 +20,9 @@
 
 namespace Physica::Core {
     template<class VectorType>
-    class VectorExpr<ExpressionType::Sqrt, VectorType> : public UnitaryVectorExpr<ExpressionType::Sqrt, VectorType> {
-        using This = VectorExpr<ExpressionType::Sqrt, VectorType>;
-        using Base = UnitaryVectorExpr<ExpressionType::Sqrt, VectorType>;
+    class VectorExpr<ExprType::Sqrt, VectorType> : public UnitaryVectorExpr<ExprType::Sqrt, VectorType> {
+        using This = VectorExpr<ExprType::Sqrt, VectorType>;
+        using Base = UnitaryVectorExpr<ExprType::Sqrt, VectorType>;
     public:
         using typename Base::ScalarType;
     public:
@@ -39,6 +39,6 @@ namespace Physica::Core {
 
     template<class VectorType>
     [[nodiscard]] inline auto sqrt(const RValueVector<VectorType>& v) noexcept {
-        return VectorExpr<ExpressionType::Sqrt, VectorType>(v);
+        return VectorExpr<ExprType::Sqrt, VectorType>(v);
     }
 }

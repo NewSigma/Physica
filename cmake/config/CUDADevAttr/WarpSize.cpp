@@ -16,23 +16,10 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#pragma once
+#include <cuda_runtime_api.h>
 
-namespace Physica::Core {
-    template<class MatrixType>
-    class MatrixExpr<ExprType::Ln, MatrixType>
-            : public UnitaryMatrixExpr<ExprType::Ln, MatrixType> {
-        using Base = UnitaryMatrixExpr<ExprType::Ln, MatrixType>;
-    public:
-        using typename Base::ScalarType;
-    public:
-        using Base::Base;
-        /* Operations */
-        [[nodiscard]] ScalarType calc(size_t row, size_t col) const { return ln(Base::getExpr().calc(row, col)); }
-    };
-
-    template<class MatrixType>
-    [[nodiscard]] inline auto ln_elem(const RValueMatrix<MatrixType>& m) noexcept {
-        return MatrixExpr<ExprType::Ln, MatrixType>(m.getDerived());
-    }
+int main() {
+    int result = 0;
+    cudaDeviceGetAttribute(&result, cudaDevAttrWarpSize, 0);
+    return result;
 }

@@ -20,9 +20,9 @@
 
 namespace Physica::Core {
     template<class VectorType, class AnyScalar>
-    class device_obj<VectorExpr<ExpressionType::Mul, VectorType, ScalarBase<AnyScalar>>>
-            : public device_obj<BinaryVectorExpr<ExpressionType::Mul, VectorType, ScalarBase<AnyScalar>>> {
-        using Base = device_obj<BinaryVectorExpr<ExpressionType::Mul, VectorType, ScalarBase<AnyScalar>>>;
+    class device_obj<VectorExpr<ExprType::Mul, VectorType, ScalarBase<AnyScalar>>>
+            : public device_obj<BinaryVectorExpr<ExprType::Mul, VectorType, ScalarBase<AnyScalar>>> {
+        using Base = device_obj<BinaryVectorExpr<ExprType::Mul, VectorType, ScalarBase<AnyScalar>>>;
         static_assert(is_scalar<AnyScalar>::value, "[Error]: This is not a scalar type");
     public:
         using typename Base::ScalarType;
@@ -49,9 +49,9 @@ namespace Physica::Core {
     };
 
     template<class VectorType1, class VectorType2>
-    class device_obj<VectorExpr<ExpressionType::Mul, VectorType1, VectorType2>>
-            : public device_obj<BinaryVectorExpr<ExpressionType::Mul, VectorType1, VectorType2>> {
-        using Base = device_obj<BinaryVectorExpr<ExpressionType::Mul, VectorType1, VectorType2>>;
+    class device_obj<VectorExpr<ExprType::Mul, VectorType1, VectorType2>>
+            : public device_obj<BinaryVectorExpr<ExprType::Mul, VectorType1, VectorType2>> {
+        using Base = device_obj<BinaryVectorExpr<ExprType::Mul, VectorType1, VectorType2>>;
     public:
         using typename Base::ScalarType;
     public:
@@ -77,19 +77,19 @@ namespace Physica::Core {
     };
 
     template<class VectorType, class ScalarType>
-    [[nodiscard]] __device__ inline device_obj<VectorExpr<ExpressionType::Mul, VectorType, ScalarBase<ScalarType>>>
+    [[nodiscard]] __device__ inline device_obj<VectorExpr<ExprType::Mul, VectorType, ScalarBase<ScalarType>>>
     operator*(const device_obj<RValueVector<VectorType>>& v, const ScalarBase<ScalarType>& s) noexcept {
         return {v.getDerived(), s.getDerived()};
     }
 
     template<class ScalarType, class VectorType>
-    [[nodiscard]] __device__ inline device_obj<VectorExpr<ExpressionType::Mul, VectorType, ScalarBase<ScalarType>>>
+    [[nodiscard]] __device__ inline device_obj<VectorExpr<ExprType::Mul, VectorType, ScalarBase<ScalarType>>>
     operator*(const ScalarBase<ScalarType>& s, const device_obj<RValueVector<VectorType>>& v) noexcept {
         return v * s.getDerived();
     }
     
     template<class VectorType1, class VectorType2>
-    [[nodiscard]] __host__ __device__ inline device_obj<VectorExpr<ExpressionType::Mul, VectorType1, VectorType2>>
+    [[nodiscard]] __host__ __device__ inline device_obj<VectorExpr<ExprType::Mul, VectorType1, VectorType2>>
     hadamard(const device_obj<RValueVector<VectorType1>>& v1, const device_obj<RValueVector<VectorType2>>& v2) noexcept {
         return {v1.getDerived(), v2.getDerived()};
     }

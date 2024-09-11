@@ -58,8 +58,8 @@ namespace Physica::Core {
         while (iteration < maxIteration) {
             y.template operator=<decltype(m * x), Executor>(m * x);
 
-            using ExprType = decltype(m.hermite() * unit(y));
-            z.template operator=<ExprType, Executor>(m.hermite() * unit(y));
+            using MatVecDot = decltype(m.hermite() * unit(y));
+            z.template operator=<MatVecDot, Executor>(m.hermite() * unit(y));
             const RealType criteria = iteration == 0 ? (toRealVector(z).sum() * factor) : z[index].getReal();
             const bool isConverged = z.normInf() <= criteria * RealType(1 + std::numeric_limits<RealType>::epsilon());
             const bool isCycling = iteration > 0 && (lastIndex == index); // Avoid cycling because unit(0) is implemented as 1

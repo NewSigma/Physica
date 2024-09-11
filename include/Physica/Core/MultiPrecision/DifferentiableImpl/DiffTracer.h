@@ -51,9 +51,9 @@ namespace Physica::Core {
         template<size_t Size>
         inline void pushOperand(const DiffScalar (&operand)[Size]);
 
-        [[nodiscard]] DiffScalar pushOperation(ScalarType value, ExpressionType source);
+        [[nodiscard]] DiffScalar pushOperation(ScalarType value, ExprType source);
         template<size_t Size>
-        [[nodiscard]] DiffScalar pushOperation(const SIMD<ScalarType, Size>& simd, ExpressionType source);
+        [[nodiscard]] DiffScalar pushOperation(const SIMD<ScalarType, Size>& simd, ExprType source);
         [[nodiscard]] DiffScalar copy(DiffScalar s);
 
         template<class... Args>
@@ -79,7 +79,7 @@ namespace Physica::Core {
         /* Getters */
         [[nodiscard]] const TraceListType& getTraceList() const noexcept { return traceList; }
         [[nodiscard]] size_t getNumRecord() const noexcept;
-        [[nodiscard]] ExpressionType getSource(DiffScalar s) const noexcept;
+        [[nodiscard]] ExprType getSource(DiffScalar s) const noexcept;
         [[nodiscard]] DiffScalar* getFirstOperand(DiffScalar s);
         /* Static members */
         [[nodiscard]] static DiffTracer& getInstance() noexcept;
@@ -144,13 +144,13 @@ namespace Physica::Core {
 
     template<class ScalarType, unsigned int Order>
     inline typename DiffTracer<ScalarType, Order>::DiffScalar
-    DiffTracer<ScalarType, Order>::pushOperation(ScalarType value, ExpressionType source) {
+    DiffTracer<ScalarType, Order>::pushOperation(ScalarType value, ExprType source) {
         assert(checkLastOpDone() && "[Error]: New record cannot begin unless last record is done");
         if (traceList.empty() || traceList.front().full())
             pushSegment();
         auto& segment = traceList.front();
         auto& records = segment.records;
-        if (source == ExpressionType::Set)
+        if (source == ExprType::Set)
             records.grow(makeSetOpNode(records));
         else
             records.grow(DiffRecord{segment.operands.getLength(), source});
@@ -166,7 +166,7 @@ namespace Physica::Core {
         }
         else {
             auto& tracer = DiffTracer<ScalarType, Order - 1>::getInstance();
-            auto grad = tracer.pushOperation(ScalarType(0), ExpressionType::Diff);
+            auto grad = tracer.pushOperation(ScalarType(0), ExprType::Diff);
             segment.grads.grow(grad);
             tracer.pushOperand(grad);
             return DiffScalar(values.data() + offset, std::move(grad));
@@ -176,7 +176,7 @@ namespace Physica::Core {
     template<class ScalarType, unsigned int Order>
     template<size_t Size>
     typename DiffTracer<ScalarType, Order>::DiffScalar
-    DiffTracer<ScalarType, Order>::pushOperation(const SIMD<ScalarType, Size>& simd, ExpressionType source) {
+    DiffTracer<ScalarType, Order>::pushOperation(const SIMD<ScalarType, Size>& simd, ExprType source) {
         assert(checkLastOpDone() && "[Error]: New record cannot begin unless last record is done");
         /* Allocate */ {
             if (traceList.empty())
@@ -191,7 +191,7 @@ namespace Physica::Core {
         const size_t oldNumRecord = segment.getLength();
         const size_t newNumRecord = oldNumRecord + Size;
         auto& records = segment.records;
-        if (source == ExpressionType::Set) {
+        if (source == ExprType::Set) {
             const DiffRecord record = makeSetOpNode(records);
             records.setLength(newNumRecord);
             for (size_t i = 0; i < Size; ++i)
@@ -200,7 +200,7 @@ namespace Physica::Core {
         else {
             records.setLength(newNumRecord);
             const size_t idFirstOperand = segment.operands.getLength();
-            const unsigned int numOp = (source == ExpressionType::MulAdd2 || source == ExpressionType::MulAdd4 || source == ExpressionType::MulAdd8) // Until now, these operantions are optimized using SIMD
+            const unsigned int numOp = (source == ExprType::MulAdd2 || source == ExprType::MulAdd4 || source == ExprType::MulAdd8) // Until now, these operantions are optimized using SIMD
                                      ? 0
                                      : SegmentType::numOperand(source);
             for (size_t i = 0; i < Size; ++i)
@@ -225,13 +225,13 @@ namespace Physica::Core {
     template<class ScalarType, unsigned int Order>
     typename DiffTracer<ScalarType, Order>::DiffScalar DiffTracer<ScalarType, Order>::copy(DiffScalar s) {
         if constexpr (Order == 1) {
-            const auto result = pushOperation(s.getValue(), ExpressionType::Assign);
+            const auto result = pushOperation(s.getValue(), ExprType::Assign);
             pushOperand(s);
             return result;
         }
         else {
             assert(checkLastOpDone() && "[Error]: New record cannot begin unless last record is done");
-            assert(s.getSource() == ExpressionType::Diff && "[Error]: Unexpected source");
+            assert(s.getSource() == ExprType::Diff && "[Error]: Unexpected source");
             if (traceList.empty() || traceList.front().full())
                 pushSegment();
 
@@ -419,7 +419,7 @@ namespace Physica::Core {
         const auto& operands = segment.operands;
         const auto& records = segment.records;
         const auto& record = *records.crbegin();
-        return record.source == ExpressionType::Set
+        return record.source == ExprType::Set
             || operands.getLength() >= (record.idFirstOperand + SegmentType::numOperand(record.source));
     }
 
@@ -432,7 +432,7 @@ namespace Physica::Core {
     }
 
     template<class ScalarType, unsigned int Order>
-    ExpressionType DiffTracer<ScalarType, Order>::getSource(DiffScalar s) const noexcept {
+    ExprType DiffTracer<ScalarType, Order>::getSource(DiffScalar s) const noexcept {
         for (auto ite = traceList.cbegin(); ite != traceList.cend(); ++ite) {
             const auto& segment = *ite;
             if (!segment.isFound(s))
@@ -441,7 +441,7 @@ namespace Physica::Core {
             return segment.records[index].source;
         }
         assert(false && "[Error]: Cannot find the record, maybe it is on another thread?");
-        return ExpressionType::Set;
+        return ExprType::Set;
     }
 
     template<class ScalarType, unsigned int Order>
@@ -489,11 +489,11 @@ namespace Physica::Core {
         size_t lastSetOpNode = 0;
         if (length != 0) {
             const auto lastRecord = records[length - 1];
-            if (lastRecord.source == ExpressionType::Set)
+            if (lastRecord.source == ExprType::Set)
                 lastSetOpNode = lastRecord.idFirstOperand;
             else
                 lastSetOpNode = length;
         }
-        return DiffRecord{lastSetOpNode, ExpressionType::Set};
+        return DiffRecord{lastSetOpNode, ExprType::Set};
     }
 }

@@ -36,7 +36,7 @@ namespace Physica::Core {
     }
 
     template<class PlainScalar, unsigned Order>
-    device_obj<Differentiable<Vector<PlainScalar>, DiffMode::Reverse, Order>>::device_obj(size_t length, ExpressionType type)
+    device_obj<Differentiable<Vector<PlainScalar>, DiffMode::Reverse, Order>>::device_obj(size_t length, ExprType type)
             : traceSeg(asStruct(TracerType::getInstance().pushSegment(length, type))) {}
 
     template<class PlainScalar, unsigned Order>
@@ -116,7 +116,7 @@ namespace Physica::Core {
         if (index != 0)
             return;
         const auto& trace = getTraceSegment();
-        result.getRecords()[0] = {0, ExpressionType::Assign};
+        result.getRecords()[0] = {0, ExprType::Assign};
         result.getOperands()[0] = trace[valueIndex];
         result.getValues()[0] = value;
         result.getGrads()[0] = 0;
@@ -146,7 +146,7 @@ namespace Physica::Core {
         if (index != 0)
             return;
         const auto& trace = getTraceSegment();
-        result.getRecords()[0] = {0, ExpressionType::Sum};
+        result.getRecords()[0] = {0, ExprType::Sum};
         result.getOperands()[0] = trace[0];
         result.getOperands()[1] = trace[length - 1];
         result.getValues()[0] = threadSum;
@@ -198,7 +198,7 @@ namespace Physica::Core {
     template<class PlainScalar, unsigned Order>
     typename device_obj<Differentiable<Vector<PlainScalar>, DiffMode::Reverse, Order>>::ScalarType
     device_obj<Differentiable<Vector<PlainScalar>, DiffMode::Reverse, Order>>::max() const {
-        auto& trace = TracerType::getInstance().pushSegment(1, ExpressionType::Assign);
+        auto& trace = TracerType::getInstance().pushSegment(1, ExprType::Assign);
         const size_t length = getLength();
         const size_t numThread = length > MaxThreadPerBlock ? MaxThreadPerBlock : length;
         Internal::DiffVector_minmaxKernel<This, SegmentType, true>
@@ -209,7 +209,7 @@ namespace Physica::Core {
     template<class PlainScalar, unsigned Order>
     typename device_obj<Differentiable<Vector<PlainScalar>, DiffMode::Reverse, Order>>::ScalarType
     device_obj<Differentiable<Vector<PlainScalar>, DiffMode::Reverse, Order>>::min() const {
-        auto& trace = TracerType::getInstance().pushSegment(1, ExpressionType::Assign);
+        auto& trace = TracerType::getInstance().pushSegment(1, ExprType::Assign);
         const size_t length = getLength();
         const size_t numThread = length > MaxThreadPerBlock ? MaxThreadPerBlock : length;
         Internal::DiffVector_minmaxKernel<This, SegmentType, false>
@@ -220,7 +220,7 @@ namespace Physica::Core {
     template<class PlainScalar, unsigned Order>
     typename device_obj<Differentiable<Vector<PlainScalar>, DiffMode::Reverse, Order>>::ScalarType
     device_obj<Differentiable<Vector<PlainScalar>, DiffMode::Reverse, Order>>::sum() const {
-        auto& trace = TracerType::getInstance().pushSegment(1, ExpressionType::Sum);
+        auto& trace = TracerType::getInstance().pushSegment(1, ExprType::Sum);
         const size_t length = getLength();
         const size_t numThread = length > MaxThreadPerBlock ? MaxThreadPerBlock : length;
         Internal::DiffVector_sumKernel<This, SegmentType>

@@ -140,7 +140,7 @@ namespace Physica::Core {
         [[nodiscard]] __host__ __device__ bool isZero() const noexcept { return getValue().isZero(); }
         [[nodiscard]] __host__ __device__ bool isPositive() const { return getValue().isPositive(); }
         [[nodiscard]] __host__ __device__ bool isNegative() const { return getValue().isNegative(); }
-        [[nodiscard]] inline ExpressionType getSource() const noexcept;
+        [[nodiscard]] inline ExprType getSource() const noexcept;
         [[nodiscard]] inline This* getFirstOperand() const;
         /* Setters */
         void setValue(const ScalarType& x) { *pValue = x; }

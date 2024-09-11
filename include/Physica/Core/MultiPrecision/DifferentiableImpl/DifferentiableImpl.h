@@ -67,7 +67,7 @@ namespace Physica::Core {
     ////////////////////////////////////////////////////////////
     template<class ScalarType, unsigned int Order>
     Differentiable<ScalarType, DiffMode::Reverse, Order>::Differentiable(ScalarType value)
-            : Differentiable(TracerType::getInstance().pushOperation(std::move(value), ExpressionType::Set)) {}
+            : Differentiable(TracerType::getInstance().pushOperation(std::move(value), ExprType::Set)) {}
 
     template<class ScalarType, unsigned int Order>
     Differentiable<ScalarType, DiffMode::Reverse, Order>::Differentiable(
@@ -101,14 +101,14 @@ namespace Physica::Core {
     template<class ScalarType, unsigned int Order>
     inline Differentiable<ScalarType, DiffMode::Reverse, Order> Differentiable<ScalarType, DiffMode::Reverse, Order>::operator-() const {
         auto& tracer = TracerType::getInstance();
-        const auto result = tracer.pushOperation(-getValue(), ExpressionType::Minus);
+        const auto result = tracer.pushOperation(-getValue(), ExprType::Minus);
         tracer.pushOperand(*this);
         return result;
     }
 
     template<class ScalarType, unsigned int Order>
     inline void Differentiable<ScalarType, DiffMode::Reverse, Order>::reverse() {
-        if (getSource() == ExpressionType::Diff) { //Optimize: Always false if no high order differential is required
+        if (getSource() == ExprType::Diff) { //Optimize: Always false if no high order differential is required
             getFirstOperand()->reverse();
             return;
         }
@@ -122,7 +122,7 @@ namespace Physica::Core {
 
     template<class ScalarType, unsigned int Order>
     inline void Differentiable<ScalarType, DiffMode::Reverse, Order>::reverse_to(Differentiable to) {
-        if (getSource() == ExpressionType::Diff) {
+        if (getSource() == ExprType::Diff) {
             getFirstOperand()->reverse_to(to);
             return;
         }
@@ -198,7 +198,7 @@ namespace Physica::Core {
     }
 
     template<class ScalarType, unsigned int Order>
-    inline ExpressionType Differentiable<ScalarType, DiffMode::Reverse, Order>::getSource() const noexcept {
+    inline ExprType Differentiable<ScalarType, DiffMode::Reverse, Order>::getSource() const noexcept {
         auto& tracer = TracerType::getInstance();
         return tracer.getSource(*this);
     }
@@ -253,13 +253,13 @@ namespace Physica::Core {
             const PlainScalar value = s1.getValue() + s2.getValue();
             ResultType result;
             if constexpr (OtherScalar::isDifferentiable) {
-                result = tracer.pushOperation(value, ExpressionType::Add);
+                result = tracer.pushOperation(value, ExprType::Add);
                 tracer.pushOperand(s1.getDerived());
                 tracer.pushOperand(s2.getDerived());
             }
             else {
                 const ResultType copy = s2.getDerived();
-                result = tracer.pushOperation(value, ExpressionType::Add);
+                result = tracer.pushOperation(value, ExprType::Add);
                 tracer.pushOperand(s1.getDerived());
                 tracer.pushOperand(copy);
             }
@@ -295,13 +295,13 @@ namespace Physica::Core {
             const PlainScalar value = s1.getValue() - s2.getValue();
             ResultType result;
             if constexpr (OtherScalar::isDifferentiable) {
-                result = tracer.pushOperation(value, ExpressionType::Sub);
+                result = tracer.pushOperation(value, ExprType::Sub);
                 tracer.pushOperand(s1.getDerived());
                 tracer.pushOperand(s2.getDerived());
             }
             else {
                 const ResultType copy = s2.getDerived();
-                result = tracer.pushOperation(value, ExpressionType::Sub);
+                result = tracer.pushOperation(value, ExprType::Sub);
                 tracer.pushOperand(s1.getDerived());
                 tracer.pushOperand(copy);
             }
@@ -337,13 +337,13 @@ namespace Physica::Core {
             const PlainScalar value = s1.getValue() * s2.getValue();
             ResultType result;
             if constexpr (OtherScalar::isDifferentiable) {
-                result = tracer.pushOperation(value, ExpressionType::Mul);
+                result = tracer.pushOperation(value, ExprType::Mul);
                 tracer.pushOperand(s1.getDerived());
                 tracer.pushOperand(s2.getDerived());
             }
             else {
                 const ResultType copy = s2.getDerived();
-                result = tracer.pushOperation(value, ExpressionType::Mul);
+                result = tracer.pushOperation(value, ExprType::Mul);
                 tracer.pushOperand(s1.getDerived());
                 tracer.pushOperand(copy);
             }
@@ -380,13 +380,13 @@ namespace Physica::Core {
             const PlainScalar value = s1.getValue() / s2.getValue();
             ResultType result;
             if constexpr (OtherScalar::isDifferentiable) {
-                result = tracer.pushOperation(value, ExpressionType::Div);
+                result = tracer.pushOperation(value, ExprType::Div);
                 tracer.pushOperand(s1.getDerived());
                 tracer.pushOperand(s2.getDerived());
             }
             else {
                 const ResultType copy = s2.getDerived();
-                result = tracer.pushOperation(value, ExpressionType::Div);
+                result = tracer.pushOperation(value, ExprType::Div);
                 tracer.pushOperand(s1.getDerived());
                 tracer.pushOperand(copy);
             }
@@ -407,7 +407,7 @@ namespace Physica::Core {
             const ScalarType value = s1.getValue() / s2.getValue();
             const ResultType copy = s1.getDerived();
             auto& tracer = DiffTracer<ScalarType, Order>::getInstance();
-            const auto result = tracer.pushOperation(value, ExpressionType::Div);
+            const auto result = tracer.pushOperation(value, ExprType::Div);
             tracer.pushOperand(copy);
             tracer.pushOperand(s2.getDerived());
             return result;

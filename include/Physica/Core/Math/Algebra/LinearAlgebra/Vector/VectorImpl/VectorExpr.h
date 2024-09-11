@@ -20,7 +20,7 @@
 
 #include <cassert>
 #include <Physica/Core/MultiPrecision/Scalar.h>
-#include <Physica/Core/MultiPrecision/ScalarImpl/ExpressionType.h>
+#include <Physica/Core/MultiPrecision/ScalarImpl/ExprType.h>
 #include <Physica/Utils/Template/CRTPBase.h>
 
 namespace Physica::Core {
@@ -29,11 +29,11 @@ namespace Physica::Core {
      * 
      * Operations defined as \tparam T1 \tparam Type \tparam T2. e.g. vector + scalar, expression * expression
      */
-    template<ExpressionType Type, class T1, class T2 = T1> class VectorExpr;
+    template<ExprType Type, class T1, class T2 = T1> class VectorExpr;
 
-    template<ExpressionType ExprType, class VectorType>
-    class UnitaryVectorExpr : public RValueVector<VectorExpr<ExprType, VectorType>> {
-        using This = UnitaryVectorExpr<ExprType, VectorType>;
+    template<ExprType Type, class VectorType>
+    class UnitaryVectorExpr : public RValueVector<VectorExpr<Type, VectorType>> {
+        using This = UnitaryVectorExpr<Type, VectorType>;
         using Base = RValueVector<This>;
     private:
         const VectorType& expr;
@@ -50,10 +50,10 @@ namespace Physica::Core {
         [[nodiscard]] __host__ __device__ const VectorType& getExpr() const noexcept { return expr; }
     };
 
-    template<ExpressionType ExprType, class LHS, class RHS>
-    class BinaryVectorExpr : public RValueVector<VectorExpr<ExprType, LHS, RHS>> {
-        static_assert(Internal::is_vector<LHS>::value, "[Error]: Invalid left hand side type");
-        using This = BinaryVectorExpr<ExprType, LHS, RHS>;
+    template<ExprType Type, class LHS, class RHS>
+    class BinaryVectorExpr : public RValueVector<VectorExpr<Type, LHS, RHS>> {
+        static_assert(is_vector<LHS>::value, "[Error]: Invalid left hand side type");
+        using This = BinaryVectorExpr<Type, LHS, RHS>;
         using Base = RValueVector<This>;
         using LHS1 = LHS;
         using RHS1 = typename std::conditional<is_scalar<RHS>::value, typename RHS::ScalarType, RHS>::type;
@@ -85,7 +85,7 @@ namespace Physica::Core {
 namespace Physica {
     using namespace Core;
 
-    template<ExpressionType Type, class Expr1, class Expr2>
+    template<ExprType Type, class Expr1, class Expr2>
     class Traits<VectorExpr<Type, Expr1, Expr2>> {
         static_assert(Expr1::SizeAtCompile == Dynamic || Expr2::SizeAtCompile == Dynamic || (Expr1::SizeAtCompile == Expr2::SizeAtCompile)
                          , "[Error]: Vector dimentions do not match");
@@ -96,15 +96,15 @@ namespace Physica {
         constexpr static bool FastAssign2 = Traits<Expr2>::FastAssign;
         constexpr static bool FastPacket1 = Traits<Expr1>::FastPacket;
         constexpr static bool FastPacket2 = Traits<Expr2>::FastPacket;
-        constexpr static bool IsAddOrSub = Type == ExpressionType::Add || Type == ExpressionType::Sub;
+        constexpr static bool IsAddOrSub = Type == ExprType::Add || Type == ExprType::Sub;
     public:
-        using ScalarType = typename std::conditional<Type == ExpressionType::Abs, RealType, BinaryScalarType>::type;
+        using ScalarType = typename std::conditional<Type == ExprType::Abs, RealType, BinaryScalarType>::type;
         constexpr static size_t SizeAtCompile = Expr1::SizeAtCompile > Expr2::SizeAtCompile ? Expr1::SizeAtCompile : Expr2::SizeAtCompile;
         constexpr static bool FastAssign = IsAddOrSub && (FastAssign1 || FastAssign2);
         constexpr static bool FastPacket = FastPacket1 && FastPacket2;
     };
 
-    template<ExpressionType Type, class Expr, class AnyScalar>
+    template<ExprType Type, class Expr, class AnyScalar>
     class Traits<VectorExpr<Type, Expr, ScalarBase<AnyScalar>>> {
         static_assert(is_scalar<AnyScalar>::value, "[Error]: This is not a scalar type");
     public:

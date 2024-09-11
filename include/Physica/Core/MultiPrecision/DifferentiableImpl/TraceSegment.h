@@ -18,7 +18,7 @@
  */
 #pragma once
 
-#include "Physica/Core/MultiPrecision/ScalarImpl/ExpressionType.h"
+#include "Physica/Core/MultiPrecision/ScalarImpl/ExprType.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/Vector.h"
 #include "Print/ColorfulTraceSegment.h"
 
@@ -42,7 +42,7 @@ namespace Physica::Core {
             using device_obj_type = DiffRecord;
 
             size_t idFirstOperand;
-            ExpressionType source;
+            ExprType source;
         };
     private:
         using ColorfulType = ColorfulTraceSegment<ScalarType, Order>;
@@ -94,7 +94,7 @@ namespace Physica::Core {
         [[nodiscard]] GradVector& getGrads() noexcept { return grads; }
         [[nodiscard]] const GradVector& getGrads() const noexcept { return grads; }
         /* Static members */
-        [[nodiscard]] constexpr static unsigned int numOperand(ExpressionType type);
+        [[nodiscard]] constexpr static unsigned int numOperand(ExprType type);
     private:
         /* Operations */
         void reverse(size_t fromIndex, size_t toIndex);
@@ -121,7 +121,7 @@ namespace Physica::Core {
     template<class ScalarType, unsigned int Order>
     TraceSegment<ScalarType, Order>::TraceSegment(ValueVector values_) : values(std::move(values_)) {
         const size_t length = values.getLength();
-        records.resize(length, DiffRecord{0, ExpressionType::Set});
+        records.resize(length, DiffRecord{0, ExprType::Set});
         grads.resize(length, ScalarType(0));
     }
 
@@ -145,7 +145,7 @@ namespace Physica::Core {
             const auto source = segment.records[i].source;
             const auto width = os.width();
             os << std::setw(4) << i << std::setw(width) << ": ";
-            os << std::setw(10) << expressionTypeToStr(source) << std::setw(width) << ' ';
+            os << std::setw(10) << ExprTypeToStr(source) << std::setw(width) << ' ';
             os << segment.values[i] << ' ' << segment.grads[i] << ' ';
             os << "Op: ";
             const size_t idFirstOperand = segment.records[i].idFirstOperand;
@@ -228,7 +228,7 @@ namespace Physica::Core {
         assert(isFound(to) && "[Error]: forgeting a non existent, this may be a bug");
         const size_t index = find(to);
         const auto& record = records[index];
-        if (record.source == ExpressionType::Set) {
+        if (record.source == ExprType::Set) {
             size_t idLastOperand = 0;
             if (index != 0) {
                 const auto& lastRecord = records[index - 1];
@@ -290,34 +290,34 @@ namespace Physica::Core {
     }
 
     template<class ScalarType, unsigned int Order>
-    constexpr unsigned int TraceSegment<ScalarType, Order>::numOperand(ExpressionType type) {
+    constexpr unsigned int TraceSegment<ScalarType, Order>::numOperand(ExprType type) {
         switch (type) {
-            case ExpressionType::Set: return 0;
-            case ExpressionType::Assign: return 1;
-            case ExpressionType::Diff: return 1;
-            case ExpressionType::Minus: return 1;
-            case ExpressionType::Add: return 2;
-            case ExpressionType::Sub: return 2;
-            case ExpressionType::Mul: return 2;
-            case ExpressionType::Div: return 2;
-            case ExpressionType::Sum: return 2;
-            case ExpressionType::MulAdd2: [[fallthrough]];
-            case ExpressionType::MulAdd4: [[fallthrough]];
-            case ExpressionType::MulAdd8: return 3;
-            case ExpressionType::More: return 2;
-            case ExpressionType::MoreEq: return 2;
-            case ExpressionType::Reciprocal: return 1;
-            case ExpressionType::Sqrt: return 1;
-            case ExpressionType::Cbrt: return 1;
-            case ExpressionType::Abs: return 1;
-            case ExpressionType::Relu: return 1;
-            case ExpressionType::Square: return 1;
-            case ExpressionType::Ln: return 1;
-            case ExpressionType::Exp: return 1;
-            case ExpressionType::Pow: return 2;
-            case ExpressionType::Sin: return 1;
-            case ExpressionType::Cos: return 1;
-            case ExpressionType::ArcCos: return 1;
+            case ExprType::Set: return 0;
+            case ExprType::Assign: return 1;
+            case ExprType::Diff: return 1;
+            case ExprType::Minus: return 1;
+            case ExprType::Add: return 2;
+            case ExprType::Sub: return 2;
+            case ExprType::Mul: return 2;
+            case ExprType::Div: return 2;
+            case ExprType::Sum: return 2;
+            case ExprType::MulAdd2: [[fallthrough]];
+            case ExprType::MulAdd4: [[fallthrough]];
+            case ExprType::MulAdd8: return 3;
+            case ExprType::More: return 2;
+            case ExprType::MoreEq: return 2;
+            case ExprType::Reciprocal: return 1;
+            case ExprType::Sqrt: return 1;
+            case ExprType::Cbrt: return 1;
+            case ExprType::Abs: return 1;
+            case ExprType::Relu: return 1;
+            case ExprType::Square: return 1;
+            case ExprType::Ln: return 1;
+            case ExprType::Exp: return 1;
+            case ExprType::Pow: return 2;
+            case ExprType::Sin: return 1;
+            case ExprType::Cos: return 1;
+            case ExprType::ArcCos: return 1;
             default: [[unlikely]]
                 throw std::invalid_argument("[Error]: Unrecognized type");
         }
@@ -329,8 +329,8 @@ namespace Physica::Core {
         for (size_t i = fromIndex; toIndex <= i && i <= fromIndex; --i) {
             const DiffRecord record = records[i];
             const size_t idFirstOperand = record.idFirstOperand;
-            const ExpressionType source = record.source;
-            if (source == ExpressionType::Set) {
+            const ExprType source = record.source;
+            if (source == ExprType::Set) {
                 i = idFirstOperand;
                 continue;
             }
@@ -338,7 +338,7 @@ namespace Physica::Core {
             DiffScalar currentNode = (*this)[i];
             DiffScalar operandX = operands[idFirstOperand];
             GradType& gradX = operandX.getGrad();
-            if (source == ExpressionType::Diff) {
+            if (source == ExprType::Diff) {
                 auto& grad = currentNode.getGrad();
                 if constexpr (Order == 1)
                     grad += gradX;
@@ -357,41 +357,41 @@ namespace Physica::Core {
                 continue;
             /* Unitary Operations */ {
                 switch (source) {
-                    case ExpressionType::Assign:
-                    case ExpressionType::Minus:
-                        updateGrad(gradX, grad * GradType(source == ExpressionType::Assign ? 1.0 : -1.0));
+                    case ExprType::Assign:
+                    case ExprType::Minus:
+                        updateGrad(gradX, grad * GradType(source == ExprType::Assign ? 1.0 : -1.0));
                         continue;
-                    case ExpressionType::Reciprocal:
+                    case ExprType::Reciprocal:
                         updateGrad(gradX, -grad * square(GradType(currentNode)));
                         continue;
-                    case ExpressionType::Sqrt:
+                    case ExprType::Sqrt:
                         updateGrad(gradX, grad / GradType(currentNode) * GradType(0.5));
                         continue;
-                    case ExpressionType::Cbrt:
+                    case ExprType::Cbrt:
                         updateGrad(gradX, grad / (square(GradType(currentNode)) * GradType(3)));
                         continue;
-                    case ExpressionType::Abs:
+                    case ExprType::Abs:
                         updateGrad(gradX, operandX.getValue().isPositive() ? grad : -grad);
                         continue;
-                    case ExpressionType::Relu:
+                    case ExprType::Relu:
                         updateGrad(gradX, operandX.getValue().isPositive() ? grad : GradType(0));
                         continue;
-                    case ExpressionType::Square:
+                    case ExprType::Square:
                         updateGrad(gradX, grad * GradType(operandX) * GradType(2));
                         continue;
-                    case ExpressionType::Ln:
+                    case ExprType::Ln:
                         updateGrad(gradX, grad / GradType(operandX));
                         continue;
-                    case ExpressionType::Exp:
+                    case ExprType::Exp:
                         updateGrad(gradX, grad * GradType(currentNode));
                         continue;
-                    case ExpressionType::Sin:
+                    case ExprType::Sin:
                         updateGrad(gradX, grad * cos(GradType(operandX)));
                         continue;
-                    case ExpressionType::Cos:
+                    case ExprType::Cos:
                         updateGrad(gradX, -grad * sin(GradType(operandX)));
                         continue;
-                    case ExpressionType::ArcCos:
+                    case ExprType::ArcCos:
                         updateGrad(gradX, -grad / sqrt(GradType(1) - square(GradType(operandX))));
                         continue;
                     default:;
@@ -401,22 +401,22 @@ namespace Physica::Core {
                 DiffScalar operandY = operands[idFirstOperand + 1];
                 GradType& gradY = operandY.getGrad();
                 switch (source) {
-                    case ExpressionType::Add:
-                    case ExpressionType::Sub:
+                    case ExprType::Add:
+                    case ExprType::Sub:
                         updateGrad(gradX, grad);
-                        updateGrad(gradY, grad * GradType(source == ExpressionType::Add ? 1.0 : -1.0));
+                        updateGrad(gradY, grad * GradType(source == ExprType::Add ? 1.0 : -1.0));
                         continue;
-                    case ExpressionType::Mul:
+                    case ExprType::Mul:
                         updateGrad(gradX, grad * GradType(operandY));
                         updateGrad(gradY, grad * GradType(operandX));
                         continue;
-                    case ExpressionType::Div: {
+                    case ExprType::Div: {
                         const GradType dx = grad * reciprocal(GradType(operandY));
                         updateGrad(gradX, dx);
                         updateGrad(gradY, -dx * GradType(currentNode));
                         continue;
                     }
-                    case ExpressionType::MulAdd2:
+                    case ExprType::MulAdd2:
                         if constexpr (Order == 1) {
                             if constexpr (ScalarType::Option == Double) {
                                 DiffScalar operandZ = operands[idFirstOperand + 2];
@@ -433,7 +433,7 @@ namespace Physica::Core {
                             assert(false && "[Error]: MulAdd2 for high order autodiff not implemented");
                         }
                         continue;
-                    case ExpressionType::MulAdd4: {
+                    case ExprType::MulAdd4: {
                         if constexpr (Order == 1) {
                             DiffScalar operandZ = operands[idFirstOperand + 2];
                             i -= 3;
@@ -446,7 +446,7 @@ namespace Physica::Core {
                         }
                         continue;
                     }
-                    case ExpressionType::MulAdd8: {
+                    case ExprType::MulAdd8: {
                         if constexpr (Order == 1) {
                             DiffScalar operandZ = operands[idFirstOperand + 2];
                             i -= 7;
@@ -513,7 +513,7 @@ namespace Physica::Core {
         if constexpr (Order == 1)
             target += deltaGrad;
         else {
-            assert(target.getSource() == ExpressionType::Diff);
+            assert(target.getSource() == ExprType::Diff);
             const GradType temp = target + deltaGrad;
             *target.getFirstOperand() = temp;
             target.setValue(ScalarType(temp));

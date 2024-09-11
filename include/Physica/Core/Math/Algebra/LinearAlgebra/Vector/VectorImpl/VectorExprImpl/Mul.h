@@ -20,9 +20,9 @@
 
 namespace Physica::Core {
     template<class VectorType, class AnyScalar>
-    class VectorExpr<ExpressionType::Mul, VectorType, ScalarBase<AnyScalar>>
-            : public BinaryVectorExpr<ExpressionType::Mul, VectorType, ScalarBase<AnyScalar>> {
-        using Base = BinaryVectorExpr<ExpressionType::Mul, VectorType, ScalarBase<AnyScalar>>;
+    class VectorExpr<ExprType::Mul, VectorType, ScalarBase<AnyScalar>>
+            : public BinaryVectorExpr<ExprType::Mul, VectorType, ScalarBase<AnyScalar>> {
+        using Base = BinaryVectorExpr<ExprType::Mul, VectorType, ScalarBase<AnyScalar>>;
     public:
         using typename Base::ScalarType;
     public:
@@ -46,7 +46,7 @@ namespace Physica::Core {
 
     template<class VectorType, class AnyScalar>
     template<class OtherDerived, class Executor>
-    inline void VectorExpr<ExpressionType::Mul, VectorType, ScalarBase<AnyScalar>>::assignTo(LValueVector<OtherDerived>& v) const {
+    inline void VectorExpr<ExprType::Mul, VectorType, ScalarBase<AnyScalar>>::assignTo(LValueVector<OtherDerived>& v) const {
         constexpr bool FastAssign = Traits<VectorType>::FastAssign;
         if constexpr (FastAssign) {
             Base::getLHS().template assignTo<OtherDerived, Executor>(v.getDerived());
@@ -57,9 +57,9 @@ namespace Physica::Core {
     }
 
     template<class VectorType1, class VectorType2>
-    class VectorExpr<ExpressionType::Mul, VectorType1, VectorType2>
-            : public BinaryVectorExpr<ExpressionType::Mul, VectorType1, VectorType2> {
-        using Base = BinaryVectorExpr<ExpressionType::Mul, VectorType1, VectorType2>;
+    class VectorExpr<ExprType::Mul, VectorType1, VectorType2>
+            : public BinaryVectorExpr<ExprType::Mul, VectorType1, VectorType2> {
+        using Base = BinaryVectorExpr<ExprType::Mul, VectorType1, VectorType2>;
     public:
         using Base::Base;
         /* Operations */
@@ -80,7 +80,7 @@ namespace Physica::Core {
 
     template<class VectorType, class ScalarType>
     [[nodiscard]] inline auto operator*(const RValueVector<VectorType>& v, const ScalarBase<ScalarType>& s) noexcept {
-        return VectorExpr<ExpressionType::Mul, VectorType, ScalarBase<ScalarType>>(v.getDerived(), s.getDerived());
+        return VectorExpr<ExprType::Mul, VectorType, ScalarBase<ScalarType>>(v.getDerived(), s.getDerived());
     }
 
     template<class ScalarType, class VectorType>
@@ -90,6 +90,6 @@ namespace Physica::Core {
     
     template<class VectorType1, class VectorType2>
     [[nodiscard]] inline auto hadamard(const RValueVector<VectorType1>& v1, const RValueVector<VectorType2>& v2) noexcept {
-        return VectorExpr<ExpressionType::Mul, VectorType1, VectorType2>(v1.getDerived(), v2.getDerived());
+        return VectorExpr<ExprType::Mul, VectorType1, VectorType2>(v1.getDerived(), v2.getDerived());
     }
 }

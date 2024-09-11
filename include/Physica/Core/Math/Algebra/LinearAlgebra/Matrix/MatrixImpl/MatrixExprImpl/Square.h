@@ -20,9 +20,9 @@
 
 namespace Physica::Core {
     template<class MatrixType>
-    class MatrixExpr<ExpressionType::Square, MatrixType>
-            : public UnitaryMatrixExpr<ExpressionType::Square, MatrixType> {
-        using Base = UnitaryMatrixExpr<ExpressionType::Square, MatrixType>;
+    class MatrixExpr<ExprType::Square, MatrixType>
+            : public UnitaryMatrixExpr<ExprType::Square, MatrixType> {
+        using Base = UnitaryMatrixExpr<ExprType::Square, MatrixType>;
     public:
         using typename Base::ScalarType;
     public:
@@ -33,6 +33,6 @@ namespace Physica::Core {
 
     template<class MatrixType>
     [[nodiscard]] inline auto square_elem(const RValueMatrix<MatrixType>& m) noexcept {
-        return MatrixExpr<ExpressionType::Square, MatrixType>(m.getDerived());
+        return MatrixExpr<ExprType::Square, MatrixType>(m.getDerived());
     }
 }

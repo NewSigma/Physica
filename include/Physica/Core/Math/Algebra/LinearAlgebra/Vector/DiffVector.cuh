@@ -45,7 +45,7 @@ namespace Physica::Core {
         PlainStruct<SegmentType> traceSeg;
     public:
         device_obj() = default;
-        device_obj(size_t length, ExpressionType type);
+        device_obj(size_t length, ExprType type);
         device_obj(const PlainVector& values);
         device_obj(const device_obj&) = default;
         device_obj(device_obj&&) noexcept = default;

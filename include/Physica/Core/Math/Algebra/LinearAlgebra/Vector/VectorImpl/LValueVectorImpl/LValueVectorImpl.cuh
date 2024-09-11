@@ -66,7 +66,7 @@ namespace Physica::Core {
     template<class AnyScalar>
     inline device_obj<Derived>& device_obj<LValueVector<Derived>>::operator=(const ScalarBase<AnyScalar>& s) {
         using namespace Physica;
-        constexpr unsigned int WarpSize = Utils::DeviceProp::WarpSize;
+        constexpr unsigned int WarpSize = Physica::CUDADevAttr::WarpSize;
         const int numBlock = (Base::getLength() + WarpSize - 1) / WarpSize;
         const int numThread = WarpSize;
         Internal::assignConst_kernel<<<numBlock, numThread, 0, CUDAContext::getInstance()>>>(asStruct(Base::getDerived()), s.getDerived());

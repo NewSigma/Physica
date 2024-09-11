@@ -47,12 +47,12 @@ namespace Physica::Core {
         public:
             constexpr static bool value = isSameScalar && BestPacket<ScalarType, VectorType1::SizeAtCompile>::Size > 1;
         };
-
-        template<class T>
-        struct is_vector {
-            constexpr static bool value = std::is_base_of<RValueVector<T>, T>::value;
-        };
     }
+
+    template<class T>
+    struct is_vector {
+        constexpr static bool value = std::is_base_of<RValueVector<T>, T>::value;
+    };
     /**
      * \class RValueVector is a base class for vectors. You cannot take the address of elements in an RValueVector.
      * An RValueVector can be assigned to an LValueVector, but no other vector classes can be assigned to an RValueVector.

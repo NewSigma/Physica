@@ -26,7 +26,7 @@ namespace Physica::Core {
             return {value, s.getValue().isPositive() ? s.getGrad() : -s.getGrad()};
         else {
             auto& tracer = DiffTracer<ScalarType, Order>::getInstance();
-            const auto result = tracer.pushOperation(value, ExpressionType::Abs);
+            const auto result = tracer.pushOperation(value, ExprType::Abs);
             tracer.pushOperand(s);
             return result;
         }
@@ -39,7 +39,7 @@ namespace Physica::Core {
             return {value, s.getValue().isPositive() ? s.getGrad() : ScalarType(0)};
         else {
             auto& tracer = DiffTracer<ScalarType, Order>::getInstance();
-            const auto result = tracer.pushOperation(value, ExpressionType::Relu);
+            const auto result = tracer.pushOperation(value, ExprType::Relu);
             tracer.pushOperand(s);
             return result;
         }
@@ -52,7 +52,7 @@ namespace Physica::Core {
             return {value, ScalarType(2) * s.getValue() * s.getGrad()};
         else {
             auto& tracer = DiffTracer<ScalarType, Order>::getInstance();
-            const auto result = tracer.pushOperation(value, ExpressionType::Square);
+            const auto result = tracer.pushOperation(value, ExprType::Square);
             tracer.pushOperand(s);
             return result;
         }
@@ -65,7 +65,7 @@ namespace Physica::Core {
             return {rep, -s.getGrad() * square(rep)};
         else {
             auto& tracer = DiffTracer<ScalarType, Order>::getInstance();
-            const auto result = tracer.pushOperation(rep, ExpressionType::Reciprocal);
+            const auto result = tracer.pushOperation(rep, ExprType::Reciprocal);
             tracer.pushOperand(s);
             return result;
         }
@@ -78,7 +78,7 @@ namespace Physica::Core {
             return {value, ScalarType(0.5) * s.getGrad() / value};
         else {
             auto& tracer = DiffTracer<ScalarType, Order>::getInstance();
-            const auto result = tracer.pushOperation(value, ExpressionType::Sqrt);
+            const auto result = tracer.pushOperation(value, ExprType::Sqrt);
             tracer.pushOperand(s);
             return result;
         }
@@ -93,7 +93,7 @@ namespace Physica::Core {
         }
         else {
             auto& tracer = DiffTracer<ScalarType, Order>::getInstance();
-            const auto result = tracer.pushOperation(value, ExpressionType::Cbrt);
+            const auto result = tracer.pushOperation(value, ExprType::Cbrt);
             tracer.pushOperand(s);
             return result;
         }
@@ -106,7 +106,7 @@ namespace Physica::Core {
             return {value, s.getGrad() / s.getValue()};
         else {
             auto& tracer = DiffTracer<ScalarType, Order>::getInstance();
-            const auto result = tracer.pushOperation(value, ExpressionType::Ln);
+            const auto result = tracer.pushOperation(value, ExprType::Ln);
             tracer.pushOperand(s);
             return result;
         }
@@ -119,7 +119,7 @@ namespace Physica::Core {
             return {value, value * s.getGrad()};
         else {
             auto& tracer = DiffTracer<ScalarType, Order>::getInstance();
-            const auto result = tracer.pushOperation(value, ExpressionType::Exp);
+            const auto result = tracer.pushOperation(value, ExprType::Exp);
             tracer.pushOperand(s);
             return result;
         }
@@ -135,7 +135,7 @@ namespace Physica::Core {
         else {
             const ScalarType value = cos(s.getValue());
             auto& tracer = DiffTracer<ScalarType, Order>::getInstance();
-            const auto result = tracer.pushOperation(value, ExpressionType::Cos);
+            const auto result = tracer.pushOperation(value, ExprType::Cos);
             tracer.pushOperand(s);
             return result;
         }
@@ -151,7 +151,7 @@ namespace Physica::Core {
         else {
             const ScalarType value = sin(s.getValue());
             auto& tracer = DiffTracer<ScalarType, Order>::getInstance();
-            const auto result = tracer.pushOperation(value, ExpressionType::Sin);
+            const auto result = tracer.pushOperation(value, ExprType::Sin);
             tracer.pushOperand(s);
             return result;
         }
@@ -167,9 +167,9 @@ namespace Physica::Core {
         }
         else {
             auto& tracer = DiffTracer<ScalarType, Order>::getInstance();
-            sin_result = tracer.pushOperation(sin_value, ExpressionType::Sin);
+            sin_result = tracer.pushOperation(sin_value, ExprType::Sin);
             tracer.pushOperand(s);
-            cos_result = tracer.pushOperation(cos_value, ExpressionType::Cos);
+            cos_result = tracer.pushOperation(cos_value, ExprType::Cos);
             tracer.pushOperand(s);
         }
     }
@@ -182,7 +182,7 @@ namespace Physica::Core {
         else {
             const ScalarType value = arccos(s.getValue());
             auto& tracer = DiffTracer<ScalarType, Order>::getInstance();
-            const auto result = tracer.pushOperation(value, ExpressionType::ArcCos);
+            const auto result = tracer.pushOperation(value, ExprType::ArcCos);
             tracer.pushOperand(s);
             return result;
         }

@@ -30,6 +30,8 @@ namespace Physica {
     class CUDADevAttr {
     public:
     #ifdef PHYSICA_CUDA
+        constexpr static unsigned int MaxThreadsPerBlock = 1024;
+        constexpr static unsigned int WarpSize = @WarpSize@;
         constexpr static bool MemoryPoolsSupported = @MemoryPoolsSupported@;
     #endif
     };

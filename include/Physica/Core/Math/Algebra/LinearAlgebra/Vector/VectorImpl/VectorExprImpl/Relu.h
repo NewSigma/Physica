@@ -20,9 +20,9 @@
 
 namespace Physica::Core {
     template<class VectorType>
-    class VectorExpr<ExpressionType::Relu, VectorType> : public UnitaryVectorExpr<ExpressionType::Relu, VectorType> {
-        using This = VectorExpr<ExpressionType::Relu, VectorType>;
-        using Base = UnitaryVectorExpr<ExpressionType::Relu, VectorType>;
+    class VectorExpr<ExprType::Relu, VectorType> : public UnitaryVectorExpr<ExprType::Relu, VectorType> {
+        using This = VectorExpr<ExprType::Relu, VectorType>;
+        using Base = UnitaryVectorExpr<ExprType::Relu, VectorType>;
     public:
         using typename Base::ScalarType;
     public:
@@ -33,6 +33,6 @@ namespace Physica::Core {
 
     template<class VectorType>
     [[nodiscard]] inline auto relu(const RValueVector<VectorType>& v) noexcept {
-        return VectorExpr<ExpressionType::Relu, VectorType>(v);
+        return VectorExpr<ExprType::Relu, VectorType>(v);
     }
 }

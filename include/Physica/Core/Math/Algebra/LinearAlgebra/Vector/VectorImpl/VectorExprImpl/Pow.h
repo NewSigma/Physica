@@ -20,9 +20,9 @@
 
 namespace Physica::Core {
     template<class VectorType, class AnyScalar>
-    class VectorExpr<ExpressionType::Pow, VectorType, ScalarBase<AnyScalar>>
-            : public BinaryVectorExpr<ExpressionType::Pow, VectorType, ScalarBase<AnyScalar>> {
-        using Base = BinaryVectorExpr<ExpressionType::Pow, VectorType, ScalarBase<AnyScalar>>;
+    class VectorExpr<ExprType::Pow, VectorType, ScalarBase<AnyScalar>>
+            : public BinaryVectorExpr<ExprType::Pow, VectorType, ScalarBase<AnyScalar>> {
+        using Base = BinaryVectorExpr<ExprType::Pow, VectorType, ScalarBase<AnyScalar>>;
     public:
         using typename Base::ScalarType;
     public:
@@ -33,6 +33,6 @@ namespace Physica::Core {
 
     template<class VectorType, class AnyScalar>
     [[nodiscard]] inline auto pow(const RValueVector<VectorType>& v, const ScalarBase<AnyScalar>& s) noexcept {
-        return VectorExpr<ExpressionType::Pow, VectorType, ScalarBase<AnyScalar>>(v.getDerived(), s.getDerived());
+        return VectorExpr<ExprType::Pow, VectorType, ScalarBase<AnyScalar>>(v.getDerived(), s.getDerived());
     }
 }

@@ -20,7 +20,7 @@
 
 namespace Physica::Core {
     namespace Internal {
-        template<class ScalarType, ExpressionType Type>
+        template<class ScalarType, ExprType Type>
         __global__ void __launch_bounds__(1, 1) ElementaryFunction_calcKernel(
                 Physica::PlainStruct<device_obj<TraceSegment<ScalarType, 1>>> segment_,
                 Physica::PlainStruct<const device_obj<Differentiable<ScalarType, DiffMode::Reverse, 1>>> s_) {
@@ -30,10 +30,10 @@ namespace Physica::Core {
             segment.getRecords()[0] = DiffRecord{0, Type};
             const auto& s = s_.getDerived();
             segment.getOperands()[0] = s;
-            if constexpr (Type == ExpressionType::Ln)
+            if constexpr (Type == ExprType::Ln)
                 segment.getValues()[0] = ln(s.getValue());
             else
-                static_assert(Type == ExpressionType::Ln, "[Error]: Not implemented");
+                static_assert(Type == ExprType::Ln, "[Error]: Not implemented");
             segment.getGrads()[0] = 0;
         }
     }
@@ -41,8 +41,8 @@ namespace Physica::Core {
     template<class ScalarType>
     device_obj<Differentiable<ScalarType, DiffMode::Reverse, 1>> ln(const device_obj<Differentiable<ScalarType, DiffMode::Reverse, 1>>& s) {
         using TracerType = device_obj<DiffTracer<ScalarType, 1>>;
-        auto& segment = TracerType::getInstance().pushSegment(1, ExpressionType::Ln);
-        Internal::ElementaryFunction_calcKernel<ScalarType, ExpressionType::Ln>
+        auto& segment = TracerType::getInstance().pushSegment(1, ExprType::Ln);
+        Internal::ElementaryFunction_calcKernel<ScalarType, ExprType::Ln>
                 <<<1, 1, 0, CUDAContext::getInstance()>>>(asStruct(segment), asStruct(s));
         return segment[0];
     }

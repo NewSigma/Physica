@@ -18,7 +18,7 @@
  */
 #pragma once
 
-#include "Physica/Core/MultiPrecision/ScalarImpl/ExpressionType.h"
+#include "Physica/Core/MultiPrecision/ScalarImpl/ExprType.h"
 
 namespace Physica::Core {
     template<class ScalarType, size_t Size>
@@ -114,13 +114,13 @@ namespace Physica::Core {
     template<class PlainScalar, size_t Size>
     SIMD<Differentiable<PlainScalar, DiffMode::Reverse, 1>, Size>::SIMD(PlainScalar s) : Base(s) {
         auto& tracer = TracerType::getInstance();
-        headNode = tracer.pushOperation(*this, ExpressionType::Set);
+        headNode = tracer.pushOperation(*this, ExprType::Set);
     }
 
     template<class PlainScalar, size_t Size>
     SIMD<Differentiable<PlainScalar, DiffMode::Reverse, 1>, Size>::SIMD(ScalarType s) : Base(s.getValue()) {
         auto& tracer = TracerType::getInstance();
-        headNode = tracer.pushOperation(*this, ExpressionType::Assign);
+        headNode = tracer.pushOperation(*this, ExprType::Assign);
         ScalarType operand[Size];
         for (size_t i = 0; i < Size; ++i)
             operand[i] = s;
@@ -142,7 +142,7 @@ namespace Physica::Core {
     SIMD<Differentiable<PlainScalar, DiffMode::Reverse, 1>, Size>::operator+(const SIMD& other) const {
         auto& tracer = TracerType::getInstance();
         const auto temp = Base::operator+(other);
-        const ScalarType newHeadNode = tracer.pushOperation(temp, ExpressionType::Add);
+        const ScalarType newHeadNode = tracer.pushOperation(temp, ExprType::Add);
         ScalarType operand[Size * 2];
         for (size_t i = 0; i < Size; ++i) {
             operand[2 * i] = ScalarType(value_ptr() + i, grad_ptr() + i);
@@ -157,7 +157,7 @@ namespace Physica::Core {
     SIMD<Differentiable<PlainScalar, DiffMode::Reverse, 1>, Size>::operator-(const SIMD& other) const {
         auto& tracer = TracerType::getInstance();
         const auto temp = Base::operator-(other);
-        const ScalarType newHeadNode = tracer.pushOperation(temp, ExpressionType::Sub);
+        const ScalarType newHeadNode = tracer.pushOperation(temp, ExprType::Sub);
         ScalarType operand[Size * 2];
         for (size_t i = 0; i < Size; ++i) {
             operand[2 * i] = ScalarType(value_ptr() + i, grad_ptr() + i);
@@ -172,7 +172,7 @@ namespace Physica::Core {
     SIMD<Differentiable<PlainScalar, DiffMode::Reverse, 1>, Size>::operator*(const SIMD& other) const {
         auto& tracer = TracerType::getInstance();
         const auto temp = Base::operator*(other);
-        const ScalarType newHeadNode = tracer.pushOperation(temp, ExpressionType::Mul);
+        const ScalarType newHeadNode = tracer.pushOperation(temp, ExprType::Mul);
         ScalarType operand[Size * 2];
         for (size_t i = 0; i < Size; ++i) {
             operand[2 * i] = ScalarType(value_ptr() + i, grad_ptr() + i);
@@ -187,7 +187,7 @@ namespace Physica::Core {
     SIMD<Differentiable<PlainScalar, DiffMode::Reverse, 1>, Size>::operator/(const SIMD& other) const {
         auto& tracer = TracerType::getInstance();
         const auto temp = Base::operator/(other);
-        const ScalarType newHeadNode = tracer.pushOperation(temp, ExpressionType::Div);
+        const ScalarType newHeadNode = tracer.pushOperation(temp, ExprType::Div);
         ScalarType operand[Size * 2];
         for (size_t i = 0; i < Size; ++i) {
             operand[2 * i] = ScalarType(value_ptr() + i, grad_ptr() + i);
@@ -202,7 +202,7 @@ namespace Physica::Core {
     SIMD<Differentiable<PlainScalar, DiffMode::Reverse, 1>, Size>::operator-() const {
         auto& tracer = TracerType::getInstance();
         const auto temp = Base::operator-();
-        const ScalarType headNode = tracer.pushOperation(temp, ExpressionType::Minus);
+        const ScalarType headNode = tracer.pushOperation(temp, ExprType::Minus);
         ScalarType operand[Size];
         for (size_t i = 0; i < Size; ++i)
             operand[i] = ScalarType(value_ptr() + i, grad_ptr() + i);
@@ -276,13 +276,13 @@ namespace Physica::Core {
             using TracerType = typename ScalarType::TracerType;
             auto& tracer = TracerType::getInstance();
             const auto temp = mul_add<PlainScalar, Size>(a, b, c);
-            ExpressionType source;
+            ExprType source;
             if constexpr (Size == 2)
-                source = ExpressionType::MulAdd2;
+                source = ExprType::MulAdd2;
             else if constexpr (Size == 4)
-                source = ExpressionType::MulAdd4;
+                source = ExprType::MulAdd4;
             else
-                source = ExpressionType::MulAdd8;
+                source = ExprType::MulAdd8;
             const ScalarType headNode = tracer.pushOperation(temp, source);
             tracer.pushOperand(a.getHeadNode(), b.getHeadNode(), c.getHeadNode());
             return {temp, headNode};

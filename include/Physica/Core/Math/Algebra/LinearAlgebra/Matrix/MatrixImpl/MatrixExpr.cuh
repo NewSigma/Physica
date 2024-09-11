@@ -21,11 +21,11 @@
 #include "MatrixExpr.h"
 
 namespace Physica::Core {
-    template<ExpressionType ExprType, class MatrixType>
-    class device_obj<UnitaryMatrixExpr<ExprType, MatrixType>> : public device_obj<RValueMatrix<MatrixExpr<ExprType, MatrixType>>> {
-        using host_obj = UnitaryMatrixExpr<ExprType, MatrixType>;
+    template<ExprType Type, class MatrixType>
+    class device_obj<UnitaryMatrixExpr<Type, MatrixType>> : public device_obj<RValueMatrix<MatrixExpr<Type, MatrixType>>> {
+        using host_obj = UnitaryMatrixExpr<Type, MatrixType>;
         using This = device_obj<host_obj>;
-        using Base = device_obj<RValueMatrix<MatrixExpr<ExprType, MatrixType>>>;
+        using Base = device_obj<RValueMatrix<MatrixExpr<Type, MatrixType>>>;
         using DeviceMatrix = device_obj<MatrixType>;
     private:
         union {
@@ -65,12 +65,12 @@ namespace Physica::Core {
         }
     };
 
-    template<ExpressionType ExprType, class LHS, class RHS>
-    class device_obj<BinaryMatrixExpr<ExprType, LHS, RHS>> : public device_obj<RValueMatrix<MatrixExpr<ExprType, LHS, RHS>>> {
-        static_assert(Internal::is_matrix<LHS>::value, "[Error]: Invalid left hand side type");
-        using host_obj = BinaryMatrixExpr<ExprType, LHS, RHS>;
+    template<ExprType Type, class LHS, class RHS>
+    class device_obj<BinaryMatrixExpr<Type, LHS, RHS>> : public device_obj<RValueMatrix<MatrixExpr<Type, LHS, RHS>>> {
+        static_assert(is_matrix<LHS>::value, "[Error]: Invalid left hand side type");
+        using host_obj = BinaryMatrixExpr<Type, LHS, RHS>;
         using This = device_obj<host_obj>;
-        using Base = device_obj<RValueMatrix<MatrixExpr<ExprType, LHS, RHS>>>;
+        using Base = device_obj<RValueMatrix<MatrixExpr<Type, LHS, RHS>>>;
         using DeviceLHS = device_obj<LHS>;
         using DeviceRHS = typename std::conditional<is_scalar<RHS>::value, typename RHS::ScalarType, device_obj<RHS>>::type;
     private:
@@ -85,7 +85,7 @@ namespace Physica::Core {
         } rhs;
     public:
         __host__ __device__ inline device_obj(const DeviceLHS& lhs_, const DeviceRHS& rhs_) {
-            if constexpr (Internal::is_matrix<RHS>::value) {
+            if constexpr (is_matrix<RHS>::value) {
                 assert(lhs_.getRow() == rhs_.getRow());
                 assert(lhs_.getColumn() == rhs_.getColumn());
             }
@@ -135,7 +135,7 @@ namespace Physica::Core {
 }
 
 namespace Physica {
-    template <ExpressionType type, class T1, class T2>
+    template <ExprType type, class T1, class T2>
     class Traits<Core::device_obj<Core::MatrixExpr<type, T1, T2>>> : public Traits<Core::MatrixExpr<type, T1, T2>> {};
 }
 

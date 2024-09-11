@@ -40,7 +40,7 @@ namespace Physica::Core {
             PlainScalar threadSum = 0;
             for (int i = index; i < column; i += blockDim.x) {
                 const size_t offset = dots.calcOffset(r, i);
-                dots.getRecord(r, i) = DiffRecord{offset * 2, ExpressionType::Mul};
+                dots.getRecord(r, i) = DiffRecord{offset * 2, ExprType::Mul};
                 dots.getOperands()[2 * offset] = m.calc(r, i);
                 dots.getOperands()[2 * offset + 1] = v.calc(i);
                 PlainScalar value = m.getValue(r, i) * v.getValue(i);
@@ -63,7 +63,7 @@ namespace Physica::Core {
             if (index != 0)
                 return;
             VectorType& result = result_.getDerived();
-            result.getRecord(r) = DiffRecord{r * 2, ExpressionType::Sum};
+            result.getRecord(r) = DiffRecord{r * 2, ExprType::Sum};
             result.getOperands()[r * 2] = dots.calc(r, 0);
             result.getOperands()[r * 2 + 1] = dots.calc(r, column - 1);
             result.getValue(r) = threadSum;
@@ -79,8 +79,8 @@ namespace Physica::Core {
         using VectorType = device_obj<Differentiable<Vector<PlainScalar>, DiffMode::Reverse, Order>>;
         assert(m.getRow() > 0 && "[Error]: This is a empty matrix");
         assert(m.getColumn() == v.getLength() && "[Error]: Dims do not match");
-        MatrixType dots(m.getRow(), m.getColumn(), ExpressionType::Mul);
-        VectorType result(m.getRow(), ExpressionType::Sum);
+        MatrixType dots(m.getRow(), m.getColumn(), ExprType::Mul);
+        VectorType result(m.getRow(), ExprType::Sum);
         const size_t numThread = std::min(m.getColumn(), VectorType::MaxThreadPerBlock);
         Internal::DiffMatrixProduct_gemvKernel<MatrixType, VectorType>
                 <<<m.getRow(), numThread, numThread * sizeof(PlainScalar), CUDAContext::getInstance()>>>(asStruct(m), asStruct(v), asStruct(dots), asStruct(result));

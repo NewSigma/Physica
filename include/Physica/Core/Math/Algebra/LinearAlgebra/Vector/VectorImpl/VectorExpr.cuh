@@ -19,11 +19,11 @@
 #pragma once
 
 namespace Physica::Core {
-    template<ExpressionType ExprType, class VectorType>
-    class device_obj<UnitaryVectorExpr<ExprType, VectorType>> : public device_obj<RValueVector<VectorExpr<ExprType, VectorType>>> {
-        using host_obj = UnitaryVectorExpr<ExprType, VectorType>;
+    template<ExprType Type, class VectorType>
+    class device_obj<UnitaryVectorExpr<Type, VectorType>> : public device_obj<RValueVector<VectorExpr<Type, VectorType>>> {
+        using host_obj = UnitaryVectorExpr<Type, VectorType>;
         using This = device_obj<host_obj>;
-        using Base = device_obj<RValueVector<VectorExpr<ExprType, VectorType>>>;
+        using Base = device_obj<RValueVector<VectorExpr<Type, VectorType>>>;
         using DeviceVector = device_obj<VectorType>;
     private:
         union {
@@ -58,13 +58,13 @@ namespace Physica::Core {
         }
     };
 
-    template<ExpressionType ExprType, class LHS, class RHS>
-    class device_obj<BinaryVectorExpr<ExprType, LHS, RHS>>
-            : public device_obj<RValueVector<VectorExpr<ExprType, LHS, RHS>>> {
-        static_assert(Internal::is_vector<LHS>::value, "[Error]: Invalid left hand side type");
-        using host_obj = BinaryVectorExpr<ExprType, LHS, RHS>;
+    template<ExprType Type, class LHS, class RHS>
+    class device_obj<BinaryVectorExpr<Type, LHS, RHS>>
+            : public device_obj<RValueVector<VectorExpr<Type, LHS, RHS>>> {
+        static_assert(is_vector<LHS>::value, "[Error]: Invalid left hand side type");
+        using host_obj = BinaryVectorExpr<Type, LHS, RHS>;
         using This = device_obj<host_obj>;
-        using Base = device_obj<RValueVector<VectorExpr<ExprType, LHS, RHS>>>;
+        using Base = device_obj<RValueVector<VectorExpr<Type, LHS, RHS>>>;
         using DeviceLHS = device_obj<LHS>;
         using DeviceRHS = typename std::conditional<is_scalar<RHS>::value, typename RHS::ScalarType, device_obj<RHS>>::type;
     private:
@@ -79,7 +79,7 @@ namespace Physica::Core {
         } rhs;
     public:
         __host__ __device__ inline device_obj(const DeviceLHS& lhs_, const DeviceRHS& rhs_) {
-            if constexpr (Internal::is_vector<RHS>::value)
+            if constexpr (is_vector<RHS>::value)
                 assert(lhs_.getLength() == rhs_.getLength());
             if constexpr (IsHost()) {
                 lhs.value = asStruct(lhs_);
@@ -119,7 +119,7 @@ namespace Physica::Core {
 }
 
 namespace Physica {
-    template<ExpressionType Type, class Expr1, class Expr2>
+    template<ExprType Type, class Expr1, class Expr2>
     class Traits<Core::device_obj<Core::VectorExpr<Type, Expr1, Expr2>>> : public Traits<Core::VectorExpr<Type, Expr1, Expr2>> {};
 }
 

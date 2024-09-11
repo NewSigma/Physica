@@ -20,9 +20,9 @@
 
 namespace Physica::Core {
     template<class VectorType>
-    class VectorExpr<ExpressionType::Abs, VectorType> : public UnitaryVectorExpr<ExpressionType::Abs, VectorType> {
-        using This = VectorExpr<ExpressionType::Abs, VectorType>;
-        using Base = UnitaryVectorExpr<ExpressionType::Abs, VectorType>;
+    class VectorExpr<ExprType::Abs, VectorType> : public UnitaryVectorExpr<ExprType::Abs, VectorType> {
+        using This = VectorExpr<ExprType::Abs, VectorType>;
+        using Base = UnitaryVectorExpr<ExprType::Abs, VectorType>;
     public:
         using typename Base::ScalarType;
     public:
@@ -43,6 +43,6 @@ namespace Physica::Core {
 
     template<class VectorType>
     [[nodiscard]] inline auto abs(const RValueVector<VectorType>& v) noexcept {
-        return VectorExpr<ExpressionType::Abs, VectorType>(v);
+        return VectorExpr<ExprType::Abs, VectorType>(v);
     }
 }

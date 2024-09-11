@@ -33,13 +33,13 @@ namespace Physica::Core {
 
     template<class ScalarType>
     inline void SGD<device_obj<ScalarType>>::recordBegin() {
-        auto& segment = TracerType::getInstance().pushSegment(1, ExpressionType::Set);
+        auto& segment = TracerType::getInstance().pushSegment(1, ExprType::Set);
         to = DeviceScalar(segment.getValues().data(), segment.getGrads().data());
     }
     
     template<class ScalarType>
     inline void SGD<device_obj<ScalarType>>::recordEnd() {
-        auto& segment = TracerType::getInstance().pushSegment(1, ExpressionType::Set);
+        auto& segment = TracerType::getInstance().pushSegment(1, ExprType::Set);
         from = DeviceScalar(segment.getValues().data(), segment.getGrads().data());
     }
 

@@ -20,9 +20,9 @@
 
 namespace Physica::Core {
     template<class VectorType, class AnyScalar>
-    class device_obj<VectorExpr<ExpressionType::Add, VectorType, ScalarBase<AnyScalar>>>
-            : public device_obj<BinaryVectorExpr<ExpressionType::Add, VectorType, ScalarBase<AnyScalar>>> {
-        using Base = device_obj<BinaryVectorExpr<ExpressionType::Add, VectorType, ScalarBase<AnyScalar>>>;
+    class device_obj<VectorExpr<ExprType::Add, VectorType, ScalarBase<AnyScalar>>>
+            : public device_obj<BinaryVectorExpr<ExprType::Add, VectorType, ScalarBase<AnyScalar>>> {
+        using Base = device_obj<BinaryVectorExpr<ExprType::Add, VectorType, ScalarBase<AnyScalar>>>;
     public:
         using typename Base::ScalarType;
     public:
@@ -48,9 +48,9 @@ namespace Physica::Core {
     };
 
     template<class VectorType1, class VectorType2>
-    class device_obj<VectorExpr<ExpressionType::Add, VectorType1, VectorType2>>
-            : public device_obj<BinaryVectorExpr<ExpressionType::Add, VectorType1, VectorType2>> {
-        using Base = device_obj<BinaryVectorExpr<ExpressionType::Add, VectorType1, VectorType2>>;
+    class device_obj<VectorExpr<ExprType::Add, VectorType1, VectorType2>>
+            : public device_obj<BinaryVectorExpr<ExprType::Add, VectorType1, VectorType2>> {
+        using Base = device_obj<BinaryVectorExpr<ExprType::Add, VectorType1, VectorType2>>;
     public:
         using typename Base::ScalarType;
     public:
@@ -78,12 +78,12 @@ namespace Physica::Core {
     template<class VectorType, class AnyScalar>
     [[nodiscard]] __host__ __device__ inline auto operator+(
             const device_obj<RValueVector<VectorType>>& v, const ScalarBase<AnyScalar>& s) noexcept {
-        return device_obj<VectorExpr<ExpressionType::Add, VectorType, ScalarBase<AnyScalar>>>(v.getDerived(), s.getDerived());
+        return device_obj<VectorExpr<ExprType::Add, VectorType, ScalarBase<AnyScalar>>>(v.getDerived(), s.getDerived());
     }
 
     template<class Derived, class OtherDerived>
     [[nodiscard]] __host__ __device__ inline auto operator+(
             const device_obj<RValueVector<Derived>>& v1, const device_obj<RValueVector<OtherDerived>>& v2) noexcept {
-        return device_obj<VectorExpr<ExpressionType::Add, Derived, OtherDerived>>(v1.getDerived(), v2.getDerived());
+        return device_obj<VectorExpr<ExprType::Add, Derived, OtherDerived>>(v1.getDerived(), v2.getDerived());
     }
 }

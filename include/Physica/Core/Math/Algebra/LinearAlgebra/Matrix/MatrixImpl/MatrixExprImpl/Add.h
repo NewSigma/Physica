@@ -20,10 +20,10 @@
 
 namespace Physica::Core {
     template<class MatrixType1, class MatrixType2>
-    class MatrixExpr<ExpressionType::Add, MatrixType1, MatrixType2>
-            : public BinaryMatrixExpr<ExpressionType::Add, MatrixType1, MatrixType2> {
-        using Base = BinaryMatrixExpr<ExpressionType::Add, MatrixType1, MatrixType2>;
-        using This = MatrixExpr<ExpressionType::Add, MatrixType1, MatrixType2>;
+    class MatrixExpr<ExprType::Add, MatrixType1, MatrixType2>
+            : public BinaryMatrixExpr<ExprType::Add, MatrixType1, MatrixType2> {
+        using Base = BinaryMatrixExpr<ExprType::Add, MatrixType1, MatrixType2>;
+        using This = MatrixExpr<ExprType::Add, MatrixType1, MatrixType2>;
         constexpr static bool IsSymm = MatrixOption::isSymmMatrix<MatrixType1>() && MatrixOption::isSymmMatrix<MatrixType2>();
         constexpr static bool IsHermite = MatrixOption::isHermiteMatrix<MatrixType1>() && MatrixOption::isHermiteMatrix<MatrixType2>();
         using TransposeRtnTy = typename std::conditional<IsSymm, const This&, Transpose<This>>::type;
@@ -42,9 +42,9 @@ namespace Physica::Core {
     };
 
     template<class MatrixType, class AnyScalar>
-    class MatrixExpr<ExpressionType::Add, MatrixType, ScalarBase<AnyScalar>>
-            : public BinaryMatrixExpr<ExpressionType::Add, MatrixType, ScalarBase<AnyScalar>> {
-        using Base = BinaryMatrixExpr<ExpressionType::Add, MatrixType, ScalarBase<AnyScalar>>;
+    class MatrixExpr<ExprType::Add, MatrixType, ScalarBase<AnyScalar>>
+            : public BinaryMatrixExpr<ExprType::Add, MatrixType, ScalarBase<AnyScalar>> {
+        using Base = BinaryMatrixExpr<ExprType::Add, MatrixType, ScalarBase<AnyScalar>>;
     public:
         using typename Base::ScalarType;
     public:
@@ -57,11 +57,11 @@ namespace Physica::Core {
 
     template<class MatrixType1, class MatrixType2>
     [[nodiscard]] inline auto operator+(const RValueMatrix<MatrixType1>& mat1, const RValueMatrix<MatrixType2>& mat2) noexcept {
-        return MatrixExpr<ExpressionType::Add, MatrixType1, MatrixType2>(mat1.getDerived(), mat2.getDerived());
+        return MatrixExpr<ExprType::Add, MatrixType1, MatrixType2>(mat1.getDerived(), mat2.getDerived());
     }
 
     template<class MatrixType, class ScalarType>
     [[nodiscard]] inline auto operator+(const RValueMatrix<MatrixType>& mat, const ScalarBase<ScalarType>& s) noexcept {
-        return MatrixExpr<ExpressionType::Add, MatrixType, ScalarBase<ScalarType>>(mat.getDerived(), s.getDerived());
+        return MatrixExpr<ExprType::Add, MatrixType, ScalarBase<ScalarType>>(mat.getDerived(), s.getDerived());
     }
 }

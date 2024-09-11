@@ -20,9 +20,9 @@
 
 namespace Physica::Core {
     template<class VectorType1, class VectorType2>
-    class VectorExpr<ExpressionType::MoreEq, VectorType1, VectorType2>
-            : public BinaryVectorExpr<ExpressionType::MoreEq, VectorType1, VectorType2> {
-        using Base = BinaryVectorExpr<ExpressionType::MoreEq, VectorType1, VectorType2>;
+    class VectorExpr<ExprType::MoreEq, VectorType1, VectorType2>
+            : public BinaryVectorExpr<ExprType::MoreEq, VectorType1, VectorType2> {
+        using Base = BinaryVectorExpr<ExprType::MoreEq, VectorType1, VectorType2>;
     public:
         using typename Base::ScalarType;
     public:
@@ -45,9 +45,9 @@ namespace Physica::Core {
     };
 
     template<class VectorType, class AnyScalar>
-    class VectorExpr<ExpressionType::MoreEq, VectorType, ScalarBase<AnyScalar>>
-            : public BinaryVectorExpr<ExpressionType::MoreEq, VectorType, ScalarBase<AnyScalar>> {
-        using Base = BinaryVectorExpr<ExpressionType::MoreEq, VectorType, ScalarBase<AnyScalar>>;
+    class VectorExpr<ExprType::MoreEq, VectorType, ScalarBase<AnyScalar>>
+            : public BinaryVectorExpr<ExprType::MoreEq, VectorType, ScalarBase<AnyScalar>> {
+        using Base = BinaryVectorExpr<ExprType::MoreEq, VectorType, ScalarBase<AnyScalar>>;
     public:
         using typename Base::ScalarType;
     public:
@@ -71,11 +71,11 @@ namespace Physica::Core {
 
     template<class VectorType1, class VectorType2>
     [[nodiscard]] inline auto operator>=(const RValueVector<VectorType1>& v1, const RValueVector<VectorType2>& v2) noexcept {
-        return VectorExpr<ExpressionType::MoreEq, VectorType1, VectorType2>(v1.getDerived(), v2.getDerived());
+        return VectorExpr<ExprType::MoreEq, VectorType1, VectorType2>(v1.getDerived(), v2.getDerived());
     }
 
     template<class VectorType, class ScalarType>
     [[nodiscard]] inline auto operator>=(const RValueVector<VectorType>& v, const ScalarBase<ScalarType>& s) noexcept {
-        return VectorExpr<ExpressionType::MoreEq, VectorType, ScalarBase<ScalarType>>(v.getDerived(), s.getDerived());
+        return VectorExpr<ExprType::MoreEq, VectorType, ScalarBase<ScalarType>>(v.getDerived(), s.getDerived());
     }
 }

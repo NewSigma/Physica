@@ -80,7 +80,7 @@ namespace Physica::Core {
 
     template<class VectorType>
     typename Mnist::DatasetType<VectorType> Mnist::makeTrainDataset() const {
-        static_assert(Internal::is_vector<VectorType>::value, "[Error]: This is not a vector");
+        static_assert(is_vector<VectorType>::value, "[Error]: This is not a vector");
         using SampleArray = typename DatasetType<VectorType>::SampleArray;
         const size_t numSample = getNumTrainSample();
         SampleArray samples(numSample);
@@ -91,7 +91,7 @@ namespace Physica::Core {
 
     template<class VectorType>
     typename Mnist::DatasetType<VectorType> Mnist::makeTestDataset() const {
-        static_assert(Internal::is_vector<VectorType>::value, "[Error]: This is not a vector");
+        static_assert(is_vector<VectorType>::value, "[Error]: This is not a vector");
         using SampleArray = typename DatasetType<VectorType>::SampleArray;
         const size_t numSample = getNumTestSample();
         SampleArray samples(numSample);
@@ -102,7 +102,7 @@ namespace Physica::Core {
 
     template<class VectorType>
     VectorType Mnist::ImageType::asVector() const {
-        static_assert(Internal::is_vector<VectorType>::value, "[Error]: This is not a vector");
+        static_assert(is_vector<VectorType>::value, "[Error]: This is not a vector");
         using ScalarType = typename VectorType::ScalarType::PlainScalar;
         Vector<ScalarType> result(NumPixelInImage);
         for (size_t i = 0; i < NumPixelInImage; ++i)

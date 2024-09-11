@@ -49,7 +49,7 @@ namespace Physica::Core {
         GradVector grads;
     public:
         device_obj() = default;
-        device_obj(size_t size, ExpressionType type);
+        device_obj(size_t size, ExprType type);
         explicit device_obj(ScalarType value);
         explicit device_obj(const HostValueVector& values_);
         device_obj(const device_obj&) = default;
@@ -82,7 +82,7 @@ namespace Physica::Core {
         [[nodiscard]] __host__ __device__ GradVector& getGrads() noexcept { return grads; }
         [[nodiscard]] __host__ __device__ const GradVector& getGrads() const noexcept { return grads; }
         /* Static members */
-        [[nodiscard]] constexpr static unsigned int numOperand(ExpressionType type) { return host_obj::numOperand(type); }
+        [[nodiscard]] constexpr static unsigned int numOperand(ExprType type) { return host_obj::numOperand(type); }
     private:
         /* Operations */
         inline void init(ScalarType value);

@@ -106,9 +106,9 @@ namespace Physica::Core {
             term = target;
             RealType norm1 = term.normInf();
             for (int n = 1; n <= numTaylorTerm; ++n) {
-                using ExprType = decltype(mat * term - traceMu * term);
+                using ExprType1 = decltype(mat * term - traceMu * term);
                 term *= reciprocal(RealType(numSplit * n));
-                buffer.template operator=<ExprType, Executor>(mat * term - traceMu * term);
+                buffer.template operator=<ExprType1, Executor>(mat * term - traceMu * term);
                 buffer.swap(term);
                 const RealType norm2 = term.normInf();
                 target += term;

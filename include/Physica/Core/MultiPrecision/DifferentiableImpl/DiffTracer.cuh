@@ -41,7 +41,7 @@ namespace Physica::Core {
     public:
         ~device_obj() = default;
         /* Operations */
-        SegmentType& pushSegment(size_t size, ExpressionType type);
+        SegmentType& pushSegment(size_t size, ExprType type);
         SegmentType& pushSegment(ScalarType value);
         SegmentType& pushSegment(const HostValueVector& value);
 
@@ -74,7 +74,7 @@ namespace Physica::Core {
     };
 
     template<class ScalarType, unsigned int Order>
-    typename device_obj<DiffTracer<ScalarType, Order>>::SegmentType& device_obj<DiffTracer<ScalarType, Order>>::pushSegment(size_t size, ExpressionType type) {
+    typename device_obj<DiffTracer<ScalarType, Order>>::SegmentType& device_obj<DiffTracer<ScalarType, Order>>::pushSegment(size_t size, ExprType type) {
         const auto end = reserveList.end();
         for (auto ite = reserveList.begin(); ite != end; ++ite) {
             auto& segment = *ite;
@@ -100,14 +100,14 @@ namespace Physica::Core {
 
     template<class ScalarType, unsigned int Order>
     typename device_obj<DiffTracer<ScalarType, Order>>::SegmentType& device_obj<DiffTracer<ScalarType, Order>>::pushSegment(ScalarType value) {
-        auto& result = pushSegment(1, ExpressionType::Set);
+        auto& result = pushSegment(1, ExprType::Set);
         result.init(value);
         return result;
     }
 
     template<class ScalarType, unsigned int Order>
     typename device_obj<DiffTracer<ScalarType, Order>>::SegmentType& device_obj<DiffTracer<ScalarType, Order>>::pushSegment(const HostValueVector& value) {
-        auto& result = pushSegment(value.getLength(), ExpressionType::Set);
+        auto& result = pushSegment(value.getLength(), ExprType::Set);
         result.init(value);
         return result;
     }

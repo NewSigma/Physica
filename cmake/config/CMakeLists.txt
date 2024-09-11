@@ -21,6 +21,10 @@ endif()
 message(STATUS "Performing CheckRightShift --Passed")
 
 if(${PHYSICA_CUDA})
+    # WarpSize
+    physica_check(WarpSize CUDADevAttr/WarpSize.cpp)
+    set(WarpSize ${RUN_RESULT_VAR})
+    message(STATUS "Performing WarpSize --${RUN_RESULT_VAR}")
     # MemoryPoolsSupported
     physica_check(MemoryPoolsSupported CUDADevAttr/MemoryPoolsSupported.cpp)
     if(${RUN_RESULT_VAR} MATCHES 0)

@@ -21,12 +21,12 @@
 #include "RSparseVector.h"
 
 namespace Physica::Core {
-    template<ExpressionType type, class T1, class T2 = T1> class SparseVectorExpr;
+    template<ExprType type, class T1, class T2 = T1> class SparseVectorExpr;
 
     template<class VectorType, class AnyScalar>
-    class SparseVectorExpr<ExpressionType::Mul, VectorType, AnyScalar>
-            : public RSparseVector<SparseVectorExpr<ExpressionType::Mul, VectorType, AnyScalar>> {
-        using This = SparseVectorExpr<ExpressionType::Mul, VectorType, AnyScalar>;
+    class SparseVectorExpr<ExprType::Mul, VectorType, AnyScalar>
+            : public RSparseVector<SparseVectorExpr<ExprType::Mul, VectorType, AnyScalar>> {
+        using This = SparseVectorExpr<ExprType::Mul, VectorType, AnyScalar>;
         using Base = RSparseVector<This>;
         using typename Base::ScalarType;
         using typename Base::NonZeroPair;
@@ -54,13 +54,13 @@ namespace Physica::Core {
     //////////////////////////////////////Operators//////////////////////////////////////
     //////////////////////////////////////Mul//////////////////////////////////////
     template<class VectorType, class ScalarType>
-    [[nodiscard]] inline SparseVectorExpr<ExpressionType::Mul, VectorType, ScalarType>
+    [[nodiscard]] inline SparseVectorExpr<ExprType::Mul, VectorType, ScalarType>
     operator*(const RSparseVector<VectorType>& v, const ScalarBase<ScalarType>& s) noexcept {
-        return SparseVectorExpr<ExpressionType::Mul, VectorType, ScalarType>(v.getDerived(), s.getDerived());
+        return SparseVectorExpr<ExprType::Mul, VectorType, ScalarType>(v.getDerived(), s.getDerived());
     }
 
     template<class ScalarType, class VectorType>
-    [[nodiscard]] inline SparseVectorExpr<ExpressionType::Mul, VectorType, ScalarType>
+    [[nodiscard]] inline SparseVectorExpr<ExprType::Mul, VectorType, ScalarType>
     operator*(const ScalarBase<ScalarType>& s, const RSparseVector<VectorType>& v) noexcept {
         return v * s;
     }
@@ -69,7 +69,7 @@ namespace Physica::Core {
 namespace Physica {
     using namespace Core;
 
-    template<ExpressionType type, class Exp, class AnyScalar>
+    template<ExprType type, class Exp, class AnyScalar>
     class Traits<SparseVectorExpr<type, Exp, AnyScalar>> {
         static_assert(is_scalar<AnyScalar>::value, "[Error]: Invalid scalar type");
     public:

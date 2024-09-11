@@ -23,10 +23,8 @@
 #include "RValueVector.h"
 
 namespace Physica::Core {
-    namespace Internal {
-        template<class T>
-        struct is_vector<device_obj<T>> : public is_vector<T> {};
-    }
+    template<class T>
+    struct is_vector<device_obj<T>> : public is_vector<T> {};
 
     template<class Derived>
     class device_obj<RValueVector<Derived>> : public Utils::CRTPBase<device_obj<Derived>> {

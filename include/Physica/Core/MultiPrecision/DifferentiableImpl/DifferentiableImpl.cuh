@@ -27,14 +27,14 @@ namespace Physica::Core {
             using SegmentType = device_obj<TraceSegment<ScalarType, Order>>;
             using DiffRecord = typename SegmentType::DiffRecord;
             auto& segment = segment_.getDerived();
-            segment.getRecords()[0] = DiffRecord{0, ExpressionType::Minus};
+            segment.getRecords()[0] = DiffRecord{0, ExprType::Minus};
             const auto& s = s_.getDerived();
             segment.getOperands()[0] = s;
             segment.getValues()[0] = -s.getValue();
             segment.getGrads()[0] = 0;
         }
 
-        template<class ScalarType, unsigned int Order, ExpressionType Type>
+        template<class ScalarType, unsigned int Order, ExprType Type>
         __global__ void __launch_bounds__(1, 1) Differentiable_calcKernel(
                 Physica::PlainStruct<device_obj<TraceSegment<ScalarType, Order>>> segment_,
                 Physica::PlainStruct<const device_obj<Differentiable<ScalarType, DiffMode::Reverse, Order>>> s1_,
@@ -47,16 +47,16 @@ namespace Physica::Core {
             const auto& s2 = s2_.getDerived();
             segment.getOperands()[0] = s1;
             segment.getOperands()[1] = s2;
-            if constexpr (Type == ExpressionType::Add)
+            if constexpr (Type == ExprType::Add)
                 segment.getValues()[0] = s1.getValue() + s2.getValue();
-            else if constexpr (Type == ExpressionType::Sub)
+            else if constexpr (Type == ExprType::Sub)
                 segment.getValues()[0] = s1.getValue() - s2.getValue();
-            else if constexpr (Type == ExpressionType::Mul)
+            else if constexpr (Type == ExprType::Mul)
                 segment.getValues()[0] = s1.getValue() * s2.getValue();
-            else if constexpr (Type == ExpressionType::Div)
+            else if constexpr (Type == ExprType::Div)
                 segment.getValues()[0] = s1.getValue() / s2.getValue();
             else
-                static_assert(Type == ExpressionType::Add, "[Error]: Not implemented");
+                static_assert(Type == ExprType::Add, "[Error]: Not implemented");
             segment.getGrads()[0] = 0;
         }
 
@@ -86,7 +86,7 @@ namespace Physica::Core {
     template<class ScalarType, unsigned int Order>
     inline device_obj<Differentiable<ScalarType, DiffMode::Reverse, Order>>
     device_obj<Differentiable<ScalarType, DiffMode::Reverse, Order>>::operator-() const {
-        auto& segment = TracerType::getInstance().pushSegment(1, ExpressionType::Minus);
+        auto& segment = TracerType::getInstance().pushSegment(1, ExprType::Minus);
         Internal::Differentiable_minusKernel<ScalarType, Order><<<1, 1, 0, CUDAContext::getInstance()>>>(asStruct(segment), asStruct(*this));
         return segment[0];
     }
@@ -141,8 +141,8 @@ namespace Physica::Core {
     operator+(const device_obj<Differentiable<ScalarType, DiffMode::Reverse, Order>>& s1,
               const device_obj<Differentiable<ScalarType, DiffMode::Reverse, Order>>& s2) {
         using TracerType = device_obj<DiffTracer<ScalarType, Order>>;
-        auto& segment = TracerType::getInstance().pushSegment(1, ExpressionType::Add);
-        Internal::Differentiable_calcKernel<ScalarType, Order, ExpressionType::Add>
+        auto& segment = TracerType::getInstance().pushSegment(1, ExprType::Add);
+        Internal::Differentiable_calcKernel<ScalarType, Order, ExprType::Add>
                 <<<1, 1, 0, CUDAContext::getInstance()>>>(asStruct(segment), asStruct(s1), asStruct(s2));
         return segment[0];
     }
@@ -152,8 +152,8 @@ namespace Physica::Core {
     operator-(const device_obj<Differentiable<ScalarType, DiffMode::Reverse, Order>>& s1,
               const device_obj<Differentiable<ScalarType, DiffMode::Reverse, Order>>& s2) {
         using TracerType = device_obj<DiffTracer<ScalarType, Order>>;
-        auto& segment = TracerType::getInstance().pushSegment(1, ExpressionType::Sub);
-        Internal::Differentiable_calcKernel<ScalarType, Order, ExpressionType::Sub>
+        auto& segment = TracerType::getInstance().pushSegment(1, ExprType::Sub);
+        Internal::Differentiable_calcKernel<ScalarType, Order, ExprType::Sub>
                 <<<1, 1, 0, CUDAContext::getInstance()>>>(asStruct(segment), asStruct(s1), asStruct(s2));
         return segment[0];
     }
@@ -163,8 +163,8 @@ namespace Physica::Core {
     operator*(const device_obj<Differentiable<ScalarType, DiffMode::Reverse, Order>>& s1,
               const device_obj<Differentiable<ScalarType, DiffMode::Reverse, Order>>& s2) {
         using TracerType = device_obj<DiffTracer<ScalarType, Order>>;
-        auto& segment = TracerType::getInstance().pushSegment(1, ExpressionType::Mul);
-        Internal::Differentiable_calcKernel<ScalarType, Order, ExpressionType::Mul>
+        auto& segment = TracerType::getInstance().pushSegment(1, ExprType::Mul);
+        Internal::Differentiable_calcKernel<ScalarType, Order, ExprType::Mul>
                 <<<1, 1, 0, CUDAContext::getInstance()>>>(asStruct(segment), asStruct(s1), asStruct(s2));
         return segment[0];
     }
@@ -174,8 +174,8 @@ namespace Physica::Core {
     operator/(const device_obj<Differentiable<ScalarType, DiffMode::Reverse, Order>>& s1,
               const device_obj<Differentiable<ScalarType, DiffMode::Reverse, Order>>& s2) {
         using TracerType = device_obj<DiffTracer<ScalarType, Order>>;
-        auto& segment = TracerType::getInstance().pushSegment(1, ExpressionType::Div);
-        Internal::Differentiable_calcKernel<ScalarType, Order, ExpressionType::Div>
+        auto& segment = TracerType::getInstance().pushSegment(1, ExprType::Div);
+        Internal::Differentiable_calcKernel<ScalarType, Order, ExprType::Div>
                 <<<1, 1, 0, CUDAContext::getInstance()>>>(asStruct(segment), asStruct(s1), asStruct(s2));
         return segment[0];
     }

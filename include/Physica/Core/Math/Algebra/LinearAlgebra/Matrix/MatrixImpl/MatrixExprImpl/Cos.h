@@ -20,9 +20,9 @@
 
 namespace Physica::Core {
     template<class MatrixType>
-    class MatrixExpr<ExpressionType::Cos, MatrixType>
-            : public UnitaryMatrixExpr<ExpressionType::Cos, MatrixType> {
-        using Base = UnitaryMatrixExpr<ExpressionType::Cos, MatrixType>;
+    class MatrixExpr<ExprType::Cos, MatrixType>
+            : public UnitaryMatrixExpr<ExprType::Cos, MatrixType> {
+        using Base = UnitaryMatrixExpr<ExprType::Cos, MatrixType>;
     public:
         using typename Base::ScalarType;
     public:
@@ -33,6 +33,6 @@ namespace Physica::Core {
 
     template<class MatrixType>
     [[nodiscard]] inline auto cos_elem(const RValueMatrix<MatrixType>& m) noexcept {
-        return MatrixExpr<ExpressionType::Cos, MatrixType>(m.getDerived());
+        return MatrixExpr<ExprType::Cos, MatrixType>(m.getDerived());
     }
 }

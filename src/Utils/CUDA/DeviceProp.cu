@@ -94,7 +94,7 @@ namespace Physica::Utils {
         propList.resize(deviceCount);
         for (size_t i = 0; i < propList.getLength(); ++i) {
             check(cudaGetDeviceProperties(&propList[i], i));
-            if (getProperty(i).warpSize != WarpSize) {
+            if (getProperty(i).warpSize != Physica::CUDADevAttr::WarpSize) {
                 std::cerr << "[Error]: WarpSize is not standard\n";
                 exit(EXIT_FAILURE);
             }

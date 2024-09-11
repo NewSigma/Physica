@@ -20,9 +20,9 @@
 
 namespace Physica::Core {
     template<class VectorType1, class VectorType2>
-    class VectorExpr<ExpressionType::Sub, VectorType1, VectorType2>
-            : public BinaryVectorExpr<ExpressionType::Sub, VectorType1, VectorType2> {
-        using Base = BinaryVectorExpr<ExpressionType::Sub, VectorType1, VectorType2>;
+    class VectorExpr<ExprType::Sub, VectorType1, VectorType2>
+            : public BinaryVectorExpr<ExprType::Sub, VectorType1, VectorType2> {
+        using Base = BinaryVectorExpr<ExprType::Sub, VectorType1, VectorType2>;
     public:
         using typename Base::ScalarType;
     public:
@@ -49,7 +49,7 @@ namespace Physica::Core {
 
     template<class VectorType1, class VectorType2>
     template<class OtherDerived, class Executor>
-    inline void VectorExpr<ExpressionType::Sub, VectorType1, VectorType2>::assignTo(LValueVector<OtherDerived>& v_) const {
+    inline void VectorExpr<ExprType::Sub, VectorType1, VectorType2>::assignTo(LValueVector<OtherDerived>& v_) const {
         constexpr bool FastAssign1 = Traits<VectorType1>::FastAssign;
         constexpr bool FastAssign2 = Traits<VectorType2>::FastAssign;
         auto& v = v_.getDerived();
@@ -76,9 +76,9 @@ namespace Physica::Core {
     }
 
     template<class VectorType, class AnyScalar>
-    class VectorExpr<ExpressionType::Sub, VectorType, ScalarBase<AnyScalar>>
-            : public BinaryVectorExpr<ExpressionType::Sub, VectorType, ScalarBase<AnyScalar>> {
-        using Base = BinaryVectorExpr<ExpressionType::Sub, VectorType, ScalarBase<AnyScalar>>;
+    class VectorExpr<ExprType::Sub, VectorType, ScalarBase<AnyScalar>>
+            : public BinaryVectorExpr<ExprType::Sub, VectorType, ScalarBase<AnyScalar>> {
+        using Base = BinaryVectorExpr<ExprType::Sub, VectorType, ScalarBase<AnyScalar>>;
     public:
         using typename Base::ScalarType;
     public:
@@ -101,11 +101,11 @@ namespace Physica::Core {
 
     template<class Derived, class OtherDerived>
     [[nodiscard]] inline auto operator-(const RValueVector<Derived>& v1, const RValueVector<OtherDerived>& v2) noexcept {
-        return VectorExpr<ExpressionType::Sub, Derived, OtherDerived>(v1.getDerived(), v2.getDerived());
+        return VectorExpr<ExprType::Sub, Derived, OtherDerived>(v1.getDerived(), v2.getDerived());
     }
 
     template<class VectorType, class ScalarType>
     [[nodiscard]] inline auto operator-(const RValueVector<VectorType>& v, const ScalarBase<ScalarType>& s) noexcept {
-        return VectorExpr<ExpressionType::Sub, VectorType, ScalarBase<ScalarType>>(v.getDerived(), s.getDerived());
+        return VectorExpr<ExprType::Sub, VectorType, ScalarBase<ScalarType>>(v.getDerived(), s.getDerived());
     }
 }

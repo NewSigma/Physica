@@ -20,9 +20,9 @@
 
 namespace Physica::Core {
     template<class VectorType>
-    class VectorExpr<ExpressionType::Cos, VectorType> : public UnitaryVectorExpr<ExpressionType::Cos, VectorType> {
-        using This = VectorExpr<ExpressionType::Cos, VectorType>;
-        using Base = UnitaryVectorExpr<ExpressionType::Cos, VectorType>;
+    class VectorExpr<ExprType::Cos, VectorType> : public UnitaryVectorExpr<ExprType::Cos, VectorType> {
+        using This = VectorExpr<ExprType::Cos, VectorType>;
+        using Base = UnitaryVectorExpr<ExprType::Cos, VectorType>;
     public:
         using typename Base::ScalarType;
     public:
@@ -33,6 +33,6 @@ namespace Physica::Core {
 
     template<class VectorType>
     [[nodiscard]] inline auto cos(const RValueVector<VectorType>& v) noexcept {
-        return VectorExpr<ExpressionType::Cos, VectorType>(v);
+        return VectorExpr<ExprType::Cos, VectorType>(v);
     }
 }
