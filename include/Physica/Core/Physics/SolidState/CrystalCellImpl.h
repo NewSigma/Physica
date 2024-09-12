@@ -74,7 +74,7 @@ namespace Physica::Core {
         result.toSuperCell(x, y, z);
         return result;
     }
-
+#ifdef PHYSICA_HDF5
     template<class ScalarType>
     H5Group CrystalCell<ScalarType>::read(const H5Location& loc, const char* name) {
         const auto group = Base::read(loc, name);
@@ -95,7 +95,7 @@ namespace Physica::Core {
         dataset.write(atomicNumbers.data(), H5::PredType::NATIVE_UINT16);
         return group;
     }
-
+#endif
     template<class ScalarType>
     void CrystalCell<ScalarType>::swap(CrystalCell& __restrict cell) noexcept {
         assert(this != &cell && "[Error]: Self swap is likely a bug");

@@ -67,8 +67,8 @@ namespace Physica::Core {
         template<class Distribution, class RandomGenerator>
         void random_any(Distribution& dist, RandomGenerator& gen);
 
-        inline const H5DataSet<1> read(const H5Location& loc, const char* name, const H5::DSetMemXferPropList& xfer_plist = H5::DSetMemXferPropList::DEFAULT);
-        inline H5DataSet<1> write(H5Location& loc, const char* name, const H5::DSetMemXferPropList& xfer_plist = H5::DSetMemXferPropList::DEFAULT) const;
+        inline const H5DataSet<1> read(const H5Location& loc, const char* name);
+        inline H5DataSet<1> write(H5Location& loc, const char* name) const;
         /* Getters */
         using Base::getDerived;
         using Storage::getColumn;
@@ -203,19 +203,19 @@ namespace Physica::Core {
         result.random_any(dist, gen);
         return result;
     }
-
+#ifdef PHYSICA_HDF5
     template<class T, size_t Order>
     inline const H5DataSet<1> DenseHermiteMatrix<T, Order>::read(
-            const H5Location& loc, const char* name, const H5::DSetMemXferPropList& xfer_plist) {
-        return asVector().read(loc, name, xfer_plist);
+            const H5Location& loc, const char* name) {
+        return asVector().read(loc, name);
     }
 
     template<class T, size_t Order>
     inline H5DataSet<1> DenseHermiteMatrix<T, Order>::write(
-            H5Location& loc, const char* name, const H5::DSetMemXferPropList& xfer_plist) const {
-        return asVector().write(loc, name, xfer_plist);
+            H5Location& loc, const char* name) const {
+        return asVector().write(loc, name);
     }
-
+#endif
     template<class T, size_t Order>
     template<class MatrixType>
     bool DenseHermiteMatrix<T, Order>::isHermiteMatrix(const RValueMatrix<MatrixType>& mat, double precision) {

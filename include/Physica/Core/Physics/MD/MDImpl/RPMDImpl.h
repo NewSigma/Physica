@@ -705,7 +705,7 @@ namespace Physica::Core {
         pot -= ScalarType(pot[0]);
         return pot;
     }
-
+#ifdef PHYSICA_HDF5
     template<class ScalarType, unsigned int Dim, size_t NumReplica, class ForceMatrixAllocator>
     void RPMD<ScalarType, Dim, NumReplica, ForceMatrixAllocator>::read(const H5Location& loc, const char* name) {
         const auto group = loc.openGroup(name);
@@ -723,7 +723,7 @@ namespace Physica::Core {
         getPhaseMatrix().write(group, "phase");
         forceBuffer.write(group, "force");
     }
-
+#endif
     template<class ScalarType, unsigned int Dim, size_t NumReplica, class ForceMatrixAllocator>
     void RPMD<ScalarType, Dim, NumReplica, ForceMatrixAllocator>::swap(RPMD& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");

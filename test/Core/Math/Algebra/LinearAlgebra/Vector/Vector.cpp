@@ -16,9 +16,8 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include <fstream>
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/CrossProduct.h"
-#include "Physica/Utils/Unix/TempFile.h"
+#include <Physica/Core/Math/Algebra/LinearAlgebra/Vector/CrossProduct.h>
+#include <Physica/Utils/Unix/TempFile.h>
 
 using namespace Physica::Core;
 using namespace Physica::Utils;
@@ -33,6 +32,7 @@ void crossProductTest() {
 }
 
 void hdfTest() {
+#ifdef PHYSICA_HDF5
     std::mt19937 gen{};
     /* Real */ {
         using T = Scalar<Double>;
@@ -64,6 +64,7 @@ void hdfTest() {
         if (data != buffer)
             exit(EXIT_FAILURE);
     }
+#endif
 }
 
 int main() {

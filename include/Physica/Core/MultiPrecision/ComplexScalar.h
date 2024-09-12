@@ -94,8 +94,6 @@ namespace Physica::Core {
         template<class RandomGenerator>
         [[nodiscard]] static ComplexScalar random_normal(RandomGenerator& gen);
         [[nodiscard]] static const H5::DataType& getH5DataType();
-    private:
-        [[nodiscard]] static H5::DataType* makeH5DataType();
     };
 
     template<class T>

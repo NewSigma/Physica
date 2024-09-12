@@ -119,8 +119,8 @@ namespace Physica::Core {
         template<class Distribution, class RandomGenerator>
         void random_any(Distribution& dist, RandomGenerator& gen);
 
-        const H5DataSet<2> read(const H5Location& loc, const char* name, const H5::DSetMemXferPropList& xfer_plist = H5::DSetMemXferPropList::DEFAULT);
-        H5DataSet<2> write(H5Location& loc, const char* name, const H5::DSetMemXferPropList& xfer_plist = H5::DSetMemXferPropList::DEFAULT) const;
+        const H5DataSet<2> read(const H5Location& loc, const char* name);
+        H5DataSet<2> write(H5Location& loc, const char* name) const;
         /* Getters */
         [[nodiscard]] __host__ __device__ ScalarType* data() { return Base::getDerived().data_ptr(0, 0); }
         [[nodiscard]] __host__ __device__ const ScalarType* data() const { return Base::getDerived().data_ptr(0, 0); }

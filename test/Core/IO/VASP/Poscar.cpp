@@ -120,7 +120,8 @@ int main() {
         const auto& numOfEachType = poscar.getNumOfEachType();
         if (numOfEachType[0] != 8 || numOfEachType[1] != 4)
             return 1;
-        
+
+    #ifdef PHYSICA_HDF5
         auto tmp = TempFile("/tmp/tmpXXXXXX");
         {
             H5File h5f(tmp.getName(), H5File::ReadWrite | H5File::Creat);
@@ -135,6 +136,7 @@ int main() {
             if (!matrixNear(poscar.getPos(), poscar1.getPos(), 1E-15))
                 return 1;
         }
+    #endif
     }
     return 0;
 }

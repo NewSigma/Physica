@@ -377,7 +377,7 @@ namespace Physica::Core {
         result.toUnitCell(x, y, z);
         return result;
     }
-
+#ifdef PHYSICA_HDF5
     template<class ScalarType, unsigned int Dim>
     H5Group PeriodicCell<ScalarType, Dim>::read(const H5Location& loc, const char* name) {
         const auto group = loc.openGroup(name);
@@ -397,7 +397,7 @@ namespace Physica::Core {
         typeAttr.write(H5::PredType::NATIVE_INT8, &type);
         return H5Group(group);
     }
-
+#endif
     template<class ScalarType, unsigned int Dim>
     void PeriodicCell<ScalarType, Dim>::swap(PeriodicCell& __restrict cell) noexcept {
         assert(this != &cell && "[Error]: Self swap is likely a bug");

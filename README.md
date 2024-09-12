@@ -16,7 +16,7 @@ Physica is also an open source platform that maintains scientific code written i
 
 ## Design philosophy <a id="philosophy"></a>
 
-1. Be complex, strict, and precise
+1. Be complex, strict and precise
 
 2. Optimal performance and scalability: Balancing between performance, scalability and ease of use is a trade-off. Physica targets on performance and scalability, taking ease of use as a secondary concern if necessary.
 
@@ -41,10 +41,10 @@ A C++ compiler that support C++ 17, the following compilers are tested:
 [GCC](https://gcc.gnu.org/) 9.4.0  
 [clang](https://clang.llvm.org/) 17.0.6  
 
-External libraries:
+Addtional libraries:
 
 [fftw](http://www.fftw.org)  3.3.10  
-[HDF5](https://www.hdfgroup.org/solutions/hdf5/) 1.14.1  
+[HDF5](https://www.hdfgroup.org/solutions/hdf5/) 1.14.1  (Optional)  
 [Qt](https://www.qt.io/)  6.2.1  (Optional, Plotting support)  
 [CUDA](https://developer.nvidia.com/cuda-downloads)  12.3  (Optional)  
 [oneMKL](https://www.intel.com/) 2023.2.0 (Optional, Experimental)  

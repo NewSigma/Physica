@@ -18,13 +18,28 @@
  */
 #pragma once
 
+#include <Physica/Macro.h>
+
 #ifdef PHYSICA_HDF5
     #include <H5Cpp.h>
 
-    #include "Physica/Macro.h"
     #include "H5DataSet.h"
     #include "H5DataSpace.h"
     #include "H5Location.h"
     #include "H5File.h"
     #include "H5Group.h"
+#else
+    namespace H5 {
+        class DataType;
+        class DSetMemXferPropList;
+    }
+
+    namespace Physica::Core {
+        template<class Derived> class DataSpaceBase {};
+        template<size_t Dim> class H5DataSpace {};
+        template<size_t Dim> class H5DataSet {};
+        class H5File;
+        class H5Group {};
+        class H5Location {};
+    }
 #endif

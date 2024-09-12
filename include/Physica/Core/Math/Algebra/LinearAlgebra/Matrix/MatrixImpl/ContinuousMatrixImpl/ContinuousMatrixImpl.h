@@ -335,9 +335,9 @@ namespace Physica::Core {
         else
             Base::random_any(dist, gen);
     }
-
+#ifdef PHYSICA_HDF5
     template<class Derived>
-    const H5DataSet<2> ContinuousMatrix<Derived>::read(const H5Location& loc, const char* name, const H5::DSetMemXferPropList& xfer_plist) {
+    const H5DataSet<2> ContinuousMatrix<Derived>::read(const H5Location& loc, const char* name) {
         const auto dataset = loc.openDataSet<2>(name);
         const size_t maxMajor = dataset.getSize(0);
         const size_t maxMinor = dataset.getSize(1);
@@ -348,15 +348,15 @@ namespace Physica::Core {
         for (size_t major = 0; major < maxMajor; ++major) {
             fileSpace.selectHyperslab(H5S_SELECT_SET, {1, maxMinor}, {major, 0});
             if constexpr (isColumnMatrix)
-                dataset.read(col(major).data(), ScalarType::getH5DataType(), memSpace, fileSpace, xfer_plist);
+                dataset.read(col(major).data(), ScalarType::getH5DataType(), memSpace, fileSpace);
             else
-                dataset.read(row(major).data(), ScalarType::getH5DataType(), memSpace, fileSpace, xfer_plist);
+                dataset.read(row(major).data(), ScalarType::getH5DataType(), memSpace, fileSpace);
         }
         return dataset;
     }
 
     template<class Derived>
-    H5DataSet<2> ContinuousMatrix<Derived>::write(H5Location& loc, const char* name, const H5::DSetMemXferPropList& xfer_plist) const {
+    H5DataSet<2> ContinuousMatrix<Derived>::write(H5Location& loc, const char* name) const {
         const size_t maxMajor = Base::getMaxMajor();
         const size_t maxMinor = Base::getMaxMinor();
         const auto space = H5DataSpace<2>({maxMajor, maxMinor});
@@ -371,10 +371,11 @@ namespace Physica::Core {
         for (size_t major = 0; major < maxMajor; ++major) {
             fileSpace.selectHyperslab(H5S_SELECT_SET, {1, maxMinor}, {major, 0});
             if constexpr (isColumnMatrix)
-                dataset.write(col(major).data(), ScalarType::getH5DataType(), memSpace, fileSpace, xfer_plist);
+                dataset.write(col(major).data(), ScalarType::getH5DataType(), memSpace, fileSpace);
             else
-                dataset.write(row(major).data(), ScalarType::getH5DataType(), memSpace, fileSpace, xfer_plist);
+                dataset.write(row(major).data(), ScalarType::getH5DataType(), memSpace, fileSpace);
         }
         return std::cref(dataset);
     }
+#endif
 }

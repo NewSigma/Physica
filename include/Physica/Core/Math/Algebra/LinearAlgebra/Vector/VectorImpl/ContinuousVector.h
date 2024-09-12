@@ -72,17 +72,13 @@ namespace Physica::Core {
         template<class Distribution, class RandomGenerator>
         inline void random_any(Distribution& dist, RandomGenerator& gen);
 
-        const H5DataSet<1> read(const H5Location& loc, const char* name, const H5::DSetMemXferPropList& xfer_plist = H5::DSetMemXferPropList::DEFAULT);
+        const H5DataSet<1> read(const H5Location& loc, const char* name);
         template<class SpaceType>
-        void read(const H5DataSet<1>& dataset,
-                  const DataSpaceBase<SpaceType>& file_space,
-                  const H5::DSetMemXferPropList& xfer_plist = H5::DSetMemXferPropList::DEFAULT);
+        void read(const H5DataSet<1>& dataset, const DataSpaceBase<SpaceType>& file_space);
         
-        H5DataSet<1> write(H5Location& loc, const char* name, const H5::DSetMemXferPropList& xfer_plist = H5::DSetMemXferPropList::DEFAULT) const;
+        H5DataSet<1> write(H5Location& loc, const char* name) const;
         template<class SpaceType>
-        void write(H5DataSet<1>& dataset, 
-                   const DataSpaceBase<SpaceType>& file_space,
-                   const H5::DSetMemXferPropList& xfer_plist = H5::DSetMemXferPropList::DEFAULT) const;
+        void write(H5DataSet<1>& dataset, const DataSpaceBase<SpaceType>& file_space) const;
         /* Getters */
         [[nodiscard]] __host__ __device__ ScalarType* data() { return Base::data_ptr(0); }
         [[nodiscard]] __host__ __device__ const ScalarType* data() const { return Base::data_ptr(0); }

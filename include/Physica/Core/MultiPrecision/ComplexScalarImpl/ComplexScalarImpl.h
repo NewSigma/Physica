@@ -118,22 +118,19 @@ namespace Physica::Core {
         T imag = T::random_normal(gen);
         return ComplexScalar(std::move(real), std::move(imag));
     }
-
+#ifdef PHYSICA_HDF5
     template<class T>
     const H5::DataType& ComplexScalar<T>::getH5DataType() {
-        static const auto instance = std::unique_ptr<H5::DataType>(makeH5DataType());
+        static const auto instance = std::unique_ptr<H5::DataType>([]() -> H5::DataType* {
+            auto* result = new H5::DataType(H5T_COMPOUND, sizeof(This));
+            const auto id = result->getId();
+            H5Tinsert(id, "Real", HOFFSET(This, real), T::getH5DataType().getId());
+            H5Tinsert(id, "Imag", HOFFSET(This, imag), T::getH5DataType().getId());
+            return result;
+        }());
         return *instance;
     }
-
-    template<class T>
-    H5::DataType* ComplexScalar<T>::makeH5DataType() {
-        auto* result = new H5::DataType(H5T_COMPOUND, sizeof(This));
-        const auto id = result->getId();
-        H5Tinsert(id, "Real", HOFFSET(This, real), T::getH5DataType().getId());
-        H5Tinsert(id, "Imag", HOFFSET(This, imag), T::getH5DataType().getId());
-        return result;
-    }
-
+#endif
     template<class T>
     std::ostream& operator<<(std::ostream& os, const ComplexScalar<T>& c) {
         const auto& imagine = c.getImag();

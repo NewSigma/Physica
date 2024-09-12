@@ -181,7 +181,7 @@ namespace Physica::Core {
         assert(index == ResultSize && "[Error]: Wrong result");
         return wignerSeitzRadius;
     }
-
+#ifdef PHYSICA_HDF5
     template<class ScalarType>
     void FrozenPhonon<ScalarType>::read(RSpaceFCGrid& rSpaceFC, const H5Location& loc, const char* name) {
         const auto group = loc.openGroup(name);
@@ -219,7 +219,7 @@ namespace Physica::Core {
             rSpaceFC(index).write(group, name);
         });
     }
-
+#endif
     template<class ScalarType>
     GridStorage<DenseMatrix<ScalarType>>
     FrozenPhonon<ScalarType>::makeWignerSeitzWeights() const {
