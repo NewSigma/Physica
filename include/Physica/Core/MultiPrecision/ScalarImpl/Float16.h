@@ -81,7 +81,7 @@ namespace Physica::Core {
         [[nodiscard]] __host__ __device__ bool isZero() const noexcept { return f == __half(0); }
         [[nodiscard]] __host__ __device__ bool isPositive() const noexcept { return f > __half(0); }
         [[nodiscard]] __host__ __device__ bool isNegative() const noexcept { return f < __half(0); }
-        [[nodiscard]] bool isFinite() const noexcept { return __hisinf(f) == 0; }
+        [[nodiscard]] __host__ __device__ bool isFinite() const noexcept { return __hisinf(f) == 0; }
     };
 
     template<class OtherScalar>

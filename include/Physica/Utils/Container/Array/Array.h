@@ -47,7 +47,7 @@ namespace Physica::Utils {
     public:
         Array() = default;
         template<class... Args>
-        __host__ __device__ explicit Array(size_t length_, Args&&... args);
+        __host__ __device__ explicit Array(size_t length, Args&&... args);
         __host__ __device__ Array(std::initializer_list<T> list);
         Array(const This&) = default;
         Array(This&&) noexcept = default;
@@ -61,7 +61,7 @@ namespace Physica::Utils {
         __host__ __device__ void insert(const T&, size_t) { assert(false); }
         __host__ __device__ void reserve([[maybe_unused]] size_t size) { assert(size == Length); }
         template<class... Args>
-        __host__ __device__ void resize([[maybe_unused]] size_t size, [[maybe_unused]] Args&&... args) { assert(size == Length); }
+        __host__ __device__ void resize(size_t length, Args&&... args);
         __host__ __device__ void swap(Array& __restrict array) noexcept;
 
         [[nodiscard]] inline auto toDevice() const;

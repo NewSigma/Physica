@@ -81,7 +81,7 @@ namespace Physica::Core {
         [[nodiscard]] __host__ __device__ bool isZero() const noexcept{ return d == 0; }
         [[nodiscard]] __host__ __device__ bool isPositive() const noexcept { return d > 0; }
         [[nodiscard]] __host__ __device__ bool isNegative() const noexcept { return d < 0; }
-        [[nodiscard]] bool isFinite() const noexcept { return std::isfinite(d); }
+        [[nodiscard]] __host__ __device__ inline bool isFinite() const noexcept;
         [[nodiscard]] bool isInteger() const;
         /* Static Members */
         template<class RandomGenerator>
@@ -103,6 +103,14 @@ namespace Physica::Core {
 
     template<class OtherScalar>
     __host__ __device__ inline Scalar<Double>::Scalar(const ScalarBase<OtherScalar>& s) : d(double(s.getDerived())) {}
+
+    __host__ __device__ inline bool Scalar<Double>::isFinite() const noexcept {
+    #ifdef __CUDA_ARCH__
+        return isfinite(d);
+    #else
+        return std::isfinite(d);
+    #endif
+    }
 
     template<class RandomGenerator>
     inline Scalar<Double> Scalar<Double>::random_uniform(RandomGenerator& gen) {

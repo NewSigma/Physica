@@ -28,12 +28,8 @@ namespace Physica::Utils {
     //////////////////////////////////////////Array<T, Length, Allocator>//////////////////////////////////////////
     template<class T, size_t Length, class Allocator>
     template<class... Args>
-    __host__ __device__ Array<T, Length, Allocator>::Array([[maybe_unused]] size_t length_, Args&&... args) {
-        assert(length_ == Length);
-        if constexpr (!Base::template isTrivialDefaultConstruct<Args...>()) {
-            for (size_t i = 0; i < Length; ++i)
-                *(arr + i) = T(std::forward<Args>(args)...);
-        }
+    __host__ __device__ Array<T, Length, Allocator>::Array(size_t length, Args&&... args) {
+        resize(length, std::forward<Args>(args)...);
     }
 
     template<class T, size_t Length, class Allocator>
@@ -71,6 +67,18 @@ namespace Physica::Utils {
         for(size_t i = 0; from < Length; ++from, ++i)
             result.allocate(std::move(Base::operator[](from)), i);
         return result;
+    }
+    /**
+     * Resize a fixed array is implicitly fill
+     */
+    template<class T, size_t Length, class Allocator>
+    template<class... Args>
+    __host__ __device__ void Array<T, Length, Allocator>::resize([[maybe_unused]] size_t length, Args&&... args) {
+        assert(length == Length);
+        if constexpr (!Base::template isTrivialDefaultConstruct<Args...>()) {
+            for (size_t i = 0; i < Length; ++i)
+                *(arr + i) = T(std::forward<Args>(args)...);
+        }
     }
 
     template<class T, size_t Length, class Allocator>
