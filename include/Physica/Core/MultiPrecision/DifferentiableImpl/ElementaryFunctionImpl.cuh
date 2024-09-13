@@ -44,6 +44,7 @@ namespace Physica::Core {
         auto& segment = TracerType::getInstance().pushSegment(1, ExprType::Ln);
         Internal::ElementaryFunction_calcKernel<ScalarType, ExprType::Ln>
                 <<<1, 1, 0, CUDAContext::getInstance()>>>(asStruct(segment), asStruct(s));
+        check(cudaGetLastError());
         return segment[0];
     }
 }

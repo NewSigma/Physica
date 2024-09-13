@@ -18,8 +18,6 @@
  */
 #pragma once
 
-#include <Physica/Core/Math/Algebra/LinearAlgebra/Vector/CrossProduct.h>
-#include <type_traits>
 #include "GridImpl/GridStorage.h"
 #include "GridImpl/LValueGrid.h"
 

@@ -88,18 +88,21 @@ namespace Physica::Core {
     device_obj<Differentiable<ScalarType, DiffMode::Reverse, Order>>::operator-() const {
         auto& segment = TracerType::getInstance().pushSegment(1, ExprType::Minus);
         Internal::Differentiable_minusKernel<ScalarType, Order><<<1, 1, 0, CUDAContext::getInstance()>>>(asStruct(segment), asStruct(*this));
+        check(cudaGetLastError());
         return segment[0];
     }
 
     template<class ScalarType, unsigned int Order>
     inline void device_obj<Differentiable<ScalarType, DiffMode::Reverse, Order>>::reverse() {
         Internal::Differentiable_reverseKernel<ScalarType, Order><<<1, 1, 0, CUDAContext::getInstance()>>>(asStruct(*this));
+        check(cudaGetLastError());
         TracerType::getInstance().reverse_from(*this);
     }
 
     template<class ScalarType, unsigned int Order>
     inline void device_obj<Differentiable<ScalarType, DiffMode::Reverse, Order>>::reverse_to(This to) {
         Internal::Differentiable_reverseKernel<ScalarType, Order><<<1, 1, 0, CUDAContext::getInstance()>>>(asStruct(*this));
+        check(cudaGetLastError());
         TracerType::getInstance().reverse(*this, to);
     }
 
@@ -144,6 +147,7 @@ namespace Physica::Core {
         auto& segment = TracerType::getInstance().pushSegment(1, ExprType::Add);
         Internal::Differentiable_calcKernel<ScalarType, Order, ExprType::Add>
                 <<<1, 1, 0, CUDAContext::getInstance()>>>(asStruct(segment), asStruct(s1), asStruct(s2));
+        check(cudaGetLastError());
         return segment[0];
     }
 
@@ -155,6 +159,7 @@ namespace Physica::Core {
         auto& segment = TracerType::getInstance().pushSegment(1, ExprType::Sub);
         Internal::Differentiable_calcKernel<ScalarType, Order, ExprType::Sub>
                 <<<1, 1, 0, CUDAContext::getInstance()>>>(asStruct(segment), asStruct(s1), asStruct(s2));
+        check(cudaGetLastError());
         return segment[0];
     }
 
@@ -166,6 +171,7 @@ namespace Physica::Core {
         auto& segment = TracerType::getInstance().pushSegment(1, ExprType::Mul);
         Internal::Differentiable_calcKernel<ScalarType, Order, ExprType::Mul>
                 <<<1, 1, 0, CUDAContext::getInstance()>>>(asStruct(segment), asStruct(s1), asStruct(s2));
+        check(cudaGetLastError());
         return segment[0];
     }
 
@@ -177,6 +183,7 @@ namespace Physica::Core {
         auto& segment = TracerType::getInstance().pushSegment(1, ExprType::Div);
         Internal::Differentiable_calcKernel<ScalarType, Order, ExprType::Div>
                 <<<1, 1, 0, CUDAContext::getInstance()>>>(asStruct(segment), asStruct(s1), asStruct(s2));
+        check(cudaGetLastError());
         return segment[0];
     }
 }

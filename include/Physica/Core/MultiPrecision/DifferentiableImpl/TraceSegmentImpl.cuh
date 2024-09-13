@@ -85,6 +85,7 @@ namespace Physica::Core {
         const size_t numThread = getLength() < MaxThreadPerBlock ? getLength() : MaxThreadPerBlock;
         const size_t numBlock = (getLength() + numThread - 1) / numThread;
         Internal::TraceSegment_reverseKernel<<<numBlock, numThread, 0, CUDAContext::getInstance()>>>(asStruct(*this));
+        check(cudaGetLastError());
     }
 
     template<class ScalarType, unsigned int Order>
@@ -99,6 +100,7 @@ namespace Physica::Core {
         const size_t numThread = getLength() < MaxThreadPerBlock ? getLength() : MaxThreadPerBlock;
         const size_t numBlock = (getLength() + numThread - 1) / numThread;
         Internal::TraceSegment_copyKernel<<<numBlock, numThread, 0, CUDAContext::getInstance()>>>(asStruct(*this), asStruct(result));
+        check(cudaGetLastError());
         result.values = values;
         zero_grad();
         return result;
@@ -232,6 +234,7 @@ namespace Physica::Core {
     template<class ScalarType, unsigned int Order>
     inline void device_obj<TraceSegment<ScalarType, Order>>::init(ScalarType value) {
         Internal::TraceSegment_setKernel<<<1, 1, 0, CUDAContext::getInstance()>>>(asStruct(*this), value);
+        check(cudaGetLastError());
     }
 
     template<class ScalarType, unsigned int Order>

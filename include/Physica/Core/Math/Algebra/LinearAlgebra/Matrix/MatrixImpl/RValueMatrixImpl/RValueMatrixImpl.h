@@ -19,7 +19,7 @@
 #pragma once
 
 #include <cassert>
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/FormatedMatrix.h"
+#include <Physica/Core/Math/Algebra/LinearAlgebra/Matrix/MatrixImpl/FormatedMatrix.h>
 
 namespace Physica::Core {
     template<class Derived>

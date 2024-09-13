@@ -72,6 +72,7 @@ int main() {
         VectorType result(len);
         DeviceVector d_result(len);
         test_kernel<<<1, len, 0, CUDAContext::getInstance()>>>(asStruct(d_a), asStruct(d_b), asStruct(d_result), factor);
+        check(cudaGetLastError());
         d_result.toHostAsync(result);
         CUDAExecutor::wait();
         if (!vectorNear(result, answer, 1E-7)) {

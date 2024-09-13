@@ -51,6 +51,7 @@ namespace Physica::Core {
             const size_t numThread = length < MaxNumThreadPerBlock ? length : MaxNumThreadPerBlock;
             const size_t numBlock = (length + numThread - 1) / numThread;
             Internal::SGD_stepKernel<This, SegmentType><<<numBlock, numThread, 0, CUDAContext::getInstance()>>>(asStruct(*this), asStruct(segment));
+            check(cudaGetLastError());
         });
     }
 

@@ -89,6 +89,7 @@ namespace Physica::Core {
         const unsigned int numThread = numParticle > maxThread ? maxThread : numParticle;
         Internal::HardCore_stepKernel<ScalarType, IsFixedBoundary, NumReplica>
             <<<1, numThread, numThread * sizeof(ScalarType), CUDAContext::getInstance()>>>(asStruct(*this), deltaT, numStep);
+        check(cudaGetLastError());
     }
 
     template<class ScalarType, bool IsFixedBoundary, size_t NumReplica, RPMDIntegrator Integrator>

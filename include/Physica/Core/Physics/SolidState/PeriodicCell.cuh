@@ -19,7 +19,6 @@
 #pragma once
 
 #include "PeriodicCell.h"
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/CrossProduct.cuh"
 
 namespace Physica::Core {
     template<class ScalarType, unsigned int Dim>

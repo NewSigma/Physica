@@ -70,6 +70,7 @@ namespace Physica::Core {
         const int numBlock = (Base::getLength() + WarpSize - 1) / WarpSize;
         const int numThread = WarpSize;
         Internal::assignConst_kernel<<<numBlock, numThread, 0, CUDAContext::getInstance()>>>(asStruct(Base::getDerived()), s.getDerived());
+        check(cudaGetLastError());
         return Base::getDerived();
     }
 

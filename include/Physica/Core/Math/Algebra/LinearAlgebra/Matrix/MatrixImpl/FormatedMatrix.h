@@ -18,8 +18,6 @@
  */
 #pragma once
 
-#include "MatrixImpl/RValueMatrix.h"
-
 namespace Physica::Core {
     /**
      * \class FormatedMatrix convert a matrix to text, either readable to human, or other softwares.

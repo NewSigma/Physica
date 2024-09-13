@@ -71,5 +71,6 @@ namespace Physica::Core {
 
 #include "RValueVectorImpl/RValueVectorImpl.cuh"
 #include "VectorExpr.cuh"
+#include "CrossProduct.cuh"
 #include "InnerDot.cuh"
 

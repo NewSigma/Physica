@@ -122,6 +122,7 @@ namespace Physica::Core {
             const size_t numBlock = (length + numThread - 1) / numThread;
             Internal::DiffVectorExpr_unitaryOpKernel<Type, VectorType>
                     <<<numBlock, numThread, 0, CUDAContext::getInstance()>>>(asStruct(result), asStruct(v));
+            check(cudaGetLastError());
             return result;
         }
     };
@@ -139,6 +140,7 @@ namespace Physica::Core {
             const size_t numBlock = (length + numThread - 1) / numThread;
             Internal::DiffVectorExpr_binaryOpKernel<Type, VectorType>
                     <<<numBlock, numThread, 0, CUDAContext::getInstance()>>>(asStruct(result), asStruct(v), asStruct(s));
+            check(cudaGetLastError());
             return result;
         }
     };
@@ -156,6 +158,7 @@ namespace Physica::Core {
             const size_t numBlock = (length + numThread - 1) / numThread;
             Internal::DiffVectorExpr_binaryOpKernel<Type, VectorType>
                     <<<numBlock, numThread, 0, CUDAContext::getInstance()>>>(asStruct(result), asStruct(v1), asStruct(v2));
+            check(cudaGetLastError());
             return result;
         }
     };

@@ -84,6 +84,7 @@ namespace Physica::Core {
         const size_t numThread = std::min(m.getColumn(), VectorType::MaxThreadPerBlock);
         Internal::DiffMatrixProduct_gemvKernel<MatrixType, VectorType>
                 <<<m.getRow(), numThread, numThread * sizeof(PlainScalar), CUDAContext::getInstance()>>>(asStruct(m), asStruct(v), asStruct(dots), asStruct(result));
+        check(cudaGetLastError());
         return result;
     }
 }

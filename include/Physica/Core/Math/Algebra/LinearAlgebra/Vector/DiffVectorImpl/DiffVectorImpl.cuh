@@ -203,6 +203,7 @@ namespace Physica::Core {
         const size_t numThread = length > MaxThreadPerBlock ? MaxThreadPerBlock : length;
         Internal::DiffVector_minmaxKernel<This, SegmentType, true>
                 <<<1, numThread, numThread * sizeof(PlainScalar), CUDAContext::getInstance()>>>(asStruct(*this), asStruct(trace));
+        check(cudaGetLastError());
         return ScalarType(trace.getValues().data(), trace.getGrads().data());
     }
 
@@ -214,6 +215,7 @@ namespace Physica::Core {
         const size_t numThread = length > MaxThreadPerBlock ? MaxThreadPerBlock : length;
         Internal::DiffVector_minmaxKernel<This, SegmentType, false>
                 <<<1, numThread, numThread * sizeof(PlainScalar), CUDAContext::getInstance()>>>(asStruct(*this), asStruct(trace));
+        check(cudaGetLastError());
         return ScalarType(trace.getValues().data(), trace.getGrads().data());
     }
 
@@ -225,6 +227,7 @@ namespace Physica::Core {
         const size_t numThread = length > MaxThreadPerBlock ? MaxThreadPerBlock : length;
         Internal::DiffVector_sumKernel<This, SegmentType>
                 <<<1, numThread, numThread * sizeof(PlainScalar), CUDAContext::getInstance()>>>(asStruct(*this), asStruct(trace));
+        check(cudaGetLastError());
         return ScalarType(trace.getValues().data(), trace.getGrads().data());
     }
 

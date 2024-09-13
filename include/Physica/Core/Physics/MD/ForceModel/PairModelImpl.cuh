@@ -115,6 +115,7 @@ namespace Physica::Core {
                 <<<gridDims, numThread, numThread * sizeof(Vector3D), CUDAContext::getInstance()>>>(asStruct(Base::getDerived()));
         if constexpr (IsSmallCell)
             Internal::PairModel_postForceKernel<Derived><<<gridDims.x, numThread, 0, CUDAContext::getInstance()>>>(asStruct(Base::getDerived()));
+        check(cudaGetLastError());
         forceBuffer.col(0).toHostAsync(result);
     }
 
@@ -154,6 +155,7 @@ namespace Physica::Core {
                 <<<gridDims, numThread, numThread * sizeof(Vector3D), CUDAContext::getInstance()>>>(asStruct(Base::getDerived()));
         Internal::PairModel_postVirialKernel<Derived>
                 <<<1, NumVirialElem, 0, CUDAContext::getInstance()>>>(asStruct(Base::getDerived()));
+        check(cudaGetLastError());
 
         auto head = swapBuffer.head(NumVirialElem);
         virialBuffer.col(0).toHostAsync(head);

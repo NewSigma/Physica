@@ -18,8 +18,6 @@
  */
 #pragma once
 
-#include "Vector.h"
-
 namespace Physica::Core {
     template<class AnyVector1, class AnyVector2>
     class CrossProduct : public RValueVector<CrossProduct<AnyVector1, AnyVector2>> {

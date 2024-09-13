@@ -18,7 +18,7 @@
  */
 #pragma once
 
-#include <Physica/Core/Math/Algebra/LinearAlgebra/Vector/FormatedVector.h>
+#include <Physica/Core/Math/Algebra/LinearAlgebra/Vector/VectorImpl/FormatedVector.h>
 
 namespace Physica::Core {
     namespace Internal {

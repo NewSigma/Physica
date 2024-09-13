@@ -146,6 +146,7 @@ namespace Physica::Core {
 
 #include "RValueVectorImpl/RValueVectorImpl.h"
 #include "RValueVectorImpl/ReverseVector.h"
+#include "CrossProduct.h"
 #include "InnerDot.h"
 #include "VectorExpr.h"
 #include "VectorConvert.h"

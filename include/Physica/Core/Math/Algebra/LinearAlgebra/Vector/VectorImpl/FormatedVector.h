@@ -18,8 +18,6 @@
  */
 #pragma once
 
-#include "VectorImpl/RValueVector.h"
-
 namespace Physica::Core {
     template<class VectorType>
     class FormatedVector {

@@ -16,8 +16,8 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include <Physica/Core/Math/Algebra/LinearAlgebra/Vector/CrossProduct.h>
 #include <Physica/Utils/Unix/TempFile.h>
+#include <Physica/Core/Math/Algebra/LinearAlgebra/Vector/Vector.h>
 
 using namespace Physica::Core;
 using namespace Physica::Utils;
