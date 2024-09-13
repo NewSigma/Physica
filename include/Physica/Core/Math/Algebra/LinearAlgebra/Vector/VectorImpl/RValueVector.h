@@ -62,6 +62,8 @@ namespace Physica::Core {
         static_assert(!std::is_const<Derived>::value, "[Error]: A common mistake, const is unnecessary");
         static_assert(!std::is_volatile<Derived>::value, "[Error]: A common mistake, volatile is unnecessary");
         using Base = Utils::CRTPBase<Derived>;
+        template<size_t Length>
+        using BlockType = RVectorBlock<Derived, Length>;
     public:
         using ScalarType = typename Traits<Derived>::ScalarType;
         using PlainScalar = typename ScalarType::PlainScalar;
@@ -107,12 +109,18 @@ namespace Physica::Core {
         [[nodiscard]] inline CrossProduct<Derived, OtherDerived> crossProduct(const RValueVector<OtherDerived>& v) const noexcept;
         template<class OtherDerived>
         [[nodiscard]] ScalarType angleTo(const RValueVector<OtherDerived>& v) const noexcept;
-        [[nodiscard]] inline RVectorBlock<Derived> head(size_t to);
-        [[nodiscard]] inline const RVectorBlock<Derived> head(size_t to) const;
-        [[nodiscard]] inline RVectorBlock<Derived> tail(size_t from);
-        [[nodiscard]] inline const RVectorBlock<Derived> tail(size_t from) const;
-        [[nodiscard]] inline RVectorBlock<Derived> segment(size_t from, size_t to);
-        [[nodiscard]] inline const RVectorBlock<Derived> segment(size_t from, size_t to) const;
+        template<size_t Length = Dynamic>
+        [[nodiscard]] inline BlockType<Length> head(size_t to);
+        template<size_t Length = Dynamic>
+        [[nodiscard]] inline const BlockType<Length> head(size_t to) const;
+        template<size_t Length = Dynamic>
+        [[nodiscard]] inline BlockType<Length> tail(size_t from);
+        template<size_t Length = Dynamic>
+        [[nodiscard]] inline const BlockType<Length> tail(size_t from) const;
+        template<size_t Length = Dynamic>
+        [[nodiscard]] inline BlockType<Length> segment(size_t from, size_t to);
+        template<size_t Length = Dynamic>
+        [[nodiscard]] inline const BlockType<Length> segment(size_t from, size_t to) const;
         [[nodiscard]] inline ReverseVector<Derived> reverse();
         [[nodiscard]] inline const ReverseVector<Derived> reverse() const;
 

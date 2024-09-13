@@ -49,12 +49,18 @@ namespace Physica::Core {
         template<class OtherDerived> void toHost(ContinuousVector<OtherDerived>& obj) const;
         template<class OtherDerived> void toHostAsync(ContinuousVector<OtherDerived>& obj) const;
 
-        template<size_t Length = Dynamic> __host__ __device__ inline BlockType<Length> head(size_t to);
-        template<size_t Length = Dynamic> __host__ __device__ inline const BlockType<Length> head(size_t to) const;
-        template<size_t Length = Dynamic> __host__ __device__ inline BlockType<Length> tail(size_t from);
-        template<size_t Length = Dynamic> __host__ __device__ inline const BlockType<Length> tail(size_t from) const;
-        template<size_t Length = Dynamic> __host__ __device__ inline BlockType<Length> segment(size_t from, size_t to);
-        template<size_t Length = Dynamic> __host__ __device__ inline const BlockType<Length> segment(size_t from, size_t to) const;
+        template<size_t Length = Dynamic>
+        [[nodiscard]] __host__ __device__ inline BlockType<Length> head(size_t to);
+        template<size_t Length = Dynamic>
+        [[nodiscard]] __host__ __device__ inline const BlockType<Length> head(size_t to) const;
+        template<size_t Length = Dynamic>
+        [[nodiscard]] __host__ __device__ inline BlockType<Length> tail(size_t from);
+        template<size_t Length = Dynamic>
+        [[nodiscard]] __host__ __device__ inline const BlockType<Length> tail(size_t from) const;
+        template<size_t Length = Dynamic>
+        [[nodiscard]] __host__ __device__ inline BlockType<Length> segment(size_t from, size_t to);
+        template<size_t Length = Dynamic>
+        [[nodiscard]] __host__ __device__ inline const BlockType<Length> segment(size_t from, size_t to) const;
         /* Getters */
         [[nodiscard]] __host__ __device__ ScalarType* data() { return Base::data_ptr(0); }
         [[nodiscard]] __host__ __device__ const ScalarType* data() const { return Base::data_ptr(0); }

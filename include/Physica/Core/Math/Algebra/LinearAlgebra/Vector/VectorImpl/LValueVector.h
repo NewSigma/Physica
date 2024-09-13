@@ -28,8 +28,11 @@ namespace Physica::Core {
      */
     template<class Derived>
     class LValueVector : public RValueVector<Derived> {
-    public:
         using Base = RValueVector<Derived>;
+        template<size_t Length>
+        using BlockType = LVectorBlock<Derived, Length>;
+    public:
+        
         using typename Base::ScalarType;
     public:
         ~LValueVector() = default;
@@ -50,12 +53,18 @@ namespace Physica::Core {
         template<class AnyPacket> void writePacket(size_t index, const AnyPacket packet);
         template<class AnyPacket> void writePacketPartial(size_t index, size_t count, const AnyPacket packet);
 
-        [[nodiscard]] inline LVectorBlock<Derived> head(size_t to);
-        [[nodiscard]] inline const LVectorBlock<Derived> head(size_t to) const;
-        [[nodiscard]] inline LVectorBlock<Derived> tail(size_t from);
-        [[nodiscard]] inline const LVectorBlock<Derived> tail(size_t from) const;
-        [[nodiscard]] inline LVectorBlock<Derived> segment(size_t from, size_t to);
-        [[nodiscard]] inline const LVectorBlock<Derived> segment(size_t from, size_t to) const;
+        template<size_t Length = Dynamic>
+        [[nodiscard]] inline BlockType<Length> head(size_t to);
+        template<size_t Length = Dynamic>
+        [[nodiscard]] inline const BlockType<Length> head(size_t to) const;
+        template<size_t Length = Dynamic>
+        [[nodiscard]] inline BlockType<Length> tail(size_t from);
+        template<size_t Length = Dynamic>
+        [[nodiscard]] inline const BlockType<Length> tail(size_t from) const;
+        template<size_t Length = Dynamic>
+        [[nodiscard]] inline BlockType<Length> segment(size_t from, size_t to);
+        template<size_t Length = Dynamic>
+        [[nodiscard]] inline const BlockType<Length> segment(size_t from, size_t to) const;
 
         inline void toUnit();
         template<class RandomGenerator>

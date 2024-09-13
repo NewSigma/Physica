@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2024 Weibo He.
+ * Copyright 2024 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -19,14 +19,11 @@
 #pragma once
 
 namespace Physica::Core {
-    template<class Derived> class RValueVector;
-    /**
-     * Reference a part of the given vector
-     */
     template<class VectorType, size_t Length>
-    class RVectorBlock : public RValueVector<RVectorBlock<VectorType, Length>> {
-        using This = RVectorBlock<VectorType, Length>;
-        using Base = RValueVector<This>;
+    class device_obj<RVectorBlock<VectorType, Length>> : public device_obj<RValueVector<RVectorBlock<VectorType, Length>>> {
+        using host_obj = RVectorBlock<VectorType, Length>;
+        using This = device_obj<host_obj>;
+        using Base = device_obj<RValueVector<host_obj>>;
     public:
         using ScalarType = typename Base::ScalarType;
     private:
@@ -34,33 +31,34 @@ namespace Physica::Core {
         size_t from;
         size_t to;
     public:
-        RVectorBlock(const RValueVector<VectorType>& vec_, size_t from_, size_t to_);
-        RVectorBlock(const RValueVector<VectorType>& vec_, size_t from_);
-        RVectorBlock(const This& block) = delete;
-        RVectorBlock(This&&) noexcept = delete;
-        ~RVectorBlock() = default;
+        __host__ __device__ device_obj(const device_obj<RValueVector<VectorType>>& vec_, size_t from_, size_t to_);
+        __host__ __device__ device_obj(const device_obj<RValueVector<VectorType>>& vec_, size_t from_);
+        device_obj(const This& block) = delete;
+        device_obj(This&&) noexcept = delete;
+        ~device_obj() = default;
         /* Operators */
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
         /* Operations */
-        [[nodiscard]] ScalarType calc(size_t index) const { return vec.calc(index + from); }
+        [[nodiscard]] __device__ ScalarType calc(size_t index) const { return vec.calc(index + from); }
         /* Getters */
         [[nodiscard]] __host__ __device__ inline size_t getLength() const noexcept;
     };
 
     template<class VectorType, size_t Length>
-    RVectorBlock<VectorType, Length>::RVectorBlock(const RValueVector<VectorType>& vec_, size_t from_, size_t to_)
-            : vec(vec_.getDerived()), from(from_), to(to_) {
+    __host__ __device__ device_obj<RVectorBlock<VectorType, Length>>::device_obj(
+            const device_obj<RValueVector<VectorType>>& vec_, size_t from_, size_t to_) : vec(asStruct(vec_.getDerived())), from(from_), to(to_) {
         assert(from_ < to);
         assert(to <= vec.getLength());
         assert(Length == Dynamic || Length == getLength());
     }
 
     template<class VectorType, size_t Length>
-    RVectorBlock<VectorType, Length>::RVectorBlock(const RValueVector<VectorType>& vec_, size_t from_) : RVectorBlock(vec_, from_, vec_.getLength()) {}
+    __host__ __device__ device_obj<RVectorBlock<VectorType, Length>>::device_obj(
+            const device_obj<RValueVector<VectorType>>& vec_, size_t from_) : device_obj(vec_, from_, vec_.getLength()) {}
 
     template<class VectorType, size_t Length>
-    __host__ __device__ inline size_t RVectorBlock<VectorType, Length>::getLength() const noexcept {
+    __host__ __device__ inline size_t device_obj<RVectorBlock<VectorType, Length>>::getLength() const noexcept {
         if constexpr (Length == Dynamic)
             return to - from;
         return Length;
@@ -69,11 +67,5 @@ namespace Physica::Core {
 
 namespace Physica {
     template<class VectorType, size_t Length>
-    class Traits<Core::RVectorBlock<VectorType, Length>> {
-    public:
-        using ScalarType = typename VectorType::ScalarType;
-        constexpr static size_t SizeAtCompile = Length;
-        constexpr static bool FastAssign = false;
-        constexpr static bool FastPacket = false;
-    };
+    class Traits<Core::device_obj<Core::RVectorBlock<VectorType, Length>>> : public Traits<Core::RVectorBlock<VectorType, Length>> {};
 }

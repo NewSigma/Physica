@@ -47,7 +47,7 @@ namespace Physica {
         using Base = PlainStruct<const T>;
     public:
         using Base::getDerived;
-        [[nodiscard]] __device__ T& getDerived() noexcept { return *reinterpret_cast<T*>(this); }
+        [[nodiscard]] __host__ __device__ T& getDerived() noexcept { return *reinterpret_cast<T*>(this); }
     };
 
     template<class T>

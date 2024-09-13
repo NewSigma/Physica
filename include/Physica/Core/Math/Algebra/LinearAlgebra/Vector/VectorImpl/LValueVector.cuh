@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2023 Weibo He.
+ * Copyright 2022-2024 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -24,8 +24,10 @@
 namespace Physica::Core {
     template<class Derived>
     class device_obj<LValueVector<Derived>> : public device_obj<RValueVector<Derived>> {
-    public:
         using Base = device_obj<RValueVector<Derived>>;
+        template<size_t Length>
+        using BlockType = device_obj<LVectorBlock<Derived, Length>>;
+    public:
         using typename Base::ScalarType;
     public:
         ~device_obj() = default;
@@ -41,6 +43,19 @@ namespace Physica::Core {
         /* Operations */
         template<Side Owner = GetSide()>
         [[nodiscard]] __device__ ScalarType calc(size_t index) const { return *data_ptr(index); }
+
+        template<size_t Length = Dynamic>
+        [[nodiscard]] __host__ __device__ inline BlockType<Length> head(size_t to);
+        template<size_t Length = Dynamic>
+        [[nodiscard]] __host__ __device__ inline const BlockType<Length> head(size_t to) const;
+        template<size_t Length = Dynamic>
+        [[nodiscard]] __host__ __device__ inline BlockType<Length> tail(size_t from);
+        template<size_t Length = Dynamic>
+        [[nodiscard]] __host__ __device__ inline const BlockType<Length> tail(size_t from) const;
+        template<size_t Length = Dynamic>
+        [[nodiscard]] __host__ __device__ inline BlockType<Length> segment(size_t from, size_t to);
+        template<size_t Length = Dynamic>
+        [[nodiscard]] __host__ __device__ inline const BlockType<Length> segment(size_t from, size_t to) const;
         /* Getters */
         [[nodiscard]] __host__ __device__ inline ScalarType* data_ptr(size_t index);
         [[nodiscard]] __host__ __device__ inline const ScalarType* data_ptr(size_t index) const;
@@ -77,3 +92,4 @@ namespace Physica::Core {
 }
 
 #include "LValueVectorImpl/LValueVectorImpl.cuh"
+#include "LValueVectorImpl/LVectorBlock.h"

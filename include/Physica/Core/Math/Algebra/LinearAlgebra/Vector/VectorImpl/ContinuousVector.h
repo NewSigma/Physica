@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2023 Weibo He.
+ * Copyright 2022-2024 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -28,8 +28,10 @@ namespace Physica::Core {
      */
     template<class Derived>
     class ContinuousVector : public LValueVector<Derived> {
-    public:
         using Base = LValueVector<Derived>;
+        template<size_t Length>
+        using BlockType = ContinuousVectorBlock<Derived, Length>;
+    public:
         using typename Base::ScalarType;
         using typename Base::PlainScalar;
         using typename Base::PacketType;
@@ -55,12 +57,18 @@ namespace Physica::Core {
         template<class OtherDerived> void toDevice(device_obj<ContinuousVector<OtherDerived>>& obj) const;
         template<class OtherDerived> void toDeviceAsync(device_obj<ContinuousVector<OtherDerived>>& obj) const;
 
-        template<size_t Length = Dynamic> inline ContinuousVectorBlock<Derived, Length> head(size_t to);
-        template<size_t Length = Dynamic> inline const ContinuousVectorBlock<Derived, Length> head(size_t to) const;
-        template<size_t Length = Dynamic> inline ContinuousVectorBlock<Derived, Length> tail(size_t from);
-        template<size_t Length = Dynamic> inline const ContinuousVectorBlock<Derived, Length> tail(size_t from) const;
-        template<size_t Length = Dynamic> inline ContinuousVectorBlock<Derived, Length> segment(size_t from, size_t to);
-        template<size_t Length = Dynamic> inline const ContinuousVectorBlock<Derived, Length> segment(size_t from, size_t to) const;
+        template<size_t Length = Dynamic>
+        [[nodiscard]] inline BlockType<Length> head(size_t to);
+        template<size_t Length = Dynamic>
+        [[nodiscard]] inline const BlockType<Length> head(size_t to) const;
+        template<size_t Length = Dynamic>
+        [[nodiscard]] inline BlockType<Length> tail(size_t from);
+        template<size_t Length = Dynamic>
+        [[nodiscard]] inline const BlockType<Length> tail(size_t from) const;
+        template<size_t Length = Dynamic>
+        [[nodiscard]] inline BlockType<Length> segment(size_t from, size_t to);
+        template<size_t Length = Dynamic>
+        [[nodiscard]] inline const BlockType<Length> segment(size_t from, size_t to) const;
 
         void resize(size_t length) { Base::getDerived().resize(length); }
         inline void makeContinuous();

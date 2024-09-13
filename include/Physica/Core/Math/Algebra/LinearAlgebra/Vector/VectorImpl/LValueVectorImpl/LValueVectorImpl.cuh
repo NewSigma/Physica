@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Weibo He.
+ * Copyright 2023-2024 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -74,13 +74,49 @@ namespace Physica::Core {
     }
 
     template<class Derived>
-    __host__ __device__ typename device_obj<LValueVector<Derived>>::ScalarType*
+    template<size_t Length>
+    __host__ __device__ inline device_obj<LVectorBlock<Derived, Length>> device_obj<LValueVector<Derived>>::head(size_t to) {
+        return {Base::getDerived(), 0, to};
+    }
+
+    template<class Derived>
+    template<size_t Length>
+    __host__ __device__ inline const device_obj<LVectorBlock<Derived, Length>> device_obj<LValueVector<Derived>>::head(size_t to) const {
+        return {Base::getConstCastDerived(), 0, to};
+    }
+
+    template<class Derived>
+    template<size_t Length>
+    __host__ __device__ inline device_obj<LVectorBlock<Derived, Length>> device_obj<LValueVector<Derived>>::tail(size_t from) {
+        return {Base::getDerived(), from};
+    }
+
+    template<class Derived>
+    template<size_t Length>
+    __host__ __device__ inline const device_obj<LVectorBlock<Derived, Length>> device_obj<LValueVector<Derived>>::tail(size_t from) const {
+        return {Base::getConstCastDerived(), from};
+    }
+
+    template<class Derived>
+    template<size_t Length>
+    __host__ __device__ inline device_obj<LVectorBlock<Derived, Length>> device_obj<LValueVector<Derived>>::segment(size_t from, size_t to) {
+        return {Base::getDerived(), from, to};
+    }
+
+    template<class Derived>
+    template<size_t Length>
+    __host__ __device__ inline const device_obj<LVectorBlock<Derived, Length>> device_obj<LValueVector<Derived>>::segment(size_t from, size_t to) const {
+        return {Base::getConstCastDerived(), from, to};
+    }
+
+    template<class Derived>
+    __host__ __device__ inline typename device_obj<LValueVector<Derived>>::ScalarType*
     device_obj<LValueVector<Derived>>::data_ptr(size_t index) {
         return Base::getDerived().data_ptr(index);
     }
     
     template<class Derived>
-    __host__ __device__ const typename device_obj<LValueVector<Derived>>::ScalarType*
+    __host__ __device__ inline const typename device_obj<LValueVector<Derived>>::ScalarType*
     device_obj<LValueVector<Derived>>::data_ptr(size_t index) const {
         return Base::getDerived().data_ptr(index);
     }

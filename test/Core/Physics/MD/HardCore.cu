@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Weibo He.
+ * Copyright 2023-2024 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -144,7 +144,6 @@ void testCpuGpuCompare() {
         if (!scalarNear(gpu_data[i], cpu_data[i], precision))
             exit(EXIT_FAILURE);
     }
-
 }
 
 int main() {

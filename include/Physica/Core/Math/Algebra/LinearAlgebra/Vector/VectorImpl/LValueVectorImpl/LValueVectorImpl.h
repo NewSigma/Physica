@@ -65,33 +65,39 @@ namespace Physica::Core {
     }
 
     template<class Derived>
-    inline LVectorBlock<Derived> LValueVector<Derived>::head(size_t to) {
-        return LVectorBlock<Derived>(Base::getDerived(), 0, to);
+    template<size_t Length>
+    inline LVectorBlock<Derived, Length> LValueVector<Derived>::head(size_t to) {
+        return {Base::getDerived(), 0, to};
     }
 
     template<class Derived>
-    inline const LVectorBlock<Derived> LValueVector<Derived>::head(size_t to) const {
-        return LVectorBlock<Derived>(Base::getConstCastDerived(), 0, to);
+    template<size_t Length>
+    inline const LVectorBlock<Derived, Length> LValueVector<Derived>::head(size_t to) const {
+        return {Base::getConstCastDerived(), 0, to};
     }
 
     template<class Derived>
-    inline LVectorBlock<Derived> LValueVector<Derived>::tail(size_t from) {
-        return LVectorBlock<Derived>(Base::getDerived(), from);
+    template<size_t Length>
+    inline LVectorBlock<Derived, Length> LValueVector<Derived>::tail(size_t from) {
+        return {Base::getDerived(), from};
     }
 
     template<class Derived>
-    inline const LVectorBlock<Derived> LValueVector<Derived>::tail(size_t from) const {
-        return LVectorBlock<Derived>(Base::getConstCastDerived(), from);
+    template<size_t Length>
+    inline const LVectorBlock<Derived, Length> LValueVector<Derived>::tail(size_t from) const {
+        return {Base::getConstCastDerived(), from};
     }
 
     template<class Derived>
-    inline LVectorBlock<Derived> LValueVector<Derived>::segment(size_t from, size_t to) {
-        return LVectorBlock<Derived>(Base::getDerived(), from, to);
+    template<size_t Length>
+    inline LVectorBlock<Derived, Length> LValueVector<Derived>::segment(size_t from, size_t to) {
+        return {Base::getDerived(), from, to};
     }
 
     template<class Derived>
-    inline const LVectorBlock<Derived> LValueVector<Derived>::segment(size_t from, size_t to) const {
-        return LVectorBlock<Derived>(Base::getConstCastDerived(), from, to);
+    template<size_t Length>
+    inline const LVectorBlock<Derived, Length> LValueVector<Derived>::segment(size_t from, size_t to) const {
+        return {Base::getConstCastDerived(), from, to};
     }
 
     template<class Derived>

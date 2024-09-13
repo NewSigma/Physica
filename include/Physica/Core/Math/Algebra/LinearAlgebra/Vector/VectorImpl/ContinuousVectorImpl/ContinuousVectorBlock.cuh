@@ -21,10 +21,10 @@
 namespace Physica::Core {
     template<class VectorType, size_t Length>
     class device_obj<ContinuousVectorBlock<VectorType, Length>> : public device_obj<ContinuousVector<ContinuousVectorBlock<VectorType, Length>>> {
-        using DeviceVector = device_obj<VectorType>;
-    public:
         using host_obj = ContinuousVectorBlock<VectorType, Length>;
         using Base = device_obj<ContinuousVector<host_obj>>;
+        using DeviceVector = device_obj<VectorType>;
+    public:
         using typename Base::ScalarType;
     private:
         Physica::PlainStruct<DeviceVector> vec;
@@ -47,16 +47,20 @@ namespace Physica::Core {
         /* Getters */
         template<Side Owner = GetSide()>
         [[nodiscard]] __host__ __device__ inline size_t getLength() const noexcept;
-        [[nodiscard]] __host__ __device__ inline ScalarType* data_ptr(size_t index) { return vec.getDerived().data() + from + index; }
-        [[nodiscard]] __host__ __device__ inline const ScalarType* data_ptr(size_t index) const { return vec.getDerived().data() + from + index; }
+        [[nodiscard]] __host__ __device__ ScalarType* data_ptr(size_t index) { return vec.getDerived().data() + from + index; }
+        [[nodiscard]] __host__ __device__ const ScalarType* data_ptr(size_t index) const { return vec.getDerived().data() + from + index; }
     };
 
     template<class VectorType, size_t Length>
     __host__ __device__ device_obj<ContinuousVectorBlock<VectorType, Length>>::device_obj(
             device_obj<ContinuousVector<VectorType>>& vec_,
             size_t from_,
-            size_t to_) : vec(asStruct(vec_.getDerived())), from(from_), to(to_) {}
-    
+            size_t to_) : vec(asStruct(vec_.getDerived())), from(from_), to(to_) {
+        assert(from_ < to);
+        assert(to <= vec.getDerived().getLength());
+        assert(Length == Dynamic || Length == getLength());
+    }
+
     template<class VectorType, size_t Length>
     __host__ __device__ device_obj<ContinuousVectorBlock<VectorType, Length>>::device_obj(
             device_obj<ContinuousVector<VectorType>>& vec_, size_t from_) : device_obj(vec_, from_, vec_.getLength()) {}
@@ -99,8 +103,6 @@ namespace Physica::Core {
 }
 
 namespace Physica {
-    using namespace Core;
-
     template<class VectorType, size_t Length>
-    class Traits<Core::device_obj<ContinuousVectorBlock<VectorType, Length>>> : public Traits<ContinuousVectorBlock<VectorType, Length>> {};
+    class Traits<Core::device_obj<Core::ContinuousVectorBlock<VectorType, Length>>> : public Traits<Core::ContinuousVectorBlock<VectorType, Length>> {};
 }
