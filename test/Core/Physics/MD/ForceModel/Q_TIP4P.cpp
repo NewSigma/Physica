@@ -28,7 +28,7 @@ using namespace Physica::Utils;
 namespace Physica {
     class Test {
         using RandomGenerator = std::mt19937;
-        using PlainScalar = Scalar<Double>;
+        using PlainScalar = float64;
         using ScalarType = Differentiable<PlainScalar, DiffMode::Reverse, 1>;
         using MDCellType = MDCell<ScalarType>;
         using LatticeMatrix = typename MDCellType::LatticeMatrix;

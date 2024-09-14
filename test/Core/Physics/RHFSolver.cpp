@@ -23,7 +23,7 @@ using namespace Physica::Core;
 using namespace Physica::Core::Physics;
 using namespace Physica::Utils;
 
-using ScalarType = Scalar<Double>;
+using ScalarType = float64;
 
 constexpr double precitionGoal = 1E-8;
 

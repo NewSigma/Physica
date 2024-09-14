@@ -23,7 +23,7 @@
 #include "Physica/Core/Physics/ElectronicStructure/DFT/BandGrid.h"
 
 using namespace Physica::Core;
-using ScalarType = Scalar<Double>;
+using ScalarType = float64;
 using ComplexType = ComplexScalar<ScalarType>;
 
 namespace Physica {

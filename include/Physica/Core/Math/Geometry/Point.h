@@ -18,14 +18,14 @@
  */
 #pragma once
 
-#include "Physica/Core/MultiPrecision/Scalar.h"
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/Vector.h"
+#include <Physica/Core/MultiPrecision/Scalar.h>
+#include <Physica/Core/Math/Algebra/LinearAlgebra/Vector/Vector.h>
 
 namespace Physica::Core {
     /*!
      * By default, point do not need high precision, so @param type is set to @enum ScalarType::Float.
      */
-    template<size_t dim, class ScalarType = Scalar<Float>>
+    template<size_t dim, class ScalarType = float32>
     class Point {
         static_assert(dim > 0, "0 dim point is not allowed\n");
     public:

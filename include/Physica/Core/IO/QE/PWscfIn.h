@@ -28,7 +28,7 @@ namespace Physica::Core {
      * [1] https://www.quantum-espresso.org/Doc/INPUT_PW.html
      */
     class PHYSICA_API PWscfIn {
-        using ScalarType = Scalar<Double>;
+        using ScalarType = float64;
         constexpr static size_t BufferSize = 1024;
     public:
         enum CalculationType {

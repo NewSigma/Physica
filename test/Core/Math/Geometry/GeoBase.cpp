@@ -20,7 +20,7 @@
 
 using namespace Physica::Core;
 using namespace Physica::Utils;
-using ScalarType = Scalar<Float>;
+using ScalarType = float32;
 
 int main() {
     constexpr float epsilon = std::numeric_limits<float>::epsilon();

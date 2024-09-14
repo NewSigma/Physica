@@ -21,7 +21,7 @@
 using namespace Physica::Core;
 
 int main() {
-    typedef DenseMatrix<Scalar<Double>, MatrixOption::Row | MatrixOption::Vector, 3, 3> Matrix3x3;
+    typedef DenseMatrix<float64, MatrixOption::Row | MatrixOption::Vector, 3, 3> Matrix3x3;
     Matrix3x3 mat1{{2, 3, 4}, {1, 1, 9}, {1, 2, -6}};
     LUDecomposition lu(mat1);
     Matrix3x3 decomp(lu);

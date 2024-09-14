@@ -27,7 +27,7 @@
 
 using namespace Physica::Core;
 using namespace Physica::Utils;
-using RealType = Scalar<Double>;
+using RealType = float64;
 using ScalarType = ComplexScalar<RealType>;
 using VectorType = Vector<RealType>;
 using RandomPoolType = RandomPool<std::mt19937>;

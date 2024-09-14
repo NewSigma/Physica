@@ -20,8 +20,8 @@
 
 namespace Physica::Core {
     //!Compute a ^ unit.
-    inline Scalar<MultiPrecision> powWord(const Scalar<MultiPrecision>& a, MPUnit unit) {
-        Scalar<MultiPrecision> result(a);
+    inline Scalar<FloatMP> powWord(const Scalar<FloatMP>& a, MPUnit unit) {
+        Scalar<FloatMP> result(a);
         const auto lastUnitBits = countLeadingZeros(unit);
         for(unsigned int j = 0; j < MPUnitWidth - lastUnitBits; ++j) {
             result = square(result);
@@ -33,8 +33,8 @@ namespace Physica::Core {
     }
 
     //!Compute a ^ unit, the highest bit of unit must be set.
-    inline Scalar<MultiPrecision> powFullWord(const Scalar<MultiPrecision>& a, MPUnit unit) {
-        Scalar<MultiPrecision> result(a);
+    inline Scalar<FloatMP> powFullWord(const Scalar<FloatMP>& a, MPUnit unit) {
+        Scalar<FloatMP> result(a);
         for(int j = 0; j < 64; ++j) {
             result = square(result);
             if((unit & 1U) != 0)
@@ -48,9 +48,9 @@ namespace Physica::Core {
      *
      * Reference: MaTHmu Project Group.计算机代数系统的数学原理[M].Beijing: TsingHua University Press, 2009:45
      */
-    inline Scalar<MultiPrecision> powScalar(const Scalar<MultiPrecision>& a, const Scalar<MultiPrecision>& n) {
+    inline Scalar<FloatMP> powScalar(const Scalar<FloatMP>& a, const Scalar<FloatMP>& n) {
         const auto size = n.getSize();
-        Scalar<MultiPrecision> result(a);
+        Scalar<FloatMP> result(a);
         if(n.getLength() < 0)
             result = reciprocal(a);
 

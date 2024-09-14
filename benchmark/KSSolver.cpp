@@ -26,7 +26,7 @@
 #include "Physica/Utils/Cycler.h"
 
 using namespace Physica::Core;
-using ScalarType = Scalar<Double>;
+using ScalarType = float64;
 using ComplexType = ComplexScalar<ScalarType>;
 constexpr bool isSpinPolarized = false;
 

@@ -21,11 +21,9 @@
 #include <cstdint>
 #include <limits>
 #include <Physica/Macro.h>
-/**
- * This header contains some types and definitions used by package MultiPrecision.
- * Here MP stands for MultiPrecision.
- */
+
 namespace Physica::Core {
+    // MP = MultiPrecision
     using MPUnit = typename std::conditional<PhysicaWordSize == 64, uint64_t, uint32_t>::type;
     using SignedMPUnit = typename std::conditional<PhysicaWordSize == 64, int64_t, int32_t>::type;
     constexpr static unsigned int MPUnitWidth = PhysicaWordSize;
@@ -37,7 +35,7 @@ namespace Physica::Core {
         Float16 = 0,
         Float32 = 1,
         Float64 = 2,
-        MultiPrecision = 3,
+        FloatMP = 3,
 
         Half = Float16,
         Float = Float32,
@@ -46,6 +44,6 @@ namespace Physica::Core {
     /**
      * \class Scalar is a advanced float type that supports multiple precision
      */
-    template<ScalarOption Option = Double> class Scalar;
+    template<ScalarOption Option = Float64> class Scalar;
     template<class AnyScalar> class ComplexScalar;
 }

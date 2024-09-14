@@ -28,7 +28,7 @@ T func(T x, T y) {
 }
 
 int main() {
-    using PlainScalar = Scalar<Double>;
+    using PlainScalar = float64;
     {
         using ScalarType = Differentiable<PlainScalar, DiffMode::Forward, 1>;
         const PlainScalar x = 3;

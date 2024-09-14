@@ -38,8 +38,8 @@ namespace Physica {
 
 namespace Physica::Core {
     template<>
-    class Scalar<Float> : public ScalarBase<Scalar<Float>> {
-        using This = Scalar<Float>;
+    class Scalar<Float32> : public ScalarBase<Scalar<Float32>> {
+        using This = Scalar<Float32>;
         using Base = ScalarBase<This>;
     public:
         using device_obj_type = This;
@@ -76,7 +76,7 @@ namespace Physica::Core {
         /* Operations */
         void swap(Scalar& __restrict s) noexcept { std::swap(f, s.f); }
         /* Getters */
-        [[nodiscard]] constexpr static ScalarOption getOption() { return Float; }
+        [[nodiscard]] constexpr static ScalarOption getOption() { return Float32; }
         [[nodiscard]] __host__ __device__ float getTrivial() const noexcept { return f; }
         [[nodiscard]] __host__ __device__ bool isZero() const noexcept { return f == 0; }
         [[nodiscard]] __host__ __device__ bool isPositive() const noexcept { return f > 0; }
@@ -102,9 +102,9 @@ namespace Physica::Core {
     };
 
     template<class OtherScalar>
-    __host__ __device__ inline Scalar<Float>::Scalar(const ScalarBase<OtherScalar>& s) : f(float(s.getDerived())) {}
+    __host__ __device__ inline Scalar<Float32>::Scalar(const ScalarBase<OtherScalar>& s) : f(float(s.getDerived())) {}
 
-    __host__ __device__ inline bool Scalar<Float>::isFinite() const noexcept {
+    __host__ __device__ inline bool Scalar<Float32>::isFinite() const noexcept {
     #ifdef __CUDA_ARCH__
         return isfinite(f);
     #else
@@ -113,29 +113,29 @@ namespace Physica::Core {
     }
 
     template<class RandomGenerator>
-    inline Scalar<Float> Scalar<Float>::random_uniform(RandomGenerator& gen) {
+    inline Scalar<Float32> Scalar<Float32>::random_uniform(RandomGenerator& gen) {
         std::uniform_real_distribution<float> dist{};
         return Scalar(dist(gen));
     }
 
     template<class RandomGenerator, typename RandomGenerator::result_type FixedSeed>
-    inline Scalar<Float> Scalar<Float>::random_uniform(RandomPool<RandomGenerator, FixedSeed>& pool) {
+    inline Scalar<Float32> Scalar<Float32>::random_uniform(RandomPool<RandomGenerator, FixedSeed>& pool) {
         return random_uniform<RandomGenerator>(pool.getGen());
     }
 
     template<class RandomGenerator>
-    inline Scalar<Float> Scalar<Float>::random_normal(RandomGenerator& gen) {
+    inline Scalar<Float32> Scalar<Float32>::random_normal(RandomGenerator& gen) {
         std::normal_distribution<float> dist{};
         return Scalar(dist(gen));
     }
 
     template<class RandomGenerator, typename RandomGenerator::result_type FixedSeed>
-    inline Scalar<Float> Scalar<Float>::random_normal(RandomPool<RandomGenerator, FixedSeed>& pool) {
+    inline Scalar<Float32> Scalar<Float32>::random_normal(RandomPool<RandomGenerator, FixedSeed>& pool) {
         return random_normal<RandomGenerator>(pool.getGen());
     }
 
     template<class Distribution, class RandomGenerator>
-    inline Scalar<Float> Scalar<Float>::random_any(Distribution& dist, RandomGenerator& gen) {
+    inline Scalar<Float32> Scalar<Float32>::random_any(Distribution& dist, RandomGenerator& gen) {
         return Scalar(dist(gen));
     }
 
@@ -144,25 +144,25 @@ namespace Physica::Core {
         return os << std::setprecision(7) << float(s) << std::setprecision(lastPrec);
     }
 
-    inline Scalar<Float>& operator++(Scalar<Float>& s) {
-        s += Scalar<Float>(1.0F);
+    inline Scalar<Float32>& operator++(Scalar<Float32>& s) {
+        s += float32(1.0F);
         return s;
     }
 
-    inline Scalar<Float>& operator--(Scalar<Float>& s) {
-        s -= Scalar<Float>(1.0F);
+    inline Scalar<Float32>& operator--(Scalar<Float32>& s) {
+        s -= float32(1.0F);
         return s;
     }
 
-    inline Scalar<Float> operator++(Scalar<Float>& s, int) {
-        Scalar<Float> temp(s);
-        s += Scalar<Float>(1.0F);
+    inline Scalar<Float32> operator++(Scalar<Float32>& s, int) {
+        float32 temp(s);
+        s += float32(1.0F);
         return temp;
     }
 
-    inline Scalar<Float> operator--(Scalar<Float>& s, int) {
-        Scalar<Float> temp(s);
-        s -= Scalar<Float>(1.0F);
+    inline Scalar<Float32> operator--(Scalar<Float32>& s, int) {
+        float32 temp(s);
+        s -= float32(1.0F);
         return temp;
     }
 }

@@ -51,7 +51,7 @@ bool hessTest(const MatrixType& source, double tolerance) {
 }
 
 int main() {
-    using RealType = Scalar<Double>;
+    using RealType = float64;
     using ComplexType = ComplexScalar<RealType>;
     {
         using MatrixType = DenseMatrix<RealType, MatrixOption::Column | MatrixOption::Vector, 4, 4>;

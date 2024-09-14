@@ -26,11 +26,11 @@
 
 namespace Physica::Core {
     ///////////////////////////////////////BasicCalculates////////////////////////////////////////////
-    inline Scalar<MultiPrecision> Scalar<MultiPrecision>::add(const Scalar<MultiPrecision>& s1, const Scalar<MultiPrecision>& s2) {
+    inline Scalar<FloatMP> Scalar<FloatMP>::add(const Scalar<FloatMP>& s1, const Scalar<FloatMP>& s2) {
         if(s1.isZero())
-            return Scalar<MultiPrecision>(static_cast<const Scalar<MultiPrecision>&>(s2));
+            return Scalar<FloatMP>(static_cast<const Scalar<FloatMP>&>(s2));
         else if(s2.isZero())
-            return Scalar<MultiPrecision>(static_cast<const Scalar<MultiPrecision>&>(s1));
+            return Scalar<FloatMP>(static_cast<const Scalar<FloatMP>&>(s1));
         else if (!matchSign(s1, s2)) {
             if (s1.length > 0) {
                 Scalar shallow_copy(const_cast<MPUnit*>(s2.byte), -s2.length, s2.power);
@@ -95,15 +95,15 @@ namespace Physica::Core {
                 byte[length - 1] = 1;
             }
             ////////////////////////////////////Out put////////////////////////////////////////
-            return Scalar<MultiPrecision>(byte, big->length < 0 ? -length : length, power);
+            return Scalar<FloatMP>(byte, big->length < 0 ? -length : length, power);
         }
     }
 
-    inline Scalar<MultiPrecision> Scalar<MultiPrecision>::sub(const Scalar<MultiPrecision>& s1, const Scalar<MultiPrecision>& s2) {
+    inline Scalar<FloatMP> Scalar<FloatMP>::sub(const Scalar<FloatMP>& s1, const Scalar<FloatMP>& s2) {
         if(s1.isZero())
-            return Scalar<MultiPrecision>(static_cast<Scalar<MultiPrecision>&&>(-s2));
+            return Scalar<FloatMP>(static_cast<Scalar<FloatMP>&&>(-s2));
         else if(s2.isZero())
-            return Scalar<MultiPrecision>(static_cast<const Scalar<MultiPrecision>&>(s1));
+            return Scalar<FloatMP>(static_cast<const Scalar<FloatMP>&>(s1));
         else if (s1.length > 0) {
             if (s2.length < 0) {
                 Scalar shallow_copy(const_cast<MPUnit*>(s2.byte), -s2.length, s2.power);
@@ -168,7 +168,7 @@ namespace Physica::Core {
                     free(byte);
                     goto redo;
                 }
-                Scalar<MultiPrecision> result(byte, changeSign ? -length : length, big->power);
+                Scalar<FloatMP> result(byte, changeSign ? -length : length, big->power);
                 result.cutZero();
                 return result;
             }
@@ -190,13 +190,13 @@ namespace Physica::Core {
         }
     }
     //Optimize: length may be too long and it is unnecessary, cut it and consider the accuracy.
-    inline Scalar<MultiPrecision> Scalar<MultiPrecision>::mul(const Scalar<MultiPrecision>& s1, const Scalar<MultiPrecision>& s2) {
+    inline Scalar<FloatMP> Scalar<FloatMP>::mul(const Scalar<FloatMP>& s1, const Scalar<FloatMP>& s2) {
         if (s1.isZero() || s2.isZero())
-            return Scalar<MultiPrecision>(0);
+            return Scalar<FloatMP>(0);
         if (s1 == BasicConst::getInstance()._1)
-            return Scalar<MultiPrecision>(static_cast<const Scalar<MultiPrecision>&>(s2));
+            return Scalar<FloatMP>(static_cast<const Scalar<FloatMP>&>(s2));
         if (s2 == BasicConst::getInstance()._1)
-            return Scalar<MultiPrecision>(static_cast<const Scalar<MultiPrecision>&>(s1));
+            return Scalar<FloatMP>(static_cast<const Scalar<FloatMP>&>(s1));
         const int size1 = s1.getSize();
         const int size2 = s2.getSize();
         //Estimate the ed of result first. we will calculate it accurately later.
@@ -212,10 +212,10 @@ namespace Physica::Core {
             byte = reinterpret_cast<MPUnit*>(realloc(byte, length * sizeof(MPUnit)));
         }
         ////////////////////////////////////Out put////////////////////////////////////////
-        return Scalar<MultiPrecision>(byte, matchSign(s1, s2) ? length : -length, power);
+        return Scalar<FloatMP>(byte, matchSign(s1, s2) ? length : -length, power);
     }
 
-    inline Scalar<MultiPrecision> Scalar<MultiPrecision>::div(const Scalar<MultiPrecision>& s1, const Scalar<MultiPrecision>& s2) {
+    inline Scalar<FloatMP> Scalar<FloatMP>::div(const Scalar<FloatMP>& s1, const Scalar<FloatMP>& s2) {
         if(s2.isZero())
             throw DivideByZeroException();
 
@@ -258,20 +258,20 @@ namespace Physica::Core {
                 delete[] arr1;
                 delete[] arr2;
                 ////////////////////////////////////Out put////////////////////////////////////////
-                return Scalar<MultiPrecision>(byte, matchSign(s1, s2) ? length : -length
+                return Scalar<FloatMP>(byte, matchSign(s1, s2) ? length : -length
                         , s1.getPower() - s2.getPower() - 1) >> (s1_shift - s2_shift);
             }
             else
-                return static_cast<const Scalar<MultiPrecision>&>(s1);
+                return static_cast<const Scalar<FloatMP>&>(s1);
         }
         else
-            return Scalar<MultiPrecision>(static_cast<SignedMPUnit>(0));
+            return Scalar<FloatMP>(static_cast<SignedMPUnit>(0));
     }
     /**
      * If the length of new array is larger than GlobalPrecision, it will be set to GlobalPrecision.
      * Return true if array is cut.
      */
-    inline bool Scalar<MultiPrecision>::cutLength(Scalar<MultiPrecision>& s) {
+    inline bool Scalar<FloatMP>::cutLength(Scalar<FloatMP>& s) {
         bool result = false;
         int size = s.getSize();
 

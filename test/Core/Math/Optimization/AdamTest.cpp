@@ -21,7 +21,7 @@
 
 using namespace Physica::Utils;
 
-using T = Scalar<Double>;
+using T = float64;
 
 int main() {
     {

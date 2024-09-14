@@ -21,7 +21,7 @@
 
 using namespace Physica::Core;
 
-void printElements(const Scalar<MultiPrecision>& n) {
+void printElements(const Scalar<FloatMP>& n) {
     int size = n.getSize();
     for(int i = 0; i < size; ++i)
         std::cout << n[i] << ' ';

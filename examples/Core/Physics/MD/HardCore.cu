@@ -44,7 +44,7 @@ constexpr double temperatureT = 2;
 constexpr size_t numSample = 5000;
 constexpr bool IsComputeMode = true;
 
-using ScalarType = Scalar<Float>;
+using ScalarType = float32;
 using VectorType = Vector<ScalarType>;
 using MatrixType = DenseMatrix<ScalarType>;
 using MDType = RPMD<ScalarType, 1, 1>;

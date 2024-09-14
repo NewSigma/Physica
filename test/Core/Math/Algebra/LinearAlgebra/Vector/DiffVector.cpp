@@ -19,7 +19,7 @@
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/DiffVector.h"
 
 using namespace Physica::Core;
-using ScalarType = Scalar<Double>;
+using ScalarType = float64;
 using VectorType = Differentiable<Vector<ScalarType>, DiffMode::Reverse, 1>;
 using RandomGenerator = std::mt19937;
 

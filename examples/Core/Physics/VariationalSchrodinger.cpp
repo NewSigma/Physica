@@ -26,7 +26,7 @@
 using namespace Physica::Core;
 using namespace Physica::Gui;
 using namespace Physica::Utils;
-using ScalarType = Scalar<Double>;
+using ScalarType = float64;
 
 class InfiniteDeepWell {
     constexpr static size_t baseSetCount = 8;

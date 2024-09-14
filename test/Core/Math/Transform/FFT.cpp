@@ -23,11 +23,11 @@
 
 using namespace Physica::Core;
 using namespace Physica::Utils;
-using RealType = Scalar<Double>;
+using RealType = float64;
 using ComplexType = ComplexScalar<RealType>;
 
 void test_differentiable() {
-    using PlainScalar = Scalar<Double>;
+    using PlainScalar = float64;
     using ComplexPlainScalar = ComplexScalar<PlainScalar>;
     using ScalarType = Differentiable<PlainScalar, DiffMode::Forward, 1>;
     using ComplexType = Differentiable<ComplexPlainScalar, DiffMode::Forward, 1>;

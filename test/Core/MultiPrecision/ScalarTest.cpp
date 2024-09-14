@@ -21,7 +21,7 @@
 #include <Physica/Core/MultiPrecision/Scalar.h>
 
 using namespace Physica::Core;
-using ScalarType = Scalar<MultiPrecision>;
+using ScalarType = Scalar<FloatMP>;
 constexpr unsigned int iterateCount = 50;
 static std::default_random_engine engine(clock());
 /*!

@@ -6,7 +6,7 @@
 
 using namespace Physica::Core;
 using namespace Physica::Utils;
-using ScalarType = Scalar<Double>;
+using ScalarType = float64;
 using ComplexType = ComplexScalar<ScalarType>;
 using VectorType = Vector<ScalarType>;
 using Vector3D = Vector<ScalarType, 3>;

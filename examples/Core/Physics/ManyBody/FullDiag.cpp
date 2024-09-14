@@ -29,7 +29,7 @@
 using namespace Physica::Core;
 using namespace Physica::Gui;
 using Physica::Dynamic;
-using ScalarType = Scalar<Double>;
+using ScalarType = float64;
 using VectorType = Vector<ScalarType>;
 using RandomPoolType = RandomPool<std::mt19937>;
 using VectorPair = std::pair<VectorType, VectorType>;

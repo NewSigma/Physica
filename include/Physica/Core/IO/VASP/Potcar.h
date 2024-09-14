@@ -19,11 +19,11 @@
 #pragma once
 
 #include <fstream>
-#include "Physica/Core/MultiPrecision/Scalar.h"
+#include <Physica/Core/MultiPrecision/Scalar.h>
 
 namespace Physica::Core {
     class PHYSICA_API Potcar {
-        using ScalarType = Scalar<Float>;
+        using ScalarType = float32;
         ScalarType mass;
         unsigned char numValenceElectron;
     public:

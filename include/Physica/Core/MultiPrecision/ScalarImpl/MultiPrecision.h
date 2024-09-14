@@ -20,14 +20,14 @@
 
 namespace Physica {
     template<>
-    class Traits<Core::Scalar<Core::MultiPrecision>> {
+    class Traits<Core::Scalar<Core::FloatMP>> {
     public:
-        using ScalarType = Core::Scalar<Core::MultiPrecision>;
+        using ScalarType = Core::Scalar<Core::FloatMP>;
         using RealType = ScalarType;
         using ComplexType = Core::ComplexScalar<ScalarType>;
         using TrivialType = ScalarType;
         using PlainScalar = ScalarType;
-        constexpr static Core::ScalarOption Option = Core::MultiPrecision;
+        constexpr static Core::ScalarOption Option = Core::FloatMP;
         constexpr static bool isComplex = false;
         constexpr static bool isDifferentiable = false;
         constexpr static bool isForwardDiff = false;
@@ -40,10 +40,10 @@ namespace Physica::Core {
     constexpr int GlobalPrecision = 4;
 
     template<>
-    class PHYSICA_API Scalar<MultiPrecision> : public ScalarBase<Scalar<MultiPrecision>> {
+    class PHYSICA_API Scalar<FloatMP> : public ScalarBase<Scalar<FloatMP>> {
         static_assert(GlobalPrecision > 1, "GlobalPrecision must be larger than 1.");
     public:
-        using ScalarType = Scalar<MultiPrecision>;
+        using ScalarType = Scalar<FloatMP>;
     private:
         //Store effective digits using little endian standard.
         MPUnit* __restrict byte;
@@ -91,7 +91,7 @@ namespace Physica::Core {
         Scalar& toAbs() noexcept { length = getSize(); return *this; }
         void swap(Scalar& __restrict obj) noexcept;
         /* Getters */
-        [[nodiscard]] constexpr static ScalarOption getOption() { return MultiPrecision; }
+        [[nodiscard]] constexpr static ScalarOption getOption() { return FloatMP; }
         [[nodiscard]] int getLength() const noexcept { return length; }
         [[nodiscard]] int getPower() const noexcept { return power; }
         [[nodiscard]] int getSize() const noexcept { return std::abs(length); }
@@ -121,28 +121,28 @@ namespace Physica::Core {
         template<ScalarOption Option> __host__ __device__ friend Scalar<Option> sqrt(const Scalar<Option>& s) noexcept;
         template<ScalarOption Option> friend Scalar<Option> ln(const Scalar<Option>& s) noexcept;
         /* Static members */
-        inline static Scalar<MultiPrecision> add(const Scalar& s1, const Scalar& s2);
-        inline static Scalar<MultiPrecision> sub(const Scalar& s1, const Scalar& s2);
-        inline static Scalar<MultiPrecision> mul(const Scalar& s1, const Scalar& s2);
-        inline static Scalar<MultiPrecision> div(const Scalar& s1, const Scalar& s2);
-        inline static bool cutLength(Scalar<MultiPrecision>& s);
+        inline static Scalar<FloatMP> add(const Scalar& s1, const Scalar& s2);
+        inline static Scalar<FloatMP> sub(const Scalar& s1, const Scalar& s2);
+        inline static Scalar<FloatMP> mul(const Scalar& s1, const Scalar& s2);
+        inline static Scalar<FloatMP> div(const Scalar& s1, const Scalar& s2);
+        inline static bool cutLength(Scalar<FloatMP>& s);
     };
 
-    inline Scalar<MultiPrecision>& operator++(Scalar<MultiPrecision>& s);
-    inline Scalar<MultiPrecision>& operator--(Scalar<MultiPrecision>& s);
-    inline Scalar<MultiPrecision> operator++(Scalar<MultiPrecision>& s, int);
-    inline Scalar<MultiPrecision> operator--(Scalar<MultiPrecision>& s, int);
+    inline Scalar<FloatMP>& operator++(Scalar<FloatMP>& s);
+    inline Scalar<FloatMP>& operator--(Scalar<FloatMP>& s);
+    inline Scalar<FloatMP> operator++(Scalar<FloatMP>& s, int);
+    inline Scalar<FloatMP> operator--(Scalar<FloatMP>& s, int);
     /* Compare */
-    bool absCompare(const Scalar<MultiPrecision>& s1, const Scalar<MultiPrecision>& s2);
-    bool operator> (const Scalar<MultiPrecision>& s1, const Scalar<MultiPrecision>& s2);
-    bool operator< (const Scalar<MultiPrecision>& s1, const Scalar<MultiPrecision>& s2);
-    bool operator== (const Scalar<MultiPrecision>& s1, const Scalar<MultiPrecision>& s2);
+    bool absCompare(const Scalar<FloatMP>& s1, const Scalar<FloatMP>& s2);
+    bool operator> (const Scalar<FloatMP>& s1, const Scalar<FloatMP>& s2);
+    bool operator< (const Scalar<FloatMP>& s1, const Scalar<FloatMP>& s2);
+    bool operator== (const Scalar<FloatMP>& s1, const Scalar<FloatMP>& s2);
 }
 
 namespace std {
     template<>
-    struct numeric_limits<Physica::Core::Scalar<Physica::Core::MultiPrecision>> {
-        using T = Physica::Core::Scalar<Physica::Core::MultiPrecision>;
+    struct numeric_limits<Physica::Core::Scalar<Physica::Core::FloatMP>> {
+        using T = Physica::Core::Scalar<Physica::Core::FloatMP>;
     public:
         static T epsilon() noexcept {
             auto result = T(static_cast<Physica::Core::SignedMPUnit>(1));

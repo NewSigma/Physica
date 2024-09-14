@@ -16,17 +16,17 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include <gperftools/profiler.h>
 #include <iostream>
-#include "Physica/Core/Physics/MD/RPMD.h"
-#include "Physica/Core/Physics/MD/ForceModel/SilveraGoldman.h"
-#include "Physica/Core/Parallel/Executor/ThreadExecutor.h"
-#include "Physica/Core/Physics/MD/KineticModel/FreeModel.h"
-#include "Physica/Utils/BenchmarkHelper.h"
+#include <gperftools/profiler.h>
+#include <Physica/Core/Physics/MD/RPMD.h>
+#include <Physica/Core/Physics/MD/ForceModel/SilveraGoldman.h>
+#include <Physica/Core/Parallel/Executor/ThreadExecutor.h>
+#include <Physica/Core/Physics/MD/KineticModel/FreeModel.h>
+#include <Physica/Utils/BenchmarkHelper.h>
 
 using namespace Physica::Core;
 using namespace Physica::Utils;
-using ScalarType = Scalar<Float>;
+using ScalarType = float32;
 using KineticModel = FreeModel<ScalarType, 3, Physica::Dynamic, RPMDIntegrator::Exact>;
 using ForceModel = SilveraGoldman<ScalarType, true>;
 using RandomPoolType = RandomPool<std::mt19937, 3438603950906262893>;

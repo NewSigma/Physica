@@ -23,7 +23,7 @@
 
 namespace Physica::Core {
     class PHYSICA_API Outcar {
-        using ScalarType = Scalar<Double>;
+        using ScalarType = float64;
 
         Vector<ScalarType> force;
         ScalarType internalEnergy;

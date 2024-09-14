@@ -32,7 +32,7 @@
 
 using namespace Physica::Core;
 using namespace Physica::Gui;
-using ScalarType = Scalar<Double>;
+using ScalarType = float64;
 using VectorType = Vector<ScalarType>;
 using RandomPoolType = RandomPool<std::mt19937>;
 using EwaldType = RandomBatchEwald<ScalarType, RandomPoolType>;

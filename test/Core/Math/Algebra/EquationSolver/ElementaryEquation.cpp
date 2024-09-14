@@ -20,7 +20,7 @@
 
 int main() {
     using namespace Physica::Core;
-    using ScalarType = Scalar<Double>;
+    using ScalarType = float64;
     auto func = [](const ScalarType& x) { return exp(x) - ScalarType(5); };
     {
         ScalarType result = bisectionMethod(func, ScalarType(0), ScalarType(3));

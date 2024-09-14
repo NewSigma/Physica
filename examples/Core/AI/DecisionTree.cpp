@@ -22,7 +22,7 @@
 
 using namespace Physica::Core;
 using namespace Physica::Utils;
-using ScalarType = Scalar<Double>;
+using ScalarType = float64;
 using TreeType = DecisionTree<ScalarType, DecisionTreeType::Classify>;
 /*
  * Reference:

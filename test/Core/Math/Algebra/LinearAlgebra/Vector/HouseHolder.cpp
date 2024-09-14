@@ -22,7 +22,7 @@
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/Householder.h"
 
 using namespace Physica::Core;
-using T = Scalar<Double>;
+using T = float64;
 
 void emptyVectorTest() {
     using VectorType = Vector<T, 4>;

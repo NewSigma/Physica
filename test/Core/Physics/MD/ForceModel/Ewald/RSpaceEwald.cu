@@ -16,11 +16,11 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include "Physica/Core/Physics/MD/ForceModel/Ewald/RSpaceEwald.cuh"
-#include "Physica/Core/Math/Random/RandomPool.h"
+#include <Physica/Core/Physics/MD/ForceModel/Ewald/RSpaceEwald.cuh>
+#include <Physica/Core/Math/Random/RandomPool.h>
 
 using namespace Physica::Core;
-using ScalarType = Scalar<Float>;
+using ScalarType = float32;
 using MDCellType = MDCell<ScalarType>;
 using LatticeMatrix = typename MDCellType::LatticeMatrix;
 using PositionMatrix = typename MDCellType::PositionMatrix;

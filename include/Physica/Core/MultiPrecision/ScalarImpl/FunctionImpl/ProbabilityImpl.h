@@ -28,7 +28,7 @@ namespace Physica::Core {
     }
 
     template<>
-    Scalar<MultiPrecision> floor(const Scalar<MultiPrecision>& s) noexcept;
+    Scalar<FloatMP> floor(const Scalar<FloatMP>& s) noexcept;
 
     template<ScalarOption Option>
     __host__ __device__ inline Scalar<Option> ceil(const Scalar<Option>& s) noexcept {

@@ -21,10 +21,10 @@
 #include "Physica/Core/MultiPrecision/BasicImpl/Convert.h"
 
 namespace Physica::Core {
-    //////////////////////////////////MultiPrecision///////////////////////////////////
-    Scalar<MultiPrecision>::Scalar() : byte(nullptr), length(0), power(0) {}
+    //////////////////////////////////FloatMP///////////////////////////////////
+    Scalar<FloatMP>::Scalar() : byte(nullptr), length(0), power(0) {}
 
-    Scalar<MultiPrecision>::Scalar(int length_, int power_)
+    Scalar<FloatMP>::Scalar(int length_, int power_)
             : byte(reinterpret_cast<MPUnit*>(malloc(std::abs(length_) * sizeof(MPUnit))))
             , length(length_), power(power_) {
         /**
@@ -33,15 +33,15 @@ namespace Physica::Core {
         assert(length != INT_MIN);
     }
 
-    Scalar<MultiPrecision>::Scalar(int i) : Scalar(static_cast<SignedMPUnit>(i)) {}
+    Scalar<FloatMP>::Scalar(int i) : Scalar(static_cast<SignedMPUnit>(i)) {}
 
-    Scalar<MultiPrecision>::Scalar(SignedMPUnit unit)
+    Scalar<FloatMP>::Scalar(SignedMPUnit unit)
             : byte(reinterpret_cast<MPUnit*>(malloc(sizeof(MPUnit))))
             , length(unit > 0 ? 1 : -1), power(0) {
             byte[0] = unit > 0 ? unit : -unit;
     }
 
-    Scalar<MultiPrecision>::Scalar(double d) {
+    Scalar<FloatMP>::Scalar(double d) {
         if(d == 0) {
             byte = reinterpret_cast<MPUnit*>(malloc(sizeof(MPUnit)));
             length = 1;
@@ -113,17 +113,17 @@ namespace Physica::Core {
             length = -length;
     }
 
-    Scalar<MultiPrecision>::Scalar(const Integer& i)
+    Scalar<FloatMP>::Scalar(const Integer& i)
             : byte(reinterpret_cast<MPUnit*>(malloc(i.getSize() * sizeof(MPUnit))))
             , length(i.getLength())
             , power(i.getSize() - 1) {
         memcpy(byte, i.getByte(), getSize() * sizeof(MPUnit));
     }
 
-    Scalar<MultiPrecision>::Scalar(const Rational& r) {
-        Scalar<MultiPrecision> numerator(r.getNumerator());
-        Scalar<MultiPrecision> denominator(r.getDenominator());
-        Scalar<MultiPrecision> result = numerator / denominator;
+    Scalar<FloatMP>::Scalar(const Rational& r) {
+        Scalar<FloatMP> numerator(r.getNumerator());
+        Scalar<FloatMP> denominator(r.getDenominator());
+        Scalar<FloatMP> result = numerator / denominator;
         byte = result.byte;
         result.byte = nullptr;
         length = result.length;
@@ -132,76 +132,76 @@ namespace Physica::Core {
     /**
      * Not accurate.
      */
-    Scalar<MultiPrecision>::Scalar(const char* s) : Scalar(strtod(s, nullptr)) {}
+    Scalar<FloatMP>::Scalar(const char* s) : Scalar(strtod(s, nullptr)) {}
     /**
     * Not accurate.
     */
-    Scalar<MultiPrecision>::Scalar(const wchar_t* s) {
+    Scalar<FloatMP>::Scalar(const wchar_t* s) {
         size_t size = wcslen(s);
         char str[size + 1];
         str[size] = '\0';
         for(size_t i = 0; i < size; ++i)
             str[i] = (char)s[i];
-        Scalar<MultiPrecision> temp(str);
+        Scalar<FloatMP> temp(str);
         byte = temp.byte;
         temp.byte = nullptr;
         length = temp.length;
         power = temp.power;
     }
 
-    MPUnit Scalar<MultiPrecision>::operator[](unsigned int index) const {
+    MPUnit Scalar<FloatMP>::operator[](unsigned int index) const {
         assert(index < static_cast<unsigned int>(getSize()));
         return byte[index];
     }
 
-    Scalar<MultiPrecision>::operator double() const {
+    Scalar<FloatMP>::operator double() const {
         if(isZero())
             return 0.0;
         return Internal::convertDoubleImpl(length, power, byte);
     }
 
-    Scalar<MultiPrecision>::Scalar(const Scalar<MultiPrecision>& s)
+    Scalar<FloatMP>::Scalar(const Scalar<FloatMP>& s)
             : byte(reinterpret_cast<MPUnit*>(malloc(s.getSize() * sizeof(MPUnit))))
             , length(s.length), power(s.power) {
         memcpy(byte, s.byte, getSize() * sizeof(MPUnit));
     }
 
-    Scalar<MultiPrecision>::Scalar(Scalar<MultiPrecision>&& s) noexcept
+    Scalar<FloatMP>::Scalar(Scalar<FloatMP>&& s) noexcept
             : byte(s.byte), length(s.length), power(s.power) {
         s.byte = nullptr;
     }
 
-    Scalar<MultiPrecision>::~Scalar() {
+    Scalar<FloatMP>::~Scalar() {
         free(byte);
     }
 
-    Scalar<MultiPrecision> Scalar<MultiPrecision>::operator+(
-            const Scalar<MultiPrecision>& s) const {
+    Scalar<FloatMP> Scalar<FloatMP>::operator+(
+            const Scalar<FloatMP>& s) const {
         auto result = add(*this, s);
         cutLength(result);
         return result;
     }
 
-    Scalar<MultiPrecision> Scalar<MultiPrecision>::operator-(
-            const Scalar<MultiPrecision>& s) const {
+    Scalar<FloatMP> Scalar<FloatMP>::operator-(
+            const Scalar<FloatMP>& s) const {
         auto result = sub(*this, s);
         cutLength(result);
         return result;
     }
 
-    Scalar<MultiPrecision> Scalar<MultiPrecision>::operator*(
-            const Scalar<MultiPrecision>& s) const {
+    Scalar<FloatMP> Scalar<FloatMP>::operator*(
+            const Scalar<FloatMP>& s) const {
         auto result = mul(*this, s);
         cutLength(result);
         return result;
     }
 
-    Scalar<MultiPrecision> Scalar<MultiPrecision>::operator/(
-            const Scalar<MultiPrecision>& s) const {
+    Scalar<FloatMP> Scalar<FloatMP>::operator/(
+            const Scalar<FloatMP>& s) const {
         return div(*this, s);
     }
 
-    Scalar<MultiPrecision> Scalar<MultiPrecision>::operator<<(int bits) const {
+    Scalar<FloatMP> Scalar<FloatMP>::operator<<(int bits) const {
         if(bits == 0)
             return Scalar(*this);
         if(bits < 0)
@@ -230,7 +230,7 @@ namespace Physica::Core {
         return result;
     }
 
-    Scalar<MultiPrecision> Scalar<MultiPrecision>::operator>>(int bits) const {
+    Scalar<FloatMP> Scalar<FloatMP>::operator>>(int bits) const {
         if(bits == 0)
             return Scalar(*this);
         if(bits < 0)
@@ -258,13 +258,13 @@ namespace Physica::Core {
         return result;
     }
 
-    Scalar<MultiPrecision> Scalar<MultiPrecision>::operator-() const {
+    Scalar<FloatMP> Scalar<FloatMP>::operator-() const {
         Scalar result(-length, power);
         memcpy(result.byte, byte, getSize() * sizeof(MPUnit));
         return result;
     }
 
-    void Scalar<MultiPrecision>::swap(Scalar<MultiPrecision>& __restrict s) noexcept {
+    void Scalar<FloatMP>::swap(Scalar<FloatMP>& __restrict s) noexcept {
         assert(this != &s && "[Error]: Self swap is likely a bug");
         std::swap(byte, s.byte);
         std::swap(length, s.length);
@@ -277,14 +277,14 @@ namespace Physica::Core {
      * Optimize:
      * Is subtract faster than comparing the elements?
      */
-    bool absCompare(const Scalar<MultiPrecision>& s1, const Scalar<MultiPrecision>& s2) {
+    bool absCompare(const Scalar<FloatMP>& s1, const Scalar<FloatMP>& s2) {
         if(s1.isZero() || s2.isZero())
             return true;
         if(s1.getPower() > s2.getPower())
             return true;
         if(s1.getPower() < s2.getPower())
             return false;
-        const Scalar<MultiPrecision>* longer, *shorter;
+        const Scalar<FloatMP>* longer, *shorter;
         int longer_length, shorter_length;
         /* Compare length */ {
             const auto n1_length = s1.getLength(), n2_length = s2.getLength();
@@ -308,7 +308,7 @@ namespace Physica::Core {
      * Optimize:
      * Is subtract faster than comparing the elements?
      */
-    bool operator>(const Scalar<MultiPrecision>& s1, const Scalar<MultiPrecision>& s2) {
+    bool operator>(const Scalar<FloatMP>& s1, const Scalar<FloatMP>& s2) {
         //Judge from sign.
         const bool positive = s1.isPositive();
         if(positive) {
@@ -328,11 +328,11 @@ namespace Physica::Core {
         else if(s1.getPower() < s2.getPower())
             result = !positive;
         else {
-            auto scalar1 = static_cast<const Scalar<MultiPrecision>&>(s1);
-            auto scalar2 = static_cast<const Scalar<MultiPrecision>&>(s2);
+            auto scalar1 = static_cast<const Scalar<FloatMP>&>(s1);
+            auto scalar2 = static_cast<const Scalar<FloatMP>&>(s2);
             //The only method left.
             //Optimize: We have confirmed that s1, s2 have the same sign and power, possible make use them to get better performance.
-            Scalar<MultiPrecision> subtract = scalar1 - scalar2;
+            Scalar<FloatMP> subtract = scalar1 - scalar2;
             result = subtract.isPositive();
         }
         return result;
@@ -341,7 +341,7 @@ namespace Physica::Core {
      * Optimize:
      * Is subtract faster than comparing the elements?
      */
-    bool operator<(const Scalar<MultiPrecision>& s1, const Scalar<MultiPrecision>& s2) {
+    bool operator<(const Scalar<FloatMP>& s1, const Scalar<FloatMP>& s2) {
         //Judge from sign.
         const bool positive = s1.isPositive();
         if(positive) {
@@ -361,32 +361,32 @@ namespace Physica::Core {
         else if(s1.getPower() < s2.getPower())
             result = positive;
         else {
-            auto scalar1 = static_cast<const Scalar<MultiPrecision>&>(s1);
-            auto scalar2 = static_cast<const Scalar<MultiPrecision>&>(s2);
+            auto scalar1 = static_cast<const Scalar<FloatMP>&>(s1);
+            auto scalar2 = static_cast<const Scalar<FloatMP>&>(s2);
             //The only method left.
             //Optimize: We have confirmed that s1, s2 have the same sign and power, possible make use them to get better performance.
-            Scalar<MultiPrecision> subtract = scalar1 - scalar2;
+            Scalar<FloatMP> subtract = scalar1 - scalar2;
             result = subtract.isNegative();
         }
         return result;
     }
 
-    bool operator==(const Scalar<MultiPrecision>& s1, const Scalar<MultiPrecision>& s2) {
-        auto scalar1 = static_cast<const Scalar<MultiPrecision>&>(s1);
-        auto scalar2 = static_cast<const Scalar<MultiPrecision>&>(s2);
+    bool operator==(const Scalar<FloatMP>& s1, const Scalar<FloatMP>& s2) {
+        auto scalar1 = static_cast<const Scalar<FloatMP>&>(s1);
+        auto scalar2 = static_cast<const Scalar<FloatMP>&>(s2);
         return s1.getPower() == s2.getPower()
                //Here length may not equal n.length because we define numbers like 1.0 and 1.00 are equal.
                && ((s1.getLength() ^ s2.getLength()) >= 0) //NOLINT
                //Optimize: We have confirmed that s1, s2 have the same sign and power, possible make use them to get better performance.
-               && Scalar<MultiPrecision>(scalar1 - scalar2).isZero();
+               && Scalar<FloatMP>(scalar1 - scalar2).isZero();
     }
     ///////////////////////////////////////////Float////////////////////////////////////////////////
-    std::istream& operator>>(std::istream& is, Scalar<Float>& scalar) {
+    std::istream& operator>>(std::istream& is, Scalar<Float32>& scalar) {
         is >> scalar.f;
         return is;
     }
 
-    bool Scalar<Float>::isInteger() const {
+    bool Scalar<Float32>::isInteger() const {
         float_extract extract{f};
         const auto exp = extract.exp;
         if(exp == 0U)
@@ -409,12 +409,12 @@ namespace Physica::Core {
         return exp + zeros >= 150;
     }
     ///////////////////////////////////////////Double////////////////////////////////////////////////
-    std::istream& operator>>(std::istream& is, Scalar<Double>& scalar) {
+    std::istream& operator>>(std::istream& is, Scalar<Float64>& scalar) {
         is >> scalar.d;
         return is;
     }
 
-    bool Scalar<Double>::isInteger() const {
+    bool Scalar<Float64>::isInteger() const {
         double_extract extract{d};
         const auto exp = extract.exp;
         if(exp == 0U)
@@ -437,7 +437,7 @@ namespace Physica::Core {
         return exp + zeros >= 1075;
     }
     ///////////////////////////////////////////Global////////////////////////////////////////////////
-    std::ostream& operator<<(std::ostream& os, const Scalar<MultiPrecision>& s) {
+    std::ostream& operator<<(std::ostream& os, const Scalar<FloatMP>& s) {
         const auto& basicConst = BasicConst::getInstance();
         const int power = s.getPower();
         int exp = int(power * basicConst.ln_2_10);

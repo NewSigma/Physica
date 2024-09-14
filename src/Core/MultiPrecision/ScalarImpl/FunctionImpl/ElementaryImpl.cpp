@@ -21,13 +21,13 @@
 
 namespace Physica::Core {
     template<>
-    Scalar<MultiPrecision> abs(const Scalar<MultiPrecision>& s) noexcept {
-        Scalar<MultiPrecision> temp(s);
-        return Scalar<MultiPrecision>(std::move(temp.toAbs()));
+    Scalar<FloatMP> abs(const Scalar<FloatMP>& s) noexcept {
+        Scalar<FloatMP> temp(s);
+        return Scalar<FloatMP>(std::move(temp.toAbs()));
     }
 
     template<>
-    Scalar<MultiPrecision> sqrt(const Scalar<MultiPrecision>& s) noexcept {
+    Scalar<FloatMP> sqrt(const Scalar<FloatMP>& s) noexcept {
         assert(!s.isNegative());
         if(s.isZero())
             return Scalar(BasicConst::getInstance()._0);
@@ -45,24 +45,24 @@ namespace Physica::Core {
             }
         }
 
-        Scalar result = Scalar<MultiPrecision>(static_cast<SignedMPUnit>(1));
+        Scalar result = Scalar<FloatMP>(static_cast<SignedMPUnit>(1));
         for(unsigned int i = 0; i < MPUnitWidth * GlobalPrecision; ++i)
-            result = (result + Scalar<MultiPrecision>::div(copy_s, result)) >> 1U;
+            result = (result + Scalar<FloatMP>::div(copy_s, result)) >> 1U;
         result.power += add_power;
         return result;
     }
 
     template<>
-    Scalar<MultiPrecision> ln(const Scalar<MultiPrecision>& s) noexcept {
+    Scalar<FloatMP> ln(const Scalar<FloatMP>& s) noexcept {
         assert(s.isPositive());
-        Scalar<MultiPrecision> result(static_cast<SignedMPUnit>(0));
+        Scalar<FloatMP> result(static_cast<SignedMPUnit>(0));
         if(s == BasicConst::getInstance()._1)
             return result;
         const auto& _1 = BasicConst::getInstance()._1;
-        auto temp_1 = Scalar<MultiPrecision>::sub(s, _1)
-                      / Scalar<MultiPrecision>::add(s, _1);
-        Scalar<MultiPrecision> copy_temp_1(temp_1);
-        Scalar<MultiPrecision> rank(static_cast<SignedMPUnit>(1));
+        auto temp_1 = Scalar<FloatMP>::sub(s, _1)
+                      / Scalar<FloatMP>::add(s, _1);
+        Scalar<FloatMP> copy_temp_1(temp_1);
+        Scalar<FloatMP> rank(static_cast<SignedMPUnit>(1));
 
         while(true) {
             //Calculate one term of the taylor series.
@@ -84,12 +84,12 @@ namespace Physica::Core {
     }
 
     template<>
-    Scalar<MultiPrecision> exp(const Scalar<MultiPrecision>& s) noexcept {
+    Scalar<FloatMP> exp(const Scalar<FloatMP>& s) noexcept {
         if(s.isNegative())
             return reciprocal(exp(-s));
-        Scalar<MultiPrecision> result = 1;
-        Scalar<MultiPrecision> rank = 1;
-        Scalar<MultiPrecision> temp(s);
+        Scalar<FloatMP> result = 1;
+        Scalar<FloatMP> rank = 1;
+        Scalar<FloatMP> temp(s);
         const auto& relativeError = BasicConst::getInstance().expectedRelativeError;
         while(true) {
             temp /= rank;
@@ -103,17 +103,17 @@ namespace Physica::Core {
     }
 
     template<>
-    Scalar<MultiPrecision> pow(const Scalar<MultiPrecision>& s1, const Scalar<MultiPrecision>& s2) noexcept;
+    Scalar<FloatMP> pow(const Scalar<FloatMP>& s1, const Scalar<FloatMP>& s2) noexcept;
 
     template<>
-    Scalar<MultiPrecision> cos(const Scalar<MultiPrecision>& s) noexcept {
-        Scalar<MultiPrecision> result(static_cast<SignedMPUnit>(1));
+    Scalar<FloatMP> cos(const Scalar<FloatMP>& s) noexcept {
+        Scalar<FloatMP> result(static_cast<SignedMPUnit>(1));
         if(s == BasicConst::getInstance()._0)
             return result;
-        Scalar<MultiPrecision> square_n = square(s);
-        Scalar<MultiPrecision> temp_1(square_n);
-        Scalar<MultiPrecision> temp_2(static_cast<SignedMPUnit>(2));
-        Scalar<MultiPrecision> rank(static_cast<SignedMPUnit>(2));
+        Scalar<FloatMP> square_n = square(s);
+        Scalar<FloatMP> temp_1(square_n);
+        Scalar<FloatMP> temp_2(static_cast<SignedMPUnit>(2));
+        Scalar<FloatMP> rank(static_cast<SignedMPUnit>(2));
         bool changeSign = true;
 
         while(true) {
@@ -140,14 +140,14 @@ namespace Physica::Core {
     }
 
     template<>
-    Scalar<MultiPrecision> sin(const Scalar<MultiPrecision>& s) noexcept {
-        Scalar<MultiPrecision> result(static_cast<SignedMPUnit>(0));
+    Scalar<FloatMP> sin(const Scalar<FloatMP>& s) noexcept {
+        Scalar<FloatMP> result(static_cast<SignedMPUnit>(0));
         if(s == BasicConst::getInstance()._0)
             return result;
-        Scalar<MultiPrecision> square_s = square(s);
-        Scalar<MultiPrecision> temp_1(s);
-        Scalar<MultiPrecision> temp_2(static_cast<SignedMPUnit>(1));
-        Scalar<MultiPrecision> rank(static_cast<SignedMPUnit>(1));
+        Scalar<FloatMP> square_s = square(s);
+        Scalar<FloatMP> temp_1(s);
+        Scalar<FloatMP> temp_2(static_cast<SignedMPUnit>(1));
+        Scalar<FloatMP> rank(static_cast<SignedMPUnit>(1));
         bool changeSign = false;
 
         while(true) {
@@ -170,12 +170,12 @@ namespace Physica::Core {
             rank += BasicConst::getInstance()._1;
             temp_2 *= rank;
         }
-        return Scalar<MultiPrecision>(result);
+        return Scalar<FloatMP>(result);
     }
 
     template<>
-    Scalar<MultiPrecision> arccos(const Scalar<MultiPrecision>& s) noexcept {
-        using ScalarType = Scalar<MultiPrecision>;
+    Scalar<FloatMP> arccos(const Scalar<FloatMP>& s) noexcept {
+        using ScalarType = Scalar<FloatMP>;
         auto func = [&](const ScalarType& x) -> ScalarType { return cos(x) - s; };
         return bisectionMethod<decltype(func), ScalarType>(func,
                                                            BasicConst::getInstance()._0,
@@ -185,8 +185,8 @@ namespace Physica::Core {
     }
 
     template<>
-    Scalar<MultiPrecision> arcsin(const Scalar<MultiPrecision>& s) noexcept {
-        using ScalarType = Scalar<MultiPrecision>;
+    Scalar<FloatMP> arcsin(const Scalar<FloatMP>& s) noexcept {
+        using ScalarType = Scalar<FloatMP>;
         auto func = [&](const ScalarType& x) -> ScalarType { return sin(x) - s; };
         return bisectionMethod<decltype(func), ScalarType>(func,
                                                            MathConst::getInstance().Minus_PI_2,
@@ -196,91 +196,91 @@ namespace Physica::Core {
     }
 
     template<>
-    Scalar<MultiPrecision> arctan(const Scalar<MultiPrecision>& s) noexcept {
-        Scalar<MultiPrecision> temp = square(s) + BasicConst::getInstance()._1;
-        Scalar<MultiPrecision> result = arcsin(s / sqrt(temp));
+    Scalar<FloatMP> arctan(const Scalar<FloatMP>& s) noexcept {
+        Scalar<FloatMP> temp = square(s) + BasicConst::getInstance()._1;
+        Scalar<FloatMP> result = arcsin(s / sqrt(temp));
         if((result.getLength() ^ s.getLength()) < 0) // NOLINT(hicpp-signed-bitwise)
             result.toAbs();
         return result;
     }
 
     template<>
-    Scalar<MultiPrecision> cosh(const Scalar<MultiPrecision>& s) noexcept {
-        Scalar<MultiPrecision> result = exp(s);
+    Scalar<FloatMP> cosh(const Scalar<FloatMP>& s) noexcept {
+        Scalar<FloatMP> result = exp(s);
         result = (result + reciprocal(result)) >> 1;
         return result;
     }
 
     template<>
-    Scalar<MultiPrecision> sinh(const Scalar<MultiPrecision>& s) noexcept {
-        Scalar<MultiPrecision> result = exp(s);
-        Scalar<MultiPrecision> temp = reciprocal(result);
+    Scalar<FloatMP> sinh(const Scalar<FloatMP>& s) noexcept {
+        Scalar<FloatMP> result = exp(s);
+        Scalar<FloatMP> temp = reciprocal(result);
         result -= temp;
         result >>= 1;
         return result;
     }
 
     template<>
-    Scalar<MultiPrecision> tanh(const Scalar<MultiPrecision>& s) noexcept {
-        Scalar<MultiPrecision> result = exp(s);
-        Scalar<MultiPrecision> temp = reciprocal(result);
-        Scalar<MultiPrecision> temp1 = result + temp;
+    Scalar<FloatMP> tanh(const Scalar<FloatMP>& s) noexcept {
+        Scalar<FloatMP> result = exp(s);
+        Scalar<FloatMP> temp = reciprocal(result);
+        Scalar<FloatMP> temp1 = result + temp;
         result -= temp;
         result /= temp1;
         return result;
     }
 
     template<>
-    Scalar<MultiPrecision> sech(const Scalar<MultiPrecision>& s) noexcept {
-        Scalar<MultiPrecision> result(static_cast<SignedMPUnit>(2));
-        Scalar<MultiPrecision> temp = exp(s);
+    Scalar<FloatMP> sech(const Scalar<FloatMP>& s) noexcept {
+        Scalar<FloatMP> result(static_cast<SignedMPUnit>(2));
+        Scalar<FloatMP> temp = exp(s);
         temp += reciprocal(temp);
         result /= temp;
         return result;
     }
 
     template<>
-    Scalar<MultiPrecision> csch(const Scalar<MultiPrecision>& s) noexcept {
-        Scalar<MultiPrecision> result(static_cast<SignedMPUnit>(2));
-        Scalar<MultiPrecision> temp = exp(s);
+    Scalar<FloatMP> csch(const Scalar<FloatMP>& s) noexcept {
+        Scalar<FloatMP> result(static_cast<SignedMPUnit>(2));
+        Scalar<FloatMP> temp = exp(s);
         temp -= reciprocal(temp);
         result /= temp;
         return result;
     }
 
     template<>
-    Scalar<MultiPrecision> coth(const Scalar<MultiPrecision>& s) noexcept {
-        Scalar<MultiPrecision> result = exp(s);
-        Scalar<MultiPrecision> temp = reciprocal(result);
-        Scalar<MultiPrecision> temp1 = result - temp;
+    Scalar<FloatMP> coth(const Scalar<FloatMP>& s) noexcept {
+        Scalar<FloatMP> result = exp(s);
+        Scalar<FloatMP> temp = reciprocal(result);
+        Scalar<FloatMP> temp1 = result - temp;
         result += temp;
         result /= temp1;
         return result;
     }
 
     template<>
-    Scalar<MultiPrecision> arccosh(const Scalar<MultiPrecision>& s) noexcept {
-        Scalar<MultiPrecision> temp = square(s) - BasicConst::getInstance()._1;
-        Scalar<MultiPrecision> temp1 = sqrt(temp) + s;
+    Scalar<FloatMP> arccosh(const Scalar<FloatMP>& s) noexcept {
+        Scalar<FloatMP> temp = square(s) - BasicConst::getInstance()._1;
+        Scalar<FloatMP> temp1 = sqrt(temp) + s;
         return ln(temp1);
     }
 
     template<>
-    Scalar<MultiPrecision> arcsinh(const Scalar<MultiPrecision>& s) noexcept {
-        Scalar<MultiPrecision> temp = square(s) + BasicConst::getInstance()._1;
-        Scalar<MultiPrecision> temp1 = sqrt(temp) + s;
+    Scalar<FloatMP> arcsinh(const Scalar<FloatMP>& s) noexcept {
+        Scalar<FloatMP> temp = square(s) + BasicConst::getInstance()._1;
+        Scalar<FloatMP> temp1 = sqrt(temp) + s;
         return ln(temp1);
     }
 
     template<>
-    Scalar<MultiPrecision> arctanh(const Scalar<MultiPrecision>& s) noexcept {
+    Scalar<FloatMP> arctanh(const Scalar<FloatMP>& s) noexcept {
         return ln((BasicConst::getInstance()._1 + s)
-                  / Scalar<MultiPrecision>(BasicConst::getInstance()._1 - s)) >> 1;
+                  / Scalar<FloatMP>(BasicConst::getInstance()._1 - s)) >> 1;
     }
 
     template<>
-    Scalar<MultiPrecision> arccoth(const Scalar<MultiPrecision>& s) noexcept {
+    Scalar<FloatMP> arccoth(const Scalar<FloatMP>& s) noexcept {
         return ln((s + BasicConst::getInstance()._1)
-                  / Scalar<MultiPrecision>(s - BasicConst::getInstance()._1)) >> 1;
+                  / Scalar<FloatMP>(s - BasicConst::getInstance()._1)) >> 1;
     }
 }

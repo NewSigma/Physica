@@ -28,7 +28,7 @@ constexpr double RepelU = 2;
 
 template<unsigned int NumSite, unsigned int NumSpinUp, unsigned int NumSpinDown>
 void testRSpinMatrix1D() {
-    using ScalarType = Scalar<Double>;
+    using ScalarType = float64;
     using VectorType = Vector<ScalarType>;
     using MatrixType = DenseMatrix<ScalarType>;
     using ReprType = SpinRepr<1, NumSite, NumSpinUp == NumSpinDown>;
@@ -52,7 +52,7 @@ void testRSpinMatrix1D() {
 
 template<unsigned int NumSiteX, unsigned int NumSiteY, unsigned int NumSpinUp, unsigned int NumSpinDown>
 void testRSpinMatrix2D() {
-    using ScalarType = Scalar<Double>;
+    using ScalarType = float64;
     using VectorType = Vector<ScalarType>;
     using MatrixType = DenseMatrix<ScalarType>;
     using ReprType = SpinRepr<2, NumSiteX * NumSiteY, NumSpinUp == NumSpinDown>;
@@ -77,7 +77,7 @@ void testRSpinMatrix2D() {
 void testKSpinMatrix() {
     constexpr unsigned int NumSite = 4;
     constexpr unsigned int NumParticle = NumSite / 2;
-    using RealType = Scalar<Double>;
+    using RealType = float64;
     using ScalarType = ComplexScalar<RealType>;
     using VectorType = Vector<ScalarType>;
     using MatrixType = DenseMatrix<ScalarType>;

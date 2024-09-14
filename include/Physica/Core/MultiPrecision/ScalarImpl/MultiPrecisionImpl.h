@@ -23,14 +23,14 @@ namespace Physica::Core {
      * Returns true if s1 and s2 has the same sign. Both s1 and s2 do not equal to zero.
      * This function provide a quick sign check compare to using isPositive() and isNegative().
      */
-    inline bool Scalar<MultiPrecision>::matchSign(const Scalar<MultiPrecision>& s1, const Scalar<MultiPrecision>& s2) {
+    inline bool Scalar<FloatMP>::matchSign(const Scalar<FloatMP>& s1, const Scalar<FloatMP>& s2) {
         assert(!s1.isZero() && !s2.isZero());
         return (s1.length ^ s2.length) >= 0; //NOLINT Bitwise operator between two signed integer is intended.
     }
     /**
      * Cut zeros from the beginning.
      */
-    inline void Scalar<MultiPrecision>::cutZero() {
+    inline void Scalar<FloatMP>::cutZero() {
         const int size = getSize();
         int id = size - 1;
         while(byte[id] == 0 && id > 0)
@@ -46,24 +46,24 @@ namespace Physica::Core {
         }
     }
 
-    inline Scalar<MultiPrecision>& operator++(Scalar<MultiPrecision>& s) {
+    inline Scalar<FloatMP>& operator++(Scalar<FloatMP>& s) {
         s += BasicConst::getInstance()._1;
         return s;
     }
 
-    inline Scalar<MultiPrecision>& operator--(Scalar<MultiPrecision>& s) {
+    inline Scalar<FloatMP>& operator--(Scalar<FloatMP>& s) {
         s -= BasicConst::getInstance()._1;
         return s;
     }
 
-    inline Scalar<MultiPrecision> operator++(Scalar<MultiPrecision>& s, int) {
-        Scalar<MultiPrecision> temp(s);
+    inline Scalar<FloatMP> operator++(Scalar<FloatMP>& s, int) {
+        Scalar<FloatMP> temp(s);
         s += BasicConst::getInstance()._1;
         return temp;
     }
 
-    inline Scalar<MultiPrecision> operator--(Scalar<MultiPrecision>& s, int) {
-        Scalar<MultiPrecision> temp(s);
+    inline Scalar<FloatMP> operator--(Scalar<FloatMP>& s, int) {
+        Scalar<FloatMP> temp(s);
         s -= BasicConst::getInstance()._1;
         return temp;
     }

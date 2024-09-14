@@ -38,8 +38,8 @@ namespace Physica {
 
 namespace Physica::Core {
     template<>
-    class Scalar<Double> : public ScalarBase<Scalar<Double>> {
-        using This = Scalar<Double>;
+    class Scalar<Float64> : public ScalarBase<Scalar<Float64>> {
+        using This = Scalar<Float64>;
         using Base = ScalarBase<This>;
     public:
         using device_obj_type = This;
@@ -76,7 +76,7 @@ namespace Physica::Core {
         /* Operations */
         void swap(Scalar& __restrict s) noexcept { std::swap(d, s.d); }
         /* Getters */
-        [[nodiscard]] constexpr static ScalarOption getOption() { return Double; }
+        [[nodiscard]] constexpr static ScalarOption getOption() { return Float64; }
         [[nodiscard]] __host__ __device__ double getTrivial() const noexcept { return d; }
         [[nodiscard]] __host__ __device__ bool isZero() const noexcept{ return d == 0; }
         [[nodiscard]] __host__ __device__ bool isPositive() const noexcept { return d > 0; }
@@ -102,9 +102,9 @@ namespace Physica::Core {
     };
 
     template<class OtherScalar>
-    __host__ __device__ inline Scalar<Double>::Scalar(const ScalarBase<OtherScalar>& s) : d(double(s.getDerived())) {}
+    __host__ __device__ inline Scalar<Float64>::Scalar(const ScalarBase<OtherScalar>& s) : d(double(s.getDerived())) {}
 
-    __host__ __device__ inline bool Scalar<Double>::isFinite() const noexcept {
+    __host__ __device__ inline bool Scalar<Float64>::isFinite() const noexcept {
     #ifdef __CUDA_ARCH__
         return isfinite(d);
     #else
@@ -113,29 +113,29 @@ namespace Physica::Core {
     }
 
     template<class RandomGenerator>
-    inline Scalar<Double> Scalar<Double>::random_uniform(RandomGenerator& gen) {
+    inline Scalar<Float64> Scalar<Float64>::random_uniform(RandomGenerator& gen) {
         std::uniform_real_distribution<double> dist{};
         return Scalar(dist(gen));
     }
 
     template<class RandomGenerator, typename RandomGenerator::result_type FixedSeed>
-    inline Scalar<Double> Scalar<Double>::random_uniform(RandomPool<RandomGenerator, FixedSeed>& pool) {
+    inline Scalar<Float64> Scalar<Float64>::random_uniform(RandomPool<RandomGenerator, FixedSeed>& pool) {
         return random_uniform<RandomGenerator>(pool.getGen());
     }
 
     template<class RandomGenerator>
-    inline Scalar<Double> Scalar<Double>::random_normal(RandomGenerator& gen) {
+    inline Scalar<Float64> Scalar<Float64>::random_normal(RandomGenerator& gen) {
         std::normal_distribution<double> dist{};
         return Scalar(dist(gen));
     }
 
     template<class RandomGenerator, typename RandomGenerator::result_type FixedSeed>
-    inline Scalar<Double> Scalar<Double>::random_normal(RandomPool<RandomGenerator, FixedSeed>& pool) {
+    inline Scalar<Float64> Scalar<Float64>::random_normal(RandomPool<RandomGenerator, FixedSeed>& pool) {
         return random_normal<RandomGenerator>(pool.getGen());
     }
 
     template<class Distribution, class RandomGenerator>
-    inline Scalar<Double> Scalar<Double>::random_any(Distribution& dist, RandomGenerator& gen) {
+    inline Scalar<Float64> Scalar<Float64>::random_any(Distribution& dist, RandomGenerator& gen) {
         return Scalar(dist(gen));
     }
 
@@ -144,32 +144,32 @@ namespace Physica::Core {
         return os << std::setprecision(16) << float(s) << std::setprecision(lastPrec);
     }
 
-    inline Scalar<Double>& operator++(Scalar<Double>& s) {
-        s += Scalar<Double>(1.0);
+    inline Scalar<Float64>& operator++(Scalar<Float64>& s) {
+        s += float64(1.0);
         return s;
     }
 
-    inline Scalar<Double>& operator--(Scalar<Double>& s) {
-        s -= Scalar<Double>(1.0);
+    inline Scalar<Float64>& operator--(Scalar<Float64>& s) {
+        s -= float64(1.0);
         return s;
     }
 
-    inline Scalar<Double> operator++(Scalar<Double>& s, int) {
-        Scalar<Double> temp(s);
-        s += Scalar<Double>(1.0);
+    inline Scalar<Float64> operator++(Scalar<Float64>& s, int) {
+        float64 temp(s);
+        s += float64(1.0);
         return temp;
     }
 
-    inline Scalar<Double> operator--(Scalar<Double>& s, int) {
-        Scalar<Double> temp(s);
-        s -= Scalar<Double>(1.0);
+    inline Scalar<Float64> operator--(Scalar<Float64>& s, int) {
+        float64 temp(s);
+        s -= float64(1.0);
         return temp;
     }
 }
 
 namespace std {
     template<>
-    struct numeric_limits<Physica::Core::Scalar<Physica::Core::Double>> : 
+    struct numeric_limits<Physica::Core::Scalar<Physica::Core::Float64>> : 
     #ifdef PHYSICA_CUDA
         public ::cuda::std::numeric_limits<double>
     #else

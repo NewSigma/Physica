@@ -30,7 +30,7 @@
 
 using namespace Physica::Core;
 using namespace Physica::Gui;
-using ScalarType = Scalar<Double>;
+using ScalarType = float64;
 using VectorType = Vector<ScalarType>;
 using KineticModel = FreeModel<ScalarType, 3, 1, RPMDIntegrator::Exact>;
 using ThermoType = DoubleThermo<KineticModel>;

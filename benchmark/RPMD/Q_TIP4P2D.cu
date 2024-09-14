@@ -18,20 +18,19 @@
  */
 #include <iostream>
 #include <gperftools/profiler.h>
-#include "Physica/Core/Physics/MD/ForceModel/Q_TIP4P.h"
-#include "Physica/Core/Physics/MD/ForceModel/Ewald/RSpaceEwald.cuh"
-#include "Physica/Core/Physics/MD/ForceModel/Ewald/Ewald.h"
-#include "Physica/Core/Physics/SolidState/CrystalCell.h"
-#include "Physica/Core/Physics/MD/RPMD.h"
-#include "Physica/Core/Physics/MD/KineticModel/FreeModel.h"
-#include "Physica/Core/Physics/MD/Thermostat/DoubleThermo.h"
-#include "Physica/Core/Physics/MD/Barostat/SCRBaro.h"
-#include "Physica/Core/Parallel/Executor/CUDAExecutor.cuh"
-#include "Physica/Utils/BenchmarkHelper.h"
+#include <Physica/Core/Physics/MD/ForceModel/Q_TIP4P.h>
+#include <Physica/Core/Physics/MD/ForceModel/Ewald/RSpaceEwald.cuh>
+#include <Physica/Core/Physics/MD/ForceModel/Ewald/Ewald.h>
+#include <Physica/Core/Physics/MD/RPMD.h>
+#include <Physica/Core/Physics/MD/KineticModel/FreeModel.h>
+#include <Physica/Core/Physics/MD/Thermostat/DoubleThermo.h>
+#include <Physica/Core/Physics/MD/Barostat/SCRBaro.h>
+#include <Physica/Core/Parallel/Executor/CUDAExecutor.cuh>
+#include <Physica/Utils/BenchmarkHelper.h>
 
 using namespace Physica::Core;
 using namespace Physica::Utils;
-using ScalarType = Scalar<Float>;
+using ScalarType = float32;
 using RandomGenerator = std::mt19937;
 using RandomPoolType = RandomPool<RandomGenerator>;
 using EwaldType = Ewald<ScalarType, Physica::Core::device_obj<RSpaceEwald<ScalarType>>>;

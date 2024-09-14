@@ -19,7 +19,7 @@
 #include "Physica/Core/Math/Statistics/NumCharacter.h"
 
 using namespace Physica::Core;
-using ScalarType = Scalar<Double>;
+using ScalarType = float64;
 
 int main() {
     Vector<ScalarType> a{1, 2, 3, 4, 5};

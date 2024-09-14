@@ -23,7 +23,7 @@
 #include "Physica/Core/Math/Random/RandomPool.h"
 
 using namespace Physica::Core;
-using ScalarType = Differentiable<Scalar<Double>, DiffMode::Reverse, 1>;
+using ScalarType = Differentiable<float64, DiffMode::Reverse, 1>;
 /**
  * Params referenced from [1]
  * 

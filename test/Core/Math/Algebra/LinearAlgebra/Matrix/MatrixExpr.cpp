@@ -17,31 +17,31 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include <iostream>
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h"
+#include <Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h>
 
 using namespace Physica::Core;
 
 int main() {
     {
-        DenseMatrix<Scalar<Double>, MatrixOption::Column | MatrixOption::Vector, 3, 3> mat1{{1, 1, 1}, {1, 1, 1}, {1, 1, 1}};
-        DenseMatrix<Scalar<Float>, MatrixOption::Column | MatrixOption::Element, 3, 3> mat2{1, 1, 1, 1, 1, 1, 1, 1, 1};
+        DenseMatrix<float64, MatrixOption::Column | MatrixOption::Vector, 3, 3> mat1{{1, 1, 1}, {1, 1, 1}, {1, 1, 1}};
+        DenseMatrix<float32, MatrixOption::Column | MatrixOption::Element, 3, 3> mat2{1, 1, 1, 1, 1, 1, 1, 1, 1};
         {
-            DenseMatrix<Scalar<Double>, MatrixOption::Row | MatrixOption::Vector, 3, 3> mat = -(mat1 + mat2);
+            DenseMatrix<float64, MatrixOption::Row | MatrixOption::Vector, 3, 3> mat = -(mat1 + mat2);
             for (size_t i = 0; i < mat.getRow(); ++i)
                 for (size_t j = 0; j < mat.getColumn(); ++j)
-                    if (mat(i, j) != Scalar<Double>(-2))
+                    if (mat(i, j) != float64(-2))
                         return 1;
         }
         {
-            DenseMatrix<Scalar<Double>, MatrixOption::Row | MatrixOption::Vector, 3, 3> mat = mat1 * mat2;
+            DenseMatrix<float64, MatrixOption::Row | MatrixOption::Vector, 3, 3> mat = mat1 * mat2;
             for (size_t i = 0; i < mat.getRow(); ++i)
                 for (size_t j = 0; j < mat.getColumn(); ++j)
-                    if (mat(i, j) != Scalar<Double>(3))
+                    if (mat(i, j) != float64(3))
                         return 1;
         }
     }
     /* ContinuousMatrixBlock<Derived, 1, 1> */ {
-        using ScalarType = Scalar<Double>;
+        using ScalarType = float64;
         DenseMatrix<ScalarType, MatrixOption::Column | MatrixOption::Vector, Physica::Dynamic, 1> mat(2, 1);
         mat(0, 0) = 1.0;
         mat(1, 0) = 2.0;

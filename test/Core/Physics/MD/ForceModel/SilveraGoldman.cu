@@ -26,7 +26,7 @@
 #include "Physica/Core/Math/Random/RandomPool.h"
 
 using namespace Physica::Core;
-using ScalarType = Scalar<Float>;
+using ScalarType = float32;
 using HostForceModel = SilveraGoldman<ScalarType, true, true>;
 using DeviceForceModel = device_obj<HostForceModel>;
 using RandomPoolType = RandomPool<std::mt19937, 10000>;

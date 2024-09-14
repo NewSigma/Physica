@@ -31,7 +31,7 @@ namespace Physica::Core {
     }
 
     template<>
-    Scalar<MultiPrecision> abs(const Scalar<MultiPrecision>& s) noexcept;
+    Scalar<FloatMP> abs(const Scalar<FloatMP>& s) noexcept;
 
     template<ScalarOption Option>
     __host__ __device__ inline Scalar<Option> relu(const Scalar<Option>& s) noexcept {
@@ -57,7 +57,7 @@ namespace Physica::Core {
     }
 
     template<>
-    Scalar<MultiPrecision> sqrt(const Scalar<MultiPrecision>& s) noexcept;
+    Scalar<FloatMP> sqrt(const Scalar<FloatMP>& s) noexcept;
 
     template<ScalarOption Option>
     __host__ __device__ inline Scalar<Option> cbrt(const Scalar<Option>& s) noexcept {
@@ -76,7 +76,7 @@ namespace Physica::Core {
     }
 
     template<>
-    Scalar<MultiPrecision> ln(const Scalar<MultiPrecision>& s) noexcept;
+    Scalar<FloatMP> ln(const Scalar<FloatMP>& s) noexcept;
 
     template<ScalarOption Option>
     __host__ __device__ inline Scalar<Option> ln1p(const Scalar<Option>& s) noexcept {
@@ -102,11 +102,11 @@ namespace Physica::Core {
     }
 
     template<>
-    Scalar<MultiPrecision> exp(const Scalar<MultiPrecision>& s) noexcept;
+    Scalar<FloatMP> exp(const Scalar<FloatMP>& s) noexcept;
 
     template<ScalarOption Option>
     Scalar<Option> pow(const Scalar<Option>& s, const Scalar<Option>& n) noexcept {
-        if constexpr (Option == MultiPrecision)
+        if constexpr (Option == FloatMP)
             return exp(n * ln(s));
         else if constexpr (Option == Float)
             return Scalar<Option>(::powf(s.getTrivial(), n.getTrivial()));
@@ -115,7 +115,7 @@ namespace Physica::Core {
     }
 
     template<>
-    inline Scalar<MultiPrecision> pow(const Scalar<MultiPrecision>& s1, const Scalar<MultiPrecision>& s2) noexcept {
+    inline Scalar<FloatMP> pow(const Scalar<FloatMP>& s1, const Scalar<FloatMP>& s2) noexcept {
         return s1.isInteger() ? powScalar(s1, s2) : exp(ln(s1) * s2);
     }
     /*!
@@ -126,12 +126,12 @@ namespace Physica::Core {
      */
     template<ScalarOption Option>
     Scalar<Option> factorial(const Scalar<Option>& s) noexcept {
-        if constexpr (Option == MultiPrecision) {
+        if constexpr (Option == FloatMP) {
             //Optimize: Unnecessary copy during floor() if s is a integer itself.
-            const Scalar<MultiPrecision> integer = floor(s);
+            const Scalar<FloatMP> integer = floor(s);
 
-            Scalar<MultiPrecision> result(SignedMPUnit(1));
-            Scalar<MultiPrecision> temp(SignedMPUnit(1));
+            Scalar<FloatMP> result(SignedMPUnit(1));
+            Scalar<FloatMP> temp(SignedMPUnit(1));
             while(temp < integer)
                 result *= ++temp;
             return result;
@@ -150,7 +150,7 @@ namespace Physica::Core {
     }
 
     template<>
-    Scalar<MultiPrecision> factorial(const Scalar<MultiPrecision>& s) noexcept;
+    Scalar<FloatMP> factorial(const Scalar<FloatMP>& s) noexcept;
 
     template<ScalarOption Option>
     __host__ __device__ inline Scalar<Option> cos(const Scalar<Option>& s) noexcept {
@@ -161,7 +161,7 @@ namespace Physica::Core {
     }
 
     template<>
-    Scalar<MultiPrecision> cos(const Scalar<MultiPrecision>& s) noexcept;
+    Scalar<FloatMP> cos(const Scalar<FloatMP>& s) noexcept;
 
     template<ScalarOption Option>
     __host__ __device__ inline Scalar<Option> sin(const Scalar<Option>& s) noexcept {
@@ -172,7 +172,7 @@ namespace Physica::Core {
     }
 
     template<>
-    Scalar<MultiPrecision> sin(const Scalar<MultiPrecision>& s) noexcept;
+    Scalar<FloatMP> sin(const Scalar<FloatMP>& s) noexcept;
 
     template<ScalarOption Option>
     __host__ __device__ inline void sincos(Scalar<Option> s, Scalar<Option>& sin_result, Scalar<Option>& cos_result) noexcept {
@@ -215,7 +215,7 @@ namespace Physica::Core {
     }
 
     template<>
-    Scalar<MultiPrecision> arccos(const Scalar<MultiPrecision>& s) noexcept;
+    Scalar<FloatMP> arccos(const Scalar<FloatMP>& s) noexcept;
 
     template<ScalarOption Option>
     Scalar<Option> arcsin(const Scalar<Option>& s) noexcept {
@@ -223,7 +223,7 @@ namespace Physica::Core {
     }
 
     template<>
-    Scalar<MultiPrecision> arcsin(const Scalar<MultiPrecision>& s) noexcept;
+    Scalar<FloatMP> arcsin(const Scalar<FloatMP>& s) noexcept;
 
     template<ScalarOption Option>
     Scalar<Option> arctan(const Scalar<Option>& s) noexcept {
@@ -231,7 +231,7 @@ namespace Physica::Core {
     }
 
     template<>
-    Scalar<MultiPrecision> arctan(const Scalar<MultiPrecision>& s) noexcept;
+    Scalar<FloatMP> arctan(const Scalar<FloatMP>& s) noexcept;
 
     template<ScalarOption Option>
     Scalar<Option> arcsec(const Scalar<Option>& s) noexcept {
@@ -254,7 +254,7 @@ namespace Physica::Core {
     }
 
     template<>
-    Scalar<MultiPrecision> cosh(const Scalar<MultiPrecision>& s) noexcept;
+    Scalar<FloatMP> cosh(const Scalar<FloatMP>& s) noexcept;
 
     template<ScalarOption Option>
     Scalar<Option> sinh(const Scalar<Option>& s) noexcept {
@@ -262,7 +262,7 @@ namespace Physica::Core {
     }
 
     template<>
-    Scalar<MultiPrecision> sinh(const Scalar<MultiPrecision>& s) noexcept;
+    Scalar<FloatMP> sinh(const Scalar<FloatMP>& s) noexcept;
 
     template<ScalarOption Option>
     Scalar<Option> tanh(const Scalar<Option>& s) noexcept {
@@ -270,7 +270,7 @@ namespace Physica::Core {
     }
 
     template<>
-    Scalar<MultiPrecision> tanh(const Scalar<MultiPrecision>& s) noexcept;
+    Scalar<FloatMP> tanh(const Scalar<FloatMP>& s) noexcept;
 
     template<ScalarOption Option>
     Scalar<Option> sech(const Scalar<Option>& s) noexcept {
@@ -278,7 +278,7 @@ namespace Physica::Core {
     }
 
     template<>
-    Scalar<MultiPrecision> sech(const Scalar<MultiPrecision>& s) noexcept;
+    Scalar<FloatMP> sech(const Scalar<FloatMP>& s) noexcept;
 
     template<ScalarOption Option>
     Scalar<Option> csch(const Scalar<Option>& s) noexcept {
@@ -286,7 +286,7 @@ namespace Physica::Core {
     }
 
     template<>
-    Scalar<MultiPrecision> csch(const Scalar<MultiPrecision>& s) noexcept;
+    Scalar<FloatMP> csch(const Scalar<FloatMP>& s) noexcept;
 
     template<ScalarOption Option>
     Scalar<Option> coth(const Scalar<Option>& s) noexcept {
@@ -294,7 +294,7 @@ namespace Physica::Core {
     }
 
     template<>
-    Scalar<MultiPrecision> coth(const Scalar<MultiPrecision>& s) noexcept;
+    Scalar<FloatMP> coth(const Scalar<FloatMP>& s) noexcept;
 
     template<ScalarOption Option>
     Scalar<Option> arccosh(const Scalar<Option>& s) noexcept {
@@ -302,7 +302,7 @@ namespace Physica::Core {
     }
 
     template<>
-    Scalar<MultiPrecision> arccosh(const Scalar<MultiPrecision>& s) noexcept;
+    Scalar<FloatMP> arccosh(const Scalar<FloatMP>& s) noexcept;
 
     template<ScalarOption Option>
     Scalar<Option> arcsinh(const Scalar<Option>& s) noexcept {
@@ -310,7 +310,7 @@ namespace Physica::Core {
     }
 
     template<>
-    Scalar<MultiPrecision> arcsinh(const Scalar<MultiPrecision>& s) noexcept;
+    Scalar<FloatMP> arcsinh(const Scalar<FloatMP>& s) noexcept;
 
     template<ScalarOption Option>
     Scalar<Option> arctanh(const Scalar<Option>& s) noexcept {
@@ -318,7 +318,7 @@ namespace Physica::Core {
     }
 
     template<>
-    Scalar<MultiPrecision> arctanh(const Scalar<MultiPrecision>& s) noexcept;
+    Scalar<FloatMP> arctanh(const Scalar<FloatMP>& s) noexcept;
 
     template<ScalarOption Option>
     Scalar<Option> arcsech(const Scalar<Option>& s) noexcept {
@@ -337,5 +337,5 @@ namespace Physica::Core {
     }
 
     template<>
-    Scalar<MultiPrecision> arccoth(const Scalar<MultiPrecision>& s) noexcept;
+    Scalar<FloatMP> arccoth(const Scalar<FloatMP>& s) noexcept;
 }

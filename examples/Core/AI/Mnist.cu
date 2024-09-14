@@ -115,7 +115,7 @@ private:
     template<class OtherScalar> friend class MnistNet;
 };
 
-using PlainScalar = Scalar<Float>;
+using PlainScalar = float32;
 using ScalarType = Differentiable<PlainScalar, DiffMode::Reverse, 1>;
 using DeviceVector = Physica::Core::device_obj<Differentiable<Vector<PlainScalar>, DiffMode::Reverse, 1>>;
 using Dataset = typename Mnist::DatasetType<DeviceVector>;

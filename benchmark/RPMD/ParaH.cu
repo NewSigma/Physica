@@ -17,19 +17,17 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include <iostream>
-#include <fstream>
 #include <gperftools/profiler.h>
-#include "Physica/Core/Physics/MD/RPMD.h"
-#include "Physica/Core/Physics/MD/Thermostat/TRPMDThermo.h"
-#include "Physica/Core/Physics/MD/KineticModel/FreeModel.h"
-#include "Physica/Core/Physics/MD/ForceModel/SilveraGoldman.cuh"
-#include "Physica/Core/Parallel/Executor/CUDAExecutor.cuh"
-#include "Physica/Core/Math/Random/RandomPool.h"
-#include "Physica/Utils/BenchmarkHelper.h"
+#include <Physica/Core/Physics/MD/RPMD.h>
+#include <Physica/Core/Physics/MD/KineticModel/FreeModel.h>
+#include <Physica/Core/Physics/MD/ForceModel/SilveraGoldman.cuh>
+#include <Physica/Core/Parallel/Executor/CUDAExecutor.cuh>
+#include <Physica/Core/Math/Random/RandomPool.h>
+#include <Physica/Utils/BenchmarkHelper.h>
 
 using namespace Physica::Core;
 using Physica::Dynamic;
-using ScalarType = Scalar<Float>;
+using ScalarType = float32;
 using KineticModel = FreeModel<ScalarType, 3, Dynamic, RPMDIntegrator::Exact>;
 using RandomPoolType = RandomPool<std::mt19937, 10000>;
 using MDType = RPMD<ScalarType, 3, Physica::Dynamic, Physica::Utils::PageLockedAllocator<ScalarType>>;

@@ -21,7 +21,7 @@
 #include <Physica/Core/Math/Algebra/LinearAlgebra/Vector/Vector.h>
 
 using namespace Physica::Core;
-using T = Scalar<Double>;
+using T = float64;
 
 template<class Function>
 void testFit(Function func) {

@@ -21,7 +21,7 @@
 #include "Physica/Core/Math/Calculus/PDE/FEM/Element/Triangle1.h"
 
 using namespace Physica::Core;
-using ScalarType = Scalar<Double>;
+using ScalarType = float64;
 using VectorType = Vector<ScalarType, 2>;
 
 constexpr double width = 2;

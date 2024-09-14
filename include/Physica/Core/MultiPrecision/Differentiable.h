@@ -58,18 +58,18 @@ namespace Physica::Core {
         Differentiable(double d) : This(ScalarType(d)) {}
         Differentiable(ScalarType value_);
         Differentiable(ScalarType value_, ScalarType grad_);
-        Differentiable(const Differentiable&) = default;
-        Differentiable(Differentiable&&) noexcept = default;
+        Differentiable(const This&) = default;
+        Differentiable(This&&) noexcept = default;
         ~Differentiable() = default;
         /* Operators */
-        Differentiable& operator=(Differentiable obj) noexcept { swap(obj); return *this; }
+        This& operator=(This obj) noexcept { swap(obj); return *this; }
         [[nodiscard]] explicit operator float() const { return float(value); }
         [[nodiscard]] explicit operator double() const { return double(value); }
         [[nodiscard]] inline bool operator==(const This& other) const;
-        [[nodiscard]] inline Differentiable operator-() const;
+        [[nodiscard]] inline This operator-() const;
         /* Operations */
         [[nodiscard]] This conjugate() const { noImpl(); }
-        void swap(Differentiable& __restrict obj) noexcept;
+        void swap(This& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] ScalarType& getValue() noexcept { return value; }
         [[nodiscard]] ScalarType& getGrad() noexcept { return grad; }
@@ -109,12 +109,12 @@ namespace Physica::Core {
         Differentiable(ScalarType value);
         Differentiable(ScalarType value, ScalarType grad);
         Differentiable(ValueType pValue_, GradType grad_);
-        Differentiable(const Differentiable&) = default;
-        Differentiable(Differentiable&&) noexcept = default;
+        Differentiable(const This&) = default;
+        Differentiable(This&&) noexcept = default;
         ~Differentiable() = default;
         /* Operators */
-        Differentiable& operator=(const Differentiable&) = default;
-        Differentiable& operator=(Differentiable&&) noexcept = default;
+        This& operator=(const This&) = default;
+        This& operator=(This&&) noexcept = default;
         [[nodiscard]] explicit operator float() const { return float(getValue()); }
         [[nodiscard]] explicit operator double() const { return double(getValue()); }
         template<unsigned int KeepDeep>
@@ -127,7 +127,7 @@ namespace Physica::Core {
         inline void reverse_to(Differentiable to);
         inline void zero_grad();
         [[nodiscard]] inline This copy() const;
-        inline void swap(Differentiable& __restrict obj) noexcept;
+        inline void swap(This& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] __host__ __device__ inline ScalarType* value_ptr() const noexcept;
         [[nodiscard]] __host__ __device__ inline ScalarType* grad_ptr() const noexcept;

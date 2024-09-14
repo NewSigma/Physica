@@ -22,7 +22,7 @@
 
 using namespace Physica::Core;
 
-using ScalarType = Scalar<Double>;
+using ScalarType = float64;
 using RandomPoolType = RandomPool<std::mt19937, 10000>;
 using MDCellType = MDCell<ScalarType, 1>;
 constexpr double latticeSize = 20;

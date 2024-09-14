@@ -48,13 +48,13 @@ const static char* data2 = "Structure\n"
                            "0.00 0.00 0.00\n"
                            "0.25 0.25 0.25";
 
-Poscar<Scalar<Double>> readTest1() {
+Poscar<float64> readTest1() {
     auto tmp = TempFile("/tmp/tmpXXXXXX");
     std::ofstream os(tmp.getName());
     os << data1;
     os.close();
 
-    Poscar<Scalar<Double>> poscar{};
+    Poscar<float64> poscar{};
     std::ifstream is(tmp.getName());
     is >> poscar;
     is.close();
@@ -74,7 +74,7 @@ void readTest2() {
     os << data2;
     os.close();
 
-    Poscar<Scalar<Float>> poscar{};
+    Poscar<float32> poscar{};
     std::ifstream is(tmp.getName());
     is >> poscar;
     is.close();
@@ -82,7 +82,7 @@ void readTest2() {
 
 int main() {
     {
-        using PoscarType = Poscar<Scalar<Double>>;
+        using PoscarType = Poscar<float64>;
         PoscarType poscar = readTest1();
 
         typename PoscarType::LatticeMatrix mat = poscar.getLattice();
@@ -94,7 +94,7 @@ int main() {
         readTest2();
     }
     {
-        using ScalarType = Scalar<Float>;
+        using ScalarType = float32;
         using CrystalCellType = CrystalCell<ScalarType>;
         typename CrystalCellType::LatticeMatrix lattice{
             -4.6635062604325164,   -0.2499522611778955,    0.0000000000000000,

@@ -23,7 +23,7 @@
 
 namespace Physica::Core {
     class PHYSICA_API PWscfOut {
-        using ScalarType = Scalar<Double>;
+        using ScalarType = float64;
         constexpr static size_t DefaultBufferSize = 1024; //1024 shall be enough
 
         std::ifstream fin;

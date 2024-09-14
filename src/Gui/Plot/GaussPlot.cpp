@@ -22,7 +22,7 @@ namespace Physica::Gui {
     GaussPlot::GaussPlot(double maxX, double maxY, double deltaX, double deltaY, unsigned int numSigma)
             : Base(-maxX, maxX, 0, maxY, deltaX, deltaY) {
         using namespace Physica::Core;
-        using ScalarType = Scalar<Double>;
+        using ScalarType = float64;
         using VectorType = Vector<ScalarType>;
 
         auto& line = Base::line(VectorType{-maxX, maxX}, VectorType{0, 0});

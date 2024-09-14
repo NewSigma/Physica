@@ -34,7 +34,7 @@ bool testPolyRoot(const RValueVector<VectorType>& coeffs, double precision) {
 }
 
 int main() {
-    using ScalarType = Scalar<Double>;
+    using ScalarType = float64;
     Vector<ScalarType, 6> coeffs{1, 2, 3, 4, 5, 6};
     if (!testPolyRoot(coeffs, 1E-11))
         return 1;

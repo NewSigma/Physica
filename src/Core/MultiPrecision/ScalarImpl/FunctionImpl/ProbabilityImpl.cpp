@@ -19,7 +19,7 @@
 #include "Physica/Core/MultiPrecision/Scalar.h"
 
 namespace Physica::Core {
-    Scalar<MultiPrecision> floor(const Scalar<MultiPrecision>& s) noexcept {
+    Scalar<FloatMP> floor(const Scalar<FloatMP>& s) noexcept {
         if(s.isInteger())
             return Scalar(s);
         const auto size = s.getSize();
@@ -27,7 +27,7 @@ namespace Physica::Core {
         const auto power_1 = power + 1;
         auto length = size > power_1 ? power_1 : size;
         length = s.isNegative() ? -length : length;
-        Scalar<MultiPrecision> result(length, power);
+        Scalar<FloatMP> result(length, power);
         for(int i = 0; i < length; ++i)
             result.setByte(i, s[i]);
         return result;

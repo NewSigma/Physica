@@ -29,7 +29,7 @@ void testLnGamma() {
     constexpr static double doubleResult[count]{21.77464517303463, 1.09579799481807552};
     
     for (int i = 0; i < count; ++i) {
-        using T = Scalar<Float>;
+        using T = float32;
         T s(value[i]);
         auto temp = lnGamma(s);
         if (!scalarNear(temp, T(floatResult[i]), 1E-6))
@@ -37,7 +37,7 @@ void testLnGamma() {
     }
 
     for (int i = 0; i < count; ++i) {
-        using T = Scalar<Double>;
+        using T = float64;
         T s(value[i]);
         auto temp = lnGamma(s);
         if (!scalarNear(temp, T(doubleResult[i]), 1E-15))
@@ -46,7 +46,7 @@ void testLnGamma() {
 }
 
 void testGammaPQ() {
-    using T = Scalar<Double>;
+    using T = float64;
     constexpr static int count = 2;
     constexpr static double a[count]{13.7, 0.3};
     constexpr static double x[count]{2, 8};
@@ -63,7 +63,7 @@ void testGammaPQ() {
 }
 
 void testBiGamma() {
-    using T = Scalar<Double>;
+    using T = float64;
     constexpr static int count = 2;
     constexpr static double x[count]{13.7, 0.3};
     constexpr static double step[count]{1E-1, 1E-1};
@@ -77,7 +77,7 @@ void testBiGamma() {
 }
 
 void testBesselJ() {
-    using T = Scalar<Double>;
+    using T = float64;
     constexpr static int count = 2;
     constexpr static int n[count]{2, 5};
     constexpr static double x[count]{3, 3};
@@ -91,7 +91,7 @@ void testBesselJ() {
 }
 
 void testBesselY() {
-    using T = Scalar<Double>;
+    using T = float64;
     constexpr static int count = 2;
     constexpr static int n[count]{2, 5};
     constexpr static double x[count]{3, 3};
@@ -105,7 +105,7 @@ void testBesselY() {
 }
 
 void testBesselJn_Yn_dJn_dYn() {
-    using T = Scalar<Double>;
+    using T = float64;
     constexpr static int count = 5;
     constexpr static double n[count]{2, 2, 5, 4, 0.5};
     constexpr static double x[count]{1, 3, 3, 2000, 1};
@@ -129,7 +129,7 @@ void testBesselJn_Yn_dJn_dYn() {
 }
 
 void testLegendreP() {
-    using T = Scalar<Double>;
+    using T = float64;
     constexpr static int count = 2;
     constexpr static unsigned l[count]{5, 4};
     constexpr static unsigned m[count]{2, 3};
@@ -148,7 +148,7 @@ void testLegendreP() {
 }
 
 void testSphericalHarmomicY() {
-    using T = Scalar<Double>;
+    using T = float64;
     constexpr static int count = 2;
     constexpr static unsigned l[count]{5, 4};
     constexpr static unsigned m[count]{2, 3};
@@ -169,7 +169,7 @@ void testSphericalHarmomicY() {
  */
 void testHamonicRotator() {
     constexpr double epsilon = 1E-9;
-    using T = Scalar<Double>;
+    using T = float64;
     using MatrixType = DenseMatrix<T, MatrixOption::Row | MatrixOption::Element>;
     using Matrix3D = DenseMatrix<T, MatrixOption::Row | MatrixOption::Element, 3, 3>;
     const Matrix3D rotation({0.707106781, -0.707106781, 0, 0.707106781, 0.707106781, 0, 0, 0, 1});
@@ -210,7 +210,7 @@ void testHamonicRotator() {
 }
 
 void testHermiteH() {
-    using T = Scalar<Double>;
+    using T = float64;
     constexpr static size_t count = 3;
     constexpr static unsigned int n[count]{2, 5, 3};
     constexpr static double x[count]{3, 3, 18};
@@ -224,7 +224,7 @@ void testHermiteH() {
 }
 
 void testIncompBeta() {
-    using T = Scalar<Double>;
+    using T = float64;
     constexpr static size_t count = 3;
     constexpr static unsigned int n[count]{5, 10, 12};
     constexpr static double x[count]{1.2, 0.2, 2.1};

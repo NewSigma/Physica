@@ -22,7 +22,7 @@
 #include "Physica/Core/Math/Calculus/Interpolation.h"
 
 using namespace Physica::Core;
-using ScalarType = Scalar<Double>;
+using ScalarType = float64;
 using VectorType = Vector<ScalarType>;
 
 void testLaglange() {

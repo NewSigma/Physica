@@ -25,7 +25,7 @@
 
 using namespace Physica::Core;
 using Physica::Dynamic;
-using ScalarType = Scalar<Float>;
+using ScalarType = float32;
 using ForceModel = device_obj<SilveraGoldman<ScalarType, true>>;
 using KineticModel = FreeModel<ScalarType, 3, Dynamic, RPMDIntegrator::Exact>;
 using ThermoType = DoubleThermo<KineticModel>;

@@ -31,7 +31,7 @@ namespace Physica::Core {
         byte[0] = i >= 0 ? i : -i;
     }
 
-    Integer::Integer(const Scalar<MultiPrecision>& s) {
+    Integer::Integer(const Scalar<FloatMP>& s) {
         const auto power = s.getPower();
         if (power < 0) {
             byte = reinterpret_cast<MPUnit*>(malloc(sizeof(MPUnit)));

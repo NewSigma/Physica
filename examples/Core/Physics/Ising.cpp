@@ -19,14 +19,14 @@
 #include <random>
 #include <iostream>
 #include <QtWidgets/QApplication>
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h"
-#include "Physica/Core/Math/Statistics/NumCharacter.h"
-#include "Physica/Core/Math/Random/RandomSeed.h"
-#include "Physica/Gui/Plot/Plot.h"
+#include <Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h>
+#include <Physica/Core/Math/Statistics/NumCharacter.h>
+#include <Physica/Core/Math/Random/RandomSeed.h>
+#include <Physica/Gui/Plot/Plot.h>
 
 using namespace Physica::Core;
 using namespace Physica::Gui;
-using ScalarType = Scalar<Float>;
+using ScalarType = float32;
 /**
  * Reference:
  * [1] Jos Thijssen. Computational Physics[M].London: Cambridge university press, 2013:304-308

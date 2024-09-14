@@ -20,7 +20,7 @@
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/MatrixDecomposition/Bidiagonalization.h"
 
 using namespace Physica::Core;
-using ScalarType = Scalar<Double>;
+using ScalarType = float64;
 using MatrixType = DenseMatrix<ScalarType, MatrixOption::Column | MatrixOption::Vector>;
 
 template<class MatrixType>

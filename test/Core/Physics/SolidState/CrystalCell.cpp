@@ -16,10 +16,10 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include "Physica/Core/Physics/SolidState/CrystalCell.h"
+#include <Physica/Core/Physics/SolidState/CrystalCell.h>
 
 using namespace Physica::Core;
-using ScalarType = Scalar<Float>;
+using ScalarType = float32;
 using CrystalCellType = CrystalCell<ScalarType>;
 using LatticeMatrix = typename CrystalCellType::LatticeMatrix;
 using PositionMatrix = typename CrystalCellType::PositionMatrix;

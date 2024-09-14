@@ -24,7 +24,7 @@
 
 namespace Physica::Core {
     class PHYSICA_API Xdatcar {
-        using ScalarType = Scalar<Double>;
+        using ScalarType = float64;
     private:
         Poscar<ScalarType> data;
         std::ifstream fin;

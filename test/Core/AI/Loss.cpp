@@ -17,10 +17,10 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include <iostream>
-#include "Physica/Core/AI/NeuralNetwork/Loss.h"
+#include <Physica/Core/AI/NeuralNetwork/Loss.h>
 
 using namespace Physica::Core;
-using ScalarType = Scalar<Float>;
+using ScalarType = float32;
 
 void testSelectProperty() {
     const Vector<ScalarType> result{-3.34036088, -109.5531235, 13.51656151, 11.29175949};

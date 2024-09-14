@@ -25,7 +25,7 @@ using namespace Physica::Utils;
 int main() {
     std::mt19937 gen{};
     /* Column float matrix */ {
-        using T = Scalar<Float>;
+        using T = float32;
         using MatrixType = DenseMatrix<T>;
         const auto data = MatrixType::random_uniform(32, 16, gen);
 
@@ -39,7 +39,7 @@ int main() {
             exit(EXIT_FAILURE);
     }
     /* Row double matrix */ {
-        using T = Scalar<Double>;
+        using T = float64;
         using MatrixType = DenseMatrix<T, MatrixOption::Row | MatrixOption::Vector>;
         const auto data = MatrixType::random_uniform(16, 20, gen);
 
@@ -53,7 +53,7 @@ int main() {
             exit(EXIT_FAILURE);
     }
     /* Row complex float matrix */ {
-        using T = ComplexScalar<Scalar<Float>>;
+        using T = ComplexScalar<float32>;
         using MatrixType = DenseMatrix<T, MatrixOption::Row | MatrixOption::Vector>;
         const auto data = MatrixType::random_uniform(16, 12, gen);
 

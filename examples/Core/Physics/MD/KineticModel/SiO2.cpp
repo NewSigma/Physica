@@ -20,7 +20,7 @@
 using namespace Physica::Core;
 using namespace Physica::Utils;
 using namespace Physica::Gui;
-using ScalarType = Scalar<Double>;
+using ScalarType = float64;
 using VectorType = Vector<ScalarType>;
 using RandomPoolType = RandomPool<std::mt19937>;
 using MDType = RPMD<ScalarType, 3, 1>;

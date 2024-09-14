@@ -23,7 +23,7 @@
 
 using namespace Physica::Core;
 using namespace Physica::Utils;
-using ScalarType = Scalar<Double>;
+using ScalarType = float64;
 extern const char* outcar_data;
 
 int main() {
@@ -37,7 +37,7 @@ int main() {
     answer *= PhyConst<AU>::eVToHartree(1) / PhyConst<AU>::angstormToBohr(1);
     if (!vectorNear(force, answer, std::numeric_limits<ScalarType>::epsilon()))
         return 1;
-    if (!scalarNear(outcar.getInternalEnergy(), Scalar<Double>(PhyConst<AU>::eVToHartree(-43.76513486)), 1E-8))
+    if (!scalarNear(outcar.getInternalEnergy(), float64(PhyConst<AU>::eVToHartree(-43.76513486)), 1E-8))
       return 1;
     return 0;
 }

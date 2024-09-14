@@ -49,8 +49,8 @@ namespace Physica::Core {
             unsigned int uint_value;
             long long_value;
             unsigned long ulong_value;
-            Scalar<Float> float_value;
-            Scalar<Double> double_value;
+            float32 float_value;
+            float64 double_value;
             bool bool_value;
 
             DefaultValue(signed char c) : char_value(c) {}
@@ -61,8 +61,8 @@ namespace Physica::Core {
             DefaultValue(unsigned int i) : uint_value(i) {}
             DefaultValue(long l) : long_value(l) {}
             DefaultValue(unsigned long l) : ulong_value(l) {}
-            DefaultValue(Scalar<Float> f) : float_value(std::move(f)) {}
-            DefaultValue(Scalar<Double> d) : double_value(std::move(d)) {}
+            DefaultValue(float32 f) : float_value(std::move(f)) {}
+            DefaultValue(float64 d) : double_value(std::move(d)) {}
             DefaultValue(bool b) : bool_value(b) {}
         };
         using DataTypeArray = Utils::Array<DataType>;
@@ -100,8 +100,8 @@ namespace Physica::Core {
         [[nodiscard]] inline const Utils::Array<unsigned int>& asUnsignedInts(size_t column) const noexcept;
         [[nodiscard]] inline const Utils::Array<long>& asLongs(size_t column) const noexcept;
         [[nodiscard]] inline const Utils::Array<unsigned long>& asUnsignedLongs(size_t column) const noexcept;
-        [[nodiscard]] inline const Vector<Scalar<Float>>& asFloats(size_t column) const noexcept;
-        [[nodiscard]] inline const Vector<Scalar<Double>>& asDoubles(size_t column) const noexcept;
+        [[nodiscard]] inline const Vector<float32>& asFloats(size_t column) const noexcept;
+        [[nodiscard]] inline const Vector<float64>& asDoubles(size_t column) const noexcept;
         [[nodiscard]] inline const Utils::Array<bool>& asBools(size_t column) const noexcept;
         [[nodiscard]] inline const Utils::Array<std::string>& asStrings(size_t column) const noexcept;
         [[nodiscard]] inline size_t getRow() const noexcept;
@@ -199,14 +199,14 @@ namespace Physica::Core {
         return *reinterpret_cast<const Utils::Array<unsigned long>*>(data[column]);
     }
 
-    inline const Vector<Scalar<Float>>& CsvFile::asFloats(size_t column) const noexcept {
+    inline const Vector<float32>& CsvFile::asFloats(size_t column) const noexcept {
         assert(datatypes[column] == FLOAT && "[Error]: Invalid conversion");
-        return *reinterpret_cast<const Vector<Scalar<Float>>*>(data[column]);
+        return *reinterpret_cast<const Vector<float32>*>(data[column]);
     }
 
-    inline const Vector<Scalar<Double>>& CsvFile::asDoubles(size_t column) const noexcept {
+    inline const Vector<float64>& CsvFile::asDoubles(size_t column) const noexcept {
         assert(datatypes[column] == DOUBLE && "[Error]: Invalid conversion");
-        return *reinterpret_cast<const Vector<Scalar<Double>>*>(data[column]);
+        return *reinterpret_cast<const Vector<float64>*>(data[column]);
     }
 
     inline const Utils::Array<bool>& CsvFile::asBools(size_t column) const noexcept {

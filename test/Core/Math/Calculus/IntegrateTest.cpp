@@ -20,7 +20,7 @@
 #include "Physica/Core/Math/Calculus/Integrate/Integrate.h"
 
 using namespace Physica::Core;
-using ScalarType = Scalar<Double>;
+using ScalarType = float64;
 
 ScalarType func(ScalarType x) {
     return ScalarType(M_PI_2) * x * sin(ScalarType(M_PI) * x);

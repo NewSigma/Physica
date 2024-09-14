@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2021 Weibo He.
+ * Copyright 2020-2024 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -16,8 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef PHYSICA_INTEGERARITHMETIC_H
-#define PHYSICA_INTEGERARITHMETIC_H
+#pragma once
 
 #include <cassert>
 #include "Physica/Core/MultiPrecision/BasicImpl/AddBasic.h"
@@ -86,5 +85,3 @@ namespace Physica::Core {
         return result;
     }
 }
-
-#endif

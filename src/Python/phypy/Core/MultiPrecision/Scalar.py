@@ -20,9 +20,9 @@ from enum import Enum
 from phypy import CXXObj
 
 class ScalarOption(Enum):
-    Float = 0
-    Double = 1
-    MultiPrecision = 2
+    Float32 = 0
+    Float64 = 1
+    FloatMP = 2
 
 class Scalar(CXXObj):
     __pDecl = None

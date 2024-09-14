@@ -26,7 +26,7 @@
 using namespace Physica::Core;
 using namespace Physica::Gui;
 
-using T = Scalar<Double>;
+using T = float64;
 using ODE = ODESolver<T, 2>;
 
 struct WaterDropArgs {

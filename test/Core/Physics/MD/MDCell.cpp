@@ -20,7 +20,7 @@
 #include "Physica/Core/Physics/MD/MDCell.h"
 
 using namespace Physica::Core;
-using ScalarType = Scalar<Double>;
+using ScalarType = float64;
 using MDCellType = MDCell<ScalarType>;
 using CrystalCellType = CrystalCell<ScalarType>;
 using LatticeMatrix = typename CrystalCellType::LatticeMatrix;

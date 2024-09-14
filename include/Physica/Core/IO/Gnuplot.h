@@ -23,8 +23,8 @@
 namespace Physica::Core {
     class PHYSICA_API Gnuplot {
     public:
-        using VectorType = Vector<Scalar<Double>>;
-        using DataArray = Utils::Array<Vector<Scalar<Double>>>;
+        using VectorType = Vector<float64>;
+        using DataArray = Utils::Array<Vector<float64>>;
     private:
         DataArray xDatas;
         DataArray yDatas;

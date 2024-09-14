@@ -25,7 +25,7 @@ using namespace Physica::Core;
  * [1] R. L. Honeycutt, Stochastic Runge-Kutta algorithm: I. White noise, Phys. Rev. A 45, 600 (1992).
  */
 int main() {
-    using ScalarType = Scalar<Double>;
+    using ScalarType = float64;
     using XVector = Vector<ScalarType, 1>;
     constexpr double stepSize = 0.1;
     constexpr double D = 0.1;

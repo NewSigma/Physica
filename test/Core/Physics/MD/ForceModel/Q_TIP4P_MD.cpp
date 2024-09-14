@@ -25,7 +25,7 @@
 #include "Physica/Core/Parallel/Executor/ThreadExecutor.h"
 
 using namespace Physica::Core;
-using ScalarType = Scalar<Double>;
+using ScalarType = float64;
 using ForceModel = Q_TIP4P<ScalarType, Ewald<ScalarType>>;
 using KineticModel = FreeModel<ScalarType, 3, Physica::Dynamic, RPMDIntegrator::Exact>;
 using ThermoType = DoubleThermo<KineticModel>;

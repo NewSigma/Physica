@@ -22,7 +22,7 @@
 
 int main() {
     using namespace Physica::Core;
-    using ScalarType = Scalar<Double>;
+    using ScalarType = float64;
     {
         auto func = [](const ScalarType& x) { return hermiteH(5, x); };
         auto result = Differential<ScalarType>::forward(func, ScalarType(3), ScalarType(1E-8));

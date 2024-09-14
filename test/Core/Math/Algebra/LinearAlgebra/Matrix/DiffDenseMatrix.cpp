@@ -19,7 +19,7 @@
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DiffDenseMatrix.h"
 
 using namespace Physica::Core;
-using ScalarType = Scalar<Double>;
+using ScalarType = float64;
 using MatrixType = Differentiable<DenseMatrix<ScalarType>, DiffMode::Reverse, 1>;
 using RandomGenerator = std::mt19937;
 

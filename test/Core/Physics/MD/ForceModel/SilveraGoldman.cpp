@@ -23,7 +23,7 @@
 
 using namespace Physica::Core;
 
-using PlainScalar = Scalar<Double>;
+using PlainScalar = float64;
 using ScalarType = Differentiable<PlainScalar, DiffMode::Reverse, 1>;
 
 class PressTest {

@@ -22,7 +22,7 @@
 #include <Physica/Core/Math/Algebra/LinearAlgebra/Eigen/SymmEigenSolver.h>
 
 using namespace Physica::Core;
-using ScalarType = Scalar<Double>;
+using ScalarType = float64;
 using VectorType = Vector<ScalarType>;
 using MatrixType = DenseSymmMatrix<ScalarType>;
 

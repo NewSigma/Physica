@@ -23,7 +23,7 @@ using namespace Physica::Core;
 using namespace Physica::Utils;
 
 void crossProductTest() {
-    using T = Scalar<Float>;
+    using T = float32;
     Vector<T> v1{3.845971,0.000000,0.000000};
     Vector<T> v2{-0.007733,3.835502,0.000000};
     Vector<T> v3(v1.crossProduct(v2));
@@ -35,7 +35,7 @@ void hdfTest() {
 #ifdef PHYSICA_HDF5
     std::mt19937 gen{};
     /* Real */ {
-        using T = Scalar<Double>;
+        using T = float64;
         const auto data = Vector<T>::random_uniform(64, gen);
 
         TempFile tmp("/tmp/tmpXXXXXX");
@@ -50,7 +50,7 @@ void hdfTest() {
             exit(EXIT_FAILURE);
     }
     /* Complex */ {
-        using T = ComplexScalar<Scalar<Double>>;
+        using T = ComplexScalar<float64>;
         const auto data = Vector<T>::random_uniform(64, gen);
 
         TempFile tmp("/tmp/tmpXXXXXX");

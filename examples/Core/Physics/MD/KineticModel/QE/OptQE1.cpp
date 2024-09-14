@@ -11,7 +11,7 @@
 using namespace Physica::Core;
 using namespace Physica::Gui;
 
-using ScalarType = Scalar<Double>;
+using ScalarType = float64;
 using VectorType = Vector<ScalarType>;
 
 int main(int argc, char** argv) {

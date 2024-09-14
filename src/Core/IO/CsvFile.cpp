@@ -67,10 +67,10 @@ namespace Physica::Core {
                 delete reinterpret_cast<Array<unsigned long>*>(p_array);
                 break;
             case FLOAT:
-                delete reinterpret_cast<Vector<Scalar<Float>>*>(p_array);
+                delete reinterpret_cast<Vector<float32>*>(p_array);
                 break;
             case DOUBLE:
-                delete reinterpret_cast<Vector<Scalar<Double>>*>(p_array);
+                delete reinterpret_cast<Vector<float64>*>(p_array);
                 break;
             case BOOL:
                 delete reinterpret_cast<Array<bool>*>(p_array);
@@ -147,14 +147,14 @@ namespace Physica::Core {
             break;
         }
         case FLOAT: {
-            const Scalar<Float> value = defaultValues[column]->float_value;
+            const float32 value = defaultValues[column]->float_value;
             const auto& arr = asFloats(column);
             for (auto f : arr)
                 result += value == f;
             break;
         }
         case DOUBLE: {
-            const Scalar<Double> value = defaultValues[column]->double_value;
+            const float64 value = defaultValues[column]->double_value;
             const auto& arr = asDoubles(column);
             for (auto d : arr)
                 result += value == d;
@@ -251,10 +251,10 @@ namespace Physica::Core {
                 p_array = new Array<unsigned long>();
                 break;
             case FLOAT:
-                p_array = new Vector<Scalar<Float>>();
+                p_array = new Vector<float32>();
                 break;
             case DOUBLE:
-                p_array = new Vector<Scalar<Double>>();
+                p_array = new Vector<float64>();
                 break;
             case BOOL:
                 p_array = new Array<bool>();
@@ -386,25 +386,25 @@ namespace Physica::Core {
                     break;
                 }
                 case FLOAT: {
-                    Scalar<Float> f;
+                    float32 f;
                     fin >> f;
                     if (!fin && defaultValue.has_value()) {
                         fin.clear();
                         std::getline(fin, buffer, isLast ? '\n' : ',');
                         f = defaultValue->float_value;
                     }
-                    reinterpret_cast<Vector<Scalar<Float>>*>(p_array)->append(f);
+                    reinterpret_cast<Vector<float32>*>(p_array)->append(f);
                     break;
                 }
                 case DOUBLE: {
-                    Scalar<Double> d;
+                    float64 d;
                     fin >> d;
                     if (!fin && defaultValue.has_value()) {
                         fin.clear();
                         std::getline(fin, buffer, isLast ? '\n' : ',');
                         d = defaultValue->double_value;
                     }
-                    reinterpret_cast<Vector<Scalar<Double>>*>(p_array)->append(d);
+                    reinterpret_cast<Vector<float64>*>(p_array)->append(d);
                     break;
                 }
                 case BOOL: {

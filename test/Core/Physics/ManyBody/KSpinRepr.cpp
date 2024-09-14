@@ -24,7 +24,7 @@
 #include "Physica/Core/Parallel/Executor/ThreadExecutor.h"
 
 using namespace Physica::Core;
-using RealType = Scalar<Double>;
+using RealType = float64;
 using ScalarType = ComplexScalar<RealType>;
 using VectorType = Vector<RealType>;
 using RandomPoolType = RandomPool<std::mt19937, 10000>;

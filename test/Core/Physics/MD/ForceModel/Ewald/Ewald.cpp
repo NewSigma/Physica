@@ -98,7 +98,7 @@ void madelungTest() {
 
 namespace Physica {
     class Test {
-        using ScalarType = Differentiable<Scalar<Double>, DiffMode::Reverse, 1>;
+        using ScalarType = Differentiable<float64, DiffMode::Reverse, 1>;
         using CrystalCellType = CrystalCell<ScalarType>;
         using LatticeMatrix = typename CrystalCellType::LatticeMatrix;
         using PositionMatrix = typename CrystalCellType::PositionMatrix;
@@ -159,7 +159,7 @@ namespace Physica {
     };
 
     class PressTest {
-        using PlainScalar = Scalar<Double>;
+        using PlainScalar = float64;
         using ScalarType = Differentiable<PlainScalar, DiffMode::Reverse, 1>;
         using MDCellType = MDCell<ScalarType>;
         using LatticeMatrix = typename MDCellType::LatticeMatrix;
@@ -205,10 +205,10 @@ namespace Physica {
 }
 
 int main() {
-    VASPTest<Scalar<Double>>();
-    VASPTest<Scalar<Float>>();
-    madelungTest<Scalar<Double>>();
-    madelungTest<Scalar<Float>>();
+    VASPTest<float64>();
+    VASPTest<float32>();
+    madelungTest<float64>();
+    madelungTest<float32>();
     Physica::Test test{};
     test.functorTest();
     test.forceTest();

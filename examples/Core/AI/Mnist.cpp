@@ -111,7 +111,7 @@ private:
     template<class OtherScalar> friend class MnistNet;
 };
 
-using PlainScalar = Scalar<Float>;
+using PlainScalar = float32;
 using ScalarType = Differentiable<PlainScalar, DiffMode::Reverse, 1>;
 using Dataset = typename Mnist::DatasetType<Vector<PlainScalar>>;
 using Optimizer = MomentumSGD<ScalarType>;

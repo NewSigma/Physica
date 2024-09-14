@@ -18,13 +18,12 @@
  */
 #include <random>
 #include <iostream>
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/Vector.h"
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/Vector.cuh"
-#include "Physica/Core/Parallel/Executor/CUDAExecutor.cuh"
+#include <Physica/Core/Math/Algebra/LinearAlgebra/Vector/Vector.cuh>
+#include <Physica/Core/Parallel/Executor/CUDAExecutor.cuh>
 
 using namespace Physica;
 using namespace Physica::Core;
-using ScalarType = Scalar<Float>;
+using ScalarType = float32;
 using VectorType = Vector<ScalarType>;
 using DeviceVector = Core::device_obj<VectorType>;
 

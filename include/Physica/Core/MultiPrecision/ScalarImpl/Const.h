@@ -25,7 +25,7 @@
  */
 namespace Physica::Core {
     class PHYSICA_API BasicConst {
-        using ScalarType = Scalar<MultiPrecision>;
+        using ScalarType = Scalar<FloatMP>;
     public:
         double ln_2;
         double ln_10;
@@ -58,7 +58,7 @@ namespace Physica::Core {
     };
 
     class PHYSICA_API MathConst {
-        using ScalarType = Scalar<MultiPrecision>;
+        using ScalarType = Scalar<FloatMP>;
     public:
         ScalarType PI;
         ScalarType E;

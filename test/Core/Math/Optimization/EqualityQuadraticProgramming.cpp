@@ -21,7 +21,7 @@
 using namespace Physica::Core;
 
 int main() {
-    using ScalarType = Scalar<Double>;
+    using ScalarType = float64;
     {
         using VectorType = Vector<ScalarType, 3>;
         const DenseMatrix<ScalarType, MatrixOption::Row | MatrixOption::Vector, 3, 3> G{{1, 0, 0}, {0, 1, 0}, {0, 0, 1}};

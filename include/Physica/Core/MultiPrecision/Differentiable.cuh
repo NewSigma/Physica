@@ -42,16 +42,16 @@ namespace Physica::Core {
         device_obj(double d) : device_obj(ScalarType(d)) {}
         device_obj(ScalarType s);
         __host__ __device__ device_obj(const ScalarType* pValue_, const ScalarType* pGrad_);
-        device_obj(const device_obj&) = default;
-        device_obj(device_obj&&) noexcept = default;
+        device_obj(const This&) = default;
+        device_obj(This&&) noexcept = default;
         ~device_obj() = default;
         /* Operators */
-        device_obj& operator=(const device_obj&) = default;
-        device_obj& operator=(device_obj&&) noexcept = default;
+        This& operator=(const This&) = default;
+        This& operator=(This&&) noexcept = default;
         [[nodiscard]] __device__ explicit operator float() const { return float(getValue()); }
         [[nodiscard]] __device__ explicit operator double() const { return double(getValue()); }
         [[nodiscard]] __host__ __device__ inline bool operator==(const This& other) const;
-        [[nodiscard]] inline device_obj operator-() const;
+        [[nodiscard]] inline This operator-() const;
         /* Operations */
         void reverse();
         void reverse_to(This to);
@@ -59,7 +59,7 @@ namespace Physica::Core {
         [[nodiscard]] ScalarType toHost_grad() const;
         void toHostAsync_value(ScalarType& value) const;
         void toHostAsync_grad(ScalarType& grad) const;
-        __host__ __device__ inline void swap(device_obj& __restrict obj) noexcept;
+        __host__ __device__ inline void swap(This& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] __host__ __device__ ScalarType* value_ptr() const noexcept { return pValue; }
         [[nodiscard]] __host__ __device__ ScalarType* grad_ptr() const noexcept { return pGrad; }

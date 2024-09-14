@@ -32,7 +32,7 @@ namespace Physica::Core {
      * [2] Grassberger, P. and Procaccia, I.: Measuring the strangeness of strange attractors, Physica, D9 (1983) 189^208.
      */
     class DimEstimator {
-        using ScalarType = Scalar<Double>;
+        using ScalarType = float64;
         using DataMatrix = DenseMatrix<ScalarType, MatrixOption::Row | MatrixOption::Vector>;
         Vector<ScalarType> intrinsicDim;
         Vector<ScalarType> correlateDim;
