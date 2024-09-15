@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2022 Weibo He.
+ * Copyright 2020-2024 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -33,9 +33,9 @@ namespace Physica::Core {
         using ScalarType = typename ElementType::ScalarType;
         using VectorType = typename ElementType::VectorType;
     private:
-        Utils::Array<ElementType> elements;
+        Array<ElementType> elements;
         Vector<ScalarType> coeffs;
-        Utils::Array<NodeType> nodeTypes;
+        Array<NodeType> nodeTypes;
     public:
         Mesh(size_t numElement, size_t numNode);
         Mesh(const Mesh&) = default;
@@ -51,12 +51,12 @@ namespace Physica::Core {
         /* Getters */
         [[nodiscard]] size_t getNumElems() const { return elements.getLength(); }
         [[nodiscard]] size_t getNumNodes() const { return coeffs.getLength(); }
-        [[nodiscard]] const Utils::Array<ElementType>& getElements() const { return elements; }
+        [[nodiscard]] const Array<ElementType>& getElements() const { return elements; }
         [[nodiscard]] Vector<ScalarType>& getCoeffs() { return coeffs; }
         [[nodiscard]] const Vector<ScalarType>& getCoeffs() const { return coeffs; }
-        [[nodiscard]] const Utils::Array<NodeType>& getNodeTypes() const { return nodeTypes; }
+        [[nodiscard]] const Array<NodeType>& getNodeTypes() const { return nodeTypes; }
         [[nodiscard]] size_t getNumFreeNodes() const;
-        [[nodiscard]] Utils::Array<VectorType> getNodes() const;
+        [[nodiscard]] Array<VectorType> getNodes() const;
         /* Setters */
         void setElem(ElementType elem, size_t index);
     };

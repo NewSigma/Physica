@@ -18,8 +18,8 @@
  */
 #pragma once
 
-#include <Physica/Utils/CUDA/device_obj.cuh>
-#include <Physica/Utils/CUDA/DeviceProp.cuh>
+#include <Physica/Core/Utils/CUDA/device_obj.cuh>
+#include <Physica/Core/Utils/CUDA/DeviceProp.cuh>
 #include "RValueVector.h"
 
 namespace Physica::Core {
@@ -27,8 +27,8 @@ namespace Physica::Core {
     struct is_vector<device_obj<T>> : public is_vector<T> {};
 
     template<class Derived>
-    class device_obj<RValueVector<Derived>> : public Utils::CRTPBase<device_obj<Derived>> {
-        using Base = Utils::CRTPBase<device_obj<Derived>>;
+    class device_obj<RValueVector<Derived>> : public CRTPBase<device_obj<Derived>> {
+        using Base = CRTPBase<device_obj<Derived>>;
         using TraitsType = Traits<device_obj<Derived>>;
     public:
         using ScalarType = typename TraitsType::ScalarType;
@@ -46,6 +46,11 @@ namespace Physica::Core {
         /* Getters */
         template<Side Owner = GetSide()>
         [[nodiscard]] __device__ ScalarType calc(size_t index) const { return Base::getDerived().template calc<Owner>(index); }
+        template<class AnyPacket, Side Owner = GetSide()>
+        [[nodiscard]] __device__ inline AnyPacket packet(size_t) const { noImpl(); }
+        template<class AnyPacket, Side Owner = GetSide()>
+        [[nodiscard]] __device__ inline AnyPacket packetPartial(size_t, size_t) const { noImpl(); }
+
         [[nodiscard]] __host__ __device__ inline device_obj<TransposeVector<Derived>> transpose() const noexcept;
         template<Side Owner = GetSide()>
         [[nodiscard]] __host__ __device__ size_t getLength() const noexcept { return Base::getDerived().template getLength<Owner>(); }

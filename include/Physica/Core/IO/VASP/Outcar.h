@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Weibo He.
+ * Copyright 2022-2024 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -19,7 +19,7 @@
 #pragma once
 
 #include <fstream>
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/Vector.h"
+#include <Physica/Core/Math/Algebra/LinearAlgebra/Vector/Vector.h>
 
 namespace Physica::Core {
     class PHYSICA_API Outcar {
@@ -41,7 +41,7 @@ namespace Physica::Core {
         [[nodiscard]] const Vector<ScalarType>& getForce() const noexcept { return force; }
         [[nodiscard]] ScalarType getInternalEnergy() const noexcept { return internalEnergy; }
     private:
-        void readForce(std::ifstream& fin, Utils::Array<char>& buffer);
-        void readEnergy(std::ifstream& fin, Utils::Array<char>& buffer);
+        void readForce(std::ifstream& fin, Array<char>& buffer);
+        void readEnergy(std::ifstream& fin, Array<char>& buffer);
     };
 }

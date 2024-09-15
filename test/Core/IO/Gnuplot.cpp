@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Weibo He.
+ * Copyright 2021-2024 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -18,7 +18,7 @@
  */
 #include <fstream>
 #include "Physica/Core/IO/Gnuplot.h"
-#include "Physica/Utils/Unix/TempFile.h"
+#include <Physica/Core/Utils/Unix/TempFile.h>
 
 using namespace Physica::Core;
 
@@ -34,7 +34,7 @@ const static char* data1 = "# Test Gnuplot\n"
                            "0 0\n";
 
 Gnuplot readTest() {
-    auto tmp = Physica::Utils::TempFile("/tmp/tmpXXXXXX");
+    auto tmp = TempFile("/tmp/tmpXXXXXX");
     std::ofstream os(tmp.getName());
     os << data1;
     os.close();

@@ -102,7 +102,7 @@ namespace Physica {
     template<class T, DiffMode M, unsigned int Order_>
     class Traits<Core::device_obj<Differentiable<T, M, Order_>>> {
         static_assert(!T::isDifferentiable, "[Error]: Nested Differentiable<> is not allowed");
-        static_assert(!Utils::is_device_obj<T>::value, "[Error]: Nested device_obj<> is not allowed");
+        static_assert(!is_device_obj<T>::value, "[Error]: Nested device_obj<> is not allowed");
         using RealT = typename T::RealType;
         using ComplexT = typename T::ComplexType;
     public:

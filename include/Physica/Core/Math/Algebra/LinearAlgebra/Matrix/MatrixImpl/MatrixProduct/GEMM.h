@@ -45,7 +45,7 @@ namespace Physica::Core {
                                         Internal::ProductOption<MatrixType1, MatrixType2>::Option,
                                         Base::RowAtCompile,
                                         Base::ColumnAtCompile,
-                                        Utils::HostAllocator<ScalarType>>;
+                                        HostAllocator<ScalarType>>;
     private:
         const MatrixType1& mat1;
         const MatrixType2& mat2;

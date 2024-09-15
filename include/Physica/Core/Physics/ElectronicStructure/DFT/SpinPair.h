@@ -18,7 +18,7 @@
  */
 #pragma once
 
-#include "Physica/Utils/Container/Array/Array.h"
+#include "Physica/Core/Utils/Container/Array.h"
 
 namespace Physica::Core {
     enum class SpinState {
@@ -58,6 +58,6 @@ namespace Physica {
     class Traits<Core::SpinPair<T, IsSpinPolarized>> {
     public:
         constexpr static unsigned char NumSpin = IsSpinPolarized ? 2 : 1;
-        using Base = Utils::Array<T, NumSpin>;
+        using Base = Array<T, NumSpin>;
     };
 }

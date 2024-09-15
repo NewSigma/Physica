@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Weibo He.
+ * Copyright 2023-2024 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -23,10 +23,9 @@
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h"
 #include "Physica/Core/Math/Statistics/ProbabilityDistributionFunction.h"
 #include "Physica/Core/Parallel/Executor/ThreadExecutor.h"
-#include "Physica/Utils/BenchmarkHelper.h"
+#include "Physica/Core/Utils/BenchmarkHelper.h"
 
 using namespace Physica::Core;
-using namespace Physica::Utils;
 using ScalarType = float64;
 using VectorType = Vector<ScalarType>;
 using MatrixType = DenseMatrix<ScalarType>;

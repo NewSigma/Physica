@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Weibo He.
+ * Copyright 2023-2024 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -42,7 +42,7 @@ namespace Physica::Core {
 
     std::istream& operator>>(std::istream& is, PWscfIn& input) {
         assert(is.good());
-        Utils::Array<char> buffer(PWscfIn::BufferSize);
+        Array<char> buffer(PWscfIn::BufferSize);
         do {
             is.getline(buffer.data(), buffer.size());
             const std::string card = buffer.data();
@@ -88,7 +88,7 @@ namespace Physica::Core {
         };
     }
 
-    void PWscfIn::readControl(std::istream& is, Utils::Array<char>& buffer) {
+    void PWscfIn::readControl(std::istream& is, Array<char>& buffer) {
         do {
             is >> std::ws;
             is.getline(buffer.data(), buffer.getLength(), ' ');
@@ -132,13 +132,13 @@ namespace Physica::Core {
             calculation = VC_MD;
     }
 
-    void PWscfIn::readStr(std::istream& is, Utils::Array<char>& buffer, std::string& saveTo) {
+    void PWscfIn::readStr(std::istream& is, Array<char>& buffer, std::string& saveTo) {
         is.ignore(std::numeric_limits<std::streamsize>::max(), '\'');
         is.getline(buffer.data(), buffer.getLength(), '\'');
         saveTo = buffer.data();
     }
 
-    bool PWscfIn::readBool(std::istream& is, Utils::Array<char>& buffer) {
+    bool PWscfIn::readBool(std::istream& is, Array<char>& buffer) {
         is.ignore(std::numeric_limits<std::streamsize>::max(), '.');
         is.getline(buffer.data(), buffer.getLength(), '.');
         return strcmp(buffer.data(), "true") == 0;

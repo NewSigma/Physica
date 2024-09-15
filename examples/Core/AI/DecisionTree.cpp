@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Weibo He.
+ * Copyright 2023-2024 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -21,7 +21,6 @@
 #include "Physica/Core/AI/DecisionTree/DecisionTree.h"
 
 using namespace Physica::Core;
-using namespace Physica::Utils;
 using ScalarType = float64;
 using TreeType = DecisionTree<ScalarType, DecisionTreeType::Classify>;
 /*

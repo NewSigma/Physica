@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2022 Weibo He.
+ * Copyright 2020-2024 Weibo He.
  *
  * This file is part of Physica.
  * 
@@ -127,7 +127,7 @@ namespace Physica::Core {
         template<class Function, class RandomGenerator>
         ScalarType solve(Function func, RandomGenerator& generator) const;
         template<class Function, class RandomGenerator, class Executor>
-        ScalarType parallel_solve(Function func, const Utils::Array<typename RandomGenerator::result_type>& seeds) const;
+        ScalarType parallel_solve(Function func, const Array<typename RandomGenerator::result_type>& seeds) const;
         template<class Function, class RandomGenerator>
         ScalarType solve_e(unsigned int numSequence, Function func, RandomGenerator& generator, ScalarType& deviation) const;
 

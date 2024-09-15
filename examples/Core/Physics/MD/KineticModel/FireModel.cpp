@@ -13,7 +13,6 @@
 #include "Physica/Gui/Plot/Plot.h"
 
 using namespace Physica::Core;
-using namespace Physica::Utils;
 using namespace Physica::Gui;
 using ScalarType = float64;
 using VectorType = Vector<ScalarType>;

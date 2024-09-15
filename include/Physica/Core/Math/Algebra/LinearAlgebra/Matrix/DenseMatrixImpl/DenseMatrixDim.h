@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Weibo He.
+ * Copyright 2022-2024 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -19,7 +19,7 @@
 #pragma once
 
 #include <cassert>
-#include "Physica/Utils/Template/CRTPBase.h"
+#include <Physica/CRTPBase.h>
 
 namespace Physica::Core {
     template<class Derived, size_t Row, size_t Column>
@@ -47,8 +47,8 @@ namespace Physica::Core {
     };
 
     template<class Derived, size_t Column>
-    class DenseMatrixDim<Derived, Dynamic, Column> : public Utils::CRTPBase<Derived, 2> {
-        using Base = Utils::CRTPBase<Derived, 2>;
+    class DenseMatrixDim<Derived, Dynamic, Column> : public CRTPBase<Derived, 2> {
+        using Base = CRTPBase<Derived, 2>;
         using This = DenseMatrixDim<Derived, Dynamic, Column>;
     public:
         DenseMatrixDim() = default;
@@ -76,8 +76,8 @@ namespace Physica::Core {
     };
 
     template<class Derived, size_t Row>
-    class DenseMatrixDim<Derived, Row, Dynamic> : public Utils::CRTPBase<Derived, 2> {
-        using Base = Utils::CRTPBase<Derived, 2>;
+    class DenseMatrixDim<Derived, Row, Dynamic> : public CRTPBase<Derived, 2> {
+        using Base = CRTPBase<Derived, 2>;
         using This = DenseMatrixDim<Derived, Row, Dynamic>;
     public:
         DenseMatrixDim() = default;
@@ -105,8 +105,8 @@ namespace Physica::Core {
     };
 
     template<class Derived>
-    class DenseMatrixDim<Derived, Dynamic, Dynamic> : public Utils::CRTPBase<Derived, 2> {
-        using Base = Utils::CRTPBase<Derived, 2>;
+    class DenseMatrixDim<Derived, Dynamic, Dynamic> : public CRTPBase<Derived, 2> {
+        using Base = CRTPBase<Derived, 2>;
         using This = DenseMatrixDim<Derived, Dynamic, Dynamic>;
     private:
         size_t r;

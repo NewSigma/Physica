@@ -20,14 +20,14 @@
 
 #include "Vector.h"
 #include "VectorImpl/ContinuousVector.cuh"
-#include <Physica/Utils/Container/Array/Array.cuh>
+#include <Physica/Core/Utils/Container/Array.cuh>
 
 namespace Physica::Core {
     template<class T, size_t Length>
     class device_obj<Vector<T, Length>>
             : public device_obj<ContinuousVector<Vector<T, Length>>>
-            , public Utils::device_obj<Utils::Array<T, Length>> {
-        using Storage = Utils::device_obj<Utils::Array<T, Length>>;
+            , public device_obj<Array<T, Length>> {
+        using Storage = device_obj<Array<T, Length>>;
     public:
         using host_obj = Vector<T, Length>;
         using Base = device_obj<ContinuousVector<host_obj>>;

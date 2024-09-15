@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Weibo He.
+ * Copyright 2023-2024 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -19,10 +19,9 @@
 #include <iostream>
 #include <fstream>
 #include "Physica/Core/IO/QE/PWscfIn.h"
-#include "Physica/Utils/Unix/TempFile.h"
+#include <Physica/Core/Utils/Unix/TempFile.h>
 
 using namespace Physica::Core;
-using namespace Physica::Utils;
 const char* data = "&CONTROL\n"
                    "  pseudo_dir = '/home/sigma/Program/pot-QE/pslibrary-master/pbe/PSEUDOPOTENTIALS'\n"
                    "  calculation = 'scf'\n"

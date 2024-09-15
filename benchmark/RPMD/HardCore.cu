@@ -22,10 +22,9 @@
 #include <Physica/Core/Physics/MD/ForceModel/SilveraGoldman.cuh>
 #include <Physica/Core/Parallel/Executor/CUDAExecutor.cuh>
 #include <Physica/Core/Math/Random/RandomPool.h>
-#include <Physica/Utils/BenchmarkHelper.h>
+#include <Physica/Core/Utils/BenchmarkHelper.h>
 
 using namespace Physica::Core;
-using namespace Physica::Utils;
 using Physica::Dynamic;
 using ScalarType = float32;
 using ForceModel = Physica::Core::device_obj<SilveraGoldman<ScalarType, true>>;

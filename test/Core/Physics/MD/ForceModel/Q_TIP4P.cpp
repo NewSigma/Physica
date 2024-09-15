@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Weibo He.
+ * Copyright 2023-2024 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -23,7 +23,6 @@
 
 using namespace Physica;
 using namespace Physica::Core;
-using namespace Physica::Utils;
 
 namespace Physica {
     class Test {

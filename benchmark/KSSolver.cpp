@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2022 Weibo He.
+ * Copyright 2021-2024 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -23,7 +23,7 @@
 #include "Physica/Core/Physics/ElectronicStructure/DFT/KSSolver.h"
 #include "Physica/Core/Physics/ElectronicStructure/DFT/XCProvider/LDA.h"
 #include "Physica/Core/Physics/ElectronicStructure/DFT/BandGrid.h"
-#include "Physica/Utils/Cycler.h"
+#include <Physica/Core/Utils/Cycler.h>
 
 using namespace Physica::Core;
 using ScalarType = float64;
@@ -31,7 +31,6 @@ using ComplexType = ComplexScalar<ScalarType>;
 constexpr bool isSpinPolarized = false;
 
 int main() {
-    using namespace Physica::Utils;
     CrystalCell<ScalarType> Si({{5, 0, 0, 0, 5, 0, 0, 0, 5}, {0.5, 0.5, 0.5}, CrystalCell<ScalarType>::Type::Direct}, {2});
     ScalarType cutEnergy(4.9);
 

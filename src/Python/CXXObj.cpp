@@ -24,8 +24,8 @@
 #include <Physica/Python/PhysicaPython.h>
 #include <Physica/Python/Exception/LLVMException.h>
 #include <Physica/Python/FFI/FuncInfo.h>
-#include <Physica/Utils/Container/Array/Array.h>
-#include <Physica/Utils/Unreachable.h>
+#include <Physica/Core/Utils/Container/Array.h>
+#include <Physica/Core/Utils/Unreachable.h>
 
 namespace Physica::Python {
     CXXObj::CXXObj(CXXPtr p, py::args tparams) : pObj(nullptr) {
@@ -104,8 +104,8 @@ namespace Physica::Python {
         auto pRtn = rtnType.allocate();
 
         const size_t numArgs = args.size();
-        Utils::Array<const ffi_type*> argTypes(numArgs + 1);
-        Utils::Array<Core::PlainPtr> pArgs(numArgs + 1);
+        Core::Array<const ffi_type*> argTypes(numArgs + 1);
+        Core::Array<Core::PlainPtr> pArgs(numArgs + 1);
         argTypes[0] = &ffi_type_pointer;
         pArgs[0] = Core::PlainPtr(&pObj);
         for (size_t i = 1; i <= numArgs; ++i){
@@ -168,7 +168,7 @@ namespace Physica::Python {
             return false;
         default:
             assert(false && "[Error]: Invalid tparam type");
-            Utils::unreachable();
+            Core::unreachable();
         }
     }
 

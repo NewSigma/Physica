@@ -23,7 +23,7 @@
 #include "Physica/Core/Exception/SystemException.h"
 #include "Physica/Core/Parallel/Executor/ProcessExecutor.h"
 #include "Physica/Core/Physics/MD/MDCell.h"
-#include "Physica/Utils/Unix/TempFile.h"
+#include <Physica/Core/Utils/Unix/TempFile.h>
 
 namespace Physica::Core {
     template<class ScalarType>
@@ -32,7 +32,7 @@ namespace Physica::Core {
         using ElementTypeArray = typename Poscar<ScalarType>::ElementTypeArray;
 
         std::string pathToPW;
-        Utils::Array<char> input;
+        Array<char> input;
         ElementTypeArray elementTypes;
         unsigned int numMPIProcess;
     public:
@@ -56,7 +56,7 @@ namespace Physica::Core {
         [[nodiscard]] size_t getNumParticle() const noexcept { return elementTypes.getLength(); }
         [[nodiscard]] unsigned int getNumMPIProcess() const noexcept { return numMPIProcess; }
     private:
-        template<size_t N> ProcessFuture run_qe(Utils::TempFile<N>& __restrict input, Utils::TempFile<N>& __restrict output) const;
+        template<size_t N> ProcessFuture run_qe(TempFile<N>& __restrict input, TempFile<N>& __restrict output) const;
     };
 
     template<class ScalarType>
@@ -88,7 +88,7 @@ namespace Physica::Core {
     void QEModel<ScalarType>::forceAsync(const MDCellType& cell, ContinuousVector<VectorType>& result) const noexcept {
         assert(cell.getNumParticle() == getNumParticle());
         try {
-            auto inputTmp = Utils::TempFile("/tmp/tmpXXXXXX");
+            auto inputTmp = TempFile("/tmp/tmpXXXXXX");
             /* Make input */ {
                 std::ofstream os(inputTmp.getName());
                 os << input.data() << '\n';
@@ -103,7 +103,7 @@ namespace Physica::Core {
                     << row[2] << '\n';
                 }
             }
-            auto outputTmp = Utils::TempFile("/tmp/tmpXXXXXX");
+            auto outputTmp = TempFile("/tmp/tmpXXXXXX");
             const int err = run_qe(inputTmp, outputTmp).wait();
             [[unlikely]] if (err != 0) {
                 inputTmp.release();
@@ -137,7 +137,7 @@ namespace Physica::Core {
     template<class ScalarType>
     template<size_t N>
     ProcessFuture QEModel<ScalarType>::run_qe(
-            Utils::TempFile<N>& __restrict input, Utils::TempFile<N>& __restrict output) const {
+            TempFile<N>& __restrict input, TempFile<N>& __restrict output) const {
         int fd[2];
         if (pipe(fd) == -1)
             throw SystemException();
@@ -172,7 +172,7 @@ namespace Physica::Core {
         fin.seekg(0, std::ios::end);
         const auto size = fin.tellg();
         fin.seekg(0, std::ios::beg);
-        Utils::Array<char> buffer(size);
+        Array<char> buffer(size);
         fin.read(buffer.data(), size);
         if (write(fd[1], buffer.data(), size) == -1)
             throw SystemException();

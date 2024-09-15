@@ -27,14 +27,14 @@ namespace Physica::Core {
     }
 
     template<class Derived>
-    class Element : public Utils::CRTPBase<Derived> {
-        using Base = Utils::CRTPBase<Derived>;
+    class Element : public CRTPBase<Derived> {
+        using Base = CRTPBase<Derived>;
     public:
         using ScalarType = typename Traits<Derived>::ScalarType;
         constexpr static unsigned int Dim = Traits<Derived>::Dim;
         constexpr static unsigned int Order = Traits<Derived>::Order;
         constexpr static unsigned int DegreeOfFreedom = Traits<Derived>::DegreeOfFreedom;
-        using IndexArray = Utils::Array<size_t, DegreeOfFreedom>;
+        using IndexArray = Array<size_t, DegreeOfFreedom>;
         using VectorType = Vector<ScalarType, Dim>;
         using MatrixType = typename Traits<Derived>::MatrixType;
         static_assert(!ScalarType::isComplex, "[Error]: Complex scalar is not allowed");

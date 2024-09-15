@@ -20,7 +20,7 @@
 
 #include <Physica/Core/Physics/SolidState/CrystalCell.h>
 #include <Physica/Core/Physics/MD/MDImpl/CellList.h>
-#include <Physica/Utils/CUDA/PlainStruct.h>
+#include <Physica/PlainStruct.h>
 #include "RSpaceEwald.h"
 
 namespace Physica::Core {
@@ -34,7 +34,7 @@ namespace Physica::Core {
      */
     template<class ScalarType, class REwaldType = RSpaceEwald<ScalarType, false>>
     class Ewald : private REwaldType {
-        constexpr static bool IsDeviceREwald = Utils::is_device_obj<REwaldType>::value;
+        constexpr static bool IsDeviceREwald = is_device_obj<REwaldType>::value;
         using This = Ewald<ScalarType, REwaldType>;
         using Base = REwaldType;
         using Base::Dim;

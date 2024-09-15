@@ -9,7 +9,6 @@ Physica is also an open source platform that maintains scientific code written i
 - [Design philosophy](#philosophy)
 - [Features](#feature)
 - [Usage](#usage)
-- [Source structure](#structure)
 - [Maintainers](#maintainers)
 - [Contributing](#contributing)
 - [License](#license)
@@ -72,14 +71,6 @@ ctest -j<N>
 Do not use Physica if any test were failed.  
 
 To use Physica, examples that under /path/to/install/Physica/examples are ready to use(Note: BUILD_EXAMPLES is OFF by default). Link Physica as a part of your project for production use.
-
-## Source structure <a id="structure"></a>
-
-**Core**: Contains implementation of core functionality for computational physics  
-**Gui**: Provides 2D and 3D plotting using Qt as its background  
-**Logging**: High performance log library based on [NanoLog](https://github.com/PlatformLab/NanoLog)  
-**Utils**: Basic data structures, allocators and misc  
-**Python** Physica python interface  
 
 ## Maintainers
 

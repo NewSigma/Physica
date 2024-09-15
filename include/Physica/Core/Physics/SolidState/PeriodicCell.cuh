@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Weibo He.
+ * Copyright 2023-2024 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -30,7 +30,7 @@ namespace Physica::Core {
         using InvLatticeMatrix = device_obj<typename host_obj::InvLatticeMatrix>;
         using PositionMatrix = device_obj<typename host_obj::PositionMatrix>;
         using MomentumMatrix = PositionMatrix;
-        using SearchRangeType = Utils::Array<ssize_t, Dim>;
+        using SearchRangeType = Array<ssize_t, Dim>;
     protected:
         using VectorType = device_obj<Vector<ScalarType, Dim>>;
 

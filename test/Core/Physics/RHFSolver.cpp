@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2022 Weibo He.
+ * Copyright 2021-2024 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -21,7 +21,6 @@
 
 using namespace Physica::Core;
 using namespace Physica::Core::Physics;
-using namespace Physica::Utils;
 
 using ScalarType = float64;
 

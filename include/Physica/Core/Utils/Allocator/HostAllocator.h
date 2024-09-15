@@ -1,0 +1,166 @@
+/*
+ * Copyright 2021-2024 Weibo He.
+ *
+ * This file is part of Physica.
+ *
+ * Physica is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Physica is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
+ */
+#pragma once
+
+#include <cstdlib>
+#include <new>
+#include <memory>
+#include <limits>
+#include "Allocator.h"
+
+namespace Physica::Core {
+    template<class T> class HostAllocator;
+
+    template<class From, class To>
+    struct ChangeAllocatorValueType<HostAllocator<From>, To> {
+        using Type = HostAllocator<To>;
+    };
+}
+
+namespace Physica::Core {
+    /**
+     * Default allocator for \class Array, which provides custom interface reallocate()
+     * 
+     * Designed to meet C++17 standard(WIP)
+     */
+    template<class T>
+    class HostAllocator {
+    public:
+        using value_type = T;
+        using size_type = std::size_t;
+        using difference_type = std::ptrdiff_t;
+        using propagate_on_container_move_assignment = std::true_type;
+        template<class U>
+        using rebind = HostAllocator<U>;
+    public:
+        HostAllocator() noexcept = default;
+        HostAllocator(const HostAllocator&) noexcept = default;
+        HostAllocator(HostAllocator&&) noexcept = delete;
+        ~HostAllocator() = default;
+        /* Operators */
+        HostAllocator& operator=(const HostAllocator&) noexcept = default;
+        HostAllocator& operator=(HostAllocator&&) noexcept = delete;
+        /* Operations */
+        [[nodiscard]] T* allocate(size_t n);
+        inline void deallocate(T* p, size_t n) noexcept;
+        [[nodiscard]] T* reallocate(T* p, size_t new_size, size_t old_size);
+        template<class... Args>
+        inline void construct(T* p, Args&&... args);
+        inline void destroy(T* p);
+    };
+
+    template<class T>
+    [[nodiscard]] T* HostAllocator<T>::allocate(size_t n) {
+        auto* p = reinterpret_cast<T*>(malloc(n * sizeof(T)));
+        if (!p)
+            throw std::bad_alloc();
+        return p;
+    }
+
+    template<class T>
+    inline void HostAllocator<T>::deallocate(T* p, [[maybe_unused]] size_t n) noexcept {
+        free(p);
+    }
+
+    template<class T>
+    T* HostAllocator<T>::reallocate(T* p, size_t new_size, [[maybe_unused]] size_t old_size) {
+        if constexpr (std::is_trivially_copyable<T>::value)
+            return reinterpret_cast<T*>(realloc(p, new_size * sizeof(T)));
+        else {
+            T* new_p = allocate(new_size);
+            for (size_t i = 0; i < std::min(new_size, old_size); ++i)
+                construct(new_p + i, std::move(p[i]));
+            deallocate(p, old_size);
+            return new_p;
+        }
+    }
+
+    template<class T>
+    template<class... Args>
+    inline void HostAllocator<T>::construct(T* p, Args&&... args) {
+        ::new (static_cast<void*>(p)) T(std::forward<Args>(args)...);
+    }
+
+    template<class T>
+    inline void HostAllocator<T>::destroy(T* p) {
+        p->~T();
+    }
+}
+
+namespace std {
+    template<class T>
+    struct allocator_traits<Physica::Core::HostAllocator<T>> {
+    public:
+        using allocator_type = Physica::Core::HostAllocator<T>;
+        using value_type = T;
+        using pointer = T*;
+        using const_pointer = const T*;
+        using void_pointer = void*;
+        using const_void_pointer = const void*;
+        using lvalue_reference = T&;
+        using const_lvalue_reference = const T&;
+        using rvalue_reference = T&&;
+        using size_type = typename allocator_type::size_type;
+        using difference_type = typename allocator_type::difference_type;
+        using propagate_on_container_copy_assignment = std::false_type;
+        using propagate_on_container_move_assignment = std::false_type;
+        using propagate_on_container_swap = std::false_type;
+        using is_always_equal = typename std::is_empty<allocator_type>::type;
+        template<class U>
+        using rebind_alloc = Physica::Core::HostAllocator<U>;
+        template<class U>
+        using rebind_traits = std::allocator_traits<rebind_alloc<U>>;
+
+        constexpr static bool isPageLocked = false;
+    public:
+        [[nodiscard]] static pointer allocate(allocator_type& a, size_type n) {
+            return a.allocate(n);
+        }
+
+        static void deallocate(allocator_type& a, pointer p, size_type n) {
+            a.deallocate(p, n);
+        }
+
+        [[nodiscard]] static pointer reallocate(allocator_type& a, pointer p, size_type n) {
+            return a.reallocate(p, n);
+        }
+
+        template<class... Args>
+        static void construct(allocator_type& a, T* p, Args&&... args) {
+            a.construct(p, std::forward<Args>(args)...);
+        }
+
+        static void destroy(allocator_type& a, T* p) {
+            a.destroy(p);
+        }
+
+        static constexpr size_type max_size([[maybe_unused]] const allocator_type& a) noexcept {
+            return std::numeric_limits<size_type>::max() / sizeof(value_type);
+        }
+
+        static allocator_type select_on_container_copy_construction(const allocator_type& a) {
+            allocator_type result = a;
+            return result;
+        }
+    };
+}
+
+#ifdef PHYSICA_CUDA    
+    #include "DeviceAllocator.cuh"
+#endif

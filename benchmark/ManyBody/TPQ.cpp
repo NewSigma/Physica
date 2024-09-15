@@ -22,7 +22,7 @@
 #include <Physica/Core/Physics/ManyBody/ExactDiag/Hamilton/HubbardMatrix.h>
 #include <Physica/Core/Physics/ManyBody/ExactDiag/ReprSpace/SpinRepr.h>
 #include <Physica/Core/Physics/ManyBody/ExactDiag/TPQ.h>
-#include <Physica/Utils/BenchmarkHelper.h>
+#include <Physica/Core/Utils/BenchmarkHelper.h>
 
 using namespace Physica::Core;
 using ScalarType = float64;
@@ -36,7 +36,6 @@ constexpr double RepelU = 8;
 constexpr double Beta = 16;
 
 int main() {
-    using namespace Physica::Utils;
     using ReprType = SpinRepr<2, NumSite, true>;
     using Hamilton = HubbardMatrix<ScalarType, ReprType>;
     const LatticeModel<2> lattice({NumSiteX, NumSiteY}, 1);

@@ -38,7 +38,7 @@ namespace Physica::Core {
     protected:
         Index3D superSize;
         size_t numDOF;
-        Utils::Array<VectorType> transBases;
+        Array<VectorType> transBases;
     public:
         FCProjector() = default;
         FCProjector(Index3D superSize_, size_t numDOF_);

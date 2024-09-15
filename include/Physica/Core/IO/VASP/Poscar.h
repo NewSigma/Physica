@@ -40,16 +40,16 @@ namespace Physica::Core {
         using Base = PeriodicCell<ScalarType, 3>;
         using LatticeMatrix = typename Base::LatticeMatrix;
         using Type = typename Base::Type;
-        using ElementTypeArray = Utils::Array<uint8_t>;
+        using ElementTypeArray = Array<uint8_t>;
     private:
         using Base::lattice;
         using Base::pos;
         using Base::type;
         ElementTypeArray elementTypes;
-        Utils::Array<size_t> numOfEachType;
+        Array<size_t> numOfEachType;
     public:
         Poscar();
-        Poscar(Base base, ElementTypeArray elementTypes_, Utils::Array<size_t> numOfEachType_);
+        Poscar(Base base, ElementTypeArray elementTypes_, Array<size_t> numOfEachType_);
         Poscar(CrystalCell<ScalarType> cell);
         /* Operators */
         template<class AnyScalar>
@@ -63,9 +63,9 @@ namespace Physica::Core {
         void toQECell(std::ostream& os) const;
         void swap(Poscar& __restrict poscar) noexcept;
         /* Getters */
-        [[nodiscard]] const Utils::Array<uint8_t> getElementTypes() const noexcept { return elementTypes; }
+        [[nodiscard]] const Array<uint8_t> getElementTypes() const noexcept { return elementTypes; }
         [[nodiscard]] bool isElementTypeInitialized() const noexcept { return !elementTypes.empty(); }
-        [[nodiscard]] const Utils::Array<size_t>& getNumOfEachType() const noexcept { return numOfEachType; }
+        [[nodiscard]] const Array<size_t>& getNumOfEachType() const noexcept { return numOfEachType; }
         [[nodiscard]] CrystalSystem getCrystalSystem(double precision) const noexcept;
     private:
         using Base::toUnitCell;

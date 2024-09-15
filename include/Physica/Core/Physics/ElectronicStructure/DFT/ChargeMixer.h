@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Weibo He.
+ * Copyright 2022-2024 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -35,7 +35,7 @@ namespace Physica::Core {
         constexpr static double pulay_mix = 0.4;
         using LatticeMatrix = typename CrystalCell<ScalarType>::LatticeMatrix;
         using DensityType = DensityGrid<ScalarType, isSpinPolarized>;
-        using DensityArray = Utils::Array<DensityType, DIISBufferSize>;
+        using DensityArray = Array<DensityType, DIISBufferSize>;
         using FFT3D = FFT<ScalarType, 3>;
         using Index3D = typename DensityType::Index3D;
     private:

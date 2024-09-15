@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2023 Weibo He.
+ * Copyright 2022-2024 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -43,10 +43,10 @@ namespace Physica::Core {
         CorrMatrix momentum_corr;
         size_t numSample;
 
-        Utils::Array<DenseHermiteMatrix<ComplexType>> kSpaceForceCorr;
-        Utils::Array<DenseHermiteMatrix<ComplexType>> kSpaceMomentumCorr;
+        Array<DenseHermiteMatrix<ComplexType>> kSpaceForceCorr;
+        Array<DenseHermiteMatrix<ComplexType>> kSpaceMomentumCorr;
 
-        Utils::Array<DenseMatrix<ComplexType>> normalModes;
+        Array<DenseMatrix<ComplexType>> normalModes;
     public:
         PIPhonon(size_t numAtomUnitCell_,
                  size_t superSizeX_,

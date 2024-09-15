@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Weibo He.
+ * Copyright 2021-2024 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -20,10 +20,9 @@
 #include <fstream>
 #include "Physica/Core/IO/VASP/Poscar.h"
 #include "Physica/Core/Physics/SolidState/CrystalCell.h"
-#include "Physica/Utils/Unix/TempFile.h"
+#include <Physica/Core/Utils/Unix/TempFile.h>
 
 using namespace Physica::Core;
-using namespace Physica::Utils;
 
 const static char* data1 = "Structure\n"
                            "1.0\n"

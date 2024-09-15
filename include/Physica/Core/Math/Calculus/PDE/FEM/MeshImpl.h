@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Weibo He.
+ * Copyright 2022-2024 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -96,8 +96,8 @@ namespace Physica::Core {
     }
 
     template<class T>
-    Utils::Array<typename Mesh<T>::VectorType> Mesh<T>::getNodes() const {
-        Utils::Array<typename Mesh<T>::VectorType> result(getNumNodes());
+    Array<typename Mesh<T>::VectorType> Mesh<T>::getNodes() const {
+        Array<typename Mesh<T>::VectorType> result(getNumNodes());
         for (const auto& element : elements) {
             size_t local_index = 0;
             for (size_t node : element.getGlobalNodes()) {

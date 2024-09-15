@@ -36,7 +36,7 @@ namespace Physica::Core {
         using SegmentType = device_obj<typename host_obj::SegmentType>;
     public:
         using ScalarType = typename Base::ScalarType;
-        static_assert(Utils::is_device_obj<ScalarType>::value, "Invalid ScalarType");
+        static_assert(is_device_obj<ScalarType>::value, "Invalid ScalarType");
         using DiffRecord = typename SegmentType::DiffRecord;
         using OperandArray = typename SegmentType::OperandArray;
     private:
@@ -53,6 +53,7 @@ namespace Physica::Core {
         device_obj& operator=(device_obj&&) noexcept = default;
         /* Operations */
         [[nodiscard]] __device__ inline size_t calcOffset(size_t row, size_t col) const;
+        template<Side Owner = GetSide()>
         [[nodiscard]] __device__ inline ScalarType calc(size_t row, size_t col) const;
 
         template<class RandomGenerator> inline void random_uniform(RandomGenerator& gen);
@@ -107,6 +108,7 @@ namespace Physica::Core {
     }
 
     template<class PlainScalar, int Option, unsigned int Order>
+    template<Side Owner>
     __device__ inline typename device_obj<Differentiable<DenseMatrix<PlainScalar, Option>, DiffMode::Reverse, Order>>::ScalarType
     device_obj<Differentiable<DenseMatrix<PlainScalar, Option>, DiffMode::Reverse, Order>>::calc(size_t row, size_t col) const {
         return getTraceSegment()[calcOffset(row, col)];

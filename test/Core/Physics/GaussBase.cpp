@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2022 Weibo He.
+ * Copyright 2021-2024 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -17,7 +17,7 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include "Physica/Core/Physics/ElectronicStructure/HF/GaussBase.h"
-#include "Physica/Utils/Container/Array/Array.h"
+#include "Physica/Core/Utils/Container/Array.h"
 
 using namespace Physica;
 using namespace Physica::Core;

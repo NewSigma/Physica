@@ -26,7 +26,7 @@
 namespace Physica::Core {
     template<class ScalarType, bool WithBias>
     class device_obj<LinearLayer<ScalarType, WithBias>> : public device_obj<LayerBase<LinearLayer<ScalarType, WithBias>>> {
-        static_assert(!Utils::is_device_obj<ScalarType>::value, "[Error]: Nested device_obj<> is not allowed");
+        static_assert(!is_device_obj<ScalarType>::value, "[Error]: Nested device_obj<> is not allowed");
         using host_obj = LinearLayer<ScalarType, WithBias>;
         using This = device_obj<host_obj>;
         using Base = device_obj<LayerBase<host_obj>>;

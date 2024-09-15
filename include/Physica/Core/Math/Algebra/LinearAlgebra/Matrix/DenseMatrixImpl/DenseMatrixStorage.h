@@ -28,17 +28,17 @@ namespace Physica::Core {
              int Option = MatrixOption::Column | MatrixOption::Vector,
              size_t Row = Dynamic,
              size_t Column = Dynamic,
-             class Allocator = Utils::HostAllocator<T>>
+             class Allocator = HostAllocator<T>>
     class DenseMatrixStorage;
 
     template<class T, size_t Row, size_t Column, class Allocator>
     class DenseMatrixStorage<T, MatrixOption::Column | MatrixOption::Element, Row, Column, Allocator>
-            : public Utils::Array<T, Row * Column, Allocator>
+            : public Array<T, Row * Column, Allocator>
             , public DenseMatrixDim<DenseMatrixStorage<T, MatrixOption::Column | MatrixOption::Element, Row, Column, Allocator>, Row, Column> {
         using This = DenseMatrixStorage<T, MatrixOption::Column | MatrixOption::Element, Row, Column, Allocator>;
         using Dim = DenseMatrixDim<This, Row, Column>;
     public:
-        using Base = Utils::Array<T, Row * Column, Allocator>;
+        using Base = Array<T, Row * Column, Allocator>;
         using InitializerType = T;
     public:
         DenseMatrixStorage() = default;
@@ -94,12 +94,12 @@ namespace Physica::Core {
 
     template<class T, size_t Row, size_t Column, class Allocator>
     class DenseMatrixStorage<T, MatrixOption::Row | MatrixOption::Element, Row, Column, Allocator>
-            : public Utils::Array<T, Row * Column, Allocator>
+            : public Array<T, Row * Column, Allocator>
             , public DenseMatrixDim<DenseMatrixStorage<T, MatrixOption::Row | MatrixOption::Element, Row, Column, Allocator>, Row, Column> {
         using This = DenseMatrixStorage<T, MatrixOption::Row | MatrixOption::Element, Row, Column, Allocator>;
         using Dim = DenseMatrixDim<This, Row, Column>;
     public:
-        using Base = Utils::Array<T, Row * Column, Allocator>;
+        using Base = Array<T, Row * Column, Allocator>;
         using InitializerType = T;
     public:
         DenseMatrixStorage() = default;
@@ -157,11 +157,11 @@ namespace Physica::Core {
         using This = DenseMatrixStorage<T, MatrixOption::Column | MatrixOption::Vector, Row, Column, Allocator>;
         using Dim = DenseMatrixDim<This, Row, Column>;
     public:
-        using VectorType = typename std::conditional<is_scalar<T>::value, Vector<T, Row, Allocator>, Utils::Array<T, Row, Allocator>>::type;
+        using VectorType = typename std::conditional<is_scalar<T>::value, Vector<T, Row, Allocator>, Array<T, Row, Allocator>>::type;
         using InitializerType = VectorType;
     private:
-        using AllocatorV = typename Utils::ChangeAllocatorValueType<Allocator, VectorType>::Type;
-        using ArrayType = Utils::Array<VectorType, Column, AllocatorV>;
+        using AllocatorV = typename ChangeAllocatorValueType<Allocator, VectorType>::Type;
+        using ArrayType = Array<VectorType, Column, AllocatorV>;
 
         ArrayType array;
     public:
@@ -219,11 +219,11 @@ namespace Physica::Core {
         using This = DenseMatrixStorage<T, MatrixOption::Row | MatrixOption::Vector, Row, Column, Allocator>;
         using Dim = DenseMatrixDim<This, Row, Column>;
     public:
-        using VectorType = typename std::conditional<is_scalar<T>::value, Vector<T, Column, Allocator>, Utils::Array<T, Column, Allocator>>::type;
+        using VectorType = typename std::conditional<is_scalar<T>::value, Vector<T, Column, Allocator>, Array<T, Column, Allocator>>::type;
         using InitializerType = VectorType;
     private:
-        using AllocatorV = typename Utils::ChangeAllocatorValueType<Allocator, VectorType>::Type;
-        using ArrayType = Utils::Array<VectorType, Row, AllocatorV>;
+        using AllocatorV = typename ChangeAllocatorValueType<Allocator, VectorType>::Type;
+        using ArrayType = Array<VectorType, Row, AllocatorV>;
 
         ArrayType array;
     public:

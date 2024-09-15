@@ -18,15 +18,15 @@
  */
 #pragma once
 
-#include <Physica/Utils/Template/CRTPBase.h>
+#include <Physica/CRTPBase.h>
 #include "GridBase.h"
 
 namespace Physica::Core {
     template<class Derived> class LValueGrid;
 
     template<class Derived>
-    class RValueGrid : public Utils::CRTPBase<Derived>, public GridBase {
-        using Base = Utils::CRTPBase<Derived>;
+    class RValueGrid : public CRTPBase<Derived>, public GridBase {
+        using Base = CRTPBase<Derived>;
     public:
         using ScalarType = typename Traits<Derived>::ScalarType;
         constexpr static bool isComplex = ScalarType::isComplex;

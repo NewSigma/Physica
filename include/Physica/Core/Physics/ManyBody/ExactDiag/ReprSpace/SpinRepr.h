@@ -21,8 +21,8 @@
 #include <unordered_map>
 #include "ReprImpl/ReprSpace.h"
 #include "State/SpinFermion.h"
-#include "Physica/Utils/Container/Array/Array.h"
-#include "Physica/Utils/CUDA/PlainStruct.h"
+#include "Physica/Core/Utils/Container/Array.h"
+#include <Physica/PlainStruct.h>
 
 namespace Physica::Core {
     template<unsigned int Dim, unsigned int NumSite, bool UseInversionSymm>
@@ -33,7 +33,7 @@ namespace Physica::Core {
         using typename Base::StateType;
     private:
         using SpinlessState = SpinlessFermion<Dim, NumSite>;
-        using StateArray = Utils::Array<SpinlessState>;
+        using StateArray = Array<SpinlessState>;
         using DownStateArray = typename std::conditional<UseInversionSymm, PlainStruct<void>, StateArray>::type;
         using StateIndexMap = std::unordered_map<SpinlessState, size_t>;
         using DownStateIndexMap = typename std::conditional<UseInversionSymm, PlainStruct<void>, StateIndexMap>::type;

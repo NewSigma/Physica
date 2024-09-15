@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2023 Weibo He.
+ * Copyright 2020-2024 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -236,7 +236,7 @@ namespace Physica::Core {
             , planFlag(PlanFlag::Measure) {}
 
     template<class ScalarType, size_t Dim>
-    FFT<ScalarType, Dim>::FFT(const Utils::Array<size_t, Dim>& rSpaceSize_)
+    FFT<ScalarType, Dim>::FFT(const Array<size_t, Dim>& rSpaceSize_)
             : forward_plan(nullptr)
             , backward_plan(nullptr)
             , rSpaceSize(rSpaceSize_.getLength())
@@ -250,7 +250,7 @@ namespace Physica::Core {
     }
 
     template<class ScalarType, size_t Dim>
-    FFT<ScalarType, Dim>::FFT(const Utils::Array<size_t, Dim>& rSpaceSize_, PlanFlag planFlag_)
+    FFT<ScalarType, Dim>::FFT(const Array<size_t, Dim>& rSpaceSize_, PlanFlag planFlag_)
             : FFT(rSpaceSize_) {
         planFlag = planFlag_;
         initializePlan();
@@ -341,14 +341,14 @@ namespace Physica::Core {
     }
 
     template<class ScalarType, size_t Dim>
-    inline FFT<ScalarType, Dim> FFT<ScalarType, Dim>::makeEmptyFFT(const Utils::Array<size_t, Dim>& rSpaceSize) {
+    inline FFT<ScalarType, Dim> FFT<ScalarType, Dim>::makeEmptyFFT(const Array<size_t, Dim>& rSpaceSize) {
         return FFT(rSpaceSize);
     }
 
     template<class ScalarType, size_t Dim>
     template<class IndexType>
-    Utils::Array<IndexType, Dim> FFT<ScalarType, Dim>::rSizeToKSize(const Utils::Array<IndexType, Dim>& rSize) {
-        Utils::Array<IndexType, Dim> result(rSize.getLength());
+    Array<IndexType, Dim> FFT<ScalarType, Dim>::rSizeToKSize(const Array<IndexType, Dim>& rSize) {
+        Array<IndexType, Dim> result(rSize.getLength());
         size_t i = 0;
         for (; i < rSize.getLength() - 1; ++i)
             result[i] = rSize[i];
@@ -529,7 +529,7 @@ namespace Physica::Core {
     }
 
     template<class ScalarType, size_t Dim>
-    void FFT<ScalarType, Dim>::normalizeIndexes(Utils::Array<ssize_t, Dim>& indexes) const {
+    void FFT<ScalarType, Dim>::normalizeIndexes(Array<ssize_t, Dim>& indexes) const {
         for (size_t i = 0; i < getDim(); ++i) {
             const int size_i = rSpaceSize[i];
             ssize_t index = indexes[i];
@@ -559,8 +559,8 @@ namespace Physica::Core {
     }
 
     template<class ScalarType, size_t Dim>
-    Utils::Array<ssize_t, Dim> FFT<ScalarType, Dim>::linearIndexToDim(size_t index) const {
-        Utils::Array<ssize_t, Dim> result(getDim());
+    Array<ssize_t, Dim> FFT<ScalarType, Dim>::linearIndexToDim(size_t index) const {
+        Array<ssize_t, Dim> result(getDim());
         for (size_t i = 0; i < getDim(); ++i) {
             const size_t componentsSizeFrom_i = componentsSizeFrom(i + 1);
             ssize_t dim_i = index / componentsSizeFrom_i;
@@ -578,7 +578,7 @@ namespace Physica::Core {
     }
 
     template<class ScalarType, size_t Dim>
-    bool FFT<ScalarType, Dim>::checkSize(const Utils::Array<size_t, Dim>& rSpaceSize) {
+    bool FFT<ScalarType, Dim>::checkSize(const Array<size_t, Dim>& rSpaceSize) {
         for (size_t elem : rSpaceSize)
             if (elem > static_cast<size_t>(std::numeric_limits<int>::max()))
                 return false;

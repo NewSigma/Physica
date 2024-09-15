@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2023 Weibo He.
+ * Copyright 2020-2024 Weibo He.
  *
  * This file is part of Physica.
 
@@ -18,7 +18,7 @@
  */
 #pragma once
 
-#include "Physica/Utils/Container/Array/Array.h"
+#include "Physica/Core/Utils/Container/Array.h"
 #include "Physica/Core/MultiPrecision/Scalar.h"
 
 namespace Physica::Core {
@@ -40,8 +40,8 @@ namespace Physica::Core {
     private:
         AlgorithmConfig config;
         Function func;
-        Utils::Array<VectorType> population;
-        Utils::Array<ScalarType> fitness;
+        Array<VectorType> population;
+        Array<ScalarType> fitness;
         size_t minFitnessIndex;
     public:
         GeneAlgorithm(Function func_, const AlgorithmConfig& config_);

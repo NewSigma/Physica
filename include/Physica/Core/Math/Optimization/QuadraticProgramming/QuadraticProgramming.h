@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2022 Weibo He.
+ * Copyright 2021-2024 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -44,7 +44,7 @@ namespace Physica::Core {
         ConstraintMatrix equalityConstraint;
         ConstraintMatrix inequalityConstraint;
         Vector<ScalarType, Dynamic> x;
-        Utils::Array<bool, Dynamic> activeConstraintFlags;
+        Array<bool, Dynamic> activeConstraintFlags;
     public:
         template<class MatrixType1, class VectorType1, class MatrixType2, class MatrixType3, class VectorType2>
         QuadraticProgramming(const LValueMatrix<MatrixType1>& objectiveMatG_,
@@ -82,7 +82,7 @@ namespace Physica::Core {
             , equalityConstraint(equalityConstraint_)
             , inequalityConstraint(inequalityConstraint_)
             , x(initial)
-            , activeConstraintFlags(Utils::Array<bool, Dynamic>(inequalityConstraint_.getRow(), false)) {
+            , activeConstraintFlags(Array<bool, Dynamic>(inequalityConstraint_.getRow(), false)) {
         assert(objectiveMatG.getRow() == objectiveVecC.getLength());
         assert(equalityConstraint.getColumn() == 0 || equalityConstraint.getColumn() == objectiveVecC.getLength() + 1);
         assert(inequalityConstraint.getColumn() == 0 || inequalityConstraint.getColumn() == objectiveVecC.getLength() + 1);

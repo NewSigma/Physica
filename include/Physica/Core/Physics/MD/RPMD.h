@@ -51,7 +51,7 @@ namespace Physica::Core {
     template<class ScalarType,
              unsigned int Dim = 3,
              size_t NumReplica = Dynamic,
-             class ForceMatrixAllocator = Utils::HostAllocator<ScalarType>>
+             class ForceMatrixAllocator = HostAllocator<ScalarType>>
     class RPMD final : public RPMDBase<ScalarType> {
         using This = RPMD<ScalarType, Dim, NumReplica, ForceMatrixAllocator>;
         using Base = RPMDBase<ScalarType>;

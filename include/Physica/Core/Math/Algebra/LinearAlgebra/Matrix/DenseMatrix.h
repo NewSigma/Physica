@@ -35,7 +35,7 @@ namespace Physica::Core {
              int Option = MatrixOption::Column | MatrixOption::Vector,
              size_t Row = Dynamic,
              size_t Column = Dynamic,
-             class Allocator = Utils::HostAllocator<T>>
+             class Allocator = HostAllocator<T>>
     class DenseMatrix : public ContinuousMatrix<DenseMatrix<T, Option, Row, Column, Allocator>>
                       , public DenseMatrixStorage<T, Option, Row, Column, Allocator> {
         using This = DenseMatrix<T, Option, Row, Column, Allocator>;

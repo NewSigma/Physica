@@ -42,9 +42,9 @@ namespace Physica::Core::Physics {
         constexpr static size_t DIISBufferSize = 3; //Refer DIIS from [2]
         constexpr static size_t MatrixBufferSize = std::max(EDIISBufferSize, DIISBufferSize);
         static_assert(DIISBufferSize >= 3, "DIISBufferSize less than three makes no sence");
-        using EDIISBuffer = Utils::Array<MatrixType, EDIISBufferSize>;
-        using DIISBuffer = Utils::Array<MatrixType, DIISBufferSize - 1>;
-        using MatrixBuffer = Utils::Array<MatrixType, MatrixBufferSize>;
+        using EDIISBuffer = Array<MatrixType, EDIISBufferSize>;
+        using DIISBuffer = Array<MatrixType, DIISBufferSize - 1>;
+        using MatrixBuffer = Array<MatrixType, MatrixBufferSize>;
         using DIISMatrix = DenseMatrix<ScalarType, MatrixOption::Column | MatrixOption::Element, DIISBufferSize, DIISBufferSize>;
     public:
         using WaveType = MatrixType;
@@ -54,7 +54,7 @@ namespace Physica::Core::Physics {
         size_t numOccupiedOrbit;
         DenseSymmMatrix<ScalarType, Dynamic> singleHamilton;
         MatrixType overlap;
-        Utils::Array<BaseSetType> baseSet;
+        Array<BaseSetType> baseSet;
         ScalarType selfConsistentEnergy;
         MatrixType wave;
         EigenSolver<ScalarType> eigenSolver;
@@ -70,8 +70,8 @@ namespace Physica::Core::Physics {
         /* Operations */
         bool compute(const ScalarType& criteria, size_t maxIte);
         /* Getters */
-        [[nodiscard]] Utils::Array<BaseSetType>& getBaseSet() noexcept { return baseSet; }
-        [[nodiscard]] const Utils::Array<BaseSetType>& getBaseSet() const noexcept { return baseSet; }
+        [[nodiscard]] Array<BaseSetType>& getBaseSet() noexcept { return baseSet; }
+        [[nodiscard]] const Array<BaseSetType>& getBaseSet() const noexcept { return baseSet; }
         [[nodiscard]] size_t getBaseSetSize() const noexcept { return baseSet.getLength(); }
         [[nodiscard]] ScalarType getSelfConsistentEnergy() const noexcept { return selfConsistentEnergy; }
         [[nodiscard]] ScalarType getTotalEnergy() const noexcept { return selfConsistentEnergy + molecular.getNuclearRepulsionEnergy(); }

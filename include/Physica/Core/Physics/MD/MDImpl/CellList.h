@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2023 Weibo He.
+ * Copyright 2022-2024 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -40,10 +40,10 @@ namespace Physica::Core {
         PositionMatrix directPos;
         PlainScalar cutoff;
         Index3D cellGridDim;
-        Utils::Array<size_t> cellAtomMap;
-        Utils::Array<size_t> cellStartOffset;
-        Utils::Array<Index3D> atomCellMap;
-        Utils::Array<Vector3D> neighShifts;
+        Array<size_t> cellAtomMap;
+        Array<size_t> cellStartOffset;
+        Array<Index3D> atomCellMap;
+        Array<Vector3D> neighShifts;
     public:
         CellList(LatticeMatrix lattice_, PositionMatrix cartesianPos, PlainScalar cutoff_);
         CellList(const MDCellType& mdCell, PlainScalar cutoff_);
@@ -73,15 +73,15 @@ namespace Physica::Core {
         [[nodiscard]] size_t getCellGridDimX() const noexcept { return cellGridDim[0]; }
         [[nodiscard]] size_t getCellGridDimY() const noexcept { return cellGridDim[1]; }
         [[nodiscard]] size_t getCellGridDimZ() const noexcept { return cellGridDim[2]; }
-        [[nodiscard]] const Utils::Array<size_t>& getCellAtomMap() const noexcept { return cellAtomMap; }
-        [[nodiscard]] const Utils::Array<size_t>& getCellStartOffset() const noexcept { return cellStartOffset; }
+        [[nodiscard]] const Array<size_t>& getCellAtomMap() const noexcept { return cellAtomMap; }
+        [[nodiscard]] const Array<size_t>& getCellStartOffset() const noexcept { return cellStartOffset; }
         [[nodiscard]] inline size_t getNumAtomInCell(size_t cell) const;
         [[nodiscard]] size_t getNumCell() const noexcept { return cellStartOffset.getLength() - 1; }
-        [[nodiscard]] const Utils::Array<Index3D>& getAtomCellMap() const noexcept { return atomCellMap; }
+        [[nodiscard]] const Array<Index3D>& getAtomCellMap() const noexcept { return atomCellMap; }
     private:
         Index3D posToIndex(size_t atomId) const;
         /* Static members */
-        [[nodiscard]] static Utils::Array<Vector3D> makeNeighShifts(const LatticeMatrix& lattice);
+        [[nodiscard]] static Array<Vector3D> makeNeighShifts(const LatticeMatrix& lattice);
         template<size_t DimID>
         [[nodiscard]] __host__ __device__ inline static int findNeighbor(
                 const Index3D& cellGridDim, size_t centerIndex, int deltaIndex, Index3D& neighborIndex);
@@ -277,9 +277,9 @@ namespace Physica::Core {
     }
 
     template<class ScalarType>
-    Utils::Array<typename CellList<ScalarType>::Vector3D>
+    Array<typename CellList<ScalarType>::Vector3D>
     CellList<ScalarType>::makeNeighShifts(const LatticeMatrix& lattice) {
-        Utils::Array<Vector3D> neighShifts(3 * 3 * 3);
+        Array<Vector3D> neighShifts(3 * 3 * 3);
         for (int x = 0; x < 3; ++x) {
             ScalarType deltaX(x - 1);
             for (int y = 0; y < 3; ++y) {

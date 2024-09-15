@@ -40,8 +40,8 @@ namespace Physica::Core {
         using Base::superSize;
         using Base::numDOF;
         using Base::transBases;
-        Utils::Array<VectorType> rotBases;
-        Utils::Array<VectorType> huangBases;
+        Array<VectorType> rotBases;
+        Array<VectorType> huangBases;
     public:
         BHProjector(Index3D superSize_, size_t numDOF_, const MDCellType& unitCell);
         BHProjector(const BHProjector&) = default;

@@ -14,11 +14,10 @@
 #include "Physica/Core/Physics/MD/KineticModel/FreeModel.h"
 #include "Physica/Core/Physics/MD/KineticModel/FireModel.h"
 #include "Physica/Core/Parallel/Executor/ThreadExecutor.h"
-#include "Physica/Utils/Unix/UnixHelper.h"
+#include "Physica/Core/Utils/Unix/UnixHelper.h"
 #include "Physica/Gui/Plot/Plot.h"
 
 using namespace Physica::Core;
-using namespace Physica::Utils;
 using namespace Physica::Gui;
 using ScalarType = float64;
 using VectorType = Vector<ScalarType>;

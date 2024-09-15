@@ -28,7 +28,7 @@ namespace Physica::Core {
     template<class ScalarType>
     class SGD {
         static_assert(ScalarType::isDifferentiable, "[Error]: ScalarType must be differentiable");
-        static_assert(!Utils::is_device_obj<ScalarType>::value, "[Error]: Include corresponding *.cuh file to enable CUDA support");
+        static_assert(!is_device_obj<ScalarType>::value, "[Error]: Include corresponding *.cuh file to enable CUDA support");
     public:
         using PlainScalar = typename ScalarType::PlainScalar;
     private:

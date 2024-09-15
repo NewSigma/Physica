@@ -19,6 +19,7 @@
 #pragma once
 
 #include <cuda_fp16.h>
+#include <iomanip>
 
 namespace Physica {
     template<>

@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Weibo He.
+ * Copyright 2021-2024 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -19,7 +19,6 @@
 #include <Physica/Core/Math/Algebra/LinearAlgebra/LinearEquations/LinearEquations.h>
 #include <Physica/Core/Math/Algebra/LinearAlgebra/LinearEquations/IterateSolver.h>
 
-using namespace Physica::Utils;
 using namespace Physica::Core;
 
 int main() {

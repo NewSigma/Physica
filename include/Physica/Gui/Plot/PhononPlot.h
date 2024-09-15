@@ -36,7 +36,7 @@ namespace Physica::Gui {
         using KSpaceFCGrid = typename PhononType::KSpaceFCGrid;
         using EigenSolverType = typename PhononType::EigenSolverType;
         using Index3D = typename Core::GridBase::Index3D;
-        using ColorArray = Utils::Array<QColor>;
+        using ColorArray = Core::Array<QColor>;
 
         enum BandConnectMethod {
             Direct,

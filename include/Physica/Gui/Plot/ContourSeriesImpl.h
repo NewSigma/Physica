@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Weibo He.
+ * Copyright 2021-2024 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -243,7 +243,7 @@ namespace Physica::Gui {
     ContourSeries<MatrixType>::ContourSeries(const Core::LValueMatrix<MatrixType>& x,
                                              const Core::LValueMatrix<MatrixType>& y,
                                              const Core::LValueMatrix<MatrixType>& z,
-                                             Utils::Array<double> levels,
+                                             Core::Array<double> levels,
                                              QObject* parent) : QObject(parent) {
         for (double level : levels) {
             Grid grid = Grid(x, y, z);

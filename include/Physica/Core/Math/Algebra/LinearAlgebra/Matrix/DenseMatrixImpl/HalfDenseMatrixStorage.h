@@ -145,6 +145,6 @@ namespace Physica {
         constexpr static bool IsScalar = is_scalar<T>::value;
         constexpr static size_t Size = Order * (Order + 1) / 2;
     public:
-        using ArrayType = typename std::conditional<IsScalar, Vector<T, Size>, Utils::Array<T, Size>>::type;
+        using ArrayType = typename std::conditional<IsScalar, Vector<T, Size>, Array<T, Size>>::type;
     };
 }

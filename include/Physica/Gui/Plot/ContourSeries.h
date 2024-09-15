@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2023 Weibo He.
+ * Copyright 2021-2024 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -25,7 +25,7 @@ namespace Physica::Gui {
     template<class MatrixType>
     class ContourSeries : public QObject {
         using ScalarType = typename MatrixType::ScalarType;
-        using ContourLine = std::pair<Utils::Array<double>, Utils::Array<double>>;
+        using ContourLine = std::pair<Core::Array<double>, Core::Array<double>>;
 
         struct Quad {
             using Vertex = std::pair<size_t, size_t>;
@@ -69,7 +69,7 @@ namespace Physica::Gui {
         };
 
         class Grid {
-            using FlagMatrix = Utils::Array<Utils::Array<bool>>;
+            using FlagMatrix = Core::Array<Core::Array<bool>>;
 
             const Core::LValueMatrix<MatrixType>& x;
             const Core::LValueMatrix<MatrixType>& y;
@@ -98,13 +98,13 @@ namespace Physica::Gui {
             void interpolateEdge(Edge edge, double level, ContourLine& line) const;
         };
         
-        Utils::Array<ContourLine> contourLines;
-        Utils::Array<QLineSeries*> splines;
+        Core::Array<ContourLine> contourLines;
+        Core::Array<QLineSeries*> splines;
     public:
         ContourSeries(const Core::LValueMatrix<MatrixType>& x,
                       const Core::LValueMatrix<MatrixType>& y,
                       const Core::LValueMatrix<MatrixType>& z,
-                      Utils::Array<double> level,
+                      Core::Array<double> level,
                       QObject* parent = nullptr);
         ContourSeries(const ContourSeries&) = delete;
         ContourSeries(ContourSeries&&) noexcept = delete;

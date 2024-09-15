@@ -20,9 +20,9 @@
 #include <iostream>
 #include <cassert>
 #include <ctime>
-#include "Physica/Logger/LogBuffer.h"
-#include "Physica/Logger/LoggerRuntime.h"
-#include "Physica/Utils/Cycler.h"
+#include <Physica/Core/Utils/Cycler.h>
+#include <Physica/Logger/LogBuffer.h>
+#include <Physica/Logger/LoggerRuntime.h>
 
 namespace Physica::Logger {
     std::string LogBuffer::makeMsgString() {

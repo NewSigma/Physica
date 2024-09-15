@@ -18,7 +18,7 @@
  */
 #pragma once
 
-#include "Physica/Utils/Container/Array/Array.h"
+#include "Physica/Core/Utils/Container/Array.h"
 
 namespace Physica::Core {
     template<class SampleType, class LabelType>
@@ -27,8 +27,8 @@ namespace Physica::Core {
         using SplitResultType = std::pair<This, This>;
     public:
         using device_obj_type = device_obj<This>;
-        using SampleArray = Utils::Array<SampleType>;
-        using LabelArray = Utils::Array<LabelType>;
+        using SampleArray = Array<SampleType>;
+        using LabelArray = Array<LabelType>;
         using DataType = std::pair<SampleType, LabelType>;
     private:
         SampleArray samples;
@@ -110,7 +110,7 @@ namespace Physica::Core {
         large.reserve(largeSize);
         small.reserve(smallSize);
 
-        Utils::Array<size_t> permutation(getSize());
+        Array<size_t> permutation(getSize());
         for (size_t i = 0; i < getSize(); ++i)
             permutation[i] = i;
 

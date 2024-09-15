@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2023 Weibo He.
+ * Copyright 2022-2024 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -29,17 +29,17 @@ namespace Physica::Core {
     class RDF {
         constexpr static unsigned int Dim = 3;
     private:
-        Utils::Array<bool> isFromParticle;
-        Utils::Array<bool> isToParticle;
-        Utils::Array<uint64_t> particleBucket;
+        Array<bool> isFromParticle;
+        Array<bool> isToParticle;
+        Array<uint64_t> particleBucket;
         ScalarType cellVolume;
         ScalarType stepSize;
         unsigned int numStep;
         unsigned int numSample;
     public:
         RDF() = default;
-        RDF(Utils::Array<bool> isFromParticle_,
-            Utils::Array<bool> isToParticle_,
+        RDF(Array<bool> isFromParticle_,
+            Array<bool> isToParticle_,
             ScalarType cellVolume_,
             ScalarType stepSize_,
             unsigned int numStep_);
@@ -67,8 +67,8 @@ namespace Physica::Core {
     };
 
     template<class ScalarType>
-    RDF<ScalarType>::RDF(Utils::Array<bool> isFromParticle_,
-                         Utils::Array<bool> isToParticle_,
+    RDF<ScalarType>::RDF(Array<bool> isFromParticle_,
+                         Array<bool> isToParticle_,
                          ScalarType cellVolume_,
                          ScalarType stepSize_,
                          unsigned int numStep_)

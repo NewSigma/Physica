@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Weibo He.
+ * Copyright 2023-2024 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -29,7 +29,7 @@ namespace Physica::Core {
         readFile(path);
     }
 
-    CsvFile::CsvFile(DataTypeArray datatypes_, Utils::Array<std::optional<DefaultValue>> defaultValues_, const char* path)
+    CsvFile::CsvFile(DataTypeArray datatypes_, Array<std::optional<DefaultValue>> defaultValues_, const char* path)
             : datatypes(std::move(datatypes_))
             , defaultValues(std::move(defaultValues_)) {
         assert(defaultValues.getLength() == getColumn() && "[Error]: Not enough values");
@@ -39,7 +39,6 @@ namespace Physica::Core {
 
     CsvFile::~CsvFile() {
         for (size_t i = 0; i < getColumn(); ++i) {
-            using Physica::Utils::Array;
             void* p_array = data[i];
             switch (datatypes[i]) {
             case CHAR:
@@ -223,7 +222,6 @@ namespace Physica::Core {
         defaultValues.resize(getColumn());
         data.resize(getColumn());
         for (size_t i = 0; i < getColumn(); ++i) {
-            using Physica::Utils::Array;
             void* p_array;
             switch (datatypes[i]) {
             case CHAR:
@@ -292,7 +290,6 @@ namespace Physica::Core {
             }
 
             for (size_t column = 0; column < getColumn(); ++column) {
-                using Physica::Utils::Array;
                 const bool isLast = column == getColumn() - 1;
                 void* const p_array = data[column];
                 const auto& defaultValue = defaultValues[column];

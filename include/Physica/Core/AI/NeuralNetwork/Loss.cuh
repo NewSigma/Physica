@@ -23,7 +23,7 @@
 namespace Physica::Core {
     template<class ScalarType>
     class device_obj<Loss<ScalarType>> {
-        static_assert(!Utils::is_device_obj<ScalarType>::value, "[Error]: Nested device_obj<> is not allowed");
+        static_assert(!is_device_obj<ScalarType>::value, "[Error]: Nested device_obj<> is not allowed");
         using host_obj = Loss<ScalarType>;
     public:
         constexpr static bool IsTrainMode = ScalarType::isDifferentiable;

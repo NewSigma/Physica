@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2023 Weibo He.
+ * Copyright 2021-2024 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -30,7 +30,7 @@ namespace Physica::Core {
         constexpr static unsigned int Dim = 3;
         using Base = PeriodicCell<ScalarType, Dim>;
         using ComplexType = ComplexScalar<ScalarType>;
-        using AtomicArray = Utils::Array<uint16_t>;
+        using AtomicArray = Array<uint16_t>;
         using typename Base::Type;
     private:
         AtomicArray atomicNumbers;

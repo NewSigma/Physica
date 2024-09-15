@@ -1,5 +1,5 @@
 /*
- * Copyright 2022-2023 Weibo He.
+ * Copyright 2022-2024 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -51,7 +51,7 @@ namespace Physica::Core {
         using InvLatticeMatrix = DenseMatrix<ScalarType, MatrixOption::Column | MatrixOption::Element, Dim, Dim>;
         using PositionMatrix = DenseMatrix<ScalarType, MatrixOption::Row | MatrixOption::Element, Dynamic, Dim>;
         using MomentumMatrix = PositionMatrix;
-        using SearchRangeType = Utils::Array<ssize_t, Dim>;
+        using SearchRangeType = Array<ssize_t, Dim>;
     protected:
         using VectorType = Vector<ScalarType, Dim>;
 

@@ -18,7 +18,7 @@
  */
 #pragma once
 
-#include <Physica/Utils/CUDA/PlainStruct.h>
+#include <Physica/PlainStruct.h>
 #include <Physica/Core/Parallel/CUDAContext.cuh>
 
 namespace Physica::Core {
@@ -159,7 +159,7 @@ namespace Physica::Core {
         else {
             using OtherScalar = typename OtherDerived::ScalarType;
             for (size_t i = 0; i < getLength(); ++i)
-                target[i] = ScalarType(calc(i));
+                target[i] = OtherScalar(calc(i));
         }
     }
 }

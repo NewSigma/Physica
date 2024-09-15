@@ -31,8 +31,8 @@ namespace Physica::Core {
      * [1] Jos Thijssen. Computational Physics[M].London: Cambridge university press, 2013:205
      */
     template<class Derived>
-    class PairModel : public Utils::CRTPBase<Derived> {
-        using Base = Utils::CRTPBase<Derived>;
+    class PairModel : public CRTPBase<Derived> {
+        using Base = CRTPBase<Derived>;
         using TraitType = Traits<Derived>;
 
         constexpr static bool IsPotDependOnAtomIndex = TraitType::IsPotDependOnAtomIndex;
@@ -319,7 +319,7 @@ namespace Physica::Core {
         }
         else {
             const CellListType cellList(lattice, pos, cutoff);
-            Utils::Array<size_t> arr1{};
+            Array<size_t> arr1{};
             cellList.forCellInList([this, pos, &arr1, &func, &cellList](Index3D center) {
                 cellList.forAtomInCell(center, [&arr1](size_t atom) {
                     arr1.append(atom);
@@ -341,7 +341,7 @@ namespace Physica::Core {
                         }
                     }
                 }
-                Utils::Array<size_t> arr2{};
+                Array<size_t> arr2{};
                 cellList.forReducedNeighInRange(center, [this, pos, &arr1, &arr2, &func, &cellList](Vector3D translate, Index3D neigh) {
                     cellList.forAtomInCell(neigh, [&arr2](size_t atom) {
                         arr2.append(atom);

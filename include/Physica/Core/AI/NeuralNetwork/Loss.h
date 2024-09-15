@@ -23,7 +23,7 @@
 namespace Physica::Core {
     template<class ScalarType>
     class Loss {
-        static_assert(!Utils::is_device_obj<ScalarType>::value, "[Error]: Include corresponding *.cuh file to enable CUDA support");
+        static_assert(!is_device_obj<ScalarType>::value, "[Error]: Include corresponding *.cuh file to enable CUDA support");
     public:
         constexpr static bool IsTrainMode = ScalarType::isDifferentiable;
         using PlainScalar = typename ScalarType::PlainScalar;

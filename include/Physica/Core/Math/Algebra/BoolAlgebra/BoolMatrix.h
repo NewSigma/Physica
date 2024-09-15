@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2021 Weibo He.
+ * Copyright 2020-2024 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -16,14 +16,12 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef PHYSICA_BOOLMATRIX_H
-#define PHYSICA_BOOLMATRIX_H
+#pragma once
 
-#include "Physica/Utils/BitArray.h"
-#include "Physica/Utils/Container/Array/Array.h"
+#include <Physica/Core/Utils/Container/BitArray.h>
+#include <Physica/Core/Utils/Container/Array.h>
 
 namespace Physica::Core {
-    using namespace Utils;
     /*!
      * Optimize:
      * 1. Fixed size matrix
@@ -64,5 +62,3 @@ namespace Physica::Core {
         return getRow() == m.getRow() && getColumn() == m.getColumn();
     }
 }
-
-#endif

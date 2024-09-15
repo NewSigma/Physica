@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2021 Weibo He.
+ * Copyright 2020-2024 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -23,13 +23,13 @@
 namespace Physica::Logger {
     LoggerTimer::LoggerTimer() {
         gettimeofday(&startTime, nullptr);
-        startCycle = Utils::Cycler::now();
+        startCycle = Core::Cycler::now();
     }
 
     timeval LoggerTimer::toTime(uint64_t cycle) const {
         assert(cycle > startCycle);
         const uint64_t delta = cycle - startCycle;
-        const uint64_t us = Utils::Cycler::toMicroseconds(delta) + startTime.tv_usec;
+        const uint64_t us = Core::Cycler::toMicroseconds(delta) + startTime.tv_usec;
         const uint64_t s = us / 1000000;
         timeval result = startTime;
         result.tv_sec += s;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Weibo He.
+ * Copyright 2022-2024 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -19,7 +19,7 @@
 #pragma once
 
 #include "Physica/Macro.h"
-#include "Physica/Utils/Container/Array/Array.h"
+#include "Physica/Core/Utils/Container/Array.h"
 
 namespace Physica::Core {
     /**
@@ -29,7 +29,7 @@ namespace Physica::Core {
         constexpr static size_t hostLength = 64; //64 is enough to hold ipv6
 
         unsigned int jobCore;
-        Utils::Array<std::string> hostList;
+        Array<std::string> hostList;
     public:
         PBSWarpper(const PBSWarpper&) = delete;
         PBSWarpper(PBSWarpper&&) noexcept = delete;
@@ -39,7 +39,7 @@ namespace Physica::Core {
         PBSWarpper& operator=(PBSWarpper&&) noexcept = delete;
         /* Getters */
         [[nodiscard]] unsigned int getJobCore() const noexcept { return jobCore; }
-        [[nodiscard]] const Utils::Array<std::string>& getHostList() const noexcept { return hostList; }
+        [[nodiscard]] const Array<std::string>& getHostList() const noexcept { return hostList; }
         /* Static members */
         static const PBSWarpper& getInstance(); // No [[nodiscard]] for initialization in multi-thread mode
     private:

@@ -232,7 +232,7 @@ namespace Physica {
     public:
         constexpr static bool IsSpinPolarized = polarized;
         constexpr static size_t NumSpin = IsSpinPolarized ? 2 : 1;
-        using DensityType = Utils::Array<GridType, NumSpin>;
-        using PotType = Utils::Array<GridType, NumSpin>;
+        using DensityType = Array<GridType, NumSpin>;
+        using PotType = Array<GridType, NumSpin>;
     };
 }

@@ -36,8 +36,8 @@ namespace Physica::Core {
     public:
         using DiffScalar = device_obj<HostDiffScalar>;
         using DiffRecord = typename host_obj::DiffRecord;
-        using RecordArray = Utils::device_obj<Utils::Array<DiffRecord>>;
-        using OperandArray = Utils::device_obj<Utils::Array<HostDiffScalar>>;
+        using RecordArray = device_obj<Array<DiffRecord>>;
+        using OperandArray = device_obj<Array<HostDiffScalar>>;
         using ValueVector = device_obj<HostValueVector>;
         using GradVector = device_obj<HostGradVector>;
         constexpr static size_t DefaultSize = host_obj::DefaultSize;

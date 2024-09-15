@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2022 Weibo He.
+ * Copyright 2020-2024 Weibo He.
  *
  * This file is part of Physica.
  * 
@@ -145,9 +145,9 @@ namespace Physica::Core {
     template<class Function, class RandomGenerator, class Executor>
     ScalarType Integrate<MonteCarlo, ScalarType, dim>::parallel_solve(
             Function func,
-            const Utils::Array<typename RandomGenerator::result_type>& seeds) const {
+            const Array<typename RandomGenerator::result_type>& seeds) const {
         const size_t numGen = seeds.getLength();
-        Utils::Array<RandomGenerator> gens(numGen);
+        Array<RandomGenerator> gens(numGen);
         for (size_t i = 0; i < numGen; ++i)
             gens[i] = RandomGenerator(seeds[i]);
 

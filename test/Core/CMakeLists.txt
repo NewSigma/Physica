@@ -11,9 +11,7 @@ physica_add_test(Integer MultiPrecision/IntegerTest.cpp)
 physica_add_test(Scalar MultiPrecision/ScalarTest.cpp)
 ## Parallel
 physica_add_test(ThreadPool Parallel/ThreadPool.cpp)
+## Utils
+physica_add_test(DirStack Utils/DirStackTest.cpp)
 
 add_subdirectory(Physics)
-
-if(NOT ${CMAKE_BUILD_TYPE} MATCHES "Debug")
-    include(SlowTests.cmake)
-endif()

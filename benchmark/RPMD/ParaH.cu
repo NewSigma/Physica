@@ -23,14 +23,14 @@
 #include <Physica/Core/Physics/MD/ForceModel/SilveraGoldman.cuh>
 #include <Physica/Core/Parallel/Executor/CUDAExecutor.cuh>
 #include <Physica/Core/Math/Random/RandomPool.h>
-#include <Physica/Utils/BenchmarkHelper.h>
+#include <Physica/Core/Utils/BenchmarkHelper.h>
 
 using namespace Physica::Core;
 using Physica::Dynamic;
 using ScalarType = float32;
 using KineticModel = FreeModel<ScalarType, 3, Dynamic, RPMDIntegrator::Exact>;
 using RandomPoolType = RandomPool<std::mt19937, 10000>;
-using MDType = RPMD<ScalarType, 3, Physica::Dynamic, Physica::Utils::PageLockedAllocator<ScalarType>>;
+using MDType = RPMD<ScalarType, 3, Physica::Dynamic, PageLockedAllocator<ScalarType>>;
 constexpr size_t numReplica = 24;
 constexpr double temperatureT = PhyConst<AU>::kToTemperature(25);
 constexpr double timeStep = PhyConst<AU>::secondToTime(1E-15) * 0.5;
@@ -67,7 +67,7 @@ int main() {
         MDType rpmd = makeSystem(numMolecular, gen);
         rpmd.initMomentum<KineticModel, decltype(gen)>(gen);
         ForceModel forceModel(numMolecular, pair_cutoff);
-        auto timeuse = Physica::Utils::Benchmark::run([&]() {
+        auto timeuse = Benchmark::run([&]() {
             rpmd.nve_step_for<KineticModel, ForceModel, CUDAExecutor>(PhyConst<AU>::secondToTime(2 * 1E-13), kineticModel, forceModel);
         }, 16, 20);
         std::cout << "108 atom time use: " << timeuse.first << '(' << timeuse.second << ")\n";
@@ -78,7 +78,7 @@ int main() {
         MDType rpmd = makeSystem(numMolecular, gen);
         rpmd.initMomentum<KineticModel, decltype(gen)>(gen);
         ForceModel forceModel(numMolecular, pair_cutoff);
-        auto timeuse = Physica::Utils::Benchmark::run([&]() {
+        auto timeuse = Benchmark::run([&]() {
             rpmd.nve_step_for<KineticModel, ForceModel, CUDAExecutor>(PhyConst<AU>::secondToTime(2 * 1E-13), kineticModel, forceModel);
         }, 16, 20);
         std::cout << "256 atom time use: " << timeuse.first << '(' << timeuse.second << ")\n";
@@ -89,7 +89,7 @@ int main() {
         MDType rpmd = makeSystem(numMolecular, gen);
         rpmd.initMomentum<KineticModel, decltype(gen)>(gen);
         ForceModel forceModel(numMolecular, pair_cutoff);
-        auto timeuse = Physica::Utils::Benchmark::run([&]() {
+        auto timeuse = Benchmark::run([&]() {
             rpmd.nve_step_for<KineticModel, ForceModel, CUDAExecutor>(PhyConst<AU>::secondToTime(1 * 1E-13), kineticModel, forceModel);
         }, 16, 20);
         std::cout << "500 atom time use: " << timeuse.first << '(' << timeuse.second << ")\n";
@@ -100,7 +100,7 @@ int main() {
         MDType rpmd = makeSystem(numMolecular, gen);
         rpmd.initMomentum<KineticModel, decltype(gen)>(gen);
         ForceModel forceModel(numMolecular, pair_cutoff);
-        auto timeuse = Physica::Utils::Benchmark::run([&]() {
+        auto timeuse = Benchmark::run([&]() {
             rpmd.nve_step_for<KineticModel, ForceModel, CUDAExecutor>(PhyConst<AU>::secondToTime(5 * 1E-14), kineticModel, forceModel);
         }, 16, 20);
         std::cout << "864 atom time use: " << timeuse.first << '(' << timeuse.second << ")\n";

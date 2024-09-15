@@ -7,7 +7,6 @@ add_subdirectory(Logger)
 if(${PHYSICA_PYTHON})
     add_subdirectory(Python)
 endif()
-add_subdirectory(Utils)
 
 if(${PHYSICA_GUI})
     add_executable(Physica Physica.cpp ${HEADERS})

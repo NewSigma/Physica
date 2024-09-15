@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Weibo He.
+ * Copyright 2023-2024 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -23,7 +23,7 @@ namespace Physica::Core {
     DecisionTree<ScalarType, Type>::DecisionTree(const Dataset& dataset) : DecisionTree(train(dataset)) {}
 
     template<class ScalarType, DecisionTreeType Type>
-    DecisionTree<ScalarType, Type>::DecisionTree(size_t featureId_, ScalarType splitPoint_, Utils::Array<DecisionTree> subTrees_, NodeType nodeType_)
+    DecisionTree<ScalarType, Type>::DecisionTree(size_t featureId_, ScalarType splitPoint_, Array<DecisionTree> subTrees_, NodeType nodeType_)
             : featureId(featureId_)
             , splitPoint(std::move(splitPoint_))
             , subTrees(std::move(subTrees_))
@@ -134,7 +134,7 @@ namespace Physica::Core {
                 newAvailableFeature.push_front(feature);
         }
 
-        Utils::Array<DecisionTree> subTrees{};
+        Array<DecisionTree> subTrees{};
         std::forward_list<size_t> list1{}, list2{};
         subTrees.reserve(2U);
         const bool isContinuous = dataset.isFeatureContinuous[featureId];
@@ -210,7 +210,7 @@ namespace Physica::Core {
     }
 
     template<class ScalarType, DecisionTreeType Type>
-    ScalarType DecisionTree<ScalarType, Type>::giniIndex(const Dataset& dataset, const Utils::Array<size_t>& availableSample) {
+    ScalarType DecisionTree<ScalarType, Type>::giniIndex(const Dataset& dataset, const Array<size_t>& availableSample) {
         std::multiset<ScalarType> set{};
         for (size_t sample : availableSample)
             set.insert(dataset.labels[sample]);
@@ -225,7 +225,7 @@ namespace Physica::Core {
     }
 
     template<class ScalarType, DecisionTreeType Type>
-    ScalarType DecisionTree<ScalarType, Type>::mse(const Dataset& dataset, const Utils::Array<size_t>& availableSample) {
+    ScalarType DecisionTree<ScalarType, Type>::mse(const Dataset& dataset, const Array<size_t>& availableSample) {
         ScalarType sum = 0;
         ScalarType sumSquare = 0;
         size_t count = 0;
@@ -252,7 +252,7 @@ namespace Physica::Core {
         size_t optimalFeatureId = dataset.features.getColumn();
         ScalarType optimalSplitPoint = 0;
         ScalarType minLoss = std::numeric_limits<ScalarType>::max();
-        Utils::Array<size_t> list1{}, list2{};
+        Array<size_t> list1{}, list2{};
         list1.reserve(numAvailableSample);
         list2.reserve(numAvailableSample);
         for (auto featureId : availableFeature) {

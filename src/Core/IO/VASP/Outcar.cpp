@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Weibo He.
+ * Copyright 2022-2024 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -29,7 +29,7 @@ namespace Physica::Core {
         fin.seekg(0, std::ios::end);
         const auto size = fin.tellg();
         fin.seekg(0, std::ios::beg);
-        Utils::Array<char> buffer(size);
+        Array<char> buffer(size);
 
         readForce(fin, buffer);
         readEnergy(fin, buffer);
@@ -41,7 +41,7 @@ namespace Physica::Core {
         internalEnergy.swap(obj.internalEnergy);
     }
 
-    void Outcar::readForce(std::ifstream& fin, Utils::Array<char>& buffer) {
+    void Outcar::readForce(std::ifstream& fin, Array<char>& buffer) {
         using MatrixType = DenseMatrix<ScalarType, MatrixOption::Row | MatrixOption::Element, Dynamic, 6>;
 
         std::string str{};
@@ -69,7 +69,7 @@ namespace Physica::Core {
         force *= ScalarType(PhyConst<AU>::eVToHartree(1) * PhyConst<AU>::bohrToAngstorm(1));
     }
 
-    void Outcar::readEnergy(std::ifstream& fin, Utils::Array<char>& buffer) {
+    void Outcar::readEnergy(std::ifstream& fin, Array<char>& buffer) {
         std::string str{};
         do {
             fin.getline(buffer.data(), buffer.getLength());

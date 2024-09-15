@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Weibo He.
+ * Copyright 2022-2024 Weibo He.
  *
  * This file is part of Physica.
 
@@ -19,7 +19,6 @@
 #include "Physica/Core/Math/Geometry/GeoBase2D.h"
 
 using namespace Physica::Core;
-using namespace Physica::Utils;
 using ScalarType = float32;
 
 int main() {

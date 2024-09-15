@@ -29,7 +29,7 @@ namespace Physica::Gui {
         using VectorType = Core::Vector<ScalarType>;
         using MatrixType = Core::DenseMatrix<ScalarType>;
         using MeshType = std::pair<MatrixType, MatrixType>;
-        using BandArray = Utils::Array<MatrixType>;
+        using BandArray = Core::Array<MatrixType>;
         using PhononType = Core::FrozenPhonon<ScalarType>;
         using KSpaceFCGrid = typename PhononType::KSpaceFCGrid;
     public:

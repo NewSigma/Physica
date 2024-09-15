@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Weibo He.
+ * Copyright 2022-2024 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -32,7 +32,7 @@ namespace Physica::Core {
     private:
         Vector3D pos;
         ScalarType weight;
-        Utils::Array<BandEnergy, NumSpin> bandE;
+        Array<BandEnergy, NumSpin> bandE;
     public:
         KPoint() = default;
         KPoint(Vector3D pos_, ScalarType weight_, size_t numBand);

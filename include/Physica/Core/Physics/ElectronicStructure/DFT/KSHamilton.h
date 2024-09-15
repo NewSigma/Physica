@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Weibo He.
+ * Copyright 2023-2024 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -28,7 +28,7 @@ namespace Physica::Core {
     public:
         using ComplexType = ComplexScalar<ScalarType>;
         using GridType = RSpaceGrid<ComplexType>;
-        using StrucFactorArray = Utils::Array<GridType>;
+        using StrucFactorArray = Array<GridType>;
         using LatticeMatrix = typename PeriodicCell<ScalarType, 3>::LatticeMatrix;
         using BasisType = PlainWaveBasis<ScalarType>;
         using HermiteMatrix = DenseHermiteMatrix<ComplexType>;
@@ -198,7 +198,7 @@ namespace Physica::Core {
     typename KSHamilton<ScalarType, IsSpinPolarized>::StrucFactorArray
     KSHamilton<ScalarType, IsSpinPolarized>::makeStructureFactor() const {
         const auto species = cell.getSpecies();
-        auto result = Utils::Array<GridType>(species.size(), kSpaceIonCoulomb.getDim());
+        auto result = Array<GridType>(species.size(), kSpaceIonCoulomb.getDim());
         size_t i = 0;
         for (uint16_t element : species) {
             GridType& grid = result[i];

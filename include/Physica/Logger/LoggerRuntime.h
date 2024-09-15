@@ -84,7 +84,7 @@ namespace Physica::Logger {
         [[nodiscard]] AbstractLogger& getLogger(size_t index) const { assert(index < loggerList.size()); return *loggerList[index]; }
         [[nodiscard]] size_t getNextLogID() const noexcept { return logInfos.size(); }
         [[nodiscard]] LogInfo getLogInfo(size_t index) const { return logInfos[index]; }
-        [[nodiscard]] Utils::RingBuffer& getBuffer();
+        [[nodiscard]] Core::RingBuffer& getBuffer();
         /* Setters */
         void releaseBuffer() noexcept { threadLogBuffer->schedualDelete(); threadLogBuffer = nullptr; }
         /* Static Members */

@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Weibo He.
+ * Copyright 2023-2024 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -85,7 +85,7 @@ namespace Physica::Core {
     void HardCore<ScalarType, IsFixedBoundary, NumReplica, Integrator, CUDAExecutor>::do_nve_step(ScalarType deltaT, size_t numStep) {
         assert(deltaT.isPositive());
         const size_t numParticle = getNumParticle();
-        const size_t maxThread = Utils::DeviceProp::getInstance().getProperty(0).maxThreadsPerBlock;
+        const size_t maxThread = DeviceProp::getInstance().getProperty(0).maxThreadsPerBlock;
         const unsigned int numThread = numParticle > maxThread ? maxThread : numParticle;
         Internal::HardCore_stepKernel<ScalarType, IsFixedBoundary, NumReplica>
             <<<1, numThread, numThread * sizeof(ScalarType), CUDAContext::getInstance()>>>(asStruct(*this), deltaT, numStep);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Weibo He.
+ * Copyright 2023-2024 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -26,8 +26,8 @@ namespace Physica::Core {
         using This = GridStorage<T>;
         using Base = GridBase;
     public:
-        using Index3D = Utils::Array<size_t, 3>;
-        using ArrayType = Utils::Array<T>;
+        using Index3D = Array<size_t, 3>;
+        using ArrayType = Array<T>;
     private:
         ArrayType values;
         size_t dimX;

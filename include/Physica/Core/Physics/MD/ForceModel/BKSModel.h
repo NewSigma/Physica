@@ -18,7 +18,7 @@
  */
 #pragma once
 
-#include "Physica/Utils/CUDA/PlainStruct.h"
+#include <Physica/PlainStruct.h>
 #include "Ewald/RSpaceEwald.h"
 #include "ForceModelImpl/AABModel.h"
 #include "PairModel.h"

@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2021 Weibo He.
+ * Copyright 2020-2024 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -28,7 +28,7 @@ namespace Physica::Core {
         using MatrixType = DenseMatrix<T, type, maxRow, maxColumn>;
     private:
         MatrixType matrix;
-        Utils::Array<size_t> biasOrder; //TODO: use permutation matrix instead
+        Array<size_t> biasOrder; //TODO: use permutation matrix instead
     public:
         PLUDecomposition() = default;
         explicit PLUDecomposition(MatrixType m);
@@ -42,7 +42,7 @@ namespace Physica::Core {
         void swap(PLUDecomposition& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] const MatrixType& getMatrix() const noexcept { return matrix; }
-        [[nodiscard]] const Utils::Array<size_t>& getBiasOrder() const noexcept { return biasOrder; }
+        [[nodiscard]] const Array<size_t>& getBiasOrder() const noexcept { return biasOrder; }
     private:
         void decompositionColumn(size_t column);
     };

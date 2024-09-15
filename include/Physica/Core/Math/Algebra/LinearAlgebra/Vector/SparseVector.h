@@ -30,8 +30,8 @@ namespace Physica::Core {
         using SparseRef = SparseReference<ScalarType>;
         using typename Base::NonZeroPair;
     public:
-        using IndexArray = Utils::Array<size_t>;
-        using ElemArray = Utils::Array<ScalarType>;
+        using IndexArray = Array<size_t>;
+        using ElemArray = Array<ScalarType>;
     private:
         size_t length;
         IndexArray indexes;

@@ -38,7 +38,7 @@ namespace Physica::Core {
         using ParticleType = typename MDCellType::ParticleType;
         using MassTypeMap = typename MDCellType::MassTypeMap;
         using DescriptorMatrix = DenseMatrix<ScalarType>;
-        using DescriptorArray = Utils::Array<DescriptorMatrix>;
+        using DescriptorArray = Array<DescriptorMatrix>;
     private:
         MassTypeMap massTypeMap;
         unsigned int maxOrder;

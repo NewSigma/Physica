@@ -27,7 +27,7 @@ namespace Physica::Core {
         static_assert(1 <= Dim && Dim <= 3, "[Error]: Invalid Dim");
         using This = LatticeModel<Dim>;
     public:
-        using DimArray = Utils::Array<size_t, Dim>;
+        using DimArray = Array<size_t, Dim>;
         using IndexType = SiteIndex<Dim>;
     private:
         DimArray superSize;

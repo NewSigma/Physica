@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Weibo He.
+ * Copyright 2022-2024 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -28,7 +28,7 @@ namespace Physica::Core {
      */
     template<class ScalarType>
     class VarianceAnalyzer {
-        using DataSet = Utils::Array<Vector<ScalarType>>;
+        using DataSet = Array<Vector<ScalarType>>;
         DataSet data;
     public:
         VarianceAnalyzer(size_t numGroup, size_t samplePerGroup);

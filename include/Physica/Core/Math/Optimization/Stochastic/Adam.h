@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2022 Weibo He.
+ * Copyright 2021-2024 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -27,10 +27,10 @@ namespace Physica::Core {
      */
     template<class ScalarType, class VectorType>
     class Adam {
-        const Utils::Array<ScalarType, 6> args;
+        const Array<ScalarType, 6> args;
         VectorType params;
     public:
-        Adam(const Utils::Array<ScalarType, 6>& args_);
+        Adam(const Array<ScalarType, 6>& args_);
         ~Adam() = default;
         /* Operations */
         template<class Function>
@@ -51,7 +51,7 @@ namespace Physica::Core {
      * args[5]: Expected relative error, small real number in (0, inf)
      */
     template<class ScalarType, class VectorType>
-    Adam<ScalarType, VectorType>::Adam(const Utils::Array<ScalarType, 6>& args_) : args(args_), params() {
+    Adam<ScalarType, VectorType>::Adam(const Array<ScalarType, 6>& args_) : args(args_), params() {
         assert(args[0].isPositive());
         assert(args[1].isPositive() && args[1] < ScalarType(1));
         assert(args[2].isPositive() && args[2] < ScalarType(1));

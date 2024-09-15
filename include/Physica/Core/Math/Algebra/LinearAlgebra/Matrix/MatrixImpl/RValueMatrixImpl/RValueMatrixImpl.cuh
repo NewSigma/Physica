@@ -20,8 +20,7 @@
 
 #include <Physica/Core/Exception/CUDA/CUDA.cuh>
 #include <Physica/Core/Parallel/CUDAContext.cuh>
-#include <Physica/Utils/CUDA/DeviceProp.cuh>
-#include <Physica/Utils/CUDA/PlainStruct.h>
+#include <Physica/PlainStruct.h>
 #include "RValueFlatten.cuh"
 
 namespace Physica::Core {

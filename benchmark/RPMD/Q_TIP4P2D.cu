@@ -26,16 +26,15 @@
 #include <Physica/Core/Physics/MD/Thermostat/DoubleThermo.h>
 #include <Physica/Core/Physics/MD/Barostat/SCRBaro.h>
 #include <Physica/Core/Parallel/Executor/CUDAExecutor.cuh>
-#include <Physica/Utils/BenchmarkHelper.h>
+#include <Physica/Core/Utils/BenchmarkHelper.h>
 
 using namespace Physica::Core;
-using namespace Physica::Utils;
 using ScalarType = float32;
 using RandomGenerator = std::mt19937;
 using RandomPoolType = RandomPool<RandomGenerator>;
 using EwaldType = Ewald<ScalarType, Physica::Core::device_obj<RSpaceEwald<ScalarType>>>;
 using ForceModel = Q_TIP4P<ScalarType, EwaldType>;
-using MDType = RPMD<ScalarType, 3, 1, Physica::Utils::PageLockedAllocator<ScalarType>>;
+using MDType = RPMD<ScalarType, 3, 1, PageLockedAllocator<ScalarType>>;
 using KineticModel = FreeModel<ScalarType, 3, 1, RPMDIntegrator::Exact>;
 using ThermoType = DoubleThermo<KineticModel>;
 using BarostatType = SCRBaro<ScalarType, 1, RandomPoolType, BaroType::XY>;

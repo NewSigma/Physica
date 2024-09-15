@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Weibo He.
+ * Copyright 2023-2024 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -35,7 +35,7 @@ namespace Physica::Core {
     public:
         using Dataset = typename TreeType::Dataset;
     private:
-        Utils::Array<TreeType> trees;
+        Array<TreeType> trees;
     public:
         RandomForest(const RandomForest&) = default;
         RandomForest(RandomForest&&) noexcept = default;
@@ -64,7 +64,7 @@ namespace Physica::Core {
                 Dataset dataset,
                 RandomGenerator& gen);
     private:
-        RandomForest(Utils::Array<TreeType> trees_);
+        RandomForest(Array<TreeType> trees_);
         template<class RandomGenerator>
         static TreeType trainTree(const Dataset& dataset,
                                   std::forward_list<size_t> availableSample,
@@ -72,12 +72,12 @@ namespace Physica::Core {
                                   RandomGenerator& gen);
         template<class RandomGenerator>
         static std::pair<std::forward_list<size_t>, std::forward_list<size_t>> randTrainTestSet(size_t numSample, RandomGenerator& gen);
-        static void testTree(ScalarType prediction, ScalarType label, size_t sampleId, VectorType& predictions, Utils::Array<size_t>& numTestSample);
-        static ScalarType makeTestError(const VectorType& predictions, const VectorType& labels, const Utils::Array<size_t>& numTestSample);
+        static void testTree(ScalarType prediction, ScalarType label, size_t sampleId, VectorType& predictions, Array<size_t>& numTestSample);
+        static ScalarType makeTestError(const VectorType& predictions, const VectorType& labels, const Array<size_t>& numTestSample);
     };
 
     template<class ScalarType, DecisionTreeType Type>
-    RandomForest<ScalarType, Type>::RandomForest(Utils::Array<TreeType> trees_) : trees(std::move(trees_)) {}
+    RandomForest<ScalarType, Type>::RandomForest(Array<TreeType> trees_) : trees(std::move(trees_)) {}
 
     template<class ScalarType, DecisionTreeType Type>
     RandomForest<ScalarType, Type>& RandomForest<ScalarType, Type>::operator=(RandomForest obj) noexcept {
@@ -125,10 +125,10 @@ namespace Physica::Core {
             RandomGenerator& gen) {
         const size_t numSample = dataset.features.getRow();
         const auto availableFeature = TreeType::makeInitialFeatures(dataset.features.getColumn());
-        Utils::Array<TreeType> trees{};
+        Array<TreeType> trees{};
         trees.reserve(numTree);
         VectorType predictions(numSample, 0);
-        Utils::Array<size_t> numTestSample(numSample, 0);
+        Array<size_t> numTestSample(numSample, 0);
         for (size_t i = 0; i < numTree; ++i) {
             auto pair = randTrainTestSet(numSample, gen);
             auto& trainSample = pair.first;
@@ -173,7 +173,7 @@ namespace Physica::Core {
                     features(j, i + numFeature) = features(dist(gen), i);
 
             VectorType predictions(numSample, 0);
-            Utils::Array<size_t> numTestSample(numSample, 0);
+            Array<size_t> numTestSample(numSample, 0);
             for (size_t _ = 0; _ < numTree; ++_) {
                 auto pair = randTrainTestSet(numSample, gen);
                 auto& trainSample = pair.first;
@@ -208,7 +208,7 @@ namespace Physica::Core {
         while (true) {
             const size_t numFeature = std::distance(result.begin(), result.end());
             MatrixType features(numSample, numFeature);
-            Utils::Array<bool> isFeatureContinuous(numFeature);
+            Array<bool> isFeatureContinuous(numFeature);
             {
                 size_t index = 0;
                 for (auto ite = result.begin(); ite != result.end(); ++ite) {
@@ -299,7 +299,7 @@ namespace Physica::Core {
             [[maybe_unused]] ScalarType label,
             size_t sampleId,
             VectorType& predictions,
-            Utils::Array<size_t>& numTestSample) {
+            Array<size_t>& numTestSample) {
         if constexpr (Type == DecisionTreeType::Classify) {
             const bool isCorrect = prediction == label;
             predictions[sampleId] += ScalarType(isCorrect ? 1.0 : -1.0);
@@ -315,7 +315,7 @@ namespace Physica::Core {
     ScalarType RandomForest<ScalarType, Type>::makeTestError(
             const VectorType& predictions,
             const VectorType& labels,
-            [[maybe_unused]] const Utils::Array<size_t>& numTestSample) {
+            [[maybe_unused]] const Array<size_t>& numTestSample) {
         const size_t numSample = predictions.getLength();
         if constexpr (Type == DecisionTreeType::Classify) {
             size_t count = 0;

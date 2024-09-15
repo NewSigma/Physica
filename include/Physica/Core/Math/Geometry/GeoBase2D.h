@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Weibo He.
+ * Copyright 2022-2024 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -29,12 +29,12 @@ namespace Physica::Core {
         using typename Base::VectorType;
     public:
         template<size_t PolyVertex>
-        [[nodiscard]] static bool pointInPoly(const VectorType& p, const Utils::Array<VectorType, PolyVertex>& vertexes);
+        [[nodiscard]] static bool pointInPoly(const VectorType& p, const Array<VectorType, PolyVertex>& vertexes);
         template<size_t PolyVertex>
-        [[nodiscard]] static bool pointOnPoly(const VectorType& p, const Utils::Array<VectorType, PolyVertex>& vertexes);
+        [[nodiscard]] static bool pointOnPoly(const VectorType& p, const Array<VectorType, PolyVertex>& vertexes);
     private:
         template<size_t PolyVertex>
-        static ScalarType pointPolyImpl(const VectorType& p, const Utils::Array<VectorType, PolyVertex>& vertexes);
+        static ScalarType pointPolyImpl(const VectorType& p, const Array<VectorType, PolyVertex>& vertexes);
     };
     /**
      * \param vertexes
@@ -45,7 +45,7 @@ namespace Physica::Core {
      */
     template<class ScalarType>
     template<size_t PolyVertex>
-    bool GeoBase2D<ScalarType>::pointInPoly(const VectorType& p, const Utils::Array<VectorType, PolyVertex>& vertexes) {
+    bool GeoBase2D<ScalarType>::pointInPoly(const VectorType& p, const Array<VectorType, PolyVertex>& vertexes) {
         const size_t numVertex = vertexes.getLength();
         for (size_t i = 0; i < numVertex; ++i) {
             const size_t next_i = (i + 1) % numVertex;
@@ -59,7 +59,7 @@ namespace Physica::Core {
 
     template<class ScalarType>
     template<size_t PolyVertex>
-    bool GeoBase2D<ScalarType>::pointOnPoly(const VectorType& p, const Utils::Array<VectorType, PolyVertex>& vertexes) {
+    bool GeoBase2D<ScalarType>::pointOnPoly(const VectorType& p, const Array<VectorType, PolyVertex>& vertexes) {
         const size_t numVertex = vertexes.getLength();
         for (size_t i = 0; i < numVertex; ++i) {
             const size_t next_i = (i + 1) % numVertex;

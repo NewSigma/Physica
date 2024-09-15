@@ -72,9 +72,9 @@ namespace Physica::Gui {
         ContourSeries<MatrixType>& contour(const Core::LValueMatrix<MatrixType>& x,
                                            const Core::LValueMatrix<MatrixType>& y,
                                            const Core::LValueMatrix<MatrixType>& z,
-                                           Utils::Array<double> levels);
+                                           Core::Array<double> levels);
         template<class VectorType>
-        QBoxPlotSeries& boxWhisker(const Core::LValueVector<VectorType>& x, const Utils::Array<VectorType>& data);
+        QBoxPlotSeries& boxWhisker(const Core::LValueVector<VectorType>& x, const Core::Array<VectorType>& data);
         template<class VectorType>
         QBoxPlotSeries& errorBar(const Core::LValueVector<VectorType>& mean, const Core::LValueVector<VectorType>& deviation);
         template<class VectorType1, class VectorType2>
@@ -194,7 +194,7 @@ namespace Physica::Gui {
                 binWidth = 1;
         }
 
-        Utils::Array<unsigned int> arr(binCount + 1, 0);
+        Core::Array<unsigned int> arr(binCount + 1, 0);
         const double binCountPerUnit = 1 / binWidth;
         for (size_t i = 0; i < length; ++i) {
             const size_t binIndex = size_t((double(data[i]) - min) * binCountPerUnit);
@@ -268,7 +268,7 @@ namespace Physica::Gui {
     ContourSeries<MatrixType>& Plot::contour(const Core::LValueMatrix<MatrixType>& x,
                                              const Core::LValueMatrix<MatrixType>& y,
                                              const Core::LValueMatrix<MatrixType>& z,
-                                             Utils::Array<double> levels) {
+                                             Core::Array<double> levels) {
         auto* series = new ContourSeries<MatrixType>(x, y, z, std::move(levels));
         series->attachTo(*getChart());
         series->attachAxis(axisX);
@@ -278,7 +278,7 @@ namespace Physica::Gui {
     }
 
     template<class VectorType>
-    QBoxPlotSeries& Plot::boxWhisker(const Core::LValueVector<VectorType>& x, const Utils::Array<VectorType>& data) {
+    QBoxPlotSeries& Plot::boxWhisker(const Core::LValueVector<VectorType>& x, const Core::Array<VectorType>& data) {
         assert(x.getLength() == data.getLength());
         QBoxPlotSeries* series = new QBoxPlotSeries(QBoxPlotSeries::Numeric);
         for (size_t i = 0; i < x.getLength(); ++i) {

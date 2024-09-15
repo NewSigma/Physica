@@ -26,7 +26,7 @@ namespace Physica::Core {
         static_assert(!ScalarType::isComplex, "[Error]: Model param must be real");
         using This = Hubbard<ScalarType, Dim>;
         using Base = LatticeModel<Dim>;
-        using HopIndexArray = Utils::Array<Utils::Array<size_t>>;
+        using HopIndexArray = Array<Array<size_t>>;
     public:
         using typename Base::IndexType;
     private:
@@ -71,7 +71,7 @@ namespace Physica::Core {
         HopIndexArray result(numSite);
         Base::forSiteInLattice([this, numSite, &result](IndexType index) {
             const auto& dims = Base::getDims();
-            Utils::Array<size_t> hopTargets{};
+            Array<size_t> hopTargets{};
             hopTargets.reserve(numSite * Dim * 2);
             for (unsigned int dim = 0; dim < Dim; ++dim) {
                 IndexType index1 = index;

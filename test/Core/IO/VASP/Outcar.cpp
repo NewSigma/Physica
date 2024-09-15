@@ -19,10 +19,9 @@
 #include <fstream>
 #include "Physica/Core/IO/VASP/Outcar.h"
 #include "Physica/Core/Physics/PhyConst.h"
-#include "Physica/Utils/Unix/TempFile.h"
+#include <Physica/Core/Utils/Unix/TempFile.h>
 
 using namespace Physica::Core;
-using namespace Physica::Utils;
 using ScalarType = float64;
 extern const char* outcar_data;
 

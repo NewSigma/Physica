@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Weibo He.
+ * Copyright 2023-2024 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -19,11 +19,11 @@
 #include "Physica/Core/Exception/IOException.h"
 #include "Physica/Core/Exception/BadFileFormatException.h"
 #include "Physica/Core/IO/Mnist.h"
-#include "Physica/Utils/DirStack.h"
+#include "Physica/Core/Utils/DirStack.h"
 
 namespace Physica::Core {
     Mnist::Mnist(const char* folder) {
-        Utils::DirStack dir(folder);
+        DirStack dir(folder);
         dir.push("train-images.idx3-ubyte");
         trainSamples = readDatas(dir.toPath());
         if (trainSamples.getLength() != 60000)

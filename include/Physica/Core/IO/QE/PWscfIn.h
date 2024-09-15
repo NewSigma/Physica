@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Weibo He.
+ * Copyright 2023-2024 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -61,9 +61,9 @@ namespace Physica::Core {
         /* Static members */
         static const char* calculationToStr(CalculationType calculation);
     private:
-        void readControl(std::istream& is, Utils::Array<char>& buffer);
+        void readControl(std::istream& is, Array<char>& buffer);
         void setCalculation(const std::string& str);
-        void readStr(std::istream& is, Utils::Array<char>& buffer, std::string& saveTo);
-        bool readBool(std::istream& is, Utils::Array<char>& buffer);
+        void readStr(std::istream& is, Array<char>& buffer, std::string& saveTo);
+        bool readBool(std::istream& is, Array<char>& buffer);
     };
 }

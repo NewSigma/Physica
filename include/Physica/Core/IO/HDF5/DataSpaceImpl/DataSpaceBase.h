@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Weibo He.
+ * Copyright 2023-2024 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -18,15 +18,15 @@
  */
 #pragma once
 
-#include "Physica/Utils/Template/CRTPBase.h"
+#include <Physica/CRTPBase.h>
 
 namespace Physica::Core {
     template<class Derived>
-    class DataSpaceBase : public Utils::CRTPBase<Derived> {
-        using Base = Utils::CRTPBase<Derived>;
+    class DataSpaceBase : public CRTPBase<Derived> {
+        using Base = CRTPBase<Derived>;
     public:
         constexpr static size_t Dim = Traits<Derived>::Dim;
-        using SizeArray = Utils::Array<hsize_t, Dim>;
+        using SizeArray = Array<hsize_t, Dim>;
     public:
         /* Operations */
         void selectHyperslab(H5S_seloper_t op, const SizeArray& count, const SizeArray& start) { Base::getDerived().selectHyperslab(op, count, start); }

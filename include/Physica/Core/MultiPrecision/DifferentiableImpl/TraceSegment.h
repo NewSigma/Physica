@@ -47,8 +47,8 @@ namespace Physica::Core {
     private:
         using ColorfulType = ColorfulTraceSegment<ScalarType, Order>;
 
-        Utils::Array<DiffRecord> records;
-        Utils::Array<DiffScalar> operands;
+        Array<DiffRecord> records;
+        Array<DiffScalar> operands;
         ValueVector values;
         GradVector grads;
     public:
@@ -87,8 +87,8 @@ namespace Physica::Core {
         [[nodiscard]] bool full() const noexcept { return records.full(); }
         [[nodiscard]] bool isFound(DiffScalar s) const noexcept { return find(s) < getLength(); }
         [[nodiscard]] size_t find(DiffScalar s) const noexcept;
-        [[nodiscard]] const Utils::Array<DiffRecord>& getRecords() const noexcept { return records; }
-        [[nodiscard]] const Utils::Array<DiffScalar>& getOperands() const noexcept { return operands; }
+        [[nodiscard]] const Array<DiffRecord>& getRecords() const noexcept { return records; }
+        [[nodiscard]] const Array<DiffScalar>& getOperands() const noexcept { return operands; }
         [[nodiscard]] ValueVector& getValues() noexcept { return values; }
         [[nodiscard]] const ValueVector& getValues() const noexcept { return values; }
         [[nodiscard]] GradVector& getGrads() noexcept { return grads; }

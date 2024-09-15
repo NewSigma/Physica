@@ -26,12 +26,12 @@ namespace Physica::Core {
     class BlockMatrix : public RValueMatrix<BlockMatrix<MatrixType>> {
         using This = BlockMatrix<MatrixType>;
         using Base = RValueMatrix<This>;
-        using BlockArray = Utils::Array<MatrixType>;
+        using BlockArray = Array<MatrixType>;
     public:
         using typename Base::ScalarType;
     private:
         BlockArray blocks;
-        Utils::Array<size_t> indexEnds;
+        Array<size_t> indexEnds;
     public:
         BlockMatrix(BlockArray blocks_);
         BlockMatrix(const This&) = default;
@@ -45,7 +45,7 @@ namespace Physica::Core {
         /* Getters */
         [[nodiscard]] const BlockArray& getBlocks() const noexcept { return blocks; }
         [[nodiscard]] size_t getNumBlock() const noexcept { return blocks.getLength(); }
-        [[nodiscard]] const Utils::Array<size_t>& getIndexEnds() const noexcept { return indexEnds; }
+        [[nodiscard]] const Array<size_t>& getIndexEnds() const noexcept { return indexEnds; }
         [[nodiscard]] __host__ __device__ size_t getRow() const noexcept { return indexEnds[getNumBlock() - 1]; }
         [[nodiscard]] __host__ __device__ size_t getColumn() const noexcept { return getRow(); }
     private:
@@ -95,7 +95,7 @@ namespace Physica::Core {
             if (inTheBlock)
                 return i;
         }
-        Utils::unreachable();
+        unreachable();
     }
 }
 

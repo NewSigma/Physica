@@ -18,6 +18,8 @@
  */
 #pragma once
 
+#include <iomanip>
+
 namespace Physica {
     template<>
     class Traits<Core::float64> {

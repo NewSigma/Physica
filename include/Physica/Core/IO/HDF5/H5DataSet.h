@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Weibo He.
+ * Copyright 2023-2024 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -19,7 +19,7 @@
 #pragma once
 
 #include <fstream>
-#include "Physica/Utils/Container/Array/Array.h"
+#include <Physica/Core/Utils/Container/Array.h>
 
 namespace Physica::Core {
     template<size_t Dim> class H5DataSpace;
@@ -76,7 +76,7 @@ namespace Physica::Core {
     void H5DataSet<Dim>::toFile(const char* path) const {
         std::ofstream fout(path);
         const auto size = getDataSpace().getSize(0);
-        auto buffer = Utils::Array<char>(size);
+        auto buffer = Array<char>(size);
         fout.write(buffer.data(), size);
     }
 

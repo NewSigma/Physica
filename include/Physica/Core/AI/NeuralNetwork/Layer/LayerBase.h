@@ -18,13 +18,13 @@
  */
 #pragma once
 
-#include "Physica/Utils/Template/CRTPBase.h"
+#include <Physica/CRTPBase.h>
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/Vector.h"
 
 namespace Physica::Core {
     template<class Derived>
-    class LayerBase : public Utils::CRTPBase<Derived> {
-        using Base = Utils::CRTPBase<Derived>;
+    class LayerBase : public CRTPBase<Derived> {
+        using Base = CRTPBase<Derived>;
         using TraitsType = Traits<Derived>;
     public:
         using ScalarType = typename TraitsType::ScalarType;

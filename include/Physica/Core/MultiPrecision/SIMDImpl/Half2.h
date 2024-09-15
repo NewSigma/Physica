@@ -18,7 +18,7 @@
  */
 #pragma once
 
-#include <Physica/Utils/Unreachable.h>
+#include <Physica/Core/Utils/Unreachable.h>
 
 namespace Physica::Core {
     template<>

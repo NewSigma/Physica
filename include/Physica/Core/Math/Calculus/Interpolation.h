@@ -247,7 +247,7 @@ namespace Physica::Core {
         using ScalarType = typename GridType::ScalarType;
         using RealType = typename ScalarType::RealType;
         using ComplexType = typename ScalarType::ComplexType;
-        using Index3D = Utils::Array<size_t, 3>;
+        using Index3D = Array<size_t, 3>;
         constexpr size_t Dim = 3;
         constexpr bool isComplex = ScalarType::isComplex;
         

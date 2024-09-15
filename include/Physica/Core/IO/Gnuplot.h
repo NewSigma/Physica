@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Weibo He.
+ * Copyright 2021-2024 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -24,7 +24,7 @@ namespace Physica::Core {
     class PHYSICA_API Gnuplot {
     public:
         using VectorType = Vector<float64>;
-        using DataArray = Utils::Array<Vector<float64>>;
+        using DataArray = Array<Vector<float64>>;
     private:
         DataArray xDatas;
         DataArray yDatas;

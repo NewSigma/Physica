@@ -25,7 +25,6 @@
 
 using namespace Physica::Core;
 using namespace Physica::Gui;
-using namespace Physica::Utils;
 using ScalarType = float64;
 
 class InfiniteDeepWell {

@@ -96,7 +96,7 @@ namespace Physica::Core {
         inline void pushOperandImpl(DiffScalar* p, DiffScalar operand, Args... args);
         void pushOperandImpl([[maybe_unused]] DiffScalar* p) {}
         /* Static members */
-        [[nodiscard]] static DiffRecord makeSetOpNode(const Utils::Array<DiffRecord>& records);
+        [[nodiscard]] static DiffRecord makeSetOpNode(const Array<DiffRecord>& records);
     };
 
     template<class AnyScalar, unsigned int AnyOrder>
@@ -484,7 +484,7 @@ namespace Physica::Core {
     }
 
     template<class ScalarType, unsigned int Order>
-    typename DiffTracer<ScalarType, Order>::DiffRecord DiffTracer<ScalarType, Order>::makeSetOpNode(const Utils::Array<DiffRecord>& records) {
+    typename DiffTracer<ScalarType, Order>::DiffRecord DiffTracer<ScalarType, Order>::makeSetOpNode(const Array<DiffRecord>& records) {
         const size_t length = records.getLength();
         size_t lastSetOpNode = 0;
         if (length != 0) {

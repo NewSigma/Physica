@@ -42,7 +42,7 @@ namespace Physica::Core {
         using typename Base::ForceConstMatrix;
         using SearchRangeType = typename PeriodicCell<ScalarType, Dim>::SearchRangeType;
         using Matrix3D = DenseMatrix<ScalarType, MatrixOption::Column | MatrixOption::Vector, 3, 3>;
-        using BornChargeArray = Utils::Array<Matrix3D>;
+        using BornChargeArray = Array<Matrix3D>;
         constexpr static size_t ErfcTableSize = 4096 + 512 + 2;
         constexpr static double ErfcTableStep = 0.001;
         constexpr static double SumPrec = (ErfcTableSize - 2) * ErfcTableStep; // Referenced from [1], minus 2 to avoid overflow

@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Weibo He. All rights reserved.
+ * Copyright 2023-2024 Weibo He. All rights reserved.
  *
  * This file is part of PhysicaNotes.
  */
@@ -15,7 +15,6 @@
 #include "Physica/Gui/Plot/Plot.h"
 
 using namespace Physica::Core;
-using namespace Physica::Utils;
 using namespace Physica::Gui;
 using ScalarType = float64;
 using VectorType = Vector<ScalarType>;

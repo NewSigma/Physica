@@ -25,7 +25,7 @@ namespace Physica::Core {
     template<class ScalarType>
     class MomentumSGD : public SGD<ScalarType> {
         static_assert(ScalarType::isDifferentiable, "[Error]: ScalarType must be differentiable");
-        static_assert(!Utils::is_device_obj<ScalarType>::value, "[Error]: Not implemented");
+        static_assert(!is_device_obj<ScalarType>::value, "[Error]: Not implemented");
         using Base = SGD<ScalarType>;
         using typename Base::PlainScalar;
         using TracerType = typename ScalarType::TracerType;

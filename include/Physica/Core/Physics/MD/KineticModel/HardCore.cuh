@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Weibo He.
+ * Copyright 2023-2024 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -18,11 +18,10 @@
  */
 #pragma once
 
+#include <Physica/PlainStruct.h>
 #include <Physica/Core/Math/Algebra/LinearAlgebra/Vector/Vector.cuh>
 #include <Physica/Core/Parallel/Executor/CUDAExecutor.cuh>
-#include <Physica/Utils/CUDA/PlainStruct.h>
-#include <Physica/Utils/CUDA/DeviceProp.cuh>
-#include <Physica/Utils/Allocator/PageLockedAllocator.cuh>
+#include <Physica/Core/Utils/Allocator/PageLockedAllocator.cuh>
 #include "HardCore.h"
 
 namespace Physica::Core {
@@ -34,7 +33,7 @@ namespace Physica::Core {
     public:
         using RingPolymerType = typename HardCore<ScalarType, IsFixedBoundary, NumReplica, Integrator>::RingPolymerType;
         using DeviceVector = device_obj<Vector<ScalarType>>;
-        using PageLockedVector = Vector<ScalarType, Dynamic, Utils::PageLockedAllocator<ScalarType>>;
+        using PageLockedVector = Vector<ScalarType, Dynamic, PageLockedAllocator<ScalarType>>;
     private:
         ScalarType latticeSize;
         ScalarType collideFactor;

@@ -123,8 +123,8 @@ RDF<ScalarType> calcRDF(size_t numReplica) {
 
     RDF<ScalarType> rdf;
     {
-        Physica::Utils::Array<bool> isFromParticle(rpmd.getNumParticle());
-        Physica::Utils::Array<bool> isToParticle(rpmd.getNumParticle());
+        Array<bool> isFromParticle(rpmd.getNumParticle());
+        Array<bool> isToParticle(rpmd.getNumParticle());
         for (size_t i = 0; i < isFromParticle.getLength(); ++i) {
             const bool isHydrogen = i < isFromParticle.getLength() * 2 / 3;
             isFromParticle[i] = isHydrogen;

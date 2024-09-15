@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Weibo He.
+ * Copyright 2022-2024 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -31,7 +31,7 @@ namespace Physica::Core {
     public:
         using Index3D = typename RSpaceGrid<ScalarType>::Index3D;
         using BasisType = PlainWaveBasis<ScalarType>;
-        using KSOrbitArray = Utils::Array<SpinPair<BasisType, IsSpinPolarized>>;
+        using KSOrbitArray = Array<SpinPair<BasisType, IsSpinPolarized>>;
     private:
         SpinPair<GridType, IsSpinPolarized> densityPair;
     public:

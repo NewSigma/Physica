@@ -27,11 +27,11 @@ namespace Physica::Core {
         using This = KSpinRepr<Dim, NumSite, UseInversionSymm>;
         using Base = ReprBasis<This>;
         using RSpinType = SpinRepr<Dim, NumSite, UseInversionSymm>;
-        using PeriodArray = Utils::Array<int>;
+        using PeriodArray = Array<int>;
     public:
         using typename Base::StateType;
     private:
-        Utils::Array<StateType> states; //Optimize: Each spin up state might pair with several spin down states
+        Array<StateType> states; //Optimize: Each spin up state might pair with several spin down states
         PeriodArray periods;
         RSpinType rSpin;
         unsigned int kIndex;

@@ -24,11 +24,11 @@
 namespace Physica::Core {
     template<class T, size_t Row, size_t Column, class Allocator>
     class device_obj<DenseMatrixStorage<T, MatrixOption::Column | MatrixOption::Element, Row, Column, Allocator>>
-            : public Utils::device_obj<Utils::Array<T, Row * Column, Allocator>>
+            : public device_obj<Array<T, Row * Column, Allocator>>
             , public DenseMatrixDim<device_obj<DenseMatrixStorage<T, MatrixOption::Column | MatrixOption::Element, Row, Column, Allocator>>, Row, Column> {
         using host_obj = DenseMatrixStorage<T, MatrixOption::Column | MatrixOption::Element, Row, Column, Allocator>;
         using This = device_obj<host_obj>;
-        using Base = Utils::device_obj<Utils::Array<T, Row * Column, Allocator>>;
+        using Base = device_obj<Array<T, Row * Column, Allocator>>;
         using Dim = DenseMatrixDim<This, Row, Column>;
         using ValueType = typename Base::ValueType;
     public:
@@ -62,11 +62,11 @@ namespace Physica::Core {
 
     template<class T, size_t Row, size_t Column, class Allocator>
     class device_obj<DenseMatrixStorage<T, MatrixOption::Row | MatrixOption::Element, Row, Column, Allocator>>
-            : public Utils::device_obj<Utils::Array<T, Row * Column, Allocator>>
+            : public device_obj<Array<T, Row * Column, Allocator>>
             , public DenseMatrixDim<device_obj<DenseMatrixStorage<T, MatrixOption::Row | MatrixOption::Element, Row, Column, Allocator>>, Row, Column> {
         using host_obj = DenseMatrixStorage<T, MatrixOption::Row | MatrixOption::Element, Row, Column, Allocator>;
         using This = device_obj<host_obj>;
-        using Base = Utils::device_obj<Utils::Array<T, Row * Column, Allocator>>;
+        using Base = device_obj<Array<T, Row * Column, Allocator>>;
         using Dim = DenseMatrixDim<This, Row, Column>;
         using ValueType = typename Base::ValueType;
     public:
@@ -105,7 +105,7 @@ namespace Physica::Core {
         using This = device_obj<host_obj>;
         using Dim = DenseMatrixDim<This, Row, Column>;
         using VectorType = typename host_obj::VectorType;
-        using ArrayType = Physica::Utils::device_obj<typename host_obj::ArrayType>;
+        using ArrayType = device_obj<typename host_obj::ArrayType>;
 
         ArrayType array;
         size_t size;
@@ -140,7 +140,7 @@ namespace Physica::Core {
         using This = device_obj<host_obj>;
         using Dim = DenseMatrixDim<This, Row, Column>;
         using VectorType = typename host_obj::VectorType;
-        using ArrayType = Physica::Utils::device_obj<typename host_obj::ArrayType>;
+        using ArrayType = device_obj<typename host_obj::ArrayType>;
 
         ArrayType array;
         size_t size;

@@ -55,11 +55,11 @@ namespace Physica::Core {
         template<ExtendCellOption Option>
         void toSuperCell(unsigned int x, unsigned int y, unsigned int z);
         template<ExtendCellOption Option>
-        void toSuperCell(Utils::Array<size_t, 3> size) { toSuperCell<Option>(size[0], size[1], size[2]); }
+        void toSuperCell(Array<size_t, 3> size) { toSuperCell<Option>(size[0], size[1], size[2]); }
         template<ExtendCellOption Option>
         MDCell makeSuperCell(unsigned int x, unsigned int y, unsigned int z) const;
         template<ExtendCellOption Option>
-        MDCell makeSuperCell(Utils::Array<size_t, 3> size) const { return makeSuperCell<Option>(size[0], size[1], size[2]); }
+        MDCell makeSuperCell(Array<size_t, 3> size) const { return makeSuperCell<Option>(size[0], size[1], size[2]); }
 
         [[nodiscard]] MassTypeMap makeMassTypeMap() const;
         /* Getters */

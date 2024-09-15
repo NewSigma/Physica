@@ -36,7 +36,7 @@ namespace Physica::Core {
 
     void Potcar::readFile(std::ifstream& fin) {
         constexpr size_t DefaultBufferSize = 1024; //1024 shall be enough
-        Physica::Utils::Array<char> buffer(DefaultBufferSize);
+        Array<char> buffer(DefaultBufferSize);
         std::string str{};
         do {
             fin.getline(buffer.data(), buffer.getLength());

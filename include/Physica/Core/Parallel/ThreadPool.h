@@ -26,7 +26,7 @@
 #include <condition_variable>
 #include <future>
 #include <sys/sysinfo.h>
-#include <Physica/Utils/Container/Array/Array.h>
+#include <Physica/Core/Utils/Container/Array.h>
 #include "PackagedTask.h"
 
 namespace Physica::Core {
@@ -55,7 +55,7 @@ namespace Physica::Core {
         constexpr static size_t MainThreadID = std::numeric_limits<decltype(numThreadRequired)>::max();
         thread_local static std::unique_ptr<ThreadInfo> info;
 
-        Utils::Array<ThreadData> thread_data;
+        Array<ThreadData> thread_data;
         std::mutex poolMutex;
         std::condition_variable cond;
         bool exit;

@@ -18,7 +18,7 @@
  */
 #pragma once
 
-#include "Physica/Utils/Unix/ColorGuard.h"
+#include <Physica/Core/Utils/Unix/ColorGuard.h>
 
 namespace Physica::Core {
     template<class ScalarType, unsigned int Order> class DiffTracer;
@@ -45,8 +45,8 @@ namespace Physica::Core {
 
     template<class AnyScalar, unsigned int AnyOrder>
     std::ostream& operator<<(std::ostream& os, const ColorfulTracer<AnyScalar, AnyOrder>& obj) {
-        using Color = typename Utils::ColorGuard::Color;
-        using ColorGuard = Utils::ColorGuard;
+        using Color = typename ColorGuard::Color;
+        using ColorGuard = ColorGuard;
         const auto& tracer = obj.tracer;
         const auto& list = tracer.getTraceList();
         for (auto ite = list.cbegin(); ite != list.cend(); ++ite) {

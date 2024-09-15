@@ -18,9 +18,8 @@
  */
 #pragma once
 
-#include <iomanip>
 #include <cassert>
-#include "Physica/Utils/Template/CRTPBase.h"
+#include <Physica/CRTPBase.h>
 
 namespace Physica::Core {
     enum class DiffMode {
@@ -39,7 +38,7 @@ namespace Physica::Core {
     };
 
     template<class Derived>
-    class ScalarBase : public Utils::CRTPBase<Derived> {
+    class ScalarBase : public CRTPBase<Derived> {
     public:
         using ScalarType = typename Traits<Derived>::ScalarType;
         using TrivialType = typename Traits<Derived>::TrivialType;

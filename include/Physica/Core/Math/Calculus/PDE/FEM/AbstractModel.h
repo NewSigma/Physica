@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Weibo He.
+ * Copyright 2022-2024 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -19,7 +19,7 @@
 #pragma once
 
 #include "Mesh.h"
-#include "Physica/Utils/Template/CRTPBase.h"
+#include <Physica/CRTPBase.h>
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/SparseMatrix.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/LinearEquations/IterateSolver.h"
 
@@ -38,8 +38,8 @@ namespace Physica::Core {
         Vector<ScalarType> b;
     private:
         SolverType solver;
-        Utils::Array<size_t> map_var_node;
-        Utils::Array<size_t> map_node_var;
+        Array<size_t> map_var_node;
+        Array<size_t> map_node_var;
     public:
         AbstractModel(MeshType mesh_);
         /* Operators */

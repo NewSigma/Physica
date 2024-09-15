@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Weibo He.
+ * Copyright 2023-2024 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -20,9 +20,8 @@
 
 #include <string>
 #include <fstream>
-#include "Physica/Utils/Container/Array/Array.h"
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/Vector.h"
-#include "Physica/Core/AI/NeuralNetwork/SimpleDataset.h"
+#include <Physica/Core/Math/Algebra/LinearAlgebra/Vector/Vector.h>
+#include <Physica/Core/AI/NeuralNetwork/SimpleDataset.h>
 
 namespace Physica::Core {
     /**
@@ -47,8 +46,8 @@ namespace Physica::Core {
             int32_t i;
         };
 
-        using LabelArray = Utils::Array<unsigned char>;
-        using DataArray = Utils::Array<ImageType>;
+        using LabelArray = Array<unsigned char>;
+        using DataArray = Array<ImageType>;
 
         DataArray trainSamples;
         DataArray testSamples;

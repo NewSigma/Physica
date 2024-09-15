@@ -36,8 +36,8 @@ namespace Physica::Core {
         CrystalCellType initialCell;
         ScalarType maxDistOO;
         ScalarType maxDistOH;
-        Utils::Array<bool> isHydrogenOccupied;
-        Utils::Array<unsigned char> numHydrogenRequired;
+        Array<bool> isHydrogenOccupied;
+        Array<unsigned char> numHydrogenRequired;
     public:
         IceGenerator(ScalarType maxDistOO_, ScalarType maxDistOH_);
         IceGenerator(CrystalCellType initialCell_, ScalarType maxDistOO_, ScalarType maxDistOH_);
@@ -47,11 +47,11 @@ namespace Physica::Core {
         /* Operators */
         IceGenerator& operator=(IceGenerator obj) noexcept;
         /* Operations */
-        Utils::Array<CrystalCellType> exhaust();
+        Array<CrystalCellType> exhaust();
         template<class RandomGenerator> CrystalCellType makeRand(RandomGenerator& gen);
         template<class RandomGenerator> CrystalCellType makeDefects(unsigned int numDefect, RandomGenerator& gen) const;
-        template<class RandomGenerator> Utils::Array<size_t> randRing(RandomGenerator& gen) const;
-        CrystalCellType makeRingMove(const Utils::Array<size_t>& ring, PositionMatrix& momentumMat) const;
+        template<class RandomGenerator> Array<size_t> randRing(RandomGenerator& gen) const;
+        CrystalCellType makeRingMove(const Array<size_t>& ring, PositionMatrix& momentumMat) const;
         void swap(IceGenerator& __restrict obj) noexcept;
         /* Setters */
         void setInitialCell(CrystalCellType cell);
@@ -60,19 +60,19 @@ namespace Physica::Core {
     private:
         PositionMatrix prepareRun();
         void searchDanglingH(PositionMatrix& pos);
-        Utils::Array<size_t> findOInRadius(size_t indexO, ScalarType radius) const;
-        Utils::Array<size_t> findBondedH(size_t indexMolecule) const;
-        Utils::Array<size_t> findFreeBondedHInRadius(size_t indexO) const;
+        Array<size_t> findOInRadius(size_t indexO, ScalarType radius) const;
+        Array<size_t> findBondedH(size_t indexMolecule) const;
+        Array<size_t> findFreeBondedHInRadius(size_t indexO) const;
         std::pair<size_t, size_t> findHydrogenInMolecule(size_t indexMolecule) const;
         size_t findHydrogenBetweenO(size_t indexO1, size_t indexO2) const;
         template<class RandomGenerator> size_t makeRandEmptyO(RandomGenerator& gen) const;
         template<class RandomGenerator> size_t makeRandFreeH(size_t indexO, RandomGenerator& gen) const;
         void fetchHydrogen(PositionMatrix& pos, size_t indexO, size_t indexH);
-        size_t countFreeH(const Utils::Array<size_t>& hIndexes) const;
+        size_t countFreeH(const Array<size_t>& hIndexes) const;
         void searchForPairs(PositionMatrix& pos);
         size_t getIndexToPair() const;
         template<class RandomGenerator> void randUninitializedH(PositionMatrix& pos, RandomGenerator& gen);
-        void exhaustImpl(size_t stackDepth, const PositionMatrix& pos, Utils::Array<CrystalCellType>& result);
+        void exhaustImpl(size_t stackDepth, const PositionMatrix& pos, Array<CrystalCellType>& result);
         /* Getters */
         [[nodiscard]] size_t getEndIndexH() const noexcept { return getNumMolecule() * 2U; }
         [[nodiscard]] size_t getStartIndexO() const noexcept { return getEndIndexH(); }

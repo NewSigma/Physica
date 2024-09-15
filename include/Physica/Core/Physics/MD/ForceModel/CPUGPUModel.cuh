@@ -20,7 +20,7 @@
 
 #include "Physica/Core/Parallel/ThreadPool.h"
 #include "Physica/Core/Parallel/Executor/AutoExecutor.h"
-#include "Physica/Utils/CUDA/device_obj.cuh"
+#include <Physica/Core/Utils/CUDA/device_obj.cuh>
 
 namespace Physica::Core {
     /**
@@ -28,12 +28,12 @@ namespace Physica::Core {
      */
     template<class HostModel, class DeviceModel>
     class CPUGPUModel {
-        static_assert(!Utils::is_device_obj<HostModel>::value, "[Error]: Host model must not be device object");
-        static_assert(!Utils::is_device_obj<DeviceModel>::value, "[Error]: device_obj<> is unnecessary");
+        static_assert(!is_device_obj<HostModel>::value, "[Error]: Host model must not be device object");
+        static_assert(!is_device_obj<DeviceModel>::value, "[Error]: device_obj<> is unnecessary");
         using ScalarType = typename HostModel::ScalarType;
         using MDCellType = typename HostModel::MDCellType;
         HostModel hostModel;
-        Physica::Utils::Array<device_obj<DeviceModel>> deviceModels;
+        Array<device_obj<DeviceModel>> deviceModels;
     public:
         template<class... Args>
         CPUGPUModel(size_t numCUDAThread, HostModel hostModel_, Args&&... deviceArgs);

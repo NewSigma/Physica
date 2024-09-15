@@ -72,7 +72,7 @@ namespace Physica::Logger {
             logThread.join();
     }
 
-    Utils::RingBuffer& LoggerRuntime::getBuffer() {
+    Core::RingBuffer& LoggerRuntime::getBuffer() {
         if (shouldExit) [[unlikely]]
             throw std::runtime_error("[Error]: Try to append log to closed LoggerRuntime");
         if (threadLogBuffer == nullptr) {

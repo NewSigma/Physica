@@ -29,7 +29,7 @@ namespace Physica::Core {
         using typename Base::VectorType;
         using typename Base::MatrixType;
         using typename Base::IndexArray;
-        using PosArray = Utils::Array<VectorType, Traits<Triangle1<ScalarType>>::NumPoint>;
+        using PosArray = Array<VectorType, Traits<Triangle1<ScalarType>>::NumPoint>;
     private:
         PosArray pos;
     public:

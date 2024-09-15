@@ -18,7 +18,7 @@
  */
 #pragma once
 
-#include <Physica/Utils/CUDA/PlainStruct.h>
+#include <Physica/PlainStruct.h>
 
 namespace Physica::Core {
     template<class VectorType, class MatrixType>

@@ -18,7 +18,7 @@
  */
 #pragma once
 
-#include "Physica/Utils/Template/CRTPBase.h"
+#include <Physica/CRTPBase.h>
 
 namespace Physica {
     template<class T> class Traits;
@@ -26,8 +26,8 @@ namespace Physica {
 
 namespace Physica::Core {
     template<class Derived>
-    class ReprBasis : public Utils::CRTPBase<Derived> {
-        using Base = Utils::CRTPBase<Derived>;
+    class ReprBasis : public CRTPBase<Derived> {
+        using Base = CRTPBase<Derived>;
     public:
         using StateType = typename Traits<Derived>::StateType;
         constexpr static unsigned int Dim = Traits<Derived>::Dim;

@@ -24,7 +24,7 @@ namespace Physica::Core {
     template<class ScalarType>
     class AutoDiffGuard {
         static_assert(ScalarType::isDifferentiable, "[Error]: ScalarType must be differentiable");
-        constexpr static bool isDeviceSide = Utils::is_device_obj<ScalarType>::value;
+        constexpr static bool isDeviceSide = is_device_obj<ScalarType>::value;
         using This = AutoDiffGuard<ScalarType>;
     public:
         using PlainScalar = typename ScalarType::PlainScalar;

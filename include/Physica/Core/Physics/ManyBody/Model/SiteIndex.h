@@ -18,13 +18,13 @@
  */
 #pragma once
 
-#include <Physica/Utils/Container/Array/Array.h>
+#include <Physica/Core/Utils/Container/Array.h>
 
 namespace Physica::Core {
     template<unsigned int Dim>
-    class SiteIndex : public Utils::Array<size_t, Dim + 1> {
+    class SiteIndex : public Array<size_t, Dim + 1> {
         using This = SiteIndex<Dim>;
-        using Base = Utils::Array<size_t, Dim + 1>;
+        using Base = Array<size_t, Dim + 1>;
         static_assert(1 <= Dim && Dim <= 3, "[Error]: Invalid Dim");
     public:
         using Base::Base;

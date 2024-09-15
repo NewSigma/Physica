@@ -25,7 +25,6 @@
 
 using namespace Physica;
 using namespace Physica::Core;
-using namespace Physica::Utils;
 
 template<class ScalarType>
 void VASPTest() {

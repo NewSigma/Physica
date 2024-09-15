@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2022 Weibo He.
+ * Copyright 2020-2024 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -16,11 +16,10 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include <Physica/Utils/Unix/TempFile.h>
+#include <Physica/Core/Utils/Unix/TempFile.h>
 #include <Physica/Core/Math/Algebra/LinearAlgebra/Vector/Vector.h>
 
 using namespace Physica::Core;
-using namespace Physica::Utils;
 
 void crossProductTest() {
     using T = float32;

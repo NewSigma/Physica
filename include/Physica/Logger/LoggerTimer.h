@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2021 Weibo He.
+ * Copyright 2020-2024 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -20,7 +20,7 @@
 
 #include <ctime>
 #include <cstdint>
-#include "Physica/Utils/Cycler.h"
+#include <Physica/Core/Utils/Cycler.h>
 
 namespace Physica::Logger {
     /**
@@ -33,7 +33,7 @@ namespace Physica::Logger {
         LoggerTimer();
         ~LoggerTimer() = default;
         /* Operations */
-        [[nodiscard]] timeval now() const { return toTime(Utils::Cycler::now()); }
+        [[nodiscard]] timeval now() const { return toTime(Core::Cycler::now()); }
         [[nodiscard]] timeval toTime(uint64_t cycle) const;
         /* Getters */
         [[nodiscard]] timeval getStartTime() const noexcept { return startTime; }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Weibo He.
+ * Copyright 2023-2024 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -19,10 +19,9 @@
 #pragma once
 
 #include <cub/cub.cuh>
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Grid/PeriodIndex3D.h"
-#include "Physica/Core/Parallel/Executor/CUDAExecutor.cuh"
-#include "Physica/Utils/CUDA/DeviceProp.cuh"
-#include "Physica/Utils/CUDA/PlainStruct.h"
+#include <Physica/PlainStruct.h>
+#include <Physica/Core/Math/Algebra/LinearAlgebra/Grid/PeriodIndex3D.h>
+#include <Physica/Core/Parallel/Executor/CUDAExecutor.cuh>
 
 namespace Physica::Core {
     namespace Internal {
@@ -292,7 +291,7 @@ namespace Physica::Core {
             gridDims.y = static_cast<unsigned int>(cellList.getCellGridDimY());
             gridDims.z = static_cast<unsigned int>(cellList.getCellGridDimZ());
             const size_t maxNumAtomInCell = hostCellList.calcMaxNumAtomInCell();
-            const size_t maxThread = Utils::DeviceProp::getInstance().getProperty(0).maxThreadsPerBlock;
+            const size_t maxThread = DeviceProp::getInstance().getProperty(0).maxThreadsPerBlock;
             numThread = maxNumAtomInCell > maxThread ? maxThread : maxNumAtomInCell;
             assert(maxThread >= maxNumAtomInCell && "[Error]: Too many particle in the cell, performance may be pool");
         }

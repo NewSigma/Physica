@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Weibo He.
+ * Copyright 2023-2024 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -18,8 +18,8 @@
  */
 #pragma once
 
+#include <Physica/Core/Utils/CUDA/device_obj.cuh>
 #include "CellList.h"
-#include "Physica/Utils/CUDA/device_obj.cuh"
 
 namespace Physica::Core {
     template<class ScalarType>
@@ -29,8 +29,8 @@ namespace Physica::Core {
         using Index3D = typename GridBase::Index3D;
         using Vector3D = typename host_obj::Vector3D;
         using LatticeMatrix = device_obj<typename host_obj::LatticeMatrix>;
-        using DeviceIndexArray = Utils::device_obj<Utils::Array<size_t>>;
-        using DeviceNeighShift = Utils::device_obj<Utils::Array<Vector3D>>;
+        using DeviceIndexArray = device_obj<Array<size_t>>;
+        using DeviceNeighShift = device_obj<Array<Vector3D>>;
 
         LatticeMatrix lattice;
         Index3D cellGridDim;

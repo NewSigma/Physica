@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Weibo He.
+ * Copyright 2022-2024 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -50,7 +50,7 @@ int main() {
         0.8333333333333333, 0.2500000000000000, 0.5000000000000000,
         0.8333333333333333, 0.7500000000000000, 0.5000000000000000
     };
-    const Physica::Utils::Array<uint16_t> answer_atomic{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 8, 8, 8, 8, 8, 8};
+    const Array<uint16_t> answer_atomic{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 8, 8, 8, 8, 8, 8};
     CrystalCellType supercell_direct = cell_direct.makeSuperCell(3, 2, 1);
     if (!matrixNear(answer_lattice, supercell_direct.getLattice(), 1E-15))
         return 1;

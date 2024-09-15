@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Weibo He.
+ * Copyright 2023-2024 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -42,8 +42,8 @@ namespace Physica::Core {
     }
 
     template<class ScalarType>
-    Utils::Array<typename IceGenerator<ScalarType>::CrystalCellType> IceGenerator<ScalarType>::exhaust() {
-        Utils::Array<CrystalCellType> result{};
+    Array<typename IceGenerator<ScalarType>::CrystalCellType> IceGenerator<ScalarType>::exhaust() {
+        Array<CrystalCellType> result{};
         PositionMatrix pos = prepareRun();
         searchDanglingH(pos);
         exhaustImpl(0, pos, result);
@@ -73,7 +73,7 @@ namespace Physica::Core {
         assert(numDefect < getNumMolecule());
         PositionMatrix pos = initialCell.getPos();
 
-        Utils::Array<size_t> permutation(getNumMolecule());
+        Array<size_t> permutation(getNumMolecule());
         for (size_t i = 0; i < permutation.getLength(); ++i)
             permutation[i] = i;
 
@@ -106,8 +106,8 @@ namespace Physica::Core {
      */
     template<class ScalarType>
     template<class RandomGenerator>
-    Utils::Array<size_t> IceGenerator<ScalarType>::randRing(RandomGenerator& gen) const {
-        Utils::Array<size_t> ring{};
+    Array<size_t> IceGenerator<ScalarType>::randRing(RandomGenerator& gen) const {
+        Array<size_t> ring{};
         size_t ringStart = 0;
         {
             std::uniform_int_distribution<size_t> dist(0, getNumMolecule() - 1);
@@ -128,7 +128,7 @@ namespace Physica::Core {
             else if (isBondedH1 || isBondedH2)
                 indexH = isBondedH1 ? pair.first : pair.second;
             else
-                return Utils::Array<size_t>{};
+                return Array<size_t>{};
             
             size_t nextIndexO = getNumMolecule();
             /* Find next oxygen */ {
@@ -161,7 +161,7 @@ namespace Physica::Core {
         done:;
         }
 
-        Utils::Array<size_t> result(ring.getLength() - ringStart);
+        Array<size_t> result(ring.getLength() - ringStart);
         for (size_t i = 0; i < result.getLength(); ++i)
             result[i] = ring[i + ringStart];
         return result;
@@ -172,7 +172,7 @@ namespace Physica::Core {
      */
     template<class ScalarType>
     typename IceGenerator<ScalarType>::CrystalCellType IceGenerator<ScalarType>::makeRingMove(
-                const Utils::Array<size_t>& ring, PositionMatrix& momentumMat) const {
+                const Array<size_t>& ring, PositionMatrix& momentumMat) const {
         const bool isInvalidRing = ring.getLength() == 0;
         if (isInvalidRing)
             return initialCell;
@@ -256,8 +256,8 @@ namespace Physica::Core {
     }
 
     template<class ScalarType>
-    Utils::Array<size_t> IceGenerator<ScalarType>::findOInRadius(size_t indexO, ScalarType radius) const {
-        Utils::Array<size_t> result{};
+    Array<size_t> IceGenerator<ScalarType>::findOInRadius(size_t indexO, ScalarType radius) const {
+        Array<size_t> result{};
         const ScalarType squaredRadiusO = square(radius);
         for (size_t i = getStartIndexO(); i < getEndIndexO(); ++i) {
             const size_t shiftIndexO = getStartIndexO() + indexO;
@@ -271,9 +271,9 @@ namespace Physica::Core {
     }
 
     template<class ScalarType>
-    Utils::Array<size_t> IceGenerator<ScalarType>::findBondedH(size_t indexMolecule) const {
+    Array<size_t> IceGenerator<ScalarType>::findBondedH(size_t indexMolecule) const {
         const auto range = CrystalCellType::estimateRange(initialCell.getLattice(), maxDistOO);
-        Utils::Array<size_t> result{};
+        Array<size_t> result{};
         CrystalCellType::forCellInRange(range, initialCell.getLattice(), [this, indexMolecule, &result](Vector3D delta) {
             const ScalarType squaredRadiusH = square(maxDistOO * 0.5);
             const ScalarType squaredRadiusO = square(maxDistOO);
@@ -299,8 +299,8 @@ namespace Physica::Core {
     }
 
     template<class ScalarType>
-    Utils::Array<size_t> IceGenerator<ScalarType>::findFreeBondedHInRadius(size_t indexO) const {
-        Utils::Array<size_t> result{};
+    Array<size_t> IceGenerator<ScalarType>::findFreeBondedHInRadius(size_t indexO) const {
+        Array<size_t> result{};
         const auto hInRange = findBondedH(indexO);
         for (auto h : hInRange)
             if (!isHydrogenOccupied[h])
@@ -407,7 +407,7 @@ namespace Physica::Core {
     }
 
     template<class ScalarType>
-    size_t IceGenerator<ScalarType>::countFreeH(const Utils::Array<size_t>& hIndexes) const {
+    size_t IceGenerator<ScalarType>::countFreeH(const Array<size_t>& hIndexes) const {
         size_t numFreeH = 0;
         for (auto h : hIndexes)
             numFreeH += isHydrogenOccupied[h] == false;
@@ -453,7 +453,7 @@ namespace Physica::Core {
     }
 
     template<class ScalarType>
-    void IceGenerator<ScalarType>::exhaustImpl(size_t stackDepth, const PositionMatrix& pos, Utils::Array<CrystalCellType>& result) {
+    void IceGenerator<ScalarType>::exhaustImpl(size_t stackDepth, const PositionMatrix& pos, Array<CrystalCellType>& result) {
         const bool recursionStop = stackDepth == getNumMolecule();
         if (recursionStop) {
             CrystalCellType cell({initialCell.getLattice(), pos, CrystalCellType::Type::Cartesian}, initialCell.getAtomicNumbers());

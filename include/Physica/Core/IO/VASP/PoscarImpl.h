@@ -31,7 +31,7 @@ namespace Physica::Core {
             : Base(), elementTypes(), numOfEachType() {}
 
     template<class ScalarType>
-    Poscar<ScalarType>::Poscar(Base base, ElementTypeArray elementTypes_, Utils::Array<size_t> numOfEachType_)
+    Poscar<ScalarType>::Poscar(Base base, ElementTypeArray elementTypes_, Array<size_t> numOfEachType_)
             : Base(std::move(base))
             , elementTypes(std::move(elementTypes_))
             , numOfEachType(std::move(numOfEachType_)) {
@@ -178,7 +178,6 @@ namespace Physica::Core {
 
     template<class ScalarType>
     typename Poscar<ScalarType>::CrystalSystem Poscar<ScalarType>::getCrystalSystem(double precision) const noexcept {
-        using namespace Utils;
         const ScalarType norm_list[3]{lattice.row(0).squaredNorm(),
                                       lattice.row(1).squaredNorm(),
                                       lattice.row(2).squaredNorm()};

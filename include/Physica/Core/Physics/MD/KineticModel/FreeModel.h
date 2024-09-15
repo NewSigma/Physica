@@ -55,7 +55,7 @@ namespace Physica::Core {
     private:
         VectorType omegaK;
         ScalarType omegaW;
-        Utils::Array<Vector2D> coeffMatrixBase;
+        Array<Vector2D> coeffMatrixBase;
         ScalarType lastTimeStep;
         size_t numReplica;
     public:

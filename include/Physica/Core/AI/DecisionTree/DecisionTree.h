@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Weibo He.
+ * Copyright 2023-2024 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -41,10 +41,10 @@ namespace Physica::Core {
         struct Dataset {
             MatrixType features;
             VectorType labels;
-            Utils::Array<bool> isFeatureContinuous;
+            Array<bool> isFeatureContinuous;
         };
 
-        using LossFunctor = ScalarType (*)(const Dataset&, const Utils::Array<size_t>&);
+        using LossFunctor = ScalarType (*)(const Dataset&, const Array<size_t>&);
     private:
         enum NodeType {
             Regression,
@@ -53,7 +53,7 @@ namespace Physica::Core {
 
         size_t featureId;
         ScalarType splitPoint;
-        Utils::Array<DecisionTree> subTrees;
+        Array<DecisionTree> subTrees;
         NodeType nodeType;
     public:
         DecisionTree(const Dataset& dataset);
@@ -68,7 +68,7 @@ namespace Physica::Core {
         /* Static members */
         static DecisionTree train(const Dataset& dataset);
     private:
-        DecisionTree(size_t featureId_, ScalarType splitPoint_, Utils::Array<DecisionTree> subTrees_, NodeType nodeType_);
+        DecisionTree(size_t featureId_, ScalarType splitPoint_, Array<DecisionTree> subTrees_, NodeType nodeType_);
         /* Getters */
         [[nodiscard]] bool isClassifyNode() const noexcept { return !isLeafNode() && nodeType == NodeType::Classify; }
         [[nodiscard]] bool isRegressionNode() const noexcept { return !isLeafNode() && nodeType == NodeType::Regression; }
@@ -90,8 +90,8 @@ namespace Physica::Core {
                                   std::forward_list<size_t> availableFeature);
         static ScalarType findCommonLabel(const VectorType& labels, const std::forward_list<size_t>& availableSample);
         static ScalarType makeAverageLabel(const VectorType& labels, const std::forward_list<size_t>& availableSample);
-        static ScalarType giniIndex(const Dataset& dataset, const Utils::Array<size_t>& availableSample);
-        static ScalarType mse(const Dataset& dataset, const Utils::Array<size_t>& availableSample);
+        static ScalarType giniIndex(const Dataset& dataset, const Array<size_t>& availableSample);
+        static ScalarType mse(const Dataset& dataset, const Array<size_t>& availableSample);
         static std::pair<size_t, ScalarType> selectOptimalFeature(const Dataset& dataset,
                                                                   const std::forward_list<size_t>& availableSample,
                                                                   const std::forward_list<size_t>& availableFeature,

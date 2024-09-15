@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Weibo He.
+ * Copyright 2023-2024 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -20,7 +20,6 @@
 #include "Physica/Core/Math/Algebra/LinearAlgebra/LinearEquations/LUSolver.h"
 
 using namespace Physica::Core;
-using namespace Physica::Utils;
 
 int main() {
     using ScalarType = float64;

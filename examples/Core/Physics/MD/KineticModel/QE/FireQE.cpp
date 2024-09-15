@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Weibo He. All rights reserved.
+ * Copyright 2023-2024 Weibo He. All rights reserved.
  *
  * This file is part of PhysicaNotes.
  */
@@ -12,7 +12,6 @@
 #include "Physica/Core/Physics/MD/Barostat/Berendsen.h"
 
 using namespace Physica::Core;
-using namespace Physica::Utils;
 using ScalarType = float64;
 using VectorType = Vector<ScalarType>;
 using RandomPoolType = RandomPool<std::mt19937, 10002>;

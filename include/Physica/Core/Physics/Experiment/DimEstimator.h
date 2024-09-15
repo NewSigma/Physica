@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Weibo He.
+ * Copyright 2022-2024 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -23,7 +23,7 @@
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h"
 #include "Physica/Core/Math/Statistics/LinearFit.h"
 #include "Physica/Core/Math/Calculus/Interpolation.h"
-#include "Physica/Utils/Container/Array/Array.h"
+#include "Physica/Core/Utils/Container/Array.h"
 
 namespace Physica::Core {
     /**
@@ -38,7 +38,7 @@ namespace Physica::Core {
         Vector<ScalarType> correlateDim;
     public:
         template<class VectorType, class RandomGenerator>
-        DimEstimator(size_t sampleNum, const Utils::Array<size_t>& intrinsicDim_, const LValueVector<VectorType>& radius, RandomGenerator& gen);
+        DimEstimator(size_t sampleNum, const Array<size_t>& intrinsicDim_, const LValueVector<VectorType>& radius, RandomGenerator& gen);
         /* Operations */
         template<class MatrixType, class VectorType>
         ScalarType intrinDim(const LValueMatrix<MatrixType>& data, const LValueVector<VectorType>& radius) const;
@@ -53,7 +53,7 @@ namespace Physica::Core {
 
     template<class VectorType, class RandomGenerator>
     DimEstimator::DimEstimator(size_t sampleNum,
-                               const Utils::Array<size_t>& intrinsicDim_,
+                               const Array<size_t>& intrinsicDim_,
                                const LValueVector<VectorType>& radius,
                                RandomGenerator& gen)
             : intrinsicDim(intrinsicDim_.getLength()) {

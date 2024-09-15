@@ -28,9 +28,9 @@ namespace Physica::Core {
         using Base = RValueMatrix<This>;
         static_assert(MatrixOption::isElementMatrix<This>(), "[Error]: Sparse matrix should be element matrix");
     private:
-        Utils::Array<ScalarType> elements;
-        Utils::Array<size_t> minorIndexes;
-        Utils::Array<size_t> majorStarts;
+        Array<ScalarType> elements;
+        Array<size_t> minorIndexes;
+        Array<size_t> majorStarts;
         size_t maxMinor;
     public:
         SparseMatrix();
@@ -43,9 +43,9 @@ namespace Physica::Core {
         [[nodiscard]] ScalarType calc(size_t row, size_t col) const;
         [[nodiscard]] inline size_t getRow() const noexcept;
         [[nodiscard]] inline size_t getColumn() const noexcept;
-        [[nodiscard]] const Utils::Array<ScalarType>& getElements() const { return elements; }
-        [[nodiscard]] const Utils::Array<size_t>& getMinorIndexes() const { return minorIndexes; }
-        [[nodiscard]] const Utils::Array<size_t>& getMajorStarts() const { return majorStarts; }
+        [[nodiscard]] const Array<ScalarType>& getElements() const { return elements; }
+        [[nodiscard]] const Array<size_t>& getMinorIndexes() const { return minorIndexes; }
+        [[nodiscard]] const Array<size_t>& getMajorStarts() const { return majorStarts; }
         [[nodiscard]] inline size_t getMaxMajor() const noexcept;
         [[nodiscard]] inline size_t getMaxMinor() const noexcept;
         [[nodiscard]] size_t getNumNonZero() const noexcept { return elements.getLength(); }

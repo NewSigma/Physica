@@ -39,7 +39,7 @@ namespace Physica::Core {
         using FFTType = FFT<typename std::conditional<isComplex, PlainComplexType, PlainRealType>::type, 1>;
 
         FFTType fft_impl;
-        Utils::Array<ComplexType> buffer;
+        Array<ComplexType> buffer;
     public:
         FFT();
         FFT(size_t rSpaceSize, PlanFlag planFlag);

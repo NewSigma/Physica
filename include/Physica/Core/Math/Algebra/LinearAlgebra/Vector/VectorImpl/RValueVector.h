@@ -18,7 +18,7 @@
  */
 #pragma once
 
-#include <Physica/Utils/Template/CRTPBase.h>
+#include <Physica/CRTPBase.h>
 #include <Physica/Core/MultiPrecision/Scalar.h>
 #include <Physica/Core/MultiPrecision/ComplexScalar.h>
 #include <Physica/Core/Math/Algebra/LinearAlgebra/Matrix/MatrixOption.h>
@@ -58,10 +58,10 @@ namespace Physica::Core {
      * An RValueVector can be assigned to an LValueVector, but no other vector classes can be assigned to an RValueVector.
      */
     template<class Derived>
-    class RValueVector : public Utils::CRTPBase<Derived> {
+    class RValueVector : public CRTPBase<Derived> {
         static_assert(!std::is_const<Derived>::value, "[Error]: A common mistake, const is unnecessary");
         static_assert(!std::is_volatile<Derived>::value, "[Error]: A common mistake, volatile is unnecessary");
-        using Base = Utils::CRTPBase<Derived>;
+        using Base = CRTPBase<Derived>;
         template<size_t Length>
         using BlockType = RVectorBlock<Derived, Length>;
     public:
@@ -69,8 +69,8 @@ namespace Physica::Core {
         using PlainScalar = typename ScalarType::PlainScalar;
         constexpr static size_t SizeAtCompile = Traits<Derived>::SizeAtCompile;
         using PacketType = typename BestPacket<ScalarType, SizeAtCompile>::Type;
-        using ColMatrix = DenseMatrix<ScalarType, MatrixOption::Column | MatrixOption::Vector, SizeAtCompile, 1, Utils::HostAllocator<ScalarType>>;
-        using RowMatrix = DenseMatrix<ScalarType, MatrixOption::Row | MatrixOption::Vector, 1, SizeAtCompile, Utils::HostAllocator<ScalarType>>;
+        using ColMatrix = DenseMatrix<ScalarType, MatrixOption::Column | MatrixOption::Vector, SizeAtCompile, 1, HostAllocator<ScalarType>>;
+        using RowMatrix = DenseMatrix<ScalarType, MatrixOption::Row | MatrixOption::Vector, 1, SizeAtCompile, HostAllocator<ScalarType>>;
         constexpr static bool isReverseDiff = ScalarType::isReverseDiff;
         constexpr static bool isComplex = ScalarType::isComplex;
     private:
@@ -81,13 +81,13 @@ namespace Physica::Core {
         /* Operations */
         template<class OtherDerived, class Executor = SequentialExecutor>
         inline void assignTo(LValueVector<OtherDerived>& v) const;
-
+        /* Getters */
         [[nodiscard]] ScalarType calc(size_t index) const { return Base::getDerived().calc(index); }
         template<class AnyPacket>
         [[nodiscard]] inline AnyPacket packet(size_t index) const;
         template<class AnyPacket>
         [[nodiscard]] inline AnyPacket packetPartial(size_t index, size_t count) const;
-        /* Getters */
+
         [[nodiscard]] inline FormatedVector<Derived> format() const;
         [[nodiscard]] TransposeVector<Derived> transpose() const noexcept { return TransposeVector<Derived>(*this); }
         [[nodiscard]] ConjugateVector<Derived> conjugate() const noexcept { return ConjugateVector<Derived>(*this); }

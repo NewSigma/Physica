@@ -30,12 +30,12 @@ namespace Physica::Core {
     template<class ScalarType>
     class VASPModel {
         using MDCellType = MDCell<ScalarType>;
-        using WorkingDirType = Utils::TempDir<15>;
+        using WorkingDirType = TempDir<15>;
     private:
         std::string pathToVasp;
         WorkingDirType workingDir;
         int logFd;
-        Utils::Array<size_t> numOfEachType;
+        Array<size_t> numOfEachType;
         unsigned int numMPIProcess;
     public:
         VASPModel() = default;
@@ -44,7 +44,7 @@ namespace Physica::Core {
             const char* pathToINCAR,
             const char* pathToPOTCAR,
             const char* pathToKpoints,
-            Utils::Array<size_t> numOfEachType_,
+            Array<size_t> numOfEachType_,
             unsigned int numMPIProcess_);
         VASPModel(const VASPModel&) = delete;
         VASPModel(VASPModel&&) noexcept = default;
@@ -74,13 +74,12 @@ namespace Physica::Core {
                                      const char* pathToINCAR,
                                      const char* pathToPOTCAR,
                                      const char* pathToKPOINTS,
-                                     Utils::Array<size_t> numOfEachType_,
+                                     Array<size_t> numOfEachType_,
                                      unsigned int numMPIProcess_)
             : pathToVasp(std::move(pathToVasp_))
             , workingDir("/tmp/tmpXXXXXX")
             , numOfEachType(std::move(numOfEachType_))
             , numMPIProcess(numMPIProcess_) {
-        using namespace Physica::Utils;
         auto path = makePath("%s/log", workingDir.getName());
         logFd = open(path.data(), O_WRONLY | O_TRUNC | O_CREAT, S_IRUSR | S_IWUSR);
         if (logFd == -1)
@@ -107,7 +106,7 @@ namespace Physica::Core {
     void VASPModel<ScalarType>::forceAsync(const MDCellType& cell, ContinuousVector<VectorType>& result) const noexcept {
         try {
             /* Make POSCAR */ {
-                const auto path = Utils::makePath("%s/POSCAR", workingDir.getName());
+                const auto path = makePath("%s/POSCAR", workingDir.getName());
                 std::ofstream os(path.data(), std::ios_base::out | std::ios_base::trunc);
                 os << '\n';
                 os << PhyConst<AU>::bohrToAngstorm(1) << '\n';
@@ -120,7 +119,7 @@ namespace Physica::Core {
             const int error = run_vasp().wait();
             if (error != 0) [[unlikely]]
                 throw std::runtime_error("[Error]: VASP finished with non zero exit code");
-            const auto path = Utils::makePath("%s/OUTCAR", workingDir.getName());
+            const auto path = makePath("%s/OUTCAR", workingDir.getName());
             const Outcar outcar(path.data(), getNumParticle());
             result.getDerived() = outcar.getForce();
         }

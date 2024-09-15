@@ -19,7 +19,7 @@
 #pragma once
 
 #include <vectorclass/vectorclass.h>
-#include <Physica/Utils/Container/Array/Array.h>
+#include <Physica/Core/Utils/Container/Array.h>
 #include "Scalar.h"
 #include "SIMDImpl/Instruset.h"
 

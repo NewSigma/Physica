@@ -22,15 +22,15 @@
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.cuh"
 #include "Physica/Core/Physics/MD/MDCell.cuh"
 #include "Physica/Core/Physics/MD/MDImpl/CellList.cuh"
-#include "Physica/Utils/Allocator/PageLockedAllocator.cuh"
+#include "Physica/Core/Utils/Allocator/PageLockedAllocator.cuh"
 
 namespace Physica::Core {
     template<class Derived>
-    class device_obj<PairModel<Derived>> : public Utils::CRTPBase<device_obj<Derived>> {
-        static_assert(!Utils::is_device_obj<Derived>::value, "[Error]: Nested device_obj is unnecessary");
+    class device_obj<PairModel<Derived>> : public CRTPBase<device_obj<Derived>> {
+        static_assert(!is_device_obj<Derived>::value, "[Error]: Nested device_obj is unnecessary");
         using host_obj = PairModel<Derived>;
         using This = device_obj<PairModel<Derived>>;
-        using Base = Utils::CRTPBase<device_obj<Derived>>;
+        using Base = CRTPBase<device_obj<Derived>>;
         using TraitType = Traits<Derived>;
 
         constexpr static bool IsPotDependOnAtomIndex = TraitType::IsPotDependOnAtomIndex;
@@ -52,7 +52,7 @@ namespace Physica::Core {
         using Vector3D = device_obj<Vector<ScalarType, 3>>;
         using ForceBufferType = device_obj<DenseMatrix<ScalarType>>;
         using VirialBufferType = device_obj<DenseMatrix<ScalarType, MatrixOption::Column | MatrixOption::Element, NumVirialElem>>;
-        using PageLockedVector = Vector<ScalarType, Dynamic, Utils::PageLockedAllocator<ScalarType>>;
+        using PageLockedVector = Vector<ScalarType, Dynamic, PageLockedAllocator<ScalarType>>;
     private:
         ScalarType cutoff;
         ScalarType squared_cutoff;

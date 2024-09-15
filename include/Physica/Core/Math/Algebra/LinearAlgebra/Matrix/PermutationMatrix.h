@@ -24,11 +24,11 @@
 namespace Physica::Core {
     template<class ScalarType>
     class PermutationMatrix : public RValueMatrix<PermutationMatrix<ScalarType>> {
-        Utils::Array<size_t> indexes;
+        Array<size_t> indexes;
     public:
         PermutationMatrix() = default;
         PermutationMatrix(size_t order);
-        PermutationMatrix(Utils::Array<size_t> indexes_);
+        PermutationMatrix(Array<size_t> indexes_);
         PermutationMatrix(const PermutationMatrix&) = default;
         PermutationMatrix(PermutationMatrix&&) noexcept = default;
         ~PermutationMatrix() = default;
@@ -51,7 +51,7 @@ namespace Physica::Core {
     }
 
     template<class ScalarType>
-    PermutationMatrix<ScalarType>::PermutationMatrix(Utils::Array<size_t> indexes_) : indexes(std::move(indexes_)) {
+    PermutationMatrix<ScalarType>::PermutationMatrix(Array<size_t> indexes_) : indexes(std::move(indexes_)) {
         std::unordered_set<size_t> buffer{};
         for (size_t index : indexes) {
             if (index >= indexes.getLength())
@@ -75,7 +75,7 @@ namespace Physica::Core {
 
     template<class ScalarType>
     PermutationMatrix<ScalarType> PermutationMatrix<ScalarType>::inverse() const noexcept {
-        Utils::Array<size_t> result(indexes.getLength());
+        Array<size_t> result(indexes.getLength());
         for (size_t i = 0; i < result.getLength(); ++i)
             result[indexes[i]] = i;
         return PermutationMatrix<ScalarType>(std::move(result));

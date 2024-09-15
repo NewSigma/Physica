@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Weibo He.
+ * Copyright 2021-2024 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -21,20 +21,20 @@
 #include <fstream>
 #include "Physica/Core/Physics/PhyConst.h"
 #include "Physica/Core/Math/Geometry/Point.h"
-#include "Physica/Utils/Container/Array/Array.h"
+#include "Physica/Core/Utils/Container/Array.h"
 
 namespace Physica::Core::Physics {
     template<class ScalarType>
     class Molecular {
         using PointType = Point<3, ScalarType>;
-        Utils::Array<PointType> atoms;
-        Utils::Array<uint8_t> atomicNumbers;
+        Array<PointType> atoms;
+        Array<uint8_t> atomicNumbers;
     public:
         Molecular(size_t atomCount);
         ~Molecular() = default;
         /* Getters */
-        [[nodiscard]] Utils::Array<PointType>& getAtoms() noexcept { return atoms; }
-        [[nodiscard]] Utils::Array<uint8_t>& getAtomicNumbers() noexcept { return atomicNumbers; }
+        [[nodiscard]] Array<PointType>& getAtoms() noexcept { return atoms; }
+        [[nodiscard]] Array<uint8_t>& getAtomicNumbers() noexcept { return atomicNumbers; }
         [[nodiscard]] size_t getAtomCount() const noexcept { return atoms.getLength(); }
         [[nodiscard]] PointType getAtom(size_t i) const { return atoms[i]; }
         [[nodiscard]] uint8_t getAtomicNumber(size_t i) const { return atomicNumbers[i]; }

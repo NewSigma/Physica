@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Weibo He.
+ * Copyright 2023-2024 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -24,7 +24,7 @@ namespace Physica::Core {
     template<class ScalarType>
     class ProbabilityDistributionFunction {
         using This = ProbabilityDistributionFunction;
-        using BucketType = Utils::Array<size_t>;
+        using BucketType = Array<size_t>;
         using VectorType = Vector<ScalarType>;
 
         BucketType bucket;

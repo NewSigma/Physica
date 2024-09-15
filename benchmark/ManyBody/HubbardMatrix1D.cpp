@@ -23,10 +23,9 @@
 #include <Physica/Core/Physics/ManyBody/ExactDiag/Hamilton/HubbardMatrix.h>
 #include <Physica/Core/Physics/ManyBody/ExactDiag/ReprSpace/KSpinRepr.h>
 #include <Physica/Core/Parallel/Executor/ThreadExecutor.h>
-#include <Physica/Utils/Cycler.h>
+#include <Physica/Core/Utils/Cycler.h>
 
 using namespace Physica::Core;
-using namespace Physica::Utils;
 using RealType = float64;
 using ScalarType = ComplexScalar<RealType>;
 using VectorType = Vector<RealType>;

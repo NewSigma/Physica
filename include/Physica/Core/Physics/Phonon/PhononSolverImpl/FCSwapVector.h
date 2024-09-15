@@ -30,8 +30,8 @@ namespace Physica::Core {
     template<class ScalarType>
     class FCSwapVector : public SparseVector<ScalarType> {
         using Base = SparseVector<ScalarType>;
-        using Index3D = Utils::Array<size_t, 3>;
-        using Index5D = Utils::Array<size_t, 5>;
+        using Index3D = Array<size_t, 3>;
+        using Index5D = Array<size_t, 5>;
 
         Index3D superSize;
         Index3D cellIndex;

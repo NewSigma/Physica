@@ -119,7 +119,7 @@ namespace Physica::Core {
         using ComplexType = typename Traits<This>::ComplexType;
         using PlanType = typename Traits<This>::PlanType;
         using ComplexTypeFFTW = typename Traits<This>::ComplexTypeFFTW;
-        using IndexArray = Utils::Array<size_t, Dim>;
+        using IndexArray = Array<size_t, Dim>;
         constexpr static bool isComplex = Traits<This>::isComplex;
         constexpr static bool isSinglePrec = Traits<This>::isSinglePrec;
     public:
@@ -129,12 +129,12 @@ namespace Physica::Core {
         PlanType forward_plan;
         PlanType backward_plan;
         ComplexTypeFFTW* buffer;
-        Utils::Array<int, Dim> rSpaceSize;
-        Utils::Array<int, Dim> kSpaceSize;
+        Array<int, Dim> rSpaceSize;
+        Array<int, Dim> kSpaceSize;
         PlanFlag planFlag;
     public:
         FFT();
-        FFT(const Utils::Array<size_t, Dim>& rSpaceSize_, PlanFlag planFlag_);
+        FFT(const Array<size_t, Dim>& rSpaceSize_, PlanFlag planFlag_);
         FFT(const FFT&);
         FFT(FFT&&) noexcept;
         ~FFT();
@@ -160,30 +160,30 @@ namespace Physica::Core {
         [[nodiscard]] __host__ __device__ const RSpaceType& getRSpace() const { return *this; }
         [[nodiscard]] __host__ __device__ const KSpaceType& getKSpace() const { return *this; }
         /* Static members */
-        [[nodiscard]] inline static FFT<ScalarType, Dim> makeEmptyFFT(const Utils::Array<size_t, Dim>& rSpaceSize);
+        [[nodiscard]] inline static FFT<ScalarType, Dim> makeEmptyFFT(const Array<size_t, Dim>& rSpaceSize);
         template<class IndexType>
-        [[nodiscard]] static Utils::Array<IndexType, Dim> rSizeToKSize(const Utils::Array<IndexType, Dim>& rSize);
+        [[nodiscard]] static Array<IndexType, Dim> rSizeToKSize(const Array<IndexType, Dim>& rSize);
         static void transform(const This& planProvider, This& bufferProvider);
         static void rawInvTransform(const This& planProvider, This& bufferProvider);
         static void invTransform(const This& planProvider, This& bufferProvider);
     private:
-        FFT(const Utils::Array<size_t, Dim>& rSpaceSize_);
+        FFT(const Array<size_t, Dim>& rSpaceSize_);
         /* Operations */
         void initializePlan();
         PlanType makeForwardPlan();
         PlanType makeBackwardPlan();
         size_t sumRSpaceSize(size_t from_dim) const;
         size_t sumKSpaceSize(size_t from_dim) const;
-        void normalizeIndexes(Utils::Array<ssize_t, Dim>& indexes) const;
+        void normalizeIndexes(Array<ssize_t, Dim>& indexes) const;
         [[nodiscard]] size_t componentsSizeFrom(size_t dim) const;
-        [[nodiscard]] Utils::Array<ssize_t, Dim> linearIndexToDim(size_t index) const;
+        [[nodiscard]] Array<ssize_t, Dim> linearIndexToDim(size_t index) const;
         /* Getters */
         [[nodiscard]] __host__ __device__ RealType* asRealBuffer() { return reinterpret_cast<RealType*>(buffer); }
         [[nodiscard]] __host__ __device__ ComplexType* asComplexBuffer() { return reinterpret_cast<ComplexType*>(buffer); }
         [[nodiscard]] __host__ __device__ const RealType* asRealBuffer() const { return reinterpret_cast<const RealType*>(buffer); }
         [[nodiscard]] __host__ __device__ const ComplexType* asComplexBuffer() const { return reinterpret_cast<const ComplexType*>(buffer); }
         /* Static members */
-        static bool checkSize(const Utils::Array<size_t, Dim>& rSpaceSize);
+        static bool checkSize(const Array<size_t, Dim>& rSpaceSize);
         /* Friends */
         friend class FFTRSpace<This, Dim>;
         friend class FFTKSpace<This, Dim>;

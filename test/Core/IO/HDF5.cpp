@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Weibo He.
+ * Copyright 2023-2024 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -18,10 +18,9 @@
  */
 #include <iostream>
 #include "Physica/Core/IO/HDF5/HDF5.h"
-#include "Physica/Utils/Unix/TempFile.h"
+#include <Physica/Core/Utils/Unix/TempFile.h>
 
 using namespace Physica::Core;
-using namespace Physica::Utils;
 
 int main() {
     TempFile temp("/tmp/tmpXXXXXX");

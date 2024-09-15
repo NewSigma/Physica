@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Weibo He.
+ * Copyright 2023-2024 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -61,7 +61,7 @@ namespace Physica::Core {
 
         PositionMatrix new_pos(source.getRow(), 3);
         MassVector new_mass(numAtom);
-        Utils::Array<size_t> orderStage1(numAtom);
+        Array<size_t> orderStage1(numAtom);
         /* Stage 1: Classify H and O */ {
             size_t indexH = 0, indexO = numH;
             for (size_t i = 0; i < numAtom; ++i) {
@@ -77,7 +77,7 @@ namespace Physica::Core {
             assert(indexO == numAtom);
             cell.setPos(new_pos);
         }
-        Utils::Array<size_t> orderStage2(numAtom);
+        Array<size_t> orderStage2(numAtom);
         /* Stage 2: Sort H */ {
             for (size_t i = 0; i < numO; ++i) {
                 const size_t indexO = i + numH;

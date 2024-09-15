@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Weibo He.
+ * Copyright 2021-2024 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -19,7 +19,7 @@
 #pragma once
 
 #include "Physica/Macro.h"
-#include "Physica/Utils/Container/Array/Array.h"
+#include "Physica/Core/Utils/Container/Array.h"
 
 namespace Physica::Core::Physics {
     class PHYSICA_API ElectronConfig {
@@ -30,7 +30,7 @@ namespace Physica::Core::Physics {
             DoubleOccupacy
         };
     private:
-        Utils::Array<OrbitState> states;
+        Array<OrbitState> states;
     public:
         ElectronConfig(size_t maxOrbitCount) : states(maxOrbitCount, NoOccupacy) { assert(maxOrbitCount > 0); }
         /* Setters */

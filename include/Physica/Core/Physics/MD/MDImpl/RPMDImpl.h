@@ -530,7 +530,7 @@ namespace Physica::Core {
         if constexpr (NumReplica == 1)
             return makeStressClassical<ForceModel, Executor>(model);
 
-        Utils::Array<LatticeMatrix> buffer(getNumReplica());
+        Array<LatticeMatrix> buffer(getNumReplica());
         const ScalarType squaredOmegaW = square(ringPolymer.calcOmegaW(temperatureT));
         auto kernel = [this, &model, &buffer, squaredOmegaW](unsigned int replica) {
             using VectorType = Vector<ScalarType, Dim>;
@@ -586,7 +586,7 @@ namespace Physica::Core {
         if constexpr (NumReplica == 1)
             return makeStressClassical<ForceModel, Executor>(model);
 
-        Utils::Array<LatticeMatrix> buffer(getNumReplica());
+        Array<LatticeMatrix> buffer(getNumReplica());
         const auto centroidPos = ringPolymer.makeCentroidPos();
         auto kernel = [this, &model, &buffer, &centroidPos](unsigned int replica) {
             using VectorType = Vector<ScalarType, Dim>;
@@ -658,7 +658,7 @@ namespace Physica::Core {
             }
         }
         else {
-            Utils::Array<LatticeMatrix> buffer(getNumReplica());
+            Array<LatticeMatrix> buffer(getNumReplica());
             auto kernel = [this, &model, &buffer](unsigned int replica) {
                 const size_t dof = getDOF();
                 const size_t numReplica = getNumReplica();

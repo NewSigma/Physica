@@ -22,10 +22,9 @@
 #include <Physica/Core/Physics/MD/ForceModel/SilveraGoldman.h>
 #include <Physica/Core/Parallel/Executor/ThreadExecutor.h>
 #include <Physica/Core/Physics/MD/KineticModel/FreeModel.h>
-#include <Physica/Utils/BenchmarkHelper.h>
+#include <Physica/Core/Utils/BenchmarkHelper.h>
 
 using namespace Physica::Core;
-using namespace Physica::Utils;
 using ScalarType = float32;
 using KineticModel = FreeModel<ScalarType, 3, Physica::Dynamic, RPMDIntegrator::Exact>;
 using ForceModel = SilveraGoldman<ScalarType, true>;

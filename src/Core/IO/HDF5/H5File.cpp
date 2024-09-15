@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Weibo He.
+ * Copyright 2023-2024 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -42,7 +42,7 @@ namespace Physica::Core {
         const hsize_t size = fin.tellg();
         fin.seekg(0, std::ios::beg);
 
-        auto buffer = Utils::Array<char>(size);
+        auto buffer = Array<char>(size);
         fin.read(buffer.data(), size);
         const auto space = H5DataSpace<1>({size});
         auto dataset = Base::createDataSet(name, H5::PredType::NATIVE_CHAR, space);

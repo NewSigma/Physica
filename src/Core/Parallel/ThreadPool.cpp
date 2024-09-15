@@ -62,7 +62,7 @@ namespace Physica::Core {
         waitExit();
         exit = false;
         const int numThread = makeNumThread();
-        thread_data = Utils::Array<ThreadData>(numThread);
+        thread_data = Array<ThreadData>(numThread);
         for (int i = 0; i < numThread; ++i) {
             thread_data[i].thread.reset(new std::thread([this, i]() { workerMainLoop(i); } ));
         }

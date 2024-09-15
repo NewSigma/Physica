@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Weibo He.
+ * Copyright 2022-2024 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -18,12 +18,12 @@
  */
 #pragma once
 
-#include "Physica/Utils/Template/CRTPBase.h"
+#include <Physica/CRTPBase.h>
 
 namespace Physica::Core {
     template<class Derived>
-    class ParamSet : public Utils::CRTPBase<Derived> {
-        using Base = Utils::CRTPBase<Derived>;
+    class ParamSet : public CRTPBase<Derived> {
+        using Base = CRTPBase<Derived>;
     public:
         template<class RandomGenerator>
         [[nodiscard]] static Derived randomSet(RandomGenerator& gen) { return Base::getDerived().random(gen); }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Weibo He.
+ * Copyright 2023-2024 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -28,7 +28,7 @@ namespace Physica::Core {
 
         std::ifstream fin;
         Vector<ScalarType> force;
-        Utils::Array<char> buffer;
+        Array<char> buffer;
     public:
         PWscfOut(const char* path, size_t numAtom);
         PWscfOut(const PWscfOut&) = delete;

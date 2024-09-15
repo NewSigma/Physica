@@ -23,10 +23,10 @@ namespace Physica::Core {
 
     template<class Derived>
     class FFTKSpace<Derived, 1>
-            : public Utils::CRTPBase<Derived, 1>
+            : public CRTPBase<Derived, 1>
             , public ContinuousVector<FFTKSpace<Derived, 1>> {
         using This = FFTKSpace<Derived, 1>;
-        using Base = Utils::CRTPBase<Derived, 1>;
+        using Base = CRTPBase<Derived, 1>;
         using VectorBase = ContinuousVector<This>;
         using RealType = typename Traits<This>::ScalarType::RealType;
     public:
@@ -102,10 +102,10 @@ namespace Physica::Core {
     //////////////////////////////////////////////////////////////////////
     template<class Derived>
     class FFTKSpace<Derived, 2>
-            : public Utils::CRTPBase<Derived, 1>
+            : public CRTPBase<Derived, 1>
             , public ContinuousMatrix<FFTKSpace<Derived, 2>> {
         using This = FFTKSpace<Derived, 2>;
-        using Base = Utils::CRTPBase<Derived, 1>;
+        using Base = CRTPBase<Derived, 1>;
         using MatrixBase = ContinuousMatrix<This>;
     public:
         using typename MatrixBase::ScalarType;
@@ -161,10 +161,10 @@ namespace Physica::Core {
     //////////////////////////////////////////////////////////////////////
     template<class Derived>
     class FFTKSpace<Derived, 3>
-            : public Utils::CRTPBase<Derived, 1>
+            : public CRTPBase<Derived, 1>
             , public LValueGrid<FFTKSpace<Derived, 3>> {
         using This = FFTKSpace<Derived, 3>;
-        using Base = Utils::CRTPBase<Derived, 1>;
+        using Base = CRTPBase<Derived, 1>;
         using GridBase = LValueGrid<This>;
     public:
         using typename GridBase::ScalarType;

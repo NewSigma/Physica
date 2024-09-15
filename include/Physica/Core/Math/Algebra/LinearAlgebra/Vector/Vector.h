@@ -19,17 +19,17 @@
 #pragma once
 
 #include <Physica/Core/MultiPrecision/Scalar.h>
-#include <Physica/Utils/Container/Array/Array.h>
+#include <Physica/Core/Utils/Container/Array.h>
 #include <Physica/Core/Math/Algebra/LinearAlgebra/Matrix/MatrixOption.h>
 #include "VectorImpl/ContinuousVector.h"
 
 namespace Physica::Core {
-    template<class T, size_t Length = Dynamic, class Allocator = Utils::HostAllocator<T>>
-    class Vector : public ContinuousVector<Vector<T, Length, Allocator>>, public Utils::Array<T, Length, Allocator> {
+    template<class T, size_t Length = Dynamic, class Allocator = HostAllocator<T>>
+    class Vector : public ContinuousVector<Vector<T, Length, Allocator>>, public Array<T, Length, Allocator> {
         using This = Vector<T, Length, Allocator>;
     public:
         using Base = ContinuousVector<This>;
-        using Storage = Utils::Array<T, Length, Allocator>;
+        using Storage = Array<T, Length, Allocator>;
         using device_obj_type = device_obj<This>;
         using typename Base::ScalarType;
         using typename Base::PlainScalar;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Weibo He.
+ * Copyright 2023-2024 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -18,13 +18,13 @@
  */
 #pragma once
 
-#include "Physica/Utils/Container/Array/Array.h"
+#include "Physica/Core/Utils/Container/Array.h"
 #include "Physica/Core/Physics/SolidState/PeriodicCell.h"
 
 namespace Physica::Core {
     class GridBase {
     public:
-        using Index3D = Utils::Array<size_t, 3>;
+        using Index3D = Array<size_t, 3>;
         /* Static members */
         template<class ScalarType, bool IsUnitLattice, class Functor>
         static void forPointInGrid(Index3D dim, const typename PeriodicCell<ScalarType, 3>::LatticeMatrix& lattice, Functor func);

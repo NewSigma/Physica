@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Weibo He.
+ * Copyright 2021-2024 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -20,13 +20,13 @@
 #pragma once
 
 #include <string>
-#include "Physica/Utils/RingBuffer.h"
+#include <Physica/Core/Utils/Container/RingBuffer.h>
 
 namespace Physica::Logger {
     /**
      * LogThread will scan and delete buffers that should be deleted.
      */
-    class LogBuffer : public Utils::RingBuffer {
+    class LogBuffer : public Core::RingBuffer {
         bool shouldDelete;
     public:
         LogBuffer(size_t size) : RingBuffer(size), shouldDelete(false) {}
