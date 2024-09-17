@@ -22,8 +22,8 @@
 #include <Physica/Core/Math/Statistics/NumCharacter.h>
 #include <Physica/Core/Math/Random/RandomPool.h>
 #include <Physica/Core/Math/Algebra/LinearAlgebra/Eigen/SymmEigenSolver.h>
-#include <Physica/Core/Physics/ManyBody/ExactDiag/Hamilton/HubbardMatrix.h>
-#include <Physica/Core/Physics/ManyBody/ExactDiag/ReprSpace/SpinRepr.h>
+#include <Physica/Core/Physics/ManyBody/Hamilton/HubbardMatrix.h>
+#include <Physica/Core/Physics/ManyBody/ReprSpace/SpinRepr.h>
 #include <Physica/Gui/Plot/Plot.h>
 
 using namespace Physica::Core;

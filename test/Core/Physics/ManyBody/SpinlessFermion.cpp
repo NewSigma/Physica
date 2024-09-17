@@ -17,7 +17,7 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include <iostream>
-#include <Physica/Core/Physics/ManyBody/ExactDiag/ReprSpace/State/SpinlessFermion.h>
+#include <Physica/Core/Physics/ManyBody/ReprSpace/State/SpinlessFermion.h>
 
 using namespace Physica::Core;
 

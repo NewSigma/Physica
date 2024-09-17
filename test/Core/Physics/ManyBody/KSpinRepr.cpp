@@ -19,8 +19,8 @@
 #include <iostream>
 #include "Physica/Core/Math/Random/RandomPool.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Eigen/JacobiDavidson.h"
-#include "Physica/Core/Physics/ManyBody/ExactDiag/Hamilton/HubbardMatrix.h"
-#include "Physica/Core/Physics/ManyBody/ExactDiag/ReprSpace/KSpinRepr.h"
+#include <Physica/Core/Physics/ManyBody/Hamilton/HubbardMatrix.h>
+#include <Physica/Core/Physics/ManyBody/ReprSpace/KSpinRepr.h>
 #include "Physica/Core/Parallel/Executor/ThreadExecutor.h"
 
 using namespace Physica::Core;

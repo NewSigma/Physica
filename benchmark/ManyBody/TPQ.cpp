@@ -19,9 +19,9 @@
 #include <iostream>
 #include <gperftools/profiler.h>
 #include <Physica/Core/Math/Random/RandomPool.h>
-#include <Physica/Core/Physics/ManyBody/ExactDiag/Hamilton/HubbardMatrix.h>
-#include <Physica/Core/Physics/ManyBody/ExactDiag/ReprSpace/SpinRepr.h>
-#include <Physica/Core/Physics/ManyBody/ExactDiag/TPQ.h>
+#include <Physica/Core/Physics/ManyBody/Hamilton/HubbardMatrix.h>
+#include <Physica/Core/Physics/ManyBody/ReprSpace/SpinRepr.h>
+#include <Physica/Core/Physics/ManyBody/TPQ.h>
 #include <Physica/Core/Utils/BenchmarkHelper.h>
 
 using namespace Physica::Core;
