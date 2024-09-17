@@ -1,0 +1,99 @@
+#############################################Settings#############################################
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED TRUE)
+set(CMAKE_CXX_VISIBILITY_PRESET "hidden")
+set(CMAKE_VISIBILITY_INLINES_HIDDEN TRUE)
+
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -fPIC -mrdrnd")
+if(${PHYSICA_OPTIMIZE})
+    add_definitions(-DPHYSICA_ASM)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=native")
+endif()
+
+if(NOT ${CMAKE_BUILD_TYPE} MATCHES "Debug")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-math-errno -fno-signaling-nans -fno-trapping-math")
+endif()
+
+if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-ignored-optimization-argument -Wno-unknown-warning-option")
+    add_link_options(-lstdc++) # Add this if you prefer libstdc++
+endif()
+
+if(${PHYSICA_CUDA})
+    if(NOT DEFINED CMAKE_CUDA_ARCHITECTURES)
+        message(FATAL_ERROR "To use CUDA, you should define CMAKE_CUDA_ARCHITECTURES.")
+    endif()
+    enable_language(CUDA)
+    find_package(CUDAToolkit REQUIRED)
+    add_definitions(-DPHYSICA_CUDA)
+
+    set(CMAKE_CUDA_STANDARD ${CMAKE_CXX_STANDARD})
+    set(CMAKE_CUDA_STANDARD_REQUIRED ${CMAKE_CXX_STANDARD_REQUIRED})
+    set(CMAKE_CUDA_VISIBILITY_PRESET ${CMAKE_CXX_VISIBILITY_PRESET})
+    set(CMAKE_CUDA_SEPARABLE_COMPILATION ON)
+
+    set(CMAKE_CUDA_FLAGS_DEBUG "${CMAKE_CUDA_FLAGS_DEBUG} -G")
+    set(CMAKE_CUDA_FLAGS_RELWITHDEBINFO "${CMAKE_CUDA_FLAGS_RELWITHDEBINFO} -G -dopt=on")
+    # clangd does not work with response file
+    # Reference: https://github.com/clangd/clangd/discussions/1676
+    set(CMAKE_CUDA_USE_RESPONSE_FILE_FOR_INCLUDES 0)
+
+    # Warning 20011: Call host function from host-device function
+    # Warning 20208: Use long double in device code
+    set(CMAKE_CUDA_FLAGS 
+        ${CMAKE_CUDA_FLAGS}
+        --Wreorder
+        --Wdefault-stream-launch
+        --Wext-lambda-captures-this
+        --Wno-deprecated-declarations
+        --Wno-deprecated-gpu-targets
+        --diag-suppress 20011
+        --diag-suppress 20208
+        --default-stream per-thread
+        ${CMAKE_CXX_FLAGS})
+    string(REPLACE ";" " " CMAKE_CUDA_FLAGS "${CMAKE_CUDA_FLAGS}")
+endif()
+##############################################Libs################################################
+# FFTW3
+find_package(FFTW3 REQUIRED)
+link_directories(${FFTW3_LIBRARY_DIRS})
+include_directories(SYSTEM ${FFTW3_INCLUDE_DIRS})
+
+if (${PHYSICA_HDF5})
+    find_package(HDF5 NAMES hdf5 REQUIRED COMPONENTS CXX shared)
+    include_directories(SYSTEM ${HDF5_INCLUDE_DIR_CPP})
+    add_definitions(-DPHYSICA_HDF5 -DH5_NO_DEPRECATED_SYMBOLS)
+endif()
+
+if(${PHYSICA_PROFILE})
+    find_package(GPerfTools REQUIRED)
+    include_directories(SYSTEM ${GPerfTools_INCLUDE_DIR})
+endif()
+
+if(${PHYSICA_GUI})
+    find_package(Qt6 COMPONENTS Core Widgets REQUIRED)
+endif()
+
+if(${PHYSICA_MKL})
+    set(MKL_ARCH intel64)
+    set(MKL_LINK dynamic)
+    set(MKL_THREADING sequential)
+    set(MKL_INTERFACE_FULL intel_ilp64)
+    find_package(MKL REQUIRED)
+    add_definitions(-DPHYSICA_MKL)
+    include_directories(SYSTEM ${MKL_INCLUDE})
+endif()
+
+if(${PHYSICA_MPI})
+    find_package(MPI REQUIRED)
+    add_definitions(-DPHYSICA_MPI)
+    include_directories(SYSTEM ${MPI_CXX_INCLUDE_DIRS})
+endif()
+
+if(${PHYSICA_CUDA})
+    include_directories(SYSTEM ${CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES})
+    set(CUDA_MATH_INCLUDE_DIRECTORIES ${CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES}/../../../../../math_libs/include)
+    if (EXISTS ${CUDA_MATH_INCLUDE_DIRECTORIES}) # NVIDIA HPC SDK seems do not put math includes in standard location
+        include_directories(SYSTEM ${CUDA_MATH_INCLUDE_DIRECTORIES})
+    endif()
+endif()

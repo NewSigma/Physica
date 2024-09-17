@@ -33,6 +33,8 @@ namespace Physica {
         constexpr static unsigned int MaxThreadsPerBlock = 1024;
         constexpr static unsigned int WarpSize = @WarpSize@;
         constexpr static bool MemoryPoolsSupported = @MemoryPoolsSupported@;
+
+        static_assert(WarpSize > 0, "[Error]: Generate attributes automatically by compiling on a machine equipped with GPUs, or specify attributes based on your target device");
     #endif
     };
 }

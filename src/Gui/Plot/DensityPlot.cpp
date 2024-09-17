@@ -19,7 +19,6 @@
 #include <QtGui/QPainter>
 #include <QMouseEvent>
 #include "Physica/Gui/Plot/DensityPlot.h"
-#include "Physica/Logger/LoggerRuntime.h"
 
 namespace Physica::Gui {
     DensityPlot::DensityPlot(int width, int height, QWidget* parent)
@@ -46,7 +45,7 @@ namespace Physica::Gui {
 
     void DensityPlot::appendPoint(int x, int y, int radius, unsigned char alpha) {
         if(x < 0 || y < 0 || radius < 0 || x >= width() || y >= height())
-            Warn(0, "Encountered invalid argument.");
+            throw std::invalid_argument("[Error]: Point out of range");
 
         QPainter painter(&dataImage);
         painter.setPen(Qt::transparent);

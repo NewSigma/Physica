@@ -17,16 +17,20 @@ target_sources(PhysicaCore PRIVATE ${SOURCES_CORE})
 install(TARGETS PhysicaCore DESTINATION lib)
 install(DIRECTORY ${CMAKE_SOURCE_DIR}/include/Physica/Core DESTINATION include/Physica)
 #############################################Options##############################################
-target_link_libraries(PhysicaCore ${FFTW3_LIBRARIES} ${HDF5_CXX_SHARED_LIBRARY} pthread)
+target_link_libraries(PhysicaCore PUBLIC ${FFTW3_LIBRARIES} PUBLIC pthread)
+
+if(${PHYSICA_HDF5})
+    target_link_libraries(PhysicaCore PUBLIC ${HDF5_CXX_SHARED_LIBRARY})
+endif()
 
 if(${PHYSICA_CUDA})
-    target_link_libraries(PhysicaCore CUDA::cublas)
+    target_link_libraries(PhysicaCore PUBLIC CUDA::cublas)
 endif()
 
 if(${PHYSICA_MKL})
-    target_link_libraries(PhysicaCore MKL::MKL)
+    target_link_libraries(PhysicaCore PUBLIC MKL::MKL)
 endif()
 
 if(${PHYSICA_MPI})
-    target_link_libraries(PhysicaCore MPI::MPI_CXX)
+    target_link_libraries(PhysicaCore PUBLIC MPI::MPI_CXX)
 endif()

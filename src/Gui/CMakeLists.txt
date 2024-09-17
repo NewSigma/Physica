@@ -11,4 +11,4 @@ add_library(PhysicaGui SHARED ${SOURCES_GUI})
 install(TARGETS PhysicaGui DESTINATION lib)
 install(DIRECTORY ${CMAKE_SOURCE_DIR}/include/Physica/Gui DESTINATION include/Physica)
 #############################################Options##############################################
-target_link_libraries(PhysicaGui PhysicaCore PhysicaLogger Qt6::Core Qt6::Gui Qt6::Widgets Qt6::Charts Qt6::DataVisualization)
+target_link_libraries(PhysicaGui PhysicaCore Qt6::Core Qt6::Gui Qt6::Widgets Qt6::Charts Qt6::DataVisualization)
