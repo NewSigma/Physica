@@ -24,6 +24,7 @@
 namespace Physica::Core {
     template<class Derived>
     class device_obj<SimpleNet<Derived>> : public device_obj<LayerBase<Derived>> {
+        static_assert(!is_device_obj<Derived>::value, "[Error]: device_obj<> is unnecessary");
         using host_obj = SimpleNet<Derived>;
         using This = device_obj<host_obj>;
         using Base = device_obj<LayerBase<Derived>>;

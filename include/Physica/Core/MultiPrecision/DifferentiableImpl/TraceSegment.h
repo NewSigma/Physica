@@ -145,7 +145,7 @@ namespace Physica::Core {
             const auto source = segment.records[i].source;
             const auto width = os.width();
             os << std::setw(4) << i << std::setw(width) << ": ";
-            os << std::setw(10) << ExprTypeToStr(source) << std::setw(width) << ' ';
+            os << std::setw(10) << exprTypeToStr(source) << std::setw(width) << ' ';
             os << segment.values[i] << ' ' << segment.grads[i] << ' ';
             os << "Op: ";
             const size_t idFirstOperand = segment.records[i].idFirstOperand;

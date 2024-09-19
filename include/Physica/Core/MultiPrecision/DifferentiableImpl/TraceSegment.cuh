@@ -52,18 +52,19 @@ namespace Physica::Core {
         device_obj(size_t size, ExprType type);
         explicit device_obj(ScalarType value);
         explicit device_obj(const HostValueVector& values_);
-        device_obj(const device_obj&) = default;
-        device_obj(device_obj&&) noexcept = default;
+        device_obj(const This&) = default;
+        device_obj(This&&) noexcept = default;
         ~device_obj() = default;
         /* Operators */
-        device_obj& operator=(device_obj obj) noexcept { swap(obj); return *this; }
+        This& operator=(This obj) noexcept { swap(obj); return *this; }
         [[nodiscard]] __host__ __device__ inline DiffScalar operator[](size_t index);
         [[nodiscard]] __host__ __device__ inline const DiffScalar operator[](size_t index) const;
         /* Operations */
         void reverse();
         void zero_grad();
         [[nodiscard]] This copy() const;
-        void swap(device_obj& __restrict obj) noexcept;
+        [[nodiscard]] host_obj toHost() const;
+        void swap(This& __restrict obj) noexcept;
 
         __device__ void reverseKernelImpl();
         __device__ void copyKernelImpl(This& target) const;

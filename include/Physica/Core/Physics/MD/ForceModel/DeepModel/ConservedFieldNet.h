@@ -32,9 +32,10 @@ namespace Physica::Core {
         using typename Base::InputType;
         using typename Base::OutputType;
 
-        constexpr static bool IsTrainMode = ScalarType::Order == 2;
+        using device_obj_type = device_obj<LinearLayer<ScalarType, WithBias>>;
         using DiffScalar1 = Differentiable<PlainScalar, DiffMode::Reverse, 1>;
         using LossType = typename Loss<ScalarType>::LossType;
+        constexpr static bool IsTrainMode = ScalarType::Order == 2;
     private:
         using DiffGuard = typename std::conditional<IsTrainMode, AutoDiffGuard<ScalarType>, PlainStruct<void>>::type;
 
@@ -77,12 +78,9 @@ namespace Physica {
     public:
         using ScalarType = T;
         constexpr static bool WithBias = B;
-        using device_obj_type = device_obj<LinearLayer<ScalarType, WithBias>>;
 
-        using PlainScalar = typename ScalarType::PlainScalar;
         using InputType = Vector<ScalarType>;
         using OutputType = InputType;
-        constexpr static bool IsTrainMode = ScalarType::isDifferentiable;
         static_assert(std::is_same<OutputType, ScalarType>::value, "[Error]: Output is energy, which should be a scalar");
     };
 }

@@ -107,6 +107,16 @@ namespace Physica::Core {
     }
 
     template<class ScalarType, unsigned int Order>
+    TraceSegment<ScalarType, Order> device_obj<TraceSegment<ScalarType, Order>>::toHost() const {
+        host_obj result(getCapacity());
+        records.toHost(result.records);
+        operands.toHost(result.operands);
+        values.toHost(result.values);
+        grads.toHost(result.grads);
+        return result;
+    }
+
+    template<class ScalarType, unsigned int Order>
     void device_obj<TraceSegment<ScalarType, Order>>::swap(device_obj& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         records.swap(obj.records);

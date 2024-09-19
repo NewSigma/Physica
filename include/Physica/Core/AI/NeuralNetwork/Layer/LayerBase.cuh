@@ -23,18 +23,19 @@
 
 namespace Physica::Core {
     template<class Derived>
-    class device_obj<LayerBase<Derived>> : public CRTPBase<typename Traits<Derived>::device_obj_type> {
+    class device_obj<LayerBase<Derived>> : public CRTPBase<device_obj<Derived>> {
+        static_assert(!is_device_obj<Derived>::value, "[Error]: device_obj<> is unnecessary");
         using host_obj = LayerBase<Derived>;
         using This = device_obj<host_obj>;
-        using device_obj_type = typename Traits<Derived>::device_obj_type;
+        using device_obj_type = device_obj<Derived>;
         using Base = CRTPBase<device_obj_type>;
         using TraitsType = Traits<device_obj_type>;
     public:
-        using PlainScalar = typename TraitsType::PlainScalar;
         using ScalarType = typename TraitsType::ScalarType;
+        using PlainScalar = typename ScalarType::PlainScalar;
         using InputType = typename TraitsType::InputType;
         using OutputType = typename TraitsType::OutputType;
-        constexpr static bool IsTrainMode = TraitsType::IsTrainMode;
+        constexpr static bool IsTrainMode = ScalarType::isDifferentiable;
         static_assert(!is_device_obj<ScalarType>::value, "[Error]: Nested device_obj<> is not allowed");
     public:
         ~device_obj() = default;

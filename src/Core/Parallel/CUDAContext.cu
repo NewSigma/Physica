@@ -35,7 +35,7 @@ namespace Physica::Core {
     }
 
     CUDAContext& CUDAContext::getInstance() noexcept {
-        thread_local static CUDAContext instance{};
-        return instance;
+        thread_local static auto* instance = new CUDAContext();
+        return *instance;
     }
 }

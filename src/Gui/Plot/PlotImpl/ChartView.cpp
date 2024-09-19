@@ -27,6 +27,7 @@ namespace Physica::Gui {
 
         setFrameShape(QFrame::NoFrame);
         setBackgroundRole(QPalette::Window);
+        setBackgroundBrush(QBrush(Qt::white));
         setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
         setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
         setScene(new QGraphicsScene(this));

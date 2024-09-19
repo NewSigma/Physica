@@ -33,91 +33,91 @@ template<class ScalarType> class MnistNet;
 
 namespace Physica {
     template<class T>
-    class Traits<MnistNet<T>> : public Traits<Core::device_obj<LinearLayer<T>>> {
-        using Base = Traits<Core::device_obj<LinearLayer<T>>>;
+    class Traits<Core::device_obj<MnistNet<T>>> : public Traits<Core::device_obj<LinearLayer<T>>> {};
+}
+
+namespace Physica::Core {
+    template<class ScalarType>
+    class device_obj<MnistNet<ScalarType>> : public device_obj<SimpleNet<MnistNet<ScalarType>>> {
+        using host_obj = MnistNet<ScalarType>;
+        using This = device_obj<host_obj>;
+        using Base = device_obj<SimpleNet<host_obj>>;
+        using typename Base::PlainScalar;
+        using typename Base::InputType;
+        using typename Base::OutputType;
+        using typename Base::LossType;
+        using Base::IsTrainMode;
     public:
-        using device_obj_type = MnistNet<T>;
+        using device_obj_type = This;
+    private:
+        device_obj<LinearLayer<ScalarType>> layer1;
+        device_obj<LinearLayer<ScalarType, false>> layer2;
+    public:
+        device_obj() = default;
+        template<class RandomGenerator>
+        device_obj(size_t width1, RandomGenerator& gen)
+                : layer1(decltype(layer1)::random_xavier_normal(Mnist::NumPixelInImage, width1, 1, gen))
+                , layer2(decltype(layer2)::random_xavier_normal(width1, 10, 1, gen)) {}
+        template<class OtherScalar>
+        device_obj(const device_obj<MnistNet<OtherScalar>>& net) : layer1(net.getLayer1()), layer2(net.getLayer2()) {}
+        device_obj(const This& other) = default;
+        device_obj(This&&) noexcept = default;
+        ~device_obj() = default;
+        /* Operators */
+        This& operator=(This& obj) noexcept { swap(obj); return *this; }
+        /* Operations */
+        [[nodiscard]] OutputType forward(const InputType& x) const {
+            OutputType result = relu(layer1.forward(x));
+            result = layer2.forward(result);
+            return result;
+        }
+
+        template<class Dataset>
+        [[nodiscard]] LossType loss(const Dataset& dataset, size_t index) const {
+            OutputType output;
+            if constexpr (IsTrainMode)
+                output = forward(dataset.getSamples()[index]);
+            else
+                output = forward(dataset.getSamples()[index].getValues());
+            return device_obj<Loss<ScalarType>>::crossEntropy(output, dataset.getLabels()[index]);
+        }
+
+        template<class Dataset>
+        [[nodiscard]] LossType loss(const Dataset& dataset) const { return Base::loss(dataset); }
+
+        [[nodiscard]] This copy() const {
+            This result{};
+            result.layer1 = layer1.copy();
+            result.layer2 = layer2.copy();
+            return result;
+        }
+
+        template<class Dataset>
+        PlainScalar calcAccuracy(const Dataset& dataset) const {
+            const auto& testSamples = dataset.getSamples();
+            const auto& testLabels = dataset.getLabels();
+            const size_t numTestData = dataset.getSize();
+            size_t count = 0;
+            for (size_t i = 0; i < numTestData; ++i)
+                count += testLabels[i] == Base::classify(testSamples[i]);
+            return PlainScalar(count) / PlainScalar(numTestData);
+        }
+
+        void swap(This& __restrict obj) noexcept {
+            assert(this != &obj && "[Error]: Self swap is likely a bug");
+            Base::swap(obj);
+            layer1.swap(obj.layer1);
+            layer2.swap(obj.layer2);
+        }
+        /* Getters */
+        [[nodiscard]] const auto& getLayer1() const noexcept { return layer1; }
+        [[nodiscard]] const auto& getLayer2() const noexcept { return layer2; }
     };
 }
 
-template<class ScalarType>
-class MnistNet : public Physica::Core::device_obj<SimpleNet<MnistNet<ScalarType>>> {
-    using This = MnistNet<ScalarType>;
-    using Base = Physica::Core::device_obj<SimpleNet<This>>;
-    using typename Base::PlainScalar;
-    using typename Base::InputType;
-    using typename Base::OutputType;
-    using typename Base::LossType;
-    using Base::IsTrainMode;
-public:
-    using device_obj_type = This;
-private:
-    Physica::Core::device_obj<LinearLayer<ScalarType>> layer1;
-    Physica::Core::device_obj<LinearLayer<ScalarType, false>> layer2;
-public:
-    MnistNet() = default;
-    template<class RandomGenerator>
-    MnistNet(size_t width1, RandomGenerator& gen)
-            : layer1(decltype(layer1)::random_xavier_normal(Mnist::NumPixelInImage, width1, 1, gen))
-            , layer2(decltype(layer2)::random_xavier_normal(width1, 10, 1, gen)) {}
-    template<class OtherScalar>
-    MnistNet(const MnistNet<OtherScalar>& net) : layer1(net.layer1), layer2(net.layer2) {}
-    MnistNet(const MnistNet& other) = default;
-    MnistNet(MnistNet&&) noexcept = default;
-    ~MnistNet() = default;
-    /* Operators */
-    MnistNet& operator=(MnistNet& obj) noexcept { swap(obj); return *this; }
-    /* Operations */
-    [[nodiscard]] OutputType forward(const InputType& x) const {
-        OutputType result = relu(layer1.forward(x));
-        result = layer2.forward(result);
-        return result;
-    }
-
-    template<class Dataset>
-    [[nodiscard]] LossType loss(const Dataset& dataset, size_t index) const {
-        OutputType output;
-        if constexpr (IsTrainMode)
-            output = forward(dataset.getSamples()[index]);
-        else
-            output = forward(dataset.getSamples()[index].getValues());
-        return device_obj<Loss<ScalarType>>::crossEntropy(output, dataset.getLabels()[index]);
-    }
-
-    template<class Dataset>
-    [[nodiscard]] LossType loss(const Dataset& dataset) const { return Base::loss(dataset); }
-
-    [[nodiscard]] MnistNet copy() const {
-        MnistNet result{};
-        result.layer1 = layer1.copy();
-        result.layer2 = layer2.copy();
-        return result;
-    }
-
-    template<class Dataset>
-    PlainScalar calcAccuracy(const Dataset& dataset) const {
-        const auto& testSamples = dataset.getSamples();
-        const auto& testLabels = dataset.getLabels();
-        const size_t numTestData = dataset.getSize();
-        size_t count = 0;
-        for (size_t i = 0; i < numTestData; ++i)
-            count += testLabels[i] == Base::classify(testSamples[i]);
-        return PlainScalar(count) / PlainScalar(numTestData);
-    }
-
-    void swap(MnistNet& obj) noexcept {
-        assert(this != &obj && "[Error]: Self swap is likely a bug");
-        Base::swap(obj);
-        layer1.swap(obj.layer1);
-        layer2.swap(obj.layer2);
-    }
-private:
-    template<class OtherScalar> friend class MnistNet;
-};
-
 using PlainScalar = float32;
 using ScalarType = Differentiable<PlainScalar, DiffMode::Reverse, 1>;
-using DeviceVector = Physica::Core::device_obj<Differentiable<Vector<PlainScalar>, DiffMode::Reverse, 1>>;
+using DeviceVector = device_obj<Differentiable<Vector<PlainScalar>, DiffMode::Reverse, 1>>;
 using Dataset = typename Mnist::DatasetType<DeviceVector>;
 using Optimizer = SGD<device_obj<ScalarType>>;
 using RandomGenerator = std::mt19937;
@@ -144,7 +144,7 @@ int main(int argc, char** argv) {
 
     auto opt = Optimizer(learnRate, batchSize);
     opt.recordBegin();
-    auto nn = MnistNet<ScalarType>(32, gen);
+    auto nn = device_obj<MnistNet<ScalarType>>(32, gen);
     opt.recordEnd();
 
     Vector<PlainScalar> loss_train(numEpoch), loss_valid(numEpoch), acc_train(numEpoch), acc_valid(numEpoch);
@@ -155,7 +155,7 @@ int main(int argc, char** argv) {
         }
 
         using VectorType = Vector<PlainScalar>;
-        const auto nn_infer = MnistNet<PlainScalar>(nn);
+        const auto nn_infer = device_obj<MnistNet<PlainScalar>>(nn);
         loss_train[epoch] = nn_infer.loss(dataset.first);
         loss_valid[epoch] = nn_infer.loss(dataset.second);
         acc_train[epoch] = nn_infer.calcAccuracy(dataset.first);

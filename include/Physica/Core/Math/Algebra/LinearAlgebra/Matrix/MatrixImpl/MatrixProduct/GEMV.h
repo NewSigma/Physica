@@ -57,8 +57,14 @@ namespace Physica::Core {
             for (size_t i = 1; i < vec.getLength(); ++i)
                 target += mat.col(i).asVector() * vec.calc(i);
         }
-        else
-            Base::template assignTo<OtherDerived, Executor>(target);
+        else {
+            for (size_t i = 0; i < getLength(); ++i)
+                target[i] = calc(i);
+            
+            constexpr bool isContinuous = std::is_base_of<ContinuousVector<OtherDerived>, OtherDerived>::value;
+            if constexpr (isContinuous && Base::isReverseDiff)
+                target.getDerived().makeContinuous();
+        }
     }
 
     template<class MatrixType, class VectorType>

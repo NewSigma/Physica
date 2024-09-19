@@ -33,7 +33,9 @@ namespace Physica::Core {
         constexpr static int Option = MatrixOption::Row | MatrixOption::Vector;
         using MatrixType = DenseMatrix<ScalarType, Option>;
         using BiasType = typename std::conditional<WithBias, InputType, PlainStruct<void>>::type;
-
+    public:
+        using device_obj_type = device_obj<This>;
+    private:
         MatrixType weights;
         BiasType bias;
     public:
@@ -146,18 +148,13 @@ namespace Physica::Core {
 }
 
 namespace Physica {
-    using namespace Core;
-
     template<class T, bool B>
-    class Traits<LinearLayer<T, B>> {
+    class Traits<Core::LinearLayer<T, B>> {
     public:
         using ScalarType = T;
         constexpr static bool WithBias = B;
-        using device_obj_type = Core::device_obj<LinearLayer<ScalarType, WithBias>>;
 
-        using PlainScalar = typename ScalarType::PlainScalar;
-        using InputType = Vector<ScalarType>;
+        using InputType = Core::Vector<ScalarType>;
         using OutputType = InputType;
-        constexpr static bool IsTrainMode = ScalarType::isDifferentiable;
     };
 }

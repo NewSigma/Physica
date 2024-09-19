@@ -31,7 +31,7 @@ namespace Physica::Core {
         using PlainScalar = typename ScalarType::PlainScalar;
         using InputType = typename TraitsType::InputType;
         using OutputType = typename TraitsType::OutputType;
-        constexpr static bool IsTrainMode = TraitsType::IsTrainMode;
+        constexpr static bool IsTrainMode = ScalarType::isDifferentiable;
     public:
         ~LayerBase() = default;
         /* Operations */

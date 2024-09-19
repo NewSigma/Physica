@@ -58,7 +58,7 @@ namespace Physica::Core {
             }
             {
                 ColorGuard guard(os, Color::Magenta, true);
-                os << std::setw(10) << ExprTypeToStr(source) << std::setw(width) << ' ';
+                os << std::setw(10) << exprTypeToStr(source) << std::setw(width) << ' ';
             }
 
             /* Print value */ {

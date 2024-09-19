@@ -53,7 +53,7 @@ namespace Physica::Core {
         Cosh
     };
 
-    constexpr const char* ExprTypeToStr(ExprType type) {
+    constexpr const char* exprTypeToStr(ExprType type) {
         switch (type) {
             case ExprType::Set: return "Set";
             case ExprType::Assign: return "Assign";
