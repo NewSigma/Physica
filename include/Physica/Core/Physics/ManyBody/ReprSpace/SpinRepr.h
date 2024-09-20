@@ -25,7 +25,7 @@
 #include <Physica/PlainStruct.h>
 
 namespace Physica::Core {
-    template<unsigned int Dim, unsigned int NumSite, bool UseInversionSymm>
+    template<int Dim, int NumSite, bool UseInversionSymm>
     class SpinRepr : public ReprBasis<SpinRepr<Dim, NumSite, UseInversionSymm>> {
         using This = SpinRepr<Dim, NumSite, UseInversionSymm>;
         using Base = ReprBasis<This>;
@@ -39,15 +39,15 @@ namespace Physica::Core {
         using DownStateIndexMap = typename std::conditional<UseInversionSymm, PlainStruct<void>, StateIndexMap>::type;
         using PairType = std::pair<StateArray, StateIndexMap>;
 
-        unsigned int numSpinUp;
-        unsigned int numSpinDown;
+        int numSpinUp;
+        int numSpinDown;
         StateArray upStates;
         DownStateArray downStates;
         StateIndexMap upIndexMap;
         DownStateIndexMap downIndexMap;
     public:
         SpinRepr() = default;
-        SpinRepr(unsigned int numSpinUp_, unsigned int numSpinDown_);
+        SpinRepr(int numSpinUp_, int numSpinDown_);
         SpinRepr(const SpinRepr&) = default;
         SpinRepr(SpinRepr&&) noexcept = default;
         ~SpinRepr() = default;
@@ -58,9 +58,9 @@ namespace Physica::Core {
         /* Operations */
         void swap(This& __restrict obj) noexcept;
         /* Getters */
-        [[nodiscard]] unsigned int getNumSpinUp() const noexcept { return numSpinUp; }
-        [[nodiscard]] unsigned int getNumSpinDown() const noexcept { return numSpinDown; }
-        [[nodiscard]] unsigned int getNumParticle() const noexcept { return numSpinUp + numSpinDown; }
+        [[nodiscard]] int getNumSpinUp() const noexcept { return numSpinUp; }
+        [[nodiscard]] int getNumSpinDown() const noexcept { return numSpinDown; }
+        [[nodiscard]] int getNumParticle() const noexcept { return numSpinUp + numSpinDown; }
         [[nodiscard]] const StateArray& getUpStates() const noexcept { return upStates; }
         [[nodiscard]] inline const StateArray& getDownStates() const noexcept;
         [[nodiscard]] const StateIndexMap& getUpIndexMap() const noexcept { return upIndexMap; }
@@ -69,14 +69,16 @@ namespace Physica::Core {
         [[nodiscard]] size_t getNumUpStates() const noexcept { return getUpStates().getLength(); }
         [[nodiscard]] size_t getNumDownStates() const noexcept { return getDownStates().getLength(); }
     private:
-        [[nodiscard]] PairType makeSpinlessStates(size_t numParticle) const noexcept;
+        [[nodiscard]] PairType makeSpinlessStates(int numParticle) const noexcept;
         [[nodiscard]] size_t findStateIndex(const StateArray& arr, SpinlessState psi) const;
         void checkState(StateType state) const noexcept;
     };
 
-    template<unsigned int Dim, unsigned int NumSite, bool UseInversionSymm>
-    SpinRepr<Dim, NumSite, UseInversionSymm>::SpinRepr(unsigned int numSpinUp_, unsigned int numSpinDown_)
+    template<int Dim, int NumSite, bool UseInversionSymm>
+    SpinRepr<Dim, NumSite, UseInversionSymm>::SpinRepr(int numSpinUp_, int numSpinDown_)
             : numSpinUp(numSpinUp_), numSpinDown(numSpinDown_) {
+        assert((numSpinUp >= 0) && (numSpinDown >= 0));
+        assert(getNumParticle() > 0 && "[Error]: Empty representation");
         assert(!((numSpinUp == numSpinDown) ^ UseInversionSymm) && "[Error]: Inconsistent inversion symmetry");
         auto pair = makeSpinlessStates(numSpinUp);
         upStates = std::move(pair.first);
@@ -88,7 +90,7 @@ namespace Physica::Core {
         }
     }
 
-    template<unsigned int Dim, unsigned int NumSite, bool UseInversionSymm>
+    template<int Dim, int NumSite, bool UseInversionSymm>
     typename SpinRepr<Dim, NumSite, UseInversionSymm>::StateType
     SpinRepr<Dim, NumSite, UseInversionSymm>::operator[](size_t index) const noexcept {
         assert(index < getNumState() && "[Error]: Index out of range");
@@ -100,7 +102,7 @@ namespace Physica::Core {
         return result;
     }
 
-    template<unsigned int Dim, unsigned int NumSite, bool UseInversionSymm>
+    template<int Dim, int NumSite, bool UseInversionSymm>
     size_t SpinRepr<Dim, NumSite, UseInversionSymm>::operator[](StateType state) const noexcept {
         checkState(state);
         const size_t upIndex = upIndexMap.find(state.getSpinUp())->second;
@@ -110,7 +112,7 @@ namespace Physica::Core {
         return index;
     }
 
-    template<unsigned int Dim, unsigned int NumSite, bool UseInversionSymm>
+    template<int Dim, int NumSite, bool UseInversionSymm>
     void SpinRepr<Dim, NumSite, UseInversionSymm>::swap(This& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         std::swap(numSpinUp, obj.numSpinUp);
@@ -119,7 +121,7 @@ namespace Physica::Core {
         downStates.swap(obj.downStates);
     }
 
-    template<unsigned int Dim, unsigned int NumSite, bool UseInversionSymm>
+    template<int Dim, int NumSite, bool UseInversionSymm>
     inline const typename SpinRepr<Dim, NumSite, UseInversionSymm>::StateArray&
     SpinRepr<Dim, NumSite, UseInversionSymm>::getDownStates() const noexcept {
         if constexpr (UseInversionSymm)
@@ -128,7 +130,7 @@ namespace Physica::Core {
             return downStates;
     }
 
-    template<unsigned int Dim, unsigned int NumSite, bool UseInversionSymm>
+    template<int Dim, int NumSite, bool UseInversionSymm>
     inline const typename SpinRepr<Dim, NumSite, UseInversionSymm>::StateIndexMap&
     SpinRepr<Dim, NumSite, UseInversionSymm>::getDownIndexMap() const noexcept {
         if constexpr (UseInversionSymm)
@@ -137,9 +139,10 @@ namespace Physica::Core {
             return downIndexMap;
     }
 
-    template<unsigned int Dim, unsigned int NumSite, bool UseInversionSymm>
+    template<int Dim, int NumSite, bool UseInversionSymm>
     typename SpinRepr<Dim, NumSite, UseInversionSymm>::PairType
-    SpinRepr<Dim, NumSite, UseInversionSymm>::makeSpinlessStates(size_t numParticle) const noexcept {
+    SpinRepr<Dim, NumSite, UseInversionSymm>::makeSpinlessStates(int numParticle) const noexcept {
+        assert(numParticle > 0);
         constexpr size_t numSpinlessState = SpinlessState::calcFullNumState();
         StateArray arr{};
         StateIndexMap map{};
@@ -155,7 +158,7 @@ namespace Physica::Core {
         return std::make_pair(std::move(arr), std::move(map));
     }
 
-    template<unsigned int Dim, unsigned int NumSite, bool UseInversionSymm>
+    template<int Dim, int NumSite, bool UseInversionSymm>
     size_t SpinRepr<Dim, NumSite, UseInversionSymm>::findStateIndex(const StateArray& arr, SpinlessState psi) const {
         size_t left = 0, right = arr.getLength() - 1;  
         while (left < right) {
@@ -172,7 +175,7 @@ namespace Physica::Core {
         return left;
     }
 
-    template<unsigned int Dim, unsigned int NumSite, bool UseInversionSymm>
+    template<int Dim, int NumSite, bool UseInversionSymm>
     void SpinRepr<Dim, NumSite, UseInversionSymm>::checkState([[maybe_unused]] StateType state) const noexcept {
         assert(state.getNumSpinUpParticle() == numSpinUp && "[Error]: Unexpected state");
         assert(state.getNumSpinDownParticle() == numSpinDown && "[Error]: Unexpected state");
@@ -180,11 +183,11 @@ namespace Physica::Core {
 }
 
 namespace Physica {
-    template<unsigned int I1, unsigned int I2, bool UseInversionSymm>
+    template<int I1, int I2, bool UseInversionSymm>
     class Traits<Core::SpinRepr<I1, I2, UseInversionSymm>> {
     public:
-        using StateType = SpinFermion<I1, I2>;
-        constexpr static unsigned int Dim = I1;
+        using StateType = Core::SpinFermion<I1, I2>;
+        constexpr static int Dim = I1;
         constexpr static bool IsTransInvariant = false;
     };
 }

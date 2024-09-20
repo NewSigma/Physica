@@ -23,10 +23,10 @@ namespace Physica::Core {
 
     template<class Derived>
     class FFTRSpace<Derived, 1>
-            : public CRTPBase<Derived, 0>
+            : public CRTPBase<FFTRSpace<Derived, 1>>
             , public ContinuousVector<FFTRSpace<Derived, 1>> {
         using This = FFTRSpace<Derived, 1>;
-        using Base = CRTPBase<Derived, 0>;
+        using Base = CRTPBase<This>;
         using VectorBase = ContinuousVector<This>;
     public:
         using typename VectorBase::ScalarType;
@@ -98,10 +98,10 @@ namespace Physica::Core {
     //////////////////////////////////////////////////////////////////////
     template<class Derived>
     class FFTRSpace<Derived, 2>
-            : public CRTPBase<Derived, 0>
+            : public CRTPBase<FFTRSpace<Derived, 2>>
             , public ContinuousMatrix<FFTRSpace<Derived, 2>> {
         using This = FFTRSpace<Derived, 2>;
-        using Base = CRTPBase<Derived, 0>;
+        using Base = CRTPBase<This>;
         using MatrixBase = ContinuousMatrix<This>;
     public:
         using typename MatrixBase::ScalarType;
@@ -164,10 +164,10 @@ namespace Physica::Core {
     //////////////////////////////////////////////////////////////////////
     template<class Derived>
     class FFTRSpace<Derived, 3>
-            : public CRTPBase<Derived, 0>
+            : public CRTPBase<FFTRSpace<Derived, 3>>
             , public LValueGrid<FFTRSpace<Derived, 3>> {
         using This = FFTRSpace<Derived, 3>;
-        using Base = CRTPBase<Derived, 0>;
+        using Base = CRTPBase<This>;
         using GridBase = LValueGrid<This>;
     public:
         using typename GridBase::ScalarType;
@@ -243,32 +243,34 @@ namespace Physica::Core {
 namespace Physica {
     using namespace Core;
 
-    template<class Derived>
-    class Traits<FFTRSpace<Derived, 1>> {
-        static_assert(Traits<Derived>::Dim == 1, "[Error]: Inconsistent template param");
+    template<class T>
+    class Traits<FFTRSpace<T, 1>> {
+        static_assert(Traits<T>::Dim == 1, "[Error]: Inconsistent template param");
     public:
-        using ScalarType = typename Traits<Derived>::ScalarType;
+        using Derived = T;
+        using ScalarType = typename Traits<T>::ScalarType;
         constexpr static size_t SizeAtCompile = Dynamic;
         constexpr static bool FastAssign = false;
         constexpr static bool FastPacket = true;
     };
 
-    template<class Derived>
-    class Traits<FFTRSpace<Derived, 2>> {
-        static_assert(Traits<Derived>::Dim == 2, "[Error]: Inconsistent template param");
+    template<class T>
+    class Traits<FFTRSpace<T, 2>> {
+        static_assert(Traits<T>::Dim == 2, "[Error]: Inconsistent template param");
     public:
-        using ScalarType = typename Traits<Derived>::ScalarType;
+        using Derived = T;
+        using ScalarType = typename Traits<T>::ScalarType;
         constexpr static int Option = MatrixOption::Row | MatrixOption::Vector;
         constexpr static size_t RowAtCompile = Dynamic;
         constexpr static size_t ColumnAtCompile = Dynamic;
         constexpr static size_t SizeAtCompile = RowAtCompile * ColumnAtCompile;
     };
 
-    template<class Derived>
-    class Traits<FFTRSpace<Derived, 3>> {
-        static_assert(Traits<Derived>::Dim == 3, "[Error]: Inconsistent template param");
-        using T = typename Traits<Derived>::ScalarType;
+    template<class T>
+    class Traits<FFTRSpace<T, 3>> {
+        static_assert(Traits<T>::Dim == 3, "[Error]: Inconsistent template param");
     public:
-        using ScalarType = typename Traits<Derived>::ScalarType;
+        using Derived = T;
+        using ScalarType = typename Traits<T>::ScalarType;
     };
 }

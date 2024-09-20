@@ -41,10 +41,11 @@ namespace Physica::Core {
      * In other words, you cannot take the address of elements in a RValueMatrix but can calculate its value.
      */
     template<class Derived>
-    class RValueMatrix : public CRTPBase<Derived> {
+    class RValueMatrix : public CRTPBase<RValueMatrix<Derived>> {
         static_assert(!std::is_const<Derived>::value, "[Error]: A common mistake, const is unnecessary");
         static_assert(!std::is_volatile<Derived>::value, "[Error]: A common mistake, volatile is unnecessary");
-        using Base = CRTPBase<Derived>;
+        using This = RValueMatrix<Derived>;
+        using Base = CRTPBase<This>;
         using RowVector = RMatrixBlock<Derived, 1, Dynamic>;
         using ColVector = RMatrixBlock<Derived, Dynamic, 1>;
         using BlockType = RMatrixBlock<Derived>;
@@ -131,6 +132,14 @@ namespace Physica::Core {
 
     template<class Derived>
     inline bool operator!=(const RValueMatrix<Derived>& m1, const RValueMatrix<Derived>& m2) { return !(m1 == m2); }
+}
+
+namespace Physica {
+    template<class T>
+    class Traits<Core::RValueMatrix<T>> {
+    public:
+        using Derived = T;
+    };
 }
 
 #include "RValueMatrixImpl/RValueMatrixImpl.h"

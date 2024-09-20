@@ -22,10 +22,11 @@
 
 namespace Physica::Core {
     template<class Derived>
-    class device_obj<RValueMatrix<Derived>> : public CRTPBase<device_obj<Derived>> {
+    class device_obj<RValueMatrix<Derived>> : public CRTPBase<device_obj<RValueMatrix<Derived>>> {
         static_assert(!is_device_obj<Derived>::value, "[Error]: Nested device_obj is unnecessary");
-        using Base = CRTPBase<device_obj<Derived>>;
         using host_obj = RValueMatrix<Derived>;
+        using This = device_obj<host_obj>;
+        using Base = CRTPBase<This>;
         using TraitsType = Traits<device_obj<Derived>>;
         using RowVector = device_obj<RMatrixBlock<Derived, 1, Dynamic>>;
         using ColVector = device_obj<RMatrixBlock<Derived, Dynamic, 1>>;
@@ -91,6 +92,14 @@ namespace Physica::Core {
         /* Static members */
         [[nodiscard]] __host__ __device__ static size_t rowFromMajorMinor(size_t major, size_t minor) noexcept { return MatrixOption::rowFromMajorMinor<device_obj<Derived>>(major, minor); }
         [[nodiscard]] __host__ __device__ static size_t columnFromMajorMinor(size_t major, size_t minor) noexcept { return MatrixOption::columnFromMajorMinor<device_obj<Derived>>(major, minor); }
+    };
+}
+
+namespace Physica {
+    template<class T>
+    class Traits<Core::device_obj<Core::RValueMatrix<T>>> {
+    public:
+        using Derived = device_obj<T>;
     };
 }
 

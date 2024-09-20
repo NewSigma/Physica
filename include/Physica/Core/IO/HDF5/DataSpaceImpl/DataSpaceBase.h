@@ -19,11 +19,13 @@
 #pragma once
 
 #include <Physica/CRTPBase.h>
+#include <Physica/Core/Utils/Container/Array.h>
 
 namespace Physica::Core {
     template<class Derived>
-    class DataSpaceBase : public CRTPBase<Derived> {
-        using Base = CRTPBase<Derived>;
+    class DataSpaceBase : public CRTPBase<DataSpaceBase<Derived>> {
+        using This = DataSpaceBase<Derived>;
+        using Base = CRTPBase<This>;
     public:
         constexpr static size_t Dim = Traits<Derived>::Dim;
         using SizeArray = Array<hsize_t, Dim>;
@@ -37,5 +39,13 @@ namespace Physica::Core {
         [[nodiscard]] size_t getSize(size_t dim) const noexcept { return Base::getDerived().getSize(dim); }
         [[nodiscard]] const SizeArray& getSelectedCount() const noexcept { return Base::getDerived().getSelectedCount(); }
         [[nodiscard]] const SizeArray& getSelectedStart() const noexcept { return Base::getDerived().getSelectedStart(); }
+    };
+}
+
+namespace Physica {
+    template<class T>
+    class Traits<Core::DataSpaceBase<T>> {
+    public:
+        using Derived = T;
     };
 }

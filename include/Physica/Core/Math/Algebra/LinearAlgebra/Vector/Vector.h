@@ -82,10 +82,8 @@ namespace Physica::Core {
 }
 
 namespace Physica {
-    using namespace Core;
-
     template<class T, size_t Length, class Allocator>
-    class Traits<Vector<T, Length, Allocator>> {
+    class Traits<Core::Vector<T, Length, Allocator>> {
     public:
         using ScalarType = T;
         constexpr static size_t SizeAtCompile = Length;

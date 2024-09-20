@@ -25,8 +25,9 @@ namespace Physica::Core {
     template<class Derived> class LValueGrid;
 
     template<class Derived>
-    class RValueGrid : public CRTPBase<Derived>, public GridBase {
-        using Base = CRTPBase<Derived>;
+    class RValueGrid : public CRTPBase<RValueGrid<Derived>>, public GridBase {
+        using This = RValueGrid<Derived>;
+        using Base = CRTPBase<This>;
     public:
         using ScalarType = typename Traits<Derived>::ScalarType;
         constexpr static bool isComplex = ScalarType::isComplex;
@@ -76,6 +77,14 @@ namespace Physica::Core {
             const RValueGrid& grid, const typename PeriodicCell<PosScalarType, 3>::LatticeMatrix& lattice, Functor func) {
         forPointIndexInGrid<PosScalarType, IsUnitLattice, Functor>(grid.getDim(), lattice, func);
     }
+}
+
+namespace Physica {
+    template<class T>
+    class Traits<Core::RValueGrid<T>> {
+    public:
+        using Derived = T;
+    };
 }
 
 #include "GridExpression.h"

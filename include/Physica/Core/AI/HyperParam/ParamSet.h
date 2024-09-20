@@ -22,10 +22,18 @@
 
 namespace Physica::Core {
     template<class Derived>
-    class ParamSet : public CRTPBase<Derived> {
+    class ParamSet : public CRTPBase<ParamSet<Derived>> {
         using Base = CRTPBase<Derived>;
     public:
         template<class RandomGenerator>
         [[nodiscard]] static Derived randomSet(RandomGenerator& gen) { return Base::getDerived().random(gen); }
+    };
+}
+
+namespace Physica {
+    template<class T>
+    class Traits<Core::ParamSet<T>> {
+    public:
+        using Derived = T;
     };
 }

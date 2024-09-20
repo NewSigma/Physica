@@ -19,16 +19,16 @@
 #pragma once
 
 #include "LayerBase.h"
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/DiffVector.cuh"
+#include <Physica/Core/Math/Algebra/LinearAlgebra/Vector/DiffVector.cuh>
 
 namespace Physica::Core {
     template<class Derived>
-    class device_obj<LayerBase<Derived>> : public CRTPBase<device_obj<Derived>> {
+    class device_obj<LayerBase<Derived>> : public CRTPBase<device_obj<LayerBase<Derived>>> {
         static_assert(!is_device_obj<Derived>::value, "[Error]: device_obj<> is unnecessary");
         using host_obj = LayerBase<Derived>;
         using This = device_obj<host_obj>;
+        using Base = CRTPBase<This>;
         using device_obj_type = device_obj<Derived>;
-        using Base = CRTPBase<device_obj_type>;
         using TraitsType = Traits<device_obj_type>;
     public:
         using ScalarType = typename TraitsType::ScalarType;
@@ -49,5 +49,13 @@ namespace Physica::Core {
         /* Operators */
         device_obj& operator=(const device_obj&) = default;
         device_obj& operator=(device_obj&&) noexcept = default;
+    };
+}
+
+namespace Physica {
+    template<class T>
+    class Traits<device_obj<LayerBase<T>>> {
+    public:
+        using Derived = device_obj<T>;
     };
 }

@@ -19,11 +19,12 @@
 #pragma once
 
 #include <iostream>
+#include <Physica/Core/Math/Discrete/Combination.h>
+#include <Physica/Core/MultiPrecision/BasicImpl/Util/Bitwise.h>
 #include "State.h"
-#include "Physica/Core/Math/Discrete/Combination.h"
 
 namespace Physica::Core {
-    template<unsigned int Dim, unsigned int NumSite>
+    template<int Dim, int NumSite>
     class SpinlessFermion : public State<SpinlessFermion<Dim, NumSite>> {
         using This = SpinlessFermion<Dim, NumSite>;
         using Base = State<This>;
@@ -40,6 +41,7 @@ namespace Physica::Core {
         ~SpinlessFermion() = default;
         /* Operators */
         This& operator=(This obj) noexcept { swap(obj); return *this; }
+        [[nodiscard]] bool operator[](int8_t site) const noexcept { return isOccupy(site); }
         [[nodiscard]] inline bool operator==(const This& other) const noexcept;
         [[nodiscard]] bool operator!=(const This& other) const noexcept { return !(*this == other); }
         [[nodiscard]] bool operator>(const This& other) const noexcept { return occupyBits > other.occupyBits; }
@@ -60,8 +62,8 @@ namespace Physica::Core {
         /* Getters */
         [[nodiscard]] IntType getOccupyBits() const noexcept { return occupyBits; }
         [[nodiscard]] bool isVacuum() const noexcept { return occupyBits == 0; }
-        [[nodiscard]] inline bool isOccupy(uint8_t site) const noexcept;
-        [[nodiscard]] unsigned int getNumParticle() const noexcept { return countOnes(occupyBits); }
+        [[nodiscard]] inline bool isOccupy(int8_t site) const noexcept;
+        [[nodiscard]] int getNumParticle() const noexcept { return countOnes(occupyBits); }
         [[nodiscard]] inline bool isTransReducible(int period = 1) const noexcept;
         /* Static members */
         template<class RandomGenerator>
@@ -72,7 +74,7 @@ namespace Physica::Core {
         [[nodiscard]] constexpr static IntType makeHighMask() noexcept { return (static_cast<IntType>(1) << (NumSite - 1)); }
     };
 
-    template<unsigned int Dim, unsigned int NumSite>
+    template<int Dim, int NumSite>
     std::ostream& operator<<(std::ostream& os, SpinlessFermion<Dim, NumSite> e) {
         auto mask = e.makeHighMask();
         for (int i = 0; i < int(NumSite); ++i) {
@@ -85,20 +87,19 @@ namespace Physica::Core {
 }
 
 namespace Physica {
-    template<unsigned int I1, unsigned int I2>
+    template<int I1, int I2>
     class Traits<Core::SpinlessFermion<I1, I2>> {
     public:
-        constexpr static unsigned int Dim = I1;
-        constexpr static unsigned int NumSite = I2;
-        constexpr static unsigned int SiteDOF = 2;
+        constexpr static int Dim = I1;
+        constexpr static int NumSite = I2;
+        constexpr static int SiteDOF = 2;
 
-        static_assert(1 <= Dim && Dim <= 3, "[Error]: Invalid Dim");
-        static_assert(0 < NumSite && NumSite < 64, "[Error]: Invalid site number");
+        static_assert(NumSite < 64, "[Error]: Use Dynamic if NumSite is large");
     };
 }
 
 namespace std {
-    template<unsigned int Dim, unsigned int NumSite>
+    template<int Dim, int NumSite>
     struct hash<Physica::Core::SpinlessFermion<Dim, NumSite>> {
         using T = Physica::Core::SpinlessFermion<Dim, NumSite>;
 

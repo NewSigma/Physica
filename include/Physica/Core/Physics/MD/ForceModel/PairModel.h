@@ -31,8 +31,9 @@ namespace Physica::Core {
      * [1] Jos Thijssen. Computational Physics[M].London: Cambridge university press, 2013:205
      */
     template<class Derived>
-    class PairModel : public CRTPBase<Derived> {
-        using Base = CRTPBase<Derived>;
+    class PairModel : public CRTPBase<PairModel<Derived>> {
+        using This = PairModel<Derived>;
+        using Base = CRTPBase<This>;
         using TraitType = Traits<Derived>;
 
         constexpr static bool IsPotDependOnAtomIndex = TraitType::IsPotDependOnAtomIndex;
@@ -388,9 +389,11 @@ namespace Physica::Core {
 }
 
 namespace Physica {
-    template<class Derived>
-    class Traits<Core::PairModel<Derived>> {
+    template<class T>
+    class Traits<Core::PairModel<T>> {
     public:
+        using Derived = T;
+
         constexpr static bool IsPeriodBoundary = true;
         constexpr static bool IsContractable = false;
     };

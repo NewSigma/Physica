@@ -27,8 +27,9 @@ namespace Physica::Core {
     struct is_vector<device_obj<T>> : public is_vector<T> {};
 
     template<class Derived>
-    class device_obj<RValueVector<Derived>> : public CRTPBase<device_obj<Derived>> {
-        using Base = CRTPBase<device_obj<Derived>>;
+    class device_obj<RValueVector<Derived>> : public CRTPBase<device_obj<RValueVector<Derived>>> {
+        using This = device_obj<RValueVector<Derived>>;
+        using Base = CRTPBase<This>;
         using TraitsType = Traits<device_obj<Derived>>;
     public:
         using ScalarType = typename TraitsType::ScalarType;
@@ -71,6 +72,14 @@ namespace Physica::Core {
         /* Operations */
         template<class OtherDerived>
         __device__ void assignToImpl(device_obj<LValueVector<OtherDerived>>& target_) const;
+    };
+}
+
+namespace Physica {
+    template<class T>
+    class Traits<Core::device_obj<Core::RValueVector<T>>> {
+    public:
+        using Derived = device_obj<T>;
     };
 }
 

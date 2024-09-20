@@ -99,8 +99,9 @@ namespace Physica::Core {
      * Public parts among specializations of \class Array.
      */
     template<class Derived, class Allocator>
-    class ArrayBase : public CRTPBase<Derived> {
-        using Base = CRTPBase<Derived>;
+    class ArrayBase : public CRTPBase<ArrayBase<Derived, Allocator>> {
+        using This = ArrayBase<Derived, Allocator>;
+        using Base = CRTPBase<This>;
         using AllocatorTraits = std::allocator_traits<Allocator>;
     public:
         using allocator_type = Allocator;
@@ -110,10 +111,10 @@ namespace Physica::Core {
         using lvalue_reference = typename AllocatorTraits::lvalue_reference;
         using const_lvalue_reference = typename AllocatorTraits::const_lvalue_reference;
         using rvalue_reference = typename AllocatorTraits::rvalue_reference;
-        using Iterator = ContainerIterator<ValueType, ArrayBase<Derived, Allocator>>;
-        using ConstIterator = ContainerIterator<const ValueType, ArrayBase<Derived, Allocator>>;
-        using ReverseIterator = ReverseContainerIterator<ValueType, ArrayBase<Derived, Allocator>>;
-        using ConstReverseIterator = ReverseContainerIterator<const ValueType, ArrayBase<Derived, Allocator>>;
+        using Iterator = ContainerIterator<ValueType, This>;
+        using ConstIterator = ContainerIterator<const ValueType, This>;
+        using ReverseIterator = ReverseContainerIterator<ValueType, This>;
+        using ConstReverseIterator = ReverseContainerIterator<const ValueType, This>;
 
         static_assert(std::is_same<ValueType, typename Traits<Derived>::ValueType>::value, "[Error]: Declaration is not self consistent");
     public:
@@ -156,6 +157,14 @@ namespace Physica::Core {
         /* Static members */
         template<class... Args>
         __host__ __device__ constexpr static bool isTrivialDefaultConstruct();
+    };
+}
+
+namespace Physica {
+    template<class T, class Allocator>
+    class Traits<Core::ArrayBase<T, Allocator>> {
+    public:
+        using Derived = T;
     };
 }
 

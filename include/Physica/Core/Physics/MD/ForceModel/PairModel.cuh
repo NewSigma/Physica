@@ -26,11 +26,11 @@
 
 namespace Physica::Core {
     template<class Derived>
-    class device_obj<PairModel<Derived>> : public CRTPBase<device_obj<Derived>> {
+    class device_obj<PairModel<Derived>> : public CRTPBase<device_obj<PairModel<Derived>>> {
         static_assert(!is_device_obj<Derived>::value, "[Error]: Nested device_obj is unnecessary");
         using host_obj = PairModel<Derived>;
         using This = device_obj<PairModel<Derived>>;
-        using Base = CRTPBase<device_obj<Derived>>;
+        using Base = CRTPBase<This>;
         using TraitType = Traits<Derived>;
 
         constexpr static bool IsPotDependOnAtomIndex = TraitType::IsPotDependOnAtomIndex;
@@ -125,6 +125,14 @@ namespace Physica::Core {
                 size_t& numThread);
         template<class Functor>
         [[nodiscard]] __device__ size_t forPairInCutoff(Functor func) const;
+    };
+}
+
+namespace Physica {
+    template<class T>
+    class Traits<Core::device_obj<Core::PairModel<T>>> : public Traits<Core::PairModel<T>> {
+    public:
+        using Derived = Core::device_obj<T>;
     };
 }
 

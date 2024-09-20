@@ -38,7 +38,7 @@ namespace Physica::Core {
     };
 
     template<class Derived>
-    class ScalarBase : public CRTPBase<Derived> {
+    class ScalarBase : public CRTPBase<ScalarBase<Derived>> {
     public:
         using ScalarType = typename Traits<Derived>::ScalarType;
         using TrivialType = typename Traits<Derived>::TrivialType;
@@ -246,4 +246,12 @@ namespace Physica::Core {
     inline void swap(ScalarBase<ScalarType>& __restrict s1, ScalarBase<ScalarType>& __restrict s2) noexcept {
         s1.getDerived().swap(s2.getDerived());
     }
+}
+
+namespace Physica {
+    template<class T>
+    class Traits<Core::ScalarBase<T>> {
+    public:
+        using Derived = T;
+    };
 }

@@ -18,7 +18,7 @@
  */
 #pragma once
 
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h"
+#include <Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h>
 
 namespace Physica::Core {
     namespace Internal {
@@ -27,8 +27,9 @@ namespace Physica::Core {
     }
 
     template<class Derived>
-    class Element : public CRTPBase<Derived> {
-        using Base = CRTPBase<Derived>;
+    class Element : public CRTPBase<Element<Derived>> {
+        using This = Element<Derived>;
+        using Base = CRTPBase<This>;
     public:
         using ScalarType = typename Traits<Derived>::ScalarType;
         constexpr static unsigned int Dim = Traits<Derived>::Dim;
@@ -73,4 +74,12 @@ namespace Physica::Core {
         assert(this != &elem && "[Error]: Self swap is likely a bug");
         globalNodes.swap(elem.globalNodes);
     }
+}
+
+namespace Physica {
+    template<class T>
+    class Traits<Core::Element<T>> {
+    public:
+        using Derived = T;
+    };
 }

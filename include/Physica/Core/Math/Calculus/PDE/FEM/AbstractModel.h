@@ -19,7 +19,6 @@
 #pragma once
 
 #include "Mesh.h"
-#include <Physica/CRTPBase.h>
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/SparseMatrix.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/LinearEquations/IterateSolver.h"
 

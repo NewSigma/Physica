@@ -47,9 +47,9 @@ namespace Physica::Core {
     };
 
     template<class Derived, size_t Column>
-    class DenseMatrixDim<Derived, Dynamic, Column> : public CRTPBase<Derived, 2> {
-        using Base = CRTPBase<Derived, 2>;
+    class DenseMatrixDim<Derived, Dynamic, Column> : public CRTPBase<DenseMatrixDim<Derived, Dynamic, Column>> {
         using This = DenseMatrixDim<Derived, Dynamic, Column>;
+        using Base = CRTPBase<This>;
     public:
         DenseMatrixDim() = default;
         __host__ __device__ DenseMatrixDim(size_t row, size_t column) { resize(row, column); }
@@ -76,9 +76,9 @@ namespace Physica::Core {
     };
 
     template<class Derived, size_t Row>
-    class DenseMatrixDim<Derived, Row, Dynamic> : public CRTPBase<Derived, 2> {
-        using Base = CRTPBase<Derived, 2>;
+    class DenseMatrixDim<Derived, Row, Dynamic> : public CRTPBase<DenseMatrixDim<Derived, Row, Dynamic>> {
         using This = DenseMatrixDim<Derived, Row, Dynamic>;
+        using Base = CRTPBase<This>;
     public:
         DenseMatrixDim() = default;
         __host__ __device__ DenseMatrixDim(size_t row, size_t column) { resize(row, column); }
@@ -105,9 +105,9 @@ namespace Physica::Core {
     };
 
     template<class Derived>
-    class DenseMatrixDim<Derived, Dynamic, Dynamic> : public CRTPBase<Derived, 2> {
-        using Base = CRTPBase<Derived, 2>;
+    class DenseMatrixDim<Derived, Dynamic, Dynamic> : public CRTPBase<DenseMatrixDim<Derived, Dynamic, Dynamic>> {
         using This = DenseMatrixDim<Derived, Dynamic, Dynamic>;
+        using Base = CRTPBase<This>;
     private:
         size_t r;
     public:
@@ -138,5 +138,13 @@ namespace Physica::Core {
             std::swap(r, dim.r);
         #endif
         }
+    };
+}
+
+namespace Physica {
+    template<class T, size_t Row, size_t Column>
+    class Traits<Core::DenseMatrixDim<T, Row, Column>> {
+    public:
+        using Derived = T;
     };
 }

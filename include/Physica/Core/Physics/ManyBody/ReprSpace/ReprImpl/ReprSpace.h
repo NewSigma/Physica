@@ -26,8 +26,9 @@ namespace Physica {
 
 namespace Physica::Core {
     template<class Derived>
-    class ReprBasis : public CRTPBase<Derived> {
-        using Base = CRTPBase<Derived>;
+    class ReprBasis : public CRTPBase<ReprBasis<Derived>> {
+        using This = ReprBasis<Derived>;
+        using Base = CRTPBase<This>;
     public:
         using StateType = typename Traits<Derived>::StateType;
         constexpr static unsigned int Dim = Traits<Derived>::Dim;
@@ -45,5 +46,13 @@ namespace Physica::Core {
         /* Operators */
         ReprBasis& operator=(const ReprBasis&) = default;
         ReprBasis& operator=(ReprBasis&&) noexcept = default;
+    };
+}
+
+namespace Physica {
+    template<class T>
+    class Traits<Core::ReprBasis<T>> {
+    public:
+        using Derived = T;
     };
 }

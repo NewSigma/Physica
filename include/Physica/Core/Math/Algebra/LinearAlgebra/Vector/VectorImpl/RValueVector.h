@@ -58,10 +58,11 @@ namespace Physica::Core {
      * An RValueVector can be assigned to an LValueVector, but no other vector classes can be assigned to an RValueVector.
      */
     template<class Derived>
-    class RValueVector : public CRTPBase<Derived> {
+    class RValueVector : public CRTPBase<RValueVector<Derived>> {
         static_assert(!std::is_const<Derived>::value, "[Error]: A common mistake, const is unnecessary");
         static_assert(!std::is_volatile<Derived>::value, "[Error]: A common mistake, volatile is unnecessary");
-        using Base = CRTPBase<Derived>;
+        using This = RValueVector<Derived>;
+        using Base = CRTPBase<This>;
         template<size_t Length>
         using BlockType = RVectorBlock<Derived, Length>;
     public:
@@ -142,6 +143,14 @@ namespace Physica::Core {
 
     template<class VectorType1, class VectorType2>
     bool vectorNear(const RValueVector<VectorType1>& v1, const RValueVector<VectorType2>& v2, double precision);
+}
+
+namespace Physica {
+    template<class T>
+    class Traits<Core::RValueVector<T>> {
+    public:
+        using Derived = T;
+    };
 }
 
 #include "RValueVectorImpl/RValueVectorImpl.h"

@@ -22,7 +22,7 @@
 #include "Physica/Core/Math/NumberTheory/NumberTheory.h"
 
 namespace Physica::Core {
-    template<unsigned int Dim, unsigned int NumSite>
+    template<int Dim, int NumSite>
     class SpinFermion : public State<SpinFermion<Dim, NumSite>> {
         using This = SpinFermion<Dim, NumSite>;
         using Base = State<This>;
@@ -66,10 +66,10 @@ namespace Physica::Core {
         [[nodiscard]] bool isVacuum() const noexcept { return spinUp.isVacuum() && spinDown.isVacuum(); }
         [[nodiscard]] bool isUpOccupy(uint8_t site) const noexcept { return spinUp.isOccupy(site); }
         [[nodiscard]] bool isDownOccupy(uint8_t site) const noexcept { return spinDown.isOccupy(site); }
-        [[nodiscard]] unsigned int getNumParticle() const noexcept { return getNumSpinUpParticle() + getNumSpinDownParticle(); }
-        [[nodiscard]] unsigned int getNumSpinUpParticle() const noexcept { return spinUp.getNumParticle(); }
-        [[nodiscard]] unsigned int getNumSpinDownParticle() const noexcept { return spinDown.getNumParticle(); }
-        [[nodiscard]] inline unsigned int getNumDoubleOccupy() const noexcept;
+        [[nodiscard]] int getNumParticle() const noexcept { return getNumSpinUpParticle() + getNumSpinDownParticle(); }
+        [[nodiscard]] int getNumSpinUpParticle() const noexcept { return spinUp.getNumParticle(); }
+        [[nodiscard]] int getNumSpinDownParticle() const noexcept { return spinDown.getNumParticle(); }
+        [[nodiscard]] inline int getNumDoubleOccupy() const noexcept;
         /* Static member */
         template<class RandomGenerator>
         [[nodiscard]] static This random_state(RandomGenerator& gen);
@@ -77,19 +77,19 @@ namespace Physica::Core {
         [[nodiscard]] static This random_state(size_t numSpinUp, size_t numSpinDown, RandomGenerator& gen);
     };
 
-    template<unsigned int Dim, unsigned int NumSite>
+    template<int Dim, int NumSite>
     inline std::ostream& operator<<(std::ostream& os, SpinFermion<Dim, NumSite> e) {
         return os << e.getSpinUp() << ' ' << e.getSpinDown();
     }
 }
 
 namespace Physica {
-    template<unsigned int I1, unsigned int I2>
+    template<int I1, int I2>
     class Traits<Core::SpinFermion<I1, I2>> {
     public:
-        constexpr static unsigned int Dim = I1;
-        constexpr static unsigned int NumSite = I2;
-        constexpr static unsigned int SiteDOF = 4;
+        constexpr static int Dim = I1;
+        constexpr static int NumSite = I2;
+        constexpr static int SiteDOF = 4;
     };
 }
 

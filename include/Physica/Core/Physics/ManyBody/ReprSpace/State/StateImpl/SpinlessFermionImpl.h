@@ -21,15 +21,15 @@
 #include <Physica/Core/Exception/NoImplException.h>
 
 namespace Physica::Core {
-    template<unsigned int Dim, unsigned int NumSite>
+    template<int Dim, int NumSite>
     inline SpinlessFermion<Dim, NumSite>::SpinlessFermion(IntType occupyBits_) : occupyBits(occupyBits_) {}
 
-    template<unsigned int Dim, unsigned int NumSite>
+    template<int Dim, int NumSite>
     inline bool SpinlessFermion<Dim, NumSite>::operator==(const This& other) const noexcept {
         return occupyBits == other.occupyBits;
     }
 
-    template<unsigned int Dim, unsigned int NumSite>
+    template<int Dim, int NumSite>
     inline SpinlessFermion<Dim, NumSite> SpinlessFermion<Dim, NumSite>::operator<<(int shift) const noexcept {
         assert(0 <= shift && shift < int(NumSite) && "[Error]: Invalid shift");
         const auto highBits = occupyBits << shift;
@@ -37,7 +37,7 @@ namespace Physica::Core {
         return SpinlessFermion((highBits | lowBits) & makeFullMask());
     }
 
-    template<unsigned int Dim, unsigned int NumSite>
+    template<int Dim, int NumSite>
     inline SpinlessFermion<Dim, NumSite> SpinlessFermion<Dim, NumSite>::operator>>(int shift) const noexcept {
         assert(0 <= shift && shift < int(NumSite) && "[Error]: Invalid shift");
         const auto highBits = occupyBits << (NumSite - shift);
@@ -45,7 +45,7 @@ namespace Physica::Core {
         return SpinlessFermion((highBits | lowBits) & makeFullMask());
     }
 
-    template<unsigned int Dim, unsigned int NumSite>
+    template<int Dim, int NumSite>
     inline SpinlessFermion<Dim, NumSite> SpinlessFermion<Dim, NumSite>::hop(uint8_t from, uint8_t to) const {
         assert(from != to && "[Error]: Assuming different sites");
         const bool canHop = isOccupy(from) && !isOccupy(to);
@@ -56,7 +56,7 @@ namespace Physica::Core {
         return SpinlessFermion((occupyBits ^ fromMask) | toMask);
     }
 
-    template<unsigned int Dim, unsigned int NumSite>
+    template<int Dim, int NumSite>
     inline int SpinlessFermion<Dim, NumSite>::hopSign(uint8_t from, uint8_t to) const {
         const int numElectron = countOnes(occupyBits >> (from + 1)) - countOnes(occupyBits >> (to + 1));
         const bool flag1 = from < to;
@@ -64,7 +64,7 @@ namespace Physica::Core {
         return (flag1 == flag2) ? 1 : -1;
     }
 
-    template<unsigned int Dim, unsigned int NumSite>
+    template<int Dim, int NumSite>
     SpinlessFermion<Dim, NumSite> SpinlessFermion<Dim, NumSite>::transReduce(int period) const {
         if constexpr (Dim != 1)
             noImpl();
@@ -82,7 +82,7 @@ namespace Physica::Core {
         return SpinlessFermion(result);
     }
 
-    template<unsigned int Dim, unsigned int NumSite>
+    template<int Dim, int NumSite>
     int SpinlessFermion<Dim, NumSite>::lShiftSign() const {
         const This other = (*this) << 1;
         const bool noExchange = (*this) > other;
@@ -91,12 +91,12 @@ namespace Physica::Core {
         return (getNumParticle() % 2U != 0) ? 1 : -1;
     }
 
-    template<unsigned int Dim, unsigned int NumSite>
+    template<int Dim, int NumSite>
     int SpinlessFermion<Dim, NumSite>::calcPeriod() const {
         if constexpr (Dim != 1)
             noImpl();
         This copy = *this;
-        unsigned int i = 1;
+        int i = 1;
         for (; i <= NumSite; ++i) {
             copy <<= 1;
             if (copy == *this)
@@ -106,25 +106,25 @@ namespace Physica::Core {
         return i;
     }
 
-    template<unsigned int Dim, unsigned int NumSite>
+    template<int Dim, int NumSite>
     inline void SpinlessFermion<Dim, NumSite>::swap(SpinlessFermion& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         std::swap(occupyBits, obj.occupyBits);
     }
 
-    template<unsigned int Dim, unsigned int NumSite>
-    inline bool SpinlessFermion<Dim, NumSite>::isOccupy(uint8_t site) const noexcept {
-        assert(site < sizeof(occupyBits) * CHAR_BIT && "[Error]: Invalid site");
+    template<int Dim, int NumSite>
+    inline bool SpinlessFermion<Dim, NumSite>::isOccupy(int8_t site) const noexcept {
+        assert((0 <= site) && (static_cast<uint8_t>(site) < sizeof(occupyBits) * CHAR_BIT) && "[Error]: Invalid site");
         const IntType mask = 1UL << site;
         return (occupyBits & mask) != 0;
     }
 
-    template<unsigned int Dim, unsigned int NumSite>
+    template<int Dim, int NumSite>
     inline bool SpinlessFermion<Dim, NumSite>::isTransReducible(int period) const noexcept {
         return transReduce(period) != (*this);
     }
 
-    template<unsigned int Dim, unsigned int NumSite>
+    template<int Dim, int NumSite>
     template<class RandomGenerator>
     SpinlessFermion<Dim, NumSite> SpinlessFermion<Dim, NumSite>::random_state(RandomGenerator& gen) {
         constexpr bool flag = NumSite < sizeof(typename RandomGenerator::result_type) * CHAR_BIT;
@@ -132,7 +132,7 @@ namespace Physica::Core {
         return gen() & makeFullMask();
     }
 
-    template<unsigned int Dim, unsigned int NumSite>
+    template<int Dim, int NumSite>
     template<class RandomGenerator>
     SpinlessFermion<Dim, NumSite> SpinlessFermion<Dim, NumSite>::random_state(size_t numParticle, RandomGenerator& gen) {
         constexpr bool flag = NumSite < sizeof(typename RandomGenerator::result_type) * CHAR_BIT;
@@ -145,7 +145,7 @@ namespace Physica::Core {
         std::shuffle(bits, bits + NumSite, gen);
 
         IntType result = bits[0];
-        for (unsigned int i = 1; i < NumSite; ++i) {
+        for (int i = 1; i < NumSite; ++i) {
             result <<= 1U;
             result += bits[i];
         }

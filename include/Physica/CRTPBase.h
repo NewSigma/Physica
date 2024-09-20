@@ -23,16 +23,23 @@
 
 namespace Physica {
     /**
-     * This class helps implemant CRTP.
-     * 
-     * \tparam ID
-     * Only to avoid multiple inheritance
+     * This class helps implementing CRTP.
      */
-    template<class Derived, size_t ID = 0>
+    template<class T>
     class CRTPBase {
+        using Derived = typename Traits<T>::Derived;
+        using This = CRTPBase<T>;
     public:
         [[nodiscard]] __host__ __device__ Derived& getDerived() noexcept { return *static_cast<Derived*>(this); }
         [[nodiscard]] __host__ __device__ const Derived& getDerived() const noexcept { return *static_cast<const Derived*>(this); }
         [[nodiscard]] __host__ __device__ Derived& getConstCastDerived() const noexcept { return *static_cast<Derived*>(const_cast<CRTPBase*>(this)); }
+    protected:
+        CRTPBase() = default;
+        CRTPBase(const This&) = default;
+        CRTPBase(This&&) noexcept = default;
+        ~CRTPBase() = default;
+        /* Operators */
+        This& operator=(const This&) = default;
+        This& operator=(This&&) noexcept = default;
     };
 }

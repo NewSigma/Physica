@@ -23,8 +23,9 @@
 
 namespace Physica::Core {
     template<class Derived>
-    class LayerBase : public CRTPBase<Derived> {
-        using Base = CRTPBase<Derived>;
+    class LayerBase : public CRTPBase<LayerBase<Derived>> {
+        using This = LayerBase<Derived>;
+        using Base = CRTPBase<This>;
         using TraitsType = Traits<Derived>;
     public:
         using ScalarType = typename TraitsType::ScalarType;
@@ -37,12 +38,23 @@ namespace Physica::Core {
         /* Operations */
         [[nodiscard]] OutputType forward(const InputType& x) const { return Base::getDerived().forward(x); }
         [[nodiscard]] Derived copy() const { return Base::getDerived().copy(); }
+        /* Getters */
+        [[nodiscard]] size_t getInputDim() const noexcept { return Base::getDerived().getInputDim(); }
+        [[nodiscard]] size_t getOutputDim() const noexcept { return Base::getDerived().getOutputDim(); }
     protected:
         LayerBase() = default;
-        LayerBase(const LayerBase&) = default;
-        LayerBase(LayerBase&&) noexcept = default;
+        LayerBase(const This&) = default;
+        LayerBase(This&&) noexcept = default;
         /* Operators */
-        LayerBase& operator=(const LayerBase&) = default;
-        LayerBase& operator=(LayerBase&&) noexcept = default;
+        This& operator=(const This&) = default;
+        This& operator=(This&&) noexcept = default;
+    };
+}
+
+namespace Physica {
+    template<class T>
+    class Traits<LayerBase<T>> {
+    public:
+        using Derived = T;
     };
 }

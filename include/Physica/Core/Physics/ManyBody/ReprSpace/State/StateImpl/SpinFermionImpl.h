@@ -19,11 +19,11 @@
 #pragma once
 
 namespace Physica::Core {
-    template<unsigned int Dim, unsigned int NumSite>
+    template<int Dim, int NumSite>
     inline SpinFermion<Dim, NumSite>::SpinFermion(SpinlessType spinUp_, SpinlessType spinDown_)
             : spinUp(spinUp_), spinDown(spinDown_) {}
 
-    template<unsigned int Dim, unsigned int NumSite>
+    template<int Dim, int NumSite>
     inline bool SpinFermion<Dim, NumSite>::operator>(const This& other) const noexcept {
         if (spinUp > other.spinUp)
             return true;
@@ -32,7 +32,7 @@ namespace Physica::Core {
         return false;
     }
 
-    template<unsigned int Dim, unsigned int NumSite>
+    template<int Dim, int NumSite>
     inline bool SpinFermion<Dim, NumSite>::operator<(const This& other) const noexcept {
         if (spinUp < other.spinUp)
             return true;
@@ -41,7 +41,7 @@ namespace Physica::Core {
         return false;
     }
 
-    template<unsigned int Dim, unsigned int NumSite>
+    template<int Dim, int NumSite>
     SpinFermion<Dim, NumSite> SpinFermion<Dim, NumSite>::hopUp(uint8_t from, uint8_t to) const {
         auto newSpinUp = spinUp.hop(from, to);
         const bool hopFailed = newSpinUp.isVacuum() && !spinUp.isVacuum();
@@ -50,7 +50,7 @@ namespace Physica::Core {
         return SpinFermion(std::move(newSpinUp), spinDown);
     }
 
-    template<unsigned int Dim, unsigned int NumSite>
+    template<int Dim, int NumSite>
     SpinFermion<Dim, NumSite> SpinFermion<Dim, NumSite>::hopDown(uint8_t from, uint8_t to) const {
         auto newSpinDown = spinDown.hop(from, to);
         const bool hopFailed = newSpinDown.isVacuum() && !spinDown.isVacuum();
@@ -59,22 +59,22 @@ namespace Physica::Core {
         return SpinFermion(spinUp, std::move(newSpinDown));
     }
 
-    template<unsigned int Dim, unsigned int NumSite>
+    template<int Dim, int NumSite>
     inline int SpinFermion<Dim, NumSite>::hopUpSign(uint8_t from, uint8_t to) const {
         return spinUp.hopSign(from, to);
     }
 
-    template<unsigned int Dim, unsigned int NumSite>
+    template<int Dim, int NumSite>
     inline int SpinFermion<Dim, NumSite>::hopDownSign(uint8_t from, uint8_t to) const {
         return spinDown.hopSign(from, to);
     }
 
-    template<unsigned int Dim, unsigned int NumSite>
+    template<int Dim, int NumSite>
     SpinFermion<Dim, NumSite> SpinFermion<Dim, NumSite>::transReduce() const {
         if constexpr (Dim != 1)
             noImpl();
         This result = *this, temp = *this;
-        for (unsigned int i = 0; i < NumSite; ++i) {
+        for (int i = 0; i < NumSite; ++i) {
             temp <<= 1;
             if (temp.getSpinUp().getOccupyBits() < result.getSpinUp().getOccupyBits())
                 result = temp;
@@ -83,12 +83,12 @@ namespace Physica::Core {
         return result;
     }
 
-    template<unsigned int Dim, unsigned int NumSite>
+    template<int Dim, int NumSite>
     inline int SpinFermion<Dim, NumSite>::lShiftSign() const {
         return spinUp.lShiftSign() * spinDown.lShiftSign();
     }
 
-    template<unsigned int Dim, unsigned int NumSite>
+    template<int Dim, int NumSite>
     inline int SpinFermion<Dim, NumSite>::calcPeriod() const noexcept {
         if constexpr (Dim != 1)
             noImpl();
@@ -97,25 +97,25 @@ namespace Physica::Core {
         return result;
     }
 
-    template<unsigned int Dim, unsigned int NumSite>
+    template<int Dim, int NumSite>
     inline void SpinFermion<Dim, NumSite>::swap(SpinFermion& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         spinUp.swap(obj.spinUp);
         spinDown.swap(obj.spinDown);
     }
 
-    template<unsigned int Dim, unsigned int NumSite>
-    inline unsigned int SpinFermion<Dim, NumSite>::getNumDoubleOccupy() const noexcept {
+    template<int Dim, int NumSite>
+    inline int SpinFermion<Dim, NumSite>::getNumDoubleOccupy() const noexcept {
         return countOnes(spinUp.getOccupyBits() & spinDown.getOccupyBits());
     }
 
-    template<unsigned int Dim, unsigned int NumSite>
+    template<int Dim, int NumSite>
     template<class RandomGenerator>
     SpinFermion<Dim, NumSite> SpinFermion<Dim, NumSite>::random_state(RandomGenerator& gen) {
         return This(SpinlessType::random_state(gen), SpinlessType::random_state(gen));
     }
 
-    template<unsigned int Dim, unsigned int NumSite>
+    template<int Dim, int NumSite>
     template<class RandomGenerator>
     SpinFermion<Dim, NumSite> SpinFermion<Dim, NumSite>::random_state(size_t numSpinUp, size_t numSpinDown, RandomGenerator& gen) {
         return This(SpinlessType::random_state(numSpinUp, gen), SpinlessType::random_state(numSpinDown, gen));

@@ -21,7 +21,6 @@
 #include <cassert>
 #include <Physica/Core/MultiPrecision/Scalar.h>
 #include <Physica/Core/MultiPrecision/ScalarImpl/ExprType.h>
-#include <Physica/CRTPBase.h>
 
 namespace Physica::Core {
     /**

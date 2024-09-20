@@ -18,22 +18,20 @@
  */
 #pragma once
 
-#include <cassert>
-#include <utility>
-#include <stdint.h>
-#include <Physica/Core/MultiPrecision/BasicImpl/Util/Bitwise.h>
-
-namespace Physica {
-    template<class T> class Traits;
-}
+#include <cstddef>
+#include <Physica/Macro.h>
 
 namespace Physica::Core {
     template<class Derived>
     class State {
     public:
-        constexpr static unsigned int Dim = Traits<Derived>::Dim;
-        constexpr static unsigned int NumSite = Traits<Derived>::NumSite;
-        constexpr static unsigned int SiteDOF = Traits<Derived>::SiteDOF;
+        constexpr static int Dim = Traits<Derived>::Dim;
+        constexpr static int NumSite = Traits<Derived>::NumSite;
+        constexpr static int SiteDOF = Traits<Derived>::SiteDOF;
+
+        static_assert(1 <= Dim && Dim <= 3, "[Error]: Invalid Dim");
+        static_assert(NumSite > 0);
+        static_assert(SiteDOF > 0);
     public:
         constexpr static size_t calcFullNumState() noexcept;
     };
@@ -41,7 +39,7 @@ namespace Physica::Core {
     template<class Derived>
     constexpr size_t State<Derived>::calcFullNumState() noexcept {
         size_t result = 1;
-        for (unsigned int i = 0; i < NumSite; ++i)
+        for (int i = 0; i < NumSite; ++i)
             result *= SiteDOF;
         return result;
     }
