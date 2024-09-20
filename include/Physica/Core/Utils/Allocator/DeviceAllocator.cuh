@@ -22,7 +22,6 @@
 #include <memory>
 #include <Physica/Core/Parallel/CUDAContext.cuh>
 #include <Physica/Core/Utils/CUDA/device_obj.cuh>
-#include "Allocator.h"
 
 namespace Physica::Core {
     namespace Internal {
@@ -37,79 +36,16 @@ namespace Physica::Core {
         };
     }
 
-    template<class T> class DeviceAllocator;
-
-    template<class From, class To>
-    struct ChangeAllocatorValueType<DeviceAllocator<From>, To> {
-        using Type = DeviceAllocator<To>;
-    };
-}
-
-namespace std {
-    template<class T>
-    struct allocator_traits<Physica::Core::DeviceAllocator<T>> {
-    public:
-        using allocator_type = Physica::Core::DeviceAllocator<T>;
-        using value_type = typename Physica::Core::Internal::DeviceAllocatorValueType<T, std::is_class<T>::value>::Type;
-        using pointer = value_type*;
-        using const_pointer = const value_type*;
-        using void_pointer = void*;
-        using const_void_pointer = const void*;
-        using lvalue_reference = value_type&;
-        using const_lvalue_reference = const value_type&;
-        using rvalue_reference = value_type&&;
-        using size_type = size_t;
-        using difference_type = std::ptrdiff_t;
-        using propagate_on_container_copy_assignment = std::false_type;
-        using propagate_on_container_move_assignment = std::false_type;
-        using propagate_on_container_swap = std::false_type;
-        using is_always_equal = typename std::is_empty<allocator_type>::type;
-        template<class U>
-        using rebind_alloc = Physica::Core::DeviceAllocator<U>;
-        template<class U>
-        using rebind_traits = std::allocator_traits<rebind_alloc<U>>;
-
-        constexpr static bool isPageLocked = false;
-    public:
-        [[nodiscard]] __host__ __device__ static pointer allocate(allocator_type& a, size_type n) {
-            return a.allocate(n);
-        }
-
-        __host__ __device__ static void deallocate(allocator_type& a, pointer p, size_type n) noexcept {
-            a.deallocate(p, n);
-        }
-
-        template<class... Args>
-        __host__ __device__ static void construct(allocator_type& a, pointer p, Args&&... args) {
-            a.construct(p, std::forward<Args>(args)...);
-        }
-
-        __host__ __device__ static void destroy(allocator_type& a, pointer p) {
-            a.destroy(p);
-        }
-
-         __host__ __device__ static constexpr size_type max_size([[maybe_unused]] const allocator_type& a) noexcept {
-            return std::numeric_limits<size_type>::max() / sizeof(value_type);
-        }
-
-         __host__ __device__ static allocator_type select_on_container_copy_construction(const allocator_type& a) {
-            allocator_type result = a;
-            return result;
-        }
-    };
-}
-
-namespace Physica::Core {
     template<class T>
     class DeviceAllocator {
     public:
-        using value_type = typename std::allocator_traits<DeviceAllocator>::value_type;
-        using pointer = typename std::allocator_traits<DeviceAllocator>::pointer;
-        using size_type = typename std::allocator_traits<DeviceAllocator>::size_type;
-        using difference_type = typename std::allocator_traits<DeviceAllocator>::difference_type;
+        using value_type = typename Physica::Core::Internal::DeviceAllocatorValueType<T, std::is_class<T>::value>::Type;
+        using pointer = value_type*;
+        using size_type = size_t;
+        using difference_type = std::ptrdiff_t;
         using propagate_on_container_move_assignment = std::true_type;
         template<class U>
-        using rebind = DeviceAllocator<U>;
+        using rebind_alloc = DeviceAllocator<U>;
     public:
         DeviceAllocator() noexcept = default;
         DeviceAllocator(const DeviceAllocator&) noexcept = default;
@@ -158,10 +94,10 @@ namespace Physica::Core {
     template<class... Args>
     __host__ __device__ void DeviceAllocator<T>::construct(pointer p, Args&&... args) {
         if constexpr (IsDevice())
-            ::new (static_cast<void*>(p.get())) value_type(std::forward<Args>(args)...);
+            ::new (static_cast<void*>(p)) value_type(std::forward<Args>(args)...);
         else {
             value_type temp(std::forward<Args>(args)...);
-            check(cudaMemcpy(p.get(), &temp, sizeof(value_type), cudaMemcpyHostToDevice));
+            check(cudaMemcpy(p, &temp, sizeof(value_type), cudaMemcpyHostToDevice));
             if constexpr (!std::is_trivial<value_type>::value)
                 temp.release(); //Ownership has been given to device
         }
@@ -169,14 +105,68 @@ namespace Physica::Core {
 
     template<class T>
     __host__ __device__ void DeviceAllocator<T>::destroy(pointer p) {
-        if constexpr (std::is_trivial<value_type>::value)
-            return;
-
-        if constexpr (IsDevice())
-            p->~value_type();
-        else {
-            value_type temp;
-            cudaMemcpyAsync(&temp, p.get(), sizeof(value_type), cudaMemcpyDeviceToHost, Core::CUDAContext::getInstance());
+        if constexpr (!std::is_trivial<value_type>::value) {
+            if constexpr (IsDevice())
+                p->~value_type();
+            else {
+                value_type temp;
+                cudaMemcpyAsync(&temp, p, sizeof(value_type), cudaMemcpyDeviceToHost, Core::CUDAContext::getInstance());
+            }
         }
     }
+}
+
+namespace std {
+    template<class T>
+    struct allocator_traits<Physica::Core::DeviceAllocator<T>> {
+    public:
+        using allocator_type = Physica::Core::DeviceAllocator<T>;
+        using value_type = typename allocator_type::value_type;
+        using pointer = value_type*;
+        using const_pointer = const value_type*;
+        using void_pointer = void*;
+        using const_void_pointer = const void*;
+        using lvalue_reference = value_type&;
+        using const_lvalue_reference = const value_type&;
+        using rvalue_reference = value_type&&;
+        using size_type = size_t;
+        using difference_type = std::ptrdiff_t;
+        using propagate_on_container_copy_assignment = std::false_type;
+        using propagate_on_container_move_assignment = std::false_type;
+        using propagate_on_container_swap = std::false_type;
+        using is_always_equal = typename std::is_empty<allocator_type>::type;
+        template<class U>
+        using rebind_alloc = Physica::Core::DeviceAllocator<U>;
+        template<class U>
+        using rebind_traits = std::allocator_traits<rebind_alloc<U>>;
+
+        constexpr static size_t Align = 256; // CUDA default
+        constexpr static bool isPageLocked = false;
+    public:
+        [[nodiscard]] __host__ __device__ static pointer allocate(allocator_type& a, size_type n) {
+            return a.allocate(n);
+        }
+
+        __host__ __device__ static void deallocate(allocator_type& a, pointer p, size_type n) noexcept {
+            a.deallocate(p, n);
+        }
+
+        template<class... Args>
+        __host__ __device__ static void construct(allocator_type& a, pointer p, Args&&... args) {
+            a.construct(p, std::forward<Args>(args)...);
+        }
+
+        __host__ __device__ static void destroy(allocator_type& a, pointer p) {
+            a.destroy(p);
+        }
+
+         __host__ __device__ static constexpr size_type max_size([[maybe_unused]] const allocator_type& a) noexcept {
+            return std::numeric_limits<size_type>::max() / sizeof(value_type);
+        }
+
+         __host__ __device__ static allocator_type select_on_container_copy_construction(const allocator_type& a) {
+            allocator_type result = a;
+            return result;
+        }
+    };
 }

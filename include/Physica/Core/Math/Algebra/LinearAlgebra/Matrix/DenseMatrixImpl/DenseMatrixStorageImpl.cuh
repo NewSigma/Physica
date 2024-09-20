@@ -33,18 +33,19 @@ namespace Physica::Core {
     }
 
     template<tparams>
-    device_obj<ColumnElementStorage>::device_obj(const host_obj& storage) : Base(storage), Dim(storage.getRow(), storage.getColumn()) {}
+    device_obj<ColumnElementStorage>::device_obj(const host_obj& storage)
+            : Dim(storage.getRow(), storage.getColumn()), arr(storage.arr) {}
 
     template<tparams>
     __device__ typename device_obj<ColumnElementStorage>::ValueType& device_obj<ColumnElementStorage>::operator()(size_t r, size_t c) {
         assert(r < getRow() && c < getColumn());
-        return Base::operator[](toIndex(r, c));
+        return arr[toIndex(r, c)];
     }
 
     template<tparams>
     __device__ const typename device_obj<ColumnElementStorage>::ValueType& device_obj<ColumnElementStorage>::operator()(size_t r, size_t c) const {
         assert(r < getRow() && c < getColumn());
-        return Base::operator[](toIndex(r, c));
+        return arr[toIndex(r, c)];
     }
 
     template<tparams>
@@ -52,15 +53,15 @@ namespace Physica::Core {
     __host__ __device__ void device_obj<ColumnElementStorage>::resize(size_t row, size_t column, Args&&... args) {
         if constexpr (IsDevice())
             assert(Row * Column != Dynamic && "[Error]: Do not allocate dynamic matrix in device code");
-        Base::resize(row * column, std::forward<Args>(args)...);
         Dim::resize(row, column);
+        arr.resize(row * column, std::forward<Args>(args)...);
     }
 
     template<tparams>
     void device_obj<ColumnElementStorage>::swap(This& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
-        Base::swap(obj);
         Dim::swap(obj);
+        arr.swap(obj.arr);
     }
 
     template<tparams>
@@ -77,12 +78,12 @@ namespace Physica::Core {
 
     template<tparams>
     inline void ColumnElementStorage::toDevice(device_obj<This>& obj) const {
-        Base::toDevice(obj);
+        arr.toDevice(obj.asArray());
     }
 
     template<tparams>
     inline void ColumnElementStorage::toDeviceAsync(device_obj<This>& obj) const {
-        Base::toDeviceAsync(obj);
+        arr.toDeviceAsync(obj.asArray());
     }
 
     #undef ColumnElementStorage
@@ -99,20 +100,21 @@ namespace Physica::Core {
     }
 
     template<tparams>
-    device_obj<RowElementStorage>::device_obj(const host_obj& storage): Base(storage), Dim(storage.getRow(), storage.getColumn()) {}
+    device_obj<RowElementStorage>::device_obj(const host_obj& storage)
+            : Dim(storage.getRow(), storage.getColumn()), arr(storage.arr) {}
 
     template<tparams>
     __device__ typename device_obj<RowElementStorage>::ValueType&
     device_obj<RowElementStorage>::operator()(size_t r, size_t c) {
         assert(r < getRow() && c < getColumn());
-        return Base::operator[](toIndex(r, c));
+        return arr[toIndex(r, c)];
     }
 
     template<tparams>
     __device__ const typename device_obj<RowElementStorage>::ValueType&
     device_obj<RowElementStorage>::operator()(size_t r, size_t c) const {
         assert(r < getRow() && c < getColumn());
-        return Base::operator[](toIndex(r, c));
+        return arr[toIndex(r, c)];
     }
 
     template<tparams>
@@ -120,15 +122,15 @@ namespace Physica::Core {
     __host__ __device__ void device_obj<RowElementStorage>::resize(size_t row, size_t column, Args&&... args) {
         if constexpr (IsDevice())
             assert(Row * Column != Dynamic && "[Error]: Do not allocate dynamic matrix in device code");
-        Base::resize(row * column, std::forward<Args>(args)...);
         Dim::resize(row, column);
+        arr.resize(row * column, std::forward<Args>(args)...);
     }
 
     template<tparams>
     void device_obj<RowElementStorage>::swap(This& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
-        Base::swap(obj);
         Dim::swap(obj);
+        arr.swap(obj.arr);
     }
 
     template<tparams>
@@ -145,12 +147,12 @@ namespace Physica::Core {
 
     template<tparams>
     inline void RowElementStorage::toDevice(device_obj<This>& obj) const {
-        Base::toDevice(obj);
+        arr.toDevice(obj.asArray());
     }
 
     template<tparams>
     inline void RowElementStorage::toDeviceAsync(device_obj<This>& obj) const {
-        Base::toDeviceAsync(obj);
+        arr.toDeviceAsync(obj.asArray());
     }
 
     #undef RowElementStorage

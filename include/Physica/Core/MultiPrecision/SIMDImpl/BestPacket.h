@@ -24,6 +24,7 @@ namespace Physica::Core {
      */
     template<class ScalarType, size_t Length>
     class BestPacket {
+        static_assert(is_scalar<ScalarType>::value, "[Error]: Invalid ScalarType");
         using PlainScalar = typename ScalarType::PlainScalar;
         constexpr static bool isSinglePrec = ScalarType::Option == Float;
         constexpr static bool isComplex = ScalarType::isComplex;

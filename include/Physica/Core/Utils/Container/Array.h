@@ -42,7 +42,10 @@ namespace Physica::Core {
         using typename Base::const_lvalue_reference;
         using typename Base::rvalue_reference;
     private:
-        T arr[Length];
+    #pragma GCC diagnostic push
+    #pragma GCC diagnostic ignored "-Wattributes"
+        alignas(std::allocator_traits<Allocator>::Align) T arr[Length];
+    #pragma GCC diagnostic pop
         allocator_type alloc;
     public:
         Array() = default;

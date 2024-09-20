@@ -21,6 +21,17 @@
 #include "DenseMatrixStorage.h"
 
 namespace Physica::Core {
+    namespace Internal {
+        template<bool IsScalar, class T, size_t Size>
+        struct HalfDenseMatrixStorageHelper {
+            using Type = Vector<T, Size>;
+        };
+
+        template<class T, size_t Size>
+        struct HalfDenseMatrixStorageHelper<false, T, Size> {
+            using Type = Array<T, Size>;
+        };
+    }
     /**
      * \class HalfDenseMatrixStorage stores half of the elements of a matrix, while the other half may be symmetric, hermitian, or etc.
      *
@@ -29,8 +40,9 @@ namespace Physica::Core {
     template<class T, size_t Order = Dynamic>
     class HalfDenseMatrixStorage {
         using This = HalfDenseMatrixStorage<T, Order>;
+        constexpr static size_t Size = Order * (Order + 1) / 2;
     public:
-        using ArrayType = typename Traits<This>::ArrayType;
+        using ArrayType = typename Internal::HalfDenseMatrixStorageHelper<is_scalar<T>::value, T, Size>::Type;
         using pointer = typename ArrayType::pointer;
         using const_pointer = typename ArrayType::const_pointer;
         using lvalue_reference = typename ArrayType::lvalue_reference;
@@ -129,22 +141,22 @@ namespace Physica::Core {
         const size_t max = exchange ? r : c;
         return (order * 2U - min - 1) * min / 2U + max;
     }
-
-    template<class T, size_t Order>
-    inline void swap(HalfDenseMatrixStorage<T, Order>& __restrict mat1,
-                     HalfDenseMatrixStorage<T, Order>& __restrict mat2) noexcept {
-        mat1.swap(mat2);
-    }
 }
 
-namespace Physica {
-    using namespace Core;
-
+/*namespace Physica {
     template<class T, size_t Order>
-    class Traits<HalfDenseMatrixStorage<T, Order>> {
-        constexpr static bool IsScalar = is_scalar<T>::value;
+    class Traits<Core::HalfDenseMatrixStorage<T, Order>> {
+        constexpr static bool IsScalar = Core::is_scalar<T>::value;
         constexpr static size_t Size = Order * (Order + 1) / 2;
     public:
-        using ArrayType = typename std::conditional<IsScalar, Vector<T, Size>, Array<T, Size>>::type;
+        using ArrayType = typename std::conditional<IsScalar, Core::Vector<T, Size>, Core::Array<T, Size>>::type;
     };
+}*/
+
+namespace std {
+    template<class T, size_t Order>
+    inline void swap(Physica::Core::HalfDenseMatrixStorage<T, Order>& __restrict mat1,
+                     Physica::Core::HalfDenseMatrixStorage<T, Order>& __restrict mat2) noexcept {
+        mat1.swap(mat2);
+    }
 }

@@ -750,7 +750,7 @@ namespace Physica::Core {
 
     template<class ScalarType, unsigned int Dim>
     void PeriodicCell<ScalarType, Dim>::normalize_direct() {
-        for (auto& elem : pos) {
+        for (auto& elem : pos.asArray()) {
             elem -= floor(elem);
             assert(ScalarType(0) <= elem && elem <= ScalarType(1));
         }

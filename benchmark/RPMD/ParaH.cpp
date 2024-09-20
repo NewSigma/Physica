@@ -42,7 +42,7 @@ RPMD<ScalarType> makeSystem(size_t numMolecular, RandomGenerator& gen) {
     typename MDCellType::LatticeMatrix lattice = MDCellType::LatticeMatrix::unitMatrix(3);
     typename MDCellType::PositionMatrix pos(numMolecular, 3);
     std::uniform_real_distribution dist{};
-    for (auto& elem : pos)
+    for (auto& elem : pos.asArray())
         elem = dist(gen);
     typename MDCellType::MassVector massVec(numMolecular, mass);
     MDCellType cell(std::move(lattice), std::move(pos), std::move(massVec));

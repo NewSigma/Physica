@@ -374,7 +374,7 @@ namespace Physica::Core {
         PositionMatrix pos(getNumParticle(), Dim);
         auto phase = posContract.col(contract);
         size_t index = 0;
-        for (auto& elem : pos) {
+        for (auto& elem : pos.asArray()) {
             elem = ScalarType(phase[index]);
             ++index;
         }

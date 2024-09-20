@@ -135,7 +135,7 @@ namespace Physica::Core {
     template<class ScalarType, unsigned int Dim>
     void MDCell<ScalarType, Dim>::normalizePos(PositionMatrix& target) const {
         Base::toDirect(target, invLattice);
-        for (auto& elem : target) {
+        for (auto& elem : target.asArray()) {
             elem -= floor(elem);
             assert(ScalarType(0) <= elem && elem <= ScalarType(1));
         }

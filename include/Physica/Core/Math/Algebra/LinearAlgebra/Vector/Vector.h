@@ -24,8 +24,10 @@
 #include "VectorImpl/ContinuousVector.h"
 
 namespace Physica::Core {
-    template<class T, size_t Length = Dynamic, class Allocator = HostAllocator<T>>
+    template<class T, size_t Length = Dynamic, class Allocator = HostAllocator<T, alignof(typename BestPacket<T, Length>::Type)>>
     class Vector : public ContinuousVector<Vector<T, Length, Allocator>>, public Array<T, Length, Allocator> {
+        constexpr static size_t DefaultAlign = alignof(typename BestPacket<T, Length>::Type);
+        static_assert(std::allocator_traits<Allocator>::Align % DefaultAlign == 0, "[Error]: Bad alignment for SIMD");
         using This = Vector<T, Length, Allocator>;
     public:
         using Base = ContinuousVector<This>;

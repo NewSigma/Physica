@@ -19,19 +19,10 @@
 #pragma once
 
 #include <cstdlib>
-#include <new>
+#include <cstring>
 #include <memory>
 #include <limits>
-#include "Allocator.h"
-
-namespace Physica::Core {
-    template<class T> class HostAllocator;
-
-    template<class From, class To>
-    struct ChangeAllocatorValueType<HostAllocator<From>, To> {
-        using Type = HostAllocator<To>;
-    };
-}
+#include <Physica/Macro.h>
 
 namespace Physica::Core {
     /**
@@ -39,7 +30,7 @@ namespace Physica::Core {
      * 
      * Designed to meet C++17 standard(WIP)
      */
-    template<class T>
+    template<class T, size_t Align = Dynamic>
     class HostAllocator {
     public:
         using value_type = T;
@@ -47,7 +38,7 @@ namespace Physica::Core {
         using difference_type = std::ptrdiff_t;
         using propagate_on_container_move_assignment = std::true_type;
         template<class U>
-        using rebind = HostAllocator<U>;
+        using rebind_alloc = HostAllocator<U, Align>;
     public:
         HostAllocator() noexcept = default;
         HostAllocator(const HostAllocator&) noexcept = default;
@@ -65,49 +56,68 @@ namespace Physica::Core {
         inline void destroy(T* p);
     };
 
-    template<class T>
-    [[nodiscard]] T* HostAllocator<T>::allocate(size_t n) {
-        auto* p = reinterpret_cast<T*>(malloc(n * sizeof(T)));
+    template<class T, size_t Align>
+    [[nodiscard]] T* HostAllocator<T, Align>::allocate(size_t n) {
+        T* p;
+        if constexpr (Align == Dynamic)
+            p = reinterpret_cast<T*>(std::malloc(n * sizeof(T)));
+        else
+            p = reinterpret_cast<T*>(std::aligned_alloc(Align, n * sizeof(T)));
+
         if (!p)
             throw std::bad_alloc();
         return p;
     }
 
-    template<class T>
-    inline void HostAllocator<T>::deallocate(T* p, [[maybe_unused]] size_t n) noexcept {
-        free(p);
+    template<class T, size_t Align>
+    inline void HostAllocator<T, Align>::deallocate(T* p, [[maybe_unused]] size_t n) noexcept {
+        std::free(p);
     }
 
-    template<class T>
-    T* HostAllocator<T>::reallocate(T* p, size_t new_size, [[maybe_unused]] size_t old_size) {
-        if constexpr (std::is_trivially_copyable<T>::value)
-            return reinterpret_cast<T*>(realloc(p, new_size * sizeof(T)));
+    template<class T, size_t Align>
+    T* HostAllocator<T, Align>::reallocate(T* p, size_t new_size, [[maybe_unused]] size_t old_size) {
+        if constexpr (Align == Dynamic) {
+            if constexpr (std::is_trivially_copyable<T>::value)
+                return reinterpret_cast<T*>(realloc(p, new_size * sizeof(T)));
+            else {
+                T* new_p = allocate(new_size);
+                for (size_t i = 0; i < std::min(new_size, old_size); ++i)
+                    construct(new_p + i, std::move(p[i]));
+                deallocate(p, old_size);
+                return new_p;
+            }
+        }
         else {
             T* new_p = allocate(new_size);
-            for (size_t i = 0; i < std::min(new_size, old_size); ++i)
-                construct(new_p + i, std::move(p[i]));
+            const size_t size = std::min(new_size, old_size);
+            if constexpr (std::is_trivially_copyable<T>::value)
+                memcpy(new_p, p, size * sizeof(T));
+            else {
+                for (size_t i = 0; i < size; ++i)
+                    construct(new_p + i, std::move(p[i]));
+            }
             deallocate(p, old_size);
             return new_p;
         }
     }
 
-    template<class T>
+    template<class T, size_t Align>
     template<class... Args>
-    inline void HostAllocator<T>::construct(T* p, Args&&... args) {
+    inline void HostAllocator<T, Align>::construct(T* p, Args&&... args) {
         ::new (static_cast<void*>(p)) T(std::forward<Args>(args)...);
     }
 
-    template<class T>
-    inline void HostAllocator<T>::destroy(T* p) {
+    template<class T, size_t Align>
+    inline void HostAllocator<T, Align>::destroy(T* p) {
         p->~T();
     }
 }
 
 namespace std {
-    template<class T>
-    struct allocator_traits<Physica::Core::HostAllocator<T>> {
+    template<class T, size_t Align_>
+    struct allocator_traits<Physica::Core::HostAllocator<T, Align_>> {
     public:
-        using allocator_type = Physica::Core::HostAllocator<T>;
+        using allocator_type = Physica::Core::HostAllocator<T, Align_>;
         using value_type = T;
         using pointer = T*;
         using const_pointer = const T*;
@@ -127,6 +137,7 @@ namespace std {
         template<class U>
         using rebind_traits = std::allocator_traits<rebind_alloc<U>>;
 
+        constexpr static size_t Align = Align_;
         constexpr static bool isPageLocked = false;
     public:
         [[nodiscard]] static pointer allocate(allocator_type& a, size_type n) {

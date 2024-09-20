@@ -21,83 +21,16 @@
 #include "HostAllocator.h"
 
 namespace Physica::Core {
-    template<class T> class PageLockedAllocator;
-
-    template<class From, class To>
-    struct ChangeAllocatorValueType<PageLockedAllocator<From>, To> {
-        using Type = PageLockedAllocator<To>;
-    };
-}
-
-namespace std {
-    template<class T>
-    struct allocator_traits<Physica::Core::PageLockedAllocator<T>> {
-    public:
-        using allocator_type = Physica::Core::PageLockedAllocator<T>;
-        using value_type = T;
-        using pointer = T*;
-        using const_pointer = const T*;
-        using void_pointer = void*;
-        using const_void_pointer = const void*;
-        using lvalue_reference = T&;
-        using const_lvalue_reference = const T&;
-        using rvalue_reference = T&&;
-        using size_type = size_t;
-        using difference_type = std::ptrdiff_t;
-        using propagate_on_container_copy_assignment = std::false_type;
-        using propagate_on_container_move_assignment = std::false_type;
-        using propagate_on_container_swap = std::false_type;
-        using is_always_equal = typename std::is_empty<allocator_type>::type;
-        template<class U>
-        using rebind_alloc = Physica::Core::PageLockedAllocator<U>;
-        template<class U>
-        using rebind_traits = std::allocator_traits<rebind_alloc<U>>;
-
-        constexpr static bool isPageLocked = true;
-    public:
-        [[nodiscard]] static pointer allocate(allocator_type& a, size_type n) {
-            return a.allocate(n);
-        }
-
-        static void deallocate(allocator_type& a, pointer p, size_type n) noexcept {
-            a.deallocate(p, n);
-        }
-
-        [[nodiscard]] static pointer reallocate(allocator_type& a, pointer p, size_type n) {
-            return a.reallocate(p, n);
-        }
-
-        template<class... Args>
-        static void construct(allocator_type& a, pointer p, Args&&... args) {
-            a.construct(p, std::forward<Args>(args)...);
-        }
-
-        static void destroy(allocator_type& a, pointer p) {
-            a.destroy(p);
-        }
-
-        static constexpr size_type max_size(const allocator_type& a) noexcept {
-            return std::numeric_limits<size_type>::max() / sizeof(value_type);
-        }
-
-        static allocator_type select_on_container_copy_construction(const allocator_type& a) {
-            allocator_type result = a;
-            return result;
-        }
-    };
-}
-
-namespace Physica::Core {
     template<class T>
     class PageLockedAllocator {
     public:
-        using value_type = typename std::allocator_traits<PageLockedAllocator>::value_type;
-        using pointer = typename std::allocator_traits<PageLockedAllocator>::pointer;
-        using size_type = typename std::allocator_traits<PageLockedAllocator>::size_type;
-        using difference_type = typename std::allocator_traits<PageLockedAllocator>::difference_type;
+        using value_type = T;
+        using pointer = T*;
+        using size_type = size_t;
+        using difference_type = std::ptrdiff_t;
         using propagate_on_container_move_assignment = std::true_type;
         template<class U>
-        using rebind = PageLockedAllocator<U>;
+        using rebind_alloc = PageLockedAllocator<U>;
     public:
         PageLockedAllocator() noexcept = default;
         PageLockedAllocator(const PageLockedAllocator&) noexcept = default;
@@ -152,4 +85,63 @@ namespace Physica::Core {
         HostAllocator<T> alloc{};
         alloc.destroy(p);
     }
+}
+
+namespace std {
+    template<class T>
+    struct allocator_traits<Physica::Core::PageLockedAllocator<T>> {
+    public:
+        using allocator_type = Physica::Core::PageLockedAllocator<T>;
+        using value_type = T;
+        using pointer = T*;
+        using const_pointer = const T*;
+        using void_pointer = void*;
+        using const_void_pointer = const void*;
+        using lvalue_reference = T&;
+        using const_lvalue_reference = const T&;
+        using rvalue_reference = T&&;
+        using size_type = size_t;
+        using difference_type = std::ptrdiff_t;
+        using propagate_on_container_copy_assignment = std::false_type;
+        using propagate_on_container_move_assignment = std::false_type;
+        using propagate_on_container_swap = std::false_type;
+        using is_always_equal = typename std::is_empty<allocator_type>::type;
+        template<class U>
+        using rebind_alloc = Physica::Core::PageLockedAllocator<U>;
+        template<class U>
+        using rebind_traits = std::allocator_traits<rebind_alloc<U>>;
+
+        constexpr static size_t Align = 256; // CUDA default
+        constexpr static bool isPageLocked = true;
+    public:
+        [[nodiscard]] static pointer allocate(allocator_type& a, size_type n) {
+            return a.allocate(n);
+        }
+
+        static void deallocate(allocator_type& a, pointer p, size_type n) noexcept {
+            a.deallocate(p, n);
+        }
+
+        [[nodiscard]] static pointer reallocate(allocator_type& a, pointer p, size_type n) {
+            return a.reallocate(p, n);
+        }
+
+        template<class... Args>
+        static void construct(allocator_type& a, pointer p, Args&&... args) {
+            a.construct(p, std::forward<Args>(args)...);
+        }
+
+        static void destroy(allocator_type& a, pointer p) {
+            a.destroy(p);
+        }
+
+        static constexpr size_type max_size(const allocator_type& a) noexcept {
+            return std::numeric_limits<size_type>::max() / sizeof(value_type);
+        }
+
+        static allocator_type select_on_container_copy_construction(const allocator_type& a) {
+            allocator_type result = a;
+            return result;
+        }
+    };
 }

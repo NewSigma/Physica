@@ -100,7 +100,7 @@ namespace Physica::Core {
         momentum = ScalarType(0);
         /* Fill pos */ {
             size_t index = dof;
-            for (auto elem : cell.getPos()) {
+            for (auto elem : cell.getPos().asArray()) {
                 phase(index, 0) = elem;
                 ++index;
             }
@@ -257,7 +257,7 @@ namespace Physica::Core {
         PositionMatrix result(getNumParticle(), Dim);
         auto col = phase.col(replica);
         size_t index = getDOF();
-        for (auto& elem : result) {
+        for (auto& elem : result.asArray()) {
             elem = ScalarType(col[index]);
             ++index;
         }
@@ -270,7 +270,7 @@ namespace Physica::Core {
         PositionMatrix result(getNumParticle(), Dim);
         const size_t dof = getDOF();
         size_t index = dof;
-        for (auto& elem : result) {
+        for (auto& elem : result.asArray()) {
             elem = ScalarType(mean(phase.row(index)));
             ++index;
         }
@@ -282,7 +282,7 @@ namespace Physica::Core {
     RingPolymer<ScalarType, Dim, NumReplica>::makeBeadMomentum(size_t replica) const {
         PositionMatrix result(getNumParticle(), Dim, 0);
         size_t index = 0;
-        for (auto& elem : result) {
+        for (auto& elem : result.asArray()) {
             elem = ScalarType(phase(index, replica));
             ++index;
         }
@@ -294,7 +294,7 @@ namespace Physica::Core {
     RingPolymer<ScalarType, Dim, NumReplica>::makeCentroidMomentum() const {
         PositionMatrix result(getNumParticle(), Dim, 0);
         size_t index = 0;
-        for (auto& elem : result) {
+        for (auto& elem : result.asArray()) {
             elem = ScalarType(mean(phase.row(index)));
             ++index;
         }

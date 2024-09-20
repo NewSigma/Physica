@@ -59,7 +59,7 @@ MDCell<ScalarType> makeSystem() {
     pos = cell1.getPos();
     auto& gen = RandomPoolType::getInstance().getGen();
     std::normal_distribution<double> dist(0, 0.5);
-    for (auto& elem : pos)
+    for (auto& elem : pos.asArray())
         elem += ScalarType::random_any(dist, gen); //Perturbation
     cell1.setPos(pos);
     return cell1;

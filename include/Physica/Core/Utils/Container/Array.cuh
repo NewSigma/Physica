@@ -85,7 +85,7 @@ namespace Physica::Core {
         using typename Base::ReverseIterator;
         using typename Base::ConstReverseIterator;
         using PlainElemType = typename std::conditional<isTrivial, ValueType, Physica::PlainStruct<ValueType>>::type;
-        using PlainElemAllocator = typename ChangeAllocatorValueType<Allocator, PlainElemType>::Type;
+        using PlainElemAllocator = typename Allocator::template rebind_alloc<PlainElemType>;
         using PlainHostObj = Array<PlainElemType, Dynamic, PlainElemAllocator>;
     private:
         pointer d_data;

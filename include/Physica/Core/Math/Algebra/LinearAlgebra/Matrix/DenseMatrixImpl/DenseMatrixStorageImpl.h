@@ -25,8 +25,8 @@ namespace Physica::Core {
     template<tparams>
     template<class... Args>
     void ColumnElementStorage::resize(size_t row, size_t column, Args&&... args) {
-        Base::resize(row * column, std::forward<Args>(args)...);
         Dim::resize(row, column);
+        arr.resize(row * column, std::forward<Args>(args)...);
     }
 
     template<tparams>
@@ -35,7 +35,7 @@ namespace Physica::Core {
         const size_t column = getColumn();
         assert(r1 < row && r2 < row);
         for (size_t i = 0, temp = 0; i < column; ++i, temp += row)
-            swap((*this)[temp + r1], (*this)[temp + r2]);
+            arr[temp + r1].swap(arr[temp + r2]);
     }
 
     template<tparams>
@@ -46,7 +46,7 @@ namespace Physica::Core {
         const size_t offset1 = c1 * row;
         const size_t offset2 = c2 * row;
         for (size_t i = 0; i < row; ++i)
-            (*this)[offset1 + i].swap((*this)[offset2 + i]);
+            arr[offset1 + i].swap(arr[offset2 + i]);
     }
 
     #undef ColumnElementStorage
@@ -55,8 +55,8 @@ namespace Physica::Core {
     template<tparams>
     template<class... Args>
     void RowElementStorage::resize(size_t row, size_t column, Args&&... args) {
-        Base::resize(row * column, std::forward<Args>(args)...);
         Dim::resize(row, column);
+        arr.resize(row * column, std::forward<Args>(args)...);
     }
 
     template<tparams>
@@ -67,7 +67,7 @@ namespace Physica::Core {
         const size_t offset1 = r1 * column;
         const size_t offset2 = r2 * column;
         for (size_t i = 0; i < column; ++i)
-            (*this)[offset1 + i].swap((*this)[offset2 + i]);
+            arr[offset1 + i].swap(arr[offset2 + i]);
     }
 
     template<tparams>
@@ -76,7 +76,7 @@ namespace Physica::Core {
         const size_t column = getColumn();
         assert(c1 < column && c2 < column);
         for (size_t i = 0, temp = 0; i < column; ++i, temp += row)
-            swap((*this)[temp + c1], (*this)[temp + c2]);
+            arr[temp + c1].swap(arr[temp + c2]);
     }
 
     #undef RowElementStorage
