@@ -119,7 +119,7 @@ Plot& plotDeltaFreeEnergy(const VectorType& lattices, const VectorType& density)
     {
         deltaFreeEnergy[lattices.getLength() - 1] = 0;
         ThreadExecutor::parallel_for([&deltaFreeEnergy, &density](unsigned int i) {
-            Integrate<Simpson, ScalarType, 1> simpson({{density[i + 1]}, {density[i]}}, 0.0001);
+            Integrate<IntegrateMethod::Simpson, ScalarType, 1> simpson({{density[i + 1]}, {density[i]}}, 0.0001);
             deltaFreeEnergy[i] = simpson.solve([&](ScalarType rho) -> ScalarType {
                 const ScalarType numParticle = numMolecular;
                 const ScalarType latticeSize = numParticle / rho;

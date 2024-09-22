@@ -21,7 +21,7 @@
 #include "IntegrateRange.h"
 
 namespace Physica::Core {
-    enum IntegrateMethod {
+    enum class IntegrateMethod {
         Rectangular,
         Ladder,
         Simpson,
@@ -33,12 +33,12 @@ namespace Physica::Core {
     class Integrate;
     //////////////////////////////////Rectangular//////////////////////////////////
     template<class ScalarType, size_t dim>
-    class Integrate<Rectangular, ScalarType, dim> : public IntegrateRange<ScalarType, dim> {
+    class Integrate<IntegrateMethod::Rectangular, ScalarType, dim> : public IntegrateRange<ScalarType, dim> {
         using Base = IntegrateRange<ScalarType, dim>;
     };
 
     template<class ScalarType>
-    class Integrate<Rectangular, ScalarType, 1> : public IntegrateRange<ScalarType, 1> {
+    class Integrate<IntegrateMethod::Rectangular, ScalarType, 1> : public IntegrateRange<ScalarType, 1> {
         using Base = IntegrateRange<ScalarType, 1>;
     public:
         using typename Base::VectorType;
@@ -52,12 +52,12 @@ namespace Physica::Core {
     };
     //////////////////////////////////Ladder//////////////////////////////////
     template<class ScalarType, size_t dim>
-    class Integrate<Ladder, ScalarType, dim> : public IntegrateRange<ScalarType, dim> {
+    class Integrate<IntegrateMethod::Ladder, ScalarType, dim> : public IntegrateRange<ScalarType, dim> {
         using Base = IntegrateRange<ScalarType, dim>;
     };
 
     template<class ScalarType>
-    class Integrate<Ladder, ScalarType, 1> : public IntegrateRange<ScalarType, 1> {
+    class Integrate<IntegrateMethod::Ladder, ScalarType, 1> : public IntegrateRange<ScalarType, 1> {
         using Base = IntegrateRange<ScalarType, 1>;
     public:
         using typename Base::VectorType;
@@ -71,12 +71,12 @@ namespace Physica::Core {
     };
     //////////////////////////////////Simpson//////////////////////////////////
     template<class ScalarType, size_t dim>
-    class Integrate<Simpson, ScalarType, dim> : public IntegrateRange<ScalarType, dim> {
+    class Integrate<IntegrateMethod::Simpson, ScalarType, dim> : public IntegrateRange<ScalarType, dim> {
         using Base = IntegrateRange<ScalarType, dim>;
     };
 
     template<class ScalarType>
-    class Integrate<Simpson, ScalarType, 1> : public IntegrateRange<ScalarType, 1> {
+    class Integrate<IntegrateMethod::Simpson, ScalarType, 1> : public IntegrateRange<ScalarType, 1> {
         using Base = IntegrateRange<ScalarType, 1>;
     public:
         using typename Base::VectorType;
@@ -95,12 +95,12 @@ namespace Physica::Core {
      * Tanh-sinh quadrature for single and multiple integration using floating-point arithmetic. arXiv:2007.15057
      */
     template<class ScalarType, size_t dim>
-    class Integrate<Tanh_Sinh, ScalarType, dim> : public IntegrateRange<ScalarType, dim> {
+    class Integrate<IntegrateMethod::Tanh_Sinh, ScalarType, dim> : public IntegrateRange<ScalarType, dim> {
         using Base = IntegrateRange<ScalarType, dim>;
     };
 
     template<class ScalarType>
-    class Integrate<Tanh_Sinh, ScalarType, 1> : public IntegrateRange<ScalarType, 1> {
+    class Integrate<IntegrateMethod::Tanh_Sinh, ScalarType, 1> : public IntegrateRange<ScalarType, 1> {
         using Base = IntegrateRange<ScalarType, 1>;
     public:
         using typename Base::VectorType;
@@ -115,7 +115,7 @@ namespace Physica::Core {
     };
     //////////////////////////////////MonteCarlo//////////////////////////////////
     template<class ScalarType, size_t dim>
-    class Integrate<MonteCarlo, ScalarType, dim> : public IntegrateRange<ScalarType, dim> {
+    class Integrate<IntegrateMethod::MonteCarlo, ScalarType, dim> : public IntegrateRange<ScalarType, dim> {
         using Base = IntegrateRange<ScalarType, dim>;
     public:
         using typename Base::VectorType;

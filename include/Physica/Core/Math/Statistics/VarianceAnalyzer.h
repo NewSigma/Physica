@@ -83,7 +83,7 @@ namespace Physica::Core {
     }
 
     template<class ScalarType>
-    ScalarType VarianceAnalyzer<ScalarType>::getMSA() const {
+    ScalarType VarianceAnalyzer<ScalarType>::getSSA() const {
         const ScalarType mean_total = getTotalMean();
         ScalarType result = 0;
         for (const auto& vec : data)

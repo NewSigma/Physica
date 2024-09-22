@@ -38,7 +38,7 @@ namespace Physica::Core {
         DeepEAM(DeepEAM&&) noexcept = default;
         ~DeepEAM() = default;
         /* Operators */
-        DeepEAM& operator(DeepEAM obj) noexcept { swap(obj); return *this; }
+        DeepEAM& operator=(DeepEAM obj) noexcept { swap(obj); return *this; }
         /* Operations */
         [[nodiscard]] PlainScalar potentialV(const MDCellType& cell) const;
 
@@ -52,11 +52,11 @@ namespace Physica::Core {
     };
 
     template<class NetType, bool IsSmallCell>
-    DeepEAM<ScalarType, IsSmallCell>::DeepEAM(DescriptorBase base_, NetType net_) : base(std::move(base_)), net(std::move(net_)) {}
+    DeepEAM<NetType, IsSmallCell>::DeepEAM(DescriptorBase base_, NetType net_) : base(std::move(base_)), net(std::move(net_)) {}
 
     template<class NetType, bool IsSmallCell>
-    typename DeepEAM<ScalarType, IsSmallCell>::PlainScalar
-    DeepEAM<ScalarType, IsSmallCell>::potentialV(const MDCellType& cell) const {
+    typename DeepEAM<NetType, IsSmallCell>::PlainScalar
+    DeepEAM<NetType, IsSmallCell>::potentialV(const MDCellType& cell) const {
         PlainScalar result = 0;
         const auto descriptors = base.project(cell);
         for (size_t i = 0; i < cell.getNumParticle(); ++i)
@@ -65,7 +65,7 @@ namespace Physica::Core {
     }
 
     template<class NetType, bool IsSmallCell>
-    void DeepEAM<ScalarType, IsSmallCell>::swap(DeepEAM& __restrict obj) noexcept {
+    void DeepEAM<NetType, IsSmallCell>::swap(DeepEAM& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         base.swap(obj.base);
         net.swap(obj.net);

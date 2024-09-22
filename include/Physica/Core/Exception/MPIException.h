@@ -18,9 +18,7 @@
  */
 #pragma once
 
-#ifndef PHYSICA_MPI
-    #error MPI is disabled. Do not include this file.
-#endif
+#ifdef PHYSICA_MPI
 
 #include <exception>
 #include <mpi/mpi.h>
@@ -43,3 +41,5 @@ namespace Physica {
             throw Physica::Core::MPIException(err);
     }
 }
+
+#endif

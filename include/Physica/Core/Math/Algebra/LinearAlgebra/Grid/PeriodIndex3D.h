@@ -18,14 +18,14 @@
  */
 #pragma once
 
+#include <Physica/Core/Math/Transform/FFT.h>
 #include "GridImpl/GridBase.h"
-#include "Physica/Core/Math/Transform/FFT.h"
 
 namespace Physica::Core {
     /**
      * Provide a algebra for Index1D and Index3D in periodic boundary condition
      */
-    class PeriodIndex3D {
+    class PHYSICA_API PeriodIndex3D {
         using Index3D = typename GridBase::Index3D;
         using Index1D = typename Index3D::ValueType;
 
@@ -51,7 +51,7 @@ namespace Physica::Core {
         /* Getters */
         [[nodiscard]] Index3D getDim() const noexcept { return dim; }
     private:
-        __host__ __device__ static Index3D toIndex3D(Index1D index, Index3D dim);
+        __host__ __device__ inline static Index3D toIndex3D(Index1D index, Index3D dim);
     };
 
     __host__ __device__ inline PeriodIndex3D::PeriodIndex3D(Index3D index_, Index3D dim_) : index(index_), dim(dim_) {
@@ -104,7 +104,7 @@ namespace Physica::Core {
         dim.swap(obj.dim);
     }
 
-    __host__ __device__ typename PeriodIndex3D::Index3D PeriodIndex3D::toIndex3D(Index1D index, Index3D dim) {
+    __host__ __device__ inline typename PeriodIndex3D::Index3D PeriodIndex3D::toIndex3D(Index1D index, Index3D dim) {
         Index3D result{};
         result[0] = index / (dim[1] * dim[2]);
         const Index1D temp = index % (dim[1] * dim[2]);

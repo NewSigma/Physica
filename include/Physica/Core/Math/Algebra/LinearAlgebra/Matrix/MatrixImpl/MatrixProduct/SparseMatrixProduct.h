@@ -21,6 +21,8 @@
 #include "GEMV.h"
 
 namespace Physica::Core {
+    template<class T, int Option> class SparseMatrix;
+
     template<class T, int Option, class VectorType>
     class MatrixVectorProduct<SparseMatrix<T, Option>, VectorType>
             : public RValueVector<MatrixVectorProduct<SparseMatrix<T, Option>, VectorType>> {

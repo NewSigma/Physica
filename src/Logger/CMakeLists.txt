@@ -1,7 +1,7 @@
-#############################################Project##############################################
+add_library(PhysicaLogger)
+
 file(GLOB_RECURSE SOURCES_LOGGER *.cpp)
-add_library(PhysicaLogger SHARED ${SOURCES_LOGGER})
+target_sources(PhysicaLogger PRIVATE ${SOURCES_LOGGER})
 
 install(TARGETS PhysicaLogger DESTINATION lib)
 install(DIRECTORY ${CMAKE_SOURCE_DIR}/include/Physica/Logger DESTINATION include/Physica)
-#############################################Options##############################################

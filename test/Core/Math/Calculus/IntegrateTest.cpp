@@ -29,27 +29,27 @@ ScalarType func(ScalarType x) {
 int main() {
     {
         IntegrateRange<ScalarType, 1> range({-1}, {1});
-        Integrate<Rectangular, ScalarType, 1> rec(range, 0.01);
+        Integrate<IntegrateMethod::Rectangular, ScalarType, 1> rec(range, 0.01);
         if (!scalarNear(ScalarType(1), rec.solve(func), 1E-4))
             return 1;
 
-        Integrate<Ladder, ScalarType, 1> ladder(range, 0.01);
+        Integrate<IntegrateMethod::Ladder, ScalarType, 1> ladder(range, 0.01);
         if (!scalarNear(ScalarType(1), ladder.solve(func), 1E-4))
             return 1;
 
-        Integrate<Simpson, ScalarType, 1> simpson(range, 0.01);
+        Integrate<IntegrateMethod::Simpson, ScalarType, 1> simpson(range, 0.01);
         if (!scalarNear(ScalarType(1), simpson.solve(func), 1E-8))
             return 1;
     }
     {
         IntegrateRange<ScalarType, 1> range({1E-10}, {1});
-        Integrate<Tanh_Sinh, ScalarType, 1> tanh_sinh(range, 0.001, 3500);
+        Integrate<IntegrateMethod::Tanh_Sinh, ScalarType, 1> tanh_sinh(range, 0.001, 3500);
         if (!scalarNear(ScalarType(23.025850929940456840), tanh_sinh.solve([](ScalarType x) -> ScalarType { return reciprocal(x); }), 1E-7))
             return 1;
     }
     {
         IntegrateRange<ScalarType, 2> range({0, 0}, {1, 1});
-        Integrate<MonteCarlo, ScalarType, 2> mc(range, 1000);
+        Integrate<IntegrateMethod::MonteCarlo, ScalarType, 2> mc(range, 1000);
 
         const ScalarType answer = 1.317363136305819;
         ScalarType result, deviation;

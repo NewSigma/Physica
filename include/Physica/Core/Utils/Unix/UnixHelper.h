@@ -20,10 +20,11 @@
 
 #include <memory>
 #include <dirent.h>
+#include <sys/stat.h>
 #include <Physica/Core/Utils/Container/Array.h>
 
 namespace Physica::Core {
-    PHYSICA_API void statCheck(const char* __restrict file, struct stat* __restrict buf);
+    PHYSICA_API void statCheck(const char* file, struct ::stat* buf);
     PHYSICA_API int forceRemoveDir(const char* dirPath);
     PHYSICA_API long getMaxPathLength();
     PHYSICA_API Array<char> getPathBuffer();

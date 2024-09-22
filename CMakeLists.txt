@@ -10,8 +10,8 @@ if (${CMAKE_SOURCE_DIR} MATCHES ${CMAKE_BINARY_DIR})
     message(FATAL_ERROR "In source build is a bad practice")
 endif()
 #############################################Settings#############################################
-option(BUILD_EXAMPLES "Build examples" OFF)
 option(BUILD_TESTS "Build tests" ON)
+option(BUILD_EXAMPLES "Build examples" OFF)
 option(BUILD_BENCHMARKS "Build benchmarks" OFF)
 option(BUILD_DOC "Build documentation" OFF)
 option(RUN_CHECKS "Run Checks" ON)
@@ -24,6 +24,7 @@ option(PHYSICA_CUDA "CUDA enables GPU accleration" OFF)
 option(PHYSICA_PYTHON "Enable python suppert" OFF)
 option(PHYSICA_OPTIMIZE "Enable aggressive optimizations" ON)
 option(BUILD_SHARED_LIBS "Build shared libraries" ON)
+option(CMAKE_DISABLE_PRECOMPILE_HEADERS "Set OFF to acclerate compile using PCH" ON)
 
 message(STATUS "Running under ${CMAKE_BUILD_TYPE} mode.")
 # Policies

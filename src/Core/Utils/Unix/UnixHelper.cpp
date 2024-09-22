@@ -17,7 +17,6 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include <unistd.h>
-#include <sys/stat.h>
 #include <cstring>
 #include <cstdio>
 #include <cstdarg>
@@ -28,8 +27,8 @@
 #include <Physica/Core/Utils/Unix/UnixHelper.h>
 
 namespace Physica::Core {
-    void statCheck(const char* __restrict file, struct stat* __restrict buf) {
-        if (stat(file, buf) != 0) {
+    void statCheck(const char* file, struct ::stat* buf) {
+        if (::stat(file, buf) != 0) {
             perror("[Error]: Failed to fetch file stat");
             exit(EXIT_FAILURE);
         }

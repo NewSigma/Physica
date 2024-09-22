@@ -16,10 +16,12 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
+#pragma once
+
 #include <vector>
 #include <memory>
 #include <string>
-#include "Physica/Macro.h"
+#include <Physica/Macro.h>
 
 namespace Physica::Core {
     class PHYSICA_API DirStack {

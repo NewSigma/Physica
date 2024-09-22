@@ -18,10 +18,6 @@
  */
 #pragma once
 
-#ifndef NDEBUG
-    #error Running benchmark under debug mode is not what you usually want!
-#endif
-
 #include <Physica/Core/MultiPrecision/Scalar.h>
 #include <Physica/Core/Math/Statistics/NumCharacter.h>
 #include <Physica/Core/Math/Calculus/SpetialFunctions.h>
@@ -29,7 +25,7 @@
 
 namespace Physica::Core {
     class Benchmark {
-        using ScalarType = Core::Scalar<Core::Double>;
+        using ScalarType = float64;
     public:
         template<class Functor>
         [[nodiscard]] static std::pair<ScalarType, ScalarType> run(Functor func, unsigned int numTest, unsigned int numSample) {

@@ -16,11 +16,9 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef PHYSICA_MATRIXCHAIN_H
-#define PHYSICA_MATRIXCHAIN_H
+#pragma once
 
 #include <cstdlib>
-#include <memory>
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h"
 
 namespace Physica::Core {
@@ -68,9 +66,6 @@ namespace Physica::Core {
 
     template<class T, int type, size_t maxRow, size_t maxColumn>
     MatrixChain<T, type, maxRow, maxColumn>::~MatrixChain() {
-        void(type);
-        void(maxRow);
-        void(maxColumn);
         delete[] chain;
         const auto length_1 = length - 1;
         for(size_t i = 0; i < length_1; ++i) {
@@ -85,9 +80,6 @@ namespace Physica::Core {
     //!Optimize: Only half of the space of price and point is used. Maybe change them into a 1D array.
     template<class T, int type, size_t maxRow, size_t maxColumn>
     DenseMatrix<T, type, Dynamic, Dynamic> MatrixChain<T, type, maxRow, maxColumn>::solve() {
-        void(type);
-        void(maxRow);
-        void(maxColumn);
         for(size_t i = 0; i < length; ++i)
             price[i][i] = 0;
 
@@ -122,8 +114,6 @@ namespace Physica::Core {
     //!Both \from and \to are included.
     template<class T, int type, size_t maxRow, size_t maxColumn>
     DenseMatrix<T, type, Dynamic, Dynamic> MatrixChain<T, type, maxRow, maxColumn>::multiply(size_t from, size_t to) {
-        void(maxRow);
-        void(maxColumn);
         if(from == to)
             return DenseMatrix<T, type, Dynamic, Dynamic>(*chain[from]);
         const auto cut_at = point[from][to];
@@ -132,5 +122,3 @@ namespace Physica::Core {
         return first * second;
     }
 }
-
-#endif

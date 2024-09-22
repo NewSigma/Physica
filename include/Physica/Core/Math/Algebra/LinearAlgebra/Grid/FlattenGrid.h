@@ -21,6 +21,8 @@
 #include <Physica/Core/Math/Algebra/LinearAlgebra/Vector/VectorImpl/LValueVector.h>
 
 namespace Physica::Core {
+    template<class GridType> class LValueGrid;
+
     template<class GridType>
     class FlattenGrid : public LValueVector<FlattenGrid<GridType>> {
         using This = FlattenGrid<GridType>;

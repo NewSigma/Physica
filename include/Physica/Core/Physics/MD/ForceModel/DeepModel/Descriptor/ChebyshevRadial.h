@@ -82,9 +82,10 @@ namespace Physica::Core {
     template<class ScalarType, bool IsSmallCell>
     typename ChebyshevRadial<ScalarType, IsSmallCell>::DescriptorArray ChebyshevRadial<ScalarType, IsSmallCell>::project(
             const MDCellType& cell) const {
+        using Vector3D = Vector<ScalarType, 3>;
         const size_t numType = massTypeMap.size();
         DescriptorArray result(cell.getNumParticle(), maxOrder, numType, ScalarType(0));
-        auto kernel = [this, maxOrder, &cell, &result](size_t i, size_t j, Vector3D r, ScalarType norm1, ScalarType norm2) {
+        auto kernel = [this, &cell, &result](size_t i, size_t j, Vector3D r, ScalarType norm1, ScalarType norm2) {
             const ParticleType typeI = massTypeMap[cell.getMass(i)];
             const ParticleType typeJ = massTypeMap[cell.getMass(j)];
             auto descriptorDi = result[i].col(typeJ);

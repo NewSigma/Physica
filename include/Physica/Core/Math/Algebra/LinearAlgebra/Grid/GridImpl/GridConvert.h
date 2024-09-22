@@ -19,6 +19,8 @@
 #pragma once
 
 namespace Physica::Core {
+    template<class GridType> class RValueGrid;
+
     template<class GridType>
     class RealGrid : public RValueGrid<RealGrid<GridType>> {
         using Base = RValueGrid<RealGrid<GridType>>;

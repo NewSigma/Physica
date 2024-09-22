@@ -26,12 +26,12 @@
 namespace Physica::Core {
     //////////////////////////////////Rectangular//////////////////////////////////
     template<class ScalarType>
-    Integrate<Rectangular, ScalarType, 1>::Integrate(Base range, ScalarType stepSize_)
+    Integrate<IntegrateMethod::Rectangular, ScalarType, 1>::Integrate(Base range, ScalarType stepSize_)
             : Base(std::move(range)), stepSize(std::move(stepSize_)) {}
 
     template<class ScalarType>
     template<class Function>
-    ScalarType Integrate<Rectangular, ScalarType, 1>::solve(Function func) const {
+    ScalarType Integrate<IntegrateMethod::Rectangular, ScalarType, 1>::solve(Function func) const {
         ScalarType result = 0;
         ScalarType start(Base::from()[0]);
         while(start < Base::to()[0]) {
@@ -43,12 +43,12 @@ namespace Physica::Core {
     }
     //////////////////////////////////Ladder//////////////////////////////////
     template<class ScalarType>
-    Integrate<Ladder, ScalarType, 1>::Integrate(Base range, ScalarType stepSize_)
+    Integrate<IntegrateMethod::Ladder, ScalarType, 1>::Integrate(Base range, ScalarType stepSize_)
             : Base(std::move(range)), stepSize(std::move(stepSize_)) {}
 
     template<class ScalarType>
     template<class Function>
-    ScalarType Integrate<Ladder, ScalarType, 1>::solve(Function func) const {
+    ScalarType Integrate<IntegrateMethod::Ladder, ScalarType, 1>::solve(Function func) const {
         const ScalarType& from = Base::from()[0];
         const ScalarType& to = Base::to()[0];
         ScalarType result = ((func(from) + func(to)) >> 1);
@@ -62,12 +62,12 @@ namespace Physica::Core {
     }
     //////////////////////////////////Simpson//////////////////////////////////
     template<class ScalarType>
-    Integrate<Simpson, ScalarType, 1>::Integrate(Base range, ScalarType stepSize_)
+    Integrate<IntegrateMethod::Simpson, ScalarType, 1>::Integrate(Base range, ScalarType stepSize_)
             : Base(std::move(range)), stepSize(std::move(stepSize_)) {}
 
     template<class ScalarType>
     template<class Function>
-    ScalarType Integrate<Simpson, ScalarType, 1>::solve(Function func) const {
+    ScalarType Integrate<IntegrateMethod::Simpson, ScalarType, 1>::solve(Function func) const {
         const ScalarType& from = Base::from()[0];
         const ScalarType& to = Base::to()[0];
         ScalarType result = func(from) + func(to);
@@ -94,12 +94,12 @@ namespace Physica::Core {
      * \param pointCount Points count on one side of the x-axis. There are same points on both sides.
      */
     template<class ScalarType>
-    Integrate<Tanh_Sinh, ScalarType, 1>::Integrate(Base range, ScalarType stepSize_, uint64_t pointCount_)
+    Integrate<IntegrateMethod::Tanh_Sinh, ScalarType, 1>::Integrate(Base range, ScalarType stepSize_, uint64_t pointCount_)
             : Base(std::move(range)), stepSize(std::move(stepSize_)), pointCount(pointCount_) {}
 
     template<class ScalarType>
     template<class Function>
-    ScalarType Integrate<Tanh_Sinh, ScalarType, 1>::solve(Function func) const {
+    ScalarType Integrate<IntegrateMethod::Tanh_Sinh, ScalarType, 1>::solve(Function func) const {
         const ScalarType& from = Base::from()[0];
         const ScalarType& to = Base::to()[0];
 
@@ -122,12 +122,12 @@ namespace Physica::Core {
     }
     //////////////////////////////////MonteCarlo//////////////////////////////////
     template<class ScalarType, size_t dim>
-    Integrate<MonteCarlo, ScalarType, dim>::Integrate(Base range, uint64_t sampleCount_)
+    Integrate<IntegrateMethod::MonteCarlo, ScalarType, dim>::Integrate(Base range, uint64_t sampleCount_)
             : Base(std::move(range)), sampleCount(sampleCount_) {}
 
     template<class ScalarType, size_t dim>
     template<class Function, class RandomGenerator>
-    ScalarType Integrate<MonteCarlo, ScalarType, dim>::solve(Function func, RandomGenerator& generator) const {
+    ScalarType Integrate<IntegrateMethod::MonteCarlo, ScalarType, dim>::solve(Function func, RandomGenerator& generator) const {
         ScalarType result = 0;
         for (uint64_t i = 0; i < sampleCount; ++i) {
             VectorType x = VectorType::template random_uniform(Base::from(), Base::to(), generator);
@@ -143,7 +143,7 @@ namespace Physica::Core {
 
     template<class ScalarType, size_t dim>
     template<class Function, class RandomGenerator, class Executor>
-    ScalarType Integrate<MonteCarlo, ScalarType, dim>::parallel_solve(
+    ScalarType Integrate<IntegrateMethod::MonteCarlo, ScalarType, dim>::parallel_solve(
             Function func,
             const Array<typename RandomGenerator::result_type>& seeds) const {
         const size_t numGen = seeds.getLength();
@@ -159,7 +159,7 @@ namespace Physica::Core {
 
     template<class ScalarType, size_t dim>
     template<class Function, class RandomGenerator>
-    ScalarType Integrate<MonteCarlo, ScalarType, dim>::solve_e(unsigned int numSequence, Function func, RandomGenerator& generator, ScalarType& deviation) const {
+    ScalarType Integrate<IntegrateMethod::MonteCarlo, ScalarType, dim>::solve_e(unsigned int numSequence, Function func, RandomGenerator& generator, ScalarType& deviation) const {
         assert(numSequence > 0);
         ScalarType mean = 0;
         ScalarType variance = 0;
@@ -171,7 +171,7 @@ namespace Physica::Core {
 
     template<class ScalarType, size_t dim>
     template<class Functor1, class Functor2, class Distribution, class RandomGenerator>
-    ScalarType Integrate<MonteCarlo, ScalarType, dim>::solve(
+    ScalarType Integrate<IntegrateMethod::MonteCarlo, ScalarType, dim>::solve(
             Functor1 func,
             Functor2 importance,
             Distribution& dist,
@@ -186,7 +186,7 @@ namespace Physica::Core {
 
     template<class ScalarType, size_t dim>
     template<class Functor1, class Functor2, class Distribution, class RandomGenerator>
-    ScalarType Integrate<MonteCarlo, ScalarType, dim>::solve_e(
+    ScalarType Integrate<IntegrateMethod::MonteCarlo, ScalarType, dim>::solve_e(
             unsigned int numSequence,
             Functor1 func,
             Functor2 importance,

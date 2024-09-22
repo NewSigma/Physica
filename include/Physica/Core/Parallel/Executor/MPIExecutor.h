@@ -18,9 +18,7 @@
  */
 #pragma once
 
-#ifndef PHYSICA_MPI
-    #error MPI is disabled. Do not include this file.
-#endif
+#ifdef PHYSICA_MPI
 
 #include <mpi/mpi.h>
 #include <Physica/Macro.h>
@@ -60,3 +58,5 @@ namespace Physica::Core {
         return result;
     }
 }
+
+#endif
