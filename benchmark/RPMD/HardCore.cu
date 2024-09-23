@@ -16,6 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
+#include <benchmark/benchmark.h>
 #include <gperftools/profiler.h>
 #include <Physica/Core/Physics/MD/RPMD.h>
 #include <Physica/Core/Physics/MD/KineticModel/FreeModel.h>
@@ -39,33 +40,37 @@ constexpr double pair_cutoff = 15;
 constexpr double molarVolume = 31.7;
 constexpr double mass = PhyConst<AU>::atomMass(1) * 2;
 
-template<class RandomGenerator>
-MDType makeSystem(RandomGenerator& gen) {
-    using MDCellType = typename MDType::MDCellType;
-    typename MDCellType::LatticeMatrix lattice = MDCellType::LatticeMatrix::unitMatrix(3);
-    typename MDCellType::PositionMatrix pos(numMolecular, 3);
-    std::uniform_real_distribution dist{};
-    for (auto& elem : pos.asArray())
-        elem = dist(gen);
-    typename MDCellType::MassVector massVec(numMolecular, mass);
-    MDCellType cell(std::move(lattice), std::move(pos), std::move(massVec));
+namespace {
+    template<class RandomGenerator>
+    MDType makeSystem(RandomGenerator& gen) {
+        using MDCellType = typename MDType::MDCellType;
+        typename MDCellType::LatticeMatrix lattice = MDCellType::LatticeMatrix::unitMatrix(3);
+        typename MDCellType::PositionMatrix pos(numMolecular, 3);
+        std::uniform_real_distribution dist{};
+        for (auto& elem : pos.asArray())
+            elem = dist(gen);
+        typename MDCellType::MassVector massVec(numMolecular, mass);
+        MDCellType cell(std::move(lattice), std::move(pos), std::move(massVec));
 
-    const double factor = (std::cbrt(numMolecular * molarVolume / PhyConst<SI>::avogadroNa) / 100) / PhyConst<SI>::bohrRadius;
-    cell.scale(factor);
+        const double factor = (std::cbrt(numMolecular * molarVolume / PhyConst<SI>::avogadroNa) / 100) / PhyConst<SI>::bohrRadius;
+        cell.scale(factor);
 
-    return MDType(std::move(cell), numReplica, numReplica, temperatureT, timeStep);
+        return MDType(std::move(cell), numReplica, numReplica, temperatureT, timeStep);
+    }
+    /**
+    * Reference:
+    * [1] Miller TF, Manolopoulos DE. 2005. Quantum diffusion in liquid para-hydrogen from ring polymer molecular dynamics. J. Chem. Phys. 122:184503
+    */
+    void main(benchmark::State& state) {
+        auto& gen = RandomPoolType::getInstance().getGen();
+        MDType rpmd = makeSystem(gen);
+        rpmd.initMomentum<KineticModel, decltype(gen)>(gen);
+
+        KineticModel kineticModel(temperatureT, numReplica);
+        ForceModel forceModel(numMolecular, pair_cutoff);
+        for (auto _ : state)
+            rpmd.nve_step_for<KineticModel, ForceModel, CUDAExecutor>(PhyConst<AU>::secondToTime(1 * 1E-11), kineticModel, forceModel);
+    }
 }
-/**
- * Reference:
- * [1] Miller TF, Manolopoulos DE. 2005. Quantum diffusion in liquid para-hydrogen from ring polymer molecular dynamics. J. Chem. Phys. 122:184503
- */
-int main() {
-    auto& gen = RandomPoolType::getInstance().getGen();
-    MDType rpmd = makeSystem(gen);
-    rpmd.initMomentum<KineticModel, decltype(gen)>(gen);
 
-    KineticModel kineticModel(temperatureT, numReplica);
-    ForceModel forceModel(numMolecular, pair_cutoff);
-    rpmd.nve_step_for<KineticModel, ForceModel, CUDAExecutor>(PhyConst<AU>::secondToTime(1 * 1E-11), kineticModel, forceModel);
-    return 0;
-}
+BENCHMARK(main)->Name("HardCore_cuda")->Unit(benchmark::kSecond);

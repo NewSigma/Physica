@@ -111,13 +111,16 @@ namespace Physica::Core {
     JacobiDavidson<ScalarType>::JacobiDavidson()
             : linearSolver(MaxLinearSolverIteration, LinearSolverPrecision)
             , error(std::numeric_limits<RealType>::epsilon())
-            , stableThreshold(DefaultStableThreshold) {}
+            , stableThreshold(DefaultStableThreshold) {
+        linearSolver.mustConverge = false;
+    }
 
     template<class ScalarType>
     JacobiDavidson<ScalarType>::JacobiDavidson(size_t size, size_t numRequired, RealType error_, RealType stableThreshold_)
             : linearSolver(size, MaxLinearSolverIteration, LinearSolverPrecision)
             , error(error_)
             , stableThreshold(stableThreshold_) {
+        linearSolver.mustConverge = false;
         resize(size, numRequired);
     }
 

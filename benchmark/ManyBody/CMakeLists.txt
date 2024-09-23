@@ -1,2 +1,2 @@
-physica_add_benchmark(HubbardMatrix1D HubbardMatrix1D.cpp)
-physica_add_benchmark(TPQ TPQ.cpp)
+target_sources(Benchmark PRIVATE HubbardMatrix1D.cpp)
+target_sources(Benchmark PRIVATE TPQ.cpp)

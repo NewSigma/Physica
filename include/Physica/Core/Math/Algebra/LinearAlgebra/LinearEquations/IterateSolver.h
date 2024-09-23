@@ -36,6 +36,8 @@ namespace Physica::Core {
         size_t maxIteration;
         size_t iteration;
     public:
+        bool mustConverge = true;
+    public:
         IterateSolver();
         IterateSolver(size_t maxIteration_, RealType error_);
         IterateSolver(size_t size, size_t maxIteration_, RealType error_);
@@ -126,7 +128,7 @@ namespace Physica::Core {
             ++iteration;
         }
 
-        if (!isConverged()) [[unlikely]]
+        if (mustConverge && !isConverged()) [[unlikely]]
             throw BadConvergenceException("[Error]: CG cannot converge in the given iterations");
     }
     /**
@@ -161,7 +163,7 @@ namespace Physica::Core {
             ++iteration;
         }
 
-        if (!isConverged()) [[unlikely]]
+        if (mustConverge && !isConverged()) [[unlikely]]
             throw BadConvergenceException("[Error]: CGNR cannot converge in the given iterations");
     }
 
@@ -183,6 +185,7 @@ namespace Physica::Core {
         error.swap(obj.error);
         std::swap(maxIteration, obj.maxIteration);
         std::swap(iteration, obj.iteration);
+        std::swap(mustConverge, obj.mustConverge);
     }
 }
 

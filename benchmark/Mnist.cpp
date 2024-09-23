@@ -4,6 +4,7 @@
  * This file is part of PhysicaNotes.
  */
 #include <iostream>
+#include <benchmark/benchmark.h>
 #include <gperftools/profiler.h>
 #include "Physica/Core/IO/Mnist.h"
 #include "Physica/Core/AI/NeuralNetwork/Layer/LinearLayer.h"
@@ -104,26 +105,30 @@ using Optimizer = SGD<ScalarType>;
 using RandomPoolType = RandomPool<std::mt19937>;
 constexpr size_t batchSize = 9000;
 
-Dataset makeDataset() {
-    const Mnist mnist("/home/sigma/Documents/data");
-    auto dataset = mnist.makeTrainDataset<Vector<PlainScalar>>();
-    for (size_t i = 0; i < dataset.getSize(); ++i) {
-        auto& sample = dataset.getSamples()[i];
-        sample = sample * PlainScalar(1.0 / 128) - PlainScalar(1);
+namespace {
+    Dataset makeDataset() {
+        const Mnist mnist("/home/sigma/Documents/data");
+        auto dataset = mnist.makeTrainDataset<Vector<PlainScalar>>();
+        for (size_t i = 0; i < dataset.getSize(); ++i) {
+            auto& sample = dataset.getSamples()[i];
+            sample = sample * PlainScalar(1.0 / 128) - PlainScalar(1);
+        }
+        return dataset;
     }
-    return dataset;
+
+    static void main(benchmark::State& state) {
+        ThreadPool::numThreadRequired = 4;
+
+        auto& gen = RandomPoolType::getInstance().getGen();
+        const auto dataset = makeDataset();
+        auto opt = Optimizer(0.01, batchSize);
+        opt.recordBegin();
+        auto nn = MnistNet<ScalarType>(512, 512, gen);
+        opt.recordEnd();
+
+        for (auto _ : state)
+            nn.train_step<Dataset, Optimizer, RandomPoolType, SequentialExecutor>(dataset, opt);
+    }
 }
 
-int main() {
-    ThreadPool::numThreadRequired = 4;
-
-    auto& gen = RandomPoolType::getInstance().getGen();
-    const auto dataset = makeDataset();
-    auto opt = Optimizer(0.01, batchSize);
-    opt.recordBegin();
-    auto nn = MnistNet<ScalarType>(512, 512, gen);
-    opt.recordEnd();
-
-    nn.train_step<Dataset, Optimizer, RandomPoolType, SequentialExecutor>(dataset, opt);
-    return 0;
-}
+BENCHMARK(main)->Name("Mnist")->Unit(benchmark::kSecond);

@@ -37,36 +37,24 @@ if(${RUN_CHECKS})
     add_subdirectory(cmake/config)
 endif()
 add_subdirectory(cmake/Modules)
-##############################################Libs################################################
+##############################################Project################################################
 set(CMAKE_INSTALL_RPATH ${CMAKE_INSTALL_PREFIX}/lib)
 set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
-# vectorclass
+
 include_directories(SYSTEM 3rdparty)
-
-if(${PHYSICA_PYTHON})
-    set(PYBIND11_FINDPYTHON ON)
-    add_subdirectory(3rdparty/pybind11)
-    include_directories(${pybind11_INCLUDE_DIRS})
-    add_definitions(-DPHYSICA_PYTHON)
-endif()
-
-if(${BUILD_DOC})
-    find_package(Sphinx REQUIRED)
-endif()
-#############################################Project##############################################
 include_directories(./include)
 file(GLOB_RECURSE HEADERS include/*.h include/*.cuh)
 add_subdirectory(src)
-#Enable examples
+
+if(${BUILD_TESTS})
+    add_subdirectory(test)
+endif()
+
 if(${BUILD_EXAMPLES})
     if(NOT ${PHYSICA_GUI})
         message(FATAL_ERROR "To use Physica examples, you should enable PHYSICA_GUI.")
     endif()
     add_subdirectory(examples)
-endif()
-#Enable Tests
-if(${BUILD_TESTS})
-    add_subdirectory(test)
 endif()
 
 if(${BUILD_BENCHMARKS})
@@ -78,6 +66,7 @@ if(${BUILD_BENCHMARKS})
 endif()
 
 if(${BUILD_DOC})
+    find_package(Sphinx REQUIRED)
     add_custom_target(Sphinx
                       COMMAND ${SPHINX_EXEC} -b html ${CMAKE_SOURCE_DIR}/doc ${CMAKE_BINARY_DIR}/sphinx
                       WORKING_DIRECTORY ${CMAKE_BINARY_DIR}

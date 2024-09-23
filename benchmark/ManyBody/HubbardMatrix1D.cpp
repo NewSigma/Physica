@@ -17,6 +17,7 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include <iostream>
+#include <benchmark/benchmark.h>
 #include <gperftools/profiler.h>
 #include <Physica/Core/Math/Random/RandomPool.h>
 #include <Physica/Core/Math/Algebra/LinearAlgebra/Eigen/JacobiDavidson.h>
@@ -35,20 +36,23 @@ constexpr unsigned int NumParticle = NumSite / 2;
 constexpr double HoppingT = 1.0;
 constexpr double RepelU = 4;
 
-int main() {
-    const size_t kSize = FFT<RealType, 1>::rSizeToKSize(NumSite);
-    //ProfilerStart("profiler.dat");
-    const LatticeModel<1> lattice({NumSite}, 1);
-    const Hubbard<RealType, 1> hubbard(lattice, HoppingT, RepelU);
-    for (unsigned int kIndex = 0; kIndex < kSize; ++kIndex) {
-        using ReprType = KSpinRepr<1, NumSite, true>;
-        ReprType repr({NumParticle, NumParticle}, kIndex);
-        const HubbardMatrix<ScalarType, ReprType> model(hubbard, std::move(repr));
+namespace {
+    static void main(benchmark::State& state) {
+        const size_t kSize = FFT<RealType, 1>::rSizeToKSize(NumSite);
+        const LatticeModel<1> lattice({NumSite}, 1);
+        const Hubbard<RealType, 1> hubbard(lattice, HoppingT, RepelU);
+        for (auto _ : state) {
+            for (unsigned int kIndex = 0; kIndex < kSize; ++kIndex) {
+                using ReprType = KSpinRepr<1, NumSite, true>;
+                ReprType repr({NumParticle, NumParticle}, kIndex);
+                const HubbardMatrix<ScalarType, ReprType> model(hubbard, std::move(repr));
 
-        const size_t numState = model.getNumState();
-        JacobiDavidson<ScalarType> jd(numState, 4);
-        jd.compute(model, VectorType::random_uniform(numState, RandomPoolType::getInstance().getGen()));
+                const size_t numState = model.getNumState();
+                JacobiDavidson<ScalarType> jd(numState, 4);
+                jd.compute(model, VectorType::random_uniform(numState, RandomPoolType::getInstance().getGen()));
+            }
+        }
     }
-    //ProfilerStop();
-    return 0;
 }
+
+BENCHMARK(main)->Name("HubbardMatrix1D")->Unit(benchmark::kSecond);

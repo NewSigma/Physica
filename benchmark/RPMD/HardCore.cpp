@@ -16,6 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
+#include <benchmark/benchmark.h>
 #include <gperftools/profiler.h>
 #include "Physica/Core/Physics/MD/RPMD.h"
 #include "Physica/Core/Physics/MD/KineticModel/HardCore.h"
@@ -43,37 +44,39 @@ using MDCellType = typename MDType::MDCellType;
 using ForceModel = EmptyForceModel<ScalarType, 1>;
 using KineticModel = HardCore<ScalarType, true, numReplica, RPMDIntegrator::Exact>;
 
-MDCellType makeSystem(std::mt19937& gen) {
-    typename MDCellType::LatticeMatrix lattice{latticeSize};
+namespace {
+    MDCellType makeSystem(std::mt19937& gen) {
+        typename MDCellType::LatticeMatrix lattice{latticeSize};
 
-    std::uniform_real_distribution dist{};
-    Vector<ScalarType> posVec(numMolecular);
-    for (auto& elem : posVec)
-        elem = dist(gen) * latticeSize;
-    std::sort(posVec.begin(), posVec.end());
-    typename MDCellType::PositionMatrix pos(numMolecular, 1);
-    pos.col(0) = posVec;
+        std::uniform_real_distribution dist{};
+        Vector<ScalarType> posVec(numMolecular);
+        for (auto& elem : posVec)
+            elem = dist(gen) * latticeSize;
+        std::sort(posVec.begin(), posVec.end());
+        typename MDCellType::PositionMatrix pos(numMolecular, 1);
+        pos.col(0) = posVec;
 
-    typename MDCellType::MassVector massVec(numMolecular);
-    for (size_t i = 0; i < numMolecular; ++i) {
-        massVec[i] = unitMassM;
+        typename MDCellType::MassVector massVec(numMolecular);
+        for (size_t i = 0; i < numMolecular; ++i) {
+            massVec[i] = unitMassM;
+        }
+        return MDCellType(std::move(lattice), std::move(pos), std::move(massVec));
     }
-    return MDCellType(std::move(lattice), std::move(pos), std::move(massVec));
+
+    static void main(benchmark::State& state) {
+        const double timeStep = timeStepLambda * (latticeSize / numMolecular) * std::sqrt(unitMassM / temperatureT);
+        std::mt19937 gen{};
+        MDType rpmd = MDType(makeSystem(gen), numReplica, numReplica, temperatureT, timeStep);
+        rpmd.initMomentum<KineticModel, decltype(gen)>(gen);
+        KineticModel kineticModel(latticeSize, collideFactor, temperatureT, numMolecular, numReplica, maxHandleNum);
+        kineticModel.updateMass(rpmd.getRingPolymer());
+
+        for (auto _ : state) {
+            ForceModel forceModel{};
+            for (size_t i = 0; i < 50000; ++i)
+                rpmd.nve_step<KineticModel, ForceModel, SequentialExecutor>(kineticModel, forceModel);
+        };
+    }
 }
 
-int main() {
-    const double timeStep = timeStepLambda * (latticeSize / numMolecular) * std::sqrt(unitMassM / temperatureT);
-    std::mt19937 gen{};
-    MDType rpmd = MDType(makeSystem(gen), numReplica, numReplica, temperatureT, timeStep);
-    rpmd.initMomentum<KineticModel, decltype(gen)>(gen);
-    KineticModel kineticModel(latticeSize, collideFactor, temperatureT, numMolecular, numReplica, maxHandleNum);
-    kineticModel.updateMass(rpmd.getRingPolymer());
-
-    auto timeuse = Benchmark::run([&]() {
-        ForceModel forceModel{};
-        for (size_t i = 0; i < 50000; ++i)
-            rpmd.nve_step<KineticModel, ForceModel, SequentialExecutor>(kineticModel, forceModel);
-    }, 8, 20);
-    std::cout << "4 Threads time use: " << timeuse.first << '(' << timeuse.second << ")\n";
-    return 0;
-}
+BENCHMARK(main)->Name("HardCore")->Unit(benchmark::kSecond);

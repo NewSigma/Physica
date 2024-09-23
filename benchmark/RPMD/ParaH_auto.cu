@@ -17,6 +17,7 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include <iostream>
+#include <benchmark/benchmark.h>
 #include <gperftools/profiler.h>
 #include <Physica/Core/Physics/MD/RPMD.h>
 #include <Physica/Core/Physics/MD/KineticModel/FreeModel.h>
@@ -39,77 +40,92 @@ constexpr double pair_cutoff = 15;
 constexpr double molarVolume = 31.7;
 constexpr double mass = PhyConst<AU>::atomMass(1) * 2;
 
-template<class RandomGenerator>
-MDType makeSystem(size_t numMolecular, RandomGenerator& gen) {
-    typename MDCellType::LatticeMatrix lattice = MDCellType::LatticeMatrix::unitMatrix(3);
-    typename MDCellType::PositionMatrix pos(numMolecular, 3);
-    std::uniform_real_distribution dist{};
-    for (auto& elem : pos.asArray())
-        elem = dist(gen);
-    typename MDCellType::MassVector massVec(numMolecular, mass);
-    MDCellType cell(std::move(lattice), std::move(pos), std::move(massVec));
+namespace {
+    template<class RandomGenerator>
+    MDType makeSystem(size_t numMolecular, RandomGenerator& gen) {
+        typename MDCellType::LatticeMatrix lattice = MDCellType::LatticeMatrix::unitMatrix(3);
+        typename MDCellType::PositionMatrix pos(numMolecular, 3);
+        std::uniform_real_distribution dist{};
+        for (auto& elem : pos.asArray())
+            elem = dist(gen);
+        typename MDCellType::MassVector massVec(numMolecular, mass);
+        MDCellType cell(std::move(lattice), std::move(pos), std::move(massVec));
 
-    const double factor = (std::cbrt(numMolecular * molarVolume / PhyConst<SI>::avogadroNa) / 100) / PhyConst<SI>::bohrRadius;
-    cell.scale(factor);
+        const double factor = (std::cbrt(numMolecular * molarVolume / PhyConst<SI>::avogadroNa) / 100) / PhyConst<SI>::bohrRadius;
+        cell.scale(factor);
 
-    return MDType(std::move(cell), numReplica, numReplica, temperatureT, timeStep);
-}
-/**
- * Reference:
- * [1] Miller TF, Manolopoulos DE. 2005. Quantum diffusion in liquid para-hydrogen from ring polymer molecular dynamics. J. Chem. Phys. 122:184503
- */
-int main() {
-    ThreadPool::numThreadRequired = 8;
-    auto& gen = RandomPoolType::getInstance().getGen();
-    KineticModel kineticModel(temperatureT, numReplica);
-    using HostModel = SilveraGoldman<ScalarType, true, false>;
-    {
+        return MDType(std::move(cell), numReplica, numReplica, temperatureT, timeStep);
+    }
+    /**
+    * Reference:
+    * [1] Miller TF, Manolopoulos DE. 2005. Quantum diffusion in liquid para-hydrogen from ring polymer molecular dynamics. J. Chem. Phys. 122:184503
+    */
+    void bench108(benchmark::State& state) {
+        ThreadPool::numThreadRequired = 8;
+        auto& gen = RandomPoolType::getInstance().getGen();
+        KineticModel kineticModel(temperatureT, numReplica);
+        using HostModel = SilveraGoldman<ScalarType, true, false>;
+
         using DeviceModel = SilveraGoldman<ScalarType, true, true>;
         using ForceModel = CPUGPUModel<HostModel, DeviceModel>;
         constexpr size_t numMolecular = 108;
         MDType rpmd = makeSystem(numMolecular, gen);
         rpmd.initMomentum<KineticModel, decltype(gen)>(gen);
         ForceModel forceModel(4, HostModel(pair_cutoff), numMolecular, pair_cutoff);
-        auto timeuse = Benchmark::run([&]() {
+        for (auto _ : state)
             rpmd.nve_step_for<KineticModel, ForceModel, AutoExecutor>(PhyConst<AU>::secondToTime(2 * 1E-13), kineticModel, forceModel);
-        }, 8, 20);
-        std::cout << "108 atom time use: " << timeuse.first << '(' << timeuse.second << ")\n";
     }
-    {
+
+    void bench256(benchmark::State& state) {
+        ThreadPool::numThreadRequired = 8;
+        auto& gen = RandomPoolType::getInstance().getGen();
+        KineticModel kineticModel(temperatureT, numReplica);
+        using HostModel = SilveraGoldman<ScalarType, true, false>;
+
         using DeviceModel = SilveraGoldman<ScalarType, true, true>;
         using ForceModel = CPUGPUModel<HostModel, DeviceModel>;
         constexpr size_t numMolecular = 256;
         MDType rpmd = makeSystem(numMolecular, gen);
         rpmd.initMomentum<KineticModel, decltype(gen)>(gen);
         ForceModel forceModel(4, HostModel(pair_cutoff), numMolecular, pair_cutoff);
-        auto timeuse = Benchmark::run([&]() {
+        for (auto _ : state)
             rpmd.nve_step_for<KineticModel, ForceModel, AutoExecutor>(PhyConst<AU>::secondToTime(2 * 1E-13), kineticModel, forceModel);
-        }, 8, 20);
-        std::cout << "256 atom time use: " << timeuse.first << '(' << timeuse.second << ")\n";
     }
-    {
+
+    void bench500(benchmark::State& state) {
+        ThreadPool::numThreadRequired = 8;
+        auto& gen = RandomPoolType::getInstance().getGen();
+        KineticModel kineticModel(temperatureT, numReplica);
+        using HostModel = SilveraGoldman<ScalarType, true, false>;
+
         using DeviceModel = SilveraGoldman<ScalarType, true, true>;
         using ForceModel = CPUGPUModel<HostModel, DeviceModel>;
         constexpr size_t numMolecular = 500;
         MDType rpmd = makeSystem(numMolecular, gen);
         rpmd.initMomentum<KineticModel, decltype(gen)>(gen);
         ForceModel forceModel(4, HostModel(pair_cutoff), numMolecular, pair_cutoff);
-        auto timeuse = Benchmark::run([&]() {
+        for (auto _ : state)
             rpmd.nve_step_for<KineticModel, ForceModel, AutoExecutor>(PhyConst<AU>::secondToTime(1 * 1E-13), kineticModel, forceModel);
-        }, 8, 20);
-        std::cout << "500 atom time use: " << timeuse.first << '(' << timeuse.second << ")\n";
     }
-    {
+
+    void bench864(benchmark::State& state) {
+        ThreadPool::numThreadRequired = 8;
+        auto& gen = RandomPoolType::getInstance().getGen();
+        KineticModel kineticModel(temperatureT, numReplica);
+        using HostModel = SilveraGoldman<ScalarType, true, false>;
+
         using DeviceModel = SilveraGoldman<ScalarType, true, false>;
         using ForceModel = CPUGPUModel<HostModel, DeviceModel>;
         constexpr size_t numMolecular = 864;
         MDType rpmd = makeSystem(numMolecular, gen);
         rpmd.initMomentum<KineticModel, decltype(gen)>(gen);
         ForceModel forceModel(4, HostModel(pair_cutoff), numMolecular, pair_cutoff);
-        auto timeuse = Benchmark::run([&]() {
+        for (auto _ : state)
             rpmd.nve_step_for<KineticModel, ForceModel, AutoExecutor>(PhyConst<AU>::secondToTime(5 * 1E-14), kineticModel, forceModel);
-        }, 8, 20);
-        std::cout << "864 atom time use: " << timeuse.first << '(' << timeuse.second << ")\n";
     }
-    return 0;
 }
+
+BENCHMARK(bench108)->Name("ParaH auto 108")->Unit(benchmark::kSecond);
+BENCHMARK(bench256)->Name("ParaH auto 256")->Unit(benchmark::kSecond);
+BENCHMARK(bench500)->Name("ParaH auto 500")->Unit(benchmark::kSecond);
+BENCHMARK(bench864)->Name("ParaH auto 864")->Unit(benchmark::kSecond);

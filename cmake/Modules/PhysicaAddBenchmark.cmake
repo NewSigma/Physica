@@ -1,7 +1,0 @@
-function(physica_add_benchmark NAME SOURCES)
-    add_executable(Benchmark-${NAME})
-    target_sources(Benchmark-${NAME} PRIVATE ${SOURCES} ${ARGN})
-    target_precompile_headers(Benchmark-${NAME} REUSE_FROM PhysicaCore)
-    target_link_libraries(Benchmark-${NAME} PhysicaCore ${GPerfTools_LIBRARY})
-    add_test(NAME Benchmark-${NAME} COMMAND Benchmark-${NAME})
-endfunction()

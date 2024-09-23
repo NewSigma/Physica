@@ -17,6 +17,7 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include <iostream>
+#include <benchmark/benchmark.h>
 #include <gperftools/profiler.h>
 #include <Physica/Core/Math/Random/RandomPool.h>
 #include <Physica/Core/Physics/ManyBody/Hamilton/HubbardMatrix.h>
@@ -35,20 +36,22 @@ constexpr double HoppingT = 1;
 constexpr double RepelU = 8;
 constexpr double Beta = 16;
 
-int main() {
-    using ReprType = SpinRepr<2, NumSite, true>;
-    using Hamilton = HubbardMatrix<ScalarType, ReprType>;
-    const LatticeModel<2> lattice({NumSiteX, NumSiteY}, 1);
-    const Hubbard<ScalarType, 2> hubbard(lattice, HoppingT, RepelU);
-    const Hamilton hamilton(hubbard, ReprType(4, 4));
-    auto psi = TPQ<ScalarType>::random_normal(hamilton.getNumState(), RandomPoolType::getInstance().getGen());
-    psi.pre_nvt_step(hamilton, Beta);
-    const auto pair = Benchmark::run([&]() {
-        auto& gen = RandomPoolType::getInstance().getGen();
-        psi.random_normal(gen);
-        psi.template nvt_step<Hamilton, SequentialExecutor>(hamilton, Beta);
-        return psi.lnPartitionXi();
-    }, 6, 8);
-    std::cout << pair.first << ' ' << pair.second << std::endl;
-    return 0;
+namespace {
+    static void main(benchmark::State& state) {
+        using ReprType = SpinRepr<2, NumSite, true>;
+        using Hamilton = HubbardMatrix<ScalarType, ReprType>;
+        const LatticeModel<2> lattice({NumSiteX, NumSiteY}, 1);
+        const Hubbard<ScalarType, 2> hubbard(lattice, HoppingT, RepelU);
+        const Hamilton hamilton(hubbard, ReprType(4, 4));
+        auto psi = TPQ<ScalarType>::random_normal(hamilton.getNumState(), RandomPoolType::getInstance().getGen());
+        psi.pre_nvt_step(hamilton, Beta);
+        for (auto _ : state) {
+            auto& gen = RandomPoolType::getInstance().getGen();
+            psi.random_normal(gen);
+            psi.template nvt_step<Hamilton, SequentialExecutor>(hamilton, Beta);
+            [[maybe_unused]] auto xi = psi.lnPartitionXi();
+        };
+    }
 }
+
+BENCHMARK(main)->Name("TPQ")->Unit(benchmark::kSecond);
