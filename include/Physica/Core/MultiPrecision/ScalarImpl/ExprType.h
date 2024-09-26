@@ -50,7 +50,8 @@ namespace Physica::Core {
         Sin,
         Cos,
         ArcCos,
-        Cosh
+        Cosh,
+        Tanh
     };
 
     constexpr const char* exprTypeToStr(ExprType type) {
@@ -81,6 +82,8 @@ namespace Physica::Core {
             case ExprType::Sin: return "Sin";
             case ExprType::Cos: return "Cos";
             case ExprType::ArcCos: return "ArcCos";
+            case ExprType::Cosh: return "Cosh";
+            case ExprType::Tanh: return "Tanh";
             default: [[unlikely]]
                 return "Unknown";
         }

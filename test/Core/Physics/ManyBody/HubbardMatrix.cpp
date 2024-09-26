@@ -17,8 +17,8 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include <iostream>
-#include "Physica/Core/Math/Random/RandomPool.h"
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Eigen/JacobiDavidson.h"
+#include <Physica/Core/Math/Random/RandomPool.h>
+#include <Physica/Core/Math/Algebra/LinearAlgebra/Eigen/JacobiDavidson.h>
 #include <Physica/Core/Physics/ManyBody/Hamilton/HubbardMatrix.h>
 #include <Physica/Core/Physics/ManyBody/ReprSpace/KSpinRepr.h>
 
@@ -101,10 +101,34 @@ void testKSpinMatrix() {
         exit(EXIT_FAILURE);
 }
 
+void testVecProduct() {
+    constexpr int Dim = 1;
+    constexpr int NumSite = 4;
+    using ReprType = SpinRepr<1, NumSite, false>;
+    using Hamilton = HubbardMatrix<float64, ReprType>;
+    using RandomGenerator = std::mt19937;
+    using RandomPoolType = RandomPool<RandomGenerator, 10000>;
+
+    LatticeModel<Dim> lattice({NumSite}, 1);
+    Hubbard<float64, Dim> hubbard(lattice, HoppingT, RepelU);
+    const auto repr = ReprType(2, 1);
+    const Hamilton hamiltonH(hubbard, repr);
+
+    const auto v = Vector<float64>::random_uniform(hamiltonH.getNumState(), RandomPoolType::getInstance().getGen());
+    const Vector<float64> v1 = hamiltonH * v;
+    Vector<float64> v2(v.getLength());
+    for (size_t i = 0; i < v.getLength(); ++i)
+        v2[i] = (hamiltonH * v).calc(i);
+
+    if (!vectorNear(v1, v2, 1E-14))
+        exit(EXIT_FAILURE);
+}
+
 int main() {
     testRSpinMatrix1D<3, 2, 1>();
     testRSpinMatrix1D<2, 1, 1>();
     testRSpinMatrix2D<2, 3, 2, 3>();
     testKSpinMatrix();
+    testVecProduct();
     return 0;
 }

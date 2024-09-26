@@ -34,30 +34,38 @@ namespace Physica::Core {
     public:
         AutoDiffGuard();
         AutoDiffGuard(const AutoDiffGuard&) = delete;
-        AutoDiffGuard(AutoDiffGuard&&) noexcept = default;
+        AutoDiffGuard(AutoDiffGuard&& other) noexcept;
         ~AutoDiffGuard();
         /* Operators */
         AutoDiffGuard& operator=(AutoDiffGuard obj) noexcept { swap(obj); return *this; }
+        This& operator=(std::nullptr_t) noexcept { node = nullptr; return *this; }
+        [[nodiscard]] operator const ScalarType&() const noexcept { return node; }
         /* Operations */
         void swap(AutoDiffGuard& __restrict obj) noexcept { node.swap(obj.node); }
-        /* Getters */
-        [[nodiscard]] ScalarType getNode() const noexcept { return node; }
     };
 
     template<class ScalarType>
     AutoDiffGuard<ScalarType>::AutoDiffGuard() {
         if constexpr (isDeviceSide) {
-            auto& segment = TracerType::getInstance().pushSegment(1, ExprType::Set);
-            node = ScalarType(segment.getValues().data(), segment.getGrads().data());
+            const auto& segment = TracerType::getInstance().pushSegment(1, ExprType::Set);
+            node = segment[0];
         }
         else {
+            TracerType::getInstance().pushSegment(1);
             const ScalarType anyNewNode = ScalarType(0);
             node = anyNewNode;
         }
     }
 
     template<class ScalarType>
+    AutoDiffGuard<ScalarType>::AutoDiffGuard(AutoDiffGuard&& other) noexcept : node(other.node) {
+        other = nullptr;
+    }
+
+    template<class ScalarType>
     AutoDiffGuard<ScalarType>::~AutoDiffGuard() {
-        TracerType::getInstance().forget(node);
+        const bool isValid = node != nullptr;
+        if (isValid)
+            TracerType::getInstance().forget_to(node);
     }
 }

@@ -72,10 +72,10 @@ namespace Physica::Core {
         for (unsigned int _ = 0; _ < opt.getBatchSize(); ++_) {
             DiffGuardType guard{};
             const size_t index = dist(gen);
-            loss<Dataset>(dataset, index).reverse_to(guard.getNode());
+            loss<Dataset>(dataset, index).reverse_to(guard);
         }
         opt.step();
-        TracerType::getInstance().zero_grad_to(net_guard.getNode());
+        TracerType::getInstance().zero_grad_to(net_guard);
     }
 
     template<class Derived>

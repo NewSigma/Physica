@@ -67,7 +67,8 @@ namespace Physica::Core {
         void zero_grad_from(DiffScalar from);
         void zero_grad_to(DiffScalar to);
         void zero_grad();
-        void forget(DiffScalar to);
+        void forget(DiffScalar from, DiffScalar to);
+        void forget_to(DiffScalar to);
         void reserve(size_t size);
         inline void clear();
 
@@ -78,6 +79,7 @@ namespace Physica::Core {
         [[nodiscard]] inline bool checkLastOpDone() const;
         /* Getters */
         [[nodiscard]] const TraceListType& getTraceList() const noexcept { return traceList; }
+        [[nodiscard]] bool isFound(DiffScalar s) const noexcept;
         [[nodiscard]] size_t getNumRecord() const noexcept;
         [[nodiscard]] ExprType getSource(DiffScalar s) const noexcept;
         [[nodiscard]] DiffScalar* getFirstOperand(DiffScalar s);
@@ -277,7 +279,7 @@ namespace Physica::Core {
 
             segment.reverse_from(from);
         }
-        assert(foundBeginSegment && "[Error]: Cannot find begin record, maybe it is on another thread?");
+        assert(foundBeginSegment && "[Error]: Cannot find record, maybe it is on another thread?");
     }
 
     template<class ScalarType, unsigned int Order>
@@ -292,7 +294,7 @@ namespace Physica::Core {
             if (foundFinalSegment)
                 break;
         }
-        assert(foundFinalSegment && "[Error]: Cannot find final record, maybe it is on another thread?");
+        assert(foundFinalSegment && "[Error]: Cannot find record, maybe it is on another thread?");
     }
 
     template<class ScalarType, unsigned int Order>
@@ -322,7 +324,7 @@ namespace Physica::Core {
                 continue;
             segment.zero_grad_from(from);
         }
-        assert(foundBeginSegment && "[Error]: Cannot find begin record, maybe it is on another thread?");
+        assert(foundBeginSegment && "[Error]: Cannot find record, maybe it is on another thread?");
     }
 
     template<class ScalarType, unsigned int Order>
@@ -337,7 +339,7 @@ namespace Physica::Core {
             if (foundFinalSegment)
                 break;
         }
-        assert(foundFinalSegment && "[Error]: Cannot find final record, maybe it is on another thread?");
+        assert(foundFinalSegment && "[Error]: Cannot find record, maybe it is on another thread?");
     }
 
     template<class ScalarType, unsigned int Order>
@@ -348,19 +350,42 @@ namespace Physica::Core {
     }
 
     template<class ScalarType, unsigned int Order>
-    void DiffTracer<ScalarType, Order>::forget(DiffScalar to) {
+    void DiffTracer<ScalarType, Order>::forget(DiffScalar from, DiffScalar to) {
         assert(!traceList.empty() && "[Error]: No record found");
-        const auto end = traceList.end();
-        for (auto ite = traceList.begin(); ite != end; ite = traceList.begin()) {
-            auto& segment = *ite;
-            const bool isFound = segment.isFound(to);
-            if (isFound) {
-                segment.forget(to);
-                return;
+        auto ite = traceList.begin();
+        /* Find from */ {
+            const auto end = traceList.end();
+            for (; ite != end; ++ite) {
+                const bool isFound = (*ite).isFound(from);
+                if (isFound)
+                    break;
             }
-            traceList.pop_front();
+            assert(ite != end && "[Error]: Cannot find record, maybe it is on another thread?");   
         }
-        assert(false && "[Error]: Cannot find begin record, maybe it is on another thread?");
+        auto ite0 = ite;
+        /* Find from */ {
+            assert((*ite).getLength() == 1 && "[Error]: Part forget leads to memory fragment");
+            ++ite;
+            while (ite != traceList.end() && !(*ite).isFound(to))
+                ite = traceList.erase_after(ite0);
+            assert(ite != traceList.end() && "[Error]: Cannot find record, maybe it is on another thread?");
+        }
+        auto& s = *ite;
+        s.forget_to(to);
+        if (s.empty())
+            traceList.erase_after(ite0);
+    }
+
+    template<class ScalarType, unsigned int Order>
+    void DiffTracer<ScalarType, Order>::forget_to(DiffScalar to) {
+        while (!traceList.empty() && !traceList.front().isFound(to))
+            traceList.pop_front();
+        assert(!traceList.empty() && "[Error]: Cannot find record, maybe it is on another thread?");
+
+        auto& front = traceList.front();
+        front.forget_to(to);
+        if (front.empty())
+            traceList.pop_front();
     }
     /**
      * Ensure current segment have at least \param size elements of empty space for next continuous store
@@ -401,8 +426,8 @@ namespace Physica::Core {
             if (foundFinalSegment)
                 break;
         }
-        assert(foundBeginSegment && "[Error]: Cannot find begin record, maybe it is on another thread?");
-        assert(foundFinalSegment && "[Error]: Cannot find final record, maybe it is on another thread?");
+        assert(foundBeginSegment && "[Error]: Cannot find record, maybe it is on another thread?");
+        assert(foundFinalSegment && "[Error]: Cannot find record, maybe it is on another thread?");
     }
 
     template<class ScalarType, unsigned int Order>
@@ -421,6 +446,14 @@ namespace Physica::Core {
         const auto& record = *records.crbegin();
         return record.source == ExprType::Set
             || operands.getLength() >= (record.idFirstOperand + SegmentType::numOperand(record.source));
+    }
+
+    template<class ScalarType, unsigned int Order>
+    bool DiffTracer<ScalarType, Order>::isFound(DiffScalar s) const noexcept {
+        for (auto& trace : traceList)
+            if (trace.isFound(s))
+                return true;
+        return false;
     }
 
     template<class ScalarType, unsigned int Order>

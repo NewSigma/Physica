@@ -18,9 +18,9 @@
  */
 #pragma once
 
-#include "Physica/Core/Math/Statistics/NumCharacter.h"
-#include "Physica/Core/MultiPrecision/AutoDiffGuard.h"
-#include "Physica/Core/Parallel/Executor/ThreadExecutor.h"
+#include <Physica/Core/Math/Statistics/NumCharacter.h>
+#include <Physica/Core/MultiPrecision/AutoDiffGuard.h>
+#include <Physica/Core/Parallel/Executor/ThreadExecutor.h>
 #include "Layer/LayerBase.h"
 #include "Loss.h"
 
@@ -88,7 +88,7 @@ namespace Physica::Core {
                 for (size_t _ = 0; _ < batchSizePerThread; ++_) {
                     AutoDiffGuard<ScalarType> guard{};
                     const size_t index = dist(gen);
-                    tempNet.template loss<Dataset>(dataset, index).reverse_to(guard.getNode());
+                    tempNet.template loss<Dataset>(dataset, index).reverse_to(guard);
                 }
                 auto& tracer = TracerType::getInstance();
                 std::lock_guard locker(mutex);
@@ -96,7 +96,7 @@ namespace Physica::Core {
             }, numThread, numThread).wait();
         }
         opt.step();
-        TracerType::getInstance().zero_grad_to(diffGuard.getNode());
+        TracerType::getInstance().zero_grad_to(diffGuard);
     }
 
     template<class Derived>
@@ -128,7 +128,6 @@ namespace Physica::Core {
     template<class Derived>
     inline void SimpleNet<Derived>::swap(SimpleNet& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
-        if constexpr (IsTrainMode)
-            diffGuard.swap(obj.diffGuard);
+        diffGuard.swap(obj.diffGuard);
     }
 }

@@ -43,28 +43,27 @@ namespace Physica::Core {
         using FFTType = FFT<RealType, 1>;
         using StateType = typename ReprType::StateType;
         using typename ModelBase::IndexType;
-        constexpr static unsigned int SiteDOF = StateType::SiteDOF;
-        constexpr static bool IsTransInvariant = Traits<ReprType>::IsTransInvariant;
     public:
         constexpr static unsigned int Dim = ReprType::Dim;
         constexpr static unsigned int NumSite = StateType::NumSite;
+        constexpr static unsigned int SiteDOF = StateType::SiteDOF;
+        constexpr static bool IsTransInvariant = Traits<ReprType>::IsTransInvariant;
         static_assert((IsTransInvariant && ScalarType::isComplex) || !IsTransInvariant, "[Error]: Use complex scalar if translational invariance is enabled");
         static_assert(!IsTransInvariant || (Dim == 1), "[Error]: Trans invariantce is not implemented in high dimension");
     private:
         ReprType repr;
-        RealType dotPrec;
         FFTType planProvider;
     public:
         HubbardMatrix() = default;
-        HubbardMatrix(ModelBase hubbard, ReprType repr_, RealType dotPrec_ = RealType(0));
+        HubbardMatrix(ModelBase hubbard, ReprType repr_);
         HubbardMatrix(const This&) = default;
         HubbardMatrix(This&&) noexcept = default;
         ~HubbardMatrix() = default;
         /* Operators */
         This& operator=(This obj) noexcept { swap(obj); return *this; }
         /* Operations */
-        template<class SourceVector, class TargetVector, class Executor>
-        void dot(const SourceVector& source, TargetVector& target) const;
+        template<class Functor>
+        void forNeighSites(Functor func, int site) const;
 
         [[nodiscard]] ScalarType calc(size_t row, size_t col) const;
         [[nodiscard]] ScalarType trace() const;
@@ -80,8 +79,9 @@ namespace Physica::Core {
         RealType hoppingElem(StateType rowPsi, StateType colPsi) const;
     private:
         template<class TargetType> void sumHopping(TargetType& target, FFTType& fft, ScalarType factor, StateType psi) const;
-        template<class TargetType> void dotImpl1D(TargetType& target, ScalarType factor, size_t index) const;
-        template<class TargetType> void dotImplND(TargetType& target, ScalarType factor, size_t index) const;
+        template<class TargetType> void dotImpl(TargetType& target, ScalarType factor, size_t index) const;
+
+        template<class, class> friend class MatrixVectorProduct;
     };
 }
 

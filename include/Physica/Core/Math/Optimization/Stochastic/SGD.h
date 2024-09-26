@@ -29,6 +29,7 @@ namespace Physica::Core {
     class SGD {
         static_assert(ScalarType::isDifferentiable, "[Error]: ScalarType must be differentiable");
         static_assert(!is_device_obj<ScalarType>::value, "[Error]: Include corresponding *.cuh file to enable CUDA support");
+        using TracerType = typename ScalarType::TracerType;
     public:
         using PlainScalar = typename ScalarType::PlainScalar;
     private:
@@ -49,7 +50,8 @@ namespace Physica::Core {
         /* Operations */
         inline void recordBegin();
         inline void recordEnd();
-        void step();
+        void step() const;
+        inline void zero_grad() const;
         void swap(SGD& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] PlainScalar getLearnRate() const noexcept { return learnRate; }
@@ -61,6 +63,7 @@ namespace Physica::Core {
 
     template<class ScalarType>
     SGD<ScalarType>::SGD(PlainScalar learnRate_, unsigned int batchSize_) : batchSize(batchSize_) {
+        assert(batchSize > 0);
         setLearnRate(learnRate_);
     }
 
@@ -75,18 +78,20 @@ namespace Physica::Core {
     }
 
     template<class ScalarType>
-    void SGD<ScalarType>::step() {
-        using TracerType = typename ScalarType::TracerType;
+    void SGD<ScalarType>::step() const {
         using SegmentType = typename TracerType::SegmentType;
         using DiffScalar = typename TracerType::DiffScalar;
         auto& tracer = TracerType::getInstance();
-        size_t i = 0;
-        tracer.forSegmentInRange(from, to, [this, &i](SegmentType& segment) {
-            segment.forNodeInRange(from, to, [this, &i](DiffScalar s) {
+        tracer.forSegmentInRange(from, to, [this](SegmentType& segment) {
+            segment.forNodeInRange(from, to, [this](DiffScalar s) {
                 s.setValue(s.getValue() - meanLearnRate * s.getGrad());
-                i += 1;
             });
         });
+    }
+
+    template<class ScalarType>
+    inline void SGD<ScalarType>::zero_grad() const {
+        TracerType::getInstance().zero_grad(from, to);
     }
 
     template<class ScalarType>
@@ -101,6 +106,7 @@ namespace Physica::Core {
 
     template<class PlainScalar>
     void SGD<PlainScalar>::setLearnRate(PlainScalar lr) {
+        assert(!lr.isZero() && "[Error]: 0 learn rate does nothing");
         learnRate = lr;
         meanLearnRate = lr / PlainScalar(batchSize);
     }

@@ -72,7 +72,7 @@ namespace Physica::Core {
         inline void zero_grad_from(DiffScalar from);
         inline void zero_grad_to(DiffScalar to);
         inline void zero_grad();
-        void forget(DiffScalar to);
+        void forget_to(DiffScalar to);
         void squeeze();
 
         [[nodiscard]] ColorfulType color() const noexcept { return ColorfulType(*this); }
@@ -111,7 +111,7 @@ namespace Physica::Core {
 
     template<class ScalarType, unsigned int Order>
     TraceSegment<ScalarType, Order>::TraceSegment(size_t size) {
-        assert(size >= DefaultSize && "[Error]: Allocate a small segment maybe bad to performance");
+        assert(size > 0 && "[Error]: Bad size");
         records.reserve(size);
         operands.reserve(3 * size); //MulAdd operation is 3-operand
         values.reserve(size);
@@ -121,6 +121,7 @@ namespace Physica::Core {
     template<class ScalarType, unsigned int Order>
     TraceSegment<ScalarType, Order>::TraceSegment(ValueVector values_) : values(std::move(values_)) {
         const size_t length = values.getLength();
+        assert(length > 0 && "[Error]: Bad size");
         records.resize(length, DiffRecord{0, ExprType::Set});
         grads.resize(length, ScalarType(0));
     }
@@ -224,7 +225,7 @@ namespace Physica::Core {
     }
 
     template<class ScalarType, unsigned int Order>
-    void TraceSegment<ScalarType, Order>::forget(DiffScalar to) {
+    void TraceSegment<ScalarType, Order>::forget_to(DiffScalar to) {
         assert(isFound(to) && "[Error]: forgeting a non existent, this may be a bug");
         const size_t index = find(to);
         const auto& record = records[index];
@@ -394,6 +395,9 @@ namespace Physica::Core {
                     case ExprType::ArcCos:
                         updateGrad(gradX, -grad / sqrt(GradType(1) - square(GradType(operandX))));
                         continue;
+                    case ExprType::Tanh:
+                        updateGrad(gradX, grad - grad * square(GradType(operandX)));
+                        continue;
                     default:;
                 }
             }
@@ -492,6 +496,7 @@ namespace Physica::Core {
 
     template<class ScalarType, unsigned int Order>
     size_t TraceSegment<ScalarType, Order>::makeFromIndex(DiffScalar from) const noexcept {
+        assert(!empty());
         size_t fromIndex = find(from);
         const bool isFromNotFound = fromIndex >= getLength();
         if (isFromNotFound)
@@ -501,6 +506,7 @@ namespace Physica::Core {
 
     template<class ScalarType, unsigned int Order>
     size_t TraceSegment<ScalarType, Order>::makeToIndex(DiffScalar to) const noexcept {
+        assert(!empty());
         size_t toIndex = find(to);
         const bool isToNotFound = toIndex >= getLength();
         if (isToNotFound)

@@ -20,59 +20,22 @@
 
 namespace Physica::Core {
     template<class ScalarType, class ReprType>
-    HubbardMatrix<ScalarType, ReprType>::HubbardMatrix(ModelBase hubbard, ReprType repr_, RealType dotPrec_)
+    HubbardMatrix<ScalarType, ReprType>::HubbardMatrix(ModelBase hubbard, ReprType repr_)
             : ModelBase(std::move(hubbard))
             , repr(std::move(repr_))
-            , dotPrec(dotPrec_)
             , planProvider(NumSite, PlanFlag::Estimate) {
         assert(ModelBase::getNumSuperCellSite() == NumSite && "[Error]: Inconsistent site number");
     }
 
     template<class ScalarType, class ReprType>
-    template<class SourceVector, class TargetVector, class Executor>
-    void HubbardMatrix<ScalarType, ReprType>::dot(const SourceVector& source, TargetVector& target) const {
-        static_assert(std::is_base_of<RValueVector<SourceVector>, SourceVector>::value, "[Error]: Invalid source type");
-        static_assert(std::is_base_of<LValueVector<TargetVector>, TargetVector>::value, "[Error]: Invalid target type");
-        const size_t length = Base::getColumn();
-        assert(source.getLength() == length && "[Error]: Dimensions do not match");
-        assert(source.getLength() == target.getLength() && "[Error]: Dimensions do not match");
-
-        const RealType maxAbs = abs(source).max();
-        target = RealType(0);
-        if constexpr (std::is_same<Executor, ThreadExecutor>::value) {
-            std::mutex mutex{};
-            auto future = Executor::parallel_for([&, length](unsigned int thread) {
-                Vector<ScalarType> local(length, 0);
-                SparseVector<ScalarType> buffer(length, std::min(size_t(NumSite * SiteDOF), length));
-                const auto range = Executor::splitJob(length, Executor::getNumThread(), thread);
-                for (unsigned int i = range.first; i < range.second; ++i) {
-                    const ScalarType factor = source.calc(i);
-                    if (abs(factor) < maxAbs * dotPrec)
-                        continue;
-
-                    if constexpr (Dim == 1)
-                        dotImpl1D(buffer, factor, i);
-                    else
-                        dotImplND(buffer, factor, i);
-                    local += buffer;
-                    buffer.clear();
-                }
-                std::unique_lock locker(mutex);
-                target += local;
-            }, Executor::getNumThread());
-            Executor::auto_wait(future);
-        }
+    template<class Functor>
+    void HubbardMatrix<ScalarType, ReprType>::forNeighSites(Functor func, int site) const {
+        if constexpr (Dim == 1)
+            func(site, (site + 1) % NumSite);
         else {
-            for (size_t i = 0; i < length; ++i) {
-                const ScalarType factor = source.calc(i);
-                if (abs(factor) < maxAbs * dotPrec)
-                    continue;
-
-                if constexpr (Dim == 1)
-                    dotImpl1D(target, factor, i);
-                else
-                    dotImplND(target, factor, i);
-            }
+            const auto& hopTargets = ModelBase::getHopIndexArray()[site];
+            for (int site1 : hopTargets)
+                func(site, site1);
         }
     }
 
@@ -126,7 +89,6 @@ namespace Physica::Core {
         Base::swap(obj);
         ModelBase::swap(obj);
         repr.swap(obj.repr);
-        dotPrec.swap(obj.dotPrec);
         planProvider.swap(obj.planProvider);
     }
 
@@ -197,16 +159,14 @@ namespace Physica::Core {
 
     template<class ScalarType, class ReprType>
     template<class TargetVector>
-    void HubbardMatrix<ScalarType, ReprType>::dotImpl1D(TargetVector& target, ScalarType factor, size_t index) const {
-        ScalarType hop = -factor * getHoppingT();
-        if constexpr (IsTransInvariant) {
-            const RealType normalizer = sqrt(RealType(repr.getPeriods()[index])) / RealType(NumSite);
-            hop *= normalizer;
-        }
-
+    void HubbardMatrix<ScalarType, ReprType>::dotImpl(TargetVector& target, ScalarType factor, size_t index) const {
         const auto state = repr[index];
         int numRepel = 0;
         if constexpr (IsTransInvariant) {
+            static_assert(Dim == 1 && "[Error]: Not implemented");
+            const RealType normalizer = sqrt(RealType(repr.getPeriods()[index])) / RealType(NumSite);
+            const ScalarType hop = -factor * normalizer * getHoppingT();
+
             auto fft = FFTType::makeEmptyFFT(NumSite);
             for (int site = 0; site < int(NumSite); ++site) {
                 const auto site1 = (site + 1) % NumSite;
@@ -220,58 +180,27 @@ namespace Physica::Core {
             }
         }
         else {
-            bool upOccupy1 = state.isUpOccupy(0);
-            bool downOccupy1 = state.isDownOccupy(0);
+            const ScalarType hop = -factor * getHoppingT();
             for (int site = 0; site < int(NumSite); ++site) {
-                const auto site1 = (site + 1) % NumSite;
-                const bool upOccupy2 = state.isUpOccupy(site1);
-                const bool downOccupy2 = state.isDownOccupy(site1);
-                if (upOccupy1 != upOccupy2) {
-                    const ScalarType hopUp = hop * RealType(state.hopUpSign(site, site1));
-                    const size_t index = repr[upOccupy1 ? state.hopUp(site, site1) : state.hopUp(site1, site)];
-                    target[index] += upOccupy1 ? hopUp : -hopUp;
-                }
+                const bool upOccupy1 = state.isUpOccupy(site);
+                const bool downOccupy1 = state.isDownOccupy(site);
+                forNeighSites([this, &target, &state, hop, upOccupy1, downOccupy1](int site, int site1) {
+                    const bool upOccupy2 = state.isUpOccupy(site1);
+                    const bool downOccupy2 = state.isDownOccupy(site1);
+                    if (upOccupy1 != upOccupy2) {
+                        const ScalarType hopUp = hop * RealType(state.hopUpSign(site, site1));
+                        const size_t index = repr[upOccupy1 ? state.hopUp(site, site1) : state.hopUp(site1, site)];
+                        target[index] += upOccupy1 ? hopUp : -hopUp;
+                    }
 
-                if (downOccupy1 != downOccupy2) {
-                    const ScalarType hopDown = hop * RealType(state.hopDownSign(site, site1));
-                    const size_t index = repr[downOccupy1 ? state.hopDown(site, site1) : state.hopDown(site1, site)];
-                    target[index] += downOccupy1 ? hopDown : -hopDown;
-                }
+                    if (downOccupy1 != downOccupy2) {
+                        const ScalarType hopDown = hop * RealType(state.hopDownSign(site, site1));
+                        const size_t index = repr[downOccupy1 ? state.hopDown(site, site1) : state.hopDown(site1, site)];
+                        target[index] += downOccupy1 ? hopDown : -hopDown;
+                    }
+                }, site);
                 numRepel += upOccupy1 && downOccupy1;
-                upOccupy1 = upOccupy2;
-                downOccupy1 = downOccupy2;
             }
-        }
-        target[index] += factor * (getRepelU() * RealType(numRepel));
-    }
-
-    template<class ScalarType, class ReprType>
-    template<class TargetVector>
-    void HubbardMatrix<ScalarType, ReprType>::dotImplND(TargetVector& target, ScalarType factor, size_t index) const {
-        static_assert(!IsTransInvariant && "[Error]: Not implemented");
-        const ScalarType hop = -factor * getHoppingT();
-        const auto state = repr[index];
-        int numRepel = 0;
-        for (int site = 0; site < int(NumSite); ++site) {
-            const auto& hopTargets = ModelBase::getHopIndexArray()[site];
-            const bool upOccupy1 = state.isUpOccupy(site);
-            const bool downOccupy1 = state.isDownOccupy(site);
-            for (int site1 : hopTargets) {
-                const bool upOccupy2 = state.isUpOccupy(site1);
-                const bool downOccupy2 = state.isDownOccupy(site1);
-                if (upOccupy1 != upOccupy2) {
-                    const ScalarType hopUp = hop * RealType(state.hopUpSign(site, site1));
-                    const size_t index = repr[upOccupy1 ? state.hopUp(site, site1) : state.hopUp(site1, site)];
-                    target[index] += upOccupy1 ? hopUp : -hopUp;
-                }
-
-                if (downOccupy1 != downOccupy2) {
-                    const ScalarType hopDown = hop * RealType(state.hopDownSign(site, site1));
-                    const size_t index = repr[downOccupy1 ? state.hopDown(site, site1) : state.hopDown(site1, site)];
-                    target[index] += downOccupy1 ? hopDown : -hopDown;
-                }
-            }
-            numRepel += upOccupy1 && downOccupy1;
         }
         target[index] += factor * (getRepelU() * RealType(numRepel));
     }

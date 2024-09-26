@@ -187,4 +187,18 @@ namespace Physica::Core {
             return result;
         }
     }
+
+    template<class ScalarType, DiffMode Mode, unsigned int Order>
+    Differentiable<ScalarType, Mode, Order> tanh(const Differentiable<ScalarType, Mode, Order>& s) {
+        const ScalarType value = tanh(s.getValue());
+        if constexpr (Mode == DiffMode::Forward) {
+            return {value, ScalarType(1) - square(value)};
+        }
+        else {
+            auto& tracer = DiffTracer<ScalarType, Order>::getInstance();
+            const auto result = tracer.pushOperation(value, ExprType::Tanh);
+            tracer.pushOperand(s);
+            return result;
+        }
+    }
 }

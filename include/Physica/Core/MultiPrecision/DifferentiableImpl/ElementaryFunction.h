@@ -97,10 +97,10 @@ namespace Physica::Core {
 
     template<class ScalarType, DiffMode Mode, unsigned int Order>
     Differentiable<ScalarType, Mode, Order> sinh(const Differentiable<ScalarType, Mode, Order>& s);
-
+*/
     template<class ScalarType, DiffMode Mode, unsigned int Order>
     Differentiable<ScalarType, Mode, Order> tanh(const Differentiable<ScalarType, Mode, Order>& s);
-
+/*
     template<class ScalarType, DiffMode Mode, unsigned int Order>
     Differentiable<ScalarType, Mode, Order> sech(const Differentiable<ScalarType, Mode, Order>& s);
 

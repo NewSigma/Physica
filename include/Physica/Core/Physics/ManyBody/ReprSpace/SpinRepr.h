@@ -78,7 +78,6 @@ namespace Physica::Core {
     SpinRepr<Dim, NumSite, UseInversionSymm>::SpinRepr(int numSpinUp_, int numSpinDown_)
             : numSpinUp(numSpinUp_), numSpinDown(numSpinDown_) {
         assert((numSpinUp >= 0) && (numSpinDown >= 0));
-        assert(getNumParticle() > 0 && "[Error]: Empty representation");
         assert(!((numSpinUp == numSpinDown) ^ UseInversionSymm) && "[Error]: Inconsistent inversion symmetry");
         auto pair = makeSpinlessStates(numSpinUp);
         upStates = std::move(pair.first);
@@ -142,8 +141,8 @@ namespace Physica::Core {
     template<int Dim, int NumSite, bool UseInversionSymm>
     typename SpinRepr<Dim, NumSite, UseInversionSymm>::PairType
     SpinRepr<Dim, NumSite, UseInversionSymm>::makeSpinlessStates(int numParticle) const noexcept {
-        assert(numParticle > 0);
         constexpr size_t numSpinlessState = SpinlessState::calcFullNumState();
+        assert(numParticle >= 0);
         StateArray arr{};
         StateIndexMap map{};
         arr.reserve(numSpinlessState);

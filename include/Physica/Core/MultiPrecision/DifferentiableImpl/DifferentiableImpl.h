@@ -92,10 +92,23 @@ namespace Physica::Core {
     }
 
     template<class ScalarType, unsigned int Order>
+    inline Differentiable<ScalarType, DiffMode::Reverse, Order>& Differentiable<ScalarType, DiffMode::Reverse, Order>::operator=(std::nullptr_t) noexcept {
+        pValue = nullptr;
+        grad = nullptr;
+        return *this;
+    }
+
+    template<class ScalarType, unsigned int Order>
     inline bool Differentiable<ScalarType, DiffMode::Reverse, Order>::operator==(const This& other) const {
         const bool result = pValue == other.pValue;
         assert(result == (grad == other.grad) && "[Error]: Bad scalar");
         return result;
+    }
+
+    template<class ScalarType, unsigned int Order>
+    inline bool Differentiable<ScalarType, DiffMode::Reverse, Order>::operator==(std::nullptr_t) const noexcept {
+        const bool isInvalid = value_ptr() == nullptr;
+        return isInvalid;
     }
 
     template<class ScalarType, unsigned int Order>
@@ -145,7 +158,7 @@ namespace Physica::Core {
     }
 
     template<class ScalarType, unsigned int Order>
-    inline void Differentiable<ScalarType, DiffMode::Reverse, Order>::swap(Differentiable<ScalarType, DiffMode::Reverse, Order>& __restrict obj) noexcept {
+    inline void Differentiable<ScalarType, DiffMode::Reverse, Order>::swap(This& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         std::swap(pValue, obj.pValue);
         std::swap(grad, obj.grad);

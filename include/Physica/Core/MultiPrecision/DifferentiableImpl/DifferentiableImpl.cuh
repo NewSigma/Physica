@@ -77,10 +77,24 @@ namespace Physica::Core {
             : pValue(const_cast<ScalarType*>(pValue_)), pGrad(const_cast<ScalarType*>(pGrad_)) {}
 
     template<class ScalarType, unsigned int Order>
+    __host__ __device__ inline device_obj<Differentiable<ScalarType, DiffMode::Reverse, Order>>&
+    device_obj<Differentiable<ScalarType, DiffMode::Reverse, Order>>::operator=(std::nullptr_t) noexcept {
+        pValue = nullptr;
+        pGrad = nullptr;
+        return *this;
+    }
+
+    template<class ScalarType, unsigned int Order>
     __host__ __device__ inline bool device_obj<Differentiable<ScalarType, DiffMode::Reverse, Order>>::operator==(const This& other) const {
         const bool result = pValue == other.pValue;
         assert(result == (pGrad == other.pGrad) && "[Error]: Bad scalar");
         return result;
+    }
+
+    template<class ScalarType, unsigned int Order>
+    __host__ __device__ inline bool device_obj<Differentiable<ScalarType, DiffMode::Reverse, Order>>::operator==(std::nullptr_t) const noexcept {
+        const bool isInvalid = value_ptr() == nullptr;
+        return isInvalid;
     }
 
     template<class ScalarType, unsigned int Order>
@@ -133,7 +147,7 @@ namespace Physica::Core {
     }
 
     template<class ScalarType, unsigned int Order>
-    __host__ __device__ inline void device_obj<Differentiable<ScalarType, DiffMode::Reverse, Order>>::swap(device_obj& __restrict obj) noexcept {
+    __host__ __device__ inline void device_obj<Differentiable<ScalarType, DiffMode::Reverse, Order>>::swap(This& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         std::swap(pValue, obj.pValue);
         std::swap(pGrad, obj.pGrad);

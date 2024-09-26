@@ -48,9 +48,12 @@ namespace Physica::Core {
         /* Operators */
         This& operator=(const This&) = default;
         This& operator=(This&&) noexcept = default;
+        __host__ __device__ inline This& operator=(std::nullptr_t) noexcept;
         [[nodiscard]] __device__ explicit operator float() const { return float(getValue()); }
         [[nodiscard]] __device__ explicit operator double() const { return double(getValue()); }
         [[nodiscard]] __host__ __device__ inline bool operator==(const This& other) const;
+        [[nodiscard]] __host__ __device__ inline bool operator==(std::nullptr_t) const noexcept;
+        [[nodiscard]] __host__ __device__ inline bool operator!=(std::nullptr_t) const noexcept { return !((*this) == nullptr); }
         [[nodiscard]] inline This operator-() const;
         /* Operations */
         void reverse();

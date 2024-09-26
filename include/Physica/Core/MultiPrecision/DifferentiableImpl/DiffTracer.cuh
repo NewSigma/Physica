@@ -53,7 +53,7 @@ namespace Physica::Core {
         void zero_grad_from(DiffScalar from);
         void zero_grad_to(DiffScalar to);
         void zero_grad();
-        void forget(DiffScalar to);
+        void forget_to(DiffScalar to);
         inline void clear();
 
         template<class Functor> void forSegmentInRange(DiffScalar from, DiffScalar to, Functor func);
@@ -203,7 +203,7 @@ namespace Physica::Core {
     }
 
     template<class ScalarType, unsigned int Order>
-    void device_obj<DiffTracer<ScalarType, Order>>::forget(DiffScalar to) {
+    void device_obj<DiffTracer<ScalarType, Order>>::forget_to(DiffScalar to) {
         assert(!traceList.empty() && "[Error]: No record found");
         const auto end = traceList.end();
         for (auto ite = traceList.begin(); ite != end; ite = traceList.begin()) {

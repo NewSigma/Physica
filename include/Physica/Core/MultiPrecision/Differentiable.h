@@ -115,11 +115,14 @@ namespace Physica::Core {
         /* Operators */
         This& operator=(const This&) = default;
         This& operator=(This&&) noexcept = default;
+        inline This& operator=(std::nullptr_t) noexcept;
         [[nodiscard]] explicit operator float() const { return float(getValue()); }
         [[nodiscard]] explicit operator double() const { return double(getValue()); }
         template<unsigned int KeepDeep>
         [[nodiscard]] explicit operator Differentiable<ScalarType, DiffMode::Reverse, KeepDeep>() const;
         [[nodiscard]] inline bool operator==(const This& other) const;
+        [[nodiscard]] inline bool operator==(std::nullptr_t) const noexcept;
+        [[nodiscard]] inline bool operator!=(std::nullptr_t) const noexcept { return !((*this) == nullptr); }
         [[nodiscard]] inline Differentiable operator-() const;
         /* Operations */
         [[nodiscard]] This conjugate() const { noImpl(); }
