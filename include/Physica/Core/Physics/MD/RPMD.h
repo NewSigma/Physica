@@ -45,7 +45,7 @@ namespace Physica::Core {
      * 
      * Reference:
      * [1] Annual Review of Physical Chemistry 64, 387-413 (2013); https://doi.org/10.1146/annurev-physchem-040412-110122
-     * [2] Jos Thijssen. Computational Physics[M].London: Cambridge university press, 2013:197-211
+     * [2] J. H. Thijssen. Computational Physics[M]. London: Cambridge University Press, 2013:197-211
      * [3] J. Chem. Phys. 121, 3368 (2004); https://doi.org/10.1063/1.1777575
      */
     template<class ScalarType,

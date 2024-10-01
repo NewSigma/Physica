@@ -47,30 +47,30 @@ namespace Physica::Gui {
             axisX->setTickAnchor(0);
             axisX->setTickInterval(deltaX);
             axisX->setTickType(QValueAxis::TicksDynamic);
-            axisX->setMinorGridLineVisible(false);
-            axisX->setLinePenColor(Qt::black);
             axisX->setGridLineVisible(false);
+            axisX->setMinorGridLineVisible(false);
             axisX->setLabelsFont(font);
             axisX->setRange(minX, maxX);
             axisX->setTitleFont(font);
+            axisX->setLinePenColor(Qt::black);
 
             axisY->setTickAnchor(0);
             axisY->setTickInterval(deltaY);
             axisY->setTickType(QValueAxis::TicksDynamic);
-            axisY->setMinorGridLineVisible(false);
-            axisY->setMinorTickCount(4);
-            axisY->setLinePenColor(Qt::black);
             axisY->setGridLineVisible(false);
             axisY->setMinorGridLineVisible(false);
+            axisY->setMinorTickCount(4);
             axisY->setLabelsFont(font);
             axisY->setRange(minY, maxY);
             axisY->setTitleFont(font);
+            axisY->setLinePenColor(Qt::black);
 
             axisTop->setTickAnchor(0);
             axisTop->setTickInterval(deltaX);
             axisTop->setTickType(QValueAxis::TicksDynamic);
             axisTop->setLabelsVisible(false);
             axisTop->setGridLineVisible(false);
+            axisTop->setMinorGridLineVisible(false);
             axisTop->setLabelsFont(font);
             axisTop->setRange(minX, maxX);
             axisTop->setTitleFont(font);

@@ -27,9 +27,10 @@
 using namespace Physica::Core;
 using namespace Physica::Gui;
 using ScalarType = float32;
+using RandomPoolType = RandomPool<std::mt19937>;
 /**
  * Reference:
- * [1] Jos Thijssen. Computational Physics[M].London: Cambridge university press, 2013:304-308
+ * [1] J. H. Thijssen. Computational Physics[M]. London: Cambridge University Press, 2013:304-308
  */
 class Ising {
     DenseMatrix<ScalarType> lattice;
@@ -80,6 +81,10 @@ public:
     [[nodiscard]] ScalarType getEnergy() const {
         return energy;
     }
+
+    [[nodiscard]] size_t getNumSite() const noexcept {
+        return lattice.getSize();
+    }
 private:
     ScalarType deltaDotSpin(size_t i, size_t j) const {
         const size_t order_1 = lattice.getRow() - 1;
@@ -92,37 +97,36 @@ private:
     }
 };
 
-int main(int argc, char** argv) {
-    std::mt19937::result_type seed;
-    RandomSeed::rdrand(seed);
-    std::mt19937 gen(seed);
+constexpr int NumPoint = 120;
+constexpr int NumSample = 5000;
 
-    const int count = 30;
-    Vector<ScalarType> t(count);
-    Vector<ScalarType> Cv(count);
-    {
-        Vector<ScalarType> buffer(500);
-        for (int i = 0; i < count; ++i) {
-            t[i] = 1 + i * 0.2;
-            Ising ising(20, 1, 1, t[i]);
-            ising.init(gen);
-            ising.step(2000, gen);
-            for (size_t i = 0; i < 500; ++i) {
-                ising.step(10, gen);
-                buffer[i] = ising.getEnergy();
-            }
-            auto e_mean = mean(buffer);
-            buffer = square(buffer - e_mean);
-            Cv[i] = mean(buffer) / square(t[i]);
+int main(int argc, char** argv) {
+    ThreadPool::numThreadRequired = 4;
+    const auto t = Vector<ScalarType>::linspace(1, 7, NumPoint);
+    Vector<ScalarType> Cv(NumPoint);
+    ThreadExecutor::parallel_for([&](size_t i) {
+        auto& gen = RandomPoolType::getInstance().getGen();
+        Ising ising(20, 1, 1, t[i]);
+        ising.init(gen);
+        ising.step(2000, gen);
+
+        ScalarType energy = 0, energy2 = 0;
+        for (size_t i = 0; i < NumSample; ++i) {
+            ising.step(10, gen);
+            toNextMean(energy, i, ising.getEnergy());
+            toNextMean(energy2, i, square(ising.getEnergy()));
         }
-    }
+        Cv[i] = (energy2 - square(energy)) / (square(t[i]) * ScalarType(ising.getNumSite()));
+    }, NumPoint, ThreadPool::numThreadRequired).wait();
+
     QApplication app(argc, argv);
-    Plot* plot = new Plot(1, 6.8, 0, 650, 2, 200);
-    plot->spline(t, Cv);
+    Plot* plot = new Plot(1, 7, 0, 2, 1, 1);
+    plot->getLegend().hide();
     plot->getAxisX()->setLabelFormat("%d");
     plot->getAxisY()->setLabelFormat("%d");
     plot->getAxisX()->setTitleText("T");
     plot->getAxisY()->setTitleText("C<sub>v</sub>");
+    plot->scatter(t, Cv).setMarkerSize(10);
     plot->show();
     return QApplication::exec();
 }

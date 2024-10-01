@@ -319,6 +319,7 @@ namespace Physica::Core {
             case ExprType::Sin: return 1;
             case ExprType::Cos: return 1;
             case ExprType::ArcCos: return 1;
+            case ExprType::Tanh: return 1;
             default: [[unlikely]]
                 throw std::invalid_argument("[Error]: Unrecognized type");
         }
@@ -396,7 +397,7 @@ namespace Physica::Core {
                         updateGrad(gradX, -grad / sqrt(GradType(1) - square(GradType(operandX))));
                         continue;
                     case ExprType::Tanh:
-                        updateGrad(gradX, grad - grad * square(GradType(operandX)));
+                        updateGrad(gradX, grad - grad * square(GradType(currentNode)));
                         continue;
                     default:;
                 }

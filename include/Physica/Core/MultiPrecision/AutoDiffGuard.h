@@ -42,6 +42,8 @@ namespace Physica::Core {
         [[nodiscard]] operator const ScalarType&() const noexcept { return node; }
         /* Operations */
         void swap(AutoDiffGuard& __restrict obj) noexcept { node.swap(obj.node); }
+        /* Getters */
+        [[nodiscard]] bool isValid() const noexcept { return node != nullptr; }
     };
 
     template<class ScalarType>
@@ -64,8 +66,9 @@ namespace Physica::Core {
 
     template<class ScalarType>
     AutoDiffGuard<ScalarType>::~AutoDiffGuard() {
-        const bool isValid = node != nullptr;
-        if (isValid)
+        if (isValid()) {
             TracerType::getInstance().forget_to(node);
+            node = nullptr;
+        }
     }
 }

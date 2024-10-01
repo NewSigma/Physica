@@ -63,7 +63,7 @@ void scf_solve(double dist, ScalarType& electronEnergy, ScalarType& potentialEne
 }
 /**
  * Reference:
- * [1] Jos Thijssen. Computational Physics[M].London: Cambridge university press, 2013:84
+ * [1] J. H. Thijssen. Computational Physics[M]. London: Cambridge University Press, 2013:84
  * [2] Larsen A, Poulsen R S. Applied Hartree-Fock methods. https://projekter.aau.dk/projekter/files/213481562/report.pdf
  * 
  * TODO: Add p-orbital may improve the result, but will lead to divergence, try to enhance the DIIS procedure

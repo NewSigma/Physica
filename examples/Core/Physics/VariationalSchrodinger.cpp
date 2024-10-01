@@ -376,7 +376,7 @@ private:
 };
 /**
  * Reference:
- * [1] Jos Thijssen. Computational Physics[M].London: Cambridge university press, 2013:29-51
+ * [1] J. H. Thijssen. Computational Physics[M]. London: Cambridge University Press, 2013:29-51
  */
 int main(int argc, char** argv) {
     int exit_code = 0;

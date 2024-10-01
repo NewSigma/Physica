@@ -29,7 +29,7 @@
 namespace Physica::Core::Physics {
     /**
      * Reference:
-     * [1] Jos Thijssen. Computational Physics[M].London: Cambridge university press, 2013:43-88
+     * [1] J. H. Thijssen. Computational Physics[M]. London: Cambridge University Press, 2013:43-88
      * [2] Larsen A, Poulsen R S. Applied Hartree-Fock methods.
      * [3] Kudin K N, Scuseria G E, Cances E. A black-box self-consistent field convergence algorithm: One step closer[J]. Journal of Chemical Physics, 2002, 116(19):8255-8261.
      */

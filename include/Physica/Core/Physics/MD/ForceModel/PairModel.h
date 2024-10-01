@@ -28,7 +28,7 @@ namespace Physica::Core {
      * Member variable pot_shift is referenced from [1]
      * 
      * References:
-     * [1] Jos Thijssen. Computational Physics[M].London: Cambridge university press, 2013:205
+     * [1] J. H. Thijssen. Computational Physics[M]. London: Cambridge University Press, 2013:205
      */
     template<class Derived>
     class PairModel : public CRTPBase<PairModel<Derived>> {

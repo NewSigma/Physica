@@ -99,7 +99,7 @@ int main() {
      * Comes from Check 1 in [1]
      * 
      * Reference:
-     * [1] Jos Thijssen. Computational Physics[M].London: Cambridge university press, 2013:20
+     * [1] J. H. Thijssen. Computational Physics[M]. London: Cambridge University Press, 2013:20
      */
     {
         ODESolver<T, 2> solver(0, 2, stepSize, {0});

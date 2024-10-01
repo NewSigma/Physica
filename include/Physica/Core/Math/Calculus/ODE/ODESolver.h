@@ -105,7 +105,7 @@ namespace Physica::Core {
      * Value of y(h)
      * 
      * Reference:
-     * [1] Jos Thijssen. Computational Physics[M].London: Cambridge university press, 2013:572
+     * [1] J. H. Thijssen. Computational Physics[M]. London: Cambridge University Press, 2013:572
      */
     template<class T, size_t Dim>
     template<class Function>
@@ -133,7 +133,7 @@ namespace Physica::Core {
      * Tangent value at x[0]
      * 
      * Reference:
-     * [1] Jos Thijssen. Computational Physics[M].London: Cambridge university press, 2013:573
+     * [1] J. H. Thijssen. Computational Physics[M]. London: Cambridge University Press, 2013:573
      */
     template<class T, size_t Dim>
     template<class Function>

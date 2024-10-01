@@ -392,11 +392,13 @@ namespace Physica::Core {
      */
     template<class ScalarType, unsigned int Order>
     void DiffTracer<ScalarType, Order>::reserve(size_t size) {
-        const auto& segment = traceList.front();
-        const bool isSpaceEnough = segment.getLength() + size <= segment.getCapacity();
-        if (isSpaceEnough)
-            return;
-        
+        if (!traceList.empty()) {
+            const auto& segment = traceList.front();
+            const bool isSpaceEnough = segment.getLength() + size <= segment.getCapacity();
+            if (isSpaceEnough)
+                return;
+        }
+
         const bool isSmallSize = size < SegmentType::DefaultSize;
         if (isSmallSize)
             pushSegment();

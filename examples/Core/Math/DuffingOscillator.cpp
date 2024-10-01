@@ -30,7 +30,7 @@ using T = float64;
 using ODE = ODESolver<T, 2>;
 /**
  * Reference:
- * [1] Jos Thijssen. Computational Physics[M].London: Cambridge university press, 2013:11-12
+ * [1] J. H. Thijssen. Computational Physics[M]. London: Cambridge University Press, 2013:11-12
  */
 int main(int argc, char** argv) {
     ODE solver(0, 200, 0.01, {0.5, 0});

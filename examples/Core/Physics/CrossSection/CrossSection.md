@@ -11,4 +11,4 @@ $$\frac{d^2 U(h)}{d h^2} = [\frac{2m \rho^2}{\hbar^2} (V(r) - E) + \frac{l(l + 1
 Here $\frac{2m \rho^2}{\hbar^2}$ is the source of $6.12 meV^{-1} \rho^{-2}$ provided in [1].
 
 Reference:
-[1] Jos Thijssen. Computational Physics[M].London: Cambridge university press, 2013:21
+[1] J. H. Thijssen. Computational Physics[M]. London: Cambridge University Press, 2013:21

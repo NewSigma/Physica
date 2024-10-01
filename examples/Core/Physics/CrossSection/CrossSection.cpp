@@ -138,7 +138,7 @@ void plotPWBaseWave(double energy, double radialNum) {
 }
 /**
  * Reference:
- * [1] Jos Thijssen. Computational Physics[M].London: Cambridge university press, 2013:14-28
+ * [1] J. H. Thijssen. Computational Physics[M]. London: Cambridge University Press, 2013:14-28
  * [2] J.P. Toennies, W. Welz, and G. Wolf,'Molecular beam scattering studies of orbiting resonances
  * and the determination of Van der Waals potentials for H-He, Ar, Kr, and Xe and for H2-Ar, Kr and Xe,'
  * J.Chem.Phys., 71(1979), 614-42

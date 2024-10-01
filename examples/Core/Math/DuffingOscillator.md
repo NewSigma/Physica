@@ -16,4 +16,4 @@ Duffing振子示例展示如何使用Physica的ODESolver求解常微分方程
 
 ## Reference
 
-[1] Jos Thijssen. Computational Physics[M]. London: Cambridge university press, 2013:11-12
+[1] J. H. Thijssen. Computational Physics[M]. London: Cambridge University Press, 2013:11-12

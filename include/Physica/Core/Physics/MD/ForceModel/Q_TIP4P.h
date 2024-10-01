@@ -28,7 +28,7 @@ namespace Physica::Core {
     /**
      * Reference:
      * [1] J. Chem. Phys. 131, 024501 (2009); https://doi.org/10.1063/1.3167790
-     * [2] Jos Thijssen. Computational Physics[M]. London: Cambridge university press, 2013:205
+     * [2] J. H. Thijssen. Computational Physics[M]. London: Cambridge University Press, 2013:205
      */
     template<class ScalarType, class EwaldType>
     class Q_TIP4P : public AABModel<ScalarType> {

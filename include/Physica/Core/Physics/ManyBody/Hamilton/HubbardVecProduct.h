@@ -25,6 +25,8 @@ namespace Physica::Core {
         using MatrixType = HubbardMatrix<T, ReprType>;
         using This = MatrixVectorProduct<MatrixType, VectorType>;
         using Base = RValueVector<This>;
+        using FFTType = typename MatrixType::FFTType;
+        using StateType = typename ReprType::StateType;
         constexpr static unsigned int Dim = MatrixType::Dim;
         constexpr static unsigned int NumSite = MatrixType::NumSite;
         constexpr static unsigned int SiteDOF = MatrixType::SiteDOF;
@@ -54,6 +56,13 @@ namespace Physica::Core {
         [[nodiscard]] __host__ __device__ size_t getLength() const { return mat.getRow(); }
         [[nodiscard]] const MatrixType& getLHS() const noexcept { return mat; }
         [[nodiscard]] const VectorType& getRHS() const noexcept { return vec; }
+    private:
+        template<class OtherDerived> void sumHopping(OtherDerived& target, FFTType& fft, ScalarType factor, StateType psi) const;
+        template<class OtherDerived> void dotImpl(OtherDerived& target, ScalarType factor, size_t index) const;
+        /* Getters */
+        [[nodiscard]] ScalarType getHoppingT() const noexcept { return mat.getHoppingT(); }
+        [[nodiscard]] ScalarType getRepelU() const noexcept { return mat.getRepelU(); }
+        [[nodiscard]] const ReprType& getRepr() const noexcept { return mat.getRepr(); }
     };
 
     template<class T, class ReprType, class VectorType>
@@ -84,7 +93,7 @@ namespace Physica::Core {
         else {
             const size_t length = getLength();
             for (size_t i = 0; i < length; ++i)
-                mat.dotImpl(target, vec.calc(i), i);
+                dotImpl<OtherDerived>(target, vec.calc(i), i);
         }
     }
 
@@ -93,7 +102,7 @@ namespace Physica::Core {
     MatrixVectorProduct<HubbardMatrix<T, ReprType>, VectorType>::calc(size_t index) const {
         static_assert(!IsTransInvariant && "[Error]: Not implemented");
         const ScalarType hop = -mat.getHoppingT();
-        const auto state = mat.repr[index];
+        const auto state = getRepr()[index];
         ScalarType result = 0;
         int numRepel = 0;
         for (int site = 0; site < int(NumSite); ++site) {
@@ -104,13 +113,13 @@ namespace Physica::Core {
                 const bool downOccupy2 = state.isDownOccupy(site1);
                 if (upOccupy1 != upOccupy2) {
                     const ScalarType hopUp = hop * RealType(state.hopUpSign(site, site1));
-                    const size_t index1 = mat.repr[upOccupy1 ? state.hopUp(site, site1) : state.hopUp(site1, site)];
+                    const size_t index1 = getRepr()[upOccupy1 ? state.hopUp(site, site1) : state.hopUp(site1, site)];
                     result += vec.calc(index1) * (upOccupy1 ? hopUp : -hopUp);
                 }
 
                 if (downOccupy1 != downOccupy2) {
                     const ScalarType hopDown = hop * RealType(state.hopDownSign(site, site1));
-                    const size_t index1 = mat.repr[downOccupy1 ? state.hopDown(site, site1) : state.hopDown(site1, site)];
+                    const size_t index1 = getRepr()[downOccupy1 ? state.hopDown(site, site1) : state.hopDown(site1, site)];
                     result += vec.calc(index1) * (downOccupy1 ? hopDown : -hopDown);
                 }
             }, site);
@@ -118,6 +127,74 @@ namespace Physica::Core {
         }
         result += vec.calc(index) * (mat.getRepelU() * RealType(numRepel));
         return result;
+    }
+
+    template<class T, class ReprType, class VectorType>
+    template<class OtherDerived>
+    void MatrixVectorProduct<HubbardMatrix<T, ReprType>, VectorType>::sumHopping(OtherDerived& target, FFTType& fft, ScalarType factor, StateType psi) const {
+        if (psi.isVacuum())
+            return;
+        const auto reducedPsi = psi.transReduce();
+        auto& rSpace = fft.getRSpace();
+        int sign = 1;
+        for (int i = 0; i < int(NumSite); ++i) {
+            rSpace[i] = RealType(reducedPsi == psi ? sign : 0);
+            sign *= psi.lShiftSign();
+            psi <<= 1;
+        }
+        FFTType::transform(mat.planProvider, fft);
+        const auto& repr = getRepr();
+        const size_t index = repr[reducedPsi];
+        target[index] += fft.getKSpace()[repr.getReducedK()] * sqrt(RealType(repr.getPeriods()[index])) * factor;
+    }
+
+    template<class T, class ReprType, class VectorType>
+    template<class OtherDerived>
+    void MatrixVectorProduct<HubbardMatrix<T, ReprType>, VectorType>::dotImpl(OtherDerived& target, ScalarType factor, size_t index) const {
+        const auto state = getRepr()[index];
+        int numRepel = 0;
+        if constexpr (IsTransInvariant) {
+            static_assert(Dim == 1 && "[Error]: Not implemented");
+            const RealType normalizer = sqrt(RealType(getRepr().getPeriods()[index])) / RealType(NumSite);
+            const ScalarType hop = -factor * normalizer * getHoppingT();
+
+            auto fft = FFTType::makeEmptyFFT(NumSite);
+            for (int site = 0; site < int(NumSite); ++site) {
+                const auto site1 = (site + 1) % NumSite;
+                const ScalarType hopUp = hop * RealType(state.hopUpSign(site, site1));
+                const ScalarType hopDown = hop * RealType(state.hopDownSign(site, site1));
+                sumHopping(target, fft, hopUp, state.hopUp(site, site1));
+                sumHopping(target, fft, -hopUp, state.hopUp(site1, site));
+                sumHopping(target, fft, hopDown, state.hopDown(site, site1));
+                sumHopping(target, fft, -hopDown, state.hopDown(site1, site));
+                numRepel += state.isUpOccupy(site) && state.isDownOccupy(site);
+            }
+        }
+        else {
+            const ScalarType hop = -factor * getHoppingT();
+            for (int site = 0; site < int(NumSite); ++site) {
+                const bool upOccupy1 = state.isUpOccupy(site);
+                const bool downOccupy1 = state.isDownOccupy(site);
+                mat.forNeighSites([this, &target, &state, hop, upOccupy1, downOccupy1](int site, int site1) {
+                    const auto& repr = getRepr();
+                    const bool upOccupy2 = state.isUpOccupy(site1);
+                    const bool downOccupy2 = state.isDownOccupy(site1);
+                    if (upOccupy1 != upOccupy2) {
+                        const ScalarType hopUp = hop * RealType(state.hopUpSign(site, site1));
+                        const size_t index = repr[upOccupy1 ? state.hopUp(site, site1) : state.hopUp(site1, site)];
+                        target[index] += upOccupy1 ? hopUp : -hopUp;
+                    }
+
+                    if (downOccupy1 != downOccupy2) {
+                        const ScalarType hopDown = hop * RealType(state.hopDownSign(site, site1));
+                        const size_t index = repr[downOccupy1 ? state.hopDown(site, site1) : state.hopDown(site1, site)];
+                        target[index] += downOccupy1 ? hopDown : -hopDown;
+                    }
+                }, site);
+                numRepel += upOccupy1 && downOccupy1;
+            }
+        }
+        target[index] += factor * (getRepelU() * RealType(numRepel));
     }
 }
 

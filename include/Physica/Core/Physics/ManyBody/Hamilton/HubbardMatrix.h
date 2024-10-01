@@ -40,10 +40,11 @@ namespace Physica::Core {
         using This = HubbardMatrix<ScalarType, ReprType>;
         using Base = HamiltonMatrix<This>;
         using ModelBase = Hubbard<RealType, ReprType::Dim>;
-        using FFTType = FFT<RealType, 1>;
+        
         using StateType = typename ReprType::StateType;
         using typename ModelBase::IndexType;
     public:
+        using FFTType = FFT<RealType, 1>;
         constexpr static unsigned int Dim = ReprType::Dim;
         constexpr static unsigned int NumSite = StateType::NumSite;
         constexpr static unsigned int SiteDOF = StateType::SiteDOF;
@@ -78,9 +79,6 @@ namespace Physica::Core {
         inline RealType repelElem(StateType psi) const;
         RealType hoppingElem(StateType rowPsi, StateType colPsi) const;
     private:
-        template<class TargetType> void sumHopping(TargetType& target, FFTType& fft, ScalarType factor, StateType psi) const;
-        template<class TargetType> void dotImpl(TargetType& target, ScalarType factor, size_t index) const;
-
         template<class, class> friend class MatrixVectorProduct;
     };
 }
