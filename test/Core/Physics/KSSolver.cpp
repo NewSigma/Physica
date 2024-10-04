@@ -24,7 +24,7 @@
 
 using namespace Physica::Core;
 using ScalarType = float64;
-using ComplexType = ComplexScalar<ScalarType>;
+using ComplexType = Complex<ScalarType>;
 
 namespace Physica {
     class Test {

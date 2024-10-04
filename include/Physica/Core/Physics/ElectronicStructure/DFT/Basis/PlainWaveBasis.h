@@ -18,13 +18,13 @@
  */
 #pragma once
 
-#include "Physica/Core/MultiPrecision/ComplexScalar.h"
+#include "Physica/Core/MultiPrecision/Complex.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Grid/PeriodIndex3D.h"
 
 namespace Physica::Core {
     template<class ScalarType>
     class PlainWaveBasis {
-        using ComplexType = ComplexScalar<ScalarType>;
+        using ComplexType = Complex<ScalarType>;
         using GridType = RSpaceGrid<ComplexType>;
         using LatticeMatrix = typename PeriodicCell<ScalarType, 3>::LatticeMatrix;
         using Index3D = typename GridBase::Index3D;

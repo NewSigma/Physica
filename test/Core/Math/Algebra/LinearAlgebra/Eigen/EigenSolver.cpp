@@ -69,7 +69,7 @@ bool reconstructTest(const MatrixType& mat, double precision) {
 
 int main() {
     using RealType = float64;
-    using ComplexType = ComplexScalar<RealType>;
+    using ComplexType = Complex<RealType>;
     {
         using MatrixType = DenseMatrix<RealType, MatrixOption::Column | MatrixOption::Vector, 3, 3>;
         const MatrixType mat1{{-0.590316, -2.19514, -2.37463},

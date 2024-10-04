@@ -52,7 +52,7 @@ int main() {
             exit(EXIT_FAILURE);
     }
     /* Row complex float matrix */ {
-        using T = ComplexScalar<float32>;
+        using T = Complex<float32>;
         using MatrixType = DenseMatrix<T, MatrixOption::Row | MatrixOption::Vector>;
         const auto data = MatrixType::random_uniform(16, 12, gen);
 

@@ -27,7 +27,7 @@ namespace Physica::Core {
     class PhononSolver {
         using This = PhononSolver<ScalarType>;
     public:
-        using ComplexType = ComplexScalar<ScalarType>;
+        using ComplexType = Complex<ScalarType>;
         using Vector3D = Vector<ScalarType, 3>;
         using FFT3D = FFT<ScalarType, 3>;
         using MDCellType = MDCell<ScalarType>;

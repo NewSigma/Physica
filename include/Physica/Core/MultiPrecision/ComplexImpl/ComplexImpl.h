@@ -20,18 +20,18 @@
 
 namespace Physica::Core {
     template<class T>
-    ComplexScalar<T>::ComplexScalar(double d) : ComplexScalar(T(d)) {}
+    Complex<T>::Complex(double d) : Complex(T(d)) {}
 
     template<class T>
-    ComplexScalar<T>::ComplexScalar(T real_)
+    Complex<T>::Complex(T real_)
             : real(real_), imag(0) {}
 
     template<class T>
-    ComplexScalar<T>::ComplexScalar(T real_, T imag_)
+    Complex<T>::Complex(T real_, T imag_)
             : real(real_), imag(imag_) {}
 
     template<class T>
-    ComplexScalar<T>::ComplexScalar(std::initializer_list<T> list) {
+    Complex<T>::Complex(std::initializer_list<T> list) {
         assert(list.size() == 2);
         auto ite = list.begin();
         real = *ite;
@@ -40,47 +40,47 @@ namespace Physica::Core {
     }
 
     template<class T>
-    ComplexScalar<T>& ComplexScalar<T>::operator=(ComplexScalar c) {
+    Complex<T>& Complex<T>::operator=(Complex c) {
         swap(c);
         return *this;
     }
 
     template<class T>
-    bool ComplexScalar<T>::operator==(const ComplexScalar<T>& c) const {
+    bool Complex<T>::operator==(const Complex<T>& c) const {
         return real == c.real && imag == c.imag;
     }
 
     template<class T>
-    inline typename ComplexScalar<T>::PacketType ComplexScalar<T>::packet() const {
+    inline typename Complex<T>::PacketType Complex<T>::packet() const {
         PacketType packet{};
         packet.load(&real);
         return packet;
     }
 
     template<class T>
-    inline void ComplexScalar<T>::writePacket(const PacketType packet) {
+    inline void Complex<T>::writePacket(const PacketType packet) {
         packet.store(&real);
     }
 
     template<class T>
-    void ComplexScalar<T>::swap(ComplexScalar& __restrict c) noexcept {
+    void Complex<T>::swap(Complex& __restrict c) noexcept {
         assert(this != &c && "[Error]: Self swap is likely a bug");
         real.swap(c.real);
         imag.swap(c.imag);
     }
 
     template<class T>
-    T ComplexScalar<T>::squaredNorm() const {
+    T Complex<T>::squaredNorm() const {
         return square(real) + square(imag);
     }
 
     template<class T>
-    inline T ComplexScalar<T>::norm() const {
+    inline T Complex<T>::norm() const {
         return sqrt(squaredNorm());
     }
 
     template<class T>
-    T ComplexScalar<T>::phase() const {
+    T Complex<T>::phase() const {
         auto result = arctan(imag / real);
         //Result of arctan is defined on [-Pi / 2, Pi / 2], Result of arg is defined on [-Pi, Pi].
         if(real.isNegative() && !imag.isZero())
@@ -89,38 +89,38 @@ namespace Physica::Core {
     }
 
     template<class T>
-    ComplexScalar<T> ComplexScalar<T>::unit() const {
+    Complex<T> Complex<T>::unit() const {
         const T temp = norm();
         if (temp.isZero())
-            return ComplexScalar(1);
+            return Complex(1);
         return *this * reciprocal(temp);
     }
 
     template<class T>
-    inline ComplexScalar<T> ComplexScalar<T>::fromPhase(T phase) {
+    inline Complex<T> Complex<T>::fromPhase(T phase) {
         T s, c;
         sincos(phase, s, c);
-        return ComplexScalar(c, s);
+        return Complex(c, s);
     }
 
     template<class T>
     template<class RandomGenerator>
-    ComplexScalar<T> ComplexScalar<T>::random_uniform(RandomGenerator& gen) {
+    Complex<T> Complex<T>::random_uniform(RandomGenerator& gen) {
         T real = T::random_uniform(gen);
         T imag = T::random_uniform(gen);
-        return ComplexScalar(std::move(real), std::move(imag));
+        return Complex(std::move(real), std::move(imag));
     }
 
     template<class T>
     template<class RandomGenerator>
-    ComplexScalar<T> ComplexScalar<T>::random_normal(RandomGenerator& gen) {
+    Complex<T> Complex<T>::random_normal(RandomGenerator& gen) {
         T real = T::random_normal(gen);
         T imag = T::random_normal(gen);
-        return ComplexScalar(std::move(real), std::move(imag));
+        return Complex(std::move(real), std::move(imag));
     }
 #ifdef PHYSICA_HDF5
     template<class T>
-    const H5::DataType& ComplexScalar<T>::getH5DataType() {
+    const H5::DataType& Complex<T>::getH5DataType() {
         static const auto instance = std::unique_ptr<H5::DataType>([]() -> H5::DataType* {
             auto* result = new H5::DataType(H5T_COMPOUND, sizeof(This));
             const auto id = result->getId();
@@ -132,7 +132,7 @@ namespace Physica::Core {
     }
 #endif
     template<class T>
-    std::ostream& operator<<(std::ostream& os, const ComplexScalar<T>& c) {
+    std::ostream& operator<<(std::ostream& os, const Complex<T>& c) {
         const auto& imagine = c.getImag();
         return os << c.getReal()
                   << (imagine.isNegative() ? " - " : " + " )
@@ -140,17 +140,17 @@ namespace Physica::Core {
     }
 
     template<class T>
-    inline ComplexScalar<T> operator+(const ComplexScalar<T>& c1, const ComplexScalar<T>& c2) {
-        return ComplexScalar<T>(c1.getReal() + c2.getReal(), c1.getImag() + c2.getImag());
+    inline Complex<T> operator+(const Complex<T>& c1, const Complex<T>& c2) {
+        return Complex<T>(c1.getReal() + c2.getReal(), c1.getImag() + c2.getImag());
     }
 
     template<class T>
-    inline ComplexScalar<T> operator-(const ComplexScalar<T>& c1, const ComplexScalar<T>& c2) {
-        return ComplexScalar<T>(c1.getReal() - c2.getReal(), c1.getImag() - c2.getImag());
+    inline Complex<T> operator-(const Complex<T>& c1, const Complex<T>& c2) {
+        return Complex<T>(c1.getReal() - c2.getReal(), c1.getImag() - c2.getImag());
     }
 
     template<class T>
-    ComplexScalar<T> operator*(const ComplexScalar<T>& c1, const ComplexScalar<T>& c2) {
+    Complex<T> operator*(const Complex<T>& c1, const Complex<T>& c2) {
         const auto& real_1 = c1.getReal();
         const auto& imagine_1 = c1.getImag();
         const auto& real_2 = c2.getReal();
@@ -164,12 +164,12 @@ namespace Physica::Core {
          */
         const auto ac = real_1 * real_2;
         const auto bd = imagine_1 * imagine_2;
-        return ComplexScalar<T>(ac - bd
+        return Complex<T>(ac - bd
                 , (real_1 + imagine_1) * (real_2 + imagine_2) - ac - bd);
     }
 
     template<class T>
-    ComplexScalar<T> operator/(const ComplexScalar<T>& c1, const ComplexScalar<T>& c2) {
+    Complex<T> operator/(const Complex<T>& c1, const Complex<T>& c2) {
         const auto& real_1 = c1.getReal();
         const auto& imagine_1 = c1.getImag();
         const auto& real_2 = c2.getReal();
@@ -180,56 +180,56 @@ namespace Physica::Core {
         const auto ac = real_1 * real_2;
         const auto bd = imagine_1 * imagine_2;
         const auto divisor = square(real_2) + square(imagine_2);
-        return ComplexScalar<T>((ac + bd) / divisor
+        return Complex<T>((ac + bd) / divisor
                 , ((real_1 + imagine_1) * (real_2 - imagine_2) - ac + bd) / divisor);
     }
 
     template<class ScalarType, ScalarOption Option>
-    ComplexScalar<typename Internal::BinaryScalarOpReturnType<ScalarType, Scalar<Option>>::Type> operator+(
-            const ComplexScalar<ScalarType>& c,const Scalar<Option>& s) {
+    Complex<typename Internal::BinaryScalarOpReturnType<ScalarType, Scalar<Option>>::Type> operator+(
+            const Complex<ScalarType>& c,const Scalar<Option>& s) {
         return {c.getReal() + s, c.getImag()};
     }
 
     template<class ScalarType, ScalarOption Option>
-    ComplexScalar<typename Internal::BinaryScalarOpReturnType<ScalarType, Scalar<Option>>::Type> operator-(
-            const ComplexScalar<ScalarType>& c, const Scalar<Option>& s) {
+    Complex<typename Internal::BinaryScalarOpReturnType<ScalarType, Scalar<Option>>::Type> operator-(
+            const Complex<ScalarType>& c, const Scalar<Option>& s) {
         return {c.getReal() - s, c.getImag()};
     }
 
     template<class ScalarType, ScalarOption Option>
-    ComplexScalar<typename Internal::BinaryScalarOpReturnType<ScalarType, Scalar<Option>>::Type> operator*(
-            const ComplexScalar<ScalarType>& c, const Scalar<Option>& s) {
+    Complex<typename Internal::BinaryScalarOpReturnType<ScalarType, Scalar<Option>>::Type> operator*(
+            const Complex<ScalarType>& c, const Scalar<Option>& s) {
         return {c.getReal() * s, c.getImag() * s};
     }
 
     template<class ScalarType, ScalarOption Option>
-    ComplexScalar<typename Internal::BinaryScalarOpReturnType<ScalarType, Scalar<Option>>::Type> operator/(
-            const ComplexScalar<ScalarType>& c, const Scalar<Option>& s) {
+    Complex<typename Internal::BinaryScalarOpReturnType<ScalarType, Scalar<Option>>::Type> operator/(
+            const Complex<ScalarType>& c, const Scalar<Option>& s) {
         const auto rep = reciprocal(s);
         return {c.getReal() * rep, c.getImag() * rep};
     }
 
     template<class ScalarType, ScalarOption Option>
-    ComplexScalar<typename Internal::BinaryScalarOpReturnType<ScalarType, Scalar<Option>>::Type> operator+(
-            const Scalar<Option>& s, const ComplexScalar<ScalarType>& c) {
+    Complex<typename Internal::BinaryScalarOpReturnType<ScalarType, Scalar<Option>>::Type> operator+(
+            const Scalar<Option>& s, const Complex<ScalarType>& c) {
         return c + s;
     }
 
     template<class ScalarType, ScalarOption Option>
-    ComplexScalar<typename Internal::BinaryScalarOpReturnType<ScalarType, Scalar<Option>>::Type> operator-(
-            const Scalar<Option>& s, const ComplexScalar<ScalarType>& c) {
+    Complex<typename Internal::BinaryScalarOpReturnType<ScalarType, Scalar<Option>>::Type> operator-(
+            const Scalar<Option>& s, const Complex<ScalarType>& c) {
         return {s - c.getReal(), c.getImag()};
     }
 
     template<class ScalarType, ScalarOption Option>
-    ComplexScalar<typename Internal::BinaryScalarOpReturnType<ScalarType, Scalar<Option>>::Type> operator*(
-            const Scalar<Option>& s, const ComplexScalar<ScalarType>& c) {
+    Complex<typename Internal::BinaryScalarOpReturnType<ScalarType, Scalar<Option>>::Type> operator*(
+            const Scalar<Option>& s, const Complex<ScalarType>& c) {
         return c * s;
     }
 
     template<class ScalarType, ScalarOption Option>
-    ComplexScalar<typename Internal::BinaryScalarOpReturnType<ScalarType, Scalar<Option>>::Type> operator/(
-            const Scalar<Option>& s, const ComplexScalar<ScalarType>& c) {
+    Complex<typename Internal::BinaryScalarOpReturnType<ScalarType, Scalar<Option>>::Type> operator/(
+            const Scalar<Option>& s, const Complex<ScalarType>& c) {
         const auto& real = c.getReal();
         const auto& imagine = c.getImag();
         const auto divisor = s * reciprocal(square(real) + square(imagine));
@@ -237,4 +237,4 @@ namespace Physica::Core {
     }
 }
 
-#include "CElementaryFunction.h"
+#include "ElemFunc.h"

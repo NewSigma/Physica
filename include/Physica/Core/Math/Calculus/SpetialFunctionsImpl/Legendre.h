@@ -68,7 +68,7 @@ namespace Physica::Core {
     }
 
     template<class ScalarType>
-    ComplexScalar<ScalarType> sphericalHarmomicY(unsigned int l,
+    Complex<ScalarType> sphericalHarmomicY(unsigned int l,
                                                 int m,
                                                 const ScalarBase<ScalarType>& theta,
                                                 const ScalarBase<ScalarType>& phi) {
@@ -80,7 +80,7 @@ namespace Physica::Core {
         const ScalarType factor = sqrt((ScalarType(2 * l + 1) * factorial1) / (ScalarType(pi_4) * factorial2));
         const ScalarType result_module = factor * legendreP(l, abs_m, cos(theta.getDerived()));
         const ScalarType m_phi = ScalarType(m) * phi.getDerived();
-        return ComplexScalar<ScalarType>(result_module * cos(m_phi), result_module * sin(m_phi));
+        return Complex<ScalarType>(result_module * cos(m_phi), result_module * sin(m_phi));
     }
 
     template<class Matrix>

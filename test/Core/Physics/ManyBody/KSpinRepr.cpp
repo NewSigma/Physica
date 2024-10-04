@@ -25,7 +25,7 @@
 
 using namespace Physica::Core;
 using RealType = float64;
-using ScalarType = ComplexScalar<RealType>;
+using ScalarType = Complex<RealType>;
 using VectorType = Vector<RealType>;
 using RandomPoolType = RandomPool<std::mt19937, 10000>;
 constexpr unsigned int NumSite = 6;

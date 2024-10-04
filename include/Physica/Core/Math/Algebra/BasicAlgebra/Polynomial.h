@@ -73,7 +73,7 @@ namespace Physica::Core {
      * [1] https://www.mathworks.com/help/matlab/ref/roots.html
      */
     template<class ScalarType, size_t Power>
-    Vector<ComplexScalar<ScalarType>, Power>
+    Vector<Complex<ScalarType>, Power>
     polyRoot(const Polynomial<ScalarType, Power>& poly) {
         using MatrixType = DenseMatrix<ScalarType, MatrixOption::Column | MatrixOption::Vector, Power, Power>;
 

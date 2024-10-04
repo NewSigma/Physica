@@ -49,7 +49,7 @@ void hdfTest() {
             exit(EXIT_FAILURE);
     }
     /* Complex */ {
-        using T = ComplexScalar<float64>;
+        using T = Complex<float64>;
         const auto data = Vector<T>::random_uniform(64, gen);
 
         TempFile tmp("/tmp/tmpXXXXXX");

@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include "Physica/Core/MultiPrecision/ComplexScalar.h"
+#include "Physica/Core/MultiPrecision/Complex.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/Vector.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/Givens.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h"
@@ -25,7 +25,7 @@ using namespace Physica::Core;
 
 int main() {
     using RealType = float64;
-    using ComplexType = ComplexScalar<RealType>;
+    using ComplexType = Complex<RealType>;
     {
         Vector<RealType, 2> v{2, 1};
         auto givens_vector = givens(v, 0, 1);

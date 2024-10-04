@@ -22,7 +22,7 @@
 
 using namespace Physica::Core;
 using ScalarType = float64;
-using ComplexType = ComplexScalar<ScalarType>;
+using ComplexType = Complex<ScalarType>;
 
 int main() {
     using MatrixType = DenseMatrix<ComplexType, MatrixOption::Row | MatrixOption::Vector>;

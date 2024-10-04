@@ -51,7 +51,7 @@ int main() {
             return 1;
     }
     /* Complex case */ {
-        using MatrixType = DenseMatrix<ComplexScalar<RealType>, MatrixOption::Column | MatrixOption::Vector, 3, 3>;
+        using MatrixType = DenseMatrix<Complex<RealType>, MatrixOption::Column | MatrixOption::Vector, 3, 3>;
         const MatrixType temp{{{2, 1}, {-3, 6}, {12, 7}}, {{-50, -9}, {2, 180}, {-9, -6}}, {{-7, 8}, {546, 0}, {0, -25}}};
         const MatrixType mat = temp + temp.hermite();
         if (!doTest(mat, 1E-12))

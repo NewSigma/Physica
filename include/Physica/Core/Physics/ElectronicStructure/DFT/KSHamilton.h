@@ -26,7 +26,7 @@ namespace Physica::Core {
     class KSHamilton {
         static_assert(!IsSpinPolarized, "[Error]: Not implemented");
     public:
-        using ComplexType = ComplexScalar<ScalarType>;
+        using ComplexType = Complex<ScalarType>;
         using GridType = RSpaceGrid<ComplexType>;
         using StrucFactorArray = Array<GridType>;
         using LatticeMatrix = typename PeriodicCell<ScalarType, 3>::LatticeMatrix;

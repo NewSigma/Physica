@@ -159,7 +159,7 @@ void testSphericalHarmomicY() {
 
     for (int i = 0; i < count; ++i) {
         auto result = sphericalHarmomicY(l[i], m[i], T(theta[i]), T(phi[i]));
-        if (!scalarNear(result, ComplexScalar<T>(T(result_real[i]), T(result_imag[i])), 1E-14))
+        if (!scalarNear(result, Complex<T>(T(result_real[i]), T(result_imag[i])), 1E-14))
             exit(EXIT_FAILURE);
     }
 }

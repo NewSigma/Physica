@@ -25,7 +25,7 @@ template<class MatrixType>
 bool eigenTest(const MatrixType& mat, double precision) {
     using ScalarType = typename MatrixType::ScalarType;
     using RealType = typename ScalarType::RealType;
-    using ComplexVector = Vector<ComplexScalar<RealType>, MatrixType::RowAtCompile>;
+    using ComplexVector = Vector<Complex<RealType>, MatrixType::RowAtCompile>;
     using EigenvectorMatrix = typename SymmEigenSolver<ScalarType>::EigenvectorMatrix;
 
     auto solver = SymmEigenSolver<ScalarType>(mat, true);

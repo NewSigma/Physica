@@ -19,7 +19,7 @@
 #pragma once
 
 #include "Physica/Core/MultiPrecision/Scalar.h"
-#include "Physica/Core/MultiPrecision/ComplexScalar.h"
+#include "Physica/Core/MultiPrecision/Complex.h"
 #include "Physica/Core/Math/NumberTheory/NumberTheory.h"
 
 namespace Physica::Core {
@@ -155,7 +155,7 @@ namespace Physica::Core {
     Scalar<Option> legendreP(unsigned int l, unsigned int m, const Scalar<Option>& x);
 
     template<class ScalarType>
-    ComplexScalar<ScalarType> sphericalHarmomicY(unsigned int l,
+    Complex<ScalarType> sphericalHarmomicY(unsigned int l,
                                                 int m,
                                                 const ScalarBase<ScalarType>& theta,
                                                 const ScalarBase<ScalarType>& phi);

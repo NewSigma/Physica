@@ -33,7 +33,7 @@ namespace Physica::Core {
         using This = RSpaceEwald<ScalarType, IsSmallCell>;
         using Base = PairModel<This>;
     public:
-        using ComplexType = ComplexScalar<ScalarType>;
+        using ComplexType = Complex<ScalarType>;
         using Base::Dim;
         using typename Base::PlainScalar;
         using typename Base::LatticeMatrix;

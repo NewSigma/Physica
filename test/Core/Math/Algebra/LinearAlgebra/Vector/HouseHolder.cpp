@@ -34,7 +34,7 @@ void emptyVectorTest() {
 }
 
 void emptyComplexVectorTest() {
-    using ComplexType = ComplexScalar<T>;
+    using ComplexType = Complex<T>;
     using ComplexVector = Vector<ComplexType, 4>;
     const ComplexVector x = Vector<T, 4>{0, 0, 1, 0};
     ComplexVector v(4);
@@ -92,7 +92,7 @@ int main() {
             return 1;
     }
     /* Complex test */ {
-        using ScalarType = ComplexScalar<T>;
+        using ScalarType = Complex<T>;
         using VectorType = Vector<ScalarType, 2>;
         using MatrixType = DenseMatrix<ScalarType, MatrixOption::Column | MatrixOption::Vector, 2, 2>;
 

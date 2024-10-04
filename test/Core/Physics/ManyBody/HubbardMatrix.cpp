@@ -78,7 +78,7 @@ void testKSpinMatrix() {
     constexpr unsigned int NumSite = 4;
     constexpr unsigned int NumParticle = NumSite / 2;
     using RealType = float64;
-    using ScalarType = ComplexScalar<RealType>;
+    using ScalarType = Complex<RealType>;
     using VectorType = Vector<ScalarType>;
     using MatrixType = DenseMatrix<ScalarType>;
     using ReprType = KSpinRepr<1, NumSite, true>;

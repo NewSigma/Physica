@@ -1,6 +1,6 @@
 ##############################################Libs################################################
 set(PYBIND11_FINDPYTHON ON)
-add_subdirectory(${CMAKE_SOURCE_DIR}/3rdparty/pybind11)
+add_subdirectory(${CMAKE_SOURCE_DIR}/3rdparty/pybind11 pybind11 EXCLUDE_FROM_ALL)
 
 find_package(LLVM REQUIRED CONFIG)
 find_package(Clang REQUIRED CONFIG)

@@ -39,7 +39,7 @@ namespace Physica::Core {
         using Vector3D = Vector<ScalarType, 3>;
     public:
         using RealType = typename ScalarType::RealType;
-        using ComplexType = ComplexScalar<RealType>;
+        using ComplexType = Complex<RealType>;
         using WorkingMatrix = typename HessenburgType::WorkingMatrix;
     private:
         WorkingMatrix matrixT;

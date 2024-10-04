@@ -40,7 +40,7 @@ namespace Physica::Core {
              RPMDIntegrator Integrator>
     class FreeModel {
         using PlainScalar = typename ScalarType::PlainScalar;
-        using ComplexType = ComplexScalar<ScalarType>;
+        using ComplexType = Complex<ScalarType>;
         using MDType = RPMD<ScalarType, Dim, NumReplica>;
         using MDCellType = typename MDType::MDCellType;
         using RingPolymerType = typename MDType::RingPolymerType;

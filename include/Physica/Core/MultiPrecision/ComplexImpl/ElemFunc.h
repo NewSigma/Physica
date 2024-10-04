@@ -20,58 +20,58 @@
 
 namespace Physica::Core {
     template<class ScalarType>
-    ScalarType abs(const ComplexScalar<ScalarType>& c);
+    ScalarType abs(const Complex<ScalarType>& c);
 
     template<class ScalarType>
-    ComplexScalar<ScalarType> square(const ComplexScalar<ScalarType>& c);
+    Complex<ScalarType> square(const Complex<ScalarType>& c);
 
     template<class ScalarType>
-    inline ComplexScalar<ScalarType> reciprocal(const ComplexScalar<ScalarType>& c);
+    inline Complex<ScalarType> reciprocal(const Complex<ScalarType>& c);
 
     template<class ScalarType>
-    ComplexScalar<ScalarType> sqrt(const ComplexScalar<ScalarType>& c);
+    Complex<ScalarType> sqrt(const Complex<ScalarType>& c);
 
     template<class ScalarType>
-    ComplexScalar<ScalarType> ln(const ComplexScalar<ScalarType>& c);
+    Complex<ScalarType> ln(const Complex<ScalarType>& c);
 
     template<class ScalarType>
-    ComplexScalar<ScalarType> exp(const ComplexScalar<ScalarType>& c);
+    Complex<ScalarType> exp(const Complex<ScalarType>& c);
 
     template<class ScalarType>
-    ComplexScalar<ScalarType> cos(const ComplexScalar<ScalarType>& c);
+    Complex<ScalarType> cos(const Complex<ScalarType>& c);
 
     template<class ScalarType>
-    ComplexScalar<ScalarType> sin(const ComplexScalar<ScalarType>& c);
+    Complex<ScalarType> sin(const Complex<ScalarType>& c);
 
     template<class ScalarType>
-    ComplexScalar<ScalarType> tan(const ComplexScalar<ScalarType>& c);
+    Complex<ScalarType> tan(const Complex<ScalarType>& c);
 
     template<class ScalarType>
-    ComplexScalar<ScalarType> sec(const ComplexScalar<ScalarType>& c);
+    Complex<ScalarType> sec(const Complex<ScalarType>& c);
 
     template<class ScalarType>
-    ComplexScalar<ScalarType> csc(const ComplexScalar<ScalarType>& c);
+    Complex<ScalarType> csc(const Complex<ScalarType>& c);
 
     template<class ScalarType>
-    ComplexScalar<ScalarType> cot(const ComplexScalar<ScalarType>& c);
+    Complex<ScalarType> cot(const Complex<ScalarType>& c);
 
     template<class ScalarType>
-    ComplexScalar<ScalarType> cosh(const ComplexScalar<ScalarType>& c);
+    Complex<ScalarType> cosh(const Complex<ScalarType>& c);
 
     template<class ScalarType>
-    ComplexScalar<ScalarType> sinh(const ComplexScalar<ScalarType>& c);
+    Complex<ScalarType> sinh(const Complex<ScalarType>& c);
 
     template<class ScalarType>
-    ComplexScalar<ScalarType> tanh(const ComplexScalar<ScalarType>& c);
+    Complex<ScalarType> tanh(const Complex<ScalarType>& c);
 
     template<class ScalarType>
-    ComplexScalar<ScalarType> sech(const ComplexScalar<ScalarType>& c);
+    Complex<ScalarType> sech(const Complex<ScalarType>& c);
 
     template<class ScalarType>
-    ComplexScalar<ScalarType> csch(const ComplexScalar<ScalarType>& c);
+    Complex<ScalarType> csch(const Complex<ScalarType>& c);
 
     template<class ScalarType>
-    ComplexScalar<ScalarType> coth(const ComplexScalar<ScalarType>& c);
+    Complex<ScalarType> coth(const Complex<ScalarType>& c);
 }
 
-#include "FunctionImpl/CElementaryImpl.h"
+#include "ElemFuncImpl.h"

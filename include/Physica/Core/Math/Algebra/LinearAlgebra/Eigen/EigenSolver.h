@@ -19,7 +19,7 @@
 #pragma once
 
 #include <Physica/Core/Math/Algebra/LinearAlgebra/Matrix/MatrixDecomposition/Schur.h>
-#include <Physica/Core/MultiPrecision/ComplexScalar.h>
+#include <Physica/Core/MultiPrecision/Complex.h>
 
 namespace Physica::Core {
     /**
@@ -36,7 +36,7 @@ namespace Physica::Core {
         constexpr static bool isComplex = ScalarType::isComplex;
     public:
         using RealType = typename ScalarType::RealType;
-        using ComplexType = ComplexScalar<RealType>;
+        using ComplexType = Complex<RealType>;
         using EigenvalueVector = Vector<ComplexType, Order>;
         using EigenvectorMatrix = DenseMatrix<ComplexType, MatrixOption::Column | MatrixOption::Vector, Order, Order>;
         using RawEigenvectorType = DenseMatrix<ScalarType, MatrixOption::Column | MatrixOption::Vector, Order, Order>;
@@ -284,8 +284,8 @@ namespace Physica::Core {
                     z = max * sqrt(abs(square(p0) + t0 * t1));
                 }
                 const ScalarType real = p + matrixT(i + 1, i + 1);
-                eigenvalues[i] = ComplexScalar<ScalarType>(real, z);
-                eigenvalues[i + 1] = ComplexScalar<ScalarType>(real, -z);
+                eigenvalues[i] = Complex<ScalarType>(real, z);
+                eigenvalues[i + 1] = Complex<ScalarType>(real, -z);
                 i += 2;
             }
         }
@@ -328,8 +328,8 @@ namespace Physica::Core {
                     col2[i - 1] = (eigenvalues[i].getReal() - matrixT(i, i)) * temp;
                 }
                 else {
-                    ComplexScalar<ScalarType> c = ComplexScalar<ScalarType>(ScalarType(0), -matrixT(i - 1, i)) /
-                                                  ComplexScalar<ScalarType>(matrixT(i - 1, i - 1) - eigenvalues[i].getReal(), eigenvalues[i].getImag());
+                    Complex<ScalarType> c = Complex<ScalarType>(ScalarType(0), -matrixT(i - 1, i)) /
+                                                  Complex<ScalarType>(matrixT(i - 1, i - 1) - eigenvalues[i].getReal(), eigenvalues[i].getImag());
                     col1[i - 1] = c.getReal();
                     col2[i - 1] = c.getImag();
                 }
@@ -365,9 +365,9 @@ namespace Physica::Core {
                         
                         const ScalarType temp1 = matrixT(j, j) - eigenvalues[i].getReal();
 
-                        ComplexScalar<ScalarType> c = ComplexScalar<ScalarType>(x * dot21 - temp1 * dot11 + eigenvalues[i].getImag() * dot12,
+                        Complex<ScalarType> c = Complex<ScalarType>(x * dot21 - temp1 * dot11 + eigenvalues[i].getImag() * dot12,
                                                                                 x * dot22 - temp1 * dot12 - eigenvalues[i].getImag() * dot11)
-                                                      / ComplexScalar(vr,vi);
+                                                      / Complex(vr,vi);
                         matrixT(j - 1, i - 1) = c.getReal();
                         matrixT(j - 1, i) = c.getImag();
                         if (abs(x) > (abs(temp1) + abs(eigenvalues[i].getImag()))) {
@@ -376,7 +376,7 @@ namespace Physica::Core {
                             matrixT(j, i) = (-dot12 - temp2 * matrixT(j - 1, i) - eigenvalues[i].getImag() * matrixT(j - 1, i - 1)) / x;
                         }
                         else {
-                            c = ComplexScalar(-dot21 - y * matrixT(j - 1, i - 1), -dot22 - y * matrixT(j - 1, i)) / ComplexScalar(temp1, eigenvalues[i].getImag());
+                            c = Complex(-dot21 - y * matrixT(j - 1, i - 1), -dot22 - y * matrixT(j - 1, i)) / Complex(temp1, eigenvalues[i].getImag());
                             matrixT(j, i - 1) = c.getReal();
                             matrixT(j, i) = c.getImag();
                         }

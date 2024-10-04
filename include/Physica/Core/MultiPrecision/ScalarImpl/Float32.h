@@ -26,7 +26,7 @@ namespace Physica {
     public:
         using ScalarType = Core::float32;
         using RealType = ScalarType;
-        using ComplexType = Core::ComplexScalar<ScalarType>;
+        using ComplexType = Core::Complex<ScalarType>;
         using TrivialType = float;
         using PlainScalar = ScalarType;
         constexpr static Core::ScalarOption Option = Core::Float32;

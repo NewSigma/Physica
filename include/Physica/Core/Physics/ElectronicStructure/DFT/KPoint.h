@@ -25,7 +25,7 @@ namespace Physica::Core {
     class KPoint {
     public:
         constexpr static size_t NumSpin = isSpinPolarized ? 2 : 1;
-        using ComplexType = ComplexScalar<ScalarType>;
+        using ComplexType = Complex<ScalarType>;
         using Vector3D = Vector<ScalarType, 3>;
         using BandEnergy = Vector<ScalarType, NumBand>;
         using BandEnergyPair = std::pair<BandEnergy, BandEnergy>;

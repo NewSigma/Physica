@@ -19,7 +19,7 @@
 #pragma once
 
 #include <fftw3.h>
-#include <Physica/Core/MultiPrecision/ComplexScalar.h>
+#include <Physica/Core/MultiPrecision/Complex.h>
 #include <Physica/Core/Math/Algebra/LinearAlgebra/Vector/Vector.h>
 #include <Physica/Core/Math/Algebra/LinearAlgebra/Matrix/MatrixImpl/ContinuousMatrix.h>
 #include <Physica/Core/Math/Algebra/LinearAlgebra/Grid/GridImpl/LValueGrid.h>

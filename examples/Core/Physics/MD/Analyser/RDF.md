@@ -7,4 +7,3 @@
 ## Reference
 
 [1] J. Chem. Phys. 131, 024501 (2009); https://doi.org/10.1063/1.3167790
-

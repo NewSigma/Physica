@@ -24,7 +24,7 @@
 
 using namespace Physica::Core;
 using ScalarType = float64;
-using ComplexType = ComplexScalar<ScalarType>;
+using ComplexType = Complex<ScalarType>;
 using VectorType = Vector<ScalarType>;
 using Vector3D = Vector<ScalarType, 3>;
 using PhononType = FrozenPhonon<ScalarType>;

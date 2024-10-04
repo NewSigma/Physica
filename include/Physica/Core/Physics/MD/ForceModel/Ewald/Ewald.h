@@ -41,7 +41,7 @@ namespace Physica::Core {
         using typename Base::PlainScalar;
         using typename Base::LatticeMatrix;
         using typename Base::PositionMatrix;
-        using ComplexType = ComplexScalar<ScalarType>;
+        using ComplexType = Complex<ScalarType>;
         using CellListType = CellList<ScalarType>;
         using Index3D = typename CellListType::Index3D;
         using Vector3D = Vector<ScalarType, 3>;

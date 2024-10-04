@@ -20,108 +20,108 @@
 
 namespace Physica::Core {
     template<class ScalarType>
-    ScalarType abs(const ComplexScalar<ScalarType>& c) {
+    ScalarType abs(const Complex<ScalarType>& c) {
         return c.norm();
     }
 
     template<class ScalarType>
-    ComplexScalar<ScalarType> square(const ComplexScalar<ScalarType>& c) {
+    Complex<ScalarType> square(const Complex<ScalarType>& c) {
         const auto& real = c.getReal();
         const auto& imagine = c.getImag();
-        return ComplexScalar<ScalarType>(square(real) - square(imagine), (real * imagine) << 1);
+        return Complex<ScalarType>(square(real) - square(imagine), (real * imagine) << 1);
     }
 
     template<class ScalarType>
-    inline ComplexScalar<ScalarType> reciprocal(const ComplexScalar<ScalarType>& c) {
+    inline Complex<ScalarType> reciprocal(const Complex<ScalarType>& c) {
         const auto& real = c.getReal();
         const auto& imagine = c.getImag();
         const auto divisor = reciprocal(square(real) + square(imagine));
-        return ComplexScalar<ScalarType>(real * divisor, -imagine * divisor);
+        return Complex<ScalarType>(real * divisor, -imagine * divisor);
     }
 
     template<class ScalarType>
-    ComplexScalar<ScalarType> sqrt(const ComplexScalar<ScalarType>& c) {
+    Complex<ScalarType> sqrt(const Complex<ScalarType>& c) {
         using RealType = typename ScalarType::RealType;
         const RealType n = sqrt(c.norm());
         const RealType a = c.phase() * RealType(0.5);
-        return ComplexScalar<ScalarType>(n * cos(a), n * sin(a));
+        return Complex<ScalarType>(n * cos(a), n * sin(a));
     }
 
     template<class ScalarType>
-    ComplexScalar<ScalarType> ln(const ComplexScalar<ScalarType>& c) {
+    Complex<ScalarType> ln(const Complex<ScalarType>& c) {
         const auto n = c.norm();
         const auto a = c.phase();
-        return ComplexScalar<ScalarType>(ln(n), a);
+        return Complex<ScalarType>(ln(n), a);
     }
 
     template<class ScalarType>
-    ComplexScalar<ScalarType> exp(const ComplexScalar<ScalarType>& c) {
+    Complex<ScalarType> exp(const Complex<ScalarType>& c) {
         const auto& exp_real = exp(c.getReal());
         const auto& imagine = c.getImag();
-        return ComplexScalar<ScalarType>(exp_real * cos(imagine), exp_real * sin(imagine));
+        return Complex<ScalarType>(exp_real * cos(imagine), exp_real * sin(imagine));
     }
 
     template<class ScalarType>
-    ComplexScalar<ScalarType> cos(const ComplexScalar<ScalarType>& c) {
+    Complex<ScalarType> cos(const Complex<ScalarType>& c) {
         const auto& real = c.getReal();
         const auto& imagine = c.getImag();
-        return ComplexScalar<ScalarType>(cos(real) * cosh(imagine), - sin(real) * sinh(imagine));
+        return Complex<ScalarType>(cos(real) * cosh(imagine), - sin(real) * sinh(imagine));
     }
 
     template<class ScalarType>
-    ComplexScalar<ScalarType> sin(const ComplexScalar<ScalarType>& c) {
+    Complex<ScalarType> sin(const Complex<ScalarType>& c) {
         const auto& real = c.getReal();
         const auto& imagine = c.getImag();
-        return ComplexScalar<ScalarType>(sin(real) * cosh(imagine), cos(real) * sinh(imagine));
+        return Complex<ScalarType>(sin(real) * cosh(imagine), cos(real) * sinh(imagine));
     }
 
     template<class ScalarType>
-    ComplexScalar<ScalarType> tan(const ComplexScalar<ScalarType>& c) {
+    Complex<ScalarType> tan(const Complex<ScalarType>& c) {
         return sin(c) / cos(c);
     }
 
     template<class ScalarType>
-    ComplexScalar<ScalarType> sec(const ComplexScalar<ScalarType>& c) {
+    Complex<ScalarType> sec(const Complex<ScalarType>& c) {
         return reciprocal(cos(c));
     }
 
     template<class ScalarType>
-    ComplexScalar<ScalarType> csc(const ComplexScalar<ScalarType>& c) {
+    Complex<ScalarType> csc(const Complex<ScalarType>& c) {
         return reciprocal(sin(c));
     }
 
     template<class ScalarType>
-    ComplexScalar<ScalarType> cot(const ComplexScalar<ScalarType>& c) {
+    Complex<ScalarType> cot(const Complex<ScalarType>& c) {
         return reciprocal(tan(c));
     }
 
     template<class ScalarType>
-    ComplexScalar<ScalarType> cosh(const ComplexScalar<ScalarType>& c) {
+    Complex<ScalarType> cosh(const Complex<ScalarType>& c) {
         return (exp(c) + exp(-c)) >> 1;
     }
 
     template<class ScalarType>
-    ComplexScalar<ScalarType> sinh(const ComplexScalar<ScalarType>& c) {
+    Complex<ScalarType> sinh(const Complex<ScalarType>& c) {
         return (exp(c) - exp(-c)) >> 1;
     }
 
     template<class ScalarType>
-    ComplexScalar<ScalarType> tanh(const ComplexScalar<ScalarType>& c) {
+    Complex<ScalarType> tanh(const Complex<ScalarType>& c) {
         return sinh(c) / cosh(c);
     }
 
     template<class ScalarType>
-    ComplexScalar<ScalarType> sech(const ComplexScalar<ScalarType>& c) {
+    Complex<ScalarType> sech(const Complex<ScalarType>& c) {
         return reciprocal(cosh(c));
     }
 
     template<class ScalarType>
-    ComplexScalar<ScalarType> csch(const ComplexScalar<ScalarType>& c) {
+    Complex<ScalarType> csch(const Complex<ScalarType>& c) {
         return reciprocal(sinh(c));
     }
 
     template<class ScalarType>
-    ComplexScalar<ScalarType> coth(const ComplexScalar<ScalarType>& c) {
+    Complex<ScalarType> coth(const Complex<ScalarType>& c) {
         return reciprocal(tanh(c));
     }
 }

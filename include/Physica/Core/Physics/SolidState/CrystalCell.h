@@ -29,7 +29,7 @@ namespace Physica::Core {
     public:
         constexpr static unsigned int Dim = 3;
         using Base = PeriodicCell<ScalarType, Dim>;
-        using ComplexType = ComplexScalar<ScalarType>;
+        using ComplexType = Complex<ScalarType>;
         using AtomicArray = Array<uint16_t>;
         using typename Base::Type;
     private:

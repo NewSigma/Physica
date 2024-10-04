@@ -32,7 +32,7 @@ namespace Physica::Core {
     class KSSolver {
     public:
         constexpr static bool IsSpinPolarized = XCProvider::IsSpinPolarized;
-        using ComplexType = ComplexScalar<ScalarType>;
+        using ComplexType = Complex<ScalarType>;
         using Vector3D = Vector<ScalarType, 3>;
         using BandType = BandGrid<ScalarType, IsSpinPolarized>;
         using HamiltonType = KSHamilton<ScalarType, IsSpinPolarized>;

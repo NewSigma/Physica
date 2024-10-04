@@ -18,10 +18,9 @@
  */
 #include <iostream>
 #include <QApplication>
-#include "Physica/Core/Math/Optimization/GeneAlgorithm.h"
-#include "Physica/Core/Physics/ElectronicStructure/HF/RHFSolver.h"
-#include "Physica/Core/Physics/ElectronicStructure/HF/GTOnG.h"
-#include "Physica/Gui/Plot/Plot.h"
+#include <Physica/Core/Physics/ElectronicStructure/HF/RHFSolver.h>
+#include <Physica/Core/Physics/ElectronicStructure/HF/GTOnG.h>
+#include <Physica/Gui/Plot/Plot.h>
 
 using namespace Physica::Core;
 using namespace Physica::Core::Physics;
@@ -42,18 +41,13 @@ void scf_solve(double dist, ScalarType& electronEnergy, ScalarType& potentialEne
 
     ElectronConfig config = ElectronConfig(2);
     config.setOrbitState(0, ElectronConfig::DoubleOccupacy);
+
     const Vector<ScalarType, 8> alphas{13.00773, 1.962079, 0.444529, 0.1219492, 13.00773, 1.962079, 0.444529, 0.1219492};
     RHFSolver<GaussBase<ScalarType>> solver = RHFSolver<GaussBase<ScalarType>>(H2, config, alphas.getLength());
     auto& baseSet = solver.getBaseSet();
-    size_t i = 0;
-    baseSet[i++] = GaussBase<ScalarType>(pos_H1, abs(alphas[0]), 0, 0, 0);
-    baseSet[i++] = GaussBase<ScalarType>(pos_H1, abs(alphas[1]), 0, 0, 0);
-    baseSet[i++] = GaussBase<ScalarType>(pos_H1, abs(alphas[2]), 0, 0, 0);
-    baseSet[i++] = GaussBase<ScalarType>(pos_H1, abs(alphas[3]), 0, 0, 0);
-    baseSet[i++] = GaussBase<ScalarType>(pos_H2, abs(alphas[4]), 0, 0, 0);
-    baseSet[i++] = GaussBase<ScalarType>(pos_H2, abs(alphas[5]), 0, 0, 0);
-    baseSet[i++] = GaussBase<ScalarType>(pos_H2, abs(alphas[6]), 0, 0, 0);
-    baseSet[i++] = GaussBase<ScalarType>(pos_H2, abs(alphas[7]), 0, 0, 0);
+    for (size_t i = 0; i < alphas.getLength(); ++i)
+        baseSet[i] = GaussBase<ScalarType>(i < 4 ? pos_H1 : pos_H2, abs(alphas[i]), 0, 0, 0);
+
     if (!solver.compute(1E-5, 6)) {
         std::cerr << "[Error]: Cannot converge\n";
         exit(EXIT_FAILURE);
