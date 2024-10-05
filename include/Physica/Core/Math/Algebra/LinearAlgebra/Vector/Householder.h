@@ -18,7 +18,7 @@
  */
 #pragma once
 
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/MatrixImpl/LValueMatrix.h"
+#include <Physica/Core/Math/Algebra/LinearAlgebra/Matrix/MatrixImpl/LValueMatrix.h>
 
 namespace Physica::Core {
     /**
@@ -71,24 +71,22 @@ namespace Physica::Core {
 
     template<class MatrixType, class VectorType>
     void applyHouseholder(const RValueVector<VectorType>& householder, LValueMatrix<MatrixType>& mat) {
-        using std::swap;
         using ScalarType = typename MatrixType::ScalarType;
         using T = Vector<ScalarType, VectorType::SizeAtCompile>;
         T copy = householder;
         auto temp = ScalarType(1);
-        swap(temp, copy[0]);
+        temp.swap(copy[0]);
         const T temp1 = copy * temp;
         mat -= temp1 * (copy.hermite() * mat).compute();
     }
 
     template<class MatrixType, class VectorType>
     void applyHouseholder(LValueMatrix<MatrixType>& mat, const RValueVector<VectorType>& householder) {
-        using std::swap;
         using ScalarType = typename MatrixType::ScalarType;
         using T = Vector<ScalarType, VectorType::SizeAtCompile>;
         T copy = householder;
         ScalarType temp = ScalarType(1);
-        swap(temp, copy[0]);
+        temp.swap(copy[0]);
         using ProductType = decltype(mat * copy);
         using T1 = Vector<ScalarType, ProductType::SizeAtCompile>;
         mat -= T1(mat * copy) * (copy.hermite() * temp);

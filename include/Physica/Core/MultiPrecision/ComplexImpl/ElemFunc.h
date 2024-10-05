@@ -32,19 +32,19 @@ namespace Physica::Core {
     Complex<ScalarType> sqrt(const Complex<ScalarType>& c);
 
     template<class ScalarType>
-    Complex<ScalarType> ln(const Complex<ScalarType>& c);
+    inline Complex<ScalarType> ln(const Complex<ScalarType>& c);
 
     template<class ScalarType>
-    Complex<ScalarType> exp(const Complex<ScalarType>& c);
+    inline Complex<ScalarType> exp(const Complex<ScalarType>& c);
 
     template<class ScalarType>
-    Complex<ScalarType> cos(const Complex<ScalarType>& c);
+    inline Complex<ScalarType> cos(const Complex<ScalarType>& c);
 
     template<class ScalarType>
-    Complex<ScalarType> sin(const Complex<ScalarType>& c);
+    inline Complex<ScalarType> sin(const Complex<ScalarType>& c);
 
     template<class ScalarType>
-    Complex<ScalarType> tan(const Complex<ScalarType>& c);
+    inline Complex<ScalarType> tan(const Complex<ScalarType>& c);
 
     template<class ScalarType>
     Complex<ScalarType> sec(const Complex<ScalarType>& c);
@@ -56,13 +56,13 @@ namespace Physica::Core {
     Complex<ScalarType> cot(const Complex<ScalarType>& c);
 
     template<class ScalarType>
-    Complex<ScalarType> cosh(const Complex<ScalarType>& c);
+    inline Complex<ScalarType> cosh(const Complex<ScalarType>& c);
 
     template<class ScalarType>
-    Complex<ScalarType> sinh(const Complex<ScalarType>& c);
+    inline Complex<ScalarType> sinh(const Complex<ScalarType>& c);
 
     template<class ScalarType>
-    Complex<ScalarType> tanh(const Complex<ScalarType>& c);
+    inline Complex<ScalarType> tanh(const Complex<ScalarType>& c);
 
     template<class ScalarType>
     Complex<ScalarType> sech(const Complex<ScalarType>& c);
@@ -72,6 +72,9 @@ namespace Physica::Core {
 
     template<class ScalarType>
     Complex<ScalarType> coth(const Complex<ScalarType>& c);
+
+    template<class ScalarType>
+    Complex<ScalarType> lncosh(const Complex<ScalarType>& c);
 }
 
 #include "ElemFuncImpl.h"

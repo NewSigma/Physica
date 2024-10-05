@@ -116,12 +116,11 @@ namespace Physica::Core {
     template<class ScalarType>
     void FFT<ScalarType, 1>::swap(FFT& __restrict fft) noexcept {
         assert(this != &fft && "[Error]: Self swap is likely a bug");
-        using std::swap;
-        swap(forward_plan, fft.forward_plan);
-        swap(backward_plan, fft.backward_plan);
-        swap(buffer, fft.buffer);
-        swap(rSpaceSize, fft.rSpaceSize);
-        swap(planFlag, fft.planFlag);
+        std::swap(forward_plan, fft.forward_plan);
+        std::swap(backward_plan, fft.backward_plan);
+        std::swap(buffer, fft.buffer);
+        std::swap(rSpaceSize, fft.rSpaceSize);
+        std::swap(planFlag, fft.planFlag);
     }
 
     template<class ScalarType>

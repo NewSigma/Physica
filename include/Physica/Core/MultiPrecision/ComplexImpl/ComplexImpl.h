@@ -23,12 +23,10 @@ namespace Physica::Core {
     Complex<T>::Complex(double d) : Complex(T(d)) {}
 
     template<class T>
-    Complex<T>::Complex(T real_)
-            : real(real_), imag(0) {}
+    Complex<T>::Complex(T real_) : real(real_), imag(0) {}
 
     template<class T>
-    Complex<T>::Complex(T real_, T imag_)
-            : real(real_), imag(imag_) {}
+    Complex<T>::Complex(T real_, T imag_) : real(real_), imag(imag_) {}
 
     template<class T>
     Complex<T>::Complex(std::initializer_list<T> list) {
@@ -40,14 +38,34 @@ namespace Physica::Core {
     }
 
     template<class T>
-    Complex<T>& Complex<T>::operator=(Complex c) {
-        swap(c);
-        return *this;
+    Complex<T>::Complex(std::complex<TrivialType> c) : real(c.real()), imag(c.imag()) {}
+
+    template<class T>
+    inline bool Complex<T>::operator==(const This& other) const {
+        return real == other.real && imag == other.imag;
     }
 
     template<class T>
-    bool Complex<T>::operator==(const Complex<T>& c) const {
-        return real == c.real && imag == c.imag;
+    inline T Complex<T>::squaredNorm() const {
+        return square(real) + square(imag);
+    }
+
+    template<class T>
+    inline T Complex<T>::norm() const {
+        return sqrt(squaredNorm());
+    }
+
+    template<class T>
+    inline T Complex<T>::phase() const {
+        return std::arg(getTrivial());
+    }
+
+    template<class T>
+    Complex<T> Complex<T>::unit() const {
+        const T temp = norm();
+        if (temp.isZero())
+            return Complex(1);
+        return *this * reciprocal(temp);
     }
 
     template<class T>
@@ -63,37 +81,15 @@ namespace Physica::Core {
     }
 
     template<class T>
-    void Complex<T>::swap(Complex& __restrict c) noexcept {
-        assert(this != &c && "[Error]: Self swap is likely a bug");
-        real.swap(c.real);
-        imag.swap(c.imag);
+    void Complex<T>::swap(Complex& __restrict obj) noexcept {
+        assert(this != &obj && "[Error]: Self swap is likely a bug");
+        real.swap(obj.real);
+        imag.swap(obj.imag);
     }
 
     template<class T>
-    T Complex<T>::squaredNorm() const {
-        return square(real) + square(imag);
-    }
-
-    template<class T>
-    inline T Complex<T>::norm() const {
-        return sqrt(squaredNorm());
-    }
-
-    template<class T>
-    T Complex<T>::phase() const {
-        auto result = arctan(imag / real);
-        //Result of arctan is defined on [-Pi / 2, Pi / 2], Result of arg is defined on [-Pi, Pi].
-        if(real.isNegative() && !imag.isZero())
-            result += T(M_PI);
-        return result;
-    }
-
-    template<class T>
-    Complex<T> Complex<T>::unit() const {
-        const T temp = norm();
-        if (temp.isZero())
-            return Complex(1);
-        return *this * reciprocal(temp);
+    inline std::complex<typename Complex<T>::TrivialType> Complex<T>::getTrivial() const noexcept {
+        return {real.getTrivial(), imag.getTrivial()};
     }
 
     template<class T>

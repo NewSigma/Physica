@@ -24,7 +24,6 @@ namespace Physica::Core {
 
     template<class ScalarType>
     ScalarType hermiteH(unsigned int n, const ScalarBase<ScalarType>& x) {
-        using std::swap;
         if (n == 0)
             return ScalarType(1);
         const ScalarType double_x = ScalarType(2) * x.getDerived();
@@ -36,7 +35,7 @@ namespace Physica::Core {
         ScalarType float_i = ScalarType(1);
         for (unsigned int i = 1; i != n; ++i) {
             old_H = double_x * H - float_i * old_H * ScalarType(2);
-            swap(old_H, H);
+            old_H.swap(H);
             float_i += ScalarType(1);
         }
         return H;

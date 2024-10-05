@@ -57,36 +57,28 @@ namespace Physica::Core {
     }
 
     template<class ScalarType>
-    Complex<ScalarType> ln(const Complex<ScalarType>& c) {
-        const auto n = c.norm();
-        const auto a = c.phase();
-        return Complex<ScalarType>(ln(n), a);
+    inline Complex<ScalarType> ln(const Complex<ScalarType>& c) {
+        return Complex<ScalarType>(std::log(c.getTrivial()));
     }
 
     template<class ScalarType>
-    Complex<ScalarType> exp(const Complex<ScalarType>& c) {
-        const auto& exp_real = exp(c.getReal());
-        const auto& imag = c.getImag();
-        return Complex<ScalarType>(exp_real * cos(imag), exp_real * sin(imag));
+    inline Complex<ScalarType> exp(const Complex<ScalarType>& c) {
+        return Complex<ScalarType>(std::exp(c.getTrivial()));
     }
 
     template<class ScalarType>
-    Complex<ScalarType> cos(const Complex<ScalarType>& c) {
-        const auto& real = c.getReal();
-        const auto& imag = c.getImag();
-        return Complex<ScalarType>(cos(real) * cosh(imag), - sin(real) * sinh(imag));
+    inline Complex<ScalarType> cos(const Complex<ScalarType>& c) {
+        return Complex<ScalarType>(std::cos(c.getTrivial()));
     }
 
     template<class ScalarType>
-    Complex<ScalarType> sin(const Complex<ScalarType>& c) {
-        const auto& real = c.getReal();
-        const auto& imag = c.getImag();
-        return Complex<ScalarType>(sin(real) * cosh(imag), cos(real) * sinh(imag));
+    inline Complex<ScalarType> sin(const Complex<ScalarType>& c) {
+        return Complex<ScalarType>(std::sin(c.getTrivial()));
     }
 
     template<class ScalarType>
-    Complex<ScalarType> tan(const Complex<ScalarType>& c) {
-        return sin(c) / cos(c);
+    inline Complex<ScalarType> tan(const Complex<ScalarType>& c) {
+        return Complex<ScalarType>(std::tan(c.getTrivial()));
     }
 
     template<class ScalarType>
@@ -106,19 +98,17 @@ namespace Physica::Core {
 
     template<class ScalarType>
     Complex<ScalarType> cosh(const Complex<ScalarType>& c) {
-        const auto& real = c.getReal();
-        const auto& imag = c.getImag();
-        return Complex<ScalarType>(cos(imag) * cosh(real), sin(imag) * sinh(real));
+        return Complex<ScalarType>(std::cosh(c.getTrivial()));
     }
 
     template<class ScalarType>
     Complex<ScalarType> sinh(const Complex<ScalarType>& c) {
-        return (exp(c) - exp(-c)) >> 1;
+        return Complex<ScalarType>(std::sinh(c.getTrivial()));
     }
 
     template<class ScalarType>
     Complex<ScalarType> tanh(const Complex<ScalarType>& c) {
-        return sinh(c) / cosh(c);
+        return Complex<ScalarType>(std::tanh(c.getTrivial()));
     }
 
     template<class ScalarType>
@@ -134,5 +124,14 @@ namespace Physica::Core {
     template<class ScalarType>
     Complex<ScalarType> coth(const Complex<ScalarType>& c) {
         return reciprocal(tanh(c));
+    }
+
+    template<class ScalarType>
+    Complex<ScalarType> lncosh(const Complex<ScalarType>& c) {
+        const ScalarType abs_real = abs(c.getReal());
+        const ScalarType norm1 = exp(ScalarType(-2) * abs_real);
+        const ScalarType phase = c.getReal().isPositive() ? c.getImag() : -c.getImag();
+        const auto temp = Complex<ScalarType>((ScalarType(1) + norm1) * cos(phase), (ScalarType(1) - norm1) * sin(phase));
+        return abs_real + ln(temp);
     }
 }

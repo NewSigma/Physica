@@ -50,6 +50,7 @@ namespace Physica::Core {
 
     template<ScalarOption Option>
     __host__ __device__ inline Scalar<Option> sqrt(const Scalar<Option>& s) noexcept {
+        assert(!s.isNegative());
         if constexpr (Option == Float)
             return Scalar<Option>(::sqrtf(s.getTrivial()));
         else

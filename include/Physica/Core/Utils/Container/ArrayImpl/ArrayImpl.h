@@ -88,8 +88,7 @@ namespace Physica::Core {
         #ifdef __CUDA_ARCH__
             thrust::swap(arr[i], array[i]);
         #else
-            using std::swap;
-            swap(arr[i], array[i]);
+            std::swap(arr[i], array[i]);
         #endif
         }
     }

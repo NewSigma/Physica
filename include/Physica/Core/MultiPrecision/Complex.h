@@ -18,7 +18,8 @@
  */
 #pragma once
 
-#include "Physica/Core/MultiPrecision/Scalar.h"
+#include <complex>
+#include <Physica/Core/MultiPrecision/Scalar.h>
 
 namespace Physica::Core {
     template<class T> class Complex;
@@ -64,28 +65,28 @@ namespace Physica::Core {
         Complex(T real_);
         Complex(T real_, T imag_);
         Complex(std::initializer_list<T> list);
-        Complex(const Complex& c) = default;
-        Complex(Complex&& c) noexcept = default;
+        explicit Complex(std::complex<TrivialType> c);
+        Complex(const This&) = default;
+        Complex(This&&) noexcept = default;
         /* Operators */
-        Complex& operator=(Complex c);
-        void operator<<=(int i) { real <<= i; imag<<= i; }
-        void operator>>=(int i) { real >>= i; imag>>= i; }
-        bool operator==(const Complex<T>& c) const;
-        bool operator!=(const Complex<T>& c) const { return !(operator==(c)); }
+        This& operator=(This obj) noexcept { swap(obj); return *this; }
+        bool operator==(const This& other) const;
         /* Operations */
-        [[nodiscard]] inline PacketType packet() const;
-        inline void writePacket(const PacketType packet);
-        void swap(Complex& __restrict c) noexcept;
-        /* Getters */
-        [[nodiscard]] T squaredNorm() const;
+        [[nodiscard]] inline T squaredNorm() const;
         [[nodiscard]] inline T norm() const;
-        [[nodiscard]] T phase() const;
+        [[nodiscard]] inline T phase() const;
         [[nodiscard]] Complex unit() const;
         [[nodiscard]] Complex conjugate() const noexcept { return Complex(real, -imag); }
+
+        [[nodiscard]] inline PacketType packet() const;
+        inline void writePacket(const PacketType packet);
+        void swap(Complex& __restrict obj) noexcept;
+        /* Getters */
         [[nodiscard]] T& getReal() noexcept { return real; }
         [[nodiscard]] const T& getReal() const noexcept { return real; }
         [[nodiscard]] T& getImag() noexcept { return imag; }
         [[nodiscard]] const T& getImag() const noexcept { return imag; }
+        [[nodiscard]] inline std::complex<TrivialType> getTrivial() const noexcept;
         [[nodiscard]] bool isZero() const noexcept { return real.isZero() && imag.isZero(); }
         /* Static Members */
         [[nodiscard]] inline static Complex fromPhase(T phase);
@@ -144,20 +145,7 @@ namespace Physica::Core {
             const Scalar<Option>& s, const Complex<ScalarType>& c);
 
     template<class T>
-    Complex<T> operator<<(const Complex<T>& c, int i) {
-        return Complex<T>(c.getReal() << i, c.getImag() << i);
-    }
-
-    template<class T>
-    Complex<T> operator>>(const Complex<T>& c, int i) {
-        return Complex<T>(c.getReal() >> i, c.getImag() >> i);
-    }
-
-    template<class T>
     Complex<T> operator-(const Complex<T>& c) { return Complex(-c.getReal(), -c.getImag()); }
-
-    template<class T>
-    void swap(Complex<T>& __restrict c1, Complex<T>& __restrict c2) noexcept { c1.swap(c2); }
 
     template<class T, class ScalarType>
     void operator+=(Complex<T>& c, const ScalarType& t) { c = c + t; }
@@ -196,8 +184,11 @@ namespace Physica {
 }
 
 namespace std {
-    template<class RealType>
-    struct numeric_limits<Physica::Core::Complex<RealType>> : public numeric_limits<RealType> {};
+    template<class T>
+    struct numeric_limits<Physica::Core::Complex<T>> : public numeric_limits<T> {};
+
+    template<class T>
+    void swap(Physica::Core::Complex<T>& __restrict c1, Physica::Core::Complex<T>& __restrict c2) noexcept { c1.swap(c2); }
 }
 
 #include "ComplexImpl/ComplexImpl.h"
