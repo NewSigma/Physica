@@ -28,7 +28,7 @@ namespace Physica::Core {
     public:
         using Base::Base;
         /* Operations */
-        [[nodiscard]] ScalarType calc(size_t index) const { return relu(Base::getExpr().calc(index)); }
+        [[nodiscard]] ScalarType calc(size_t index) const { return sqrt(Base::getExpr().calc(index)); }
 
         template<class AnyPacket>
         [[nodiscard]] AnyPacket packet(size_t index) const { return sqrt(Base::getExpr().template packet<AnyPacket>(index)); }

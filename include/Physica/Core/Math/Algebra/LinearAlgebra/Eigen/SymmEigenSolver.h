@@ -87,8 +87,8 @@ namespace Physica::Core {
     template<class ScalarType, size_t Order>
     template<class MatrixType>
     void SymmEigenSolver<ScalarType, Order>::compute(const RValueMatrix<MatrixType>& source, bool computeEigenvectors_) {
-        assert(source.getRow() == source.getColumn() && "[Error]: Square matrix is required");
-        assert(source.getRow() == eigenvalues.getLength());
+        assert(source.isSymm() && "[Error]: Bad symm matrix");
+        assert(source.getRow() == eigenvalues.getLength() && "[Error]: Dimensions do not match");
         computeEigenvectors = computeEigenvectors_;
         [[unlikely]] if (source.getRow() == 1) {
             eigenvalues[0] = source.calc(0, 0);

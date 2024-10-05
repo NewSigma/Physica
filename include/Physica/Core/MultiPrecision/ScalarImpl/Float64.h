@@ -49,7 +49,7 @@ namespace Physica::Core {
         double d;
     public:
         Scalar() = default;
-        __host__ __device__ Scalar(double d_) : d(d_) {}
+        __host__ __device__ Scalar(double d_) noexcept : d(d_) {}
         Scalar(const Integer& i) : Scalar(double(i)) {}
         Scalar(const Rational& r) : Scalar(double(r)) {}
         template<class OtherScalar>
@@ -62,18 +62,18 @@ namespace Physica::Core {
         using Base::operator<;
         Scalar& operator=(const Scalar& obj) = default;
         Scalar& operator=(Scalar&& obj) noexcept = default;
-        __host__ __device__ explicit operator float() const { return d; }
-        __host__ __device__ explicit operator double() const { return d; }
-        __host__ __device__ Scalar operator+(const Scalar& s) const { return Scalar(d + s.d); }
-        __host__ __device__ Scalar operator-(const Scalar& s) const { return Scalar(d - s.d); }
-        __host__ __device__ Scalar operator*(const Scalar& s) const { return Scalar(d * s.d); }
-        __host__ __device__ Scalar operator/(const Scalar& s) const { return Scalar(d / s.d); }
+        __host__ __device__ explicit operator float() const noexcept { return d; }
+        __host__ __device__ explicit operator double() const noexcept { return d; }
+        __host__ __device__ Scalar operator+(const Scalar& s) const noexcept { return Scalar(d + s.d); }
+        __host__ __device__ Scalar operator-(const Scalar& s) const noexcept { return Scalar(d - s.d); }
+        __host__ __device__ Scalar operator*(const Scalar& s) const noexcept { return Scalar(d * s.d); }
+        __host__ __device__ Scalar operator/(const Scalar& s) const noexcept { return Scalar(d / s.d); }
         Scalar operator<<(int i) const { return Scalar(d * std::pow(2, i)); }
         Scalar operator>>(int i) const { return Scalar(d / std::pow(2, i)); }
         __host__ __device__ Scalar operator-() const noexcept { return Scalar(-d); }
-        __host__ __device__ bool operator>(const Scalar& s) const { return d > s.d; }
-        __host__ __device__ bool operator<(const Scalar& s) const { return d < s.d; }
-        __host__ __device__ bool operator==(const Scalar& s) const { return d == s.d; }
+        __host__ __device__ bool operator>(const Scalar& s) const noexcept { return d > s.d; }
+        __host__ __device__ bool operator<(const Scalar& s) const noexcept { return d < s.d; }
+        __host__ __device__ bool operator==(const Scalar& s) const noexcept { return d == s.d; }
         PHYSICA_API friend std::istream& operator>>(std::istream& is, Scalar& scalar);
         /* Operations */
         void swap(Scalar& __restrict s) noexcept { std::swap(d, s.d); }

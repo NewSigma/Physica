@@ -42,6 +42,8 @@ namespace Physica::Core {
         [[nodiscard]] AnyPacket packetPartial(size_t index, size_t count) const {
             return Base::getLHS().template packetPartial<AnyPacket>(index, count) * AnyPacket(Base::getRHS());
         }
+
+        [[nodiscard]] ScalarType sum() const { return Base::getLHS() * Base::getRHS(); }
     };
 
     template<class VectorType, class AnyScalar>

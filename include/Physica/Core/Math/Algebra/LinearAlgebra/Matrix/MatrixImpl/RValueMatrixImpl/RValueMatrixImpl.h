@@ -306,6 +306,18 @@ namespace Physica::Core {
         return result;
     }
 
+    template<class Derived>
+    bool RValueMatrix<Derived>::isSymm() const noexcept {
+        if (getRow() != getColumn())
+            return false;
+        const size_t order = getRow();
+        for (size_t r = 0; r < order; ++r)
+            for (size_t c = r + 1; c < order; ++c)
+                if (calc(r, c) != calc(c, r))
+                    return false;
+        return true;
+    }
+
     template<class MatrixType, class MatrixType2>
     bool matrixNear(const RValueMatrix<MatrixType>& m1, const RValueMatrix<MatrixType2>& m2, double precision) {
         assert(m1.getRow() == m2.getRow());

@@ -133,10 +133,10 @@ namespace Physica::Core {
 #endif
     template<class T>
     std::ostream& operator<<(std::ostream& os, const Complex<T>& c) {
-        const auto& imagine = c.getImag();
+        const auto& imag = c.getImag();
         return os << c.getReal()
-                  << (imagine.isNegative() ? " - " : " + " )
-                  << abs(imagine) << 'i';
+                  << (imag.isNegative() ? " - " : " + " )
+                  << abs(imag) << 'i';
     }
 
     template<class T>
@@ -231,9 +231,9 @@ namespace Physica::Core {
     Complex<typename Internal::BinaryScalarOpReturnType<ScalarType, Scalar<Option>>::Type> operator/(
             const Scalar<Option>& s, const Complex<ScalarType>& c) {
         const auto& real = c.getReal();
-        const auto& imagine = c.getImag();
-        const auto divisor = s * reciprocal(square(real) + square(imagine));
-        return {real * divisor, -imagine * divisor};
+        const auto& imag = c.getImag();
+        const auto divisor = s * reciprocal(square(real) + square(imag));
+        return {real * divisor, -imag * divisor};
     }
 }
 

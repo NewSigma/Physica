@@ -23,7 +23,7 @@
 
 namespace Physica::Core {
     /**
-     * \class RandomPool Provides per-thread, reusable random generator support.
+     * \class RandomPool provides per-thread, reusable random generator support.
      * 
      * \tparam FixedSeed:
      * Multi-threads will break reproducibility and fixing random seed is not enough.
@@ -44,6 +44,7 @@ namespace Physica::Core {
         RandomGenerator gen;
         SeedType seed;
     public:
+        ~RandomPool() = default;
         /* Getters */
         [[nodiscard]] RandomGenerator& getGen() noexcept { return gen; }
         [[nodiscard]] inline SeedType getThreadSpecificSeed() const noexcept;
@@ -53,7 +54,6 @@ namespace Physica::Core {
         RandomPool();
         RandomPool(const RandomPool&) = default;
         RandomPool(RandomPool&&) noexcept = default;
-        ~RandomPool() = default;
         /* Operators */
         RandomPool& operator=(const RandomPool&) = default;
         RandomPool& operator=(RandomPool&&) noexcept = default;

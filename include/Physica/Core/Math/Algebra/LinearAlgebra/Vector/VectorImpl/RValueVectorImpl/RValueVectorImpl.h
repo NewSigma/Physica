@@ -213,6 +213,15 @@ namespace Physica::Core {
     }
 
     template<class Derived>
+    typename RValueVector<Derived>::ScalarType RValueVector<Derived>::prod() const {
+        assert(getLength() != 0);
+        auto result = calc(0);
+        for(size_t i = 1; i < getLength(); ++i)
+            result *= calc(i);
+        return result;
+    }
+
+    template<class Derived>
     bool RValueVector<Derived>::isZeros() const {
         for(size_t i = 0; i < getLength(); ++i)
             if (!calc(i).isZero())
