@@ -46,17 +46,18 @@ namespace Physica::Core {
         using Base = device_obj<PairModel<host_obj>>;
         using typename Base::MDCellType;
     public:
+        device_obj() = default;
         device_obj(size_t numParticle, ScalarType cutoff_);
         device_obj(const host_obj& obj, size_t numParticle);
-        device_obj(const device_obj&) = default;
-        device_obj(device_obj&&) noexcept = default;
+        device_obj(const This&) = default;
+        device_obj(This&&) noexcept = default;
         ~device_obj() = default;
         /* Operators */
-        device_obj& operator=(device_obj obj) noexcept { swap(obj); return *this; }
+        This& operator=(This obj) noexcept { swap(obj); return *this; }
         /* Operations */
         [[nodiscard]] __host__ __device__ inline ScalarType pot_functor(size_t i, size_t j, ScalarType r, ScalarType r2) const;
         [[nodiscard]] __host__ __device__ inline ScalarType force_functor(size_t i, size_t j, ScalarType r, ScalarType r2) const;
-        void swap(device_obj& __restrict obj) noexcept;
+        inline void swap(This& __restrict obj) noexcept;
     };
 
     template<class ScalarType, bool IsPeriodBoundary, bool IsSmallCell>
@@ -68,7 +69,7 @@ namespace Physica::Core {
             : device_obj(numParticle, obj.getCutoff()) {}
 
     template<class ScalarType, bool IsPeriodBoundary, bool IsSmallCell>
-    void device_obj<SilveraGoldman<ScalarType, IsPeriodBoundary, IsSmallCell>>::swap(device_obj& __restrict obj) noexcept {
+    inline void device_obj<SilveraGoldman<ScalarType, IsPeriodBoundary, IsSmallCell>>::swap(This& __restrict obj) noexcept {
         Base::swap(obj);
     }
 

@@ -21,97 +21,145 @@
 namespace Physica::Core {
     template<class VectorType>
     class RealVector : public RValueVector<RealVector<VectorType>> {
-        using Base = RValueVector<RealVector<VectorType>>;
+        using This = RealVector<VectorType>;
+        using Base = RValueVector<This>;
+
         const VectorType& v;
     public:
         explicit RealVector(const RValueVector<VectorType>& v_) : v(v_.getDerived()) {}
-
+        RealVector(const This&) = delete;
+        RealVector(This&&) noexcept = delete;
+        ~RealVector() = default;
+        /* Operators */
+        This& operator=(const This&) = delete;
+        This& operator=(This&&) = delete;
+        /* Getters */
         typename Base::ScalarType calc(size_t s) const { return v.calc(s).getReal(); }
         [[nodiscard]] size_t getLength() const { return v.getLength(); }
     };
 
     template<class VectorType>
     class ImagVector : public RValueVector<ImagVector<VectorType>> {
-        using Base = RValueVector<ImagVector<VectorType>>;
+        using This = ImagVector<VectorType>;
+        using Base = RValueVector<This>;
+
         const VectorType& v;
     public:
         explicit ImagVector(const RValueVector<VectorType>& v_) : v(v_.getDerived()) {}
-
+        ImagVector(const This&) = delete;
+        ImagVector(This&&) noexcept = delete;
+        ~ImagVector() = default;
+        /* Operators */
+        This& operator=(const This&) = delete;
+        This& operator=(This&&) = delete;
+        /* Getters */
         typename Base::ScalarType calc(size_t s) const { return v.calc(s).getImag(); }
         [[nodiscard]] size_t getLength() const { return v.getLength(); }
     };
 
     template<class VectorType>
     class SquaredNormVector : public RValueVector<SquaredNormVector<VectorType>> {
-        using Base = RValueVector<SquaredNormVector<VectorType>>;
+        using This = SquaredNormVector<VectorType>;
+        using Base = RValueVector<This>;
+
         const VectorType& v;
     public:
         explicit SquaredNormVector(const RValueVector<VectorType>& v_) : v(v_.getDerived()) {}
-
+        SquaredNormVector(const This&) = delete;
+        SquaredNormVector(This&&) noexcept = delete;
+        ~SquaredNormVector() = default;
+        /* Operators */
+        This& operator=(const This&) = delete;
+        This& operator=(This&&) = delete;
+        /* Getters */
         typename Base::ScalarType calc(size_t s) const { return v.calc(s).squaredNorm(); }
         [[nodiscard]] size_t getLength() const { return v.getLength(); }
     };
 
     template<class VectorType>
     class NormVector : public RValueVector<NormVector<VectorType>> {
-        using Base = RValueVector<NormVector<VectorType>>;
+        using This = NormVector<VectorType>;
+        using Base = RValueVector<This>;
+
         const VectorType& v;
     public:
         explicit NormVector(const RValueVector<VectorType>& v_) : v(v_.getDerived()) {}
-
+        NormVector(const This&) = delete;
+        NormVector(This&&) noexcept = delete;
+        ~NormVector() = default;
+        /* Operators */
+        This& operator=(const This&) = delete;
+        This& operator=(This&&) = delete;
+        /* Getters */
         typename Base::ScalarType calc(size_t s) const { return v.calc(s).norm(); }
         [[nodiscard]] size_t getLength() const { return v.getLength(); }
     };
 
     template<class VectorType>
     class ValueVector : public RValueVector<ValueVector<VectorType>> {
-        using Base = RValueVector<ValueVector<VectorType>>;
+        using This = ValueVector<VectorType>;
+        using Base = RValueVector<This>;
+
         const VectorType& v;
     public:
         explicit ValueVector(const RValueVector<VectorType>& v_) : v(v_.getDerived()) {}
-
+        ValueVector(const This&) = delete;
+        ValueVector(This&&) noexcept = delete;
+        ~ValueVector() = default;
+        /* Operators */
+        This& operator=(const This&) = delete;
+        This& operator=(This&&) = delete;
+        /* Getters */
         typename Base::ScalarType calc(size_t s) const { return v.calc(s).getValue(); }
         [[nodiscard]] size_t getLength() const { return v.getLength(); }
     };
 
     template<class VectorType>
     class GradVector : public RValueVector<GradVector<VectorType>> {
-        using Base = RValueVector<GradVector<VectorType>>;
+        using This = GradVector<VectorType>;
+        using Base = RValueVector<This>;
+
         const VectorType& v;
     public:
         explicit GradVector(const RValueVector<VectorType>& v_) : v(v_.getDerived()) {}
-
+        GradVector(const This&) = delete;
+        GradVector(This&&) noexcept = delete;
+        ~GradVector() = default;
+        /* Operators */
+        This& operator=(const This&) = delete;
+        This& operator=(This&&) = delete;
+        /* Getters */
         typename Base::ScalarType calc(size_t s) const { return v.calc(s).getGrad(); }
         [[nodiscard]] size_t getLength() const { return v.getLength(); }
     };
 
     template<class VectorType>
-    [[nodiscard]] inline RealVector<VectorType> toRealVector(const RValueVector<VectorType>& v) {
+    [[nodiscard]] inline auto toRealVector(const RValueVector<VectorType>& v) {
         return RealVector<VectorType>{v};
     }
 
     template<class VectorType>
-    [[nodiscard]] inline ImagVector<VectorType> toImagVector(const RValueVector<VectorType>& v) {
+    [[nodiscard]] inline auto toImagVector(const RValueVector<VectorType>& v) {
         return ImagVector<VectorType>{v};
     }
 
     template<class VectorType>
-    [[nodiscard]] inline SquaredNormVector<VectorType> toSquaredNormVector(const RValueVector<VectorType>& v) {
+    [[nodiscard]] inline auto toSquaredNormVector(const RValueVector<VectorType>& v) {
         return SquaredNormVector<VectorType>{v};
     }
 
     template<class VectorType>
-    [[nodiscard]] inline NormVector<VectorType> toNormVector(const RValueVector<VectorType>& v) {
+    [[nodiscard]] inline auto toNormVector(const RValueVector<VectorType>& v) {
         return NormVector<VectorType>{v};
     }
 
     template<class VectorType>
-    [[nodiscard]] inline ValueVector<VectorType> toValueVector(const RValueVector<VectorType>& v) {
+    [[nodiscard]] inline auto toValueVector(const RValueVector<VectorType>& v) {
         return ValueVector<VectorType>{v};
     }
 
     template<class VectorType>
-    [[nodiscard]] inline GradVector<VectorType> toGradVector(const RValueVector<VectorType>& v) {
+    [[nodiscard]] inline auto toGradVector(const RValueVector<VectorType>& v) {
         return GradVector<VectorType>{v};
     }
 }

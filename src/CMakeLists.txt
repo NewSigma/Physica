@@ -1,5 +1,7 @@
-#############################################Project##############################################
+include(PhysicaTargets)
+
 add_subdirectory(Core)
+
 if(${PHYSICA_GUI})
     add_subdirectory(Gui)
 endif()
@@ -8,7 +10,7 @@ if(${PHYSICA_PYTHON})
     add_subdirectory(Python)
 endif()
 
-add_executable(Physica Physica.cpp ${HEADERS})
+add_executable(Physica Physica.cpp)
 target_link_libraries(Physica PhysicaCore ${HDF5_CXX_SHARED_LIBRARY} ${GPerfTools_LIBRARY})
 if(${PHYSICA_GUI})
     target_link_libraries(Physica PhysicaGui Qt6::Core Qt6::Widgets)

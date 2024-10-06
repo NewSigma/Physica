@@ -147,6 +147,9 @@ namespace Physica::Core {
         [[nodiscard]] __host__ __device__ const_pointer data() const noexcept { return Base::getDerived().data(); }
         [[nodiscard]] __host__ __device__ pointer data_ptr(size_t index) noexcept { return data() + index; }
         [[nodiscard]] __host__ __device__ const_pointer data_ptr(size_t index) const noexcept { return data() + index; }
+        /* Static members */
+        template<class... Args>
+        __host__ __device__ constexpr static bool isTrivialDefaultConstruct();
     protected:
         ArrayBase() = default;
         ArrayBase(const ArrayBase&) = default;
@@ -154,9 +157,6 @@ namespace Physica::Core {
         /* Operators */
         ArrayBase& operator=(const ArrayBase&) = default;
         ArrayBase& operator=(ArrayBase&&) noexcept = default;
-        /* Static members */
-        template<class... Args>
-        __host__ __device__ constexpr static bool isTrivialDefaultConstruct();
     };
 }
 

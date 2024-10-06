@@ -52,19 +52,18 @@ namespace Physica::Core {
         template<class... Args>
         __host__ __device__ explicit Array(size_t length, Args&&... args);
         __host__ __device__ Array(std::initializer_list<T> list);
+        template<class OtherAlloc>
+        Array(const Array<T, Length, OtherAlloc>& other);
         Array(const This&) = default;
         Array(This&&) noexcept = default;
         ~Array() = default;
         /* Operators */
         __host__ __device__ This& operator=(This array) noexcept { swap(array); return *this; }
         /* Operations */
-        Array<T, Dynamic, Allocator> subArray(size_t from, size_t to);
-        Array<T, Dynamic, Allocator> subArray(size_t from) { return subArray(from, Length); }
-        Array<T, Dynamic, Allocator> cut(size_t from);
         __host__ __device__ void insert(const T&, size_t) { assert(false); }
         __host__ __device__ void reserve([[maybe_unused]] size_t size) { assert(size == Length); }
         template<class... Args>
-        __host__ __device__ void resize(size_t length, Args&&... args);
+        __host__ __device__ inline void resize(size_t length, Args&&... args);
         __host__ __device__ void swap(Array& __restrict array) noexcept;
 
         [[nodiscard]] inline auto toDevice() const;
@@ -107,6 +106,8 @@ namespace Physica::Core {
         template<class... Args>
         explicit Array(size_t length_, Args&&... args);
         Array(std::initializer_list<T> list);
+        template<class OtherAlloc>
+        Array(const Array<T, Dynamic, OtherAlloc>& other);
         Array(const This& array);
         Array(This&& array) noexcept;
         ~Array();

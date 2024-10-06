@@ -21,7 +21,7 @@
 #include <QtWidgets/QApplication>
 #include <Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h>
 #include <Physica/Core/Math/Statistics/NumCharacter.h>
-#include <Physica/Core/Math/Random/RandomSeed.h>
+#include <Physica/Core/Math/Random/RandomPool.h>
 #include <Physica/Gui/Plot/Plot.h>
 
 using namespace Physica::Core;

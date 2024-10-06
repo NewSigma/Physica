@@ -41,10 +41,9 @@ add_subdirectory(cmake/Modules)
 set(CMAKE_INSTALL_RPATH ${CMAKE_INSTALL_PREFIX}/lib)
 set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 
-set(Physica_INCLUDE_DIR "./include")
+set(Physica_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/include")
 include_directories(SYSTEM 3rdparty)
 include_directories(${Physica_INCLUDE_DIR})
-file(GLOB_RECURSE HEADERS include/*.h include/*.cuh)
 add_subdirectory(src)
 
 if(${BUILD_TESTS})

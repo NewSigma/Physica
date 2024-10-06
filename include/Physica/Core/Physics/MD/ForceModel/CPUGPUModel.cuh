@@ -18,8 +18,8 @@
  */
 #pragma once
 
-#include "Physica/Core/Parallel/ThreadPool.h"
-#include "Physica/Core/Parallel/Executor/AutoExecutor.h"
+#include <Physica/Core/Parallel/ThreadPool.h>
+#include <Physica/Core/Parallel/Executor/AutoExecutor.h>
 #include <Physica/Core/Utils/CUDA/device_obj.cuh>
 
 namespace Physica::Core {

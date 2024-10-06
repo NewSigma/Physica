@@ -28,8 +28,12 @@ namespace Physica::Core {
     //////////////////////////////////////////Array<T, Length, Allocator>//////////////////////////////////////////
     template<class T, size_t Length, class Allocator>
     template<class... Args>
-    __host__ __device__ Array<T, Length, Allocator>::Array(size_t length, Args&&... args) {
-        resize(length, std::forward<Args>(args)...);
+    __host__ __device__ Array<T, Length, Allocator>::Array([[maybe_unused]] size_t length, Args&&... args) {
+        assert(length == Length);
+        if constexpr (!Base::template isTrivialDefaultConstruct<Args...>()) {
+            for (size_t i = 0; i < Length; ++i)
+                *(arr + i) = T(std::forward<Args>(args)...);
+        }
     }
 
     template<class T, size_t Length, class Allocator>
@@ -40,45 +44,18 @@ namespace Physica::Core {
         for (auto ite = list.begin(); ite != end; ++ite, ++i)
             *(arr + i) = *ite;
     }
-    /*!
-     * Return the sub array of current array. \from is included and \to is excluded.
-     */
+
     template<class T, size_t Length, class Allocator>
-    Array<T, Dynamic, Allocator> Array<T, Length, Allocator>::subArray(size_t from, size_t to) {
-        assert(from < to && to <= Length);
-        const auto result_length = to - from;
-        Array<T, Dynamic, Allocator> result(result_length);
-        if constexpr(!std::is_trivial<T>::value)
-            for(size_t i = 0; i < result_length; ++i, ++from)
-                new (result.arr + i) T(arr[from]);
-        else
-            memcpy(result.arr, arr, result_length * sizeof(T));
-        return result;
+    template<class OtherAlloc>
+    Array<T, Length, Allocator>::Array(const Array<T, Length, OtherAlloc>& other) {
+        for (size_t i = 0; i < Length; ++i)
+            arr[i] = other[i];
     }
-    /*!
-     * Cut the array from index \from, \from is included.
-     * The result is a array whose length and capacity are equal.
-     */
-    template<class T, size_t Length, class Allocator>
-    Array<T, Dynamic, Allocator> Array<T, Length, Allocator>::cut(size_t from) {
-        assert(from < Length);
-        auto result_length = Length - from;
-        Array<T, Dynamic, Allocator> result(result_length);
-        for(size_t i = 0; from < Length; ++from, ++i)
-            result.allocate(std::move(Base::operator[](from)), i);
-        return result;
-    }
-    /**
-     * Resize a fixed array is implicitly fill
-     */
+
     template<class T, size_t Length, class Allocator>
     template<class... Args>
-    __host__ __device__ void Array<T, Length, Allocator>::resize([[maybe_unused]] size_t length, Args&&... args) {
+    __host__ __device__ inline void Array<T, Length, Allocator>::resize([[maybe_unused]] size_t length, Args&&...) {
         assert(length == Length);
-        if constexpr (!Base::template isTrivialDefaultConstruct<Args...>()) {
-            for (size_t i = 0; i < Length; ++i)
-                *(arr + i) = T(std::forward<Args>(args)...);
-        }
     }
 
     template<class T, size_t Length, class Allocator>
@@ -113,6 +90,13 @@ namespace Physica::Core {
         for (auto ite = list.begin(); ite != end; ++ite, ++i)
             alloc.construct(arr + i, *ite);
         setLength(list.size());
+    }
+
+    template<class T, class Allocator>
+    template<class OtherAlloc>
+    Array<T, Dynamic, Allocator>::Array(const Array<T, Dynamic, OtherAlloc>& other) : Array(other.getLength()) {
+        for (size_t i = 0; i < getLength(); ++i)
+            arr[i] = other[i];
     }
 
     template<class T, class Allocator>

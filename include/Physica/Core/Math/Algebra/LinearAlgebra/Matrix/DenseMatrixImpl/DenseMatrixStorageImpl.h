@@ -25,8 +25,8 @@ namespace Physica::Core {
     template<tparams>
     template<class... Args>
     void ColumnElementStorage::resize(size_t row, size_t column, Args&&... args) {
-        Dim::resize(row, column);
         arr.resize(row * column, std::forward<Args>(args)...);
+        Dim::resize(row, column);
     }
 
     template<tparams>
@@ -55,8 +55,8 @@ namespace Physica::Core {
     template<tparams>
     template<class... Args>
     void RowElementStorage::resize(size_t row, size_t column, Args&&... args) {
-        Dim::resize(row, column);
         arr.resize(row * column, std::forward<Args>(args)...);
+        Dim::resize(row, column);
     }
 
     template<tparams>

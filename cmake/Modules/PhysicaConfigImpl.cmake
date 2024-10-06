@@ -71,7 +71,7 @@ if(${PHYSICA_PROFILE})
 endif()
 
 if(${PHYSICA_GUI})
-    find_package(Qt6 COMPONENTS Core Widgets REQUIRED)
+    find_package(Qt6 COMPONENTS Core Gui Widgets Charts DataVisualization REQUIRED)
     add_definitions(-DPHYSICA_GUI)
 endif()
 
