@@ -46,4 +46,8 @@ namespace Physica::Core {
      */
     template<ScalarOption Option = Float64> class Scalar;
     template<class AnyScalar> class Complex;
+
+    using float16 = Scalar<Float16>;
+    using float32 = Scalar<Float32>;
+    using float64 = Scalar<Float64>;
 }

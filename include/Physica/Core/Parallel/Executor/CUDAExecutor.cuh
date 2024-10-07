@@ -30,6 +30,14 @@ namespace Physica::Core {
     public:
         static void wait() { check(cudaDeviceSynchronize()); }
     };
+
+    __device__ inline bool isZeroThread() {
+    #ifdef __CUDA_ARCH__
+        return !threadIdx.x && !threadIdx.y && !threadIdx.z && !blockIdx.x && !blockIdx.x && !blockIdx.x;
+    #else
+        return false;
+    #endif
+    }
 }
 
 namespace Physica {

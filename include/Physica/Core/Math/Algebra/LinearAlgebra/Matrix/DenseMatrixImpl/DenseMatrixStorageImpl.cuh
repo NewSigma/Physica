@@ -23,14 +23,10 @@ namespace Physica::Core {
     #define ColumnElementStorage DenseMatrixStorage<T, MatrixOption::Column | MatrixOption::Element, Row, Column, Allocator>
 
     template<tparams>
-    __host__ __device__ device_obj<ColumnElementStorage>::device_obj(size_t row, size_t column) {
-        resize(row, column);
-    }
+    __host__ __device__ device_obj<ColumnElementStorage>::device_obj(size_t row, size_t column) : Dim(row, column), arr(row * column) {}
 
     template<tparams>
-    __host__ __device__ device_obj<ColumnElementStorage>::device_obj(size_t row, size_t column, ValueType value) {
-        resize(row, column, std::move(value));
-    }
+    __host__ __device__ device_obj<ColumnElementStorage>::device_obj(size_t row, size_t column, ValueType value) : Dim(row, column), arr(row * column, std::move(value)) {}
 
     template<tparams>
     device_obj<ColumnElementStorage>::device_obj(const host_obj& storage)
@@ -90,14 +86,10 @@ namespace Physica::Core {
     #define RowElementStorage DenseMatrixStorage<T, MatrixOption::Row | MatrixOption::Element, Row, Column, Allocator>
 
     template<tparams>
-    __host__ __device__ device_obj<RowElementStorage>::device_obj(size_t row, size_t column) {
-        resize(row, column);
-    }
+    __host__ __device__ device_obj<RowElementStorage>::device_obj(size_t row, size_t column) : Dim(row, column), arr(row * column) {}
 
     template<tparams>
-    __host__ __device__ device_obj<RowElementStorage>::device_obj(size_t row, size_t column, ValueType value) {
-        resize(row, column, std::move(value));
-    }
+    __host__ __device__ device_obj<RowElementStorage>::device_obj(size_t row, size_t column, ValueType value) : Dim(row, column), arr(row * column, std::move(value)) {}
 
     template<tparams>
     device_obj<RowElementStorage>::device_obj(const host_obj& storage)

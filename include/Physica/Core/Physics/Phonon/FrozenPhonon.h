@@ -208,9 +208,7 @@ namespace Physica::Core {
                 assert(gridDim[i] <= std::numeric_limits<unsigned char>::max() && "[Error]: Unexpected large super cell");
                 superSize[i] = gridDim[i];
             }
-            const auto space = H5DataSpace<1>(Dim);
-            auto attr = group.createAttribute("SuperSize", H5::PredType::NATIVE_UCHAR, space);
-            attr.write(H5::PredType::NATIVE_UCHAR, superSize);
+            group.writeAttr("SuperSize", superSize);
         }
 
         rSpaceFC.forIndexInGrid([&group, &rSpaceFC](Index3D index) {

@@ -137,7 +137,7 @@ namespace Physica::Core {
                                 return {sqrt((temperatureT * sol[0]) / (thermostatTime * dof)) * 2 * rand};
                             });
         if (!sol[0].isPositive()) [[unlikely]]
-            throw std::invalid_argument("[Error]: Number of particle is too small that negative probability is encountered");
+            throw std::invalid_argument("[Error]: Bad probability, maybe particle number is too small");
         return sqrt(temperatureT / sol[0]);
     }
 }

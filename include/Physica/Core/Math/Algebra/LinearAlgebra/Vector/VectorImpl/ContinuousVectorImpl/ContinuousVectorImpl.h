@@ -384,7 +384,6 @@ namespace Physica::Core {
 
     template<class Derived>
     H5DataSet<1> ContinuousVector<Derived>::write(H5Location& loc, const char* name) const {
-    
         const auto space = H5DataSpace<1>({Base::getLength()});
         H5DataSet<1> dataset;
         if (loc.exists(name))

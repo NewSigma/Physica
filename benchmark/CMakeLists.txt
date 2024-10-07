@@ -22,4 +22,4 @@ target_precompile_headers(Benchmark REUSE_FROM PhysicaCore)
 get_target_property(benchmark_INCLUDE_DIR benchmark::benchmark INTERFACE_INCLUDE_DIRECTORIES)
 target_include_directories(Benchmark PRIVATE ${benchmark_INCLUDE_DIR}) # Explicit include to help clangd
 
-target_link_libraries(Benchmark PhysicaCore benchmark::benchmark_main ${GPerfTools_LIBRARY})
+target_link_libraries(Benchmark PhysicaCore benchmark::benchmark_main)

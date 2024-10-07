@@ -18,6 +18,8 @@
  */
 #pragma once
 
+#include <Physica/Core/MultiPrecision/MultiPrecisionType.h>
+
 namespace Physica::Core {
     class PHYSICA_API H5Group : public H5::Group, public H5Location {
         using Base = H5::Group;
@@ -36,9 +38,14 @@ namespace Physica::Core {
 
         inline H5Group createGroup(const char* name, size_t size_hint = 0) const;
         [[nodiscard]] inline H5Group openGroup(const char* name) const;
+
+        template<class T>
+        H5::Attribute writeAttr(const char* name, T value);
     private:
         using Base::createDataSet;
         using Base::openDataSet;
+        template<class T>
+        [[nodiscard]] static const H5::PredType& getPredType();
     };
 
     inline H5Group H5Group::createGroup(const char* name, size_t size_hint) const {
@@ -47,5 +54,45 @@ namespace Physica::Core {
 
     inline H5Group H5Group::openGroup(const char* name) const {
         return Base::openGroup(name);
+    }
+
+    template<class T>
+    H5::Attribute H5Group::writeAttr(const char* name, T value) {
+        constexpr bool IsArray = std::is_array<T>::value;
+        constexpr size_t NumElem = IsArray ? std::extent<T>::value : 1;
+        static_assert(!IsArray || std::rank<T>::value == 1, "[Error]: High dim array is not supported");
+        static_assert(NumElem > 0, "[Error]: Bad array size");
+
+        const auto type = getPredType<T>();
+        const auto space = H5DataSpace<1>(NumElem);
+        H5::Attribute attr;
+        if (Base::attrExists(name))
+            attr = Base::openAttribute(name);
+        else
+            attr = Base::createAttribute(name, type, space);
+        attr.write(type, &value);
+        return attr;
+    }
+
+    template<class T>
+    const H5::PredType& H5Group::getPredType() {
+        if constexpr (std::is_same<T, uint8_t>::value)
+            return H5::PredType::NATIVE_UINT8;
+        else if constexpr (std::is_same<T, uint16_t>::value)
+            return H5::PredType::NATIVE_UINT16;
+        else if constexpr (std::is_same<T, uint32_t>::value)
+            return H5::PredType::NATIVE_UINT32;
+        else if constexpr (std::is_same<T, uint64_t>::value)
+            return H5::PredType::NATIVE_UINT64;
+        else if constexpr (std::is_same<T, float>::value)
+            return H5::PredType::NATIVE_FLOAT;
+        else if constexpr (std::is_same<T, float32>::value)
+            return H5::PredType::NATIVE_FLOAT;
+        else if constexpr (std::is_same<T, double>::value)
+            return H5::PredType::NATIVE_DOUBLE;
+        else if constexpr (std::is_same<T, float64>::value)
+            return H5::PredType::NATIVE_DOUBLE;
+        else
+            static_assert(std::is_same<T, uint8_t>::value, "[Error]: Not implemented");
     }
 }

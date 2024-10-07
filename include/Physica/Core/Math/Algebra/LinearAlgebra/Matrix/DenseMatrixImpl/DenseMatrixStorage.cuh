@@ -52,8 +52,8 @@ namespace Physica::Core {
         /* Getters */
         using Dim::getColumn;
         using Dim::getRow;
-        [[nodiscard]] ArrayType& asArray() noexcept { return arr; }
-        [[nodiscard]] const ArrayType& asArray() const noexcept { return arr; }
+        [[nodiscard]] __host__ __device__ ArrayType& asArray() noexcept { return arr; }
+        [[nodiscard]] __host__ __device__ const ArrayType& asArray() const noexcept { return arr; }
         [[nodiscard]] __host__ __device__ size_t getSize() const noexcept { return arr.getLength(); }
         [[nodiscard]] __host__ __device__ ValueType* data_ptr(size_t row, size_t column) { return arr.data() + toIndex(row, column); }
         [[nodiscard]] __host__ __device__ const ValueType* data_ptr(size_t row, size_t column) const { return arr.data() + toIndex(row, column); }
@@ -91,8 +91,8 @@ namespace Physica::Core {
         /* Getters */
         using Dim::getColumn;
         using Dim::getRow;
-        [[nodiscard]] ArrayType& asArray() noexcept { return arr; }
-        [[nodiscard]] const ArrayType& asArray() const noexcept { return arr; }
+        [[nodiscard]] __host__ __device__ ArrayType& asArray() noexcept { return arr; }
+        [[nodiscard]] __host__ __device__ const ArrayType& asArray() const noexcept { return arr; }
         [[nodiscard]] __host__ __device__ size_t getSize() const noexcept { return arr.getLength(); }
         [[nodiscard]] __host__ __device__ ValueType* data_ptr(size_t row, size_t column) { return arr.data() + toIndex(row, column); }
         [[nodiscard]] __host__ __device__ const ValueType* data_ptr(size_t row, size_t column) const { return arr.data() + toIndex(row, column); }
