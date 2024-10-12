@@ -45,6 +45,7 @@ namespace Physica::Core {
         Unit,
         Square,
         Ln,
+        Ln1p,
         Exp,
         Pow,
         Sin,
@@ -52,6 +53,7 @@ namespace Physica::Core {
         ArcCos,
         Cosh,
         Tanh,
+        Sech,
         LnCosh
     };
 
@@ -78,6 +80,7 @@ namespace Physica::Core {
             case ExprType::Relu: return "Relu";
             case ExprType::Square: return "Square";
             case ExprType::Ln: return "Ln";
+            case ExprType::Ln1p: return "Ln1p";
             case ExprType::Exp: return "Exp";
             case ExprType::Pow: return "Pow";
             case ExprType::Sin: return "Sin";
@@ -85,6 +88,7 @@ namespace Physica::Core {
             case ExprType::ArcCos: return "ArcCos";
             case ExprType::Cosh: return "Cosh";
             case ExprType::Tanh: return "Tanh";
+            case ExprType::Sech: return "Sech";
             case ExprType::LnCosh: return "LnCosh";
             default: [[unlikely]]
                 return "Unknown";

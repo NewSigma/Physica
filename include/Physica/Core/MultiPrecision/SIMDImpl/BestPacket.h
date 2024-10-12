@@ -30,9 +30,9 @@ namespace Physica::Core {
         constexpr static bool isComplex = ScalarType::isComplex;
         constexpr static bool isForward = ScalarType::isForwardDiff;
         constexpr static bool isDynamic = Length == Dynamic;
-        constexpr static size_t size128 = (isSinglePrec ? 4 : 2) / (isComplex ? 2 : 1) / (isForward ? 2 : 1);
-        constexpr static size_t size256 = (isSinglePrec ? 8 : 4) / (isComplex ? 2 : 1) / (isForward ? 2 : 1);
-        constexpr static size_t size512 = (isSinglePrec ? 16 : 8) / (isComplex ? 2 : 1) / (isForward ? 2 : 1);
+        constexpr static size_t size128 = (isSinglePrec ? 4 : 2) / (isForward ? 2 : 1);
+        constexpr static size_t size256 = (isSinglePrec ? 8 : 4) / (isForward ? 2 : 1);
+        constexpr static size_t size512 = (isSinglePrec ? 16 : 8) / (isForward ? 2 : 1);
         constexpr static bool support128 = INSTRSET >= 2;
         constexpr static bool support256 = INSTRSET >= 7 && support128;
         constexpr static bool support512 = INSTRSET >= 9 && support256;
@@ -50,21 +50,10 @@ namespace Physica::Core {
         using Type = typename std::conditional<Size == 1, ScalarType, SIMD<ScalarType, Size>>::type;
     };
 
-    template<size_t Length>
-    class BestPacket<Scalar<Float16>, Length> {
-        using ScalarType = Scalar<Float16>;
-    public:
-        constexpr static size_t Size = Length == 1 ? 1 : 2;
-        using Type = typename std::conditional<Length == 1, ScalarType, SIMD<ScalarType, 2>>::type;
-    };
-
     template<class ScalarType, size_t Length>
     class device_obj<BestPacket<ScalarType, Length>> {
     public:
         constexpr static size_t Size = 1;
         using Type = ScalarType;
     };
-
-    template<size_t Length>
-    class device_obj<BestPacket<float16, Length>> : public BestPacket<float16, Length> {};
 }

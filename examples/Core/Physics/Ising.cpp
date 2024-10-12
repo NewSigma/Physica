@@ -22,6 +22,7 @@
 #include <Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h>
 #include <Physica/Core/Math/Statistics/NumCharacter.h>
 #include <Physica/Core/Math/Random/RandomPool.h>
+#include <Physica/Core/Parallel/Executor/ThreadExecutor.h>
 #include <Physica/Gui/Plot/Plot.h>
 
 using namespace Physica::Core;

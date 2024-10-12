@@ -21,6 +21,19 @@
 #include <Physica/Core/Utils/Unreachable.h>
 
 namespace Physica::Core {
+    template<class ScalarType, size_t Length> class BestPacket;
+
+    template<size_t Length>
+    class BestPacket<float16, Length> {
+        using ScalarType = float16;
+    public:
+        constexpr static size_t Size = Length == 1 ? 1 : 2;
+        using Type = typename std::conditional<Length == 1, float16, SIMD<float16, 2>>::type;
+    };
+
+    template<size_t Length>
+    class device_obj<BestPacket<float16, Length>> : public BestPacket<float16, Length> {};
+
     template<>
     class SIMD<Scalar<Float16>, 2> : private __half2 {
         constexpr static size_t Size = 2;

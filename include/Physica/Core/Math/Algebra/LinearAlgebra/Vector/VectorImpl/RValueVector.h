@@ -28,6 +28,7 @@
 namespace Physica::Core {
     template<class Derived> class LValueVector;
     template<class Derived> class ContinuousVector;
+    template<class Derived> class ContinuousMatrix;
     template<class T, int Option, size_t Row, size_t Column, class Allocator> class DenseMatrix;
     template<class VectorType> class TransposeVector;
     template<class VectorType> class ConjugateVector;
@@ -39,6 +40,16 @@ namespace Physica::Core {
     template<class Derived> class ContinuousVector;
     template<class Derived> class RValueMatrix;
 
+    template<class T>
+    struct is_vector {
+        constexpr static bool value = std::is_base_of<RValueVector<T>, T>::value;
+    };
+
+    template<class T>
+    struct is_continuous {
+        constexpr static bool value = std::is_base_of<ContinuousVector<T>, T>::value || std::is_base_of<ContinuousMatrix<T>, T>::value;
+    };
+
     namespace Internal {
         template<class VectorType1, class VectorType2 = VectorType1>
         class EnableSIMD {
@@ -49,9 +60,9 @@ namespace Physica::Core {
         };
     }
 
-    template<class T>
-    struct is_vector {
-        constexpr static bool value = std::is_base_of<RValueVector<T>, T>::value;
+    template<class VectorType1, class VectorType2 = VectorType1>
+    struct EnableMKL {
+        constexpr static bool value = HasMKL() && is_continuous<VectorType1>::value && is_continuous<VectorType2>::value;
     };
     /**
      * \class RValueVector is a base class for vectors. You cannot take the address of elements in an RValueVector.

@@ -72,6 +72,10 @@
 
 #define PHYSICA_API __attribute__ ((visibility ("default")))
 
+#ifdef PHYSICA_MKL
+    #include <mkl.h>
+#endif
+
 #ifndef PHYSICA_CUDA
     #define __host__
     #define __device__

@@ -22,7 +22,10 @@
 
 namespace Physica::Core {
     template<class ScalarType, size_t Size>
-    [[nodiscard]] inline ScalarType SIMD<ScalarType, Size>::operator[](int index) const {
+    SIMD<ScalarType, Size>::SIMD(HalfType a, HalfType b) : Base(a.getImpl(), b.getImpl()) {}
+
+    template<class ScalarType, size_t Size>
+    inline ScalarType SIMD<ScalarType, Size>::operator[](int index) const {
         if constexpr (isForward)
             return ScalarType(Base::operator[](index * 2), Base::operator[](index * 2 + 1));
         else
@@ -30,38 +33,43 @@ namespace Physica::Core {
     }
 
     template<class ScalarType, size_t Size>
-    [[nodiscard]] inline SIMD<ScalarType, Size> SIMD<ScalarType, Size>::operator+(const SIMD& other) const {
+    inline SIMD<ScalarType, Size> SIMD<ScalarType, Size>::operator+(const SIMD& other) const {
         return SIMD(getImpl() + other.getImpl());
     }
 
     template<class ScalarType, size_t Size>
-    [[nodiscard]] inline SIMD<ScalarType, Size> SIMD<ScalarType, Size>::operator-(const SIMD& other) const {
+    inline SIMD<ScalarType, Size> SIMD<ScalarType, Size>::operator-(const SIMD& other) const {
         return SIMD(getImpl() - other.getImpl());
     }
 
     template<class ScalarType, size_t Size>
-    [[nodiscard]] inline SIMD<ScalarType, Size> SIMD<ScalarType, Size>::operator*(const SIMD& other) const {
+    inline SIMD<ScalarType, Size> SIMD<ScalarType, Size>::operator*(const SIMD& other) const {
         return SIMD(getImpl() * other.getImpl());
     }
 
     template<class ScalarType, size_t Size>
-    [[nodiscard]] inline SIMD<ScalarType, Size> SIMD<ScalarType, Size>::operator/(const SIMD& other) const {
+    inline SIMD<ScalarType, Size> SIMD<ScalarType, Size>::operator*(const ScalarType& v) const {
+        return operator*(SIMD(v));
+    }
+
+    template<class ScalarType, size_t Size>
+    inline SIMD<ScalarType, Size> SIMD<ScalarType, Size>::operator/(const SIMD& other) const {
         return SIMD(getImpl() / other.getImpl());
     }
 
     template<class ScalarType, size_t Size>
-    [[nodiscard]] inline SIMD<ScalarType, Size> SIMD<ScalarType, Size>::operator-() const {
+    inline SIMD<ScalarType, Size> SIMD<ScalarType, Size>::operator-() const {
         return SIMD(-getImpl());
     }
 
     template<class ScalarType, size_t Size>
-    [[nodiscard]] inline typename SIMD<ScalarType, Size>::BoolSIMDType
+    inline typename SIMD<ScalarType, Size>::BoolSIMDType
     SIMD<ScalarType, Size>::operator>(const SIMD& other) const {
         return BoolSIMDType(getImpl() > other.getImpl());
     }
     
     template<class ScalarType, size_t Size>
-    [[nodiscard]] inline typename SIMD<ScalarType, Size>::BoolSIMDType
+    inline typename SIMD<ScalarType, Size>::BoolSIMDType
     SIMD<ScalarType, Size>::operator<(const SIMD& other) const {
         return BoolSIMDType(getImpl() < other.getImpl());
     }
@@ -97,6 +105,36 @@ namespace Physica::Core {
     }
 
     template<class ScalarType, size_t Size>
+    template<int... Order>
+    inline SIMD<ScalarType, Size> SIMD<ScalarType, Size>::shuffle() const {
+        constexpr unsigned int mask = makeShuffleMask<Order...>(0);
+        if constexpr (ScalarType::Option == Float32) {
+            static_assert(sizeof...(Order) == 4, "[Error]: Invalid number of orders");
+            if constexpr (Size == 4)
+                return _mm_shuffle_ps(*this, *this, mask);
+            else if constexpr (Size == 8)
+                return _mm256_shuffle_ps(*this, *this, mask);
+            else if constexpr (Size == 16)
+                return _mm512_shuffle_ps(*this, *this, mask);
+        }
+        else {
+            static_assert(sizeof...(Order) == Size, "[Error]: Invalid number of orders");
+            if constexpr (Size == 2)
+                return _mm_shuffle_pd(*this, *this, mask);
+            else if constexpr (Size == 4)
+                return _mm256_shuffle_pd(*this, *this, mask);
+            else if constexpr (Size == 8)
+                return _mm512_shuffle_pd(*this, *this, mask);
+        }
+    }
+
+    template<class ScalarType, size_t Size>
+    template<int... Flags>
+    inline SIMD<ScalarType, Size> SIMD<ScalarType, Size>::change_sign() const {
+        return Physica::change_sign<Flags...>(getImpl());
+    }
+
+    template<class ScalarType, size_t Size>
     inline ScalarType SIMD<ScalarType, Size>::horizontal_add() const {
         return Physica::horizontal_add(getImpl());
     }
@@ -109,6 +147,24 @@ namespace Physica::Core {
     template<class ScalarType, size_t Size>
     inline ScalarType SIMD<ScalarType, Size>::horizontal_min() const {
         return Physica::horizontal_min(getImpl());
+    }
+
+    template<class ScalarType, size_t Size>
+    template<int Order, int... Orders>
+    constexpr unsigned int SIMD<ScalarType, Size>::makeShuffleMask(int order) {
+        int result = order;
+        if constexpr (ScalarType::Option == Float32) {
+            static_assert(0 <= Order && Order < 4, "[Error]: Invalid order");
+            result |= Order << ((4 - (sizeof...(Orders) + 1)) * 2);
+        }
+        else {
+            static_assert(0 <= Order && Order < 2, "[Error]: Invalid order");
+            result |= Order << (Size - (sizeof...(Orders) + 1));
+        }
+
+        if constexpr (sizeof...(Orders) != 0)
+            return makeShuffleMask<Orders...>(result);
+        return result;
     }
     //////////////////////////////////////////////////////////////////
     template<class PlainScalar, size_t Size>
@@ -180,6 +236,12 @@ namespace Physica::Core {
         }
         tracer.pushOperand(operand);
         return {temp, newHeadNode};
+    }
+
+    template<class PlainScalar, size_t Size>
+    inline SIMD<Differentiable<PlainScalar, DiffMode::Reverse, 1>, Size>
+    SIMD<Differentiable<PlainScalar, DiffMode::Reverse, 1>, Size>::operator*(const ScalarType& v) const {
+        return operator*(SIMD(v));
     }
 
     template<class PlainScalar, size_t Size>
@@ -307,5 +369,72 @@ namespace Physica::Core {
             const SIMD<ScalarType, Size> c) {
         static_assert(!ScalarType::isDifferentiable, "[Error]: Not implemented");
         return SIMD<ScalarType, Size>(mul_sub(a.getImpl(), b.getImpl(), c.getImpl()));
+    }
+
+    template<class ScalarType, size_t Size>
+    [[nodiscard]] inline SIMD<ScalarType, Size> mul_addsub(
+            const SIMD<ScalarType, Size> a,
+            const SIMD<ScalarType, Size> b,
+            const SIMD<ScalarType, Size> c) {
+        static_assert(!ScalarType::isDifferentiable, "[Error]: Not implemented");
+        if constexpr (ScalarType::Option == Float32) {
+            if constexpr (Size == 4) {
+                if constexpr (Instruset::hasFMA() || Instruset::hasAVX2())
+                    return  _mm_fmaddsub_ps(a, b, c);
+                else if constexpr (Instruset::hasFMA4())
+                    return  _mm_maddsub_ps(a, b, c);
+                else if constexpr (Instruset::hasSSE3())
+                    return _mm_addsub_ps(a * b, c);
+                else
+                    return a * b + c.template change_sign<1, 0, 1, 0>();
+            }
+            else if constexpr (Size == 8) {
+                if constexpr (Instruset::hasAVX()) {
+                    if constexpr (Instruset::hasFMA() || Instruset::hasAVX2())
+                        return  _mm256_fmaddsub_ps(a, b, c);
+                    else
+                        return _mm256_addsub_ps(a * b, c);
+                }
+                else
+                    return {mul_addsub(a.getLow(), b.getLow(), c.getLow()), mul_addsub(a.getHigh(), b.getHigh(), c.getHigh())};
+            }
+            else {
+                static_assert(Size == 16, "[Error]: Unexpected size");
+                if constexpr (Instruset::hasAVX512())
+                    return _mm512_fmaddsub_ps(a, b, c);
+                else
+                    return {mul_addsub(a.getLow(), b.getLow(), c.getLow()), mul_addsub(a.getHigh(), b.getHigh(), c.getHigh())};
+            }
+        }
+        else {
+            static_assert(ScalarType::Option == Float64, "[Error]: Unexpected float type");
+            if constexpr (Size == 2) {
+                if constexpr (Instruset::hasFMA() || Instruset::hasAVX2())
+                    return  _mm_fmaddsub_pd(a, b, c);
+                else if constexpr (Instruset::hasFMA4())
+                    return  _mm_maddsub_pd(a, b, c);
+                else if constexpr (Instruset::hasSSE3())
+                    return _mm_addsub_pd(a * b, c);
+                else
+                    return a * b + c.template change_sign<1, 0>();
+            }
+            else if constexpr (Size == 4) {
+                if constexpr (Instruset::hasAVX()) {
+                    if constexpr (Instruset::hasFMA() || Instruset::hasAVX2())
+                        return  _mm256_fmaddsub_pd(a, b, c);
+                    else
+                        return _mm256_addsub_pd(a * b, c);
+                }
+                else
+                    return {mul_addsub(a.getLow(), b.getLow(), c.getLow()), mul_addsub(a.getHigh(), b.getHigh(), c.getHigh())};
+            }
+            else {
+                static_assert(Size == 8, "[Error]: Unexpected size");
+                if constexpr (Instruset::hasAVX512())
+                    return _mm512_fmaddsub_pd(a, b, c);
+                else
+                    return {mul_addsub(a.getLow(), b.getLow(), c.getLow()), mul_addsub(a.getHigh(), b.getHigh(), c.getHigh())};
+            }
+        }
     }
 }

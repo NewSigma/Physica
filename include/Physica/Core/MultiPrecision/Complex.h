@@ -56,6 +56,9 @@ namespace Physica::Core {
         using typename Base::ScalarType;
         using typename Base::TrivialType;
         constexpr static bool enableSIMD = !std::is_same<T, PacketType>::value;
+    #ifdef PHYSICA_MKL
+        using MKL_Complex = typename std::conditional<T::Option == Float32, MKL_Complex8, MKL_Complex16>::type;
+    #endif
     private:
         T real;
         T imag;

@@ -34,7 +34,7 @@ namespace Physica::Core {
         template<class Functor>
         static FutureGroup<FutureType> parallel_for(Functor func, unsigned int loopCount);
         template<class Functor>
-        static FutureGroup<FutureType> parallel_for(Functor func, unsigned int loopCount, [[maybe_unused]] unsigned int core);
+        static FutureGroup<FutureType> parallel_for(Functor func, unsigned int loopCount, unsigned int core);
         static void auto_wait([[maybe_unused]] FutureType& future) {}
         static void auto_wait([[maybe_unused]] FutureGroup<FutureType>& group) {}
         static void wait() {}
@@ -63,11 +63,9 @@ namespace Physica::Core {
 
     template<class Functor>
     FutureGroup<typename SequentialExecutor::FutureType> SequentialExecutor::parallel_for(
-            Functor func, unsigned int loopCount, [[maybe_unused]] unsigned int core) {
+            Functor func, unsigned int loopCount, unsigned int) {
         using ResultType = typename std::invoke_result<Functor, unsigned int>::type;
         static_assert(std::is_same<void, ResultType>::value, "[Error]: Invalid functor");
-        assert(loopCount >= core);
-        assert(core > 0);
         for (unsigned int i = 0; i < loopCount; ++i)
             func(i);
         return FutureGroup<FutureType>{};

@@ -32,7 +32,7 @@ int main() {
 
     EigenSolver<ComplexType> eig(hermite, false);
     eig.sort();
-    JacobiDavidson<ComplexType> jd(hermite.getRow(), 61);
+    JacobiDavidson<ComplexType> jd(hermite.getRow(), 59);
     jd.compute(hermite, Vector<ComplexType>::random_uniform(data.getRow(), gen));
     jd.sort();
 

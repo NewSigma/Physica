@@ -34,7 +34,6 @@ namespace Physica::Core {
         template<class T1, class T2>
         class AddAssignImpl<T1, T2, true> {
             static_assert(std::is_same<typename T1::ScalarType, typename T2::ScalarType>::value, "[Error]: SIMD on different scalars is not supported");
-            static_assert(!T1::isComplex && !T2::isComplex, "[Error]: SIMD on complex scalars are not supported");
             constexpr static size_t size1 = T1::SizeAtCompile;
             constexpr static size_t size2 = T2::SizeAtCompile;
             constexpr static size_t SizeAtCompile = size1 > size2 ? size1 : size2;

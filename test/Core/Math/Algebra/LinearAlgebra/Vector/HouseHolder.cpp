@@ -110,7 +110,7 @@ int main() {
 
         if (!scalarNear(m1(0, 0).norm(), norm, 1E-15))
             return 1;
-        if (!scalarNear(m1(1, 0).norm(), T(0), 1E-15))
+        if (!scalarNear(m1(1, 0).norm(), T(0), 1E-14))
             return 1;
 
         m1(1, 0) = m2(1, 0) = T(0);

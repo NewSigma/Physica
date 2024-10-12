@@ -18,12 +18,12 @@
  */
 #pragma once
 
-namespace Physica::Core::Internal {
+namespace Physica::Core {
     /**
      * Reference:
      * [1] vectorclass2 https://github.com/vectorclass/version2/blob/master/instrset.h
      */
-    class Instrset {
+    class Instruset {
     public:
         [[nodiscard]] constexpr static bool hasAVX512() {
         #if defined (__AVX512F__) || defined (__AVX512__)
@@ -112,6 +112,22 @@ namespace Physica::Core::Internal {
             return true;
         #elif defined _M_IX86_FP
             return _M_IX86_FP == 1;
+        #else
+            return false;
+        #endif
+        }
+
+        [[nodiscard]] constexpr static bool hasFMA() {
+        #ifdef __FMA__
+            return true;
+        #else
+            return false;
+        #endif
+        }
+
+        [[nodiscard]] constexpr static bool hasFMA4() {
+        #ifdef __FMA4__
+            return true;
         #else
             return false;
         #endif

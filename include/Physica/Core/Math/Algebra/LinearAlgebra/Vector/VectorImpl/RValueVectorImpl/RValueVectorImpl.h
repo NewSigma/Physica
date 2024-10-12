@@ -106,7 +106,8 @@ namespace Physica::Core {
     template<class Derived>
     template<class AnyPacket>
     inline AnyPacket RValueVector<Derived>::packet(size_t index) const {
-        ScalarType buffer[AnyPacket::size()];
+        using T = typename Traits<AnyPacket>::ScalarType;
+        T buffer[AnyPacket::size()];
         for (size_t i = 0; i < AnyPacket::size(); ++i, ++index)
             buffer[i] = calc(index);
         if constexpr (isExpression && isReverseDiff) { //Optimize: For expression such as A + B, there is no need to create new node
@@ -123,9 +124,10 @@ namespace Physica::Core {
     template<class Derived>
     template<class AnyPacket>
     inline AnyPacket RValueVector<Derived>::packetPartial(size_t index, size_t count) const {
-        ScalarType buffer[AnyPacket::size()]{};
-        for (size_t i = 0; i < count; ++i, ++index)
-            buffer[i] = calc(index);
+        using T = typename Traits<AnyPacket>::ScalarType;
+        T buffer[AnyPacket::size()];
+        for (size_t i = 0; i < AnyPacket::size(); ++i, ++index)
+            buffer[i] = i < count ? calc(index) : ScalarType(0);
         if constexpr (isExpression && isReverseDiff) {
             using TracerType = typename ScalarType::TracerType;
             TracerType::getInstance().reserve(count);

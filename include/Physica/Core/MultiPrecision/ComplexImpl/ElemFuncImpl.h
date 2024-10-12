@@ -131,7 +131,7 @@ namespace Physica::Core {
         const ScalarType abs_real = abs(c.getReal());
         const ScalarType norm1 = exp(ScalarType(-2) * abs_real);
         const ScalarType phase = c.getReal().isPositive() ? c.getImag() : -c.getImag();
-        const auto temp = Complex<ScalarType>((ScalarType(1) + norm1) * cos(phase), (ScalarType(1) - norm1) * sin(phase));
+        const auto temp = Complex<ScalarType>((ScalarType(1) + norm1) * cos(phase), (ScalarType(1) - norm1) * sin(phase)) * ScalarType(0.5);
         return abs_real + ln(temp);
     }
 }
