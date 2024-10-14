@@ -718,7 +718,7 @@ namespace Physica::Core {
     
     template<class ScalarType, unsigned int Dim, size_t NumReplica, class ForceMatrixAllocator>
     void RPMD<ScalarType, Dim, NumReplica, ForceMatrixAllocator>::write(H5Location& loc, const char* name) const {
-        auto group = loc.createGroup(name);
+        auto group = loc.openGroup(name);
         getLattice().write(group, "lattice");
         getPhaseMatrix().write(group, "phase");
         forceBuffer.write(group, "force");

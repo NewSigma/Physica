@@ -80,12 +80,12 @@ namespace Physica::Core {
 
     template<class ScalarType>
     H5Group DeepModelDataset<ScalarType>::write(H5Location& loc, const char* name) const {
-        auto group = loc.createGroup(name);
+        auto group = loc.openGroup(name);
         energys.write(group, "Energys");
 
         char buffer[32]; //32 should be enough to hold size_t
-        auto cellGroup = group.createGroup("Cells");
-        auto forceGroup = group.createGroup("Forces");
+        auto cellGroup = group.openGroup("Cells");
+        auto forceGroup = group.openGroup("Forces");
         for (size_t i = 0; i < getNumSample(); ++i) {
             sprintf(buffer, "%zu", i);
             cells[i].write(cellGroup, buffer);

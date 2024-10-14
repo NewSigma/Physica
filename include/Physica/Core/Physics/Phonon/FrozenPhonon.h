@@ -200,7 +200,7 @@ namespace Physica::Core {
 
     template<class ScalarType>
     void FrozenPhonon<ScalarType>::write(const RSpaceFCGrid& rSpaceFC, H5Location& loc, const char* name) {
-        auto group = loc.createGroup(name);
+        auto group = loc.openGroup(name);
         const auto gridDim = rSpaceFC.getDim();
         /* Write superSize */ {
             unsigned char superSize[Dim];

@@ -388,7 +388,7 @@ namespace Physica::Core {
 
     template<class ScalarType, unsigned int Dim>
     H5Group PeriodicCell<ScalarType, Dim>::write(H5Location& loc, const char* name) const {
-        auto group = loc.createGroup(name);
+        auto group = loc.openGroup(name);
         lattice.write(group, "lattice");
         auto posDataset = pos.write(group, "pos");
         auto typeAttr = posDataset.createAttribute("Type", H5::PredType::NATIVE_INT8, H5DataSpace<1>(1));

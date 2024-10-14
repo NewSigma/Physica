@@ -19,11 +19,14 @@
 #include "Physica/Core/IO/HDF5/HDF5.h"
 
 namespace Physica::Core {
-    H5Group H5Location::createGroup(const char* name, size_t size_hint) const {
-        return getDerived().createGroup(name, size_hint);
+    const H5Group H5Location::openGroup(const char* name) const {
+        return getDerived().openGroup(name);
     }
 
-    H5Group H5Location::openGroup(const char* name) const {
-        return getDerived().openGroup(name);
+    H5Group H5Location::openGroup(const char* name) {
+        auto& loc = getDerived();
+        if (loc.exists(name))
+            return loc.openGroup(name);
+        return loc.createGroup(name, 0);
     }
 }

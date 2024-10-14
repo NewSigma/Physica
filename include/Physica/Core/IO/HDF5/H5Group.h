@@ -35,9 +35,7 @@ namespace Physica::Core {
         /* Operations */
         using Location::createDataSet;
         using Location::openDataSet;
-
-        inline H5Group createGroup(const char* name, size_t size_hint = 0) const;
-        [[nodiscard]] inline H5Group openGroup(const char* name) const;
+        using Location::openGroup;
 
         template<class T>
         H5::Attribute writeAttr(const char* name, T value);
@@ -47,14 +45,6 @@ namespace Physica::Core {
         template<class T>
         [[nodiscard]] static const H5::PredType& getPredType();
     };
-
-    inline H5Group H5Group::createGroup(const char* name, size_t size_hint) const {
-        return Base::createGroup(name, size_hint);
-    }
-
-    inline H5Group H5Group::openGroup(const char* name) const {
-        return Base::openGroup(name);
-    }
 
     template<class T>
     H5::Attribute H5Group::writeAttr(const char* name, T value) {
