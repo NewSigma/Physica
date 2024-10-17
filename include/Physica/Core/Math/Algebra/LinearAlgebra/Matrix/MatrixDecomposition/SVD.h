@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Weibo He.
+ * Copyright 2022-2024 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -18,11 +18,11 @@
  */
 #pragma once
 
-#include "Decouplable.h"
+#include <Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h>
+#include <Physica/Core/Math/Algebra/LinearAlgebra/Vector/Givens.h>
+#include <Physica/Core/Exception/BadConvergenceException.h>
 #include "Bidiagonalization.h"
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h"
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/Givens.h"
-#include "Physica/Core/Exception/BadConvergenceException.h"
+#include "Decouplable.h"
 
 namespace Physica::Core {
     /**
@@ -64,19 +64,21 @@ namespace Physica::Core {
         template<class OtherMatrix>
         SVD(const RValueMatrix<OtherMatrix>& source);
         SVD(const SVD&) = default;
-        SVD(SVD&& svd) noexcept = default;
+        SVD(SVD&&) noexcept = default;
         ~SVD() = default;
         /* Operators */
-        SVD& operator=(SVD svd) noexcept;
+        SVD& operator=(SVD obj) noexcept { swap(obj); return *this; }
         /* Operations */
         template<class OtherMatrix>
         void compute(const RValueMatrix<OtherMatrix>& source);
         void sort();
+        void resize(size_t row, size_t col);
         void swap(SVD& __restrict svd) noexcept;
         /* Getters */
         [[nodiscard]] const SingularValueVector& getSingulars() const noexcept { return singulars; }
         [[nodiscard]] const LSingularMatrix& getMatrixU() const noexcept { return lSingularMat; }
         [[nodiscard]] const RSingularMatrix& getMatrixV() const noexcept { return rSingularMat; }
+        [[nodiscard]] size_t getNumSingular() const noexcept { return singulars.getLength(); }
     private:
         void stepSVD(size_t lower, size_t sub_order);
         ScalarType computeShift(size_t lower, size_t sub_order);
@@ -87,27 +89,15 @@ namespace Physica::Core {
     };
 
     template<class ScalarType, size_t RowAtCompile, size_t ColumnAtCompile>
-    SVD<ScalarType, RowAtCompile, ColumnAtCompile>::SVD(size_t row, size_t col)
-            : working(row, col)
-            , singulars(std::min(row, col))
-            , lSingularMat(row, row)
-            , rSingularMat(col, col) {}
+    SVD<ScalarType, RowAtCompile, ColumnAtCompile>::SVD(size_t row, size_t col) {
+        resize(row, col);
+    }
 
     template<class ScalarType, size_t RowAtCompile, size_t ColumnAtCompile>
     template<class OtherMatrix>
     SVD<ScalarType, RowAtCompile, ColumnAtCompile>::SVD(const RValueMatrix<OtherMatrix>& source)
-            : working(source)
-            , singulars(std::min(source.getRow(), source.getColumn()))
-            , lSingularMat(source.getRow(), source.getRow())
-            , rSingularMat(source.getColumn(), source.getColumn()) {
+            : SVD(source.getRow(), source.getColumn()) {
         compute(source);
-    }
-
-    template<class ScalarType, size_t RowAtCompile, size_t ColumnAtCompile>
-    SVD<ScalarType, RowAtCompile, ColumnAtCompile>&
-    SVD<ScalarType, RowAtCompile, ColumnAtCompile>::operator=(SVD svd) noexcept {
-        this->swap(svd);
-        return *this;
     }
 
     template<class ScalarType, size_t RowAtCompile, size_t ColumnAtCompile>
@@ -115,6 +105,8 @@ namespace Physica::Core {
     void SVD<ScalarType, RowAtCompile, ColumnAtCompile>::compute(const RValueMatrix<OtherMatrix>& source) {
         const size_t row = source.getRow();
         const size_t col = source.getColumn();
+        assert(row == lSingularMat.getRow());
+        assert(col == rSingularMat.getRow());
         {
             Bidiagonalization<WorkingMatrix> bidiag(std::max(row, col), std::min(row, col));
             if (row < col) {
@@ -183,6 +175,14 @@ namespace Physica::Core {
             lSingularMat[i].swap(lSingularMat[index_min]);
             rSingularMat[i].swap(rSingularMat[index_min]);
         }
+    }
+
+    template<class ScalarType, size_t RowAtCompile, size_t ColumnAtCompile>
+    void SVD<ScalarType, RowAtCompile, ColumnAtCompile>::resize(size_t row, size_t col) {
+        working.resize(row, col);
+        singulars.resize(std::min(row, col));
+        lSingularMat.resize(row, row);
+        rSingularMat.resize(col, col);
     }
 
     template<class ScalarType, size_t RowAtCompile, size_t ColumnAtCompile>
@@ -261,10 +261,12 @@ namespace Physica::Core {
         applyGivens(mat, buffer, i, i + 1);
         applyGivens(rSingularMat, buffer, i, i + 1);
     }
+}
 
+namespace std {
     template<class ScalarType, size_t RowAtCompile, size_t ColumnAtCompile>
-    inline void swap(SVD<ScalarType, RowAtCompile, ColumnAtCompile>& __restrict svd1,
-                     SVD<ScalarType, RowAtCompile, ColumnAtCompile>& __restrict svd2) noexcept {
+    inline void swap(Physica::Core::SVD<ScalarType, RowAtCompile, ColumnAtCompile>& __restrict svd1,
+                     Physica::Core::SVD<ScalarType, RowAtCompile, ColumnAtCompile>& __restrict svd2) noexcept {
         svd1.swap(svd2);
     }
 }

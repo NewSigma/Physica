@@ -40,6 +40,7 @@ namespace Physica::Gui {
         legend->setFont(font);
         legend->setAlignment(Qt::AlignTop);
         legend->setMarkerShape(QLegend::MarkerShapeFromSeries);
+        legend->hide();
         chart.setTitleFont(font);
         chart.setBackgroundVisible(false);
         chart.setMargins(QMargins{});
@@ -59,7 +60,6 @@ namespace Physica::Gui {
             axisY->setTickType(QValueAxis::TicksDynamic);
             axisY->setGridLineVisible(false);
             axisY->setMinorGridLineVisible(false);
-            axisY->setMinorTickCount(4);
             axisY->setLabelsFont(font);
             axisY->setRange(minY, maxY);
             axisY->setTitleFont(font);
@@ -82,7 +82,6 @@ namespace Physica::Gui {
             axisRight->setLabelsVisible(false);
             axisRight->setGridLineVisible(false);
             axisRight->setMinorGridLineVisible(false);
-            axisRight->setMinorTickCount(4);
             axisRight->setLabelsFont(font);
             axisRight->setRange(minY, maxY);
             axisRight->setTitleFont(font);

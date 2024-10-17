@@ -129,6 +129,9 @@ namespace Physica::Core {
 
     template<ScalarOption Option>
     Scalar<Option> arccoth(const Scalar<Option>& s) noexcept;
+
+    template<ScalarOption Option>
+    Scalar<Option> lncosh(const Scalar<Option>& s) noexcept;
 }
 
 #include "FunctionImpl/ElementaryImpl.h"

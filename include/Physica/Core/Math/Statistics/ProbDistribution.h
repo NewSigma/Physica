@@ -18,12 +18,12 @@
  */
 #pragma once
 
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/Vector.h"
+#include <Physica/Core/Math/Algebra/LinearAlgebra/Vector/Vector.h>
 
 namespace Physica::Core {
     template<class ScalarType>
-    class ProbabilityDistributionFunction {
-        using This = ProbabilityDistributionFunction;
+    class ProbDistribution {
+        using This = ProbDistribution;
         using BucketType = Array<size_t>;
         using VectorType = Vector<ScalarType>;
 
@@ -31,12 +31,12 @@ namespace Physica::Core {
         VectorType seperates;
         ScalarType repDelta;
     public:
-        ProbabilityDistributionFunction(ScalarType from, ScalarType to, size_t numBin);
-        ProbabilityDistributionFunction(const This&) = default;
-        ProbabilityDistributionFunction(This&&) noexcept = default;
-        ~ProbabilityDistributionFunction() = default;
+        ProbDistribution(ScalarType from, ScalarType to, size_t numBin);
+        ProbDistribution(const This&) = default;
+        ProbDistribution(This&&) noexcept = default;
+        ~ProbDistribution() = default;
         /* Operators */
-        This& operator=(This obj) noexcept;
+        This& operator=(This obj) noexcept { swap(obj); return *this; }
         void operator+=(const This& pdf);
         /* Operations */
         void sample(ScalarType data);
@@ -55,7 +55,7 @@ namespace Physica::Core {
     };
 
     template<class ScalarType>
-    ProbabilityDistributionFunction<ScalarType>::ProbabilityDistributionFunction(ScalarType from, ScalarType to, size_t numBin)
+    ProbDistribution<ScalarType>::ProbDistribution(ScalarType from, ScalarType to, size_t numBin)
             : bucket(numBin, 0)
             , seperates(VectorType::linspace(from, to, numBin + 1))
             , repDelta(ScalarType(numBin) / (to - from)) {
@@ -63,34 +63,34 @@ namespace Physica::Core {
     }
 
     template<class ScalarType>
-    void ProbabilityDistributionFunction<ScalarType>::sample(ScalarType data) {
+    void ProbDistribution<ScalarType>::sample(ScalarType data) {
         const long index = double((data - getFromPoint()) * repDelta);
         if (data > getFromPoint() && 0 <= index && size_t(index) < getNumBin())
             bucket[index] += 1;
     }
 
     template<class ScalarType>
-    inline void ProbabilityDistributionFunction<ScalarType>::sample(VectorType datas) {
+    inline void ProbDistribution<ScalarType>::sample(VectorType datas) {
         for (auto data : datas)
             sample(data);
     }
 
     template<class ScalarType>
-    void ProbabilityDistributionFunction<ScalarType>::clear() {
+    void ProbDistribution<ScalarType>::clear() {
         for (auto& elem : bucket)
             elem = 0;
     }
 
     template<class ScalarType>
-    typename ProbabilityDistributionFunction<ScalarType>::VectorType
-    ProbabilityDistributionFunction<ScalarType>::makePosition() const {
+    typename ProbDistribution<ScalarType>::VectorType
+    ProbDistribution<ScalarType>::makePosition() const {
         const ScalarType delta = (getToPoint() - getFromPoint()) / ScalarType(getNumBin());
         return seperates.head(getNumBin()) + (delta * 0.5);
     }
 
     template<class ScalarType>
-    typename ProbabilityDistributionFunction<ScalarType>::VectorType
-    ProbabilityDistributionFunction<ScalarType>::makeDistribution() const {
+    typename ProbDistribution<ScalarType>::VectorType
+    ProbDistribution<ScalarType>::makeDistribution() const {
         const ScalarType factor = repDelta / ScalarType(calcNumSample());
         VectorType result(getNumBin());
         for (size_t i = 0; i < result.getLength(); ++i)
@@ -99,20 +99,13 @@ namespace Physica::Core {
     }
 
     template<class ScalarType>
-    ProbabilityDistributionFunction<ScalarType>& ProbabilityDistributionFunction<ScalarType>::operator=(
-            ProbabilityDistributionFunction<ScalarType> obj) noexcept {
-        swap(obj);
-        return *this;
-    }
-
-    template<class ScalarType>
-    void ProbabilityDistributionFunction<ScalarType>::operator+=(const ProbabilityDistributionFunction<ScalarType>& pdf) {
+    void ProbDistribution<ScalarType>::operator+=(const ProbDistribution<ScalarType>& pdf) {
         for (size_t i = 0; i < bucket.getLength(); ++i)
             bucket[i] += pdf.bucket[i];
     }
 
     template<class ScalarType>
-    void ProbabilityDistributionFunction<ScalarType>::swap(This& __restrict obj) noexcept {
+    void ProbDistribution<ScalarType>::swap(This& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         bucket.swap(obj.bucket);
         seperates.swap(obj.seperates);
@@ -120,7 +113,7 @@ namespace Physica::Core {
     }
 
     template<class ScalarType>
-    size_t ProbabilityDistributionFunction<ScalarType>::calcNumSample() const {
+    size_t ProbDistribution<ScalarType>::calcNumSample() const {
         size_t num = 0;
         for (auto elem : bucket)
             num += elem;

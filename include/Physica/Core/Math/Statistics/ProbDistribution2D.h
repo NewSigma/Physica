@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Weibo He.
+ * Copyright 2023-2024 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -18,13 +18,13 @@
  */
 #pragma once
 
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h"
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Grid/GridImpl/GridStorage.h"
+#include <Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h>
+#include <Physica/Core/Math/Algebra/LinearAlgebra/Grid/GridImpl/GridStorage.h>
 
 namespace Physica::Core {
     template<class ScalarType>
-    class ProbabilityDistributionFunction2D {
-        using This = ProbabilityDistributionFunction2D;
+    class ProbDistribution2D {
+        using This = ProbDistribution2D;
         using BucketType = GridStorage<size_t>;
         using VectorType = Vector<ScalarType>;
         using MatrixType = DenseMatrix<ScalarType>;
@@ -36,12 +36,12 @@ namespace Physica::Core {
         ScalarType repDeltaX;
         ScalarType repDeltaY;
     public:
-        ProbabilityDistributionFunction2D(ScalarType fromX, ScalarType toX, ScalarType fromY, ScalarType toY, size_t numBinX, size_t numBinY);
-        ProbabilityDistributionFunction2D(const This&) = default;
-        ProbabilityDistributionFunction2D(This&&) noexcept = default;
-        ~ProbabilityDistributionFunction2D() = default;
+        ProbDistribution2D(ScalarType fromX, ScalarType toX, ScalarType fromY, ScalarType toY, size_t numBinX, size_t numBinY);
+        ProbDistribution2D(const This&) = default;
+        ProbDistribution2D(This&&) noexcept = default;
+        ~ProbDistribution2D() = default;
         /* Operators */
-        This& operator=(This obj) noexcept;
+        This& operator=(This obj) noexcept { swap(obj); return *this; }
         [[nodiscard]] This operator+(const This& pdf);
         void operator+=(const This& pdf);
         /* Operations */
@@ -63,7 +63,7 @@ namespace Physica::Core {
     };
 
     template<class ScalarType>
-    ProbabilityDistributionFunction2D<ScalarType>::ProbabilityDistributionFunction2D(
+    ProbDistribution2D<ScalarType>::ProbDistribution2D(
             ScalarType fromX, ScalarType toX, ScalarType fromY, ScalarType toY, size_t numBinX, size_t numBinY)
             : bucket({numBinX, numBinY, 1}, 0)
             , seperatesX(VectorType::linspace(fromX, toX, numBinX + 1))
@@ -75,14 +75,7 @@ namespace Physica::Core {
     }
 
     template<class ScalarType>
-    ProbabilityDistributionFunction2D<ScalarType>& ProbabilityDistributionFunction2D<ScalarType>::operator=(
-            ProbabilityDistributionFunction2D<ScalarType> obj) noexcept {
-        swap(obj);
-        return *this;
-    }
-
-    template<class ScalarType>
-    ProbabilityDistributionFunction2D<ScalarType> ProbabilityDistributionFunction2D<ScalarType>::operator+(
+    ProbDistribution2D<ScalarType> ProbDistribution2D<ScalarType>::operator+(
             const This& pdf) {
         This result(*this);
         for (size_t i = 0; i < result.bucket.getDimX(); ++i)
@@ -92,14 +85,14 @@ namespace Physica::Core {
     }
 
     template<class ScalarType>
-    void ProbabilityDistributionFunction2D<ScalarType>::operator+=(const This& pdf) {
+    void ProbDistribution2D<ScalarType>::operator+=(const This& pdf) {
         for (size_t i = 0; i < bucket.getDimX(); ++i)
             for (size_t j = 0; j < bucket.getDimY(); ++j)
                 bucket(i, j, 0) += pdf.bucket(i, j, 0);
     }
 
     template<class ScalarType>
-    void ProbabilityDistributionFunction2D<ScalarType>::sample(ScalarType x, ScalarType y) {
+    void ProbDistribution2D<ScalarType>::sample(ScalarType x, ScalarType y) {
         const long indexX = double((x - getFromPointX()) * repDeltaX);
         const long indexY = double((y - getFromPointY()) * repDeltaY);
         if (x > getFromPointX() && 0 <= indexX && size_t(indexX) < getNumBinX())
@@ -108,14 +101,14 @@ namespace Physica::Core {
     }
 
     template<class ScalarType>
-    void ProbabilityDistributionFunction2D<ScalarType>::clear() {
+    void ProbDistribution2D<ScalarType>::clear() {
         for (auto& elem : bucket)
             elem = 0;
     }
 
     template<class ScalarType>
-    typename ProbabilityDistributionFunction2D<ScalarType>::MeshType
-    ProbabilityDistributionFunction2D<ScalarType>::makePosition() const {
+    typename ProbDistribution2D<ScalarType>::MeshType
+    ProbDistribution2D<ScalarType>::makePosition() const {
         const ScalarType deltaX = (getToPointX() - getFromPointX()) / ScalarType(getNumBinX());
         const ScalarType deltaY = (getToPointY() - getFromPointY()) / ScalarType(getNumBinY());
         VectorType translateX = seperatesX.head(getNumBinX()) + (deltaX * 0.5);
@@ -124,8 +117,8 @@ namespace Physica::Core {
     }
 
     template<class ScalarType>
-    typename ProbabilityDistributionFunction2D<ScalarType>::MatrixType
-    ProbabilityDistributionFunction2D<ScalarType>::makeDistribution() const {
+    typename ProbDistribution2D<ScalarType>::MatrixType
+    ProbDistribution2D<ScalarType>::makeDistribution() const {
         const ScalarType factor = repDeltaX * repDeltaY / ScalarType(calcNumSample());
         MatrixType result(getNumBinX(), getNumBinY());
         for (size_t i = 0; i < result.getColumn(); ++i) {
@@ -137,7 +130,7 @@ namespace Physica::Core {
     }
 
     template<class ScalarType>
-    void ProbabilityDistributionFunction2D<ScalarType>::swap(This& __restrict obj) noexcept {
+    void ProbDistribution2D<ScalarType>::swap(This& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         bucket.swap(obj.bucket);
         seperatesX.swap(obj.seperatesX);
@@ -147,7 +140,7 @@ namespace Physica::Core {
     }
 
     template<class ScalarType>
-    size_t ProbabilityDistributionFunction2D<ScalarType>::calcNumSample() const {
+    size_t ProbDistribution2D<ScalarType>::calcNumSample() const {
         size_t num = 0;
         for (size_t elem : bucket)
             num += elem;

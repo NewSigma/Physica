@@ -22,7 +22,7 @@
 #include "Physica/Core/Physics/MD/KineticModel/HardCore.h"
 #include "Physica/Core/Physics/MD/Thermostat/Langevin.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h"
-#include "Physica/Core/Math/Statistics/ProbabilityDistributionFunction.h"
+#include "Physica/Core/Math/Statistics/ProbDistribution.h"
 #include "Physica/Core/Parallel/Executor/ThreadExecutor.h"
 #include "Physica/Core/Utils/BenchmarkHelper.h"
 
@@ -30,7 +30,7 @@ using namespace Physica::Core;
 using ScalarType = float64;
 using VectorType = Vector<ScalarType>;
 using MatrixType = DenseMatrix<ScalarType>;
-using PDFType = ProbabilityDistributionFunction<ScalarType>;
+using PDFType = ProbDistribution<ScalarType>;
 constexpr double timeStepLambda = 0.01;
 constexpr double collideFactor = 0.01;
 constexpr double latticeSize = 512;

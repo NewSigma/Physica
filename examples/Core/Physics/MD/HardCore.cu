@@ -25,7 +25,7 @@
 #include "Physica/Core/Physics/MD/RPMD.h"
 #include "Physica/Core/Physics/MD/KineticModel/HardCore.cuh"
 #include "Physica/Core/Math/Random/RandomPool.h"
-#include "Physica/Core/Math/Statistics/ProbabilityDistributionFunction.h"
+#include "Physica/Core/Math/Statistics/ProbDistribution.h"
 #include "Physica/Core/Parallel/Executor/ThreadExecutor.h"
 #include "Physica/Gui/Plot/Plot.h"
 #include "Physica/Core/Utils/BenchmarkHelper.h"

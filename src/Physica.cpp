@@ -16,16 +16,9 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include <QApplication>
 /**
  * This file is empty, you can include Physica headers to test your code.
  */
-int main(int argc, char** argv) {
-    QApplication::setApplicationName("Physica");
-    QApplication::setApplicationVersion("0.0.1");
-    QApplication::setOrganizationName("NewSigma@163.com");
-
-    QApplication app(argc, argv);
-
-    return QApplication::exec();
+int main() {
+    return 0;
 }

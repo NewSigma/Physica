@@ -339,4 +339,11 @@ namespace Physica::Core {
 
     template<>
     Scalar<FloatMP> arccoth(const Scalar<FloatMP>& s) noexcept;
+
+    template<ScalarOption Option>
+    Scalar<Option> lncosh(const Scalar<Option>& s) noexcept {
+        using T = Scalar<Option>;
+        const auto x = abs(s);
+        return x + ln1p(exp(-x * T(2))) - T(M_LN2);
+    }
 }

@@ -18,7 +18,7 @@
  */
 #pragma once
 
-#include "Physica/Core/MultiPrecision/ScalarImpl/ExprType.h"
+#include <Physica/Core/MultiPrecision/ScalarImpl/ExprType.h>
 
 namespace Physica::Core {
     template<class ScalarType, size_t Size>

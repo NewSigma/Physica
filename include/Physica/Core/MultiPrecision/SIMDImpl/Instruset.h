@@ -25,6 +25,30 @@ namespace Physica::Core {
      */
     class Instruset {
     public:
+        [[nodiscard]] constexpr static bool hasAVX512VL() {
+        #ifdef __AVX512VL__
+            return true;
+        #else
+            return false;
+        #endif
+        }
+
+        [[nodiscard]] constexpr static bool hasAVX512BW() {
+        #ifdef __AVX512BW__
+            return true;
+        #else
+            return false;
+        #endif
+        }
+
+        [[nodiscard]] constexpr static bool hasAVX512DQ() {
+        #ifdef __AVX512DQ__
+            return true;
+        #else
+            return false;
+        #endif
+        }
+
         [[nodiscard]] constexpr static bool hasAVX512() {
         #if defined (__AVX512F__) || defined (__AVX512__)
             return true;
