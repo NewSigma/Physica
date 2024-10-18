@@ -81,7 +81,8 @@ namespace Physica::Gui {
         QBoxPlotSeries& errorBar(const Core::LValueVector<VectorType1>& x, const Core::LValueVector<VectorType2>& mean, const Core::LValueVector<VectorType2>& deviation);
         QScatterSeries& label(double x, double y, QString text);
 
-        [[nodiscard]] QImage toImage() { return Base::grab().toImage(); }
+        [[nodiscard]] QImage toImage(int width = 640, int height = 480);
+        void toSvg(const char* path, int width = 640, int height = 480, int resolution = 0);
         /* Getters */
         [[nodiscard]] QLegend& getLegend() const noexcept { return *getChart()->legend(); }
         [[nodiscard]] QValueAxis* getAxisX() const noexcept { return axisX; }
@@ -105,6 +106,7 @@ namespace Physica::Gui {
         inline void setRangeY(double minY, double maxY);
         inline void setDeltaX(double value) noexcept;
         inline void setDeltaY(double value) noexcept;
+        void setTickDirection(QAbstractAxis::TickDirection d);
     private:
         template<class VectorType>
         QBoxSet* setFromVector(const Core::LValueVector<VectorType>& v);

@@ -25,7 +25,7 @@ if(${PHYSICA_GUI})
 
     target_link_libraries(Physica::Gui INTERFACE ${PhysicaGui_LIBRARIES})
     target_link_libraries(Physica::Gui INTERFACE PhysicaCore INTERFACE Qt6::Core INTERFACE Qt6::Gui INTERFACE Qt6::Widgets)
-    target_link_libraries(Physica::Gui INTERFACE Qt6::Charts INTERFACE Qt6::DataVisualization)
+    target_link_libraries(Physica::Gui INTERFACE Qt6::Charts INTERFACE Qt6::DataVisualization INTERFACE Qt6::Svg)
 endif()
 ##############################################Logger################################################
 add_library(Physica::Logger INTERFACE IMPORTED)

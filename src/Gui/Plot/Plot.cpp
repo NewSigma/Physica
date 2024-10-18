@@ -16,7 +16,8 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include "Physica/Gui/Plot/Plot.h"
+#include <QSvgGenerator>
+#include <Physica/Gui/Plot/Plot.h>
 
 using namespace Physica::Core;
 
@@ -30,7 +31,7 @@ namespace Physica::Gui {
         setAttribute(Qt::WA_DeleteOnClose);
 
         setChart(new QChart());
-        setRenderHint(QPainter::Antialiasing);
+        setRenderHints(QPainter::Antialiasing | QPainter::TextAntialiasing | QPainter::SmoothPixmapTransform);
         setBackgroundRole(QPalette::Light);
 
         auto& chart = *Base::getChart();
@@ -87,6 +88,7 @@ namespace Physica::Gui {
             axisRight->setTitleFont(font);
             axisRight->setLinePenColor(Qt::black);
 
+            setTickDirection(QAbstractAxis::Inner);
             chart.addAxis(axisX, Qt::AlignBottom);
             chart.addAxis(axisY, Qt::AlignLeft);
             chart.addAxis(axisTop, Qt::AlignTop);
@@ -101,5 +103,60 @@ namespace Physica::Gui {
         result.setPointLabelsFormat(QPointLabelFormat(std::move(text)));
         result.setMarkerSize(0);
         return result;
+    }
+
+    QImage Plot::toImage(int width, int height) {
+        auto image = QImage(QSize(width, height), QImage::Format_ARGB32);
+
+        QPainter painter{};
+        painter.begin(&image);
+        painter.setRenderHints(renderHints());
+        painter.fillRect(image.rect(), Qt::white);
+
+        auto& chart = *getChart();
+        const auto size1 = image.size() * 0.99;
+        chart.setMinimumSize(size1);
+        chart.setMaximumSize(size1);
+
+        render(&painter, image.rect(), chart.rect().toRect());
+        painter.end();
+
+        chart.setMaximumSize(0, 0);
+        chart.setMaximumSize(QWIDGETSIZE_MAX, QWIDGETSIZE_MAX);
+        return image;
+    }
+
+    void Plot::toSvg(const char* path, int width, int height, int resolution) {
+        QSvgGenerator gen{};
+        gen.setFileName(path);
+        gen.setTitle("SVG Plot");
+        gen.setDescription("Created by Physica(https://gitee.com/newsigma/Physica)");
+        gen.setSize(QSize(width, height));
+        gen.setViewBox(QRectF(QPointF{}, gen.size()));
+        if (resolution > 0)
+            gen.setResolution(resolution);
+
+        QPainter painter{};
+        painter.begin(&gen);
+        painter.setRenderHints(renderHints());
+        painter.fillRect(gen.viewBox(), Qt::white);
+
+        auto& chart = *getChart();
+        const auto size1 = gen.size() * 0.99;
+        chart.setMinimumSize(size1);
+        chart.setMaximumSize(size1);
+
+        render(&painter);
+        painter.end();
+
+        chart.setMaximumSize(0, 0);
+        chart.setMaximumSize(QWIDGETSIZE_MAX, QWIDGETSIZE_MAX);
+    }
+
+    void Plot::setTickDirection(QAbstractAxis::TickDirection d) {
+        axisX->setTickDirection(d);
+        axisY->setTickDirection(d);
+        axisTop->setTickDirection(d);
+        axisRight->setTickDirection(d);
     }
 }
