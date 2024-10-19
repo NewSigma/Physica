@@ -46,7 +46,7 @@ public:
         std::cout << "\tNumerical\tAnalytical\n";
         std::array<double, baseSetCount> energy{};
         for (size_t i = 0; i < baseSetCount; ++i)
-            energy[i] = double(eigenvalues[i].getReal());
+            energy[i] = double(eigenvalues[i].real());
         std::sort(energy.begin(), energy.end());
 
         for (size_t i = 0; i < baseSetCount; ++i) {
@@ -112,11 +112,11 @@ private:
             x[i] = temp_x;
             ScalarType temp_y = ScalarType(0);
             for (size_t j = 0; j < baseSetCount; ++j)
-                temp_y += solver.getEigenvectors().col(n)[j].getReal() * baseFunction(temp_x, j);
+                temp_y += solver.getEigenvectors().col(n)[j].real() * baseFunction(temp_x, j);
             y[i] = temp_y;
             temp_x += step;
         }
-        QString name = QString("E = %1").arg(solver.getEigenvalues()[n].getReal().getTrivial());
+        QString name = QString("E = %1").arg(solver.getEigenvalues()[n].real().getTrivial());
         auto& spline = plot.spline(x, y);
         spline.setName(name);
     }
@@ -168,7 +168,7 @@ public:
         size_t groundStateIndex = 0;
         for (size_t i = 0; i < baseSetCount; ++i) {
             std::cout << '\t' << eigenvalues[i] << '\n';
-            if (eigenvalues[i].getReal() < eigenvalues[groundStateIndex].getReal())
+            if (eigenvalues[i].real() < eigenvalues[groundStateIndex].real())
                 groundStateIndex = i;
         }
         QApplication app(argc, argv);
@@ -274,7 +274,7 @@ public:
             auto eigenvalues = solver.getEigenvalues();
             size_t groundStateIndex = 0;
             for (size_t i = 0; i < baseSetCount; ++i) {
-                real_eigenvalues[i] = eigenvalues[i].getReal();
+                real_eigenvalues[i] = eigenvalues[i].real();
                 if (real_eigenvalues[i] < real_eigenvalues[groundStateIndex])
                     groundStateIndex = i;
             }

@@ -78,7 +78,7 @@ int main() {
         const Vector<ScalarType> x1 = Vector<ScalarType>::linspace(0, 1, 40);
         for (size_t i = 0; i < x1.getLength(); ++i) {
             const auto value = zone(Vector3D{x1[i], 0, 0});
-            if (!scalarNear(value.getImag(), ScalarType(0), 1E-5))
+            if (!scalarNear(value.imag(), ScalarType(0), 1E-5))
                 return 1;
         }
     }

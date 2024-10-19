@@ -170,9 +170,9 @@ namespace Physica::Core {
                 else {
                     if (isFirstEigen) {
                         extremeSearch();
-                        eigenvalue = eigenSolver.getEigenvalues()[0].getReal();
+                        eigenvalue = eigenSolver.getEigenvalues()[0].real();
                         residule = source * eigenvector.asVector() - eigenvalue * eigenvector.asVector();
-                        eigenGoal = std::min(eigenGoal.getReal(), eigenvalue.getReal());
+                        eigenGoal = std::min(eigenGoal.real(), eigenvalue.real());
                     }
                     else {
                         refinedSearch(i, eigenGoal);
@@ -191,12 +191,12 @@ namespace Physica::Core {
                         const VectorType eigenvector2 = subSearchSpace * eigenSolver.getRawEigenvectors().col(1);
                         buffer = source * eigenvector2;
                         const ScalarType eigenvalue2 = eigenvector2.conjugate() * buffer;
-                        const RealType deltaEigen = abs(eigenvalue2.getReal() - eigenvalue.getReal());
+                        const RealType deltaEigen = abs(eigenvalue2.real() - eigenvalue.real());
                         const bool nearConverge = squaredRes < square(deltaEigen);
                         const bool deltaEigenStable = abs(deltaEigen - lastDeltaEigen) < stableThreshold * lastDeltaEigen;
                         const bool goodDeltaEigen = lastDeltaEigen > std::numeric_limits<ScalarType>::epsilon();
                         const bool increaseGoal = !goodDeltaEigen || (deltaEigenStable && nearConverge);
-                        const bool decreaseGoal = eigenvalue.getReal() < eigenGoal.getReal();
+                        const bool decreaseGoal = eigenvalue.real() < eigenGoal.real();
                         if (increaseGoal || decreaseGoal)
                             eigenGoal = eigenvalue;
                         lastDeltaEigen = deltaEigen;
@@ -246,7 +246,7 @@ namespace Physica::Core {
         for (size_t i = 0; i < order - 1; ++i) {
             size_t index_min = i;
             for (size_t j = i + 1; j < order; ++j) {
-                if (eigenvalues[j].getReal() < eigenvalues[index_min].getReal())
+                if (eigenvalues[j].real() < eigenvalues[index_min].real())
                     index_min = j;
             }
 
@@ -405,7 +405,7 @@ namespace Physica::Core {
     template<class ScalarType>
     void JacobiDavidson<ScalarType>::refinedSearch(size_t eigenIndex, ScalarType eigenGoal) {
         assert(numSearchDim > 1 && "[Error]: No need to search if dim = 1");
-        assert(eigenGoal.getReal() != RealType(InvalidGoal) && "[Error]: Goal is not updated, this is a bug");
+        assert(eigenGoal.real() != RealType(InvalidGoal) && "[Error]: Goal is not updated, this is a bug");
         const auto corner1 = dotSpaceProj.topLeftCorner(numSearchDim);
         const auto corner2 = searchSpaceProj.topLeftCorner(numSearchDim);
         auto corner = spaceProj.topLeftCorner(numSearchDim);

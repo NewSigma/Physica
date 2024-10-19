@@ -79,7 +79,7 @@ namespace Physica::Core {
 
             fft.transform();
             auto& kSpace = fft.getKSpace();
-            toNextMean(mean, numSample, kSpace[0].getReal() / ScalarType(numStep));
+            toNextMean(mean, numSample, kSpace[0].real() / ScalarType(numStep));
             kSpace = toSquaredNormVector(kSpace);
             fft.invTransform();
 

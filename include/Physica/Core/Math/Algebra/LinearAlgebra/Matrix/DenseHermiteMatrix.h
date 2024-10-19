@@ -151,7 +151,7 @@ namespace Physica::Core {
     void DenseHermiteMatrix<T, Order>::random_uniform(RandomGenerator& gen) {
         Storage::random_uniform(gen);
         for (size_t i = 0; i < getRow(); ++i)
-            this->operator()(i, i).getImag() = RealType(0);
+            this->operator()(i, i).imag() = RealType(0);
     }
 
     template<class T, size_t Order>
@@ -159,7 +159,7 @@ namespace Physica::Core {
     void DenseHermiteMatrix<T, Order>::random_normal(RandomGenerator& gen) {
         Storage::random_normal(gen);
         for (size_t i = 0; i < getRow(); ++i)
-            this->operator()(i, i).getImag() = RealType(0);
+            this->operator()(i, i).imag() = RealType(0);
     }
 
     template<class T, size_t Order>
@@ -167,7 +167,7 @@ namespace Physica::Core {
     void DenseHermiteMatrix<T, Order>::random_any(Distribution& dist, RandomGenerator& gen) {
         Storage::random_any(dist, gen);
         for (size_t i = 0; i < getRow(); ++i)
-            this->operator()(i, i).getImag() = RealType(0);
+            this->operator()(i, i).imag() = RealType(0);
     }
 
     template<class T, size_t Order>

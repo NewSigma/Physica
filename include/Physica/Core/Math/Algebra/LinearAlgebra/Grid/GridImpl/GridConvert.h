@@ -31,7 +31,7 @@ namespace Physica::Core {
     public:
         explicit RealGrid(const RValueGrid<GridType>& g_) : g(g_.getDerived()) {}
         /* Getters */
-        [[nodiscard]] ScalarType calc(Index3D index) const { return g.calc(index).getReal(); }
+        [[nodiscard]] ScalarType calc(Index3D index) const { return g.calc(index).real(); }
         [[nodiscard]] size_t getDimX() const noexcept { return g.getDimX(); }
         [[nodiscard]] size_t getDimY() const noexcept { return g.getDimY(); }
         [[nodiscard]] size_t getDimZ() const noexcept { return g.getDimZ(); }
@@ -47,7 +47,7 @@ namespace Physica::Core {
     public:
         explicit ImagGrid(const RValueGrid<GridType>& g_) : g(g_.getDerived()) {}
         /* Getters */
-        [[nodiscard]] ScalarType calc(Index3D index) const { return g.calc(index).getImag(); }
+        [[nodiscard]] ScalarType calc(Index3D index) const { return g.calc(index).imag(); }
         [[nodiscard]] size_t getDimX() const noexcept { return g.getDimX(); }
         [[nodiscard]] size_t getDimY() const noexcept { return g.getDimY(); }
         [[nodiscard]] size_t getDimZ() const noexcept { return g.getDimZ(); }

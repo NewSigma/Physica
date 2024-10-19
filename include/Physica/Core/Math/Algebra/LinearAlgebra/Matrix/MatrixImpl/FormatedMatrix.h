@@ -73,7 +73,7 @@ namespace Physica::Core {
                 for (size_t r = 0; r < row; ++ r) {
                     std::stringstream stream{};
                     stream.copyfmt(os);
-                    stream << m.calc(r, c).getReal();
+                    stream << m.calc(r, c).real();
                     width = std::max(width, stream.str().length());
                 }
             }

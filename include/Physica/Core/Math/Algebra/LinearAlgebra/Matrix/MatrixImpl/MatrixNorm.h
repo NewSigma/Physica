@@ -60,7 +60,7 @@ namespace Physica::Core {
 
             using MatVecDot = decltype(m.hermite() * unit(y));
             z.template operator=<MatVecDot, Executor>(m.hermite() * unit(y));
-            const RealType criteria = iteration == 0 ? (toRealVector(z).sum() * factor) : z[index].getReal();
+            const RealType criteria = iteration == 0 ? (toRealVector(z).sum() * factor) : z[index].real();
             const bool isConverged = z.normInf() <= criteria * RealType(1 + std::numeric_limits<RealType>::epsilon());
             const bool isCycling = iteration > 0 && (lastIndex == index); // Avoid cycling because unit(0) is implemented as 1
             if (isConverged || isCycling) {
@@ -84,7 +84,7 @@ namespace Physica::Core {
             size_t nextIndex = 0;
             RealType maxAbs = 0;
             for (size_t i = 0; i < length; ++i) {
-                const RealType temp = abs(z.calc(i).getReal());
+                const RealType temp = abs(z.calc(i).real());
                 if (temp > maxAbs) {
                     nextIndex = i;
                     maxAbs = temp;

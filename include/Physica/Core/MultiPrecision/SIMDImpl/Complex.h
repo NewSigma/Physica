@@ -103,9 +103,9 @@ namespace Physica::Core {
         }
         else {
             if constexpr (T::Option == Float32)
-                *this = Base(x.getReal().getTrivial(), x.getImag().getTrivial(), x.getReal().getTrivial(), x.getImag().getTrivial());
+                *this = Base(x.real().getTrivial(), x.imag().getTrivial(), x.real().getTrivial(), x.imag().getTrivial());
             else
-                *this = Base(x.getReal().getTrivial(), x.getImag().getTrivial());
+                *this = Base(x.real().getTrivial(), x.imag().getTrivial());
         }
     }
 

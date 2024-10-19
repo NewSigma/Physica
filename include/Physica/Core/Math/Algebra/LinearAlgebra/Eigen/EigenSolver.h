@@ -145,7 +145,7 @@ namespace Physica::Core {
 
     template<class ScalarType, size_t Order>
     void EigenSolver<ScalarType, Order>::sort() {
-        sort([](ComplexType a, ComplexType b) noexcept { return a.getReal() < b.getReal(); });
+        sort([](ComplexType a, ComplexType b) noexcept { return a.real() < b.real(); });
     }
 
     template<class ScalarType, size_t Order>
@@ -239,7 +239,7 @@ namespace Physica::Core {
             const size_t order = eigenvalues.getLength();
             EigenvectorMatrix result = EigenvectorMatrix(order, order);
             for (size_t i = 0; i < order; ++i) {
-                if (eigenvalues[i].getImag().isZero()) {
+                if (eigenvalues[i].imag().isZero()) {
                     auto toCol = result.col(i);
                     toCol.asVector() = rawEigenvectors.col(i);
                     toCol.toUnit();
@@ -250,8 +250,8 @@ namespace Physica::Core {
                     auto fromCol1 = rawEigenvectors.col(i);
                     auto fromCol2 = rawEigenvectors.col(i + 1);
                     for (size_t j = 0; j < order; ++j) {
-                        toCol1[j] = ComplexType(fromCol1[j].getReal(), fromCol2[j].getReal());
-                        toCol2[j] = ComplexType(fromCol1[j].getReal(), -fromCol2[j].getReal());
+                        toCol1[j] = ComplexType(fromCol1[j].real(), fromCol2[j].real());
+                        toCol2[j] = ComplexType(fromCol1[j].real(), -fromCol2[j].real());
                     }
                     toCol1.toUnit();
                     toCol2.toUnit();
@@ -296,13 +296,13 @@ namespace Physica::Core {
         const size_t order = matrixT.getRow();
         for (size_t i = order - 1; i < order; --i) {
             auto block = matrixT.topLeftCorner(i + 1, i + 1);
-            if (eigenvalues[i].getImag().isZero()) {
+            if (eigenvalues[i].imag().isZero()) {
                 auto col = block.col(i);
                 col[i] = ScalarType(1);
                 for (size_t j = i - 1; j < i; --j) {
-                    if (eigenvalues[j].getImag().isZero()) {
+                    if (eigenvalues[j].imag().isZero()) {
                         auto row = block.row(j);
-                        col[j] = (col.tail(j + 1) * row.tail(j + 1)) / (eigenvalues[i].getReal() - eigenvalues[j].getReal());
+                        col[j] = (col.tail(j + 1) * row.tail(j + 1)) / (eigenvalues[i].real() - eigenvalues[j].real());
                     }
                     else {
                         auto row1 = block.row(j - 1);
@@ -310,7 +310,7 @@ namespace Physica::Core {
                         auto tail = col.tail(j + 1);
                         ScalarType dot1 = tail * row1.tail(j + 1);
                         ScalarType dot2 = tail * row2.tail(j + 1);
-                        ScalarType inv_determinate = reciprocal(square(eigenvalues[j].getReal() - eigenvalues[i].getReal()) + square(eigenvalues[j].getImag()));
+                        ScalarType inv_determinate = reciprocal(square(eigenvalues[j].real() - eigenvalues[i].real()) + square(eigenvalues[j].imag()));
                         col[j - 1] = (dot1 * block(j, j) - dot2 * block(j - 1, j)) * inv_determinate;
                         col[j] = (dot2 * block(j - 1, j - 1) - dot1 * block(j, j - 1)) * inv_determinate;
                         --j;
@@ -318,32 +318,32 @@ namespace Physica::Core {
                 }
             }
             else {
-                assert(eigenvalues[i].getImag().isNegative());
+                assert(eigenvalues[i].imag().isNegative());
                 auto col1 = block.col(i - 1);
                 auto col2 = block.col(i);
                 //Referenced from eigen, to ensure numerical stable
                 if (abs(matrixT(i, i - 1)) > abs(matrixT(i - 1, i))) {
                     auto temp = reciprocal(matrixT(i, i - 1));
-                    col1[i - 1] = eigenvalues[i].getImag() * temp;
-                    col2[i - 1] = (eigenvalues[i].getReal() - matrixT(i, i)) * temp;
+                    col1[i - 1] = eigenvalues[i].imag() * temp;
+                    col2[i - 1] = (eigenvalues[i].real() - matrixT(i, i)) * temp;
                 }
                 else {
                     Complex<ScalarType> c = Complex<ScalarType>(ScalarType(0), -matrixT(i - 1, i)) /
-                                                  Complex<ScalarType>(matrixT(i - 1, i - 1) - eigenvalues[i].getReal(), eigenvalues[i].getImag());
-                    col1[i - 1] = c.getReal();
-                    col2[i - 1] = c.getImag();
+                                                  Complex<ScalarType>(matrixT(i - 1, i - 1) - eigenvalues[i].real(), eigenvalues[i].imag());
+                    col1[i - 1] = c.real();
+                    col2[i - 1] = c.imag();
                 }
                 col1[i] = ScalarType(0);
                 col2[i] = ScalarType(1);
 
                 for (size_t j = i - 2; j < i; --j) {
-                    if (eigenvalues[j].getImag().isZero()) {
+                    if (eigenvalues[j].imag().isZero()) {
                         auto row = block.row(j);
                         auto tail = row.tail(j + 1);
                         const ScalarType dot1 = -(tail * col1.tail(j + 1));
                         const ScalarType dot2 = -(tail * col2.tail(j + 1));
-                        const ScalarType a = block(j, j) - eigenvalues[i].getReal();
-                        const ScalarType b = eigenvalues[i].getImag();
+                        const ScalarType a = block(j, j) - eigenvalues[i].real();
+                        const ScalarType b = eigenvalues[i].imag();
                         const ScalarType inv_denominator = reciprocal(square(a) + square(b));
                         col1[j] = (a * dot1 + b * dot2) * inv_denominator;
                         col2[j] = (a * dot2 - b * dot1) * inv_denominator;
@@ -360,25 +360,25 @@ namespace Physica::Core {
 
                         const ScalarType x = matrixT(j - 1, j);
                         const ScalarType y = matrixT(j, j - 1);
-                        const ScalarType vr = square(eigenvalues[j].getReal() - eigenvalues[i].getReal()) + square(eigenvalues[j].getImag()) - square(eigenvalues[i].getImag());
-                        const ScalarType vi = ScalarType(2) * (eigenvalues[j].getReal() - eigenvalues[i].getReal()) * eigenvalues[i].getImag();
+                        const ScalarType vr = square(eigenvalues[j].real() - eigenvalues[i].real()) + square(eigenvalues[j].imag()) - square(eigenvalues[i].imag());
+                        const ScalarType vi = ScalarType(2) * (eigenvalues[j].real() - eigenvalues[i].real()) * eigenvalues[i].imag();
                         
-                        const ScalarType temp1 = matrixT(j, j) - eigenvalues[i].getReal();
+                        const ScalarType temp1 = matrixT(j, j) - eigenvalues[i].real();
 
-                        Complex<ScalarType> c = Complex<ScalarType>(x * dot21 - temp1 * dot11 + eigenvalues[i].getImag() * dot12,
-                                                                                x * dot22 - temp1 * dot12 - eigenvalues[i].getImag() * dot11)
+                        Complex<ScalarType> c = Complex<ScalarType>(x * dot21 - temp1 * dot11 + eigenvalues[i].imag() * dot12,
+                                                                                x * dot22 - temp1 * dot12 - eigenvalues[i].imag() * dot11)
                                                       / Complex(vr,vi);
-                        matrixT(j - 1, i - 1) = c.getReal();
-                        matrixT(j - 1, i) = c.getImag();
-                        if (abs(x) > (abs(temp1) + abs(eigenvalues[i].getImag()))) {
-                            const ScalarType temp2 = matrixT(j - 1, j - 1) - eigenvalues[i].getReal();
-                            matrixT(j, i - 1) = (-dot11 - temp2 * matrixT(j - 1, i - 1) + eigenvalues[i].getImag() * matrixT(j - 1, i)) / x;
-                            matrixT(j, i) = (-dot12 - temp2 * matrixT(j - 1, i) - eigenvalues[i].getImag() * matrixT(j - 1, i - 1)) / x;
+                        matrixT(j - 1, i - 1) = c.real();
+                        matrixT(j - 1, i) = c.imag();
+                        if (abs(x) > (abs(temp1) + abs(eigenvalues[i].imag()))) {
+                            const ScalarType temp2 = matrixT(j - 1, j - 1) - eigenvalues[i].real();
+                            matrixT(j, i - 1) = (-dot11 - temp2 * matrixT(j - 1, i - 1) + eigenvalues[i].imag() * matrixT(j - 1, i)) / x;
+                            matrixT(j, i) = (-dot12 - temp2 * matrixT(j - 1, i) - eigenvalues[i].imag() * matrixT(j - 1, i - 1)) / x;
                         }
                         else {
-                            c = Complex(-dot21 - y * matrixT(j - 1, i - 1), -dot22 - y * matrixT(j - 1, i)) / Complex(temp1, eigenvalues[i].getImag());
-                            matrixT(j, i - 1) = c.getReal();
-                            matrixT(j, i) = c.getImag();
+                            c = Complex(-dot21 - y * matrixT(j - 1, i - 1), -dot22 - y * matrixT(j - 1, i)) / Complex(temp1, eigenvalues[i].imag());
+                            matrixT(j, i - 1) = c.real();
+                            matrixT(j, i) = c.imag();
                         }
                         --j;
                     }

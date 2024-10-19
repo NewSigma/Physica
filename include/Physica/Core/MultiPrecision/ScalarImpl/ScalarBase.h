@@ -72,16 +72,16 @@ namespace Physica::Core {
             return getValue() < s.getValue();
         }
         /* Getters */
-        [[nodiscard]] __host__ __device__ const RealType& getReal() const {
+        [[nodiscard]] __host__ __device__ const RealType& real() const {
             if constexpr (isComplex)
-                return this->getDerived().getReal();
+                return this->getDerived().real();
             else
                 return this->getDerived();
         }
 
-        [[nodiscard]] __host__ __device__ RealType getImag() const {
+        [[nodiscard]] __host__ __device__ RealType imag() const {
             if constexpr (isComplex)
-                return this->getDerived().getImag();
+                return this->getDerived().imag();
             else
                 return Derived(0);
         }
@@ -90,14 +90,14 @@ namespace Physica::Core {
             if constexpr (isComplex)
                 return this->getDerived().conjugate();
             else
-                return getReal();
+                return real();
         }
 
         [[nodiscard]] __host__ __device__ ScalarType unit() const {
             if constexpr (isComplex)
                 return this->getDerived().unit();
             else
-                return ScalarType(getReal().isNegative() ? -1 : 1);
+                return ScalarType(real().isNegative() ? -1 : 1);
         }
 
         [[nodiscard]] __host__ __device__ RealType norm() const { return sqrt(squaredNorm()); }
@@ -177,9 +177,9 @@ namespace Physica::Core {
         }
         else {
             using PlainScalar = typename ScalarType::PlainScalar;
-            const bool isValueNear = relativeError(s1.getValue().getReal(), s2.getValue().getReal()) < PlainScalar(precision);
+            const bool isValueNear = relativeError(s1.getValue().real(), s2.getValue().real()) < PlainScalar(precision);
             if constexpr (ScalarType::isDifferentiable)
-                return isValueNear && relativeError(s1.getGrad().getReal(), s2.getGrad().getReal()) < PlainScalar(precision);
+                return isValueNear && relativeError(s1.getGrad().real(), s2.getGrad().real()) < PlainScalar(precision);
             else
                 return isValueNear;
         }

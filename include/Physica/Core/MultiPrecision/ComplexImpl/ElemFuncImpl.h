@@ -26,15 +26,15 @@ namespace Physica::Core {
 
     template<class ScalarType>
     Complex<ScalarType> square(const Complex<ScalarType>& c) {
-        const auto& real = c.getReal();
-        const auto& imag = c.getImag();
+        const auto& real = c.real();
+        const auto& imag = c.imag();
         return Complex<ScalarType>(square(real) - square(imag), (real * imag) << 1);
     }
 
     template<class ScalarType>
     inline Complex<ScalarType> reciprocal(const Complex<ScalarType>& c) {
-        const auto& real = c.getReal();
-        const auto& imag = c.getImag();
+        const auto& real = c.real();
+        const auto& imag = c.imag();
         const auto divisor = reciprocal(square(real) + square(imag));
         return Complex<ScalarType>(real * divisor, -imag * divisor);
     }
@@ -48,12 +48,12 @@ namespace Physica::Core {
         if (c.isZero())
             return ResultType(0);
         using RealType = typename ScalarType::RealType;
-        const RealType abs_real = abs(c.getReal());
+        const RealType abs_real = abs(c.real());
         const RealType w = sqrt((abs_real + c.norm()) * ScalarType(0.5));
-        if (!c.getReal().isNegative())
-            return ResultType(w, c.getImag() / w * ScalarType(0.5));
-        const RealType abs_imag = abs(c.getImag());
-        return ResultType(abs_imag / w * ScalarType(0.5), c.getImag().isNegative() ? -w : w);
+        if (!c.real().isNegative())
+            return ResultType(w, c.imag() / w * ScalarType(0.5));
+        const RealType abs_imag = abs(c.imag());
+        return ResultType(abs_imag / w * ScalarType(0.5), c.imag().isNegative() ? -w : w);
     }
 
     template<class ScalarType>
@@ -128,9 +128,9 @@ namespace Physica::Core {
 
     template<class ScalarType>
     Complex<ScalarType> lncosh(const Complex<ScalarType>& c) {
-        const ScalarType abs_real = abs(c.getReal());
+        const ScalarType abs_real = abs(c.real());
         const ScalarType norm1 = exp(ScalarType(-2) * abs_real);
-        const ScalarType phase = c.getReal().isPositive() ? c.getImag() : -c.getImag();
+        const ScalarType phase = c.real().isPositive() ? c.imag() : -c.imag();
         const auto temp = Complex<ScalarType>((ScalarType(1) + norm1) * cos(phase), (ScalarType(1) - norm1) * sin(phase)) * ScalarType(0.5);
         return abs_real + ln(temp);
     }

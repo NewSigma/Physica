@@ -125,8 +125,8 @@ namespace Physica::Core {
     MatrixVectorProduct<MatrixExp<MatrixType>, VectorType>::calcTraceMu() const {
         const auto& mat = mexp.getMatrix();
         const ScalarType trace = mat.trace();
-        assert(trace.getImag().isZero() && "[Error]: Not implemented");
-        return trace.getReal() / RealType(getLength());
+        assert(trace.imag().isZero() && "[Error]: Not implemented");
+        return trace.real() / RealType(getLength());
     }
 
     template<class MatrixType, class VectorType>

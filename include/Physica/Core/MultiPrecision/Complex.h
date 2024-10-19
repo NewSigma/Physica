@@ -60,13 +60,13 @@ namespace Physica::Core {
         using MKL_Complex = typename std::conditional<T::Option == Float32, MKL_Complex8, MKL_Complex16>::type;
     #endif
     private:
-        T real;
-        T imag;
+        T re;
+        T im;
     public:
         Complex() = default;
         Complex(double d);
-        Complex(T real_);
-        Complex(T real_, T imag_);
+        Complex(T re_);
+        Complex(T re_, T im_);
         Complex(std::initializer_list<T> list);
         explicit Complex(std::complex<TrivialType> c);
         Complex(const This&) = default;
@@ -79,18 +79,18 @@ namespace Physica::Core {
         [[nodiscard]] inline T norm() const;
         [[nodiscard]] inline T phase() const;
         [[nodiscard]] Complex unit() const;
-        [[nodiscard]] Complex conjugate() const noexcept { return Complex(real, -imag); }
+        [[nodiscard]] Complex conjugate() const noexcept { return Complex(re, -im); }
 
         [[nodiscard]] inline PacketType packet() const;
         inline void writePacket(const PacketType packet);
         void swap(Complex& __restrict obj) noexcept;
         /* Getters */
-        [[nodiscard]] T& getReal() noexcept { return real; }
-        [[nodiscard]] const T& getReal() const noexcept { return real; }
-        [[nodiscard]] T& getImag() noexcept { return imag; }
-        [[nodiscard]] const T& getImag() const noexcept { return imag; }
+        [[nodiscard]] T& real() noexcept { return re; }
+        [[nodiscard]] const T& real() const noexcept { return re; }
+        [[nodiscard]] T& imag() noexcept { return im; }
+        [[nodiscard]] const T& imag() const noexcept { return im; }
         [[nodiscard]] inline std::complex<TrivialType> getTrivial() const noexcept;
-        [[nodiscard]] bool isZero() const noexcept { return real.isZero() && imag.isZero(); }
+        [[nodiscard]] bool isZero() const noexcept { return re.isZero() && im.isZero(); }
         /* Static Members */
         [[nodiscard]] inline static Complex fromPhase(T phase);
         template<class RandomGenerator>
@@ -148,7 +148,7 @@ namespace Physica::Core {
             const Scalar<Option>& s, const Complex<ScalarType>& c);
 
     template<class T>
-    Complex<T> operator-(const Complex<T>& c) { return Complex(-c.getReal(), -c.getImag()); }
+    Complex<T> operator-(const Complex<T>& c) { return Complex(-c.real(), -c.imag()); }
 
     template<class T, class ScalarType>
     void operator+=(Complex<T>& c, const ScalarType& t) { c = c + t; }

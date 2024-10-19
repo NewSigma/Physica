@@ -143,7 +143,7 @@ namespace Physica::Core {
             if constexpr (isComplex)
                 result[i] = elem;
             else
-                result[i] = elem.getReal();
+                result[i] = elem.real();
         }
         result *= reciprocal(RealType(rSpaceSize));
         return result;
@@ -185,7 +185,7 @@ namespace Physica::Core {
         if constexpr (isComplex)
             result = elem;
         else
-            result = elem.getReal();
+            result = elem.real();
         result *= reciprocal(RealType(rSpaceSize));
         return result;
     }
@@ -233,7 +233,7 @@ namespace Physica::Core {
             if constexpr (isComplex)
                 result(rIndex) = elem;
             else
-                result(rIndex) = elem.getReal();
+                result(rIndex) = elem.real();
         });
         result *= reciprocal(RealType(data.getSize()));
         return result;
@@ -284,7 +284,7 @@ namespace Physica::Core {
         if constexpr (isComplex)
             result = elem;
         else
-            result = elem.getReal();
+            result = elem.real();
         result *= reciprocal(RealType(data.getSize()));
         return result;
     }

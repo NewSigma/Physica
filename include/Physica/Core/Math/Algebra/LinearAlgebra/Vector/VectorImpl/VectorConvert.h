@@ -34,7 +34,7 @@ namespace Physica::Core {
         This& operator=(const This&) = delete;
         This& operator=(This&&) = delete;
         /* Getters */
-        typename Base::ScalarType calc(size_t s) const { return v.calc(s).getReal(); }
+        typename Base::ScalarType calc(size_t s) const { return v.calc(s).real(); }
         [[nodiscard]] size_t getLength() const { return v.getLength(); }
     };
 
@@ -53,7 +53,7 @@ namespace Physica::Core {
         This& operator=(const This&) = delete;
         This& operator=(This&&) = delete;
         /* Getters */
-        typename Base::ScalarType calc(size_t s) const { return v.calc(s).getImag(); }
+        typename Base::ScalarType calc(size_t s) const { return v.calc(s).imag(); }
         [[nodiscard]] size_t getLength() const { return v.getLength(); }
     };
 

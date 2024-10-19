@@ -49,7 +49,7 @@ namespace Physica::Core {
             const ScalarType factor2 = reciprocal(factor1);
 
             target.tail(1) = source.tail(1) * factor2;
-            target[0] = (factor1 / factor).getReal();
+            target[0] = (factor1 / factor).real();
             return norm;
         }
         else {

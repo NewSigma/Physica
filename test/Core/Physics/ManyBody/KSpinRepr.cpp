@@ -70,7 +70,7 @@ void testEigen() {
         JacobiDavidson<ScalarType> jd(numState, 4);
         jd.compute(model, VectorType::random_uniform(numState, RandomPoolType::getInstance().getGen()));
         jd.sort();
-        result = jd.getEigenvalues()[0].getReal();
+        result = jd.getEigenvalues()[0].real();
     }
     if (!scalarNear(answer, result, 1E-14))
         exit(EXIT_FAILURE);

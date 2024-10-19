@@ -326,7 +326,7 @@ namespace Physica::Core {
         using Matrix2D = DenseMatrix<ScalarType, MatrixOption::Column | MatrixOption::Element, 2, 2>;
         if ((iter == 10 || iter == 20) && upper > 1) {
             // exceptional shift, taken from http://www.netlib.org/eispack/comqr.f
-            return abs(matrixT(upper, upper - 1).getReal()) + abs(matrixT(upper - 1, upper - 2).getReal());
+            return abs(matrixT(upper, upper - 1).real()) + abs(matrixT(upper - 1, upper - 2).real());
         }
         //compute the shift as one of the eigenvalues of t, the 2x2
         //diagonal block on the bottom of the active submatrix

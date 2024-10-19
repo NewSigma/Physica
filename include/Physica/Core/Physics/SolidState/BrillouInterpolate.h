@@ -98,9 +98,9 @@ namespace Physica::Core {
             if constexpr (!isComplex) {
                 PeriodIndex3D pIndex(index, baseDim);
                 if (pIndex.isInReducedK())
-                    result += (baseCoeff(index) * factor).getReal();
+                    result += (baseCoeff(index) * factor).real();
                 else
-                    result += (baseCoeff(pIndex.toReducedK()).conjugate() * factor).getReal();
+                    result += (baseCoeff(pIndex.toReducedK()).conjugate() * factor).real();
             }
             else {
                 (void)baseDim;

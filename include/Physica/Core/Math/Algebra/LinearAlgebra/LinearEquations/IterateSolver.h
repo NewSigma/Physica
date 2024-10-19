@@ -117,7 +117,7 @@ namespace Physica::Core {
         iteration = 0;
         while(!isConverged() && !shouldStop()) {
             dotFunc(searchP, dot);
-            const RealType step = squaredRes / (searchP.conjugate() * dot).getReal();
+            const RealType step = squaredRes / (searchP.conjugate() * dot).real();
             x += step * searchP;
             residual += step * dot;
 

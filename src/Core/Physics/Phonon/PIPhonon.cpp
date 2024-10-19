@@ -94,7 +94,7 @@ namespace Physica::Core {
             else {
                 const Schur<ComplexType> schur(kSpaceMomentumCorr[qPointId], true);
                 for (size_t i = 0; i < base.getColumn(); ++i) {
-                    const ScalarType eigenvalue = schur.getMatrixT().diag().calc(i).getReal();
+                    const ScalarType eigenvalue = schur.getMatrixT().diag().calc(i).real();
                     if (eigenvalue > ScalarType(ConsiderAsZeroThrehold))
                         base.col(i) = schur.getMatrixU().col(i).asVector() * reciprocal(sqrt(eigenvalue));
                     else
@@ -154,12 +154,12 @@ namespace Physica::Core {
                 ScalarType term1 = 0;
                 for (size_t i = 0; i < getNumAtomUnitCell(); ++i)
                     for (size_t j = 0; j < getNumAtomUnitCell(); ++j)
-                        term1 += target.calc(3 * i + r % 3U, 3 * j + c % 3U).getReal();
+                        term1 += target.calc(3 * i + r % 3U, 3 * j + c % 3U).real();
                 term1 /= ScalarType(getNumAtomUnitCell() * getNumAtomUnitCell());
 
                 ScalarType term2 = 0;
                 for (size_t i = 0; i < getNumAtomUnitCell(); ++i)
-                    term2 += target.calc(r, 3 * i + c % 3U).getReal() + target.calc(3 * i + r % 3U, c).getReal();
+                    term2 += target.calc(r, 3 * i + c % 3U).real() + target.calc(3 * i + r % 3U, c).real();
                 term2 /= ScalarType(getNumAtomUnitCell());
                 buffer(r, c) = term1 - term2;
             }

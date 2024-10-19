@@ -362,7 +362,7 @@ namespace Physica::Core {
             auto toCol = result.col(i);
             for (size_t j = 0; j < result.getRow(); ++j) {
                 const ScalarType repSqrtMass = reciprocal(sqrt(unitCell.getMass(j / Dim)));
-                toCol[j] = fromCol[j].getReal() * repSqrtMass;
+                toCol[j] = fromCol[j].real() * repSqrtMass;
             }
             toCol.toUnit(); // Optimize: repSqrtMass matrix is diagonal
         }

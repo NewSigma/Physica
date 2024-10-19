@@ -185,7 +185,7 @@ namespace Physica::Core {
         Vector<ScalarType, 2> buffer{};
         /* Init buffer */ {
             const auto subBlock = working.block(lower, sub_order, lower, sub_order);
-            const RealType factor = (subBlock(sub_order - 2, sub_order - 2).getReal() - subBlock(sub_order - 1, sub_order - 1).getReal()) * 0.5;
+            const RealType factor = (subBlock(sub_order - 2, sub_order - 2).real() - subBlock(sub_order - 1, sub_order - 1).real()) * 0.5;
             const RealType factor2 = square(subBlock(sub_order - 1, sub_order - 2));
             const RealType factor3 = sqrt(square(factor) + factor2);
             const ScalarType shift = subBlock(sub_order - 1, sub_order - 1) - factor2 / (factor + (factor.isPositive() ? factor3 : -factor3)); //TODO: why we introduce a divide operation

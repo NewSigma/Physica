@@ -101,7 +101,7 @@ namespace Physica::Core {
         const ScalarType deltaOmegaW = getDeltaOmegaW();
         Vector<ScalarType> spectrum(kSpaceSize);
         for (size_t i = 0; i < kSpaceSize; ++i)
-            spectrum[i] = factor * abs(kSpace[i].getReal()) * square(deltaOmegaW * i);
+            spectrum[i] = factor * abs(kSpace[i].real()) * square(deltaOmegaW * i);
         filter.smooth_zero(spectrum);
         return spectrum.segment(filter.getLRange(), kSpaceSize + filter.getLRange());
     }

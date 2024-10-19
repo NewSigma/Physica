@@ -168,7 +168,7 @@ namespace Physica::Core {
         for (size_t i = 0; i < order - 1; ++i) {
             size_t index_min = i;
             for (size_t j = i + 1; j < order; ++j) {
-                if (abs(singulars[j].getReal()) < abs(singulars[index_min].getReal()))
+                if (abs(singulars[j].real()) < abs(singulars[index_min].real()))
                     index_min = j;
             }
             singulars[i].swap(singulars[index_min]);
