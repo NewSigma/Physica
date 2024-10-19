@@ -28,7 +28,7 @@ namespace Physica {
     class Test {
         using RandomGenerator = std::mt19937;
         using PlainScalar = float64;
-        using ScalarType = Differentiable<PlainScalar, DiffMode::Reverse, 1>;
+        using ScalarType = Diff<PlainScalar, DiffMode::Reverse, 1>;
         using MDCellType = MDCell<ScalarType>;
         using LatticeMatrix = typename MDCellType::LatticeMatrix;
         using PositionMatrix = typename MDCellType::PositionMatrix;

@@ -19,7 +19,7 @@
 #pragma once
 
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/MatrixImpl/LValueMatrix.h"
-#include "Physica/Core/MultiPrecision/Differentiable.h"
+#include "Physica/Core/MultiPrecision/Diff.h"
 
 namespace Physica::Core {
     /**

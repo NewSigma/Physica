@@ -73,10 +73,10 @@ namespace Physica::Core {
 
     template<class PlainScalar, int Option, unsigned int Order>
     auto operator*(
-            const device_obj<Differentiable<DenseMatrix<PlainScalar, Option>, DiffMode::Reverse, Order>>& m,
-            const device_obj<Differentiable<Vector<PlainScalar>, DiffMode::Reverse, Order>>& v) {
-        using MatrixType = device_obj<Differentiable<DenseMatrix<PlainScalar, Option>, DiffMode::Reverse, Order>>;
-        using VectorType = device_obj<Differentiable<Vector<PlainScalar>, DiffMode::Reverse, Order>>;
+            const device_obj<Diff<DenseMatrix<PlainScalar, Option>, DiffMode::Reverse, Order>>& m,
+            const device_obj<Diff<Vector<PlainScalar>, DiffMode::Reverse, Order>>& v) {
+        using MatrixType = device_obj<Diff<DenseMatrix<PlainScalar, Option>, DiffMode::Reverse, Order>>;
+        using VectorType = device_obj<Diff<Vector<PlainScalar>, DiffMode::Reverse, Order>>;
         assert(m.getRow() > 0 && "[Error]: This is a empty matrix");
         assert(m.getColumn() == v.getLength() && "[Error]: Dims do not match");
         MatrixType dots(m.getRow(), m.getColumn(), ExprType::Mul);

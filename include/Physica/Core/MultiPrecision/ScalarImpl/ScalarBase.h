@@ -27,7 +27,7 @@ namespace Physica::Core {
         Reverse
     };
     template<class Derived> class ScalarBase;
-    template<class T, DiffMode Mode, unsigned int Order = 1> class Differentiable;
+    template<class T, DiffMode Mode, unsigned int Order = 1> class Diff;
 
     template<class T>
     struct is_scalar : public std::is_base_of<ScalarBase<T>, T> {};

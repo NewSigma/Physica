@@ -20,7 +20,7 @@
 
 using namespace Physica::Core;
 using ScalarType = float64;
-using VectorType = Differentiable<Vector<ScalarType>, DiffMode::Reverse, 1>;
+using VectorType = Diff<Vector<ScalarType>, DiffMode::Reverse, 1>;
 using RandomGenerator = std::mt19937;
 
 int main() {

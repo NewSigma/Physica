@@ -17,14 +17,14 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include <iostream>
-#include "Physica/Core/MultiPrecision/Differentiable.h"
+#include "Physica/Core/MultiPrecision/Diff.h"
 #include "Physica/Core/MultiPrecision/AutoDiffGuard.h"
 #include "Physica/Core/Physics/MD/ForceModel/SilveraGoldman.h"
 
 using namespace Physica::Core;
 
 using PlainScalar = float64;
-using ScalarType = Differentiable<PlainScalar, DiffMode::Reverse, 1>;
+using ScalarType = Diff<PlainScalar, DiffMode::Reverse, 1>;
 
 class PressTest {
     using RandomGenerator = std::mt19937;

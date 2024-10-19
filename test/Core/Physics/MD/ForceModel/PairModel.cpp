@@ -17,13 +17,13 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include <iostream>
-#include "Physica/Core/MultiPrecision/Differentiable.h"
+#include "Physica/Core/MultiPrecision/Diff.h"
 #include "Physica/Core/Physics/MD/ForceModel/LJModel.h"
 #include "Physica/Core/Physics/MD/ForceModel/SilveraGoldman.h"
 #include "Physica/Core/Math/Random/RandomPool.h"
 
 using namespace Physica::Core;
-using ScalarType = Differentiable<float64, DiffMode::Reverse, 1>;
+using ScalarType = Diff<float64, DiffMode::Reverse, 1>;
 /**
  * Params referenced from [1]
  * 

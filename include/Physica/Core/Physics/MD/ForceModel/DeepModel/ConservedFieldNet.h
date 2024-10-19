@@ -33,7 +33,7 @@ namespace Physica::Core {
         using typename Base::OutputType;
 
         using device_obj_type = device_obj<LinearLayer<ScalarType, true>>;
-        using DiffScalar1 = Differentiable<PlainScalar, DiffMode::Reverse, 1>;
+        using DiffScalar1 = Diff<PlainScalar, DiffMode::Reverse, 1>;
         using LossType = typename Loss<ScalarType>::LossType;
         constexpr static bool IsTrainMode = ScalarType::Order == 2;
         static_assert(std::is_same<OutputType, ScalarType>::value, "[Error]: Output is energy, which should be a scalar");

@@ -18,7 +18,7 @@
  */
 #pragma once
 
-#include "Differentiable.h"
+#include "Diff.h"
 
 namespace Physica::Core {
     template<class ScalarType>

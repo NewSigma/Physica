@@ -18,15 +18,15 @@
  */
 #pragma once
 
-#include <Physica/Core/MultiPrecision/Differentiable.h>
+#include <Physica/Core/MultiPrecision/Diff.h>
 #include "Vector.h"
 
 namespace Physica::Core {
     template<class PlainScalar, unsigned int Order>
-    class Differentiable<Vector<PlainScalar>, DiffMode::Reverse, Order>
-            : public RValueVector<Differentiable<Vector<PlainScalar>, DiffMode::Reverse, Order>> {
+    class Diff<Vector<PlainScalar>, DiffMode::Reverse, Order>
+            : public RValueVector<Diff<Vector<PlainScalar>, DiffMode::Reverse, Order>> {
         using VectorType = Vector<PlainScalar>;
-        using This = Differentiable<VectorType, DiffMode::Reverse, Order>;
+        using This = Diff<VectorType, DiffMode::Reverse, Order>;
         using Base = RValueVector<This>;
         using TracerType = DiffTracer<PlainScalar, Order>;
         using SegmentType = TraceSegment<PlainScalar, Order>;
@@ -35,21 +35,21 @@ namespace Physica::Core {
     private:
         SegmentType& traceSeg;
     public:
-        Differentiable();
-        Differentiable(size_t length);
-        Differentiable(VectorType values);
-        Differentiable(const Differentiable&) = default;
-        Differentiable(Differentiable&&) noexcept = default;
-        ~Differentiable() = default;
+        Diff();
+        Diff(size_t length);
+        Diff(VectorType values);
+        Diff(const Diff&) = default;
+        Diff(Diff&&) noexcept = default;
+        ~Diff() = default;
         /* Operators */
-        Differentiable& operator=(const Differentiable&) = default;
-        Differentiable& operator=(Differentiable&&) noexcept = default;
+        Diff& operator=(const Diff&) = default;
+        Diff& operator=(Diff&&) noexcept = default;
         /* Operations */
         template<class RandomGenerator> inline void random_uniform(RandomGenerator& gen);
         template<class RandomGenerator> inline void random_normal(RandomGenerator& gen);
         template<class Distribution, class RandomGenerator>
         inline void random_any(Distribution& dist, RandomGenerator& gen);
-        void swap(Differentiable& obj) noexcept { std::swap(*this, obj); }
+        void swap(Diff& obj) noexcept { std::swap(*this, obj); }
         /* Getters */
         [[nodiscard]] inline ScalarType calc(size_t index) const;
         [[nodiscard]] size_t getLength() const noexcept { return traceSeg.getLength(); }
@@ -67,60 +67,60 @@ namespace Physica::Core {
     };
 
     template<class PlainScalar, unsigned int Order>
-    Differentiable<Vector<PlainScalar>, DiffMode::Reverse, Order>::Differentiable()
+    Diff<Vector<PlainScalar>, DiffMode::Reverse, Order>::Diff()
             : traceSeg(TracerType::getInstance().pushSegment()) {}
 
     template<class PlainScalar, unsigned int Order>
-    Differentiable<Vector<PlainScalar>, DiffMode::Reverse, Order>::Differentiable(size_t length)
+    Diff<Vector<PlainScalar>, DiffMode::Reverse, Order>::Diff(size_t length)
             : traceSeg(TracerType::getInstance().pushSegment(length)) {}
 
     template<class PlainScalar, unsigned int Order>
-    Differentiable<Vector<PlainScalar>, DiffMode::Reverse, Order>::Differentiable(VectorType values)
+    Diff<Vector<PlainScalar>, DiffMode::Reverse, Order>::Diff(VectorType values)
             : traceSeg(TracerType::getInstance().pushSegment(std::move(values))) {}
 
     template<class PlainScalar, unsigned int Order>
     template<class RandomGenerator>
-    inline void Differentiable<Vector<PlainScalar>, DiffMode::Reverse, Order>::random_uniform(RandomGenerator& gen) {
+    inline void Diff<Vector<PlainScalar>, DiffMode::Reverse, Order>::random_uniform(RandomGenerator& gen) {
         *this = random_uniform(getLength(), gen);
     }
 
     template<class PlainScalar, unsigned int Order>
     template<class RandomGenerator>
-    inline void Differentiable<Vector<PlainScalar>, DiffMode::Reverse, Order>::random_normal(RandomGenerator& gen) {
+    inline void Diff<Vector<PlainScalar>, DiffMode::Reverse, Order>::random_normal(RandomGenerator& gen) {
         *this = random_normal(getLength(), gen);
     }
 
     template<class PlainScalar, unsigned int Order>
     template<class Distribution, class RandomGenerator>
-    inline void Differentiable<Vector<PlainScalar>, DiffMode::Reverse, Order>::random_any(Distribution& dist, RandomGenerator& gen) {
+    inline void Diff<Vector<PlainScalar>, DiffMode::Reverse, Order>::random_any(Distribution& dist, RandomGenerator& gen) {
         *this = random_any(getLength(), dist, gen);
     }
 
     template<class PlainScalar, unsigned int Order>
-    inline typename Differentiable<Vector<PlainScalar>, DiffMode::Reverse, Order>::ScalarType
-    Differentiable<Vector<PlainScalar>, DiffMode::Reverse, Order>::calc(size_t index) const {
+    inline typename Diff<Vector<PlainScalar>, DiffMode::Reverse, Order>::ScalarType
+    Diff<Vector<PlainScalar>, DiffMode::Reverse, Order>::calc(size_t index) const {
         assert(index < getLength() && "[Error]: Index out of range");
         return traceSeg[index];
     }
 
     template<class PlainScalar, unsigned int Order>
     template<class RandomGenerator>
-    inline Differentiable<Vector<PlainScalar>, DiffMode::Reverse, Order>
-    Differentiable<Vector<PlainScalar>, DiffMode::Reverse, Order>::random_uniform(size_t len, RandomGenerator& gen) {
+    inline Diff<Vector<PlainScalar>, DiffMode::Reverse, Order>
+    Diff<Vector<PlainScalar>, DiffMode::Reverse, Order>::random_uniform(size_t len, RandomGenerator& gen) {
         return This(VectorType::random_uniform(len, gen));
     }
 
     template<class PlainScalar, unsigned int Order>
     template<class RandomGenerator>
-    inline Differentiable<Vector<PlainScalar>, DiffMode::Reverse, Order>
-    Differentiable<Vector<PlainScalar>, DiffMode::Reverse, Order>::random_normal(size_t len, RandomGenerator& gen) {
+    inline Diff<Vector<PlainScalar>, DiffMode::Reverse, Order>
+    Diff<Vector<PlainScalar>, DiffMode::Reverse, Order>::random_normal(size_t len, RandomGenerator& gen) {
         return This(VectorType::random_normal(len, gen));
     }
 
     template<class PlainScalar, unsigned int Order>
     template<class Distribution, class RandomGenerator>
-    inline Differentiable<Vector<PlainScalar>, DiffMode::Reverse, Order>
-    Differentiable<Vector<PlainScalar>, DiffMode::Reverse, Order>::random_any(size_t len, Distribution& dist, RandomGenerator& gen) {
+    inline Diff<Vector<PlainScalar>, DiffMode::Reverse, Order>
+    Diff<Vector<PlainScalar>, DiffMode::Reverse, Order>::random_any(size_t len, Distribution& dist, RandomGenerator& gen) {
         return This(VectorType::random_any(len, dist, gen));
     }
 }
@@ -129,9 +129,9 @@ namespace Physica {
     using namespace Core;
 
     template<class T, unsigned int Order>
-    class Traits<Differentiable<Vector<T>, DiffMode::Reverse, Order>> : public Traits<Vector<T>> {
-        static_assert(!T::isDifferentiable, "[Error]: Nested Differentiable<> is not allowed");
+    class Traits<Diff<Vector<T>, DiffMode::Reverse, Order>> : public Traits<Vector<T>> {
+        static_assert(!T::isDifferentiable, "[Error]: Nested Diff<> is not allowed");
     public:
-        using ScalarType = Differentiable<T, DiffMode::Reverse, Order>;
+        using ScalarType = Diff<T, DiffMode::Reverse, Order>;
     };
 }

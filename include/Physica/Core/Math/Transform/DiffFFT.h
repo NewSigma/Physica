@@ -18,15 +18,15 @@
  */
 #pragma once
 
-#include <Physica/Core/MultiPrecision/Differentiable.h>
+#include <Physica/Core/MultiPrecision/Diff.h>
 #include "FFT.h"
 
 namespace Physica::Core {
     template<class PlainScalar, DiffMode Mode>
-    class FFT<Differentiable<PlainScalar, Mode, 1>, 1>
-            : public FFTRSpace<FFT<Differentiable<PlainScalar, Mode, 1>, 1>, 1>
-            , public FFTKSpace<FFT<Differentiable<PlainScalar, Mode, 1>, 1>, 1> {
-        using ScalarType = Differentiable<PlainScalar, Mode, 1>;
+    class FFT<Diff<PlainScalar, Mode, 1>, 1>
+            : public FFTRSpace<FFT<Diff<PlainScalar, Mode, 1>, 1>, 1>
+            , public FFTKSpace<FFT<Diff<PlainScalar, Mode, 1>, 1>, 1> {
+        using ScalarType = Diff<PlainScalar, Mode, 1>;
         using This = FFT<ScalarType, 1>;
         using RealType = typename Traits<This>::RealType;
         using ComplexType = typename Traits<This>::ComplexType;
@@ -84,48 +84,48 @@ namespace Physica::Core {
     };
 
     template<class PlainScalar, DiffMode Mode>
-    FFT<Differentiable<PlainScalar, Mode, 1>, 1>::FFT() : fft_impl(), buffer() {}
+    FFT<Diff<PlainScalar, Mode, 1>, 1>::FFT() : fft_impl(), buffer() {}
 
     template<class PlainScalar, DiffMode Mode>
-    FFT<Differentiable<PlainScalar, Mode, 1>, 1>::FFT(size_t rSpaceSize, PlanFlag planFlag)
+    FFT<Diff<PlainScalar, Mode, 1>, 1>::FFT(size_t rSpaceSize, PlanFlag planFlag)
             : fft_impl(rSpaceSize, planFlag) {
         buffer.resize(getKSpaceSize());
     }
 
     template<class PlainScalar, DiffMode Mode>
-    FFT<Differentiable<PlainScalar, Mode, 1>, 1>::FFT(const Vector<ScalarType>& data, PlanFlag planFlag)
+    FFT<Diff<PlainScalar, Mode, 1>, 1>::FFT(const Vector<ScalarType>& data, PlanFlag planFlag)
             : FFT(data.getLength(), planFlag) {
         RSpaceType::transform(data);
     }
 
     template<class PlainScalar, DiffMode Mode>
-    FFT<Differentiable<PlainScalar, Mode, 1>, 1>::FFT(size_t rSpaceSize)
+    FFT<Diff<PlainScalar, Mode, 1>, 1>::FFT(size_t rSpaceSize)
             : fft_impl(FFTType::makeEmptyFFT(rSpaceSize)) {
         buffer.resize(getKSpaceSize());
     }
 
     template<class PlainScalar, DiffMode Mode>
-    FFT<Differentiable<PlainScalar, Mode, 1>, 1>&
-    FFT<Differentiable<PlainScalar, Mode, 1>, 1>::operator=(FFT<Differentiable<PlainScalar, Mode, 1>, 1> obj) noexcept {
+    FFT<Diff<PlainScalar, Mode, 1>, 1>&
+    FFT<Diff<PlainScalar, Mode, 1>, 1>::operator=(FFT<Diff<PlainScalar, Mode, 1>, 1> obj) noexcept {
         swap(obj);
         return *this;
     }
 
     template<class PlainScalar, DiffMode Mode>
-    void FFT<Differentiable<PlainScalar, Mode, 1>, 1>::swap(FFT& __restrict obj) noexcept {
+    void FFT<Diff<PlainScalar, Mode, 1>, 1>::swap(FFT& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         fft_impl.swap(obj.fft_impl);
         buffer.swap(obj.buffer);
     }
 
     template<class PlainScalar, DiffMode Mode>
-    inline FFT<Differentiable<PlainScalar, Mode, 1>, 1>
-    FFT<Differentiable<PlainScalar, Mode, 1>, 1>::makeEmptyFFT(size_t rSpaceSize) {
+    inline FFT<Diff<PlainScalar, Mode, 1>, 1>
+    FFT<Diff<PlainScalar, Mode, 1>, 1>::makeEmptyFFT(size_t rSpaceSize) {
         return This(rSpaceSize);
     }
 
     template<class PlainScalar, DiffMode Mode>
-    inline void FFT<Differentiable<PlainScalar, Mode, 1>, 1>::transform(const This& planProvider, This& bufferProvider) {
+    inline void FFT<Diff<PlainScalar, Mode, 1>, 1>::transform(const This& planProvider, This& bufferProvider) {
         assert(planProvider.getRSpaceSize() == bufferProvider.getRSpaceSize());
         assert(planProvider.getKSpaceSize() == bufferProvider.getKSpaceSize());
         const size_t rSpaceSize = planProvider.getRSpaceSize();
@@ -163,7 +163,7 @@ namespace Physica::Core {
     }
 
     template<class PlainScalar, DiffMode Mode>
-    inline void FFT<Differentiable<PlainScalar, Mode, 1>, 1>::invTransform(const This& planProvider, This& bufferProvider) {
+    inline void FFT<Diff<PlainScalar, Mode, 1>, 1>::invTransform(const This& planProvider, This& bufferProvider) {
         assert(planProvider.getRSpaceSize() == bufferProvider.getRSpaceSize());
         assert(planProvider.getKSpaceSize() == bufferProvider.getKSpaceSize());
         const size_t rSpaceSize = planProvider.getRSpaceSize();

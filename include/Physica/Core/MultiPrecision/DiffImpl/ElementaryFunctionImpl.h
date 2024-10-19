@@ -20,7 +20,7 @@
 
 namespace Physica::Core {
     template<class ScalarType, DiffMode Mode, unsigned int Order>
-    __host__ __device__ inline Differentiable<ScalarType, Mode, Order> abs(const Differentiable<ScalarType, Mode, Order>& s) {
+    __host__ __device__ inline Diff<ScalarType, Mode, Order> abs(const Diff<ScalarType, Mode, Order>& s) {
         const ScalarType value = abs(s.getValue());
         if constexpr (Mode == DiffMode::Forward)
             return {value, s.getValue().isPositive() ? s.getGrad() : -s.getGrad()};
@@ -33,7 +33,7 @@ namespace Physica::Core {
     }
 
     template<class ScalarType, DiffMode Mode, unsigned int Order>
-    inline Differentiable<ScalarType, Mode, Order> relu(const Differentiable<ScalarType, Mode, Order>& s) {
+    inline Diff<ScalarType, Mode, Order> relu(const Diff<ScalarType, Mode, Order>& s) {
         const ScalarType value = relu(s.getValue());
         if constexpr (Mode == DiffMode::Forward)
             return {value, s.getValue().isPositive() ? s.getGrad() : ScalarType(0)};
@@ -46,7 +46,7 @@ namespace Physica::Core {
     }
 
     template<class ScalarType, DiffMode Mode, unsigned int Order>
-    __host__ __device__ inline Differentiable<ScalarType, Mode, Order> square(const Differentiable<ScalarType, Mode, Order>& s) {
+    __host__ __device__ inline Diff<ScalarType, Mode, Order> square(const Diff<ScalarType, Mode, Order>& s) {
         const ScalarType value = square(s.getValue());
         if constexpr (Mode == DiffMode::Forward)
             return {value, ScalarType(2) * s.getValue() * s.getGrad()};
@@ -59,7 +59,7 @@ namespace Physica::Core {
     }
 
     template<class ScalarType, DiffMode Mode, unsigned int Order>
-    __host__ __device__ inline Differentiable<ScalarType, Mode, Order> reciprocal(const Differentiable<ScalarType, Mode, Order>& s) {
+    __host__ __device__ inline Diff<ScalarType, Mode, Order> reciprocal(const Diff<ScalarType, Mode, Order>& s) {
         const ScalarType rep = reciprocal(s.getValue());
         if constexpr (Mode == DiffMode::Forward)
             return {rep, -s.getGrad() * square(rep)};
@@ -72,7 +72,7 @@ namespace Physica::Core {
     }
 
     template<class ScalarType, DiffMode Mode, unsigned int Order>
-    __host__ __device__ Differentiable<ScalarType, Mode, Order> sqrt(const Differentiable<ScalarType, Mode, Order>& s) {
+    __host__ __device__ Diff<ScalarType, Mode, Order> sqrt(const Diff<ScalarType, Mode, Order>& s) {
         const ScalarType value = sqrt(s.getValue());
         if constexpr (Mode == DiffMode::Forward)
             return {value, ScalarType(0.5) * s.getGrad() / value};
@@ -85,7 +85,7 @@ namespace Physica::Core {
     }
 
     template<class ScalarType, DiffMode Mode, unsigned int Order>
-    Differentiable<ScalarType, Mode, Order> cbrt(const Differentiable<ScalarType, Mode, Order>& s) {
+    Diff<ScalarType, Mode, Order> cbrt(const Diff<ScalarType, Mode, Order>& s) {
         const ScalarType value = cbrt(s.getValue());
         if constexpr (Mode == DiffMode::Forward) {
             constexpr double Factor = 1.0 / 3;
@@ -100,7 +100,7 @@ namespace Physica::Core {
     }
 
     template<class ScalarType, DiffMode Mode, unsigned int Order>
-    Differentiable<ScalarType, Mode, Order> ln(const Differentiable<ScalarType, Mode, Order>& s) {
+    Diff<ScalarType, Mode, Order> ln(const Diff<ScalarType, Mode, Order>& s) {
         const ScalarType value = ln(s.getValue());
         if constexpr (Mode == DiffMode::Forward)
             return {value, s.getGrad() / s.getValue()};
@@ -113,7 +113,7 @@ namespace Physica::Core {
     }
 
     template<class ScalarType, DiffMode Mode, unsigned int Order>
-    Differentiable<ScalarType, Mode, Order> exp(const Differentiable<ScalarType, Mode, Order>& s) {
+    Diff<ScalarType, Mode, Order> exp(const Diff<ScalarType, Mode, Order>& s) {
         const ScalarType value = exp(s.getValue());
         if constexpr (Mode == DiffMode::Forward)
             return {value, value * s.getGrad()};
@@ -126,7 +126,7 @@ namespace Physica::Core {
     }
 
     template<class ScalarType, DiffMode Mode, unsigned int Order>
-    Differentiable<ScalarType, Mode, Order> cos(const Differentiable<ScalarType, Mode, Order>& s) {
+    Diff<ScalarType, Mode, Order> cos(const Diff<ScalarType, Mode, Order>& s) {
         if constexpr (Mode == DiffMode::Forward) {
             ScalarType sin_value, cos_value;
             sincos(s.getValue(), sin_value, cos_value);
@@ -142,7 +142,7 @@ namespace Physica::Core {
     }
 
     template<class ScalarType, DiffMode Mode, unsigned int Order>
-    Differentiable<ScalarType, Mode, Order> sin(const Differentiable<ScalarType, Mode, Order>& s) {
+    Diff<ScalarType, Mode, Order> sin(const Diff<ScalarType, Mode, Order>& s) {
         if constexpr (Mode == DiffMode::Forward) {
             ScalarType sin_value, cos_value;
             sincos(s.getValue(), sin_value, cos_value);
@@ -158,12 +158,12 @@ namespace Physica::Core {
     }
 
     template<class ScalarType, DiffMode Mode, unsigned int Order>
-    void sincos(Differentiable<ScalarType, Mode, Order> s, Differentiable<ScalarType, Mode, Order>& sin_result, Differentiable<ScalarType, Mode, Order>& cos_result) {
+    void sincos(Diff<ScalarType, Mode, Order> s, Diff<ScalarType, Mode, Order>& sin_result, Diff<ScalarType, Mode, Order>& cos_result) {
         ScalarType sin_value, cos_value;
         sincos(s.getValue(), sin_value, cos_value);
         if constexpr (Mode == DiffMode::Forward) {
-            sin_result = Differentiable<ScalarType, Mode, Order>(sin_value, cos_value * s.getGrad());
-            cos_result = Differentiable<ScalarType, Mode, Order>(cos_value, -sin_value * s.getGrad());
+            sin_result = Diff<ScalarType, Mode, Order>(sin_value, cos_value * s.getGrad());
+            cos_result = Diff<ScalarType, Mode, Order>(cos_value, -sin_value * s.getGrad());
         }
         else {
             auto& tracer = DiffTracer<ScalarType, Order>::getInstance();
@@ -175,7 +175,7 @@ namespace Physica::Core {
     }
 
     template<class ScalarType, DiffMode Mode, unsigned int Order>
-    Differentiable<ScalarType, Mode, Order> arccos(const Differentiable<ScalarType, Mode, Order>& s) {
+    Diff<ScalarType, Mode, Order> arccos(const Diff<ScalarType, Mode, Order>& s) {
         if constexpr (Mode == DiffMode::Forward) {
             return {arccos(s.getValue()), -s.getGrad() / sqrt(ScalarType(1) - square(s.getValue()))};
         }
@@ -189,7 +189,7 @@ namespace Physica::Core {
     }
 
     template<class ScalarType, DiffMode Mode, unsigned int Order>
-    Differentiable<ScalarType, Mode, Order> tanh(const Differentiable<ScalarType, Mode, Order>& s) {
+    Diff<ScalarType, Mode, Order> tanh(const Diff<ScalarType, Mode, Order>& s) {
         const ScalarType value = tanh(s.getValue());
         if constexpr (Mode == DiffMode::Forward) {
             return {value, ScalarType(1) - square(value)};

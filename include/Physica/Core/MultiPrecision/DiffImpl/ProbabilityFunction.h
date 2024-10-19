@@ -20,12 +20,12 @@
 
 namespace Physica::Core {
     template<class ScalarType, DiffMode Mode, unsigned int Order>
-    inline ScalarType floor(const Differentiable<ScalarType, Mode, Order>& s) {
+    inline ScalarType floor(const Diff<ScalarType, Mode, Order>& s) {
         return floor(s.getValue());
     }
     
     template<class ScalarType, DiffMode Mode, unsigned int Order>
-    inline ScalarType ceil(const Differentiable<ScalarType, Mode, Order>& s) {
+    inline ScalarType ceil(const Diff<ScalarType, Mode, Order>& s) {
         return ceil(s.getValue());
     }
 }

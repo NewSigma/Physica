@@ -99,9 +99,9 @@ namespace Physica::Core {
     };
 
     template<class PlainScalar, size_t Size>
-    class SIMD<Differentiable<PlainScalar, DiffMode::Reverse, 1>, Size> : public SIMD<PlainScalar, Size> {
+    class SIMD<Diff<PlainScalar, DiffMode::Reverse, 1>, Size> : public SIMD<PlainScalar, Size> {
         static_assert(!PlainScalar::isDifferentiable, "[Error]: Invalid template param");
-        using ScalarType = Differentiable<PlainScalar, DiffMode::Reverse, 1>;
+        using ScalarType = Diff<PlainScalar, DiffMode::Reverse, 1>;
         using This = SIMD<ScalarType, Size>;
         using Base = SIMD<PlainScalar, Size>;
         using BoolSIMDType = typename Traits<This>::BoolSIMDType;

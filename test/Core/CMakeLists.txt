@@ -6,7 +6,7 @@ add_subdirectory(IO)
 add_subdirectory(Math)
 ## MultiPrecision
 physica_add_test(Const MultiPrecision/ConstTest.cpp)
-physica_add_test(Differentiable MultiPrecision/Differentiable.cpp)
+physica_add_test(Diff MultiPrecision/Diff.cpp)
 physica_add_test(Integer MultiPrecision/IntegerTest.cpp)
 physica_add_test(Scalar MultiPrecision/ScalarTest.cpp)
 ## Parallel

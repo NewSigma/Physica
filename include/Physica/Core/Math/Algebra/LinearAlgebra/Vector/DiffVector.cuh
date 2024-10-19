@@ -18,17 +18,17 @@
  */
 #pragma once
 
-#include <Physica/Core/MultiPrecision/Differentiable.cuh>
+#include <Physica/Core/MultiPrecision/Diff.cuh>
 #include "DiffVector.h"
 #include "Vector.cuh"
 
 namespace Physica::Core {
     template<class PlainScalar, unsigned Order>
-    class device_obj<Differentiable<Vector<PlainScalar>, DiffMode::Reverse, Order>>
-            : public device_obj<RValueVector<Differentiable<Vector<PlainScalar>, DiffMode::Reverse, Order>>> {
-        static_assert(!PlainScalar::isDifferentiable, "[Error]: Nested Differentiable<> is not allowed");
+    class device_obj<Diff<Vector<PlainScalar>, DiffMode::Reverse, Order>>
+            : public device_obj<RValueVector<Diff<Vector<PlainScalar>, DiffMode::Reverse, Order>>> {
+        static_assert(!PlainScalar::isDifferentiable, "[Error]: Nested Diff<> is not allowed");
         using PlainVector = Vector<PlainScalar>;
-        using host_obj = Differentiable<PlainVector, DiffMode::Reverse, Order>;
+        using host_obj = Diff<PlainVector, DiffMode::Reverse, Order>;
         using This = device_obj<host_obj>;
         using Base = device_obj<RValueVector<host_obj>>;
         using TracerType = device_obj<typename host_obj::TracerType>;
@@ -100,9 +100,9 @@ namespace Physica {
     using namespace Core;
 
     template<class T, unsigned int Order>
-    class Traits<Core::device_obj<Differentiable<Vector<T>, DiffMode::Reverse, Order>>> : public Traits<Vector<T>> {
+    class Traits<Core::device_obj<Diff<Vector<T>, DiffMode::Reverse, Order>>> : public Traits<Vector<T>> {
     public:
-        using ScalarType = Core::device_obj<Differentiable<T, DiffMode::Reverse, Order>>;
+        using ScalarType = Core::device_obj<Diff<T, DiffMode::Reverse, Order>>;
     };
 }
 

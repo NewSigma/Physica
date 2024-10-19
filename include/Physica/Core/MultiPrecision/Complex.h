@@ -169,7 +169,7 @@ namespace Physica {
     template<class T>
     class Traits<Complex<T>> {
         static_assert(!T::isComplex, "[Error]: Double complex mark is not allowed");
-        static_assert(!T::isDifferentiable, "[Error]: Differentiable mark should locate in outsite");
+        static_assert(!T::isDifferentiable, "[Error]: Diff mark should locate in outsite");
     public:
         using ScalarType = Complex<T>;
         using RealType = T;

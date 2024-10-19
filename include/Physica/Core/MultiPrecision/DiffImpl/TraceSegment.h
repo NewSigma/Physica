@@ -29,13 +29,13 @@ namespace Physica::Core {
      */
     template<class ScalarType, unsigned int Order>
     class TraceSegment {
-        static_assert(!ScalarType::isDifferentiable, "[Error]: Differentiable<> pack is not necessary");
+        static_assert(!ScalarType::isDifferentiable, "[Error]: Diff<> pack is not necessary");
         static_assert(Order > 0, "[Error]: 0 order is not differentiable");
         using This = TraceSegment<ScalarType, Order>;
-        using GradType = typename std::conditional<Order == 1, ScalarType, Differentiable<ScalarType, DiffMode::Reverse, Order - 1>>::type;
+        using GradType = typename std::conditional<Order == 1, ScalarType, Diff<ScalarType, DiffMode::Reverse, Order - 1>>::type;
     public:
         constexpr static size_t DefaultSize = 4096; // I guess it is not a bad choice
-        using DiffScalar = Differentiable<ScalarType, DiffMode::Reverse, Order>;
+        using DiffScalar = Diff<ScalarType, DiffMode::Reverse, Order>;
         using ValueVector = Vector<ScalarType>;
         using GradVector = Vector<GradType>;
         struct DiffRecord {

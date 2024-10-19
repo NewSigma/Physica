@@ -112,7 +112,7 @@ private:
 };
 
 using PlainScalar = float32;
-using ScalarType = Differentiable<PlainScalar, DiffMode::Reverse>;
+using ScalarType = Diff<PlainScalar, DiffMode::Reverse>;
 using Dataset = typename Mnist::DatasetType<Vector<PlainScalar>>;
 using Optimizer = MomentumSGD<ScalarType>;
 using RandomGenerator = std::mt19937;

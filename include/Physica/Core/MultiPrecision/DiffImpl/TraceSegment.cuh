@@ -20,13 +20,13 @@
 
 #include <Physica/Core/Parallel/CUDAContext.cuh>
 #include <Physica/Core/Parallel/Future/StreamFuture.cuh>
-#include <Physica/Core/MultiPrecision/Differentiable.cuh>
+#include <Physica/Core/MultiPrecision/Diff.cuh>
 #include "TraceSegment.h"
 
 namespace Physica::Core {
     template<class ScalarType, unsigned int Order>
     class device_obj<TraceSegment<ScalarType, Order>> {
-        static_assert(!ScalarType::isDifferentiable, "[Error]: Differentiable<> pack is not necessary");
+        static_assert(!ScalarType::isDifferentiable, "[Error]: Diff<> pack is not necessary");
         static_assert(Order > 0, "[Error]: 0 order is not differentiable");
         using host_obj = TraceSegment<ScalarType, Order>;
         using This = device_obj<host_obj>;

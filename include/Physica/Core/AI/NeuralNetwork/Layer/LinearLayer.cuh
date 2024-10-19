@@ -37,7 +37,7 @@ namespace Physica::Core {
         using typename Base::PlainScalar;
         using typename Base::InputType;
         using typename Base::OutputType;
-        using DiffMatrix = Differentiable<DenseMatrix<PlainScalar, host_obj::Option>, DiffMode::Reverse, ScalarType::Order>;
+        using DiffMatrix = Diff<DenseMatrix<PlainScalar, host_obj::Option>, DiffMode::Reverse, ScalarType::Order>;
         using DeviceMatrix = device_obj<typename std::conditional<IsTrainMode, DiffMatrix, MatrixType>::type>;
         using BiasType = typename std::conditional<WithBias, InputType, PlainStruct<void>>::type;
     private:
@@ -195,7 +195,7 @@ namespace Physica {
         using Base = Traits<LinearLayer<T, WithBias>>;
         using VectorType = Vector<typename Base::ScalarType>;
         using PlainScalar = typename Base::ScalarType::PlainScalar;
-        using DiffVector = Differentiable<Vector<PlainScalar>, DiffMode::Reverse, T::Order>;
+        using DiffVector = Diff<Vector<PlainScalar>, DiffMode::Reverse, T::Order>;
         constexpr static bool IsTrainMode = Base::ScalarType::isDifferentiable;
     public:
         using InputType = Core::device_obj<typename std::conditional<IsTrainMode, DiffVector, VectorType>::type>;

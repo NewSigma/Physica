@@ -18,7 +18,7 @@
  */
 #include <iostream>
 #include "Physica/Core/MultiPrecision/Scalar.h"
-#include "Physica/Core/MultiPrecision/Differentiable.h"
+#include "Physica/Core/MultiPrecision/Diff.h"
 
 using namespace Physica::Core;
 
@@ -30,7 +30,7 @@ T func(T x, T y) {
 int main() {
     using PlainScalar = float64;
     {
-        using ScalarType = Differentiable<PlainScalar, DiffMode::Forward, 1>;
+        using ScalarType = Diff<PlainScalar, DiffMode::Forward, 1>;
         const PlainScalar x = 3;
         const PlainScalar y = 4;
         const ScalarType result = func(ScalarType(x, 1), ScalarType(y, 1));
@@ -39,7 +39,7 @@ int main() {
             return 1;
     }
     {
-        using ScalarType = Differentiable<PlainScalar, DiffMode::Reverse, 1>;
+        using ScalarType = Diff<PlainScalar, DiffMode::Reverse, 1>;
         ScalarType x(3);
         ScalarType y(4);
         ScalarType result = func(x, y);
@@ -50,7 +50,7 @@ int main() {
             return 1;
     }
     {
-        using ScalarType = Differentiable<PlainScalar, DiffMode::Reverse, 2>;
+        using ScalarType = Diff<PlainScalar, DiffMode::Reverse, 2>;
         ScalarType x(3);
         ScalarType result = square(x);
         result.reverse();
@@ -61,7 +61,7 @@ int main() {
             return 1;
     }
     {
-        using ScalarType = Differentiable<PlainScalar, DiffMode::Reverse, 2>;
+        using ScalarType = Diff<PlainScalar, DiffMode::Reverse, 2>;
         ScalarType x(3);
         ScalarType y(4);
         ScalarType result = func(x, y);

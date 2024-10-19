@@ -31,7 +31,7 @@ namespace Physica::Core {
         using LossType = typename std::conditional<IsTrainMode, device_obj<ScalarType>, ScalarType>::type;
     private:
         using PlainVector = Vector<PlainScalar>;
-        using DiffVector = Differentiable<PlainVector, DiffMode::Reverse, ScalarType::Order>;
+        using DiffVector = Diff<PlainVector, DiffMode::Reverse, ScalarType::Order>;
         using VectorType = device_obj<typename std::conditional<IsTrainMode, DiffVector, PlainVector>::type>;
     public:
         [[nodiscard]] static LossType softmax(const VectorType& v, size_t label);

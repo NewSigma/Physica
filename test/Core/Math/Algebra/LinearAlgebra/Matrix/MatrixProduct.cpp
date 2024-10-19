@@ -18,7 +18,7 @@
  */
 #include <iostream>
 #include <Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h>
-#include <Physica/Core/MultiPrecision/Differentiable.h>
+#include <Physica/Core/MultiPrecision/Diff.h>
 
 using namespace Physica::Core;
 
@@ -33,7 +33,7 @@ int main() {
             return 1;
     }
     {
-        using ScalarType = Differentiable<float32, DiffMode::Reverse>;
+        using ScalarType = Diff<float32, DiffMode::Reverse>;
         using VectorType = Vector<float32, 3>;
         using MatrixType = DenseMatrix<float32, MatrixOption::Column | MatrixOption::Element, 3, 3>;
         using DVector = Vector<ScalarType, 3>;
