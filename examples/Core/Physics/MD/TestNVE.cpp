@@ -29,7 +29,7 @@ using namespace Physica::Core;
 using namespace Physica::Gui;
 using ScalarType = float64;
 using VectorType = Vector<ScalarType>;
-using RandomPoolType = RandomPool<std::mt19937>;
+using RandomType = Random<std::mt19937>;
 using MDType = RPMD<ScalarType, 3, 1>;
 using KineticModel = FreeModel<ScalarType, 3, 1, RPMDIntegrator::Exact>;
 using ForceModel = BKSModel<ScalarType, Ewald<ScalarType, RSpaceEwald<ScalarType, true>>, false>;
@@ -79,7 +79,7 @@ MDCell<ScalarType> makeSystem() {
 int main(int argc, char** argv) {
     ThreadPool::numThreadRequired = 4;
     MDType rpmd(makeSystem(), 1, 1, temperatureT, timeStep);
-    auto& gen = RandomPoolType::getInstance().getGen();
+    auto& gen = RandomType::getInstance().getGen();
     rpmd.initMomentum<KineticModel, decltype(gen)>(gen);
     KineticModel kineticModel(temperatureT, 1);
     ForceModel forceModel(rpmd.phaseToCell(0), pair_cutoff, {});

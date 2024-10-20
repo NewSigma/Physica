@@ -26,8 +26,8 @@
 
 using namespace Physica::Core;
 using ScalarType = float64;
-using RandomPoolType = RandomPool<std::mt19937, 12989825518855205292UL>;
-using ForceModel = Q_TIP4P<ScalarType, RandomBatchEwald<ScalarType, RandomPoolType>>;
+using RandomType = Random<std::mt19937, 12989825518855205292UL>;
+using ForceModel = Q_TIP4P<ScalarType, RandomBatchEwald<ScalarType, RandomType>>;
 using KineticModel = FreeModel<ScalarType, 3, Physica::Dynamic, RPMDIntegrator::Exact>;
 using ThermoType = DoubleThermo<KineticModel>;
 constexpr size_t numReplica = 32;
@@ -106,11 +106,11 @@ MDCell<ScalarType> makeSystem(unsigned int cellSize, RandomGenerator& gen) {
  * [1] S. Habershon, T. E. Markland, and D. E. Manolopoulosa, J. Chem. Phys. 131, 024501(2009)
  */
 int main() {
-    auto& pool = RandomPoolType::getInstance();
+    auto& pool = RandomType::getInstance();
     auto& gen = pool.getGen();
     auto cell = makeSystem(2, gen);
     ForceModel::sortPosition(cell);
-    ForceModel forceModel(cell, pair_cutoff, RandomBatchEwald<ScalarType, RandomPoolType>(1000, 200));
+    ForceModel forceModel(cell, pair_cutoff, RandomBatchEwald<ScalarType, RandomType>(1000, 200));
     RPMD<ScalarType> rpmd(std::move(cell), numReplica, numContract, temperatureT, timeStep);
     rpmd.initMomentum<KineticModel, decltype(gen)>(gen);
 
@@ -121,7 +121,7 @@ int main() {
     {
         const ThermoType thermo(temperatureT, thermostatTime);
         KineticModel kineticModel(temperatureT, numReplica);
-        rpmd.nvt_step_for<ThermoType, RandomPoolType, KineticModel, decltype(forceModel), SequentialExecutor>(
+        rpmd.nvt_step_for<ThermoType, RandomType, KineticModel, decltype(forceModel), SequentialExecutor>(
             PhyConst<AU>::secondToTime(1 * 1E-12),
             thermo,
             pool,
@@ -137,7 +137,7 @@ int main() {
                 toNextMean(temp, 2 * j + 1, cell.minDistVector(numH + j, 2 * j + 1).norm());
             }
             toNextMean(bond, i, temp);
-            rpmd.nvt_step<ThermoType, RandomPoolType, KineticModel, decltype(forceModel), SequentialExecutor>(thermo, pool, kineticModel, forceModel);
+            rpmd.nvt_step<ThermoType, RandomType, KineticModel, decltype(forceModel), SequentialExecutor>(thermo, pool, kineticModel, forceModel);
         }
     }
     ThreadPool::getInstance().shouldExit();

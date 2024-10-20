@@ -17,7 +17,7 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include <iostream>
-#include <Physica/Core/Math/Random/RandomPool.h>
+#include <Physica/Core/Math/Random/Random.h>
 #include <Physica/Core/Math/Algebra/LinearAlgebra/Eigen/JacobiDavidson.h>
 #include <Physica/Core/Physics/ManyBody/Hamilton/HubbardMatrix.h>
 #include <Physica/Core/Physics/ManyBody/ReprSpace/KSpinRepr.h>
@@ -107,14 +107,14 @@ void testVecProduct() {
     using ReprType = SpinRepr<1, NumSite, false>;
     using Hamilton = HubbardMatrix<float64, ReprType>;
     using RandomGenerator = std::mt19937;
-    using RandomPoolType = RandomPool<RandomGenerator, 10000>;
+    using RandomType = Random<RandomGenerator, 10000>;
 
     LatticeModel<Dim> lattice({NumSite}, 1);
     Hubbard<float64, Dim> hubbard(lattice, HoppingT, RepelU);
     const auto repr = ReprType(2, 1);
     const Hamilton hamiltonH(hubbard, repr);
 
-    const auto v = Vector<float64>::random_uniform(hamiltonH.getNumState(), RandomPoolType::getInstance());
+    const auto v = Vector<float64>::random_uniform(hamiltonH.getNumState(), RandomType::getInstance());
     const Vector<float64> v1 = hamiltonH * v;
     Vector<float64> v2(v.getLength());
     for (size_t i = 0; i < v.getLength(); ++i)

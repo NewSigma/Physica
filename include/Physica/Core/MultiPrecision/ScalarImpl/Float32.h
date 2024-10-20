@@ -89,13 +89,13 @@ namespace Physica::Core {
         template<class RandomGenerator>
         [[nodiscard]] inline static Scalar random_uniform(RandomGenerator& gen);
         template<class RandomGenerator, typename RandomGenerator::result_type FixedSeed>
-        [[nodiscard]] inline static Scalar random_uniform(RandomPool<RandomGenerator, FixedSeed>& pool);
+        [[nodiscard]] inline static Scalar random_uniform(Random<RandomGenerator, FixedSeed>& pool);
         template<class RandomGenerator>
         [[nodiscard]] inline static Scalar random_normal(RandomGenerator& gen);
         template<class RandomGenerator, typename RandomGenerator::result_type FixedSeed>
-        [[nodiscard]] inline static Scalar random_normal(RandomPool<RandomGenerator, FixedSeed>& pool);
-        template<class RandomPoolType>
-        [[nodiscard]] static Scalar random_normal(GaussRandomPool<This, RandomPoolType>& pool) { return pool(); }
+        [[nodiscard]] inline static Scalar random_normal(Random<RandomGenerator, FixedSeed>& pool);
+        template<class RandomType>
+        [[nodiscard]] static Scalar random_normal(GaussRandomPool<This, RandomType>& pool) { return pool(); }
         template<class Distribution, class RandomGenerator>
         [[nodiscard]] inline static Scalar random_any(Distribution& dist, RandomGenerator& gen);
     #ifdef PHYSICA_HDF5
@@ -121,7 +121,7 @@ namespace Physica::Core {
     }
 
     template<class RandomGenerator, typename RandomGenerator::result_type FixedSeed>
-    inline Scalar<Float32> Scalar<Float32>::random_uniform(RandomPool<RandomGenerator, FixedSeed>& pool) {
+    inline Scalar<Float32> Scalar<Float32>::random_uniform(Random<RandomGenerator, FixedSeed>& pool) {
         return random_uniform<RandomGenerator>(pool.getGen());
     }
 
@@ -132,7 +132,7 @@ namespace Physica::Core {
     }
 
     template<class RandomGenerator, typename RandomGenerator::result_type FixedSeed>
-    inline Scalar<Float32> Scalar<Float32>::random_normal(RandomPool<RandomGenerator, FixedSeed>& pool) {
+    inline Scalar<Float32> Scalar<Float32>::random_normal(Random<RandomGenerator, FixedSeed>& pool) {
         return random_normal<RandomGenerator>(pool.getGen());
     }
 

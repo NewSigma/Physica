@@ -21,14 +21,14 @@
 #include <QtWidgets/QApplication>
 #include <Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h>
 #include <Physica/Core/Math/Statistics/NumCharacter.h>
-#include <Physica/Core/Math/Random/RandomPool.h>
+#include <Physica/Core/Math/Random/Random.h>
 #include <Physica/Core/Parallel/Executor/ThreadExecutor.h>
 #include <Physica/Gui/Plot/Plot.h>
 
 using namespace Physica::Core;
 using namespace Physica::Gui;
 using ScalarType = float32;
-using RandomPoolType = RandomPool<std::mt19937>;
+using RandomType = Random<std::mt19937>;
 /**
  * Reference:
  * [1] J. H. Thijssen. Computational Physics[M]. London: Cambridge University Press, 2013:304-308
@@ -106,7 +106,7 @@ int main(int argc, char** argv) {
     const auto t = Vector<ScalarType>::linspace(1, 7, NumPoint);
     Vector<ScalarType> Cv(NumPoint);
     ThreadExecutor::parallel_for([&](size_t i) {
-        auto& gen = RandomPoolType::getInstance().getGen();
+        auto& gen = RandomType::getInstance().getGen();
         Ising ising(20, 1, 1, t[i]);
         ising.init(gen);
         ising.step(2000, gen);

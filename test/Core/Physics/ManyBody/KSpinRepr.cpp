@@ -17,7 +17,7 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include <iostream>
-#include <Physica/Core/Math/Random/RandomPool.h>
+#include <Physica/Core/Math/Random/Random.h>
 #include <Physica/Core/Math/Algebra/LinearAlgebra/Eigen/JacobiDavidson.h>
 #include <Physica/Core/Physics/ManyBody/Hamilton/HubbardMatrix.h>
 #include <Physica/Core/Physics/ManyBody/ReprSpace/KSpinRepr.h>
@@ -26,7 +26,7 @@ using namespace Physica::Core;
 using RealType = float64;
 using ScalarType = Complex<RealType>;
 using VectorType = Vector<RealType>;
-using RandomPoolType = RandomPool<std::mt19937, 10000>;
+using RandomType = Random<std::mt19937, 10000>;
 constexpr unsigned int NumSite = 6;
 constexpr unsigned int NumParticle = NumSite / 2;
 constexpr double HoppingT = 1.0;
@@ -55,7 +55,7 @@ void testEigen() {
 
         const size_t numState = model.getNumState();
         JacobiDavidson<RealType> jd(numState, 4);
-        jd.compute(model, VectorType::random_uniform(numState, RandomPoolType::getInstance()));
+        jd.compute(model, VectorType::random_uniform(numState, RandomType::getInstance()));
         jd.sort();
         answer = jd.getEigenvalues()[0];
     }
@@ -67,7 +67,7 @@ void testEigen() {
 
         const size_t numState = model.getNumState();
         JacobiDavidson<ScalarType> jd(numState, 4);
-        jd.compute(model, VectorType::random_uniform(numState, RandomPoolType::getInstance()));
+        jd.compute(model, VectorType::random_uniform(numState, RandomType::getInstance()));
         jd.sort();
         result = jd.getEigenvalues()[0].real();
     }

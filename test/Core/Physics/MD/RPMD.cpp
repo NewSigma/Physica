@@ -25,7 +25,7 @@
 
 using namespace Physica::Core;
 using RandomGenerator = std::mt19937;
-using RandomPoolType = RandomPool<RandomGenerator, 3438603950906262893>;
+using RandomType = Random<RandomGenerator, 3438603950906262893>;
 using ScalarType = float64;
 using KineticModel = FreeModel<ScalarType, 3, Physica::Dynamic, RPMDIntegrator::Exact>;
 constexpr size_t numReplica = 24;
@@ -54,7 +54,7 @@ RPMD<ScalarType> makeSystem(RandomGenerator& gen) {
 }
 
 bool testDriftMomentum(double precision) {
-    auto& gen = RandomPoolType::getInstance().getGen();
+    auto& gen = RandomType::getInstance().getGen();
     auto rpmd = makeSystem(gen);
     rpmd.initMomentum<KineticModel, decltype(gen)>(gen);
     for (int i = 0; i < 3; ++i) {
@@ -70,7 +70,7 @@ bool testDriftMomentum(double precision) {
 bool testCalcKinetic(double precision) {
     using ForceModel = SilveraGoldman<ScalarType, true, false>;
 
-    auto& gen = RandomPoolType::getInstance().getGen();
+    auto& gen = RandomType::getInstance().getGen();
     auto rpmd = makeSystem(gen);
     rpmd.initMomentum<KineticModel, decltype(gen)>(gen);
     ForceModel forceModel(pair_cutoff);
@@ -95,14 +95,14 @@ void testMDRun() {
         const ThermoType thermo(temperatureT, thermostatTime);
         KineticModel kineticModel(temperatureT, numReplica);
         ForceModel forceModel(pair_cutoff);
-        auto& pool = RandomPoolType::getInstance();
+        auto& pool = RandomType::getInstance();
         auto& gen = pool.getGen();
         auto rpmd = makeSystem(gen);
         rpmd.initMomentum<KineticModel, decltype(gen)>(gen);
 
         for (unsigned int i = 0; i < 6; ++i) {
             ScalarType temp = 0;
-            rpmd.nvt_step_for<ThermoType, RandomPoolType, KineticModel, ForceModel, ThreadExecutor>(
+            rpmd.nvt_step_for<ThermoType, RandomType, KineticModel, ForceModel, ThreadExecutor>(
                 PhyConst<AU>::secondToTime(2 * 1E-12),
                 thermo,
                 pool,
@@ -110,7 +110,7 @@ void testMDRun() {
                 forceModel);
 
             for (unsigned int j = 0; j < 100; ++j) {
-                rpmd.nvt_step<ThermoType, RandomPoolType, KineticModel, ForceModel, ThreadExecutor>(thermo, pool, kineticModel, forceModel);
+                rpmd.nvt_step<ThermoType, RandomType, KineticModel, ForceModel, ThreadExecutor>(thermo, pool, kineticModel, forceModel);
                 toNextMean(temp, j, rpmd.calcKinetic<KineticModel>());
             }
             toNextVariance(var, mean, i, temp);

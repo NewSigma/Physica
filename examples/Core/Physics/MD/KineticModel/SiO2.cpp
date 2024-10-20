@@ -21,7 +21,7 @@ using namespace Physica::Core;
 using namespace Physica::Gui;
 using ScalarType = float64;
 using VectorType = Vector<ScalarType>;
-using RandomPoolType = RandomPool<std::mt19937>;
+using RandomType = Random<std::mt19937>;
 using MDType = RPMD<ScalarType, 3, 1>;
 using ThermostatType = Langevin<ScalarType, 3, 1>;
 using KineticModel = FreeModel<ScalarType, 3, 1, RPMDIntegrator::Exact>;
@@ -86,8 +86,8 @@ int main() {
         KineticModel kineticModel(temperatureT, 1);
         ThermostatType thermo(temperatureT, thermostatTime, true);
 
-        rpmd.nvt_step_for<ThermostatType, RandomPoolType, KineticModel, ForceModel, ThreadExecutor>(
-                PhyConst<AU>::secondToTime(1E-12), thermo, RandomPoolType::getInstance(), kineticModel, forceModel);
+        rpmd.nvt_step_for<ThermostatType, RandomType, KineticModel, ForceModel, ThreadExecutor>(
+                PhyConst<AU>::secondToTime(1E-12), thermo, RandomType::getInstance(), kineticModel, forceModel);
         energy[step] = rpmd.calcPotential<ForceModel, SequentialExecutor>(forceModel);
     }
 

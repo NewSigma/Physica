@@ -44,8 +44,8 @@ namespace Physica::Core {
         /* Operators */
         Langevin& operator=(Langevin obj) noexcept;
         /* Operations */
-        template<class RandomPoolType, class Executor>
-        void step(RingPolymerType& ringPolymer, ScalarType deltaT, RandomPoolType& pool) const;
+        template<class RandomType, class Executor>
+        void step(RingPolymerType& ringPolymer, ScalarType deltaT, RandomType& pool) const;
         void swap(Langevin& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] bool isRemoveDriftEnabled() const noexcept { return removeDrift; }
@@ -76,9 +76,9 @@ namespace Physica::Core {
     }
 
     template<class ScalarType, unsigned int Dim, size_t NumReplica>
-    template<class RandomPoolType, class Executor>
+    template<class RandomType, class Executor>
     void Langevin<ScalarType, Dim, NumReplica>::step(
-            RingPolymerType& ringPolymer, ScalarType deltaT, RandomPoolType& pool) const {
+            RingPolymerType& ringPolymer, ScalarType deltaT, RandomType& pool) const {
         const size_t dof = ringPolymer.getDOF();
         const ScalarType repBeta = ringPolymer.calcRepBeta(temperatureT);
         const ScalarType momentumViscosityY = Core::reciprocal(thermostatTime);

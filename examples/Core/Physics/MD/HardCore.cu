@@ -24,7 +24,7 @@
 #include <QtCharts/QValueAxis>
 #include "Physica/Core/Physics/MD/RPMD.h"
 #include "Physica/Core/Physics/MD/KineticModel/HardCore.cuh"
-#include "Physica/Core/Math/Random/RandomPool.h"
+#include "Physica/Core/Math/Random/Random.h"
 #include "Physica/Core/Math/Statistics/ProbDistribution.h"
 #include "Physica/Core/Parallel/Executor/ThreadExecutor.h"
 #include "Physica/Gui/Plot/Plot.h"
@@ -84,7 +84,7 @@ int main(int argc, char** argv) {
     if constexpr (IsComputeMode) {
         ThreadPool::numThreadRequired = record.getColumn();
         ThreadExecutor::parallel_for([&record](unsigned int sys) {
-            auto& gen = RandomPool<RandomGenerator>::getInstance().getGen();
+            auto& gen = Random<RandomGenerator>::getInstance().getGen();
             MDType rpmd = MDType(makeSystem(gen), 1, 1, temperatureT, timeStep);
             KineticModel kineticModel(latticeSize, collideFactor, temperatureT, numMolecular, 100);
             kineticModel.updateMass(rpmd.getRingPolymer());

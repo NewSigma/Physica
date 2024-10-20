@@ -34,7 +34,7 @@ using KineticModel = FreeModel<ScalarType, 3, Physica::Dynamic, RPMDIntegrator::
 using ForceModel = Q_TIP4P<ScalarType, Ewald<ScalarType>>;
 using ThermoType = DoubleThermo<KineticModel>;
 using RandomGenerator = std::mt19937;
-using RandomPoolType = RandomPool<RandomGenerator>;
+using RandomType = Random<RandomGenerator>;
 constexpr size_t numReplica = 32;
 constexpr size_t numContract = 8;
 constexpr double temperatureT = PhyConst<AU>::kToTemperature(298);
@@ -109,7 +109,7 @@ namespace {
     }
 
     void bench1(benchmark::State& state) {
-        auto& gen = RandomPoolType::getInstance().getGen();
+        auto& gen = RandomType::getInstance().getGen();
         auto cell = makeSystem(2, gen);
         ForceModel::sortPosition(cell);
         ForceModel forceModel(cell, pair_cutoff, {});
@@ -123,7 +123,7 @@ namespace {
 
     void bench2(benchmark::State& state) {
         ThreadPool::numThreadRequired = 2;
-        auto& gen = RandomPoolType::getInstance().getGen();
+        auto& gen = RandomType::getInstance().getGen();
         auto cell = makeSystem(2, gen);
         ForceModel::sortPosition(cell);
         ForceModel forceModel(cell, pair_cutoff, {});
@@ -137,7 +137,7 @@ namespace {
 
     void bench4(benchmark::State& state) {
         ThreadPool::numThreadRequired = 4;
-        auto& gen = RandomPoolType::getInstance().getGen();
+        auto& gen = RandomType::getInstance().getGen();
         auto cell = makeSystem(2, gen);
         ForceModel::sortPosition(cell);
         ForceModel forceModel(cell, pair_cutoff, {});

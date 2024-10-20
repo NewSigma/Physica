@@ -34,8 +34,8 @@ using namespace Physica::Core;
 using namespace Physica::Gui;
 using ScalarType = float64;
 using VectorType = Vector<ScalarType>;
-using RandomPoolType = RandomPool<std::mt19937>;
-using EwaldType = RandomBatchEwald<ScalarType, RandomPoolType>;
+using RandomType = Random<std::mt19937>;
+using EwaldType = RandomBatchEwald<ScalarType, RandomType>;
 using ForceModel = Q_TIP4P<ScalarType, EwaldType>;
 constexpr double temperatureT = PhyConst<AU>::kToTemperature(298);
 constexpr double thermostatTime = PhyConst<AU>::secondToTime(100 * 1E-15);
@@ -111,7 +111,7 @@ template<size_t NumReplica>
 RDF<ScalarType> calcRDF(size_t numReplica) {
     using KineticModel = FreeModel<ScalarType, 3, NumReplica, RPMDIntegrator::Exact>;
     using ThermoType = DoubleThermo<KineticModel>;
-    auto& pool = RandomPoolType::getInstance();
+    auto& pool = RandomType::getInstance();
     auto& gen = pool.getGen();
     auto cell = makeSystem(3, gen);
     ForceModel::sortPosition(cell);
@@ -135,10 +135,10 @@ RDF<ScalarType> calcRDF(size_t numReplica) {
 
     ThreadPool::numThreadRequired = 4;
     {
-        rpmd.template nvt_step_for<ThermoType, RandomPoolType, KineticModel, ForceModel, ThreadExecutor>(
+        rpmd.template nvt_step_for<ThermoType, RandomType, KineticModel, ForceModel, ThreadExecutor>(
             PhyConst<AU>::secondToTime(2 * 1E-12), thermo, pool, kineticModel, forceModel);
         for (size_t i = 0; i < 1000; ++i) {
-            rpmd.template nvt_step<ThermoType, RandomPoolType, KineticModel, ForceModel, ThreadExecutor>(
+            rpmd.template nvt_step<ThermoType, RandomType, KineticModel, ForceModel, ThreadExecutor>(
                 thermo, pool, kineticModel, forceModel);
             for (size_t j = 0; j < numReplica; ++j)
                 rdf.sample(rpmd.phaseToCell(j));

@@ -41,8 +41,8 @@ namespace Physica::Core {
         /* Operators */
         TRPMDThermo& operator=(TRPMDThermo obj) noexcept;
         /* Operations */
-        template<class RandomPoolType, class Executor>
-        void step(RingPolymerType& ringPolymer, ScalarType deltaT, RandomPoolType& pool) const;
+        template<class RandomType, class Executor>
+        void step(RingPolymerType& ringPolymer, ScalarType deltaT, RandomType& pool) const;
         void swap(TRPMDThermo& __restrict obj) noexcept;
         /* Setters */
         void setTemperature(ScalarType temperatureT_) { temperatureT = temperatureT_; }
@@ -60,11 +60,11 @@ namespace Physica::Core {
     }
 
     template<class ScalarType, unsigned int Dim, size_t NumReplica>
-    template<class RandomPoolType, class Executor>
+    template<class RandomType, class Executor>
     void TRPMDThermo<ScalarType, Dim, NumReplica>::step(
             RingPolymerType& ringPolymer,
             ScalarType deltaT,
-            RandomPoolType& pool) const {
+            RandomType& pool) const {
         if constexpr (NumReplica == 1)
             return;
         const size_t dof = ringPolymer.getDOF();

@@ -14,7 +14,7 @@
 using namespace Physica::Core;
 using ScalarType = float64;
 using VectorType = Vector<ScalarType>;
-using RandomPoolType = RandomPool<std::mt19937, 10002>;
+using RandomType = Random<std::mt19937, 10002>;
 using KineticModel = FreeModel<ScalarType, 3, 1, RPMDIntegrator::Exact>;
 using ForceModel = QEModel<ScalarType>;
 constexpr double timeStep = PhyConst<AU>::secondToTime(1E-15) * 0.5;
@@ -81,7 +81,7 @@ MDCell<ScalarType> makeSystem() {
     //for (size_t i = 1; i < cell1.getNumParticle(); ++i)
     //    cell1.setMass(i, cell1.getMass(0)); // Set all mass equal to mass H is vital to performance
     pos = cell1.getPos();
-    auto& gen = RandomPoolType::getInstance().getGen();
+    auto& gen = RandomType::getInstance().getGen();
     std::normal_distribution<double> dist(0, 0.5);
     for (auto& elem : pos.asArray())
         elem += ScalarType::random_any(dist, gen); //Perturbation

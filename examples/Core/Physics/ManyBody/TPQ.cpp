@@ -20,7 +20,7 @@
 #include <QApplication>
 #include <Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseSymmMatrix.h>
 #include <Physica/Core/Math/Statistics/NumCharacter.h>
-#include <Physica/Core/Math/Random/RandomPool.h>
+#include <Physica/Core/Math/Random/Random.h>
 #include <Physica/Core/Physics/ManyBody/Hamilton/HubbardMatrix.h>
 #include <Physica/Core/Physics/ManyBody/ReprSpace/SpinRepr.h>
 #include <Physica/Core/Physics/ManyBody/TPQ.h>
@@ -30,7 +30,7 @@ using namespace Physica::Core;
 using namespace Physica::Gui;
 using ScalarType = float64;
 using VectorType = Vector<ScalarType>;
-using RandomPoolType = RandomPool<std::mt19937, 10000>;
+using RandomType = Random<std::mt19937, 10000>;
 constexpr unsigned int NumSite = 4;
 constexpr double HoppingT = 1;
 constexpr double RepelU = 8;
@@ -43,7 +43,7 @@ VectorType calcPartition(ReprType repr_, const VectorType& betas) {
     LatticeModel<1> lattice({NumSite}, 1);
     Hubbard<ScalarType, 1> hubbard(lattice, HoppingT, RepelU);
     const Hamilton hamilton(hubbard, std::move(repr_));
-    auto& gen = RandomPoolType::getInstance();
+    auto& gen = RandomType::getInstance();
     VectorType result(NumBeta);
     const ScalarType deltaBeta = betas[1] - betas[0];
     auto psi = TPQ<ScalarType>(hamilton.getNumState());

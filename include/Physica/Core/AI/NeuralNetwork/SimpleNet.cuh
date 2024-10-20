@@ -43,7 +43,7 @@ namespace Physica::Core {
         device_obj(const device_obj&) = delete;
         ~device_obj() = default;
         /* Operations */
-        template<class Dataset, class Optimizer, class RandomPoolType>
+        template<class Dataset, class Optimizer, class RandomType>
         void train_step(const Dataset& dataset, Optimizer& opt);
 
         template<class Dataset>
@@ -62,13 +62,13 @@ namespace Physica::Core {
     };
 
     template<class Derived>
-    template<class Dataset, class Optimizer, class RandomPoolType>
+    template<class Dataset, class Optimizer, class RandomType>
     void device_obj<SimpleNet<Derived>>::train_step(const Dataset& dataset, Optimizer& opt) {
         static_assert(IsTrainMode, "[Error]: train_step must be called under training mode");
         using TracerType = typename device_obj<ScalarType>::TracerType;
 
         auto dist = std::uniform_int_distribution<size_t>(0, dataset.getSize() - 1);
-        auto& gen = RandomPoolType::getInstance().getGen();
+        auto& gen = RandomType::getInstance().getGen();
         for (unsigned int _ = 0; _ < opt.getBatchSize(); ++_) {
             DiffGuardType guard{};
             const size_t index = dist(gen);

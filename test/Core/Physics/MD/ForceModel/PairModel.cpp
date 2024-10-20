@@ -20,7 +20,7 @@
 #include "Physica/Core/MultiPrecision/Diff.h"
 #include "Physica/Core/Physics/MD/ForceModel/LJModel.h"
 #include "Physica/Core/Physics/MD/ForceModel/SilveraGoldman.h"
-#include "Physica/Core/Math/Random/RandomPool.h"
+#include "Physica/Core/Math/Random/Random.h"
 
 using namespace Physica::Core;
 using ScalarType = Diff<float64, DiffMode::Reverse, 1>;
@@ -32,7 +32,7 @@ using ScalarType = Diff<float64, DiffMode::Reverse, 1>;
  */
 class ForceConstTest {
     using MDCellType = MDCell<ScalarType>;
-    using RandomPoolType = RandomPool<std::mt19937, 12345>;
+    using RandomType = Random<std::mt19937, 12345>;
     constexpr static unsigned int numMolecular = 32;
     constexpr static double pair_cutoff = 15;
     constexpr static double molarVolume = 31.7;
@@ -40,7 +40,7 @@ class ForceConstTest {
 public:
     static void run() {
         SilveraGoldman<ScalarType, true> sg(pair_cutoff);
-        auto& gen = RandomPoolType::getInstance().getGen();
+        auto& gen = RandomType::getInstance().getGen();
         const auto cell = makeSystem(gen);
         const auto fc = sg.forceConst(cell);
         for (size_t i = 0; i < cell.getDOF(); ++i) {

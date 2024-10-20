@@ -44,7 +44,7 @@ namespace Physica::Core {
         SimpleNet(const SimpleNet&) = delete;
         ~SimpleNet() = default;
         /* Operations */
-        template<class Dataset, class Optimizer, class RandomPoolType, class Executor>
+        template<class Dataset, class Optimizer, class RandomType, class Executor>
         void train_step(const Dataset& dataset, Optimizer& opt);
 
         template<class Dataset>
@@ -64,13 +64,13 @@ namespace Physica::Core {
     };
 
     template<class Derived>
-    template<class Dataset, class Optimizer, class RandomPoolType, class Executor>
+    template<class Dataset, class Optimizer, class RandomType, class Executor>
     void SimpleNet<Derived>::train_step(const Dataset& dataset, Optimizer& opt) {
         static_assert(IsTrainMode, "[Error]: train_step must be called under training mode");
         using TracerType = typename ScalarType::TracerType;
         if constexpr (std::is_same<Executor, SequentialExecutor>::value) {
             auto dist = std::uniform_int_distribution<size_t>(0, dataset.getSize() - 1);
-            auto& gen = RandomPoolType::getInstance().getGen();
+            auto& gen = RandomType::getInstance().getGen();
             for (unsigned int _ = 0; _ < opt.getBatchSize(); ++_) {
                 AutoDiffGuard<ScalarType> guard{};
                 const size_t index = dist(gen);
@@ -84,7 +84,7 @@ namespace Physica::Core {
             Executor::parallel_for([this, batchSizePerThread, &mutex, &dataset](unsigned int) {
                 Derived tempNet = copy();
                 auto dist = std::uniform_int_distribution<size_t>(0, dataset.getSize() - 1);
-                auto& gen = RandomPoolType::getInstance().getGen();
+                auto& gen = RandomType::getInstance().getGen();
                 for (size_t _ = 0; _ < batchSizePerThread; ++_) {
                     AutoDiffGuard<ScalarType> guard{};
                     const size_t index = dist(gen);

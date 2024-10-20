@@ -17,7 +17,7 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include <Physica/Core/Physics/MD/ForceModel/Ewald/RSpaceEwald.cuh>
-#include <Physica/Core/Math/Random/RandomPool.h>
+#include <Physica/Core/Math/Random/Random.h>
 
 using namespace Physica::Core;
 using ScalarType = float32;
@@ -27,7 +27,7 @@ using PositionMatrix = typename MDCellType::PositionMatrix;
 using MassVector = typename MDCellType::MassVector;
 using HostForceModel = RSpaceEwald<ScalarType>;
 using DeviceForceModel = device_obj<HostForceModel>;
-using RandomPoolType = RandomPool<std::mt19937, 10000>;
+using RandomType = Random<std::mt19937, 10000>;
 
 template<class RandomGenerator>
 MDCellType makeSystem(size_t numMolecular, RandomGenerator& gen) {
@@ -41,7 +41,7 @@ MDCellType makeSystem(size_t numMolecular, RandomGenerator& gen) {
 }
 
 int main() {
-    const auto cell = makeSystem(108, RandomPoolType::getInstance().getGen());
+    const auto cell = makeSystem(108, RandomType::getInstance().getGen());
     const auto& pos = cell.getPos();
     Vector<ScalarType> charges(cell.getNumParticle(), 1.0);
     auto tail = charges.tail(cell.getNumParticle() / 2);

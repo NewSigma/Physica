@@ -19,7 +19,7 @@
 #pragma once
 
 #include <Physica/Core/Math/Calculus/ODE/SRK2.h>
-#include <Physica/Core/Math/Random/RandomPool.h>
+#include <Physica/Core/Math/Random/Random.h>
 #include "Langevin.h"
 
 namespace Physica::Core {
@@ -50,15 +50,15 @@ namespace Physica::Core {
         /* Operators */
         DoubleThermo& operator=(DoubleThermo obj) noexcept { swap(obj); return *this; }
         /* Operations */
-        template<class RandomPoolType, class Executor>
-        void step(RingPolymerType& ringPolymer, ScalarType deltaT, RandomPoolType& pool) const;
+        template<class RandomType, class Executor>
+        void step(RingPolymerType& ringPolymer, ScalarType deltaT, RandomType& pool) const;
         void swap(DoubleThermo& __restrict obj) noexcept;
         /* Setters */
         void setTemperature(ScalarType temperatureT_) { temperatureT = temperatureT_; }
         void setThermostatTime(ScalarType time) { thermostatTime = time; }
     private:
-        template<class RandomPoolType>
-        ScalarType makeTranslationalFactor(const RingPolymerType& ringPolymer, ScalarType deltaT, RandomPoolType& pool) const;
+        template<class RandomType>
+        ScalarType makeTranslationalFactor(const RingPolymerType& ringPolymer, ScalarType deltaT, RandomType& pool) const;
     };
 
     template<class KineticModel>
@@ -67,11 +67,11 @@ namespace Physica::Core {
             , thermostatTime(thermostatTime_) {}
 
     template<class KineticModel>
-    template<class RandomPoolType, class Executor>
+    template<class RandomType, class Executor>
     void DoubleThermo<KineticModel>::step(
-            RingPolymerType& ringPolymer, ScalarType deltaT, RandomPoolType& pool) const {
+            RingPolymerType& ringPolymer, ScalarType deltaT, RandomType& pool) const {
         const size_t dof = ringPolymer.getDOF();
-        const ScalarType factor_translational = makeTranslationalFactor<RandomPoolType>(ringPolymer, deltaT, pool);
+        const ScalarType factor_translational = makeTranslationalFactor<RandomType>(ringPolymer, deltaT, pool);
         if constexpr (NumReplica != 1) {
             const ScalarType repBeta = ringPolymer.calcRepBeta(temperatureT);
             const ScalarType omegaW = ringPolymer.calcOmegaW(temperatureT);
@@ -116,9 +116,9 @@ namespace Physica::Core {
     }
 
     template<class KineticModel>
-    template<class RandomPoolType>
+    template<class RandomType>
     typename DoubleThermo<KineticModel>::ScalarType DoubleThermo<KineticModel>::makeTranslationalFactor(
-            const RingPolymerType& ringPolymer, ScalarType deltaT, RandomPoolType& pool) const {
+            const RingPolymerType& ringPolymer, ScalarType deltaT, RandomType& pool) const {
         using Integrator = SRK2<ScalarType, 1>;
         using VectorType = typename Integrator::VectorType;
 

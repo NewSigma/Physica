@@ -29,7 +29,7 @@ namespace Physica::Core {
      * [1] J. Chem. Phys. 153, 114107 (2020); https://doi.org/10.1063/5.0020514
      * [2] https://doi.org/10.48550/arXiv.2111.06402
      */
-    template<class ScalarType, size_t NumReplica, class RandomPoolType, BaroType Type>
+    template<class ScalarType, size_t NumReplica, class RandomType, BaroType Type>
     class SCRBaro : private Berendsen<ScalarType, NumReplica, Type> {
         using Base = Berendsen<ScalarType, NumReplica, Type>;
         using typename Base::MDCellType;
@@ -57,13 +57,13 @@ namespace Physica::Core {
         [[nodiscard]] LatticeMatrix makeDiffuseMatrix(ScalarType pressPerDOF) const;
     };
 
-    template<class ScalarType, size_t NumReplica, class RandomPoolType, BaroType Type>
-    SCRBaro<ScalarType, NumReplica, RandomPoolType, Type>::SCRBaro(
+    template<class ScalarType, size_t NumReplica, class RandomType, BaroType Type>
+    SCRBaro<ScalarType, NumReplica, RandomType, Type>::SCRBaro(
             ScalarType compressRate, ScalarType tempT, ScalarType targetP) : Base(compressRate, tempT, targetP) {}
 
-    template<class ScalarType, size_t NumReplica, class RandomPoolType, BaroType Type>
+    template<class ScalarType, size_t NumReplica, class RandomType, BaroType Type>
     template<class MDType, class ForceModel>
-    inline void SCRBaro<ScalarType, NumReplica, RandomPoolType, Type>::npt_step(
+    inline void SCRBaro<ScalarType, NumReplica, RandomType, Type>::npt_step(
             MDType& rpmd, const LatticeMatrix& stress, ScalarType deltaT) {
         const ScalarType pressPerDOF = (Base::tempT * PhyConst<AU>::boltzmannK) / rpmd.getVolume();
         const auto decayMatrix = Base::makeDecayMatrix(stress, pressPerDOF);
@@ -80,17 +80,17 @@ namespace Physica::Core {
                     [&, r, c]([[maybe_unused]] ScalarType x, [[maybe_unused]] VectorType sol) -> VectorType {
                         return {(diffuseMatrix * rpmd.getLattice()).calc(r, c)};
                     });
-                if (abs(sol[0]) > abs(rpmd.getLattice()(r, c))) [[unlikely]]
+                if (abs(sol[0]) > abs(rpmd.getLattice().row(r)).max()) [[unlikely]]
                     throw std::runtime_error("[Error]: Unexpected large delta lattice");
                 return sol[0];
             }));
     }
 
-    template<class ScalarType, size_t NumReplica, class RandomPoolType, BaroType Type>
-    typename SCRBaro<ScalarType, NumReplica, RandomPoolType, Type>::LatticeMatrix
-    SCRBaro<ScalarType, NumReplica, RandomPoolType, Type>::makeDiffuseMatrix(ScalarType pressPerDOF) const {
+    template<class ScalarType, size_t NumReplica, class RandomType, BaroType Type>
+    typename SCRBaro<ScalarType, NumReplica, RandomType, Type>::LatticeMatrix
+    SCRBaro<ScalarType, NumReplica, RandomType, Type>::makeDiffuseMatrix(ScalarType pressPerDOF) const {
         const ScalarType diffuseFactor = sqrt(ScalarType(2.0 / Dim) * Base::compressRate * pressPerDOF);
-        auto& gen = RandomPoolType::getInstance().getGen();
+        auto& gen = RandomType::getInstance().getGen();
         LatticeMatrix result(Dim, Dim, 0);
         if constexpr (Type == BaroType::Anisotropic) {
             const auto rand = LatticeMatrix::random_normal(Dim, Dim, gen);
@@ -115,8 +115,8 @@ namespace Physica::Core {
 }
 
 namespace Physica {
-    template<class ScalarType, size_t NumReplica, class RandomPoolType, BaroType Type>
-    class Traits<Core::SCRBaro<ScalarType, NumReplica, RandomPoolType, Type>> {
+    template<class ScalarType, size_t NumReplica, class RandomType, BaroType Type>
+    class Traits<Core::SCRBaro<ScalarType, NumReplica, RandomType, Type>> {
     public:
         constexpr static unsigned int Order = 1;
     };

@@ -54,9 +54,9 @@ int main() {
         const ScalarType answer = 1.317363136305819;
         ScalarType result, deviation;
         {
-            using RandomPoolType = RandomPool<std::mt19937, std::mt19937::default_seed>;
+            using RandomType = Random<std::mt19937, std::mt19937::default_seed>;
             result = mc.solve_e(6, [](Vector<ScalarType, 2> x) -> ScalarType { return reciprocal(sqrt(square(x[0]) + sin(x[1]))); }
-                                 , RandomPoolType::getInstance(), deviation);
+                                 , RandomType::getInstance(), deviation);
         }
         const bool isGoodResult = std::isfinite(double(answer)) && std::isfinite(double(deviation));
         if (!isGoodResult || abs(answer - result) > deviation)

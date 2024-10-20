@@ -18,7 +18,7 @@
  */
 #include <iostream>
 #include <Physica/Core/Math/Algebra/LinearAlgebra/Vector/Vector.cuh>
-#include <Physica/Core/Math/Random/RandomPool.h>
+#include <Physica/Core/Math/Random/Random.h>
 #include <Physica/Core/Parallel/Executor/CUDAExecutor.cuh>
 
 using namespace Physica;
@@ -62,7 +62,7 @@ int main() {
     {
         constexpr size_t len = 32;
         const ScalarType factor = 1.4;
-        auto& gen = RandomPool<std::mt19937, std::mt19937::default_seed>::getInstance();
+        auto& gen = Random<std::mt19937, std::mt19937::default_seed>::getInstance();
         const auto a = VectorType::random_uniform(len, gen);
         const auto b = VectorType::random_uniform(len, gen);
         const VectorType answer = a + b * factor;

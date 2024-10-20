@@ -17,13 +17,13 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include <iostream>
-#include "Physica/Core/Math/Random/RandomPool.h"
+#include "Physica/Core/Math/Random/Random.h"
 #include "Physica/Core/Physics/MD/ForceModel/TodaModel.h"
 
 using namespace Physica::Core;
 
 using ScalarType = float64;
-using RandomPoolType = RandomPool<std::mt19937, 10000>;
+using RandomType = Random<std::mt19937, 10000>;
 using MDCellType = MDCell<ScalarType, 1>;
 constexpr double latticeSize = 20;
 constexpr size_t numMolecular = 20;
@@ -51,7 +51,7 @@ template<bool IsPeriodBoundary>
 void forceConstTest() {
     using ForceModel = TodaModel<ScalarType, IsPeriodBoundary>;
     ForceModel model(1.0);
-    const auto cell = makeSystem(RandomPoolType::getInstance().getGen());
+    const auto cell = makeSystem(RandomType::getInstance().getGen());
     const auto fc = model.forceConst(cell);
     if constexpr (IsPeriodBoundary) {
         for (size_t i = 0; i < fc.getRow(); ++i)

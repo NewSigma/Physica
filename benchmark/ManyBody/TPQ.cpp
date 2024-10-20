@@ -19,7 +19,7 @@
 #include <iostream>
 #include <benchmark/benchmark.h>
 #include <gperftools/profiler.h>
-#include <Physica/Core/Math/Random/RandomPool.h>
+#include <Physica/Core/Math/Random/Random.h>
 #include <Physica/Core/Physics/ManyBody/Hamilton/HubbardMatrix.h>
 #include <Physica/Core/Physics/ManyBody/ReprSpace/SpinRepr.h>
 #include <Physica/Core/Physics/ManyBody/TPQ.h>
@@ -28,7 +28,7 @@
 using namespace Physica::Core;
 using ScalarType = float64;
 using VectorType = Vector<ScalarType>;
-using RandomPoolType = RandomPool<std::mt19937>;
+using RandomType = Random<std::mt19937>;
 constexpr unsigned int NumSiteX = 4;
 constexpr unsigned int NumSiteY = 2;
 constexpr unsigned int NumSite = NumSiteX * NumSiteY;
@@ -43,7 +43,7 @@ namespace {
         const LatticeModel<2> lattice({NumSiteX, NumSiteY}, 1);
         const Hubbard<ScalarType, 2> hubbard(lattice, HoppingT, RepelU);
         const Hamilton hamilton(hubbard, ReprType(4, 4));
-        auto& gen = RandomPoolType::getInstance();
+        auto& gen = RandomType::getInstance();
         auto psi = TPQ<ScalarType>::random_normal(hamilton.getNumState(), gen);
         psi.pre_nvt_step(hamilton, Beta);
         for (auto _ : state) {

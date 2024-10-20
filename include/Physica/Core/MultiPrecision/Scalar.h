@@ -47,8 +47,8 @@ namespace Physica::Core {
         };
     }
 
-    template<class RandomGenerator, typename RandomGenerator::result_type FixedSeed> class RandomPool;
-    template<class ScalarType, class RandomPoolType> class GaussRandomPool;
+    template<class RandomGenerator, typename RandomGenerator::result_type FixedSeed> class Random;
+    template<class ScalarType, class RandomType> class GaussRandomPool;
     template<ScalarOption Option> __host__ __device__ inline Scalar<Option> abs(const Scalar<Option>& s) noexcept;
     template<ScalarOption Option> __host__ __device__ inline Scalar<Option> square(const Scalar<Option>& s) noexcept;
     template<ScalarOption Option> __host__ __device__ inline Scalar<Option> sqrt(const Scalar<Option>& s) noexcept;

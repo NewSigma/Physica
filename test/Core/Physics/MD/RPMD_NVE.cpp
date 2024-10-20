@@ -7,7 +7,7 @@
 #include "Physica/Core/Physics/MD/KineticModel/HardCore.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h"
 #include "Physica/Core/Parallel/Executor/SequentialExecutor.h"
-#include "Physica/Core/Math/Random/RandomPool.h"
+#include "Physica/Core/Math/Random/Random.h"
 
 using namespace Physica;
 using namespace Physica::Core;
@@ -18,7 +18,7 @@ using MDType = RPMD<ScalarType, 1, Dynamic>;
 using MDCellType = typename MDType::MDCellType;
 using ForceModel = EmptyForceModel<ScalarType, 1>;
 using KineticModel = HardCore<ScalarType, true, Dynamic, RPMDIntegrator::Exact>;
-using RandomPoolType = RandomPool<std::mt19937>;
+using RandomType = Random<std::mt19937>;
 constexpr double timeStepLambda = 0.01;
 constexpr double collideFactor = 0.01;
 constexpr double latticeSize = 20;
@@ -48,7 +48,7 @@ MDCellType makeSystem(std::mt19937& gen) {
 
 int main() {
     const double timeStep = timeStepLambda * (latticeSize / numMolecular) * std::sqrt(unitMassM / temperatureT);
-    auto& pool = RandomPoolType::getInstance();
+    auto& pool = RandomType::getInstance();
     auto& gen = pool.getGen();
     VectorType nve(20000);
     {

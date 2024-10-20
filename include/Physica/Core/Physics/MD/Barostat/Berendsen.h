@@ -120,7 +120,7 @@ namespace Physica::Core {
                     [&, r, c]([[maybe_unused]] ScalarType x, [[maybe_unused]] const VectorType& y) -> VectorType {
                         return {(decayMatrix * rpmd.getLattice()).calc(r, c)};
                     })[0];
-                if (abs(deltaElem) > abs(rpmd.getLattice()(r, c))) [[unlikely]]
+                if (abs(deltaElem) > abs(rpmd.getLattice().row(r)).max()) [[unlikely]]
                     throw std::runtime_error("[Error]: Unexpected large delta lattice");
                 return deltaElem;
             }));

@@ -10,7 +10,7 @@
 #include "Physica/Core/AI/NeuralNetwork/Layer/LinearLayer.h"
 #include "Physica/Core/AI/NeuralNetwork/SimpleNet.h"
 #include "Physica/Core/AI/NeuralNetwork/Loss.h"
-#include "Physica/Core/Math/Random/RandomPool.h"
+#include "Physica/Core/Math/Random/Random.h"
 #include "Physica/Core/Math/Optimization/Stochastic/SGD.h"
 #include "Physica/Core/Parallel/Executor/ThreadExecutor.h"
 
@@ -102,7 +102,7 @@ using PlainScalar = float32;
 using ScalarType = Diff<PlainScalar, DiffMode::Reverse, 1>;
 using Dataset = typename Mnist::DatasetType<Vector<PlainScalar>>;
 using Optimizer = SGD<ScalarType>;
-using RandomPoolType = RandomPool<std::mt19937>;
+using RandomType = Random<std::mt19937>;
 constexpr size_t batchSize = 9000;
 
 namespace {
@@ -119,7 +119,7 @@ namespace {
     static void main(benchmark::State& state) {
         ThreadPool::numThreadRequired = 4;
 
-        auto& gen = RandomPoolType::getInstance().getGen();
+        auto& gen = RandomType::getInstance().getGen();
         const auto dataset = makeDataset();
         auto opt = Optimizer(0.01, batchSize);
         opt.recordBegin();
@@ -127,7 +127,7 @@ namespace {
         opt.recordEnd();
 
         for (auto _ : state)
-            nn.train_step<Dataset, Optimizer, RandomPoolType, SequentialExecutor>(dataset, opt);
+            nn.train_step<Dataset, Optimizer, RandomType, SequentialExecutor>(dataset, opt);
     }
 }
 

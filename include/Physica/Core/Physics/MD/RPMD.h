@@ -99,32 +99,32 @@ namespace Physica::Core {
         void nve_step_for(ScalarType duration, KineticModel& kineticModel, ForceModel& forceModel);
 
         template<class Thermostat,
-                 class RandomPoolType,
+                 class RandomType,
                  class KineticModel,
                  class ForceModel,
                  class Executor>
-        void nvt_step(const Thermostat& thermostat, RandomPoolType& pool, KineticModel& kineticModel, ForceModel& forceModel);
+        void nvt_step(const Thermostat& thermostat, RandomType& pool, KineticModel& kineticModel, ForceModel& forceModel);
         template<class Thermostat,
-                 class RandomPoolType,
+                 class RandomType,
                  class KineticModel,
                  class ForceModel,
                  class Executor>
-        void nvt_step_for(ScalarType duration, const Thermostat& thermostat, RandomPoolType& pool, KineticModel& kineticModel, ForceModel& forceModel);
+        void nvt_step_for(ScalarType duration, const Thermostat& thermostat, RandomType& pool, KineticModel& kineticModel, ForceModel& forceModel);
 
         template<class Thermostat,
-                 class RandomPoolType,
+                 class RandomType,
                  class Barostat,
                  class KineticModel,
                  class ForceModel,
                  class Executor>
-        void npt_step(const Thermostat& thermostat, RandomPoolType& pool, Barostat& barostat, KineticModel& kineticModel, ForceModel& forceModel);
+        void npt_step(const Thermostat& thermostat, RandomType& pool, Barostat& barostat, KineticModel& kineticModel, ForceModel& forceModel);
         template<class Thermostat,
-                 class RandomPoolType,
+                 class RandomType,
                  class Barostat,
                  class KineticModel,
                  class ForceModel,
                  class Executor>
-        void npt_step_for(ScalarType duration, const Thermostat& thermostat, RandomPoolType& pool, Barostat& barostat, KineticModel& kineticModel, ForceModel& forceModel);
+        void npt_step_for(ScalarType duration, const Thermostat& thermostat, RandomType& pool, Barostat& barostat, KineticModel& kineticModel, ForceModel& forceModel);
 
         template<class KineticModel, class ForceModel, class Executor>
         void fire_vstep(FireModelType& fire, KineticModel& kineticModel, ForceModel& forceModel);

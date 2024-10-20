@@ -23,14 +23,14 @@
 #include <Physica/Core/Physics/MD/KineticModel/FreeModel.h>
 #include <Physica/Core/Physics/MD/ForceModel/SilveraGoldman.cuh>
 #include <Physica/Core/Parallel/Executor/CUDAExecutor.cuh>
-#include <Physica/Core/Math/Random/RandomPool.h>
+#include <Physica/Core/Math/Random/Random.h>
 #include <Physica/Core/Utils/BenchmarkHelper.h>
 
 using namespace Physica::Core;
 using Physica::Dynamic;
 using ScalarType = float32;
 using KineticModel = FreeModel<ScalarType, 3, Dynamic, RPMDIntegrator::Exact>;
-using RandomPoolType = RandomPool<std::mt19937, 10000>;
+using RandomType = Random<std::mt19937, 10000>;
 using MDType = RPMD<ScalarType, 3, Physica::Dynamic, PageLockedAllocator<ScalarType>>;
 constexpr size_t numReplica = 24;
 constexpr double temperatureT = PhyConst<AU>::kToTemperature(25);
@@ -63,7 +63,7 @@ namespace {
     void bench108(benchmark::State& state) {
         using ForceModel = device_obj<SilveraGoldman<ScalarType, true, true>>;
         constexpr size_t numMolecular = 108;
-        auto& gen = RandomPoolType::getInstance().getGen();
+        auto& gen = RandomType::getInstance().getGen();
         KineticModel kineticModel(temperatureT, numReplica);
         MDType rpmd = makeSystem(numMolecular, gen);
         rpmd.initMomentum<KineticModel, decltype(gen)>(gen);
@@ -75,7 +75,7 @@ namespace {
     void bench256(benchmark::State& state) {
         using ForceModel = device_obj<SilveraGoldman<ScalarType, true, true>>;
         constexpr size_t numMolecular = 256;
-        auto& gen = RandomPoolType::getInstance().getGen();
+        auto& gen = RandomType::getInstance().getGen();
         KineticModel kineticModel(temperatureT, numReplica);
         MDType rpmd = makeSystem(numMolecular, gen);
         rpmd.initMomentum<KineticModel, decltype(gen)>(gen);
@@ -87,7 +87,7 @@ namespace {
     void bench500(benchmark::State& state) {
         using ForceModel = device_obj<SilveraGoldman<ScalarType, true, true>>;
         constexpr size_t numMolecular = 500;
-        auto& gen = RandomPoolType::getInstance().getGen();
+        auto& gen = RandomType::getInstance().getGen();
         KineticModel kineticModel(temperatureT, numReplica);
         MDType rpmd = makeSystem(numMolecular, gen);
         rpmd.initMomentum<KineticModel, decltype(gen)>(gen);
@@ -99,7 +99,7 @@ namespace {
     void bench864(benchmark::State& state) {
         using ForceModel = device_obj<SilveraGoldman<ScalarType, true, true>>;
         constexpr size_t numMolecular = 864;
-        auto& gen = RandomPoolType::getInstance().getGen();
+        auto& gen = RandomType::getInstance().getGen();
         KineticModel kineticModel(temperatureT, numReplica);
         MDType rpmd = makeSystem(numMolecular, gen);
         rpmd.initMomentum<KineticModel, decltype(gen)>(gen);

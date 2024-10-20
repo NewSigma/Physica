@@ -23,7 +23,7 @@
 #include <Physica/Core/Physics/MD/KineticModel/FreeModel.h>
 #include <Physica/Core/Physics/MD/ForceModel/SilveraGoldman.cuh>
 #include <Physica/Core/Physics/MD/ForceModel/CPUGPUModel.cuh>
-#include <Physica/Core/Math/Random/RandomPool.h>
+#include <Physica/Core/Math/Random/Random.h>
 #include <Physica/Core/Utils/BenchmarkHelper.h>
 
 using namespace Physica::Core;
@@ -32,7 +32,7 @@ using ScalarType = float32;
 using MDType = RPMD<ScalarType, 3, Physica::Dynamic, PageLockedAllocator<ScalarType>>;
 using MDCellType = typename MDType::MDCellType;
 using KineticModel = FreeModel<ScalarType, 3, Dynamic, RPMDIntegrator::Exact>;
-using RandomPoolType = RandomPool<std::mt19937, 10000>;
+using RandomType = Random<std::mt19937, 10000>;
 constexpr size_t numReplica = 24;
 constexpr double temperatureT = PhyConst<AU>::kToTemperature(25);
 constexpr double timeStep = PhyConst<AU>::secondToTime(1E-15) * 0.5;
@@ -62,7 +62,7 @@ namespace {
     */
     void bench108(benchmark::State& state) {
         ThreadPool::numThreadRequired = 8;
-        auto& gen = RandomPoolType::getInstance().getGen();
+        auto& gen = RandomType::getInstance().getGen();
         KineticModel kineticModel(temperatureT, numReplica);
         using HostModel = SilveraGoldman<ScalarType, true, false>;
 
@@ -78,7 +78,7 @@ namespace {
 
     void bench256(benchmark::State& state) {
         ThreadPool::numThreadRequired = 8;
-        auto& gen = RandomPoolType::getInstance().getGen();
+        auto& gen = RandomType::getInstance().getGen();
         KineticModel kineticModel(temperatureT, numReplica);
         using HostModel = SilveraGoldman<ScalarType, true, false>;
 
@@ -94,7 +94,7 @@ namespace {
 
     void bench500(benchmark::State& state) {
         ThreadPool::numThreadRequired = 8;
-        auto& gen = RandomPoolType::getInstance().getGen();
+        auto& gen = RandomType::getInstance().getGen();
         KineticModel kineticModel(temperatureT, numReplica);
         using HostModel = SilveraGoldman<ScalarType, true, false>;
 
@@ -110,7 +110,7 @@ namespace {
 
     void bench864(benchmark::State& state) {
         ThreadPool::numThreadRequired = 8;
-        auto& gen = RandomPoolType::getInstance().getGen();
+        auto& gen = RandomType::getInstance().getGen();
         KineticModel kineticModel(temperatureT, numReplica);
         using HostModel = SilveraGoldman<ScalarType, true, false>;
 

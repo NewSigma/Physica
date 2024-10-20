@@ -23,13 +23,13 @@
 #include "Physica/Core/Physics/MD/KineticModel/FreeModel.h"
 #include "Physica/Core/Physics/MD/ForceModel/SilveraGoldman.cuh"
 #include "Physica/Core/Parallel/Executor/CUDAExecutor.cuh"
-#include "Physica/Core/Math/Random/RandomPool.h"
+#include "Physica/Core/Math/Random/Random.h"
 
 using namespace Physica::Core;
 using ScalarType = float32;
 using HostForceModel = SilveraGoldman<ScalarType, true, true>;
 using DeviceForceModel = device_obj<HostForceModel>;
-using RandomPoolType = RandomPool<std::mt19937, 10000>;
+using RandomType = Random<std::mt19937, 10000>;
 constexpr size_t numReplica = 24;
 constexpr double temperatureT = PhyConst<AU>::kToTemperature(25);
 constexpr double timeStep = PhyConst<AU>::secondToTime(1E-15) * 0.5;
@@ -58,7 +58,7 @@ RPMD<ScalarType> makeSystem(size_t numMolecular, RandomGenerator& gen) {
  * [1] Miller TF, Manolopoulos DE. 2005. Quantum diffusion in liquid para-hydrogen from ring polymer molecular dynamics. J. Chem. Phys. 122:184503
  */
 int main() {
-    auto& gen = RandomPoolType::getInstance().getGen();
+    auto& gen = RandomType::getInstance().getGen();
     HostForceModel hostModel(pair_cutoff);
     for (size_t numMolecular : {108, 160}) {
         DeviceForceModel deviceModel(numMolecular, pair_cutoff);
