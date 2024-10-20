@@ -114,7 +114,7 @@ void testVecProduct() {
     const auto repr = ReprType(2, 1);
     const Hamilton hamiltonH(hubbard, repr);
 
-    const auto v = Vector<float64>::random_uniform(hamiltonH.getNumState(), RandomPoolType::getInstance().getGen());
+    const auto v = Vector<float64>::random_uniform(hamiltonH.getNumState(), RandomPoolType::getInstance());
     const Vector<float64> v1 = hamiltonH * v;
     Vector<float64> v2(v.getLength());
     for (size_t i = 0; i < v.getLength(); ++i)

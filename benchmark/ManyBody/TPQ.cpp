@@ -43,10 +43,10 @@ namespace {
         const LatticeModel<2> lattice({NumSiteX, NumSiteY}, 1);
         const Hubbard<ScalarType, 2> hubbard(lattice, HoppingT, RepelU);
         const Hamilton hamilton(hubbard, ReprType(4, 4));
-        auto psi = TPQ<ScalarType>::random_normal(hamilton.getNumState(), RandomPoolType::getInstance().getGen());
+        auto& gen = RandomPoolType::getInstance();
+        auto psi = TPQ<ScalarType>::random_normal(hamilton.getNumState(), gen);
         psi.pre_nvt_step(hamilton, Beta);
         for (auto _ : state) {
-            auto& gen = RandomPoolType::getInstance().getGen();
             psi.random_normal(gen);
             psi.template nvt_step<Hamilton, SequentialExecutor>(hamilton, Beta);
             [[maybe_unused]] auto xi = psi.lnPartitionXi();

@@ -19,6 +19,7 @@
 #pragma once
 
 #include <Physica/Core/Exception/NoImplException.h>
+#include <Physica/Core/Exception/MKL/VSL.h>
 
 namespace Physica::Core {
     namespace Internal {
@@ -330,6 +331,15 @@ namespace Physica::Core {
             for (size_t i = 0; i < length; ++i)
                 this->operator[](i) = ScalarType::random_uniform(gen);
         }
+        else if constexpr (HasMKL()) {
+            const size_t length = Base::getLength() * (Base::isComplex ? 2 : 1) * (Base::isForwardDiff ? 2 : 1);
+            if constexpr (ScalarType::Option == Float32)
+                vslCheck(vsRngUniform(VSL_RNG_METHOD_UNIFORM_STD, gen, length, (float*)data(), 0, 1));
+            else if constexpr (ScalarType::Option == Float64)
+                vslCheck(vdRngUniform(VSL_RNG_METHOD_UNIFORM_STD, gen, length, (double*)data(), 0, 1));
+            else
+                Base::random_uniform(gen);
+        }
         else
             Base::random_uniform(gen);
     }
@@ -343,6 +353,15 @@ namespace Physica::Core {
             TracerType::getInstance().reserve(length);
             for (size_t i = 0; i < length; ++i)
                 this->operator[](i) = ScalarType::random_normal(gen);
+        }
+        else if constexpr (HasMKL()) {
+            const size_t length = Base::getLength() * (Base::isComplex ? 2 : 1) * (Base::isForwardDiff ? 2 : 1);
+            if constexpr (ScalarType::Option == Float32)
+                vslCheck(vsRngGaussian(VSL_RNG_METHOD_GAUSSIAN_BOXMULLER2, gen, length, (float*)data(), 0, 1));
+            else if constexpr (ScalarType::Option == Float64)
+                vslCheck(vdRngGaussian(VSL_RNG_METHOD_GAUSSIAN_BOXMULLER2, gen, length, (double*)data(), 0, 1));
+            else
+                Base::random_normal(gen);
         }
         else
             Base::random_normal(gen);

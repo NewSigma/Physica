@@ -17,11 +17,10 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include <iostream>
-#include "Physica/Core/Math/Random/RandomPool.h"
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Eigen/JacobiDavidson.h"
+#include <Physica/Core/Math/Random/RandomPool.h>
+#include <Physica/Core/Math/Algebra/LinearAlgebra/Eigen/JacobiDavidson.h>
 #include <Physica/Core/Physics/ManyBody/Hamilton/HubbardMatrix.h>
 #include <Physica/Core/Physics/ManyBody/ReprSpace/KSpinRepr.h>
-#include "Physica/Core/Parallel/Executor/ThreadExecutor.h"
 
 using namespace Physica::Core;
 using RealType = float64;
@@ -56,7 +55,7 @@ void testEigen() {
 
         const size_t numState = model.getNumState();
         JacobiDavidson<RealType> jd(numState, 4);
-        jd.compute(model, VectorType::random_uniform(numState, RandomPoolType::getInstance().getGen()));
+        jd.compute(model, VectorType::random_uniform(numState, RandomPoolType::getInstance()));
         jd.sort();
         answer = jd.getEigenvalues()[0];
     }
@@ -68,7 +67,7 @@ void testEigen() {
 
         const size_t numState = model.getNumState();
         JacobiDavidson<ScalarType> jd(numState, 4);
-        jd.compute(model, VectorType::random_uniform(numState, RandomPoolType::getInstance().getGen()));
+        jd.compute(model, VectorType::random_uniform(numState, RandomPoolType::getInstance()));
         jd.sort();
         result = jd.getEigenvalues()[0].real();
     }

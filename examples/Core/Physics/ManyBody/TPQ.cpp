@@ -43,7 +43,7 @@ VectorType calcPartition(ReprType repr_, const VectorType& betas) {
     LatticeModel<1> lattice({NumSite}, 1);
     Hubbard<ScalarType, 1> hubbard(lattice, HoppingT, RepelU);
     const Hamilton hamilton(hubbard, std::move(repr_));
-    auto& gen = RandomPoolType::getInstance().getGen();
+    auto& gen = RandomPoolType::getInstance();
     VectorType result(NumBeta);
     const ScalarType deltaBeta = betas[1] - betas[0];
     auto psi = TPQ<ScalarType>(hamilton.getNumState());

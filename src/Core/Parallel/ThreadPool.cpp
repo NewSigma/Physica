@@ -34,7 +34,7 @@ namespace Physica::Core {
     }
 
     std::unique_ptr<Task> ThreadPool::steal() {
-        const auto random = threadRand(getThreadInfo().randState);
+        const auto random = RandomSeed::toNextSeed(getThreadInfo().randState);
         const int numThreads = getNumThreads();
         for (int i = 0; i < numThreads; ++i) {
             ThreadData& data = thread_data[(random + i) % numThreads];

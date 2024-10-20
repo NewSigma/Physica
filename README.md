@@ -43,10 +43,10 @@ A C++ compiler that support C++ 17, the following compilers are tested:
 Addtional libraries:
 
 [fftw](http://www.fftw.org)  3.3.10  
-[HDF5](https://www.hdfgroup.org/solutions/hdf5/) 1.14.1  (Optional)  
-[Qt](https://www.qt.io/)  6.2.1  (Optional, Plotting support)  
+[HDF5](https://www.hdfgroup.org/solutions/hdf5/) 1.14.1  (Optional, Recommanded data format)  
+[oneMKL](https://www.intel.com/) 2024.2 (Optional)  
 [CUDA](https://developer.nvidia.com/cuda-downloads)  12.3  (Optional)  
-[oneMKL](https://www.intel.com/) 2023.2.0 (Optional, Experimental)  
+[Qt](https://www.qt.io/)  6.5.3  (Optional, Plotting support)  
 [pybind11](https://github.com/pybind/pybind11) 2.11 (Optional, Python binding, Experimental)  
 [LLVM](https://llvm.org/) 17.0.6 (Optional, Python binding, Experimental)  
 [libffi](https://github.com/libffi/libffi/) 3.4.6 (Optional, Python binding, Experimental)  

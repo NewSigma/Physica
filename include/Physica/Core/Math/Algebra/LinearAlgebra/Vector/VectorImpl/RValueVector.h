@@ -83,6 +83,7 @@ namespace Physica::Core {
         using PacketType = typename BestPacket<ScalarType, SizeAtCompile>::Type;
         using ColMatrix = DenseMatrix<ScalarType, MatrixOption::Column | MatrixOption::Vector, SizeAtCompile, 1, HostAllocator<ScalarType>>;
         using RowMatrix = DenseMatrix<ScalarType, MatrixOption::Row | MatrixOption::Vector, 1, SizeAtCompile, HostAllocator<ScalarType>>;
+        constexpr static bool isForwardDiff = ScalarType::isForwardDiff;
         constexpr static bool isReverseDiff = ScalarType::isReverseDiff;
         constexpr static bool isComplex = ScalarType::isComplex;
     private:

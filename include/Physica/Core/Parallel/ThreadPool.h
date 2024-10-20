@@ -87,7 +87,6 @@ namespace Physica::Core {
         /* Static Members */
         [[nodiscard]] static inline int getNumProcesser() noexcept { return get_nprocs(); }
         [[nodiscard]] static inline int makeNumThread() noexcept;
-        [[nodiscard]] static inline unsigned int threadRand(uint64_t& state) noexcept;
     };
 
     template<class Function, class... Args>
@@ -121,12 +120,5 @@ namespace Physica::Core {
             return numProcesser * 3 / 4;
         else
             return numThreadRequired;
-    }
-
-    inline unsigned int ThreadPool::threadRand(uint64_t& state) noexcept {
-        uint64_t current = state;
-        state = current * 6364136223846793005ULL + 0xda3e39cb94b95bdbULL;
-        // Generate the random output (using the PCG-XSH-RS scheme)
-        return static_cast<unsigned int>((current ^ (current >> 22U)) >> (22U + (current >> 61U)));
     }
 }

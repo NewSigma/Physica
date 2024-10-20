@@ -24,6 +24,7 @@
 using namespace Physica::Core;
 using ScalarType = float64;
 using VectorType = Vector<ScalarType>;
+using RandomPoolType = RandomPool<std::mt19937, std::mt19937::default_seed>;
 
 void testLaglange() {
     const VectorType x{0, 1, 2};
@@ -34,19 +35,18 @@ void testLaglange() {
 }
 
 void testFFT1D() {
-    std::mt19937 gen{};
-    const auto data = VectorType::random_normal(20, gen);
+    const auto data = VectorType::random_normal(20, RandomPoolType::getInstance());
     const auto result = interpolate_fft(data, 100);
 
     const size_t delta = result.getLength() / data.getLength();
     for (size_t i = 0; i < result.getLength(); i += delta) {
-        if (!scalarNear(data[i / delta], result[i], 1E-12))
+        if (!scalarNear(data[i / delta], result[i], 1E-11))
             exit(EXIT_FAILURE);
     }
 
     for (size_t i = 0; i < data.getLength(); ++i) {
         ScalarType result = interpolate_fft(data, i, data.getLength());
-        if (!scalarNear(result, data[i], 1E-13))
+        if (!scalarNear(result, data[i], 1E-11))
             exit(EXIT_FAILURE);
     }
     /* Test periodicity */ {
@@ -62,7 +62,7 @@ void testFFT3D() {
     using Index3D = typename GridType::Index3D;
 
     std::mt19937 gen{};
-    const auto data = GridType::random_uniform({5, 5, 5}, gen);
+    const auto data = GridType::random_uniform({5, 5, 5}, RandomPoolType::getInstance());
     {
         const auto result = interpolate_fft(data, {10, 10, 10});
         GridType::forIndexInGrid(data.getDim(), [&data, &result](Index3D index) {

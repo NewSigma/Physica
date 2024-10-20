@@ -20,7 +20,7 @@
 
 #include <cstdint>
 #include <x86intrin.h>
-#include "Physica/Core/Exception/RdrandException.h"
+#include <Physica/Core/Exception/RdrandException.h>
 
 namespace Physica::Core {
     /**
@@ -55,6 +55,12 @@ namespace Physica::Core {
                     return;
             }
             throw RdrandException();
+        }
+        // Generate a sequence of random seed (using the PCG-XSH-RS scheme)
+        static uint32_t toNextSeed(uint64_t& state) noexcept {
+            const uint64_t current = state;
+            state = current * 6364136223846793005ULL + 0xda3e39cb94b95bdbULL;
+            return static_cast<uint32_t>((current ^ (current >> 22U)) >> (22U + (current >> 61U)));
         }
     };
 }

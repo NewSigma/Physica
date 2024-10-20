@@ -16,16 +16,14 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/DiffVector.h"
+#include <Physica/Core/Math/Algebra/LinearAlgebra/Vector/DiffVector.h>
 
 using namespace Physica::Core;
 using ScalarType = float64;
 using VectorType = Diff<Vector<ScalarType>, DiffMode::Reverse, 1>;
-using RandomGenerator = std::mt19937;
 
 int main() {
-    RandomGenerator gen{};
-    VectorType v = VectorType::random_uniform(16, gen);
+    VectorType v = VectorType::random_uniform(16, RandomPool<std::mt19937, std::mt19937::default_seed>::getInstance());
     auto sum = v.sum();
     sum.reverse();
     for (size_t i = 0; i < v.getLength(); ++i)
