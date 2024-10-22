@@ -49,8 +49,7 @@ namespace Physica::Core {
          * Because of out of order execution, the result may be less  or more than several cycles.
          * Use tic() and toc() to avoid this problem.
          */
-        static __inline __attribute__((always_inline))
-        uint64_t now() {
+        [[nodiscard]] static __inline __attribute__((always_inline)) uint64_t now() {
             uint32_t lo, hi;
             __asm__ __volatile__ (
                     "rdtsc"
@@ -65,8 +64,7 @@ namespace Physica::Core {
          *
          * This function is slower than now().
          */
-        static __inline __attribute__((always_inline))
-        uint64_t tic() {
+        [[nodiscard]] static __inline __attribute__((always_inline)) uint64_t tic() {
             uint32_t lo, hi;
             __asm__ __volatile__ (
                     "cpuid\n\t"
@@ -82,8 +80,7 @@ namespace Physica::Core {
          *
          * This function is slower than now().
          */
-        static __inline __attribute__((always_inline))
-        uint64_t toc() {
+        [[nodiscard]] static __inline __attribute__((always_inline)) uint64_t toc() {
             uint32_t lo, hi;
             __asm__ __volatile__ (
                     "rdtscp\n\t"

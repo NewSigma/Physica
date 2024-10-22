@@ -119,7 +119,7 @@ namespace Physica::Core {
         template<class... Args> inline void append(Args&&... args);
         template<class... Args> void insert(size_t index, Args&&... args);
         void reserve(size_t size);
-        template<class... Args> void resize(size_t size, Args&&... args);
+        template<class... Args> inline void resize(size_t size, Args&&... args);
         void squeeze();
         void increase(size_t size);
         void decrease(size_t size);
@@ -141,6 +141,9 @@ namespace Physica::Core {
         [[nodiscard]] allocator_type get_allocator() const noexcept { return alloc; }
         /* Setters */
         inline void setLength(size_t size);
+    private:
+        template<class... Args>
+        void resizeImpl(size_t size, Args&&... args);
     };
 }
 

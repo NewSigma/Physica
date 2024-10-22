@@ -46,6 +46,12 @@ namespace Physica::Core {
     public:
         __host__ __device__ device_obj(
                 const device_obj<RValueMatrix<MatrixType>>& mat_, const device_obj<RValueVector<VectorType>>& vec_);
+        device_obj(const This&) = delete;
+        device_obj(This&&) noexcept = delete;
+        ~device_obj() = default;
+        /* Operators */
+        This& operator=(const This&) = delete;
+        This& operator=(This&&) noexcept = delete;
         /* Operations */
         template<class OtherDerived>
         __host__ __device__ void assignTo(device_obj<LValueVector<OtherDerived>>& target) const;
@@ -114,9 +120,8 @@ namespace Physica::Core {
     }
 
     template<class MatrixType, class VectorType>
-    __host__ __device__ inline typename std::enable_if<MatrixType::RowAtCompile != 1, device_obj<MatrixVectorProduct<MatrixType, VectorType>>>::type
-    operator*(const device_obj<RValueMatrix<MatrixType>>& mat, const device_obj<RValueVector<VectorType>>& vec) {
-        assert(mat.getColumn() == vec.getLength());
+    [[nodiscard]] __host__ __device__ inline typename std::enable_if<MatrixType::RowAtCompile != 1, device_obj<MatrixVectorProduct<MatrixType, VectorType>>>::type
+    operator*(const device_obj<RValueMatrix<MatrixType>>& mat, const device_obj<RValueVector<VectorType>>& vec) noexcept {
         return {mat.getDerived(), vec.getDerived()};
     }
 }

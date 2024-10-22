@@ -159,27 +159,14 @@ namespace Physica::Core {
             capacity = size;
         }
     }
-
+    /**
+     * resize() is inlined, if there is no need to resize, we avoid the overhead of a slow function call
+     */
     template<class T, class Allocator>
     template<class... Args>
-    void Array<T, Dynamic, Allocator>::resize(size_t size, Args&&... args) {
-        if (capacity < size)
-            reserve(size);
-
-        if (length > size) {
-            if constexpr (!std::is_trivial<T>::value)
-                for (size_t i = size; i < length; ++i)
-                    (arr + i)->~T();
-            length = size;
-        }
-        else {
-            if constexpr (Base::template isTrivialDefaultConstruct<Args...>())
-                length = size;
-            else {
-                for (; length < size; ++length)
-                    alloc.construct(arr + length, std::forward<Args>(args)...);
-            }
-        }
+    inline void Array<T, Dynamic, Allocator>::resize(size_t size, Args&&... args) {
+        if (length != size)
+            resizeImpl<Args...>(size, std::forward<Args>(args)...);
     }
 
     template<class T, class Allocator>
@@ -244,5 +231,27 @@ namespace Physica::Core {
             assert(length <= size && "[Error]: setLength() cannot destruct unused elements, memory leak is expected");
         }
         length = size;
+    }
+
+    template<class T, class Allocator>
+    template<class... Args>
+    void Array<T, Dynamic, Allocator>::resizeImpl(size_t size, Args&&... args) {
+        if (capacity < size)
+            reserve(size);
+
+        if (length > size) {
+            if constexpr (!std::is_trivial<T>::value)
+                for (size_t i = size; i < length; ++i)
+                    (arr + i)->~T();
+            length = size;
+        }
+        else {
+            if constexpr (Base::template isTrivialDefaultConstruct<Args...>())
+                length = size;
+            else {
+                for (; length < size; ++length)
+                    alloc.construct(arr + length, std::forward<Args>(args)...);
+            }
+        }
     }
 }

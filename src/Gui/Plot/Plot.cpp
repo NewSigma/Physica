@@ -22,70 +22,46 @@
 using namespace Physica::Core;
 
 namespace Physica::Gui {
-    Plot::Plot(double minX, double maxX, double minY, double maxY, double deltaX, double deltaY, QWidget* parent)
-            : ChartView(parent)
-            , axisX(new QValueAxis())
-            , axisY(new QValueAxis())
-            , axisTop(new QValueAxis())
-            , axisRight(new QValueAxis()) {
+    Plot::Plot(QWidget* parent) : ChartView(parent), axisX(new QValueAxis()), axisY(new QValueAxis()), axisTop(new QValueAxis()), axisRight(new QValueAxis()) {
         setAttribute(Qt::WA_DeleteOnClose);
 
         setChart(new QChart());
         setRenderHints(QPainter::Antialiasing | QPainter::TextAntialiasing | QPainter::SmoothPixmapTransform);
         setBackgroundRole(QPalette::Light);
 
+        auto& legend = getLegend();
+        legend.setAlignment(Qt::AlignTop);
+        legend.setMarkerShape(QLegend::MarkerShapeFromSeries);
+        legend.hide();
+
         auto& chart = *Base::getChart();
-        auto* legend = chart.legend();
-        QFont font = legend->font();
-        font.setPointSize(15);
-        legend->setFont(font);
-        legend->setAlignment(Qt::AlignTop);
-        legend->setMarkerShape(QLegend::MarkerShapeFromSeries);
-        legend->hide();
-        chart.setTitleFont(font);
         chart.setBackgroundVisible(false);
         chart.setMargins(QMargins{});
         {
             axisX->setTickAnchor(0);
-            axisX->setTickInterval(deltaX);
             axisX->setTickType(QValueAxis::TicksDynamic);
             axisX->setGridLineVisible(false);
             axisX->setMinorGridLineVisible(false);
-            axisX->setLabelsFont(font);
-            axisX->setRange(minX, maxX);
-            axisX->setTitleFont(font);
             axisX->setLinePenColor(Qt::black);
 
             axisY->setTickAnchor(0);
-            axisY->setTickInterval(deltaY);
             axisY->setTickType(QValueAxis::TicksDynamic);
             axisY->setGridLineVisible(false);
             axisY->setMinorGridLineVisible(false);
-            axisY->setLabelsFont(font);
-            axisY->setRange(minY, maxY);
-            axisY->setTitleFont(font);
             axisY->setLinePenColor(Qt::black);
 
             axisTop->setTickAnchor(0);
-            axisTop->setTickInterval(deltaX);
             axisTop->setTickType(QValueAxis::TicksDynamic);
             axisTop->setLabelsVisible(false);
             axisTop->setGridLineVisible(false);
             axisTop->setMinorGridLineVisible(false);
-            axisTop->setLabelsFont(font);
-            axisTop->setRange(minX, maxX);
-            axisTop->setTitleFont(font);
             axisTop->setLinePenColor(Qt::black);
 
             axisRight->setTickAnchor(0);
-            axisRight->setTickInterval(deltaY);
             axisRight->setTickType(QValueAxis::TicksDynamic);
             axisRight->setLabelsVisible(false);
             axisRight->setGridLineVisible(false);
             axisRight->setMinorGridLineVisible(false);
-            axisRight->setLabelsFont(font);
-            axisRight->setRange(minY, maxY);
-            axisRight->setTitleFont(font);
             axisRight->setLinePenColor(Qt::black);
 
             setTickDirection(QAbstractAxis::Inner);
@@ -94,6 +70,14 @@ namespace Physica::Gui {
             chart.addAxis(axisTop, Qt::AlignTop);
             chart.addAxis(axisRight, Qt::AlignRight);
         }
+
+        QFont font{};
+        font.setPointSize(15);
+        setFont(font);
+    }
+
+    Plot::Plot(double minX, double maxX, double minY, double maxY, double deltaX, double deltaY, QWidget* parent) : Plot(parent) {
+        setBox(minX, maxX, minY, maxY, deltaX, deltaY);
     }
 
     QScatterSeries& Plot::label(double x, double y, QString text) {
@@ -153,10 +137,42 @@ namespace Physica::Gui {
         chart.setMaximumSize(QWIDGETSIZE_MAX, QWIDGETSIZE_MAX);
     }
 
+    void Plot::setBox(double minX, double maxX, double minY, double maxY, double deltaX, double deltaY) {
+        axisX->setTickInterval(deltaX);
+        axisX->setRange(minX, maxX);
+        axisY->setTickInterval(deltaY);
+        axisY->setRange(minY, maxY);
+        axisTop->setTickInterval(deltaX);
+        axisTop->setRange(minX, maxX);
+        axisRight->setTickInterval(deltaY);
+        axisRight->setRange(minY, maxY);
+    }
+
     void Plot::setTickDirection(QAbstractAxis::TickDirection d) {
         axisX->setTickDirection(d);
         axisY->setTickDirection(d);
         axisTop->setTickDirection(d);
         axisRight->setTickDirection(d);
+    }
+
+    void Plot::setFont(QFont font) {
+        Base::setFont(font);
+        getLegend().setFont(font);
+        getChart()->setTitleFont(font);
+
+        axisX->setLabelsFont(font);
+        axisX->setTitleFont(font);
+        axisY->setLabelsFont(font);
+        axisY->setTitleFont(font);
+        axisTop->setLabelsFont(font);
+        axisTop->setTitleFont(font);
+        axisRight->setLabelsFont(font);
+        axisRight->setTitleFont(font);
+    }
+
+    void Plot::setFontSize(int size) {
+        auto f = Base::font();
+        f.setPointSize(size);
+        setFont(f);
     }
 }

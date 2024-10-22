@@ -37,8 +37,8 @@ namespace Physica::Core {
     template<class MatrixType1, class MatrixType2>
     class MatrixProduct : public RValueMatrix<MatrixProduct<MatrixType1, MatrixType2>> {
         using This = MatrixProduct<MatrixType1, MatrixType2>;
-    public:
         using Base = RValueMatrix<This>;
+    public:
         using Base::isReverseDiff;
         using typename Base::ScalarType;
         using DefaultType = DenseMatrix<ScalarType,

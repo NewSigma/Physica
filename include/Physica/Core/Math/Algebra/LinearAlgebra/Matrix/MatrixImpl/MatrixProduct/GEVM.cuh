@@ -39,6 +39,12 @@ namespace Physica::Core {
                 : vec(asStruct(vec_.getDerived())), mat(asStruct(mat_.getDerived())) {
             assert(mat.getDerived().getRow() == 1);
         }
+        device_obj(const This&) = delete;
+        device_obj(This&&) noexcept = delete;
+        ~device_obj() = default;
+        /* Operators */
+        This& operator=(const This&) = delete;
+        This& operator=(This&&) noexcept = delete;
         /* Getters */
         [[nodiscard]] __device__ ScalarType calc(size_t row, size_t column) const;
         [[nodiscard]] __host__ __device__ size_t getRow() const { return vec.getDerived().getLength(); }
@@ -52,8 +58,8 @@ namespace Physica::Core {
     }
 
     template<class VectorType, class MatrixType>
-    __host__ __device__ inline typename std::enable_if<MatrixType::RowAtCompile == 1, device_obj<VectorMatrixProduct<VectorType, MatrixType>>>::type
-    operator*(const device_obj<RValueVector<VectorType>>& vec, const device_obj<RValueMatrix<MatrixType>>& mat) {
+    [[nodiscard]] __host__ __device__ inline typename std::enable_if<MatrixType::RowAtCompile == 1, device_obj<VectorMatrixProduct<VectorType, MatrixType>>>::type
+    operator*(const device_obj<RValueVector<VectorType>>& vec, const device_obj<RValueMatrix<MatrixType>>& mat) noexcept {
         assert(mat.getRow() == 1);
         return {vec, mat};
     }

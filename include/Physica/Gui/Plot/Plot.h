@@ -38,6 +38,7 @@ namespace Physica::Gui {
         QValueAxis* axisTop;
         QValueAxis* axisRight;
     public:
+        Plot(QWidget* parent = nullptr);
         Plot(double minX, double maxX, double minY, double maxY, double deltaX, double deltaY, QWidget* parent = nullptr);
         Plot(const Plot&) = delete;
         Plot(Plot&&) noexcept = delete;
@@ -106,7 +107,11 @@ namespace Physica::Gui {
         inline void setRangeY(double minY, double maxY);
         inline void setDeltaX(double value) noexcept;
         inline void setDeltaY(double value) noexcept;
+        void setBox(double minX, double maxX, double minY, double maxY, double deltaX, double deltaY);
+
         void setTickDirection(QAbstractAxis::TickDirection d);
+        void setFont(QFont font);
+        void setFontSize(int size);
     private:
         template<class VectorType>
         QBoxSet* setFromVector(const Core::LValueVector<VectorType>& v);
