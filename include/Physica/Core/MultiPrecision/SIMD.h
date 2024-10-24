@@ -19,6 +19,7 @@
 #pragma once
 
 #include <vectorclass/vectorclass.h>
+#include <vectorclass/vectormath_exp.h>
 #include <Physica/PlainStruct.h>
 #include <Physica/Core/Utils/Container/Array.h>
 #include "Scalar.h"
@@ -39,9 +40,12 @@ namespace Physica::Core {
     public:
         using BoolSIMDType = typename Traits<This>::BoolSIMDType;
         using PlainPacket = This;
+
+        constexpr static bool isSeparatable = !std::is_same<HalfType, PlainStruct<void>>::value;
     public:
         SIMD() = default;
         explicit SIMD(ScalarType s) : Base(s.getTrivial()) {}
+        SIMD(ScalarType s, int count);
         SIMD(Base value) : Base(value) {}
         SIMD(HalfType a, HalfType b);
         using Base::Base;

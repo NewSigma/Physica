@@ -109,7 +109,7 @@ namespace Physica::Core {
         using T = typename Traits<AnyPacket>::ScalarType;
         T buffer[AnyPacket::size()];
         for (size_t i = 0; i < AnyPacket::size(); ++i, ++index)
-            buffer[i] = calc(index);
+            buffer[i] = T(calc(index));
         if constexpr (isExpression && isReverseDiff) { //Optimize: For expression such as A + B, there is no need to create new node
             using TracerType = typename ScalarType::TracerType;
             TracerType::getInstance().reserve(AnyPacket::size());
@@ -127,7 +127,7 @@ namespace Physica::Core {
         using T = typename Traits<AnyPacket>::ScalarType;
         T buffer[AnyPacket::size()];
         for (size_t i = 0; i < AnyPacket::size(); ++i, ++index)
-            buffer[i] = i < count ? calc(index) : ScalarType(0);
+            buffer[i] = i < count ? T(calc(index)) : T(0);
         if constexpr (isExpression && isReverseDiff) {
             using TracerType = typename ScalarType::TracerType;
             TracerType::getInstance().reserve(count);
@@ -184,34 +184,137 @@ namespace Physica::Core {
     template<class Derived>
     typename RValueVector<Derived>::ScalarType RValueVector<Derived>::max() const {
         assert(getLength() != 0);
-        ScalarType result = calc(0);
-        for(size_t i = 1; i < getLength(); ++i) {
-            ScalarType temp = calc(i);
-            if (result < temp)
-                result = temp;
+        constexpr bool EnableSIMD = Internal::EnableSIMD<Derived>::value;
+        if constexpr (!EnableSIMD || isReverseDiff) {  // Optimize: Not implemented for reverse diff
+            ScalarType result = calc(0);
+            for(size_t i = 1; i < getLength(); ++i) {
+                ScalarType temp = calc(i);
+                if (result < temp)
+                    result = temp;
+            }
+            return result;
         }
-        return result;
+        else {
+            const auto& v = Base::getDerived();
+            PacketType buffer(std::numeric_limits<ScalarType>::lowest());
+            ScalarType result;
+            if constexpr (SizeAtCompile != Dynamic) {
+                constexpr size_t to = SizeAtCompile / PacketType::size() * PacketType::size();
+                for (size_t i = 0; i < to; i += PacketType::size())
+                    buffer = std::max(v.template packet<PacketType>(i), buffer);
+                result = buffer.horizontal_max();
+
+                constexpr size_t i = SizeAtCompile - SizeAtCompile % PacketType::size();
+                if constexpr (i != SizeAtCompile) {
+                    constexpr size_t count = SizeAtCompile - i;
+                    for (size_t j = 0; j < count; ++j)
+                        result = std::max(result, v.calc(i + j));
+                }
+            }
+            else {
+                const size_t length = getLength();
+                size_t i = 0;
+                const size_t to = length / PacketType::size() * PacketType::size();
+                for (; i < to; i += PacketType::size())
+                    buffer = std::max(v.template packet<PacketType>(i), buffer);
+                result = buffer.horizontal_max();
+
+                if (to != length) {
+                    const size_t count = length - i;
+                    for (size_t j = 0; j < count; ++j)
+                        result = std::max(result, v.calc(i + j));
+                }
+            }
+            return result;
+        }
     }
 
     template<class Derived>
     typename RValueVector<Derived>::ScalarType RValueVector<Derived>::min() const {
         assert(getLength() != 0);
-        ScalarType result = calc(0);
-        for(size_t i = 1; i < getLength(); ++i) {
-            ScalarType temp = calc(i);
-            if (result > temp)
-                result = temp;
+        constexpr bool EnableSIMD = Internal::EnableSIMD<Derived>::value;
+        if constexpr (!EnableSIMD || isReverseDiff) { // Optimize: Not implemented for reverse diff
+            ScalarType result = calc(0);
+            for(size_t i = 1; i < getLength(); ++i) {
+                ScalarType temp = calc(i);
+                if (result > temp)
+                    result = temp;
+            }
+            return result;
         }
-        return result;
+        else {
+            const auto& v = Base::getDerived();
+            PacketType buffer(std::numeric_limits<ScalarType>::max());
+            ScalarType result;
+            if constexpr (SizeAtCompile != Dynamic) {
+                constexpr size_t to = SizeAtCompile / PacketType::size() * PacketType::size();
+                for (size_t i = 0; i < to; i += PacketType::size())
+                    buffer = std::min(v.template packet<PacketType>(i), buffer);
+                result = buffer.horizontal_min();
+
+                constexpr size_t i = SizeAtCompile - SizeAtCompile % PacketType::size();
+                if constexpr (i != SizeAtCompile) {
+                    constexpr size_t count = SizeAtCompile - i;
+                    for (size_t j = 0; j < count; ++j)
+                        result = std::min(result, v.calc(i + j));
+                }
+            }
+            else {
+                const size_t length = getLength();
+                size_t i = 0;
+                const size_t to = length / PacketType::size() * PacketType::size();
+                for (; i < to; i += PacketType::size())
+                    buffer = std::min(v.template packet<PacketType>(i), buffer);
+                result = buffer.horizontal_min();
+
+                if (to != length) {
+                    const size_t count = length - i;
+                    for (size_t j = 0; j < count; ++j)
+                        result = std::min(result, v.calc(i + j));
+                }
+            }
+            return result;
+        }
     }
 
     template<class Derived>
     typename RValueVector<Derived>::ScalarType RValueVector<Derived>::sum() const {
         assert(getLength() != 0);
-        auto result = ScalarType(0);
-        for(size_t i = 0; i < getLength(); ++i)
-            result += calc(i);
-        return result;
+        constexpr bool EnableSIMD = Internal::EnableSIMD<Derived>::value;
+        if constexpr (!EnableSIMD || isReverseDiff) { // Optimize: Not implemented for reverse diff
+            auto result = ScalarType(0);
+            for(size_t i = 0; i < getLength(); ++i)
+                result += calc(i);
+            return result;
+        }
+        else {
+            const auto& v = Base::getDerived();
+            PacketType sum(0);
+            if constexpr (SizeAtCompile != Dynamic) {
+                constexpr size_t to = SizeAtCompile / PacketType::size() * PacketType::size();
+                for (size_t i = 0; i < to; i += PacketType::size())
+                    sum += v.template packet<PacketType>(i);
+
+                constexpr size_t i = SizeAtCompile - SizeAtCompile % PacketType::size();
+                if constexpr (i != SizeAtCompile) {
+                    constexpr size_t count = SizeAtCompile - i;
+                    sum += v.template packetPartial<PacketType>(i, count);
+                }
+            }
+            else {
+                const size_t length = getLength();
+                size_t i = 0;
+                const size_t to = length / PacketType::size() * PacketType::size();
+                for (; i < to; i += PacketType::size())
+                    sum += v.template packet<PacketType>(i);
+
+                if (to != length) {
+                    const size_t count = length - i;
+                    sum += v.template packetPartial<PacketType>(i, count);
+                }
+            }
+            return sum.horizontal_add();
+        }
     }
 
     template<class Derived>

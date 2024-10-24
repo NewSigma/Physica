@@ -50,10 +50,6 @@ namespace Physica::Core {
         template<class AnyPacket> inline void writePacket(size_t index, const AnyPacket packet);
         template<class AnyPacket> inline void writePacketPartial(size_t index, size_t count, const AnyPacket packet);
 
-        [[nodiscard]] ScalarType max() const;
-        [[nodiscard]] ScalarType min() const;
-        [[nodiscard]] ScalarType sum() const;
-
         template<class OtherDerived> void toDevice(device_obj<ContinuousVector<OtherDerived>>& obj) const;
         template<class OtherDerived> void toDeviceAsync(device_obj<ContinuousVector<OtherDerived>>& obj) const;
 

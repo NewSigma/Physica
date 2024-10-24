@@ -63,6 +63,7 @@ namespace Physica::Core {
         [[nodiscard]] constexpr static result_type max() { return RandomGenerator::max(); }
 
         [[nodiscard]] static Random& getInstance();
+        [[nodiscard]] static Array<int> random_int(size_t length, int from, int to);
     private:
         Random();
         Random(const Random&) = default;
@@ -109,6 +110,14 @@ namespace Physica::Core {
     Random<RandomGenerator, FixedSeed>& Random<RandomGenerator, FixedSeed>::getInstance() {
         thread_local static This instance{};
         return instance;
+    }
+
+    template<class RandomGenerator, typename RandomGenerator::result_type FixedSeed>
+    Array<int> Random<RandomGenerator, FixedSeed>::random_int(size_t length, int from, int to) {
+        assert(from <= to && to < INT_MAX);
+        Array<int> result(length);
+        vslCheck(viRngUniform(VSL_RNG_METHOD_UNIFORM_STD, getInstance(), length, result.data(), from, to + 1));
+        return result;
     }
 
     template<class RandomGenerator, typename RandomGenerator::result_type FixedSeed>

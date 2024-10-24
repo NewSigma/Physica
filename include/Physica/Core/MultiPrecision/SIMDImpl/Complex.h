@@ -44,9 +44,8 @@ namespace Physica::Core {
         using Base = SIMD<T, Size * 2>;
         using BoolSIMDType = typename Base::BoolSIMDType;
         using TrivialType = typename ScalarType::TrivialType;
-        using HalfType = typename std::conditional<sizeof(Base) * CHAR_BIT != 128, SIMD<Complex<T>, Size / 2>, void>::type;
-
-        constexpr static bool isSeparatable = !std::is_same<HalfType, void>::value;
+        using HalfType = typename std::conditional<sizeof(Base) * CHAR_BIT != 128, SIMD<Complex<T>, Size / 2>, PlainStruct<void>>::type;
+        using Base::isSeparatable;
     public:
         using PlainPacket = This;
     public:

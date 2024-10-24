@@ -88,6 +88,24 @@ namespace Physica::Core {
     }
 
     template<class ScalarType, size_t Size>
+    [[nodiscard]] inline auto ln(const SIMD<ScalarType, Size>& x) {
+        static_assert(!ScalarType::isDifferentiable, "[Error]: Not implemented");
+        return SIMD<ScalarType, Size>(log(x.getImpl()));
+    }
+
+    template<class ScalarType, size_t Size>
+    [[nodiscard]] inline auto ln1p(const SIMD<ScalarType, Size>& x) {
+        static_assert(!ScalarType::isDifferentiable, "[Error]: Not implemented");
+        return SIMD<ScalarType, Size>(log1p(x.getImpl()));
+    }
+
+    template<class ScalarType, size_t Size>
+    [[nodiscard]] inline auto exp(const SIMD<ScalarType, Size>& x) {
+        static_assert(!ScalarType::isDifferentiable, "[Error]: Not implemented");
+        return SIMD<ScalarType, Size>(exp(x.getImpl()));
+    }
+
+    template<class ScalarType, size_t Size>
     inline static void sincos(const SIMD<ScalarType, Size>& x, SIMD<ScalarType, Size>& s, SIMD<ScalarType, Size>& c) {
         sincos(x.getImpl(), s.getImpl(), c.getImpl());
         if constexpr (ScalarType::isDifferentiable) {
@@ -103,5 +121,12 @@ namespace Physica::Core {
                 tracer.pushOperand(ScalarType(x.value_ptr() + i, x.grad_ptr() + i));
             c = SIMD<ScalarType, Size>(c, cosHeadNode);
         }
+    }
+
+    template<class ScalarType, size_t Size>
+    [[nodiscard]] inline SIMD<ScalarType, Size> lncosh(const SIMD<ScalarType, Size>& x) noexcept {
+        using T = SIMD<ScalarType, Size>;
+        const auto x1 = abs(x);
+        return x1 + ln1p(exp(-x1 * T(2))) - T(M_LN2);
     }
 }

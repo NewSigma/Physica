@@ -25,6 +25,9 @@ namespace Physica::Core {
         using Base = UnitaryVectorExpr<ExprType::Abs, VectorType>;
     public:
         using typename Base::ScalarType;
+    private:
+        constexpr static bool isBaseComplex = VectorType::isComplex;
+        constexpr static bool isReverseDiff = Base::isReverseDiff;
     public:
         using Base::Base;
         /* Operations */
@@ -32,12 +35,34 @@ namespace Physica::Core {
 
         template<class AnyPacket>
         [[nodiscard]] AnyPacket packet(size_t index) const {
-            return abs(Base::getExpr().template packet<AnyPacket>(index));
+            if constexpr (isBaseComplex) {
+                static_assert(!isReverseDiff, "[Error]: Not implemented");
+                ScalarType buffer[AnyPacket::size()];
+                for (size_t i = 0; i < AnyPacket::size(); ++i, ++index)
+                    buffer[i] = abs(calc(index));
+
+                AnyPacket packet{};
+                packet.load(buffer);
+                return packet;
+            }
+            else
+                return abs(Base::getExpr().template packet<AnyPacket>(index));
         }
 
         template<class AnyPacket>
         [[nodiscard]] AnyPacket packetPartial(size_t index, size_t count) const {
-            return abs(Base::getExpr().template packetPartial<AnyPacket>(index, count));
+            if constexpr (isBaseComplex) {
+                static_assert(!isReverseDiff, "[Error]: Not implemented");
+                ScalarType buffer[AnyPacket::size()];
+                for (size_t i = 0; i < AnyPacket::size(); ++i, ++index)
+                    buffer[i] = i < count ? abs(calc(index)) : ScalarType(0);
+
+                AnyPacket packet{};
+                packet.load_partial(count, buffer);
+                return packet;
+            }
+            else
+                return abs(Base::getExpr().template packetPartial<AnyPacket>(index, count));
         }
     };
 

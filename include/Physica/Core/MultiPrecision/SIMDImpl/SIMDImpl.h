@@ -19,10 +19,50 @@
 #pragma once
 
 #include <Physica/Core/MultiPrecision/ScalarImpl/ExprType.h>
+#include <Physica/Core/Utils/Unreachable.h>
 
 namespace Physica::Core {
     template<class ScalarType, size_t Size>
     SIMD<ScalarType, Size>::SIMD(HalfType a, HalfType b) : Base(a.getImpl(), b.getImpl()) {}
+
+    template<class ScalarType, size_t Size>
+    SIMD<ScalarType, Size>::SIMD(ScalarType s, int count) {
+        assert(0 < count && count < int(Size) && "[Error]: Invalid count");
+        if (count == Size) {
+            *this = SIMD(s);
+            return;
+        }
+
+        constexpr int HalfSize = Size / 2;
+        if constexpr (isSeparatable) {
+            if (count > HalfSize)
+                *this = SIMD(HalfType(s), HalfType(s, count - HalfSize));
+            else
+                *this = SIMD(HalfType(s, count), HalfType(0));
+        }
+        else {
+            if constexpr (ScalarType::Option == Float32) {
+                const float f = float(s);
+                switch(count) {
+                case 1:
+                    *this = SIMD(Base(f, 0.0F, 0.0F, 0.0F));
+                    break;
+                case 2:
+                    *this = SIMD(Base(f, f, 0.0F, 0.0F));
+                    break;
+                case 3:
+                    *this = SIMD(Base(f, f, f, 0.0F));
+                    break;
+                default:
+                    unreachable();
+                }
+            }
+            else {
+                static_assert(ScalarType::Option == Float64, "[Error]: Unsupported float type");
+                *this = SIMD(Base(double(s), 0.0));
+            }
+        }
+    }
 
     template<class ScalarType, size_t Size>
     inline ScalarType SIMD<ScalarType, Size>::operator[](int index) const {

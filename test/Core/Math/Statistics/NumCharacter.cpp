@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Weibo He.
+ * Copyright 2022-2024 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -16,13 +16,13 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include "Physica/Core/Math/Statistics/NumCharacter.h"
+#include <Physica/Core/Math/Statistics/NumCharacter.h>
 
 using namespace Physica::Core;
 using ScalarType = float64;
 
 int main() {
-    Vector<ScalarType> a{1, 2, 3, 4, 5};
+    const Vector<ScalarType> a{1, 2, 3, 4, 5};
     if (!scalarNear(covariance(a, a), variance(a), 1E-16))
         return 1;
     return 0;
