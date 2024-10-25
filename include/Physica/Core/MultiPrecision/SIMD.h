@@ -65,13 +65,21 @@ namespace Physica::Core {
         [[nodiscard]] inline SIMD operator+(const SIMD& other) const;
         [[nodiscard]] inline SIMD operator-(const SIMD& other) const;
         [[nodiscard]] inline SIMD operator*(const SIMD& other) const;
-        [[nodiscard]] inline SIMD operator*(const ScalarType& v) const;
+        [[nodiscard]] inline SIMD operator*(const ScalarType& x) const;
         [[nodiscard]] inline SIMD operator/(const SIMD& other) const;
         [[nodiscard]] inline SIMD operator-() const;
+        [[nodiscard]] inline SIMD operator&(const SIMD& other) const;
+        [[nodiscard]] inline SIMD operator|(const SIMD& other) const;
+        [[nodiscard]] inline SIMD operator^(const SIMD& other) const;
+        [[nodiscard]] inline SIMD operator!() const;
         void operator+=(const SIMD& other) { *this = *this + other; }
         void operator-=(const SIMD& other) { *this = *this - other; }
         void operator*=(const SIMD& other) { *this = *this * other; }
+        void operator*=(const ScalarType& x) { *this = *this * x; }
         void operator/=(const SIMD& other) { *this = *this / other; }
+        void operator&=(const SIMD& other) { *this = *this & other; }
+        void operator|=(const SIMD& other) { *this = *this | other; }
+        void operator^=(const SIMD& other) { *this = *this ^ other; }
         [[nodiscard]] inline BoolSIMDType operator>(const SIMD& other) const;
         [[nodiscard]] inline BoolSIMDType operator<(const SIMD& other) const;
         [[nodiscard]] inline BoolSIMDType operator>=(const SIMD& other) const { return !(*this < other); }
@@ -97,6 +105,11 @@ namespace Physica::Core {
         [[nodiscard]] const Base& getImpl() const noexcept { return *this; }
         [[nodiscard]] HalfType getLow() const noexcept { return Base::get_low(); }
         [[nodiscard]] HalfType getHigh() const noexcept { return Base::get_high(); }
+        /* Static members */
+        template<bool... Flags>
+        [[nodiscard]] static SIMD makeSignBits();
+        template<class RandomType>
+        [[nodiscard]] static SIMD random_uniform(RandomType& gen);
     private:
         template<int Order, int... Orders>
         [[nodiscard]] constexpr static unsigned int makeShuffleMask(int order);

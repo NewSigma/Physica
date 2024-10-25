@@ -88,8 +88,8 @@ namespace Physica::Core {
     }
 
     template<class ScalarType, size_t Size>
-    inline SIMD<ScalarType, Size> SIMD<ScalarType, Size>::operator*(const ScalarType& v) const {
-        return operator*(SIMD(v));
+    inline SIMD<ScalarType, Size> SIMD<ScalarType, Size>::operator*(const ScalarType& x) const {
+        return operator*(SIMD(x));
     }
 
     template<class ScalarType, size_t Size>
@@ -100,6 +100,26 @@ namespace Physica::Core {
     template<class ScalarType, size_t Size>
     inline SIMD<ScalarType, Size> SIMD<ScalarType, Size>::operator-() const {
         return SIMD(-getImpl());
+    }
+
+    template<class ScalarType, size_t Size>
+    inline SIMD<ScalarType, Size> SIMD<ScalarType, Size>::operator&(const SIMD& other) const {
+        return SIMD(getImpl() & other.getImpl());
+    }
+
+    template<class ScalarType, size_t Size>
+    inline SIMD<ScalarType, Size> SIMD<ScalarType, Size>::operator|(const SIMD& other) const {
+        return SIMD(getImpl() | other.getImpl());
+    }
+
+    template<class ScalarType, size_t Size>
+    inline SIMD<ScalarType, Size> SIMD<ScalarType, Size>::operator^(const SIMD& other) const {
+        return SIMD(getImpl() ^ other.getImpl());
+    }
+
+    template<class ScalarType, size_t Size>
+    inline SIMD<ScalarType, Size> SIMD<ScalarType, Size>::operator!() const {
+        return SIMD(!getImpl());
     }
 
     template<class ScalarType, size_t Size>
@@ -187,6 +207,58 @@ namespace Physica::Core {
     template<class ScalarType, size_t Size>
     inline ScalarType SIMD<ScalarType, Size>::horizontal_min() const {
         return Physica::horizontal_min(getImpl());
+    }
+
+    template<class ScalarType, size_t Size>
+    template<bool... Flags>
+    SIMD<ScalarType, Size> SIMD<ScalarType, Size>::makeSignBits() {
+        using IntType = typename std::conditional<ScalarType::Option == Float32, uint32_t, uint64_t>::type;
+        constexpr auto Functor = [](bool flag) constexpr -> IntType {
+            constexpr IntType Mask = ScalarType::Option == Float32 ? IntType(0x80000000U) : IntType(0x8000000000000000U);
+            return flag ? Mask : 0;
+        };
+
+        static_assert(sizeof...(Flags) == Size, "[Error]: Size do not match");
+        if constexpr (ScalarType::Option == Float32) {
+            if constexpr (Size == 4)
+                return __m128(_mm_setr_epi32(Functor(Flags)...));
+            else if constexpr (Size == 8)
+                return __m256(_mm256_setr_epi32(Functor(Flags)...));
+            else {
+                static_assert(Size == 16);
+                // GCC 9.5.0 defines _mm512_setr_epi32 and _mm512_setr_epi64 as macro definitions, and we cannot apply template parameter pack expansion to macro definitions.
+                // Therefore, it is necessary to define our own versions manually.
+                const static auto mm512_setr_epi32 = [](int32_t i0, int32_t i1, int32_t i2, int32_t i3, int32_t i4, int32_t i5, int32_t i6, int32_t i7,
+                                                        int32_t i8, int32_t i9, int32_t i10, int32_t i11, int32_t i12, int32_t i13, int32_t i14, int32_t i15) {
+                    return _mm512_set_epi32(i15, i14, i13, i12, i11, i10, i9, i8, i7, i6, i5, i4, i3, i2, i1, i0);
+                };
+                return __m512(mm512_setr_epi32(Functor(Flags)...));
+            }
+        }
+        else {
+            if constexpr (Size == 2)
+                return __m128d(_mm_setr_epi64(Functor(Flags)...));
+            else if constexpr (Size == 4)
+                return __m256d(_mm256_setr_epi64(Functor(Flags)...));
+            else {
+                static_assert(Size == 8);
+                const static auto mm512_setr_epi64 = [](int64_t i0, int64_t i1, int64_t i2, int64_t i3, int64_t i4, int64_t i5, int64_t i6, int64_t i7) {
+                    return _mm512_set_epi64(i7, i6, i5, i4, i3, i2, i1, i0);
+                };
+                return __m512d(mm512_setr_epi64(Functor(Flags)...));
+            }
+        }
+    }
+
+    template<class ScalarType, size_t Size>
+    template<class RandomType>
+    SIMD<ScalarType, Size> SIMD<ScalarType, Size>::random_uniform(RandomType& gen) {
+        SIMD result{};
+        ScalarType buffer[Size];
+        for (auto& elem : buffer)
+            elem = ScalarType::random_uniform(gen);
+        result.load(buffer);
+        return result;
     }
 
     template<class ScalarType, size_t Size>

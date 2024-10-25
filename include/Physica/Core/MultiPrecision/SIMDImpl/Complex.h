@@ -85,7 +85,9 @@ namespace Physica::Core {
         [[nodiscard]] HalfType getLow() const noexcept { return HalfType::asComplex(Base::getLow()); }
         [[nodiscard]] HalfType getHigh() const noexcept { return HalfType::asComplex(Base::getHigh()); }
         /* Static members */
-        [[nodiscard]] static SIMD asComplex(Base base) { return base; }
+        [[nodiscard]] static SIMD asComplex(Base base) noexcept { return base; }
+        template<class RandomType>
+        [[nodiscard]] static SIMD random_uniform(RandomType& gen) { return asComplex(Base::random_uniform(gen)); }
     private:
         SIMD(Base base) : Base(std::move(base)) {}
     };
@@ -185,3 +187,5 @@ namespace Physica {
         using ScalarType = Core::Complex<T>;
     };
 }
+
+#include "MathComplex.h"

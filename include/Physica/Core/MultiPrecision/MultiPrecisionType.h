@@ -50,4 +50,7 @@ namespace Physica::Core {
     using float16 = Scalar<Float16>;
     using float32 = Scalar<Float32>;
     using float64 = Scalar<Float64>;
+    using cfloat16 = Complex<float16>;
+    using cfloat32 = Complex<float32>;
+    using cfloat64 = Complex<float64>;
 }

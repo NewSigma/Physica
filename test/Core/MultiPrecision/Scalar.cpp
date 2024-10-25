@@ -24,9 +24,7 @@ using namespace Physica::Core;
 using ScalarType = Scalar<FloatMP>;
 constexpr unsigned int iterateCount = 50;
 static std::default_random_engine engine(clock());
-/*!
- * Test operator+(), return true if passed.
- */
+
 bool numericalAddTest(unsigned int loop) {
     double d{};
     for(unsigned int i = 0; i < loop; ++i) {
