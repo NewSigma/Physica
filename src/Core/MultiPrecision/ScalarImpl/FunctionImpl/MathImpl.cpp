@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2023 Weibo He.
+ * Copyright 2020-2024 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -104,6 +104,18 @@ namespace Physica::Core {
 
     template<>
     Scalar<FloatMP> pow(const Scalar<FloatMP>& s1, const Scalar<FloatMP>& s2) noexcept;
+
+    template<>
+    Scalar<FloatMP> factorial(const Scalar<FloatMP>& s) noexcept {
+        //Optimize: Unnecessary copy during floor() if s is a integer itself.
+        const Scalar<FloatMP> integer = floor(s);
+
+        Scalar<FloatMP> result(SignedMPUnit(1));
+        Scalar<FloatMP> temp(SignedMPUnit(1));
+        while(temp < integer)
+            result *= ++temp;
+        return result;
+    }
 
     template<>
     Scalar<FloatMP> cos(const Scalar<FloatMP>& s) noexcept {
@@ -282,5 +294,20 @@ namespace Physica::Core {
     Scalar<FloatMP> arccoth(const Scalar<FloatMP>& s) noexcept {
         return ln((s + BasicConst::getInstance()._1)
                   / Scalar<FloatMP>(s - BasicConst::getInstance()._1)) >> 1;
+    }
+
+    template<>
+    Scalar<FloatMP> floor(const Scalar<FloatMP>& s) noexcept {
+        if(s.isInteger())
+            return Scalar(s);
+        const auto size = s.getSize();
+        const auto power = s.getPower();
+        const auto power_1 = power + 1;
+        auto length = size > power_1 ? power_1 : size;
+        length = s.isNegative() ? -length : length;
+        Scalar<FloatMP> result(length, power);
+        for(int i = 0; i < length; ++i)
+            result.setByte(i, s[i]);
+        return result;
     }
 }

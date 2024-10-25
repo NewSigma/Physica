@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Weibo He.
+ * Copyright 2020-2024 Weibo He.
  *
  * This file is part of Physica.
 
@@ -16,8 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef PHYSICA_REGIONTREE_H
-#define PHYSICA_REGIONTREE_H
+#pragma once
 
 #include "GeometryRegion.h"
 
@@ -69,5 +68,3 @@ namespace Physica::Core {
         return new RegionTree(std::move(*this));
     }
 }
-
-#endif

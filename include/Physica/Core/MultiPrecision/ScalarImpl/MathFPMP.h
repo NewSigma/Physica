@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2023 Weibo He.
+ * Copyright 2024 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -19,6 +19,18 @@
 #pragma once
 
 namespace Physica::Core {
+    template<>
+    Scalar<FloatMP> abs(const Scalar<FloatMP>& s) noexcept;
+
+    template<>
+    Scalar<FloatMP> sqrt(const Scalar<FloatMP>& s) noexcept;
+
+    template<>
+    Scalar<FloatMP> ln(const Scalar<FloatMP>& s) noexcept;
+
+    template<>
+    Scalar<FloatMP> exp(const Scalar<FloatMP>& s) noexcept;
+
     //!Compute a ^ unit.
     inline Scalar<FloatMP> powWord(const Scalar<FloatMP>& a, MPUnit unit) {
         Scalar<FloatMP> result(a);
@@ -31,7 +43,6 @@ namespace Physica::Core {
         }
         return result;
     }
-
     //!Compute a ^ unit, the highest bit of unit must be set.
     inline Scalar<FloatMP> powFullWord(const Scalar<FloatMP>& a, MPUnit unit) {
         Scalar<FloatMP> result(a);
@@ -59,4 +70,60 @@ namespace Physica::Core {
         result = powWord(result, n[size - 1]);
         return result;
     }
+
+    template<>
+    inline Scalar<FloatMP> pow(const Scalar<FloatMP>& s1, const Scalar<FloatMP>& s2) noexcept {
+        return s1.isInteger() ? powScalar(s1, s2) : exp(ln(s1) * s2);
+    }
+
+    template<>
+    Scalar<FloatMP> factorial(const Scalar<FloatMP>& s) noexcept;
+
+    template<>
+    Scalar<FloatMP> cos(const Scalar<FloatMP>& s) noexcept;
+
+    template<>
+    Scalar<FloatMP> sin(const Scalar<FloatMP>& s) noexcept;
+
+    template<>
+    Scalar<FloatMP> arccos(const Scalar<FloatMP>& s) noexcept;
+
+    template<>
+    Scalar<FloatMP> arcsin(const Scalar<FloatMP>& s) noexcept;
+
+    template<>
+    Scalar<FloatMP> arctan(const Scalar<FloatMP>& s) noexcept;
+
+    template<>
+    Scalar<FloatMP> cosh(const Scalar<FloatMP>& s) noexcept;
+
+    template<>
+    Scalar<FloatMP> sinh(const Scalar<FloatMP>& s) noexcept;
+
+    template<>
+    Scalar<FloatMP> tanh(const Scalar<FloatMP>& s) noexcept;
+
+    template<>
+    Scalar<FloatMP> sech(const Scalar<FloatMP>& s) noexcept;
+
+    template<>
+    Scalar<FloatMP> csch(const Scalar<FloatMP>& s) noexcept;
+
+    template<>
+    Scalar<FloatMP> coth(const Scalar<FloatMP>& s) noexcept;
+
+    template<>
+    Scalar<FloatMP> arccosh(const Scalar<FloatMP>& s) noexcept;
+
+    template<>
+    Scalar<FloatMP> arcsinh(const Scalar<FloatMP>& s) noexcept;
+
+    template<>
+    Scalar<FloatMP> arctanh(const Scalar<FloatMP>& s) noexcept;
+
+    template<>
+    Scalar<FloatMP> arccoth(const Scalar<FloatMP>& s) noexcept;
+
+    template<>
+    Scalar<FloatMP> floor(const Scalar<FloatMP>& s) noexcept;
 }

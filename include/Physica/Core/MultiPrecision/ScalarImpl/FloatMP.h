@@ -153,5 +153,5 @@ namespace std {
 }
 
 #include "Const.h"
-#include "MultiPrecisionImpl.h"
-#include "ScalarArithmetic.h"
+#include "FloatMPImpl/FloatMPImpl.h"
+#include "MathFPMP.h"

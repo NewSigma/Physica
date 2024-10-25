@@ -18,7 +18,7 @@
  */
 #pragma once
 
-#include "Physica/Core/MultiPrecision/ScalarImpl/ExprType.h"
+#include "Physica/Core/MultiPrecision/ExprType.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/Vector.h"
 #include "Print/ColorfulTraceSegment.h"
 

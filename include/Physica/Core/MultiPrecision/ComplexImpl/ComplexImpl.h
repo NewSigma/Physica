@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2023 Weibo He.
+ * Copyright 2020-2024 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -233,4 +233,4 @@ namespace Physica::Core {
     }
 }
 
-#include "ElemFunc.h"
+#include "Math.h"

@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2023 Weibo He.
+ * Copyright 2024 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -18,14 +18,40 @@
  */
 #pragma once
 
-#include "Physica/Core/MultiPrecision/BasicImpl/AddBasic.h"
-#include "Physica/Core/MultiPrecision/BasicImpl/DivBasic.h"
-#include "Physica/Core/MultiPrecision/BasicImpl/Util/ArraySupport.h"
-#include "Physica/Core/MultiPrecision/BasicImpl/Util/Bitwise.h"
-#include "Physica/Core/Exception/DivideByZeroException.h"
+#include <Physica/Core/Exception/DivideByZeroException.h>
+#include "AddBasic.h"
+#include "DivBasic.h"
+#include "ArraySupport.h"
+#include "Bitwise.h"
 
 namespace Physica::Core {
-    ///////////////////////////////////////BasicCalculates////////////////////////////////////////////
+    /**
+     * Returns true if s1 and s2 has the same sign. Both s1 and s2 do not equal to zero.
+     * This function provide a quick sign check compare to using isPositive() and isNegative().
+     */
+    inline bool Scalar<FloatMP>::matchSign(const Scalar<FloatMP>& s1, const Scalar<FloatMP>& s2) {
+        assert(!s1.isZero() && !s2.isZero());
+        return (s1.length ^ s2.length) >= 0; //NOLINT Bitwise operator between two signed integer is intended.
+    }
+    /**
+     * Cut zeros from the beginning.
+     */
+    inline void Scalar<FloatMP>::cutZero() {
+        const int size = getSize();
+        int id = size - 1;
+        while(byte[id] == 0 && id > 0)
+            --id;
+        ++id;
+
+        if(id != size) {
+            int shorten = size - id;
+            byte = reinterpret_cast<MPUnit*>(realloc(byte, id * sizeof(MPUnit)));
+            length = length > 0 ? id : -id;
+            auto temp = power;
+            power = byte[id - 1] != 0 ? (temp - shorten) : 0;
+        }
+    }
+
     inline Scalar<FloatMP> Scalar<FloatMP>::add(const Scalar<FloatMP>& s1, const Scalar<FloatMP>& s2) {
         if(s1.isZero())
             return Scalar<FloatMP>(static_cast<const Scalar<FloatMP>&>(s2));
@@ -285,5 +311,27 @@ namespace Physica::Core {
             s.length = s.length > 0 ? GlobalPrecision : -GlobalPrecision;
         }
         return result;
+    }
+
+    inline Scalar<FloatMP>& operator++(Scalar<FloatMP>& s) {
+        s += BasicConst::getInstance()._1;
+        return s;
+    }
+
+    inline Scalar<FloatMP>& operator--(Scalar<FloatMP>& s) {
+        s -= BasicConst::getInstance()._1;
+        return s;
+    }
+
+    inline Scalar<FloatMP> operator++(Scalar<FloatMP>& s, int) {
+        Scalar<FloatMP> temp(s);
+        s += BasicConst::getInstance()._1;
+        return temp;
+    }
+
+    inline Scalar<FloatMP> operator--(Scalar<FloatMP>& s, int) {
+        Scalar<FloatMP> temp(s);
+        s -= BasicConst::getInstance()._1;
+        return temp;
     }
 }

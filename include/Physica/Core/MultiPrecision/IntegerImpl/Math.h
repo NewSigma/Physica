@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2023 Weibo He.
+ * Copyright 2020-2024 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -14,16 +14,10 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
+ * al
  */
 #pragma once
 
 namespace Physica::Core {
-    template<ScalarOption Option>
-    __host__ __device__ inline Scalar<Option> floor(const Scalar<Option>& s) noexcept;
-    
-    template<ScalarOption Option>
-    __host__ __device__ inline Scalar<Option> ceil(const Scalar<Option>& s) noexcept;
+    Integer factorial(const Integer& i);
 }
-
-#include "FunctionImpl/ProbabilityImpl.h"

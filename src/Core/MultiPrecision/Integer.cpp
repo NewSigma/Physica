@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2023 Weibo He.
+ * Copyright 2020-2024 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -19,10 +19,8 @@
 #include <cmath>
 #include <cstdlib>
 #include <cstring>
-#include "Physica/Core/MultiPrecision/Integer.h"
-#include "Physica/Core/MultiPrecision/Scalar.h"
-#include "Physica/Core/MultiPrecision/BasicImpl/Util/Bitwise.h"
-#include "Physica/Core/MultiPrecision/BasicImpl/Convert.h"
+#include <Physica/Core/MultiPrecision/Integer.h>
+#include <Physica/Core/MultiPrecision/ScalarImpl/FloatMPImpl/Convert.h>
 
 namespace Physica::Core {
     Integer::Integer(int i)

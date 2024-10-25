@@ -125,4 +125,4 @@ namespace Physica {
 }
 
 #include "DiffImpl/DiffImpl.cuh"
-#include "DiffImpl/ElementaryFunction.cuh"
+#include "DiffImpl/Math.cuh"

@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Weibo He.
+ * Copyright 2023-2024 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -18,7 +18,7 @@
  */
 #pragma once
 
-#include <Physica/Core/MultiPrecision/ScalarImpl/ExprType.h>
+#include <Physica/Core/MultiPrecision/ExprType.h>
 #include <Physica/Core/Utils/Unreachable.h>
 
 namespace Physica::Core {
@@ -478,3 +478,5 @@ namespace Physica::Core {
         }
     }
 }
+
+#include "Math.h"

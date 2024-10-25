@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Weibo He.
+ * Copyright 2020-2024 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -14,18 +14,16 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
+ * al
  */
-#pragma once
+#include "Physica/Core/MultiPrecision/Integer.h"
 
 namespace Physica::Core {
-    template<class ScalarType, DiffMode Mode, unsigned int Order>
-    inline ScalarType floor(const Diff<ScalarType, Mode, Order>& s) {
-        return floor(s.getValue());
-    }
-    
-    template<class ScalarType, DiffMode Mode, unsigned int Order>
-    inline ScalarType ceil(const Diff<ScalarType, Mode, Order>& s) {
-        return ceil(s.getValue());
+    Integer factorial(const Integer& i) {
+        Integer result = 1;
+        Integer temp = 1;
+        while(temp < i)
+            result *= ++temp;
+        return result;
     }
 }

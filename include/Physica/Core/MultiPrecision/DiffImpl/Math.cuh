@@ -131,4 +131,4 @@ namespace Physica::Core {
 */
 }
 
-#include "ElementaryFunctionImpl.cuh"
+#include "MathImpl.cuh"

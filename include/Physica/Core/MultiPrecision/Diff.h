@@ -230,5 +230,4 @@ namespace std {
 }
 
 #include "DiffImpl/DiffImpl.h"
-#include "DiffImpl/ElementaryFunction.h"
-#include "DiffImpl/ProbabilityFunction.h"
+#include "DiffImpl/Math.h"

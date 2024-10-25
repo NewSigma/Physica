@@ -236,5 +236,4 @@ namespace std {
 #ifdef PHYSICA_CUDA
     #include "SIMDImpl/Half2.h"
 #endif
-#include "SIMDImpl/MathFunc.h"
 #include "SIMDImpl/Complex.h"

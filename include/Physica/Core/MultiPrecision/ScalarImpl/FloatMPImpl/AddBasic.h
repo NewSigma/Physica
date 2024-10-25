@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Weibo He.
+ * Copyright 2020-2024 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -16,8 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef PHYSICA_ADDBASIC_H
-#define PHYSICA_ADDBASIC_H
+#pragma once
 
 namespace Physica::Core {
     /*!
@@ -48,5 +47,3 @@ namespace Physica::Core {
         return carry;
     }
 }
-
-#endif

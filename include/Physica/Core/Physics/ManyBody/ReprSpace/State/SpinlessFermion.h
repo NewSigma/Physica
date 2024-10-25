@@ -20,7 +20,6 @@
 
 #include <iostream>
 #include <Physica/Core/Math/Discrete/Combination.h>
-#include <Physica/Core/MultiPrecision/BasicImpl/Util/Bitwise.h>
 #include "State.h"
 
 namespace Physica::Core {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Weibo He.
+ * Copyright 2020-2024 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -16,11 +16,10 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef PHYSICA_DIVIDEBYZEROEXCEPTION_H
-#define PHYSICA_DIVIDEBYZEROEXCEPTION_H
+#pragma once
 
 #include <exception>
-#include "Physica/Macro.h"
+#include <Physica/Macro.h>
 
 namespace Physica::Core {
     class PHYSICA_API DivideByZeroException : public std::exception {
@@ -29,5 +28,3 @@ namespace Physica::Core {
         const char* what() const noexcept override { return "[Error]: Scalar is divided by zero."; }
     };
 }
-
-#endif

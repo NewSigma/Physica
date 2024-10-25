@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2021 Weibo He.
+ * Copyright 2020-2024 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -77,4 +77,4 @@ namespace Physica::Core {
     Complex<ScalarType> lncosh(const Complex<ScalarType>& c);
 }
 
-#include "ElemFuncImpl.h"
+#include "MathImpl.h"

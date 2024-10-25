@@ -20,7 +20,7 @@
 
 #include <cassert>
 #include <Physica/Core/MultiPrecision/Scalar.h>
-#include <Physica/Core/MultiPrecision/ScalarImpl/ExprType.h>
+#include <Physica/Core/MultiPrecision/ExprType.h>
 
 namespace Physica::Core {
     /**

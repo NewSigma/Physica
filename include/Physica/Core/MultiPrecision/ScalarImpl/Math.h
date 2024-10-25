@@ -132,6 +132,12 @@ namespace Physica::Core {
 
     template<ScalarOption Option>
     Scalar<Option> lncosh(const Scalar<Option>& s) noexcept;
+
+    template<ScalarOption Option>
+    __host__ __device__ inline Scalar<Option> floor(const Scalar<Option>& s) noexcept;
+    
+    template<ScalarOption Option>
+    __host__ __device__ inline Scalar<Option> ceil(const Scalar<Option>& s) noexcept;
 }
 
-#include "FunctionImpl/ElementaryImpl.h"
+#include "MathImpl.h"

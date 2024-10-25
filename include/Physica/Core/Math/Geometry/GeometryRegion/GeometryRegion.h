@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 Weibo He.
+ * Copyright 2020-2024 Weibo He.
  *
  * This file is part of Physica.
 
@@ -16,10 +16,9 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef PHYSICA_GEOMETRYREGION_H
-#define PHYSICA_GEOMETRYREGION_H
+#pragma once
 
-#include "Physica/Core/Math/Geometry/Point.h"
+#include <Physica/Core/Math/Geometry/Point.h>
 
 namespace Physica::Core {
     /*!
@@ -99,5 +98,3 @@ namespace Physica::Core {
         virtual GeometryRegion* release() = 0;
     };
 }
-
-#endif

@@ -19,11 +19,8 @@
 #pragma once
 
 #include <cassert>
-#include "Physica/Core/MultiPrecision/BasicImpl/AddBasic.h"
-#include "Physica/Core/MultiPrecision/BasicImpl/DivBasic.h"
-#include "Physica/Core/MultiPrecision/BasicImpl/Util/ArraySupport.h"
-#include "Physica/Core/MultiPrecision/BasicImpl/Util/Bitwise.h"
-#include "Physica/Core/Exception/DivideByZeroException.h"
+#include <Physica/Core/MultiPrecision/ScalarImpl/FloatMPImpl/AddBasic.h>
+#include <Physica/Core/MultiPrecision/ScalarImpl/FloatMPImpl/DivBasic.h>
 
 namespace Physica::Core {
     /**

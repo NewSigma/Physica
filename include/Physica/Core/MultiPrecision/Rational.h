@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2022 Weibo He.
+ * Copyright 2021-2024 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -16,8 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#ifndef PHYSICA_RATIONAL_H
-#define PHYSICA_RATIONAL_H
+#pragma once
 
 #include "Integer.h"
 
@@ -75,5 +74,3 @@ namespace std {
         r1.swap(r2);
     }
 }
-
-#endif

@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Weibo He.
+ * Copyright 2023-2024 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -128,6 +128,15 @@ namespace Physica::Core {
     template<class ScalarType, DiffMode Mode, unsigned int Order>
     Diff<ScalarType, Mode, Order> arccoth(const Diff<ScalarType, Mode, Order>& s);
 */
+    template<class ScalarType, DiffMode Mode, unsigned int Order>
+    inline ScalarType floor(const Diff<ScalarType, Mode, Order>& s) {
+        return floor(s.getValue());
+    }
+    
+    template<class ScalarType, DiffMode Mode, unsigned int Order>
+    inline ScalarType ceil(const Diff<ScalarType, Mode, Order>& s) {
+        return ceil(s.getValue());
+    }
 }
 
-#include "ElementaryFunctionImpl.h"
+#include "MathImpl.h"
