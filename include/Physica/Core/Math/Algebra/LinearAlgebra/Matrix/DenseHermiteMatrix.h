@@ -75,8 +75,8 @@ namespace Physica::Core {
         using Storage::getRow;
         [[nodiscard]] Base& asMatrix() noexcept { return *this; }
         [[nodiscard]] const Base& asMatrix() const noexcept { return *this; }
-        [[nodiscard]] VectorStorage& asVector() noexcept { return Storage::getArray(); }
-        [[nodiscard]] const VectorStorage& asVector() const noexcept { return Storage::getArray(); }
+        [[nodiscard]] VectorStorage& asVector() noexcept { return Storage::asArray(); }
+        [[nodiscard]] const VectorStorage& asVector() const noexcept { return Storage::asArray(); }
         /* Static members */
         [[nodiscard]] static This unitMatrix(size_t order);
         template<class RandomGenerator>

@@ -39,7 +39,7 @@ namespace Physica::Core {
     template<class T>
     class DeviceAllocator {
     public:
-        using value_type = typename Physica::Core::Internal::DeviceAllocatorValueType<T, std::is_class<T>::value>::Type;
+        using value_type = typename Internal::DeviceAllocatorValueType<T, std::is_class<T>::value>::Type;
         using pointer = value_type*;
         using size_type = size_t;
         using difference_type = std::ptrdiff_t;
@@ -55,21 +55,21 @@ namespace Physica::Core {
         DeviceAllocator& operator=(const DeviceAllocator&) noexcept = default;
         DeviceAllocator& operator=(DeviceAllocator&&) noexcept = delete;
         /* Operations */
-        [[nodiscard]] __host__ __device__ static pointer allocate(size_t n);
-        __host__ __device__ static void deallocate(pointer p, size_t n) noexcept;
+        [[nodiscard]] __host__ __device__ inline pointer allocate(size_t n) noexcept;
+        __host__ __device__ inline void deallocate(pointer p, size_t n) noexcept;
         template<class... Args>
         __host__ __device__ void construct(pointer p, Args&&... args);
-        __host__ __device__ void destroy(pointer p);
+        __host__ __device__ void destroy(pointer p) noexcept;
     };
 
     template<class T>
-    __host__ __device__ typename DeviceAllocator<T>::pointer DeviceAllocator<T>::allocate(size_t n) {
+    __host__ __device__ inline typename DeviceAllocator<T>::pointer DeviceAllocator<T>::allocate(size_t n) noexcept {
         pointer p;
         if constexpr (IsDevice())
             p = reinterpret_cast<pointer>(malloc(n * sizeof(value_type)));
         else {
             if constexpr (CUDADevAttr::MemoryPoolsSupported)
-                cudaMallocAsync(&p, n * sizeof(value_type), Core::CUDAContext::getInstance());
+                cudaMallocAsync(&p, n * sizeof(value_type), CUDAContext::getInstance());
             else
                 cudaMalloc(&p, n * sizeof(value_type));
         }
@@ -77,13 +77,13 @@ namespace Physica::Core {
     }
 
     template<class T>
-    __host__ __device__ void DeviceAllocator<T>::deallocate(pointer p, [[maybe_unused]] size_t n) noexcept {
+    __host__ __device__ inline void DeviceAllocator<T>::deallocate(pointer p, [[maybe_unused]] size_t n) noexcept {
         if constexpr (IsDevice())
             free(p);
         else {
             if (p != nullptr) { // No unnecessary cuda api call to make profiler output cleaner
                 if constexpr (CUDADevAttr::MemoryPoolsSupported)
-                    cudaFreeAsync(p, Core::CUDAContext::getInstance());
+                    cudaFreeAsync(p, CUDAContext::getInstance());
                 else
                     cudaFree(p);
             }
@@ -104,13 +104,13 @@ namespace Physica::Core {
     }
 
     template<class T>
-    __host__ __device__ void DeviceAllocator<T>::destroy(pointer p) {
+    __host__ __device__ void DeviceAllocator<T>::destroy(pointer p) noexcept {
         if constexpr (!std::is_trivial<value_type>::value) {
             if constexpr (IsDevice())
                 p->~value_type();
             else {
                 value_type temp;
-                cudaMemcpyAsync(&temp, p, sizeof(value_type), cudaMemcpyDeviceToHost, Core::CUDAContext::getInstance());
+                cudaMemcpyAsync(&temp, p, sizeof(value_type), cudaMemcpyDeviceToHost, CUDAContext::getInstance());
             }
         }
     }

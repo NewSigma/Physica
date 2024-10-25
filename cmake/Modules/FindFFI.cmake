@@ -1,5 +1,5 @@
 find_path(FFI_INCLUDE_DIR ffi.h)
-find_library(FFI_LIBRARY libffi.a)
+find_library(FFI_LIBRARY NAMES libffi_pic.a libffi.a)
 
 set(FFI_INCLUDE_DIRS ${FFI_INCLUDE_DIR})
 set(FFI_LIBRARIES ${FFI_LIBRARY})

@@ -1,6 +1,6 @@
 ##############################################Libs################################################
 set(PYBIND11_FINDPYTHON ON)
-add_subdirectory(${CMAKE_SOURCE_DIR}/3rdparty/pybind11 pybind11 EXCLUDE_FROM_ALL)
+find_package(pybind11 CONFIG REQUIRED)
 
 find_package(LLVM REQUIRED CONFIG)
 find_package(Clang REQUIRED CONFIG)
@@ -21,7 +21,6 @@ set(LLVM_INCLUDE_DIR "${LLVM_INSTALL_PREFIX}/lib/clang/${LLVM_VERSION_MAJOR}/inc
 target_include_directories(PhysicaPython SYSTEM PRIVATE ${pybind11_INCLUDE_DIRS})
 target_include_directories(PhysicaPython SYSTEM PRIVATE ${LLVM_INCLUDE_DIRS})
 target_include_directories(PhysicaPython SYSTEM PRIVATE ${FFI_INCLUDE_DIRS})
-target_precompile_headers(PhysicaPython REUSE_FROM PhysicaCore)
 
 target_compile_definitions(PhysicaPython PRIVATE ${LLVM_DEFINITIONS})
 target_compile_definitions(PhysicaPython PRIVATE -DLLVM_RESOURCE_DIR="${LLVM_LIBRARY_DIR}/clang/${LLVM_VERSION_MAJOR}")

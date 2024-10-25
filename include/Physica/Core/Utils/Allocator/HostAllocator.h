@@ -32,6 +32,7 @@ namespace Physica::Core {
      */
     template<class T, size_t Align = Dynamic>
     class HostAllocator {
+        using This = HostAllocator<T, Align>;
     public:
         using value_type = T;
         using size_type = std::size_t;
@@ -41,32 +42,24 @@ namespace Physica::Core {
         using rebind_alloc = HostAllocator<U, Align>;
     public:
         HostAllocator() noexcept = default;
-        HostAllocator(const HostAllocator&) noexcept = default;
-        HostAllocator(HostAllocator&&) noexcept = delete;
+        HostAllocator(const This&) noexcept = default;
+        HostAllocator(This&&) noexcept = delete;
         ~HostAllocator() = default;
         /* Operators */
-        HostAllocator& operator=(const HostAllocator&) noexcept = default;
-        HostAllocator& operator=(HostAllocator&&) noexcept = delete;
+        This& operator=(const This&) noexcept = default;
+        This& operator=(This&&) noexcept = delete;
         /* Operations */
-        [[nodiscard]] T* allocate(size_t n);
+        [[nodiscard]] inline T* allocate(size_t n) noexcept;
         inline void deallocate(T* p, size_t n) noexcept;
-        [[nodiscard]] T* reallocate(T* p, size_t new_size, size_t old_size);
+        [[nodiscard]] T* reallocate(T* p, size_t new_size, size_t old_size) noexcept;
         template<class... Args>
         inline void construct(T* p, Args&&... args);
-        inline void destroy(T* p);
+        inline void destroy(T* p) noexcept;
     };
 
     template<class T, size_t Align>
-    [[nodiscard]] T* HostAllocator<T, Align>::allocate(size_t n) {
-        T* p;
-        if constexpr (Align == Dynamic)
-            p = reinterpret_cast<T*>(std::malloc(n * sizeof(T)));
-        else
-            p = reinterpret_cast<T*>(std::aligned_alloc(Align, n * sizeof(T)));
-
-        if (!p)
-            throw std::bad_alloc();
-        return p;
+    [[nodiscard]] inline T* HostAllocator<T, Align>::allocate(size_t n) noexcept {
+        return reinterpret_cast<T*>(std::aligned_alloc(Align == Dynamic ? alignof(T) : Align, n * sizeof(T)));
     }
 
     template<class T, size_t Align>
@@ -75,30 +68,17 @@ namespace Physica::Core {
     }
 
     template<class T, size_t Align>
-    T* HostAllocator<T, Align>::reallocate(T* p, size_t new_size, [[maybe_unused]] size_t old_size) {
-        if constexpr (Align == Dynamic) {
-            if constexpr (std::is_trivially_copyable<T>::value)
-                return reinterpret_cast<T*>(realloc(p, new_size * sizeof(T)));
-            else {
-                T* new_p = allocate(new_size);
-                for (size_t i = 0; i < std::min(new_size, old_size); ++i)
-                    construct(new_p + i, std::move(p[i]));
-                deallocate(p, old_size);
-                return new_p;
-            }
-        }
+    T* HostAllocator<T, Align>::reallocate(T* p, size_t new_size, [[maybe_unused]] size_t old_size) noexcept {
+        T* new_p = allocate(new_size);
+        const size_t size = std::min(new_size, old_size);
+        if constexpr (std::is_trivially_copyable<T>::value)
+            memcpy(new_p, p, size * sizeof(T));
         else {
-            T* new_p = allocate(new_size);
-            const size_t size = std::min(new_size, old_size);
-            if constexpr (std::is_trivially_copyable<T>::value)
-                memcpy(new_p, p, size * sizeof(T));
-            else {
-                for (size_t i = 0; i < size; ++i)
-                    construct(new_p + i, std::move(p[i]));
-            }
-            deallocate(p, old_size);
-            return new_p;
+            for (size_t i = 0; i < size; ++i)
+                construct(new_p + i, std::move(p[i]));
         }
+        deallocate(p, old_size);
+        return new_p;
     }
 
     template<class T, size_t Align>
@@ -108,7 +88,7 @@ namespace Physica::Core {
     }
 
     template<class T, size_t Align>
-    inline void HostAllocator<T, Align>::destroy(T* p) {
+    inline void HostAllocator<T, Align>::destroy(T* p) noexcept {
         p->~T();
     }
 }

@@ -72,8 +72,8 @@ namespace Physica::Core {
         void resize(size_t row) { resize(row, row); }
         void swap(This& __restrict storage) noexcept;
         /* Getters */
-        [[nodiscard]] const ArrayType& getArray() const noexcept { return arr; }
-        [[nodiscard]] ArrayType& getArray() noexcept { return arr; }
+        [[nodiscard]] const ArrayType& asArray() const noexcept { return arr; }
+        [[nodiscard]] ArrayType& asArray() noexcept { return arr; }
         [[nodiscard]] __host__ __device__ size_t getOrder() const noexcept { return order; }
         [[nodiscard]] __host__ __device__ size_t getRow() const noexcept { return getOrder(); }
         [[nodiscard]] __host__ __device__ size_t getColumn() const noexcept { return getOrder(); }

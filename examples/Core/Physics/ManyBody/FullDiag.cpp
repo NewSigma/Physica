@@ -29,7 +29,7 @@
 using namespace Physica::Core;
 using namespace Physica::Gui;
 using Physica::Dynamic;
-using ScalarType = float64;
+using ScalarType = float64; // Will overflow if use float32
 using VectorType = Vector<ScalarType>;
 using RandomType = Random<std::mt19937>;
 using VectorPair = std::pair<VectorType, VectorType>;

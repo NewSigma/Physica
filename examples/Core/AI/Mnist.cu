@@ -164,9 +164,9 @@ int main(int argc, char** argv) {
 
     QApplication app(argc, argv);
     Plot* plot = new Plot(-0.5, numEpoch - 0.5, 0, 3, 2, 1);
-    auto* legend = plot->getChart()->legend();
-    legend->setAlignment(Qt::AlignRight);
-    legend->setMarkerShape(QLegend::MarkerShapeFromSeries);
+    auto& legend = plot->getLegend();
+    legend.setAlignment(Qt::AlignRight);
+    legend.show();
     auto* axisX = plot->getAxisX();
     auto* axisY = plot->getAxisY();
     auto* axisRight = plot->getAxisRight();

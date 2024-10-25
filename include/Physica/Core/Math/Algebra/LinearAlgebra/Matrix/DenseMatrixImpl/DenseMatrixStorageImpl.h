@@ -131,5 +131,5 @@ namespace Physica::Core {
     }
 
     #undef RowVectorStorage
-    #undef tparam
+    #undef tparams
 }
