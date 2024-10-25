@@ -202,7 +202,7 @@ namespace Physica::Core {
                 constexpr size_t to = SizeAtCompile / PacketType::size() * PacketType::size();
                 for (size_t i = 0; i < to; i += PacketType::size())
                     buffer = std::max(v.template packet<PacketType>(i), buffer);
-                result = buffer.horizontal_max();
+                result = buffer.max();
 
                 constexpr size_t i = SizeAtCompile - SizeAtCompile % PacketType::size();
                 if constexpr (i != SizeAtCompile) {
@@ -217,7 +217,7 @@ namespace Physica::Core {
                 const size_t to = length / PacketType::size() * PacketType::size();
                 for (; i < to; i += PacketType::size())
                     buffer = std::max(v.template packet<PacketType>(i), buffer);
-                result = buffer.horizontal_max();
+                result = buffer.max();
 
                 if (to != length) {
                     const size_t count = length - i;
@@ -250,7 +250,7 @@ namespace Physica::Core {
                 constexpr size_t to = SizeAtCompile / PacketType::size() * PacketType::size();
                 for (size_t i = 0; i < to; i += PacketType::size())
                     buffer = std::min(v.template packet<PacketType>(i), buffer);
-                result = buffer.horizontal_min();
+                result = buffer.min();
 
                 constexpr size_t i = SizeAtCompile - SizeAtCompile % PacketType::size();
                 if constexpr (i != SizeAtCompile) {
@@ -265,7 +265,7 @@ namespace Physica::Core {
                 const size_t to = length / PacketType::size() * PacketType::size();
                 for (; i < to; i += PacketType::size())
                     buffer = std::min(v.template packet<PacketType>(i), buffer);
-                result = buffer.horizontal_min();
+                result = buffer.min();
 
                 if (to != length) {
                     const size_t count = length - i;
@@ -289,16 +289,16 @@ namespace Physica::Core {
         }
         else {
             const auto& v = Base::getDerived();
-            PacketType sum(0);
+            PacketType buffer(0);
             if constexpr (SizeAtCompile != Dynamic) {
                 constexpr size_t to = SizeAtCompile / PacketType::size() * PacketType::size();
                 for (size_t i = 0; i < to; i += PacketType::size())
-                    sum += v.template packet<PacketType>(i);
+                    buffer += v.template packet<PacketType>(i);
 
                 constexpr size_t i = SizeAtCompile - SizeAtCompile % PacketType::size();
                 if constexpr (i != SizeAtCompile) {
                     constexpr size_t count = SizeAtCompile - i;
-                    sum += v.template packetPartial<PacketType>(i, count);
+                    buffer += v.template packetPartial<PacketType>(i, count);
                 }
             }
             else {
@@ -306,14 +306,14 @@ namespace Physica::Core {
                 size_t i = 0;
                 const size_t to = length / PacketType::size() * PacketType::size();
                 for (; i < to; i += PacketType::size())
-                    sum += v.template packet<PacketType>(i);
+                    buffer += v.template packet<PacketType>(i);
 
                 if (to != length) {
                     const size_t count = length - i;
-                    sum += v.template packetPartial<PacketType>(i, count);
+                    buffer += v.template packetPartial<PacketType>(i, count);
                 }
             }
-            return sum.horizontal_add();
+            return buffer.sum();
         }
     }
 

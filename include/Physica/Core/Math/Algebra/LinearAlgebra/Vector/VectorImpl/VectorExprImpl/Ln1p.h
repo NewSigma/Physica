@@ -29,6 +29,16 @@ namespace Physica::Core {
         using Base::Base;
         /* Operations */
         [[nodiscard]] ScalarType calc(size_t index) const { return ln1p(Base::getExpr().calc(index)); }
+
+        template<class AnyPacket>
+        [[nodiscard]] AnyPacket packet(size_t index) const {
+            return ln1p(Base::getExpr().template packet<AnyPacket>(index));
+        }
+
+        template<class AnyPacket>
+        [[nodiscard]] AnyPacket packetPartial(size_t index, size_t count) const {
+            return ln1p(Base::getExpr().template packetPartial<AnyPacket>(index, count));
+        }
     };
 
     template<class VectorType>

@@ -95,9 +95,11 @@ namespace Physica::Core {
         template<int... Flags>
         inline SIMD change_sign() const;
 
-        [[nodiscard]] inline ScalarType horizontal_add() const;
-        [[nodiscard]] inline ScalarType horizontal_max() const;
-        [[nodiscard]] inline ScalarType horizontal_min() const;
+        inline This& cutoff(int count);
+
+        [[nodiscard]] inline ScalarType sum() const;
+        [[nodiscard]] inline ScalarType max() const;
+        [[nodiscard]] inline ScalarType min() const;
         void swap(SIMD& __restrict other) noexcept { std::swap(*this, other); }
         /* Getters */
         [[nodiscard]] constexpr static size_t size() { return Size; }
@@ -159,7 +161,7 @@ namespace Physica::Core {
         inline void load_partial(int n, const ScalarType* p);
         inline void store(ScalarType* p) const;
         inline void store_partial(int n, ScalarType* p) const;
-        [[nodiscard]] inline ScalarType horizontal_add() const;
+        [[nodiscard]] inline ScalarType sum() const;
         inline void swap(SIMD& __restrict obj) noexcept;
         /* Getters */
         using Base::size;

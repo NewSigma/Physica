@@ -76,7 +76,7 @@ namespace Physica::Core {
         inline void store(ScalarType* p) const;
         inline void store_partial(int n, ScalarType* p) const;
         //inline void insert(int index, const ScalarType& value);
-        [[nodiscard]] inline ScalarType horizontal_add() const;
+        [[nodiscard]] inline ScalarType sum() const;
         void swap(SIMD& __restrict other) noexcept { std::swap(*this, other); }
         /* Getters */
         [[nodiscard]] constexpr static size_t size() { return Size; }
@@ -168,9 +168,9 @@ namespace Physica::Core {
     }
 
     template<class T, size_t Size>
-    inline typename SIMD<Complex<T>, Size>::ScalarType SIMD<Complex<T>, Size>::horizontal_add() const {
+    inline typename SIMD<Complex<T>, Size>::ScalarType SIMD<Complex<T>, Size>::sum() const {
         if constexpr (isSeparatable)
-            return getHigh().horizontal_add() + getLow().horizontal_add();
+            return getHigh().sum() + getLow().sum();
         else {
             if constexpr (T::Option == Float32)
                 return operator[](0) + operator[](1);

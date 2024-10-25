@@ -72,9 +72,9 @@ namespace Physica::Core {
         __host__ __device__ inline void store(ScalarType* p) const;
         __host__ __device__ inline void store_partial(int n, ScalarType* p) const;
         //inline void insert(int index, const ScalarType& value);
-        [[nodiscard]] __host__ __device__ inline ScalarType horizontal_add() const noexcept;
-        //[[nodiscard]] inline ScalarType horizontal_max() const;
-        //[[nodiscard]] inline ScalarType horizontal_min() const;
+        [[nodiscard]] __host__ __device__ inline ScalarType sum() const noexcept;
+        //[[nodiscard]] inline ScalarType max() const;
+        //[[nodiscard]] inline ScalarType min() const;
         __host__ __device__ void swap(SIMD& __restrict other) noexcept { std::swap(*this, other); }
         /* Getters */
         [[nodiscard]] __host__ __device__ constexpr static size_t size() { return Size; }
@@ -137,7 +137,7 @@ namespace Physica::Core {
             store(p);
     }
 
-    __host__ __device__ inline Scalar<Float16> SIMD<Scalar<Float16>, 2>::horizontal_add() const noexcept {
+    __host__ __device__ inline Scalar<Float16> SIMD<Scalar<Float16>, 2>::sum() const noexcept {
         return operator[](0) + operator[](1);
     }
 

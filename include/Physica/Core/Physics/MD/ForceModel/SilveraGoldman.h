@@ -109,7 +109,7 @@ namespace Physica::Core {
         const Vector4D rep{rep_r, rep_r3, rep_r4, rep_r5};
         const Vector4D rep1 = rep * rep_r6;
         const Vector4D const1{-6 * c6, -8 * c8, 9 * c9, -10 * c10};
-        const ScalarType d_g = (rep1 * const1).horizontal_add();
+        const ScalarType d_g = (rep1 * const1).sum();
 
         if (r < PlainScalar(cutoff)) {
             const ScalarType g = (rep_r2 * PlainScalar(c6) + rep_r4 * PlainScalar(c8)) * rep_r4 - (rep_r5 * PlainScalar(c9) - rep_r6 * PlainScalar(c10)) * rep_r4;

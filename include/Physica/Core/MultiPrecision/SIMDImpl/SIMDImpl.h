@@ -195,17 +195,24 @@ namespace Physica::Core {
     }
 
     template<class ScalarType, size_t Size>
-    inline ScalarType SIMD<ScalarType, Size>::horizontal_add() const {
+    inline SIMD<ScalarType, Size>& SIMD<ScalarType, Size>::cutoff(int count) {
+        assert(0 < count && count < int(Size) && "[Error]: Invalid count");
+        Base::cutoff(count);
+        return *this;
+    }
+
+    template<class ScalarType, size_t Size>
+    inline ScalarType SIMD<ScalarType, Size>::sum() const {
         return Physica::horizontal_add(getImpl());
     }
 
     template<class ScalarType, size_t Size>
-    inline ScalarType SIMD<ScalarType, Size>::horizontal_max() const {
+    inline ScalarType SIMD<ScalarType, Size>::max() const {
         return Physica::horizontal_max(getImpl());
     }
 
     template<class ScalarType, size_t Size>
-    inline ScalarType SIMD<ScalarType, Size>::horizontal_min() const {
+    inline ScalarType SIMD<ScalarType, Size>::min() const {
         return Physica::horizontal_min(getImpl());
     }
 
@@ -412,7 +419,7 @@ namespace Physica::Core {
 
     template<class PlainScalar, size_t Size>
     inline typename SIMD<Diff<PlainScalar, DiffMode::Reverse, 1>, Size>::ScalarType
-    SIMD<Diff<PlainScalar, DiffMode::Reverse, 1>, Size>::horizontal_add() const {
+    SIMD<Diff<PlainScalar, DiffMode::Reverse, 1>, Size>::sum() const {
         ScalarType result = 0;
         for (size_t i = 0; i < Size; ++i)
             result += this->operator[](i);

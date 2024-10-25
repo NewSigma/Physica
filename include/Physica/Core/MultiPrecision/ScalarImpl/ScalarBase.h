@@ -130,7 +130,7 @@ namespace Physica::Core {
         }
 
         void insert([[maybe_unused]] int index, ScalarType value) { this->getDerived() = ScalarType(value); }
-        [[nodiscard]] ScalarType horizontal_add() const { return this->getDerived(); }
+        [[nodiscard]] ScalarType sum() const { return this->getDerived(); }
         /* Auto differential support */
         [[nodiscard]] __host__ __device__  const PlainScalar& getValue() const noexcept {
             if constexpr (isDifferentiable)

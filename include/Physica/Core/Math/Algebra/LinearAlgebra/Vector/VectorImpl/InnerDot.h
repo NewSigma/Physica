@@ -85,7 +85,7 @@ namespace Physica::Core {
                         buffer = mul_add(p1, p2, buffer);
                     }
                 }
-                return buffer.horizontal_add();
+                return buffer.sum();
             }
             else {
                 auto result = ResultType(0);
