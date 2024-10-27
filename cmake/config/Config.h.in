@@ -27,6 +27,8 @@
 #cmakedefine PhysicaEndian @PhysicaEndian@
 
 namespace Physica {
+    constexpr static const char* GitHash = "@GIT_HASH@";
+
     class CUDADevAttr {
     public:
     #ifdef PHYSICA_CUDA
