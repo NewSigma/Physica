@@ -27,7 +27,7 @@ namespace Physica::Core {
 
     template<class ScalarType, size_t Size>
     SIMD<ScalarType, Size>::SIMD(ScalarType s, int count) {
-        assert(0 < count && count < int(Size) && "[Error]: Invalid count");
+        assert(0 < count && count <= int(Size) && "[Error]: Invalid count");
         if (count == Size) {
             *this = SIMD(s);
             return;

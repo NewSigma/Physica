@@ -18,8 +18,10 @@
  */
 #pragma once
 
+#ifdef __linux__
+    #include <x86intrin.h>
+#endif
 #include <cstdint>
-#include <x86intrin.h>
 #include <Physica/Core/Exception/RdrandException.h>
 
 namespace Physica::Core {
@@ -30,6 +32,7 @@ namespace Physica::Core {
     class RandomSeed {
         constexpr static int RetryLimit = 8;
     public:
+    #ifdef __linux__
         static void rdrand(uint16_t& __restrict integer) {
             for(int i = 0; i < RetryLimit; ++i) {
                 const int code = _rdrand16_step(&integer);
@@ -56,6 +59,7 @@ namespace Physica::Core {
             }
             throw RdrandException();
         }
+    #endif
         // Generate a sequence of random seed (using the PCG-XSH-RS scheme)
         static uint32_t toNextSeed(uint64_t& state) noexcept {
             const uint64_t current = state;

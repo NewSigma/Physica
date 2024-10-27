@@ -20,6 +20,7 @@
 
 #include <cassert>
 #include <Physica/CRTPBase.h>
+#include <Physica/Core/Exception/NoImplException.h>
 
 namespace Physica::Core {
     enum class DiffMode {
@@ -140,7 +141,10 @@ namespace Physica::Core {
         }
 
         [[nodiscard]] __host__ __device__  const PlainScalar& getGrad() const noexcept {
-            return this->getDerived().getGrad();
+            if constexpr (isDifferentiable)
+                return this->getDerived().getGrad();
+            else
+                noImpl();
         }
         /* Static Members */
         static inline bool matchSign(const ScalarType& s1, const ScalarType& s2) {

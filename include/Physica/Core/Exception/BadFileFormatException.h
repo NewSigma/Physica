@@ -23,8 +23,14 @@
 
 namespace Physica::Core {
     class PHYSICA_API BadFileFormatException : public IOException {
+        using This = BadFileFormatException;
     public:
         BadFileFormatException(const char* msg) : IOException(msg) {}
+        BadFileFormatException(const This&) = default;
+        BadFileFormatException(This&&) noexcept = default;
         ~BadFileFormatException() noexcept override = default;
+        /* Operators */
+        This& operator=(const This&) = default;
+        This& operator=(This&&) noexcept = default;
     };
 }

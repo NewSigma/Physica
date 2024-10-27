@@ -18,6 +18,8 @@
  */
 #pragma once
 
+#ifdef __linux__
+
 #include <memory>
 #include <dirent.h>
 #include <sys/stat.h>
@@ -36,3 +38,5 @@ namespace Physica::Core {
     PHYSICA_API void copyFileFromDir(const char* fromDirPath, const char* toDirPath);
     PHYSICA_API void mkdirCheck(const char* path, mode_t mode);
 }
+
+#endif

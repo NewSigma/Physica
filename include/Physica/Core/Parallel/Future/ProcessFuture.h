@@ -19,7 +19,14 @@
 #pragma once
 
 #include <sys/types.h>
-#include "Physica/Macro.h"
+#ifdef _MSC_VER
+    //#include <io.h>
+    #include <process.h>
+    using pid_t = int;
+#else
+    #include <unistd.h>
+#endif
+#include <Physica/Macro.h>
 #include "FutureGroup.h"
 
 namespace Physica::Core {

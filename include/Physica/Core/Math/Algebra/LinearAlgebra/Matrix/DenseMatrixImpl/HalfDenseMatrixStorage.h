@@ -134,7 +134,6 @@ namespace Physica::Core {
 
     template<class T, size_t Order>
     __host__ __device__ size_t HalfDenseMatrixStorage<T, Order>::toIndex1D(size_t r, size_t c) const noexcept {
-        const size_t order = getOrder();
         assert(r < order && c < order);
         const bool exchange = c < r;
         const size_t min = exchange ? c : r;

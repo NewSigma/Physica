@@ -16,6 +16,8 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
+#ifdef __linux__
+
 #include <unistd.h>
 #include <cstring>
 #include <cstdio>
@@ -190,3 +192,5 @@ namespace Physica::Core {
         }
     }
 }
+
+#endif

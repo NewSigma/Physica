@@ -97,7 +97,7 @@ namespace Physica::Core {
         using Base::getDerived;
         constexpr static size_t MinDeltaSpace = 1024;
     private:
-        pointer __restrict arr;
+        pointer arr;
         size_t length;
         size_t capacity;
         allocator_type alloc;

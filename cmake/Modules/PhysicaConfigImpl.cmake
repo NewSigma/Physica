@@ -4,7 +4,20 @@ set(CMAKE_CXX_STANDARD_REQUIRED TRUE)
 set(CMAKE_CXX_VISIBILITY_PRESET "hidden")
 set(CMAKE_VISIBILITY_INLINES_HIDDEN TRUE)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -fPIC -mrdrnd")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
+if (CMAKE_CXX_COMPILER_ID MATCHES GNU)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wextra -fPIC -mrdrnd")
+elseif (CMAKE_CXX_COMPILER_ID MATCHES Clang)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-ignored-optimization-argument -Wno-unknown-warning-option")
+    add_link_options(-lstdc++) # Add this if you prefer libstdc++
+elseif(CMAKE_CXX_COMPILER_ID MATCHES MSVC)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /wd4068 /wd4201 /wd4242 /wd4244 /wd4251 /wd4267 /wd4275 /wd4305 /wd4365 /wd4458 /wd4514 /wd4623 /wd4625 /wd4626 /wd4710 /wd4711 /wd4800 /wd4819 /wd4820 /wd4996 /wd5026 /wd5027 /wd5045 /wd5051 /wd5219")
+    add_definitions(-D_USE_MATH_DEFINES)
+    add_definitions(-DNOMINMAX)
+else()
+    message(FATAL_ERROR Unknown compiler)
+endif()
+
 if(${PHYSICA_OPTIMIZE})
     add_definitions(-DPHYSICA_ASM)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=native")
@@ -12,11 +25,6 @@ endif()
 
 if(NOT ${CMAKE_BUILD_TYPE} MATCHES "Debug")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-math-errno -fno-signaling-nans -fno-trapping-math")
-endif()
-
-if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-ignored-optimization-argument -Wno-unknown-warning-option")
-    add_link_options(-lstdc++) # Add this if you prefer libstdc++
 endif()
 
 if(${PHYSICA_CUDA})

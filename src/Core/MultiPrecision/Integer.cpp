@@ -19,7 +19,9 @@
 #include <cmath>
 #include <cstdlib>
 #include <cstring>
+#include <Physica/Core/Exception/DivideByZeroException.h>
 #include <Physica/Core/MultiPrecision/Integer.h>
+#include <Physica/Core/MultiPrecision/Scalar.h>
 #include <Physica/Core/MultiPrecision/ScalarImpl/FloatMPImpl/Convert.h>
 
 namespace Physica::Core {
@@ -205,7 +207,7 @@ namespace Physica::Core {
             return *this >> -bits;
         const int size = getSize();
         const int quotient = bits / MPUnitWidth; //NOLINT: quotient < INT_MAX
-        const unsigned int remainder = bits - quotient * MPUnitWidth;
+        const int remainder = bits - quotient * MPUnitWidth;
         //If remainder = 0, we must return directly because shifting a MPUnit for MPUnitWidth bits is a undefined behavior.
         MPUnit* __restrict resultByte;
         int resultLength = size + quotient;

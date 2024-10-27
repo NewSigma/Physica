@@ -48,9 +48,9 @@ namespace Physica::Core {
             pre_carry = temp1 < temp2;
             temp1 = temp2 - carry;
             result[i] = temp1;
-            carry = pre_carry | (temp1 > temp2);
+            carry = MPUnit(pre_carry | (temp1 > temp2));
         }
-        return carry;
+        return bool(carry);
     }
     //Another version of subArrByArr(), calculate arr1 -= arr2.
     inline bool subArrByArrEq(MPUnit* __restrict arr1, const MPUnit* __restrict arr2, size_t len) {
@@ -62,8 +62,8 @@ namespace Physica::Core {
             pre_carry = temp1 < temp2;
             temp1 = temp2 - carry;
             arr1[i] = temp1;
-            carry = pre_carry | (temp1 > temp2);
+            carry = MPUnit(pre_carry | (temp1 > temp2));
         }
-        return carry;
+        return bool(carry);
     }
 }

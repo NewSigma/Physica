@@ -49,11 +49,11 @@ namespace Physica::Core {
         }
         double_extract extract{d};
         auto quotient = static_cast<int>(extract.exp) - 1023;
-        power = quotient / __WORDSIZE;
-        //Have power * __WORDSIZE < extract.exp, so that remainder > 0.
+        power = quotient / MPUnitWidth;
+        //Have power * MPUnitWidth < extract.exp, so that remainder > 0.
         if(quotient < 0)
             --power;
-        unsigned int remainder = quotient - power * __WORDSIZE;
+        unsigned int remainder = quotient - power * MPUnitWidth;
         if constexpr (PhysicaWordSize == 64) {
             if(remainder < 52) {
                 length = 2;
@@ -137,7 +137,7 @@ namespace Physica::Core {
     */
     Scalar<FloatMP>::Scalar(const wchar_t* s) {
         size_t size = wcslen(s);
-        char str[size + 1];
+        char* str = new char[size + 1];
         str[size] = '\0';
         for(size_t i = 0; i < size; ++i)
             str[i] = (char)s[i];
@@ -146,6 +146,7 @@ namespace Physica::Core {
         temp.byte = nullptr;
         length = temp.length;
         power = temp.power;
+        delete[] str;
     }
 
     MPUnit Scalar<FloatMP>::operator[](unsigned int index) const {
@@ -207,7 +208,7 @@ namespace Physica::Core {
             return *this >> -bits;
         const int size = getSize();
         const int quotient = bits / MPUnitWidth; //NOLINT: quotient < INT_MAX
-        const unsigned int remainder = bits - quotient * MPUnitWidth;
+        const int remainder = bits - quotient * MPUnitWidth;
         //If remainder = 0, we must return directly because shifting a MPUnit for MPUnitWidth bits is a undefined behavior.
         if(remainder == 0) {
             Scalar copy(*this);

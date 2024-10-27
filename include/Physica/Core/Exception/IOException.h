@@ -19,14 +19,22 @@
 #pragma once
 
 #include <exception>
-#include "Physica/Macro.h"
+#include <Physica/Macro.h>
 
 namespace Physica::Core {
     class PHYSICA_API IOException : public std::exception {
+        using This = IOException;
+
         const char* msg;
     public:
         IOException(const char* msg_) : msg(msg_) {}
+        IOException(const This&) = default;
+        IOException(This&&) noexcept = default;
         ~IOException() noexcept override = default;
+        /* Operators */
+        This& operator=(const This&) = default;
+        This& operator=(This&&) noexcept = default;
+        /* Getters */
         const char* what() const noexcept override { return msg; }
     };
 }

@@ -177,7 +177,6 @@ namespace Physica {
         using TrivialType = typename T::TrivialType;
         using PlainScalar = ScalarType;
         constexpr static ScalarOption Option = Traits<T>::Option;
-        constexpr static bool errorTrack = Traits<T>::errorTrack;
         constexpr static bool isComplex = true;
         constexpr static bool isDifferentiable = false;
         constexpr static bool isForwardDiff = false;

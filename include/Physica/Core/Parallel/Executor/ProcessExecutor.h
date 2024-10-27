@@ -18,10 +18,9 @@
  */
 #pragma once
 
-#include <unistd.h>
 #include <cassert>
-#include "Physica/Core/Parallel/Future/ProcessFuture.h"
-#include "Physica/Core/Parallel/SubProcess.h"
+#include <Physica/Core/Parallel/Future/ProcessFuture.h>
+#include <Physica/Core/Parallel/SubProcess.h>
 
 namespace Physica::Core {
     class ProcessExecutor {

@@ -88,7 +88,6 @@ namespace Physica::Core {
         constexpr static bool isComplex = ScalarType::isComplex;
     private:
         using RealType = typename ScalarType::RealType;
-        constexpr static bool isExpression = !std::is_base_of<LValueVector<Derived>, Derived>::value;
     public:
         ~RValueVector() = default;
         /* Operations */

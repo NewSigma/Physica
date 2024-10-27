@@ -59,12 +59,20 @@ namespace Physica::Core {
 
     template<class T, size_t Align>
     [[nodiscard]] inline T* HostAllocator<T, Align>::allocate(size_t n) noexcept {
+    #ifdef _MSC_VER
+        return reinterpret_cast<T*>(_aligned_malloc(Align == Dynamic ? alignof(T) : Align, n * sizeof(T)));
+    #else
         return reinterpret_cast<T*>(std::aligned_alloc(Align == Dynamic ? alignof(T) : Align, n * sizeof(T)));
+    #endif
     }
 
     template<class T, size_t Align>
     inline void HostAllocator<T, Align>::deallocate(T* p, [[maybe_unused]] size_t n) noexcept {
+    #ifdef _MSC_VER
+        _aligned_free(p);
+    #else
         std::free(p);
+    #endif
     }
 
     template<class T, size_t Align>

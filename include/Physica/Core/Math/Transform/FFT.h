@@ -38,12 +38,12 @@ namespace Physica::Core {
     /**
      * A FFT transform a tensor in r-space to a tensor in k-space.
      */
-    template<class ScalarType>
-    class FFT<ScalarType, 1>
-            : public FFTRSpace<FFT<ScalarType, 1>, 1>
-            , public FFTKSpace<FFT<ScalarType, 1>, 1> {
-        static_assert(!ScalarType::isDifferentiable, "[Error]: Header of differentiable fft should be included");
-        using This = FFT<ScalarType, 1>;
+    template<class T>
+    class FFT<T, 1>
+            : public FFTRSpace<FFT<T, 1>, 1>
+            , public FFTKSpace<FFT<T, 1>, 1> {
+        static_assert(!T::isDifferentiable, "[Error]: Header of differentiable fft should be included");
+        using This = FFT<T, 1>;
         using TrivialType = typename Traits<This>::TrivialType;
         using RealType = typename Traits<This>::RealType;
         using ComplexType = typename Traits<This>::ComplexType;
@@ -54,6 +54,8 @@ namespace Physica::Core {
     public:
         using RSpaceType = FFTRSpace<This, 1>;
         using KSpaceType = FFTKSpace<This, 1>;
+
+        using ScalarType = typename RSpaceType::ScalarType;
     private:
         PlanType forward_plan;
         PlanType backward_plan;
@@ -89,7 +91,7 @@ namespace Physica::Core {
         [[nodiscard]] __host__ __device__ const RSpaceType& getRSpace() const { return *this; }
         [[nodiscard]] __host__ __device__ const KSpaceType& getKSpace() const { return *this; }
         /* Static members */
-        [[nodiscard]] inline static FFT<ScalarType, 1> makeEmptyFFT(size_t rSpaceSize);
+        [[nodiscard]] inline static FFT<T, 1> makeEmptyFFT(size_t rSpaceSize);
         template<class IndexType>
         [[nodiscard]] __host__ __device__ constexpr inline static IndexType rSizeToKSize(IndexType rSize) noexcept;
         static void transform(const This& planProvider, This& bufferProvider);
@@ -109,11 +111,11 @@ namespace Physica::Core {
         friend class FFTKSpace<This, 1>;
     };
 
-    template<class ScalarType, size_t Dim>
-    class FFT : public FFTRSpace<FFT<ScalarType, Dim>, Dim>
-              , public FFTKSpace<FFT<ScalarType, Dim>, Dim> {
-        static_assert(!ScalarType::isDifferentiable, "[Error]: Not implemented");
-        using This = FFT<ScalarType, Dim>;
+    template<class T, size_t Dim>
+    class FFT : public FFTRSpace<FFT<T, Dim>, Dim>
+              , public FFTKSpace<FFT<T, Dim>, Dim> {
+        static_assert(!T::isDifferentiable, "[Error]: Not implemented");
+        using This = FFT<T, Dim>;
         using TrivialType = typename Traits<This>::TrivialType;
         using RealType = typename Traits<This>::RealType;
         using ComplexType = typename Traits<This>::ComplexType;
@@ -125,6 +127,8 @@ namespace Physica::Core {
     public:
         using RSpaceType = FFTRSpace<This, Dim>;
         using KSpaceType = FFTKSpace<This, Dim>;
+
+        using ScalarType = typename RSpaceType::ScalarType;
     private:
         PlanType forward_plan;
         PlanType backward_plan;
@@ -160,7 +164,7 @@ namespace Physica::Core {
         [[nodiscard]] __host__ __device__ const RSpaceType& getRSpace() const { return *this; }
         [[nodiscard]] __host__ __device__ const KSpaceType& getKSpace() const { return *this; }
         /* Static members */
-        [[nodiscard]] inline static FFT<ScalarType, Dim> makeEmptyFFT(const Array<size_t, Dim>& rSpaceSize);
+        [[nodiscard]] inline static FFT<T, Dim> makeEmptyFFT(const Array<size_t, Dim>& rSpaceSize);
         template<class IndexType>
         [[nodiscard]] static Array<IndexType, Dim> rSizeToKSize(const Array<IndexType, Dim>& rSize);
         static void transform(const This& planProvider, This& bufferProvider);

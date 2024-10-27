@@ -70,8 +70,6 @@
     };
 #endif
 
-#define PHYSICA_API __attribute__ ((visibility ("default")))
-
 #ifdef PHYSICA_MKL
     #include <mkl.h>
 #endif
@@ -81,6 +79,19 @@
     #define __device__
 #else
     #include <cuda_runtime_api.h>
+#endif
+
+#ifdef __GNUC__
+    #define PHYSICA_API __attribute__((visibility("default")))
+    #ifndef __forceinline
+        #define __forceinline inline __attribute__((always_inline))
+    #endif
+#else
+    #define PHYSICA_API __declspec(dllexport)
+    #define __restrict__ __restrict
+
+    #include <BaseTsd.h>
+    using ssize_t = SSIZE_T;
 #endif
 
 namespace Physica {
@@ -112,6 +123,14 @@ namespace Physica {
 
     __host__ __device__ constexpr inline static bool IsDevice() {
         return GetSide() == Side::Device;
+    }
+
+    constexpr inline static bool IsMSVC() {
+    #ifdef _MSC_VER
+        return true;
+    #else
+        return false;
+    #endif
     }
 
     constexpr inline static bool UseASM() {

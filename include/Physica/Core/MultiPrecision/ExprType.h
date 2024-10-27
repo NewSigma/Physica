@@ -78,6 +78,7 @@ namespace Physica::Core {
             case ExprType::Cbrt: return "Cbrt";
             case ExprType::Abs: return "Abs";
             case ExprType::Relu: return "Relu";
+            case ExprType::Unit: return "Unit";
             case ExprType::Square: return "Square";
             case ExprType::Ln: return "Ln";
             case ExprType::Ln1p: return "Ln1p";

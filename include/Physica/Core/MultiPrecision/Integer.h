@@ -20,6 +20,7 @@
 
 #include <cmath>
 #include <cassert>
+#include <utility>
 #include "MultiPrecisionType.h"
 
 namespace Physica::Core {
@@ -116,8 +117,7 @@ namespace std {
     };
 
     template<>
-    inline void swap<Physica::Core::Integer>(
-            Physica::Core::Integer& __restrict i1, Physica::Core::Integer& __restrict i2) noexcept {
+    inline void swap(Physica::Core::Integer& __restrict i1, Physica::Core::Integer& __restrict i2) noexcept {
         i1.swap(i2);
     }
 }

@@ -18,6 +18,7 @@
  */
 #pragma once
 
+#include <string>
 #include <Physica/Core/Parallel/Executor/ProcessExecutor.h>
 
 namespace Physica::Core {
@@ -32,7 +33,7 @@ namespace Physica::Core {
         SSHWarpper(SSHWarpper&&) noexcept = default;
         ~SSHWarpper() = default;
         /* Operators */
-        SSHWarpper& operator=(SSHWarpper ssh) noexcept;
+        SSHWarpper& operator=(SSHWarpper obj) noexcept { swap(obj); return *this; }
         /* Operations */
         void execute();
         void swap(SSHWarpper& __restrict ssh) noexcept;

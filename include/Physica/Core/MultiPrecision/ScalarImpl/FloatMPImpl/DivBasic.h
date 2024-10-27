@@ -27,40 +27,40 @@ namespace Physica::Core {
      * Reference: T. Granlund and N. M¨oller, “Division of integers large and small”, to appear.
      */
     inline MPUnit getInverse(MPUnit unit) {
-        unsigned long unit0 = unit & 1U;
+        MPUnit unit0 = unit & 1U;
         if constexpr (PhysicaWordSize == 64) {
-            unsigned long unit9 = unit >> 55U;
-            unsigned long unit40 = (unit >> 24U) + 1;
-            unsigned long unit63 = (unit >> 1U) + unit0;
-            unsigned long v0 = ((static_cast<unsigned long>(1) << 19U) - 3 * (static_cast<unsigned long>(1) << 8U)) / unit9;
-            unsigned long v1 = (static_cast<unsigned long>(1) << 11U) * v0 - ((v0 * v0 * unit40) >> 40U) - 1;
-            unsigned long v2 = (static_cast<unsigned long>(1) << 13U) * v1
-                            + ((((static_cast<unsigned long>(1) << 60U) - v1 * unit40) * v1) >> 47U);
-            unsigned long e = (v2 >> 1U) * unit0 - v2 * unit63;
-            unsigned long v3 = (static_cast<unsigned long>(1) << 31U) * v2 + (mulWordByWordHigh(v2, e) >> 1U);
-            unsigned long high, low;
+            MPUnit unit9 = unit >> 55U;
+            MPUnit unit40 = (unit >> 24U) + 1;
+            MPUnit unit63 = (unit >> 1U) + unit0;
+            MPUnit v0 = ((static_cast<MPUnit>(1) << 19U) - 3 * (static_cast<MPUnit>(1) << 8U)) / unit9;
+            MPUnit v1 = (static_cast<MPUnit>(1) << 11U) * v0 - ((v0 * v0 * unit40) >> 40U) - 1;
+            MPUnit v2 = (static_cast<MPUnit>(1) << 13U) * v1
+                            + ((((static_cast<MPUnit>(1) << 60U) - v1 * unit40) * v1) >> 47U);
+            MPUnit e = (v2 >> 1U) * unit0 - v2 * unit63;
+            MPUnit v3 = (static_cast<MPUnit>(1) << 31U) * v2 + (mulWordByWordHigh(v2, e) >> 1U);
+            MPUnit high, low;
             mulWordByWord(high, low, v3, unit);
-            unsigned long v4 = v3 - unit - high - (low + unit < low);
+            MPUnit v4 = v3 - unit - high - (low + unit < low);
             return v4;
         }
         else {
-            unsigned long unit10 = unit >> 22U;
-            unsigned long unit21 = (unit >> 11U) + 1;
-            unsigned long unit31 = (unit >> 1U) + unit10;
-            unsigned long v0 = ((static_cast<unsigned long>(1) << 24U) - (static_cast<unsigned long>(1) << 14U)
-                    + (static_cast<unsigned long>(1) << 9U)) / unit10;
-            unsigned long v1 = (static_cast<unsigned long>(1) << 4U) * v0 - mulWordByWordHigh(v0 * v0, unit21) - 1;
-            unsigned long e = (v1 >> 1U) * unit0 - v1 * unit31;
-            unsigned long v2 = (static_cast<unsigned long>(1) << 15U) * v1 - (mulWordByWordHigh(v1, e) >> 1U);
-            unsigned long high, low;
+            MPUnit unit10 = unit >> 22U;
+            MPUnit unit21 = (unit >> 11U) + 1;
+            MPUnit unit31 = (unit >> 1U) + unit10;
+            MPUnit v0 = ((static_cast<MPUnit>(1) << 24U) - (static_cast<MPUnit>(1) << 14U)
+                    + (static_cast<MPUnit>(1) << 9U)) / unit10;
+            MPUnit v1 = (static_cast<MPUnit>(1) << 4U) * v0 - mulWordByWordHigh(v0 * v0, unit21) - 1;
+            MPUnit e = (v1 >> 1U) * unit0 - v1 * unit31;
+            MPUnit v2 = (static_cast<MPUnit>(1) << 15U) * v1 - (mulWordByWordHigh(v1, e) >> 1U);
+            MPUnit high, low;
             mulWordByWord(high, low, v2, unit);
-            unsigned long v3 = v2 - unit - high - (low + unit < low);
+            MPUnit v3 = v2 - unit - high - (low + unit < low);
             return v3;
         }
     }
     /*
      * Calculate (high, low) / divisor.
-     * Assume high < divisor and divisor >= 2^(__WORDSIZE - 1).
+     * Assume high < divisor and divisor >= 2^(MPUnitWidth - 1).
      *
      * A full word here indicates that the highest bit of divisor is set.
      *

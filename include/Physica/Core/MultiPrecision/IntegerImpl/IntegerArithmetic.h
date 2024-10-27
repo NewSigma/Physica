@@ -40,7 +40,7 @@ namespace Physica::Core {
         while (carry != 0 && carryToIndex < length) {
             MPUnit temp = byte[carryToIndex] + 1;
             byte[carryToIndex] = temp;
-            carry = temp < carry;
+            carry = temp < MPUnit(carry);
             ++carryToIndex;
         }
         if (carry) {

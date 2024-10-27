@@ -18,6 +18,11 @@
  */
 #pragma once
 
+#ifdef __linux__
+    #include <sys/sysinfo.h>
+#else
+    #include <windows.h>
+#endif
 #include <memory>
 #include <thread>
 #include <mutex>
@@ -25,7 +30,7 @@
 #include <functional>
 #include <condition_variable>
 #include <future>
-#include <sys/sysinfo.h>
+#include <limits>
 #include <Physica/Core/Utils/Container/Array.h>
 #include "PackagedTask.h"
 
@@ -53,7 +58,6 @@ namespace Physica::Core {
         static int numThreadRequired;
     private:
         constexpr static size_t MainThreadID = std::numeric_limits<decltype(numThreadRequired)>::max();
-        thread_local static std::unique_ptr<ThreadInfo> info;
 
         Array<ThreadData> thread_data;
         std::mutex poolMutex;
@@ -85,7 +89,7 @@ namespace Physica::Core {
         /* Operations */
         void workerMainLoop(int thread_id) noexcept;
         /* Static Members */
-        [[nodiscard]] static inline int getNumProcesser() noexcept { return get_nprocs(); }
+        [[nodiscard]] static inline int getNumProcesser() noexcept;
         [[nodiscard]] static inline int makeNumThread() noexcept;
     };
 
@@ -112,6 +116,16 @@ namespace Physica::Core {
 
     inline bool ThreadPool::isMainThread() noexcept {
         return getThreadInfo().id == MainThreadID;
+    }
+
+    inline int ThreadPool::getNumProcesser() noexcept {
+    #ifdef __linux__
+        return get_nprocs();
+    #else
+        SYSTEM_INFO sinfo;
+        GetSystemInfo(&sinfo);
+        return sinfo.dwNumberOfProcessors;
+    #endif
     }
 
     inline int ThreadPool::makeNumThread() noexcept {

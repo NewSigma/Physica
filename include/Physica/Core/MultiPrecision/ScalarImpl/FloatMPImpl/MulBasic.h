@@ -19,6 +19,7 @@
 #pragma once
 
 #include <Physica/Macro.h>
+#include <Physica/Core/Exception/NoImplException.h>
 
 namespace Physica::Core {
     /*!
@@ -26,7 +27,8 @@ namespace Physica::Core {
      * It is slightly faster than mulWordByWord() if we are interested in the high Unit only.
      */
     inline MPUnit mulWordByWordHigh(MPUnit n1, MPUnit n2) {
-        if constexpr (UseASM()) {
+        if constexpr (UseASM() && !IsMSVC()) {
+        #ifdef __GNUC__
             MPUnit result;
             if constexpr (PhysicaWordSize == 64) {
                 asm (
@@ -45,21 +47,24 @@ namespace Physica::Core {
                 );
             }
             return result;
+        #else
+            noImpl();
+        #endif
         }
         else {
-            unsigned long n1_low = n1 & MPUnitLowerMask;
-            unsigned long n1_high = n1 >> (64U / 2U);
-            unsigned long n2_low = n2 & MPUnitLowerMask;
-            unsigned long n2_high = n2 >> (64U / 2U);
+            MPUnit n1_low = n1 & MPUnitLowerMask;
+            MPUnit n1_high = n1 >> (64U / 2U);
+            MPUnit n2_low = n2 & MPUnitLowerMask;
+            MPUnit n2_high = n2 >> (64U / 2U);
 
-            auto ll = n1_low * n2_low;
-            auto lh = n1_low * n2_high;
-            auto hl = n1_high * n2_low;
-            auto hh = n1_high * n2_high;
+            MPUnit ll = n1_low * n2_low;
+            MPUnit lh = n1_low * n2_high;
+            MPUnit hl = n1_high * n2_low;
+            MPUnit hh = n1_high * n2_high;
 
             lh += ll >> (64U / 2U);
             lh += hl;
-            hh += static_cast<unsigned long>(lh < hl) << (64U / 2U);
+            hh += static_cast<MPUnit>(lh < hl) << (64U / 2U);
             return hh + (lh >> (64U / 2U));
         }
     }
@@ -68,7 +73,8 @@ namespace Physica::Core {
      * n1 * n2 = product(16 bytes) = carry(high 8 bytes) + ReturnValue(low bytes)
      */
     inline void mulWordByWord(MPUnit& high, MPUnit& low, MPUnit n1, MPUnit n2) {
-        if constexpr (UseASM()) {
+        if constexpr (UseASM() && !IsMSVC()) {
+        #ifdef __GNUC__
             if constexpr (PhysicaWordSize == 64) {
                 asm (
                         "mulq %3"
@@ -83,6 +89,9 @@ namespace Physica::Core {
                         : "a"(n1), "rm"(n2)
                 );
             }
+        #else
+            noImpl();
+        #endif
         }
         else {
             MPUnit n1_low = n1 & MPUnitLowerMask;

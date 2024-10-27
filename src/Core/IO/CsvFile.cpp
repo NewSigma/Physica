@@ -76,8 +76,10 @@ namespace Physica::Core {
                 break;
             case STRING:
                 delete reinterpret_cast<Array<std::string>*>(p_array);
+                break;
             default: [[unlikely]]
                 assert("This is impossible");
+                unreachable();
             }
         }
     }

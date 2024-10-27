@@ -19,7 +19,8 @@
 #pragma once
 
 #include <cstdint>
-#include "Physica/Macro.h"
+#include <Physica/Macro.h>
+#include <Physica/Core/Exception/NoImplException.h>
 
 namespace Physica::Core {
     /**
@@ -49,13 +50,17 @@ namespace Physica::Core {
          * Because of out of order execution, the result may be less  or more than several cycles.
          * Use tic() and toc() to avoid this problem.
          */
-        [[nodiscard]] static __inline __attribute__((always_inline)) uint64_t now() {
+        [[nodiscard]] static __forceinline uint64_t now() {
             uint32_t lo, hi;
+        #ifdef __GNUC__
             __asm__ __volatile__ (
                     "rdtsc"
                     : "=a" (lo), "=d" (hi)
                     ::
             );
+        #else
+            noImpl();
+        #endif
             return ((static_cast<uint64_t>(hi) << 32U) | lo);
         }
         /**
@@ -64,14 +69,18 @@ namespace Physica::Core {
          *
          * This function is slower than now().
          */
-        [[nodiscard]] static __inline __attribute__((always_inline)) uint64_t tic() {
+        [[nodiscard]] static __forceinline uint64_t tic() {
             uint32_t lo, hi;
+        #ifdef __GNUC__
             __asm__ __volatile__ (
                     "cpuid\n\t"
                     "rdtsc\n\t"
                     : "=a" (lo), "=d" (hi)
                     :: "ebx", "ecx"
             );
+        #else
+            noImpl();
+        #endif
             return ((static_cast<uint64_t>(hi) << 32U) | lo);
         }
         /**
@@ -80,8 +89,9 @@ namespace Physica::Core {
          *
          * This function is slower than now().
          */
-        [[nodiscard]] static __inline __attribute__((always_inline)) uint64_t toc() {
+        [[nodiscard]] static __forceinline uint64_t toc() {
             uint32_t lo, hi;
+        #ifdef __GNUC__
             __asm__ __volatile__ (
                     "rdtscp\n\t"
                     : "=a" (lo), "=d" (hi)
@@ -90,13 +100,16 @@ namespace Physica::Core {
                     "cpuid\n\t"
                     ::: "eax", "ebx", "ecx", "edx"
             );
+        #else
+            noImpl();
+        #endif
             return ((static_cast<uint64_t>(hi) << 32U) | lo);
         }
         /**
          * Returns the conversion factor between cycles in seconds, using
          * a mock value for testing when appropriate.
          */
-        [[nodiscard]] static __inline __attribute__((always_inline)) double getCyclesPerSec() {
+        [[nodiscard]] static __forceinline double getCyclesPerSec() {
             static const double localCyclesPerSec = makeCyclesPerSec();
             return localCyclesPerSec;
         }

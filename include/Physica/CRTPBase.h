@@ -27,12 +27,12 @@ namespace Physica {
      */
     template<class T>
     class CRTPBase {
-        using Derived = typename Traits<T>::Derived;
         using This = CRTPBase<T>;
+        using U = typename Traits<T>::Derived;
     public:
-        [[nodiscard]] __host__ __device__ Derived& getDerived() noexcept { return *static_cast<Derived*>(this); }
-        [[nodiscard]] __host__ __device__ const Derived& getDerived() const noexcept { return *static_cast<const Derived*>(this); }
-        [[nodiscard]] __host__ __device__ Derived& getConstCastDerived() const noexcept { return *static_cast<Derived*>(const_cast<CRTPBase*>(this)); }
+        [[nodiscard]] __host__ __device__ U& getDerived() noexcept { return *static_cast<U*>(this); }
+        [[nodiscard]] __host__ __device__ const U& getDerived() const noexcept { return *static_cast<const U*>(this); }
+        [[nodiscard]] __host__ __device__ U& getConstCastDerived() const noexcept { return *static_cast<U*>(const_cast<CRTPBase*>(this)); }
     protected:
         CRTPBase() = default;
         CRTPBase(const This&) = default;

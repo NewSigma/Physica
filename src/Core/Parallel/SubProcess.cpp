@@ -16,6 +16,8 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
+#ifdef __linux__
+
 #include <iostream>
 #include <unistd.h>
 #include <signal.h>
@@ -59,3 +61,5 @@ namespace Physica::Core {
         std::swap(nice_incr, process.nice_incr);
     }
 }
+
+#endif

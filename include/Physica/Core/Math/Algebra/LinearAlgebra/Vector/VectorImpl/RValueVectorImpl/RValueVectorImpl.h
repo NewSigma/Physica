@@ -106,11 +106,12 @@ namespace Physica::Core {
     template<class Derived>
     template<class AnyPacket>
     inline AnyPacket RValueVector<Derived>::packet(size_t index) const {
+        constexpr static bool isExpr = !std::is_base_of<LValueVector<Derived>, Derived>::value;
         using T = typename Traits<AnyPacket>::ScalarType;
         T buffer[AnyPacket::size()];
         for (size_t i = 0; i < AnyPacket::size(); ++i, ++index)
             buffer[i] = T(calc(index));
-        if constexpr (isExpression && isReverseDiff) { //Optimize: For expression such as A + B, there is no need to create new node
+        if constexpr (isExpr && isReverseDiff) { //Optimize: For expression such as A + B, there is no need to create new node
             using TracerType = typename ScalarType::TracerType;
             TracerType::getInstance().reserve(AnyPacket::size());
             for (auto& elem : buffer)
@@ -124,11 +125,12 @@ namespace Physica::Core {
     template<class Derived>
     template<class AnyPacket>
     inline AnyPacket RValueVector<Derived>::packetPartial(size_t index, size_t count) const {
+        constexpr static bool isExpr = !std::is_base_of<LValueVector<Derived>, Derived>::value;
         using T = typename Traits<AnyPacket>::ScalarType;
         T buffer[AnyPacket::size()];
         for (size_t i = 0; i < AnyPacket::size(); ++i, ++index)
             buffer[i] = i < count ? T(calc(index)) : T(0);
-        if constexpr (isExpression && isReverseDiff) {
+        if constexpr (isExpr && isReverseDiff) {
             using TracerType = typename ScalarType::TracerType;
             TracerType::getInstance().reserve(count);
             for (size_t i = 0; i < count; ++i)

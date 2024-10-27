@@ -17,10 +17,10 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include <Physica/Core/Parallel/ThreadPool.h>
+#include <Physica/Core/Math/Random/RandomSeed.h>
 
 namespace Physica::Core {
     int ThreadPool::numThreadRequired = 0;
-    thread_local std::unique_ptr<ThreadPool::ThreadInfo> ThreadPool::info = nullptr;
 
     ThreadPool::ThreadPool(int numThreads) : thread_data(numThreads), exit(false) {
         assert(numThreads > 0 && "[Error]: numThreads must be positive");
@@ -76,6 +76,7 @@ namespace Physica::Core {
     }
 
     ThreadPool::ThreadInfo& ThreadPool::getThreadInfo() noexcept {
+        thread_local static std::unique_ptr<ThreadInfo> info = nullptr;
         if (info == nullptr) {
             info.reset(new ThreadInfo());
             info->id = MainThreadID;

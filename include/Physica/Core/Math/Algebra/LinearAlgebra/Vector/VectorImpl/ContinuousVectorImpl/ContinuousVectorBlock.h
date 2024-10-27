@@ -123,7 +123,8 @@ namespace Physica::Core {
     __host__ __device__ inline size_t ContinuousVectorBlock<VectorType, Length>::getLength() const noexcept {
         if constexpr (Length == Dynamic)
             return to - from;
-        return Length;
+        else
+            return Length;
     }
 }
 

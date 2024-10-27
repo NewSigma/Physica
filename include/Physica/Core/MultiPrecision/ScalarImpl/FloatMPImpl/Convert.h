@@ -19,6 +19,7 @@
 #pragma once
 
 #include <Physica/Core/MultiPrecision/MultiPrecisionType.h>
+#include "Bitwise.h"
 
 namespace Physica::Core::Internal {
     /**
@@ -31,7 +32,7 @@ namespace Physica::Core::Internal {
             const auto size = std::abs(length);
             const auto zeroCount = countLeadingZeros(byte[size - 1]); //Optimize: (size - 1) and (size > 1) is used several times
             //Using long to avoid overflow.
-            const long exp = power * __WORDSIZE + static_cast<long>(MPUnitWidth - zeroCount) - 1 + 1023;
+            const long exp = power * int(MPUnitWidth) + static_cast<long>(MPUnitWidth - zeroCount) - 1 + 1023;
             if(exp >= 2047) {
                 extract.high = extract.low = 0;
                 extract.exp = 2047;

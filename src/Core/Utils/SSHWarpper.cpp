@@ -19,6 +19,7 @@
 #include <utility>
 #include <Physica/Core/Utils/SSHWarpper.h>
 #include <Physica/Core/Exception/SystemException.h>
+#include <Physica/Core/Exception/NoImplException.h>
 
 namespace Physica::Core {
     SSHWarpper::SSHWarpper(std::string hostname_, std::string command_)
@@ -26,12 +27,8 @@ namespace Physica::Core {
         execute();
     }
 
-    SSHWarpper& SSHWarpper::operator=(SSHWarpper ssh) noexcept {
-        swap(ssh);
-        return *this;
-    }
-
     void SSHWarpper::execute() {
+    #ifdef __linux__
         int fd[2];
         if (pipe(fd) == -1)
             throw SystemException();
@@ -56,6 +53,9 @@ namespace Physica::Core {
         if (write(fd[1], command.c_str(), command.size()) == -1)
             throw SystemException();
         close(fd[1]);
+    #else
+        noImpl();
+    #endif
     }
 
     void SSHWarpper::swap(SSHWarpper& __restrict ssh) noexcept {

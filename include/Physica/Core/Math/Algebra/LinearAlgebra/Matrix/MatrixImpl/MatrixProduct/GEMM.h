@@ -131,6 +131,7 @@ namespace Physica {
     public:
         using ScalarType = typename Core::Internal::BinaryScalarOpReturnType<typename MatrixType1::ScalarType,
                                                                              typename MatrixType2::ScalarType>::Type;
+        constexpr static int Option = MatrixOption::AnyMajor | MatrixOption::AnyStorage;
         constexpr static size_t RowAtCompile = MatrixType1::RowAtCompile;
         constexpr static size_t ColumnAtCompile = MatrixType2::ColumnAtCompile;
         constexpr static size_t SizeAtCompile = RowAtCompile * ColumnAtCompile;

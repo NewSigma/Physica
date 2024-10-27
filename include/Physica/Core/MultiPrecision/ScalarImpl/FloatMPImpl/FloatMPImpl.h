@@ -108,7 +108,7 @@ namespace Physica::Core {
                 while(carry != 0 && usableSmall < length) {
                     MPUnit temp = byte[usableSmall] + 1;
                     byte[usableSmall] = temp;
-                    carry = temp < carry;
+                    carry = temp < MPUnit(carry);
                     ++usableSmall;
                 }
             }

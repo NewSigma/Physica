@@ -16,10 +16,9 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include <cerrno>
-#include <sys/time.h>
-#include <cstring>
-#include <iostream>
+#ifdef __linux__
+    #include <sys/time.h>
+#endif
 #include <cassert>
 #include <Physica/Core/Utils/Cycler.h>
 #include <Physica/Core/Exception/SystemException.h>
@@ -142,6 +141,7 @@ namespace Physica::Core {
     }
 
     double Cycler::makeCyclesPerSec() {
+    #ifdef __linux__
         struct timeval startTime, stopTime; /* NOLINT no initializing is intended */
         // There is one tricky aspect, which is that we could get interrupted
         // between calling gettimeofday and reading the cycle counter, in which
@@ -175,5 +175,8 @@ namespace Physica::Core {
                 break;
         }
         return result;
+    #else
+        noImpl();
+    #endif
     }
 }

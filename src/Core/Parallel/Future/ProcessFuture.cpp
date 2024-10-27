@@ -19,11 +19,13 @@
 #include <stdexcept>
 #include <future>
 #include <cassert>
-#include <unistd.h>
 #include <signal.h>
-#include <sys/wait.h>
+#ifdef __linux__
+    #include <sys/wait.h>
+#endif
 #include <Physica/Core/Parallel/Future/ProcessFuture.h>
 #include <Physica/Core/Exception/SystemException.h>
+#include <Physica/Core/Exception/NoImplException.h>
 
 namespace Physica::Core {
     ProcessFuture::ProcessFuture() : error(-1), isValid(false) {}
@@ -36,7 +38,7 @@ namespace Physica::Core {
 
         if (finished)
             return error;
-
+    #ifdef __linux__
         int status;
         pid_t endPid = waitpid(pid, &status, 0);
         if (endPid <= 0) {
@@ -47,6 +49,9 @@ namespace Physica::Core {
 
         if (WIFEXITED(status))
             error = WEXITSTATUS(status);
+    #else
+        noImpl();
+    #endif
         return error;
     }
 

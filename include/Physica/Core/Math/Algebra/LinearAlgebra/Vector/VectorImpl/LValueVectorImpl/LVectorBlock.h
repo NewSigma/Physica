@@ -66,7 +66,8 @@ namespace Physica::Core {
     __host__ __device__ size_t LVectorBlock<VectorType, Length>::getLength() const noexcept {
         if constexpr (Length == Dynamic)
             return to - from;
-        return Length;
+        else
+            return Length;
     }
 
     template<class VectorType, size_t Length>

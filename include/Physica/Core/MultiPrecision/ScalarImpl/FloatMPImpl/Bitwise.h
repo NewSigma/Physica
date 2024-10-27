@@ -21,18 +21,22 @@
 #include <Physica/Core/MultiPrecision/MultiPrecisionType.h>
 
 namespace Physica::Core {
-    inline unsigned int countLeadingZeros(MPUnit n) noexcept {
+    inline int countLeadingZeros(MPUnit n) noexcept {
         if(n == 0)
             return MPUnitWidth;
 
         MPUnit count;
-        if constexpr (UseASM()) {
+        if constexpr (UseASM() && !IsMSVC()) {
+        #ifdef __GNUC__
             asm volatile (
                 "bsrq %1, %0\n\t"
                 : "=r" (count)
                 : "rm" (n)
             );
             (count) ^= 63U;
+        #else
+            noImpl();
+        #endif
         }
         else {
             count = 0;
@@ -41,20 +45,24 @@ namespace Physica::Core {
                 n <<= 1U;
             }
         }
-        return count;
+        return int(count);
     }
 
-    inline unsigned int countBackZeros(unsigned long n) noexcept {
+    inline int countBackZeros(unsigned long n) noexcept {
         if(n == 0)
             return MPUnitWidth;
 
         MPUnit count;
-        if constexpr (UseASM()) {
+        if constexpr (UseASM() && !IsMSVC()) {
+        #ifdef __GNUC__
             asm volatile (
                 "bsfq %1, %0\n\t"
                 : "=r" (count)
                 : "rm" (n)
             );
+        #else
+            noImpl();
+        #endif
         }
         else {
             count = 0;
@@ -63,7 +71,7 @@ namespace Physica::Core {
                 n >>= 1U;
             }
         }
-        return count;
+        return int(count);
     }
 
     inline int countOnes(MPUnit n) noexcept {

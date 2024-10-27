@@ -26,6 +26,13 @@ namespace Physica::Core {
     class PHYSICA_API cuBLASException : public std::system_error {
         class Impl final : public std::error_category {
         public:
+            Impl() = default;
+            Impl(const Impl&) = delete;
+            Impl(Impl&&) noexcept = delete;
+            ~Impl() = default;
+            /* Operators */
+            Impl& operator=(const Impl&) = delete;
+            Impl& operator=(Impl&&) noexcept = delete;
             /* Getters */
             [[nodiscard]] const char* name() const noexcept override final { return "cuBLAS"; }
             [[nodiscard]] std::string message(int code) const override final { return cublasGetStatusString(cublasStatus_t(code)); }

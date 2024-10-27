@@ -57,7 +57,7 @@ namespace Physica::Core {
          */
         int length;
         /**
-         * Number = (x0 +- a * (2 ^ __WORDSIZE) ^ (1 - length)) * (2 ^ __WORDSIZE) ^ power
+         * Number = (x0 +- a * (2 ^ MPUnitWidth) ^ (1 - length)) * (2 ^ MPUnitWidth) ^ power
          *
          * FixIt: We have not considered overflow of power in our codes elsewhere.
          */

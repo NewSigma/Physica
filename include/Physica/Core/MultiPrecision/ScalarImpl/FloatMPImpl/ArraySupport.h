@@ -50,7 +50,7 @@ namespace Physica::Core {
     // operator>>
     [[nodiscard]] inline std::unique_ptr<MPUnit[]> byteRightShift(
                             const MPUnit* __restrict byte, size_t length, size_t shift) {
-        const unsigned int quotient = shift / MPUnitWidth;
+        const size_t quotient = shift / MPUnitWidth;
         auto result = std::unique_ptr<MPUnit[]>(new MPUnit[length]);
         if(quotient < length) {
             auto bufferSize = length - quotient;
@@ -61,7 +61,7 @@ namespace Physica::Core {
             }
             if(shift != 0) {
                 MPUnit carry = 0, temp;
-                for(unsigned int i = bufferSize - 1; i > 0; --i) {
+                for(size_t i = bufferSize - 1; i > 0; --i) {
                     temp = result[i] << (MPUnitWidth - shift);
                     result[i] >>= shift;
                     result[i] |= carry;
@@ -97,9 +97,9 @@ namespace Physica::Core {
     }
     // operator>>=
     inline void byteRightShiftEq(MPUnit* __restrict byte, size_t length, size_t shift) {
-        const unsigned int quotient = shift / MPUnitWidth;
+        const size_t quotient = shift / MPUnitWidth;
         if(quotient < length) {
-            auto bufferSize = length - quotient;
+            size_t bufferSize = length - quotient;
             if(quotient != 0) {
                 memmove(byte, byte + quotient, bufferSize * sizeof(MPUnit));
                 memset(byte + bufferSize, 0, quotient * sizeof(MPUnit));
@@ -107,7 +107,7 @@ namespace Physica::Core {
             }
             if(shift != 0) {
                 MPUnit carry = 0, temp;
-                for(unsigned int i = bufferSize - 1; i > 0; --i) {
+                for(size_t i = bufferSize - 1; i > 0; --i) {
                     temp = byte[i] << (MPUnitWidth - shift);
                     byte[i] >>= shift;
                     byte[i] |= carry;
