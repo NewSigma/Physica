@@ -36,6 +36,7 @@ namespace Physica::Core {
         using RealType = typename ScalarType::RealType;
         using MatrixH = HessenburgMatrixH<ScalarType, Order>;
         using HouseholderNorm = Vector<ScalarType, NormVectorLength>;
+        using This = Hessenburg<ScalarType, Order>;
     public:
         using WorkingMatrix = DenseMatrix<ScalarType, Traits<MatrixH>::Option, Order, Order>;
     private:
@@ -43,7 +44,15 @@ namespace Physica::Core {
         HouseholderNorm normVector;
     public:
         template<class MatrixType>
-        Hessenburg(const RValueMatrix<MatrixType>& source_);
+        Hessenburg(const RValueMatrix<MatrixType>& source);
+        Hessenburg(const This&) = default;
+        Hessenburg(This&&) noexcept = default;
+        ~Hessenburg() = default;
+        /* Operators */
+        This& operator=(This obj) noexcept { swap(obj); return *this; }
+        /* Operations */
+        void resize(size_t size);
+        void swap(This& __restrict obj);
         /* Getters */
         [[nodiscard]] size_t getSize() const noexcept { return working.getRow(); }
         [[nodiscard]] MatrixH getMatrixH() const noexcept { return MatrixH(*this); }
@@ -56,10 +65,23 @@ namespace Physica::Core {
 
     template<class ScalarType, size_t Order>
     template<class MatrixType>
-    Hessenburg<ScalarType, Order>::Hessenburg(const RValueMatrix<MatrixType>& source_)
-            : working(source_.getRow(), source_.getRow())
-            , normVector(source_.getRow() - 2) {
-        compute(source_.getDerived());
+    Hessenburg<ScalarType, Order>::Hessenburg(const RValueMatrix<MatrixType>& source) {
+        resize(source.getRow());
+        compute(source.getDerived());
+    }
+
+    template<class ScalarType, size_t Order>
+    void Hessenburg<ScalarType, Order>::resize(size_t size) {
+        assert(size >= 3 && "[Error]: Hessenberg decomposition with a size smaller than 3 does not perform any operations");
+        working.resize(size, size);
+        normVector.resize(size - 2);
+    }
+
+    template<class ScalarType, size_t Order>
+    void Hessenburg<ScalarType, Order>::swap(This& __restrict obj) {
+        assert(this != &obj && "[Error]: Self swap is likely a bug");
+        working.swap(obj.working);
+        normVector.swap(obj.normVector);
     }
 
     template<class ScalarType, size_t Order>

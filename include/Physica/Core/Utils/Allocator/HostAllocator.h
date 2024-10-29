@@ -59,10 +59,12 @@ namespace Physica::Core {
 
     template<class T, size_t Align>
     [[nodiscard]] inline T* HostAllocator<T, Align>::allocate(size_t n) noexcept {
+        constexpr size_t Alignment = Align == Dynamic ? alignof(T) : Align;
+        const size_t size = n * sizeof(T);
     #ifdef _MSC_VER
-        return reinterpret_cast<T*>(_aligned_malloc(Align == Dynamic ? alignof(T) : Align, n * sizeof(T)));
+        return reinterpret_cast<T*>(_aligned_malloc(Alignment, size));
     #else
-        return reinterpret_cast<T*>(std::aligned_alloc(Align == Dynamic ? alignof(T) : Align, n * sizeof(T)));
+        return reinterpret_cast<T*>(std::aligned_alloc(Alignment, size));
     #endif
     }
 
@@ -78,6 +80,9 @@ namespace Physica::Core {
     template<class T, size_t Align>
     T* HostAllocator<T, Align>::reallocate(T* p, size_t new_size, [[maybe_unused]] size_t old_size) noexcept {
         T* new_p = allocate(new_size);
+        if (p == nullptr)
+            return new_p;
+
         const size_t size = std::min(new_size, old_size);
         if constexpr (std::is_trivially_copyable<T>::value)
             memcpy(new_p, p, size * sizeof(T));

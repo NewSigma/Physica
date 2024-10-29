@@ -28,13 +28,13 @@ namespace Physica::Core {
     StreamFuture::~StreamFuture() {
         if (!isDone) {
             std::unique_lock locker(mutex);
-            cond.wait(locker, [=]() { return isDone; });
+            cond.wait(locker, [this]() { return isDone; });
         }
     }
 
     void StreamFuture::wait() {
         std::unique_lock locker(mutex);
-        cond.wait(locker, [=]() { return isDone; });
+        cond.wait(locker, [this]() { return isDone; });
         check(cudaGetLastError());
     }
 

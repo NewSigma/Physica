@@ -30,14 +30,16 @@ namespace Physica::Core {
      */
     template<class MatrixType>
     class Bidiagonalization {
+        using This = Bidiagonalization<MatrixType>;
         using ScalarType = typename MatrixType::ScalarType;
-        static_assert(!ScalarType::isComplex, "[Error]: Bidiagonalization do not support complex matrixes");
         using WorkingMatrix = typename MatrixType::ColMatrix;
         constexpr static size_t NumSingularValue = MatrixType::RowAtCompile > MatrixType::ColumnAtCompile
                                                                             ? MatrixType::ColumnAtCompile
                                                                             : MatrixType::RowAtCompile;
         using MainDiagVector = Vector<ScalarType, NumSingularValue>;
         using SubDiagVector = Vector<ScalarType, NumSingularValue == 0 ? Dynamic : NumSingularValue - 1>;
+
+        static_assert(!ScalarType::isComplex, "[Error]: Bidiagonalization do not support complex matrixes");
     private:
         WorkingMatrix working;
         MainDiagVector mainDiag;
@@ -46,15 +48,16 @@ namespace Physica::Core {
         Bidiagonalization() = default;
         Bidiagonalization(size_t row, size_t col);
         Bidiagonalization(const MatrixType& source);
-        Bidiagonalization(const Bidiagonalization&) = default;
-        Bidiagonalization(Bidiagonalization&&) noexcept = default;
+        Bidiagonalization(const This&) = default;
+        Bidiagonalization(This&&) noexcept = default;
         ~Bidiagonalization() = default;
         /* Operators */
-        Bidiagonalization& operator=(Bidiagonalization& obj) noexcept;
+        This& operator=(This& obj) noexcept { swap(obj); return *this; }
         /* Operations */
         template<class OtherMatrix>
         void compute(const RValueMatrix<OtherMatrix>& source);
-        void swap(Bidiagonalization& __restrict obj) noexcept;
+        void resize(size_t row, size_t col);
+        void swap(This& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] BiDiagMatrixB<MatrixType> getMatrixB() const noexcept { return BiDiagMatrixB(*this); }
         [[nodiscard]] HouseholderSequence<WorkingMatrix> getMatrixU() const;
@@ -65,11 +68,8 @@ namespace Physica::Core {
     };
 
     template<class MatrixType>
-    Bidiagonalization<MatrixType>::Bidiagonalization(size_t row, size_t col)
-            : working(row, col)
-            , mainDiag(col)
-            , subDiag(col - 1) {
-        assert(row >= col);
+    Bidiagonalization<MatrixType>::Bidiagonalization(size_t row, size_t col) {
+        resize(row, col);
     }
 
     template<class MatrixType>
@@ -78,22 +78,12 @@ namespace Physica::Core {
     }
 
     template<class MatrixType>
-    Bidiagonalization<MatrixType>& Bidiagonalization<MatrixType>::operator=(Bidiagonalization& obj) noexcept {
-        swap(obj);
-        return *this;
-    }
-
-    template<class MatrixType>
     template<class OtherMatrix>
     void Bidiagonalization<MatrixType>::compute(const RValueMatrix<OtherMatrix>& source) {
         assert(source.getRow() >= source.getColumn());
-        const size_t numCol = working.getColumn();
-        /* Allocate */ {
-            working = source;
-            mainDiag.resize(numCol);
-            subDiag.resize(numCol - 1);
-        }
+        working = source;
 
+        const size_t numCol = working.getColumn();
         size_t i = 0;
         ScalarType unit;
         for (; i < numCol - 2; ++i) {
@@ -120,7 +110,15 @@ namespace Physica::Core {
     }
 
     template<class MatrixType>
-    void Bidiagonalization<MatrixType>::swap(Bidiagonalization& __restrict obj) noexcept {
+    void Bidiagonalization<MatrixType>::resize(size_t row, size_t col) {
+        assert(row >= col && col > 1 && "[Error]: Invalid size");
+        working.resize(row, col);
+        mainDiag.resize(col);
+        subDiag.resize(col - 1);
+    }
+
+    template<class MatrixType>
+    void Bidiagonalization<MatrixType>::swap(This& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         working.swap(obj.working);
         mainDiag.swap(obj.mainDiag);
@@ -152,11 +150,6 @@ namespace Physica::Core {
         mainDiag[colIndex] = -householderInPlace(sub_col) * unit;
         auto corner = working.bottomRightCorner(colIndex, colIndex + 1);
         applyHouseholder(sub_col, corner);
-    }
-
-    template<class MatrixType>
-    inline void swap(Bidiagonalization<MatrixType>& __restrict obj1, Bidiagonalization<MatrixType>& __restrict obj2) noexcept {
-        obj1.swap(obj2);
     }
 
     template<class MatrixType>
@@ -194,4 +187,11 @@ namespace Physica {
         using Base = Traits<MatrixType>;
         using Base::Option;
     };
+}
+
+namespace std {
+    template<class MatrixType>
+    inline void swap(Physica::Core::Bidiagonalization<MatrixType>& __restrict obj1, Physica::Core::Bidiagonalization<MatrixType>& __restrict obj2) noexcept {
+        obj1.swap(obj2);
+    }
 }

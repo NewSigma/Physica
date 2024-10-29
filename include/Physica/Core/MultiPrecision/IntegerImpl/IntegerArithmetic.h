@@ -19,6 +19,7 @@
 #pragma once
 
 #include <cassert>
+#include <cstring>
 #include <Physica/Core/MultiPrecision/ScalarImpl/FloatMPImpl/AddBasic.h>
 #include <Physica/Core/MultiPrecision/ScalarImpl/FloatMPImpl/DivBasic.h>
 

@@ -24,8 +24,10 @@ namespace Physica::Core {
         if constexpr (!ScalarType::isDifferentiable) {
             if constexpr (ScalarType::Option == Float16)
                 return SIMD<ScalarType, Size>(__habs2(x.getImpl()));
-            else
+            else if constexpr (IsHost())
                 return SIMD<ScalarType, Size>(abs(x.getImpl()));
+            else
+                noImpl();
         }
         else {
             using PlainSIMD = SIMD<typename ScalarType::PlainScalar, Size>;
