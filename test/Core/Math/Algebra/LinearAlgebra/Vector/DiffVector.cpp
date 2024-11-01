@@ -17,6 +17,7 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include <Physica/Core/Math/Algebra/LinearAlgebra/Vector/DiffVector.h>
+#include <Physica/Core/Math/Random/Random.h>
 
 using namespace Physica::Core;
 using ScalarType = float64;

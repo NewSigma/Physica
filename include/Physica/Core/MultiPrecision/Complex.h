@@ -22,31 +22,6 @@
 #include <Physica/Core/MultiPrecision/Scalar.h>
 
 namespace Physica::Core {
-    template<class T> class Complex;
-
-    namespace Internal {
-        template<class AnyScalar1, class AnyScalar2>
-        class BinaryScalarOpReturnType<Complex<AnyScalar1>, AnyScalar2> {
-            static_assert(!AnyScalar1::isDifferentiable && !AnyScalar2::isDifferentiable, "[Error]: This class applies to plain scalar only");
-        public:
-            using Type = Complex<typename BinaryScalarOpReturnType<AnyScalar1, AnyScalar2>::Type>;
-        };
-
-        template<class AnyScalar1, class AnyScalar2>
-        class BinaryScalarOpReturnType<AnyScalar1, Complex<AnyScalar2>> {
-            static_assert(!AnyScalar1::isDifferentiable && !AnyScalar2::isDifferentiable, "[Error]: This class applies to plain scalar only");
-        public:
-            using Type = Complex<typename BinaryScalarOpReturnType<AnyScalar1, AnyScalar2>::Type>;
-        };
-
-        template<class AnyScalar1, class AnyScalar2>
-        class BinaryScalarOpReturnType<Complex<AnyScalar1>, Complex<AnyScalar2>> {
-            static_assert(!AnyScalar1::isDifferentiable && !AnyScalar2::isDifferentiable, "[Error]: This class applies to plain scalar only");
-        public:
-            using Type = Complex<typename BinaryScalarOpReturnType<AnyScalar1, AnyScalar2>::Type>;
-        };
-    }
-
     template<class T>
     class Complex : public ScalarBase<Complex<T>> {
         using This = Complex<T>;
@@ -69,6 +44,8 @@ namespace Physica::Core {
         Complex(T re_, T im_);
         Complex(std::initializer_list<T> list);
         explicit Complex(std::complex<TrivialType> c);
+        template<class U, DiffMode Mode, int Order>
+        explicit Complex(const Diff<U, Mode, Order>& d);
         Complex(const This&) = default;
         Complex(This&&) noexcept = default;
         /* Operators */
@@ -181,7 +158,8 @@ namespace Physica {
         constexpr static bool isDifferentiable = false;
         constexpr static bool isForwardDiff = false;
         constexpr static bool isReverseDiff = false;
-        constexpr static unsigned int Order = 0;
+        constexpr static Core::DiffMode Mode = Core::DiffMode::Forward;
+        constexpr static int Order = 0;
     };
 }
 
@@ -194,3 +172,4 @@ namespace std {
 }
 
 #include "ComplexImpl/ComplexImpl.h"
+#include "SIMDImpl/Complex.h"

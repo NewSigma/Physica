@@ -359,7 +359,7 @@ namespace Physica::Core::Physics {
     typename RHFSolver<BaseSetType>::ScalarType RHFSolver<BaseSetType>::updateSelfConsistentEnergy(
             Vector<ScalarType, EDIISBufferSize>& energyBuffer) {
         for (size_t i = 0; i < energyBuffer.getLength() - 1; ++i)
-            swap(energyBuffer[i], energyBuffer[i + 1]);
+            energyBuffer[i].swap(energyBuffer[i + 1]);
 
         const auto& eigenvalues = eigenSolver.getEigenvalues();
         selfConsistentEnergy = ScalarType(0);

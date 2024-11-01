@@ -20,6 +20,7 @@
 
 #include <cassert>
 #include <Physica/CRTPBase.h>
+#include <Physica/PlainStruct.h>
 #include <Physica/Core/Exception/NoImplException.h>
 
 namespace Physica::Core {
@@ -28,7 +29,7 @@ namespace Physica::Core {
         Reverse
     };
     template<class Derived> class ScalarBase;
-    template<class T, DiffMode Mode, unsigned int Order = 1> class Diff;
+    template<class T, DiffMode Mode, int Order = 1> class Diff;
 
     template<class T>
     struct is_scalar : public std::is_base_of<ScalarBase<T>, T> {};
@@ -41,37 +42,42 @@ namespace Physica::Core {
     template<class Derived>
     class ScalarBase : public CRTPBase<ScalarBase<Derived>> {
     public:
+        constexpr static ScalarOption Option = Traits<Derived>::Option;
+        constexpr static bool isComplex = Traits<Derived>::isComplex;
+        constexpr static bool isDifferentiable = Traits<Derived>::isDifferentiable;
+        constexpr static bool isForwardDiff = Traits<Derived>::isForwardDiff;
+        constexpr static bool isReverseDiff = Traits<Derived>::isReverseDiff;
+        constexpr static DiffMode Mode = isForwardDiff ? DiffMode::Forward : DiffMode::Reverse;
+        constexpr static int Order = Traits<Derived>::Order;
+
         using ScalarType = typename Traits<Derived>::ScalarType;
         using TrivialType = typename Traits<Derived>::TrivialType;
         using RealType = typename Traits<Derived>::RealType;
         using ComplexType = typename Traits<Derived>::ComplexType;
         using PlainScalar = typename Traits<Derived>::PlainScalar;
         using device_obj_type = Derived;
-
-        constexpr static ScalarOption Option = Traits<Derived>::Option;
-        constexpr static bool isComplex = Traits<Derived>::isComplex;
-        constexpr static bool isDifferentiable = Traits<Derived>::isDifferentiable;
-        constexpr static bool isForwardDiff = Traits<Derived>::isForwardDiff;
-        constexpr static bool isReverseDiff = Traits<Derived>::isReverseDiff;
-        constexpr static unsigned int Order = Traits<Derived>::Order;
     private:
         constexpr static bool isConsistent1 = isDifferentiable && (isForwardDiff != isReverseDiff) && (Order > 0);
         constexpr static bool isConsistent2 = !isDifferentiable && !isForwardDiff && !isReverseDiff && (Order == 0);
         static_assert(isConsistent1 || isConsistent2, "[Error]: DiffMode is not self consistent");
         static_assert(std::is_same<Derived, ScalarType>::value, "[Error]: Inconsistence type between traits and inherit class");
+
+        using ValueType = typename std::conditional<isForwardDiff || !isDifferentiable, PlainScalar, PlainScalar*>::type;
+        using GradType1 = typename std::conditional<Order == 1, ValueType, Diff<PlainScalar, Mode, Order - 1>>::type;
+    public:
+        using GradType = typename std::conditional<isDifferentiable, GradType1, PlainStruct<void>>::type;
+        template<int GradOrder>
+        using GradRtnTy = typename std::conditional<Order == GradOrder, PlainScalar, Diff<PlainScalar, Mode, Order - GradOrder>>::type;
     public:
         /* Operators */
+        __host__ __device__ inline bool operator>(float s) const noexcept;
+        __host__ __device__ inline bool operator<(float s) const noexcept;
+        __host__ __device__ inline bool operator>(double s) const noexcept;
+        __host__ __device__ inline bool operator<(double s) const noexcept;
         template<class T>
-        __host__ __device__ inline bool operator>(const ScalarBase<T>& s) const {
-            static_assert(!isComplex && !T::isComplex, "[Error]: Comparison between complex scalars is invalid");
-            return getValue() > s.getValue();
-        }
-
+        __host__ __device__ inline bool operator>(const ScalarBase<T>& s) const noexcept;
         template<class T>
-        __host__ __device__ inline bool operator<(const ScalarBase<T>& s) const {
-            static_assert(!isComplex && !T::isComplex, "[Error]: Comparison between complex scalars is invalid");
-            return getValue() < s.getValue();
-        }
+        __host__ __device__ inline bool operator<(const ScalarBase<T>& s) const noexcept;
         /* Getters */
         [[nodiscard]] __host__ __device__ const RealType& real() const {
             if constexpr (isComplex)
@@ -140,7 +146,8 @@ namespace Physica::Core {
                 return this->getDerived();
         }
 
-        [[nodiscard]] __host__ __device__  const PlainScalar& getGrad() const noexcept {
+        template<int GradOrder = 1>
+        [[nodiscard]] __host__ __device__  const GradRtnTy<GradOrder>& getGrad() const noexcept {
             if constexpr (isDifferentiable)
                 return this->getDerived().getGrad();
             else
@@ -151,6 +158,46 @@ namespace Physica::Core {
             return (s1.isPositive() && s2.isPositive()) || (s1.isNegative() && s2.isNegative());
         }
     };
+
+    template<class Derived>
+    __host__ __device__ inline bool ScalarBase<Derived>::operator>(float s) const noexcept {
+        static_assert(!isComplex, "[Error]: Comparison between complex scalars is invalid");
+        return float(getValue()) > s;
+    }
+
+    template<class Derived>
+    __host__ __device__ inline bool ScalarBase<Derived>::operator<(float s) const noexcept {
+        static_assert(!isComplex, "[Error]: Comparison between complex scalars is invalid");
+        return float(getValue()) < s;
+    }
+
+    template<class Derived>
+    __host__ __device__ inline bool ScalarBase<Derived>::operator>(double s) const noexcept {
+        static_assert(!isComplex, "[Error]: Comparison between complex scalars is invalid");
+        return double(getValue()) > s;
+    }
+
+    template<class Derived>
+    __host__ __device__ inline bool ScalarBase<Derived>::operator<(double s) const noexcept {
+        static_assert(!isComplex, "[Error]: Comparison between complex scalars is invalid");
+        return double(getValue()) < s;
+    }
+    /**
+     * TODO: Move to \class Diff once we merge forward and reverse pass
+     */
+    template<class Derived>
+    template<class T>
+    __host__ __device__ inline bool ScalarBase<Derived>::operator>(const ScalarBase<T>& s) const noexcept {
+        static_assert(!isComplex && !T::isComplex, "[Error]: Comparison between complex scalars is invalid");
+        return getValue() > s.getValue();
+    }
+
+    template<class Derived>
+    template<class T>
+    __host__ __device__ inline bool ScalarBase<Derived>::operator<(const ScalarBase<T>& s) const noexcept {
+        static_assert(!isComplex && !T::isComplex, "[Error]: Comparison between complex scalars is invalid");
+        return getValue() < s.getValue();
+    }
 
     template<class ScalarType>
     ScalarType relativeError(const ScalarType& scalar1, const ScalarType& scalar2) {
@@ -245,11 +292,6 @@ namespace Physica::Core {
         else
             return abs(s1.getDerived()) >= abs(s2.getDerived());
     }
-
-    template<class ScalarType>
-    inline void swap(ScalarBase<ScalarType>& __restrict s1, ScalarBase<ScalarType>& __restrict s2) noexcept {
-        s1.getDerived().swap(s2.getDerived());
-    }
 }
 
 namespace Physica {
@@ -258,4 +300,11 @@ namespace Physica {
     public:
         using Derived = T;
     };
+}
+
+namespace std {
+    template<class ScalarType>
+    inline void swap(Physica::Core::ScalarBase<ScalarType>& __restrict s1, Physica::Core::ScalarBase<ScalarType>& __restrict s2) noexcept {
+        s1.getDerived().swap(s2.getDerived());
+    }
 }

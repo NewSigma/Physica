@@ -20,6 +20,7 @@
 
 #include <iostream>
 #include <Physica/Core/Math/Discrete/Combination.h>
+#include <Physica/Core/MultiPrecision/Scalar.h>
 #include "State.h"
 
 namespace Physica::Core {

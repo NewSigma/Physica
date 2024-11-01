@@ -21,9 +21,9 @@
 #include <Physica/Core/Utils/Unix/ColorGuard.h>
 
 namespace Physica::Core {
-    template<class ScalarType, unsigned int Order> class TraceSegment;
+    template<class ScalarType, int Order> class TraceSegment;
 
-    template<class ScalarType, unsigned int Order>
+    template<class ScalarType, int Order>
     class ColorfulTraceSegment {
         using SegmentType = TraceSegment<ScalarType, Order>;
 
@@ -40,7 +40,7 @@ namespace Physica::Core {
         friend std::ostream& operator<<(std::ostream& os, const ColorfulTraceSegment<AnyScalar, AnyOrder>& obj);
     };
 
-    template<class ScalarType, unsigned int Order>
+    template<class ScalarType, int Order>
     ColorfulTraceSegment<ScalarType, Order>::ColorfulTraceSegment(const SegmentType& segment_) : segment(segment_) {}
 
     template<class AnyScalar, unsigned int AnyOrder>

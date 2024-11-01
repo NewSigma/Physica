@@ -27,7 +27,7 @@
 
 namespace Physica::Core {
     template<class T, size_t Size> class BoolSIMD;
-    template<class ScalarType, unsigned int Order> class DiffTracer;
+    template<class ScalarType, int Order> class DiffTracer;
 
     template<class ScalarType, size_t Size>
     class SIMD : private Traits<SIMD<ScalarType, Size>>::BaseType {
@@ -251,4 +251,3 @@ namespace std {
 #ifdef PHYSICA_CUDA
     #include "SIMDImpl/Half2.h"
 #endif
-#include "SIMDImpl/Complex.h"

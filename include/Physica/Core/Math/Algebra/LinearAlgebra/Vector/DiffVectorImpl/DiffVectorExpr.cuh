@@ -22,8 +22,8 @@
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/VectorImpl/VectorExpr.cuh"
 
 namespace Physica::Core {
-    template<ExprType type, unsigned int Order, class T1> class DiffVectorExprUnitary;
-    template<ExprType type, unsigned int Order, class T1, class T2 = T1> class DiffVectorExprBinary;
+    template<ExprType type, int Order, class T1> class DiffVectorExprUnitary;
+    template<ExprType type, int Order, class T1, class T2 = T1> class DiffVectorExprBinary;
 
     namespace Internal {
         template<ExprType Type, class VectorType>
@@ -110,7 +110,7 @@ namespace Physica::Core {
         }
     }
 
-    template<ExprType Type, unsigned int Order, class PlainScalar>
+    template<ExprType Type, int Order, class PlainScalar>
     class DiffVectorExprUnitary<Type, Order, Vector<PlainScalar>> {
         using VectorType = device_obj<Diff<Vector<PlainScalar>, DiffMode::Reverse, Order>>;
     public:
@@ -127,7 +127,7 @@ namespace Physica::Core {
         }
     };
 
-    template<ExprType Type, unsigned int Order, class PlainScalar>
+    template<ExprType Type, int Order, class PlainScalar>
     class DiffVectorExprBinary<Type, Order, Vector<PlainScalar>, PlainScalar> {
         using VectorType = device_obj<Diff<Vector<PlainScalar>, DiffMode::Reverse, Order>>;
         using ScalarType = typename VectorType::ScalarType;
@@ -145,7 +145,7 @@ namespace Physica::Core {
         }
     };
 
-    template<ExprType Type, unsigned int Order, class PlainScalar>
+    template<ExprType Type, int Order, class PlainScalar>
     class DiffVectorExprBinary<Type, Order, Vector<PlainScalar>> {
         using VectorType = device_obj<Diff<Vector<PlainScalar>, DiffMode::Reverse, Order>>;
     public:
@@ -165,70 +165,70 @@ namespace Physica::Core {
     //////////////////////////////////////Operators//////////////////////////////////////
     //////////////////////////////////////Minus//////////////////////////////////////
     //////////////////////////////////////Add//////////////////////////////////////
-    template<class PlainScalar, unsigned int Order>
+    template<class PlainScalar, int Order>
     inline auto operator+(
             const device_obj<Diff<Vector<PlainScalar>, DiffMode::Reverse, Order>>& v,
             const device_obj<Diff<PlainScalar, DiffMode::Reverse, Order>>& s) {
         return DiffVectorExprBinary<ExprType::Add, Order, Vector<PlainScalar>, PlainScalar>::calc(v, s);
     }
 
-    template<class PlainScalar, unsigned int Order>
+    template<class PlainScalar, int Order>
     inline auto operator+(
             const device_obj<Diff<PlainScalar, DiffMode::Reverse, Order>>& s,
             const device_obj<Diff<Vector<PlainScalar>, DiffMode::Reverse, Order>>& v) {
         return v + s;
     }
 
-    template<class PlainScalar, unsigned int Order>
+    template<class PlainScalar, int Order>
     inline auto operator+(
             const device_obj<Diff<Vector<PlainScalar>, DiffMode::Reverse, Order>>& v1,
             const device_obj<Diff<Vector<PlainScalar>, DiffMode::Reverse, Order>>& v2) {
         return DiffVectorExprBinary<ExprType::Add, Order, Vector<PlainScalar>, Vector<PlainScalar>>::calc(v1, v2);
     }
     //////////////////////////////////////Sub//////////////////////////////////////
-    template<class PlainScalar, unsigned int Order>
+    template<class PlainScalar, int Order>
     inline auto operator-(
             const device_obj<Diff<Vector<PlainScalar>, DiffMode::Reverse, Order>>& v,
             const device_obj<Diff<PlainScalar, DiffMode::Reverse, Order>>& s) {
         return DiffVectorExprBinary<ExprType::Sub, Order, Vector<PlainScalar>, PlainScalar>::calc(v, s);
     }
 
-    template<class PlainScalar, unsigned int Order>
+    template<class PlainScalar, int Order>
     inline auto operator-(
             const device_obj<Diff<Vector<PlainScalar>, DiffMode::Reverse, Order>>& v1,
             const device_obj<Diff<Vector<PlainScalar>, DiffMode::Reverse, Order>>& v2) {
         return DiffVectorExprBinary<ExprType::Sub, Order, Vector<PlainScalar>, Vector<PlainScalar>>::calc(v1, v2);
     }
     //////////////////////////////////////Mul//////////////////////////////////////
-    template<class PlainScalar, unsigned int Order>
+    template<class PlainScalar, int Order>
     inline auto operator*(
             const device_obj<Diff<Vector<PlainScalar>, DiffMode::Reverse, Order>>& v,
             const device_obj<Diff<PlainScalar, DiffMode::Reverse, Order>>& s) {
         return DiffVectorExprBinary<ExprType::Mul, Order, Vector<PlainScalar>, PlainScalar>::calc(v, s);
     }
 
-    template<class PlainScalar, unsigned int Order>
+    template<class PlainScalar, int Order>
     inline auto operator*(
             const device_obj<Diff<PlainScalar, DiffMode::Reverse, Order>>& s,
             const device_obj<Diff<Vector<PlainScalar>, DiffMode::Reverse, Order>>& v) {
         return v * s;
     }
 
-    template<class PlainScalar, unsigned int Order>
+    template<class PlainScalar, int Order>
     inline auto hadamard(
             const device_obj<Diff<Vector<PlainScalar>, DiffMode::Reverse, Order>>& v1,
             const device_obj<Diff<Vector<PlainScalar>, DiffMode::Reverse, Order>>& v2) {
         return DiffVectorExprBinary<ExprType::Mul, Order, Vector<PlainScalar>, Vector<PlainScalar>>::calc(v1, v2);
     }
     //////////////////////////////////////Div//////////////////////////////////////
-    template<class PlainScalar, unsigned int Order>
+    template<class PlainScalar, int Order>
     inline auto operator/(
             const device_obj<Diff<Vector<PlainScalar>, DiffMode::Reverse, Order>>& v,
             const device_obj<Diff<PlainScalar, DiffMode::Reverse, Order>>& s) {
         return DiffVectorExprBinary<ExprType::Div, Order, Vector<PlainScalar>, PlainScalar>::calc(v, s);
     }
 
-    template<class PlainScalar, unsigned int Order>
+    template<class PlainScalar, int Order>
     inline auto devide(
             const device_obj<Diff<Vector<PlainScalar>, DiffMode::Reverse, Order>>& v1,
             const device_obj<Diff<Vector<PlainScalar>, DiffMode::Reverse, Order>>& v2) {
@@ -236,12 +236,12 @@ namespace Physica::Core {
     }
     //////////////////////////////////////Compare//////////////////////////////////////
     ////////////////////////////////////////Elementary Functions////////////////////////////////////////////
-    template<class PlainScalar, unsigned int Order>
+    template<class PlainScalar, int Order>
     auto relu(const device_obj<Diff<Vector<PlainScalar>, DiffMode::Reverse, Order>>& v) {
         return DiffVectorExprUnitary<ExprType::Relu, Order, Vector<PlainScalar>>::calc(v);
     }
 
-    template<class PlainScalar, unsigned int Order>
+    template<class PlainScalar, int Order>
     auto exp(const device_obj<Diff<Vector<PlainScalar>, DiffMode::Reverse, Order>>& v) {
         return DiffVectorExprUnitary<ExprType::Exp, Order, Vector<PlainScalar>>::calc(v);
     }

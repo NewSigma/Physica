@@ -18,6 +18,7 @@
  */
 #include <Physica/Core/Utils/Unix/TempFile.h>
 #include <Physica/Core/Math/Algebra/LinearAlgebra/Vector/Vector.h>
+#include <Physica/Core/Math/Random/Random.h>
 
 using namespace Physica::Core;
 

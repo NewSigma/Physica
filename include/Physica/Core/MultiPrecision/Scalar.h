@@ -24,10 +24,10 @@
 #ifdef PHYSICA_CUDA
     #include <cuda/std/limits>
 #endif
+#include <Physica/Core/Exception/NoImplException.h>
+#include <Physica/Core/IO/HDF5/HDF5.h>
 #include "MultiPrecisionType.h"
 #include "ScalarImpl/ScalarBase.h"
-#include "Physica/Core/Exception/NoImplException.h"
-#include "Physica/Core/IO/HDF5/HDF5.h"
 
 namespace Physica::Core {
     namespace Internal {
@@ -38,12 +38,27 @@ namespace Physica::Core {
         class BinaryScalarOpReturnType {
             static_assert(Core::is_scalar<AnyScalar1>::value, "[Error]: This is not a scalar type");
             static_assert(Core::is_scalar<AnyScalar2>::value, "[Error]: This is not a scalar type");
-            static_assert(!AnyScalar1::isComplex && !AnyScalar2::isComplex, "[Error]: This class applies to real scalar only");
-            static_assert(!AnyScalar1::isDifferentiable && !AnyScalar2::isDifferentiable, "[Error]: This class applies to plain scalar only");
-            static constexpr ScalarOption Option =
-                    Traits<AnyScalar1>::Option > Traits<AnyScalar2>::Option ? Traits<AnyScalar1>::Option : Traits<AnyScalar2>::Option;
+            constexpr static ScalarOption Option = std::max(Traits<AnyScalar1>::Option, Traits<AnyScalar2>::Option);
+            constexpr static bool isComplex = AnyScalar1::isComplex || AnyScalar2::isComplex;
+            constexpr static bool isDiffable1 = AnyScalar1::isDifferentiable;
+            constexpr static bool isDiffable2 = AnyScalar2::isDifferentiable;
+            constexpr static bool isDiffable = isDiffable1 || isDiffable2;
+
+            constexpr static DiffMode Mode = AnyScalar1::isDifferentiable ? Traits<AnyScalar1>::Mode : Traits<AnyScalar2>::Mode;
+            constexpr static DiffMode Mode1 = AnyScalar2::isDifferentiable ? Traits<AnyScalar2>::Mode : Traits<AnyScalar1>::Mode;
+            static_assert(Mode == Mode1, "[Error]: Operation between differentiable scalars with different mode is not well defined");
+
+            constexpr static int Order1 = Traits<AnyScalar1>::Order;
+            constexpr static int Order2 = Traits<AnyScalar2>::Order;
+            constexpr static bool UseMixOrder = isDiffable1 && isDiffable2 && (Order1 != Order2);
+            constexpr static int Order = UseMixOrder ? std::min(Order1, Order2) : std::max(Order1, Order2);
+            static_assert(!(Mode == DiffMode::Reverse && UseMixOrder), "[Error]: Reverse mode does not support mixed order");
+
+            using Type0 = Scalar<Option>;
+            using Type1 = typename std::conditional<isComplex, Complex<Type0>, Type0>::type;
+            using Type2 = typename std::conditional<isDiffable, Diff<Type1, Mode, Order>, Type1>::type;
         public:
-            using Type = Scalar<Option>;
+            using Type = Type2;
         };
     }
 
@@ -53,9 +68,15 @@ namespace Physica::Core {
     template<ScalarOption Option> __host__ __device__ inline Scalar<Option> square(const Scalar<Option>& s) noexcept;
     template<ScalarOption Option> __host__ __device__ inline Scalar<Option> sqrt(const Scalar<Option>& s) noexcept;
     template<ScalarOption Option> __host__ __device__ inline Scalar<Option> ln(const Scalar<Option>& s) noexcept;
+
+    inline int countLeadingZeros(MPUnit n) noexcept;
+    inline int countBackZeros(unsigned long n) noexcept;
+    inline int countOnes(MPUnit n) noexcept;
+    inline double convertDoubleImpl(int length, int power, MPUnit* __restrict byte);
 }
 
 #include "Rational.h"
+#include "ScalarImpl/ScalarImpl.h"
 #ifdef PHYSICA_CUDA
     #include "ScalarImpl/Float16.h"
 #endif

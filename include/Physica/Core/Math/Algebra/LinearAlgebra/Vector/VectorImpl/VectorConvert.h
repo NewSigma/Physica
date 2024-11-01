@@ -114,9 +114,9 @@ namespace Physica::Core {
         [[nodiscard]] size_t getLength() const { return v.getLength(); }
     };
 
-    template<class VectorType>
-    class GradVector : public RValueVector<GradVector<VectorType>> {
-        using This = GradVector<VectorType>;
+    template<class VectorType, int GradOrder>
+    class GradVector : public RValueVector<GradVector<VectorType, GradOrder>> {
+        using This = GradVector<VectorType, GradOrder>;
         using Base = RValueVector<This>;
 
         const VectorType& v;
@@ -129,38 +129,38 @@ namespace Physica::Core {
         This& operator=(const This&) = delete;
         This& operator=(This&&) = delete;
         /* Getters */
-        typename Base::ScalarType calc(size_t s) const { return v.calc(s).getGrad(); }
+        typename Base::ScalarType calc(size_t s) const { return v.calc(s).template getGrad<GradOrder>(); }
         [[nodiscard]] size_t getLength() const { return v.getLength(); }
     };
 
     template<class VectorType>
-    [[nodiscard]] inline auto toRealVector(const RValueVector<VectorType>& v) {
+    [[nodiscard]] inline auto toRealVector(const RValueVector<VectorType>& v) noexcept {
         return RealVector<VectorType>{v};
     }
 
     template<class VectorType>
-    [[nodiscard]] inline auto toImagVector(const RValueVector<VectorType>& v) {
+    [[nodiscard]] inline auto toImagVector(const RValueVector<VectorType>& v) noexcept {
         return ImagVector<VectorType>{v};
     }
 
     template<class VectorType>
-    [[nodiscard]] inline auto toSquaredNormVector(const RValueVector<VectorType>& v) {
+    [[nodiscard]] inline auto toSquaredNormVector(const RValueVector<VectorType>& v) noexcept {
         return SquaredNormVector<VectorType>{v};
     }
 
     template<class VectorType>
-    [[nodiscard]] inline auto toNormVector(const RValueVector<VectorType>& v) {
+    [[nodiscard]] inline auto toNormVector(const RValueVector<VectorType>& v) noexcept {
         return NormVector<VectorType>{v};
     }
 
     template<class VectorType>
-    [[nodiscard]] inline auto toValueVector(const RValueVector<VectorType>& v) {
+    [[nodiscard]] inline auto toValueVector(const RValueVector<VectorType>& v) noexcept {
         return ValueVector<VectorType>{v};
     }
 
-    template<class VectorType>
-    [[nodiscard]] inline auto toGradVector(const RValueVector<VectorType>& v) {
-        return GradVector<VectorType>{v};
+    template<class VectorType, int GradOrder = 1>
+    [[nodiscard]] inline auto toGradVector(const RValueVector<VectorType>& v) noexcept {
+        return GradVector<VectorType, GradOrder>{v};
     }
 }
 
@@ -196,6 +196,14 @@ namespace Physica {
         constexpr static bool FastPacket = false;
     };
 
-    template<class VectorType>
-    class Traits<GradVector<VectorType>> : public Traits<ValueVector<VectorType>> {};
+    template<class VectorType, int GradOrder>
+    class Traits<GradVector<VectorType, GradOrder>> {
+        using T = typename VectorType::ScalarType;
+        static_assert(T::isDifferentiable, "[Error]: Unnecessary toValueVector() call or toGradVector() call");
+    public:
+        using ScalarType = typename T::template GradRtnTy<GradOrder>;
+        constexpr static size_t SizeAtCompile = VectorType::SizeAtCompile;
+        constexpr static bool FastAssign = false;
+        constexpr static bool FastPacket = false;
+    };
 }

@@ -22,7 +22,6 @@
 #include <Physica/Core/Exception/DivideByZeroException.h>
 #include <Physica/Core/MultiPrecision/Integer.h>
 #include <Physica/Core/MultiPrecision/Scalar.h>
-#include <Physica/Core/MultiPrecision/ScalarImpl/FloatMPImpl/Convert.h>
 
 namespace Physica::Core {
     Integer::Integer(int i)
@@ -325,7 +324,7 @@ namespace Physica::Core {
     Integer::operator double() const {
         if (isZero())
             return 0;
-        return Internal::convertDoubleImpl(length, length - 1, byte);
+        return convertDoubleImpl(length, length - 1, byte);
     }
 
     void Integer::swap(Integer& __restrict i) noexcept {

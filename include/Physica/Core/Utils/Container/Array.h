@@ -20,6 +20,7 @@
 
 #include <cassert>
 #include <cstdlib>
+#include <initializer_list>
 #include <Physica/Core/Utils/Allocator/HostAllocator.h>
 #include <Physica/Core/Utils/CUDA/device_obj.cuh>
 #include "ArrayImpl/ArrayBase.h"

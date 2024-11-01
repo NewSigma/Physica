@@ -35,7 +35,8 @@ namespace Physica {
         constexpr static bool isDifferentiable = false;
         constexpr static bool isForwardDiff = false;
         constexpr static bool isReverseDiff = false;
-        constexpr static unsigned int Order = 0;
+        constexpr static Core::DiffMode Mode = Core::DiffMode::Forward;
+        constexpr static int Order = 0;
     };
 }
 
@@ -47,13 +48,13 @@ namespace Physica::Core {
     public:
         using device_obj_type = This;
     private:
-        __half f;
+        __half h;
     public:
         Scalar() = default;
-        __host__ __device__ Scalar(int i) : f(i) {}
-        __host__ __device__ Scalar(__half f_) : f(f_) {}
-        __host__ __device__ Scalar(float f_) : f(f_) {}
-        __host__ __device__ Scalar(double d_) : f(d_) {}
+        __host__ __device__ Scalar(int i) : h(i) {}
+        __host__ __device__ Scalar(__half f_) : h(f_) {}
+        __host__ __device__ Scalar(float f_) : h(f_) {}
+        __host__ __device__ Scalar(double d_) : h(d_) {}
         template<class OtherScalar>
         __host__ __device__ explicit inline Scalar(const ScalarBase<OtherScalar>& s);
         Scalar(const This&) = default;
@@ -64,29 +65,29 @@ namespace Physica::Core {
         using Base::operator<;
         Scalar& operator=(const Scalar& obj) = default;
         Scalar& operator=(Scalar&& obj) noexcept = default;
-        __host__ __device__ explicit operator float() const { return f; }
-        __host__ __device__ explicit operator double() const { return f; }
-        __host__ __device__ Scalar operator+(const Scalar& s) const { return Scalar(f + s.f); }
-        __host__ __device__ Scalar operator-(const Scalar& s) const { return Scalar(f - s.f); }
-        __host__ __device__ Scalar operator*(const Scalar& s) const { return Scalar(f * s.f); }
-        __host__ __device__ Scalar operator/(const Scalar& s) const { return Scalar(f / s.f); }
-        __host__ __device__ Scalar operator-() const noexcept { return Scalar(-f); }
-        __host__ __device__ bool operator>(const Scalar& s) const { return f > s.f; }
-        __host__ __device__ bool operator<(const Scalar& s) const { return f < s.f; }
-        __host__ __device__ bool operator==(const Scalar& s) const { return f == s.f; }
+        __host__ __device__ explicit operator float() const { return h; }
+        __host__ __device__ explicit operator double() const { return h; }
+        __host__ __device__ Scalar operator+(const Scalar& s) const { return Scalar(h + s.h); }
+        __host__ __device__ Scalar operator-(const Scalar& s) const { return Scalar(h - s.h); }
+        __host__ __device__ Scalar operator*(const Scalar& s) const { return Scalar(h * s.h); }
+        __host__ __device__ Scalar operator/(const Scalar& s) const { return Scalar(h / s.h); }
+        __host__ __device__ Scalar operator-() const noexcept { return Scalar(-h); }
+        __host__ __device__ bool operator>(const Scalar& s) const { return h > s.h; }
+        __host__ __device__ bool operator<(const Scalar& s) const { return h < s.h; }
+        __host__ __device__ bool operator==(const Scalar& s) const { return h == s.h; }
         /* Operations */
-        void swap(Scalar& __restrict s) noexcept { std::swap(f, s.f); }
+        void swap(Scalar& __restrict s) noexcept { std::swap(h, s.h); }
         /* Getters */
         [[nodiscard]] constexpr static ScalarOption getOption() { return Float16; }
-        [[nodiscard]] __host__ __device__ __half getTrivial() const noexcept { return f; }
-        [[nodiscard]] __host__ __device__ bool isZero() const noexcept { return f == __half(0); }
-        [[nodiscard]] __host__ __device__ bool isPositive() const noexcept { return f > __half(0); }
-        [[nodiscard]] __host__ __device__ bool isNegative() const noexcept { return f < __half(0); }
-        [[nodiscard]] __host__ __device__ bool isFinite() const noexcept { return __hisinf(f) == 0; }
+        [[nodiscard]] __host__ __device__ __half getTrivial() const noexcept { return h; }
+        [[nodiscard]] __host__ __device__ bool isZero() const noexcept { return h == __half(0); }
+        [[nodiscard]] __host__ __device__ bool isPositive() const noexcept { return h > __half(0); }
+        [[nodiscard]] __host__ __device__ bool isNegative() const noexcept { return h < __half(0); }
+        [[nodiscard]] __host__ __device__ bool isFinite() const noexcept { return __hisinf(h) == 0; }
     };
 
     template<class OtherScalar>
-    __host__ __device__ inline Scalar<Float16>::Scalar(const ScalarBase<OtherScalar>& s) : f(s.getDerived().getTrivial()) {}
+    __host__ __device__ inline Scalar<Float16>::Scalar(const ScalarBase<OtherScalar>& s) : h(s.getDerived().getTrivial()) {}
 
     inline std::ostream& operator<<(std::ostream& os, const Scalar<Float16>& s) {
         const auto lastPrec = os.precision();

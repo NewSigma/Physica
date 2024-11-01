@@ -34,7 +34,8 @@ namespace Physica {
         constexpr static bool isDifferentiable = false;
         constexpr static bool isForwardDiff = false;
         constexpr static bool isReverseDiff = false;
-        constexpr static unsigned int Order = 0;
+        constexpr static Core::DiffMode Mode = Core::DiffMode::Forward;
+        constexpr static int Order = 0;
     };
 }
 

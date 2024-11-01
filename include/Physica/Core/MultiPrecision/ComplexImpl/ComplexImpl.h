@@ -41,6 +41,10 @@ namespace Physica::Core {
     Complex<T>::Complex(std::complex<TrivialType> c) : re(c.real()), im(c.imag()) {}
 
     template<class T>
+    template<class U, DiffMode Mode, int Order>
+    Complex<T>::Complex(const Diff<U, Mode, Order>& d) : Complex(d.getValue()) {}
+
+    template<class T>
     inline bool Complex<T>::operator==(const This& other) const {
         return re == other.re && im == other.im;
     }

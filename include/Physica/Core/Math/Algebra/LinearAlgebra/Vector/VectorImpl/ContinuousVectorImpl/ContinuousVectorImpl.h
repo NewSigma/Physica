@@ -239,8 +239,8 @@ namespace Physica::Core {
             for (size_t i = 0; i < length; ++i)
                 this->operator[](i) = ScalarType::random_normal(gen);
         }
-        else if constexpr (HasMKL()) {
-            const size_t length = Base::getLength() * (Base::isComplex ? 2 : 1) * (Base::isForwardDiff ? 2 : 1);
+        else if constexpr (HasMKL() && !isForwardDiff) {
+            const size_t length = Base::getLength() * (Base::isComplex ? 2 : 1);
             if constexpr (ScalarType::Option == Float32)
                 vslCheck(vsRngGaussian(VSL_RNG_METHOD_GAUSSIAN_BOXMULLER2, gen, length, (float*)data(), 0, 1));
             else if constexpr (ScalarType::Option == Float64)

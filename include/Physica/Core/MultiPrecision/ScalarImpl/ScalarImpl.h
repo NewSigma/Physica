@@ -1,5 +1,5 @@
 /*
- * Copyright 2021-2024 Weibo He.
+ * Copyright 2024 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -18,10 +18,68 @@
  */
 #pragma once
 
-#include <Physica/Core/MultiPrecision/MultiPrecisionType.h>
-#include "Bitwise.h"
+namespace Physica::Core {
+    inline int countLeadingZeros(MPUnit n) noexcept {
+        if(n == 0)
+            return MPUnitWidth;
 
-namespace Physica::Core::Internal {
+        MPUnit count;
+        if constexpr (UseASM() && !IsMSVC()) {
+        #ifdef __GNUC__
+            asm volatile (
+                "bsrq %1, %0\n\t"
+                : "=r" (count)
+                : "rm" (n)
+            );
+            (count) ^= 63U;
+        #else
+            noImpl();
+        #endif
+        }
+        else {
+            count = 0;
+            while((n & MPUnitHighestBitMask) == 0) {
+                ++count;
+                n <<= 1U;
+            }
+        }
+        return int(count);
+    }
+
+    inline int countBackZeros(unsigned long n) noexcept {
+        if(n == 0)
+            return MPUnitWidth;
+
+        MPUnit count;
+        if constexpr (UseASM() && !IsMSVC()) {
+        #ifdef __GNUC__
+            asm volatile (
+                "bsfq %1, %0\n\t"
+                : "=r" (count)
+                : "rm" (n)
+            );
+        #else
+            noImpl();
+        #endif
+        }
+        else {
+            count = 0;
+            while((n & 1U) == 0) {
+                ++count;
+                n >>= 1U;
+            }
+        }
+        return int(count);
+    }
+
+    inline int countOnes(MPUnit n) noexcept {
+        int count=0 ;
+        while(n != 0) {
+            n &= (n - 1);
+            count += 1;
+        }
+        return count;
+    }
     /**
      * This function is shared by \class Scalar and \class Integer.
      */

@@ -20,6 +20,9 @@
 
 #include <system_error>
 #include <Physica/Macro.h>
+#ifdef PHYSICA_MKL
+    #include <mkl_vsl.h>
+#endif
 
 namespace Physica::Core {
     class PHYSICA_API VSLException : public std::system_error {

@@ -24,7 +24,7 @@
 #include "TraceSegment.h"
 
 namespace Physica::Core {
-    template<class ScalarType, unsigned int Order>
+    template<class ScalarType, int Order>
     class device_obj<TraceSegment<ScalarType, Order>> {
         static_assert(!ScalarType::isDifferentiable, "[Error]: Diff<> pack is not necessary");
         static_assert(Order > 0, "[Error]: 0 order is not differentiable");

@@ -21,60 +21,80 @@
 #include <Physica/Core/MultiPrecision/Diff.h>
 
 using namespace Physica::Core;
+using T = float64;
 
-template<class T>
-T func(T x, T y) {
-    return square(x - T(1.0)) + square(y - T(2.0));
+template<class ScalarType>
+ScalarType func(ScalarType x, ScalarType y) {
+    return square(x - ScalarType(1.0)) + square(y - ScalarType(2.0));
 }
 
-int main() {
-    using PlainScalar = float64;
+void testFunc() {
+    bool good = true;
     {
-        using ScalarType = Diff<PlainScalar, DiffMode::Forward, 1>;
-        const PlainScalar x = 3;
-        const PlainScalar y = 4;
+        using ScalarType = Diff<T, DiffMode::Forward, 1>;
+        const T x = 3;
+        const T y = 4;
         const ScalarType result = func(ScalarType(x, 1), ScalarType(y, 1));
-        const PlainScalar answer = (x + y - 3.0) * 2.0;
-        if (!scalarNear(result.getGrad(), answer, 1E-15))
-            return 1;
+        const T answer = (x + y - 3.0) * 2.0;
+        good &= scalarNear(result.getGrad(), answer, 1E-15);
     }
     {
-        using ScalarType = Diff<PlainScalar, DiffMode::Reverse, 1>;
+        using ScalarType = Diff<T, DiffMode::Forward, 2>;
+        ScalarType x{3, 1};
+        ScalarType y = square(x);
+        good &= scalarNear(y.template getGrad<2>(), float64(2), 1E-15);
+    }
+    {
+        using ScalarType = Diff<T, DiffMode::Reverse, 1>;
         ScalarType x(3);
         ScalarType y(4);
         ScalarType result = func(x, y);
         result.reverse();
-        if (!scalarNear(x.getGrad(), (x.getValue() - 1.0) * 2.0, 1E-15))
-            return 1;
-        if (!scalarNear(y.getGrad(), (y.getValue() - 2.0) * 2.0, 1E-15))
-            return 1;
+        good &= scalarNear(x.getGrad(), (x.getValue() - 1.0) * 2.0, 1E-15);
+        good &= scalarNear(y.getGrad(), (y.getValue() - 2.0) * 2.0, 1E-15);
     }
     {
-        using ScalarType = Diff<PlainScalar, DiffMode::Reverse, 2>;
+        using ScalarType = Diff<T, DiffMode::Reverse, 2>;
         ScalarType x(3);
         ScalarType result = square(x);
         result.reverse();
-        if (!scalarNear(PlainScalar(x.getGrad<1>()), PlainScalar(6), 1E-15))
-            return 1;
+        good &= scalarNear(T(x.getGrad<1>()), T(6), 1E-15);
         x.getGrad().reverse();
-        if (!scalarNear(x.getGrad<2>(), PlainScalar(2), 1E-15))
-            return 1;
+        good &= scalarNear(x.getGrad<2>(), T(2), 1E-15);
     }
     {
-        using ScalarType = Diff<PlainScalar, DiffMode::Reverse, 2>;
+        using ScalarType = Diff<T, DiffMode::Reverse, 2>;
         ScalarType x(3);
         ScalarType y(4);
         ScalarType result = func(x, y);
         result.reverse();
-        if (!scalarNear(PlainScalar(x.getGrad<1>()), PlainScalar(4), 1E-15))
-            return 1;
-        if (!scalarNear(PlainScalar(y.getGrad<1>()), PlainScalar(4), 1E-15))
-            return 1;
+        good &= scalarNear(T(x.getGrad<1>()), T(4), 1E-15);
+        good &= scalarNear(T(y.getGrad<1>()), T(4), 1E-15);
         x.getGrad().reverse();
-        if (!scalarNear(PlainScalar(x.getGrad<2>()), PlainScalar(2), 1E-15))
-            return 1;
-        if (!scalarNear(PlainScalar(y.getGrad<2>()), PlainScalar(0), 1E-15))
-            return 1;
+        good &= scalarNear(T(x.getGrad<2>()), T(2), 1E-15);
+        good &= scalarNear(T(y.getGrad<2>()), T(0), 1E-15);
     }
+    if (!good)
+        exit(EXIT_FAILURE);
+}
+
+void testMath() {
+    using dfloat = Diff<T, DiffMode::Forward, 2>;
+    bool good = true;
+    dfloat x(3, 1);
+    auto y = reciprocal(x);
+    good &= scalarNear(y.getGrad().getValue(), -square(reciprocal(x.getValue())), 1E-15);
+    good &= scalarNear(y.getGrad<2>(), pow(reciprocal(x.getValue()), T(3)) * T(2), 1E-15);
+
+    y = sqrt(x);
+    good &= scalarNear(y.getGrad().getValue(), reciprocal(T(2) * sqrt(x.getValue())), 1E-15);
+    good &= scalarNear(y.getGrad<2>(), -reciprocal(T(4) * x.getValue() * sqrt(x.getValue())), 1E-15);
+    if (!good)
+        exit(EXIT_FAILURE);
+}
+
+int main() {
+    testFunc();
+    testMath();
     return 0;
 }

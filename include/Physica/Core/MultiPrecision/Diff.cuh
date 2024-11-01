@@ -22,7 +22,7 @@
 #include "Diff.h"
 
 namespace Physica::Core {
-    template<class ScalarType, unsigned int Order>
+    template<class ScalarType, int Order>
     class device_obj<Diff<ScalarType, DiffMode::Reverse, Order>>
             : public ScalarBase<device_obj<Diff<ScalarType, DiffMode::Reverse, Order>>> {
         static_assert(Order == 1, "[Error]: High order autodiff is not implemented");
@@ -78,22 +78,22 @@ namespace Physica::Core {
         __device__ void setGrad(ScalarType grad) { *pGrad = grad; }
     };
     ////////////////////////////////////////////////////////////
-    template<class ScalarType, unsigned int Order>
+    template<class ScalarType, int Order>
     [[nodiscard]] inline device_obj<Diff<ScalarType, DiffMode::Reverse, Order>>
     operator+(const device_obj<Diff<ScalarType, DiffMode::Reverse, Order>>& s1,
               const device_obj<Diff<ScalarType, DiffMode::Reverse, Order>>& s2);
 
-    template<class ScalarType, unsigned int Order>
+    template<class ScalarType, int Order>
     [[nodiscard]] inline device_obj<Diff<ScalarType, DiffMode::Reverse, Order>>
     operator-(const device_obj<Diff<ScalarType, DiffMode::Reverse, Order>>& s1,
               const device_obj<Diff<ScalarType, DiffMode::Reverse, Order>>& s2);
 
-    template<class ScalarType, unsigned int Order>
+    template<class ScalarType, int Order>
     [[nodiscard]] inline device_obj<Diff<ScalarType, DiffMode::Reverse, Order>>
     operator*(const device_obj<Diff<ScalarType, DiffMode::Reverse, Order>>& s1,
               const device_obj<Diff<ScalarType, DiffMode::Reverse, Order>>& s2);
 
-    template<class ScalarType, unsigned int Order>
+    template<class ScalarType, int Order>
     [[nodiscard]] inline device_obj<Diff<ScalarType, DiffMode::Reverse, Order>>
     operator/(const device_obj<Diff<ScalarType, DiffMode::Reverse, Order>>& s1,
               const device_obj<Diff<ScalarType, DiffMode::Reverse, Order>>& s2);
@@ -102,7 +102,7 @@ namespace Physica::Core {
 namespace Physica {
     using namespace Core;
 
-    template<class T, DiffMode M, unsigned int Order_>
+    template<class T, DiffMode M, int Order_>
     class Traits<Core::device_obj<Diff<T, M, Order_>>> {
         static_assert(!T::isDifferentiable, "[Error]: Nested Diff<> is not allowed");
         static_assert(!is_device_obj<T>::value, "[Error]: Nested device_obj<> is not allowed");
@@ -111,7 +111,7 @@ namespace Physica {
     public:
         using PlainScalar = T;
         constexpr static DiffMode Mode = M;
-        constexpr static unsigned int Order = Order_;
+        constexpr static int Order = Order_;
         using ScalarType = Core::device_obj<Diff<T, M, Order>>;
         using RealType = Core::device_obj<Diff<RealT, M, Order>>;
         using ComplexType = Core::device_obj<Diff<ComplexT, M, Order>>;

@@ -71,7 +71,7 @@ namespace Physica::Core {
         }
     }
 
-    template<class PlainScalar, int Option, unsigned int Order>
+    template<class PlainScalar, int Option, int Order>
     auto operator*(
             const device_obj<Diff<DenseMatrix<PlainScalar, Option>, DiffMode::Reverse, Order>>& m,
             const device_obj<Diff<Vector<PlainScalar>, DiffMode::Reverse, Order>>& v) {

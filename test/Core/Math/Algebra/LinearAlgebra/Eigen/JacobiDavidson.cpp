@@ -19,6 +19,7 @@
 #include <iostream>
 #include <Physica/Core/Math/Algebra/LinearAlgebra/Eigen/JacobiDavidson.h>
 #include <Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseHermiteMatrix.h>
+#include <Physica/Core/Math/Random/Random.h>
 
 using namespace Physica::Core;
 using ScalarType = float64;

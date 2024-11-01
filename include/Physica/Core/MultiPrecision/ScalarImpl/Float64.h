@@ -34,7 +34,8 @@ namespace Physica {
         constexpr static bool isDifferentiable = false;
         constexpr static bool isForwardDiff = false;
         constexpr static bool isReverseDiff = false;
-        constexpr static unsigned int Order = 0;
+        constexpr static Core::DiffMode Mode = Core::DiffMode::Forward;
+        constexpr static int Order = 0;
     };
 }
 
@@ -143,7 +144,7 @@ namespace Physica::Core {
 
     inline std::ostream& operator<<(std::ostream& os, const Scalar<Float64>& s) {
         const auto lastPrec = os.precision();
-        return os << std::setprecision(16) << float(s) << std::setprecision(lastPrec);
+        return os << std::setprecision(16) << double(s) << std::setprecision(lastPrec);
     }
 
     inline Scalar<Float64>& operator++(Scalar<Float64>& s) {

@@ -17,7 +17,6 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include <Physica/Core/MultiPrecision/Scalar.h>
-#include <Physica/Core/MultiPrecision/ScalarImpl/FloatMPImpl/Convert.h>
 
 namespace Physica::Core {
     //////////////////////////////////FloatMP///////////////////////////////////
@@ -157,7 +156,7 @@ namespace Physica::Core {
     Scalar<FloatMP>::operator double() const {
         if(isZero())
             return 0.0;
-        return Internal::convertDoubleImpl(length, power, byte);
+        return convertDoubleImpl(length, power, byte);
     }
 
     Scalar<FloatMP>::Scalar(const Scalar<FloatMP>& s)

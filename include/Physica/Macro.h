@@ -71,7 +71,7 @@
 #endif
 
 #ifdef PHYSICA_MKL
-    #include <mkl.h>
+    #include <mkl_types.h>
 #endif
 
 #ifndef PHYSICA_CUDA

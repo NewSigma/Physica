@@ -23,7 +23,7 @@
 #include "Vector.cuh"
 
 namespace Physica::Core {
-    template<class PlainScalar, unsigned Order>
+    template<class PlainScalar, int Order>
     class device_obj<Diff<Vector<PlainScalar>, DiffMode::Reverse, Order>>
             : public device_obj<RValueVector<Diff<Vector<PlainScalar>, DiffMode::Reverse, Order>>> {
         static_assert(!PlainScalar::isDifferentiable, "[Error]: Nested Diff<> is not allowed");
@@ -99,7 +99,7 @@ namespace Physica::Core {
 namespace Physica {
     using namespace Core;
 
-    template<class T, unsigned int Order>
+    template<class T, int Order>
     class Traits<Core::device_obj<Diff<Vector<T>, DiffMode::Reverse, Order>>> : public Traits<Vector<T>> {
     public:
         using ScalarType = Core::device_obj<Diff<T, DiffMode::Reverse, Order>>;

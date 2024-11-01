@@ -65,10 +65,10 @@ namespace Physica::Core {
         [[nodiscard]] size_t getColumn() const { return mat.getColumn(); }
     };
 
-    template<class MatrixType>
-    class GradMatrix : public RValueMatrix<GradMatrix<MatrixType>> {
-        using Base = RValueMatrix<GradMatrix<MatrixType>>;
-        using This = GradMatrix<MatrixType>;
+    template<class MatrixType, int GradOrder>
+    class GradMatrix : public RValueMatrix<GradMatrix<MatrixType, GradOrder>> {
+        using This = GradMatrix<MatrixType, GradOrder>;
+        using Base = RValueMatrix<This>;
     public:
         using typename Base::ScalarType;
     private:
@@ -82,24 +82,24 @@ namespace Physica::Core {
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
         /* Getters */
-        [[nodiscard]] ScalarType calc(size_t row, size_t col) const { return mat.calc(row, col).getGrad(); }
+        [[nodiscard]] ScalarType calc(size_t row, size_t col) const { return mat.calc(row, col).template getGrad<GradOrder>(); }
         [[nodiscard]] size_t getRow() const { return mat.getRow(); }
         [[nodiscard]] size_t getColumn() const { return mat.getColumn(); }
     };
 
     template<class MatrixType>
-    [[nodiscard]] auto toRealMatrix(const RValueMatrix<MatrixType>& m) {
-        return RealMatrix(m);
+    [[nodiscard]] inline auto toRealMatrix(const RValueMatrix<MatrixType>& m) noexcept {
+        return RealMatrix<MatrixType>(m);
     }
 
     template<class MatrixType>
-    [[nodiscard]] auto toValueMatrix(const RValueMatrix<MatrixType>& m) {
-        return ValueMatrix(m);
+    [[nodiscard]] inline auto toValueMatrix(const RValueMatrix<MatrixType>& m) noexcept {
+        return ValueMatrix<MatrixType>(m);
     }
 
-    template<class MatrixType>
-    [[nodiscard]] auto toGradMatrix(const RValueMatrix<MatrixType>& m) {
-        return GradMatrix(m);
+    template<class MatrixType, int GradOrder = 1>
+    [[nodiscard]] inline auto toGradMatrix(const RValueMatrix<MatrixType>& m) noexcept {
+        return GradMatrix<MatrixType, GradOrder>(m);
     }
 }
 
@@ -126,6 +126,15 @@ namespace Physica {
         constexpr static size_t SizeAtCompile = MatrixType::SizeAtCompile;
     };
 
-    template <class MatrixType>
-    class Traits<Core::GradMatrix<MatrixType>> : public Traits<Core::ValueMatrix<MatrixType>> {};
+    template <class MatrixType, int GradOrder>
+    class Traits<Core::GradMatrix<MatrixType, GradOrder>> {
+        using T = typename MatrixType::ScalarType;
+        static_assert(T::isDifferentiable, "[Error]: Unnecessary toValueVector() call or toGradVector() call");
+    public:
+        using ScalarType = typename T::template GradRtnTy<GradOrder>;
+        constexpr static int Option = MatrixType::Option;
+        constexpr static size_t RowAtCompile = MatrixType::RowAtCompile;
+        constexpr static size_t ColumnAtCompile = MatrixType::ColumnAtCompile;
+        constexpr static size_t SizeAtCompile = MatrixType::SizeAtCompile;
+    };
 }

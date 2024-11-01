@@ -20,6 +20,7 @@
 #include <Physica/Core/Math/Algebra/LinearAlgebra/Matrix/MatrixFunction/MatrixExp.h>
 #include <Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseSymmMatrix.h>
 #include <Physica/Core/Math/Algebra/LinearAlgebra/Eigen/SymmEigenSolver.h>
+#include <Physica/Core/Math/Random/Random.h>
 
 using namespace Physica::Core;
 using ScalarType = float64;

@@ -36,6 +36,7 @@ namespace Physica::Core {
         using typename Base::PlainScalar;
         using typename Base::PacketType;
         using Base::SizeAtCompile;
+        using Base::isForwardDiff;
         using Base::isReverseDiff;
     public:
         ~ContinuousVector() = default;

@@ -393,7 +393,7 @@ namespace Physica::Core {
             }
             const T gamma = (p - f) / q;
             Jmu = sqrt(wronskian / ((p - f) * gamma + q));
-            Jmu = a_Jv_m > 0 ? Jmu : -Jmu;
+            Jmu = a_Jv_m.isPositive() ? Jmu : -Jmu;
             Ymu = Jmu * gamma;
             const T dYmu = Ymu * (p + q / gamma);
             Ymu_1 = mu * reciprocal_x * Ymu - dYmu;

@@ -22,7 +22,6 @@
 #include "AddBasic.h"
 #include "DivBasic.h"
 #include "ArraySupport.h"
-#include "Bitwise.h"
 
 namespace Physica::Core {
     /**
