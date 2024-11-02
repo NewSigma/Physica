@@ -163,10 +163,7 @@ namespace Physica::Core {
 
     template<class Derived>
     inline typename RValueVector<Derived>::RealType RValueVector<Derived>::squaredNorm() const {
-        auto result = RealType(0);
-        for(size_t i = 0; i < getLength(); ++i)
-            result += calc(i).squaredNorm();
-        return result;
+        return toSquaredNormVector(Base::getDerived()).sum();
     }
 
     template<class Derived>

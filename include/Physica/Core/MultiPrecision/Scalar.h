@@ -84,4 +84,4 @@ namespace Physica::Core {
 #include "ScalarImpl/Float64.h"
 #include "ScalarImpl/Math.h"
 #include "ScalarImpl/FloatMP.h"
-#include "SIMD.h"
+#include "ScalarImpl/SIMD.h"

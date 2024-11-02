@@ -22,7 +22,6 @@
 #include <vectorclass/vectormath_exp.h>
 #include <Physica/PlainStruct.h>
 #include <Physica/Core/Utils/Container/Array.h>
-#include "Scalar.h"
 #include "SIMDImpl/Instruset.h"
 
 namespace Physica::Core {
@@ -90,10 +89,9 @@ namespace Physica::Core {
         inline void store(ScalarType* p) const;
         inline void store_partial(int n, ScalarType* p) const;
         inline void insert(int index, const ScalarType& value);
-        template<int... Order>
-        inline SIMD shuffle() const;
-        template<int... Flags>
-        inline SIMD change_sign() const;
+        template<int... Order> inline SIMD shuffle() const;
+        template<int... Order> inline SIMD permute() const;
+        template<int... Flags> inline SIMD change_sign() const;
 
         inline This& cutoff(int count);
 

@@ -73,6 +73,6 @@ namespace Physica::Core {
         const RealPack t5 = t3 + (t4 ^ signbit);
         const RealPack t6 = sqrt(t5 * T(0.5));
         const RealPack result = t6 ^ (x1 & signbit);
-        return SIMD<Complex<T>, Size>::asComplex(result);
+        return SIMD<Complex<T>, Size>(result);
     }
 }

@@ -23,8 +23,8 @@
 namespace Physica::Core {
     template<class MatrixType>
     class RealMatrix : public RValueMatrix<RealMatrix<MatrixType>> {
-        using Base = RValueMatrix<RealMatrix<MatrixType>>;
         using This = RealMatrix<MatrixType>;
+        using Base = RValueMatrix<This>;
     public:
         using typename Base::ScalarType;
     private:
@@ -45,8 +45,8 @@ namespace Physica::Core {
 
     template<class MatrixType>
     class ValueMatrix : public RValueMatrix<ValueMatrix<MatrixType>> {
-        using Base = RValueMatrix<ValueMatrix<MatrixType>>;
         using This = ValueMatrix<MatrixType>;
+        using Base = RValueMatrix<This>;
     public:
         using typename Base::ScalarType;
     private:

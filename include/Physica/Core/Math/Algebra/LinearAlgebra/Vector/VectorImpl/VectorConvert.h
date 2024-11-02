@@ -23,7 +23,9 @@ namespace Physica::Core {
     class RealVector : public RValueVector<RealVector<VectorType>> {
         using This = RealVector<VectorType>;
         using Base = RValueVector<This>;
-
+    public:
+        using typename Base::ScalarType;
+    private:
         const VectorType& v;
     public:
         explicit RealVector(const RValueVector<VectorType>& v_) : v(v_.getDerived()) {}
@@ -34,7 +36,7 @@ namespace Physica::Core {
         This& operator=(const This&) = delete;
         This& operator=(This&&) = delete;
         /* Getters */
-        typename Base::ScalarType calc(size_t s) const { return v.calc(s).real(); }
+        [[nodiscard]] ScalarType calc(size_t s) const { return v.calc(s).real(); }
         [[nodiscard]] size_t getLength() const { return v.getLength(); }
     };
 
@@ -42,7 +44,9 @@ namespace Physica::Core {
     class ImagVector : public RValueVector<ImagVector<VectorType>> {
         using This = ImagVector<VectorType>;
         using Base = RValueVector<This>;
-
+    public:
+        using typename Base::ScalarType;
+    private:
         const VectorType& v;
     public:
         explicit ImagVector(const RValueVector<VectorType>& v_) : v(v_.getDerived()) {}
@@ -53,7 +57,7 @@ namespace Physica::Core {
         This& operator=(const This&) = delete;
         This& operator=(This&&) = delete;
         /* Getters */
-        typename Base::ScalarType calc(size_t s) const { return v.calc(s).imag(); }
+        [[nodiscard]] ScalarType calc(size_t s) const { return v.calc(s).imag(); }
         [[nodiscard]] size_t getLength() const { return v.getLength(); }
     };
 
@@ -61,6 +65,12 @@ namespace Physica::Core {
     class SquaredNormVector : public RValueVector<SquaredNormVector<VectorType>> {
         using This = SquaredNormVector<VectorType>;
         using Base = RValueVector<This>;
+        using ComplexType = typename VectorType::ScalarType;
+    public:
+        using typename Base::ScalarType;
+        using Base::isReverseDiff;
+    private:
+        constexpr static bool isComplexV = VectorType::isComplex;
 
         const VectorType& v;
     public:
@@ -72,7 +82,66 @@ namespace Physica::Core {
         This& operator=(const This&) = delete;
         This& operator=(This&&) = delete;
         /* Getters */
-        typename Base::ScalarType calc(size_t s) const { return v.calc(s).squaredNorm(); }
+        [[nodiscard]] ScalarType calc(size_t s) const { return v.calc(s).squaredNorm(); }
+
+        template<class AnyPacket>
+        [[nodiscard]] AnyPacket packet(size_t index) const {
+            if constexpr (isComplexV) {
+                static_assert(!isReverseDiff, "[Error]: Not implemented");
+                constexpr size_t MaxSize = BestPacket<ComplexType, Dynamic>::Size;
+                constexpr size_t Size = AnyPacket::size();
+                if constexpr (Size <= MaxSize) {
+                    using PacketType = SIMD<ComplexType, Size>;
+                    const auto reim = PacketType(square(v.template packet<PacketType>(index).getImpl()));
+                    const auto imre = PacketType(reim.swapRealImag());
+                    return AnyPacket((reim + imre).real());
+                }
+                else {
+                    constexpr size_t Size1 = Size / 2;
+                    using PacketType = SIMD<ComplexType, Size1>;
+                    const auto reim1 = PacketType(square(v.template packet<PacketType>(index).getImpl()));
+                    const auto imre1 = PacketType(reim1.swapRealImag());
+                    const auto reim2 = PacketType(square(v.template packet<PacketType>(index + Size1).getImpl()));
+                    const auto imre2 = PacketType(reim2.swapRealImag());
+                    return AnyPacket((reim1 + imre1).real(), (reim2 + imre2).real());
+                }
+            }
+            else
+                return square(v.template packet<AnyPacket>(index));
+        }
+
+        template<class AnyPacket>
+        [[nodiscard]] AnyPacket packetPartial(size_t index, size_t count) const {
+            if constexpr (isComplexV) {
+                static_assert(!isReverseDiff, "[Error]: Not implemented");
+                constexpr size_t MaxSize = BestPacket<ComplexType, Dynamic>::Size;
+                constexpr size_t Size = AnyPacket::size();
+                if constexpr (Size <= MaxSize) {
+                    using PacketType = SIMD<ComplexType, Size>;
+                    const auto reim = PacketType(square(v.template packetPartial<PacketType>(index, count).getImpl()));
+                    const auto imre = PacketType(reim.swapRealImag());
+                    return AnyPacket((reim + imre).real());
+                }
+                else {
+                    constexpr size_t Size1 = Size / 2;
+                    using PacketType = SIMD<ComplexType, Size1>;
+                    const bool flag = count <= Size1;
+                    const size_t count1 = flag ? count : Size1;
+                    const auto reim1 = PacketType(square(v.template packetPartial<PacketType>(index, count1).getImpl()));
+                    const auto imre1 = PacketType(reim1.swapRealImag());
+
+                    if (flag)
+                        return AnyPacket((reim1 + imre1).real(), 0);
+                    const size_t count2 = count - count1;
+                    const auto reim2 = PacketType(square(v.template packetPartial<PacketType>(index + Size / 2, count2).getImpl()));
+                    const auto imre2 = PacketType(reim2.swapRealImag());
+                    return AnyPacket((reim1 + imre1).real(), (reim2 + imre2).real());
+                }
+            }
+            else
+                return square(v.template packetPartial<AnyPacket>(index, count));
+        }
+
         [[nodiscard]] size_t getLength() const { return v.getLength(); }
     };
 
@@ -80,7 +149,9 @@ namespace Physica::Core {
     class NormVector : public RValueVector<NormVector<VectorType>> {
         using This = NormVector<VectorType>;
         using Base = RValueVector<This>;
-
+    public:
+        using typename Base::ScalarType;
+    private:
         const VectorType& v;
     public:
         explicit NormVector(const RValueVector<VectorType>& v_) : v(v_.getDerived()) {}
@@ -91,7 +162,7 @@ namespace Physica::Core {
         This& operator=(const This&) = delete;
         This& operator=(This&&) = delete;
         /* Getters */
-        typename Base::ScalarType calc(size_t s) const { return v.calc(s).norm(); }
+        [[nodiscard]] ScalarType calc(size_t s) const { return v.calc(s).norm(); }
         [[nodiscard]] size_t getLength() const { return v.getLength(); }
     };
 
@@ -99,7 +170,9 @@ namespace Physica::Core {
     class ValueVector : public RValueVector<ValueVector<VectorType>> {
         using This = ValueVector<VectorType>;
         using Base = RValueVector<This>;
-
+    public:
+        using typename Base::ScalarType;
+    private:
         const VectorType& v;
     public:
         explicit ValueVector(const RValueVector<VectorType>& v_) : v(v_.getDerived()) {}
@@ -110,7 +183,7 @@ namespace Physica::Core {
         This& operator=(const This&) = delete;
         This& operator=(This&&) = delete;
         /* Getters */
-        typename Base::ScalarType calc(size_t s) const { return v.calc(s).getValue(); }
+        [[nodiscard]] ScalarType calc(size_t s) const { return v.calc(s).getValue(); }
         [[nodiscard]] size_t getLength() const { return v.getLength(); }
     };
 
@@ -118,7 +191,9 @@ namespace Physica::Core {
     class GradVector : public RValueVector<GradVector<VectorType, GradOrder>> {
         using This = GradVector<VectorType, GradOrder>;
         using Base = RValueVector<This>;
-
+    public:
+        using typename Base::ScalarType;
+    private:
         const VectorType& v;
     public:
         explicit GradVector(const RValueVector<VectorType>& v_) : v(v_.getDerived()) {}
@@ -129,7 +204,7 @@ namespace Physica::Core {
         This& operator=(const This&) = delete;
         This& operator=(This&&) = delete;
         /* Getters */
-        typename Base::ScalarType calc(size_t s) const { return v.calc(s).template getGrad<GradOrder>(); }
+        [[nodiscard]] ScalarType calc(size_t s) const { return v.calc(s).template getGrad<GradOrder>(); }
         [[nodiscard]] size_t getLength() const { return v.getLength(); }
     };
 

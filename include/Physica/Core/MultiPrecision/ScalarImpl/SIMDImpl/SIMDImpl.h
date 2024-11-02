@@ -189,6 +189,22 @@ namespace Physica::Core {
     }
 
     template<class ScalarType, size_t Size>
+    template<int... Order>
+    inline SIMD<ScalarType, Size> SIMD<ScalarType, Size>::permute() const {
+        static_assert(sizeof...(Order) == Size, "[Error]: Size of Order do not match the packet");
+        if constexpr (Size == 2)
+            return Physica::permute2<Order...>(getImpl());
+        else if constexpr (Size == 4)
+            return Physica::permute4<Order...>(getImpl());
+        else if constexpr (Size == 8)
+            return Physica::permute8<Order...>(getImpl());
+        else {
+            static_assert(Size == 16, "[Error]: Unexpected size");
+            return Physica::permute16<Order...>(getImpl());
+        }
+    }
+
+    template<class ScalarType, size_t Size>
     template<int... Flags>
     inline SIMD<ScalarType, Size> SIMD<ScalarType, Size>::change_sign() const {
         return Physica::change_sign<Flags...>(getImpl());
