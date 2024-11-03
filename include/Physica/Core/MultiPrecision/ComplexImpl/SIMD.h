@@ -30,15 +30,13 @@ namespace Physica::Core {
 
     template<class ScalarType, size_t Length>
     class device_obj<BestPacket<Complex<ScalarType>, Length>> {
-        using RealPacket = device_obj<BestPacket<ScalarType, Length * 2>>;
     public:
         constexpr static size_t Size = 1;
-        using Type = typename RealPacket::Type;
+        using Type = Complex<ScalarType>;
     };
 
     template<class T, size_t Size>
     class SIMD<Complex<T>, Size> : private SIMD<T, Size * 2> {
-        static_assert(T::Option == Float32 || T::Option == Float64, "[Error]: Not implemented");
         using ScalarType = Complex<T>;
         using This = SIMD<ScalarType, Size>;
         using Base = SIMD<T, Size * 2>;

@@ -21,32 +21,19 @@
 #include "DenseMatrixStorage.h"
 
 namespace Physica::Core {
-    namespace Internal {
-        template<bool IsScalar, class T, size_t Size>
-        struct HalfDenseMatrixStorageHelper {
-            using Type = Vector<T, Size>;
-        };
-
-        template<class T, size_t Size>
-        struct HalfDenseMatrixStorageHelper<false, T, Size> {
-            using Type = Array<T, Size>;
-        };
-    }
     /**
      * \class HalfDenseMatrixStorage stores half of the elements of a matrix, while the other half may be symmetric, hermitian, or etc.
-     *
-     * TODO: This class should extends ArrayBase after merging Core and Utils
      */
     template<class T, size_t Order = Dynamic>
-    class HalfDenseMatrixStorage {
+    class HalfDenseMatrixStorage : public ArrayBase<HalfDenseMatrixStorage<T, Order>, HostAllocator<T>> {
         using This = HalfDenseMatrixStorage<T, Order>;
-        constexpr static size_t Size = Order * (Order + 1) / 2;
+        using Base = ArrayBase<This, HostAllocator<T>>;
     public:
-        using ArrayType = typename Internal::HalfDenseMatrixStorageHelper<is_scalar<T>::value, T, Size>::Type;
-        using pointer = typename ArrayType::pointer;
-        using const_pointer = typename ArrayType::const_pointer;
-        using lvalue_reference = typename ArrayType::lvalue_reference;
-        using const_lvalue_reference = typename ArrayType::const_lvalue_reference;
+        using ArrayType = typename Traits<This>::ArrayType;
+        using pointer = typename Base::pointer;
+        using const_pointer = typename Base::const_pointer;
+        using lvalue_reference = typename Base::lvalue_reference;
+        using const_lvalue_reference = typename Base::const_lvalue_reference;
     private:
         ArrayType arr;
         size_t order;
@@ -62,8 +49,6 @@ namespace Physica::Core {
         ~HalfDenseMatrixStorage() = default;
         /* Operators */
         HalfDenseMatrixStorage& operator=(This obj) noexcept { swap(obj); return *this; }
-        [[nodiscard]] __host__ __device__ lvalue_reference operator[](size_t index) { return arr[index]; }
-        [[nodiscard]] __host__ __device__ const_lvalue_reference operator[](size_t index) const { return arr[index]; }
         [[nodiscard]] __host__ __device__ inline lvalue_reference operator()(size_t row, size_t col);
         [[nodiscard]] __host__ __device__ inline const_lvalue_reference operator()(size_t row, size_t col) const;
         /* Operations */
@@ -142,15 +127,26 @@ namespace Physica::Core {
     }
 }
 
-/*namespace Physica {
+namespace Physica {
     template<class T, size_t Order>
     class Traits<Core::HalfDenseMatrixStorage<T, Order>> {
+        template<bool, size_t Size>
+        struct Helper {
+            using Type = Vector<T, Size>;
+        };
+
+        template<size_t Size>
+        struct Helper<false, Size> {
+            using Type = Array<T, Size>;
+        };
+
         constexpr static bool IsScalar = Core::is_scalar<T>::value;
-        constexpr static size_t Size = Order * (Order + 1) / 2;
+        constexpr static size_t SizeAtCompile = Order * (Order + 1) / 2;
     public:
-        using ArrayType = typename std::conditional<IsScalar, Core::Vector<T, Size>, Core::Array<T, Size>>::type;
+        using ValueType = T;
+        using ArrayType = typename Helper<IsScalar, SizeAtCompile>::Type;
     };
-}*/
+}
 
 namespace std {
     template<class T, size_t Order>

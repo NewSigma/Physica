@@ -210,3 +210,4 @@ namespace std {
 
 #include "DiffImpl/DiffImpl.h"
 #include "DiffImpl/Math.h"
+#include "DiffImpl/SIMD.h"

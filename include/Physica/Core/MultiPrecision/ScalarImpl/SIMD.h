@@ -26,7 +26,6 @@
 
 namespace Physica::Core {
     template<class T, size_t Size> class BoolSIMD;
-    template<class ScalarType, int Order> class DiffTracer;
 
     template<class ScalarType, size_t Size>
     class SIMD : private Traits<SIMD<ScalarType, Size>>::BaseType {
@@ -115,63 +114,6 @@ namespace Physica::Core {
         [[nodiscard]] constexpr static unsigned int makeShuffleMask(int order);
     };
 
-    template<class PlainScalar, size_t Size>
-    class SIMD<Diff<PlainScalar, DiffMode::Reverse, 1>, Size> : public SIMD<PlainScalar, Size> {
-        static_assert(!PlainScalar::isDifferentiable, "[Error]: Invalid template param");
-        using ScalarType = Diff<PlainScalar, DiffMode::Reverse, 1>;
-        using This = SIMD<ScalarType, Size>;
-        using Base = SIMD<PlainScalar, Size>;
-        using BoolSIMDType = typename Traits<This>::BoolSIMDType;
-    public:
-        using PlainPacket = Base;
-        using TracerType = DiffTracer<PlainScalar, 1>;
-    private:
-        ScalarType headNode;
-    public:
-        SIMD() = default;
-        explicit SIMD(int i) : SIMD(PlainScalar(i)) {}
-        explicit SIMD(PlainScalar s);
-        explicit SIMD(ScalarType s);
-        SIMD(Base base, ScalarType headNode_);
-        SIMD(const SIMD&) = default;
-        SIMD(SIMD&&) noexcept = default;
-        ~SIMD() = default;
-        /* Operators */
-        SIMD& operator=(const SIMD&) = default;
-        SIMD& operator=(SIMD&&) noexcept = default;
-        [[nodiscard]] inline ScalarType operator[](int i) const;
-        [[nodiscard]] inline SIMD operator+(const SIMD& other) const;
-        [[nodiscard]] inline SIMD operator-(const SIMD& other) const;
-        [[nodiscard]] inline SIMD operator*(const SIMD& other) const;
-        [[nodiscard]] inline SIMD operator*(const ScalarType& v) const;
-        [[nodiscard]] inline SIMD operator/(const SIMD& other) const;
-        [[nodiscard]] inline SIMD operator-() const;
-        void operator+=(const SIMD& other) { *this = *this + other; }
-        void operator-=(const SIMD& other) { *this = *this - other; }
-        void operator*=(const SIMD& other) { *this = *this * other; }
-        void operator/=(const SIMD& other) { *this = *this / other; }
-        using Base::operator>;
-        using Base::operator<;
-        using Base::operator>=;
-        using Base::operator<=;
-        /* Operations */
-        inline void load(const ScalarType* p);
-        inline void load_partial(int n, const ScalarType* p);
-        inline void store(ScalarType* p) const;
-        inline void store_partial(int n, ScalarType* p) const;
-        [[nodiscard]] inline ScalarType sum() const;
-        inline void swap(SIMD& __restrict obj) noexcept;
-        /* Getters */
-        using Base::size;
-        using Base::getImpl;
-        [[nodiscard]] ScalarType getHeadNode() const noexcept { return headNode; }
-        [[nodiscard]] PlainScalar* value_ptr() const noexcept { return headNode.value_ptr(); }
-        [[nodiscard]] PlainScalar* grad_ptr() const noexcept { return headNode.grad_ptr(); }
-    private:
-        using Base::insert; //Insert a scalar may lead to incontineous memory, which harms performance
-        [[nodiscard]] static bool checkContinuous(int n, const ScalarType* p);
-    };
-
     template<class ScalarType, size_t Size>
     [[nodiscard]] inline SIMD<ScalarType, Size> operator*(const ScalarType& scalar, const SIMD<ScalarType, Size>& packet) {
         return packet * scalar;
@@ -205,29 +147,23 @@ namespace Physica::Core {
 namespace Physica {
     template<class T, size_t Size>
     class Traits<Core::SIMD<T, Size>> {
-    public:
-        using ScalarType = T;
-
-        static_assert(ScalarType::Option == Core::Float || ScalarType::Option == Core::Double, "[Error]: Unsupported float type");
-        static_assert(!ScalarType::isComplex, "[Error]: The main template targets on real scalar");
+        constexpr static bool isFloat32 = T::Option == Core::Float32;
+        static_assert(isFloat32 || T::Option == Core::Float64, "[Error]: Unsupported float type");
+        static_assert(!T::isComplex, "[Error]: The main template targets on real scalar");
+        static_assert(!T::isForwardDiff, "[Error]: The main template targets on plain scalar");
         static_assert(Size % 2 == 0 && Size <= 16, "[Error]: Invalid Size");
-    private:
-        using PlainScalar = typename ScalarType::PlainScalar;
-        constexpr static bool isForward = ScalarType::isForwardDiff;
-        constexpr static bool isFloat32 = ScalarType::Option == Core::Float32;
-        constexpr static size_t PlainSize = isForward ? (Size * 2) : Size;
-        static_assert(!isForward, "[Error]: SIMD for forward autodiff is not implemented");
-            
+
+        using PlainScalar = typename T::PlainScalar;
         using Size2Type = typename std::conditional<isFloat32, void, Vec2d>::type;
         using Size4Type = typename std::conditional<isFloat32, Vec4f, Vec4d>::type;
         using Size8Type = typename std::conditional<isFloat32, Vec8f, Vec8d>::type;
         using Size16Type = typename std::conditional<isFloat32, Vec16f, void>::type;
-        using Base1 = typename std::conditional<PlainSize == 2, Size2Type, Size4Type>::type;
-        using Base2 = typename std::conditional<PlainSize == 8, Size8Type, Size16Type>::type;
-        using Base3 = typename std::conditional<PlainSize <= 4, Base1, Base2>::type;
+        using Base1 = typename std::conditional<Size == 2, Size2Type, Size4Type>::type;
+        using Base2 = typename std::conditional<Size == 8, Size8Type, Size16Type>::type;
     public:
-        using BaseType = Base3;
-        using BoolSIMDType = Core::BoolSIMD<ScalarType, Size>;
+        using ScalarType = T;
+        using BaseType = typename std::conditional<Size <= 4, Base1, Base2>::type;
+        using BoolSIMDType = Core::BoolSIMD<T, Size>;
     };
 }
 

@@ -25,14 +25,14 @@ namespace Physica::Core {
     template<class ScalarType, size_t Length>
     class BestPacket {
         static_assert(is_scalar<ScalarType>::value, "[Error]: Invalid ScalarType");
+        static_assert(!ScalarType::isComplex, "[Error]: This specialization does not handle complex");
+        static_assert(!ScalarType::isForwardDiff, "[Error]: This specialization does not handle forward diff");
         using PlainScalar = typename ScalarType::PlainScalar;
         constexpr static bool isSinglePrec = ScalarType::Option == Float;
-        constexpr static bool isComplex = ScalarType::isComplex;
-        constexpr static bool isForward = ScalarType::isForwardDiff;
         constexpr static bool isDynamic = Length == Dynamic;
-        constexpr static size_t size128 = (isSinglePrec ? 4 : 2) / (isForward ? 2 : 1);
-        constexpr static size_t size256 = (isSinglePrec ? 8 : 4) / (isForward ? 2 : 1);
-        constexpr static size_t size512 = (isSinglePrec ? 16 : 8) / (isForward ? 2 : 1);
+        constexpr static size_t size128 = isSinglePrec ? 4 : 2;
+        constexpr static size_t size256 = isSinglePrec ? 8 : 4;
+        constexpr static size_t size512 = isSinglePrec ? 16 : 8;
         constexpr static bool support128 = INSTRSET >= 2;
         constexpr static bool support256 = INSTRSET >= 7 && support128;
         constexpr static bool support512 = INSTRSET >= 9 && support256;
@@ -46,7 +46,7 @@ namespace Physica::Core {
         constexpr static size_t BiggestSize2 = support256 ? size256 : BiggestSize1;
         constexpr static size_t BiggestSize = support512 ? size512 : BiggestSize2;
     public:
-        constexpr static size_t Size = (isComplex || isForward) ? 1 : (isDynamic ? BiggestSize : Size3);
+        constexpr static size_t Size = isDynamic ? BiggestSize : Size3;
         using Type = typename std::conditional<Size == 1, ScalarType, SIMD<ScalarType, Size>>::type;
     };
 

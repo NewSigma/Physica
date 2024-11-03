@@ -41,10 +41,10 @@ namespace Physica::Core {
         using Base::isReverseDiff;
     public:
         Vector() = default;
-        explicit Vector(size_t length_);
-        Vector(size_t length_, const T& value);
+        explicit Vector(size_t length);
+        Vector(size_t length, const T& init);
         Vector(std::initializer_list<T> list);
-        Vector(Storage array) noexcept;
+        explicit Vector(Storage array) noexcept;
         template<class Derived>
         Vector(const RValueVector<Derived>& v);
         Vector(const This&) = default;
@@ -53,7 +53,7 @@ namespace Physica::Core {
         /* Operators */
         This& operator=(This obj) noexcept { swap(obj); return *this; }
         using Base::operator=;
-        using Storage::operator[];
+        using Base::operator[];
         /* Operations */
         using Storage::resize;
         using Base::random_uniform;

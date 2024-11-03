@@ -37,7 +37,7 @@ assignTo具有整体性，因此FastAssign具有传播性。
 
 **FastPacket**
 
-FastPacket = true表示可利用SIMD获得性能提升
+FastPacket = true表示可以快速构造SIMD对象. 对于右值表达式, 需要逐个计算元素并保存在栈上, 此时FastPacket = false
 
 ## Reference
 
