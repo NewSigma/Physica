@@ -1,3 +1,16 @@
+<!--
+Copyright 2024 Weibo He.
+
+This file is part of Physica.
+
+Permission is granted to copy, distribute and/or modify this document
+under the terms of the GNU Free Documentation License, Version 1.3
+or any later version published by the Free Software Foundation;
+with no Invariant Sections, no Front-Cover Texts, and no Back-Cover Texts.
+
+You should have received a copy of the GNU Free Documentation License
+along with Physica.  If not, see <https://www.gnu.org/licenses/>.
+-->
 # Physica C++编程规范
 
 如本规范未明确指出，默认遵循Google C++编程规范$^{[1]}$。本规范与[1]均未指出的，应与已有的多数代码一致。
