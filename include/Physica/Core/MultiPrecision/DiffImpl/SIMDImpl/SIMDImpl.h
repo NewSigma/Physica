@@ -29,7 +29,7 @@ namespace Physica::Core {
     SIMD<Diff<T, DiffMode::Forward, Order>, Size>::SIMD(ScalarType x) : values(x.getValue()), grads(x.getGrad()) {}
 
     template<class T, int Order, size_t Size>
-    SIMD<Diff<T, DiffMode::Forward, Order>, Size>::SIMD(T x, int count) : values(x, count), grads(0) {}
+    SIMD<Diff<T, DiffMode::Forward, Order>, Size>::SIMD(ScalarType x, int count) : values(x.getValue(), count), grads(x.getGrad()) {}
 
     template<class T, int Order, size_t Size>
     SIMD<Diff<T, DiffMode::Forward, Order>, Size>::SIMD(ValuePacket values_, GradPacket grads_) : values(std::move(values_)), grads(std::move(grads_)) {}
@@ -115,6 +115,8 @@ namespace Physica::Core {
 
     template<class T, int Order, size_t Size>
     inline Diff<T, DiffMode::Forward, Order> SIMD<Diff<T, DiffMode::Forward, Order>, Size>::min() const {
+        const T x = values.min();
+        return ScalarType(x, GradPacket::select(ValuePacket(x) == values, grads, GradPacket(0)).sum());
     }
 
     template<class T, int Order, size_t Size>

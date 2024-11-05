@@ -35,17 +35,18 @@ namespace Physica::Core {
         SizeArray selectedCount;
         SizeArray selectedStart;
     public:
+        H5DataSpace() = default;
         explicit H5DataSpace(hsize_t size);
         explicit H5DataSpace(const SizeArray& dims);
         explicit H5DataSpace(std::initializer_list<SizeType> dims);
         H5DataSpace(const SizeArray& dims, const SizeArray& maxdims);
         explicit H5DataSpace(const H5::DataSpace& obj);
         H5DataSpace(const H5DataSpace&) = default;
-        H5DataSpace(H5DataSpace&&) noexcept = delete;
+        H5DataSpace(H5DataSpace&& obj) noexcept;
         virtual ~H5DataSpace() = default;
         /* Operators */
         inline H5DataSpace& operator=(const H5DataSpace& obj);
-        H5DataSpace& operator=(H5DataSpace&&) noexcept = delete;
+        H5DataSpace& operator=(H5DataSpace&&) noexcept;
         /* Operations */
         void selectHyperslab(H5S_seloper_t op, const SizeArray& count, const SizeArray& start);
         template<size_t SubDim>
@@ -82,6 +83,15 @@ namespace Physica::Core {
 
     template<size_t Dim>
     H5DataSpace<Dim>::H5DataSpace(const H5::DataSpace& obj) : ImplType(obj) {}
+
+    template<size_t Dim>
+    H5DataSpace<Dim>::H5DataSpace(H5DataSpace&& obj) noexcept
+            : ImplType(obj), selectedCount(std::move(obj.selectedCount)), selectedStart(std::move(obj.selectedStart)) {}
+
+    template<size_t Dim>
+    H5DataSpace<Dim>& H5DataSpace<Dim>::operator=(H5DataSpace&& obj) noexcept {
+        return *this = obj;
+    }
 
     template<size_t Dim>
     void H5DataSpace<Dim>::selectHyperslab(H5S_seloper_t op, const SizeArray& count, const SizeArray& start) {

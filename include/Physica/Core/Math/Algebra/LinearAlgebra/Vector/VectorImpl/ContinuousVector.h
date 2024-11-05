@@ -41,6 +41,11 @@ namespace Physica::Core {
     protected:
         using typename Base::PtrTy;
         using typename Base::ConstPtrTy;
+    private:
+        constexpr static int DiffOrder = ScalarType::Order;
+        constexpr static int DataDim = 1 + (DiffOrder > 1);
+        using DataSetType = H5DataSet<DataDim>;
+        using DataSpaceType = H5DataSpace<DataDim>;
     public:
         ~ContinuousVector() = default;
         /* Operators */
@@ -81,13 +86,8 @@ namespace Physica::Core {
         template<class Distribution, class RandomGenerator>
         inline void random_any(Distribution& dist, RandomGenerator& gen);
 
-        const H5DataSet<1> read(const H5Location& loc, const char* name);
-        template<class SpaceType>
-        void read(const H5DataSet<1>& dataset, const DataSpaceBase<SpaceType>& file_space);
-        
-        H5DataSet<1> write(H5Location& loc, const char* name) const;
-        template<class SpaceType>
-        void write(H5DataSet<1>& dataset, const DataSpaceBase<SpaceType>& file_space) const;
+        const DataSetType read(const H5Location& loc, const char* name);
+        DataSetType write(H5Location& loc, const char* name) const;
         /* Getters */
         [[nodiscard]] __host__ __device__ PtrTy data() { return Base::data_ptr(0); }
         [[nodiscard]] __host__ __device__ ConstPtrTy data() const { return Base::data_ptr(0); }

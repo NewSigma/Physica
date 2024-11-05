@@ -127,7 +127,10 @@ namespace Physica::Core {
     public:
         using GradPtrTy = typename GradType::PtrTy;
     private:
-        std::pair<T*, GradPtrTy> pair;
+        union {
+            std::pair<T*, GradPtrTy> pair;
+            T* arr[Order + 1];
+        };
     public:
         ScalarPtr(T* pValue, GradPtrTy pGrad) : pair(std::make_pair(pValue, pGrad)) {}
         ScalarPtr(ScalarType* p) : ScalarPtr(&p->getValue(), &p->getGrad()) {}
@@ -145,6 +148,7 @@ namespace Physica::Core {
         }
         [[nodiscard]] ScalarRef<ScalarType> operator*() const { return ScalarRef<ScalarType>(*this); }
         [[nodiscard]] This operator+(size_t n) { return ScalarPtr(value_ptr() + n, grad_ptr() + n); }
+        [[nodiscard]] T* operator[](size_t i) const noexcept { assert(i < Order); return arr[i]; }
         /* Getters */
         [[nodiscard]] T* value_ptr() const noexcept { return pair.first; }
         [[nodiscard]] GradPtrTy grad_ptr() const noexcept { return pair.second; }

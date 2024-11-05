@@ -56,7 +56,7 @@ namespace Physica::Core {
         explicit SIMD(int x);
         explicit SIMD(double x);
         explicit SIMD(ScalarType x);
-        SIMD(T x, int count);
+        SIMD(ScalarType x, int count);
         SIMD(ValuePacket values_, GradPacket grads_);
         template<int OtherOrder>
         explicit SIMD(const SIMD<Diff<T, DiffMode::Forward, OtherOrder>, Size>& other);

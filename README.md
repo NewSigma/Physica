@@ -43,7 +43,7 @@ A C++ compiler that support C++ 17, the following compilers are tested:
 Addtional libraries:
 
 [fftw](http://www.fftw.org)  3.3.10  
-[HDF5](https://www.hdfgroup.org/solutions/hdf5/) 1.14.1  (Optional, Recommanded data format)  
+[HDF5](https://www.hdfgroup.org/solutions/hdf5/) 1.14.1  (Optional, Recommended data format)  
 [oneMKL](https://www.intel.com/) 2024.2 (Optional)  
 [CUDA](https://developer.nvidia.com/cuda-downloads)  12.3  (Optional)  
 [Qt](https://www.qt.io/)  6.5.3  (Optional, Plotting support)  

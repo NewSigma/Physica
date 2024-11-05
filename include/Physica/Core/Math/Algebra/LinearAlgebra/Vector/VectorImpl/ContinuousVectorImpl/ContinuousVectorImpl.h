@@ -273,41 +273,49 @@ namespace Physica::Core {
     }
 #ifdef PHYSICA_HDF5
     template<class Derived>
-    const H5DataSet<1> ContinuousVector<Derived>::read(const H5Location& loc, const char* name) {
-        const auto dataset = loc.openDataSet<1>(name);
+    const typename ContinuousVector<Derived>::DataSetType ContinuousVector<Derived>::read(const H5Location& loc, const char* name) {
+        const auto dataset = loc.openDataSet<DataDim>(name);
         const size_t length = dataset.getSize(0);
         resize(length);
-        const auto space = H5DataSpace<1>({length});
-        dataset.read(data(), ScalarType::getH5DataType(), space, space);
+
+        const auto memSpace = H5DataSpace<1>(length);
+        if constexpr (isForwardDiff) {
+            auto fileSpace = DataSpaceType({length, DiffOrder + 1});
+            for (size_t i = 0; i <= DiffOrder; ++i) {
+                fileSpace.selectHyperslab(H5S_SELECT_SET, {length, 1}, {0, i});
+                dataset.read(data()[i], PlainScalar::getH5DataType(), memSpace, fileSpace);
+            }
+        }
+        else
+            dataset.read(data(), PlainScalar::getH5DataType(), memSpace, memSpace);
         return dataset;
     }
 
     template<class Derived>
-    template<class SpaceType>
-    void ContinuousVector<Derived>::read(const H5DataSet<1>& dataset, const DataSpaceBase<SpaceType>& file_space) {
-        const size_t length = dataset.getSize(0);
-        resize(length);
-        const auto mem_space = H5DataSpace<1>({length});
-        dataset.read(data(), ScalarType::getH5DataType(), mem_space, file_space.asH5Type());
-    }
-
-    template<class Derived>
-    H5DataSet<1> ContinuousVector<Derived>::write(H5Location& loc, const char* name) const {
-        const auto space = H5DataSpace<1>({Base::getLength()});
-        H5DataSet<1> dataset;
-        if (loc.exists(name))
-            dataset = loc.openDataSet<1>(name);
+    typename ContinuousVector<Derived>::DataSetType ContinuousVector<Derived>::write(H5Location& loc, const char* name) const {
+        const size_t length = Base::getLength();
+        const auto memSpace = H5DataSpace<1>(length);
+        DataSpaceType fileSpace;
+        if constexpr (isForwardDiff)
+            fileSpace = DataSpaceType({length, DiffOrder + 1});
         else
-            dataset = loc.createDataSet<1>(name, ScalarType::getH5DataType(), space);
-        dataset.write(data(), ScalarType::getH5DataType(), space, space);
-        return std::cref(dataset);
-    }
+            fileSpace = memSpace;
 
-    template<class Derived>
-    template<class SpaceType>
-    void ContinuousVector<Derived>::write(H5DataSet<1>& dataset, const DataSpaceBase<SpaceType>& file_space) const {
-        const auto mem_space = H5DataSpace<1>({Base::getLength()});
-        dataset.write(data(), ScalarType::getH5DataType(), mem_space, file_space.asH5Type());
+        DataSetType dataset;
+        if (loc.exists(name))
+            dataset = loc.openDataSet<DataDim>(name);
+        else
+            dataset = loc.createDataSet<DataDim>(name, PlainScalar::getH5DataType(), fileSpace);
+
+        if constexpr (isForwardDiff) {
+            for (size_t i = 0; i <= DiffOrder; ++i) {
+                fileSpace.selectHyperslab(H5S_SELECT_SET, {length, 1}, {0, i});
+                dataset.write(data()[i], PlainScalar::getH5DataType(), memSpace, fileSpace);
+            }
+        }
+        else
+            dataset.write(data(), PlainScalar::getH5DataType(), memSpace, fileSpace);
+        return std::cref(dataset);
     }
 #endif
     template<class Derived>
