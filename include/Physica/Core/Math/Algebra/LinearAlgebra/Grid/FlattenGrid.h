@@ -31,6 +31,9 @@ namespace Physica::Core {
     public:
         using Base = LValueVector<FlattenGrid<GridType>>;
         using typename Base::ScalarType;
+    protected:
+        using typename Base::PtrTy;
+        using typename Base::ConstPtrTy;
     public:
         FlattenGrid(const LValueGrid<GridType>& grid_) : grid(grid_.getDerived()) {}
         /* Operators */
@@ -40,8 +43,8 @@ namespace Physica::Core {
         void resize([[maybe_unused]] size_t length) { assert(length == getLength()); }
         /* Getters */
         [[nodiscard]] size_t getLength() const noexcept { return grid.getSize(); }
-        [[nodiscard]] __host__ __device__ inline ScalarType* data_ptr(size_t index);
-        [[nodiscard]] __host__ __device__ inline const ScalarType* data_ptr(size_t index) const;
+        [[nodiscard]] __host__ __device__ inline PtrTy data_ptr(size_t index);
+        [[nodiscard]] __host__ __device__ inline ConstPtrTy data_ptr(size_t index) const;
     };
 
     template<class GridType>
@@ -51,12 +54,12 @@ namespace Physica::Core {
     }
 
     template<class GridType>
-    __host__ __device__ typename FlattenGrid<GridType>::ScalarType* FlattenGrid<GridType>::data_ptr(size_t index) {
+    __host__ __device__ typename FlattenGrid<GridType>::PtrTy FlattenGrid<GridType>::data_ptr(size_t index) {
         return const_cast<ScalarType*>(const_cast<const This&>(*this).data_ptr(index));
     }
 
     template<class GridType>
-    __host__ __device__ const typename FlattenGrid<GridType>::ScalarType* FlattenGrid<GridType>::data_ptr(size_t index) const {
+    __host__ __device__ typename FlattenGrid<GridType>::ConstPtrTy FlattenGrid<GridType>::data_ptr(size_t index) const {
         const size_t temp = index / grid.getDimZ();
         const size_t x = temp / grid.getDimY();
         const size_t y = temp % grid.getDimY();

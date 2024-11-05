@@ -36,6 +36,8 @@ namespace Physica::Core {
             : public DenseMatrixDim<DenseMatrixStorage<T, MatrixOption::Column | MatrixOption::Element, Row, Column, Allocator>, Row, Column> {
         using This = DenseMatrixStorage<T, MatrixOption::Column | MatrixOption::Element, Row, Column, Allocator>;
         using Dim = DenseMatrixDim<This, Row, Column>;
+        using RefTy = typename T::RefTy;
+        using ConstRefTy = typename T::ConstRefTy;
         using ArrayType = typename std::conditional<is_scalar<T>::value, Vector<T, Row * Column>, Array<T, Row * Column>>::type;
     public:
         using InitializerType = T;
@@ -53,12 +55,12 @@ namespace Physica::Core {
         ~DenseMatrixStorage() = default;
         /* Operators */
         This& operator=(This obj) noexcept { swap(obj); return *this; }
-        [[nodiscard]] T& operator()(size_t r, size_t c) {
+        [[nodiscard]] RefTy operator()(size_t r, size_t c) {
             assert(r < getRow() && c < getColumn());
             return arr[toIndex(r, c)];
         }
 
-        [[nodiscard]] const T& operator()(size_t r, size_t c) const {
+        [[nodiscard]] ConstRefTy operator()(size_t r, size_t c) const {
             assert(r < getRow() && c < getColumn());
             return arr[toIndex(r, c)];
         }
@@ -96,6 +98,8 @@ namespace Physica::Core {
             : public DenseMatrixDim<DenseMatrixStorage<T, MatrixOption::Row | MatrixOption::Element, Row, Column, Allocator>, Row, Column> {
         using This = DenseMatrixStorage<T, MatrixOption::Row | MatrixOption::Element, Row, Column, Allocator>;
         using Dim = DenseMatrixDim<This, Row, Column>;
+        using RefTy = typename T::RefTy;
+        using ConstRefTy = typename T::ConstRefTy;
         using ArrayType = typename std::conditional<is_scalar<T>::value, Vector<T, Row * Column>, Array<T, Row * Column>>::type;
     public:
         using InitializerType = T;
@@ -111,12 +115,12 @@ namespace Physica::Core {
         ~DenseMatrixStorage() = default;
         /* Operators */
         This& operator=(This obj) noexcept { swap(obj); return *this; }
-        [[nodiscard]] T& operator()(size_t r, size_t c) {
+        [[nodiscard]] RefTy& operator()(size_t r, size_t c) {
             assert(r < getRow() && c < getColumn());
             return arr[toIndex(r, c)];
         }
 
-        [[nodiscard]] const T& operator()(size_t r, size_t c) const {
+        [[nodiscard]] ConstRefTy operator()(size_t r, size_t c) const {
             assert(r < getRow() && c < getColumn());
             return arr[toIndex(r, c)];
         }
@@ -154,6 +158,8 @@ namespace Physica::Core {
             : public DenseMatrixDim<DenseMatrixStorage<T, MatrixOption::Column | MatrixOption::Vector, Row, Column, Allocator>, Row, Column> {
         using This = DenseMatrixStorage<T, MatrixOption::Column | MatrixOption::Vector, Row, Column, Allocator>;
         using Dim = DenseMatrixDim<This, Row, Column>;
+        using RefTy = typename T::RefTy;
+        using ConstRefTy = typename T::ConstRefTy;
     public:
         using VectorType = typename std::conditional<is_scalar<T>::value, Vector<T, Row>, Array<T, Row>>::type;
         using InitializerType = VectorType;
@@ -176,12 +182,12 @@ namespace Physica::Core {
         ~DenseMatrixStorage() = default;
         /* Operators */
         This& operator=(This obj) noexcept { swap(obj); return *this; }
-        [[nodiscard]] T& operator()(size_t r, size_t c) {
+        [[nodiscard]] RefTy operator()(size_t r, size_t c) {
             assert(r < getRow() && c < getColumn());
             return array[c][r];
         }
 
-        [[nodiscard]] const T& operator()(size_t r, size_t c) const {
+        [[nodiscard]] ConstRefTy operator()(size_t r, size_t c) const {
             assert(r < getRow() && c < getColumn());
             return array[c][r];
         }
@@ -216,6 +222,8 @@ namespace Physica::Core {
             : public DenseMatrixDim<DenseMatrixStorage<T, MatrixOption::Row | MatrixOption::Vector, Row, Column, Allocator>, Row, Column> {
         using This = DenseMatrixStorage<T, MatrixOption::Row | MatrixOption::Vector, Row, Column, Allocator>;
         using Dim = DenseMatrixDim<This, Row, Column>;
+        using RefTy = typename T::RefTy;
+        using ConstRefTy = typename T::ConstRefTy;
     public:
         using VectorType = typename std::conditional<is_scalar<T>::value, Vector<T, Column>, Array<T, Column>>::type;
         using InitializerType = VectorType;
@@ -238,12 +246,12 @@ namespace Physica::Core {
         ~DenseMatrixStorage() = default;
         /* Operators */
         This& operator=(This obj) noexcept { swap(obj); return *this; }
-        [[nodiscard]] T& operator()(size_t r, size_t c) {
+        [[nodiscard]] RefTy operator()(size_t r, size_t c) {
             assert(r < getRow() && c < getColumn());
             return array[r][c];
         }
 
-        [[nodiscard]] const T& operator()(size_t r, size_t c) const {
+        [[nodiscard]] ConstRefTy operator()(size_t r, size_t c) const {
             assert(r < getRow() && c < getColumn());
             return array[r][c];
         }

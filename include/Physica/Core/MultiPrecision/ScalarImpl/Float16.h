@@ -25,18 +25,22 @@ namespace Physica {
     template<>
     class Traits<Core::float16> {
     public:
-        using ScalarType = Core::float16;
-        using RealType = ScalarType;
-        using ComplexType = Core::Complex<ScalarType>;
-        using TrivialType = __half;
-        using PlainScalar = ScalarType;
         constexpr static Core::ScalarOption Option = Core::Float16;
+        constexpr static int Order = 0;
         constexpr static bool isComplex = false;
         constexpr static bool isDifferentiable = false;
         constexpr static bool isForwardDiff = false;
         constexpr static bool isReverseDiff = false;
-        constexpr static Core::DiffMode Mode = Core::DiffMode::Forward;
-        constexpr static int Order = 0;
+
+        using PlainScalar = Core::float16;
+        using ScalarType = PlainScalar;
+        using PtrTy = ScalarType*;
+        using ConstPtrTy = const ScalarType*;
+        using RefTy = ScalarType&;
+        using ConstRefTy = const ScalarType&;
+        using RealType = ScalarType;
+        using ComplexType = Core::Complex<ScalarType>;
+        using TrivialType = __half;
     };
 }
 
@@ -63,8 +67,8 @@ namespace Physica::Core {
         /* Operators */
         using Base::operator>;
         using Base::operator<;
-        Scalar& operator=(const Scalar& obj) = default;
-        Scalar& operator=(Scalar&& obj) noexcept = default;
+        This& operator=(const This& obj) = default;
+        This& operator=(This&& obj) noexcept = default;
         __host__ __device__ explicit operator float() const { return h; }
         __host__ __device__ explicit operator double() const { return h; }
         __host__ __device__ Scalar operator+(const Scalar& s) const { return Scalar(h + s.h); }

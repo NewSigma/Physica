@@ -22,17 +22,22 @@ namespace Physica {
     template<>
     class Traits<Core::Scalar<Core::FloatMP>> {
     public:
-        using ScalarType = Core::Scalar<Core::FloatMP>;
-        using RealType = ScalarType;
-        using ComplexType = Core::Complex<ScalarType>;
-        using TrivialType = ScalarType;
-        using PlainScalar = ScalarType;
         constexpr static Core::ScalarOption Option = Core::FloatMP;
+        constexpr static int Order = 0;
         constexpr static bool isComplex = false;
         constexpr static bool isDifferentiable = false;
         constexpr static bool isForwardDiff = false;
         constexpr static bool isReverseDiff = false;
-        constexpr static int Order = 0;
+
+        using PlainScalar = Core::Scalar<Core::FloatMP>;
+        using ScalarType = PlainScalar;
+        using PtrTy = ScalarType*;
+        using ConstPtrTy = const ScalarType*;
+        using RefTy = ScalarType&;
+        using ConstRefTy = const ScalarType&;
+        using RealType = ScalarType;
+        using ComplexType = Core::Complex<ScalarType>;
+        using TrivialType = ScalarType;
     };
 }
 

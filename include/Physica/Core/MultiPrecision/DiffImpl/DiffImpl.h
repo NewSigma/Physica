@@ -107,6 +107,51 @@ namespace Physica::Core {
         return *instance;
     }
 #endif
+
+    template<class T, int Order>
+    ScalarRef<Diff<T, DiffMode::Forward, Order>>& ScalarRef<Diff<T, DiffMode::Forward, Order>>::operator=(const ScalarRef& other) {
+        getValue() = other.getValue();
+        getGrad() = other.getGrad();
+        return *this;
+    }
+
+    template<class T, int Order>
+    ScalarRef<Diff<T, DiffMode::Forward, Order>>& ScalarRef<Diff<T, DiffMode::Forward, Order>>::operator=(const ScalarType& other) {
+        getValue() = other.getValue();
+        getGrad() = other.getGrad();
+        return *this;
+    }
+
+    template<class T, int Order>
+    void ScalarRef<Diff<T, DiffMode::Forward, Order>>::swap(This&& obj) noexcept {
+        getValue().swap(obj.getValue());
+        getGrad().swap(obj.getGrad());
+    }
+
+    template<class T, int Order>
+    void ScalarRef<Diff<T, DiffMode::Forward, Order>>::swap(ScalarType& obj) noexcept {
+        getValue().swap(obj.getValue());
+        getGrad().swap(obj.getGrad());
+    }
+
+    template<class T, int Order>
+    template<int GradOrder>
+    typename ScalarRef<Diff<T, DiffMode::Forward, Order>>::template GradRtnTy<GradOrder> ScalarRef<Diff<T, DiffMode::Forward, Order>>::getGrad() noexcept {
+        if constexpr (GradOrder == 1) {
+            if constexpr (Order == GradOrder)
+                return *ptr.grad_ptr();
+            else
+                return ScalarRef<Diff<T, DiffMode::Forward, Order - GradOrder>>(ptr.grad_ptr());
+        }
+        else
+            return ptr.grad_ptr().template getGrad<GradOrder - 1>();
+    }
+
+    template<class T, int Order>
+    template<int GradOrder>
+    const typename ScalarRef<Diff<T, DiffMode::Forward, Order>>::template GradRtnTy<GradOrder> ScalarRef<Diff<T, DiffMode::Forward, Order>>::getGrad() const noexcept {
+        return const_cast<This&>(*this).template getGrad<GradOrder>();
+    }
     ////////////////////////////////////////////////////////////
     template<class ScalarType, int Order>
     Diff<ScalarType, DiffMode::Reverse, Order>::Diff(ScalarType value)

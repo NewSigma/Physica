@@ -27,6 +27,9 @@ namespace Physica::Core {
         using DeviceVector = device_obj<VectorType>;
     public:
         using ScalarType = typename Base::ScalarType;
+    protected:
+        using typename Base::PtrTy;
+        using typename Base::ConstPtrTy;
     private:
         Physica::PlainStruct<DeviceVector> vec;
         size_t from;
@@ -45,8 +48,8 @@ namespace Physica::Core {
         __host__ __device__ void resize([[maybe_unused]] size_t length) const { assert(length == getLength()); }
         /* Getters */
         [[nodiscard]] __host__ __device__ inline size_t getLength() const noexcept { return to - from; }
-        [[nodiscard]] __host__ __device__ inline ScalarType* data_ptr(size_t index);
-        [[nodiscard]] __host__ __device__ inline const ScalarType* data_ptr(size_t index) const;
+        [[nodiscard]] __host__ __device__ inline PtrTy data_ptr(size_t index);
+        [[nodiscard]] __host__ __device__ inline ConstPtrTy data_ptr(size_t index) const;
     };
 
     template<class VectorType, size_t Length>
@@ -69,14 +72,14 @@ namespace Physica::Core {
     }
 
     template<class VectorType, size_t Length>
-    __host__ __device__ inline typename device_obj<LVectorBlock<VectorType, Length>>::ScalarType*
+    __host__ __device__ inline typename device_obj<LVectorBlock<VectorType, Length>>::PtrTy
     device_obj<LVectorBlock<VectorType, Length>>::data_ptr(size_t index) {
         assert((index + from) < to);
         return vec.getDerived().data_ptr(index);
     }
 
     template<class VectorType, size_t Length>
-    __host__ __device__ inline const typename device_obj<LVectorBlock<VectorType, Length>>::ScalarType*
+    __host__ __device__ inline const typename device_obj<LVectorBlock<VectorType, Length>>::ConstPtrTy
     device_obj<LVectorBlock<VectorType, Length>>::data_ptr(size_t index) const {
         return const_cast<This&>(*this).data_ptr(index);
     }

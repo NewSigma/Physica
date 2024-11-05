@@ -23,12 +23,15 @@ namespace Physica::Core {
     class ContinuousFlatten : public ContinuousVector<ContinuousFlatten<MatrixType>> {
         using This = ContinuousFlatten<MatrixType>;
 
-        const MatrixType& mat;
+        MatrixType& mat;
     public:
         using Base = ContinuousVector<This>;
         using typename Base::ScalarType;
+    protected:
+        using PtrTy = typename ScalarType::PtrTy;
+        using ConstPtrTy = typename ScalarType::ConstPtrTy;
     public:
-        ContinuousFlatten(const ContinuousMatrix<MatrixType>& mat_) : mat(mat_.getDerived()) {}
+        ContinuousFlatten(ContinuousMatrix<MatrixType>& mat_) : mat(mat_.getDerived()) {}
         ContinuousFlatten(const This&) = delete;
         ContinuousFlatten(This&&) noexcept = delete;
         ~ContinuousFlatten() = default;
@@ -42,22 +45,22 @@ namespace Physica::Core {
         void resize([[maybe_unused]] size_t length) { assert(length == getLength()); }
         /* Getters */
         [[nodiscard]] __host__ __device__ size_t getLength() const noexcept { return mat.getRow() * mat.getColumn(); }
-        [[nodiscard]] __host__ __device__ inline ScalarType* data_ptr(size_t index);
-        [[nodiscard]] __host__ __device__ inline const ScalarType* data_ptr(size_t index) const;
+        [[nodiscard]] __host__ __device__ inline PtrTy data_ptr(size_t index);
+        [[nodiscard]] __host__ __device__ inline ConstPtrTy data_ptr(size_t index) const;
     };
 
     template<class MatrixType>
-    __host__ __device__ inline typename ContinuousFlatten<MatrixType>::ScalarType* ContinuousFlatten<MatrixType>::data_ptr(size_t index) {
-        return const_cast<ScalarType*>(const_cast<const This&>(*this).data_ptr(index));
-    }
-
-    template<class MatrixType>
-    __host__ __device__ inline const typename ContinuousFlatten<MatrixType>::ScalarType* ContinuousFlatten<MatrixType>::data_ptr(size_t index) const {
+    __host__ __device__ inline typename ContinuousFlatten<MatrixType>::PtrTy ContinuousFlatten<MatrixType>::data_ptr(size_t index) {
         const size_t major = index / mat.getMaxMinor();
         const size_t minor = index % mat.getMaxMinor();
         const size_t row = MatrixOption::rowFromMajorMinor<MatrixType>(major, minor);
         const size_t col = MatrixOption::columnFromMajorMinor<MatrixType>(major, minor);
         return mat.data_ptr(row, col);
+    }
+
+    template<class MatrixType>
+    __host__ __device__ inline typename ContinuousFlatten<MatrixType>::ConstPtrTy ContinuousFlatten<MatrixType>::data_ptr(size_t index) const {
+        return const_cast<This&>(*this).data_ptr(index);
     }
 }
 

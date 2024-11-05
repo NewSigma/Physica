@@ -26,7 +26,9 @@ namespace Physica::Core {
     Vector<T, Length, Allocator>::Vector(size_t length) : Storage(length) {}
 
     template<class T, size_t Length, class Allocator>
-    Vector<T, Length, Allocator>::Vector(size_t length, const T& init) : Storage(length, init) {}
+    Vector<T, Length, Allocator>::Vector(size_t length, const T& init) : Vector(length) {
+        *this = init;
+    }
 
     template<class T, size_t Length, class Allocator>
     Vector<T, Length, Allocator>::Vector(std::initializer_list<T> list) : Storage(std::move(list)) {

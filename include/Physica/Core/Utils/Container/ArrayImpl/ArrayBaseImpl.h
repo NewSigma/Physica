@@ -21,69 +21,6 @@
 #include <cstring>
 
 namespace Physica::Core {
-    template<class T> class DeviceAllocator;
-}
-
-namespace Physica::Core {
-    template<class Pointer, class Derived, class Allocator>
-    __host__ __device__ ContainerIterator<Pointer, ArrayBase<Derived, Allocator>>&
-    ContainerIterator<Pointer, ArrayBase<Derived, Allocator>>::operator=(const ContainerIterator& ite) { //NOLINT Self assign is ok.
-        p = ite.p;
-        return *this;
-    }
-
-    template<class Pointer, class Derived, class Allocator>
-    __host__ __device__ ContainerIterator<Pointer, ArrayBase<Derived, Allocator>>
-    ContainerIterator<Pointer, ArrayBase<Derived, Allocator>>::operator+(difference_type n) const {
-        return ContainerIterator(p + n);
-    }
-
-    template<class Pointer, class Derived, class Allocator>
-    __host__ __device__ ContainerIterator<Pointer, ArrayBase<Derived, Allocator>>
-    ContainerIterator<Pointer, ArrayBase<Derived, Allocator>>::operator-(difference_type n) const {
-        return ContainerIterator(p - n);
-    }
-
-    template<class Pointer, class Derived, class Allocator>
-    __host__ __device__ ContainerIterator<Pointer, ArrayBase<Derived, Allocator>>&
-    ContainerIterator<Pointer, ArrayBase<Derived, Allocator>>::operator++() {
-        ++p;
-        return *this;
-    }
-
-    template<class Pointer, class Derived, class Allocator>
-    __host__ __device__ const ContainerIterator<Pointer, ArrayBase<Derived, Allocator>>
-    ContainerIterator<Pointer, ArrayBase<Derived, Allocator>>::operator++(int) {
-        return ContainerIterator(p++);
-    }
-
-    template<class Pointer, class Derived, class Allocator>
-    __host__ __device__ ContainerIterator<Pointer, ArrayBase<Derived, Allocator>>&
-    ContainerIterator<Pointer, ArrayBase<Derived, Allocator>>::operator--() {
-        --p;
-        return *this;
-    }
-
-    template<class Pointer, class Derived, class Allocator>
-    __host__ __device__ ReverseContainerIterator<Pointer, ArrayBase<Derived, Allocator>>&
-    ReverseContainerIterator<Pointer, ArrayBase<Derived, Allocator>>::operator=(const ReverseContainerIterator& ite) { //NOLINT Self assign is ok.
-        p = ite.p;
-        return *this;
-    }
-
-    template<class Pointer, class Derived, class Allocator>
-    __host__ __device__ ReverseContainerIterator<Pointer, ArrayBase<Derived, Allocator>>&
-    ReverseContainerIterator<Pointer, ArrayBase<Derived, Allocator>>::operator++() {
-        --p;
-        return *this;
-    }
-
-    template<class Pointer, class Derived, class Allocator>
-    __host__ __device__ const ReverseContainerIterator<Pointer, ArrayBase<Derived, Allocator>>
-    ReverseContainerIterator<Pointer, ArrayBase<Derived, Allocator>>::operator++(int) {
-        return ReverseContainerIterator(p--);
-    }
-
     template<class Derived, class Allocator>
     __host__ __device__ inline typename ArrayBase<Derived, Allocator>::lvalue_reference
     ArrayBase<Derived, Allocator>::operator[](size_t index) {
@@ -113,6 +50,6 @@ namespace Physica::Core {
     template<class Derived, class Allocator>
     template<class... Args>
     __host__ __device__ constexpr bool ArrayBase<Derived, Allocator>::isTrivialDefaultConstruct() {
-        return (sizeof...(Args) == 0) && std::is_trivially_default_constructible<ValueType>::value;
+        return (sizeof...(Args) == 0) && std::is_trivially_default_constructible<value_type>::value;
     }
 }

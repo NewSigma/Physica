@@ -1,0 +1,129 @@
+/*
+ * Copyright 2024 Weibo He.
+ *
+ * This file is part of Physica.
+ *
+ * Physica is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Physica is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
+ */
+#pragma once
+
+namespace Physica::Core {
+    template<class T, int Order, int Option>
+    DenseMatrix<Diff<T, DiffMode::Forward, Order>, Option>::DenseMatrix(size_t row, size_t col) : values(row, col), grads(row, col) {}
+
+    template<class T, int Order, int Option>
+    DenseMatrix<Diff<T, DiffMode::Forward, Order>, Option>::DenseMatrix(size_t row, size_t col, T init)
+            : values(row, col, init), grads(row, col, init) {}
+
+    template<class T, int Order, int Option>
+    template<class OtherMatrix>
+    DenseMatrix<Diff<T, DiffMode::Forward, Order>, Option>::DenseMatrix(const RValueMatrix<OtherMatrix>& mat) : DenseMatrix(mat.getRow(), mat.getColumn()) {
+        mat.getDerived().assignTo(*this);
+    }
+
+    template<class T, int Order, int Option>
+    template<class VectorType>
+    DenseMatrix<Diff<T, DiffMode::Forward, Order>, Option>::DenseMatrix(const RValueVector<VectorType>& vec) : DenseMatrix(vec.getLength(), 1) {
+        auto col = this->col(0);
+        vec.getDerived().assignTo(col);
+    }
+
+    template<class T, int Order, int Option>
+    void DenseMatrix<Diff<T, DiffMode::Forward, Order>, Option>::resize(size_t row, size_t col) {
+        values.resize(row, col);
+        grads.resize(row, col);
+    }
+
+    template<class T, int Order, int Option>
+    void DenseMatrix<Diff<T, DiffMode::Forward, Order>, Option>::swap(This& __restrict obj) noexcept {
+        assert(this != &obj && "[Error]: Self swap is likely a bug");
+        values.swap(obj.values);
+        grads.swap(obj.grads);
+    }
+
+    template<class T, int Order, int Option>
+    inline typename DenseMatrix<Diff<T, DiffMode::Forward, Order>, Option>::PtrTy
+    DenseMatrix<Diff<T, DiffMode::Forward, Order>, Option>::data_ptr(size_t row, size_t col) noexcept {
+        return PtrTy(values.data_ptr(row, col), grads.data_ptr(row, col));
+    }
+
+    template<class T, int Order, int Option>
+    inline typename DenseMatrix<Diff<T, DiffMode::Forward, Order>, Option>::ConstPtrTy
+    DenseMatrix<Diff<T, DiffMode::Forward, Order>, Option>::data_ptr(size_t row, size_t col) const noexcept {
+        return const_cast<This&>(*this).data_ptr(row, col);
+    }
+    ////////////////////////////////////////////////////////////////////////
+    template<class PlainScalar, int Option, int Order>
+    Diff<DenseMatrix<PlainScalar, Option>, DiffMode::Reverse, Order>::Diff()
+            : traceSeg(TracerType::getInstance().pushSegment()) {}
+
+    template<class PlainScalar, int Option, int Order>
+    Diff<DenseMatrix<PlainScalar, Option>, DiffMode::Reverse, Order>::Diff(size_t row, size_t column)
+            : traceSeg(TracerType::getInstance().pushSegment(row * column)) {}
+
+    template<class PlainScalar, int Option, int Order>
+    Diff<DenseMatrix<PlainScalar, Option>, DiffMode::Reverse, Order>::Diff(PlainMatrix values)
+            : traceSeg(TracerType::getInstance().pushSegment(values.flatten())) {}
+
+    template<class PlainScalar, int Option, int Order>
+    inline typename Diff<DenseMatrix<PlainScalar, Option>, DiffMode::Reverse, Order>::ScalarType
+    Diff<DenseMatrix<PlainScalar, Option>, DiffMode::Reverse, Order>::calc(size_t row, size_t col) const {
+        if constexpr (Base::isRowMatrix)
+            return traceSeg[row * getColumn() + col];
+        else
+            return traceSeg[col * getRow() + row];
+    }
+
+    template<class PlainScalar, int Option, int Order>
+    template<class RandomGenerator>
+    inline void Diff<DenseMatrix<PlainScalar, Option>, DiffMode::Reverse, Order>::random_uniform(RandomGenerator& gen) {
+        *this = random_uniform(getRow(), getColumn(), gen);
+    }
+
+    template<class PlainScalar, int Option, int Order>
+    template<class RandomGenerator>
+    inline void Diff<DenseMatrix<PlainScalar, Option>, DiffMode::Reverse, Order>::random_normal(RandomGenerator& gen) {
+        *this = random_normal(getRow(), getColumn(), gen);
+    }
+
+    template<class PlainScalar, int Option, int Order>
+    template<class Distribution, class RandomGenerator>
+    inline void Diff<DenseMatrix<PlainScalar, Option>, DiffMode::Reverse, Order>::random_any(Distribution& dist, RandomGenerator& gen) {
+        *this = random_any(getRow(), getColumn(), dist, gen);
+    }
+
+    template<class PlainScalar, int Option, int Order>
+    template<class RandomGenerator>
+    inline Diff<DenseMatrix<PlainScalar, Option>, DiffMode::Reverse, Order>
+    Diff<DenseMatrix<PlainScalar, Option>, DiffMode::Reverse, Order>::random_uniform(
+            size_t row, size_t column, RandomGenerator& gen) {
+        return This(PlainMatrix::random_uniform(row, column, gen));
+    }
+
+    template<class PlainScalar, int Option, int Order>
+    template<class RandomGenerator>
+    inline Diff<DenseMatrix<PlainScalar, Option>, DiffMode::Reverse, Order>
+    Diff<DenseMatrix<PlainScalar, Option>, DiffMode::Reverse, Order>::random_normal(
+            size_t row, size_t column, RandomGenerator& gen) {
+        return This(PlainMatrix::random_normal(row, column, gen));
+    }
+
+    template<class PlainScalar, int Option, int Order>
+    template<class Distribution, class RandomGenerator>
+    inline Diff<DenseMatrix<PlainScalar, Option>, DiffMode::Reverse, Order>
+    Diff<DenseMatrix<PlainScalar, Option>, DiffMode::Reverse, Order>::random_any(
+            size_t row, size_t column, Distribution& dist, RandomGenerator& gen) {
+        return This(PlainMatrix::random_any(row, column, dist, gen));
+    }
+}

@@ -102,25 +102,29 @@ namespace Physica::Core {
 namespace Physica {
     using namespace Core;
 
-    template<class T, DiffMode M, int Order_>
-    class Traits<Core::device_obj<Diff<T, M, Order_>>> {
+    template<class T, DiffMode Mode, int Order_>
+    class Traits<Core::device_obj<Diff<T, Mode, Order_>>> {
         static_assert(!T::isDifferentiable, "[Error]: Nested Diff<> is not allowed");
         static_assert(!is_device_obj<T>::value, "[Error]: Nested device_obj<> is not allowed");
         using RealT = typename T::RealType;
         using ComplexT = typename T::ComplexType;
     public:
-        using PlainScalar = T;
-        constexpr static DiffMode Mode = M;
-        constexpr static int Order = Order_;
-        using ScalarType = Core::device_obj<Diff<T, M, Order>>;
-        using RealType = Core::device_obj<Diff<RealT, M, Order>>;
-        using ComplexType = Core::device_obj<Diff<ComplexT, M, Order>>;
-        using TrivialType = typename T::TrivialType;
         constexpr static ScalarOption Option = T::Option;
         constexpr static bool isComplex = T::isComplex;
         constexpr static bool isDifferentiable = true;
         constexpr static bool isForwardDiff = false;
         constexpr static bool isReverseDiff = true;
+
+        using PlainScalar = T;
+        constexpr static int Order = Order_;
+        using ScalarType = Core::device_obj<Diff<T, Mode, Order>>;
+        using PtrTy = ScalarType*;
+        using ConstPtrTy = const ScalarType*;
+        using RefTy = ScalarType&;
+        using ConstRefTy = const ScalarType&;
+        using RealType = Core::device_obj<Diff<RealT, Mode, Order>>;
+        using ComplexType = Core::device_obj<Diff<ComplexT, Mode, Order>>;
+        using TrivialType = typename T::TrivialType;
     };
 }
 

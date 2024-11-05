@@ -38,13 +38,17 @@ namespace Physica::Core {
         using Base::SizeAtCompile;
         using Base::isForwardDiff;
         using Base::isReverseDiff;
+    protected:
+        using typename Base::PtrTy;
+        using typename Base::ConstPtrTy;
     public:
         ~ContinuousVector() = default;
         /* Operators */
         using Base::operator=;
         inline ContinuousVector& operator=(const ContinuousVector& v);
         inline ContinuousVector& operator=(ContinuousVector&& v) noexcept;
-        inline Derived& operator=(const ScalarType& s);
+        template<class OtherScalar>
+        inline Derived& operator=(const ScalarBase<OtherScalar>& s);
         /* Operations */
         template<class AnyPacket> [[nodiscard]] inline AnyPacket packet(size_t index) const;
         template<class AnyPacket> [[nodiscard]] inline AnyPacket packetPartial(size_t index, size_t count) const;
@@ -85,8 +89,8 @@ namespace Physica::Core {
         template<class SpaceType>
         void write(H5DataSet<1>& dataset, const DataSpaceBase<SpaceType>& file_space) const;
         /* Getters */
-        [[nodiscard]] __host__ __device__ ScalarType* data() { return Base::data_ptr(0); }
-        [[nodiscard]] __host__ __device__ const ScalarType* data() const { return Base::data_ptr(0); }
+        [[nodiscard]] __host__ __device__ PtrTy data() { return Base::data_ptr(0); }
+        [[nodiscard]] __host__ __device__ ConstPtrTy data() const { return Base::data_ptr(0); }
     protected:
         ContinuousVector() = default;
         ContinuousVector(const ContinuousVector&) = default;

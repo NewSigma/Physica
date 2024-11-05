@@ -108,12 +108,6 @@ namespace Physica::Core {
     }
 
     template<class T>
-    FFT<T, 1>& FFT<T, 1>::operator=(FFT<T, 1> fft) noexcept {
-        swap(fft);
-        return *this;
-    }
-
-    template<class T>
     void FFT<T, 1>::swap(FFT& __restrict fft) noexcept {
         assert(this != &fft && "[Error]: Self swap is likely a bug");
         std::swap(forward_plan, fft.forward_plan);
@@ -292,12 +286,6 @@ namespace Physica::Core {
         }
         fftw_free(buffer);
         Internal::ThreadGuardFFTW::getInstance().globalMutex.unlock();
-    }
-
-    template<class T, size_t Dim>
-    FFT<T, Dim>& FFT<T, Dim>::operator=(FFT<T, Dim> fft) noexcept {
-        swap(fft);
-        return *this;
     }
 
     template<class T, size_t Dim>

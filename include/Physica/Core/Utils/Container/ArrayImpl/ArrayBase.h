@@ -22,79 +22,10 @@
 #include <type_traits>
 #include <memory>
 #include <Physica/CRTPBase.h>
-
-namespace Physica {
-    template<class T> class Traits;
-}
+#include "Iterator.h"
 
 namespace Physica::Core {
-    template<class Derived, class Allocator> class ArrayBase;
 
-    template<class T, class Container>
-    class ContainerIterator;
-    
-    template<class ValueType, class Derived, class Allocator>
-    class ContainerIterator<ValueType, ArrayBase<Derived, Allocator>> {
-    public:
-        using difference_type = std::ptrdiff_t;
-        using value_type = ValueType;
-        using pointer = typename std::add_pointer<ValueType>::type;;
-        using reference = typename std::add_lvalue_reference<ValueType>::type;
-        using iterator_category = std::random_access_iterator_tag;
-    private:
-        pointer p;
-    public:
-        __host__ __device__ ContainerIterator(const ContainerIterator& ite) : p(ite.p) {}
-        ~ContainerIterator() = default;
-        /* Operators */
-        __host__ __device__ ContainerIterator& operator=(const ContainerIterator& ite);
-        [[nodiscard]] __host__ __device__ ContainerIterator operator+(difference_type n) const;
-        [[nodiscard]] __host__ __device__ ContainerIterator operator-(difference_type n) const;
-        [[nodiscard]] __host__ __device__ bool operator<(const ContainerIterator& ite) const { return p < ite.p; }
-        [[nodiscard]] __host__ __device__ bool operator>(const ContainerIterator& ite) const { return p > ite.p; }
-        [[nodiscard]] __host__ __device__ bool operator<=(const ContainerIterator& ite) const { return !(p > ite.p); }
-        [[nodiscard]] __host__ __device__ bool operator>=(const ContainerIterator& ite) const { return !(p < ite.p); }
-        [[nodiscard]] __host__ __device__ difference_type operator-(const ContainerIterator& ite) const { return p - ite.p; }
-        [[nodiscard]] __host__ __device__ bool operator==(const ContainerIterator& ite) const noexcept { return p == ite.p; }
-        [[nodiscard]] __host__ __device__ bool operator!=(const ContainerIterator& ite) const noexcept { return p != ite.p; }
-        __host__ __device__ ContainerIterator& operator++();
-        __host__ __device__ const ContainerIterator operator++(int);
-        __host__ __device__ ContainerIterator& operator--();
-        [[nodiscard]] __host__ __device__ reference operator*() const { return *p; }
-    private:
-        __host__ __device__ explicit ContainerIterator(pointer p) : p(p) {}
-
-        friend class ArrayBase<Derived, Allocator>;
-    };
-
-    template<class Pointer, class Container>
-    class ReverseContainerIterator;
-    
-    template<class ValueType, class Derived, class Allocator>
-    class ReverseContainerIterator<ValueType, ArrayBase<Derived, Allocator>> {
-    public:
-        using difference_type = std::ptrdiff_t;
-        using value_type = ValueType;
-        using pointer = typename std::add_pointer<ValueType>::type;;
-        using reference = typename std::add_lvalue_reference<ValueType>::type;
-        using iterator_category = std::random_access_iterator_tag;
-    private:
-        pointer p;
-    public:
-        __host__ __device__ ReverseContainerIterator(const ReverseContainerIterator& ite) : p(ite.p) {}
-        ~ReverseContainerIterator() = default;
-        /* Operators */
-        __host__ __device__ ReverseContainerIterator& operator=(const ReverseContainerIterator& ite);
-        [[nodiscard]] __host__ __device__ bool operator==(const ReverseContainerIterator& ite) const noexcept { return p == ite.p; }
-        [[nodiscard]] __host__ __device__ bool operator!=(const ReverseContainerIterator& ite) const noexcept { return p != ite.p; }
-        __host__ __device__ ReverseContainerIterator& operator++();
-        __host__ __device__ const ReverseContainerIterator operator++(int);
-        [[nodiscard]] __host__ __device__ reference operator*() const { return *p; }
-    private:
-        __host__ __device__ explicit ReverseContainerIterator(pointer p) : p(p) {}
-
-        friend class ArrayBase<Derived, Allocator>;
-    };
     /**
      * Public parts among specializations of \class Array.
      */
@@ -105,18 +36,21 @@ namespace Physica::Core {
         using AllocatorTraits = std::allocator_traits<Allocator>;
     public:
         using allocator_type = Allocator;
-        using ValueType = typename AllocatorTraits::value_type;
+        using value_type = typename AllocatorTraits::value_type;
         using pointer = typename AllocatorTraits::pointer;
         using const_pointer = typename AllocatorTraits::const_pointer;
         using lvalue_reference = typename AllocatorTraits::lvalue_reference;
         using const_lvalue_reference = typename AllocatorTraits::const_lvalue_reference;
         using rvalue_reference = typename AllocatorTraits::rvalue_reference;
-        using Iterator = ContainerIterator<ValueType, This>;
-        using ConstIterator = ContainerIterator<const ValueType, This>;
-        using ReverseIterator = ReverseContainerIterator<ValueType, This>;
-        using ConstReverseIterator = ReverseContainerIterator<const ValueType, This>;
 
-        static_assert(std::is_same<ValueType, typename Traits<Derived>::ValueType>::value, "[Error]: Declaration is not self consistent");
+        using ElemType = typename Traits<Derived>::ElemType;
+    protected:
+        using FIteType = FIterator<Derived>;
+        using RIteType = RIterator<Derived>;
+        using CFIteType = FIterator<const Derived>;
+        using CRIteType = RIterator<const Derived>;
+
+        static_assert(std::is_same<value_type, ElemType>::value, "[Error]: Declaration is not self consistent");
     public:
         ~ArrayBase() = default;
         /* Operators */
@@ -125,18 +59,18 @@ namespace Physica::Core {
         bool operator==(const ArrayBase& array) const;
         bool operator!=(const ArrayBase& array) const { return !(*this == array); }
         /* Iterators */
-        __host__ __device__ Iterator begin() noexcept { return Iterator(data()); }
-        __host__ __device__ ConstIterator begin() const noexcept { return cbegin(); }
-        __host__ __device__ ConstIterator cbegin() const noexcept { return ConstIterator(data()); }
-        __host__ __device__ Iterator end() noexcept { return Iterator(data() + getLength()); }
-        __host__ __device__ ConstIterator end() const noexcept { return cend(); }
-        __host__ __device__ ConstIterator cend() const noexcept { return ConstIterator(data() + getLength()); }
-        __host__ __device__ ReverseIterator rbegin() noexcept { return ReverseIterator(data() + getLength() - 1); }
-        __host__ __device__ ConstReverseIterator rbegin() const noexcept { return crbegin(); }
-        __host__ __device__ ConstReverseIterator crbegin() const noexcept { return ConstReverseIterator(data() + getLength() - 1); }
-        __host__ __device__ ReverseIterator rend() noexcept { return ReverseIterator(data() - 1); }
-        __host__ __device__ ConstReverseIterator rend() const noexcept { return crend(); }
-        __host__ __device__ ConstReverseIterator crend() const noexcept { return ConstReverseIterator(data() - 1); }
+        __host__ __device__ FIteType begin() noexcept { return FIteType(data()); }
+        __host__ __device__ CFIteType begin() const noexcept { return cbegin(); }
+        __host__ __device__ CFIteType cbegin() const noexcept { return CFIteType(data()); }
+        __host__ __device__ FIteType end() noexcept { return FIteType(data() + getLength()); }
+        __host__ __device__ CFIteType end() const noexcept { return cend(); }
+        __host__ __device__ CFIteType cend() const noexcept { return CFIteType(data() + getLength()); }
+        __host__ __device__ RIteType rbegin() noexcept { return RIteType(data() + getLength() - 1); }
+        __host__ __device__ CRIteType rbegin() const noexcept { return crbegin(); }
+        __host__ __device__ CRIteType crbegin() const noexcept { return CRIteType(data() + getLength() - 1); }
+        __host__ __device__ RIteType rend() noexcept { return RIteType(data() - 1); }
+        __host__ __device__ CRIteType rend() const noexcept { return crend(); }
+        __host__ __device__ CRIteType crend() const noexcept { return CRIteType(data() - 1); }
         /* Getters */
         [[nodiscard]] __host__ __device__ size_t size() const noexcept { return Base::getDerived().size(); }
         [[nodiscard]] __host__ __device__ size_t getLength() const noexcept { return Base::getDerived().getLength(); }

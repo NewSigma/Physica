@@ -27,6 +27,11 @@ namespace Physica::Core {
     public:
         using Base = ContinuousVector<This>;
         using ScalarType = typename VectorType::ScalarType;
+    protected:
+        using typename Base::PtrTy;
+        using typename Base::ConstPtrTy;
+        using typename Base::RefTy;
+        using typename Base::ConstRefTy;
     private:
         VectorType& vec;
         size_t from;
@@ -41,8 +46,8 @@ namespace Physica::Core {
         using Base::operator=;
         inline ContinuousVectorBlock& operator=(const ContinuousVectorBlock& v);
         inline ContinuousVectorBlock& operator=(ContinuousVectorBlock&& v) noexcept;
-        [[nodiscard]] ScalarType& operator[](size_t index);
-        [[nodiscard]] const ScalarType& operator[](size_t index) const;
+        [[nodiscard]] RefTy operator[](size_t index);
+        [[nodiscard]] ConstRefTy operator[](size_t index) const;
         /* Operations */
         template<class AnyPacket> [[nodiscard]] inline AnyPacket packet(size_t index) const;
         template<class AnyPacket> [[nodiscard]] inline AnyPacket packetPartial(size_t index, size_t count) const;
@@ -51,8 +56,8 @@ namespace Physica::Core {
         void resize([[maybe_unused]] size_t length) const { assert(length == getLength()); }
         /* Getters */
         [[nodiscard]] __host__ __device__ inline size_t getLength() const noexcept;
-        [[nodiscard]] __host__ __device__ inline ScalarType* data_ptr(size_t index) { return vec.data() + from + index; }
-        [[nodiscard]] __host__ __device__ inline const ScalarType* data_ptr(size_t index) const { return vec.data() + from + index; }
+        [[nodiscard]] __host__ __device__ inline PtrTy data_ptr(size_t index) { return vec.data() + from + index; }
+        [[nodiscard]] __host__ __device__ inline ConstPtrTy data_ptr(size_t index) const { return vec.data() + from + index; }
     };
 
     template<class VectorType, size_t Length>
@@ -82,14 +87,14 @@ namespace Physica::Core {
     }
 
     template<class VectorType, size_t Length>
-    inline typename ContinuousVectorBlock<VectorType, Length>::ScalarType&
+    inline typename ContinuousVectorBlock<VectorType, Length>::RefTy
     ContinuousVectorBlock<VectorType, Length>::operator[](size_t index) {
         assert((index + from) < to);
         return vec[index + from];
     }
 
     template<class VectorType, size_t Length>
-    inline const typename ContinuousVectorBlock<VectorType, Length>::ScalarType&
+    inline typename ContinuousVectorBlock<VectorType, Length>::ConstRefTy
     ContinuousVectorBlock<VectorType, Length>::operator[](size_t index) const {
         assert((index + from) < to);
         return vec[index + from];

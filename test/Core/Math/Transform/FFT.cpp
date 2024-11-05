@@ -19,6 +19,7 @@
 #include <iostream>
 #include <Physica/Core/Math/Transform/FFT.h>
 #include <Physica/Core/Math/Transform/DiffFFT.h>
+#include <Physica/Core/Math/Algebra/LinearAlgebra/Vector/DiffVector.h>
 #include <Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h>
 
 using namespace Physica::Core;
@@ -70,7 +71,7 @@ void test_differentiable() {
         constexpr double precision = 1E-13;
         fft.invTransform();
         for (size_t i = 0; i < data.getLength(); ++i) {
-            const bool isNear = scalarNear(data[i], fft.getRSpace()[i], precision);
+            const bool isNear = scalarNear(ScalarType(data[i]), ScalarType(fft.getRSpace()[i]), precision);
             const bool isSmall = abs(data[i].getValue()) < PlainScalar(precision) && abs(fft.getRSpace()[i].getValue()) < PlainScalar(precision);
             if(!isNear && !isSmall)
                 exit(EXIT_FAILURE);

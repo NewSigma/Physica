@@ -82,6 +82,20 @@ namespace Physica::Core {
     }
 
     template<class Derived>
+    inline typename LValueMatrix<Derived>::RefTy LValueMatrix<Derived>::operator()(size_t row, size_t column) {
+        auto p = data_ptr(row, column);
+        if constexpr (isForwardDiff)
+            return RefTy(p);
+        else
+            return *p;
+    }
+
+    template<class Derived>
+    inline typename LValueMatrix<Derived>::ConstRefTy LValueMatrix<Derived>::operator()(size_t row, size_t column) const {
+        return const_cast<This&>(*this).operator()(row, column);
+    }
+
+    template<class Derived>
     inline typename LValueMatrix<Derived>::RowVector LValueMatrix<Derived>::row(size_t r) {
         return RowVector(Base::getDerived(), r, 0, Base::getColumn());
     }
@@ -366,7 +380,22 @@ namespace Physica::Core {
     }
 
     template<class Derived>
-    inline typename LValueMatrix<Derived>::ScalarType& LValueMatrix<Derived>::refFromMajorMinor(size_t major, size_t minor) {
+    typename LValueMatrix<Derived>::ScalarType LValueMatrix<Derived>::calc(size_t row, size_t col) const {
+        return ScalarType(*data_ptr(row, col));
+    }
+
+    template<class Derived>
+    __host__ __device__ inline typename LValueMatrix<Derived>::PtrTy LValueMatrix<Derived>::data_ptr(size_t row, size_t col) noexcept {
+        return Base::getDerived().data_ptr(row, col);
+    }
+
+    template<class Derived>
+    __host__ __device__ inline typename LValueMatrix<Derived>::ConstPtrTy LValueMatrix<Derived>::data_ptr(size_t row, size_t col) const noexcept {
+        return const_cast<This&>(*this).data_ptr(row, col);
+    }
+
+    template<class Derived>
+    inline typename LValueMatrix<Derived>::RefTy LValueMatrix<Derived>::refFromMajorMinor(size_t major, size_t minor) {
         const size_t r = MatrixOption::rowFromMajorMinor<Derived>(major, minor);
         const size_t c = MatrixOption::columnFromMajorMinor<Derived>(major, minor);
         assert(r < Base::getDerived().getRow() && c < Base::getDerived().getColumn());
@@ -374,7 +403,7 @@ namespace Physica::Core {
     }
 
     template<class Derived>
-    inline const typename LValueMatrix<Derived>::ScalarType& LValueMatrix<Derived>::refFromMajorMinor(size_t major, size_t minor) const {
+    inline typename LValueMatrix<Derived>::ConstRefTy LValueMatrix<Derived>::refFromMajorMinor(size_t major, size_t minor) const {
         const size_t r = MatrixOption::rowFromMajorMinor<Derived>(major, minor);
         const size_t c = MatrixOption::columnFromMajorMinor<Derived>(major, minor);
         assert(r < Base::getDerived().getRow() && c < Base::getDerived().getColumn());

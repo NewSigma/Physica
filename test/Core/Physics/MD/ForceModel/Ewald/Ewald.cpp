@@ -16,10 +16,8 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include <Physica/Core/Math/Calculus/Differential.h>
+#include <iostream>
 #include <Physica/Core/Physics/MD/ForceModel/Ewald/Ewald.h>
-#include <Physica/Core/Physics/SolidState/CrystalCell.h>
-#include <Physica/Core/Physics/PhyConst.h>
 #include <Physica/Core/MultiPrecision/AutoDiffGuard.h>
 #include <Physica/Core/Parallel/Executor/SequentialExecutor.h>
 
@@ -40,7 +38,7 @@ void VASPTest() {
 }
 /**
  * Reference:
- * [1] pyewald(github.com/lukeolson/pyewald)
+ * [1] pyewald; https://github.com/lukeolson/pyewald
  */
 template<class ScalarType>
 void madelungTest() {

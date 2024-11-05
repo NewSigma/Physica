@@ -30,6 +30,9 @@ namespace Physica::Core {
     public:
         using Base = device_obj<LValueVector<host_obj>>;
         using typename Base::ScalarType;
+    protected:
+        using PtrTy = typename ScalarType::PtrTy;
+        using ConstPtrTy = typename ScalarType::ConstPtrTy;
     public:
         __host__ __device__ device_obj(const device_obj<LValueMatrix<MatrixType>>& mat_) : mat(mat_.getDerived()) {}
         device_obj(const This&) = delete;
@@ -43,24 +46,24 @@ namespace Physica::Core {
         [[nodiscard]] __device__ const ScalarType& operator[](size_t index) const { return *data_ptr(index); }
         /* Getters */
         [[nodiscard]] __host__ __device__ size_t getLength() const noexcept { return mat.getRow() * mat.getColumn(); }
-        [[nodiscard]] __host__ __device__ inline ScalarType* data_ptr(size_t index);
-        [[nodiscard]] __host__ __device__ inline const ScalarType* data_ptr(size_t index) const;
+        [[nodiscard]] __host__ __device__ inline PtrTy data_ptr(size_t index);
+        [[nodiscard]] __host__ __device__ inline ConstPtrTy data_ptr(size_t index) const;
     };
 
     template<class MatrixType>
-    __host__ __device__ inline typename device_obj<LValueFlatten<MatrixType>>::ScalarType*
+    __host__ __device__ inline typename device_obj<LValueFlatten<MatrixType>>::PtrTy
     device_obj<LValueFlatten<MatrixType>>::data_ptr(size_t index) {
-        return const_cast<ScalarType*>(const_cast<const This&>(*this).data_ptr(index));
-    }
-
-    template<class MatrixType>
-    __host__ __device__ inline const typename device_obj<LValueFlatten<MatrixType>>::ScalarType*
-    device_obj<LValueFlatten<MatrixType>>::data_ptr(size_t index) const {
         const size_t major = index / mat.getMaxMinor();
         const size_t minor = index % mat.getMaxMinor();
         const size_t row = MatrixOption::rowFromMajorMinor<MatrixType>(major, minor);
         const size_t col = MatrixOption::columnFromMajorMinor<MatrixType>(major, minor);
         return mat.data_ptr(row, col);
+    }
+
+    template<class MatrixType>
+    __host__ __device__ inline typename device_obj<LValueFlatten<MatrixType>>::ConstPtrTy
+    device_obj<LValueFlatten<MatrixType>>::data_ptr(size_t index) const {
+        return const_cast<This&>(*this).data_ptr(index);
     }
 }
 

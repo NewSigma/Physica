@@ -28,6 +28,9 @@ namespace Physica::Core {
         using typename Base::ScalarType;
         using Base::RowAtCompile;
         using Base::ColumnAtCompile;
+    protected:
+        using PtrTy = typename ScalarType::PtrTy;
+        using ConstPtrTy = typename ScalarType::ConstPtrTy;
     public:
         /* Operators */
         device_obj& operator=(const device_obj& m) = delete;
@@ -46,8 +49,8 @@ namespace Physica::Core {
         /* Getters */
         template<Side Owner = GetSide()>
         [[nodiscard]] __device__ ScalarType calc(size_t row, size_t col) const { return *data_ptr(row, col); }
-        [[nodiscard]] __host__ __device__ ScalarType* data_ptr(size_t row, size_t column) { return Base::getDerived().data_ptr(row, column); }
-        [[nodiscard]] __host__ __device__ const ScalarType* data_ptr(size_t row, size_t column) const { return Base::getDerived().data_ptr(row, column); }
+        [[nodiscard]] __host__ __device__ PtrTy data_ptr(size_t row, size_t column) { return Base::getDerived().data_ptr(row, column); }
+        [[nodiscard]] __host__ __device__ ConstPtrTy data_ptr(size_t row, size_t column) const { return Base::getDerived().data_ptr(row, column); }
         [[nodiscard]] __device__ inline ScalarType& refFromMajorMinor(size_t major, size_t minor);
         [[nodiscard]] __device__ inline const ScalarType& refFromMajorMinor(size_t major, size_t minor) const;
         [[nodiscard]] __host__ __device__ device_obj<LValueFlatten<Derived>> flatten() { return {*this}; }

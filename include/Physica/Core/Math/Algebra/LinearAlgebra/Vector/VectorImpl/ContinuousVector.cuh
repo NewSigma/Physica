@@ -31,6 +31,9 @@ namespace Physica::Core {
     public:
         using host_obj = ContinuousVector<Derived>;
         using typename Base::ScalarType;
+    protected:
+        using typename Base::PtrTy;
+        using typename Base::ConstPtrTy;
     public:
         ~device_obj() = default;
         /* Operators */
@@ -62,8 +65,8 @@ namespace Physica::Core {
         template<size_t Length = Dynamic>
         [[nodiscard]] __host__ __device__ inline const BlockType<Length> segment(size_t from, size_t to) const;
         /* Getters */
-        [[nodiscard]] __host__ __device__ ScalarType* data() { return Base::data_ptr(0); }
-        [[nodiscard]] __host__ __device__ const ScalarType* data() const { return Base::data_ptr(0); }
+        [[nodiscard]] __host__ __device__ PtrTy data() { return Base::data_ptr(0); }
+        [[nodiscard]] __host__ __device__ ConstPtrTy data() const { return Base::data_ptr(0); }
     protected:
         device_obj() = default;
         device_obj(const device_obj&) = default;

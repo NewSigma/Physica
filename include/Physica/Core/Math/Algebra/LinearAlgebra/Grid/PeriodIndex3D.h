@@ -27,7 +27,7 @@ namespace Physica::Core {
      */
     class PHYSICA_API PeriodIndex3D {
         using Index3D = typename GridBase::Index3D;
-        using Index1D = typename Index3D::ValueType;
+        using Index1D = typename Index3D::ElemType;
 
         Index3D index;
         Index3D dim;

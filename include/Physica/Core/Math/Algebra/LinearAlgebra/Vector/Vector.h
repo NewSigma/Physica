@@ -39,6 +39,9 @@ namespace Physica::Core {
         using typename Base::RowMatrix;
         using Base::SizeAtCompile;
         using Base::isReverseDiff;
+    protected:
+        using typename Base::PtrTy;
+        using typename Base::ConstPtrTy;
     public:
         Vector() = default;
         explicit Vector(size_t length);
@@ -67,8 +70,8 @@ namespace Physica::Core {
         /* Getters */
         using Storage::getLength;
         using Storage::data;
-        [[nodiscard]] __host__ __device__ ScalarType* data_ptr(size_t index) { return data() + index; }
-        [[nodiscard]] __host__ __device__ const ScalarType* data_ptr(size_t index) const { return data() + index; }
+        [[nodiscard]] __host__ __device__ PtrTy data_ptr(size_t index) { return data() + index; }
+        [[nodiscard]] __host__ __device__ ConstPtrTy data_ptr(size_t index) const { return data() + index; }
         /* Static members */
         [[nodiscard]] static Vector zeros(size_t len);
         template<class RandomGenerator>
@@ -86,6 +89,7 @@ namespace Physica::Core {
 namespace Physica {
     template<class T, size_t Length, class Allocator>
     class Traits<Core::Vector<T, Length, Allocator>> {
+        static_assert(!T::isForwardDiff, "[Error]: Use diffable vector instead");
     public:
         using ScalarType = T;
         constexpr static size_t SizeAtCompile = Length;

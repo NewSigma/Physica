@@ -29,6 +29,7 @@ namespace Physica::Core {
     template<class Derived>
     class ContinuousMatrix : public LValueMatrix<Derived> {
         using Base = LValueMatrix<Derived>;
+        using This = ContinuousMatrix<Derived>;
     public:
         using typename Base::ScalarType;
         using typename Base::PlainScalar;
@@ -37,6 +38,9 @@ namespace Physica::Core {
         using Base::isColumnMatrix;
         using Base::isRowMatrix;
         using Base::isReverseDiff;
+    protected:
+        using typename Base::PtrTy;
+        using typename Base::ConstPtrTy;
     private:
         using RowVector = ContinuousMatrixBlock<Derived, 1, ColumnAtCompile>;
         using ColVector = ContinuousMatrixBlock<Derived, RowAtCompile, 1>;
@@ -122,10 +126,10 @@ namespace Physica::Core {
         const H5DataSet<2> read(const H5Location& loc, const char* name);
         H5DataSet<2> write(H5Location& loc, const char* name) const;
         /* Getters */
-        [[nodiscard]] __host__ __device__ ScalarType* data() { return Base::getDerived().data_ptr(0, 0); }
-        [[nodiscard]] __host__ __device__ const ScalarType* data() const { return Base::getDerived().data_ptr(0, 0); }
+        [[nodiscard]] __host__ __device__ PtrTy data() { return Base::getDerived().data_ptr(0, 0); }
+        [[nodiscard]] __host__ __device__ ConstPtrTy data() const { return Base::getDerived().data_ptr(0, 0); }
         [[nodiscard]] ContinuousFlatten<Derived> flatten() { return {*this}; }
-        [[nodiscard]] const ContinuousFlatten<Derived> flatten() const { return {*this}; }
+        [[nodiscard]] const ContinuousFlatten<Derived> flatten() const { return {const_cast<This&>(*this)}; }
     protected:
         ContinuousMatrix() = default;
         ContinuousMatrix(const ContinuousMatrix&) = default;

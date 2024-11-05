@@ -35,8 +35,8 @@ namespace Physica::Core {
         using This = Array<T, Length, Allocator>;
     public:
         using Base = ArrayBase<This, Allocator>;
+        using typename Base::ElemType;
         using typename Base::allocator_type;
-        using typename Base::ValueType;
         using typename Base::pointer;
         using typename Base::const_pointer;
         using typename Base::lvalue_reference;
@@ -87,8 +87,8 @@ namespace Physica::Core {
         using This = Array<T, Dynamic, Allocator>;
     public:
         using Base = ArrayBase<This, Allocator>;
+        using typename Base::ElemType;
         using typename Base::allocator_type;
-        using typename Base::ValueType;
         using typename Base::pointer;
         using typename Base::const_pointer;
         using typename Base::lvalue_reference;
@@ -152,7 +152,7 @@ namespace Physica {
     template<class T, size_t Length, class Allocator>
     class Traits<Core::Array<T, Length, Allocator>> {
     public:
-        using ValueType = T;
+        using ElemType = T;
         constexpr static size_t SizeAtCompile = Length;
         using AllocatorType = Allocator;
     };

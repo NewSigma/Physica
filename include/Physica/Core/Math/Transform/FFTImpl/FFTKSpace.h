@@ -31,13 +31,15 @@ namespace Physica::Core {
         using RealType = typename Traits<This>::ScalarType::RealType;
     public:
         using typename VectorBase::ScalarType;
+    protected:
+        using typename VectorBase::PtrTy;
+        using typename VectorBase::ConstPtrTy;
     public:
         ~FFTKSpace() = default;
         /* Operators */
-        using VectorBase::operator=;
         FFTKSpace& operator=(const FFTKSpace& obj);
-        [[nodiscard]] __host__ __device__ inline ScalarType& operator[](size_t index);
-        [[nodiscard]] __host__ __device__ inline const ScalarType& operator[](size_t index) const;
+        using VectorBase::operator=;
+        using VectorBase::operator[];
         /* Operations */
         [[nodiscard]] ScalarType calc(size_t index) const;
         template<class VectorType>
@@ -47,8 +49,8 @@ namespace Physica::Core {
         [[nodiscard]] __host__ __device__ size_t getLength() const noexcept { return Derived::rSizeToKSize(Base::getDerived().getRSpaceSize()); }
         [[nodiscard]] __host__ __device__ size_t getSize() const noexcept { return getLength(); }
         [[nodiscard]] __host__ __device__ size_t getRSpaceSize() const noexcept { return Base::getDerived().getRSpaceSize(); }
-        [[nodiscard]] __host__ __device__ inline ScalarType* data_ptr(size_t index);
-        [[nodiscard]] __host__ __device__ inline const ScalarType* data_ptr(size_t index) const;
+        [[nodiscard]] __host__ __device__ inline PtrTy data_ptr(size_t index);
+        [[nodiscard]] __host__ __device__ inline ConstPtrTy data_ptr(size_t index) const;
     protected:
         FFTKSpace() = default;
         FFTKSpace(const FFTKSpace&) = default;
@@ -60,17 +62,6 @@ namespace Physica::Core {
         resize(obj.getLength());
         obj.assignTo(*this);
         return *this;
-    }
-
-    template<class Derived>
-    inline typename FFTKSpace<Derived, 1>::ScalarType& FFTKSpace<Derived, 1>::operator[](size_t index) {
-        return const_cast<ScalarType&>(const_cast<const This&>(*this).operator[](index));
-    }
-
-    template<class Derived>
-    inline const typename FFTKSpace<Derived, 1>::ScalarType& FFTKSpace<Derived, 1>::operator[](size_t index) const {
-        assert(index < getLength());
-        return Base::getDerived().asComplexBuffer()[index];
     }
 
     template<class Derived>
@@ -90,14 +81,15 @@ namespace Physica::Core {
     }
 
     template<class Derived>
-    __host__ __device__ inline typename FFTKSpace<Derived, 1>::ScalarType* FFTKSpace<Derived, 1>::data_ptr(size_t index) {
-        return const_cast<ScalarType*>(const_cast<const This&>(*this).data_ptr(index));
+    __host__ __device__ inline typename FFTKSpace<Derived, 1>::PtrTy FFTKSpace<Derived, 1>::data_ptr(size_t index) {
+        assert(index < getLength());
+        return Base::getDerived().asComplexBuffer() + index;
+
     }
 
     template<class Derived>
-    __host__ __device__ inline const typename FFTKSpace<Derived, 1>::ScalarType* FFTKSpace<Derived, 1>::data_ptr(size_t index) const {
-        assert(index < getLength());
-        return Base::getDerived().asComplexBuffer() + index;
+    __host__ __device__ inline typename FFTKSpace<Derived, 1>::ConstPtrTy FFTKSpace<Derived, 1>::data_ptr(size_t index) const {
+        return const_cast<This&>(*this).data_ptr(index);
     }
     //////////////////////////////////////////////////////////////////////
     template<class Derived>
@@ -109,13 +101,15 @@ namespace Physica::Core {
         using MatrixBase = ContinuousMatrix<This>;
     public:
         using typename MatrixBase::ScalarType;
+    protected:
+        using typename MatrixBase::PtrTy;
+        using typename MatrixBase::ConstPtrTy;
     public:
         ~FFTKSpace() = default;
         /* Operators */
-        using MatrixBase::operator=;
         FFTKSpace& operator=(const FFTKSpace& obj);
-        [[nodiscard]] inline ScalarType& operator()(size_t row, size_t col) { return *data_ptr(row, col); }
-        [[nodiscard]] inline const ScalarType& operator()(size_t row, size_t col) const { return *data_ptr(row, col); }
+        using MatrixBase::operator=;
+        using MatrixBase::operator();
         /* Operations */
         template<class MatrixType>
         inline void invTransform(const RValueMatrix<MatrixType>& data);
@@ -123,8 +117,8 @@ namespace Physica::Core {
         /* Getters */
         [[nodiscard]] __host__ __device__ size_t getRow() const noexcept { return Base::getDerived().getKSpaceSize()[0]; }
         [[nodiscard]] __host__ __device__ size_t getColumn() const noexcept { return Base::getDerived().getKSpaceSize()[1]; }
-        [[nodiscard]] __host__ __device__ ScalarType* data_ptr(size_t row, size_t column);
-        [[nodiscard]] __host__ __device__ const ScalarType* data_ptr(size_t row, size_t column) const;
+        [[nodiscard]] __host__ __device__ PtrTy data_ptr(size_t row, size_t column);
+        [[nodiscard]] __host__ __device__ ConstPtrTy data_ptr(size_t row, size_t column) const;
     protected:
         FFTKSpace() = default;
         FFTKSpace(const FFTKSpace&) = default;
@@ -148,15 +142,15 @@ namespace Physica::Core {
     }
 
     template<class Derived>
-    inline typename FFTKSpace<Derived, 2>::ScalarType* FFTKSpace<Derived, 2>::data_ptr(size_t row, size_t col) {
-        return const_cast<ScalarType*>(const_cast<const This&>(*this).data_ptr(row, col));
-    }
-
-    template<class Derived>
-    inline const typename FFTKSpace<Derived, 2>::ScalarType* FFTKSpace<Derived, 2>::data_ptr(size_t row, size_t col) const {
+    inline typename FFTKSpace<Derived, 2>::PtrTy FFTKSpace<Derived, 2>::data_ptr(size_t row, size_t col) {
         assert(row < getRow());
         assert(col < getColumn());
         return Base::getDerived().asComplexBuffer() + row * getColumn() + col;
+    }
+
+    template<class Derived>
+    inline typename FFTKSpace<Derived, 2>::ConstPtrTy FFTKSpace<Derived, 2>::data_ptr(size_t row, size_t col) const {
+        return const_cast<This&>(*this).data_ptr(row, col);
     }
     //////////////////////////////////////////////////////////////////////
     template<class Derived>
@@ -169,11 +163,14 @@ namespace Physica::Core {
     public:
         using typename GridBase::ScalarType;
         using Index3D = typename GridBase::Index3D;
+    protected:
+        using typename GridBase::PtrTy;
+        using typename GridBase::ConstPtrTy;
     public:
         ~FFTKSpace() = default;
         /* Operators */
-        using GridBase::operator=;
         FFTKSpace& operator=(const FFTKSpace& obj);
+        using GridBase::operator=;
         using GridBase::operator();
         /* Operations */
         template<class GridType> inline void invTransform(const LValueGrid<GridType>& data);
@@ -183,8 +180,8 @@ namespace Physica::Core {
         [[nodiscard]] __host__ __device__ size_t getDimX() const noexcept { return Base::getDerived().getKSpaceSize()[0]; }
         [[nodiscard]] __host__ __device__ size_t getDimY() const noexcept { return Base::getDerived().getKSpaceSize()[1]; }
         [[nodiscard]] __host__ __device__ size_t getDimZ() const noexcept { return Base::getDerived().getKSpaceSize()[2]; }
-        [[nodiscard]] __host__ __device__ inline ScalarType* data_ptr(Index3D index);
-        [[nodiscard]] __host__ __device__ inline const ScalarType* data_ptr(Index3D index) const;
+        [[nodiscard]] __host__ __device__ inline PtrTy data_ptr(Index3D index);
+        [[nodiscard]] __host__ __device__ inline ConstPtrTy data_ptr(Index3D index) const;
     protected:
         FFTKSpace() = default;
         FFTKSpace(const FFTKSpace&) = default;
@@ -216,18 +213,18 @@ namespace Physica::Core {
     }
 
     template<class Derived>
-    __host__ __device__ inline typename FFTKSpace<Derived, 3>::ScalarType*
+    __host__ __device__ inline typename FFTKSpace<Derived, 3>::PtrTy
     FFTKSpace<Derived, 3>::data_ptr(Index3D index) {
-        return const_cast<ScalarType*>(const_cast<const This&>(*this).data_ptr(index));
-    }
-
-    template<class Derived>
-    __host__ __device__ inline const typename FFTKSpace<Derived, 3>::ScalarType*
-    FFTKSpace<Derived, 3>::data_ptr(Index3D index) const {
         assert(index[0] < getDimX());
         assert(index[1] < getDimY());
         assert(index[2] < getDimZ());
         return Base::getDerived().asComplexBuffer() + (index[0] * getDimY() + index[1]) * getDimZ() + index[2];
+    }
+
+    template<class Derived>
+    __host__ __device__ inline typename FFTKSpace<Derived, 3>::ConstPtrTy
+    FFTKSpace<Derived, 3>::data_ptr(Index3D index) const {
+        return const_cast<This&>(*this).data_ptr(index);
     }
 }
 

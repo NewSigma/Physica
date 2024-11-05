@@ -24,7 +24,6 @@
 namespace Physica::Core {
     template<class MatrixType> class InverseMatrix;
     template<class MatrixType> class LValueFlatten;
-
     /**
      * \class LValueMatrix is base class of matrixes that can be assigned to \class LValueMatrix
      * and other matrixes can be assigned to this class.
@@ -32,16 +31,23 @@ namespace Physica::Core {
      */
     template<class Derived>
     class LValueMatrix : public RValueMatrix<Derived> {
+        using Base = RValueMatrix<Derived>;
+        using This = LValueMatrix<Derived>;
         using RowVector = LMatrixBlock<Derived, 1, Dynamic>;
         using ColVector = LMatrixBlock<Derived, Dynamic, 1>;
     public:
-        using Base = RValueMatrix<Derived>;
         using typename Base::ScalarType;
         using Base::RowAtCompile;
         using Base::ColumnAtCompile;
         using Base::isComplex;
         using Base::isColumnMatrix;
         using Base::isRowMatrix;
+        using Base::isForwardDiff;
+    protected:
+        using PtrTy = typename ScalarType::PtrTy;
+        using ConstPtrTy = typename ScalarType::ConstPtrTy;
+        using RefTy = typename ScalarType::RefTy;
+        using ConstRefTy = typename ScalarType::ConstRefTy;
     public:
         ~LValueMatrix() = default;
         /* Operators */
@@ -49,8 +55,8 @@ namespace Physica::Core {
         LValueMatrix& operator=(LValueMatrix&& m) = delete;
         template<class OtherMatrix> Derived& operator=(const RValueMatrix<OtherMatrix>& m);
         Derived& operator=(const ScalarType& s);
-        [[nodiscard]] ScalarType& operator()(size_t row, size_t column) { return *data_ptr(row, column); }
-        [[nodiscard]] const ScalarType& operator()(size_t row, size_t column) const { return *data_ptr(row, column); }
+        [[nodiscard]] inline RefTy operator()(size_t row, size_t column);
+        [[nodiscard]] inline ConstRefTy operator()(size_t row, size_t column) const;
         void operator+=(const ScalarType& s) { (*this) = (*this) + s; }
         void operator-=(const ScalarType& s) { (*this) = (*this) - s; }
         void operator*=(const ScalarType& s) { (*this) = (*this) * s; }
@@ -108,11 +114,11 @@ namespace Physica::Core {
         template<class Distribution, class RandomGenerator>
         void random_any(Distribution& dist, RandomGenerator& gen);
         /* Getters */
-        [[nodiscard]] ScalarType calc(size_t row, size_t col) const { return *data_ptr(row, col); }
-        [[nodiscard]] __host__ __device__ ScalarType* data_ptr(size_t row, size_t column) { return Base::getDerived().data_ptr(row, column); }
-        [[nodiscard]] __host__ __device__ const ScalarType* data_ptr(size_t row, size_t column) const { return Base::getDerived().data_ptr(row, column); }
-        [[nodiscard]] inline ScalarType& refFromMajorMinor(size_t major, size_t minor);
-        [[nodiscard]] inline const ScalarType& refFromMajorMinor(size_t major, size_t minor) const;
+        [[nodiscard]] ScalarType calc(size_t row, size_t col) const;
+        [[nodiscard]] __host__ __device__ inline PtrTy data_ptr(size_t row, size_t col) noexcept;
+        [[nodiscard]] __host__ __device__ inline ConstPtrTy data_ptr(size_t row, size_t col) const noexcept;
+        [[nodiscard]] inline RefTy refFromMajorMinor(size_t major, size_t minor);
+        [[nodiscard]] inline ConstRefTy refFromMajorMinor(size_t major, size_t minor) const;
         [[nodiscard]] LValueFlatten<Derived> flatten();
         [[nodiscard]] const LValueFlatten<Derived> flatten() const;
         /* Setters */

@@ -86,17 +86,23 @@ namespace Physica::Core {
     }
 
     template<class Derived>
-    inline Derived& ContinuousVector<Derived>::operator=(const ScalarType& s) {
+    template<class OtherScalar>
+    inline Derived& ContinuousVector<Derived>::operator=(const ScalarBase<OtherScalar>& s) {
         const size_t length = Base::getLength();
         if constexpr (isReverseDiff) {
             using TracerType = typename ScalarType::TracerType;
             TracerType::getInstance().reserve(length);
-            for (size_t i = 0; i < length; ++i)
-                (*this)[i] = s.copy();
+            for (size_t i = 0; i < length; ++i) {
+                if constexpr (std::is_same<ScalarType, OtherScalar>::value)
+                    (*this)[i] = s.getDerived().copy();
+                else
+                    (*this)[i] = ScalarType(s.getDerived());
+            }
         }
         else {
+            const auto x = ScalarType(s.getDerived());
             for (size_t i = 0; i < length; ++i)
-                (*this)[i] = s;
+                (*this)[i] = x;
         }
         return Base::getDerived();
     }

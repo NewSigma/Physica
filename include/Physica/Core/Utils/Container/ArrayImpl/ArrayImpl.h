@@ -102,11 +102,11 @@ namespace Physica::Core {
     template<class T, class Allocator>
     Array<T, Dynamic, Allocator>::Array(const This& array) : length(array.length), capacity(array.capacity), alloc() {
         arr = alloc.allocate(capacity);
-        if constexpr (!std::is_trivial<ValueType>::value)
+        if constexpr (!std::is_trivial<ElemType>::value)
             for(size_t i = 0; i < length; ++i)
                 alloc.construct(arr + i, array[i]);
         else
-            memcpy(arr, array.arr, length * sizeof(ValueType));
+            memcpy(arr, array.arr, length * sizeof(ElemType));
     }
 
     template<class T, class Allocator>
@@ -119,7 +119,7 @@ namespace Physica::Core {
 
     template<class T, class Allocator>
     Array<T, Dynamic, Allocator>::~Array() {
-        if constexpr (!std::is_trivial<ValueType>::value)
+        if constexpr (!std::is_trivial<ElemType>::value)
             if (arr != nullptr)
                 for(size_t i = 0; i < length; ++i)
                     alloc.destroy(arr + i);
@@ -227,7 +227,7 @@ namespace Physica::Core {
     template<class T, class Allocator>
     inline void Array<T, Dynamic, Allocator>::setLength(size_t size) {
         assert(size <= getCapacity() && "[Error]: Requiring more elements than the array have");
-        if constexpr (!std::is_trivial<ValueType>::value) {
+        if constexpr (!std::is_trivial<ElemType>::value) {
             assert(length <= size && "[Error]: setLength() cannot destruct unused elements, memory leak is expected");
         }
         length = size;

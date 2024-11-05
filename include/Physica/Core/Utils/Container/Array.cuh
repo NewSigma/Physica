@@ -74,19 +74,22 @@ namespace Physica::Core {
     public:
         constexpr static bool isTrivial = std::is_trivial<T>::value;
         using typename Base::allocator_type;
-        using typename Base::ValueType;
+        using typename Base::value_type;
         using typename Base::pointer;
         using typename Base::const_pointer;
         using typename Base::lvalue_reference;
         using typename Base::const_lvalue_reference;
         using typename Base::rvalue_reference;
-        using typename Base::Iterator;
-        using typename Base::ConstIterator;
-        using typename Base::ReverseIterator;
-        using typename Base::ConstReverseIterator;
-        using PlainElemType = typename std::conditional<isTrivial, ValueType, Physica::PlainStruct<ValueType>>::type;
+
+        using typename Base::ElemType;
+        using PlainElemType = typename std::conditional<isTrivial, ElemType, Physica::PlainStruct<ElemType>>::type;
         using PlainElemAllocator = typename Allocator::template rebind_alloc<PlainElemType>;
         using PlainHostObj = Array<PlainElemType, Dynamic, PlainElemAllocator>;
+    protected:
+        using typename Base::FIteType;
+        using typename Base::RIteType;
+        using typename Base::CFIteType;
+        using typename Base::CRIteType;
     private:
         pointer d_data;
         size_t length;
@@ -105,18 +108,18 @@ namespace Physica::Core {
         [[nodiscard]] __device__ lvalue_reference operator[](size_t index) { return Base::operator[](index); }
         [[nodiscard]] __device__ const_lvalue_reference operator[](size_t index) const { return Base::operator[](index); }
         /* Iterators */
-        __device__ Iterator begin() noexcept { return Base::begin(); }
-        __device__ ConstIterator begin() const noexcept { return Base::cbegin(); }
-        __device__ ConstIterator cbegin() const noexcept { return Base::cbegin(); }
-        __device__ Iterator end() noexcept { return Base::end(); }
-        __device__ ConstIterator end() const noexcept { return Base::cend(); }
-        __device__ ConstIterator cend() const noexcept { return Base::cend(); }
-        __device__ ReverseIterator rbegin() noexcept { return Base::rbegin(); }
-        __device__ ConstReverseIterator rbegin() const noexcept { return Base::crbegin(); }
-        __device__ ConstReverseIterator crbegin() const noexcept { return Base::cbegin(); }
-        __device__ ReverseIterator rend() noexcept { return Base::rend(); }
-        __device__ ConstReverseIterator rend() const noexcept { return Base::crend(); }
-        __device__ ConstReverseIterator crend() const noexcept { return Base::crend(); }
+        __device__ FIteType begin() noexcept { return Base::begin(); }
+        __device__ CFIteType begin() const noexcept { return Base::cbegin(); }
+        __device__ CFIteType cbegin() const noexcept { return Base::cbegin(); }
+        __device__ FIteType end() noexcept { return Base::end(); }
+        __device__ CFIteType end() const noexcept { return Base::cend(); }
+        __device__ CFIteType cend() const noexcept { return Base::cend(); }
+        __device__ RIteType rbegin() noexcept { return Base::rbegin(); }
+        __device__ CRIteType rbegin() const noexcept { return Base::crbegin(); }
+        __device__ CRIteType crbegin() const noexcept { return Base::cbegin(); }
+        __device__ RIteType rend() noexcept { return Base::rend(); }
+        __device__ CRIteType rend() const noexcept { return Base::crend(); }
+        __device__ CRIteType crend() const noexcept { return Base::crend(); }
         /* Operations */
         [[nodiscard]] PlainHostObj toPlainHost() const;
         [[nodiscard]] host_obj toHost() const;
@@ -170,11 +173,11 @@ namespace Physica::Core {
         if constexpr (isTrivial)
             cudaMemcpyAsync(d_data, obj.d_data, length * sizeof(T), cudaMemcpyKind::cudaMemcpyDeviceToDevice, ctx);
         else {
-            Array<ValueType, Dynamic> buffer(length);
-            cudaMemcpyAsync(buffer.data(), obj.d_data, length * sizeof(ValueType), cudaMemcpyKind::cudaMemcpyDeviceToHost, ctx);
+            Array<ElemType, Dynamic> buffer(length);
+            cudaMemcpyAsync(buffer.data(), obj.d_data, length * sizeof(ElemType), cudaMemcpyKind::cudaMemcpyDeviceToHost, ctx);
             ctx.wait();
-            Array<ValueType, Dynamic> buffer1 = buffer;
-            cudaMemcpyAsync(d_data, buffer1.data(), length * sizeof(ValueType), cudaMemcpyKind::cudaMemcpyHostToDevice, ctx);
+            Array<ElemType, Dynamic> buffer1 = buffer;
+            cudaMemcpyAsync(d_data, buffer1.data(), length * sizeof(ElemType), cudaMemcpyKind::cudaMemcpyHostToDevice, ctx);
             buffer.get_allocator().deallocate(buffer.release(), length);
             ctx.wait();
             buffer1.get_allocator().deallocate(buffer1.release(), length);
@@ -191,9 +194,9 @@ namespace Physica::Core {
     template<class T, class Allocator>
     device_obj<Array<T, Dynamic, Allocator>>::~device_obj() {
         if constexpr (!isTrivial) {
-            Array<ValueType, Dynamic> buffer(length);
+            Array<ElemType, Dynamic> buffer(length);
             auto& ctx = Core::CUDAContext::getInstance();
-            cudaMemcpyAsync(buffer.data(), d_data, length * sizeof(ValueType), cudaMemcpyKind::cudaMemcpyDeviceToHost, ctx);
+            cudaMemcpyAsync(buffer.data(), d_data, length * sizeof(ElemType), cudaMemcpyKind::cudaMemcpyDeviceToHost, ctx);
             ctx.wait();
         }
         alloc.deallocate(d_data, capacity);
@@ -214,7 +217,7 @@ namespace Physica::Core {
     typename device_obj<Array<T, Dynamic, Allocator>>::PlainHostObj
     device_obj<Array<T, Dynamic, Allocator>>::toPlainHost() const {
         PlainHostObj result(getLength());
-        check(cudaMemcpy(result.data(), (void*)d_data, getLength() * sizeof(ValueType), cudaMemcpyKind::cudaMemcpyDeviceToHost));
+        check(cudaMemcpy(result.data(), (void*)d_data, getLength() * sizeof(ElemType), cudaMemcpyKind::cudaMemcpyDeviceToHost));
         return result;
     }
     /**
@@ -224,7 +227,7 @@ namespace Physica::Core {
     Array<T, Dynamic, Allocator> device_obj<Array<T, Dynamic, Allocator>>::toHost() const {
         host_obj result(length);
         if constexpr (isTrivial)
-            check(cudaMemcpy(result.data(), d_data, length * sizeof(ValueType), cudaMemcpyKind::cudaMemcpyDeviceToHost));
+            check(cudaMemcpy(result.data(), d_data, length * sizeof(ElemType), cudaMemcpyKind::cudaMemcpyDeviceToHost));
         else {
             const auto buffer = toPlainHost();
             for (size_t i = 0; i < length; ++i)
@@ -246,7 +249,7 @@ namespace Physica::Core {
         const auto buffer = toPlainHost();
         alloc.deallocate(d_data, capacity);
         d_data = alloc.allocate(size);
-        check(cudaMemcpy(d_data, buffer.data(), getLength() * sizeof(ValueType), cudaMemcpyKind::cudaMemcpyHostToDevice));
+        check(cudaMemcpy(d_data, buffer.data(), getLength() * sizeof(ElemType), cudaMemcpyKind::cudaMemcpyHostToDevice));
         capacity = size;
         check(cudaStreamSynchronize(nullptr));
     }
@@ -264,18 +267,18 @@ namespace Physica::Core {
         if (length > size) {
             if constexpr (!isTrivial) {
                 const size_t delta = length - size;
-                Array<ValueType, Dynamic> buffer{};
+                Array<ElemType, Dynamic> buffer{};
                 buffer.reserve(delta);
-                check(cudaMemcpy(buffer.data(), d_data + size, delta * sizeof(ValueType), cudaMemcpyKind::cudaMemcpyDeviceToHost));
+                check(cudaMemcpy(buffer.data(), d_data + size, delta * sizeof(ElemType), cudaMemcpyKind::cudaMemcpyDeviceToHost));
                 buffer.setLength(delta);
             }
         }
         else {
             const size_t delta = size - length;
-            Array<ValueType, Dynamic> buffer(delta);
+            Array<ElemType, Dynamic> buffer(delta);
             for (size_t i = 0; i < delta; ++i)
                 buffer.get_allocator().construct(buffer.data() + i, std::forward<Args>(args)...);
-            check(cudaMemcpy(d_data + length, buffer.data(), delta * sizeof(ValueType), cudaMemcpyKind::cudaMemcpyHostToDevice));
+            check(cudaMemcpy(d_data + length, buffer.data(), delta * sizeof(ElemType), cudaMemcpyKind::cudaMemcpyHostToDevice));
             buffer.get_allocator().deallocate(buffer.release(), delta);
             check(cudaStreamSynchronize(nullptr));
         }
@@ -314,21 +317,21 @@ namespace Physica::Core {
 
     template<class T, class Allocator>
     void Array<T, Dynamic, Allocator>::toDevice(device_obj<This>& obj) const {
-        using ValueType = typename device_obj<This>::ValueType;
+        using ElemType = typename device_obj<This>::ElemType;
         constexpr bool isTrivial = device_obj<This>::isTrivial;
         const size_t length = getLength();
         obj.resize(length);
 
         auto& ctx = Core::CUDAContext::getInstance();
         if constexpr (isTrivial) {
-            cudaMemcpyAsync(obj.data(), this->data(), length * sizeof(ValueType), cudaMemcpyKind::cudaMemcpyHostToDevice, ctx);
+            cudaMemcpyAsync(obj.data(), this->data(), length * sizeof(ElemType), cudaMemcpyKind::cudaMemcpyHostToDevice, ctx);
             ctx.wait();
         }
         else {
-            Array<ValueType, Dynamic> buffer(length);
+            Array<ElemType, Dynamic> buffer(length);
             for (size_t i = 0; i < length; ++i)
                 buffer[i] = this->operator[](i).toDevice();
-            cudaMemcpyAsync(obj.data(), buffer.data(), length * sizeof(ValueType), cudaMemcpyKind::cudaMemcpyHostToDevice, ctx);
+            cudaMemcpyAsync(obj.data(), buffer.data(), length * sizeof(ElemType), cudaMemcpyKind::cudaMemcpyHostToDevice, ctx);
             ctx.wait();
             buffer.get_allocator().deallocate(buffer.release(), length);
         }
@@ -337,12 +340,12 @@ namespace Physica::Core {
     template<class T, class Allocator>
     void Array<T, Dynamic, Allocator>::toDeviceAsync(device_obj<This>& obj) const {
         static_assert(device_obj<This>::isTrivial, "[Error]: Do not pass non trivial elements to device asynchronously");
-        using ValueType = typename device_obj<This>::ValueType;
+        using ElemType = typename device_obj<This>::ElemType;
         const size_t length = getLength();
         obj.resize(length);
 
         auto& ctx = Core::CUDAContext::getInstance();
-        cudaMemcpyAsync(obj.data(), this->data(), length * sizeof(ValueType), cudaMemcpyKind::cudaMemcpyHostToDevice, ctx);
+        cudaMemcpyAsync(obj.data(), this->data(), length * sizeof(ElemType), cudaMemcpyKind::cudaMemcpyHostToDevice, ctx);
     }
 }
 
@@ -351,7 +354,7 @@ namespace Physica {
     class Traits<Core::device_obj<Core::Array<T, Length, Allocator>>> {
     public:
         using AllocatorType = Core::DeviceAllocator<T>;
-        using ValueType = typename AllocatorType::value_type;
+        using ElemType = typename AllocatorType::value_type;
         constexpr static size_t SizeAtCompile = Length;
     };
 }

@@ -29,21 +29,21 @@ namespace Physica::Core {
         using This = device_obj<host_obj>;
         using Dim = DenseMatrixDim<This, Row, Column>;
         using ArrayType = device_obj<typename std::conditional<is_scalar<T>::value, Vector<T, Row * Column>, Array<T, Row * Column>>::type>;
-        using ValueType = typename ArrayType::ValueType;
+        using ElemType = typename ArrayType::ElemType;
     private:
         ArrayType arr;
     public:
         device_obj() = default;
         __host__ __device__ device_obj(size_t row, size_t column);
-        __host__ __device__ device_obj(size_t row, size_t column, ValueType value);
+        __host__ __device__ device_obj(size_t row, size_t column, ElemType value);
         device_obj(const host_obj& storage);
         device_obj(const This&) = default;
         device_obj(This&& obj) noexcept = default;
         ~device_obj() = default;
         /* Operators */
         This& operator=(This obj) noexcept { swap(obj); return *this; }
-        [[nodiscard]] __device__ ValueType& operator()(size_t r, size_t c);
-        [[nodiscard]] __device__ const ValueType& operator()(size_t r, size_t c) const;
+        [[nodiscard]] __device__ ElemType& operator()(size_t r, size_t c);
+        [[nodiscard]] __device__ const ElemType& operator()(size_t r, size_t c) const;
         /* Operations */
         [[nodiscard]] host_obj toHost() const { return host_obj(arr.toHost(), {getRow(), getColumn()}); }
         template<class... Args>
@@ -55,8 +55,8 @@ namespace Physica::Core {
         [[nodiscard]] __host__ __device__ ArrayType& asArray() noexcept { return arr; }
         [[nodiscard]] __host__ __device__ const ArrayType& asArray() const noexcept { return arr; }
         [[nodiscard]] __host__ __device__ size_t getSize() const noexcept { return arr.getLength(); }
-        [[nodiscard]] __host__ __device__ ValueType* data_ptr(size_t row, size_t column) { return arr.data() + toIndex(row, column); }
-        [[nodiscard]] __host__ __device__ const ValueType* data_ptr(size_t row, size_t column) const { return arr.data() + toIndex(row, column); }
+        [[nodiscard]] __host__ __device__ ElemType* data_ptr(size_t row, size_t column) { return arr.data() + toIndex(row, column); }
+        [[nodiscard]] __host__ __device__ const ElemType* data_ptr(size_t row, size_t column) const { return arr.data() + toIndex(row, column); }
     private:
         __host__ __device__ size_t toIndex(size_t r, size_t c) const { return getRow() * c + r; }
     };
@@ -68,21 +68,21 @@ namespace Physica::Core {
         using This = device_obj<host_obj>;
         using Dim = DenseMatrixDim<This, Row, Column>;
         using ArrayType = device_obj<typename std::conditional<is_scalar<T>::value, Vector<T, Row * Column>, Array<T, Row * Column>>::type>;
-        using ValueType = typename ArrayType::ValueType;
+        using ElemType = typename ArrayType::ElemType;
     private:
         ArrayType arr;
     public:
         device_obj() = default;
         __host__ __device__ device_obj(size_t row, size_t column);
-        __host__ __device__ device_obj(size_t row, size_t column, ValueType value);
+        __host__ __device__ device_obj(size_t row, size_t column, ElemType value);
         device_obj(const host_obj& storage);
         device_obj(const This&) = default;
         device_obj(This&& obj) noexcept = default;
         ~device_obj() = default;
         /* Operators */
         This& operator=(This obj) noexcept { swap(obj); return *this; }
-        [[nodiscard]] __device__ ValueType& operator()(size_t r, size_t c);
-        [[nodiscard]] __device__ const ValueType& operator()(size_t r, size_t c) const;
+        [[nodiscard]] __device__ ElemType& operator()(size_t r, size_t c);
+        [[nodiscard]] __device__ const ElemType& operator()(size_t r, size_t c) const;
         /* Operations */
         [[nodiscard]] host_obj toHost() const { return host_obj(arr.toHost(), {getRow(), getColumn()}); }
         template<class... Args>
@@ -94,8 +94,8 @@ namespace Physica::Core {
         [[nodiscard]] __host__ __device__ ArrayType& asArray() noexcept { return arr; }
         [[nodiscard]] __host__ __device__ const ArrayType& asArray() const noexcept { return arr; }
         [[nodiscard]] __host__ __device__ size_t getSize() const noexcept { return arr.getLength(); }
-        [[nodiscard]] __host__ __device__ ValueType* data_ptr(size_t row, size_t column) { return arr.data() + toIndex(row, column); }
-        [[nodiscard]] __host__ __device__ const ValueType* data_ptr(size_t row, size_t column) const { return arr.data() + toIndex(row, column); }
+        [[nodiscard]] __host__ __device__ ElemType* data_ptr(size_t row, size_t column) { return arr.data() + toIndex(row, column); }
+        [[nodiscard]] __host__ __device__ const ElemType* data_ptr(size_t row, size_t column) const { return arr.data() + toIndex(row, column); }
     private:
         __host__ __device__ size_t toIndex(size_t r, size_t c) const { return getColumn() * r + c; }
     };

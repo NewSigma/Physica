@@ -29,6 +29,8 @@ namespace Physica::Core {
         Reverse
     };
     template<class Derived> class ScalarBase;
+    template<class T> class ScalarRef;
+    template<class T> class ScalarPtr;
     template<class T, DiffMode Mode, int Order = 1> class Diff;
 
     template<class T>
@@ -43,18 +45,22 @@ namespace Physica::Core {
     class ScalarBase : public CRTPBase<ScalarBase<Derived>> {
     public:
         constexpr static ScalarOption Option = Traits<Derived>::Option;
+        constexpr static int Order = Traits<Derived>::Order;
         constexpr static bool isComplex = Traits<Derived>::isComplex;
         constexpr static bool isDifferentiable = Traits<Derived>::isDifferentiable;
         constexpr static bool isForwardDiff = Traits<Derived>::isForwardDiff;
         constexpr static bool isReverseDiff = Traits<Derived>::isReverseDiff;
         constexpr static DiffMode Mode = isForwardDiff ? DiffMode::Forward : DiffMode::Reverse;
-        constexpr static int Order = Traits<Derived>::Order;
 
+        using PlainScalar = typename Traits<Derived>::PlainScalar;
         using ScalarType = typename Traits<Derived>::ScalarType;
-        using TrivialType = typename Traits<Derived>::TrivialType;
+        using PtrTy = typename Traits<Derived>::PtrTy;
+        using ConstPtrTy = typename Traits<Derived>::ConstPtrTy;
+        using RefTy = typename Traits<Derived>::RefTy;
+        using ConstRefTy = typename Traits<Derived>::ConstRefTy;
         using RealType = typename Traits<Derived>::RealType;
         using ComplexType = typename Traits<Derived>::ComplexType;
-        using PlainScalar = typename Traits<Derived>::PlainScalar;
+        using TrivialType = typename Traits<Derived>::TrivialType;
         using device_obj_type = Derived;
     private:
         constexpr static bool isConsistent1 = isDifferentiable && (isForwardDiff != isReverseDiff) && (Order > 0);

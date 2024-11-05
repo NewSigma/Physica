@@ -29,6 +29,9 @@ namespace Physica::Core {
         using Base = LValueVector<This>;
     public:
         using ScalarType = typename Base::ScalarType;
+    protected:
+        using typename Base::PtrTy;
+        using typename Base::ConstPtrTy;
     private:
         VectorType& vec;
         size_t from;
@@ -47,8 +50,8 @@ namespace Physica::Core {
         void resize([[maybe_unused]] size_t length) const { assert(length == getLength()); }
         /* Getters */
         [[nodiscard]] __host__ __device__ size_t getLength() const noexcept;
-        [[nodiscard]] __host__ __device__ ScalarType* data_ptr(size_t index);
-        [[nodiscard]] __host__ __device__ const ScalarType* data_ptr(size_t index) const;
+        [[nodiscard]] __host__ __device__ PtrTy data_ptr(size_t index);
+        [[nodiscard]] __host__ __device__ ConstPtrTy data_ptr(size_t index) const;
     };
 
     template<class VectorType, size_t Length>
@@ -71,14 +74,14 @@ namespace Physica::Core {
     }
 
     template<class VectorType, size_t Length>
-    __host__ __device__ inline typename LVectorBlock<VectorType, Length>::ScalarType*
+    __host__ __device__ inline typename LVectorBlock<VectorType, Length>::PtrTy
     LVectorBlock<VectorType, Length>::data_ptr(size_t index) {
         assert((index + from) < to);
         return vec.data_ptr(index + from);
     }
 
     template<class VectorType, size_t Length>
-    __host__ __device__ inline const typename LVectorBlock<VectorType, Length>::ScalarType*
+    __host__ __device__ inline typename LVectorBlock<VectorType, Length>::ConstPtrTy
     LVectorBlock<VectorType, Length>::data_ptr(size_t index) const {
         assert((index + from) < to);
         return vec.data_ptr(index + from);

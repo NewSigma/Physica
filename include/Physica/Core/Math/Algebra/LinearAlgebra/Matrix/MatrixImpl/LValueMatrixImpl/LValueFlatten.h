@@ -27,6 +27,9 @@ namespace Physica::Core {
     public:
         using Base = LValueVector<This>;
         using typename Base::ScalarType;
+    protected:
+        using PtrTy = typename ScalarType::PtrTy;
+        using ConstPtrTy = typename ScalarType::ConstPtrTy;
     public:
         LValueFlatten(const LValueMatrix<MatrixType>& mat_) : mat(mat_.getDerived()) {}
         LValueFlatten(const This&) = delete;
@@ -40,18 +43,18 @@ namespace Physica::Core {
         [[nodiscard]] const ScalarType& operator[](size_t index) const { return *data_ptr(index); }
         /* Getters */
         [[nodiscard]] size_t getLength() const noexcept { return mat.getRow() * mat.getColumn(); }
-        [[nodiscard]] __host__ __device__ inline ScalarType* data_ptr(size_t index);
-        [[nodiscard]] __host__ __device__ inline const ScalarType* data_ptr(size_t index) const;
+        [[nodiscard]] __host__ __device__ inline PtrTy data_ptr(size_t index);
+        [[nodiscard]] __host__ __device__ inline ConstPtrTy data_ptr(size_t index) const;
     };
 
     template<class MatrixType>
-    __host__ __device__ inline typename LValueFlatten<MatrixType>::ScalarType*
+    __host__ __device__ inline typename LValueFlatten<MatrixType>::PtrTy
     LValueFlatten<MatrixType>::data_ptr(size_t index) {
         return const_cast<ScalarType*>(const_cast<const This&>(*this).data_ptr(index));
     }
 
     template<class MatrixType>
-    __host__ __device__ inline const typename LValueFlatten<MatrixType>::ScalarType*
+    __host__ __device__ inline typename LValueFlatten<MatrixType>::ConstPtrTy
     LValueFlatten<MatrixType>::data_ptr(size_t index) const {
         const size_t major = index / mat.getMaxMinor();
         const size_t minor = index % mat.getMaxMinor();

@@ -123,14 +123,17 @@ namespace Physica::Core {
     }
 
     template<class ScalarType, size_t Size>
-    inline typename SIMD<ScalarType, Size>::BoolSIMDType
-    SIMD<ScalarType, Size>::operator>(const SIMD& other) const {
+    inline auto SIMD<ScalarType, Size>::operator==(const SIMD& other) const {
+        return BoolSIMDType(getImpl() == other.getImpl());
+    }
+
+    template<class ScalarType, size_t Size>
+    inline auto SIMD<ScalarType, Size>::operator>(const SIMD& other) const {
         return BoolSIMDType(getImpl() > other.getImpl());
     }
     
     template<class ScalarType, size_t Size>
-    inline typename SIMD<ScalarType, Size>::BoolSIMDType
-    SIMD<ScalarType, Size>::operator<(const SIMD& other) const {
+    inline auto SIMD<ScalarType, Size>::operator<(const SIMD& other) const {
         return BoolSIMDType(getImpl() < other.getImpl());
     }
 
@@ -285,6 +288,11 @@ namespace Physica::Core {
     }
 
     template<class ScalarType, size_t Size>
+    SIMD<ScalarType, Size> SIMD<ScalarType, Size>::select(BoolSIMDType flags, const SIMD& x, const SIMD& y) {
+        return SIMD(Physica::select(flags.getImpl(), x.getImpl(), y.getImpl()));
+    }
+
+    template<class ScalarType, size_t Size>
     template<int Order, int... Orders>
     constexpr unsigned int SIMD<ScalarType, Size>::makeShuffleMask(int order) {
         int result = order;
@@ -307,25 +315,7 @@ namespace Physica::Core {
             const SIMD<ScalarType, Size>& a,
             const SIMD<ScalarType, Size>& b,
             const SIMD<ScalarType, Size>& c) {
-        if constexpr (ScalarType::isReverseDiff) {
-            static_assert(Size == 2 || Size == 4 || Size == 8, "[Error]: Not implemented");
-            using PlainScalar = typename ScalarType::PlainScalar;
-            using TracerType = typename ScalarType::TracerType;
-            auto& tracer = TracerType::getInstance();
-            const auto temp = mul_add<PlainScalar, Size>(a, b, c);
-            ExprType source;
-            if constexpr (Size == 2)
-                source = ExprType::MulAdd2;
-            else if constexpr (Size == 4)
-                source = ExprType::MulAdd4;
-            else
-                source = ExprType::MulAdd8;
-            const ScalarType headNode = tracer.pushOperation(temp, source);
-            tracer.pushOperand(a.getHeadNode(), b.getHeadNode(), c.getHeadNode());
-            return {temp, headNode};
-        }
-        else
-            return SIMD<ScalarType, Size>(mul_add(a.getImpl(), b.getImpl(), c.getImpl()));
+        return SIMD<ScalarType, Size>(mul_add(a.getImpl(), b.getImpl(), c.getImpl()));
     }
 
     template<class ScalarType, size_t Size>

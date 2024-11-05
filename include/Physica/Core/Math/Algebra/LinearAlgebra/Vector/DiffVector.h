@@ -22,6 +22,58 @@
 #include "Vector.h"
 
 namespace Physica::Core {
+    template<class T, int Order, size_t Length, class Allocator>
+    class Vector<Diff<T, DiffMode::Forward, Order>, Length, Allocator> : public ContinuousVector<Vector<Diff<T, DiffMode::Forward, Order>, Length, Allocator>> {
+        using This = Vector<Diff<T, DiffMode::Forward, Order>, Length, Allocator>;
+        using Base = ContinuousVector<This>;
+    public:
+        using typename Base::ScalarType;
+    protected:
+        using typename Base::PtrTy;
+        using typename Base::ConstPtrTy;
+    private:
+        using ValueVector = Vector<T, Length>;
+        using GradType = typename ScalarType::GradType;
+        using GradVector = typename std::conditional<Order == 1, ValueVector, Vector<GradType, Length>>::type;
+
+        ValueVector values;
+        GradVector grads;
+    public:
+        Vector() = default;
+        explicit Vector(size_t length);
+        Vector(size_t length, const ScalarType& init);
+        //Vector(std::initializer_list<T> list);
+        Vector(ValueVector values_, GradVector grads_) noexcept;
+        template<class Derived>
+        Vector(const RValueVector<Derived>& v);
+        Vector(const This&) = default;
+        Vector(This&&) noexcept = default;
+        ~Vector() = default;
+        /* Operators */
+        This& operator=(This obj) noexcept { swap(obj); return *this; }
+        using Base::operator=;
+        using Base::operator[];
+        /* Operations */
+        inline void resize(size_t size);
+        template<class RandomType> inline void random_uniform(RandomType& gen);
+        template<class RandomType> inline void random_normal(RandomType& gen);
+        template<class Distribution, class RandomType>
+        inline void random_any(Distribution& dist, RandomType& gen);
+        void swap(This& __restrict obj) noexcept;
+        /* Getters */
+        [[nodiscard]] size_t getLength() const noexcept { return values.getLength(); }
+        [[nodiscard]] __host__ __device__ inline PtrTy data_ptr(size_t index) noexcept;
+        [[nodiscard]] __host__ __device__ inline ConstPtrTy data_ptr(size_t index) const noexcept;
+        /* Static members */
+        template<class RandomType>
+        [[nodiscard]] inline static This random_uniform(size_t len, RandomType& gen);
+        template<class RandomType>
+        [[nodiscard]] inline static This random_normal(size_t len, RandomType& gen);
+        template<class Distribution, class RandomType>
+        [[nodiscard]] inline static This random_any(size_t len, Distribution& dist, RandomType& gen);
+        [[nodiscard]] static auto linspace(ScalarType from, ScalarType to, size_t count);
+    };
+    ////////////////////////////////////////////////////////////////////////////////////
     template<class PlainScalar, int Order>
     class Diff<Vector<PlainScalar>, DiffMode::Reverse, Order>
             : public RValueVector<Diff<Vector<PlainScalar>, DiffMode::Reverse, Order>> {
@@ -65,73 +117,26 @@ namespace Physica::Core {
         /* Friends */
         friend class device_obj<This>;
     };
-
-    template<class PlainScalar, int Order>
-    Diff<Vector<PlainScalar>, DiffMode::Reverse, Order>::Diff()
-            : traceSeg(TracerType::getInstance().pushSegment()) {}
-
-    template<class PlainScalar, int Order>
-    Diff<Vector<PlainScalar>, DiffMode::Reverse, Order>::Diff(size_t length)
-            : traceSeg(TracerType::getInstance().pushSegment(length)) {}
-
-    template<class PlainScalar, int Order>
-    Diff<Vector<PlainScalar>, DiffMode::Reverse, Order>::Diff(VectorType values)
-            : traceSeg(TracerType::getInstance().pushSegment(std::move(values))) {}
-
-    template<class PlainScalar, int Order>
-    template<class RandomGenerator>
-    inline void Diff<Vector<PlainScalar>, DiffMode::Reverse, Order>::random_uniform(RandomGenerator& gen) {
-        *this = random_uniform(getLength(), gen);
-    }
-
-    template<class PlainScalar, int Order>
-    template<class RandomGenerator>
-    inline void Diff<Vector<PlainScalar>, DiffMode::Reverse, Order>::random_normal(RandomGenerator& gen) {
-        *this = random_normal(getLength(), gen);
-    }
-
-    template<class PlainScalar, int Order>
-    template<class Distribution, class RandomGenerator>
-    inline void Diff<Vector<PlainScalar>, DiffMode::Reverse, Order>::random_any(Distribution& dist, RandomGenerator& gen) {
-        *this = random_any(getLength(), dist, gen);
-    }
-
-    template<class PlainScalar, int Order>
-    inline typename Diff<Vector<PlainScalar>, DiffMode::Reverse, Order>::ScalarType
-    Diff<Vector<PlainScalar>, DiffMode::Reverse, Order>::calc(size_t index) const {
-        assert(index < getLength() && "[Error]: Index out of range");
-        return traceSeg[index];
-    }
-
-    template<class PlainScalar, int Order>
-    template<class RandomGenerator>
-    inline Diff<Vector<PlainScalar>, DiffMode::Reverse, Order>
-    Diff<Vector<PlainScalar>, DiffMode::Reverse, Order>::random_uniform(size_t len, RandomGenerator& gen) {
-        return This(VectorType::random_uniform(len, gen));
-    }
-
-    template<class PlainScalar, int Order>
-    template<class RandomGenerator>
-    inline Diff<Vector<PlainScalar>, DiffMode::Reverse, Order>
-    Diff<Vector<PlainScalar>, DiffMode::Reverse, Order>::random_normal(size_t len, RandomGenerator& gen) {
-        return This(VectorType::random_normal(len, gen));
-    }
-
-    template<class PlainScalar, int Order>
-    template<class Distribution, class RandomGenerator>
-    inline Diff<Vector<PlainScalar>, DiffMode::Reverse, Order>
-    Diff<Vector<PlainScalar>, DiffMode::Reverse, Order>::random_any(size_t len, Distribution& dist, RandomGenerator& gen) {
-        return This(VectorType::random_any(len, dist, gen));
-    }
 }
 
 namespace Physica {
-    using namespace Core;
+    template<class T, int Order, size_t Length, class Allocator>
+    class Traits<Core::Vector<Diff<T, DiffMode::Forward, Order>, Length, Allocator>> {
+        static_assert(!T::isDifferentiable, "[Error]: Nested Diff<> is not allowed");
+    public:
+        using ScalarType = Diff<T, DiffMode::Forward, Order>;
+        constexpr static size_t SizeAtCompile = Length;
+
+        constexpr static bool FastAssign = false;
+        constexpr static bool FastPacket = true;
+    };
 
     template<class T, int Order>
-    class Traits<Diff<Vector<T>, DiffMode::Reverse, Order>> : public Traits<Vector<T>> {
+    class Traits<Core::Diff<Vector<T>, Core::DiffMode::Reverse, Order>> : public Traits<Vector<T>> {
         static_assert(!T::isDifferentiable, "[Error]: Nested Diff<> is not allowed");
     public:
         using ScalarType = Diff<T, DiffMode::Reverse, Order>;
     };
 }
+
+#include "DiffVectorImpl/DiffVectorImpl.h"

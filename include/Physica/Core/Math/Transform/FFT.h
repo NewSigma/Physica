@@ -70,7 +70,7 @@ namespace Physica::Core {
         FFT(FFT&& fft) noexcept;
         ~FFT();
         /* Operators */
-        FFT& operator=(FFT fft) noexcept;
+        FFT& operator=(FFT obj) noexcept { swap(obj); return *this; }
         /* Operations */
         using RSpaceType::transform;
         using KSpaceType::invTransform;
@@ -143,7 +143,7 @@ namespace Physica::Core {
         FFT(FFT&&) noexcept;
         ~FFT();
         /* Operators */
-        FFT& operator=(FFT fft) noexcept;
+        FFT& operator=(FFT obj) noexcept { swap(obj); return *this; }
         /* Operations */
         using RSpaceType::transform;
         using KSpaceType::invTransform;

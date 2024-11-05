@@ -78,10 +78,12 @@ namespace Physica::Core {
         void operator&=(const SIMD& other) { *this = *this & other; }
         void operator|=(const SIMD& other) { *this = *this | other; }
         void operator^=(const SIMD& other) { *this = *this ^ other; }
-        [[nodiscard]] inline BoolSIMDType operator>(const SIMD& other) const;
-        [[nodiscard]] inline BoolSIMDType operator<(const SIMD& other) const;
-        [[nodiscard]] inline BoolSIMDType operator>=(const SIMD& other) const { return !(*this < other); }
-        [[nodiscard]] inline BoolSIMDType operator<=(const SIMD& other) const { return !(*this > other); }
+        [[nodiscard]] inline auto operator==(const SIMD& other) const;
+        [[nodiscard]] inline auto operator>(const SIMD& other) const;
+        [[nodiscard]] inline auto operator<(const SIMD& other) const;
+        [[nodiscard]] auto operator!=(const SIMD& other) const { return !(*this == other); }
+        [[nodiscard]] auto operator>=(const SIMD& other) const { return !(*this < other); }
+        [[nodiscard]] auto operator<=(const SIMD& other) const { return !(*this > other); }
         /* Operations */
         inline void load(const ScalarType* p);
         inline void load_partial(int n, const ScalarType* p);
@@ -104,11 +106,15 @@ namespace Physica::Core {
         [[nodiscard]] const Base& getImpl() const noexcept { return *this; }
         [[nodiscard]] HalfType getLow() const noexcept { return Base::get_low(); }
         [[nodiscard]] HalfType getHigh() const noexcept { return Base::get_high(); }
+        [[nodiscard]] This getValue() const noexcept { return *this; }
+        [[nodiscard]] auto isPositive() const noexcept { return operator>(This(0)); }
+        [[nodiscard]] auto isNegative() const noexcept { return operator<(This(0)); }
         /* Static members */
         template<bool... Flags>
         [[nodiscard]] static SIMD makeSignBits();
         template<class RandomType>
         [[nodiscard]] static SIMD random_uniform(RandomType& gen);
+        [[nodiscard]] static SIMD select(BoolSIMDType flags, const SIMD& x, const SIMD& y);
     private:
         template<int Order, int... Orders>
         [[nodiscard]] constexpr static unsigned int makeShuffleMask(int order);
@@ -150,7 +156,7 @@ namespace Physica {
         constexpr static bool isFloat32 = T::Option == Core::Float32;
         static_assert(isFloat32 || T::Option == Core::Float64, "[Error]: Unsupported float type");
         static_assert(!T::isComplex, "[Error]: The main template targets on real scalar");
-        static_assert(!T::isForwardDiff, "[Error]: The main template targets on plain scalar");
+        static_assert(!T::isDifferentiable, "[Error]: The main template targets on plain scalar");
         static_assert(Size % 2 == 0 && Size <= 16, "[Error]: Invalid Size");
 
         using PlainScalar = typename T::PlainScalar;
@@ -168,15 +174,31 @@ namespace Physica {
 }
 
 namespace std {
+    #define PacketType Physica::Core::SIMD<ScalarType, Size>
+
     template<class ScalarType, size_t Size>
-    inline Physica::Core::SIMD<ScalarType, Size> max(Physica::Core::SIMD<ScalarType, Size> a, Physica::Core::SIMD<ScalarType, Size> b) {
-        return Physica::Core::SIMD<ScalarType, Size>(Physica::max(a.getImpl(), b.getImpl()));
+    inline PacketType max(PacketType a, PacketType b) {
+        if constexpr (ScalarType::isForwardDiff) {
+            using GradPacket = typename PacketType::GradPacket;
+            const auto values = max(a.getValue(), b.getValue());
+            return PacketType(values, GradPacket::select(values == a.getValue(), a.getGrad(), b.getGrad()));
+        }
+        else
+            return Physica::max(a.getImpl(), b.getImpl());
     }
 
     template<class ScalarType, size_t Size>
-    inline Physica::Core::SIMD<ScalarType, Size> min(Physica::Core::SIMD<ScalarType, Size> a, Physica::Core::SIMD<ScalarType, Size> b) {
-        return Physica::Core::SIMD<ScalarType, Size>(Physica::min(a.getImpl(), b.getImpl()));
+    inline PacketType min(PacketType a, PacketType b) {
+        if constexpr (ScalarType::isForwardDiff) {
+            using GradPacket = typename PacketType::GradPacket;
+            const auto values = min(a.getValue(), b.getValue());
+            return PacketType(values, GradPacket::select(values == a.getValue(), a.getGrad(), b.getGrad()));
+        }
+        else
+            return Physica::min(a.getImpl(), b.getImpl());
     }
+
+    #undef PacketType
 }
 
 #include "SIMDImpl/BoolSIMD.h"

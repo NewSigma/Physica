@@ -29,7 +29,11 @@ namespace Physica::Core {
         using ScalarType = Diff<PlainScalar, Mode, 1>;
         using This = FFT<ScalarType, 1>;
         using RealType = typename Traits<This>::RealType;
+        using RealPtrTy = typename RealType::PtrTy;
+        using RealConstPtrTy = typename RealType::ConstPtrTy;
         using ComplexType = typename Traits<This>::ComplexType;
+        using ComplexPtrTy = typename ComplexType::PtrTy;
+        using ComplexConstPtrTy = typename ComplexType::ConstPtrTy;
         using RSpaceType = FFTRSpace<This, 1>;
         using KSpaceType = FFTKSpace<This, 1>;
     private:
@@ -39,7 +43,7 @@ namespace Physica::Core {
         using FFTType = FFT<typename std::conditional<isComplex, PlainComplexType, PlainRealType>::type, 1>;
 
         FFTType fft_impl;
-        Array<ComplexType> buffer;
+        Vector<ComplexType> buffer;
     public:
         FFT();
         FFT(size_t rSpaceSize, PlanFlag planFlag);
@@ -48,7 +52,7 @@ namespace Physica::Core {
         FFT(FFT&& fft) noexcept = default;
         ~FFT() = default;
         /* Operators */
-        FFT& operator=(FFT obj) noexcept;
+        FFT& operator=(FFT obj) noexcept { swap(obj); return *this; }
         /* Operations */
         using RSpaceType::transform;
         using KSpaceType::invTransform;
@@ -74,10 +78,10 @@ namespace Physica::Core {
     private:
         FFT(size_t rSpaceSize);
         /* Getters */
-        [[nodiscard]] RealType* asRealBuffer() { return reinterpret_cast<RealType*>(buffer.data()); }
-        [[nodiscard]] const RealType* asRealBuffer() const { return reinterpret_cast<const RealType*>(buffer.data()); }
-        [[nodiscard]] ComplexType* asComplexBuffer() { return buffer.data(); }
-        [[nodiscard]] const ComplexType* asComplexBuffer() const { return buffer.data(); }
+        [[nodiscard]] inline RealPtrTy asRealBuffer();
+        [[nodiscard]] inline RealConstPtrTy asRealBuffer() const;
+        [[nodiscard]] inline ComplexPtrTy asComplexBuffer();
+        [[nodiscard]] inline ComplexConstPtrTy asComplexBuffer() const;
         /* Frients */
         friend class FFTRSpace<This, 1>;
         friend class FFTKSpace<This, 1>;
@@ -102,13 +106,6 @@ namespace Physica::Core {
     FFT<Diff<PlainScalar, Mode, 1>, 1>::FFT(size_t rSpaceSize)
             : fft_impl(FFTType::makeEmptyFFT(rSpaceSize)) {
         buffer.resize(getKSpaceSize());
-    }
-
-    template<class PlainScalar, DiffMode Mode>
-    FFT<Diff<PlainScalar, Mode, 1>, 1>&
-    FFT<Diff<PlainScalar, Mode, 1>, 1>::operator=(FFT<Diff<PlainScalar, Mode, 1>, 1> obj) noexcept {
-        swap(obj);
-        return *this;
     }
 
     template<class PlainScalar, DiffMode Mode>
@@ -198,5 +195,25 @@ namespace Physica::Core {
 
         for (size_t i = 0; i < rSpaceSize; ++i)
             rSpace[i].getGrad() = rSpaceImpl[i];
+    }
+
+    template<class PlainScalar, DiffMode Mode>
+    inline typename FFT<Diff<PlainScalar, Mode, 1>, 1>::RealPtrTy FFT<Diff<PlainScalar, Mode, 1>, 1>::asRealBuffer() {
+        return RealPtrTy(buffer.data());
+    }
+
+    template<class PlainScalar, DiffMode Mode>
+    inline typename FFT<Diff<PlainScalar, Mode, 1>, 1>::RealConstPtrTy FFT<Diff<PlainScalar, Mode, 1>, 1>::asRealBuffer() const {
+        return const_cast<This&>(*this).asRealBuffer();
+    }
+
+    template<class PlainScalar, DiffMode Mode>
+    inline typename FFT<Diff<PlainScalar, Mode, 1>, 1>::ComplexPtrTy FFT<Diff<PlainScalar, Mode, 1>, 1>::asComplexBuffer() {
+        return buffer.data();
+    }
+
+    template<class PlainScalar, DiffMode Mode>
+    inline typename FFT<Diff<PlainScalar, Mode, 1>, 1>::ComplexConstPtrTy FFT<Diff<PlainScalar, Mode, 1>, 1>::asComplexBuffer() const {
+        return const_cast<This&>(*this).asComplexBuffer();
     }
 }

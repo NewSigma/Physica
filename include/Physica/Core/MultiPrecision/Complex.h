@@ -148,18 +148,22 @@ namespace Physica {
         static_assert(!T::isComplex, "[Error]: Double complex mark is not allowed");
         static_assert(!T::isDifferentiable, "[Error]: Diff mark should locate in outsite");
     public:
-        using ScalarType = Complex<T>;
-        using RealType = T;
-        using ComplexType = Complex<T>;
-        using TrivialType = typename T::TrivialType;
-        using PlainScalar = ScalarType;
         constexpr static ScalarOption Option = Traits<T>::Option;
+        constexpr static int Order = 0;
         constexpr static bool isComplex = true;
         constexpr static bool isDifferentiable = false;
         constexpr static bool isForwardDiff = false;
         constexpr static bool isReverseDiff = false;
-        constexpr static Core::DiffMode Mode = Core::DiffMode::Forward;
-        constexpr static int Order = 0;
+
+        using PlainScalar = Complex<T>;
+        using ScalarType = PlainScalar;
+        using PtrTy = ScalarType*;
+        using ConstPtrTy = const ScalarType*;
+        using RefTy = ScalarType&;
+        using ConstRefTy = const ScalarType&;
+        using RealType = T;
+        using ComplexType = ScalarType;
+        using TrivialType = typename T::TrivialType;
     };
 }
 

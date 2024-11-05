@@ -41,11 +41,11 @@ namespace Physica::Core {
         using This = SIMD<ScalarType, Size>;
         using Base = SIMD<T, Size * 2>;
         using RealType = SIMD<T, Size>;
-        using BoolSIMDType = typename Base::BoolSIMDType;
         using TrivialType = typename ScalarType::TrivialType;
         using HalfType = typename std::conditional<sizeof(Base) * CHAR_BIT != 128, SIMD<Complex<T>, Size / 2>, PlainStruct<void>>::type;
         using Base::isSeparatable;
     public:
+        using BoolSIMDType = typename Base::BoolSIMDType;
         using PlainPacket = This;
     public:
         SIMD() = default;

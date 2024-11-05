@@ -32,6 +32,9 @@ namespace Physica::Core {
         using typename Base::ScalarType;
         using Base::RowAtCompile;
         using Base::ColumnAtCompile;
+    protected:
+        using typename Base::PtrTy;
+        using typename Base::ConstPtrTy;
     public:
         ~device_obj() = default;
         /* Operators */
@@ -96,10 +99,10 @@ namespace Physica::Core {
         template<size_t Row = Dynamic, size_t Column = Dynamic>
         [[nodiscard]] __host__ __device__ inline const device_obj<ContinuousMatrixBlock<Derived, Row, Column>> block(size_t fromRow, size_t rowCount, size_t fromCol, size_t colCount) const;
         /* Getters */
-        [[nodiscard]] __host__ __device__ ScalarType* data() { return Base::getDerived().data_ptr(0, 0); }
-        [[nodiscard]] __host__ __device__ const ScalarType* data() const { return Base::getDerived().data_ptr(0, 0); }
+        [[nodiscard]] __host__ __device__ PtrTy data() { return Base::getDerived().data_ptr(0, 0); }
+        [[nodiscard]] __host__ __device__ ConstPtrTy data() const { return Base::getDerived().data_ptr(0, 0); }
         [[nodiscard]] device_obj<ContinuousFlatten<Derived>> flatten() { return {*this}; }
-        [[nodiscard]] const device_obj<ContinuousFlatten<Derived>> flatten() const { return {*this}; }
+        [[nodiscard]] const device_obj<ContinuousFlatten<Derived>> flatten() const { return {const_cast<This&>(*this)}; }
     protected:
         device_obj() = default;
         device_obj(const device_obj&) = default;

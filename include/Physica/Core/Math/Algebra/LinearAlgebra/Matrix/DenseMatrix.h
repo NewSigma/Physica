@@ -66,7 +66,7 @@ namespace Physica::Core {
         /* Operators */
         This& operator=(This obj) noexcept { swap(obj); return *this; }
         using Base::operator=;
-        using Storage::operator();
+        using Base::operator();
         /* Operations */
         size_t completePivoting(size_t column);
         size_t partialPivoting(size_t column);
@@ -113,6 +113,7 @@ namespace Physica::Core {
 namespace Physica {
     template<class T, int Op, size_t Row, size_t Column, class Allocator>
     class Traits<Core::DenseMatrix<T, Op, Row, Column, Allocator>> {
+        static_assert(!T::isForwardDiff, "[Error]: Use diffable matrix instead");
     public:
         using ScalarType = T;
         constexpr static int Option = Op;

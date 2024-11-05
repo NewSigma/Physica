@@ -29,11 +29,17 @@ namespace Physica::Core {
     template<class Derived>
     class LValueVector : public RValueVector<Derived> {
         using Base = RValueVector<Derived>;
+        using This = LValueVector<Derived>;
         template<size_t Length>
         using BlockType = LVectorBlock<Derived, Length>;
     public:
-        
         using typename Base::ScalarType;
+        using Base::isForwardDiff;
+    protected:
+        using PtrTy = typename ScalarType::PtrTy;
+        using ConstPtrTy = typename ScalarType::ConstPtrTy;
+        using RefTy = typename ScalarType::RefTy;
+        using ConstRefTy = typename ScalarType::ConstRefTy;
     public:
         ~LValueVector() = default;
         /* Operators */
@@ -41,15 +47,16 @@ namespace Physica::Core {
         inline LValueVector& operator=(LValueVector&& v) noexcept;
         template<class OtherVector, class Executor = SequentialExecutor>
         inline Derived& operator=(const RValueVector<OtherVector>& v_);
-        inline Derived& operator=(const ScalarType& s);
-        [[nodiscard]] ScalarType& operator[](size_t index) { return *data_ptr(index); }
-        [[nodiscard]] const ScalarType& operator[](size_t index) const { return *data_ptr(index); }
+        template<class OtherScalar>
+        inline Derived& operator=(const ScalarBase<OtherScalar>& s);
+        [[nodiscard]] inline RefTy operator[](size_t index);
+        [[nodiscard]] inline ConstRefTy operator[](size_t index) const;
         void operator+=(const ScalarType& s) { (*this) = (*this) + s; }
         void operator-=(const ScalarType& s) { (*this) = (*this) - s; }
         void operator*=(const ScalarType& s) { (*this) = (*this) * s; }
         void operator/=(const ScalarType& s) { (*this) = (*this) / s; }
         /* Operations */
-        [[nodiscard]] ScalarType calc(size_t index) const { return *data_ptr(index); }
+        [[nodiscard]] ScalarType calc(size_t index) const;
         template<class AnyPacket> void writePacket(size_t index, const AnyPacket packet);
         template<class AnyPacket> void writePacketPartial(size_t index, size_t count, const AnyPacket packet);
 
@@ -74,8 +81,8 @@ namespace Physica::Core {
         template<class Distribution, class RandomGenerator>
         inline void random_any(Distribution& dist, RandomGenerator& gen);
         /* Getters */
-        [[nodiscard]] __host__ __device__ inline ScalarType* data_ptr(size_t index);
-        [[nodiscard]] __host__ __device__ inline const ScalarType* data_ptr(size_t index) const;
+        [[nodiscard]] __host__ __device__ inline PtrTy data_ptr(size_t index) noexcept;
+        [[nodiscard]] __host__ __device__ inline ConstPtrTy data_ptr(size_t index) const noexcept;
     protected:
         LValueVector() = default;
         LValueVector(const LValueVector&) = default;

@@ -26,20 +26,20 @@ namespace Physica::Core {
     __host__ __device__ device_obj<ColumnElementStorage>::device_obj(size_t row, size_t column) : Dim(row, column), arr(row * column) {}
 
     template<tparams>
-    __host__ __device__ device_obj<ColumnElementStorage>::device_obj(size_t row, size_t column, ValueType value) : Dim(row, column), arr(row * column, std::move(value)) {}
+    __host__ __device__ device_obj<ColumnElementStorage>::device_obj(size_t row, size_t column, ElemType value) : Dim(row, column), arr(row * column, std::move(value)) {}
 
     template<tparams>
     device_obj<ColumnElementStorage>::device_obj(const host_obj& storage)
             : Dim(storage.getRow(), storage.getColumn()), arr(storage.arr) {}
 
     template<tparams>
-    __device__ typename device_obj<ColumnElementStorage>::ValueType& device_obj<ColumnElementStorage>::operator()(size_t r, size_t c) {
+    __device__ typename device_obj<ColumnElementStorage>::ElemType& device_obj<ColumnElementStorage>::operator()(size_t r, size_t c) {
         assert(r < getRow() && c < getColumn());
         return arr[toIndex(r, c)];
     }
 
     template<tparams>
-    __device__ const typename device_obj<ColumnElementStorage>::ValueType& device_obj<ColumnElementStorage>::operator()(size_t r, size_t c) const {
+    __device__ const typename device_obj<ColumnElementStorage>::ElemType& device_obj<ColumnElementStorage>::operator()(size_t r, size_t c) const {
         assert(r < getRow() && c < getColumn());
         return arr[toIndex(r, c)];
     }
@@ -89,21 +89,21 @@ namespace Physica::Core {
     __host__ __device__ device_obj<RowElementStorage>::device_obj(size_t row, size_t column) : Dim(row, column), arr(row * column) {}
 
     template<tparams>
-    __host__ __device__ device_obj<RowElementStorage>::device_obj(size_t row, size_t column, ValueType value) : Dim(row, column), arr(row * column, std::move(value)) {}
+    __host__ __device__ device_obj<RowElementStorage>::device_obj(size_t row, size_t column, ElemType value) : Dim(row, column), arr(row * column, std::move(value)) {}
 
     template<tparams>
     device_obj<RowElementStorage>::device_obj(const host_obj& storage)
             : Dim(storage.getRow(), storage.getColumn()), arr(storage.arr) {}
 
     template<tparams>
-    __device__ typename device_obj<RowElementStorage>::ValueType&
+    __device__ typename device_obj<RowElementStorage>::ElemType&
     device_obj<RowElementStorage>::operator()(size_t r, size_t c) {
         assert(r < getRow() && c < getColumn());
         return arr[toIndex(r, c)];
     }
 
     template<tparams>
-    __device__ const typename device_obj<RowElementStorage>::ValueType&
+    __device__ const typename device_obj<RowElementStorage>::ElemType&
     device_obj<RowElementStorage>::operator()(size_t r, size_t c) const {
         assert(r < getRow() && c < getColumn());
         return arr[toIndex(r, c)];

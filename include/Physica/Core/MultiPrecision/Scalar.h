@@ -38,18 +38,18 @@ namespace Physica::Core {
         class BinaryScalarOpReturnType {
             static_assert(Core::is_scalar<AnyScalar1>::value, "[Error]: This is not a scalar type");
             static_assert(Core::is_scalar<AnyScalar2>::value, "[Error]: This is not a scalar type");
-            constexpr static ScalarOption Option = std::max(Traits<AnyScalar1>::Option, Traits<AnyScalar2>::Option);
+            constexpr static ScalarOption Option = std::max(AnyScalar1::Option, AnyScalar2::Option);
             constexpr static bool isComplex = AnyScalar1::isComplex || AnyScalar2::isComplex;
             constexpr static bool isDiffable1 = AnyScalar1::isDifferentiable;
             constexpr static bool isDiffable2 = AnyScalar2::isDifferentiable;
             constexpr static bool isDiffable = isDiffable1 || isDiffable2;
 
-            constexpr static DiffMode Mode = AnyScalar1::isDifferentiable ? Traits<AnyScalar1>::Mode : Traits<AnyScalar2>::Mode;
-            constexpr static DiffMode Mode1 = AnyScalar2::isDifferentiable ? Traits<AnyScalar2>::Mode : Traits<AnyScalar1>::Mode;
+            constexpr static DiffMode Mode = AnyScalar1::isDifferentiable ? AnyScalar1::Mode : AnyScalar2::Mode;
+            constexpr static DiffMode Mode1 = AnyScalar2::isDifferentiable ? AnyScalar2::Mode : AnyScalar1::Mode;
             static_assert(Mode == Mode1, "[Error]: Operation between differentiable scalars with different mode is not well defined");
 
-            constexpr static int Order1 = Traits<AnyScalar1>::Order;
-            constexpr static int Order2 = Traits<AnyScalar2>::Order;
+            constexpr static int Order1 = AnyScalar1::Order;
+            constexpr static int Order2 = AnyScalar2::Order;
             constexpr static bool UseMixOrder = isDiffable1 && isDiffable2 && (Order1 != Order2);
             constexpr static int Order = UseMixOrder ? std::min(Order1, Order2) : std::max(Order1, Order2);
             static_assert(!(Mode == DiffMode::Reverse && UseMixOrder), "[Error]: Reverse mode does not support mixed order");

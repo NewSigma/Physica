@@ -30,6 +30,9 @@ namespace Physica::Core {
     public:
         using Base = LValueVector<RowLVector<MatrixType>>;
         using ScalarType = typename MatrixType::ScalarType;
+    protected:
+        using PtrTy = typename ScalarType::PtrTy;
+        using ConstPtrTy = typename ScalarType::ConstPtrTy;
     private:
         MatrixType& mat;
         size_t row;
@@ -51,8 +54,8 @@ namespace Physica::Core {
         void resize([[maybe_unused]] size_t length) { assert(length == colCount); }
         /* Getters */
         [[nodiscard]] __host__ __device__ size_t getLength() const noexcept { return colCount; }
-        [[nodiscard]] __host__ __device__ inline ScalarType* data_ptr(size_t index) { assert(index < colCount); return mat.data_ptr(row, fromCol + index); }
-        [[nodiscard]] __host__ __device__ inline const ScalarType* data_ptr(size_t index) const { assert(index < colCount); return mat.data_ptr(row, fromCol + index); }
+        [[nodiscard]] __host__ __device__ inline PtrTy data_ptr(size_t index) { assert(index < colCount); return mat.data_ptr(row, fromCol + index); }
+        [[nodiscard]] __host__ __device__ inline ConstPtrTy data_ptr(size_t index) const { assert(index < colCount); return mat.data_ptr(row, fromCol + index); }
     };
 
     template<class MatrixType>
@@ -60,6 +63,9 @@ namespace Physica::Core {
     public:
         using Base = LValueVector<ColLVector<MatrixType>>;
         using ScalarType = typename MatrixType::ScalarType;
+    protected:
+        using PtrTy = typename ScalarType::PtrTy;
+        using ConstPtrTy = typename ScalarType::ConstPtrTy;
     private:
         MatrixType& mat;
         size_t col;
@@ -82,8 +88,8 @@ namespace Physica::Core {
         void resize([[maybe_unused]] size_t length) { assert(length == rowCount); }
         /* Getters */
         [[nodiscard]] __host__ __device__ size_t getLength() const noexcept { return rowCount; }
-        [[nodiscard]] __host__ __device__ inline ScalarType* data_ptr(size_t index) { assert(index < rowCount); return mat.data_ptr(fromRow + index, col); }
-        [[nodiscard]] __host__ __device__ inline const ScalarType* data_ptr(size_t index) const { assert(index < rowCount); return mat.data_ptr(fromRow + index, col); }
+        [[nodiscard]] __host__ __device__ inline PtrTy data_ptr(size_t index) { assert(index < rowCount); return mat.data_ptr(fromRow + index, col); }
+        [[nodiscard]] __host__ __device__ inline ConstPtrTy data_ptr(size_t index) const { assert(index < rowCount); return mat.data_ptr(fromRow + index, col); }
     };
 
     template<class MatrixType>
@@ -143,6 +149,9 @@ namespace Physica::Core {
         using Base = LValueMatrix<This>;
         using VectorBase = ColLVector<MatrixType>;
         using ScalarType = typename MatrixType::ScalarType;
+    protected:
+        using PtrTy = typename ScalarType::PtrTy;
+        using ConstPtrTy = typename ScalarType::ConstPtrTy;
     public:
         LMatrixBlock(MatrixType& mat_, size_t fromRow_, size_t rowCount_, size_t col_) : VectorBase(mat_, fromRow_, rowCount_, col_) {}
         LMatrixBlock(const LMatrixBlock&) = default;
@@ -173,8 +182,8 @@ namespace Physica::Core {
         using VectorBase::sum;
         [[nodiscard]] __host__ __device__ size_t getRow() const noexcept { return VectorBase::getLength(); }
         [[nodiscard]] __host__ __device__ constexpr static size_t getColumn() noexcept { return 1; }
-        [[nodiscard]] __host__ __device__ ScalarType* data_ptr(size_t row, [[maybe_unused]] size_t column) { assert(col == 0); return VectorBase::operator[](row); }
-        [[nodiscard]] __host__ __device__ const ScalarType* data_ptr(size_t row, [[maybe_unused]] size_t column) const { assert(col == 0); return VectorBase::operator[](row); }
+        [[nodiscard]] __host__ __device__ PtrTy data_ptr(size_t row, size_t) { assert(col == 0); return VectorBase::operator[](row); }
+        [[nodiscard]] __host__ __device__ ConstPtrTy data_ptr(size_t row, size_t) const { assert(col == 0); return VectorBase::operator[](row); }
         /**
          * There are some common functions shared by vector and matrix, it is necessary to decide which function to call explicitly.
          */
@@ -190,6 +199,9 @@ namespace Physica::Core {
         using This = LMatrixBlock<MatrixType, Dynamic, Dynamic>;
         using Base = LValueMatrix<This>;
         using typename Base::ScalarType;
+    protected:
+        using PtrTy = typename ScalarType::PtrTy;
+        using ConstPtrTy = typename ScalarType::ConstPtrTy;
     private:
         MatrixType& mat;
         size_t fromRow;
@@ -210,8 +222,8 @@ namespace Physica::Core {
         /* Getters */
         [[nodiscard]] __host__ __device__ size_t getRow() const noexcept { return rowCount; }
         [[nodiscard]] __host__ __device__ size_t getColumn() const noexcept { return colCount; }
-        [[nodiscard]] __host__ __device__ inline ScalarType* data_ptr(size_t row, size_t column);
-        [[nodiscard]] __host__ __device__ inline const ScalarType* data_ptr(size_t row, size_t column) const;
+        [[nodiscard]] __host__ __device__ inline PtrTy data_ptr(size_t row, size_t column);
+        [[nodiscard]] __host__ __device__ inline ConstPtrTy data_ptr(size_t row, size_t column) const;
         [[nodiscard]] This& asMatrix() noexcept { return *this; }
         [[nodiscard]] const This& asMatrix() const noexcept { return *this; }
     };
@@ -228,7 +240,7 @@ namespace Physica::Core {
     }
 
     template<class MatrixType>
-    __host__ __device__ typename LMatrixBlock<MatrixType, Dynamic, Dynamic>::ScalarType*
+    __host__ __device__ inline typename LMatrixBlock<MatrixType, Dynamic, Dynamic>::PtrTy
     LMatrixBlock<MatrixType, Dynamic, Dynamic>::data_ptr(size_t row, size_t col) {
         assert(row < rowCount);
         assert(col < colCount);
@@ -236,11 +248,9 @@ namespace Physica::Core {
     }
 
     template<class MatrixType>
-    __host__ __device__ const typename LMatrixBlock<MatrixType, Dynamic, Dynamic>::ScalarType*
+    __host__ __device__ typename LMatrixBlock<MatrixType, Dynamic, Dynamic>::ConstPtrTy
     LMatrixBlock<MatrixType, Dynamic, Dynamic>::data_ptr(size_t row, size_t col) const {
-        assert(row < rowCount);
-        assert(col < colCount);
-        return mat.data_ptr(row + fromRow, col + fromCol);
+        return const_cast<This&>(*this).data_ptr(row, col);
     }
 }
 

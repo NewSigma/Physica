@@ -26,6 +26,11 @@ namespace Physica::Core {
         using DeviceVector = device_obj<VectorType>;
     public:
         using typename Base::ScalarType;
+    protected:
+        using typename Base::PtrTy;
+        using typename Base::ConstPtrTy;
+        using typename Base::RefTy;
+        using typename Base::ConstRefTy;
     private:
         Physica::PlainStruct<DeviceVector> vec;
         size_t from;
@@ -40,15 +45,15 @@ namespace Physica::Core {
         using Base::operator=;
         inline device_obj& operator=(const device_obj& obj);
         inline device_obj& operator=(device_obj&& obj) noexcept;
-        [[nodiscard]] __device__ inline ScalarType& operator[](size_t index);
-        [[nodiscard]] __device__ inline const ScalarType& operator[](size_t index) const;
+        [[nodiscard]] __device__ inline RefTy operator[](size_t index);
+        [[nodiscard]] __device__ inline ConstRefTy operator[](size_t index) const;
         /* Operations */
         __host__ __device__ void resize([[maybe_unused]] size_t length) const { assert(length == getLength()); }
         /* Getters */
         template<Side Owner = GetSide()>
         [[nodiscard]] __host__ __device__ inline size_t getLength() const noexcept;
-        [[nodiscard]] __host__ __device__ ScalarType* data_ptr(size_t index) { return vec.getDerived().data() + from + index; }
-        [[nodiscard]] __host__ __device__ const ScalarType* data_ptr(size_t index) const { return vec.getDerived().data() + from + index; }
+        [[nodiscard]] __host__ __device__ PtrTy data_ptr(size_t index) { return vec.getDerived().data() + from + index; }
+        [[nodiscard]] __host__ __device__ ConstPtrTy data_ptr(size_t index) const { return vec.getDerived().data() + from + index; }
     };
 
     template<class VectorType, size_t Length>
@@ -80,14 +85,14 @@ namespace Physica::Core {
     }
 
     template<class VectorType, size_t Length>
-    __device__ inline typename device_obj<ContinuousVectorBlock<VectorType, Length>>::ScalarType&
+    __device__ inline typename device_obj<ContinuousVectorBlock<VectorType, Length>>::RefTy
     device_obj<ContinuousVectorBlock<VectorType, Length>>::operator[](size_t index) {
         assert((index + from) < to);
         return vec.getDerived()[index + from];
     }
 
     template<class VectorType, size_t Length>
-    __device__ inline const typename device_obj<ContinuousVectorBlock<VectorType, Length>>::ScalarType&
+    __device__ inline typename device_obj<ContinuousVectorBlock<VectorType, Length>>::ConstRefTy
     device_obj<ContinuousVectorBlock<VectorType, Length>>::operator[](size_t index) const {
         assert((index + from) < to);
         return vec.getDerived()[index + from];

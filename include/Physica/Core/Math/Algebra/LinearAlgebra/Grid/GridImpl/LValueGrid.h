@@ -35,6 +35,11 @@ namespace Physica::Core {
     public:
         using typename Base::ScalarType;
         using typename Base::Index3D;
+    protected:
+        using PtrTy = typename ScalarType::PtrTy;
+        using ConstPtrTy = typename ScalarType::ConstPtrTy;
+        using RefTy = typename ScalarType::RefTy;
+        using ConstRefTy = typename ScalarType::ConstRefTy;
     public:
         template<class OtherDerived>
         Derived& operator=(const RValueGrid<OtherDerived>& other);

@@ -40,10 +40,27 @@ namespace Physica::Core {
     }
 
     template<class Derived>
-    inline Derived& LValueVector<Derived>::operator=(const ScalarType& s) {
+    template<class OtherScalar>
+    inline Derived& LValueVector<Derived>::operator=(const ScalarBase<OtherScalar>& s) {
+        const auto x = ScalarType(s.getDerived());
         for (size_t i = 0; i < Base::getLength(); ++i)
-            (*this)[i] = s;
+            (*this)[i] = x;
         return Base::getDerived();
+    }
+
+    template<class Derived>
+    inline typename LValueVector<Derived>::RefTy LValueVector<Derived>::operator[](size_t index) {
+        return *data_ptr(index);
+    }
+
+    template<class Derived>
+    inline typename LValueVector<Derived>::ConstRefTy LValueVector<Derived>::operator[](size_t index) const {
+        return const_cast<This&>(*this).operator[](index);
+    }
+
+    template<class Derived>
+    typename LValueVector<Derived>::ScalarType LValueVector<Derived>::calc(size_t index) const {
+        return ScalarType(*data_ptr(index));
     }
 
     template<class Derived>
@@ -129,13 +146,13 @@ namespace Physica::Core {
      * Add this function because we cannot simply return &(*this)[index], it is invalid to dereference a device pointer on host.
      */
     template<class Derived>
-    __host__ __device__ inline typename LValueVector<Derived>::ScalarType* LValueVector<Derived>::data_ptr(size_t index) {
+    __host__ __device__ inline typename LValueVector<Derived>::PtrTy LValueVector<Derived>::data_ptr(size_t index) noexcept {
         return Base::getDerived().data_ptr(index);
     }
 
     template<class Derived>
-    __host__ __device__ inline const typename LValueVector<Derived>::ScalarType* LValueVector<Derived>::data_ptr(size_t index) const {
-        return Base::getDerived().data_ptr(index);
+    __host__ __device__ inline typename LValueVector<Derived>::ConstPtrTy LValueVector<Derived>::data_ptr(size_t index) const noexcept {
+        return const_cast<This&>(*this).data_ptr(index);
     }
 
     template<class Derived, class OtherDerived>

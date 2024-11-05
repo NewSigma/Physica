@@ -143,7 +143,7 @@ namespace Physica {
         constexpr static bool IsScalar = Core::is_scalar<T>::value;
         constexpr static size_t SizeAtCompile = Order * (Order + 1) / 2;
     public:
-        using ValueType = T;
+        using ElemType = T;
         using ArrayType = typename Helper<IsScalar, SizeAtCompile>::Type;
     };
 }

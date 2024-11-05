@@ -28,6 +28,9 @@ namespace Physica::Core {
         using This = device_obj<host_obj>;
         using Base = typename Traits<This>::Base;
         using ScalarType = typename MatrixType::ScalarType;
+    protected:
+        using PtrTy = typename ScalarType::PtrTy;
+        using ConstPtrTy = typename ScalarType::ConstPtrTy;
     private:
         device_obj<MatrixType>& mat;
         size_t row;
@@ -53,8 +56,8 @@ namespace Physica::Core {
         /* Getters */
         template<Side Owner = GetSide()>
         [[nodiscard]] __host__ __device__ size_t getLength() const noexcept { return Length == Dynamic ? colCount : Length; }
-        [[nodiscard]] __host__ __device__ ScalarType* data_ptr(size_t index) { return mat.data_ptr(row, fromCol + index); }
-        [[nodiscard]] __host__ __device__ const ScalarType* data_ptr(size_t index) const { return mat.data_ptr(row, fromCol + index); }
+        [[nodiscard]] __host__ __device__ PtrTy data_ptr(size_t index) { return mat.data_ptr(row, fromCol + index); }
+        [[nodiscard]] __host__ __device__ ConstPtrTy data_ptr(size_t index) const { return mat.data_ptr(row, fromCol + index); }
     };
 
     template<class MatrixType, size_t Length>
@@ -64,6 +67,9 @@ namespace Physica::Core {
         using This = device_obj<host_obj>;
         using Base = typename Traits<This>::Base;
         using ScalarType = typename MatrixType::ScalarType;
+    protected:
+        using PtrTy = typename ScalarType::PtrTy;
+        using ConstPtrTy = typename ScalarType::ConstPtrTy;
     private:
         device_obj<MatrixType>& mat;
         size_t col;
@@ -89,8 +95,8 @@ namespace Physica::Core {
         /* Getters */
         template<Side Owner = GetSide()>
         [[nodiscard]] __host__ __device__ size_t getLength() const noexcept { return Length == Dynamic ? rowCount : Length; }
-        [[nodiscard]] __host__ __device__ ScalarType* data_ptr(size_t index) { return mat.data_ptr(fromRow + index, col); }
-        [[nodiscard]] __host__ __device__ const ScalarType* data_ptr(size_t index) const { return mat.data_ptr(fromRow + index, col); }
+        [[nodiscard]] __host__ __device__ PtrTy data_ptr(size_t index) { return mat.data_ptr(fromRow + index, col); }
+        [[nodiscard]] __host__ __device__ ConstPtrTy data_ptr(size_t index) const { return mat.data_ptr(fromRow + index, col); }
     };
 
     template<class MatrixType, size_t Column>
@@ -103,6 +109,9 @@ namespace Physica::Core {
         using Base = device_obj<LValueMatrix<host_obj>>;
         using VectorBase = device_obj<RowContinuousVector<MatrixType, Column>>;
         using ScalarType = typename MatrixType::ScalarType;
+    protected:
+        using PtrTy = typename ScalarType::PtrTy;
+        using ConstPtrTy = typename ScalarType::ConstPtrTy;
     public:
         __host__ __device__ device_obj(device_obj<ContinuousMatrix<MatrixType>>& mat_, size_t fromRow_, [[maybe_unused]] size_t rowCount_, size_t fromCol_, size_t colCount_)
                 : device_obj(mat_, fromRow_, fromCol_, colCount_) {
@@ -140,8 +149,8 @@ namespace Physica::Core {
         using VectorBase::data_ptr;
         [[nodiscard]] __host__ __device__ constexpr static size_t getRow() noexcept { return 1; }
         [[nodiscard]] __host__ __device__ size_t getColumn() const noexcept { return Column == Dynamic ? VectorBase::getLength() : Column; }
-        [[nodiscard]] __host__ __device__ ScalarType* data_ptr([[maybe_unused]] size_t row, size_t column) { assert(row == 0); return VectorBase::data_ptr(column); }
-        [[nodiscard]] __host__ __device__ const ScalarType* data_ptr([[maybe_unused]] size_t row, size_t column) const { assert(row == 0); return VectorBase::data_ptr(column); }
+        [[nodiscard]] __host__ __device__ PtrTy data_ptr([[maybe_unused]] size_t row, size_t column) { assert(row == 0); return VectorBase::data_ptr(column); }
+        [[nodiscard]] __host__ __device__ ConstPtrTy data_ptr([[maybe_unused]] size_t row, size_t column) const { assert(row == 0); return VectorBase::data_ptr(column); }
         /**
          * There are some common functions shared by vector and matrix, it is necessary to decide which function to call explicitly.
          */
@@ -161,6 +170,9 @@ namespace Physica::Core {
         using Base = device_obj<LValueMatrix<host_obj>>;
         using VectorBase = device_obj<ColContinuousVector<MatrixType, Row>>;
         using ScalarType = typename MatrixType::ScalarType;
+    protected:
+        using PtrTy = typename ScalarType::PtrTy;
+        using ConstPtrTy = typename ScalarType::ConstPtrTy;
     public:
         __host__ __device__ device_obj(device_obj<ContinuousMatrix<MatrixType>>& mat_, size_t fromRow_, size_t rowCount_, size_t fromCol_, [[maybe_unused]] size_t colCount_)
                 : device_obj(mat_, fromRow_, rowCount_, fromCol_) {
@@ -198,8 +210,8 @@ namespace Physica::Core {
         using VectorBase::data_ptr;
         [[nodiscard]] __host__ __device__ size_t getRow() const noexcept { return Row == Dynamic ? VectorBase::getLength() : Row; }
         [[nodiscard]] __host__ __device__ constexpr static size_t getColumn() noexcept { return 1; }
-        [[nodiscard]] __host__ __device__ ScalarType* data_ptr(size_t row, [[maybe_unused]] size_t column) { assert(column == 0); return VectorBase::data_ptr(row); }
-        [[nodiscard]] __host__ __device__ const ScalarType* data_ptr(size_t row, [[maybe_unused]] size_t column) const { assert(column == 0); return VectorBase::data_ptr(row); }
+        [[nodiscard]] __host__ __device__ PtrTy data_ptr(size_t row, [[maybe_unused]] size_t column) { assert(column == 0); return VectorBase::data_ptr(row); }
+        [[nodiscard]] __host__ __device__ ConstPtrTy data_ptr(size_t row, [[maybe_unused]] size_t column) const { assert(column == 0); return VectorBase::data_ptr(row); }
         /**
          * There are some common functions shared by vector and matrix, it is necessary to decide which function to call explicitly.
          */

@@ -29,6 +29,11 @@ namespace Physica::Core {
         using BlockType = device_obj<LVectorBlock<Derived, Length>>;
     public:
         using typename Base::ScalarType;
+    protected:
+        using PtrTy = typename ScalarType::PtrTy;
+        using ConstPtrTy = typename ScalarType::ConstPtrTy;
+        using RefTy = typename ScalarType::RefTy;
+        using ConstRefTy = typename ScalarType::ConstRefTy;
     public:
         ~device_obj() = default;
         /* Operators */
@@ -38,8 +43,8 @@ namespace Physica::Core {
         __host__ __device__ device_obj<Derived>& operator=(const device_obj<RValueVector<OtherDerived>>& v);
         template<class AnyScalar>
         inline device_obj<Derived>& operator=(const ScalarBase<AnyScalar>& s);
-        [[nodiscard]] __device__ ScalarType& operator[](size_t index) { return *data_ptr(index); }
-        [[nodiscard]] __device__ const ScalarType& operator[](size_t index) const { return *data_ptr(index); }
+        [[nodiscard]] __device__ RefTy operator[](size_t index) { return *data_ptr(index); }
+        [[nodiscard]] __device__ ConstRefTy operator[](size_t index) const { return *data_ptr(index); }
         /* Operations */
         template<Side Owner = GetSide()>
         [[nodiscard]] __device__ ScalarType calc(size_t index) const { return *data_ptr(index); }
@@ -57,8 +62,8 @@ namespace Physica::Core {
         template<size_t Length = Dynamic>
         [[nodiscard]] __host__ __device__ inline const BlockType<Length> segment(size_t from, size_t to) const;
         /* Getters */
-        [[nodiscard]] __host__ __device__ inline ScalarType* data_ptr(size_t index);
-        [[nodiscard]] __host__ __device__ inline const ScalarType* data_ptr(size_t index) const;
+        [[nodiscard]] __host__ __device__ inline PtrTy data_ptr(size_t index);
+        [[nodiscard]] __host__ __device__ inline ConstPtrTy data_ptr(size_t index) const;
     protected:
         device_obj() = default;
         device_obj(const device_obj&) = default;
