@@ -234,9 +234,9 @@ namespace Physica::Core {
         }
         else {
             using PlainScalar = typename ScalarType::PlainScalar;
-            const bool isValueNear = relativeError(s1.getValue().real(), s2.getValue().real()) < PlainScalar(precision);
+            const bool isValueNear = relativeError(s1.getValue(), s2.getValue()) < PlainScalar(precision);
             if constexpr (ScalarType::isDifferentiable)
-                return isValueNear && relativeError(s1.getGrad().real(), s2.getGrad().real()) < PlainScalar(precision);
+                return isValueNear && scalarNear(s1.getGrad(), s2.getGrad(), precision);
             else
                 return isValueNear;
         }

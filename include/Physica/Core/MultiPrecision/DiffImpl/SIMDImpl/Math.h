@@ -43,8 +43,7 @@ namespace Physica::Core {
         using ResultType = SIMD<Diff<T, Mode, Order>, Size>;
         if constexpr (Mode == DiffMode::Forward) {
             using GradPacket = typename ResultType::GradPacket;
-            const auto y = square(GradPacket(x));
-            return ResultType(y.getValue(), y * x.getGrad() * T(2));
+            return ResultType(square(x.getValue()), GradPacket(x) * x.getGrad() * T(2));
         }
         else {
             using PlainSIMD = SIMD<T, Size>;
@@ -64,7 +63,7 @@ namespace Physica::Core {
         using ResultType = SIMD<Diff<T, Mode, Order>, Size>;
         using GradPacket = typename ResultType::GradPacket;
         const auto y = reciprocal(GradPacket(x));
-        return ResultType(y, -x.getGrad() * square(y));
+        return ResultType(y.getValue(), -x.getGrad() * square(y));
     }
 
     template<class T, DiffMode Mode, int Order, size_t Size>

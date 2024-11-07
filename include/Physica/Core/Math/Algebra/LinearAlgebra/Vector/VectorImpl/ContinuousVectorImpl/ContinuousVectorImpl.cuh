@@ -66,13 +66,15 @@ namespace Physica::Core {
     template<class Derived>
     template<class AnyPacket>
     __device__ inline void device_obj<ContinuousVector<Derived>>::writePacket(size_t index, const AnyPacket packet) {
-        packet.store(Base::data_ptr(index));
+        using LocalPacket = typename std::conditional<AnyPacket::size() == 1, ScalarType, SIMD<ScalarType, AnyPacket::size()>>::type;
+        LocalPacket(packet).store(Base::data_ptr(index));
     }
 
     template<class Derived>
     template<class AnyPacket>
     __device__ inline void device_obj<ContinuousVector<Derived>>::writePacketPartial(size_t index, size_t count, const AnyPacket packet) {
-        packet.store_partial(count, Base::data_ptr(index));
+        using LocalPacket = typename std::conditional<AnyPacket::size() == 1, ScalarType, SIMD<ScalarType, AnyPacket::size()>>::type;
+        LocalPacket(packet).store_partial(count, Base::data_ptr(index));
     }
 
     template<class Derived>

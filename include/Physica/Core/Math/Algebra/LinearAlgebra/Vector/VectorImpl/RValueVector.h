@@ -54,7 +54,8 @@ namespace Physica::Core {
         template<class VectorType1, class VectorType2 = VectorType1>
         class EnableSIMD {
             using ScalarType = typename VectorType1::ScalarType;
-            constexpr static bool isSameScalar = std::is_same<ScalarType, typename VectorType2::ScalarType>::value;
+            using PlainScalar = typename ScalarType::PlainScalar;
+            constexpr static bool isSameScalar = std::is_same<PlainScalar, typename VectorType2::PlainScalar>::value;
         public:
             constexpr static bool value = isSameScalar && BestPacket<ScalarType, VectorType1::SizeAtCompile>::Size > 1;
         };

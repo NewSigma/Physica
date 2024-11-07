@@ -93,8 +93,42 @@ void testMath() {
         exit(EXIT_FAILURE);
 }
 
+void testSIMD() {
+    T value[4]{1.5, -1.5, 0, 2};
+    T grad1[4]{1, 1, 1, 0};
+    T grad2[4]{0, 0, 0, 0};
+
+    using dfloat = Diff<T, DiffMode::Forward, 2>;
+    SIMD<dfloat, 4> packet{};
+    packet.load({value, {grad1, grad2}});
+
+    bool good = true;
+    auto result = abs(packet);
+    for (int i = 0; i < 4; ++i)
+        good &= scalarNear(abs(dfloat(value[i], grad1[i])), result[i], 1E-15);
+
+    result = square(packet);
+    for (int i = 0; i < 4; ++i)
+        good &= scalarNear(square(dfloat(value[i], grad1[i])), result[i], 1E-15);
+
+    result = reciprocal(packet);
+    for (int i = 0; i < 4; ++i) {
+        if (value[i].isZero())
+            continue;
+        good &= scalarNear(reciprocal(dfloat(value[i], grad1[i])), result[i], 1E-15);
+    }
+
+    result = exp(packet);
+    for (int i = 0; i < 4; ++i)
+        good &= scalarNear(exp(dfloat(value[i], grad1[i])), result[i], 1E-15);
+
+    if (!good)
+        exit(EXIT_FAILURE);
+}
+
 int main() {
     testFunc();
     testMath();
+    testSIMD();
     return 0;
 }

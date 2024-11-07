@@ -144,7 +144,7 @@ namespace Physica::Core {
                 return ScalarRef<Diff<T, DiffMode::Forward, Order - GradOrder>>(ptr.grad_ptr());
         }
         else
-            return ptr.grad_ptr().template getGrad<GradOrder - 1>();
+            return (*ptr.grad_ptr()).template getGrad<GradOrder - 1>();
     }
 
     template<class T, int Order>

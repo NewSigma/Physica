@@ -132,8 +132,8 @@ namespace Physica::Core {
             T* arr[Order + 1];
         };
     public:
+        ScalarPtr(std::pair<T*, GradPtrTy> pair_) : pair(std::move(pair_)) {}
         ScalarPtr(T* pValue, GradPtrTy pGrad) : pair(std::make_pair(pValue, pGrad)) {}
-        ScalarPtr(ScalarType* p) : ScalarPtr(&p->getValue(), &p->getGrad()) {}
         ScalarPtr(const This&) = default;
         ScalarPtr(This&&) noexcept = default;
         ~ScalarPtr() = default;
@@ -148,7 +148,7 @@ namespace Physica::Core {
         }
         [[nodiscard]] ScalarRef<ScalarType> operator*() const { return ScalarRef<ScalarType>(*this); }
         [[nodiscard]] This operator+(size_t n) { return ScalarPtr(value_ptr() + n, grad_ptr() + n); }
-        [[nodiscard]] T* operator[](size_t i) const noexcept { assert(i < Order); return arr[i]; }
+        [[nodiscard]] T* operator[](size_t i) const noexcept { assert(i <= Order); return arr[i]; }
         /* Getters */
         [[nodiscard]] T* value_ptr() const noexcept { return pair.first; }
         [[nodiscard]] GradPtrTy grad_ptr() const noexcept { return pair.second; }

@@ -39,13 +39,15 @@ void hdfTest() {
         const auto data = Vector<T>::random_uniform(64, gen);
 
         TempFile tmp("/tmp/tmpXXXXXX");
-        H5File h5f(tmp.getName(), H5File::OpenFlag(H5File::OpenFlag::ReadWrite | H5File::OpenFlag::Creat));
-        auto space = H5DataSpace<1>({data.getLength()});
-        auto dataset = h5f.createDataSet<1>("/set", T::getH5DataType(), space);
-        data.write(dataset, space);
-
+        {
+            H5File h5f(tmp.getName(), H5File::OpenFlag::ReadWrite | H5File::OpenFlag::Creat);
+            data.write(h5f, "set");
+        }
         Vector<T> buffer(data.getLength());
-        buffer.read(dataset, space);
+        {
+            H5File h5f(tmp.getName(), H5File::OpenFlag::ReadOnly);
+            buffer.read(h5f, "set");
+        }
         if (data != buffer)
             exit(EXIT_FAILURE);
     }
@@ -54,13 +56,15 @@ void hdfTest() {
         const auto data = Vector<T>::random_uniform(64, gen);
 
         TempFile tmp("/tmp/tmpXXXXXX");
-        H5File h5f(tmp.getName(), H5File::OpenFlag(H5File::OpenFlag::ReadWrite | H5File::OpenFlag::Creat));
-        auto space = H5DataSpace<1>({data.getLength()});
-        auto dataset = h5f.createDataSet<1>("/set", T::getH5DataType(), space);
-        data.write(dataset, space);
-
+        {
+            H5File h5f(tmp.getName(), H5File::OpenFlag::ReadWrite | H5File::OpenFlag::Creat);
+            data.write(h5f, "set");
+        }
         Vector<T> buffer(data.getLength());
-        buffer.read(dataset, space);
+        {
+            H5File h5f(tmp.getName(), H5File::OpenFlag::ReadOnly);
+            buffer.read(h5f, "set");
+        }
         if (data != buffer)
             exit(EXIT_FAILURE);
     }

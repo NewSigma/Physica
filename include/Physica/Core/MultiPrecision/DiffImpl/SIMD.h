@@ -57,6 +57,7 @@ namespace Physica::Core {
         explicit SIMD(double x);
         explicit SIMD(ScalarType x);
         SIMD(ScalarType x, int count);
+        explicit SIMD(ValuePacket values_);
         SIMD(ValuePacket values_, GradPacket grads_);
         template<int OtherOrder>
         explicit SIMD(const SIMD<Diff<T, DiffMode::Forward, OtherOrder>, Size>& other);
@@ -67,7 +68,7 @@ namespace Physica::Core {
         SIMD& operator=(const SIMD&) = default;
         SIMD& operator=(SIMD&&) noexcept = default;
         [[nodiscard]] explicit operator ValuePacket() const noexcept { return values; }
-        //[[nodiscard]] inline ScalarType operator[](int index) const;
+        [[nodiscard]] inline ScalarType operator[](int index) const;
         [[nodiscard]] inline SIMD operator+(const SIMD& other) const;
         [[nodiscard]] inline SIMD operator-(const SIMD& other) const;
         [[nodiscard]] inline SIMD operator*(const SIMD& x) const;
