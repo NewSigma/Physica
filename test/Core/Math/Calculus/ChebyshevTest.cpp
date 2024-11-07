@@ -37,7 +37,7 @@ void testFit(Function func) {
         x += delta;
         T answer = func(x);
         T result = chebyshev_calc(from, to, coeff, x);
-        if (fabs(result.getTrivial() - answer.getTrivial()) > 1E-14) {
+        if (fabs(result.toMachine() - answer.toMachine()) > 1E-14) {
             std::cout << "testFit failed: " << result << ' ' << answer << std::endl;
             exit(EXIT_FAILURE);
         }
@@ -58,7 +58,7 @@ void testFitEven(Function func) {
         x += delta;
         T answer = func(x);
         T result = chebyshev_calc_even(from, to, coeff, x);
-        if (fabs(result.getTrivial() - answer.getTrivial()) > 1E-14) {
+        if (fabs(result.toMachine() - answer.toMachine()) > 1E-14) {
             std::cout << "testFitEven failed: " << x << result << ' ' << answer << std::endl;
             exit(EXIT_FAILURE);
         }
@@ -79,7 +79,7 @@ void testFitOdd(Function func) {
         x += delta;
         T answer = func(x);
         T result = chebyshev_calc_odd(from, to, coeff, x);
-        if (fabs(result.getTrivial() - answer.getTrivial()) > 1E-14) {
+        if (fabs(result.toMachine() - answer.toMachine()) > 1E-14) {
             std::cout << "testFitOdd failed: " << result << ' ' << answer << std::endl;
             exit(EXIT_FAILURE);
         }

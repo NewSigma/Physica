@@ -190,7 +190,7 @@ namespace Physica::Core {
     __device__ inline ScalarType device_obj<RSpaceEwald<ScalarType, IsSmallCell>>::pot_functor(
             size_t i, size_t j, ScalarType r, [[maybe_unused]] ScalarType r2) const {
         const ScalarType temp = r * repErfcStep + PlainScalar(0.5);
-        const int index = temp.getTrivial();
+        const int index = temp.toMachine();
         const ScalarType x1 = erfcStep * floor(temp);
         auto y = erfc_table.template segment<3>(index, index + 3);
         const ScalarType interp = Internal::quadraticInterpolate<ScalarType>(x1 - erfcStep, x1, x1 + erfcStep, y[0], y[1], y[2], r);
@@ -201,7 +201,7 @@ namespace Physica::Core {
     __device__ inline ScalarType device_obj<RSpaceEwald<ScalarType, IsSmallCell>>::force_functor(
             size_t i, size_t j, ScalarType r, [[maybe_unused]] ScalarType r2) const {
         const ScalarType temp = r * repErfcStep + PlainScalar(0.5);
-        const int index = temp.getTrivial();
+        const int index = temp.toMachine();
         const ScalarType x1 = erfcStep * floor(temp);
         auto y = erfc_table.template segment<3>(index, index + 3);
         return -charges[i] * charges[j] * Internal::quadraticInterpolate_diff1<ScalarType>(repDoubleSquareStep, erfcStep, x1, y[0], y[1], y[2], r);

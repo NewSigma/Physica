@@ -87,9 +87,9 @@ namespace Physica::Core {
     }
 
     template<class T, int Order, size_t Size>
-    inline void SIMD<Diff<T, DiffMode::Forward, Order>, Size>::load_partial(int n, ConstPtrTy p) {
-        values.load_partial(n, p.value_ptr());
-        grads.load_partial(n, p.grad_ptr());
+    inline void SIMD<Diff<T, DiffMode::Forward, Order>, Size>::load_partial(ConstPtrTy p, int n) {
+        values.load_partial(p.value_ptr(), n);
+        grads.load_partial(p.grad_ptr(), n);
     }
 
     template<class T, int Order, size_t Size>
@@ -99,9 +99,9 @@ namespace Physica::Core {
     }
 
     template<class T, int Order, size_t Size>
-    inline void SIMD<Diff<T, DiffMode::Forward, Order>, Size>::store_partial(int n, PtrTy p) const {
-        values.store_partial(n, p.value_ptr());
-        grads.store_partial(n, p.grad_ptr());
+    inline void SIMD<Diff<T, DiffMode::Forward, Order>, Size>::store_partial(PtrTy p, int n) const {
+        values.store_partial(p.value_ptr(), n);
+        grads.store_partial(p.grad_ptr(), n);
     }
 
     template<class T, int Order, size_t Size>
@@ -247,16 +247,16 @@ namespace Physica::Core {
 
     template<class PlainScalar, size_t Size>
     inline void SIMD<Diff<PlainScalar, DiffMode::Reverse, 1>, Size>::load(const ScalarType* p) {
-        assert(checkContinuous(Size, p) && "[Error]: Load a uncontinuous pointer is a bug");
+        assert(checkContinuous(p, Size) && "[Error]: Load a uncontinuous pointer is a bug");
         headNode = *p;
         Base::load(headNode.value_ptr());
     }
 
     template<class PlainScalar, size_t Size>
-    inline void SIMD<Diff<PlainScalar, DiffMode::Reverse, 1>, Size>::load_partial(int n, const ScalarType* p) {
-        assert(checkContinuous(n, p) && "[Error]: Load a uncontinuous pointer is a bug");
+    inline void SIMD<Diff<PlainScalar, DiffMode::Reverse, 1>, Size>::load_partial(const ScalarType* p, int n) {
+        assert(checkContinuous(p, n) && "[Error]: Load a uncontinuous pointer is a bug");
         headNode = *p;
-        Base::load_partial(n, headNode.value_ptr());
+        Base::load_partial(headNode.value_ptr(), n);
     }
 
     template<class PlainScalar, size_t Size>
@@ -266,7 +266,7 @@ namespace Physica::Core {
     }
 
     template<class PlainScalar, size_t Size>
-    inline void SIMD<Diff<PlainScalar, DiffMode::Reverse, 1>, Size>::store_partial(int n, ScalarType* p) const {
+    inline void SIMD<Diff<PlainScalar, DiffMode::Reverse, 1>, Size>::store_partial(ScalarType* p, int n) const {
         for (int i = 0; i < n; ++i)
             *(p + i) = ScalarType(value_ptr() + i, grad_ptr() + i);
     }
@@ -288,7 +288,7 @@ namespace Physica::Core {
     }
 
     template<class PlainScalar, size_t Size>
-    bool SIMD<Diff<PlainScalar, DiffMode::Reverse, 1>, Size>::checkContinuous(int n, const ScalarType* p) {
+    bool SIMD<Diff<PlainScalar, DiffMode::Reverse, 1>, Size>::checkContinuous(const ScalarType* p, int n) {
         const PlainScalar* pValue = p->value_ptr();
         const PlainScalar* pGrad = p->grad_ptr();
         for (int i = 1; i < n; ++i) {

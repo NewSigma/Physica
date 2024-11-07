@@ -31,9 +31,9 @@ namespace Physica::Core {
         }
         else {
             if constexpr (T::Option == Float32)
-                *this = This(Base(x.real().getTrivial(), x.imag().getTrivial(), x.real().getTrivial(), x.imag().getTrivial()));
+                *this = This(Base(x.real().toMachine(), x.imag().toMachine(), x.real().toMachine(), x.imag().toMachine()));
             else
-                *this = This(Base(x.real().getTrivial(), x.imag().getTrivial()));
+                *this = This(Base(x.real().toMachine(), x.imag().toMachine()));
         }
     }
 
@@ -104,8 +104,8 @@ namespace Physica::Core {
     }
 
     template<class T, size_t Size>
-    inline void SIMD<Complex<T>, Size>::load_partial(int n, const ScalarType* p) {
-        Base::load_partial(2 * n, reinterpret_cast<const T*>(p));
+    inline void SIMD<Complex<T>, Size>::load_partial(const ScalarType* p, int n) {
+        Base::load_partial(reinterpret_cast<const T*>(p), 2 * n);
     }
 
     template<class T, size_t Size>
@@ -114,8 +114,8 @@ namespace Physica::Core {
     }
 
     template<class T, size_t Size>
-    inline void SIMD<Complex<T>, Size>::store_partial(int n, ScalarType* p) const {
-        Base::store_partial(2 * n, reinterpret_cast<T*>(p));
+    inline void SIMD<Complex<T>, Size>::store_partial(ScalarType* p, int n) const {
+        Base::store_partial(reinterpret_cast<T*>(p), 2 * n);
     }
 
     template<class T, size_t Size>

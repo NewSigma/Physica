@@ -386,6 +386,7 @@ namespace Physica::Core {
 
     template<class Derived>
     __host__ __device__ inline typename LValueMatrix<Derived>::PtrTy LValueMatrix<Derived>::data_ptr(size_t row, size_t col) noexcept {
+        assert(row < Base::getRow() && col < Base::getColumn());
         return Base::getDerived().data_ptr(row, col);
     }
 

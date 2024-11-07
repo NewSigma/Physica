@@ -16,15 +16,16 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h"
+#include <Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h>
+#include <Physica/Core/Math/Algebra/LinearAlgebra/Matrix/MatrixDecomposition/LUDecomposition.h>
 
 using namespace Physica::Core;
 
 int main() {
     typedef DenseMatrix<float64, MatrixOption::Row | MatrixOption::Vector, 3, 3> Matrix3x3;
     Matrix3x3 mat1{{2, 3, 4}, {1, 1, 9}, {1, 2, -6}};
-    LUDecomposition lu(mat1);
-    Matrix3x3 decomp(lu);
+    LUDecomposition<float64> lu(mat1);
+    Matrix3x3 decomp = lu.getMatrixLU();
     Matrix3x3 answer{{2, 3, 4}, {0.5, -0.5, 7}, {0.5, -1, -1}};
     decomp -= answer;
     for (int i = 0; i < 3; ++i)

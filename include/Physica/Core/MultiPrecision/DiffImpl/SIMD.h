@@ -82,9 +82,9 @@ namespace Physica::Core {
         void operator/=(const SIMD& x) { *this = *this / x; }
         /* Operations */
         inline void load(ConstPtrTy p);
-        inline void load_partial(int n, ConstPtrTy p);
+        inline void load_partial(ConstPtrTy p, int n);
         inline void store(PtrTy p) const;
-        inline void store_partial(int n, PtrTy p) const;
+        inline void store_partial(PtrTy p, int n) const;
 
         inline This& cutoff(int count);
 
@@ -143,9 +143,9 @@ namespace Physica::Core {
         using Base::operator<=;
         /* Operations */
         inline void load(const ScalarType* p);
-        inline void load_partial(int n, const ScalarType* p);
+        inline void load_partial(const ScalarType* p, int n);
         inline void store(ScalarType* p) const;
-        inline void store_partial(int n, ScalarType* p) const;
+        inline void store_partial(ScalarType* p, int n) const;
         [[nodiscard]] inline ScalarType sum() const;
         inline void swap(SIMD& __restrict obj) noexcept;
         /* Getters */
@@ -156,7 +156,7 @@ namespace Physica::Core {
         [[nodiscard]] PlainScalar* grad_ptr() const noexcept { return headNode.grad_ptr(); }
     private:
         using Base::insert; //Insert a scalar may lead to incontineous memory, which harms performance
-        [[nodiscard]] static bool checkContinuous(int n, const ScalarType* p);
+        [[nodiscard]] static bool checkContinuous(const ScalarType* p, int n);
     };
 
     template<class T, DiffMode Mode, int Order, size_t Size>

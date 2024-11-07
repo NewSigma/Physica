@@ -128,11 +128,11 @@ namespace Physica::Core {
                 // When the coefficient is 0, these would attempt to access matrix elements that
                 // are out of bounds. The list of rotations, @r, must have the @l - 1
                 // previously completed band rotations. These functions are valid for l >= 2.
-                if (!nearByMargin(u.getTrivial(), 0.0))
+                if (!nearByMargin(u.toMachine(), 0.0))
                     u *= U(m, n, l);
-                if (!nearByMargin(v.getTrivial(), 0.0))
+                if (!nearByMargin(v.toMachine(), 0.0))
                     v *= V(m, n, l);
-                if (!nearByMargin(w.getTrivial(), 0.0))
+                if (!nearByMargin(w.toMachine(), 0.0))
                     w *= W(m, n, l);
 
                 result(m + l, n + l) = T(u + v + w);

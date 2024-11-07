@@ -50,35 +50,35 @@ namespace Physica::Core {
         using RealType = typename ScalarType::RealType;
         const RealType abs_real = abs(c.real());
         const RealType w = sqrt((abs_real + c.norm()) * ScalarType(0.5));
+        const RealType v = c.imag() / w * ScalarType(0.5);
         if (!c.real().isNegative())
-            return ResultType(w, c.imag() / w * ScalarType(0.5));
-        const RealType abs_imag = abs(c.imag());
-        return ResultType(abs_imag / w * ScalarType(0.5), c.imag().isNegative() ? -w : w);
+            return ResultType(w, v);
+        return ResultType(abs(v), c.imag().isNegative() ? -w : w);
     }
 
     template<class ScalarType>
     inline Complex<ScalarType> ln(const Complex<ScalarType>& c) {
-        return Complex<ScalarType>(std::log(c.getTrivial()));
+        return Complex<ScalarType>(std::log(c.toMachine()));
     }
 
     template<class ScalarType>
     inline Complex<ScalarType> exp(const Complex<ScalarType>& c) {
-        return Complex<ScalarType>(std::exp(c.getTrivial()));
+        return Complex<ScalarType>(std::exp(c.toMachine()));
     }
 
     template<class ScalarType>
     inline Complex<ScalarType> cos(const Complex<ScalarType>& c) {
-        return Complex<ScalarType>(std::cos(c.getTrivial()));
+        return Complex<ScalarType>(std::cos(c.toMachine()));
     }
 
     template<class ScalarType>
     inline Complex<ScalarType> sin(const Complex<ScalarType>& c) {
-        return Complex<ScalarType>(std::sin(c.getTrivial()));
+        return Complex<ScalarType>(std::sin(c.toMachine()));
     }
 
     template<class ScalarType>
     inline Complex<ScalarType> tan(const Complex<ScalarType>& c) {
-        return Complex<ScalarType>(std::tan(c.getTrivial()));
+        return Complex<ScalarType>(std::tan(c.toMachine()));
     }
 
     template<class ScalarType>
@@ -98,17 +98,17 @@ namespace Physica::Core {
 
     template<class ScalarType>
     Complex<ScalarType> cosh(const Complex<ScalarType>& c) {
-        return Complex<ScalarType>(std::cosh(c.getTrivial()));
+        return Complex<ScalarType>(std::cosh(c.toMachine()));
     }
 
     template<class ScalarType>
     Complex<ScalarType> sinh(const Complex<ScalarType>& c) {
-        return Complex<ScalarType>(std::sinh(c.getTrivial()));
+        return Complex<ScalarType>(std::sinh(c.toMachine()));
     }
 
     template<class ScalarType>
     Complex<ScalarType> tanh(const Complex<ScalarType>& c) {
-        return Complex<ScalarType>(std::tanh(c.getTrivial()));
+        return Complex<ScalarType>(std::tanh(c.toMachine()));
     }
 
     template<class ScalarType>

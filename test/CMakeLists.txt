@@ -1,5 +1,11 @@
 include(CTest)
-include(../cmake/Modules/PhysicaAddTest.cmake)
+function(physica_add_test NAME SOURCES)
+    add_executable(Test-${NAME})
+    target_sources(Test-${NAME} PRIVATE ${SOURCES} ${ARGN})
+    target_precompile_headers(Test-${NAME} REUSE_FROM PhysicaCore)
+    target_link_libraries(Test-${NAME} PhysicaCore ${GPerfTools_LIBRARY})
+    add_test(NAME Test-${NAME} COMMAND Test-${NAME})
+endfunction()
 
 message(STATUS "Configuring tests.")
 

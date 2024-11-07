@@ -22,9 +22,9 @@ namespace Physica::Core {
     template<ScalarOption Option>
     __host__ __device__ inline Scalar<Option> abs(const Scalar<Option>& s) noexcept {
         if constexpr (Option == Float)
-            return Scalar<Option>(::fabsf(s.getTrivial()));
+            return Scalar<Option>(::fabsf(s.toMachine()));
         else
-            return Scalar<Option>(::fabs(s.getTrivial()));
+            return Scalar<Option>(::fabs(s.toMachine()));
     }
 
     template<ScalarOption Option>
@@ -46,33 +46,33 @@ namespace Physica::Core {
     __host__ __device__ inline Scalar<Option> sqrt(const Scalar<Option>& s) noexcept {
         assert(!s.isNegative());
         if constexpr (Option == Float)
-            return Scalar<Option>(::sqrtf(s.getTrivial()));
+            return Scalar<Option>(::sqrtf(s.toMachine()));
         else
-            return Scalar<Option>(::sqrt(s.getTrivial()));
+            return Scalar<Option>(::sqrt(s.toMachine()));
     }
 
     template<ScalarOption Option>
     __host__ __device__ inline Scalar<Option> cbrt(const Scalar<Option>& s) noexcept {
         if constexpr (Option == Float)
-            return Scalar<Option>(::cbrtf(s.getTrivial()));
+            return Scalar<Option>(::cbrtf(s.toMachine()));
         else
-            return Scalar<Option>(::cbrt(s.getTrivial()));
+            return Scalar<Option>(::cbrt(s.toMachine()));
     }
 
     template<ScalarOption Option>
     __host__ __device__ inline Scalar<Option> ln(const Scalar<Option>& s) noexcept {
         if constexpr (Option == Float)
-            return Scalar<Option>(::logf(s.getTrivial()));
+            return Scalar<Option>(::logf(s.toMachine()));
         else
-            return Scalar<Option>(::log(s.getTrivial()));
+            return Scalar<Option>(::log(s.toMachine()));
     }
 
     template<ScalarOption Option>
     __host__ __device__ inline Scalar<Option> ln1p(const Scalar<Option>& s) noexcept {
         if constexpr (Option == Float)
-            return Scalar<Option>(::log1pf(s.getTrivial()));
+            return Scalar<Option>(::log1pf(s.toMachine()));
         else
-            return Scalar<Option>(::log1p(s.getTrivial()));
+            return Scalar<Option>(::log1p(s.toMachine()));
     }
     /**
      * \return log_a n
@@ -85,18 +85,18 @@ namespace Physica::Core {
     template<ScalarOption Option>
     __host__ __device__ inline Scalar<Option> exp(const Scalar<Option>& s) noexcept {
         if constexpr (Option == Float)
-            return Scalar<Option>(::expf(s.getTrivial()));
+            return Scalar<Option>(::expf(s.toMachine()));
         else
-            return Scalar<Option>(::exp(s.getTrivial()));
+            return Scalar<Option>(::exp(s.toMachine()));
     }
 
     template<ScalarOption Option>
     Scalar<Option> pow(const Scalar<Option>& s, const Scalar<Option>& n) noexcept {
         if constexpr (Option == Float)
-            return Scalar<Option>(::powf(s.getTrivial(), n.getTrivial()));
+            return Scalar<Option>(::powf(s.toMachine(), n.toMachine()));
         else {
             static_assert(Option == Float64);
-            return Scalar<Option>(::pow(s.getTrivial(), n.getTrivial()));
+            return Scalar<Option>(::pow(s.toMachine(), n.toMachine()));
         }
     }
     /*!
@@ -107,8 +107,8 @@ namespace Physica::Core {
      */
     template<ScalarOption Option>
     Scalar<Option> factorial(const Scalar<Option>& s) noexcept {
-        typedef decltype(s.getTrivial()) FloatType;
-        const auto trivial = s.getTrivial();
+        typedef decltype(s.toMachine()) FloatType;
+        const auto trivial = s.toMachine();
         FloatType temp = 1;
         FloatType result = 0;
         while(temp < trivial) {
@@ -121,27 +121,27 @@ namespace Physica::Core {
     template<ScalarOption Option>
     __host__ __device__ inline Scalar<Option> cos(const Scalar<Option>& s) noexcept {
         if constexpr (Option == Float)
-            return Scalar<Option>(::cosf(s.getTrivial()));
+            return Scalar<Option>(::cosf(s.toMachine()));
         else
-            return Scalar<Option>(::cos(s.getTrivial()));
+            return Scalar<Option>(::cos(s.toMachine()));
     }
 
     template<ScalarOption Option>
     __host__ __device__ inline Scalar<Option> sin(const Scalar<Option>& s) noexcept {
         if constexpr (Option == Float)
-            return Scalar<Option>(::sinf(s.getTrivial()));
+            return Scalar<Option>(::sinf(s.toMachine()));
         else
-            return Scalar<Option>(::sin(s.getTrivial()));
+            return Scalar<Option>(::sin(s.toMachine()));
     }
 
     template<ScalarOption Option>
     __host__ __device__ inline void sincos(Scalar<Option> s, Scalar<Option>& sin_result, Scalar<Option>& cos_result) noexcept {
-        using TrivialType = typename Scalar<Option>::TrivialType;
-        TrivialType sin_temp, cos_temp;
+        using MachineType = typename Scalar<Option>::MachineType;
+        MachineType sin_temp, cos_temp;
         if constexpr (Option == Double)
-            ::sincos(s.getTrivial(), (double*)&sin_temp, (double*)&cos_temp);
+            ::sincos(s.toMachine(), (double*)&sin_temp, (double*)&cos_temp);
         else
-            ::sincosf(s.getTrivial(), (float*)&sin_temp, (float*)&cos_temp);
+            ::sincosf(s.toMachine(), (float*)&sin_temp, (float*)&cos_temp);
         sin_result = sin_temp;
         cos_result = cos_temp;
     }
@@ -149,9 +149,9 @@ namespace Physica::Core {
     template<ScalarOption Option>
     __host__ __device__ inline Scalar<Option> tan(const Scalar<Option>& s) noexcept {
         if constexpr (Option == Float)
-            return Scalar<Option>(::tanf(s.getTrivial()));
+            return Scalar<Option>(::tanf(s.toMachine()));
         else
-            return Scalar<Option>(::tan(s.getTrivial()));
+            return Scalar<Option>(::tan(s.toMachine()));
     }
 
     template<ScalarOption Option>
@@ -171,17 +171,17 @@ namespace Physica::Core {
 
     template<ScalarOption Option>
     Scalar<Option> arccos(const Scalar<Option>& s) noexcept {
-        return Scalar<Option>(std::acos(s.getTrivial()));
+        return Scalar<Option>(std::acos(s.toMachine()));
     }
 
     template<ScalarOption Option>
     Scalar<Option> arcsin(const Scalar<Option>& s) noexcept {
-        return Scalar<Option>(std::asin(s.getTrivial()));
+        return Scalar<Option>(std::asin(s.toMachine()));
     }
 
     template<ScalarOption Option>
     Scalar<Option> arctan(const Scalar<Option>& s) noexcept {
-        return Scalar<Option>(std::atan(s.getTrivial()));
+        return Scalar<Option>(std::atan(s.toMachine()));
     }
 
     template<ScalarOption Option>
@@ -201,48 +201,48 @@ namespace Physica::Core {
 
     template<ScalarOption Option>
     Scalar<Option> cosh(const Scalar<Option>& s) noexcept {
-        return Scalar<Option>(std::cosh(s.getTrivial()));
+        return Scalar<Option>(std::cosh(s.toMachine()));
     }
 
 
     template<ScalarOption Option>
     Scalar<Option> sinh(const Scalar<Option>& s) noexcept {
-        return Scalar<Option>(std::sinh(s.getTrivial()));
+        return Scalar<Option>(std::sinh(s.toMachine()));
     }
 
     template<ScalarOption Option>
     Scalar<Option> tanh(const Scalar<Option>& s) noexcept {
-        return Scalar<Option>(std::tanh(s.getTrivial()));
+        return Scalar<Option>(std::tanh(s.toMachine()));
     }
 
     template<ScalarOption Option>
     Scalar<Option> sech(const Scalar<Option>& s) noexcept {
-        return Scalar<Option>(1 / std::cosh(s.getTrivial()));
+        return Scalar<Option>(1 / std::cosh(s.toMachine()));
     }
 
     template<ScalarOption Option>
     Scalar<Option> csch(const Scalar<Option>& s) noexcept {
-        return Scalar<Option>(1 / std::sinh(s.getTrivial()));
+        return Scalar<Option>(1 / std::sinh(s.toMachine()));
     }
 
     template<ScalarOption Option>
     Scalar<Option> coth(const Scalar<Option>& s) noexcept {
-        return Scalar<Option>(1 / std::tanh(s.getTrivial()));
+        return Scalar<Option>(1 / std::tanh(s.toMachine()));
     }
 
     template<ScalarOption Option>
     Scalar<Option> arccosh(const Scalar<Option>& s) noexcept {
-        return Scalar<Option>(std::acosh(s.getTrivial()));
+        return Scalar<Option>(std::acosh(s.toMachine()));
     }
 
     template<ScalarOption Option>
     Scalar<Option> arcsinh(const Scalar<Option>& s) noexcept {
-        return Scalar<Option>(std::asinh(s.getTrivial()));
+        return Scalar<Option>(std::asinh(s.toMachine()));
     }
 
     template<ScalarOption Option>
     Scalar<Option> arctanh(const Scalar<Option>& s) noexcept {
-        return Scalar<Option>(std::atanh(s.getTrivial()));
+        return Scalar<Option>(std::atanh(s.toMachine()));
     }
 
     template<ScalarOption Option>
@@ -257,7 +257,7 @@ namespace Physica::Core {
 
     template<ScalarOption Option>
     Scalar<Option> arccoth(const Scalar<Option>& s) noexcept {
-        auto trivial = s.getTrivial();
+        auto trivial = s.toMachine();
         return Scalar<Option>(std::log((trivial + 1) / (trivial - 1)) / 2);
     }
 
@@ -271,16 +271,16 @@ namespace Physica::Core {
     template<ScalarOption Option>
     Scalar<Option> floor(const Scalar<Option>& s) noexcept {
         if constexpr (Option == Float)
-            return Scalar<Option>(::floorf(s.getTrivial()));
+            return Scalar<Option>(::floorf(s.toMachine()));
         else
-            return Scalar<Option>(::floor(s.getTrivial()));
+            return Scalar<Option>(::floor(s.toMachine()));
     }
 
     template<ScalarOption Option>
     __host__ __device__ inline Scalar<Option> ceil(const Scalar<Option>& s) noexcept {
         if constexpr (Option == Float)
-            return Scalar<Option>(::ceilf(s.getTrivial()));
+            return Scalar<Option>(::ceilf(s.toMachine()));
         else
-            return Scalar<Option>(::ceil(s.getTrivial()));
+            return Scalar<Option>(::ceil(s.toMachine()));
     }
 }

@@ -71,6 +71,7 @@ if(${BUILD_DOC})
                       COMMAND ${SPHINX_EXEC} -b html ${CMAKE_SOURCE_DIR}/doc ${CMAKE_BINARY_DIR}/sphinx
                       WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
                       COMMENT "Generating documentation with Sphinx")
+    add_subdirectory(doc)
 endif()
 
 install(DIRECTORY ${CMAKE_SOURCE_DIR}/3rdparty/vectorclass DESTINATION include)

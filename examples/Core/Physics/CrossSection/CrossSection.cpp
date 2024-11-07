@@ -50,7 +50,7 @@ struct ProgramArgs {
 };
 
 std::unique_ptr<ODE> solveEqu(const ProgramArgs& args) {
-    const T m2_h_2 = T(2 * args.reducedMass.getTrivial() / (PhyConst<SI>::reducedPlanck * PhyConst<SI>::reducedPlanck) * PhyConst<SI>::unitCharge * 1E-23) * square(args.rho); //1E-23 for unit conversion
+    const T m2_h_2 = T(2 * args.reducedMass.toMachine() / (PhyConst<SI>::reducedPlanck * PhyConst<SI>::reducedPlanck) * PhyConst<SI>::unitCharge * 1E-23) * square(args.rho); //1E-23 for unit conversion
     const T stepSize(0.001);
 
     const T r0 = args.rho * T(0.6);

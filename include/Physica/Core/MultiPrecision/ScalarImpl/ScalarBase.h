@@ -43,6 +43,7 @@ namespace Physica::Core {
 
     template<class Derived>
     class ScalarBase : public CRTPBase<ScalarBase<Derived>> {
+        using Base = CRTPBase<ScalarBase<Derived>>;
     public:
         constexpr static ScalarOption Option = Traits<Derived>::Option;
         constexpr static int Order = Traits<Derived>::Order;
@@ -60,7 +61,7 @@ namespace Physica::Core {
         using ConstRefTy = typename Traits<Derived>::ConstRefTy;
         using RealType = typename Traits<Derived>::RealType;
         using ComplexType = typename Traits<Derived>::ComplexType;
-        using TrivialType = typename Traits<Derived>::TrivialType;
+        using MachineType = typename Traits<Derived>::MachineType;
         using device_obj_type = Derived;
     private:
         constexpr static bool isConsistent1 = isDifferentiable && (isForwardDiff != isReverseDiff) && (Order > 0);
@@ -131,13 +132,13 @@ namespace Physica::Core {
 
         __host__ __device__ void store(ScalarType* p) const { *p = this->getDerived().getValue(); }
 
-        __host__ __device__ Derived& load_partial(int n, const ScalarType* p) {
+        __host__ __device__ Derived& load_partial(const ScalarType* p, int n) {
             if (n)
                 load(p);
             return this->getDerived();
         }
 
-        __host__ __device__ void store_partial(int n, ScalarType* p) const {
+        __host__ __device__ void store_partial(ScalarType* p, int n) const {
             if (n)
                 store(p);
         }

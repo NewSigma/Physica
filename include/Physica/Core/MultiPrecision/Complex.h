@@ -29,7 +29,7 @@ namespace Physica::Core {
         using PacketType = typename BestPacket<T, 2>::Type;
     public:
         using typename Base::ScalarType;
-        using typename Base::TrivialType;
+        using typename Base::MachineType;
         constexpr static bool enableSIMD = !std::is_same<T, PacketType>::value;
     #ifdef PHYSICA_MKL
         using MKL_Complex = typename std::conditional<T::Option == Float32, MKL_Complex8, MKL_Complex16>::type;
@@ -43,7 +43,7 @@ namespace Physica::Core {
         Complex(T re_);
         Complex(T re_, T im_);
         Complex(std::initializer_list<T> list);
-        explicit Complex(std::complex<TrivialType> c);
+        explicit Complex(std::complex<MachineType> c);
         template<class U, DiffMode Mode, int Order>
         explicit Complex(const Diff<U, Mode, Order>& d);
         Complex(const This&) = default;
@@ -66,7 +66,7 @@ namespace Physica::Core {
         [[nodiscard]] const T& real() const noexcept { return re; }
         [[nodiscard]] T& imag() noexcept { return im; }
         [[nodiscard]] const T& imag() const noexcept { return im; }
-        [[nodiscard]] inline std::complex<TrivialType> getTrivial() const noexcept;
+        [[nodiscard]] inline std::complex<MachineType> toMachine() const noexcept;
         [[nodiscard]] bool isZero() const noexcept { return re.isZero() && im.isZero(); }
         /* Static Members */
         [[nodiscard]] inline static Complex fromPhase(T phase);
@@ -163,7 +163,7 @@ namespace Physica {
         using ConstRefTy = const ScalarType&;
         using RealType = T;
         using ComplexType = ScalarType;
-        using TrivialType = typename T::TrivialType;
+        using MachineType = typename T::MachineType;
     };
 }
 

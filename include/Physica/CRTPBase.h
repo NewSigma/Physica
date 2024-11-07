@@ -18,7 +18,6 @@
  */
 #pragma once
 
-#include <cstddef>
 #include "Macro.h"
 
 namespace Physica {

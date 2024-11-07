@@ -111,9 +111,9 @@ namespace Physica::Core {
     template<class ScalarType, bool WithBias>
     template<class RandomGenerator>
     void LinearLayer<ScalarType, WithBias>::random_xavier_uniform(PlainScalar gain, RandomGenerator& gen) {
-        using TrivialType = typename ScalarType::TrivialType;
-        const auto factor = (gain * sqrt(PlainScalar(6) / PlainScalar(getInputDim() + getOutputDim()))).getTrivial();
-        std::uniform_real_distribution<TrivialType> dist(-factor, factor);
+        using MachineType = typename ScalarType::MachineType;
+        const auto factor = (gain * sqrt(PlainScalar(6) / PlainScalar(getInputDim() + getOutputDim()))).toMachine();
+        std::uniform_real_distribution<MachineType> dist(-factor, factor);
         weights.random_any(dist, gen);
         if constexpr (WithBias)
             bias.random_any(dist, gen);
@@ -122,9 +122,9 @@ namespace Physica::Core {
     template<class ScalarType, bool WithBias>
     template<class RandomGenerator>
     void LinearLayer<ScalarType, WithBias>::random_xavier_normal(PlainScalar gain, RandomGenerator& gen) {
-        using TrivialType = typename ScalarType::TrivialType;
-        const auto deviation = (gain * sqrt(PlainScalar(2) / PlainScalar(getInputDim() + getOutputDim()))).getTrivial();
-        std::normal_distribution<TrivialType> dist(0, deviation);
+        using MachineType = typename ScalarType::MachineType;
+        const auto deviation = (gain * sqrt(PlainScalar(2) / PlainScalar(getInputDim() + getOutputDim()))).toMachine();
+        std::normal_distribution<MachineType> dist(0, deviation);
         weights.random_any(dist, gen);
         if constexpr (WithBias)
             bias.random_any(dist, gen);

@@ -126,7 +126,7 @@ namespace Physica::Core {
         assert(index + count <= Base::getLength());
         if constexpr (std::is_same_v<ScalarType, typename Traits<AnyPacket>::ScalarType>) {
             AnyPacket packet{};
-            packet.load_partial(count, Base::data_ptr(index));
+            packet.load_partial(Base::data_ptr(index), count);
             return packet;
         }
         else
@@ -148,7 +148,7 @@ namespace Physica::Core {
     inline void ContinuousVector<Derived>::writePacketPartial(size_t index, size_t count, const AnyPacket packet) {
         constexpr bool isSameScalar = std::is_same_v<ScalarType, typename Traits<AnyPacket>::ScalarType>;
         if constexpr (isSameScalar)
-            packet.store_partial(count, Base::data_ptr(index));
+            packet.store_partial(Base::data_ptr(index), count);
         else
             Base::template writePacketPartial<AnyPacket>(index, count, packet);
     }

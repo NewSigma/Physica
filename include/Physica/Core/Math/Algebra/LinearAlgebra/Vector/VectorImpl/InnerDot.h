@@ -67,8 +67,8 @@ namespace Physica::Core {
                         const ResultType node1(head1.value_ptr() + i, head1.grad_ptr() + i);
                         const ResultType node2(head2.value_ptr() + i, head2.grad_ptr() + i);
                         PlainPacket p1{}, p2{};
-                        p1.load_partial(count, node1.value_ptr());
-                        p2.load_partial(count, node2.value_ptr());
+                        p1.load_partial(node1.value_ptr(), count);
+                        p2.load_partial(node2.value_ptr(), count);
                         buffer = mul_add(PacketType(p1, node1), PacketType(p2, node2), buffer);
                     }
                 }

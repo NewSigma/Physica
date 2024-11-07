@@ -68,9 +68,9 @@ namespace Physica::Core {
         //[[nodiscard]] inline BoolSIMDType operator<=(const SIMD& other) const { return !(*this > other); }
         /* Operations */
         __host__ __device__ inline void load(const ScalarType* p);
-        __host__ __device__ inline void load_partial(int n, const ScalarType* p);
+        __host__ __device__ inline void load_partial(const ScalarType* p, int n);
         __host__ __device__ inline void store(ScalarType* p) const;
-        __host__ __device__ inline void store_partial(int n, ScalarType* p) const;
+        __host__ __device__ inline void store_partial(ScalarType* p, int n) const;
         //inline void insert(int index, const ScalarType& value);
         [[nodiscard]] __host__ __device__ inline ScalarType sum() const noexcept;
         //[[nodiscard]] inline ScalarType max() const;
@@ -82,10 +82,10 @@ namespace Physica::Core {
         [[nodiscard]] __host__ __device__ const Base& getImpl() const noexcept { return *this; }
     };
 
-    __host__ __device__ inline SIMD<Scalar<Float16>, 2>::SIMD(ScalarType v) : Base(__half2half2(v.getTrivial())) {}
+    __host__ __device__ inline SIMD<Scalar<Float16>, 2>::SIMD(ScalarType v) : Base(__half2half2(v.toMachine())) {}
 
     __host__ __device__ inline SIMD<Scalar<Float16>, 2>::SIMD(ScalarType l, ScalarType h)
-            : Base(make_half2(l.getTrivial(), h.getTrivial())) {}
+            : Base(make_half2(l.toMachine(), h.toMachine())) {}
 
     __host__ __device__ inline SIMD<Scalar<Float16>, 2>::SIMD(Base value) : Base(value) {}
 
@@ -119,7 +119,7 @@ namespace Physica::Core {
         *reinterpret_cast<uint32_t*>(this) = *reinterpret_cast<const uint32_t*>(p);
     }
 
-    __host__ __device__ inline void SIMD<Scalar<Float16>, 2>::load_partial(int n, const ScalarType* p) {
+    __host__ __device__ inline void SIMD<Scalar<Float16>, 2>::load_partial(const ScalarType* p, int n) {
         if (n == 1)
             (*this) = SIMD(*p, 0);
         else if (n == 2)
@@ -130,7 +130,7 @@ namespace Physica::Core {
         *reinterpret_cast<uint32_t*>(p) = *reinterpret_cast<const uint32_t*>(this);
     }
 
-    __host__ __device__ inline void SIMD<Scalar<Float16>, 2>::store_partial(int n, ScalarType* p) const {
+    __host__ __device__ inline void SIMD<Scalar<Float16>, 2>::store_partial(ScalarType* p, int n) const {
         if (n == 1)
             *p = operator[](0);
         else if (n == 2)

@@ -39,7 +39,7 @@ namespace Physica {
         using ConstRefTy = const ScalarType&;
         using RealType = ScalarType;
         using ComplexType = Core::Complex<ScalarType>;
-        using TrivialType = double;
+        using MachineType = double;
     };
 }
 
@@ -84,7 +84,7 @@ namespace Physica::Core {
         void swap(Scalar& __restrict s) noexcept { std::swap(d, s.d); }
         /* Getters */
         [[nodiscard]] constexpr static ScalarOption getOption() { return Float64; }
-        [[nodiscard]] __host__ __device__ double getTrivial() const noexcept { return d; }
+        [[nodiscard]] __host__ __device__ double toMachine() const noexcept { return d; }
         [[nodiscard]] __host__ __device__ bool isZero() const noexcept{ return d == 0; }
         [[nodiscard]] __host__ __device__ bool isPositive() const noexcept { return d > 0; }
         [[nodiscard]] __host__ __device__ bool isNegative() const noexcept { return d < 0; }

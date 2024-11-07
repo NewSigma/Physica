@@ -37,7 +37,7 @@ namespace Physica::Core {
         using ParamPair = std::pair<int, int>;
     private:
         using RealType = typename ScalarType::RealType;
-        using TrivialType = typename RealType::TrivialType;
+        using MachineType = typename RealType::MachineType;
         constexpr static bool IsFloat = ScalarType::Option == Float;
         constexpr static int MaxNumTaylorTerm = 55;
         constexpr static int MaxNormOrder = 8;
@@ -72,7 +72,7 @@ namespace Physica::Core {
         [[nodiscard]] const MatrixExp<MatrixType>& getLHS() const noexcept { return mexp; }
         [[nodiscard]] const VectorType& getRHS() const noexcept { return v; }
     private:
-        constexpr static TrivialType calcTheta(int numTaylorTerm);
+        constexpr static MachineType calcTheta(int numTaylorTerm);
     };
 
     template<class MatrixType, class VectorType>
@@ -133,16 +133,16 @@ namespace Physica::Core {
     template<class Executor>
     typename MatrixVectorProduct<MatrixExp<MatrixType>, VectorType>::ParamPair
     MatrixVectorProduct<MatrixExp<MatrixType>, VectorType>::calcParam(RealType traceMu) const {
-        constexpr static TrivialType NormLimit = ((2 * MaxNormOrder * (MaxNormOrder + 3)) * calcTheta(MaxNumTaylorTerm)) / MaxNumTaylorTerm;
+        constexpr static MachineType NormLimit = ((2 * MaxNormOrder * (MaxNormOrder + 3)) * calcTheta(MaxNumTaylorTerm)) / MaxNumTaylorTerm;
         const auto unit = UnitMatrix<ScalarType>(getLength());
         const ScalarType norm1 = (mexp.getMatrix() - unit * traceMu).template norm1_power<Executor>(MaxNormIteration);
-        const bool isSmallNorm = TrivialType(norm1) <= NormLimit;
+        const bool isSmallNorm = MachineType(norm1) <= NormLimit;
         int cost = std::numeric_limits<int>::max();
         int numMinCostTerm = 0;
         if (isSmallNorm) {
             int numSplit = 1;
             for (int numTerm = 1; numTerm <= MaxNumTaylorTerm; ++numTerm) {
-                const int split = int(TrivialType(norm1) / calcTheta(numTerm)) + 1;
+                const int split = int(MachineType(norm1) / calcTheta(numTerm)) + 1;
                 const int temp = numTerm * split;
                 if (cost > temp) {
                     cost = temp;
@@ -161,7 +161,7 @@ namespace Physica::Core {
         }
 
         for (int order = 2; order <= MaxNormOrder; ++order) {
-            const TrivialType powerNorm = std::max(powerNorms[order - 2], powerNorms[order - 1]).getTrivial();
+            const MachineType powerNorm = std::max(powerNorms[order - 2], powerNorms[order - 1]).toMachine();
             for (int numTerm = order * (order - 1) - 1; numTerm <= MaxNumTaylorTerm; ++numTerm) {
                 const int temp = numTerm * int(powerNorm / calcTheta(numTerm)) + numTerm;
                 if (cost > temp) {
@@ -174,7 +174,7 @@ namespace Physica::Core {
     }
 
     template<class MatrixType, class VectorType>
-    constexpr typename MatrixVectorProduct<MatrixExp<MatrixType>, VectorType>::TrivialType
+    constexpr typename MatrixVectorProduct<MatrixExp<MatrixType>, VectorType>::MachineType
     MatrixVectorProduct<MatrixExp<MatrixType>, VectorType>::calcTheta(int numTaylorTerm) {
         assert(1 <= numTaylorTerm && numTaylorTerm <= MaxNumTaylorTerm && "[Error]: Invalid param");
         const int bufferIndex = (numTaylorTerm - 1) / 5; 

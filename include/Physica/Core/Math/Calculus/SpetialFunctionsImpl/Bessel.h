@@ -79,13 +79,13 @@ namespace Physica::Core {
     template<ScalarOption Option>
     Scalar<Option> besselJn(const Integer& n, const Scalar<Option>& x) {
         using T = Scalar<Option>;
-        constexpr int iexp = std::numeric_limits<typename T::TrivialType>::max_exponent / 2;
+        constexpr int iexp = std::numeric_limits<typename T::MachineType>::max_exponent / 2;
         constexpr int acc = 160;
 
         assert(n > 1);
         const T ax = abs(x);
         const T square_ax = square(ax);
-        if (square_ax < T(8 * std::numeric_limits<typename T::TrivialType>::min()))
+        if (square_ax < T(8 * std::numeric_limits<typename T::MachineType>::min()))
             return T(0);
         
         const T two_x = T(2) / ax;
@@ -112,12 +112,12 @@ namespace Physica::Core {
                 bjp = std::move(bj);
                 bj = std::move(temp);
                 int k;
-                std::frexp(bj.getTrivial(), &k);
+                std::frexp(bj.toMachine(), &k);
                 if (k > iexp) {
-                    bj = T(std::ldexp(bj.getTrivial(), -iexp));
-                    bjp = T(std::ldexp(bjp.getTrivial(), -iexp));
-                    result = T(std::ldexp(result.getTrivial(), -iexp));
-                    sum = T(std::ldexp(sum.getTrivial(), -iexp));
+                    bj = T(std::ldexp(bj.toMachine(), -iexp));
+                    bjp = T(std::ldexp(bjp.toMachine(), -iexp));
+                    result = T(std::ldexp(result.toMachine(), -iexp));
+                    sum = T(std::ldexp(sum.toMachine(), -iexp));
                 }
                 if (do_sum) //Optimize: extract loop will avoid branch
                     sum += bj;

@@ -38,7 +38,7 @@ namespace Physica::Core {
     }
 
     template<class T>
-    Complex<T>::Complex(std::complex<TrivialType> c) : re(c.real()), im(c.imag()) {}
+    Complex<T>::Complex(std::complex<MachineType> c) : re(c.real()), im(c.imag()) {}
 
     template<class T>
     template<class U, DiffMode Mode, int Order>
@@ -61,7 +61,7 @@ namespace Physica::Core {
 
     template<class T>
     inline T Complex<T>::phase() const {
-        return std::arg(getTrivial());
+        return std::arg(toMachine());
     }
 
     template<class T>
@@ -92,8 +92,8 @@ namespace Physica::Core {
     }
 
     template<class T>
-    inline std::complex<typename Complex<T>::TrivialType> Complex<T>::getTrivial() const noexcept {
-        return {re.getTrivial(), im.getTrivial()};
+    inline std::complex<typename Complex<T>::MachineType> Complex<T>::toMachine() const noexcept {
+        return {re.toMachine(), im.toMachine()};
     }
 
     template<class T>

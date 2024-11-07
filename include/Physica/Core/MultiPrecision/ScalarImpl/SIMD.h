@@ -32,7 +32,7 @@ namespace Physica::Core {
         using This = SIMD<ScalarType, Size>;
         using Base = typename Traits<This>::BaseType;
         using PlainScalar = typename ScalarType::PlainScalar;
-        using TrivialType = typename ScalarType::TrivialType;
+        using MachineType = typename ScalarType::MachineType;
         using HalfType = typename std::conditional<sizeof(Base) * CHAR_BIT != 128, SIMD<ScalarType, Size / 2>, PlainStruct<void>>::type;
         constexpr static bool isForward = ScalarType::isForwardDiff;
     public:
@@ -42,7 +42,7 @@ namespace Physica::Core {
         constexpr static bool isSeparatable = !std::is_same<HalfType, PlainStruct<void>>::value;
     public:
         SIMD() = default;
-        explicit SIMD(ScalarType s) : Base(s.getTrivial()) {}
+        explicit SIMD(ScalarType s) : Base(s.toMachine()) {}
         SIMD(ScalarType s, int count);
         SIMD(Base value) : Base(value) {}
         SIMD(HalfType a, HalfType b);
@@ -86,9 +86,9 @@ namespace Physica::Core {
         [[nodiscard]] auto operator<=(const SIMD& other) const { return !(*this > other); }
         /* Operations */
         inline void load(const ScalarType* p);
-        inline void load_partial(int n, const ScalarType* p);
+        inline void load_partial(const ScalarType* p, int n);
         inline void store(ScalarType* p) const;
-        inline void store_partial(int n, ScalarType* p) const;
+        inline void store_partial(ScalarType* p, int n) const;
         inline void insert(int index, const ScalarType& value);
         template<int... Order> inline SIMD shuffle() const;
         template<int... Order> inline SIMD permute() const;

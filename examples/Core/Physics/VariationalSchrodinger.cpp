@@ -116,7 +116,7 @@ private:
             y[i] = temp_y;
             temp_x += step;
         }
-        QString name = QString("E = %1").arg(solver.getEigenvalues()[n].real().getTrivial());
+        QString name = QString("E = %1").arg(solver.getEigenvalues()[n].real().toMachine());
         auto& spline = plot.spline(x, y);
         spline.setName(name);
     }

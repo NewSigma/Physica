@@ -73,7 +73,7 @@ namespace Physica::Core {
         constexpr bool IsDeviceMatrix = Traits<MatrixType1>::SizeAtCompile == Dynamic && Traits<MatrixType2>::SizeAtCompile == Dynamic;
         static_assert(IsDeviceMatrix, "[Error]: Fixed matrix is on host, pass it to device before calling cuBLAS");
 
-        using T = typename ScalarType::TrivialType;
+        using T = typename ScalarType::MachineType;
         const auto& lhs = getLHS();
         const auto& rhs = getRHS();
         const size_t r = getRow();

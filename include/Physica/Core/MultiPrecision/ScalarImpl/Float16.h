@@ -40,7 +40,7 @@ namespace Physica {
         using ConstRefTy = const ScalarType&;
         using RealType = ScalarType;
         using ComplexType = Core::Complex<ScalarType>;
-        using TrivialType = __half;
+        using MachineType = __half;
     };
 }
 
@@ -83,7 +83,7 @@ namespace Physica::Core {
         void swap(Scalar& __restrict s) noexcept { std::swap(h, s.h); }
         /* Getters */
         [[nodiscard]] constexpr static ScalarOption getOption() { return Float16; }
-        [[nodiscard]] __host__ __device__ __half getTrivial() const noexcept { return h; }
+        [[nodiscard]] __host__ __device__ __half toMachine() const noexcept { return h; }
         [[nodiscard]] __host__ __device__ bool isZero() const noexcept { return h == __half(0); }
         [[nodiscard]] __host__ __device__ bool isPositive() const noexcept { return h > __half(0); }
         [[nodiscard]] __host__ __device__ bool isNegative() const noexcept { return h < __half(0); }
@@ -91,7 +91,7 @@ namespace Physica::Core {
     };
 
     template<class OtherScalar>
-    __host__ __device__ inline Scalar<Float16>::Scalar(const ScalarBase<OtherScalar>& s) : h(s.getDerived().getTrivial()) {}
+    __host__ __device__ inline Scalar<Float16>::Scalar(const ScalarBase<OtherScalar>& s) : h(s.getDerived().toMachine()) {}
 
     inline std::ostream& operator<<(std::ostream& os, const Scalar<Float16>& s) {
         const auto lastPrec = os.precision();

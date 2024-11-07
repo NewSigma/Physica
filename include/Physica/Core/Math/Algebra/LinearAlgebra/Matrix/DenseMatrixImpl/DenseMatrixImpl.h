@@ -47,16 +47,6 @@ namespace Physica::Core {
         auto col = this->col(0);
         vec.getDerived().assignTo(col);
     }
-
-    template<class T, int Option, size_t Row, size_t Column, class Allocator>
-    template<class MatrixIn>
-    DenseMatrix<T, Option, Row, Column, Allocator>::DenseMatrix(LUDecomposition<MatrixIn> lu)
-            : DenseMatrix(lu.getRow(), lu.getRow()) {
-        const size_t rank = lu.getRow();
-        (*this) = lu.getMatrix();
-        for (size_t i = 0; i < rank; ++i)
-            lu.decompositionColumn((*this), i);
-    }
     /**
      * \returns the origin column index of the main element
      *

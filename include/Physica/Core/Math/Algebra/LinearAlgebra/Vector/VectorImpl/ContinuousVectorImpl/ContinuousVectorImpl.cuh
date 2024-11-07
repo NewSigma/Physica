@@ -59,7 +59,7 @@ namespace Physica::Core {
     template<class AnyPacket, Side Owner>
     __device__ inline AnyPacket device_obj<ContinuousVector<Derived>>::packetPartial(size_t index, size_t count) const  {
         AnyPacket packet{};
-        packet.load_partial(count, Base::data_ptr(index));
+        packet.load_partial(Base::data_ptr(index), count);
         return packet;
     }
 
@@ -74,7 +74,7 @@ namespace Physica::Core {
     template<class AnyPacket>
     __device__ inline void device_obj<ContinuousVector<Derived>>::writePacketPartial(size_t index, size_t count, const AnyPacket packet) {
         using LocalPacket = typename std::conditional<AnyPacket::size() == 1, ScalarType, SIMD<ScalarType, AnyPacket::size()>>::type;
-        LocalPacket(packet).store_partial(count, Base::data_ptr(index));
+        LocalPacket(packet).store_partial(Base::data_ptr(index), count);
     }
 
     template<class Derived>

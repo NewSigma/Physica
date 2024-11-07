@@ -44,7 +44,7 @@ namespace Physica::Core {
             , public FFTKSpace<FFT<T, 1>, 1> {
         static_assert(!T::isDifferentiable, "[Error]: Header of differentiable fft should be included");
         using This = FFT<T, 1>;
-        using TrivialType = typename Traits<This>::TrivialType;
+        using MachineType = typename Traits<This>::MachineType;
         using RealType = typename Traits<This>::RealType;
         using ComplexType = typename Traits<This>::ComplexType;
         using PlanType = typename Traits<This>::PlanType;
@@ -116,7 +116,7 @@ namespace Physica::Core {
               , public FFTKSpace<FFT<T, Dim>, Dim> {
         static_assert(!T::isDifferentiable, "[Error]: Not implemented");
         using This = FFT<T, Dim>;
-        using TrivialType = typename Traits<This>::TrivialType;
+        using MachineType = typename Traits<This>::MachineType;
         using RealType = typename Traits<This>::RealType;
         using ComplexType = typename Traits<This>::ComplexType;
         using PlanType = typename Traits<This>::PlanType;
@@ -199,18 +199,18 @@ namespace Physica {
     class Traits<Core::FFT<T, dim>> {
     public :
         using ScalarType = T;
-        using TrivialType = typename ScalarType::TrivialType;
+        using MachineType = typename ScalarType::MachineType;
         using RealType = typename ScalarType::RealType;
         using ComplexType = typename ScalarType::ComplexType;
         constexpr static size_t Dim = dim;
 
         constexpr static bool isComplex = T::isComplex;
         constexpr static bool isDifferentiable = T::isDifferentiable;
-        constexpr static bool isSinglePrec = std::is_same<TrivialType, float>::value;
+        constexpr static bool isSinglePrec = std::is_same<MachineType, float>::value;
         using PlanType = typename std::conditional<isSinglePrec, fftwf_plan, fftw_plan>::type;
         using ComplexTypeFFTW = typename std::conditional<isSinglePrec, fftwf_complex, fftw_complex>::type;
 
-        static_assert(isDifferentiable || sizeof(RealType) == sizeof(TrivialType), "[Error]: Invalid ScalarType");
+        static_assert(isDifferentiable || sizeof(RealType) == sizeof(MachineType), "[Error]: Invalid ScalarType");
         static_assert(isDifferentiable || sizeof(ComplexType) == sizeof(ComplexTypeFFTW), "[Error]: Invalid ScalarType");
         static_assert(Dim <= 3U, "[Error]: Dimension higher than 3 should be declared as dynamic");
         static_assert(Dim != 0, "[Error]: Not implemented");

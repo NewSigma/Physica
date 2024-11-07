@@ -19,7 +19,6 @@
 #pragma once
 
 #include "DenseMatrixImpl/DenseMatrixStorage.h"
-#include "MatrixDecomposition/LUDecomposition.h"
 #include "MatrixImpl/ContinuousMatrix.h"
 
 namespace Physica::Core {
@@ -59,8 +58,6 @@ namespace Physica::Core {
         DenseMatrix(const RValueMatrix<OtherMatrix>& mat);
         template<class VectorType>
         DenseMatrix(const RValueVector<VectorType>& mat);
-        template<class MatrixIn>
-        DenseMatrix(LUDecomposition<MatrixIn> lu);
         DenseMatrix(const This&) = default;
         DenseMatrix(This&&) noexcept = default;
         /* Operators */

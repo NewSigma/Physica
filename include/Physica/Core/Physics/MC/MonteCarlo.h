@@ -24,13 +24,13 @@ namespace Physica::Core {
         using MDCellType = MDCell<ScalarType, Dim>;
         using PositionMatrix = typename MDCellType::PositionMatrix;
         using VectorType = Vector<ScalarType>;
-        using TrivialType = typename ScalarType::TrivialType;
+        using MachineType = typename ScalarType::MachineType;
 
         MDCellType cell;
         PositionMatrix buffer;
         ScalarType repTemperature;
         ScalarType lastEnergy;
-        std::uniform_real_distribution<TrivialType> dist;
+        std::uniform_real_distribution<MachineType> dist;
     public:
         MonteCarlo(MDCellType cell_, ScalarType temperatureT, ScalarType sigma);
         MonteCarlo(const MonteCarlo&) = default;
@@ -51,7 +51,7 @@ namespace Physica::Core {
 
     template<class ScalarType, unsigned int Dim>
     MonteCarlo<ScalarType, Dim>::MonteCarlo(MDCellType cell_, ScalarType temperatureT, ScalarType sigma)
-            : cell(std::move(cell_)), repTemperature(reciprocal(temperatureT)), lastEnergy(0), dist(-TrivialType(sigma), TrivialType(sigma)) {
+            : cell(std::move(cell_)), repTemperature(reciprocal(temperatureT)), lastEnergy(0), dist(-MachineType(sigma), MachineType(sigma)) {
         buffer.resize(cell.getNumParticle(), Dim);
     }
 

@@ -276,7 +276,7 @@ namespace Physica::Core {
                 }
                 else {
                     auto pos_end = ringPolymer.asMatrix().row(numParticle * 2 - 1);
-                    const PacketType latticeSizes(latticeSize.getTrivial());
+                    const PacketType latticeSizes(latticeSize.toMachine());
                     size_t i = 0;
                     for (; i < to; i += PacketType::size()) {
                         const PacketType pack1 = pos_end.template packet<PacketType>(i) - latticeSizes;
@@ -311,7 +311,7 @@ namespace Physica::Core {
                 }
                 if constexpr (IsFixedBoundary) {
                     [[unlikely]] if (id_dof == numParticle - 1) {
-                        const PacketType latticeSizes(latticeSize.getValue().getTrivial());
+                        const PacketType latticeSizes(latticeSize.getValue().toMachine());
                         size_t i = 0;
                         for (; i < to; i += PacketType::size()) {
                             const auto boolPacket = BoolPacketType(pos.template packet<PacketType>(i) > latticeSizes);

@@ -73,6 +73,7 @@ namespace Physica::Core {
     template<class T, int Order, size_t Length, class Allocator>
     __host__ __device__ inline typename Vector<Diff<T, DiffMode::Forward, Order>, Length, Allocator>::PtrTy
     Vector<Diff<T, DiffMode::Forward, Order>, Length, Allocator>::data_ptr(size_t index) noexcept {
+        assert(index < getLength() && "[Error]: Index out of range");
         return PtrTy(values.data_ptr(index), grads.data_ptr(index));
     }
 

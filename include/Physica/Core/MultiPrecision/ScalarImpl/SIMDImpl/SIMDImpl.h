@@ -139,32 +139,32 @@ namespace Physica::Core {
 
     template<class ScalarType, size_t Size>
     inline void SIMD<ScalarType, Size>::load(const ScalarType* p) {
-        Base::load(reinterpret_cast<const TrivialType*>(p));
+        Base::load(reinterpret_cast<const MachineType*>(p));
     }
 
     template<class ScalarType, size_t Size>
-    inline void SIMD<ScalarType, Size>::load_partial(int n, const ScalarType* p) {
-        Base::load_partial(n, reinterpret_cast<const TrivialType*>(p));
+    inline void SIMD<ScalarType, Size>::load_partial(const ScalarType* p, int n) {
+        Base::load_partial(n, reinterpret_cast<const MachineType*>(p));
     }
 
     template<class ScalarType, size_t Size>
     inline void SIMD<ScalarType, Size>::store(ScalarType* p) const {
-        Base::store(reinterpret_cast<TrivialType*>(p));
+        Base::store(reinterpret_cast<MachineType*>(p));
     }
 
     template<class ScalarType, size_t Size>
-    inline void SIMD<ScalarType, Size>::store_partial(int n, ScalarType* p) const {
-        Base::store_partial(n, reinterpret_cast<TrivialType*>(p));
+    inline void SIMD<ScalarType, Size>::store_partial(ScalarType* p, int n) const {
+        Base::store_partial(n, reinterpret_cast<MachineType*>(p));
     }
 
     template<class ScalarType, size_t Size>
     inline void SIMD<ScalarType, Size>::insert(int index, const ScalarType& value) {
         if constexpr (isForward) {
-            Base::insert(index * 2, value.getValue().getTrivial());
-            Base::insert(index * 2 + 1, value.getGrad().getTrivial());
+            Base::insert(index * 2, value.getValue().toMachine());
+            Base::insert(index * 2 + 1, value.getGrad().toMachine());
         }
         else
-            Base::insert(index, value.getTrivial());
+            Base::insert(index, value.toMachine());
     }
 
     template<class ScalarType, size_t Size>

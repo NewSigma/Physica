@@ -34,7 +34,7 @@ class Scalar(CXXObj):
 
     def __float__(self):
         rtnTyName = str(self.Option).lower()
-        return float(self.call(rtnTyName, 'getTrivial'))
+        return float(self.call(rtnTyName, 'toMachine'))
 
     def __repr__(self):
         return repr(float(self))

@@ -37,7 +37,7 @@ namespace Physica {
         using ConstRefTy = const ScalarType&;
         using RealType = ScalarType;
         using ComplexType = Core::Complex<ScalarType>;
-        using TrivialType = ScalarType;
+        using MachineType = ScalarType;
     };
 }
 

@@ -91,6 +91,8 @@ namespace Physica::Core {
         ScalarRef& operator=(const This& other);
         ScalarRef& operator=(const ScalarType& other);
         [[nodiscard]] operator ScalarType() const { return ScalarType(getValue(), getGrad()); }
+        [[nodiscard]] __host__ __device__ explicit operator float() const noexcept { return float(ScalarType(*this)); }
+        [[nodiscard]] __host__ __device__ explicit operator double() const noexcept { return double(ScalarType(*this)); }
         template<class U> auto operator+(const ScalarBase<U>& s) const { return ScalarType(*this) + s; }
         template<class U> auto operator-(const ScalarBase<U>& s) const { return ScalarType(*this) - s; }
         template<class U> auto operator*(const ScalarBase<U>& s) const { return ScalarType(*this) * s; }
@@ -282,7 +284,7 @@ namespace Physica {
         using ConstRefTy = std::add_const_t<RefTy>;
         using RealType = Core::Diff<RealT, Mode, Order>;
         using ComplexType = Core::Diff<ComplexT, Mode, Order>;
-        using TrivialType = typename T::TrivialType;
+        using MachineType = typename T::MachineType;
         /* SIMD */
         using BoolSIMDType = Core::BoolSIMD<ScalarType, 1>;
     };

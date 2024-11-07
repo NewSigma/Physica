@@ -147,6 +147,7 @@ namespace Physica::Core {
      */
     template<class Derived>
     __host__ __device__ inline typename LValueVector<Derived>::PtrTy LValueVector<Derived>::data_ptr(size_t index) noexcept {
+        assert(index < Base::getLength() && "[Error]: Index out of range");
         return Base::getDerived().data_ptr(index);
     }
 

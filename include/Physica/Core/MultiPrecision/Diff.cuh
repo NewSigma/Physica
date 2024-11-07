@@ -124,7 +124,7 @@ namespace Physica {
         using ConstRefTy = const ScalarType&;
         using RealType = Core::device_obj<Diff<RealT, Mode, Order>>;
         using ComplexType = Core::device_obj<Diff<ComplexT, Mode, Order>>;
-        using TrivialType = typename T::TrivialType;
+        using MachineType = typename T::MachineType;
     };
 }
 

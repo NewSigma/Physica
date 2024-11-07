@@ -21,6 +21,6 @@
 namespace Physica::Core {
     template<>
     __host__ __device__ inline Scalar<Float16> abs(const Scalar<Float16>& s) noexcept {
-        return Scalar<Float16>(::__habs(s.getTrivial()));
+        return Scalar<Float16>(::__habs(s.toMachine()));
     }
 }

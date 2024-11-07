@@ -5,3 +5,5 @@ function(physica_add_test NAME SOURCES)
     target_link_libraries(Test-${NAME} PhysicaCore ${GPerfTools_LIBRARY})
     add_test(NAME Test-${NAME} COMMAND Test-${NAME})
 endfunction()
+
+add_subdirectory(Physics)

@@ -190,7 +190,7 @@ namespace Physica::Core {
                     buffer[i] = buffer[i].copy();
             }
             AnyPacket packet{};
-            packet.load_partial(count, buffer);
+            packet.load_partial(buffer, count);
             return packet;
         }
     }

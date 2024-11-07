@@ -41,7 +41,7 @@ namespace Physica::Core {
         using This = SIMD<ScalarType, Size>;
         using Base = SIMD<T, Size * 2>;
         using RealType = SIMD<T, Size>;
-        using TrivialType = typename ScalarType::TrivialType;
+        using MachineType = typename ScalarType::MachineType;
         using HalfType = typename std::conditional<sizeof(Base) * CHAR_BIT != 128, SIMD<Complex<T>, Size / 2>, PlainStruct<void>>::type;
         using Base::isSeparatable;
     public:
@@ -72,9 +72,9 @@ namespace Physica::Core {
         //void operator/=(const SIMD& other) { *this = *this / other; }
         /* Operations */
         inline void load(const ScalarType* p);
-        inline void load_partial(int n, const ScalarType* p);
+        inline void load_partial(const ScalarType* p, int n);
         inline void store(ScalarType* p) const;
-        inline void store_partial(int n, ScalarType* p) const;
+        inline void store_partial(ScalarType* p, int n) const;
 
         [[nodiscard]] inline Base swapRealImag() const noexcept;
         [[nodiscard]] inline Base permRealImag() const noexcept;

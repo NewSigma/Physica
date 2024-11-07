@@ -37,6 +37,7 @@ namespace Physica::Core {
         constexpr static const char* BadConvergenceMessage = "Exceed max iteration of Schur";
         using HessenburgType = Hessenburg<ScalarType, Order>;
         using Vector3D = Vector<ScalarType, 3>;
+        using This = Schur<ScalarType, Order>;
     public:
         using RealType = typename ScalarType::RealType;
         using ComplexType = Complex<RealType>;
@@ -48,7 +49,15 @@ namespace Physica::Core {
         ScalarType exshift;
     public:
         template<class MatrixType>
-        Schur(const RValueMatrix<MatrixType>& source_, bool computeMatrixU_ = false);
+        Schur(const RValueMatrix<MatrixType>& source, bool computeMatrixU_ = false);
+        Schur(const This&) = default;
+        Schur(This&&) noexcept = default;
+        /* Operators */
+        This& operator=(This obj) { swap(obj); return *this; }
+        /* Operations */
+        template<class MatrixType>
+        void compute(const RValueMatrix<MatrixType>& source_, bool computeMatrixU_ = false);
+        void swap(This& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] WorkingMatrix& getMatrixT() noexcept { return matrixT; }
         [[nodiscard]] WorkingMatrix& getMatrixU() noexcept { assert(computeMatrixU); return matrixU; }
@@ -66,13 +75,18 @@ namespace Physica::Core {
 
     template<class ScalarType, size_t Order>
     template<class MatrixType>
-    Schur<ScalarType, Order>::Schur(const RValueMatrix<MatrixType>& source_, bool computeMatrixU_)
-            : matrixT(source_.getRow(), source_.getColumn())
-            , matrixU()
-            , computeMatrixU(computeMatrixU_) {
+    Schur<ScalarType, Order>::Schur(const RValueMatrix<MatrixType>& source, bool computeMatrixU_)
+            : matrixT(source.getRow(), source.getColumn()), matrixU() {
+        compute(source, computeMatrixU_);
+    }
+
+    template<class ScalarType, size_t Order>
+    template<class MatrixType>
+    void Schur<ScalarType, Order>::compute(const RValueMatrix<MatrixType>& source_, bool computeMatrixU_) {
         static_assert(std::is_same<ScalarType, typename MatrixType::ScalarType>::value, "[Error]: Inconsistent ScalarType");
         const auto& source = source_.getDerived();
         assert(source.getRow() == source.getColumn());
+        computeMatrixU = computeMatrixU_;
         if (computeMatrixU)
             matrixU = WorkingMatrix::unitMatrix(source.getRow());
 
@@ -151,6 +165,15 @@ namespace Physica::Core {
             }
         }
         matrixT *= factor;
+    }
+
+    template<class ScalarType, size_t Order>
+    void Schur<ScalarType, Order>::swap(This& __restrict obj) noexcept {
+        assert(this != &obj && "[Error]: Self swap is likely a bug");
+        matrixT.swap(obj.matrixT);
+        matrixU.swap(obj.matrixU);
+        std::swap(computeMatrixU, obj.computeMatrixU);
+        exshift.swap(obj.exshift);
     }
     /**
      * Upper triangulize submatrix of \param mat, whose columns have index \param index and \param index + 1.
