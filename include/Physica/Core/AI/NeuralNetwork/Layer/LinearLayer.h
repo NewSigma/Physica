@@ -62,7 +62,7 @@ namespace Physica::Core {
         void random_any(Distribution& dist, RandomGenerator& gen);
         void swap(LinearLayer& __restrict obj) noexcept;
         /* Getters */
-        [[nodiscard]] size_t getInputDim() const noexcept { return weights.getColumn(); }
+        [[nodiscard]] size_t getInputDim() const noexcept { return weights.getCol(); }
         [[nodiscard]] size_t getOutputDim() const noexcept { return weights.getRow(); }
         [[nodiscard]] const MatrixType& getWeights() const noexcept { return weights; }
         [[nodiscard]] const BiasType& getBias() const noexcept { return bias; }

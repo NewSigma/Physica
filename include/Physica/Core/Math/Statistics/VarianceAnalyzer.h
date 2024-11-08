@@ -38,7 +38,7 @@ namespace Physica::Core {
         [[nodiscard]] size_t getNumGroup() const noexcept { return data.getLength(); }
         [[nodiscard]] size_t getTotalNumSample() const noexcept;
         [[nodiscard]] ScalarType getParamF() const { return getMSA() / getMSE(); }
-        [[nodiscard]] ScalarType relationCoeff() const;
+        [[nodiscard]] ScalarType relationCoeff() const noexcept;
         /* Setters */
         template<class VectorType>
         void setGroup(size_t groupId, const RValueVector<VectorType>& group) { data[groupId] = group; }

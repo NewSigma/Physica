@@ -35,7 +35,7 @@ namespace Physica::Core {
     public:
         MatrixVectorProduct(const MatrixType& expr_, const RValueVector<VectorType>& vec_)
                 : expr(expr_), vec(vec_.getDerived()) {
-            assert(expr.getColumn() == vec.getLength());
+            assert(expr.getCol() == vec.getLength());
         }
         MatrixVectorProduct(const This&) = delete;
         MatrixVectorProduct(This&&) noexcept = delete;
@@ -107,7 +107,7 @@ namespace Physica {
         static_assert(MatrixType::ColumnAtCompile == VectorType::SizeAtCompile ||
                       MatrixType::ColumnAtCompile == Dynamic ||
                       VectorType::SizeAtCompile == Dynamic,
-                      "Row and column do not match in matrix product");
+                      "Row and col do not match in matrix product");
 
         constexpr static bool calcFastAssign() {
             constexpr bool isScalarT2 = Core::is_scalar<T2>::value;

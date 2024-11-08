@@ -78,7 +78,7 @@ namespace Physica::Core {
     template<class MatrixType>
     void PIPhonon::sample(const RValueMatrix<MatrixType>& force, const RValueMatrix<MatrixType>& momentum) {
         assert(force.getRow() == momentum.getRow());
-        assert(force.getColumn() == momentum.getColumn());
+        assert(force.getCol() == momentum.getCol());
         assert(force.getRow() == getSuperCellDOF());
         const size_t numCell = getNumCell();
         const size_t unitDof = getUnitCellDOF();

@@ -53,15 +53,15 @@ namespace Physica::Gui {
     QSurface3DSeries& Plot3D::surf(const Core::LValueMatrix<MatrixType>& x,
                                    const Core::LValueMatrix<MatrixType>& y,
                                    const Core::LValueMatrix<MatrixType>& z) {
-        assert(x.getColumn() == y.getColumn() && x.getRow() == y.getRow());
-        assert(y.getColumn() == z.getColumn() && y.getRow() == z.getRow());
+        assert(x.getCol() == y.getCol() && x.getRow() == y.getRow());
+        assert(y.getCol() == z.getCol() && y.getRow() == z.getRow());
         auto* series = new QSurface3DSeries(new QSurfaceDataProxy());
 
         auto* dataArray = new QSurfaceDataArray;
         dataArray->reserve(z.getRow());
         for (size_t i = 0 ; i < z.getRow() ; ++i) {
-            auto* dataRow = new QSurfaceDataRow(z.getColumn());
-            for (size_t j = 0; j < z.getColumn(); j++)
+            auto* dataRow = new QSurfaceDataRow(z.getCol());
+            for (size_t j = 0; j < z.getCol(); j++)
                 (*dataRow)[j].setPosition(QVector3D(float(x(i, j)),
                                                     float(z(i, j)),
                                                     float(y(i, j))));

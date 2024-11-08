@@ -38,8 +38,8 @@ namespace Physica::Core {
         using RealType = typename ScalarType::RealType;
         using ComplexType = Complex<RealType>;
         using EigenvalueVector = Vector<ComplexType, Order>;
-        using EigenvectorMatrix = DenseMatrix<ComplexType, MatrixOption::Column | MatrixOption::Vector, Order, Order>;
-        using RawEigenvectorType = DenseMatrix<ScalarType, MatrixOption::Column | MatrixOption::Vector, Order, Order>;
+        using EigenvectorMatrix = DenseMatrix<ComplexType, MatrixOption::Col | MatrixOption::Vector, Order, Order>;
+        using RawEigenvectorType = DenseMatrix<ScalarType, MatrixOption::Col | MatrixOption::Vector, Order, Order>;
     private:
         using WorkingMatrix = typename Schur<ScalarType, Order>::WorkingMatrix;
 
@@ -109,7 +109,7 @@ namespace Physica::Core {
     template<class MatrixType>
     void EigenSolver<ScalarType, Order>::compute(const RValueMatrix<MatrixType>& source, bool computeEigenvectors_) {
         static_assert(std::is_same<ScalarType, typename MatrixType::ScalarType>::value, "[Error]: Inconsistent ScalarType");
-        assert(source.getRow() == source.getColumn());
+        assert(source.getRow() == source.getCol());
         assert(source.getRow() == eigenvalues.getLength());
         computeEigenvectors = computeEigenvectors_;
         [[unlikely]] if (source.getRow() == 1) {

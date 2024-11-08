@@ -64,7 +64,7 @@ namespace Physica::Core {
         const size_t numSample = dataset.features.getRow();
         for (size_t i = 0; i < numSample; ++i)
             availableSample.push_front(i);
-        return train(dataset, std::move(availableSample), makeInitialFeatures(dataset.features.getColumn()));
+        return train(dataset, std::move(availableSample), makeInitialFeatures(dataset.features.getCol()));
     }
 
     template<class ScalarType, DecisionTreeType Type>
@@ -165,7 +165,7 @@ namespace Physica::Core {
             std::forward_list<size_t> availableSample,
             std::forward_list<size_t> availableFeature) {
         using TrainFunctor = DecisionTree (*)(const Dataset& dataset, std::forward_list<size_t>, std::forward_list<size_t>);
-        const size_t numFeature = dataset.features.getColumn();
+        const size_t numFeature = dataset.features.getCol();
         const ScalarType criteria = checkStopRecursion(dataset, availableSample, availableFeature);
         const bool shouldStopRecursion = !std::isnan(double(criteria));
         if (shouldStopRecursion)
@@ -249,7 +249,7 @@ namespace Physica::Core {
         assert(!availableFeature.empty());
 
         const size_t numAvailableSample = std::distance(availableSample.begin(), availableSample.end());
-        size_t optimalFeatureId = dataset.features.getColumn();
+        size_t optimalFeatureId = dataset.features.getCol();
         ScalarType optimalSplitPoint = 0;
         ScalarType minLoss = std::numeric_limits<ScalarType>::max();
         Array<size_t> list1{}, list2{};

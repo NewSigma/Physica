@@ -155,7 +155,7 @@ namespace Physica::Core {
     inline void FreeModel<ScalarType, Dim, NumReplica, Integrator>::pre_nve_step_impl(
             [[maybe_unused]] RingPolymerType& ringPolymer, ScalarType deltaT) {
         assert(NumReplica != 1);
-        assert(omegaK.getLength() == ringPolymer.getBuffer().getColumn());
+        assert(omegaK.getLength() == ringPolymer.getBuffer().getCol());
         if (lastTimeStep != deltaT)
             updateTimeStep(deltaT);
     }

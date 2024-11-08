@@ -83,7 +83,7 @@ namespace Physica::Core {
     template<class ScalarType>
     template<class MatrixType>
     inline void IterateSolver<ScalarType>::cg(const RValueMatrix<MatrixType>& A, VectorType& b) {
-        assert(A.getRow() == A.getColumn());
+        assert(A.getRow() == A.getCol());
         assert(A.getRow() == b.getLength());
         cg_functor([&A](const VectorType& v, VectorType& dot) { dot = A.getDerived() * v; }, b);
     }
@@ -91,7 +91,7 @@ namespace Physica::Core {
     template<class ScalarType>
     template<class MatrixType>
     inline void IterateSolver<ScalarType>::cgnr(const RValueMatrix<MatrixType>& A, VectorType& b) {
-        assert(A.getRow() == A.getColumn());
+        assert(A.getRow() == A.getCol());
         assert(A.getRow() == b.getLength());
         auto dotFunc = [&A](const VectorType& v, VectorType& dot) { dot = A.getDerived() * v; };
         auto dotTransFunc = [&A](const VectorType& v, VectorType& dot) { dot = A.getDerived().transpose() * v; };

@@ -23,7 +23,7 @@ namespace Physica::Core {
     class RingPolymer {
         using PlainScalar = typename ScalarType::PlainScalar;
         using BufferScalarType = typename PlainScalar::ComplexType;
-        constexpr static int PhaseMatrixMajor = NumReplica == 1 ? MatrixOption::Column : MatrixOption::Row;
+        constexpr static int PhaseMatrixMajor = NumReplica == 1 ? MatrixOption::Col : MatrixOption::Row;
     public:
         using MDCellType = MDCell<ScalarType, Dim>;
         using MassVector = typename MDCellType::MassVector;
@@ -73,7 +73,7 @@ namespace Physica::Core {
         [[nodiscard]] PhaseMatrix& asMatrix() noexcept { return phase; }
         [[nodiscard]] size_t getDOF() const noexcept { return phase.getRow() / 2U; }
         [[nodiscard]] size_t getNumParticle() const noexcept { return getDOF() / Dim; }
-        [[nodiscard]] size_t getNumReplica() const noexcept { return phase.getColumn(); }
+        [[nodiscard]] size_t getNumReplica() const noexcept { return phase.getCol(); }
 
         [[nodiscard]] const MassVector& getMassVec() const noexcept { return massVec; }
         [[nodiscard]] FFT<ScalarType, 1>& getCanonicalFFT() noexcept { return fft; }
@@ -81,7 +81,7 @@ namespace Physica::Core {
         [[nodiscard]] const FFTType& getFFT() const noexcept { return fft; }
         [[nodiscard]] const BufferType& getBuffer() const noexcept { return buffer; }
         [[nodiscard]] BufferType& getBuffer() noexcept { return buffer; }
-        [[nodiscard]] size_t getKSpaceSize() const noexcept { return buffer.getColumn(); }
+        [[nodiscard]] size_t getKSpaceSize() const noexcept { return buffer.getCol(); }
         /* Static members */
         [[nodiscard]] static ScalarType calcRepBeta(ScalarType temperatureT, size_t numReplica) noexcept;
         [[nodiscard]] static ScalarType calcOmegaW(ScalarType temperatureT, size_t numReplica) noexcept;
@@ -222,7 +222,7 @@ namespace Physica::Core {
             size_t posID, const PhaseMatrix& outer_phase, BufferType& outer_buffer, FFTType& outer_fft) const {
         assert(posID < getDOF());
         assert(outer_fft.getRSpaceSize() == getNumReplica());
-        assert(outer_fft.getKSpaceSize() == outer_buffer.getColumn());
+        assert(outer_fft.getKSpaceSize() == outer_buffer.getCol());
         outer_fft.getRSpace() = outer_phase.row(posID);
         FFTType::transform(fft, outer_fft);
         auto momentum = outer_buffer.row(0);
@@ -239,7 +239,7 @@ namespace Physica::Core {
             size_t posID, PhaseMatrix& outer_phase, const BufferType& outer_buffer, FFTType& outer_fft) const {
         assert(posID < getDOF());
         assert(outer_fft.getRSpaceSize() == getNumReplica());
-        assert(outer_fft.getKSpaceSize() == outer_buffer.getColumn());
+        assert(outer_fft.getKSpaceSize() == outer_buffer.getCol());
         outer_fft.getKSpace() = outer_buffer.row(0);
         FFTType::invTransform(fft, outer_fft);
         auto momentum = outer_phase.row(posID);

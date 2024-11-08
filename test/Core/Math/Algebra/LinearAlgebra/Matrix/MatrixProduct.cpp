@@ -24,7 +24,7 @@ using namespace Physica::Core;
 
 int main() {
     {
-        using Matrix = DenseMatrix<float32, MatrixOption::Column | MatrixOption::Vector, 2, 2>;
+        using Matrix = DenseMatrix<float32, MatrixOption::Col | MatrixOption::Vector, 2, 2>;
         const Matrix m1{{1, 2}, {2, 1}};
         const Matrix m2{{3, 3}, {1, 5}};
         const Matrix result = m1 * m2;
@@ -35,9 +35,9 @@ int main() {
     {
         using ScalarType = Diff<float32, DiffMode::Reverse>;
         using VectorType = Vector<float32, 3>;
-        using MatrixType = DenseMatrix<float32, MatrixOption::Column | MatrixOption::Element, 3, 3>;
+        using MatrixType = DenseMatrix<float32, MatrixOption::Col | MatrixOption::Element, 3, 3>;
         using DVector = Vector<ScalarType, 3>;
-        using DMatrix = DenseMatrix<ScalarType, MatrixOption::Column | MatrixOption::Element, 3, 3>;
+        using DMatrix = DenseMatrix<ScalarType, MatrixOption::Col | MatrixOption::Element, 3, 3>;
         const DMatrix m{1, 2, 3, 4, 5, 6, 7, 8, 9};
         const DVector x{1, 2, 3};
         const DVector y = m * x;
@@ -50,7 +50,7 @@ int main() {
 
         const MatrixType dm = toGradMatrix(m);
         for (size_t r = 0; r < dm.getRow(); ++r)
-            for (size_t c = 0; c < dm.getColumn(); ++c)
+            for (size_t c = 0; c < dm.getCol(); ++c)
                 if (!scalarNear(dm(r, c), toValueVector(x).calc(c), 1E-15))
                     return 1;
     }

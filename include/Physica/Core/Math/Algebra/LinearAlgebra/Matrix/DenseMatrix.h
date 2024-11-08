@@ -31,28 +31,28 @@ namespace Physica::Core {
      * Option is combinations of \enum MatrixOption
      */
     template<class T,
-             int Option = MatrixOption::Column | MatrixOption::Vector,
+             int Option = MatrixOption::Col | MatrixOption::Vector,
              size_t Row = Dynamic,
-             size_t Column = Dynamic,
+             size_t Col = Dynamic,
              class Allocator = HostAllocator<T>>
-    class DenseMatrix : public ContinuousMatrix<DenseMatrix<T, Option, Row, Column, Allocator>>
-                      , public DenseMatrixStorage<T, Option, Row, Column, Allocator> {
-        using This = DenseMatrix<T, Option, Row, Column, Allocator>;
+    class DenseMatrix : public ContinuousMatrix<DenseMatrix<T, Option, Row, Col, Allocator>>
+                      , public DenseMatrixStorage<T, Option, Row, Col, Allocator> {
+        using This = DenseMatrix<T, Option, Row, Col, Allocator>;
         using Base = ContinuousMatrix<This>;
-        using Storage = DenseMatrixStorage<T, Option, Row, Column, Allocator>;
+        using Storage = DenseMatrixStorage<T, Option, Row, Col, Allocator>;
         using InitializerType = typename Storage::InitializerType;
         using Base::isReverseDiff;
     public:
         using typename Base::PlainScalar;
         using typename Base::ScalarType;
         using device_obj_type = device_obj<This>;
-        using ColMatrix = DenseMatrix<T, MatrixOption::getStorage<DenseMatrix>() | MatrixOption::Column, Row, Column>;
-        using RowMatrix = DenseMatrix<T, MatrixOption::getStorage<DenseMatrix>() | MatrixOption::Row, Row, Column>;
-        using RealMatrix = DenseMatrix<typename T::RealType, Option, Row, Column>;
+        using ColMatrix = DenseMatrix<T, MatrixOption::getStorage<DenseMatrix>() | MatrixOption::Col, Row, Col>;
+        using RowMatrix = DenseMatrix<T, MatrixOption::getStorage<DenseMatrix>() | MatrixOption::Row, Row, Col>;
+        using RealMatrix = DenseMatrix<typename T::RealType, Option, Row, Col>;
     public:
         DenseMatrix() = default;
-        DenseMatrix(size_t row, size_t column);
-        DenseMatrix(size_t row, size_t column, T value);
+        DenseMatrix(size_t row, size_t col);
+        DenseMatrix(size_t row, size_t col, T value);
         DenseMatrix(std::initializer_list<InitializerType> list);
         template<class OtherMatrix>
         DenseMatrix(const RValueMatrix<OtherMatrix>& mat);
@@ -65,8 +65,8 @@ namespace Physica::Core {
         using Base::operator=;
         using Base::operator();
         /* Operations */
-        size_t completePivoting(size_t column);
-        size_t partialPivoting(size_t column);
+        size_t completePivoting(size_t col);
+        size_t partialPivoting(size_t col);
 
         using Storage::resize;
         [[nodiscard]] DenseMatrix copy() const;
@@ -82,20 +82,20 @@ namespace Physica::Core {
         /* Getters */
         using Base::data;
         using Storage::data_ptr;
-        using Storage::getColumn;
+        using Storage::getCol;
         using Storage::getRow;
         /* Static members */
         [[nodiscard]] static DenseMatrix zeros(size_t rank) { return DenseMatrix(rank, rank, T(0)); }
-        [[nodiscard]] static DenseMatrix zeros(size_t row, size_t column) { return DenseMatrix(row, column, T(0)); }
+        [[nodiscard]] static DenseMatrix zeros(size_t row, size_t col) { return DenseMatrix(row, col, T(0)); }
         [[nodiscard]] static DenseMatrix unitMatrix(size_t order);
         template<class RandomGenerator>
         [[nodiscard]] static DenseMatrix random_uniform(size_t order, RandomGenerator& gen) { return random_uniform(order, order, gen); }
         template<class RandomGenerator>
-        [[nodiscard]] inline static DenseMatrix random_uniform(size_t row, size_t column, RandomGenerator& gen);
+        [[nodiscard]] inline static DenseMatrix random_uniform(size_t row, size_t col, RandomGenerator& gen);
         template<class RandomGenerator>
-        [[nodiscard]] inline static DenseMatrix random_normal(size_t row, size_t column, RandomGenerator& gen);
+        [[nodiscard]] inline static DenseMatrix random_normal(size_t row, size_t col, RandomGenerator& gen);
         template<class Distribution, class RandomGenerator>
-        [[nodiscard]] inline static DenseMatrix random_any(size_t row, size_t column, Distribution& dist, RandomGenerator& gen);
+        [[nodiscard]] inline static DenseMatrix random_any(size_t row, size_t col, Distribution& dist, RandomGenerator& gen);
         template<class VectorType>
         [[nodiscard]] static std::pair<DenseMatrix, DenseMatrix> meshgrid(const LValueVector<VectorType>& vecInCols, const LValueVector<VectorType>& vecInRows);
     private:
@@ -103,29 +103,29 @@ namespace Physica::Core {
         friend class device_obj<This>;
     };
 
-    template<class T, int Option, size_t Row, size_t Column, class Allocator>
-    std::istream& operator>>(std::istream& is, DenseMatrix<T, Option, Row, Column, Allocator>& mat);
+    template<class T, int Option, size_t Row, size_t Col, class Allocator>
+    std::istream& operator>>(std::istream& is, DenseMatrix<T, Option, Row, Col, Allocator>& mat);
 }
 
 namespace Physica {
-    template<class T, int Op, size_t Row, size_t Column, class Allocator>
-    class Traits<Core::DenseMatrix<T, Op, Row, Column, Allocator>> {
+    template<class T, int Op, size_t Row, size_t Col, class Allocator>
+    class Traits<Core::DenseMatrix<T, Op, Row, Col, Allocator>> {
         static_assert(!T::isForwardDiff, "[Error]: Use diffable matrix instead");
     public:
         using ScalarType = T;
         constexpr static int Option = Op;
         constexpr static size_t RowAtCompile = Row;
-        constexpr static size_t ColumnAtCompile = Column;
+        constexpr static size_t ColumnAtCompile = Col;
         constexpr static size_t SizeAtCompile = RowAtCompile * ColumnAtCompile;
         using AllocatorType = Allocator;
     };
 }
 
 namespace std {
-    template<class T, int Option, size_t Row, size_t Column, class Allocator>
+    template<class T, int Option, size_t Row, size_t Col, class Allocator>
     inline void swap(
-            Physica::Core::DenseMatrix<T, Option, Row, Column, Allocator>& __restrict m1,
-            Physica::Core::DenseMatrix<T, Option, Row, Column, Allocator>& __restrict m2) noexcept {
+            Physica::Core::DenseMatrix<T, Option, Row, Col, Allocator>& __restrict m1,
+            Physica::Core::DenseMatrix<T, Option, Row, Col, Allocator>& __restrict m2) noexcept {
         m1.swap(m2);
     }
 }

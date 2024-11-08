@@ -33,7 +33,7 @@ int main() {
         solver.rungeKutta4([](T x, const Vector<T, 1>& y) -> Vector<T, 1> { (void)x; return y; });
         const auto& x = solver.getX();
         const auto& solution = solver.getSolution();
-        for (size_t i = 0; i < solution.getColumn(); ++i) {
+        for (size_t i = 0; i < solution.getCol(); ++i) {
             const T result = solution.col(i)[0];
             const T answer = exp(x[i]);
             if (!scalarNear(result, answer, 1E-11))
@@ -49,7 +49,7 @@ int main() {
         solver.rungeKutta4([](T x, const Vector<T, 2>& y) -> Vector<T, 2> { (void)x; return {y[1], -y[0]}; });
         const auto& x = solver.getX();
         const auto& solution = solver.getSolution();
-        for (size_t i = 0; i < solution.getColumn(); ++i) {
+        for (size_t i = 0; i < solution.getCol(); ++i) {
             const auto& x_i = x[i];
             const auto solVector = solution.col(i);
             const auto answer1 = sin(x_i);
@@ -69,7 +69,7 @@ int main() {
         solver.verlet([](T x, const T& y) -> T { (void)x; return y; }, {exp(stepSize)});
         const auto& x = solver.getX();
         const auto& solution = solver.getSolution();
-        for (size_t i = 0; i < solution.getColumn(); ++i) {
+        for (size_t i = 0; i < solution.getCol(); ++i) {
             const auto solVector = solution.col(i);
             const auto answer = exp(x[i]);
             if (!scalarNear(solVector[0], answer, 1E-9))
@@ -85,7 +85,7 @@ int main() {
         solver.degenerate_numerov([](T x) -> T { (void)x; return -1; }, {1});
         const auto& x = solver.getX();
         const auto& solution = solver.getSolution();
-        for (size_t i = 0; i < solution.getColumn(); ++i) {
+        for (size_t i = 0; i < solution.getCol(); ++i) {
             const auto& x_i = x[i];
             const auto solVector = solution.col(i);
             const auto answer = sin(x_i);
@@ -106,7 +106,7 @@ int main() {
         solver.degenerate_numerov([](T x) -> T { return square(x) - T(3); }, {1});
         const auto& x = solver.getX();
         const auto& solution = solver.getSolution();
-        for (size_t i = 0; i < solution.getColumn(); ++i) {
+        for (size_t i = 0; i < solution.getCol(); ++i) {
             const auto& x_i = x[i];
             const auto solVector = solution.col(i);
             const auto answer = x_i * exp(-square(x_i) / 2);

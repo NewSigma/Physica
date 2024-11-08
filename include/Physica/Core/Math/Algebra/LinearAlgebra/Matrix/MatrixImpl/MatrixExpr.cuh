@@ -52,8 +52,8 @@ namespace Physica::Core {
         }
 
         template<Side Owner = GetSide()>
-        [[nodiscard]] __host__ __device__ size_t getColumn() const {
-            return getExpr<Owner>().template getColumn<Owner>();
+        [[nodiscard]] __host__ __device__ size_t getCol() const {
+            return getExpr<Owner>().template getCol<Owner>();
         }
 
         template<Side Owner = GetSide()>
@@ -87,7 +87,7 @@ namespace Physica::Core {
         __host__ __device__ inline device_obj(const DeviceLHS& lhs_, const DeviceRHS& rhs_) {
             if constexpr (is_matrix<RHS>::value) {
                 assert(lhs_.getRow() == rhs_.getRow());
-                assert(lhs_.getColumn() == rhs_.getColumn());
+                assert(lhs_.getCol() == rhs_.getCol());
             }
 
             if constexpr (IsHost()) {
@@ -112,8 +112,8 @@ namespace Physica::Core {
         }
 
         template<Side Owner = GetSide()>
-        [[nodiscard]] __host__ __device__ size_t getColumn() const {
-            return getLHS<Owner>().template getColumn<Owner>();
+        [[nodiscard]] __host__ __device__ size_t getCol() const {
+            return getLHS<Owner>().template getCol<Owner>();
         }
 
         template<Side Owner = GetSide()>

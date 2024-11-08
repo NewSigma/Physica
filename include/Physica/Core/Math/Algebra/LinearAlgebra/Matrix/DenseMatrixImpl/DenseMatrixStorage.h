@@ -25,30 +25,30 @@
 
 namespace Physica::Core {
     template<class T,
-             int Option = MatrixOption::Column | MatrixOption::Vector,
+             int Option = MatrixOption::Col | MatrixOption::Vector,
              size_t Row = Dynamic,
-             size_t Column = Dynamic,
+             size_t Col = Dynamic,
              class Allocator = HostAllocator<T>>
     class DenseMatrixStorage;
 
-    template<class T, size_t Row, size_t Column, class Allocator>
-    class DenseMatrixStorage<T, MatrixOption::Column | MatrixOption::Element, Row, Column, Allocator>
-            : public DenseMatrixDim<DenseMatrixStorage<T, MatrixOption::Column | MatrixOption::Element, Row, Column, Allocator>, Row, Column> {
-        using This = DenseMatrixStorage<T, MatrixOption::Column | MatrixOption::Element, Row, Column, Allocator>;
-        using Dim = DenseMatrixDim<This, Row, Column>;
+    template<class T, size_t Row, size_t Col, class Allocator>
+    class DenseMatrixStorage<T, MatrixOption::Col | MatrixOption::Element, Row, Col, Allocator>
+            : public DenseMatrixDim<DenseMatrixStorage<T, MatrixOption::Col | MatrixOption::Element, Row, Col, Allocator>, Row, Col> {
+        using This = DenseMatrixStorage<T, MatrixOption::Col | MatrixOption::Element, Row, Col, Allocator>;
+        using Dim = DenseMatrixDim<This, Row, Col>;
         using RefTy = typename T::RefTy;
         using ConstRefTy = typename T::ConstRefTy;
-        using ArrayType = typename std::conditional<is_scalar<T>::value, Vector<T, Row * Column>, Array<T, Row * Column>>::type;
+        using ArrayType = typename std::conditional<is_scalar<T>::value, Vector<T, Row * Col>, Array<T, Row * Col>>::type;
     public:
         using InitializerType = T;
     private:
         ArrayType arr;
     public:
         DenseMatrixStorage() = default;
-        DenseMatrixStorage(size_t row, size_t column) : Dim(row, column), arr(row * column) {}
-        DenseMatrixStorage(size_t row, size_t column, T value) : Dim(row, column), arr(row * column, std::move(value)) {}
+        DenseMatrixStorage(size_t row, size_t col) : Dim(row, col), arr(row * col) {}
+        DenseMatrixStorage(size_t row, size_t col, T value) : Dim(row, col), arr(row * col, std::move(value)) {}
         DenseMatrixStorage(std::initializer_list<T> list) : arr(list) {
-            assert(Row != Dynamic && Column != Dynamic && "[Error]: Row or Column is unknown");
+            assert(Row != Dynamic && Col != Dynamic && "[Error]: Row or Col is unknown");
         }
         DenseMatrixStorage(const This&) = default;
         DenseMatrixStorage(This&&) noexcept = default;
@@ -56,19 +56,19 @@ namespace Physica::Core {
         /* Operators */
         This& operator=(This obj) noexcept { swap(obj); return *this; }
         [[nodiscard]] RefTy operator()(size_t r, size_t c) {
-            assert(r < getRow() && c < getColumn());
+            assert(r < getRow() && c < getCol());
             return arr[toIndex(r, c)];
         }
 
         [[nodiscard]] ConstRefTy operator()(size_t r, size_t c) const {
-            assert(r < getRow() && c < getColumn());
+            assert(r < getRow() && c < getCol());
             return arr[toIndex(r, c)];
         }
         /* Operations */
         template<class... Args>
-        void resize(size_t row, size_t column, Args&&... args);
+        void resize(size_t row, size_t col, Args&&... args);
         void rowSwap(size_t r1, size_t r2);
-        void columnSwap(size_t c1, size_t r1);
+        void colSwap(size_t c1, size_t r1);
         [[nodiscard]] inline auto toDevice() const;
         [[nodiscard]] inline auto toDeviceAsync() const;
         inline void toDevice(device_obj<This>& obj) const;
@@ -79,13 +79,13 @@ namespace Physica::Core {
             arr.swap(obj.arr);
         }
         /* Getters */
-        using Dim::getColumn;
+        using Dim::getCol;
         using Dim::getRow;
         [[nodiscard]] ArrayType& asArray() noexcept { return arr; }
         [[nodiscard]] const ArrayType& asArray() const noexcept { return arr; }
         [[nodiscard]] __host__ __device__ size_t getSize() const noexcept { return arr.getLength(); }
-        [[nodiscard]] __host__ __device__ T* data_ptr(size_t row, size_t column) { return arr.data() + toIndex(row, column); }
-        [[nodiscard]] __host__ __device__ const T* data_ptr(size_t row, size_t column) const { return arr.data() + toIndex(row, column); }
+        [[nodiscard]] __host__ __device__ T* data_ptr(size_t row, size_t col) { return arr.data() + toIndex(row, col); }
+        [[nodiscard]] __host__ __device__ const T* data_ptr(size_t row, size_t col) const { return arr.data() + toIndex(row, col); }
     private:
         DenseMatrixStorage(ArrayType arr_, Dim dim) : Dim(std::move(dim)), arr(std::move(arr_)) {}
         __host__ __device__ size_t toIndex(size_t r, size_t c) const { return getRow() * c + r; }
@@ -93,22 +93,22 @@ namespace Physica::Core {
         friend class device_obj<This>;
     };
 
-    template<class T, size_t Row, size_t Column, class Allocator>
-    class DenseMatrixStorage<T, MatrixOption::Row | MatrixOption::Element, Row, Column, Allocator>
-            : public DenseMatrixDim<DenseMatrixStorage<T, MatrixOption::Row | MatrixOption::Element, Row, Column, Allocator>, Row, Column> {
-        using This = DenseMatrixStorage<T, MatrixOption::Row | MatrixOption::Element, Row, Column, Allocator>;
-        using Dim = DenseMatrixDim<This, Row, Column>;
+    template<class T, size_t Row, size_t Col, class Allocator>
+    class DenseMatrixStorage<T, MatrixOption::Row | MatrixOption::Element, Row, Col, Allocator>
+            : public DenseMatrixDim<DenseMatrixStorage<T, MatrixOption::Row | MatrixOption::Element, Row, Col, Allocator>, Row, Col> {
+        using This = DenseMatrixStorage<T, MatrixOption::Row | MatrixOption::Element, Row, Col, Allocator>;
+        using Dim = DenseMatrixDim<This, Row, Col>;
         using RefTy = typename T::RefTy;
         using ConstRefTy = typename T::ConstRefTy;
-        using ArrayType = typename std::conditional<is_scalar<T>::value, Vector<T, Row * Column>, Array<T, Row * Column>>::type;
+        using ArrayType = typename std::conditional<is_scalar<T>::value, Vector<T, Row * Col>, Array<T, Row * Col>>::type;
     public:
         using InitializerType = T;
     private:
         ArrayType arr;
     public:
         DenseMatrixStorage() = default;
-        DenseMatrixStorage(size_t row, size_t column) : Dim(row, column), arr(row * column) {}
-        DenseMatrixStorage(size_t row, size_t column, T value) : Dim(row, column), arr(row * column, std::move(value)) {}
+        DenseMatrixStorage(size_t row, size_t col) : Dim(row, col), arr(row * col) {}
+        DenseMatrixStorage(size_t row, size_t col, T value) : Dim(row, col), arr(row * col, std::move(value)) {}
         DenseMatrixStorage(std::initializer_list<T> list) : arr(list) {}
         DenseMatrixStorage(const This&) = default;
         DenseMatrixStorage(This&&) noexcept = default;
@@ -116,19 +116,19 @@ namespace Physica::Core {
         /* Operators */
         This& operator=(This obj) noexcept { swap(obj); return *this; }
         [[nodiscard]] RefTy& operator()(size_t r, size_t c) {
-            assert(r < getRow() && c < getColumn());
+            assert(r < getRow() && c < getCol());
             return arr[toIndex(r, c)];
         }
 
         [[nodiscard]] ConstRefTy operator()(size_t r, size_t c) const {
-            assert(r < getRow() && c < getColumn());
+            assert(r < getRow() && c < getCol());
             return arr[toIndex(r, c)];
         }
         /* Operations */
         template<class... Args>
-        void resize(size_t row, size_t column, Args&&... args);
+        void resize(size_t row, size_t col, Args&&... args);
         void rowSwap(size_t r1, size_t r2);
-        void columnSwap(size_t c1, size_t r1);
+        void colSwap(size_t c1, size_t r1);
         [[nodiscard]] inline auto toDevice() const;
         [[nodiscard]] inline auto toDeviceAsync() const;
         inline void toDevice(device_obj<This>& obj) const;
@@ -139,25 +139,25 @@ namespace Physica::Core {
             arr.swap(obj.arr);
         }
         /* Getters */
-        using Dim::getColumn;
+        using Dim::getCol;
         using Dim::getRow;
         [[nodiscard]] ArrayType& asArray() noexcept { return arr; }
         [[nodiscard]] const ArrayType& asArray() const noexcept { return arr; }
         [[nodiscard]] __host__ __device__ size_t getSize() const noexcept { return arr.getLength(); }
-        [[nodiscard]] __host__ __device__ T* data_ptr(size_t row, size_t column) { return arr.data() + toIndex(row, column); }
-        [[nodiscard]] __host__ __device__ const T* data_ptr(size_t row, size_t column) const { return arr.data() + toIndex(row, column); }
+        [[nodiscard]] __host__ __device__ T* data_ptr(size_t row, size_t col) { return arr.data() + toIndex(row, col); }
+        [[nodiscard]] __host__ __device__ const T* data_ptr(size_t row, size_t col) const { return arr.data() + toIndex(row, col); }
     private:
         DenseMatrixStorage(ArrayType arr_, Dim dim) : Dim(std::move(dim)), arr(std::move(arr_)) {}
-        __host__ __device__ size_t toIndex(size_t r, size_t c) const { return getColumn() * r + c; }
+        __host__ __device__ size_t toIndex(size_t r, size_t c) const { return getCol() * r + c; }
         /* Friends */
         friend class device_obj<This>;
     };
 
-    template<class T, size_t Row, size_t Column, class Allocator>
-    class DenseMatrixStorage<T, MatrixOption::Column | MatrixOption::Vector, Row, Column, Allocator>
-            : public DenseMatrixDim<DenseMatrixStorage<T, MatrixOption::Column | MatrixOption::Vector, Row, Column, Allocator>, Row, Column> {
-        using This = DenseMatrixStorage<T, MatrixOption::Column | MatrixOption::Vector, Row, Column, Allocator>;
-        using Dim = DenseMatrixDim<This, Row, Column>;
+    template<class T, size_t Row, size_t Col, class Allocator>
+    class DenseMatrixStorage<T, MatrixOption::Col | MatrixOption::Vector, Row, Col, Allocator>
+            : public DenseMatrixDim<DenseMatrixStorage<T, MatrixOption::Col | MatrixOption::Vector, Row, Col, Allocator>, Row, Col> {
+        using This = DenseMatrixStorage<T, MatrixOption::Col | MatrixOption::Vector, Row, Col, Allocator>;
+        using Dim = DenseMatrixDim<This, Row, Col>;
         using RefTy = typename T::RefTy;
         using ConstRefTy = typename T::ConstRefTy;
     public:
@@ -165,13 +165,13 @@ namespace Physica::Core {
         using InitializerType = VectorType;
     private:
         using AllocatorV = typename Allocator::template rebind_alloc<VectorType>;
-        using ArrayType = Array<VectorType, Column, AllocatorV>;
+        using ArrayType = Array<VectorType, Col, AllocatorV>;
 
         ArrayType array;
     public:
         DenseMatrixStorage() = default;
-        DenseMatrixStorage(size_t row, size_t column) : Dim(row, column), array(column, row) {}
-        DenseMatrixStorage(size_t row, size_t column, T value) : Dim(row, column), array(column, row, std::move(value)) {}
+        DenseMatrixStorage(size_t row, size_t col) : Dim(row, col), array(col, row) {}
+        DenseMatrixStorage(size_t row, size_t col, T value) : Dim(row, col), array(col, row, std::move(value)) {}
         DenseMatrixStorage(std::initializer_list<VectorType> list) : array(list) {
             const size_t length = array.getLength();
             const size_t size = getSize();
@@ -183,19 +183,19 @@ namespace Physica::Core {
         /* Operators */
         This& operator=(This obj) noexcept { swap(obj); return *this; }
         [[nodiscard]] RefTy operator()(size_t r, size_t c) {
-            assert(r < getRow() && c < getColumn());
+            assert(r < getRow() && c < getCol());
             return array[c][r];
         }
 
         [[nodiscard]] ConstRefTy operator()(size_t r, size_t c) const {
-            assert(r < getRow() && c < getColumn());
+            assert(r < getRow() && c < getCol());
             return array[c][r];
         }
         /* Operations */
         template<class... Args>
-        void resize(size_t row, size_t column, Args&&... args);
+        void resize(size_t row, size_t col, Args&&... args);
         void rowSwap(size_t r1, size_t r2);
-        void columnSwap(size_t c1, size_t r1);
+        void colSwap(size_t c1, size_t r1);
         [[nodiscard]] inline auto toDevice() const;
         void swap(This& __restrict obj) noexcept {
             assert(this != &obj && "[Error]: Self swap is likely a bug");
@@ -203,29 +203,29 @@ namespace Physica::Core {
             Dim::swap(obj);
         }
         /* Getters */
-        using Dim::getColumn;
+        using Dim::getCol;
         using Dim::getRow;
         [[nodiscard]] ArrayType& asArray() noexcept { return array; }
         [[nodiscard]] const ArrayType& asArray() const noexcept { return array; }
         [[nodiscard]] __host__ __device__ size_t getSize() const noexcept {
             return array.getLength() == 0 ? 0 : array.getLength() * array[0].getLength();
         }
-        [[nodiscard]] __host__ __device__ T* data_ptr(size_t row, size_t column) { return array[column].data() + row; }
-        [[nodiscard]] __host__ __device__ const T* data_ptr(size_t row, size_t column) const { return array[column].data() + row; }
+        [[nodiscard]] __host__ __device__ T* data_ptr(size_t row, size_t col) { return array[col].data() + row; }
+        [[nodiscard]] __host__ __device__ const T* data_ptr(size_t row, size_t col) const { return array[col].data() + row; }
     private:
         DenseMatrixStorage(ArrayType array, Dim dim) : Dim(std::move(dim)), array(std::move(array)) {}
         friend class device_obj<This>;
     };
 
-    template<class T, size_t Row, size_t Column, class Allocator>
-    class DenseMatrixStorage<T, MatrixOption::Row | MatrixOption::Vector, Row, Column, Allocator>
-            : public DenseMatrixDim<DenseMatrixStorage<T, MatrixOption::Row | MatrixOption::Vector, Row, Column, Allocator>, Row, Column> {
-        using This = DenseMatrixStorage<T, MatrixOption::Row | MatrixOption::Vector, Row, Column, Allocator>;
-        using Dim = DenseMatrixDim<This, Row, Column>;
+    template<class T, size_t Row, size_t Col, class Allocator>
+    class DenseMatrixStorage<T, MatrixOption::Row | MatrixOption::Vector, Row, Col, Allocator>
+            : public DenseMatrixDim<DenseMatrixStorage<T, MatrixOption::Row | MatrixOption::Vector, Row, Col, Allocator>, Row, Col> {
+        using This = DenseMatrixStorage<T, MatrixOption::Row | MatrixOption::Vector, Row, Col, Allocator>;
+        using Dim = DenseMatrixDim<This, Row, Col>;
         using RefTy = typename T::RefTy;
         using ConstRefTy = typename T::ConstRefTy;
     public:
-        using VectorType = typename std::conditional<is_scalar<T>::value, Vector<T, Column>, Array<T, Column>>::type;
+        using VectorType = typename std::conditional<is_scalar<T>::value, Vector<T, Col>, Array<T, Col>>::type;
         using InitializerType = VectorType;
     private:
         using AllocatorV = typename Allocator::template rebind_alloc<VectorType>;
@@ -234,8 +234,8 @@ namespace Physica::Core {
         ArrayType array;
     public:
         DenseMatrixStorage() = default;
-        DenseMatrixStorage(size_t row, size_t column) : Dim(row, column), array(row, column) {}
-        DenseMatrixStorage(size_t row, size_t column, T value) : Dim(row, column), array(row, column, std::move(value)) {}
+        DenseMatrixStorage(size_t row, size_t col) : Dim(row, col), array(row, col) {}
+        DenseMatrixStorage(size_t row, size_t col, T value) : Dim(row, col), array(row, col, std::move(value)) {}
         DenseMatrixStorage(std::initializer_list<VectorType> list) : array(list) {
             const size_t length = array.getLength();
             const size_t size = getSize();
@@ -247,19 +247,19 @@ namespace Physica::Core {
         /* Operators */
         This& operator=(This obj) noexcept { swap(obj); return *this; }
         [[nodiscard]] RefTy operator()(size_t r, size_t c) {
-            assert(r < getRow() && c < getColumn());
+            assert(r < getRow() && c < getCol());
             return array[r][c];
         }
 
         [[nodiscard]] ConstRefTy operator()(size_t r, size_t c) const {
-            assert(r < getRow() && c < getColumn());
+            assert(r < getRow() && c < getCol());
             return array[r][c];
         }
         /* Operations */
         template<class... Args>
-        void resize(size_t row, size_t column, Args&&... args);
+        void resize(size_t row, size_t col, Args&&... args);
         void rowSwap(size_t r1, size_t r2);
-        void columnSwap(size_t c1, size_t r1);
+        void colSwap(size_t c1, size_t r1);
         [[nodiscard]] inline auto toDevice() const;
         void swap(This& __restrict obj) noexcept {
             assert(this != &obj && "[Error]: Self swap is likely a bug");
@@ -267,15 +267,15 @@ namespace Physica::Core {
             Dim::swap(obj);
         }
         /* Getters */
-        using Dim::getColumn;
+        using Dim::getCol;
         using Dim::getRow;
         [[nodiscard]] ArrayType& asArray() noexcept { return array; }
         [[nodiscard]] const ArrayType& asArray() const noexcept { return array; }
         [[nodiscard]] __host__ __device__ size_t getSize() const noexcept {
             return array.getLength() == 0 ? 0 : array.getLength() * array[0].getLength();
         }
-        [[nodiscard]] __host__ __device__ T* data_ptr(size_t row, size_t column) { return array[row].data() + column; }
-        [[nodiscard]] __host__ __device__ const T* data_ptr(size_t row, size_t column) const { return array[row].data() + column; }
+        [[nodiscard]] __host__ __device__ T* data_ptr(size_t row, size_t col) { return array[row].data() + col; }
+        [[nodiscard]] __host__ __device__ const T* data_ptr(size_t row, size_t col) const { return array[row].data() + col; }
     private:
         DenseMatrixStorage(ArrayType array, Dim dim) : Dim(std::move(dim)), array(std::move(array)) {}
         friend class device_obj<This>;

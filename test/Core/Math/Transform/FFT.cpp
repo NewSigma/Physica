@@ -180,7 +180,7 @@ int main() {
             constexpr double precision = 1E-11;
             fft.invTransform();
             for (size_t i = 0; i < data.getRow(); ++i) {
-                for (size_t j = 0; j < data.getColumn(); ++j) {
+                for (size_t j = 0; j < data.getCol(); ++j) {
                     const bool isNear = scalarNear(data(i, j), fft.getRSpace()(i, j), precision);
                     const bool isSmall = abs(data(i, j)) < RealType(precision) && abs(fft.getRSpace()(i, j)) < RealType(precision);
                     if(!isNear && !isSmall)

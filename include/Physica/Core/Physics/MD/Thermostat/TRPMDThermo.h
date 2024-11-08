@@ -84,7 +84,7 @@ namespace Physica::Core {
                     ringPolymer.toNormalRepr(i, ringPolymer.asMatrix(), buffer, fft);
                     fft.getRSpace().random_normal(pool);
                     FFT<ScalarType, 1>::transform(ringPolymer.getFFT(), fft);
-                    for (size_t j = 1; j < buffer.getColumn(); ++j) {
+                    for (size_t j = 1; j < buffer.getCol(); ++j) {
                         const ScalarType phase = M_PI * j / numReplica;
                         const ScalarType viscosityY = sin(phase) * omegaW;
                         Langevin<ScalarType, Dim>::langevinImpl(

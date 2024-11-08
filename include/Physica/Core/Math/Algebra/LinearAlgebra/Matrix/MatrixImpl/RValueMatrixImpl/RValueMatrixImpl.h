@@ -29,15 +29,15 @@ namespace Physica::Core {
         constexpr size_t OtherRow = OtherDerived::RowAtCompile;
         constexpr size_t OtherColumn = OtherDerived::ColumnAtCompile;
         static_assert(RowAtCompile == OtherRow || RowAtCompile == Dynamic || OtherRow == Dynamic, "[Error]: Row mismatch between two matrix");
-        static_assert(ColumnAtCompile == OtherColumn || ColumnAtCompile == Dynamic || OtherColumn == Dynamic, "[Error]: Column mismatch between two matrix");
+        static_assert(ColumnAtCompile == OtherColumn || ColumnAtCompile == Dynamic || OtherColumn == Dynamic, "[Error]: Col mismatch between two matrix");
         static_assert(!(isComplex && !OtherDerived::isComplex), "[Error]: Cannot assign a complex matrix to real matrix");
         assert(getRow() == target.getRow());
-        assert(getColumn() == target.getColumn());
+        assert(getCol() == target.getCol());
         const size_t maxMajor = target.getMaxMajor();
         const size_t maxMinor = target.getMaxMinor();
         for (size_t i = 0; i < maxMajor; ++i)
             for (size_t j = 0; j < maxMinor; ++j)
-                target.refFromMajorMinor(i, j) = OtherScalar(calc(target.rowFromMajorMinor(i, j), target.columnFromMajorMinor(i, j)));
+                target.refFromMajorMinor(i, j) = OtherScalar(calc(target.rowFromMajorMinor(i, j), target.colFromMajorMinor(i, j)));
 
         constexpr bool isContinuous = std::is_base_of<ContinuousMatrix<OtherDerived>, OtherDerived>::value;
         if constexpr (isContinuous && isReverseDiff)
@@ -46,12 +46,12 @@ namespace Physica::Core {
 
     template<class Derived>
     inline typename RValueMatrix<Derived>::RowVector RValueMatrix<Derived>::row(size_t r) {
-        return {Base::getDerived(), r, 0, getColumn()};
+        return {Base::getDerived(), r, 0, getCol()};
     }
 
     template<class Derived>
     inline const typename RValueMatrix<Derived>::RowVector RValueMatrix<Derived>::row(size_t r) const {
-        return {Base::getConstCastDerived(), r, 0, getColumn()};
+        return {Base::getConstCastDerived(), r, 0, getCol()};
     }
 
     template<class Derived>
@@ -66,32 +66,32 @@ namespace Physica::Core {
 
     template<class Derived>
     inline RMatrixBlock<Derived> RValueMatrix<Derived>::rows(size_t fromRow, size_t rowCount) {
-        return {Base::getDerived(), fromRow, rowCount, 0, getColumn()};
+        return {Base::getDerived(), fromRow, rowCount, 0, getCol()};
     }
 
     template<class Derived>
     inline const RMatrixBlock<Derived> RValueMatrix<Derived>::rows(size_t fromRow, size_t rowCount) const {
-        return {Base::getConstCastDerived(), fromRow, rowCount, 0, getColumn()};
+        return {Base::getConstCastDerived(), fromRow, rowCount, 0, getCol()};
     }
 
     template<class Derived>
     inline RMatrixBlock<Derived> RValueMatrix<Derived>::topRows(size_t to) {
-        return {Base::getDerived(), 0, to, 0, getColumn()};
+        return {Base::getDerived(), 0, to, 0, getCol()};
     }
 
     template<class Derived>
     inline const RMatrixBlock<Derived> RValueMatrix<Derived>::topRows(size_t to) const {
-        return {Base::getConstCastDerived(), 0, to, 0, getColumn()};
+        return {Base::getConstCastDerived(), 0, to, 0, getCol()};
     }
 
     template<class Derived>
     inline RMatrixBlock<Derived> RValueMatrix<Derived>::bottomRows(size_t from) {
-        return {Base::getDerived(), from, getRow() - from, 0, getColumn()};
+        return {Base::getDerived(), from, getRow() - from, 0, getCol()};
     }
 
     template<class Derived>
     inline const RMatrixBlock<Derived> RValueMatrix<Derived>::bottomRows(size_t from) const {
-        return {Base::getConstCastDerived(), from, getRow() - from, 0, getColumn()};
+        return {Base::getConstCastDerived(), from, getRow() - from, 0, getCol()};
     }
 
     template<class Derived>
@@ -116,12 +116,12 @@ namespace Physica::Core {
 
     template<class Derived>
     inline RMatrixBlock<Derived> RValueMatrix<Derived>::rightCols(size_t from) {
-        return {Base::getDerived(), 0, getRow(), from, getColumn() - from};
+        return {Base::getDerived(), 0, getRow(), from, getCol() - from};
     }
 
     template<class Derived>
     inline const RMatrixBlock<Derived> RValueMatrix<Derived>::rightCols(size_t from) const {
-        return {Base::getConstCastDerived(), 0, getRow(), from, getColumn() - from};
+        return {Base::getConstCastDerived(), 0, getRow(), from, getCol() - from};
     }
 
     template<class Derived>
@@ -175,23 +175,23 @@ namespace Physica::Core {
     template<class Derived>
     inline RMatrixBlock<Derived>
     RValueMatrix<Derived>::bottomRightCorner(size_t fromRow, size_t fromCol) {
-        return {Base::getDerived(), fromRow, getRow() - fromRow, fromCol, getColumn() - fromCol};
+        return {Base::getDerived(), fromRow, getRow() - fromRow, fromCol, getCol() - fromCol};
     }
 
     template<class Derived>
     inline const RMatrixBlock<Derived>
     RValueMatrix<Derived>::bottomRightCorner(size_t fromRow, size_t fromCol) const {
-        return {Base::getConstCastDerived(), fromRow, getRow() - fromRow, fromCol, getColumn() - fromCol};
+        return {Base::getConstCastDerived(), fromRow, getRow() - fromRow, fromCol, getCol() - fromCol};
     }
 
     template<class Derived>
     inline RMatrixBlock<Derived> RValueMatrix<Derived>::bottomRightCorner(size_t from) {
-        return {Base::getDerived(), from, getRow() - from, from, getColumn() - from};
+        return {Base::getDerived(), from, getRow() - from, from, getCol() - from};
     }
 
     template<class Derived>
     inline const RMatrixBlock<Derived> RValueMatrix<Derived>::bottomRightCorner(size_t from) const {
-        return {Base::getConstCastDerived(), from, getRow() - from, from, getColumn() - from};
+        return {Base::getConstCastDerived(), from, getRow() - from, from, getCol() - from};
     }
 
     template<class Derived>
@@ -216,7 +216,7 @@ namespace Physica::Core {
 
     template<class Derived>
     inline typename RValueMatrix<Derived>::ScalarType RValueMatrix<Derived>::calcFromMajorMinor(size_t major, size_t minor) const {
-        return calc(rowFromMajorMinor(major, minor), columnFromMajorMinor(major, minor));
+        return calc(rowFromMajorMinor(major, minor), colFromMajorMinor(major, minor));
     }
 
     template<class Derived>
@@ -229,7 +229,7 @@ namespace Physica::Core {
         ScalarType result;
         if constexpr (isColumnMatrix) {
             result = col(0).max();
-            for (size_t i = 1; i < getColumn(); ++i) {
+            for (size_t i = 1; i < getCol(); ++i) {
                 ScalarType temp = col(i).max();
                 if (temp > result)
                     result = temp;
@@ -251,7 +251,7 @@ namespace Physica::Core {
         ScalarType result;
         if constexpr (isColumnMatrix) {
             result = col(0).min();
-            for (size_t i = 1; i < getColumn(); ++i) {
+            for (size_t i = 1; i < getCol(); ++i) {
                 ScalarType temp = col(i).min();
                 if (temp < result)
                     result = temp;
@@ -270,7 +270,7 @@ namespace Physica::Core {
 
     template<class Derived>
     typename RValueMatrix<Derived>::ScalarType RValueMatrix<Derived>::trace() const {
-        assert(getRow() == getColumn());
+        assert(getRow() == getCol());
         ScalarType result = ScalarType(0);
         for (size_t i = 0; i < getRow(); ++i)
             result += calc(i, i);
@@ -308,7 +308,7 @@ namespace Physica::Core {
 
     template<class Derived>
     bool RValueMatrix<Derived>::isSymm() const noexcept {
-        if (getRow() != getColumn())
+        if (getRow() != getCol())
             return false;
         const size_t order = getRow();
         for (size_t r = 0; r < order; ++r)
@@ -321,8 +321,8 @@ namespace Physica::Core {
     template<class MatrixType, class MatrixType2>
     bool matrixNear(const RValueMatrix<MatrixType>& m1, const RValueMatrix<MatrixType2>& m2, double precision) {
         assert(m1.getRow() == m2.getRow());
-        assert(m1.getColumn() == m2.getColumn());
-        for (size_t i = 0; i < m1.getColumn(); ++i)
+        assert(m1.getCol() == m2.getCol());
+        for (size_t i = 0; i < m1.getCol(); ++i)
             for (size_t j = 0; j < m1.getRow(); ++j)
                 if (!scalarNear(m1.calc(j, i), m2.calc(j, i), precision))
                     return false;
@@ -333,7 +333,7 @@ namespace Physica::Core {
     bool operator==(const RValueMatrix<Derived>& m1, const RValueMatrix<Derived>& m2) {
         if (m1.getRow() != m2.getRow())
             return false;
-        if (m1.getColumn() != m2.getColumn())
+        if (m1.getCol() != m2.getCol())
             return false;
         for (size_t major = 0; major < m1.getMaxMajor(); ++major)
             for (size_t minor = 0; minor < m1.getMaxMinor(); ++minor)

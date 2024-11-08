@@ -48,7 +48,7 @@ namespace Physica::Core {
         using PlainScalar = typename ScalarType::PlainScalar;
     public:
         using LatticeMatrix = DenseMatrix<ScalarType, MatrixOption::Row | MatrixOption::Element, Dim, Dim>;
-        using InvLatticeMatrix = DenseMatrix<ScalarType, MatrixOption::Column | MatrixOption::Element, Dim, Dim>;
+        using InvLatticeMatrix = DenseMatrix<ScalarType, MatrixOption::Col | MatrixOption::Element, Dim, Dim>;
         using PositionMatrix = DenseMatrix<ScalarType, MatrixOption::Row | MatrixOption::Element, Dynamic, Dim>;
         using MomentumMatrix = PositionMatrix;
         using SearchRangeType = Array<ssize_t, Dim>;

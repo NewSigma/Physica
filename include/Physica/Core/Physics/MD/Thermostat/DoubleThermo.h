@@ -91,7 +91,7 @@ namespace Physica::Core {
                     /* Translational mode */ {
                         buffer(0, 0) *= factor_translational;
                     }
-                    for (size_t j = 1; j < buffer.getColumn(); ++j) {
+                    for (size_t j = 1; j < buffer.getCol(); ++j) {
                         const ScalarType phase = M_PI * j / numReplica;
                         const ScalarType viscosityY = sin(phase) * omegaW;
                         Langevin<ScalarType, Dim>::langevinImpl(

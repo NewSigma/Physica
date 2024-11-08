@@ -35,7 +35,7 @@ namespace Physica::Core {
         __host__ __device__ device_obj(device_obj<RValueMatrix<MatrixType>>& mat_, size_t row_, size_t fromCol_, size_t colCount_)
                 : mat(mat_.getDerived()), row(row_), fromCol(fromCol_), colCount(colCount_) {
             assert(row < mat.getRow());
-            assert(fromCol + colCount <= mat.getColumn());
+            assert(fromCol + colCount <= mat.getCol());
         }
         device_obj(const device_obj&) = delete;
         device_obj(device_obj&&) noexcept = delete;
@@ -64,7 +64,7 @@ namespace Physica::Core {
         __host__ __device__ device_obj(device_obj<RValueMatrix<MatrixType>>& mat_, size_t fromRow_, size_t rowCount_, size_t col_)
                 : mat(mat_.getDerived()), col(col_), fromRow(fromRow_), rowCount(rowCount_) {
             assert(fromRow + rowCount <= mat.getRow());
-            assert(col < mat.getColumn());
+            assert(col < mat.getCol());
         }
         device_obj(const device_obj&) = delete;
         device_obj(device_obj&&) noexcept = delete;
@@ -100,7 +100,7 @@ namespace Physica::Core {
         [[nodiscard]] __device__ ScalarType calc([[maybe_unused]] size_t row, size_t col) const { assert(row == 0); return VectorBase::calc(col); }
         using VectorBase::calc;
         [[nodiscard]] __host__ __device__ constexpr static size_t getRow() noexcept { return 1; }
-        [[nodiscard]] __host__ __device__ size_t getColumn() const noexcept { return VectorBase::getLength(); }
+        [[nodiscard]] __host__ __device__ size_t getCol() const noexcept { return VectorBase::getLength(); }
         //using VectorBase::conjugate;  // Not implemented
         using VectorBase::max;
         using VectorBase::min;
@@ -135,7 +135,7 @@ namespace Physica::Core {
         [[nodiscard]] __device__ ScalarType calc(size_t row, [[maybe_unused]] size_t col) const { assert(col == 0); return VectorBase::calc(row); }
         using VectorBase::calc;
         [[nodiscard]] __host__ __device__ size_t getRow() const noexcept { return VectorBase::getLength(); }
-        [[nodiscard]] __host__ __device__ constexpr static size_t getColumn() noexcept { return 1; }
+        [[nodiscard]] __host__ __device__ constexpr static size_t getCol() noexcept { return 1; }
         //using VectorBase::conjugate;  // Not implemented
         using VectorBase::max;
         using VectorBase::min;
@@ -168,7 +168,7 @@ namespace Physica::Core {
         /* Getters */
         [[nodiscard]] __device__ ScalarType calc(size_t row, size_t col) const;
         [[nodiscard]] __host__ __device__ size_t getRow() const noexcept { return rowCount; }
-        [[nodiscard]] __host__ __device__ size_t getColumn() const noexcept { return colCount; }
+        [[nodiscard]] __host__ __device__ size_t getCol() const noexcept { return colCount; }
     };
 
     template<class MatrixType>
@@ -180,7 +180,7 @@ namespace Physica::Core {
             , fromCol(fromCol_)
             , colCount(colCount_) {
         assert((fromRow + rowCount) <= mat.getRow());
-        assert((fromCol + colCount) <= mat.getColumn());
+        assert((fromCol + colCount) <= mat.getCol());
     }
 
     template<class MatrixType>
@@ -201,6 +201,6 @@ namespace Physica {
     template<class MatrixType>
     class Traits<Core::device_obj<ColRVector<MatrixType>>> : public Traits<ColRVector<MatrixType>> {};
 
-    template<class MatrixType, size_t Row, size_t Column>
-    class Traits<Core::device_obj<RMatrixBlock<MatrixType, Row, Column>>> : public Traits<RMatrixBlock<MatrixType, Row, Column>> {};
+    template<class MatrixType, size_t Row, size_t Col>
+    class Traits<Core::device_obj<RMatrixBlock<MatrixType, Row, Col>>> : public Traits<RMatrixBlock<MatrixType, Row, Col>> {};
 }

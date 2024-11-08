@@ -48,8 +48,8 @@ namespace Physica::Core {
     template<class ScalarType, size_t Dim>
     template<class Function, class RandomFunc>
     void SRK2<ScalarType, Dim>::solve(Function func, RandomFunc random) {
-        const size_t column_1 = Base::solution.getColumn() - 1;
-        for (size_t i = 0; i < column_1; ++i) {
+        const size_t col_1 = Base::solution.getCol() - 1;
+        for (size_t i = 0; i < col_1; ++i) {
             ScalarType temp = Base::x[i];
             Base::solution.asArray()[i + 1] = Base::solution.col(i);
             step(Base::stepSize, temp, Base::solution.asArray()[i + 1], func, random);

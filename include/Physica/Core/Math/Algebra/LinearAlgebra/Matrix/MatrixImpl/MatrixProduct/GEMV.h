@@ -31,7 +31,7 @@ namespace Physica::Core {
     public:
         MatrixVectorProduct(const RValueMatrix<MatrixType>& mat_, const RValueVector<VectorType>& vec_)
                 : mat(mat_.getDerived()), vec(vec_.getDerived()) {
-            assert(mat.getColumn() == vec.getLength());
+            assert(mat.getCol() == vec.getLength());
         }
         MatrixVectorProduct(const This&) = delete;
         MatrixVectorProduct(This&&) noexcept = delete;
@@ -75,7 +75,7 @@ namespace Physica::Core {
     template<class MatrixType, class VectorType>
     [[nodiscard]] inline typename std::enable_if<MatrixType::RowAtCompile != 1, MatrixVectorProduct<MatrixType, VectorType>>::type
     operator*(const RValueMatrix<MatrixType>& mat, const RValueVector<VectorType>& vec) noexcept {
-        assert(mat.getColumn() == vec.getLength());
+        assert(mat.getCol() == vec.getLength());
         return MatrixVectorProduct(mat.getDerived(), vec.getDerived());
     }
 
@@ -84,7 +84,7 @@ namespace Physica::Core {
                                                  typename Internal::BinaryScalarOpReturnType<typename MatrixType::ScalarType,
                                                                                              typename VectorType::ScalarType>::Type>::type
     operator*(const RValueMatrix<MatrixType>& mat, const RValueVector<VectorType>& vec) {
-        assert(mat.getColumn() == vec.getLength());
+        assert(mat.getCol() == vec.getLength());
         return mat.row(0) * vec;
     }
 }

@@ -59,7 +59,7 @@ namespace Physica::Core {
         using Base::data;
         [[nodiscard]] __host__ __device__ inline PtrTy data_ptr(size_t row, size_t col) noexcept;
         [[nodiscard]] __host__ __device__ inline ConstPtrTy data_ptr(size_t row, size_t col) const noexcept;
-        [[nodiscard]] size_t getColumn() const noexcept { return values.getColumn(); }
+        [[nodiscard]] size_t getCol() const noexcept { return values.getCol(); }
         [[nodiscard]] size_t getRow() const noexcept { return values.getRow(); }
     };
 
@@ -80,7 +80,7 @@ namespace Physica::Core {
         SegmentType& traceSeg;
     public:
         Diff();
-        Diff(size_t row, size_t column);
+        Diff(size_t row, size_t col);
         Diff(PlainMatrix values);
         Diff(const Diff&) = default;
         Diff(Diff&&) noexcept = default;
@@ -99,16 +99,16 @@ namespace Physica::Core {
         inline void random_any(Distribution& dist, RandomGenerator& gen);
         void swap(Diff& obj) noexcept { std::swap(*this, obj); }
         /* Getters */
-        using Dim::getColumn;
+        using Dim::getCol;
         using Dim::getRow;
         [[nodiscard]] size_t getSize() const noexcept { return traceSeg.getLength(); }
         /* Static members */
         template<class RandomGenerator>
-        [[nodiscard]] inline static This random_uniform(size_t row, size_t column, RandomGenerator& gen);
+        [[nodiscard]] inline static This random_uniform(size_t row, size_t col, RandomGenerator& gen);
         template<class RandomGenerator>
-        [[nodiscard]] inline static This random_normal(size_t row, size_t column, RandomGenerator& gen);
+        [[nodiscard]] inline static This random_normal(size_t row, size_t col, RandomGenerator& gen);
         template<class Distribution, class RandomGenerator>
-        [[nodiscard]] inline static This random_any(size_t row, size_t column, Distribution& dist, RandomGenerator& gen);
+        [[nodiscard]] inline static This random_any(size_t row, size_t col, Distribution& dist, RandomGenerator& gen);
     private:
         friend class device_obj<This>;
     };

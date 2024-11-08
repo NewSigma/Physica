@@ -25,7 +25,7 @@ namespace Physica::Core {
     template<class Derived>
     typename RValueMatrix<Derived>::RealType RValueMatrix<Derived>::norm1() const {
         RealType maxNorm1 = 0;
-        for (size_t c = 0; c < getColumn(); ++c) {
+        for (size_t c = 0; c < getCol(); ++c) {
             const auto v = col(c);
             RealType temp = abs(v).sum();
             if (temp > maxNorm1)
@@ -42,7 +42,7 @@ namespace Physica::Core {
     template<class Derived>
     template<class Executor>
     typename RValueMatrix<Derived>::RealType RValueMatrix<Derived>::norm1_power(unsigned int maxIteration) const {
-        assert(getRow() == getColumn() && "[Error]: norm1_power only applies to square matrix");
+        assert(getRow() == getCol() && "[Error]: norm1_power only applies to square matrix");
         assert(maxIteration > 0 && "[Error]: Invalid max iteration");
         using VectorType = Vector<ScalarType>;
         const Derived& m = Base::getDerived();

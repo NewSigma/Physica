@@ -109,14 +109,14 @@ namespace Physica::Core {
 #endif
 
     template<class T, int Order>
-    ScalarRef<Diff<T, DiffMode::Forward, Order>>& ScalarRef<Diff<T, DiffMode::Forward, Order>>::operator=(const ScalarRef& other) {
+    inline ScalarRef<Diff<T, DiffMode::Forward, Order>>& ScalarRef<Diff<T, DiffMode::Forward, Order>>::operator=(const ScalarRef& other) {
         getValue() = other.getValue();
         getGrad() = other.getGrad();
         return *this;
     }
 
     template<class T, int Order>
-    ScalarRef<Diff<T, DiffMode::Forward, Order>>& ScalarRef<Diff<T, DiffMode::Forward, Order>>::operator=(const ScalarType& other) {
+    inline ScalarRef<Diff<T, DiffMode::Forward, Order>>& ScalarRef<Diff<T, DiffMode::Forward, Order>>::operator=(const ScalarType& other) {
         getValue() = other.getValue();
         getGrad() = other.getGrad();
         return *this;

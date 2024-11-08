@@ -50,7 +50,7 @@ public:
     template<class RandomGenerator>
     void init(RandomGenerator& generator) {
         std::uniform_real_distribution<float> dist{};
-        for (uint64_t i = 0; i < lattice.getColumn(); ++i)
+        for (uint64_t i = 0; i < lattice.getCol(); ++i)
             for (uint64_t j = 0; j < lattice.getRow(); ++j)
                 lattice(j, i) = (dist(generator) > 0.5) ? 1 : -1;
         energy = 0;
@@ -58,7 +58,7 @@ public:
 
     template<class RandomGenerator>
     void step(uint64_t stepNum, RandomGenerator& generator) {
-        uint64_t iteration = stepNum * lattice.getRow() * lattice.getColumn();
+        uint64_t iteration = stepNum * lattice.getRow() * lattice.getCol();
 
         std::uniform_int_distribution<size_t> int_dist(0, lattice.getRow() - 1);
         std::uniform_real_distribution<float> dist{};

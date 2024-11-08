@@ -21,7 +21,7 @@
 #include <Physica/Core/Math/Algebra/LinearAlgebra/Vector/VectorImpl/LValueVector.h>
 
 namespace Physica::Core {
-    template<class MatrixType, size_t Row = Dynamic, size_t Column = Dynamic> class LMatrixBlock;
+    template<class MatrixType, size_t Row = Dynamic, size_t Col = Dynamic> class LMatrixBlock;
     /**
      * \class RowLVector and \class ColLVector is designed to implement \class LMatrixBlock, and they can be used indepently.
      */
@@ -41,7 +41,7 @@ namespace Physica::Core {
     public:
         RowLVector(MatrixType& mat_, size_t row_, size_t fromCol_, size_t colCount_) : mat(mat_), row(row_), fromCol(fromCol_), colCount(colCount_) {
             assert(row < mat.getRow());
-            assert(fromCol + colCount <= mat.getColumn());
+            assert(fromCol + colCount <= mat.getCol());
         }
         RowLVector(const RowLVector&) = default;
         RowLVector(RowLVector&&) noexcept = default;
@@ -75,7 +75,7 @@ namespace Physica::Core {
         ColLVector(MatrixType& mat_, size_t fromRow_, size_t rowCount_, size_t col_)
                 : mat(mat_), col(col_), fromRow(fromRow_), rowCount(rowCount_) {
             assert(fromRow + rowCount <= mat.getRow());
-            assert(col < mat.getColumn());
+            assert(col < mat.getCol());
         }
         ColLVector(const ColLVector&) = default;
         ColLVector(ColLVector&&) noexcept = default;
@@ -118,7 +118,7 @@ namespace Physica::Core {
         /* Operations */
         using Base::assignTo;
         using VectorBase::assignTo;
-        void resize([[maybe_unused]] size_t row, [[maybe_unused]] size_t col) { assert(row == 1 && col == getColumn()); }
+        void resize([[maybe_unused]] size_t row, [[maybe_unused]] size_t col) { assert(row == 1 && col == getCol()); }
 
         using VectorBase::format;
 
@@ -131,7 +131,7 @@ namespace Physica::Core {
         using VectorBase::min;
         using VectorBase::sum;
         [[nodiscard]] __host__ __device__ constexpr static size_t getRow() noexcept { return 1; }
-        [[nodiscard]] __host__ __device__ size_t getColumn() const noexcept { return VectorBase::getLength(); }
+        [[nodiscard]] __host__ __device__ size_t getCol() const noexcept { return VectorBase::getLength(); }
         /**
          * There are some common functions shared by vector and matrix, it is necessary to decide which function to call explicitly.
          */
@@ -181,7 +181,7 @@ namespace Physica::Core {
         using VectorBase::min;
         using VectorBase::sum;
         [[nodiscard]] __host__ __device__ size_t getRow() const noexcept { return VectorBase::getLength(); }
-        [[nodiscard]] __host__ __device__ constexpr static size_t getColumn() noexcept { return 1; }
+        [[nodiscard]] __host__ __device__ constexpr static size_t getCol() noexcept { return 1; }
         [[nodiscard]] __host__ __device__ PtrTy data_ptr(size_t row, size_t) { assert(col == 0); return VectorBase::operator[](row); }
         [[nodiscard]] __host__ __device__ ConstPtrTy data_ptr(size_t row, size_t) const { assert(col == 0); return VectorBase::operator[](row); }
         /**
@@ -221,9 +221,9 @@ namespace Physica::Core {
         void resize([[maybe_unused]] size_t row, [[maybe_unused]] size_t col) { assert(row == rowCount && col == colCount); }
         /* Getters */
         [[nodiscard]] __host__ __device__ size_t getRow() const noexcept { return rowCount; }
-        [[nodiscard]] __host__ __device__ size_t getColumn() const noexcept { return colCount; }
-        [[nodiscard]] __host__ __device__ inline PtrTy data_ptr(size_t row, size_t column);
-        [[nodiscard]] __host__ __device__ inline ConstPtrTy data_ptr(size_t row, size_t column) const;
+        [[nodiscard]] __host__ __device__ size_t getCol() const noexcept { return colCount; }
+        [[nodiscard]] __host__ __device__ inline PtrTy data_ptr(size_t row, size_t col);
+        [[nodiscard]] __host__ __device__ inline ConstPtrTy data_ptr(size_t row, size_t col) const;
         [[nodiscard]] This& asMatrix() noexcept { return *this; }
         [[nodiscard]] const This& asMatrix() const noexcept { return *this; }
     };
@@ -236,7 +236,7 @@ namespace Physica::Core {
             , fromCol(fromCol_)
             , colCount(colCount_) {
         assert((fromRow + rowCount) <= mat.getRow());
-        assert((fromCol + colCount) <= mat.getColumn());
+        assert((fromCol + colCount) <= mat.getCol());
     }
 
     template<class MatrixType>
@@ -279,13 +279,13 @@ namespace Physica {
         constexpr static bool FastPacket = false;
     };
 
-    template<class MatrixType, size_t Row, size_t Column>
-    class Traits<LMatrixBlock<MatrixType, Row, Column>> {
+    template<class MatrixType, size_t Row, size_t Col>
+    class Traits<LMatrixBlock<MatrixType, Row, Col>> {
     public:
         using ScalarType = typename MatrixType::ScalarType;
         constexpr static int Option = MatrixType::Option;
         constexpr static size_t RowAtCompile = Row;
-        constexpr static size_t ColumnAtCompile = Column;
-        constexpr static size_t SizeAtCompile = Row * Column;
+        constexpr static size_t ColumnAtCompile = Col;
+        constexpr static size_t SizeAtCompile = Row * Col;
     };
 }

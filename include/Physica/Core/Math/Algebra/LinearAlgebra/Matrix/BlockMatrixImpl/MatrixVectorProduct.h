@@ -51,7 +51,7 @@ namespace Physica::Core {
     template<class MatrixType, class VectorType>
     MatrixVectorProduct<BlockMatrix<MatrixType>, VectorType>::MatrixVectorProduct(
             const BlockMatrix<MatrixType>& m, const VectorType& v) {
-        assert(m.getColumn() == v.getLength() && "[Error]: Dimensions do not match");
+        assert(m.getCol() == v.getLength() && "[Error]: Dimensions do not match");
     }
 
     template<class MatrixType, class VectorType>

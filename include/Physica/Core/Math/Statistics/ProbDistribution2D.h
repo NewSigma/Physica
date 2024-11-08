@@ -121,7 +121,7 @@ namespace Physica::Core {
     ProbDistribution2D<ScalarType>::makeDistribution() const {
         const ScalarType factor = repDeltaX * repDeltaY / ScalarType(calcNumSample());
         MatrixType result(getNumBinX(), getNumBinY());
-        for (size_t i = 0; i < result.getColumn(); ++i) {
+        for (size_t i = 0; i < result.getCol(); ++i) {
             auto col = result.col(i);
             for (size_t j = 0; j < result.getRow(); ++j)
                 col[j] = ScalarType(bucket(i, j, 0)) * factor;

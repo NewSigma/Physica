@@ -96,7 +96,7 @@ namespace Physica::Core {
     template<class ScalarType, size_t Order>
     template<class MatrixType>
     void Hessenburg<ScalarType, Order>::compute(const MatrixType& source) {
-        assert(source.getRow() == source.getColumn());
+        assert(source.getRow() == source.getCol());
         assert(source.getRow() > 2);
         const size_t order = source.getRow();
         working = source;
@@ -133,7 +133,7 @@ namespace Physica::Core {
         void assignTo(LValueMatrix<OtherMatrix>& target) const;
         /* Getters */
         [[nodiscard]] __host__ __device__ size_t getRow() const noexcept { return hess.getSize(); }
-        [[nodiscard]] __host__ __device__ size_t getColumn() const noexcept { return hess.getSize(); }
+        [[nodiscard]] __host__ __device__ size_t getCol() const noexcept { return hess.getSize(); }
     };
 
     template<class ScalarType, size_t Order>
@@ -162,7 +162,7 @@ namespace Physica {
     class Traits<HessenburgMatrixH<T, Order>> {
     public:
         using ScalarType = T;
-        constexpr static int Option = MatrixOption::Column | (Order == Dynamic ? MatrixOption::Vector : MatrixOption::Element);
+        constexpr static int Option = MatrixOption::Col | (Order == Dynamic ? MatrixOption::Vector : MatrixOption::Element);
         constexpr static size_t RowAtCompile = Order;
         constexpr static size_t ColumnAtCompile = Order;
         constexpr static size_t SizeAtCompile = RowAtCompile * ColumnAtCompile;

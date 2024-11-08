@@ -152,14 +152,14 @@ namespace Physica::Core {
         const MatrixType& matrix;
     public:
         InverseMatrix(const LValueMatrix<MatrixType>& matrix_) : matrix(matrix_.getDerived()) {
-            assert(matrix.getRow() == matrix.getColumn());
+            assert(matrix.getRow() == matrix.getCol());
         }
         template<class OtherMatrix>
         void assignTo(LValueMatrix<OtherMatrix>& target) const;
         /* Getters */
         [[nodiscard]] const MatrixType& getMatrix() const noexcept { return matrix; }
         [[nodiscard]] __host__ __device__ size_t getRow() const noexcept { return matrix.getRow(); }
-        [[nodiscard]] __host__ __device__ size_t getColumn() const noexcept { return matrix.getRow(); }
+        [[nodiscard]] __host__ __device__ size_t getCol() const noexcept { return matrix.getRow(); }
     };
 
     template<class MatrixType>

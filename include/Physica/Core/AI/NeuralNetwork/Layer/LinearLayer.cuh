@@ -66,7 +66,7 @@ namespace Physica::Core {
         void random_any(Distribution& dist, RandomGenerator& gen);
         void swap(device_obj& __restrict obj) noexcept;
         /* Getters */
-        [[nodiscard]] __host__ __device__ size_t getInputDim() const noexcept { return weights.getColumn(); }
+        [[nodiscard]] __host__ __device__ size_t getInputDim() const noexcept { return weights.getCol(); }
         [[nodiscard]] __host__ __device__ size_t getOutputDim() const noexcept { return weights.getRow(); }
         [[nodiscard]] const DeviceMatrix& getWeights() const noexcept { return weights; }
         [[nodiscard]] const BiasType& getBias() const noexcept { return bias; }

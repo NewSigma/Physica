@@ -32,7 +32,7 @@ int main() {
             return 1;
     }
     {
-        using MatrixType = DenseMatrix<float32, MatrixOption::Column | MatrixOption::Element>;
+        using MatrixType = DenseMatrix<float32, MatrixOption::Col | MatrixOption::Element>;
         using DeviceMatrix = typename MatrixType::device_obj_type;
         std::mt19937 gen{};
         const MatrixType A = MatrixType::random_uniform(3, 4, gen);

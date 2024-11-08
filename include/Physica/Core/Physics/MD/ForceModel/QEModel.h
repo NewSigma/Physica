@@ -68,7 +68,7 @@ namespace Physica::Core {
         if (!fin)
             throw IOException("[Error]: No QE input file found");
         fin.seekg(0, std::ios::end);
-        const auto size = fin.tellg();
+        const std::streamsize size = fin.tellg();
         fin.seekg(0, std::ios::beg);
         input.resize(size + 1);
         fin.read(input.data(), size);

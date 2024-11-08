@@ -40,7 +40,7 @@ namespace Physica::Core {
         __host__ __device__ device_obj(device_obj<ContinuousMatrix<MatrixType>>& mat_, size_t row_, size_t fromCol_, size_t colCount_)
                 : mat(mat_.getDerived()), row(row_), fromCol(fromCol_), colCount(colCount_) {
             assert(row < mat.getRow());
-            assert(fromCol + colCount <= mat.getColumn());
+            assert(fromCol + colCount <= mat.getCol());
         }
         device_obj(const device_obj&) = delete;
         device_obj(device_obj&&) noexcept = delete;
@@ -79,7 +79,7 @@ namespace Physica::Core {
         __host__ __device__ device_obj(device_obj<ContinuousMatrix<MatrixType>>& mat_, size_t fromRow_, size_t rowCount_, size_t col_)
                 : mat(mat_.getDerived()), col(col_), fromRow(fromRow_), rowCount(rowCount_) {
             assert(fromRow + rowCount <= mat.getRow());
-            assert(col < mat.getColumn());
+            assert(col < mat.getCol());
         }
         device_obj(const device_obj&) = delete;
         device_obj(device_obj&&) noexcept = delete;
@@ -99,15 +99,15 @@ namespace Physica::Core {
         [[nodiscard]] __host__ __device__ ConstPtrTy data_ptr(size_t index) const { return mat.data_ptr(fromRow + index, col); }
     };
 
-    template<class MatrixType, size_t Column>
-    class device_obj<ContinuousMatrixBlock<MatrixType, 1, Column>>
-            : public device_obj<LValueMatrix<ContinuousMatrixBlock<MatrixType, 1, Column>>>
-            , public device_obj<RowContinuousVector<MatrixType, Column>> {
-        using host_obj = ContinuousMatrixBlock<MatrixType, 1, Column>;
+    template<class MatrixType, size_t Col>
+    class device_obj<ContinuousMatrixBlock<MatrixType, 1, Col>>
+            : public device_obj<LValueMatrix<ContinuousMatrixBlock<MatrixType, 1, Col>>>
+            , public device_obj<RowContinuousVector<MatrixType, Col>> {
+        using host_obj = ContinuousMatrixBlock<MatrixType, 1, Col>;
         using This = device_obj<host_obj>;
     public:
         using Base = device_obj<LValueMatrix<host_obj>>;
-        using VectorBase = device_obj<RowContinuousVector<MatrixType, Column>>;
+        using VectorBase = device_obj<RowContinuousVector<MatrixType, Col>>;
         using ScalarType = typename MatrixType::ScalarType;
     protected:
         using PtrTy = typename ScalarType::PtrTy;
@@ -137,7 +137,7 @@ namespace Physica::Core {
         /* Operations */
         using Base::assignTo;
         using VectorBase::assignTo;
-        __host__ __device__ void resize([[maybe_unused]] size_t row, [[maybe_unused]] size_t col) { assert(row == 1 && col == getColumn()); }
+        __host__ __device__ void resize([[maybe_unused]] size_t row, [[maybe_unused]] size_t col) { assert(row == 1 && col == getCol()); }
 
         using Base::row;
         /* Getters */
@@ -148,9 +148,9 @@ namespace Physica::Core {
         using VectorBase::sum;
         using VectorBase::data_ptr;
         [[nodiscard]] __host__ __device__ constexpr static size_t getRow() noexcept { return 1; }
-        [[nodiscard]] __host__ __device__ size_t getColumn() const noexcept { return Column == Dynamic ? VectorBase::getLength() : Column; }
-        [[nodiscard]] __host__ __device__ PtrTy data_ptr([[maybe_unused]] size_t row, size_t column) { assert(row == 0); return VectorBase::data_ptr(column); }
-        [[nodiscard]] __host__ __device__ ConstPtrTy data_ptr([[maybe_unused]] size_t row, size_t column) const { assert(row == 0); return VectorBase::data_ptr(column); }
+        [[nodiscard]] __host__ __device__ size_t getCol() const noexcept { return Col == Dynamic ? VectorBase::getLength() : Col; }
+        [[nodiscard]] __host__ __device__ PtrTy data_ptr([[maybe_unused]] size_t row, size_t col) { assert(row == 0); return VectorBase::data_ptr(col); }
+        [[nodiscard]] __host__ __device__ ConstPtrTy data_ptr([[maybe_unused]] size_t row, size_t col) const { assert(row == 0); return VectorBase::data_ptr(col); }
         /**
          * There are some common functions shared by vector and matrix, it is necessary to decide which function to call explicitly.
          */
@@ -209,9 +209,9 @@ namespace Physica::Core {
         using VectorBase::sum;
         using VectorBase::data_ptr;
         [[nodiscard]] __host__ __device__ size_t getRow() const noexcept { return Row == Dynamic ? VectorBase::getLength() : Row; }
-        [[nodiscard]] __host__ __device__ constexpr static size_t getColumn() noexcept { return 1; }
-        [[nodiscard]] __host__ __device__ PtrTy data_ptr(size_t row, [[maybe_unused]] size_t column) { assert(column == 0); return VectorBase::data_ptr(row); }
-        [[nodiscard]] __host__ __device__ ConstPtrTy data_ptr(size_t row, [[maybe_unused]] size_t column) const { assert(column == 0); return VectorBase::data_ptr(row); }
+        [[nodiscard]] __host__ __device__ constexpr static size_t getCol() noexcept { return 1; }
+        [[nodiscard]] __host__ __device__ PtrTy data_ptr(size_t row, [[maybe_unused]] size_t col) { assert(col == 0); return VectorBase::data_ptr(row); }
+        [[nodiscard]] __host__ __device__ ConstPtrTy data_ptr(size_t row, [[maybe_unused]] size_t col) const { assert(col == 0); return VectorBase::data_ptr(row); }
         /**
          * There are some common functions shared by vector and matrix, it is necessary to decide which function to call explicitly.
          */
@@ -258,7 +258,7 @@ namespace Physica::Core {
         using Base::calc;
         using VectorBase::calc;
         [[nodiscard]] __host__ __device__ constexpr static size_t getRow() noexcept { return 1; }
-        [[nodiscard]] __host__ __device__ constexpr static size_t getColumn() noexcept { return 1; }
+        [[nodiscard]] __host__ __device__ constexpr static size_t getCol() noexcept { return 1; }
         using VectorBase::max;
         using VectorBase::min;
         /**
@@ -270,10 +270,10 @@ namespace Physica::Core {
         [[nodiscard]] __host__ __device__ const VectorBase& asVector() const noexcept { return *this; }
     };
 
-    template<class MatrixType, size_t Row, size_t Column>
-    class device_obj<ContinuousMatrixBlock<MatrixType, Row, Column>>
-            : public device_obj<LValueMatrix<ContinuousMatrixBlock<MatrixType, Row, Column>>> {
-        using host_obj = ContinuousMatrixBlock<MatrixType, Row, Column>;
+    template<class MatrixType, size_t Row, size_t Col>
+    class device_obj<ContinuousMatrixBlock<MatrixType, Row, Col>>
+            : public device_obj<LValueMatrix<ContinuousMatrixBlock<MatrixType, Row, Col>>> {
+        using host_obj = ContinuousMatrixBlock<MatrixType, Row, Col>;
         using This = device_obj<host_obj>;
     public:
         using Base = device_obj<LValueMatrix<host_obj>>;
@@ -299,13 +299,13 @@ namespace Physica::Core {
         __host__ __device__ void resize([[maybe_unused]] size_t row, [[maybe_unused]] size_t col) { assert(row == rowCount && col == colCount); }
         /* Getters */
         [[nodiscard]] __host__ __device__ size_t getRow() const noexcept { return Row == Dynamic ? rowCount : Row; }
-        [[nodiscard]] __host__ __device__ size_t getColumn() const noexcept { return Column == Dynamic ? colCount : Column; }
+        [[nodiscard]] __host__ __device__ size_t getCol() const noexcept { return Col == Dynamic ? colCount : Col; }
         [[nodiscard]] __host__ __device__ This& asMatrix() noexcept { return *this; }
         [[nodiscard]] __host__ __device__ const This& asMatrix() const noexcept { return *this; }
     };
 
-    template<class MatrixType, size_t Row, size_t Column>
-    __host__ __device__ device_obj<ContinuousMatrixBlock<MatrixType, Row, Column>>::device_obj(
+    template<class MatrixType, size_t Row, size_t Col>
+    __host__ __device__ device_obj<ContinuousMatrixBlock<MatrixType, Row, Col>>::device_obj(
             device_obj<ContinuousMatrix<MatrixType>>& mat_, size_t fromRow_, size_t rowCount_, size_t fromCol_, size_t colCount_)
             : mat(mat_.getDerived())
             , fromRow(fromRow_)
@@ -313,20 +313,20 @@ namespace Physica::Core {
             , fromCol(fromCol_)
             , colCount(colCount_) {
         assert((fromRow + rowCount) <= mat.getRow());
-        assert((fromCol + colCount) <= mat.getColumn());
+        assert((fromCol + colCount) <= mat.getCol());
     }
 
-    template<class MatrixType, size_t Row, size_t Column>
-    __device__ typename device_obj<ContinuousMatrixBlock<MatrixType, Row, Column>>::ScalarType&
-    device_obj<ContinuousMatrixBlock<MatrixType, Row, Column>>::operator()(size_t row, size_t col) {
+    template<class MatrixType, size_t Row, size_t Col>
+    __device__ typename device_obj<ContinuousMatrixBlock<MatrixType, Row, Col>>::ScalarType&
+    device_obj<ContinuousMatrixBlock<MatrixType, Row, Col>>::operator()(size_t row, size_t col) {
         assert(row < rowCount);
         assert(col < colCount);
         return mat(row + fromRow, col + fromCol);
     }
 
-    template<class MatrixType, size_t Row, size_t Column>
-    __device__ const typename device_obj<ContinuousMatrixBlock<MatrixType, Row, Column>>::ScalarType&
-    device_obj<ContinuousMatrixBlock<MatrixType, Row, Column>>::operator()(size_t row, size_t col) const {
+    template<class MatrixType, size_t Row, size_t Col>
+    __device__ const typename device_obj<ContinuousMatrixBlock<MatrixType, Row, Col>>::ScalarType&
+    device_obj<ContinuousMatrixBlock<MatrixType, Row, Col>>::operator()(size_t row, size_t col) const {
         assert(row < rowCount);
         assert(col < colCount);
         return mat(row + fromRow, col + fromCol);
@@ -360,6 +360,6 @@ namespace Physica {
         constexpr static size_t SizeAtCompile = Length;
     };
 
-    template<class MatrixType, size_t Row, size_t Column>
-    class Traits<Core::device_obj<ContinuousMatrixBlock<MatrixType, Row, Column>>> : public Traits<ContinuousMatrixBlock<MatrixType, Row, Column>> {};
+    template<class MatrixType, size_t Row, size_t Col>
+    class Traits<Core::device_obj<ContinuousMatrixBlock<MatrixType, Row, Col>>> : public Traits<ContinuousMatrixBlock<MatrixType, Row, Col>> {};
 }

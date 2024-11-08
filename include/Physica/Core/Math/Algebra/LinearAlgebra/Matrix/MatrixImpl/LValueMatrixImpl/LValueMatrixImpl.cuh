@@ -24,9 +24,9 @@ namespace Physica::Core {
     __host__ __device__ device_obj<Derived>& device_obj<LValueMatrix<Derived>>::operator=(
             const device_obj<RValueMatrix<OtherMatrix>>& m) {
         static_assert(RowAtCompile == Dynamic || OtherMatrix::RowAtCompile == Dynamic || RowAtCompile == OtherMatrix::RowAtCompile, "[Error]: Incompatible row number");
-        static_assert(ColumnAtCompile == Dynamic || OtherMatrix::ColumnAtCompile == Dynamic || ColumnAtCompile == OtherMatrix::ColumnAtCompile, "[Error]: Incompatible column number");
+        static_assert(ColumnAtCompile == Dynamic || OtherMatrix::ColumnAtCompile == Dynamic || ColumnAtCompile == OtherMatrix::ColumnAtCompile, "[Error]: Incompatible col number");
         auto& target = Base::getDerived();
-        target.resize(m.getRow(), m.getColumn());
+        target.resize(m.getRow(), m.getCol());
         m.getDerived().assignTo(target);
         return target;
     }
@@ -43,8 +43,8 @@ namespace Physica::Core {
     __device__ inline typename device_obj<LValueMatrix<Derived>>::ScalarType&
     device_obj<LValueMatrix<Derived>>::refFromMajorMinor(size_t major, size_t minor) {
         const size_t r = MatrixOption::rowFromMajorMinor<Derived>(major, minor);
-        const size_t c = MatrixOption::columnFromMajorMinor<Derived>(major, minor);
-        assert(r < Base::getDerived().getRow() && c < Base::getDerived().getColumn());
+        const size_t c = MatrixOption::colFromMajorMinor<Derived>(major, minor);
+        assert(r < Base::getDerived().getRow() && c < Base::getDerived().getCol());
         return Base::getDerived()(r, c);
     }
 
@@ -52,8 +52,8 @@ namespace Physica::Core {
     __device__ inline const typename device_obj<LValueMatrix<Derived>>::ScalarType&
     device_obj<LValueMatrix<Derived>>::refFromMajorMinor(size_t major, size_t minor) const {
         const size_t r = MatrixOption::rowFromMajorMinor<Derived>(major, minor);
-        const size_t c = MatrixOption::columnFromMajorMinor<Derived>(major, minor);
-        assert(r < Base::getDerived().getRow() && c < Base::getDerived().getColumn());
+        const size_t c = MatrixOption::colFromMajorMinor<Derived>(major, minor);
+        assert(r < Base::getDerived().getRow() && c < Base::getDerived().getCol());
         return Base::getDerived()(r, c);
     }
 }

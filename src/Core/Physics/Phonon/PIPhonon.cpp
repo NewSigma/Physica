@@ -83,7 +83,7 @@ namespace Physica::Core {
             if (isGammaPoint) {
                 const DenseSymmMatrix<ScalarType> m = toRealMatrix(kSpaceMomentumCorr[qPointId]);
                 const Schur<ScalarType> schur(m, true);
-                for (size_t i = 0; i < base.getColumn(); ++i) {
+                for (size_t i = 0; i < base.getCol(); ++i) {
                     const ScalarType eigenvalue = schur.getMatrixT().diag().calc(i);
                     if (eigenvalue > ScalarType(ConsiderAsZeroThrehold))
                         base.col(i) = schur.getMatrixU().col(i).asVector() * reciprocal(sqrt(eigenvalue));
@@ -93,7 +93,7 @@ namespace Physica::Core {
             }
             else {
                 const Schur<ComplexType> schur(kSpaceMomentumCorr[qPointId], true);
-                for (size_t i = 0; i < base.getColumn(); ++i) {
+                for (size_t i = 0; i < base.getCol(); ++i) {
                     const ScalarType eigenvalue = schur.getMatrixT().diag().calc(i).real();
                     if (eigenvalue > ScalarType(ConsiderAsZeroThrehold))
                         base.col(i) = schur.getMatrixU().col(i).asVector() * reciprocal(sqrt(eigenvalue));
@@ -107,7 +107,7 @@ namespace Physica::Core {
             solver.compute(buffer, true);
             solver.sort();
             normalModes[qPointId] = base * solver.getEigenvectors();
-            for (size_t i = 0; i < buffer.getColumn(); ++i)
+            for (size_t i = 0; i < buffer.getCol(); ++i)
                 kSpaceMomentumCorr[qPointId](i, i) = solver.getEigenvalues()[i];
         }
     }
@@ -148,8 +148,8 @@ namespace Physica::Core {
     void PIPhonon::applyTranslationInvariance(DenseHermiteMatrix<ComplexType>& target) {
         [[maybe_unused]] const bool isRealMatrix = &target == &kSpaceForceCorr[0] || &target == &kSpaceMomentumCorr[0];
         assert(isRealMatrix);
-        DenseSymmMatrix<ScalarType> buffer(target.getRow(), target.getColumn());
-        for (size_t c = 0; c < target.getColumn(); ++c) {
+        DenseSymmMatrix<ScalarType> buffer(target.getRow(), target.getCol());
+        for (size_t c = 0; c < target.getCol(); ++c) {
             for (size_t r = 0; r <= c; ++r) {
                 ScalarType term1 = 0;
                 for (size_t i = 0; i < getNumAtomUnitCell(); ++i)
@@ -165,7 +165,7 @@ namespace Physica::Core {
             }
         }
 
-        for (size_t c = 0; c < target.getColumn(); ++c)
+        for (size_t c = 0; c < target.getCol(); ++c)
             for (size_t r = 0; r <= c; ++r)
                 target(r, c) += buffer(r, c);
     }

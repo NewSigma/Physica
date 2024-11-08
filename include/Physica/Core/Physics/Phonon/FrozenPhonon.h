@@ -233,7 +233,7 @@ namespace Physica::Core {
                                   ScalarType(index[2]) - ScalarType(2 * superSize[2])};
             const Vector3D r0 = unitCell.getLattice().transpose() * factor;
             auto& mat = result(index);
-            for (size_t c = 0; c < result.getColumn(); ++c) {
+            for (size_t c = 0; c < result.getCol(); ++c) {
                 for (size_t r = 0; r < result.getRow(); ++r) {
                     const Vector3D r1 = r0 + unitCell.getPos().row(r) - unitCell.getPos().row(c);
                     mat(r, c) = calcWignerSeitzWeight(r1, wignerSeitzRadius);

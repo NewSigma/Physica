@@ -71,7 +71,7 @@ namespace Physica::Core {
         inline H5DataSet<1> write(H5Location& loc, const char* name) const;
         /* Getters */
         using Base::getDerived;
-        using Storage::getColumn;
+        using Storage::getCol;
         using Storage::getRow;
         [[nodiscard]] Base& asMatrix() noexcept { return *this; }
         [[nodiscard]] const Base& asMatrix() const noexcept { return *this; }
@@ -95,7 +95,7 @@ namespace Physica::Core {
     template<class OtherMatrix>
     DenseHermiteMatrix<T, Order>::DenseHermiteMatrix(const RValueMatrix<OtherMatrix>& mat)
             : DenseHermiteMatrix(mat.getRow()) {
-        assert(mat.getRow() == mat.getColumn());
+        assert(mat.getRow() == mat.getCol());
         size_t index = 0;
         for (size_t i = 0; i < mat.getRow(); ++i) {
             for (size_t j = i; j < mat.getRow(); ++j) {
@@ -219,11 +219,11 @@ namespace Physica::Core {
     template<class T, size_t Order>
     template<class MatrixType>
     bool DenseHermiteMatrix<T, Order>::isHermiteMatrix(const RValueMatrix<MatrixType>& mat, double precision) {
-        if (mat.getRow() != mat.getColumn())
+        if (mat.getRow() != mat.getCol())
             return false;
 
         for (size_t i = 0; i < mat.getRow(); ++i)
-            for (size_t j = 0; j < mat.getColumn(); ++j)
+            for (size_t j = 0; j < mat.getCol(); ++j)
                 if (!scalarNear(mat.calc(i, j), mat.calc(j, i).conjugate(), precision))
                     return false;
         return true;

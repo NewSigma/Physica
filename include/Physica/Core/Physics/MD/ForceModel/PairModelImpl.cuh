@@ -102,11 +102,11 @@ namespace Physica::Core {
         preParallel(lattice, invLattice, cartesianPos, gridDims, numThread);
         if constexpr (IsSmallCell) {
             const auto numCell = cellList.getNumCell();
-            if (numCell != forceBuffer.getColumn())
+            if (numCell != forceBuffer.getCol())
                 forceBuffer.resize(cell.getDOF(), numCell);
         }
         else {
-            if (forceBuffer.getColumn() != 1)
+            if (forceBuffer.getCol() != 1)
                 forceBuffer.resize(cell.getDOF(), 1);
         }
 

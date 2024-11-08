@@ -78,7 +78,7 @@ namespace Physica::Core {
     template<class MatrixType, class VectorType>
     MatrixVectorProduct<MatrixExp<MatrixType>, VectorType>::MatrixVectorProduct(
             const MatrixExp<MatrixType>& mexp_, const RValueVector<VectorType>& v_) : mexp(mexp_), v(v_.getDerived()) {
-        assert(mexp.getColumn() == v.getLength());
+        assert(mexp.getCol() == v.getLength());
     }
 
     template<class MatrixType, class VectorType>

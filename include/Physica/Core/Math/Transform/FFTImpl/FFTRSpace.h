@@ -106,12 +106,12 @@ namespace Physica::Core {
         /* Operations */
         template<class MatrixType>
         inline void transform(const RValueMatrix<MatrixType>& data);
-        void resize([[maybe_unused]] size_t row, [[maybe_unused]] size_t col) { assert(row == getRow()); assert(col == getColumn()); }
+        void resize([[maybe_unused]] size_t row, [[maybe_unused]] size_t col) { assert(row == getRow()); assert(col == getCol()); }
         /* Getters */
         [[nodiscard]] __host__ __device__ size_t getRow() const noexcept { return Base::getDerived().getRSpaceSize()[0]; }
-        [[nodiscard]] __host__ __device__ size_t getColumn() const noexcept { return Base::getDerived().getRSpaceSize()[1]; }
-        [[nodiscard]] __host__ __device__ PtrTy data_ptr(size_t row, size_t column);
-        [[nodiscard]] __host__ __device__ ConstPtrTy data_ptr(size_t row, size_t column) const;
+        [[nodiscard]] __host__ __device__ size_t getCol() const noexcept { return Base::getDerived().getRSpaceSize()[1]; }
+        [[nodiscard]] __host__ __device__ PtrTy data_ptr(size_t row, size_t col);
+        [[nodiscard]] __host__ __device__ ConstPtrTy data_ptr(size_t row, size_t col) const;
     protected:
         FFTRSpace() = default;
         FFTRSpace(const FFTRSpace&) = default;
@@ -120,7 +120,7 @@ namespace Physica::Core {
 
     template<class Derived>
     FFTRSpace<Derived, 2>& FFTRSpace<Derived, 2>::operator=(const FFTRSpace<Derived, 2>& obj) {
-        resize(obj.getRow(), obj.getColumn());
+        resize(obj.getRow(), obj.getCol());
         obj.assignTo(*this);
         return *this;
     }
@@ -129,7 +129,7 @@ namespace Physica::Core {
     template<class MatrixType>
     inline void FFTRSpace<Derived, 2>::transform(const RValueMatrix<MatrixType>& data) {
         assert(data.getRow() == getRow());
-        assert(data.getColumn() == getColumn());
+        assert(data.getCol() == getCol());
         *this = data;
         Base::getDerived().transform();
     }
@@ -137,8 +137,8 @@ namespace Physica::Core {
     template<class Derived>
     __host__ __device__ inline typename FFTRSpace<Derived, 2>::PtrTy FFTRSpace<Derived, 2>::data_ptr(size_t row, size_t col) {
         assert(row < getRow());
-        assert(col < getColumn());
-        const size_t numColumn = getColumn();
+        assert(col < getCol());
+        const size_t numColumn = getCol();
         if constexpr (isComplex)
             return Base::getDerived().asComplexBuffer() + row * numColumn + col;
         else {

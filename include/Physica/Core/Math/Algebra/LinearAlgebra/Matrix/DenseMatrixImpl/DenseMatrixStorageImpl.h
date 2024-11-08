@@ -19,30 +19,30 @@
 #pragma once
 
 namespace Physica::Core {
-    #define tparams class T, size_t Row, size_t Column, class Allocator
-    #define ColumnElementStorage DenseMatrixStorage<T, MatrixOption::Column | MatrixOption::Element, Row, Column, Allocator>
+    #define tparams class T, size_t Row, size_t Col, class Allocator
+    #define ColumnElementStorage DenseMatrixStorage<T, MatrixOption::Col | MatrixOption::Element, Row, Col, Allocator>
 
     template<tparams>
     template<class... Args>
-    void ColumnElementStorage::resize(size_t row, size_t column, Args&&... args) {
-        arr.resize(row * column, std::forward<Args>(args)...);
-        Dim::resize(row, column);
+    void ColumnElementStorage::resize(size_t row, size_t col, Args&&... args) {
+        arr.resize(row * col, std::forward<Args>(args)...);
+        Dim::resize(row, col);
     }
 
     template<tparams>
     void ColumnElementStorage::rowSwap(size_t r1, size_t r2) {
         const size_t row = getRow();
-        const size_t column = getColumn();
+        const size_t col = getCol();
         assert(r1 < row && r2 < row);
-        for (size_t i = 0, temp = 0; i < column; ++i, temp += row)
+        for (size_t i = 0, temp = 0; i < col; ++i, temp += row)
             arr[temp + r1].swap(arr[temp + r2]);
     }
 
     template<tparams>
-    void ColumnElementStorage::columnSwap(size_t c1, size_t c2) {
+    void ColumnElementStorage::colSwap(size_t c1, size_t c2) {
         const size_t row = getRow();
-        [[maybe_unused]] const size_t column = getColumn();
-        assert(c1 < column && c2 < column);
+        [[maybe_unused]] const size_t col = getCol();
+        assert(c1 < col && c2 < col);
         const size_t offset1 = c1 * row;
         const size_t offset2 = c2 * row;
         for (size_t i = 0; i < row; ++i)
@@ -50,71 +50,71 @@ namespace Physica::Core {
     }
 
     #undef ColumnElementStorage
-    #define RowElementStorage DenseMatrixStorage<T, MatrixOption::Row | MatrixOption::Element, Row, Column, Allocator>
+    #define RowElementStorage DenseMatrixStorage<T, MatrixOption::Row | MatrixOption::Element, Row, Col, Allocator>
 
     template<tparams>
     template<class... Args>
-    void RowElementStorage::resize(size_t row, size_t column, Args&&... args) {
-        arr.resize(row * column, std::forward<Args>(args)...);
-        Dim::resize(row, column);
+    void RowElementStorage::resize(size_t row, size_t col, Args&&... args) {
+        arr.resize(row * col, std::forward<Args>(args)...);
+        Dim::resize(row, col);
     }
 
     template<tparams>
     void RowElementStorage::rowSwap(size_t r1, size_t r2) {
         [[maybe_unused]] const size_t row = getRow();
-        const size_t column = getColumn();
+        const size_t col = getCol();
         assert(r1 < row && r2 < row);
-        const size_t offset1 = r1 * column;
-        const size_t offset2 = r2 * column;
-        for (size_t i = 0; i < column; ++i)
+        const size_t offset1 = r1 * col;
+        const size_t offset2 = r2 * col;
+        for (size_t i = 0; i < col; ++i)
             arr[offset1 + i].swap(arr[offset2 + i]);
     }
 
     template<tparams>
-    void RowElementStorage::columnSwap(size_t c1, size_t c2) {
+    void RowElementStorage::colSwap(size_t c1, size_t c2) {
         const size_t row = getRow();
-        const size_t column = getColumn();
-        assert(c1 < column && c2 < column);
-        for (size_t i = 0, temp = 0; i < column; ++i, temp += row)
+        const size_t col = getCol();
+        assert(c1 < col && c2 < col);
+        for (size_t i = 0, temp = 0; i < col; ++i, temp += row)
             arr[temp + c1].swap(arr[temp + c2]);
     }
 
     #undef RowElementStorage
-    #define ColumnVectorStorage DenseMatrixStorage<T, MatrixOption::Column | MatrixOption::Vector, Row, Column, Allocator>
+    #define ColumnVectorStorage DenseMatrixStorage<T, MatrixOption::Col | MatrixOption::Vector, Row, Col, Allocator>
 
     template<tparams>
     template<class... Args>
     void ColumnVectorStorage::resize(
-            size_t row, size_t column, Args&&... args) {
-        array.resize(column);
+            size_t row, size_t col, Args&&... args) {
+        array.resize(col);
         for (auto& vector : array)
             vector.resize(row, std::forward<Args>(args)...);
-        Dim::resize(row, column);
+        Dim::resize(row, col);
     }
 
     template<tparams>
     void ColumnVectorStorage::rowSwap(size_t r1, size_t r2) {
         assert(r1 < getRow() && r2 < getRow());
-        for (auto& columnVector : array)
-            columnVector[r1].swap(columnVector[r2]);
+        for (auto& colVector : array)
+            colVector[r1].swap(colVector[r2]);
     }
 
     template<tparams>
-    void ColumnVectorStorage::columnSwap(size_t c1, size_t c2) {
-        assert(c1 < getColumn() && c2 < getColumn());
+    void ColumnVectorStorage::colSwap(size_t c1, size_t c2) {
+        assert(c1 < getCol() && c2 < getCol());
         array[c1].swap(array[c2]);
     }
 
     #undef ColumnVectorStorage
-    #define RowVectorStorage DenseMatrixStorage<T, MatrixOption::Row | MatrixOption::Vector, Row, Column, Allocator>
+    #define RowVectorStorage DenseMatrixStorage<T, MatrixOption::Row | MatrixOption::Vector, Row, Col, Allocator>
 
     template<tparams>
     template<class... Args>
-    void RowVectorStorage::resize(size_t row, size_t column, Args&&... args) {
+    void RowVectorStorage::resize(size_t row, size_t col, Args&&... args) {
         array.resize(row);
         for (auto& vector : array)
-            vector.resize(column, std::forward<Args>(args)...);
-        Dim::resize(row, column);
+            vector.resize(col, std::forward<Args>(args)...);
+        Dim::resize(row, col);
     }
 
     template<tparams>
@@ -124,8 +124,8 @@ namespace Physica::Core {
     }
 
     template<tparams>
-    void RowVectorStorage::columnSwap(size_t c1, size_t c2) {
-        assert(c1 < getColumn() && c2 < getColumn());
+    void RowVectorStorage::colSwap(size_t c1, size_t c2) {
+        assert(c1 < getCol() && c2 < getCol());
         for (auto& rowVector : array)
             rowVector[c1].swap(rowVector[c2]);
     }

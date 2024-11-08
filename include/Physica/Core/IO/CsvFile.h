@@ -85,26 +85,26 @@ namespace Physica::Core {
         CsvFile& operator=(CsvFile obj) noexcept { swap(obj); return *this; }
         /* Operations */
         template<class ScalarType>
-        [[nodiscard]] Vector<ScalarType> asVector(size_t column) const;
-        size_t countMissingValue(size_t column, const char* missingTag = "NA") const;
+        [[nodiscard]] Vector<ScalarType> asVector(size_t col) const;
+        size_t countMissingValue(size_t col, const char* missingTag = "NA") const;
         void swap(CsvFile& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] const DataTypeArray& getDatatypes() const noexcept { return datatypes; }
-        [[nodiscard]] size_t getColumn() const noexcept { return datatypes.getLength(); }
         [[nodiscard]] const Array<std::string>& getHeaders() const noexcept { return headers; }
-        [[nodiscard]] inline const Array<signed char>& asChars(size_t column) const noexcept;
-        [[nodiscard]] inline const Array<unsigned char>& asUsignedChars(size_t column) const noexcept;
-        [[nodiscard]] inline const Array<short>& asShorts(size_t column) const noexcept;
-        [[nodiscard]] inline const Array<unsigned short>& asUnsignedShorts(size_t column) const noexcept;
-        [[nodiscard]] inline const Array<int>& asInts(size_t column) const noexcept;
-        [[nodiscard]] inline const Array<unsigned int>& asUnsignedInts(size_t column) const noexcept;
-        [[nodiscard]] inline const Array<long>& asLongs(size_t column) const noexcept;
-        [[nodiscard]] inline const Array<unsigned long>& asUnsignedLongs(size_t column) const noexcept;
-        [[nodiscard]] inline const Vector<float32>& asFloats(size_t column) const noexcept;
-        [[nodiscard]] inline const Vector<float64>& asDoubles(size_t column) const noexcept;
-        [[nodiscard]] inline const Array<bool>& asBools(size_t column) const noexcept;
-        [[nodiscard]] inline const Array<std::string>& asStrings(size_t column) const noexcept;
+        [[nodiscard]] inline const Array<signed char>& asChars(size_t col) const noexcept;
+        [[nodiscard]] inline const Array<unsigned char>& asUsignedChars(size_t col) const noexcept;
+        [[nodiscard]] inline const Array<short>& asShorts(size_t col) const noexcept;
+        [[nodiscard]] inline const Array<unsigned short>& asUnsignedShorts(size_t col) const noexcept;
+        [[nodiscard]] inline const Array<int>& asInts(size_t col) const noexcept;
+        [[nodiscard]] inline const Array<unsigned int>& asUnsignedInts(size_t col) const noexcept;
+        [[nodiscard]] inline const Array<long>& asLongs(size_t col) const noexcept;
+        [[nodiscard]] inline const Array<unsigned long>& asUnsignedLongs(size_t col) const noexcept;
+        [[nodiscard]] inline const Vector<float32>& asFloats(size_t col) const noexcept;
+        [[nodiscard]] inline const Vector<float64>& asDoubles(size_t col) const noexcept;
+        [[nodiscard]] inline const Array<bool>& asBools(size_t col) const noexcept;
+        [[nodiscard]] inline const Array<std::string>& asStrings(size_t col) const noexcept;
         [[nodiscard]] inline size_t getRow() const noexcept;
+        [[nodiscard]] size_t getCol() const noexcept { return datatypes.getLength(); }
         [[nodiscard]] const Array<std::optional<DefaultValue>>& getDefaultValues() const noexcept { return defaultValues; }
         /* Static members */
         [[nodiscard]] static const char* toString(DataType type);
@@ -114,42 +114,42 @@ namespace Physica::Core {
     };
 
     template<class ScalarType>
-    Vector<ScalarType> CsvFile::asVector(size_t column) const {
-        const DataType type = datatypes[column];
+    Vector<ScalarType> CsvFile::asVector(size_t col) const {
+        const DataType type = datatypes[col];
         Vector<ScalarType> result(getRow());
         if (type == FLOAT)
-            result = asFloats(column);
+            result = asFloats(col);
         else if (type == DOUBLE)
-            result = asDoubles(column);
+            result = asDoubles(col);
         else {
             for (size_t i = 0; i < result.getLength(); ++i) {
                 switch (type) {
                 case CHAR:
-                    result[i] = ScalarType(asChars(column)[i]);
+                    result[i] = ScalarType(asChars(col)[i]);
                     break;
                 case UCHAR:
-                    result[i] = ScalarType(asUsignedChars(column)[i]);
+                    result[i] = ScalarType(asUsignedChars(col)[i]);
                     break;
                 case SHORT:
-                    result[i] = ScalarType(asShorts(column)[i]);
+                    result[i] = ScalarType(asShorts(col)[i]);
                     break;
                 case USHORT:
-                    result[i] = ScalarType(asUnsignedShorts(column)[i]);
+                    result[i] = ScalarType(asUnsignedShorts(col)[i]);
                     break;
                 case INT:
-                    result[i] = ScalarType(asInts(column)[i]);
+                    result[i] = ScalarType(asInts(col)[i]);
                     break;
                 case UINT:
-                    result[i] = ScalarType(asUnsignedInts(column)[i]);
+                    result[i] = ScalarType(asUnsignedInts(col)[i]);
                     break;
                 case LONG:
-                    result[i] = ScalarType(asLongs(column)[i]);
+                    result[i] = ScalarType(asLongs(col)[i]);
                     break;
                 case ULONG:
-                    result[i] = ScalarType(asUnsignedLongs(column)[i]);
+                    result[i] = ScalarType(asUnsignedLongs(col)[i]);
                     break;
                 case BOOL:
-                    result[i] = ScalarType(asBools(column)[i]);
+                    result[i] = ScalarType(asBools(col)[i]);
                     break;
                 default: [[unlikely]]
                     throw std::invalid_argument("[Error]: Cannot convert string type to float type");
@@ -159,64 +159,64 @@ namespace Physica::Core {
         return result;
     }
 
-    inline const Array<signed char>& CsvFile::asChars(size_t column) const noexcept {
-        assert(datatypes[column] == CHAR && "[Error]: Invalid conversion");
-        return *reinterpret_cast<const Array<signed char>*>(data[column]);
+    inline const Array<signed char>& CsvFile::asChars(size_t col) const noexcept {
+        assert(datatypes[col] == CHAR && "[Error]: Invalid conversion");
+        return *reinterpret_cast<const Array<signed char>*>(data[col]);
     }
 
-    inline const Array<unsigned char>& CsvFile::asUsignedChars(size_t column) const noexcept {
-        assert(datatypes[column] == UCHAR && "[Error]: Invalid conversion");
-        return *reinterpret_cast<const Array<unsigned char>*>(data[column]);
+    inline const Array<unsigned char>& CsvFile::asUsignedChars(size_t col) const noexcept {
+        assert(datatypes[col] == UCHAR && "[Error]: Invalid conversion");
+        return *reinterpret_cast<const Array<unsigned char>*>(data[col]);
     }
 
-    inline const Array<short>& CsvFile::asShorts(size_t column) const noexcept {
-        assert(datatypes[column] == SHORT && "[Error]: Invalid conversion");
-        return *reinterpret_cast<const Array<short>*>(data[column]);
+    inline const Array<short>& CsvFile::asShorts(size_t col) const noexcept {
+        assert(datatypes[col] == SHORT && "[Error]: Invalid conversion");
+        return *reinterpret_cast<const Array<short>*>(data[col]);
     }
 
-    inline const Array<unsigned short>& CsvFile::asUnsignedShorts(size_t column) const noexcept {
-        assert(datatypes[column] == USHORT && "[Error]: Invalid conversion");
-        return *reinterpret_cast<const Array<unsigned short>*>(data[column]);
+    inline const Array<unsigned short>& CsvFile::asUnsignedShorts(size_t col) const noexcept {
+        assert(datatypes[col] == USHORT && "[Error]: Invalid conversion");
+        return *reinterpret_cast<const Array<unsigned short>*>(data[col]);
     }
 
-    inline const Array<int>& CsvFile::asInts(size_t column) const noexcept {
-        assert(datatypes[column] == INT && "[Error]: Invalid conversion");
-        return *reinterpret_cast<const Array<int>*>(data[column]);
+    inline const Array<int>& CsvFile::asInts(size_t col) const noexcept {
+        assert(datatypes[col] == INT && "[Error]: Invalid conversion");
+        return *reinterpret_cast<const Array<int>*>(data[col]);
     }
 
-    inline const Array<unsigned int>& CsvFile::asUnsignedInts(size_t column) const noexcept {
-        assert(datatypes[column] == UINT && "[Error]: Invalid conversion");
-        return *reinterpret_cast<const Array<unsigned int>*>(data[column]);
+    inline const Array<unsigned int>& CsvFile::asUnsignedInts(size_t col) const noexcept {
+        assert(datatypes[col] == UINT && "[Error]: Invalid conversion");
+        return *reinterpret_cast<const Array<unsigned int>*>(data[col]);
     }
 
-    inline const Array<long>& CsvFile::asLongs(size_t column) const noexcept {
-        assert(datatypes[column] == LONG && "[Error]: Invalid conversion");
-        return *reinterpret_cast<const Array<long>*>(data[column]);
+    inline const Array<long>& CsvFile::asLongs(size_t col) const noexcept {
+        assert(datatypes[col] == LONG && "[Error]: Invalid conversion");
+        return *reinterpret_cast<const Array<long>*>(data[col]);
     }
 
-    inline const Array<unsigned long>& CsvFile::asUnsignedLongs(size_t column) const noexcept {
-        assert(datatypes[column] == ULONG && "[Error]: Invalid conversion");
-        return *reinterpret_cast<const Array<unsigned long>*>(data[column]);
+    inline const Array<unsigned long>& CsvFile::asUnsignedLongs(size_t col) const noexcept {
+        assert(datatypes[col] == ULONG && "[Error]: Invalid conversion");
+        return *reinterpret_cast<const Array<unsigned long>*>(data[col]);
     }
 
-    inline const Vector<float32>& CsvFile::asFloats(size_t column) const noexcept {
-        assert(datatypes[column] == FLOAT && "[Error]: Invalid conversion");
-        return *reinterpret_cast<const Vector<float32>*>(data[column]);
+    inline const Vector<float32>& CsvFile::asFloats(size_t col) const noexcept {
+        assert(datatypes[col] == FLOAT && "[Error]: Invalid conversion");
+        return *reinterpret_cast<const Vector<float32>*>(data[col]);
     }
 
-    inline const Vector<float64>& CsvFile::asDoubles(size_t column) const noexcept {
-        assert(datatypes[column] == DOUBLE && "[Error]: Invalid conversion");
-        return *reinterpret_cast<const Vector<float64>*>(data[column]);
+    inline const Vector<float64>& CsvFile::asDoubles(size_t col) const noexcept {
+        assert(datatypes[col] == DOUBLE && "[Error]: Invalid conversion");
+        return *reinterpret_cast<const Vector<float64>*>(data[col]);
     }
 
-    inline const Array<bool>& CsvFile::asBools(size_t column) const noexcept {
-        assert(datatypes[column] == BOOL && "[Error]: Invalid conversion");
-        return *reinterpret_cast<const Array<bool>*>(data[column]);
+    inline const Array<bool>& CsvFile::asBools(size_t col) const noexcept {
+        assert(datatypes[col] == BOOL && "[Error]: Invalid conversion");
+        return *reinterpret_cast<const Array<bool>*>(data[col]);
     }
 
-    inline const Array<std::string>& CsvFile::asStrings(size_t column) const noexcept {
-        assert(datatypes[column] == STRING && "[Error]: Invalid conversion");
-        return *reinterpret_cast<const Array<std::string>*>(data[column]);
+    inline const Array<std::string>& CsvFile::asStrings(size_t col) const noexcept {
+        assert(datatypes[col] == STRING && "[Error]: Invalid conversion");
+        return *reinterpret_cast<const Array<std::string>*>(data[col]);
     }
 
     inline size_t CsvFile::getRow() const noexcept {

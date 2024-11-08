@@ -76,7 +76,7 @@ namespace Physica::Core {
     template<class ScalarType, size_t Order>
     template<class MatrixType>
     Schur<ScalarType, Order>::Schur(const RValueMatrix<MatrixType>& source, bool computeMatrixU_)
-            : matrixT(source.getRow(), source.getColumn()), matrixU() {
+            : matrixT(source.getRow(), source.getCol()), matrixU() {
         compute(source, computeMatrixU_);
     }
 
@@ -85,7 +85,7 @@ namespace Physica::Core {
     void Schur<ScalarType, Order>::compute(const RValueMatrix<MatrixType>& source_, bool computeMatrixU_) {
         static_assert(std::is_same<ScalarType, typename MatrixType::ScalarType>::value, "[Error]: Inconsistent ScalarType");
         const auto& source = source_.getDerived();
-        assert(source.getRow() == source.getColumn());
+        assert(source.getRow() == source.getCol());
         computeMatrixU = computeMatrixU_;
         if (computeMatrixU)
             matrixU = WorkingMatrix::unitMatrix(source.getRow());
@@ -346,7 +346,7 @@ namespace Physica::Core {
 
     template<class ScalarType, size_t Order>
     typename Schur<ScalarType, Order>::ComplexType Schur<ScalarType, Order>::complexShift(size_t upper, size_t iter) {
-        using Matrix2D = DenseMatrix<ScalarType, MatrixOption::Column | MatrixOption::Element, 2, 2>;
+        using Matrix2D = DenseMatrix<ScalarType, MatrixOption::Col | MatrixOption::Element, 2, 2>;
         if ((iter == 10 || iter == 20) && upper > 1) {
             // exceptional shift, taken from http://www.netlib.org/eispack/comqr.f
             return abs(matrixT(upper, upper - 1).real()) + abs(matrixT(upper - 1, upper - 2).real());

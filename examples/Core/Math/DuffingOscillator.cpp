@@ -39,11 +39,11 @@ int main(int argc, char** argv) {
     const auto& solution = solver.getSolution();
 
     Vector<T> x{};
-    x.resize(solution.getColumn());
+    x.resize(solution.getCol());
     Vector<T> p{};
-    p.resize(solution.getColumn());
+    p.resize(solution.getCol());
 
-    for (size_t i = 0; i < solution.getColumn(); ++i) {
+    for (size_t i = 0; i < solution.getCol(); ++i) {
         x[i] = solution(0, i);
         p[i] = solution(1, i);
     }

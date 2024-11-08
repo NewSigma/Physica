@@ -40,17 +40,17 @@ namespace Physica::Core {
                                                                 ? ColumnAtCompile
                                                                 : RowAtCompile;
         using WorkingMatrix = DenseMatrix<RealType,
-                                          MatrixOption::Column | MatrixOption::Vector,
+                                          MatrixOption::Col | MatrixOption::Vector,
                                           RowAtCompile,
                                           ColumnAtCompile>;
     public:
         using SingularValueVector = Vector<RealType, NumSingularValue>;
         using LSingularMatrix = DenseMatrix<RealType,
-                                            MatrixOption::Column | MatrixOption::Vector,
+                                            MatrixOption::Col | MatrixOption::Vector,
                                             RowAtCompile,
                                             RowAtCompile>;
         using RSingularMatrix = DenseMatrix<RealType,
-                                            MatrixOption::Column | MatrixOption::Vector,
+                                            MatrixOption::Col | MatrixOption::Vector,
                                             ColumnAtCompile,
                                             ColumnAtCompile>;
     private:
@@ -96,7 +96,7 @@ namespace Physica::Core {
     template<class ScalarType, size_t RowAtCompile, size_t ColumnAtCompile>
     template<class OtherMatrix>
     SVD<ScalarType, RowAtCompile, ColumnAtCompile>::SVD(const RValueMatrix<OtherMatrix>& source)
-            : SVD(source.getRow(), source.getColumn()) {
+            : SVD(source.getRow(), source.getCol()) {
         compute(source);
     }
 
@@ -104,7 +104,7 @@ namespace Physica::Core {
     template<class OtherMatrix>
     void SVD<ScalarType, RowAtCompile, ColumnAtCompile>::compute(const RValueMatrix<OtherMatrix>& source) {
         const size_t row = source.getRow();
-        const size_t col = source.getColumn();
+        const size_t col = source.getCol();
         assert(row == lSingularMat.getRow());
         assert(col == rSingularMat.getRow());
         {
@@ -121,7 +121,7 @@ namespace Physica::Core {
             }
             working = bidiag.getMatrixB();
         }
-        const size_t order = working.getColumn();
+        const size_t order = working.getCol();
         size_t upper = order - 1;
         size_t total_iter = 0;
         const size_t max_iter = Decouplable::maxItePerCol * order;

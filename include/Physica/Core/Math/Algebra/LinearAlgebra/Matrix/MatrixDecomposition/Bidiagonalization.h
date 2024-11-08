@@ -73,17 +73,17 @@ namespace Physica::Core {
     }
 
     template<class MatrixType>
-    Bidiagonalization<MatrixType>::Bidiagonalization(const MatrixType& source) : Bidiagonalization(source.getRow(), source.getColumn()) {
+    Bidiagonalization<MatrixType>::Bidiagonalization(const MatrixType& source) : Bidiagonalization(source.getRow(), source.getCol()) {
         compute(source);
     }
 
     template<class MatrixType>
     template<class OtherMatrix>
     void Bidiagonalization<MatrixType>::compute(const RValueMatrix<OtherMatrix>& source) {
-        assert(source.getRow() >= source.getColumn());
+        assert(source.getRow() >= source.getCol());
         working = source;
 
-        const size_t numCol = working.getColumn();
+        const size_t numCol = working.getCol();
         size_t i = 0;
         ScalarType unit;
         for (; i < numCol - 2; ++i) {
@@ -129,7 +129,7 @@ namespace Physica::Core {
     HouseholderSequence<typename Bidiagonalization<MatrixType>::WorkingMatrix>
     Bidiagonalization<MatrixType>::getMatrixU() const {
         HouseholderSequence result(working);
-        result.setSize(working.getColumn());
+        result.setSize(working.getCol());
         return result;
     }
 
@@ -137,7 +137,7 @@ namespace Physica::Core {
     HouseholderSequence<typename Bidiagonalization<MatrixType>::WorkingMatrix, false>
     Bidiagonalization<MatrixType>::getMatrixV() const {
         HouseholderSequence<WorkingMatrix, false> result(working);
-        result.setSize(working.getColumn() - 2);
+        result.setSize(working.getCol() - 2);
         result.setShift(1);
         return result;
     }
@@ -164,14 +164,14 @@ namespace Physica::Core {
         void assignTo(LValueMatrix<OtherMatrix>& target) const;
         /* Getters */
         [[nodiscard]] __host__ __device__ size_t getRow() const noexcept { return bidiag.working.getRow(); }
-        [[nodiscard]] __host__ __device__ size_t getColumn() const noexcept { return bidiag.working.getColumn(); }
+        [[nodiscard]] __host__ __device__ size_t getCol() const noexcept { return bidiag.working.getCol(); }
     };
 
     template<class MatrixType>
     template<class OtherMatrix>
     void BiDiagMatrixB<MatrixType>::assignTo(LValueMatrix<OtherMatrix>& target) const {
         target = ScalarType(0);
-        const size_t col_1 = target.getColumn() - 1;
+        const size_t col_1 = target.getCol() - 1;
         for (size_t i = 0; i < col_1; ++i) {
             target(i, i) = bidiag.mainDiag[i];
             target(i, i + 1) = bidiag.subDiag[i];

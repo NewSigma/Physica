@@ -20,8 +20,8 @@
 
 namespace Physica::Core {
     template<class T>
-    FDM<T>::FDM(size_t column, size_t row) : data(column) {
-        for(size_t i = 0; i < column; ++i)
+    FDM<T>::FDM(size_t col, size_t row) : data(col) {
+        for(size_t i = 0; i < col; ++i)
             data.allocate(Vector<T>::zeroVector(row), i);
     }
     /*!
@@ -42,7 +42,7 @@ namespace Physica::Core {
 
     template<class T>
     void FDM<T>::loop() {
-        const auto column_1 = data.getColumn() - 1;
+        const auto col_1 = data.getCol() - 1;
         const auto row_1 = data.getRow() - 1;
         int iterate = 0;
         T copy;
@@ -50,7 +50,7 @@ namespace Physica::Core {
         bool keep;
         do {
             keep = false;
-            for(size_t i = 1; i < column_1; ++i) {
+            for(size_t i = 1; i < col_1; ++i) {
                 for(size_t j = 1; j < row_1; ++j) {
                     if(!onBoundary(i, j)) {
                         auto& temp = data(j, i);
@@ -66,13 +66,13 @@ namespace Physica::Core {
     }
 
     template<class T>
-    bool FDM<T>::onBoundary(size_t column, size_t row) {
+    bool FDM<T>::onBoundary(size_t col, size_t row) {
         bool result = false;
         for(auto& boundary : boundaries) {
             if(boundary.type == Row)
-                result |= row == boundary.index && boundary.from <= column && column <= boundary.to;
+                result |= row == boundary.index && boundary.from <= col && col <= boundary.to;
             else
-                result |= column == boundary.index && boundary.from <= row && row <= boundary.to;
+                result |= col == boundary.index && boundary.from <= row && row <= boundary.to;
         }
         return result;
     }

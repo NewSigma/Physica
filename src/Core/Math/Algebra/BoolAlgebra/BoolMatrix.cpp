@@ -19,12 +19,12 @@
 #include "Physica/Core/Math/Algebra/BoolAlgebra/BoolMatrix.h"
 
 namespace Physica::Core {
-    BoolMatrix::BoolMatrix(size_t column, size_t row) : arr(row, BitArray(column)) {
-        assert(column > 0 && row > 0);
+    BoolMatrix::BoolMatrix(size_t col, size_t row) : arr(row, BitArray(col)) {
+        assert(col > 0 && row > 0);
     }
 
-    BoolMatrix::BoolMatrix(size_t column, size_t row, bool initial) : arr(row, BitArray(column, initial)) {
-        assert(column > 0 && row > 0);
+    BoolMatrix::BoolMatrix(size_t col, size_t row, bool initial) : arr(row, BitArray(col, initial)) {
+        assert(col > 0 && row > 0);
     }
     /*!
      * Return the multiple of two @class BoolMatrix: A(m * k) and B(k * n).
@@ -32,9 +32,9 @@ namespace Physica::Core {
      * Complexity: O(m * k * n)  possible to optimize.
      */
     BoolMatrix BoolMatrix::operator*(const BoolMatrix& m) const {
-        const size_t c1 = getColumn();
+        const size_t c1 = getCol();
         const size_t r1 = getRow();
-        const size_t c2 = m.getColumn();
+        const size_t c2 = m.getCol();
         assert(c1 == m.getRow());
 
         Array<BitArray> array{};

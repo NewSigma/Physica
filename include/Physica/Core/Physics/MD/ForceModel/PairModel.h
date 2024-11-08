@@ -170,7 +170,7 @@ namespace Physica::Core {
     template<class Executor>
     Vector<typename PairModel<Derived>::ScalarType> PairModel<Derived>::force(
             const LatticeMatrix& lattice, const PositionMatrix& cartesianPos) const {
-        const size_t DOF = cartesianPos.getRow() * cartesianPos.getColumn();
+        const size_t DOF = cartesianPos.getRow() * cartesianPos.getCol();
         Vector<ScalarType> result(DOF);
         forceAsync<Vector<ScalarType>, Executor>(lattice, cartesianPos, result);
         return result;

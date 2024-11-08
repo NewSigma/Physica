@@ -35,7 +35,7 @@ bool testCluster(const std::forward_list<size_t>& cluster) {
 
 int main() {
     DenseMatrix<ScalarType> points{{5, 0}, {5, 1}, {5, -1}, {-5, 0}, {-5, 1}, {-5, -1}};
-    DenseSymmMatrix<ScalarType> similar(points.getColumn());
+    DenseSymmMatrix<ScalarType> similar(points.getCol());
     for (size_t i = 0; i < similar.getOrder(); ++i) {
         similar(i, i) = ScalarType(-1);
         for (size_t j = i + 1; j < similar.getOrder(); ++j) {

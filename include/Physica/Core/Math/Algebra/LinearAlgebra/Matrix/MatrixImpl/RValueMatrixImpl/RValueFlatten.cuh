@@ -40,7 +40,7 @@ namespace Physica::Core {
         This& operator=(This&&) noexcept = delete;
         /* Getters */
         [[nodiscard]] __device__ ScalarType calc(size_t index) const;
-        [[nodiscard]] __host__ __device__ size_t getLength() const noexcept { return mat.getRow() * mat.getColumn(); }
+        [[nodiscard]] __host__ __device__ size_t getLength() const noexcept { return mat.getRow() * mat.getCol(); }
     };
 
     template<class MatrixType>

@@ -23,7 +23,7 @@ using namespace Physica::Core;
 
 int main() {
     std::mt19937 gen{};
-    /* Column float matrix */ {
+    /* Col float matrix */ {
         using T = float32;
         using MatrixType = DenseMatrix<T>;
         const auto data = MatrixType::random_uniform(32, 16, gen);
@@ -32,7 +32,7 @@ int main() {
         H5File h5f(tmp.getName(), H5File::OpenFlag(H5File::OpenFlag::ReadWrite | H5File::OpenFlag::Creat));
         data.write(h5f, "/set");
 
-        MatrixType buffer(data.getRow(), data.getColumn());
+        MatrixType buffer(data.getRow(), data.getCol());
         buffer.read(h5f, "/set");
         if (data != buffer)
             exit(EXIT_FAILURE);
@@ -46,7 +46,7 @@ int main() {
         H5File h5f(tmp.getName(), H5File::OpenFlag(H5File::OpenFlag::ReadWrite | H5File::OpenFlag::Creat));
         data.write(h5f, "/set");
 
-        MatrixType buffer(data.getRow(), data.getColumn());
+        MatrixType buffer(data.getRow(), data.getCol());
         buffer.read(h5f, "/set");
         if (data != buffer)
             exit(EXIT_FAILURE);
@@ -60,7 +60,7 @@ int main() {
         H5File h5f(tmp.getName(), H5File::OpenFlag(H5File::OpenFlag::ReadWrite | H5File::OpenFlag::Creat));
         data.write(h5f, "/set");
 
-        MatrixType buffer(data.getRow(), data.getColumn());
+        MatrixType buffer(data.getRow(), data.getCol());
         buffer.read(h5f, "/set");
         if (data != buffer)
             exit(EXIT_FAILURE);

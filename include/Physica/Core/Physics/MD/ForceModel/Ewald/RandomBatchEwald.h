@@ -36,7 +36,7 @@ namespace Physica::Core {
         using typename Base::LatticeMatrix;
         using typename Base::PositionMatrix;
         using typename Base::Vector3D;
-        using SamplePool = DenseMatrix<ScalarType, MatrixOption::Column | MatrixOption::Element, Dynamic, Dim>;
+        using SamplePool = DenseMatrix<ScalarType, MatrixOption::Col | MatrixOption::Element, Dynamic, Dim>;
     public:
         using typename Base::BornChargeArray;
     private:

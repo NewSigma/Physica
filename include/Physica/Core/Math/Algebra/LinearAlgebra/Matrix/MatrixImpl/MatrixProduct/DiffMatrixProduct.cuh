@@ -33,12 +33,12 @@ namespace Physica::Core {
             const MatrixType& m = m_.getDerived();
             const VectorType& v = v_.getDerived();
             MatrixType& dots = dots_.getDerived();
-            const int column = m.getColumn();
+            const int col = m.getCol();
 
             const unsigned int r = blockIdx.x;
             const int index = threadIdx.x;
             PlainScalar threadSum = 0;
-            for (int i = index; i < column; i += blockDim.x) {
+            for (int i = index; i < col; i += blockDim.x) {
                 const size_t offset = dots.calcOffset(r, i);
                 dots.getRecord(r, i) = DiffRecord{offset * 2, ExprType::Mul};
                 dots.getOperands()[2 * offset] = m.calc(r, i);
@@ -65,7 +65,7 @@ namespace Physica::Core {
             VectorType& result = result_.getDerived();
             result.getRecord(r) = DiffRecord{r * 2, ExprType::Sum};
             result.getOperands()[r * 2] = dots.calc(r, 0);
-            result.getOperands()[r * 2 + 1] = dots.calc(r, column - 1);
+            result.getOperands()[r * 2 + 1] = dots.calc(r, col - 1);
             result.getValue(r) = threadSum;
             result.getGrad(r) = 0;
         }
@@ -78,10 +78,10 @@ namespace Physica::Core {
         using MatrixType = device_obj<Diff<DenseMatrix<PlainScalar, Option>, DiffMode::Reverse, Order>>;
         using VectorType = device_obj<Diff<Vector<PlainScalar>, DiffMode::Reverse, Order>>;
         assert(m.getRow() > 0 && "[Error]: This is a empty matrix");
-        assert(m.getColumn() == v.getLength() && "[Error]: Dims do not match");
-        MatrixType dots(m.getRow(), m.getColumn(), ExprType::Mul);
+        assert(m.getCol() == v.getLength() && "[Error]: Dims do not match");
+        MatrixType dots(m.getRow(), m.getCol(), ExprType::Mul);
         VectorType result(m.getRow(), ExprType::Sum);
-        const size_t numThread = std::min(m.getColumn(), VectorType::MaxThreadPerBlock);
+        const size_t numThread = std::min(m.getCol(), VectorType::MaxThreadPerBlock);
         Internal::DiffMatrixProduct_gemvKernel<MatrixType, VectorType>
                 <<<m.getRow(), numThread, numThread * sizeof(PlainScalar), CUDAContext::getInstance()>>>(asStruct(m), asStruct(v), asStruct(dots), asStruct(result));
         check(cudaGetLastError());

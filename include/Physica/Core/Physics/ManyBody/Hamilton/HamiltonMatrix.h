@@ -35,7 +35,7 @@ namespace Physica::Core {
         /* Getters */
         [[nodiscard]] size_t getNumState() const noexcept { return Base::getDerived().getNumState(); }
         [[nodiscard]] size_t getRow() const noexcept { return getNumState(); }
-        [[nodiscard]] size_t getColumn() const noexcept { return getNumState(); }
+        [[nodiscard]] size_t getCol() const noexcept { return getNumState(); }
     protected:
         HamiltonMatrix() = default;
         HamiltonMatrix(const This&) = default;

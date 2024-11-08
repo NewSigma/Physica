@@ -53,7 +53,7 @@ namespace Physica::Core {
         template<Side Owner = GetSide()>
         [[nodiscard]] __host__ __device__ size_t getRow() const { return getLHS().getRow(); }
         template<Side Owner = GetSide()>
-        [[nodiscard]] __host__ __device__ size_t getColumn() const { return getRHS().getColumn(); }
+        [[nodiscard]] __host__ __device__ size_t getCol() const { return getRHS().getCol(); }
         [[nodiscard]] __host__ __device__ const device_obj<MatrixType1>& getLHS() const noexcept { return mat1.getDerived(); }
         [[nodiscard]] __host__ __device__ const device_obj<MatrixType2>& getRHS() const noexcept { return mat2.getDerived(); }
     };
@@ -62,7 +62,7 @@ namespace Physica::Core {
     __host__ __device__ device_obj<MatrixProduct<MatrixType1, MatrixType2>>::device_obj(
             const device_obj<RValueMatrix<MatrixType1>>& mat1_, const device_obj<RValueMatrix<MatrixType2>>& mat2_)
             : mat1(asStruct(mat1_.getDerived())), mat2(asStruct(mat2_.getDerived())) {
-        assert(mat1_.getColumn() == mat2_.getRow());
+        assert(mat1_.getCol() == mat2_.getRow());
     }
 
     template<class MatrixType1, class MatrixType2>
@@ -77,8 +77,8 @@ namespace Physica::Core {
         const auto& lhs = getLHS();
         const auto& rhs = getRHS();
         const size_t r = getRow();
-        const size_t c = getColumn();
-        const size_t k = lhs.getColumn();
+        const size_t c = getCol();
+        const size_t k = lhs.getCol();
         const ScalarType alpha = 1;
         const ScalarType beta = 0;
         auto& ctx = CUDAContext::getInstance();

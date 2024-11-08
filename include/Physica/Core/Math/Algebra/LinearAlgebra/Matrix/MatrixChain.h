@@ -90,20 +90,20 @@ namespace Physica::Core {
                 auto n = m; //Cut (m ... ) into (m ... n) and (n + 1 ... m_end).
                 auto chain_n = chain[n];
                 /* Handle n = m */ {
-                    price[m][m_end] = price[n + 1][m_end] + chain_n->getRow() * chain_n->getColumn() * chain[n + 1]->getRow();
+                    price[m][m_end] = price[n + 1][m_end] + chain_n->getRow() * chain_n->getCol() * chain[n + 1]->getRow();
                     point[m][m_end] = n;
                     ++n;
                 }
                 for(; n < m_end; ++n) {
                     chain_n = chain[n];
                     size_t temp = price[m][n] + price[n + 1][m_end]
-                                                + chain_n->getRow() * chain_n->getColumn() * chain[n + 1]->getRow();
+                                                + chain_n->getRow() * chain_n->getCol() * chain[n + 1]->getRow();
                     price[m][m_end] = temp < price[m][m_end] ? temp : price[m][m_end];
                     point[m][m_end] = temp < price[m][m_end] ? n : point[m][m_end];
                 }
                 /* Handle n = m_end */ {
                     chain_n = chain[n];
-                    size_t temp = price[m][n] + chain_n->getRow() * chain_n->getColumn() * chain[n + 1]->getRow();
+                    size_t temp = price[m][n] + chain_n->getRow() * chain_n->getCol() * chain[n + 1]->getRow();
                     price[m][m_end] = temp < price[m][m_end] ? temp : price[m][m_end];
                     point[m][m_end] = temp < price[m][m_end] ? n : point[m][m_end];
                 }

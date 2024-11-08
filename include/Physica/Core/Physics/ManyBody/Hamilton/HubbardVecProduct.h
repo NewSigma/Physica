@@ -40,7 +40,7 @@ namespace Physica::Core {
     public:
         MatrixVectorProduct(const RValueMatrix<MatrixType>& mat_, const RValueVector<VectorType>& vec_)
                 : mat(mat_.getDerived()), vec(vec_.getDerived()) {
-            assert(mat.getColumn() == vec.getLength());
+            assert(mat.getCol() == vec.getLength());
         }
         MatrixVectorProduct(const This&) = delete;
         MatrixVectorProduct(This&&) noexcept = delete;

@@ -21,7 +21,7 @@
 
 using namespace Physica::Core;
 using ScalarType = float64;
-using MatrixType = DenseMatrix<ScalarType, MatrixOption::Column | MatrixOption::Vector>;
+using MatrixType = DenseMatrix<ScalarType, MatrixOption::Col | MatrixOption::Vector>;
 
 template<class MatrixType>
 bool doTest(const MatrixType& source, double tolerance) {

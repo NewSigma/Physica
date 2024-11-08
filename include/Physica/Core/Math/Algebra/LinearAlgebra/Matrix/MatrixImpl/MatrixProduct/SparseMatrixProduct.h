@@ -38,7 +38,7 @@ namespace Physica::Core {
     public:
         MatrixVectorProduct(const MatrixType& mat_, const RValueVector<VectorType>& vec_)
                 : mat(mat_), vec(vec_.getDerived()) {
-            assert(mat.getColumn() == vec.getLength());
+            assert(mat.getCol() == vec.getLength());
         }
         /* Operations */
         template<class OtherDerived, class Executor = SequentialExecutor>

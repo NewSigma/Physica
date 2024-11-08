@@ -37,8 +37,8 @@ namespace Physica::Gui {
     }
 
     Plot& MultiPlot::operator()(int row, int col) {
-        assert(0 <= row && row < layout->rowCount());
-        assert(0 <= col && col < layout->columnCount());
+        assert(0 <= row && row < getRow());
+        assert(0 <= col && col < getCol());
         return static_cast<Plot&>(*layout->itemAtPosition(row, col)->widget());
     }
 

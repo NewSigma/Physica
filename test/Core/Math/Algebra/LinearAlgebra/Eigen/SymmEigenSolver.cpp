@@ -48,7 +48,7 @@ bool eigenTest(const MatrixType& mat, double precision) {
 int main() {
     using RealType = float64;
     {
-        using MatrixType = DenseMatrix<RealType, MatrixOption::Column | MatrixOption::Vector, 3, 3>;
+        using MatrixType = DenseMatrix<RealType, MatrixOption::Col | MatrixOption::Vector, 3, 3>;
         const MatrixType mat1{{-0.590316, -2.19514, -2.37463},
                              {-1.25006, -0.297493, 1.40349},
                              {0.517063, -0.956614, -0.920775}};

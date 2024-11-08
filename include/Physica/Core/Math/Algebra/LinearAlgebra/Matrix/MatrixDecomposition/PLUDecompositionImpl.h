@@ -57,21 +57,21 @@ namespace Physica::Core {
      * [1] William H. Press, Saul A. Teukolsky, William T. Vetterling, Brian P. Flannery. C++数值算法(第二版)[M]. 北京: 电子工业出版社, 2005:32
      */
     template<class T, int type, size_t maxRow, size_t maxColumn>
-    void PLUDecomposition<T, type, maxRow, maxColumn>::decompositionColumn(size_t column) {
-        const auto startAlphaIndex = column + 1;
+    void PLUDecomposition<T, type, maxRow, maxColumn>::decompositionColumn(size_t col) {
+        const auto startAlphaIndex = col + 1;
         for (size_t j = 1; j < startAlphaIndex; ++j) { //Start from 1, unnecessary to handle j = 0
-            T temp(matrix(j, column));
+            T temp(matrix(j, col));
             for (size_t k = 0; k < j; ++k)
-                temp -= matrix(j, k) * matrix(k, column);
-            matrix(j, column) = std::move(temp);
+                temp -= matrix(j, k) * matrix(k, col);
+            matrix(j, col) = std::move(temp);
         }
 
         const auto r = matrix.getRow();
         for (size_t j = startAlphaIndex; j < r; ++j) {
-            T temp(matrix(j, column));
-            for (size_t k = 0; k < column; ++k)
-                temp -= matrix(j, k) * matrix(k, column);
-            matrix(j, column) = temp / matrix(column, column);
+            T temp(matrix(j, col));
+            for (size_t k = 0; k < col; ++k)
+                temp -= matrix(j, k) * matrix(k, col);
+            matrix(j, col) = temp / matrix(col, col);
         }
     }
 }

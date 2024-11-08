@@ -70,7 +70,7 @@ namespace Physica::Core {
         inline H5DataSet<1> write(H5Location& loc, const char* name) const;
         /* Getters */
         using Storage::data_ptr;
-        using Storage::getColumn;
+        using Storage::getCol;
         using Storage::getOrder;
         using Storage::getRow;
         [[nodiscard]] Base& asMatrix() noexcept { return *this; }
@@ -93,7 +93,7 @@ namespace Physica::Core {
     template<class OtherMatrix>
     DenseSymmMatrix<T, Order>::DenseSymmMatrix(const RValueMatrix<OtherMatrix>& mat)
             : DenseSymmMatrix(mat.getRow()) {
-        assert(mat.getRow() == mat.getColumn());
+        assert(mat.getRow() == mat.getCol());
         for (size_t i = 0; i < mat.getRow(); ++i)
             for (size_t j = i; j < mat.getRow(); ++j)
                 Base::operator()(i, j) = mat.calc(i, j);

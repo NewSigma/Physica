@@ -137,7 +137,7 @@ namespace Physica::Core {
         constexpr bool isRealSymm = !ScalarType::isComplex && MatrixOption::isSymmMatrix<MatrixType>();
         static_assert(isHermite || isRealSymm, "[Error]: Support for complex eigenvalues is not implemented");
         const auto& source = source_.getDerived();
-        assert(source.getRow() == source.getColumn() && "[Error]: Matrix should be square");
+        assert(source.getRow() == source.getCol() && "[Error]: Matrix should be square");
         assert(source.getRow() == initial.getLength() && "[Error]: Dimensions do not match");
         assert(eigenGoal == InvalidGoal && "[Error]: Not implemented");
 
@@ -182,7 +182,7 @@ namespace Physica::Core {
                     }
                     squaredRes = residule.squaredNorm();
                     isConverged = squaredRes < error;
-                    const bool shouldRestart = numSearchDim == searchSpace.getColumn();
+                    const bool shouldRestart = numSearchDim == searchSpace.getCol();
                     if (isConverged || shouldRestart)
                         break;
 

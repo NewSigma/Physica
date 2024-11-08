@@ -21,7 +21,7 @@
 
 using namespace Physica::Core;
 using ScalarType = float64;
-using MatrixType = DenseMatrix<ScalarType, MatrixOption::Column | MatrixOption::Vector>;
+using MatrixType = DenseMatrix<ScalarType, MatrixOption::Col | MatrixOption::Vector>;
 
 template<class MatrixType>
 bool doTest(const MatrixType& source, double tolerance) {
@@ -29,7 +29,7 @@ bool doTest(const MatrixType& source, double tolerance) {
     MatrixType U = svd.getMatrixU();
     MatrixType V = svd.getMatrixV();
     auto v = svd.getSingulars();
-    MatrixType A(source.getRow(), source.getColumn());
+    MatrixType A(source.getRow(), source.getCol());
     A = ScalarType(0);
     for (size_t i = 0; i < v.getLength(); ++i)
         A += U.col(i) * V.col(i).asVector().transpose() * v[i];

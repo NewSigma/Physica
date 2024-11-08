@@ -86,12 +86,12 @@ namespace Physica::Core {
         template<Side Owner = GetSide()>
         [[nodiscard]] __host__ __device__ size_t getRow() const noexcept { return Base::getDerived().template getRow<Owner>(); }
         template<Side Owner = GetSide()>
-        [[nodiscard]] __host__ __device__ size_t getColumn() const noexcept { return Base::getDerived().template getColumn<Owner>(); }
+        [[nodiscard]] __host__ __device__ size_t getCol() const noexcept { return Base::getDerived().template getCol<Owner>(); }
         [[nodiscard]] __host__ __device__ size_t getMaxMajor() const noexcept { return MatrixOption::getMaxMajor<device_obj<Derived>>(Base::getDerived()); }
         [[nodiscard]] __host__ __device__ size_t getMaxMinor() const noexcept { return MatrixOption::getMaxMinor<device_obj<Derived>>(Base::getDerived()); }
         /* Static members */
         [[nodiscard]] __host__ __device__ static size_t rowFromMajorMinor(size_t major, size_t minor) noexcept { return MatrixOption::rowFromMajorMinor<device_obj<Derived>>(major, minor); }
-        [[nodiscard]] __host__ __device__ static size_t columnFromMajorMinor(size_t major, size_t minor) noexcept { return MatrixOption::columnFromMajorMinor<device_obj<Derived>>(major, minor); }
+        [[nodiscard]] __host__ __device__ static size_t colFromMajorMinor(size_t major, size_t minor) noexcept { return MatrixOption::colFromMajorMinor<device_obj<Derived>>(major, minor); }
     };
 }
 

@@ -32,13 +32,13 @@ namespace Physica::Core {
     CsvFile::CsvFile(DataTypeArray datatypes_, Array<std::optional<DefaultValue>> defaultValues_, const char* path)
             : datatypes(std::move(datatypes_))
             , defaultValues(std::move(defaultValues_)) {
-        assert(defaultValues.getLength() == getColumn() && "[Error]: Not enough values");
+        assert(defaultValues.getLength() == getCol() && "[Error]: Not enough values");
         allocate();
         readFile(path);
     }
 
     CsvFile::~CsvFile() {
-        for (size_t i = 0; i < getColumn(); ++i) {
+        for (size_t i = 0; i < getCol(); ++i) {
             void* p_array = data[i];
             switch (datatypes[i]) {
             case CHAR:
@@ -84,92 +84,92 @@ namespace Physica::Core {
         }
     }
 
-    size_t CsvFile::countMissingValue(size_t column, const char* missingTag) const {
-        const auto datatype = datatypes[column];
-        if (datatype != DataType::STRING && !defaultValues[column].has_value())
+    size_t CsvFile::countMissingValue(size_t col, const char* missingTag) const {
+        const auto datatype = datatypes[col];
+        if (datatype != DataType::STRING && !defaultValues[col].has_value())
             return 0;
 
         size_t result = 0;
         switch (datatype) {
         case CHAR: {
-            const signed char value = defaultValues[column]->char_value;
-            const auto& arr = asChars(column);
+            const signed char value = defaultValues[col]->char_value;
+            const auto& arr = asChars(col);
             for (auto c : arr)
                 result += value == c;
             break;
         }
         case UCHAR: {
-            const unsigned char value = defaultValues[column]->uchar_value;
-            const auto& arr = asUsignedChars(column);
+            const unsigned char value = defaultValues[col]->uchar_value;
+            const auto& arr = asUsignedChars(col);
             for (auto c : arr)
                 result += value == c;
             break;
         }
         case SHORT: {
-            const short value = defaultValues[column]->short_value;
-            const auto& arr = asShorts(column);
+            const short value = defaultValues[col]->short_value;
+            const auto& arr = asShorts(col);
             for (auto s : arr)
                 result += value == s;
             break;
         }
         case USHORT: {
-            const unsigned short value = defaultValues[column]->ushort_value;
-            const auto& arr = asUnsignedShorts(column);
+            const unsigned short value = defaultValues[col]->ushort_value;
+            const auto& arr = asUnsignedShorts(col);
             for (auto s : arr)
                 result += value == s;
             break;
         }
         case INT: {
-            const int value = defaultValues[column]->int_value;
-            const auto& arr = asInts(column);
+            const int value = defaultValues[col]->int_value;
+            const auto& arr = asInts(col);
             for (auto i : arr)
                 result += value == i;
             break;
         }
         case UINT: {
-            const unsigned int value = defaultValues[column]->uint_value;
-            const auto& arr = asUnsignedInts(column);
+            const unsigned int value = defaultValues[col]->uint_value;
+            const auto& arr = asUnsignedInts(col);
             for (auto i : arr)
                 result += value == i;
             break;
         }
         case LONG: {
-            const long value = defaultValues[column]->long_value;
-            const auto& arr = asLongs(column);
+            const long value = defaultValues[col]->long_value;
+            const auto& arr = asLongs(col);
             for (auto l : arr)
                 result += value == l;
             break;
         }
         case ULONG: {
-            const unsigned long value = defaultValues[column]->ulong_value;
-            const auto& arr = asUnsignedLongs(column);
+            const unsigned long value = defaultValues[col]->ulong_value;
+            const auto& arr = asUnsignedLongs(col);
             for (auto l : arr)
                 result += value == l;
             break;
         }
         case FLOAT: {
-            const float32 value = defaultValues[column]->float_value;
-            const auto& arr = asFloats(column);
+            const float32 value = defaultValues[col]->float_value;
+            const auto& arr = asFloats(col);
             for (auto f : arr)
                 result += value == f;
             break;
         }
         case DOUBLE: {
-            const float64 value = defaultValues[column]->double_value;
-            const auto& arr = asDoubles(column);
+            const float64 value = defaultValues[col]->double_value;
+            const auto& arr = asDoubles(col);
             for (auto d : arr)
                 result += value == d;
             break;
         }
         case BOOL: {
-            const bool value = defaultValues[column]->bool_value;
-            const auto& arr = asBools(column);
+            const bool value = defaultValues[col]->bool_value;
+            const auto& arr = asBools(col);
             for (auto b : arr)
                 result += value == b;
             break;
         }
         case STRING: {
-            const auto& arr = asStrings(column);
+            const auto& arr = asStrings(col);
             for (const auto& s : arr)
                 result += s == missingTag;
             break;
@@ -220,10 +220,10 @@ namespace Physica::Core {
     }
 
     void CsvFile::allocate() {
-        headers.resize(getColumn());
-        defaultValues.resize(getColumn());
-        data.resize(getColumn());
-        for (size_t i = 0; i < getColumn(); ++i) {
+        headers.resize(getCol());
+        defaultValues.resize(getCol());
+        data.resize(getCol());
+        for (size_t i = 0; i < getCol(); ++i) {
             void* p_array;
             switch (datatypes[i]) {
             case CHAR:
@@ -274,8 +274,8 @@ namespace Physica::Core {
         if (!fin)
             throw IOException("[Error]: File does not exist");
         std::string buffer{};
-        for (size_t i = 0; i < getColumn(); ++i) {
-            const bool isLast = i == getColumn() - 1;
+        for (size_t i = 0; i < getCol(); ++i) {
+            const bool isLast = i == getCol() - 1;
             std::getline(fin, buffer, isLast ? '\n' : ',');
             headers[i] = buffer;
         }
@@ -291,11 +291,11 @@ namespace Physica::Core {
                     break;
             }
 
-            for (size_t column = 0; column < getColumn(); ++column) {
-                const bool isLast = column == getColumn() - 1;
-                void* const p_array = data[column];
-                const auto& defaultValue = defaultValues[column];
-                switch (datatypes[column]) {
+            for (size_t col = 0; col < getCol(); ++col) {
+                const bool isLast = col == getCol() - 1;
+                void* const p_array = data[col];
+                const auto& defaultValue = defaultValues[col];
+                switch (datatypes[col]) {
                 case CHAR: {
                     int c; //Use int instread of char to avoid specialization for character
                     fin >> c;

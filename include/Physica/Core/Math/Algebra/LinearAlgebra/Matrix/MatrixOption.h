@@ -25,14 +25,14 @@
 namespace Physica::Core {
     /**
      * This enum decides how the data is stored in a matrix.
-     * A dense matrix can be stored as elements or vectors in rows or columns.
+     * A dense matrix can be stored as elements or vectors in rows or cols.
      *
      * It is recommended that store elements to store a small matrix.
      */
     class MatrixOption {
     public:
         enum {
-            Column = 0b0000,
+            Col = 0b0000,
             Row = 0b0001,
             AnyMajor = 0b0010,
             Vector = 0b0000,
@@ -57,7 +57,7 @@ namespace Physica::Core {
 
         template<class Matrix>
         __host__ __device__ constexpr static int getMajor() {
-            return isAnyMajor<Matrix>() ? AnyMajor : (isColumnMatrix<Matrix>() ? Column : Row);
+            return isAnyMajor<Matrix>() ? AnyMajor : (isColumnMatrix<Matrix>() ? Col : Row);
         }
 
         template<class Matrix>
@@ -98,12 +98,12 @@ namespace Physica::Core {
 
         template<class Matrix>
         [[nodiscard]] __host__ __device__ static size_t getMaxMajor(const Matrix& mat) noexcept {
-            return isColumnMatrix<Matrix>() ? mat.getColumn() : mat.getRow();
+            return isColumnMatrix<Matrix>() ? mat.getCol() : mat.getRow();
         }
 
         template<class Matrix>
         [[nodiscard]] __host__ __device__ static size_t getMaxMinor(const Matrix& mat) noexcept {
-            return isColumnMatrix<Matrix>() ? mat.getRow() : mat.getColumn();
+            return isColumnMatrix<Matrix>() ? mat.getRow() : mat.getCol();
         }
 
         template<class Matrix>
@@ -112,7 +112,7 @@ namespace Physica::Core {
         }
 
         template<class Matrix>
-        [[nodiscard]] __host__ __device__ constexpr static size_t columnFromMajorMinor(size_t major, size_t minor) noexcept {
+        [[nodiscard]] __host__ __device__ constexpr static size_t colFromMajorMinor(size_t major, size_t minor) noexcept {
             return isColumnMatrix<Matrix>() ? major : minor;
         }
 

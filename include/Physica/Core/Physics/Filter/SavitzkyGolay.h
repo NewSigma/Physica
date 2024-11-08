@@ -66,9 +66,9 @@ namespace Physica::Core {
                 if (major == 0 && minor == 0)
                     coeffs.refFromMajorMinor(0, 0) = 1;
                 const size_t row = MatrixOption::rowFromMajorMinor<MatrixType>(major, minor);
-                const size_t column = MatrixOption::columnFromMajorMinor<MatrixType>(major, minor);
+                const size_t col = MatrixOption::colFromMajorMinor<MatrixType>(major, minor);
                 const int i = int(row) - int(lRange);
-                coeffs.refFromMajorMinor(major, minor) = pow(delta * i, ScalarType(column));
+                coeffs.refFromMajorMinor(major, minor) = pow(delta * i, ScalarType(col));
             }
         }
 

@@ -58,46 +58,46 @@ namespace Physica::Core {
         [[nodiscard]] __host__ __device__ inline device_obj<ContinuousMatrixBlock<Derived, Row, ColumnAtCompile>> bottomRows(size_t from);
         template<size_t Row = Dynamic>
         [[nodiscard]] __host__ __device__ inline const device_obj<ContinuousMatrixBlock<Derived, Row, ColumnAtCompile>> bottomRows(size_t from) const;
-        template<size_t Column = Dynamic>
-        [[nodiscard]] __host__ __device__ inline device_obj<ContinuousMatrixBlock<Derived, RowAtCompile, Column>> cols(size_t fromCol, size_t colCount);
-        template<size_t Column = Dynamic>
-        [[nodiscard]] __host__ __device__ inline const device_obj<ContinuousMatrixBlock<Derived, RowAtCompile, Column>> cols(size_t fromCol, size_t colCount) const;
-        template<size_t Column = Dynamic>
-        [[nodiscard]] __host__ __device__ inline device_obj<ContinuousMatrixBlock<Derived, RowAtCompile, Column>> leftCols(size_t to);
-        template<size_t Column = Dynamic>
-        [[nodiscard]] __host__ __device__ inline const device_obj<ContinuousMatrixBlock<Derived, RowAtCompile, Column>> leftCols(size_t to) const;
-        template<size_t Column = Dynamic>
-        [[nodiscard]] __host__ __device__ inline device_obj<ContinuousMatrixBlock<Derived, RowAtCompile, Column>> rightCols(size_t from);
-        template<size_t Column = Dynamic>
-        [[nodiscard]] __host__ __device__ inline const device_obj<ContinuousMatrixBlock<Derived, RowAtCompile, Column>> rightCols(size_t from) const;
-        template<size_t Row = Dynamic, size_t Column = Dynamic>
-        [[nodiscard]] __host__ __device__ inline device_obj<ContinuousMatrixBlock<Derived, Row, Column>> topLeftCorner(size_t toRow, size_t toCol);
-        template<size_t Row = Dynamic, size_t Column = Dynamic>
-        [[nodiscard]] __host__ __device__ inline const device_obj<ContinuousMatrixBlock<Derived, Row, Column>> topLeftCorner(size_t toRow, size_t toCol) const;
-        template<size_t Row = Dynamic, size_t Column = Dynamic>
-        [[nodiscard]] __host__ __device__ inline device_obj<ContinuousMatrixBlock<Derived, Row, Column>> topLeftCorner(size_t to);
-        template<size_t Row = Dynamic, size_t Column = Dynamic>
-        [[nodiscard]] __host__ __device__ inline const device_obj<ContinuousMatrixBlock<Derived, Row, Column>> topLeftCorner(size_t to) const;
-        template<size_t Row = Dynamic, size_t Column = Dynamic>
-        [[nodiscard]] __host__ __device__ inline device_obj<ContinuousMatrixBlock<Derived, Row, Column>> topRightCorner(size_t toRow, size_t fromCol);
-        template<size_t Row = Dynamic, size_t Column = Dynamic>
-        [[nodiscard]] __host__ __device__ inline const device_obj<ContinuousMatrixBlock<Derived, Row, Column>> topRightCorner(size_t toRow, size_t fromCol) const;
-        template<size_t Row = Dynamic, size_t Column = Dynamic>
-        [[nodiscard]] __host__ __device__ inline device_obj<ContinuousMatrixBlock<Derived, Row, Column>> bottomLeftCorner(size_t fromRow, size_t toCol);
-        template<size_t Row = Dynamic, size_t Column = Dynamic>
-        [[nodiscard]] __host__ __device__ inline const device_obj<ContinuousMatrixBlock<Derived, Row, Column>> bottomLeftCorner(size_t fromRow, size_t toCol) const;
-        template<size_t Row = Dynamic, size_t Column = Dynamic>
-        [[nodiscard]] __host__ __device__ inline device_obj<ContinuousMatrixBlock<Derived, Row, Column>> bottomRightCorner(size_t fromRow, size_t fromCol);
-        template<size_t Row = Dynamic, size_t Column = Dynamic>
-        [[nodiscard]] __host__ __device__ inline const device_obj<ContinuousMatrixBlock<Derived, Row, Column>> bottomRightCorner(size_t fromRow, size_t fromCol) const;
-        template<size_t Row = Dynamic, size_t Column = Dynamic>
-        [[nodiscard]] __host__ __device__ inline device_obj<ContinuousMatrixBlock<Derived, Row, Column>> bottomRightCorner(size_t from);
-        template<size_t Row = Dynamic, size_t Column = Dynamic>
-        [[nodiscard]] __host__ __device__ inline const device_obj<ContinuousMatrixBlock<Derived, Row, Column>> bottomRightCorner(size_t from) const;
-        template<size_t Row = Dynamic, size_t Column = Dynamic>
-        [[nodiscard]] __host__ __device__ inline device_obj<ContinuousMatrixBlock<Derived, Row, Column>> block(size_t fromRow, size_t rowCount, size_t fromCol, size_t colCount);
-        template<size_t Row = Dynamic, size_t Column = Dynamic>
-        [[nodiscard]] __host__ __device__ inline const device_obj<ContinuousMatrixBlock<Derived, Row, Column>> block(size_t fromRow, size_t rowCount, size_t fromCol, size_t colCount) const;
+        template<size_t Col = Dynamic>
+        [[nodiscard]] __host__ __device__ inline device_obj<ContinuousMatrixBlock<Derived, RowAtCompile, Col>> cols(size_t fromCol, size_t colCount);
+        template<size_t Col = Dynamic>
+        [[nodiscard]] __host__ __device__ inline const device_obj<ContinuousMatrixBlock<Derived, RowAtCompile, Col>> cols(size_t fromCol, size_t colCount) const;
+        template<size_t Col = Dynamic>
+        [[nodiscard]] __host__ __device__ inline device_obj<ContinuousMatrixBlock<Derived, RowAtCompile, Col>> leftCols(size_t to);
+        template<size_t Col = Dynamic>
+        [[nodiscard]] __host__ __device__ inline const device_obj<ContinuousMatrixBlock<Derived, RowAtCompile, Col>> leftCols(size_t to) const;
+        template<size_t Col = Dynamic>
+        [[nodiscard]] __host__ __device__ inline device_obj<ContinuousMatrixBlock<Derived, RowAtCompile, Col>> rightCols(size_t from);
+        template<size_t Col = Dynamic>
+        [[nodiscard]] __host__ __device__ inline const device_obj<ContinuousMatrixBlock<Derived, RowAtCompile, Col>> rightCols(size_t from) const;
+        template<size_t Row = Dynamic, size_t Col = Dynamic>
+        [[nodiscard]] __host__ __device__ inline device_obj<ContinuousMatrixBlock<Derived, Row, Col>> topLeftCorner(size_t toRow, size_t toCol);
+        template<size_t Row = Dynamic, size_t Col = Dynamic>
+        [[nodiscard]] __host__ __device__ inline const device_obj<ContinuousMatrixBlock<Derived, Row, Col>> topLeftCorner(size_t toRow, size_t toCol) const;
+        template<size_t Row = Dynamic, size_t Col = Dynamic>
+        [[nodiscard]] __host__ __device__ inline device_obj<ContinuousMatrixBlock<Derived, Row, Col>> topLeftCorner(size_t to);
+        template<size_t Row = Dynamic, size_t Col = Dynamic>
+        [[nodiscard]] __host__ __device__ inline const device_obj<ContinuousMatrixBlock<Derived, Row, Col>> topLeftCorner(size_t to) const;
+        template<size_t Row = Dynamic, size_t Col = Dynamic>
+        [[nodiscard]] __host__ __device__ inline device_obj<ContinuousMatrixBlock<Derived, Row, Col>> topRightCorner(size_t toRow, size_t fromCol);
+        template<size_t Row = Dynamic, size_t Col = Dynamic>
+        [[nodiscard]] __host__ __device__ inline const device_obj<ContinuousMatrixBlock<Derived, Row, Col>> topRightCorner(size_t toRow, size_t fromCol) const;
+        template<size_t Row = Dynamic, size_t Col = Dynamic>
+        [[nodiscard]] __host__ __device__ inline device_obj<ContinuousMatrixBlock<Derived, Row, Col>> bottomLeftCorner(size_t fromRow, size_t toCol);
+        template<size_t Row = Dynamic, size_t Col = Dynamic>
+        [[nodiscard]] __host__ __device__ inline const device_obj<ContinuousMatrixBlock<Derived, Row, Col>> bottomLeftCorner(size_t fromRow, size_t toCol) const;
+        template<size_t Row = Dynamic, size_t Col = Dynamic>
+        [[nodiscard]] __host__ __device__ inline device_obj<ContinuousMatrixBlock<Derived, Row, Col>> bottomRightCorner(size_t fromRow, size_t fromCol);
+        template<size_t Row = Dynamic, size_t Col = Dynamic>
+        [[nodiscard]] __host__ __device__ inline const device_obj<ContinuousMatrixBlock<Derived, Row, Col>> bottomRightCorner(size_t fromRow, size_t fromCol) const;
+        template<size_t Row = Dynamic, size_t Col = Dynamic>
+        [[nodiscard]] __host__ __device__ inline device_obj<ContinuousMatrixBlock<Derived, Row, Col>> bottomRightCorner(size_t from);
+        template<size_t Row = Dynamic, size_t Col = Dynamic>
+        [[nodiscard]] __host__ __device__ inline const device_obj<ContinuousMatrixBlock<Derived, Row, Col>> bottomRightCorner(size_t from) const;
+        template<size_t Row = Dynamic, size_t Col = Dynamic>
+        [[nodiscard]] __host__ __device__ inline device_obj<ContinuousMatrixBlock<Derived, Row, Col>> block(size_t fromRow, size_t rowCount, size_t fromCol, size_t colCount);
+        template<size_t Row = Dynamic, size_t Col = Dynamic>
+        [[nodiscard]] __host__ __device__ inline const device_obj<ContinuousMatrixBlock<Derived, Row, Col>> block(size_t fromRow, size_t rowCount, size_t fromCol, size_t colCount) const;
         /* Getters */
         [[nodiscard]] __host__ __device__ PtrTy data() { return Base::getDerived().data_ptr(0, 0); }
         [[nodiscard]] __host__ __device__ ConstPtrTy data() const { return Base::getDerived().data_ptr(0, 0); }

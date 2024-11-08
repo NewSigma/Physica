@@ -30,7 +30,7 @@ namespace Physica::Core {
         std::ifstream fin;
         uint64_t stepNum;
     public:
-        MatrixSequence(size_t row, size_t column, std::ifstream fin_);
+        MatrixSequence(size_t row, size_t col, std::ifstream fin_);
         MatrixSequence(const MatrixSequence&) = default;
         MatrixSequence(MatrixSequence&&) = default;
         ~MatrixSequence() = default;
@@ -45,8 +45,8 @@ namespace Physica::Core {
     };
 
     template<class ScalarType>
-    MatrixSequence<ScalarType>::MatrixSequence(size_t row, size_t column, std::ifstream fin_)
-            : mat(row, column)
+    MatrixSequence<ScalarType>::MatrixSequence(size_t row, size_t col, std::ifstream fin_)
+            : mat(row, col)
             , fin(std::move(fin_))
             , stepNum(0) {}
 

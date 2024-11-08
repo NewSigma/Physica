@@ -44,7 +44,7 @@ namespace Physica::Core {
         /* Operations */
         void resize([[maybe_unused]] size_t length) { assert(length == getLength()); }
         /* Getters */
-        [[nodiscard]] __host__ __device__ size_t getLength() const noexcept { return mat.getRow() * mat.getColumn(); }
+        [[nodiscard]] __host__ __device__ size_t getLength() const noexcept { return mat.getRow() * mat.getCol(); }
         [[nodiscard]] __host__ __device__ inline PtrTy data_ptr(size_t index);
         [[nodiscard]] __host__ __device__ inline ConstPtrTy data_ptr(size_t index) const;
     };
@@ -54,7 +54,7 @@ namespace Physica::Core {
         const size_t major = index / mat.getMaxMinor();
         const size_t minor = index % mat.getMaxMinor();
         const size_t row = MatrixOption::rowFromMajorMinor<MatrixType>(major, minor);
-        const size_t col = MatrixOption::columnFromMajorMinor<MatrixType>(major, minor);
+        const size_t col = MatrixOption::colFromMajorMinor<MatrixType>(major, minor);
         return mat.data_ptr(row, col);
     }
 

@@ -29,8 +29,8 @@ namespace Physica::Core {
     template<class MatrixType, class VectorType>
     void gramSchmidt(const RValueMatrix<MatrixType>& base_, LValueVector<VectorType>& v) {
         const auto& base = base_.getDerived();
-        assert(base.getRow() > base.getColumn() && "[Error]: base is over complete");
-        for (size_t i = 0; i < base.getColumn(); ++i) {
+        assert(base.getRow() > base.getCol() && "[Error]: base is over complete");
+        for (size_t i = 0; i < base.getCol(); ++i) {
             const auto col = base.col(i);
             const auto dot = col.asVector().conjugate() * v.getDerived();
             v -= dot * col.asVector();
@@ -51,9 +51,9 @@ namespace Physica::Core {
         using RealType = typename ScalarType::RealType;
         [[maybe_unused]] constexpr double epsilon = 1E-3;
         const auto& base = base_.getDerived();
-        assert(base.getRow() > base.getColumn() && "[Error]: base is over complete");
+        assert(base.getRow() > base.getCol() && "[Error]: base is over complete");
         assert(scalarNear(v.squaredNorm(), squaredNorm, epsilon) && "[Error]: Invalid param");
-        for (size_t i = 0; i < base.getColumn(); ++i) {
+        for (size_t i = 0; i < base.getCol(); ++i) {
             const auto col = base.col(i);
             [[maybe_unused]] const RealType temp = col.squaredNorm();
             assert(scalarNear(temp, RealType(1), epsilon) && "[Error]: Invalid param");
@@ -67,11 +67,11 @@ namespace Physica::Core {
     template<class MatrixType>
     void gramSchmidt(LValueMatrix<MatrixType>& m_) {
         auto& m = m_.getDerived();
-        assert(m.getRow() >= m.getColumn() && "[Error]: base is over complete");
-        for (size_t i = 0; i < m.getColumn(); ++i) {
+        assert(m.getRow() >= m.getCol() && "[Error]: base is over complete");
+        for (size_t i = 0; i < m.getCol(); ++i) {
             auto col1 = m.col(i);
             col1.toUnit();
-            for (size_t j = i + 1; j < m.getColumn(); ++j) {
+            for (size_t j = i + 1; j < m.getCol(); ++j) {
                 auto col2 = m.col(j);
                 const auto dot = col1.asVector().conjugate() * col2.asVector();
                 col2 -= dot * col1.asVector();

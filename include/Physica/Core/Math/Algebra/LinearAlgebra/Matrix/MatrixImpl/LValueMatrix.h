@@ -55,8 +55,8 @@ namespace Physica::Core {
         LValueMatrix& operator=(LValueMatrix&& m) = delete;
         template<class OtherMatrix> Derived& operator=(const RValueMatrix<OtherMatrix>& m);
         Derived& operator=(const ScalarType& s);
-        [[nodiscard]] inline RefTy operator()(size_t row, size_t column);
-        [[nodiscard]] inline ConstRefTy operator()(size_t row, size_t column) const;
+        [[nodiscard]] inline RefTy operator()(size_t row, size_t col);
+        [[nodiscard]] inline ConstRefTy operator()(size_t row, size_t col) const;
         void operator+=(const ScalarType& s) { (*this) = (*this) + s; }
         void operator-=(const ScalarType& s) { (*this) = (*this) - s; }
         void operator*=(const ScalarType& s) { (*this) = (*this) * s; }
@@ -101,7 +101,7 @@ namespace Physica::Core {
         [[nodiscard]] InverseMatrix<Derived> inverse() const noexcept;
         ScalarType determinate() const;
         void rowReduce(size_t r1, size_t r2, size_t elementIndex);
-        void columnReduce(size_t c1, size_t c2, size_t elementIndex);
+        void colReduce(size_t c1, size_t c2, size_t elementIndex);
         inline void majorReduce(size_t v1, size_t v2, size_t elementIndex);
         inline void majorReduce(size_t v1, size_t v2, const ScalarType& factor);
         inline void majorMulScalar(size_t v, const ScalarType& factor);

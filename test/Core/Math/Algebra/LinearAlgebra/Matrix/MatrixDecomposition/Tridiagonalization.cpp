@@ -38,7 +38,7 @@ bool doTest(const MatrixType& source, double tolerance) {
 int main() {
     using RealType = float64;
     {
-        using MatrixType = DenseMatrix<RealType, MatrixOption::Column | MatrixOption::Vector, 4, 4>;
+        using MatrixType = DenseMatrix<RealType, MatrixOption::Col | MatrixOption::Vector, 4, 4>;
         const MatrixType temp{{1, 2, 3, 4}, {5, 6, 7, 8}, {9, 10, 11, 12}, {13, 14, 15, 16}};
         const MatrixType mat = temp + temp.transpose();
         if (!doTest(mat, 1E-14))
@@ -51,7 +51,7 @@ int main() {
             return 1;
     }
     /* Complex case */ {
-        using MatrixType = DenseMatrix<Complex<RealType>, MatrixOption::Column | MatrixOption::Vector, 3, 3>;
+        using MatrixType = DenseMatrix<Complex<RealType>, MatrixOption::Col | MatrixOption::Vector, 3, 3>;
         const MatrixType temp{{{2, 1}, {-3, 6}, {12, 7}}, {{-50, -9}, {2, 180}, {-9, -6}}, {{-7, 8}, {546, 0}, {0, -25}}};
         const MatrixType mat = temp + temp.hermite();
         if (!doTest(mat, 1E-12))

@@ -184,7 +184,7 @@ namespace Physica::Core {
         /* Getters */
         Matrix getCurrentRotation() const { return hamonicRotation; }
     private:
-        ScalarType getCenteredElement(size_t row, size_t column);
+        ScalarType getCenteredElement(size_t row, size_t col);
         bool nearByMargin(double actual, double expected);
         ScalarType P(int i, int a, int b, int l);
         ScalarType U(int m, int n, int l);

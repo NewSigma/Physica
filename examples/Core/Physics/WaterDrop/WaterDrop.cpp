@@ -94,7 +94,7 @@ int WaterDropSolver::output() {
     const auto& r = solver.getX();
     const auto& solution = solver.getSolution();
 
-    const size_t length = solution.getColumn();
+    const size_t length = solution.getCol();
     Vector<T> z{};
     z.resize(length);
 
@@ -123,7 +123,7 @@ T WaterDropSolver::getVolume() const {
     const auto& r = solver.getX();
     const auto& solution = solver.getSolution();
 
-    const size_t length = solution.getColumn();
+    const size_t length = solution.getCol();
     T volumeHelper(0);
     for (size_t i = 0; i < length; ++i)
         volumeHelper += solution(0, i) * r[i];
@@ -132,7 +132,7 @@ T WaterDropSolver::getVolume() const {
 
 T WaterDropSolver::getMinTangent() const {
     const auto& solution = solver.getSolution();
-    return solution(1, solution.getColumn() - 1);
+    return solution(1, solution.getCol() - 1);
 }
 
 void parallelSolve(WaterDropArgs args, const EquationEnv& env) {

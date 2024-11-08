@@ -99,7 +99,7 @@ namespace Physica::Core {
                     /* Translational mode */ {
                         langevinImpl(buffer(0, 0), deltaT, momentumViscosityY, factor, fft.getKSpace()[0]);
                     }
-                    for (size_t j = 1; j < buffer.getColumn(); ++j) {
+                    for (size_t j = 1; j < buffer.getCol(); ++j) {
                         const ScalarType phase = M_PI * j / numReplica;
                         const ScalarType viscosityY = sin(phase) * omegaW;
                         langevinImpl(buffer(0, j), deltaT, viscosityY, factor, fft.getKSpace()[j]);

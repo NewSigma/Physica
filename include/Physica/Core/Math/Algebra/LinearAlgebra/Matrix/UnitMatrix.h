@@ -43,7 +43,7 @@ namespace Physica::Core {
         inline void swap(This& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] __host__ __device__ size_t getRow() const noexcept { return order; }
-        [[nodiscard]] __host__ __device__ size_t getColumn() const noexcept { return order; }
+        [[nodiscard]] __host__ __device__ size_t getCol() const noexcept { return order; }
     };
 
     template<class ScalarType, size_t Order>
@@ -60,7 +60,7 @@ namespace Physica::Core {
     template<class ScalarType, size_t Order, class VectorType>
     [[nodiscard]] inline const VectorType&
     operator*([[maybe_unused]] const UnitMatrix<ScalarType, Order>& mat, const RValueVector<VectorType>& vec) noexcept {
-        assert(mat.getColumn() == vec.getLength());
+        assert(mat.getCol() == vec.getLength());
         return vec.getDerived();
     }
 }

@@ -19,38 +19,38 @@
 #pragma once
 
 namespace Physica::Core {
-    #define tparams class T, size_t Row, size_t Column, class Allocator
-    #define ColumnElementStorage DenseMatrixStorage<T, MatrixOption::Column | MatrixOption::Element, Row, Column, Allocator>
+    #define tparams class T, size_t Row, size_t Col, class Allocator
+    #define ColumnElementStorage DenseMatrixStorage<T, MatrixOption::Col | MatrixOption::Element, Row, Col, Allocator>
 
     template<tparams>
-    __host__ __device__ device_obj<ColumnElementStorage>::device_obj(size_t row, size_t column) : Dim(row, column), arr(row * column) {}
+    __host__ __device__ device_obj<ColumnElementStorage>::device_obj(size_t row, size_t col) : Dim(row, col), arr(row * col) {}
 
     template<tparams>
-    __host__ __device__ device_obj<ColumnElementStorage>::device_obj(size_t row, size_t column, ElemType value) : Dim(row, column), arr(row * column, std::move(value)) {}
+    __host__ __device__ device_obj<ColumnElementStorage>::device_obj(size_t row, size_t col, ElemType value) : Dim(row, col), arr(row * col, std::move(value)) {}
 
     template<tparams>
     device_obj<ColumnElementStorage>::device_obj(const host_obj& storage)
-            : Dim(storage.getRow(), storage.getColumn()), arr(storage.arr) {}
+            : Dim(storage.getRow(), storage.getCol()), arr(storage.arr) {}
 
     template<tparams>
     __device__ typename device_obj<ColumnElementStorage>::ElemType& device_obj<ColumnElementStorage>::operator()(size_t r, size_t c) {
-        assert(r < getRow() && c < getColumn());
+        assert(r < getRow() && c < getCol());
         return arr[toIndex(r, c)];
     }
 
     template<tparams>
     __device__ const typename device_obj<ColumnElementStorage>::ElemType& device_obj<ColumnElementStorage>::operator()(size_t r, size_t c) const {
-        assert(r < getRow() && c < getColumn());
+        assert(r < getRow() && c < getCol());
         return arr[toIndex(r, c)];
     }
 
     template<tparams>
     template<class... Args>
-    __host__ __device__ void device_obj<ColumnElementStorage>::resize(size_t row, size_t column, Args&&... args) {
+    __host__ __device__ void device_obj<ColumnElementStorage>::resize(size_t row, size_t col, Args&&... args) {
         if constexpr (IsDevice())
-            assert(Row * Column != Dynamic && "[Error]: Do not allocate dynamic matrix in device code");
-        Dim::resize(row, column);
-        arr.resize(row * column, std::forward<Args>(args)...);
+            assert(Row * Col != Dynamic && "[Error]: Do not allocate dynamic matrix in device code");
+        Dim::resize(row, col);
+        arr.resize(row * col, std::forward<Args>(args)...);
     }
 
     template<tparams>
@@ -67,7 +67,7 @@ namespace Physica::Core {
 
     template<tparams>
     inline auto ColumnElementStorage::toDeviceAsync() const {
-        device_obj<This> result(getRow(), getColumn());
+        device_obj<This> result(getRow(), getCol());
         toDeviceAsync(result);
         return device_obj<This>(std::move(result));
     }
@@ -83,39 +83,39 @@ namespace Physica::Core {
     }
 
     #undef ColumnElementStorage
-    #define RowElementStorage DenseMatrixStorage<T, MatrixOption::Row | MatrixOption::Element, Row, Column, Allocator>
+    #define RowElementStorage DenseMatrixStorage<T, MatrixOption::Row | MatrixOption::Element, Row, Col, Allocator>
 
     template<tparams>
-    __host__ __device__ device_obj<RowElementStorage>::device_obj(size_t row, size_t column) : Dim(row, column), arr(row * column) {}
+    __host__ __device__ device_obj<RowElementStorage>::device_obj(size_t row, size_t col) : Dim(row, col), arr(row * col) {}
 
     template<tparams>
-    __host__ __device__ device_obj<RowElementStorage>::device_obj(size_t row, size_t column, ElemType value) : Dim(row, column), arr(row * column, std::move(value)) {}
+    __host__ __device__ device_obj<RowElementStorage>::device_obj(size_t row, size_t col, ElemType value) : Dim(row, col), arr(row * col, std::move(value)) {}
 
     template<tparams>
     device_obj<RowElementStorage>::device_obj(const host_obj& storage)
-            : Dim(storage.getRow(), storage.getColumn()), arr(storage.arr) {}
+            : Dim(storage.getRow(), storage.getCol()), arr(storage.arr) {}
 
     template<tparams>
     __device__ typename device_obj<RowElementStorage>::ElemType&
     device_obj<RowElementStorage>::operator()(size_t r, size_t c) {
-        assert(r < getRow() && c < getColumn());
+        assert(r < getRow() && c < getCol());
         return arr[toIndex(r, c)];
     }
 
     template<tparams>
     __device__ const typename device_obj<RowElementStorage>::ElemType&
     device_obj<RowElementStorage>::operator()(size_t r, size_t c) const {
-        assert(r < getRow() && c < getColumn());
+        assert(r < getRow() && c < getCol());
         return arr[toIndex(r, c)];
     }
 
     template<tparams>
     template<class... Args>
-    __host__ __device__ void device_obj<RowElementStorage>::resize(size_t row, size_t column, Args&&... args) {
+    __host__ __device__ void device_obj<RowElementStorage>::resize(size_t row, size_t col, Args&&... args) {
         if constexpr (IsDevice())
-            assert(Row * Column != Dynamic && "[Error]: Do not allocate dynamic matrix in device code");
-        Dim::resize(row, column);
-        arr.resize(row * column, std::forward<Args>(args)...);
+            assert(Row * Col != Dynamic && "[Error]: Do not allocate dynamic matrix in device code");
+        Dim::resize(row, col);
+        arr.resize(row * col, std::forward<Args>(args)...);
     }
 
     template<tparams>
@@ -132,7 +132,7 @@ namespace Physica::Core {
 
     template<tparams>
     inline auto RowElementStorage::toDeviceAsync() const {
-        device_obj<This> result(getRow(), getColumn());
+        device_obj<This> result(getRow(), getCol());
         toDeviceAsync(result);
         return device_obj<This>(std::move(result));
     }
@@ -148,43 +148,43 @@ namespace Physica::Core {
     }
 
     #undef RowElementStorage
-    #define ColumnVectorStorage DenseMatrixStorage<T, MatrixOption::Column | MatrixOption::Vector, Row, Column, Allocator>
+    #define ColumnVectorStorage DenseMatrixStorage<T, MatrixOption::Col | MatrixOption::Vector, Row, Col, Allocator>
 
     template<tparams>
-    device_obj<ColumnVectorStorage>::device_obj(size_t row, size_t column)
-            : Dim(row, column), array(column, row), size(row * column) {}
+    device_obj<ColumnVectorStorage>::device_obj(size_t row, size_t col)
+            : Dim(row, col), array(col, row), size(row * col) {}
 
     template<tparams>
-    device_obj<ColumnVectorStorage>::device_obj(size_t row, size_t column, T value)
-            : Dim(row, column), array(column, row, std::move(value)), size(row * column) {}
+    device_obj<ColumnVectorStorage>::device_obj(size_t row, size_t col, T value)
+            : Dim(row, col), array(col, row, std::move(value)), size(row * col) {}
 
     template<tparams>
     device_obj<ColumnVectorStorage>::device_obj(const host_obj& storage)
-            : Dim(storage.getRow(), storage.getColumn()), array(storage.array), size(storage.getSize()) {}
+            : Dim(storage.getRow(), storage.getCol()), array(storage.array), size(storage.getSize()) {}
 
     template<tparams>
     __device__ T&
     device_obj<ColumnVectorStorage>::operator()(size_t r, size_t c) {
-        assert(r < getRow() && c < getColumn());
+        assert(r < getRow() && c < getCol());
         return array[c][r];
     }
 
     template<tparams>
     __device__ const T&
     device_obj<ColumnVectorStorage>::operator()(size_t r, size_t c) const {
-        assert(r < getRow() && c < getColumn());
+        assert(r < getRow() && c < getCol());
         return array[c][r];
     }
 
     template<tparams>
-    void device_obj<ColumnVectorStorage>::resize(size_t row, size_t column) {
-        array.resize(column);
+    void device_obj<ColumnVectorStorage>::resize(size_t row, size_t col) {
+        array.resize(col);
         auto host_array = array.toHost();
         for (auto& vector : host_array)
             vector.resize(row);
         host_array.toDevice(array);
-        Dim::resize(row, column);
-        size = row * column;
+        Dim::resize(row, col);
+        size = row * col;
     }
 
     template<tparams>
@@ -197,18 +197,18 @@ namespace Physica::Core {
 
     template<tparams>
     __host__ __device__ T*
-    device_obj<ColumnVectorStorage>::data_ptr(size_t row, size_t column) {
-        return const_cast<T*>(const_cast<const This&>(*this).data_ptr(row, column));
+    device_obj<ColumnVectorStorage>::data_ptr(size_t row, size_t col) {
+        return const_cast<T*>(const_cast<const This&>(*this).data_ptr(row, col));
     }
 
     template<tparams>
     __host__ __device__ const T*
-    device_obj<ColumnVectorStorage>::data_ptr(size_t row, size_t column) const {
+    device_obj<ColumnVectorStorage>::data_ptr(size_t row, size_t col) const {
         if constexpr (IsDevice())
-            return array[column].data() + row;
+            return array[col].data() + row;
         else {
             const auto host_array = array.toPlainHost();
-            const auto* p = host_array[column].getDerived().data() + row;
+            const auto* p = host_array[col].getDerived().data() + row;
             return p;
         }
     }
@@ -219,43 +219,43 @@ namespace Physica::Core {
     }
 
     #undef ColumnVectorStorage
-    #define RowVectorStorage DenseMatrixStorage<T, MatrixOption::Row | MatrixOption::Vector, Row, Column, Allocator>
+    #define RowVectorStorage DenseMatrixStorage<T, MatrixOption::Row | MatrixOption::Vector, Row, Col, Allocator>
 
     template<tparams>
-    device_obj<RowVectorStorage>::device_obj(size_t row, size_t column)
-            : Dim(row, column), array(row, column), size(row * column) {}
+    device_obj<RowVectorStorage>::device_obj(size_t row, size_t col)
+            : Dim(row, col), array(row, col), size(row * col) {}
 
     template<tparams>
-    device_obj<RowVectorStorage>::device_obj(size_t row, size_t column, T value)
-            : Dim(row, column), array(row, column, std::move(value)), size(row * column) {}
+    device_obj<RowVectorStorage>::device_obj(size_t row, size_t col, T value)
+            : Dim(row, col), array(row, col, std::move(value)), size(row * col) {}
 
     template<tparams>
     device_obj<RowVectorStorage>::device_obj(const host_obj& storage)
-            : Dim(storage.getRow(), storage.getColumn()), array(storage.array), size(storage.getSize()) {}
+            : Dim(storage.getRow(), storage.getCol()), array(storage.array), size(storage.getSize()) {}
 
     template<tparams>
     __device__ T&
     device_obj<RowVectorStorage>::operator()(size_t r, size_t c) {
-        assert(r < getRow() && c < getColumn());
+        assert(r < getRow() && c < getCol());
         return array[r][c];
     }
 
     template<tparams>
     __device__ const T&
     device_obj<RowVectorStorage>::operator()(size_t r, size_t c) const {
-        assert(r < getRow() && c < getColumn());
+        assert(r < getRow() && c < getCol());
         return array[r][c];
     }
 
     template<tparams>
-    void device_obj<RowVectorStorage>::resize(size_t row, size_t column) {
+    void device_obj<RowVectorStorage>::resize(size_t row, size_t col) {
         array.resize(row);
         auto host_array = array.toHost();
         for (auto& vector : host_array)
-            vector.resize(column);
+            vector.resize(col);
         host_array.toDevice(array);
-        Dim::resize(row, column);
-        size = row * column;
+        Dim::resize(row, col);
+        size = row * col;
     }
 
     template<tparams>
@@ -268,18 +268,18 @@ namespace Physica::Core {
 
     template<tparams>
     __host__ __device__ T*
-    device_obj<RowVectorStorage>::data_ptr(size_t row, size_t column) {
-        return const_cast<T*>(const_cast<const This&>(*this).data_ptr(row, column));
+    device_obj<RowVectorStorage>::data_ptr(size_t row, size_t col) {
+        return const_cast<T*>(const_cast<const This&>(*this).data_ptr(row, col));
     }
 
     template<tparams>
     __host__ __device__ const T*
-    device_obj<RowVectorStorage>::data_ptr(size_t row, size_t column) const {
+    device_obj<RowVectorStorage>::data_ptr(size_t row, size_t col) const {
         if constexpr (IsDevice())
-            return array[row].data() + column;
+            return array[row].data() + col;
         else {
             const auto host_array = array.toPlainHost();
-            const auto* p = host_array[row].getDerived().data() + column;
+            const auto* p = host_array[row].getDerived().data() + col;
             return p;
         }
     }

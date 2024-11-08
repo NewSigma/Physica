@@ -82,7 +82,7 @@ int main(int argc, char** argv) {
     MatrixType record(1000, 8);
     VectorType mean(record.getRow()), devia(record.getRow());
     if constexpr (IsComputeMode) {
-        ThreadPool::numThreadRequired = record.getColumn();
+        ThreadPool::numThreadRequired = record.getCol();
         ThreadExecutor::parallel_for([&record](unsigned int sys) {
             auto& gen = Random<RandomGenerator>::getInstance().getGen();
             MDType rpmd = MDType(makeSystem(gen), 1, 1, temperatureT, timeStep);
@@ -104,7 +104,7 @@ int main(int argc, char** argv) {
                 }
             }
             record.asArray()[sys] = std::move(mean);
-        }, record.getColumn(), ThreadPool::numThreadRequired).wait();
+        }, record.getCol(), ThreadPool::numThreadRequired).wait();
 
         for (size_t i = 0; i < mean.getLength(); ++i) {
             mean[i] = Physica::Core::mean(record.row(i));

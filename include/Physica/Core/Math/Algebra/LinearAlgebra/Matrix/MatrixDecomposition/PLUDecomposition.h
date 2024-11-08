@@ -44,7 +44,7 @@ namespace Physica::Core {
         [[nodiscard]] const MatrixType& getMatrix() const noexcept { return matrix; }
         [[nodiscard]] const Array<size_t>& getBiasOrder() const noexcept { return biasOrder; }
     private:
-        void decompositionColumn(size_t column);
+        void decompositionColumn(size_t col);
     };
 }
 

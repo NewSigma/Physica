@@ -57,7 +57,7 @@ namespace Physica::Core {
         void swap(HardCore& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] size_t getNumParticle() const noexcept { return repMass.getLength(); }
-        [[nodiscard]] size_t getNumReplica() const noexcept { return buffer.getColumn(); }
+        [[nodiscard]] size_t getNumReplica() const noexcept { return buffer.getCol(); }
         [[nodiscard]] const Vector<ScalarType>& getRepMass() const noexcept { return repMass; }
         [[nodiscard]] size_t getHandleNum() { return handleNum; }
         /* Static members */

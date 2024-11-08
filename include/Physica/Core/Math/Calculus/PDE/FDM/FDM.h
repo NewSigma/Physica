@@ -28,7 +28,7 @@ namespace Physica::Core {
     public:
         enum BoundaryType {
             Row,
-            Column
+            Col
         };
         /*!
          * Only supports horizontal or vertical Dirichlet boundary conditions.
@@ -52,19 +52,19 @@ namespace Physica::Core {
     template<class T>
     class FDM : public FDMBase {
     public:
-        using DataMatrix = DenseMatrix<T, MatrixOption::Column | MatrixOption::Vector, Dynamic, Dynamic>;
+        using DataMatrix = DenseMatrix<T, MatrixOption::Col | MatrixOption::Vector, Dynamic, Dynamic>;
     private:
         DataMatrix data;
         std::vector<Boundary> boundaries;
     public:
-        FDM(size_t column, size_t row);
+        FDM(size_t col, size_t row);
         /* Operations */
         void addBoundary(const Boundary& boundary, const T& value);
         void loop();
         /* Getters */
         [[nodiscard]] const DataMatrix& getData() { return data; }
     private:
-        bool onBoundary(size_t column, size_t row);
+        bool onBoundary(size_t col, size_t row);
     };
 }
 

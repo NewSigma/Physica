@@ -82,7 +82,7 @@ namespace Physica::Core {
     template<class MatrixType, class VectorType>
     __host__ __device__ device_obj<MatrixVectorProduct<MatrixType, VectorType>>::device_obj(
             const device_obj<RValueMatrix<MatrixType>>& mat_, const device_obj<RValueVector<VectorType>>& vec_) {
-        assert(mat_.getColumn() == vec_.getLength());
+        assert(mat_.getCol() == vec_.getLength());
         if constexpr (IsHost()) {
             mat.value = asStruct(mat_.getDerived());
             vec.value = asStruct(vec_.getDerived());

@@ -48,7 +48,7 @@ namespace Physica::Core {
         [[nodiscard]] size_t getCol() const noexcept { return getOrder(); }
         [[nodiscard]] const WorkingMatrix& getMatrixLU() const noexcept { return working; }
     private:
-        void decompositionColumn(size_t column);
+        void decompositionColumn(size_t col);
     };
 
     template<class ScalarType>
@@ -63,7 +63,7 @@ namespace Physica::Core {
     template<class ScalarType>
     template<class MatrixType>
     void LUDecomposition<ScalarType>::compute(const RValueMatrix<MatrixType>& source) {
-        assert(source.getRow() == source.getColumn());
+        assert(source.getRow() == source.getCol());
         working = source;
         const size_t order = getOrder();
         for (size_t i = 0; i < order; ++i)
@@ -82,21 +82,21 @@ namespace Physica::Core {
      * [1] William H. Press, Saul A. Teukolsky, William T. Vetterling, Brian P. Flannery. C++数值算法(第二版)[M]. 北京: 电子工业出版社, 2005:32
      */
     template<class ScalarType>
-    void LUDecomposition<ScalarType>::decompositionColumn(size_t column) {
-        const auto startAlphaIndex = column + 1;
+    void LUDecomposition<ScalarType>::decompositionColumn(size_t col) {
+        const auto startAlphaIndex = col + 1;
         for (size_t j = 1; j < startAlphaIndex; ++j) {
-            ScalarType temp(working(j, column));
+            ScalarType temp(working(j, col));
             for (size_t k = 0; k < j; ++k)
-                temp -= working(j, k) * working(k, column);
-            working(j, column) = std::move(temp);
+                temp -= working(j, k) * working(k, col);
+            working(j, col) = std::move(temp);
         }
 
         const auto r = working.getRow();
         for (size_t j = startAlphaIndex; j < r; ++j) {
-            ScalarType temp(working(j, column));
-            for (size_t k = 0; k < column; ++k)
-                temp -= working(j, k) * working(k, column);
-            working(j, column) = temp / working(column, column);
+            ScalarType temp(working(j, col));
+            for (size_t k = 0; k < col; ++k)
+                temp -= working(j, k) * working(k, col);
+            working(j, col) = temp / working(col, col);
         }
     }
 }

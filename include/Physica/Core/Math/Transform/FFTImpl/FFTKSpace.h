@@ -113,12 +113,12 @@ namespace Physica::Core {
         /* Operations */
         template<class MatrixType>
         inline void invTransform(const RValueMatrix<MatrixType>& data);
-        void resize([[maybe_unused]] size_t row, [[maybe_unused]] size_t col) { assert(row == getRow()); assert(col == getColumn()); }
+        void resize([[maybe_unused]] size_t row, [[maybe_unused]] size_t col) { assert(row == getRow()); assert(col == getCol()); }
         /* Getters */
         [[nodiscard]] __host__ __device__ size_t getRow() const noexcept { return Base::getDerived().getKSpaceSize()[0]; }
-        [[nodiscard]] __host__ __device__ size_t getColumn() const noexcept { return Base::getDerived().getKSpaceSize()[1]; }
-        [[nodiscard]] __host__ __device__ PtrTy data_ptr(size_t row, size_t column);
-        [[nodiscard]] __host__ __device__ ConstPtrTy data_ptr(size_t row, size_t column) const;
+        [[nodiscard]] __host__ __device__ size_t getCol() const noexcept { return Base::getDerived().getKSpaceSize()[1]; }
+        [[nodiscard]] __host__ __device__ PtrTy data_ptr(size_t row, size_t col);
+        [[nodiscard]] __host__ __device__ ConstPtrTy data_ptr(size_t row, size_t col) const;
     protected:
         FFTKSpace() = default;
         FFTKSpace(const FFTKSpace&) = default;
@@ -127,7 +127,7 @@ namespace Physica::Core {
 
     template<class Derived>
     FFTKSpace<Derived, 2>& FFTKSpace<Derived, 2>::operator=(const FFTKSpace<Derived, 2>& obj) {
-        resize(obj.getRow(), obj.getColumn());
+        resize(obj.getRow(), obj.getCol());
         obj.assignTo(*this);
         return *this;
     }
@@ -136,7 +136,7 @@ namespace Physica::Core {
     template<class MatrixType>
     inline void FFTKSpace<Derived, 2>::invTransform(const RValueMatrix<MatrixType>& data) {
         assert(data.getRow() == getRow());
-        assert(data.getColumn() == getColumn());
+        assert(data.getCol() == getCol());
         *this = data;
         Base::getDerived().invTransform();
     }
@@ -144,8 +144,8 @@ namespace Physica::Core {
     template<class Derived>
     inline typename FFTKSpace<Derived, 2>::PtrTy FFTKSpace<Derived, 2>::data_ptr(size_t row, size_t col) {
         assert(row < getRow());
-        assert(col < getColumn());
-        return Base::getDerived().asComplexBuffer() + row * getColumn() + col;
+        assert(col < getCol());
+        return Base::getDerived().asComplexBuffer() + row * getCol() + col;
     }
 
     template<class Derived>

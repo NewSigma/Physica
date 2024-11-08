@@ -22,7 +22,7 @@
 
 namespace Physica::Core {
     template<class Derived> class RValueMatrix;
-    template<class MatrixType, size_t Row = Dynamic, size_t Column = Dynamic> class RMatrixBlock;
+    template<class MatrixType, size_t Row = Dynamic, size_t Col = Dynamic> class RMatrixBlock;
     /**
      * \class RowRVector and \class ColRVector is designed to implement \class RMatrixBlock, and they can be used indepently.
      */
@@ -39,7 +39,7 @@ namespace Physica::Core {
     public:
         RowRVector(MatrixType& mat_, size_t row_, size_t fromCol_, size_t colCount_) : mat(mat_), row(row_), fromCol(fromCol_), colCount(colCount_) {
             assert(row < mat.getRow());
-            assert(fromCol + colCount <= mat.getColumn());
+            assert(fromCol + colCount <= mat.getCol());
         }
         RowRVector(const RowRVector&) = delete;
         RowRVector(RowRVector&&) noexcept = delete;
@@ -63,7 +63,7 @@ namespace Physica::Core {
         ColRVector(MatrixType& mat_, size_t fromRow_, size_t rowCount_, size_t col_)
                 : mat(mat_), col(col_), fromRow(fromRow_), rowCount(rowCount_) {
             assert(fromRow + rowCount <= mat.getRow());
-            assert(col < mat.getColumn());
+            assert(col < mat.getCol());
         }
         ColRVector(const ColRVector&) = delete;
         ColRVector(ColRVector&&) noexcept = delete;
@@ -98,7 +98,7 @@ namespace Physica::Core {
         using VectorBase::sum;
         [[nodiscard]] ScalarType calc([[maybe_unused]] size_t row, size_t col) const { assert(row == 0); return VectorBase::calc(col); }
         [[nodiscard]] __host__ __device__ constexpr static size_t getRow() noexcept { return 1; }
-        [[nodiscard]] __host__ __device__ size_t getColumn() const noexcept { return VectorBase::getLength(); }
+        [[nodiscard]] __host__ __device__ size_t getCol() const noexcept { return VectorBase::getLength(); }
         /**
          * There are some common functions shared by vector and matrix, it is necessary to decide which function to call explicitly.
          */
@@ -133,7 +133,7 @@ namespace Physica::Core {
         using VectorBase::sum;
         [[nodiscard]] ScalarType calc(size_t row, [[maybe_unused]] size_t col) const { assert(col == 0); return VectorBase::calc(row); }
         [[nodiscard]] __host__ __device__ size_t getRow() const noexcept { return VectorBase::getLength(); }
-        [[nodiscard]] __host__ __device__ constexpr static size_t getColumn() noexcept { return 1; }
+        [[nodiscard]] __host__ __device__ constexpr static size_t getCol() noexcept { return 1; }
         /**
          * There are some common functions shared by vector and matrix, it is necessary to decide which function to call explicitly.
          */
@@ -162,7 +162,7 @@ namespace Physica::Core {
         /* Getters */
         [[nodiscard]] ScalarType calc(size_t row, size_t col) const;
         [[nodiscard]] __host__ __device__ size_t getRow() const noexcept { return rowCount; }
-        [[nodiscard]] __host__ __device__ size_t getColumn() const noexcept { return colCount; }
+        [[nodiscard]] __host__ __device__ size_t getCol() const noexcept { return colCount; }
     };
 
     template<class MatrixType>
@@ -173,7 +173,7 @@ namespace Physica::Core {
             , fromCol(fromCol_)
             , colCount(colCount_) {
         assert((fromRow + rowCount) <= mat.getRow());
-        assert((fromCol + colCount) <= mat.getColumn());
+        assert((fromCol + colCount) <= mat.getCol());
     }
 
     template<class MatrixType>
@@ -206,13 +206,13 @@ namespace Physica {
         constexpr static bool FastPacket = false;
     };
 
-    template<class MatrixType, size_t Row, size_t Column>
-    class Traits<RMatrixBlock<MatrixType, Row, Column>> {
+    template<class MatrixType, size_t Row, size_t Col>
+    class Traits<RMatrixBlock<MatrixType, Row, Col>> {
     public:
         using ScalarType = typename MatrixType::ScalarType;
         constexpr static int Option = MatrixType::Option;
         constexpr static size_t RowAtCompile = Row;
-        constexpr static size_t ColumnAtCompile = Column;
-        constexpr static size_t SizeAtCompile = Row * Column;
+        constexpr static size_t ColumnAtCompile = Col;
+        constexpr static size_t SizeAtCompile = Row * Col;
     };
 }

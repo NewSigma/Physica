@@ -29,11 +29,11 @@ namespace Physica::Core {
     template<class Derived> class LValueVector;
     template<class Derived> class ContinuousVector;
     template<class Derived> class ContinuousMatrix;
-    template<class T, int Option, size_t Row, size_t Column, class Allocator> class DenseMatrix;
+    template<class T, int Option, size_t Row, size_t Col, class Allocator> class DenseMatrix;
     template<class VectorType> class TransposeVector;
     template<class VectorType> class ConjugateVector;
     template<class VectorType> class HermiteVector;
-    template<class VectorType, int MatrixMajor, size_t Row, size_t Column> class ReshapedVector;
+    template<class VectorType, int MatrixMajor, size_t Row, size_t Col> class ReshapedVector;
     template<class VectorType> class FormatedVector;
     template<class VectorType> class ReverseVector;
     template<class AnyVector1, class AnyVector2> class CrossProduct;
@@ -82,7 +82,7 @@ namespace Physica::Core {
         using PlainScalar = typename ScalarType::PlainScalar;
         constexpr static size_t SizeAtCompile = Traits<Derived>::SizeAtCompile;
         using PacketType = typename BestPacket<ScalarType, SizeAtCompile>::Type;
-        using ColMatrix = DenseMatrix<ScalarType, MatrixOption::Column | MatrixOption::Vector, SizeAtCompile, 1, HostAllocator<ScalarType>>;
+        using ColMatrix = DenseMatrix<ScalarType, MatrixOption::Col | MatrixOption::Vector, SizeAtCompile, 1, HostAllocator<ScalarType>>;
         using RowMatrix = DenseMatrix<ScalarType, MatrixOption::Row | MatrixOption::Vector, 1, SizeAtCompile, HostAllocator<ScalarType>>;
         constexpr static bool isForwardDiff = ScalarType::isForwardDiff;
         constexpr static bool isReverseDiff = ScalarType::isReverseDiff;
@@ -141,10 +141,10 @@ namespace Physica::Core {
         template<class OtherDerived>
         ReshapedVector<Derived, MatrixOption::getMajor<OtherDerived>(), OtherDerived::RowAtCompile, OtherDerived::ColumnAtCompile>
         reshape(const RValueMatrix<OtherDerived>& mat) const;
-        template<size_t Row = Dynamic, size_t Column = Dynamic>
-        ReshapedVector<Derived, MatrixOption::Column, Row, Column> reshape_col(size_t row, size_t col) const;
-        template<size_t Row = Dynamic, size_t Column = Dynamic>
-        ReshapedVector<Derived, MatrixOption::Row, Row, Column> reshape_row(size_t row, size_t col) const;
+        template<size_t Row = Dynamic, size_t Col = Dynamic>
+        ReshapedVector<Derived, MatrixOption::Col, Row, Col> reshape_col(size_t row, size_t col) const;
+        template<size_t Row = Dynamic, size_t Col = Dynamic>
+        ReshapedVector<Derived, MatrixOption::Row, Row, Col> reshape_row(size_t row, size_t col) const;
     protected:
         RValueVector() = default;
         RValueVector(const RValueVector&) = default;

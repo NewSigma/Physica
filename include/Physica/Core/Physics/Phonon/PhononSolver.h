@@ -357,7 +357,7 @@ namespace Physica::Core {
     template<class ScalarType>
     DenseMatrix<ScalarType> PhononSolver<ScalarType>::makeEigenVectors(const EigenSolverType& eigen) const {
         DenseMatrix<ScalarType> result(getUnitCellDOF(), getUnitCellDOF());
-        for (size_t i = 0; i < result.getColumn(); ++i) {
+        for (size_t i = 0; i < result.getCol(); ++i) {
             const auto fromCol = eigen.getRawEigenvectors().col(i);
             auto toCol = result.col(i);
             for (size_t j = 0; j < result.getRow(); ++j) {

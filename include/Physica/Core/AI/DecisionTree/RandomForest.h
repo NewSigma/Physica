@@ -124,7 +124,7 @@ namespace Physica::Core {
             const Dataset& dataset,
             RandomGenerator& gen) {
         const size_t numSample = dataset.features.getRow();
-        const auto availableFeature = TreeType::makeInitialFeatures(dataset.features.getColumn());
+        const auto availableFeature = TreeType::makeInitialFeatures(dataset.features.getCol());
         Array<TreeType> trees{};
         trees.reserve(numTree);
         VectorType predictions(numSample, 0);
@@ -155,14 +155,14 @@ namespace Physica::Core {
             Dataset dataset,
             RandomGenerator& gen) {
         const size_t numSample = dataset.features.getRow();
-        const size_t numFeature = dataset.features.getColumn();
+        const size_t numFeature = dataset.features.getCol();
         assert(featureId < numFeature * 2);
         const auto availableFeature = TreeType::makeInitialFeatures(numFeature);
         auto& features = dataset.features;
         std::uniform_int_distribution<size_t> dist(0, numSample - 1);
         /* Extend features */ {
             features.resize(numSample, numFeature * 2);
-            dataset.isFeatureContinuous.resize(features.getColumn());
+            dataset.isFeatureContinuous.resize(features.getCol());
             for (size_t i = 0; i < numFeature; ++i)
                 dataset.isFeatureContinuous[i + numFeature] = dataset.isFeatureContinuous[i];
         }
@@ -256,7 +256,7 @@ namespace Physica::Core {
         const ScalarType criteria = TreeType::checkStopRecursion(dataset, availableSample, randomFeature);
         const bool shouldStopRecursion = !std::isnan(double(criteria));
         if (shouldStopRecursion)
-            return TreeType(dataset.features.getColumn(), criteria, {}, TreeType::NodeType::Classify);
+            return TreeType(dataset.features.getCol(), criteria, {}, TreeType::NodeType::Classify);
 
         auto pair = TreeType::selectOptimalFeature(dataset,
                                                    availableSample,

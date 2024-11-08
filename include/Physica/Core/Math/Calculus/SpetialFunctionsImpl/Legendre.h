@@ -85,7 +85,7 @@ namespace Physica::Core {
 
     template<class Matrix>
     HamonicRotator<Matrix>::HamonicRotator(const Matrix& axisRotation) : initialMat(3, 3), hamonicRotation() {
-        assert(axisRotation.getRow() == 3 && axisRotation.getColumn() == 3);
+        assert(axisRotation.getRow() == 3 && axisRotation.getCol() == 3);
         initialMat(0, 0) = axisRotation(1, 1);
         initialMat(0, 1) = -axisRotation(1, 2);
         initialMat(0, 2) = axisRotation(1, 0);
@@ -142,11 +142,11 @@ namespace Physica::Core {
     }
 
     template<class Matrix>
-    typename Matrix::ScalarType HamonicRotator<Matrix>::getCenteredElement(size_t row, size_t column) {
+    typename Matrix::ScalarType HamonicRotator<Matrix>::getCenteredElement(size_t row, size_t col) {
         const size_t matRow = hamonicRotation.getRow();
         assert(matRow % 2U == 1U);
         const size_t offset = matRow >> 1U;
-        return hamonicRotation(row + offset, column + offset);
+        return hamonicRotation(row + offset, col + offset);
     }
 
     template<class Matrix>

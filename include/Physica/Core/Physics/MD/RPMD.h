@@ -59,7 +59,7 @@ namespace Physica::Core {
     public:
         using RingPolymerType = RingPolymer<ScalarType, Dim, NumReplica>;
         using PhaseMatrix = typename RingPolymerType::PhaseMatrix;
-        using ForceMatrix = DenseMatrix<ScalarType, MatrixOption::Column | MatrixOption::Vector, Dynamic, Dynamic, ForceMatrixAllocator>;
+        using ForceMatrix = DenseMatrix<ScalarType, MatrixOption::Col | MatrixOption::Vector, Dynamic, Dynamic, ForceMatrixAllocator>;
         using MDCellType = typename RingPolymerType::MDCellType;
         using LatticeMatrix = typename MDCellType::LatticeMatrix;
         using PositionMatrix = typename MDCellType::PositionMatrix;

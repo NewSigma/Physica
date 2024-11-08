@@ -31,7 +31,7 @@ namespace Physica::Core {
         /* Getters */
         [[nodiscard]] ScalarType calc(size_t row, size_t col) const { return matrix.calc(row, col).conjugate(); }
         [[nodiscard]] __host__ __device__ size_t getRow() const noexcept { return matrix.getRow(); }
-        [[nodiscard]] __host__ __device__ size_t getColumn() const noexcept { return matrix.getColumn(); }
+        [[nodiscard]] __host__ __device__ size_t getCol() const noexcept { return matrix.getCol(); }
     };
 
     template<class VectorType>

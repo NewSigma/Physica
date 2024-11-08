@@ -32,7 +32,7 @@ namespace Physica::Core {
     template<class ScalarType>
     class LinearEquations {
         using This = LinearEquations<ScalarType>;
-        using WorkingMatrix = DenseMatrix<ScalarType, MatrixOption::Column | MatrixOption::Vector>;
+        using WorkingMatrix = DenseMatrix<ScalarType, MatrixOption::Col | MatrixOption::Vector>;
 
         WorkingMatrix working;
     public:
@@ -52,7 +52,7 @@ namespace Physica::Core {
         void swap(This& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] const WorkingMatrix& getWorking() const noexcept { return working; }
-        [[nodiscard]] auto getSolution() const noexcept { return working.col(working.getColumn() - 1); }
+        [[nodiscard]] auto getSolution() const noexcept { return working.col(working.getCol() - 1); }
     private:
         void upperEliminate(size_t index);
         void lowerEliminate(size_t index);

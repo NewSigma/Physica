@@ -34,7 +34,7 @@ namespace Physica::Core {
             const auto newHeadNode = tracer.pushOperation(values, ExprType::Abs);
             for (size_t i = 0; i < Size; ++i)
                 tracer.pushOperand(T(x.value_ptr() + i, x.grad_ptr() + i));
-            return {values, newHeadNode};
+            return ResultType(values, newHeadNode);
         }
     }
 
@@ -53,7 +53,7 @@ namespace Physica::Core {
             const auto newHeadNode = tracer.pushOperation(values, ExprType::Square);
             for (size_t i = 0; i < Size; ++i)
                 tracer.pushOperand(T(x.value_ptr() + i, x.grad_ptr() + i));
-            return {values, newHeadNode};
+            return ResultType(values, newHeadNode);
         }
     }
 

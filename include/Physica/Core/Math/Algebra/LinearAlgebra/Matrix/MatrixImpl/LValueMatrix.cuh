@@ -49,8 +49,8 @@ namespace Physica::Core {
         /* Getters */
         template<Side Owner = GetSide()>
         [[nodiscard]] __device__ ScalarType calc(size_t row, size_t col) const { return *data_ptr(row, col); }
-        [[nodiscard]] __host__ __device__ PtrTy data_ptr(size_t row, size_t column) { return Base::getDerived().data_ptr(row, column); }
-        [[nodiscard]] __host__ __device__ ConstPtrTy data_ptr(size_t row, size_t column) const { return Base::getDerived().data_ptr(row, column); }
+        [[nodiscard]] __host__ __device__ PtrTy data_ptr(size_t row, size_t col) { return Base::getDerived().data_ptr(row, col); }
+        [[nodiscard]] __host__ __device__ ConstPtrTy data_ptr(size_t row, size_t col) const { return Base::getDerived().data_ptr(row, col); }
         [[nodiscard]] __device__ inline ScalarType& refFromMajorMinor(size_t major, size_t minor);
         [[nodiscard]] __device__ inline const ScalarType& refFromMajorMinor(size_t major, size_t minor) const;
         [[nodiscard]] __host__ __device__ device_obj<LValueFlatten<Derived>> flatten() { return {*this}; }

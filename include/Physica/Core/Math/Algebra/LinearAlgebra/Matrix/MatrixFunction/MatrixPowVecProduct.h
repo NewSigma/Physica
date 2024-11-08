@@ -53,7 +53,7 @@ namespace Physica::Core {
     template<class MatrixType, class VectorType>
     MatrixVectorProduct<MatrixPow<MatrixType>, VectorType>::MatrixVectorProduct(
             const MatrixPow<MatrixType>& mpow_, const VectorType& v_) : mpow(mpow_), v(v_) {
-        assert(mpow.getColumn() == v.getLength());
+        assert(mpow.getCol() == v.getLength());
     }
 
     template<class MatrixType, class VectorType>

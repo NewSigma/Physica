@@ -41,8 +41,8 @@ namespace Physica::Core {
         HalfDenseMatrixStorage() : arr(), order(Order) {}
         HalfDenseMatrixStorage(size_t order_) : arr(order_ * (order_ + 1) / 2), order(order_) {}
         HalfDenseMatrixStorage(size_t order_, const T& t) : arr(order_ * (order_ + 1) / 2, t), order(order_) {}
-        HalfDenseMatrixStorage(size_t row, size_t column);
-        HalfDenseMatrixStorage(size_t row, size_t column, const T& t);
+        HalfDenseMatrixStorage(size_t row, size_t col);
+        HalfDenseMatrixStorage(size_t row, size_t col, const T& t);
         HalfDenseMatrixStorage(std::initializer_list<T> list) : arr(list) {}
         HalfDenseMatrixStorage(const This&) = default;
         HalfDenseMatrixStorage(This&&) noexcept = default;
@@ -53,7 +53,7 @@ namespace Physica::Core {
         [[nodiscard]] __host__ __device__ inline const_lvalue_reference operator()(size_t row, size_t col) const;
         /* Operations */
         template<class... Args>
-        void resize(size_t row, size_t column, Args&&... args);
+        void resize(size_t row, size_t col, Args&&... args);
         void resize(size_t row) { resize(row, row); }
         void swap(This& __restrict storage) noexcept;
         /* Getters */
@@ -61,27 +61,27 @@ namespace Physica::Core {
         [[nodiscard]] ArrayType& asArray() noexcept { return arr; }
         [[nodiscard]] __host__ __device__ size_t getOrder() const noexcept { return order; }
         [[nodiscard]] __host__ __device__ size_t getRow() const noexcept { return getOrder(); }
-        [[nodiscard]] __host__ __device__ size_t getColumn() const noexcept { return getOrder(); }
+        [[nodiscard]] __host__ __device__ size_t getCol() const noexcept { return getOrder(); }
         [[nodiscard]] __host__ __device__ size_t size() const noexcept { return arr.size(); }
         [[nodiscard]] __host__ __device__ size_t getLength() const noexcept { return arr.getLength(); }
         [[nodiscard]] __host__ __device__ size_t getCapacity() const noexcept { return arr.getCapacity(); }
         [[nodiscard]] __host__ __device__ pointer data() noexcept { return arr.data(); }
         [[nodiscard]] __host__ __device__ const_pointer data() const noexcept { return arr.data(); }
-        [[nodiscard]] __host__ __device__ inline T* data_ptr(size_t row, size_t column) noexcept;
-        [[nodiscard]] __host__ __device__ inline const T* data_ptr(size_t row, size_t column) const noexcept;
+        [[nodiscard]] __host__ __device__ inline T* data_ptr(size_t row, size_t col) noexcept;
+        [[nodiscard]] __host__ __device__ inline const T* data_ptr(size_t row, size_t col) const noexcept;
         [[nodiscard]] __host__ __device__ size_t toIndex1D(size_t r, size_t c) const noexcept;
     };
 
     template<class T, size_t Order>
-    HalfDenseMatrixStorage<T, Order>::HalfDenseMatrixStorage(size_t row, [[maybe_unused]] size_t column)
+    HalfDenseMatrixStorage<T, Order>::HalfDenseMatrixStorage(size_t row, [[maybe_unused]] size_t col)
             : HalfDenseMatrixStorage(row) {
-        assert(row == column);
+        assert(row == col);
     }
 
     template<class T, size_t Order>
-    HalfDenseMatrixStorage<T, Order>::HalfDenseMatrixStorage(size_t row, [[maybe_unused]] size_t column, const T& t)
+    HalfDenseMatrixStorage<T, Order>::HalfDenseMatrixStorage(size_t row, [[maybe_unused]] size_t col, const T& t)
             : HalfDenseMatrixStorage(row, t) {
-        assert(row == column);
+        assert(row == col);
     }
 
     template<class T, size_t Order>
@@ -94,8 +94,8 @@ namespace Physica::Core {
 
     template<class T, size_t Order>
     template<class... Args>
-    void HalfDenseMatrixStorage<T, Order>::resize(size_t row, [[maybe_unused]] size_t column, Args&&... args) {
-        assert(row == column);
+    void HalfDenseMatrixStorage<T, Order>::resize(size_t row, [[maybe_unused]] size_t col, Args&&... args) {
+        assert(row == col);
         arr.resize(row * (row + 1) / 2, std::forward<Args>(args)...);
         order = row;
     }
@@ -108,13 +108,13 @@ namespace Physica::Core {
     }
 
     template<class T, size_t Order>
-    __host__ __device__ inline T* HalfDenseMatrixStorage<T, Order>::data_ptr(size_t row, size_t column) noexcept {
-        return arr.data() + toIndex1D(row, column);
+    __host__ __device__ inline T* HalfDenseMatrixStorage<T, Order>::data_ptr(size_t row, size_t col) noexcept {
+        return arr.data() + toIndex1D(row, col);
     }
 
     template<class T, size_t Order>
-    __host__ __device__ inline const T* HalfDenseMatrixStorage<T, Order>::data_ptr(size_t row, size_t column) const noexcept {
-        return arr.data() + toIndex1D(row, column);
+    __host__ __device__ inline const T* HalfDenseMatrixStorage<T, Order>::data_ptr(size_t row, size_t col) const noexcept {
+        return arr.data() + toIndex1D(row, col);
     }
 
     template<class T, size_t Order>

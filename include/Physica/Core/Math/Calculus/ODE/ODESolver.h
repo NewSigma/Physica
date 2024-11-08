@@ -25,7 +25,7 @@ namespace Physica::Core {
     class ODESolver {
     public:
         using VectorType = Vector<T, Dim>;
-        using SolutionType = DenseMatrix<T, MatrixOption::Column | MatrixOption::Vector, Dim>;
+        using SolutionType = DenseMatrix<T, MatrixOption::Col | MatrixOption::Vector, Dim>;
     protected:
         Vector<T> x;
         SolutionType solution;
@@ -71,8 +71,8 @@ namespace Physica::Core {
     void ODESolver<T, Dim>::rungeKutta4(Function func) {
         using FunctionResult = typename std::invoke_result<Function, T, VectorType>::type;
         static_assert(FunctionResult::SizeAtCompile == Dim, "[Possible optimization]: Dimention between ODESolver and functor do not match");
-        const size_t column_1 = solution.getColumn() - 1;
-        for (size_t i = 0; i < column_1; ++i) {
+        const size_t col_1 = solution.getCol() - 1;
+        for (size_t i = 0; i < col_1; ++i) {
             const T& x_i = x[i];
             solution.asArray()[i + 1] = rungeKutta4_step(stepSize, x_i, solution.asArray()[i], func);
             x[i + 1] = x_i + stepSize;
@@ -113,8 +113,8 @@ namespace Physica::Core {
         x[1] = x[0] + stepSize;
         solution(0, 1) = initial1;
         const T stepSize_2 = square(stepSize);
-        const size_t column_1 = solution.getColumn() - 1;
-        for (size_t i = 1; i < column_1; ++i) {
+        const size_t col_1 = solution.getCol() - 1;
+        for (size_t i = 1; i < col_1; ++i) {
             const T& x_i = x[i];
             const T& y_i = solution(0, i);
             solution(0, i + 1) = -solution(0, i - 1) + y_i * T(2) + func(x_i, y_i) * stepSize_2;
@@ -153,11 +153,11 @@ namespace Physica::Core {
             solution(0, 1) = numerator / denominator;
         }
 
-        const size_t column_1 = solution.getColumn() - 1;
+        const size_t col_1 = solution.getCol() - 1;
         T w_i_minus1 = solution(0, 0) * (T(1) - stepSize_2_12 * func(x[0]));
         T w_i = solution(0, 1) * (T(1) - stepSize_2_12 * func(x[1]));
         T x_i = x[1];
-        for (size_t i = 1; i < column_1; ++i) {
+        for (size_t i = 1; i < col_1; ++i) {
             const T w_i_plus1 = T(2) * w_i + stepSize_2 * func(x_i) * solution(0, i) - w_i_minus1;
             w_i_minus1 = w_i;
             w_i = w_i_plus1;

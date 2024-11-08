@@ -88,8 +88,8 @@ namespace Physica::Core {
         ScalarRef(ScalarRef&&) noexcept = default;
         ~ScalarRef() = default;
         /* Operators */
-        ScalarRef& operator=(const This& other);
-        ScalarRef& operator=(const ScalarType& other);
+        inline ScalarRef& operator=(const This& other);
+        inline ScalarRef& operator=(const ScalarType& other);
         [[nodiscard]] operator ScalarType() const { return ScalarType(getValue(), getGrad()); }
         [[nodiscard]] __host__ __device__ explicit operator float() const noexcept { return float(ScalarType(*this)); }
         [[nodiscard]] __host__ __device__ explicit operator double() const noexcept { return double(ScalarType(*this)); }

@@ -36,7 +36,7 @@ namespace Physica::Core::Physics {
     template<class BaseSetType>
     class RHFSolver {
         using ScalarType = typename Traits<BaseSetType>::ScalarType;
-        using MatrixType = DenseMatrix<ScalarType, MatrixOption::Column | MatrixOption::Vector>;
+        using MatrixType = DenseMatrix<ScalarType, MatrixOption::Col | MatrixOption::Vector>;
 
         constexpr static size_t EDIISBufferSize = 3; //Refer EDIIS from [3]
         constexpr static size_t DIISBufferSize = 3; //Refer DIIS from [2]
@@ -45,7 +45,7 @@ namespace Physica::Core::Physics {
         using EDIISBuffer = Array<MatrixType, EDIISBufferSize>;
         using DIISBuffer = Array<MatrixType, DIISBufferSize - 1>;
         using MatrixBuffer = Array<MatrixType, MatrixBufferSize>;
-        using DIISMatrix = DenseMatrix<ScalarType, MatrixOption::Column | MatrixOption::Element, DIISBufferSize, DIISBufferSize>;
+        using DIISMatrix = DenseMatrix<ScalarType, MatrixOption::Col | MatrixOption::Element, DIISBufferSize, DIISBufferSize>;
     public:
         using WaveType = MatrixType;
     private:
@@ -363,7 +363,7 @@ namespace Physica::Core::Physics {
 
         const auto& eigenvalues = eigenSolver.getEigenvalues();
         selfConsistentEnergy = ScalarType(0);
-        for (size_t i = 0; i < wave.getColumn(); ++i) {
+        for (size_t i = 0; i < wave.getCol(); ++i) {
             const size_t orbitPos = electronConfig.getOccupiedOrbitPos(i);
             ScalarType temp = eigenvalues[orbitPos].real();
             auto orbit = wave.col(i);

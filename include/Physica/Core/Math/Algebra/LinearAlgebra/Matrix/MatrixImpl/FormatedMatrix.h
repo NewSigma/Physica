@@ -43,7 +43,7 @@ namespace Physica::Core {
         /* Getters */
         [[nodiscard]] ScalarType calc(size_t row, size_t col) const { return data.calc(row, col); }
         [[nodiscard]] size_t getRow() const noexcept { return data.getRow(); }
-        [[nodiscard]] size_t getColumn() const noexcept { return data.getColumn(); }
+        [[nodiscard]] size_t getCol() const noexcept { return data.getCol(); }
         /* Setters */
         FormatedMatrix& setMatPrefix(std::string matPrefix_);
         FormatedMatrix& setMatSuffix(std::string matSuffix_);
@@ -65,11 +65,11 @@ namespace Physica::Core {
 
     template<class MatrixType>
     std::ostream& operator<<(std::ostream& os, const FormatedMatrix<MatrixType>& m) {
-        const size_t column = m.getColumn();
+        const size_t col = m.getCol();
         const size_t row = m.getRow();
         size_t width = 0;
         /* Get max width */ {
-            for (size_t c = 0; c < column; ++c) {
+            for (size_t c = 0; c < col; ++c) {
                 for (size_t r = 0; r < row; ++ r) {
                     std::stringstream stream{};
                     stream.copyfmt(os);
@@ -82,10 +82,10 @@ namespace Physica::Core {
             os << m.matPrefix;
             for (size_t r = 0; r < row; ++r) {
                 os << m.rowPrefix;
-                for (size_t c = 0; c < column; ++c) {
+                for (size_t c = 0; c < col; ++c) {
                     os.width(width);
                     os << m.calc(r, c);
-                    const bool isLastElem = c + 1 == column;
+                    const bool isLastElem = c + 1 == col;
                     if (!isLastElem)
                         os << m.separator;
                 }

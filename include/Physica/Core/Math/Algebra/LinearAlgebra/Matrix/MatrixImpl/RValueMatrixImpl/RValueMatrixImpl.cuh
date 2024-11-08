@@ -36,8 +36,8 @@ namespace Physica::Core {
             const size_t minor = blockIdx.x * blockDim.x + threadIdx.x;
             if (minor < maxMinor) {
                 const size_t row = target.rowFromMajorMinor(major, minor);
-                const size_t column = target.columnFromMajorMinor(major, minor);
-                target.refFromMajorMinor(major, minor) = ScalarType(source.calc(row, column));
+                const size_t col = target.colFromMajorMinor(major, minor);
+                target.refFromMajorMinor(major, minor) = ScalarType(source.calc(row, col));
             }
         }
     }
@@ -60,7 +60,7 @@ namespace Physica::Core {
             for (size_t major = 0; major < maxMajor; ++major) {
                 for (size_t minor = 0; minor < maxMinor; ++minor) {
                     const size_t r = target.rowFromMajorMinor(major, minor);
-                    const size_t c = target.columnFromMajorMinor(major, minor);
+                    const size_t c = target.colFromMajorMinor(major, minor);
                     target.refFromMajorMinor(major, minor) = OtherScalar(calc(r, c));
                 }
             }
@@ -70,13 +70,13 @@ namespace Physica::Core {
     template<class Derived>
     __host__ __device__ inline typename device_obj<RValueMatrix<Derived>>::RowVector
     device_obj<RValueMatrix<Derived>>::row(size_t r) {
-        return {Base::getDerived(), r, 0, getColumn()};
+        return {Base::getDerived(), r, 0, getCol()};
     }
 
     template<class Derived>
     __host__ __device__ inline const typename device_obj<RValueMatrix<Derived>>::RowVector
     device_obj<RValueMatrix<Derived>>::row(size_t r) const {
-        return {Base::getConstCastDerived(), r, 0, getColumn()};
+        return {Base::getConstCastDerived(), r, 0, getCol()};
     }
 
     template<class Derived>
@@ -94,37 +94,37 @@ namespace Physica::Core {
     template<class Derived>
     __host__ __device__ inline device_obj<RValueMatrix<Derived>>::BlockType
     device_obj<RValueMatrix<Derived>>::rows(size_t fromRow, size_t rowCount) {
-        return {Base::getDerived(), fromRow, rowCount, 0, getColumn()};
+        return {Base::getDerived(), fromRow, rowCount, 0, getCol()};
     }
 
     template<class Derived>
     __host__ __device__ inline const device_obj<RValueMatrix<Derived>>::BlockType
     device_obj<RValueMatrix<Derived>>::rows(size_t fromRow, size_t rowCount) const {
-        return {Base::getConstCastDerived(), fromRow, rowCount, 0, getColumn()};
+        return {Base::getConstCastDerived(), fromRow, rowCount, 0, getCol()};
     }
 
     template<class Derived>
     __host__ __device__ inline device_obj<RValueMatrix<Derived>>::BlockType
     device_obj<RValueMatrix<Derived>>::topRows(size_t to) {
-        return {Base::getDerived(), 0, to, 0, getColumn()};
+        return {Base::getDerived(), 0, to, 0, getCol()};
     }
 
     template<class Derived>
     __host__ __device__ inline const device_obj<RValueMatrix<Derived>>::BlockType
     device_obj<RValueMatrix<Derived>>::topRows(size_t to) const {
-        return {Base::getConstCastDerived(), 0, to, 0, getColumn()};
+        return {Base::getConstCastDerived(), 0, to, 0, getCol()};
     }
 
     template<class Derived>
     __host__ __device__ inline device_obj<RValueMatrix<Derived>>::BlockType
     device_obj<RValueMatrix<Derived>>::bottomRows(size_t from) {
-        return {Base::getDerived(), from, getRow() - from, 0, getColumn()};
+        return {Base::getDerived(), from, getRow() - from, 0, getCol()};
     }
 
     template<class Derived>
     __host__ __device__ inline const device_obj<RValueMatrix<Derived>>::BlockType
     device_obj<RValueMatrix<Derived>>::bottomRows(size_t from) const {
-        return {Base::getConstCastDerived(), from, getRow() - from, 0, getColumn()};
+        return {Base::getConstCastDerived(), from, getRow() - from, 0, getCol()};
     }
 
     template<class Derived>
@@ -154,13 +154,13 @@ namespace Physica::Core {
     template<class Derived>
     __host__ __device__ inline device_obj<RValueMatrix<Derived>>::BlockType
     device_obj<RValueMatrix<Derived>>::rightCols(size_t from) {
-        return {Base::getDerived(), 0, getRow(), from, getColumn() - from};
+        return {Base::getDerived(), 0, getRow(), from, getCol() - from};
     }
 
     template<class Derived>
     __host__ __device__ inline const device_obj<RValueMatrix<Derived>>::BlockType
     device_obj<RValueMatrix<Derived>>::rightCols(size_t from) const {
-        return {Base::getConstCastDerived(), 0, getRow(), from, getColumn() - from};
+        return {Base::getConstCastDerived(), 0, getRow(), from, getCol() - from};
     }
 
     template<class Derived>
@@ -214,25 +214,25 @@ namespace Physica::Core {
     template<class Derived>
     __host__ __device__ inline device_obj<RValueMatrix<Derived>>::BlockType
     device_obj<RValueMatrix<Derived>>::bottomRightCorner(size_t fromRow, size_t fromCol) {
-        return {Base::getDerived(), fromRow, getRow() - fromRow, fromCol, getColumn() - fromCol};
+        return {Base::getDerived(), fromRow, getRow() - fromRow, fromCol, getCol() - fromCol};
     }
 
     template<class Derived>
     __host__ __device__ inline const device_obj<RValueMatrix<Derived>>::BlockType
     device_obj<RValueMatrix<Derived>>::bottomRightCorner(size_t fromRow, size_t fromCol) const {
-        return {Base::getConstCastDerived(), fromRow, getRow() - fromRow, fromCol, getColumn() - fromCol};
+        return {Base::getConstCastDerived(), fromRow, getRow() - fromRow, fromCol, getCol() - fromCol};
     }
 
     template<class Derived>
     __host__ __device__ inline device_obj<RValueMatrix<Derived>>::BlockType
     device_obj<RValueMatrix<Derived>>::bottomRightCorner(size_t from) {
-        return {Base::getDerived(), from, getRow() - from, from, getColumn() - from};
+        return {Base::getDerived(), from, getRow() - from, from, getCol() - from};
     }
 
     template<class Derived>
     __host__ __device__ inline const device_obj<RValueMatrix<Derived>>::BlockType
     device_obj<RValueMatrix<Derived>>::bottomRightCorner(size_t from) const {
-        return {Base::getConstCastDerived(), from, getRow() - from, from, getColumn() - from};
+        return {Base::getConstCastDerived(), from, getRow() - from, from, getCol() - from};
     }
 
     template<class Derived>
@@ -250,7 +250,7 @@ namespace Physica::Core {
     template<class Derived>
     inline typename device_obj<RValueMatrix<Derived>>::ScalarType
     __device__ device_obj<RValueMatrix<Derived>>::calcFromMajorMinor(size_t major, size_t minor) const {
-        return calc(rowFromMajorMinor(major, minor), columnFromMajorMinor(major, minor));
+        return calc(rowFromMajorMinor(major, minor), colFromMajorMinor(major, minor));
     }
 
     template<class Derived>

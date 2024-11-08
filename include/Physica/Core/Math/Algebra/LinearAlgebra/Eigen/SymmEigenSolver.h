@@ -38,8 +38,8 @@ namespace Physica::Core {
         static_assert(!isComplex, "[Error]: Complex matrix is not supported");
     public:
         using EigenvalueVector = Vector<RealType, Order>;
-        using EigenvectorMatrix = DenseMatrix<ScalarType, MatrixOption::Column | MatrixOption::Vector, Order, Order>;
-        using WorkingMatrix = DenseMatrix<ScalarType, MatrixOption::Column | MatrixOption::Vector, Order, Order>; //Optimize: Use tridiagonal matrix is better
+        using EigenvectorMatrix = DenseMatrix<ScalarType, MatrixOption::Col | MatrixOption::Vector, Order, Order>;
+        using WorkingMatrix = DenseMatrix<ScalarType, MatrixOption::Col | MatrixOption::Vector, Order, Order>; //Optimize: Use tridiagonal matrix is better
     private:
         EigenvalueVector eigenvalues;
         EigenvectorMatrix eigenvectors;

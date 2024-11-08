@@ -119,13 +119,13 @@ namespace Physica::Core {
             rho_new = rho_old + fft.getRSpace().flatten();
         }
         else {
-            using MatrixType = DenseMatrix<ScalarType, MatrixOption::Column | MatrixOption::Element>;
+            using MatrixType = DenseMatrix<ScalarType, MatrixOption::Col | MatrixOption::Element>;
             const size_t numValidRecord = iteration > mixIteration ? (DIISBufferSize - 1) : (mixIteration + 1);
             MatrixType diisMat = MatrixType(numValidRecord + 1, numValidRecord + 1, 1.0);
             diisMat(0, 0) = ScalarType(0);
             /* Construct equation */ {
                 for (size_t i = 1; i < diisMat.getRow(); ++i) {
-                    for (size_t j = i; j < diisMat.getColumn(); ++j) {
+                    for (size_t j = i; j < diisMat.getCol(); ++j) {
                         ScalarType temp = residules[i - 1].getTotalDensity().flatten() * residules[j - 1].getTotalDensity().flatten();
                         diisMat(i, j) = temp;
                         diisMat(j, i) = temp;

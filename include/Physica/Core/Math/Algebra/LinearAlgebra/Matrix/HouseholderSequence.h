@@ -47,8 +47,8 @@ namespace Physica::Core {
         template<class OtherMatrix>
         void assignTo(LValueMatrix<OtherMatrix>& target) const;
         /* Getters */
-        [[nodiscard]] __host__ __device__ size_t getRow() const noexcept { return ColWiseRead ? source.getRow() : source.getColumn(); }
-        [[nodiscard]] __host__ __device__ size_t getColumn() const noexcept { return getRow(); }
+        [[nodiscard]] __host__ __device__ size_t getRow() const noexcept { return ColWiseRead ? source.getRow() : source.getCol(); }
+        [[nodiscard]] __host__ __device__ size_t getCol() const noexcept { return getRow(); }
         [[nodiscard]] size_t getSize() const noexcept { return size; }
         [[nodiscard]] size_t getShift() const noexcept { return shift; }
         /* Setters */
@@ -59,14 +59,14 @@ namespace Physica::Core {
     template<class MatrixType, bool ColWiseRead>
     HouseholderSequence<MatrixType, ColWiseRead>::HouseholderSequence(const RValueMatrix<MatrixType>& source_)
             : source(source_.getDerived())
-            , size(source.getColumn())
+            , size(source.getCol())
             , shift(0) {}
 
     template<class MatrixType, bool ColWiseRead>
     template<class OtherMatrix>
     void HouseholderSequence<MatrixType, ColWiseRead>::assignTo(LValueMatrix<OtherMatrix>& target) const {
         target.toUnitMatrix();
-        const size_t shift1 = shift + target.getRow() - (ColWiseRead ? source.getRow() : source.getColumn());
+        const size_t shift1 = shift + target.getRow() - (ColWiseRead ? source.getRow() : source.getCol());
         assert(shift1 < target.getRow());
 
         for (size_t i = 0; i < size; ++i) {
@@ -84,7 +84,7 @@ namespace Physica::Core {
 
     template<class MatrixType, bool ColWiseRead>
     inline void HouseholderSequence<MatrixType, ColWiseRead>::setSize(size_t size_) {
-        assert(size_ <= source.getColumn());
+        assert(size_ <= source.getCol());
         size = size_;
     }
 

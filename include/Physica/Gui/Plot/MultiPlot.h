@@ -28,15 +28,15 @@ namespace Physica::Gui {
 
         QGridLayout* layout;
     public:
-        MultiPlot(int row, int column, QWidget* parent = nullptr);
-        MultiPlot(int row, int column, double minX, double maxX, double minY, double maxY, double deltaX, double deltaY, QWidget* parent = nullptr);
+        MultiPlot(int row, int col, QWidget* parent = nullptr);
+        MultiPlot(int row, int col, double minX, double maxX, double minY, double maxY, double deltaX, double deltaY, QWidget* parent = nullptr);
         MultiPlot(const This&) = delete;
         MultiPlot(This&&) noexcept = delete;
         ~MultiPlot() = default;
         /* Operators */
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
-        Plot& operator()(int row, int column);
+        Plot& operator()(int row, int col);
         /* Operations */
         template<class Functor>
         void forPlot(Functor func) noexcept;

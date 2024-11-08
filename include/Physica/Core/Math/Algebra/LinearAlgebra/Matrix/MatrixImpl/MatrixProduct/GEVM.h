@@ -43,20 +43,20 @@ namespace Physica::Core {
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
         /* Getters */
-        [[nodiscard]] ScalarType calc(size_t row, size_t column) const;
+        [[nodiscard]] ScalarType calc(size_t row, size_t col) const;
         [[nodiscard]] __host__ __device__ size_t getRow() const { return vec.getLength(); }
-        [[nodiscard]] __host__ __device__ size_t getColumn() const { return mat.getColumn(); }
+        [[nodiscard]] __host__ __device__ size_t getCol() const { return mat.getCol(); }
         [[nodiscard]] const VectorType& getLHS() const noexcept { return vec; }
         [[nodiscard]] const MatrixType& getRHS() const noexcept { return mat; }
     };
 
     template<class VectorType, class MatrixType>
-    typename VectorMatrixProduct<VectorType, MatrixType>::ScalarType VectorMatrixProduct<VectorType, MatrixType>::calc(size_t row, size_t column) const {
-        return vec.calc(row) * mat.calc(0, column);
+    typename VectorMatrixProduct<VectorType, MatrixType>::ScalarType VectorMatrixProduct<VectorType, MatrixType>::calc(size_t row, size_t col) const {
+        return vec.calc(row) * mat.calc(0, col);
     }
     /**
-     * \note Here we force the row of \param mat is 1, because in Physica vectors are naturally column vectors.
-     * To compute row vector * matrix, users should converted it to matrix^T * column vector.
+     * \note Here we force the row of \param mat is 1, because in Physica vectors are naturally col vectors.
+     * To compute row vector * matrix, users should converted it to matrix^T * col vector.
      */
     template<class VectorType, class MatrixType>
     [[nodiscard]] inline typename std::enable_if<MatrixType::RowAtCompile == 1, VectorMatrixProduct<VectorType, MatrixType>>::type

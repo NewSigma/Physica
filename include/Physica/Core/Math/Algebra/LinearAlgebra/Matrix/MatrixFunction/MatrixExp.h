@@ -42,12 +42,12 @@ namespace Physica::Core {
         /* Getters */
         [[nodiscard]] const MatrixType& getMatrix() const noexcept { return m; }
         [[nodiscard]] __host__ __device__ size_t getRow() const noexcept { return m.getRow(); }
-        [[nodiscard]] __host__ __device__ size_t getColumn() const noexcept { return m.getColumn(); }
+        [[nodiscard]] __host__ __device__ size_t getCol() const noexcept { return m.getCol(); }
     };
 
     template<class MatrixType>
     MatrixExp<MatrixType>::MatrixExp(const RValueMatrix<MatrixType>& m_) : m(m_.getDerived()) {
-        assert(m.getRow() == m.getColumn());
+        assert(m.getRow() == m.getCol());
     }
 
     template<class MatrixType>

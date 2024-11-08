@@ -91,7 +91,7 @@ namespace Physica::Core {
             cells[i].write(cellGroup, buffer);
             forces[i].write(forceGroup, buffer);
         }
-        return group;
+        return H5Group(group);
     }
 
     template<class ScalarType>

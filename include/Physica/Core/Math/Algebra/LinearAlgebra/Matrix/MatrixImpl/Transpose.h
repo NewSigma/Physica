@@ -32,8 +32,8 @@ namespace Physica::Core {
         Transpose(const RValueMatrix<MatrixType>& matrix_) : matrix(matrix_.getDerived()) {}
         /* Getters */
         [[nodiscard]] ScalarType calc(size_t row, size_t col) const { return matrix.calc(col, row); }
-        [[nodiscard]] __host__ __device__ size_t getRow() const noexcept { return matrix.getColumn(); }
-        [[nodiscard]] __host__ __device__ size_t getColumn() const noexcept { return matrix.getRow(); }
+        [[nodiscard]] __host__ __device__ size_t getRow() const noexcept { return matrix.getCol(); }
+        [[nodiscard]] __host__ __device__ size_t getCol() const noexcept { return matrix.getRow(); }
     };
 
     template<class VectorType>
@@ -52,7 +52,7 @@ namespace Physica::Core {
         /* Getters */
         [[nodiscard]] ScalarType calc([[maybe_unused]] size_t row, size_t col) const { assert(row == 0); return vec.calc(col); }
         [[nodiscard]] __host__ __device__ constexpr static size_t getRow() noexcept { return 1; }
-        [[nodiscard]] __host__ __device__ size_t getColumn() const noexcept { return vec.getLength(); }
+        [[nodiscard]] __host__ __device__ size_t getCol() const noexcept { return vec.getLength(); }
     };
 
     template<class VectorType>
@@ -60,7 +60,7 @@ namespace Physica::Core {
     void TransposeVector<VectorType>::assignTo(LValueMatrix<OtherMatrix>& target) const {
         using TargetType = LValueMatrix<OtherMatrix>;
         for (size_t i = 0; i < vec.getLength(); ++i)
-            target.refFromMajorMinor(0, i) = calc(TargetType::rowFromMajorMinor(0, i), TargetType::columnFromMajorMinor(0, i));
+            target.refFromMajorMinor(0, i) = calc(TargetType::rowFromMajorMinor(0, i), TargetType::colFromMajorMinor(0, i));
     }
 }
 
@@ -70,7 +70,7 @@ namespace Physica {
     template<class MatrixType>
     class Traits<Transpose<MatrixType>> {
     private:
-        constexpr static int OtherMajor = MatrixOption::isColumnMatrix<MatrixType>() ? MatrixOption::Row : MatrixOption::Column;
+        constexpr static int OtherMajor = MatrixOption::isColumnMatrix<MatrixType>() ? MatrixOption::Row : MatrixOption::Col;
         constexpr static int Major = MatrixOption::isAnyMajor<MatrixType>() ? MatrixOption::AnyMajor : OtherMajor;
         constexpr static int Storage = MatrixOption::getStorage<MatrixType>();
     public:

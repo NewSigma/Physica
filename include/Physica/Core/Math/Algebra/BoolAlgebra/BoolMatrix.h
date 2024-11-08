@@ -25,13 +25,13 @@ namespace Physica::Core {
     /*!
      * Optimize:
      * 1. Fixed size matrix
-     * 2. Implement a column matrix.
+     * 2. Implement a col matrix.
      */
     class BoolMatrix {
         Array<BitArray> arr;
     public:
-        BoolMatrix(size_t column, size_t row);
-        BoolMatrix(size_t column, size_t row, bool initial);
+        BoolMatrix(size_t col, size_t row);
+        BoolMatrix(size_t col, size_t row, bool initial);
         BoolMatrix(const BoolMatrix& m) = default;
         BoolMatrix(BoolMatrix&& m) noexcept : arr(std::move(m.arr)) {}
         ~BoolMatrix() = default;
@@ -47,10 +47,10 @@ namespace Physica::Core {
         /* Operations */
         [[nodiscard]] inline bool hasSameSize(const BoolMatrix& m) const;
         /* Getters */
-        [[nodiscard]] size_t getColumn() const { return arr[0].getLength(); }
+        [[nodiscard]] size_t getCol() const { return arr[0].getLength(); }
         [[nodiscard]] size_t getRow() const { return arr.getLength(); }
         /* Setters */
-        void setValue(size_t row, size_t column, bool value) { arr[row].setBit(column, value); }
+        void setValue(size_t row, size_t col, bool value) { arr[row].setBit(col, value); }
     private:
         /*!
          * Construct a BoolMatrix from its members, declared private to avoid improper uses.
@@ -59,6 +59,6 @@ namespace Physica::Core {
     };
 
     inline bool BoolMatrix::hasSameSize(const BoolMatrix& m) const {
-        return getRow() == m.getRow() && getColumn() == m.getColumn();
+        return getRow() == m.getRow() && getCol() == m.getCol();
     }
 }

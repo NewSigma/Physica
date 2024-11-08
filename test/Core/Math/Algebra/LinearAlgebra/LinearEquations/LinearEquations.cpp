@@ -55,7 +55,7 @@ int main() {
             return 1;
     }
     {
-        using MatrixType = DenseMatrix<ScalarType, MatrixOption::Column | MatrixOption::Row, 4, 4>;
+        using MatrixType = DenseMatrix<ScalarType, MatrixOption::Col | MatrixOption::Row, 4, 4>;
         const MatrixType mat = A.leftCols(4);
         Vector<ScalarType> b = A.col(4);
         IterateSolver<ScalarType> solver{};

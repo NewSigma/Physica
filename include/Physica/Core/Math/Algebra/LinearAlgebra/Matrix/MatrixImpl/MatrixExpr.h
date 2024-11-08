@@ -42,7 +42,7 @@ namespace Physica::Core {
         This& operator=(This&&) noexcept = delete;
         /* Operations */
         [[nodiscard]] __host__ __device__ size_t getRow() const { return getExpr().getRow(); }
-        [[nodiscard]] __host__ __device__ size_t getColumn() const { return getExpr().getColumn(); }
+        [[nodiscard]] __host__ __device__ size_t getCol() const { return getExpr().getCol(); }
         [[nodiscard]] __host__ __device__ const MatrixType& getExpr() const noexcept { return expr; }
     };
 
@@ -63,7 +63,7 @@ namespace Physica::Core {
             else {
                 rhs = &rhs_;
                 assert(lhs->getRow() == rhs->getRow());
-                assert(lhs->getColumn() == rhs->getColumn());
+                assert(lhs->getCol() == rhs->getCol());
             }
         }
         BinaryMatrixExpr(const This&) = delete;
@@ -74,7 +74,7 @@ namespace Physica::Core {
         This& operator=(This&&) noexcept = delete;
         /* Operations */
         [[nodiscard]] __host__ __device__ size_t getRow() const { return getLHS().getRow(); }
-        [[nodiscard]] __host__ __device__ size_t getColumn() const { return getLHS().getColumn(); }
+        [[nodiscard]] __host__ __device__ size_t getCol() const { return getLHS().getCol(); }
         [[nodiscard]] __host__ __device__ const LHS1& getLHS() const noexcept { return *lhs; }
         [[nodiscard]] __host__ __device__ const RHS1& getRHS() const noexcept { return *rhs; }
     };

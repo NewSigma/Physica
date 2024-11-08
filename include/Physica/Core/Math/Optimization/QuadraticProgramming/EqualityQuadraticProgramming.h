@@ -71,7 +71,7 @@ namespace Physica::Core {
             , constraints(constraints_)
             , x(initial) {
         assert(objectiveMatG.getRow() == objectiveVecC.getLength());
-        assert(constraints_.getColumn() == 0 || constraints_.getColumn() == objectiveVecC.getLength() + 1);
+        assert(constraints_.getCol() == 0 || constraints_.getCol() == objectiveVecC.getLength() + 1);
         assert(x.getLength() == objectiveVecC.getLength());
         compute();
     }

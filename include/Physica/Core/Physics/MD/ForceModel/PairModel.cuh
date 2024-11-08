@@ -51,7 +51,7 @@ namespace Physica::Core {
         using Index3D = typename GridBase::Index3D;
         using Vector3D = device_obj<Vector<ScalarType, 3>>;
         using ForceBufferType = device_obj<DenseMatrix<ScalarType>>;
-        using VirialBufferType = device_obj<DenseMatrix<ScalarType, MatrixOption::Column | MatrixOption::Element, NumVirialElem>>;
+        using VirialBufferType = device_obj<DenseMatrix<ScalarType, MatrixOption::Col | MatrixOption::Element, NumVirialElem>>;
         using PageLockedVector = Vector<ScalarType, Dynamic, PageLockedAllocator<ScalarType>>;
     private:
         ScalarType cutoff;

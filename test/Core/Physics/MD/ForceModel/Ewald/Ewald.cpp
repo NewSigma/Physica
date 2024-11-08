@@ -146,9 +146,9 @@ namespace Physica {
             }
             const AutoDiffGuard<ScalarType> guard{};
             const Vector<ScalarType> force = ewald.force<SequentialExecutor>(pos);
-            PositionMatrix force_diff(pos.getRow(), pos.getColumn());
+            PositionMatrix force_diff(pos.getRow(), pos.getCol());
             for (size_t i = 0; i < pos.getRow(); ++i)
-                for (size_t j = 0; j < pos.getColumn(); ++j)
+                for (size_t j = 0; j < pos.getCol(); ++j)
                     force_diff(i, j) = -pos(i, j).getGrad();
             if (!vectorNear(force, force_diff.flatten(), 1E-11))
                 exit(EXIT_FAILURE);

@@ -40,7 +40,7 @@ namespace Physica::Core {
         /* Getters */
         [[nodiscard]] ScalarType calc(size_t row, size_t col) const { return mat.calc(row, col).real(); }
         [[nodiscard]] size_t getRow() const { return mat.getRow(); }
-        [[nodiscard]] size_t getColumn() const { return mat.getColumn(); }
+        [[nodiscard]] size_t getCol() const { return mat.getCol(); }
     };
 
     template<class MatrixType>
@@ -62,7 +62,7 @@ namespace Physica::Core {
         /* Getters */
         [[nodiscard]] ScalarType calc(size_t row, size_t col) const { return mat.calc(row, col).getValue(); }
         [[nodiscard]] size_t getRow() const { return mat.getRow(); }
-        [[nodiscard]] size_t getColumn() const { return mat.getColumn(); }
+        [[nodiscard]] size_t getCol() const { return mat.getCol(); }
     };
 
     template<class MatrixType, int GradOrder>
@@ -84,7 +84,7 @@ namespace Physica::Core {
         /* Getters */
         [[nodiscard]] ScalarType calc(size_t row, size_t col) const { return mat.calc(row, col).template getGrad<GradOrder>(); }
         [[nodiscard]] size_t getRow() const { return mat.getRow(); }
-        [[nodiscard]] size_t getColumn() const { return mat.getColumn(); }
+        [[nodiscard]] size_t getCol() const { return mat.getCol(); }
     };
 
     template<class MatrixType>

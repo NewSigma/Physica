@@ -37,7 +37,7 @@ namespace Physica::Core {
         This& operator=(This&&) noexcept = delete;
         /* Getters */
         [[nodiscard]] ScalarType calc(size_t index) const;
-        [[nodiscard]] size_t getLength() const noexcept { return mat.getRow() * mat.getColumn(); }
+        [[nodiscard]] size_t getLength() const noexcept { return mat.getRow() * mat.getCol(); }
     };
 
     template<class MatrixType>

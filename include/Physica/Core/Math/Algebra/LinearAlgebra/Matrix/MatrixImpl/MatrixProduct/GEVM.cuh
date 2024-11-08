@@ -46,15 +46,15 @@ namespace Physica::Core {
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
         /* Getters */
-        [[nodiscard]] __device__ ScalarType calc(size_t row, size_t column) const;
+        [[nodiscard]] __device__ ScalarType calc(size_t row, size_t col) const;
         [[nodiscard]] __host__ __device__ size_t getRow() const { return vec.getDerived().getLength(); }
-        [[nodiscard]] __host__ __device__ size_t getColumn() const { return mat.getDerived().getColumn(); }
+        [[nodiscard]] __host__ __device__ size_t getCol() const { return mat.getDerived().getCol(); }
     };
 
     template<class VectorType, class MatrixType>
     __device__ typename device_obj<VectorMatrixProduct<VectorType, MatrixType>>::ScalarType
-    device_obj<VectorMatrixProduct<VectorType, MatrixType>>::calc(size_t row, size_t column) const {
-        return vec.getDerived().calc(row) * mat.getDerived().calc(0, column);
+    device_obj<VectorMatrixProduct<VectorType, MatrixType>>::calc(size_t row, size_t col) const {
+        return vec.getDerived().calc(row) * mat.getDerived().calc(0, col);
     }
 
     template<class VectorType, class MatrixType>

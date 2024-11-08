@@ -24,13 +24,13 @@ namespace Physica::Core {
         struct ProductOption {
             constexpr static bool SameMajor = MatrixOption::isSameMajor<MatrixType1, MatrixType2>();
             constexpr static bool RowMajor = MatrixOption::isRowMatrix<MatrixType1>();
-            constexpr static int Major = SameMajor ? (RowMajor ? int(MatrixOption::Column)
+            constexpr static int Major = SameMajor ? (RowMajor ? int(MatrixOption::Col)
                                                                : int(MatrixOption::Row))
                                                    : int(MatrixOption::AnyMajor);
             constexpr static int Storage = (MatrixOption::isElementMatrix<MatrixType1>() && MatrixOption::isElementMatrix<MatrixType2>())
                                          ? MatrixOption::Element
                                          : MatrixOption::Vector;
-            constexpr static int Option = (Major == MatrixOption::AnyMajor ? MatrixOption::Column : Major) | Storage;
+            constexpr static int Option = (Major == MatrixOption::AnyMajor ? MatrixOption::Col : Major) | Storage;
         };
     }
 
@@ -52,7 +52,7 @@ namespace Physica::Core {
     public:
         MatrixProduct(const RValueMatrix<MatrixType1>& mat1_, const RValueMatrix<MatrixType2>& mat2_)
                 : mat1(mat1_.getDerived()), mat2(mat2_.getDerived()) {
-            assert(mat1.getColumn() == mat2.getRow());
+            assert(mat1.getCol() == mat2.getRow());
         }
         MatrixProduct(const This&) = delete;
         MatrixProduct(This&&) noexcept = delete;
@@ -65,9 +65,9 @@ namespace Physica::Core {
         void assignTo(LValueMatrix<OtherDerived>& target) const;
         [[nodiscard]] DefaultType compute() const { return DefaultType(*this); }
         /* Getters */
-        [[nodiscard]] ScalarType calc(size_t row, size_t column) const;
+        [[nodiscard]] ScalarType calc(size_t row, size_t col) const;
         [[nodiscard]] __host__ __device__ size_t getRow() const { return mat1.getRow(); }
-        [[nodiscard]] __host__ __device__ size_t getColumn() const { return mat2.getColumn(); }
+        [[nodiscard]] __host__ __device__ size_t getCol() const { return mat2.getCol(); }
         [[nodiscard]] const MatrixType1& getLHS() const noexcept { return mat1; }
         [[nodiscard]] const MatrixType2& getRHS() const noexcept { return mat2; }
     };
@@ -83,16 +83,16 @@ namespace Physica::Core {
             for (size_t i = 0; i < target.getMaxMajor(); ++i) {
                 for (size_t j = 0; j < target.getMaxMinor(); ++j) {
                     const size_t r = MatrixOption::rowFromMajorMinor<TargetType>(i, j);
-                    const size_t c = MatrixOption::columnFromMajorMinor<TargetType>(i, j);
+                    const size_t c = MatrixOption::colFromMajorMinor<TargetType>(i, j);
                     target.refFromMajorMinor(i, j) = calc(r, c);
                 }
             }
         }
         else {
-            for (size_t i = 0; i < (defaultMajor == MatrixOption::Column ? getColumn() : getRow()); ++i) {
-                for (size_t j = 0; j < (defaultMajor == MatrixOption::Column ?  getRow() : getColumn()); ++j) {
+            for (size_t i = 0; i < (defaultMajor == MatrixOption::Col ? getCol() : getRow()); ++i) {
+                for (size_t j = 0; j < (defaultMajor == MatrixOption::Col ?  getRow() : getCol()); ++j) {
                     const size_t r = MatrixOption::rowFromMajorMinor<DefaultType>(i, j);
-                    const size_t c = MatrixOption::columnFromMajorMinor<DefaultType>(i, j);
+                    const size_t c = MatrixOption::colFromMajorMinor<DefaultType>(i, j);
                     target(r, c) = calc(r, c);
                 }
             }
@@ -104,10 +104,10 @@ namespace Physica::Core {
     }
 
     template<class T1, class T2>
-    typename MatrixProduct<T1, T2>::ScalarType MatrixProduct<T1, T2>::calc(size_t row, size_t column) const {
+    typename MatrixProduct<T1, T2>::ScalarType MatrixProduct<T1, T2>::calc(size_t row, size_t col) const {
         ScalarType result(0);
-        for (size_t i = 0; i < mat1.getColumn(); ++i)
-            result += ScalarType(mat1.calc(row, i)) * ScalarType(mat2.calc(i, column));
+        for (size_t i = 0; i < mat1.getCol(); ++i)
+            result += ScalarType(mat1.calc(row, i)) * ScalarType(mat2.calc(i, col));
         return result;
     }
 
@@ -116,7 +116,7 @@ namespace Physica::Core {
                                                  (MatrixType1::ColumnAtCompile == 1 && MatrixType2::ColumnAtCompile == 1),
                                                   MatrixProduct<MatrixType1, MatrixType2>>::type
     operator*(const RValueMatrix<MatrixType1>& mat1, const RValueMatrix<MatrixType2>& mat2) noexcept {
-        assert(mat1.getColumn() == mat2.getRow());
+        assert(mat1.getCol() == mat2.getRow());
         return MatrixProduct(mat1, mat2);
     }
 }

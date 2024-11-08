@@ -24,7 +24,7 @@ using namespace Physica::Core;
 
 template<class MatrixType>
 bool isUpperQuasiTriangle(const LValueMatrix<MatrixType>& m) {
-    if (m.getRow() != m.getColumn())
+    if (m.getRow() != m.getCol())
         return false;
     for (size_t i = 0; i < m.getRow() - 1; ++i) {
         if (m(i + 1, i).isZero()) {
@@ -45,7 +45,7 @@ bool isUpperQuasiTriangle(const LValueMatrix<MatrixType>& m) {
 
 template<class MatrixType>
 bool isUpperTriangle(const LValueMatrix<MatrixType>& m) {
-    if (m.getRow() != m.getColumn())
+    if (m.getRow() != m.getCol())
         return false;
     for (size_t i = 0; i < m.getRow() - 1; ++i) {
         auto col = m.col(i);
@@ -78,19 +78,19 @@ int main() {
     using RealType = float64;
     using ComplexType = Complex<RealType>;
     {
-        using MatrixType = DenseMatrix<RealType, MatrixOption::Column | MatrixOption::Vector>;
+        using MatrixType = DenseMatrix<RealType, MatrixOption::Col | MatrixOption::Vector>;
         const MatrixType mat{{1, 2}, {3, 4}};
         if (!realSchurTest(mat, 1E-15))
             return 1;
     }
     {
-        using MatrixType = DenseMatrix<ComplexType, MatrixOption::Column | MatrixOption::Vector>;
+        using MatrixType = DenseMatrix<ComplexType, MatrixOption::Col | MatrixOption::Vector>;
         const MatrixType mat{{{1, 2}, {3, 4}}, {{5, 6}, {7, 8}}};
         if (!schurTest(mat, 1E-15))
             return 1;
     }
     {
-        using MatrixType = DenseMatrix<RealType, MatrixOption::Column | MatrixOption::Vector, 3, 3>;
+        using MatrixType = DenseMatrix<RealType, MatrixOption::Col | MatrixOption::Vector, 3, 3>;
         const MatrixType mat1{{-149, 537, -27}, {-50, 180, -9}, {-154, 546, -25}};
         if (!realSchurTest(mat1, 1E-14))
             return 1;
@@ -101,7 +101,7 @@ int main() {
             return 1;
     }
     {
-        using MatrixType = DenseMatrix<ComplexType, MatrixOption::Column | MatrixOption::Vector, 3, 3>;
+        using MatrixType = DenseMatrix<ComplexType, MatrixOption::Col | MatrixOption::Vector, 3, 3>;
         const MatrixType mat1{{{-149, 37}, {537, -126}, {-27, 0}},
                               {{0, -50}, {0, 180}, {-9, 17}},
                               {{12, -154}, {546, 8}, {-25, 9}}};
@@ -126,7 +126,7 @@ int main() {
             return 1;
     }
     /* Test degeneracy */ {
-        using MatrixType = DenseMatrix<RealType, MatrixOption::Column | MatrixOption::Vector, 6, 6>;
+        using MatrixType = DenseMatrix<RealType, MatrixOption::Col | MatrixOption::Vector, 6, 6>;
         const MatrixType mat1{{ 0.1343184046,             0,             0, -0.1343184056,             0,             0},
                               {            0,  0.1341424528,             0,             0, -0.1341424541,             0},
                               {            0,             0,  0.1342191829,             0,             0, -0.1342191848},
@@ -136,7 +136,7 @@ int main() {
         if (!realSchurTest(mat1, 1E-15))
             return 1;
 
-        using ComplexMatrix = DenseMatrix<ComplexType, MatrixOption::Column | MatrixOption::Vector, 6, 6>;
+        using ComplexMatrix = DenseMatrix<ComplexType, MatrixOption::Col | MatrixOption::Vector, 6, 6>;
         const ComplexMatrix mat2 = mat1;
         if (!schurTest(mat2, 1E-14))
             return 1;

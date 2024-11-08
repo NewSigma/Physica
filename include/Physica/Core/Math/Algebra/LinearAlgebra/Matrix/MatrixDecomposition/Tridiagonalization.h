@@ -111,7 +111,7 @@ namespace Physica::Core {
                 p = factor * (corner * temp);
                 p -= (p.conjugate() * temp * factor * ScalarType(0.5)) * temp;
                 for (size_t r = 0; r < corner.getRow(); ++r)
-                    for (size_t c = r; c < corner.getColumn(); ++c)
+                    for (size_t c = r; c < corner.getCol(); ++c)
                         working(r + i + 1, c + i + 1) -= temp.calc(r) * p[c].conjugate() + temp.calc(c).conjugate() * p[r];
                 working(i, i + 1) = factor;
             }
@@ -154,7 +154,7 @@ namespace Physica::Core {
         void assignTo(LValueMatrix<OtherMatrix>& target) const;
         /* Getters */
         [[nodiscard]] __host__ __device__ size_t getRow() const noexcept { return tri.working.getRow(); }
-        [[nodiscard]] __host__ __device__ size_t getColumn() const noexcept { return tri.working.getColumn(); }
+        [[nodiscard]] __host__ __device__ size_t getCol() const noexcept { return tri.working.getCol(); }
     };
 
     template<class ScalarType, size_t Order>

@@ -31,9 +31,9 @@ namespace Physica::Gui {
             using Vertex = std::pair<size_t, size_t>;
 
             size_t row;
-            size_t column;
+            size_t col;
 
-            Quad(size_t row_, size_t column_) : row(row_), column(column_) {}
+            Quad(size_t row_, size_t col_) : row(row_), col(col_) {}
             /* Operators */
             [[nodiscard]] bool operator==(Quad quad) const noexcept;
             /* Getters */
@@ -88,12 +88,12 @@ namespace Physica::Gui {
             ContourLine interpolateFromEdge(Edge edge, double level);
             /* Getters */
             [[nodiscard]] size_t getRow() const noexcept { assert(x.getRow() > 0); return x.getRow() - 1; }
-            [[nodiscard]] size_t getColumn() const noexcept { assert(x.getColumn() > 0); return x.getColumn() - 1; }
+            [[nodiscard]] size_t getCol() const noexcept { assert(x.getCol() > 0); return x.getCol() - 1; }
             [[nodiscard]] bool canInterpolate(Edge edge, double level) const noexcept;
             [[nodiscard]] bool isBoundary(Edge edge) const noexcept;
-            [[nodiscard]] bool haveVisited(Quad quad) const { return flags[quad.row][quad.column]; }
+            [[nodiscard]] bool haveVisited(Quad quad) const { return flags[quad.row][quad.col]; }
             /* Setters */
-            void setVisited(Quad quad) { flags[quad.row][quad.column] = true; }
+            void setVisited(Quad quad) { flags[quad.row][quad.col] = true; }
         private:
             void interpolateEdge(Edge edge, double level, ContourLine& line) const;
         };

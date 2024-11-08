@@ -35,12 +35,12 @@ namespace Physica::Core {
         void assignTo(LValueMatrix<OtherMatrix>& target) const;
         /* Getters */
         [[nodiscard]] size_t getRow() const noexcept { return source.getRow(); }
-        [[nodiscard]] size_t getColumn() const noexcept { return source.getRow(); }
+        [[nodiscard]] size_t getCol() const noexcept { return source.getRow(); }
     };
 
     template<class MatrixType>
     Cholesky<MatrixType>::Cholesky(const MatrixType& source_) : source(source_) {
-        assert(source.getRow() == source.getColumn());
+        assert(source.getRow() == source.getCol());
     }
     /**
      * Implemented the square method

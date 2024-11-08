@@ -85,7 +85,7 @@ namespace Physica::Gui {
         using namespace Physica::Core;
         const MatrixType& meshX = mesh.first;
         const MatrixType& meshY = mesh.second;
-        BandArray result(ph.getNumBand(), meshX.getRow(), meshX.getColumn());
+        BandArray result(ph.getNumBand(), meshX.getRow(), meshX.getCol());
         ScalarType minFreq = Base::getMinZ();
         ScalarType maxFreq = Base::getMaxZ();
         for (size_t major = 0; major < meshX.getMaxMajor(); ++major) {

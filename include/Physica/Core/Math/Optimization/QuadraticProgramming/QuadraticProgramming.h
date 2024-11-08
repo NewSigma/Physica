@@ -84,8 +84,8 @@ namespace Physica::Core {
             , x(initial)
             , activeConstraintFlags(Array<bool, Dynamic>(inequalityConstraint_.getRow(), false)) {
         assert(objectiveMatG.getRow() == objectiveVecC.getLength());
-        assert(equalityConstraint.getColumn() == 0 || equalityConstraint.getColumn() == objectiveVecC.getLength() + 1);
-        assert(inequalityConstraint.getColumn() == 0 || inequalityConstraint.getColumn() == objectiveVecC.getLength() + 1);
+        assert(equalityConstraint.getCol() == 0 || equalityConstraint.getCol() == objectiveVecC.getLength() + 1);
+        assert(inequalityConstraint.getCol() == 0 || inequalityConstraint.getCol() == objectiveVecC.getLength() + 1);
     }
 
     template<class ScalarType>

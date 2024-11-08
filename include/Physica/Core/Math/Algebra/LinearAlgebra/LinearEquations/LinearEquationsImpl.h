@@ -21,14 +21,14 @@
 namespace Physica::Core {
     template<class ScalarType>
     LinearEquations<ScalarType>::LinearEquations(WorkingMatrix&& working_) : working(std::move(working_)) {
-        assert(working.getRow() + 1 == working.getColumn() && "[Error]: Invalid working matrix");
+        assert(working.getRow() + 1 == working.getCol() && "[Error]: Invalid working matrix");
     }
 
     template<class ScalarType>
     template<class MatrixType>
     LinearEquations<ScalarType>::LinearEquations(const RValueMatrix<MatrixType>& working_)
             : working(working_.getDerived()) {
-        assert(working.getRow() + 1 == working.getColumn() && "[Error]: Invalid working matrix");
+        assert(working.getRow() + 1 == working.getCol() && "[Error]: Invalid working matrix");
     }
 
     template<class ScalarType>

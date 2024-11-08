@@ -41,7 +41,7 @@ namespace Physica::Core {
         /* Getters */
         [[nodiscard]] ScalarType calc(size_t row, size_t col) const;
         [[nodiscard]] size_t getRow() const noexcept { return indexes.getLength(); }
-        [[nodiscard]] size_t getColumn() const noexcept { return indexes.getLength(); }
+        [[nodiscard]] size_t getCol() const noexcept { return indexes.getLength(); }
     };
 
     template<class ScalarType>
