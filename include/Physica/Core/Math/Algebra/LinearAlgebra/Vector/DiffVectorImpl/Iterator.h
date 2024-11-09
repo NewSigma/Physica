@@ -19,20 +19,20 @@
 #pragma once
 
 namespace Physica::Core {
-    template<class Derived, class Allocator> class ArrayBase;
     /**
      * FIterator(Forward)
      */
-    template<class Container>
-    class FIterator {
-        constexpr static bool isConst = std::is_const<Container>::value;
+    template<class T, int Order, size_t Length, class Allocator>
+    class FIterator<Vector<Diff<T, DiffMode::Forward, Order>, Length, Allocator>> {
+        using ElemType = Diff<T, DiffMode::Forward, Order>;
+        using Container = Vector<ElemType, Length, Allocator>;
         using This = FIterator<Container>;
-        using ElemType = typename Traits<std::remove_const_t<Container>>::ElemType;
+        constexpr static bool isConst = std::is_const<Container>::value;
     public:
         using difference_type = std::ptrdiff_t;
         using value_type = typename std::conditional<isConst, const ElemType, ElemType>::type;
-        using pointer = typename std::add_pointer<value_type>::type;
-        using reference = typename std::add_lvalue_reference<value_type>::type;
+        using pointer = typename ElemType::PtrTy;
+        using reference = typename ElemType::RefTy;
         using iterator_category = std::random_access_iterator_tag;
     private:
         pointer p;
@@ -59,16 +59,17 @@ namespace Physica::Core {
     /**
      * RIterator(Reverse)
      */
-    template<class Container>
-    class RIterator {
-        constexpr static bool isConst = std::is_const<Container>::value;
+    template<class T, int Order, size_t Length, class Allocator>
+    class RIterator<Vector<Diff<T, DiffMode::Forward, Order>, Length, Allocator>> {
+        using ElemType = Diff<T, DiffMode::Forward, Order>;
+        using Container = Vector<ElemType, Length, Allocator>;
         using This = RIterator<Container>;
-        using ElemType = typename Traits<std::remove_const_t<Container>>::ElemType;
+        constexpr static bool isConst = std::is_const<Container>::value;
     public:
         using difference_type = std::ptrdiff_t;
         using value_type = typename std::conditional<isConst, const ElemType, ElemType>::type;
-        using pointer = typename std::add_pointer<value_type>::type;
-        using reference = typename std::add_lvalue_reference<value_type>::type;
+        using pointer = typename ElemType::PtrTy;
+        using reference = typename ElemType::RefTy;
         using iterator_category = std::random_access_iterator_tag;
     private:
         pointer p;

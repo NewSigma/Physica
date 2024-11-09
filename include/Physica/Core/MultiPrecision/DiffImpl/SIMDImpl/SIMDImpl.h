@@ -69,6 +69,16 @@ namespace Physica::Core {
     }
 
     template<class T, int Order, size_t Size>
+    template<class OtherScalar>
+    inline SIMD<Diff<T, DiffMode::Forward, Order>, Size> SIMD<Diff<T, DiffMode::Forward, Order>, Size>::operator*(const ScalarBase<OtherScalar>& x_) const {
+        const auto& x = x_.getDerived();
+        if constexpr (OtherScalar::isDifferentiable)
+            return *this * ScalarType(x);
+        else
+            return This(values * x, grads * x);
+    }
+
+    template<class T, int Order, size_t Size>
     inline SIMD<Diff<T, DiffMode::Forward, Order>, Size> SIMD<Diff<T, DiffMode::Forward, Order>, Size>::operator/(const SIMD& x) const {
         const auto x1 = GradPacket(x);
         const auto v = reciprocal(x1);

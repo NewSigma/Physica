@@ -139,9 +139,7 @@ void plotPWBaseWave(double energy, double radialNum) {
 /**
  * Reference:
  * [1] J. H. Thijssen. Computational Physics[M]. London: Cambridge University Press, 2013:14-28
- * [2] J.P. Toennies, W. Welz, and G. Wolf,'Molecular beam scattering studies of orbiting resonances
- * and the determination of Van der Waals potentials for H-He, Ar, Kr, and Xe and for H2-Ar, Kr and Xe,'
- * J.Chem.Phys., 71(1979), 614-42
+ * [2] J. Chem. Phys., 71, 614-642 (1979); https://doi.org/10.1063/1.438414
  */
 int main(int argc, char** argv) {
     const double step = 0.005;

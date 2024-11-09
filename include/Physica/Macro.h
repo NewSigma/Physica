@@ -22,8 +22,6 @@
 #include <cstddef>
 #include <Physica/Config.h>
 
-//Avoid "unused parameter" warnings and note that the parameter is used in asm.
-#define USE_IN_ASM(x) (void)x
 /**
  * Improve: Platform dependent, may be wrong on some spatial platforms, add a test before compile.
  * Note: Use of double_extract may cause several warnings in valgrind.

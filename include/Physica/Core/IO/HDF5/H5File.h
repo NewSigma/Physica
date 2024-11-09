@@ -36,7 +36,7 @@ namespace Physica::Core {
         unsigned int openflag;
     public:
         H5File(const char* name,
-               unsigned int openflag_,
+               unsigned int openflag_ = OpenFlag::ReadOnly,
                const H5::FileCreatPropList& create_plist = H5::FileCreatPropList::DEFAULT,
                const H5::FileAccPropList& access_plist = H5::FileAccPropList::DEFAULT);
         H5File(const H5File& obj);

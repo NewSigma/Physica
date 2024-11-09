@@ -86,20 +86,8 @@ namespace Physica::Core {
         template<class T>
         __host__ __device__ inline bool operator<(const ScalarBase<T>& s) const noexcept;
         /* Getters */
-        [[nodiscard]] __host__ __device__ const RealType& real() const {
-            if constexpr (isComplex)
-                return this->getDerived().real();
-            else
-                return this->getDerived();
-        }
-
-        [[nodiscard]] __host__ __device__ RealType imag() const {
-            if constexpr (isComplex)
-                return this->getDerived().imag();
-            else
-                return Derived(0);
-        }
-
+        [[nodiscard]] __host__ __device__ RealType real() const;
+        [[nodiscard]] __host__ __device__ RealType imag() const;
         [[nodiscard]] __host__ __device__ ScalarType conjugate() const {
             if constexpr (isComplex)
                 return this->getDerived().conjugate();
@@ -204,6 +192,26 @@ namespace Physica::Core {
     __host__ __device__ inline bool ScalarBase<Derived>::operator<(const ScalarBase<T>& s) const noexcept {
         static_assert(!isComplex && !T::isComplex, "[Error]: Comparison between complex scalars is invalid");
         return getValue() < s.getValue();
+    }
+
+    template<class Derived>
+    __host__ __device__ typename ScalarBase<Derived>::RealType ScalarBase<Derived>::real() const {
+        if constexpr (isDifferentiable)
+            return RealType(getValue().real(), getGrad().real());
+        else if constexpr (isComplex)
+            return this->getDerived().real();
+        else
+            return this->getDerived();
+    }
+
+    template<class Derived>
+    __host__ __device__ typename ScalarBase<Derived>::RealType ScalarBase<Derived>::imag() const {
+        if constexpr (isDifferentiable)
+            return RealType(getValue().imag(), getGrad().imag());
+        else if constexpr (isComplex)
+            return this->getDerived().imag();
+        else
+            return this->getDerived();
     }
 
     template<class ScalarType>

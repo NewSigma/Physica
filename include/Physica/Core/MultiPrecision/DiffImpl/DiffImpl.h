@@ -152,6 +152,36 @@ namespace Physica::Core {
     const typename ScalarRef<Diff<T, DiffMode::Forward, Order>>::template GradRtnTy<GradOrder> ScalarRef<Diff<T, DiffMode::Forward, Order>>::getGrad() const noexcept {
         return const_cast<This&>(*this).template getGrad<GradOrder>();
     }
+
+    template<class T, int Order>
+    inline bool ScalarPtr<Diff<T, DiffMode::Forward, Order>>::operator==(const This& other) const noexcept {
+        assert(pair.second == other.pair.second && "[Error]: Bad ScalarPtr");
+        return pair.first == other.pair.first;
+    }
+
+    template<class T, int Order>
+    inline ScalarPtr<Diff<T, DiffMode::Forward, Order>>& ScalarPtr<Diff<T, DiffMode::Forward, Order>>::operator++() {
+        for (auto& p : arr)
+            p++;
+        return *this;
+    }
+
+    template<class T, int Order>
+    inline ScalarPtr<Diff<T, DiffMode::Forward, Order>>& ScalarPtr<Diff<T, DiffMode::Forward, Order>>::operator--() {
+        for (auto& p : arr)
+            p--;
+        return *this;
+    }
+
+    template<class T, int Order>
+    inline const ScalarPtr<Diff<T, DiffMode::Forward, Order>> ScalarPtr<Diff<T, DiffMode::Forward, Order>>::operator++(int) {
+        return This(pair.first++, pair.second++);
+    }
+
+    template<class T, int Order>
+    inline const ScalarPtr<Diff<T, DiffMode::Forward, Order>> ScalarPtr<Diff<T, DiffMode::Forward, Order>>::operator--(int) {
+        return This(pair.first--, pair.second--);
+    }
     ////////////////////////////////////////////////////////////
     template<class ScalarType, int Order>
     Diff<ScalarType, DiffMode::Reverse, Order>::Diff(ScalarType value)

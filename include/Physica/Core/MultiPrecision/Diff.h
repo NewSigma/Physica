@@ -142,6 +142,8 @@ namespace Physica::Core {
         /* Operators */
         This& operator=(const This& obj) = default;
         This& operator=(This&& obj) noexcept = default;
+        [[nodiscard]] inline bool operator==(const This& other) const noexcept;
+        [[nodiscard]] bool operator!=(const This& other) const noexcept { return !(*this == other); }
         template<class U>
         [[nodiscard]] explicit operator ScalarPtr<Diff<U, DiffMode::Forward, Order>>() noexcept {
             using Target = ScalarPtr<Diff<U, DiffMode::Forward, Order>>;
@@ -150,6 +152,10 @@ namespace Physica::Core {
         }
         [[nodiscard]] ScalarRef<ScalarType> operator*() const { return ScalarRef<ScalarType>(*this); }
         [[nodiscard]] This operator+(size_t n) { return ScalarPtr(value_ptr() + n, grad_ptr() + n); }
+        inline This& operator++();
+        inline This& operator--();
+        inline const This operator++(int);
+        inline const This operator--(int);
         [[nodiscard]] T* operator[](size_t i) const noexcept { assert(i <= Order); return arr[i]; }
         /* Getters */
         [[nodiscard]] T* value_ptr() const noexcept { return pair.first; }

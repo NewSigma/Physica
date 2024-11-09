@@ -111,22 +111,14 @@ namespace Physica::Core {
         constexpr static bool isExpr = !std::is_base_of<LValueVector<Derived>, Derived>::value;
         using T = typename Traits<AnyPacket>::ScalarType;
         if constexpr (T::isForwardDiff) {
-            using PlainScalar = typename T::PlainScalar;
-            PlainScalar values[AnyPacket::size()];
+            using ValuePacket = typename AnyPacket::ValuePacket;
             if constexpr (isForwardDiff) {
-                using GradType = typename T::GradType;
-                GradType grads[AnyPacket::size()];
-                for (size_t i = 0; i < AnyPacket::size(); ++i, ++index) {
-                    auto temp = T(calc(index));
-                    values[i] = temp.getValue();
-                    grads[i] = temp.getGrad();
-                }
-                AnyPacket packet{};
-                packet.load({values, grads});
-                return packet;
+                using GradPacket = typename AnyPacket::GradPacket;
+                return AnyPacket(toValueVector(*this).template packet<ValuePacket>(index), toGradVector(*this).template packet<GradPacket>(index));
             }
             else {
-                using ValuePacket = typename AnyPacket::ValuePacket;
+                using PlainScalar = typename T::PlainScalar;
+                PlainScalar values[AnyPacket::size()];
                 for (size_t i = 0; i < AnyPacket::size(); ++i, ++index)
                     values[i] = PlainScalar(calc(index));
                 ValuePacket packet{};
@@ -156,22 +148,14 @@ namespace Physica::Core {
         constexpr static bool isExpr = !std::is_base_of<LValueVector<Derived>, Derived>::value;
         using T = typename Traits<AnyPacket>::ScalarType;
         if constexpr (T::isForwardDiff) {
-            using PlainScalar = typename T::PlainScalar;
-            PlainScalar values[AnyPacket::size()];
+            using ValuePacket = typename AnyPacket::ValuePacket;
             if constexpr (isForwardDiff) {
-                using GradType = typename T::GradType;
-                GradType grads[AnyPacket::size()];
-                for (size_t i = 0; i < AnyPacket::size(); ++i, ++index) {
-                    auto temp = i < count ? T(calc(index)) : T(0);
-                    values[i] = temp.getValue();
-                    grads[i] = temp.getGrad();
-                }
-                AnyPacket packet{};
-                packet.load({values, grads});
-                return packet;
+                using GradPacket = typename AnyPacket::GradPacket;
+                return AnyPacket(toValueVector(*this).template packet<ValuePacket>(index), toGradVector(*this).template packet<GradPacket>(index));
             }
             else {
-                using ValuePacket = typename AnyPacket::ValuePacket;
+                using PlainScalar = typename T::PlainScalar;
+                PlainScalar values[AnyPacket::size()];
                 for (size_t i = 0; i < AnyPacket::size(); ++i, ++index)
                     values[i] = i < count ? PlainScalar(calc(index)) : PlainScalar(0);
                 ValuePacket packet{};
