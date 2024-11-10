@@ -1,0 +1,2 @@
+physica_add_example(ProbDistribution ProbDistribution.cpp)
+physica_add_example(ProbDistribution2D ProbDistribution2D.cpp)
