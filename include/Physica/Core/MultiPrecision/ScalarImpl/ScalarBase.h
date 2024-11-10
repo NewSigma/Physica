@@ -211,7 +211,7 @@ namespace Physica::Core {
         else if constexpr (isComplex)
             return this->getDerived().imag();
         else
-            return this->getDerived();
+            return RealType(0);
     }
 
     template<class ScalarType>

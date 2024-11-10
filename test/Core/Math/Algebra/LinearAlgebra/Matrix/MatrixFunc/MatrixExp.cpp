@@ -37,10 +37,9 @@ int main() {
     const DenseMatrix<ScalarType> eigenvectors = toRealMatrix(solver.getEigenvectors());
     VectorType v1 = eigenvectors.transpose() * v;
     v1 = hadamard(eigenvalues, v1);
-    const VectorType answer = eigenvectors * v1;
 
+    const VectorType answer = eigenvectors * v1;
     const VectorType result = exp(mat.asMatrix()) * v;
-    std::cout << answer.format() << '\n' << result.format() << std::endl;
     if (!vectorNear(answer, result, 1E-13))
         return 1;
     return 0;

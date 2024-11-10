@@ -45,16 +45,20 @@ namespace Physica::Core {
         /* Operators */
         inline LValueVector& operator=(const LValueVector& v);
         inline LValueVector& operator=(LValueVector&& v) noexcept;
-        template<class OtherVector, class Executor = SequentialExecutor>
-        inline Derived& operator=(const RValueVector<OtherVector>& v_);
+
         template<class OtherScalar>
         inline Derived& operator=(const ScalarBase<OtherScalar>& s);
-        [[nodiscard]] inline RefTy operator[](size_t index);
-        [[nodiscard]] inline ConstRefTy operator[](size_t index) const;
         void operator+=(const ScalarType& s) { (*this) = (*this) + s; }
         void operator-=(const ScalarType& s) { (*this) = (*this) - s; }
         void operator*=(const ScalarType& s) { (*this) = (*this) * s; }
         void operator/=(const ScalarType& s) { (*this) = (*this) / s; }
+
+        template<class OtherVector, class Executor = SequentialExecutor>
+        inline Derived& operator=(const RValueVector<OtherVector>& v_);
+        template<class OtherVector> void operator+=(const RValueVector<OtherVector>& v) { (*this) = (*this) + v; }
+        template<class OtherVector> void operator-=(const RValueVector<OtherVector>& v) { Base::getDerived() += (-v.getDerived()); }
+        [[nodiscard]] inline RefTy operator[](size_t index);
+        [[nodiscard]] inline ConstRefTy operator[](size_t index) const;
         /* Operations */
         [[nodiscard]] ScalarType calc(size_t index) const;
         template<class AnyPacket> void writePacket(size_t index, const AnyPacket packet);
@@ -88,12 +92,6 @@ namespace Physica::Core {
         LValueVector(const LValueVector&) = default;
         LValueVector(LValueVector&&) noexcept = default;
     };
-
-    template<class Derived, class OtherDerived>
-    inline void operator+=(LValueVector<Derived>& v1, const RValueVector<OtherDerived>& v2);
-
-    template<class Derived, class OtherDerived>
-    inline void operator-=(LValueVector<Derived>& v1, const RValueVector<OtherDerived>& v2);
 }
 
 #include "LValueVectorImpl/LValueVectorImpl.h"

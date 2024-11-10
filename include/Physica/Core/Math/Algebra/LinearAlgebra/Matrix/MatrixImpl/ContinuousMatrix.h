@@ -51,10 +51,10 @@ namespace Physica::Core {
     public:
         ~ContinuousMatrix() = default;
         /* Operators */
+        using Base::operator=;
         inline ContinuousMatrix& operator=(const ContinuousMatrix& obj);
         inline ContinuousMatrix& operator=(ContinuousMatrix&& obj) noexcept;
         Derived& operator=(const ScalarType& s);
-        using Base::operator=;
         /* Operations */
         [[nodiscard]] inline RowVector row(size_t r);
         [[nodiscard]] inline const RowVector row(size_t r) const;

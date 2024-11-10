@@ -132,10 +132,10 @@ namespace Physica::Core {
         This& operator=(const ScalarType& s) { VectorBase::operator=(s); return *this; }
         using Base::operator=;
         using VectorBase::operator=;
-        void operator+=(const ScalarType& s) { VectorBase::operator+=(s); }
-        void operator-=(const ScalarType& s) { VectorBase::operator-=(s); }
-        void operator*=(const ScalarType& s) { VectorBase::operator*=(s); }
-        void operator/=(const ScalarType& s) { VectorBase::operator/=(s); }
+        using VectorBase::operator+=;
+        using VectorBase::operator-=;
+        using VectorBase::operator*=;
+        using VectorBase::operator/=;
         /* Operations */
         using Base::assignTo;
         using VectorBase::assignTo;
@@ -199,10 +199,10 @@ namespace Physica::Core {
         This& operator=(const ScalarType& s) { VectorBase::operator=(s); return *this; }
         using Base::operator=;
         using VectorBase::operator=;
-        void operator+=(const ScalarType& s) { VectorBase::operator+=(s); }
-        void operator-=(const ScalarType& s) { VectorBase::operator-=(s); }
-        void operator*=(const ScalarType& s) { VectorBase::operator*=(s); }
-        void operator/=(const ScalarType& s) { VectorBase::operator/=(s); }
+        using VectorBase::operator+=;
+        using VectorBase::operator-=;
+        using VectorBase::operator*=;
+        using VectorBase::operator/=;
         /* Operations */
         using Base::assignTo;
         using VectorBase::assignTo;

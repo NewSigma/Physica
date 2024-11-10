@@ -31,12 +31,13 @@ namespace Physica::Core {
         using Base = ScalarBase<This>;
     public:
         using typename Base::GradType;
+        using typename Base::MachineType;
     private:
         ScalarType value;
         GradType grad;
     public:
         Diff() = default;
-        Diff(double d) : This(ScalarType(d)) {}
+        Diff(MachineType x) : This(ScalarType(x)) {}
         Diff(ScalarType value_);
         Diff(ScalarType value_, GradType grad_);
         template<class OtherScalar, int OtherOrder>
@@ -90,6 +91,8 @@ namespace Physica::Core {
         /* Operators */
         inline ScalarRef& operator=(const This& other);
         inline ScalarRef& operator=(const ScalarType& other);
+        inline ScalarRef& operator=(int x) { return operator=(ScalarType(x)); }
+        inline ScalarRef& operator=(double x) { return operator=(ScalarType(x)); }
         [[nodiscard]] operator ScalarType() const { return ScalarType(getValue(), getGrad()); }
         [[nodiscard]] __host__ __device__ explicit operator float() const noexcept { return float(ScalarType(*this)); }
         [[nodiscard]] __host__ __device__ explicit operator double() const noexcept { return double(ScalarType(*this)); }

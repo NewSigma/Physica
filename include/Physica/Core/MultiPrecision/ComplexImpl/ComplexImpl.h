@@ -20,9 +20,6 @@
 
 namespace Physica::Core {
     template<class T>
-    Complex<T>::Complex(double d) : Complex(T(d)) {}
-
-    template<class T>
     Complex<T>::Complex(T re_) : re(re_), im(0) {}
 
     template<class T>
@@ -68,7 +65,7 @@ namespace Physica::Core {
     Complex<T> Complex<T>::unit() const {
         const T temp = norm();
         if (temp.isZero())
-            return Complex(1);
+            return T(1);
         return *this * reciprocal(temp);
     }
 

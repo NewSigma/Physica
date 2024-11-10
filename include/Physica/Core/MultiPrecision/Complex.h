@@ -39,7 +39,7 @@ namespace Physica::Core {
         T im;
     public:
         Complex() = default;
-        Complex(double d);
+        Complex(MachineType x) : This(T(x)) {}
         Complex(T re_);
         Complex(T re_, T im_);
         Complex(std::initializer_list<T> list);

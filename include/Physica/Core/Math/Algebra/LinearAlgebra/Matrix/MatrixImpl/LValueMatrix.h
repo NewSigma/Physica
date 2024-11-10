@@ -37,12 +37,14 @@ namespace Physica::Core {
         using ColVector = LMatrixBlock<Derived, Dynamic, 1>;
     public:
         using typename Base::ScalarType;
+        using typename Base::RealType;
         using Base::RowAtCompile;
         using Base::ColumnAtCompile;
         using Base::isComplex;
         using Base::isColumnMatrix;
         using Base::isRowMatrix;
         using Base::isForwardDiff;
+        using Base::isReverseDiff;
     protected:
         using PtrTy = typename ScalarType::PtrTy;
         using ConstPtrTy = typename ScalarType::ConstPtrTy;
@@ -53,17 +55,19 @@ namespace Physica::Core {
         /* Operators */
         LValueMatrix& operator=(const LValueMatrix& m) = delete;
         LValueMatrix& operator=(LValueMatrix&& m) = delete;
-        template<class OtherMatrix> Derived& operator=(const RValueMatrix<OtherMatrix>& m);
-        Derived& operator=(const ScalarType& s);
-        [[nodiscard]] inline RefTy operator()(size_t row, size_t col);
-        [[nodiscard]] inline ConstRefTy operator()(size_t row, size_t col) const;
+
+        Derived& operator=(const ScalarType& s_);
         void operator+=(const ScalarType& s) { (*this) = (*this) + s; }
         void operator-=(const ScalarType& s) { (*this) = (*this) - s; }
         void operator*=(const ScalarType& s) { (*this) = (*this) * s; }
         void operator/=(const ScalarType& s) { (*this) = (*this) / s; }
-        template<class OtherDerived> void operator+=(const RValueMatrix<OtherDerived>& m) { (*this) = (*this) + m; }
-        template<class OtherDerived> void operator-=(const RValueMatrix<OtherDerived>& m) { (*this) = (*this) - m; }
-        template<class OtherDerived> void operator*=(const RValueMatrix<OtherDerived>& m) { Base::getDerived() = Derived((*this) * m); }
+
+        template<class OtherMatrix> Derived& operator=(const RValueMatrix<OtherMatrix>& m);
+        template<class OtherMatrix> void operator+=(const RValueMatrix<OtherMatrix>& m) { (*this) = (*this) + m; }
+        template<class OtherMatrix> void operator-=(const RValueMatrix<OtherMatrix>& m) { (*this) = (*this) - m; }
+        template<class OtherMatrix> void operator*=(const RValueMatrix<OtherMatrix>& m) { Base::getDerived() = Derived((*this) * m); }
+        [[nodiscard]] inline RefTy operator()(size_t row, size_t col);
+        [[nodiscard]] inline ConstRefTy operator()(size_t row, size_t col) const;
         /* Operations */
         [[nodiscard]] inline RowVector row(size_t r);
         [[nodiscard]] inline const RowVector row(size_t r) const;

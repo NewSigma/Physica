@@ -106,7 +106,7 @@ namespace Physica::Core {
 
             ScalarType unit;
             if (temp[0].squaredNorm() <= RealType(std::numeric_limits<RealType>::min()))
-                unit = ScalarType(1);
+                unit = RealType(1);
             else
                 unit = temp[0].unit();
 
@@ -139,6 +139,7 @@ namespace Physica::Core {
     template<class ScalarType, size_t Order>
     template<class OtherMatrix>
     void HessenburgMatrixH<ScalarType, Order>::assignTo(LValueMatrix<OtherMatrix>& target) const {
+        using RealType = typename ScalarType::RealType;
         const size_t order = getRow();
         size_t i = 0;
         for (; i < order - 2; ++i) {
@@ -148,7 +149,7 @@ namespace Physica::Core {
             copy = fromCol.head(i + 1);
             toCol[i + 1] = hess.normVector[i];
             auto zero = toCol.tail(i + 2);
-            zero = ScalarType(0);
+            zero = RealType(0);
         }
         auto copy = target.rightCols(i);
         copy = hess.working.rightCols(i);

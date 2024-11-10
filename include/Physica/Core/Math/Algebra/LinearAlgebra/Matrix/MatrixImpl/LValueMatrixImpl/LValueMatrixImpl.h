@@ -74,10 +74,21 @@ namespace Physica::Core {
     }
     
     template<class Derived>
-    Derived& LValueMatrix<Derived>::operator=(const ScalarType& s) {
-        for (size_t i = 0; i < Base::getMaxMajor(); ++i)
-            for (size_t j = 0; j < Base::getMaxMinor(); ++j)
-                refFromMajorMinor(i, j) = ScalarType(s.getDerived());
+    Derived& LValueMatrix<Derived>::operator=(const ScalarType& s_) {
+        const size_t maxMajor = Base::getMaxMajor();
+        const size_t maxMinor = Base::getMaxMinor();
+        if constexpr (isReverseDiff) {
+            const auto& s = s_.getDerived();
+            for (size_t i = 0; i < maxMajor; ++i)
+                for (size_t j = 0; j < maxMinor; ++j)
+                    refFromMajorMinor(i, j) = s.copy();
+        }
+        else {
+            const auto s = ScalarType(s_.getDerived());
+            for (size_t i = 0; i < maxMajor; ++i)
+                for (size_t j = 0; j < maxMinor; ++j)
+                    refFromMajorMinor(i, j) = s;
+        }
         return Base::getDerived();
     }
 
@@ -417,7 +428,7 @@ namespace Physica::Core {
         const size_t order = Base::getRow();
         for (size_t i = 0; i < order; ++i)
             for (size_t j = 0; j < order; ++j)
-                refFromMajorMinor(i, j) = ScalarType(i == j ? 1 : 0);
+                refFromMajorMinor(i, j) = RealType(i == j ? 1 : 0);
     }
 
     template<class Derived>

@@ -33,21 +33,13 @@ namespace Physica::Core {
 
     template<class Derived>
     Derived& ContinuousMatrix<Derived>::operator=(const ScalarType& s) {
-        const size_t maxMajor = Base::getMaxMajor();
-        const size_t maxMinor = Base::getMaxMinor();
         if constexpr (isReverseDiff) {
             using TracerType = typename ScalarType::TracerType;
+            const size_t maxMajor = Base::getMaxMajor();
+            const size_t maxMinor = Base::getMaxMinor();
             TracerType::getInstance().reserve(maxMajor * maxMinor);
-            for (size_t i = 0; i < maxMajor; ++i)
-                for (size_t j = 0; j < maxMinor; ++j)
-                    Base::refFromMajorMinor(i, j) = s.copy();
         }
-        else {
-            for (size_t i = 0; i < maxMajor; ++i)
-                for (size_t j = 0; j < maxMinor; ++j)
-                    Base::refFromMajorMinor(i, j) = s;
-        }
-        return Base::getDerived();
+        return Base::operator=(s); // TODO: Optimize it using SIMD
     }
 
     template<class Derived>

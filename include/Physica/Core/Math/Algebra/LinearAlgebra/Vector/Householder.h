@@ -55,12 +55,12 @@ namespace Physica::Core {
         else {
             const bool isZeroVector = sourceNorm0 < std::numeric_limits<ScalarType>::min();
             if (isZeroVector) {
-                target = ScalarType(0);
+                target = RealType(0);
                 return RealType(0);
             }
         }
-        target[0] = ScalarType(2);
-        target.tail(1) = ScalarType(0);
+        target[0] = RealType(2);
+        target.tail(1) = RealType(0);
         return sqrt(sourceNorm0);
     }
 
