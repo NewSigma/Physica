@@ -55,6 +55,13 @@ namespace Physica::Core {
     }
 
     template<class ScalarType, int Order>
+    void Diff<ScalarType, DiffMode::Forward, Order>::swap(ScalarRef<This>&& ref) noexcept {
+        assert(ScalarPtr<This>(*this) != ScalarPtr<This>(ref) && "[Error]: Self swap is likely a bug");
+        value.swap(ref.getValue());
+        grad.swap(ref.getGrad());
+    }
+
+    template<class ScalarType, int Order>
     template<int GradOrder>
     typename Diff<ScalarType, DiffMode::Forward, Order>::Base::template GradRtnTy<GradOrder>&
     Diff<ScalarType, DiffMode::Forward, Order>::getGrad() noexcept {
@@ -130,8 +137,7 @@ namespace Physica::Core {
 
     template<class T, int Order>
     void ScalarRef<Diff<T, DiffMode::Forward, Order>>::swap(ScalarType& obj) noexcept {
-        getValue().swap(obj.getValue());
-        getGrad().swap(obj.getGrad());
+        obj.swap(*this);
     }
 
     template<class T, int Order>
@@ -154,9 +160,16 @@ namespace Physica::Core {
     }
 
     template<class T, int Order>
+    ScalarPtr<Diff<T, DiffMode::Forward, Order>>::ScalarPtr(ScalarType& x) : ScalarPtr(&x.getValue(), &x.getGrad()) {}
+
+    template<class T, int Order>
+    ScalarPtr<Diff<T, DiffMode::Forward, Order>>::ScalarPtr(ScalarRef<ScalarType>& x) : ScalarPtr(&x.getValue(), &x.getGrad()) {}
+
+    template<class T, int Order>
     inline bool ScalarPtr<Diff<T, DiffMode::Forward, Order>>::operator==(const This& other) const noexcept {
-        assert(pair.second == other.pair.second && "[Error]: Bad ScalarPtr");
-        return pair.first == other.pair.first;
+        bool flag = pair.first == other.pair.first;
+        assert(flag == (pair.second == other.pair.second) && "[Error]: Bad ScalarPtr");
+        return flag;
     }
 
     template<class T, int Order>
@@ -181,6 +194,12 @@ namespace Physica::Core {
     template<class T, int Order>
     inline const ScalarPtr<Diff<T, DiffMode::Forward, Order>> ScalarPtr<Diff<T, DiffMode::Forward, Order>>::operator--(int) {
         return This(pair.first--, pair.second--);
+    }
+
+    template<class T, int Order>
+    inline void ScalarPtr<Diff<T, DiffMode::Forward, Order>>::swap(This& __restrict obj) noexcept {
+        assert(this != &obj && "[Error]: Self swap is likely a bug");
+        pair.swap(obj.pair);
     }
     ////////////////////////////////////////////////////////////
     template<class ScalarType, int Order>

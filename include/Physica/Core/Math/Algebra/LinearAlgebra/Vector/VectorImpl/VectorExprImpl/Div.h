@@ -28,7 +28,10 @@ namespace Physica::Core {
     public:
         using Base::Base;
         /* Operations */
-        [[nodiscard]] ScalarType calc(size_t s) const { return Base::getLHS().calc(s) / Base::getRHS(); }
+        [[nodiscard]] ScalarType calc(size_t s) const {
+            assert(!Base::getRHS().isZero() && "[Error]: Divide by zero");
+            return Base::getLHS().calc(s) / Base::getRHS();
+        }
 
         template<class AnyPacket>
         [[nodiscard]] AnyPacket packet(size_t index) const {

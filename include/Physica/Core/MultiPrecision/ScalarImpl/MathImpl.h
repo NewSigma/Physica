@@ -39,6 +39,7 @@ namespace Physica::Core {
 
     template<ScalarOption Option>
     __host__ __device__ inline Scalar<Option> reciprocal(const Scalar<Option>& s) noexcept {
+        assert(!s.isZero() && "[Error]: Divide by zero");
         return Scalar<Option>(1) / s;
     }
 

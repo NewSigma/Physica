@@ -112,7 +112,7 @@ namespace Physica::Core {
                 p -= (p.conjugate() * temp * factor * ScalarType(0.5)) * temp;
                 for (size_t r = 0; r < corner.getRow(); ++r)
                     for (size_t c = r; c < corner.getCol(); ++c)
-                        working(r + i + 1, c + i + 1) -= temp.calc(r) * p[c].conjugate() + temp.calc(c).conjugate() * p[r];
+                        working(r + i + 1, c + i + 1) -= temp.calc(r) * p[c].conjugate() + temp.calc(c).conjugate() * ScalarType(p[r]);
                 working(i, i + 1) = factor;
             }
         }

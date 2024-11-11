@@ -46,7 +46,7 @@ namespace Physica::Core {
         Vector() = default;
         explicit Vector(size_t length);
         Vector(size_t length, const ScalarType& init);
-        //Vector(std::initializer_list<T> list);
+        Vector(std::initializer_list<ScalarType> list);
         Vector(ValueVector values_, GradVector grads_) noexcept;
         template<class Derived>
         Vector(const RValueVector<Derived>& v);

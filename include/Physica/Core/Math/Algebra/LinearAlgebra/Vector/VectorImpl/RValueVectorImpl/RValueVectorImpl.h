@@ -110,11 +110,14 @@ namespace Physica::Core {
     inline AnyPacket RValueVector<Derived>::packet(size_t index) const {
         constexpr static bool isExpr = !std::is_base_of<LValueVector<Derived>, Derived>::value;
         using T = typename Traits<AnyPacket>::ScalarType;
+        assert(index + AnyPacket::size() <= getLength() && "[Error]: Index out of range");
         if constexpr (T::isForwardDiff) {
             using ValuePacket = typename AnyPacket::ValuePacket;
             if constexpr (isForwardDiff) {
                 using GradPacket = typename AnyPacket::GradPacket;
-                return AnyPacket(toValueVector(*this).template packet<ValuePacket>(index), toGradVector(*this).template packet<GradPacket>(index));
+                auto values = toValueVector(*this).template packet<ValuePacket>(index);
+                auto grads = toGradVector(*this).template packet<GradPacket>(index);
+                return AnyPacket(std::move(values), std::move(grads));
             }
             else {
                 using PlainScalar = typename T::PlainScalar;
@@ -147,11 +150,14 @@ namespace Physica::Core {
     inline AnyPacket RValueVector<Derived>::packetPartial(size_t index, size_t count) const {
         constexpr static bool isExpr = !std::is_base_of<LValueVector<Derived>, Derived>::value;
         using T = typename Traits<AnyPacket>::ScalarType;
+        assert(index + count <= getLength() && "[Error]: Index out of range");
         if constexpr (T::isForwardDiff) {
             using ValuePacket = typename AnyPacket::ValuePacket;
             if constexpr (isForwardDiff) {
                 using GradPacket = typename AnyPacket::GradPacket;
-                return AnyPacket(toValueVector(*this).template packet<ValuePacket>(index), toGradVector(*this).template packet<GradPacket>(index));
+                auto values = toValueVector(*this).template packetPartial<ValuePacket>(index, count);
+                auto grads = toGradVector(*this).template packetPartial<GradPacket>(index, count);
+                return AnyPacket(std::move(values), std::move(grads));
             }
             else {
                 using PlainScalar = typename T::PlainScalar;

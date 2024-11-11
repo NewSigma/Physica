@@ -26,10 +26,12 @@ namespace Physica::Core {
         static_assert(!ScalarType::isComplex, "[Error]: Model param must be real");
         using This = Hubbard<ScalarType, Dim>;
         using Base = LatticeModel<Dim>;
-        using HopIndexArray = Array<Array<size_t>>;
     public:
+        constexpr static bool UntrivialNearestNeighbor = Dim > 1;
         using typename Base::IndexType;
     private:
+        using HopIndexArray = typename std::conditional<UntrivialNearestNeighbor, Array<Array<size_t>>, PlainStruct<void>>::type;
+
         ScalarType hoppingT;
         ScalarType repelU;
         HopIndexArray hopIndexArr;
@@ -53,7 +55,7 @@ namespace Physica::Core {
     template<class ScalarType, unsigned int Dim>
     Hubbard<ScalarType, Dim>::Hubbard(Base lattice, ScalarType hoppingT_, ScalarType repelU_)
             : Base(std::move(lattice)), hoppingT(hoppingT_), repelU(repelU_) {
-        if constexpr (Dim > 1)
+        if constexpr (UntrivialNearestNeighbor)
             hopIndexArr = makeHopIndexArray();
     }
 

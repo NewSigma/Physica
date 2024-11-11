@@ -27,6 +27,16 @@ namespace Physica::Core {
             : values(length, init.getValue()), grads(length, init.getGrad()) {}
 
     template<class T, int Order, size_t Length, class Allocator>
+    Vector<Diff<T, DiffMode::Forward, Order>, Length, Allocator>::Vector(std::initializer_list<ScalarType> list) : Vector(list.size()) {
+        size_t i = 0;
+        for (auto& elem : list) {
+            values[i] = elem.getValue();
+            grads[i] = elem.getGrad();
+            i += 1;
+        }
+    }
+
+    template<class T, int Order, size_t Length, class Allocator>
     Vector<Diff<T, DiffMode::Forward, Order>, Length, Allocator>::Vector(ValueVector values_, GradVector grads_) noexcept
             : values(std::move(values_)), grads(std::move(grads_)) {}
 

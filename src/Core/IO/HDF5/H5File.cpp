@@ -16,8 +16,8 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include "Physica/Core/IO/HDF5/HDF5.h"
-#include "Physica/Core/Exception/IOException.h"
+#include <Physica/Core/IO/HDF5/HDF5.h>
+#include <Physica/Core/Exception/IOException.h>
 
 namespace Physica::Core {
     H5File::H5File(
@@ -48,5 +48,13 @@ namespace Physica::Core {
         auto dataset = Base::createDataSet(name, H5::PredType::NATIVE_CHAR, space);
         dataset.write(buffer.data(), H5::PredType::NATIVE_CHAR);
         return dataset;
+    }
+
+    H5Group H5File::openGroup(const char* name) {
+        if (Base::exists(name))
+            return Base::openGroup(name);
+        if (isReadOnly())
+            throw IOException("[Error]: Group not found");
+        return Base::createGroup(name, 0);
     }
 }

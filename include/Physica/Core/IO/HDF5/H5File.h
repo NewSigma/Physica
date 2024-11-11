@@ -50,7 +50,8 @@ namespace Physica::Core {
         using Location::createDataSet;
         using Location::openDataSet;
         using Location::openGroup;
-        H5DataSet<1> createDataSet(const char* filepath, const char* name);
+        [[nodiscard]] H5DataSet<1> createDataSet(const char* filepath, const char* name);
+        [[nodiscard]] H5Group openGroup(const char* name);
         /* Getters */
         [[nodiscard]] unsigned int getOpenflag() const noexcept { return openflag; }
         [[nodiscard]] bool isReadOnly() const noexcept { return (openflag & ReadWrite) == 0; }

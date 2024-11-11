@@ -33,6 +33,11 @@ namespace Physica::Core {
     }
 
     template<class ScalarType, DiffMode Mode, int Order>
+    __host__ __device__ inline auto abs(const ScalarRef<Diff<ScalarType, Mode, Order>>& x) {
+        return abs(Diff<ScalarType, Mode, Order>(x));
+    }
+
+    template<class ScalarType, DiffMode Mode, int Order>
     inline Diff<ScalarType, Mode, Order> relu(const Diff<ScalarType, Mode, Order>& s) {
         const ScalarType value = relu(s.getValue());
         if constexpr (Mode == DiffMode::Forward)
@@ -59,6 +64,11 @@ namespace Physica::Core {
             tracer.pushOperand(s);
             return result;
         }
+    }
+
+    template<class ScalarType, DiffMode Mode, int Order>
+    __host__ __device__ inline auto square(const ScalarRef<Diff<ScalarType, Mode, Order>>& x) {
+        return square(Diff<ScalarType, Mode, Order>(x));
     }
 
     template<class ScalarType, DiffMode Mode, int Order>
@@ -122,6 +132,18 @@ namespace Physica::Core {
             tracer.pushOperand(s);
             return result;
         }
+    }
+
+    template<class ScalarType, DiffMode Mode, int Order>
+    Diff<ScalarType, Mode, Order> ln1p(const Diff<ScalarType, Mode, Order>& x) {
+        static_assert(Mode == DiffMode::Forward, "[Error]: Not implemented");
+        using ResultType = Diff<ScalarType, Mode, Order>;
+        if constexpr (Mode == DiffMode::Forward) {
+            using GradType = typename ResultType::GradType;
+            return ResultType(ln1p(x.getValue()), x.getGrad() / (ScalarType(1) + GradType(x)));
+        }
+        else
+            noImpl();
     }
 
     template<class ScalarType, DiffMode Mode, int Order>

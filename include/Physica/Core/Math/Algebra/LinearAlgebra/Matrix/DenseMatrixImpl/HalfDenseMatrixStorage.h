@@ -28,12 +28,8 @@ namespace Physica::Core {
     class HalfDenseMatrixStorage : public ArrayBase<HalfDenseMatrixStorage<T, Order>, HostAllocator<T>> {
         using This = HalfDenseMatrixStorage<T, Order>;
         using Base = ArrayBase<This, HostAllocator<T>>;
-    public:
+    protected:
         using ArrayType = typename Traits<This>::ArrayType;
-        using pointer = typename Base::pointer;
-        using const_pointer = typename Base::const_pointer;
-        using lvalue_reference = typename Base::lvalue_reference;
-        using const_lvalue_reference = typename Base::const_lvalue_reference;
     private:
         ArrayType arr;
         size_t order;
@@ -49,8 +45,8 @@ namespace Physica::Core {
         ~HalfDenseMatrixStorage() = default;
         /* Operators */
         HalfDenseMatrixStorage& operator=(This obj) noexcept { swap(obj); return *this; }
-        [[nodiscard]] __host__ __device__ inline lvalue_reference operator()(size_t row, size_t col);
-        [[nodiscard]] __host__ __device__ inline const_lvalue_reference operator()(size_t row, size_t col) const;
+        [[nodiscard]] __host__ __device__ inline auto operator()(size_t row, size_t col);
+        [[nodiscard]] __host__ __device__ inline auto operator()(size_t row, size_t col) const;
         /* Operations */
         template<class... Args>
         void resize(size_t row, size_t col, Args&&... args);
@@ -65,10 +61,10 @@ namespace Physica::Core {
         [[nodiscard]] __host__ __device__ size_t size() const noexcept { return arr.size(); }
         [[nodiscard]] __host__ __device__ size_t getLength() const noexcept { return arr.getLength(); }
         [[nodiscard]] __host__ __device__ size_t getCapacity() const noexcept { return arr.getCapacity(); }
-        [[nodiscard]] __host__ __device__ pointer data() noexcept { return arr.data(); }
-        [[nodiscard]] __host__ __device__ const_pointer data() const noexcept { return arr.data(); }
-        [[nodiscard]] __host__ __device__ inline T* data_ptr(size_t row, size_t col) noexcept;
-        [[nodiscard]] __host__ __device__ inline const T* data_ptr(size_t row, size_t col) const noexcept;
+        [[nodiscard]] __host__ __device__ auto data() noexcept { return arr.data(); }
+        [[nodiscard]] __host__ __device__ auto data() const noexcept { return arr.data(); }
+        [[nodiscard]] __host__ __device__ inline auto data_ptr(size_t row, size_t col) noexcept;
+        [[nodiscard]] __host__ __device__ inline auto data_ptr(size_t row, size_t col) const noexcept;
         [[nodiscard]] __host__ __device__ size_t toIndex1D(size_t r, size_t c) const noexcept;
     };
 
@@ -85,12 +81,14 @@ namespace Physica::Core {
     }
 
     template<class T, size_t Order>
-    __host__ __device__ inline typename HalfDenseMatrixStorage<T, Order>::lvalue_reference
-    HalfDenseMatrixStorage<T, Order>::operator()(size_t row, size_t col) { return (*this)[toIndex1D(row, col)]; }
+    __host__ __device__ inline auto HalfDenseMatrixStorage<T, Order>::operator()(size_t row, size_t col) {
+        return (*this)[toIndex1D(row, col)];
+    }
 
     template<class T, size_t Order>
-    __host__ __device__ inline typename HalfDenseMatrixStorage<T, Order>::const_lvalue_reference
-    HalfDenseMatrixStorage<T, Order>::operator()(size_t row, size_t col) const { return (*this)[toIndex1D(row, col)]; }
+    __host__ __device__ inline auto HalfDenseMatrixStorage<T, Order>::operator()(size_t row, size_t col) const {
+        return (*this)[toIndex1D(row, col)];
+    }
 
     template<class T, size_t Order>
     template<class... Args>
@@ -108,12 +106,12 @@ namespace Physica::Core {
     }
 
     template<class T, size_t Order>
-    __host__ __device__ inline T* HalfDenseMatrixStorage<T, Order>::data_ptr(size_t row, size_t col) noexcept {
+    __host__ __device__ inline auto HalfDenseMatrixStorage<T, Order>::data_ptr(size_t row, size_t col) noexcept {
         return arr.data() + toIndex1D(row, col);
     }
 
     template<class T, size_t Order>
-    __host__ __device__ inline const T* HalfDenseMatrixStorage<T, Order>::data_ptr(size_t row, size_t col) const noexcept {
+    __host__ __device__ inline auto HalfDenseMatrixStorage<T, Order>::data_ptr(size_t row, size_t col) const noexcept {
         return arr.data() + toIndex1D(row, col);
     }
 

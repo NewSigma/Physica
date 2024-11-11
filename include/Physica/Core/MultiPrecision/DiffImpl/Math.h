@@ -39,6 +39,9 @@ namespace Physica::Core {
 
     template<class ScalarType, DiffMode Mode, int Order>
     Diff<ScalarType, Mode, Order> ln(const Diff<ScalarType, Mode, Order>& s);
+
+    template<class ScalarType, DiffMode Mode, int Order>
+    Diff<ScalarType, Mode, Order> ln1p(const Diff<ScalarType, Mode, Order>& x);
 /*
     template<class ScalarType, DiffMode Mode, int Order>
     Diff<ScalarType, Mode, Order> log(const Diff<ScalarType, Mode, Order>& s, const Diff<ScalarType, Mode, Order>& a);

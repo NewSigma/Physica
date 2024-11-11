@@ -54,6 +54,7 @@ namespace Physica::Core {
         /* Operations */
         [[nodiscard]] This conjugate() const;
         void swap(This& __restrict obj) noexcept;
+        void swap(ScalarRef<This>&& ref) noexcept;
         /* Getters */
         [[nodiscard]] ScalarType& getValue() noexcept { return value; }
         template<int GradOrder = 1>
@@ -104,6 +105,14 @@ namespace Physica::Core {
         template<class U> void operator-=(const ScalarBase<U>& s) { *this = ScalarType(*this) - s; }
         template<class U> void operator*=(const ScalarBase<U>& s) { *this = ScalarType(*this) * s; }
         template<class U> void operator/=(const ScalarBase<U>& s) { *this = ScalarType(*this) / s; }
+        template<class U> auto operator+(const ScalarRef<U>& s) const { return operator+(U(s)); }
+        template<class U> auto operator-(const ScalarRef<U>& s) const { return operator-(U(s)); }
+        template<class U> auto operator*(const ScalarRef<U>& s) const { return operator*(U(s)); }
+        template<class U> auto operator/(const ScalarRef<U>& s) const { return operator/(U(s)); }
+        template<class U> void operator+=(const ScalarRef<U>& s) { operator+=(U(s)); }
+        template<class U> void operator-=(const ScalarRef<U>& s) { operator-=(U(s)); }
+        template<class U> void operator*=(const ScalarRef<U>& s) { operator*=(U(s)); }
+        template<class U> void operator/=(const ScalarRef<U>& s) { operator/=(U(s)); }
         [[nodiscard]] ScalarType operator-() const { return -ScalarType(*this); }
         __host__ __device__ inline bool operator>(double s) const noexcept { return ScalarType(*this) > s; }
         __host__ __device__ inline bool operator<(double s) const noexcept { return ScalarType(*this) < s; }
@@ -115,6 +124,8 @@ namespace Physica::Core {
         void swap(This&& obj) noexcept;
         void swap(ScalarType& obj) noexcept;
         /* Getters */
+        [[nodiscard]] auto real() const { return ScalarType(*this).real(); }
+        [[nodiscard]] auto imag() const { return ScalarType(*this).imag(); }
         [[nodiscard]] auto conjugate() const { return ScalarType(*this).conjugate(); }
         [[nodiscard]] auto& getValue() noexcept { return *ptr.value_ptr(); }
         template<int GradOrder = 1>
@@ -139,6 +150,8 @@ namespace Physica::Core {
     public:
         ScalarPtr(std::pair<T*, GradPtrTy> pair_) : pair(std::move(pair_)) {}
         ScalarPtr(T* pValue, GradPtrTy pGrad) : pair(std::make_pair(pValue, pGrad)) {}
+        explicit ScalarPtr(ScalarType& x);
+        explicit ScalarPtr(ScalarRef<ScalarType>& x);
         ScalarPtr(const This&) = default;
         ScalarPtr(This&&) noexcept = default;
         ~ScalarPtr() = default;
@@ -160,6 +173,8 @@ namespace Physica::Core {
         inline const This operator++(int);
         inline const This operator--(int);
         [[nodiscard]] T* operator[](size_t i) const noexcept { assert(i <= Order); return arr[i]; }
+        /* Operations */
+        inline void swap(This& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] T* value_ptr() const noexcept { return pair.first; }
         [[nodiscard]] GradPtrTy grad_ptr() const noexcept { return pair.second; }

@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include "Physica/Core/IO/HDF5/HDF5.h"
+#include <Physica/Core/IO/HDF5/HDF5.h>
 
 namespace Physica::Core {
     const H5Group H5Location::openGroup(const char* name) const {
