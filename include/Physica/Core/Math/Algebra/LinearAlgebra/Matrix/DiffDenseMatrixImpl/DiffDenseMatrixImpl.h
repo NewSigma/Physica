@@ -19,48 +19,60 @@
 #pragma once
 
 namespace Physica::Core {
-    template<class T, int Order, int Option>
-    DenseMatrix<Diff<T, DiffMode::Forward, Order>, Option>::DenseMatrix(size_t row, size_t col) : values(row, col), grads(row, col) {}
+    template<class T, int Order, int Option, size_t Row, size_t Col>
+    DenseMatrix<Diff<T, DiffMode::Forward, Order>, Option, Row, Col>::DenseMatrix(size_t row, size_t col) : values(row, col), grads(row, col) {}
 
-    template<class T, int Order, int Option>
-    DenseMatrix<Diff<T, DiffMode::Forward, Order>, Option>::DenseMatrix(size_t row, size_t col, T init)
+    template<class T, int Order, int Option, size_t Row, size_t Col>
+    DenseMatrix<Diff<T, DiffMode::Forward, Order>, Option, Row, Col>::DenseMatrix(size_t row, size_t col, T init)
             : values(row, col, init), grads(row, col, init) {}
 
-    template<class T, int Order, int Option>
+    template<class T, int Order, int Option, size_t Row, size_t Col>
     template<class OtherMatrix>
-    DenseMatrix<Diff<T, DiffMode::Forward, Order>, Option>::DenseMatrix(const RValueMatrix<OtherMatrix>& mat) : DenseMatrix(mat.getRow(), mat.getCol()) {
+    DenseMatrix<Diff<T, DiffMode::Forward, Order>, Option, Row, Col>::DenseMatrix(const RValueMatrix<OtherMatrix>& mat) : DenseMatrix(mat.getRow(), mat.getCol()) {
         mat.getDerived().assignTo(*this);
     }
 
-    template<class T, int Order, int Option>
+    template<class T, int Order, int Option, size_t Row, size_t Col>
     template<class VectorType>
-    DenseMatrix<Diff<T, DiffMode::Forward, Order>, Option>::DenseMatrix(const RValueVector<VectorType>& vec) : DenseMatrix(vec.getLength(), 1) {
+    DenseMatrix<Diff<T, DiffMode::Forward, Order>, Option, Row, Col>::DenseMatrix(const RValueVector<VectorType>& vec) : DenseMatrix(vec.getLength(), 1) {
         auto col = this->col(0);
         vec.getDerived().assignTo(col);
     }
 
-    template<class T, int Order, int Option>
-    void DenseMatrix<Diff<T, DiffMode::Forward, Order>, Option>::resize(size_t row, size_t col) {
+    template<class T, int Order, int Option, size_t Row, size_t Col>
+    void DenseMatrix<Diff<T, DiffMode::Forward, Order>, Option, Row, Col>::resize(size_t row, size_t col) {
         values.resize(row, col);
         grads.resize(row, col);
     }
 
-    template<class T, int Order, int Option>
-    void DenseMatrix<Diff<T, DiffMode::Forward, Order>, Option>::swap(This& __restrict obj) noexcept {
+    template<class T, int Order, int Option, size_t Row, size_t Col>
+    void DenseMatrix<Diff<T, DiffMode::Forward, Order>, Option, Row, Col>::swap(This& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         values.swap(obj.values);
         grads.swap(obj.grads);
     }
 
-    template<class T, int Order, int Option>
-    inline typename DenseMatrix<Diff<T, DiffMode::Forward, Order>, Option>::PtrTy
-    DenseMatrix<Diff<T, DiffMode::Forward, Order>, Option>::data_ptr(size_t row, size_t col) noexcept {
+    template<class T, int Order, int Option, size_t Row, size_t Col>
+    void DenseMatrix<Diff<T, DiffMode::Forward, Order>, Option, Row, Col>::swap_row(size_t r1, size_t r2) noexcept {
+        values.swap_row(r1, r2);
+        grads.swap_row(r1, r2);
+    }
+
+    template<class T, int Order, int Option, size_t Row, size_t Col>
+    void DenseMatrix<Diff<T, DiffMode::Forward, Order>, Option, Row, Col>::swap_col(size_t c1, size_t c2) noexcept {
+        values.swap_col(c1, c2);
+        grads.swap_col(c1, c2);
+    }
+
+    template<class T, int Order, int Option, size_t Row, size_t Col>
+    inline typename DenseMatrix<Diff<T, DiffMode::Forward, Order>, Option, Row, Col>::PtrTy
+    DenseMatrix<Diff<T, DiffMode::Forward, Order>, Option, Row, Col>::data_ptr(size_t row, size_t col) noexcept {
         return PtrTy(values.data_ptr(row, col), grads.data_ptr(row, col));
     }
 
-    template<class T, int Order, int Option>
-    inline typename DenseMatrix<Diff<T, DiffMode::Forward, Order>, Option>::ConstPtrTy
-    DenseMatrix<Diff<T, DiffMode::Forward, Order>, Option>::data_ptr(size_t row, size_t col) const noexcept {
+    template<class T, int Order, int Option, size_t Row, size_t Col>
+    inline typename DenseMatrix<Diff<T, DiffMode::Forward, Order>, Option, Row, Col>::ConstPtrTy
+    DenseMatrix<Diff<T, DiffMode::Forward, Order>, Option, Row, Col>::data_ptr(size_t row, size_t col) const noexcept {
         return const_cast<This&>(*this).data_ptr(row, col);
     }
     ////////////////////////////////////////////////////////////////////////

@@ -71,7 +71,7 @@ namespace Physica::Core {
         }
 
         if (col != main_row_index)
-            Storage::rowSwap(col, main_row_index);
+            Storage::swap_row(col, main_row_index);
         return main_col_index;
     }
     /**
@@ -94,7 +94,7 @@ namespace Physica::Core {
         }
 
         if (col != main_col_index)
-            Storage::rowSwap(col, main_col_index);
+            Storage::swap_row(col, main_col_index);
         return main_col_index;
     }
 

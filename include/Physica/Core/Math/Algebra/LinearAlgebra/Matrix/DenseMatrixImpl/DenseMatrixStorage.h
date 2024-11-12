@@ -67,17 +67,14 @@ namespace Physica::Core {
         /* Operations */
         template<class... Args>
         void resize(size_t row, size_t col, Args&&... args);
-        void rowSwap(size_t r1, size_t r2);
-        void colSwap(size_t c1, size_t r1);
         [[nodiscard]] inline auto toDevice() const;
         [[nodiscard]] inline auto toDeviceAsync() const;
         inline void toDevice(device_obj<This>& obj) const;
         inline void toDeviceAsync(device_obj<This>& obj) const;
-        void swap(This& __restrict obj) noexcept {
-            assert(this != &obj && "[Error]: Self swap is likely a bug");
-            Dim::swap(obj);
-            arr.swap(obj.arr);
-        }
+
+        void swap(This& __restrict obj) noexcept;
+        void swap_row(size_t r1, size_t r2) noexcept;
+        void swap_col(size_t c1, size_t r1) noexcept;
         /* Getters */
         using Dim::getCol;
         using Dim::getRow;
@@ -127,17 +124,14 @@ namespace Physica::Core {
         /* Operations */
         template<class... Args>
         void resize(size_t row, size_t col, Args&&... args);
-        void rowSwap(size_t r1, size_t r2);
-        void colSwap(size_t c1, size_t r1);
         [[nodiscard]] inline auto toDevice() const;
         [[nodiscard]] inline auto toDeviceAsync() const;
         inline void toDevice(device_obj<This>& obj) const;
         inline void toDeviceAsync(device_obj<This>& obj) const;
-        void swap(This& __restrict obj) noexcept {
-            assert(this != &obj && "[Error]: Self swap is likely a bug");
-            Dim::swap(obj);
-            arr.swap(obj.arr);
-        }
+
+        void swap(This& __restrict obj) noexcept;
+        void swap_row(size_t r1, size_t r2) noexcept;
+        void swap_col(size_t c1, size_t r1) noexcept;
         /* Getters */
         using Dim::getCol;
         using Dim::getRow;
@@ -194,14 +188,11 @@ namespace Physica::Core {
         /* Operations */
         template<class... Args>
         void resize(size_t row, size_t col, Args&&... args);
-        void rowSwap(size_t r1, size_t r2);
-        void colSwap(size_t c1, size_t r1);
         [[nodiscard]] inline auto toDevice() const;
-        void swap(This& __restrict obj) noexcept {
-            assert(this != &obj && "[Error]: Self swap is likely a bug");
-            array.swap(obj.array);
-            Dim::swap(obj);
-        }
+
+        void swap(This& __restrict obj) noexcept;
+        void swap_row(size_t r1, size_t r2) noexcept;
+        void swap_col(size_t c1, size_t r1) noexcept;
         /* Getters */
         using Dim::getCol;
         using Dim::getRow;
@@ -258,14 +249,11 @@ namespace Physica::Core {
         /* Operations */
         template<class... Args>
         void resize(size_t row, size_t col, Args&&... args);
-        void rowSwap(size_t r1, size_t r2);
-        void colSwap(size_t c1, size_t r1);
         [[nodiscard]] inline auto toDevice() const;
-        void swap(This& __restrict obj) noexcept {
-            assert(this != &obj && "[Error]: Self swap is likely a bug");
-            array.swap(obj.array);
-            Dim::swap(obj);
-        }
+
+        void swap(This& __restrict obj) noexcept;
+        void swap_row(size_t r1, size_t r2) noexcept;
+        void swap_col(size_t c1, size_t r1) noexcept;
         /* Getters */
         using Dim::getCol;
         using Dim::getRow;

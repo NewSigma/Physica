@@ -78,8 +78,8 @@ namespace Physica::Core {
         __host__ __device__ void swap(SIMD& __restrict other) noexcept { std::swap(*this, other); }
         /* Getters */
         [[nodiscard]] __host__ __device__ constexpr static size_t size() { return Size; }
-        [[nodiscard]] __host__ __device__ Base& getImpl() noexcept { return *this; }
-        [[nodiscard]] __host__ __device__ const Base& getImpl() const noexcept { return *this; }
+        [[nodiscard]] __host__ __device__ Base& toMachine() noexcept { return *this; }
+        [[nodiscard]] __host__ __device__ const Base& toMachine() const noexcept { return *this; }
     };
 
     __host__ __device__ inline SIMD<Scalar<Float16>, 2>::SIMD(ScalarType v) : Base(__half2half2(v.toMachine())) {}
@@ -96,23 +96,23 @@ namespace Physica::Core {
     }
 
     __host__ __device__ inline SIMD<Scalar<Float16>, 2> SIMD<Scalar<Float16>, 2>::operator+(const SIMD& other) const noexcept {
-        return This(__hadd2(getImpl(), other.getImpl()));
+        return This(__hadd2(toMachine(), other.toMachine()));
     }
 
     __host__ __device__ inline SIMD<Scalar<Float16>, 2> SIMD<Scalar<Float16>, 2>::operator-(const SIMD& other) const noexcept {
-        return This(__hsub2(getImpl(), other.getImpl()));
+        return This(__hsub2(toMachine(), other.toMachine()));
     }
 
     __host__ __device__ inline SIMD<Scalar<Float16>, 2> SIMD<Scalar<Float16>, 2>::operator*(const SIMD& other) const noexcept {
-        return This(__hmul2(getImpl(), other.getImpl()));
+        return This(__hmul2(toMachine(), other.toMachine()));
     }
 
     __host__ __device__ inline SIMD<Scalar<Float16>, 2> SIMD<Scalar<Float16>, 2>::operator/(const SIMD& other) const noexcept {
-        return This(__h2div(getImpl(), other.getImpl()));
+        return This(__h2div(toMachine(), other.toMachine()));
     }
 
     __host__ __device__ inline SIMD<Scalar<Float16>, 2> SIMD<Scalar<Float16>, 2>::operator-() const noexcept {
-        return This(__hneg2(getImpl()));
+        return This(__hneg2(toMachine()));
     }
 
     __host__ __device__ inline void SIMD<Scalar<Float16>, 2>::load(const ScalarType* p) {
@@ -144,7 +144,7 @@ namespace Physica::Core {
     [[nodiscard]] __host__ __device__ inline SIMD<Scalar<Float16>, 2> mul_add(
             const SIMD<Scalar<Float16>, 2>& a, const SIMD<Scalar<Float16>, 2>& b, const SIMD<Scalar<Float16>, 2>& c) noexcept {
     #ifdef __CUDA_ARCH__
-        return SIMD<Scalar<Float16>, 2>(__hfma2(a.getImpl(), b.getImpl(), c.getImpl()));
+        return SIMD<Scalar<Float16>, 2>(__hfma2(a.toMachine(), b.toMachine(), c.toMachine()));
     #else
         return a * b + c;
     #endif
@@ -168,11 +168,11 @@ namespace std {
     #define T Physica::Core::SIMD<Physica::Core::Scalar<Physica::Core::Float16>, 2>
 
     __host__ __device__ inline T max(T a, T b) noexcept {
-        return T(__hmax2_nan(a.getImpl(), b.getImpl()));
+        return T(__hmax2_nan(a.toMachine(), b.toMachine()));
     }
 
     __host__ __device__ inline T min(T a, T b) noexcept {
-        return T(__hmin2_nan(a.getImpl(), b.getImpl()));
+        return T(__hmin2_nan(a.toMachine(), b.toMachine()));
     }
 
     #undef T

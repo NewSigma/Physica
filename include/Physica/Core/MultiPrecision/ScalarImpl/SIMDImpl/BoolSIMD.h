@@ -38,13 +38,13 @@ namespace Physica::Core {
         /* Getters */
         [[nodiscard]] constexpr static size_t size() { return Size; }
         [[nodiscard]] constexpr static size_t getSize() { return Size; }
-        [[nodiscard]] Base& getImpl() noexcept { return *this; }
-        [[nodiscard]] const Base& getImpl() const noexcept { return *this; }
+        [[nodiscard]] Base& toMachine() noexcept { return *this; }
+        [[nodiscard]] const Base& toMachine() const noexcept { return *this; }
     };
 
     template<class ScalarType, size_t Size>
     [[nodiscard]] inline bool BoolSIMD<ScalarType, Size>::horizontal_or() const {
-        return Physica::horizontal_or(getImpl());
+        return Physica::horizontal_or(toMachine());
     }
 
     template<class ScalarType>

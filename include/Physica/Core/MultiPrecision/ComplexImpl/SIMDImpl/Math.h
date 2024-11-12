@@ -26,7 +26,7 @@ namespace Physica::Core {
     template<class T, size_t Size>
     inline SIMD<Complex<T>, Size> sqrt(const SIMD<Complex<T>, Size>& x) {
         using RealPack = SIMD<T, Size * 2>;
-        const RealPack x1 = x.getImpl();
+        const RealPack x1 = x.asReal();
         const RealPack t1 = x1 * x1;
         RealPack t2;
         if constexpr (T::Option == Float32)
@@ -73,6 +73,6 @@ namespace Physica::Core {
         const RealPack t5 = t3 + (t4 ^ signbit);
         const RealPack t6 = sqrt(t5 * T(0.5));
         const RealPack result = t6 ^ (x1 & signbit);
-        return SIMD<Complex<T>, Size>(result);
+        return SIMD<Complex<T>, Size>::asComplex(result);
     }
 }

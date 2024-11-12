@@ -16,8 +16,8 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include <Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h>
 #include <Physica/Core/Math/Algebra/LinearAlgebra/Eigen/SymmEigenSolver.h>
+#include <Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DiffDenseMatrix.h>
 #include <Physica/Core/Math/Random/Random.h>
 
 using namespace Physica::Core;
@@ -26,7 +26,7 @@ template<class MatrixType>
 bool eigenTest(const MatrixType& mat, double precision) {
     using ScalarType = typename MatrixType::ScalarType;
     using RealType = typename ScalarType::RealType;
-    using ComplexVector = Vector<Complex<RealType>, MatrixType::RowAtCompile>;
+    using ComplexVector = Vector<typename RealType::ComplexType, MatrixType::RowAtCompile>;
     using EigenvectorMatrix = typename SymmEigenSolver<ScalarType>::EigenvectorMatrix;
 
     auto solver = SymmEigenSolver<ScalarType>(mat, true);
@@ -38,7 +38,7 @@ bool eigenTest(const MatrixType& mat, double precision) {
         if (i > 1 && solver.getEigenvalues()[i - 1] > solver.getEigenvalues()[i])
             return false;
         ComplexVector v1 = mat * eigenvectors.col(i);
-        ComplexVector v2 = solver.getEigenvalues()[i] * eigenvectors.col(i).asVector();
+        ComplexVector v2 = RealType(solver.getEigenvalues()[i]) * eigenvectors.col(i).asVector();
         if (!vectorNear(v1, v2, precision))
             return false;
     }
@@ -46,19 +46,25 @@ bool eigenTest(const MatrixType& mat, double precision) {
 }
 
 int main() {
-    using RealType = float64;
     {
-        using MatrixType = DenseMatrix<RealType, MatrixOption::Col | MatrixOption::Vector, 3, 3>;
-        const MatrixType mat1{{-0.590316, -2.19514, -2.37463},
-                             {-1.25006, -0.297493, 1.40349},
-                             {0.517063, -0.956614, -0.920775}};
-        MatrixType mat = mat1 + mat1.transpose();
+        using MatrixType = DenseMatrix<float64, MatrixOption::Col | MatrixOption::Vector, 3, 3>;
+        const MatrixType data{
+                {-0.590316, -2.195140, -2.374630},
+                {-1.250060, -0.297493,  1.403490},
+                { 0.517063, -0.956614, -0.920775}
+        };
+        const MatrixType mat = data + data.transpose();
         if (!eigenTest(mat, 1E-14))
+            return 1;
+
+        using T = Diff<float64, DiffMode::Forward, 1>;
+        using DiffMatrix = DenseMatrix<T, MatrixOption::Col | MatrixOption::Vector, 3, 3>;
+        const DiffMatrix mat1 = mat;
+        if (!eigenTest(mat1, 1E-14))
             return 1;
     }
     {
-        using MatrixType = DenseSymmMatrix<RealType>;
-        std::mt19937 gen{};
+        using MatrixType = DenseSymmMatrix<float64>;
         const auto mat = MatrixType::random_uniform(8, Random<std::mt19937, std::mt19937::default_seed>::getInstance());
         if (!eigenTest(mat, 1E-14))
             return 1;

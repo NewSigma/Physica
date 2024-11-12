@@ -85,8 +85,6 @@ $$\mathbf{\Pi} = (1 - \alpha) \mathbf{\Pi}' + \alpha \frac{|\mathbf{\Pi}|}{|\mat
 
 **图1** 力随迭代步数变化曲线，固定步长FIRE算法的速度优于QE实现的自适应步长FIRE算法。FIRE1(质量未归一)花费约250步达到给定精度，FIRE2(质量归一)花费约125步达到给定精度。
 
-使用unix的time函数，FIRE1用时，FIRE2用时162m12.741s
-
 ![](./QE/OptQE1.png)
 
 **图2** 固定优化200步，Fire不能达到比BFGS更低的力

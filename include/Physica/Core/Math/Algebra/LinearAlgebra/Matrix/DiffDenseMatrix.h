@@ -18,13 +18,13 @@
  */
 #pragma once
 
-#include <Physica/Core/MultiPrecision/Diff.h>
+#include <Physica/Core/Math/Algebra/LinearAlgebra/Vector/DiffVector.h>
 #include "DenseMatrix.h"
 
 namespace Physica::Core {
-    template<class T, int Order, int Option>
-    class DenseMatrix<Diff<T, DiffMode::Forward, Order>, Option> : public ContinuousMatrix<DenseMatrix<Diff<T, DiffMode::Forward, Order> , Option>> {
-        using This = DenseMatrix<Diff<T, DiffMode::Forward, Order> , Option>;
+    template<class T, int Order, int Option, size_t Row, size_t Col>
+    class DenseMatrix<Diff<T, DiffMode::Forward, Order>, Option, Row, Col> : public ContinuousMatrix<DenseMatrix<Diff<T, DiffMode::Forward, Order> , Option, Row, Col>> {
+        using This = DenseMatrix<Diff<T, DiffMode::Forward, Order> , Option, Row, Col>;
         using Base = ContinuousMatrix<This>;
     public:
         using typename Base::ScalarType;
@@ -32,9 +32,9 @@ namespace Physica::Core {
         using typename Base::PtrTy;
         using typename Base::ConstPtrTy;
     private:
-        using ValueMatrix = DenseMatrix<T, Option>;
+        using ValueMatrix = DenseMatrix<T, Option, Row, Col>;
         using GradType = typename ScalarType::GradType;
-        using GradMatrix = typename std::conditional<Order == 1, ValueMatrix, DenseMatrix<GradType, Option>>::type;
+        using GradMatrix = typename std::conditional<Order == 1, ValueMatrix, DenseMatrix<GradType, Option, Row, Col>>::type;
 
         ValueMatrix values;
         GradMatrix grads;
@@ -55,6 +55,8 @@ namespace Physica::Core {
         /* Operations */
         void resize(size_t row, size_t col);
         void swap(This& __restrict obj) noexcept;
+        void swap_row(size_t r1, size_t r2) noexcept;
+        void swap_col(size_t c1, size_t c2) noexcept;
         /* Getters */
         using Base::data;
         [[nodiscard]] __host__ __device__ inline PtrTy data_ptr(size_t row, size_t col) noexcept;
@@ -115,8 +117,8 @@ namespace Physica::Core {
 }
 
 namespace Physica {
-    template<class T, int Order, int Option>
-    class Traits<Core::DenseMatrix<Core::Diff<T, Core::DiffMode::Forward, Order>, Option>> : public Traits<Core::DenseMatrix<T, Option>> {
+    template<class T, int Order, int Option, size_t Row, size_t Col>
+    class Traits<Core::DenseMatrix<Core::Diff<T, Core::DiffMode::Forward, Order>, Option, Row, Col>> : public Traits<Core::DenseMatrix<T, Option>> {
     public:
         using ScalarType = Core::Diff<T, Core::DiffMode::Forward, Order>;
     };

@@ -43,6 +43,8 @@ namespace Physica::Core {
         using PtrTy = typename ScalarType::PtrTy;
         using ConstPtrTy = typename ScalarType::ConstPtrTy;
         using GradType = typename ScalarType::GradType;
+        using RealType = SIMD<Diff<typename T::RealType, DiffMode::Forward, Order>, Size>;
+        using AsRealRtnTy = SIMD<Diff<typename T::RealType, DiffMode::Forward, Order>, Size * (T::isComplex ? 2 : 1)>;
     public:
         using ValuePacket = SIMD<T, Size>;
         using GradPacket = SIMD<GradType, Size>;
@@ -59,6 +61,7 @@ namespace Physica::Core {
         SIMD(ScalarType x, int count);
         explicit SIMD(ValuePacket values_);
         SIMD(ValuePacket values_, GradPacket grads_);
+        SIMD(HalfType a, HalfType b);
         template<int OtherOrder>
         explicit SIMD(const SIMD<Diff<T, DiffMode::Forward, OtherOrder>, Size>& other);
         SIMD(const SIMD&) = default;
@@ -88,6 +91,8 @@ namespace Physica::Core {
         inline void store_partial(PtrTy p, int n) const;
 
         inline This& cutoff(int count);
+        [[nodiscard]] inline AsRealRtnTy swapRealImag() const noexcept;
+        [[nodiscard]] inline AsRealRtnTy permRealImag() const noexcept;
 
         [[nodiscard]] inline ScalarType sum() const;
         [[nodiscard]] inline ScalarType max() const;
@@ -95,12 +100,16 @@ namespace Physica::Core {
         void swap(SIMD& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] constexpr static size_t size() { return Size; }
+        [[nodiscard]] AsRealRtnTy asReal() const noexcept;
         [[nodiscard]] ValuePacket getValue() const noexcept { return values; }
         [[nodiscard]] GradPacket getGrad() const noexcept { return grads; }
         [[nodiscard]] HalfType getLow() const noexcept { return HalfType(values.getLow(), grads.getLow()); }
         [[nodiscard]] HalfType getHigh() const noexcept { return HalfType(values.getHigh(), grads.getHigh()); }
+        [[nodiscard]] inline RealType real() const noexcept;
+        [[nodiscard]] inline RealType imag() const noexcept;
         /* Static members */
         [[nodiscard]] static SIMD select(BoolSIMDType flags, const SIMD& x, const SIMD& y);
+        [[nodiscard]] static SIMD asComplex(const AsRealRtnTy& reals);
     };
 
     template<class T, size_t Size>
@@ -151,7 +160,7 @@ namespace Physica::Core {
         inline void swap(SIMD& __restrict obj) noexcept;
         /* Getters */
         using Base::size;
-        using Base::getImpl;
+        using Base::toMachine;
         [[nodiscard]] ScalarType getHeadNode() const noexcept { return headNode; }
         [[nodiscard]] T* value_ptr() const noexcept { return headNode.value_ptr(); }
         [[nodiscard]] T* grad_ptr() const noexcept { return headNode.grad_ptr(); }

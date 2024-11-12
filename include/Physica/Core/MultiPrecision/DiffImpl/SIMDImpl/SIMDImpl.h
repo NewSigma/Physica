@@ -38,6 +38,9 @@ namespace Physica::Core {
     SIMD<Diff<T, DiffMode::Forward, Order>, Size>::SIMD(ValuePacket values_, GradPacket grads_) : values(std::move(values_)), grads(std::move(grads_)) {}
 
     template<class T, int Order, size_t Size>
+    SIMD<Diff<T, DiffMode::Forward, Order>, Size>::SIMD(HalfType a, HalfType b) : values(a.getValue(), b.getValue()), grads(a.getGrad(), b.getGrad()) {}
+
+    template<class T, int Order, size_t Size>
     template<int OtherOrder>
     SIMD<Diff<T, DiffMode::Forward, Order>, Size>::SIMD(const SIMD<Diff<T, DiffMode::Forward, OtherOrder>, Size>& other)
             : values(other.getValue()), grads(other.getGrad()) {}
@@ -122,6 +125,18 @@ namespace Physica::Core {
     }
 
     template<class T, int Order, size_t Size>
+    inline typename SIMD<Diff<T, DiffMode::Forward, Order>, Size>::AsRealRtnTy
+    SIMD<Diff<T, DiffMode::Forward, Order>, Size>::swapRealImag() const noexcept {
+        return AsRealRtnTy(values.swapRealImag(), grads.swapRealImag());
+    }
+
+    template<class T, int Order, size_t Size>
+    inline typename SIMD<Diff<T, DiffMode::Forward, Order>, Size>::AsRealRtnTy
+    SIMD<Diff<T, DiffMode::Forward, Order>, Size>::permRealImag() const noexcept {
+        return AsRealRtnTy(values.permRealImag(), grads.permRealImag());
+    }
+
+    template<class T, int Order, size_t Size>
     inline Diff<T, DiffMode::Forward, Order> SIMD<Diff<T, DiffMode::Forward, Order>, Size>::sum() const {
         return ScalarType(values.sum(), grads.sum());
     }
@@ -146,8 +161,36 @@ namespace Physica::Core {
     }
 
     template<class T, int Order, size_t Size>
+    typename SIMD<Diff<T, DiffMode::Forward, Order>, Size>::AsRealRtnTy SIMD<Diff<T, DiffMode::Forward, Order>, Size>::asReal() const noexcept {
+        if constexpr (T::isComplex)
+            return AsRealRtnTy(values.asReal(), grads.asReal());
+        else
+            return *this;
+    }
+
+    template<class T, int Order, size_t Size>
+    inline typename SIMD<Diff<T, DiffMode::Forward, Order>, Size>::RealType
+    SIMD<Diff<T, DiffMode::Forward, Order>, Size>::real() const noexcept {
+        return RealType(values.real(), grads.real());
+    }
+
+    template<class T, int Order, size_t Size>
+    inline typename SIMD<Diff<T, DiffMode::Forward, Order>, Size>::RealType
+    SIMD<Diff<T, DiffMode::Forward, Order>, Size>::imag() const noexcept {
+        return RealType(values.imag(), grads.imag());
+    }
+
+    template<class T, int Order, size_t Size>
     SIMD<Diff<T, DiffMode::Forward, Order>, Size> SIMD<Diff<T, DiffMode::Forward, Order>, Size>::select(BoolSIMDType flags, const SIMD& x, const SIMD& y) {
         return This(ValuePacket::select(flags, x.getValue(), y.getValue()), GradPacket::select(flags, x.getGrad(), y.getGrad()));
+    }
+
+    template<class T, int Order, size_t Size>
+    SIMD<Diff<T, DiffMode::Forward, Order>, Size> SIMD<Diff<T, DiffMode::Forward, Order>, Size>::asComplex(const AsRealRtnTy& reals) {
+        This result{};
+        result.values = ValuePacket::asComplex(reals.getValue());
+        result.grads = GradPacket::asComplex(reals.getGrad());
+        return result;
     }
     ////////////////////////////////////////////////////////////////////////////////////
     template<class T, size_t Size>

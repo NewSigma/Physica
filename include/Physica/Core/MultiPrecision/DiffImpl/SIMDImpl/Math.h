@@ -30,7 +30,7 @@ namespace Physica::Core {
             using PlainSIMD = SIMD<T, Size>;
             using TracerType = typename T::TracerType;
             auto& tracer = TracerType::getInstance();
-            const PlainSIMD values(abs(x.getImpl()));
+            const PlainSIMD values(abs(x.toMachine()));
             const auto newHeadNode = tracer.pushOperation(values, ExprType::Abs);
             for (size_t i = 0; i < Size; ++i)
                 tracer.pushOperand(T(x.value_ptr() + i, x.grad_ptr() + i));
@@ -49,7 +49,7 @@ namespace Physica::Core {
             using PlainSIMD = SIMD<T, Size>;
             using TracerType = typename T::TracerType;
             auto& tracer = TracerType::getInstance();
-            const PlainSIMD values(square(x.getImpl()));
+            const PlainSIMD values(square(x.toMachine()));
             const auto newHeadNode = tracer.pushOperation(values, ExprType::Square);
             for (size_t i = 0; i < Size; ++i)
                 tracer.pushOperand(T(x.value_ptr() + i, x.grad_ptr() + i));

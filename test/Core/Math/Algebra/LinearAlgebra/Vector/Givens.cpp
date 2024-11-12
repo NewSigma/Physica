@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Weibo He.
+ * Copyright 2021-2024 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -16,24 +16,28 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include "Physica/Core/MultiPrecision/Complex.h"
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/Vector.h"
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/Givens.h"
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h"
+#include <iostream>
+#include <Physica/Core/MultiPrecision/Complex.h>
+#include <Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DiffDenseMatrix.h>
+#include <Physica/Core/Math/Algebra/LinearAlgebra/Vector/Givens.h>
 
 using namespace Physica::Core;
+using RealType = float64;
+using ComplexType = Complex<RealType>;
+
+template<class T>
+void test1() {
+    Vector<T, 2> v{2, 1};
+    auto givens_vector = givens(v, 0, 1);
+    DenseMatrix<T> v_mat = v;
+    applyGivens(givens_vector, v_mat, 0, 1);
+    if (abs(v_mat(1, 0)) > RealType(1E-15))
+        exit(EXIT_FAILURE);
+}
 
 int main() {
-    using RealType = float64;
-    using ComplexType = Complex<RealType>;
-    {
-        Vector<RealType, 2> v{2, 1};
-        auto givens_vector = givens(v, 0, 1);
-        DenseMatrix<RealType> v_mat = v;
-        applyGivens(givens_vector, v_mat, 0, 1);
-        if (abs(v_mat(1, 0)) > RealType(1E-15))
-            return 1;
-    }
+    test1<RealType>();
+    test1<Diff<RealType, DiffMode::Forward, 1>>();
     {
         Vector<ComplexType, 2> v{{2, 1}, {1, -3}};
         auto givens_vector = givens(v, 0, 1);

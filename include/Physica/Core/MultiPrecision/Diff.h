@@ -120,6 +120,10 @@ namespace Physica::Core {
         __host__ __device__ bool operator>(const ScalarBase<U>& s) const noexcept { return ScalarType(*this) > s; }
         template<class U>
         __host__ __device__ bool operator<(const ScalarBase<U>& s) const noexcept { return ScalarType(*this) < s; }
+        template<class U>
+        __host__ __device__ bool operator>(const ScalarRef<U>& s) const noexcept { return operator>(U(s)); }
+        template<class U>
+        __host__ __device__ bool operator<(const ScalarRef<U>& s) const noexcept { return operator<(U(s)); }
         /* Operations */
         void swap(This&& obj) noexcept;
         void swap(ScalarType& obj) noexcept;

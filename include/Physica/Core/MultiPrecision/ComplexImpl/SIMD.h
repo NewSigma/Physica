@@ -41,6 +41,7 @@ namespace Physica::Core {
         using This = SIMD<ScalarType, Size>;
         using Base = SIMD<T, Size * 2>;
         using RealType = SIMD<T, Size>;
+        using AsRealRtnTy = Base;
         using MachineType = typename ScalarType::MachineType;
         using HalfType = typename std::conditional<sizeof(Base) * CHAR_BIT != 128, SIMD<Complex<T>, Size / 2>, PlainStruct<void>>::type;
         using Base::isSeparatable;
@@ -51,7 +52,6 @@ namespace Physica::Core {
         SIMD() = default;
         explicit SIMD(int x);
         explicit SIMD(ScalarType x);
-        explicit SIMD(Base base);
         SIMD(const SIMD&) = default;
         SIMD(SIMD&&) noexcept = default;
         ~SIMD() = default;
@@ -84,15 +84,15 @@ namespace Physica::Core {
         void swap(SIMD& __restrict other) noexcept { std::swap(*this, other); }
         /* Getters */
         [[nodiscard]] constexpr static size_t size() { return Size; }
-        [[nodiscard]] Base& getImpl() noexcept { return *this; }
-        [[nodiscard]] const Base& getImpl() const noexcept { return *this; }
-        [[nodiscard]] HalfType getLow() const noexcept { return HalfType(Base::getLow()); }
-        [[nodiscard]] HalfType getHigh() const noexcept { return HalfType(Base::getHigh()); }
+        [[nodiscard]] AsRealRtnTy asReal() const noexcept { return Base::toMachine(); }
+        [[nodiscard]] HalfType getLow() const noexcept { return HalfType::asComplex(Base::getLow()); }
+        [[nodiscard]] HalfType getHigh() const noexcept { return HalfType::asComplex(Base::getHigh()); }
         [[nodiscard]] inline RealType real() const noexcept;
         [[nodiscard]] inline RealType imag() const noexcept;
         /* Static members */
         template<class RandomType>
-        [[nodiscard]] static SIMD random_uniform(RandomType& gen) { return SIMD(Base::random_uniform(gen)); }
+        [[nodiscard]] static SIMD random_uniform(RandomType& gen) { return asComplex(Base::random_uniform(gen)); }
+        [[nodiscard]] static SIMD asComplex(AsRealRtnTy reals);
     };
 }
 

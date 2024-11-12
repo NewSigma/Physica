@@ -53,12 +53,12 @@ namespace Physica::Core {
         /* Operators */
         SIMD& operator=(const SIMD&) = default;
         SIMD& operator=(SIMD&&) noexcept = default;
-        [[nodiscard]] operator __m128() const noexcept { return getImpl(); }
-        [[nodiscard]] operator __m256() const noexcept { return getImpl(); }
-        [[nodiscard]] operator __m512() const noexcept { return getImpl(); }
-        [[nodiscard]] operator __m128d() const noexcept { return getImpl(); }
-        [[nodiscard]] operator __m256d() const noexcept { return getImpl(); }
-        [[nodiscard]] operator __m512d() const noexcept { return getImpl(); }
+        [[nodiscard]] operator __m128() const noexcept { return toMachine(); }
+        [[nodiscard]] operator __m256() const noexcept { return toMachine(); }
+        [[nodiscard]] operator __m512() const noexcept { return toMachine(); }
+        [[nodiscard]] operator __m128d() const noexcept { return toMachine(); }
+        [[nodiscard]] operator __m256d() const noexcept { return toMachine(); }
+        [[nodiscard]] operator __m512d() const noexcept { return toMachine(); }
         [[nodiscard]] inline ScalarType operator[](int index) const;
         [[nodiscard]] inline SIMD operator+(const SIMD& other) const;
         [[nodiscard]] inline SIMD operator-(const SIMD& other) const;
@@ -102,8 +102,8 @@ namespace Physica::Core {
         void swap(SIMD& __restrict other) noexcept { std::swap(*this, other); }
         /* Getters */
         [[nodiscard]] constexpr static size_t size() { return Size; }
-        [[nodiscard]] Base& getImpl() noexcept { return *this; }
-        [[nodiscard]] const Base& getImpl() const noexcept { return *this; }
+        [[nodiscard]] Base& toMachine() noexcept { return *this; }
+        [[nodiscard]] const Base& toMachine() const noexcept { return *this; }
         [[nodiscard]] HalfType getLow() const noexcept { return Base::get_low(); }
         [[nodiscard]] HalfType getHigh() const noexcept { return Base::get_high(); }
         [[nodiscard]] This getValue() const noexcept { return *this; }
@@ -184,7 +184,7 @@ namespace std {
             return PacketType(values, GradPacket::select(values == a.getValue(), a.getGrad(), b.getGrad()));
         }
         else
-            return Physica::max(a.getImpl(), b.getImpl());
+            return Physica::max(a.toMachine(), b.toMachine());
     }
 
     template<class ScalarType, size_t Size>
@@ -195,7 +195,7 @@ namespace std {
             return PacketType(values, GradPacket::select(values == a.getValue(), a.getGrad(), b.getGrad()));
         }
         else
-            return Physica::min(a.getImpl(), b.getImpl());
+            return Physica::min(a.toMachine(), b.toMachine());
     }
 
     #undef PacketType

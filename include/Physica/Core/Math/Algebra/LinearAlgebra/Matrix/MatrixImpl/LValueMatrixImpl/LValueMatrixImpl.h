@@ -355,9 +355,9 @@ namespace Physica::Core {
     template<class Derived>
     inline void LValueMatrix<Derived>::majorSwap(size_t v1, size_t v2) {
         if constexpr (MatrixOption::isColumnMatrix<Derived>())
-            Base::getDerived().colSwap(v1, v2);
+            Base::getDerived().swap_col(v1, v2);
         else
-            Base::getDerived().rowSwap(v1, v2);
+            Base::getDerived().swap_row(v1, v2);
     }
 
     template<class Derived>

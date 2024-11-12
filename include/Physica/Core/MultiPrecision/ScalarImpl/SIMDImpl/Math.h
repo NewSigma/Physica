@@ -22,9 +22,9 @@ namespace Physica::Core {
     template<class ScalarType, size_t Size>
     [[nodiscard]] __host__ __device__ inline SIMD<ScalarType, Size> abs(const SIMD<ScalarType, Size>& x) {
         if constexpr (ScalarType::Option == Float16)
-            return SIMD<ScalarType, Size>(__habs2(x.getImpl()));
+            return SIMD<ScalarType, Size>(__habs2(x.toMachine()));
         else if constexpr (IsHost())
-            return SIMD<ScalarType, Size>(abs(x.getImpl()));
+            return SIMD<ScalarType, Size>(abs(x.toMachine()));
         else
             noImpl();
     }
@@ -43,12 +43,12 @@ namespace Physica::Core {
     template<class ScalarType, size_t Size>
     [[nodiscard]] inline SIMD<ScalarType, Size> sqrt(const SIMD<ScalarType, Size>& x) {
         if constexpr (!ScalarType::isDifferentiable)
-            return SIMD<ScalarType, Size>(sqrt(x.getImpl()));
+            return SIMD<ScalarType, Size>(sqrt(x.toMachine()));
         else {
             using PlainSIMD = SIMD<typename ScalarType::ValueType, Size>;
             using TracerType = typename ScalarType::TracerType;
             auto& tracer = TracerType::getInstance();
-            const PlainSIMD values(sqrt(x.getImpl()));
+            const PlainSIMD values(sqrt(x.toMachine()));
             const size_t newHeadNode = tracer.pushOperation(values, ExprType::Sqrt);
             for (size_t i = 0; i < Size; ++i)
                 tracer.pushOperand(ScalarType(x.value_ptr() + i, x.grad_ptr() + i));
@@ -59,12 +59,12 @@ namespace Physica::Core {
     template<class ScalarType, size_t Size>
     [[nodiscard]] inline SIMD<ScalarType, Size> cbrt(const SIMD<ScalarType, Size>& x) {
         if constexpr (!ScalarType::isDifferentiable)
-            return SIMD<ScalarType, Size>(cbrt(x.getImpl()));
+            return SIMD<ScalarType, Size>(cbrt(x.toMachine()));
         else {
             using PlainSIMD = SIMD<typename ScalarType::ValueType, Size>;
             using TracerType = typename ScalarType::TracerType;
             auto& tracer = TracerType::getInstance();
-            const PlainSIMD values(cbrt(x.getImpl()));
+            const PlainSIMD values(cbrt(x.toMachine()));
             const size_t newHeadNode = tracer.pushOperation(values, ExprType::Cbrt);
             for (size_t i = 0; i < Size; ++i)
                 tracer.pushOperand(ScalarType(x.value_ptr() + i, x.grad_ptr() + i));
@@ -75,22 +75,22 @@ namespace Physica::Core {
     template<class ScalarType, size_t Size>
     [[nodiscard]] inline auto ln(const SIMD<ScalarType, Size>& x) {
         static_assert(!ScalarType::isDifferentiable, "[Error]: Not implemented");
-        return SIMD<ScalarType, Size>(log(x.getImpl()));
+        return SIMD<ScalarType, Size>(log(x.toMachine()));
     }
 
     template<class ScalarType, size_t Size>
     [[nodiscard]] inline auto ln1p(const SIMD<ScalarType, Size>& x) {
-        return SIMD<ScalarType, Size>(log1p(x.getImpl()));
+        return SIMD<ScalarType, Size>(log1p(x.toMachine()));
     }
 
     template<class ScalarType, size_t Size>
     [[nodiscard]] inline auto exp(const SIMD<ScalarType, Size>& x) {
-        return SIMD<ScalarType, Size>(exp(x.getImpl()));
+        return SIMD<ScalarType, Size>(exp(x.toMachine()));
     }
 
     template<class ScalarType, size_t Size>
     inline static void sincos(const SIMD<ScalarType, Size>& x, SIMD<ScalarType, Size>& s, SIMD<ScalarType, Size>& c) {
-        sincos(x.getImpl(), s.getImpl(), c.getImpl());
+        sincos(x.toMachine(), s.toMachine(), c.toMachine());
         if constexpr (ScalarType::isDifferentiable) {
             using TracerType = typename ScalarType::TracerType;
             auto& tracer = TracerType::getInstance();

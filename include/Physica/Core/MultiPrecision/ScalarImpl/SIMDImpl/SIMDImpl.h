@@ -23,7 +23,7 @@
 
 namespace Physica::Core {
     template<class ScalarType, size_t Size>
-    SIMD<ScalarType, Size>::SIMD(HalfType a, HalfType b) : Base(a.getImpl(), b.getImpl()) {}
+    SIMD<ScalarType, Size>::SIMD(HalfType a, HalfType b) : Base(a.toMachine(), b.toMachine()) {}
 
     template<class ScalarType, size_t Size>
     SIMD<ScalarType, Size>::SIMD(ScalarType s, int count) {
@@ -74,17 +74,17 @@ namespace Physica::Core {
 
     template<class ScalarType, size_t Size>
     inline SIMD<ScalarType, Size> SIMD<ScalarType, Size>::operator+(const SIMD& other) const {
-        return SIMD(getImpl() + other.getImpl());
+        return SIMD(toMachine() + other.toMachine());
     }
 
     template<class ScalarType, size_t Size>
     inline SIMD<ScalarType, Size> SIMD<ScalarType, Size>::operator-(const SIMD& other) const {
-        return SIMD(getImpl() - other.getImpl());
+        return SIMD(toMachine() - other.toMachine());
     }
 
     template<class ScalarType, size_t Size>
     inline SIMD<ScalarType, Size> SIMD<ScalarType, Size>::operator*(const SIMD& other) const {
-        return SIMD(getImpl() * other.getImpl());
+        return SIMD(toMachine() * other.toMachine());
     }
 
     template<class ScalarType, size_t Size>
@@ -94,47 +94,47 @@ namespace Physica::Core {
 
     template<class ScalarType, size_t Size>
     inline SIMD<ScalarType, Size> SIMD<ScalarType, Size>::operator/(const SIMD& other) const {
-        return SIMD(getImpl() / other.getImpl());
+        return SIMD(toMachine() / other.toMachine());
     }
 
     template<class ScalarType, size_t Size>
     inline SIMD<ScalarType, Size> SIMD<ScalarType, Size>::operator-() const {
-        return SIMD(-getImpl());
+        return SIMD(-toMachine());
     }
 
     template<class ScalarType, size_t Size>
     inline SIMD<ScalarType, Size> SIMD<ScalarType, Size>::operator&(const SIMD& other) const {
-        return SIMD(getImpl() & other.getImpl());
+        return SIMD(toMachine() & other.toMachine());
     }
 
     template<class ScalarType, size_t Size>
     inline SIMD<ScalarType, Size> SIMD<ScalarType, Size>::operator|(const SIMD& other) const {
-        return SIMD(getImpl() | other.getImpl());
+        return SIMD(toMachine() | other.toMachine());
     }
 
     template<class ScalarType, size_t Size>
     inline SIMD<ScalarType, Size> SIMD<ScalarType, Size>::operator^(const SIMD& other) const {
-        return SIMD(getImpl() ^ other.getImpl());
+        return SIMD(toMachine() ^ other.toMachine());
     }
 
     template<class ScalarType, size_t Size>
     inline SIMD<ScalarType, Size> SIMD<ScalarType, Size>::operator!() const {
-        return SIMD(!getImpl());
+        return SIMD(!toMachine());
     }
 
     template<class ScalarType, size_t Size>
     inline auto SIMD<ScalarType, Size>::operator==(const SIMD& other) const {
-        return BoolSIMDType(getImpl() == other.getImpl());
+        return BoolSIMDType(toMachine() == other.toMachine());
     }
 
     template<class ScalarType, size_t Size>
     inline auto SIMD<ScalarType, Size>::operator>(const SIMD& other) const {
-        return BoolSIMDType(getImpl() > other.getImpl());
+        return BoolSIMDType(toMachine() > other.toMachine());
     }
     
     template<class ScalarType, size_t Size>
     inline auto SIMD<ScalarType, Size>::operator<(const SIMD& other) const {
-        return BoolSIMDType(getImpl() < other.getImpl());
+        return BoolSIMDType(toMachine() < other.toMachine());
     }
 
     template<class ScalarType, size_t Size>
@@ -196,21 +196,21 @@ namespace Physica::Core {
     inline SIMD<ScalarType, Size> SIMD<ScalarType, Size>::permute() const {
         static_assert(sizeof...(Order) == Size, "[Error]: Size of Order do not match the packet");
         if constexpr (Size == 2)
-            return Physica::permute2<Order...>(getImpl());
+            return Physica::permute2<Order...>(toMachine());
         else if constexpr (Size == 4)
-            return Physica::permute4<Order...>(getImpl());
+            return Physica::permute4<Order...>(toMachine());
         else if constexpr (Size == 8)
-            return Physica::permute8<Order...>(getImpl());
+            return Physica::permute8<Order...>(toMachine());
         else {
             static_assert(Size == 16, "[Error]: Unexpected size");
-            return Physica::permute16<Order...>(getImpl());
+            return Physica::permute16<Order...>(toMachine());
         }
     }
 
     template<class ScalarType, size_t Size>
     template<int... Flags>
     inline SIMD<ScalarType, Size> SIMD<ScalarType, Size>::change_sign() const {
-        return Physica::change_sign<Flags...>(getImpl());
+        return Physica::change_sign<Flags...>(toMachine());
     }
 
     template<class ScalarType, size_t Size>
@@ -222,17 +222,17 @@ namespace Physica::Core {
 
     template<class ScalarType, size_t Size>
     inline ScalarType SIMD<ScalarType, Size>::sum() const {
-        return Physica::horizontal_add(getImpl());
+        return Physica::horizontal_add(toMachine());
     }
 
     template<class ScalarType, size_t Size>
     inline ScalarType SIMD<ScalarType, Size>::max() const {
-        return Physica::horizontal_max(getImpl());
+        return Physica::horizontal_max(toMachine());
     }
 
     template<class ScalarType, size_t Size>
     inline ScalarType SIMD<ScalarType, Size>::min() const {
-        return Physica::horizontal_min(getImpl());
+        return Physica::horizontal_min(toMachine());
     }
 
     template<class ScalarType, size_t Size>
@@ -289,7 +289,7 @@ namespace Physica::Core {
 
     template<class ScalarType, size_t Size>
     SIMD<ScalarType, Size> SIMD<ScalarType, Size>::select(BoolSIMDType flags, const SIMD& x, const SIMD& y) {
-        return SIMD(Physica::select(flags.getImpl(), x.getImpl(), y.getImpl()));
+        return SIMD(Physica::select(flags.toMachine(), x.toMachine(), y.toMachine()));
     }
 
     template<class ScalarType, size_t Size>
@@ -315,7 +315,7 @@ namespace Physica::Core {
             const SIMD<ScalarType, Size>& a,
             const SIMD<ScalarType, Size>& b,
             const SIMD<ScalarType, Size>& c) {
-        return SIMD<ScalarType, Size>(mul_add(a.getImpl(), b.getImpl(), c.getImpl()));
+        return SIMD<ScalarType, Size>(mul_add(a.toMachine(), b.toMachine(), c.toMachine()));
     }
 
     template<class ScalarType, size_t Size>
@@ -324,7 +324,7 @@ namespace Physica::Core {
             const SIMD<ScalarType, Size> b,
             const SIMD<ScalarType, Size> c) {
         static_assert(!ScalarType::isDifferentiable, "[Error]: Not implemented");
-        return SIMD<ScalarType, Size>(nmul_add(a.getImpl(), b.getImpl(), c.getImpl()));
+        return SIMD<ScalarType, Size>(nmul_add(a.toMachine(), b.toMachine(), c.toMachine()));
     }
 
     template<class ScalarType, size_t Size>
@@ -333,7 +333,7 @@ namespace Physica::Core {
             const SIMD<ScalarType, Size> b,
             const SIMD<ScalarType, Size> c) {
         static_assert(!ScalarType::isDifferentiable, "[Error]: Not implemented");
-        return SIMD<ScalarType, Size>(mul_sub(a.getImpl(), b.getImpl(), c.getImpl()));
+        return SIMD<ScalarType, Size>(mul_sub(a.toMachine(), b.toMachine(), c.toMachine()));
     }
 
     template<class ScalarType, size_t Size>
