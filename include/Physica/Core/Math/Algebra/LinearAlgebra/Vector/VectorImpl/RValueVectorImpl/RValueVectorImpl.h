@@ -120,10 +120,10 @@ namespace Physica::Core {
                 return AnyPacket(std::move(values), std::move(grads));
             }
             else {
-                using PlainScalar = typename T::PlainScalar;
-                PlainScalar values[AnyPacket::size()];
+                using ValueType = typename T::ValueType;
+                ValueType values[AnyPacket::size()];
                 for (size_t i = 0; i < AnyPacket::size(); ++i, ++index)
-                    values[i] = PlainScalar(calc(index));
+                    values[i] = ValueType(calc(index));
                 ValuePacket packet{};
                 packet.load(values);
                 return AnyPacket(std::move(packet));
@@ -160,10 +160,10 @@ namespace Physica::Core {
                 return AnyPacket(std::move(values), std::move(grads));
             }
             else {
-                using PlainScalar = typename T::PlainScalar;
-                PlainScalar values[AnyPacket::size()];
+                using ValueType = typename T::ValueType;
+                ValueType values[AnyPacket::size()];
                 for (size_t i = 0; i < AnyPacket::size(); ++i, ++index)
-                    values[i] = i < count ? PlainScalar(calc(index)) : PlainScalar(0);
+                    values[i] = i < count ? ValueType(calc(index)) : ValueType(0);
                 ValuePacket packet{};
                 packet.load(values);
                 return AnyPacket(std::move(packet));

@@ -27,15 +27,15 @@ namespace Physica::Core {
         static_assert(ScalarType::isDifferentiable, "[Error]: ScalarType must be differentiable");
         static_assert(!is_device_obj<ScalarType>::value, "[Error]: Not implemented");
         using Base = SGD<ScalarType>;
-        using typename Base::PlainScalar;
+        using typename Base::ValueType;
         using TracerType = typename ScalarType::TracerType;
     private:
         using Base::from;
         using Base::to;
-        Vector<PlainScalar> lastGrad;
-        PlainScalar momentum;
+        Vector<ValueType> lastGrad;
+        ValueType momentum;
     public:
-        MomentumSGD(PlainScalar momentum_, PlainScalar learnRate, unsigned int batchSize);
+        MomentumSGD(ValueType momentum_, ValueType learnRate, unsigned int batchSize);
         MomentumSGD(const MomentumSGD&) = default;
         MomentumSGD(MomentumSGD&&) noexcept = default;
         ~MomentumSGD() = default;
@@ -50,7 +50,7 @@ namespace Physica::Core {
     };
 
     template<class ScalarType>
-    MomentumSGD<ScalarType>::MomentumSGD(PlainScalar momentum_, PlainScalar learnRate, unsigned int batchSize)
+    MomentumSGD<ScalarType>::MomentumSGD(ValueType momentum_, ValueType learnRate, unsigned int batchSize)
             : Base(std::move(learnRate), batchSize)
             , momentum(std::move(momentum_)) {
         assert(momentum.isPositive() && "[Error]: Invalid momentum");
@@ -59,7 +59,7 @@ namespace Physica::Core {
     template<class ScalarType>
     void MomentumSGD<ScalarType>::recordEnd() {
         Base::recordEnd();
-        lastGrad.resize(TracerType::distance(from, to), PlainScalar(0));
+        lastGrad.resize(TracerType::distance(from, to), ValueType(0));
     }
 
     template<class ScalarType>

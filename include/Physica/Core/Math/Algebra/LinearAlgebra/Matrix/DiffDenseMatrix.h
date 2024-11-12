@@ -63,15 +63,15 @@ namespace Physica::Core {
         [[nodiscard]] size_t getRow() const noexcept { return values.getRow(); }
     };
 
-    template<class PlainScalar, int Option, int Order>
-    class Diff<DenseMatrix<PlainScalar, Option>, DiffMode::Reverse, Order>
-            : public RValueMatrix<Diff<DenseMatrix<PlainScalar, Option>, DiffMode::Reverse, Order>>
-            , public DenseMatrixDim<Diff<DenseMatrix<PlainScalar, Option>, DiffMode::Reverse, Order>, Dynamic, Dynamic> {
-        using PlainMatrix = DenseMatrix<PlainScalar, Option>;
+    template<class T, int Option, int Order>
+    class Diff<DenseMatrix<T, Option>, DiffMode::Reverse, Order>
+            : public RValueMatrix<Diff<DenseMatrix<T, Option>, DiffMode::Reverse, Order>>
+            , public DenseMatrixDim<Diff<DenseMatrix<T, Option>, DiffMode::Reverse, Order>, Dynamic, Dynamic> {
+        using PlainMatrix = DenseMatrix<T, Option>;
         using This = Diff<PlainMatrix, DiffMode::Reverse, Order>;
         using Base = RValueMatrix<This>;
         using Dim = DenseMatrixDim<This, Dynamic, Dynamic>;
-        using TracerType = DiffTracer<PlainScalar, Order>;
+        using TracerType = DiffTracer<T, Order>;
         using SegmentType = typename TracerType::SegmentType;
     public:
         using device_obj_type = device_obj<This>;

@@ -64,65 +64,65 @@ namespace Physica::Core {
         return const_cast<This&>(*this).data_ptr(row, col);
     }
     ////////////////////////////////////////////////////////////////////////
-    template<class PlainScalar, int Option, int Order>
-    Diff<DenseMatrix<PlainScalar, Option>, DiffMode::Reverse, Order>::Diff()
+    template<class T, int Option, int Order>
+    Diff<DenseMatrix<T, Option>, DiffMode::Reverse, Order>::Diff()
             : traceSeg(TracerType::getInstance().pushSegment()) {}
 
-    template<class PlainScalar, int Option, int Order>
-    Diff<DenseMatrix<PlainScalar, Option>, DiffMode::Reverse, Order>::Diff(size_t row, size_t col)
+    template<class T, int Option, int Order>
+    Diff<DenseMatrix<T, Option>, DiffMode::Reverse, Order>::Diff(size_t row, size_t col)
             : traceSeg(TracerType::getInstance().pushSegment(row * col)) {}
 
-    template<class PlainScalar, int Option, int Order>
-    Diff<DenseMatrix<PlainScalar, Option>, DiffMode::Reverse, Order>::Diff(PlainMatrix values)
+    template<class T, int Option, int Order>
+    Diff<DenseMatrix<T, Option>, DiffMode::Reverse, Order>::Diff(PlainMatrix values)
             : traceSeg(TracerType::getInstance().pushSegment(values.flatten())) {}
 
-    template<class PlainScalar, int Option, int Order>
-    inline typename Diff<DenseMatrix<PlainScalar, Option>, DiffMode::Reverse, Order>::ScalarType
-    Diff<DenseMatrix<PlainScalar, Option>, DiffMode::Reverse, Order>::calc(size_t row, size_t col) const {
+    template<class T, int Option, int Order>
+    inline typename Diff<DenseMatrix<T, Option>, DiffMode::Reverse, Order>::ScalarType
+    Diff<DenseMatrix<T, Option>, DiffMode::Reverse, Order>::calc(size_t row, size_t col) const {
         if constexpr (Base::isRowMatrix)
             return traceSeg[row * getCol() + col];
         else
             return traceSeg[col * getRow() + row];
     }
 
-    template<class PlainScalar, int Option, int Order>
+    template<class T, int Option, int Order>
     template<class RandomGenerator>
-    inline void Diff<DenseMatrix<PlainScalar, Option>, DiffMode::Reverse, Order>::random_uniform(RandomGenerator& gen) {
+    inline void Diff<DenseMatrix<T, Option>, DiffMode::Reverse, Order>::random_uniform(RandomGenerator& gen) {
         *this = random_uniform(getRow(), getCol(), gen);
     }
 
-    template<class PlainScalar, int Option, int Order>
+    template<class T, int Option, int Order>
     template<class RandomGenerator>
-    inline void Diff<DenseMatrix<PlainScalar, Option>, DiffMode::Reverse, Order>::random_normal(RandomGenerator& gen) {
+    inline void Diff<DenseMatrix<T, Option>, DiffMode::Reverse, Order>::random_normal(RandomGenerator& gen) {
         *this = random_normal(getRow(), getCol(), gen);
     }
 
-    template<class PlainScalar, int Option, int Order>
+    template<class T, int Option, int Order>
     template<class Distribution, class RandomGenerator>
-    inline void Diff<DenseMatrix<PlainScalar, Option>, DiffMode::Reverse, Order>::random_any(Distribution& dist, RandomGenerator& gen) {
+    inline void Diff<DenseMatrix<T, Option>, DiffMode::Reverse, Order>::random_any(Distribution& dist, RandomGenerator& gen) {
         *this = random_any(getRow(), getCol(), dist, gen);
     }
 
-    template<class PlainScalar, int Option, int Order>
+    template<class T, int Option, int Order>
     template<class RandomGenerator>
-    inline Diff<DenseMatrix<PlainScalar, Option>, DiffMode::Reverse, Order>
-    Diff<DenseMatrix<PlainScalar, Option>, DiffMode::Reverse, Order>::random_uniform(
+    inline Diff<DenseMatrix<T, Option>, DiffMode::Reverse, Order>
+    Diff<DenseMatrix<T, Option>, DiffMode::Reverse, Order>::random_uniform(
             size_t row, size_t col, RandomGenerator& gen) {
         return This(PlainMatrix::random_uniform(row, col, gen));
     }
 
-    template<class PlainScalar, int Option, int Order>
+    template<class T, int Option, int Order>
     template<class RandomGenerator>
-    inline Diff<DenseMatrix<PlainScalar, Option>, DiffMode::Reverse, Order>
-    Diff<DenseMatrix<PlainScalar, Option>, DiffMode::Reverse, Order>::random_normal(
+    inline Diff<DenseMatrix<T, Option>, DiffMode::Reverse, Order>
+    Diff<DenseMatrix<T, Option>, DiffMode::Reverse, Order>::random_normal(
             size_t row, size_t col, RandomGenerator& gen) {
         return This(PlainMatrix::random_normal(row, col, gen));
     }
 
-    template<class PlainScalar, int Option, int Order>
+    template<class T, int Option, int Order>
     template<class Distribution, class RandomGenerator>
-    inline Diff<DenseMatrix<PlainScalar, Option>, DiffMode::Reverse, Order>
-    Diff<DenseMatrix<PlainScalar, Option>, DiffMode::Reverse, Order>::random_any(
+    inline Diff<DenseMatrix<T, Option>, DiffMode::Reverse, Order>
+    Diff<DenseMatrix<T, Option>, DiffMode::Reverse, Order>::random_any(
             size_t row, size_t col, Distribution& dist, RandomGenerator& gen) {
         return This(PlainMatrix::random_any(row, col, dist, gen));
     }

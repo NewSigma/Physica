@@ -32,7 +32,7 @@ namespace Physica::Core {
         using This = ContinuousMatrix<Derived>;
     public:
         using typename Base::ScalarType;
-        using typename Base::PlainScalar;
+        using typename Base::ValueType;
         using Base::RowAtCompile;
         using Base::ColumnAtCompile;
         using Base::isColumnMatrix;

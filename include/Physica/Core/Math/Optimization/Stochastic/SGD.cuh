@@ -27,11 +27,11 @@ namespace Physica::Core {
         using This = SGD<device_obj<ScalarType>>;
         using DeviceScalar = device_obj<ScalarType>;
     public:
-        using PlainScalar = typename ScalarType::PlainScalar;
+        using ValueType = typename ScalarType::ValueType;
         constexpr static size_t MaxNumThreadPerBlock = 256;
     protected:
-        PlainScalar learnRate;
-        PlainScalar meanLearnRate;
+        ValueType learnRate;
+        ValueType meanLearnRate;
         unsigned int batchSize;
         DeviceScalar from;
         DeviceScalar to;
@@ -39,7 +39,7 @@ namespace Physica::Core {
         using TracerType = typename DeviceScalar::TracerType;
         using SegmentType = typename TracerType::SegmentType;
     public:
-        SGD(PlainScalar learnRate_, unsigned int batchSize_);
+        SGD(ValueType learnRate_, unsigned int batchSize_);
         SGD(const SGD&) = default;
         SGD(SGD&&) noexcept = default;
         ~SGD() = default;
@@ -53,11 +53,11 @@ namespace Physica::Core {
 
         __device__ void stepKernelImpl(SegmentType& segment) const;
         /* Getters */
-        [[nodiscard]] PlainScalar getLearnRate() const noexcept { return learnRate; }
-        [[nodiscard]] PlainScalar getMeanLearnRate() const noexcept { return meanLearnRate; }
+        [[nodiscard]] ValueType getLearnRate() const noexcept { return learnRate; }
+        [[nodiscard]] ValueType getMeanLearnRate() const noexcept { return meanLearnRate; }
         [[nodiscard]] unsigned int getBatchSize() const noexcept { return batchSize; }
         /* Setters */
-        void setLearnRate(PlainScalar lr);
+        void setLearnRate(ValueType lr);
     };
 }
 

@@ -32,9 +32,9 @@ namespace Physica::Core {
     template<class ScalarType, bool IsSmallCell>
     class ChebyshevRadial : protected PairModel<ChebyshevRadial<ScalarType, IsSmallCell>> {
         using Base = PairModel<ChebyshevRadial<ScalarType, IsSmallCell>>;
-        using PlainScalar = typename ScalarType::PlainScalar;
+        using ValueType = typename ScalarType::ValueType;
     public:
-        using MDCellType = MDCell<PlainScalar, 3>;
+        using MDCellType = MDCell<ValueType, 3>;
         using ParticleType = typename MDCellType::ParticleType;
         using MassTypeMap = typename MDCellType::MassTypeMap;
         using DescriptorMatrix = DenseMatrix<ScalarType>;

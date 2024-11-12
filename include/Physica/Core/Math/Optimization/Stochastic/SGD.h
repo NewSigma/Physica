@@ -31,17 +31,17 @@ namespace Physica::Core {
         static_assert(!is_device_obj<ScalarType>::value, "[Error]: Include corresponding *.cuh file to enable CUDA support");
         using TracerType = typename ScalarType::TracerType;
     public:
-        using PlainScalar = typename ScalarType::PlainScalar;
+        using ValueType = typename ScalarType::ValueType;
     private:
         constexpr static int AnyValue = 0;
     protected:
-        PlainScalar learnRate;
-        PlainScalar meanLearnRate;
+        ValueType learnRate;
+        ValueType meanLearnRate;
         unsigned int batchSize;
         ScalarType from;
         ScalarType to;
     public:
-        SGD(PlainScalar learnRate_, unsigned int batchSize_);
+        SGD(ValueType learnRate_, unsigned int batchSize_);
         SGD(const SGD&) = default;
         SGD(SGD&&) noexcept = default;
         ~SGD() = default;
@@ -54,15 +54,15 @@ namespace Physica::Core {
         inline void zero_grad() const;
         void swap(SGD& __restrict obj) noexcept;
         /* Getters */
-        [[nodiscard]] PlainScalar getLearnRate() const noexcept { return learnRate; }
-        [[nodiscard]] PlainScalar getMeanLearnRate() const noexcept { return meanLearnRate; }
+        [[nodiscard]] ValueType getLearnRate() const noexcept { return learnRate; }
+        [[nodiscard]] ValueType getMeanLearnRate() const noexcept { return meanLearnRate; }
         [[nodiscard]] unsigned int getBatchSize() const noexcept { return batchSize; }
         /* Setters */
-        void setLearnRate(PlainScalar lr);
+        void setLearnRate(ValueType lr);
     };
 
     template<class ScalarType>
-    SGD<ScalarType>::SGD(PlainScalar learnRate_, unsigned int batchSize_) : batchSize(batchSize_) {
+    SGD<ScalarType>::SGD(ValueType learnRate_, unsigned int batchSize_) : batchSize(batchSize_) {
         assert(batchSize > 0);
         setLearnRate(learnRate_);
     }
@@ -104,10 +104,10 @@ namespace Physica::Core {
         to.swap(obj.to);
     }
 
-    template<class PlainScalar>
-    void SGD<PlainScalar>::setLearnRate(PlainScalar lr) {
+    template<class ValueType>
+    void SGD<ValueType>::setLearnRate(ValueType lr) {
         assert(!lr.isZero() && "[Error]: 0 learn rate does nothing");
         learnRate = lr;
-        meanLearnRate = lr / PlainScalar(batchSize);
+        meanLearnRate = lr / ValueType(batchSize);
     }
 }

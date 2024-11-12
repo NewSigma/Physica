@@ -39,7 +39,7 @@ namespace Physica {
 template<class ScalarType>
 class MnistNet : public SimpleNet<MnistNet<ScalarType>> {
     using Base = SimpleNet<MnistNet<ScalarType>>;
-    using typename Base::PlainScalar;
+    using typename Base::ValueType;
     using typename Base::InputType;
     using typename Base::OutputType;
 
@@ -90,14 +90,14 @@ public:
     }
 
     template<class Dataset>
-    PlainScalar calcAccuracy(const Dataset& dataset) const {
+    ValueType calcAccuracy(const Dataset& dataset) const {
         const auto& testSamples = dataset.getSamples();
         const auto& testLabels = dataset.getLabels();
         const size_t numTestData = dataset.getSize();
         size_t count = 0;
         for (const auto& sample : testSamples)
             count += testLabels[Base::classify(VectorType(sample))] == 1;
-        return PlainScalar(count) / PlainScalar(numTestData);
+        return ValueType(count) / ValueType(numTestData);
     }
 
     void swap(MnistNet& __restrict obj) noexcept {
@@ -111,9 +111,9 @@ private:
     template<class OtherScalar> friend class MnistNet;
 };
 
-using PlainScalar = float32;
-using ScalarType = Diff<PlainScalar, DiffMode::Reverse, 1>;
-using Dataset = typename Mnist::DatasetType<Vector<PlainScalar>>;
+using ValueType = float32;
+using ScalarType = Diff<ValueType, DiffMode::Reverse, 1>;
+using Dataset = typename Mnist::DatasetType<Vector<ValueType>>;
 using Optimizer = SGD<ScalarType>;
 using RandomType = Random<std::mt19937>;
 constexpr size_t batchSize = 9000;
@@ -121,10 +121,10 @@ constexpr size_t batchSize = 9000;
 namespace {
     Dataset makeDataset() {
         const Mnist mnist("/home/sigma/Documents/data");
-        auto dataset = mnist.makeTrainDataset<Vector<PlainScalar>>();
+        auto dataset = mnist.makeTrainDataset<Vector<ValueType>>();
         for (size_t i = 0; i < dataset.getSize(); ++i) {
             auto& sample = dataset.getSamples()[i];
-            sample = sample * PlainScalar(1.0 / 128) - PlainScalar(1);
+            sample = sample * ValueType(1.0 / 128) - ValueType(1);
         }
         return dataset;
     }

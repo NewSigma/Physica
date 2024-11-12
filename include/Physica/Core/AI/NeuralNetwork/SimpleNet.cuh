@@ -29,7 +29,7 @@ namespace Physica::Core {
         using This = device_obj<host_obj>;
         using Base = device_obj<LayerBase<Derived>>;
     public:
-        using typename Base::PlainScalar;
+        using typename Base::ValueType;
         using typename Base::ScalarType;
         using typename Base::InputType;
         using typename Base::OutputType;
@@ -93,7 +93,7 @@ namespace Physica::Core {
     size_t device_obj<SimpleNet<Derived>>::classify(const InputType& input) const {
         static_assert(!IsTrainMode, "[Error]: It is suggested using eval mode to reduce memory use");
         const auto output = Base::forward(input).toHost();
-        PlainScalar max = output[0];
+        ValueType max = output[0];
         size_t index = 0;
         for (size_t i = 1; i < output.getLength(); ++i) {
             if (output[i] > max) {

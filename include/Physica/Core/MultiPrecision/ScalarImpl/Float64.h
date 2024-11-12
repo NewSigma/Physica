@@ -31,8 +31,8 @@ namespace Physica {
         constexpr static bool isForwardDiff = false;
         constexpr static bool isReverseDiff = false;
 
-        using PlainScalar = Core::float64;
-        using ScalarType = PlainScalar;
+        using ValueType = Core::float64;
+        using ScalarType = ValueType;
         using PtrTy = ScalarType*;
         using ConstPtrTy = const ScalarType*;
         using RefTy = ScalarType&;

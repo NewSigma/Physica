@@ -31,7 +31,7 @@ namespace Physica::Core {
     class SIMD : private Traits<SIMD<ScalarType, Size>>::BaseType {
         using This = SIMD<ScalarType, Size>;
         using Base = typename Traits<This>::BaseType;
-        using PlainScalar = typename ScalarType::PlainScalar;
+        using ValueType = typename ScalarType::ValueType;
         using MachineType = typename ScalarType::MachineType;
         using HalfType = typename std::conditional<sizeof(Base) * CHAR_BIT != 128, SIMD<ScalarType, Size / 2>, PlainStruct<void>>::type;
         constexpr static bool isForward = ScalarType::isForwardDiff;
@@ -159,7 +159,7 @@ namespace Physica {
         static_assert(!T::isDifferentiable, "[Error]: The main template targets on plain scalar");
         static_assert(Size % 2 == 0 && Size <= 16, "[Error]: Invalid Size");
 
-        using PlainScalar = typename T::PlainScalar;
+        using ValueType = typename T::ValueType;
         using Size2Type = typename std::conditional<isFloat32, void, Vec2d>::type;
         using Size4Type = typename std::conditional<isFloat32, Vec4f, Vec4d>::type;
         using Size8Type = typename std::conditional<isFloat32, Vec8f, Vec8d>::type;

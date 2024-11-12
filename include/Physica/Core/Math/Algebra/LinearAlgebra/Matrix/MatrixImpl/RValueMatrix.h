@@ -51,7 +51,7 @@ namespace Physica::Core {
         using BlockType = RMatrixBlock<Derived>;
     public:
         using ScalarType = typename Traits<Derived>::ScalarType;
-        using PlainScalar = typename ScalarType::PlainScalar;
+        using ValueType = typename ScalarType::ValueType;
         using RealType = typename ScalarType::RealType;
         constexpr static int Option = Traits<Derived>::Option;
         constexpr static size_t RowAtCompile = Traits<Derived>::RowAtCompile;

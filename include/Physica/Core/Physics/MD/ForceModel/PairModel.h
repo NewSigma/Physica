@@ -42,7 +42,7 @@ namespace Physica::Core {
         using ScalarType = typename TraitType::ScalarType;
         constexpr static unsigned int Dim = 3;
 
-        using PlainScalar = typename ScalarType::PlainScalar;
+        using ValueType = typename ScalarType::ValueType;
         using MDCellType = MDCell<ScalarType, Dim>;
         using LatticeMatrix = typename MDCellType::LatticeMatrix;
         using PositionMatrix = typename MDCellType::PositionMatrix;
@@ -51,7 +51,7 @@ namespace Physica::Core {
         using Vector3D = Vector<ScalarType, 3>;
         using ForceConstMatrix = typename EmptyForceModel<ScalarType, Dim>::ForceConstMatrix;
     private:
-        PlainScalar cutoff;
+        ValueType cutoff;
         ScalarType squared_cutoff;
         ScalarType pot_shift;
     public:
@@ -84,13 +84,13 @@ namespace Physica::Core {
         [[nodiscard]] LatticeMatrix virial(const LatticeMatrix& lattice, const PositionMatrix& pos) const;
         void swap(PairModel& __restrict pair) noexcept;
         /* Getters */
-        [[nodiscard]] const PlainScalar& getCutoff() const noexcept { return cutoff; }
+        [[nodiscard]] const ValueType& getCutoff() const noexcept { return cutoff; }
         [[nodiscard]] const ScalarType& getSquaredCutoff() const noexcept { return squared_cutoff; }
         /* Setters */
-        void setCutoff(PlainScalar cutoff_);
+        void setCutoff(ValueType cutoff_);
     protected:
         PairModel() = default;
-        PairModel(PlainScalar cutoff_);
+        PairModel(ValueType cutoff_);
         PairModel(const PairModel&) = default;
         PairModel(PairModel&&) noexcept = default;
         /* Operators */
@@ -103,7 +103,7 @@ namespace Physica::Core {
     };
 
     template<class Derived>
-    PairModel<Derived>::PairModel(PlainScalar cutoff_) {
+    PairModel<Derived>::PairModel(ValueType cutoff_) {
         setCutoff(std::move(cutoff_));
     }
 
@@ -146,7 +146,7 @@ namespace Physica::Core {
                     Vector3D from = pos.row(i) + delta;
                     for (size_t j = i; j < numParticle; ++j) {
                         const ScalarType r2 = (from - pos.row(j)).squaredNorm();
-                        const bool isNotSelf = PlainScalar(std::numeric_limits<ScalarType>::min()) < r2;
+                        const bool isNotSelf = ValueType(std::numeric_limits<ScalarType>::min()) < r2;
                         if (isNotSelf && r2 < squared_cutoff) {
                             const ScalarType dist = sqrt(r2);
                             if constexpr (IsPotDependOnAtomIndex)
@@ -284,7 +284,7 @@ namespace Physica::Core {
     }
 
     template<class Derived>
-    void PairModel<Derived>::setCutoff(PlainScalar cutoff_) {
+    void PairModel<Derived>::setCutoff(ValueType cutoff_) {
         cutoff = std::move(cutoff_);
         squared_cutoff = square(cutoff);
         if constexpr (!IsPotDependOnAtomIndex) {

@@ -33,9 +33,9 @@ namespace Physica::Core {
     template<class ScalarType>
     class RPMDBase {        
     public:
-        using PlainScalar = typename ScalarType::PlainScalar;
+        using ValueType = typename ScalarType::ValueType;
 
-        [[nodiscard]] static uint64_t durationToStep(PlainScalar duration, PlainScalar timeStep) {
+        [[nodiscard]] static uint64_t durationToStep(ValueType duration, ValueType timeStep) {
             return double(duration / timeStep) + 0.5;
         }
     };
@@ -55,7 +55,7 @@ namespace Physica::Core {
     class RPMD final : public RPMDBase<ScalarType> {
         using This = RPMD<ScalarType, Dim, NumReplica, ForceMatrixAllocator>;
         using Base = RPMDBase<ScalarType>;
-        using typename Base::PlainScalar;
+        using typename Base::ValueType;
     public:
         using RingPolymerType = RingPolymer<ScalarType, Dim, NumReplica>;
         using PhaseMatrix = typename RingPolymerType::PhaseMatrix;

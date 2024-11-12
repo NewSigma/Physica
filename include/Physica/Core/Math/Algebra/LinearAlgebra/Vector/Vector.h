@@ -34,7 +34,7 @@ namespace Physica::Core {
         using Storage = Array<T, Length, Allocator>;
         using device_obj_type = device_obj<This>;
         using typename Base::ScalarType;
-        using typename Base::PlainScalar;
+        using typename Base::ValueType;
         using typename Base::ColMatrix;
         using typename Base::RowMatrix;
         using Base::SizeAtCompile;

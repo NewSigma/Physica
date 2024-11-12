@@ -23,11 +23,11 @@
 #include "Vector.cuh"
 
 namespace Physica::Core {
-    template<class PlainScalar, int Order>
-    class device_obj<Diff<Vector<PlainScalar>, DiffMode::Reverse, Order>>
-            : public device_obj<RValueVector<Diff<Vector<PlainScalar>, DiffMode::Reverse, Order>>> {
-        static_assert(!PlainScalar::isDifferentiable, "[Error]: Nested Diff<> is not allowed");
-        using PlainVector = Vector<PlainScalar>;
+    template<class T, int Order>
+    class device_obj<Diff<Vector<T>, DiffMode::Reverse, Order>>
+            : public device_obj<RValueVector<Diff<Vector<T>, DiffMode::Reverse, Order>>> {
+        static_assert(!T::isDifferentiable, "[Error]: Nested Diff<> is not allowed");
+        using PlainVector = Vector<T>;
         using host_obj = Diff<PlainVector, DiffMode::Reverse, Order>;
         using This = device_obj<host_obj>;
         using Base = device_obj<RValueVector<host_obj>>;
@@ -70,14 +70,14 @@ namespace Physica::Core {
         [[nodiscard]] __host__ __device__ inline ScalarType calc(size_t index) const;
         template<Side Owner = GetSide()>
         [[nodiscard]] __host__ __device__ size_t getLength() const noexcept { return getTraceSegment().getLength(); }
-        [[nodiscard]] __host__ __device__ inline PlainScalar* value_ptr(size_t index) const noexcept;
-        [[nodiscard]] __host__ __device__ inline PlainScalar* grad_ptr(size_t index) const noexcept;
+        [[nodiscard]] __host__ __device__ inline T* value_ptr(size_t index) const noexcept;
+        [[nodiscard]] __host__ __device__ inline T* grad_ptr(size_t index) const noexcept;
         [[nodiscard]] __device__ inline DiffRecord& getRecord(size_t index);
         [[nodiscard]] __device__ OperandArray& getOperands() noexcept { return getTraceSegment().getOperands(); }
-        [[nodiscard]] __device__ inline PlainScalar& getValue(size_t index);
-        [[nodiscard]] __device__ inline const PlainScalar& getValue(size_t index) const;
-        [[nodiscard]] __device__ inline PlainScalar& getGrad(size_t index);
-        [[nodiscard]] __device__ inline const PlainScalar& getGrad(size_t index) const;
+        [[nodiscard]] __device__ inline T& getValue(size_t index);
+        [[nodiscard]] __device__ inline const T& getValue(size_t index) const;
+        [[nodiscard]] __device__ inline T& getGrad(size_t index);
+        [[nodiscard]] __device__ inline const T& getGrad(size_t index) const;
         [[nodiscard]] const ValueVector& getValues() const noexcept { return getTraceSegment().getValues(); }
         [[nodiscard]] const GradVector& getGrads() const noexcept { return getTraceSegment().getGrads(); }
         [[nodiscard]] ScalarType max() const;

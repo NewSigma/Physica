@@ -31,7 +31,7 @@ namespace Physica::Core {
         using DeviceVector = device_obj<Vector<ScalarType>>;
     public:
         using Base::Dim;
-        using typename Base::PlainScalar;
+        using typename Base::ValueType;
         using typename Base::LatticeMatrix;
         using typename Base::InvLatticeMatrix;
         using typename Base::PositionMatrix;
@@ -163,25 +163,25 @@ namespace Physica::Core {
         const ScalarType heightY_2Pi = reciprocal(hostRepLatt.row(1).norm());
         const ScalarType heightZ_2Pi = reciprocal(hostRepLatt.row(2).norm());
         constexpr double factor1 = 2 * M_PI * (1 - std::numeric_limits<ScalarType>::epsilon()); //To avoid rSpaceCutoff larger than max value
-        const ScalarType maxRSpaceCutoff = std::min(heightX_2Pi, std::min(heightY_2Pi, heightZ_2Pi)) * PlainScalar(factor1);
+        const ScalarType maxRSpaceCutoff = std::min(heightX_2Pi, std::min(heightY_2Pi, heightZ_2Pi)) * ValueType(factor1);
         const ScalarType minLimit = ScalarType(SumPrec) / maxRSpaceCutoff;
         integralLimit = std::max(integralLimit_, minLimit).getValue();
 
-        const PlainScalar rSpaceCutoff = PlainScalar(SumPrec) / integralLimit.getValue();
+        const ValueType rSpaceCutoff = ValueType(SumPrec) / integralLimit.getValue();
         rSpaceSumRange = PeriodicCell<ScalarType, Dim>::estimateRange(lattice.toHost(), rSpaceCutoff);
-        kSpaceSumRange = PeriodicCell<ScalarType, Dim>::estimateRange(hostRepLatt, PlainScalar(SumPrec * 2) * integralLimit.getValue());
+        kSpaceSumRange = PeriodicCell<ScalarType, Dim>::estimateRange(hostRepLatt, ValueType(SumPrec * 2) * integralLimit.getValue());
         makeTables();
         Base::setCutoff(rSpaceCutoff);
     }
 
     template<class ScalarType, bool IsSmallCell>
     inline ScalarType device_obj<RSpaceEwald<ScalarType, IsSmallCell>>::calcSelfE() const {
-        return square(charges.toHost()).sum() * integralLimit / sqrt(PlainScalar(M_PI));
+        return square(charges.toHost()).sum() * integralLimit / sqrt(ValueType(M_PI));
     }
 
     template<class ScalarType, bool IsSmallCell>
     inline ScalarType device_obj<RSpaceEwald<ScalarType, IsSmallCell>>::calcGammaPointE() const {
-        return square(charges.toHost().sum()) * PlainScalar(-M_PI) / (PlainScalar(2) * square(integralLimit)) * inv_volume;
+        return square(charges.toHost().sum()) * ValueType(-M_PI) / (ValueType(2) * square(integralLimit)) * inv_volume;
     }
     /**
      * Optimize: make use of x1, x2, x3 are equal distance
@@ -189,7 +189,7 @@ namespace Physica::Core {
     template<class ScalarType, bool IsSmallCell>
     __device__ inline ScalarType device_obj<RSpaceEwald<ScalarType, IsSmallCell>>::pot_functor(
             size_t i, size_t j, ScalarType r, [[maybe_unused]] ScalarType r2) const {
-        const ScalarType temp = r * repErfcStep + PlainScalar(0.5);
+        const ScalarType temp = r * repErfcStep + ValueType(0.5);
         const int index = temp.toMachine();
         const ScalarType x1 = erfcStep * floor(temp);
         auto y = erfc_table.template segment<3>(index, index + 3);
@@ -200,7 +200,7 @@ namespace Physica::Core {
     template<class ScalarType, bool IsSmallCell>
     __device__ inline ScalarType device_obj<RSpaceEwald<ScalarType, IsSmallCell>>::force_functor(
             size_t i, size_t j, ScalarType r, [[maybe_unused]] ScalarType r2) const {
-        const ScalarType temp = r * repErfcStep + PlainScalar(0.5);
+        const ScalarType temp = r * repErfcStep + ValueType(0.5);
         const int index = temp.toMachine();
         const ScalarType x1 = erfcStep * floor(temp);
         auto y = erfc_table.template segment<3>(index, index + 3);
@@ -211,14 +211,14 @@ namespace Physica::Core {
     void device_obj<RSpaceEwald<ScalarType, IsSmallCell>>::makeTables() {
         Vector<ScalarType> hostErfcTable(erfc_table.getLength());
         for (size_t i = 2; i < hostErfcTable.getLength(); ++i) {
-            const auto x = PlainScalar((i - 1) * ErfcTableStep);
+            const auto x = ValueType((i - 1) * ErfcTableStep);
             hostErfcTable[i] = erfc(x) / x * integralLimit;
         }
         hostErfcTable[0] = hostErfcTable[1] = hostErfcTable[2]; // Smooth out divergent erfc(0) / 0
         hostErfcTable.toDevice(erfc_table);
-        erfcStep = PlainScalar(ErfcTableStep) / integralLimit;
+        erfcStep = ValueType(ErfcTableStep) / integralLimit;
         repErfcStep = reciprocal(erfcStep);
-        repDoubleSquareStep = reciprocal(square(erfcStep) * PlainScalar(2));
+        repDoubleSquareStep = reciprocal(square(erfcStep) * ValueType(2));
     }
 }
 

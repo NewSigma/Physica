@@ -27,7 +27,7 @@ namespace Physica::Core {
         constexpr static bool isDeviceSide = is_device_obj<ScalarType>::value;
         using This = AutoDiffGuard<ScalarType>;
     public:
-        using PlainScalar = typename ScalarType::PlainScalar;
+        using ValueType = typename ScalarType::ValueType;
         using TracerType = typename ScalarType::TracerType;
     private:
         ScalarType node;

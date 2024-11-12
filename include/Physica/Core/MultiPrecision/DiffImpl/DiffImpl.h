@@ -213,7 +213,7 @@ namespace Physica::Core {
     }
 
     template<class ScalarType, int Order>
-    Diff<ScalarType, DiffMode::Reverse, Order>::Diff(ValueType pValue_, GradType grad_)
+    Diff<ScalarType, DiffMode::Reverse, Order>::Diff(ValuePtr pValue_, GradType grad_)
             : pValue(pValue_), grad(grad_) {}
 
     template<class ScalarType, int Order>
@@ -394,13 +394,13 @@ namespace Physica::Core {
                 return ResultType(s1.getValue() + s2.getValue(), s1.getGrad());
         }
         else {
-            using FirstPlain = typename FirstType::PlainScalar;
-            using SecondPlain = typename SecondType::PlainScalar;
-            using PlainScalar = typename Internal::BinaryScalarOpReturnType<FirstPlain, SecondPlain>::Type;
-            static_assert(std::is_same<FirstPlain, SecondPlain>::value, "[Error]: Reverse mode between different type is not supported");
+            using FirstValue = typename FirstType::ValueType;
+            using SecondValue = typename SecondType::ValueType;
+            using ValueType = typename Internal::BinaryScalarOpReturnType<FirstValue, SecondValue>::Type;
+            static_assert(std::is_same<FirstValue, SecondValue>::value, "[Error]: Reverse mode between different type is not supported");
             
             auto& tracer = DiffTracer<ScalarType, Order>::getInstance();
-            const PlainScalar value = s1.getValue() + s2.getValue();
+            const ValueType value = s1.getValue() + s2.getValue();
             ResultType result;
             if constexpr (OtherScalar::isDifferentiable) {
                 result = tracer.pushOperation(value, ExprType::Add);
@@ -436,13 +436,13 @@ namespace Physica::Core {
                 return ResultType(s1.getValue() - s2.getValue(), s1.getGrad());
         }
         else {
-            using FirstPlain = typename FirstType::PlainScalar;
-            using SecondPlain = typename SecondType::PlainScalar;
-            using PlainScalar = typename Internal::BinaryScalarOpReturnType<FirstPlain, SecondPlain>::Type;
-            static_assert(std::is_same<FirstPlain, SecondPlain>::value, "[Error]: Reverse mode between different type is not supported");
+            using FirstValue = typename FirstType::ValueType;
+            using SecondValue = typename SecondType::ValueType;
+            using ValueType = typename Internal::BinaryScalarOpReturnType<FirstValue, SecondValue>::Type;
+            static_assert(std::is_same<FirstValue, SecondValue>::value, "[Error]: Reverse mode between different type is not supported");
             
             auto& tracer = DiffTracer<ScalarType, Order>::getInstance();
-            const PlainScalar value = s1.getValue() - s2.getValue();
+            const ValueType value = s1.getValue() - s2.getValue();
             ResultType result;
             if constexpr (OtherScalar::isDifferentiable) {
                 result = tracer.pushOperation(value, ExprType::Sub);
@@ -480,13 +480,13 @@ namespace Physica::Core {
                 return ResultType(s1.getValue() * s2.getValue(), s1.getGrad() * s2.getValue());
         }
         else {
-            using FirstPlain = typename FirstType::PlainScalar;
-            using SecondPlain = typename SecondType::PlainScalar;
-            using PlainScalar = typename Internal::BinaryScalarOpReturnType<FirstPlain, SecondPlain>::Type;
-            static_assert(std::is_same<FirstPlain, SecondPlain>::value, "[Error]: Reverse mode between different type is not supported");
+            using FirstValue = typename FirstType::ValueType;
+            using SecondValue = typename SecondType::ValueType;
+            using ValueType = typename Internal::BinaryScalarOpReturnType<FirstValue, SecondValue>::Type;
+            static_assert(std::is_same<FirstValue, SecondValue>::value, "[Error]: Reverse mode between different type is not supported");
             
             auto& tracer = DiffTracer<ScalarType, Order>::getInstance();
-            const PlainScalar value = s1.getValue() * s2.getValue();
+            const ValueType value = s1.getValue() * s2.getValue();
             ResultType result;
             if constexpr (OtherScalar::isDifferentiable) {
                 result = tracer.pushOperation(value, ExprType::Mul);
@@ -527,13 +527,13 @@ namespace Physica::Core {
             }
         }
         else {
-            using FirstPlain = typename FirstType::PlainScalar;
-            using SecondPlain = typename SecondType::PlainScalar;
-            using PlainScalar = typename Internal::BinaryScalarOpReturnType<FirstPlain, SecondPlain>::Type;
-            static_assert(std::is_same<FirstPlain, SecondPlain>::value, "[Error]: Reverse mode between different type is not supported");
+            using FirstValue = typename FirstType::ValueType;
+            using SecondValue = typename SecondType::ValueType;
+            using ValueType = typename Internal::BinaryScalarOpReturnType<FirstValue, SecondValue>::Type;
+            static_assert(std::is_same<FirstValue, SecondValue>::value, "[Error]: Reverse mode between different type is not supported");
             
             auto& tracer = DiffTracer<ScalarType, Order>::getInstance();
-            const PlainScalar value = s1.getValue() / s2.getValue();
+            const ValueType value = s1.getValue() / s2.getValue();
             ResultType result;
             if constexpr (OtherScalar::isDifferentiable) {
                 result = tracer.pushOperation(value, ExprType::Div);

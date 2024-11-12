@@ -39,7 +39,7 @@ namespace Physica::Core {
              size_t NumReplica,
              RPMDIntegrator Integrator>
     class FreeModel {
-        using PlainScalar = typename ScalarType::PlainScalar;
+        using ValueType = typename ScalarType::ValueType;
         using ComplexType = Complex<ScalarType>;
         using MDType = RPMD<ScalarType, Dim, NumReplica>;
         using MDCellType = typename MDType::MDCellType;
@@ -148,7 +148,7 @@ namespace Physica::Core {
     void FreeModel<ScalarType, Dim, NumReplica, Integrator>::setTemperature(ScalarType temperatureT) {
         omegaW = RingPolymerType::calcOmegaW(temperatureT, numReplica);
         for (size_t i = 0; i < omegaK.getLength(); ++i)
-            omegaK[i] = omegaW * sin(PlainScalar(M_PI * i / numReplica)) * PlainScalar(2);
+            omegaK[i] = omegaW * sin(ValueType(M_PI * i / numReplica)) * ValueType(2);
     }
 
     template<class ScalarType, unsigned int Dim, size_t NumReplica, RPMDIntegrator Integrator>

@@ -26,7 +26,7 @@ namespace Physica::Core {
         static_assert(!is_device_obj<ScalarType>::value, "[Error]: Include corresponding *.cuh file to enable CUDA support");
     public:
         constexpr static bool IsTrainMode = ScalarType::isDifferentiable;
-        using PlainScalar = typename ScalarType::PlainScalar;
+        using ValueType = typename ScalarType::ValueType;
         using LossType = ScalarType;
     private:
         using VectorType = Vector<ScalarType>;
@@ -47,7 +47,7 @@ namespace Physica::Core {
     template<class ScalarType>
     ScalarType Loss<ScalarType>::crossEntropy(const VectorType& v, size_t label) {
         assert(label < v.getLength() && "[Error]: The label is not exist");
-        return -ln(softmax(v, label) + ScalarType(std::numeric_limits<PlainScalar>::min())); //Add minimum to avoid ln(0)
+        return -ln(softmax(v, label) + ScalarType(std::numeric_limits<ValueType>::min())); //Add minimum to avoid ln(0)
     }
     /**
      * \returns polarization rate, the lower the better, minus value means overfitting

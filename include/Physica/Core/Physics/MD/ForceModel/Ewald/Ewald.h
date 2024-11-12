@@ -38,7 +38,7 @@ namespace Physica::Core {
         using This = Ewald<ScalarType, REwaldType>;
         using Base = REwaldType;
         using Base::Dim;
-        using typename Base::PlainScalar;
+        using typename Base::ValueType;
         using typename Base::LatticeMatrix;
         using typename Base::PositionMatrix;
         using ComplexType = Complex<ScalarType>;
@@ -125,7 +125,7 @@ namespace Physica::Core {
         const size_t numParticle = getNumParticle();
         const ScalarType rSpaceSum = Base::potentialV(pos);
         ScalarType kSpaceSum = 0;
-        const ScalarType factor = reciprocal(square(PlainScalar(2) * getIntegralLimit()));
+        const ScalarType factor = reciprocal(square(ValueType(2) * getIntegralLimit()));
         Vector<ScalarType> dots(numParticle);
         Vector<ScalarType> sin_vec(numParticle);
         Vector<ScalarType> cos_vec(numParticle);
@@ -142,7 +142,7 @@ namespace Physica::Core {
                     kSpaceSum += (square(sum_cos) + square(sum_sin)) / (squaredNorm * exp(squaredNorm * factor));
                 }
             });
-        kSpaceSum *= PlainScalar(4 * M_PI) * Base::getInvVolume();
+        kSpaceSum *= ValueType(4 * M_PI) * Base::getInvVolume();
         kSpaceSum += gammaPointE;
         return kSpaceSum + rSpaceSum - selfE;
     }
@@ -168,7 +168,7 @@ namespace Physica::Core {
         Vector<ScalarType> dots(numParticle);
         Vector<ScalarType> sin_vec(numParticle);
         Vector<ScalarType> cos_vec(numParticle);
-        const ScalarType factor1 = reciprocal(square(PlainScalar(2) * getIntegralLimit()));
+        const ScalarType factor1 = reciprocal(square(ValueType(2) * getIntegralLimit()));
         PeriodicCell<ScalarType, Dim>::forReducedCellInRange( // Reduce cell using time reversal symmetry
             getKSpaceSumRange(), getRepLattice(), [this, numParticle, factor1, &dots, &sin_vec, &cos_vec, &pos, &kSpaceSum](Vector3D delta) {
                 const auto& charges = getCharges();
@@ -221,7 +221,7 @@ namespace Physica::Core {
 
     template<class ScalarType, class REwaldType>
     typename Ewald<ScalarType, REwaldType>::LatticeMatrix Ewald<ScalarType, REwaldType>::virial(const PositionMatrix& pos) {
-        const ScalarType factor = reciprocal(square(PlainScalar(2) * getIntegralLimit()));
+        const ScalarType factor = reciprocal(square(ValueType(2) * getIntegralLimit()));
         const size_t numParticle = getNumParticle();
         Vector<ScalarType> dots(numParticle);
         Vector<ScalarType> sin_vec(numParticle);
@@ -308,7 +308,7 @@ namespace Physica::Core {
         const ScalarType charge1 = charges[atom1];
         const ScalarType charge2 = charges[atom2];
 
-        const ScalarType factor1 = reciprocal(square(PlainScalar(2) * getIntegralLimit()));
+        const ScalarType factor1 = reciprocal(square(ValueType(2) * getIntegralLimit()));
         ComplexType kSpaceSum = 0;
         PeriodicCell<ScalarType, Dim>::forCellInRange(getKSpaceSumRange(), getRepLattice(),
             [this, atom1, atom2, direction1, direction2, charge1, charge2, waveQ, factor1, &pos, &kSpaceSum](Vector3D waveG) {
@@ -347,7 +347,7 @@ namespace Physica::Core {
                 }
                 kSpaceSum += temp;
             });
-        kSpaceSum *= PlainScalar(4 * M_PI) * Base::getInvVolume();
+        kSpaceSum *= ValueType(4 * M_PI) * Base::getInvVolume();
         return kSpaceSum;
     }
 

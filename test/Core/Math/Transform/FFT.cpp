@@ -27,26 +27,26 @@ using RealType = float64;
 using ComplexType = Complex<RealType>;
 
 void test_differentiable() {
-    using PlainScalar = float64;
-    using ComplexPlainScalar = Complex<PlainScalar>;
-    using ScalarType = Diff<PlainScalar, DiffMode::Forward, 1>;
+    using ValueType = float64;
+    using ComplexPlainScalar = Complex<ValueType>;
+    using ScalarType = Diff<ValueType, DiffMode::Forward, 1>;
     using ComplexType = Diff<ComplexPlainScalar, DiffMode::Forward, 1>;
     const size_t N = 100;
     constexpr double freq1 = 3;
     constexpr double freq2 = 4;
 
-    Vector<PlainScalar> values(N);
-    Vector<PlainScalar> grads(N);
+    Vector<ValueType> values(N);
+    Vector<ValueType> grads(N);
     Vector<ScalarType> data(N);
     for (size_t i = 0; i < N; ++i) {
-        const PlainScalar x = PlainScalar(i) * 0.01;
-        values[i] = sin(PlainScalar(2 * M_PI * freq1) * x) + sin(PlainScalar(2 * M_PI * freq2) * x) * 2;
-        grads[i] = cos(PlainScalar(2 * M_PI * freq1) * x) * 2 + cos(PlainScalar(2 * M_PI * freq2) * x);
+        const ValueType x = ValueType(i) * 0.01;
+        values[i] = sin(ValueType(2 * M_PI * freq1) * x) + sin(ValueType(2 * M_PI * freq2) * x) * 2;
+        grads[i] = cos(ValueType(2 * M_PI * freq1) * x) * 2 + cos(ValueType(2 * M_PI * freq2) * x);
         data[i] = ScalarType(values[i], grads[i]);
     }
     Vector<ComplexType> answer{};
     /* Make answer */ {
-        FFT<PlainScalar> fft(N, PlanFlag::Estimate);
+        FFT<ValueType> fft(N, PlanFlag::Estimate);
         fft.getRSpace() = values;
         fft.transform();
         Vector<ComplexPlainScalar> k_values = fft.getKSpace();
@@ -72,7 +72,7 @@ void test_differentiable() {
         fft.invTransform();
         for (size_t i = 0; i < data.getLength(); ++i) {
             const bool isNear = scalarNear(ScalarType(data[i]), ScalarType(fft.getRSpace()[i]), precision);
-            const bool isSmall = abs(data[i].getValue()) < PlainScalar(precision) && abs(fft.getRSpace()[i].getValue()) < PlainScalar(precision);
+            const bool isSmall = abs(data[i].getValue()) < ValueType(precision) && abs(fft.getRSpace()[i].getValue()) < ValueType(precision);
             if(!isNear && !isSmall)
                 exit(EXIT_FAILURE);
         }

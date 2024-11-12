@@ -42,7 +42,7 @@ namespace Physica::Core {
         using host_obj = MnistNet<ScalarType>;
         using This = device_obj<host_obj>;
         using Base = device_obj<SimpleNet<host_obj>>;
-        using typename Base::PlainScalar;
+        using typename Base::ValueType;
         using typename Base::InputType;
         using typename Base::OutputType;
         using typename Base::LossType;
@@ -93,14 +93,14 @@ namespace Physica::Core {
         }
 
         template<class Dataset>
-        PlainScalar calcAccuracy(const Dataset& dataset) const {
+        ValueType calcAccuracy(const Dataset& dataset) const {
             const auto& testSamples = dataset.getSamples();
             const auto& testLabels = dataset.getLabels();
             const size_t numTestData = dataset.getSize();
             size_t count = 0;
             for (size_t i = 0; i < numTestData; ++i)
                 count += testLabels[i] == Base::classify(testSamples[i]);
-            return PlainScalar(count) / PlainScalar(numTestData);
+            return ValueType(count) / ValueType(numTestData);
         }
 
         void swap(This& __restrict obj) noexcept {
@@ -115,9 +115,9 @@ namespace Physica::Core {
     };
 }
 
-using PlainScalar = float32;
-using ScalarType = Diff<PlainScalar, DiffMode::Reverse, 1>;
-using DeviceVector = device_obj<Diff<Vector<PlainScalar>, DiffMode::Reverse, 1>>;
+using ValueType = float32;
+using ScalarType = Diff<ValueType, DiffMode::Reverse, 1>;
+using DeviceVector = device_obj<Diff<Vector<ValueType>, DiffMode::Reverse, 1>>;
 using Dataset = typename Mnist::DatasetType<DeviceVector>;
 using Optimizer = SGD<device_obj<ScalarType>>;
 using RandomGenerator = std::mt19937;
@@ -128,10 +128,10 @@ constexpr double learnRate = 0.05;
 
 std::pair<Dataset, Dataset> makeDataset(RandomGenerator& gen) {
     const Mnist mnist("/home/sigma/Documents/data");
-    auto dataset = mnist.makeTrainDataset<Vector<PlainScalar>>();
+    auto dataset = mnist.makeTrainDataset<Vector<ValueType>>();
     for (size_t i = 0; i < dataset.getSize(); ++i) {
         auto& sample = dataset.getSamples()[i];
-        sample = sample * PlainScalar(1.0 / 128) - PlainScalar(1);
+        sample = sample * ValueType(1.0 / 128) - ValueType(1);
     }
     return dataset.randomSplit(54000, gen);
 }
@@ -147,15 +147,15 @@ int main(int argc, char** argv) {
     auto nn = device_obj<MnistNet<ScalarType>>(32, gen);
     opt.recordEnd();
 
-    Vector<PlainScalar> loss_train(numEpoch), loss_valid(numEpoch), acc_train(numEpoch), acc_valid(numEpoch);
+    Vector<ValueType> loss_train(numEpoch), loss_valid(numEpoch), acc_train(numEpoch), acc_valid(numEpoch);
     for (size_t epoch = 0; epoch < numEpoch; ++epoch) {
         if (epoch != 0) {
             for (size_t i = 0; i < itePerEpoch; ++i)
                 nn.train_step<Dataset, Optimizer, RandomType>(dataset.first, opt);
         }
 
-        using VectorType = Vector<PlainScalar>;
-        const auto nn_infer = device_obj<MnistNet<PlainScalar>>(nn);
+        using VectorType = Vector<ValueType>;
+        const auto nn_infer = device_obj<MnistNet<ValueType>>(nn);
         loss_train[epoch] = nn_infer.loss(dataset.first);
         loss_valid[epoch] = nn_infer.loss(dataset.second);
         acc_train[epoch] = nn_infer.calcAccuracy(dataset.first);

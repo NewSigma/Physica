@@ -34,10 +34,10 @@ namespace Physica::Core {
         using MachineType = typename ScalarType::MachineType;
     public:
         using Base::IsTrainMode;
-        using typename Base::PlainScalar;
+        using typename Base::ValueType;
         using typename Base::InputType;
         using typename Base::OutputType;
-        using DiffMatrix = Diff<DenseMatrix<PlainScalar, host_obj::Option>, DiffMode::Reverse, ScalarType::Order>;
+        using DiffMatrix = Diff<DenseMatrix<ValueType, host_obj::Option>, DiffMode::Reverse, ScalarType::Order>;
         using DeviceMatrix = device_obj<typename std::conditional<IsTrainMode, DiffMatrix, MatrixType>::type>;
         using BiasType = typename std::conditional<WithBias, InputType, PlainStruct<void>>::type;
     private:
@@ -59,9 +59,9 @@ namespace Physica::Core {
         template<class RandomGenerator>
         void random_normal(RandomGenerator& gen);
         template<class RandomGenerator>
-        void random_xavier_uniform(PlainScalar gain, RandomGenerator& gen);
+        void random_xavier_uniform(ValueType gain, RandomGenerator& gen);
         template<class RandomGenerator>
-        void random_xavier_normal(PlainScalar gain, RandomGenerator& gen);
+        void random_xavier_normal(ValueType gain, RandomGenerator& gen);
         template<class Distribution, class RandomGenerator>
         void random_any(Distribution& dist, RandomGenerator& gen);
         void swap(device_obj& __restrict obj) noexcept;
@@ -74,9 +74,9 @@ namespace Physica::Core {
         template<class RandomGenerator>
         [[nodiscard]] static This random_normal(size_t inputDim, size_t outputDim, RandomGenerator& gen);
         template<class RandomGenerator>
-        [[nodiscard]] static This random_xavier_uniform(size_t inputDim, size_t outputDim, PlainScalar gain, RandomGenerator& gen);
+        [[nodiscard]] static This random_xavier_uniform(size_t inputDim, size_t outputDim, ValueType gain, RandomGenerator& gen);
         template<class RandomGenerator>
-        [[nodiscard]] static This random_xavier_normal(size_t inputDim, size_t outputDim, PlainScalar gain, RandomGenerator& gen);
+        [[nodiscard]] static This random_xavier_normal(size_t inputDim, size_t outputDim, ValueType gain, RandomGenerator& gen);
     };
 
     template<class ScalarType, bool WithBias>
@@ -114,9 +114,9 @@ namespace Physica::Core {
     
     template<class ScalarType, bool WithBias>
     template<class RandomGenerator>
-    void device_obj<LinearLayer<ScalarType, WithBias>>::random_xavier_uniform(PlainScalar gain, RandomGenerator& gen) {
+    void device_obj<LinearLayer<ScalarType, WithBias>>::random_xavier_uniform(ValueType gain, RandomGenerator& gen) {
         using MachineType = typename ScalarType::MachineType;
-        const auto factor = (gain * sqrt(PlainScalar(6) / PlainScalar(getInputDim() + getOutputDim()))).toMachine();
+        const auto factor = (gain * sqrt(ValueType(6) / ValueType(getInputDim() + getOutputDim()))).toMachine();
         std::uniform_real_distribution<MachineType> dist(-factor, factor);
         weights.random_any(dist, gen);
         if constexpr (WithBias)
@@ -125,8 +125,8 @@ namespace Physica::Core {
     
     template<class ScalarType, bool WithBias>
     template<class RandomGenerator>
-    void device_obj<LinearLayer<ScalarType, WithBias>>::random_xavier_normal(PlainScalar gain, RandomGenerator& gen) {
-        const auto deviation = (gain * sqrt(PlainScalar(2) / PlainScalar(getInputDim() + getOutputDim()))).toMachine();
+    void device_obj<LinearLayer<ScalarType, WithBias>>::random_xavier_normal(ValueType gain, RandomGenerator& gen) {
+        const auto deviation = (gain * sqrt(ValueType(2) / ValueType(getInputDim() + getOutputDim()))).toMachine();
         std::normal_distribution<MachineType> dist(0, deviation);
         weights.random_any(dist, gen);
         if constexpr (WithBias)
@@ -163,9 +163,9 @@ namespace Physica::Core {
     template<class ScalarType, bool WithBias>
     template<class RandomGenerator>
     device_obj<LinearLayer<ScalarType, WithBias>> device_obj<LinearLayer<ScalarType, WithBias>>::random_xavier_uniform(
-            size_t inputDim, size_t outputDim, PlainScalar gain, RandomGenerator& gen) {
+            size_t inputDim, size_t outputDim, ValueType gain, RandomGenerator& gen) {
         This result{};
-        const auto factor = (gain * sqrt(PlainScalar(6) / PlainScalar(inputDim + outputDim))).toMachine();
+        const auto factor = (gain * sqrt(ValueType(6) / ValueType(inputDim + outputDim))).toMachine();
         std::uniform_real_distribution<MachineType> dist(-factor, factor);
         result.weights = DeviceMatrix::random_any(outputDim, inputDim, dist, gen);
         if constexpr (WithBias)
@@ -176,9 +176,9 @@ namespace Physica::Core {
     template<class ScalarType, bool WithBias>
     template<class RandomGenerator>
     device_obj<LinearLayer<ScalarType, WithBias>> device_obj<LinearLayer<ScalarType, WithBias>>::random_xavier_normal(
-            size_t inputDim, size_t outputDim, PlainScalar gain, RandomGenerator& gen) {
+            size_t inputDim, size_t outputDim, ValueType gain, RandomGenerator& gen) {
         This result{};
-        const auto deviation = (gain * sqrt(PlainScalar(2) / PlainScalar(inputDim + outputDim))).toMachine();
+        const auto deviation = (gain * sqrt(ValueType(2) / ValueType(inputDim + outputDim))).toMachine();
         std::normal_distribution<MachineType> dist(0, deviation);
         result.weights = DeviceMatrix::random_any(outputDim, inputDim, dist, gen);
         if constexpr (WithBias)
@@ -194,8 +194,8 @@ namespace Physica {
     class Traits<Core::device_obj<LinearLayer<T, WithBias>>> : public Traits<LinearLayer<T, WithBias>> {
         using Base = Traits<LinearLayer<T, WithBias>>;
         using VectorType = Vector<typename Base::ScalarType>;
-        using PlainScalar = typename Base::ScalarType::PlainScalar;
-        using DiffVector = Diff<Vector<PlainScalar>, DiffMode::Reverse, T::Order>;
+        using ValueType = typename Base::ScalarType::ValueType;
+        using DiffVector = Diff<Vector<ValueType>, DiffMode::Reverse, T::Order>;
         constexpr static bool IsTrainMode = Base::ScalarType::isDifferentiable;
     public:
         using InputType = Core::device_obj<typename std::conditional<IsTrainMode, DiffVector, VectorType>::type>;

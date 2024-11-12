@@ -40,7 +40,7 @@ namespace Physica::Core {
         constexpr static int Dim = host_obj::Dim;
         constexpr static int NumVirialElem = Dim * Dim;
 
-        using PlainScalar = typename ScalarType::PlainScalar;
+        using ValueType = typename ScalarType::ValueType;
         using MDCellType = MDCell<ScalarType>;
         using DeviceMDCell = device_obj<MDCellType>;
         using LatticeMatrix = typename MDCellType::LatticeMatrix;

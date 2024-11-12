@@ -265,7 +265,7 @@ namespace Physica {
         using T = typename VectorType::ScalarType;
         static_assert(T::isDifferentiable, "[Error]: Unnecessary toValueVector() call or toGradVector() call");
     public:
-        using ScalarType = typename T::PlainScalar;
+        using ScalarType = typename T::ValueType;
         constexpr static size_t SizeAtCompile = VectorType::SizeAtCompile;
         constexpr static bool FastAssign = false;
         constexpr static bool FastPacket = false;

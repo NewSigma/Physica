@@ -92,14 +92,14 @@ namespace Physica::Core {
         [[nodiscard]] static auto linspace(ScalarType from, ScalarType to, size_t count);
     };
     ////////////////////////////////////////////////////////////////////////////////////
-    template<class PlainScalar, int Order>
-    class Diff<Vector<PlainScalar>, DiffMode::Reverse, Order>
-            : public RValueVector<Diff<Vector<PlainScalar>, DiffMode::Reverse, Order>> {
-        using VectorType = Vector<PlainScalar>;
+    template<class T, int Order>
+    class Diff<Vector<T>, DiffMode::Reverse, Order>
+            : public RValueVector<Diff<Vector<T>, DiffMode::Reverse, Order>> {
+        using VectorType = Vector<T>;
         using This = Diff<VectorType, DiffMode::Reverse, Order>;
         using Base = RValueVector<This>;
-        using TracerType = DiffTracer<PlainScalar, Order>;
-        using SegmentType = TraceSegment<PlainScalar, Order>;
+        using TracerType = DiffTracer<T, Order>;
+        using SegmentType = TraceSegment<T, Order>;
     public:
         using ScalarType = typename Base::ScalarType;
     private:

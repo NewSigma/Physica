@@ -39,7 +39,7 @@ namespace Physica {
 template<class ScalarType>
 class MnistNet : public SimpleNet<MnistNet<ScalarType>> {
     using Base = SimpleNet<MnistNet<ScalarType>>;
-    using typename Base::PlainScalar;
+    using typename Base::ValueType;
     using typename Base::InputType;
     using typename Base::OutputType;
 private:
@@ -91,14 +91,14 @@ public:
     }
 
     template<class Dataset>
-    PlainScalar calcAccuracy(const Dataset& dataset) const {
+    ValueType calcAccuracy(const Dataset& dataset) const {
         const auto& testSamples = dataset.getSamples();
         const auto& testLabels = dataset.getLabels();
         const size_t numTestData = dataset.getSize();
         size_t count = 0;
         for (size_t i = 0; i < numTestData; ++i)
             count += testLabels[i] == Base::classify(InputType(testSamples[i]));
-        return PlainScalar(count) / PlainScalar(numTestData);
+        return ValueType(count) / ValueType(numTestData);
     }
 
     void swap(MnistNet& obj) noexcept {
@@ -111,9 +111,9 @@ private:
     template<class OtherScalar> friend class MnistNet;
 };
 
-using PlainScalar = float32;
-using ScalarType = Diff<PlainScalar, DiffMode::Reverse>;
-using Dataset = typename Mnist::DatasetType<Vector<PlainScalar>>;
+using ValueType = float32;
+using ScalarType = Diff<ValueType, DiffMode::Reverse>;
+using Dataset = typename Mnist::DatasetType<Vector<ValueType>>;
 using Optimizer = MomentumSGD<ScalarType>;
 using RandomGenerator = std::mt19937;
 using RandomType = Random<RandomGenerator>;
@@ -124,10 +124,10 @@ constexpr double learnRate = 0.05;
 
 std::pair<Dataset, Dataset> makeDataset(RandomGenerator& gen) {
     const Mnist mnist("/home/sigma/Documents/data");
-    auto dataset = mnist.makeTrainDataset<Vector<PlainScalar>>();
+    auto dataset = mnist.makeTrainDataset<Vector<ValueType>>();
     for (size_t i = 0; i < dataset.getSize(); ++i) {
         auto& sample = dataset.getSamples()[i];
-        sample = sample * PlainScalar(1.0 / 128) - PlainScalar(1);
+        sample = sample * ValueType(1.0 / 128) - ValueType(1);
     }
     return dataset.randomSplit(54000, gen);
 }
@@ -143,14 +143,14 @@ int main(int argc, char** argv) {
     auto nn = MnistNet<ScalarType>(32, gen);
     opt.recordEnd();
 
-    Vector<PlainScalar> loss_train(numEpoch), loss_valid(numEpoch), acc_train(numEpoch), acc_valid(numEpoch);
+    Vector<ValueType> loss_train(numEpoch), loss_valid(numEpoch), acc_train(numEpoch), acc_valid(numEpoch);
     for (size_t epoch = 0; epoch < numEpoch; ++epoch) {
         if (epoch != 0) {
             for (size_t i = 0; i < itePerEpoch; ++i)
                 nn.train_step<Dataset, Optimizer, RandomType, ThreadExecutor>(dataset.first, opt);
         }
 
-        const auto nn_infer = MnistNet<PlainScalar>(nn);
+        const auto nn_infer = MnistNet<ValueType>(nn);
         loss_train[epoch] = nn_infer.loss(dataset.first);
         loss_valid[epoch] = nn_infer.loss(dataset.second);
         acc_train[epoch] = nn_infer.calcAccuracy(dataset.first);

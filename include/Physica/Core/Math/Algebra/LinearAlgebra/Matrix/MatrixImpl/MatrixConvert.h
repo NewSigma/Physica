@@ -119,7 +119,7 @@ namespace Physica {
         using T = typename MatrixType::ScalarType;
         static_assert(T::isDifferentiable, "[Error]: Unnecessary toValueVector() call or toGradVector() call");
     public:
-        using ScalarType = typename T::PlainScalar;
+        using ScalarType = typename T::ValueType;
         constexpr static int Option = MatrixType::Option;
         constexpr static size_t RowAtCompile = MatrixType::RowAtCompile;
         constexpr static size_t ColumnAtCompile = MatrixType::ColumnAtCompile;

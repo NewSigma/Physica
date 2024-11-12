@@ -27,7 +27,7 @@ namespace Physica::Core {
     }
 
     template<class ScalarType>
-    SGD<device_obj<ScalarType>>::SGD(PlainScalar learnRate_, unsigned int batchSize_) : batchSize(batchSize_) {
+    SGD<device_obj<ScalarType>>::SGD(ValueType learnRate_, unsigned int batchSize_) : batchSize(batchSize_) {
         setLearnRate(learnRate_);
     }
 
@@ -76,8 +76,8 @@ namespace Physica::Core {
     }
 
     template<class ScalarType>
-    void SGD<device_obj<ScalarType>>::setLearnRate(PlainScalar lr) {
+    void SGD<device_obj<ScalarType>>::setLearnRate(ValueType lr) {
         learnRate = lr;
-        meanLearnRate = lr / PlainScalar(batchSize);
+        meanLearnRate = lr / ValueType(batchSize);
     }
 }

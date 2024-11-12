@@ -27,8 +27,8 @@ using namespace Physica::Core;
 namespace Physica {
     class Test {
         using RandomGenerator = std::mt19937;
-        using PlainScalar = float64;
-        using ScalarType = Diff<PlainScalar, DiffMode::Reverse, 1>;
+        using ValueType = float64;
+        using ScalarType = Diff<ValueType, DiffMode::Reverse, 1>;
         using MDCellType = MDCell<ScalarType>;
         using LatticeMatrix = typename MDCellType::LatticeMatrix;
         using PositionMatrix = typename MDCellType::PositionMatrix;
@@ -49,8 +49,8 @@ namespace Physica {
                 forceModel.potentialV(cell).reverse();
             }
             /* Test press */ {
-                const PlainScalar press_diff = -volume.getGrad() / PlainScalar(cellSize * cellSize * cellSize);
-                const PlainScalar press = (forceModel.virial(cell).trace() / ScalarType(3)).getValue();
+                const ValueType press_diff = -volume.getGrad() / ValueType(cellSize * cellSize * cellSize);
+                const ValueType press = (forceModel.virial(cell).trace() / ScalarType(3)).getValue();
                 if (!scalarNear(press_diff, press, 1E-12))
                     exit(EXIT_FAILURE);
             }

@@ -32,7 +32,7 @@ namespace Physica::Core {
         using TraitsType = Traits<device_obj_type>;
     public:
         using ScalarType = typename TraitsType::ScalarType;
-        using PlainScalar = typename ScalarType::PlainScalar;
+        using ValueType = typename ScalarType::ValueType;
         using InputType = typename TraitsType::InputType;
         using OutputType = typename TraitsType::OutputType;
         constexpr static bool IsTrainMode = ScalarType::isDifferentiable;

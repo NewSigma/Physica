@@ -155,8 +155,8 @@ namespace Physica {
         constexpr static bool isForwardDiff = false;
         constexpr static bool isReverseDiff = false;
 
-        using PlainScalar = Complex<T>;
-        using ScalarType = PlainScalar;
+        using ValueType = Complex<T>;
+        using ScalarType = ValueType;
         using PtrTy = ScalarType*;
         using ConstPtrTy = const ScalarType*;
         using RefTy = ScalarType&;

@@ -184,20 +184,20 @@ namespace Physica::Core {
     class Diff<ScalarType, DiffMode::Reverse, Order> : public ScalarBase<Diff<ScalarType, DiffMode::Reverse, Order>> {
         using This = Diff<ScalarType, DiffMode::Reverse, Order>;
         using Base = ScalarBase<This>;
-        using ValueType = ScalarType* __restrict;
+        using ValuePtr = ScalarType* __restrict;
     public:
         using device_obj_type = device_obj<This>;
         using TracerType = DiffTracer<ScalarType, Order>;
         using typename Base::GradType;
     private:
-        ValueType pValue;
+        ValuePtr pValue;
         GradType grad;
     public:
         Diff() = default;
         Diff(double d) : This(ScalarType(d)) {}
         Diff(ScalarType value);
         Diff(ScalarType value, ScalarType grad);
-        Diff(ValueType pValue_, GradType grad_);
+        Diff(ValuePtr pValue_, GradType grad_);
         Diff(const This&) = default;
         Diff(This&&) noexcept = default;
         ~Diff() = default;
@@ -300,7 +300,7 @@ namespace Physica {
     private:
         using GradType = typename std::conditional<Order == 1, T, Core::Diff<T, Mode, Order - 1>>::type;
     public:
-        using PlainScalar = T;
+        using ValueType = T;
         using ScalarType = Core::Diff<T, Mode, Order>;
         using PtrTy = typename std::conditional<isForwardDiff, Core::ScalarPtr<ScalarType>, ScalarType*>::type;
         using ConstPtrTy = std::add_const_t<PtrTy>;

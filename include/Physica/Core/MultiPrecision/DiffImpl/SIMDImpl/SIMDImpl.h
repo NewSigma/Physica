@@ -150,14 +150,14 @@ namespace Physica::Core {
         return This(ValuePacket::select(flags, x.getValue(), y.getValue()), GradPacket::select(flags, x.getGrad(), y.getGrad()));
     }
     ////////////////////////////////////////////////////////////////////////////////////
-    template<class PlainScalar, size_t Size>
-    SIMD<Diff<PlainScalar, DiffMode::Reverse, 1>, Size>::SIMD(PlainScalar s) : Base(s) {
+    template<class T, size_t Size>
+    SIMD<Diff<T, DiffMode::Reverse, 1>, Size>::SIMD(T s) : Base(s) {
         auto& tracer = TracerType::getInstance();
         headNode = tracer.pushOperation(*this, ExprType::Set);
     }
 
-    template<class PlainScalar, size_t Size>
-    SIMD<Diff<PlainScalar, DiffMode::Reverse, 1>, Size>::SIMD(ScalarType s) : Base(s.getValue()) {
+    template<class T, size_t Size>
+    SIMD<Diff<T, DiffMode::Reverse, 1>, Size>::SIMD(ScalarType s) : Base(s.getValue()) {
         auto& tracer = TracerType::getInstance();
         headNode = tracer.pushOperation(*this, ExprType::Assign);
         ScalarType operand[Size];
@@ -166,19 +166,19 @@ namespace Physica::Core {
         tracer.pushOperand(operand);
     }
 
-    template<class PlainScalar, size_t Size>
-    SIMD<Diff<PlainScalar, DiffMode::Reverse, 1>, Size>::SIMD(Base base, ScalarType headNode_)
+    template<class T, size_t Size>
+    SIMD<Diff<T, DiffMode::Reverse, 1>, Size>::SIMD(Base base, ScalarType headNode_)
             : Base(std::move(base)), headNode(headNode_) {}
 
-    template<class PlainScalar, size_t Size>
-    inline typename SIMD<Diff<PlainScalar, DiffMode::Reverse, 1>, Size>::ScalarType
-    SIMD<Diff<PlainScalar, DiffMode::Reverse, 1>, Size>::operator[](int i) const {
+    template<class T, size_t Size>
+    inline typename SIMD<Diff<T, DiffMode::Reverse, 1>, Size>::ScalarType
+    SIMD<Diff<T, DiffMode::Reverse, 1>, Size>::operator[](int i) const {
         return ScalarType(value_ptr() + i, grad_ptr() + i);
     }
 
-    template<class PlainScalar, size_t Size>
-    inline SIMD<Diff<PlainScalar, DiffMode::Reverse, 1>, Size>
-    SIMD<Diff<PlainScalar, DiffMode::Reverse, 1>, Size>::operator+(const SIMD& other) const {
+    template<class T, size_t Size>
+    inline SIMD<Diff<T, DiffMode::Reverse, 1>, Size>
+    SIMD<Diff<T, DiffMode::Reverse, 1>, Size>::operator+(const SIMD& other) const {
         auto& tracer = TracerType::getInstance();
         const auto temp = Base::operator+(other);
         const ScalarType newHeadNode = tracer.pushOperation(temp, ExprType::Add);
@@ -191,9 +191,9 @@ namespace Physica::Core {
         return {temp, newHeadNode};
     }
 
-    template<class PlainScalar, size_t Size>
-    inline SIMD<Diff<PlainScalar, DiffMode::Reverse, 1>, Size>
-    SIMD<Diff<PlainScalar, DiffMode::Reverse, 1>, Size>::operator-(const SIMD& other) const {
+    template<class T, size_t Size>
+    inline SIMD<Diff<T, DiffMode::Reverse, 1>, Size>
+    SIMD<Diff<T, DiffMode::Reverse, 1>, Size>::operator-(const SIMD& other) const {
         auto& tracer = TracerType::getInstance();
         const auto temp = Base::operator-(other);
         const ScalarType newHeadNode = tracer.pushOperation(temp, ExprType::Sub);
@@ -206,9 +206,9 @@ namespace Physica::Core {
         return {temp, newHeadNode};
     }
 
-    template<class PlainScalar, size_t Size>
-    inline SIMD<Diff<PlainScalar, DiffMode::Reverse, 1>, Size>
-    SIMD<Diff<PlainScalar, DiffMode::Reverse, 1>, Size>::operator*(const SIMD& other) const {
+    template<class T, size_t Size>
+    inline SIMD<Diff<T, DiffMode::Reverse, 1>, Size>
+    SIMD<Diff<T, DiffMode::Reverse, 1>, Size>::operator*(const SIMD& other) const {
         auto& tracer = TracerType::getInstance();
         const auto temp = Base::operator*(other);
         const ScalarType newHeadNode = tracer.pushOperation(temp, ExprType::Mul);
@@ -221,15 +221,15 @@ namespace Physica::Core {
         return {temp, newHeadNode};
     }
 
-    template<class PlainScalar, size_t Size>
-    inline SIMD<Diff<PlainScalar, DiffMode::Reverse, 1>, Size>
-    SIMD<Diff<PlainScalar, DiffMode::Reverse, 1>, Size>::operator*(const ScalarType& v) const {
+    template<class T, size_t Size>
+    inline SIMD<Diff<T, DiffMode::Reverse, 1>, Size>
+    SIMD<Diff<T, DiffMode::Reverse, 1>, Size>::operator*(const ScalarType& v) const {
         return operator*(SIMD(v));
     }
 
-    template<class PlainScalar, size_t Size>
-    inline SIMD<Diff<PlainScalar, DiffMode::Reverse, 1>, Size>
-    SIMD<Diff<PlainScalar, DiffMode::Reverse, 1>, Size>::operator/(const SIMD& other) const {
+    template<class T, size_t Size>
+    inline SIMD<Diff<T, DiffMode::Reverse, 1>, Size>
+    SIMD<Diff<T, DiffMode::Reverse, 1>, Size>::operator/(const SIMD& other) const {
         auto& tracer = TracerType::getInstance();
         const auto temp = Base::operator/(other);
         const ScalarType newHeadNode = tracer.pushOperation(temp, ExprType::Div);
@@ -242,9 +242,9 @@ namespace Physica::Core {
         return {temp, newHeadNode};
     }
 
-    template<class PlainScalar, size_t Size>
-    inline SIMD<Diff<PlainScalar, DiffMode::Reverse, 1>, Size>
-    SIMD<Diff<PlainScalar, DiffMode::Reverse, 1>, Size>::operator-() const {
+    template<class T, size_t Size>
+    inline SIMD<Diff<T, DiffMode::Reverse, 1>, Size>
+    SIMD<Diff<T, DiffMode::Reverse, 1>, Size>::operator-() const {
         auto& tracer = TracerType::getInstance();
         const auto temp = Base::operator-();
         const ScalarType headNode = tracer.pushOperation(temp, ExprType::Minus);
@@ -255,52 +255,52 @@ namespace Physica::Core {
         return {temp, headNode};
     }
 
-    template<class PlainScalar, size_t Size>
-    inline void SIMD<Diff<PlainScalar, DiffMode::Reverse, 1>, Size>::load(const ScalarType* p) {
+    template<class T, size_t Size>
+    inline void SIMD<Diff<T, DiffMode::Reverse, 1>, Size>::load(const ScalarType* p) {
         assert(checkContinuous(p, Size) && "[Error]: Load a uncontinuous pointer is a bug");
         headNode = *p;
         Base::load(headNode.value_ptr());
     }
 
-    template<class PlainScalar, size_t Size>
-    inline void SIMD<Diff<PlainScalar, DiffMode::Reverse, 1>, Size>::load_partial(const ScalarType* p, int n) {
+    template<class T, size_t Size>
+    inline void SIMD<Diff<T, DiffMode::Reverse, 1>, Size>::load_partial(const ScalarType* p, int n) {
         assert(checkContinuous(p, n) && "[Error]: Load a uncontinuous pointer is a bug");
         headNode = *p;
         Base::load_partial(headNode.value_ptr(), n);
     }
 
-    template<class PlainScalar, size_t Size>
-    inline void SIMD<Diff<PlainScalar, DiffMode::Reverse, 1>, Size>::store(ScalarType* p) const {
+    template<class T, size_t Size>
+    inline void SIMD<Diff<T, DiffMode::Reverse, 1>, Size>::store(ScalarType* p) const {
         for (size_t i = 0; i < Size; ++i)
             *(p + i) = ScalarType(value_ptr() + i, grad_ptr() + i);
     }
 
-    template<class PlainScalar, size_t Size>
-    inline void SIMD<Diff<PlainScalar, DiffMode::Reverse, 1>, Size>::store_partial(ScalarType* p, int n) const {
+    template<class T, size_t Size>
+    inline void SIMD<Diff<T, DiffMode::Reverse, 1>, Size>::store_partial(ScalarType* p, int n) const {
         for (int i = 0; i < n; ++i)
             *(p + i) = ScalarType(value_ptr() + i, grad_ptr() + i);
     }
 
-    template<class PlainScalar, size_t Size>
-    inline typename SIMD<Diff<PlainScalar, DiffMode::Reverse, 1>, Size>::ScalarType
-    SIMD<Diff<PlainScalar, DiffMode::Reverse, 1>, Size>::sum() const {
+    template<class T, size_t Size>
+    inline typename SIMD<Diff<T, DiffMode::Reverse, 1>, Size>::ScalarType
+    SIMD<Diff<T, DiffMode::Reverse, 1>, Size>::sum() const {
         ScalarType result = 0;
         for (size_t i = 0; i < Size; ++i)
             result += this->operator[](i);
         return result;
     }
 
-    template<class PlainScalar, size_t Size>
-    inline void SIMD<Diff<PlainScalar, DiffMode::Reverse, 1>, Size>::swap(SIMD& __restrict obj) noexcept {
+    template<class T, size_t Size>
+    inline void SIMD<Diff<T, DiffMode::Reverse, 1>, Size>::swap(SIMD& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         Base::swap(obj);
         std::swap(headNode, obj.headNode);
     }
 
-    template<class PlainScalar, size_t Size>
-    bool SIMD<Diff<PlainScalar, DiffMode::Reverse, 1>, Size>::checkContinuous(const ScalarType* p, int n) {
-        const PlainScalar* pValue = p->value_ptr();
-        const PlainScalar* pGrad = p->grad_ptr();
+    template<class T, size_t Size>
+    bool SIMD<Diff<T, DiffMode::Reverse, 1>, Size>::checkContinuous(const ScalarType* p, int n) {
+        const T* pValue = p->value_ptr();
+        const T* pGrad = p->grad_ptr();
         for (int i = 1; i < n; ++i) {
             if ((pValue + i) != (p + i)->value_ptr())
                 return false;

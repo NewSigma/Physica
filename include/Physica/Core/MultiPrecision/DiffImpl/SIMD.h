@@ -103,22 +103,22 @@ namespace Physica::Core {
         [[nodiscard]] static SIMD select(BoolSIMDType flags, const SIMD& x, const SIMD& y);
     };
 
-    template<class PlainScalar, size_t Size>
-    class SIMD<Diff<PlainScalar, DiffMode::Reverse, 1>, Size> : public SIMD<PlainScalar, Size> {
-        static_assert(!PlainScalar::isDifferentiable, "[Error]: Invalid template param");
-        using ScalarType = Diff<PlainScalar, DiffMode::Reverse, 1>;
+    template<class T, size_t Size>
+    class SIMD<Diff<T, DiffMode::Reverse, 1>, Size> : public SIMD<T, Size> {
+        static_assert(!T::isDifferentiable, "[Error]: Invalid template param");
+        using ScalarType = Diff<T, DiffMode::Reverse, 1>;
         using This = SIMD<ScalarType, Size>;
-        using Base = SIMD<PlainScalar, Size>;
+        using Base = SIMD<T, Size>;
         using BoolSIMDType = typename Traits<This>::BoolSIMDType;
     public:
         using PlainPacket = Base;
-        using TracerType = DiffTracer<PlainScalar, 1>;
+        using TracerType = DiffTracer<T, 1>;
     private:
         ScalarType headNode;
     public:
         SIMD() = default;
-        explicit SIMD(int i) : SIMD(PlainScalar(i)) {}
-        explicit SIMD(PlainScalar s);
+        explicit SIMD(int i) : SIMD(T(i)) {}
+        explicit SIMD(T s);
         explicit SIMD(ScalarType s);
         SIMD(Base base, ScalarType headNode_);
         SIMD(const SIMD&) = default;
@@ -153,8 +153,8 @@ namespace Physica::Core {
         using Base::size;
         using Base::getImpl;
         [[nodiscard]] ScalarType getHeadNode() const noexcept { return headNode; }
-        [[nodiscard]] PlainScalar* value_ptr() const noexcept { return headNode.value_ptr(); }
-        [[nodiscard]] PlainScalar* grad_ptr() const noexcept { return headNode.grad_ptr(); }
+        [[nodiscard]] T* value_ptr() const noexcept { return headNode.value_ptr(); }
+        [[nodiscard]] T* grad_ptr() const noexcept { return headNode.grad_ptr(); }
     private:
         using Base::insert; //Insert a scalar may lead to incontineous memory, which harms performance
         [[nodiscard]] static bool checkContinuous(const ScalarType* p, int n);

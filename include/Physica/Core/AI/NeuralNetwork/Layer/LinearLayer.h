@@ -29,7 +29,7 @@ namespace Physica::Core {
         using Base = LayerBase<This>;
         using typename Base::InputType;
         using typename Base::OutputType;
-        using typename Base::PlainScalar;
+        using typename Base::ValueType;
         constexpr static int Option = MatrixOption::Row | MatrixOption::Vector;
         using MatrixType = DenseMatrix<ScalarType, Option>;
         using BiasType = typename std::conditional<WithBias, InputType, PlainStruct<void>>::type;
@@ -55,9 +55,9 @@ namespace Physica::Core {
         template<class RandomGenerator>
         void random_normal(RandomGenerator& gen);
         template<class RandomGenerator>
-        void random_xavier_uniform(PlainScalar gain, RandomGenerator& gen);
+        void random_xavier_uniform(ValueType gain, RandomGenerator& gen);
         template<class RandomGenerator>
-        void random_xavier_normal(PlainScalar gain, RandomGenerator& gen);
+        void random_xavier_normal(ValueType gain, RandomGenerator& gen);
         template<class Distribution, class RandomGenerator>
         void random_any(Distribution& dist, RandomGenerator& gen);
         void swap(LinearLayer& __restrict obj) noexcept;
@@ -110,9 +110,9 @@ namespace Physica::Core {
 
     template<class ScalarType, bool WithBias>
     template<class RandomGenerator>
-    void LinearLayer<ScalarType, WithBias>::random_xavier_uniform(PlainScalar gain, RandomGenerator& gen) {
+    void LinearLayer<ScalarType, WithBias>::random_xavier_uniform(ValueType gain, RandomGenerator& gen) {
         using MachineType = typename ScalarType::MachineType;
-        const auto factor = (gain * sqrt(PlainScalar(6) / PlainScalar(getInputDim() + getOutputDim()))).toMachine();
+        const auto factor = (gain * sqrt(ValueType(6) / ValueType(getInputDim() + getOutputDim()))).toMachine();
         std::uniform_real_distribution<MachineType> dist(-factor, factor);
         weights.random_any(dist, gen);
         if constexpr (WithBias)
@@ -121,9 +121,9 @@ namespace Physica::Core {
 
     template<class ScalarType, bool WithBias>
     template<class RandomGenerator>
-    void LinearLayer<ScalarType, WithBias>::random_xavier_normal(PlainScalar gain, RandomGenerator& gen) {
+    void LinearLayer<ScalarType, WithBias>::random_xavier_normal(ValueType gain, RandomGenerator& gen) {
         using MachineType = typename ScalarType::MachineType;
-        const auto deviation = (gain * sqrt(PlainScalar(2) / PlainScalar(getInputDim() + getOutputDim()))).toMachine();
+        const auto deviation = (gain * sqrt(ValueType(2) / ValueType(getInputDim() + getOutputDim()))).toMachine();
         std::normal_distribution<MachineType> dist(0, deviation);
         weights.random_any(dist, gen);
         if constexpr (WithBias)

@@ -43,7 +43,7 @@ namespace Physica::Core {
         using InitializerType = typename Storage::InitializerType;
         using Base::isReverseDiff;
     public:
-        using typename Base::PlainScalar;
+        using typename Base::ValueType;
         using typename Base::ScalarType;
         using device_obj_type = device_obj<This>;
         using ColMatrix = DenseMatrix<T, MatrixOption::getStorage<DenseMatrix>() | MatrixOption::Col, Row, Col>;

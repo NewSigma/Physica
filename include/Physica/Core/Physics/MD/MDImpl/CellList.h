@@ -27,7 +27,7 @@ namespace Physica::Core {
     template<class ScalarType>
     class CellList {
         using This = CellList<ScalarType>;
-        using PlainScalar = typename ScalarType::PlainScalar;
+        using ValueType = typename ScalarType::ValueType;
     public:
         using MDCellType = MDCell<ScalarType>;
         using LatticeMatrix = typename MDCellType::LatticeMatrix;
@@ -38,15 +38,15 @@ namespace Physica::Core {
     private:
         LatticeMatrix lattice;
         PositionMatrix directPos;
-        PlainScalar cutoff;
+        ValueType cutoff;
         Index3D cellGridDim;
         Array<size_t> cellAtomMap;
         Array<size_t> cellStartOffset;
         Array<Index3D> atomCellMap;
         Array<Vector3D> neighShifts;
     public:
-        CellList(LatticeMatrix lattice_, PositionMatrix cartesianPos, PlainScalar cutoff_);
-        CellList(const MDCellType& mdCell, PlainScalar cutoff_);
+        CellList(LatticeMatrix lattice_, PositionMatrix cartesianPos, ValueType cutoff_);
+        CellList(const MDCellType& mdCell, ValueType cutoff_);
         CellList(const CellList&) = default;
         CellList(CellList&&) noexcept = default;
         ~CellList() = default;
@@ -68,7 +68,7 @@ namespace Physica::Core {
         /* Getters */
         [[nodiscard]] const LatticeMatrix& getLattice() const noexcept { return lattice; }
         [[nodiscard]] size_t getNumParticle() const noexcept { return directPos.getRow(); }
-        [[nodiscard]] PlainScalar getCutoff() const noexcept { return cutoff; }
+        [[nodiscard]] ValueType getCutoff() const noexcept { return cutoff; }
         [[nodiscard]] Index3D getCellGridDim() const noexcept { return cellGridDim; }
         [[nodiscard]] size_t getCellGridDimX() const noexcept { return cellGridDim[0]; }
         [[nodiscard]] size_t getCellGridDimY() const noexcept { return cellGridDim[1]; }
@@ -85,13 +85,13 @@ namespace Physica::Core {
         template<size_t DimID>
         [[nodiscard]] __host__ __device__ inline static int findNeighbor(
                 const Index3D& cellGridDim, size_t centerIndex, int deltaIndex, Index3D& neighborIndex);
-        [[nodiscard]] static Index3D makeGridDim(const LatticeMatrix& lattice, PlainScalar cutoff);
+        [[nodiscard]] static Index3D makeGridDim(const LatticeMatrix& lattice, ValueType cutoff);
         /* Friends */
         friend class device_obj<This>;
     };
 
     template<class ScalarType>
-    CellList<ScalarType>::CellList(LatticeMatrix lattice_, PositionMatrix cartesianPos, PlainScalar cutoff_)
+    CellList<ScalarType>::CellList(LatticeMatrix lattice_, PositionMatrix cartesianPos, ValueType cutoff_)
             : lattice(std::move(lattice_))
             , directPos(std::move(cartesianPos))
             , cutoff(cutoff_) {
@@ -125,7 +125,7 @@ namespace Physica::Core {
     }
 
     template<class ScalarType>
-    CellList<ScalarType>::CellList(const MDCellType& mdCell, PlainScalar cutoff_)
+    CellList<ScalarType>::CellList(const MDCellType& mdCell, ValueType cutoff_)
             : CellList(mdCell.getLattice(), mdCell.getPos(), std::move(cutoff_)) {}
 
     template<class ScalarType>
@@ -264,9 +264,9 @@ namespace Physica::Core {
     template<class ScalarType>
     typename CellList<ScalarType>::Index3D
     CellList<ScalarType>::posToIndex(size_t atomId) const {
-        const ScalarType x0 = abs(directPos(atomId, 0) - PlainScalar(std::numeric_limits<ScalarType>::epsilon()));
-        const ScalarType y0 = abs(directPos(atomId, 1) - PlainScalar(std::numeric_limits<ScalarType>::epsilon()));
-        const ScalarType z0 = abs(directPos(atomId, 2) - PlainScalar(std::numeric_limits<ScalarType>::epsilon()));
+        const ScalarType x0 = abs(directPos(atomId, 0) - ValueType(std::numeric_limits<ScalarType>::epsilon()));
+        const ScalarType y0 = abs(directPos(atomId, 1) - ValueType(std::numeric_limits<ScalarType>::epsilon()));
+        const ScalarType z0 = abs(directPos(atomId, 2) - ValueType(std::numeric_limits<ScalarType>::epsilon()));
         assert(ScalarType(0) <= x0 && x0 <= ScalarType(1));
         assert(ScalarType(0) <= y0 && y0 <= ScalarType(1));
         assert(ScalarType(0) <= z0 && z0 <= ScalarType(1));
@@ -313,9 +313,9 @@ namespace Physica::Core {
 
     template<class ScalarType>
     typename CellList<ScalarType>::Index3D
-    CellList<ScalarType>::makeGridDim(const LatticeMatrix& lattice, PlainScalar cutoff) {
+    CellList<ScalarType>::makeGridDim(const LatticeMatrix& lattice, ValueType cutoff) {
         const auto repLatt = MDCellType::makeRepLattice(lattice);
-        const PlainScalar factor = reciprocal(cutoff) * PlainScalar(2 * M_PI);
+        const ValueType factor = reciprocal(cutoff) * ValueType(2 * M_PI);
         size_t dimX = static_cast<size_t>(double(factor * reciprocal(repLatt.row(0).norm())));
         size_t dimY = static_cast<size_t>(double(factor * reciprocal(repLatt.row(1).norm())));
         size_t dimZ = static_cast<size_t>(double(factor * reciprocal(repLatt.row(2).norm())));

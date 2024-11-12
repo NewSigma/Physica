@@ -45,7 +45,7 @@ namespace Physica::Core {
 
         using This = PeriodicCell<ScalarType, Dim>;
         using Base = Internal::PeriodicCellImpl;
-        using PlainScalar = typename ScalarType::PlainScalar;
+        using ValueType = typename ScalarType::ValueType;
     public:
         using LatticeMatrix = DenseMatrix<ScalarType, MatrixOption::Row | MatrixOption::Element, Dim, Dim>;
         using InvLatticeMatrix = DenseMatrix<ScalarType, MatrixOption::Col | MatrixOption::Element, Dim, Dim>;
@@ -120,7 +120,7 @@ namespace Physica::Core {
         [[nodiscard]] static ScalarType getVolume(const LatticeMatrix& lattice);
         static void toDirect(PositionMatrix& target, const LatticeMatrix& lattice);
         static void toCartesian(PositionMatrix& target, const LatticeMatrix& lattice);
-        [[nodiscard]] static SearchRangeType estimateRange(const LatticeMatrix& cell, PlainScalar cutoff);
+        [[nodiscard]] static SearchRangeType estimateRange(const LatticeMatrix& cell, ValueType cutoff);
         template<class Functor> static void forCellInRange(const SearchRangeType& range, const LatticeMatrix& lattice, Functor func);
         template<class Functor> static void forReducedCellInRange(const SearchRangeType& range, const LatticeMatrix& lattice, Functor func);
     protected:
@@ -630,9 +630,9 @@ namespace Physica::Core {
 
     template<class ScalarType, unsigned int Dim>
     typename PeriodicCell<ScalarType, Dim>::SearchRangeType
-    PeriodicCell<ScalarType, Dim>::estimateRange(const LatticeMatrix& lattice, PlainScalar cutoff) {
+    PeriodicCell<ScalarType, Dim>::estimateRange(const LatticeMatrix& lattice, ValueType cutoff) {
         const auto repLatt = makeRepLattice(lattice);
-        const PlainScalar factor = cutoff * PlainScalar(1 / (2 * M_PI));
+        const ValueType factor = cutoff * ValueType(1 / (2 * M_PI));
         SearchRangeType range{};
         if constexpr (Dim == 1) {
             range[0] = static_cast<ssize_t>(double(factor * repLatt.row(0).norm()) + 1);

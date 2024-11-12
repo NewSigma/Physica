@@ -29,13 +29,12 @@ namespace Physica::Core {
         using host_obj = Diff<ScalarType, DiffMode::Reverse, Order>;
         using This = device_obj<host_obj>;
         using Base = ScalarBase<This>;
-        using ReducedType = device_obj<Diff<ScalarType, DiffMode::Reverse, Order - 1>>;
-        using ValueType = ScalarType* __restrict;
-        using GradType = typename std::conditional<Order == 1, ValueType, ReducedType>::type;
+        using ValuePtr = ScalarType* __restrict;
     public:
         using TracerType = device_obj<typename host_obj::TracerType>;
+        using typename Base::GradType;
     private:
-        ValueType pValue;
+        ValuePtr pValue;
         GradType pGrad;
     public:
         device_obj() = default;
@@ -110,13 +109,13 @@ namespace Physica {
         using ComplexT = typename T::ComplexType;
     public:
         constexpr static ScalarOption Option = T::Option;
+        constexpr static int Order = Order_;
         constexpr static bool isComplex = T::isComplex;
         constexpr static bool isDifferentiable = true;
         constexpr static bool isForwardDiff = false;
         constexpr static bool isReverseDiff = true;
 
-        using PlainScalar = T;
-        constexpr static int Order = Order_;
+        using ValueType = T;
         using ScalarType = Core::device_obj<Diff<T, Mode, Order>>;
         using PtrTy = ScalarType*;
         using ConstPtrTy = const ScalarType*;

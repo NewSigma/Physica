@@ -27,7 +27,6 @@ namespace Physica::Core {
         static_assert(is_scalar<ScalarType>::value, "[Error]: Invalid ScalarType");
         static_assert(!ScalarType::isComplex, "[Error]: This specialization does not handle complex");
         static_assert(!ScalarType::isForwardDiff, "[Error]: This specialization does not handle forward diff");
-        using PlainScalar = typename ScalarType::PlainScalar;
         constexpr static bool isSinglePrec = ScalarType::Option == Float;
         constexpr static bool isDynamic = Length == Dynamic;
         constexpr static size_t size128 = isSinglePrec ? 4 : 2;

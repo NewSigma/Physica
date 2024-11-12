@@ -35,7 +35,7 @@ namespace Physica::Core {
         using This = Q_TIP4P<ScalarType, EwaldType>;
         using Base = AABModel<ScalarType>;
         using Base::Dim;
-        using PlainScalar = typename ScalarType::PlainScalar;
+        using ValueType = typename ScalarType::ValueType;
         using REwaldType = typename Traits<EwaldType>::REwaldType;
         using BornChargeArray = typename REwaldType::BornChargeArray;
         constexpr static bool IsSmallCell = Traits<REwaldType>::IsSmallCell;
@@ -60,7 +60,7 @@ namespace Physica::Core {
         EwaldType ewald;
         LJModelType lj_model;
     public:
-        Q_TIP4P(const MDCellType& refer_cell, PlainScalar cutoff, EwaldType ewald_);
+        Q_TIP4P(const MDCellType& refer_cell, ValueType cutoff, EwaldType ewald_);
         Q_TIP4P(const Q_TIP4P&) = default;
         Q_TIP4P(Q_TIP4P&&) noexcept = default;
         ~Q_TIP4P() = default;
@@ -117,7 +117,7 @@ namespace Physica::Core {
     };
 
     template<class ScalarType, class EwaldType>
-    Q_TIP4P<ScalarType, EwaldType>::Q_TIP4P(const MDCellType& refer_cell, PlainScalar cutoff, EwaldType ewald_)
+    Q_TIP4P<ScalarType, EwaldType>::Q_TIP4P(const MDCellType& refer_cell, ValueType cutoff, EwaldType ewald_)
             : ewald(std::move(ewald_))
             , lj_model(lj_sigma, cutoff.getValue()) {
         assert(refer_cell.getNumParticle() % 3 == 0 && "[Error]: This is not a cell of water");

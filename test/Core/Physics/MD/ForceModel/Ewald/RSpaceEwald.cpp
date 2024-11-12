@@ -28,8 +28,8 @@ using namespace Physica::Core;
 
 namespace Physica {
     class Test {
-        using PlainScalar = float64;
-        using ScalarType = Diff<PlainScalar, DiffMode::Reverse, 1>;
+        using ValueType = float64;
+        using ScalarType = Diff<ValueType, DiffMode::Reverse, 1>;
         using MDCellType = MDCell<ScalarType>;
         using LatticeMatrix = typename MDCellType::LatticeMatrix;
         using PositionMatrix = typename MDCellType::PositionMatrix;
@@ -50,8 +50,8 @@ namespace Physica {
                 ewald.potentialV(pos).reverse();
             }
             /* Test press */ {
-                const PlainScalar press_diff = -volume.getGrad() / PlainScalar(cellSize * cellSize * cellSize);
-                const PlainScalar press = (ewald.virial(pos).trace() / ScalarType(3)).getValue();
+                const ValueType press_diff = -volume.getGrad() / ValueType(cellSize * cellSize * cellSize);
+                const ValueType press = (ewald.virial(pos).trace() / ScalarType(3)).getValue();
                 if (!scalarNear(press_diff, press, 1E-13))
                     exit(EXIT_FAILURE);
             }
@@ -63,7 +63,7 @@ namespace Physica {
             const ScalarType latticeConst = cbrt(volume);
             lattice *= latticeConst;
 
-            PositionMatrix pos(numMolecularUnitCell, 3, PlainScalar(0));
+            PositionMatrix pos(numMolecularUnitCell, 3, ValueType(0));
             auto row = pos.row(1);
             row = ScalarType(0.5);
             pos *= latticeConst;

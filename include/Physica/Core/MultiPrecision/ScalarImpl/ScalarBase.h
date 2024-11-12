@@ -53,7 +53,7 @@ namespace Physica::Core {
         constexpr static bool isReverseDiff = Traits<Derived>::isReverseDiff;
         constexpr static DiffMode Mode = isForwardDiff ? DiffMode::Forward : DiffMode::Reverse;
 
-        using PlainScalar = typename Traits<Derived>::PlainScalar;
+        using ValueType = typename Traits<Derived>::ValueType;
         using ScalarType = typename Traits<Derived>::ScalarType;
         using PtrTy = typename Traits<Derived>::PtrTy;
         using ConstPtrTy = typename Traits<Derived>::ConstPtrTy;
@@ -69,12 +69,12 @@ namespace Physica::Core {
         static_assert(isConsistent1 || isConsistent2, "[Error]: DiffMode is not self consistent");
         static_assert(std::is_same<Derived, ScalarType>::value, "[Error]: Inconsistence type between traits and inherit class");
 
-        using ValueType = typename std::conditional<isForwardDiff || !isDifferentiable, PlainScalar, PlainScalar*>::type;
-        using GradType1 = typename std::conditional<Order == 1, ValueType, Diff<PlainScalar, Mode, Order - 1>>::type;
+        using ValuePtr = typename std::conditional<isForwardDiff || !isDifferentiable, ValueType, ValueType*>::type;
+        using GradType1 = typename std::conditional<Order == 1, ValuePtr, Diff<ValueType, Mode, Order - 1>>::type;
     public:
         using GradType = typename std::conditional<isDifferentiable, GradType1, PlainStruct<void>>::type;
         template<int GradOrder>
-        using GradRtnTy = typename std::conditional<Order == GradOrder, PlainScalar, Diff<PlainScalar, Mode, Order - GradOrder>>::type;
+        using GradRtnTy = typename std::conditional<Order == GradOrder, ValueType, Diff<ValueType, Mode, Order - GradOrder>>::type;
     public:
         /* Operators */
         __host__ __device__ inline bool operator>(float s) const noexcept;
@@ -134,7 +134,7 @@ namespace Physica::Core {
         void insert([[maybe_unused]] int index, ScalarType value) { this->getDerived() = ScalarType(value); }
         [[nodiscard]] ScalarType sum() const { return this->getDerived(); }
         /* Auto differential support */
-        [[nodiscard]] __host__ __device__  const PlainScalar& getValue() const noexcept {
+        [[nodiscard]] __host__ __device__  const ValueType& getValue() const noexcept {
             if constexpr (isDifferentiable)
                 return this->getDerived().getValue();
             else
@@ -233,7 +233,7 @@ namespace Physica::Core {
         assert(precision > 0);
         constexpr bool isDifferentiable = ScalarType::isDifferentiable;
         if constexpr (ScalarType::isComplex) {
-            using PlainRealType = typename ScalarType::PlainScalar::RealType;
+            using PlainRealType = typename ScalarType::ValueType::RealType;
             const ScalarType diff = s1.getDerived() - s2.getDerived();
             const bool isValueNear = scalarNear(abs(diff.getValue()), PlainRealType(0), precision);
             if constexpr (isDifferentiable)
@@ -242,8 +242,8 @@ namespace Physica::Core {
                 return isValueNear;
         }
         else {
-            using PlainScalar = typename ScalarType::PlainScalar;
-            const bool isValueNear = relativeError(s1.getValue(), s2.getValue()) < PlainScalar(precision);
+            using ValueType = typename ScalarType::ValueType;
+            const bool isValueNear = relativeError(s1.getValue(), s2.getValue()) < ValueType(precision);
             if constexpr (ScalarType::isDifferentiable)
                 return isValueNear && scalarNear(s1.getGrad(), s2.getGrad(), precision);
             else

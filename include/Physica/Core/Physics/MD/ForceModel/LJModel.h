@@ -25,12 +25,12 @@ namespace Physica::Core {
     class LJModel : public PairModel<LJModel<ScalarType, IsSmallCell>> {
         using This = LJModel<ScalarType, IsSmallCell>;
         using Base = PairModel<This>;
-        using typename Base::PlainScalar;
+        using typename Base::ValueType;
 
         ScalarType sigma;
         ScalarType sigma1;
     public:
-        LJModel(ScalarType sigma_, PlainScalar cutoff);
+        LJModel(ScalarType sigma_, ValueType cutoff);
         LJModel(const LJModel&) = default;
         LJModel(LJModel&&) noexcept = default;
         ~LJModel() = default;
@@ -44,9 +44,9 @@ namespace Physica::Core {
     };
 
     template<class ScalarType, bool IsSmallCell>
-    LJModel<ScalarType, IsSmallCell>::LJModel(ScalarType sigma_, PlainScalar cutoff)
+    LJModel<ScalarType, IsSmallCell>::LJModel(ScalarType sigma_, ValueType cutoff)
             : Base(), sigma(std::move(sigma_)) {
-        sigma1 = PlainScalar(6) / sigma;
+        sigma1 = ValueType(6) / sigma;
         Base::setCutoff(std::move(cutoff));
     }
 
@@ -75,7 +75,7 @@ namespace Physica::Core {
         const ScalarType rep_r6 = rep_r4 * rep_r2;
         const ScalarType rep_r7 = rep_r6 * rep_r;
         const ScalarType rep_r13 = rep_r7 * rep_r6;
-        return (rep_r13 * PlainScalar(2) - rep_r7) * sigma1;
+        return (rep_r13 * ValueType(2) - rep_r7) * sigma1;
     }
 
     template<class ScalarType, bool IsSmallCell>

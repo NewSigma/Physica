@@ -54,8 +54,8 @@ namespace Physica::Core {
         template<class VectorType1, class VectorType2 = VectorType1>
         class EnableSIMD {
             using ScalarType = typename VectorType1::ScalarType;
-            using PlainScalar = typename ScalarType::PlainScalar;
-            constexpr static bool isSameScalar = std::is_same<PlainScalar, typename VectorType2::PlainScalar>::value;
+            using ValueType = typename ScalarType::ValueType;
+            constexpr static bool isSameScalar = std::is_same<ValueType, typename VectorType2::ValueType>::value;
         public:
             constexpr static bool value = isSameScalar && BestPacket<ScalarType, VectorType1::SizeAtCompile>::Size > 1;
         };
@@ -79,7 +79,7 @@ namespace Physica::Core {
         using BlockType = RVectorBlock<Derived, Length>;
     public:
         using ScalarType = typename Traits<Derived>::ScalarType;
-        using PlainScalar = typename ScalarType::PlainScalar;
+        using ValueType = typename ScalarType::ValueType;
         constexpr static size_t SizeAtCompile = Traits<Derived>::SizeAtCompile;
         using PacketType = typename BestPacket<ScalarType, SizeAtCompile>::Type;
         using ColMatrix = DenseMatrix<ScalarType, MatrixOption::Col | MatrixOption::Vector, SizeAtCompile, 1, HostAllocator<ScalarType>>;

@@ -45,7 +45,7 @@ namespace Physica::Core {
         if constexpr (!ScalarType::isDifferentiable)
             return SIMD<ScalarType, Size>(sqrt(x.getImpl()));
         else {
-            using PlainSIMD = SIMD<typename ScalarType::PlainScalar, Size>;
+            using PlainSIMD = SIMD<typename ScalarType::ValueType, Size>;
             using TracerType = typename ScalarType::TracerType;
             auto& tracer = TracerType::getInstance();
             const PlainSIMD values(sqrt(x.getImpl()));
@@ -61,7 +61,7 @@ namespace Physica::Core {
         if constexpr (!ScalarType::isDifferentiable)
             return SIMD<ScalarType, Size>(cbrt(x.getImpl()));
         else {
-            using PlainSIMD = SIMD<typename ScalarType::PlainScalar, Size>;
+            using PlainSIMD = SIMD<typename ScalarType::ValueType, Size>;
             using TracerType = typename ScalarType::TracerType;
             auto& tracer = TracerType::getInstance();
             const PlainSIMD values(cbrt(x.getImpl()));

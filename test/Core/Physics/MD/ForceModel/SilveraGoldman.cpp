@@ -23,8 +23,8 @@
 
 using namespace Physica::Core;
 
-using PlainScalar = float64;
-using ScalarType = Diff<PlainScalar, DiffMode::Reverse, 1>;
+using ValueType = float64;
+using ScalarType = Diff<ValueType, DiffMode::Reverse, 1>;
 
 class PressTest {
     using RandomGenerator = std::mt19937;

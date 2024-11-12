@@ -127,61 +127,61 @@ namespace Physica::Core {
         return This(std::move(values), std::move(grads));
     }
     ////////////////////////////////////////////////////////////////////////////////////
-    template<class PlainScalar, int Order>
-    Diff<Vector<PlainScalar>, DiffMode::Reverse, Order>::Diff()
+    template<class T, int Order>
+    Diff<Vector<T>, DiffMode::Reverse, Order>::Diff()
             : traceSeg(TracerType::getInstance().pushSegment()) {}
 
-    template<class PlainScalar, int Order>
-    Diff<Vector<PlainScalar>, DiffMode::Reverse, Order>::Diff(size_t length)
+    template<class T, int Order>
+    Diff<Vector<T>, DiffMode::Reverse, Order>::Diff(size_t length)
             : traceSeg(TracerType::getInstance().pushSegment(length)) {}
 
-    template<class PlainScalar, int Order>
-    Diff<Vector<PlainScalar>, DiffMode::Reverse, Order>::Diff(VectorType values)
+    template<class T, int Order>
+    Diff<Vector<T>, DiffMode::Reverse, Order>::Diff(VectorType values)
             : traceSeg(TracerType::getInstance().pushSegment(std::move(values))) {}
 
-    template<class PlainScalar, int Order>
+    template<class T, int Order>
     template<class RandomGenerator>
-    inline void Diff<Vector<PlainScalar>, DiffMode::Reverse, Order>::random_uniform(RandomGenerator& gen) {
+    inline void Diff<Vector<T>, DiffMode::Reverse, Order>::random_uniform(RandomGenerator& gen) {
         *this = random_uniform(getLength(), gen);
     }
 
-    template<class PlainScalar, int Order>
+    template<class T, int Order>
     template<class RandomGenerator>
-    inline void Diff<Vector<PlainScalar>, DiffMode::Reverse, Order>::random_normal(RandomGenerator& gen) {
+    inline void Diff<Vector<T>, DiffMode::Reverse, Order>::random_normal(RandomGenerator& gen) {
         *this = random_normal(getLength(), gen);
     }
 
-    template<class PlainScalar, int Order>
+    template<class T, int Order>
     template<class Distribution, class RandomGenerator>
-    inline void Diff<Vector<PlainScalar>, DiffMode::Reverse, Order>::random_any(Distribution& dist, RandomGenerator& gen) {
+    inline void Diff<Vector<T>, DiffMode::Reverse, Order>::random_any(Distribution& dist, RandomGenerator& gen) {
         *this = random_any(getLength(), dist, gen);
     }
 
-    template<class PlainScalar, int Order>
-    inline typename Diff<Vector<PlainScalar>, DiffMode::Reverse, Order>::ScalarType
-    Diff<Vector<PlainScalar>, DiffMode::Reverse, Order>::calc(size_t index) const {
+    template<class T, int Order>
+    inline typename Diff<Vector<T>, DiffMode::Reverse, Order>::ScalarType
+    Diff<Vector<T>, DiffMode::Reverse, Order>::calc(size_t index) const {
         assert(index < getLength() && "[Error]: Index out of range");
         return traceSeg[index];
     }
 
-    template<class PlainScalar, int Order>
+    template<class T, int Order>
     template<class RandomGenerator>
-    inline Diff<Vector<PlainScalar>, DiffMode::Reverse, Order>
-    Diff<Vector<PlainScalar>, DiffMode::Reverse, Order>::random_uniform(size_t len, RandomGenerator& gen) {
+    inline Diff<Vector<T>, DiffMode::Reverse, Order>
+    Diff<Vector<T>, DiffMode::Reverse, Order>::random_uniform(size_t len, RandomGenerator& gen) {
         return This(VectorType::random_uniform(len, gen));
     }
 
-    template<class PlainScalar, int Order>
+    template<class T, int Order>
     template<class RandomGenerator>
-    inline Diff<Vector<PlainScalar>, DiffMode::Reverse, Order>
-    Diff<Vector<PlainScalar>, DiffMode::Reverse, Order>::random_normal(size_t len, RandomGenerator& gen) {
+    inline Diff<Vector<T>, DiffMode::Reverse, Order>
+    Diff<Vector<T>, DiffMode::Reverse, Order>::random_normal(size_t len, RandomGenerator& gen) {
         return This(VectorType::random_normal(len, gen));
     }
 
-    template<class PlainScalar, int Order>
+    template<class T, int Order>
     template<class Distribution, class RandomGenerator>
-    inline Diff<Vector<PlainScalar>, DiffMode::Reverse, Order>
-    Diff<Vector<PlainScalar>, DiffMode::Reverse, Order>::random_any(size_t len, Distribution& dist, RandomGenerator& gen) {
+    inline Diff<Vector<T>, DiffMode::Reverse, Order>
+    Diff<Vector<T>, DiffMode::Reverse, Order>::random_any(size_t len, Distribution& dist, RandomGenerator& gen) {
         return This(VectorType::random_any(len, dist, gen));
     }
 }

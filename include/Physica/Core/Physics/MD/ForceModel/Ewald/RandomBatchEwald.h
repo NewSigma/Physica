@@ -32,7 +32,7 @@ namespace Physica::Core {
         using This = RandomBatchEwald<ScalarType, RandomType>;
         using Base = RSpaceEwald<ScalarType, false>;
         using Base::Dim;
-        using typename Base::PlainScalar;
+        using typename Base::ValueType;
         using typename Base::LatticeMatrix;
         using typename Base::PositionMatrix;
         using typename Base::Vector3D;
@@ -184,7 +184,7 @@ namespace Physica::Core {
     template<class ScalarType, class RandomType>
     void RandomBatchEwald<ScalarType, RandomType>::updateSumGauss() {
         sumGauss = 0;
-        const ScalarType factor = reciprocal(square(PlainScalar(2) * Base::getIntegralLimit()));
+        const ScalarType factor = reciprocal(square(ValueType(2) * Base::getIntegralLimit()));
         PeriodicCell<ScalarType, Dim>::forReducedCellInRange( // Reduce cell using time reversal symmetry
             Base::getKSpaceSumRange(), Base::getRepLattice(), [this, factor](Vector3D delta) {
                 const ScalarType squaredNorm = ScalarType(delta.squaredNorm());
@@ -192,7 +192,7 @@ namespace Physica::Core {
                 if (isNotGammaPoint)
                     sumGauss += exp(-squaredNorm * factor);
             });
-        sumGauss *= PlainScalar(2);
+        sumGauss *= ValueType(2);
     }
 
     template<class ScalarType, class RandomType>

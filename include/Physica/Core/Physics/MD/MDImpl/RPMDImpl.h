@@ -135,10 +135,10 @@ namespace Physica::Core {
             kineticModel.nve_step(ringPolymer, timeStep);
         }
         else {
-            forceStep(timeStep * PlainScalar(0.5));
+            forceStep(timeStep * ValueType(0.5));
             kineticModel.nve_step(ringPolymer, timeStep);
             updateForce<ForceModel, Executor>(forceModel);
-            forceStep(timeStep * PlainScalar(0.5));
+            forceStep(timeStep * ValueType(0.5));
         }
     }
 
@@ -447,7 +447,7 @@ namespace Physica::Core {
         for (size_t i = 0; i < getNumReplica(); ++i)
             kinetic += square(pos[i] - pos[(i + 1) % getNumReplica()]);
         const ScalarType factor = getMassVec()[dofIndex / Dim] * square(omegaW) / ScalarType(getNumReplica());
-        kinetic = (-kinetic * factor + repBeta) * PlainScalar(0.5);
+        kinetic = (-kinetic * factor + repBeta) * ValueType(0.5);
         return kinetic;
     }
 
@@ -823,8 +823,8 @@ namespace Physica::Core {
     template<class ScalarType, unsigned int Dim, size_t NumReplica, class ForceMatrixAllocator>
     void RPMD<ScalarType, Dim, NumReplica, ForceMatrixAllocator>::checkParam() const {
         if constexpr (NumReplica != 1) {
-            const ScalarType cycle = PlainScalar(2 * M_PI) / ringPolymer.calcOmegaW(temperatureT);
-            bool isSmallEnough = timeStep < cycle / PlainScalar(4);
+            const ScalarType cycle = ValueType(2 * M_PI) / ringPolymer.calcOmegaW(temperatureT);
+            bool isSmallEnough = timeStep < cycle / ValueType(4);
             if (!isSmallEnough)
                 throw std::invalid_argument("[Error]: Time step is too large");
         }

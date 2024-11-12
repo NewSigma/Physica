@@ -38,7 +38,7 @@ namespace Physica::Core {
         using REwaldType = typename Traits<EwaldType>::REwaldType;
         using DoublePotType = typename std::conditional<AvoidTooNear, ScalarType, PlainStruct<void>>::type;
     public:
-        using typename Base::PlainScalar;
+        using typename Base::ValueType;
         using typename Base::MDCellType;
         using typename Base::LatticeMatrix;
         using typename Base::PositionMatrix;
@@ -64,7 +64,7 @@ namespace Physica::Core {
         DoublePotType doublePot0_OO;
         DoublePotType doublePot0_SiO;
     public:
-        BKSModel(const MDCellType& refer_cell, PlainScalar cutoff, EwaldType ewald_);
+        BKSModel(const MDCellType& refer_cell, ValueType cutoff, EwaldType ewald_);
         BKSModel(const BKSModel&) = default;
         BKSModel(BKSModel&&) noexcept = default;
         ~BKSModel() = default;
@@ -99,7 +99,7 @@ namespace Physica::Core {
     };
 
     template<class ScalarType, class EwaldType, bool AvoidTooNear>
-    BKSModel<ScalarType, EwaldType, AvoidTooNear>::BKSModel(const MDCellType& refer_cell, PlainScalar cutoff, EwaldType ewald_)
+    BKSModel<ScalarType, EwaldType, AvoidTooNear>::BKSModel(const MDCellType& refer_cell, ValueType cutoff, EwaldType ewald_)
             : Base(cutoff)
             , ewald(std::move(ewald_)) {
         assert(refer_cell.getNumParticle() % 3 == 0 && "[Error]: This is not a cell of SiO2");
