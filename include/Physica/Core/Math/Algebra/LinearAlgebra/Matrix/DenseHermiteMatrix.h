@@ -26,7 +26,7 @@ namespace Physica::Core {
 
     template<class T, size_t Order = Dynamic>
     class DenseHermiteMatrix : public RValueMatrix<DenseHermiteMatrix<T, Order>>
-            , private HalfDenseMatrixStorage<T, Order> {
+                             , private HalfDenseMatrixStorage<T, Order> {
         using This = DenseHermiteMatrix<T, Order>;
         using Base = RValueMatrix<This>;
         using Storage = HalfDenseMatrixStorage<T, Order>;
@@ -149,7 +149,7 @@ namespace Physica::Core {
     template<class T, size_t Order>
     template<class RandomGenerator>
     void DenseHermiteMatrix<T, Order>::random_uniform(RandomGenerator& gen) {
-        Storage::random_uniform(gen);
+        asVector().random_uniform(gen);
         for (size_t i = 0; i < getRow(); ++i)
             this->operator()(i, i).imag() = RealType(0);
     }
@@ -157,7 +157,7 @@ namespace Physica::Core {
     template<class T, size_t Order>
     template<class RandomGenerator>
     void DenseHermiteMatrix<T, Order>::random_normal(RandomGenerator& gen) {
-        Storage::random_normal(gen);
+        asVector().random_normal(gen);
         for (size_t i = 0; i < getRow(); ++i)
             this->operator()(i, i).imag() = RealType(0);
     }
@@ -165,7 +165,7 @@ namespace Physica::Core {
     template<class T, size_t Order>
     template<class Distribution, class RandomGenerator>
     void DenseHermiteMatrix<T, Order>::random_any(Distribution& dist, RandomGenerator& gen) {
-        Storage::random_any(dist, gen);
+        asVector().random_any(dist, gen);
         for (size_t i = 0; i < getRow(); ++i)
             this->operator()(i, i).imag() = RealType(0);
     }
