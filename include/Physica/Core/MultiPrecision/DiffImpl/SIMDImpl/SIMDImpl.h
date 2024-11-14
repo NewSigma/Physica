@@ -72,10 +72,9 @@ namespace Physica::Core {
     }
 
     template<class T, int Order, size_t Size>
-    template<class OtherScalar>
-    inline SIMD<Diff<T, DiffMode::Forward, Order>, Size> SIMD<Diff<T, DiffMode::Forward, Order>, Size>::operator*(const ScalarBase<OtherScalar>& x_) const {
-        const auto& x = x_.getDerived();
-        if constexpr (OtherScalar::isDifferentiable)
+    template<Scalar U>
+    inline SIMD<Diff<T, DiffMode::Forward, Order>, Size> SIMD<Diff<T, DiffMode::Forward, Order>, Size>::operator*(const U& x) const {
+        if constexpr (U::isDifferentiable)
             return *this * ScalarType(x);
         else
             return This(values * x, grads * x);

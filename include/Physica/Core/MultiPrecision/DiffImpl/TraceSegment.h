@@ -61,8 +61,8 @@ namespace Physica::Core {
         TraceSegment& operator=(TraceSegment obj) noexcept { swap(obj); return *this; }
         [[nodiscard]] inline DiffScalar operator[](size_t index);
         [[nodiscard]] inline const DiffScalar operator[](size_t index) const;
-        template<class AnyScalar, unsigned int AnyOrder>
-        friend std::ostream& operator<<(std::ostream& os, const TraceSegment<AnyScalar, AnyOrder>& segment);
+        template<Scalar T, unsigned int AnyOrder>
+        friend std::ostream& operator<<(std::ostream& os, const TraceSegment<T, AnyOrder>& segment);
         /* Operations */
         inline void reverse(DiffScalar from, DiffScalar to);
         void reverse_from(DiffScalar from) { reverse(makeFromIndex(from), 0); }
@@ -139,8 +139,8 @@ namespace Physica::Core {
         return const_cast<This&>(*this).operator[](index);
     }
 
-    template<class AnyScalar, unsigned int AnyOrder>
-    std::ostream& operator<<(std::ostream& os, const TraceSegment<AnyScalar, AnyOrder>& segment) {
+    template<Scalar T, unsigned int AnyOrder>
+    std::ostream& operator<<(std::ostream& os, const TraceSegment<T, AnyOrder>& segment) {
         const size_t length = segment.getLength();
         for (size_t i = 0; i < length; ++i) {
             const auto source = segment.records[i].source;
@@ -150,7 +150,7 @@ namespace Physica::Core {
             os << segment.values[i] << ' ' << segment.grads[i] << ' ';
             os << "Op: ";
             const size_t idFirstOperand = segment.records[i].idFirstOperand;
-            const size_t num = TraceSegment<AnyScalar, AnyOrder>::numOperand(source);
+            const size_t num = TraceSegment<T, AnyOrder>::numOperand(source);
             for (size_t j = 0; j < num; ++j) {
                 const auto& op = segment.operands[idFirstOperand + j];
                 const size_t index = segment.find(op);

@@ -41,10 +41,10 @@ namespace Physica::Core {
         [[nodiscard]] HermiteRtnTy hermite() const noexcept { return HermiteRtnTy(*this); }
     };
 
-    template<class MatrixType, class AnyScalar>
-    class MatrixExpr<ExprType::Sub, MatrixType, ScalarBase<AnyScalar>>
-            : public BinaryMatrixExpr<ExprType::Sub, MatrixType, ScalarBase<AnyScalar>> {
-        using Base = BinaryMatrixExpr<ExprType::Sub, MatrixType, ScalarBase<AnyScalar>>;
+    template<class MatrixType, Scalar T>
+    class MatrixExpr<ExprType::Sub, MatrixType, T>
+            : public BinaryMatrixExpr<ExprType::Sub, MatrixType, T> {
+        using Base = BinaryMatrixExpr<ExprType::Sub, MatrixType, T>;
     public:
         using typename Base::ScalarType;
     public:
@@ -55,9 +55,9 @@ namespace Physica::Core {
         }
     };
 
-    template<class MatrixType, class ScalarType>
-    [[nodiscard]] inline auto operator-(const RValueMatrix<MatrixType>& mat, const ScalarBase<ScalarType>& s) noexcept {
-        return MatrixExpr<ExprType::Sub, MatrixType, ScalarBase<ScalarType>>(mat.getDerived(), s.getDerived());
+    template<class MatrixType, Scalar T>
+    [[nodiscard]] inline auto operator-(const RValueMatrix<MatrixType>& mat, const T& x) noexcept {
+        return MatrixExpr<ExprType::Sub, MatrixType, T>(mat.getDerived(), x);
     }
 
     template<class MatrixType1, class MatrixType2>

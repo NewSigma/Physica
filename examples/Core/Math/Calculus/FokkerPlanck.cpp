@@ -17,10 +17,9 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include <fstream>
-#include "Physica/Core/Math/Calculus/Integrate/Integrate.h"
-#include "Physica/Core/Math/Calculus/PDE/FEM/FokkerPlanckModel.h"
-#include "Physica/Core/Math/Calculus/PDE/FEM/Element/Rectangle1.h"
-#include "Physica/Core/IO/VTKFile.h"
+#include <Physica/Core/Math/Calculus/PDE/FEM/FokkerPlanckModel.h>
+#include <Physica/Core/Math/Calculus/PDE/FEM/Element/Rectangle1.h>
+#include <Physica/Core/IO/VTKFile.h>
 
 using namespace Physica::Core;
 using ScalarType = float64;

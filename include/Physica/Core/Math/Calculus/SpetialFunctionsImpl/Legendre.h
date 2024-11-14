@@ -67,20 +67,17 @@ namespace Physica::Core {
         return legendre_m_n_1;
     }
 
-    template<class ScalarType>
-    Complex<ScalarType> sphericalHarmomicY(unsigned int l,
-                                                int m,
-                                                const ScalarBase<ScalarType>& theta,
-                                                const ScalarBase<ScalarType>& phi) {
+    template<Scalar T>
+    Complex<T> sphericalHarmomicY(unsigned int l, int m, const T& theta, const T& phi) {
         constexpr static double pi_4 = M_PI * 4;
         const unsigned int abs_m = std::abs(m);
         assert(l >= abs_m);
-        const ScalarType factorial1 = Internal::factorial<ScalarType>(l - abs_m);
-        const ScalarType factorial2 = Internal::factorial<ScalarType>(l + abs_m);
-        const ScalarType factor = sqrt((ScalarType(2 * l + 1) * factorial1) / (ScalarType(pi_4) * factorial2));
-        const ScalarType result_module = factor * legendreP(l, abs_m, cos(theta.getDerived()));
-        const ScalarType m_phi = ScalarType(m) * phi.getDerived();
-        return Complex<ScalarType>(result_module * cos(m_phi), result_module * sin(m_phi));
+        const T factorial1 = Internal::factorial<T>(l - abs_m);
+        const T factorial2 = Internal::factorial<T>(l + abs_m);
+        const T factor = sqrt((T(2 * l + 1) * factorial1) / (T(pi_4) * factorial2));
+        const T result_module = factor * legendreP(l, abs_m, cos(theta.getDerived()));
+        const T m_phi = T(m) * phi.getDerived();
+        return Complex<T>(result_module * cos(m_phi), result_module * sin(m_phi));
     }
 
     template<class Matrix>

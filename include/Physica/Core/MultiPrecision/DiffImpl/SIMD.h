@@ -76,8 +76,8 @@ namespace Physica::Core {
         [[nodiscard]] inline SIMD operator-(const SIMD& other) const;
         [[nodiscard]] inline SIMD operator*(const SIMD& x) const;
         [[nodiscard]] inline SIMD operator*(const ScalarType& x) const;
-        template<class OtherScalar>
-        [[nodiscard]] inline SIMD operator*(const ScalarBase<OtherScalar>& x_) const;
+        template<Scalar U>
+        [[nodiscard]] inline SIMD operator*(const U& x) const;
         [[nodiscard]] inline SIMD operator/(const SIMD& x) const;
         [[nodiscard]] inline SIMD operator-() const;
         void operator+=(const SIMD& x) { *this = *this + x; }

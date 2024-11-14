@@ -44,10 +44,10 @@ namespace Physica::Core {
         using Base::getRHS;
     };
 
-    template<class VectorType, class AnyScalar>
-    class VectorExpr<ExprType::MoreEq, VectorType, ScalarBase<AnyScalar>>
-            : public BinaryVectorExpr<ExprType::MoreEq, VectorType, ScalarBase<AnyScalar>> {
-        using Base = BinaryVectorExpr<ExprType::MoreEq, VectorType, ScalarBase<AnyScalar>>;
+    template<class VectorType, Scalar T>
+    class VectorExpr<ExprType::MoreEq, VectorType, T>
+            : public BinaryVectorExpr<ExprType::MoreEq, VectorType, T> {
+        using Base = BinaryVectorExpr<ExprType::MoreEq, VectorType, T>;
     public:
         using typename Base::ScalarType;
     public:
@@ -74,8 +74,8 @@ namespace Physica::Core {
         return VectorExpr<ExprType::MoreEq, VectorType1, VectorType2>(v1.getDerived(), v2.getDerived());
     }
 
-    template<class VectorType, class ScalarType>
-    [[nodiscard]] inline auto operator>=(const RValueVector<VectorType>& v, const ScalarBase<ScalarType>& s) noexcept {
-        return VectorExpr<ExprType::MoreEq, VectorType, ScalarBase<ScalarType>>(v.getDerived(), s.getDerived());
+    template<class VectorType, Scalar T>
+    [[nodiscard]] inline auto operator>=(const RValueVector<VectorType>& v, const T& x) noexcept {
+        return VectorExpr<ExprType::MoreEq, VectorType, T>(v.getDerived(), x);
     }
 }

@@ -52,10 +52,10 @@ namespace Physica::Core {
         Poscar(Base base, ElementTypeArray elementTypes_, Array<size_t> numOfEachType_);
         Poscar(CrystalCell<ScalarType> cell);
         /* Operators */
-        template<class AnyScalar>
-        friend std::ostream& operator<<(std::ostream& os, const Poscar<AnyScalar>& poscar);
-        template<class AnyScalar>
-        friend std::istream& operator>>(std::istream& is, Poscar<AnyScalar>& poscar);
+        template<Scalar T>
+        friend std::ostream& operator<<(std::ostream& os, const Poscar<T>& poscar);
+        template<Scalar T>
+        friend std::istream& operator>>(std::istream& is, Poscar<T>& poscar);
         /* Operations */
         void standrizeLattice();
         void extendInZ(ScalarType factor);

@@ -22,7 +22,22 @@
 
 namespace Physica::Core {
     template<ScalarOption Option>
-    Integer::Integer(const Real<Option>& s) : Integer(static_cast<int>(s.toMachine())) {}
+    Integer::Integer(const Real<Option>& s) {
+        if constexpr (Option == FloatMP) {
+            const auto power = s.getPower();
+            if (power < 0) {
+                byte = reinterpret_cast<MPUnit*>(malloc(sizeof(MPUnit)));
+                byte[0] = 0;
+                length = 1;
+            }
+            length = power + 1;
+            const size_t size = length * sizeof(MPUnit);
+            byte = reinterpret_cast<MPUnit*>(malloc(size));
+            memcpy(byte, s.byte, length * sizeof(MPUnit));
+        }
+        else
+            *this = Integer(static_cast<int>(s.toMachine()));
+    }
     /**
      * Returns true if i1 and i2 has the same sign. Both i1 and i2 do not equal to zero.
      * This function provide a quick sign check compare to using isPositive() and isNegative().

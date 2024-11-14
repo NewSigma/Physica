@@ -41,8 +41,8 @@ namespace Physica::Core {
         __host__ __device__ inline device_obj& operator=(device_obj&& obj) noexcept;
         template<class OtherDerived>
         __host__ __device__ device_obj<Derived>& operator=(const device_obj<RValueVector<OtherDerived>>& v);
-        template<class AnyScalar>
-        inline device_obj<Derived>& operator=(const ScalarBase<AnyScalar>& s);
+        template<Scalar T>
+        inline device_obj<Derived>& operator=(const T& s);
         [[nodiscard]] __device__ RefTy operator[](size_t index) { return *data_ptr(index); }
         [[nodiscard]] __device__ ConstRefTy operator[](size_t index) const { return *data_ptr(index); }
         /* Operations */
@@ -80,19 +80,19 @@ namespace Physica::Core {
         v1.getDerived() = v1.getDerived() - v2.getDerived();
     }
 
-    template<class VectorType, class ScalarType>
-    __host__ __device__ inline void operator+=(device_obj<LValueVector<VectorType>>& v, const ScalarBase<ScalarType>& s) {
-        v.getDerived() = v.getDerived() + s.getDerived();
+    template<class VectorType, Scalar T>
+    __host__ __device__ inline void operator+=(device_obj<LValueVector<VectorType>>& v, const T& x) {
+        v.getDerived() = v.getDerived() + x;
     }
 
-    template<class VectorType, class ScalarType>
-    __host__ __device__ inline void operator*=(device_obj<LValueVector<VectorType>>& v, const ScalarBase<ScalarType>& s) {
-        v.getDerived() = v.getDerived() * s.getDerived();
+    template<class VectorType, Scalar T>
+    __host__ __device__ inline void operator*=(device_obj<LValueVector<VectorType>>& v, const T& x) {
+        v.getDerived() = v.getDerived() * x;
     }
 
-    template<class VectorType, class ScalarType>
-    __host__ __device__ inline void operator/=(device_obj<LValueVector<VectorType>>& v, const ScalarBase<ScalarType>& s) {
-        v.getDerived() = v.getDerived() * reciprocal(s.getDerived());
+    template<class VectorType, Scalar T>
+    __host__ __device__ inline void operator/=(device_obj<LValueVector<VectorType>>& v, const T& x) {
+        v.getDerived() = v.getDerived() * reciprocal(x);
     }
 }
 

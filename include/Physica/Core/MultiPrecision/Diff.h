@@ -40,8 +40,8 @@ namespace Physica::Core {
         Diff(MachineType x) : This(ScalarType(x)) {}
         Diff(ScalarType value_);
         Diff(ScalarType value_, GradType grad_);
-        template<class OtherScalar, int OtherOrder>
-        explicit Diff(const Diff<OtherScalar, DiffMode::Forward, OtherOrder>& other);
+        template<Scalar U, int OtherOrder>
+        explicit Diff(const Diff<U, DiffMode::Forward, OtherOrder>& other);
         Diff(const This&) = default;
         Diff(This&&) noexcept = default;
         ~Diff() = default;
@@ -97,14 +97,14 @@ namespace Physica::Core {
         [[nodiscard]] operator ScalarType() const { return ScalarType(getValue(), getGrad()); }
         [[nodiscard]] __host__ __device__ explicit operator float() const noexcept { return float(ScalarType(*this)); }
         [[nodiscard]] __host__ __device__ explicit operator double() const noexcept { return double(ScalarType(*this)); }
-        template<class U> auto operator+(const ScalarBase<U>& s) const { return ScalarType(*this) + s; }
-        template<class U> auto operator-(const ScalarBase<U>& s) const { return ScalarType(*this) - s; }
-        template<class U> auto operator*(const ScalarBase<U>& s) const { return ScalarType(*this) * s; }
-        template<class U> auto operator/(const ScalarBase<U>& s) const { return ScalarType(*this) / s; }
-        template<class U> void operator+=(const ScalarBase<U>& s) { *this = ScalarType(*this) + s; }
-        template<class U> void operator-=(const ScalarBase<U>& s) { *this = ScalarType(*this) - s; }
-        template<class U> void operator*=(const ScalarBase<U>& s) { *this = ScalarType(*this) * s; }
-        template<class U> void operator/=(const ScalarBase<U>& s) { *this = ScalarType(*this) / s; }
+        template<Scalar U> auto operator+(const U& s) const { return ScalarType(*this) + s; }
+        template<Scalar U> auto operator-(const U& s) const { return ScalarType(*this) - s; }
+        template<Scalar U> auto operator*(const U& s) const { return ScalarType(*this) * s; }
+        template<Scalar U> auto operator/(const U& s) const { return ScalarType(*this) / s; }
+        template<Scalar U> void operator+=(const U& s) { *this = ScalarType(*this) + s; }
+        template<Scalar U> void operator-=(const U& s) { *this = ScalarType(*this) - s; }
+        template<Scalar U> void operator*=(const U& s) { *this = ScalarType(*this) * s; }
+        template<Scalar U> void operator/=(const U& s) { *this = ScalarType(*this) / s; }
         template<class U> auto operator+(const ScalarRef<U>& s) const { return operator+(U(s)); }
         template<class U> auto operator-(const ScalarRef<U>& s) const { return operator-(U(s)); }
         template<class U> auto operator*(const ScalarRef<U>& s) const { return operator*(U(s)); }
@@ -116,10 +116,10 @@ namespace Physica::Core {
         [[nodiscard]] ScalarType operator-() const { return -ScalarType(*this); }
         __host__ __device__ inline bool operator>(double s) const noexcept { return ScalarType(*this) > s; }
         __host__ __device__ inline bool operator<(double s) const noexcept { return ScalarType(*this) < s; }
-        template<class U>
-        __host__ __device__ bool operator>(const ScalarBase<U>& s) const noexcept { return ScalarType(*this) > s; }
-        template<class U>
-        __host__ __device__ bool operator<(const ScalarBase<U>& s) const noexcept { return ScalarType(*this) < s; }
+        template<Scalar U>
+        __host__ __device__ bool operator>(const U& s) const noexcept { return ScalarType(*this) > s; }
+        template<Scalar U>
+        __host__ __device__ bool operator<(const U& s) const noexcept { return ScalarType(*this) < s; }
         template<class U>
         __host__ __device__ bool operator>(const ScalarRef<U>& s) const noexcept { return operator>(U(s)); }
         template<class U>
@@ -252,33 +252,33 @@ namespace Physica::Core {
         friend class device_obj<This>;
     };
     ////////////////////////////////////////////////////////////
-    template<class ScalarType, DiffMode Mode, int Order, class OtherScalar>
-    [[nodiscard]] inline auto operator+(const Diff<ScalarType, Mode, Order>& s1, const ScalarBase<OtherScalar>& s2_);
+    template<class ScalarType, DiffMode Mode, int Order, Scalar U>
+    [[nodiscard]] inline auto operator+(const Diff<ScalarType, Mode, Order>& s1, const U& s2_);
 
-    template<class ScalarType, DiffMode Mode, int Order, class OtherScalar>
-    [[nodiscard]] inline typename std::enable_if<!OtherScalar::isDifferentiable, typename Internal::BinaryScalarOpReturnType<Diff<ScalarType, Mode, Order>, OtherScalar>::Type>::type
-    operator+(const ScalarBase<OtherScalar>& s1, const Diff<ScalarType, Mode, Order>& s2);
+    template<class ScalarType, DiffMode Mode, int Order, Scalar U>
+    [[nodiscard]] inline typename std::enable_if<!U::isDifferentiable, typename Internal::BinaryScalarOpReturnType<Diff<ScalarType, Mode, Order>, U>::Type>::type
+    operator+(const U& s1, const Diff<ScalarType, Mode, Order>& s2);
 
-    template<class ScalarType, DiffMode Mode, int Order, class OtherScalar>
-    [[nodiscard]] inline auto operator-(const Diff<ScalarType, Mode, Order>& s1, const ScalarBase<OtherScalar>& s2_);
+    template<class ScalarType, DiffMode Mode, int Order, Scalar U>
+    [[nodiscard]] inline auto operator-(const Diff<ScalarType, Mode, Order>& s1, const U& s2_);
 
-    template<class ScalarType, DiffMode Mode, int Order, class OtherScalar>
-    [[nodiscard]] inline typename std::enable_if<!OtherScalar::isDifferentiable, typename Internal::BinaryScalarOpReturnType<Diff<ScalarType, Mode, Order>, OtherScalar>::Type>::type
-    operator-(const ScalarBase<OtherScalar>& s1, const Diff<ScalarType, Mode, Order>& s2);
+    template<class ScalarType, DiffMode Mode, int Order, Scalar U>
+    [[nodiscard]] inline typename std::enable_if<!U::isDifferentiable, typename Internal::BinaryScalarOpReturnType<Diff<ScalarType, Mode, Order>, U>::Type>::type
+    operator-(const U& s1, const Diff<ScalarType, Mode, Order>& s2);
 
-    template<class ScalarType, DiffMode Mode, int Order, class OtherScalar>
-    [[nodiscard]] inline auto operator*(const Diff<ScalarType, Mode, Order>& s1, const ScalarBase<OtherScalar>& s2_);
+    template<class ScalarType, DiffMode Mode, int Order, Scalar U>
+    [[nodiscard]] inline auto operator*(const Diff<ScalarType, Mode, Order>& s1, const U& s2_);
 
-    template<class ScalarType, DiffMode Mode, int Order, class OtherScalar>
-    [[nodiscard]] inline typename std::enable_if<!OtherScalar::isDifferentiable, typename Internal::BinaryScalarOpReturnType<Diff<ScalarType, Mode, Order>, OtherScalar>::Type>::type
-    operator*(const ScalarBase<OtherScalar>& s1, const Diff<ScalarType, Mode, Order>& s2);
+    template<class ScalarType, DiffMode Mode, int Order, Scalar U>
+    [[nodiscard]] inline typename std::enable_if<!U::isDifferentiable, typename Internal::BinaryScalarOpReturnType<Diff<ScalarType, Mode, Order>, U>::Type>::type
+    operator*(const U& s1, const Diff<ScalarType, Mode, Order>& s2);
     
-    template<class ScalarType, DiffMode Mode, int Order, class OtherScalar>
-    [[nodiscard]] inline auto operator/(const Diff<ScalarType, Mode, Order>& s1, const ScalarBase<OtherScalar>& s2_);
+    template<class ScalarType, DiffMode Mode, int Order, Scalar U>
+    [[nodiscard]] inline auto operator/(const Diff<ScalarType, Mode, Order>& s1, const U& s2_);
 
-    template<class ScalarType, DiffMode Mode, int Order, class OtherScalar>
-    [[nodiscard]] inline typename std::enable_if<!OtherScalar::isDifferentiable, typename Internal::BinaryScalarOpReturnType<Diff<ScalarType, Mode, Order>, OtherScalar>::Type>::type
-    operator/(const ScalarBase<OtherScalar>& s1, const Diff<ScalarType, Mode, Order>& s2);
+    template<class ScalarType, DiffMode Mode, int Order, Scalar U>
+    [[nodiscard]] inline typename std::enable_if<!U::isDifferentiable, typename Internal::BinaryScalarOpReturnType<Diff<ScalarType, Mode, Order>, U>::Type>::type
+    operator/(const U& s1, const Diff<ScalarType, Mode, Order>& s2);
 
     template<class ScalarType, DiffMode Mode, int Order>
     inline std::ostream& operator<<(std::ostream& os, const Diff<ScalarType, Mode, Order>& obj) {

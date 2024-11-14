@@ -19,11 +19,10 @@
 #pragma once
 
 namespace Physica::Core {
-    template<class VectorType, class AnyScalar>
-    class device_obj<VectorExpr<ExprType::Div, VectorType, ScalarBase<AnyScalar>>>
-            : public device_obj<BinaryVectorExpr<ExprType::Div, VectorType, ScalarBase<AnyScalar>>> {
-        using Base = device_obj<BinaryVectorExpr<ExprType::Div, VectorType, ScalarBase<AnyScalar>>>;
-        static_assert(is_scalar<AnyScalar>::value, "[Error]: This is not a scalar type");
+    template<class VectorType, Scalar T>
+    class device_obj<VectorExpr<ExprType::Div, VectorType, T>>
+            : public device_obj<BinaryVectorExpr<ExprType::Div, VectorType, T>> {
+        using Base = device_obj<BinaryVectorExpr<ExprType::Div, VectorType, T>>;
     public:
         using typename Base::ScalarType;
     public:
@@ -35,9 +34,9 @@ namespace Physica::Core {
         }
     };
 
-    template<class VectorType, class ScalarType>
-    [[nodiscard]] __host__ __device__ inline device_obj<VectorExpr<ExprType::Div, VectorType, ScalarBase<ScalarType>>>
-    operator/(const device_obj<RValueVector<VectorType>>& v, const ScalarBase<ScalarType>& s) noexcept {
-        return {v.getDerived(), s.getDerived()};
+    template<class VectorType, Scalar T>
+    [[nodiscard]] __host__ __device__ inline device_obj<VectorExpr<ExprType::Div, VectorType, T>>
+    operator/(const device_obj<RValueVector<VectorType>>& v, const T& x) noexcept {
+        return {v.getDerived(), x};
     }
 }

@@ -19,10 +19,10 @@
 #pragma once
 
 namespace Physica::Core {
-    template<class MatrixType, class AnyScalar>
-    class device_obj<MatrixExpr<ExprType::Add, MatrixType, ScalarBase<AnyScalar>>>
-            : public device_obj<BinaryMatrixExpr<ExprType::Add, MatrixType, ScalarBase<AnyScalar>>> {
-        using Base = device_obj<BinaryMatrixExpr<ExprType::Add, MatrixType, ScalarBase<AnyScalar>>>;
+    template<class MatrixType, Scalar T>
+    class device_obj<MatrixExpr<ExprType::Add, MatrixType, T>>
+            : public device_obj<BinaryMatrixExpr<ExprType::Add, MatrixType, T>> {
+        using Base = device_obj<BinaryMatrixExpr<ExprType::Add, MatrixType, T>>;
     public:
         using typename Base::ScalarType;
     public:
@@ -55,9 +55,9 @@ namespace Physica::Core {
         return device_obj<MatrixExpr<ExprType::Add, MatrixType1, MatrixType2>>(mat1.getDerived(), mat2.getDerived());
     }
 
-    template<class MatrixType, class ScalarType>
+    template<class MatrixType, Scalar T>
     [[nodiscard]] __host__ __device__ inline auto operator+(
-            const device_obj<RValueMatrix<MatrixType>>& mat, const ScalarBase<ScalarType>& s) noexcept {
-        return device_obj<MatrixExpr<ExprType::Add, MatrixType, ScalarBase<ScalarType>>>(mat.getDerived(), s.getDerived());
+            const device_obj<RValueMatrix<MatrixType>>& mat, const T& x) noexcept {
+        return device_obj<MatrixExpr<ExprType::Add, MatrixType, T>>(mat.getDerived(), x);
     }
 }

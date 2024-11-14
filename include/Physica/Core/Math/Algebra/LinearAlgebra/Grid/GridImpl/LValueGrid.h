@@ -48,10 +48,10 @@ namespace Physica::Core {
         [[nodiscard]] const ScalarType& operator()(size_t x, size_t y, size_t z) const { return *data_ptr({x, y, z}); }
         [[nodiscard]] ScalarType& operator()(Index3D index) { return *data_ptr(index); }
         [[nodiscard]] const ScalarType& operator()(Index3D index) const { return *data_ptr(index); }
-        template<class T> void operator+=(const ScalarBase<T>& s) { (*this) = (*this) + s.getDerived(); }
-        template<class T> void operator-=(const ScalarBase<T>& s) { (*this) = (*this) - s.getDerived(); }
-        template<class T> void operator*=(const ScalarBase<T>& s) { (*this) = (*this) * s.getDerived(); }
-        template<class T> void operator/=(const ScalarBase<T>& s) { (*this) = (*this) / s.getDerived(); }
+        template<Scalar T> void operator+=(const T& s) { (*this) = (*this) + s; }
+        template<Scalar T> void operator-=(const T& s) { (*this) = (*this) - s; }
+        template<Scalar T> void operator*=(const T& s) { (*this) = (*this) * s; }
+        template<Scalar T> void operator/=(const T& s) { (*this) = (*this) / s; }
         /* Operations */
         [[nodiscard]] inline LGridBlock<Derived> leftFrontBottomCorner(Index3D cornerIndex);
         [[nodiscard]] inline const LGridBlock<Derived> leftFrontBottomCorner(Index3D cornerIndex) const;

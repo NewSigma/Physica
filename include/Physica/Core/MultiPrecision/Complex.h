@@ -127,17 +127,17 @@ namespace Physica::Core {
     template<class T>
     Complex<T> operator-(const Complex<T>& c) { return Complex(-c.real(), -c.imag()); }
 
-    template<class T, class ScalarType>
-    void operator+=(Complex<T>& c, const ScalarType& t) { c = c + t; }
+    template<Scalar T, Scalar U>
+    void operator+=(Complex<T>& c, const U& t) { c = c + t; }
 
-    template<class T, class ScalarType>
-    void operator-=(Complex<T>& c, const ScalarType& t) { c = c - t; }
+    template<Scalar T, Scalar U>
+    void operator-=(Complex<T>& c, const U& t) { c = c - t; }
 
-    template<class T, class ScalarType>
-    void operator*=(Complex<T>& c, const ScalarType& t) { c = c * t; }
+    template<Scalar T, Scalar U>
+    void operator*=(Complex<T>& c, const U& t) { c = c * t; }
 
-    template<class T, class ScalarType>
-    void operator/=(Complex<T>& c, const ScalarType& t) { c = c / t; }
+    template<Scalar T, Scalar U>
+    void operator/=(Complex<T>& c, const U& t) { c = c / t; }
 }
 
 namespace Physica {

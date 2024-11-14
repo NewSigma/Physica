@@ -57,8 +57,8 @@ namespace Physica::Core {
         __host__ __device__ Real(float f_) : f(f_) {}
         Real(const Integer& i) : Real(float(double(i))) {}
         Real(const Rational& r) : Real(float(double(r))) {}
-        template<class OtherScalar>
-        __host__ __device__ explicit inline Real(const ScalarBase<OtherScalar>& s);
+        template<Scalar T>
+        __host__ __device__ explicit inline Real(const T& x);
         Real(const Real&) = default;
         Real(Real&&) noexcept = default;
         //~Real() = default; /* Dynamic parallelism of CUDA 12.1 does not recognize that PlainStruct is trivial */
@@ -108,8 +108,8 @@ namespace Physica::Core {
     #endif
     };
 
-    template<class OtherScalar>
-    __host__ __device__ inline Real<Float32>::Real(const ScalarBase<OtherScalar>& s) : f(float(s.getDerived())) {}
+    template<Scalar T>
+    __host__ __device__ inline Real<Float32>::Real(const T& x) : f(float(x)) {}
 
     __host__ __device__ inline bool Real<Float32>::isFinite() const noexcept {
     #ifdef __CUDA_ARCH__

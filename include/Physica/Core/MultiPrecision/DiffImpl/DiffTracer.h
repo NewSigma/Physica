@@ -43,8 +43,8 @@ namespace Physica::Core {
     public:
         ~DiffTracer() = default;
         /* Operators */
-        template<class AnyScalar, unsigned int AnyOrder>
-        friend std::ostream& operator<<(std::ostream& os, const DiffTracer<AnyScalar, AnyOrder>& tracer);
+        template<Scalar T, unsigned int AnyOrder>
+        friend std::ostream& operator<<(std::ostream& os, const DiffTracer<T, AnyOrder>& tracer);
         /* Operations */
         template<class... Args>
         inline void pushOperand(DiffScalar operand, Args... args);
@@ -101,8 +101,8 @@ namespace Physica::Core {
         [[nodiscard]] static DiffRecord makeSetOpNode(const Array<DiffRecord>& records);
     };
 
-    template<class AnyScalar, unsigned int AnyOrder>
-    std::ostream& operator<<(std::ostream& os, const DiffTracer<AnyScalar, AnyOrder>& tracer) {
+    template<Scalar T, unsigned int AnyOrder>
+    std::ostream& operator<<(std::ostream& os, const DiffTracer<T, AnyOrder>& tracer) {
         const auto& list = tracer.traceList;
         for (auto ite = list.cbegin(); ite != list.cend(); ++ite) {
             const auto& segment = *ite;

@@ -26,7 +26,7 @@
 #endif
 #include <Physica/Core/Exception/NoImplException.h>
 #include <Physica/Core/IO/HDF5/HDF5.h>
-#include "MultiPrecisionType.h"
+#include "Scalar.h"
 #include "RealImpl/ScalarBase.h"
 
 namespace Physica::Core {
@@ -34,22 +34,20 @@ namespace Physica::Core {
         /**
          * This class return a type that can exactly represent the two input scalars.
          */
-        template<class AnyScalar1, class AnyScalar2>
+        template<Scalar T1, Scalar T2>
         class BinaryScalarOpReturnType {
-            static_assert(Core::is_scalar<AnyScalar1>::value, "[Error]: This is not a scalar type");
-            static_assert(Core::is_scalar<AnyScalar2>::value, "[Error]: This is not a scalar type");
-            constexpr static ScalarOption Option = std::max(AnyScalar1::Option, AnyScalar2::Option);
-            constexpr static bool isComplex = AnyScalar1::isComplex || AnyScalar2::isComplex;
-            constexpr static bool isDiffable1 = AnyScalar1::isDifferentiable;
-            constexpr static bool isDiffable2 = AnyScalar2::isDifferentiable;
+            constexpr static ScalarOption Option = std::max(T1::Option, T2::Option);
+            constexpr static bool isComplex = T1::isComplex || T2::isComplex;
+            constexpr static bool isDiffable1 = T1::isDifferentiable;
+            constexpr static bool isDiffable2 = T2::isDifferentiable;
             constexpr static bool isDiffable = isDiffable1 || isDiffable2;
 
-            constexpr static DiffMode Mode = AnyScalar1::isDifferentiable ? AnyScalar1::Mode : AnyScalar2::Mode;
-            constexpr static DiffMode Mode1 = AnyScalar2::isDifferentiable ? AnyScalar2::Mode : AnyScalar1::Mode;
+            constexpr static DiffMode Mode = T1::isDifferentiable ? T1::Mode : T2::Mode;
+            constexpr static DiffMode Mode1 = T2::isDifferentiable ? T2::Mode : T1::Mode;
             static_assert(Mode == Mode1, "[Error]: Operation between differentiable scalars with different mode is not well defined");
 
-            constexpr static int Order1 = AnyScalar1::Order;
-            constexpr static int Order2 = AnyScalar2::Order;
+            constexpr static int Order1 = T1::Order;
+            constexpr static int Order2 = T2::Order;
             constexpr static bool UseMixOrder = isDiffable1 && isDiffable2 && (Order1 != Order2);
             constexpr static int Order = UseMixOrder ? std::min(Order1, Order2) : std::max(Order1, Order2);
             static_assert(!(Mode == DiffMode::Reverse && UseMixOrder), "[Error]: Reverse mode does not support mixed order");

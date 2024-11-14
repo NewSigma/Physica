@@ -30,19 +30,6 @@ namespace Physica::Core {
         byte[0] = i >= 0 ? i : -i;
     }
 
-    Integer::Integer(const Real<FloatMP>& s) {
-        const auto power = s.getPower();
-        if (power < 0) {
-            byte = reinterpret_cast<MPUnit*>(malloc(sizeof(MPUnit)));
-            byte[0] = 0;
-            length = 1;
-        }
-        length = power + 1;
-        const size_t size = length * sizeof(MPUnit);
-        byte = reinterpret_cast<MPUnit*>(malloc(size));
-        memcpy(byte, s.byte, length * sizeof(MPUnit));
-    }
-
     Integer::Integer(const Integer& toCopy)
             : byte(reinterpret_cast<MPUnit*>(malloc(toCopy.getSize() * sizeof(MPUnit))))
             , length(toCopy.length) {

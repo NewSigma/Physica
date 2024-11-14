@@ -19,10 +19,10 @@
 #pragma once
 
 namespace Physica::Core {
-    template<class MatrixType, class AnyScalar>
-    class MatrixExpr<ExprType::Div, MatrixType, AnyScalar>
-            : public BinaryMatrixExpr<ExprType::Div, MatrixType, AnyScalar> {
-        using Base = BinaryMatrixExpr<ExprType::Div, MatrixType, AnyScalar>;
+    template<class MatrixType, Scalar T>
+    class MatrixExpr<ExprType::Div, MatrixType, T>
+            : public BinaryMatrixExpr<ExprType::Div, MatrixType, T> {
+        using Base = BinaryMatrixExpr<ExprType::Div, MatrixType, T>;
     public:
         using typename Base::ScalarType;
     public:
@@ -33,8 +33,8 @@ namespace Physica::Core {
         }
     };
 
-    template<class MatrixType, class ScalarType>
-    [[nodiscard]] inline auto operator/(const RValueMatrix<MatrixType>& m, const ScalarBase<ScalarType>& s) noexcept {
-        return MatrixExpr<ExprType::Div, MatrixType, ScalarType>(m.getDerived(), s.getDerived());
+    template<class MatrixType, Scalar T>
+    [[nodiscard]] inline auto operator/(const RValueMatrix<MatrixType>& m, const T& x) noexcept {
+        return MatrixExpr<ExprType::Div, MatrixType, T>(m.getDerived(), x);
     }
 }

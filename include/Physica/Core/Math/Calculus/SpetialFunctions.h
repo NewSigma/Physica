@@ -24,8 +24,8 @@
 
 namespace Physica::Core {
     namespace Internal {
-        template<class ScalarType>
-        ScalarType factorial(unsigned int x) {
+        template<Scalar T>
+        T factorial(unsigned int x) {
             constexpr static int size = 16;
             static const double cache[size] = {1, 1, 2, 6, 24, 120, 720, 5040, 40320, 362880, 3628800, 39916800, 479001600, 6227020800, 87178291200, 1307674368000};
             if (x < size)
@@ -41,8 +41,8 @@ namespace Physica::Core {
             }
         }
 
-        template<class ScalarType>
-        ScalarType doubleFactorial(size_t x) {
+        template<Scalar T>
+        T doubleFactorial(size_t x) {
             constexpr static size_t size = 16;
             static const double cache[size] = {1, 1, 2, 3, 8, 15, 48, 105, 384, 945, 3840, 10395, 46080, 135135, 645120, 2027025};
             if (x < size)
@@ -59,8 +59,7 @@ namespace Physica::Core {
         }
     }
 
-    template<class ScalarType>
-    ScalarType lnGamma(const ScalarBase<ScalarType>& s_);
+    template<Scalar T> T lnGamma(const T& s_);
 
     template<ScalarOption Option>
     inline Real<Option> gamma(const Real<Option>& s);
@@ -68,20 +67,16 @@ namespace Physica::Core {
     template<ScalarOption Option>
     inline Real<Option> beta(const Real<Option>& s1, const Real<Option>& s2);
 
-    template<class ScalarType>
-    ScalarType gammaP(const ScalarBase<ScalarType>& a_, const ScalarBase<ScalarType>& x_);
+    template<Scalar T> T gammaP(const T& a_, const T& x_);
 
-    template<class ScalarType>
-    ScalarType gammaQ(const ScalarBase<ScalarType>& a_, const ScalarBase<ScalarType>& x_);
+    template<Scalar T> T gammaQ(const T& a_, const T& x_);
 
-    template<class ScalarType>
-    ScalarType bigamma(const ScalarBase<ScalarType>& x, const ScalarType& step);
+    template<Scalar T> T bigamma(const T& x, const T& step);
 
     template<ScalarOption Option>
     Real<Option> erf(const Real<Option>& x);
 
-    template<class ScalarType>
-    ScalarType erfc(const ScalarBase<ScalarType>& x_);
+    template<Scalar T> T erfc(const T& x_);
 
     template<ScalarOption Option>
     Real<Option> standardNormalDistribution(const Real<Option>& x);
@@ -154,11 +149,8 @@ namespace Physica::Core {
     template<ScalarOption Option>
     Real<Option> legendreP(unsigned int l, unsigned int m, const Real<Option>& x);
 
-    template<class ScalarType>
-    Complex<ScalarType> sphericalHarmomicY(unsigned int l,
-                                                int m,
-                                                const ScalarBase<ScalarType>& theta,
-                                                const ScalarBase<ScalarType>& phi);
+    template<Scalar T>
+    Complex<T> sphericalHarmomicY(unsigned int l, int m, const T& theta, const T& phi);
     /**
      * This class generates rotation matrix for spherical hamonic functions
      * 
@@ -192,8 +184,7 @@ namespace Physica::Core {
         ScalarType W(int m, int n, int l);
     };
 
-    template<class ScalarType>
-    ScalarType hermiteH(unsigned int n, const ScalarBase<ScalarType>& x);
+    template<Scalar T> T hermiteH(unsigned int n, const T& x);
 
     template<ScalarOption Option>
     Real<Option> incompBeta(const Real<Option>& a, const Real<Option>& b, const Real<Option>& x);

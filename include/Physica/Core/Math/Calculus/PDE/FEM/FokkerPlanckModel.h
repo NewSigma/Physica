@@ -147,7 +147,7 @@ namespace Physica::Core {
                     const size_t row = Base::nodeToVar(node);
                     for (size_t j = 0; j < ElementType::getNumNodes(); ++j) {
                         const size_t baseNode = nodes[j];
-                        const auto func = [=, &elem](VectorType p) {
+                        const auto func = [=, this, &elem](VectorType p) {
                             const VectorType globalPos = elem.toGlobalPos(p);
                             const auto inv_jacobi = elem.inv_jacobi(p);
                             const VectorType global_grad_i = inv_jacobi.transpose() * elem.grad(i, p);

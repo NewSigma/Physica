@@ -125,15 +125,15 @@ namespace Physica::Core {
         /* Operators */
         __device__ device_obj& operator=(const device_obj& m) { VectorBase::operator=(m.asVector()); return *this; }
         __device__ device_obj& operator=(device_obj&& m) noexcept { VectorBase::operator=(m.asVector()); return *this; }
-        template<class T> This& operator=(const ScalarBase<T>& s) { VectorBase::operator=(s); return *this; }
+        template<Scalar T> This& operator=(const T& s) { VectorBase::operator=(s); return *this; }
         using Base::operator=;
         using VectorBase::operator=;
         [[nodiscard]] __device__ ScalarType& operator()([[maybe_unused]] size_t row, size_t col) { assert(row == 0); return VectorBase::operator[](col); }
         [[nodiscard]] __device__ const ScalarType& operator()([[maybe_unused]] size_t row, size_t col) const { assert(row == 0); return VectorBase::operator[](col); }
-        template<class T> void operator+=(const ScalarBase<T>& s) { VectorBase::operator+=(s); }
-        template<class T> void operator-=(const ScalarBase<T>& s) { VectorBase::operator-=(s); }
-        template<class T> void operator*=(const ScalarBase<T>& s) { VectorBase::operator*=(s); }
-        template<class T> void operator/=(const ScalarBase<T>& s) { VectorBase::operator/=(s); }
+        template<Scalar T> void operator+=(const T& s) { VectorBase::operator+=(s); }
+        template<Scalar T> void operator-=(const T& s) { VectorBase::operator-=(s); }
+        template<Scalar T> void operator*=(const T& s) { VectorBase::operator*=(s); }
+        template<Scalar T> void operator/=(const T& s) { VectorBase::operator/=(s); }
         /* Operations */
         using Base::assignTo;
         using VectorBase::assignTo;
@@ -186,15 +186,15 @@ namespace Physica::Core {
         /* Operators */
         __device__ device_obj& operator=(const device_obj& m) { VectorBase::operator=(m.asVector()); return *this; }
         __device__ device_obj& operator=(device_obj&& m) noexcept { VectorBase::operator=(m.asVector()); return *this; }
-        template<class T> This& operator=(const ScalarBase<T>& s) { VectorBase::operator=(s); return *this; }
+        template<Scalar T> This& operator=(const T& s) { VectorBase::operator=(s); return *this; }
         using Base::operator=;
         using VectorBase::operator=;
         [[nodiscard]] __device__ ScalarType& operator()(size_t row, [[maybe_unused]] size_t col) { assert(col == 0); return VectorBase::operator[](row); }
         [[nodiscard]] __device__ const ScalarType& operator()(size_t row, [[maybe_unused]] size_t col) const { assert(col == 0); return VectorBase::operator[](row); }
-        template<class T> void operator+=(const ScalarBase<T>& s) { VectorBase::operator+=(s); }
-        template<class T> void operator-=(const ScalarBase<T>& s) { VectorBase::operator-=(s); }
-        template<class T> void operator*=(const ScalarBase<T>& s) { VectorBase::operator*=(s); }
-        template<class T> void operator/=(const ScalarBase<T>& s) { VectorBase::operator/=(s); }
+        template<Scalar T> void operator+=(const T& s) { VectorBase::operator+=(s); }
+        template<Scalar T> void operator-=(const T& s) { VectorBase::operator-=(s); }
+        template<Scalar T> void operator*=(const T& s) { VectorBase::operator*=(s); }
+        template<Scalar T> void operator/=(const T& s) { VectorBase::operator/=(s); }
         /* Operations */
         using Base::assignTo;
         using VectorBase::assignTo;

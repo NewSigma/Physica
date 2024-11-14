@@ -19,11 +19,10 @@
 #pragma once
 
 namespace Physica::Core {
-    template<class VectorType, class AnyScalar>
-    class device_obj<VectorExpr<ExprType::Mul, VectorType, ScalarBase<AnyScalar>>>
-            : public device_obj<BinaryVectorExpr<ExprType::Mul, VectorType, ScalarBase<AnyScalar>>> {
-        using Base = device_obj<BinaryVectorExpr<ExprType::Mul, VectorType, ScalarBase<AnyScalar>>>;
-        static_assert(is_scalar<AnyScalar>::value, "[Error]: This is not a scalar type");
+    template<class VectorType, Scalar T>
+    class device_obj<VectorExpr<ExprType::Mul, VectorType, T>>
+            : public device_obj<BinaryVectorExpr<ExprType::Mul, VectorType, T>> {
+        using Base = device_obj<BinaryVectorExpr<ExprType::Mul, VectorType, T>>;
     public:
         using typename Base::ScalarType;
     public:
@@ -76,16 +75,16 @@ namespace Physica::Core {
         }
     };
 
-    template<class VectorType, class ScalarType>
-    [[nodiscard]] __device__ inline device_obj<VectorExpr<ExprType::Mul, VectorType, ScalarBase<ScalarType>>>
-    operator*(const device_obj<RValueVector<VectorType>>& v, const ScalarBase<ScalarType>& s) noexcept {
-        return {v.getDerived(), s.getDerived()};
+    template<class VectorType, Scalar T>
+    [[nodiscard]] __device__ inline device_obj<VectorExpr<ExprType::Mul, VectorType, T>>
+    operator*(const device_obj<RValueVector<VectorType>>& v, const T& x) noexcept {
+        return {v.getDerived(), x};
     }
 
-    template<class ScalarType, class VectorType>
-    [[nodiscard]] __device__ inline device_obj<VectorExpr<ExprType::Mul, VectorType, ScalarBase<ScalarType>>>
-    operator*(const ScalarBase<ScalarType>& s, const device_obj<RValueVector<VectorType>>& v) noexcept {
-        return v * s.getDerived();
+    template<Scalar T, class VectorType>
+    [[nodiscard]] __device__ inline device_obj<VectorExpr<ExprType::Mul, VectorType, T>>
+    operator*(const T& x, const device_obj<RValueVector<VectorType>>& v) noexcept {
+        return v * x;
     }
     
     template<class VectorType1, class VectorType2>

@@ -22,21 +22,21 @@ namespace Physica::Core {
     template<ScalarOption Option, bool errorTrack>
     Real<Option> lnGamma(const Real<Option>& s);
 
-    template<class ScalarType>
-    ScalarType hermiteH(unsigned int n, const ScalarBase<ScalarType>& x) {
+    template<Scalar T>
+    T hermiteH(unsigned int n, const T& x) {
         if (n == 0)
-            return ScalarType(1);
-        const ScalarType double_x = ScalarType(2) * x.getDerived();
+            return T(1);
+        const T double_x = T(2) * x;
         if (n == 1)
             return double_x;
 
-        ScalarType old_H = ScalarType(1);
-        ScalarType H = double_x;
-        ScalarType float_i = ScalarType(1);
+        T old_H = T(1);
+        T H = double_x;
+        T float_i = T(1);
         for (unsigned int i = 1; i != n; ++i) {
-            old_H = double_x * H - float_i * old_H * ScalarType(2);
+            old_H = double_x * H - float_i * old_H * T(2);
             old_H.swap(H);
-            float_i += ScalarType(1);
+            float_i += T(1);
         }
         return H;
     }

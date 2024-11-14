@@ -19,10 +19,10 @@
 #pragma once
 
 namespace Physica::Core {
-    template<class VectorType, class AnyScalar>
-    class VectorExpr<ExprType::Add, VectorType, ScalarBase<AnyScalar>>
-            : public BinaryVectorExpr<ExprType::Add, VectorType, ScalarBase<AnyScalar>> {
-        using Base = BinaryVectorExpr<ExprType::Add, VectorType, ScalarBase<AnyScalar>>;
+    template<class VectorType, Scalar T>
+    class VectorExpr<ExprType::Add, VectorType, T>
+            : public BinaryVectorExpr<ExprType::Add, VectorType, T> {
+        using Base = BinaryVectorExpr<ExprType::Add, VectorType, T>;
     public:
         using typename Base::ScalarType;
     public:
@@ -96,14 +96,14 @@ namespace Physica::Core {
         }
     }
 
-    template<class VectorType, class ScalarType>
-    [[nodiscard]] inline auto operator+(const RValueVector<VectorType>& v, const ScalarBase<ScalarType>& s) noexcept {
-        return VectorExpr<ExprType::Add, VectorType, ScalarBase<ScalarType>>(v.getDerived(), s.getDerived());
+    template<class VectorType, Scalar T>
+    [[nodiscard]] inline auto operator+(const RValueVector<VectorType>& v, const T& x) noexcept {
+        return VectorExpr<ExprType::Add, VectorType, T>(v.getDerived(), x);
     }
 
-    template<class ScalarType, class VectorType>
-    [[nodiscard]] inline auto operator+(const ScalarBase<ScalarType>& s, const RValueVector<VectorType>& v) noexcept {
-        return v + s;
+    template<Scalar T, class VectorType>
+    [[nodiscard]] inline auto operator+(const T& x, const RValueVector<VectorType>& v) noexcept {
+        return v + x;
     }
 
     template<class Derived, class OtherDerived>

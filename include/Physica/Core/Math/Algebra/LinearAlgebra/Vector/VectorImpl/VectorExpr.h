@@ -103,11 +103,10 @@ namespace Physica {
         constexpr static bool FastPacket = FastPacket1 && FastPacket2;
     };
 
-    template<ExprType Type, class Expr, class AnyScalar>
-    class Traits<VectorExpr<Type, Expr, ScalarBase<AnyScalar>>> {
-        static_assert(is_scalar<AnyScalar>::value, "[Error]: This is not a scalar type");
+    template<ExprType Type, class Expr, Scalar T>
+    class Traits<VectorExpr<Type, Expr, T>> {
     public:
-        using ScalarType = typename Core::Internal::BinaryScalarOpReturnType<typename Expr::ScalarType, AnyScalar>::Type;
+        using ScalarType = typename Core::Internal::BinaryScalarOpReturnType<typename Expr::ScalarType, T>::Type;
         constexpr static size_t SizeAtCompile = Expr::SizeAtCompile;
         constexpr static bool FastAssign = Traits<Expr>::FastAssign;
         constexpr static bool FastPacket = Traits<Expr>::FastPacket;

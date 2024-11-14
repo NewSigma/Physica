@@ -46,8 +46,8 @@ namespace Physica::Core {
         inline LValueVector& operator=(const LValueVector& v);
         inline LValueVector& operator=(LValueVector&& v) noexcept;
 
-        template<class OtherScalar>
-        inline Derived& operator=(const ScalarBase<OtherScalar>& s);
+        template<Scalar T>
+        inline Derived& operator=(const T& x);
         void operator+=(const ScalarType& s) { (*this) = (*this) + s; }
         void operator-=(const ScalarType& s) { (*this) = (*this) - s; }
         void operator*=(const ScalarType& s) { (*this) = (*this) * s; }

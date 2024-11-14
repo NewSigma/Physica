@@ -62,8 +62,8 @@ namespace Physica::Core {
         }
     }
 
-    template<class AnyScalar>
-    std::ostream& operator<<(std::ostream& os, const Poscar<AnyScalar>& poscar) {
+    template<Scalar T>
+    std::ostream& operator<<(std::ostream& os, const Poscar<T>& poscar) {
         os << '\n';
         os << 1.0 << '\n';
         os << poscar.lattice.format();
@@ -75,13 +75,13 @@ namespace Physica::Core {
         for (size_t i = 0; i < poscar.numOfEachType.getLength(); ++i)
             os << ' ' << poscar.numOfEachType[i];
         os << '\n';
-        os << ((poscar.type == Poscar<AnyScalar>::Type::Direct) ? "Direct\n" : "Cartesian\n");
+        os << ((poscar.type == Poscar<T>::Type::Direct) ? "Direct\n" : "Cartesian\n");
         os << poscar.pos.format();
         return os;
     }
 
-    template<class AnyScalar>
-    std::istream& operator>>(std::istream& is, Poscar<AnyScalar>& poscar) {
+    template<Scalar T>
+    std::istream& operator>>(std::istream& is, Poscar<T>& poscar) {
         assert(is.good());
         is.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
         is.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
@@ -95,9 +95,9 @@ namespace Physica::Core {
             const int ch = std::tolower(is.get());
             is.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
             if (ch == 'd')
-                poscar.type = Poscar<AnyScalar>::Type::Direct;
+                poscar.type = Poscar<T>::Type::Direct;
             else if (ch == 'c')
-                poscar.type = Poscar<AnyScalar>::Type::Cartesian;
+                poscar.type = Poscar<T>::Type::Cartesian;
             else
                 throw BadFileFormatException("[Error]: Failed to read format type");
         }

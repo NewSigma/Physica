@@ -29,11 +29,11 @@ namespace Physica::Core {
         return x.getDerived().sum() / ScalarType(x.getLength());
     }
 
-    template<class ScalarType>
-    __host__ __device__ inline void toNextMean(ScalarBase<ScalarType>& mean_, size_t lastNumSample, ScalarType sample) {
-        const ScalarType factor1 = ScalarType(lastNumSample);
-        const ScalarType factor2 = reciprocal(ScalarType(lastNumSample + 1));
-        ScalarType& mean = mean_.getDerived();
+    template<Scalar T>
+    __host__ __device__ inline void toNextMean(T& mean_, size_t lastNumSample, T sample) {
+        const T factor1 = T(lastNumSample);
+        const T factor2 = reciprocal(T(lastNumSample + 1));
+        T& mean = mean_.getDerived();
         mean = (factor1 * mean + sample) * factor2;
     }
 
@@ -81,11 +81,11 @@ namespace Physica::Core {
         return square(x - prior_mean).sum() / ScalarType(length);
     }
 
-    template<class ScalarType>
-    inline void toNextVariance(ScalarBase<ScalarType>& var_, ScalarType& mean, size_t lastNumSample, ScalarType sample) {
-        ScalarType& var = var_.getDerived();
-        const ScalarType factor1 = ScalarType(lastNumSample);
-        const ScalarType factor2 = reciprocal(ScalarType(lastNumSample + 1));
+    template<Scalar T>
+    inline void toNextVariance(T& var_, T& mean, size_t lastNumSample, T sample) {
+        T& var = var_.getDerived();
+        const T factor1 = T(lastNumSample);
+        const T factor2 = reciprocal(T(lastNumSample + 1));
         var = (var + square(mean - sample) * factor2) * (factor1 * factor2);
         toNextMean(mean, lastNumSample, sample);
     }

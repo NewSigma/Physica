@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2023 Weibo He.
+ * Copyright 2020-2024 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -21,12 +21,14 @@
 #include <cmath>
 #include <cassert>
 #include <utility>
-#include "MultiPrecisionType.h"
+#include "Scalar.h"
 
 namespace Physica::Core {
+    template<ScalarOption Option> class Real;
+
     class PHYSICA_API Integer {
         //Store effective digits using little endian standard.
-        MPUnit* __restrict byte;
+        MPUnit* __restrict byte = nullptr;
         /*
          * Length of byte = abs(length).
          * sign of length and sign of Integer are same. (when Integer != 0)
@@ -41,7 +43,6 @@ namespace Physica::Core {
         Integer(int i); //NOLINT Conversion is always available.
         template<ScalarOption Option>
         explicit Integer(const Real<Option>& s);
-        explicit Integer(const Real<FloatMP>& s);
         Integer(const Integer& toCopy);
         Integer(Integer&& toMove) noexcept;
         ~Integer();

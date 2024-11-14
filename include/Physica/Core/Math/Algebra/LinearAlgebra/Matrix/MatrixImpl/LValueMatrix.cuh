@@ -37,7 +37,7 @@ namespace Physica::Core {
         device_obj& operator=(device_obj&& m) = delete;
         template<class OtherMatrix>
         __host__ __device__ device_obj<Derived>& operator=(const device_obj<RValueMatrix<OtherMatrix>>& m);
-        __device__ device_obj<Derived>& operator=(const ScalarType& s);
+        __device__ device_obj<Derived>& operator=(const ScalarType& x);
         [[nodiscard]] __device__ ScalarType& operator()(size_t row, size_t col) { return *data_ptr(row, col); }
         [[nodiscard]] __device__ const ScalarType& operator()(size_t row, size_t col) const { return *data_ptr(row, col); }
         __device__ void operator+=(const ScalarType& s) { (*this) = (*this) + s; }

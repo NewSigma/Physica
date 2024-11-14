@@ -42,22 +42,22 @@ namespace Physica::Core {
         /* Operators */
         Polynomial& operator=(const Polynomial& p) = default;
         Polynomial& operator=(Polynomial&& p) noexcept { coeffs = std::move(p.coeffs); return *this; }
-        template<class AnyScalar>
-        typename Internal::BinaryScalarOpReturnType<ScalarType, AnyScalar>::Type operator()(const ScalarBase<AnyScalar>& x) const;
+        template<Scalar T>
+        typename Internal::BinaryScalarOpReturnType<ScalarType, T>::Type operator()(const T& x) const;
         /* Getters */
         [[nodiscard]] size_t getPower() const noexcept { return coeffs.getLength(); }
         [[nodiscard]] const VectorType& getCoeffVector() const noexcept { return coeffs; }
     };
 
     template<class ScalarType, size_t Power>
-    template<class AnyScalar>
-    typename Internal::BinaryScalarOpReturnType<ScalarType, AnyScalar>::Type
-    Polynomial<ScalarType, Power>::operator()(const ScalarBase<AnyScalar>& x) const {
-        using ResultType = typename Internal::BinaryScalarOpReturnType<ScalarType, AnyScalar>::Type;
+    template<Scalar T>
+    typename Internal::BinaryScalarOpReturnType<ScalarType, T>::Type
+    Polynomial<ScalarType, Power>::operator()(const T& x) const {
+        using ResultType = typename Internal::BinaryScalarOpReturnType<ScalarType, T>::Type;
         if (coeffs.empty())
             return ResultType(0);
         ResultType result = ResultType(coeffs[0]);
-        AnyScalar temp = x.getDerived();
+        T temp = x.getDerived();
         const auto length = coeffs.getLength();
         for (size_t i = 1; i < length; ++i) {
             result += temp * coeffs[i];

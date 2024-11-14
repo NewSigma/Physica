@@ -40,11 +40,11 @@ namespace Physica::Core {
     }
 
     template<class Derived>
-    template<class OtherScalar>
-    inline Derived& LValueVector<Derived>::operator=(const ScalarBase<OtherScalar>& s) {
-        const auto x = ScalarType(s.getDerived());
+    template<Scalar T>
+    inline Derived& LValueVector<Derived>::operator=(const T& x) {
+        const ScalarType x1 = x;
         for (size_t i = 0; i < Base::getLength(); ++i)
-            (*this)[i] = x;
+            (*this)[i] = x1;
         return Base::getDerived();
     }
 

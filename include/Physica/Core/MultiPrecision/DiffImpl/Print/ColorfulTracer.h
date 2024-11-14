@@ -36,15 +36,15 @@ namespace Physica::Core {
         /* Operators */
         ColorfulTracer& operator=(const ColorfulTracer&) = delete;
         ColorfulTracer& operator=(ColorfulTracer&&) noexcept = delete;
-        template<class AnyScalar, unsigned int AnyOrder>
-        friend std::ostream& operator<<(std::ostream& os, const ColorfulTracer<AnyScalar, AnyOrder>& obj);
+        template<Scalar T, unsigned int AnyOrder>
+        friend std::ostream& operator<<(std::ostream& os, const ColorfulTracer<T, AnyOrder>& obj);
     };
 
     template<class ScalarType, int Order>
     ColorfulTracer<ScalarType, Order>::ColorfulTracer(const TracerType& tracer_) : tracer(tracer_) {}
 
-    template<class AnyScalar, unsigned int AnyOrder>
-    std::ostream& operator<<(std::ostream& os, const ColorfulTracer<AnyScalar, AnyOrder>& obj) {
+    template<Scalar T, unsigned int AnyOrder>
+    std::ostream& operator<<(std::ostream& os, const ColorfulTracer<T, AnyOrder>& obj) {
         using Color = typename ColorGuard::Color;
         using ColorGuard = ColorGuard;
         const auto& tracer = obj.tracer;

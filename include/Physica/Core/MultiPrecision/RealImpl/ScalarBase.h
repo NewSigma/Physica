@@ -28,18 +28,9 @@ namespace Physica::Core {
         Forward,
         Reverse
     };
-    template<class Derived> class ScalarBase;
     template<class T> class ScalarRef;
     template<class T> class ScalarPtr;
     template<class T, DiffMode Mode, int Order = 1> class Diff;
-
-    template<class T>
-    struct is_scalar : public std::is_base_of<ScalarBase<T>, T> {};
-
-    template<class T>
-    struct is_scalar<ScalarBase<T>> {
-        constexpr static bool value = true;
-    };
 
     template<class Derived>
     class ScalarBase : public CRTPBase<ScalarBase<Derived>> {
@@ -214,27 +205,23 @@ namespace Physica::Core {
             return RealType(0);
     }
 
-    template<class ScalarType>
-    ScalarType relativeError(const ScalarType& scalar1, const ScalarType& scalar2) {
-        static_assert(Core::is_scalar<ScalarType>::value && !ScalarType::isComplex && !ScalarType::isDifferentiable, "[Error]: Invalid template param");
-        const auto& s1 = scalar1.getDerived();
-        const auto& s2 = scalar2.getDerived();
-        const ScalarType min = std::numeric_limits<ScalarType>::min();
-        const bool useAbsCompare = (abs(s1) < min) || (abs(s2) < min);
-        const ScalarType delta = s1 - s2;
-        const ScalarType error = useAbsCompare ? abs(delta) : abs(delta / (s1 + s2) * ScalarType(2));
+    template<Scalar T>
+    T relativeError(const T& x, const T& y) {
+        static_assert(!T::isComplex && !T::isDifferentiable, "[Error]: Invalid template param");
+        const T min = std::numeric_limits<T>::min();
+        const bool useAbsCompare = (abs(x) < min) || (abs(y) < min);
+        const T delta = x - y;
+        const T error = useAbsCompare ? abs(delta) : abs(delta / (x + y) * T(2));
         return error;
     }
 
-    template<class ScalarType>
-    bool scalarNear(const ScalarBase<ScalarType>& s1,
-                    const ScalarBase<ScalarType>& s2,
-                    double precision) {
+    template<Scalar T>
+    bool scalarNear(const T& x, const T& y, double precision) {
         assert(precision > 0);
-        constexpr bool isDifferentiable = ScalarType::isDifferentiable;
-        if constexpr (ScalarType::isComplex) {
-            using PlainRealType = typename ScalarType::ValueType::RealType;
-            const ScalarType diff = s1.getDerived() - s2.getDerived();
+        constexpr bool isDifferentiable = T::isDifferentiable;
+        if constexpr (T::isComplex) {
+            using PlainRealType = typename T::ValueType::RealType;
+            const T diff = x - y;
             const bool isValueNear = scalarNear(abs(diff.getValue()), PlainRealType(0), precision);
             if constexpr (isDifferentiable)
                 return isValueNear && scalarNear(abs(diff.getGrad()), PlainRealType(0), precision);
@@ -242,70 +229,70 @@ namespace Physica::Core {
                 return isValueNear;
         }
         else {
-            using ValueType = typename ScalarType::ValueType;
-            const bool isValueNear = relativeError(s1.getValue(), s2.getValue()) < ValueType(precision);
-            if constexpr (ScalarType::isDifferentiable)
-                return isValueNear && scalarNear(s1.getGrad(), s2.getGrad(), precision);
+            using ValueType = typename T::ValueType;
+            const bool isValueNear = relativeError(x.getValue(), y.getValue()) < ValueType(precision);
+            if constexpr (T::isDifferentiable)
+                return isValueNear && scalarNear(x.getGrad(), y.getGrad(), precision);
             else
                 return isValueNear;
         }
     }
 
-    template<class ScalarType>
-    inline ScalarType operator+(const ScalarBase<ScalarType>& s) {
-        return ScalarType(s.getDerived());
+    template<Scalar T>
+    inline T operator+(const T& x) {
+        return T(x);
     }
 
-    template<class ScalarType1, class ScalarType2>
-    __host__ __device__ inline void operator+=(ScalarBase<ScalarType1>& s1, const ScalarBase<ScalarType2>& s2) {
-        s1.getDerived() = s1.getDerived() + s2.getDerived();
+    template<Scalar T1, Scalar T2>
+    __host__ __device__ inline void operator+=(T1& x, const T2& y) {
+        x = x + y;
     }
 
-    template<class ScalarType1, class ScalarType2>
-    __host__ __device__ inline void operator-=(ScalarBase<ScalarType1>& s1, const ScalarBase<ScalarType2>& s2) {
-        s1.getDerived() = s1.getDerived() - s2.getDerived();
+    template<Scalar T1, Scalar T2>
+    __host__ __device__ inline void operator-=(T1& x, const T2& y) {
+        x = x - y;
     }
 
-    template<class ScalarType1, class ScalarType2>
-    __host__ __device__ inline void operator*=(ScalarBase<ScalarType1>& s1, const ScalarBase<ScalarType2>& s2) {
-        s1.getDerived() = s1.getDerived() * s2.getDerived();
+    template<Scalar T1, Scalar T2>
+    __host__ __device__ inline void operator*=(T1& x, const T2& y) {
+        x = x * y;
     }
 
-    template<class ScalarType1, class ScalarType2>
-    __host__ __device__ inline void operator/=(ScalarBase<ScalarType1>& s1, const ScalarBase<ScalarType2>& s2) {
-        s1.getDerived() = s1.getDerived() / s2.getDerived();
+    template<Scalar T1, Scalar T2>
+    __host__ __device__ inline void operator/=(T1& x, const T2& y) {
+        x = x / y;
     }
 
-    template<class ScalarType>
-    inline void operator^=(ScalarBase<ScalarType>& s1, const ScalarBase<ScalarType>& s2) { s1.getDerived() = s1.getDerived() ^ s2.getDerived(); }
+    template<Scalar T>
+    inline void operator^=(T& x, const T& y) { x = x ^ y; }
 
-    template<class ScalarType>
-    inline void operator<<=(ScalarBase<ScalarType>& s, int bits) { s.getDerived() = s.getDerived() << bits; }
+    template<Scalar T>
+    inline void operator<<=(T& x, int bits) { x = x << bits; }
 
-    template<class ScalarType>
-    inline void operator>>=(ScalarBase<ScalarType>& s, int bits) { s.getDerived() = s.getDerived() >> bits; }
+    template<Scalar T>
+    inline void operator>>=(T& x, int bits) { x = x >> bits; }
 
-    template<class ScalarType>
-    __host__ __device__ inline bool operator>=(const ScalarBase<ScalarType>& s1, const ScalarBase<ScalarType>& s2) {
-        return !(s1.getDerived() < s2.getDerived());
+    template<Scalar T>
+    __host__ __device__ inline bool operator>=(const T& x, const T& y) {
+        return !(x < y);
     }
 
-    template<class ScalarType>
-    __host__ __device__ inline bool operator<=(const ScalarBase<ScalarType>& s1, const ScalarBase<ScalarType>& s2) {
-        return !(s1.getDerived() > s2.getDerived());
+    template<Scalar T>
+    __host__ __device__ inline bool operator<=(const T& x, const T& y) {
+        return !(x > y);
     }
 
-    template<class ScalarType>
-    __host__ __device__ inline bool operator!=(const ScalarBase<ScalarType>& s1, const ScalarBase<ScalarType>& s2) {
-        return !(s1.getDerived() == s2.getDerived());
+    template<Scalar T>
+    __host__ __device__ inline bool operator!=(const T& x, const T& y) {
+        return !(x == y);
     }
 
-    template<class ScalarType>
-    [[nodiscard]] bool absCompare(const ScalarBase<ScalarType>& s1, const ScalarBase<ScalarType>& s2) {
-        if constexpr (ScalarType::isComplex)
-            return s1.squaredNorm() >= s2.squaredNorm();
+    template<Scalar T>
+    [[nodiscard]] bool absCompare(const T& x, const T& y) {
+        if constexpr (T::isComplex)
+            return x.squaredNorm() >= y.squaredNorm();
         else
-            return abs(s1.getDerived()) >= abs(s2.getDerived());
+            return abs(x) >= abs(y);
     }
 }
 
@@ -318,8 +305,8 @@ namespace Physica {
 }
 
 namespace std {
-    template<class ScalarType>
-    inline void swap(Physica::Core::ScalarBase<ScalarType>& __restrict s1, Physica::Core::ScalarBase<ScalarType>& __restrict s2) noexcept {
-        s1.getDerived().swap(s2.getDerived());
+    template<Physica::Core::Scalar T>
+    inline void swap(T& __restrict x, T& __restrict y) noexcept {
+        x.swap(y);
     }
 }

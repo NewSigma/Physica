@@ -1,5 +1,5 @@
 #############################################Settings#############################################
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED TRUE)
 set(CMAKE_CXX_VISIBILITY_PRESET "hidden")
 set(CMAKE_VISIBILITY_INLINES_HIDDEN TRUE)
@@ -58,6 +58,7 @@ if(${PHYSICA_CUDA})
         --diag-suppress 20011
         --diag-suppress 20208
         --default-stream per-thread
+        --expt-relaxed-constexpr
         ${CMAKE_CXX_FLAGS})
     string(REPLACE ";" " " CMAKE_CUDA_FLAGS "${CMAKE_CUDA_FLAGS}")
 endif()

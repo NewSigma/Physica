@@ -32,10 +32,10 @@ namespace Physica::Core {
     }
 
     template<class Derived>
-    __device__ device_obj<Derived>& device_obj<LValueMatrix<Derived>>::operator=(const ScalarType& s) {
+    __device__ device_obj<Derived>& device_obj<LValueMatrix<Derived>>::operator=(const ScalarType& x) {
         for (size_t i = 0; i < Base::getMaxMajor(); ++i)
             for (size_t j = 0; j < Base::getMaxMinor(); ++j)
-                refFromMajorMinor(i, j) = ScalarType(s.getDerived());
+                refFromMajorMinor(i, j) = ScalarType(x);
         return Base::getDerived();
     }
 

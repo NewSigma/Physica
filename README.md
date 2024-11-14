@@ -35,9 +35,9 @@ We adopt CMake as our building system:
 
 [CMake](https://cmake.org/) 3.19 and above  
 
-A C++ compiler that support C++ 17, the following compilers are tested:
+A C++ compiler that support C++ 20, the following compilers are tested:
 
-[GCC](https://gcc.gnu.org/) 9.4.0  
+[GCC](https://gcc.gnu.org/) 13.2.0  
 [clang](https://clang.llvm.org/) 17.0.6  
 
 Addtional libraries:

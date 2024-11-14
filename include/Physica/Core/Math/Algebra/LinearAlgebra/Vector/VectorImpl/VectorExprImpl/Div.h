@@ -19,10 +19,10 @@
 #pragma once
 
 namespace Physica::Core {
-    template<class VectorType, class AnyScalar>
-    class VectorExpr<ExprType::Div, VectorType, ScalarBase<AnyScalar>>
-            : public BinaryVectorExpr<ExprType::Div, VectorType, ScalarBase<AnyScalar>> {
-        using Base = BinaryVectorExpr<ExprType::Div, VectorType, ScalarBase<AnyScalar>>;
+    template<class VectorType, Scalar T>
+    class VectorExpr<ExprType::Div, VectorType, T>
+            : public BinaryVectorExpr<ExprType::Div, VectorType, T> {
+        using Base = BinaryVectorExpr<ExprType::Div, VectorType, T>;
     public:
         using typename Base::ScalarType;
     public:
@@ -64,9 +64,9 @@ namespace Physica::Core {
         }
     };
 
-    template<class VectorType, class ScalarType>
-    [[nodiscard]] inline auto operator/(const RValueVector<VectorType>& v, const ScalarBase<ScalarType>& s) noexcept {
-        return VectorExpr<ExprType::Div, VectorType, ScalarBase<ScalarType>>(v.getDerived(), s.getDerived());
+    template<class VectorType, Scalar T>
+    [[nodiscard]] inline auto operator/(const RValueVector<VectorType>& v, const T& x) noexcept {
+        return VectorExpr<ExprType::Div, VectorType, T>(v.getDerived(), x);
     }
 
     template<class VectorType1, class VectorType2>

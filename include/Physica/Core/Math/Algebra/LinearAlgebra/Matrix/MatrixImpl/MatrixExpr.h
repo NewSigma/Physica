@@ -101,8 +101,8 @@ namespace Physica {
         constexpr static size_t SizeAtCompile = T1::SizeAtCompile;
     };
 
-    template<Core::ExprType Type, class T1, class T2>
-    class Traits<Core::MatrixExpr<Type, T1, ScalarBase<T2>>> {
+    template<Core::ExprType Type, class T1, Scalar T2>
+    class Traits<Core::MatrixExpr<Type, T1, T2>> {
     public:
         using ScalarType = typename Core::Internal::BinaryScalarOpReturnType<typename T1::ScalarType, T2>::Type;
         constexpr static int Option = T1::Option;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Weibo He.
+ * Copyright 2023-2024 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -18,7 +18,7 @@
  */
 #pragma once
 
-#include <Physica/Core/MultiPrecision/MultiPrecisionType.h>
+#include <Physica/Core/MultiPrecision/Scalar.h>
 
 namespace Physica::Core {
     class PHYSICA_API H5Group : public H5::Group, public H5Location {
