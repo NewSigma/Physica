@@ -18,10 +18,10 @@
  */
 #include <random>
 #include <iostream>
-#include <Physica/Core/MultiPrecision/Scalar.h>
+#include <Physica/Core/MultiPrecision/Real.h>
 
 using namespace Physica::Core;
-using ScalarType = Scalar<FloatMP>;
+using ScalarType = Real<FloatMP>;
 constexpr unsigned int iterateCount = 50;
 static std::default_random_engine engine(clock());
 

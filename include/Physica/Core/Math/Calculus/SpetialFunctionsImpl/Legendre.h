@@ -22,8 +22,8 @@
 
 namespace Physica::Core {
     template<ScalarOption Option>
-    Scalar<Option> legendreP(unsigned int l, const Scalar<Option>& x) {
-        using T = Scalar<Option>;
+    Real<Option> legendreP(unsigned int l, const Real<Option>& x) {
+        using T = Real<Option>;
         assert(abs(x) <= T(1));
         T legendre_n(1);
         if (l == 0)
@@ -42,8 +42,8 @@ namespace Physica::Core {
      * [1] William H. Press, Saul A. Teukolsky, William T. Vetterling, Brian P. Flannery. C++数值算法(第二版)[M]. 北京: 电子工业出版社, 2005:189
      */
     template<ScalarOption Option>
-    Scalar<Option> legendreP(unsigned int l, unsigned int m, const Scalar<Option>& x) {
-        using T = Scalar<Option>;
+    Real<Option> legendreP(unsigned int l, unsigned int m, const Real<Option>& x) {
+        using T = Real<Option>;
         assert(m <= l && abs(x) <= T(1));
         //Get P^m_m
         T legendre_m_n(1);

@@ -28,14 +28,14 @@ namespace Physica::Core {
      * Returns true if s1 and s2 has the same sign. Both s1 and s2 do not equal to zero.
      * This function provide a quick sign check compare to using isPositive() and isNegative().
      */
-    inline bool Scalar<FloatMP>::matchSign(const Scalar<FloatMP>& s1, const Scalar<FloatMP>& s2) {
+    inline bool Real<FloatMP>::matchSign(const Real<FloatMP>& s1, const Real<FloatMP>& s2) {
         assert(!s1.isZero() && !s2.isZero());
         return (s1.length ^ s2.length) >= 0; //NOLINT Bitwise operator between two signed integer is intended.
     }
     /**
      * Cut zeros from the beginning.
      */
-    inline void Scalar<FloatMP>::cutZero() {
+    inline void Real<FloatMP>::cutZero() {
         const int size = getSize();
         int id = size - 1;
         while(byte[id] == 0 && id > 0)
@@ -51,28 +51,28 @@ namespace Physica::Core {
         }
     }
 
-    inline Scalar<FloatMP> Scalar<FloatMP>::add(const Scalar<FloatMP>& s1, const Scalar<FloatMP>& s2) {
+    inline Real<FloatMP> Real<FloatMP>::add(const Real<FloatMP>& s1, const Real<FloatMP>& s2) {
         if(s1.isZero())
-            return Scalar<FloatMP>(static_cast<const Scalar<FloatMP>&>(s2));
+            return Real<FloatMP>(static_cast<const Real<FloatMP>&>(s2));
         else if(s2.isZero())
-            return Scalar<FloatMP>(static_cast<const Scalar<FloatMP>&>(s1));
+            return Real<FloatMP>(static_cast<const Real<FloatMP>&>(s1));
         else if (!matchSign(s1, s2)) {
             if (s1.length > 0) {
-                Scalar shallow_copy(const_cast<MPUnit*>(s2.byte), -s2.length, s2.power);
+                Real shallow_copy(const_cast<MPUnit*>(s2.byte), -s2.length, s2.power);
                 auto result = sub(s1, shallow_copy);
                 shallow_copy.byte = nullptr;
                 return result;
             }
             else {
-                Scalar shallow_copy(const_cast<MPUnit*>(s1.byte), -s1.length, s1.power);
+                Real shallow_copy(const_cast<MPUnit*>(s1.byte), -s1.length, s1.power);
                 auto result = sub(s2, shallow_copy);
                 shallow_copy.byte = nullptr;
                 return result;
             }
         }
         else {
-            const Scalar* big;
-            const Scalar* small;
+            const Real* big;
+            const Real* small;
             if (s1.power > s2.power) {
                 big = &s1;
                 small = &s2;
@@ -120,25 +120,25 @@ namespace Physica::Core {
                 byte[length - 1] = 1;
             }
             ////////////////////////////////////Out put////////////////////////////////////////
-            return Scalar<FloatMP>(byte, big->length < 0 ? -length : length, power);
+            return Real<FloatMP>(byte, big->length < 0 ? -length : length, power);
         }
     }
 
-    inline Scalar<FloatMP> Scalar<FloatMP>::sub(const Scalar<FloatMP>& s1, const Scalar<FloatMP>& s2) {
+    inline Real<FloatMP> Real<FloatMP>::sub(const Real<FloatMP>& s1, const Real<FloatMP>& s2) {
         if(s1.isZero())
-            return Scalar<FloatMP>(static_cast<Scalar<FloatMP>&&>(-s2));
+            return Real<FloatMP>(static_cast<Real<FloatMP>&&>(-s2));
         else if(s2.isZero())
-            return Scalar<FloatMP>(static_cast<const Scalar<FloatMP>&>(s1));
+            return Real<FloatMP>(static_cast<const Real<FloatMP>&>(s1));
         else if (s1.length > 0) {
             if (s2.length < 0) {
-                Scalar shallow_copy(const_cast<MPUnit*>(s2.byte), -s2.length, s2.power);
-                Scalar result = add(s1, shallow_copy);
+                Real shallow_copy(const_cast<MPUnit*>(s2.byte), -s2.length, s2.power);
+                Real result = add(s1, shallow_copy);
                 shallow_copy.byte = nullptr;
                 return result;
             }
             else {
-                const Scalar* big;
-                const Scalar* small;
+                const Real* big;
+                const Real* small;
                 bool changeSign = false;
                 if (s1.power > s2.power) {
                     big = &s1;
@@ -193,35 +193,35 @@ namespace Physica::Core {
                     free(byte);
                     goto redo;
                 }
-                Scalar<FloatMP> result(byte, changeSign ? -length : length, big->power);
+                Real<FloatMP> result(byte, changeSign ? -length : length, big->power);
                 result.cutZero();
                 return result;
             }
         }
         else {
-            Scalar shallow_copy(const_cast<MPUnit*>(s1.byte), -s1.length, s1.power);
+            Real shallow_copy(const_cast<MPUnit*>(s1.byte), -s1.length, s1.power);
             if (s2.length > 0) {
-                Scalar result = add(shallow_copy, s2);
+                Real result = add(shallow_copy, s2);
                 result.toOpposite();
                 shallow_copy.byte = nullptr;
                 return result;
             }
             else {
-                Scalar shallow_copy_1(const_cast<MPUnit*>(s2.byte), -s2.length, s2.power);
-                Scalar result = sub(shallow_copy_1, shallow_copy);
+                Real shallow_copy_1(const_cast<MPUnit*>(s2.byte), -s2.length, s2.power);
+                Real result = sub(shallow_copy_1, shallow_copy);
                 shallow_copy.byte = shallow_copy_1.byte = nullptr;
                 return result;
             }
         }
     }
     //Optimize: length may be too long and it is unnecessary, cut it and consider the accuracy.
-    inline Scalar<FloatMP> Scalar<FloatMP>::mul(const Scalar<FloatMP>& s1, const Scalar<FloatMP>& s2) {
+    inline Real<FloatMP> Real<FloatMP>::mul(const Real<FloatMP>& s1, const Real<FloatMP>& s2) {
         if (s1.isZero() || s2.isZero())
-            return Scalar<FloatMP>(0);
+            return Real<FloatMP>(0);
         if (s1 == BasicConst::getInstance()._1)
-            return Scalar<FloatMP>(static_cast<const Scalar<FloatMP>&>(s2));
+            return Real<FloatMP>(static_cast<const Real<FloatMP>&>(s2));
         if (s2 == BasicConst::getInstance()._1)
-            return Scalar<FloatMP>(static_cast<const Scalar<FloatMP>&>(s1));
+            return Real<FloatMP>(static_cast<const Real<FloatMP>&>(s1));
         const int size1 = s1.getSize();
         const int size2 = s2.getSize();
         //Estimate the ed of result first. we will calculate it accurately later.
@@ -237,10 +237,10 @@ namespace Physica::Core {
             byte = reinterpret_cast<MPUnit*>(realloc(byte, length * sizeof(MPUnit)));
         }
         ////////////////////////////////////Out put////////////////////////////////////////
-        return Scalar<FloatMP>(byte, matchSign(s1, s2) ? length : -length, power);
+        return Real<FloatMP>(byte, matchSign(s1, s2) ? length : -length, power);
     }
 
-    inline Scalar<FloatMP> Scalar<FloatMP>::div(const Scalar<FloatMP>& s1, const Scalar<FloatMP>& s2) {
+    inline Real<FloatMP> Real<FloatMP>::div(const Real<FloatMP>& s1, const Real<FloatMP>& s2) {
         if(s2.isZero())
             throw DivideByZeroException();
 
@@ -283,20 +283,20 @@ namespace Physica::Core {
                 delete[] arr1;
                 delete[] arr2;
                 ////////////////////////////////////Out put////////////////////////////////////////
-                return Scalar<FloatMP>(byte, matchSign(s1, s2) ? length : -length
+                return Real<FloatMP>(byte, matchSign(s1, s2) ? length : -length
                         , s1.getPower() - s2.getPower() - 1) >> (s1_shift - s2_shift);
             }
             else
-                return static_cast<const Scalar<FloatMP>&>(s1);
+                return static_cast<const Real<FloatMP>&>(s1);
         }
         else
-            return Scalar<FloatMP>(static_cast<SignedMPUnit>(0));
+            return Real<FloatMP>(static_cast<SignedMPUnit>(0));
     }
     /**
      * If the length of new array is larger than GlobalPrecision, it will be set to GlobalPrecision.
      * Return true if array is cut.
      */
-    inline bool Scalar<FloatMP>::cutLength(Scalar<FloatMP>& s) {
+    inline bool Real<FloatMP>::cutLength(Real<FloatMP>& s) {
         bool result = false;
         int size = s.getSize();
 
@@ -312,24 +312,24 @@ namespace Physica::Core {
         return result;
     }
 
-    inline Scalar<FloatMP>& operator++(Scalar<FloatMP>& s) {
+    inline Real<FloatMP>& operator++(Real<FloatMP>& s) {
         s += BasicConst::getInstance()._1;
         return s;
     }
 
-    inline Scalar<FloatMP>& operator--(Scalar<FloatMP>& s) {
+    inline Real<FloatMP>& operator--(Real<FloatMP>& s) {
         s -= BasicConst::getInstance()._1;
         return s;
     }
 
-    inline Scalar<FloatMP> operator++(Scalar<FloatMP>& s, int) {
-        Scalar<FloatMP> temp(s);
+    inline Real<FloatMP> operator++(Real<FloatMP>& s, int) {
+        Real<FloatMP> temp(s);
         s += BasicConst::getInstance()._1;
         return temp;
     }
 
-    inline Scalar<FloatMP> operator--(Scalar<FloatMP>& s, int) {
-        Scalar<FloatMP> temp(s);
+    inline Real<FloatMP> operator--(Real<FloatMP>& s, int) {
+        Real<FloatMP> temp(s);
         s -= BasicConst::getInstance()._1;
         return temp;
     }

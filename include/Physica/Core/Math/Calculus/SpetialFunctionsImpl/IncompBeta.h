@@ -23,8 +23,8 @@
 namespace Physica::Core {
     namespace Internal {
         template<ScalarOption Option>
-        Scalar<Option> incompBetaImpl(const Scalar<Option>& a, const Scalar<Option>& b, const Scalar<Option>& x) {
-            using ScalarType = Scalar<Option>;
+        Real<Option> incompBetaImpl(const Real<Option>& a, const Real<Option>& b, const Real<Option>& x) {
+            using ScalarType = Real<Option>;
             constexpr int MaxIteration = 100;
             constexpr auto epsilon = std::numeric_limits<ScalarType>::epsilon();
             constexpr auto minimum = std::numeric_limits<ScalarType>::min();
@@ -74,8 +74,8 @@ namespace Physica::Core {
     }
 
     template<ScalarOption Option>
-    Scalar<Option> incompBeta(const Scalar<Option>& a, const Scalar<Option>& b, const Scalar<Option>& x) {
-        using ScalarType = Scalar<Option>;
+    Real<Option> incompBeta(const Real<Option>& a, const Real<Option>& b, const Real<Option>& x) {
+        using ScalarType = Real<Option>;
         assert(x.isPositive() && x <= ScalarType(1) && "[Error]: Invalid value");
         if (x.isZero() || x == ScalarType(1)) [[unlikely]]
             return x;
@@ -88,15 +88,15 @@ namespace Physica::Core {
     }
 
     template<ScalarOption Option>
-    inline Scalar<Option> studentT(size_t n, const Scalar<Option>& x) {
-        using ScalarType = Scalar<Option>;
+    inline Real<Option> studentT(size_t n, const Real<Option>& x) {
+        using ScalarType = Real<Option>;
         const auto n1 = ScalarType(n);
         return ScalarType(1) - incompBeta(n1 * ScalarType(0.5), ScalarType(0.5), n1 / (n1 + square(x)));
     }
 
     template<ScalarOption Option>
-    inline Scalar<Option> distributionF(const Scalar<Option>& v1, const Scalar<Option>& v2, const Scalar<Option>& x) {
-        using ScalarType = Scalar<Option>;
+    inline Real<Option> distributionF(const Real<Option>& v1, const Real<Option>& v2, const Real<Option>& x) {
+        using ScalarType = Real<Option>;
         return ScalarType(1) - incompBeta(v1 * ScalarType(0.5), v2 * ScalarType(0.5), v2 / (v2 + v1 * x));
     }
 }

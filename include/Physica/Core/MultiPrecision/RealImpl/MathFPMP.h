@@ -20,20 +20,20 @@
 
 namespace Physica::Core {
     template<>
-    Scalar<FloatMP> abs(const Scalar<FloatMP>& s) noexcept;
+    Real<FloatMP> abs(const Real<FloatMP>& s) noexcept;
 
     template<>
-    Scalar<FloatMP> sqrt(const Scalar<FloatMP>& s) noexcept;
+    Real<FloatMP> sqrt(const Real<FloatMP>& s) noexcept;
 
     template<>
-    Scalar<FloatMP> ln(const Scalar<FloatMP>& s) noexcept;
+    Real<FloatMP> ln(const Real<FloatMP>& s) noexcept;
 
     template<>
-    Scalar<FloatMP> exp(const Scalar<FloatMP>& s) noexcept;
+    Real<FloatMP> exp(const Real<FloatMP>& s) noexcept;
 
     //!Compute a ^ unit.
-    inline Scalar<FloatMP> powWord(const Scalar<FloatMP>& a, MPUnit unit) {
-        Scalar<FloatMP> result(a);
+    inline Real<FloatMP> powWord(const Real<FloatMP>& a, MPUnit unit) {
+        Real<FloatMP> result(a);
         const auto lastUnitBits = countLeadingZeros(unit);
         for(unsigned int j = 0; j < MPUnitWidth - lastUnitBits; ++j) {
             result = square(result);
@@ -44,8 +44,8 @@ namespace Physica::Core {
         return result;
     }
     //!Compute a ^ unit, the highest bit of unit must be set.
-    inline Scalar<FloatMP> powFullWord(const Scalar<FloatMP>& a, MPUnit unit) {
-        Scalar<FloatMP> result(a);
+    inline Real<FloatMP> powFullWord(const Real<FloatMP>& a, MPUnit unit) {
+        Real<FloatMP> result(a);
         for(int j = 0; j < 64; ++j) {
             result = square(result);
             if((unit & 1U) != 0)
@@ -59,9 +59,9 @@ namespace Physica::Core {
      *
      * Reference: MaTHmu Project Group.计算机代数系统的数学原理[M].Beijing: TsingHua University Press, 2009:45
      */
-    inline Scalar<FloatMP> powScalar(const Scalar<FloatMP>& a, const Scalar<FloatMP>& n) {
+    inline Real<FloatMP> powScalar(const Real<FloatMP>& a, const Real<FloatMP>& n) {
         const auto size = n.getSize();
-        Scalar<FloatMP> result(a);
+        Real<FloatMP> result(a);
         if(n.getLength() < 0)
             result = reciprocal(a);
 
@@ -72,58 +72,58 @@ namespace Physica::Core {
     }
 
     template<>
-    inline Scalar<FloatMP> pow(const Scalar<FloatMP>& s1, const Scalar<FloatMP>& s2) noexcept {
+    inline Real<FloatMP> pow(const Real<FloatMP>& s1, const Real<FloatMP>& s2) noexcept {
         return s1.isInteger() ? powScalar(s1, s2) : exp(ln(s1) * s2);
     }
 
     template<>
-    Scalar<FloatMP> factorial(const Scalar<FloatMP>& s) noexcept;
+    Real<FloatMP> factorial(const Real<FloatMP>& s) noexcept;
 
     template<>
-    Scalar<FloatMP> cos(const Scalar<FloatMP>& s) noexcept;
+    Real<FloatMP> cos(const Real<FloatMP>& s) noexcept;
 
     template<>
-    Scalar<FloatMP> sin(const Scalar<FloatMP>& s) noexcept;
+    Real<FloatMP> sin(const Real<FloatMP>& s) noexcept;
 
     template<>
-    Scalar<FloatMP> arccos(const Scalar<FloatMP>& s) noexcept;
+    Real<FloatMP> arccos(const Real<FloatMP>& s) noexcept;
 
     template<>
-    Scalar<FloatMP> arcsin(const Scalar<FloatMP>& s) noexcept;
+    Real<FloatMP> arcsin(const Real<FloatMP>& s) noexcept;
 
     template<>
-    Scalar<FloatMP> arctan(const Scalar<FloatMP>& s) noexcept;
+    Real<FloatMP> arctan(const Real<FloatMP>& s) noexcept;
 
     template<>
-    Scalar<FloatMP> cosh(const Scalar<FloatMP>& s) noexcept;
+    Real<FloatMP> cosh(const Real<FloatMP>& s) noexcept;
 
     template<>
-    Scalar<FloatMP> sinh(const Scalar<FloatMP>& s) noexcept;
+    Real<FloatMP> sinh(const Real<FloatMP>& s) noexcept;
 
     template<>
-    Scalar<FloatMP> tanh(const Scalar<FloatMP>& s) noexcept;
+    Real<FloatMP> tanh(const Real<FloatMP>& s) noexcept;
 
     template<>
-    Scalar<FloatMP> sech(const Scalar<FloatMP>& s) noexcept;
+    Real<FloatMP> sech(const Real<FloatMP>& s) noexcept;
 
     template<>
-    Scalar<FloatMP> csch(const Scalar<FloatMP>& s) noexcept;
+    Real<FloatMP> csch(const Real<FloatMP>& s) noexcept;
 
     template<>
-    Scalar<FloatMP> coth(const Scalar<FloatMP>& s) noexcept;
+    Real<FloatMP> coth(const Real<FloatMP>& s) noexcept;
 
     template<>
-    Scalar<FloatMP> arccosh(const Scalar<FloatMP>& s) noexcept;
+    Real<FloatMP> arccosh(const Real<FloatMP>& s) noexcept;
 
     template<>
-    Scalar<FloatMP> arcsinh(const Scalar<FloatMP>& s) noexcept;
+    Real<FloatMP> arcsinh(const Real<FloatMP>& s) noexcept;
 
     template<>
-    Scalar<FloatMP> arctanh(const Scalar<FloatMP>& s) noexcept;
+    Real<FloatMP> arctanh(const Real<FloatMP>& s) noexcept;
 
     template<>
-    Scalar<FloatMP> arccoth(const Scalar<FloatMP>& s) noexcept;
+    Real<FloatMP> arccoth(const Real<FloatMP>& s) noexcept;
 
     template<>
-    Scalar<FloatMP> floor(const Scalar<FloatMP>& s) noexcept;
+    Real<FloatMP> floor(const Real<FloatMP>& s) noexcept;
 }

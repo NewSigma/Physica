@@ -42,14 +42,14 @@ namespace Physica::Core {
         Double = Float64
     };
     /**
-     * \class Scalar is a advanced float type that supports multiple precision
+     * \class Real is a advanced float type that supports multiple precision
      */
-    template<ScalarOption Option = Float64> class Scalar;
+    template<ScalarOption Option = Float64> class Real;
     template<class AnyScalar> class Complex;
 
-    using float16 = Scalar<Float16>;
-    using float32 = Scalar<Float32>;
-    using float64 = Scalar<Float64>;
+    using float16 = Real<Float16>;
+    using float32 = Real<Float32>;
+    using float64 = Real<Float64>;
     using cfloat16 = Complex<float16>;
     using cfloat32 = Complex<float32>;
     using cfloat64 = Complex<float64>;

@@ -19,7 +19,7 @@
 #pragma once
 
 #include "Physica/Core/Utils/Container/Array.h"
-#include "Physica/Core/MultiPrecision/Scalar.h"
+#include "Physica/Core/MultiPrecision/Real.h"
 
 namespace Physica::Core {
     /**

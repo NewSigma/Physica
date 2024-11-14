@@ -18,7 +18,7 @@
  */
 #pragma once
 
-#include "Scalar.h"
+#include "Real.h"
 #include "DiffImpl/DiffTracer.h"
 
 namespace Physica::Core {

@@ -18,7 +18,7 @@
  */
 #pragma once
 
-#include "Physica/Core/MultiPrecision/Scalar.h"
+#include "Physica/Core/MultiPrecision/Real.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/PermutationMatrix.h"
 #include "Physica/Core/Physics/MD/MDCell.h"
 #include "Physica/Core/Physics/PhyConst.h"

@@ -22,7 +22,7 @@
 #include <Physica/Core/Math/Random/Random.h>
 
 using namespace Physica::Core;
-using ScalarType = Scalar<Double>;
+using ScalarType = Real<Double>;
 using ComplexType = Complex<ScalarType>;
 using MatrixType = DenseHermiteMatrix<ComplexType>;
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Weibo He.
+ * Copyright 2021-2024 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -18,23 +18,12 @@
  */
 #pragma once
 
-#include <exception>
+#include <stdexcept>
 #include <Physica/Macro.h>
 
 namespace Physica::Core {
-    class PHYSICA_API IOException : public std::exception {
-        using This = IOException;
-
-        const char* msg;
+    class PHYSICA_API IOException : public std::runtime_error {
     public:
-        IOException(const char* msg_) : msg(msg_) {}
-        IOException(const This&) = default;
-        IOException(This&&) noexcept = default;
-        ~IOException() noexcept override = default;
-        /* Operators */
-        This& operator=(const This&) = default;
-        This& operator=(This&&) noexcept = default;
-        /* Getters */
-        const char* what() const noexcept override { return msg; }
+        IOException(const char* msg) : std::runtime_error(msg) {}
     };
 }

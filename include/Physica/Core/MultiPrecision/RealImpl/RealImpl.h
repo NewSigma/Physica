@@ -81,7 +81,7 @@ namespace Physica::Core {
         return count;
     }
     /**
-     * This function is shared by \class Scalar and \class Integer.
+     * This function is shared by \class Real and \class Integer.
      */
     inline double convertDoubleImpl(int length, int power, MPUnit* __restrict byte) {
             double_extract extract{0};

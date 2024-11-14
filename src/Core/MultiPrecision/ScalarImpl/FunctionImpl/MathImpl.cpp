@@ -16,22 +16,22 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include "Physica/Core/MultiPrecision/Scalar.h"
+#include "Physica/Core/MultiPrecision/Real.h"
 #include "Physica/Core/Math/Algebra/EquationSolver/ElementaryEquation.h"
 
 namespace Physica::Core {
     template<>
-    Scalar<FloatMP> abs(const Scalar<FloatMP>& s) noexcept {
-        Scalar<FloatMP> temp(s);
-        return Scalar<FloatMP>(std::move(temp.toAbs()));
+    Real<FloatMP> abs(const Real<FloatMP>& s) noexcept {
+        Real<FloatMP> temp(s);
+        return Real<FloatMP>(std::move(temp.toAbs()));
     }
 
     template<>
-    Scalar<FloatMP> sqrt(const Scalar<FloatMP>& s) noexcept {
+    Real<FloatMP> sqrt(const Real<FloatMP>& s) noexcept {
         assert(!s.isNegative());
         if(s.isZero())
-            return Scalar(BasicConst::getInstance()._0);
-        Scalar copy_s(s);
+            return Real(BasicConst::getInstance()._0);
+        Real copy_s(s);
         //Let s < 1 so as to control error.
         int add_power = 0;
         if(copy_s.getPower() > 0) {
@@ -45,33 +45,33 @@ namespace Physica::Core {
             }
         }
 
-        Scalar result = Scalar<FloatMP>(static_cast<SignedMPUnit>(1));
+        Real result = Real<FloatMP>(static_cast<SignedMPUnit>(1));
         for(unsigned int i = 0; i < MPUnitWidth * GlobalPrecision; ++i)
-            result = (result + Scalar<FloatMP>::div(copy_s, result)) >> 1U;
+            result = (result + Real<FloatMP>::div(copy_s, result)) >> 1U;
         result.power += add_power;
         return result;
     }
 
     template<>
-    Scalar<FloatMP> ln(const Scalar<FloatMP>& s) noexcept {
+    Real<FloatMP> ln(const Real<FloatMP>& s) noexcept {
         assert(s.isPositive());
-        Scalar<FloatMP> result(static_cast<SignedMPUnit>(0));
+        Real<FloatMP> result(static_cast<SignedMPUnit>(0));
         if(s == BasicConst::getInstance()._1)
             return result;
         const auto& _1 = BasicConst::getInstance()._1;
-        auto temp_1 = Scalar<FloatMP>::sub(s, _1)
-                      / Scalar<FloatMP>::add(s, _1);
-        Scalar<FloatMP> copy_temp_1(temp_1);
-        Scalar<FloatMP> rank(static_cast<SignedMPUnit>(1));
+        auto temp_1 = Real<FloatMP>::sub(s, _1)
+                      / Real<FloatMP>::add(s, _1);
+        Real<FloatMP> copy_temp_1(temp_1);
+        Real<FloatMP> rank(static_cast<SignedMPUnit>(1));
 
         while(true) {
             //Calculate one term of the taylor series.
-            Scalar temp = temp_1 / rank;
+            Real temp = temp_1 / rank;
             result += temp;
 
             temp_1 *= copy_temp_1;
             rank += BasicConst::getInstance()._1;
-            Scalar criteria = temp_1 / rank;
+            Real criteria = temp_1 / rank;
             //Break if result meets the precision goal.
             if(result.getPower() - criteria.getPower() >= GlobalPrecision)
                 break;
@@ -84,12 +84,12 @@ namespace Physica::Core {
     }
 
     template<>
-    Scalar<FloatMP> exp(const Scalar<FloatMP>& s) noexcept {
+    Real<FloatMP> exp(const Real<FloatMP>& s) noexcept {
         if(s.isNegative())
             return reciprocal(exp(-s));
-        Scalar<FloatMP> result = 1;
-        Scalar<FloatMP> rank = 1;
-        Scalar<FloatMP> temp(s);
+        Real<FloatMP> result = 1;
+        Real<FloatMP> rank = 1;
+        Real<FloatMP> temp(s);
         const auto& relativeError = BasicConst::getInstance().expectedRelativeError;
         while(true) {
             temp /= rank;
@@ -103,34 +103,34 @@ namespace Physica::Core {
     }
 
     template<>
-    Scalar<FloatMP> pow(const Scalar<FloatMP>& s1, const Scalar<FloatMP>& s2) noexcept;
+    Real<FloatMP> pow(const Real<FloatMP>& s1, const Real<FloatMP>& s2) noexcept;
 
     template<>
-    Scalar<FloatMP> factorial(const Scalar<FloatMP>& s) noexcept {
+    Real<FloatMP> factorial(const Real<FloatMP>& s) noexcept {
         //Optimize: Unnecessary copy during floor() if s is a integer itself.
-        const Scalar<FloatMP> integer = floor(s);
+        const Real<FloatMP> integer = floor(s);
 
-        Scalar<FloatMP> result(SignedMPUnit(1));
-        Scalar<FloatMP> temp(SignedMPUnit(1));
+        Real<FloatMP> result(SignedMPUnit(1));
+        Real<FloatMP> temp(SignedMPUnit(1));
         while(temp < integer)
             result *= ++temp;
         return result;
     }
 
     template<>
-    Scalar<FloatMP> cos(const Scalar<FloatMP>& s) noexcept {
-        Scalar<FloatMP> result(static_cast<SignedMPUnit>(1));
+    Real<FloatMP> cos(const Real<FloatMP>& s) noexcept {
+        Real<FloatMP> result(static_cast<SignedMPUnit>(1));
         if(s == BasicConst::getInstance()._0)
             return result;
-        Scalar<FloatMP> square_n = square(s);
-        Scalar<FloatMP> temp_1(square_n);
-        Scalar<FloatMP> temp_2(static_cast<SignedMPUnit>(2));
-        Scalar<FloatMP> rank(static_cast<SignedMPUnit>(2));
+        Real<FloatMP> square_n = square(s);
+        Real<FloatMP> temp_1(square_n);
+        Real<FloatMP> temp_2(static_cast<SignedMPUnit>(2));
+        Real<FloatMP> rank(static_cast<SignedMPUnit>(2));
         bool changeSign = true;
 
         while(true) {
             //Calculate one term of the taylor series.
-            Scalar temp = temp_1 / temp_2;
+            Real temp = temp_1 / temp_2;
             if(changeSign)
                 temp.toOpposite();
             changeSign = !changeSign;
@@ -152,19 +152,19 @@ namespace Physica::Core {
     }
 
     template<>
-    Scalar<FloatMP> sin(const Scalar<FloatMP>& s) noexcept {
-        Scalar<FloatMP> result(static_cast<SignedMPUnit>(0));
+    Real<FloatMP> sin(const Real<FloatMP>& s) noexcept {
+        Real<FloatMP> result(static_cast<SignedMPUnit>(0));
         if(s == BasicConst::getInstance()._0)
             return result;
-        Scalar<FloatMP> square_s = square(s);
-        Scalar<FloatMP> temp_1(s);
-        Scalar<FloatMP> temp_2(static_cast<SignedMPUnit>(1));
-        Scalar<FloatMP> rank(static_cast<SignedMPUnit>(1));
+        Real<FloatMP> square_s = square(s);
+        Real<FloatMP> temp_1(s);
+        Real<FloatMP> temp_2(static_cast<SignedMPUnit>(1));
+        Real<FloatMP> rank(static_cast<SignedMPUnit>(1));
         bool changeSign = false;
 
         while(true) {
             //Calculate one term of the taylor series.
-            Scalar temp = temp_1 / temp_2;
+            Real temp = temp_1 / temp_2;
             if(changeSign)
                 temp.toOpposite();
             changeSign = !changeSign;
@@ -182,12 +182,12 @@ namespace Physica::Core {
             rank += BasicConst::getInstance()._1;
             temp_2 *= rank;
         }
-        return Scalar<FloatMP>(result);
+        return Real<FloatMP>(result);
     }
 
     template<>
-    Scalar<FloatMP> arccos(const Scalar<FloatMP>& s) noexcept {
-        using ScalarType = Scalar<FloatMP>;
+    Real<FloatMP> arccos(const Real<FloatMP>& s) noexcept {
+        using ScalarType = Real<FloatMP>;
         auto func = [&](const ScalarType& x) -> ScalarType { return cos(x) - s; };
         return bisectionMethod<decltype(func), ScalarType>(func,
                                                            BasicConst::getInstance()._0,
@@ -197,8 +197,8 @@ namespace Physica::Core {
     }
 
     template<>
-    Scalar<FloatMP> arcsin(const Scalar<FloatMP>& s) noexcept {
-        using ScalarType = Scalar<FloatMP>;
+    Real<FloatMP> arcsin(const Real<FloatMP>& s) noexcept {
+        using ScalarType = Real<FloatMP>;
         auto func = [&](const ScalarType& x) -> ScalarType { return sin(x) - s; };
         return bisectionMethod<decltype(func), ScalarType>(func,
                                                            MathConst::getInstance().Minus_PI_2,
@@ -208,104 +208,104 @@ namespace Physica::Core {
     }
 
     template<>
-    Scalar<FloatMP> arctan(const Scalar<FloatMP>& s) noexcept {
-        Scalar<FloatMP> temp = square(s) + BasicConst::getInstance()._1;
-        Scalar<FloatMP> result = arcsin(s / sqrt(temp));
+    Real<FloatMP> arctan(const Real<FloatMP>& s) noexcept {
+        Real<FloatMP> temp = square(s) + BasicConst::getInstance()._1;
+        Real<FloatMP> result = arcsin(s / sqrt(temp));
         if((result.getLength() ^ s.getLength()) < 0) // NOLINT(hicpp-signed-bitwise)
             result.toAbs();
         return result;
     }
 
     template<>
-    Scalar<FloatMP> cosh(const Scalar<FloatMP>& s) noexcept {
-        Scalar<FloatMP> result = exp(s);
+    Real<FloatMP> cosh(const Real<FloatMP>& s) noexcept {
+        Real<FloatMP> result = exp(s);
         result = (result + reciprocal(result)) >> 1;
         return result;
     }
 
     template<>
-    Scalar<FloatMP> sinh(const Scalar<FloatMP>& s) noexcept {
-        Scalar<FloatMP> result = exp(s);
-        Scalar<FloatMP> temp = reciprocal(result);
+    Real<FloatMP> sinh(const Real<FloatMP>& s) noexcept {
+        Real<FloatMP> result = exp(s);
+        Real<FloatMP> temp = reciprocal(result);
         result -= temp;
         result >>= 1;
         return result;
     }
 
     template<>
-    Scalar<FloatMP> tanh(const Scalar<FloatMP>& s) noexcept {
-        Scalar<FloatMP> result = exp(s);
-        Scalar<FloatMP> temp = reciprocal(result);
-        Scalar<FloatMP> temp1 = result + temp;
+    Real<FloatMP> tanh(const Real<FloatMP>& s) noexcept {
+        Real<FloatMP> result = exp(s);
+        Real<FloatMP> temp = reciprocal(result);
+        Real<FloatMP> temp1 = result + temp;
         result -= temp;
         result /= temp1;
         return result;
     }
 
     template<>
-    Scalar<FloatMP> sech(const Scalar<FloatMP>& s) noexcept {
-        Scalar<FloatMP> result(static_cast<SignedMPUnit>(2));
-        Scalar<FloatMP> temp = exp(s);
+    Real<FloatMP> sech(const Real<FloatMP>& s) noexcept {
+        Real<FloatMP> result(static_cast<SignedMPUnit>(2));
+        Real<FloatMP> temp = exp(s);
         temp += reciprocal(temp);
         result /= temp;
         return result;
     }
 
     template<>
-    Scalar<FloatMP> csch(const Scalar<FloatMP>& s) noexcept {
-        Scalar<FloatMP> result(static_cast<SignedMPUnit>(2));
-        Scalar<FloatMP> temp = exp(s);
+    Real<FloatMP> csch(const Real<FloatMP>& s) noexcept {
+        Real<FloatMP> result(static_cast<SignedMPUnit>(2));
+        Real<FloatMP> temp = exp(s);
         temp -= reciprocal(temp);
         result /= temp;
         return result;
     }
 
     template<>
-    Scalar<FloatMP> coth(const Scalar<FloatMP>& s) noexcept {
-        Scalar<FloatMP> result = exp(s);
-        Scalar<FloatMP> temp = reciprocal(result);
-        Scalar<FloatMP> temp1 = result - temp;
+    Real<FloatMP> coth(const Real<FloatMP>& s) noexcept {
+        Real<FloatMP> result = exp(s);
+        Real<FloatMP> temp = reciprocal(result);
+        Real<FloatMP> temp1 = result - temp;
         result += temp;
         result /= temp1;
         return result;
     }
 
     template<>
-    Scalar<FloatMP> arccosh(const Scalar<FloatMP>& s) noexcept {
-        Scalar<FloatMP> temp = square(s) - BasicConst::getInstance()._1;
-        Scalar<FloatMP> temp1 = sqrt(temp) + s;
+    Real<FloatMP> arccosh(const Real<FloatMP>& s) noexcept {
+        Real<FloatMP> temp = square(s) - BasicConst::getInstance()._1;
+        Real<FloatMP> temp1 = sqrt(temp) + s;
         return ln(temp1);
     }
 
     template<>
-    Scalar<FloatMP> arcsinh(const Scalar<FloatMP>& s) noexcept {
-        Scalar<FloatMP> temp = square(s) + BasicConst::getInstance()._1;
-        Scalar<FloatMP> temp1 = sqrt(temp) + s;
+    Real<FloatMP> arcsinh(const Real<FloatMP>& s) noexcept {
+        Real<FloatMP> temp = square(s) + BasicConst::getInstance()._1;
+        Real<FloatMP> temp1 = sqrt(temp) + s;
         return ln(temp1);
     }
 
     template<>
-    Scalar<FloatMP> arctanh(const Scalar<FloatMP>& s) noexcept {
+    Real<FloatMP> arctanh(const Real<FloatMP>& s) noexcept {
         return ln((BasicConst::getInstance()._1 + s)
-                  / Scalar<FloatMP>(BasicConst::getInstance()._1 - s)) >> 1;
+                  / Real<FloatMP>(BasicConst::getInstance()._1 - s)) >> 1;
     }
 
     template<>
-    Scalar<FloatMP> arccoth(const Scalar<FloatMP>& s) noexcept {
+    Real<FloatMP> arccoth(const Real<FloatMP>& s) noexcept {
         return ln((s + BasicConst::getInstance()._1)
-                  / Scalar<FloatMP>(s - BasicConst::getInstance()._1)) >> 1;
+                  / Real<FloatMP>(s - BasicConst::getInstance()._1)) >> 1;
     }
 
     template<>
-    Scalar<FloatMP> floor(const Scalar<FloatMP>& s) noexcept {
+    Real<FloatMP> floor(const Real<FloatMP>& s) noexcept {
         if(s.isInteger())
-            return Scalar(s);
+            return Real(s);
         const auto size = s.getSize();
         const auto power = s.getPower();
         const auto power_1 = power + 1;
         auto length = size > power_1 ? power_1 : size;
         length = s.isNegative() ? -length : length;
-        Scalar<FloatMP> result(length, power);
+        Real<FloatMP> result(length, power);
         for(int i = 0; i < length; ++i)
             result.setByte(i, s[i]);
         return result;

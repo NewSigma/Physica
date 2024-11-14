@@ -19,7 +19,7 @@
 #pragma once
 
 #include <complex>
-#include <Physica/Core/MultiPrecision/Scalar.h>
+#include <Physica/Core/MultiPrecision/Real.h>
 
 namespace Physica::Core {
     template<class T>
@@ -93,36 +93,36 @@ namespace Physica::Core {
     Complex<T> operator/(const Complex<T>& c1, const Complex<T>& c2);
 
     template<class ScalarType, ScalarOption Option>
-    Complex<typename Internal::BinaryScalarOpReturnType<ScalarType, Scalar<Option>>::Type> operator+(
-            const Complex<ScalarType>& c,const Scalar<Option>& s);
+    Complex<typename Internal::BinaryScalarOpReturnType<ScalarType, Real<Option>>::Type> operator+(
+            const Complex<ScalarType>& c,const Real<Option>& s);
 
     template<class ScalarType, ScalarOption Option>
-    Complex<typename Internal::BinaryScalarOpReturnType<ScalarType, Scalar<Option>>::Type> operator-(
-            const Complex<ScalarType>& c, const Scalar<Option>& s);
+    Complex<typename Internal::BinaryScalarOpReturnType<ScalarType, Real<Option>>::Type> operator-(
+            const Complex<ScalarType>& c, const Real<Option>& s);
 
     template<class ScalarType, ScalarOption Option>
-    Complex<typename Internal::BinaryScalarOpReturnType<ScalarType, Scalar<Option>>::Type> operator*(
-            const Complex<ScalarType>& c, const Scalar<Option>& s);
+    Complex<typename Internal::BinaryScalarOpReturnType<ScalarType, Real<Option>>::Type> operator*(
+            const Complex<ScalarType>& c, const Real<Option>& s);
 
     template<class ScalarType, ScalarOption Option>
-    Complex<typename Internal::BinaryScalarOpReturnType<ScalarType, Scalar<Option>>::Type> operator/(
-            const Complex<ScalarType>& c, const Scalar<Option>& s);
+    Complex<typename Internal::BinaryScalarOpReturnType<ScalarType, Real<Option>>::Type> operator/(
+            const Complex<ScalarType>& c, const Real<Option>& s);
 
     template<class ScalarType, ScalarOption Option>
-    Complex<typename Internal::BinaryScalarOpReturnType<ScalarType, Scalar<Option>>::Type> operator+(
-            const Scalar<Option>& s, const Complex<ScalarType>& c);
+    Complex<typename Internal::BinaryScalarOpReturnType<ScalarType, Real<Option>>::Type> operator+(
+            const Real<Option>& s, const Complex<ScalarType>& c);
 
     template<class ScalarType, ScalarOption Option>
-    Complex<typename Internal::BinaryScalarOpReturnType<ScalarType, Scalar<Option>>::Type> operator-(
-            const Scalar<Option>& s, const Complex<ScalarType>& c);
+    Complex<typename Internal::BinaryScalarOpReturnType<ScalarType, Real<Option>>::Type> operator-(
+            const Real<Option>& s, const Complex<ScalarType>& c);
 
     template<class ScalarType, ScalarOption Option>
-    Complex<typename Internal::BinaryScalarOpReturnType<ScalarType, Scalar<Option>>::Type> operator*(
-            const Scalar<Option>& s, const Complex<ScalarType>& c);
+    Complex<typename Internal::BinaryScalarOpReturnType<ScalarType, Real<Option>>::Type> operator*(
+            const Real<Option>& s, const Complex<ScalarType>& c);
 
     template<class ScalarType, ScalarOption Option>
-    Complex<typename Internal::BinaryScalarOpReturnType<ScalarType, Scalar<Option>>::Type> operator/(
-            const Scalar<Option>& s, const Complex<ScalarType>& c);
+    Complex<typename Internal::BinaryScalarOpReturnType<ScalarType, Real<Option>>::Type> operator/(
+            const Real<Option>& s, const Complex<ScalarType>& c);
 
     template<class T>
     Complex<T> operator-(const Complex<T>& c) { return Complex(-c.real(), -c.imag()); }

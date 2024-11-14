@@ -8,7 +8,7 @@ add_subdirectory(Math)
 physica_add_test(Const MultiPrecision/Const.cpp)
 physica_add_test(Diff MultiPrecision/Diff.cpp)
 physica_add_test(Integer MultiPrecision/Integer.cpp)
-physica_add_test(Scalar MultiPrecision/Scalar.cpp)
+physica_add_test(Real MultiPrecision/Real.cpp)
 physica_add_test(SIMD MultiPrecision/SIMD.cpp)
 ## Parallel
 physica_add_test(ThreadPool Parallel/ThreadPool.cpp)

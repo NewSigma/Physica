@@ -220,6 +220,54 @@ namespace Physica::Core {
     }
 
     template<class ScalarType, DiffMode Mode, int Order>
+    Diff<ScalarType, Mode, Order> tan(const Diff<ScalarType, Mode, Order>& s) {
+        using ResultType = Diff<ScalarType, Mode, Order>;
+        if constexpr (Mode == DiffMode::Forward) {
+            using GradType = typename ResultType::GradType;
+            return ResultType(tan(s.getValue()), s.getGrad() * square(sec(GradType(s))));
+        }
+        else
+            noImpl();
+    }
+
+    template<class ScalarType, DiffMode Mode, int Order>
+    Diff<ScalarType, Mode, Order> sec(const Diff<ScalarType, Mode, Order>& s) {
+        using ResultType = Diff<ScalarType, Mode, Order>;
+        if constexpr (Mode == DiffMode::Forward) {
+            using GradType = typename ResultType::GradType;
+            const auto x1 = GradType(s);
+            const auto v = sec(x1);
+            return ResultType(v.getValue(), s.getGrad() * v * tan(x1));
+        }
+        else
+            noImpl();
+    }
+
+    template<class ScalarType, DiffMode Mode, int Order>
+    Diff<ScalarType, Mode, Order> csc(const Diff<ScalarType, Mode, Order>& s) {
+        using ResultType = Diff<ScalarType, Mode, Order>;
+        if constexpr (Mode == DiffMode::Forward) {
+            using GradType = typename ResultType::GradType;
+            const auto x1 = GradType(s);
+            const auto v = csc(x1);
+            return ResultType(v.getValue(), -s.getGrad() * v * cot(x1));
+        }
+        else
+            noImpl();
+    }
+
+    template<class ScalarType, DiffMode Mode, int Order>
+    Diff<ScalarType, Mode, Order> cot(const Diff<ScalarType, Mode, Order>& s) {
+        using ResultType = Diff<ScalarType, Mode, Order>;
+        if constexpr (Mode == DiffMode::Forward) {
+            using GradType = typename ResultType::GradType;
+            return ResultType(cot(s.getValue()), -s.getGrad() * square(csc(GradType(s))));
+        }
+        else
+            noImpl();
+    }
+
+    template<class ScalarType, DiffMode Mode, int Order>
     Diff<ScalarType, Mode, Order> arccos(const Diff<ScalarType, Mode, Order>& s) {
         using ResultType = Diff<ScalarType, Mode, Order>;
         if constexpr (Mode == DiffMode::Forward) {
@@ -233,6 +281,28 @@ namespace Physica::Core {
             tracer.pushOperand(s);
             return result;
         }
+    }
+
+    template<class ScalarType, DiffMode Mode, int Order>
+    Diff<ScalarType, Mode, Order> cosh(const Diff<ScalarType, Mode, Order>& s) {
+        using ResultType = Diff<ScalarType, Mode, Order>;
+        if constexpr (Mode == DiffMode::Forward) {
+            using GradType = typename ResultType::GradType;
+            return ResultType(cosh(s.getValue()), s.getGrad() * sinh(GradType(s)));
+        }
+        else
+            noImpl();
+    }
+
+    template<class ScalarType, DiffMode Mode, int Order>
+    Diff<ScalarType, Mode, Order> sinh(const Diff<ScalarType, Mode, Order>& s) {
+        using ResultType = Diff<ScalarType, Mode, Order>;
+        if constexpr (Mode == DiffMode::Forward) {
+            using GradType = typename ResultType::GradType;
+            return ResultType(sinh(s.getValue()), s.getGrad() * cosh(GradType(s)));
+        }
+        else
+            noImpl();
     }
 
     template<class ScalarType, DiffMode Mode, int Order>

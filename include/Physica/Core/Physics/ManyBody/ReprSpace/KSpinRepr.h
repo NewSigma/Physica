@@ -104,7 +104,7 @@ namespace Physica::Core {
 
     template<unsigned int Dim, unsigned int NumSite, bool UseInversionSymm>
     inline unsigned int KSpinRepr<Dim, NumSite, UseInversionSymm>::getReducedK() const noexcept {
-        const auto kSize = FFT<Scalar<>, 1>::rSizeToKSize(NumSite);
+        const auto kSize = FFT<Real<>, 1>::rSizeToKSize(NumSite);
         if (kIndex < kSize)
             return kIndex;
         return NumSite - kIndex;

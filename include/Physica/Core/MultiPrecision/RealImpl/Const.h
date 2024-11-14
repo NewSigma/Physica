@@ -20,12 +20,12 @@
 
 #include <iosfwd>
 /*!
- * This file is part of implementations of \Scalar.
- * Do not include this header file, include Scalar.h instead.
+ * This file is part of implementations of \Real.
+ * Do not include this header file, include Real.h instead.
  */
 namespace Physica::Core {
     class PHYSICA_API BasicConst {
-        using ScalarType = Scalar<FloatMP>;
+        using ScalarType = Real<FloatMP>;
     public:
         double ln_2;
         double ln_10;
@@ -58,7 +58,7 @@ namespace Physica::Core {
     };
 
     class PHYSICA_API MathConst {
-        using ScalarType = Scalar<FloatMP>;
+        using ScalarType = Real<FloatMP>;
     public:
         ScalarType PI;
         ScalarType E;

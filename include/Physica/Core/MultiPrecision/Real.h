@@ -27,7 +27,7 @@
 #include <Physica/Core/Exception/NoImplException.h>
 #include <Physica/Core/IO/HDF5/HDF5.h>
 #include "MultiPrecisionType.h"
-#include "ScalarImpl/ScalarBase.h"
+#include "RealImpl/ScalarBase.h"
 
 namespace Physica::Core {
     namespace Internal {
@@ -54,7 +54,7 @@ namespace Physica::Core {
             constexpr static int Order = UseMixOrder ? std::min(Order1, Order2) : std::max(Order1, Order2);
             static_assert(!(Mode == DiffMode::Reverse && UseMixOrder), "[Error]: Reverse mode does not support mixed order");
 
-            using Type0 = Scalar<Option>;
+            using Type0 = Real<Option>;
             using Type1 = typename std::conditional<isComplex, Complex<Type0>, Type0>::type;
             using Type2 = typename std::conditional<isDiffable, Diff<Type1, Mode, Order>, Type1>::type;
         public:
@@ -64,10 +64,10 @@ namespace Physica::Core {
 
     template<class RandomGenerator, typename RandomGenerator::result_type FixedSeed> class Random;
     template<class ScalarType, class RandomType> class GaussRandomPool;
-    template<ScalarOption Option> __host__ __device__ inline Scalar<Option> abs(const Scalar<Option>& s) noexcept;
-    template<ScalarOption Option> __host__ __device__ inline Scalar<Option> square(const Scalar<Option>& s) noexcept;
-    template<ScalarOption Option> __host__ __device__ inline Scalar<Option> sqrt(const Scalar<Option>& s) noexcept;
-    template<ScalarOption Option> __host__ __device__ inline Scalar<Option> ln(const Scalar<Option>& s) noexcept;
+    template<ScalarOption Option> __host__ __device__ inline Real<Option> abs(const Real<Option>& s) noexcept;
+    template<ScalarOption Option> __host__ __device__ inline Real<Option> square(const Real<Option>& s) noexcept;
+    template<ScalarOption Option> __host__ __device__ inline Real<Option> sqrt(const Real<Option>& s) noexcept;
+    template<ScalarOption Option> __host__ __device__ inline Real<Option> ln(const Real<Option>& s) noexcept;
 
     inline int countLeadingZeros(MPUnit n) noexcept;
     inline int countBackZeros(unsigned long n) noexcept;
@@ -76,12 +76,12 @@ namespace Physica::Core {
 }
 
 #include "Rational.h"
-#include "ScalarImpl/ScalarImpl.h"
+#include "RealImpl/RealImpl.h"
 #ifdef PHYSICA_CUDA
-    #include "ScalarImpl/Float16.h"
+    #include "RealImpl/Float16.h"
 #endif
-#include "ScalarImpl/Float32.h"
-#include "ScalarImpl/Float64.h"
-#include "ScalarImpl/Math.h"
-#include "ScalarImpl/FloatMP.h"
-#include "ScalarImpl/SIMD.h"
+#include "RealImpl/Float32.h"
+#include "RealImpl/Float64.h"
+#include "RealImpl/Math.h"
+#include "RealImpl/FloatMP.h"
+#include "RealImpl/SIMD.h"

@@ -17,7 +17,7 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include <iostream>
-#include <Physica/Core/MultiPrecision/Scalar.h>
+#include <Physica/Core/MultiPrecision/Real.h>
 #include <Physica/Core/MultiPrecision/Diff.h>
 
 using namespace Physica::Core;

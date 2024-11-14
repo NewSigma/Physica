@@ -79,7 +79,7 @@ namespace Physica::Core {
     }
 
     __host__ __device__ inline bool PeriodIndex3D::isInReducedK() const {
-        const size_t kSpaceDimZ = FFT<Scalar<>>::rSizeToKSize(dim[2]);
+        const size_t kSpaceDimZ = FFT<Real<>>::rSizeToKSize(dim[2]);
         return index[2] < kSpaceDimZ;
     }
 

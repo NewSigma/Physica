@@ -28,6 +28,8 @@ namespace Physica::Core {
     class HalfDenseMatrixStorage : public ArrayBase<HalfDenseMatrixStorage<T, Order>, HostAllocator<T>> {
         using This = HalfDenseMatrixStorage<T, Order>;
         using Base = ArrayBase<This, HostAllocator<T>>;
+        using typename Base::lvalue_reference;
+        using typename Base::const_lvalue_reference;
     protected:
         using ArrayType = typename Traits<This>::ArrayType;
     private:
@@ -45,8 +47,8 @@ namespace Physica::Core {
         ~HalfDenseMatrixStorage() = default;
         /* Operators */
         HalfDenseMatrixStorage& operator=(This obj) noexcept { swap(obj); return *this; }
-        [[nodiscard]] __host__ __device__ inline auto operator()(size_t row, size_t col);
-        [[nodiscard]] __host__ __device__ inline auto operator()(size_t row, size_t col) const;
+        [[nodiscard]] __host__ __device__ inline lvalue_reference operator()(size_t row, size_t col);
+        [[nodiscard]] __host__ __device__ inline const_lvalue_reference operator()(size_t row, size_t col) const;
         /* Operations */
         template<class... Args>
         void resize(size_t row, size_t col, Args&&... args);
@@ -81,12 +83,14 @@ namespace Physica::Core {
     }
 
     template<class T, size_t Order>
-    __host__ __device__ inline auto HalfDenseMatrixStorage<T, Order>::operator()(size_t row, size_t col) {
+    __host__ __device__ inline typename HalfDenseMatrixStorage<T, Order>::lvalue_reference
+    HalfDenseMatrixStorage<T, Order>::operator()(size_t row, size_t col) {
         return (*this)[toIndex1D(row, col)];
     }
 
     template<class T, size_t Order>
-    __host__ __device__ inline auto HalfDenseMatrixStorage<T, Order>::operator()(size_t row, size_t col) const {
+    __host__ __device__ inline typename HalfDenseMatrixStorage<T, Order>::const_lvalue_reference
+    HalfDenseMatrixStorage<T, Order>::operator()(size_t row, size_t col) const {
         return (*this)[toIndex1D(row, col)];
     }
 

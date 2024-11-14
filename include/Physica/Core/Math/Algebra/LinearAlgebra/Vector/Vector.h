@@ -18,7 +18,7 @@
  */
 #pragma once
 
-#include <Physica/Core/MultiPrecision/Scalar.h>
+#include <Physica/Core/MultiPrecision/Real.h>
 #include <Physica/Core/Utils/Container/Array.h>
 #include <Physica/Core/Math/Algebra/LinearAlgebra/Matrix/MatrixOption.h>
 #include "VectorImpl/ContinuousVector.h"

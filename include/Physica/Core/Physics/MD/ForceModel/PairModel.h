@@ -19,7 +19,7 @@
 #pragma once
 
 #include <algorithm>
-#include "Physica/Core/MultiPrecision/Scalar.h"
+#include "Physica/Core/MultiPrecision/Real.h"
 #include "Physica/Core/Physics/MD/MDImpl/CellList.h"
 #include "EmptyForceModel.h"
 

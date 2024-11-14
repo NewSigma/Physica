@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Weibo He.
+ * Copyright 2021-2024 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -18,15 +18,12 @@
  */
 #pragma once
 
-#include <exception>
-#include "Physica/Macro.h"
+#include <stdexcept>
+#include <Physica/Macro.h>
 
 namespace Physica::Core {
-    class PHYSICA_API BadConvergenceException : public std::exception {
-        const char* msg;
+    class PHYSICA_API BadConvergenceException : public std::runtime_error {
     public:
-        BadConvergenceException(const char* msg_) : msg(msg_) {}
-        ~BadConvergenceException() override = default;
-        const char* what() const noexcept override { return msg; }
+        BadConvergenceException(const char* msg_) : std::runtime_error(msg_) {}
     };
 }

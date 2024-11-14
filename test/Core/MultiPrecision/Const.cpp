@@ -17,11 +17,11 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include <iostream>
-#include <Physica/Core/MultiPrecision/Scalar.h>
+#include <Physica/Core/MultiPrecision/Real.h>
 
 using namespace Physica::Core;
 
-void printElements(const Scalar<FloatMP>& n) {
+void printElements(const Real<FloatMP>& n) {
     int size = n.getSize();
     for(int i = 0; i < size; ++i)
         std::cout << n[i] << ' ';

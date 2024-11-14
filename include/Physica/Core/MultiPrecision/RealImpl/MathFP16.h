@@ -1,8 +1,8 @@
 /*
- * Copyright 2021 Weibo He.
+ * Copyright 2024 Weibo He.
  *
  * This file is part of Physica.
- *
+
  * Physica is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
@@ -16,13 +16,11 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include <iostream>
-#include <Physica/Core/MultiPrecision/Real.h>
+#pragma once
 
-using namespace Physica::Core;
-
-int main() {
-    Real<FloatMP> i(45);
-    std::cout << double(i >> 64) << std::endl;
-    return 0;
+namespace Physica::Core {
+    template<>
+    __host__ __device__ inline Real<Float16> abs(const Real<Float16>& s) noexcept {
+        return Real<Float16>(::__habs(s.toMachine()));
+    }
 }

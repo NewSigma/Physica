@@ -74,7 +74,6 @@ namespace Physica::Core {
 
     template<class ScalarType, size_t Size>
     [[nodiscard]] inline auto ln(const SIMD<ScalarType, Size>& x) {
-        static_assert(!ScalarType::isDifferentiable, "[Error]: Not implemented");
         return SIMD<ScalarType, Size>(log(x.toMachine()));
     }
 

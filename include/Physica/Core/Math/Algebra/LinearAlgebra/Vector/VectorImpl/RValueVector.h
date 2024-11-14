@@ -19,7 +19,7 @@
 #pragma once
 
 #include <Physica/CRTPBase.h>
-#include <Physica/Core/MultiPrecision/Scalar.h>
+#include <Physica/Core/MultiPrecision/Real.h>
 #include <Physica/Core/MultiPrecision/Complex.h>
 #include <Physica/Core/Math/Algebra/LinearAlgebra/Matrix/MatrixOption.h>
 #include <Physica/Core/Parallel/Executor/SequentialExecutor.h>

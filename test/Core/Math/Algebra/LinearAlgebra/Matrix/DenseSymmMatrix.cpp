@@ -2,7 +2,7 @@
  * Copyright 2024 Weibo He.
  *
  * This file is part of Physica.
-
+ *
  * Physica is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
@@ -16,11 +16,19 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#pragma once
+#include <Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseSymmMatrix.h>
 
-namespace Physica::Core {
-    template<>
-    __host__ __device__ inline Scalar<Float16> abs(const Scalar<Float16>& s) noexcept {
-        return Scalar<Float16>(::__habs(s.toMachine()));
-    }
+using namespace Physica::Core;
+
+int main() {
+    HalfDenseMatrixStorage<float64> s(3, 3, 0);
+    s(1, 0) = 5;
+    if (s(0, 1) != float64(5))
+        return 1;
+
+    DenseSymmMatrix<float64> m(3, 3, 0);
+    m(1, 0) = 5;
+    if (m(0, 1) != float64(5))
+        return 1;
+    return 0;
 }

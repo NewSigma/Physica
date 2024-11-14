@@ -20,7 +20,7 @@
 
 namespace Physica::Core {
     template<ScalarOption Option, bool errorTrack>
-    Scalar<Option> lnGamma(const Scalar<Option>& s);
+    Real<Option> lnGamma(const Real<Option>& s);
 
     template<class ScalarType>
     ScalarType hermiteH(unsigned int n, const ScalarBase<ScalarType>& x) {

@@ -18,13 +18,12 @@
  */
 #pragma once
 
-#include <exception>
-#include "Physica/Macro.h"
+#include <stdexcept>
+#include <Physica/Macro.h>
 
 namespace Physica::Core {
-    class PHYSICA_API RdrandException : public std::exception {
+    class PHYSICA_API RdrandException : public std::runtime_error {
     public:
-        ~RdrandException() noexcept override = default;
-        const char* what() const noexcept override { return "Unable to generate a rand in the given iteration"; }
+        RdrandException() : std::runtime_error("Unable to generate a rand in the given iteration") {}
     };
 }

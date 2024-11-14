@@ -21,7 +21,7 @@
 #include <cstring>
 #include <Physica/Core/Exception/DivideByZeroException.h>
 #include <Physica/Core/MultiPrecision/Integer.h>
-#include <Physica/Core/MultiPrecision/Scalar.h>
+#include <Physica/Core/MultiPrecision/Real.h>
 
 namespace Physica::Core {
     Integer::Integer(int i)
@@ -30,7 +30,7 @@ namespace Physica::Core {
         byte[0] = i >= 0 ? i : -i;
     }
 
-    Integer::Integer(const Scalar<FloatMP>& s) {
+    Integer::Integer(const Real<FloatMP>& s) {
         const auto power = s.getPower();
         if (power < 0) {
             byte = reinterpret_cast<MPUnit*>(malloc(sizeof(MPUnit)));

@@ -45,23 +45,23 @@ namespace Physica {
 
 namespace Physica::Core {
     template<>
-    class Scalar<Float64> : public ScalarBase<Scalar<Float64>> {
-        using This = Scalar<Float64>;
+    class Real<Float64> : public ScalarBase<Real<Float64>> {
+        using This = Real<Float64>;
         using Base = ScalarBase<This>;
     public:
         using device_obj_type = This;
     private:
         double d;
     public:
-        Scalar() = default;
-        __host__ __device__ Scalar(double d_) noexcept : d(d_) {}
-        Scalar(const Integer& i) : Scalar(double(i)) {}
-        Scalar(const Rational& r) : Scalar(double(r)) {}
+        Real() = default;
+        __host__ __device__ Real(double d_) noexcept : d(d_) {}
+        Real(const Integer& i) : Real(double(i)) {}
+        Real(const Rational& r) : Real(double(r)) {}
         template<class OtherScalar>
-        __host__ __device__ explicit inline Scalar(const ScalarBase<OtherScalar>& s);
-        Scalar(const Scalar&) = default;
-        Scalar(Scalar&&) noexcept = default;
-        //~Scalar() = default; /* Dynamic parallelism of CUDA 12.1 does not recognize that PlainStruct is trivial */
+        __host__ __device__ explicit inline Real(const ScalarBase<OtherScalar>& s);
+        Real(const Real&) = default;
+        Real(Real&&) noexcept = default;
+        //~Real() = default; /* Dynamic parallelism of CUDA 12.1 does not recognize that PlainStruct is trivial */
         /* Operators */
         using Base::operator>;
         using Base::operator<;
@@ -69,19 +69,19 @@ namespace Physica::Core {
         This& operator=(This&& obj) noexcept = default;
         __host__ __device__ explicit operator float() const noexcept { return d; }
         __host__ __device__ explicit operator double() const noexcept { return d; }
-        __host__ __device__ Scalar operator+(const Scalar& s) const noexcept { return Scalar(d + s.d); }
-        __host__ __device__ Scalar operator-(const Scalar& s) const noexcept { return Scalar(d - s.d); }
-        __host__ __device__ Scalar operator*(const Scalar& s) const noexcept { return Scalar(d * s.d); }
-        __host__ __device__ Scalar operator/(const Scalar& s) const noexcept { return Scalar(d / s.d); }
-        Scalar operator<<(int i) const { return Scalar(d * std::pow(2, i)); }
-        Scalar operator>>(int i) const { return Scalar(d / std::pow(2, i)); }
-        __host__ __device__ Scalar operator-() const noexcept { return Scalar(-d); }
-        __host__ __device__ bool operator>(const Scalar& s) const noexcept { return d > s.d; }
-        __host__ __device__ bool operator<(const Scalar& s) const noexcept { return d < s.d; }
-        __host__ __device__ bool operator==(const Scalar& s) const noexcept { return d == s.d; }
-        PHYSICA_API friend std::istream& operator>>(std::istream& is, Scalar& scalar);
+        __host__ __device__ Real operator+(const Real& s) const noexcept { return Real(d + s.d); }
+        __host__ __device__ Real operator-(const Real& s) const noexcept { return Real(d - s.d); }
+        __host__ __device__ Real operator*(const Real& s) const noexcept { return Real(d * s.d); }
+        __host__ __device__ Real operator/(const Real& s) const noexcept { return Real(d / s.d); }
+        Real operator<<(int i) const { return Real(d * std::pow(2, i)); }
+        Real operator>>(int i) const { return Real(d / std::pow(2, i)); }
+        __host__ __device__ Real operator-() const noexcept { return Real(-d); }
+        __host__ __device__ bool operator>(const Real& s) const noexcept { return d > s.d; }
+        __host__ __device__ bool operator<(const Real& s) const noexcept { return d < s.d; }
+        __host__ __device__ bool operator==(const Real& s) const noexcept { return d == s.d; }
+        PHYSICA_API friend std::istream& operator>>(std::istream& is, Real& scalar);
         /* Operations */
-        void swap(Scalar& __restrict s) noexcept { std::swap(d, s.d); }
+        void swap(Real& __restrict s) noexcept { std::swap(d, s.d); }
         /* Getters */
         [[nodiscard]] constexpr static ScalarOption getOption() { return Float64; }
         [[nodiscard]] __host__ __device__ double toMachine() const noexcept { return d; }
@@ -92,26 +92,26 @@ namespace Physica::Core {
         [[nodiscard]] bool isInteger() const;
         /* Static Members */
         template<class RandomGenerator>
-        [[nodiscard]] inline static Scalar random_uniform(RandomGenerator& gen);
+        [[nodiscard]] inline static Real random_uniform(RandomGenerator& gen);
         template<class RandomGenerator, typename RandomGenerator::result_type FixedSeed>
-        [[nodiscard]] inline static Scalar random_uniform(Random<RandomGenerator, FixedSeed>& pool);
+        [[nodiscard]] inline static Real random_uniform(Random<RandomGenerator, FixedSeed>& pool);
         template<class RandomGenerator>
-        [[nodiscard]] inline static Scalar random_normal(RandomGenerator& gen);
+        [[nodiscard]] inline static Real random_normal(RandomGenerator& gen);
         template<class RandomGenerator, typename RandomGenerator::result_type FixedSeed>
-        [[nodiscard]] inline static Scalar random_normal(Random<RandomGenerator, FixedSeed>& pool);
+        [[nodiscard]] inline static Real random_normal(Random<RandomGenerator, FixedSeed>& pool);
         template<class RandomType>
-        [[nodiscard]] static Scalar random_normal(GaussRandomPool<This, RandomType>& pool) { return pool(); }
+        [[nodiscard]] static Real random_normal(GaussRandomPool<This, RandomType>& pool) { return pool(); }
         template<class Distribution, class RandomGenerator>
-        [[nodiscard]] inline static Scalar random_any(Distribution& dist, RandomGenerator& gen);
+        [[nodiscard]] inline static Real random_any(Distribution& dist, RandomGenerator& gen);
     #ifdef PHYSICA_HDF5
         [[nodiscard]] static const H5::DataType& getH5DataType() { return H5::PredType::NATIVE_DOUBLE; }
     #endif
     };
 
     template<class OtherScalar>
-    __host__ __device__ inline Scalar<Float64>::Scalar(const ScalarBase<OtherScalar>& s) : d(double(s.getDerived())) {}
+    __host__ __device__ inline Real<Float64>::Real(const ScalarBase<OtherScalar>& s) : d(double(s.getDerived())) {}
 
-    __host__ __device__ inline bool Scalar<Float64>::isFinite() const noexcept {
+    __host__ __device__ inline bool Real<Float64>::isFinite() const noexcept {
     #ifdef __CUDA_ARCH__
         return isfinite(d);
     #else
@@ -120,54 +120,54 @@ namespace Physica::Core {
     }
 
     template<class RandomGenerator>
-    inline Scalar<Float64> Scalar<Float64>::random_uniform(RandomGenerator& gen) {
+    inline Real<Float64> Real<Float64>::random_uniform(RandomGenerator& gen) {
         std::uniform_real_distribution<double> dist{};
-        return Scalar(dist(gen));
+        return Real(dist(gen));
     }
 
     template<class RandomGenerator, typename RandomGenerator::result_type FixedSeed>
-    inline Scalar<Float64> Scalar<Float64>::random_uniform(Random<RandomGenerator, FixedSeed>& pool) {
+    inline Real<Float64> Real<Float64>::random_uniform(Random<RandomGenerator, FixedSeed>& pool) {
         return random_uniform<RandomGenerator>(pool.getGen());
     }
 
     template<class RandomGenerator>
-    inline Scalar<Float64> Scalar<Float64>::random_normal(RandomGenerator& gen) {
+    inline Real<Float64> Real<Float64>::random_normal(RandomGenerator& gen) {
         std::normal_distribution<double> dist{};
-        return Scalar(dist(gen));
+        return Real(dist(gen));
     }
 
     template<class RandomGenerator, typename RandomGenerator::result_type FixedSeed>
-    inline Scalar<Float64> Scalar<Float64>::random_normal(Random<RandomGenerator, FixedSeed>& pool) {
+    inline Real<Float64> Real<Float64>::random_normal(Random<RandomGenerator, FixedSeed>& pool) {
         return random_normal<RandomGenerator>(pool.getGen());
     }
 
     template<class Distribution, class RandomGenerator>
-    inline Scalar<Float64> Scalar<Float64>::random_any(Distribution& dist, RandomGenerator& gen) {
-        return Scalar(dist(gen));
+    inline Real<Float64> Real<Float64>::random_any(Distribution& dist, RandomGenerator& gen) {
+        return Real(dist(gen));
     }
 
-    inline std::ostream& operator<<(std::ostream& os, const Scalar<Float64>& s) {
+    inline std::ostream& operator<<(std::ostream& os, const Real<Float64>& s) {
         const auto lastPrec = os.precision();
         return os << std::setprecision(16) << double(s) << std::setprecision(lastPrec);
     }
 
-    inline Scalar<Float64>& operator++(Scalar<Float64>& s) {
+    inline Real<Float64>& operator++(Real<Float64>& s) {
         s += float64(1.0);
         return s;
     }
 
-    inline Scalar<Float64>& operator--(Scalar<Float64>& s) {
+    inline Real<Float64>& operator--(Real<Float64>& s) {
         s -= float64(1.0);
         return s;
     }
 
-    inline Scalar<Float64> operator++(Scalar<Float64>& s, int) {
+    inline Real<Float64> operator++(Real<Float64>& s, int) {
         float64 temp(s);
         s += float64(1.0);
         return temp;
     }
 
-    inline Scalar<Float64> operator--(Scalar<Float64>& s, int) {
+    inline Real<Float64> operator--(Real<Float64>& s, int) {
         float64 temp(s);
         s -= float64(1.0);
         return temp;
@@ -176,7 +176,7 @@ namespace Physica::Core {
 
 namespace std {
     template<>
-    struct numeric_limits<Physica::Core::Scalar<Physica::Core::Float64>> : 
+    struct numeric_limits<Physica::Core::Real<Physica::Core::Float64>> : 
     #ifdef PHYSICA_CUDA
         public ::cuda::std::numeric_limits<double>
     #else

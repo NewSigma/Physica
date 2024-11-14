@@ -51,9 +51,6 @@ namespace Physica::Core {
 /*
     template<class ScalarType, DiffMode Mode, int Order>
     Diff<ScalarType, Mode, Order> pow(const Diff<ScalarType, Mode, Order>& s, const Diff<ScalarType, Mode, Order>& n);
-
-    template<class ScalarType, DiffMode Mode, int Order>
-    Diff<ScalarType, Mode, Order> factorial(const Diff<ScalarType, Mode, Order>& s);
 */
     template<class ScalarType, DiffMode Mode, int Order>
     Diff<ScalarType, Mode, Order> cos(const Diff<ScalarType, Mode, Order>& s);
@@ -63,7 +60,7 @@ namespace Physica::Core {
 
     template<class ScalarType, DiffMode Mode, int Order>
     void sincos(Diff<ScalarType, Mode, Order> s, Diff<ScalarType, Mode, Order>& sin_result, Diff<ScalarType, Mode, Order>& cos_result);
-/*
+
     template<class ScalarType, DiffMode Mode, int Order>
     Diff<ScalarType, Mode, Order> tan(const Diff<ScalarType, Mode, Order>& s);
 
@@ -75,7 +72,7 @@ namespace Physica::Core {
 
     template<class ScalarType, DiffMode Mode, int Order>
     Diff<ScalarType, Mode, Order> cot(const Diff<ScalarType, Mode, Order>& s);
-*/
+
     template<class ScalarType, DiffMode Mode, int Order>
     Diff<ScalarType, Mode, Order> arccos(const Diff<ScalarType, Mode, Order>& s);
 /*
@@ -94,13 +91,13 @@ namespace Physica::Core {
 
     template<class ScalarType, DiffMode Mode, int Order>
     Diff<ScalarType, Mode, Order> arccot(const Diff<ScalarType, Mode, Order>& s);
-
+*/
     template<class ScalarType, DiffMode Mode, int Order>
     Diff<ScalarType, Mode, Order> cosh(const Diff<ScalarType, Mode, Order>& s);
 
     template<class ScalarType, DiffMode Mode, int Order>
     Diff<ScalarType, Mode, Order> sinh(const Diff<ScalarType, Mode, Order>& s);
-*/
+
     template<class ScalarType, DiffMode Mode, int Order>
     Diff<ScalarType, Mode, Order> tanh(const Diff<ScalarType, Mode, Order>& s);
 /*

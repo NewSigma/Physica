@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include "Physica/Core/MultiPrecision/Scalar.h"
+#include "Physica/Core/MultiPrecision/Real.h"
 
 namespace Physica::Core {
     /*!
@@ -74,7 +74,7 @@ namespace Physica::Core {
 
         int goal = 1;
         while(goal < precision) {
-            Scalar y(a);
+            Real y(a);
             a = (a + b) >> 1;
             b = sqrt(b * y);
             y -= a;

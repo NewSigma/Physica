@@ -19,7 +19,7 @@
 #pragma once
 
 #include <algorithm>
-#include "Physica/Core/MultiPrecision/Scalar.h"
+#include "Physica/Core/MultiPrecision/Real.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h"
 #include "Physica/Core/Math/Statistics/LinearFit.h"
 #include "Physica/Core/Math/Calculus/Interpolation.h"

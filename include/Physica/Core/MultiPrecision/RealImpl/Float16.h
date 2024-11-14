@@ -46,24 +46,24 @@ namespace Physica {
 
 namespace Physica::Core {
     template<>
-    class Scalar<Float16> : public ScalarBase<Scalar<Float16>> {
-        using This = Scalar<Float16>;
+    class Real<Float16> : public ScalarBase<Real<Float16>> {
+        using This = Real<Float16>;
         using Base = ScalarBase<This>;
     public:
         using device_obj_type = This;
     private:
         __half h;
     public:
-        Scalar() = default;
-        __host__ __device__ Scalar(int i) : h(i) {}
-        __host__ __device__ Scalar(__half f_) : h(f_) {}
-        __host__ __device__ Scalar(float f_) : h(f_) {}
-        __host__ __device__ Scalar(double d_) : h(d_) {}
+        Real() = default;
+        __host__ __device__ Real(int i) : h(i) {}
+        __host__ __device__ Real(__half f_) : h(f_) {}
+        __host__ __device__ Real(float f_) : h(f_) {}
+        __host__ __device__ Real(double d_) : h(d_) {}
         template<class OtherScalar>
-        __host__ __device__ explicit inline Scalar(const ScalarBase<OtherScalar>& s);
-        Scalar(const This&) = default;
-        Scalar(This&&) noexcept = default;
-        //~Scalar() = default; /* Dynamic parallelism of CUDA 12.1 does not recognize that PlainStruct is trivial */
+        __host__ __device__ explicit inline Real(const ScalarBase<OtherScalar>& s);
+        Real(const This&) = default;
+        Real(This&&) noexcept = default;
+        //~Real() = default; /* Dynamic parallelism of CUDA 12.1 does not recognize that PlainStruct is trivial */
         /* Operators */
         using Base::operator>;
         using Base::operator<;
@@ -71,16 +71,16 @@ namespace Physica::Core {
         This& operator=(This&& obj) noexcept = default;
         __host__ __device__ explicit operator float() const { return h; }
         __host__ __device__ explicit operator double() const { return h; }
-        __host__ __device__ Scalar operator+(const Scalar& s) const { return Scalar(h + s.h); }
-        __host__ __device__ Scalar operator-(const Scalar& s) const { return Scalar(h - s.h); }
-        __host__ __device__ Scalar operator*(const Scalar& s) const { return Scalar(h * s.h); }
-        __host__ __device__ Scalar operator/(const Scalar& s) const { return Scalar(h / s.h); }
-        __host__ __device__ Scalar operator-() const noexcept { return Scalar(-h); }
-        __host__ __device__ bool operator>(const Scalar& s) const { return h > s.h; }
-        __host__ __device__ bool operator<(const Scalar& s) const { return h < s.h; }
-        __host__ __device__ bool operator==(const Scalar& s) const { return h == s.h; }
+        __host__ __device__ Real operator+(const Real& s) const { return Real(h + s.h); }
+        __host__ __device__ Real operator-(const Real& s) const { return Real(h - s.h); }
+        __host__ __device__ Real operator*(const Real& s) const { return Real(h * s.h); }
+        __host__ __device__ Real operator/(const Real& s) const { return Real(h / s.h); }
+        __host__ __device__ Real operator-() const noexcept { return Real(-h); }
+        __host__ __device__ bool operator>(const Real& s) const { return h > s.h; }
+        __host__ __device__ bool operator<(const Real& s) const { return h < s.h; }
+        __host__ __device__ bool operator==(const Real& s) const { return h == s.h; }
         /* Operations */
-        void swap(Scalar& __restrict s) noexcept { std::swap(h, s.h); }
+        void swap(Real& __restrict s) noexcept { std::swap(h, s.h); }
         /* Getters */
         [[nodiscard]] constexpr static ScalarOption getOption() { return Float16; }
         [[nodiscard]] __host__ __device__ __half toMachine() const noexcept { return h; }
@@ -91,9 +91,9 @@ namespace Physica::Core {
     };
 
     template<class OtherScalar>
-    __host__ __device__ inline Scalar<Float16>::Scalar(const ScalarBase<OtherScalar>& s) : h(s.getDerived().toMachine()) {}
+    __host__ __device__ inline Real<Float16>::Real(const ScalarBase<OtherScalar>& s) : h(s.getDerived().toMachine()) {}
 
-    inline std::ostream& operator<<(std::ostream& os, const Scalar<Float16>& s) {
+    inline std::ostream& operator<<(std::ostream& os, const Real<Float16>& s) {
         const auto lastPrec = os.precision();
         return os << std::setprecision(4) << float(s) << std::setprecision(lastPrec);
     }

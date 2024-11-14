@@ -18,13 +18,12 @@
  */
 #pragma once
 
-#include <exception>
+#include <stdexcept>
 #include <Physica/Macro.h>
 
 namespace Physica::Core {
-    class PHYSICA_API DivideByZeroException : public std::exception {
+    class PHYSICA_API DivideByZeroException : public std::runtime_error {
     public:
-        ~DivideByZeroException() noexcept override = default;
-        const char* what() const noexcept override { return "[Error]: Scalar is divided by zero."; }
+        DivideByZeroException() : std::runtime_error("[Error]: Scalar is divided by zero.") {}
     };
 }

@@ -16,13 +16,13 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include <Physica/Core/MultiPrecision/Scalar.h>
+#include <Physica/Core/MultiPrecision/Real.h>
 
 namespace Physica::Core {
     //////////////////////////////////FloatMP///////////////////////////////////
-    Scalar<FloatMP>::Scalar() : byte(nullptr), length(0), power(0) {}
+    Real<FloatMP>::Real() : byte(nullptr), length(0), power(0) {}
 
-    Scalar<FloatMP>::Scalar(int length_, int power_)
+    Real<FloatMP>::Real(int length_, int power_)
             : byte(reinterpret_cast<MPUnit*>(malloc(std::abs(length_) * sizeof(MPUnit))))
             , length(length_), power(power_) {
         /**
@@ -31,15 +31,15 @@ namespace Physica::Core {
         assert(length != INT_MIN);
     }
 
-    Scalar<FloatMP>::Scalar(int i) : Scalar(static_cast<SignedMPUnit>(i)) {}
+    Real<FloatMP>::Real(int i) : Real(static_cast<SignedMPUnit>(i)) {}
 
-    Scalar<FloatMP>::Scalar(SignedMPUnit unit)
+    Real<FloatMP>::Real(SignedMPUnit unit)
             : byte(reinterpret_cast<MPUnit*>(malloc(sizeof(MPUnit))))
             , length(unit > 0 ? 1 : -1), power(0) {
             byte[0] = unit > 0 ? unit : -unit;
     }
 
-    Scalar<FloatMP>::Scalar(double d) {
+    Real<FloatMP>::Real(double d) {
         if(d == 0) {
             byte = reinterpret_cast<MPUnit*>(malloc(sizeof(MPUnit)));
             length = 1;
@@ -111,17 +111,17 @@ namespace Physica::Core {
             length = -length;
     }
 
-    Scalar<FloatMP>::Scalar(const Integer& i)
+    Real<FloatMP>::Real(const Integer& i)
             : byte(reinterpret_cast<MPUnit*>(malloc(i.getSize() * sizeof(MPUnit))))
             , length(i.getLength())
             , power(i.getSize() - 1) {
         memcpy(byte, i.getByte(), getSize() * sizeof(MPUnit));
     }
 
-    Scalar<FloatMP>::Scalar(const Rational& r) {
-        Scalar<FloatMP> numerator(r.getNumerator());
-        Scalar<FloatMP> denominator(r.getDenominator());
-        Scalar<FloatMP> result = numerator / denominator;
+    Real<FloatMP>::Real(const Rational& r) {
+        Real<FloatMP> numerator(r.getNumerator());
+        Real<FloatMP> denominator(r.getDenominator());
+        Real<FloatMP> result = numerator / denominator;
         byte = result.byte;
         result.byte = nullptr;
         length = result.length;
@@ -130,17 +130,17 @@ namespace Physica::Core {
     /**
      * Not accurate.
      */
-    Scalar<FloatMP>::Scalar(const char* s) : Scalar(strtod(s, nullptr)) {}
+    Real<FloatMP>::Real(const char* s) : Real(strtod(s, nullptr)) {}
     /**
     * Not accurate.
     */
-    Scalar<FloatMP>::Scalar(const wchar_t* s) {
+    Real<FloatMP>::Real(const wchar_t* s) {
         size_t size = wcslen(s);
         char* str = new char[size + 1];
         str[size] = '\0';
         for(size_t i = 0; i < size; ++i)
             str[i] = (char)s[i];
-        Scalar<FloatMP> temp(str);
+        Real<FloatMP> temp(str);
         byte = temp.byte;
         temp.byte = nullptr;
         length = temp.length;
@@ -148,61 +148,61 @@ namespace Physica::Core {
         delete[] str;
     }
 
-    MPUnit Scalar<FloatMP>::operator[](unsigned int index) const {
+    MPUnit Real<FloatMP>::operator[](unsigned int index) const {
         assert(index < static_cast<unsigned int>(getSize()));
         return byte[index];
     }
 
-    Scalar<FloatMP>::operator double() const {
+    Real<FloatMP>::operator double() const {
         if(isZero())
             return 0.0;
         return convertDoubleImpl(length, power, byte);
     }
 
-    Scalar<FloatMP>::Scalar(const Scalar<FloatMP>& s)
+    Real<FloatMP>::Real(const Real<FloatMP>& s)
             : byte(reinterpret_cast<MPUnit*>(malloc(s.getSize() * sizeof(MPUnit))))
             , length(s.length), power(s.power) {
         memcpy(byte, s.byte, getSize() * sizeof(MPUnit));
     }
 
-    Scalar<FloatMP>::Scalar(Scalar<FloatMP>&& s) noexcept
+    Real<FloatMP>::Real(Real<FloatMP>&& s) noexcept
             : byte(s.byte), length(s.length), power(s.power) {
         s.byte = nullptr;
     }
 
-    Scalar<FloatMP>::~Scalar() {
+    Real<FloatMP>::~Real() {
         free(byte);
     }
 
-    Scalar<FloatMP> Scalar<FloatMP>::operator+(
-            const Scalar<FloatMP>& s) const {
+    Real<FloatMP> Real<FloatMP>::operator+(
+            const Real<FloatMP>& s) const {
         auto result = add(*this, s);
         cutLength(result);
         return result;
     }
 
-    Scalar<FloatMP> Scalar<FloatMP>::operator-(
-            const Scalar<FloatMP>& s) const {
+    Real<FloatMP> Real<FloatMP>::operator-(
+            const Real<FloatMP>& s) const {
         auto result = sub(*this, s);
         cutLength(result);
         return result;
     }
 
-    Scalar<FloatMP> Scalar<FloatMP>::operator*(
-            const Scalar<FloatMP>& s) const {
+    Real<FloatMP> Real<FloatMP>::operator*(
+            const Real<FloatMP>& s) const {
         auto result = mul(*this, s);
         cutLength(result);
         return result;
     }
 
-    Scalar<FloatMP> Scalar<FloatMP>::operator/(
-            const Scalar<FloatMP>& s) const {
+    Real<FloatMP> Real<FloatMP>::operator/(
+            const Real<FloatMP>& s) const {
         return div(*this, s);
     }
 
-    Scalar<FloatMP> Scalar<FloatMP>::operator<<(int bits) const {
+    Real<FloatMP> Real<FloatMP>::operator<<(int bits) const {
         if(bits == 0)
-            return Scalar(*this);
+            return Real(*this);
         if(bits < 0)
             return *this >> -bits;
         const int size = getSize();
@@ -210,13 +210,13 @@ namespace Physica::Core {
         const int remainder = bits - quotient * MPUnitWidth;
         //If remainder = 0, we must return directly because shifting a MPUnit for MPUnitWidth bits is a undefined behavior.
         if(remainder == 0) {
-            Scalar copy(*this);
+            Real copy(*this);
             copy.power += quotient;
             return copy;
         }
 
         const bool carry = countLeadingZeros(byte[size - 1]) < remainder;
-        Scalar result(length >= 0 ? (size + carry) : -(size + carry), power + quotient + carry);
+        Real result(length >= 0 ? (size + carry) : -(size + carry), power + quotient + carry);
         result.byte[0] = 0;
         const int size_1 = size - 1;
         for(int i = 0; i < size_1; ++i) {
@@ -229,9 +229,9 @@ namespace Physica::Core {
         return result;
     }
 
-    Scalar<FloatMP> Scalar<FloatMP>::operator>>(int bits) const {
+    Real<FloatMP> Real<FloatMP>::operator>>(int bits) const {
         if(bits == 0)
-            return Scalar(*this);
+            return Real(*this);
         if(bits < 0)
             return *this << -bits;
         const int size = getSize();
@@ -239,13 +239,13 @@ namespace Physica::Core {
         const unsigned int remainder = bits - quotient * MPUnitWidth;
         //If remainder = 0, we must return directly because shifting a MPUnit for MPUnitWidth bits is a undefined behavior.
         if(remainder == 0) {
-            Scalar copy(*this);
+            Real copy(*this);
             copy.power -= quotient;
             return copy;
         }
 
         const bool carry = (countLeadingZeros(byte[size - 1]) + remainder) < MPUnitWidth;
-        Scalar result(length >= 0 ? (size + carry) : -(size + carry), power - quotient + carry - 1);
+        Real result(length >= 0 ? (size + carry) : -(size + carry), power - quotient + carry - 1);
         if(carry)
             result.byte[size] = byte[size - 1] >> remainder;
 
@@ -257,13 +257,13 @@ namespace Physica::Core {
         return result;
     }
 
-    Scalar<FloatMP> Scalar<FloatMP>::operator-() const {
-        Scalar result(-length, power);
+    Real<FloatMP> Real<FloatMP>::operator-() const {
+        Real result(-length, power);
         memcpy(result.byte, byte, getSize() * sizeof(MPUnit));
         return result;
     }
 
-    void Scalar<FloatMP>::swap(Scalar<FloatMP>& __restrict s) noexcept {
+    void Real<FloatMP>::swap(Real<FloatMP>& __restrict s) noexcept {
         assert(this != &s && "[Error]: Self swap is likely a bug");
         std::swap(byte, s.byte);
         std::swap(length, s.length);
@@ -276,14 +276,14 @@ namespace Physica::Core {
      * Optimize:
      * Is subtract faster than comparing the elements?
      */
-    bool absCompare(const Scalar<FloatMP>& s1, const Scalar<FloatMP>& s2) {
+    bool absCompare(const Real<FloatMP>& s1, const Real<FloatMP>& s2) {
         if(s1.isZero() || s2.isZero())
             return true;
         if(s1.getPower() > s2.getPower())
             return true;
         if(s1.getPower() < s2.getPower())
             return false;
-        const Scalar<FloatMP>* longer, *shorter;
+        const Real<FloatMP>* longer, *shorter;
         int longer_length, shorter_length;
         /* Compare length */ {
             const auto n1_length = s1.getLength(), n2_length = s2.getLength();
@@ -307,7 +307,7 @@ namespace Physica::Core {
      * Optimize:
      * Is subtract faster than comparing the elements?
      */
-    bool operator>(const Scalar<FloatMP>& s1, const Scalar<FloatMP>& s2) {
+    bool operator>(const Real<FloatMP>& s1, const Real<FloatMP>& s2) {
         //Judge from sign.
         const bool positive = s1.isPositive();
         if(positive) {
@@ -327,11 +327,11 @@ namespace Physica::Core {
         else if(s1.getPower() < s2.getPower())
             result = !positive;
         else {
-            auto scalar1 = static_cast<const Scalar<FloatMP>&>(s1);
-            auto scalar2 = static_cast<const Scalar<FloatMP>&>(s2);
+            auto scalar1 = static_cast<const Real<FloatMP>&>(s1);
+            auto scalar2 = static_cast<const Real<FloatMP>&>(s2);
             //The only method left.
             //Optimize: We have confirmed that s1, s2 have the same sign and power, possible make use them to get better performance.
-            Scalar<FloatMP> subtract = scalar1 - scalar2;
+            Real<FloatMP> subtract = scalar1 - scalar2;
             result = subtract.isPositive();
         }
         return result;
@@ -340,7 +340,7 @@ namespace Physica::Core {
      * Optimize:
      * Is subtract faster than comparing the elements?
      */
-    bool operator<(const Scalar<FloatMP>& s1, const Scalar<FloatMP>& s2) {
+    bool operator<(const Real<FloatMP>& s1, const Real<FloatMP>& s2) {
         //Judge from sign.
         const bool positive = s1.isPositive();
         if(positive) {
@@ -360,32 +360,32 @@ namespace Physica::Core {
         else if(s1.getPower() < s2.getPower())
             result = positive;
         else {
-            auto scalar1 = static_cast<const Scalar<FloatMP>&>(s1);
-            auto scalar2 = static_cast<const Scalar<FloatMP>&>(s2);
+            auto scalar1 = static_cast<const Real<FloatMP>&>(s1);
+            auto scalar2 = static_cast<const Real<FloatMP>&>(s2);
             //The only method left.
             //Optimize: We have confirmed that s1, s2 have the same sign and power, possible make use them to get better performance.
-            Scalar<FloatMP> subtract = scalar1 - scalar2;
+            Real<FloatMP> subtract = scalar1 - scalar2;
             result = subtract.isNegative();
         }
         return result;
     }
 
-    bool operator==(const Scalar<FloatMP>& s1, const Scalar<FloatMP>& s2) {
-        auto scalar1 = static_cast<const Scalar<FloatMP>&>(s1);
-        auto scalar2 = static_cast<const Scalar<FloatMP>&>(s2);
+    bool operator==(const Real<FloatMP>& s1, const Real<FloatMP>& s2) {
+        auto scalar1 = static_cast<const Real<FloatMP>&>(s1);
+        auto scalar2 = static_cast<const Real<FloatMP>&>(s2);
         return s1.getPower() == s2.getPower()
                //Here length may not equal n.length because we define numbers like 1.0 and 1.00 are equal.
                && ((s1.getLength() ^ s2.getLength()) >= 0) //NOLINT
                //Optimize: We have confirmed that s1, s2 have the same sign and power, possible make use them to get better performance.
-               && Scalar<FloatMP>(scalar1 - scalar2).isZero();
+               && Real<FloatMP>(scalar1 - scalar2).isZero();
     }
     ///////////////////////////////////////////Float////////////////////////////////////////////////
-    std::istream& operator>>(std::istream& is, Scalar<Float32>& scalar) {
+    std::istream& operator>>(std::istream& is, Real<Float32>& scalar) {
         is >> scalar.f;
         return is;
     }
 
-    bool Scalar<Float32>::isInteger() const {
+    bool Real<Float32>::isInteger() const {
         float_extract extract{f};
         const auto exp = extract.exp;
         if(exp == 0U)
@@ -408,12 +408,12 @@ namespace Physica::Core {
         return exp + zeros >= 150;
     }
     ///////////////////////////////////////////Double////////////////////////////////////////////////
-    std::istream& operator>>(std::istream& is, Scalar<Float64>& scalar) {
+    std::istream& operator>>(std::istream& is, Real<Float64>& scalar) {
         is >> scalar.d;
         return is;
     }
 
-    bool Scalar<Float64>::isInteger() const {
+    bool Real<Float64>::isInteger() const {
         double_extract extract{d};
         const auto exp = extract.exp;
         if(exp == 0U)
@@ -436,7 +436,7 @@ namespace Physica::Core {
         return exp + zeros >= 1075;
     }
     ///////////////////////////////////////////Global////////////////////////////////////////////////
-    std::ostream& operator<<(std::ostream& os, const Scalar<FloatMP>& s) {
+    std::ostream& operator<<(std::ostream& os, const Real<FloatMP>& s) {
         const auto& basicConst = BasicConst::getInstance();
         const int power = s.getPower();
         int exp = int(power * basicConst.ln_2_10);

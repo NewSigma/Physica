@@ -40,8 +40,8 @@ namespace Physica::Core {
     public:
         Integer(int i); //NOLINT Conversion is always available.
         template<ScalarOption Option>
-        explicit Integer(const Scalar<Option>& s);
-        explicit Integer(const Scalar<FloatMP>& s);
+        explicit Integer(const Real<Option>& s);
+        explicit Integer(const Real<FloatMP>& s);
         Integer(const Integer& toCopy);
         Integer(Integer&& toMove) noexcept;
         ~Integer();

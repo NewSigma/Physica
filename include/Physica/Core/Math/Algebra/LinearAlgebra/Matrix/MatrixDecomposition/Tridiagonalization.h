@@ -74,7 +74,9 @@ namespace Physica::Core {
     Tridiagonalization<ScalarType, Order>::Tridiagonalization(size_t size)
             : working(size, size)
             , normBuffer(size - 2)
-            , buffer(size - 1) {}
+            , buffer(size - 1) {
+        assert(size > 2 && "[Error]: Matrix is too small, no need for tridiagonalization");
+    }
 
     template<class ScalarType, size_t Order>
     template<class MatrixType>

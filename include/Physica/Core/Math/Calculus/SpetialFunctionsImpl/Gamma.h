@@ -134,12 +134,12 @@ namespace Physica::Core {
     }
 
     template<ScalarOption Option>
-    inline Scalar<Option> gamma(const Scalar<Option>& s) {
+    inline Real<Option> gamma(const Real<Option>& s) {
         return exp(lnGamma(s));
     }
 
     template<ScalarOption Option>
-    inline Scalar<Option> beta(const Scalar<Option>& s1, const Scalar<Option>& s2) {
+    inline Real<Option> beta(const Real<Option>& s1, const Real<Option>& s2) {
         return exp(lnGamma(s1) + lnGamma(s2) - lnGamma(s1 + s2));
     }
 
@@ -165,8 +165,8 @@ namespace Physica::Core {
     }
 
     template<ScalarOption Option>
-    Scalar<Option> erf(const Scalar<Option>& x) {
-        using T = Scalar<Option>;
+    Real<Option> erf(const Real<Option>& x) {
+        using T = Real<Option>;
         T x2 = square(x);
         return (x.isNegative()) ? -gammaP(T(0.5), x2) : gammaP(T(0.5), x2);
     }
@@ -179,8 +179,8 @@ namespace Physica::Core {
     }
 
     template<ScalarOption Option>
-    Scalar<Option> standardNormalDistribution(const Scalar<Option>& x) {
-        using T = Scalar<Option>;
+    Real<Option> standardNormalDistribution(const Real<Option>& x) {
+        using T = Real<Option>;
         return (erf(x / sqrt(T(2))) + T(1)) >> 1U;
     }
 }
