@@ -31,8 +31,8 @@ namespace Physica::Core {
      */
     template<class ScalarType>
     class CubeCross {
-        using Vector3D = Vector<ScalarType, 3>;
-        using Vector4D = Vector<ScalarType, 4>;
+        using Vector3D = Vector3D<ScalarType>;
+        using Vector4D = Vector4D<ScalarType>;
     public:
         enum CrossType : char {
             Parallelogram,

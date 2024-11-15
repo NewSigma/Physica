@@ -35,7 +35,7 @@ namespace Physica::Core {
         ScalarType latticeSize;
         ValueType collideFactor;
         ScalarType temperatureT;
-        Vector<ScalarType> repMass;
+        VectorND<ScalarType> repMass;
         PhaseMatrix buffer;
         size_t maxHandleNum;
         size_t handleNum;
@@ -58,7 +58,7 @@ namespace Physica::Core {
         /* Getters */
         [[nodiscard]] size_t getNumParticle() const noexcept { return repMass.getLength(); }
         [[nodiscard]] size_t getNumReplica() const noexcept { return buffer.getCol(); }
-        [[nodiscard]] const Vector<ScalarType>& getRepMass() const noexcept { return repMass; }
+        [[nodiscard]] const VectorND<ScalarType>& getRepMass() const noexcept { return repMass; }
         [[nodiscard]] size_t getHandleNum() { return handleNum; }
         /* Static members */
         static void checkParam(ValueType collideFactor, size_t numReplica);

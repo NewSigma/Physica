@@ -1,4 +1,4 @@
-include(PhysicaCheck)
+include(./PhysicaCheck.cmake)
 
 find_package(Git QUIET)
 if (${Git_FOUND})

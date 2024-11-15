@@ -18,10 +18,10 @@
  */
 #include <iostream>
 #include <QtWidgets/QApplication>
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h"
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/MatrixDecomposition/Cholesky.h"
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Eigen/EigenSolver.h"
-#include "Physica/Gui/Plot/Plot.h"
+#include <Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h>
+#include <Physica/Core/Math/Algebra/LinearAlgebra/Matrix/MatrixDecomposition/Cholesky.h>
+#include <Physica/Core/Math/Algebra/LinearAlgebra/Eigen/EigenSolver.h>
+#include <Physica/Gui/Plot/Plot.h>
 
 using namespace Physica::Core;
 using namespace Physica::Gui;
@@ -103,12 +103,12 @@ private:
     }
 
     void plotWave(Plot& plot, const EigenSolver<ScalarType>& solver, size_t n) {
-        constexpr size_t sampleCount = 100;
-        Vector<ScalarType, sampleCount> x{};
-        Vector<ScalarType, sampleCount> y{};
-        const ScalarType step = ScalarType(2) / ScalarType(sampleCount);
+        constexpr size_t SampleCount = 100;
+        Vector<ScalarType, SampleCount> x{};
+        Vector<ScalarType, SampleCount> y{};
+        const ScalarType step = ScalarType(2) / ScalarType(SampleCount);
         ScalarType temp_x = -ScalarType(1);
-        for (size_t i = 0; i < sampleCount; ++i) {
+        for (size_t i = 0; i < SampleCount; ++i) {
             x[i] = temp_x;
             ScalarType temp_y = ScalarType(0);
             for (size_t j = 0; j < baseSetCount; ++j)
@@ -122,21 +122,21 @@ private:
     }
 
     void plotReferenceWave(Plot& plot, size_t n) {
-        constexpr size_t sampleCount = 100;
-        Vector<ScalarType, sampleCount> x{};
-        Vector<ScalarType, sampleCount> y{};
-        const ScalarType step = ScalarType(2) / ScalarType(sampleCount);
+        constexpr size_t SampleCount = 100;
+        Vector<ScalarType, SampleCount> x{};
+        Vector<ScalarType, SampleCount> y{};
+        const ScalarType step = ScalarType(2) / ScalarType(SampleCount);
         ScalarType temp = -ScalarType(1);
         const ScalarType factor = square(ScalarType(n * M_PI * 0.25));
         if (n % 2U == 0) {
-            for (size_t i = 0; i < sampleCount; ++i) {
+            for (size_t i = 0; i < SampleCount; ++i) {
                 x[i] = temp;
                 y[i] = cos(temp * factor);
                 temp += step;
             }
         }
         else {
-            for (size_t i = 0; i < sampleCount; ++i) {
+            for (size_t i = 0; i < SampleCount; ++i) {
                 x[i] = temp;
                 y[i] = sin(temp * factor);
                 temp += step;
@@ -175,7 +175,7 @@ public:
         Plot* plot = new Plot(0, 5, 0, 0.6001, 1, 0.2);
 
         auto eigenvectors = solver.getEigenvectors();
-        Vector<ScalarType> real_eigenvector = toRealVector(eigenvectors.col(groundStateIndex));
+        VectorND<ScalarType> real_eigenvector = toRealVector(eigenvectors.col(groundStateIndex));
         real_eigenvector = inv_cholesky.transpose() * real_eigenvector; //Safe for in-place product
         plotWave(*plot, real_eigenvector);
 
@@ -217,12 +217,12 @@ private:
 
     template<class VectorType>
     void plotWave(Plot& plot, const LValueVector<VectorType>& coeff) {
-        constexpr size_t sampleCount = 100;
-        Vector<ScalarType, sampleCount> x{};
-        Vector<ScalarType, sampleCount> y{};
-        const ScalarType step = ScalarType(5) / ScalarType(sampleCount);
+        constexpr size_t SampleCount = 100;
+        Vector<ScalarType, SampleCount> x{};
+        Vector<ScalarType, SampleCount> y{};
+        const ScalarType step = ScalarType(5) / ScalarType(SampleCount);
         ScalarType temp_x = ScalarType(0);
-        for (size_t i = 0; i < sampleCount; ++i) {
+        for (size_t i = 0; i < SampleCount; ++i) {
             x[i] = temp_x;
             ScalarType temp_y = ScalarType(0);
             for (size_t j = 0; j < baseSetCount; ++j)
@@ -235,12 +235,12 @@ private:
     }
 
     void plotReferenceWave(Plot& plot) {
-        constexpr size_t sampleCount = 100;
-        Vector<ScalarType, sampleCount> x{};
-        Vector<ScalarType, sampleCount> y{};
-        const ScalarType step = ScalarType(5) / ScalarType(sampleCount);
+        constexpr size_t SampleCount = 100;
+        Vector<ScalarType, SampleCount> x{};
+        Vector<ScalarType, SampleCount> y{};
+        const ScalarType step = ScalarType(5) / ScalarType(SampleCount);
         ScalarType temp = ScalarType(0);
-        for (size_t i = 0; i < sampleCount; ++i) {
+        for (size_t i = 0; i < SampleCount; ++i) {
             x[i] = temp;
             y[i] = exp(-temp) / sqrt(ScalarType(M_PI)); //The wave function in [1] is not normalized
             temp += step;
@@ -357,12 +357,12 @@ private:
 
     template<class VectorType>
     void plotWave(Plot& plot, const LValueVector<VectorType>& coeff) {
-        constexpr size_t sampleCount = 100;
-        Vector<ScalarType, sampleCount> x{};
-        Vector<ScalarType, sampleCount> y{};
-        const ScalarType step = ScalarType(5) / ScalarType(sampleCount);
+        constexpr size_t SampleCount = 100;
+        Vector<ScalarType, SampleCount> x{};
+        Vector<ScalarType, SampleCount> y{};
+        const ScalarType step = ScalarType(5) / ScalarType(SampleCount);
         ScalarType temp_x = ScalarType(0);
-        for (size_t i = 0; i < sampleCount; ++i) {
+        for (size_t i = 0; i < SampleCount; ++i) {
             x[i] = temp_x;
             ScalarType temp_y = ScalarType(0);
             for (size_t j = 0; j < baseSetCount; ++j)

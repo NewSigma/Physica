@@ -23,7 +23,7 @@ using namespace Physica::Core;
 int main() {
     using ScalarType = float64;
     {
-        using VectorType = Vector<ScalarType, 2>;
+        using VectorType = Vector2D<ScalarType>;
         const DenseMatrix<ScalarType, MatrixOption::Row | MatrixOption::Vector, 2, 2> G{{2, 0}, {0, 2}};
         const VectorType c{-2, -5};
         const DenseMatrix<ScalarType, MatrixOption::Row | MatrixOption::Vector> equality{};

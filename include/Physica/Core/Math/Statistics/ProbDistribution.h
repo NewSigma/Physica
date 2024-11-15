@@ -25,7 +25,7 @@ namespace Physica::Core {
     class ProbDistribution {
         using This = ProbDistribution;
         using BucketType = Array<size_t>;
-        using VectorType = Vector<ScalarType>;
+        using VectorType = VectorND<ScalarType>;
 
         BucketType bucket;
         VectorType seperates;

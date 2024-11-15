@@ -48,7 +48,7 @@ namespace Physica::Core {
 
         constexpr static size_t NumDiagBase = 22;
         constexpr static size_t NumOffDiagBase = 13;
-        using Vector3D = Vector<ScalarType, 3>;
+        using Vector3D = Vector3D<ScalarType>;
         using Matrix3D = typename PeriodicCell<ScalarType, 3>::LatticeMatrix;
         using DiagBaseVector = Vector<ScalarType, NumDiagBase>;
         using OffDiagBaseVector = Vector<ScalarType, NumOffDiagBase>;

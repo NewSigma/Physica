@@ -28,7 +28,7 @@ namespace Physica::Core {
         using This = PhononSolver<ScalarType>;
     public:
         using ComplexType = Complex<ScalarType>;
-        using Vector3D = Vector<ScalarType, 3>;
+        using Vector3D = Vector3D<ScalarType>;
         using FFT3D = FFT<ScalarType, 3>;
         using MDCellType = MDCell<ScalarType>;
         using PositionMatrix = typename MDCellType::PositionMatrix;
@@ -68,7 +68,7 @@ namespace Physica::Core {
         void toDynamicMatrix(KSpaceFCGrid& forceConstants) const;
         [[nodiscard]] DenseMatrix<ScalarType> makeEigenVectors(const EigenSolverType& eigen) const;
         [[nodiscard]] inline DenseMatrix<ScalarType> makeEigenVectors(const QPointGrid& qPoints, Index3D qIndex) const;
-        [[nodiscard]] MDCellType shiftAtom(const Vector<ScalarType>& eigenVector, ScalarType distance);
+        [[nodiscard]] MDCellType shiftAtom(const VectorND<ScalarType>& eigenVector, ScalarType distance);
         void swap(PhononSolver& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] const MDCellType& getUnitCell() const noexcept { return unitCell; }
@@ -85,10 +85,10 @@ namespace Physica::Core {
         /* Static members */
         [[nodiscard]] static EigenSolverType diagonalize(const KSpaceFCMat& dynamicMatrix);
         [[nodiscard]] static QPointGrid diagonalize(const KSpaceFCGrid& dynamicMatrixes);
-        [[nodiscard]] static Vector<ScalarType> makeFreq(const EigenSolverType& eigen);
-        [[nodiscard]] static inline Vector<ScalarType> makeFreq(const QPointGrid& qPoints, Index3D qIndex);
+        [[nodiscard]] static VectorND<ScalarType> makeFreq(const EigenSolverType& eigen);
+        [[nodiscard]] static inline VectorND<ScalarType> makeFreq(const QPointGrid& qPoints, Index3D qIndex);
     private:
-        ScalarType removeDriftForce(Vector<ScalarType>& force) const;
+        ScalarType removeDriftForce(VectorND<ScalarType>& force) const;
     };
 
     template<class ScalarType>
@@ -114,7 +114,7 @@ namespace Physica::Core {
         auto rSpace = fft.getRSpace().flatten();
         auto kSpace = fft.getKSpace().flatten();
 
-        Vector<ScalarType> forceConst(getSuperCellDOF());
+        VectorND<ScalarType> forceConst(getSuperCellDOF());
         KSpaceFCMat temp;
         ScalarType averageDrift = std::numeric_limits<ScalarType>::max();
         size_t iteration = 0;
@@ -377,7 +377,7 @@ namespace Physica::Core {
 
     template<class ScalarType>
     typename PhononSolver<ScalarType>::MDCellType
-    PhononSolver<ScalarType>::shiftAtom(const Vector<ScalarType>& eigenVector, ScalarType distance) {
+    PhononSolver<ScalarType>::shiftAtom(const VectorND<ScalarType>& eigenVector, ScalarType distance) {
         assert(eigenVector.getLength() == getUnitCellDOF() && "[Error]: This is not a eigenVector of current cell");
         PositionMatrix shiftPos = unitCell.getPos() + eigenVector.reshape_row(getNumUnitCellAtom(), 3) * distance;
         return MDCellType(unitCell.getLattice(), std::move(shiftPos), unitCell.getMassVec());
@@ -415,10 +415,10 @@ namespace Physica::Core {
     }
 
     template<class ScalarType>
-    Vector<ScalarType> PhononSolver<ScalarType>::makeFreq(const EigenSolverType& eigen) {
+    VectorND<ScalarType> PhononSolver<ScalarType>::makeFreq(const EigenSolverType& eigen) {
         const size_t unitCellDOF = eigen.getSize();
-        Vector<ScalarType> result(unitCellDOF);
-        const Vector<ScalarType> eigenvalues = toRealVector(eigen.getEigenvalues());
+        VectorND<ScalarType> result(unitCellDOF);
+        const VectorND<ScalarType> eigenvalues = toRealVector(eigen.getEigenvalues());
         for (size_t i = 0; i < unitCellDOF; ++i)
             result[i] = eigenvalues[i].isNegative() ? -1 : 1;
         result = hadamard(result, sqrt(abs(eigenvalues)));
@@ -427,12 +427,12 @@ namespace Physica::Core {
     }
 
     template<class ScalarType>
-    inline Vector<ScalarType> PhononSolver<ScalarType>::makeFreq(const QPointGrid& qPoints, Index3D qIndex) {
+    inline VectorND<ScalarType> PhononSolver<ScalarType>::makeFreq(const QPointGrid& qPoints, Index3D qIndex) {
         return makeFreq(qPoints(qIndex));
     }
 
     template<class ScalarType>
-    ScalarType PhononSolver<ScalarType>::removeDriftForce(Vector<ScalarType>& force) const {
+    ScalarType PhononSolver<ScalarType>::removeDriftForce(VectorND<ScalarType>& force) const {
         const size_t superCellDOF = getSuperCellDOF();
         assert(force.getLength() == superCellDOF);
         const size_t numSuperAtom = superCellDOF / Dim;

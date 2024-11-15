@@ -22,15 +22,14 @@
 #include "CellList.h"
 
 namespace Physica::Core {
-    template<class ScalarType>
-    class device_obj<CellList<ScalarType>> {
-        using host_obj = CellList<ScalarType>;
+    template<Scalar T>
+    class device_obj<CellList<T>> {
+        using host_obj = CellList<T>;
         using This = device_obj<host_obj>;
         using Index3D = typename GridBase::Index3D;
-        using Vector3D = typename host_obj::Vector3D;
         using LatticeMatrix = device_obj<typename host_obj::LatticeMatrix>;
         using DeviceIndexArray = device_obj<Array<size_t>>;
-        using DeviceNeighShift = device_obj<Array<Vector3D>>;
+        using DeviceNeighShift = device_obj<Array<Vector3D<T>>>;
 
         LatticeMatrix lattice;
         Index3D cellGridDim;
@@ -65,26 +64,26 @@ namespace Physica::Core {
         /* Setters */
         void setCellGridDim(Index3D cellGridDim_) { cellGridDim = std::move(cellGridDim_); }
     private:
-        friend class CellList<ScalarType>;
+        friend class CellList<T>;
     };
 
-    template<class ScalarType>
-    device_obj<CellList<ScalarType>>::device_obj(const host_obj& obj) {
+    template<Scalar T>
+    device_obj<CellList<T>>::device_obj(const host_obj& obj) {
         obj.toDevice(*this);
     }
 
-    template<class ScalarType>
+    template<Scalar T>
     template<class Functor>
-    __device__ void device_obj<CellList<ScalarType>>::forCellInList(Functor func) const {
+    __device__ void device_obj<CellList<T>>::forCellInList(Functor func) const {
         for (size_t x = 0; x < getCellGridDimX(); ++x)
             for (size_t y = 0; y < getCellGridDimY(); ++y)
                 for (size_t z = 0; z < getCellGridDimZ(); ++z)
                     func(Index3D{x, y, z});
     }
 
-    template<class ScalarType>
+    template<Scalar T>
     template<class Functor>
-    __device__ void device_obj<CellList<ScalarType>>::forNeighInRange(Index3D centerCell, Functor func) const {
+    __device__ void device_obj<CellList<T>>::forNeighInRange(Index3D centerCell, Functor func) const {
         auto a1 = lattice.row(0);
         auto a2 = lattice.row(1);
         auto a3 = lattice.row(2);
@@ -110,9 +109,9 @@ namespace Physica::Core {
         }
     }
 
-    template<class ScalarType>
+    template<Scalar T>
     template<class Functor>
-    __device__ void device_obj<CellList<ScalarType>>::forReducedNeighInRange(Index3D centerCell, Functor func) const {
+    __device__ void device_obj<CellList<T>>::forReducedNeighInRange(Index3D centerCell, Functor func) const {
         auto a1 = lattice.row(0);
         auto a2 = lattice.row(1);
         auto a3 = lattice.row(2);
@@ -136,9 +135,9 @@ namespace Physica::Core {
         }
     }
 
-    template<class ScalarType>
+    template<Scalar T>
     template<class Functor>
-    __device__ inline void device_obj<CellList<ScalarType>>::forAtomInCell(Index3D cellIndex, Functor func) const {
+    __device__ inline void device_obj<CellList<T>>::forAtomInCell(Index3D cellIndex, Functor func) const {
         const auto index1D = PeriodIndex3D(cellIndex, cellGridDim).toIndex1D();
         const size_t cellBegin = cellStartOffset[index1D];
         const size_t cellEnd = cellStartOffset[index1D + 1];
@@ -146,8 +145,8 @@ namespace Physica::Core {
             func(cellAtomMap[i]);
     }
 
-    template<class ScalarType>
-    void device_obj<CellList<ScalarType>>::swap(device_obj& __restrict obj) noexcept {
+    template<Scalar T>
+    void device_obj<CellList<T>>::swap(device_obj& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         lattice.swap(obj.lattice);
         cellGridDim.swap(obj.cellGridDim);
@@ -156,13 +155,13 @@ namespace Physica::Core {
         neighShifts.swap(obj.neighShifts);
     }
 
-    template<class ScalarType>
-    inline device_obj<CellList<ScalarType>> CellList<ScalarType>::toDevice() const {
-        return device_obj<CellList<ScalarType>>(*this);
+    template<Scalar T>
+    inline device_obj<CellList<T>> CellList<T>::toDevice() const {
+        return device_obj<CellList<T>>(*this);
     }
 
-    template<class ScalarType>
-    void CellList<ScalarType>::toDevice(device_obj<CellList<ScalarType>>& obj) const {
+    template<Scalar T>
+    void CellList<T>::toDevice(device_obj<CellList<T>>& obj) const {
         lattice.toDevice(obj.lattice);
         obj.cellGridDim = cellGridDim;
         cellAtomMap.toDevice(obj.cellAtomMap);

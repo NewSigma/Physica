@@ -33,10 +33,10 @@ namespace Physica::Core {
         return *this;
     }
 
-    Vector<typename PWscfOut::ScalarType> PWscfOut::makeTotalForces() {
+    VectorND<typename PWscfOut::ScalarType> PWscfOut::makeTotalForces() {
         fin.seekg(std::ios::beg);
 
-        Vector<ScalarType> result{};
+        VectorND<ScalarType> result{};
         std::string str{};
         do {
             fin.getline(buffer.data(), buffer.getLength());

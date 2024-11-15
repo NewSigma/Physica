@@ -45,11 +45,11 @@ constexpr double massMoleculeInSI = PhyConst<SI>::atomMass(1) * 2 + PhyConst<SI>
 
 namespace {
     template<class RandomGenerator>
-    Vector<ScalarType, 3> randomVector(RandomGenerator& gen) {
+    Vector3D<ScalarType> randomVector(RandomGenerator& gen) {
         std::uniform_real_distribution dist{};
         const ScalarType theta(dist(gen) * M_PI);
         const ScalarType phi(dist(gen) * M_PI * 2);
-        Vector<ScalarType, 3> result{cos(phi) * sin(theta), sin(phi) * sin(theta), cos(theta)};
+        Vector3D<ScalarType> result{cos(phi) * sin(theta), sin(phi) * sin(theta), cos(theta)};
         result *= ScalarType(ForceModel::equalR);
         return result;
     }

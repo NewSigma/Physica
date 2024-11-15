@@ -31,7 +31,7 @@ int main() {
     const auto mat = MatrixType::random_uniform(5000, gen);
 
     JacobiDavidson<ComplexType> jd(mat.getRow(), 4);
-    jd.compute(mat, Vector<ComplexType>::random_uniform(mat.getRow(), gen));
+    jd.compute(mat, VectorND<ComplexType>::random_uniform(mat.getRow(), gen));
     jd.sort();
 
     std::cout << toRealVector(jd.getEigenvalues()).format() << std::endl;

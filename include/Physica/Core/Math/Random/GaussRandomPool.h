@@ -27,7 +27,7 @@ namespace Physica::Core {
     public:
         using GeneratorType = typename RandomPoolType::GeneratorType;
     private:
-        Vector<ScalarType> rands;
+        VectorND<ScalarType> rands;
     public:
         GaussRandomPool(size_t size);
         GaussRandomPool(const GaussRandomPool&) = default;

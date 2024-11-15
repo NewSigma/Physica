@@ -26,10 +26,10 @@ using ScalarType = float64;
 
 constexpr double precitionGoal = 1E-8;
 
-ScalarType scf_solve(size_t atomicNumber, const ElectronConfig& config, const Vector<ScalarType>& alphas, size_t maxIte) {
+ScalarType scf_solve(size_t atomicNumber, const ElectronConfig& config, const VectorND<ScalarType>& alphas, size_t maxIte) {
     Molecular<ScalarType> system = Molecular<ScalarType>(1);
     auto& atoms = system.getAtoms();
-    const Vector<ScalarType, 3> pos_atom{0, 0, 0};
+    const Vector3D<ScalarType> pos_atom{0, 0, 0};
     atoms[0] = pos_atom;
     auto& atomicNumbers = system.getAtomicNumbers();
     atomicNumbers[0] = atomicNumber;
@@ -50,14 +50,14 @@ int main() {
     {
         ElectronConfig config = ElectronConfig(1);
         config.setOrbitState(0, ElectronConfig::SingleOccupacy);
-        const Vector<ScalarType, 6> base{8.2921890E1, 1.2452437E1, 2.8330562, 8.0001038E-1, 2.5859469E-1, 8.9968966E-2};
+        const VectorND<ScalarType> base{8.2921890E1, 1.2452437E1, 2.8330562, 8.0001038E-1, 2.5859469E-1, 8.9968966E-2};
         if (!scalarNear(scf_solve(1, config, base, 1), ScalarType(-0.499945570), precitionGoal))
             return 1;
     }
     {
         ElectronConfig config = ElectronConfig(1);
         config.setOrbitState(0, ElectronConfig::DoubleOccupacy);
-        const Vector<ScalarType, 6> base{2.3406425E2, 3.5174075E1, 7.9911108, 2.2124201, 6.6706872E-1, 2.0894727E-1};
+        const VectorND<ScalarType> base{2.3406425E2, 3.5174075E1, 7.9911108, 2.2124201, 6.6706872E-1, 2.0894727E-1};
         if (!scalarNear(scf_solve(2, config, base, 8), ScalarType( -2.86115334), precitionGoal))
             return 1;
     }

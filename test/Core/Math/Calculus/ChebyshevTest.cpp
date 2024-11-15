@@ -29,7 +29,7 @@ void testFit(Function func) {
     const T from(-1);
     const T to(1);
 
-    Vector<T> coeff(30);
+    VectorND<T> coeff(30);
     chebyshev_fit(from, to, coeff, func);
     const T delta = (to - from) / T(sample);
     T x = from;
@@ -50,7 +50,7 @@ void testFitEven(Function func) {
     const T from(-1);
     const T to(1);
 
-    Vector<T> coeff(30);
+    VectorND<T> coeff(30);
     chebyshev_fit_even(from, to, coeff, func);
     const T delta = (to - from) / T(sample);
     T x = from;
@@ -71,7 +71,7 @@ void testFitOdd(Function func) {
     const T from(-1);
     const T to(1);
 
-    Vector<T> coeff(30);
+    VectorND<T> coeff(30);
     chebyshev_fit_odd(from, to, coeff, func);
     const T delta = (to - from) / T(sample);
     T x = from;

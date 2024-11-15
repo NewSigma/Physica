@@ -28,7 +28,7 @@
 
 using namespace Physica::Core;
 using ScalarType = float64;
-using VectorType = Vector<ScalarType>;
+using VectorType = VectorND<ScalarType>;
 using MatrixType = DenseMatrix<ScalarType>;
 using PDFType = ProbDistribution<ScalarType>;
 constexpr double timeStepLambda = 0.01;
@@ -49,7 +49,7 @@ namespace {
         typename MDCellType::LatticeMatrix lattice{latticeSize};
 
         std::uniform_real_distribution dist{};
-        Vector<ScalarType> posVec(numMolecular);
+        VectorND<ScalarType> posVec(numMolecular);
         for (auto& elem : posVec)
             elem = dist(gen) * latticeSize;
         std::sort(posVec.begin(), posVec.end());

@@ -306,7 +306,7 @@ namespace Physica::Gui {
             const Core::RValueVector<VectorType>& deviation) {
         using namespace Physica::Core;
         using ScalarType = float64;
-        const auto x = Vector<ScalarType>::linspace(0, mean.getLength() - 1, mean.getLength());
+        const auto x = VectorND<ScalarType>::linspace(0, mean.getLength() - 1, mean.getLength());
         return errorBar(x, mean, deviation);
     }
 

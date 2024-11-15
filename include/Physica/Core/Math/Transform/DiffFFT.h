@@ -43,11 +43,11 @@ namespace Physica::Core {
         using FFTType = FFT<typename std::conditional<isComplex, PlainComplexType, PlainRealType>::type, 1>;
 
         FFTType fft_impl;
-        Vector<ComplexType> buffer;
+        VectorND<ComplexType> buffer;
     public:
         FFT();
         FFT(size_t rSpaceSize, PlanFlag planFlag);
-        FFT(const Vector<ScalarType>& data, PlanFlag planFlag);
+        FFT(const VectorND<ScalarType>& data, PlanFlag planFlag);
         FFT(const FFT& fft) = default;
         FFT(FFT&& fft) noexcept = default;
         ~FFT() = default;
@@ -97,7 +97,7 @@ namespace Physica::Core {
     }
 
     template<class T, DiffMode Mode>
-    FFT<Diff<T, Mode, 1>, 1>::FFT(const Vector<ScalarType>& data, PlanFlag planFlag)
+    FFT<Diff<T, Mode, 1>, 1>::FFT(const VectorND<ScalarType>& data, PlanFlag planFlag)
             : FFT(data.getLength(), planFlag) {
         RSpaceType::transform(data);
     }

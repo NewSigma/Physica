@@ -35,10 +35,10 @@ namespace Physica::Core {
         using DensityType = typename Traits<This>::DensityType;
         using PotType = typename Traits<This>::PotType;
     private:
-        Vector<ScalarType> buffer;
-        Vector<ScalarType> buffer1;
-        Vector<ScalarType> buffer2;
-        Vector<ScalarType> buffer3;
+        VectorND<ScalarType> buffer;
+        VectorND<ScalarType> buffer1;
+        VectorND<ScalarType> buffer2;
+        VectorND<ScalarType> buffer3;
     public:
         LDA() = default;
         LDA(size_t bufferSize);
@@ -152,7 +152,7 @@ namespace Physica::Core {
         using DensityType = typename Traits<This>::DensityType;
         using PotType = typename Traits<This>::PotType;
     private:
-        Vector<ScalarType> buffer;
+        VectorND<ScalarType> buffer;
     public:
         LDA() = default;
         LDA(size_t bufferSize);

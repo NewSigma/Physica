@@ -51,7 +51,7 @@ namespace Physica::Core {
         template<class VectorType>
         [[nodiscard]] VectorType getDensityOfStates(const LValueVector<VectorType>& atEnergy) const;
     private:
-        [[nodiscard]] Vector<ScalarType, 3> gradEnergy(size_t kPointId) const;
+        [[nodiscard]] Vector3D<ScalarType> gradEnergy(size_t kPointId) const;
     };
 
     template<class ScalarType, bool isSpinPolarized>
@@ -74,7 +74,7 @@ namespace Physica::Core {
         const ScalarType stepY = reciprocal(ScalarType(kPointY));
         const ScalarType stepZ = reciprocal(ScalarType(kPointZ));
 
-        Vector<ScalarType, 3> k{};
+        Vector3D<ScalarType> k{};
         ScalarType& kx = k[0];
         ScalarType& ky = k[1];
         ScalarType& kz = k[2];
@@ -163,7 +163,7 @@ namespace Physica::Core {
      * [1] Bross H. On the Efficiency of Different Schemes for the Evaluation of the Density of States and Related Properties in Solids[J]. Physica Status Solidi, 2010, 179(2):429-439.
      */
     template<class ScalarType, bool isSpinPolarized>
-    Vector<ScalarType, 3> BandGrid<ScalarType, isSpinPolarized>::gradEnergy(size_t kPointId) const {
+    Vector3D<ScalarType> BandGrid<ScalarType, isSpinPolarized>::gradEnergy(size_t kPointId) const {
         auto dimAdd = [](size_t dim, size_t dim_all) { return dim == dim_all - 1 ? 0 : dim + 1; };
         auto dimSub = [](size_t dim, size_t dim_all) { return dim == 0 ? dim_all - 1 : dim - 1; };
         const auto[x, y, z] = kPointGrid.indexToDim(kPointId);

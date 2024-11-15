@@ -33,7 +33,7 @@ namespace Physica::Core {
     public:
         constexpr static bool IsSpinPolarized = XCProvider::IsSpinPolarized;
         using ComplexType = Complex<ScalarType>;
-        using Vector3D = Vector<ScalarType, 3>;
+        using Vector3D = Vector3D<ScalarType>;
         using BandType = BandGrid<ScalarType, IsSpinPolarized>;
         using HamiltonType = KSHamilton<ScalarType, IsSpinPolarized>;
         using EigenSolverType = SpinPair<JacobiDavidson<ComplexType>, IsSpinPolarized>;

@@ -28,7 +28,7 @@ namespace Physica::Core {
      */
     template<class ScalarType>
     class VarianceAnalyzer {
-        using DataSet = Array<Vector<ScalarType>>;
+        using DataSet = Array<VectorND<ScalarType>>;
         DataSet data;
     public:
         VarianceAnalyzer(size_t numGroup, size_t samplePerGroup);

@@ -31,9 +31,9 @@ namespace Physica::Core {
         using PositionMatrix = typename MDCellType::PositionMatrix;
     private:
         PositionMatrix sites;
-        Vector<ScalarType> springCoeffs;
+        VectorND<ScalarType> springCoeffs;
     public:
-        Hamonic(PositionMatrix sites_, Vector<ScalarType> springCoeffs_);
+        Hamonic(PositionMatrix sites_, VectorND<ScalarType> springCoeffs_);
         Hamonic(const Hamonic&) = default;
         Hamonic(Hamonic&&) noexcept = default;
         ~Hamonic() = default;
@@ -43,11 +43,11 @@ namespace Physica::Core {
         [[nodiscard]] ScalarType potentialV(const MDCellType& cell) const;
 
         template<class Executor>
-        [[nodiscard]] Vector<ScalarType> force(const MDCellType& cell) const;
+        [[nodiscard]] VectorND<ScalarType> force(const MDCellType& cell) const;
         template<class VectorType, class Executor>
         void forceAsync(const MDCellType& cell, ContinuousVector<VectorType>& result) const;
         template<class Executor>
-        [[nodiscard]] Vector<ScalarType> force_short(const MDCellType& cell) const { return force<Executor>(cell); }
+        [[nodiscard]] VectorND<ScalarType> force_short(const MDCellType& cell) const { return force<Executor>(cell); }
         using Base::force_long;
 
         [[nodiscard]] ScalarType forceConst([[maybe_unused]] const MDCellType& cell, size_t dof1, size_t dof2) const;
@@ -57,11 +57,11 @@ namespace Physica::Core {
         void swap(Hamonic& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] size_t getNumParticle() const noexcept { return sites.getRow(); }
-        [[nodiscard]] const Vector<ScalarType>& getSpringCoeffs() const noexcept { return springCoeffs; }
+        [[nodiscard]] const VectorND<ScalarType>& getSpringCoeffs() const noexcept { return springCoeffs; }
     };
 
     template<class ScalarType, unsigned int Dim>
-    Hamonic<ScalarType, Dim>::Hamonic(PositionMatrix sites_, Vector<ScalarType> springCoeffs_)
+    Hamonic<ScalarType, Dim>::Hamonic(PositionMatrix sites_, VectorND<ScalarType> springCoeffs_)
             : sites(std::move(sites_))
             , springCoeffs(std::move(springCoeffs_)) {
         assert(springCoeffs.getLength() == getNumParticle() && "[Error]: Number of particles is not consistent");
@@ -78,9 +78,9 @@ namespace Physica::Core {
 
     template<class ScalarType, unsigned int Dim>
     template<class Executor>
-    Vector<ScalarType> Hamonic<ScalarType, Dim>::force(const MDCellType& cell) const {
-        Vector<ScalarType> result(cell.getDOF());
-        forceAsync<Vector<ScalarType>, Executor>(cell, result);
+    VectorND<ScalarType> Hamonic<ScalarType, Dim>::force(const MDCellType& cell) const {
+        VectorND<ScalarType> result(cell.getDOF());
+        forceAsync<VectorND<ScalarType>, Executor>(cell, result);
         return result;
     }
 

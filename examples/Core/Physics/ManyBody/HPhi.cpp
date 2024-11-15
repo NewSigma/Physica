@@ -24,7 +24,7 @@
 using namespace Physica::Core;
 using namespace Physica::Gui;
 using ScalarType = float64;
-using VectorType = Vector<ScalarType>;
+using VectorType = VectorND<ScalarType>;
 using MatrixType = DenseMatrix<ScalarType>;
 constexpr int NumAve = 100;
 constexpr int NumStep = 41;

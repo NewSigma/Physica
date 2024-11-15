@@ -35,24 +35,24 @@ void test_differentiable() {
     constexpr double freq1 = 3;
     constexpr double freq2 = 4;
 
-    Vector<ValueType> values(N);
-    Vector<ValueType> grads(N);
-    Vector<ScalarType> data(N);
+    VectorND<ValueType> values(N);
+    VectorND<ValueType> grads(N);
+    VectorND<ScalarType> data(N);
     for (size_t i = 0; i < N; ++i) {
         const ValueType x = ValueType(i) * 0.01;
         values[i] = sin(ValueType(2 * M_PI * freq1) * x) + sin(ValueType(2 * M_PI * freq2) * x) * 2;
         grads[i] = cos(ValueType(2 * M_PI * freq1) * x) * 2 + cos(ValueType(2 * M_PI * freq2) * x);
         data[i] = ScalarType(values[i], grads[i]);
     }
-    Vector<ComplexType> answer{};
+    VectorND<ComplexType> answer{};
     /* Make answer */ {
         FFT<ValueType> fft(N, PlanFlag::Estimate);
         fft.getRSpace() = values;
         fft.transform();
-        Vector<ComplexPlainScalar> k_values = fft.getKSpace();
+        VectorND<ComplexPlainScalar> k_values = fft.getKSpace();
         fft.getRSpace() = grads;
         fft.transform();
-        Vector<ComplexPlainScalar> k_grads = fft.getKSpace();
+        VectorND<ComplexPlainScalar> k_grads = fft.getKSpace();
         if (k_values.getLength() != k_grads.getLength()) [[unlikely]]
             exit(EXIT_FAILURE);
 
@@ -86,16 +86,16 @@ int main() {
         constexpr double freq1 = 3;
         constexpr double freq2 = 4;
         
-        Vector<RealType> data(N);
+        VectorND<RealType> data(N);
         {
-            const Vector<RealType> v_x = Vector<RealType>::linspace(RealType(0), RealType(t_max), N + 1);
+            const VectorND<RealType> v_x = VectorND<RealType>::linspace(RealType(0), RealType(t_max), N + 1);
             for (size_t i = 0; i < N; ++i) {
                 const auto& x = v_x[i];
                 data[i] = sin(RealType(2 * M_PI * freq1) * x) + sin(RealType(2 * M_PI * freq2) * x) * 2;
             }
         }
         FFT<RealType> fft(data, PlanFlag::Measure);
-        const Vector<RealType> intense = toNormVector(fft.getKSpace());
+        const VectorND<RealType> intense = toNormVector(fft.getKSpace());
 
         /* Parseval theorem */ {
             const RealType power = square(data).sum();
@@ -127,16 +127,16 @@ int main() {
         constexpr double freq1 = 3;
         constexpr double freq2 = 4;
         
-        Vector<ComplexType> data(N);
+        VectorND<ComplexType> data(N);
         {
-            const Vector<RealType> v_x = Vector<RealType>::linspace(RealType(0), RealType(t_max), N + 1);
+            const VectorND<RealType> v_x = VectorND<RealType>::linspace(RealType(0), RealType(t_max), N + 1);
             for (size_t i = 0; i < N; ++i) {
                 const auto& x = v_x[i];
                 data[i] = sin(RealType(2 * M_PI * freq1) * x) + sin(RealType(2 * M_PI * freq2) * x) * 2;
             }
         }
         FFT<ComplexType> fft(data, PlanFlag::Estimate);
-        Vector<ComplexType> trans(N);
+        VectorND<ComplexType> trans(N);
         for (size_t i = 0; i < N; ++i) {
             ComplexType temp(0);
             for (size_t j = 0; j < N; ++j) {
@@ -167,7 +167,7 @@ int main() {
         /* Test freq */ {
             const double deltaFreq1 = double(fft.getKSpaceDelta(deltaX, 0)) / (2 * M_PI);
             const double deltaFreq2 = double(fft.getKSpaceDelta(deltaY, 1)) / (2 * M_PI);
-            const Vector<RealType> intense = toNormVector(fft.getKSpace().flatten());
+            const VectorND<RealType> intense = toNormVector(fft.getKSpace().flatten());
             const RealType freq1_power = intense[size_t(freq1 / deltaFreq1) * fft.getKSpaceSize()[1]];
             const RealType freq1_power_conj = intense[(N1 - size_t(freq1 / deltaFreq1)) * fft.getKSpaceSize()[1]];
             const RealType freq2_power = intense[freq2 / deltaFreq2];

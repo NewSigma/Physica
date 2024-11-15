@@ -32,7 +32,7 @@ namespace Physica::Core {
         static_assert(Integrator == RPMDIntegrator::Exact, "[Error]: Cayley integrator not implemented");
     public:
         using RingPolymerType = typename HardCore<ScalarType, IsFixedBoundary, NumReplica, Integrator>::RingPolymerType;
-        using DeviceVector = device_obj<Vector<ScalarType>>;
+        using DeviceVector = device_obj<VectorND<ScalarType>>;
         using PageLockedVector = Vector<ScalarType, Dynamic, PageLockedAllocator<ScalarType>>;
     private:
         ScalarType latticeSize;

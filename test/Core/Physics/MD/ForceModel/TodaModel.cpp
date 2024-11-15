@@ -33,7 +33,7 @@ MDCellType makeSystem(std::mt19937& gen) {
     typename MDCellType::LatticeMatrix lattice{latticeSize};
 
     std::uniform_real_distribution dist{};
-    Vector<ScalarType> posVec(numMolecular);
+    VectorND<ScalarType> posVec(numMolecular);
     for (auto& elem : posVec)
         elem = dist(gen) * latticeSize;
     std::sort(posVec.begin(), posVec.end());

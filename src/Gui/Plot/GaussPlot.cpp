@@ -23,7 +23,7 @@ namespace Physica::Gui {
             : Base(-maxX, maxX, 0, maxY, deltaX, deltaY) {
         using namespace Physica::Core;
         using ScalarType = float64;
-        using VectorType = Vector<ScalarType>;
+        using VectorType = VectorND<ScalarType>;
 
         auto& line = Base::line(VectorType{-maxX, maxX}, VectorType{0, 0});
         auto pen = line.pen();

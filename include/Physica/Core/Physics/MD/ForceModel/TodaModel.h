@@ -43,13 +43,13 @@ namespace Physica::Core {
         [[nodiscard]] ScalarType potentialV(const MDCellType& cell) const;
 
         template<class Executor>
-        [[nodiscard]] Vector<ScalarType> force(const MDCellType& cell) const;
+        [[nodiscard]] VectorND<ScalarType> force(const MDCellType& cell) const;
         template<class VectorType, class Executor>
         void forceAsync(const MDCellType& cell, ContinuousVector<VectorType>& result) const;
         template<class Executor>
-        [[nodiscard]] Vector<ScalarType> force_short(const MDCellType& cell) const { return force<Executor>(cell); }
+        [[nodiscard]] VectorND<ScalarType> force_short(const MDCellType& cell) const { return force<Executor>(cell); }
         template<class Executor>
-        [[nodiscard]] Vector<ScalarType> force_long(const MDCellType& cell) const { return Vector<ScalarType>(cell.getDOF(), 0); }
+        [[nodiscard]] VectorND<ScalarType> force_long(const MDCellType& cell) const { return VectorND<ScalarType>(cell.getDOF(), 0); }
         
         [[nodiscard]] ScalarType forceConst(const MDCellType& cell, size_t dof1, size_t dof2) const;
         [[nodiscard]] ForceConstMatrix forceConst(const MDCellType& cell) const;
@@ -89,10 +89,10 @@ namespace Physica::Core {
 
     template<class ScalarType, bool IsPeriodBoundary>
     template<class Executor>
-    Vector<ScalarType> TodaModel<ScalarType, IsPeriodBoundary>::force(const MDCellType& cell) const {
+    VectorND<ScalarType> TodaModel<ScalarType, IsPeriodBoundary>::force(const MDCellType& cell) const {
         const size_t numParticle = cell.getNumParticle();
-        Vector<ScalarType> result(numParticle);
-        forceAsync<Vector<ScalarType>, Executor>(cell, result);
+        VectorND<ScalarType> result(numParticle);
+        forceAsync<VectorND<ScalarType>, Executor>(cell, result);
         return result;
     }
 

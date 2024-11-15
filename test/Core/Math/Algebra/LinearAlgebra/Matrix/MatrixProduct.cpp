@@ -34,16 +34,15 @@ int main() {
     }
     {
         using ScalarType = Diff<float32, DiffMode::Reverse>;
-        using VectorType = Vector<float32, 3>;
         using MatrixType = DenseMatrix<float32, MatrixOption::Col | MatrixOption::Element, 3, 3>;
-        using DVector = Vector<ScalarType, 3>;
+        using DVector = Vector3D<ScalarType>;
         using DMatrix = DenseMatrix<ScalarType, MatrixOption::Col | MatrixOption::Element, 3, 3>;
         const DMatrix m{1, 2, 3, 4, 5, 6, 7, 8, 9};
         const DVector x{1, 2, 3};
         const DVector y = m * x;
         y.sum().reverse();
 
-        const VectorType dx = toGradVector(x);
+        const Vector3D<float32> dx = toGradVector(x);
         for (size_t i = 0; i < dx.getLength(); ++i)
             if (!scalarNear(dx[i], toValueMatrix(m).col(i).sum(), 1E-15))
                 return 1;

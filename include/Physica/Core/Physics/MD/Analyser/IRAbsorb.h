@@ -30,7 +30,7 @@ namespace Physica::Core {
     template<class ScalarType>
     class IRAbsorb {
         static_assert(is_scalar<ScalarType>::value, "[Error]: ScalarType must be a scalar");
-        using VectorType = Vector<ScalarType>;
+        using VectorType = VectorND<ScalarType>;
     public:
         VectorType dipoleCorr;
         FFT<ScalarType, 1> fft;
@@ -99,7 +99,7 @@ namespace Physica::Core {
         const auto& kSpace = fft.getKSpace();
         const size_t kSpaceSize = fft.getKSpaceSize();
         const ScalarType deltaOmegaW = getDeltaOmegaW();
-        Vector<ScalarType> spectrum(kSpaceSize);
+        VectorND<ScalarType> spectrum(kSpaceSize);
         for (size_t i = 0; i < kSpaceSize; ++i)
             spectrum[i] = factor * abs(kSpace[i].real()) * square(deltaOmegaW * i);
         filter.smooth_zero(spectrum);

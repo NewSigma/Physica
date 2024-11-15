@@ -18,7 +18,7 @@
 using namespace Physica::Core;
 using namespace Physica::Gui;
 using ScalarType = float64;
-using VectorType = Vector<ScalarType>;
+using VectorType = VectorND<ScalarType>;
 using KineticModel = FreeModel<ScalarType, 3, 1, RPMDIntegrator::Exact>;
 using ForceModel = BKSModel<ScalarType, Ewald<ScalarType, RSpaceEwald<ScalarType, true>>, true>;
 constexpr double timeStep = PhyConst<AU>::secondToTime(1E-15);

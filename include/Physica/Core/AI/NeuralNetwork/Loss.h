@@ -29,7 +29,7 @@ namespace Physica::Core {
         using ValueType = typename ScalarType::ValueType;
         using LossType = ScalarType;
     private:
-        using VectorType = Vector<ScalarType>;
+        using VectorType = VectorND<ScalarType>;
     public:
         [[nodiscard]] static ScalarType softmax(const VectorType& v, size_t label);
         [[nodiscard]] static ScalarType crossEntropy(const VectorType& v, size_t label);

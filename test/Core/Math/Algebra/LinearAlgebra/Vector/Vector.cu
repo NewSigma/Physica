@@ -24,7 +24,7 @@
 using namespace Physica;
 using namespace Physica::Core;
 using ScalarType = float32;
-using VectorType = Vector<ScalarType>;
+using VectorType = VectorND<ScalarType>;
 using DeviceVector = Core::device_obj<VectorType>;
 
 __global__ void test_kernel(

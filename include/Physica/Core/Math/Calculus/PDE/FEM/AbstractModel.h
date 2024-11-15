@@ -34,7 +34,7 @@ namespace Physica::Core {
 
         MeshType mesh;
         SparseMatrix<ScalarType> A;
-        Vector<ScalarType> b;
+        VectorND<ScalarType> b;
     private:
         SolverType solver;
         Array<size_t> map_var_node;

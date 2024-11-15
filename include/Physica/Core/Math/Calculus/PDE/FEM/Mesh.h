@@ -34,7 +34,7 @@ namespace Physica::Core {
         using VectorType = typename ElementType::VectorType;
     private:
         Array<ElementType> elements;
-        Vector<ScalarType> coeffs;
+        VectorND<ScalarType> coeffs;
         Array<NodeType> nodeTypes;
     public:
         Mesh(size_t numElement, size_t numNode);
@@ -52,8 +52,8 @@ namespace Physica::Core {
         [[nodiscard]] size_t getNumElems() const { return elements.getLength(); }
         [[nodiscard]] size_t getNumNodes() const { return coeffs.getLength(); }
         [[nodiscard]] const Array<ElementType>& getElements() const { return elements; }
-        [[nodiscard]] Vector<ScalarType>& getCoeffs() { return coeffs; }
-        [[nodiscard]] const Vector<ScalarType>& getCoeffs() const { return coeffs; }
+        [[nodiscard]] VectorND<ScalarType>& getCoeffs() { return coeffs; }
+        [[nodiscard]] const VectorND<ScalarType>& getCoeffs() const { return coeffs; }
         [[nodiscard]] const Array<NodeType>& getNodeTypes() const { return nodeTypes; }
         [[nodiscard]] size_t getNumFreeNodes() const;
         [[nodiscard]] Array<VectorType> getNodes() const;

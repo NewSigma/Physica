@@ -18,7 +18,7 @@
  */
 #pragma once
 
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/Vector.h"
+#include <Physica/Core/Math/Algebra/LinearAlgebra/Vector/Vector.h>
 
 using namespace Physica::Core;
 /**
@@ -26,7 +26,7 @@ using namespace Physica::Core;
  * [1] http://www.sfu.ca/~ssurjano/index.html
  */
 template<class T>
-T func1(const Vector<T>& v) {
+T func1(const VectorND<T>& v) {
     const T& x = v[0];
     const T& y = v[1];
     const T& z = v[2];
@@ -34,7 +34,7 @@ T func1(const Vector<T>& v) {
 }
 
 template<class T>
-T func2(const Vector<T>& v) {
+T func2(const VectorND<T>& v) {
     const T& x = v[0];
     const T& y = v[1];
     const T& z = v[2];
@@ -45,6 +45,6 @@ T func2(const Vector<T>& v) {
 }
 
 template<class ScalarType>
-ScalarType rosenbrock(const Vector<ScalarType>& v) {
+ScalarType rosenbrock(const VectorND<ScalarType>& v) {
     return ScalarType(100) * square(v[1] - square(v[0])) + square(ScalarType(1) - v[0]);
 }

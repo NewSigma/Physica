@@ -36,7 +36,7 @@ namespace Physica::Core {
     template<class ScalarType, DecisionTreeType Type>
     class DecisionTree {
         using MatrixType = Core::DenseMatrix<ScalarType>;
-        using VectorType = Core::Vector<ScalarType>;
+        using VectorType = Core::VectorND<ScalarType>;
     public:
         struct Dataset {
             MatrixType features;

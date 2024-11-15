@@ -76,11 +76,11 @@ namespace Physica::Core {
 
         [[nodiscard]] inline ScalarType potentialV(const MDCellType& cell) const;
 
-        template<class Executor> [[nodiscard]] Vector<ScalarType> force(const MDCellType& cell);
+        template<class Executor> [[nodiscard]] VectorND<ScalarType> force(const MDCellType& cell);
         template<class VectorType, class Executor>
         void forceAsync(const MDCellType& cell, ContinuousVector<VectorType>& result);
-        template<class Executor> [[nodiscard]] Vector<ScalarType> force_short(const MDCellType& cell) const;
-        template<class Executor> [[nodiscard]] inline Vector<ScalarType> force_long(const MDCellType& cell);
+        template<class Executor> [[nodiscard]] VectorND<ScalarType> force_short(const MDCellType& cell) const;
+        template<class Executor> [[nodiscard]] inline VectorND<ScalarType> force_long(const MDCellType& cell);
 
         [[nodiscard]] inline LatticeMatrix virial(const MDCellType& cell);
         void swap(BKSModel& __restrict obj) noexcept;
@@ -162,9 +162,9 @@ namespace Physica::Core {
 
     template<class ScalarType, class EwaldType, bool AvoidTooNear>
     template<class Executor>
-    Vector<ScalarType> BKSModel<ScalarType, EwaldType, AvoidTooNear>::force(const MDCellType& cell) {
-        Vector<ScalarType> result;
-        forceAsync<Vector<ScalarType>, Executor>(cell, result);
+    VectorND<ScalarType> BKSModel<ScalarType, EwaldType, AvoidTooNear>::force(const MDCellType& cell) {
+        VectorND<ScalarType> result;
+        forceAsync<VectorND<ScalarType>, Executor>(cell, result);
         return result;
     }
 
@@ -177,20 +177,20 @@ namespace Physica::Core {
             result = force_short<Executor>(cell);
         });
 
-        const Vector<ScalarType> coulomb = force_long<Executor>(cell);
+        const VectorND<ScalarType> coulomb = force_long<Executor>(cell);
         Executor::auto_wait(future);
         result += coulomb;
     }
 
     template<class ScalarType, class EwaldType, bool AvoidTooNear>
     template<class Executor>
-    Vector<ScalarType> BKSModel<ScalarType, EwaldType, AvoidTooNear>::force_short(const MDCellType& cell) const {
+    VectorND<ScalarType> BKSModel<ScalarType, EwaldType, AvoidTooNear>::force_short(const MDCellType& cell) const {
         return Base::template force_short<Executor>(cell);
     }
 
     template<class ScalarType, class EwaldType, bool AvoidTooNear>
     template<class Executor>
-    inline Vector<ScalarType> BKSModel<ScalarType, EwaldType, AvoidTooNear>::force_long(const MDCellType& cell) {
+    inline VectorND<ScalarType> BKSModel<ScalarType, EwaldType, AvoidTooNear>::force_long(const MDCellType& cell) {
         return ewald.template force<Executor>(cell.getPos());
     }
 

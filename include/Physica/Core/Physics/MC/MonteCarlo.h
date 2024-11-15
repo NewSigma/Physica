@@ -23,7 +23,7 @@ namespace Physica::Core {
     class MonteCarlo {
         using MDCellType = MDCell<ScalarType, Dim>;
         using PositionMatrix = typename MDCellType::PositionMatrix;
-        using VectorType = Vector<ScalarType>;
+        using VectorType = VectorND<ScalarType>;
         using MachineType = typename ScalarType::MachineType;
 
         MDCellType cell;

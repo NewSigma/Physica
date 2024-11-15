@@ -65,7 +65,7 @@ namespace Physica::Core {
     }
 
     template<class T>
-    FFT<T, 1>::FFT(const Vector<ScalarType>& data_, PlanFlag planFlag)
+    FFT<T, 1>::FFT(const VectorND<ScalarType>& data_, PlanFlag planFlag)
             : FFT(data_.getLength(), planFlag) {
         transform(data_);
     }

@@ -32,7 +32,7 @@ namespace Physica::Core {
     private:
         using Base::from;
         using Base::to;
-        Vector<ValueType> lastGrad;
+        VectorND<ValueType> lastGrad;
         ValueType momentum;
     public:
         MomentumSGD(ValueType momentum_, ValueType learnRate, unsigned int batchSize);

@@ -121,7 +121,7 @@ namespace Physica::Core {
                 const size_t atom = index5D[4] / Dim;
                 const unsigned int dir = index5D[4] % Dim;
 
-                Vector<ScalarType, 3> pos = unitCell.getPos().row(atom);
+                Vector3D<ScalarType> pos = unitCell.getPos().row(atom);
                 for (unsigned int j = 0; j < Dim; ++j) {
                     const ssize_t index_j = index5D[j];
                     const ssize_t superSize_j = superSize[j];
@@ -151,8 +151,8 @@ namespace Physica::Core {
             const auto index5D = FCSwapVector<ScalarType>::index1DTo5D(numDOF, superSize, i);
             const unsigned int dir1 = index5D[3] % Dim;
             const unsigned int dir2 = index5D[4] % Dim;
-            const Vector<ScalarType, 3> pos1 = pos.row(index5D[3] / Dim);
-            Vector<ScalarType, 3> pos2 = pos.row(index5D[4] / Dim);
+            const Vector3D<ScalarType> pos1 = pos.row(index5D[3] / Dim);
+            Vector3D<ScalarType> pos2 = pos.row(index5D[4] / Dim);
             for (unsigned int j = 0; j < Dim; ++j) {
                 const ssize_t index_j = index5D[j];
                 const ssize_t superSize_j = superSize[j];

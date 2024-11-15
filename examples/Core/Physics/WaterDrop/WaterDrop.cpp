@@ -38,9 +38,9 @@ struct WaterDropArgs {
 };
 
 struct EquationEnv {
-    Vector<T>& r_arr;
-    Vector<T>& lambda_arr;
-    Vector<T>& volume_arr;
+    VectorND<T>& r_arr;
+    VectorND<T>& lambda_arr;
+    VectorND<T>& volume_arr;
     size_t from;
     size_t to;
     double rmin;
@@ -78,7 +78,7 @@ WaterDropSolver::WaterDropSolver(const WaterDropArgs& drop, T rmin, T stepSize_)
 T WaterDropSolver::solve() {
     return bisection([&](const T& lambda) { //We use bisection method by experience and without any prove
                setLambda(lambda);
-               solver.rungeKutta4([&](const T& r, const Vector<T, 2>& v) -> Vector<T, 2> {
+               solver.rungeKutta4([&](const T& r, const Vector2D<T>& v) -> Vector2D<T> {
                        const T momentum = v[1];
                        const T momentum_2_1 = momentum * momentum + T(1);
                        const T sqrt_momentum_2_1 = sqrt(momentum_2_1);
@@ -95,7 +95,7 @@ int WaterDropSolver::output() {
     const auto& solution = solver.getSolution();
 
     const size_t length = solution.getCol();
-    Vector<T> z{};
+    VectorND<T> z{};
     z.resize(length);
 
     T volumeHelper(0);
@@ -107,7 +107,7 @@ int WaterDropSolver::output() {
     std::cout << "Volume is " << abs(volumeHelper * stepSize * T(1E9)) << " mm^3" << std::endl;
     std::cout << "Minimum tangent is " << solution(1, length - 1) << std::endl;
     /* Plot z */ {
-        const Vector<T> scaled_r = r * T(1E3);
+        const VectorND<T> scaled_r = r * T(1E3);
         z *= T(1E3);
         Plot* r_z = new Plot(-0.1, 0.001, 0, 0.05, 0.02, 0.02);
         r_z->spline(scaled_r, z);
@@ -165,11 +165,11 @@ int main(int argc, char** argv) {
     const double plotStepSize = 0.0001;
 
     const size_t length = 50;
-    Vector<T> r_arr{};
+    VectorND<T> r_arr{};
     r_arr.resize(length);
-    Vector<T> lambda_arr{};
+    VectorND<T> lambda_arr{};
     lambda_arr.resize(length);
-    Vector<T> volume_arr{};
+    VectorND<T> volume_arr{};
     volume_arr.resize(length);
     {
         const unsigned int threadCount = 5;
@@ -201,7 +201,7 @@ int main(int argc, char** argv) {
         }, threadCount).wait();
     }
 
-    const Vector<T> scaled_r = r_arr * T(1E3);
+    const VectorND<T> scaled_r = r_arr * T(1E3);
     /* Plot lambda */ {
         Plot* r_lambda = new Plot(0, 5, -1.2, 0.1, 1, 0.25);
         r_lambda->spline(scaled_r, lambda_arr);
@@ -212,7 +212,7 @@ int main(int argc, char** argv) {
         r_lambda->show();
     }
     /* Plot volume */ {
-        const Vector<T> scaled_v = volume_arr * T(1E9);
+        const VectorND<T> scaled_v = volume_arr * T(1E9);
         Plot* r_volume = new Plot(0, 5, 0, 12, 1, 5);
         r_volume->spline(scaled_r, scaled_v);
         r_volume->getChart()->legend()->hide();

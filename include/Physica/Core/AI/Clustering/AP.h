@@ -73,7 +73,7 @@ namespace Physica::Core {
         const size_t order = similarity.getOrder();
         const ScalarType mixing2 = ScalarType(1) - mixing;
 
-        Core::Vector<ScalarType> buffer(order);
+        Core::VectorND<ScalarType> buffer(order);
         exemplars.clear();
         availabilities = ScalarType(0);
 

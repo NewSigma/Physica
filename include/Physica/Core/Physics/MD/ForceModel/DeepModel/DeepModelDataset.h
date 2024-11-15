@@ -25,7 +25,7 @@ namespace Physica::Core {
     class DeepModelDataset {
         using CellType = CrystalCell<ScalarType>;
         using CellArray = Array<CellType>;
-        using VectorType = Vector<ScalarType>;
+        using VectorType = VectorND<ScalarType>;
         using ForceArray = Array<VectorType>;
 
         CellArray cells;

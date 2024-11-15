@@ -55,7 +55,7 @@ void testSi() {
     constexpr double cutEnergyRho = 3.5;
     std::mt19937 gen{};
     CrystalCell<ScalarType> Si({{5, 0, 0, 0, 5, 0, 0, 0, 5}, {0.5, 0.5, 0.5}, CrystalCell<ScalarType>::Type::Direct}, {14});
-    Vector<ScalarType> data{-7.792391329, -1.041100405, -1.035201289, -1.034604466, 0.6683090416, 1.089343903, 1.092870102, 1.320171657, 1.333518296, 1.338267588, 2.048168732, 2.067794503, 2.068418852, 2.279423053, 2.296210041, 2.299139794, 2.319865956, 2.599589113, 2.607027813, 2.783839081, 3.224438445, 3.230179297, 3.239812718, 3.45520247, 3.466638718, 3.467162989, 3.613037906};
+    VectorND<ScalarType> data{-7.792391329, -1.041100405, -1.035201289, -1.034604466, 0.6683090416, 1.089343903, 1.092870102, 1.320171657, 1.333518296, 1.338267588, 2.048168732, 2.067794503, 2.068418852, 2.279423053, 2.296210041, 2.299139794, 2.319865956, 2.599589113, 2.607027813, 2.783839081, 3.224438445, 3.230179297, 3.239812718, 3.45520247, 3.466638718, 3.467162989, 3.613037906};
     {
         BandGrid<ScalarType, false> grid(Si.makeRepLattice(), 1, 1, 1, 14, 8);
         auto solver = KSSolver<ScalarType, LDA<ScalarType, LDAType::HL, false>>(
@@ -64,7 +64,7 @@ void testSi() {
         solver.getDensity().initDensity(ScalarType(Si.getElectronCount()) / Si.getVolume());
         solver.solve(1E-3, 100);
         const auto& band = solver.getBand();
-        Vector<ComplexType> delta = abs(band.getKPointGrid()(0, 0, 0).getBandEnergy(SpinState::Up) - data);
+        VectorND<ComplexType> delta = abs(band.getKPointGrid()(0, 0, 0).getBandEnergy(SpinState::Up) - data);
         for (size_t i = 0; i < delta.getLength(); ++i)
             if (scalarNear(delta.calc(i), ComplexType(0), 1E-15))
                 exit(EXIT_FAILURE);

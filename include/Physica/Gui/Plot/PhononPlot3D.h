@@ -25,8 +25,8 @@ namespace Physica::Gui {
     template<class ScalarType>
     class PhononPlot3D : public Plot3D {
         using Base = Plot3D;
-        using Vector3D = Core::Vector<ScalarType, 3>;
-        using VectorType = Core::Vector<ScalarType>;
+        using Vector3D = Core::Vector3D<ScalarType>;
+        using VectorType = Core::VectorND<ScalarType>;
         using MatrixType = Core::DenseMatrix<ScalarType>;
         using MeshType = std::pair<MatrixType, MatrixType>;
         using BandArray = Core::Array<MatrixType>;

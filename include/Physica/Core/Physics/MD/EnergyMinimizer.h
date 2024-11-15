@@ -29,7 +29,7 @@ namespace Physica::Core {
     public:
         using MDCellType = MDCell<ScalarType, Dim>;
         using LatticeMatrix = typename MDCellType::LatticeMatrix;
-        using VectorType = Vector<ScalarType, Dynamic>;
+        using VectorType = VectorND<ScalarType>;
     private:
         MDCellType cell;
     public:

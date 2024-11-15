@@ -25,15 +25,15 @@ using ScalarType = float64;
 
 int main() {
     const PermutationMatrix<ScalarType> perm({0, 3, 2, 1});
-    const Vector<ScalarType> v{0, 1, 2, 3};
-    const Vector<ScalarType> perm_v = perm * v;
+    const VectorND<ScalarType> v{0, 1, 2, 3};
+    const VectorND<ScalarType> perm_v = perm * v;
     {
-        const Vector<ScalarType> answer{0, 3, 2, 1};
+        const VectorND<ScalarType> answer{0, 3, 2, 1};
         if (!vectorNear(perm_v, answer, 1E-15))
             return 1;
     }
     const auto inv = perm.inverse();
-    const Vector<ScalarType> v1 = inv * perm_v;
+    const VectorND<ScalarType> v1 = inv * perm_v;
     if (!vectorNear(v, v1, 1E-15))
         return 1;
     return 0;

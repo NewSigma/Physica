@@ -35,9 +35,9 @@ int main() {
                 return 1;
         }
         {
-            Vector<ScalarType> v{1, 1, 1};
-            Vector<ScalarType> result = mat * v;
-            Vector<ScalarType> answer{1, 2, 1};
+            VectorND<ScalarType> v{1, 1, 1};
+            VectorND<ScalarType> result = mat * v;
+            VectorND<ScalarType> answer{1, 2, 1};
             if (!vectorNear(result, answer, 1E-16))
                 return 1;
         }

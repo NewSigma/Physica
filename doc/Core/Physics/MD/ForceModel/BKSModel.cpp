@@ -25,7 +25,7 @@
 using namespace Physica::Core;
 using namespace Physica::Gui;
 using ScalarType = Real<Double>;
-using VectorType = Vector<ScalarType>;
+using VectorType = VectorND<ScalarType>;
 using ForceModel = BKSModel<ScalarType, Ewald<ScalarType, RSpaceEwald<ScalarType>>, false>;
 constexpr double A = ForceModel::A_SiO;
 constexpr double b = ForceModel::b_SiO;

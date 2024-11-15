@@ -53,13 +53,13 @@ namespace Physica::Core {
         VASPModel& operator=(VASPModel obj) noexcept { swap(obj); return *this; }
         /* Operations */
         template<class Executor>
-        [[nodiscard]] Vector<ScalarType> force(const MDCellType& cell) const;
+        [[nodiscard]] VectorND<ScalarType> force(const MDCellType& cell) const;
         template<class VectorType, class Executor>
         void forceAsync(const MDCellType& cell, ContinuousVector<VectorType>& result) const noexcept;
         template<class Executor>
-        [[nodiscard]] Vector<ScalarType> force_short(const MDCellType& cell) const { return force<Executor>(cell); }
+        [[nodiscard]] VectorND<ScalarType> force_short(const MDCellType& cell) const { return force<Executor>(cell); }
         template<class Executor>
-        [[nodiscard]] Vector<ScalarType> force_long(const MDCellType& cell) const { return Vector<ScalarType>(cell.getDOF(), 0); }
+        [[nodiscard]] VectorND<ScalarType> force_long(const MDCellType& cell) const { return VectorND<ScalarType>(cell.getDOF(), 0); }
         void swap(VASPModel& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] const WorkingDirType& getWorkingDir() const noexcept { return workingDir; }
@@ -95,9 +95,9 @@ namespace Physica::Core {
 
     template<class ScalarType>
     template<class Executor>
-    Vector<ScalarType> VASPModel<ScalarType>::force(const MDCellType& cell) const {
-        Vector<ScalarType> result(cell.getNumParticle());
-        forceAsync<Vector<ScalarType>, Executor>(cell, result);
+    VectorND<ScalarType> VASPModel<ScalarType>::force(const MDCellType& cell) const {
+        VectorND<ScalarType> result(cell.getNumParticle());
+        forceAsync<VectorND<ScalarType>, Executor>(cell, result);
         return result;
     }
 

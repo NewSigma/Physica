@@ -29,7 +29,7 @@ constexpr double RepelU = 2;
 template<unsigned int NumSite, unsigned int NumSpinUp, unsigned int NumSpinDown>
 void testRSpinMatrix1D() {
     using ScalarType = float64;
-    using VectorType = Vector<ScalarType>;
+    using VectorType = VectorND<ScalarType>;
     using MatrixType = DenseMatrix<ScalarType>;
     using ReprType = SpinRepr<1, NumSite, NumSpinUp == NumSpinDown>;
 
@@ -53,7 +53,7 @@ void testRSpinMatrix1D() {
 template<unsigned int NumSiteX, unsigned int NumSiteY, unsigned int NumSpinUp, unsigned int NumSpinDown>
 void testRSpinMatrix2D() {
     using ScalarType = float64;
-    using VectorType = Vector<ScalarType>;
+    using VectorType = VectorND<ScalarType>;
     using MatrixType = DenseMatrix<ScalarType>;
     using ReprType = SpinRepr<2, NumSiteX * NumSiteY, NumSpinUp == NumSpinDown>;
 
@@ -79,7 +79,7 @@ void testKSpinMatrix() {
     constexpr unsigned int NumParticle = NumSite / 2;
     using RealType = float64;
     using ScalarType = Complex<RealType>;
-    using VectorType = Vector<ScalarType>;
+    using VectorType = VectorND<ScalarType>;
     using MatrixType = DenseMatrix<ScalarType>;
     using ReprType = KSpinRepr<1, NumSite, true>;
 
@@ -114,9 +114,9 @@ void testVecProduct() {
     const auto repr = ReprType(2, 1);
     const Hamilton hamiltonH(hubbard, repr);
 
-    const auto v = Vector<float64>::random_uniform(hamiltonH.getNumState(), RandomType::getInstance());
-    const Vector<float64> v1 = hamiltonH * v;
-    Vector<float64> v2(v.getLength());
+    const auto v = VectorND<float64>::random_uniform(hamiltonH.getNumState(), RandomType::getInstance());
+    const VectorND<float64> v1 = hamiltonH * v;
+    VectorND<float64> v2(v.getLength());
     for (size_t i = 0; i < v.getLength(); ++i)
         v2[i] = (hamiltonH * v).calc(i);
 

@@ -34,7 +34,7 @@
 using namespace Physica::Core;
 using namespace Physica::Gui;
 using ScalarType = float64;
-using VectorType = Vector<ScalarType>;
+using VectorType = VectorND<ScalarType>;
 using MatrixType = DenseMatrix<ScalarType>;
 using ThermoType = Langevin<ScalarType, 1, 1>;
 using KineticModel = HardCore<ScalarType, false, 1, RPMDIntegrator::Exact>;

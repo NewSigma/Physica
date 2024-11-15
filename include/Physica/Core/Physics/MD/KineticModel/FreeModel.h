@@ -49,8 +49,8 @@ namespace Physica::Core {
         using PhaseMatrix = typename RingPolymerType::PhaseMatrix;
         using BufferType = typename RingPolymerType::BufferType;
         using FFTType = typename RingPolymerType::FFTType;
-        using VectorType = Vector<ScalarType>;
-        using Vector2D = Vector<ScalarType, 2>;
+        using VectorType = VectorND<ScalarType>;
+        using Vector2D = Vector2D<ScalarType>;
         static_assert(std::is_same<ComplexType, typename BufferType::ScalarType>::value, "[Error]: Inconsistent type");
     private:
         VectorType omegaK;

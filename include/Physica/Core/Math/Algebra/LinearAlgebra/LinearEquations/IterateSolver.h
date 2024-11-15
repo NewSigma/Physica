@@ -24,7 +24,7 @@ namespace Physica::Core {
     template<class ScalarType>
     class IterateSolver {
         using This = IterateSolver<ScalarType>;
-        using VectorType = Vector<ScalarType>;
+        using VectorType = VectorND<ScalarType>;
         using RealType = typename ScalarType::RealType;
     private:
         VectorType residual;

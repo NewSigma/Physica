@@ -182,7 +182,7 @@ namespace Physica::Core {
      */
     template<class ScalarType, size_t Order>
     void SymmEigenSolver<ScalarType, Order>::stepQR(WorkingMatrix& working, size_t lower, size_t sub_order) {
-        Vector<ScalarType, 2> buffer{};
+        Vector2D<ScalarType> buffer{};
         /* Init buffer */ {
             const auto subBlock = working.block(lower, sub_order, lower, sub_order);
             const RealType factor = (subBlock(sub_order - 2, sub_order - 2).real() - subBlock(sub_order - 1, sub_order - 1).real()) * ScalarType(0.5);

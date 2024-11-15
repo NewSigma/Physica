@@ -27,7 +27,7 @@ namespace Physica::Core {
     class PIPhonon final {
         using ScalarType = float64;
         using ComplexType = Complex<ScalarType>;
-        using CorrMatrix = HalfDenseMatrixStorage<Vector<ScalarType>, Dynamic>;
+        using CorrMatrix = HalfDenseMatrixStorage<VectorND<ScalarType>, Dynamic>;
         using Index3D = typename RSpaceGrid<ScalarType>::Index3D;
         using FFT3D = FFT<ScalarType, 3>;
         constexpr static unsigned int Dim = 3;
@@ -84,15 +84,15 @@ namespace Physica::Core {
         const size_t unitDof = getUnitCellDOF();
         const size_t superDof = getSuperCellDOF();
 
-        Vector<ScalarType> average_force(superDof);
-        Vector<ScalarType> average_momentum(superDof);
+        VectorND<ScalarType> average_force(superDof);
+        VectorND<ScalarType> average_momentum(superDof);
         for (size_t i = 0; i < superDof; ++i) {
             average_force[i] = mean(force.row(i));
             average_momentum[i] = mean(momentum.row(i));
         }
 
-        Vector<ScalarType> buffer1(numCell);
-        Vector<ScalarType> buffer2(numCell);
+        VectorND<ScalarType> buffer1(numCell);
+        VectorND<ScalarType> buffer2(numCell);
         for (size_t r = 0; r < unitDof; ++r) {
             const size_t offset_r = r * numCell;
             for (size_t c = r; c < unitDof; ++c) {

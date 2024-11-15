@@ -106,7 +106,7 @@ namespace Physica::Core {
             fft.transform();
 
             auto& kSpace = fft.getKSpace();
-            auto kernel = [&kSpace](Vector<ScalarType, 3> k, Index3D index) {
+            auto kernel = [&kSpace](Vector3D<ScalarType> k, Index3D index) {
                 const ScalarType kNorm = k.squaredNorm();
                 const ScalarType factor = ScalarType(amix) * std::min(kNorm / (kNorm + square(ScalarType(bmix))), ScalarType(amin));
                 kSpace(index) *= factor;
@@ -132,9 +132,9 @@ namespace Physica::Core {
                     }
                 }
             }
-            Vector<ScalarType> x(diisMat.getRow());
+            VectorND<ScalarType> x(diisMat.getRow());
             /* Solve */ {
-                auto b = Vector<ScalarType>(diisMat.getRow(), 0);
+                auto b = VectorND<ScalarType>(diisMat.getRow(), 0);
                 b[0] = 1;
                 const MatrixType inv_A = diisMat.inverse();
                 x = inv_A * b;

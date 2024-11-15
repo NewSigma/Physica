@@ -44,9 +44,9 @@ namespace Physica::Core {
         using ComplexType = Complex<ScalarType>;
         using CellListType = CellList<ScalarType>;
         using Index3D = typename CellListType::Index3D;
-        using Vector3D = Vector<ScalarType, 3>;
+        using Vector3D = Vector3D<ScalarType>;
         using LatticeReturnType = typename std::conditional<IsDeviceREwald, LatticeMatrix, const LatticeMatrix&>::type;
-        using HostChargeVector = typename std::conditional<IsDeviceREwald, Vector<ScalarType>, PlainStruct<void>>::type;
+        using HostChargeVector = typename std::conditional<IsDeviceREwald, VectorND<ScalarType>, PlainStruct<void>>::type;
     public:
         using typename Base::BornChargeArray;
     private:
@@ -55,7 +55,7 @@ namespace Physica::Core {
         HostChargeVector hostCharges;
     public:
         Ewald() = default;
-        Ewald(LatticeMatrix lattice, Vector<ScalarType> charges);
+        Ewald(LatticeMatrix lattice, VectorND<ScalarType> charges);
         Ewald(const Ewald&) = default;
         Ewald(Ewald&&) noexcept = default;
         ~Ewald() = default;
@@ -66,10 +66,10 @@ namespace Physica::Core {
         [[nodiscard]] ScalarType potentialV(const PositionMatrix& pos) const;
 
         template<class Executor>
-        [[nodiscard]] Vector<ScalarType> force(const PositionMatrix& pos);
+        [[nodiscard]] VectorND<ScalarType> force(const PositionMatrix& pos);
         using Base::force_short;
         template<class Executor>
-        [[nodiscard]] Vector<ScalarType> force_long(const PositionMatrix& pos) const;
+        [[nodiscard]] VectorND<ScalarType> force_long(const PositionMatrix& pos) const;
 
         [[nodiscard]] ComplexType forceConst(const PositionMatrix& pos, Vector3D qPoint, size_t dof1, size_t dof2) const;
         [[nodiscard]] ComplexType kSpaceForceConst(const PositionMatrix& pos, Vector3D qPoint, size_t dof1, size_t dof2) const;
@@ -82,7 +82,7 @@ namespace Physica::Core {
         /* Getters */
         [[nodiscard]] inline LatticeReturnType getLattice() const noexcept;
         [[nodiscard]] inline LatticeReturnType getRepLattice() const noexcept;
-        [[nodiscard]] inline const Vector<ScalarType>& getCharges() const noexcept;
+        [[nodiscard]] inline const VectorND<ScalarType>& getCharges() const noexcept;
         using Base::getNumParticle;
         using Base::getVolume;
         using Base::getIntegralLimit;
@@ -100,7 +100,7 @@ namespace Physica::Core {
     };
 
     template<class ScalarType, class REwaldType>
-    Ewald<ScalarType, REwaldType>::Ewald(LatticeMatrix lattice, Vector<ScalarType> charges)
+    Ewald<ScalarType, REwaldType>::Ewald(LatticeMatrix lattice, VectorND<ScalarType> charges)
             : Base(std::move(lattice), std::move(charges)) {
         selfE = Base::calcSelfE();
         gammaPointE = Base::calcGammaPointE();
@@ -126,9 +126,9 @@ namespace Physica::Core {
         const ScalarType rSpaceSum = Base::potentialV(pos);
         ScalarType kSpaceSum = 0;
         const ScalarType factor = reciprocal(square(ValueType(2) * getIntegralLimit()));
-        Vector<ScalarType> dots(numParticle);
-        Vector<ScalarType> sin_vec(numParticle);
-        Vector<ScalarType> cos_vec(numParticle);
+        VectorND<ScalarType> dots(numParticle);
+        VectorND<ScalarType> sin_vec(numParticle);
+        VectorND<ScalarType> cos_vec(numParticle);
         PeriodicCell<ScalarType, Dim>::forReducedCellInRange( // Reduce cell using time reversal symmetry
             getKSpaceSumRange(), getRepLattice(), [this, factor, &pos, &kSpaceSum, &dots, &sin_vec, &cos_vec](Vector3D delta) {
                 const auto& charges = getCharges();
@@ -149,12 +149,12 @@ namespace Physica::Core {
 
     template<class ScalarType, class REwaldType>
     template<class Executor>
-    Vector<ScalarType> Ewald<ScalarType, REwaldType>::force(const PositionMatrix& pos) {
-        Vector<ScalarType> result;
+    VectorND<ScalarType> Ewald<ScalarType, REwaldType>::force(const PositionMatrix& pos) {
+        VectorND<ScalarType> result;
         auto kSpaceFuture = Executor::schedule([this, pos, &result]() {
             result = force_long<SequentialExecutor>(pos);
         });
-        const Vector<ScalarType> rSpaceSum = Base::template force_short<Executor>(pos);
+        const VectorND<ScalarType> rSpaceSum = Base::template force_short<Executor>(pos);
         Executor::auto_wait(kSpaceFuture);
         result += rSpaceSum;
         return result;
@@ -162,12 +162,12 @@ namespace Physica::Core {
 
     template<class ScalarType, class REwaldType>
     template<class Executor>
-    Vector<ScalarType> Ewald<ScalarType, REwaldType>::force_long(const PositionMatrix& pos) const {
+    VectorND<ScalarType> Ewald<ScalarType, REwaldType>::force_long(const PositionMatrix& pos) const {
         const size_t numParticle = getNumParticle();
-        Vector<ScalarType> kSpaceSum(numParticle * Dim, 0);
-        Vector<ScalarType> dots(numParticle);
-        Vector<ScalarType> sin_vec(numParticle);
-        Vector<ScalarType> cos_vec(numParticle);
+        VectorND<ScalarType> kSpaceSum(numParticle * Dim, 0);
+        VectorND<ScalarType> dots(numParticle);
+        VectorND<ScalarType> sin_vec(numParticle);
+        VectorND<ScalarType> cos_vec(numParticle);
         const ScalarType factor1 = reciprocal(square(ValueType(2) * getIntegralLimit()));
         PeriodicCell<ScalarType, Dim>::forReducedCellInRange( // Reduce cell using time reversal symmetry
             getKSpaceSumRange(), getRepLattice(), [this, numParticle, factor1, &dots, &sin_vec, &cos_vec, &pos, &kSpaceSum](Vector3D delta) {
@@ -223,9 +223,9 @@ namespace Physica::Core {
     typename Ewald<ScalarType, REwaldType>::LatticeMatrix Ewald<ScalarType, REwaldType>::virial(const PositionMatrix& pos) {
         const ScalarType factor = reciprocal(square(ValueType(2) * getIntegralLimit()));
         const size_t numParticle = getNumParticle();
-        Vector<ScalarType> dots(numParticle);
-        Vector<ScalarType> sin_vec(numParticle);
-        Vector<ScalarType> cos_vec(numParticle);
+        VectorND<ScalarType> dots(numParticle);
+        VectorND<ScalarType> sin_vec(numParticle);
+        VectorND<ScalarType> cos_vec(numParticle);
         LatticeMatrix kSpaceVirial(Dim, Dim, 0);
         PeriodicCell<ScalarType, Dim>::forReducedCellInRange( // Reduce cell using time reversal symmetry
             getKSpaceSumRange(), getRepLattice(), [this, &pos, &kSpaceVirial, &dots, &sin_vec, &cos_vec, factor](Vector3D delta) {
@@ -283,7 +283,7 @@ namespace Physica::Core {
     }
 
     template<class ScalarType, class REwaldType>
-    inline const Vector<ScalarType>& Ewald<ScalarType, REwaldType>::getCharges() const noexcept {
+    inline const VectorND<ScalarType>& Ewald<ScalarType, REwaldType>::getCharges() const noexcept {
         if constexpr (IsDeviceREwald)
             return hostCharges;
         else
@@ -332,9 +332,9 @@ namespace Physica::Core {
                     const bool isNotGammaPoint = ScalarType(std::numeric_limits<ScalarType>::min()) < squaredNorm;
                     if (isNotGammaPoint) {
                         const size_t numParticle = getNumParticle();
-                        const Vector<ScalarType> dots = pos * waveG;
-                        Vector<ScalarType> sin_vec(numParticle);
-                        Vector<ScalarType> cos_vec(numParticle);
+                        const VectorND<ScalarType> dots = pos * waveG;
+                        VectorND<ScalarType> sin_vec(numParticle);
+                        VectorND<ScalarType> cos_vec(numParticle);
                         sincos(dots, sin_vec, cos_vec);
                         const ScalarType sum_cos = cos_vec * charges;
                         const ScalarType sum_sin = sin_vec * charges;

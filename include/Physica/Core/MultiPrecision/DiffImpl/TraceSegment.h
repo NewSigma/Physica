@@ -36,7 +36,7 @@ namespace Physica::Core {
     public:
         constexpr static size_t DefaultSize = 4096; // I guess it is not a bad choice
         using DiffScalar = Diff<ScalarType, DiffMode::Reverse, Order>;
-        using ValueVector = Vector<ScalarType>;
+        using ValueVector = VectorND<ScalarType>;
         using GradVector = Vector<GradType>;
         struct DiffRecord {
             using device_obj_type = DiffRecord;

@@ -29,7 +29,7 @@
 using namespace Physica::Core;
 using RealType = float64;
 using ScalarType = Complex<RealType>;
-using VectorType = Vector<RealType>;
+using VectorType = VectorND<RealType>;
 using RandomType = Random<std::mt19937>;
 constexpr unsigned int NumSite = 10;
 constexpr unsigned int NumParticle = NumSite / 2;

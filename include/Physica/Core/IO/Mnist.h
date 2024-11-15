@@ -103,7 +103,7 @@ namespace Physica::Core {
     VectorType Mnist::ImageType::asVector() const {
         static_assert(is_vector<VectorType>::value, "[Error]: This is not a vector");
         using ScalarType = typename VectorType::ScalarType::ValueType;
-        Vector<ScalarType> result(NumPixelInImage);
+        VectorND<ScalarType> result(NumPixelInImage);
         for (size_t i = 0; i < NumPixelInImage; ++i)
             result[i] = ScalarType(pixels[i]);
         return result;

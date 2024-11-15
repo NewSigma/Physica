@@ -49,8 +49,8 @@ namespace Physica::Core {
     private:
         LatticeMatrix lattice;
         LatticeMatrix repLatt;
-        Vector<ScalarType> charges;
-        Vector<ScalarType> erfc_table;
+        VectorND<ScalarType> charges;
+        VectorND<ScalarType> erfc_table;
         ScalarType volume;
         ScalarType inv_volume;
         ScalarType integralLimit;
@@ -61,7 +61,7 @@ namespace Physica::Core {
         SearchRangeType kSpaceSumRange;
     public:
         RSpaceEwald() = default;
-        RSpaceEwald(LatticeMatrix lattice_, Vector<ScalarType> charges_);
+        RSpaceEwald(LatticeMatrix lattice_, VectorND<ScalarType> charges_);
         RSpaceEwald(const RSpaceEwald&) = default;
         RSpaceEwald(RSpaceEwald&&) noexcept = default;
         ~RSpaceEwald() = default;
@@ -71,7 +71,7 @@ namespace Physica::Core {
         [[nodiscard]] inline ScalarType potentialV(const PositionMatrix& pos) const;
 
         template<class Executor>
-        [[nodiscard]] inline Vector<ScalarType> force_short(const PositionMatrix& pos) const;
+        [[nodiscard]] inline VectorND<ScalarType> force_short(const PositionMatrix& pos) const;
 
         [[nodiscard]] ComplexType forceConst(const PositionMatrix& pos, const Vector3D& waveQ, size_t dof1, size_t dof2) const;
 
@@ -81,7 +81,7 @@ namespace Physica::Core {
         /* Getters */
         [[nodiscard]] const LatticeMatrix& getLattice() const noexcept { return lattice; }
         [[nodiscard]] const LatticeMatrix& getRepLattice() const noexcept { return repLatt; }
-        [[nodiscard]] const Vector<ScalarType>& getCharges() const noexcept { return charges; }
+        [[nodiscard]] const VectorND<ScalarType>& getCharges() const noexcept { return charges; }
         [[nodiscard]] size_t getNumParticle() const noexcept { return charges.getLength(); }
         [[nodiscard]] ScalarType getVolume() const noexcept { return volume; }
         [[nodiscard]] ScalarType getInvVolume() const noexcept { return inv_volume; }
@@ -111,7 +111,7 @@ namespace Physica::Core {
         using Base::getCutoff;
         using Base::getSquaredCutoff;
         /* Static members */
-        [[nodiscard]] static BornChargeArray makeBornCharge(const Vector<ScalarType>& charges);
+        [[nodiscard]] static BornChargeArray makeBornCharge(const VectorND<ScalarType>& charges);
         /* Friends */
         friend class PairModel<RSpaceEwald<ScalarType, IsSmallCell>>;
         friend class device_obj<This>;
@@ -119,7 +119,7 @@ namespace Physica::Core {
     };
 
     template<class ScalarType, bool IsSmallCell>
-    RSpaceEwald<ScalarType, IsSmallCell>::RSpaceEwald(LatticeMatrix lattice_, Vector<ScalarType> charges_)
+    RSpaceEwald<ScalarType, IsSmallCell>::RSpaceEwald(LatticeMatrix lattice_, VectorND<ScalarType> charges_)
             : charges(std::move(charges_)), erfc_table(ErfcTableSize + 1) {
         setLattice(std::move(lattice_));
     }
@@ -133,8 +133,8 @@ namespace Physica::Core {
 
     template<class ScalarType, bool IsSmallCell>
     template<class Executor> 
-    inline Vector<ScalarType> RSpaceEwald<ScalarType, IsSmallCell>::force_short(const PositionMatrix& pos) const {
-        const Vector<ScalarType> rSpaceSum = Base::template force<SequentialExecutor>(lattice, pos);
+    inline VectorND<ScalarType> RSpaceEwald<ScalarType, IsSmallCell>::force_short(const PositionMatrix& pos) const {
+        const VectorND<ScalarType> rSpaceSum = Base::template force<SequentialExecutor>(lattice, pos);
         return rSpaceSum;
     }
     /**
@@ -323,7 +323,7 @@ namespace Physica::Core {
 
     template<class ScalarType, bool IsSmallCell>
     typename RSpaceEwald<ScalarType, IsSmallCell>::BornChargeArray
-    RSpaceEwald<ScalarType, IsSmallCell>::makeBornCharge(const Vector<ScalarType>& charges) {
+    RSpaceEwald<ScalarType, IsSmallCell>::makeBornCharge(const VectorND<ScalarType>& charges) {
         BornChargeArray result(charges.getLength(), Matrix3D(3, 3, ScalarType(0)));
         for (size_t i = 0; i < result.getLength(); ++i) {
             auto diag = result[i].diag();

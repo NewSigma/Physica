@@ -26,7 +26,7 @@ using namespace Physica::Core;
  */
 int main() {
     using ScalarType = float64;
-    using XVector = Vector<ScalarType, 1>;
+    using XVector = Vector1D<ScalarType>;
     constexpr double stepSize = 0.1;
     constexpr double D = 0.1;
     constexpr double lambda = 1;
@@ -34,7 +34,7 @@ int main() {
     constexpr size_t iteration = 5000;
 
     const size_t count = t_max / stepSize;
-    Vector<ScalarType> x(count, 0);
+    VectorND<ScalarType> x(count, 0);
     for (size_t i = 0; i < iteration; ++i) {
         std::mt19937 gen{i};
         std::normal_distribution phi{};
@@ -45,9 +45,9 @@ int main() {
         x += solver.getSolution().row(0);
     }
     x *= reciprocal(ScalarType(iteration));
-    const Vector<ScalarType> log_x = ln(x);
-    const Vector<ScalarType> t = Vector<ScalarType>::linspace(0, t_max - stepSize, count);
-    const Vector<ScalarType> log_x_theory = ScalarType(-lambda) * t;
+    const VectorND<ScalarType> log_x = ln(x);
+    const VectorND<ScalarType> t = VectorND<ScalarType>::linspace(0, t_max - stepSize, count);
+    const VectorND<ScalarType> log_x_theory = ScalarType(-lambda) * t;
     if (abs(log_x - log_x_theory).max() > ScalarType(0.178))
         return 1;
     return 0;

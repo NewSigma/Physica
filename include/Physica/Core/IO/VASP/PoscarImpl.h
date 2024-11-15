@@ -111,7 +111,7 @@ namespace Physica::Core {
     void Poscar<ScalarType>::standrizeLattice() {
         using MatrixType = typename LatticeMatrix::ColMatrix;
         MatrixType temp = lattice.transpose();
-        using VectorType = Vector<ScalarType, 3>;
+        using VectorType = Vector3D<ScalarType>;
         VectorType buffer{};
         householder(temp.col(0), buffer);
         applyHouseholder(buffer, temp);

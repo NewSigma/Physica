@@ -58,18 +58,18 @@ namespace Physica {
             }
         }
     private:
-        static Vector<ScalarType, 3> randomVector(ScalarType latticeConst, RandomGenerator& gen) {
+        static Vector3D<ScalarType> randomVector(ScalarType latticeConst, RandomGenerator& gen) {
             std::uniform_real_distribution dist{};
             const ScalarType theta(dist(gen) * M_PI);
             const ScalarType phi(dist(gen) * M_PI * 2);
-            Vector<ScalarType, 3> result{cos(phi) * sin(theta), sin(phi) * sin(theta), cos(theta)};
+            Vector3D<ScalarType> result{cos(phi) * sin(theta), sin(phi) * sin(theta), cos(theta)};
             result *= ScalarType(ForceModel::equalR / double(latticeConst.getValue())) * latticeConst; // Pass grad to latticeConst while keep O-H bond length unchanged
             return result;
         }
 
         static MDCell<ScalarType> makeSystem(unsigned int cellSize, ScalarType cellVolume, RandomGenerator& gen) {
             using CrystalCellType = CrystalCell<ScalarType>;
-            using Vector3D = Vector<ScalarType, 3>;
+            using Vector3D = Vector3D<ScalarType>;
             
             constexpr size_t maxIndexH = MoleculePerCell * 2;
             constexpr size_t maxIndexO = MoleculePerCell * 3;

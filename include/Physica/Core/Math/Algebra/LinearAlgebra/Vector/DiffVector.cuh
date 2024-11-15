@@ -24,10 +24,10 @@
 
 namespace Physica::Core {
     template<class T, int Order>
-    class device_obj<Diff<Vector<T>, DiffMode::Reverse, Order>>
-            : public device_obj<RValueVector<Diff<Vector<T>, DiffMode::Reverse, Order>>> {
+    class device_obj<Diff<VectorND<T>, DiffMode::Reverse, Order>>
+            : public device_obj<RValueVector<Diff<VectorND<T>, DiffMode::Reverse, Order>>> {
         static_assert(!T::isDifferentiable, "[Error]: Nested Diff<> is not allowed");
-        using PlainVector = Vector<T>;
+        using PlainVector = VectorND<T>;
         using host_obj = Diff<PlainVector, DiffMode::Reverse, Order>;
         using This = device_obj<host_obj>;
         using Base = device_obj<RValueVector<host_obj>>;
@@ -100,7 +100,7 @@ namespace Physica {
     using namespace Core;
 
     template<class T, int Order>
-    class Traits<Core::device_obj<Diff<Vector<T>, DiffMode::Reverse, Order>>> : public Traits<Vector<T>> {
+    class Traits<Core::device_obj<Diff<VectorND<T>, DiffMode::Reverse, Order>>> : public Traits<VectorND<T>> {
     public:
         using ScalarType = Core::device_obj<Diff<T, DiffMode::Reverse, Order>>;
     };

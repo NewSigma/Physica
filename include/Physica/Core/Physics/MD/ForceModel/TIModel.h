@@ -37,14 +37,14 @@ namespace Physica::Core {
 
         ForceModel original;
         HamonicType hamonic;
-        Vector<ScalarType> mass;
+        VectorND<ScalarType> mass;
         ScalarType temperatureT;
         ScalarType refPotentialV;
         ScalarType refHelmholtzF;
 
         ScalarType lambda;
     public:
-        TIModel(ForceModel original_, const MDCellType& refCell, Vector<ScalarType> springCoeffs, ScalarType temperatureT_);
+        TIModel(ForceModel original_, const MDCellType& refCell, VectorND<ScalarType> springCoeffs, ScalarType temperatureT_);
         TIModel(const TIModel&) = default;
         TIModel(TIModel&&) noexcept = default;
         ~TIModel() = default;
@@ -55,7 +55,7 @@ namespace Physica::Core {
         [[nodiscard]] ScalarType deltaPotentialV(const MDCellType& cell) const;
 
         template<class Executor>
-        [[nodiscard]] Vector<ScalarType> force(const MDCellType& cell) const;
+        [[nodiscard]] VectorND<ScalarType> force(const MDCellType& cell) const;
         template<class VectorType, class Executor>
         void forceAsync(const MDCellType& cell, ContinuousVector<VectorType>& result);
 
@@ -65,13 +65,13 @@ namespace Physica::Core {
         /* Setters */
         void setLambda(ScalarType lambda_);
         /* Static members */
-        [[nodiscard]] static Vector<ScalarType> makeSpringCoeffs(const Vector<ScalarType>& msd, ScalarType temperatureT);
+        [[nodiscard]] static VectorND<ScalarType> makeSpringCoeffs(const VectorND<ScalarType>& msd, ScalarType temperatureT);
     private:
         void updateRef();
     };
 
     template<class ForceModel>
-    TIModel<ForceModel>::TIModel(ForceModel original_, const MDCellType& refCell, Vector<ScalarType> springCoeffs, ScalarType temperatureT_)
+    TIModel<ForceModel>::TIModel(ForceModel original_, const MDCellType& refCell, VectorND<ScalarType> springCoeffs, ScalarType temperatureT_)
             : original(std::move(original_))
             , hamonic(refCell.getPos(), std::move(springCoeffs))
             , mass(refCell.getMassVec())
@@ -96,8 +96,8 @@ namespace Physica::Core {
 
     template<class ForceModel>
     template<class Executor>
-    Vector<typename TIModel<ForceModel>::ScalarType> TIModel<ForceModel>::force(const MDCellType& cell) const {
-        const Vector<ScalarType> hamonicF = hamonic.force(cell);
+    VectorND<typename TIModel<ForceModel>::ScalarType> TIModel<ForceModel>::force(const MDCellType& cell) const {
+        const VectorND<ScalarType> hamonicF = hamonic.force(cell);
         if (lambda.isZero())
             return hamonicF;
         return lambda * original.template force<Executor>(cell) + (ScalarType(1) - lambda) * hamonicF;
@@ -108,7 +108,7 @@ namespace Physica::Core {
     void TIModel<ForceModel>::forceAsync(const MDCellType& cell, ContinuousVector<VectorType>& result) {
         if (!lambda.isZero())
             original.template forceAsync<VectorType, Executor>(cell, result);
-        const Vector<ScalarType> hamonicF = hamonic.template force<Executor>(cell);
+        const VectorND<ScalarType> hamonicF = hamonic.template force<Executor>(cell);
         Executor::wait();
         result = lambda * result + (ScalarType(1) - lambda) * hamonicF;
     }
@@ -137,8 +137,8 @@ namespace Physica::Core {
      * [1] Comput. Mater. Sci. 112, 333-341 (2016); https://doi.org/10.1016/j.commatsci.2015.10.050
      */
     template<class ForceModel>
-    Vector<typename TIModel<ForceModel>::ScalarType> TIModel<ForceModel>::makeSpringCoeffs(
-            const Vector<ScalarType>& msd, ScalarType temperatureT) {
+    VectorND<typename TIModel<ForceModel>::ScalarType> TIModel<ForceModel>::makeSpringCoeffs(
+            const VectorND<ScalarType>& msd, ScalarType temperatureT) {
         const ScalarType factor = ScalarType(3 * PhyConst<AU>::boltzmannK) * temperatureT;
         return reciprocal(msd) * factor;
     }
@@ -146,7 +146,7 @@ namespace Physica::Core {
     template<class ForceModel>
     void TIModel<ForceModel>::updateRef() {
         const ScalarType factor = ScalarType(PhyConst<AU>::reducedPlanck / PhyConst<AU>::boltzmannK) / temperatureT;
-        const Vector<ScalarType> omegas = sqrt(divide(hamonic.getSpringCoeffs(), mass));
+        const VectorND<ScalarType> omegas = sqrt(divide(hamonic.getSpringCoeffs(), mass));
         refHelmholtzF = ScalarType(3 * PhyConst<AU>::boltzmannK) * temperatureT * ln(omegas * factor).sum();
     }
 }

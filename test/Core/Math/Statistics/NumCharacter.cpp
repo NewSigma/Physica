@@ -22,7 +22,7 @@ using namespace Physica::Core;
 using ScalarType = float64;
 
 int main() {
-    const Vector<ScalarType> a{1, 2, 3, 4, 5};
+    const VectorND<ScalarType> a{1, 2, 3, 4, 5};
     if (!scalarNear(covariance(a, a), variance(a), 1E-16))
         return 1;
     return 0;

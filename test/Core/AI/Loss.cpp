@@ -23,7 +23,7 @@ using namespace Physica::Core;
 using ScalarType = float32;
 
 void testSelectProperty() {
-    const Vector<ScalarType> result{-3.34036088, -109.5531235, 13.51656151, 11.29175949};
+    const VectorND<ScalarType> result{-3.34036088, -109.5531235, 13.51656151, 11.29175949};
     const ScalarType l1 = Loss<ScalarType>::crossEntropy(result, 3);
     if (!std::isfinite(double(l1)))
         exit(EXIT_FAILURE);
@@ -34,7 +34,7 @@ void testSelectProperty() {
 }
 
 void testOverFlow() {
-    const Vector<ScalarType> result{555.321167, 364.9577942, 355.3863831, -594.8062134};
+    const VectorND<ScalarType> result{555.321167, 364.9577942, 355.3863831, -594.8062134};
     for (size_t i = 0; i < result.getLength(); ++i) {
         const ScalarType s = Loss<ScalarType>::softmax(result, i);
         if (!std::isfinite(double(s)))

@@ -145,7 +145,7 @@ namespace Physica {
                 ewald.potentialV(pos).reverse();
             }
             const AutoDiffGuard<ScalarType> guard{};
-            const Vector<ScalarType> force = ewald.force<SequentialExecutor>(pos);
+            const VectorND<ScalarType> force = ewald.force<SequentialExecutor>(pos);
             PositionMatrix force_diff(pos.getRow(), pos.getCol());
             for (size_t i = 0; i < pos.getRow(); ++i)
                 for (size_t j = 0; j < pos.getCol(); ++j)
@@ -168,7 +168,7 @@ namespace Physica {
             const ScalarType volume = 125;
             const size_t cellSize = 3;
             const auto cell = makeSystem(volume, cellSize);
-            Vector<ScalarType> charges(cell.getNumParticle(), 1.0);
+            VectorND<ScalarType> charges(cell.getNumParticle(), 1.0);
             auto tail = charges.tail(cell.getNumParticle() / 2);
             tail = ScalarType(-1);
             EwaldType ewald(cell.getLattice(), std::move(charges));

@@ -21,7 +21,7 @@
 
 using namespace Physica::Core;
 using ScalarType = float64;
-using VectorType = Diff<Vector<ScalarType>, DiffMode::Reverse, 1>;
+using VectorType = Diff<VectorND<ScalarType>, DiffMode::Reverse, 1>;
 
 int main() {
     VectorType v = VectorType::random_uniform(16, Random<std::mt19937, std::mt19937::default_seed>::getInstance());

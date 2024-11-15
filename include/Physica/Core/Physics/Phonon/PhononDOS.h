@@ -33,7 +33,7 @@ namespace Physica::Core {
         using CoeffVector = Vector<ScalarType, ElementType::DegreeOfFreedom>;
         using MDCellType = typename SolverType::MDCellType;
         using KSpaceFCGrid = typename SolverType::KSpaceFCGrid;
-        using EigenValueGrid = GridStorage<Vector<ScalarType>>;
+        using EigenValueGrid = GridStorage<VectorND<ScalarType>>;
         constexpr static unsigned int Dim = Traits<MDCellType>::Dim;
         constexpr static unsigned int ElementVolume = 8;
     protected:
@@ -161,7 +161,7 @@ namespace Physica::Core {
         cornerFreq[6] = eigenvalues(index1[0], index1[1], index[2])[band];
         cornerFreq[7] = eigenvalues(index1)[band];
 
-        using Vector4D = Vector<ScalarType, 4>;
+        using Vector4D = Vector4D<ScalarType>;
         const Vector4D plane{cornerFreq * diffCoeffX, cornerFreq * diffCoeffY, cornerFreq * diffCoeffZ, freq - mean(cornerFreq)};
         const auto head = plane.head(3);
         const auto cross = CubeCross<ScalarType>(plane);

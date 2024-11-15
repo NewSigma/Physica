@@ -28,7 +28,7 @@ namespace Physica::Core {
         using GridType = RSpaceGrid<ComplexType>;
         using LatticeMatrix = typename PeriodicCell<ScalarType, 3>::LatticeMatrix;
         using Index3D = typename GridBase::Index3D;
-        using Vector3D = Vector<ScalarType, 3>;
+        using Vector3D = Vector3D<ScalarType>;
 
         GridType coeffGrid;
         LatticeMatrix repLatt;

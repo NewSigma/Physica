@@ -31,7 +31,7 @@
 using namespace Physica::Core;
 using namespace Physica::Gui;
 using ScalarType = float64;
-using VectorType = Vector<ScalarType>;
+using VectorType = VectorND<ScalarType>;
 using KineticModel = FreeModel<ScalarType, 3, 1, RPMDIntegrator::Exact>;
 using ThermoType = DoubleThermo<KineticModel>;
 using MDType = RPMD<ScalarType, 3, 1>;

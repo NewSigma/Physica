@@ -29,7 +29,7 @@ namespace Physica::Core {
         using typename Base::ElementType;
     private:
         using typename Base::VectorType;
-        using BufferType = Vector<ScalarType>;
+        using BufferType = VectorND<ScalarType>;
         using Base::mesh;
 
         Functor force;

@@ -18,10 +18,10 @@
  */
 #include <iostream>
 #include <QtWidgets/QApplication>
-#include "Physica/Core/Math/Calculus/ODE/ODESolver.h"
-#include "Physica/Core/Math/Algebra/BoolAlgebra/BoolMatrix.h"
-#include "Physica/Core/Physics/Experiment/DimEstimator.h"
-#include "Physica/Gui/Plot/Plot.h"
+#include <Physica/Core/Math/Calculus/ODE/ODESolver.h>
+#include <Physica/Core/Math/Algebra/BoolAlgebra/BoolMatrix.h>
+#include <Physica/Core/Physics/Experiment/DimEstimator.h>
+#include <Physica/Gui/Plot/Plot.h>
 
 using namespace Physica::Core;
 using namespace Physica::Gui;
@@ -34,13 +34,13 @@ using ODE = ODESolver<T, 2>;
  */
 int main(int argc, char** argv) {
     ODE solver(0, 200, 0.01, {0.5, 0});
-    solver.rungeKutta4([](const T& t, const Vector<T, 2>& x) { return Vector<T, 2>{x[1], -x[1] * T(0.1) + (T(0.5) - T(2) * x[0] * x[0]) * x[0] + T(2) * cos(T(2.4) * t)}; });
+    solver.rungeKutta4([](const T& t, const Vector2D<T>& x) { return Vector2D<T>{x[1], -x[1] * T(0.1) + (T(0.5) - T(2) * x[0] * x[0]) * x[0] + T(2) * cos(T(2.4) * t)}; });
     const auto& t = solver.getX();
     const auto& solution = solver.getSolution();
 
-    Vector<T> x{};
+    VectorND<T> x{};
     x.resize(solution.getCol());
-    Vector<T> p{};
+    VectorND<T> p{};
     p.resize(solution.getCol());
 
     for (size_t i = 0; i < solution.getCol(); ++i) {
@@ -50,7 +50,7 @@ int main(int argc, char** argv) {
 
     /* Get fractal dimention */ {
         const size_t length = 32;
-        using VectorType = Vector<T>;
+        using VectorType = VectorND<T>;
         DenseMatrix<T> trans = solution.transpose();
         const VectorType r = exp(VectorType::linspace(-4, -1, length));
         const T dim = DimEstimator::corrDimen(trans, r);

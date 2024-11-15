@@ -23,7 +23,7 @@ using namespace Physica::Core;
 
 int main() {
     using ScalarType = float64;
-    using VectorType = Vector<ScalarType, 4>;
+    using VectorType = Vector4D<ScalarType>;
     const DenseMatrix<ScalarType, MatrixOption::Vector | MatrixOption::Row, 4, 5> A
             {{0.691809621910274, -0.000696013585639699, 0.131671000379563, -0.0701048797366553, 4.316511702487202E-1},
             {-0.000696013585639699, 0.816492585748236, 0.0216969440126965, -0.0884307621566726, 1.548712563601895E-2},
@@ -57,7 +57,7 @@ int main() {
     {
         using MatrixType = DenseMatrix<ScalarType, MatrixOption::Col | MatrixOption::Row, 4, 4>;
         const MatrixType mat = A.leftCols(4);
-        Vector<ScalarType> b = A.col(4);
+        VectorND<ScalarType> b = A.col(4);
         IterateSolver<ScalarType> solver{};
         solver.cg(mat, b);
         if (!vectorNear(b, answer, 1E-14))

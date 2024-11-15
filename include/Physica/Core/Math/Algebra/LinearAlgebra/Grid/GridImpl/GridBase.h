@@ -37,7 +37,7 @@ namespace Physica::Core {
     void GridBase::forPointInGrid(
             Index3D dim, const typename PeriodicCell<ScalarType, 3>::LatticeMatrix& lattice, Functor func) {
         using LatticeMatrix = typename PeriodicCell<ScalarType, 3>::LatticeMatrix;
-        using VectorType = Vector<ScalarType, 3>;
+        using VectorType = Vector3D<ScalarType>;
 
         LatticeMatrix sub_lattice{};
         auto a1 = sub_lattice.row(0);
@@ -69,7 +69,7 @@ namespace Physica::Core {
             Index3D dim, const typename PeriodicCell<ScalarType, 3>::LatticeMatrix& lattice, Functor func) {
         static_assert(!ScalarType::isComplex, "[Error]: Position in 3D space can not be complex number");
         using LatticeMatrix = typename PeriodicCell<ScalarType, 3>::LatticeMatrix;
-        using VectorType = Vector<ScalarType, 3>;
+        using VectorType = Vector3D<ScalarType>;
 
         LatticeMatrix sub_lattice{};
         auto a1 = sub_lattice.row(0);

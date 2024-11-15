@@ -26,21 +26,20 @@ namespace Physica::Core {
      * References:
      * [1] M. Matsumoto, T. Yagasaki, H. Tanaka. GenIce: Hydrogen-Disordered Ice Generator.[J]. J. Comput. Chem. 2017, DOI: 10.1002/jcc.25077
      */
-    template<class ScalarType>
+    template<Scalar T>
     class IceGenerator {
-        using PositionMatrix = typename PeriodicCell<ScalarType, 3>::PositionMatrix;
-        using Vector3D = Vector<ScalarType, 3>;
-        using CrystalCellType = CrystalCell<ScalarType>;
+        using PositionMatrix = typename PeriodicCell<T, 3>::PositionMatrix;
+        using CrystalCellType = CrystalCell<T>;
         constexpr static double BondLengthOH = PhyConst<AU>::angstormToBohr(1);
 
         CrystalCellType initialCell;
-        ScalarType maxDistOO;
-        ScalarType maxDistOH;
+        T maxDistOO;
+        T maxDistOH;
         Array<bool> isHydrogenOccupied;
         Array<unsigned char> numHydrogenRequired;
     public:
-        IceGenerator(ScalarType maxDistOO_, ScalarType maxDistOH_);
-        IceGenerator(CrystalCellType initialCell_, ScalarType maxDistOO_, ScalarType maxDistOH_);
+        IceGenerator(T maxDistOO_, T maxDistOH_);
+        IceGenerator(CrystalCellType initialCell_, T maxDistOO_, T maxDistOH_);
         IceGenerator(const IceGenerator&) = default;
         IceGenerator(IceGenerator&&) noexcept = default;
         ~IceGenerator() = default;
@@ -60,7 +59,7 @@ namespace Physica::Core {
     private:
         PositionMatrix prepareRun();
         void searchDanglingH(PositionMatrix& pos);
-        Array<size_t> findOInRadius(size_t indexO, ScalarType radius) const;
+        Array<size_t> findOInRadius(size_t indexO, T radius) const;
         Array<size_t> findBondedH(size_t indexMolecule) const;
         Array<size_t> findFreeBondedHInRadius(size_t indexO) const;
         std::pair<size_t, size_t> findHydrogenInMolecule(size_t indexMolecule) const;
@@ -79,9 +78,9 @@ namespace Physica::Core {
         [[nodiscard]] size_t getEndIndexO() const noexcept { return initialCell.getNumParticle(); }
         [[nodiscard]] bool isFinished() const noexcept;
         /* Static members */
-        static Vector3D rotate(ScalarType angle, Vector3D axis, Vector3D target);
+        static Vector3D<T> rotate(T angle, Vector3D<T> axis, Vector3D<T> target);
         template<class RandomGenerator>
-        static Vector<ScalarType, 3> randUnitVector(RandomGenerator& gen);
+        static Vector3D<T> randUnitVector(RandomGenerator& gen);
 
         friend class ::Physica::Test;
     };

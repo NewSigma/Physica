@@ -113,7 +113,7 @@ private:
 
 using ValueType = float32;
 using ScalarType = Diff<ValueType, DiffMode::Reverse>;
-using Dataset = typename Mnist::DatasetType<Vector<ValueType>>;
+using Dataset = typename Mnist::DatasetType<VectorND<ValueType>>;
 using Optimizer = MomentumSGD<ScalarType>;
 using RandomGenerator = std::mt19937;
 using RandomType = Random<RandomGenerator>;
@@ -124,7 +124,7 @@ constexpr double learnRate = 0.05;
 
 std::pair<Dataset, Dataset> makeDataset(RandomGenerator& gen) {
     const Mnist mnist("/home/sigma/Documents/data");
-    auto dataset = mnist.makeTrainDataset<Vector<ValueType>>();
+    auto dataset = mnist.makeTrainDataset<VectorND<ValueType>>();
     for (size_t i = 0; i < dataset.getSize(); ++i) {
         auto& sample = dataset.getSamples()[i];
         sample = sample * ValueType(1.0 / 128) - ValueType(1);
@@ -143,7 +143,7 @@ int main(int argc, char** argv) {
     auto nn = MnistNet<ScalarType>(32, gen);
     opt.recordEnd();
 
-    Vector<ValueType> loss_train(numEpoch), loss_valid(numEpoch), acc_train(numEpoch), acc_valid(numEpoch);
+    VectorND<ValueType> loss_train(numEpoch), loss_valid(numEpoch), acc_train(numEpoch), acc_valid(numEpoch);
     for (size_t epoch = 0; epoch < numEpoch; ++epoch) {
         if (epoch != 0) {
             for (size_t i = 0; i < itePerEpoch; ++i)

@@ -459,7 +459,7 @@ namespace Physica::Core {
     template<class ScalarType, unsigned int Dim, size_t NumReplica, class ForceMatrixAllocator>
     template<class ForceModel, class Executor>
     ScalarType RPMD<ScalarType, Dim, NumReplica, ForceMatrixAllocator>::calcPotential(const ForceModel& model) const {
-        Vector<ScalarType> temp(getNumReplica());
+        VectorND<ScalarType> temp(getNumReplica());
         auto kernel = [this, model, &temp](unsigned int replica) {
             temp[replica] = model.potentialV(phaseToCell(replica));
         };
@@ -693,11 +693,11 @@ namespace Physica::Core {
 
     template<class ScalarType, unsigned int Dim, size_t NumReplica, class ForceMatrixAllocator>
     template<class KineticModel, class ForceModel, class Executor>
-    Vector<ScalarType> RPMD<ScalarType, Dim, NumReplica, ForceMatrixAllocator>::testNVE(
+    VectorND<ScalarType> RPMD<ScalarType, Dim, NumReplica, ForceMatrixAllocator>::testNVE(
             ScalarType duration, KineticModel& kineticModel, ForceModel& forceModel) const {
         This rpmd = *this;
         const uint64_t step = Base::durationToStep(duration, timeStep);
-        Vector<ScalarType> pot(step);
+        VectorND<ScalarType> pot(step);
         for (uint64_t i = 0; i < step; ++i) {
             rpmd.nve_step<KineticModel, ForceModel, Executor>(kineticModel, forceModel);
             pot[i] = rpmd.calcKinetic<KineticModel>() + rpmd.calcPotential<ForceModel, Executor>(forceModel);

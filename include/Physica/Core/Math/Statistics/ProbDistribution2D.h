@@ -26,7 +26,7 @@ namespace Physica::Core {
     class ProbDistribution2D {
         using This = ProbDistribution2D;
         using BucketType = GridStorage<size_t>;
-        using VectorType = Vector<ScalarType>;
+        using VectorType = VectorND<ScalarType>;
         using MatrixType = DenseMatrix<ScalarType>;
         using MeshType = std::pair<MatrixType, MatrixType>;
 

@@ -27,7 +27,7 @@ namespace Physica::Core {
         using VectorType = Vector<T, Dim>;
         using SolutionType = DenseMatrix<T, MatrixOption::Col | MatrixOption::Vector, Dim>;
     protected:
-        Vector<T> x;
+        VectorND<T> x;
         SolutionType solution;
         T stepSize;
     public:
@@ -40,7 +40,7 @@ namespace Physica::Core {
         template<class Function>
         void degenerate_numerov(Function func, const T& tangent);
         /* Getters */
-        [[nodiscard]] const Vector<T>& getX() const noexcept { return x; }
+        [[nodiscard]] const VectorND<T>& getX() const noexcept { return x; }
         [[nodiscard]] const SolutionType& getSolution() const noexcept { return solution; }
         [[nodiscard]] size_t getNumStep() const noexcept { return x.getLength(); }
         /* Static members */

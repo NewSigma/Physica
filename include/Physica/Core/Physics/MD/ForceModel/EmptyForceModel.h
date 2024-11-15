@@ -47,13 +47,13 @@ namespace Physica::Core {
         [[nodiscard]] ScalarType potentialV([[maybe_unused]] const MDCellType& cell) const { return 0; }
 
         template<class Executor>
-        [[nodiscard]] Vector<ScalarType> force(const MDCellType& cell) const { return Vector<ScalarType>(cell.getDOF(), 0); }
+        [[nodiscard]] VectorND<ScalarType> force(const MDCellType& cell) const { return VectorND<ScalarType>(cell.getDOF(), 0); }
         template<class VectorType, class Executor>
         void forceAsync([[maybe_unused]] const MDCellType& cell, ContinuousVector<VectorType>& result) const;
         template<class Executor>
-        [[nodiscard]] Vector<ScalarType> force_short(const MDCellType& cell) const { return force<Executor>(cell); }
+        [[nodiscard]] VectorND<ScalarType> force_short(const MDCellType& cell) const { return force<Executor>(cell); }
         template<class Executor>
-        [[nodiscard]] Vector<ScalarType> force_long(const MDCellType& cell) const { return Vector<ScalarType>(cell.getDOF(), 0); }
+        [[nodiscard]] VectorND<ScalarType> force_long(const MDCellType& cell) const { return VectorND<ScalarType>(cell.getDOF(), 0); }
 
         [[nodiscard]] ScalarType forceConst([[maybe_unused]] const MDCellType& cell, [[maybe_unused]] size_t dof1, [[maybe_unused]] size_t dof2) const { return ScalarType(0); }
         [[nodiscard]] ForceConstMatrix forceConst([[maybe_unused]] const MDCellType& cell) const;

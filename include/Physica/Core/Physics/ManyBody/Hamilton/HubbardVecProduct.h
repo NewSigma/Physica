@@ -77,7 +77,7 @@ namespace Physica::Core {
             std::mutex mutex{};
             auto future = Executor::parallel_for([&](unsigned int thread) {
                 const size_t length = getLength();
-                Vector<ScalarType> local(length, 0);
+                VectorND<ScalarType> local(length, 0);
                 SparseVector<ScalarType> buffer(length, std::min(size_t(NumSite * SiteDOF), length));
                 const auto range = Executor::splitJob(length, Executor::getNumThread(), thread);
                 for (unsigned int i = range.first; i < range.second; ++i) {

@@ -28,8 +28,8 @@ namespace Physica::Gui {
     class PhononPlot : public Plot {
     public:
         using ComplexType = Core::Complex<ScalarType>;
-        using Vector3D = Core::Vector<ScalarType, 3>;
-        using VectorType = Core::Vector<ScalarType>;
+        using Vector3D = Core::Vector3D<ScalarType>;
+        using VectorType = Core::VectorND<ScalarType>;
         using MatrixType = Core::DenseMatrix<ScalarType>;
         using ComplexMatrix = Core::DenseMatrix<ComplexType>;
         using PhononType = Core::FrozenPhonon<ScalarType>;

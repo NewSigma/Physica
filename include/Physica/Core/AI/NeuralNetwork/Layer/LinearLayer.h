@@ -154,7 +154,7 @@ namespace Physica {
         using ScalarType = T;
         constexpr static bool WithBias = B;
 
-        using InputType = Core::Vector<ScalarType>;
+        using InputType = Core::VectorND<ScalarType>;
         using OutputType = InputType;
     };
 }

@@ -23,7 +23,7 @@
 using namespace Physica::Core;
 using namespace Physica::Gui;
 using ScalarType = float64;
-using VectorType = Vector<ScalarType>;
+using VectorType = VectorND<ScalarType>;
 
 int main(int argc, char** argv) {
     const auto betas = VectorType::linspace(0, 4, 41);

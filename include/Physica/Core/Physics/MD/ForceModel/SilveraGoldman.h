@@ -42,7 +42,7 @@ namespace Physica::Core {
         using This = SilveraGoldman<ScalarType, IsPeriodBoundary, IsSmallCell>;
         using Base = PairModel<This>;
         using typename Base::ValueType;
-        using Vector4D = Vector<ScalarType, 4>;
+        using Vector4D = Vector4D<ScalarType>;
     public:
         SilveraGoldman(ValueType cutoff_);
         SilveraGoldman(const SilveraGoldman&) = default;

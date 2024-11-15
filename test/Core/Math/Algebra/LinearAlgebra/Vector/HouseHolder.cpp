@@ -25,7 +25,7 @@ using namespace Physica::Core;
 using T = float64;
 
 void emptyVectorTest() {
-    using VectorType = Vector<T, 4>;
+    using VectorType = Vector4D<T>;
     VectorType x{0, 0, 0, 0};
     householderInPlace(x);
     for (auto& elem : x)
@@ -35,8 +35,8 @@ void emptyVectorTest() {
 
 void emptyComplexVectorTest() {
     using ComplexType = Complex<T>;
-    using ComplexVector = Vector<ComplexType, 4>;
-    const ComplexVector x = Vector<T, 4>{0, 0, 1, 0};
+    using ComplexVector = Vector4D<ComplexType>;
+    const ComplexVector x = Vector4D<T>{0, 0, 1, 0};
     ComplexVector v(4);
     const T norm = householder(x, v);
     const ComplexType tau = v[0];
@@ -53,7 +53,7 @@ void emptyComplexVectorTest() {
 
 int main() {
     {
-        using VectorType = Vector<T, 4>;
+        using VectorType = Vector4D<T>;
         const VectorType x{2, 3, 4, 5};
         const size_t rank = x.getLength();
         VectorType v(rank);
@@ -70,7 +70,7 @@ int main() {
                 return 1;
     }
     {
-        using VectorType = Vector<T, 4>;
+        using VectorType = Vector4D<T>;
         const VectorType x{2, 3, 4, 5};
         const size_t rank = x.getLength();
         VectorType v(rank);
@@ -93,7 +93,7 @@ int main() {
     }
     /* Complex test */ {
         using ScalarType = Complex<T>;
-        using VectorType = Vector<ScalarType, 2>;
+        using VectorType = Vector2D<ScalarType>;
         using MatrixType = DenseMatrix<ScalarType, MatrixOption::Col | MatrixOption::Vector, 2, 2>;
 
         const VectorType x{{1, 1}, {3, -5}};

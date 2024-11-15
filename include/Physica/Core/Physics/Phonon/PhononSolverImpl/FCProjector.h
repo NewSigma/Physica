@@ -31,7 +31,7 @@ namespace Physica::Core {
     class FCProjector {
     public:
         constexpr static unsigned int Dim = 3;
-        using VectorType = Vector<ScalarType>;
+        using VectorType = VectorND<ScalarType>;
         using RSpaceFCMat = DenseMatrix<ScalarType>;
         using RSpaceFCGrid = GridStorage<RSpaceFCMat>;
         using Index3D = typename RSpaceFCGrid::Index3D;

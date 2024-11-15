@@ -51,8 +51,8 @@ namespace Physica::Core {
         /* Operations */
         template<class T>
         void sample(const MDCell<T>& cell);
-        Vector<ScalarType> makeDists() const;
-        Vector<ScalarType> makeRDF() const;
+        VectorND<ScalarType> makeDists() const;
+        VectorND<ScalarType> makeRDF() const;
         void swap(RDF& __restrict rdf) noexcept;
         [[nodiscard]] bool checkRadius(const PeriodicCell<ScalarType, 3>& cell) const;
         /* Getters */
@@ -112,16 +112,16 @@ namespace Physica::Core {
     }
 
     template<class ScalarType>
-    Vector<ScalarType> RDF<ScalarType>::makeDists() const {
-        Vector<ScalarType> dists(numStep);
+    VectorND<ScalarType> RDF<ScalarType>::makeDists() const {
+        VectorND<ScalarType> dists(numStep);
         for (size_t i = 0; i < dists.getLength(); ++i)
             dists[i] = stepSize * (i + 1.5);
         return dists;
     }
 
     template<class ScalarType>
-    Vector<ScalarType> RDF<ScalarType>::makeRDF() const {
-        Vector<ScalarType> rdf(numStep);
+    VectorND<ScalarType> RDF<ScalarType>::makeRDF() const {
+        VectorND<ScalarType> rdf(numStep);
         const uint64_t numFromParticle = sumFromParticle();
         const uint64_t numToParticle = sumToParticle();
         for (size_t i = 0; i < numStep; ++i) {

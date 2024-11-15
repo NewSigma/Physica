@@ -38,7 +38,7 @@ namespace Physica::Core {
     class JacobiDavidson {
         using RealType = typename ScalarType::RealType;
         using WorkingMatrix = DenseMatrix<ScalarType>;
-        using VectorType = Vector<ScalarType>;
+        using VectorType = VectorND<ScalarType>;
         using LinearSolverType = IterateSolver<ScalarType>;
 
         constexpr static bool isComplex = ScalarType::isComplex;

@@ -182,7 +182,7 @@ namespace Physica::Core {
                                                                    VectorType topRight,
                                                                    size_t numElementX,
                                                                    size_t numElementY) {
-        using VectorType = Vector<ScalarType, 2>;
+        using VectorType = Vector2D<ScalarType>;
         const size_t numNodeX = numElementX + 1;
         const size_t numNodeY = numElementY + 1;
         Mesh<Rectangle1<ScalarType>> mesh(numElementX * numElementY, numNodeX * numNodeY);

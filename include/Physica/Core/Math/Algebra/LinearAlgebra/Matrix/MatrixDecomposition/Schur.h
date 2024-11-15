@@ -36,7 +36,7 @@ namespace Physica::Core {
         static_assert(is_scalar<ScalarType>::value, "[Error]: Invalid ScalarType");
         constexpr static const char* BadConvergenceMessage = "Exceed max iteration of Schur";
         using HessenburgType = Hessenburg<ScalarType, Order>;
-        using Vector3D = Vector<ScalarType, 3>;
+        using Vector3D = Vector3D<ScalarType>;
         using This = Schur<ScalarType, Order>;
     public:
         using RealType = typename ScalarType::RealType;
@@ -189,7 +189,7 @@ namespace Physica::Core {
         const bool haveTwoRealEigenvalues = !q.isNegative();
         if (haveTwoRealEigenvalues) {
             const ScalarType z = sqrt(q);
-            Vector<ScalarType, 2> target;
+            Vector2D<ScalarType> target;
             target[0] = p + (p.isPositive() ? z : -z); //Select the root that ensure numerical stable
             target[1] = matrixT(index_1, index);
             auto givensVector = givens(target, 0, 1);
@@ -276,7 +276,7 @@ namespace Physica::Core {
             specialHessenburg(lower, sub_order);
         }
         else {
-            Vector<ScalarType, 2> householderVector{};
+            Vector2D<ScalarType> householderVector{};
             householder(col_1_M.head(2), householderVector);
             {
                 auto block = matrixT.rightCols(lower);
@@ -378,7 +378,7 @@ namespace Physica::Core {
 
     template<class ScalarType, size_t Order>
     void Schur<ScalarType, Order>::complexQR(size_t lower, size_t upper, ComplexType shift) {
-        using Vector2D = Vector<ScalarType, 2>;
+        using Vector2D = Vector2D<ScalarType>;
         {
             auto givensVec = givens(Vector2D{matrixT(lower, lower) - shift, matrixT(lower + 1, lower)}, 0, 1);
             auto rightCols = matrixT.rightCols(lower);

@@ -39,14 +39,14 @@ namespace Physica::Core {
         CPUGPUModel(size_t numCUDAThread, HostModel hostModel_, Args&&... deviceArgs);
 
         template<class Executor>
-        [[nodiscard]] Vector<ScalarType> force(const MDCellType& cell);
+        [[nodiscard]] VectorND<ScalarType> force(const MDCellType& cell);
         template<class VectorType, class Executor>
         void forceAsync(const MDCellType& cell, ContinuousVector<VectorType>& result);
 
         template<class Executor>
-        [[nodiscard]] Vector<ScalarType> force_short(const MDCellType& cell) { return force<Executor>(cell); }
+        [[nodiscard]] VectorND<ScalarType> force_short(const MDCellType& cell) { return force<Executor>(cell); }
         template<class Executor>
-        [[nodiscard]] Vector<ScalarType> force_long(const MDCellType& cell) const { return Vector<ScalarType>(cell.getNumParticle() * 3, 0); }
+        [[nodiscard]] VectorND<ScalarType> force_long(const MDCellType& cell) const { return VectorND<ScalarType>(cell.getNumParticle() * 3, 0); }
         /* Getters */
         [[nodiscard]] size_t getNumCUDAThread() const noexcept { return deviceModels.getLength(); }
     };
@@ -62,8 +62,8 @@ namespace Physica::Core {
     template<class HostModel, class DeviceModel>
     template<class Executor>
     Vector<typename CPUGPUModel<HostModel, DeviceModel>::ScalarType> CPUGPUModel<HostModel, DeviceModel>::force(const MDCellType& cell) {
-        Vector<ScalarType> result(cell.getDOF());
-        forceAsync<Vector<ScalarType>, Executor>(cell, result);
+        VectorND<ScalarType> result(cell.getDOF());
+        forceAsync<VectorND<ScalarType>, Executor>(cell, result);
         CUDAContext::getInstance().wait();
         return result;
     }

@@ -65,7 +65,7 @@ namespace Physica::Core {
     public:
         FFT();
         FFT(size_t rSpaceSize_, PlanFlag planFlag);
-        FFT(const Vector<ScalarType>& data, PlanFlag planFlag);
+        FFT(const VectorND<ScalarType>& data, PlanFlag planFlag);
         FFT(const FFT& fft);
         FFT(FFT&& fft) noexcept;
         ~FFT();

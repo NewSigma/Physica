@@ -105,7 +105,7 @@ namespace Physica::Core {
             ScalarType& toDisplace = pos(major / Dim, major % Dim);
             const ScalarType copy = toDisplace;
             toDisplace += displace;
-            Vector<ScalarType> forceConst =
+            VectorND<ScalarType> forceConst =
                     model.template force<SequentialExecutor>(MDCellType(superCell.getLattice(), pos, superCell.getMassVec())) * factor;
             toDisplace = copy;
 

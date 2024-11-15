@@ -34,7 +34,7 @@ namespace Physica::Core {
         Normal& operator=(Normal obj) noexcept { swap(obj); return *this; }
         [[nodiscard]] ScalarType operator()(const ScalarType& x) const;
         template<class VectorType>
-        [[nodiscard]] Vector<ScalarType> operator()(const RValueVector<VectorType>& x) const;
+        [[nodiscard]] VectorND<ScalarType> operator()(const RValueVector<VectorType>& x) const;
         /* Operations */
         void swap(Normal& __restrict obj) noexcept;
     };
@@ -52,7 +52,7 @@ namespace Physica::Core {
 
     template<class ScalarType>
     template<class VectorType>
-    Vector<ScalarType> Normal<ScalarType>::operator()(const RValueVector<VectorType>& x) const {
+    VectorND<ScalarType> Normal<ScalarType>::operator()(const RValueVector<VectorType>& x) const {
         const ScalarType repDevia = reciprocal(deviation);
         const ScalarType factor = repDevia / sqrt(ScalarType(2 * M_PI));
         return exp(square((x - mean) * repDevia) * ScalarType(-0.5)) * factor;

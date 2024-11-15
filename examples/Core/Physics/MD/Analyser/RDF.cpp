@@ -33,7 +33,7 @@
 using namespace Physica::Core;
 using namespace Physica::Gui;
 using ScalarType = float64;
-using VectorType = Vector<ScalarType>;
+using VectorType = VectorND<ScalarType>;
 using RandomType = Random<std::mt19937>;
 using EwaldType = RandomBatchEwald<ScalarType, RandomType>;
 using ForceModel = Q_TIP4P<ScalarType, EwaldType>;
@@ -44,11 +44,11 @@ constexpr double pair_cutoff = PhyConst<AU>::angstormToBohr(9);
 constexpr double massMoleculeInSI = PhyConst<SI>::atomMass(1) * 2 + PhyConst<SI>::atomMass(8);
 
 template<class RandomGenerator>
-Vector<ScalarType, 3> randomVector(RandomGenerator& gen) {
+Vector3D<ScalarType> randomVector(RandomGenerator& gen) {
     std::uniform_real_distribution dist{};
     const ScalarType theta(dist(gen) * M_PI);
     const ScalarType phi(dist(gen) * M_PI * 2);
-    Vector<ScalarType, 3> result{cos(phi) * sin(theta), sin(phi) * sin(theta), cos(theta)};
+    Vector3D<ScalarType> result{cos(phi) * sin(theta), sin(phi) * sin(theta), cos(theta)};
     result *= ScalarType(ForceModel::equalR);
     return result;
 }

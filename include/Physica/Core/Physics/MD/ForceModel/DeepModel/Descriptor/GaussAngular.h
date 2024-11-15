@@ -30,7 +30,7 @@ namespace Physica::Core {
      */
     template<class ScalarType, bool IsSmallCell>
     class GaussAngular {
-        using VectorType = Vector<ScalarType>;
+        using VectorType = VectorND<ScalarType>;
         using CellType = PeriodicCell<ScalarType, 3>;
 
         ScalarType paramEta;

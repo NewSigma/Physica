@@ -34,8 +34,8 @@ namespace Physica::Core {
     class DimEstimator {
         using ScalarType = float64;
         using DataMatrix = DenseMatrix<ScalarType, MatrixOption::Row | MatrixOption::Vector>;
-        Vector<ScalarType> intrinsicDim;
-        Vector<ScalarType> correlateDim;
+        VectorND<ScalarType> intrinsicDim;
+        VectorND<ScalarType> correlateDim;
     public:
         template<class VectorType, class RandomGenerator>
         DimEstimator(size_t sampleNum, const Array<size_t>& intrinsicDim_, const LValueVector<VectorType>& radius, RandomGenerator& gen);

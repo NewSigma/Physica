@@ -29,7 +29,7 @@ namespace Physica::Core {
     template<class ScalarType>
     class LinearFit {
         static_assert(is_scalar<ScalarType>::value, "[Error]: This is not a scalar");
-        using VectorType = Vector<ScalarType>;
+        using VectorType = VectorND<ScalarType>;
         using ScalarPair = std::pair<ScalarType, ScalarType>;
     public:
         [[nodiscard]] static ScalarPair fit(const VectorType& x, const VectorType& y);

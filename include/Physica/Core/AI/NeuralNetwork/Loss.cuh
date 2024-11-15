@@ -30,7 +30,7 @@ namespace Physica::Core {
         using ValueType = typename ScalarType::ValueType;
         using LossType = typename std::conditional<IsTrainMode, device_obj<ScalarType>, ScalarType>::type;
     private:
-        using ValueVector = Vector<ValueType>;
+        using ValueVector = VectorND<ValueType>;
         using DiffVector = Diff<ValueVector, DiffMode::Reverse, ScalarType::Order>;
         using VectorType = device_obj<typename std::conditional<IsTrainMode, DiffVector, ValueVector>::type>;
     public:

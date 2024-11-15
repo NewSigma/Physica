@@ -31,8 +31,8 @@ using ScalarType = float64;
 void scf_solve(double dist, ScalarType& electronEnergy, ScalarType& potentialEnergy) {
     Molecular<ScalarType> H2 = Molecular<ScalarType>(2);
     auto& atoms = H2.getAtoms();
-    const Vector<ScalarType, 3> pos_H1{0, 0, 0};
-    const Vector<ScalarType, 3> pos_H2{0, 0, dist};
+    const Vector3D<ScalarType> pos_H1{0, 0, 0};
+    const Vector3D<ScalarType> pos_H2{0, 0, dist};
     atoms[0] = pos_H1;
     atoms[1] = pos_H2;
     auto& atomicNumbers = H2.getAtomicNumbers();
@@ -42,7 +42,7 @@ void scf_solve(double dist, ScalarType& electronEnergy, ScalarType& potentialEne
     ElectronConfig config = ElectronConfig(2);
     config.setOrbitState(0, ElectronConfig::DoubleOccupacy);
 
-    const Vector<ScalarType, 8> alphas{13.00773, 1.962079, 0.444529, 0.1219492, 13.00773, 1.962079, 0.444529, 0.1219492};
+    const VectorND<ScalarType> alphas{13.00773, 1.962079, 0.444529, 0.1219492, 13.00773, 1.962079, 0.444529, 0.1219492};
     RHFSolver<GaussBase<ScalarType>> solver = RHFSolver<GaussBase<ScalarType>>(H2, config, alphas.getLength());
     auto& baseSet = solver.getBaseSet();
     for (size_t i = 0; i < alphas.getLength(); ++i)
@@ -67,9 +67,9 @@ int main(int argc, char** argv) {
     const double to = 8;
     const size_t sampleCount = 800;
 
-    Vector<ScalarType> r = Vector<ScalarType>(sampleCount);
-    Vector<ScalarType> electronEnergy = Vector<ScalarType>(sampleCount);
-    Vector<ScalarType> potentialEnergy = Vector<ScalarType>(sampleCount);
+    VectorND<ScalarType> r = VectorND<ScalarType>(sampleCount);
+    VectorND<ScalarType> electronEnergy = VectorND<ScalarType>(sampleCount);
+    VectorND<ScalarType> potentialEnergy = VectorND<ScalarType>(sampleCount);
 
     const double step = (to - from) / sampleCount;
     double radius = from;
@@ -78,7 +78,7 @@ int main(int argc, char** argv) {
         scf_solve(radius, electronEnergy[i], potentialEnergy[i]);
         radius += step;
     }
-    const Vector<ScalarType> totalEnergy = electronEnergy + potentialEnergy;
+    const VectorND<ScalarType> totalEnergy = electronEnergy + potentialEnergy;
     size_t minEnergyIndex = 0;
     for (size_t i = 1; i < sampleCount; ++i) {
         if (totalEnergy[i] > totalEnergy[minEnergyIndex])

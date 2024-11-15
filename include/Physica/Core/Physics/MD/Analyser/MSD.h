@@ -46,8 +46,8 @@ namespace Physica::Core {
 
         [[nodiscard]] ScalarType calcMSD() const { return mean(calcAtomMSD()); }
         [[nodiscard]] ScalarType calcMSD2D() const { return mean(calcAtomMSD2D()); }
-        [[nodiscard]] Vector<ScalarType> calcAtomMSD() const;
-        [[nodiscard]] Vector<ScalarType> calcAtomMSD2D() const;
+        [[nodiscard]] VectorND<ScalarType> calcAtomMSD() const;
+        [[nodiscard]] VectorND<ScalarType> calcAtomMSD2D() const;
         [[nodiscard]] inline ScalarType calcFiniteSizeLimit(size_t atomId) const noexcept;
         void clear();
         void swap(MSD& __restrict obj) noexcept;
@@ -83,18 +83,18 @@ namespace Physica::Core {
     }
 
     template<class ScalarType, unsigned int Dim>
-    Vector<ScalarType> MSD<ScalarType, Dim>::calcAtomMSD() const {
+    VectorND<ScalarType> MSD<ScalarType, Dim>::calcAtomMSD() const {
         const size_t numParticle = getNumParticle();
-        Vector<ScalarType> result(numParticle);
+        VectorND<ScalarType> result(numParticle);
         for (size_t i = 0; i < numParticle; ++i)
             result[i] = buffer.row(i).sum();
         return result;
     }
 
     template<class ScalarType, unsigned int Dim>
-    Vector<ScalarType> MSD<ScalarType, Dim>::calcAtomMSD2D() const {
+    VectorND<ScalarType> MSD<ScalarType, Dim>::calcAtomMSD2D() const {
         const size_t numParticle = getNumParticle();
-        Vector<ScalarType> result(numParticle);
+        VectorND<ScalarType> result(numParticle);
         for (size_t i = 0; i < numParticle; ++i) {
             const auto row = buffer.row(i);
             result[i] = row[0] + row[1];

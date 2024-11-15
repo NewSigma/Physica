@@ -33,7 +33,7 @@ namespace Physica::Core {
         LogNormal& operator=(LogNormal obj) noexcept { swap(obj); return *this; }
         [[nodiscard]] ScalarType operator()(const ScalarType& x) const;
         template<class VectorType>
-        [[nodiscard]] Vector<ScalarType> operator()(const RValueVector<VectorType>& x) const;
+        [[nodiscard]] VectorND<ScalarType> operator()(const RValueVector<VectorType>& x) const;
         /* Operations */
         void swap(LogNormal& __restrict obj) noexcept;
     };
@@ -49,7 +49,7 @@ namespace Physica::Core {
 
     template<class ScalarType>
     template<class VectorType>
-    Vector<ScalarType> LogNormal<ScalarType>::operator()(const RValueVector<VectorType>& x) const {
+    VectorND<ScalarType> LogNormal<ScalarType>::operator()(const RValueVector<VectorType>& x) const {
         return divide(normal(ln(x)), x);
     }
 

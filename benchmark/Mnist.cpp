@@ -113,7 +113,7 @@ private:
 
 using ValueType = float32;
 using ScalarType = Diff<ValueType, DiffMode::Reverse, 1>;
-using Dataset = typename Mnist::DatasetType<Vector<ValueType>>;
+using Dataset = typename Mnist::DatasetType<VectorND<ValueType>>;
 using Optimizer = SGD<ScalarType>;
 using RandomType = Random<std::mt19937>;
 constexpr size_t batchSize = 9000;
@@ -121,7 +121,7 @@ constexpr size_t batchSize = 9000;
 namespace {
     Dataset makeDataset() {
         const Mnist mnist("/home/sigma/Documents/data");
-        auto dataset = mnist.makeTrainDataset<Vector<ValueType>>();
+        auto dataset = mnist.makeTrainDataset<VectorND<ValueType>>();
         for (size_t i = 0; i < dataset.getSize(); ++i) {
             auto& sample = dataset.getSamples()[i];
             sample = sample * ValueType(1.0 / 128) - ValueType(1);

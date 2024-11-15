@@ -29,7 +29,7 @@ namespace Physica::Core {
      */
     template<class ScalarType>
     class Correlation {
-        using VectorType = Vector<ScalarType>;
+        using VectorType = VectorND<ScalarType>;
 
         FFT<ScalarType, 1> fft;
         VectorType corr;

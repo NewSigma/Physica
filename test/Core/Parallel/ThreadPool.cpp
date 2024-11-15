@@ -24,7 +24,7 @@
 using namespace Physica::Core;
 using ScalarType = float64;
 using MatrixType = DenseMatrix<ScalarType>;
-using VectorType = Vector<ScalarType>;
+using VectorType = VectorND<ScalarType>;
 
 void func([[maybe_unused]] size_t i) {
     printf("Thread ID: %d\n", ThreadPool::getThreadInfo().id);

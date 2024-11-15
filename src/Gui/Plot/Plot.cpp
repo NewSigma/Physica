@@ -81,8 +81,8 @@ namespace Physica::Gui {
     }
 
     QScatterSeries& Plot::label(double x, double y, QString text) {
-        using VectorType = Vector<float64, 1>;
-        auto& result = scatter(VectorType{x}, VectorType{y});
+        using Vec = Vector1D<float64>;
+        auto& result = scatter(Vec{x}, Vec{y});
         result.setPointLabelsVisible(true);
         result.setPointLabelsFormat(QPointLabelFormat(std::move(text)));
         result.setMarkerSize(0);

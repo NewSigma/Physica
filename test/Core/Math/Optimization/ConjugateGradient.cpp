@@ -22,7 +22,7 @@
 using namespace Physica::Core;
 
 using ScalarType = float64;
-using VectorType = Vector<ScalarType, 3>;
+using VectorType = Vector3D<ScalarType>;
 
 template<class Functor>
 VectorType grad(Functor func, const VectorType& at, ScalarType diffStep) {

@@ -36,11 +36,11 @@ namespace Physica::Core {
      */
     template<class ScalarType>
     class EqualityQuadraticProgramming {
-        DenseSymmMatrix<ScalarType, Dynamic> objectiveMatG;
-        Vector<ScalarType, Dynamic> objectiveVecC;
+        DenseSymmMatrix<ScalarType> objectiveMatG;
+        VectorND<ScalarType> objectiveVecC;
         DenseMatrix<ScalarType, MatrixOption::Row | MatrixOption::Vector> constraints;
-        Vector<ScalarType, Dynamic> x;
-        Vector<ScalarType, Dynamic> multipliers;
+        VectorND<ScalarType> x;
+        VectorND<ScalarType> multipliers;
     public:
         template<class MatrixType1, class VectorType1, class MatrixType2, class VectorType2>
         EqualityQuadraticProgramming(const RValueMatrix<MatrixType1>& objectiveMatG_,
@@ -56,8 +56,8 @@ namespace Physica::Core {
         /* Operations */
         void compute();
         /* Getters */
-        [[nodiscard]] const Vector<ScalarType, Dynamic>& getSolution() const noexcept { return x; }
-        [[nodiscard]] const Vector<ScalarType, Dynamic>& getMultipliers() const noexcept { return multipliers; }
+        [[nodiscard]] const VectorND<ScalarType>& getSolution() const noexcept { return x; }
+        [[nodiscard]] const VectorND<ScalarType>& getMultipliers() const noexcept { return multipliers; }
     };
 
     template<class ScalarType>
@@ -80,16 +80,16 @@ namespace Physica::Core {
     void EqualityQuadraticProgramming<ScalarType>::compute() {
         const size_t degreeOfFreedom = x.getLength();
         const bool haveConstraints = constraints.getRow() != 0;
-        Vector<ScalarType> equationVecB(objectiveMatG.getRow() + constraints.getRow());
+        VectorND<ScalarType> equationVecB(objectiveMatG.getRow() + constraints.getRow());
         /* Assemble vector */ {
-            const Vector<ScalarType> g = objectiveMatG * x + objectiveVecC;
+            const VectorND<ScalarType> g = objectiveMatG * x + objectiveVecC;
             auto head = equationVecB.head(degreeOfFreedom);
             head = g;
 
             if (haveConstraints) {
                 const auto matA = constraints.leftCols(degreeOfFreedom);
                 const auto vecB = constraints.col(degreeOfFreedom);
-                const Vector<ScalarType> h = matA * x - vecB;
+                const VectorND<ScalarType> h = matA * x - vecB;
                 auto tail = equationVecB.tail(degreeOfFreedom);
                 tail = h;
             }
@@ -113,7 +113,7 @@ namespace Physica::Core {
                 equationMatA = objectiveMatG;
         }
         const DenseMatrix<ScalarType, MatrixOption::Row | MatrixOption::Vector> inv_equationMatA = equationMatA.inverse();
-        const Vector<ScalarType> solution = inv_equationMatA * equationVecB;
+        const VectorND<ScalarType> solution = inv_equationMatA * equationVecB;
         x -= solution.head(degreeOfFreedom);
         if (haveConstraints)
             multipliers = solution.tail(degreeOfFreedom);

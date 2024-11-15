@@ -66,10 +66,10 @@ namespace Physica::Core {
                 delete reinterpret_cast<Array<unsigned long>*>(p_array);
                 break;
             case FLOAT:
-                delete reinterpret_cast<Vector<float32>*>(p_array);
+                delete reinterpret_cast<VectorND<float32>*>(p_array);
                 break;
             case DOUBLE:
-                delete reinterpret_cast<Vector<float64>*>(p_array);
+                delete reinterpret_cast<VectorND<float64>*>(p_array);
                 break;
             case BOOL:
                 delete reinterpret_cast<Array<bool>*>(p_array);
@@ -251,10 +251,10 @@ namespace Physica::Core {
                 p_array = new Array<unsigned long>();
                 break;
             case FLOAT:
-                p_array = new Vector<float32>();
+                p_array = new VectorND<float32>();
                 break;
             case DOUBLE:
-                p_array = new Vector<float64>();
+                p_array = new VectorND<float64>();
                 break;
             case BOOL:
                 p_array = new Array<bool>();
@@ -392,7 +392,7 @@ namespace Physica::Core {
                         std::getline(fin, buffer, isLast ? '\n' : ',');
                         f = defaultValue->float_value;
                     }
-                    reinterpret_cast<Vector<float32>*>(p_array)->append(f);
+                    reinterpret_cast<VectorND<float32>*>(p_array)->append(f);
                     break;
                 }
                 case DOUBLE: {
@@ -403,7 +403,7 @@ namespace Physica::Core {
                         std::getline(fin, buffer, isLast ? '\n' : ',');
                         d = defaultValue->double_value;
                     }
-                    reinterpret_cast<Vector<float64>*>(p_array)->append(d);
+                    reinterpret_cast<VectorND<float64>*>(p_array)->append(d);
                     break;
                 }
                 case BOOL: {

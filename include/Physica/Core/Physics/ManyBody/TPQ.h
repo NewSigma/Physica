@@ -32,9 +32,9 @@ namespace Physica::Core {
      * [2] Phys. Rev. Lett. 111, 010401 (2013); https://doi.org/10.1103/PhysRevLett.111.010401
      */
     template<class ScalarType>
-    class TPQ : public Vector<ScalarType> {
+    class TPQ : public VectorND<ScalarType> {
         using This = TPQ<ScalarType>;
-        using Base = Vector<ScalarType>;
+        using Base = VectorND<ScalarType>;
         using RealType = typename ScalarType::RealType;
 
         RealType beta;
@@ -58,7 +58,7 @@ namespace Physica::Core {
 
         [[nodiscard]] inline RealType calcPartitionXi() const;
         [[nodiscard]] inline RealType lnPartitionXi() const;
-        [[nodiscard]] RealType lnSquaredDot(const Vector<RealType>& other) const;
+        [[nodiscard]] RealType lnSquaredDot(const VectorND<RealType>& other) const;
         void swap(This& __restrict obj) noexcept;
 
         template<class RandomGenerator>
@@ -117,7 +117,7 @@ namespace Physica::Core {
     void TPQ<ScalarType>::nvt_step(const HamiltonMatrix<ModelType>& hamiltonH_, RealType deltaBeta) {
         if (deltaBeta.isZero())
             return;
-        using BufferType = Vector<ScalarType>;
+        using BufferType = VectorND<ScalarType>;
         const RealType factor = deltaBeta * -0.5;
         const auto& hamiltonH = hamiltonH_.getDerived();
         const auto expr1 = factor * hamiltonH;
@@ -146,7 +146,7 @@ namespace Physica::Core {
     }
 
     template<class ScalarType>
-    typename TPQ<ScalarType>::RealType TPQ<ScalarType>::lnSquaredDot(const Vector<RealType>& other) const {
+    typename TPQ<ScalarType>::RealType TPQ<ScalarType>::lnSquaredDot(const VectorND<RealType>& other) const {
         assert(Base::getLength() == other.getLength() && "[Error]: Dimensions do not match");
         const RealType maxabs = abs(*this).max();
         const bool isUnderflow = maxabs < RealType(std::numeric_limits<RealType>::min());

@@ -84,6 +84,12 @@ namespace Physica::Core {
         [[nodiscard]] static Vector random_any(size_t len, Distribution& dist, RandomGenerator& gen);
         [[nodiscard]] static Vector linspace(T from, T to, size_t count);
     };
+
+    template<Scalar T> using Vector1D = Vector<T, 1>;
+    template<Scalar T> using Vector2D = Vector<T, 2>;
+    template<Scalar T> using Vector3D = Vector<T, 3>;
+    template<Scalar T> using Vector4D = Vector<T, 4>;
+    template<Scalar T> using VectorND = Vector<T>;
 }
 
 namespace Physica {

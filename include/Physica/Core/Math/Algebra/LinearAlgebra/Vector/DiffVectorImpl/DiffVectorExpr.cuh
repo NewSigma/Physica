@@ -111,8 +111,8 @@ namespace Physica::Core {
     }
 
     template<ExprType Type, int Order, class T>
-    class DiffVectorExprUnitary<Type, Order, Vector<T>> {
-        using VectorType = device_obj<Diff<Vector<T>, DiffMode::Reverse, Order>>;
+    class DiffVectorExprUnitary<Type, Order, VectorND<T>> {
+        using VectorType = device_obj<Diff<VectorND<T>, DiffMode::Reverse, Order>>;
     public:
         [[nodiscard]] static VectorType calc(const VectorType& v) {
             const size_t length = v.getLength();
@@ -128,8 +128,8 @@ namespace Physica::Core {
     };
 
     template<ExprType Type, int Order, class T>
-    class DiffVectorExprBinary<Type, Order, Vector<T>, T> {
-        using VectorType = device_obj<Diff<Vector<T>, DiffMode::Reverse, Order>>;
+    class DiffVectorExprBinary<Type, Order, VectorND<T>, T> {
+        using VectorType = device_obj<Diff<VectorND<T>, DiffMode::Reverse, Order>>;
         using ScalarType = typename VectorType::ScalarType;
     public:
         [[nodiscard]] static VectorType calc(const VectorType& v, const ScalarType& s) {
@@ -146,8 +146,8 @@ namespace Physica::Core {
     };
 
     template<ExprType Type, int Order, class T>
-    class DiffVectorExprBinary<Type, Order, Vector<T>> {
-        using VectorType = device_obj<Diff<Vector<T>, DiffMode::Reverse, Order>>;
+    class DiffVectorExprBinary<Type, Order, VectorND<T>> {
+        using VectorType = device_obj<Diff<VectorND<T>, DiffMode::Reverse, Order>>;
     public:
         [[nodiscard]] static VectorType calc(const VectorType& v1, const VectorType& v2) {
             const size_t length = v1.getLength();
@@ -167,82 +167,82 @@ namespace Physica::Core {
     //////////////////////////////////////Add//////////////////////////////////////
     template<class T, int Order>
     inline auto operator+(
-            const device_obj<Diff<Vector<T>, DiffMode::Reverse, Order>>& v,
+            const device_obj<Diff<VectorND<T>, DiffMode::Reverse, Order>>& v,
             const device_obj<Diff<T, DiffMode::Reverse, Order>>& s) {
-        return DiffVectorExprBinary<ExprType::Add, Order, Vector<T>, T>::calc(v, s);
+        return DiffVectorExprBinary<ExprType::Add, Order, VectorND<T>, T>::calc(v, s);
     }
 
     template<class T, int Order>
     inline auto operator+(
             const device_obj<Diff<T, DiffMode::Reverse, Order>>& s,
-            const device_obj<Diff<Vector<T>, DiffMode::Reverse, Order>>& v) {
+            const device_obj<Diff<VectorND<T>, DiffMode::Reverse, Order>>& v) {
         return v + s;
     }
 
     template<class T, int Order>
     inline auto operator+(
-            const device_obj<Diff<Vector<T>, DiffMode::Reverse, Order>>& v1,
-            const device_obj<Diff<Vector<T>, DiffMode::Reverse, Order>>& v2) {
-        return DiffVectorExprBinary<ExprType::Add, Order, Vector<T>, Vector<T>>::calc(v1, v2);
+            const device_obj<Diff<VectorND<T>, DiffMode::Reverse, Order>>& v1,
+            const device_obj<Diff<VectorND<T>, DiffMode::Reverse, Order>>& v2) {
+        return DiffVectorExprBinary<ExprType::Add, Order, VectorND<T>, VectorND<T>>::calc(v1, v2);
     }
     //////////////////////////////////////Sub//////////////////////////////////////
     template<class T, int Order>
     inline auto operator-(
-            const device_obj<Diff<Vector<T>, DiffMode::Reverse, Order>>& v,
+            const device_obj<Diff<VectorND<T>, DiffMode::Reverse, Order>>& v,
             const device_obj<Diff<T, DiffMode::Reverse, Order>>& s) {
-        return DiffVectorExprBinary<ExprType::Sub, Order, Vector<T>, T>::calc(v, s);
+        return DiffVectorExprBinary<ExprType::Sub, Order, VectorND<T>, T>::calc(v, s);
     }
 
     template<class T, int Order>
     inline auto operator-(
-            const device_obj<Diff<Vector<T>, DiffMode::Reverse, Order>>& v1,
-            const device_obj<Diff<Vector<T>, DiffMode::Reverse, Order>>& v2) {
-        return DiffVectorExprBinary<ExprType::Sub, Order, Vector<T>, Vector<T>>::calc(v1, v2);
+            const device_obj<Diff<VectorND<T>, DiffMode::Reverse, Order>>& v1,
+            const device_obj<Diff<VectorND<T>, DiffMode::Reverse, Order>>& v2) {
+        return DiffVectorExprBinary<ExprType::Sub, Order, VectorND<T>, VectorND<T>>::calc(v1, v2);
     }
     //////////////////////////////////////Mul//////////////////////////////////////
     template<class T, int Order>
     inline auto operator*(
-            const device_obj<Diff<Vector<T>, DiffMode::Reverse, Order>>& v,
+            const device_obj<Diff<VectorND<T>, DiffMode::Reverse, Order>>& v,
             const device_obj<Diff<T, DiffMode::Reverse, Order>>& s) {
-        return DiffVectorExprBinary<ExprType::Mul, Order, Vector<T>, T>::calc(v, s);
+        return DiffVectorExprBinary<ExprType::Mul, Order, VectorND<T>, T>::calc(v, s);
     }
 
     template<class T, int Order>
     inline auto operator*(
             const device_obj<Diff<T, DiffMode::Reverse, Order>>& s,
-            const device_obj<Diff<Vector<T>, DiffMode::Reverse, Order>>& v) {
+            const device_obj<Diff<VectorND<T>, DiffMode::Reverse, Order>>& v) {
         return v * s;
     }
 
     template<class T, int Order>
     inline auto hadamard(
-            const device_obj<Diff<Vector<T>, DiffMode::Reverse, Order>>& v1,
-            const device_obj<Diff<Vector<T>, DiffMode::Reverse, Order>>& v2) {
-        return DiffVectorExprBinary<ExprType::Mul, Order, Vector<T>, Vector<T>>::calc(v1, v2);
+            const device_obj<Diff<VectorND<T>, DiffMode::Reverse, Order>>& v1,
+            const device_obj<Diff<VectorND<T>, DiffMode::Reverse, Order>>& v2) {
+        return DiffVectorExprBinary<ExprType::Mul, Order, VectorND<T>, VectorND<T>>::calc(v1, v2);
     }
     //////////////////////////////////////Div//////////////////////////////////////
     template<class T, int Order>
     inline auto operator/(
-            const device_obj<Diff<Vector<T>, DiffMode::Reverse, Order>>& v,
+            const device_obj<Diff<VectorND<T>, DiffMode::Reverse, Order>>& v,
             const device_obj<Diff<T, DiffMode::Reverse, Order>>& s) {
-        return DiffVectorExprBinary<ExprType::Div, Order, Vector<T>, T>::calc(v, s);
+        return DiffVectorExprBinary<ExprType::Div, Order, VectorND<T>, T>::calc(v, s);
     }
 
     template<class T, int Order>
     inline auto devide(
-            const device_obj<Diff<Vector<T>, DiffMode::Reverse, Order>>& v1,
-            const device_obj<Diff<Vector<T>, DiffMode::Reverse, Order>>& v2) {
-        return DiffVectorExprBinary<ExprType::Div, Order, Vector<T>, Vector<T>>::calc(v1, v2);
+            const device_obj<Diff<VectorND<T>, DiffMode::Reverse, Order>>& v1,
+            const device_obj<Diff<VectorND<T>, DiffMode::Reverse, Order>>& v2) {
+        return DiffVectorExprBinary<ExprType::Div, Order, VectorND<T>, VectorND<T>>::calc(v1, v2);
     }
     //////////////////////////////////////Compare//////////////////////////////////////
     ////////////////////////////////////////Elementary Functions////////////////////////////////////////////
     template<class T, int Order>
-    auto relu(const device_obj<Diff<Vector<T>, DiffMode::Reverse, Order>>& v) {
-        return DiffVectorExprUnitary<ExprType::Relu, Order, Vector<T>>::calc(v);
+    auto relu(const device_obj<Diff<VectorND<T>, DiffMode::Reverse, Order>>& v) {
+        return DiffVectorExprUnitary<ExprType::Relu, Order, VectorND<T>>::calc(v);
     }
 
     template<class T, int Order>
-    auto exp(const device_obj<Diff<Vector<T>, DiffMode::Reverse, Order>>& v) {
-        return DiffVectorExprUnitary<ExprType::Exp, Order, Vector<T>>::calc(v);
+    auto exp(const device_obj<Diff<VectorND<T>, DiffMode::Reverse, Order>>& v) {
+        return DiffVectorExprUnitary<ExprType::Exp, Order, VectorND<T>>::calc(v);
     }
 }

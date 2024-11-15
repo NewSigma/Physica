@@ -43,7 +43,7 @@ MDCellType makeSystem(size_t numMolecular, RandomGenerator& gen) {
 int main() {
     const auto cell = makeSystem(108, RandomType::getInstance().getGen());
     const auto& pos = cell.getPos();
-    Vector<ScalarType> charges(cell.getNumParticle(), 1.0);
+    VectorND<ScalarType> charges(cell.getNumParticle(), 1.0);
     auto tail = charges.tail(cell.getNumParticle() / 2);
     tail = ScalarType(-1);
 

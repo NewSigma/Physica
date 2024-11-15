@@ -26,7 +26,7 @@ namespace Physica::Core {
     template<class ScalarType, bool IsSpinPolarized>
     class DensityGrid {
         using LatticeMatrix = typename PeriodicCell<ScalarType, 3>::LatticeMatrix;
-        using Vector3D = Vector<ScalarType, 3>;
+        using Vector3D = Vector3D<ScalarType>;
         using GridType = RSpaceGrid<ScalarType>;
     public:
         using Index3D = typename RSpaceGrid<ScalarType>::Index3D;

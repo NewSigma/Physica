@@ -27,7 +27,7 @@ using ComplexType = Complex<RealType>;
 
 template<class T>
 void test1() {
-    Vector<T, 2> v{2, 1};
+    Vector2D<T> v{2, 1};
     auto givens_vector = givens(v, 0, 1);
     DenseMatrix<T> v_mat = v;
     applyGivens(givens_vector, v_mat, 0, 1);
@@ -39,7 +39,7 @@ int main() {
     test1<RealType>();
     test1<Diff<RealType, DiffMode::Forward, 1>>();
     {
-        Vector<ComplexType, 2> v{{2, 1}, {1, -3}};
+        Vector2D<ComplexType> v{{2, 1}, {1, -3}};
         auto givens_vector = givens(v, 0, 1);
         DenseMatrix<ComplexType> v_mat = v;
         applyGivens(givens_vector, v_mat, 0, 1);
@@ -47,7 +47,7 @@ int main() {
             return 1;
     }
     {
-        Vector<ComplexType, 2> v{{0.8699464447, 0.1883214037}, {-0.520340944, 0.1297693695}};
+        Vector2D<ComplexType> v{{0.8699464447, 0.1883214037}, {-0.520340944, 0.1297693695}};
         auto givens_vector = givens(v, 0, 1);
         DenseMatrix<ComplexType> v_mat = v;
         applyGivens(givens_vector, v_mat, 0, 1);

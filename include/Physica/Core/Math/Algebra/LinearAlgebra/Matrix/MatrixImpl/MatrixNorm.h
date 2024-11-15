@@ -44,12 +44,12 @@ namespace Physica::Core {
     typename RValueMatrix<Derived>::RealType RValueMatrix<Derived>::norm1_power(unsigned int maxIteration) const {
         assert(getRow() == getCol() && "[Error]: norm1_power only applies to square matrix");
         assert(maxIteration > 0 && "[Error]: Invalid max iteration");
-        using VectorType = Vector<ScalarType>;
+        using VectorType = VectorND<ScalarType>;
         const Derived& m = Base::getDerived();
         const size_t length = getRow();
         const RealType factor = reciprocal(RealType(length));
 
-        Vector<RealType> x(length, factor);
+        VectorND<RealType> x(length, factor);
         VectorType y(length);
         VectorType z(length);
         unsigned int iteration = 0;

@@ -22,7 +22,7 @@ namespace Physica::Core {
     template<class T>
     FDM<T>::FDM(size_t col, size_t row) : data(col) {
         for(size_t i = 0; i < col; ++i)
-            data.allocate(Vector<T>::zeroVector(row), i);
+            data.allocate(VectorND<T>::zeroVector(row), i);
     }
     /*!
      * By default, edge of the matrix is set zero.

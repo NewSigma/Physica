@@ -103,8 +103,8 @@ constexpr int NumSample = 5000;
 
 int main(int argc, char** argv) {
     ThreadPool::numThreadRequired = 4;
-    const auto t = Vector<ScalarType>::linspace(1, 7, NumPoint);
-    Vector<ScalarType> Cv(NumPoint);
+    const auto t = VectorND<ScalarType>::linspace(1, 7, NumPoint);
+    VectorND<ScalarType> Cv(NumPoint);
     ThreadExecutor::parallel_for([&](size_t i) {
         auto& gen = RandomType::getInstance().getGen();
         Ising ising(20, 1, 1, t[i]);

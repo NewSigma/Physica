@@ -32,7 +32,7 @@ namespace Physica::Core {
         using typename Base::InvLatticeMatrix;
         using typename Base::PositionMatrix;
         using typename Base::Type;
-        using MassVector = device_obj<Vector<ScalarType>>;
+        using MassVector = device_obj<VectorND<ScalarType>>;
     private:
         using HostLatticeMatrix = typename host_obj::LatticeMatrix;
         using HostInvLatticeMatrix = typename host_obj::InvLatticeMatrix;

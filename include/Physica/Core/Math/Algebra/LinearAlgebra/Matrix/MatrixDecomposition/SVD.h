@@ -83,9 +83,9 @@ namespace Physica::Core {
         void stepSVD(size_t lower, size_t sub_order);
         ScalarType computeShift(size_t lower, size_t sub_order);
         template<class MatrixType>
-        void leftGivens(LValueMatrix<MatrixType>& mat, Vector<ScalarType, 2>& buffer, size_t i);
+        void leftGivens(LValueMatrix<MatrixType>& mat, Vector2D<ScalarType>& buffer, size_t i);
         template<class MatrixType>
-        void rightGivens(LValueMatrix<MatrixType>& mat, Vector<ScalarType, 2>& buffer, size_t i);
+        void rightGivens(LValueMatrix<MatrixType>& mat, Vector2D<ScalarType>& buffer, size_t i);
     };
 
     template<class ScalarType, size_t RowAtCompile, size_t ColumnAtCompile>
@@ -199,7 +199,7 @@ namespace Physica::Core {
         auto subBlock = working.block(lower, sub_order, lower, sub_order);
         const ScalarType shift = computeShift(lower, sub_order);
 
-        Vector<ScalarType, 2> buffer{square(subBlock(0, 0)) - shift, subBlock(0, 0) * subBlock(0, 1)};
+        Vector2D<ScalarType> buffer{square(subBlock(0, 0)) - shift, subBlock(0, 0) * subBlock(0, 1)};
         rightGivens(subBlock, buffer, 0);
         for (size_t i = 0; i < sub_order - 2; ++i) {
             leftGivens(subBlock, buffer, i);
@@ -239,7 +239,7 @@ namespace Physica::Core {
     template<class MatrixType>
     void SVD<ScalarType, RowAtCompile, ColumnAtCompile>::leftGivens(
             LValueMatrix<MatrixType>& mat,
-            Vector<ScalarType, 2>& buffer,
+            Vector2D<ScalarType>& buffer,
             size_t i) {
         buffer[0] = mat(i, i);
         buffer[1] = mat(i + 1, i);
@@ -254,7 +254,7 @@ namespace Physica::Core {
     template<class MatrixType>
     void SVD<ScalarType, RowAtCompile, ColumnAtCompile>::rightGivens(
             LValueMatrix<MatrixType>& mat,
-            Vector<ScalarType, 2>& buffer,
+            Vector2D<ScalarType>& buffer,
             size_t i) {
         buffer = givens(buffer, 0, 1);
         buffer[1] = -buffer[1];

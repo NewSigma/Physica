@@ -72,7 +72,7 @@ namespace Physica::Core {
 
     template<class Derived>
     template<class Executor>
-    Vector<typename device_obj<PairModel<Derived>>::ScalarType>
+    VectorND<typename device_obj<PairModel<Derived>>::ScalarType>
     device_obj<PairModel<Derived>>::force(
             const LatticeMatrix& lattice,
             const InvLatticeMatrix& invLattice,
@@ -84,7 +84,7 @@ namespace Physica::Core {
 
     template<class Derived>
     template<class Executor>
-    inline Vector<typename device_obj<PairModel<Derived>>::ScalarType>
+    inline VectorND<typename device_obj<PairModel<Derived>>::ScalarType>
     device_obj<PairModel<Derived>>::force(const MDCellType& hostCell) {
         return force<Executor>(hostCell.getLattice(), hostCell.getInvLattice(), hostCell.getPos());
     }
@@ -126,16 +126,16 @@ namespace Physica::Core {
 
     template<class Derived>
     template<class Executor>
-    inline Vector<typename device_obj<PairModel<Derived>>::ScalarType>
+    inline VectorND<typename device_obj<PairModel<Derived>>::ScalarType>
     device_obj<PairModel<Derived>>::force_short(const MDCellType& cell) {
         return force<Executor>(cell);
     }
 
     template<class Derived>
     template<class Executor>
-    inline Vector<typename device_obj<PairModel<Derived>>::ScalarType>
+    inline VectorND<typename device_obj<PairModel<Derived>>::ScalarType>
     device_obj<PairModel<Derived>>::force_long(const MDCellType& cell) const {
-        return Vector<ScalarType>(cell.getNumParticle() * 3, 0);
+        return VectorND<ScalarType>(cell.getNumParticle() * 3, 0);
     }
 
     template<class Derived>

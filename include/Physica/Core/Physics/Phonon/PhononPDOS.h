@@ -33,7 +33,7 @@ namespace Physica::Core {
         using typename Base::EigenValueGrid;
         using Base::Dim;
         using Base::ElementVolume;
-        using VectorType = Vector<ScalarType>;
+        using VectorType = VectorND<ScalarType>;
 
         using Base::solver;
         using Base::eigenvalues;

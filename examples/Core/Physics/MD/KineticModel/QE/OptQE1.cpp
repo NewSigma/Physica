@@ -12,7 +12,7 @@ using namespace Physica::Core;
 using namespace Physica::Gui;
 
 using ScalarType = float64;
-using VectorType = Vector<ScalarType>;
+using VectorType = VectorND<ScalarType>;
 
 int main(int argc, char** argv) {
     QApplication app(argc, argv);
@@ -29,21 +29,21 @@ int main(int argc, char** argv) {
         axisY->setTitleText("Force/a.u.");
         axisY->setLabelFormat("10<sup>%d</sup>");
         {
-            Vector<ScalarType> bfgs;
+            VectorND<ScalarType> bfgs;
             PWscfOut pwout("./bfgs1.out", 12);
             bfgs = pwout.makeTotalForces();
             const VectorType logNorm = ln(bfgs) * reciprocal(ln(ScalarType(10)));
             plot->line(logNorm).setName("BFGS(QE)");
         }
         {
-            Vector<ScalarType> damp;
+            VectorND<ScalarType> damp;
             PWscfOut pwout("./damp1.out", 12);
             damp = pwout.makeTotalForces();
             const VectorType logNorm = ln(damp) * reciprocal(ln(ScalarType(10)));
             plot->line(logNorm).setName("Damp(QE)");
         }
         {
-            Vector<ScalarType> fire;
+            VectorND<ScalarType> fire;
             H5File h5f("FireQE2.h5", H5File::ReadOnly);
             fire.read(h5f, "force");
             const VectorType logNorm = ln(fire) * reciprocal(ln(ScalarType(10)));

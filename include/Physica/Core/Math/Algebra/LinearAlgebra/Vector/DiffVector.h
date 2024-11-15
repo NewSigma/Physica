@@ -93,9 +93,9 @@ namespace Physica::Core {
     };
     ////////////////////////////////////////////////////////////////////////////////////
     template<class T, int Order>
-    class Diff<Vector<T>, DiffMode::Reverse, Order>
-            : public RValueVector<Diff<Vector<T>, DiffMode::Reverse, Order>> {
-        using VectorType = Vector<T>;
+    class Diff<VectorND<T>, DiffMode::Reverse, Order>
+            : public RValueVector<Diff<VectorND<T>, DiffMode::Reverse, Order>> {
+        using VectorType = VectorND<T>;
         using This = Diff<VectorType, DiffMode::Reverse, Order>;
         using Base = RValueVector<This>;
         using TracerType = DiffTracer<T, Order>;
@@ -150,7 +150,7 @@ namespace Physica {
     };
 
     template<class T, int Order>
-    class Traits<Core::Diff<Vector<T>, Core::DiffMode::Reverse, Order>> : public Traits<Vector<T>> {
+    class Traits<Core::Diff<VectorND<T>, Core::DiffMode::Reverse, Order>> : public Traits<VectorND<T>> {
         static_assert(!T::isDifferentiable, "[Error]: Nested Diff<> is not allowed");
     public:
         using ScalarType = Diff<T, DiffMode::Reverse, Order>;

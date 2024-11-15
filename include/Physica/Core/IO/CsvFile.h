@@ -85,7 +85,7 @@ namespace Physica::Core {
         CsvFile& operator=(CsvFile obj) noexcept { swap(obj); return *this; }
         /* Operations */
         template<class ScalarType>
-        [[nodiscard]] Vector<ScalarType> asVector(size_t col) const;
+        [[nodiscard]] VectorND<ScalarType> asVector(size_t col) const;
         size_t countMissingValue(size_t col, const char* missingTag = "NA") const;
         void swap(CsvFile& __restrict obj) noexcept;
         /* Getters */
@@ -99,8 +99,8 @@ namespace Physica::Core {
         [[nodiscard]] inline const Array<unsigned int>& asUnsignedInts(size_t col) const noexcept;
         [[nodiscard]] inline const Array<long>& asLongs(size_t col) const noexcept;
         [[nodiscard]] inline const Array<unsigned long>& asUnsignedLongs(size_t col) const noexcept;
-        [[nodiscard]] inline const Vector<float32>& asFloats(size_t col) const noexcept;
-        [[nodiscard]] inline const Vector<float64>& asDoubles(size_t col) const noexcept;
+        [[nodiscard]] inline const VectorND<float32>& asFloats(size_t col) const noexcept;
+        [[nodiscard]] inline const VectorND<float64>& asDoubles(size_t col) const noexcept;
         [[nodiscard]] inline const Array<bool>& asBools(size_t col) const noexcept;
         [[nodiscard]] inline const Array<std::string>& asStrings(size_t col) const noexcept;
         [[nodiscard]] inline size_t getRow() const noexcept;
@@ -114,9 +114,9 @@ namespace Physica::Core {
     };
 
     template<class ScalarType>
-    Vector<ScalarType> CsvFile::asVector(size_t col) const {
+    VectorND<ScalarType> CsvFile::asVector(size_t col) const {
         const DataType type = datatypes[col];
-        Vector<ScalarType> result(getRow());
+        VectorND<ScalarType> result(getRow());
         if (type == FLOAT)
             result = asFloats(col);
         else if (type == DOUBLE)
@@ -199,14 +199,14 @@ namespace Physica::Core {
         return *reinterpret_cast<const Array<unsigned long>*>(data[col]);
     }
 
-    inline const Vector<float32>& CsvFile::asFloats(size_t col) const noexcept {
+    inline const VectorND<float32>& CsvFile::asFloats(size_t col) const noexcept {
         assert(datatypes[col] == FLOAT && "[Error]: Invalid conversion");
-        return *reinterpret_cast<const Vector<float32>*>(data[col]);
+        return *reinterpret_cast<const VectorND<float32>*>(data[col]);
     }
 
-    inline const Vector<float64>& CsvFile::asDoubles(size_t col) const noexcept {
+    inline const VectorND<float64>& CsvFile::asDoubles(size_t col) const noexcept {
         assert(datatypes[col] == DOUBLE && "[Error]: Invalid conversion");
-        return *reinterpret_cast<const Vector<float64>*>(data[col]);
+        return *reinterpret_cast<const VectorND<float64>*>(data[col]);
     }
 
     inline const Array<bool>& CsvFile::asBools(size_t col) const noexcept {

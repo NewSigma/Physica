@@ -71,7 +71,7 @@ std::unique_ptr<ODE> solveEqu(const ProgramArgs& args) {
     return std::unique_ptr<ODE>(&solver);
 }
 
-T calcPhase(const ProgramArgs& args, const Vector<T>& h, const Vector<T>& wave) {
+T calcPhase(const ProgramArgs& args, const VectorND<T>& h, const VectorND<T>& wave) {
     const T wave_vector = T(2 * M_PI) / args.wave_length;
     const size_t length = h.getLength();
     assert(length == wave.getLength());
@@ -108,7 +108,7 @@ T calcCrossSection(double energy) {
         const auto& h = solver->getX();
         const auto& solution = solver->getSolution();
 
-        Vector<T> waveFunc(solution.getCol());
+        VectorND<T> waveFunc(solution.getCol());
         for (size_t i = 0; i < solution.getCol(); ++i)
             waveFunc[i] = solution(0, i);
         const T phase = calcPhase(args, h, waveFunc);
@@ -124,7 +124,7 @@ void plotPWBaseWave(double energy, double radialNum) {
     const auto& h = solver->getX();
     const auto& solution = solver->getSolution();
 
-    Vector<T> waveFunc(solution.getCol());
+    VectorND<T> waveFunc(solution.getCol());
     for (size_t i = 0; i < solution.getCol(); ++i)
         waveFunc[i] = solution(0, i) / (h[i] * args.rho);
     waveFunc *= reciprocal(waveFunc.max());
@@ -146,8 +146,8 @@ int main(int argc, char** argv) {
     const double from = 0.2;
     const double to = 3.5;
     const size_t count = static_cast<size_t>((to - from) / step);
-    Vector<T> energyArr(count);
-    Vector<T> crossSectionArr(count);
+    VectorND<T> energyArr(count);
+    VectorND<T> crossSectionArr(count);
     /* Get energy-crossSection */ {
         double temp = 0.2;
         for (size_t i = 1; i <= count; ++i) {

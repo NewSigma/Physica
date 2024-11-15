@@ -40,7 +40,7 @@ namespace Physica::Core {
         /* Static members */
         static PermutationMatrix<ScalarType> sortPosition(MDCellType& cell, size_t atomicNum1, size_t atomicNum2);
         static bool isCellOrdered(const MDCellType& cell, size_t atomicNum1, size_t atomicNum2);
-        static Vector<ScalarType> makeCharges(size_t numMolecule, ValueType atomCharge1, ValueType atomCharge2);
+        static VectorND<ScalarType> makeCharges(size_t numMolecule, ValueType atomCharge1, ValueType atomCharge2);
     protected:
         AABModel() = default;
         AABModel(const AABModel&) = default;
@@ -139,11 +139,11 @@ namespace Physica::Core {
     }
 
     template<class ScalarType>
-    Vector<ScalarType> AABModel<ScalarType>::makeCharges(size_t numMolecule, ValueType atomCharge1, ValueType atomCharge2) {
+    VectorND<ScalarType> AABModel<ScalarType>::makeCharges(size_t numMolecule, ValueType atomCharge1, ValueType atomCharge2) {
         const size_t maxIndexH = 2 * numMolecule;
         const size_t minIndexO = maxIndexH;
         const size_t maxIndexO = minIndexO + numMolecule;
-        Vector<ScalarType> charges(maxIndexO);
+        VectorND<ScalarType> charges(maxIndexO);
         for (size_t i = 0; i < maxIndexH; ++i)
             charges[i] = atomCharge1;
         

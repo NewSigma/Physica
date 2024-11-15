@@ -25,7 +25,7 @@ namespace Physica::Core {
     class PHYSICA_API Outcar {
         using ScalarType = float64;
 
-        Vector<ScalarType> force;
+        VectorND<ScalarType> force;
         ScalarType internalEnergy;
     public:
         Outcar(const char* path, unsigned int numAtom);
@@ -38,7 +38,7 @@ namespace Physica::Core {
         void swap(Outcar& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] size_t getNumAtom() const noexcept { return force.getLength() / 3; }
-        [[nodiscard]] const Vector<ScalarType>& getForce() const noexcept { return force; }
+        [[nodiscard]] const VectorND<ScalarType>& getForce() const noexcept { return force; }
         [[nodiscard]] ScalarType getInternalEnergy() const noexcept { return internalEnergy; }
     private:
         void readForce(std::ifstream& fin, Array<char>& buffer);

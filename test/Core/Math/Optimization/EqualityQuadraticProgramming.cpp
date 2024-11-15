@@ -23,7 +23,7 @@ using namespace Physica::Core;
 int main() {
     using ScalarType = float64;
     {
-        using VectorType = Vector<ScalarType, 3>;
+        using VectorType = Vector3D<ScalarType>;
         const DenseMatrix<ScalarType, MatrixOption::Row | MatrixOption::Vector, 3, 3> G{{1, 0, 0}, {0, 1, 0}, {0, 0, 1}};
         const VectorType c{0, 0, 0};
         const DenseMatrix<ScalarType> constraints{};
@@ -35,7 +35,7 @@ int main() {
             return 1;
     }
     {
-        using VectorType = Vector<ScalarType, 3>;
+        using VectorType = Vector3D<ScalarType>;
         const DenseMatrix<ScalarType, MatrixOption::Row | MatrixOption::Vector, 3, 3> G{{6, 2, 1}, {2, 5, 2}, {1, 2, 4}};
         const VectorType c{-8, -3, -3};
         const DenseMatrix<ScalarType, MatrixOption::Row | MatrixOption::Vector, 2, 4> constraints{{1, 0, 1, 3}, {0, 1, 1, 0}};

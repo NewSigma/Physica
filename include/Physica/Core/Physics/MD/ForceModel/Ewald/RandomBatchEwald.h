@@ -46,7 +46,7 @@ namespace Physica::Core {
     public:
         RandomBatchEwald() = default;
         RandomBatchEwald(size_t samplePoolSize, size_t batchSize_);
-        RandomBatchEwald(size_t samplePoolSize, size_t batchSize_, LatticeMatrix lattice, Vector<ScalarType> charges);
+        RandomBatchEwald(size_t samplePoolSize, size_t batchSize_, LatticeMatrix lattice, VectorND<ScalarType> charges);
         RandomBatchEwald(const RandomBatchEwald&) = default;
         RandomBatchEwald(RandomBatchEwald&&) noexcept = default;
         ~RandomBatchEwald() = default;
@@ -55,10 +55,10 @@ namespace Physica::Core {
         RandomBatchEwald& operator=(Base base);
         /* Operations */
         template<class Executor>
-        [[nodiscard]] Vector<ScalarType> force(const PositionMatrix& pos) const;
+        [[nodiscard]] VectorND<ScalarType> force(const PositionMatrix& pos) const;
         using Base::force_short;
         template<class Executor>
-        [[nodiscard]] Vector<ScalarType> force_long(const PositionMatrix& pos) const;
+        [[nodiscard]] VectorND<ScalarType> force_long(const PositionMatrix& pos) const;
 
         [[nodiscard]] ScalarType calcDefaultIntegralLimit() const;
         void swap(RandomBatchEwald& __restrict obj) noexcept;
@@ -88,7 +88,7 @@ namespace Physica::Core {
             size_t samplePoolSize,
             size_t batchSize_,
             LatticeMatrix lattice,
-            Vector<ScalarType> charges) : This(samplePoolSize, batchSize_) {
+            VectorND<ScalarType> charges) : This(samplePoolSize, batchSize_) {
         assert(checkParam(lattice) && "[Error]: Non-orthogonal lattice is not implemented");
         Base::setCharges(std::move(charges));
         Base::setLattice(std::move(lattice));
@@ -104,12 +104,12 @@ namespace Physica::Core {
 
     template<class ScalarType, class RandomType>
     template<class Executor>
-    Vector<ScalarType> RandomBatchEwald<ScalarType, RandomType>::force(const PositionMatrix& pos) const {
-        Vector<ScalarType> result;
+    VectorND<ScalarType> RandomBatchEwald<ScalarType, RandomType>::force(const PositionMatrix& pos) const {
+        VectorND<ScalarType> result;
         auto kSpaceFuture = Executor::schedule([this, pos, &result]() {
             result = force_long<SequentialExecutor>(pos);
         });
-        const Vector<ScalarType> rSpaceSum = Base::template force_short<SequentialExecutor>(pos);
+        const VectorND<ScalarType> rSpaceSum = Base::template force_short<SequentialExecutor>(pos);
         Executor::auto_wait(kSpaceFuture);
         result += rSpaceSum;
         return result;
@@ -117,12 +117,12 @@ namespace Physica::Core {
     //TODO: time reversal symmetry?
     template<class ScalarType, class RandomType>
     template<class Executor>
-    Vector<ScalarType> RandomBatchEwald<ScalarType, RandomType>::force_long(const PositionMatrix& pos) const {
+    VectorND<ScalarType> RandomBatchEwald<ScalarType, RandomType>::force_long(const PositionMatrix& pos) const {
         const size_t numParticle = getNumParticle();
-        Vector<ScalarType> kSpaceSum(numParticle * Dim, 0);
-        Vector<ScalarType> dots(numParticle);
-        Vector<ScalarType> sin_vec(numParticle);
-        Vector<ScalarType> cos_vec(numParticle);
+        VectorND<ScalarType> kSpaceSum(numParticle * Dim, 0);
+        VectorND<ScalarType> dots(numParticle);
+        VectorND<ScalarType> sin_vec(numParticle);
+        VectorND<ScalarType> cos_vec(numParticle);
         size_t numLoop = batchSize;
         for (size_t _ = 0; _ < numLoop; ++_) {
             const Vector3D waveG = randWaveG();

@@ -22,7 +22,7 @@
 
 using namespace Physica::Core;
 using ScalarType = float64;
-using VectorType = Vector<ScalarType, 2>;
+using VectorType = Vector2D<ScalarType>;
 
 constexpr double width = 2;
 constexpr double height = 1;
@@ -66,8 +66,8 @@ int main() {
         PoissonModel model(std::move(mesh), func);
         model.solve<ElementIntegratorPacker<ElementType>>();
 
-        const Vector<ScalarType> xs = Vector<ScalarType>::linspace(0, width * 0.9, 6);
-        const Vector<ScalarType> ys = Vector<ScalarType>::linspace(0, height * 0.9, 4);
+        const VectorND<ScalarType> xs = VectorND<ScalarType>::linspace(0, width * 0.9, 6);
+        const VectorND<ScalarType> ys = VectorND<ScalarType>::linspace(0, height * 0.9, 4);
         for (auto x : xs) {
             for (auto y : ys) {
                 const ScalarType theory = theory_solution({x, y});
@@ -90,8 +90,8 @@ int main() {
         PoissonModel model(std::move(mesh), func);
         model.solve<ElementIntegratorPacker<ElementType>>();
 
-        const Vector<ScalarType> xs = Vector<ScalarType>::linspace(0, width * 0.9, 6);
-        const Vector<ScalarType> ys = Vector<ScalarType>::linspace(0, height * 0.9, 4);
+        const VectorND<ScalarType> xs = VectorND<ScalarType>::linspace(0, width * 0.9, 6);
+        const VectorND<ScalarType> ys = VectorND<ScalarType>::linspace(0, height * 0.9, 4);
         for (auto x : xs) {
             for (auto y : ys) {
                 const ScalarType theory = theory_solution({x, y});

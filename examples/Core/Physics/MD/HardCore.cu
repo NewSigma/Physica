@@ -43,7 +43,7 @@ constexpr size_t numSample = 5000;
 constexpr bool IsComputeMode = true;
 
 using ScalarType = float32;
-using VectorType = Vector<ScalarType>;
+using VectorType = VectorND<ScalarType>;
 using MatrixType = DenseMatrix<ScalarType>;
 using MDType = RPMD<ScalarType, 1, 1>;
 using MDCellType = typename MDType::MDCellType;
@@ -55,7 +55,7 @@ MDCellType makeSystem(RandomGenerator& gen) {
     typename MDCellType::LatticeMatrix lattice{latticeSize};
 
     std::uniform_real_distribution dist{};
-    Vector<ScalarType> posVec(numMolecular);
+    VectorND<ScalarType> posVec(numMolecular);
     for (auto& elem : posVec)
         elem = dist(gen) * latticeSize;
     std::sort(posVec.begin(), posVec.end());
@@ -90,7 +90,7 @@ int main(int argc, char** argv) {
             kineticModel.updateMass(rpmd.getRingPolymer());
             rpmd.initMomentum<KineticModel, decltype(gen)>(gen);
 
-            Vector<ScalarType> mean(record.getRow(), 0);
+            VectorND<ScalarType> mean(record.getRow(), 0);
             for (size_t sample = 0; sample < numSample; ++sample) {
                 const ScalarType flux0 = calcThermoFlux(rpmd);
                 kineticModel.nve_step_for(1.0, rpmd.getRingPolymer(), timeStep);

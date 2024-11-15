@@ -32,7 +32,7 @@ namespace Physica::Core {
         using LatticeMatrix = typename PeriodicCell<ScalarType, 3>::LatticeMatrix;
         using BasisType = PlainWaveBasis<ScalarType>;
         using HermiteMatrix = DenseHermiteMatrix<ComplexType>;
-        using Vector3D = Vector<ScalarType, 3>;
+        using Vector3D = Vector3D<ScalarType>;
         using Index3D = typename GridBase::Index3D;
         using FFT3D = FFT<ScalarType, 3>;
     private:

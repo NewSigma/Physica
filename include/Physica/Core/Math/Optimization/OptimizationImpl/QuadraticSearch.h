@@ -21,7 +21,7 @@
 namespace Physica::Core {
     template<class ScalarType>
     class QuadraticSearch {
-        using Vector3D = Vector<ScalarType, 3>;
+        using Vector3D = Vector3D<ScalarType>;
 
         Vector3D x;
         Vector3D y;

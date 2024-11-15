@@ -30,7 +30,7 @@ int main() {
     if (!scalarNear(GeoBase2D<ScalarType>::distToSegment({1, -1}, {0, 0}, {1, 0}), ScalarType(1), epsilon))
         return 1;
     {
-        using VectorType = Vector<ScalarType, 2>;
+        using VectorType = Vector2D<ScalarType>;
         using Triangle = Array<VectorType, 3>;
         {
             Triangle poly{{0.57, 0}, {0.67, 0}, {0.57, 0.05}};

@@ -28,7 +28,7 @@
 using namespace Physica::Core;
 using namespace Physica::Gui;
 using ScalarType = float64;
-using VectorType = Vector<ScalarType>;
+using VectorType = VectorND<ScalarType>;
 using MatrixType = DenseMatrix<ScalarType>;
 using MDType = RPMD<ScalarType, 1, 1>;
 using MDCellType = typename MDType::MDCellType;
@@ -45,7 +45,7 @@ MDCellType makeSystem(std::mt19937& gen) {
     typename MDCellType::LatticeMatrix lattice{latticeSize};
 
     std::uniform_real_distribution dist{};
-    Vector<ScalarType> posVec(numMolecular);
+    VectorND<ScalarType> posVec(numMolecular);
     for (auto& elem : posVec)
         elem = dist(gen) * latticeSize;
     std::sort(posVec.begin(), posVec.end());

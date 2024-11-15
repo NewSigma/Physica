@@ -24,9 +24,9 @@ using namespace Physica::Core;
 
 void crossProductTest() {
     using T = float32;
-    Vector<T> v1{3.845971,0.000000,0.000000};
-    Vector<T> v2{-0.007733,3.835502,0.000000};
-    Vector<T> v3(v1.crossProduct(v2));
+    VectorND<T> v1{3.845971,0.000000,0.000000};
+    VectorND<T> v2{-0.007733,3.835502,0.000000};
+    VectorND<T> v3(v1.crossProduct(v2));
     if (!scalarNear(v3.norm() / T(2), T(7.375614), 1E-7))
         exit(EXIT_FAILURE);
 }
@@ -36,14 +36,14 @@ void hdfTest() {
     auto& gen = Random<std::mt19937, std::mt19937::default_seed>::getInstance();
     /* Real */ {
         using T = float64;
-        const auto data = Vector<T>::random_uniform(64, gen);
+        const auto data = VectorND<T>::random_uniform(64, gen);
 
         TempFile tmp("/tmp/tmpXXXXXX");
         {
             H5File h5f(tmp.getName(), H5File::OpenFlag::ReadWrite | H5File::OpenFlag::Creat);
             data.write(h5f, "set");
         }
-        Vector<T> buffer(data.getLength());
+        VectorND<T> buffer(data.getLength());
         {
             H5File h5f(tmp.getName(), H5File::OpenFlag::ReadOnly);
             buffer.read(h5f, "set");
@@ -53,14 +53,14 @@ void hdfTest() {
     }
     /* Complex */ {
         using T = Complex<float64>;
-        const auto data = Vector<T>::random_uniform(64, gen);
+        const auto data = VectorND<T>::random_uniform(64, gen);
 
         TempFile tmp("/tmp/tmpXXXXXX");
         {
             H5File h5f(tmp.getName(), H5File::OpenFlag::ReadWrite | H5File::OpenFlag::Creat);
             data.write(h5f, "set");
         }
-        Vector<T> buffer(data.getLength());
+        VectorND<T> buffer(data.getLength());
         {
             H5File h5f(tmp.getName(), H5File::OpenFlag::ReadOnly);
             buffer.read(h5f, "set");

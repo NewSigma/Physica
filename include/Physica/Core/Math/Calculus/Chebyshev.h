@@ -33,7 +33,7 @@ namespace Physica::Core {
 
         const size_t n = coeff.getLength();
         const double n_1 = 1.0 / n;
-        Vector<T> funcArr(n);
+        VectorND<T> funcArr(n);
         /* Fill func arr */ {
             const T& temp1 = (to - from) * T(0.5);
             const T& temp2 = (to + from) * T(0.5);
@@ -64,7 +64,7 @@ namespace Physica::Core {
         const size_t n = coeff.getLength();
         const size_t n_2 = n << 1U;
         const double n_2_1 = 1.0 / n_2;
-        Vector<T> funcArr(n_2);
+        VectorND<T> funcArr(n_2);
         /* Fill func arr */ {
             const T& temp1 = (to - from) * T(0.5);
             const T& temp2 = (to + from) * T(0.5);
@@ -95,7 +95,7 @@ namespace Physica::Core {
         const size_t n = coeff.getLength();
         const size_t n_2 = n << 1U;
         const double n_2_1 = 1.0 / n_2;
-        Vector<T> funcArr(n_2);
+        VectorND<T> funcArr(n_2);
         /* Fill func arr */ {
             const T& temp1 = (to - from) * T(0.5);
             const T& temp2 = (to + from) * T(0.5);

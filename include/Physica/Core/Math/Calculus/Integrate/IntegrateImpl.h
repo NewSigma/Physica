@@ -151,7 +151,7 @@ namespace Physica::Core {
         for (size_t i = 0; i < numGen; ++i)
             gens[i] = RandomGenerator(seeds[i]);
 
-        Vector<ScalarType> results(numGen);
+        VectorND<ScalarType> results(numGen);
         auto future = Executor::parallel_for([this, func, &gens, &results](unsigned int i) { results[i] = solve(func, gens[i]); }, numGen, numGen);
         Executor::auto_wait(future);
         return mean(results);

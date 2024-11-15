@@ -39,12 +39,12 @@ namespace Physica::Core {
     class QuadraticProgramming {
         using ConstraintMatrix = DenseMatrix<ScalarType, MatrixOption::Row | MatrixOption::Vector>;
 
-        DenseSymmMatrix<ScalarType, Dynamic> objectiveMatG;
-        Vector<ScalarType, Dynamic> objectiveVecC;
+        DenseSymmMatrix<ScalarType> objectiveMatG;
+        VectorND<ScalarType> objectiveVecC;
         ConstraintMatrix equalityConstraint;
         ConstraintMatrix inequalityConstraint;
-        Vector<ScalarType, Dynamic> x;
-        Array<bool, Dynamic> activeConstraintFlags;
+        VectorND<ScalarType> x;
+        Array<bool> activeConstraintFlags;
     public:
         template<class MatrixType1, class VectorType1, class MatrixType2, class MatrixType3, class VectorType2>
         QuadraticProgramming(const LValueMatrix<MatrixType1>& objectiveMatG_,
@@ -62,11 +62,11 @@ namespace Physica::Core {
         void compute(const ScalarType& precision = std::numeric_limits<ScalarType>::epsilon());
         void compute_nonconvex(const ScalarType& precision = std::numeric_limits<ScalarType>::epsilon());
         /* Getters */
-        [[nodiscard]] const Vector<ScalarType, Dynamic>& getSolution() const noexcept { return x; }
+        [[nodiscard]] const VectorND<ScalarType>& getSolution() const noexcept { return x; }
         [[nodiscard]] ScalarType getValue() const;
     private:
-        void updateVariables(const Vector<ScalarType, Dynamic>& direction);
-        [[nodiscard]] ScalarType nextStepSize(const Vector<ScalarType, Dynamic>& direction, size_t& blockedAt);
+        void updateVariables(const VectorND<ScalarType>& direction);
+        [[nodiscard]] ScalarType nextStepSize(const VectorND<ScalarType>& direction, size_t& blockedAt);
         void updateActiveConstraints(ConstraintMatrix& activeConstraints);
     };
 
@@ -82,7 +82,7 @@ namespace Physica::Core {
             , equalityConstraint(equalityConstraint_)
             , inequalityConstraint(inequalityConstraint_)
             , x(initial)
-            , activeConstraintFlags(Array<bool, Dynamic>(inequalityConstraint_.getRow(), false)) {
+            , activeConstraintFlags(Array<bool>(inequalityConstraint_.getRow(), false)) {
         assert(objectiveMatG.getRow() == objectiveVecC.getLength());
         assert(equalityConstraint.getCol() == 0 || equalityConstraint.getCol() == objectiveVecC.getLength() + 1);
         assert(inequalityConstraint.getCol() == 0 || inequalityConstraint.getCol() == objectiveVecC.getLength() + 1);
@@ -93,7 +93,7 @@ namespace Physica::Core {
         ConstraintMatrix activeConstraints = equalityConstraint;
         while (true) {
             const EqualityQuadraticProgramming<ScalarType> EQP(objectiveMatG, objectiveVecC, activeConstraints, x);
-            const Vector<ScalarType> vec_p = EQP.getSolution() - x;
+            const VectorND<ScalarType> vec_p = EQP.getSolution() - x;
             if (vec_p.norm() <= x.norm() * precision) {
                 const auto& multipliers = EQP.getMultipliers();
                 const auto minimum_ite = std::min_element(multipliers.cbegin(), multipliers.cend());
@@ -124,7 +124,7 @@ namespace Physica::Core {
         ConstraintMatrix activeConstraints = equalityConstraint;
         while (true) {
             const EqualityQuadraticProgramming<ScalarType> EQP(objectiveMatG, objectiveVecC, activeConstraints, x);
-            const Vector<ScalarType> vec_p = EQP.getSolution() - x;
+            const VectorND<ScalarType> vec_p = EQP.getSolution() - x;
             if (vec_p.norm() <= x.norm() * precision)
                 break;
             else
@@ -139,7 +139,7 @@ namespace Physica::Core {
     }
 
     template<class ScalarType>
-    void QuadraticProgramming<ScalarType>::updateVariables(const Vector<ScalarType, Dynamic>& direction) {
+    void QuadraticProgramming<ScalarType>::updateVariables(const VectorND<ScalarType>& direction) {
         size_t blockedAt = 0;
         const ScalarType step = nextStepSize(direction, blockedAt);
         x = x + step * direction;
@@ -150,7 +150,7 @@ namespace Physica::Core {
     }
 
     template<class ScalarType>
-    ScalarType QuadraticProgramming<ScalarType>::nextStepSize(const Vector<ScalarType, Dynamic>& direction, size_t& blockedAt) {
+    ScalarType QuadraticProgramming<ScalarType>::nextStepSize(const VectorND<ScalarType>& direction, size_t& blockedAt) {
         ScalarType result = ScalarType(1);
         for (size_t i = 0; i < activeConstraintFlags.getLength(); ++i) {
             const bool isActive = activeConstraintFlags[i];

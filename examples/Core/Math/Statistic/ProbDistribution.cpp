@@ -48,7 +48,7 @@ int main(int argc, char** argv) {
     const auto x = dist.makePosition();
     auto y = dist.makeDistribution();
     y *= reciprocal(y.max());
-    const Vector<float64> y1 = exp(square(x) * float64(-0.5));
+    const VectorND<float64> y1 = exp(square(x) * float64(-0.5));
     plot->line(x, y);
     plot->line(x, y1);
     plot->show();

@@ -37,13 +37,13 @@ namespace Physica::Core {
         FPUModel& operator=(FPUModel obj) noexcept { swap(obj); return *this; }
         /* Operations */
         template<class Executor>
-        [[nodiscard]] Vector<ScalarType> force(const MDCellType& cell) const;
+        [[nodiscard]] VectorND<ScalarType> force(const MDCellType& cell) const;
         template<class VectorType, class Executor>
         void forceAsync(const MDCellType& cell, ContinuousVector<VectorType>& result) const;
         template<class Executor>
-        [[nodiscard]] Vector<ScalarType> force_short(const MDCellType& cell) const { return force<Executor>(cell); }
+        [[nodiscard]] VectorND<ScalarType> force_short(const MDCellType& cell) const { return force<Executor>(cell); }
         template<class Executor>
-        [[nodiscard]] Vector<ScalarType> force_long(const MDCellType& cell) const { return Vector<ScalarType>(cell.getDOF(), 0); }
+        [[nodiscard]] VectorND<ScalarType> force_long(const MDCellType& cell) const { return VectorND<ScalarType>(cell.getDOF(), 0); }
         [[nodiscard]] ScalarType potentialV(const MDCellType& cell) const;
         [[nodiscard]] LatticeMatrix virial(const MDCellType& cell) const;
         void swap(FPUModel& __restrict obj) noexcept;
@@ -51,9 +51,9 @@ namespace Physica::Core {
 
     template<class ScalarType, bool IsPeriodBoundary, unsigned int Dim>
     template<class Executor>
-    Vector<ScalarType> FPUModel<ScalarType, IsPeriodBoundary, Dim>::force(const MDCellType& cell) const {
-        Vector<ScalarType> result(cell.getNumParticle());
-        forceAsync<Vector<ScalarType>, Executor>(cell, result);
+    VectorND<ScalarType> FPUModel<ScalarType, IsPeriodBoundary, Dim>::force(const MDCellType& cell) const {
+        VectorND<ScalarType> result(cell.getNumParticle());
+        forceAsync<VectorND<ScalarType>, Executor>(cell, result);
         return result;
     }
 

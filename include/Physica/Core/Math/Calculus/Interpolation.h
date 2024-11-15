@@ -242,8 +242,8 @@ namespace Physica::Core {
     template<class GridType>
     typename GridType::ScalarType interpolate_fft(
             const LValueGrid<GridType>& data,
-            Vector<typename GridType::ScalarType::RealType, 3> r,
-            Vector<typename GridType::ScalarType::RealType, 3> period) {
+            Vector3D<typename GridType::ScalarType::RealType> r,
+            Vector3D<typename GridType::ScalarType::RealType> period) {
         using ScalarType = typename GridType::ScalarType;
         using RealType = typename ScalarType::RealType;
         using ComplexType = typename ScalarType::ComplexType;
@@ -256,7 +256,7 @@ namespace Physica::Core {
         fft.transform();
         const auto& kSpace = fft.getKSpace();
 
-        const Vector<RealType, 3> relative_r = divide(r, period);
+        const Vector3D<RealType> relative_r = divide(r, period);
         const Index3D rSpaceSize = fft.getRSpaceSize();
         auto elem = ComplexType(0);
         GridBase::forIndexInGrid(rSpaceSize, [relative_r, rSpaceSize, &kSpace, &elem](Index3D kIndex) {

@@ -23,7 +23,7 @@
 
 using namespace Physica::Core;
 using ScalarType = float64;
-using VectorType = Vector<ScalarType, 2>;
+using VectorType = Vector2D<ScalarType>;
 
 constexpr double gammaY = 0.1;
 constexpr double diffuseD_ = 0.1;

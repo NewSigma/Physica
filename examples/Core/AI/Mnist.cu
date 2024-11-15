@@ -117,7 +117,7 @@ namespace Physica::Core {
 
 using ValueType = float32;
 using ScalarType = Diff<ValueType, DiffMode::Reverse, 1>;
-using DeviceVector = device_obj<Diff<Vector<ValueType>, DiffMode::Reverse, 1>>;
+using DeviceVector = device_obj<Diff<VectorND<ValueType>, DiffMode::Reverse, 1>>;
 using Dataset = typename Mnist::DatasetType<DeviceVector>;
 using Optimizer = SGD<device_obj<ScalarType>>;
 using RandomGenerator = std::mt19937;
@@ -128,7 +128,7 @@ constexpr double learnRate = 0.05;
 
 std::pair<Dataset, Dataset> makeDataset(RandomGenerator& gen) {
     const Mnist mnist("/home/sigma/Documents/data");
-    auto dataset = mnist.makeTrainDataset<Vector<ValueType>>();
+    auto dataset = mnist.makeTrainDataset<VectorND<ValueType>>();
     for (size_t i = 0; i < dataset.getSize(); ++i) {
         auto& sample = dataset.getSamples()[i];
         sample = sample * ValueType(1.0 / 128) - ValueType(1);
@@ -147,14 +147,14 @@ int main(int argc, char** argv) {
     auto nn = device_obj<MnistNet<ScalarType>>(32, gen);
     opt.recordEnd();
 
-    Vector<ValueType> loss_train(numEpoch), loss_valid(numEpoch), acc_train(numEpoch), acc_valid(numEpoch);
+    VectorND<ValueType> loss_train(numEpoch), loss_valid(numEpoch), acc_train(numEpoch), acc_valid(numEpoch);
     for (size_t epoch = 0; epoch < numEpoch; ++epoch) {
         if (epoch != 0) {
             for (size_t i = 0; i < itePerEpoch; ++i)
                 nn.train_step<Dataset, Optimizer, RandomType>(dataset.first, opt);
         }
 
-        using VectorType = Vector<ValueType>;
+        using VectorType = VectorND<ValueType>;
         const auto nn_infer = device_obj<MnistNet<ValueType>>(nn);
         loss_train[epoch] = nn_infer.loss(dataset.first);
         loss_valid[epoch] = nn_infer.loss(dataset.second);

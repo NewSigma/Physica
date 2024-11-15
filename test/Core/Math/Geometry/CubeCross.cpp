@@ -52,10 +52,10 @@ int main() {
     {
         const ScalarType rep3 = reciprocal(ScalarType(3));
         const ScalarType sqrt3 = sqrt(ScalarType(3));
-        const auto x = Vector<ScalarType>::linspace(-1, 1, 200);
-        Vector<ScalarType> y(x.getLength());
+        const auto x = VectorND<ScalarType>::linspace(-1, 1, 200);
+        VectorND<ScalarType> y(x.getLength());
         for (size_t i = 0; i < y.getLength(); ++i) {
-            Vector<ScalarType, 4> plane{rep3, rep3, rep3, x[i]};
+            Vector4D<ScalarType> plane{rep3, rep3, rep3, x[i]};
             plane *= ScalarType(10);
             const auto cross = CubeCross<ScalarType>(plane);
             y[i] = cross.getArea() * sqrt3;

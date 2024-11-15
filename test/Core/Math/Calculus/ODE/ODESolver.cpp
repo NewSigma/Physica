@@ -30,7 +30,7 @@ int main() {
      */
     {
         ODESolver<T, 1> solver(0, 3, stepSize, {1});
-        solver.rungeKutta4([](T x, const Vector<T, 1>& y) -> Vector<T, 1> { (void)x; return y; });
+        solver.rungeKutta4([](T x, const Vector1D<T>& y) -> Vector1D<T> { (void)x; return y; });
         const auto& x = solver.getX();
         const auto& solution = solver.getSolution();
         for (size_t i = 0; i < solution.getCol(); ++i) {
@@ -46,7 +46,7 @@ int main() {
      */
     {
         ODESolver<T, 2> solver(0, 3, stepSize, {0, 1});
-        solver.rungeKutta4([](T x, const Vector<T, 2>& y) -> Vector<T, 2> { (void)x; return {y[1], -y[0]}; });
+        solver.rungeKutta4([](T x, const Vector2D<T>& y) -> Vector2D<T> { (void)x; return {y[1], -y[0]}; });
         const auto& x = solver.getX();
         const auto& solution = solver.getSolution();
         for (size_t i = 0; i < solution.getCol(); ++i) {

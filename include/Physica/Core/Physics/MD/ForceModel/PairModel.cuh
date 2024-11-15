@@ -49,7 +49,7 @@ namespace Physica::Core {
         using CellListType = CellList<ScalarType>;
         using DeviceCellList = device_obj<CellListType>;
         using Index3D = typename GridBase::Index3D;
-        using Vector3D = device_obj<Vector<ScalarType, 3>>;
+        using Vector3D = device_obj<Vector3D<ScalarType>>;
         using ForceBufferType = device_obj<DenseMatrix<ScalarType>>;
         using VirialBufferType = device_obj<DenseMatrix<ScalarType, MatrixOption::Col | MatrixOption::Element, NumVirialElem>>;
         using PageLockedVector = Vector<ScalarType, Dynamic, PageLockedAllocator<ScalarType>>;
@@ -71,12 +71,12 @@ namespace Physica::Core {
         [[nodiscard]] ScalarType potentialV(const MDCellType& hostCell) const;
 
         template<class Executor>
-        [[nodiscard]] Vector<ScalarType> force(
+        [[nodiscard]] VectorND<ScalarType> force(
                 const LatticeMatrix& lattice,
                 const InvLatticeMatrix& invLattice,
                 const PositionMatrix& cartesianPos);
         template<class Executor>
-        [[nodiscard]] inline Vector<ScalarType> force(const MDCellType& hostCell);
+        [[nodiscard]] inline VectorND<ScalarType> force(const MDCellType& hostCell);
 
         template<class VectorType, class Executor>
         void forceAsync(
@@ -87,9 +87,9 @@ namespace Physica::Core {
         template<class VectorType, class Executor>
         inline void forceAsync(const MDCellType& cell, ContinuousVector<VectorType>& result);
         template<class Executor>
-        [[nodiscard]] inline Vector<ScalarType> force_short(const MDCellType& cell);
+        [[nodiscard]] inline VectorND<ScalarType> force_short(const MDCellType& cell);
         template<class Executor>
-        [[nodiscard]] inline Vector<ScalarType> force_long(const MDCellType& cell) const;
+        [[nodiscard]] inline VectorND<ScalarType> force_long(const MDCellType& cell) const;
 
         [[nodiscard]] LatticeMatrix virial(
                 const LatticeMatrix& lattice,

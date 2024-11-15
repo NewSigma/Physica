@@ -23,26 +23,26 @@
 #include "Physica/Core/Physics/PhyConst.h"
 
 namespace Physica::Core {
-    template<class ScalarType>
-    IceGenerator<ScalarType>::IceGenerator(ScalarType maxDistOO_, ScalarType maxDistOH_)
+    template<Scalar T>
+    IceGenerator<T>::IceGenerator(T maxDistOO_, T maxDistOH_)
             : maxDistOO(maxDistOO_)
             , maxDistOH(maxDistOH_) {}
 
-    template<class ScalarType>
-    IceGenerator<ScalarType>::IceGenerator(CrystalCellType initialCell_, ScalarType maxDistOO_, ScalarType maxDistOH_)
+    template<Scalar T>
+    IceGenerator<T>::IceGenerator(CrystalCellType initialCell_, T maxDistOO_, T maxDistOH_)
             : IceGenerator(maxDistOO_, maxDistOH_) {
         assert(initialCell.getNumParticle() % 3U == 0);
         setInitialCell(std::move(initialCell_));
     }
 
-    template<class ScalarType>
-    IceGenerator<ScalarType>& IceGenerator<ScalarType>::operator=(IceGenerator obj) noexcept {
+    template<Scalar T>
+    IceGenerator<T>& IceGenerator<T>::operator=(IceGenerator obj) noexcept {
         swap(obj);
         return *this;
     }
 
-    template<class ScalarType>
-    Array<typename IceGenerator<ScalarType>::CrystalCellType> IceGenerator<ScalarType>::exhaust() {
+    template<Scalar T>
+    Array<typename IceGenerator<T>::CrystalCellType> IceGenerator<T>::exhaust() {
         Array<CrystalCellType> result{};
         PositionMatrix pos = prepareRun();
         searchDanglingH(pos);
@@ -50,9 +50,9 @@ namespace Physica::Core {
         return result;
     }
 
-    template<class ScalarType>
+    template<Scalar T>
     template<class RandomGenerator>
-    typename IceGenerator<ScalarType>::CrystalCellType IceGenerator<ScalarType>::makeRand(RandomGenerator& gen) {
+    typename IceGenerator<T>::CrystalCellType IceGenerator<T>::makeRand(RandomGenerator& gen) {
         PositionMatrix pos = prepareRun();;
         searchDanglingH(pos);
         while (!isFinished()) {
@@ -67,9 +67,9 @@ namespace Physica::Core {
         return result;
     }
 
-    template<class ScalarType>
+    template<Scalar T>
     template<class RandomGenerator>
-    typename IceGenerator<ScalarType>::CrystalCellType IceGenerator<ScalarType>::makeDefects(unsigned int numDefect, RandomGenerator& gen) const {
+    typename IceGenerator<T>::CrystalCellType IceGenerator<T>::makeDefects(unsigned int numDefect, RandomGenerator& gen) const {
         assert(numDefect < getNumMolecule());
         PositionMatrix pos = initialCell.getPos();
 
@@ -92,8 +92,8 @@ namespace Physica::Core {
                 const size_t randIndexO = otherO[dist(gen)];
                 const size_t randIndexH = (gen() % 2U == 0) ? hydrogenInMolecular.first : hydrogenInMolecular.second;
                 auto row = pos.row(randIndexH);
-                const Vector3D delta = initialCell.minDistVector(getStartIndexO() + indexDefectO, randIndexO);
-                row = pos.row(getStartIndexO() + indexDefectO) + delta * (ScalarType(BondLengthOH) / delta.norm());
+                const Vector3D<T> delta = initialCell.minDistVector(getStartIndexO() + indexDefectO, randIndexO);
+                row = pos.row(getStartIndexO() + indexDefectO) + delta * (T(BondLengthOH) / delta.norm());
             }
         }
         CrystalCellType result(initialCell.getLattice(), std::move(pos), initialCell.getAtomicNumbers(), CrystalCellType::Type::Cartesian);
@@ -104,9 +104,9 @@ namespace Physica::Core {
      * Reference:
      * [1] S. W. Rick and A. D. J. Haymet, J. Chem. Phys. 118, 9291 (2003). DOI: 10.1063/1.1568337
      */
-    template<class ScalarType>
+    template<Scalar T>
     template<class RandomGenerator>
-    Array<size_t> IceGenerator<ScalarType>::randRing(RandomGenerator& gen) const {
+    Array<size_t> IceGenerator<T>::randRing(RandomGenerator& gen) const {
         Array<size_t> ring{};
         size_t ringStart = 0;
         {
@@ -133,15 +133,15 @@ namespace Physica::Core {
             size_t nextIndexO = getNumMolecule();
             /* Find next oxygen */ {
                 const auto range = CrystalCellType::estimateRange(initialCell.getLattice(), maxDistOO);
-                const ScalarType squaredRadiusO = square(maxDistOO);
+                const T squaredRadiusO = square(maxDistOO);
                 const size_t indexO = getStartIndexO() + lastMolecule;
-                ScalarType minSquaredDist = std::numeric_limits<ScalarType>::max();
+                T minSquaredDist = std::numeric_limits<T>::max();
                 for (size_t i = getStartIndexO(); i < getEndIndexO(); ++i) {
-                    const ScalarType r2 = initialCell.minDistVector(i, indexO).squaredNorm();
-                    const bool isNotSelf = r2 > ScalarType(std::numeric_limits<ScalarType>::epsilon());
+                    const T r2 = initialCell.minDistVector(i, indexO).squaredNorm();
+                    const bool isNotSelf = r2 > T(std::numeric_limits<T>::epsilon());
                     const bool isInRange = r2 < squaredRadiusO;
                     if (isNotSelf && isInRange) {
-                        const ScalarType squaredDist = initialCell.minDistVector(indexH, i).squaredNorm();
+                        const T squaredDist = initialCell.minDistVector(indexH, i).squaredNorm();
                         if (squaredDist < minSquaredDist) {
                             minSquaredDist = squaredDist;
                             nextIndexO = i;
@@ -170,8 +170,8 @@ namespace Physica::Core {
      * Reference:
      * [1] S. W. Rick and A. D. J. Haymet, J. Chem. Phys. 118, 9291 (2003). DOI: 10.1063/1.1568337
      */
-    template<class ScalarType>
-    typename IceGenerator<ScalarType>::CrystalCellType IceGenerator<ScalarType>::makeRingMove(
+    template<Scalar T>
+    typename IceGenerator<T>::CrystalCellType IceGenerator<T>::makeRingMove(
                 const Array<size_t>& ring, PositionMatrix& momentumMat) const {
         const bool isInvalidRing = ring.getLength() == 0;
         if (isInvalidRing)
@@ -184,24 +184,24 @@ namespace Physica::Core {
             const size_t indexO = getStartIndexO() + ring[bead];
             const size_t indexLastO = getStartIndexO() + ring[lastBead];
             const size_t indexNextO = getStartIndexO() + ring[nextBead];
-            const Vector3D vecO2O1 = initialCell.minDistVector(indexO, indexLastO);
-            const Vector3D vecO2O3 = initialCell.minDistVector(indexO, indexNextO);
+            const Vector3D<T> vecO2O1 = initialCell.minDistVector(indexO, indexLastO);
+            const Vector3D<T> vecO2O3 = initialCell.minDistVector(indexO, indexNextO);
 
             const auto pair = findHydrogenInMolecule(ring[bead]);
             const size_t indexH1 = findHydrogenBetweenO(indexO, indexNextO);
             const size_t indexH2 = pair.first == indexH1 ? pair.second : pair.first;
             assert(indexH1 == pair.first || indexH1 == pair.second);
 
-            const Vector3D vecO2H2 = initialCell.minDistVector(indexO, indexH2);
-            ScalarType angle;
+            const Vector3D<T> vecO2H2 = initialCell.minDistVector(indexO, indexH2);
+            T angle;
             {
-                const Vector3D v1 = vecO2H2.crossProduct(vecO2O1);
-                const Vector3D v2 = vecO2H2.crossProduct(vecO2O3);
+                const Vector3D<T> v1 = vecO2H2.crossProduct(vecO2O1);
+                const Vector3D<T> v2 = vecO2H2.crossProduct(vecO2O3);
                 angle = v1.angleTo(v2);
             }
-            const Vector3D vecO2H1 = initialCell.minDistVector(indexO, indexH1);
-            const Vector3D cross = vecO2O1.crossProduct(vecO2O3);
-            const ScalarType dot = cross * vecO2H2;
+            const Vector3D<T> vecO2H1 = initialCell.minDistVector(indexO, indexH1);
+            const Vector3D<T> cross = vecO2O1.crossProduct(vecO2O3);
+            const T dot = cross * vecO2H2;
             if (dot.isNegative())
                 angle = -angle;
             pos.row(indexH1) = pos.row(indexO) + rotate(angle, vecO2H2, vecO2H1);
@@ -212,8 +212,8 @@ namespace Physica::Core {
         return result;
     }
 
-    template<class ScalarType>
-    void IceGenerator<ScalarType>::swap(IceGenerator& __restrict obj) noexcept {
+    template<Scalar T>
+    void IceGenerator<T>::swap(IceGenerator& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         initialCell.swap(obj.initialCell);
         std::swap(maxDistOO, obj.maxDistOO);
@@ -222,8 +222,8 @@ namespace Physica::Core {
         numHydrogenRequired.swap(obj.numHydrogenRequired);
     }
 
-    template<class ScalarType>
-    void IceGenerator<ScalarType>::setInitialCell(CrystalCellType cell) {
+    template<Scalar T>
+    void IceGenerator<T>::setInitialCell(CrystalCellType cell) {
         initialCell.swap(cell);
         if (initialCell.getType() == CrystalCellType::Type::Direct)
             initialCell.toCartesian();
@@ -231,8 +231,8 @@ namespace Physica::Core {
         numHydrogenRequired.resize(getNumMolecule());
     }
 
-    template<class ScalarType>
-    typename IceGenerator<ScalarType>::PositionMatrix IceGenerator<ScalarType>::prepareRun() {
+    template<Scalar T>
+    typename IceGenerator<T>::PositionMatrix IceGenerator<T>::prepareRun() {
         for (auto& elem : isHydrogenOccupied)
             elem = false;
         for (auto& elem : numHydrogenRequired)
@@ -240,8 +240,8 @@ namespace Physica::Core {
         return initialCell.getPos();
     }
 
-    template<class ScalarType>
-    void IceGenerator<ScalarType>::searchDanglingH(PositionMatrix& pos) {
+    template<Scalar T>
+    void IceGenerator<T>::searchDanglingH(PositionMatrix& pos) {
         for (size_t i = 0; i < getNumMolecule(); ++i) {
             const auto pair = findHydrogenInMolecule(i);
             const auto hInRadius = findBondedH(i);
@@ -255,10 +255,10 @@ namespace Physica::Core {
         }
     }
 
-    template<class ScalarType>
-    Array<size_t> IceGenerator<ScalarType>::findOInRadius(size_t indexO, ScalarType radius) const {
+    template<Scalar T>
+    Array<size_t> IceGenerator<T>::findOInRadius(size_t indexO, T radius) const {
         Array<size_t> result{};
-        const ScalarType squaredRadiusO = square(radius);
+        const T squaredRadiusO = square(radius);
         for (size_t i = getStartIndexO(); i < getEndIndexO(); ++i) {
             const size_t shiftIndexO = getStartIndexO() + indexO;
             if (i == shiftIndexO)
@@ -270,22 +270,22 @@ namespace Physica::Core {
         return result;
     }
 
-    template<class ScalarType>
-    Array<size_t> IceGenerator<ScalarType>::findBondedH(size_t indexMolecule) const {
+    template<Scalar T>
+    Array<size_t> IceGenerator<T>::findBondedH(size_t indexMolecule) const {
         const auto range = CrystalCellType::estimateRange(initialCell.getLattice(), maxDistOO);
         Array<size_t> result{};
-        CrystalCellType::forCellInRange(range, initialCell.getLattice(), [this, indexMolecule, &result](Vector3D delta) {
-            const ScalarType squaredRadiusH = square(maxDistOO * 0.5);
-            const ScalarType squaredRadiusO = square(maxDistOO);
+        CrystalCellType::forCellInRange(range, initialCell.getLattice(), [this, indexMolecule, &result](Vector3D<T> delta) {
+            const T squaredRadiusH = square(maxDistOO * 0.5);
+            const T squaredRadiusO = square(maxDistOO);
             const size_t indexO = getStartIndexO() + indexMolecule;
 
             for (size_t i = getStartIndexO(); i < getEndIndexO(); ++i) {
-                const Vector3D otherO = initialCell.getPos().row(i) + delta;
-                const ScalarType r2 = (initialCell.getPos().row(indexO) - otherO).squaredNorm();
-                const bool isNotSelf = r2 > ScalarType(std::numeric_limits<ScalarType>::epsilon());
+                const Vector3D<T> otherO = initialCell.getPos().row(i) + delta;
+                const T r2 = (initialCell.getPos().row(indexO) - otherO).squaredNorm();
+                const bool isNotSelf = r2 > T(std::numeric_limits<T>::epsilon());
                 const bool isInRange = r2 < squaredRadiusO;
                 if (isNotSelf && isInRange) {
-                    const Vector3D middle = (otherO + initialCell.getPos().row(indexO)) * ScalarType(0.5);
+                    const Vector3D<T> middle = (otherO + initialCell.getPos().row(indexO)) * T(0.5);
                     for (size_t j = 0; j < getEndIndexH(); ++j) {
                         const bool isHInRange = initialCell.minDistVector(middle, j).squaredNorm() < squaredRadiusH;
                         const bool isOccupied = std::find(result.cbegin(), result.cend(), j) != result.cend();
@@ -298,8 +298,8 @@ namespace Physica::Core {
         return result;
     }
 
-    template<class ScalarType>
-    Array<size_t> IceGenerator<ScalarType>::findFreeBondedHInRadius(size_t indexO) const {
+    template<Scalar T>
+    Array<size_t> IceGenerator<T>::findFreeBondedHInRadius(size_t indexO) const {
         Array<size_t> result{};
         const auto hInRange = findBondedH(indexO);
         for (auto h : hInRange)
@@ -308,14 +308,14 @@ namespace Physica::Core {
         return result;
     }
 
-    template<class ScalarType>
-    std::pair<size_t, size_t> IceGenerator<ScalarType>::findHydrogenInMolecule(size_t indexMolecule) const {
-        ScalarType minSquaredDist1 = std::numeric_limits<ScalarType>::max();
-        ScalarType minSquaredDist2 = std::numeric_limits<ScalarType>::max();
+    template<Scalar T>
+    std::pair<size_t, size_t> IceGenerator<T>::findHydrogenInMolecule(size_t indexMolecule) const {
+        T minSquaredDist1 = std::numeric_limits<T>::max();
+        T minSquaredDist2 = std::numeric_limits<T>::max();
         size_t indexH1 = 0;
         size_t indexH2 = 1;
         for (size_t i = 0; i < getEndIndexH(); ++i) {
-            const ScalarType squaredDist = initialCell.minDistVector(i, getStartIndexO() + indexMolecule).squaredNorm();
+            const T squaredDist = initialCell.minDistVector(i, getStartIndexO() + indexMolecule).squaredNorm();
             if (squaredDist < minSquaredDist1) {
                 indexH1 = i;
                 minSquaredDist1 = squaredDist;
@@ -333,14 +333,14 @@ namespace Physica::Core {
         return {indexH1, indexH2};
     }
 
-    template<class ScalarType>
-    size_t IceGenerator<ScalarType>::findHydrogenBetweenO(size_t indexO1, size_t indexO2) const {
-        ScalarType minSquaredDist = std::numeric_limits<ScalarType>::max();
-        const Vector3D delta = initialCell.minDistVector(indexO1, indexO2);
-        const Vector3D middle = initialCell.getPos().row(indexO1) + delta * ScalarType(0.5);
+    template<Scalar T>
+    size_t IceGenerator<T>::findHydrogenBetweenO(size_t indexO1, size_t indexO2) const {
+        T minSquaredDist = std::numeric_limits<T>::max();
+        const Vector3D<T> delta = initialCell.minDistVector(indexO1, indexO2);
+        const Vector3D<T> middle = initialCell.getPos().row(indexO1) + delta * T(0.5);
         size_t result = 0;
         for (size_t i = 0; i < getEndIndexH(); ++i) {
-            const ScalarType squaredDist = initialCell.minDistVector(middle, i).squaredNorm();
+            const T squaredDist = initialCell.minDistVector(middle, i).squaredNorm();
             if (squaredDist < minSquaredDist) {
                 minSquaredDist = squaredDist;
                 result = i;
@@ -349,9 +349,9 @@ namespace Physica::Core {
         return result;
     }
 
-    template<class ScalarType>
+    template<Scalar T>
     template<class RandomGenerator>
-    size_t IceGenerator<ScalarType>::makeRandEmptyO(RandomGenerator& gen) const {
+    size_t IceGenerator<T>::makeRandEmptyO(RandomGenerator& gen) const {
         std::uniform_int_distribution<size_t> dist(0, getNumMolecule() - 1);
         size_t result = dist(gen);
         for (size_t i = 0; i < getNumMolecule(); ++i) {
@@ -366,9 +366,9 @@ namespace Physica::Core {
         return result;
     }
 
-    template<class ScalarType>
+    template<Scalar T>
     template<class RandomGenerator>
-    size_t IceGenerator<ScalarType>::makeRandFreeH(size_t indexO, RandomGenerator& gen) const {
+    size_t IceGenerator<T>::makeRandFreeH(size_t indexO, RandomGenerator& gen) const {
         assert(indexO < getNumMolecule());
         const auto hInRange = findBondedH(indexO);
         size_t randLogicIndex;
@@ -390,15 +390,15 @@ namespace Physica::Core {
         return hInRange[0];
     }
 
-    template<class ScalarType>
-    void IceGenerator<ScalarType>::fetchHydrogen(PositionMatrix& pos, size_t indexO, size_t indexH) {
+    template<Scalar T>
+    void IceGenerator<T>::fetchHydrogen(PositionMatrix& pos, size_t indexO, size_t indexH) {
         assert(!isHydrogenOccupied[indexH]);
         assert(numHydrogenRequired[indexO] > 0);
         
         const size_t shiftIndexO = getStartIndexO() + indexO;
-        Vector3D delta = initialCell.minDistVector(shiftIndexO, indexH);
+        Vector3D<T> delta = initialCell.minDistVector(shiftIndexO, indexH);
         delta.toUnit();
-        delta *= ScalarType(BondLengthOH);
+        delta *= T(BondLengthOH);
         auto row = pos.row(indexO * 2U + (2U - numHydrogenRequired[indexO]));
         row = initialCell.getPos().row(shiftIndexO).asVector() + delta;
 
@@ -406,16 +406,16 @@ namespace Physica::Core {
         numHydrogenRequired[indexO] -= 1;
     }
 
-    template<class ScalarType>
-    size_t IceGenerator<ScalarType>::countFreeH(const Array<size_t>& hIndexes) const {
+    template<Scalar T>
+    size_t IceGenerator<T>::countFreeH(const Array<size_t>& hIndexes) const {
         size_t numFreeH = 0;
         for (auto h : hIndexes)
             numFreeH += isHydrogenOccupied[h] == false;
         return numFreeH;
     }
 
-    template<class ScalarType>
-    void IceGenerator<ScalarType>::searchForPairs(PositionMatrix& pos) {
+    template<Scalar T>
+    void IceGenerator<T>::searchForPairs(PositionMatrix& pos) {
         size_t indexO = getIndexToPair();
         bool isValidIndex = indexO != getNumMolecule();
         while (isValidIndex) {
@@ -429,8 +429,8 @@ namespace Physica::Core {
         }
     }
 
-    template<class ScalarType>
-    size_t IceGenerator<ScalarType>::getIndexToPair() const {
+    template<Scalar T>
+    size_t IceGenerator<T>::getIndexToPair() const {
         for (size_t indexO = 0; indexO < getNumMolecule(); ++indexO) {
             const auto hInRange = findBondedH(indexO);
             const size_t numFreeH = countFreeH(hInRange);
@@ -440,20 +440,20 @@ namespace Physica::Core {
         return getNumMolecule();
     }
 
-    template<class ScalarType>
+    template<Scalar T>
     template<class RandomGenerator>
-    void IceGenerator<ScalarType>::randUninitializedH(PositionMatrix& pos, RandomGenerator& gen) {
+    void IceGenerator<T>::randUninitializedH(PositionMatrix& pos, RandomGenerator& gen) {
         for (size_t i = 0; i < getNumMolecule(); ++i) {
             while (numHydrogenRequired[i] != 0) {
                 auto row = pos.row(i * 2U + (2U - numHydrogenRequired[i]));
-                row = initialCell.getPos().row(i + getStartIndexO()).asVector() + randUnitVector(gen) * ScalarType(BondLengthOH);
+                row = initialCell.getPos().row(i + getStartIndexO()).asVector() + randUnitVector(gen) * T(BondLengthOH);
                 numHydrogenRequired[i] -= 1;
             }
         }
     }
 
-    template<class ScalarType>
-    void IceGenerator<ScalarType>::exhaustImpl(size_t stackDepth, const PositionMatrix& pos, Array<CrystalCellType>& result) {
+    template<Scalar T>
+    void IceGenerator<T>::exhaustImpl(size_t stackDepth, const PositionMatrix& pos, Array<CrystalCellType>& result) {
         const bool recursionStop = stackDepth == getNumMolecule();
         if (recursionStop) {
             CrystalCellType cell({initialCell.getLattice(), pos, CrystalCellType::Type::Cartesian}, initialCell.getAtomicNumbers());
@@ -493,8 +493,8 @@ namespace Physica::Core {
         }
     }
 
-    template<class ScalarType>
-    bool IceGenerator<ScalarType>::isFinished() const noexcept {
+    template<Scalar T>
+    bool IceGenerator<T>::isFinished() const noexcept {
         for (size_t i = 0; i < getNumMolecule(); ++i) {
             const auto hInRange = findBondedH(i);
             const size_t numFreeH = countFreeH(hInRange);
@@ -504,24 +504,24 @@ namespace Physica::Core {
         return true;
     }
 
-    template<class ScalarType>
-    typename IceGenerator<ScalarType>::Vector3D IceGenerator<ScalarType>::rotate(ScalarType angle, Vector3D axis, Vector3D target) {
-        const ScalarType factor1 = cos(angle);
+    template<Scalar T>
+    Vector3D<T> IceGenerator<T>::rotate(T angle, Vector3D<T> axis, Vector3D<T> target) {
+        const T factor1 = cos(angle);
 
-        const Vector3D parallel = (target * axis / axis.squaredNorm()) * axis;
-        const Vector3D verticle = target - parallel;
-        const Vector3D verticle2 = parallel.crossProduct(verticle);
-        ScalarType factor2 = sin(angle) / parallel.norm();
-        return Vector3D(parallel + factor1 * verticle + factor2 * verticle2);
+        const Vector3D<T> parallel = (target * axis / axis.squaredNorm()) * axis;
+        const Vector3D<T> verticle = target - parallel;
+        const Vector3D<T> verticle2 = parallel.crossProduct(verticle);
+        T factor2 = sin(angle) / parallel.norm();
+        return Vector3D<T>(parallel + factor1 * verticle + factor2 * verticle2);
     }
 
-    template<class ScalarType>
+    template<Scalar T>
     template<class RandomGenerator>
-    typename IceGenerator<ScalarType>::Vector3D IceGenerator<ScalarType>::randUnitVector(RandomGenerator& gen) {
+    Vector3D<T> IceGenerator<T>::randUnitVector(RandomGenerator& gen) {
         std::uniform_real_distribution dist{};
-        const ScalarType theta(dist(gen) * M_PI);
-        const ScalarType phi(dist(gen) * M_PI * 2);
-        Vector<ScalarType, 3> result{cos(phi) * sin(theta), sin(phi) * sin(theta), cos(theta)};
+        const T theta(dist(gen) * M_PI);
+        const T phi(dist(gen) * M_PI * 2);
+        Vector3D<T> result{cos(phi) * sin(theta), sin(phi) * sin(theta), cos(theta)};
         return result;
     }
 }

@@ -81,11 +81,11 @@ namespace Physica::Core {
     template<class VectorType>
     void SavitzkyGolay<ScalarType>::smooth(LValueVector<VectorType>& data) const {
         const size_t windowSize = getWindowSize();
-        Vector<ScalarType> mask(windowSize);
+        VectorND<ScalarType> mask(windowSize);
         for (size_t i = 0; i < windowSize; ++i)
             mask[i] = inv.row(0).asVector() * coeffs.row(i).asVector();
 
-        Vector<ScalarType> temp = data;
+        VectorND<ScalarType> temp = data;
         for (size_t pos = lRange; pos < data.getLength() - rRange; ++pos) {
             auto window = data.getDerived().segment(pos - lRange, pos - lRange + windowSize);
             temp[pos] = mask * window;
@@ -99,12 +99,12 @@ namespace Physica::Core {
     template<class VectorType>
     void SavitzkyGolay<ScalarType>::smooth_zero(LValueVector<VectorType>& data) const {
         const size_t windowSize = getWindowSize();
-        Vector<ScalarType> mask(windowSize);
+        VectorND<ScalarType> mask(windowSize);
         for (size_t i = 0; i < windowSize; ++i)
             mask[i] = inv.row(0).asVector() * coeffs.row(i).asVector();
 
         const size_t length = data.getLength();
-        Vector<ScalarType> temp = data;
+        VectorND<ScalarType> temp = data;
         /* Append zeros to pos < 0 */ {
             const size_t rRange1 = rRange + 1;
             for (size_t pos = 0; pos < lRange; ++pos) {

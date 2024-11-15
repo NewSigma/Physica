@@ -21,7 +21,7 @@
 
 using namespace Physica::Core;
 using ScalarType = float64;
-using VectorType = Vector<ScalarType>;
+using VectorType = VectorND<ScalarType>;
 using Fit = LinearFit<ScalarType>;
 
 int main() {

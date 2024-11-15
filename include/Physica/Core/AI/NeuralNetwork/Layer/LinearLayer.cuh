@@ -193,9 +193,9 @@ namespace Physica {
     template<class T, bool WithBias>
     class Traits<Core::device_obj<LinearLayer<T, WithBias>>> : public Traits<LinearLayer<T, WithBias>> {
         using Base = Traits<LinearLayer<T, WithBias>>;
-        using VectorType = Vector<typename Base::ScalarType>;
+        using VectorType = VectorND<typename Base::ScalarType>;
         using ValueType = typename Base::ScalarType::ValueType;
-        using DiffVector = Diff<Vector<ValueType>, DiffMode::Reverse, T::Order>;
+        using DiffVector = Diff<VectorND<ValueType>, DiffMode::Reverse, T::Order>;
         constexpr static bool IsTrainMode = Base::ScalarType::isDifferentiable;
     public:
         using InputType = Core::device_obj<typename std::conditional<IsTrainMode, DiffVector, VectorType>::type>;

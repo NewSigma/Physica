@@ -48,7 +48,7 @@ namespace Physica::Core {
         using PositionMatrix = typename MDCellType::PositionMatrix;
         using CellListType = CellList<ScalarType>;
         using Index3D = typename GridBase::Index3D;
-        using Vector3D = Vector<ScalarType, 3>;
+        using Vector3D = Vector3D<ScalarType>;
         using ForceConstMatrix = typename EmptyForceModel<ScalarType, Dim>::ForceConstMatrix;
     private:
         ValueType cutoff;
@@ -65,17 +65,17 @@ namespace Physica::Core {
         [[nodiscard]] inline ScalarType potentialV(const MDCellType& cell) const;
 
         template<class Executor>
-        [[nodiscard]] Vector<ScalarType> force(const LatticeMatrix& lattice, const PositionMatrix& cartesianPos) const;
+        [[nodiscard]] VectorND<ScalarType> force(const LatticeMatrix& lattice, const PositionMatrix& cartesianPos) const;
         template<class Executor>
-        [[nodiscard]] inline Vector<ScalarType> force(const MDCellType& cell) const;
+        [[nodiscard]] inline VectorND<ScalarType> force(const MDCellType& cell) const;
         template<class VectorType, class Executor>
         inline void forceAsync(const LatticeMatrix& lattice, const PositionMatrix& cartesianPos, ContinuousVector<VectorType>& result) const;
         template<class VectorType, class Executor>
         inline void forceAsync(const MDCellType& cell, ContinuousVector<VectorType>& result) const;
         template<class Executor>
-        [[nodiscard]] Vector<ScalarType> force_short(const MDCellType& cell) const { return force<Executor>(cell); }
+        [[nodiscard]] VectorND<ScalarType> force_short(const MDCellType& cell) const { return force<Executor>(cell); }
         template<class Executor>
-        [[nodiscard]] Vector<ScalarType> force_long(const MDCellType& cell) const { return Vector<ScalarType>(cell.getNumParticle() * 3, 0); }
+        [[nodiscard]] VectorND<ScalarType> force_long(const MDCellType& cell) const { return VectorND<ScalarType>(cell.getNumParticle() * 3, 0); }
 
         [[nodiscard]] ScalarType forceConst(const MDCellType& cell, size_t dof1, size_t dof2) const;
         [[nodiscard]] ForceConstMatrix forceConst(const MDCellType& cell) const;
@@ -168,17 +168,17 @@ namespace Physica::Core {
 
     template<class Derived>
     template<class Executor>
-    Vector<typename PairModel<Derived>::ScalarType> PairModel<Derived>::force(
+    VectorND<typename PairModel<Derived>::ScalarType> PairModel<Derived>::force(
             const LatticeMatrix& lattice, const PositionMatrix& cartesianPos) const {
         const size_t DOF = cartesianPos.getRow() * cartesianPos.getCol();
-        Vector<ScalarType> result(DOF);
-        forceAsync<Vector<ScalarType>, Executor>(lattice, cartesianPos, result);
+        VectorND<ScalarType> result(DOF);
+        forceAsync<VectorND<ScalarType>, Executor>(lattice, cartesianPos, result);
         return result;
     }
 
     template<class Derived>
     template<class Executor>
-    inline Vector<typename PairModel<Derived>::ScalarType> PairModel<Derived>::force(const MDCellType& cell) const {
+    inline VectorND<typename PairModel<Derived>::ScalarType> PairModel<Derived>::force(const MDCellType& cell) const {
         return force<Executor>(cell.getLattice(), cell.getPos());
     }
 

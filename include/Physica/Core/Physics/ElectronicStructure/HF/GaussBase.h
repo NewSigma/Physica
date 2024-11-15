@@ -31,14 +31,14 @@ namespace Physica::Core {
     template<class ScalarType>
     class GaussBase {
     private:
-        Vector<ScalarType, 3> center;
+        Vector3D<ScalarType> center;
         ScalarType alpha;
         size_t l;
         size_t m;
         size_t n;
     public:
         GaussBase() = default;
-        GaussBase(const Vector<ScalarType, 3> center_, const ScalarType& alpha_, size_t l_, size_t m_, size_t n_);
+        GaussBase(const Vector3D<ScalarType> center_, const ScalarType& alpha_, size_t l_, size_t m_, size_t n_);
         GaussBase(const GaussBase& base) = default;
         GaussBase(GaussBase&& base) noexcept = default;
         ~GaussBase() = default;
@@ -50,7 +50,7 @@ namespace Physica::Core {
         [[nodiscard]] static ScalarType kinetic(const GaussBase& base1, const GaussBase& base2);
         [[nodiscard]] static ScalarType nuclearAttraction(const GaussBase& base1,
                                                           const GaussBase& base2,
-                                                          const Vector<ScalarType, 3>& corePos);
+                                                          const Vector3D<ScalarType>& corePos);
         [[nodiscard]] static ScalarType electronRepulsion(const GaussBase& base1,
                                                           const GaussBase& base2,
                                                           const GaussBase& base3,
@@ -106,7 +106,7 @@ namespace Physica::Core {
     };
 
     template<class ScalarType>
-    GaussBase<ScalarType>::GaussBase(const Vector<ScalarType, 3> center_, const ScalarType& alpha_, size_t l_, size_t m_, size_t n_)
+    GaussBase<ScalarType>::GaussBase(const Vector3D<ScalarType> center_, const ScalarType& alpha_, size_t l_, size_t m_, size_t n_)
             : center(center_)
             , alpha(alpha_)
             , l(l_)
@@ -132,9 +132,9 @@ namespace Physica::Core {
         const ScalarType temp2 = ScalarType(1) - temp1;
         const ScalarType factor2 = exp(-temp1 * base2.alpha * (base1.center - base2.center).squaredNorm());
         
-        const Vector<ScalarType, 3> vector_p = temp1 * base1.center + temp2 * base2.center;
-        const Vector<ScalarType, 3> vector_pa = vector_p - base1.center;
-        const Vector<ScalarType, 3> vector_pb = vector_p - base2.center;
+        const Vector3D<ScalarType> vector_p = temp1 * base1.center + temp2 * base2.center;
+        const Vector3D<ScalarType> vector_pa = vector_p - base1.center;
+        const Vector3D<ScalarType> vector_pb = vector_p - base2.center;
         const ScalarType factor3_x = overlapImpl(vector_pa[0], vector_pb[0], alpha_sum, base1.l, base2.l);
         const ScalarType factor3_y = overlapImpl(vector_pa[1], vector_pb[1], alpha_sum, base1.m, base2.m);
         const ScalarType factor3_z = overlapImpl(vector_pa[2], vector_pb[2], alpha_sum, base1.n, base2.n);
@@ -181,7 +181,7 @@ namespace Physica::Core {
     template<class ScalarType>
     ScalarType GaussBase<ScalarType>::nuclearAttraction(const GaussBase& base1,
                                                         const GaussBase& base2,
-                                                        const Vector<ScalarType, 3>& corePos) {
+                                                        const Vector3D<ScalarType>& corePos) {
         const ScalarType alpha_sum = base1.alpha + base2.alpha;
         const ScalarType inv_alpha_sum = reciprocal(alpha_sum);
         const ScalarType factor = ScalarType(2) * ScalarType(M_PI) / alpha_sum;
@@ -189,10 +189,10 @@ namespace Physica::Core {
         const ScalarType temp2 = ScalarType(1) - temp1;
         const ScalarType factor2 = exp(-temp1 * base2.alpha * (base1.center - base2.center).squaredNorm());
         
-        const Vector<ScalarType, 3> vector_p = temp1 * base1.center + temp2 * base2.center;
-        const Vector<ScalarType, 3> vector_pa = vector_p - base1.center;
-        const Vector<ScalarType, 3> vector_pb = vector_p - base2.center;
-        const Vector<ScalarType, 3> vector_cp = corePos - vector_p;
+        const Vector3D<ScalarType> vector_p = temp1 * base1.center + temp2 * base2.center;
+        const Vector3D<ScalarType> vector_pa = vector_p - base1.center;
+        const Vector3D<ScalarType> vector_pb = vector_p - base2.center;
+        const Vector3D<ScalarType> vector_cp = corePos - vector_p;
         const ScalarType temp = alpha_sum * vector_cp.squaredNorm();
         ScalarType factor3 = ScalarType(0);
         for (size_t i = 0; i <= base1.l + base2.l; ++i) {
@@ -229,13 +229,13 @@ namespace Physica::Core {
         const ScalarType temp4 = ScalarType(1) - temp3;
         const ScalarType factor2 = exp(-temp3 * base4.alpha * (base2.center - base4.center).squaredNorm());
 
-        const Vector<ScalarType, 3> vector_p = temp1 * base1.center + temp2 * base3.center;
-        const Vector<ScalarType, 3> vector_q = temp3 * base2.center + temp4 * base4.center;
-        const Vector<ScalarType, 3> vector_pq = vector_p - vector_q;
-        const Vector<ScalarType, 3> vector_pa = vector_p - base1.center;
-        const Vector<ScalarType, 3> vector_pb = vector_p - base2.center;
-        const Vector<ScalarType, 3> vector_qc = vector_q - base3.center;
-        const Vector<ScalarType, 3> vector_qd = vector_q - base4.center;
+        const Vector3D<ScalarType> vector_p = temp1 * base1.center + temp2 * base3.center;
+        const Vector3D<ScalarType> vector_q = temp3 * base2.center + temp4 * base4.center;
+        const Vector3D<ScalarType> vector_pq = vector_p - vector_q;
+        const Vector3D<ScalarType> vector_pa = vector_p - base1.center;
+        const Vector3D<ScalarType> vector_pb = vector_p - base2.center;
+        const Vector3D<ScalarType> vector_qc = vector_q - base3.center;
+        const Vector3D<ScalarType> vector_qd = vector_q - base4.center;
 
         const ScalarType epsilon1 = reciprocal(ScalarType(4) * alpha_sum1);
         const ScalarType epsilon2 = reciprocal(ScalarType(4) * alpha_sum2);
