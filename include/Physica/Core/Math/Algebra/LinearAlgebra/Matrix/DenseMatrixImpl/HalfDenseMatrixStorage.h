@@ -134,7 +134,7 @@ namespace Physica {
     class Traits<Core::HalfDenseMatrixStorage<T, Order>> {
         template<bool, size_t Size>
         struct Helper {
-            using Type = Vector<T, Size>;
+            using Type = DenseVector<T, Size>;
         };
 
         template<size_t Size>

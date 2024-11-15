@@ -17,7 +17,7 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include <Physica/Core/Utils/Unix/TempFile.h>
-#include <Physica/Core/Math/Algebra/LinearAlgebra/Vector/Vector.h>
+#include <Physica/Core/Math/Algebra/LinearAlgebra/Vector/DenseVector.h>
 #include <Physica/Core/Math/Random/Random.h>
 
 using namespace Physica::Core;

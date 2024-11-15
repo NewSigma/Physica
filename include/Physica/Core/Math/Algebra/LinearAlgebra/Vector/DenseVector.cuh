@@ -18,18 +18,18 @@
  */
 #pragma once
 
-#include "Vector.h"
+#include "DenseVector.h"
 #include "VectorImpl/ContinuousVector.cuh"
 #include <Physica/Core/Utils/Container/Array.cuh>
 
 namespace Physica::Core {
-    template<class T, size_t Length, class Allocator>
-    class device_obj<Vector<T, Length, Allocator>>
-            : public device_obj<ContinuousVector<Vector<T, Length, Allocator>>>
+    template<Scalar T, size_t Length, class Allocator>
+    class device_obj<DenseVector<T, Length, Allocator>>
+            : public device_obj<ContinuousVector<DenseVector<T, Length, Allocator>>>
             , public device_obj<Array<T, Length, Allocator>> {
         using Storage = device_obj<Array<T, Length, Allocator>>;
     public:
-        using host_obj = Vector<T, Length, Allocator>;
+        using host_obj = DenseVector<T, Length, Allocator>;
         using Base = device_obj<ContinuousVector<host_obj>>;
         using typename Base::ScalarType;
         using Base::SizeAtCompile;
@@ -68,49 +68,49 @@ namespace Physica::Core {
         [[nodiscard]] inline static This random_any(size_t len, Distribution& dist, RandomGenerator& gen);
     };
 
-    template<class T, size_t Length, class Allocator>
+    template<Scalar T, size_t Length, class Allocator>
     template<class Derived>
-    __host__ __device__ device_obj<Vector<T, Length, Allocator>>::device_obj(const device_obj<RValueVector<Derived>>& v)
+    __host__ __device__ device_obj<DenseVector<T, Length, Allocator>>::device_obj(const device_obj<RValueVector<Derived>>& v)
             : Storage(v.getLength()) {
         v.getDerived().assignTo(*this);
     }
 
-    template<class T, size_t Length, class Allocator>
-    inline typename device_obj<Vector<T, Length, Allocator>>::host_obj
-    device_obj<Vector<T, Length, Allocator>>::toHost() const {
+    template<Scalar T, size_t Length, class Allocator>
+    inline typename device_obj<DenseVector<T, Length, Allocator>>::host_obj
+    device_obj<DenseVector<T, Length, Allocator>>::toHost() const {
         return host_obj(Storage::toHost());
     }
 
-    template<class T, size_t Length, class Allocator>
+    template<Scalar T, size_t Length, class Allocator>
     template<class RandomGenerator>
-    inline device_obj<Vector<T, Length, Allocator>> device_obj<Vector<T, Length, Allocator>>::random_uniform(
+    inline device_obj<DenseVector<T, Length, Allocator>> device_obj<DenseVector<T, Length, Allocator>>::random_uniform(
             size_t len, RandomGenerator& gen) {
         return host_obj::random_uniform(len, gen).toDevice();
     }
 
-    template<class T, size_t Length, class Allocator>
+    template<Scalar T, size_t Length, class Allocator>
     template<class RandomGenerator>
-    inline device_obj<Vector<T, Length, Allocator>> device_obj<Vector<T, Length, Allocator>>::random_normal(
+    inline device_obj<DenseVector<T, Length, Allocator>> device_obj<DenseVector<T, Length, Allocator>>::random_normal(
             size_t len, RandomGenerator& gen) {
         return host_obj::random_normal(len, gen).toDevice();
     }
 
-    template<class T, size_t Length, class Allocator>
+    template<Scalar T, size_t Length, class Allocator>
     template<class Distribution, class RandomGenerator>
-    inline device_obj<Vector<T, Length, Allocator>> device_obj<Vector<T, Length, Allocator>>::random_any(
+    inline device_obj<DenseVector<T, Length, Allocator>> device_obj<DenseVector<T, Length, Allocator>>::random_any(
             size_t len, Distribution& dist, RandomGenerator& gen) {
         return host_obj::random_any(len, dist, gen).toDevice();
     }
 
-    template<class T, size_t Length, class Allocator>
-    inline device_obj<Vector<T, Length, Allocator>> Vector<T, Length, Allocator>::toDevice() const {
-        return device_obj<Vector<T, Length, Allocator>>(*this);
+    template<Scalar T, size_t Length, class Allocator>
+    inline device_obj<DenseVector<T, Length, Allocator>> DenseVector<T, Length, Allocator>::toDevice() const {
+        return device_obj<DenseVector<T, Length, Allocator>>(*this);
     }
 }
 
 namespace Physica {
     using namespace Core;
 
-    template<class T, size_t Length, class Allocator>
-    class Traits<Core::device_obj<Vector<T, Length, Allocator>>> : public Traits<Vector<T, Length, Allocator>> {};
+    template<Scalar T, size_t Length, class Allocator>
+    class Traits<Core::device_obj<DenseVector<T, Length, Allocator>>> : public Traits<DenseVector<T, Length, Allocator>> {};
 }

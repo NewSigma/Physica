@@ -145,7 +145,7 @@ namespace Physica::Core {
     }
 
     template<class VectorType>
-    Vector<typename VectorType::ScalarType, VectorType::SizeAtCompile>
+    DenseVector<typename VectorType::ScalarType, VectorType::SizeAtCompile>
     normalize(const LValueVector<VectorType>& x) {
         using ScalarType = typename VectorType::ScalarType;
         const ScalarType x_mean = mean(x);
@@ -159,7 +159,7 @@ namespace Physica::Core {
         using ScalarType = typename VectorType::ScalarType;
         const ScalarType x_mean = mean(x);
         const ScalarType y_mean = mean(y);
-        Vector<typename VectorType::ScalarType, VectorType::SizeAtCompile> temp = hadamard((x - x_mean), (y - y_mean));
+        DenseVector<typename VectorType::ScalarType, VectorType::SizeAtCompile> temp = hadamard((x - x_mean), (y - y_mean));
         return temp.sum() / ScalarType(temp.getLength() - 1);
     }
 

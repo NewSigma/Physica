@@ -36,7 +36,7 @@ namespace Physica::Core {
         using MDCellType = MDCell<ScalarType, Dim>;
         using LatticeMatrix = typename MDCellType::LatticeMatrix;
         using InvLatticeMatrix = typename MDCellType::InvLatticeMatrix;
-        using Vector3D = Vector<ScalarType, Dim>;
+        using Vector3D = DenseVector<ScalarType, Dim>;
     protected:
         ScalarType compressRate;
         ScalarType tempT;

@@ -38,7 +38,7 @@ namespace Physica::Core {
         /* Operations */
         void decomposition(MatrixType A);
         template<class VectorType>
-        Vector<T, Order> solve(const RValueVector<VectorType>& b) const;
+        DenseVector<T, Order> solve(const RValueVector<VectorType>& b) const;
         void swap(LUSolver& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] size_t getOrder() const { return lu.getMatrix().getRow(); }
@@ -61,9 +61,9 @@ namespace Physica::Core {
 
     template<class T, int Option, size_t Order>
     template<class VectorType>
-    Vector<T, Order> LUSolver<T, Option, Order>::solve(const RValueVector<VectorType>& b) const {
+    DenseVector<T, Order> LUSolver<T, Option, Order>::solve(const RValueVector<VectorType>& b) const {
         const size_t order = getOrder();
-        Vector<T, Order> result(order);
+        DenseVector<T, Order> result(order);
         for (size_t i = 0; i < order; ++i)
             result[i] = b.calc(lu.getBiasOrder()[i]);
 

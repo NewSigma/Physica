@@ -89,7 +89,7 @@ namespace Physica::Core {
     template<class T>
     void RDF<ScalarType>::sample(const MDCell<T>& cell) {
         using CellType = MDCell<T>;
-        using VectorType = Vector<ScalarType, Dim>;
+        using VectorType = DenseVector<ScalarType, Dim>;
 
         assert(getNumParticle() == cell.getNumParticle());
         const auto range = CellType::estimateRange(cell.getLattice(), getMaxRadius());

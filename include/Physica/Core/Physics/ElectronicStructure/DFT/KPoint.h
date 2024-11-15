@@ -27,7 +27,7 @@ namespace Physica::Core {
         constexpr static size_t NumSpin = isSpinPolarized ? 2 : 1;
         using ComplexType = Complex<ScalarType>;
         using Vector3D = Vector3D<ScalarType>;
-        using BandEnergy = Vector<ScalarType, NumBand>;
+        using BandEnergy = DenseVector<ScalarType, NumBand>;
         using BandEnergyPair = std::pair<BandEnergy, BandEnergy>;
     private:
         Vector3D pos;

@@ -27,7 +27,7 @@ namespace Physica::Core {
     class MSD {
         using MDCellType = MDCell<ScalarType, Dim>;
         using PositionMatrix = typename MDCellType::PositionMatrix;
-        using VectorType = Vector<ScalarType, Dim>;
+        using VectorType = DenseVector<ScalarType, Dim>;
 
         MDCellType initCell;
         PositionMatrix buffer;

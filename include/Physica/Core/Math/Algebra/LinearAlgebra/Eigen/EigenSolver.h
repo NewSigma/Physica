@@ -37,7 +37,7 @@ namespace Physica::Core {
     public:
         using RealType = typename ScalarType::RealType;
         using ComplexType = Complex<RealType>;
-        using EigenvalueVector = Vector<ComplexType, Order>;
+        using EigenvalueVector = DenseVector<ComplexType, Order>;
         using EigenvectorMatrix = DenseMatrix<ComplexType, MatrixOption::Col | MatrixOption::Vector, Order, Order>;
         using RawEigenvectorType = DenseMatrix<ScalarType, MatrixOption::Col | MatrixOption::Vector, Order, Order>;
     private:

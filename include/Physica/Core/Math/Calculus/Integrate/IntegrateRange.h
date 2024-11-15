@@ -18,7 +18,7 @@
  */
 #pragma once
 
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/Vector.h"
+#include <Physica/Core/Math/Algebra/LinearAlgebra/Vector/DenseVector.h>
 
 namespace Physica::Core {
     template<class ScalarType, size_t dim>
@@ -26,7 +26,7 @@ namespace Physica::Core {
         //We consider dimension which is larger than 3 is unsuitable to allocate domain data on stack.
         static_assert(dim <= 3, "Dimension larger than 3 must be set Dynamic.");
     public:
-        using VectorType = Vector<ScalarType, dim>;
+        using VectorType = DenseVector<ScalarType, dim>;
     private:
         VectorType range_from;
         VectorType range_to;

@@ -37,7 +37,7 @@ namespace Physica::Core {
         constexpr static bool isComplex = ScalarType::isComplex;
         static_assert(!isComplex, "[Error]: Complex matrix is not supported");
     public:
-        using EigenvalueVector = Vector<RealType, Order>;
+        using EigenvalueVector = DenseVector<RealType, Order>;
         using EigenvectorMatrix = DenseMatrix<ScalarType, MatrixOption::Col | MatrixOption::Vector, Order, Order>;
         using WorkingMatrix = DenseMatrix<ScalarType, MatrixOption::Col | MatrixOption::Vector, Order, Order>; //Optimize: Use tridiagonal matrix is better
     private:

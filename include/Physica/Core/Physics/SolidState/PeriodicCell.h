@@ -53,7 +53,7 @@ namespace Physica::Core {
         using MomentumMatrix = PositionMatrix;
         using SearchRangeType = Array<ssize_t, Dim>;
     protected:
-        using VectorType = Vector<ScalarType, Dim>;
+        using VectorType = DenseVector<ScalarType, Dim>;
 
         LatticeMatrix lattice;
         PositionMatrix pos;

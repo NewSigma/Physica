@@ -19,7 +19,7 @@
 #pragma once
 
 #include <Physica/Core/MultiPrecision/Real.h>
-#include <Physica/Core/Math/Algebra/LinearAlgebra/Vector/Vector.h>
+#include <Physica/Core/Math/Algebra/LinearAlgebra/Vector/DenseVector.h>
 
 namespace Physica::Core {
     /*!
@@ -30,7 +30,7 @@ namespace Physica::Core {
         static_assert(dim > 0, "0 dim point is not allowed\n");
     public:
         static constexpr size_t length = dim;
-        using VectorType = Vector<ScalarType, dim>;
+        using VectorType = DenseVector<ScalarType, dim>;
     private:
         VectorType vec;
     public:

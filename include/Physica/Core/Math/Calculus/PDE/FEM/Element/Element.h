@@ -36,7 +36,7 @@ namespace Physica::Core {
         constexpr static unsigned int Order = Traits<Derived>::Order;
         constexpr static unsigned int DegreeOfFreedom = Traits<Derived>::DegreeOfFreedom;
         using IndexArray = Array<size_t, DegreeOfFreedom>;
-        using VectorType = Vector<ScalarType, Dim>;
+        using VectorType = DenseVector<ScalarType, Dim>;
         using MatrixType = typename Traits<Derived>::MatrixType;
         static_assert(!ScalarType::isComplex, "[Error]: Complex scalar is not allowed");
     protected:

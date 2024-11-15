@@ -18,7 +18,7 @@
  */
 #pragma once
 
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/Vector.h"
+#include <Physica/Core/Math/Algebra/LinearAlgebra/Vector/DenseVector.h>
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Grid/GridImpl/GridStorage.h"
 #include "KPoint.h"
 

@@ -19,12 +19,12 @@
 #pragma once
 
 #include <Physica/Core/MultiPrecision/Diff.h>
-#include "Vector.h"
+#include "DenseVector.h"
 
 namespace Physica::Core {
-    template<class T, int Order, size_t Length, class Allocator>
-    class Vector<Diff<T, DiffMode::Forward, Order>, Length, Allocator> : public ContinuousVector<Vector<Diff<T, DiffMode::Forward, Order>, Length, Allocator>> {
-        using This = Vector<Diff<T, DiffMode::Forward, Order>, Length, Allocator>;
+    template<Scalar T, int Order, size_t Length, class Allocator>
+    class DenseVector<Diff<T, DiffMode::Forward, Order>, Length, Allocator> : public ContinuousVector<DenseVector<Diff<T, DiffMode::Forward, Order>, Length, Allocator>> {
+        using This = DenseVector<Diff<T, DiffMode::Forward, Order>, Length, Allocator>;
         using Base = ContinuousVector<This>;
     public:
         using typename Base::ScalarType;
@@ -36,23 +36,23 @@ namespace Physica::Core {
         using CFIteType = FIterator<const This>;
         using CRIteType = RIterator<const This>;
     private:
-        using ValueVector = Vector<T, Length>;
+        using ValueVector = DenseVector<T, Length>;
         using GradType = typename ScalarType::GradType;
-        using GradVector = typename std::conditional<Order == 1, ValueVector, Vector<GradType, Length>>::type;
+        using GradVector = typename std::conditional<Order == 1, ValueVector, DenseVector<GradType, Length>>::type;
 
         ValueVector values;
         GradVector grads;
     public:
-        Vector() = default;
-        explicit Vector(size_t length);
-        Vector(size_t length, const ScalarType& init);
-        Vector(std::initializer_list<ScalarType> list);
-        Vector(ValueVector values_, GradVector grads_) noexcept;
+        DenseVector() = default;
+        explicit DenseVector(size_t length);
+        DenseVector(size_t length, const ScalarType& init);
+        DenseVector(std::initializer_list<ScalarType> list);
+        DenseVector(ValueVector values_, GradVector grads_) noexcept;
         template<class Derived>
-        Vector(const RValueVector<Derived>& v);
-        Vector(const This&) = default;
-        Vector(This&&) noexcept = default;
-        ~Vector() = default;
+        DenseVector(const RValueVector<Derived>& v);
+        DenseVector(const This&) = default;
+        DenseVector(This&&) noexcept = default;
+        ~DenseVector() = default;
         /* Operators */
         This& operator=(This obj) noexcept { swap(obj); return *this; }
         using Base::operator=;
@@ -92,7 +92,7 @@ namespace Physica::Core {
         [[nodiscard]] static auto linspace(ScalarType from, ScalarType to, size_t count);
     };
     ////////////////////////////////////////////////////////////////////////////////////
-    template<class T, int Order>
+    template<Scalar T, int Order>
     class Diff<VectorND<T>, DiffMode::Reverse, Order>
             : public RValueVector<Diff<VectorND<T>, DiffMode::Reverse, Order>> {
         using VectorType = VectorND<T>;
@@ -138,8 +138,8 @@ namespace Physica::Core {
 }
 
 namespace Physica {
-    template<class T, int Order, size_t Length, class Allocator>
-    class Traits<Core::Vector<Diff<T, DiffMode::Forward, Order>, Length, Allocator>> {
+    template<Scalar T, int Order, size_t Length, class Allocator>
+    class Traits<Core::DenseVector<Diff<T, DiffMode::Forward, Order>, Length, Allocator>> {
         static_assert(!T::isDifferentiable, "[Error]: Nested Diff<> is not allowed");
     public:
         using ScalarType = Diff<T, DiffMode::Forward, Order>;
@@ -149,7 +149,7 @@ namespace Physica {
         constexpr static bool FastPacket = true;
     };
 
-    template<class T, int Order>
+    template<Scalar T, int Order>
     class Traits<Core::Diff<VectorND<T>, Core::DiffMode::Reverse, Order>> : public Traits<VectorND<T>> {
         static_assert(!T::isDifferentiable, "[Error]: Nested Diff<> is not allowed");
     public:

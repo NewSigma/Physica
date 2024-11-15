@@ -351,7 +351,7 @@ namespace Physica::Core {
             const size_t component = index % Dim;
             const size_t atom_start = index - component;
             const int integer = float(elem);
-            const Vector<ScalarType, Dim> delta = ScalarType(integer - elem.isNegative()) * cell.getLattice().row(component).asVector();
+            const DenseVector<ScalarType, Dim> delta = ScalarType(integer - elem.isNegative()) * cell.getLattice().row(component).asVector();
             for (size_t i = 0; i < Dim; ++i) {
                 auto row = getPhaseMatrix().row(atom_start + i);
                 row.asVector() -= delta[i];
@@ -533,7 +533,7 @@ namespace Physica::Core {
         Array<LatticeMatrix> buffer(getNumReplica());
         const ScalarType squaredOmegaW = square(ringPolymer.calcOmegaW(temperatureT));
         auto kernel = [this, &model, &buffer, squaredOmegaW](unsigned int replica) {
-            using VectorType = Vector<ScalarType, Dim>;
+            using VectorType = DenseVector<ScalarType, Dim>;
             const size_t dof = getDOF();
             const size_t numReplica = getNumReplica();
             const auto col = getPhaseMatrix().col(replica);
@@ -589,7 +589,7 @@ namespace Physica::Core {
         Array<LatticeMatrix> buffer(getNumReplica());
         const auto centroidPos = ringPolymer.makeCentroidPos();
         auto kernel = [this, &model, &buffer, &centroidPos](unsigned int replica) {
-            using VectorType = Vector<ScalarType, Dim>;
+            using VectorType = DenseVector<ScalarType, Dim>;
             const size_t dof = getDOF();
             const size_t numReplica = getNumReplica();
             const auto col = getPhaseMatrix().col(replica);

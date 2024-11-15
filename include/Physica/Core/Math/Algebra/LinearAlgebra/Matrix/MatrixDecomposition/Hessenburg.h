@@ -35,7 +35,7 @@ namespace Physica::Core {
         constexpr static size_t NormVectorLength = Order == Dynamic ? Dynamic : (Order - 2);
         using RealType = typename ScalarType::RealType;
         using MatrixH = HessenburgMatrixH<ScalarType, Order>;
-        using HouseholderNorm = Vector<ScalarType, NormVectorLength>;
+        using HouseholderNorm = DenseVector<ScalarType, NormVectorLength>;
         using This = Hessenburg<ScalarType, Order>;
     public:
         using WorkingMatrix = DenseMatrix<ScalarType, Traits<MatrixH>::Option, Order, Order>;

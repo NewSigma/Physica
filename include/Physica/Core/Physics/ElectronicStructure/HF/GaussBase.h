@@ -19,7 +19,7 @@
 #pragma once
 
 #include <Physica/Core/MultiPrecision/Real.h>
-#include <Physica/Core/Math/Algebra/LinearAlgebra/Vector/Vector.h>
+#include <Physica/Core/Math/Algebra/LinearAlgebra/Vector/DenseVector.h>
 #include <Physica/Core/Math/Calculus/SpetialFunctions.h>
 
 namespace Physica::Core {

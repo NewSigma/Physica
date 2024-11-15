@@ -61,7 +61,7 @@ namespace Physica::Core {
 
     template<class HostModel, class DeviceModel>
     template<class Executor>
-    Vector<typename CPUGPUModel<HostModel, DeviceModel>::ScalarType> CPUGPUModel<HostModel, DeviceModel>::force(const MDCellType& cell) {
+    DenseVector<typename CPUGPUModel<HostModel, DeviceModel>::ScalarType> CPUGPUModel<HostModel, DeviceModel>::force(const MDCellType& cell) {
         VectorND<ScalarType> result(cell.getDOF());
         forceAsync<VectorND<ScalarType>, Executor>(cell, result);
         CUDAContext::getInstance().wait();

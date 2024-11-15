@@ -22,32 +22,32 @@
 #include <random>
 
 namespace Physica::Core {
-    template<class T, size_t Length, class Allocator>
-    Vector<T, Length, Allocator>::Vector(size_t length) : Storage(length) {}
+    template<Scalar T, size_t Length, class Allocator>
+    DenseVector<T, Length, Allocator>::DenseVector(size_t length) : Storage(length) {}
 
-    template<class T, size_t Length, class Allocator>
-    Vector<T, Length, Allocator>::Vector(size_t length, const T& init) : Vector(length) {
+    template<Scalar T, size_t Length, class Allocator>
+    DenseVector<T, Length, Allocator>::DenseVector(size_t length, const T& init) : DenseVector(length) {
         *this = init;
     }
 
-    template<class T, size_t Length, class Allocator>
-    Vector<T, Length, Allocator>::Vector(std::initializer_list<T> list) : Storage(std::move(list)) {
+    template<Scalar T, size_t Length, class Allocator>
+    DenseVector<T, Length, Allocator>::DenseVector(std::initializer_list<T> list) : Storage(std::move(list)) {
         Base::makeContinuous();
     }
 
-    template<class T, size_t Length, class Allocator>
-    Vector<T, Length, Allocator>::Vector(Storage array) noexcept : Storage(std::move(array)) {
+    template<Scalar T, size_t Length, class Allocator>
+    DenseVector<T, Length, Allocator>::DenseVector(Storage array) noexcept : Storage(std::move(array)) {
         Base::makeContinuous();
     }
 
-    template<class T, size_t Length, class Allocator>
+    template<Scalar T, size_t Length, class Allocator>
     template<class Derived>
-    Vector<T, Length, Allocator>::Vector(const RValueVector<Derived>& v) : Storage(v.getLength()) {
+    DenseVector<T, Length, Allocator>::DenseVector(const RValueVector<Derived>& v) : Storage(v.getLength()) {
         v.getDerived().assignTo(*this);
     }
 
-    template<class T, size_t Length, class Allocator>
-    Vector<T, Length, Allocator> Vector<T, Length, Allocator>::copy() const {
+    template<Scalar T, size_t Length, class Allocator>
+    DenseVector<T, Length, Allocator> DenseVector<T, Length, Allocator>::copy() const {
         if constexpr (isReverseDiff) {
             using TracerType = typename T::TracerType;
             const size_t length = Base::getLength();
@@ -61,8 +61,8 @@ namespace Physica::Core {
             return *this;
     }
 
-    template<class T, size_t Length, class Allocator>
-    Vector<T, Length, Allocator> Vector<T, Length, Allocator>::zeros(size_t len) {
+    template<Scalar T, size_t Length, class Allocator>
+    DenseVector<T, Length, Allocator> DenseVector<T, Length, Allocator>::zeros(size_t len) {
         This result{};
         result.reserve(len);
         for(size_t i = 0; i < len; ++i)
@@ -71,35 +71,34 @@ namespace Physica::Core {
         return result;
     }
 
-    template<class T, size_t Length, class Allocator>
+    template<Scalar T, size_t Length, class Allocator>
     template<class RandomGenerator>
-    Vector<T, Length, Allocator> Vector<T, Length, Allocator>::random_uniform(size_t len, RandomGenerator& gen) {
+    DenseVector<T, Length, Allocator> DenseVector<T, Length, Allocator>::random_uniform(size_t len, RandomGenerator& gen) {
         This result(len);
         result.random_uniform(gen);
         return result;
     }
 
-    template<class T, size_t Length, class Allocator>
+    template<Scalar T, size_t Length, class Allocator>
     template<class RandomGenerator>
-    Vector<T, Length, Allocator> Vector<T, Length, Allocator>::random_uniform(
-            const Vector& v1, const Vector& v2, RandomGenerator& gen) {
+    DenseVector<T, Length, Allocator> DenseVector<T, Length, Allocator>::random_uniform(const This& v1, const This& v2, RandomGenerator& gen) {
         assert(v1.getLength() == v2.getLength());
         This result = random_uniform(v1.getLength(), gen);
         result = v1 + hadamard((v2 - v1), result);
         return result;
     }
 
-    template<class T, size_t Length, class Allocator>
+    template<Scalar T, size_t Length, class Allocator>
     template<class RandomGenerator>
-    Vector<T, Length, Allocator> Vector<T, Length, Allocator>::random_normal(size_t len, RandomGenerator& gen) {
+    DenseVector<T, Length, Allocator> DenseVector<T, Length, Allocator>::random_normal(size_t len, RandomGenerator& gen) {
         This result(len);
         result.random_normal(gen);
         return result;
     }
 
-    template<class T, size_t Length, class Allocator>
+    template<Scalar T, size_t Length, class Allocator>
     template<class Distribution, class RandomGenerator>
-    Vector<T, Length, Allocator> Vector<T, Length, Allocator>::random_any(
+    DenseVector<T, Length, Allocator> DenseVector<T, Length, Allocator>::random_any(
             size_t len, Distribution& dist, RandomGenerator& gen) {
         This result(len);
         result.random_any(dist, gen);
@@ -108,11 +107,11 @@ namespace Physica::Core {
     /**
      * Both \param from and \param to are included
      */
-    template<class T, size_t Length, class Allocator>
-    Vector<T, Length, Allocator> Vector<T, Length, Allocator>::linspace(T from, T to, size_t count) {
+    template<Scalar T, size_t Length, class Allocator>
+    DenseVector<T, Length, Allocator> DenseVector<T, Length, Allocator>::linspace(T from, T to, size_t count) {
         assert(from < to);
         const T step = (to - from) / T(count - 1);
-        Vector result = Vector(count);
+        This result = This(count);
         for (size_t i = 0; i < count; ++i) {
             result[i] = from;
             from += step;

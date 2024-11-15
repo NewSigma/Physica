@@ -28,7 +28,7 @@ namespace Physica::Core {
     template<class ScalarType, size_t Dim>
     class LineSearch {
     public:
-        using VectorType = Vector<ScalarType, Dim>;
+        using VectorType = DenseVector<ScalarType, Dim>;
 
         ScalarType maxStepSize;
         ScalarType decreaseCondNum;

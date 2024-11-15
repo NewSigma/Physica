@@ -42,8 +42,8 @@ namespace Physica::Core {
 
         constexpr static size_t NormVectorLength = Order == Dynamic ? Dynamic : (Order - 2);
         constexpr static size_t BufferLength = Order == Dynamic ? Dynamic : (Order - 1);
-        using HouseholderNorm = Vector<ScalarType, NormVectorLength>;
-        using BufferVector = Vector<ScalarType, BufferLength>;
+        using HouseholderNorm = DenseVector<ScalarType, NormVectorLength>;
+        using BufferVector = DenseVector<ScalarType, BufferLength>;
     public:
         using WorkingMatrix = typename std::conditional<ScalarType::isComplex, HermiteMatrix, SymmMatrix>::type;
     private:

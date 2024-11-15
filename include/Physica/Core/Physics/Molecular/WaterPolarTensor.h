@@ -50,8 +50,8 @@ namespace Physica::Core {
         constexpr static size_t NumOffDiagBase = 13;
         using Vector3D = Vector3D<ScalarType>;
         using Matrix3D = typename PeriodicCell<ScalarType, 3>::LatticeMatrix;
-        using DiagBaseVector = Vector<ScalarType, NumDiagBase>;
-        using OffDiagBaseVector = Vector<ScalarType, NumOffDiagBase>;
+        using DiagBaseVector = DenseVector<ScalarType, NumDiagBase>;
+        using OffDiagBaseVector = DenseVector<ScalarType, NumOffDiagBase>;
     private:
         Matrix3D polarTensor; //In Molecular Frame
         Matrix3D labFrame;

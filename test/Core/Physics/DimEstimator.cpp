@@ -35,7 +35,7 @@ int main() {
             const ScalarType temp = col[i - 1];
             col[i] = factor * temp * (ScalarType(1) - temp);
         }
-        const ScalarType dimen = DimEstimator::corrDimen(data, Vector<ScalarType, 8>::linspace(0.00001, 0.0001, 8));
+        const ScalarType dimen = DimEstimator::corrDimen(data, DenseVector<ScalarType, 8>::linspace(0.00001, 0.0001, 8));
         if (!(ScalarType(0.495) <= dimen && dimen <= ScalarType(0.505)))
             return 1;
     }
@@ -54,7 +54,7 @@ int main() {
             col2[i] = factor2 * x;
         }
         constexpr size_t Length = 8;
-        using VectorType = Vector<ScalarType, Length>;
+        using VectorType = DenseVector<ScalarType, Length>;
         const VectorType r = exp(VectorType::linspace(-10, -3, Length));
         const ScalarType dimen = DimEstimator::corrDimen(data, r);
         if (!(ScalarType(1.2) <= dimen && dimen <= ScalarType(1.22)))

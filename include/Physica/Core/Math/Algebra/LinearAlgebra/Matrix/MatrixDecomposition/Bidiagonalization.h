@@ -36,8 +36,8 @@ namespace Physica::Core {
         constexpr static size_t NumSingularValue = MatrixType::RowAtCompile > MatrixType::ColumnAtCompile
                                                                             ? MatrixType::ColumnAtCompile
                                                                             : MatrixType::RowAtCompile;
-        using MainDiagVector = Vector<ScalarType, NumSingularValue>;
-        using SubDiagVector = Vector<ScalarType, NumSingularValue == 0 ? Dynamic : NumSingularValue - 1>;
+        using MainDiagVector = DenseVector<ScalarType, NumSingularValue>;
+        using SubDiagVector = DenseVector<ScalarType, NumSingularValue == 0 ? Dynamic : NumSingularValue - 1>;
 
         static_assert(!ScalarType::isComplex, "[Error]: Bidiagonalization do not support complex matrixes");
     private:

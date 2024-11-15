@@ -94,10 +94,10 @@ namespace Physica::Core::Physics {
                      DIISMatrix& DIISMat);
         void EDIISInterpolation(MatrixBuffer& fockMatrices,
                                 EDIISBuffer& densityMatrices,
-                                const Vector<ScalarType, EDIISBufferSize>& energyBuffer);
+                                const DenseVector<ScalarType, EDIISBufferSize>& energyBuffer);
         MatrixType DIISExtrapolation(MatrixBuffer& fockMatrices, DIISMatrix& DIISMat);
         void updateWaves(const MatrixType& inv_cholesky);
-        [[nodiscard]] ScalarType updateSelfConsistentEnergy(Vector<ScalarType, EDIISBufferSize>& energyBuffer);
+        [[nodiscard]] ScalarType updateSelfConsistentEnergy(DenseVector<ScalarType, EDIISBufferSize>& energyBuffer);
     };
 
     template<class BaseSetType>
@@ -137,7 +137,7 @@ namespace Physica::Core::Physics {
         auto errorMatrices = DIISBuffer(DIISBufferSize - 1, baseSetSize, baseSetSize, ScalarType(0));
         DIISMatrix DIISMat = DIISMatrix(DIISBufferSize, DIISBufferSize, -ScalarType(1));
         DIISMat(0, 0) = ScalarType(0);
-        Vector<ScalarType, EDIISBufferSize> energyBuffer{};
+        DenseVector<ScalarType, EDIISBufferSize> energyBuffer{};
 
         iteration = 0;
         do {
@@ -288,7 +288,7 @@ namespace Physica::Core::Physics {
     template<class BaseSetType>
     void RHFSolver<BaseSetType>::EDIISInterpolation(MatrixBuffer& fockMatrices,
                                                     EDIISBuffer& densityMatrices,
-                                                    const Vector<ScalarType, EDIISBufferSize>& energyBuffer) {
+                                                    const DenseVector<ScalarType, EDIISBufferSize>& energyBuffer) {
         constexpr size_t problemDim = EDIISBuffer::getLength();
         auto G = DenseSymmMatrix<ScalarType>(problemDim, ScalarType(0));
         MatrixType deltaFock;
@@ -330,9 +330,9 @@ namespace Physica::Core::Physics {
     template<class BaseSetType>
     typename RHFSolver<BaseSetType>::MatrixType RHFSolver<BaseSetType>::DIISExtrapolation(MatrixBuffer& fockMatrices,
                                                                                           DIISMatrix& DIISMat) {
-        Vector<ScalarType, DIISBufferSize> x{};
+        DenseVector<ScalarType, DIISBufferSize> x{};
         /* Solve linear equation */ {
-            Vector<ScalarType, DIISBufferSize> b = Vector<ScalarType, DIISBufferSize>(DIISBufferSize, ScalarType(0));
+            DenseVector<ScalarType, DIISBufferSize> b = DenseVector<ScalarType, DIISBufferSize>(DIISBufferSize, ScalarType(0));
             b[0] = -ScalarType(1);
             const DIISMatrix inv_A = DIISMat.inverse();
             x = inv_A * b;
@@ -357,7 +357,7 @@ namespace Physica::Core::Physics {
 
     template<class BaseSetType>
     typename RHFSolver<BaseSetType>::ScalarType RHFSolver<BaseSetType>::updateSelfConsistentEnergy(
-            Vector<ScalarType, EDIISBufferSize>& energyBuffer) {
+            DenseVector<ScalarType, EDIISBufferSize>& energyBuffer) {
         for (size_t i = 0; i < energyBuffer.getLength() - 1; ++i)
             energyBuffer[i].swap(energyBuffer[i + 1]);
 

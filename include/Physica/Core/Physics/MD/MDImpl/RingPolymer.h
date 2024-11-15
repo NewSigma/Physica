@@ -47,7 +47,7 @@ namespace Physica::Core {
         /* Operations */
         template<class KineticModel, class RandomGenerator> void initMomentum(ScalarType temperatureT, RandomGenerator& gen);
         template<class KineticModel> void scaleVelocity(ScalarType temperatureT);
-        [[nodiscard]] Vector<ScalarType, Dim> makeDriftMomentum() const;
+        [[nodiscard]] DenseVector<ScalarType, Dim> makeDriftMomentum() const;
         void removeDrift();
         inline void toNormalRepr(size_t posID);
         inline void toBeadRepr(size_t posID);
@@ -131,7 +131,7 @@ namespace Physica::Core {
 
         std::normal_distribution<> dist{};
         const ScalarType repBeta = calcRepBeta(temperatureT);
-        Vector<ScalarType, Dim> driftMomentum(Dim, 0);
+        DenseVector<ScalarType, Dim> driftMomentum(Dim, 0);
         for (size_t i = 0; i < dof; ++i) {
             const auto mass = massVec[i / Dim];
             const size_t direction = i % Dim;
@@ -163,9 +163,9 @@ namespace Physica::Core {
     }
 
     template<class ScalarType, unsigned int Dim, size_t NumReplica>
-    Vector<ScalarType, Dim> RingPolymer<ScalarType, Dim, NumReplica>::makeDriftMomentum() const {
+    DenseVector<ScalarType, Dim> RingPolymer<ScalarType, Dim, NumReplica>::makeDriftMomentum() const {
         const size_t dof = getDOF();
-        Vector<ScalarType, Dim> result(Dim, 0);
+        DenseVector<ScalarType, Dim> result(Dim, 0);
         for (size_t i = 0; i < dof; ++i) {
             const size_t direction = i % Dim;
             result[direction] += phase.row(i).asVector().sum();
@@ -175,7 +175,7 @@ namespace Physica::Core {
 
     template<class ScalarType, unsigned int Dim, size_t NumReplica>
     void RingPolymer<ScalarType, Dim, NumReplica>::removeDrift() {
-        const Vector<ScalarType, Dim> driftVelocity = makeDriftMomentum() * reciprocal(ScalarType(getNumReplica()) * massVec.sum());
+        const DenseVector<ScalarType, Dim> driftVelocity = makeDriftMomentum() * reciprocal(ScalarType(getNumReplica()) * massVec.sum());
         for (size_t i = 0; i < getDOF(); ++i) {
             const auto mass = massVec[i / Dim];
             auto row = phase.row(i);

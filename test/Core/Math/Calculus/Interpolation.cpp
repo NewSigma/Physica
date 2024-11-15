@@ -17,7 +17,7 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include <iostream>
-#include <Physica/Core/Math/Algebra/LinearAlgebra/Vector/Vector.h>
+#include <Physica/Core/Math/Algebra/LinearAlgebra/Vector/DenseVector.h>
 #include <Physica/Core/Math/Algebra/LinearAlgebra/Grid/RSpaceGrid.h>
 #include <Physica/Core/Math/Calculus/Interpolation.h>
 #include <Physica/Core/Math/Random/Random.h>

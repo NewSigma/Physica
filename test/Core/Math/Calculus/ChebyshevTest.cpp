@@ -18,7 +18,7 @@
  */
 #include <iostream>
 #include <Physica/Core/Math/Calculus/Chebyshev.h>
-#include <Physica/Core/Math/Algebra/LinearAlgebra/Vector/Vector.h>
+#include <Physica/Core/Math/Algebra/LinearAlgebra/Vector/DenseVector.h>
 
 using namespace Physica::Core;
 using T = float64;

@@ -24,11 +24,11 @@
 #include "VectorImpl/ContinuousVector.h"
 
 namespace Physica::Core {
-    template<class T, size_t Length = Dynamic, class Allocator = HostAllocator<T, alignof(typename BestPacket<T, Length>::Type)>>
-    class Vector : public ContinuousVector<Vector<T, Length, Allocator>>, public Array<T, Length, Allocator> {
+    template<Scalar T, size_t Length = Dynamic, class Allocator = HostAllocator<T, alignof(typename BestPacket<T, Length>::Type)>>
+    class DenseVector : public ContinuousVector<DenseVector<T, Length, Allocator>>, public Array<T, Length, Allocator> {
         constexpr static size_t DefaultAlign = alignof(typename BestPacket<T, Length>::Type);
         static_assert(std::allocator_traits<Allocator>::Align % DefaultAlign == 0, "[Error]: Bad alignment for SIMD");
-        using This = Vector<T, Length, Allocator>;
+        using This = DenseVector<T, Length, Allocator>;
     public:
         using Base = ContinuousVector<This>;
         using Storage = Array<T, Length, Allocator>;
@@ -43,16 +43,16 @@ namespace Physica::Core {
         using typename Base::PtrTy;
         using typename Base::ConstPtrTy;
     public:
-        Vector() = default;
-        explicit Vector(size_t length);
-        Vector(size_t length, const T& init);
-        Vector(std::initializer_list<T> list);
-        explicit Vector(Storage array) noexcept;
+        DenseVector() = default;
+        explicit DenseVector(size_t length);
+        DenseVector(size_t length, const T& init);
+        DenseVector(std::initializer_list<T> list);
+        explicit DenseVector(Storage array) noexcept;
         template<class Derived>
-        Vector(const RValueVector<Derived>& v);
-        Vector(const This&) = default;
-        Vector(This&&) noexcept = default;
-        ~Vector() = default;
+        DenseVector(const RValueVector<Derived>& v);
+        DenseVector(const This&) = default;
+        DenseVector(This&&) noexcept = default;
+        ~DenseVector() = default;
         /* Operators */
         This& operator=(This obj) noexcept { swap(obj); return *this; }
         using Base::operator=;
@@ -62,7 +62,7 @@ namespace Physica::Core {
         using Base::random_uniform;
         using Base::random_normal;
         using Base::random_any;
-        [[nodiscard]] Vector copy() const;
+        [[nodiscard]] This copy() const;
         [[nodiscard]] inline device_obj<This> toDevice() const;
         using Base::toDevice;
         using Base::toDeviceAsync;
@@ -73,28 +73,28 @@ namespace Physica::Core {
         [[nodiscard]] __host__ __device__ PtrTy data_ptr(size_t index) { return data() + index; }
         [[nodiscard]] __host__ __device__ ConstPtrTy data_ptr(size_t index) const { return data() + index; }
         /* Static members */
-        [[nodiscard]] static Vector zeros(size_t len);
+        [[nodiscard]] static This zeros(size_t len);
         template<class RandomGenerator>
-        [[nodiscard]] static Vector random_uniform(size_t len, RandomGenerator& gen);
+        [[nodiscard]] static This random_uniform(size_t len, RandomGenerator& gen);
         template<class RandomGenerator>
-        [[nodiscard]] static Vector random_uniform(const Vector& v1, const Vector& v2, RandomGenerator& gen);
+        [[nodiscard]] static This random_uniform(const This& v1, const This& v2, RandomGenerator& gen);
         template<class RandomGenerator>
-        [[nodiscard]] static Vector random_normal(size_t len, RandomGenerator& gen);
+        [[nodiscard]] static This random_normal(size_t len, RandomGenerator& gen);
         template<class Distribution, class RandomGenerator>
-        [[nodiscard]] static Vector random_any(size_t len, Distribution& dist, RandomGenerator& gen);
-        [[nodiscard]] static Vector linspace(T from, T to, size_t count);
+        [[nodiscard]] static This random_any(size_t len, Distribution& dist, RandomGenerator& gen);
+        [[nodiscard]] static This linspace(T from, T to, size_t count);
     };
 
-    template<Scalar T> using Vector1D = Vector<T, 1>;
-    template<Scalar T> using Vector2D = Vector<T, 2>;
-    template<Scalar T> using Vector3D = Vector<T, 3>;
-    template<Scalar T> using Vector4D = Vector<T, 4>;
-    template<Scalar T> using VectorND = Vector<T>;
+    template<Scalar T> using Vector1D = DenseVector<T, 1>;
+    template<Scalar T> using Vector2D = DenseVector<T, 2>;
+    template<Scalar T> using Vector3D = DenseVector<T, 3>;
+    template<Scalar T> using Vector4D = DenseVector<T, 4>;
+    template<Scalar T> using VectorND = DenseVector<T>;
 }
 
 namespace Physica {
-    template<class T, size_t Length, class Allocator>
-    class Traits<Core::Vector<T, Length, Allocator>> {
+    template<Scalar T, size_t Length, class Allocator>
+    class Traits<Core::DenseVector<T, Length, Allocator>> {
         static_assert(!T::isForwardDiff, "[Error]: Use diffable vector instead");
     public:
         using ScalarType = T;
@@ -107,9 +107,9 @@ namespace Physica {
 
 namespace std {
     template<class T, size_t Length>
-    inline void swap(Physica::Core::Vector<T, Length>& __restrict v1, Physica::Core::Vector<T, Length>& __restrict v2) noexcept {
+    inline void swap(Physica::Core::DenseVector<T, Length>& __restrict v1, Physica::Core::DenseVector<T, Length>& __restrict v2) noexcept {
         v1.swap(v2);
     }
 }
 
-#include "VectorImpl/VectorImpl.h"
+#include "VectorImpl/DenseVectorImpl.h"

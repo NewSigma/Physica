@@ -44,7 +44,7 @@ namespace Physica::Core {
                                           RowAtCompile,
                                           ColumnAtCompile>;
     public:
-        using SingularValueVector = Vector<RealType, NumSingularValue>;
+        using SingularValueVector = DenseVector<RealType, NumSingularValue>;
         using LSingularMatrix = DenseMatrix<RealType,
                                             MatrixOption::Col | MatrixOption::Vector,
                                             RowAtCompile,

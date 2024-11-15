@@ -18,7 +18,7 @@
  */
 #pragma once
 
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/Vector.h"
+#include <Physica/Core/Math/Algebra/LinearAlgebra/Vector/DenseVector.h>
 #include "Physica/Core/Math/Calculus/Differential.h"
 #include "OptimizationImpl/LineSearch.h"
 
@@ -29,7 +29,7 @@ namespace Physica::Core {
      */
     template<class ScalarType, size_t Dim>
     class ConjugateGradient {
-        using VectorType = Vector<ScalarType, Dim>;
+        using VectorType = DenseVector<ScalarType, Dim>;
 
         VectorType gradG;
         VectorType direction;

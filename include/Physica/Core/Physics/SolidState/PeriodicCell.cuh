@@ -32,7 +32,7 @@ namespace Physica::Core {
         using MomentumMatrix = PositionMatrix;
         using SearchRangeType = Array<ssize_t, Dim>;
     protected:
-        using VectorType = device_obj<Vector<ScalarType, Dim>>;
+        using VectorType = device_obj<DenseVector<ScalarType, Dim>>;
 
         LatticeMatrix lattice;
         PositionMatrix pos;

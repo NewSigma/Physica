@@ -30,7 +30,7 @@ namespace Physica::Core {
      */
     template<class ScalarType, size_t Power>
     class Polynomial {
-        using VectorType = Vector<ScalarType, Power>;
+        using VectorType = DenseVector<ScalarType, Power>;
     private:
         VectorType coeffs;
     public:
@@ -73,7 +73,7 @@ namespace Physica::Core {
      * [1] https://www.mathworks.com/help/matlab/ref/roots.html
      */
     template<class ScalarType, size_t Power>
-    Vector<Complex<ScalarType>, Power>
+    DenseVector<Complex<ScalarType>, Power>
     polyRoot(const Polynomial<ScalarType, Power>& poly) {
         using MatrixType = DenseMatrix<ScalarType, MatrixOption::Col | MatrixOption::Vector, Power, Power>;
 

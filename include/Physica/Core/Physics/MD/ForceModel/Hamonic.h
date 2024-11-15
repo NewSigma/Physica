@@ -122,8 +122,8 @@ namespace Physica::Core {
         assert(cell.getNumParticle() == getNumParticle() && "[Error]: Number of particles is not consistent");
         LatticeMatrix result(Dim, Dim, 0);
         for (size_t i = 0; i < getNumParticle(); ++i) {
-            const Vector<ScalarType, Dim> delta = cell.minDistVector(sites.row(i), i);
-            const Vector<ScalarType, Dim> temp = springCoeffs[i] * delta;
+            const DenseVector<ScalarType, Dim> delta = cell.minDistVector(sites.row(i), i);
+            const DenseVector<ScalarType, Dim> temp = springCoeffs[i] * delta;
             result += temp * delta.transpose();
         }
         result *= -reciprocal(cell.getVolume());

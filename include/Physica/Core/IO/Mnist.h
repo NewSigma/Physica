@@ -20,7 +20,7 @@
 
 #include <string>
 #include <fstream>
-#include <Physica/Core/Math/Algebra/LinearAlgebra/Vector/Vector.h>
+#include <Physica/Core/Math/Algebra/LinearAlgebra/Vector/DenseVector.h>
 #include <Physica/Core/AI/NeuralNetwork/SimpleDataset.h>
 
 namespace Physica::Core {

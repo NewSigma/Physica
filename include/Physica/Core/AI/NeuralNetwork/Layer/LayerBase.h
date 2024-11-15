@@ -19,7 +19,7 @@
 #pragma once
 
 #include <Physica/CRTPBase.h>
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/Vector.h"
+#include <Physica/Core/Math/Algebra/LinearAlgebra/Vector/DenseVector.h>
 
 namespace Physica::Core {
     template<class Derived>

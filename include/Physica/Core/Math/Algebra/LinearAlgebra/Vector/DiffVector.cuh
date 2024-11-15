@@ -20,10 +20,10 @@
 
 #include <Physica/Core/MultiPrecision/Diff.cuh>
 #include "DiffVector.h"
-#include "Vector.cuh"
+#include "DenseVector.cuh"
 
 namespace Physica::Core {
-    template<class T, int Order>
+    template<Scalar T, int Order>
     class device_obj<Diff<VectorND<T>, DiffMode::Reverse, Order>>
             : public device_obj<RValueVector<Diff<VectorND<T>, DiffMode::Reverse, Order>>> {
         static_assert(!T::isDifferentiable, "[Error]: Nested Diff<> is not allowed");
@@ -99,7 +99,7 @@ namespace Physica::Core {
 namespace Physica {
     using namespace Core;
 
-    template<class T, int Order>
+    template<Scalar T, int Order>
     class Traits<Core::device_obj<Diff<VectorND<T>, DiffMode::Reverse, Order>>> : public Traits<VectorND<T>> {
     public:
         using ScalarType = Core::device_obj<Diff<T, DiffMode::Reverse, Order>>;

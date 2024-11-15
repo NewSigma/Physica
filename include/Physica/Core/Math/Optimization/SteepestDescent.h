@@ -18,14 +18,14 @@
  */
 #pragma once
 
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/Vector.h"
+#include <Physica/Core/Math/Algebra/LinearAlgebra/Vector/DenseVector.h>
 #include "OptimizationImpl/LineSearch.h"
 
 namespace Physica::Core {
     template<class ScalarType, size_t Dim>
     class SteepestDescent {
     public:
-        using VectorType = Vector<ScalarType, Dim>;
+        using VectorType = DenseVector<ScalarType, Dim>;
     private:
         VectorType gradG;
         VectorType tryX;

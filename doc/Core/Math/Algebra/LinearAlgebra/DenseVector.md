@@ -11,7 +11,7 @@ with no Invariant Sections, no Front-Cover Texts, and no Back-Cover Texts.
 You should have received a copy of the GNU Free Documentation License
 along with Physica.  If not, see <https://www.gnu.org/licenses/>.
 -->
-# Vector
+# DenseVector
 
 ## 模板参数
 

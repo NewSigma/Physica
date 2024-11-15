@@ -24,7 +24,7 @@ namespace Physica::Core {
     template<class T, size_t Dim>
     class ODESolver {
     public:
-        using VectorType = Vector<T, Dim>;
+        using VectorType = DenseVector<T, Dim>;
         using SolutionType = DenseMatrix<T, MatrixOption::Col | MatrixOption::Vector, Dim>;
     protected:
         VectorND<T> x;

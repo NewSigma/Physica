@@ -19,7 +19,7 @@
 #pragma once
 
 #include <Physica/PlainStruct.h>
-#include <Physica/Core/Math/Algebra/LinearAlgebra/Vector/Vector.cuh>
+#include <Physica/Core/Math/Algebra/LinearAlgebra/Vector/DenseVector.cuh>
 #include <Physica/Core/Parallel/Executor/CUDAExecutor.cuh>
 #include <Physica/Core/Utils/Allocator/PageLockedAllocator.cuh>
 #include "HardCore.h"
@@ -33,7 +33,7 @@ namespace Physica::Core {
     public:
         using RingPolymerType = typename HardCore<ScalarType, IsFixedBoundary, NumReplica, Integrator>::RingPolymerType;
         using DeviceVector = device_obj<VectorND<ScalarType>>;
-        using PageLockedVector = Vector<ScalarType, Dynamic, PageLockedAllocator<ScalarType>>;
+        using PageLockedVector = DenseVector<ScalarType, Dynamic, PageLockedAllocator<ScalarType>>;
     private:
         ScalarType latticeSize;
         ScalarType collideFactor;

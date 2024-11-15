@@ -30,7 +30,7 @@ namespace Physica::Core {
         using ElementType = CuboidLinear<ScalarType>;
         using Index3D = typename SolverType::Index3D;
         using Vector3D = typename SolverType::Vector3D;
-        using CoeffVector = Vector<ScalarType, ElementType::DegreeOfFreedom>;
+        using CoeffVector = DenseVector<ScalarType, ElementType::DegreeOfFreedom>;
         using MDCellType = typename SolverType::MDCellType;
         using KSpaceFCGrid = typename SolverType::KSpaceFCGrid;
         using EigenValueGrid = GridStorage<VectorND<ScalarType>>;
