@@ -34,26 +34,26 @@ namespace Physica::Core {
         using typename Base::ScalarType;
         using typename Base::ValueType;
         using Base::RowAtCompile;
-        using Base::ColumnAtCompile;
-        using Base::isColumnMatrix;
+        using Base::ColAtCompile;
         using Base::isRowMatrix;
+        using Base::isColMatrix;
         using Base::isReverseDiff;
     protected:
         using typename Base::PtrTy;
         using typename Base::ConstPtrTy;
     private:
-        using RowVector = ContinuousMatrixBlock<Derived, 1, ColumnAtCompile>;
-        using ColVector = ContinuousMatrixBlock<Derived, RowAtCompile, 1>;
+        using RowVector = std::conditional<isRowMatrix, ContinuousMatrixBlock<Derived, 1, ColAtCompile>, LMatrixBlock<Derived, 1, ColAtCompile>>::type;
+        using ColVector = std::conditional<isColMatrix, ContinuousMatrixBlock<Derived, RowAtCompile, 1>, LMatrixBlock<Derived, RowAtCompile, 1>>::type;
         template<size_t Row>
-        using RowBlock = ContinuousMatrixBlock<Derived, Row, ColumnAtCompile>;
+        using RowBlock = ContinuousMatrixBlock<Derived, Row, ColAtCompile>;
         template<size_t Col>
         using ColBlock = ContinuousMatrixBlock<Derived, RowAtCompile, Col>;
     public:
         ~ContinuousMatrix() = default;
         /* Operators */
         using Base::operator=;
-        inline ContinuousMatrix& operator=(const ContinuousMatrix& obj);
-        inline ContinuousMatrix& operator=(ContinuousMatrix&& obj) noexcept;
+        inline This& operator=(const This& obj);
+        This& operator=(This&& obj) noexcept = delete;
         Derived& operator=(const ScalarType& s);
         /* Operations */
         [[nodiscard]] inline RowVector row(size_t r);
@@ -132,8 +132,8 @@ namespace Physica::Core {
         [[nodiscard]] const ContinuousFlatten<Derived> flatten() const { return {const_cast<This&>(*this)}; }
     protected:
         ContinuousMatrix() = default;
-        ContinuousMatrix(const ContinuousMatrix&) = default;
-        ContinuousMatrix(ContinuousMatrix&&) noexcept = default;
+        ContinuousMatrix(const This&) = default;
+        ContinuousMatrix(This&&) noexcept = default;
     };
 }
 

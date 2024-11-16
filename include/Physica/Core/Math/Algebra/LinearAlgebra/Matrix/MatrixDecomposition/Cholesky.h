@@ -92,7 +92,7 @@ namespace Physica {
         using ScalarType = typename MatrixType::ScalarType;
         constexpr static int Option = MatrixType::MatrixOption;
         constexpr static size_t RowAtCompile = MatrixType::RowAtCompile;
-        constexpr static size_t ColumnAtCompile = MatrixType::ColumnAtCompile;
+        constexpr static size_t ColAtCompile = MatrixType::ColAtCompile;
         constexpr static size_t SizeAtCompile = MatrixType::SizeAtCompile;
     };
 }

@@ -22,8 +22,8 @@ namespace Physica::Core {
     template<class MatrixType, class VectorType>
     class device_obj<MatrixVectorProduct<MatrixType, VectorType>>
             : public device_obj<RValueVector<MatrixVectorProduct<MatrixType, VectorType>>> {
-        static_assert(MatrixType::ColumnAtCompile == VectorType::SizeAtCompile ||
-                      MatrixType::ColumnAtCompile == Dynamic ||
+        static_assert(MatrixType::ColAtCompile == VectorType::SizeAtCompile ||
+                      MatrixType::ColAtCompile == Dynamic ||
                       VectorType::SizeAtCompile == Dynamic,
                       "[Error]: Row and column do not match in matrix-vector product");
         using host_obj = MatrixVectorProduct<MatrixType, VectorType>;
@@ -107,7 +107,7 @@ namespace Physica::Core {
         if constexpr (IsHost())
             Base::template assignTo<OtherDerived>(target);
         else {
-            if constexpr (MatrixOption::isColumnMatrix<MatrixType>()) {
+            if constexpr (MatrixOption::isColMatrix<MatrixType>()) {
                 const auto& m = getLHS();
                 const auto& v = getRHS();
                 target = m.col(0).asVector() * v.calc(0);

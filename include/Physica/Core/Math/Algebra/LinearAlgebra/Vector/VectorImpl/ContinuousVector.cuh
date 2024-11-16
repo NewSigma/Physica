@@ -27,6 +27,7 @@ namespace Physica::Core {
     template<class Derived>
     class device_obj<ContinuousVector<Derived>> : public device_obj<LValueVector<Derived>> {
         using Base = device_obj<LValueVector<Derived>>;
+        using This = device_obj<ContinuousVector<Derived>>;
         template<size_t Length> using BlockType = device_obj<ContinuousVectorBlock<Derived, Length>>;
     public:
         using host_obj = ContinuousVector<Derived>;
@@ -37,8 +38,8 @@ namespace Physica::Core {
     public:
         ~device_obj() = default;
         /* Operators */
-        inline device_obj& operator=(const device_obj& obj);
-        inline device_obj& operator=(device_obj&& obj) noexcept;
+        inline This& operator=(const This& obj);
+        inline This& operator=(This&& obj);
         using Base::operator=;
         /* Operations */
         template<class AnyPacket, Side Owner = GetSide()>
@@ -69,8 +70,8 @@ namespace Physica::Core {
         [[nodiscard]] __host__ __device__ ConstPtrTy data() const { return Base::data_ptr(0); }
     protected:
         device_obj() = default;
-        device_obj(const device_obj&) = default;
-        device_obj(device_obj&&) noexcept = default;
+        device_obj(const This&) = default;
+        device_obj(This&&) noexcept = default;
     };
 }
 

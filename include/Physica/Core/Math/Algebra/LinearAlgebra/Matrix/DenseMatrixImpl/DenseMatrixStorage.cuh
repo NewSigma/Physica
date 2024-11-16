@@ -28,7 +28,7 @@ namespace Physica::Core {
         using host_obj = DenseMatrixStorage<T, MatrixOption::Col | MatrixOption::Element, Row, Col, Allocator>;
         using This = device_obj<host_obj>;
         using Dim = DenseMatrixDim<This, Row, Col>;
-        using ArrayType = device_obj<typename std::conditional<is_scalar<T>::value, DenseVector<T, Row * Col>, Array<T, Row * Col>>::type>;
+        using ArrayType = device_obj<typename std::conditional<Scalar<T>, DenseVector<T, Row * Col>, Array<T, Row * Col>>::type>;
         using ElemType = typename ArrayType::ElemType;
     private:
         ArrayType arr;
@@ -67,7 +67,7 @@ namespace Physica::Core {
         using host_obj = DenseMatrixStorage<T, MatrixOption::Row | MatrixOption::Element, Row, Col, Allocator>;
         using This = device_obj<host_obj>;
         using Dim = DenseMatrixDim<This, Row, Col>;
-        using ArrayType = device_obj<typename std::conditional<is_scalar<T>::value, DenseVector<T, Row * Col>, Array<T, Row * Col>>::type>;
+        using ArrayType = device_obj<typename std::conditional<Scalar<T>, DenseVector<T, Row * Col>, Array<T, Row * Col>>::type>;
         using ElemType = typename ArrayType::ElemType;
     private:
         ArrayType arr;

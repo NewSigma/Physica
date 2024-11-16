@@ -26,14 +26,14 @@ namespace Physica::Core {
      */
     template<ExprType Type, class T1, class T2 = T1> class MatrixExpr;
 
-    template<ExprType Type, class MatrixType>
-    class UnitaryMatrixExpr : public RValueMatrix<MatrixExpr<Type, MatrixType>> {
-        using This = UnitaryMatrixExpr<Type, MatrixType>;
+    template<ExprType Type, Matrix M>
+    class UnitaryMatrixExpr : public RValueMatrix<MatrixExpr<Type, M>> {
+        using This = UnitaryMatrixExpr<Type, M>;
         using Base = RValueMatrix<This>;
     private:
-        const MatrixType& expr;
+        const M& expr;
     public:
-        UnitaryMatrixExpr(const RValueMatrix<MatrixType>& expr_) : expr(expr_.getDerived()) {}
+        UnitaryMatrixExpr(const RValueMatrix<M>& expr_) : expr(expr_.getDerived()) {}
         UnitaryMatrixExpr(const This&) = delete;
         UnitaryMatrixExpr(This&&) noexcept = delete;
         ~UnitaryMatrixExpr() = default;
@@ -43,22 +43,21 @@ namespace Physica::Core {
         /* Operations */
         [[nodiscard]] __host__ __device__ size_t getRow() const { return getExpr().getRow(); }
         [[nodiscard]] __host__ __device__ size_t getCol() const { return getExpr().getCol(); }
-        [[nodiscard]] __host__ __device__ const MatrixType& getExpr() const noexcept { return expr; }
+        [[nodiscard]] __host__ __device__ const M& getExpr() const noexcept { return expr; }
     };
 
-    template<ExprType Type, class LHS, class RHS>
+    template<ExprType Type, Matrix LHS, class RHS>
     class BinaryMatrixExpr : public RValueMatrix<MatrixExpr<Type, LHS, RHS>> {
-        static_assert(is_matrix<LHS>::value, "[Error]: Invalid left hand side type");
         using This = BinaryMatrixExpr<Type, LHS, RHS>;
         using Base = RValueMatrix<This>;
         using LHS1 = LHS;
-        using RHS1 = typename std::conditional<is_scalar<RHS>::value, typename RHS::ScalarType, RHS>::type;
+        using RHS1 = typename std::conditional<Scalar<RHS>, typename RHS::ScalarType, RHS>::type;
     private:
         const LHS1* lhs;
         const RHS1* rhs;
     public:
         BinaryMatrixExpr(const LHS& lhs_, const RHS& rhs_) : lhs(&lhs_) {
-            if constexpr (is_scalar<RHS>::value)
+            if constexpr (Scalar<RHS>)
                 rhs = &rhs_.getDerived();
             else {
                 rhs = &rhs_;
@@ -97,7 +96,7 @@ namespace Physica {
         constexpr static int Option = Major | Storage;
         // Optimize: T1 and T2 may not have same compiling size, for example, T1 may be fixed size and T2 may be dynamic
         constexpr static size_t RowAtCompile = T1::RowAtCompile;
-        constexpr static size_t ColumnAtCompile = T1::ColumnAtCompile;
+        constexpr static size_t ColAtCompile = T1::ColAtCompile;
         constexpr static size_t SizeAtCompile = T1::SizeAtCompile;
     };
 
@@ -107,7 +106,7 @@ namespace Physica {
         using ScalarType = typename Core::Internal::BinaryScalarOpReturnType<typename T1::ScalarType, T2>::Type;
         constexpr static int Option = T1::Option;
         constexpr static size_t RowAtCompile = T1::RowAtCompile;
-        constexpr static size_t ColumnAtCompile = T1::ColumnAtCompile;
+        constexpr static size_t ColAtCompile = T1::ColAtCompile;
         constexpr static size_t SizeAtCompile = T1::SizeAtCompile;
     };
 }

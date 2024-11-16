@@ -21,21 +21,20 @@
 #include "CrossProduct.h"
 
 namespace Physica::Core {
-    template<class AnyVector1, class AnyVector2>
-    class device_obj<CrossProduct<AnyVector1, AnyVector2>> : public device_obj<RValueVector<CrossProduct<AnyVector1, AnyVector2>>> {
-        using host_obj = CrossProduct<AnyVector1, AnyVector2>;
+    template<Vector V1, Vector V2>
+    class device_obj<CrossProduct<V1, V2>> : public device_obj<RValueVector<CrossProduct<V1, V2>>> {
+        using host_obj = CrossProduct<V1, V2>;
         using This = device_obj<host_obj>;
         using Base = device_obj<RValueVector<host_obj>>;
     private:
-        const device_obj<AnyVector1>& v1;
-        const device_obj<AnyVector2>& v2;
+        const device_obj<V1>& v1;
+        const device_obj<V2>& v2;
     public:
         device_obj() = delete;
-        __device__ device_obj(const device_obj<RValueVector<AnyVector1>>& v1_, const device_obj<RValueVector<AnyVector2>>& v2_)
-                : v1(v1_.getDerived()), v2(v2_.getDerived()) {}
+        __device__ device_obj(const device_obj<V1>& v1_, const device_obj<V2>& v2_) : v1(v1_), v2(v2_) {}
         /* Operations */
-        template<class OtherDerived>
-        __device__ void assignTo(device_obj<LValueVector<OtherDerived>>& v) const {
+        template<Vector U>
+        __device__ void assignTo(device_obj<LValueVector<U>>& v) const {
             if constexpr (IsDevice())
                 noImpl();
             else {
@@ -50,8 +49,6 @@ namespace Physica::Core {
 }
 
 namespace Physica {
-    using namespace Core;
-
-    template<class AnyVector1, class AnyVector2>
-    class Traits<Core::device_obj<CrossProduct<AnyVector1, AnyVector2>>> : public Traits<CrossProduct<AnyVector1, AnyVector2>> {};
+    template<Vector V1, Vector V2>
+    class Traits<Core::device_obj<Core::CrossProduct<V1, V2>>> : public Traits<Core::CrossProduct<V1, V2>> {};
 }

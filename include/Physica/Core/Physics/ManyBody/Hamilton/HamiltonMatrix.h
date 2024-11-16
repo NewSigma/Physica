@@ -52,7 +52,7 @@ namespace Physica {
     public:
         constexpr static int Option = MatrixOption::AnyMajor | MatrixOption::Element;
         constexpr static size_t RowAtCompile = Dynamic;
-        constexpr static size_t ColumnAtCompile = Dynamic;
+        constexpr static size_t ColAtCompile = Dynamic;
         constexpr static size_t SizeAtCompile = Dynamic;
     };
 }

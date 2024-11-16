@@ -35,9 +35,9 @@ namespace Physica::Core {
         template<class T1, class T2>
         class AddAssignImpl<T1, T2, true> {
             static_assert(std::is_same<typename T1::ScalarType, typename T2::ScalarType>::value, "[Error]: SIMD on different scalars is not supported");
-            constexpr static size_t size1 = T1::SizeAtCompile;
-            constexpr static size_t size2 = T2::SizeAtCompile;
-            constexpr static size_t SizeAtCompile = size1 > size2 ? size1 : size2;
+            constexpr static size_t Size1 = T1::SizeAtCompile;
+            constexpr static size_t Size2 = T2::SizeAtCompile;
+            constexpr static size_t SizeAtCompile = Size1 > Size2 ? Size1 : Size2;
             using PacketType = typename BestPacket<typename T1::ScalarType, SizeAtCompile>::Type;
         public:
             static void run(LValueVector<T1>& v1, const RValueVector<T2>& v2) {
@@ -74,15 +74,14 @@ namespace Physica::Core {
     }
 
     template<class Derived>
-    inline ContinuousVector<Derived>& ContinuousVector<Derived>::operator=(const ContinuousVector<Derived>& v) {
+    inline ContinuousVector<Derived>& ContinuousVector<Derived>::operator=(const This& v) {
         Base::operator=(v);
         return *this;
     }
 
     template<class Derived>
-    inline ContinuousVector<Derived>& ContinuousVector<Derived>::operator=(ContinuousVector<Derived>&& v) noexcept {
-        Base::operator=(std::forward<Base>(v));
-        return *this;
+    inline ContinuousVector<Derived>& ContinuousVector<Derived>::operator=(This&& v) {
+        return *this = v;
     }
 
     template<class Derived>
@@ -223,7 +222,7 @@ namespace Physica::Core {
                 this->operator[](i) = ScalarType::random_uniform(gen);
         }
         else if constexpr (HasMKL()) {
-            const size_t length = Base::getLength() * (Base::isComplex ? 2 : 1) * (Base::isForwardDiff ? 2 : 1);
+            [[maybe_unused]] const size_t length = Base::getLength() * (Base::isComplex ? 2 : 1) * (Base::isForwardDiff ? 2 : 1);
             if constexpr (ScalarType::Option == Float32)
                 vslCheck(vsRngUniform(VSL_RNG_METHOD_UNIFORM_STD, gen, length, (float*)data(), 0, 1));
             else if constexpr (ScalarType::Option == Float64)
@@ -246,7 +245,7 @@ namespace Physica::Core {
                 this->operator[](i) = ScalarType::random_normal(gen);
         }
         else if constexpr (HasMKL() && !isForwardDiff) {
-            const size_t length = Base::getLength() * (Base::isComplex ? 2 : 1);
+            [[maybe_unused]] const size_t length = Base::getLength() * (Base::isComplex ? 2 : 1);
             if constexpr (ScalarType::Option == Float32)
                 vslCheck(vsRngGaussian(VSL_RNG_METHOD_GAUSSIAN_BOXMULLER2, gen, length, (float*)data(), 0, 1));
             else if constexpr (ScalarType::Option == Float64)

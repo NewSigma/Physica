@@ -133,12 +133,12 @@ namespace Physica::Core {
 
     template<class ScalarType, int Option>
     inline size_t SparseMatrix<ScalarType, Option>::getRow() const noexcept {
-        return MatrixOption::isColumnMatrix<This>() ? getMaxMinor() : getMaxMajor();
+        return MatrixOption::isColMatrix<This>() ? getMaxMinor() : getMaxMajor();
     }
 
     template<class ScalarType, int Option>
     inline size_t SparseMatrix<ScalarType, Option>::getCol() const noexcept {
-        return MatrixOption::isColumnMatrix<This>() ? getMaxMajor() : getMaxMinor();
+        return MatrixOption::isColMatrix<This>() ? getMaxMajor() : getMaxMinor();
     }
 
     template<class ScalarType, int Option>
@@ -159,7 +159,7 @@ namespace Physica {
         using ScalarType = T;
         constexpr static int Option = Op;
         constexpr static size_t RowAtCompile = Dynamic;
-        constexpr static size_t ColumnAtCompile = Dynamic;
+        constexpr static size_t ColAtCompile = Dynamic;
         constexpr static size_t SizeAtCompile = Dynamic;
     };
 }

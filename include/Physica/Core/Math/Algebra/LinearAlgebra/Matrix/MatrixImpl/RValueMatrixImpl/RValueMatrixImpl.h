@@ -23,14 +23,14 @@
 
 namespace Physica::Core {
     template<class Derived>
-    template<class OtherDerived>
-    void RValueMatrix<Derived>::assignTo(LValueMatrix<OtherDerived>& target) const {
-        using OtherScalar = typename OtherDerived::ScalarType;
-        constexpr size_t OtherRow = OtherDerived::RowAtCompile;
-        constexpr size_t OtherColumn = OtherDerived::ColumnAtCompile;
+    template<Matrix M>
+    void RValueMatrix<Derived>::assignTo(LValueMatrix<M>& target) const {
+        using OtherScalar = typename M::ScalarType;
+        constexpr size_t OtherRow = M::RowAtCompile;
+        constexpr size_t OtherColumn = M::ColAtCompile;
         static_assert(RowAtCompile == OtherRow || RowAtCompile == Dynamic || OtherRow == Dynamic, "[Error]: Row mismatch between two matrix");
-        static_assert(ColumnAtCompile == OtherColumn || ColumnAtCompile == Dynamic || OtherColumn == Dynamic, "[Error]: Col mismatch between two matrix");
-        static_assert(!(isComplex && !OtherDerived::isComplex), "[Error]: Cannot assign a complex matrix to real matrix");
+        static_assert(ColAtCompile == OtherColumn || ColAtCompile == Dynamic || OtherColumn == Dynamic, "[Error]: Col mismatch between two matrix");
+        static_assert(!(isComplex && !M::isComplex), "[Error]: Cannot assign a complex matrix to real matrix");
         assert(getRow() == target.getRow());
         assert(getCol() == target.getCol());
         const size_t maxMajor = target.getMaxMajor();
@@ -39,7 +39,7 @@ namespace Physica::Core {
             for (size_t j = 0; j < maxMinor; ++j)
                 target.refFromMajorMinor(i, j) = OtherScalar(calc(target.rowFromMajorMinor(i, j), target.colFromMajorMinor(i, j)));
 
-        constexpr bool isContinuous = std::is_base_of<ContinuousMatrix<OtherDerived>, OtherDerived>::value;
+        constexpr bool isContinuous = std::is_base_of<ContinuousMatrix<M>, M>::value;
         if constexpr (isContinuous && isReverseDiff)
             target.getDerived().makeContinuous();
     }
@@ -227,7 +227,7 @@ namespace Physica::Core {
     template<class Derived>
     typename RValueMatrix<Derived>::ScalarType RValueMatrix<Derived>::max() const {
         ScalarType result;
-        if constexpr (isColumnMatrix) {
+        if constexpr (isColMatrix) {
             result = col(0).max();
             for (size_t i = 1; i < getCol(); ++i) {
                 ScalarType temp = col(i).max();
@@ -249,7 +249,7 @@ namespace Physica::Core {
     template<class Derived>
     typename RValueMatrix<Derived>::ScalarType RValueMatrix<Derived>::min() const {
         ScalarType result;
-        if constexpr (isColumnMatrix) {
+        if constexpr (isColMatrix) {
             result = col(0).min();
             for (size_t i = 1; i < getCol(); ++i) {
                 ScalarType temp = col(i).min();

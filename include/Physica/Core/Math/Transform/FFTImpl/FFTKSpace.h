@@ -248,8 +248,8 @@ namespace Physica {
         using ScalarType = typename Traits<T>::ScalarType::ComplexType;
         constexpr static int Option = MatrixOption::Row | MatrixOption::Element;
         constexpr static size_t RowAtCompile = Dynamic;
-        constexpr static size_t ColumnAtCompile = Dynamic;
-        constexpr static size_t SizeAtCompile = RowAtCompile * ColumnAtCompile;
+        constexpr static size_t ColAtCompile = Dynamic;
+        constexpr static size_t SizeAtCompile = RowAtCompile * ColAtCompile;
     };
 
     template<class T>

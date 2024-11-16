@@ -33,8 +33,8 @@ namespace Physica::Core {
         using This = Bidiagonalization<MatrixType>;
         using ScalarType = typename MatrixType::ScalarType;
         using WorkingMatrix = typename MatrixType::ColMatrix;
-        constexpr static size_t NumSingularValue = MatrixType::RowAtCompile > MatrixType::ColumnAtCompile
-                                                                            ? MatrixType::ColumnAtCompile
+        constexpr static size_t NumSingularValue = MatrixType::RowAtCompile > MatrixType::ColAtCompile
+                                                                            ? MatrixType::ColAtCompile
                                                                             : MatrixType::RowAtCompile;
         using MainDiagVector = DenseVector<ScalarType, NumSingularValue>;
         using SubDiagVector = DenseVector<ScalarType, NumSingularValue == 0 ? Dynamic : NumSingularValue - 1>;

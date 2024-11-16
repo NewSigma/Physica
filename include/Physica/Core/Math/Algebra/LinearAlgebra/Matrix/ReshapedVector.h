@@ -42,7 +42,7 @@ namespace Physica::Core {
         /* Getters */
         [[nodiscard]] ScalarType calc(size_t r, size_t c) const {
             assert(r < getRow() && c < getCol());
-            if constexpr (MatrixOption::isColumnMatrix<This>())
+            if constexpr (MatrixOption::isColMatrix<This>())
                 return v.calc(c * getRow() + r);
             else
                 return v.calc(r * getCol() + c);
@@ -69,7 +69,7 @@ namespace Physica::Core {
 
     template<class Derived>
     template<class OtherDerived>
-    ReshapedVector<Derived, MatrixOption::getMajor<OtherDerived>(), OtherDerived::RowAtCompile, OtherDerived::ColumnAtCompile>
+    ReshapedVector<Derived, MatrixOption::getMajor<OtherDerived>(), OtherDerived::RowAtCompile, OtherDerived::ColAtCompile>
     RValueVector<Derived>::reshape(const RValueMatrix<OtherDerived>& mat) const {
         return {Base::getDerived(), mat.getRow(), mat.getCol()};
     }
@@ -97,7 +97,7 @@ namespace Physica {
         using ScalarType = typename VectorType::ScalarType;
         constexpr static int Option = MatrixMajor | MatrixOption::AnyStorage;
         constexpr static size_t RowAtCompile = Row;
-        constexpr static size_t ColumnAtCompile = Col;
+        constexpr static size_t ColAtCompile = Col;
         constexpr static size_t SizeAtCompile = VectorType::SizeAtCompile;
     };
 }

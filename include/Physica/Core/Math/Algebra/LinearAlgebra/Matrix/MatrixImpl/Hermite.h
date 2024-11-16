@@ -92,15 +92,15 @@ namespace Physica {
     template <class MatrixType>
     class Traits<Hermite<MatrixType>> {
     private:
-        constexpr static int OtherMajor = MatrixOption::isColumnMatrix<MatrixType>() ? MatrixOption::Row : MatrixOption::Col;
+        constexpr static int OtherMajor = MatrixOption::isColMatrix<MatrixType>() ? MatrixOption::Row : MatrixOption::Col;
         constexpr static int Major = MatrixOption::isAnyMajor<MatrixType>() ? MatrixOption::AnyMajor : OtherMajor;
         constexpr static int Storage = MatrixOption::getStorage<MatrixType>();
 
     public:
         using ScalarType = typename MatrixType::ScalarType;
         constexpr static int Option = Major | Storage;
-        constexpr static size_t RowAtCompile = MatrixType::ColumnAtCompile;
-        constexpr static size_t ColumnAtCompile = MatrixType::RowAtCompile;
+        constexpr static size_t RowAtCompile = MatrixType::ColAtCompile;
+        constexpr static size_t ColAtCompile = MatrixType::RowAtCompile;
         constexpr static size_t SizeAtCompile = MatrixType::SizeAtCompile;
     };
 
@@ -110,7 +110,7 @@ namespace Physica {
         using ScalarType = typename VectorType::ScalarType;
         constexpr static int Option = MatrixOption::Row | MatrixOption::Vector;
         constexpr static size_t RowAtCompile = 1;
-        constexpr static size_t ColumnAtCompile = VectorType::SizeAtCompile;
+        constexpr static size_t ColAtCompile = VectorType::SizeAtCompile;
         constexpr static size_t SizeAtCompile = VectorType::SizeAtCompile;
     };
 }

@@ -62,6 +62,6 @@ namespace Physica {
         static_assert(std::is_convertible<MatrixType&, LValueMatrix<MatrixType>&>::value == isLValueMatrix, "[Error]: Invalid LValueMatrix");
     public:
         using ScalarType = typename MatrixType::ScalarType;
-        constexpr static size_t SizeAtCompile = MatrixType::RowAtCompile > MatrixType::ColumnAtCompile ? MatrixType::RowAtCompile : MatrixType::ColumnAtCompile;
+        constexpr static size_t SizeAtCompile = MatrixType::RowAtCompile > MatrixType::ColAtCompile ? MatrixType::RowAtCompile : MatrixType::ColAtCompile;
     };
 }

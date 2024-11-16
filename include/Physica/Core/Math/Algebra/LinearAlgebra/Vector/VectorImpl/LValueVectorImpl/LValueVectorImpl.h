@@ -20,13 +20,16 @@
 
 namespace Physica::Core {
     template<class Derived>
-    inline LValueVector<Derived>& LValueVector<Derived>::operator=(const LValueVector& v) {
-        return Base::getDerived() = v.getDerived();
+    inline LValueVector<Derived>& LValueVector<Derived>::operator=(const This& v) {
+        auto& target = Base::getDerived();
+        target.resize(v.getLength());
+        v.assignTo(target);
+        return target;
     }
 
     template<class Derived>
-    inline LValueVector<Derived>& LValueVector<Derived>::operator=(LValueVector&& v) noexcept {
-        return Base::getDerived() = std::move(v.getDerived());
+    inline LValueVector<Derived>& LValueVector<Derived>::operator=(This&& v) {
+        return *this = v;
     }
 
     template<class Derived>

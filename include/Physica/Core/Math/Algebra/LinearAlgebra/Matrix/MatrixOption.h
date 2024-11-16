@@ -41,13 +41,13 @@ namespace Physica::Core {
         };
     public:
         template<class Matrix>
-        __host__ __device__ constexpr static bool isColumnMatrix() {
+        __host__ __device__ constexpr static bool isColMatrix() {
             return isAnyMajor<Matrix>() || !(Traits<Matrix>::Option & Row);
         }
 
         template<class Matrix>
         __host__ __device__ constexpr static bool isRowMatrix() {
-            return isAnyMajor<Matrix>() || !isColumnMatrix<Matrix>();
+            return isAnyMajor<Matrix>() || !isColMatrix<Matrix>();
         }
 
         template<class Matrix>
@@ -57,7 +57,7 @@ namespace Physica::Core {
 
         template<class Matrix>
         __host__ __device__ constexpr static int getMajor() {
-            return isAnyMajor<Matrix>() ? AnyMajor : (isColumnMatrix<Matrix>() ? Col : Row);
+            return isAnyMajor<Matrix>() ? AnyMajor : (isColMatrix<Matrix>() ? Col : Row);
         }
 
         template<class Matrix>
@@ -81,39 +81,39 @@ namespace Physica::Core {
         }
 
         template<class Matrix1, class Matrix2>
-        __host__ __device__ constexpr static bool isSameMajor() { return isColumnMatrix<Matrix1>() == isColumnMatrix<Matrix2>(); }
+        __host__ __device__ constexpr static bool isSameMajor() { return isColMatrix<Matrix1>() == isColMatrix<Matrix2>(); }
 
         template<class Matrix1, class Matrix2>
         __host__ __device__ constexpr static bool isSameStorage() { return isElementMatrix<Matrix1>() == isElementMatrix<Matrix2>(); }
 
         template<class Matrix>
         [[nodiscard]] __host__ __device__ constexpr static size_t selectMajor(size_t row, size_t col) {
-            return isColumnMatrix<Matrix>() ? col : row;
+            return isColMatrix<Matrix>() ? col : row;
         }
 
         template<class Matrix>
         [[nodiscard]] __host__ __device__ constexpr static size_t selectMinor(size_t row, size_t col) {
-            return isColumnMatrix<Matrix>() ? row : col;
+            return isColMatrix<Matrix>() ? row : col;
         }
 
         template<class Matrix>
         [[nodiscard]] __host__ __device__ static size_t getMaxMajor(const Matrix& mat) noexcept {
-            return isColumnMatrix<Matrix>() ? mat.getCol() : mat.getRow();
+            return isColMatrix<Matrix>() ? mat.getCol() : mat.getRow();
         }
 
         template<class Matrix>
         [[nodiscard]] __host__ __device__ static size_t getMaxMinor(const Matrix& mat) noexcept {
-            return isColumnMatrix<Matrix>() ? mat.getRow() : mat.getCol();
+            return isColMatrix<Matrix>() ? mat.getRow() : mat.getCol();
         }
 
         template<class Matrix>
         [[nodiscard]] __host__ __device__ constexpr static size_t rowFromMajorMinor(size_t major, size_t minor) noexcept {
-            return isColumnMatrix<Matrix>() ? minor : major;
+            return isColMatrix<Matrix>() ? minor : major;
         }
 
         template<class Matrix>
         [[nodiscard]] __host__ __device__ constexpr static size_t colFromMajorMinor(size_t major, size_t minor) noexcept {
-            return isColumnMatrix<Matrix>() ? major : minor;
+            return isColMatrix<Matrix>() ? major : minor;
         }
 
         template<class Matrix>

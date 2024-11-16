@@ -43,8 +43,8 @@ namespace Physica::Core {
     public:
         ~LValueVector() = default;
         /* Operators */
-        inline LValueVector& operator=(const LValueVector& v);
-        inline LValueVector& operator=(LValueVector&& v) noexcept;
+        inline This& operator=(const This& v);
+        inline This& operator=(This&& v);
 
         template<Scalar T>
         inline Derived& operator=(const T& x);
@@ -89,8 +89,8 @@ namespace Physica::Core {
         [[nodiscard]] __host__ __device__ inline ConstPtrTy data_ptr(size_t index) const noexcept;
     protected:
         LValueVector() = default;
-        LValueVector(const LValueVector&) = default;
-        LValueVector(LValueVector&&) noexcept = default;
+        LValueVector(const This&) = default;
+        LValueVector(This&&) noexcept = default;
     };
 }
 

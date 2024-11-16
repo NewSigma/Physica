@@ -29,17 +29,16 @@ namespace Physica::Core {
      * References:
      * [1] Gene H. Golub, Charles F. Van Loan. Matrix computations 4th edition[M]. John Hopkins University Press, 2013
      */
-    template<class ScalarType, size_t Order = Dynamic>
+    template<Scalar T, size_t Order = Dynamic>
     class SymmEigenSolver : public Decouplable {
-        static_assert(is_scalar<ScalarType>::value, "[Error]: Invalid ScalarType");
-        using This = SymmEigenSolver<ScalarType, Order>;
-        using RealType = typename ScalarType::RealType;
-        constexpr static bool isComplex = ScalarType::isComplex;
+        using This = SymmEigenSolver<T, Order>;
+        using RealType = typename T::RealType;
+        constexpr static bool isComplex = T::isComplex;
         static_assert(!isComplex, "[Error]: Complex matrix is not supported");
     public:
         using EigenvalueVector = DenseVector<RealType, Order>;
-        using EigenvectorMatrix = DenseMatrix<ScalarType, MatrixOption::Col | MatrixOption::Vector, Order, Order>;
-        using WorkingMatrix = DenseMatrix<ScalarType, MatrixOption::Col | MatrixOption::Vector, Order, Order>; //Optimize: Use tridiagonal matrix is better
+        using EigenvectorMatrix = DenseMatrix<T, MatrixOption::Col | MatrixOption::Vector, Order, Order>;
+        using WorkingMatrix = DenseMatrix<T, MatrixOption::Col | MatrixOption::Vector, Order, Order>; //Optimize: Use tridiagonal matrix is better
     private:
         EigenvalueVector eigenvalues;
         EigenvectorMatrix eigenvectors;
@@ -69,41 +68,41 @@ namespace Physica::Core {
         void stepQR(WorkingMatrix& working, size_t lower, size_t sub_order);
     };
 
-    template<class ScalarType, size_t Order>
-    SymmEigenSolver<ScalarType, Order>::SymmEigenSolver() : eigenvalues(), eigenvectors(), computeEigenvectors(false) {}
+    template<Scalar T, size_t Order>
+    SymmEigenSolver<T, Order>::SymmEigenSolver() : eigenvalues(), eigenvectors(), computeEigenvectors(false) {}
 
-    template<class ScalarType, size_t Order>
-    SymmEigenSolver<ScalarType, Order>::SymmEigenSolver(size_t size) : SymmEigenSolver() {
+    template<Scalar T, size_t Order>
+    SymmEigenSolver<T, Order>::SymmEigenSolver(size_t size) : SymmEigenSolver() {
         resize(size);
     }
 
-    template<class ScalarType, size_t Order>
+    template<Scalar T, size_t Order>
     template<class MatrixType>
-    SymmEigenSolver<ScalarType, Order>::SymmEigenSolver(const RValueMatrix<MatrixType>& source, bool computeEigenvectors_)
+    SymmEigenSolver<T, Order>::SymmEigenSolver(const RValueMatrix<MatrixType>& source, bool computeEigenvectors_)
             : SymmEigenSolver(source.getRow()) {
         compute(source, computeEigenvectors_);
     }
 
-    template<class ScalarType, size_t Order>
+    template<Scalar T, size_t Order>
     template<class MatrixType>
-    void SymmEigenSolver<ScalarType, Order>::compute(const RValueMatrix<MatrixType>& source, bool computeEigenvectors_) {
+    void SymmEigenSolver<T, Order>::compute(const RValueMatrix<MatrixType>& source, bool computeEigenvectors_) {
         assert(source.isSymm() && "[Error]: Bad symm matrix");
         assert(source.getRow() == eigenvalues.getLength() && "[Error]: Dimensions do not match");
         computeEigenvectors = computeEigenvectors_;
         [[unlikely]] if (source.getRow() == 1) {
             eigenvalues[0] = source.calc(0, 0);
-            eigenvectors(0, 0) = ScalarType(1);
+            eigenvectors(0, 0) = T(1);
             return;
         }
 
         const RealType factor = abs_elem(source).max();
-        if (factor < std::numeric_limits<ScalarType>::min()) {
+        if (factor < std::numeric_limits<T>::min()) {
             eigenvalues = RealType(0);
             return;
         }
         const RealType inv_factor = reciprocal(factor);
         const WorkingMatrix normalized = source * inv_factor; //Referenced from eigen, to avoid under/overflow in householder
-        auto tridiagonal = Tridiagonalization<ScalarType, Order>(normalized);
+        auto tridiagonal = Tridiagonalization<T, Order>(normalized);
         WorkingMatrix working = tridiagonal.getMatrixT();
         if (computeEigenvectors)
             eigenvectors = tridiagonal.getMatrixQ();
@@ -131,14 +130,14 @@ namespace Physica::Core {
             eigenvalues[i] = working(i, i) * factor;
     }
 
-    template<class ScalarType, size_t Order>
-    void SymmEigenSolver<ScalarType, Order>::sort() {
-        sort([](ScalarType a, ScalarType b) noexcept { return a < b; });
+    template<Scalar T, size_t Order>
+    void SymmEigenSolver<T, Order>::sort() {
+        sort([](T a, T b) noexcept { return a < b; });
     }
 
-    template<class ScalarType, size_t Order>
+    template<Scalar T, size_t Order>
     template<class Compare>
-    void SymmEigenSolver<ScalarType, Order>::sort(Compare comp) {
+    void SymmEigenSolver<T, Order>::sort(Compare comp) {
         const size_t order = eigenvalues.getLength();
         for (size_t i = 0; i < order - 1; ++i) {
             size_t index_min = i;
@@ -157,38 +156,38 @@ namespace Physica::Core {
         }
     }
 
-    template<class ScalarType, size_t Order>
-    void SymmEigenSolver<ScalarType, Order>::resize(size_t size) {
+    template<Scalar T, size_t Order>
+    void SymmEigenSolver<T, Order>::resize(size_t size) {
         assert((Order == Dynamic || Order == size) && "[Error]: size is not consistent");
         eigenvalues.resize(size);
         eigenvectors.resize(size, size);
     }
 
-    template<class ScalarType, size_t Order>
-    void SymmEigenSolver<ScalarType, Order>::swap(This& __restrict solver) noexcept {
+    template<Scalar T, size_t Order>
+    void SymmEigenSolver<T, Order>::swap(This& __restrict solver) noexcept {
         assert(this != &solver && "[Error]: Self swap is likely a bug");
         eigenvalues.swap(solver.eigenvalues);
         std::swap(eigenvectors, solver.eigenvectors);
         std::swap(computeEigenvectors, solver.computeEigenvectors);
     }
 
-    template<class ScalarType, size_t Order>
-    inline typename SymmEigenSolver<ScalarType, Order>::EigenvectorMatrix SymmEigenSolver<ScalarType, Order>::getEigenvectors() const noexcept {
+    template<Scalar T, size_t Order>
+    inline typename SymmEigenSolver<T, Order>::EigenvectorMatrix SymmEigenSolver<T, Order>::getEigenvectors() const noexcept {
         assert(computeEigenvectors && "[Error]: Eigenvectors are not ready");
         return eigenvectors;
     }
     /**
      * Use wilkinson shift
      */
-    template<class ScalarType, size_t Order>
-    void SymmEigenSolver<ScalarType, Order>::stepQR(WorkingMatrix& working, size_t lower, size_t sub_order) {
-        Vector2D<ScalarType> buffer{};
+    template<Scalar T, size_t Order>
+    void SymmEigenSolver<T, Order>::stepQR(WorkingMatrix& working, size_t lower, size_t sub_order) {
+        Vector2D<T> buffer{};
         /* Init buffer */ {
             const auto subBlock = working.block(lower, sub_order, lower, sub_order);
-            const RealType factor = (subBlock(sub_order - 2, sub_order - 2).real() - subBlock(sub_order - 1, sub_order - 1).real()) * ScalarType(0.5);
+            const RealType factor = (subBlock(sub_order - 2, sub_order - 2).real() - subBlock(sub_order - 1, sub_order - 1).real()) * T(0.5);
             const RealType factor2 = square(subBlock(sub_order - 1, sub_order - 2));
             const RealType factor3 = sqrt(square(factor) + factor2);
-            const ScalarType shift = subBlock(sub_order - 1, sub_order - 1) - factor2 / (factor + (factor.isPositive() ? factor3 : -factor3)); //TODO: why we introduce a divide operation
+            const T shift = subBlock(sub_order - 1, sub_order - 1) - factor2 / (factor + (factor.isPositive() ? factor3 : -factor3)); //TODO: why we introduce a divide operation
             buffer[0] = subBlock(0, 0) - shift;
             buffer[1] = subBlock(1, 0);
         }
@@ -209,21 +208,21 @@ namespace Physica::Core {
             givens_vec[1] = -givens_vec[1];
             applyGivens(subBlock, givens_vec, index, index + 1);
 
-            const ScalarType mean = (subBlock(1, index + index) + subBlock(index + 1, index)) * ScalarType(0.5);
+            const T mean = (subBlock(1, index + index) + subBlock(index + 1, index)) * T(0.5);
             subBlock(index, index + 1) = subBlock(index + 1, index) = mean;
 
             if (computeEigenvectors)
                 applyGivens(eigenvectors, givens_vec, lower + i, lower + i + 1);
             if (!isShiftStep)
-                subBlock(2, 0) = subBlock(0, 2) = ScalarType(0);
+                subBlock(2, 0) = subBlock(0, 2) = T(0);
         }
     }
 }
 
 namespace std {
-    template<class ScalarType, size_t Order>
-    inline void swap(Physica::Core::SymmEigenSolver<ScalarType, Order>& __restrict solver1,
-                     Physica::Core::SymmEigenSolver<ScalarType, Order>& __restrict solver2) noexcept {
+    template<Physica::Core::Scalar T, size_t Order>
+    inline void swap(Physica::Core::SymmEigenSolver<T, Order>& __restrict solver1,
+                     Physica::Core::SymmEigenSolver<T, Order>& __restrict solver2) noexcept {
         solver1.swap(solver2);
     }
 }

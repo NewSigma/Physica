@@ -25,7 +25,7 @@
 #include "SIMDImpl/Instruset.h"
 
 namespace Physica::Core {
-    template<class T, size_t Size> class BoolSIMD;
+    template<Scalar T, size_t Size> class BoolSIMD;
 
     template<class ScalarType, size_t Size>
     class SIMD : private Traits<SIMD<ScalarType, Size>>::BaseType {

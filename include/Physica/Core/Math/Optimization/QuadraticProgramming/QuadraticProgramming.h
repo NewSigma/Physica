@@ -180,7 +180,7 @@ namespace Physica::Core {
         for (size_t i = 0; i < activeConstraintFlags.getLength(); ++i) {
             if (activeConstraintFlags[i]) {
                 auto row = activeConstraints.row(equalityConstraint.getRow() + activeInequalityIndex);
-                row.asVector() = inequalityConstraint.row(i);
+                row = inequalityConstraint.row(i).asVector();
                 ++activeInequalityIndex;
             }
         }

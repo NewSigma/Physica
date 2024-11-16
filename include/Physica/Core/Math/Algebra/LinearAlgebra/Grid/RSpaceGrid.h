@@ -22,7 +22,7 @@
 #include "GridImpl/LValueGrid.h"
 
 namespace Physica::Core {
-    template<class T>
+    template<Scalar T>
     class RSpaceGrid : public LValueGrid<RSpaceGrid<T>>, private GridStorage<T> {
         using This = RSpaceGrid<T>;
         using Base = LValueGrid<This>;
@@ -64,17 +64,17 @@ namespace Physica::Core {
         static RSpaceGrid random_normal(Index3D size, RandomGenerator& gen);
     };
 
-    template<class T>
+    template<Scalar T>
     template<class... Args>
     RSpaceGrid<T>::RSpaceGrid(Index3D index, Args&&... args) : Storage(index, std::forward<Args>(args)...) {}
 
-    template<class T>
+    template<Scalar T>
     RSpaceGrid<T>& RSpaceGrid<T>::operator=(RSpaceGrid grid) noexcept {
         swap(grid);
         return *this;
     }
 
-    template<class T>
+    template<Scalar T>
     std::ostream& operator<<(std::ostream& os, const RSpaceGrid<T>& grid) {
         using Index3D = typename RSpaceGrid<T>::Index3D;
         const Index3D dim = grid.getDim();
@@ -83,7 +83,7 @@ namespace Physica::Core {
         return os;
     }
 
-    template<class T>
+    template<Scalar T>
     std::istream& operator>>(std::istream& is, RSpaceGrid<T>& grid) {
         using Index3D = typename RSpaceGrid<T>::Index3D;
         Index3D dim;
@@ -93,19 +93,19 @@ namespace Physica::Core {
         return is;
     }
 
-    template<class T>
+    template<Scalar T>
     template<class... Args>
     inline void RSpaceGrid<T>::resize(Index3D index, Args&&... args) {
         Storage::resize(index, std::forward<Args>(args)...);
     }
 
-    template<class T>
+    template<Scalar T>
     inline void RSpaceGrid<T>::swap(RSpaceGrid& __restrict grid) noexcept {
         assert(this != &grid && "[Error]: Self swap is likely a bug");
         Storage::swap(grid);
     }
 
-    template<class T>
+    template<Scalar T>
     template<class RandomGenerator>
     inline RSpaceGrid<T> RSpaceGrid<T>::random_uniform(Index3D size, RandomGenerator& gen) {
         auto result = RSpaceGrid<T>(size);
@@ -113,7 +113,7 @@ namespace Physica::Core {
         return result;
     }
 
-    template<class T>
+    template<Scalar T>
     template<class RandomGenerator>
     inline RSpaceGrid<T> RSpaceGrid<T>::random_normal(Index3D size, RandomGenerator& gen) {
         auto result = RSpaceGrid<T>(size);
@@ -121,7 +121,7 @@ namespace Physica::Core {
         return result;
     }
 
-    template<class T>
+    template<Scalar T>
     inline void swap(RSpaceGrid<T>& __restrict grid1, RSpaceGrid<T>& __restrict grid2) noexcept {
         grid1.swap(grid2);
     }
@@ -130,9 +130,8 @@ namespace Physica::Core {
 namespace Physica {
     using namespace Core;
 
-    template<class T>
+    template<Scalar T>
     class Traits<RSpaceGrid<T>> {
-        static_assert(is_scalar<T>::value, "[Error]: Invalid template param");
     public:
         using ScalarType = T;
     };

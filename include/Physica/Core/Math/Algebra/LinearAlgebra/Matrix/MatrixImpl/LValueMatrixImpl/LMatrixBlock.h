@@ -22,107 +22,53 @@
 
 namespace Physica::Core {
     template<class MatrixType, size_t Row = Dynamic, size_t Col = Dynamic> class LMatrixBlock;
-    /**
-     * \class RowLVector and \class ColLVector is designed to implement \class LMatrixBlock, and they can be used indepently.
-     */
-    template<class MatrixType>
-    class RowLVector : public LValueVector<RowLVector<MatrixType>> {
+
+    template<class MatrixType, size_t Col>
+    class LMatrixBlock<MatrixType, 1, Col> : public LValueMatrix<LMatrixBlock<MatrixType, 1, Col>>
+                                           , public LValueVector<LMatrixBlock<MatrixType, 1, Col>> {
+        using This = LMatrixBlock<MatrixType, 1, Col>;
+        using Base = LValueMatrix<This>;
+        using VectorBase = LValueVector<This>;
     public:
-        using Base = LValueVector<RowLVector<MatrixType>>;
-        using ScalarType = typename MatrixType::ScalarType;
+        using typename Base::ScalarType;
+        using typename Base::ValueType;
+        using Base::isComplex;
+        using Base::SizeAtCompile;
     protected:
         using PtrTy = typename ScalarType::PtrTy;
         using ConstPtrTy = typename ScalarType::ConstPtrTy;
     private:
         MatrixType& mat;
-        size_t row;
+        size_t fromRow;
         size_t fromCol;
         size_t colCount;
     public:
-        RowLVector(MatrixType& mat_, size_t row_, size_t fromCol_, size_t colCount_) : mat(mat_), row(row_), fromCol(fromCol_), colCount(colCount_) {
-            assert(row < mat.getRow());
+        LMatrixBlock(MatrixType& mat_, size_t fromRow_, size_t fromCol_, size_t colCount_) : mat(mat_), fromRow(fromRow_), fromCol(fromCol_), colCount(colCount_) {
+            assert(fromRow < mat.getRow());
             assert(fromCol + colCount <= mat.getCol());
         }
-        RowLVector(const RowLVector&) = default;
-        RowLVector(RowLVector&&) noexcept = default;
-        ~RowLVector() = default;
-        /* Operators */
-        RowLVector& operator=(const RowLVector& v) { v.assignTo(*this); return *this; }
-        RowLVector& operator=(RowLVector&& v) noexcept { return operator=(std::cref(v)); }
-        using Base::operator=;
-        /* Operations */
-        void resize([[maybe_unused]] size_t length) { assert(length == colCount); }
-        /* Getters */
-        [[nodiscard]] __host__ __device__ size_t getLength() const noexcept { return colCount; }
-        [[nodiscard]] __host__ __device__ inline PtrTy data_ptr(size_t index) { assert(index < colCount); return mat.data_ptr(row, fromCol + index); }
-        [[nodiscard]] __host__ __device__ inline ConstPtrTy data_ptr(size_t index) const { assert(index < colCount); return mat.data_ptr(row, fromCol + index); }
-    };
-
-    template<class MatrixType>
-    class ColLVector : public LValueVector<ColLVector<MatrixType>> {
-    public:
-        using Base = LValueVector<ColLVector<MatrixType>>;
-        using ScalarType = typename MatrixType::ScalarType;
-    protected:
-        using PtrTy = typename ScalarType::PtrTy;
-        using ConstPtrTy = typename ScalarType::ConstPtrTy;
-    private:
-        MatrixType& mat;
-        size_t col;
-        size_t fromRow;
-        size_t rowCount;
-    public:
-        ColLVector(MatrixType& mat_, size_t fromRow_, size_t rowCount_, size_t col_)
-                : mat(mat_), col(col_), fromRow(fromRow_), rowCount(rowCount_) {
-            assert(fromRow + rowCount <= mat.getRow());
-            assert(col < mat.getCol());
-        }
-        ColLVector(const ColLVector&) = default;
-        ColLVector(ColLVector&&) noexcept = default;
-        ~ColLVector() = default;
-        /* Operators */
-        ColLVector& operator=(const ColLVector& v) { v.assignTo(*this); return *this; }
-        ColLVector& operator=(ColLVector&& v) noexcept { return operator=(std::cref(v)); }
-        using Base::operator=;
-        /* Operations */
-        void resize([[maybe_unused]] size_t length) { assert(length == rowCount); }
-        /* Getters */
-        [[nodiscard]] __host__ __device__ size_t getLength() const noexcept { return rowCount; }
-        [[nodiscard]] __host__ __device__ inline PtrTy data_ptr(size_t index) { assert(index < rowCount); return mat.data_ptr(fromRow + index, col); }
-        [[nodiscard]] __host__ __device__ inline ConstPtrTy data_ptr(size_t index) const { assert(index < rowCount); return mat.data_ptr(fromRow + index, col); }
-    };
-
-    template<class MatrixType>
-    class LMatrixBlock<MatrixType, 1, Dynamic> : public LValueMatrix<LMatrixBlock<MatrixType, 1, Dynamic>>
-                                               , public RowLVector<MatrixType> {
-    public:
-        using This = LMatrixBlock<MatrixType, 1, Dynamic>;
-        using Base = LValueMatrix<This>;
-        using VectorBase = RowLVector<MatrixType>;
-        using ScalarType = typename MatrixType::ScalarType;
-    public:
-        LMatrixBlock(MatrixType& mat_, size_t row_, size_t fromCol_, size_t colCount_) : VectorBase(mat_, row_, fromCol_, colCount_) {}
-        LMatrixBlock(const LMatrixBlock&) = default;
-        LMatrixBlock(LMatrixBlock&&) noexcept = default;
+        LMatrixBlock(const This&) = delete;
+        LMatrixBlock(This&&) noexcept = delete;
         ~LMatrixBlock() = default;
         /* Operators */
-        This& operator=(const ScalarType& s) { VectorBase::operator=(s); return *this; }
         using Base::operator=;
         using VectorBase::operator=;
         using VectorBase::operator+=;
         using VectorBase::operator-=;
         using VectorBase::operator*=;
         using VectorBase::operator/=;
-        [[nodiscard]] ScalarType& operator()([[maybe_unused]] size_t row, size_t col) { assert(row == 0); return VectorBase::operator[](col); }
-        [[nodiscard]] const ScalarType& operator()([[maybe_unused]] size_t row, size_t col) const { assert(row == 0); return VectorBase::operator[](col); }
         /* Operations */
         using Base::assignTo;
         using VectorBase::assignTo;
+        void resize([[maybe_unused]] size_t length) { assert(length == colCount); }
         void resize([[maybe_unused]] size_t row, [[maybe_unused]] size_t col) { assert(row == 1 && col == getCol()); }
 
         using VectorBase::format;
 
         using Base::row;
+        using VectorBase::random_uniform;
+        using VectorBase::random_normal;
+        using VectorBase::random_any;
         /* Getters */
         using Base::calc;
         using VectorBase::calc;
@@ -131,7 +77,102 @@ namespace Physica::Core {
         using VectorBase::min;
         using VectorBase::sum;
         [[nodiscard]] __host__ __device__ constexpr static size_t getRow() noexcept { return 1; }
-        [[nodiscard]] __host__ __device__ size_t getCol() const noexcept { return VectorBase::getLength(); }
+        [[nodiscard]] __host__ __device__ size_t getCol() const noexcept { return getLength(); }
+        [[nodiscard]] __host__ __device__ size_t getLength() const noexcept { return Col == Dynamic ? colCount : Col; }
+        [[nodiscard]] __host__ __device__ PtrTy data_ptr([[maybe_unused]] size_t row, size_t col) {
+            assert(row == 0);
+            return data_ptr(col);
+        }
+        [[nodiscard]] __host__ __device__ ConstPtrTy data_ptr(size_t row, size_t col) const {
+            return const_cast<This&>(*this).data_ptr(row, col);
+        }
+        [[nodiscard]] __host__ __device__ PtrTy data_ptr(size_t index) {
+            assert(index < colCount);
+            return mat.data_ptr(fromRow, fromCol + index);
+        }
+        [[nodiscard]] __host__ __device__ ConstPtrTy data_ptr(size_t index) const {
+            return const_cast<This&>(*this).data_ptr(index);
+        }
+        /**
+         * There are some common functions shared by vector and matrix, it is necessary to decide which function to call explicitly.
+         */
+        [[nodiscard]] Base& asMatrix() noexcept { return *this; }
+        [[nodiscard]] const Base& asMatrix() const noexcept { return *this; }
+        [[nodiscard]] VectorBase& asVector() noexcept { return *this; }
+        [[nodiscard]] const VectorBase& asVector() const noexcept { return *this; }
+    };
+
+    template<class MatrixType, size_t Row>
+    class LMatrixBlock<MatrixType, Row, 1> : public LValueMatrix<LMatrixBlock<MatrixType, Row, 1>>
+                                           , public LValueVector<LMatrixBlock<MatrixType, Row, 1>> {
+        using This = LMatrixBlock<MatrixType, Row, 1>;
+        using Base = LValueMatrix<This>;
+        using VectorBase = LValueVector<This>;
+    public:
+        using typename Base::ScalarType;
+        using typename Base::ValueType;
+        using Base::isComplex;
+        using Base::SizeAtCompile;
+    protected:
+        using PtrTy = typename ScalarType::PtrTy;
+        using ConstPtrTy = typename ScalarType::ConstPtrTy;
+    private:
+        MatrixType& mat;
+        size_t fromRow;
+        size_t fromCol;
+        size_t rowCount;
+    public:
+        LMatrixBlock(MatrixType& mat_, size_t fromRow_, size_t rowCount_, size_t fromCol_)
+                : mat(mat_), fromRow(fromRow_), fromCol(fromCol_), rowCount(rowCount_) {
+            assert(fromRow + rowCount <= mat.getRow());
+            assert(fromCol < mat.getCol());
+        }
+        LMatrixBlock(const This&) = delete;
+        LMatrixBlock(This&&) noexcept = delete;
+        ~LMatrixBlock() = default;
+        /* Operators */
+        using Base::operator=;
+        using VectorBase::operator=;
+        using VectorBase::operator+=;
+        using VectorBase::operator-=;
+        using VectorBase::operator*=;
+        using VectorBase::operator/=;
+        /* Operations */
+        using Base::assignTo;
+        using VectorBase::assignTo;
+        void resize([[maybe_unused]] size_t length) { assert(length == rowCount); }
+        void resize([[maybe_unused]] size_t row, [[maybe_unused]] size_t col) { assert(row == getRow() && col == 1); }
+
+        using VectorBase::format;
+
+        using Base::col;
+        using VectorBase::random_uniform;
+        using VectorBase::random_normal;
+        using VectorBase::random_any;
+        /* Getters */
+        using Base::calc;
+        using VectorBase::calc;
+        using VectorBase::conjugate;
+        using VectorBase::max;
+        using VectorBase::min;
+        using VectorBase::sum;
+        [[nodiscard]] __host__ __device__ size_t getRow() const noexcept { return getLength(); }
+        [[nodiscard]] __host__ __device__ constexpr static size_t getCol() noexcept { return 1; }
+        [[nodiscard]] __host__ __device__ size_t getLength() const noexcept { return Row == Dynamic ? rowCount : Row; }
+        [[nodiscard]] __host__ __device__ PtrTy data_ptr(size_t row, [[maybe_unused]] size_t col) {
+            assert(col == 0);
+            return data_ptr(row);
+        }
+        [[nodiscard]] __host__ __device__ ConstPtrTy data_ptr(size_t row, size_t col) const {
+            return const_cast<This&>(*this).data_ptr(row, col);
+        }
+        [[nodiscard]] __host__ __device__ PtrTy data_ptr(size_t index) {
+            assert(index < rowCount);
+            return mat.data_ptr(fromRow + index, fromCol);
+        }
+        [[nodiscard]] __host__ __device__ ConstPtrTy data_ptr(size_t index) const {
+            return const_cast<This&>(*this).data_ptr(index);
+        }
         /**
          * There are some common functions shared by vector and matrix, it is necessary to decide which function to call explicitly.
          */
@@ -142,23 +183,34 @@ namespace Physica::Core {
     };
 
     template<class MatrixType>
-    class LMatrixBlock<MatrixType, Dynamic, 1> : public LValueMatrix<LMatrixBlock<MatrixType, Dynamic, 1>>
-                                               , public ColLVector<MatrixType> {
-    public:
-        using This = LMatrixBlock<MatrixType, Dynamic, 1>;
+    class LMatrixBlock<MatrixType, 1, 1> : public LValueMatrix<LMatrixBlock<MatrixType, 1, 1>>
+                                         , public LValueVector<LMatrixBlock<MatrixType, 1, 1>> {
+        using This = LMatrixBlock<MatrixType, 1, 1>;
         using Base = LValueMatrix<This>;
-        using VectorBase = ColLVector<MatrixType>;
-        using ScalarType = typename MatrixType::ScalarType;
+        using VectorBase = LValueVector<This>;
+    public:
+        using typename Base::ScalarType;
+        using typename Base::ValueType;
+        using Base::isComplex;
+        using Base::SizeAtCompile;
     protected:
         using PtrTy = typename ScalarType::PtrTy;
         using ConstPtrTy = typename ScalarType::ConstPtrTy;
+    private:
+        MatrixType& mat;
+        size_t fromRow;
+        size_t fromCol;
+        size_t rowCount;
     public:
-        LMatrixBlock(MatrixType& mat_, size_t fromRow_, size_t rowCount_, size_t col_) : VectorBase(mat_, fromRow_, rowCount_, col_) {}
-        LMatrixBlock(const LMatrixBlock&) = default;
-        LMatrixBlock(LMatrixBlock&&) noexcept = default;
+        LMatrixBlock(MatrixType& mat_, size_t fromRow_, size_t rowCount_, size_t fromCol_)
+                : mat(mat_), fromRow(fromRow_), fromCol(fromCol_), rowCount(rowCount_) {
+            assert(fromRow + rowCount <= mat.getRow());
+            assert(fromCol < mat.getCol());
+        }
+        LMatrixBlock(const This&) = delete;
+        LMatrixBlock(This&&) noexcept = delete;
         ~LMatrixBlock() = default;
         /* Operators */
-        This& operator=(const ScalarType& s) { VectorBase::operator=(s); return *this; }
         using Base::operator=;
         using VectorBase::operator=;
         using VectorBase::operator+=;
@@ -168,11 +220,15 @@ namespace Physica::Core {
         /* Operations */
         using Base::assignTo;
         using VectorBase::assignTo;
+        void resize([[maybe_unused]] size_t length) { assert(length == rowCount); }
         void resize([[maybe_unused]] size_t row, [[maybe_unused]] size_t col) { assert(row == getRow() && col == 1); }
 
         using VectorBase::format;
 
         using Base::col;
+        using VectorBase::random_uniform;
+        using VectorBase::random_normal;
+        using VectorBase::random_any;
         /* Getters */
         using Base::calc;
         using VectorBase::calc;
@@ -180,10 +236,23 @@ namespace Physica::Core {
         using VectorBase::max;
         using VectorBase::min;
         using VectorBase::sum;
-        [[nodiscard]] __host__ __device__ size_t getRow() const noexcept { return VectorBase::getLength(); }
+        [[nodiscard]] __host__ __device__ constexpr static size_t getRow() noexcept { return 1; }
         [[nodiscard]] __host__ __device__ constexpr static size_t getCol() noexcept { return 1; }
-        [[nodiscard]] __host__ __device__ PtrTy data_ptr(size_t row, size_t) { assert(col == 0); return VectorBase::operator[](row); }
-        [[nodiscard]] __host__ __device__ ConstPtrTy data_ptr(size_t row, size_t) const { assert(col == 0); return VectorBase::operator[](row); }
+        [[nodiscard]] __host__ __device__ constexpr static size_t getLength() noexcept { return 1; }
+        [[nodiscard]] __host__ __device__ PtrTy data_ptr([[maybe_unused]] size_t row, [[maybe_unused]] size_t col) {
+            assert(row == 0 && col == 0);
+            return data_ptr(0);
+        }
+        [[nodiscard]] __host__ __device__ ConstPtrTy data_ptr(size_t row, size_t col) const {
+            return const_cast<This&>(*this).data_ptr(row, col);
+        }
+        [[nodiscard]] __host__ __device__ PtrTy data_ptr([[maybe_unused]] size_t index) {
+            assert(index == 0 && "[Error]: Index overflow");
+            return mat.data_ptr(fromRow, fromCol);
+        }
+        [[nodiscard]] __host__ __device__ ConstPtrTy data_ptr([[maybe_unused]] size_t index) const {
+            return const_cast<This&>(*this).data_ptr(index);
+        }
         /**
          * There are some common functions shared by vector and matrix, it is necessary to decide which function to call explicitly.
          */
@@ -195,10 +264,12 @@ namespace Physica::Core {
 
     template<class MatrixType>
     class LMatrixBlock<MatrixType, Dynamic, Dynamic> : public LValueMatrix<LMatrixBlock<MatrixType, Dynamic, Dynamic>> {
-    public:
         using This = LMatrixBlock<MatrixType, Dynamic, Dynamic>;
         using Base = LValueMatrix<This>;
+    public:
         using typename Base::ScalarType;
+        using Base::isComplex;
+        using Base::SizeAtCompile;
     protected:
         using PtrTy = typename ScalarType::PtrTy;
         using ConstPtrTy = typename ScalarType::ConstPtrTy;
@@ -210,13 +281,11 @@ namespace Physica::Core {
         size_t colCount;
     public:
         LMatrixBlock(MatrixType& mat_, size_t fromRow_, size_t rowCount_, size_t fromCol_, size_t colCount_);
-        LMatrixBlock(const LMatrixBlock&) = default;
-        LMatrixBlock(LMatrixBlock&&) noexcept = default;
+        LMatrixBlock(const This&) = delete;
+        LMatrixBlock(This&&) noexcept = delete;
         ~LMatrixBlock() = default;
         /* Operators */
         using Base::operator=;
-        LMatrixBlock& operator=(const LMatrixBlock& m) { Base::operator=(static_cast<const typename Base::Base&>(m)); return *this; }
-        LMatrixBlock& operator=(LMatrixBlock&& m) noexcept { Base::operator=(static_cast<const typename Base::Base&>(m)); return *this; }
         /* Operations */
         void resize([[maybe_unused]] size_t row, [[maybe_unused]] size_t col) { assert(row == rowCount && col == colCount); }
         /* Getters */
@@ -255,37 +324,16 @@ namespace Physica::Core {
 }
 
 namespace Physica {
-    using namespace Core;
-
-    template<class MatrixType>
-    class Traits<RowLVector<MatrixType>> {
-        constexpr static bool isRowMatrix = MatrixOption::isRowMatrix<MatrixType>();
-    public:
-        using ScalarType = typename MatrixType::ScalarType;
-        constexpr static size_t SizeAtCompile = Traits<MatrixType>::ColumnAtCompile;
-
-        constexpr static bool FastAssign = false;
-        constexpr static bool FastPacket = false;
-    };
-
-    template<class MatrixType>
-    class Traits<ColLVector<MatrixType>> {
-        constexpr static bool isColumnMatrix = MatrixOption::isColumnMatrix<MatrixType>();
-    public:
-        using ScalarType = typename MatrixType::ScalarType;
-        constexpr static size_t SizeAtCompile = Traits<MatrixType>::RowAtCompile;
-
-        constexpr static bool FastAssign = false;
-        constexpr static bool FastPacket = false;
-    };
-
     template<class MatrixType, size_t Row, size_t Col>
-    class Traits<LMatrixBlock<MatrixType, Row, Col>> {
+    class Traits<Core::LMatrixBlock<MatrixType, Row, Col>> {
     public:
         using ScalarType = typename MatrixType::ScalarType;
         constexpr static int Option = MatrixType::Option;
         constexpr static size_t RowAtCompile = Row;
-        constexpr static size_t ColumnAtCompile = Col;
+        constexpr static size_t ColAtCompile = Col;
         constexpr static size_t SizeAtCompile = Row * Col;
+
+        constexpr static bool FastAssign = false;
+        constexpr static bool FastPacket = false;
     };
 }

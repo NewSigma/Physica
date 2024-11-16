@@ -21,12 +21,19 @@
 namespace Physica::Core {
     template<class MatrixType, size_t Row = Dynamic, size_t Col = Dynamic> class ContinuousMatrixBlock;
 
-    template<class MatrixType, size_t Length>
-    class RowContinuousVector : public ContinuousVector<RowContinuousVector<MatrixType, Length>> {
-        using This = RowContinuousVector<MatrixType, Length>;
-        using Base = ContinuousVector<This>;
+    template<class MatrixType, size_t Col>
+    class ContinuousMatrixBlock<MatrixType, 1, Col>
+            : public LValueMatrix<ContinuousMatrixBlock<MatrixType, 1, Col>>
+            , public ContinuousVector<ContinuousMatrixBlock<MatrixType, 1, Col>> {
+        using This = ContinuousMatrixBlock<MatrixType, 1, Col>;
+        using Base = LValueMatrix<This>;
+        using VectorBase = ContinuousVector<This>;
     public:
         using typename Base::ScalarType;
+        using typename Base::ValueType;
+        using Base::isComplex;
+        using Base::isReverseDiff;
+        using Base::SizeAtCompile;
     protected:
         using PtrTy = typename ScalarType::PtrTy;
         using ConstPtrTy = typename ScalarType::ConstPtrTy;
@@ -34,102 +41,21 @@ namespace Physica::Core {
         PtrTy pVecHead;
         size_t colCount;
     public:
-        RowContinuousVector(ContinuousMatrix<MatrixType>& mat, size_t row, size_t fromCol, size_t colCount_)
-                : pVecHead(mat.data_ptr(row, fromCol)), colCount(colCount_) {
-            assert(row < mat.getRow());
-            assert(fromCol + colCount <= mat.getCol());
-        }
-        RowContinuousVector(const RowContinuousVector&) = default;
-        RowContinuousVector(RowContinuousVector&&) noexcept = default;
-        ~RowContinuousVector() = default;
-        /* Operators */
-        using Base::operator=;
-        RowContinuousVector& operator=(const RowContinuousVector& v) { v.assignTo(*this); return *this; }
-        RowContinuousVector& operator=(RowContinuousVector&& v) noexcept { return operator=(std::cref(v)); }
-        /* Operations */
-        void resize([[maybe_unused]] size_t length) { assert(length == getLength()); }
-        void makeContinuous() { /* Nothing, it is matrix's responsibility */ }
-        /* Getters */
-        [[nodiscard]] __host__ __device__ size_t getLength() const noexcept { return Length == Dynamic ? colCount : Length; }
-        [[nodiscard]] __host__ __device__ PtrTy data_ptr(size_t index) {
-            assert(index < colCount && "[Error]: Index overflow");
-            return pVecHead + index;
-        }
-        [[nodiscard]] __host__ __device__ ConstPtrTy data_ptr(size_t index) const {
-            return const_cast<This&>(*this).data_ptr(index);
-        }
-    private:
-        using Base::makeContinuous;
-    };
-
-    template<class MatrixType, size_t Length>
-    class ColContinuousVector : public ContinuousVector<ColContinuousVector<MatrixType, Length>> {
-        using This = ColContinuousVector<MatrixType, Length>;
-        using Base = ContinuousVector<This>;
-    public:
-        using typename Base::ScalarType;
-    protected:
-        using PtrTy = typename ScalarType::PtrTy;
-        using ConstPtrTy = typename ScalarType::ConstPtrTy;
-    private:
-        PtrTy pVecHead;
-        size_t rowCount;
-    public:
-        ColContinuousVector(ContinuousMatrix<MatrixType>& mat, size_t fromRow, size_t rowCount_, size_t col)
-                : pVecHead(mat.data_ptr(fromRow, col)), rowCount(rowCount_) {
-            assert(fromRow + rowCount <= mat.getRow());
-            assert(col < mat.getCol());
-        }
-        ColContinuousVector(const ColContinuousVector&) = default;
-        ColContinuousVector(ColContinuousVector&&) noexcept = default;
-        ~ColContinuousVector() = default;
-        /* Operators */
-        using Base::operator=;
-        ColContinuousVector& operator=(const ColContinuousVector& v) { v.assignTo(*this); return *this; }
-        ColContinuousVector& operator=(ColContinuousVector&& v) noexcept { return operator=(std::cref(v)); }
-        /* Operations */
-        void resize([[maybe_unused]] size_t length) { assert(length == getLength()); }
-        void makeContinuous() { /* Nothing, it is matrix's responsibility */ }
-        /* Getters */
-        [[nodiscard]] __host__ __device__ size_t getLength() const noexcept { return Length == Dynamic ? rowCount : Length; }
-        [[nodiscard]] __host__ __device__ PtrTy data_ptr(size_t index) {
-            assert(index < rowCount && "[Error]: Index overflow");
-            return pVecHead + index;
-        }
-        [[nodiscard]] __host__ __device__ ConstPtrTy data_ptr(size_t index) const {
-            return const_cast<This&>(*this).data_ptr(index);
-        }
-    private:
-        using Base::makeContinuous;
-    };
-
-    template<class MatrixType, size_t Col>
-    class ContinuousMatrixBlock<MatrixType, 1, Col>
-            : public LValueMatrix<ContinuousMatrixBlock<MatrixType, 1, Col>>
-            , public Traits<ContinuousMatrixBlock<MatrixType, 1, Col>>::VectorBase {
-        using This = ContinuousMatrixBlock<MatrixType, 1, Col>;
-    public:
-        using Base = LValueMatrix<This>;
-        using Base::isComplex;
-        using VectorBase = typename Traits<This>::VectorBase;
-        using ScalarType = typename MatrixType::ScalarType;
-    protected:
-        using PtrTy = typename ScalarType::PtrTy;
-        using ConstPtrTy = typename ScalarType::ConstPtrTy;
-    public:
-        ContinuousMatrixBlock(ContinuousMatrix<MatrixType>& mat_, size_t fromRow_, [[maybe_unused]] size_t rowCount_, size_t fromCol_, size_t colCount_)
-                : ContinuousMatrixBlock(mat_, fromRow_, fromCol_, colCount_) {
+        ContinuousMatrixBlock(ContinuousMatrix<MatrixType>& mat, size_t fromRow, [[maybe_unused]] size_t rowCount_, size_t fromCol, size_t colCount_)
+                : ContinuousMatrixBlock(mat, fromRow, fromCol, colCount_) {
             assert(rowCount_ == 1);
         }
-        ContinuousMatrixBlock(ContinuousMatrix<MatrixType>& mat_, size_t row_, size_t fromCol_, size_t colCount_)
-                : VectorBase(mat_.getDerived(), row_, fromCol_, colCount_) {}
-        ContinuousMatrixBlock(const ContinuousMatrixBlock&) = default;
-        ContinuousMatrixBlock(ContinuousMatrixBlock&&) noexcept = default;
+        ContinuousMatrixBlock(ContinuousMatrix<MatrixType>& mat, size_t fromRow, size_t fromCol, size_t colCount_)
+                : pVecHead(mat.data_ptr(fromRow, fromCol)), colCount(colCount_) {
+            assert(fromRow < mat.getRow());
+            assert(fromCol + colCount <= mat.getCol());
+        }
+        ContinuousMatrixBlock(const This&) = delete;
+        ContinuousMatrixBlock(This&&) noexcept = delete;
         ~ContinuousMatrixBlock() = default;
         /* Operators */
-        ContinuousMatrixBlock& operator=(const ContinuousMatrixBlock& m) { VectorBase::operator=(m.asVector()); return *this; }
-        ContinuousMatrixBlock& operator=(ContinuousMatrixBlock&& m) noexcept { VectorBase::operator=(m.asVector()); return *this; }
-        This& operator=(const ScalarType& s) { VectorBase::operator=(s); return *this; }
+        This& operator=(const This& m) { VectorBase::operator=(m); return *this; }
+        This& operator=(This&& m) { return *this = m; }
         using Base::operator=;
         using VectorBase::operator=;
         using VectorBase::operator+=;
@@ -139,7 +65,9 @@ namespace Physica::Core {
         /* Operations */
         using Base::assignTo;
         using VectorBase::assignTo;
+        void resize([[maybe_unused]] size_t length) { assert(length == getLength()); }
         void resize([[maybe_unused]] size_t row, [[maybe_unused]] size_t col) { assert(row == 1 && col == getCol()); }
+        void makeContinuous() { /* Nothing, it is matrix's responsibility */ }
 
         using VectorBase::format;
         using Base::row;
@@ -158,9 +86,17 @@ namespace Physica::Core {
         using VectorBase::sum;
         using VectorBase::data_ptr;
         [[nodiscard]] __host__ __device__ constexpr static size_t getRow() noexcept { return 1; }
-        [[nodiscard]] __host__ __device__ size_t getCol() const noexcept { return Col == Dynamic ? VectorBase::getLength() : Col; }
+        [[nodiscard]] __host__ __device__ size_t getCol() const noexcept { return getLength(); }
+        [[nodiscard]] __host__ __device__ size_t getLength() const noexcept { return Col == Dynamic ? colCount : Col; }
         [[nodiscard]] __host__ __device__ PtrTy data_ptr([[maybe_unused]] size_t row, size_t col) { assert(row == 0); return VectorBase::data_ptr(col); }
         [[nodiscard]] __host__ __device__ ConstPtrTy data_ptr([[maybe_unused]] size_t row, size_t col) const { assert(row == 0); return VectorBase::data_ptr(col); }
+        [[nodiscard]] __host__ __device__ PtrTy data_ptr(size_t index) {
+            assert(index < colCount && "[Error]: Index overflow");
+            return pVecHead + index;
+        }
+        [[nodiscard]] __host__ __device__ ConstPtrTy data_ptr(size_t index) const {
+            return const_cast<This&>(*this).data_ptr(index);
+        }
         /**
          * There are some common functions shared by vector and matrix, it is necessary to decide which function to call explicitly.
          */
@@ -173,30 +109,38 @@ namespace Physica::Core {
     template<class MatrixType, size_t Row>
     class ContinuousMatrixBlock<MatrixType, Row, 1>
             : public LValueMatrix<ContinuousMatrixBlock<MatrixType, Row, 1>>
-            , public Traits<ContinuousMatrixBlock<MatrixType, Row, 1>>::VectorBase {
+            , public ContinuousVector<ContinuousMatrixBlock<MatrixType, Row, 1>> {
         using This = ContinuousMatrixBlock<MatrixType, Row, 1>;
-    public:
         using Base = LValueMatrix<This>;
+        using VectorBase = ContinuousVector<This>;
+    public:
+        using typename Base::ScalarType;
+        using typename Base::ValueType;
         using Base::isComplex;
-        using VectorBase = typename Traits<This>::VectorBase;
-        using ScalarType = typename MatrixType::ScalarType;
+        using Base::isReverseDiff;
+        using Base::SizeAtCompile;
     protected:
         using PtrTy = typename ScalarType::PtrTy;
         using ConstPtrTy = typename ScalarType::ConstPtrTy;
+    private:
+        PtrTy pVecHead;
+        size_t rowCount;
     public:
-        ContinuousMatrixBlock(ContinuousMatrix<MatrixType>& mat_, size_t fromRow_, size_t rowCount_, size_t fromCol_, [[maybe_unused]] size_t colCount_)
-                : ContinuousMatrixBlock(mat_, fromRow_, rowCount_, fromCol_) {
+        ContinuousMatrixBlock(ContinuousMatrix<MatrixType>& mat, size_t fromRow, size_t rowCount_, size_t fromCol_, [[maybe_unused]] size_t colCount_)
+                : ContinuousMatrixBlock(mat, fromRow, rowCount_, fromCol_) {
             assert(colCount_ == 1);
         }
-        ContinuousMatrixBlock(ContinuousMatrix<MatrixType>& mat_, size_t fromRow_, size_t rowCount_, size_t col_)
-                : VectorBase(mat_.getDerived(), fromRow_, rowCount_, col_) {}
-        ContinuousMatrixBlock(const ContinuousMatrixBlock&) = default;
-        ContinuousMatrixBlock(ContinuousMatrixBlock&&) noexcept = default;
+        ContinuousMatrixBlock(ContinuousMatrix<MatrixType>& mat, size_t fromRow, size_t rowCount_, size_t fromCol)
+                : pVecHead(mat.data_ptr(fromRow, fromCol)), rowCount(rowCount_) {
+            assert(fromRow + rowCount <= mat.getRow());
+            assert(fromCol < mat.getCol());
+        }
+        ContinuousMatrixBlock(const This&) = delete;
+        ContinuousMatrixBlock(This&&) noexcept = delete;
         ~ContinuousMatrixBlock() = default;
         /* Operators */
-        ContinuousMatrixBlock& operator=(const ContinuousMatrixBlock& m) { VectorBase::operator=(m.asVector()); return *this; }
-        ContinuousMatrixBlock& operator=(ContinuousMatrixBlock&& m) noexcept { VectorBase::operator=(m.asVector()); return *this; }
-        This& operator=(const ScalarType& s) { VectorBase::operator=(s); return *this; }
+        This& operator=(const This& m) { VectorBase::operator=(m); return *this; }
+        This& operator=(This&& m) { return *this = m; }
         using Base::operator=;
         using VectorBase::operator=;
         using VectorBase::operator+=;
@@ -206,7 +150,9 @@ namespace Physica::Core {
         /* Operations */
         using Base::assignTo;
         using VectorBase::assignTo;
+        void resize([[maybe_unused]] size_t length) { assert(length == getLength()); }
         void resize([[maybe_unused]] size_t row, [[maybe_unused]] size_t col) { assert(row == getRow() && col == 1); }
+        void makeContinuous() { /* Nothing, it is matrix's responsibility */ }
 
         using VectorBase::format;
         using Base::col;
@@ -225,10 +171,18 @@ namespace Physica::Core {
         using VectorBase::min;
         using VectorBase::sum;
         using VectorBase::data_ptr;
-        [[nodiscard]] __host__ __device__ size_t getRow() const noexcept { return Row == Dynamic ? VectorBase::getLength() : Row; }
+        [[nodiscard]] __host__ __device__ size_t getRow() const noexcept { return getLength(); }
         [[nodiscard]] __host__ __device__ constexpr static size_t getCol() noexcept { return 1; }
+        [[nodiscard]] __host__ __device__ size_t getLength() const noexcept { return Row == Dynamic ? rowCount : Row; }
         [[nodiscard]] __host__ __device__ PtrTy data_ptr(size_t row, [[maybe_unused]] size_t col) { assert(col == 0); return VectorBase::data_ptr(row); }
         [[nodiscard]] __host__ __device__ ConstPtrTy data_ptr(size_t row, [[maybe_unused]] size_t col) const { assert(col == 0); return VectorBase::data_ptr(row); }
+        [[nodiscard]] __host__ __device__ PtrTy data_ptr(size_t index) {
+            assert(index < rowCount && "[Error]: Index overflow");
+            return pVecHead + index;
+        }
+        [[nodiscard]] __host__ __device__ ConstPtrTy data_ptr(size_t index) const {
+            return const_cast<This&>(*this).data_ptr(index);
+        }
         /**
          * There are some common functions shared by vector and matrix, it is necessary to decide which function to call explicitly.
          */
@@ -241,30 +195,40 @@ namespace Physica::Core {
     template<class MatrixType>
     class ContinuousMatrixBlock<MatrixType, 1, 1>
             : public LValueMatrix<ContinuousMatrixBlock<MatrixType, 1, 1>>
-            , public Traits<ContinuousMatrixBlock<MatrixType, 1, 1>>::VectorBase {
+            , public ContinuousVector<ContinuousMatrixBlock<MatrixType, 1, 1>> {
         using This = ContinuousMatrixBlock<MatrixType, 1, 1>;
-    public:
         using Base = LValueMatrix<This>;
+        using VectorBase = ContinuousVector<This>;
+    public:
+        using typename Base::ScalarType;
+        using typename Base::ValueType;
         using Base::isComplex;
-        using VectorBase = typename Traits<This>::VectorBase;
-        using ScalarType = typename MatrixType::ScalarType;
+        using Base::isReverseDiff;
+        using Base::SizeAtCompile;
     protected:
         using PtrTy = typename ScalarType::PtrTy;
         using ConstPtrTy = typename ScalarType::ConstPtrTy;
+    private:
+        PtrTy pVecHead;
+        size_t rowCount;
     public:
-        ContinuousMatrixBlock(ContinuousMatrix<MatrixType>& mat_, size_t fromRow_, size_t rowCount_, size_t col_)
-                : VectorBase(mat_.getDerived(), fromRow_, rowCount_, col_) {}
-        ContinuousMatrixBlock(const ContinuousMatrixBlock&) = default;
-        ContinuousMatrixBlock(ContinuousMatrixBlock&&) noexcept = default;
+        ContinuousMatrixBlock(ContinuousMatrix<MatrixType>& mat, size_t fromRow, size_t rowCount_, size_t fromCol)
+                : pVecHead(mat.data_ptr(fromRow, fromCol)), rowCount(rowCount_) {
+            assert(fromRow + rowCount <= mat.getRow());
+            assert(fromCol < mat.getCol());
+        }
+        ContinuousMatrixBlock(const This&) = delete;
+        ContinuousMatrixBlock(This&&) noexcept = delete;
         ~ContinuousMatrixBlock() = default;
         /* Operators */
-        ContinuousMatrixBlock& operator=(const ContinuousMatrixBlock& m) { VectorBase::operator=(m.asVector()); return *this; }
-        ContinuousMatrixBlock& operator=(ContinuousMatrixBlock&& m) noexcept { VectorBase::operator=(m.asVector()); return *this; }
+        This& operator=(const This& m) { VectorBase::operator=(m); return *this; }
+        This& operator=(This&& m) { return *this = m; }
         using Base::operator=;
         using VectorBase::operator=;
         /* Operations */
         using Base::assignTo;
         using VectorBase::assignTo;
+        void resize([[maybe_unused]] size_t length) { assert(length == 1); }
         void resize([[maybe_unused]] size_t row, [[maybe_unused]] size_t col) { assert(row == 1 && col == 1); }
         /* Getters */
         using Base::calc;
@@ -275,13 +239,20 @@ namespace Physica::Core {
         using VectorBase::sum;
         [[nodiscard]] __host__ __device__ constexpr static size_t getRow() noexcept { return 1; }
         [[nodiscard]] __host__ __device__ constexpr static size_t getCol() noexcept { return 1; }
+        [[nodiscard]] __host__ __device__ constexpr static size_t getLength() noexcept { return 1; }
         [[nodiscard]] __host__ __device__ PtrTy data_ptr([[maybe_unused]] size_t row, [[maybe_unused]] size_t col) {
             assert(row == 0 && col == 0 && "[Error]: Index overflow");
-            return VectorBase::data_ptr(0);
+            return data_ptr(0);
         }
         [[nodiscard]] __host__ __device__ ConstPtrTy data_ptr([[maybe_unused]] size_t row, [[maybe_unused]] size_t col) const {
-            assert(row == 0 && col == 0 && "[Error]: Index overflow");
-            return VectorBase::data_ptr(0);
+            return const_cast<This&>(*this).data_ptr(row, col);
+        }
+        [[nodiscard]] __host__ __device__ PtrTy data_ptr([[maybe_unused]] size_t index) {
+            assert(index == 0 && "[Error]: Index overflow");
+            return pVecHead;
+        }
+        [[nodiscard]] __host__ __device__ ConstPtrTy data_ptr([[maybe_unused]] size_t index) const {
+            return const_cast<This&>(*this).data_ptr(index);
         }
         /**
          * There are some common functions shared by vector and matrix, it is necessary to decide which function to call explicitly.
@@ -294,9 +265,9 @@ namespace Physica::Core {
 
     template<class MatrixType, size_t Row, size_t Col>
     class ContinuousMatrixBlock : public LValueMatrix<ContinuousMatrixBlock<MatrixType, Row, Col>> {
-    public:
         using This = ContinuousMatrixBlock<MatrixType, Row, Col>;
         using Base = LValueMatrix<This>;
+    public:
         using Base::isComplex;
         using typename Base::ScalarType;
     protected:
@@ -314,8 +285,8 @@ namespace Physica::Core {
         ContinuousMatrixBlock(This&&) noexcept = delete;
         ~ContinuousMatrixBlock() = default;
         /* Operators */
-        This& operator=(const This& m) { Base::operator=(static_cast<const RValueMatrix<This>&>(m)); return *this; }
-        This& operator=(This&& m) noexcept { Base::operator=(static_cast<RValueMatrix<This>&>(m)); return *this; }
+        This& operator=(const This& m) { Base::operator=(m); return *this; }
+        This& operator=(This&& m) { return *this = m; }
         using Base::operator=;
         /* Operations */
         void resize([[maybe_unused]] size_t row, [[maybe_unused]] size_t col) { assert(row == rowCount && col == colCount); }
@@ -360,43 +331,19 @@ namespace Physica::Core {
 }
 
 namespace Physica {
-    using namespace Core;
-
-    template<class MatrixType, size_t Length>
-    class Traits<RowContinuousVector<MatrixType, Length>> {
-    public:
-        using ScalarType = typename MatrixType::ScalarType;
-        constexpr static size_t SizeAtCompile = Length;
-
-        constexpr static bool FastAssign = false;
-        constexpr static bool FastPacket = true;
-    };
-
-    template<class MatrixType, size_t Length>
-    class Traits<ColContinuousVector<MatrixType, Length>> {
-    public:
-        using ScalarType = typename MatrixType::ScalarType;
-        constexpr static size_t SizeAtCompile = Length;
-
-        constexpr static bool FastAssign = false;
-        constexpr static bool FastPacket = true;
-    };
-
     template<class MatrixType, size_t Row, size_t Col>
-    class Traits<ContinuousMatrixBlock<MatrixType, Row, Col>> {
-        constexpr static bool isElementMatrix = MatrixOption::isElementMatrix<MatrixType>();
-        constexpr static bool isRowMatrix = MatrixOption::isRowMatrix<MatrixType>();
-        constexpr static bool isColMatrix = MatrixOption::isColumnMatrix<MatrixType>();
-        using RowVectorType = typename std::conditional<
-                isRowMatrix, RowContinuousVector<MatrixType, Col>, RowLVector<MatrixType>>::type;
-        using ColVectorType = typename std::conditional<
-                isColMatrix, ColContinuousVector<MatrixType, Row>, ColLVector<MatrixType>>::type;
+    class Traits<Core::ContinuousMatrixBlock<MatrixType, Row, Col>> {
+        constexpr static bool isElementMatrix = Core::MatrixOption::isElementMatrix<MatrixType>();
+        constexpr static bool isRowMatrix = Core::MatrixOption::isRowMatrix<MatrixType>();
+        constexpr static bool isColMatrix = Core::MatrixOption::isColMatrix<MatrixType>();
     public:
         using ScalarType = typename MatrixType::ScalarType;
         constexpr static int Option = MatrixType::Option;
         constexpr static size_t RowAtCompile = Row;
-        constexpr static size_t ColumnAtCompile = Col;
+        constexpr static size_t ColAtCompile = Col;
         constexpr static size_t SizeAtCompile = Row * Col;
-        using VectorBase = typename std::conditional<Col == 1, ColVectorType, RowVectorType>::type;
+
+        constexpr static bool FastAssign = false;
+        constexpr static bool FastPacket = true;
     };
 }

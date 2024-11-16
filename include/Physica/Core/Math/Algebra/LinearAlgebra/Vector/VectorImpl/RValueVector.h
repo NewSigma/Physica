@@ -26,6 +26,9 @@
 #include "RValueVectorImpl/RVectorBlock.h"
 
 namespace Physica::Core {
+    template<class T>
+    concept Vector = std::derived_from<T, RValueVector<T>> || std::derived_from<T, device_obj<RValueVector<T>>>;
+
     template<class Derived> class LValueVector;
     template<class Derived> class ContinuousVector;
     template<class Derived> class ContinuousMatrix;
@@ -36,14 +39,9 @@ namespace Physica::Core {
     template<class VectorType, int MatrixMajor, size_t Row, size_t Col> class ReshapedVector;
     template<class VectorType> class FormatedVector;
     template<class VectorType> class ReverseVector;
-    template<class AnyVector1, class AnyVector2> class CrossProduct;
+    template<Vector V1, Vector V2> class CrossProduct;
     template<class Derived> class ContinuousVector;
     template<class Derived> class RValueMatrix;
-
-    template<class T>
-    struct is_vector {
-        constexpr static bool value = std::is_base_of<RValueVector<T>, T>::value;
-    };
 
     template<class T>
     struct is_continuous {
@@ -92,8 +90,8 @@ namespace Physica::Core {
     public:
         ~RValueVector() = default;
         /* Operations */
-        template<class OtherDerived, class Executor = SequentialExecutor>
-        inline void assignTo(LValueVector<OtherDerived>& v) const;
+        template<Vector V, class Executor = SequentialExecutor>
+        inline void assignTo(LValueVector<V>& v) const;
         /* Getters */
         [[nodiscard]] ScalarType calc(size_t index) const { return Base::getDerived().calc(index); }
         template<class AnyPacket>
@@ -119,8 +117,8 @@ namespace Physica::Core {
         [[nodiscard]] ScalarType sum() const;
         [[nodiscard]] ScalarType prod() const;
         [[nodiscard]] bool isZeros() const;
-        template<class OtherDerived>
-        [[nodiscard]] inline CrossProduct<Derived, OtherDerived> crossProduct(const RValueVector<OtherDerived>& v) const noexcept;
+        template<Vector V>
+        [[nodiscard]] inline auto crossProduct(const V& v) const noexcept;
         template<class OtherDerived>
         [[nodiscard]] ScalarType angleTo(const RValueVector<OtherDerived>& v) const noexcept;
         template<size_t Length = Dynamic>
@@ -139,7 +137,7 @@ namespace Physica::Core {
         [[nodiscard]] inline const ReverseVector<Derived> reverse() const;
 
         template<class OtherDerived>
-        ReshapedVector<Derived, MatrixOption::getMajor<OtherDerived>(), OtherDerived::RowAtCompile, OtherDerived::ColumnAtCompile>
+        ReshapedVector<Derived, MatrixOption::getMajor<OtherDerived>(), OtherDerived::RowAtCompile, OtherDerived::ColAtCompile>
         reshape(const RValueMatrix<OtherDerived>& mat) const;
         template<size_t Row = Dynamic, size_t Col = Dynamic>
         ReshapedVector<Derived, MatrixOption::Col, Row, Col> reshape_col(size_t row, size_t col) const;

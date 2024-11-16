@@ -26,9 +26,9 @@ namespace Physica::Core {
         public:
             using ResultType = typename Internal::BinaryScalarOpReturnType<typename T1::ScalarType, typename T2::ScalarType>::Type;
 
-            constexpr static size_t size1 = T1::SizeAtCompile;
-            constexpr static size_t size2 = T2::SizeAtCompile;
-            constexpr static size_t SizeAtCompile = size1 > size2 ? size1 : size2;
+            constexpr static size_t Size1 = T1::SizeAtCompile;
+            constexpr static size_t Size2 = T2::SizeAtCompile;
+            constexpr static size_t SizeAtCompile = Size1 > Size2 ? Size1 : Size2;
             using PacketType = typename BestPacket<ResultType, SizeAtCompile>::Type;
 
             constexpr static bool isFastPacket1 = Traits<T1>::FastPacket;

@@ -36,8 +36,8 @@ namespace Physica::Core {
         struct ImageType {
             unsigned char pixels[NumPixelInImage];
             /* Operations */
-            template<class VectorType>
-            [[nodiscard]] VectorType asVector() const;
+            template<Vector V>
+            [[nodiscard]] V asVector() const;
         };
         template<class VectorType> using DatasetType = SimpleDataset<VectorType, unsigned char>;
     private:
@@ -61,8 +61,8 @@ namespace Physica::Core {
         /* Operators */
         Mnist& operator=(Mnist obj) noexcept { swap(obj); return *this; }
         /* Operations */
-        template<class VectorType> DatasetType<VectorType> makeTrainDataset() const;
-        template<class VectorType> DatasetType<VectorType> makeTestDataset() const;
+        template<Vector V> DatasetType<V> makeTrainDataset() const;
+        template<Vector V> DatasetType<V> makeTestDataset() const;
         void swap(Mnist& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] const DataArray& getTrainSamples() const noexcept { return trainSamples; }
@@ -77,32 +77,29 @@ namespace Physica::Core {
         [[nodiscard]] static int32_t readInt(std::ifstream& fin);
     };
 
-    template<class VectorType>
-    typename Mnist::DatasetType<VectorType> Mnist::makeTrainDataset() const {
-        static_assert(is_vector<VectorType>::value, "[Error]: This is not a vector");
-        using SampleArray = typename DatasetType<VectorType>::SampleArray;
+    template<Vector V>
+    typename Mnist::DatasetType<V> Mnist::makeTrainDataset() const {
+        using SampleArray = typename DatasetType<V>::SampleArray;
         const size_t numSample = getNumTrainSample();
         SampleArray samples(numSample);
         for (size_t i = 0; i < numSample; ++i)
-            samples[i] = trainSamples[i].asVector<VectorType>();
-        return DatasetType<VectorType>(std::move(samples), trainLabels);
+            samples[i] = trainSamples[i].asVector<V>();
+        return DatasetType<V>(std::move(samples), trainLabels);
     }
 
-    template<class VectorType>
-    typename Mnist::DatasetType<VectorType> Mnist::makeTestDataset() const {
-        static_assert(is_vector<VectorType>::value, "[Error]: This is not a vector");
-        using SampleArray = typename DatasetType<VectorType>::SampleArray;
+    template<Vector V>
+    typename Mnist::DatasetType<V> Mnist::makeTestDataset() const {
+        using SampleArray = typename DatasetType<V>::SampleArray;
         const size_t numSample = getNumTestSample();
         SampleArray samples(numSample);
         for (size_t i = 0; i < numSample; ++i)
-            samples[i] = testSamples[i].asVector<VectorType>();
-        return DatasetType<VectorType>(std::move(samples), testLabels);
+            samples[i] = testSamples[i].asVector<V>();
+        return DatasetType<V>(std::move(samples), testLabels);
     }
 
-    template<class VectorType>
-    VectorType Mnist::ImageType::asVector() const {
-        static_assert(is_vector<VectorType>::value, "[Error]: This is not a vector");
-        using ScalarType = typename VectorType::ScalarType::ValueType;
+    template<Vector V>
+    V Mnist::ImageType::asVector() const {
+        using ScalarType = typename V::ScalarType::ValueType;
         VectorND<ScalarType> result(NumPixelInImage);
         for (size_t i = 0; i < NumPixelInImage; ++i)
             result[i] = ScalarType(pixels[i]);

@@ -21,7 +21,9 @@
 #include "RValueMatrixImpl/RMatrixBlock.h"
 
 namespace Physica::Core {
-    template<class Derived> class RValueMatrix;
+    template<class T>
+    concept Matrix = std::derived_from<T, RValueMatrix<T>> || std::derived_from<T, device_obj<RValueMatrix<T>>>;
+
     template<class Derived> class LValueMatrix;
     template<class Derived> class ContinuousMatrix;
     template<class MatrixType> class Transpose;
@@ -30,11 +32,6 @@ namespace Physica::Core {
     template<class MatrixType> class RValueFlatten;
     template<class MatrixType> class FormatedMatrix;
     template<class MatrixType, bool isLValueMatrix> class DiagVector;
-
-    template<class T>
-    struct is_matrix {
-        constexpr static bool value = std::is_base_of<RValueMatrix<T>, T>::value;
-    };
     /**
      * \class RValueMatrix is base class of matrixes that can be assigned to \class LValueMatrix
      * and other matrixes cannot be assigned to this class.
@@ -55,17 +52,17 @@ namespace Physica::Core {
         using RealType = typename ScalarType::RealType;
         constexpr static int Option = Traits<Derived>::Option;
         constexpr static size_t RowAtCompile = Traits<Derived>::RowAtCompile;
-        constexpr static size_t ColumnAtCompile = Traits<Derived>::ColumnAtCompile;
+        constexpr static size_t ColAtCompile = Traits<Derived>::ColAtCompile;
         constexpr static size_t SizeAtCompile = Traits<Derived>::SizeAtCompile;
         constexpr static bool isForwardDiff = ScalarType::isForwardDiff;
         constexpr static bool isReverseDiff = ScalarType::isReverseDiff;
         constexpr static bool isComplex = ScalarType::isComplex;
-        constexpr static bool isColumnMatrix = MatrixOption::isColumnMatrix<Derived>();
+        constexpr static bool isColMatrix = MatrixOption::isColMatrix<Derived>();
         constexpr static bool isRowMatrix = MatrixOption::isRowMatrix<Derived>();
     public:
         /* Operations */
-        template<class OtherDerived>
-        void assignTo(LValueMatrix<OtherDerived>& target) const;
+        template<Matrix M>
+        void assignTo(LValueMatrix<M>& target) const;
         [[nodiscard]] inline RowVector row(size_t r);
         [[nodiscard]] inline const RowVector row(size_t r) const;
         [[nodiscard]] inline ColVector col(size_t c);

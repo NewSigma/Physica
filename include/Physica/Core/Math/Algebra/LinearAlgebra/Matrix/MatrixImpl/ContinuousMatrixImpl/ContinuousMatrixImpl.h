@@ -20,14 +20,8 @@
 
 namespace Physica::Core {
     template<class Derived>
-    inline ContinuousMatrix<Derived>& ContinuousMatrix<Derived>::operator=(const ContinuousMatrix<Derived>& obj) {
+    inline ContinuousMatrix<Derived>& ContinuousMatrix<Derived>::operator=(const This& obj) {
         Base::operator=(obj);
-        return *this;
-    }
-
-    template<class Derived>
-    inline ContinuousMatrix<Derived>& ContinuousMatrix<Derived>::operator=(ContinuousMatrix<Derived>&& obj) noexcept {
-        Base::operator=(std::forward<Base>(obj));
         return *this;
     }
 
@@ -44,7 +38,7 @@ namespace Physica::Core {
 
     template<class Derived>
     inline typename ContinuousMatrix<Derived>::RowVector ContinuousMatrix<Derived>::row(size_t r) {
-        const bool useSpecialization = ContinuousMatrix<Derived>::ColumnAtCompile == 1;
+        const bool useSpecialization = ContinuousMatrix<Derived>::ColAtCompile == 1;
         if constexpr (useSpecialization)
             return {Base::getDerived(), r, 1, 0};
         else
@@ -53,15 +47,15 @@ namespace Physica::Core {
 
     template<class Derived>
     inline const typename ContinuousMatrix<Derived>::RowVector ContinuousMatrix<Derived>::row(size_t r) const {
-        const bool useSpecialization = ContinuousMatrix<Derived>::ColumnAtCompile == 1;
+        const bool useSpecialization = ContinuousMatrix<Derived>::ColAtCompile == 1;
         if constexpr (useSpecialization)
             return {Base::getConstCastDerived(), r, 1, 0};
         else {
-            using ResultType = ContinuousMatrixBlock<Derived, 1, ContinuousMatrix<Derived>::ColumnAtCompile>;
-            ResultType result{Base::getConstCastDerived(), r, 0, Base::getCol()};
-            if constexpr (isRowMatrix && isReverseDiff)
+            if constexpr (isRowMatrix && isReverseDiff) {
+                RowVector result{Base::getConstCastDerived(), r, 0, Base::getCol()};
                 assert(result.checkContinuous() && "[Error]: Const matrix must be continuous because we cannot modify it and make it continuous");
-            return result;
+            }
+            return RowVector(Base::getConstCastDerived(), r, 0, Base::getCol());
         }
     }
 
@@ -72,11 +66,11 @@ namespace Physica::Core {
 
     template<class Derived>
     inline const typename ContinuousMatrix<Derived>::ColVector ContinuousMatrix<Derived>::col(size_t c) const {
-        using ResultType = ContinuousMatrixBlock<Derived, ContinuousMatrix<Derived>::RowAtCompile, 1>;
-        ResultType result{Base::getConstCastDerived(), 0, Base::getRow(), c};
-        if constexpr (isColumnMatrix && isReverseDiff)
+        if constexpr (isColMatrix && isReverseDiff) {
+            ColVector result{Base::getConstCastDerived(), 0, Base::getRow(), c};
             assert(result.checkContinuous() && "[Error]: Const matrix must be continuous because we cannot modify it and make it continuous");
-        return result;
+        }
+        return ColVector(Base::getConstCastDerived(), 0, Base::getRow(), c);
     }
 
     template<class Derived>
@@ -339,7 +333,7 @@ namespace Physica::Core {
         auto fileSpace = H5DataSpace<2>({Base::getMaxMajor(), Base::getMaxMinor()});
         for (size_t major = 0; major < maxMajor; ++major) {
             fileSpace.selectHyperslab(H5S_SELECT_SET, {1, maxMinor}, {major, 0});
-            if constexpr (isColumnMatrix)
+            if constexpr (isColMatrix)
                 dataset.read(col(major).data(), ScalarType::getH5DataType(), memSpace, fileSpace);
             else
                 dataset.read(row(major).data(), ScalarType::getH5DataType(), memSpace, fileSpace);
@@ -362,7 +356,7 @@ namespace Physica::Core {
         auto fileSpace = H5DataSpace<2>({Base::getMaxMajor(), Base::getMaxMinor()});
         for (size_t major = 0; major < maxMajor; ++major) {
             fileSpace.selectHyperslab(H5S_SELECT_SET, {1, maxMinor}, {major, 0});
-            if constexpr (isColumnMatrix)
+            if constexpr (isColMatrix)
                 dataset.write(col(major).data(), ScalarType::getH5DataType(), memSpace, fileSpace);
             else
                 dataset.write(row(major).data(), ScalarType::getH5DataType(), memSpace, fileSpace);

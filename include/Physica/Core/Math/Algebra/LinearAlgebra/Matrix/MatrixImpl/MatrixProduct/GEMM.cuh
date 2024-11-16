@@ -68,7 +68,7 @@ namespace Physica::Core {
     template<class MatrixType1, class MatrixType2>
     template<class OtherDerived>
     void device_obj<MatrixProduct<MatrixType1, MatrixType2>>::assignTo(device_obj<ContinuousMatrix<OtherDerived>>& target) const {
-        static_assert(MatrixOption::isColumnMatrix<MatrixType1>() && MatrixOption::isColumnMatrix<MatrixType2>(), "[Error]: cuBLAS uses column major");
+        static_assert(MatrixOption::isColMatrix<MatrixType1>() && MatrixOption::isColMatrix<MatrixType2>(), "[Error]: cuBLAS uses column major");
         static_assert(MatrixOption::isElementMatrix<MatrixType1>() && MatrixOption::isElementMatrix<MatrixType2>(), "[Error]: cuBLAS need element storage");
         constexpr bool IsDeviceMatrix = Traits<MatrixType1>::SizeAtCompile == Dynamic && Traits<MatrixType2>::SizeAtCompile == Dynamic;
         static_assert(IsDeviceMatrix, "[Error]: Fixed matrix is on host, pass it to device before calling cuBLAS");

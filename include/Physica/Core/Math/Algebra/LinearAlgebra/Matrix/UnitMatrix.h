@@ -74,7 +74,7 @@ namespace Physica {
         using ScalarType = T;
         constexpr static int Option = MatrixOption::AnyMajor | MatrixOption::AnyStorage;
         constexpr static size_t RowAtCompile = Order;
-        constexpr static size_t ColumnAtCompile = Order;
-        constexpr static size_t SizeAtCompile = RowAtCompile * ColumnAtCompile;
+        constexpr static size_t ColAtCompile = Order;
+        constexpr static size_t SizeAtCompile = RowAtCompile * ColAtCompile;
     };
 }

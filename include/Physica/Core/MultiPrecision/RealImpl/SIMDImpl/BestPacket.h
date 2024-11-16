@@ -22,12 +22,11 @@ namespace Physica::Core {
     /**
      * \class BestPacket finds the best packet for a linear storage
      */
-    template<class ScalarType, size_t Length>
+    template<Scalar T, size_t Length>
     class BestPacket {
-        static_assert(is_scalar<ScalarType>::value, "[Error]: Invalid ScalarType");
-        static_assert(!ScalarType::isComplex, "[Error]: This specialization does not handle complex");
-        static_assert(!ScalarType::isForwardDiff, "[Error]: This specialization does not handle forward diff");
-        constexpr static bool isSinglePrec = ScalarType::Option == Float;
+        static_assert(!T::isComplex, "[Error]: This specialization does not handle complex");
+        static_assert(!T::isForwardDiff, "[Error]: This specialization does not handle forward diff");
+        constexpr static bool isSinglePrec = T::Option == Float;
         constexpr static bool isDynamic = Length == Dynamic;
         constexpr static size_t size128 = isSinglePrec ? 4 : 2;
         constexpr static size_t size256 = isSinglePrec ? 8 : 4;
@@ -46,13 +45,13 @@ namespace Physica::Core {
         constexpr static size_t BiggestSize = support512 ? size512 : BiggestSize2;
     public:
         constexpr static size_t Size = isDynamic ? BiggestSize : Size3;
-        using Type = typename std::conditional<Size == 1, ScalarType, SIMD<ScalarType, Size>>::type;
+        using Type = typename std::conditional<Size == 1, T, SIMD<T, Size>>::type;
     };
 
-    template<class ScalarType, size_t Length>
-    class device_obj<BestPacket<ScalarType, Length>> {
+    template<Scalar T, size_t Length>
+    class device_obj<BestPacket<T, Length>> {
     public:
         constexpr static size_t Size = 1;
-        using Type = ScalarType;
+        using Type = T;
     };
 }

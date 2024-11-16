@@ -21,7 +21,8 @@
 #include <Physica/Core/Utils/Unreachable.h>
 
 namespace Physica::Core {
-    template<class ScalarType, size_t Length> class BestPacket;
+    template<Scalar T, size_t Length>
+    class BestPacket;
 
     template<size_t Length>
     class BestPacket<float16, Length> {
@@ -82,12 +83,14 @@ namespace Physica::Core {
         [[nodiscard]] __host__ __device__ const Base& toMachine() const noexcept { return *this; }
     };
 
-    __host__ __device__ inline SIMD<Real<Float16>, 2>::SIMD(ScalarType v) : Base(__half2half2(v.toMachine())) {}
+    __host__ __device__ inline SIMD<Real<Float16>, 2>::SIMD(ScalarType v)
+            : Base(__half2half2(v.toMachine())) {}
 
     __host__ __device__ inline SIMD<Real<Float16>, 2>::SIMD(ScalarType l, ScalarType h)
             : Base(make_half2(l.toMachine(), h.toMachine())) {}
 
-    __host__ __device__ inline SIMD<Real<Float16>, 2>::SIMD(Base value) : Base(value) {}
+    __host__ __device__ inline SIMD<Real<Float16>, 2>::SIMD(Base value)
+            : Base(value) {}
 
     __host__ __device__ inline Real<Float16> SIMD<Real<Float16>, 2>::operator[](int index) const noexcept {
         if (index == 0)
@@ -152,7 +155,7 @@ namespace Physica::Core {
 }
 
 namespace Physica {
-    #define T Core::Real<Core::Float16>
+#define T Core::Real<Core::Float16>
 
     template<>
     class Traits<Core::SIMD<T, 2>> {
@@ -161,11 +164,11 @@ namespace Physica {
         using BaseType = __half2;
     };
 
-    #undef T
+#undef T
 }
 
 namespace std {
-    #define T Physica::Core::SIMD<Physica::Core::Real<Physica::Core::Float16>, 2>
+#define T Physica::Core::SIMD<Physica::Core::Real<Physica::Core::Float16>, 2>
 
     __host__ __device__ inline T max(T a, T b) noexcept {
         return T(__hmax2_nan(a.toMachine(), b.toMachine()));
@@ -175,5 +178,5 @@ namespace std {
         return T(__hmin2_nan(a.toMachine(), b.toMachine()));
     }
 
-    #undef T
+#undef T
 }

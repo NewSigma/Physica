@@ -19,52 +19,52 @@
 #pragma once
 
 namespace Physica::Core {
-    template<class ScalarType, int Order>
-    Diff<ScalarType, DiffMode::Forward, Order>::Diff(ScalarType value_)
+    template<Scalar T, int Order>
+    Diff<T, DiffMode::Forward, Order>::Diff(T value_)
             : value(std::move(value_)), grad(0) {}
 
-    template<class ScalarType, int Order>
-    Diff<ScalarType, DiffMode::Forward, Order>::Diff(ScalarType value_, GradType grad_)
+    template<Scalar T, int Order>
+    Diff<T, DiffMode::Forward, Order>::Diff(T value_, GradType grad_)
             : value(std::move(value_)), grad(std::move(grad_)) {}
 
-    template<class ScalarType, int Order>
+    template<Scalar T, int Order>
     template<Scalar U, int OtherOrder>
-    Diff<ScalarType, DiffMode::Forward, Order>::Diff(const Diff<U, DiffMode::Forward, OtherOrder>& other)
+    Diff<T, DiffMode::Forward, Order>::Diff(const Diff<U, DiffMode::Forward, OtherOrder>& other)
             : value(other.getValue()), grad(other.getGrad()) {}
 
-    template<class ScalarType, int Order>
-    inline bool Diff<ScalarType, DiffMode::Forward, Order>::operator==(const This& other) const {
+    template<Scalar T, int Order>
+    inline bool Diff<T, DiffMode::Forward, Order>::operator==(const This& other) const {
         return value == other.value && grad == other.grad;
     }
 
-    template<class ScalarType, int Order>
-    inline Diff<ScalarType, DiffMode::Forward, Order> Diff<ScalarType, DiffMode::Forward, Order>::operator-() const {
+    template<Scalar T, int Order>
+    inline Diff<T, DiffMode::Forward, Order> Diff<T, DiffMode::Forward, Order>::operator-() const {
         return {-value, -grad};
     }
 
-    template<class ScalarType, int Order>
-    Diff<ScalarType, DiffMode::Forward, Order> Diff<ScalarType, DiffMode::Forward, Order>::conjugate() const {
+    template<Scalar T, int Order>
+    Diff<T, DiffMode::Forward, Order> Diff<T, DiffMode::Forward, Order>::conjugate() const {
         return This(getValue().conjugate(), getGrad().conjugate());
     }
 
-    template<class ScalarType, int Order>
-    void Diff<ScalarType, DiffMode::Forward, Order>::swap(Diff& __restrict obj) noexcept {
+    template<Scalar T, int Order>
+    void Diff<T, DiffMode::Forward, Order>::swap(Diff& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         value.swap(obj.value);
         grad.swap(obj.grad);
     }
 
-    template<class ScalarType, int Order>
-    void Diff<ScalarType, DiffMode::Forward, Order>::swap(ScalarRef<This>&& ref) noexcept {
+    template<Scalar T, int Order>
+    void Diff<T, DiffMode::Forward, Order>::swap(ScalarRef<This>&& ref) noexcept {
         assert(ScalarPtr<This>(*this) != ScalarPtr<This>(ref) && "[Error]: Self swap is likely a bug");
         value.swap(ref.getValue());
         grad.swap(ref.getGrad());
     }
 
-    template<class ScalarType, int Order>
+    template<Scalar T, int Order>
     template<int GradOrder>
-    typename Diff<ScalarType, DiffMode::Forward, Order>::Base::template GradRtnTy<GradOrder>&
-    Diff<ScalarType, DiffMode::Forward, Order>::getGrad() noexcept {
+    typename Diff<T, DiffMode::Forward, Order>::Base::template GradRtnTy<GradOrder>&
+    Diff<T, DiffMode::Forward, Order>::getGrad() noexcept {
         static_assert(Order >= GradOrder, "[Error]: Order is not enough to calculate the required grad");
         static_assert(GradOrder > 0, "[Error]: 0 or minus order is not well defined");
         if constexpr (GradOrder == 1)
@@ -73,41 +73,41 @@ namespace Physica::Core {
             return getGrad().template getGrad<GradOrder - 1>();
     }
 
-    template<class ScalarType, int Order>
+    template<Scalar T, int Order>
     template<int GradOrder>
-    inline const typename Diff<ScalarType, DiffMode::Forward, Order>::Base::template GradRtnTy<GradOrder>&
-    Diff<ScalarType, DiffMode::Forward, Order>::getGrad() const noexcept {
+    inline const typename Diff<T, DiffMode::Forward, Order>::Base::template GradRtnTy<GradOrder>&
+    Diff<T, DiffMode::Forward, Order>::getGrad() const noexcept {
         return const_cast<This&>(*this).template getGrad<GradOrder>();
     }
 
-    template<class ScalarType, int Order>
+    template<Scalar T, int Order>
     template<class RandomGenerator>
-    inline Diff<ScalarType, DiffMode::Forward, Order>
-    Diff<ScalarType, DiffMode::Forward, Order>::random_uniform(RandomGenerator& gen) {
-        return Diff(ScalarType::random_uniform(gen));
+    inline Diff<T, DiffMode::Forward, Order>
+    Diff<T, DiffMode::Forward, Order>::random_uniform(RandomGenerator& gen) {
+        return Diff(T::random_uniform(gen));
     }
 
-    template<class ScalarType, int Order>
+    template<Scalar T, int Order>
     template<class RandomGenerator>
-    inline Diff<ScalarType, DiffMode::Forward, Order>
-    Diff<ScalarType, DiffMode::Forward, Order>::random_normal(RandomGenerator& gen) {
-        return Diff(ScalarType::random_normal(gen));
+    inline Diff<T, DiffMode::Forward, Order>
+    Diff<T, DiffMode::Forward, Order>::random_normal(RandomGenerator& gen) {
+        return Diff(T::random_normal(gen));
     }
 
-    template<class ScalarType, int Order>
+    template<Scalar T, int Order>
     template<class Distribution, class RandomGenerator>
-    [[nodiscard]] inline Diff<ScalarType, DiffMode::Forward, Order>
-    Diff<ScalarType, DiffMode::Forward, Order>::random_any(Distribution& dist, RandomGenerator& gen) {
-        return Diff(ScalarType::random_any(dist, gen));
+    [[nodiscard]] inline Diff<T, DiffMode::Forward, Order>
+    Diff<T, DiffMode::Forward, Order>::random_any(Distribution& dist, RandomGenerator& gen) {
+        return Diff(T::random_any(dist, gen));
     }
 
 #ifdef PHYSICA_HDF5
-    template<class ScalarType, int Order>
-    const H5::DataType& Diff<ScalarType, DiffMode::Forward, Order>::getH5DataType() {
+    template<Scalar T, int Order>
+    const H5::DataType& Diff<T, DiffMode::Forward, Order>::getH5DataType() {
         static const auto instance = std::unique_ptr<H5::DataType>([]() -> H5::DataType* {
             auto* result = new H5::DataType(H5T_COMPOUND, sizeof(This));
             const auto id = result->getId();
-            H5Tinsert(id, "Value", HOFFSET(This, value), ScalarType::getH5DataType().getId());
+            H5Tinsert(id, "Value", HOFFSET(This, value), T::getH5DataType().getId());
             H5Tinsert(id, "Grad", HOFFSET(This, grad), GradType::getH5DataType().getId());
             return result;
         }());
@@ -202,127 +202,127 @@ namespace Physica::Core {
         pair.swap(obj.pair);
     }
     ////////////////////////////////////////////////////////////
-    template<class ScalarType, int Order>
-    Diff<ScalarType, DiffMode::Reverse, Order>::Diff(ScalarType value)
+    template<Scalar T, int Order>
+    Diff<T, DiffMode::Reverse, Order>::Diff(T value)
             : Diff(TracerType::getInstance().pushOperation(std::move(value), ExprType::Set)) {}
 
-    template<class ScalarType, int Order>
-    Diff<ScalarType, DiffMode::Reverse, Order>::Diff(
-            [[maybe_unused]] ScalarType value, [[maybe_unused]] ScalarType grad) {
+    template<Scalar T, int Order>
+    Diff<T, DiffMode::Reverse, Order>::Diff(
+            [[maybe_unused]] T value, [[maybe_unused]] T grad) {
         throw std::runtime_error("[Error]: This function is provided for template meta programming, you should not arrive here");
     }
 
-    template<class ScalarType, int Order>
-    Diff<ScalarType, DiffMode::Reverse, Order>::Diff(ValuePtr pValue_, GradType grad_)
+    template<Scalar T, int Order>
+    Diff<T, DiffMode::Reverse, Order>::Diff(ValuePtr pValue_, GradType grad_)
             : pValue(pValue_), grad(grad_) {}
 
-    template<class ScalarType, int Order>
+    template<Scalar T, int Order>
     template<int KeepDeep>
-    Diff<ScalarType, DiffMode::Reverse, Order>::operator Diff<ScalarType, DiffMode::Reverse, KeepDeep>() const {
+    Diff<T, DiffMode::Reverse, Order>::operator Diff<T, DiffMode::Reverse, KeepDeep>() const {
         static_assert(KeepDeep < Order, "[Error]: Keep depth equal or greater than order makes no sense");
         static_assert(KeepDeep > 0, "[Error]: Keep 0 depth does nothing");
-        using ResultType = Diff<ScalarType, DiffMode::Reverse, KeepDeep>;
+        using ResultType = Diff<T, DiffMode::Reverse, KeepDeep>;
         if constexpr (KeepDeep == 1)
             return ResultType(value_ptr(), grad_ptr());
         else
-            return ResultType(value_ptr(), Diff<ScalarType, DiffMode::Reverse, KeepDeep - 1>(grad));
+            return ResultType(value_ptr(), Diff<T, DiffMode::Reverse, KeepDeep - 1>(grad));
     }
 
-    template<class ScalarType, int Order>
-    inline Diff<ScalarType, DiffMode::Reverse, Order>& Diff<ScalarType, DiffMode::Reverse, Order>::operator=(std::nullptr_t) noexcept {
+    template<Scalar T, int Order>
+    inline Diff<T, DiffMode::Reverse, Order>& Diff<T, DiffMode::Reverse, Order>::operator=(std::nullptr_t) noexcept {
         pValue = nullptr;
         grad = nullptr;
         return *this;
     }
 
-    template<class ScalarType, int Order>
-    inline bool Diff<ScalarType, DiffMode::Reverse, Order>::operator==(const This& other) const {
+    template<Scalar T, int Order>
+    inline bool Diff<T, DiffMode::Reverse, Order>::operator==(const This& other) const {
         const bool result = pValue == other.pValue;
         assert(result == (grad == other.grad) && "[Error]: Bad scalar");
         return result;
     }
 
-    template<class ScalarType, int Order>
-    inline bool Diff<ScalarType, DiffMode::Reverse, Order>::operator==(std::nullptr_t) const noexcept {
+    template<Scalar T, int Order>
+    inline bool Diff<T, DiffMode::Reverse, Order>::operator==(std::nullptr_t) const noexcept {
         const bool isInvalid = value_ptr() == nullptr;
         return isInvalid;
     }
 
-    template<class ScalarType, int Order>
-    inline Diff<ScalarType, DiffMode::Reverse, Order> Diff<ScalarType, DiffMode::Reverse, Order>::operator-() const {
+    template<Scalar T, int Order>
+    inline Diff<T, DiffMode::Reverse, Order> Diff<T, DiffMode::Reverse, Order>::operator-() const {
         auto& tracer = TracerType::getInstance();
         const auto result = tracer.pushOperation(-getValue(), ExprType::Minus);
         tracer.pushOperand(*this);
         return result;
     }
 
-    template<class ScalarType, int Order>
-    inline void Diff<ScalarType, DiffMode::Reverse, Order>::reverse() {
+    template<Scalar T, int Order>
+    inline void Diff<T, DiffMode::Reverse, Order>::reverse() {
         if (getSource() == ExprType::Diff) { //Optimize: Always false if no high order differential is required
             getFirstOperand()->reverse();
             return;
         }
 
         if constexpr (Order == 1)
-            *grad = ScalarType(1);
+            *grad = T(1);
         else
-            grad.setValue(ScalarType(1));
+            grad.setValue(T(1));
         TracerType::getInstance().reverse_from(*this);
     }
 
-    template<class ScalarType, int Order>
-    inline void Diff<ScalarType, DiffMode::Reverse, Order>::reverse_to(Diff to) {
+    template<Scalar T, int Order>
+    inline void Diff<T, DiffMode::Reverse, Order>::reverse_to(Diff to) {
         if (getSource() == ExprType::Diff) {
             getFirstOperand()->reverse_to(to);
             return;
         }
 
         if constexpr (Order == 1)
-            *grad = ScalarType(1);
+            *grad = T(1);
         else
-            grad.setValue(ScalarType(1));
+            grad.setValue(T(1));
         TracerType::getInstance().reverse(*this, to);
     }
 
-    template<class ScalarType, int Order>
-    inline void Diff<ScalarType, DiffMode::Reverse, Order>::zero_grad() {
-        *grad_ptr() = ScalarType(0);
+    template<Scalar T, int Order>
+    inline void Diff<T, DiffMode::Reverse, Order>::zero_grad() {
+        *grad_ptr() = T(0);
     }
 
-    template<class ScalarType, int Order>
-    inline Diff<ScalarType, DiffMode::Reverse, Order> Diff<ScalarType, DiffMode::Reverse, Order>::copy() const {
+    template<Scalar T, int Order>
+    inline Diff<T, DiffMode::Reverse, Order> Diff<T, DiffMode::Reverse, Order>::copy() const {
         return TracerType::getInstance().copy(*this);
     }
 
-    template<class ScalarType, int Order>
-    inline void Diff<ScalarType, DiffMode::Reverse, Order>::swap(This& __restrict obj) noexcept {
+    template<Scalar T, int Order>
+    inline void Diff<T, DiffMode::Reverse, Order>::swap(This& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         std::swap(pValue, obj.pValue);
         std::swap(grad, obj.grad);
     }
 
-    template<class ScalarType, int Order>
-    __host__ __device__ inline ScalarType* Diff<ScalarType, DiffMode::Reverse, Order>::value_ptr() const noexcept {
+    template<Scalar T, int Order>
+    __host__ __device__ inline T* Diff<T, DiffMode::Reverse, Order>::value_ptr() const noexcept {
         return pValue;
     }
 
-    template<class ScalarType, int Order>
-    __host__ __device__ inline ScalarType* Diff<ScalarType, DiffMode::Reverse, Order>::grad_ptr() const noexcept {
+    template<Scalar T, int Order>
+    __host__ __device__ inline T* Diff<T, DiffMode::Reverse, Order>::grad_ptr() const noexcept {
         if constexpr (Order == 1)
             return grad;
         else
             return grad.value_ptr();
     }
 
-    template<class ScalarType, int Order>
-    inline ScalarType& Diff<ScalarType, DiffMode::Reverse, Order>::getValue() noexcept {
+    template<Scalar T, int Order>
+    inline T& Diff<T, DiffMode::Reverse, Order>::getValue() noexcept {
         return *pValue;
     }
 
-    template<class ScalarType, int Order>
+    template<Scalar T, int Order>
     template<int GradOrder>
-    inline typename Diff<ScalarType, DiffMode::Reverse, Order>::Base::template GradRtnTy<GradOrder>&
-    Diff<ScalarType, DiffMode::Reverse, Order>::getGrad() noexcept {
+    inline typename Diff<T, DiffMode::Reverse, Order>::Base::template GradRtnTy<GradOrder>&
+    Diff<T, DiffMode::Reverse, Order>::getGrad() noexcept {
         static_assert(Order >= GradOrder, "[Error]: Order is not enough to calculate the required grad");
         static_assert(GradOrder > 0, "[Error]: 0 or minus order is not well defined");
         if constexpr (GradOrder == 1) {
@@ -335,55 +335,55 @@ namespace Physica::Core {
             return getGrad<1>().template getGrad<GradOrder - 1>();
     }
 
-    template<class ScalarType, int Order>
-    inline const ScalarType& Diff<ScalarType, DiffMode::Reverse, Order>::getValue() const noexcept {
+    template<Scalar T, int Order>
+    inline const T& Diff<T, DiffMode::Reverse, Order>::getValue() const noexcept {
         return const_cast<This&>(*this).getValue();
     }
 
-    template<class ScalarType, int Order>
+    template<Scalar T, int Order>
     template<int GradOrder>
-    inline const typename Diff<ScalarType, DiffMode::Reverse, Order>::Base::template GradRtnTy<GradOrder>&
-    Diff<ScalarType, DiffMode::Reverse, Order>::getGrad() const noexcept {
+    inline const typename Diff<T, DiffMode::Reverse, Order>::Base::template GradRtnTy<GradOrder>&
+    Diff<T, DiffMode::Reverse, Order>::getGrad() const noexcept {
         return const_cast<This&>(*this).template getGrad<GradOrder>();
     }
 
-    template<class ScalarType, int Order>
-    inline ExprType Diff<ScalarType, DiffMode::Reverse, Order>::getSource() const noexcept {
+    template<Scalar T, int Order>
+    inline ExprType Diff<T, DiffMode::Reverse, Order>::getSource() const noexcept {
         auto& tracer = TracerType::getInstance();
         return tracer.getSource(*this);
     }
 
-    template<class ScalarType, int Order>
-    inline Diff<ScalarType, DiffMode::Reverse, Order>*
-    Diff<ScalarType, DiffMode::Reverse, Order>::getFirstOperand() const {
+    template<Scalar T, int Order>
+    inline Diff<T, DiffMode::Reverse, Order>*
+    Diff<T, DiffMode::Reverse, Order>::getFirstOperand() const {
         auto& tracer = TracerType::getInstance();
         return tracer.getFirstOperand(*this);
     }
 
-    template<class ScalarType, int Order>
+    template<Scalar T, int Order>
     template<class RandomGenerator>
-    inline Diff<ScalarType, DiffMode::Reverse, Order>
-    Diff<ScalarType, DiffMode::Reverse, Order>::random_uniform(RandomGenerator& gen) {
-        return Diff(ScalarType::random_uniform(gen));
+    inline Diff<T, DiffMode::Reverse, Order>
+    Diff<T, DiffMode::Reverse, Order>::random_uniform(RandomGenerator& gen) {
+        return Diff(T::random_uniform(gen));
     }
 
-    template<class ScalarType, int Order>
+    template<Scalar T, int Order>
     template<class RandomGenerator>
-    inline Diff<ScalarType, DiffMode::Reverse, Order>
-    Diff<ScalarType, DiffMode::Reverse, Order>::random_normal(RandomGenerator& gen) {
-        return Diff(ScalarType::random_normal(gen));
+    inline Diff<T, DiffMode::Reverse, Order>
+    Diff<T, DiffMode::Reverse, Order>::random_normal(RandomGenerator& gen) {
+        return Diff(T::random_normal(gen));
     }
 
-    template<class ScalarType, int Order>
+    template<Scalar T, int Order>
     template<class Distribution, class RandomGenerator>
-    inline Diff<ScalarType, DiffMode::Reverse, Order>
-    Diff<ScalarType, DiffMode::Reverse, Order>::random_any(Distribution& dist, RandomGenerator& gen) {
-        return Diff(ScalarType::random_any(dist, gen));
+    inline Diff<T, DiffMode::Reverse, Order>
+    Diff<T, DiffMode::Reverse, Order>::random_any(Distribution& dist, RandomGenerator& gen) {
+        return Diff(T::random_any(dist, gen));
     }
     ////////////////////////////////////////////////////////////
-    template<class ScalarType, DiffMode Mode, int Order, Scalar U>
-    [[nodiscard]] inline auto operator+(const Diff<ScalarType, Mode, Order>& s1, const U& s2_) {
-        using FirstType = Diff<ScalarType, Mode, Order>;
+    template<Scalar T, DiffMode Mode, int Order, Scalar U>
+    [[nodiscard]] inline auto operator+(const Diff<T, Mode, Order>& s1, const U& s2_) {
+        using FirstType = Diff<T, Mode, Order>;
         using SecondType = U;
         using ResultType = typename Internal::BinaryScalarOpReturnType<FirstType, SecondType>::Type;
         const auto& s2 = s2_.getDerived();
@@ -399,7 +399,7 @@ namespace Physica::Core {
             using ValueType = typename Internal::BinaryScalarOpReturnType<FirstValue, SecondValue>::Type;
             static_assert(std::is_same<FirstValue, SecondValue>::value, "[Error]: Reverse mode between different type is not supported");
             
-            auto& tracer = DiffTracer<ScalarType, Order>::getInstance();
+            auto& tracer = DiffTracer<T, Order>::getInstance();
             const ValueType value = s1.getValue() + s2.getValue();
             ResultType result;
             if constexpr (U::isDifferentiable) {
@@ -417,15 +417,15 @@ namespace Physica::Core {
         }
     }
 
-    template<class ScalarType, DiffMode Mode, int Order, Scalar U>
-    [[nodiscard]] inline typename std::enable_if<!U::isDifferentiable, typename Internal::BinaryScalarOpReturnType<Diff<ScalarType, Mode, Order>, U>::Type>::type
-    operator+(const U& s1, const Diff<ScalarType, Mode, Order>& s2) {
+    template<Scalar T, DiffMode Mode, int Order, Scalar U>
+    [[nodiscard]] inline typename std::enable_if<!U::isDifferentiable, typename Internal::BinaryScalarOpReturnType<Diff<T, Mode, Order>, U>::Type>::type
+    operator+(const U& s1, const Diff<T, Mode, Order>& s2) {
         return s2 + s1.getDerived();
     }
 
-    template<class ScalarType, DiffMode Mode, int Order, Scalar U>
-    [[nodiscard]] inline auto operator-(const Diff<ScalarType, Mode, Order>& s1, const U& s2_) {
-        using FirstType = Diff<ScalarType, Mode, Order>;
+    template<Scalar T, DiffMode Mode, int Order, Scalar U>
+    [[nodiscard]] inline auto operator-(const Diff<T, Mode, Order>& s1, const U& s2_) {
+        using FirstType = Diff<T, Mode, Order>;
         using SecondType = U;
         using ResultType = typename Internal::BinaryScalarOpReturnType<FirstType, SecondType>::Type;
         const auto& s2 = s2_.getDerived();
@@ -441,7 +441,7 @@ namespace Physica::Core {
             using ValueType = typename Internal::BinaryScalarOpReturnType<FirstValue, SecondValue>::Type;
             static_assert(std::is_same<FirstValue, SecondValue>::value, "[Error]: Reverse mode between different type is not supported");
             
-            auto& tracer = DiffTracer<ScalarType, Order>::getInstance();
+            auto& tracer = DiffTracer<T, Order>::getInstance();
             const ValueType value = s1.getValue() - s2.getValue();
             ResultType result;
             if constexpr (U::isDifferentiable) {
@@ -459,15 +459,15 @@ namespace Physica::Core {
         }
     }
 
-    template<class ScalarType, DiffMode Mode, int Order, Scalar U>
-    [[nodiscard]] inline typename std::enable_if<!U::isDifferentiable, typename Internal::BinaryScalarOpReturnType<Diff<ScalarType, Mode, Order>, U>::Type>::type
-    operator-(const U& s1, const Diff<ScalarType, Mode, Order>& s2) {
+    template<Scalar T, DiffMode Mode, int Order, Scalar U>
+    [[nodiscard]] inline typename std::enable_if<!U::isDifferentiable, typename Internal::BinaryScalarOpReturnType<Diff<T, Mode, Order>, U>::Type>::type
+    operator-(const U& s1, const Diff<T, Mode, Order>& s2) {
         return -(s2 - s1.getDerived());
     }
 
-    template<class ScalarType, DiffMode Mode, int Order, Scalar U>
-    [[nodiscard]] inline auto operator*(const Diff<ScalarType, Mode, Order>& s1, const U& s2_) {
-        using FirstType = Diff<ScalarType, Mode, Order>;
+    template<Scalar T, DiffMode Mode, int Order, Scalar U>
+    [[nodiscard]] inline auto operator*(const Diff<T, Mode, Order>& s1, const U& s2_) {
+        using FirstType = Diff<T, Mode, Order>;
         using SecondType = U;
         using ResultType = typename Internal::BinaryScalarOpReturnType<FirstType, SecondType>::Type;
         const auto& s2 = s2_.getDerived();
@@ -485,7 +485,7 @@ namespace Physica::Core {
             using ValueType = typename Internal::BinaryScalarOpReturnType<FirstValue, SecondValue>::Type;
             static_assert(std::is_same<FirstValue, SecondValue>::value, "[Error]: Reverse mode between different type is not supported");
             
-            auto& tracer = DiffTracer<ScalarType, Order>::getInstance();
+            auto& tracer = DiffTracer<T, Order>::getInstance();
             const ValueType value = s1.getValue() * s2.getValue();
             ResultType result;
             if constexpr (U::isDifferentiable) {
@@ -503,15 +503,15 @@ namespace Physica::Core {
         }
     }
 
-    template<class ScalarType, DiffMode Mode, int Order, Scalar U>
-    [[nodiscard]] inline typename std::enable_if<!U::isDifferentiable, typename Internal::BinaryScalarOpReturnType<Diff<ScalarType, Mode, Order>, U>::Type>::type
-    operator*(const U& s1, const Diff<ScalarType, Mode, Order>& s2) {
+    template<Scalar T, DiffMode Mode, int Order, Scalar U>
+    [[nodiscard]] inline typename std::enable_if<!U::isDifferentiable, typename Internal::BinaryScalarOpReturnType<Diff<T, Mode, Order>, U>::Type>::type
+    operator*(const U& s1, const Diff<T, Mode, Order>& s2) {
         return s2 * s1.getDerived();
     }
 
-    template<class ScalarType, DiffMode Mode, int Order, Scalar U>
-    [[nodiscard]] inline auto operator/(const Diff<ScalarType, Mode, Order>& s1, const U& s2_) {
-        using FirstType = Diff<ScalarType, Mode, Order>;
+    template<Scalar T, DiffMode Mode, int Order, Scalar U>
+    [[nodiscard]] inline auto operator/(const Diff<T, Mode, Order>& s1, const U& s2_) {
+        using FirstType = Diff<T, Mode, Order>;
         using SecondType = U;
         using ResultType = typename Internal::BinaryScalarOpReturnType<FirstType, SecondType>::Type;
         const auto& s2 = s2_.getDerived();
@@ -532,7 +532,7 @@ namespace Physica::Core {
             using ValueType = typename Internal::BinaryScalarOpReturnType<FirstValue, SecondValue>::Type;
             static_assert(std::is_same<FirstValue, SecondValue>::value, "[Error]: Reverse mode between different type is not supported");
             
-            auto& tracer = DiffTracer<ScalarType, Order>::getInstance();
+            auto& tracer = DiffTracer<T, Order>::getInstance();
             const ValueType value = s1.getValue() / s2.getValue();
             ResultType result;
             if constexpr (U::isDifferentiable) {
@@ -550,19 +550,19 @@ namespace Physica::Core {
         }
     }
 
-    template<class ScalarType, DiffMode Mode, int Order, Scalar U>
-    [[nodiscard]] inline typename std::enable_if<!U::isDifferentiable, typename Internal::BinaryScalarOpReturnType<Diff<ScalarType, Mode, Order>, U>::Type>::type
-    operator/(const U& s1, const Diff<ScalarType, Mode, Order>& s2) {
-        using ResultType = typename Internal::BinaryScalarOpReturnType<Diff<ScalarType, Mode, Order>, U>::Type;
+    template<Scalar T, DiffMode Mode, int Order, Scalar U>
+    [[nodiscard]] inline typename std::enable_if<!U::isDifferentiable, typename Internal::BinaryScalarOpReturnType<Diff<T, Mode, Order>, U>::Type>::type
+    operator/(const U& s1, const Diff<T, Mode, Order>& s2) {
+        using ResultType = typename Internal::BinaryScalarOpReturnType<Diff<T, Mode, Order>, U>::Type;
         if constexpr (Mode == DiffMode::Forward) {
             const auto rep = reciprocal(s2.getValue());
             return ResultType(s1.getValue() * rep, -s1.getValue() * s2.getGrad() * square(rep));
         }
         else {
-            static_assert(std::is_same<U, ScalarType>::value, "[Error]: Reverse mode between different type is not supported");
-            const ScalarType value = s1.getValue() / s2.getValue();
+            static_assert(std::is_same<T, U>::value, "[Error]: Reverse mode between different type is not supported");
+            const T value = s1.getValue() / s2.getValue();
             const ResultType copy = s1.getDerived();
-            auto& tracer = DiffTracer<ScalarType, Order>::getInstance();
+            auto& tracer = DiffTracer<T, Order>::getInstance();
             const auto result = tracer.pushOperation(value, ExprType::Div);
             tracer.pushOperand(copy);
             tracer.pushOperand(s2.getDerived());

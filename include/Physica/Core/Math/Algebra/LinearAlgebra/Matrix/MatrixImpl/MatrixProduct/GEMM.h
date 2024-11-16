@@ -44,7 +44,7 @@ namespace Physica::Core {
         using DefaultType = DenseMatrix<ScalarType,
                                         Internal::ProductOption<MatrixType1, MatrixType2>::Option,
                                         Base::RowAtCompile,
-                                        Base::ColumnAtCompile,
+                                        Base::ColAtCompile,
                                         HostAllocator<ScalarType>>;
     private:
         const MatrixType1& mat1;
@@ -112,8 +112,8 @@ namespace Physica::Core {
     }
 
     template<class MatrixType1, class MatrixType2>
-    [[nodiscard]] inline typename std::enable_if<(MatrixType1::ColumnAtCompile != 1 && MatrixType2::ColumnAtCompile != 1) ||
-                                                 (MatrixType1::ColumnAtCompile == 1 && MatrixType2::ColumnAtCompile == 1),
+    [[nodiscard]] inline typename std::enable_if<(MatrixType1::ColAtCompile != 1 && MatrixType2::ColAtCompile != 1) ||
+                                                 (MatrixType1::ColAtCompile == 1 && MatrixType2::ColAtCompile == 1),
                                                   MatrixProduct<MatrixType1, MatrixType2>>::type
     operator*(const RValueMatrix<MatrixType1>& mat1, const RValueMatrix<MatrixType2>& mat2) noexcept {
         assert(mat1.getCol() == mat2.getRow());
@@ -124,8 +124,8 @@ namespace Physica::Core {
 namespace Physica {
     template<class MatrixType1, class MatrixType2>
     class Traits<MatrixProduct<MatrixType1, MatrixType2>> {
-        static_assert(MatrixType1::ColumnAtCompile == MatrixType2::RowAtCompile ||
-                      MatrixType1::ColumnAtCompile == Dynamic ||
+        static_assert(MatrixType1::ColAtCompile == MatrixType2::RowAtCompile ||
+                      MatrixType1::ColAtCompile == Dynamic ||
                       MatrixType2::RowAtCompile == Dynamic,
                       "[Error]: Row and column do not match in matrix-vector product");
     public:
@@ -133,7 +133,7 @@ namespace Physica {
                                                                              typename MatrixType2::ScalarType>::Type;
         constexpr static int Option = MatrixOption::AnyMajor | MatrixOption::AnyStorage;
         constexpr static size_t RowAtCompile = MatrixType1::RowAtCompile;
-        constexpr static size_t ColumnAtCompile = MatrixType2::ColumnAtCompile;
-        constexpr static size_t SizeAtCompile = RowAtCompile * ColumnAtCompile;
+        constexpr static size_t ColAtCompile = MatrixType2::ColAtCompile;
+        constexpr static size_t SizeAtCompile = RowAtCompile * ColAtCompile;
     };
 }

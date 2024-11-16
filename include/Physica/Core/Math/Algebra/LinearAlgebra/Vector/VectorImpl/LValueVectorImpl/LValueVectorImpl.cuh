@@ -40,22 +40,21 @@ namespace Physica::Core {
     __host__ __device__
     inline device_obj<LValueVector<Derived>>&
     device_obj<LValueVector<Derived>>::operator=(const device_obj<LValueVector<Derived>>& obj) {
-        Base::operator=(obj);
+        obj.assignTo(*this);
         return *this;
     }
 
     template<class Derived>
     __host__ __device__
     inline device_obj<LValueVector<Derived>>&
-    device_obj<LValueVector<Derived>>::operator=(device_obj<LValueVector<Derived>>&& obj) noexcept {
-        Base::operator=(std::move(obj));
-        return *this;
+    device_obj<LValueVector<Derived>>::operator=(device_obj<LValueVector<Derived>>&& obj) {
+        return *this = obj;
     }
 
     template<class Derived>
-    template<class OtherDerived>
+    template<Vector V>
     __host__ __device__
-    device_obj<Derived>& device_obj<LValueVector<Derived>>::operator=(const device_obj<RValueVector<OtherDerived>>& v) {
+    device_obj<Derived>& device_obj<LValueVector<Derived>>::operator=(const device_obj<V>& v) {
         if constexpr (IsHost())
             Base::getDerived().resize(v.getLength());
         v.assignTo(*this);

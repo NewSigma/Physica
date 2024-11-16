@@ -52,10 +52,10 @@ namespace Physica::Core {
         template<class MatrixType>
         inline void cgnr(const RValueMatrix<MatrixType>& A, VectorType& b);
 
-        template<class Functor, class LVector>
-        void cg_functor(Functor dotFunc, LVector& b);
-        template<class Functor1, class Functor2, class LVector>
-        void cgnr_functor(Functor1 dotFunc, Functor2 dotTransFunc, LVector& b);
+        template<class Functor, Vector V>
+        void cg_functor(Functor dotFunc, LValueVector<V>& b);
+        template<class Functor1, class Functor2, Vector V>
+        void cgnr_functor(Functor1 dotFunc, Functor2 dotTransFunc, LValueVector<V>& b);
 
         void resize(size_t size);
         void swap(This& __restrict obj) noexcept;
@@ -105,12 +105,11 @@ namespace Physica::Core {
      * [1] Nocedal J, Wright S J, Mikosch T V, et al. Numerical Optimization. Springer, 2006.112
      */
     template<class ScalarType>
-    template<class Functor, class LVector>
-    void IterateSolver<ScalarType>::cg_functor(Functor dotFunc, LVector& b) {
-        static_assert(std::is_base_of<LValueVector<LVector>, LVector>::value, "[Error]: This is not a LValueVector");
+    template<class Functor, Vector V>
+    void IterateSolver<ScalarType>::cg_functor(Functor dotFunc, LValueVector<V>& b) {
         residual = -b;
         searchP = b;
-        LVector& x = b;
+        LValueVector<V>& x = b;
         x = ScalarType(0);
 
         squaredRes0 = squaredRes = residual.squaredNorm();
@@ -139,12 +138,11 @@ namespace Physica::Core {
      * [1] Gene H. Golub, Charles F. Van Loan. Matrix computations 4th edition[M]. John Hopkins University Press, 2013:636-637
      */
     template<class ScalarType>
-    template<class Functor1, class Functor2, class LVector>
-    void IterateSolver<ScalarType>::cgnr_functor(Functor1 dotFunc, Functor2 dotTransFunc, LVector& b) {
-        static_assert(std::is_base_of<LValueVector<LVector>, LVector>::value, "[Error]: This is not a LValueVector");
+    template<class Functor1, class Functor2, Vector V>
+    void IterateSolver<ScalarType>::cgnr_functor(Functor1 dotFunc, Functor2 dotTransFunc, LValueVector<V>& b) {
         residual = -b;
         dotTransFunc(b, searchP);
-        LVector& x = b;
+        LValueVector<V>& x = b;
         x = ScalarType(0);
 
         squaredRes0 = squaredRes = searchP.squaredNorm();

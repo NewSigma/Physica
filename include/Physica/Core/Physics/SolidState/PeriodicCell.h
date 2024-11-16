@@ -19,8 +19,8 @@
 #pragma once
 
 #include <Physica/Core/Exception/BadConvergenceException.h>
-#include <Physica/Core/MultiPrecision/Real.h>
 #include <Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h>
+#include <Physica/Core/MultiPrecision/Real.h>
 
 namespace Physica::Core {
     namespace Internal {
@@ -38,22 +38,21 @@ namespace Physica::Core {
         CellMajor
     };
 
-    template<class ScalarType, unsigned int Dim>
+    template<Scalar T, unsigned int Dim>
     class PeriodicCell : public Internal::PeriodicCellImpl {
-        static_assert(is_scalar<ScalarType>::value, "[Error]: Invalid ScalarType");
         static_assert(Dim == 1 || Dim == 2 || Dim == 3, "[Error]: Unsupported dimention");
 
-        using This = PeriodicCell<ScalarType, Dim>;
+        using This = PeriodicCell<T, Dim>;
         using Base = Internal::PeriodicCellImpl;
-        using ValueType = typename ScalarType::ValueType;
+        using ValueType = typename T::ValueType;
     public:
-        using LatticeMatrix = DenseMatrix<ScalarType, MatrixOption::Row | MatrixOption::Element, Dim, Dim>;
-        using InvLatticeMatrix = DenseMatrix<ScalarType, MatrixOption::Col | MatrixOption::Element, Dim, Dim>;
-        using PositionMatrix = DenseMatrix<ScalarType, MatrixOption::Row | MatrixOption::Element, Dynamic, Dim>;
+        using LatticeMatrix = DenseMatrix<T, MatrixOption::Row | MatrixOption::Element, Dim, Dim>;
+        using InvLatticeMatrix = DenseMatrix<T, MatrixOption::Col | MatrixOption::Element, Dim, Dim>;
+        using PositionMatrix = DenseMatrix<T, MatrixOption::Row | MatrixOption::Element, Dynamic, Dim>;
         using MomentumMatrix = PositionMatrix;
         using SearchRangeType = Array<ssize_t, Dim>;
     protected:
-        using VectorType = DenseVector<ScalarType, Dim>;
+        using VectorType = DenseVector<T, Dim>;
 
         LatticeMatrix lattice;
         PositionMatrix pos;
@@ -62,7 +61,8 @@ namespace Physica::Core {
         PeriodicCell();
         PeriodicCell(size_t numParticle, Type type_);
         PeriodicCell(LatticeMatrix lattice_, PositionMatrix pos_, Type type_);
-        template<class OtherScalar>  PeriodicCell(const PeriodicCell<OtherScalar, Dim>& cell);
+        template<class OtherScalar>
+        PeriodicCell(const PeriodicCell<OtherScalar, Dim>& cell);
         PeriodicCell(const PeriodicCell&) = default;
         PeriodicCell(PeriodicCell&&) noexcept = default;
         ~PeriodicCell() = default;
@@ -72,7 +72,7 @@ namespace Physica::Core {
         [[nodiscard]] VectorType minDistVector(size_t id_from, size_t id_to) const;
         [[nodiscard]] VectorType minDistVector(VectorType from, size_t id_to) const;
         void normalize();
-        void scale(ScalarType factor);
+        void scale(T factor);
         void niggliReduce(double precision, unsigned int maxIteration);
         void niggliReduce2D(unsigned int maxIteration);
         [[nodiscard]] inline LatticeMatrix makeRepLattice() const;
@@ -96,39 +96,41 @@ namespace Physica::Core {
         [[nodiscard]] const PositionMatrix& getPos() const noexcept { return pos; }
         [[nodiscard]] Type getType() const noexcept { return type; }
         [[nodiscard]] size_t getNumParticle() const noexcept { return pos.getRow(); }
-        [[nodiscard]] ScalarType getVolume() const noexcept { return getVolume(lattice); }
+        [[nodiscard]] T getVolume() const noexcept { return getVolume(lattice); }
         /* Setters */
         void setLattice(LatticeMatrix new_lattice) { lattice = new_lattice; }
         void setPos(PositionMatrix new_pos) noexcept { pos = std::move(new_pos); }
         void swapPos(PositionMatrix& __restrict new_pos) noexcept { pos.swap(new_pos); }
         /* Static members */
         [[nodiscard]] static LatticeMatrix makeLattice(
-                ScalarType normA,
-                ScalarType normB,
-                ScalarType normC,
-                ScalarType alpha,
-                ScalarType beta,
-                ScalarType gamma);
+                T normA,
+                T normB,
+                T normC,
+                T alpha,
+                T beta,
+                T gamma);
         [[nodiscard]] static LatticeMatrix makeLattice2D(
-                ScalarType normA,
-                ScalarType normB,
-                ScalarType normC,
-                ScalarType gamma);
+                T normA,
+                T normB,
+                T normC,
+                T gamma);
         [[nodiscard]] static LatticeMatrix makeNiggliLattice(const LatticeMatrix& lattice, double precision, unsigned int maxIteration);
         [[nodiscard]] static LatticeMatrix makeNiggliLattice2D(const LatticeMatrix& lattice, unsigned int maxIteration);
         [[nodiscard]] static LatticeMatrix makeRepLattice(const LatticeMatrix& lattice);
-        [[nodiscard]] static ScalarType getVolume(const LatticeMatrix& lattice);
+        [[nodiscard]] static T getVolume(const LatticeMatrix& lattice);
         static void toDirect(PositionMatrix& target, const LatticeMatrix& lattice);
         static void toCartesian(PositionMatrix& target, const LatticeMatrix& lattice);
         [[nodiscard]] static SearchRangeType estimateRange(const LatticeMatrix& cell, ValueType cutoff);
-        template<class Functor> static void forCellInRange(const SearchRangeType& range, const LatticeMatrix& lattice, Functor func);
-        template<class Functor> static void forReducedCellInRange(const SearchRangeType& range, const LatticeMatrix& lattice, Functor func);
+        template<class Functor>
+        static void forCellInRange(const SearchRangeType& range, const LatticeMatrix& lattice, Functor func);
+        template<class Functor>
+        static void forReducedCellInRange(const SearchRangeType& range, const LatticeMatrix& lattice, Functor func);
     protected:
         [[nodiscard]] InvLatticeMatrix makeInvLattice() const noexcept { return lattice.inverse(); }
         void toDirect(const InvLatticeMatrix& invLattice);
         void normalize_direct();
-        void scale_direct(ScalarType factor);
-        void scale_cartesian(ScalarType factor);
+        void scale_direct(T factor);
+        void scale_cartesian(T factor);
         template<ExtendCellOption Option>
         void toSuperCellDirect(unsigned int x, unsigned int y, unsigned int z);
         void toUnitCellDirect(unsigned int x, unsigned int y, unsigned int z);
@@ -141,42 +143,42 @@ namespace Physica::Core {
         friend class device_obj<This>;
     };
 
-    template<class ScalarType, unsigned int Dim>
-    PeriodicCell<ScalarType, Dim>::PeriodicCell()
+    template<Scalar T, unsigned int Dim>
+    PeriodicCell<T, Dim>::PeriodicCell()
             : lattice(LatticeMatrix::unitMatrix(Dim))
             , pos()
             , type(Type::Direct) {}
 
-    template<class ScalarType, unsigned int Dim>
-    PeriodicCell<ScalarType, Dim>::PeriodicCell(size_t numParticle, Type type_)
+    template<Scalar T, unsigned int Dim>
+    PeriodicCell<T, Dim>::PeriodicCell(size_t numParticle, Type type_)
             : PeriodicCell() {
         pos.resize(numParticle, Dim);
         type = type_;
     }
 
-    template<class ScalarType, unsigned int Dim>
-    PeriodicCell<ScalarType, Dim>::PeriodicCell(LatticeMatrix lattice_, PositionMatrix pos_, Type type_)
+    template<Scalar T, unsigned int Dim>
+    PeriodicCell<T, Dim>::PeriodicCell(LatticeMatrix lattice_, PositionMatrix pos_, Type type_)
             : lattice(std::move(lattice_))
             , pos(std::move(pos_))
             , type(type_) {}
 
-    template<class ScalarType, unsigned int Dim>
+    template<Scalar T, unsigned int Dim>
     template<class OtherScalar>
-    PeriodicCell<ScalarType, Dim>::PeriodicCell(const PeriodicCell<OtherScalar, Dim>& cell)
+    PeriodicCell<T, Dim>::PeriodicCell(const PeriodicCell<OtherScalar, Dim>& cell)
             : lattice(cell.getLattice())
             , pos(cell.getPos())
             , type(cell.getType()) {}
 
-    template<class ScalarType, unsigned int Dim>
-    PeriodicCell<ScalarType, Dim>& PeriodicCell<ScalarType, Dim>::operator=(PeriodicCell cell) noexcept {
+    template<Scalar T, unsigned int Dim>
+    PeriodicCell<T, Dim>& PeriodicCell<T, Dim>::operator=(PeriodicCell cell) noexcept {
         swap(cell);
         return *this;
     }
 
-    template<class ScalarType, unsigned int Dim>
-    typename PeriodicCell<ScalarType, Dim>::VectorType
-    PeriodicCell<ScalarType, Dim>::minDistVector(size_t id_from, size_t id_to) const {
-        ScalarType record_dist = std::numeric_limits<ScalarType>::max();
+    template<Scalar T, unsigned int Dim>
+    typename PeriodicCell<T, Dim>::VectorType
+    PeriodicCell<T, Dim>::minDistVector(size_t id_from, size_t id_to) const {
+        T record_dist = std::numeric_limits<T>::max();
         VectorType result{};
         VectorType delta = pos.row(id_to).asVector() - pos.row(id_from).asVector();
         if (type == Type::Direct)
@@ -187,8 +189,8 @@ namespace Physica::Core {
                 const bool isSelf = id_from == id_to && x == 0;
                 if (isSelf)
                     continue; // We are not interested to distance between particle and itself
-                v1 = delta + lattice.row(0).asVector() * ScalarType(x);
-                const ScalarType squared_norm = v1.squaredNorm();
+                v1 = delta + lattice.row(0).asVector() * T(x);
+                const T squared_norm = v1.squaredNorm();
                 if (squared_norm < record_dist) {
                     record_dist = squared_norm;
                     result = v1;
@@ -198,13 +200,13 @@ namespace Physica::Core {
         else if constexpr (Dim == 2) {
             VectorType v1, v2;
             for (int x = -1; x <= 1; ++x) {
-                v1 = delta + lattice.row(0).asVector() * ScalarType(x);
+                v1 = delta + lattice.row(0).asVector() * T(x);
                 for (int y = -1; y <= 1; ++y) {
                     const bool isSelf = id_from == id_to && x == 0 && y == 0;
                     if (isSelf)
                         continue; // We are not interested to distance between particle and itself
-                    v2 = v1 + lattice.row(1).asVector() * ScalarType(y);
-                    const ScalarType squared_norm = v2.squaredNorm();
+                    v2 = v1 + lattice.row(1).asVector() * T(y);
+                    const T squared_norm = v2.squaredNorm();
                     if (squared_norm < record_dist) {
                         record_dist = squared_norm;
                         result = v2;
@@ -215,15 +217,15 @@ namespace Physica::Core {
         else if constexpr (Dim == 3) {
             VectorType v1, v2, v3;
             for (int x = -1; x <= 1; ++x) {
-                v1 = delta + lattice.row(0).asVector() * ScalarType(x);
+                v1 = delta + lattice.row(0).asVector() * T(x);
                 for (int y = -1; y <= 1; ++y) {
-                    v2 = v1 + lattice.row(1).asVector() * ScalarType(y);
+                    v2 = v1 + lattice.row(1).asVector() * T(y);
                     for (int z = -1; z <= 1; ++z) {
                         const bool isSelf = id_from == id_to && x == 0 && y == 0 && z == 0;
                         if (isSelf)
                             continue; // We are not interested to distance between particle and itself
-                        v3 = v2 + lattice.row(2).asVector() * ScalarType(z);
-                        const ScalarType squared_norm = v3.squaredNorm();
+                        v3 = v2 + lattice.row(2).asVector() * T(z);
+                        const T squared_norm = v3.squaredNorm();
                         if (squared_norm < record_dist) {
                             record_dist = squared_norm;
                             result = v3;
@@ -235,10 +237,10 @@ namespace Physica::Core {
         return result;
     }
 
-    template<class ScalarType, unsigned int Dim>
-    typename PeriodicCell<ScalarType, Dim>::VectorType
-    PeriodicCell<ScalarType, Dim>::minDistVector(VectorType from, size_t id_to) const {
-        ScalarType record_dist = std::numeric_limits<ScalarType>::max();
+    template<Scalar T, unsigned int Dim>
+    typename PeriodicCell<T, Dim>::VectorType
+    PeriodicCell<T, Dim>::minDistVector(VectorType from, size_t id_to) const {
+        T record_dist = std::numeric_limits<T>::max();
         VectorType result{};
         VectorType delta;
         if (type == Type::Direct)
@@ -250,8 +252,8 @@ namespace Physica::Core {
         if constexpr (Dim == 1) {
             VectorType v1;
             for (int x = -1; x <= 1; ++x) {
-                v1 = delta + lattice.row(0).asVector() * ScalarType(x);
-                const ScalarType squared_norm = v1.squaredNorm();
+                v1 = delta + lattice.row(0).asVector() * T(x);
+                const T squared_norm = v1.squaredNorm();
                 if (squared_norm < record_dist) {
                     record_dist = squared_norm;
                     result = v1;
@@ -261,10 +263,10 @@ namespace Physica::Core {
         else if constexpr (Dim == 2) {
             VectorType v1, v2;
             for (int x = -1; x <= 1; ++x) {
-                v1 = delta + lattice.row(0).asVector() * ScalarType(x);
+                v1 = delta + lattice.row(0).asVector() * T(x);
                 for (int y = -1; y <= 1; ++y) {
-                    v2 = v1 + lattice.row(1).asVector() * ScalarType(y);
-                    const ScalarType squared_norm = v2.squaredNorm();
+                    v2 = v1 + lattice.row(1).asVector() * T(y);
+                    const T squared_norm = v2.squaredNorm();
                     if (squared_norm < record_dist) {
                         record_dist = squared_norm;
                         result = v2;
@@ -275,12 +277,12 @@ namespace Physica::Core {
         else if constexpr (Dim == 3) {
             VectorType v1, v2, v3;
             for (int x = -1; x <= 1; ++x) {
-                v1 = delta + lattice.row(0).asVector() * ScalarType(x);
+                v1 = delta + lattice.row(0).asVector() * T(x);
                 for (int y = -1; y <= 1; ++y) {
-                    v2 = v1 + lattice.row(1).asVector() * ScalarType(y);
+                    v2 = v1 + lattice.row(1).asVector() * T(y);
                     for (int z = -1; z <= 1; ++z) {
-                        v3 = v2 + lattice.row(2).asVector() * ScalarType(z);
-                        const ScalarType squared_norm = v3.squaredNorm();
+                        v3 = v2 + lattice.row(2).asVector() * T(z);
+                        const T squared_norm = v3.squaredNorm();
                         if (squared_norm < record_dist) {
                             record_dist = squared_norm;
                             result = v3;
@@ -292,8 +294,8 @@ namespace Physica::Core {
         return result;
     }
 
-    template<class ScalarType, unsigned int Dim>
-    void PeriodicCell<ScalarType, Dim>::normalize() {
+    template<Scalar T, unsigned int Dim>
+    void PeriodicCell<T, Dim>::normalize() {
         if (type == Type::Cartesian) {
             toDirect(makeInvLattice());
             normalize_direct();
@@ -303,16 +305,16 @@ namespace Physica::Core {
             normalize_direct();
     }
 
-    template<class ScalarType, unsigned int Dim>
-    void PeriodicCell<ScalarType, Dim>::scale(ScalarType factor) {
+    template<Scalar T, unsigned int Dim>
+    void PeriodicCell<T, Dim>::scale(T factor) {
         if (type == Type::Direct)
             scale_direct(factor);
         else
             scale_cartesian(factor);
     }
 
-    template<class ScalarType, unsigned int Dim>
-    void PeriodicCell<ScalarType, Dim>::niggliReduce(double precision, unsigned int maxIteration) {
+    template<Scalar T, unsigned int Dim>
+    void PeriodicCell<T, Dim>::niggliReduce(double precision, unsigned int maxIteration) {
         if (type == Type::Direct)
             toCartesian();
         setLattice(makeNiggliLattice(lattice, precision, maxIteration));
@@ -322,8 +324,8 @@ namespace Physica::Core {
             toCartesian();
     }
 
-    template<class ScalarType, unsigned int Dim>
-    void PeriodicCell<ScalarType, Dim>::niggliReduce2D(unsigned int maxIteration) {
+    template<Scalar T, unsigned int Dim>
+    void PeriodicCell<T, Dim>::niggliReduce2D(unsigned int maxIteration) {
         if (type == Type::Direct)
             toCartesian();
         setLattice(makeNiggliLattice2D(lattice, maxIteration));
@@ -333,14 +335,14 @@ namespace Physica::Core {
             toCartesian();
     }
 
-    template<class ScalarType, unsigned int Dim>
-    inline typename PeriodicCell<ScalarType, Dim>::LatticeMatrix PeriodicCell<ScalarType, Dim>::makeRepLattice() const {
+    template<Scalar T, unsigned int Dim>
+    inline typename PeriodicCell<T, Dim>::LatticeMatrix PeriodicCell<T, Dim>::makeRepLattice() const {
         return makeRepLattice(lattice);
     }
 
-    template<class ScalarType, unsigned int Dim>
+    template<Scalar T, unsigned int Dim>
     template<ExtendCellOption Option>
-    void PeriodicCell<ScalarType, Dim>::toSuperCell(unsigned int x, unsigned int y, unsigned int z) {
+    void PeriodicCell<T, Dim>::toSuperCell(unsigned int x, unsigned int y, unsigned int z) {
         if (type == Type::Cartesian) {
             toDirect();
             toSuperCellDirect<Option>(x, y, z);
@@ -350,8 +352,8 @@ namespace Physica::Core {
             toSuperCellDirect<Option>(x, y, z);
     }
 
-    template<class ScalarType, unsigned int Dim>
-    void PeriodicCell<ScalarType, Dim>::toUnitCell(unsigned int x, unsigned int y, unsigned int z) {
+    template<Scalar T, unsigned int Dim>
+    void PeriodicCell<T, Dim>::toUnitCell(unsigned int x, unsigned int y, unsigned int z) {
         if (type == Type::Cartesian) {
             toDirect();
             toUnitCellDirect(x, y, z);
@@ -361,23 +363,23 @@ namespace Physica::Core {
             toUnitCellDirect(x, y, z);
     }
 
-    template<class ScalarType, unsigned int Dim>
+    template<Scalar T, unsigned int Dim>
     template<ExtendCellOption Option>
-    PeriodicCell<ScalarType, Dim> PeriodicCell<ScalarType, Dim>::makeSuperCell(unsigned int x, unsigned int y, unsigned int z) const {
-        PeriodicCell<ScalarType, Dim> result = *this;
+    PeriodicCell<T, Dim> PeriodicCell<T, Dim>::makeSuperCell(unsigned int x, unsigned int y, unsigned int z) const {
+        This result = *this;
         result.toSuperCell<Option>(x, y, z);
         return result;
     }
 
-    template<class ScalarType, unsigned int Dim>
-    PeriodicCell<ScalarType, Dim> PeriodicCell<ScalarType, Dim>::makeUnitCell(unsigned int x, unsigned int y, unsigned int z) const {
-        PeriodicCell<ScalarType, Dim> result = *this;
+    template<Scalar T, unsigned int Dim>
+    PeriodicCell<T, Dim> PeriodicCell<T, Dim>::makeUnitCell(unsigned int x, unsigned int y, unsigned int z) const {
+        This result = *this;
         result.toUnitCell(x, y, z);
         return result;
     }
 #ifdef PHYSICA_HDF5
-    template<class ScalarType, unsigned int Dim>
-    H5Group PeriodicCell<ScalarType, Dim>::read(const H5Location& loc, const char* name) {
+    template<Scalar T, unsigned int Dim>
+    H5Group PeriodicCell<T, Dim>::read(const H5Location& loc, const char* name) {
         const auto group = loc.openGroup(name);
         lattice.read(group, "lattice");
         const auto posDataset = pos.read(group, "pos");
@@ -386,8 +388,8 @@ namespace Physica::Core {
         return H5Group(group);
     }
 
-    template<class ScalarType, unsigned int Dim>
-    H5Group PeriodicCell<ScalarType, Dim>::write(H5Location& loc, const char* name) const {
+    template<Scalar T, unsigned int Dim>
+    H5Group PeriodicCell<T, Dim>::write(H5Location& loc, const char* name) const {
         auto group = loc.openGroup(name);
         lattice.write(group, "lattice");
         auto posDataset = pos.write(group, "pos");
@@ -396,78 +398,78 @@ namespace Physica::Core {
         return H5Group(group);
     }
 #endif
-    template<class ScalarType, unsigned int Dim>
-    void PeriodicCell<ScalarType, Dim>::swap(PeriodicCell& __restrict cell) noexcept {
+    template<Scalar T, unsigned int Dim>
+    void PeriodicCell<T, Dim>::swap(PeriodicCell& __restrict cell) noexcept {
         assert(this != &cell && "[Error]: Self swap is likely a bug");
         lattice.swap(cell.lattice);
         pos.swap(cell.pos);
         std::swap(type, cell.type);
     }
 
-    template<class ScalarType, unsigned int Dim>
-    void PeriodicCell<ScalarType, Dim>::toCartesian() {
+    template<Scalar T, unsigned int Dim>
+    void PeriodicCell<T, Dim>::toCartesian() {
         if (type == Type::Direct) {
             pos *= lattice;
             type = Type::Cartesian;
         }
     }
 
-    template<class ScalarType, unsigned int Dim>
-    typename PeriodicCell<ScalarType, Dim>::LatticeMatrix PeriodicCell<ScalarType, Dim>::makeLattice(
-            ScalarType normA,
-            ScalarType normB,
-            ScalarType normC,
-            ScalarType alpha,
-            ScalarType beta,
-            ScalarType gamma) {
+    template<Scalar T, unsigned int Dim>
+    typename PeriodicCell<T, Dim>::LatticeMatrix PeriodicCell<T, Dim>::makeLattice(
+            T normA,
+            T normB,
+            T normC,
+            T alpha,
+            T beta,
+            T gamma) {
         LatticeMatrix result{};
-		result(0, 0) = normA;
-		result(0, 1) = ScalarType(0);
-		result(0, 2) = ScalarType(0);
-		result(1, 0) = normB * cos(gamma);
-		result(1, 1) = normB * sin(gamma);
-		result(1, 2) = ScalarType(0);
-		result(2, 0) = normC * cos(beta);
-		result(2, 1) = normC * (cos(alpha) - cos(beta) * cos(gamma)) / sin(gamma);
-		result(2, 2) = sqrt(square(normC) - square(result(2, 0)) - square(result(2, 1)));
-		return result;
+        result(0, 0) = normA;
+        result(0, 1) = T(0);
+        result(0, 2) = T(0);
+        result(1, 0) = normB * cos(gamma);
+        result(1, 1) = normB * sin(gamma);
+        result(1, 2) = T(0);
+        result(2, 0) = normC * cos(beta);
+        result(2, 1) = normC * (cos(alpha) - cos(beta) * cos(gamma)) / sin(gamma);
+        result(2, 2) = sqrt(square(normC) - square(result(2, 0)) - square(result(2, 1)));
+        return result;
     }
 
-    template<class ScalarType, unsigned int Dim>
-    typename PeriodicCell<ScalarType, Dim>::LatticeMatrix PeriodicCell<ScalarType, Dim>::makeLattice2D(
-            ScalarType normA,
-            ScalarType normB,
-            ScalarType normC,
-            ScalarType gamma) {
+    template<Scalar T, unsigned int Dim>
+    typename PeriodicCell<T, Dim>::LatticeMatrix PeriodicCell<T, Dim>::makeLattice2D(
+            T normA,
+            T normB,
+            T normC,
+            T gamma) {
         LatticeMatrix result{};
-		result(0, 0) = normA;
-		result(0, 1) = ScalarType(0);
-		result(0, 2) = ScalarType(0);
-		result(1, 0) = normB * cos(gamma);
-		result(1, 1) = normB * sin(gamma);
-		result(1, 2) = ScalarType(0);
-		result(2, 0) = ScalarType(0);
-		result(2, 1) = ScalarType(0);
-		result(2, 2) = normC;
-		return result;
+        result(0, 0) = normA;
+        result(0, 1) = T(0);
+        result(0, 2) = T(0);
+        result(1, 0) = normB * cos(gamma);
+        result(1, 1) = normB * sin(gamma);
+        result(1, 2) = T(0);
+        result(2, 0) = T(0);
+        result(2, 1) = T(0);
+        result(2, 2) = normC;
+        return result;
     }
     /**
      * Step 1-8 referenced from [1]
-     * 
+     *
      * Reference:
      * [1] Acta Cryst. A32, 297 (1976); https://doi.org/10.1107/S0567739476000636
      */
-    template<class ScalarType, unsigned int Dim>
-    typename PeriodicCell<ScalarType, Dim>::LatticeMatrix PeriodicCell<ScalarType, Dim>::makeNiggliLattice(
+    template<Scalar T, unsigned int Dim>
+    typename PeriodicCell<T, Dim>::LatticeMatrix PeriodicCell<T, Dim>::makeNiggliLattice(
             const LatticeMatrix& lattice, double precision, unsigned int maxIteration) {
         assert(precision > 0 && "[Error]: Precision should be positive");
         assert(maxIteration > 0 && "[Error]: Set maxIteration = 0 does nothing");
-        ScalarType squaredNormA = lattice.row(0).squaredNorm();
-        ScalarType squaredNormB = lattice.row(1).squaredNorm();
-        ScalarType squaredNormC = lattice.row(2).squaredNorm();
-        ScalarType dot1 = ScalarType(2) * (lattice.row(1).asVector() * lattice.row(2).asVector());
-        ScalarType dot2 = ScalarType(2) * (lattice.row(0).asVector() * lattice.row(2).asVector());
-        ScalarType dot3 = ScalarType(2) * (lattice.row(0).asVector() * lattice.row(1).asVector());
+        T squaredNormA = lattice.row(0).squaredNorm();
+        T squaredNormB = lattice.row(1).squaredNorm();
+        T squaredNormC = lattice.row(2).squaredNorm();
+        T dot1 = T(2) * (lattice.row(1).asVector() * lattice.row(2).asVector());
+        T dot2 = T(2) * (lattice.row(0).asVector() * lattice.row(2).asVector());
+        T dot3 = T(2) * (lattice.row(0).asVector() * lattice.row(1).asVector());
         unsigned int iteration = 0;
         do {
             if (iteration == maxIteration) [[unlikely]]
@@ -491,7 +493,7 @@ namespace Physica::Core {
                 }
             }
             /* Step 3 and 4 */ {
-                const ScalarType temp = dot1 * dot2 * dot3;
+                const T temp = dot1 * dot2 * dot3;
                 if (temp.isPositive()) {
                     dot1 = abs(dot1);
                     dot2 = abs(dot2);
@@ -505,73 +507,73 @@ namespace Physica::Core {
             }
             /* Step 5 */ {
                 const bool cond1 = abs(dot1) > squaredNormB;
-                const bool cond2 = scalarNear(dot1, squaredNormB, precision) && (ScalarType(2) * dot2 < dot3);
+                const bool cond2 = scalarNear(dot1, squaredNormB, precision) && (T(2) * dot2 < dot3);
                 const bool cond3 = scalarNear(dot1, -squaredNormB, precision) && dot3.isNegative();
                 if (cond1 || cond2 || cond3) {
                     assert(!dot1.isZero() && "[Error]: Condition 1~3 shall ensure dot1 is not zero");
-                    const ScalarType unit = dot1.unit();
+                    const T unit = dot1.unit();
                     squaredNormC += squaredNormB - abs(dot1);
                     dot2 -= dot3 * unit;
-                    dot1 -= ScalarType(2) * squaredNormB * unit;
+                    dot1 -= T(2) * squaredNormB * unit;
                     continue;
                 }
             }
             /* Step 6 */ {
                 const bool cond1 = abs(dot2) > squaredNormA;
-                const bool cond2 = scalarNear(dot2, squaredNormA, precision) && (ScalarType(2) * dot1 < dot3);
+                const bool cond2 = scalarNear(dot2, squaredNormA, precision) && (T(2) * dot1 < dot3);
                 const bool cond3 = scalarNear(dot2, -squaredNormA, precision) && dot3.isNegative();
                 if (cond1 || cond2 || cond3) {
                     assert(!dot2.isZero() && "[Error]: Condition 1~3 shall ensure dot2 is not zero");
-                    const ScalarType unit = dot2.unit();
+                    const T unit = dot2.unit();
                     squaredNormC += squaredNormA - abs(dot2);
                     dot1 -= dot3 * unit;
-                    dot2 -= ScalarType(2) * squaredNormA * unit;
+                    dot2 -= T(2) * squaredNormA * unit;
                     continue;
                 }
             }
             /* Step 7 */ {
                 const bool cond1 = abs(dot3) > squaredNormA;
-                const bool cond2 = scalarNear(dot3, squaredNormA, precision) && (ScalarType(2) * dot1 < dot2);
+                const bool cond2 = scalarNear(dot3, squaredNormA, precision) && (T(2) * dot1 < dot2);
                 const bool cond3 = scalarNear(dot3, -squaredNormA, precision) && dot2.isNegative();
                 if (cond1 || cond2 || cond3) {
                     assert(!dot3.isZero() && "[Error]: Condition 1~3 shall ensure dot3 is not zero");
-                    const ScalarType unit = dot3.unit();
+                    const T unit = dot3.unit();
                     squaredNormB += squaredNormA - abs(dot3);
                     dot1 -= dot2 * unit;
-                    dot3 -= ScalarType(2) * squaredNormA * unit;
+                    dot3 -= T(2) * squaredNormA * unit;
                     continue;
                 }
             }
             /* Step 8 */ {
-                const ScalarType temp = dot1 + dot2 + dot3 + squaredNormA + squaredNormB;
+                const T temp = dot1 + dot2 + dot3 + squaredNormA + squaredNormB;
                 const bool cond1 = temp.isNegative();
-                const bool cond2 = scalarNear(temp, ScalarType(0), precision) && (ScalarType(2) * (squaredNormA + dot2) + dot3).isPositive();
+                const bool cond2 = scalarNear(temp, T(0), precision) && (T(2) * (squaredNormA + dot2) + dot3).isPositive();
                 if (cond1 || cond2) {
                     squaredNormC += temp;
-                    dot1 += ScalarType(2) * squaredNormB + dot3;
-                    dot2 += ScalarType(2) * squaredNormA + dot3;
+                    dot1 += T(2) * squaredNormB + dot3;
+                    dot2 += T(2) * squaredNormA + dot3;
                     continue;
                 }
             }
-        } while(false);
-        const ScalarType normA = sqrt(squaredNormA);
-        const ScalarType normB = sqrt(squaredNormB);
-        const ScalarType normC = sqrt(squaredNormC);
-        const ScalarType alpha = arccos(dot1 / (ScalarType(2) * normB * normC));
-        const ScalarType beta = arccos(dot2 / (ScalarType(2) * normA * normC));
-        const ScalarType gamma = arccos(dot3 / (ScalarType(2) * normA * normB));
+        } while (false);
+        const T normA = sqrt(squaredNormA);
+        const T normB = sqrt(squaredNormB);
+        const T normC = sqrt(squaredNormC);
+        const T alpha = arccos(dot1 / (T(2) * normB * normC));
+        const T beta = arccos(dot2 / (T(2) * normA * normC));
+        const T gamma = arccos(dot3 / (T(2) * normA * normB));
         return makeLattice(normA, normB, normC, alpha, beta, gamma);
     }
     /**
      * A directly simplified version of above function
      */
-    template<class ScalarType, unsigned int Dim>
-    typename PeriodicCell<ScalarType, Dim>::LatticeMatrix PeriodicCell<ScalarType, Dim>::makeNiggliLattice2D(
+    template<Scalar T, unsigned int Dim>
+    typename PeriodicCell<T, Dim>::LatticeMatrix PeriodicCell<T, Dim>::makeNiggliLattice2D(
             const LatticeMatrix& lattice, unsigned int maxIteration) {
         assert(maxIteration > 0 && "[Error]: Set maxIteration = 0 does nothing");
-        ScalarType squaredNormA = lattice.row(0).squaredNorm();
-        ScalarType squaredNormB = lattice.row(1).squaredNorm();
-        ScalarType dot = ScalarType(2) * (lattice.row(0).asVector() * lattice.row(1).asVector());
+        T squaredNormA = lattice.row(0).squaredNorm();
+        T squaredNormB = lattice.row(1).squaredNorm();
+        T dot = T(2) * (lattice.row(0).asVector() * lattice.row(1).asVector());
         unsigned int iteration = 0;
         do {
             if (iteration == maxIteration) [[unlikely]]
@@ -584,31 +586,31 @@ namespace Physica::Core {
 
             if (abs(dot) > squaredNormA) {
                 assert(!dot.isZero() && "[Error]: Condition 1~3 shall ensure dot is not zero");
-                const ScalarType unit = dot.unit();
+                const T unit = dot.unit();
                 squaredNormB += squaredNormA - abs(dot);
-                dot -= ScalarType(2) * squaredNormA * unit;
+                dot -= T(2) * squaredNormA * unit;
                 continue;
             }
-        } while(false);
-        const ScalarType normA = sqrt(squaredNormA);
-        const ScalarType normB = sqrt(squaredNormB);
-        const ScalarType gamma = arccos(dot / (ScalarType(2) * normA * normB));
+        } while (false);
+        const T normA = sqrt(squaredNormA);
+        const T normB = sqrt(squaredNormB);
+        const T gamma = arccos(dot / (T(2) * normA * normB));
         return makeLattice2D(normA, normB, lattice(2, 2), gamma);
     }
 
-    template<class ScalarType, unsigned int Dim>
-    typename PeriodicCell<ScalarType, Dim>::LatticeMatrix PeriodicCell<ScalarType, Dim>::makeRepLattice(const LatticeMatrix& lattice) {
+    template<Scalar T, unsigned int Dim>
+    typename PeriodicCell<T, Dim>::LatticeMatrix PeriodicCell<T, Dim>::makeRepLattice(const LatticeMatrix& lattice) {
         LatticeMatrix result{};
         result.row(0) = lattice.row(1).crossProduct(lattice.row(2));
         result.row(1) = lattice.row(2).crossProduct(lattice.row(0));
         result.row(2) = lattice.row(0).crossProduct(lattice.row(1));
-        const ScalarType factor = ScalarType(2 * M_PI) / (lattice.row(0) * result.row(0).asVector());
+        const T factor = T(2 * M_PI) / (lattice.row(0) * result.row(0).asVector());
         result *= factor;
         return result;
     }
 
-    template<class ScalarType, unsigned int Dim>
-    ScalarType PeriodicCell<ScalarType, Dim>::getVolume(const LatticeMatrix& lattice) {
+    template<Scalar T, unsigned int Dim>
+    T PeriodicCell<T, Dim>::getVolume(const LatticeMatrix& lattice) {
         if constexpr (Dim == 1)
             return abs(lattice(0, 0));
         else if constexpr (Dim == 2)
@@ -617,20 +619,20 @@ namespace Physica::Core {
             return abs(VectorType(lattice.row(0).crossProduct(lattice.row(1))) * lattice.row(2).asVector());
     }
 
-    template<class ScalarType, unsigned int Dim>
-    void PeriodicCell<ScalarType, Dim>::toDirect(PositionMatrix& target, const LatticeMatrix& lattice) {
+    template<Scalar T, unsigned int Dim>
+    void PeriodicCell<T, Dim>::toDirect(PositionMatrix& target, const LatticeMatrix& lattice) {
         const InvLatticeMatrix inv = lattice.inverse();
         toDirect(target, inv);
     }
 
-    template<class ScalarType, unsigned int Dim>
-    void PeriodicCell<ScalarType, Dim>::toCartesian(PositionMatrix& target, const LatticeMatrix& lattice) {
+    template<Scalar T, unsigned int Dim>
+    void PeriodicCell<T, Dim>::toCartesian(PositionMatrix& target, const LatticeMatrix& lattice) {
         target *= lattice;
     }
 
-    template<class ScalarType, unsigned int Dim>
-    typename PeriodicCell<ScalarType, Dim>::SearchRangeType
-    PeriodicCell<ScalarType, Dim>::estimateRange(const LatticeMatrix& lattice, ValueType cutoff) {
+    template<Scalar T, unsigned int Dim>
+    typename PeriodicCell<T, Dim>::SearchRangeType
+    PeriodicCell<T, Dim>::estimateRange(const LatticeMatrix& lattice, ValueType cutoff) {
         const auto repLatt = makeRepLattice(lattice);
         const ValueType factor = cutoff * ValueType(1 / (2 * M_PI));
         SearchRangeType range{};
@@ -649,15 +651,15 @@ namespace Physica::Core {
         return range;
     }
 
-    template<class ScalarType, unsigned int Dim>
+    template<Scalar T, unsigned int Dim>
     template<class Functor>
-    void PeriodicCell<ScalarType, Dim>::forCellInRange(const SearchRangeType& range, const LatticeMatrix& lattice, Functor func) {
+    void PeriodicCell<T, Dim>::forCellInRange(const SearchRangeType& range, const LatticeMatrix& lattice, Functor func) {
         if constexpr (Dim == 1) {
             auto a1 = lattice.row(0);
 
             VectorType v1;
             for (ssize_t x = -range[0]; x <= range[0]; ++x) {
-                v1 = ScalarType(x) * a1.asVector();
+                v1 = T(x) * a1.asVector();
                 func(v1);
             }
         }
@@ -667,9 +669,9 @@ namespace Physica::Core {
 
             VectorType v1, v2;
             for (ssize_t x = -range[0]; x <= range[0]; ++x) {
-                v1 = ScalarType(x) * a1.asVector();
+                v1 = T(x) * a1.asVector();
                 for (ssize_t y = -range[1]; y <= range[1]; ++y) {
-                    v2 = v1 + ScalarType(y) * a2.asVector();
+                    v2 = v1 + T(y) * a2.asVector();
                     func(v2);
                 }
             }
@@ -681,11 +683,11 @@ namespace Physica::Core {
 
             VectorType v1, v2, v3;
             for (ssize_t x = -range[0]; x <= range[0]; ++x) {
-                v1 = ScalarType(x) * a1.asVector();
+                v1 = T(x) * a1.asVector();
                 for (ssize_t y = -range[1]; y <= range[1]; ++y) {
-                    v2 = v1 + ScalarType(y) * a2.asVector();
+                    v2 = v1 + T(y) * a2.asVector();
                     for (ssize_t z = -range[2]; z <= range[2]; ++z) {
-                        v3 = v2 + ScalarType(z) * a3.asVector();
+                        v3 = v2 + T(z) * a3.asVector();
                         func(v3);
                     }
                 }
@@ -693,15 +695,15 @@ namespace Physica::Core {
         }
     }
 
-    template<class ScalarType, unsigned int Dim>
+    template<Scalar T, unsigned int Dim>
     template<class Functor>
-    void PeriodicCell<ScalarType, Dim>::forReducedCellInRange(const SearchRangeType& range, const LatticeMatrix& lattice, Functor func) {
+    void PeriodicCell<T, Dim>::forReducedCellInRange(const SearchRangeType& range, const LatticeMatrix& lattice, Functor func) {
         if constexpr (Dim == 1) {
             auto a1 = lattice.row(0);
 
             VectorType v1;
             for (ssize_t x = 0; x <= range[0]; ++x) {
-                v1 = ScalarType(x) * a1.asVector();
+                v1 = T(x) * a1.asVector();
                 func(v1);
             }
         }
@@ -711,10 +713,10 @@ namespace Physica::Core {
 
             VectorType v1, v2;
             for (ssize_t x = 0; x <= range[0]; ++x) {
-                v1 = ScalarType(x) * a1.asVector();
+                v1 = T(x) * a1.asVector();
                 const ssize_t minY = x == 0 ? 0 : -range[1];
                 for (ssize_t y = minY; y <= range[1]; ++y) {
-                    v2 = v1 + ScalarType(y) * a2.asVector();
+                    v2 = v1 + T(y) * a2.asVector();
                     func(v2);
                 }
             }
@@ -726,13 +728,13 @@ namespace Physica::Core {
 
             VectorType v1, v2, v3;
             for (ssize_t x = 0; x <= range[0]; ++x) {
-                v1 = ScalarType(x) * a1.asVector();
+                v1 = T(x) * a1.asVector();
                 const ssize_t minY = x == 0 ? 0 : -range[1];
                 for (ssize_t y = minY; y <= range[1]; ++y) {
-                    v2 = v1 + ScalarType(y) * a2.asVector();
+                    v2 = v1 + T(y) * a2.asVector();
                     const ssize_t minZ = (x == 0 && y == 0) ? 0 : -range[2];
                     for (ssize_t z = minZ; z <= range[2]; ++z) {
-                        v3 = v2 + ScalarType(z) * a3.asVector();
+                        v3 = v2 + T(z) * a3.asVector();
                         func(v3);
                     }
                 }
@@ -740,59 +742,59 @@ namespace Physica::Core {
         }
     }
 
-    template<class ScalarType, unsigned int Dim>
-    void PeriodicCell<ScalarType, Dim>::toDirect(const InvLatticeMatrix& invLattice) {
+    template<Scalar T, unsigned int Dim>
+    void PeriodicCell<T, Dim>::toDirect(const InvLatticeMatrix& invLattice) {
         if (type == Type::Cartesian) {
             toDirect(pos, invLattice);
             type = Type::Direct;
         }
     }
 
-    template<class ScalarType, unsigned int Dim>
-    void PeriodicCell<ScalarType, Dim>::normalize_direct() {
+    template<Scalar T, unsigned int Dim>
+    void PeriodicCell<T, Dim>::normalize_direct() {
         for (auto& elem : pos.asArray()) {
             elem -= floor(elem);
-            assert(ScalarType(0) <= elem && elem <= ScalarType(1));
+            assert(T(0) <= elem && elem <= T(1));
         }
     }
 
-    template<class ScalarType, unsigned int Dim>
-    void PeriodicCell<ScalarType, Dim>::scale_direct(ScalarType factor) {
+    template<Scalar T, unsigned int Dim>
+    void PeriodicCell<T, Dim>::scale_direct(T factor) {
         assert(factor.isPositive());
         assert(type == Type::Direct);
         lattice *= factor;
     }
 
-    template<class ScalarType, unsigned int Dim>
-    void PeriodicCell<ScalarType, Dim>::scale_cartesian(ScalarType factor) {
+    template<Scalar T, unsigned int Dim>
+    void PeriodicCell<T, Dim>::scale_cartesian(T factor) {
         assert(factor.isPositive());
         assert(type == Type::Cartesian);
         lattice *= factor;
         pos *= factor;
     }
 
-    template<class ScalarType, unsigned int Dim>
+    template<Scalar T, unsigned int Dim>
     template<ExtendCellOption Option>
-    void PeriodicCell<ScalarType, Dim>::toSuperCellDirect(unsigned int x, unsigned int y, unsigned int z) {
+    void PeriodicCell<T, Dim>::toSuperCellDirect(unsigned int x, unsigned int y, unsigned int z) {
         assert(type == Type::Direct);
         toSuperPosDirect<Option>(pos, x, y, z);
         auto rowX = lattice.row(0);
-        rowX.asVector() *= ScalarType(x);
+        rowX.asVector() *= T(x);
         auto rowY = lattice.row(1);
-        rowY.asVector() *= ScalarType(y);
+        rowY.asVector() *= T(y);
         auto rowZ = lattice.row(2);
-        rowZ.asVector() *= ScalarType(z);
-        if constexpr (ScalarType::isReverseDiff)
+        rowZ.asVector() *= T(z);
+        if constexpr (T::isReverseDiff)
             lattice.makeContinuous();
     }
 
-    template<class ScalarType, unsigned int Dim>
-    void PeriodicCell<ScalarType, Dim>::toUnitCellDirect(unsigned int x, unsigned int y, unsigned int z) {
+    template<Scalar T, unsigned int Dim>
+    void PeriodicCell<T, Dim>::toUnitCellDirect(unsigned int x, unsigned int y, unsigned int z) {
         assert(type == Type::Direct);
         toUnitPosDirect(pos, x, y, z);
-        const ScalarType inv_x = Core::reciprocal(ScalarType(x));
-        const ScalarType inv_y = Core::reciprocal(ScalarType(y));
-        const ScalarType inv_z = Core::reciprocal(ScalarType(z));
+        const T inv_x = Core::reciprocal(T(x));
+        const T inv_y = Core::reciprocal(T(y));
+        const T inv_z = Core::reciprocal(T(z));
 
         auto rowX = lattice.row(0);
         rowX.asVector() *= inv_x;
@@ -802,14 +804,14 @@ namespace Physica::Core {
         rowZ.asVector() *= inv_z;
     }
 
-    template<class ScalarType, unsigned int Dim>
-    void PeriodicCell<ScalarType, Dim>::toDirect(PositionMatrix& target, const InvLatticeMatrix& invLattice) {
+    template<Scalar T, unsigned int Dim>
+    void PeriodicCell<T, Dim>::toDirect(PositionMatrix& target, const InvLatticeMatrix& invLattice) {
         target *= invLattice;
     }
 
-    template<class ScalarType, unsigned int Dim>
+    template<Scalar T, unsigned int Dim>
     template<ExtendCellOption Option>
-    void PeriodicCell<ScalarType, Dim>::toSuperPosDirect(PositionMatrix& target, unsigned int x, unsigned int y, unsigned int z) {
+    void PeriodicCell<T, Dim>::toSuperPosDirect(PositionMatrix& target, unsigned int x, unsigned int y, unsigned int z) {
         assert(Dim == 3);
         assert(x > 0 && y > 0 && z > 0);
         const size_t numParticle = target.getRow();
@@ -821,9 +823,9 @@ namespace Physica::Core {
                 for (unsigned int x_ = 0; x_ < x; ++x_) {
                     for (unsigned int y_ = 0; y_ < y; ++y_) {
                         for (unsigned int z_ = 0; z_ < z; ++z_) {
-                            new_pos(index, 0) = (target(i, 0) + ScalarType(x_)) / ScalarType(x);
-                            new_pos(index, 1) = (target(i, 1) + ScalarType(y_)) / ScalarType(y);
-                            new_pos(index, 2) = (target(i, 2) + ScalarType(z_)) / ScalarType(z);
+                            new_pos(index, 0) = (target(i, 0) + T(x_)) / T(x);
+                            new_pos(index, 1) = (target(i, 1) + T(y_)) / T(y);
+                            new_pos(index, 2) = (target(i, 2) + T(z_)) / T(z);
                             ++index;
                         }
                     }
@@ -835,9 +837,9 @@ namespace Physica::Core {
                 for (unsigned int y_ = 0; y_ < y; ++y_) {
                     for (unsigned int z_ = 0; z_ < z; ++z_) {
                         for (size_t i = 0; i < numParticle; ++i) {
-                            new_pos(index, 0) = (target(i, 0) + ScalarType(x_)) / ScalarType(x);
-                            new_pos(index, 1) = (target(i, 1) + ScalarType(y_)) / ScalarType(y);
-                            new_pos(index, 2) = (target(i, 2) + ScalarType(z_)) / ScalarType(z);
+                            new_pos(index, 0) = (target(i, 0) + T(x_)) / T(x);
+                            new_pos(index, 1) = (target(i, 1) + T(y_)) / T(y);
+                            new_pos(index, 2) = (target(i, 2) + T(z_)) / T(z);
                             ++index;
                         }
                     }
@@ -847,29 +849,29 @@ namespace Physica::Core {
         else
             static_assert(Option == ExtendCellOption::AtomMajor, "[Error]: Invalid option");
         target.swap(new_pos);
-        if constexpr (ScalarType::isReverseDiff)
+        if constexpr (T::isReverseDiff)
             target.makeContinuous();
     }
 
-    template<class ScalarType, unsigned int Dim>
-    void PeriodicCell<ScalarType, Dim>::toUnitPosDirect(PositionMatrix& target, unsigned int x, unsigned int y, unsigned int z) {
+    template<Scalar T, unsigned int Dim>
+    void PeriodicCell<T, Dim>::toUnitPosDirect(PositionMatrix& target, unsigned int x, unsigned int y, unsigned int z) {
         assert(Dim == 3);
         assert(x > 0 && y > 0 && z > 0);
         assert(target.getRow() % (x * y * z) == 0);
 
         auto colX = target.col(0);
-        colX.asVector() *= ScalarType(x);
+        colX.asVector() *= T(x);
         auto colY = target.col(1);
-        colY.asVector() *= ScalarType(y);
+        colY.asVector() *= T(y);
         auto colZ = target.col(2);
-        colZ.asVector() *= ScalarType(z);
+        colZ.asVector() *= T(z);
 
         const size_t numParticle = target.getRow();
         const size_t newNumParticle = numParticle / (x * y * z);
         PositionMatrix new_pos(newNumParticle, Dim);
         size_t toFill = 0;
         size_t toCheck = 0;
-        const ScalarType one = ScalarType(1);
+        const T one = T(1);
         for (; toFill < newNumParticle; ++toFill) {
             for (; toCheck < numParticle; ++toCheck) {
                 auto rowToCheck = target.row(toCheck);

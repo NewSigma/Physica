@@ -30,7 +30,7 @@ namespace Physica::Core {
         using Base = RValueVector<MatrixVectorProduct<SparseMatrix<T, Option>, VectorType>>;
         using typename Base::ScalarType;
         using MatrixType = SparseMatrix<T, Option>;
-        static_assert(MatrixType::ColumnAtCompile == VectorType::SizeAtCompile,
+        static_assert(MatrixType::ColAtCompile == VectorType::SizeAtCompile,
                       "Row and column do not match in matrix product");
     private:
         const MatrixType& mat;
@@ -57,13 +57,13 @@ namespace Physica::Core {
         const auto& minorIndexes = mat.getMinorIndexes();
         const auto& majorStarts = mat.getMajorStarts();
 
-        if constexpr (MatrixOption::isColumnMatrix<MatrixType>())
+        if constexpr (MatrixOption::isColMatrix<MatrixType>())
             target = 0;
 
         for (size_t major = 0; major < mat.getMaxMajor(); ++major) {
             const size_t from = majorStarts[major];
             const size_t to = majorStarts[major + 1];
-            if constexpr (MatrixOption::isColumnMatrix<MatrixType>()) {
+            if constexpr (MatrixOption::isColMatrix<MatrixType>()) {
                 for (size_t i = from; i < to; ++i) {
                     const size_t row = minorIndexes[i];
                     target[row] += elements[i] * vec[major];
@@ -88,7 +88,7 @@ namespace Physica::Core {
         const auto& majorStarts = mat.getMajorStarts();
 
         ScalarType result = 0;
-        if constexpr (MatrixOption::isColumnMatrix<MatrixType>()) {
+        if constexpr (MatrixOption::isColMatrix<MatrixType>()) {
             for (size_t major = 0; major < mat.getMaxMajor(); ++major) {
                 const size_t from = majorStarts[major];
                 const size_t to = majorStarts[major + 1];

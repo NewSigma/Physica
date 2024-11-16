@@ -19,24 +19,23 @@
 #pragma once
 
 namespace Physica::Core {
-    template<class AnyVector1, class AnyVector2>
-    class CrossProduct : public RValueVector<CrossProduct<AnyVector1, AnyVector2>> {
-        using This = CrossProduct<AnyVector1, AnyVector2>;
+    template<Vector V1, Vector V2>
+    class CrossProduct : public RValueVector<CrossProduct<V1, V2>> {
+        using This = CrossProduct<V1, V2>;
         using Base = RValueVector<This>;
         using Base::isReverseDiff;
         using typename Base::ScalarType;
     private:
-        const AnyVector1& v1;
-        const AnyVector2& v2;
+        const V1& v1;
+        const V2& v2;
     public:
-        CrossProduct(const RValueVector<AnyVector1>& v1_, const RValueVector<AnyVector2>& v2_)
-                : v1(v1_.getDerived()), v2(v2_.getDerived()) {
+        CrossProduct(const V1& v1_, const V2& v2_) : v1(v1_), v2(v2_) {
             assert(v1.getLength() == 3);
             assert(v2.getLength() == 3);
         }
         /* Operations */
-        template<class OtherDerived, class Executor = SequentialExecutor>
-        void assignTo(LValueVector<OtherDerived>& v) const {
+        template<Vector U, class Executor = SequentialExecutor>
+        void assignTo(LValueVector<U>& v) const {
             v[0] = v1[1] * v2[2] - v1[2] * v2[1];
             v[1] = v1[2] * v2[0] - v1[0] * v2[2];
             v[2] = v1[0] * v2[1] - v1[1] * v2[0];
@@ -53,16 +52,14 @@ namespace Physica::Core {
 }
 
 namespace Physica {
-    using namespace Core;
-
-    template<class AnyVector1, class AnyVector2>
-    class Traits<CrossProduct<AnyVector1, AnyVector2>> {
-        static_assert((Traits<AnyVector1>::SizeAtCompile == 3 || Traits<AnyVector1>::SizeAtCompile == Dynamic) &&
-                      (Traits<AnyVector2>::SizeAtCompile == 3 || Traits<AnyVector2>::SizeAtCompile == Dynamic),
+    template<Vector V1, Vector V2>
+    class Traits<Core::CrossProduct<V1, V2>> {
+        static_assert((Traits<V1>::SizeAtCompile == 3 || Traits<V1>::SizeAtCompile == Dynamic) &&
+                      (Traits<V2>::SizeAtCompile == 3 || Traits<V2>::SizeAtCompile == Dynamic),
                       "CrossProduct can apply on 3-dim vectors only");
     public:
-        using ScalarType = typename Core::Internal::BinaryScalarOpReturnType<typename AnyVector1::ScalarType,
-                                                                             typename AnyVector2::ScalarType>::Type;
+        using ScalarType = typename Core::Internal::BinaryScalarOpReturnType<typename V1::ScalarType,
+                                                                             typename V2::ScalarType>::Type;
         constexpr static size_t SizeAtCompile = 3;
     };
 }

@@ -31,11 +31,9 @@ namespace Physica::Core {
      * [1] Gene H. Golub, Charles F. Van Loan. Matrix computations 4th edition[M]. John Hopkins University Press, 2013
      * [2] Eigen; https://eigen.tuxfamily.org/
      */
-    template<class AnyVector, class OtherVector>
-    typename AnyVector::ScalarType::RealType householder(
-            const RValueVector<AnyVector>& source,
-            LValueVector<OtherVector>& target) {
-        using ScalarType = typename AnyVector::ScalarType;
+    template<Vector T, Vector U>
+    typename T::ScalarType::RealType householder(const T& source, LValueVector<U>& target) {
+        using ScalarType = typename T::ScalarType;
         using RealType = typename ScalarType::RealType;
         assert(source.getLength() == target.getLength());
 
@@ -64,31 +62,31 @@ namespace Physica::Core {
         return sqrt(sourceNorm0);
     }
 
-    template<class AnyVector>
-    typename AnyVector::ScalarType::RealType householderInPlace(LValueVector<AnyVector>& v) {
-        return householder(v, v);
+    template<Vector T>
+    typename T::ScalarType::RealType householderInPlace(LValueVector<T>& v) {
+        return householder(v.getDerived(), v);
     }
 
-    template<class MatrixType, class VectorType>
-    void applyHouseholder(const RValueVector<VectorType>& householder, LValueMatrix<MatrixType>& mat) {
-        using ScalarType = typename MatrixType::ScalarType;
-        using T = DenseVector<ScalarType, VectorType::SizeAtCompile>;
-        T copy = householder;
+    template<Matrix M, Vector V>
+    void applyHouseholder(const RValueVector<V>& householder, LValueMatrix<M>& mat) {
+        using ScalarType = typename M::ScalarType;
+        using BufferType = DenseVector<ScalarType, V::SizeAtCompile>;
+        BufferType copy = householder;
         auto temp = ScalarType(1);
         temp.swap(copy[0]);
-        const T temp1 = copy * temp;
+        const BufferType temp1 = copy * temp;
         mat -= temp1 * (copy.hermite() * mat).compute();
     }
 
-    template<class MatrixType, class VectorType>
-    void applyHouseholder(LValueMatrix<MatrixType>& mat, const RValueVector<VectorType>& householder) {
-        using ScalarType = typename MatrixType::ScalarType;
-        using T = DenseVector<ScalarType, VectorType::SizeAtCompile>;
-        T copy = householder;
+    template<Matrix M, Vector V>
+    void applyHouseholder(LValueMatrix<M>& mat, const RValueVector<V>& householder) {
+        using ScalarType = typename M::ScalarType;
+        using BufferType = DenseVector<ScalarType, V::SizeAtCompile>;
+        BufferType copy = householder;
         ScalarType temp = ScalarType(1);
         temp.swap(copy[0]);
         using ProductType = decltype(mat * copy);
-        using T1 = DenseVector<ScalarType, ProductType::SizeAtCompile>;
-        mat -= T1(mat * copy) * (copy.hermite() * temp);
+        using BufferType1 = DenseVector<ScalarType, ProductType::SizeAtCompile>;
+        mat -= BufferType1(mat * copy) * (copy.hermite() * temp);
     }
 }

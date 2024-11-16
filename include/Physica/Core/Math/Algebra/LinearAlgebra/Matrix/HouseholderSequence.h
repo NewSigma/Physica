@@ -101,7 +101,7 @@ namespace Physica {
         using ScalarType = typename MatrixType::ScalarType;
         constexpr static int Option = MatrixOption::AnyMajor | MatrixOption::AnyStorage;
         constexpr static size_t RowAtCompile = Dynamic;
-        constexpr static size_t ColumnAtCompile = Dynamic;
+        constexpr static size_t ColAtCompile = Dynamic;
         constexpr static size_t SizeAtCompile = Dynamic;
     };
 }

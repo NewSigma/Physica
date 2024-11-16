@@ -19,7 +19,8 @@
 #pragma once
 
 namespace Physica::Core {
-    template<class MatrixType, class VectorType> class MatrixVectorProduct;
+    template<class MatrixType, class VectorType>
+    class MatrixVectorProduct;
 
     template<ExprType Type, class T1, class T2, class VectorType>
     class MatrixVectorProduct<MatrixExpr<Type, T1, T2>, VectorType>
@@ -78,7 +79,6 @@ namespace Physica::Core {
         }
         else
             static_assert(!FastAssign, "[Error]: assignTo is not implemented");
-
     }
 
     template<ExprType Type, class T1, class T2, class VectorType>
@@ -104,13 +104,11 @@ namespace Physica {
     class Traits<Core::MatrixVectorProduct<MatrixExpr<Type, T1, T2>, VectorType>> {
         using MatrixType = Core::MatrixExpr<Type, T1, T2>;
         using ExprType = Core::ExprType;
-        static_assert(MatrixType::ColumnAtCompile == VectorType::SizeAtCompile ||
-                      MatrixType::ColumnAtCompile == Dynamic ||
-                      VectorType::SizeAtCompile == Dynamic,
+        static_assert(MatrixType::ColAtCompile == VectorType::SizeAtCompile || MatrixType::ColAtCompile == Dynamic || VectorType::SizeAtCompile == Dynamic,
                       "Row and col do not match in matrix product");
 
         constexpr static bool calcFastAssign() {
-            constexpr bool isScalarT2 = Core::is_scalar<T2>::value;
+            constexpr bool isScalarT2 = Core::Scalar<T2>;
             if constexpr (Type == ExprType::Add || Type == ExprType::Sub) {
                 if constexpr (!isScalarT2) {
                     using LHS = decltype(std::declval<T1>() * std::declval<VectorType>());

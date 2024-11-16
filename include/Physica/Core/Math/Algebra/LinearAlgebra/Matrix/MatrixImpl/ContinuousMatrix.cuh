@@ -31,7 +31,7 @@ namespace Physica::Core {
     public:
         using typename Base::ScalarType;
         using Base::RowAtCompile;
-        using Base::ColumnAtCompile;
+        using Base::ColAtCompile;
     protected:
         using typename Base::PtrTy;
         using typename Base::ConstPtrTy;
@@ -42,22 +42,22 @@ namespace Physica::Core {
         inline device_obj& operator=(device_obj&& obj) noexcept;
         using Base::operator=;
         /* Operations */
-        [[nodiscard]] __host__ __device__ inline device_obj<ContinuousMatrixBlock<Derived, 1, ColumnAtCompile>> row(size_t r);
-        [[nodiscard]] __host__ __device__ inline const device_obj<ContinuousMatrixBlock<Derived, 1, ColumnAtCompile>> row(size_t r) const;
+        [[nodiscard]] __host__ __device__ inline device_obj<ContinuousMatrixBlock<Derived, 1, ColAtCompile>> row(size_t r);
+        [[nodiscard]] __host__ __device__ inline const device_obj<ContinuousMatrixBlock<Derived, 1, ColAtCompile>> row(size_t r) const;
         [[nodiscard]] __host__ __device__ inline device_obj<ContinuousMatrixBlock<Derived, RowAtCompile, 1>> col(size_t c);
         [[nodiscard]] __host__ __device__ inline const device_obj<ContinuousMatrixBlock<Derived, RowAtCompile, 1>> col(size_t c) const;
         template<size_t Row = Dynamic>
-        [[nodiscard]] __host__ __device__ inline device_obj<ContinuousMatrixBlock<Derived, Row, ColumnAtCompile>> rows(size_t fromRow, size_t rowCount);
+        [[nodiscard]] __host__ __device__ inline device_obj<ContinuousMatrixBlock<Derived, Row, ColAtCompile>> rows(size_t fromRow, size_t rowCount);
         template<size_t Row = Dynamic>
-        [[nodiscard]] __host__ __device__ inline const device_obj<ContinuousMatrixBlock<Derived, Row, ColumnAtCompile>> rows(size_t fromRow, size_t rowCount) const;
+        [[nodiscard]] __host__ __device__ inline const device_obj<ContinuousMatrixBlock<Derived, Row, ColAtCompile>> rows(size_t fromRow, size_t rowCount) const;
         template<size_t Row = Dynamic>
-        [[nodiscard]] __host__ __device__ inline device_obj<ContinuousMatrixBlock<Derived, Row, ColumnAtCompile>> topRows(size_t to);
+        [[nodiscard]] __host__ __device__ inline device_obj<ContinuousMatrixBlock<Derived, Row, ColAtCompile>> topRows(size_t to);
         template<size_t Row = Dynamic>
-        [[nodiscard]] __host__ __device__ inline const device_obj<ContinuousMatrixBlock<Derived, Row, ColumnAtCompile>> topRows(size_t to) const;
+        [[nodiscard]] __host__ __device__ inline const device_obj<ContinuousMatrixBlock<Derived, Row, ColAtCompile>> topRows(size_t to) const;
         template<size_t Row = Dynamic>
-        [[nodiscard]] __host__ __device__ inline device_obj<ContinuousMatrixBlock<Derived, Row, ColumnAtCompile>> bottomRows(size_t from);
+        [[nodiscard]] __host__ __device__ inline device_obj<ContinuousMatrixBlock<Derived, Row, ColAtCompile>> bottomRows(size_t from);
         template<size_t Row = Dynamic>
-        [[nodiscard]] __host__ __device__ inline const device_obj<ContinuousMatrixBlock<Derived, Row, ColumnAtCompile>> bottomRows(size_t from) const;
+        [[nodiscard]] __host__ __device__ inline const device_obj<ContinuousMatrixBlock<Derived, Row, ColAtCompile>> bottomRows(size_t from) const;
         template<size_t Col = Dynamic>
         [[nodiscard]] __host__ __device__ inline device_obj<ContinuousMatrixBlock<Derived, RowAtCompile, Col>> cols(size_t fromCol, size_t colCount);
         template<size_t Col = Dynamic>

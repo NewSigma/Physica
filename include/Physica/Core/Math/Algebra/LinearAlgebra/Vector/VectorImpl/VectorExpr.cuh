@@ -19,19 +19,19 @@
 #pragma once
 
 namespace Physica::Core {
-    template<ExprType Type, class VectorType>
-    class device_obj<UnitaryVectorExpr<Type, VectorType>> : public device_obj<RValueVector<VectorExpr<Type, VectorType>>> {
-        using host_obj = UnitaryVectorExpr<Type, VectorType>;
+    template<ExprType Type, Vector V>
+    class device_obj<UnitaryVectorExpr<Type, V>> : public device_obj<RValueVector<VectorExpr<Type, V>>> {
+        using host_obj = UnitaryVectorExpr<Type, V>;
         using This = device_obj<host_obj>;
-        using Base = device_obj<RValueVector<VectorExpr<Type, VectorType>>>;
-        using DeviceVector = device_obj<VectorType>;
+        using Base = device_obj<RValueVector<VectorExpr<Type, V>>>;
+        using DeviceVector = device_obj<V>;
     private:
         union {
             PlainStruct<const DeviceVector> value;
             const DeviceVector* ptr;
         } expr;
     public:
-        __host__ __device__ inline device_obj(const device_obj<RValueVector<VectorType>>& expr_) {
+        __host__ __device__ inline device_obj(const device_obj<RValueVector<V>>& expr_) {
             if constexpr (IsHost())
                 expr.value = asStruct(expr_.getDerived());
             else
@@ -58,15 +58,14 @@ namespace Physica::Core {
         }
     };
 
-    template<ExprType Type, class LHS, class RHS>
+    template<ExprType Type, Vector LHS, class RHS>
     class device_obj<BinaryVectorExpr<Type, LHS, RHS>>
             : public device_obj<RValueVector<VectorExpr<Type, LHS, RHS>>> {
-        static_assert(is_vector<LHS>::value, "[Error]: Invalid left hand side type");
         using host_obj = BinaryVectorExpr<Type, LHS, RHS>;
         using This = device_obj<host_obj>;
         using Base = device_obj<RValueVector<VectorExpr<Type, LHS, RHS>>>;
         using DeviceLHS = device_obj<LHS>;
-        using DeviceRHS = typename std::conditional<is_scalar<RHS>::value, typename RHS::ScalarType, device_obj<RHS>>::type;
+        using DeviceRHS = typename std::conditional<Scalar<RHS>, typename RHS::ScalarType, device_obj<RHS>>::type;
     private:
         union {
             PlainStruct<const DeviceLHS> value;
@@ -79,7 +78,7 @@ namespace Physica::Core {
         } rhs;
     public:
         __host__ __device__ inline device_obj(const DeviceLHS& lhs_, const DeviceRHS& rhs_) {
-            if constexpr (is_vector<RHS>::value)
+            if constexpr (Vector<RHS>)
                 assert(lhs_.getLength() == rhs_.getLength());
             if constexpr (IsHost()) {
                 lhs.value = asStruct(lhs_);

@@ -38,7 +38,7 @@ namespace Physica::Core {
         using Dim = DenseMatrixDim<This, Row, Col>;
         using RefTy = typename T::RefTy;
         using ConstRefTy = typename T::ConstRefTy;
-        using ArrayType = typename std::conditional<is_scalar<T>::value, DenseVector<T, Row * Col>, Array<T, Row * Col>>::type;
+        using ArrayType = typename std::conditional<Scalar<T>, DenseVector<T, Row * Col>, Array<T, Row * Col>>::type;
     public:
         using InitializerType = T;
     private:
@@ -97,7 +97,7 @@ namespace Physica::Core {
         using Dim = DenseMatrixDim<This, Row, Col>;
         using RefTy = typename T::RefTy;
         using ConstRefTy = typename T::ConstRefTy;
-        using ArrayType = typename std::conditional<is_scalar<T>::value, DenseVector<T, Row * Col>, Array<T, Row * Col>>::type;
+        using ArrayType = typename std::conditional<Scalar<T>, DenseVector<T, Row * Col>, Array<T, Row * Col>>::type;
     public:
         using InitializerType = T;
     private:
@@ -155,7 +155,7 @@ namespace Physica::Core {
         using RefTy = typename T::RefTy;
         using ConstRefTy = typename T::ConstRefTy;
     public:
-        using VectorType = typename std::conditional<is_scalar<T>::value, DenseVector<T, Row>, Array<T, Row>>::type;
+        using VectorType = typename std::conditional<Scalar<T>, DenseVector<T, Row>, Array<T, Row>>::type;
         using InitializerType = VectorType;
     private:
         using AllocatorV = typename Allocator::template rebind_alloc<VectorType>;
@@ -216,7 +216,7 @@ namespace Physica::Core {
         using RefTy = typename T::RefTy;
         using ConstRefTy = typename T::ConstRefTy;
     public:
-        using VectorType = typename std::conditional<is_scalar<T>::value, DenseVector<T, Col>, Array<T, Col>>::type;
+        using VectorType = typename std::conditional<Scalar<T>, DenseVector<T, Col>, Array<T, Col>>::type;
         using InitializerType = VectorType;
     private:
         using AllocatorV = typename Allocator::template rebind_alloc<VectorType>;

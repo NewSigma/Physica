@@ -96,13 +96,13 @@ namespace Physica::Core {
     }
 
     template<class Derived>
-    template<class OtherDerived, class Executor>
-    inline void RValueVector<Derived>::assignTo(LValueVector<OtherDerived>& v) const {
-        constexpr size_t OtherSize = Traits<OtherDerived>::SizeAtCompile;
+    template<Vector V, class Executor>
+    inline void RValueVector<Derived>::assignTo(LValueVector<V>& v) const {
+        constexpr size_t OtherSize = Traits<V>::SizeAtCompile;
         static_assert(SizeAtCompile == Dynamic || OtherSize == Dynamic || SizeAtCompile == OtherSize,
                 "[Error]: Size mismatch between two vector");
         assert(v.getLength() == getLength() && "[Error]: Size mismatch between two vector");
-        Internal::AssignImpl<OtherDerived, Derived, Internal::EnableSIMD<Derived, OtherDerived>::value, Executor>::run(v, *this);
+        Internal::AssignImpl<V, Derived, Internal::EnableSIMD<V, Derived>::value, Executor>::run(v, *this);
     }
 
     template<class Derived>
@@ -378,10 +378,9 @@ namespace Physica::Core {
     }
 
     template<class Derived>
-    template<class OtherDerived>
-    inline CrossProduct<Derived, OtherDerived>
-    RValueVector<Derived>::crossProduct(const RValueVector<OtherDerived>& v) const noexcept {
-        return CrossProduct(*this, v);
+    template<Vector V>
+    inline auto RValueVector<Derived>::crossProduct(const V& v) const noexcept {
+        return CrossProduct<Derived, V>(Base::getDerived(), v);
     }
 
     template<class Derived>

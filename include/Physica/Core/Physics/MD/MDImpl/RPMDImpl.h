@@ -73,8 +73,7 @@ namespace Physica::Core {
                 if constexpr (IsPeriodBoundary)
                     cell.normalize();
                 auto saveTo = forceBuffer.col(replica);
-                using VectorType = typename decltype(saveTo)::VectorBase;
-                model.template forceAsync<VectorType, Executor>(std::move(cell), saveTo);
+                model.template forceAsync<decltype(saveTo), Executor>(std::move(cell), saveTo);
             };
 
             if constexpr (NumReplica == 1)

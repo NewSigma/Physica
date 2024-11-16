@@ -27,7 +27,7 @@ namespace Physica::Core {
     public:
         using typename Base::ScalarType;
         using Base::RowAtCompile;
-        using Base::ColumnAtCompile;
+        using Base::ColAtCompile;
     protected:
         using PtrTy = typename ScalarType::PtrTy;
         using ConstPtrTy = typename ScalarType::ConstPtrTy;

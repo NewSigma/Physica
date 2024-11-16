@@ -39,9 +39,9 @@ namespace Physica::Core {
         using typename Base::ScalarType;
         using typename Base::RealType;
         using Base::RowAtCompile;
-        using Base::ColumnAtCompile;
+        using Base::ColAtCompile;
         using Base::isComplex;
-        using Base::isColumnMatrix;
+        using Base::isColMatrix;
         using Base::isRowMatrix;
         using Base::isForwardDiff;
         using Base::isReverseDiff;
@@ -53,8 +53,8 @@ namespace Physica::Core {
     public:
         ~LValueMatrix() = default;
         /* Operators */
-        LValueMatrix& operator=(const LValueMatrix& m) = delete;
-        LValueMatrix& operator=(LValueMatrix&& m) = delete;
+        inline This& operator=(const This& m);
+        inline This& operator=(This&& m);
 
         Derived& operator=(const ScalarType& s_);
         void operator+=(const ScalarType& s) { (*this) = (*this) + s; }
@@ -129,8 +129,8 @@ namespace Physica::Core {
         void toUnitMatrix();
     protected:
         LValueMatrix() = default;
-        LValueMatrix(const LValueMatrix&) = default;
-        LValueMatrix(LValueMatrix&&) noexcept = default;
+        LValueMatrix(const This&) = default;
+        LValueMatrix(This&&) noexcept = default;
     };
 }
 

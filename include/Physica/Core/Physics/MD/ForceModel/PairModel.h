@@ -48,7 +48,7 @@ namespace Physica::Core {
         using PositionMatrix = typename MDCellType::PositionMatrix;
         using CellListType = CellList<ScalarType>;
         using Index3D = typename GridBase::Index3D;
-        using Vector3D = Vector3D<ScalarType>;
+        using Vec3D = Vector3D<ScalarType>;
         using ForceConstMatrix = typename EmptyForceModel<ScalarType, Dim>::ForceConstMatrix;
     private:
         ValueType cutoff;
@@ -140,10 +140,10 @@ namespace Physica::Core {
 
         ScalarType result = 0;
         MDCellType::forCellInRange(range, lattice,
-            [this, numParticle, &pos, &result](Vector3D delta) {
+            [this, numParticle, &pos, &result](Vec3D delta) {
                 ScalarType temp = 0;
                 for (size_t i = 0; i < numParticle; ++i) {
-                    Vector3D from = pos.row(i) + delta;
+                    Vec3D from = pos.row(i) + delta;
                     for (size_t j = i; j < numParticle; ++j) {
                         const ScalarType r2 = (from - pos.row(j)).squaredNorm();
                         const bool isNotSelf = ValueType(std::numeric_limits<ScalarType>::min()) < r2;
@@ -187,7 +187,7 @@ namespace Physica::Core {
     inline void PairModel<Derived>::forceAsync(
             const LatticeMatrix& lattice, const PositionMatrix& cartesianPos, ContinuousVector<VectorType>& result) const {
         result = ScalarType(0);
-        auto kernel = [this, &result](size_t i, size_t j, Vector3D r, ScalarType norm1, ScalarType norm2) {
+        auto kernel = [this, &result](size_t i, size_t j, Vec3D r, ScalarType norm1, ScalarType norm2) {
             const ScalarType f_norm = force_functor(i, j, norm1, norm2);
             r *= f_norm / norm1;
             auto force_i = result.template segment<Dim>(Dim * i, Dim * i + Dim);
@@ -265,9 +265,9 @@ namespace Physica::Core {
     typename PairModel<Derived>::LatticeMatrix
     PairModel<Derived>::virial(const LatticeMatrix& lattice, const PositionMatrix& pos) const {        
         LatticeMatrix result(Dim, Dim, 0);
-        auto kernel = [this, &result](size_t i, size_t j, Vector3D r, ScalarType norm1, ScalarType norm2) {
+        auto kernel = [this, &result](size_t i, size_t j, Vec3D r, ScalarType norm1, ScalarType norm2) {
             const ScalarType f_norm = force_functor(i, j, norm1, norm2);
-            const Vector3D f = r * (f_norm / norm1);
+            const Vec3D f = r * (f_norm / norm1);
             result += f * r.transpose();
         };
         forPairInCutoff(lattice, pos, kernel);
@@ -301,8 +301,8 @@ namespace Physica::Core {
             const auto range = MDCellType::estimateRange(lattice, cutoff);
             const size_t numParticle = pos.getRow();
             MDCellType::forCellInRange(range, lattice,
-                [this, pos, numParticle, &func](Vector3D delta) {
-                    Vector3D r, from;
+                [this, pos, numParticle, &func](Vec3D delta) {
+                    Vec3D r, from;
                     for (size_t i = 0; i < numParticle; ++i) {
                         from = pos.row(i) + delta;
                         for (size_t j = i; j < numParticle; ++j) {
@@ -333,7 +333,7 @@ namespace Physica::Core {
                         for (size_t j = i + 1; j < length; ++j) {
                             const size_t atom2 = arr1[j];
                             const auto to = pos.row(atom2);
-                            Vector3D r = to.asVector() - from;
+                            Vec3D r = to.asVector() - from;
                             const ScalarType norm2 = r.squaredNorm();
                             if (norm2 < squared_cutoff) {
                                 const ScalarType norm1 = sqrt(norm2);
@@ -343,15 +343,15 @@ namespace Physica::Core {
                     }
                 }
                 Array<size_t> arr2{};
-                cellList.forReducedNeighInRange(center, [this, pos, &arr1, &arr2, &func, &cellList](Vector3D translate, Index3D neigh) {
+                cellList.forReducedNeighInRange(center, [this, pos, &arr1, &arr2, &func, &cellList](Vec3D translate, Index3D neigh) {
                     cellList.forAtomInCell(neigh, [&arr2](size_t atom) {
                         arr2.append(atom);
                     });
                     std::sort(arr2.begin(), arr2.end());
 
                     for (const size_t atom1 : arr1) {
-                        const Vector3D from = pos.row(atom1) - translate;
-                        Vector3D r, f(Dim, 0);
+                        const Vec3D from = pos.row(atom1) - translate;
+                        Vec3D r, f(Dim, 0);
                         for (const size_t atom2 : arr2) {
                             const auto to = pos.row(atom2);
                             r = to.asVector() - from;
@@ -378,7 +378,7 @@ namespace Physica::Core {
         assert(atom1 != atom2 && "[Error]: The function is not responsible for this case");
         const size_t dir1 = dof1 % 3U;
         const size_t dir2 = dof2 % 3U;
-        const Vector3D delta = cell.getPos().row(atom2).asVector() - cell.getPos().row(atom1).asVector();
+        const Vec3D delta = cell.getPos().row(atom2).asVector() - cell.getPos().row(atom1).asVector();
         const ScalarType squaredNorm = delta.squaredNorm();
         const ScalarType norm = sqrt(squaredNorm);
         const ScalarType factor = delta[dir1] * delta[dir2] / squaredNorm;

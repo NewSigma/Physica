@@ -18,28 +18,28 @@
  */
 #pragma once
 
-#include "Real.h"
 #include "DiffImpl/DiffTracer.h"
+#include "Real.h"
 
 namespace Physica::Core {
     /**
      * \class Diff provides auto differential support for scalars
      */
-    template<class ScalarType, int Order>
-    class Diff<ScalarType, DiffMode::Forward, Order> : public ScalarBase<Diff<ScalarType, DiffMode::Forward, Order>> {
-        using This = Diff<ScalarType, DiffMode::Forward, Order>;
+    template<Scalar T, int Order>
+    class Diff<T, DiffMode::Forward, Order> : public ScalarBase<Diff<T, DiffMode::Forward, Order>> {
+        using This = Diff<T, DiffMode::Forward, Order>;
         using Base = ScalarBase<This>;
     public:
         using typename Base::GradType;
         using typename Base::MachineType;
     private:
-        ScalarType value;
+        T value;
         GradType grad;
     public:
         Diff() = default;
-        Diff(MachineType x) : This(ScalarType(x)) {}
-        Diff(ScalarType value_);
-        Diff(ScalarType value_, GradType grad_);
+        Diff(MachineType x) : This(T(x)) {}
+        Diff(T value_);
+        Diff(T value_, GradType grad_);
         template<Scalar U, int OtherOrder>
         explicit Diff(const Diff<U, DiffMode::Forward, OtherOrder>& other);
         Diff(const This&) = default;
@@ -56,10 +56,10 @@ namespace Physica::Core {
         void swap(This& __restrict obj) noexcept;
         void swap(ScalarRef<This>&& ref) noexcept;
         /* Getters */
-        [[nodiscard]] ScalarType& getValue() noexcept { return value; }
+        [[nodiscard]] T& getValue() noexcept { return value; }
         template<int GradOrder = 1>
         [[nodiscard]] inline typename Base::template GradRtnTy<GradOrder>& getGrad() noexcept;
-        [[nodiscard]] const ScalarType& getValue() const noexcept { return value; }
+        [[nodiscard]] const T& getValue() const noexcept { return value; }
         template<int GradOrder = 1>
         [[nodiscard]] inline const typename Base::template GradRtnTy<GradOrder>& getGrad() const noexcept;
         [[nodiscard]] __host__ __device__ bool isZero() const noexcept { return value.isZero(); }
@@ -184,23 +184,23 @@ namespace Physica::Core {
         [[nodiscard]] GradPtrTy grad_ptr() const noexcept { return pair.second; }
     };
     ////////////////////////////////////////////////////////////
-    template<class ScalarType, int Order>
-    class Diff<ScalarType, DiffMode::Reverse, Order> : public ScalarBase<Diff<ScalarType, DiffMode::Reverse, Order>> {
-        using This = Diff<ScalarType, DiffMode::Reverse, Order>;
+    template<Scalar T, int Order>
+    class Diff<T, DiffMode::Reverse, Order> : public ScalarBase<Diff<T, DiffMode::Reverse, Order>> {
+        using This = Diff<T, DiffMode::Reverse, Order>;
         using Base = ScalarBase<This>;
-        using ValuePtr = ScalarType* __restrict;
+        using ValuePtr = T* __restrict;
     public:
         using device_obj_type = device_obj<This>;
-        using TracerType = DiffTracer<ScalarType, Order>;
+        using TracerType = DiffTracer<T, Order>;
         using typename Base::GradType;
     private:
         ValuePtr pValue;
         GradType grad;
     public:
         Diff() = default;
-        Diff(double d) : This(ScalarType(d)) {}
-        Diff(ScalarType value);
-        Diff(ScalarType value, ScalarType grad);
+        Diff(double d) : This(T(d)) {}
+        Diff(T value);
+        Diff(T value, T grad);
         Diff(ValuePtr pValue_, GradType grad_);
         Diff(const This&) = default;
         Diff(This&&) noexcept = default;
@@ -212,7 +212,7 @@ namespace Physica::Core {
         [[nodiscard]] explicit operator float() const { return float(getValue()); }
         [[nodiscard]] explicit operator double() const { return double(getValue()); }
         template<int KeepDeep>
-        [[nodiscard]] explicit operator Diff<ScalarType, DiffMode::Reverse, KeepDeep>() const;
+        [[nodiscard]] explicit operator Diff<T, DiffMode::Reverse, KeepDeep>() const;
         [[nodiscard]] inline bool operator==(const This& other) const;
         [[nodiscard]] inline bool operator==(std::nullptr_t) const noexcept;
         [[nodiscard]] inline bool operator!=(std::nullptr_t) const noexcept { return !((*this) == nullptr); }
@@ -225,12 +225,12 @@ namespace Physica::Core {
         [[nodiscard]] inline This copy() const;
         inline void swap(This& __restrict obj) noexcept;
         /* Getters */
-        [[nodiscard]] __host__ __device__ inline ScalarType* value_ptr() const noexcept;
-        [[nodiscard]] __host__ __device__ inline ScalarType* grad_ptr() const noexcept;
-        [[nodiscard]] inline ScalarType& getValue() noexcept;
+        [[nodiscard]] __host__ __device__ inline T* value_ptr() const noexcept;
+        [[nodiscard]] __host__ __device__ inline T* grad_ptr() const noexcept;
+        [[nodiscard]] inline T& getValue() noexcept;
         template<int GradOrder = 1>
         [[nodiscard]] inline typename Base::template GradRtnTy<GradOrder>& getGrad() noexcept;
-        [[nodiscard]] inline const ScalarType& getValue() const noexcept;
+        [[nodiscard]] inline const T& getValue() const noexcept;
         template<int GradOrder = 1>
         [[nodiscard]] inline const typename Base::template GradRtnTy<GradOrder>& getGrad() const noexcept;
         [[nodiscard]] __host__ __device__ bool isZero() const noexcept { return getValue().isZero(); }
@@ -239,7 +239,7 @@ namespace Physica::Core {
         [[nodiscard]] inline ExprType getSource() const noexcept;
         [[nodiscard]] inline This* getFirstOperand() const;
         /* Setters */
-        void setValue(const ScalarType& x) { *pValue = x; }
+        void setValue(const T& x) { *pValue = x; }
         /* Static members */
         template<class RandomGenerator>
         [[nodiscard]] inline static Diff random_uniform(RandomGenerator& gen);
@@ -252,44 +252,43 @@ namespace Physica::Core {
         friend class device_obj<This>;
     };
     ////////////////////////////////////////////////////////////
-    template<class ScalarType, DiffMode Mode, int Order, Scalar U>
-    [[nodiscard]] inline auto operator+(const Diff<ScalarType, Mode, Order>& s1, const U& s2_);
+    template<Scalar T, DiffMode Mode, int Order, Scalar U>
+    [[nodiscard]] inline auto operator+(const Diff<T, Mode, Order>& s1, const U& s2_);
 
-    template<class ScalarType, DiffMode Mode, int Order, Scalar U>
-    [[nodiscard]] inline typename std::enable_if<!U::isDifferentiable, typename Internal::BinaryScalarOpReturnType<Diff<ScalarType, Mode, Order>, U>::Type>::type
-    operator+(const U& s1, const Diff<ScalarType, Mode, Order>& s2);
+    template<Scalar T, DiffMode Mode, int Order, Scalar U>
+    [[nodiscard]] inline typename std::enable_if<!U::isDifferentiable, typename Internal::BinaryScalarOpReturnType<Diff<T, Mode, Order>, U>::Type>::type
+    operator+(const U& s1, const Diff<T, Mode, Order>& s2);
 
-    template<class ScalarType, DiffMode Mode, int Order, Scalar U>
-    [[nodiscard]] inline auto operator-(const Diff<ScalarType, Mode, Order>& s1, const U& s2_);
+    template<Scalar T, DiffMode Mode, int Order, Scalar U>
+    [[nodiscard]] inline auto operator-(const Diff<T, Mode, Order>& s1, const U& s2_);
 
-    template<class ScalarType, DiffMode Mode, int Order, Scalar U>
-    [[nodiscard]] inline typename std::enable_if<!U::isDifferentiable, typename Internal::BinaryScalarOpReturnType<Diff<ScalarType, Mode, Order>, U>::Type>::type
-    operator-(const U& s1, const Diff<ScalarType, Mode, Order>& s2);
+    template<Scalar T, DiffMode Mode, int Order, Scalar U>
+    [[nodiscard]] inline typename std::enable_if<!U::isDifferentiable, typename Internal::BinaryScalarOpReturnType<Diff<T, Mode, Order>, U>::Type>::type
+    operator-(const U& s1, const Diff<T, Mode, Order>& s2);
 
-    template<class ScalarType, DiffMode Mode, int Order, Scalar U>
-    [[nodiscard]] inline auto operator*(const Diff<ScalarType, Mode, Order>& s1, const U& s2_);
+    template<Scalar T, DiffMode Mode, int Order, Scalar U>
+    [[nodiscard]] inline auto operator*(const Diff<T, Mode, Order>& s1, const U& s2_);
 
-    template<class ScalarType, DiffMode Mode, int Order, Scalar U>
-    [[nodiscard]] inline typename std::enable_if<!U::isDifferentiable, typename Internal::BinaryScalarOpReturnType<Diff<ScalarType, Mode, Order>, U>::Type>::type
-    operator*(const U& s1, const Diff<ScalarType, Mode, Order>& s2);
-    
-    template<class ScalarType, DiffMode Mode, int Order, Scalar U>
-    [[nodiscard]] inline auto operator/(const Diff<ScalarType, Mode, Order>& s1, const U& s2_);
+    template<Scalar T, DiffMode Mode, int Order, Scalar U>
+    [[nodiscard]] inline typename std::enable_if<!U::isDifferentiable, typename Internal::BinaryScalarOpReturnType<Diff<T, Mode, Order>, U>::Type>::type
+    operator*(const U& s1, const Diff<T, Mode, Order>& s2);
 
-    template<class ScalarType, DiffMode Mode, int Order, Scalar U>
-    [[nodiscard]] inline typename std::enable_if<!U::isDifferentiable, typename Internal::BinaryScalarOpReturnType<Diff<ScalarType, Mode, Order>, U>::Type>::type
-    operator/(const U& s1, const Diff<ScalarType, Mode, Order>& s2);
+    template<Scalar T, DiffMode Mode, int Order, Scalar U>
+    [[nodiscard]] inline auto operator/(const Diff<T, Mode, Order>& s1, const U& s2_);
 
-    template<class ScalarType, DiffMode Mode, int Order>
-    inline std::ostream& operator<<(std::ostream& os, const Diff<ScalarType, Mode, Order>& obj) {
+    template<Scalar T, DiffMode Mode, int Order, Scalar U>
+    [[nodiscard]] inline typename std::enable_if<!U::isDifferentiable, typename Internal::BinaryScalarOpReturnType<Diff<T, Mode, Order>, U>::Type>::type
+    operator/(const U& s1, const Diff<T, Mode, Order>& s2);
+
+    template<Scalar T, DiffMode Mode, int Order>
+    inline std::ostream& operator<<(std::ostream& os, const Diff<T, Mode, Order>& obj) {
         return os << obj.getValue();
     }
 }
 
 namespace Physica {
-    template<class T, Core::DiffMode Mode, int Order_>
+    template<Core::Scalar T, Core::DiffMode Mode, int Order_>
     class Traits<Core::Diff<T, Mode, Order_>> {
-        static_assert(Core::is_scalar<T>::value, "[Error]: Invalid scalar");
         static_assert(!T::isDifferentiable, "[Error]: Nested Diff<> is not allowed");
         static_assert(Order_ > 0, "[Error]: Use plain type instead of 0 order differentiable");
         using RealT = typename T::RealType;
@@ -313,8 +312,6 @@ namespace Physica {
         using RealType = Core::Diff<RealT, Mode, Order>;
         using ComplexType = Core::Diff<ComplexT, Mode, Order>;
         using MachineType = typename T::MachineType;
-        /* SIMD */
-        using BoolSIMDType = Core::BoolSIMD<ScalarType, 1>;
     };
 }
 

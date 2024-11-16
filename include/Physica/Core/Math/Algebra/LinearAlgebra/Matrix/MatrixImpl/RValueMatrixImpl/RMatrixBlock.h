@@ -76,14 +76,15 @@ namespace Physica::Core {
     template<class MatrixType>
     class RMatrixBlock<MatrixType, 1, Dynamic> : public RValueMatrix<RMatrixBlock<MatrixType, 1, Dynamic>>
                                                , public RowRVector<MatrixType> {
+        using This = RMatrixBlock<MatrixType, 1, Dynamic>;
+        using Base = RValueMatrix<This>;
     public:
-        using Base = RValueMatrix<RMatrixBlock<MatrixType, 1, Dynamic>>;
         using VectorBase = RowRVector<MatrixType>;
         using ScalarType = typename MatrixType::ScalarType;
     public:
         RMatrixBlock(MatrixType& mat_, size_t row_, size_t fromCol_, size_t colCount_) : VectorBase(mat_, row_, fromCol_, colCount_) {}
-        RMatrixBlock(const RMatrixBlock&) = delete;
-        RMatrixBlock(RMatrixBlock&&) noexcept = delete;
+        RMatrixBlock(const This&) = delete;
+        RMatrixBlock(This&&) noexcept = delete;
         ~RMatrixBlock() = default;
         /* Operations */
         using Base::assignTo;
@@ -110,15 +111,16 @@ namespace Physica::Core {
 
     template<class MatrixType>
     class RMatrixBlock<MatrixType, Dynamic, 1> : public RValueMatrix<RMatrixBlock<MatrixType, Dynamic, 1>>
-                                              , public ColRVector<MatrixType> {
+                                               , public ColRVector<MatrixType> {
+        using This = RMatrixBlock<MatrixType, Dynamic, 1>;
+        using Base = RValueMatrix<This>;
     public:
-        using Base = RValueMatrix<RMatrixBlock<MatrixType, Dynamic, 1>>;
         using VectorBase = ColRVector<MatrixType>;
         using ScalarType = typename MatrixType::ScalarType;
     public:
         RMatrixBlock(MatrixType& mat_, size_t fromRow_, size_t rowCount_, size_t col_) : VectorBase(mat_, fromRow_, rowCount_, col_) {}
-        RMatrixBlock(const RMatrixBlock&) = delete;
-        RMatrixBlock(RMatrixBlock&&) noexcept = delete;
+        RMatrixBlock(const This&) = delete;
+        RMatrixBlock(This&&) noexcept = delete;
         ~RMatrixBlock() = default;
         /* Operations */
         using Base::assignTo;
@@ -145,8 +147,9 @@ namespace Physica::Core {
 
     template<class MatrixType>
     class RMatrixBlock<MatrixType, Dynamic, Dynamic> : public RValueMatrix<RMatrixBlock<MatrixType, Dynamic, Dynamic>> {
+        using This = RMatrixBlock<MatrixType, Dynamic, Dynamic>;
+        using Base = RValueMatrix<This>;
     public:
-        using Base = RValueMatrix<RMatrixBlock<MatrixType, Dynamic, Dynamic>>;
         using typename Base::ScalarType;
     private:
         MatrixType& mat;
@@ -156,8 +159,8 @@ namespace Physica::Core {
         size_t colCount;
     public:
         RMatrixBlock(MatrixType& mat_, size_t fromRow_, size_t rowCount_, size_t fromCol_, size_t colCount_);
-        RMatrixBlock(const RMatrixBlock&) = delete;
-        RMatrixBlock(RMatrixBlock&&) noexcept = delete;
+        RMatrixBlock(const This&) = delete;
+        RMatrixBlock(This&&) noexcept = delete;
         ~RMatrixBlock() = default;
         /* Getters */
         [[nodiscard]] ScalarType calc(size_t row, size_t col) const;
@@ -192,7 +195,7 @@ namespace Physica {
     class Traits<RowRVector<MatrixType>> {
     public:
         using ScalarType = typename MatrixType::ScalarType;
-        constexpr static size_t SizeAtCompile = Traits<MatrixType>::ColumnAtCompile;
+        constexpr static size_t SizeAtCompile = Traits<MatrixType>::ColAtCompile;
         constexpr static bool FastAssign = false;
         constexpr static bool FastPacket = false;
     };
@@ -212,7 +215,7 @@ namespace Physica {
         using ScalarType = typename MatrixType::ScalarType;
         constexpr static int Option = MatrixType::Option;
         constexpr static size_t RowAtCompile = Row;
-        constexpr static size_t ColumnAtCompile = Col;
+        constexpr static size_t ColAtCompile = Col;
         constexpr static size_t SizeAtCompile = Row * Col;
     };
 }

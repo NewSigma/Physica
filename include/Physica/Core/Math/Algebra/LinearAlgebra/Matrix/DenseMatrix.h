@@ -115,8 +115,8 @@ namespace Physica {
         using ScalarType = T;
         constexpr static int Option = Op;
         constexpr static size_t RowAtCompile = Row;
-        constexpr static size_t ColumnAtCompile = Col;
-        constexpr static size_t SizeAtCompile = RowAtCompile * ColumnAtCompile;
+        constexpr static size_t ColAtCompile = Col;
+        constexpr static size_t SizeAtCompile = RowAtCompile * ColAtCompile;
         using AllocatorType = Allocator;
     };
 }

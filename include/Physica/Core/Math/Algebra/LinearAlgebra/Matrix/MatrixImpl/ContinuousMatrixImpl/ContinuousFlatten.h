@@ -69,7 +69,7 @@ namespace Physica {
     class Traits<Core::ContinuousFlatten<MatrixType>> {
     public:
         using ScalarType = typename MatrixType::ScalarType;
-        constexpr static size_t SizeAtCompile = MatrixType::RowAtCompile * MatrixType::ColumnAtCompile;
+        constexpr static size_t SizeAtCompile = MatrixType::RowAtCompile * MatrixType::ColAtCompile;
 
         constexpr static bool FastAssign = false;
         constexpr static bool FastPacket = true;

@@ -20,22 +20,14 @@
 
 #include <cstdint>
 #include <limits>
-#include <type_traits>
+#include <concepts>
 #include <Physica/Macro.h>
 
 namespace Physica::Core {
     template<class T> class ScalarBase;
 
     template<class T>
-    struct is_scalar : public std::is_base_of<ScalarBase<T>, T> {};
-
-    template<class T>
-    struct is_scalar<ScalarBase<T>> {
-        constexpr static bool value = true;
-    };
-
-    template<class T>
-    concept Scalar = is_scalar<T>::value;
+    concept Scalar = std::derived_from<T, ScalarBase<T>>;
     // MP = MultiPrecision
     using MPUnit = typename std::conditional<PhysicaWordSize == 64, uint64_t, uint32_t>::type;
     using SignedMPUnit = typename std::conditional<PhysicaWordSize == 64, int64_t, int32_t>::type;

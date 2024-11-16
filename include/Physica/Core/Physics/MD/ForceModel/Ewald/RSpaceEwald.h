@@ -38,7 +38,7 @@ namespace Physica::Core {
         using typename Base::ValueType;
         using typename Base::LatticeMatrix;
         using typename Base::PositionMatrix;
-        using typename Base::Vector3D;
+        using typename Base::Vec3D;
         using typename Base::ForceConstMatrix;
         using SearchRangeType = typename PeriodicCell<ScalarType, Dim>::SearchRangeType;
         using Matrix3D = DenseMatrix<ScalarType, MatrixOption::Col | MatrixOption::Vector, 3, 3>;
@@ -73,7 +73,7 @@ namespace Physica::Core {
         template<class Executor>
         [[nodiscard]] inline VectorND<ScalarType> force_short(const PositionMatrix& pos) const;
 
-        [[nodiscard]] ComplexType forceConst(const PositionMatrix& pos, const Vector3D& waveQ, size_t dof1, size_t dof2) const;
+        [[nodiscard]] ComplexType forceConst(const PositionMatrix& pos, const Vec3D& waveQ, size_t dof1, size_t dof2) const;
 
         [[nodiscard]] inline LatticeMatrix virial(const PositionMatrix& pos) const;
         [[nodiscard]] BornChargeArray calcBornCharge() const { return makeBornCharge(charges); }
@@ -143,7 +143,7 @@ namespace Physica::Core {
      */
     template<class ScalarType, bool IsSmallCell>
     typename RSpaceEwald<ScalarType, IsSmallCell>::ComplexType
-    RSpaceEwald<ScalarType, IsSmallCell>::forceConst(const PositionMatrix& pos, const Vector3D& waveQ, size_t dof1, size_t dof2) const {
+    RSpaceEwald<ScalarType, IsSmallCell>::forceConst(const PositionMatrix& pos, const Vec3D& waveQ, size_t dof1, size_t dof2) const {
         const size_t atom1 = dof1 / 3;
         const size_t atom2 = dof2 / 3;
         const size_t direction1 = dof1 % 3U;
@@ -153,11 +153,11 @@ namespace Physica::Core {
 
         ComplexType rSpaceSum = 0;
         PeriodicCell<ScalarType, Dim>::forCellInRange(rSpaceSumRange, lattice,
-            [this, atom1, atom2, direction1, direction2, charge1, charge2, waveQ, &pos, &rSpaceSum](Vector3D delta) {
+            [this, atom1, atom2, direction1, direction2, charge1, charge2, waveQ, &pos, &rSpaceSum](Vec3D delta) {
                 const bool isSameDirection = direction1 == direction2;
                 ComplexType temp = 0;
                 {
-                    const Vector3D x = pos.row(atom1).asVector() - pos.row(atom2).asVector() + delta;
+                    const Vec3D x = pos.row(atom1).asVector() - pos.row(atom2).asVector() + delta;
                     const ScalarType norm = x.norm();
                     const bool isNotSelf = norm > ScalarType(std::numeric_limits<ScalarType>::min());
                     if (isNotSelf) {
@@ -173,7 +173,7 @@ namespace Physica::Core {
                 if (isSameAtom) {
                     ComplexType temp1 = 0;
                     for (size_t i = 0; i < getNumParticle(); ++i) {
-                        const Vector3D x = pos.row(atom1).asVector() - pos.row(i).asVector() + delta;
+                        const Vec3D x = pos.row(atom1).asVector() - pos.row(i).asVector() + delta;
                         const ScalarType norm = x.norm();
                         const bool isNotSelf = norm > ScalarType(std::numeric_limits<ScalarType>::min());
                         if (isNotSelf) {

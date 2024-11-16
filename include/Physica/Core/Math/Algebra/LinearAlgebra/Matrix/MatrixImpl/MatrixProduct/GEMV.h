@@ -52,7 +52,7 @@ namespace Physica::Core {
     template<class MatrixType, class VectorType>
     template<class OtherDerived, class Executor>
     inline void MatrixVectorProduct<MatrixType, VectorType>::assignTo(LValueVector<OtherDerived>& target) const {
-        if constexpr (MatrixOption::isColumnMatrix<MatrixType>()) {
+        if constexpr (MatrixOption::isColMatrix<MatrixType>()) {
             target = mat.col(0).asVector() * vec.calc(0);
             for (size_t i = 1; i < vec.getLength(); ++i)
                 target += mat.col(i).asVector() * vec.calc(i);
@@ -80,7 +80,7 @@ namespace Physica::Core {
     }
 
     template<class MatrixType, class VectorType>
-    [[nodiscard]] inline typename std::enable_if<MatrixType::RowAtCompile == 1 && MatrixType::ColumnAtCompile == 1,
+    [[nodiscard]] inline typename std::enable_if<MatrixType::RowAtCompile == 1 && MatrixType::ColAtCompile == 1,
                                                  typename Internal::BinaryScalarOpReturnType<typename MatrixType::ScalarType,
                                                                                              typename VectorType::ScalarType>::Type>::type
     operator*(const RValueMatrix<MatrixType>& mat, const RValueVector<VectorType>& vec) {
@@ -92,15 +92,15 @@ namespace Physica::Core {
 namespace Physica {
     template<class MatrixType, class VectorType>
     class Traits<Core::MatrixVectorProduct<MatrixType, VectorType>> {
-        static_assert(MatrixType::ColumnAtCompile == VectorType::SizeAtCompile ||
-                      MatrixType::ColumnAtCompile == Dynamic ||
+        static_assert(MatrixType::ColAtCompile == VectorType::SizeAtCompile ||
+                      MatrixType::ColAtCompile == Dynamic ||
                       VectorType::SizeAtCompile == Dynamic,
                       "Row and column do not match in matrix product");
     public:
         using ScalarType = typename Core::Internal::BinaryScalarOpReturnType<typename MatrixType::ScalarType,
                                                                              typename VectorType::ScalarType>::Type;
         constexpr static size_t SizeAtCompile = MatrixType::RowAtCompile;
-        constexpr static bool FastAssign = Core::MatrixOption::isColumnMatrix<MatrixType>();
+        constexpr static bool FastAssign = Core::MatrixOption::isColMatrix<MatrixType>();
         constexpr static bool FastPacket = false;
     };
 }

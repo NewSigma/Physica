@@ -21,19 +21,19 @@
 #include "MatrixExpr.h"
 
 namespace Physica::Core {
-    template<ExprType Type, class MatrixType>
-    class device_obj<UnitaryMatrixExpr<Type, MatrixType>> : public device_obj<RValueMatrix<MatrixExpr<Type, MatrixType>>> {
-        using host_obj = UnitaryMatrixExpr<Type, MatrixType>;
+    template<ExprType Type, Matrix M>
+    class device_obj<UnitaryMatrixExpr<Type, M>> : public device_obj<RValueMatrix<MatrixExpr<Type, M>>> {
+        using host_obj = UnitaryMatrixExpr<Type, M>;
         using This = device_obj<host_obj>;
-        using Base = device_obj<RValueMatrix<MatrixExpr<Type, MatrixType>>>;
-        using DeviceMatrix = device_obj<MatrixType>;
+        using Base = device_obj<RValueMatrix<MatrixExpr<Type, M>>>;
+        using DeviceMatrix = device_obj<M>;
     private:
         union {
             PlainStruct<const DeviceMatrix> value;
             const DeviceMatrix* ptr;
         } expr;
     public:
-        __host__ __device__ inline device_obj(const device_obj<RValueMatrix<MatrixType>>& expr_) {
+        __host__ __device__ inline device_obj(const device_obj<RValueMatrix<M>>& expr_) {
             if constexpr (IsHost())
                 expr.value = asStruct(expr_.getDerived());
             else
@@ -65,14 +65,13 @@ namespace Physica::Core {
         }
     };
 
-    template<ExprType Type, class LHS, class RHS>
+    template<ExprType Type, Matrix LHS, class RHS>
     class device_obj<BinaryMatrixExpr<Type, LHS, RHS>> : public device_obj<RValueMatrix<MatrixExpr<Type, LHS, RHS>>> {
-        static_assert(is_matrix<LHS>::value, "[Error]: Invalid left hand side type");
         using host_obj = BinaryMatrixExpr<Type, LHS, RHS>;
         using This = device_obj<host_obj>;
         using Base = device_obj<RValueMatrix<MatrixExpr<Type, LHS, RHS>>>;
         using DeviceLHS = device_obj<LHS>;
-        using DeviceRHS = typename std::conditional<is_scalar<RHS>::value, typename RHS::ScalarType, device_obj<RHS>>::type;
+        using DeviceRHS = typename std::conditional<Scalar<RHS>, typename RHS::ScalarType, device_obj<RHS>>::type;
     private:
         union {
             PlainStruct<const DeviceLHS> value;
@@ -85,7 +84,7 @@ namespace Physica::Core {
         } rhs;
     public:
         __host__ __device__ inline device_obj(const DeviceLHS& lhs_, const DeviceRHS& rhs_) {
-            if constexpr (is_matrix<RHS>::value) {
+            if constexpr (Matrix<RHS>) {
                 assert(lhs_.getRow() == rhs_.getRow());
                 assert(lhs_.getCol() == rhs_.getCol());
             }

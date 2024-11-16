@@ -318,7 +318,7 @@ namespace Physica::Gui {
         assert(x.getLength() == mean.getLength() && x.getLength() == deviation.getLength());
         QBoxPlotSeries* series = new QBoxPlotSeries(QBoxPlotSeries::Numeric);
         for (size_t i = 0; i < x.getLength(); ++i) {
-            if (deviation[i].isNegative() || !deviation[i].isFinite())
+            if (deviation.calc(i).isNegative() || !deviation.calc(i).isFinite())
                 continue;
             auto* set = new QBoxSet();
             const auto mean_i = double(mean.calc(i));

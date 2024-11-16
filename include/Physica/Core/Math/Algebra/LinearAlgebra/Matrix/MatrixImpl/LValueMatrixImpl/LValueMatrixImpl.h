@@ -63,10 +63,23 @@ namespace Physica::Core {
     }
 
     template<class Derived>
+    inline LValueMatrix<Derived>& LValueMatrix<Derived>::operator=(const This& m) {
+        auto& target = Base::getDerived();
+        target.resize(m.getRow(), m.getCol());
+        m.assignTo(target);
+        return target;
+    }
+
+    template<class Derived>
+    inline LValueMatrix<Derived>& LValueMatrix<Derived>::operator=(This&& m) {
+        return *this = m;
+    }
+
+    template<class Derived>
     template<class OtherMatrix>
     Derived& LValueMatrix<Derived>::operator=(const RValueMatrix<OtherMatrix>& m) {
         static_assert(RowAtCompile == Dynamic || OtherMatrix::RowAtCompile == Dynamic || RowAtCompile == OtherMatrix::RowAtCompile, "[Error]: Incompatible row number");
-        static_assert(ColumnAtCompile == Dynamic || OtherMatrix::ColumnAtCompile == Dynamic || ColumnAtCompile == OtherMatrix::ColumnAtCompile, "[Error]: Incompatible col number");
+        static_assert(ColAtCompile == Dynamic || OtherMatrix::ColAtCompile == Dynamic || ColAtCompile == OtherMatrix::ColAtCompile, "[Error]: Incompatible col number");
         static_assert(!(!isComplex && OtherMatrix::isComplex), "[Error]: Cannot assign a complex matrix to real matrix");
         Base::getDerived().resize(m.getRow(), m.getCol());
         m.getDerived().assignTo(Base::getDerived());
@@ -286,9 +299,9 @@ namespace Physica::Core {
         assert(Base::getDerived().getRow() == Base::getDerived().getCol());
         using namespace Internal;
         constexpr size_t RowAtCompile = Traits<Derived>::RowAtCompile;
-        constexpr size_t ColumnAtCompile = Traits<Derived>::ColumnAtCompile;
-        //Row equals column at runtime from the assert, but RowAtCompile and ColumnAtCompile may not equal. Ether of them could be dynamic.
-        constexpr size_t Rank = RowAtCompile > ColumnAtCompile ? RowAtCompile : ColumnAtCompile;
+        constexpr size_t ColAtCompile = Traits<Derived>::ColAtCompile;
+        //Row equals column at runtime from the assert, but RowAtCompile and ColAtCompile may not equal. Ether of them could be dynamic.
+        constexpr size_t Rank = RowAtCompile > ColAtCompile ? RowAtCompile : ColAtCompile;
         return DeterminateImpl<Derived, Rank>::run(Base::getDerived());
     }
     /**
@@ -322,7 +335,7 @@ namespace Physica::Core {
 
     template<class Derived>
     inline void LValueMatrix<Derived>::majorReduce(size_t v1, size_t v2, size_t elementIndex) {
-        if constexpr (MatrixOption::isColumnMatrix<Derived>())
+        if constexpr (MatrixOption::isColMatrix<Derived>())
             colReduce(v1, v2, elementIndex);
         else
             rowReduce(v1, v2, elementIndex);
@@ -330,7 +343,7 @@ namespace Physica::Core {
 
     template<class Derived>
     inline void LValueMatrix<Derived>::majorReduce(size_t v1, size_t v2, const ScalarType& factor) {
-        if constexpr (MatrixOption::isColumnMatrix<Derived>()) {
+        if constexpr (MatrixOption::isColMatrix<Derived>()) {
             auto col1 = col(v1);
             col1 -= col(v2).asVector() * factor;
         }
@@ -342,7 +355,7 @@ namespace Physica::Core {
 
     template<class Derived>
     inline void LValueMatrix<Derived>::majorMulScalar(size_t v, const ScalarType& factor) {
-        if constexpr (MatrixOption::isColumnMatrix<Derived>()) {
+        if constexpr (MatrixOption::isColMatrix<Derived>()) {
             auto c = col(v);
             c.asVector() *= factor;
         }
@@ -354,7 +367,7 @@ namespace Physica::Core {
 
     template<class Derived>
     inline void LValueMatrix<Derived>::majorSwap(size_t v1, size_t v2) {
-        if constexpr (MatrixOption::isColumnMatrix<Derived>())
+        if constexpr (MatrixOption::isColMatrix<Derived>())
             Base::getDerived().swap_col(v1, v2);
         else
             Base::getDerived().swap_row(v1, v2);

@@ -38,11 +38,17 @@ namespace Physica::Core {
         ~device_obj() = default;
         /* Operators */
         __host__ __device__ inline device_obj& operator=(const device_obj& obj);
-        __host__ __device__ inline device_obj& operator=(device_obj&& obj) noexcept;
-        template<class OtherDerived>
-        __host__ __device__ device_obj<Derived>& operator=(const device_obj<RValueVector<OtherDerived>>& v);
+        __host__ __device__ inline device_obj& operator=(device_obj&& obj);
+        template<Vector V>
+        __host__ __device__ device_obj<Derived>& operator=(const device_obj<V>& v);
+
         template<Scalar T>
         inline device_obj<Derived>& operator=(const T& s);
+        void operator+=(const ScalarType& s) { (*this) = (*this) + s; }
+        void operator-=(const ScalarType& s) { (*this) = (*this) - s; }
+        void operator*=(const ScalarType& s) { (*this) = (*this) * s; }
+        void operator/=(const ScalarType& s) { (*this) = (*this) / s; }
+
         [[nodiscard]] __device__ RefTy operator[](size_t index) { return *data_ptr(index); }
         [[nodiscard]] __device__ ConstRefTy operator[](size_t index) const { return *data_ptr(index); }
         /* Operations */

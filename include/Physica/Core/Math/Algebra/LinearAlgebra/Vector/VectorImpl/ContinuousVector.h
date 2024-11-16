@@ -29,6 +29,7 @@ namespace Physica::Core {
     template<class Derived>
     class ContinuousVector : public LValueVector<Derived> {
         using Base = LValueVector<Derived>;
+        using This = ContinuousVector<Derived>;
         template<size_t Length>
         using BlockType = ContinuousVectorBlock<Derived, Length>;
     public:
@@ -50,8 +51,8 @@ namespace Physica::Core {
         ~ContinuousVector() = default;
         /* Operators */
         using Base::operator=;
-        inline ContinuousVector& operator=(const ContinuousVector& v);
-        inline ContinuousVector& operator=(ContinuousVector&& v) noexcept;
+        inline This& operator=(const This& v);
+        inline This& operator=(This&& v);
         template<Scalar T>
         inline Derived& operator=(const T& x);
         /* Operations */
@@ -93,8 +94,8 @@ namespace Physica::Core {
         [[nodiscard]] __host__ __device__ ConstPtrTy data() const { return Base::data_ptr(0); }
     protected:
         ContinuousVector() = default;
-        ContinuousVector(const ContinuousVector&) = default;
-        ContinuousVector(ContinuousVector&&) noexcept = default;
+        ContinuousVector(const This&) = default;
+        ContinuousVector(This&&) noexcept = default;
     private:
         /* Friends */
         template<class T>

@@ -29,10 +29,8 @@ namespace Physica::Core {
      * [1] Phys. Rev. 144, 390 (1966); https://doi.org/10.1103/PhysRev.144.390
      * [2] Phys. Rev. 147, 670 (1966); https://doi.org/10.1103/PhysRev.147.670.2
      */
-    template<class ScalarType>
+    template<Scalar T>
     class CubeCross {
-        using Vector3D = Vector3D<ScalarType>;
-        using Vector4D = Vector4D<ScalarType>;
     public:
         enum CrossType : char {
             Parallelogram,
@@ -43,10 +41,10 @@ namespace Physica::Core {
             None
         };
     private:
-        ScalarType area;
+        T area;
         CrossType type;
     public:
-        CubeCross(Vector4D coeff);
+        CubeCross(Vector4D<T> coeff);
         CubeCross(const CubeCross&) = default;
         CubeCross(CubeCross&&) noexcept = default;
         ~CubeCross() = default;
@@ -55,48 +53,48 @@ namespace Physica::Core {
         /* Operations */
         void swap(CubeCross& __restrict obj) noexcept;
         /* Getters */
-        [[nodiscard]] ScalarType getArea() const noexcept { return area; }
+        [[nodiscard]] T getArea() const noexcept { return area; }
         [[nodiscard]] CrossType getType() const noexcept { return type; }
     private:
-        static Vector3D sortVector(Vector3D v);
+        static Vector3D<T> sortVector(Vector3D<T> v);
     };
 
-    template<class ScalarType>
-    CubeCross<ScalarType>::CubeCross(Vector4D coeff) {
+    template<Scalar T>
+    CubeCross<T>::CubeCross(Vector4D<T> coeff) {
         assert(!coeff.squaredNorm().isZero() && "[Error]: Invalid plain");
-        const Vector3D coeff1 = coeff.head(3);
-        const ScalarType repNorm = reciprocal(coeff1.norm());
-        const ScalarType dist = abs(coeff[3]) * repNorm;
-        const Vector3D normalVec = sortVector(abs(coeff1) * repNorm);
+        const Vector3D<T> coeff1 = coeff.head(3);
+        const T repNorm = reciprocal(coeff1.norm());
+        const T dist = abs(coeff[3]) * repNorm;
+        const Vector3D<T> normalVec = sortVector(abs(coeff1) * repNorm);
 
-        const ScalarType signedDist1 = normalVec[0] - normalVec[1] - normalVec[2];
-        const ScalarType dist1 = abs(signedDist1);
-        const ScalarType dist2 = normalVec[0] - normalVec[1] + normalVec[2];
-        const ScalarType dist3 = normalVec[0] + normalVec[1] - normalVec[2];
-        const ScalarType dist4 = normalVec.sum();
+        const T signedDist1 = normalVec[0] - normalVec[1] - normalVec[2];
+        const T dist1 = abs(signedDist1);
+        const T dist2 = normalVec[0] - normalVec[1] + normalVec[2];
+        const T dist3 = normalVec[0] + normalVec[1] - normalVec[2];
+        const T dist4 = normalVec.sum();
         if (dist > dist4) {
             area = 0;
             type = None;
             return;
         }
 
-        const ScalarType factor = normalVec[0] * normalVec[1] * normalVec[2];
+        const T factor = normalVec[0] * normalVec[1] * normalVec[2];
         if (dist < dist2) {
             if (dist < dist1) {
                 if (!signedDist1.isNegative()) {
-                    area = ScalarType(4) / normalVec[0];
+                    area = T(4) / normalVec[0];
                     type = Parallelogram;
                 }
                 else {
                     area = normalVec[0] * normalVec[1] + normalVec[0] * normalVec[2] + normalVec[1] * normalVec[2];
-                    area = ScalarType(2) * area - (square(dist) + ScalarType(1));
+                    area = T(2) * area - (square(dist) + T(1));
                     area /= factor;
                     type = Hexagon;
                 }
             }
             else {
-                area = normalVec[0] * normalVec[1] + normalVec[0] * normalVec[2] + normalVec[1] * normalVec[2] * ScalarType(3);
-                area += dist * signedDist1 - (square(dist) + ScalarType(1)) * ScalarType(0.5);
+                area = normalVec[0] * normalVec[1] + normalVec[0] * normalVec[2] + normalVec[1] * normalVec[2] * T(3);
+                area += dist * signedDist1 - (square(dist) + T(1)) * T(0.5);
                 area /= factor;
                 type = Pentagon;
             }
@@ -104,25 +102,25 @@ namespace Physica::Core {
         else {
             if (dist < dist3) {
                 area = normalVec[0] + normalVec[1] - dist;
-                area *= ScalarType(2) / (normalVec[0] * normalVec[1]);
+                area *= T(2) / (normalVec[0] * normalVec[1]);
                 type = Quadrangle;
             }
             else {
-                area = square(dist4 - dist) / (factor * ScalarType(2));
+                area = square(dist4 - dist) / (factor * T(2));
                 type = Triangle;
             }
         }
     }
 
-    template<class ScalarType>
-    void CubeCross<ScalarType>::swap(CubeCross& __restrict obj) noexcept {
+    template<Scalar T>
+    void CubeCross<T>::swap(CubeCross& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         area.swap(obj.area);
         std::swap(type, obj.type);
     }
 
-    template<class ScalarType>
-    typename CubeCross<ScalarType>::Vector3D CubeCross<ScalarType>::sortVector(Vector3D v) {
+    template<Scalar T>
+    Vector3D<T> CubeCross<T>::sortVector(Vector3D<T> v) {
         if (v[0] < v[1])
             v[0].swap(v[1]);
         if (v[0] < v[2])

@@ -42,7 +42,6 @@ namespace Physica::Core {
         using typename Base::MDCellType;
         using typename Base::LatticeMatrix;
         using typename Base::PositionMatrix;
-        using typename Base::Vector3D;
 
         constexpr static double angstormInBohr = PhyConst<AU>::angstormToBohr(1);
         constexpr static double angstormInBohr2 = angstormInBohr * angstormInBohr;

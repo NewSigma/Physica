@@ -20,17 +20,14 @@
 
 namespace Physica::Core {
     template<class Derived>
-    inline device_obj<ContinuousVector<Derived>>&
-    device_obj<ContinuousVector<Derived>>::operator=(const device_obj<ContinuousVector<Derived>>& obj) {
+    inline device_obj<ContinuousVector<Derived>>& device_obj<ContinuousVector<Derived>>::operator=(const This& obj) {
         Base::operator=(obj);
         return *this;
     }
     
     template<class Derived>
-    inline device_obj<ContinuousVector<Derived>>&
-    device_obj<ContinuousVector<Derived>>::operator=(device_obj<ContinuousVector<Derived>>&& obj) noexcept {
-        Base::operator=(std::move(obj));
-        return *this;
+    inline device_obj<ContinuousVector<Derived>>& device_obj<ContinuousVector<Derived>>::operator=(This&& obj) {
+        return *this = obj;
     }
 
     template<class Derived>

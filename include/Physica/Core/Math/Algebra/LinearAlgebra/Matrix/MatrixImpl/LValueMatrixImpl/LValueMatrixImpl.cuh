@@ -24,7 +24,7 @@ namespace Physica::Core {
     __host__ __device__ device_obj<Derived>& device_obj<LValueMatrix<Derived>>::operator=(
             const device_obj<RValueMatrix<OtherMatrix>>& m) {
         static_assert(RowAtCompile == Dynamic || OtherMatrix::RowAtCompile == Dynamic || RowAtCompile == OtherMatrix::RowAtCompile, "[Error]: Incompatible row number");
-        static_assert(ColumnAtCompile == Dynamic || OtherMatrix::ColumnAtCompile == Dynamic || ColumnAtCompile == OtherMatrix::ColumnAtCompile, "[Error]: Incompatible col number");
+        static_assert(ColAtCompile == Dynamic || OtherMatrix::ColAtCompile == Dynamic || ColAtCompile == OtherMatrix::ColAtCompile, "[Error]: Incompatible col number");
         auto& target = Base::getDerived();
         target.resize(m.getRow(), m.getCol());
         m.getDerived().assignTo(target);

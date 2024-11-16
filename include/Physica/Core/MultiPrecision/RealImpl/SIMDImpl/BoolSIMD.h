@@ -19,9 +19,9 @@
 #pragma once
 
 namespace Physica::Core {
-    template<class ScalarType, size_t Size>
-    class BoolSIMD : private Traits<BoolSIMD<ScalarType, Size>>::BaseType {
-        using This = BoolSIMD<ScalarType, Size>;
+    template<Scalar T, size_t Size>
+    class BoolSIMD : private Traits<BoolSIMD<T, Size>>::BaseType {
+        using This = BoolSIMD<T, Size>;
     public:
         using Base = typename Traits<This>::BaseType;
     public:
@@ -42,15 +42,14 @@ namespace Physica::Core {
         [[nodiscard]] const Base& toMachine() const noexcept { return *this; }
     };
 
-    template<class ScalarType, size_t Size>
-    [[nodiscard]] inline bool BoolSIMD<ScalarType, Size>::horizontal_or() const {
+    template<Scalar T, size_t Size>
+    [[nodiscard]] inline bool BoolSIMD<T, Size>::horizontal_or() const {
         return Physica::horizontal_or(toMachine());
     }
 
-    template<class ScalarType>
-    class BoolSIMD<ScalarType, 1> {
-        static_assert(is_scalar<ScalarType>::value, "[Error]: Invalid template param");
-        using This = BoolSIMD<ScalarType, 1>;
+    template<Scalar T>
+    class BoolSIMD<T, 1> {
+        using This = BoolSIMD<T, 1>;
     public:
         using Base = typename Traits<This>::BaseType;
     private:
@@ -74,9 +73,8 @@ namespace Physica::Core {
 namespace Physica {
     using namespace Core;
 
-    template<class T, size_t Size>
+    template<Scalar T, size_t Size>
     class Traits<BoolSIMD<T, Size>> {
-        static_assert(is_scalar<T>::value, "[Error]: This is not a ScalarType");
     public:
         using ScalarType = T;
     private:

@@ -110,7 +110,7 @@ namespace Physica {
         using ScalarType = typename MatrixType::ScalarType::RealType;
         constexpr static int Option = MatrixType::Option;
         constexpr static size_t RowAtCompile = MatrixType::RowAtCompile;
-        constexpr static size_t ColumnAtCompile = MatrixType::ColumnAtCompile;
+        constexpr static size_t ColAtCompile = MatrixType::ColAtCompile;
         constexpr static size_t SizeAtCompile = MatrixType::SizeAtCompile;
     };
 
@@ -122,7 +122,7 @@ namespace Physica {
         using ScalarType = typename T::ValueType;
         constexpr static int Option = MatrixType::Option;
         constexpr static size_t RowAtCompile = MatrixType::RowAtCompile;
-        constexpr static size_t ColumnAtCompile = MatrixType::ColumnAtCompile;
+        constexpr static size_t ColAtCompile = MatrixType::ColAtCompile;
         constexpr static size_t SizeAtCompile = MatrixType::SizeAtCompile;
     };
 
@@ -134,7 +134,7 @@ namespace Physica {
         using ScalarType = typename T::template GradRtnTy<GradOrder>;
         constexpr static int Option = MatrixType::Option;
         constexpr static size_t RowAtCompile = MatrixType::RowAtCompile;
-        constexpr static size_t ColumnAtCompile = MatrixType::ColumnAtCompile;
+        constexpr static size_t ColAtCompile = MatrixType::ColAtCompile;
         constexpr static size_t SizeAtCompile = MatrixType::SizeAtCompile;
     };
 }

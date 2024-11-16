@@ -26,28 +26,27 @@ namespace Physica::Core {
      * Reference:
      * [1] 贾俊平、何晓群、金勇进. 统计学(第六版)[M]. 北京:中国人民大学出版社, 2015:280-282.
      */
-    template<class ScalarType>
+    template<Scalar T>
     class LinearFit {
-        static_assert(is_scalar<ScalarType>::value, "[Error]: This is not a scalar");
-        using VectorType = VectorND<ScalarType>;
-        using ScalarPair = std::pair<ScalarType, ScalarType>;
+        using VectorType = VectorND<T>;
+        using ScalarPair = std::pair<T, T>;
     public:
         [[nodiscard]] static ScalarPair fit(const VectorType& x, const VectorType& y);
-        [[nodiscard]] static ScalarType relatedCoeff(const VectorType& x, const VectorType& y);
+        [[nodiscard]] static T relatedCoeff(const VectorType& x, const VectorType& y);
         [[nodiscard]] static ScalarPair deviation(const VectorType& x, const VectorType& y, ScalarPair pair);
 
         [[nodiscard]] static VectorType polyfit(const VectorType& x, const VectorType& y, int order);
         [[nodiscard]] static VectorType polyval(const VectorType& x, const VectorType& polyCoeff);
     };
 
-    template<class ScalarType>
-    typename LinearFit<ScalarType>::ScalarPair LinearFit<ScalarType>::fit(const VectorType& x, const VectorType& y) {
+    template<Scalar T>
+    typename LinearFit<T>::ScalarPair LinearFit<T>::fit(const VectorType& x, const VectorType& y) {
         assert(x.getLength() == y.getLength());
         const size_t length = x.getLength();
-        ScalarType xy_sum(0);
-        ScalarType x_square_sum(0);
-        ScalarType x_sum(0);
-        ScalarType y_sum(0);
+        T xy_sum(0);
+        T x_square_sum(0);
+        T x_sum(0);
+        T y_sum(0);
         for (size_t i = 0; i < length; ++i) {
             const auto& x_i = x[i];
             const auto& y_i = y[i];
@@ -56,35 +55,35 @@ namespace Physica::Core {
             x_square_sum += square(x_i);
             x_sum += x_i;
         }
-        const ScalarType length_1 = reciprocal(ScalarType(length));
-        const ScalarType numerator = xy_sum - x_sum * y_sum * length_1;
-        const ScalarType denominator = x_square_sum - square(x_sum) * length_1;
-        const ScalarType k = numerator / denominator;
+        const T length_1 = reciprocal(T(length));
+        const T numerator = xy_sum - x_sum * y_sum * length_1;
+        const T denominator = x_square_sum - square(x_sum) * length_1;
+        const T k = numerator / denominator;
         return {k, (y_sum - k * x_sum) * length_1};
     }
 
-    template<class ScalarType>
-    ScalarType LinearFit<ScalarType>::relatedCoeff(const VectorType& x, const VectorType& y) {
+    template<Scalar T>
+    T LinearFit<T>::relatedCoeff(const VectorType& x, const VectorType& y) {
         return covariance(x, y) / sqrt(variance(x) * variance(y));
     }
 
-    template<class ScalarType>
-    typename LinearFit<ScalarType>::ScalarPair LinearFit<ScalarType>::deviation(
+    template<Scalar T>
+    typename LinearFit<T>::ScalarPair LinearFit<T>::deviation(
             const VectorType& x, const VectorType& y, ScalarPair pair) {
-        const ScalarType mean_sse = square(y - pair.first * x - pair.second).sum() / ScalarType(x.getLength() - 2);
-        const ScalarType mean_x = mean(x);
-        const ScalarType ssx = square(x - mean_x).sum();
-        const ScalarType deviation_k = sqrt(mean_sse / ssx);
-        const ScalarType deviation_b = sqrt(mean_sse);
+        const T mean_sse = square(y - pair.first * x - pair.second).sum() / T(x.getLength() - 2);
+        const T mean_x = mean(x);
+        const T ssx = square(x - mean_x).sum();
+        const T deviation_k = sqrt(mean_sse / ssx);
+        const T deviation_b = sqrt(mean_sse);
         return std::make_pair(deviation_k, deviation_b);
     }
     /**
      * References:
      * [1] William H. Press, Saul A. Teukolsky, William T. Vetterling, Brian P. Flannery. C++数值算法(第二版)[M]. 北京: 电子工业出版社, 2005:496-499
      */
-    template<class ScalarType>
-    typename LinearFit<ScalarType>::VectorType LinearFit<ScalarType>::polyfit(const VectorType& x, const VectorType& y, int order) {
-        using MatrixType = DenseMatrix<ScalarType, MatrixOption::Row | MatrixOption::Vector>;
+    template<Scalar T>
+    typename LinearFit<T>::VectorType LinearFit<T>::polyfit(const VectorType& x, const VectorType& y, int order) {
+        using MatrixType = DenseMatrix<T, MatrixOption::Row | MatrixOption::Vector>;
         assert(x.getLength() == y.getLength() && "[Error]: Dimensions do not match");
         assert(order > 1 && "[Error]: Invalid order");
         const size_t length = x.getLength();
@@ -101,13 +100,13 @@ namespace Physica::Core {
             x_r = hadamard(x, x_r);
         }
 
-        LinearEquations<ScalarType> equs(std::move(working));
+        LinearEquations<T> equs(std::move(working));
         equs.gaussJordanPartial();
         return equs.getSolution();
     }
 
-    template<class ScalarType>
-    typename LinearFit<ScalarType>::VectorType LinearFit<ScalarType>::polyval(const VectorType& x, const VectorType& polyCoeff) {
+    template<Scalar T>
+    typename LinearFit<T>::VectorType LinearFit<T>::polyval(const VectorType& x, const VectorType& polyCoeff) {
         VectorType result(x.getLength(), 0);
         VectorType x1(x.getLength(), 1);
         for (auto coeff : polyCoeff) {
