@@ -39,7 +39,7 @@ int main() {
     for (size_t i = 0; i < similar.getOrder(); ++i) {
         similar(i, i) = ScalarType(-1);
         for (size_t j = i + 1; j < similar.getOrder(); ++j) {
-            similar(i, j) = -(points.col(i).asVector() - points.col(j).asVector()).norm();
+            similar(i, j) = -(points.col(i) - points.col(j)).norm();
         }
     }
 

@@ -25,40 +25,40 @@ namespace Physica::Core {
      * Reference:
      * [1] William H. Press, Saul A. Teukolsky, William T. Vetterling, Brian P. Flannery. C++数值算法(第二版)[M]. 北京: 电子工业出版社, 2005:137-140
      */
-    template<class ScalarType>
+    template<Scalar T>
     class Differential {
     public:
         template<class Function>
-        [[nodiscard]] static ScalarType forward(Function func, ScalarType x, ScalarType step);
+        [[nodiscard]] static T forward(Function func, T x, T step);
         template<class Function>
-        [[nodiscard]] static ScalarType backward(Function func, ScalarType x, ScalarType step);
+        [[nodiscard]] static T backward(Function func, T x, T step);
         template<class Function>
-        [[nodiscard]] static ScalarType doublePoint(Function func, ScalarType x, ScalarType step);
+        [[nodiscard]] static T doublePoint(Function func, T x, T step);
         template<class Function>
-        [[nodiscard]] static ScalarType ridders(Function func, ScalarType x, ScalarType step);
+        [[nodiscard]] static T ridders(Function func, T x, T step);
     };
 
-    template<class ScalarType>
+    template<Scalar T>
     template<class Function>
-    ScalarType Differential<ScalarType>::forward(Function func, ScalarType x, ScalarType step) {
+    T Differential<T>::forward(Function func, T x, T step) {
         return (func(x + step) - func(x)) / step;
     }
 
-    template<class ScalarType>
+    template<Scalar T>
     template<class Function>
-    ScalarType Differential<ScalarType>::backward(Function func, ScalarType x, ScalarType step) {
+    T Differential<T>::backward(Function func, T x, T step) {
         return (func(x) - func(x - step)) / step;
     }
 
-    template<class ScalarType>
+    template<Scalar T>
     template<class Function>
-    ScalarType Differential<ScalarType>::doublePoint(Function func, ScalarType x, ScalarType step) {
-        return (func(x + step) - func(x - step)) / (step  * ScalarType(2));
+    T Differential<T>::doublePoint(Function func, T x, T step) {
+        return (func(x + step) - func(x - step)) / (step  * T(2));
     }
 
-    template<class ScalarType>
+    template<Scalar T>
     template<class Function>
-    ScalarType Differential<ScalarType>::ridders(Function func, ScalarType x, ScalarType step) {
+    T Differential<T>::ridders(Function func, T x, T step) {
         constexpr static size_t TableSize = 10;
         constexpr static double Factor = 1.4;
         constexpr static double RepFactor = 1 / Factor;
@@ -66,21 +66,21 @@ namespace Physica::Core {
         constexpr static double Tolerance = 2;
 
         assert(step.isPositive());
-        DenseSymmMatrix<ScalarType, TableSize> table(TableSize);
+        DenseSymmMatrix<T, TableSize> table(TableSize);
         table(0, 0) = doublePoint(func, x, step);
-        ScalarType step_now = step;
-        ScalarType error = std::numeric_limits<ScalarType>::max();
-        ScalarType result{};
+        T step_now = step;
+        T error = std::numeric_limits<T>::max();
+        T result{};
         
         for (size_t i = 1; i < TableSize; ++i) {
-            step_now *= ScalarType(RepFactor);
+            step_now *= T(RepFactor);
             table(0, i) = doublePoint(func, x, step_now);
 
-            ScalarType factor2 = Factor2;
+            T factor2 = Factor2;
             for (size_t j = 1; j <= i; ++j) {
                 table(j, i) = (table(j - 1, i) * factor2 - table(j - 1, i - 1)) / (factor2 - 1);
-                factor2 *= ScalarType(Factor2);
-                const ScalarType error_now = std::max(abs(table(j, i) - table(j - 1, i)), abs(table(j, i) - table(j - 1, i - 1)));
+                factor2 *= T(Factor2);
+                const T error_now = std::max(abs(table(j, i) - table(j - 1, i)), abs(table(j, i) - table(j - 1, i - 1)));
                 if (error_now <= error) {
                     error = error_now;
                     result = table(j, i);

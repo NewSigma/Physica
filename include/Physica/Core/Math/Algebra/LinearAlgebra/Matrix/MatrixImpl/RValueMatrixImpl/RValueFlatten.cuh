@@ -21,17 +21,17 @@
 #include "RValueFlatten.h"
 
 namespace Physica::Core {
-    template<class MatrixType>
-    class device_obj<RValueFlatten<MatrixType>> : public device_obj<RValueVector<RValueFlatten<MatrixType>>> {
-        using This = device_obj<RValueFlatten<MatrixType>>;
+    template<Matrix T>
+    class device_obj<RValueFlatten<T>> : public device_obj<RValueVector<RValueFlatten<T>>> {
+        using This = device_obj<RValueFlatten<T>>;
 
-        const device_obj<MatrixType>& mat;
+        const device_obj<T>& mat;
     public:
-        using host_obj = RValueFlatten<MatrixType>;
+        using host_obj = RValueFlatten<T>;
         using Base = device_obj<RValueVector<host_obj>>;
         using typename Base::ScalarType;
     public:
-        __host__ __device__ device_obj(const device_obj<RValueMatrix<MatrixType>>& mat_) : mat(mat_.getDerived()) {}
+        __host__ __device__ device_obj(const device_obj<T>& mat_) : mat(mat_) {}
         device_obj(const This&) = delete;
         device_obj(This&&) noexcept = delete;
         ~device_obj() = default;
@@ -43,8 +43,8 @@ namespace Physica::Core {
         [[nodiscard]] __host__ __device__ size_t getLength() const noexcept { return mat.getRow() * mat.getCol(); }
     };
 
-    template<class MatrixType>
-    __device__ typename device_obj<RValueFlatten<MatrixType>>::ScalarType device_obj<RValueFlatten<MatrixType>>::calc(size_t index) const {
+    template<Matrix T>
+    __device__ typename device_obj<RValueFlatten<T>>::ScalarType device_obj<RValueFlatten<T>>::calc(size_t index) const {
         const size_t major = index / mat.getMaxMinor();
         const size_t minor = index % mat.getMaxMinor();
         return mat.calcFromMajorMinor(major, minor);
@@ -52,8 +52,6 @@ namespace Physica::Core {
 }
 
 namespace Physica {
-    using namespace Core;
-
-    template<class MatrixType>
-    class Traits<Core::device_obj<RValueFlatten<MatrixType>>> : public Traits<RValueFlatten<MatrixType>> {};
+    template<Matrix T>
+    class Traits<Core::device_obj<RValueFlatten<T>>> : public Traits<RValueFlatten<T>> {};
 }

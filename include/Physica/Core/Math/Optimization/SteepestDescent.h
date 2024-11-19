@@ -22,18 +22,18 @@
 #include "OptimizationImpl/LineSearch.h"
 
 namespace Physica::Core {
-    template<class ScalarType, size_t Dim>
+    template<Scalar T, size_t Dim>
     class SteepestDescent {
     public:
-        using VectorType = DenseVector<ScalarType, Dim>;
+        using VectorType = DenseVector<T, Dim>;
     private:
         VectorType gradG;
         VectorType tryX;
         VectorType nowX;
-        ScalarType nowY;
-        LineSearch<ScalarType, Dim> lineSearch;
+        T nowY;
+        LineSearch<T, Dim> lineSearch;
     public:
-        SteepestDescent(ScalarType maxStepSize, ScalarType decreaseCondNum_, ScalarType curvatureCondNum_);
+        SteepestDescent(T maxStepSize, T decreaseCondNum_, T curvatureCondNum_);
         SteepestDescent(const SteepestDescent&) = default;
         SteepestDescent(SteepestDescent&&) noexcept = default;
         ~SteepestDescent() = default;
@@ -47,7 +47,7 @@ namespace Physica::Core {
         [[nodiscard]] inline size_t getDim() const noexcept;
         [[nodiscard]] const VectorType& getGradG() const noexcept { return gradG; }
         [[nodiscard]] const VectorType& getArgX() const noexcept { return nowX; }
-        [[nodiscard]] ScalarType getObjectiveValue() const noexcept { return nowY; }
+        [[nodiscard]] T getObjectiveValue() const noexcept { return nowY; }
     };
 }
 

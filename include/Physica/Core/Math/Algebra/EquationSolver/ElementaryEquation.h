@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2022 Weibo He.
+ * Copyright 2020-2024 Weibo He.
  *
  * This file is part of Physica.
 
@@ -18,44 +18,36 @@
  */
 #pragma once
 
-#include "Physica/Core/MultiPrecision/Real.h"
+#include <Physica/Core/MultiPrecision/Real.h>
 
 namespace Physica::Core {
     /**
      * Equations are defined like this:
-     * ScalarType func(const ScalarType&)
+     * T func(const T&)
      */
-    template<class Function, class ScalarType>
-    ScalarType bisectionMethod(
-            Function func,
-            const ScalarType& x1,
-            const ScalarType& x2) {
-        const ScalarType y1 = func(x1);
-        const ScalarType y2 = func(x2);
-        return bisectionMethod<Function, ScalarType>(func, x1, x2, y1, y2);
+    template<class Function, Scalar T>
+    T bisectionMethod(Function func, const T& x1, const T& x2) {
+        const T y1 = func(x1);
+        const T y2 = func(x2);
+        return bisectionMethod<Function, T>(func, x1, x2, y1, y2);
     }
 
-    template<class Function, class ScalarType>
-    ScalarType bisectionMethod(
-            Function func,
-            const ScalarType& x1,
-            const ScalarType& x2,
-            const ScalarType& y1,
-            const ScalarType& y2) {
-        if(y1.isZero())
+    template<class Function, Scalar T>
+    T bisectionMethod(Function func, const T& x1, const T& x2, const T& y1, const T& y2) {
+        if (y1.isZero())
             return x1;
-        if(y2.isZero())
+        if (y2.isZero())
             return x2;
-        assert(!ScalarType::matchSign(y1, y2)); //Root must be existent
+        assert(!T::matchSign(y1, y2)); // Root must be existent
 
-        const ScalarType half = ScalarType(0.5);
-        ScalarType result = (x1 + x2) * half;
-        ScalarType y_result(1);
+        const T half = T(0.5);
+        T result = (x1 + x2) * half;
+        T y_result(1);
 
-        ScalarType error = abs(x1 - x2) * half;
-        ScalarType x_left(x1);
-        ScalarType x_right(x2);
-        ScalarType y_left(y1);
+        T error = abs(x1 - x2) * half;
+        T x_left(x1);
+        T x_right(x2);
+        T y_left(y1);
 
         bool delta_left_sign = !y_left.isPositive();
         bool delta_right_sign;
@@ -63,58 +55,48 @@ namespace Physica::Core {
             y_result = func(result);
             delta_right_sign = !y_result.isPositive();
 
-            if(delta_left_sign == delta_right_sign) {
+            if (delta_left_sign == delta_right_sign) {
                 x_left = result;
                 y_left = y_result;
-                delta_left_sign =!y_left.isPositive();
+                delta_left_sign = !y_left.isPositive();
             }
             else
                 x_right = result;
             result = (x_left + x_right) * half;
             error *= half;
-        } while(abs(result * std::numeric_limits<ScalarType>::epsilon()) < error);
+        } while (abs(result * std::numeric_limits<T>::epsilon()) < error);
         return result;
     }
     /**
      * Reference:
      * [1] J. H. Thijssen. Computational Physics[M]. London: Cambridge University Press, 2013:559-560
      */
-    template<class Function, class ScalarType>
-    ScalarType secant(
-            Function func,
-            const ScalarType& x1,
-            const ScalarType& x2,
-            const ScalarType& abs_error) {
-        const ScalarType y1 = func(x1);
-        const ScalarType y2 = func(x2);
-        return secant<Function, ScalarType>(func, x1, x2, y1, y2, abs_error);
+    template<class Function, Scalar T>
+    T secant(Function func, const T& x1, const T& x2, const T& abs_error) {
+        const T y1 = func(x1);
+        const T y2 = func(x2);
+        return secant<Function, T>(func, x1, x2, y1, y2, abs_error);
     }
 
-    template<class Function, class ScalarType>
-    ScalarType secant(
-            Function func,
-            const ScalarType& x1,
-            const ScalarType& x2,
-            const ScalarType& y1,
-            const ScalarType& y2,
-            const ScalarType& abs_error) {
-        if(y1.isZero())
+    template<class Function, Scalar T>
+    T secant(Function func, const T& x1, const T& x2, const T& y1, const T& y2, const T& abs_error) {
+        if (y1.isZero())
             return x1;
-        if(y2.isZero())
+        if (y2.isZero())
             return x2;
-        assert(!ScalarType::matchSign(y1, y2)); //Root must be existent
+        assert(!T::matchSign(y1, y2)); // Root must be existent
 
-        ScalarType x_old = x1;
-        ScalarType x_now = x2;
-        ScalarType y_old = y1;
-        ScalarType y_now = y2;
+        T x_old = x1;
+        T x_now = x2;
+        T y_old = y1;
+        T y_now = y2;
         do {
-            ScalarType temp = (x_old * y_now - x_now * y_old) / (y_now - y_old);
+            T temp = (x_old * y_now - x_now * y_old) / (y_now - y_old);
             x_old = std::move(x_now);
             y_old = std::move(y_now);
             x_now = std::move(temp);
             y_now = func(x_now);
-        } while(abs(x_now - x_old) > abs_error);
+        } while (abs(x_now - x_old) > abs_error);
         return x_now;
     }
 }

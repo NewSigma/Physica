@@ -19,10 +19,10 @@
 #pragma once
 
 namespace Physica::Core {
-    template<class VectorType>
-    class VectorExpr<ExprType::Square, VectorType> : public UnitaryVectorExpr<ExprType::Square, VectorType> {
-        using This = VectorExpr<ExprType::Square, VectorType>;
-        using Base = UnitaryVectorExpr<ExprType::Square, VectorType>;
+    template<Vector T>
+    class VectorExpr<ExprType::Square, T> : public UnitaryVectorExpr<ExprType::Square, T> {
+        using This = VectorExpr<ExprType::Square, T>;
+        using Base = UnitaryVectorExpr<ExprType::Square, T>;
     public:
         using typename Base::ScalarType;
     public:
@@ -41,8 +41,8 @@ namespace Physica::Core {
         }
     };
 
-    template<class VectorType>
-    [[nodiscard]] inline auto square(const RValueVector<VectorType>& v) noexcept {
-        return VectorExpr<ExprType::Square, VectorType>(v);
+    template<Vector T>
+    [[nodiscard]] inline auto square(const T& v) noexcept {
+        return VectorExpr<ExprType::Square, T>(v);
     }
 }

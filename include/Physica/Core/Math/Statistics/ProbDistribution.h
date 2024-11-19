@@ -21,17 +21,17 @@
 #include <Physica/Core/Math/Algebra/LinearAlgebra/Vector/DenseVector.h>
 
 namespace Physica::Core {
-    template<class ScalarType>
+    template<Scalar T>
     class ProbDistribution {
         using This = ProbDistribution;
         using BucketType = Array<size_t>;
-        using VectorType = VectorND<ScalarType>;
+        using VectorType = VectorND<T>;
 
         BucketType bucket;
         VectorType seperates;
-        ScalarType repDelta;
+        T repDelta;
     public:
-        ProbDistribution(ScalarType from, ScalarType to, size_t numBin);
+        ProbDistribution(T from, T to, size_t numBin);
         ProbDistribution(const This&) = default;
         ProbDistribution(This&&) noexcept = default;
         ~ProbDistribution() = default;
@@ -39,7 +39,7 @@ namespace Physica::Core {
         This& operator=(This obj) noexcept { swap(obj); return *this; }
         void operator+=(const This& pdf);
         /* Operations */
-        void sample(ScalarType data);
+        void sample(T data);
         inline void sample(VectorType datas);
         void clear();
         [[nodiscard]] VectorType makePosition() const;
@@ -48,72 +48,72 @@ namespace Physica::Core {
         /* Getters */
         [[nodiscard]] const BucketType& getBucket() const noexcept { return bucket; }
         [[nodiscard]] size_t getNumBin() const noexcept { return bucket.getLength(); }
-        [[nodiscard]] ScalarType getFromPoint() const noexcept { return seperates[0]; }
-        [[nodiscard]] ScalarType getToPoint() const noexcept { return *seperates.crbegin(); }
+        [[nodiscard]] T getFromPoint() const noexcept { return seperates[0]; }
+        [[nodiscard]] T getToPoint() const noexcept { return *seperates.crbegin(); }
     private:
         size_t calcNumSample() const;
     };
 
-    template<class ScalarType>
-    ProbDistribution<ScalarType>::ProbDistribution(ScalarType from, ScalarType to, size_t numBin)
+    template<Scalar T>
+    ProbDistribution<T>::ProbDistribution(T from, T to, size_t numBin)
             : bucket(numBin, 0)
             , seperates(VectorType::linspace(from, to, numBin + 1))
-            , repDelta(ScalarType(numBin) / (to - from)) {
+            , repDelta(T(numBin) / (to - from)) {
         assert(from < to);
     }
 
-    template<class ScalarType>
-    void ProbDistribution<ScalarType>::sample(ScalarType data) {
+    template<Scalar T>
+    void ProbDistribution<T>::sample(T data) {
         const long index = double((data - getFromPoint()) * repDelta);
         if (data > getFromPoint() && 0 <= index && size_t(index) < getNumBin())
             bucket[index] += 1;
     }
 
-    template<class ScalarType>
-    inline void ProbDistribution<ScalarType>::sample(VectorType datas) {
+    template<Scalar T>
+    inline void ProbDistribution<T>::sample(VectorType datas) {
         for (auto data : datas)
             sample(data);
     }
 
-    template<class ScalarType>
-    void ProbDistribution<ScalarType>::clear() {
+    template<Scalar T>
+    void ProbDistribution<T>::clear() {
         for (auto& elem : bucket)
             elem = 0;
     }
 
-    template<class ScalarType>
-    typename ProbDistribution<ScalarType>::VectorType
-    ProbDistribution<ScalarType>::makePosition() const {
-        const ScalarType delta = (getToPoint() - getFromPoint()) / ScalarType(getNumBin());
+    template<Scalar T>
+    typename ProbDistribution<T>::VectorType
+    ProbDistribution<T>::makePosition() const {
+        const T delta = (getToPoint() - getFromPoint()) / T(getNumBin());
         return seperates.head(getNumBin()) + (delta * 0.5);
     }
 
-    template<class ScalarType>
-    typename ProbDistribution<ScalarType>::VectorType
-    ProbDistribution<ScalarType>::makeDistribution() const {
-        const ScalarType factor = repDelta / ScalarType(calcNumSample());
+    template<Scalar T>
+    typename ProbDistribution<T>::VectorType
+    ProbDistribution<T>::makeDistribution() const {
+        const T factor = repDelta / T(calcNumSample());
         VectorType result(getNumBin());
         for (size_t i = 0; i < result.getLength(); ++i)
-            result[i] = ScalarType(bucket[i]) * factor;
+            result[i] = T(bucket[i]) * factor;
         return result;
     }
 
-    template<class ScalarType>
-    void ProbDistribution<ScalarType>::operator+=(const ProbDistribution<ScalarType>& pdf) {
+    template<Scalar T>
+    void ProbDistribution<T>::operator+=(const ProbDistribution<T>& pdf) {
         for (size_t i = 0; i < bucket.getLength(); ++i)
             bucket[i] += pdf.bucket[i];
     }
 
-    template<class ScalarType>
-    void ProbDistribution<ScalarType>::swap(This& __restrict obj) noexcept {
+    template<Scalar T>
+    void ProbDistribution<T>::swap(This& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         bucket.swap(obj.bucket);
         seperates.swap(obj.seperates);
         repDelta.swap(obj.repDelta);
     }
 
-    template<class ScalarType>
-    size_t ProbDistribution<ScalarType>::calcNumSample() const {
+    template<Scalar T>
+    size_t ProbDistribution<T>::calcNumSample() const {
         size_t num = 0;
         for (auto elem : bucket)
             num += elem;

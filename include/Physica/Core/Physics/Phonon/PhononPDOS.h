@@ -21,9 +21,9 @@
 #include "PhononDOS.h"
 
 namespace Physica::Core {
-    template<class ScalarType>
-    class PhononPDOS : public PhononDOS<ScalarType> {
-        using Base = PhononDOS<ScalarType>;
+    template<Scalar T>
+    class PhononPDOS : public PhononDOS<T> {
+        using Base = PhononDOS<T>;
         using typename Base::SolverType;
         using typename Base::MDCellType;
         using typename Base::Vector3D;
@@ -33,7 +33,7 @@ namespace Physica::Core {
         using typename Base::EigenValueGrid;
         using Base::Dim;
         using Base::ElementVolume;
-        using VectorType = VectorND<ScalarType>;
+        using VectorType = VectorND<T>;
 
         using Base::solver;
         using Base::eigenvalues;
@@ -47,16 +47,16 @@ namespace Physica::Core {
         /* Operators */
         PhononPDOS& operator=(PhononPDOS obj) noexcept { swap(obj); return *this; }
         /* Operations */
-        [[nodiscard]] ScalarType calcPDOS(ScalarType freq) const;
-        [[nodiscard]] ScalarType calcPDOS(ScalarType freq, size_t band) const;
+        [[nodiscard]] T calcPDOS(T freq) const;
+        [[nodiscard]] T calcPDOS(T freq, size_t band) const;
         void swap(PhononPDOS& __restrict obj) noexcept;
         /* Getters */
         using Base::getUnitCellDOF;
         [[nodiscard]] const VectorType& getDirection() const noexcept { return direction; }
     };
 
-    template<class ScalarType>
-    PhononPDOS<ScalarType>::PhononPDOS(MDCellType unitCell,
+    template<Scalar T>
+    PhononPDOS<T>::PhononPDOS(MDCellType unitCell,
                                        Index3D superSize,
                                        const KSpaceFCGrid& forceConstants,
                                        Index3D gridDim,
@@ -69,7 +69,7 @@ namespace Physica::Core {
             const Index3D gridDim = eigenvalues.getDim();
             Vector3D qPoint{};
             for (unsigned int i = 0; i < Dim; ++i)
-                qPoint[i] = ScalarType(index[i]) / ScalarType(gridDim[i]);
+                qPoint[i] = T(index[i]) / T(gridDim[i]);
             auto fcMatrix = solver.interpolatePoint(qPoint, forceConstants);
             solver.toDynamicMatrix(fcMatrix);
             const auto eigen = SolverType::diagonalize(fcMatrix);
@@ -84,17 +84,17 @@ namespace Physica::Core {
         });
     }
 
-    template<class ScalarType>
-    ScalarType PhononPDOS<ScalarType>::calcPDOS(ScalarType freq) const {
-        ScalarType result = 0;
+    template<Scalar T>
+    T PhononPDOS<T>::calcPDOS(T freq) const {
+        T result = 0;
         for (size_t band = 0; band < solver.getNumBand(); ++band)
             result += calcPDOS(freq, band);
         return result;
     }
 
-    template<class ScalarType>
-    ScalarType PhononPDOS<ScalarType>::calcPDOS(ScalarType freq, size_t band) const {
-        ScalarType result = 0;
+    template<Scalar T>
+    T PhononPDOS<T>::calcPDOS(T freq, size_t band) const {
+        T result = 0;
         eigenvalues.forIndexInGrid([this, freq, band, &result](Index3D index) {
             const Index3D gridDim = eigenvalues.getDim();
             Index3D index1{};
@@ -112,12 +112,12 @@ namespace Physica::Core {
             cornerProj[7] = projections(index1)[band];
             result += Base::calcElemDOS(freq, band, index) * mean(cornerProj);
         });
-        result /= ScalarType(eigenvalues.getSize() * ElementVolume);
+        result /= T(eigenvalues.getSize() * ElementVolume);
         return result;
     }
 
-    template<class ScalarType>
-    void PhononPDOS<ScalarType>::swap(PhononPDOS& __restrict obj) noexcept {
+    template<Scalar T>
+    void PhononPDOS<T>::swap(PhononPDOS& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         Base::swap(obj);
         direction.swap(obj.direction);

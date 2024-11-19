@@ -30,8 +30,11 @@ namespace Physica::Core {
         using TraitsType = Traits<device_obj<Derived>>;
     public:
         using ScalarType = typename TraitsType::ScalarType;
+        using ValueType = typename ScalarType::ValueType;
         constexpr static size_t SizeAtCompile = TraitsType::SizeAtCompile;
         using PacketType = typename device_obj<BestPacket<ScalarType, SizeAtCompile>>::Type;
+        constexpr static bool isForwardDiff = ScalarType::isForwardDiff;
+        constexpr static bool isReverseDiff = ScalarType::isReverseDiff;
         constexpr static bool isComplex = ScalarType::isComplex;
         constexpr static size_t MaxThreadPerBlock = 256;
     private:
@@ -39,17 +42,17 @@ namespace Physica::Core {
     public:
         ~device_obj() = default;
         /* Operations */
-        template<class OtherDerived>
-        __host__ __device__ void assignTo(device_obj<LValueVector<OtherDerived>>& target) const;
+        template<LVector V>
+        __host__ __device__ void assignTo(device_obj<V>& target) const;
         /* Getters */
         template<Side Owner = GetSide()>
         [[nodiscard]] __device__ ScalarType calc(size_t index) const { return Base::getDerived().template calc<Owner>(index); }
         template<class AnyPacket, Side Owner = GetSide()>
-        [[nodiscard]] __device__ inline AnyPacket packet(size_t) const { noImpl(); }
+        [[nodiscard]] __device__ inline AnyPacket packet(size_t index) const;
         template<class AnyPacket, Side Owner = GetSide()>
-        [[nodiscard]] __device__ inline AnyPacket packetPartial(size_t, size_t) const { noImpl(); }
+        [[nodiscard]] __device__ inline AnyPacket packetPartial(size_t index, size_t count) const;
 
-        [[nodiscard]] __host__ __device__ inline device_obj<TransposeVector<Derived>> transpose() const noexcept;
+        [[nodiscard]] __host__ __device__ inline auto transpose() const noexcept;
         template<Side Owner = GetSide()>
         [[nodiscard]] __host__ __device__ size_t getLength() const noexcept { return Base::getDerived().template getLength<Owner>(); }
         [[nodiscard]] __device__ inline RealType norm() const;
@@ -57,8 +60,8 @@ namespace Physica::Core {
         [[nodiscard]] __device__ ScalarType max() const;
         [[nodiscard]] __device__ ScalarType min() const;
         [[nodiscard]] __device__ ScalarType sum() const;
-        template<class OtherDerived>
-        [[nodiscard]] __device__ inline device_obj<CrossProduct<Derived, OtherDerived>> crossProduct(const device_obj<RValueVector<OtherDerived>>& v) const noexcept;
+        template<Vector V>
+        [[nodiscard]] __device__ inline device_obj<CrossProduct<Derived, V>> crossProduct(const device_obj<V>& v) const noexcept;
     protected:
         device_obj() = default;
         device_obj(const device_obj&) = default;
@@ -67,14 +70,14 @@ namespace Physica::Core {
         device_obj& operator=(const device_obj&) = default;
         device_obj& operator=(device_obj&&) noexcept = default;
         /* Operations */
-        template<class OtherDerived>
-        __device__ void assignToImpl(device_obj<LValueVector<OtherDerived>>& target_) const;
+        template<LVector V>
+        __device__ void assignToImpl(device_obj<V>& target) const;
     };
 }
 
 namespace Physica {
     template<class T>
-    class Traits<Core::device_obj<Core::RValueVector<T>>> {
+    class Traits<device_obj<RValueVector<T>>> {
     public:
         using Derived = device_obj<T>;
     };

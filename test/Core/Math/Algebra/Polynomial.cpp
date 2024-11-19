@@ -20,10 +20,10 @@
 
 using namespace Physica::Core;
 
-template<class VectorType>
-bool testPolyRoot(const RValueVector<VectorType>& coeffs, double precision) {
-    using ScalarType = typename VectorType::ScalarType;
-    const Polynomial<ScalarType, VectorType::SizeAtCompile> poly(coeffs);
+template<Vector T>
+bool testPolyRoot(const T& coeffs, double precision) {
+    using ScalarType = typename T::ScalarType;
+    const Polynomial<ScalarType, T::SizeAtCompile> poly(coeffs);
     auto roots = polyRoot(poly);
     for (const auto& root : roots) {
         auto result = poly(root);

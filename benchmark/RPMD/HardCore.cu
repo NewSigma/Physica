@@ -41,8 +41,8 @@ constexpr double molarVolume = 31.7;
 constexpr double mass = PhyConst<AU>::atomMass(1) * 2;
 
 namespace {
-    template<class RandomGenerator>
-    MDType makeSystem(RandomGenerator& gen) {
+    template<class RandomType>
+    MDType makeSystem(RandomType& gen) {
         using MDCellType = typename MDType::MDCellType;
         typename MDCellType::LatticeMatrix lattice = MDCellType::LatticeMatrix::unitMatrix(3);
         typename MDCellType::PositionMatrix pos(numMolecular, 3);

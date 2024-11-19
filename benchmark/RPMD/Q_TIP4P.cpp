@@ -44,8 +44,8 @@ constexpr double pair_cutoff = PhyConst<AU>::angstormToBohr(9);
 constexpr double massMoleculeInSI = PhyConst<SI>::atomMass(1) * 2 + PhyConst<SI>::atomMass(8);
 
 namespace {
-    template<class RandomGenerator>
-    Vector3D<ScalarType> randomVector(RandomGenerator& gen) {
+    template<class RandomType>
+    Vector3D<ScalarType> randomVector(RandomType& gen) {
         std::uniform_real_distribution dist{};
         const ScalarType theta(dist(gen) * M_PI);
         const ScalarType phi(dist(gen) * M_PI * 2);
@@ -54,8 +54,8 @@ namespace {
         return result;
     }
 
-    template<class RandomGenerator>
-    MDCell<ScalarType> makeSystem(unsigned int cellSize, RandomGenerator& gen) {
+    template<class RandomType>
+    MDCell<ScalarType> makeSystem(unsigned int cellSize, RandomType& gen) {
         using CrystalCellType = CrystalCell<ScalarType>;
         constexpr size_t MoleculePerCell = 4;
         constexpr size_t maxIndexH = MoleculePerCell * 2;

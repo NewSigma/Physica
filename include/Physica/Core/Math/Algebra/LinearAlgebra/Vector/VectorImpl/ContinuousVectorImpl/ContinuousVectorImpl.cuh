@@ -31,15 +31,15 @@ namespace Physica::Core {
     }
 
     template<class Derived>
-    template<class OtherDerived>
-    void device_obj<ContinuousVector<Derived>>::toHost(ContinuousVector<OtherDerived>& obj) const {
+    template<Vector T>
+    void device_obj<ContinuousVector<Derived>>::toHost(ContinuousVector<T>& obj) const {
         toHostAsync(obj);
         CUDAContext::getInstance().wait();
     }
 
     template<class Derived>
-    template<class OtherDerived>
-    void device_obj<ContinuousVector<Derived>>::toHostAsync(ContinuousVector<OtherDerived>& obj) const {
+    template<Vector T>
+    void device_obj<ContinuousVector<Derived>>::toHostAsync(ContinuousVector<T>& obj) const {
         obj.resize(Base::getLength());
         check(cudaMemcpyAsync(obj.data(), data(), Base::getLength() * sizeof(ScalarType), cudaMemcpyKind::cudaMemcpyDeviceToHost, CUDAContext::getInstance()));
     }
@@ -117,29 +117,29 @@ namespace Physica::Core {
     }
 
     template<class Derived>
-    template<class OtherDerived>
-    void ContinuousVector<Derived>::toDevice(device_obj<ContinuousVector<OtherDerived>>& obj) const {
+    template<Vector T>
+    void ContinuousVector<Derived>::toDevice(device_obj<ContinuousVector<T>>& obj) const {
         toDeviceAsync(obj);
-        if constexpr (!std::is_trivially_copy_constructible<OtherDerived>::value)
+        if constexpr (!std::is_trivially_copy_constructible<T>::value)
             CUDAContext::getInstance().wait();
     }
 
     template<class Derived>
-    template<class OtherDerived>
-    void ContinuousVector<Derived>::toDeviceAsync(device_obj<ContinuousVector<OtherDerived>>& obj) const {
-        static_assert(std::is_same<ScalarType, typename OtherDerived::ScalarType>::value,
+    template<Vector T>
+    void ContinuousVector<Derived>::toDeviceAsync(device_obj<ContinuousVector<T>>& obj) const {
+        static_assert(std::is_same<ScalarType, typename T::ScalarType>::value,
                 "[Error]: ScalarType inconsistent, additional buffer is necessary");
         const size_t length = Base::getLength();
         const size_t size = length * sizeof(ScalarType);
         obj.resize(length);
-        if constexpr (std::is_trivially_copy_constructible<OtherDerived>::value)
+        if constexpr (std::is_trivially_copy_constructible<T>::value)
             memcpy(obj.data(), data(), size);
         else {
             /**
              * Without it some tests fail, may be a compiler bug
              * We are using GCC 9.4.0 + nvcc 12.6, Ubuntu 20.04
              */
-            const device_obj<ContinuousVector<OtherDerived>>& const_obj = obj;
+            const device_obj<ContinuousVector<T>>& const_obj = obj;
             check(cudaMemcpyAsync((void*)const_obj.data(), data(), size, cudaMemcpyKind::cudaMemcpyHostToDevice, CUDAContext::getInstance()));
         }
     }

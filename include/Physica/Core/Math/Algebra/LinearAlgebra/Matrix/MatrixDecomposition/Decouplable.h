@@ -28,10 +28,10 @@ namespace Physica::Core {
     protected:
         constexpr static size_t maxItePerCol = 40; //Reference to Eigen
 
-        template<class MatrixType>
-        static size_t activeWindowDownDiag(LValueMatrix<MatrixType>& __restrict mat, size_t upper);
-        template<class MatrixType>
-        static size_t activeWindowUpDiag(LValueMatrix<MatrixType>& __restrict mat, size_t upper);
+        template<Matrix T>
+        static size_t activeWindowDownDiag(LValueMatrix<T>& __restrict mat, size_t upper);
+        template<Matrix T>
+        static size_t activeWindowUpDiag(LValueMatrix<T>& __restrict mat, size_t upper);
     };
 
     /**
@@ -39,9 +39,9 @@ namespace Physica::Core {
      * 
      * \returns We should process columns whose index is greater or equal to the returned index
      */
-    template<class MatrixType>
-    size_t Decouplable::activeWindowDownDiag(LValueMatrix<MatrixType>& __restrict mat, size_t upper) {
-        using ScalarType = typename MatrixType::ScalarType;
+    template<Matrix T>
+    size_t Decouplable::activeWindowDownDiag(LValueMatrix<T>& __restrict mat, size_t upper) {
+        using ScalarType = typename T::ScalarType;
         using RealType = typename ScalarType::RealType;
         const RealType epsilon = std::numeric_limits<RealType>::epsilon();
 
@@ -59,9 +59,9 @@ namespace Physica::Core {
         return lower;
     }
 
-    template<class MatrixType>
-    size_t Decouplable::activeWindowUpDiag(LValueMatrix<MatrixType>& __restrict mat, size_t upper) {
-        using ScalarType = typename MatrixType::ScalarType;
+    template<Matrix T>
+    size_t Decouplable::activeWindowUpDiag(LValueMatrix<T>& __restrict mat, size_t upper) {
+        using ScalarType = typename T::ScalarType;
         using RealType = typename ScalarType::RealType;
 
         assert(upper < mat.getRow());

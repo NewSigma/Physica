@@ -26,14 +26,13 @@ namespace Physica::Core {
      * Reference:
      * [1] Gene H. Golub, Charles F. Van Loan. Matrix computations 4th edition[M]. John Hopkins University Press, 2013:254-255
      */
-    template<class MatrixType, class VectorType>
-    void gramSchmidt(const RValueMatrix<MatrixType>& base_, LValueVector<VectorType>& v) {
-        const auto& base = base_.getDerived();
+    template<Matrix T, LVector U>
+    void gramSchmidt(const T& base, U& v) {
         assert(base.getRow() > base.getCol() && "[Error]: base is over complete");
         for (size_t i = 0; i < base.getCol(); ++i) {
             const auto col = base.col(i);
-            const auto dot = col.asVector().conjugate() * v.getDerived();
-            v -= dot * col.asVector();
+            const auto dot = col.conjugate() * v;
+            v -= dot * col;
         }
         v.toUnit();
     }
@@ -42,39 +41,34 @@ namespace Physica::Core {
      * 
      * This method is vulnerable to numerical roundness.
      */
-    template<class MatrixType, class VectorType>
-    void normGramSchmidt(
-            const RValueMatrix<MatrixType>& base_,
-            LValueVector<VectorType>& v,
-            typename VectorType::ScalarType::RealType squaredNorm = 1) {
-        using ScalarType = typename VectorType::ScalarType;
+    template<Matrix T, LVector U>
+    void normGramSchmidt(const T& base, U& v, typename U::ScalarType::RealType squaredNorm = 1) {
+        using ScalarType = typename U::ScalarType;
         using RealType = typename ScalarType::RealType;
         [[maybe_unused]] constexpr double epsilon = 1E-3;
-        const auto& base = base_.getDerived();
         assert(base.getRow() > base.getCol() && "[Error]: base is over complete");
         assert(scalarNear(v.squaredNorm(), squaredNorm, epsilon) && "[Error]: Invalid param");
         for (size_t i = 0; i < base.getCol(); ++i) {
             const auto col = base.col(i);
             [[maybe_unused]] const RealType temp = col.squaredNorm();
             assert(scalarNear(temp, RealType(1), epsilon) && "[Error]: Invalid param");
-            const auto dot = col.asVector().conjugate() * v.getDerived();
-            v -= dot * col.asVector();
+            const auto dot = col.conjugate() * v;
+            v -= dot * col;
             squaredNorm -= dot.squaredNorm();
         }
         v *= reciprocal(sqrt(squaredNorm));
     }
 
-    template<class MatrixType>
-    void gramSchmidt(LValueMatrix<MatrixType>& m_) {
-        auto& m = m_.getDerived();
+    template<LMatrix T>
+    void gramSchmidt(T& m) {
         assert(m.getRow() >= m.getCol() && "[Error]: base is over complete");
         for (size_t i = 0; i < m.getCol(); ++i) {
             auto col1 = m.col(i);
             col1.toUnit();
             for (size_t j = i + 1; j < m.getCol(); ++j) {
                 auto col2 = m.col(j);
-                const auto dot = col1.asVector().conjugate() * col2.asVector();
-                col2 -= dot * col1.asVector();
+                const auto dot = col1.conjugate() * col2;
+                col2 -= dot * col1;
             }
         }
     }

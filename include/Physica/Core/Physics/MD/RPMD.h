@@ -22,18 +22,17 @@
 #include <Physica/Core/Math/Statistics/NumCharacter.h>
 #include <Physica/Core/Physics/PhyConst.h>
 #include <Physica/Core/Parallel/Executor/SequentialExecutor.h>
-#include "MDCell.h"
 #include "MDImpl/RingPolymer.h"
 #include "Barostat/BaroType.h"
 
 namespace Physica::Core {
-    template<class ScalarType, unsigned int Dim> class FireModel;
-    template<class ScalarType, unsigned int Dim, BaroType Type> class CFireModel;
+    template<Scalar T, unsigned int Dim> class FireModel;
+    template<Scalar T, unsigned int Dim, BaroType Type> class CFireModel;
 
-    template<class ScalarType>
+    template<Scalar T>
     class RPMDBase {        
     public:
-        using ValueType = typename ScalarType::ValueType;
+        using ValueType = typename T::ValueType;
 
         [[nodiscard]] static uint64_t durationToStep(ValueType duration, ValueType timeStep) {
             return double(duration / timeStep) + 0.5;
@@ -48,40 +47,40 @@ namespace Physica::Core {
      * [2] J. H. Thijssen. Computational Physics[M]. London: Cambridge University Press, 2013:197-211
      * [3] J. Chem. Phys. 121, 3368 (2004); https://doi.org/10.1063/1.1777575
      */
-    template<class ScalarType,
+    template<Scalar T,
              unsigned int Dim = 3,
              size_t NumReplica = Dynamic,
-             class ForceMatrixAllocator = HostAllocator<ScalarType>>
-    class RPMD final : public RPMDBase<ScalarType> {
-        using This = RPMD<ScalarType, Dim, NumReplica, ForceMatrixAllocator>;
-        using Base = RPMDBase<ScalarType>;
+             class ForceMatrixAllocator = HostAllocator<T>>
+    class RPMD final : public RPMDBase<T> {
+        using This = RPMD<T, Dim, NumReplica, ForceMatrixAllocator>;
+        using Base = RPMDBase<T>;
         using typename Base::ValueType;
     public:
-        using RingPolymerType = RingPolymer<ScalarType, Dim, NumReplica>;
+        using RingPolymerType = RingPolymer<T, Dim, NumReplica>;
         using PhaseMatrix = typename RingPolymerType::PhaseMatrix;
-        using ForceMatrix = DenseMatrix<ScalarType, MatrixOption::Col | MatrixOption::Vector, Dynamic, Dynamic, ForceMatrixAllocator>;
+        using ForceMatrix = DenseMatrix<T, MatrixOption::Col | MatrixOption::Vector, Dynamic, Dynamic, ForceMatrixAllocator>;
         using MDCellType = typename RingPolymerType::MDCellType;
         using LatticeMatrix = typename MDCellType::LatticeMatrix;
         using PositionMatrix = typename MDCellType::PositionMatrix;
     private:
-        using FireModelType = FireModel<ScalarType, Dim>;
+        using FireModelType = FireModel<T, Dim>;
 
         MDCellType cell;
         RingPolymerType ringPolymer;
         ForceMatrix forceBuffer;
 
-        FFT<ScalarType, 1> fftContract;
+        FFT<T, 1> fftContract;
         PhaseMatrix posContract;
         ForceMatrix forceContract;
         /* Constant */
-        ScalarType temperatureT;
-        ScalarType timeStep;
+        T temperatureT;
+        T timeStep;
     public:
         RPMD(MDCellType cell_,
              size_t numReplica,
              size_t numContract,
-             ScalarType temperatureT_,
-             ScalarType timeStep_);
+             T temperatureT_,
+             T timeStep_);
         RPMD(const RPMD&) = default;
         RPMD(RPMD&&) noexcept = default;
         ~RPMD() = default;
@@ -96,7 +95,7 @@ namespace Physica::Core {
         template<class KineticModel,
                  class ForceModel,
                  class Executor>
-        void nve_step_for(ScalarType duration, KineticModel& kineticModel, ForceModel& forceModel);
+        void nve_step_for(T duration, KineticModel& kineticModel, ForceModel& forceModel);
 
         template<class Thermostat,
                  class RandomType,
@@ -109,7 +108,7 @@ namespace Physica::Core {
                  class KineticModel,
                  class ForceModel,
                  class Executor>
-        void nvt_step_for(ScalarType duration, const Thermostat& thermostat, RandomType& pool, KineticModel& kineticModel, ForceModel& forceModel);
+        void nvt_step_for(T duration, const Thermostat& thermostat, RandomType& pool, KineticModel& kineticModel, ForceModel& forceModel);
 
         template<class Thermostat,
                  class RandomType,
@@ -124,12 +123,12 @@ namespace Physica::Core {
                  class KineticModel,
                  class ForceModel,
                  class Executor>
-        void npt_step_for(ScalarType duration, const Thermostat& thermostat, RandomType& pool, Barostat& barostat, KineticModel& kineticModel, ForceModel& forceModel);
+        void npt_step_for(T duration, const Thermostat& thermostat, RandomType& pool, Barostat& barostat, KineticModel& kineticModel, ForceModel& forceModel);
 
         template<class KineticModel, class ForceModel, class Executor>
         void fire_vstep(FireModelType& fire, KineticModel& kineticModel, ForceModel& forceModel);
         template<BaroType Type, class KineticModel, class ForceModel, class Executor>
-        void fire_pstep(CFireModel<ScalarType, Dim, Type>& cfire, KineticModel& kineticModel, ForceModel& forceModel);
+        void fire_pstep(CFireModel<T, Dim, Type>& cfire, KineticModel& kineticModel, ForceModel& forceModel);
 
         template<class KineticModel, class RandomGenerator> inline void initMomentum(RandomGenerator& gen);
         template<class KineticModel> inline void scaleVelocity();
@@ -138,21 +137,21 @@ namespace Physica::Core {
         [[nodiscard]] MDCellType contractToCell(size_t contract) const;
         [[nodiscard]] MDCellType makeAverageCell() const;
 
-        template<class KineticModel> [[nodiscard]] ScalarType calcKinetic() const;
-        template<class KineticModel> [[nodiscard]] ScalarType calcKinetic(size_t dofIndex) const;
-        template<class KineticModel> [[nodiscard]] ScalarType calcKineticPrim() const;
-        template<class KineticModel> [[nodiscard]] ScalarType calcKineticPrim(size_t dofIndex) const;
-        [[nodiscard]] inline ScalarType calcKineticClassical() const;
+        template<class KineticModel> [[nodiscard]] T calcKinetic() const;
+        template<class KineticModel> [[nodiscard]] T calcKinetic(size_t dofIndex) const;
+        template<class KineticModel> [[nodiscard]] T calcKineticPrim() const;
+        template<class KineticModel> [[nodiscard]] T calcKineticPrim(size_t dofIndex) const;
+        [[nodiscard]] inline T calcKineticClassical() const;
 
-        template<class ForceModel, class Executor> [[nodiscard]] ScalarType calcPotential(const ForceModel& model) const;
-        template<class ForceModel> [[nodiscard]] ScalarType calcPotentialClassical(const ForceModel& model) const;
+        template<class ForceModel, class Executor> [[nodiscard]] T calcPotential(const ForceModel& model) const;
+        template<class ForceModel> [[nodiscard]] T calcPotentialClassical(const ForceModel& model) const;
 
-        [[nodiscard]] ScalarType calcClassicalElastic() const;
-        template<class ForceModel> [[nodiscard]] ScalarType calcClassicalInternalEnergy(const ForceModel& model) const;
+        [[nodiscard]] T calcClassicalElastic() const;
+        template<class ForceModel> [[nodiscard]] T calcClassicalInternalEnergy(const ForceModel& model) const;
 
-        template<class KineticModel> [[nodiscard]] ScalarType calcTemperature() const;
+        template<class KineticModel> [[nodiscard]] T calcTemperature() const;
         template<class KineticModel, class ForceModel, class Executor>
-        [[nodiscard]] ScalarType calcPressThermo(ForceModel& model) const;
+        [[nodiscard]] T calcPressThermo(ForceModel& model) const;
 
         template<class ForceModel, class Executor>
         [[nodiscard]] LatticeMatrix makeStressPrim(ForceModel& model) const;
@@ -162,7 +161,7 @@ namespace Physica::Core {
         [[nodiscard]] LatticeMatrix makeStressClassical(ForceModel& model) const;
 
         template<class KineticModel, class ForceModel, class Executor>
-        VectorND<ScalarType> testNVE(ScalarType duration, KineticModel& kineticModel, ForceModel& forceModel) const;
+        VectorND<T> testNVE(T duration, KineticModel& kineticModel, ForceModel& forceModel) const;
 
         void read(const H5Location& loc, const char* name);
         void write(H5Location& loc, const char* name) const;
@@ -173,7 +172,7 @@ namespace Physica::Core {
         [[nodiscard]] const typename MDCellType::InvLatticeMatrix& getInvLattice() const noexcept { return cell.getInvLattice(); }
         [[nodiscard]] const typename MDCellType::MassVector& getMassVec() const noexcept { return cell.getMassVec(); }
         [[nodiscard]] size_t getNumParticle() const noexcept { return cell.getNumParticle(); }
-        [[nodiscard]] ScalarType getVolume() const noexcept { return cell.getVolume(); }
+        [[nodiscard]] T getVolume() const noexcept { return cell.getVolume(); }
         [[nodiscard]] RingPolymerType& getRingPolymer() noexcept { return ringPolymer; }
         [[nodiscard]] const RingPolymerType& getRingPolymer() const noexcept { return ringPolymer; }
         [[nodiscard]] PhaseMatrix& getPhaseMatrix() noexcept { return ringPolymer.asMatrix(); }
@@ -184,19 +183,19 @@ namespace Physica::Core {
         [[nodiscard]] const ForceMatrix& getForce() const noexcept { return forceBuffer; }
         [[nodiscard]] size_t getNumContract() const noexcept { return fftContract.getRSpaceSize(); }
         [[nodiscard]] bool isContractEnabled() const noexcept { return (NumReplica != 1) && (getNumReplica() != getNumContract()); }
-        [[nodiscard]] ScalarType getTemperature() const noexcept { return temperatureT; }
-        [[nodiscard]] ScalarType getTimeStep() const noexcept { return timeStep; }
+        [[nodiscard]] T getTemperature() const noexcept { return temperatureT; }
+        [[nodiscard]] T getTimeStep() const noexcept { return timeStep; }
         /* Setters */
         void setLattice(LatticeMatrix lattice) { cell.setLattice(std::move(lattice)); }
-        inline void setTemperature(ScalarType temperature);
-        void setTimeStep(ScalarType timeStep_);
+        inline void setTemperature(T temperature);
+        void setTimeStep(T timeStep_);
     private:
         void toContractBeadRepr(size_t posID);
         void forceToNormRepr(size_t posID);
         void forceToBeadRepr(size_t posID);
         void contract();
         void decontract();
-        void forceStep(ScalarType deltaT);
+        void forceStep(T deltaT);
         bool checkCentroid() const;
         void checkParam() const;
     };

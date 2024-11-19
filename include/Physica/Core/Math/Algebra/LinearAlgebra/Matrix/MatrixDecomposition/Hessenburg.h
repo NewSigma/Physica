@@ -21,7 +21,7 @@
 #include <Physica/Core/Math/Algebra/LinearAlgebra/Matrix/HouseholderSequence.h>
 
 namespace Physica::Core {
-    template<class ScalarType, size_t Order> class HessenburgMatrixH;
+    template<Scalar T, size_t Order> class HessenburgMatrixH;
     /**
      * Decomposite matrix A like A = QHQ^H
      *
@@ -29,22 +29,22 @@ namespace Physica::Core {
      * [1] Gene H. Golub, Charles F. Van Loan. Matrix computations 4th edition[M]. John Hopkins University Press, 2013
      * [2] Eigen https://eigen.tuxfamily.org/
      */
-    template<class ScalarType, size_t Order = Dynamic>
+    template<Scalar T, size_t Order = Dynamic>
     class Hessenburg {
         static_assert(Order > 2 || Order == Dynamic, "Unnecessary hessenburg operation on matrixes whose rank is 1 or 2");
         constexpr static size_t NormVectorLength = Order == Dynamic ? Dynamic : (Order - 2);
-        using RealType = typename ScalarType::RealType;
-        using MatrixH = HessenburgMatrixH<ScalarType, Order>;
-        using HouseholderNorm = DenseVector<ScalarType, NormVectorLength>;
-        using This = Hessenburg<ScalarType, Order>;
+        using RealType = typename T::RealType;
+        using MatrixH = HessenburgMatrixH<T, Order>;
+        using HouseholderNorm = DenseVector<T, NormVectorLength>;
+        using This = Hessenburg<T, Order>;
     public:
-        using WorkingMatrix = DenseMatrix<ScalarType, Traits<MatrixH>::Option, Order, Order>;
+        using WorkingMatrix = DenseMatrix<T, Traits<MatrixH>::Option, Order, Order>;
     private:
         WorkingMatrix working;
         HouseholderNorm normVector;
     public:
-        template<class MatrixType>
-        Hessenburg(const RValueMatrix<MatrixType>& source);
+        template<Matrix M>
+        Hessenburg(const M& source);
         Hessenburg(const This&) = default;
         Hessenburg(This&&) noexcept = default;
         ~Hessenburg() = default;
@@ -58,44 +58,44 @@ namespace Physica::Core {
         [[nodiscard]] MatrixH getMatrixH() const noexcept { return MatrixH(*this); }
         [[nodiscard]] HouseholderSequence<WorkingMatrix> getMatrixQ() const noexcept;
     private:
-        template<class MatrixType>
-        void compute(const MatrixType& source);
-        friend class HessenburgMatrixH<ScalarType, Order>;
+        template<Matrix M>
+        void compute(const M& source);
+        friend class HessenburgMatrixH<T, Order>;
     };
 
-    template<class ScalarType, size_t Order>
-    template<class MatrixType>
-    Hessenburg<ScalarType, Order>::Hessenburg(const RValueMatrix<MatrixType>& source) {
+    template<Scalar T, size_t Order>
+    template<Matrix M>
+    Hessenburg<T, Order>::Hessenburg(const M& source) {
         resize(source.getRow());
         compute(source.getDerived());
     }
 
-    template<class ScalarType, size_t Order>
-    void Hessenburg<ScalarType, Order>::resize(size_t size) {
+    template<Scalar T, size_t Order>
+    void Hessenburg<T, Order>::resize(size_t size) {
         assert(size >= 3 && "[Error]: Hessenberg decomposition with a size smaller than 3 does not perform any operations");
         working.resize(size, size);
         normVector.resize(size - 2);
     }
 
-    template<class ScalarType, size_t Order>
-    void Hessenburg<ScalarType, Order>::swap(This& __restrict obj) {
+    template<Scalar T, size_t Order>
+    void Hessenburg<T, Order>::swap(This& __restrict obj) {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         working.swap(obj.working);
         normVector.swap(obj.normVector);
     }
 
-    template<class ScalarType, size_t Order>
-    HouseholderSequence<typename Hessenburg<ScalarType, Order>::WorkingMatrix>
-    Hessenburg<ScalarType, Order>::getMatrixQ() const noexcept {
+    template<Scalar T, size_t Order>
+    HouseholderSequence<typename Hessenburg<T, Order>::WorkingMatrix>
+    Hessenburg<T, Order>::getMatrixQ() const noexcept {
         HouseholderSequence result(working);
         result.setSize(working.getRow() - 2);
         result.setShift(1);
         return result;
     }
 
-    template<class ScalarType, size_t Order>
-    template<class MatrixType>
-    void Hessenburg<ScalarType, Order>::compute(const MatrixType& source) {
+    template<Scalar T, size_t Order>
+    template<Matrix M>
+    void Hessenburg<T, Order>::compute(const M& source) {
         assert(source.getRow() == source.getCol());
         assert(source.getRow() > 2);
         const size_t order = source.getRow();
@@ -104,7 +104,7 @@ namespace Physica::Core {
             auto to_col = working.col(i);
             auto temp = to_col.tail(i + 1);
 
-            ScalarType unit;
+            T unit;
             if (temp[0].squaredNorm() <= RealType(std::numeric_limits<RealType>::min()))
                 unit = RealType(1);
             else
@@ -122,24 +122,24 @@ namespace Physica::Core {
         }
     }
 
-    template<class ScalarType, size_t Order>
-    class HessenburgMatrixH : public RValueMatrix<HessenburgMatrixH<ScalarType, Order>> {
-        using Base = RValueMatrix<HessenburgMatrixH<ScalarType, Order>>;
-        const Hessenburg<ScalarType, Order>& hess;
+    template<Scalar T, size_t Order>
+    class HessenburgMatrixH : public RValueMatrix<HessenburgMatrixH<T, Order>> {
+        using Base = RValueMatrix<HessenburgMatrixH<T, Order>>;
+        const Hessenburg<T, Order>& hess;
     public:
-        HessenburgMatrixH(const Hessenburg<ScalarType, Order>& hess_) : hess(hess_) {}
+        HessenburgMatrixH(const Hessenburg<T, Order>& hess_) : hess(hess_) {}
         /* Operations */
-        template<class OtherMatrix>
-        void assignTo(LValueMatrix<OtherMatrix>& target) const;
+        template<Matrix M>
+        void assignTo(LValueMatrix<M>& target) const;
         /* Getters */
         [[nodiscard]] __host__ __device__ size_t getRow() const noexcept { return hess.getSize(); }
         [[nodiscard]] __host__ __device__ size_t getCol() const noexcept { return hess.getSize(); }
     };
 
-    template<class ScalarType, size_t Order>
-    template<class OtherMatrix>
-    void HessenburgMatrixH<ScalarType, Order>::assignTo(LValueMatrix<OtherMatrix>& target) const {
-        using RealType = typename ScalarType::RealType;
+    template<Scalar T, size_t Order>
+    template<Matrix M>
+    void HessenburgMatrixH<T, Order>::assignTo(LValueMatrix<M>& target) const {
+        using RealType = typename T::RealType;
         const size_t order = getRow();
         size_t i = 0;
         for (; i < order - 2; ++i) {
@@ -157,13 +157,11 @@ namespace Physica::Core {
 }
 
 namespace Physica {
-    using namespace Core;
-
-    template<class T, size_t Order>
-    class Traits<HessenburgMatrixH<T, Order>> {
+    template<Core::Scalar T, size_t Order>
+    class Traits<Core::HessenburgMatrixH<T, Order>> {
     public:
         using ScalarType = T;
-        constexpr static int Option = MatrixOption::Col | (Order == Dynamic ? MatrixOption::Vector : MatrixOption::Element);
+        constexpr static int Option = Core::MatrixOption::Col | (Order == Dynamic ? Core::MatrixOption::Vector : Core::MatrixOption::Element);
         constexpr static size_t RowAtCompile = Order;
         constexpr static size_t ColAtCompile = Order;
         constexpr static size_t SizeAtCompile = RowAtCompile * ColAtCompile;

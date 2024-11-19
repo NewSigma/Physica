@@ -16,13 +16,13 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include "Physica/Core/Physics/SolidState/CrystalCell.h"
-#include "Physica/Core/Physics/MD/ForceModel/Q_TIP4P.h"
-#include "Physica/Core/Physics/MD/RPMD.h"
-#include "Physica/Core/Physics/MD/Thermostat/DoubleThermo.h"
-#include "Physica/Core/Physics/MD/KineticModel/FreeModel.h"
-#include "Physica/Core/Physics/MD/ForceModel/Ewald/RandomBatchEwald.h"
-#include "Physica/Core/Parallel/Executor/ThreadExecutor.h"
+#include <iostream>
+#include <Physica/Core/Physics/SolidState/CrystalCell.h>
+#include <Physica/Core/Physics/MD/ForceModel/Q_TIP4P.h>
+#include <Physica/Core/Physics/MD/RPMD.h>
+#include <Physica/Core/Physics/MD/Thermostat/DoubleThermo.h>
+#include <Physica/Core/Physics/MD/KineticModel/FreeModel.h>
+#include <Physica/Core/Physics/MD/ForceModel/Ewald/RandomBatchEwald.h>
 
 using namespace Physica::Core;
 using ScalarType = float64;

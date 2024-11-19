@@ -48,8 +48,8 @@ namespace Physica::Core {
         DenseVector(size_t length, const ScalarType& init);
         DenseVector(std::initializer_list<ScalarType> list);
         DenseVector(ValueVector values_, GradVector grads_) noexcept;
-        template<class Derived>
-        DenseVector(const RValueVector<Derived>& v);
+        template<Vector V>
+        DenseVector(const V& v);
         DenseVector(const This&) = default;
         DenseVector(This&&) noexcept = default;
         ~DenseVector() = default;

@@ -23,19 +23,19 @@
 namespace Physica::Core {
     template<class GridType> class LValueGrid;
 
-    template<class GridType>
-    class FlattenGrid : public LValueVector<FlattenGrid<GridType>> {
-        using This = FlattenGrid<GridType>;
+    template<Grid T>
+    class FlattenGrid<T> : public LValueVector<FlattenGrid<T>> {
+        using This = FlattenGrid<T>;
 
-        const GridType& grid;
+        const T& grid;
     public:
-        using Base = LValueVector<FlattenGrid<GridType>>;
+        using Base = LValueVector<FlattenGrid<T>>;
         using typename Base::ScalarType;
     protected:
         using typename Base::PtrTy;
         using typename Base::ConstPtrTy;
     public:
-        FlattenGrid(const LValueGrid<GridType>& grid_) : grid(grid_.getDerived()) {}
+        FlattenGrid(const T& grid_) : grid(grid_) {}
         /* Operators */
         FlattenGrid& operator=(const FlattenGrid& obj);
         using Base::operator=;
@@ -47,19 +47,19 @@ namespace Physica::Core {
         [[nodiscard]] __host__ __device__ inline ConstPtrTy data_ptr(size_t index) const;
     };
 
-    template<class GridType>
-    FlattenGrid<GridType>& FlattenGrid<GridType>::operator=(const FlattenGrid<GridType>& obj) {
+    template<Grid T>
+    FlattenGrid<T>& FlattenGrid<T>::operator=(const FlattenGrid<T>& obj) {
         Base::getDerived() = obj.getDerived();
         return *this;
     }
 
-    template<class GridType>
-    __host__ __device__ typename FlattenGrid<GridType>::PtrTy FlattenGrid<GridType>::data_ptr(size_t index) {
+    template<Grid T>
+    __host__ __device__ typename FlattenGrid<T>::PtrTy FlattenGrid<T>::data_ptr(size_t index) {
         return const_cast<ScalarType*>(const_cast<const This&>(*this).data_ptr(index));
     }
 
-    template<class GridType>
-    __host__ __device__ typename FlattenGrid<GridType>::ConstPtrTy FlattenGrid<GridType>::data_ptr(size_t index) const {
+    template<Grid T>
+    __host__ __device__ typename FlattenGrid<T>::ConstPtrTy FlattenGrid<T>::data_ptr(size_t index) const {
         const size_t temp = index / grid.getDimZ();
         const size_t x = temp / grid.getDimY();
         const size_t y = temp % grid.getDimY();
@@ -69,12 +69,10 @@ namespace Physica::Core {
 }
 
 namespace Physica {
-    using namespace Core;
-
-    template<class GridType>
-    class Traits<FlattenGrid<GridType>> {
+    template<Grid T>
+    class Traits<FlattenGrid<T>> {
     public:
-        using ScalarType = typename GridType::ScalarType;
+        using ScalarType = typename T::ScalarType;
         constexpr static size_t SizeAtCompile = Dynamic;
 
         constexpr static bool FastAssign = false;

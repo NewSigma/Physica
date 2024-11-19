@@ -23,51 +23,52 @@
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h"
 
 namespace Physica::Core {
-    template<class ScalarType>
+    template<Scalar T>
     class MatrixSequence {
-        using MatrixType = DenseMatrix<ScalarType, MatrixOption::Row | MatrixOption::Vector>;
+        using This = MatrixSequence<T>;
+        using MatrixType = DenseMatrix<T, MatrixOption::Row | MatrixOption::Vector>;
         MatrixType mat;
         std::ifstream fin;
         uint64_t stepNum;
     public:
         MatrixSequence(size_t row, size_t col, std::ifstream fin_);
-        MatrixSequence(const MatrixSequence&) = default;
-        MatrixSequence(MatrixSequence&&) = default;
+        MatrixSequence(const This&) = default;
+        MatrixSequence(This&&) = default;
         ~MatrixSequence() = default;
         /* Operators */
-        MatrixSequence& operator=(MatrixSequence obj) noexcept;
+        This& operator=(This obj) noexcept;
         /* Operations */
         bool step();
-        void swap(MatrixSequence& __restrict obj) noexcept;
+        void swap(This& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] const MatrixType& getCurrent() const noexcept { return mat; }
         [[nodiscard]] uint64_t getStep() const noexcept { return stepNum; }
     };
 
-    template<class ScalarType>
-    MatrixSequence<ScalarType>::MatrixSequence(size_t row, size_t col, std::ifstream fin_)
+    template<Scalar T>
+    MatrixSequence<T>::MatrixSequence(size_t row, size_t col, std::ifstream fin_)
             : mat(row, col)
             , fin(std::move(fin_))
             , stepNum(0) {}
 
-    template<class ScalarType>
-    MatrixSequence<ScalarType>& MatrixSequence<ScalarType>::operator=(MatrixSequence obj) noexcept {
+    template<Scalar T>
+    MatrixSequence<T>& MatrixSequence<T>::operator=(MatrixSequence obj) noexcept {
         swap(obj);
         return *this;
     }
     /**
      * \returns true if read successfully
      */
-    template<class ScalarType>
-    bool MatrixSequence<ScalarType>::step() {
+    template<Scalar T>
+    bool MatrixSequence<T>::step() {
         fin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
         fin >> mat;
         ++stepNum;
         return bool(fin);
     }
 
-    template<class ScalarType>
-    void MatrixSequence<ScalarType>::swap(MatrixSequence& __restrict obj) noexcept {
+    template<Scalar T>
+    void MatrixSequence<T>::swap(This& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         mat.swap(obj.mat);
         fin.swap(obj.fin);

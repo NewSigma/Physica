@@ -18,26 +18,26 @@
  */
 #pragma once
 
-#include "Physica/Core/Utils/Container/Array.h"
-#include "Physica/Core/Physics/SolidState/PeriodicCell.h"
+#include <Physica/Core/Utils/Container/Array.h>
+#include <Physica/Core/Physics/SolidState/PeriodicCell.h>
 
 namespace Physica::Core {
     class GridBase {
     public:
         using Index3D = Array<size_t, 3>;
         /* Static members */
-        template<class ScalarType, bool IsUnitLattice, class Functor>
-        static void forPointInGrid(Index3D dim, const typename PeriodicCell<ScalarType, 3>::LatticeMatrix& lattice, Functor func);
-        template<class ScalarType, bool IsUnitLattice, class Functor>
-        static void forPointIndexInGrid(Index3D dim, const typename PeriodicCell<ScalarType, 3>::LatticeMatrix& lattice, Functor func);
+        template<Scalar T, bool IsUnitLattice, class Functor>
+        static void forPointInGrid(Index3D dim, const typename PeriodicCell<T, 3>::LatticeMatrix& lattice, Functor func);
+        template<Scalar T, bool IsUnitLattice, class Functor>
+        static void forPointIndexInGrid(Index3D dim, const typename PeriodicCell<T, 3>::LatticeMatrix& lattice, Functor func);
         template<class Functor> static void forIndexInGrid(Index3D dim, Functor func);
     };
 
-    template<class ScalarType, bool IsUnitLattice, class Functor>
+    template<Scalar T, bool IsUnitLattice, class Functor>
     void GridBase::forPointInGrid(
-            Index3D dim, const typename PeriodicCell<ScalarType, 3>::LatticeMatrix& lattice, Functor func) {
-        using LatticeMatrix = typename PeriodicCell<ScalarType, 3>::LatticeMatrix;
-        using VectorType = Vector3D<ScalarType>;
+            Index3D dim, const typename PeriodicCell<T, 3>::LatticeMatrix& lattice, Functor func) {
+        using LatticeMatrix = typename PeriodicCell<T, 3>::LatticeMatrix;
+        using VectorType = Vector3D<T>;
 
         LatticeMatrix sub_lattice{};
         auto a1 = sub_lattice.row(0);
@@ -46,30 +46,30 @@ namespace Physica::Core {
         if constexpr (IsUnitLattice)
             sub_lattice = lattice;
         else {
-            a1 = lattice.row(0).asVector() * reciprocal(ScalarType(dim[0]));
-            a2 = lattice.row(1).asVector() * reciprocal(ScalarType(dim[1]));
-            a3 = lattice.row(2).asVector() * reciprocal(ScalarType(dim[2]));
+            a1 = lattice.row(0) * reciprocal(T(dim[0]));
+            a2 = lattice.row(1) * reciprocal(T(dim[1]));
+            a3 = lattice.row(2) * reciprocal(T(dim[2]));
         }
 
         VectorType v1, v2, v3;
         for (size_t x = 0; x < dim[0]; ++x) {
-            v1 = ScalarType(x) * a1.asVector();
+            v1 = T(x) * a1;
             for (size_t y = 0; y < dim[1]; ++y) {
-                v2 = v1 + ScalarType(y) * a2.asVector();
+                v2 = v1 + T(y) * a2;
                 for (size_t z = 0; z < dim[2]; ++z) {
-                    v3 = v2 + ScalarType(z) * a3.asVector();
+                    v3 = v2 + T(z) * a3;
                     func(v3);
                 }
             }
         }
     }
 
-    template<class ScalarType, bool IsUnitLattice, class Functor>
+    template<Scalar T, bool IsUnitLattice, class Functor>
     void GridBase::forPointIndexInGrid(
-            Index3D dim, const typename PeriodicCell<ScalarType, 3>::LatticeMatrix& lattice, Functor func) {
-        static_assert(!ScalarType::isComplex, "[Error]: Position in 3D space can not be complex number");
-        using LatticeMatrix = typename PeriodicCell<ScalarType, 3>::LatticeMatrix;
-        using VectorType = Vector3D<ScalarType>;
+            Index3D dim, const typename PeriodicCell<T, 3>::LatticeMatrix& lattice, Functor func) {
+        static_assert(!T::isComplex, "[Error]: Position in 3D space can not be complex number");
+        using LatticeMatrix = typename PeriodicCell<T, 3>::LatticeMatrix;
+        using VectorType = Vector3D<T>;
 
         LatticeMatrix sub_lattice{};
         auto a1 = sub_lattice.row(0);
@@ -78,18 +78,18 @@ namespace Physica::Core {
         if constexpr (IsUnitLattice)
             sub_lattice = lattice;
         else {
-            a1 = lattice.row(0).asVector() * reciprocal(ScalarType(dim[0]));
-            a2 = lattice.row(1).asVector() * reciprocal(ScalarType(dim[1]));
-            a3 = lattice.row(2).asVector() * reciprocal(ScalarType(dim[2]));
+            a1 = lattice.row(0) * reciprocal(T(dim[0]));
+            a2 = lattice.row(1) * reciprocal(T(dim[1]));
+            a3 = lattice.row(2) * reciprocal(T(dim[2]));
         }
 
         VectorType v1, v2, v3;
         for (size_t x = 0; x < dim[0]; ++x) {
-            v1 = ScalarType(x) * a1.asVector();
+            v1 = T(x) * a1;
             for (size_t y = 0; y < dim[1]; ++y) {
-                v2 = v1 + ScalarType(y) * a2.asVector();
+                v2 = v1 + T(y) * a2;
                 for (size_t z = 0; z < dim[2]; ++z) {
-                    v3 = v2 + ScalarType(z) * a3.asVector();
+                    v3 = v2 + T(z) * a3;
                     func(v3, Index3D{x, y, z});
                 }
             }

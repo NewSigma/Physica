@@ -27,8 +27,8 @@ namespace Physica::Core {
     public:
         ~MatrixMarket() = default;
         /* Static members */
-        template<class MatrixType>
-        static void read(const char* path, LValueMatrix<MatrixType>& target);
+        template<LMatrix T>
+        static void read(const char* path, T& target);
     private:
         MatrixMarket();
         MatrixMarket(const This&) = default;
@@ -38,9 +38,9 @@ namespace Physica::Core {
         This& operator=(This&&) noexcept = default;
     };
 
-    template<class MatrixType>
-    void MatrixMarket::read(const char* path, LValueMatrix<MatrixType>& target_) {
-        using ScalarType = typename MatrixType::ScalarType;
+    template<LMatrix T>
+    void MatrixMarket::read(const char* path, T& target) {
+        using ScalarType = typename T::ScalarType;
         std::ifstream fin(path);
         if (!fin)
             throw IOException("[Error]: No file found");
@@ -48,7 +48,6 @@ namespace Physica::Core {
 
         size_t row, col, numElem;
         fin >> row >> col >> numElem;
-        auto& target = target_.getDerived();
         target.resize(row, col);
         fin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
 

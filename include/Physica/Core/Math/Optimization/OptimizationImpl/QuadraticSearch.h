@@ -19,9 +19,9 @@
 #pragma once
 
 namespace Physica::Core {
-    template<class ScalarType>
+    template<Scalar T>
     class QuadraticSearch {
-        using Vector3D = Vector3D<ScalarType>;
+        using Vector3D = Vector3D<T>;
 
         Vector3D x;
         Vector3D y;
@@ -38,42 +38,42 @@ namespace Physica::Core {
         void swap(QuadraticSearch& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] int getOptimalIndex() const noexcept;
-        [[nodiscard]] ScalarType getOptimizedX() const noexcept { return x[getOptimalIndex()]; }
-        [[nodiscard]] ScalarType getOptimizedY() const noexcept { return y[getOptimalIndex()]; }
+        [[nodiscard]] T getOptimizedX() const noexcept { return x[getOptimalIndex()]; }
+        [[nodiscard]] T getOptimizedY() const noexcept { return y[getOptimalIndex()]; }
     };
 
-    template<class ScalarType>
-    QuadraticSearch<ScalarType>::QuadraticSearch(Vector3D x_, Vector3D y_) : x(std::move(x_)), y(std::move(y_)) {}
+    template<Scalar T>
+    QuadraticSearch<T>::QuadraticSearch(Vector3D x_, Vector3D y_) : x(std::move(x_)), y(std::move(y_)) {}
 
-    template<class ScalarType>
+    template<Scalar T>
     template<class Functor>
-    void QuadraticSearch<ScalarType>::step(Functor func) {
-        using ResultType = typename std::invoke_result<Functor, ScalarType>::type;
-        static_assert(std::is_same<ScalarType, ResultType>::value, "[Error]: Invalid functor");
-        const ScalarType term1 = x[0] * (y[1] - y[2]);
-        const ScalarType term2 = x[1] * (y[2] - y[0]);
-        const ScalarType term3 = x[2] * (y[0] - y[1]);
-        const ScalarType temp1 = x[0] * term1 + x[1] * term2 + x[2] * term3;
-        const ScalarType temp2 = term1 + term2 + term3;
-        const ScalarType new_x = temp1 / (temp2 * ScalarType(2));
-        const ScalarType new_y = func(new_x);
+    void QuadraticSearch<T>::step(Functor func) {
+        using ResultType = typename std::invoke_result<Functor, T>::type;
+        static_assert(std::is_same<T, ResultType>::value, "[Error]: Invalid functor");
+        const T term1 = x[0] * (y[1] - y[2]);
+        const T term2 = x[1] * (y[2] - y[0]);
+        const T term3 = x[2] * (y[0] - y[1]);
+        const T temp1 = x[0] * term1 + x[1] * term2 + x[2] * term3;
+        const T temp2 = term1 + term2 + term3;
+        const T new_x = temp1 / (temp2 * T(2));
+        const T new_y = func(new_x);
 
         const int index = getOptimalIndex();
         x[index] = new_x;
         y[index] = new_y;
     }
 
-    template<class ScalarType>
-    void QuadraticSearch<ScalarType>::swap(QuadraticSearch& __restrict obj) noexcept {
+    template<Scalar T>
+    void QuadraticSearch<T>::swap(QuadraticSearch& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         x.swap(obj.x);
         y.swap(obj.y);
     }
 
-    template<class ScalarType>
-    int QuadraticSearch<ScalarType>::getOptimalIndex() const noexcept {
+    template<Scalar T>
+    int QuadraticSearch<T>::getOptimalIndex() const noexcept {
         int index = 0;
-        ScalarType max = std::numeric_limits<ScalarType>::min();
+        T max = std::numeric_limits<T>::min();
         for (int i = 0; i < 3; ++i) {
             if (y[i] > max) {
                 index = i;

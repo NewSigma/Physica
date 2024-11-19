@@ -56,8 +56,8 @@ namespace Physica::Core {
 
         template<class Executor>
         [[nodiscard]] VectorND<ScalarType> force(const MDCellType& cell) const;
-        template<class VectorType, class Executor>
-        void forceAsync(const MDCellType& cell, ContinuousVector<VectorType>& result);
+        template<Vector V, class Executor>
+        void forceAsync(const MDCellType& cell, ContinuousVector<V>& result);
 
         void swap(TIModel& __restrict obj) noexcept;
         /* Getters */
@@ -104,10 +104,10 @@ namespace Physica::Core {
     }
 
     template<class ForceModel>
-    template<class VectorType, class Executor>
-    void TIModel<ForceModel>::forceAsync(const MDCellType& cell, ContinuousVector<VectorType>& result) {
+    template<Vector V, class Executor>
+    void TIModel<ForceModel>::forceAsync(const MDCellType& cell, ContinuousVector<V>& result) {
         if (!lambda.isZero())
-            original.template forceAsync<VectorType, Executor>(cell, result);
+            original.template forceAsync<V, Executor>(cell, result);
         const VectorND<ScalarType> hamonicF = hamonic.template force<Executor>(cell);
         Executor::wait();
         result = lambda * result + (ScalarType(1) - lambda) * hamonicF;

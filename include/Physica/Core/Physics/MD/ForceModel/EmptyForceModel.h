@@ -22,63 +22,63 @@
 #include <Physica/Core/Physics/MD/MDCell.h>
 
 namespace Physica::Core {
-    template<class ScalarType, unsigned int Dim> class EmptyForceModel;
+    template<Scalar T, unsigned int Dim> class EmptyForceModel;
 
     namespace Internal {
-        template<class T>
+        template<class>
         struct is_empty_force_model {
             constexpr static bool value = false;
         };
 
-        template<class ScalarType, unsigned int Dim>
-        struct is_empty_force_model<EmptyForceModel<ScalarType, Dim>> {
+        template<Scalar T, unsigned int Dim>
+        struct is_empty_force_model<EmptyForceModel<T, Dim>> {
             constexpr static bool value = true;
         };
     }
 
-    template<class ScalarType, unsigned int Dim>
+    template<Scalar T, unsigned int Dim>
     class EmptyForceModel {
     public:
-        using MDCellType = MDCell<ScalarType, Dim>;
+        using MDCellType = MDCell<T, Dim>;
         using LatticeMatrix = typename MDCellType::LatticeMatrix;
-        using ForceConstMatrix = DenseSymmMatrix<ScalarType>;
+        using ForceConstMatrix = DenseSymmMatrix<T>;
     public:
         /* Operations */
-        [[nodiscard]] ScalarType potentialV([[maybe_unused]] const MDCellType& cell) const { return 0; }
+        [[nodiscard]] T potentialV([[maybe_unused]] const MDCellType& cell) const { return 0; }
 
         template<class Executor>
-        [[nodiscard]] VectorND<ScalarType> force(const MDCellType& cell) const { return VectorND<ScalarType>(cell.getDOF(), 0); }
-        template<class VectorType, class Executor>
-        void forceAsync([[maybe_unused]] const MDCellType& cell, ContinuousVector<VectorType>& result) const;
+        [[nodiscard]] VectorND<T> force(const MDCellType& cell) const { return VectorND<T>(cell.getDOF(), 0); }
+        template<Vector V, class Executor>
+        void forceAsync([[maybe_unused]] const MDCellType& cell, ContinuousVector<V>& result) const;
         template<class Executor>
-        [[nodiscard]] VectorND<ScalarType> force_short(const MDCellType& cell) const { return force<Executor>(cell); }
+        [[nodiscard]] VectorND<T> force_short(const MDCellType& cell) const { return force<Executor>(cell); }
         template<class Executor>
-        [[nodiscard]] VectorND<ScalarType> force_long(const MDCellType& cell) const { return VectorND<ScalarType>(cell.getDOF(), 0); }
+        [[nodiscard]] VectorND<T> force_long(const MDCellType& cell) const { return VectorND<T>(cell.getDOF(), 0); }
 
-        [[nodiscard]] ScalarType forceConst([[maybe_unused]] const MDCellType& cell, [[maybe_unused]] size_t dof1, [[maybe_unused]] size_t dof2) const { return ScalarType(0); }
+        [[nodiscard]] T forceConst([[maybe_unused]] const MDCellType& cell, [[maybe_unused]] size_t dof1, [[maybe_unused]] size_t dof2) const { return T(0); }
         [[nodiscard]] ForceConstMatrix forceConst([[maybe_unused]] const MDCellType& cell) const;
 
         [[nodiscard]] LatticeMatrix virial([[maybe_unused]] const MDCellType& cell) const { return LatticeMatrix(Dim, Dim, 0); }
     };
 
-    template<class ScalarType, unsigned int Dim>
-    template<class VectorType, class Executor>
-    void EmptyForceModel<ScalarType, Dim>::forceAsync(
-            [[maybe_unused]] const MDCellType& cell, ContinuousVector<VectorType>& result) const {
+    template<Scalar T, unsigned int Dim>
+    template<Vector V, class Executor>
+    void EmptyForceModel<T, Dim>::forceAsync(
+            [[maybe_unused]] const MDCellType& cell, ContinuousVector<V>& result) const {
         assert(result.getLength() == cell.getDOF() && "[Error]: Array length does not match");
-        result = ScalarType(0);
+        result = T(0);
     }
 
-    template<class ScalarType, unsigned int Dim>
-    typename EmptyForceModel<ScalarType, Dim>::ForceConstMatrix
-    EmptyForceModel<ScalarType, Dim>::forceConst([[maybe_unused]] const MDCellType& cell) const {
-        return ForceConstMatrix(cell.getDOF(), ScalarType(0));
+    template<Scalar T, unsigned int Dim>
+    typename EmptyForceModel<T, Dim>::ForceConstMatrix
+    EmptyForceModel<T, Dim>::forceConst([[maybe_unused]] const MDCellType& cell) const {
+        return ForceConstMatrix(cell.getDOF(), T(0));
     }
 }
 
 namespace Physica {
-    template<class ScalarType, unsigned int Dim>
-    class Traits<Core::EmptyForceModel<ScalarType, Dim>> {
+    template<Scalar T, unsigned int Dim>
+    class Traits<Core::EmptyForceModel<T, Dim>> {
     public:
         constexpr static bool IsPeriodBoundary = true;
         constexpr static bool IsContractable = false;

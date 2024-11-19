@@ -21,10 +21,10 @@
 #include "LatticeModel.h"
 
 namespace Physica::Core {
-    template<class ScalarType, unsigned int Dim>
+    template<Scalar T, unsigned int Dim>
     class Hubbard : public LatticeModel<Dim> {
-        static_assert(!ScalarType::isComplex, "[Error]: Model param must be real");
-        using This = Hubbard<ScalarType, Dim>;
+        static_assert(!T::isComplex, "[Error]: Model param must be real");
+        using This = Hubbard<T, Dim>;
         using Base = LatticeModel<Dim>;
     public:
         constexpr static bool UntrivialNearestNeighbor = Dim > 1;
@@ -32,11 +32,11 @@ namespace Physica::Core {
     private:
         using HopIndexArray = typename std::conditional<UntrivialNearestNeighbor, Array<Array<size_t>>, PlainStruct<void>>::type;
 
-        ScalarType hoppingT;
-        ScalarType repelU;
+        T hoppingT;
+        T repelU;
         HopIndexArray hopIndexArr;
     public:
-        Hubbard(Base lattice, ScalarType hoppingT_, ScalarType repelU_);
+        Hubbard(Base lattice, T hoppingT_, T repelU_);
         Hubbard(const This&) = default;
         Hubbard(This&&) noexcept = default;
         ~Hubbard() = default;
@@ -45,30 +45,30 @@ namespace Physica::Core {
         /* Operations */
         void swap(This& __restrict obj) noexcept;
         /* Getters */
-        [[nodiscard]] ScalarType getHoppingT() const noexcept { return hoppingT; }
-        [[nodiscard]] ScalarType getRepelU() const noexcept { return repelU; }
+        [[nodiscard]] T getHoppingT() const noexcept { return hoppingT; }
+        [[nodiscard]] T getRepelU() const noexcept { return repelU; }
         [[nodiscard]] const HopIndexArray& getHopIndexArray() const noexcept { return hopIndexArr; }
     private:
         HopIndexArray makeHopIndexArray();
     };
 
-    template<class ScalarType, unsigned int Dim>
-    Hubbard<ScalarType, Dim>::Hubbard(Base lattice, ScalarType hoppingT_, ScalarType repelU_)
+    template<Scalar T, unsigned int Dim>
+    Hubbard<T, Dim>::Hubbard(Base lattice, T hoppingT_, T repelU_)
             : Base(std::move(lattice)), hoppingT(hoppingT_), repelU(repelU_) {
         if constexpr (UntrivialNearestNeighbor)
             hopIndexArr = makeHopIndexArray();
     }
 
-    template<class ScalarType, unsigned int Dim>
-    void Hubbard<ScalarType, Dim>::swap(This& __restrict obj) noexcept {
+    template<Scalar T, unsigned int Dim>
+    void Hubbard<T, Dim>::swap(This& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         hoppingT.swap(obj.hoppingT);
         repelU.swap(obj.repelU);
         hopIndexArr.swap(obj.hopIndexArr);
     }
 
-    template<class ScalarType, unsigned int Dim>
-    typename Hubbard<ScalarType, Dim>::HopIndexArray Hubbard<ScalarType, Dim>::makeHopIndexArray() {
+    template<Scalar T, unsigned int Dim>
+    typename Hubbard<T, Dim>::HopIndexArray Hubbard<T, Dim>::makeHopIndexArray() {
         const auto numSite = Base::getNumSuperCellSite();
         HopIndexArray result(numSite);
         Base::forSiteInLattice([this, numSite, &result](IndexType index) {

@@ -22,11 +22,11 @@
 
 using namespace Physica::Core;
 
-template<class MatrixType>
-bool eigenTest(const MatrixType& mat, double precision) {
-    using ScalarType = typename MatrixType::ScalarType;
+template<Matrix T>
+bool eigenTest(const T& mat, double precision) {
+    using ScalarType = typename T::ScalarType;
     using RealType = typename ScalarType::RealType;
-    using ComplexVector = DenseVector<typename RealType::ComplexType, MatrixType::RowAtCompile>;
+    using ComplexVector = DenseVector<typename RealType::ComplexType, T::RowAtCompile>;
     using EigenvectorMatrix = typename SymmEigenSolver<ScalarType>::EigenvectorMatrix;
 
     auto solver = SymmEigenSolver<ScalarType>(mat, true);
@@ -38,7 +38,7 @@ bool eigenTest(const MatrixType& mat, double precision) {
         if (i > 1 && solver.getEigenvalues()[i - 1] > solver.getEigenvalues()[i])
             return false;
         ComplexVector v1 = mat * eigenvectors.col(i);
-        ComplexVector v2 = RealType(solver.getEigenvalues()[i]) * eigenvectors.col(i).asVector();
+        ComplexVector v2 = RealType(solver.getEigenvalues()[i]) * eigenvectors.col(i);
         if (!vectorNear(v1, v2, precision))
             return false;
     }

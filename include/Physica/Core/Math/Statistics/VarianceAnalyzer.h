@@ -19,16 +19,16 @@
 #pragma once
 
 #include <Physica/Core/Math/Algebra/LinearAlgebra/Vector/DenseVector.h>
-#include "Physica/Core/Math/Statistics/NumCharacter.h"
+#include <Physica/Core/Math/Statistics/NumCharacter.h>
 
 namespace Physica::Core {
     /**
      * References:
      * [1] 贾俊平, 何晓群, 金勇进. 统计学.第6版[M]. 中国人民大学出版社, 2015.239-244
      */
-    template<class ScalarType>
+    template<Scalar T>
     class VarianceAnalyzer {
-        using DataSet = Array<VectorND<ScalarType>>;
+        using DataSet = Array<VectorND<T>>;
         DataSet data;
     public:
         VarianceAnalyzer(size_t numGroup, size_t samplePerGroup);
@@ -37,70 +37,70 @@ namespace Physica::Core {
         [[nodiscard]] const DataSet& getData() const noexcept { return data; }
         [[nodiscard]] size_t getNumGroup() const noexcept { return data.getLength(); }
         [[nodiscard]] size_t getTotalNumSample() const noexcept;
-        [[nodiscard]] ScalarType getParamF() const { return getMSA() / getMSE(); }
-        [[nodiscard]] ScalarType relationCoeff() const noexcept;
+        [[nodiscard]] T getParamF() const { return getMSA() / getMSE(); }
+        [[nodiscard]] T relationCoeff() const noexcept;
         /* Setters */
-        template<class VectorType>
-        void setGroup(size_t groupId, const RValueVector<VectorType>& group) { data[groupId] = group; }
+        template<Vector V>
+        void setGroup(size_t groupId, const V& group) { data[groupId] = group; }
     private:
-        ScalarType getSSE() const;
-        ScalarType getMSE() const;
-        ScalarType getSSA() const;
-        ScalarType getMSA() const;
-        ScalarType getTotalMean() const;
+        T getSSE() const;
+        T getMSE() const;
+        T getSSA() const;
+        T getMSA() const;
+        T getTotalMean() const;
     };
 
-    template<class ScalarType>
-    VarianceAnalyzer<ScalarType>::VarianceAnalyzer(size_t numGroup, size_t samplePerGroup) : data(numGroup, samplePerGroup) {}
+    template<Scalar T>
+    VarianceAnalyzer<T>::VarianceAnalyzer(size_t numGroup, size_t samplePerGroup) : data(numGroup, samplePerGroup) {}
 
-    template<class ScalarType>
-    size_t VarianceAnalyzer<ScalarType>::getTotalNumSample() const noexcept {
+    template<Scalar T>
+    size_t VarianceAnalyzer<T>::getTotalNumSample() const noexcept {
         size_t count = 0;
         for (const auto& vec : data)
             count += vec.getLength();
         return count;
     }
 
-    template<class ScalarType>
-    ScalarType VarianceAnalyzer<ScalarType>::relationCoeff() const noexcept {
+    template<Scalar T>
+    T VarianceAnalyzer<T>::relationCoeff() const noexcept {
         const auto ssa = getSSA();
         return ssa / (getSSE() + ssa);
     }
 
-    template<class ScalarType>
-    ScalarType VarianceAnalyzer<ScalarType>::getSSE() const {
-        ScalarType result = 0;
+    template<Scalar T>
+    T VarianceAnalyzer<T>::getSSE() const {
+        T result = 0;
         for (const auto& vec : data) {
-            const ScalarType mean_i = mean(vec);
+            const T mean_i = mean(vec);
             result += square(vec - mean_i).sum();
         }
         return result;
     }
 
-    template<class ScalarType>
-    ScalarType VarianceAnalyzer<ScalarType>::getMSE() const {
-        return getSSA() / ScalarType(getTotalNumSample() - getNumGroup());
+    template<Scalar T>
+    T VarianceAnalyzer<T>::getMSE() const {
+        return getSSA() / T(getTotalNumSample() - getNumGroup());
     }
 
-    template<class ScalarType>
-    ScalarType VarianceAnalyzer<ScalarType>::getSSA() const {
-        const ScalarType mean_total = getTotalMean();
-        ScalarType result = 0;
+    template<Scalar T>
+    T VarianceAnalyzer<T>::getSSA() const {
+        const T mean_total = getTotalMean();
+        T result = 0;
         for (const auto& vec : data)
             result += vec.getLength() * square(mean(vec) - mean_total);
         return result;
     }
 
-    template<class ScalarType>
-    ScalarType VarianceAnalyzer<ScalarType>::getMSA() const {
-        return getSSA() / ScalarType(getNumGroup());
+    template<Scalar T>
+    T VarianceAnalyzer<T>::getMSA() const {
+        return getSSA() / T(getNumGroup());
     }
 
-    template<class ScalarType>
-    ScalarType VarianceAnalyzer<ScalarType>::getTotalMean() const {
-        ScalarType result = 0;
+    template<Scalar T>
+    T VarianceAnalyzer<T>::getTotalMean() const {
+        T result = 0;
         for (const auto& vec : data)
-            result += mean(vec) * ScalarType(vec.getLength());
+            result += mean(vec) * T(vec.getLength());
         result /= getTotalNumSample();
         return result;
     }

@@ -24,7 +24,7 @@
 #include <Physica/Macro.h>
 
 namespace Physica::Core {
-    template<class T> class ScalarBase;
+    template<class Derived> class ScalarBase;
 
     template<class T>
     concept Scalar = std::derived_from<T, ScalarBase<T>>;

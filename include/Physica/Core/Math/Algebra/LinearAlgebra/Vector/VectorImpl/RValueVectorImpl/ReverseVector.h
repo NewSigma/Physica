@@ -19,16 +19,16 @@
 #pragma once
 
 namespace Physica::Core {
-    template<class VectorType>
-    class ReverseVector final : public RValueVector<ReverseVector<VectorType>> {
-        using This = ReverseVector<VectorType>;
+    template<Vector T>
+    class ReverseVector<T> final : public RValueVector<ReverseVector<T>> {
+        using This = ReverseVector<T>;
         using Base = RValueVector<This>;
 
-        VectorType& v;
+        T& v;
     public:
         using typename Base::ScalarType;
     public:
-        explicit ReverseVector(RValueVector<VectorType>& v_) : v(v_.getDerived()) {}
+        explicit ReverseVector(T& v_) : v(v_) {}
         ReverseVector(const ReverseVector&) = delete;
         ReverseVector(ReverseVector&&) noexcept = delete;
         ~ReverseVector() = default;
@@ -42,6 +42,6 @@ namespace Physica::Core {
 }
 
 namespace Physica {
-    template<class VectorType>
-    class Traits<Core::ReverseVector<VectorType>> : public Traits<VectorType> {};
+    template<Vector T>
+    class Traits<Core::ReverseVector<T>> : public Traits<T> {};
 }

@@ -19,10 +19,10 @@
 #pragma once
 
 namespace Physica::Core {
-    template<class VectorType, Scalar T>
-    class VectorExpr<ExprType::Div, VectorType, T>
-            : public BinaryVectorExpr<ExprType::Div, VectorType, T> {
-        using Base = BinaryVectorExpr<ExprType::Div, VectorType, T>;
+    template<Vector T, Scalar U>
+    class VectorExpr<ExprType::Div, T, U>
+            : public BinaryVectorExpr<ExprType::Div, T, U> {
+        using Base = BinaryVectorExpr<ExprType::Div, T, U>;
     public:
         using typename Base::ScalarType;
     public:
@@ -44,10 +44,10 @@ namespace Physica::Core {
         }
     };
 
-    template<class VectorType1, class VectorType2>
-    class VectorExpr<ExprType::Div, VectorType1, VectorType2>
-            : public BinaryVectorExpr<ExprType::Div, VectorType1, VectorType2> {
-        using Base = BinaryVectorExpr<ExprType::Div, VectorType1, VectorType2>;
+    template<Vector T1, Vector T2>
+    class VectorExpr<ExprType::Div, T1, T2>
+            : public BinaryVectorExpr<ExprType::Div, T1, T2> {
+        using Base = BinaryVectorExpr<ExprType::Div, T1, T2>;
     public:
         using Base::Base;
         /* Operations */
@@ -64,13 +64,13 @@ namespace Physica::Core {
         }
     };
 
-    template<class VectorType, Scalar T>
-    [[nodiscard]] inline auto operator/(const RValueVector<VectorType>& v, const T& x) noexcept {
-        return VectorExpr<ExprType::Div, VectorType, T>(v.getDerived(), x);
+    template<Vector T, Scalar U>
+    [[nodiscard]] inline auto operator/(const T& v, const U& x) noexcept {
+        return VectorExpr<ExprType::Div, T, U>(v, x);
     }
 
-    template<class VectorType1, class VectorType2>
-    [[nodiscard]] inline auto divide(const RValueVector<VectorType1>& v1, const RValueVector<VectorType2>& v2) noexcept {
-        return VectorExpr<ExprType::Div, VectorType1, VectorType2>(v1.getDerived(), v2.getDerived());
+    template<Vector T1, Vector T2>
+    [[nodiscard]] inline auto divide(const T1& v1, const T2& v2) noexcept {
+        return VectorExpr<ExprType::Div, T1, T2>(v1, v2);
     }
 }

@@ -19,11 +19,11 @@
 #pragma once
 
 namespace Physica::Core {
-    template<class T, class ReprType, class VectorType>
-    class MatrixVectorProduct<HubbardMatrix<T, ReprType>, VectorType>
-            : public RValueVector<MatrixVectorProduct<HubbardMatrix<T, ReprType>, VectorType>> {
+    template<Scalar T, class ReprType, Vector U>
+    class MatrixVectorProduct<HubbardMatrix<T, ReprType>, U>
+            : public RValueVector<MatrixVectorProduct<HubbardMatrix<T, ReprType>, U>> {
         using MatrixType = HubbardMatrix<T, ReprType>;
-        using This = MatrixVectorProduct<MatrixType, VectorType>;
+        using This = MatrixVectorProduct<MatrixType, U>;
         using Base = RValueVector<This>;
         using FFTType = typename MatrixType::FFTType;
         using StateType = typename ReprType::StateType;
@@ -36,10 +36,9 @@ namespace Physica::Core {
         using RealType = typename ScalarType::RealType;
     private:
         const MatrixType& mat;
-        const VectorType& vec;
+        const U& vec;
     public:
-        MatrixVectorProduct(const RValueMatrix<MatrixType>& mat_, const RValueVector<VectorType>& vec_)
-                : mat(mat_.getDerived()), vec(vec_.getDerived()) {
+        MatrixVectorProduct(const MatrixType& mat_, const U& vec_) : mat(mat_), vec(vec_) {
             assert(mat.getCol() == vec.getLength());
         }
         MatrixVectorProduct(const This&) = delete;
@@ -49,29 +48,26 @@ namespace Physica::Core {
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
         /* Operations */
-        template<class OtherDerived, class Executor = SequentialExecutor>
-        inline void assignTo(OtherDerived& target) const;
+        template<LVector V, class Executor = SequentialExecutor>
+        inline void assignTo(V& target) const;
         /* Getters */
         [[nodiscard]] ScalarType calc(size_t index) const;
         [[nodiscard]] __host__ __device__ size_t getLength() const { return mat.getRow(); }
         [[nodiscard]] const MatrixType& getLHS() const noexcept { return mat; }
-        [[nodiscard]] const VectorType& getRHS() const noexcept { return vec; }
+        [[nodiscard]] const U& getRHS() const noexcept { return vec; }
     private:
-        template<class OtherDerived> void sumHopping(OtherDerived& target, FFTType& fft, ScalarType factor, StateType psi) const;
-        template<class OtherDerived> void dotImpl(OtherDerived& target, ScalarType factor, size_t index) const;
+        template<Vector V> void sumHopping(V& target, FFTType& fft, ScalarType factor, StateType psi) const;
+        template<Vector V> void dotImpl(V& target, ScalarType factor, size_t index) const;
         /* Getters */
         [[nodiscard]] ScalarType getHoppingT() const noexcept { return mat.getHoppingT(); }
         [[nodiscard]] ScalarType getRepelU() const noexcept { return mat.getRepelU(); }
         [[nodiscard]] const ReprType& getRepr() const noexcept { return mat.getRepr(); }
     };
 
-    template<class T, class ReprType, class VectorType>
-    template<class OtherDerived, class Executor>
-    inline void MatrixVectorProduct<HubbardMatrix<T, ReprType>, VectorType>::assignTo(OtherDerived& target) const {
-        static_assert(std::is_base_of<RValueVector<VectorType>, VectorType>::value, "[Error]: Invalid source type");
-        static_assert(std::is_base_of<LValueVector<OtherDerived>, OtherDerived>::value, "[Error]: Invalid target type");
+    template<Scalar T, class ReprType, Vector U>
+    template<LVector V, class Executor>
+    inline void MatrixVectorProduct<HubbardMatrix<T, ReprType>, U>::assignTo(V& target) const {
         assert(target.getLength() == getLength() && "[Error]: Dimensions do not match");
-
         target = RealType(0);
         if constexpr (std::is_same<Executor, ThreadExecutor>::value) {
             std::mutex mutex{};
@@ -93,13 +89,13 @@ namespace Physica::Core {
         else {
             const size_t length = getLength();
             for (size_t i = 0; i < length; ++i)
-                dotImpl<OtherDerived>(target, vec.calc(i), i);
+                dotImpl<V>(target, vec.calc(i), i);
         }
     }
 
-    template<class T, class ReprType, class VectorType>
-    typename MatrixVectorProduct<HubbardMatrix<T, ReprType>, VectorType>::ScalarType
-    MatrixVectorProduct<HubbardMatrix<T, ReprType>, VectorType>::calc(size_t index) const {
+    template<Scalar T, class ReprType, Vector U>
+    typename MatrixVectorProduct<HubbardMatrix<T, ReprType>, U>::ScalarType
+    MatrixVectorProduct<HubbardMatrix<T, ReprType>, U>::calc(size_t index) const {
         static_assert(!IsTransInvariant && "[Error]: Not implemented");
         const ScalarType hop = -mat.getHoppingT();
         const auto state = getRepr()[index];
@@ -129,9 +125,9 @@ namespace Physica::Core {
         return result;
     }
 
-    template<class T, class ReprType, class VectorType>
-    template<class OtherDerived>
-    void MatrixVectorProduct<HubbardMatrix<T, ReprType>, VectorType>::sumHopping(OtherDerived& target, FFTType& fft, ScalarType factor, StateType psi) const {
+    template<Scalar T, class ReprType, Vector U>
+    template<Vector V>
+    void MatrixVectorProduct<HubbardMatrix<T, ReprType>, U>::sumHopping(V& target, FFTType& fft, ScalarType factor, StateType psi) const {
         if (psi.isVacuum())
             return;
         const auto reducedPsi = psi.transReduce();
@@ -148,9 +144,9 @@ namespace Physica::Core {
         target[index] += fft.getKSpace()[repr.getReducedK()] * sqrt(RealType(repr.getPeriods()[index])) * factor;
     }
 
-    template<class T, class ReprType, class VectorType>
-    template<class OtherDerived>
-    void MatrixVectorProduct<HubbardMatrix<T, ReprType>, VectorType>::dotImpl(OtherDerived& target, ScalarType factor, size_t index) const {
+    template<Scalar T, class ReprType, Vector U>
+    template<Vector V>
+    void MatrixVectorProduct<HubbardMatrix<T, ReprType>, U>::dotImpl(V& target, ScalarType factor, size_t index) const {
         const auto state = getRepr()[index];
         int numRepel = 0;
         if constexpr (IsTransInvariant) {
@@ -199,12 +195,10 @@ namespace Physica::Core {
 }
 
 namespace Physica {
-    using namespace Core;
-
-    template<class T, class ReprType, class VectorType>
-    class Traits<MatrixVectorProduct<HubbardMatrix<T, ReprType>, VectorType>> {
+    template<Scalar T, class ReprType, Vector U>
+    class Traits<MatrixVectorProduct<HubbardMatrix<T, ReprType>, U>> {
         using MatrixType = HubbardMatrix<T, ReprType>;
-        using T1 = typename VectorType::ScalarType;
+        using T1 = typename U::ScalarType;
     public:
         using ScalarType = typename Core::Internal::BinaryScalarOpReturnType<T, T1>::Type;
         constexpr static size_t SizeAtCompile = MatrixType::RowAtCompile;

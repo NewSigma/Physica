@@ -22,11 +22,11 @@
 #include <Physica/Core/Utils/Unreachable.h>
 
 namespace Physica::Core {
-    template<class ScalarType, size_t Size>
-    SIMD<ScalarType, Size>::SIMD(HalfType a, HalfType b) : Base(a.toMachine(), b.toMachine()) {}
+    template<Scalar T, size_t Size>
+    SIMD<T, Size>::SIMD(HalfType a, HalfType b) : Base(a.toMachine(), b.toMachine()) {}
 
-    template<class ScalarType, size_t Size>
-    SIMD<ScalarType, Size>::SIMD(ScalarType s, int count) {
+    template<Scalar T, size_t Size>
+    SIMD<T, Size>::SIMD(T s, int count) {
         assert(0 < count && count <= int(Size) && "[Error]: Invalid count");
         if (count == Size) {
             *this = SIMD(s);
@@ -41,7 +41,7 @@ namespace Physica::Core {
                 *this = SIMD(HalfType(s, count), HalfType(0));
         }
         else {
-            if constexpr (ScalarType::Option == Float32) {
+            if constexpr (T::Option == Float32) {
                 const float f = float(s);
                 switch(count) {
                 case 1:
@@ -58,107 +58,107 @@ namespace Physica::Core {
                 }
             }
             else {
-                static_assert(ScalarType::Option == Float64, "[Error]: Unsupported float type");
+                static_assert(T::Option == Float64, "[Error]: Unsupported float type");
                 *this = SIMD(Base(double(s), 0.0));
             }
         }
     }
 
-    template<class ScalarType, size_t Size>
-    inline ScalarType SIMD<ScalarType, Size>::operator[](int index) const {
+    template<Scalar T, size_t Size>
+    inline T SIMD<T, Size>::operator[](int index) const {
         if constexpr (isForward)
-            return ScalarType(Base::operator[](index * 2), Base::operator[](index * 2 + 1));
+            return T(Base::operator[](index * 2), Base::operator[](index * 2 + 1));
         else
-            return ScalarType(Base::operator[](index));
+            return T(Base::operator[](index));
     }
 
-    template<class ScalarType, size_t Size>
-    inline SIMD<ScalarType, Size> SIMD<ScalarType, Size>::operator+(const SIMD& other) const {
+    template<Scalar T, size_t Size>
+    inline SIMD<T, Size> SIMD<T, Size>::operator+(const SIMD& other) const {
         return SIMD(toMachine() + other.toMachine());
     }
 
-    template<class ScalarType, size_t Size>
-    inline SIMD<ScalarType, Size> SIMD<ScalarType, Size>::operator-(const SIMD& other) const {
+    template<Scalar T, size_t Size>
+    inline SIMD<T, Size> SIMD<T, Size>::operator-(const SIMD& other) const {
         return SIMD(toMachine() - other.toMachine());
     }
 
-    template<class ScalarType, size_t Size>
-    inline SIMD<ScalarType, Size> SIMD<ScalarType, Size>::operator*(const SIMD& other) const {
+    template<Scalar T, size_t Size>
+    inline SIMD<T, Size> SIMD<T, Size>::operator*(const SIMD& other) const {
         return SIMD(toMachine() * other.toMachine());
     }
 
-    template<class ScalarType, size_t Size>
-    inline SIMD<ScalarType, Size> SIMD<ScalarType, Size>::operator*(const ScalarType& x) const {
+    template<Scalar T, size_t Size>
+    inline SIMD<T, Size> SIMD<T, Size>::operator*(const T& x) const {
         return operator*(SIMD(x));
     }
 
-    template<class ScalarType, size_t Size>
-    inline SIMD<ScalarType, Size> SIMD<ScalarType, Size>::operator/(const SIMD& other) const {
+    template<Scalar T, size_t Size>
+    inline SIMD<T, Size> SIMD<T, Size>::operator/(const SIMD& other) const {
         return SIMD(toMachine() / other.toMachine());
     }
 
-    template<class ScalarType, size_t Size>
-    inline SIMD<ScalarType, Size> SIMD<ScalarType, Size>::operator-() const {
+    template<Scalar T, size_t Size>
+    inline SIMD<T, Size> SIMD<T, Size>::operator-() const {
         return SIMD(-toMachine());
     }
 
-    template<class ScalarType, size_t Size>
-    inline SIMD<ScalarType, Size> SIMD<ScalarType, Size>::operator&(const SIMD& other) const {
+    template<Scalar T, size_t Size>
+    inline SIMD<T, Size> SIMD<T, Size>::operator&(const SIMD& other) const {
         return SIMD(toMachine() & other.toMachine());
     }
 
-    template<class ScalarType, size_t Size>
-    inline SIMD<ScalarType, Size> SIMD<ScalarType, Size>::operator|(const SIMD& other) const {
+    template<Scalar T, size_t Size>
+    inline SIMD<T, Size> SIMD<T, Size>::operator|(const SIMD& other) const {
         return SIMD(toMachine() | other.toMachine());
     }
 
-    template<class ScalarType, size_t Size>
-    inline SIMD<ScalarType, Size> SIMD<ScalarType, Size>::operator^(const SIMD& other) const {
+    template<Scalar T, size_t Size>
+    inline SIMD<T, Size> SIMD<T, Size>::operator^(const SIMD& other) const {
         return SIMD(toMachine() ^ other.toMachine());
     }
 
-    template<class ScalarType, size_t Size>
-    inline SIMD<ScalarType, Size> SIMD<ScalarType, Size>::operator!() const {
+    template<Scalar T, size_t Size>
+    inline SIMD<T, Size> SIMD<T, Size>::operator!() const {
         return SIMD(!toMachine());
     }
 
-    template<class ScalarType, size_t Size>
-    inline auto SIMD<ScalarType, Size>::operator==(const SIMD& other) const {
+    template<Scalar T, size_t Size>
+    inline auto SIMD<T, Size>::operator==(const SIMD& other) const {
         return BoolSIMDType(toMachine() == other.toMachine());
     }
 
-    template<class ScalarType, size_t Size>
-    inline auto SIMD<ScalarType, Size>::operator>(const SIMD& other) const {
+    template<Scalar T, size_t Size>
+    inline auto SIMD<T, Size>::operator>(const SIMD& other) const {
         return BoolSIMDType(toMachine() > other.toMachine());
     }
     
-    template<class ScalarType, size_t Size>
-    inline auto SIMD<ScalarType, Size>::operator<(const SIMD& other) const {
+    template<Scalar T, size_t Size>
+    inline auto SIMD<T, Size>::operator<(const SIMD& other) const {
         return BoolSIMDType(toMachine() < other.toMachine());
     }
 
-    template<class ScalarType, size_t Size>
-    inline void SIMD<ScalarType, Size>::load(const ScalarType* p) {
+    template<Scalar T, size_t Size>
+    inline void SIMD<T, Size>::load(const T* p) {
         Base::load(reinterpret_cast<const MachineType*>(p));
     }
 
-    template<class ScalarType, size_t Size>
-    inline void SIMD<ScalarType, Size>::load_partial(const ScalarType* p, int n) {
+    template<Scalar T, size_t Size>
+    inline void SIMD<T, Size>::load_partial(const T* p, int n) {
         Base::load_partial(n, reinterpret_cast<const MachineType*>(p));
     }
 
-    template<class ScalarType, size_t Size>
-    inline void SIMD<ScalarType, Size>::store(ScalarType* p) const {
+    template<Scalar T, size_t Size>
+    inline void SIMD<T, Size>::store(T* p) const {
         Base::store(reinterpret_cast<MachineType*>(p));
     }
 
-    template<class ScalarType, size_t Size>
-    inline void SIMD<ScalarType, Size>::store_partial(ScalarType* p, int n) const {
+    template<Scalar T, size_t Size>
+    inline void SIMD<T, Size>::store_partial(T* p, int n) const {
         Base::store_partial(n, reinterpret_cast<MachineType*>(p));
     }
 
-    template<class ScalarType, size_t Size>
-    inline void SIMD<ScalarType, Size>::insert(int index, const ScalarType& value) {
+    template<Scalar T, size_t Size>
+    inline void SIMD<T, Size>::insert(int index, const T& value) {
         if constexpr (isForward) {
             Base::insert(index * 2, value.getValue().toMachine());
             Base::insert(index * 2 + 1, value.getGrad().toMachine());
@@ -167,11 +167,11 @@ namespace Physica::Core {
             Base::insert(index, value.toMachine());
     }
 
-    template<class ScalarType, size_t Size>
+    template<Scalar T, size_t Size>
     template<int... Order>
-    inline SIMD<ScalarType, Size> SIMD<ScalarType, Size>::shuffle() const {
+    inline SIMD<T, Size> SIMD<T, Size>::shuffle() const {
         constexpr unsigned int mask = makeShuffleMask<Order...>(0);
-        if constexpr (ScalarType::Option == Float32) {
+        if constexpr (T::Option == Float32) {
             static_assert(sizeof...(Order) == 4, "[Error]: Invalid number of orders");
             if constexpr (Size == 4)
                 return _mm_shuffle_ps(*this, *this, mask);
@@ -191,9 +191,9 @@ namespace Physica::Core {
         }
     }
 
-    template<class ScalarType, size_t Size>
+    template<Scalar T, size_t Size>
     template<int... Order>
-    inline SIMD<ScalarType, Size> SIMD<ScalarType, Size>::permute() const {
+    inline SIMD<T, Size> SIMD<T, Size>::permute() const {
         static_assert(sizeof...(Order) == Size, "[Error]: Size of Order do not match the packet");
         if constexpr (Size == 2)
             return Physica::permute2<Order...>(toMachine());
@@ -207,45 +207,45 @@ namespace Physica::Core {
         }
     }
 
-    template<class ScalarType, size_t Size>
+    template<Scalar T, size_t Size>
     template<int... Flags>
-    inline SIMD<ScalarType, Size> SIMD<ScalarType, Size>::change_sign() const {
+    inline SIMD<T, Size> SIMD<T, Size>::change_sign() const {
         return Physica::change_sign<Flags...>(toMachine());
     }
 
-    template<class ScalarType, size_t Size>
-    inline SIMD<ScalarType, Size>& SIMD<ScalarType, Size>::cutoff(int count) {
+    template<Scalar T, size_t Size>
+    inline SIMD<T, Size>& SIMD<T, Size>::cutoff(int count) {
         assert(0 < count && count < int(Size) && "[Error]: Invalid count");
         Base::cutoff(count);
         return *this;
     }
 
-    template<class ScalarType, size_t Size>
-    inline ScalarType SIMD<ScalarType, Size>::sum() const {
+    template<Scalar T, size_t Size>
+    inline T SIMD<T, Size>::sum() const {
         return Physica::horizontal_add(toMachine());
     }
 
-    template<class ScalarType, size_t Size>
-    inline ScalarType SIMD<ScalarType, Size>::max() const {
+    template<Scalar T, size_t Size>
+    inline T SIMD<T, Size>::max() const {
         return Physica::horizontal_max(toMachine());
     }
 
-    template<class ScalarType, size_t Size>
-    inline ScalarType SIMD<ScalarType, Size>::min() const {
+    template<Scalar T, size_t Size>
+    inline T SIMD<T, Size>::min() const {
         return Physica::horizontal_min(toMachine());
     }
 
-    template<class ScalarType, size_t Size>
+    template<Scalar T, size_t Size>
     template<bool... Flags>
-    SIMD<ScalarType, Size> SIMD<ScalarType, Size>::makeSignBits() {
-        using IntType = typename std::conditional<ScalarType::Option == Float32, uint32_t, uint64_t>::type;
+    SIMD<T, Size> SIMD<T, Size>::makeSignBits() {
+        using IntType = typename std::conditional<T::Option == Float32, uint32_t, uint64_t>::type;
         constexpr auto Functor = [](bool flag) constexpr -> IntType {
-            constexpr IntType Mask = ScalarType::Option == Float32 ? IntType(0x80000000U) : IntType(0x8000000000000000U);
+            constexpr IntType Mask = T::Option == Float32 ? IntType(0x80000000U) : IntType(0x8000000000000000U);
             return flag ? Mask : 0;
         };
 
         static_assert(sizeof...(Flags) == Size, "[Error]: Size do not match");
-        if constexpr (ScalarType::Option == Float32) {
+        if constexpr (T::Option == Float32) {
             if constexpr (Size == 4)
                 return __m128(_mm_setr_epi32(Functor(Flags)...));
             else if constexpr (Size == 8)
@@ -276,27 +276,27 @@ namespace Physica::Core {
         }
     }
 
-    template<class ScalarType, size_t Size>
+    template<Scalar T, size_t Size>
     template<class RandomType>
-    SIMD<ScalarType, Size> SIMD<ScalarType, Size>::random_uniform(RandomType& gen) {
+    SIMD<T, Size> SIMD<T, Size>::random_uniform(RandomType& gen) {
         SIMD result{};
-        ScalarType buffer[Size];
+        T buffer[Size];
         for (auto& elem : buffer)
-            elem = ScalarType::random_uniform(gen);
+            elem = T::random_uniform(gen);
         result.load(buffer);
         return result;
     }
 
-    template<class ScalarType, size_t Size>
-    SIMD<ScalarType, Size> SIMD<ScalarType, Size>::select(BoolSIMDType flags, const SIMD& x, const SIMD& y) {
+    template<Scalar T, size_t Size>
+    SIMD<T, Size> SIMD<T, Size>::select(BoolSIMDType flags, const SIMD& x, const SIMD& y) {
         return SIMD(Physica::select(flags.toMachine(), x.toMachine(), y.toMachine()));
     }
 
-    template<class ScalarType, size_t Size>
+    template<Scalar T, size_t Size>
     template<int Order, int... Orders>
-    constexpr unsigned int SIMD<ScalarType, Size>::makeShuffleMask(int order) {
+    constexpr unsigned int SIMD<T, Size>::makeShuffleMask(int order) {
         int result = order;
-        if constexpr (ScalarType::Option == Float32) {
+        if constexpr (T::Option == Float32) {
             static_assert(0 <= Order && Order < 4, "[Error]: Invalid order");
             result |= Order << ((4 - (sizeof...(Orders) + 1)) * 2);
         }
@@ -310,39 +310,39 @@ namespace Physica::Core {
         return result;
     }
     //////////////////////////////////////////////////////////////////
-    template<class ScalarType, size_t Size>
-    [[nodiscard]] inline SIMD<ScalarType, Size> mul_add(
-            const SIMD<ScalarType, Size>& a,
-            const SIMD<ScalarType, Size>& b,
-            const SIMD<ScalarType, Size>& c) {
-        return SIMD<ScalarType, Size>(mul_add(a.toMachine(), b.toMachine(), c.toMachine()));
+    template<Scalar T, size_t Size>
+    [[nodiscard]] inline SIMD<T, Size> mul_add(
+            const SIMD<T, Size>& a,
+            const SIMD<T, Size>& b,
+            const SIMD<T, Size>& c) {
+        return SIMD<T, Size>(mul_add(a.toMachine(), b.toMachine(), c.toMachine()));
     }
 
-    template<class ScalarType, size_t Size>
-    [[nodiscard]] inline SIMD<ScalarType, Size> nmul_add(
-            const SIMD<ScalarType, Size> a,
-            const SIMD<ScalarType, Size> b,
-            const SIMD<ScalarType, Size> c) {
-        static_assert(!ScalarType::isDifferentiable, "[Error]: Not implemented");
-        return SIMD<ScalarType, Size>(nmul_add(a.toMachine(), b.toMachine(), c.toMachine()));
+    template<Scalar T, size_t Size>
+    [[nodiscard]] inline SIMD<T, Size> nmul_add(
+            const SIMD<T, Size> a,
+            const SIMD<T, Size> b,
+            const SIMD<T, Size> c) {
+        static_assert(!T::isDifferentiable, "[Error]: Not implemented");
+        return SIMD<T, Size>(nmul_add(a.toMachine(), b.toMachine(), c.toMachine()));
     }
 
-    template<class ScalarType, size_t Size>
-    [[nodiscard]] inline SIMD<ScalarType, Size> mul_sub(
-            const SIMD<ScalarType, Size> a,
-            const SIMD<ScalarType, Size> b,
-            const SIMD<ScalarType, Size> c) {
-        static_assert(!ScalarType::isDifferentiable, "[Error]: Not implemented");
-        return SIMD<ScalarType, Size>(mul_sub(a.toMachine(), b.toMachine(), c.toMachine()));
+    template<Scalar T, size_t Size>
+    [[nodiscard]] inline SIMD<T, Size> mul_sub(
+            const SIMD<T, Size> a,
+            const SIMD<T, Size> b,
+            const SIMD<T, Size> c) {
+        static_assert(!T::isDifferentiable, "[Error]: Not implemented");
+        return SIMD<T, Size>(mul_sub(a.toMachine(), b.toMachine(), c.toMachine()));
     }
 
-    template<class ScalarType, size_t Size>
-    [[nodiscard]] inline SIMD<ScalarType, Size> mul_addsub(
-            const SIMD<ScalarType, Size> a,
-            const SIMD<ScalarType, Size> b,
-            const SIMD<ScalarType, Size> c) {
-        static_assert(!ScalarType::isDifferentiable, "[Error]: Not implemented");
-        if constexpr (ScalarType::Option == Float32) {
+    template<Scalar T, size_t Size>
+    [[nodiscard]] inline SIMD<T, Size> mul_addsub(
+            const SIMD<T, Size> a,
+            const SIMD<T, Size> b,
+            const SIMD<T, Size> c) {
+        static_assert(!T::isDifferentiable, "[Error]: Not implemented");
+        if constexpr (T::Option == Float32) {
             if constexpr (Size == 4) {
                 if constexpr (Instruset::hasFMA() || Instruset::hasAVX2())
                     return  _mm_fmaddsub_ps(a, b, c);
@@ -372,7 +372,7 @@ namespace Physica::Core {
             }
         }
         else {
-            static_assert(ScalarType::Option == Float64, "[Error]: Unexpected float type");
+            static_assert(T::Option == Float64, "[Error]: Unexpected float type");
             if constexpr (Size == 2) {
                 if constexpr (Instruset::hasFMA() || Instruset::hasAVX2())
                     return  _mm_fmaddsub_pd(a, b, c);

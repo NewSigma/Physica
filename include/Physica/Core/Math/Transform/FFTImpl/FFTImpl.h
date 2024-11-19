@@ -39,7 +39,7 @@ namespace Physica::Core {
         };
     }
 
-    template<class T>
+    template<Scalar T>
     FFT<T, 1>::FFT()
             : forward_plan(nullptr)
             , backward_plan(nullptr)
@@ -47,7 +47,7 @@ namespace Physica::Core {
             , rSpaceSize(0)
             , planFlag(PlanFlag::Measure) {}
 
-    template<class T>
+    template<Scalar T>
     FFT<T, 1>::FFT(size_t rSpaceSize_)
             : forward_plan(nullptr)
             , backward_plan(nullptr)
@@ -57,20 +57,20 @@ namespace Physica::Core {
         buffer = reinterpret_cast<ComplexTypeFFTW*>(fftw_malloc(getKSpaceSize() * sizeof(ComplexTypeFFTW)));
     }
 
-    template<class T>
+    template<Scalar T>
     FFT<T, 1>::FFT(size_t rSpaceSize_, PlanFlag planFlag_)
             : FFT(rSpaceSize_) {
         planFlag = planFlag_;
         initializePlan();
     }
 
-    template<class T>
+    template<Scalar T>
     FFT<T, 1>::FFT(const VectorND<ScalarType>& data_, PlanFlag planFlag)
             : FFT(data_.getLength(), planFlag) {
         transform(data_);
     }
 
-    template<class T>
+    template<Scalar T>
     FFT<T, 1>::FFT(const FFT& fft)
             : forward_plan(nullptr)
             , backward_plan(nullptr)
@@ -80,7 +80,7 @@ namespace Physica::Core {
         initializePlan();
     }
 
-    template<class T>
+    template<Scalar T>
     FFT<T, 1>::FFT(FFT&& fft) noexcept
             : forward_plan(fft.forward_plan)
             , backward_plan(fft.backward_plan)
@@ -92,7 +92,7 @@ namespace Physica::Core {
         fft.buffer = nullptr;
     }
 
-    template<class T>
+    template<Scalar T>
     FFT<T, 1>::~FFT() {
         Internal::ThreadGuardFFTW::getInstance().globalMutex.lock();
         if constexpr (isSinglePrec) {
@@ -107,7 +107,7 @@ namespace Physica::Core {
         Internal::ThreadGuardFFTW::getInstance().globalMutex.unlock();
     }
 
-    template<class T>
+    template<Scalar T>
     void FFT<T, 1>::swap(FFT& __restrict fft) noexcept {
         assert(this != &fft && "[Error]: Self swap is likely a bug");
         std::swap(forward_plan, fft.forward_plan);
@@ -117,22 +117,22 @@ namespace Physica::Core {
         std::swap(planFlag, fft.planFlag);
     }
 
-    template<class T>
+    template<Scalar T>
     inline typename FFT<T, 1>::RealType FFT<T, 1>::getRSpaceDelta(RealType kSpaceDelta) const noexcept {
         return RealType(2 * M_PI) / (kSpaceDelta * getRSpaceSize());
     }
 
-    template<class T>
+    template<Scalar T>
     inline typename FFT<T, 1>::RealType FFT<T, 1>::getKSpaceDelta(RealType rSpaceDelta) const noexcept {
         return RealType(2 * M_PI) / (rSpaceDelta * getRSpaceSize());
     }
 
-    template<class T>
+    template<Scalar T>
     inline FFT<T, 1> FFT<T, 1>::makeEmptyFFT(size_t rSpaceSize) {
         return FFT<T, 1>(rSpaceSize);
     }
 
-    template<class T>
+    template<Scalar T>
     template<class IndexType>
     __host__ __device__ constexpr inline IndexType FFT<T, 1>::rSizeToKSize(IndexType size_data) noexcept {
         if constexpr (isComplex)
@@ -141,7 +141,7 @@ namespace Physica::Core {
             return size_data / 2 + 1;
     }
 
-    template<class T>
+    template<Scalar T>
     void FFT<T, 1>::transform(const This& planProvider, This& bufferProvider) {
         const auto forward_plan = planProvider.forward_plan;
         const auto buffer = bufferProvider.buffer;
@@ -162,7 +162,7 @@ namespace Physica::Core {
         }
     }
 
-    template<class T>
+    template<Scalar T>
     void FFT<T, 1>::rawInvTransform(const This& planProvider, This& bufferProvider) {
         const auto backward_plan = planProvider.backward_plan;
         const auto buffer = bufferProvider.buffer;
@@ -183,14 +183,14 @@ namespace Physica::Core {
         }
     }
 
-    template<class T>
+    template<Scalar T>
     void FFT<T, 1>::invTransform(const This& planProvider, This& bufferProvider) {
         rawInvTransform(planProvider, bufferProvider);
         const ScalarType factor = RealType(1.0 / planProvider.getRSpaceSize());
         bufferProvider.getRSpace() *= factor;
     }
 
-    template<class T>
+    template<Scalar T>
     inline void FFT<T, 1>::initializePlan() {
         assert(forward_plan == nullptr);
         assert(backward_plan == nullptr);
@@ -219,7 +219,7 @@ namespace Physica::Core {
         Internal::ThreadGuardFFTW::getInstance().globalMutex.unlock();
     }
 
-    template<class T, size_t Dim>
+    template<Scalar T, size_t Dim>
     FFT<T, Dim>::FFT()
             : forward_plan(nullptr)
             , backward_plan(nullptr)
@@ -228,7 +228,7 @@ namespace Physica::Core {
             , kSpaceSize(Dim, 0)
             , planFlag(PlanFlag::Measure) {}
 
-    template<class T, size_t Dim>
+    template<Scalar T, size_t Dim>
     FFT<T, Dim>::FFT(const Array<size_t, Dim>& rSpaceSize_)
             : forward_plan(nullptr)
             , backward_plan(nullptr)
@@ -242,14 +242,14 @@ namespace Physica::Core {
         buffer = reinterpret_cast<ComplexTypeFFTW*>(fftw_malloc(sumKSpaceSize(0) * sizeof(ComplexTypeFFTW)));
     }
 
-    template<class T, size_t Dim>
+    template<Scalar T, size_t Dim>
     FFT<T, Dim>::FFT(const Array<size_t, Dim>& rSpaceSize_, PlanFlag planFlag_)
             : FFT(rSpaceSize_) {
         planFlag = planFlag_;
         initializePlan();
     }
 
-    template<class T, size_t Dim>
+    template<Scalar T, size_t Dim>
     FFT<T, Dim>::FFT(const FFT& fft)
             : forward_plan(nullptr)
             , backward_plan(nullptr)
@@ -260,7 +260,7 @@ namespace Physica::Core {
         initializePlan();
     }
 
-    template<class T, size_t Dim>
+    template<Scalar T, size_t Dim>
     FFT<T, Dim>::FFT(FFT&& fft) noexcept
             : forward_plan(fft.forward_plan)
             , backward_plan(fft.backward_plan)
@@ -273,7 +273,7 @@ namespace Physica::Core {
         fft.buffer = nullptr;
     }
 
-    template<class T, size_t Dim>
+    template<Scalar T, size_t Dim>
     FFT<T, Dim>::~FFT() {
         Internal::ThreadGuardFFTW::getInstance().globalMutex.lock();
         if constexpr (isSinglePrec) {
@@ -288,7 +288,7 @@ namespace Physica::Core {
         Internal::ThreadGuardFFTW::getInstance().globalMutex.unlock();
     }
 
-    template<class T, size_t Dim>
+    template<Scalar T, size_t Dim>
     void FFT<T, Dim>::swap(FFT& __restrict fft) noexcept {
         assert(this != &fft && "[Error]: Self swap is likely a bug");
         std::swap(forward_plan, fft.forward_plan);
@@ -299,7 +299,7 @@ namespace Physica::Core {
         std::swap(planFlag, fft.planFlag);
     }
 
-    template<class T, size_t Dim>
+    template<Scalar T, size_t Dim>
     typename FFT<T, Dim>::IndexArray FFT<T, Dim>::getRSpaceSize() const noexcept{
         IndexArray result{};
         for (size_t i = 0; i < Dim; ++i)
@@ -307,7 +307,7 @@ namespace Physica::Core {
         return result;
     }
 
-    template<class T, size_t Dim>
+    template<Scalar T, size_t Dim>
     typename FFT<T, Dim>::IndexArray FFT<T, Dim>::getKSpaceSize() const noexcept {
         IndexArray result{};
         for (size_t i = 0; i < Dim; ++i)
@@ -315,24 +315,24 @@ namespace Physica::Core {
         return result;
     }
 
-    template<class T, size_t Dim>
+    template<Scalar T, size_t Dim>
     inline typename FFT<T, Dim>::RealType FFT<T, Dim>::getRSpaceDelta(
             RealType kSpaceDelta, unsigned int dim) const noexcept{
         return RealType(2 * M_PI) / (kSpaceDelta * getRSpaceSize()[dim]);
     }
 
-    template<class T, size_t Dim>
+    template<Scalar T, size_t Dim>
     inline typename FFT<T, Dim>::RealType FFT<T, Dim>::getKSpaceDelta(
             RealType rSpaceDelta, unsigned int dim) const noexcept {
         return RealType(2 * M_PI) / (rSpaceDelta * getRSpaceSize()[dim]);
     }
 
-    template<class T, size_t Dim>
+    template<Scalar T, size_t Dim>
     inline FFT<T, Dim> FFT<T, Dim>::makeEmptyFFT(const Array<size_t, Dim>& rSpaceSize) {
         return FFT(rSpaceSize);
     }
 
-    template<class T, size_t Dim>
+    template<Scalar T, size_t Dim>
     template<class IndexType>
     Array<IndexType, Dim> FFT<T, Dim>::rSizeToKSize(const Array<IndexType, Dim>& rSize) {
         Array<IndexType, Dim> result(rSize.getLength());
@@ -343,7 +343,7 @@ namespace Physica::Core {
         return result;
     }
 
-    template<class T, size_t Dim>
+    template<Scalar T, size_t Dim>
     inline void FFT<T, Dim>::transform(const This& planProvider, This& bufferProvider) {
         const auto forward_plan = planProvider.forward_plan;
         const auto buffer = bufferProvider.buffer;
@@ -364,7 +364,7 @@ namespace Physica::Core {
         }
     }
 
-    template<class T, size_t Dim>
+    template<Scalar T, size_t Dim>
     void FFT<T, Dim>::rawInvTransform(const This& planProvider, This& bufferProvider) {
         const auto backward_plan = planProvider.backward_plan;
         const auto buffer = bufferProvider.buffer;
@@ -386,14 +386,14 @@ namespace Physica::Core {
         
     }
 
-    template<class T, size_t Dim>
+    template<Scalar T, size_t Dim>
     inline void FFT<T, Dim>::invTransform(const This& planProvider, This& bufferProvider) {
         rawInvTransform(planProvider, bufferProvider);
         const ScalarType factor = RealType(1.0 / planProvider.sumRSpaceSize(0));
         bufferProvider.getRSpace() *= factor;
     }
 
-    template<class T, size_t Dim>
+    template<Scalar T, size_t Dim>
     void FFT<T, Dim>::initializePlan() {
         assert(forward_plan == nullptr);
         assert(backward_plan == nullptr);
@@ -403,7 +403,7 @@ namespace Physica::Core {
         Internal::ThreadGuardFFTW::getInstance().globalMutex.unlock();
     }
 
-    template<class T, size_t Dim>
+    template<Scalar T, size_t Dim>
     typename FFT<T, Dim>::PlanType FFT<T, Dim>::makeForwardPlan() {
         PlanType plan;
         if constexpr (Dim == 2) {
@@ -451,7 +451,7 @@ namespace Physica::Core {
         return plan;
     }
     
-    template<class T, size_t Dim>
+    template<Scalar T, size_t Dim>
     typename FFT<T, Dim>::PlanType FFT<T, Dim>::makeBackwardPlan() {
         PlanType plan;
         if constexpr (Dim == 2) {
@@ -499,7 +499,7 @@ namespace Physica::Core {
         return plan;
     }
 
-    template<class T, size_t Dim>
+    template<Scalar T, size_t Dim>
     size_t FFT<T, Dim>::sumRSpaceSize(size_t from_dim) const {
         size_t result = 1;
         for (size_t i = from_dim; i < getDim(); ++i)
@@ -507,7 +507,7 @@ namespace Physica::Core {
         return result;
     }
 
-    template<class T, size_t Dim>
+    template<Scalar T, size_t Dim>
     size_t FFT<T, Dim>::sumKSpaceSize(size_t from_dim) const {
         size_t result = 1;
         for (size_t i = from_dim; i < getDim(); ++i)
@@ -515,7 +515,7 @@ namespace Physica::Core {
         return result;
     }
 
-    template<class T, size_t Dim>
+    template<Scalar T, size_t Dim>
     void FFT<T, Dim>::normalizeIndexes(Array<ssize_t, Dim>& indexes) const {
         for (size_t i = 0; i < getDim(); ++i) {
             const int size_i = rSpaceSize[i];
@@ -528,7 +528,7 @@ namespace Physica::Core {
         }
     }
 
-    template<class T, size_t Dim>
+    template<Scalar T, size_t Dim>
     size_t FFT<T, Dim>::componentsSizeFrom(size_t dim) const {
         size_t result = 1;
         for (size_t i = dim; i < getDim(); ++i) {
@@ -545,7 +545,7 @@ namespace Physica::Core {
         return result;
     }
 
-    template<class T, size_t Dim>
+    template<Scalar T, size_t Dim>
     Array<ssize_t, Dim> FFT<T, Dim>::linearIndexToDim(size_t index) const {
         Array<ssize_t, Dim> result(getDim());
         for (size_t i = 0; i < getDim(); ++i) {
@@ -564,7 +564,7 @@ namespace Physica::Core {
         return result;
     }
 
-    template<class T, size_t Dim>
+    template<Scalar T, size_t Dim>
     bool FFT<T, Dim>::checkSize(const Array<size_t, Dim>& rSpaceSize) {
         for (size_t elem : rSpaceSize)
             if (elem > static_cast<size_t>(std::numeric_limits<int>::max()))

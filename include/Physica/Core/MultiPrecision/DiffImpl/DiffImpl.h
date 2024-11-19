@@ -115,32 +115,32 @@ namespace Physica::Core {
     }
 #endif
 
-    template<class T, int Order>
+    template<Scalar T, int Order>
     inline ScalarRef<Diff<T, DiffMode::Forward, Order>>& ScalarRef<Diff<T, DiffMode::Forward, Order>>::operator=(const ScalarRef& other) {
         getValue() = other.getValue();
         getGrad() = other.getGrad();
         return *this;
     }
 
-    template<class T, int Order>
+    template<Scalar T, int Order>
     inline ScalarRef<Diff<T, DiffMode::Forward, Order>>& ScalarRef<Diff<T, DiffMode::Forward, Order>>::operator=(const ScalarType& other) {
         getValue() = other.getValue();
         getGrad() = other.getGrad();
         return *this;
     }
 
-    template<class T, int Order>
+    template<Scalar T, int Order>
     void ScalarRef<Diff<T, DiffMode::Forward, Order>>::swap(This&& obj) noexcept {
         getValue().swap(obj.getValue());
         getGrad().swap(obj.getGrad());
     }
 
-    template<class T, int Order>
+    template<Scalar T, int Order>
     void ScalarRef<Diff<T, DiffMode::Forward, Order>>::swap(ScalarType& obj) noexcept {
         obj.swap(*this);
     }
 
-    template<class T, int Order>
+    template<Scalar T, int Order>
     template<int GradOrder>
     typename ScalarRef<Diff<T, DiffMode::Forward, Order>>::template GradRtnTy<GradOrder> ScalarRef<Diff<T, DiffMode::Forward, Order>>::getGrad() noexcept {
         if constexpr (GradOrder == 1) {
@@ -153,50 +153,50 @@ namespace Physica::Core {
             return (*ptr.grad_ptr()).template getGrad<GradOrder - 1>();
     }
 
-    template<class T, int Order>
+    template<Scalar T, int Order>
     template<int GradOrder>
     const typename ScalarRef<Diff<T, DiffMode::Forward, Order>>::template GradRtnTy<GradOrder> ScalarRef<Diff<T, DiffMode::Forward, Order>>::getGrad() const noexcept {
         return const_cast<This&>(*this).template getGrad<GradOrder>();
     }
 
-    template<class T, int Order>
+    template<Scalar T, int Order>
     ScalarPtr<Diff<T, DiffMode::Forward, Order>>::ScalarPtr(ScalarType& x) : ScalarPtr(&x.getValue(), &x.getGrad()) {}
 
-    template<class T, int Order>
+    template<Scalar T, int Order>
     ScalarPtr<Diff<T, DiffMode::Forward, Order>>::ScalarPtr(ScalarRef<ScalarType>& x) : ScalarPtr(&x.getValue(), &x.getGrad()) {}
 
-    template<class T, int Order>
+    template<Scalar T, int Order>
     inline bool ScalarPtr<Diff<T, DiffMode::Forward, Order>>::operator==(const This& other) const noexcept {
         bool flag = pair.first == other.pair.first;
         assert(flag == (pair.second == other.pair.second) && "[Error]: Bad ScalarPtr");
         return flag;
     }
 
-    template<class T, int Order>
+    template<Scalar T, int Order>
     inline ScalarPtr<Diff<T, DiffMode::Forward, Order>>& ScalarPtr<Diff<T, DiffMode::Forward, Order>>::operator++() {
         for (auto& p : arr)
             p++;
         return *this;
     }
 
-    template<class T, int Order>
+    template<Scalar T, int Order>
     inline ScalarPtr<Diff<T, DiffMode::Forward, Order>>& ScalarPtr<Diff<T, DiffMode::Forward, Order>>::operator--() {
         for (auto& p : arr)
             p--;
         return *this;
     }
 
-    template<class T, int Order>
+    template<Scalar T, int Order>
     inline const ScalarPtr<Diff<T, DiffMode::Forward, Order>> ScalarPtr<Diff<T, DiffMode::Forward, Order>>::operator++(int) {
         return This(pair.first++, pair.second++);
     }
 
-    template<class T, int Order>
+    template<Scalar T, int Order>
     inline const ScalarPtr<Diff<T, DiffMode::Forward, Order>> ScalarPtr<Diff<T, DiffMode::Forward, Order>>::operator--(int) {
         return This(pair.first--, pair.second--);
     }
 
-    template<class T, int Order>
+    template<Scalar T, int Order>
     inline void ScalarPtr<Diff<T, DiffMode::Forward, Order>>::swap(This& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         pair.swap(obj.pair);
@@ -382,11 +382,10 @@ namespace Physica::Core {
     }
     ////////////////////////////////////////////////////////////
     template<Scalar T, DiffMode Mode, int Order, Scalar U>
-    [[nodiscard]] inline auto operator+(const Diff<T, Mode, Order>& s1, const U& s2_) {
+    [[nodiscard]] inline auto operator+(const Diff<T, Mode, Order>& s1, const U& s2) {
         using FirstType = Diff<T, Mode, Order>;
         using SecondType = U;
         using ResultType = typename Internal::BinaryScalarOpReturnType<FirstType, SecondType>::Type;
-        const auto& s2 = s2_.getDerived();
         if constexpr (Mode == DiffMode::Forward) {
             if constexpr (U::isDifferentiable)
                 return ResultType(s1.getValue() + s2.getValue(), s1.getGrad() + s2.getGrad());
@@ -424,11 +423,10 @@ namespace Physica::Core {
     }
 
     template<Scalar T, DiffMode Mode, int Order, Scalar U>
-    [[nodiscard]] inline auto operator-(const Diff<T, Mode, Order>& s1, const U& s2_) {
+    [[nodiscard]] inline auto operator-(const Diff<T, Mode, Order>& s1, const U& s2) {
         using FirstType = Diff<T, Mode, Order>;
         using SecondType = U;
         using ResultType = typename Internal::BinaryScalarOpReturnType<FirstType, SecondType>::Type;
-        const auto& s2 = s2_.getDerived();
         if constexpr (Mode == DiffMode::Forward) {
             if constexpr (U::isDifferentiable)
                 return ResultType(s1.getValue() - s2.getValue(), s1.getGrad() - s2.getGrad());
@@ -466,11 +464,10 @@ namespace Physica::Core {
     }
 
     template<Scalar T, DiffMode Mode, int Order, Scalar U>
-    [[nodiscard]] inline auto operator*(const Diff<T, Mode, Order>& s1, const U& s2_) {
+    [[nodiscard]] inline auto operator*(const Diff<T, Mode, Order>& s1, const U& s2) {
         using FirstType = Diff<T, Mode, Order>;
         using SecondType = U;
         using ResultType = typename Internal::BinaryScalarOpReturnType<FirstType, SecondType>::Type;
-        const auto& s2 = s2_.getDerived();
         if constexpr (Mode == DiffMode::Forward) {
             if constexpr (U::isDifferentiable) {
                 using GradType = typename ResultType::GradType;
@@ -510,11 +507,10 @@ namespace Physica::Core {
     }
 
     template<Scalar T, DiffMode Mode, int Order, Scalar U>
-    [[nodiscard]] inline auto operator/(const Diff<T, Mode, Order>& s1, const U& s2_) {
+    [[nodiscard]] inline auto operator/(const Diff<T, Mode, Order>& s1, const U& s2) {
         using FirstType = Diff<T, Mode, Order>;
         using SecondType = U;
         using ResultType = typename Internal::BinaryScalarOpReturnType<FirstType, SecondType>::Type;
-        const auto& s2 = s2_.getDerived();
         if constexpr (Mode == DiffMode::Forward) {
             if constexpr (U::isDifferentiable) {
                 using GradType = typename ResultType::GradType;

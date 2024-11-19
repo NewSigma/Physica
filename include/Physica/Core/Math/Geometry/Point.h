@@ -23,21 +23,21 @@
 
 namespace Physica::Core {
     /*!
-     * By default, point do not need high precision, so @param type is set to @enum ScalarType::Float.
+     * By default, point do not need high precision, so @param type is set to float32.
      */
-    template<size_t dim, class ScalarType = float32>
+    template<size_t Dim, Scalar T = float32>
     class Point {
-        static_assert(dim > 0, "0 dim point is not allowed\n");
+        static_assert(Dim > 0, "0 Dim point is not allowed\n");
     public:
-        static constexpr size_t length = dim;
-        using VectorType = DenseVector<ScalarType, dim>;
+        static constexpr size_t length = Dim;
+        using VectorType = DenseVector<T, Dim>;
     private:
         VectorType vec;
     public:
         Point() = default;
-        template<class Derived>
-        Point(const LValueVector<Derived>& vec_) : vec(vec_) {}
-        Point(std::initializer_list<ScalarType> list) : vec(std::move(list)) {}
+        template<LVector V>
+        Point(const V& vec_) : vec(vec_) {}
+        Point(std::initializer_list<T> list) : vec(std::move(list)) {}
         Point(const Point& p) = default;
         Point(Point&& p) noexcept = default;
         ~Point() = default;
@@ -47,20 +47,20 @@ namespace Physica::Core {
         /* Getters */
         VectorType& v() noexcept { return vec; }
         const VectorType& v() const noexcept { return vec; }
-        const ScalarType& x() const { return vec[0]; }
-        const ScalarType& y() const { return vec[1]; }
-        const ScalarType& z() const { return vec[2]; }
-        const ScalarType& w() const { return vec[3]; }
-        ScalarType dist(const Point& p) const;
+        const T& x() const { return vec[0]; }
+        const T& y() const { return vec[1]; }
+        const T& z() const { return vec[2]; }
+        const T& w() const { return vec[3]; }
+        T dist(const Point& p) const;
     };
 
-    template<size_t dim, class ScalarType>
-    std::ostream& operator<<(std::ostream& os, const Point<dim, ScalarType>& p) {
+    template<size_t Dim, Scalar T>
+    std::ostream& operator<<(std::ostream& os, const Point<Dim, T>& p) {
         return os << p.v().format().setPrefix("(").setSeparator(", ").setSuffix(")");
     }
 
-    template<size_t dim, class ScalarType>
-    ScalarType Point<dim, ScalarType>::dist(const Point<dim, ScalarType>& p) const {
+    template<size_t Dim, Scalar T>
+    T Point<Dim, T>::dist(const Point<Dim, T>& p) const {
         return (vec - p.vec).norm();
     }
 

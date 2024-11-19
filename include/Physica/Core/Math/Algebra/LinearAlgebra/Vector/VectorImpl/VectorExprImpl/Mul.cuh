@@ -19,10 +19,10 @@
 #pragma once
 
 namespace Physica::Core {
-    template<class VectorType, Scalar T>
-    class device_obj<VectorExpr<ExprType::Mul, VectorType, T>>
-            : public device_obj<BinaryVectorExpr<ExprType::Mul, VectorType, T>> {
-        using Base = device_obj<BinaryVectorExpr<ExprType::Mul, VectorType, T>>;
+    template<Vector T, Scalar U>
+    class device_obj<VectorExpr<ExprType::Mul, T, U>>
+            : public device_obj<BinaryVectorExpr<ExprType::Mul, T, U>> {
+        using Base = device_obj<BinaryVectorExpr<ExprType::Mul, T, U>>;
     public:
         using typename Base::ScalarType;
     public:
@@ -47,10 +47,10 @@ namespace Physica::Core {
         }
     };
 
-    template<class VectorType1, class VectorType2>
-    class device_obj<VectorExpr<ExprType::Mul, VectorType1, VectorType2>>
-            : public device_obj<BinaryVectorExpr<ExprType::Mul, VectorType1, VectorType2>> {
-        using Base = device_obj<BinaryVectorExpr<ExprType::Mul, VectorType1, VectorType2>>;
+    template<Vector T1, Vector T2>
+    class device_obj<VectorExpr<ExprType::Mul, T1, T2>>
+            : public device_obj<BinaryVectorExpr<ExprType::Mul, T1, T2>> {
+        using Base = device_obj<BinaryVectorExpr<ExprType::Mul, T1, T2>>;
     public:
         using typename Base::ScalarType;
     public:
@@ -75,21 +75,20 @@ namespace Physica::Core {
         }
     };
 
-    template<class VectorType, Scalar T>
-    [[nodiscard]] __device__ inline device_obj<VectorExpr<ExprType::Mul, VectorType, T>>
-    operator*(const device_obj<RValueVector<VectorType>>& v, const T& x) noexcept {
-        return {v.getDerived(), x};
+    template<Vector T, Scalar U>
+    [[nodiscard]] __device__ inline auto
+    operator*(const device_obj<T>& v, const U& x) noexcept {
+        return device_obj<VectorExpr<ExprType::Mul, T, U>>(v, x);
     }
 
-    template<Scalar T, class VectorType>
-    [[nodiscard]] __device__ inline device_obj<VectorExpr<ExprType::Mul, VectorType, T>>
-    operator*(const T& x, const device_obj<RValueVector<VectorType>>& v) noexcept {
+    template<Scalar U, Vector T>
+    [[nodiscard]] __device__ inline auto operator*(const U& x, const device_obj<T>& v) noexcept {
         return v * x;
     }
     
-    template<class VectorType1, class VectorType2>
-    [[nodiscard]] __host__ __device__ inline device_obj<VectorExpr<ExprType::Mul, VectorType1, VectorType2>>
-    hadamard(const device_obj<RValueVector<VectorType1>>& v1, const device_obj<RValueVector<VectorType2>>& v2) noexcept {
-        return {v1.getDerived(), v2.getDerived()};
+    template<Vector T1, Vector T2>
+    [[nodiscard]] __host__ __device__ inline auto
+    hadamard(const device_obj<T1>& v1, const device_obj<T2>& v2) noexcept {
+        return device_obj<VectorExpr<ExprType::Mul, T1, T2>>(v1, v2);
     }
 }

@@ -19,16 +19,16 @@
 #pragma once
 
 namespace Physica::Core {
-    template<class MatrixType>
-    class RValueFlatten : public RValueVector<RValueFlatten<MatrixType>> {
-        using This = RValueFlatten<MatrixType>;
+    template<Matrix T>
+    class RValueFlatten<T> : public RValueVector<RValueFlatten<T>> {
+        using This = RValueFlatten<T>;
 
-        const MatrixType& mat;
+        const T& mat;
     public:
-        using Base = RValueVector<RValueFlatten<MatrixType>>;
+        using Base = RValueVector<RValueFlatten<T>>;
         using typename Base::ScalarType;
     public:
-        RValueFlatten(const RValueMatrix<MatrixType>& mat_) : mat(mat_.getDerived()) {}
+        RValueFlatten(const T& mat_) : mat(mat_) {}
         RValueFlatten(const This&) = delete;
         RValueFlatten(This&&) noexcept = delete;
         ~RValueFlatten() = default;
@@ -40,8 +40,8 @@ namespace Physica::Core {
         [[nodiscard]] size_t getLength() const noexcept { return mat.getRow() * mat.getCol(); }
     };
 
-    template<class MatrixType>
-    typename RValueFlatten<MatrixType>::ScalarType RValueFlatten<MatrixType>::calc(size_t index) const {
+    template<Matrix T>
+    typename RValueFlatten<T>::ScalarType RValueFlatten<T>::calc(size_t index) const {
         const size_t major = index / mat.getMaxMinor();
         const size_t minor = index % mat.getMaxMinor();
         return mat.calcFromMajorMinor(major, minor);
@@ -49,11 +49,11 @@ namespace Physica::Core {
 }
 
 namespace Physica {
-    template<class MatrixType>
-    class Traits<Core::RValueFlatten<MatrixType>> {
+    template<Matrix T>
+    class Traits<Core::RValueFlatten<T>> {
     public:
-        using ScalarType = typename MatrixType::ScalarType;
-        constexpr static size_t SizeAtCompile = MatrixType::RowAtCompile * MatrixType::ColAtCompile;
+        using ScalarType = typename T::ScalarType;
+        constexpr static size_t SizeAtCompile = T::RowAtCompile * T::ColAtCompile;
         constexpr static bool FastAssign = false;
         constexpr static bool FastPacket = false;
     };

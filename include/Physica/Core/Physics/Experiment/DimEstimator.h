@@ -37,24 +37,24 @@ namespace Physica::Core {
         VectorND<ScalarType> intrinsicDim;
         VectorND<ScalarType> correlateDim;
     public:
-        template<class VectorType, class RandomGenerator>
-        DimEstimator(size_t sampleNum, const Array<size_t>& intrinsicDim_, const LValueVector<VectorType>& radius, RandomGenerator& gen);
+        template<Vector T, class RandomGenerator>
+        DimEstimator(size_t sampleNum, const Array<size_t>& intrinsicDim_, const T& radius, RandomGenerator& gen);
         /* Operations */
-        template<class MatrixType, class VectorType>
-        ScalarType intrinDim(const LValueMatrix<MatrixType>& data, const LValueVector<VectorType>& radius) const;
-        template<class MatrixType, class VectorType>
-        static ScalarType corrDimen(const LValueMatrix<MatrixType>& data, const LValueVector<VectorType>& radius);
-        template<class VectorType>
-        static DataMatrix toHighDimForm(const LValueVector<VectorType>& data, size_t step, size_t dim);
+        template<Vector T, Matrix U>
+        ScalarType intrinDim(const U& data, const T& radius) const;
+        template<Vector T, Matrix U>
+        static ScalarType corrDimen(const U& data, const T& radius);
+        template<Vector T>
+        static DataMatrix toHighDimForm(const T& data, size_t step, size_t dim);
     private:
-        template<class MatrixType, class VectorType>
-        static inline VectorType corrIntegral(const LValueMatrix<MatrixType>& data, const LValueVector<VectorType>& radius);
+        template<Vector T, Matrix U>
+        static inline T corrIntegral(const U& data, const T& radius);
     };
 
-    template<class VectorType, class RandomGenerator>
+    template<Vector T, class RandomGenerator>
     DimEstimator::DimEstimator(size_t sampleNum,
                                const Array<size_t>& intrinsicDim_,
-                               const LValueVector<VectorType>& radius,
+                               const T& radius,
                                RandomGenerator& gen)
             : intrinsicDim(intrinsicDim_.getLength()) {
         const size_t length = intrinsicDim.getLength();
@@ -67,28 +67,28 @@ namespace Physica::Core {
         }
     }
 
-    template<class MatrixType, class VectorType>
+    template<Vector T, Matrix U>
     typename DimEstimator::ScalarType
-    DimEstimator::intrinDim(const LValueMatrix<MatrixType>& data, const LValueVector<VectorType>& radius) const {
+    DimEstimator::intrinDim(const U& data, const T& radius) const {
         return lagrange(intrinsicDim, correlateDim, corrDimen(data, radius));
     }
     /**
      * \param data
      * Each row represents a piece of data
      */
-    template<class MatrixType, class VectorType>
+    template<Vector T, Matrix U>
     typename DimEstimator::ScalarType
-    DimEstimator::corrDimen(const LValueMatrix<MatrixType>& data, const LValueVector<VectorType>& radius) {
-        const VectorType logCorrIntegral = ln(corrIntegral(data, radius));
-        const VectorType logR = ln(radius);
+    DimEstimator::corrDimen(const U& data, const T& radius) {
+        const T logCorrIntegral = ln(corrIntegral(data, radius));
+        const T logR = ln(radius);
         return LinearFit<ScalarType>::fit(logR, logCorrIntegral).first;
     }
     /**
      * Helper function for distinguishing chaos and random noise, refer to [2]
      */
-    template<class VectorType>
+    template<Vector T>
     typename DimEstimator::DataMatrix DimEstimator::toHighDimForm(
-            const LValueVector<VectorType>& data,
+            const T& data,
             size_t step,
             size_t dim) {
         assert(step > 0);
@@ -103,16 +103,16 @@ namespace Physica::Core {
         return result;
     }
 
-    template<class MatrixType, class VectorType>
-    inline VectorType DimEstimator::corrIntegral(const LValueMatrix<MatrixType>& data, const LValueVector<VectorType>& radius) {
+    template<Vector T, Matrix U>
+    inline T DimEstimator::corrIntegral(const U& data, const T& radius) {
         const size_t numData = data.getRow();
-        const VectorType squaredR = square(radius);
-        VectorType count(radius.getLength(), 0);
+        const T squaredR = square(radius);
+        T count(radius.getLength(), 0);
         for (size_t i = 0; i < numData - 1; ++i) {
             auto data1 = data.row(i);
             for (size_t j = i + 1; j < numData; ++j) {
                 auto data2 = data.row(j);
-                const ScalarType r2 = (data1.asVector() - data2).squaredNorm();
+                const ScalarType r2 = (data1 - data2).squaredNorm();
                 for (size_t k = 0; k < count.getLength(); ++k)
                     count[k] += ScalarType(r2 <= squaredR[k]);
             }

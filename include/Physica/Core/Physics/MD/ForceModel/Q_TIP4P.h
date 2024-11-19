@@ -73,8 +73,8 @@ namespace Physica::Core {
 
         template<class Executor> [[nodiscard]] VectorND<T> force(const MDCellType& cell);
         template<class Executor> [[nodiscard]] VectorND<T> force_unsort(const MDCellType& cell);
-        template<class VectorType, class Executor>
-        void forceAsync(const MDCellType& cell, ContinuousVector<VectorType>& result);
+        template<Vector V, class Executor>
+        void forceAsync(const MDCellType& cell, ContinuousVector<V>& result);
         template<class Executor> [[nodiscard]] inline VectorND<T> force_short(const MDCellType& cell);
         template<class Executor> [[nodiscard]] VectorND<T> force_short_unsort(const MDCellType& cell);
         template<class Executor> [[nodiscard]] VectorND<T> force_long(const MDCellType& cell);
@@ -109,7 +109,7 @@ namespace Physica::Core {
         void force_short_intraMolecule(const MDCellType& cell, VectorND<T>& shortForce) const;
         template<class Executor> [[nodiscard]] VectorND<T> force_short_PartialChargeRepr(const PositionMatrix& chargePos);
         template<class Executor> [[nodiscard]] inline VectorND<T> force_long_PartialChargeRepr(const PositionMatrix& chargePos);
-        template<class VectorType> void changeRepr(ContinuousVector<VectorType>& ewaldForce) const;
+        template<Vector V> void changeRepr(ContinuousVector<V>& ewaldForce) const;
 
         [[nodiscard]] static T modifiedMorsePot(T r);
         [[nodiscard]] static T modifiedMorseForce(T r);
@@ -165,8 +165,8 @@ namespace Physica::Core {
     }
 
     template<Scalar T, class EwaldType>
-    template<class VectorType, class Executor>
-    void Q_TIP4P<T, EwaldType>::forceAsync(const MDCellType& cell, ContinuousVector<VectorType>& result) {
+    template<Vector V, class Executor>
+    void Q_TIP4P<T, EwaldType>::forceAsync(const MDCellType& cell, ContinuousVector<V>& result) {
         assert(cell.getNumParticle() % 3 == 0);
         VectorND<T> temp(getNumParticle() * 3, 0);
         auto future = Executor::schedule([this, &cell, &temp]() {
@@ -415,7 +415,7 @@ namespace Physica::Core {
             const size_t indexH2 = indexH1 + 1;
             vecOH1 = cell.minDistVector(i, indexH1);
             vecOH2 = cell.minDistVector(i, indexH2);
-            chargePosO = posO.asVector() + (vecOH1 + vecOH2) * T((1 - gamma) * 0.5);
+            chargePosO = posO + (vecOH1 + vecOH2) * T((1 - gamma) * 0.5);
         }
         cell.normalizePos(chargePos);
         return chargePos;
@@ -578,8 +578,8 @@ namespace Physica::Core {
      * Change representation: from partial charge representation to HOH representation
      */
     template<Scalar T, class EwaldType>
-    template<class VectorType>
-    void Q_TIP4P<T, EwaldType>::changeRepr(ContinuousVector<VectorType>& ewaldForce) const {
+    template<Vector V>
+    void Q_TIP4P<T, EwaldType>::changeRepr(ContinuousVector<V>& ewaldForce) const {
         const size_t numMolecule = getNumMolecule();
         const size_t minIndexO = 2 * numMolecule;
         const size_t maxIndexO = minIndexO + numMolecule;

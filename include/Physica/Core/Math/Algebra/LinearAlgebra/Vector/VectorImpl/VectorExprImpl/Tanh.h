@@ -19,10 +19,10 @@
 #pragma once
 
 namespace Physica::Core {
-    template<class VectorType>
-    class VectorExpr<ExprType::Tanh, VectorType> : public UnitaryVectorExpr<ExprType::Tanh, VectorType> {
-        using This = VectorExpr<ExprType::Tanh, VectorType>;
-        using Base = UnitaryVectorExpr<ExprType::Tanh, VectorType>;
+    template<Vector T>
+    class VectorExpr<ExprType::Tanh, T> : public UnitaryVectorExpr<ExprType::Tanh, T> {
+        using This = VectorExpr<ExprType::Tanh, T>;
+        using Base = UnitaryVectorExpr<ExprType::Tanh, T>;
     public:
         using typename Base::ScalarType;
     public:
@@ -31,8 +31,8 @@ namespace Physica::Core {
         [[nodiscard]] ScalarType calc(size_t index) const { return tanh(Base::getExpr().calc(index)); }
     };
 
-    template<class VectorType>
-    [[nodiscard]] inline auto tanh(const RValueVector<VectorType>& v) noexcept {
-        return VectorExpr<ExprType::Tanh, VectorType>(v);
+    template<Vector T>
+    [[nodiscard]] inline auto tanh(const T& v) noexcept {
+        return VectorExpr<ExprType::Tanh, T>(v);
     }
 }

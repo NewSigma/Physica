@@ -41,8 +41,6 @@ namespace Physica::Core {
         using Base::RowAtCompile;
         using Base::ColAtCompile;
         using Base::isComplex;
-        using Base::isColMatrix;
-        using Base::isRowMatrix;
         using Base::isForwardDiff;
         using Base::isReverseDiff;
     protected:
@@ -56,16 +54,16 @@ namespace Physica::Core {
         inline This& operator=(const This& m);
         inline This& operator=(This&& m);
 
-        Derived& operator=(const ScalarType& s_);
-        void operator+=(const ScalarType& s) { (*this) = (*this) + s; }
-        void operator-=(const ScalarType& s) { (*this) = (*this) - s; }
-        void operator*=(const ScalarType& s) { (*this) = (*this) * s; }
-        void operator/=(const ScalarType& s) { (*this) = (*this) / s; }
+        Derived& operator=(const ScalarType& s);
+        void operator+=(const ScalarType& s) { Base::getDerived() = Base::getDerived() + s; }
+        void operator-=(const ScalarType& s) { Base::getDerived() = Base::getDerived() - s; }
+        void operator*=(const ScalarType& s) { Base::getDerived() = Base::getDerived() * s; }
+        void operator/=(const ScalarType& s) { Base::getDerived() = Base::getDerived() / s; }
 
-        template<class OtherMatrix> Derived& operator=(const RValueMatrix<OtherMatrix>& m);
-        template<class OtherMatrix> void operator+=(const RValueMatrix<OtherMatrix>& m) { (*this) = (*this) + m; }
-        template<class OtherMatrix> void operator-=(const RValueMatrix<OtherMatrix>& m) { (*this) = (*this) - m; }
-        template<class OtherMatrix> void operator*=(const RValueMatrix<OtherMatrix>& m) { Base::getDerived() = Derived((*this) * m); }
+        template<Matrix M> Derived& operator=(const M& m);
+        template<Matrix M> void operator+=(const M& m) { Base::getDerived() = Base::getDerived() + m; }
+        template<Matrix M> void operator-=(const M& m) { Base::getDerived() = Base::getDerived() - m; }
+        template<Matrix M> void operator*=(const M& m) { Base::getDerived() = Derived(Base::getDerived() * m); }
         [[nodiscard]] inline RefTy operator()(size_t row, size_t col);
         [[nodiscard]] inline ConstRefTy operator()(size_t row, size_t col) const;
         /* Operations */

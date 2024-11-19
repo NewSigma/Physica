@@ -22,7 +22,7 @@
 #include "DenseMatrix.h"
 
 namespace Physica::Core {
-    template<class T, int Order, int Option, size_t Row, size_t Col>
+    template<Scalar T, int Order, int Option, size_t Row, size_t Col>
     class DenseMatrix<Diff<T, DiffMode::Forward, Order>, Option, Row, Col> : public ContinuousMatrix<DenseMatrix<Diff<T, DiffMode::Forward, Order> , Option, Row, Col>> {
         using This = DenseMatrix<Diff<T, DiffMode::Forward, Order> , Option, Row, Col>;
         using Base = ContinuousMatrix<This>;
@@ -42,10 +42,10 @@ namespace Physica::Core {
         DenseMatrix() = default;
         DenseMatrix(size_t row, size_t col);
         DenseMatrix(size_t row, size_t col, T init);
-        template<class OtherMatrix>
-        DenseMatrix(const RValueMatrix<OtherMatrix>& mat);
-        template<class VectorType>
-        DenseMatrix(const RValueVector<VectorType>& vec);
+        template<Matrix M>
+        DenseMatrix(const M& mat);
+        template<Vector V>
+        DenseMatrix(const V& vec);
         DenseMatrix(const This&) = default;
         DenseMatrix(This&&) noexcept = default;
         /* Operators */
@@ -65,7 +65,7 @@ namespace Physica::Core {
         [[nodiscard]] size_t getRow() const noexcept { return values.getRow(); }
     };
 
-    template<class T, int Option, int Order>
+    template<Scalar T, int Option, int Order>
     class Diff<DenseMatrix<T, Option>, DiffMode::Reverse, Order>
             : public RValueMatrix<Diff<DenseMatrix<T, Option>, DiffMode::Reverse, Order>>
             , public DenseMatrixDim<Diff<DenseMatrix<T, Option>, DiffMode::Reverse, Order>, Dynamic, Dynamic> {
@@ -93,37 +93,37 @@ namespace Physica::Core {
         /* Operations */
         [[nodiscard]] inline ScalarType calc(size_t row, size_t col) const;
 
-        template<class RandomGenerator>
-        inline void random_uniform(RandomGenerator& gen);
-        template<class RandomGenerator>
-        inline void random_normal(RandomGenerator& gen);
-        template<class Distribution, class RandomGenerator>
-        inline void random_any(Distribution& dist, RandomGenerator& gen);
+        template<class RandomType>
+        inline void random_uniform(RandomType& gen);
+        template<class RandomType>
+        inline void random_normal(RandomType& gen);
+        template<class Distribution, class RandomType>
+        inline void random_any(Distribution& dist, RandomType& gen);
         void swap(Diff& obj) noexcept { std::swap(*this, obj); }
         /* Getters */
         using Dim::getCol;
         using Dim::getRow;
         [[nodiscard]] size_t getSize() const noexcept { return traceSeg.getLength(); }
         /* Static members */
-        template<class RandomGenerator>
-        [[nodiscard]] inline static This random_uniform(size_t row, size_t col, RandomGenerator& gen);
-        template<class RandomGenerator>
-        [[nodiscard]] inline static This random_normal(size_t row, size_t col, RandomGenerator& gen);
-        template<class Distribution, class RandomGenerator>
-        [[nodiscard]] inline static This random_any(size_t row, size_t col, Distribution& dist, RandomGenerator& gen);
+        template<class RandomType>
+        [[nodiscard]] inline static This random_uniform(size_t row, size_t col, RandomType& gen);
+        template<class RandomType>
+        [[nodiscard]] inline static This random_normal(size_t row, size_t col, RandomType& gen);
+        template<class Distribution, class RandomType>
+        [[nodiscard]] inline static This random_any(size_t row, size_t col, Distribution& dist, RandomType& gen);
     private:
         friend class device_obj<This>;
     };
 }
 
 namespace Physica {
-    template<class T, int Order, int Option, size_t Row, size_t Col>
+    template<Scalar T, int Order, int Option, size_t Row, size_t Col>
     class Traits<Core::DenseMatrix<Core::Diff<T, Core::DiffMode::Forward, Order>, Option, Row, Col>> : public Traits<Core::DenseMatrix<T, Option>> {
     public:
         using ScalarType = Core::Diff<T, Core::DiffMode::Forward, Order>;
     };
 
-    template<class T, int Option, int Order>
+    template<Scalar T, int Option, int Order>
     class Traits<Core::Diff<Core::DenseMatrix<T, Option>, Core::DiffMode::Reverse, Order>> : public Traits<Core::DenseMatrix<T, Option>> {
         static_assert(!T::isDifferentiable, "[Error]: Nested Diff<> is not allowed");
     public:

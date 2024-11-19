@@ -71,8 +71,6 @@ namespace Physica::Core {
 }
 
 namespace Physica {
-    using namespace Core;
-
     template<Scalar T, size_t Size>
     class Traits<BoolSIMD<T, Size>> {
     public:

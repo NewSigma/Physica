@@ -23,32 +23,32 @@ namespace Physica::Core {
      * Decomposite a symmetrical, positive matrix A into LL^T.
      * If target matrix is a column matrix, return lower triangular matrix L, if row matrix, return upper triangular matrix L^T
      */
-    template<class MatrixType>
-    class Cholesky : public RValueMatrix<Cholesky<MatrixType>> {
-        using Base = RValueMatrix<Cholesky<MatrixType>>;
-        const MatrixType& source;
+    template<Matrix T>
+    class Cholesky : public RValueMatrix<Cholesky<T>> {
+        using Base = RValueMatrix<Cholesky<T>>;
+        const T& source;
     public:
-        explicit Cholesky(const MatrixType& source_);
+        explicit Cholesky(const T& source_);
         ~Cholesky() = default;
         /* Operations */
-        template<class OtherMatrix>
-        void assignTo(LValueMatrix<OtherMatrix>& target) const;
+        template<Matrix M>
+        void assignTo(LValueMatrix<M>& target) const;
         /* Getters */
         [[nodiscard]] size_t getRow() const noexcept { return source.getRow(); }
         [[nodiscard]] size_t getCol() const noexcept { return source.getRow(); }
     };
 
-    template<class MatrixType>
-    Cholesky<MatrixType>::Cholesky(const MatrixType& source_) : source(source_) {
+    template<Matrix T>
+    Cholesky<T>::Cholesky(const T& source_) : source(source_) {
         assert(source.getRow() == source.getCol());
     }
     /**
      * Implemented the square method
      */
-    template<class MatrixType>
-    template<class OtherMatrix>
-    void Cholesky<MatrixType>::assignTo(LValueMatrix<OtherMatrix>& target) const {
-        using ResultType = OtherMatrix;
+    template<Matrix T>
+    template<Matrix M>
+    void Cholesky<T>::assignTo(LValueMatrix<M>& target) const {
+        using ResultType = M;
         using ScalarType = typename ResultType::ScalarType;
         const size_t order = source.getRow();
         /* Handle first vector */ {
@@ -86,13 +86,13 @@ namespace Physica::Core {
 }
 
 namespace Physica {
-    template<class MatrixType>
-    class Traits<Cholesky<MatrixType>> {
+    template<Matrix T>
+    class Traits<Cholesky<T>> {
     public:
-        using ScalarType = typename MatrixType::ScalarType;
-        constexpr static int Option = MatrixType::MatrixOption;
-        constexpr static size_t RowAtCompile = MatrixType::RowAtCompile;
-        constexpr static size_t ColAtCompile = MatrixType::ColAtCompile;
-        constexpr static size_t SizeAtCompile = MatrixType::SizeAtCompile;
+        using ScalarType = typename T::ScalarType;
+        constexpr static int Option = T::MatrixOption;
+        constexpr static size_t RowAtCompile = T::RowAtCompile;
+        constexpr static size_t ColAtCompile = T::ColAtCompile;
+        constexpr static size_t SizeAtCompile = T::SizeAtCompile;
     };
 }

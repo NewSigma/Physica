@@ -60,8 +60,8 @@ namespace Physica::Core {
         friend std::ostream& operator<<(std::ostream& os, const PIPhonon& phonon);
         friend std::istream& operator>>(std::istream& is, PIPhonon& phonon);
         /* Operations */
-        template<class MatrixType>
-        void sample(const RValueMatrix<MatrixType>& force, const RValueMatrix<MatrixType>& momentum);
+        template<Matrix T>
+        void sample(const T& force, const T& momentum);
         void compute();
         void swap(PIPhonon& __restrict obj) noexcept;
         /* Getters */
@@ -75,8 +75,8 @@ namespace Physica::Core {
         void applyTranslationInvariance(DenseHermiteMatrix<ComplexType>& target);
     };
 
-    template<class MatrixType>
-    void PIPhonon::sample(const RValueMatrix<MatrixType>& force, const RValueMatrix<MatrixType>& momentum) {
+    template<Matrix T>
+    void PIPhonon::sample(const T& force, const T& momentum) {
         assert(force.getRow() == momentum.getRow());
         assert(force.getCol() == momentum.getCol());
         assert(force.getRow() == getSuperCellDOF());

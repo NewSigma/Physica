@@ -21,38 +21,38 @@
 #include "GEMV.h"
 
 namespace Physica::Core {
-    template<class T, int Option> class SparseMatrix;
+    template<Scalar T, int Option> class SparseMatrix;
 
-    template<class T, int Option, class VectorType>
-    class MatrixVectorProduct<SparseMatrix<T, Option>, VectorType>
-            : public RValueVector<MatrixVectorProduct<SparseMatrix<T, Option>, VectorType>> {
+    template<Scalar T, int Option, Vector U>
+    class MatrixVectorProduct<SparseMatrix<T, Option>, U>
+            : public RValueVector<MatrixVectorProduct<SparseMatrix<T, Option>, U>> {
     public:
-        using Base = RValueVector<MatrixVectorProduct<SparseMatrix<T, Option>, VectorType>>;
+        using Base = RValueVector<MatrixVectorProduct<SparseMatrix<T, Option>, U>>;
         using typename Base::ScalarType;
         using MatrixType = SparseMatrix<T, Option>;
-        static_assert(MatrixType::ColAtCompile == VectorType::SizeAtCompile,
+        static_assert(MatrixType::ColAtCompile == U::SizeAtCompile,
                       "Row and column do not match in matrix product");
     private:
         const MatrixType& mat;
-        const VectorType& vec;
+        const U& vec;
     public:
-        MatrixVectorProduct(const MatrixType& mat_, const RValueVector<VectorType>& vec_)
-                : mat(mat_), vec(vec_.getDerived()) {
+        MatrixVectorProduct(const MatrixType& mat_, const U& vec_)
+                : mat(mat_), vec(vec_) {
             assert(mat.getCol() == vec.getLength());
         }
         /* Operations */
-        template<class OtherDerived, class Executor = SequentialExecutor>
-        void assignTo(LValueVector<OtherDerived>& target) const;
+        template<LVector V, class Executor = SequentialExecutor>
+        void assignTo(V& target) const;
         /* Getters */
         [[nodiscard]] ScalarType calc(size_t index) const;
         [[nodiscard]] size_t getLength() const { return mat.getRow(); }
         [[nodiscard]] const MatrixType& getLHS() const noexcept { return mat; }
-        [[nodiscard]] const VectorType& getRHS() const noexcept { return vec; }
+        [[nodiscard]] const U& getRHS() const noexcept { return vec; }
     };
 
-    template<class T, int Option, class VectorType>
-    template<class OtherDerived, class Executor>
-    void MatrixVectorProduct<SparseMatrix<T, Option>, VectorType>::assignTo(LValueVector<OtherDerived>& target) const {
+    template<Scalar T, int Option, Vector U>
+    template<LVector V, class Executor>
+    void MatrixVectorProduct<SparseMatrix<T, Option>, U>::assignTo(V& target) const {
         const auto& elements = mat.getElements();
         const auto& minorIndexes = mat.getMinorIndexes();
         const auto& majorStarts = mat.getMajorStarts();
@@ -80,9 +80,9 @@ namespace Physica::Core {
         }
     }
 
-    template<class T, int Option, class VectorType>
-    typename MatrixVectorProduct<SparseMatrix<T, Option>, VectorType>::ScalarType
-    MatrixVectorProduct<SparseMatrix<T, Option>, VectorType>::calc(size_t index) const {
+    template<Scalar T, int Option, Vector U>
+    typename MatrixVectorProduct<SparseMatrix<T, Option>, U>::ScalarType
+    MatrixVectorProduct<SparseMatrix<T, Option>, U>::calc(size_t index) const {
         const auto& elements = mat.getElements();
         const auto& minorIndexes = mat.getMinorIndexes();
         const auto& majorStarts = mat.getMajorStarts();

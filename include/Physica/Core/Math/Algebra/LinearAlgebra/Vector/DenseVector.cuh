@@ -38,8 +38,8 @@ namespace Physica::Core {
     public:
         device_obj() = default;
         using Storage::Storage;
-        template<class Derived>
-        __host__ __device__ device_obj(const device_obj<RValueVector<Derived>>& v);
+        template<Vector V>
+        __host__ __device__ device_obj(const device_obj<V>& v);
         device_obj(const This&) = default;
         device_obj(This&&) noexcept = default;
         ~device_obj() = default;
@@ -69,10 +69,10 @@ namespace Physica::Core {
     };
 
     template<Scalar T, size_t Length, class Allocator>
-    template<class Derived>
-    __host__ __device__ device_obj<DenseVector<T, Length, Allocator>>::device_obj(const device_obj<RValueVector<Derived>>& v)
+    template<Vector V>
+    __host__ __device__ device_obj<DenseVector<T, Length, Allocator>>::device_obj(const device_obj<V>& v)
             : Storage(v.getLength()) {
-        v.getDerived().assignTo(*this);
+        v.assignTo(*this);
     }
 
     template<Scalar T, size_t Length, class Allocator>
@@ -109,8 +109,6 @@ namespace Physica::Core {
 }
 
 namespace Physica {
-    using namespace Core;
-
     template<Scalar T, size_t Length, class Allocator>
     class Traits<Core::device_obj<DenseVector<T, Length, Allocator>>> : public Traits<DenseVector<T, Length, Allocator>> {};
 }

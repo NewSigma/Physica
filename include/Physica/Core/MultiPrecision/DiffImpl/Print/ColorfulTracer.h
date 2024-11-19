@@ -21,11 +21,11 @@
 #include <Physica/Core/Utils/Unix/ColorGuard.h>
 
 namespace Physica::Core {
-    template<class ScalarType, int Order> class DiffTracer;
+    template<Scalar T, int Order> class DiffTracer;
 
-    template<class ScalarType, int Order>
+    template<Scalar T, int Order>
     class ColorfulTracer {
-        using TracerType = DiffTracer<ScalarType, Order>;
+        using TracerType = DiffTracer<T, Order>;
 
         const TracerType& tracer;
     public:
@@ -36,15 +36,15 @@ namespace Physica::Core {
         /* Operators */
         ColorfulTracer& operator=(const ColorfulTracer&) = delete;
         ColorfulTracer& operator=(ColorfulTracer&&) noexcept = delete;
-        template<Scalar T, unsigned int AnyOrder>
-        friend std::ostream& operator<<(std::ostream& os, const ColorfulTracer<T, AnyOrder>& obj);
+        template<Scalar U, int AnyOrder>
+        friend std::ostream& operator<<(std::ostream& os, const ColorfulTracer<U, AnyOrder>& obj);
     };
 
-    template<class ScalarType, int Order>
-    ColorfulTracer<ScalarType, Order>::ColorfulTracer(const TracerType& tracer_) : tracer(tracer_) {}
+    template<Scalar T, int Order>
+    ColorfulTracer<T, Order>::ColorfulTracer(const TracerType& tracer_) : tracer(tracer_) {}
 
-    template<Scalar T, unsigned int AnyOrder>
-    std::ostream& operator<<(std::ostream& os, const ColorfulTracer<T, AnyOrder>& obj) {
+    template<Scalar U, int AnyOrder>
+    std::ostream& operator<<(std::ostream& os, const ColorfulTracer<U, AnyOrder>& obj) {
         using Color = typename ColorGuard::Color;
         using ColorGuard = ColorGuard;
         const auto& tracer = obj.tracer;

@@ -35,23 +35,23 @@ namespace Physica::Core {
      * Reference:
      * [1] Nocedal J, Wright S J, Mikosch T V, et al. Numerical Optimization. Springer, 2006.448-496
      */
-    template<class ScalarType>
+    template<Scalar T>
     class QuadraticProgramming {
-        using ConstraintMatrix = DenseMatrix<ScalarType, MatrixOption::Row | MatrixOption::Vector>;
+        using ConstraintMatrix = DenseMatrix<T, MatrixOption::Row | MatrixOption::Vector>;
 
-        DenseSymmMatrix<ScalarType> objectiveMatG;
-        VectorND<ScalarType> objectiveVecC;
+        DenseSymmMatrix<T> objectiveMatG;
+        VectorND<T> objectiveVecC;
         ConstraintMatrix equalityConstraint;
         ConstraintMatrix inequalityConstraint;
-        VectorND<ScalarType> x;
+        VectorND<T> x;
         Array<bool> activeConstraintFlags;
     public:
-        template<class MatrixType1, class VectorType1, class MatrixType2, class MatrixType3, class VectorType2>
-        QuadraticProgramming(const LValueMatrix<MatrixType1>& objectiveMatG_,
-                             const LValueVector<VectorType1>& objectiveVecC_,
-                             const LValueMatrix<MatrixType2>& equalityConstraint_,
-                             const LValueMatrix<MatrixType3>& inequalityConstraint_,
-                             const LValueVector<VectorType2>& initial);
+        template<Matrix M1, Vector V1, Matrix M2, Matrix M3, Vector V2>
+        QuadraticProgramming(const M1& objectiveMatG_,
+                             const V1& objectiveVecC_,
+                             const M2& equalityConstraint_,
+                             const M3& inequalityConstraint_,
+                             const V2& initial);
         QuadraticProgramming(const QuadraticProgramming&) = delete;
         QuadraticProgramming(QuadraticProgramming&&) noexcept = delete;
         ~QuadraticProgramming() = default;
@@ -59,24 +59,24 @@ namespace Physica::Core {
         QuadraticProgramming& operator=(const QuadraticProgramming&) = delete;
         QuadraticProgramming& operator=(QuadraticProgramming&&) noexcept = delete;
         /* Operations */
-        void compute(const ScalarType& precision = std::numeric_limits<ScalarType>::epsilon());
-        void compute_nonconvex(const ScalarType& precision = std::numeric_limits<ScalarType>::epsilon());
+        void compute(const T& precision = std::numeric_limits<T>::epsilon());
+        void compute_nonconvex(const T& precision = std::numeric_limits<T>::epsilon());
         /* Getters */
-        [[nodiscard]] const VectorND<ScalarType>& getSolution() const noexcept { return x; }
-        [[nodiscard]] ScalarType getValue() const;
+        [[nodiscard]] const VectorND<T>& getSolution() const noexcept { return x; }
+        [[nodiscard]] T getValue() const;
     private:
-        void updateVariables(const VectorND<ScalarType>& direction);
-        [[nodiscard]] ScalarType nextStepSize(const VectorND<ScalarType>& direction, size_t& blockedAt);
+        void updateVariables(const VectorND<T>& direction);
+        [[nodiscard]] T nextStepSize(const VectorND<T>& direction, size_t& blockedAt);
         void updateActiveConstraints(ConstraintMatrix& activeConstraints);
     };
 
-    template<class ScalarType>
-    template<class MatrixType1, class VectorType1, class MatrixType2, class MatrixType3, class VectorType2>
-    QuadraticProgramming<ScalarType>::QuadraticProgramming(const LValueMatrix<MatrixType1>& objectiveMatG_,
-                                                           const LValueVector<VectorType1>& objectiveVecC_,
-                                                           const LValueMatrix<MatrixType2>& equalityConstraint_,
-                                                           const LValueMatrix<MatrixType3>& inequalityConstraint_,
-                                                           const LValueVector<VectorType2>& initial)
+    template<Scalar T>
+    template<Matrix M1, Vector V1, Matrix M2, Matrix M3, Vector V2>
+    QuadraticProgramming<T>::QuadraticProgramming(const M1& objectiveMatG_,
+                                                  const V1& objectiveVecC_,
+                                                  const M2& equalityConstraint_,
+                                                  const M3& inequalityConstraint_,
+                                                  const V2& initial)
             : objectiveMatG(objectiveMatG_)
             , objectiveVecC(objectiveVecC_)
             , equalityConstraint(equalityConstraint_)
@@ -88,12 +88,12 @@ namespace Physica::Core {
         assert(inequalityConstraint.getCol() == 0 || inequalityConstraint.getCol() == objectiveVecC.getLength() + 1);
     }
 
-    template<class ScalarType>
-    void QuadraticProgramming<ScalarType>::compute(const ScalarType& precision) {
+    template<Scalar T>
+    void QuadraticProgramming<T>::compute(const T& precision) {
         ConstraintMatrix activeConstraints = equalityConstraint;
         while (true) {
-            const EqualityQuadraticProgramming<ScalarType> EQP(objectiveMatG, objectiveVecC, activeConstraints, x);
-            const VectorND<ScalarType> vec_p = EQP.getSolution() - x;
+            const EqualityQuadraticProgramming<T> EQP(objectiveMatG, objectiveVecC, activeConstraints, x);
+            const VectorND<T> vec_p = EQP.getSolution() - x;
             if (vec_p.norm() <= x.norm() * precision) {
                 const auto& multipliers = EQP.getMultipliers();
                 const auto minimum_ite = std::min_element(multipliers.cbegin(), multipliers.cend());
@@ -119,12 +119,12 @@ namespace Physica::Core {
     /**
      * Return a local solution only
      */
-    template<class ScalarType>
-    void QuadraticProgramming<ScalarType>::compute_nonconvex(const ScalarType& precision) {
+    template<Scalar T>
+    void QuadraticProgramming<T>::compute_nonconvex(const T& precision) {
         ConstraintMatrix activeConstraints = equalityConstraint;
         while (true) {
-            const EqualityQuadraticProgramming<ScalarType> EQP(objectiveMatG, objectiveVecC, activeConstraints, x);
-            const VectorND<ScalarType> vec_p = EQP.getSolution() - x;
+            const EqualityQuadraticProgramming<T> EQP(objectiveMatG, objectiveVecC, activeConstraints, x);
+            const VectorND<T> vec_p = EQP.getSolution() - x;
             if (vec_p.norm() <= x.norm() * precision)
                 break;
             else
@@ -133,33 +133,33 @@ namespace Physica::Core {
         };
     }
 
-    template<class ScalarType>
-    ScalarType QuadraticProgramming<ScalarType>::getValue() const {
-        return (x.copyToRowMatrix() * objectiveMatG).compute().row(0) * x * ScalarType(0.5) + objectiveVecC * x;
+    template<Scalar T>
+    T QuadraticProgramming<T>::getValue() const {
+        return (x.copyToRowMatrix() * objectiveMatG).compute().row(0) * x * T(0.5) + objectiveVecC * x;
     }
 
-    template<class ScalarType>
-    void QuadraticProgramming<ScalarType>::updateVariables(const VectorND<ScalarType>& direction) {
+    template<Scalar T>
+    void QuadraticProgramming<T>::updateVariables(const VectorND<T>& direction) {
         size_t blockedAt = 0;
-        const ScalarType step = nextStepSize(direction, blockedAt);
+        const T step = nextStepSize(direction, blockedAt);
         x = x + step * direction;
-        if (step != ScalarType(1)) {
+        if (step != T(1)) {
             assert(activeConstraintFlags[blockedAt] == false);
             activeConstraintFlags[blockedAt] = true;
         }
     }
 
-    template<class ScalarType>
-    ScalarType QuadraticProgramming<ScalarType>::nextStepSize(const VectorND<ScalarType>& direction, size_t& blockedAt) {
-        ScalarType result = ScalarType(1);
+    template<Scalar T>
+    T QuadraticProgramming<T>::nextStepSize(const VectorND<T>& direction, size_t& blockedAt) {
+        T result = T(1);
         for (size_t i = 0; i < activeConstraintFlags.getLength(); ++i) {
             const bool isActive = activeConstraintFlags[i];
             if (!isActive) {
                 const auto row = inequalityConstraint.row(i);
                 const auto head = row.head(row.getLength() - 1);
-                const ScalarType dot = head * direction;
+                const T dot = head * direction;
                 if (dot.isNegative()) {
-                    const ScalarType stepSize_i = (row[row.getLength() - 1] - head * x) / dot;
+                    const T stepSize_i = (row[row.getLength() - 1] - head * x) / dot;
                     const bool less = stepSize_i < result;
                     if (less) {
                         result = stepSize_i;
@@ -171,8 +171,8 @@ namespace Physica::Core {
         return result;
     }
 
-    template<class ScalarType>
-    void QuadraticProgramming<ScalarType>::updateActiveConstraints(ConstraintMatrix& activeConstraints) {
+    template<Scalar T>
+    void QuadraticProgramming<T>::updateActiveConstraints(ConstraintMatrix& activeConstraints) {
         const size_t activeInequality = std::count(activeConstraintFlags.begin(), activeConstraintFlags.end(), true);
         activeConstraints.resize(equalityConstraint.getRow() + activeInequality, x.getLength() + 1);
 
@@ -180,7 +180,7 @@ namespace Physica::Core {
         for (size_t i = 0; i < activeConstraintFlags.getLength(); ++i) {
             if (activeConstraintFlags[i]) {
                 auto row = activeConstraints.row(equalityConstraint.getRow() + activeInequalityIndex);
-                row = inequalityConstraint.row(i).asVector();
+                row = inequalityConstraint.row(i);
                 ++activeInequalityIndex;
             }
         }

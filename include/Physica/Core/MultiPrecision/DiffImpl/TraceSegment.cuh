@@ -24,11 +24,11 @@
 #include "TraceSegment.h"
 
 namespace Physica::Core {
-    template<class ScalarType, int Order>
-    class device_obj<TraceSegment<ScalarType, Order>> {
-        static_assert(!ScalarType::isDifferentiable, "[Error]: Diff<> pack is not necessary");
+    template<Scalar T, int Order>
+    class device_obj<TraceSegment<T, Order>> {
+        static_assert(!T::isDifferentiable, "[Error]: Diff<> pack is not necessary");
         static_assert(Order > 0, "[Error]: 0 order is not differentiable");
-        using host_obj = TraceSegment<ScalarType, Order>;
+        using host_obj = TraceSegment<T, Order>;
         using This = device_obj<host_obj>;
         using HostDiffScalar = typename host_obj::DiffScalar;
         using HostValueVector = typename host_obj::ValueVector;
@@ -50,7 +50,7 @@ namespace Physica::Core {
     public:
         device_obj() = default;
         device_obj(size_t size, ExprType type);
-        explicit device_obj(ScalarType value);
+        explicit device_obj(T value);
         explicit device_obj(const HostValueVector& values_);
         device_obj(const This&) = default;
         device_obj(This&&) noexcept = default;
@@ -86,10 +86,10 @@ namespace Physica::Core {
         [[nodiscard]] constexpr static unsigned int numOperand(ExprType type) { return host_obj::numOperand(type); }
     private:
         /* Operations */
-        inline void init(ScalarType value);
+        inline void init(T value);
         void init(const HostValueVector& values_);
         /* Friends */
-        friend class device_obj<DiffTracer<ScalarType, Order>>;
+        friend class device_obj<DiffTracer<T, Order>>;
     };
 }
 

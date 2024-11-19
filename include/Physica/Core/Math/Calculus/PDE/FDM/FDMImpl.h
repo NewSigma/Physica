@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2021 Weibo He.
+ * Copyright 2020-2024 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -19,7 +19,7 @@
 #pragma once
 
 namespace Physica::Core {
-    template<class T>
+    template<Scalar T>
     FDM<T>::FDM(size_t col, size_t row) : data(col) {
         for(size_t i = 0; i < col; ++i)
             data.allocate(VectorND<T>::zeroVector(row), i);
@@ -27,7 +27,7 @@ namespace Physica::Core {
     /*!
      * By default, edge of the matrix is set zero.
      */
-    template<class T>
+    template<Scalar T>
     void FDM<T>::addBoundary(const Boundary& boundary, const T& value) {
         boundaries.push_back(boundary);
         if(boundary.type == Row) {
@@ -40,7 +40,7 @@ namespace Physica::Core {
         }
     }
 
-    template<class T>
+    template<Scalar T>
     void FDM<T>::loop() {
         const auto col_1 = data.getCol() - 1;
         const auto row_1 = data.getRow() - 1;
@@ -65,7 +65,7 @@ namespace Physica::Core {
         } while(keep && iterate < iterateMax);
     }
 
-    template<class T>
+    template<Scalar T>
     bool FDM<T>::onBoundary(size_t col, size_t row) {
         bool result = false;
         for(auto& boundary : boundaries) {

@@ -23,15 +23,15 @@
 #include "LayerBase.h"
 
 namespace Physica::Core {
-    template<class ScalarType, bool WithBias = true>
-    class LinearLayer : public LayerBase<LinearLayer<ScalarType, WithBias>> {
-        using This = LinearLayer<ScalarType, WithBias>;
+    template<Scalar T, bool WithBias = true>
+    class LinearLayer : public LayerBase<LinearLayer<T, WithBias>> {
+        using This = LinearLayer<T, WithBias>;
         using Base = LayerBase<This>;
         using typename Base::InputType;
         using typename Base::OutputType;
         using typename Base::ValueType;
         constexpr static int Option = MatrixOption::Row | MatrixOption::Vector;
-        using MatrixType = DenseMatrix<ScalarType, Option>;
+        using MatrixType = DenseMatrix<T, Option>;
         using BiasType = typename std::conditional<WithBias, InputType, PlainStruct<void>>::type;
     public:
         using device_obj_type = device_obj<This>;
@@ -41,8 +41,8 @@ namespace Physica::Core {
     public:
         LinearLayer() = default;
         LinearLayer(size_t inputDim, size_t outputDim);
-        template<class OtherScalar>
-        LinearLayer(const LinearLayer<OtherScalar, WithBias>& layer);
+        template<Scalar U>
+        LinearLayer(const LinearLayer<U, WithBias>& layer);
         LinearLayer(const This&) = default;
         LinearLayer(This&&) noexcept = default;
         ~LinearLayer() = default;
@@ -52,14 +52,14 @@ namespace Physica::Core {
         [[nodiscard]] inline OutputType forward(const InputType& x) const;
         [[nodiscard]] LinearLayer copy() const;
 
-        template<class RandomGenerator>
-        void random_normal(RandomGenerator& gen);
-        template<class RandomGenerator>
-        void random_xavier_uniform(ValueType gain, RandomGenerator& gen);
-        template<class RandomGenerator>
-        void random_xavier_normal(ValueType gain, RandomGenerator& gen);
-        template<class Distribution, class RandomGenerator>
-        void random_any(Distribution& dist, RandomGenerator& gen);
+        template<class RandomType>
+        void random_normal(RandomType& gen);
+        template<class RandomType>
+        void random_xavier_uniform(ValueType gain, RandomType& gen);
+        template<class RandomType>
+        void random_xavier_normal(ValueType gain, RandomType& gen);
+        template<class Distribution, class RandomType>
+        void random_any(Distribution& dist, RandomType& gen);
         void swap(LinearLayer& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] size_t getInputDim() const noexcept { return weights.getCol(); }
@@ -70,20 +70,20 @@ namespace Physica::Core {
         friend class device_obj<This>;
     };
 
-    template<class ScalarType, bool WithBias>
-    LinearLayer<ScalarType, WithBias>::LinearLayer(size_t inputDim, size_t outputDim)
+    template<Scalar T, bool WithBias>
+    LinearLayer<T, WithBias>::LinearLayer(size_t inputDim, size_t outputDim)
             : weights(outputDim, inputDim) {
         if constexpr (WithBias)
             bias.resize(outputDim);
     }
 
-    template<class ScalarType, bool WithBias>
-    template<class OtherScalar>
-    LinearLayer<ScalarType, WithBias>::LinearLayer(const LinearLayer<OtherScalar, WithBias>& layer)
+    template<Scalar T, bool WithBias>
+    template<Scalar U>
+    LinearLayer<T, WithBias>::LinearLayer(const LinearLayer<U, WithBias>& layer)
             : weights(layer.getWeights()), bias(layer.getBias()) {}
 
-    template<class ScalarType, bool WithBias>
-    inline typename LinearLayer<ScalarType, WithBias>::OutputType LinearLayer<ScalarType, WithBias>::forward(const InputType& x) const {
+    template<Scalar T, bool WithBias>
+    inline typename LinearLayer<T, WithBias>::OutputType LinearLayer<T, WithBias>::forward(const InputType& x) const {
         assert(x.getLength() == getInputDim() && "[Error]: Data dim and required input dim must be equal");
         if constexpr (WithBias)
             return weights * x + bias;
@@ -91,8 +91,8 @@ namespace Physica::Core {
             return weights * x;
     }
 
-    template<class ScalarType, bool WithBias>
-    LinearLayer<ScalarType, WithBias> LinearLayer<ScalarType, WithBias>::copy() const {
+    template<Scalar T, bool WithBias>
+    LinearLayer<T, WithBias> LinearLayer<T, WithBias>::copy() const {
         LinearLayer result{};
         result.weights = weights.copy();
         if constexpr (WithBias)
@@ -100,18 +100,18 @@ namespace Physica::Core {
         return result;
     }
 
-    template<class ScalarType, bool WithBias>
-    template<class RandomGenerator>
-    void LinearLayer<ScalarType, WithBias>::random_normal(RandomGenerator& gen) {
+    template<Scalar T, bool WithBias>
+    template<class RandomType>
+    void LinearLayer<T, WithBias>::random_normal(RandomType& gen) {
         weights.random_normal(gen);
         if constexpr (WithBias)
             bias.random_normal(gen);
     }
 
-    template<class ScalarType, bool WithBias>
-    template<class RandomGenerator>
-    void LinearLayer<ScalarType, WithBias>::random_xavier_uniform(ValueType gain, RandomGenerator& gen) {
-        using MachineType = typename ScalarType::MachineType;
+    template<Scalar T, bool WithBias>
+    template<class RandomType>
+    void LinearLayer<T, WithBias>::random_xavier_uniform(ValueType gain, RandomType& gen) {
+        using MachineType = typename T::MachineType;
         const auto factor = (gain * sqrt(ValueType(6) / ValueType(getInputDim() + getOutputDim()))).toMachine();
         std::uniform_real_distribution<MachineType> dist(-factor, factor);
         weights.random_any(dist, gen);
@@ -119,10 +119,10 @@ namespace Physica::Core {
             bias.random_any(dist, gen);
     }
 
-    template<class ScalarType, bool WithBias>
-    template<class RandomGenerator>
-    void LinearLayer<ScalarType, WithBias>::random_xavier_normal(ValueType gain, RandomGenerator& gen) {
-        using MachineType = typename ScalarType::MachineType;
+    template<Scalar T, bool WithBias>
+    template<class RandomType>
+    void LinearLayer<T, WithBias>::random_xavier_normal(ValueType gain, RandomType& gen) {
+        using MachineType = typename T::MachineType;
         const auto deviation = (gain * sqrt(ValueType(2) / ValueType(getInputDim() + getOutputDim()))).toMachine();
         std::normal_distribution<MachineType> dist(0, deviation);
         weights.random_any(dist, gen);
@@ -130,16 +130,16 @@ namespace Physica::Core {
             bias.random_any(dist, gen);
     }
 
-    template<class ScalarType, bool WithBias>
-    template<class Distribution, class RandomGenerator>
-    void LinearLayer<ScalarType, WithBias>::random_any(Distribution& dist, RandomGenerator& gen) {
+    template<Scalar T, bool WithBias>
+    template<class Distribution, class RandomType>
+    void LinearLayer<T, WithBias>::random_any(Distribution& dist, RandomType& gen) {
         weights.random_any(dist, gen);
         if constexpr (WithBias)
             bias.random_any(dist, gen);
     }
 
-    template<class ScalarType, bool WithBias>
-    void LinearLayer<ScalarType, WithBias>::swap(LinearLayer& __restrict obj) noexcept {
+    template<Scalar T, bool WithBias>
+    void LinearLayer<T, WithBias>::swap(LinearLayer& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         weights.swap(obj.weights);
         if constexpr (WithBias)
@@ -148,13 +148,13 @@ namespace Physica::Core {
 }
 
 namespace Physica {
-    template<class T, bool B>
+    template<Scalar T, bool B>
     class Traits<Core::LinearLayer<T, B>> {
     public:
         using ScalarType = T;
         constexpr static bool WithBias = B;
 
-        using InputType = Core::VectorND<ScalarType>;
+        using InputType = Core::VectorND<T>;
         using OutputType = InputType;
     };
 }

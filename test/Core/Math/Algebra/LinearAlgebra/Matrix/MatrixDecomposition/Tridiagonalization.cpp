@@ -22,9 +22,9 @@
 
 using namespace Physica::Core;
 
-template<class MatrixType>
-bool doTest(const MatrixType& source, double tolerance) {
-    using ScalarType = typename MatrixType::ScalarType;
+template<Matrix M>
+bool doTest(const M& source, double tolerance) {
+    using ScalarType = typename M::ScalarType;
     using GeneralMatrix = DenseMatrix<ScalarType>;
     Tridiagonalization<ScalarType> tri(source);
     GeneralMatrix T = tri.getMatrixT();

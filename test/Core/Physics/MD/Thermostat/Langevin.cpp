@@ -90,7 +90,7 @@ int main() {
             auto momentum = rpmd.getRingPolymer().asMatrix().topRows(numMolecular);
             for (size_t replica = 0; replica < numReplica; ++replica) {
                 auto col = temp.col(replica);
-                col = hadamard(hadamard(momentum.col(replica).asVector(), momentum.col((replica + 1) % numReplica).asVector()), kineticModel.getRepMass()) * factor;
+                col = hadamard(hadamard(momentum.col(replica), momentum.col((replica + 1) % numReplica)), kineticModel.getRepMass()) * factor;
             }
             toNextMean(buffer, i, temp);
             toNextMean(temperature_sample, i, rpmd.calcTemperature<KineticModel>());

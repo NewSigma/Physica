@@ -21,11 +21,11 @@
 #include "GaussBase.h"
 
 namespace Physica::Core {
-    template<class ScalarType, size_t Size>
+    template<Scalar T, size_t Size>
     class GTOnG {
-        using BaseType = GaussBase<ScalarType>;
-        GaussBase<ScalarType> bases[Size];
-        ScalarType coeffs[Size];
+        using BaseType = GaussBase<T>;
+        GaussBase<T> bases[Size];
+        T coeffs[Size];
     public:
         GTOnG() = default;
         GTOnG(const GTOnG& base) = default;
@@ -35,66 +35,66 @@ namespace Physica::Core {
         GTOnG& operator=(const GTOnG& base) = default;
         GTOnG& operator=(GTOnG&& base) noexcept = default;
         /* Getters */
-        [[nodiscard]] static ScalarType overlap(const GTOnG& base1, const GTOnG& base2);
-        [[nodiscard]] static ScalarType kinetic(const GTOnG& base1, const GTOnG& base2);
-        [[nodiscard]] static ScalarType nuclearAttraction(const GTOnG& base1,
+        [[nodiscard]] static T overlap(const GTOnG& base1, const GTOnG& base2);
+        [[nodiscard]] static T kinetic(const GTOnG& base1, const GTOnG& base2);
+        [[nodiscard]] static T nuclearAttraction(const GTOnG& base1,
                                                           const GTOnG& base2,
-                                                          const Vector3D<ScalarType>& corePos);
-        [[nodiscard]] static ScalarType electronRepulsion(const GTOnG& base1,
+                                                          const Vector3D<T>& corePos);
+        [[nodiscard]] static T electronRepulsion(const GTOnG& base1,
                                                           const GTOnG& base2,
                                                           const GTOnG& base3,
                                                           const GTOnG& base4);
-        [[nodiscard]] GaussBase<ScalarType>* getBases() noexcept { return bases; }
-        [[nodiscard]] const GaussBase<ScalarType>* getBases() const noexcept { return bases; }
-        [[nodiscard]] ScalarType* getCoeffs() noexcept { return coeffs; }
-        [[nodiscard]] const ScalarType* getCoeffs() const noexcept { return coeffs; }
+        [[nodiscard]] GaussBase<T>* getBases() noexcept { return bases; }
+        [[nodiscard]] const GaussBase<T>* getBases() const noexcept { return bases; }
+        [[nodiscard]] T* getCoeffs() noexcept { return coeffs; }
+        [[nodiscard]] const T* getCoeffs() const noexcept { return coeffs; }
         /* Static Members */
         template<class RandomGenerator>
-        [[nodiscard]] static GTOnG randomBase(const VectorND<ScalarType>& center, RandomGenerator& gen) { return randomBase(center, 0, 0, 0, gen); }
+        [[nodiscard]] static GTOnG randomBase(const VectorND<T>& center, RandomGenerator& gen) { return randomBase(center, 0, 0, 0, gen); }
         template<class RandomGenerator>
-        [[nodiscard]] static GTOnG randomBase(const VectorND<ScalarType>& center, size_t l, size_t m, size_t n, RandomGenerator& gen);
+        [[nodiscard]] static GTOnG randomBase(const VectorND<T>& center, size_t l, size_t m, size_t n, RandomGenerator& gen);
     };
 
-    template<class ScalarType, size_t Size>
-    ScalarType GTOnG<ScalarType, Size>::overlap(const GTOnG& base1, const GTOnG& base2) {
-        ScalarType result = ScalarType(0);
+    template<Scalar T, size_t Size>
+    T GTOnG<T, Size>::overlap(const GTOnG& base1, const GTOnG& base2) {
+        T result = T(0);
         for (size_t i = 0; i < Size; ++i)
             for (size_t j = 0; j < Size; ++j)
                 result += base1.coeffs[i] * base2.coeffs[j] * BaseType::overlap(base1.bases[i], base2.bases[j]);
         return result;
     }
 
-    template<class ScalarType, size_t Size>
-    ScalarType GTOnG<ScalarType, Size>::kinetic(const GTOnG& base1, const GTOnG& base2) {
-        ScalarType result = ScalarType(0);
+    template<Scalar T, size_t Size>
+    T GTOnG<T, Size>::kinetic(const GTOnG& base1, const GTOnG& base2) {
+        T result = T(0);
         for (size_t i = 0; i < Size; ++i)
             for (size_t j = 0; j < Size; ++j)
                 result += base1.coeffs[i] * base2.coeffs[j] * BaseType::kinetic(base1.bases[i], base2.bases[j]);
         return result;
     }
 
-    template<class ScalarType, size_t Size>
-    ScalarType GTOnG<ScalarType, Size>::nuclearAttraction(const GTOnG& base1,
+    template<Scalar T, size_t Size>
+    T GTOnG<T, Size>::nuclearAttraction(const GTOnG& base1,
                                                           const GTOnG& base2,
-                                                          const Vector3D<ScalarType>& corePos) {
-        ScalarType result = ScalarType(0);
+                                                          const Vector3D<T>& corePos) {
+        T result = T(0);
         for (size_t i = 0; i < Size; ++i)
             for (size_t j = 0; j < Size; ++j)
                 result += base1.coeffs[i] * base2.coeffs[j] * BaseType::nuclearAttraction(base1.bases[i], base2.bases[j], corePos);
         return result;
     }
 
-    template<class ScalarType, size_t Size>
-    ScalarType GTOnG<ScalarType, Size>::electronRepulsion(const GTOnG& base1,
+    template<Scalar T, size_t Size>
+    T GTOnG<T, Size>::electronRepulsion(const GTOnG& base1,
                                                           const GTOnG& base2,
                                                           const GTOnG& base3,
                                                           const GTOnG& base4) {
-        ScalarType result = ScalarType(0);
+        T result = T(0);
         for (size_t i = 0; i < Size; ++i) {
             for (size_t j = 0; j < Size; ++j) {
-                const ScalarType temp = base1.coeffs[i] * base2.coeffs[j];
+                const T temp = base1.coeffs[i] * base2.coeffs[j];
                 for (size_t k = 0; i < Size; ++i) {
-                    const ScalarType temp1 = temp * base3.coeffs[k];
+                    const T temp1 = temp * base3.coeffs[k];
                     for (size_t l = 0; j < Size; ++j)
                         result += temp1 * base4.coeffs[l] * BaseType::electronRepulsion(base1.bases[i], base2.bases[j], base3.bases[k], base4.bases[l]);
                 }
@@ -103,23 +103,23 @@ namespace Physica::Core {
         return result;
     }
 
-    template<class ScalarType, size_t Size>
+    template<Scalar T, size_t Size>
     template<class RandomGenerator>
-    GTOnG<ScalarType, Size> GTOnG<ScalarType, Size>::randomBase(const VectorND<ScalarType>& center, size_t l, size_t m, size_t n, RandomGenerator& gen) {
+    GTOnG<T, Size> GTOnG<T, Size>::randomBase(const VectorND<T>& center, size_t l, size_t m, size_t n, RandomGenerator& gen) {
         GTOnG result{};
         for (size_t i = 0; i < Size; ++i) {
-            result.bases[i] = GaussBase<ScalarType>(center, ScalarType::random_uniform(gen), l, m, n);
-            result.coeffs[i] = ScalarType::random_uniform(gen);
+            result.bases[i] = GaussBase<T>(center, T::random_uniform(gen), l, m, n);
+            result.coeffs[i] = T::random_uniform(gen);
         }
         return result;
     }
 
-    template<class ScalarType>
-    using GTO3G = GTOnG<ScalarType, 3>;
+    template<Scalar T>
+    using GTO3G = GTOnG<T, 3>;
 }
 
 namespace Physica {
-    template<class T, size_t Size>
+    template<Scalar T, size_t Size>
     class Traits<Core::GTOnG<T, Size>> {
     public:
         using ScalarType = T;

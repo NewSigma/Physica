@@ -23,17 +23,17 @@
 #include "PhononSolver.h"
 
 namespace Physica::Core {
-    template<class ScalarType>
+    template<Scalar T>
     class PhononDOS {
     public:
-        using SolverType = PhononSolver<ScalarType>;
-        using ElementType = CuboidLinear<ScalarType>;
+        using SolverType = PhononSolver<T>;
+        using ElementType = CuboidLinear<T>;
         using Index3D = typename SolverType::Index3D;
         using Vector3D = typename SolverType::Vector3D;
-        using CoeffVector = DenseVector<ScalarType, ElementType::DegreeOfFreedom>;
+        using CoeffVector = DenseVector<T, ElementType::DegreeOfFreedom>;
         using MDCellType = typename SolverType::MDCellType;
         using KSpaceFCGrid = typename SolverType::KSpaceFCGrid;
-        using EigenValueGrid = GridStorage<VectorND<ScalarType>>;
+        using EigenValueGrid = GridStorage<VectorND<T>>;
         constexpr static unsigned int Dim = Traits<MDCellType>::Dim;
         constexpr static unsigned int ElementVolume = 8;
     protected:
@@ -50,29 +50,29 @@ namespace Physica::Core {
         /* Operators */
         PhononDOS& operator=(PhononDOS obj) noexcept { swap(obj); return *this; }
         /* Operations */
-        [[nodiscard]] ScalarType calcDOS(ScalarType freq) const;
-        [[nodiscard]] ScalarType calcDOS(ScalarType freq, size_t band) const;
-        [[nodiscard]] ScalarType calcDiffCapacityCv(ScalarType omegaW, ScalarType temperatureT);
-        [[nodiscard]] ScalarType calcDiffHelmholtzF(ScalarType omegaW, ScalarType temperatureT);
-        [[nodiscard]] ScalarType calcDiffEntropyS(ScalarType omegaW, ScalarType temperatureT);
+        [[nodiscard]] T calcDOS(T freq) const;
+        [[nodiscard]] T calcDOS(T freq, size_t band) const;
+        [[nodiscard]] T calcDiffCapacityCv(T omegaW, T temperatureT);
+        [[nodiscard]] T calcDiffHelmholtzF(T omegaW, T temperatureT);
+        [[nodiscard]] T calcDiffEntropyS(T omegaW, T temperatureT);
         void swap(PhononDOS& __restrict obj) noexcept;
         /* Getter */
         [[nodiscard]] size_t getUnitCellDOF() const noexcept { return solver.getUnitCellDOF(); }
     protected:
         PhononDOS(MDCellType unitCell, Index3D superSize, Index3D gridDim);
         /* Operations */
-        [[nodiscard]] ScalarType calcElemDOS(ScalarType freq, size_t band, Index3D index) const;
+        [[nodiscard]] T calcElemDOS(T freq, size_t band, Index3D index) const;
     };
 
-    template<class ScalarType>
-    PhononDOS<ScalarType>::PhononDOS(
+    template<Scalar T>
+    PhononDOS<T>::PhononDOS(
             MDCellType unitCell, Index3D superSize, const KSpaceFCGrid& forceConstants, Index3D gridDim)
             : PhononDOS(std::move(unitCell), std::move(superSize), std::move(gridDim)) {
         eigenvalues.forIndexInGrid([this, &forceConstants](Index3D index) {
             const Index3D gridDim = eigenvalues.getDim();
             Vector3D qPoint{};
             for (unsigned int i = 0; i < Dim; ++i)
-                qPoint[i] = ScalarType(index[i]) / ScalarType(gridDim[i]);
+                qPoint[i] = T(index[i]) / T(gridDim[i]);
             auto fcMatrix = solver.interpolatePoint(qPoint, forceConstants);
             solver.toDynamicMatrix(fcMatrix);
             const auto eigen = SolverType::diagonalize(fcMatrix);
@@ -80,8 +80,8 @@ namespace Physica::Core {
         });
     }
 
-    template<class ScalarType>
-    PhononDOS<ScalarType>::PhononDOS(MDCellType unitCell, Index3D superSize, Index3D gridDim)
+    template<Scalar T>
+    PhononDOS<T>::PhononDOS(MDCellType unitCell, Index3D superSize, Index3D gridDim)
             : solver(std::move(unitCell), superSize), eigenvalues(gridDim) {
         for (unsigned i = 0; i < CoeffVector::SizeAtCompile; ++i) {
             diffCoeffX[i] = ElementType::dBase_dr(i);
@@ -90,52 +90,52 @@ namespace Physica::Core {
         }
     }
 
-    template<class ScalarType>
-    ScalarType PhononDOS<ScalarType>::calcDOS(ScalarType freq) const {
-        ScalarType result = 0;
+    template<Scalar T>
+    T PhononDOS<T>::calcDOS(T freq) const {
+        T result = 0;
         for (size_t band = 0; band < solver.getNumBand(); ++band)
             result += calcDOS(freq, band);
         return result;
     }
 
-    template<class ScalarType>
-    ScalarType PhononDOS<ScalarType>::calcDOS(ScalarType freq, size_t band) const {
-        ScalarType result = 0;
+    template<Scalar T>
+    T PhononDOS<T>::calcDOS(T freq, size_t band) const {
+        T result = 0;
         eigenvalues.forIndexInGrid([this, freq, band, &result](Index3D index) {
             result += calcElemDOS(freq, band, index);
         });
-        result /= ScalarType(eigenvalues.getSize() * ElementVolume);
+        result /= T(eigenvalues.getSize() * ElementVolume);
         return result;
     }
 
-    template<class ScalarType>
-    ScalarType PhononDOS<ScalarType>::calcDiffCapacityCv(ScalarType omegaW, ScalarType temperatureT) {
-        const ScalarType freq = omegaW * ScalarType(1 / (2 * M_PI));
-        const ScalarType x = omegaW / temperatureT * 0.5;
+    template<Scalar T>
+    T PhononDOS<T>::calcDiffCapacityCv(T omegaW, T temperatureT) {
+        const T freq = omegaW * T(1 / (2 * M_PI));
+        const T x = omegaW / temperatureT * 0.5;
         return calcDOS(freq) * square(x / sinh(x));
     }
 
-    template<class ScalarType>
-    ScalarType PhononDOS<ScalarType>::calcDiffHelmholtzF(ScalarType omegaW, ScalarType temperatureT) {
-        const ScalarType freq = omegaW * ScalarType(1 / (2 * M_PI));
-        const ScalarType dos = calcDOS(freq);
-        const ScalarType zeroPointE = omegaW * 0.5;
-        const ScalarType helmholtz1 = temperatureT * ln(ScalarType(1) - exp(-omegaW / temperatureT));
+    template<Scalar T>
+    T PhononDOS<T>::calcDiffHelmholtzF(T omegaW, T temperatureT) {
+        const T freq = omegaW * T(1 / (2 * M_PI));
+        const T dos = calcDOS(freq);
+        const T zeroPointE = omegaW * 0.5;
+        const T helmholtz1 = temperatureT * ln(T(1) - exp(-omegaW / temperatureT));
         return (zeroPointE + helmholtz1) * dos;
     }
 
-    template<class ScalarType>
-    ScalarType PhononDOS<ScalarType>::calcDiffEntropyS(ScalarType omegaW, ScalarType temperatureT) {
-        const ScalarType freq = omegaW * ScalarType(1 / (2 * M_PI));
-        const ScalarType dos = calcDOS(freq);
-        const ScalarType x = omegaW / temperatureT;
-        const ScalarType exp_x = exp(x);
-        const ScalarType temp = exp_x - ScalarType(1);
+    template<Scalar T>
+    T PhononDOS<T>::calcDiffEntropyS(T omegaW, T temperatureT) {
+        const T freq = omegaW * T(1 / (2 * M_PI));
+        const T dos = calcDOS(freq);
+        const T x = omegaW / temperatureT;
+        const T exp_x = exp(x);
+        const T temp = exp_x - T(1);
         return (ln(temp) - x * exp_x / temp) * dos;
     }
 
-    template<class ScalarType>
-    void PhononDOS<ScalarType>::swap(PhononDOS& __restrict obj) noexcept {
+    template<Scalar T>
+    void PhononDOS<T>::swap(PhononDOS& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         solver.swap(obj.solver);
         eigenvalues.swap(obj.eigenvalues);
@@ -144,8 +144,8 @@ namespace Physica::Core {
         diffCoeffZ.swap(obj.diffCoeffZ);
     }
 
-    template<class ScalarType>
-    ScalarType PhononDOS<ScalarType>::calcElemDOS(ScalarType freq, size_t band, Index3D index) const {
+    template<Scalar T>
+    T PhononDOS<T>::calcElemDOS(T freq, size_t band, Index3D index) const {
         const Index3D gridDim = eigenvalues.getDim();
         Index3D index1{};
         for (unsigned int i = 0; i < Dim; ++i)
@@ -161,11 +161,11 @@ namespace Physica::Core {
         cornerFreq[6] = eigenvalues(index1[0], index1[1], index[2])[band];
         cornerFreq[7] = eigenvalues(index1)[band];
 
-        using Vector4D = Vector4D<ScalarType>;
+        using Vector4D = Vector4D<T>;
         const Vector4D plane{cornerFreq * diffCoeffX, cornerFreq * diffCoeffY, cornerFreq * diffCoeffZ, freq - mean(cornerFreq)};
         const auto head = plane.head(3);
-        const auto cross = CubeCross<ScalarType>(plane);
-        const ScalarType norm = head.norm();
+        const auto cross = CubeCross<T>(plane);
+        const T norm = head.norm();
         return cross.getArea() / norm;
     }
 }

@@ -19,20 +19,20 @@
 #pragma once
 
 namespace Physica::Core {
-    template<class VectorType, size_t Length>
-    class device_obj<RVectorBlock<VectorType, Length>> : public device_obj<RValueVector<RVectorBlock<VectorType, Length>>> {
-        using host_obj = RVectorBlock<VectorType, Length>;
+    template<Vector T, size_t Length>
+    class device_obj<RVectorBlock<T, Length>> : public device_obj<RValueVector<RVectorBlock<T, Length>>> {
+        using host_obj = RVectorBlock<T, Length>;
         using This = device_obj<host_obj>;
         using Base = device_obj<RValueVector<host_obj>>;
     public:
         using ScalarType = typename Base::ScalarType;
     private:
-        const VectorType& vec;
+        const T& vec;
         size_t from;
         size_t to;
     public:
-        __host__ __device__ device_obj(const device_obj<RValueVector<VectorType>>& vec_, size_t from_, size_t to_);
-        __host__ __device__ device_obj(const device_obj<RValueVector<VectorType>>& vec_, size_t from_);
+        __host__ __device__ device_obj(const device_obj<T>& vec_, size_t from_, size_t to_);
+        __host__ __device__ device_obj(const device_obj<T>& vec_, size_t from_);
         device_obj(const This& block) = delete;
         device_obj(This&&) noexcept = delete;
         ~device_obj() = default;
@@ -45,20 +45,20 @@ namespace Physica::Core {
         [[nodiscard]] __host__ __device__ inline size_t getLength() const noexcept;
     };
 
-    template<class VectorType, size_t Length>
-    __host__ __device__ device_obj<RVectorBlock<VectorType, Length>>::device_obj(
-            const device_obj<RValueVector<VectorType>>& vec_, size_t from_, size_t to_) : vec(asStruct(vec_.getDerived())), from(from_), to(to_) {
+    template<Vector T, size_t Length>
+    __host__ __device__ device_obj<RVectorBlock<T, Length>>::device_obj(
+            const device_obj<T>& vec_, size_t from_, size_t to_) : vec(asStruct(vec_)), from(from_), to(to_) {
         assert(from_ < to);
         assert(to <= vec.getLength());
         assert(Length == Dynamic || Length == getLength());
     }
 
-    template<class VectorType, size_t Length>
-    __host__ __device__ device_obj<RVectorBlock<VectorType, Length>>::device_obj(
-            const device_obj<RValueVector<VectorType>>& vec_, size_t from_) : device_obj(vec_, from_, vec_.getLength()) {}
+    template<Vector T, size_t Length>
+    __host__ __device__ device_obj<RVectorBlock<T, Length>>::device_obj(
+            const device_obj<T>& vec_, size_t from_) : device_obj(vec_, from_, vec_.getLength()) {}
 
-    template<class VectorType, size_t Length>
-    __host__ __device__ inline size_t device_obj<RVectorBlock<VectorType, Length>>::getLength() const noexcept {
+    template<Vector T, size_t Length>
+    __host__ __device__ inline size_t device_obj<RVectorBlock<T, Length>>::getLength() const noexcept {
         if constexpr (Length == Dynamic)
             return to - from;
         return Length;
@@ -66,6 +66,6 @@ namespace Physica::Core {
 }
 
 namespace Physica {
-    template<class VectorType, size_t Length>
-    class Traits<Core::device_obj<Core::RVectorBlock<VectorType, Length>>> : public Traits<Core::RVectorBlock<VectorType, Length>> {};
+    template<Vector T, size_t Length>
+    class Traits<Core::device_obj<Core::RVectorBlock<T, Length>>> : public Traits<Core::RVectorBlock<T, Length>> {};
 }

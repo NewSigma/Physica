@@ -21,16 +21,16 @@
 #include <Physica/Core/Math/Algebra/LinearAlgebra/Matrix/MatrixImpl/RValueMatrix.h>
 
 namespace Physica::Core {
-    template<class MatrixType>
-    class MatrixExp : public RValueMatrix<MatrixExp<MatrixType>> {
-        using This = MatrixExp<MatrixType>;
+    template<Matrix T>
+    class MatrixExp : public RValueMatrix<MatrixExp<T>> {
+        using This = MatrixExp<T>;
         using Base = RValueMatrix<This>;
     public:
         using typename Base::ScalarType;
     private:
-        const MatrixType& m;
+        const T& m;
     public:
-        MatrixExp(const RValueMatrix<MatrixType>& m_);
+        MatrixExp(const T& m_);
         MatrixExp(const This&) = delete;
         MatrixExp(This&&) noexcept = delete;
         ~MatrixExp() = default;
@@ -40,27 +40,25 @@ namespace Physica::Core {
         /* Operations */
         [[nodiscard]] ScalarType calc(size_t, size_t) const { noImpl(); }
         /* Getters */
-        [[nodiscard]] const MatrixType& getMatrix() const noexcept { return m; }
+        [[nodiscard]] const T& getMatrix() const noexcept { return m; }
         [[nodiscard]] __host__ __device__ size_t getRow() const noexcept { return m.getRow(); }
         [[nodiscard]] __host__ __device__ size_t getCol() const noexcept { return m.getCol(); }
     };
 
-    template<class MatrixType>
-    MatrixExp<MatrixType>::MatrixExp(const RValueMatrix<MatrixType>& m_) : m(m_.getDerived()) {
+    template<Matrix T>
+    MatrixExp<T>::MatrixExp(const T& m_) : m(m_) {
         assert(m.getRow() == m.getCol());
     }
 
-    template<class MatrixType>
-    [[nodiscard]] inline MatrixExp<MatrixType> exp(const RValueMatrix<MatrixType>& m) noexcept {
-        return MatrixExp<MatrixType>(m);
+    template<Matrix T>
+    [[nodiscard]] inline MatrixExp<T> exp(const T& m) noexcept {
+        return MatrixExp<T>(m);
     }
 }
 
 namespace Physica {
-    using namespace Core;
-
-    template<class MatrixType>
-    class Traits<MatrixExp<MatrixType>> : public Traits<MatrixType> {
+    template<Physica::Core::Matrix T>
+    class Traits<MatrixExp<T>> : public Traits<T> {
     public:
         constexpr static int Option = MatrixOption::AnyMajor | MatrixOption::AnyStorage;
     };

@@ -47,8 +47,8 @@ public:
             , temperature(temperature_)
             , energy(0) {}
     /* Operations */
-    template<class RandomGenerator>
-    void init(RandomGenerator& generator) {
+    template<class RandomType>
+    void init(RandomType& generator) {
         std::uniform_real_distribution<float> dist{};
         for (uint64_t i = 0; i < lattice.getCol(); ++i)
             for (uint64_t j = 0; j < lattice.getRow(); ++j)
@@ -56,8 +56,8 @@ public:
         energy = 0;
     }
 
-    template<class RandomGenerator>
-    void step(uint64_t stepNum, RandomGenerator& generator) {
+    template<class RandomType>
+    void step(uint64_t stepNum, RandomType& generator) {
         uint64_t iteration = stepNum * lattice.getRow() * lattice.getCol();
 
         std::uniform_int_distribution<size_t> int_dist(0, lattice.getRow() - 1);

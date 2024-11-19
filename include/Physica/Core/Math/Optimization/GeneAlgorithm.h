@@ -18,29 +18,29 @@
  */
 #pragma once
 
-#include "Physica/Core/Utils/Container/Array.h"
-#include "Physica/Core/MultiPrecision/Real.h"
+#include <Physica/Core/Utils/Container/Array.h>
+#include <Physica/Core/MultiPrecision/Real.h>
 
 namespace Physica::Core {
     /**
      * Search for minimum value
      */
-    template<class Function, class VectorType>
+    template<class Function, Vector T>
     class GeneAlgorithm {
-        using ScalarType = typename VectorType::ScalarType;
+        using ScalarType = typename T::ScalarType;
     public:
         struct AlgorithmConfig {
             float crossoverRate;
             float mutationRate;
             unsigned int populationSize;
             unsigned int maxGeneration;
-            VectorType lowerBound;
-            VectorType upperBound;
+            T lowerBound;
+            T upperBound;
         };
     private:
         AlgorithmConfig config;
         Function func;
-        Array<VectorType> population;
+        Array<T> population;
         Array<ScalarType> fitness;
         size_t minFitnessIndex;
     public:
@@ -52,7 +52,7 @@ namespace Physica::Core {
         /* Getters */
         [[nodiscard]] const AlgorithmConfig& getConfig() const noexcept { return config; }
         [[nodiscard]] size_t getDim() const noexcept { return config.lowerBound.getLength(); }
-        [[nodiscard]] const VectorType getOptimizedParams() const noexcept { return population[minFitnessIndex]; }
+        [[nodiscard]] const T getOptimizedParams() const noexcept { return population[minFitnessIndex]; }
         [[nodiscard]] ScalarType getOptimizedValue() const noexcept { return fitness[minFitnessIndex]; }
         /* Setters */
         void setConfig(const AlgorithmConfig& c) { config = c; }

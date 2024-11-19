@@ -19,10 +19,10 @@
 #pragma once
 
 namespace Physica::Core {
-    template<class VectorType>
-    class VectorExpr<ExprType::Sin, VectorType> : public UnitaryVectorExpr<ExprType::Sin, VectorType> {
-        using This = VectorExpr<ExprType::Sin, VectorType>;
-        using Base = UnitaryVectorExpr<ExprType::Sin, VectorType>;
+    template<Vector T>
+    class VectorExpr<ExprType::Sin, T> : public UnitaryVectorExpr<ExprType::Sin, T> {
+        using This = VectorExpr<ExprType::Sin, T>;
+        using Base = UnitaryVectorExpr<ExprType::Sin, T>;
     public:
         using typename Base::ScalarType;
     public:
@@ -31,8 +31,8 @@ namespace Physica::Core {
         [[nodiscard]] ScalarType calc(size_t index) const { return sin(Base::getExpr().calc(index)); }
     };
 
-    template<class VectorType>
-    [[nodiscard]] inline auto sin(const RValueVector<VectorType>& v) noexcept {
-        return VectorExpr<ExprType::Sin, VectorType>(v);
+    template<Vector T>
+    [[nodiscard]] inline auto sin(const T& v) noexcept {
+        return VectorExpr<ExprType::Sin, T>(v);
     }
 }

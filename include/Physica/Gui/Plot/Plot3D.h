@@ -32,10 +32,10 @@ namespace Physica::Gui {
     public:
         Plot3D(QWidget* parent = nullptr);
         /* Operations */
-        template<class MatrixType>
-        QSurface3DSeries& surf(const Core::LValueMatrix<MatrixType>& x,
-                               const Core::LValueMatrix<MatrixType>& y,
-                               const Core::LValueMatrix<MatrixType>& z);
+        template<Core::Matrix T>
+        QSurface3DSeries& surf(const T& x,
+                               const T& y,
+                               const T& z);
         /* Getters */
         [[nodiscard]] QValue3DAxis* getAxisX() const noexcept { return surface->axisX(); }
         [[nodiscard]] QValue3DAxis* getAxisY() const noexcept { return surface->axisZ(); }
@@ -49,10 +49,10 @@ namespace Physica::Gui {
         [[nodiscard]] static QLinearGradient makeDefaultGrad();
     };
 
-    template<class MatrixType>
-    QSurface3DSeries& Plot3D::surf(const Core::LValueMatrix<MatrixType>& x,
-                                   const Core::LValueMatrix<MatrixType>& y,
-                                   const Core::LValueMatrix<MatrixType>& z) {
+    template<Core::Matrix T>
+    QSurface3DSeries& Plot3D::surf(const T& x,
+                                   const T& y,
+                                   const T& z) {
         assert(x.getCol() == y.getCol() && x.getRow() == y.getRow());
         assert(y.getCol() == z.getCol() && y.getRow() == z.getRow());
         auto* series = new QSurface3DSeries(new QSurfaceDataProxy());
@@ -62,9 +62,9 @@ namespace Physica::Gui {
         for (size_t i = 0 ; i < z.getRow() ; ++i) {
             auto* dataRow = new QSurfaceDataRow(z.getCol());
             for (size_t j = 0; j < z.getCol(); j++)
-                (*dataRow)[j].setPosition(QVector3D(float(x(i, j)),
-                                                    float(z(i, j)),
-                                                    float(y(i, j))));
+                (*dataRow)[j].setPosition(QVector3D(float(x.calc(i, j)),
+                                                    float(z.calc(i, j)),
+                                                    float(y.calc(i, j))));
             *dataArray << dataRow;
         }
         series->dataProxy()->resetArray(dataArray);

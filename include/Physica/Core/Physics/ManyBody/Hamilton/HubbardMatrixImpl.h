@@ -19,17 +19,17 @@
 #pragma once
 
 namespace Physica::Core {
-    template<class ScalarType, class ReprType>
-    HubbardMatrix<ScalarType, ReprType>::HubbardMatrix(ModelBase hubbard, ReprType repr_)
+    template<Scalar T, class ReprType>
+    HubbardMatrix<T, ReprType>::HubbardMatrix(ModelBase hubbard, ReprType repr_)
             : ModelBase(std::move(hubbard))
             , repr(std::move(repr_))
             , planProvider(NumSite, PlanFlag::Estimate) {
         assert(ModelBase::getNumSuperCellSite() == NumSite && "[Error]: Inconsistent site number");
     }
 
-    template<class ScalarType, class ReprType>
+    template<Scalar T, class ReprType>
     template<class Functor>
-    void HubbardMatrix<ScalarType, ReprType>::forNeighSites(Functor func, int site) const {
+    void HubbardMatrix<T, ReprType>::forNeighSites(Functor func, int site) const {
         if constexpr (Dim == 1)
             func(site, (site + 1) % NumSite);
         else {
@@ -39,8 +39,8 @@ namespace Physica::Core {
         }
     }
 
-    template<class ScalarType, class ReprType>
-    ScalarType HubbardMatrix<ScalarType, ReprType>::calc(size_t row, size_t col) const {
+    template<Scalar T, class ReprType>
+    T HubbardMatrix<T, ReprType>::calc(size_t row, size_t col) const {
         if constexpr (IsTransInvariant) {
             const auto& periods = repr.getPeriods();
             const auto psi1 = repr[row];
@@ -76,30 +76,30 @@ namespace Physica::Core {
         }
     }
 
-    template<class ScalarType, class ReprType>
-    ScalarType HubbardMatrix<ScalarType, ReprType>::trace() const {
+    template<Scalar T, class ReprType>
+    T HubbardMatrix<T, ReprType>::trace() const {
         size_t numDoubleOccupy = 0;
         for (size_t i = 0; i < getNumState(); ++i)
             numDoubleOccupy += repr[i].getNumDoubleOccupy();
-        return getRepelU() * ScalarType(numDoubleOccupy);
+        return getRepelU() * T(numDoubleOccupy);
     }
 
-    template<class ScalarType, class ReprType>
-    void HubbardMatrix<ScalarType, ReprType>::swap(HubbardMatrix& __restrict obj) noexcept {
+    template<Scalar T, class ReprType>
+    void HubbardMatrix<T, ReprType>::swap(HubbardMatrix& __restrict obj) noexcept {
         Base::swap(obj);
         ModelBase::swap(obj);
         repr.swap(obj.repr);
         planProvider.swap(obj.planProvider);
     }
 
-    template<class ScalarType, class ReprType>
-    inline typename HubbardMatrix<ScalarType, ReprType>::RealType HubbardMatrix<ScalarType, ReprType>::repelElem(StateType psi) const {
+    template<Scalar T, class ReprType>
+    inline typename HubbardMatrix<T, ReprType>::RealType HubbardMatrix<T, ReprType>::repelElem(StateType psi) const {
         return getRepelU() * RealType(psi.getNumDoubleOccupy());
     }
 
-    template<class ScalarType, class ReprType>
-    typename HubbardMatrix<ScalarType, ReprType>::RealType
-    HubbardMatrix<ScalarType, ReprType>::hoppingElem(StateType rowPsi, StateType colPsi) const {
+    template<Scalar T, class ReprType>
+    typename HubbardMatrix<T, ReprType>::RealType
+    HubbardMatrix<T, ReprType>::hoppingElem(StateType rowPsi, StateType colPsi) const {
         int count = 0;
         if constexpr (Dim == 1) {
             for (int site = 0; site < int(NumSite); ++site) {

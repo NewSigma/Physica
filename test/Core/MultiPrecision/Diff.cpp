@@ -21,12 +21,13 @@
 #include <Physica/Core/MultiPrecision/Diff.h>
 
 using namespace Physica::Core;
-using T = float64;
 
-template<class ScalarType>
-ScalarType func(ScalarType x, ScalarType y) {
-    return square(x - ScalarType(1.0)) + square(y - ScalarType(2.0));
+template<Scalar T>
+T func(T x, T y) {
+    return square(x - T(1.0)) + square(y - T(2.0));
 }
+
+using T = float64;
 
 void testFunc() {
     bool good = true;

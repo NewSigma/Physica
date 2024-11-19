@@ -19,8 +19,8 @@
 #pragma once
 
 namespace Physica::Core {
-    template<class Function, class VectorType>
-    GeneAlgorithm<Function, VectorType>::GeneAlgorithm(Function func_, const AlgorithmConfig& config_)
+    template<class Function, Vector T>
+    GeneAlgorithm<Function, T>::GeneAlgorithm(Function func_, const AlgorithmConfig& config_)
             : config(config_)
             , func(func_)
             , population(config_.populationSize)
@@ -29,14 +29,14 @@ namespace Physica::Core {
         assert(config.lowerBound.getLength() == config.upperBound.getLength());
         assert(config.populationSize > 0);
         for (size_t i = 0; i < population.getLength(); ++i) {
-            population[i] = VectorType::randomVector(config.lowerBound, config.upperBound);
+            population[i] = T::randomVector(config.lowerBound, config.upperBound);
             fitness[i] = func(std::cref(population[i]));
         }
     }
 
-    template<class Function, class VectorType>
+    template<class Function, Vector T>
     template<class RandomGenerator>
-    void GeneAlgorithm<Function, VectorType>::solve(RandomGenerator& gen) {
+    void GeneAlgorithm<Function, T>::solve(RandomGenerator& gen) {
         for (size_t iteration = 0; iteration < config.maxGeneration; ++iteration) {
             crossover(gen);
             mutation(gen);
@@ -48,9 +48,9 @@ namespace Physica::Core {
         }
     }
 
-    template<class Function, class VectorType>
+    template<class Function, Vector T>
     template<class RandomGenerator>
-    void GeneAlgorithm<Function, VectorType>::crossover(RandomGenerator& gen) {
+    void GeneAlgorithm<Function, T>::crossover(RandomGenerator& gen) {
         const auto populationSize = config.populationSize;
         const auto crossoverRate = config.crossoverRate;
         for (size_t i = 0; i < populationSize; i++) {
@@ -63,7 +63,7 @@ namespace Physica::Core {
 
                 const ScalarType random1 = ScalarType::random_uniform(gen);
                 //Whether random2 > random1 or not does not matter.
-                VectorType child = sample1 + (sample2 - sample1) * random1;
+                T child = sample1 + (sample2 - sample1) * random1;
                 ScalarType fitness_child = func(std::cref(child));
                 if (fitness_child < fitness[sampleIndex1])
                     sample1 = std::move(child);
@@ -73,13 +73,13 @@ namespace Physica::Core {
         }
     }
 
-    template<class Function, class VectorType>
+    template<class Function, Vector T>
     template<class RandomGenerator>
-    void GeneAlgorithm<Function, VectorType>::mutation(RandomGenerator& gen) {
+    void GeneAlgorithm<Function, T>::mutation(RandomGenerator& gen) {
         const ScalarType random = ScalarType::random_uniform(gen);
         if(random < ScalarType(config.mutationRate)) {
             unsigned int randomIndex = std::rand() % config.populationSize;
-            population[randomIndex] = VectorType::randomVector(config.lowerBound, config.upperBound);
+            population[randomIndex] = T::randomVector(config.lowerBound, config.upperBound);
         }
     }
 }

@@ -42,8 +42,8 @@ namespace Physica::Core {
         using VectorBase::operator[];
         /* Operations */
         [[nodiscard]] ScalarType calc(size_t index) const;
-        template<class VectorType>
-        inline void invTransform(const RValueVector<VectorType>& data);
+        template<Vector T>
+        inline void invTransform(const T& data);
         void resize([[maybe_unused]] size_t length) { assert(length == getLength()); }
         /* Getters */
         [[nodiscard]] __host__ __device__ size_t getLength() const noexcept { return Derived::rSizeToKSize(Base::getDerived().getRSpaceSize()); }
@@ -73,8 +73,8 @@ namespace Physica::Core {
     }
 
     template<class Derived>
-    template<class VectorType>
-    inline void FFTKSpace<Derived, 1>::invTransform(const RValueVector<VectorType>& data) {
+    template<Vector T>
+    inline void FFTKSpace<Derived, 1>::invTransform(const T& data) {
         assert(data.getLength() == getLength());
         *this = data;
         Base::getDerived().invTransform();
@@ -111,8 +111,8 @@ namespace Physica::Core {
         using MatrixBase::operator=;
         using MatrixBase::operator();
         /* Operations */
-        template<class MatrixType>
-        inline void invTransform(const RValueMatrix<MatrixType>& data);
+        template<Matrix T>
+        inline void invTransform(const T& data);
         void resize([[maybe_unused]] size_t row, [[maybe_unused]] size_t col) { assert(row == getRow()); assert(col == getCol()); }
         /* Getters */
         [[nodiscard]] __host__ __device__ size_t getRow() const noexcept { return Base::getDerived().getKSpaceSize()[0]; }
@@ -133,8 +133,8 @@ namespace Physica::Core {
     }
 
     template<class Derived>
-    template<class MatrixType>
-    inline void FFTKSpace<Derived, 2>::invTransform(const RValueMatrix<MatrixType>& data) {
+    template<Matrix T>
+    inline void FFTKSpace<Derived, 2>::invTransform(const T& data) {
         assert(data.getRow() == getRow());
         assert(data.getCol() == getCol());
         *this = data;
@@ -173,7 +173,7 @@ namespace Physica::Core {
         using GridBase::operator=;
         using GridBase::operator();
         /* Operations */
-        template<class GridType> inline void invTransform(const LValueGrid<GridType>& data);
+        template<Grid T> inline void invTransform(const LValueGrid<T>& data);
         inline void resize([[maybe_unused]] Index3D size);
         using GridBase::forIndexInGrid;
         /* Getters */
@@ -196,8 +196,8 @@ namespace Physica::Core {
     }
 
     template<class Derived>
-    template<class GridType>
-    inline void FFTKSpace<Derived, 3>::invTransform(const LValueGrid<GridType>& data) {
+    template<Grid T>
+    inline void FFTKSpace<Derived, 3>::invTransform(const LValueGrid<T>& data) {
         assert(data.getDimX() == getDimX());
         assert(data.getDimY() == getDimY());
         assert(data.getDimZ() == getDimZ());

@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Weibo He.
+ * Copyright 2021-2024 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -18,8 +18,8 @@
  */
 #pragma once
 
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h"
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseSymmMatrix.h"
+#include <Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h>
+#include <Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseSymmMatrix.h>
 #include <Physica/Core/Math/Algebra/LinearAlgebra/Vector/DenseVector.h>
 
 namespace Physica::Core {
@@ -34,19 +34,19 @@ namespace Physica::Core {
      * Reference:
      * [1] Nocedal J, Wright S J, Mikosch T V, et al. Numerical Optimization. Springer, 2006.448-496
      */
-    template<class ScalarType>
+    template<Scalar T>
     class EqualityQuadraticProgramming {
-        DenseSymmMatrix<ScalarType> objectiveMatG;
-        VectorND<ScalarType> objectiveVecC;
-        DenseMatrix<ScalarType, MatrixOption::Row | MatrixOption::Vector> constraints;
-        VectorND<ScalarType> x;
-        VectorND<ScalarType> multipliers;
+        DenseSymmMatrix<T> objectiveMatG;
+        VectorND<T> objectiveVecC;
+        DenseMatrix<T, MatrixOption::Row | MatrixOption::Vector> constraints;
+        VectorND<T> x;
+        VectorND<T> multipliers;
     public:
-        template<class MatrixType1, class VectorType1, class MatrixType2, class VectorType2>
-        EqualityQuadraticProgramming(const RValueMatrix<MatrixType1>& objectiveMatG_,
-                                     const RValueVector<VectorType1>& objectiveVecC_,
-                                     const RValueMatrix<MatrixType2>& constraints_,
-                                     const RValueVector<VectorType2>& initial);
+        template<Matrix M1, Vector V1, Matrix M2, Vector V2>
+        EqualityQuadraticProgramming(const M1& objectiveMatG_,
+                                     const V1& objectiveVecC_,
+                                     const M2& constraints_,
+                                     const V2& initial);
         EqualityQuadraticProgramming(const EqualityQuadraticProgramming&) = delete;
         EqualityQuadraticProgramming(EqualityQuadraticProgramming&&) noexcept = delete;
         ~EqualityQuadraticProgramming() = default;
@@ -56,16 +56,16 @@ namespace Physica::Core {
         /* Operations */
         void compute();
         /* Getters */
-        [[nodiscard]] const VectorND<ScalarType>& getSolution() const noexcept { return x; }
-        [[nodiscard]] const VectorND<ScalarType>& getMultipliers() const noexcept { return multipliers; }
+        [[nodiscard]] const VectorND<T>& getSolution() const noexcept { return x; }
+        [[nodiscard]] const VectorND<T>& getMultipliers() const noexcept { return multipliers; }
     };
 
-    template<class ScalarType>
-    template<class MatrixType1, class VectorType1, class MatrixType2, class VectorType2>
-    EqualityQuadraticProgramming<ScalarType>::EqualityQuadraticProgramming(const RValueMatrix<MatrixType1>& objectiveMatG_,
-                                                                           const RValueVector<VectorType1>& objectiveVecC_,
-                                                                           const RValueMatrix<MatrixType2>& constraints_,
-                                                                           const RValueVector<VectorType2>& initial)
+    template<Scalar T>
+    template<Matrix M1, Vector V1, Matrix M2, Vector V2>
+    EqualityQuadraticProgramming<T>::EqualityQuadraticProgramming(const M1& objectiveMatG_,
+                                                                  const V1& objectiveVecC_,
+                                                                  const M2& constraints_,
+                                                                  const V2& initial)
             : objectiveMatG(objectiveMatG_)
             , objectiveVecC(objectiveVecC_)
             , constraints(constraints_)
@@ -76,27 +76,27 @@ namespace Physica::Core {
         compute();
     }
 
-    template<class ScalarType>
-    void EqualityQuadraticProgramming<ScalarType>::compute() {
+    template<Scalar T>
+    void EqualityQuadraticProgramming<T>::compute() {
         const size_t degreeOfFreedom = x.getLength();
         const bool haveConstraints = constraints.getRow() != 0;
-        VectorND<ScalarType> equationVecB(objectiveMatG.getRow() + constraints.getRow());
+        VectorND<T> equationVecB(objectiveMatG.getRow() + constraints.getRow());
         /* Assemble vector */ {
-            const VectorND<ScalarType> g = objectiveMatG * x + objectiveVecC;
+            const VectorND<T> g = objectiveMatG * x + objectiveVecC;
             auto head = equationVecB.head(degreeOfFreedom);
             head = g;
 
             if (haveConstraints) {
                 const auto matA = constraints.leftCols(degreeOfFreedom);
                 const auto vecB = constraints.col(degreeOfFreedom);
-                const VectorND<ScalarType> h = matA * x - vecB;
+                const VectorND<T> h = matA * x - vecB;
                 auto tail = equationVecB.tail(degreeOfFreedom);
                 tail = h;
             }
         }
 
         const size_t problemSize = degreeOfFreedom + constraints.getRow();
-        DenseMatrix<ScalarType, MatrixOption::Row | MatrixOption::Vector> equationMatA(problemSize, problemSize);
+        DenseMatrix<T, MatrixOption::Row | MatrixOption::Vector> equationMatA(problemSize, problemSize);
         /* Assemble matrix */ {
             if (haveConstraints) {
                 const auto matA = constraints.leftCols(degreeOfFreedom);
@@ -107,13 +107,13 @@ namespace Physica::Core {
                 auto topRight = equationMatA.topRightCorner(degreeOfFreedom, degreeOfFreedom);
                 topRight = matA.transpose();
                 auto bottomRight = equationMatA.bottomRightCorner(degreeOfFreedom);
-                bottomRight = ScalarType(0);
+                bottomRight = T(0);
             }
             else
                 equationMatA = objectiveMatG;
         }
-        const DenseMatrix<ScalarType, MatrixOption::Row | MatrixOption::Vector> inv_equationMatA = equationMatA.inverse();
-        const VectorND<ScalarType> solution = inv_equationMatA * equationVecB;
+        const DenseMatrix<T, MatrixOption::Row | MatrixOption::Vector> inv_equationMatA = equationMatA.inverse();
+        const VectorND<T> solution = inv_equationMatA * equationVecB;
         x -= solution.head(degreeOfFreedom);
         if (haveConstraints)
             multipliers = solution.tail(degreeOfFreedom);

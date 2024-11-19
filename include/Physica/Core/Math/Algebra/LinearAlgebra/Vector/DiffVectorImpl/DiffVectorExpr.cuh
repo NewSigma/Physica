@@ -22,18 +22,18 @@
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/VectorImpl/VectorExpr.cuh"
 
 namespace Physica::Core {
-    template<ExprType type, int Order, class T1> class DiffVectorExprUnitary;
-    template<ExprType type, int Order, class T1, class T2 = T1> class DiffVectorExprBinary;
+    template<ExprType type, int Order, Vector> class DiffVectorExprUnitary;
+    template<ExprType type, int Order, Vector T1, class T2 = T1> class DiffVectorExprBinary;
 
     namespace Internal {
-        template<ExprType Type, class VectorType>
+        template<ExprType Type, Vector T>
         __global__ void DiffVectorExpr_unitaryOpKernel(
-                Physica::PlainStruct<VectorType> result_,
-                Physica::PlainStruct<const VectorType> v_) {
-            using ScalarType = typename VectorType::ScalarType;
-            using DiffRecord = typename VectorType::DiffRecord;
-            const VectorType& v = v_.getDerived();
-            VectorType& result = result_.getDerived();
+                Physica::PlainStruct<T> result_,
+                Physica::PlainStruct<const T> v_) {
+            using ScalarType = typename T::ScalarType;
+            using DiffRecord = typename T::DiffRecord;
+            const T& v = v_.getDerived();
+            T& result = result_.getDerived();
             const size_t index = blockIdx.x * blockDim.x + threadIdx.x;
             const size_t length = result.getLength();
             if (index >= length)
@@ -49,16 +49,16 @@ namespace Physica::Core {
             result.getGrad(index) = 0;
         }
 
-        template<ExprType Type, class VectorType>
+        template<ExprType Type, Vector T>
         __global__ void DiffVectorExpr_binaryOpKernel(
-                Physica::PlainStruct<VectorType> result_,
-                Physica::PlainStruct<const VectorType> v_,
-                Physica::PlainStruct<const typename VectorType::ScalarType> s_) {
-            using ScalarType = typename VectorType::ScalarType;
-            using DiffRecord = typename VectorType::DiffRecord;
-            const VectorType& v = v_.getDerived();
+                Physica::PlainStruct<T> result_,
+                Physica::PlainStruct<const T> v_,
+                Physica::PlainStruct<const typename T::ScalarType> s_) {
+            using ScalarType = typename T::ScalarType;
+            using DiffRecord = typename T::DiffRecord;
+            const T& v = v_.getDerived();
             const ScalarType& s = s_.getDerived();
-            VectorType& result = result_.getDerived();
+            T& result = result_.getDerived();
             const size_t index = blockIdx.x * blockDim.x + threadIdx.x;
             const size_t length = result.getLength();
             if (index >= length)
@@ -79,16 +79,16 @@ namespace Physica::Core {
             result.getGrad(index) = 0;
         }
 
-        template<ExprType Type, class VectorType>
+        template<ExprType Type, Vector T>
         __global__ void DiffVectorExpr_binaryOpKernel(
-                Physica::PlainStruct<VectorType> result_,
-                Physica::PlainStruct<const VectorType> v1_,
-                Physica::PlainStruct<const VectorType> v2_) {
-            using ScalarType = typename VectorType::ScalarType;
-            using DiffRecord = typename VectorType::DiffRecord;
-            const VectorType& v1 = v1_.getDerived();
-            const VectorType& v2 = v2_.getDerived();
-            VectorType& result = result_.getDerived();
+                Physica::PlainStruct<T> result_,
+                Physica::PlainStruct<const T> v1_,
+                Physica::PlainStruct<const T> v2_) {
+            using ScalarType = typename T::ScalarType;
+            using DiffRecord = typename T::DiffRecord;
+            const T& v1 = v1_.getDerived();
+            const T& v2 = v2_.getDerived();
+            T& result = result_.getDerived();
             const size_t index = blockIdx.x * blockDim.x + threadIdx.x;
             const size_t length = result.getLength();
             if (index >= length)
@@ -110,7 +110,7 @@ namespace Physica::Core {
         }
     }
 
-    template<ExprType Type, int Order, class T>
+    template<ExprType Type, int Order, Scalar T>
     class DiffVectorExprUnitary<Type, Order, VectorND<T>> {
         using VectorType = device_obj<Diff<VectorND<T>, DiffMode::Reverse, Order>>;
     public:
@@ -127,7 +127,7 @@ namespace Physica::Core {
         }
     };
 
-    template<ExprType Type, int Order, class T>
+    template<ExprType Type, int Order, Scalar T>
     class DiffVectorExprBinary<Type, Order, VectorND<T>, T> {
         using VectorType = device_obj<Diff<VectorND<T>, DiffMode::Reverse, Order>>;
         using ScalarType = typename VectorType::ScalarType;
@@ -145,7 +145,7 @@ namespace Physica::Core {
         }
     };
 
-    template<ExprType Type, int Order, class T>
+    template<ExprType Type, int Order, Scalar T>
     class DiffVectorExprBinary<Type, Order, VectorND<T>> {
         using VectorType = device_obj<Diff<VectorND<T>, DiffMode::Reverse, Order>>;
     public:
@@ -165,70 +165,70 @@ namespace Physica::Core {
     //////////////////////////////////////Operators//////////////////////////////////////
     //////////////////////////////////////Minus//////////////////////////////////////
     //////////////////////////////////////Add//////////////////////////////////////
-    template<class T, int Order>
+    template<Scalar T, int Order>
     inline auto operator+(
             const device_obj<Diff<VectorND<T>, DiffMode::Reverse, Order>>& v,
             const device_obj<Diff<T, DiffMode::Reverse, Order>>& s) {
         return DiffVectorExprBinary<ExprType::Add, Order, VectorND<T>, T>::calc(v, s);
     }
 
-    template<class T, int Order>
+    template<Scalar T, int Order>
     inline auto operator+(
             const device_obj<Diff<T, DiffMode::Reverse, Order>>& s,
             const device_obj<Diff<VectorND<T>, DiffMode::Reverse, Order>>& v) {
         return v + s;
     }
 
-    template<class T, int Order>
+    template<Scalar T, int Order>
     inline auto operator+(
             const device_obj<Diff<VectorND<T>, DiffMode::Reverse, Order>>& v1,
             const device_obj<Diff<VectorND<T>, DiffMode::Reverse, Order>>& v2) {
         return DiffVectorExprBinary<ExprType::Add, Order, VectorND<T>, VectorND<T>>::calc(v1, v2);
     }
     //////////////////////////////////////Sub//////////////////////////////////////
-    template<class T, int Order>
+    template<Scalar T, int Order>
     inline auto operator-(
             const device_obj<Diff<VectorND<T>, DiffMode::Reverse, Order>>& v,
             const device_obj<Diff<T, DiffMode::Reverse, Order>>& s) {
         return DiffVectorExprBinary<ExprType::Sub, Order, VectorND<T>, T>::calc(v, s);
     }
 
-    template<class T, int Order>
+    template<Scalar T, int Order>
     inline auto operator-(
             const device_obj<Diff<VectorND<T>, DiffMode::Reverse, Order>>& v1,
             const device_obj<Diff<VectorND<T>, DiffMode::Reverse, Order>>& v2) {
         return DiffVectorExprBinary<ExprType::Sub, Order, VectorND<T>, VectorND<T>>::calc(v1, v2);
     }
     //////////////////////////////////////Mul//////////////////////////////////////
-    template<class T, int Order>
+    template<Scalar T, int Order>
     inline auto operator*(
             const device_obj<Diff<VectorND<T>, DiffMode::Reverse, Order>>& v,
             const device_obj<Diff<T, DiffMode::Reverse, Order>>& s) {
         return DiffVectorExprBinary<ExprType::Mul, Order, VectorND<T>, T>::calc(v, s);
     }
 
-    template<class T, int Order>
+    template<Scalar T, int Order>
     inline auto operator*(
             const device_obj<Diff<T, DiffMode::Reverse, Order>>& s,
             const device_obj<Diff<VectorND<T>, DiffMode::Reverse, Order>>& v) {
         return v * s;
     }
 
-    template<class T, int Order>
+    template<Scalar T, int Order>
     inline auto hadamard(
             const device_obj<Diff<VectorND<T>, DiffMode::Reverse, Order>>& v1,
             const device_obj<Diff<VectorND<T>, DiffMode::Reverse, Order>>& v2) {
         return DiffVectorExprBinary<ExprType::Mul, Order, VectorND<T>, VectorND<T>>::calc(v1, v2);
     }
     //////////////////////////////////////Div//////////////////////////////////////
-    template<class T, int Order>
+    template<Scalar T, int Order>
     inline auto operator/(
             const device_obj<Diff<VectorND<T>, DiffMode::Reverse, Order>>& v,
             const device_obj<Diff<T, DiffMode::Reverse, Order>>& s) {
         return DiffVectorExprBinary<ExprType::Div, Order, VectorND<T>, T>::calc(v, s);
     }
 
-    template<class T, int Order>
+    template<Scalar T, int Order>
     inline auto devide(
             const device_obj<Diff<VectorND<T>, DiffMode::Reverse, Order>>& v1,
             const device_obj<Diff<VectorND<T>, DiffMode::Reverse, Order>>& v2) {
@@ -236,12 +236,12 @@ namespace Physica::Core {
     }
     //////////////////////////////////////Compare//////////////////////////////////////
     ////////////////////////////////////////Elementary Functions////////////////////////////////////////////
-    template<class T, int Order>
+    template<Scalar T, int Order>
     auto relu(const device_obj<Diff<VectorND<T>, DiffMode::Reverse, Order>>& v) {
         return DiffVectorExprUnitary<ExprType::Relu, Order, VectorND<T>>::calc(v);
     }
 
-    template<class T, int Order>
+    template<Scalar T, int Order>
     auto exp(const device_obj<Diff<VectorND<T>, DiffMode::Reverse, Order>>& v) {
         return DiffVectorExprUnitary<ExprType::Exp, Order, VectorND<T>>::calc(v);
     }

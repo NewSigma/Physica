@@ -17,13 +17,13 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include <iostream>
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h"
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/MatrixDecomposition/Schur.h"
+#include <Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h>
+#include <Physica/Core/Math/Algebra/LinearAlgebra/Matrix/MatrixDecomposition/Schur.h>
 
 using namespace Physica::Core;
 
-template<class MatrixType>
-bool isUpperQuasiTriangle(const LValueMatrix<MatrixType>& m) {
+template<LMatrix T>
+bool isUpperQuasiTriangle(const T& m) {
     if (m.getRow() != m.getCol())
         return false;
     for (size_t i = 0; i < m.getRow() - 1; ++i) {
@@ -43,8 +43,8 @@ bool isUpperQuasiTriangle(const LValueMatrix<MatrixType>& m) {
     return true;
 }
 
-template<class MatrixType>
-bool isUpperTriangle(const LValueMatrix<MatrixType>& m) {
+template<Matrix T>
+bool isUpperTriangle(const T& m) {
     if (m.getRow() != m.getCol())
         return false;
     for (size_t i = 0; i < m.getRow() - 1; ++i) {
@@ -55,22 +55,22 @@ bool isUpperTriangle(const LValueMatrix<MatrixType>& m) {
     return true;
 }
 
-template<class MatrixType>
-bool realSchurTest(const LValueMatrix<MatrixType>& mat, double precision) {
-    Schur<typename MatrixType::ScalarType> schur(mat, true);
+template<LMatrix T>
+bool realSchurTest(const T& mat, double precision) {
+    Schur<typename T::ScalarType> schur(mat, true);
     if (!isUpperQuasiTriangle(schur.getMatrixT()))
         return false;
-    MatrixType A = schur.getMatrixU() * (schur.getMatrixT() * schur.getMatrixU().transpose()).compute();
+    T A = schur.getMatrixU() * (schur.getMatrixT() * schur.getMatrixU().transpose()).compute();
     return (A - mat).norm1() <= mat.norm1() * precision;
 }
 
-template<class MatrixType>
-bool schurTest(const LValueMatrix<MatrixType>& mat, double precision) {
-    static_assert(MatrixType::isComplex, "[Error]: Use realSchurTest is prefered");
-    Schur<typename MatrixType::ScalarType> schur(mat, true);
+template<LMatrix T>
+bool schurTest(const T& mat, double precision) {
+    static_assert(T::isComplex, "[Error]: Use realSchurTest is prefered");
+    Schur<typename T::ScalarType> schur(mat, true);
     if (!isUpperTriangle(schur.getMatrixT()))
         return false;
-    MatrixType A = schur.getMatrixU() * (schur.getMatrixT() * schur.getMatrixU().hermite()).compute();
+    T A = schur.getMatrixU() * (schur.getMatrixT() * schur.getMatrixU().hermite()).compute();
     return (A - mat).norm1() <= mat.norm1() * precision;
 }
 

@@ -20,13 +20,13 @@
 
 #include <Physica/PlainStruct.h>
 #include <Physica/Core/Exception/NoImplException.h>
-#include <Physica/Core/Math/Algebra/LinearAlgebra/Matrix/MatrixOption.h>
+#include <Physica/Core/Math/Algebra/LinearAlgebra/Matrix/Matrix.h>
 #include <Physica/Core/Exception/CUDA/cuBLAS.cuh>
 
 namespace Physica::Core {
-    template<class MatrixType1, class MatrixType2>
-    class device_obj<MatrixProduct<MatrixType1, MatrixType2>> : public device_obj<RValueMatrix<MatrixProduct<MatrixType1, MatrixType2>>> {
-        using host_obj = MatrixProduct<MatrixType1, MatrixType2>;
+    template<Matrix T1, Matrix T2>
+    class device_obj<MatrixProduct<T1, T2>> : public device_obj<RValueMatrix<MatrixProduct<T1, T2>>> {
+        using host_obj = MatrixProduct<T1, T2>;
         using This = device_obj<host_obj>;
         using Base = device_obj<RValueMatrix<host_obj>>;
     public:
@@ -34,10 +34,10 @@ namespace Physica::Core {
         using typename Base::ScalarType;
         using DefaultType = typename host_obj::DefaultType::device_obj_type;
     private:
-        Physica::PlainStruct<const device_obj<MatrixType1>> mat1;
-        Physica::PlainStruct<const device_obj<MatrixType2>> mat2;
+        Physica::PlainStruct<const device_obj<T1>> mat1;
+        Physica::PlainStruct<const device_obj<T2>> mat2;
     public:
-        __host__ __device__ device_obj(const device_obj<RValueMatrix<MatrixType1>>& mat1_, const device_obj<RValueMatrix<MatrixType2>>& mat2_);
+        __host__ __device__ device_obj(const device_obj<T1>& mat1_, const device_obj<T2>& mat2_);
         device_obj(const This&) = delete;
         device_obj(This&&) noexcept = delete;
         ~device_obj() = default;
@@ -45,8 +45,8 @@ namespace Physica::Core {
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
         /* Operations */
-        template<class OtherDerived>
-        void assignTo(device_obj<ContinuousMatrix<OtherDerived>>& target) const;
+        template<Matrix M>
+        void assignTo(device_obj<ContinuousMatrix<M>>& target) const;
         [[nodiscard]] DefaultType compute() const { return DefaultType(*this); }
         /* Getters */
         [[nodiscard]] __device__ ScalarType calc(size_t, size_t) const { noImpl(); }
@@ -54,23 +54,22 @@ namespace Physica::Core {
         [[nodiscard]] __host__ __device__ size_t getRow() const { return getLHS().getRow(); }
         template<Side Owner = GetSide()>
         [[nodiscard]] __host__ __device__ size_t getCol() const { return getRHS().getCol(); }
-        [[nodiscard]] __host__ __device__ const device_obj<MatrixType1>& getLHS() const noexcept { return mat1.getDerived(); }
-        [[nodiscard]] __host__ __device__ const device_obj<MatrixType2>& getRHS() const noexcept { return mat2.getDerived(); }
+        [[nodiscard]] __host__ __device__ const device_obj<T1>& getLHS() const noexcept { return mat1.getDerived(); }
+        [[nodiscard]] __host__ __device__ const device_obj<T2>& getRHS() const noexcept { return mat2.getDerived(); }
     };
 
-    template<class MatrixType1, class MatrixType2>
-    __host__ __device__ device_obj<MatrixProduct<MatrixType1, MatrixType2>>::device_obj(
-            const device_obj<RValueMatrix<MatrixType1>>& mat1_, const device_obj<RValueMatrix<MatrixType2>>& mat2_)
-            : mat1(asStruct(mat1_.getDerived())), mat2(asStruct(mat2_.getDerived())) {
+    template<Matrix T1, Matrix T2>
+    __host__ __device__ device_obj<MatrixProduct<T1, T2>>::device_obj(
+            const device_obj<T1>& mat1_, const device_obj<T2>& mat2_) : mat1(asStruct(mat1_)), mat2(asStruct(mat2_)) {
         assert(mat1_.getCol() == mat2_.getRow());
     }
 
-    template<class MatrixType1, class MatrixType2>
-    template<class OtherDerived>
-    void device_obj<MatrixProduct<MatrixType1, MatrixType2>>::assignTo(device_obj<ContinuousMatrix<OtherDerived>>& target) const {
-        static_assert(MatrixOption::isColMatrix<MatrixType1>() && MatrixOption::isColMatrix<MatrixType2>(), "[Error]: cuBLAS uses column major");
-        static_assert(MatrixOption::isElementMatrix<MatrixType1>() && MatrixOption::isElementMatrix<MatrixType2>(), "[Error]: cuBLAS need element storage");
-        constexpr bool IsDeviceMatrix = Traits<MatrixType1>::SizeAtCompile == Dynamic && Traits<MatrixType2>::SizeAtCompile == Dynamic;
+    template<Matrix T1, Matrix T2>
+    template<Matrix M>
+    void device_obj<MatrixProduct<T1, T2>>::assignTo(device_obj<ContinuousMatrix<M>>& target) const {
+        static_assert(MatrixOption::isColMatrix<T1>() && MatrixOption::isColMatrix<T2>(), "[Error]: cuBLAS uses column major");
+        static_assert(MatrixOption::isElementMatrix<T1>() && MatrixOption::isElementMatrix<T2>(), "[Error]: cuBLAS need element storage");
+        constexpr bool IsDeviceMatrix = Traits<T1>::SizeAtCompile == Dynamic && Traits<T2>::SizeAtCompile == Dynamic;
         static_assert(IsDeviceMatrix, "[Error]: Fixed matrix is on host, pass it to device before calling cuBLAS");
 
         using T = typename ScalarType::MachineType;
@@ -99,15 +98,14 @@ namespace Physica::Core {
             static_assert(ScalarType::Option == Float16, "[Error]: Unknown ScalarType");
     }
 
-    template<class MatrixType1, class MatrixType2>
-    [[nodiscard]] inline device_obj<MatrixProduct<MatrixType1, MatrixType2>>
-    operator*(const device_obj<RValueMatrix<MatrixType1>>& mat1, const device_obj<RValueMatrix<MatrixType2>>& mat2) noexcept {
+    template<Matrix T1, Matrix T2>
+    [[nodiscard]] inline device_obj<MatrixProduct<T1, T2>>
+    operator*(const device_obj<T1>& mat1, const device_obj<T2>& mat2) noexcept {
         return {mat1, mat2};
     }
 }
 
 namespace Physica {
-    template<class MatrixType1, class MatrixType2>
-    class Traits<Core::device_obj<MatrixProduct<MatrixType1, MatrixType2>>>
-            : public Traits<MatrixProduct<MatrixType1, MatrixType2>> {};
+    template<Core::Matrix T1, Core::Matrix T2>
+    class Traits<Core::device_obj<Core::MatrixProduct<T1, T2>>> : public Traits<Core::MatrixProduct<T1, T2>> {};
 }

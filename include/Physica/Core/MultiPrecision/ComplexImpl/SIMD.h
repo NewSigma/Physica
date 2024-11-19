@@ -19,7 +19,7 @@
 #pragma once
 
 namespace Physica::Core {
-    template<class T, size_t Length>
+    template<Scalar T, size_t Length>
     class BestPacket<Complex<T>, Length> {
         using RealPacket = BestPacket<T, Length * 2>;
         using ScalarType = Complex<T>;
@@ -28,14 +28,14 @@ namespace Physica::Core {
         using Type = typename std::conditional<Size == 1, ScalarType, SIMD<ScalarType, Size>>::type;
     };
 
-    template<class ScalarType, size_t Length>
-    class device_obj<BestPacket<Complex<ScalarType>, Length>> {
+    template<Scalar T, size_t Length>
+    class device_obj<BestPacket<Complex<T>, Length>> {
     public:
         constexpr static size_t Size = 1;
-        using Type = Complex<ScalarType>;
+        using Type = Complex<T>;
     };
 
-    template<class T, size_t Size>
+    template<Scalar T, size_t Size>
     class SIMD<Complex<T>, Size> : private SIMD<T, Size * 2> {
         using ScalarType = Complex<T>;
         using This = SIMD<ScalarType, Size>;
@@ -97,7 +97,7 @@ namespace Physica::Core {
 }
 
 namespace Physica {
-    template<class T, size_t Size>
+    template<Scalar T, size_t Size>
     class Traits<Core::SIMD<Core::Complex<T>, Size>> {
     public:
         using ScalarType = Core::Complex<T>;

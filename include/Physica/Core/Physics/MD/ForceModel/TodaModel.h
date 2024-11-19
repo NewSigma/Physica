@@ -25,126 +25,126 @@ namespace Physica::Core {
      * Reference:
      * [1] T. Hatano, Phys. Rev. E 59, R1(R) (1999); https://doi.org/10.1103/PhysRevE.59.R1
      */
-    template<class ScalarType, bool IsPeriodBoundary>
+    template<Scalar T, bool IsPeriodBoundary>
     class TodaModel {
-        using MDCellType = MDCell<ScalarType, 1>;
+        using MDCellType = MDCell<T, 1>;
         using LatticeMatrix = typename MDCellType::LatticeMatrix;
-        using ForceConstMatrix = typename EmptyForceModel<ScalarType, 1>::ForceConstMatrix;
+        using ForceConstMatrix = typename EmptyForceModel<T, 1>::ForceConstMatrix;
 
-        ScalarType springLength;
+        T springLength;
     public:
-        TodaModel(ScalarType springLength_) : springLength(std::move(springLength_)) {}
+        TodaModel(T springLength_) : springLength(std::move(springLength_)) {}
         TodaModel(const TodaModel&) = default;
         TodaModel(TodaModel&&) noexcept = default;
         ~TodaModel() = default;
         /* Operators */
         TodaModel& operator=(TodaModel obj) noexcept { swap(obj); return *this; }
         /* Operations */
-        [[nodiscard]] ScalarType potentialV(const MDCellType& cell) const;
+        [[nodiscard]] T potentialV(const MDCellType& cell) const;
 
         template<class Executor>
-        [[nodiscard]] VectorND<ScalarType> force(const MDCellType& cell) const;
-        template<class VectorType, class Executor>
-        void forceAsync(const MDCellType& cell, ContinuousVector<VectorType>& result) const;
+        [[nodiscard]] VectorND<T> force(const MDCellType& cell) const;
+        template<Vector V, class Executor>
+        void forceAsync(const MDCellType& cell, ContinuousVector<V>& result) const;
         template<class Executor>
-        [[nodiscard]] VectorND<ScalarType> force_short(const MDCellType& cell) const { return force<Executor>(cell); }
+        [[nodiscard]] VectorND<T> force_short(const MDCellType& cell) const { return force<Executor>(cell); }
         template<class Executor>
-        [[nodiscard]] VectorND<ScalarType> force_long(const MDCellType& cell) const { return VectorND<ScalarType>(cell.getDOF(), 0); }
+        [[nodiscard]] VectorND<T> force_long(const MDCellType& cell) const { return VectorND<T>(cell.getDOF(), 0); }
         
-        [[nodiscard]] ScalarType forceConst(const MDCellType& cell, size_t dof1, size_t dof2) const;
+        [[nodiscard]] T forceConst(const MDCellType& cell, size_t dof1, size_t dof2) const;
         [[nodiscard]] ForceConstMatrix forceConst(const MDCellType& cell) const;
 
         [[nodiscard]] LatticeMatrix virial(const MDCellType& cell) const;
         void swap(TodaModel& __restrict obj) noexcept;
     };
 
-    template<class ScalarType, bool IsPeriodBoundary>
-    ScalarType TodaModel<ScalarType, IsPeriodBoundary>::potentialV(const MDCellType& cell) const {
+    template<Scalar T, bool IsPeriodBoundary>
+    T TodaModel<T, IsPeriodBoundary>::potentialV(const MDCellType& cell) const {
         const size_t numParticle = cell.getNumParticle();
         const auto& pos = cell.getPos();
-        ScalarType energy = 0;
+        T energy = 0;
         if constexpr (IsPeriodBoundary) {
             for (size_t i = 0; i < numParticle; ++i) {
                 const size_t i1 = (i + 1) % numParticle;
-                const ScalarType delta = cell.minDistVector(i, i1).norm() - springLength;
+                const T delta = cell.minDistVector(i, i1).norm() - springLength;
                 energy += delta + exp(-delta);
             }
         }
         else {
             /* First */ {
-                const ScalarType delta = pos(0, 0) - springLength;
+                const T delta = pos(0, 0) - springLength;
                 energy = delta + exp(-delta);
             }
             for (size_t i = 0; i < numParticle - 1; ++i) {
-                const ScalarType delta = pos(i + 1, 0) - pos(i, 0) - springLength;
+                const T delta = pos(i + 1, 0) - pos(i, 0) - springLength;
                 energy += delta + exp(-delta);
             }
             /* Last */ {
-                const ScalarType delta = cell.getLattice()(0, 0) - pos(numParticle - 1, 0) - springLength;
+                const T delta = cell.getLattice()(0, 0) - pos(numParticle - 1, 0) - springLength;
                 energy += delta + exp(-delta);
             }
         }
         return energy;
     }
 
-    template<class ScalarType, bool IsPeriodBoundary>
+    template<Scalar T, bool IsPeriodBoundary>
     template<class Executor>
-    VectorND<ScalarType> TodaModel<ScalarType, IsPeriodBoundary>::force(const MDCellType& cell) const {
+    VectorND<T> TodaModel<T, IsPeriodBoundary>::force(const MDCellType& cell) const {
         const size_t numParticle = cell.getNumParticle();
-        VectorND<ScalarType> result(numParticle);
-        forceAsync<VectorND<ScalarType>, Executor>(cell, result);
+        VectorND<T> result(numParticle);
+        forceAsync<VectorND<T>, Executor>(cell, result);
         return result;
     }
 
-    template<class ScalarType, bool IsPeriodBoundary>
-    template<class VectorType, class Executor>
-    void TodaModel<ScalarType, IsPeriodBoundary>::forceAsync(
-            const MDCellType& cell, ContinuousVector<VectorType>& result) const {
+    template<Scalar T, bool IsPeriodBoundary>
+    template<Vector V, class Executor>
+    void TodaModel<T, IsPeriodBoundary>::forceAsync(
+            const MDCellType& cell, ContinuousVector<V>& result) const {
         const size_t numParticle = cell.getNumParticle();
         const auto& pos = cell.getPos();
-        result = ScalarType(0);
+        result = T(0);
         if constexpr (IsPeriodBoundary) {
             for (size_t i = 0; i < numParticle; ++i) {
                 const size_t i1 = (i + 1) % numParticle;
-                const ScalarType delta = cell.minDistVector(i, i1).norm() - springLength;
-                const ScalarType f = exp(-delta);
+                const T delta = cell.minDistVector(i, i1).norm() - springLength;
+                const T f = exp(-delta);
                 result[i] -= f;
                 result[i1] += f;
             }
         }
         else {
             /* First */ {
-                const ScalarType delta = pos(0, 0) - springLength;
-                result[0] = ScalarType(-1.0) + exp(-delta);
+                const T delta = pos(0, 0) - springLength;
+                result[0] = T(-1.0) + exp(-delta);
             }
             for (size_t i = 0; i < numParticle - 1; ++i) {
-                const ScalarType delta = pos(i + 1, 0) - pos(i, 0) - springLength;
-                const ScalarType f = exp(-delta);
+                const T delta = pos(i + 1, 0) - pos(i, 0) - springLength;
+                const T f = exp(-delta);
                 result[i] -= f;
                 result[i + 1] += f;
             }
             /* Last */ {
-                const ScalarType delta = cell.getLattice()(0, 0) - pos(numParticle - 1, 0) - springLength;
-                result[numParticle - 1] += ScalarType(1.0) - exp(-delta);
+                const T delta = cell.getLattice()(0, 0) - pos(numParticle - 1, 0) - springLength;
+                result[numParticle - 1] += T(1.0) - exp(-delta);
             }
         }
     }
 
-    template<class ScalarType, bool IsPeriodBoundary>
-    ScalarType TodaModel<ScalarType, IsPeriodBoundary>::forceConst(const MDCellType& cell, size_t dof1, size_t dof2) const {
+    template<Scalar T, bool IsPeriodBoundary>
+    T TodaModel<T, IsPeriodBoundary>::forceConst(const MDCellType& cell, size_t dof1, size_t dof2) const {
         if constexpr (IsPeriodBoundary) {
             const size_t dof = cell.getDOF();
             const bool isNeighbor = ((dof1 + 1) % dof == dof2) || ((dof2 + 1) % dof == dof1);
             if (isNeighbor) {
-                const ScalarType delta = cell.minDistVector(dof1, dof2).norm() - springLength;
+                const T delta = cell.minDistVector(dof1, dof2).norm() - springLength;
                 return -exp(-delta);
             }
 
             if (dof1 == dof2) {
                 const size_t dof3 = (dof1 + 1) % dof;
                 const size_t dof4 = (dof1 == 0 ? cell.getNumParticle() : dof1) - 1;
-                const ScalarType delta1 = cell.minDistVector(dof1, dof3).norm() - springLength;
-                const ScalarType delta2 = cell.minDistVector(dof1, dof4).norm() - springLength;
+                const T delta1 = cell.minDistVector(dof1, dof3).norm() - springLength;
+                const T delta2 = cell.minDistVector(dof1, dof4).norm() - springLength;
                 return exp(-delta1) + exp(-delta2);
             }
         }
@@ -152,25 +152,25 @@ namespace Physica::Core {
             const auto& pos = cell.getPos();
             const bool isNeighbor = (dof1 + 1 == dof2) || (dof2 + 1 == dof1);
             if (isNeighbor) {
-                const ScalarType delta = abs(pos(dof1, 0) - pos(dof2, 0)) - springLength;
+                const T delta = abs(pos(dof1, 0) - pos(dof2, 0)) - springLength;
                 return -exp(-delta);
             }
 
             if (dof1 == dof2) {
                 const size_t numParticle = cell.getNumParticle();
-                ScalarType delta1, delta2;
+                T delta1, delta2;
                 if (dof1 == 0) {
-                    const ScalarType temp = pos(0, 0);
+                    const T temp = pos(0, 0);
                     delta1 = temp;
                     delta2 = pos(1, 0) - temp;
                 }
                 else if (dof1 == numParticle - 1) {
-                    const ScalarType temp = pos(numParticle - 1, 0);
+                    const T temp = pos(numParticle - 1, 0);
                     delta1 = temp - pos(numParticle - 2, 0);
                     delta2 = cell.getLattice()(0, 0) - temp;
                 }
                 else {
-                    const ScalarType temp = pos(dof1, 0);
+                    const T temp = pos(dof1, 0);
                     delta1 = temp - pos(dof1 - 1, 0);
                     delta2 = pos(dof1 + 1, 0) - temp;
                 }
@@ -182,16 +182,16 @@ namespace Physica::Core {
         return 0;
     }
 
-    template<class ScalarType, bool IsPeriodBoundary>
-    typename TodaModel<ScalarType, IsPeriodBoundary>::ForceConstMatrix
-    TodaModel<ScalarType, IsPeriodBoundary>::forceConst(const MDCellType& cell) const {
+    template<Scalar T, bool IsPeriodBoundary>
+    typename TodaModel<T, IsPeriodBoundary>::ForceConstMatrix
+    TodaModel<T, IsPeriodBoundary>::forceConst(const MDCellType& cell) const {
         const size_t dof = cell.getDOF();
-        ForceConstMatrix result(dof, ScalarType(0));
+        ForceConstMatrix result(dof, T(0));
         if constexpr (IsPeriodBoundary) {
             for (size_t i = 0; i < dof; ++i) {
                 const size_t i1 = (i + 1) % dof;
-                const ScalarType delta = cell.minDistVector(i, i1).norm() - springLength;
-                const ScalarType temp = exp(-delta);
+                const T delta = cell.minDistVector(i, i1).norm() - springLength;
+                const T temp = exp(-delta);
                 result(i, i1) = -temp;
                 result(i, i) += temp;
                 result(i1, i1) += temp;
@@ -202,8 +202,8 @@ namespace Physica::Core {
             const size_t dof1 = dof - 1;
             for (size_t i = 0; i < dof1; ++i) {
                 const size_t i1 = i + 1;
-                const ScalarType delta = pos(i1, 0) - pos(i, 0) - springLength;
-                const ScalarType temp = exp(-delta);
+                const T delta = pos(i1, 0) - pos(i, 0) - springLength;
+                const T temp = exp(-delta);
                 result(i, i1) = -temp;
                 result(i, i) += temp;
                 result(i1, i1) += temp;
@@ -214,38 +214,38 @@ namespace Physica::Core {
         return result;
     }
 
-    template<class ScalarType, bool IsPeriodBoundary>
-    typename TodaModel<ScalarType, IsPeriodBoundary>::LatticeMatrix
-    TodaModel<ScalarType, IsPeriodBoundary>::virial(const MDCellType& cell) const {
+    template<Scalar T, bool IsPeriodBoundary>
+    typename TodaModel<T, IsPeriodBoundary>::LatticeMatrix
+    TodaModel<T, IsPeriodBoundary>::virial(const MDCellType& cell) const {
         const size_t numParticle = cell.getNumParticle();
         const auto& pos = cell.getPos();
-        ScalarType result = 0;
+        T result = 0;
         if constexpr (IsPeriodBoundary) {
             for (size_t i = 0; i < numParticle; ++i) {
                 const size_t i1 = (i + 1) % numParticle;
-                const ScalarType r = cell.minDistVector(i, i1).norm();
-                const ScalarType delta = r - springLength;
-                const ScalarType f = exp(-delta) - ScalarType(1.0);
+                const T r = cell.minDistVector(i, i1).norm();
+                const T delta = r - springLength;
+                const T f = exp(-delta) - T(1.0);
                 result += r * f;
             }
         }
         else {
             /* First*/ {
-                const ScalarType r = pos(0, 0);
-                const ScalarType delta = r - springLength;
-                const ScalarType f = exp(-delta) - ScalarType(1.0);
+                const T r = pos(0, 0);
+                const T delta = r - springLength;
+                const T f = exp(-delta) - T(1.0);
                 result += r * f;
             }
             for (size_t i = 0; i < numParticle - 1; ++i) {
-                const ScalarType r = pos(i + 1, 0) - pos(i, 0);
-                const ScalarType delta = r - springLength;
-                const ScalarType f = exp(-delta) - ScalarType(1.0);
+                const T r = pos(i + 1, 0) - pos(i, 0);
+                const T delta = r - springLength;
+                const T f = exp(-delta) - T(1.0);
                 result += r * f;
             }
             /* Last */ {
-                const ScalarType r = cell.getLattice()(0, 0) - pos(numParticle - 1, 0);
-                const ScalarType delta = r - springLength;
-                const ScalarType f = exp(-delta) - ScalarType(1.0);
+                const T r = cell.getLattice()(0, 0) - pos(numParticle - 1, 0);
+                const T delta = r - springLength;
+                const T f = exp(-delta) - T(1.0);
                 result += r * f;
             }
         }
@@ -253,8 +253,8 @@ namespace Physica::Core {
         return LatticeMatrix{result};
     }
 
-    template<class ScalarType, bool IsPeriodBoundary>
-    void TodaModel<ScalarType, IsPeriodBoundary>::swap(TodaModel& __restrict obj) noexcept {
+    template<Scalar T, bool IsPeriodBoundary>
+    void TodaModel<T, IsPeriodBoundary>::swap(TodaModel& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         springLength.swap(obj.springLength);
     }

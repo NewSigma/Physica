@@ -29,9 +29,9 @@ namespace Physica::Core {
      * Reference:
      * [1] R. L. Honeycutt, Stochastic Runge-Kutta algorithm: I. White noise, Phys. Rev. A 45, 600 (1992).
      */
-    template<class ScalarType, size_t Dim>
-    class SRK2 : public ODESolver<ScalarType, Dim> {
-        using Base = ODESolver<ScalarType, Dim>;
+    template<Scalar T, size_t Dim>
+    class SRK2 : public ODESolver<T, Dim> {
+        using Base = ODESolver<T, Dim>;
     public:
         using typename Base::VectorType;
     public:
@@ -42,32 +42,32 @@ namespace Physica::Core {
         void solve(Function func, RandomFunc random);
 
         template<class Function, class RandomFunc>
-        static inline void step(ScalarType stepSize, ScalarType& x, VectorType& sol, Function func, RandomFunc random);
+        static inline void step(T stepSize, T& x, VectorType& sol, Function func, RandomFunc random);
     };
 
-    template<class ScalarType, size_t Dim>
+    template<Scalar T, size_t Dim>
     template<class Function, class RandomFunc>
-    void SRK2<ScalarType, Dim>::solve(Function func, RandomFunc random) {
+    void SRK2<T, Dim>::solve(Function func, RandomFunc random) {
         const size_t col_1 = Base::solution.getCol() - 1;
         for (size_t i = 0; i < col_1; ++i) {
-            ScalarType temp = Base::x[i];
+            T temp = Base::x[i];
             Base::solution.asArray()[i + 1] = Base::solution.col(i);
             step(Base::stepSize, temp, Base::solution.asArray()[i + 1], func, random);
             Base::x[i + 1] = temp;
         }
     }
 
-    template<class ScalarType, size_t Dim>
+    template<Scalar T, size_t Dim>
     template<class Function, class RandomFunc>
-    inline void SRK2<ScalarType, Dim>::step(ScalarType stepSize, ScalarType& x, VectorType& sol, Function func, RandomFunc random) {
-        using FunctionResult = typename std::invoke_result<Function, ScalarType, VectorType>::type;
-        using RandFunctionResult = typename std::invoke_result<RandomFunc, ScalarType, VectorType>::type;
+    inline void SRK2<T, Dim>::step(T stepSize, T& x, VectorType& sol, Function func, RandomFunc random) {
+        using FunctionResult = typename std::invoke_result<Function, T, VectorType>::type;
+        using RandFunctionResult = typename std::invoke_result<RandomFunc, T, VectorType>::type;
         static_assert(FunctionResult::SizeAtCompile == Dim, "[Possible optimization]: Dimention between ODESolver and functor do not match");
         static_assert(RandFunctionResult::SizeAtCompile == Dim, "[Possible optimization]: Dimention between ODESolver and functor do not match");
         const VectorType randVec = random(x, sol);
         VectorType term1 = func(x, sol);
         x += stepSize;
         VectorType term2 = func(x, sol + stepSize * term1 + randVec);
-        sol += (term1 + term2) * (stepSize * ScalarType(0.5)) + randVec;
+        sol += (term1 + term2) * (stepSize * T(0.5)) + randVec;
     }
 }

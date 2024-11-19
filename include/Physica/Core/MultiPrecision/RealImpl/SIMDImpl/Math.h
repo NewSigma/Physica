@@ -19,96 +19,96 @@
 #pragma once
 
 namespace Physica::Core {
-    template<class ScalarType, size_t Size>
-    [[nodiscard]] __host__ __device__ inline SIMD<ScalarType, Size> abs(const SIMD<ScalarType, Size>& x) {
-        if constexpr (ScalarType::Option == Float16)
-            return SIMD<ScalarType, Size>(__habs2(x.toMachine()));
+    template<Scalar T, size_t Size>
+    [[nodiscard]] __host__ __device__ inline SIMD<T, Size> abs(const SIMD<T, Size>& x) {
+        if constexpr (T::Option == Float16)
+            return SIMD<T, Size>(__habs2(x.toMachine()));
         else if constexpr (IsHost())
-            return SIMD<ScalarType, Size>(abs(x.toMachine()));
+            return SIMD<T, Size>(abs(x.toMachine()));
         else
             noImpl();
     }
 
-    template<class ScalarType, size_t Size>
-    [[nodiscard]] inline SIMD<ScalarType, Size> square(const SIMD<ScalarType, Size>& x) {
+    template<Scalar T, size_t Size>
+    [[nodiscard]] inline SIMD<T, Size> square(const SIMD<T, Size>& x) {
         return x * x;
     }
 
-    template<class ScalarType, size_t Size>
-    [[nodiscard]] inline auto reciprocal(const SIMD<ScalarType, Size>& x) {
-        using ResultType = SIMD<ScalarType, Size>;
+    template<Scalar T, size_t Size>
+    [[nodiscard]] inline auto reciprocal(const SIMD<T, Size>& x) {
+        using ResultType = SIMD<T, Size>;
         return ResultType(1) / x;
     }
 
-    template<class ScalarType, size_t Size>
-    [[nodiscard]] inline SIMD<ScalarType, Size> sqrt(const SIMD<ScalarType, Size>& x) {
-        if constexpr (!ScalarType::isDifferentiable)
-            return SIMD<ScalarType, Size>(sqrt(x.toMachine()));
+    template<Scalar T, size_t Size>
+    [[nodiscard]] inline SIMD<T, Size> sqrt(const SIMD<T, Size>& x) {
+        if constexpr (!T::isDifferentiable)
+            return SIMD<T, Size>(sqrt(x.toMachine()));
         else {
-            using PlainSIMD = SIMD<typename ScalarType::ValueType, Size>;
-            using TracerType = typename ScalarType::TracerType;
+            using PlainSIMD = SIMD<typename T::ValueType, Size>;
+            using TracerType = typename T::TracerType;
             auto& tracer = TracerType::getInstance();
             const PlainSIMD values(sqrt(x.toMachine()));
             const size_t newHeadNode = tracer.pushOperation(values, ExprType::Sqrt);
             for (size_t i = 0; i < Size; ++i)
-                tracer.pushOperand(ScalarType(x.value_ptr() + i, x.grad_ptr() + i));
+                tracer.pushOperand(T(x.value_ptr() + i, x.grad_ptr() + i));
             return {values, newHeadNode};
         }
     }
 
-    template<class ScalarType, size_t Size>
-    [[nodiscard]] inline SIMD<ScalarType, Size> cbrt(const SIMD<ScalarType, Size>& x) {
-        if constexpr (!ScalarType::isDifferentiable)
-            return SIMD<ScalarType, Size>(cbrt(x.toMachine()));
+    template<Scalar T, size_t Size>
+    [[nodiscard]] inline SIMD<T, Size> cbrt(const SIMD<T, Size>& x) {
+        if constexpr (!T::isDifferentiable)
+            return SIMD<T, Size>(cbrt(x.toMachine()));
         else {
-            using PlainSIMD = SIMD<typename ScalarType::ValueType, Size>;
-            using TracerType = typename ScalarType::TracerType;
+            using PlainSIMD = SIMD<typename T::ValueType, Size>;
+            using TracerType = typename T::TracerType;
             auto& tracer = TracerType::getInstance();
             const PlainSIMD values(cbrt(x.toMachine()));
             const size_t newHeadNode = tracer.pushOperation(values, ExprType::Cbrt);
             for (size_t i = 0; i < Size; ++i)
-                tracer.pushOperand(ScalarType(x.value_ptr() + i, x.grad_ptr() + i));
+                tracer.pushOperand(T(x.value_ptr() + i, x.grad_ptr() + i));
             return {values, newHeadNode};
         }
     }
 
-    template<class ScalarType, size_t Size>
-    [[nodiscard]] inline auto ln(const SIMD<ScalarType, Size>& x) {
-        return SIMD<ScalarType, Size>(log(x.toMachine()));
+    template<Scalar T, size_t Size>
+    [[nodiscard]] inline auto ln(const SIMD<T, Size>& x) {
+        return SIMD<T, Size>(log(x.toMachine()));
     }
 
-    template<class ScalarType, size_t Size>
-    [[nodiscard]] inline auto ln1p(const SIMD<ScalarType, Size>& x) {
-        return SIMD<ScalarType, Size>(log1p(x.toMachine()));
+    template<Scalar T, size_t Size>
+    [[nodiscard]] inline auto ln1p(const SIMD<T, Size>& x) {
+        return SIMD<T, Size>(log1p(x.toMachine()));
     }
 
-    template<class ScalarType, size_t Size>
-    [[nodiscard]] inline auto exp(const SIMD<ScalarType, Size>& x) {
-        return SIMD<ScalarType, Size>(exp(x.toMachine()));
+    template<Scalar T, size_t Size>
+    [[nodiscard]] inline auto exp(const SIMD<T, Size>& x) {
+        return SIMD<T, Size>(exp(x.toMachine()));
     }
 
-    template<class ScalarType, size_t Size>
-    inline static void sincos(const SIMD<ScalarType, Size>& x, SIMD<ScalarType, Size>& s, SIMD<ScalarType, Size>& c) {
+    template<Scalar T, size_t Size>
+    inline static void sincos(const SIMD<T, Size>& x, SIMD<T, Size>& s, SIMD<T, Size>& c) {
         sincos(x.toMachine(), s.toMachine(), c.toMachine());
-        if constexpr (ScalarType::isDifferentiable) {
-            using TracerType = typename ScalarType::TracerType;
+        if constexpr (T::isDifferentiable) {
+            using TracerType = typename T::TracerType;
             auto& tracer = TracerType::getInstance();
-            const ScalarType sinHeadNode = tracer.pushOperation(s, ExprType::Sin);
+            const T sinHeadNode = tracer.pushOperation(s, ExprType::Sin);
             for (size_t i = 0; i < Size; ++i)
-                tracer.pushOperand(ScalarType(x.value_ptr() + i, x.grad_ptr() + i));
-            s = SIMD<ScalarType, Size>(s, sinHeadNode);
+                tracer.pushOperand(T(x.value_ptr() + i, x.grad_ptr() + i));
+            s = SIMD<T, Size>(s, sinHeadNode);
 
-            const ScalarType cosHeadNode = tracer.pushOperation(c, ExprType::Cos);
+            const T cosHeadNode = tracer.pushOperation(c, ExprType::Cos);
             for (size_t i = 0; i < Size; ++i)
-                tracer.pushOperand(ScalarType(x.value_ptr() + i, x.grad_ptr() + i));
-            c = SIMD<ScalarType, Size>(c, cosHeadNode);
+                tracer.pushOperand(T(x.value_ptr() + i, x.grad_ptr() + i));
+            c = SIMD<T, Size>(c, cosHeadNode);
         }
     }
 
-    template<class ScalarType, size_t Size>
-    [[nodiscard]] inline SIMD<ScalarType, Size> lncosh(const SIMD<ScalarType, Size>& x) noexcept {
-        using T = SIMD<ScalarType, Size>;
+    template<Scalar T, size_t Size>
+    [[nodiscard]] inline SIMD<T, Size> lncosh(const SIMD<T, Size>& x) noexcept {
+        using Pack = SIMD<T, Size>;
         const auto x1 = abs(x);
-        return x1 + ln1p(exp(-x1 * T(2))) - T(M_LN2);
+        return x1 + ln1p(exp(-x1 * Pack(2))) - Pack(M_LN2);
     }
 }

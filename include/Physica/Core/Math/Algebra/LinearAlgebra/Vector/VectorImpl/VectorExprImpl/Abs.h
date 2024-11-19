@@ -19,14 +19,14 @@
 #pragma once
 
 namespace Physica::Core {
-    template<class VectorType>
-    class VectorExpr<ExprType::Abs, VectorType> : public UnitaryVectorExpr<ExprType::Abs, VectorType> {
-        using This = VectorExpr<ExprType::Abs, VectorType>;
-        using Base = UnitaryVectorExpr<ExprType::Abs, VectorType>;
+    template<Vector T>
+    class VectorExpr<ExprType::Abs, T> : public UnitaryVectorExpr<ExprType::Abs, T> {
+        using This = VectorExpr<ExprType::Abs, T>;
+        using Base = UnitaryVectorExpr<ExprType::Abs, T>;
     public:
         using typename Base::ScalarType;
     private:
-        constexpr static bool isComplexV = VectorType::isComplex;
+        constexpr static bool isComplexV = T::isComplex;
         constexpr static bool isReverseDiff = Base::isReverseDiff;
     public:
         using Base::Base;
@@ -50,8 +50,8 @@ namespace Physica::Core {
         }
     };
 
-    template<class VectorType>
-    [[nodiscard]] inline auto abs(const RValueVector<VectorType>& v) noexcept {
-        return VectorExpr<ExprType::Abs, VectorType>(v);
+    template<Vector T>
+    [[nodiscard]] inline auto abs(const T& v) noexcept {
+        return VectorExpr<ExprType::Abs, T>(v);
     }
 }

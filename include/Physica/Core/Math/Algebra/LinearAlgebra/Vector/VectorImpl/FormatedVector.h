@@ -19,17 +19,17 @@
 #pragma once
 
 namespace Physica::Core {
-    template<class VectorType>
-    class FormatedVector {
-        const RValueVector<VectorType>& data;
+    template<Vector T>
+    class FormatedVector<T> {
+        const T& data;
         std::string prefix;
         std::string suffix;
         std::string separator;
     public:
-        FormatedVector(const RValueVector<VectorType>& data_);
+        FormatedVector(const T& data_);
         /* Operators */
-        template<class T>
-        friend std::ostream& operator<<(std::ostream& os, const FormatedVector<T>& v);
+        template<Vector U>
+        friend std::ostream& operator<<(std::ostream& os, const FormatedVector<U>& v);
         /* Operations */
         FormatedVector& toFormatMMA();
         /* Setters */
@@ -38,16 +38,16 @@ namespace Physica::Core {
         FormatedVector& setSeparator(std::string separator_);
     };
 
-    template<class VectorType>
-    FormatedVector<VectorType>::FormatedVector(const RValueVector<VectorType>& data_)
+    template<Vector T>
+    FormatedVector<T>::FormatedVector(const T& data_)
             : data(data_)
             , prefix("(")
             , suffix(")")
             , separator(", ") {}
 
-    template<class VectorType>
-    std::ostream& operator<<(std::ostream& os, const FormatedVector<VectorType>& v) {
-        const RValueVector<VectorType>& data = v.data;
+    template<Vector U>
+    std::ostream& operator<<(std::ostream& os, const FormatedVector<U>& v) {
+        const U& data = v.data;
         os << v.prefix;
         size_t length = data.getLength();
         if (length > 0) {
@@ -60,28 +60,28 @@ namespace Physica::Core {
         return os;
     }
 
-    template<class VectorType>
-    FormatedVector<VectorType>& FormatedVector<VectorType>::toFormatMMA() {
+    template<Vector T>
+    FormatedVector<T>& FormatedVector<T>::toFormatMMA() {
         setPrefix("{");
         setSuffix("}");
         setSeparator(",");
         return *this;
     }
 
-    template<class VectorType>
-    FormatedVector<VectorType>& FormatedVector<VectorType>::setPrefix(std::string prefix_) {
+    template<Vector T>
+    FormatedVector<T>& FormatedVector<T>::setPrefix(std::string prefix_) {
         prefix = std::move(prefix_);
         return *this;
     }
 
-    template<class VectorType>
-    FormatedVector<VectorType>& FormatedVector<VectorType>::setSuffix(std::string suffix_) {
+    template<Vector T>
+    FormatedVector<T>& FormatedVector<T>::setSuffix(std::string suffix_) {
         suffix = std::move(suffix_);
         return *this;
     }
 
-    template<class VectorType>
-    FormatedVector<VectorType>& FormatedVector<VectorType>::setSeparator(std::string separator_) {
+    template<Vector T>
+    FormatedVector<T>& FormatedVector<T>::setSeparator(std::string separator_) {
         separator = std::move(separator_);
         return *this;
     }

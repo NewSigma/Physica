@@ -23,11 +23,11 @@
 #include "TraceSegment.cuh"
 
 namespace Physica::Core {
-    template<class ScalarType, int Order>
-    class device_obj<DiffTracer<ScalarType, Order>> {
-        static_assert(!ScalarType::isDifferentiable, "[Error]: Diff<> pack is not necessary");
+    template<Scalar T, int Order>
+    class device_obj<DiffTracer<T, Order>> {
+        static_assert(!T::isDifferentiable, "[Error]: Diff<> pack is not necessary");
         static_assert(Order > 0, "[Error]: 0 order is not differentiable");
-        using host_obj = DiffTracer<ScalarType, Order>;
+        using host_obj = DiffTracer<T, Order>;
         using This = device_obj<host_obj>;
     public:
         using SegmentType = device_obj<typename host_obj::SegmentType>;
@@ -42,7 +42,7 @@ namespace Physica::Core {
         ~device_obj() = default;
         /* Operations */
         SegmentType& pushSegment(size_t size, ExprType type);
-        SegmentType& pushSegment(ScalarType value);
+        SegmentType& pushSegment(T value);
         SegmentType& pushSegment(const HostValueVector& value);
 
         inline void reverse(DiffScalar from, DiffScalar to);
@@ -73,8 +73,8 @@ namespace Physica::Core {
         device_obj& operator=(device_obj&&) noexcept = default;
     };
 
-    template<class ScalarType, int Order>
-    typename device_obj<DiffTracer<ScalarType, Order>>::SegmentType& device_obj<DiffTracer<ScalarType, Order>>::pushSegment(size_t size, ExprType type) {
+    template<Scalar T, int Order>
+    typename device_obj<DiffTracer<T, Order>>::SegmentType& device_obj<DiffTracer<T, Order>>::pushSegment(size_t size, ExprType type) {
         const auto end = reserveList.end();
         for (auto ite = reserveList.begin(); ite != end; ++ite) {
             auto& segment = *ite;
@@ -98,29 +98,29 @@ namespace Physica::Core {
         return traceList.emplace_front(size, type);
     }
 
-    template<class ScalarType, int Order>
-    typename device_obj<DiffTracer<ScalarType, Order>>::SegmentType& device_obj<DiffTracer<ScalarType, Order>>::pushSegment(ScalarType value) {
+    template<Scalar T, int Order>
+    typename device_obj<DiffTracer<T, Order>>::SegmentType& device_obj<DiffTracer<T, Order>>::pushSegment(T value) {
         auto& result = pushSegment(1, ExprType::Set);
         result.init(value);
         return result;
     }
 
-    template<class ScalarType, int Order>
-    typename device_obj<DiffTracer<ScalarType, Order>>::SegmentType& device_obj<DiffTracer<ScalarType, Order>>::pushSegment(const HostValueVector& value) {
+    template<Scalar T, int Order>
+    typename device_obj<DiffTracer<T, Order>>::SegmentType& device_obj<DiffTracer<T, Order>>::pushSegment(const HostValueVector& value) {
         auto& result = pushSegment(value.getLength(), ExprType::Set);
         result.init(value);
         return result;
     }
 
-    template<class ScalarType, int Order>
-    inline void device_obj<DiffTracer<ScalarType, Order>>::reverse(DiffScalar from, DiffScalar to) {
+    template<Scalar T, int Order>
+    inline void device_obj<DiffTracer<T, Order>>::reverse(DiffScalar from, DiffScalar to) {
         forSegmentInRange(from, to, [](SegmentType& segment) {
             segment.reverse();
         });
     }
 
-    template<class ScalarType, int Order>
-    void device_obj<DiffTracer<ScalarType, Order>>::reverse_from(DiffScalar from) {
+    template<Scalar T, int Order>
+    void device_obj<DiffTracer<T, Order>>::reverse_from(DiffScalar from) {
         assert(!traceList.empty() && "[Error]: No record found");
         bool foundBeginSegment = false;
         const auto end = traceList.end();
@@ -135,8 +135,8 @@ namespace Physica::Core {
         assert(foundBeginSegment && "[Error]: Cannot find begin record, maybe it is on another thread?");
     }
 
-    template<class ScalarType, int Order>
-    void device_obj<DiffTracer<ScalarType, Order>>::reverse_to(DiffScalar to) {
+    template<Scalar T, int Order>
+    void device_obj<DiffTracer<T, Order>>::reverse_to(DiffScalar to) {
         assert(!traceList.empty() && "[Error]: No record found");
         bool foundFinalSegment = false;
         const auto end = traceList.end();
@@ -150,23 +150,23 @@ namespace Physica::Core {
         assert(foundFinalSegment && "[Error]: Cannot find final record, maybe it is on another thread?");
     }
 
-    template<class ScalarType, int Order>
-    void device_obj<DiffTracer<ScalarType, Order>>::reverse() {
+    template<Scalar T, int Order>
+    void device_obj<DiffTracer<T, Order>>::reverse() {
         assert(!traceList.empty() && "[Error]: No record found");
         const auto end = traceList.end();
         for (auto ite = traceList.begin(); ite != end; ++ite)
             (*ite).reverse();
     }
 
-    template<class ScalarType, int Order>
-    inline void device_obj<DiffTracer<ScalarType, Order>>::zero_grad(DiffScalar from, DiffScalar to) {
+    template<Scalar T, int Order>
+    inline void device_obj<DiffTracer<T, Order>>::zero_grad(DiffScalar from, DiffScalar to) {
         forSegmentInRange(from, to, [](SegmentType& segment) {
             segment.zero_grad();
         });
     }
 
-    template<class ScalarType, int Order>
-    void device_obj<DiffTracer<ScalarType, Order>>::zero_grad_from(DiffScalar from) {
+    template<Scalar T, int Order>
+    void device_obj<DiffTracer<T, Order>>::zero_grad_from(DiffScalar from) {
         assert(!traceList.empty() && "[Error]: No record found");
         bool foundBeginSegment = false;
         const auto end = traceList.end();
@@ -180,8 +180,8 @@ namespace Physica::Core {
         assert(foundBeginSegment && "[Error]: Cannot find begin record, maybe it is on another thread?");
     }
 
-    template<class ScalarType, int Order>
-    void device_obj<DiffTracer<ScalarType, Order>>::zero_grad_to(DiffScalar to) {
+    template<Scalar T, int Order>
+    void device_obj<DiffTracer<T, Order>>::zero_grad_to(DiffScalar to) {
         assert(!traceList.empty() && "[Error]: No record found");
         bool foundFinalSegment = false;
         const auto end = traceList.end();
@@ -195,15 +195,15 @@ namespace Physica::Core {
         assert(foundFinalSegment && "[Error]: Cannot find final record, maybe it is on another thread?");
     }
 
-    template<class ScalarType, int Order>
-    void device_obj<DiffTracer<ScalarType, Order>>::zero_grad() {
+    template<Scalar T, int Order>
+    void device_obj<DiffTracer<T, Order>>::zero_grad() {
         const auto end = traceList.end();
         for (auto ite = traceList.begin(); ite != end; ++ite)
             (*ite).zero_grad();
     }
 
-    template<class ScalarType, int Order>
-    void device_obj<DiffTracer<ScalarType, Order>>::forget_to(DiffScalar to) {
+    template<Scalar T, int Order>
+    void device_obj<DiffTracer<T, Order>>::forget_to(DiffScalar to) {
         assert(!traceList.empty() && "[Error]: No record found");
         const auto end = traceList.end();
         for (auto ite = traceList.begin(); ite != end; ite = traceList.begin()) {
@@ -218,15 +218,15 @@ namespace Physica::Core {
         assert(false && "[Error]: Cannot find begin record, maybe it is on another thread?");
     }
 
-    template<class ScalarType, int Order>
-    inline void device_obj<DiffTracer<ScalarType, Order>>::clear() {
+    template<Scalar T, int Order>
+    inline void device_obj<DiffTracer<T, Order>>::clear() {
         traceList.clear();
         reserveList.clear();
     }
 
-    template<class ScalarType, int Order>
+    template<Scalar T, int Order>
     template<class Functor>
-    void device_obj<DiffTracer<ScalarType, Order>>::forSegmentInRange(DiffScalar from, DiffScalar to, Functor func) {
+    void device_obj<DiffTracer<T, Order>>::forSegmentInRange(DiffScalar from, DiffScalar to, Functor func) {
         assert(!traceList.empty() && "[Error]: No record found");
         bool foundBeginSegment = false, foundFinalSegment = false;
         const auto end = traceList.end();
@@ -245,28 +245,28 @@ namespace Physica::Core {
         assert(foundFinalSegment && "[Error]: Cannot find final record, maybe it is on another thread?");
     }
 
-    template<class ScalarType, int Order>
+    template<Scalar T, int Order>
     template<class Functor>
-    void device_obj<DiffTracer<ScalarType, Order>>::forSegmentInRange(DiffScalar from, DiffScalar to, Functor func) const {
+    void device_obj<DiffTracer<T, Order>>::forSegmentInRange(DiffScalar from, DiffScalar to, Functor func) const {
         const_cast<This*>(this)->forSegmentInRange(from, to, func);
     }
 
-    template<class ScalarType, int Order>
-    size_t device_obj<DiffTracer<ScalarType, Order>>::getNumRecord() const noexcept {
+    template<Scalar T, int Order>
+    size_t device_obj<DiffTracer<T, Order>>::getNumRecord() const noexcept {
         size_t result = 0;
         for (auto ite = traceList.cbegin(); ite != traceList.cend(); ++ite)
             result += (*ite).getLength();
         return result;
     }
 
-    template<class ScalarType, int Order>
-    device_obj<DiffTracer<ScalarType, Order>>& device_obj<DiffTracer<ScalarType, Order>>::getInstance() noexcept {
+    template<Scalar T, int Order>
+    device_obj<DiffTracer<T, Order>>& device_obj<DiffTracer<T, Order>>::getInstance() noexcept {
         thread_local static This instance{};
         return instance;
     }
 
-    template<class ScalarType, int Order>
-    size_t device_obj<DiffTracer<ScalarType, Order>>::distance(DiffScalar from, DiffScalar to) {
+    template<Scalar T, int Order>
+    size_t device_obj<DiffTracer<T, Order>>::distance(DiffScalar from, DiffScalar to) {
         if (from == to)
             return 0;
 

@@ -22,8 +22,8 @@
 
 using namespace Physica::Core;
 
-template<class MatrixType>
-bool isHessenburgMatrix(const MatrixType& m) {
+template<Matrix T>
+bool isHessenburgMatrix(const T& m) {
     const size_t order = m.getRow();
     if (m.getRow() != m.getCol())
         return false;
@@ -37,14 +37,14 @@ bool isHessenburgMatrix(const MatrixType& m) {
     return true;
 }
 
-template<class MatrixType>
-bool hessTest(const MatrixType& source, double tolerance) {
-    Hessenburg<typename MatrixType::ScalarType> hess(source);
-    MatrixType H = hess.getMatrixH();
+template<Matrix T>
+bool hessTest(const T& source, double tolerance) {
+    Hessenburg<typename T::ScalarType> hess(source);
+    T H = hess.getMatrixH();
     if (!isHessenburgMatrix(H))
         return false;
-    MatrixType Q = hess.getMatrixQ();
-    MatrixType A = (Q * H).compute() * Q.hermite();
+    T Q = hess.getMatrixQ();
+    T A = (Q * H).compute() * Q.hermite();
     if (!matrixNear(A, source, tolerance))
         return false;
     return true;

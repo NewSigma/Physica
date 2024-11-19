@@ -19,39 +19,39 @@
 #pragma once
 
 namespace Physica::Core {
-    template<class ScalarType, size_t Dim>
-    SteepestDescent<ScalarType, Dim>::SteepestDescent(ScalarType maxStepSize, ScalarType decreaseCondNum, ScalarType curvatureCondNum)
-            : nowY(std::numeric_limits<ScalarType>::max())
+    template<Scalar T, size_t Dim>
+    SteepestDescent<T, Dim>::SteepestDescent(T maxStepSize, T decreaseCondNum, T curvatureCondNum)
+            : nowY(std::numeric_limits<T>::max())
             , lineSearch(maxStepSize, decreaseCondNum, curvatureCondNum) {}
 
-    template<class ScalarType, size_t Dim>
-    SteepestDescent<ScalarType, Dim>& SteepestDescent<ScalarType, Dim>::operator=(SteepestDescent obj) noexcept {
+    template<Scalar T, size_t Dim>
+    SteepestDescent<T, Dim>& SteepestDescent<T, Dim>::operator=(SteepestDescent obj) noexcept {
         swap(obj);
         return *this;
     }
 
-    template<class ScalarType, size_t Dim>
+    template<Scalar T, size_t Dim>
     template<class Functor, class GradFunctor>
-    void SteepestDescent<ScalarType, Dim>::init(VectorType initial, Functor func, GradFunctor grad) {
+    void SteepestDescent<T, Dim>::init(VectorType initial, Functor func, GradFunctor grad) {
         tryX = (std::move(initial));
         nowX = tryX;
         nowY = func(tryX);
         gradG = grad(nowX);
     }
 
-    template<class ScalarType, size_t Dim>
+    template<Scalar T, size_t Dim>
     template<class Functor, class GradFunctor>
-    void SteepestDescent<ScalarType, Dim>::step(Functor func, GradFunctor grad) {
+    void SteepestDescent<T, Dim>::step(Functor func, GradFunctor grad) {
         VectorType direction = -gradG;
-        const ScalarType stepSize = lineSearch.run(func, grad, nowX, gradG, direction);
+        const T stepSize = lineSearch.run(func, grad, nowX, gradG, direction);
 
         nowX += direction * stepSize;
         nowY = func(nowX);
         gradG = grad(nowX);
     }
 
-    template<class ScalarType, size_t Dim>
-    void SteepestDescent<ScalarType, Dim>::swap(SteepestDescent& __restrict obj) noexcept {
+    template<Scalar T, size_t Dim>
+    void SteepestDescent<T, Dim>::swap(SteepestDescent& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         gradG.swap(obj.gradG);
         tryX.swap(obj.tryX);
@@ -60,8 +60,8 @@ namespace Physica::Core {
         lineSearch.swap(obj.lineSearch);
     }
 
-    template<class ScalarType, size_t Dim>
-    inline size_t SteepestDescent<ScalarType, Dim>::getDim() const noexcept {
+    template<Scalar T, size_t Dim>
+    inline size_t SteepestDescent<T, Dim>::getDim() const noexcept {
         if constexpr (Dim == Dynamic)
             return gradG.getLength();
         return Dim;

@@ -21,19 +21,18 @@
 #include <Physica/Core/Math/Algebra/LinearAlgebra/Matrix/MatrixImpl/RValueMatrix.h>
 
 namespace Physica::Core {
-    template<class VectorType, class MatrixType>
-    class VectorMatrixProduct : public RValueMatrix<VectorMatrixProduct<VectorType, MatrixType>> {
-        using This = VectorMatrixProduct<VectorType, MatrixType>;
+    template<Vector T, Matrix U>
+    class VectorMatrixProduct : public RValueMatrix<VectorMatrixProduct<T, U>> {
+        using This = VectorMatrixProduct<T, U>;
     public:
         using Base = RValueMatrix<This>;
         using Base::isReverseDiff;
         using typename Base::ScalarType;
     private:
-        const VectorType& vec;
-        const MatrixType& mat;
+        const T& vec;
+        const U& mat;
     public:
-        VectorMatrixProduct(const RValueVector<VectorType>& vec_, const RValueMatrix<MatrixType>& mat_)
-                : vec(vec_.getDerived()), mat(mat_.getDerived()) {
+        VectorMatrixProduct(const T& vec_, const U& mat_) : vec(vec_), mat(mat_) {
             assert(mat.getRow() == 1);
         }
         VectorMatrixProduct(const This&) = delete;
@@ -46,39 +45,37 @@ namespace Physica::Core {
         [[nodiscard]] ScalarType calc(size_t row, size_t col) const;
         [[nodiscard]] __host__ __device__ size_t getRow() const { return vec.getLength(); }
         [[nodiscard]] __host__ __device__ size_t getCol() const { return mat.getCol(); }
-        [[nodiscard]] const VectorType& getLHS() const noexcept { return vec; }
-        [[nodiscard]] const MatrixType& getRHS() const noexcept { return mat; }
+        [[nodiscard]] const T& getLHS() const noexcept { return vec; }
+        [[nodiscard]] const U& getRHS() const noexcept { return mat; }
     };
 
-    template<class VectorType, class MatrixType>
-    typename VectorMatrixProduct<VectorType, MatrixType>::ScalarType VectorMatrixProduct<VectorType, MatrixType>::calc(size_t row, size_t col) const {
+    template<Vector T, Matrix U>
+    typename VectorMatrixProduct<T, U>::ScalarType VectorMatrixProduct<T, U>::calc(size_t row, size_t col) const {
         return vec.calc(row) * mat.calc(0, col);
     }
     /**
      * \note Here we force the row of \param mat is 1, because in Physica vectors are naturally col vectors.
      * To compute row vector * matrix, users should converted it to matrix^T * col vector.
      */
-    template<class VectorType, class MatrixType>
-    [[nodiscard]] inline typename std::enable_if<MatrixType::RowAtCompile == 1, VectorMatrixProduct<VectorType, MatrixType>>::type
-    operator*(const RValueVector<VectorType>& vec, const RValueMatrix<MatrixType>& mat) noexcept {
+    template<Vector T, Matrix U>
+    [[nodiscard]] inline typename std::enable_if<U::RowAtCompile == 1, VectorMatrixProduct<T, U>>::type
+    operator*(const T& vec, const U& mat) noexcept {
         assert(mat.getRow() == 1);
         return VectorMatrixProduct(vec, mat);
     }
 }
 
 namespace Physica {
-    using namespace Core;
-
-    template<class VectorType, class MatrixType>
-    class Traits<VectorMatrixProduct<VectorType, MatrixType>> {
-        static_assert(MatrixType::RowAtCompile == 1 || MatrixType::RowAtCompile == Dynamic,
+    template<Vector T, Matrix U>
+    class Traits<VectorMatrixProduct<T, U>> {
+        static_assert(U::RowAtCompile == 1 || U::RowAtCompile == Dynamic,
                       "Row and column do not match in matrix product");
     public:
-        using ScalarType = typename Core::Internal::BinaryScalarOpReturnType<typename VectorType::ScalarType,
-                                                                             typename MatrixType::ScalarType>::Type;
+        using ScalarType = typename Core::Internal::BinaryScalarOpReturnType<typename T::ScalarType,
+                                                                             typename U::ScalarType>::Type;
         constexpr static int Option = MatrixOption::AnyMajor | MatrixOption::AnyStorage;
-        constexpr static size_t RowAtCompile = VectorType::SizeAtCompile;
-        constexpr static size_t ColAtCompile = MatrixType::ColAtCompile;
+        constexpr static size_t RowAtCompile = T::SizeAtCompile;
+        constexpr static size_t ColAtCompile = U::ColAtCompile;
         constexpr static size_t SizeAtCompile = RowAtCompile * ColAtCompile;
     };
 }

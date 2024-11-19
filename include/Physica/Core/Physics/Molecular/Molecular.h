@@ -18,15 +18,14 @@
  */
 #pragma once
 
-#include <fstream>
-#include "Physica/Core/Physics/PhyConst.h"
-#include "Physica/Core/Math/Geometry/Point.h"
-#include "Physica/Core/Utils/Container/Array.h"
+#include <Physica/Core/Physics/PhyConst.h>
+#include <Physica/Core/Math/Geometry/Point.h>
+#include <Physica/Core/Utils/Container/Array.h>
 
 namespace Physica::Core::Physics {
-    template<class ScalarType>
+    template<Scalar T>
     class Molecular {
-        using PointType = Point<3, ScalarType>;
+        using PointType = Point<3, T>;
         Array<PointType> atoms;
         Array<uint8_t> atomicNumbers;
     public:
@@ -38,19 +37,19 @@ namespace Physica::Core::Physics {
         [[nodiscard]] size_t getAtomCount() const noexcept { return atoms.getLength(); }
         [[nodiscard]] PointType getAtom(size_t i) const { return atoms[i]; }
         [[nodiscard]] uint8_t getAtomicNumber(size_t i) const { return atomicNumbers[i]; }
-        [[nodiscard]] ScalarType getPairDist(size_t i, size_t j) const;
-        [[nodiscard]] ScalarType getTripleAngle(size_t i, size_t j, size_t k) const;
-        [[nodiscard]] ScalarType getOutOfPlaneAngle(size_t i, size_t j, size_t k, size_t l) const;
-        [[nodiscard]] ScalarType getDihedralAngle(size_t i, size_t j, size_t k, size_t l) const;
+        [[nodiscard]] T getPairDist(size_t i, size_t j) const;
+        [[nodiscard]] T getTripleAngle(size_t i, size_t j, size_t k) const;
+        [[nodiscard]] T getOutOfPlaneAngle(size_t i, size_t j, size_t k, size_t l) const;
+        [[nodiscard]] T getDihedralAngle(size_t i, size_t j, size_t k, size_t l) const;
         [[nodiscard]] PointType getMassCenter() const;
-        [[nodiscard]] ScalarType getNuclearRepulsionEnergy() const;
+        [[nodiscard]] T getNuclearRepulsionEnergy() const;
     };
 
-    template<class ScalarType>
-    Molecular<ScalarType>::Molecular(size_t atomCount) : atoms(atomCount), atomicNumbers(atomCount) {}
+    template<Scalar T>
+    Molecular<T>::Molecular(size_t atomCount) : atoms(atomCount), atomicNumbers(atomCount) {}
 
-    template<class ScalarType>
-    std::ostream& operator<<(std::ostream& os, const Molecular<ScalarType>& m) {
+    template<Scalar T>
+    std::ostream& operator<<(std::ostream& os, const Molecular<T>& m) {
         os << m.atomCount() << '\n';
         const auto& atoms = m.getAtoms();
         for (const auto& atom : atoms)
@@ -58,15 +57,15 @@ namespace Physica::Core::Physics {
         return os;
     }
 
-    template<class ScalarType>
-    ScalarType Molecular<ScalarType>::getPairDist(size_t i, size_t j) const {
+    template<Scalar T>
+    T Molecular<T>::getPairDist(size_t i, size_t j) const {
         return atoms[i].dist(atoms[j]);
     }
     /**
      * \returns The angle between vector ji and vector jk
      */
-    template<class ScalarType>
-    ScalarType Molecular<ScalarType>::getTripleAngle(size_t i, size_t j, size_t k) const {
+    template<Scalar T>
+    T Molecular<T>::getTripleAngle(size_t i, size_t j, size_t k) const {
         using VectorType = typename PointType::VectorType;
         const VectorType vector_ji = atoms[i].getVector() - atoms[j].getVector();
         const VectorType vector_jk = atoms[k].getVector() - atoms[j].getVector();
@@ -75,8 +74,8 @@ namespace Physica::Core::Physics {
     /**
      * \returns Angle between plane ijk and line kl
      */
-    template<class ScalarType>
-    ScalarType Molecular<ScalarType>::getOutOfPlaneAngle(size_t i, size_t j, size_t k, size_t l) const {
+    template<Scalar T>
+    T Molecular<T>::getOutOfPlaneAngle(size_t i, size_t j, size_t k, size_t l) const {
         using VectorType = typename PointType::VectorType;
         const VectorType vector_ki = atoms[i].getVector() - atoms[k].getVector();
         const VectorType vector_kj = atoms[j].getVector() - atoms[k].getVector();
@@ -87,8 +86,8 @@ namespace Physica::Core::Physics {
     /**
      * \returns Dihedral angle between plain ijk and plain jkl
      */
-    template<class ScalarType>
-    ScalarType Molecular<ScalarType>::getDihedralAngle(size_t i, size_t j, size_t k, size_t l) const {
+    template<Scalar T>
+    T Molecular<T>::getDihedralAngle(size_t i, size_t j, size_t k, size_t l) const {
         using VectorType = typename PointType::VectorType;
         const VectorType vector_ki = atoms[i].getVector() - atoms[k].getVector();
         const VectorType vector_kj = atoms[j].getVector() - atoms[k].getVector();
@@ -98,8 +97,8 @@ namespace Physica::Core::Physics {
         return cross1 * cross2 / (cross1.norm() * cross2.norm());
     }
 
-    template<class ScalarType>
-    typename Molecular<ScalarType>::PointType Molecular<ScalarType>::getMassCenter() const {
+    template<Scalar T>
+    typename Molecular<T>::PointType Molecular<T>::getMassCenter() const {
         using VectorType = typename PointType::VectorType;
         double totalMass = 0;
         const size_t length = atoms.getLength();
@@ -107,23 +106,23 @@ namespace Physica::Core::Physics {
         for (size_t i = 0; i < length; ++i) {
             double atomMass = PhyConst<SI>::relativeAtomMass[atomicNumbers[i]];
             totalMass += atomMass;
-            result += ScalarType(atomMass) * atoms[i].getVector();
+            result += T(atomMass) * atoms[i].getVector();
         }
-        result *= reciprocal(ScalarType(totalMass));
+        result *= reciprocal(T(totalMass));
         return PointType(std::move(result));
     }
     /**
      * Using atom unit
      */
-    template<class ScalarType>
-    ScalarType Molecular<ScalarType>::getNuclearRepulsionEnergy() const {
-        ScalarType result = ScalarType(0);
+    template<Scalar T>
+    T Molecular<T>::getNuclearRepulsionEnergy() const {
+        T result = T(0);
         const size_t atomCount = getAtomCount();
         for (size_t i = 0; i < atomCount - 1; ++i) {
-            const ScalarType atomicNumber1 = ScalarType(getAtomicNumber(i));
+            const T atomicNumber1 = T(getAtomicNumber(i));
             for (size_t j = i + 1; j < atomCount; ++j) {
-                const ScalarType atomicNumber2 = ScalarType(getAtomicNumber(j));
-                const ScalarType dist = getPairDist(i, j);
+                const T atomicNumber2 = T(getAtomicNumber(j));
+                const T dist = getPairDist(i, j);
                 result += atomicNumber1 * atomicNumber2 / dist;
             }
         }

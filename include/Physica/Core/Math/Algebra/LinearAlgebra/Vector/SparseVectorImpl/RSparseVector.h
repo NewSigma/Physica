@@ -33,10 +33,10 @@ namespace Physica::Core {
         [[nodiscard]] size_t getNumNonZero() const noexcept { return Base::getDerived().getNumNonZero(); }
     };
 
-    template<class VectorType1, class VectorType2>
-    typename Internal::BinaryScalarOpReturnType<typename VectorType1::ScalarType, typename VectorType2::ScalarType>::Type
-    operator*(const RSparseVector<VectorType1>& v1, const RValueVector<VectorType2>& v2) {
-        using ResultType = typename Internal::BinaryScalarOpReturnType<typename VectorType1::ScalarType, typename VectorType2::ScalarType>::Type;
+    template<Vector T1, Vector T2>
+    typename Internal::BinaryScalarOpReturnType<typename T1::ScalarType, typename T2::ScalarType>::Type
+    operator*(const RSparseVector<T1>& v1, const T2& v2) {
+        using ResultType = typename Internal::BinaryScalarOpReturnType<typename T1::ScalarType, typename T2::ScalarType>::Type;
         assert(v1.getLength() == v2.getLength());
         ResultType result(0);
         for (size_t i = 0; i < v1.getNumNonZero(); ++i) {
@@ -46,14 +46,14 @@ namespace Physica::Core {
         return result;
     }
 
-    template<class VectorType1, class VectorType2>
-    typename Internal::BinaryScalarOpReturnType<typename VectorType1::ScalarType, typename VectorType2::ScalarType>::Type
-    operator*(const RValueVector<VectorType1>& v1, const RSparseVector<VectorType2>& v2) {
+    template<Vector T1, Vector T2>
+    typename Internal::BinaryScalarOpReturnType<typename T1::ScalarType, typename T2::ScalarType>::Type
+    operator*(const T1& v1, const RSparseVector<T2>& v2) {
         return v2 * v1;
     }
 
-    template<class Derived, class VectorType>
-    void operator+=(LValueVector<Derived>& v1, const RSparseVector<VectorType>& v2) {
+    template<class Derived, Vector T>
+    void operator+=(LValueVector<Derived>& v1, const RSparseVector<T>& v2) {
         using ResultType = typename Derived::ScalarType;
         for (size_t i = 0; i < v2.getNumNonZero(); ++i) {
             const auto pair = v2.calcNonZero(i);
@@ -61,8 +61,8 @@ namespace Physica::Core {
         }
     }
 
-    template<class Derived, class VectorType>
-    void operator-=(LValueVector<Derived>& v1, const RSparseVector<VectorType>& v2) {
+    template<class Derived, Vector T>
+    void operator-=(LValueVector<Derived>& v1, const RSparseVector<T>& v2) {
         using ResultType = typename Derived::ScalarType;
         for (size_t i = 0; i < v2.getNumNonZero(); ++i) {
             const auto pair = v2.calcNonZero(i);
@@ -70,13 +70,13 @@ namespace Physica::Core {
         }
     }
 
-    template<class Derived, class VectorType>
-    inline void operator+=(ContinuousVector<Derived>& v1, const RSparseVector<VectorType>& v2) {
+    template<class Derived, Vector T>
+    inline void operator+=(ContinuousVector<Derived>& v1, const RSparseVector<T>& v2) {
         static_cast<LValueVector<Derived>&>(v1) += v2;
     }
 
-    template<class Derived, class VectorType>
-    inline void operator-=(ContinuousVector<Derived>& v1, const RSparseVector<VectorType>& v2) {
+    template<class Derived, Vector T>
+    inline void operator-=(ContinuousVector<Derived>& v1, const RSparseVector<T>& v2) {
         static_cast<LValueVector<Derived>&>(v1) -= v2;
     }
 }

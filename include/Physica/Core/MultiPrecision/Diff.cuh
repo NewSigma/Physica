@@ -22,14 +22,14 @@
 #include "Diff.h"
 
 namespace Physica::Core {
-    template<class ScalarType, int Order>
-    class device_obj<Diff<ScalarType, DiffMode::Reverse, Order>>
-            : public ScalarBase<device_obj<Diff<ScalarType, DiffMode::Reverse, Order>>> {
+    template<Scalar T, int Order>
+    class device_obj<Diff<T, DiffMode::Reverse, Order>>
+            : public ScalarBase<device_obj<Diff<T, DiffMode::Reverse, Order>>> {
         static_assert(Order == 1, "[Error]: High order autodiff is not implemented");
-        using host_obj = Diff<ScalarType, DiffMode::Reverse, Order>;
+        using host_obj = Diff<T, DiffMode::Reverse, Order>;
         using This = device_obj<host_obj>;
         using Base = ScalarBase<This>;
-        using ValuePtr = ScalarType* __restrict;
+        using ValuePtr = T* __restrict;
     public:
         using TracerType = device_obj<typename host_obj::TracerType>;
         using typename Base::GradType;
@@ -38,9 +38,9 @@ namespace Physica::Core {
         GradType pGrad;
     public:
         device_obj() = default;
-        device_obj(double d) : device_obj(ScalarType(d)) {}
-        device_obj(ScalarType s);
-        __host__ __device__ device_obj(const ScalarType* pValue_, const ScalarType* pGrad_);
+        device_obj(double d) : device_obj(T(d)) {}
+        device_obj(T s);
+        __host__ __device__ device_obj(const T* pValue_, const T* pGrad_);
         device_obj(const This&) = default;
         device_obj(This&&) noexcept = default;
         ~device_obj() = default;
@@ -57,51 +57,49 @@ namespace Physica::Core {
         /* Operations */
         void reverse();
         void reverse_to(This to);
-        [[nodiscard]] ScalarType toHost_value() const;
-        [[nodiscard]] ScalarType toHost_grad() const;
-        void toHostAsync_value(ScalarType& value) const;
-        void toHostAsync_grad(ScalarType& grad) const;
+        [[nodiscard]] T toHost_value() const;
+        [[nodiscard]] T toHost_grad() const;
+        void toHostAsync_value(T& value) const;
+        void toHostAsync_grad(T& grad) const;
         __host__ __device__ inline void swap(This& __restrict obj) noexcept;
         /* Getters */
-        [[nodiscard]] __host__ __device__ ScalarType* value_ptr() const noexcept { return pValue; }
-        [[nodiscard]] __host__ __device__ ScalarType* grad_ptr() const noexcept { return pGrad; }
-        [[nodiscard]] __device__ ScalarType& getValue() noexcept { return *pValue; }
-        [[nodiscard]] __device__ ScalarType& getGrad() noexcept { return *pGrad; }
-        [[nodiscard]] __device__ const ScalarType& getValue() const noexcept { return *pValue; }
-        [[nodiscard]] __device__ const ScalarType& getGrad() const noexcept { return *pGrad; }
+        [[nodiscard]] __host__ __device__ T* value_ptr() const noexcept { return pValue; }
+        [[nodiscard]] __host__ __device__ T* grad_ptr() const noexcept { return pGrad; }
+        [[nodiscard]] __device__ T& getValue() noexcept { return *pValue; }
+        [[nodiscard]] __device__ T& getGrad() noexcept { return *pGrad; }
+        [[nodiscard]] __device__ const T& getValue() const noexcept { return *pValue; }
+        [[nodiscard]] __device__ const T& getGrad() const noexcept { return *pGrad; }
         [[nodiscard]] __host__ __device__ bool isZero() const noexcept { return getValue().isZero(); }
         [[nodiscard]] __host__ __device__ bool isPositive() const { return getValue().isPositive(); }
         [[nodiscard]] __host__ __device__ bool isNegative() const { return getValue().isNegative(); }
         /* Setters */
-        __device__ void setValue(ScalarType value) { *pValue = value; }
-        __device__ void setGrad(ScalarType grad) { *pGrad = grad; }
+        __device__ void setValue(T value) { *pValue = value; }
+        __device__ void setGrad(T grad) { *pGrad = grad; }
     };
     ////////////////////////////////////////////////////////////
-    template<class ScalarType, int Order>
-    [[nodiscard]] inline device_obj<Diff<ScalarType, DiffMode::Reverse, Order>>
-    operator+(const device_obj<Diff<ScalarType, DiffMode::Reverse, Order>>& s1,
-              const device_obj<Diff<ScalarType, DiffMode::Reverse, Order>>& s2);
+    template<Scalar T, int Order>
+    [[nodiscard]] inline device_obj<Diff<T, DiffMode::Reverse, Order>>
+    operator+(const device_obj<Diff<T, DiffMode::Reverse, Order>>& s1,
+              const device_obj<Diff<T, DiffMode::Reverse, Order>>& s2);
 
-    template<class ScalarType, int Order>
-    [[nodiscard]] inline device_obj<Diff<ScalarType, DiffMode::Reverse, Order>>
-    operator-(const device_obj<Diff<ScalarType, DiffMode::Reverse, Order>>& s1,
-              const device_obj<Diff<ScalarType, DiffMode::Reverse, Order>>& s2);
+    template<Scalar T, int Order>
+    [[nodiscard]] inline device_obj<Diff<T, DiffMode::Reverse, Order>>
+    operator-(const device_obj<Diff<T, DiffMode::Reverse, Order>>& s1,
+              const device_obj<Diff<T, DiffMode::Reverse, Order>>& s2);
 
-    template<class ScalarType, int Order>
-    [[nodiscard]] inline device_obj<Diff<ScalarType, DiffMode::Reverse, Order>>
-    operator*(const device_obj<Diff<ScalarType, DiffMode::Reverse, Order>>& s1,
-              const device_obj<Diff<ScalarType, DiffMode::Reverse, Order>>& s2);
+    template<Scalar T, int Order>
+    [[nodiscard]] inline device_obj<Diff<T, DiffMode::Reverse, Order>>
+    operator*(const device_obj<Diff<T, DiffMode::Reverse, Order>>& s1,
+              const device_obj<Diff<T, DiffMode::Reverse, Order>>& s2);
 
-    template<class ScalarType, int Order>
-    [[nodiscard]] inline device_obj<Diff<ScalarType, DiffMode::Reverse, Order>>
-    operator/(const device_obj<Diff<ScalarType, DiffMode::Reverse, Order>>& s1,
-              const device_obj<Diff<ScalarType, DiffMode::Reverse, Order>>& s2);
+    template<Scalar T, int Order>
+    [[nodiscard]] inline device_obj<Diff<T, DiffMode::Reverse, Order>>
+    operator/(const device_obj<Diff<T, DiffMode::Reverse, Order>>& s1,
+              const device_obj<Diff<T, DiffMode::Reverse, Order>>& s2);
 }
 
 namespace Physica {
-    using namespace Core;
-
-    template<class T, DiffMode Mode, int Order_>
+    template<Scalar T, DiffMode Mode, int Order_>
     class Traits<Core::device_obj<Diff<T, Mode, Order_>>> {
         static_assert(!T::isDifferentiable, "[Error]: Nested Diff<> is not allowed");
         static_assert(!is_device_obj<T>::value, "[Error]: Nested device_obj<> is not allowed");

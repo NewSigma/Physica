@@ -90,12 +90,12 @@ namespace Physica::Core {
     }
 
     template<class Derived>
-    template<class VectorType, class Executor>
+    template<Vector T, class Executor>
     void device_obj<PairModel<Derived>>::forceAsync(
             const LatticeMatrix& lattice,
             const InvLatticeMatrix& invLattice,
             const PositionMatrix& cartesianPos,
-            ContinuousVector<VectorType>& result) {
+            ContinuousVector<T>& result) {
         static_assert(std::is_same<Executor, CUDAExecutor>::value, "[Error]: Incorrect type of executor");
         dim3 gridDims;
         size_t numThread;
@@ -119,9 +119,9 @@ namespace Physica::Core {
     }
 
     template<class Derived>
-    template<class VectorType, class Executor>
-    inline void device_obj<PairModel<Derived>>::forceAsync(const MDCellType& cell, ContinuousVector<VectorType>& result) {
-        forceAsync<VectorType, Executor>(cell.getLattice(), cell.getInvLattice(), cell.getPos(), result);
+    template<Vector T, class Executor>
+    inline void device_obj<PairModel<Derived>>::forceAsync(const MDCellType& cell, ContinuousVector<T>& result) {
+        forceAsync<T, Executor>(cell.getLattice(), cell.getInvLattice(), cell.getPos(), result);
     }
 
     template<class Derived>
@@ -354,7 +354,7 @@ namespace Physica::Core {
                 const Vector3D from = pos.row(atom1);
                 cellList.forAtomInCell(centerCell, [this, &pos, &from, &func, atom1](size_t atom2) {
                     auto to = pos.row(atom2);
-                    Vector3D r = to.asVector() - from;
+                    Vector3D r = to - from;
                     const ScalarType norm2 = r.squaredNorm();
                     const bool isNotSelf = atom1 != atom2;
                     if (isNotSelf && norm2 < squared_cutoff) {
@@ -367,7 +367,7 @@ namespace Physica::Core {
                 const Vector3D from = pos.row(atom1) - translate;
                 cellList.forAtomInCell(neigh, [this, &pos, &from, &func, atom1](size_t atom2) {
                     auto to = pos.row(atom2);
-                    Vector3D r = to.asVector() - from;
+                    Vector3D r = to - from;
                     const ScalarType norm2 = r.squaredNorm();
                     if (norm2 < squared_cutoff) {
                         const ScalarType norm1 = sqrt(norm2);

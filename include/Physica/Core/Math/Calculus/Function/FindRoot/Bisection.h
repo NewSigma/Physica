@@ -21,7 +21,7 @@
 #include <cassert>
 
 namespace Physica::Core {
-    template<class T, class Function>
+    template<Scalar T, class Function>
     T bisection(Function func, const T& n, const T& x1, const T& x2, const T& y1, const T& y2) {
         const T epsilon = std::numeric_limits<T>::epsilon();
         assert(T(n - y1).isPositive() ^ T(n - y2).isPositive()); //(n - y1) and (n - y2) have different sign
@@ -57,7 +57,7 @@ namespace Physica::Core {
         return result;
     }
 
-    template<class T, class Function>
+    template<Scalar T, class Function>
     T bisection(Function func, const T& n, const T& x1, const T& x2) {
         T y1 = func(x1);
         T y2 = func(x2);

@@ -25,22 +25,22 @@ namespace Physica::Core {
      * Reference:
      * [1] Lo S. H. Finite Element Mesh Generation[M]. Taylor and Francis, 2015.19-20
      */
-    template<size_t dim, class ScalarType>
+    template<size_t Dim, Scalar T>
     class GeoBase {
     public:
-        using PointType = Point<dim, ScalarType>;
+        using PointType = Point<Dim, T>;
         using VectorType = typename PointType::VectorType;
     public:
-        [[nodiscard]] static ScalarType distToSegment(const PointType& p, const PointType& segFrom, const PointType& segTo);
+        [[nodiscard]] static T distToSegment(const PointType& p, const PointType& segFrom, const PointType& segTo);
     };
 
-    template<size_t dim, class ScalarType>
-    ScalarType GeoBase<dim, ScalarType>::distToSegment(const PointType& p, const PointType& segFrom, const PointType& segTo) {
+    template<size_t Dim, Scalar T>
+    T GeoBase<Dim, T>::distToSegment(const PointType& p, const PointType& segFrom, const PointType& segTo) {
         VectorType ab = segTo.v() - segFrom.v();
-        const ScalarType norm_ab = ab.norm();
+        const T norm_ab = ab.norm();
         ab *= reciprocal(norm_ab);
         const VectorType ap = p.v() - segFrom.v();
-        const ScalarType alpha = ap * ab;
+        const T alpha = ap * ab;
 
         if (alpha.isNegative())
             return ap.norm();

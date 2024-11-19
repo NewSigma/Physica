@@ -50,8 +50,8 @@ namespace Physica::Core {
         template<class AnyPacket> __device__ inline void writePacketPartial(size_t index, size_t count, const AnyPacket packet);
 
         void resize(size_t length) { Base::getDerived().resize(length); }
-        template<class OtherDerived> void toHost(ContinuousVector<OtherDerived>& obj) const;
-        template<class OtherDerived> void toHostAsync(ContinuousVector<OtherDerived>& obj) const;
+        template<Vector V> void toHost(ContinuousVector<V>& obj) const;
+        template<Vector V> void toHostAsync(ContinuousVector<V>& obj) const;
 
         template<size_t Length = Dynamic>
         [[nodiscard]] __host__ __device__ inline BlockType<Length> head(size_t to);

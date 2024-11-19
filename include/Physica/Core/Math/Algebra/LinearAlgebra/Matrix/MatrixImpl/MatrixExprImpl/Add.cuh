@@ -19,10 +19,10 @@
 #pragma once
 
 namespace Physica::Core {
-    template<class MatrixType, Scalar T>
-    class device_obj<MatrixExpr<ExprType::Add, MatrixType, T>>
-            : public device_obj<BinaryMatrixExpr<ExprType::Add, MatrixType, T>> {
-        using Base = device_obj<BinaryMatrixExpr<ExprType::Add, MatrixType, T>>;
+    template<Matrix T, Scalar U>
+    class device_obj<MatrixExpr<ExprType::Add, T, U>>
+            : public device_obj<BinaryMatrixExpr<ExprType::Add, T, U>> {
+        using Base = device_obj<BinaryMatrixExpr<ExprType::Add, T, U>>;
     public:
         using typename Base::ScalarType;
     public:
@@ -34,10 +34,10 @@ namespace Physica::Core {
         }
     };
 
-    template<class MatrixType1, class MatrixType2>
-    class device_obj<MatrixExpr<ExprType::Add, MatrixType1, MatrixType2>>
-            : public device_obj<BinaryMatrixExpr<ExprType::Add, MatrixType1, MatrixType2>> {
-        using Base = device_obj<BinaryMatrixExpr<ExprType::Add, MatrixType1, MatrixType2>>;
+    template<Matrix T1, Matrix T2>
+    class device_obj<MatrixExpr<ExprType::Add, T1, T2>>
+            : public device_obj<BinaryMatrixExpr<ExprType::Add, T1, T2>> {
+        using Base = device_obj<BinaryMatrixExpr<ExprType::Add, T1, T2>>;
     public:
         using typename Base::ScalarType;
     public:
@@ -49,15 +49,15 @@ namespace Physica::Core {
         }
     };
 
-    template<class MatrixType1, class MatrixType2>
+    template<Matrix T1, Matrix T2>
     [[nodiscard]] __host__ __device__ inline auto operator+(
-            const device_obj<RValueMatrix<MatrixType1>>& mat1, const device_obj<RValueMatrix<MatrixType2>>& mat2) noexcept {
-        return device_obj<MatrixExpr<ExprType::Add, MatrixType1, MatrixType2>>(mat1.getDerived(), mat2.getDerived());
+            const device_obj<T1>& mat1, const device_obj<T2>& mat2) noexcept {
+        return device_obj<MatrixExpr<ExprType::Add, T1, T2>>(mat1.getDerived(), mat2.getDerived());
     }
 
-    template<class MatrixType, Scalar T>
+    template<Matrix T, Scalar U>
     [[nodiscard]] __host__ __device__ inline auto operator+(
-            const device_obj<RValueMatrix<MatrixType>>& mat, const T& x) noexcept {
-        return device_obj<MatrixExpr<ExprType::Add, MatrixType, T>>(mat.getDerived(), x);
+            const device_obj<T>& mat, const U& x) noexcept {
+        return device_obj<MatrixExpr<ExprType::Add, T, U>>(mat.getDerived(), x);
     }
 }

@@ -27,81 +27,78 @@ namespace Physica::Core {
         /**
          * Critical to performance of \class Ewald, refactor with care
          */
-        template<class ScalarType>
-        __host__ __device__ inline ScalarType quadraticInterpolate(
-                ScalarType x1, ScalarType x2, ScalarType x3, ScalarType y1, ScalarType y2, ScalarType y3, ScalarType x) {
-            const ScalarType x_x1 = x - x1;
-            const ScalarType x_x2 = x - x2;
-            const ScalarType x_x3 = x - x3;
-            const ScalarType x1_x2 = x1 - x2;
-            const ScalarType x2_x3 = x2 - x3;
-            const ScalarType x3_x1 = x3 - x1;
-            const ScalarType factor = x1_x2 * x2_x3 * x3_x1;
+        template<Scalar T>
+        __host__ __device__ inline T quadraticInterpolate(
+                T x1, T x2, T x3, T y1, T y2, T y3, T x) {
+            const T x_x1 = x - x1;
+            const T x_x2 = x - x2;
+            const T x_x3 = x - x3;
+            const T x1_x2 = x1 - x2;
+            const T x2_x3 = x2 - x3;
+            const T x3_x1 = x3 - x1;
+            const T factor = x1_x2 * x2_x3 * x3_x1;
             return -((x_x2 * x_x3) * (x2_x3 * y1) + (x_x1 * x_x3) * (x3_x1 * y2) + (x_x1 * x_x2) * (x1_x2 * y3)) / factor;
         }
 
-        template<class ScalarType>
-        __host__ __device__ inline ScalarType quadraticInterpolate_diff(
-                ScalarType x1, ScalarType x2, ScalarType x3, ScalarType y1, ScalarType y2, ScalarType y3, ScalarType x) {
-            const ScalarType xx = x * 2.0;
-            const ScalarType x1_xx = x1 - xx;
-            const ScalarType x2_xx = x2 - xx;
-            const ScalarType x3_xx = x3 - xx;
-            const ScalarType y1_y2 = y1 - y2;
-            const ScalarType y2_y3 = y2 - y3;
-            const ScalarType y3_y1 = y3 - y1;
-            const ScalarType x1_x2 = x1 - x2;
-            const ScalarType x2_x3 = x2 - x3;
-            const ScalarType x3_x1 = x3 - x1;
-            const ScalarType factor = x1_x2 * x2_x3 * x3_x1;
+        template<Scalar T>
+        __host__ __device__ inline T quadraticInterpolate_diff(
+                T x1, T x2, T x3, T y1, T y2, T y3, T x) {
+            const T xx = x * 2.0;
+            const T x1_xx = x1 - xx;
+            const T x2_xx = x2 - xx;
+            const T x3_xx = x3 - xx;
+            const T y1_y2 = y1 - y2;
+            const T y2_y3 = y2 - y3;
+            const T y3_y1 = y3 - y1;
+            const T x1_x2 = x1 - x2;
+            const T x2_x3 = x2 - x3;
+            const T x3_x1 = x3 - x1;
+            const T factor = x1_x2 * x2_x3 * x3_x1;
             return -(x3 * x3_xx * y1_y2 + x1 * x1_xx * y2_y3 + x2 * x2_xx * y3_y1) / factor;
         }
         /**
          * \param factor
          * Equals to reciprocal((x1 - x2) * (x2 - x3) * (x3 - x1))
          */
-        template<class ScalarType>
-        __host__ __device__ inline ScalarType quadraticInterpolate_diff1(
-                ScalarType factor, ScalarType step, ScalarType x2, ScalarType y1, ScalarType y2, ScalarType y3, ScalarType x) {
-            const ScalarType y1_y2 = y1 - y2;
-            const ScalarType y2_y3 = y2 - y3;
-            const ScalarType y3_y1 = y3 - y1;
-            return (step * y3_y1 + ScalarType(2) * (x - x2) * (y1_y2 - y2_y3)) * factor;
+        template<Scalar T>
+        __host__ __device__ inline T quadraticInterpolate_diff1(
+                T factor, T step, T x2, T y1, T y2, T y3, T x) {
+            const T y1_y2 = y1 - y2;
+            const T y2_y3 = y2 - y3;
+            const T y3_y1 = y3 - y1;
+            return (step * y3_y1 + T(2) * (x - x2) * (y1_y2 - y2_y3)) * factor;
         }
     }
     /**
      * Reference:
      * [1] William H. Press, Saul A. Teukolsky, William T. Vetterling, Brian P. Flannery. C++数值算法(第二版)[M]. 北京: 电子工业出版社, 2005:81-82
      */
-    template<class VectorType>
-    typename VectorType::ScalarType lagrange(
-            const LValueVector<VectorType>& x0,
-            const LValueVector<VectorType>& y0,
-            typename VectorType::ScalarType x) {
-        using ScalarType = typename VectorType::ScalarType;
+    template<LVector V>
+    typename V::ScalarType lagrange(const V& x0, const V& y0, typename V::ScalarType x) {
+        using T = typename V::ScalarType;
         assert(x0.getLength() == y0.getLength());
 
         const size_t length = x0.getLength();
-        VectorType c = y0;
-        VectorType d = y0;
+        V c = y0;
+        V d = y0;
         size_t ns = 0;
         /* Init ns */ {
-            ScalarType delta = abs(x - x0[0]);
+            T delta = abs(x - x0[0]);
             for (size_t i = 1; i < length; ++i) {
-                const ScalarType temp = abs(x - x0[i]);
+                const T temp = abs(x - x0[i]);
                 if (temp < delta) {
                     ns = i;
                     delta = temp;
                 }
             }
         }
-        ScalarType result = y0[ns--];
+        T result = y0[ns--];
         for (size_t i = 1; i < length; ++i) {
             const size_t max_j = length - i;
             for (size_t j = 0; j < max_j; ++j) {
-                const ScalarType delta1 = x0[j] - x;
-                const ScalarType delta2 = x0[j + i] - x;
-                const ScalarType factor = (c[j + 1] - d[j]) / (delta1 - delta2);
+                const T delta1 = x0[j] - x;
+                const T delta2 = x0[j + i] - x;
+                const T factor = (c[j + 1] - d[j]) / (delta1 - delta2);
                 c[j] = delta1 * factor;
                 d[j] = delta2 * factor;
             }
@@ -110,21 +107,21 @@ namespace Physica::Core {
         return result;
     }
 
-    template<class VectorType>
-    VectorType interpolate_fft(const LValueVector<VectorType>& data, size_t newDim) {
-        using ScalarType = typename VectorType::ScalarType;
-        using RealType = typename ScalarType::RealType;
-        using ComplexType = typename ScalarType::ComplexType;
-        constexpr bool isComplex = ScalarType::isComplex;
+    template<LVector V>
+    V interpolate_fft(const V& data, size_t newDim) {
+        using T = typename V::ScalarType;
+        using RealType = typename T::RealType;
+        using ComplexType = typename T::ComplexType;
+        constexpr bool isComplex = T::isComplex;
 
         const size_t rSpaceSize = data.getLength();
-        FFT<ScalarType, 1> fft(rSpaceSize, PlanFlag::Estimate);
+        FFT<T, 1> fft(rSpaceSize, PlanFlag::Estimate);
         fft.getRSpace() = data;
         fft.transform();
         const size_t kSpaceSize = fft.getKSpaceSize();
         const auto& kSpace = fft.getKSpace();
 
-        auto result = VectorType(newDim);
+        auto result = V(newDim);
         for (size_t i = 0; i < newDim; ++i) {
             auto elem = ComplexType(0);
             for (size_t k = 0; k < rSpaceSize; ++k) {
@@ -149,18 +146,15 @@ namespace Physica::Core {
         return result;
     }
 
-    template<class VectorType>
-    typename VectorType::ScalarType interpolate_fft(
-            const LValueVector<VectorType>& data,
-            typename VectorType::ScalarType::RealType x,
-            typename VectorType::ScalarType::RealType period) {
-        using ScalarType = typename VectorType::ScalarType;
-        using RealType = typename ScalarType::RealType;
-        using ComplexType = typename ScalarType::ComplexType;
-        constexpr bool isComplex = ScalarType::isComplex;
+    template<LVector V>
+    typename V::ScalarType interpolate_fft(const V& data, typename V::ScalarType::RealType x, typename V::ScalarType::RealType period) {
+        using T = typename V::ScalarType;
+        using RealType = typename T::RealType;
+        using ComplexType = typename T::ComplexType;
+        constexpr bool isComplex = T::isComplex;
 
         const size_t rSpaceSize = data.getLength();
-        FFT<ScalarType, 1> fft(rSpaceSize, PlanFlag::Estimate);
+        FFT<T, 1> fft(rSpaceSize, PlanFlag::Estimate);
         fft.getRSpace() = data;
         fft.transform();
         const size_t kSpaceSize = fft.getKSpaceSize();
@@ -181,7 +175,7 @@ namespace Physica::Core {
                 elem += kSpace[k] * factor;
         }
 
-        ScalarType result;
+        T result;
         if constexpr (isComplex)
             result = elem;
         else
@@ -190,17 +184,17 @@ namespace Physica::Core {
         return result;
     }
 
-    template<class GridType>
-    RSpaceGrid<typename GridType::ScalarType> interpolate_fft(const LValueGrid<GridType>& data, typename GridBase::Index3D newDim) {
-        using ScalarType = typename GridType::ScalarType;
-        using ResultType = RSpaceGrid<ScalarType>;
-        using RealType = typename ScalarType::RealType;
-        using ComplexType = typename ScalarType::ComplexType;
+    template<LGrid G>
+    RSpaceGrid<typename G::ScalarType> interpolate_fft(const G& data, typename GridBase::Index3D newDim) {
+        using T = typename G::ScalarType;
+        using ResultType = RSpaceGrid<T>;
+        using RealType = typename T::RealType;
+        using ComplexType = typename T::ComplexType;
         using Index3D = typename GridBase::Index3D;
         constexpr size_t Dim = 3;
-        constexpr bool isComplex = ScalarType::isComplex;
+        constexpr bool isComplex = T::isComplex;
 
-        auto fft = FFT<ScalarType, 3>(data.getDim(), PlanFlag::Estimate);
+        auto fft = FFT<T, 3>(data.getDim(), PlanFlag::Estimate);
         fft.getRSpace() = data;
         fft.transform();
 
@@ -239,19 +233,19 @@ namespace Physica::Core {
         return result;
     }
 
-    template<class GridType>
-    typename GridType::ScalarType interpolate_fft(
-            const LValueGrid<GridType>& data,
-            Vector3D<typename GridType::ScalarType::RealType> r,
-            Vector3D<typename GridType::ScalarType::RealType> period) {
-        using ScalarType = typename GridType::ScalarType;
-        using RealType = typename ScalarType::RealType;
-        using ComplexType = typename ScalarType::ComplexType;
+    template<LGrid G>
+    typename G::ScalarType interpolate_fft(
+            const G& data,
+            Vector3D<typename G::ScalarType::RealType> r,
+            Vector3D<typename G::ScalarType::RealType> period) {
+        using T = typename G::ScalarType;
+        using RealType = typename T::RealType;
+        using ComplexType = typename T::ComplexType;
         using Index3D = Array<size_t, 3>;
         constexpr size_t Dim = 3;
-        constexpr bool isComplex = ScalarType::isComplex;
+        constexpr bool isComplex = T::isComplex;
         
-        auto fft = FFT<ScalarType, 3>(data.getDim(), PlanFlag::Estimate);
+        auto fft = FFT<T, 3>(data.getDim(), PlanFlag::Estimate);
         fft.getRSpace() = data;
         fft.transform();
         const auto& kSpace = fft.getKSpace();
@@ -280,7 +274,7 @@ namespace Physica::Core {
                 elem += kSpace(kIndex) * factor;
         });
 
-        ScalarType result;
+        T result;
         if constexpr (isComplex)
             result = elem;
         else

@@ -21,12 +21,12 @@
 #include "LValueFlatten.h"
 
 namespace Physica::Core {
-    template<class MatrixType>
-    class device_obj<LValueFlatten<MatrixType>> : public device_obj<LValueVector<LValueFlatten<MatrixType>>> {
-        using host_obj = LValueFlatten<MatrixType>;
+    template<Matrix T>
+    class device_obj<LValueFlatten<T>> : public device_obj<LValueVector<LValueFlatten<T>>> {
+        using host_obj = LValueFlatten<T>;
         using This = device_obj<host_obj>;
 
-        const device_obj<MatrixType>& mat;
+        const device_obj<T>& mat;
     public:
         using Base = device_obj<LValueVector<host_obj>>;
         using typename Base::ScalarType;
@@ -34,7 +34,7 @@ namespace Physica::Core {
         using PtrTy = typename ScalarType::PtrTy;
         using ConstPtrTy = typename ScalarType::ConstPtrTy;
     public:
-        __host__ __device__ device_obj(const device_obj<LValueMatrix<MatrixType>>& mat_) : mat(mat_.getDerived()) {}
+        __host__ __device__ device_obj(const device_obj<LValueMatrix<T>>& mat_) : mat(mat_) {}
         device_obj(const This&) = delete;
         device_obj(This&&) noexcept = delete;
         ~device_obj() = default;
@@ -50,26 +50,24 @@ namespace Physica::Core {
         [[nodiscard]] __host__ __device__ inline ConstPtrTy data_ptr(size_t index) const;
     };
 
-    template<class MatrixType>
-    __host__ __device__ inline typename device_obj<LValueFlatten<MatrixType>>::PtrTy
-    device_obj<LValueFlatten<MatrixType>>::data_ptr(size_t index) {
+    template<Matrix T>
+    __host__ __device__ inline typename device_obj<LValueFlatten<T>>::PtrTy
+    device_obj<LValueFlatten<T>>::data_ptr(size_t index) {
         const size_t major = index / mat.getMaxMinor();
         const size_t minor = index % mat.getMaxMinor();
-        const size_t row = MatrixOption::rowFromMajorMinor<MatrixType>(major, minor);
-        const size_t col = MatrixOption::colFromMajorMinor<MatrixType>(major, minor);
+        const size_t row = MatrixOption::rowFromMajorMinor<T>(major, minor);
+        const size_t col = MatrixOption::colFromMajorMinor<T>(major, minor);
         return mat.data_ptr(row, col);
     }
 
-    template<class MatrixType>
-    __host__ __device__ inline typename device_obj<LValueFlatten<MatrixType>>::ConstPtrTy
-    device_obj<LValueFlatten<MatrixType>>::data_ptr(size_t index) const {
+    template<Matrix T>
+    __host__ __device__ inline typename device_obj<LValueFlatten<T>>::ConstPtrTy
+    device_obj<LValueFlatten<T>>::data_ptr(size_t index) const {
         return const_cast<This&>(*this).data_ptr(index);
     }
 }
 
 namespace Physica {
-    using namespace Core;
-
-    template<class MatrixType>
-    class Traits<Core::device_obj<LValueFlatten<MatrixType>>> : public Traits<LValueFlatten<MatrixType>> {};
+    template<Core::Matrix T>
+    class Traits<Core::device_obj<Core::LValueFlatten<T>>> : public Traits<Core::LValueFlatten<T>> {};
 }

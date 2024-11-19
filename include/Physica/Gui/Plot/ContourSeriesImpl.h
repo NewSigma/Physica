@@ -21,55 +21,55 @@
 #include <iostream>
 
 namespace Physica::Gui {
-    template<class MatrixType>
-    bool ContourSeries<MatrixType>::Quad::operator==(Quad quad) const noexcept {
+    template<Matrix T>
+    bool ContourSeries<T>::Quad::operator==(Quad quad) const noexcept {
         return row == quad.row && col == quad.col;
     }
 
-    template<class MatrixType>
-    typename ContourSeries<MatrixType>::Quad::Vertex ContourSeries<MatrixType>::Quad::getTopLeftVertex() const {
+    template<Matrix T>
+    typename ContourSeries<T>::Quad::Vertex ContourSeries<T>::Quad::getTopLeftVertex() const {
         return {row, col};
     }
 
-    template<class MatrixType>
-    typename ContourSeries<MatrixType>::Quad::Vertex ContourSeries<MatrixType>::Quad::getTopRightVertex() const {
+    template<Matrix T>
+    typename ContourSeries<T>::Quad::Vertex ContourSeries<T>::Quad::getTopRightVertex() const {
         return {row, col + 1};
     }
 
-    template<class MatrixType>
-    typename ContourSeries<MatrixType>::Quad::Vertex ContourSeries<MatrixType>::Quad::getBottomLeftVertex() const {
+    template<Matrix T>
+    typename ContourSeries<T>::Quad::Vertex ContourSeries<T>::Quad::getBottomLeftVertex() const {
         return {row + 1, col};
     }
 
-    template<class MatrixType>
-    typename ContourSeries<MatrixType>::Quad::Vertex ContourSeries<MatrixType>::Quad::getBottomRightVertex() const {
+    template<Matrix T>
+    typename ContourSeries<T>::Quad::Vertex ContourSeries<T>::Quad::getBottomRightVertex() const {
         return {row + 1, col + 1};
     }
 
-    template<class MatrixType>
-    typename ContourSeries<MatrixType>::Quad ContourSeries<MatrixType>::Quad::topNeigh() const {
+    template<Matrix T>
+    typename ContourSeries<T>::Quad ContourSeries<T>::Quad::topNeigh() const {
         assert(row > 0);
         return {row - 1, col};
     }
 
-    template<class MatrixType>
-    typename ContourSeries<MatrixType>::Quad ContourSeries<MatrixType>::Quad::bottomNeigh() const {
+    template<Matrix T>
+    typename ContourSeries<T>::Quad ContourSeries<T>::Quad::bottomNeigh() const {
         return {row + 1, col};
     }
 
-    template<class MatrixType>
-    typename ContourSeries<MatrixType>::Quad ContourSeries<MatrixType>::Quad::leftNeigh() const {
+    template<Matrix T>
+    typename ContourSeries<T>::Quad ContourSeries<T>::Quad::leftNeigh() const {
         assert(col > 0);
         return {row, col - 1};
     }
 
-    template<class MatrixType>
-    typename ContourSeries<MatrixType>::Quad ContourSeries<MatrixType>::Quad::rightNeigh() const {
+    template<Matrix T>
+    typename ContourSeries<T>::Quad ContourSeries<T>::Quad::rightNeigh() const {
         return {row, col + 1};
     }
 
-    template<class MatrixType>
-    void ContourSeries<MatrixType>::Edge::moveToNextEdge() {
+    template<Matrix T>
+    void ContourSeries<T>::Edge::moveToNextEdge() {
         switch (dir) {
             case Edge::Top:
                 quad = quad.topNeigh();
@@ -91,8 +91,8 @@ namespace Physica::Gui {
     /**
      * Label 1 and 2 is by clockwise
      */
-    template<class MatrixType>
-    typename ContourSeries<MatrixType>::Edge::Vertex ContourSeries<MatrixType>::Edge::getVertex1() const {
+    template<Matrix T>
+    typename ContourSeries<T>::Edge::Vertex ContourSeries<T>::Edge::getVertex1() const {
         switch (dir) {
             case Edge::Top:
                 return quad.getTopLeftVertex();
@@ -107,8 +107,8 @@ namespace Physica::Gui {
         return {0, 0};
     }
 
-    template<class MatrixType>
-    typename ContourSeries<MatrixType>::Edge::Vertex ContourSeries<MatrixType>::Edge::getVertex2() const {
+    template<Matrix T>
+    typename ContourSeries<T>::Edge::Vertex ContourSeries<T>::Edge::getVertex2() const {
         switch (dir) {
             case Edge::Top:
                 return quad.getTopRightVertex();
@@ -123,8 +123,8 @@ namespace Physica::Gui {
         return {0, 0};
     }
 
-    template<class MatrixType>
-    bool ContourSeries<MatrixType>::Grid::canInterpolate(Edge edge, double level) const noexcept {
+    template<Matrix T>
+    bool ContourSeries<T>::Grid::canInterpolate(Edge edge, double level) const noexcept {
         size_t vertex1_row = 0, vertex1_col = 0, vertex2_row = 0, vertex2_col = 0;
         const size_t quad_row = edge.quad.row;
         const size_t quad_col = edge.quad.col;
@@ -154,17 +154,17 @@ namespace Physica::Gui {
         return (value1 >= level && level >= value2) || (value1 <= level && level <= value2);
     }
 
-    template<class MatrixType>
-    ContourSeries<MatrixType>::Grid::Grid(const Core::LValueMatrix<MatrixType>& x_,
-                                          const Core::LValueMatrix<MatrixType>& y_,
-                                          const Core::LValueMatrix<MatrixType>& z_) : x(x_), y(y_), z(z_), flags() {
+    template<Matrix T>
+    ContourSeries<T>::Grid::Grid(const Core::LValueMatrix<T>& x_,
+                                          const Core::LValueMatrix<T>& y_,
+                                          const Core::LValueMatrix<T>& z_) : x(x_), y(y_), z(z_), flags() {
         flags.resize(x.getRow() - 1);
         for (size_t i = 0; i < x.getRow() - 1; ++i)
             flags[i].resize(x.getCol() - 1, false);
     }
 
-    template<class MatrixType>
-    typename ContourSeries<MatrixType>::ContourLine ContourSeries<MatrixType>::Grid::interpolateFromEdge(Edge edge, double level) {
+    template<Matrix T>
+    typename ContourSeries<T>::ContourLine ContourSeries<T>::Grid::interpolateFromEdge(Edge edge, double level) {
         assert(!haveVisited(edge.quad));
         ContourLine line{};
         /* Initialize */ {
@@ -211,16 +211,16 @@ namespace Physica::Gui {
         return ContourLine(std::move(line));
     }
 
-    template<class MatrixType>
-    bool ContourSeries<MatrixType>::Grid::isBoundary(Edge edge) const noexcept {
+    template<Matrix T>
+    bool ContourSeries<T>::Grid::isBoundary(Edge edge) const noexcept {
         return (edge.quad.row == 0 && edge.dir == Edge::Top)
             || (edge.quad.col == 0 && edge.dir == Edge::Left)
             || (edge.quad.row == (x.getRow() - 2) && edge.dir == Edge::Bottom)
             || (edge.quad.col == (x.getCol() - 2) && edge.dir == Edge::Right);
     }
 
-    template<class MatrixType>
-    void ContourSeries<MatrixType>::Grid::interpolateEdge(Edge edge, double level, ContourLine& line) const {
+    template<Matrix T>
+    void ContourSeries<T>::Grid::interpolateEdge(Edge edge, double level, ContourLine& line) const {
         auto vertex1 = edge.getVertex1();
         const double z1 = z(vertex1.first, vertex1.second);
 
@@ -239,10 +239,10 @@ namespace Physica::Gui {
         line.second.append(point_y);
     }
 
-    template<class MatrixType>
-    ContourSeries<MatrixType>::ContourSeries(const Core::LValueMatrix<MatrixType>& x,
-                                             const Core::LValueMatrix<MatrixType>& y,
-                                             const Core::LValueMatrix<MatrixType>& z,
+    template<Matrix T>
+    ContourSeries<T>::ContourSeries(const Core::LValueMatrix<T>& x,
+                                             const Core::LValueMatrix<T>& y,
+                                             const Core::LValueMatrix<T>& z,
                                              Core::Array<double> levels,
                                              QObject* parent) : QObject(parent) {
         for (double level : levels) {
@@ -251,8 +251,8 @@ namespace Physica::Gui {
         }
     }
 
-    template<class MatrixType>
-    void ContourSeries<MatrixType>::attachTo(QChart& chart) {
+    template<Matrix T>
+    void ContourSeries<T>::attachTo(QChart& chart) {
         QObject::setParent(&chart);
         for (const auto& line : contourLines) {
             const auto& x = line.first;
@@ -265,8 +265,8 @@ namespace Physica::Gui {
         }
     }
 
-    template<class MatrixType>
-    void ContourSeries<MatrixType>::initContourLine(Grid& grid, double level) {
+    template<Matrix T>
+    void ContourSeries<T>::initContourLine(Grid& grid, double level) {
         for (size_t i = 0; i < grid.getRow(); ++i)
             tryInterpolate(grid, level, Edge(Quad(i, 0), Edge::Left));
 
@@ -290,8 +290,8 @@ namespace Physica::Gui {
         }
     }
 
-    template<class MatrixType>
-    void ContourSeries<MatrixType>::tryInterpolate(Grid& grid, double level, Edge edge) {
+    template<Matrix T>
+    void ContourSeries<T>::tryInterpolate(Grid& grid, double level, Edge edge) {
         if (!grid.haveVisited(edge.quad) && grid.canInterpolate(edge, level)) {
             auto line = grid.interpolateFromEdge(edge, level);
             if (line.first.getLength() > 1)

@@ -27,9 +27,9 @@
 #include "Physica/Core/Utils/Unix/UnixHelper.h"
 
 namespace Physica::Core {
-    template<class ScalarType>
+    template<Scalar T>
     class VASPModel {
-        using MDCellType = MDCell<ScalarType>;
+        using MDCellType = MDCell<T>;
         using WorkingDirType = TempDir<15>;
     private:
         std::string pathToVasp;
@@ -53,13 +53,13 @@ namespace Physica::Core {
         VASPModel& operator=(VASPModel obj) noexcept { swap(obj); return *this; }
         /* Operations */
         template<class Executor>
-        [[nodiscard]] VectorND<ScalarType> force(const MDCellType& cell) const;
-        template<class VectorType, class Executor>
-        void forceAsync(const MDCellType& cell, ContinuousVector<VectorType>& result) const noexcept;
+        [[nodiscard]] VectorND<T> force(const MDCellType& cell) const;
+        template<Vector V, class Executor>
+        void forceAsync(const MDCellType& cell, ContinuousVector<V>& result) const noexcept;
         template<class Executor>
-        [[nodiscard]] VectorND<ScalarType> force_short(const MDCellType& cell) const { return force<Executor>(cell); }
+        [[nodiscard]] VectorND<T> force_short(const MDCellType& cell) const { return force<Executor>(cell); }
         template<class Executor>
-        [[nodiscard]] VectorND<ScalarType> force_long(const MDCellType& cell) const { return VectorND<ScalarType>(cell.getDOF(), 0); }
+        [[nodiscard]] VectorND<T> force_long(const MDCellType& cell) const { return VectorND<T>(cell.getDOF(), 0); }
         void swap(VASPModel& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] const WorkingDirType& getWorkingDir() const noexcept { return workingDir; }
@@ -69,8 +69,8 @@ namespace Physica::Core {
         friend class Test;
     };
 
-    template<class ScalarType>
-    VASPModel<ScalarType>::VASPModel(std::string pathToVasp_,
+    template<Scalar T>
+    VASPModel<T>::VASPModel(std::string pathToVasp_,
                                      const char* pathToINCAR,
                                      const char* pathToPOTCAR,
                                      const char* pathToKPOINTS,
@@ -93,17 +93,17 @@ namespace Physica::Core {
         copyFile(pathToKPOINTS, path.data());
     }
 
-    template<class ScalarType>
+    template<Scalar T>
     template<class Executor>
-    VectorND<ScalarType> VASPModel<ScalarType>::force(const MDCellType& cell) const {
-        VectorND<ScalarType> result(cell.getNumParticle());
-        forceAsync<VectorND<ScalarType>, Executor>(cell, result);
+    VectorND<T> VASPModel<T>::force(const MDCellType& cell) const {
+        VectorND<T> result(cell.getNumParticle());
+        forceAsync<VectorND<T>, Executor>(cell, result);
         return result;
     }
 
-    template<class ScalarType>
-    template<class VectorType, class Executor>
-    void VASPModel<ScalarType>::forceAsync(const MDCellType& cell, ContinuousVector<VectorType>& result) const noexcept {
+    template<Scalar T>
+    template<Vector V, class Executor>
+    void VASPModel<T>::forceAsync(const MDCellType& cell, ContinuousVector<V>& result) const noexcept {
         try {
             /* Make POSCAR */ {
                 const auto path = makePath("%s/POSCAR", workingDir.getName());
@@ -129,8 +129,8 @@ namespace Physica::Core {
         }
     }
 
-    template<class ScalarType>
-    void VASPModel<ScalarType>::swap(VASPModel& __restrict obj) noexcept {
+    template<Scalar T>
+    void VASPModel<T>::swap(VASPModel& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         pathToVasp.swap(obj.pathToVasp);
         workingDir.swap(obj.workingDir);
@@ -139,16 +139,16 @@ namespace Physica::Core {
         std::swap(numMPIProcess, obj.numMPIProcess);
     }
 
-    template<class ScalarType>
-    size_t VASPModel<ScalarType>::getNumParticle() const noexcept {
+    template<Scalar T>
+    size_t VASPModel<T>::getNumParticle() const noexcept {
         size_t result = 0;
         for (size_t elem : numOfEachType)
             result += elem;
         return result;
     }
 
-    template<class ScalarType>
-    ProcessFuture VASPModel<ScalarType>::run_vasp() const {
+    template<Scalar T>
+    ProcessFuture VASPModel<T>::run_vasp() const {
         return ProcessExecutor::schedule([&]() {
             const int standardErr = dup(STDERR_FILENO);
             dup2(logFd, STDOUT_FILENO);
@@ -169,8 +169,8 @@ namespace Physica::Core {
 }
 
 namespace Physica {
-    template<class ScalarType>
-    class Traits<Core::VASPModel<ScalarType>> {
+    template<Scalar T>
+    class Traits<Core::VASPModel<T>> {
     public:
         constexpr static bool IsPeriodBoundary = true;
         constexpr static bool IsContractable = false;

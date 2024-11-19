@@ -19,10 +19,10 @@
 #pragma once
 
 namespace Physica::Core {
-    template<class VectorType1, class VectorType2>
-    class VectorExpr<ExprType::More, VectorType1, VectorType2>
-            : public BinaryVectorExpr<ExprType::More, VectorType1, VectorType2> {
-        using Base = BinaryVectorExpr<ExprType::More, VectorType1, VectorType2>;
+    template<Vector T1, Vector T2>
+    class VectorExpr<ExprType::More, T1, T2>
+            : public BinaryVectorExpr<ExprType::More, T1, T2> {
+        using Base = BinaryVectorExpr<ExprType::More, T1, T2>;
     public:
         using typename Base::ScalarType;
     public:
@@ -44,10 +44,10 @@ namespace Physica::Core {
         using Base::getRHS;
     };
 
-    template<class VectorType, Scalar T>
-    class VectorExpr<ExprType::More, VectorType, T>
-            : public BinaryVectorExpr<ExprType::More, VectorType, T> {
-        using Base = BinaryVectorExpr<ExprType::More, VectorType, T>;
+    template<Vector T, Scalar U>
+    class VectorExpr<ExprType::More, T, U>
+            : public BinaryVectorExpr<ExprType::More, T, U> {
+        using Base = BinaryVectorExpr<ExprType::More, T, U>;
     public:
         using typename Base::ScalarType;
     public:
@@ -69,13 +69,13 @@ namespace Physica::Core {
         using Base::getRHS;
     };
 
-    template<class VectorType1, class VectorType2>
-    [[nodiscard]] inline auto operator>(const RValueVector<VectorType1>& v1, const RValueVector<VectorType2>& v2) noexcept {
-        return VectorExpr<ExprType::More, VectorType1, VectorType2>(v1.getDerived(), v2.getDerived());
+    template<Vector T1, Vector T2>
+    [[nodiscard]] inline auto operator>(const T1& v1, const T2& v2) noexcept {
+        return VectorExpr<ExprType::More, T1, T2>(v1, v2);
     }
 
-    template<class VectorType, Scalar T>
-    [[nodiscard]] inline auto operator>(const RValueVector<VectorType>& v, const T& x) noexcept {
-        return VectorExpr<ExprType::More, VectorType, T>(v.getDerived(), x);
+    template<Vector T, Scalar U>
+    [[nodiscard]] inline auto operator>(const T& v, const U& x) noexcept {
+        return VectorExpr<ExprType::More, T, U>(v, x);
     }
 }

@@ -20,38 +20,37 @@
 
 namespace Physica::Core {
     namespace Internal {
-        template<class MatrixType1, class MatrixType2>
+        template<Matrix T1, Matrix T2>
         struct ProductOption {
-            constexpr static bool SameMajor = MatrixOption::isSameMajor<MatrixType1, MatrixType2>();
-            constexpr static bool RowMajor = MatrixOption::isRowMatrix<MatrixType1>();
+            constexpr static bool SameMajor = MatrixOption::isSameMajor<T1, T2>();
+            constexpr static bool RowMajor = MatrixOption::isRowMatrix<T1>();
             constexpr static int Major = SameMajor ? (RowMajor ? int(MatrixOption::Col)
                                                                : int(MatrixOption::Row))
                                                    : int(MatrixOption::AnyMajor);
-            constexpr static int Storage = (MatrixOption::isElementMatrix<MatrixType1>() && MatrixOption::isElementMatrix<MatrixType2>())
+            constexpr static int Storage = (MatrixOption::isElementMatrix<T1>() && MatrixOption::isElementMatrix<T2>())
                                          ? MatrixOption::Element
                                          : MatrixOption::Vector;
             constexpr static int Option = (Major == MatrixOption::AnyMajor ? MatrixOption::Col : Major) | Storage;
         };
     }
 
-    template<class MatrixType1, class MatrixType2>
-    class MatrixProduct : public RValueMatrix<MatrixProduct<MatrixType1, MatrixType2>> {
-        using This = MatrixProduct<MatrixType1, MatrixType2>;
+    template<Matrix T1, Matrix T2>
+    class MatrixProduct : public RValueMatrix<MatrixProduct<T1, T2>> {
+        using This = MatrixProduct<T1, T2>;
         using Base = RValueMatrix<This>;
     public:
         using Base::isReverseDiff;
         using typename Base::ScalarType;
         using DefaultType = DenseMatrix<ScalarType,
-                                        Internal::ProductOption<MatrixType1, MatrixType2>::Option,
+                                        Internal::ProductOption<T1, T2>::Option,
                                         Base::RowAtCompile,
                                         Base::ColAtCompile,
                                         HostAllocator<ScalarType>>;
     private:
-        const MatrixType1& mat1;
-        const MatrixType2& mat2;
+        const T1& mat1;
+        const T2& mat2;
     public:
-        MatrixProduct(const RValueMatrix<MatrixType1>& mat1_, const RValueMatrix<MatrixType2>& mat2_)
-                : mat1(mat1_.getDerived()), mat2(mat2_.getDerived()) {
+        MatrixProduct(const T1& mat1_, const T2& mat2_) : mat1(mat1_), mat2(mat2_) {
             assert(mat1.getCol() == mat2.getRow());
         }
         MatrixProduct(const This&) = delete;
@@ -61,23 +60,23 @@ namespace Physica::Core {
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
         /* Operations */
-        template<class OtherDerived>
-        void assignTo(LValueMatrix<OtherDerived>& target) const;
+        template<Matrix M>
+        void assignTo(LValueMatrix<M>& target) const;
         [[nodiscard]] DefaultType compute() const { return DefaultType(*this); }
         /* Getters */
         [[nodiscard]] ScalarType calc(size_t row, size_t col) const;
         [[nodiscard]] __host__ __device__ size_t getRow() const { return mat1.getRow(); }
         [[nodiscard]] __host__ __device__ size_t getCol() const { return mat2.getCol(); }
-        [[nodiscard]] const MatrixType1& getLHS() const noexcept { return mat1; }
-        [[nodiscard]] const MatrixType2& getRHS() const noexcept { return mat2; }
+        [[nodiscard]] const T1& getLHS() const noexcept { return mat1; }
+        [[nodiscard]] const T2& getRHS() const noexcept { return mat2; }
     };
 
-    template<class MatrixType1, class MatrixType2>
-    template<class OtherDerived>
-    void MatrixProduct<MatrixType1, MatrixType2>::assignTo(LValueMatrix<OtherDerived>& target) const {
-        constexpr static int defaultMajor = Internal::ProductOption<MatrixType1, MatrixType2>::Major;
+    template<Matrix T1, Matrix T2>
+    template<Matrix M>
+    void MatrixProduct<T1, T2>::assignTo(LValueMatrix<M>& target) const {
+        constexpr static int defaultMajor = Internal::ProductOption<T1, T2>::Major;
         constexpr static bool isAnyMajor = defaultMajor == MatrixOption::AnyMajor;
-        using TargetType = LValueMatrix<OtherDerived>;
+        using TargetType = LValueMatrix<M>;
 
         if constexpr (isAnyMajor) {
             for (size_t i = 0; i < target.getMaxMajor(); ++i) {
@@ -98,12 +97,11 @@ namespace Physica::Core {
             }
         }
 
-        constexpr bool isContinuous = std::is_base_of<ContinuousMatrix<OtherDerived>, OtherDerived>::value;
-        if constexpr (isContinuous && isReverseDiff)
+        if constexpr (is_continuous<M>::value && isReverseDiff)
             target.getDerived().makeContinuous();
     }
 
-    template<class T1, class T2>
+    template<Matrix T1, Matrix T2>
     typename MatrixProduct<T1, T2>::ScalarType MatrixProduct<T1, T2>::calc(size_t row, size_t col) const {
         ScalarType result(0);
         for (size_t i = 0; i < mat1.getCol(); ++i)
@@ -111,29 +109,29 @@ namespace Physica::Core {
         return result;
     }
 
-    template<class MatrixType1, class MatrixType2>
-    [[nodiscard]] inline typename std::enable_if<(MatrixType1::ColAtCompile != 1 && MatrixType2::ColAtCompile != 1) ||
-                                                 (MatrixType1::ColAtCompile == 1 && MatrixType2::ColAtCompile == 1),
-                                                  MatrixProduct<MatrixType1, MatrixType2>>::type
-    operator*(const RValueMatrix<MatrixType1>& mat1, const RValueMatrix<MatrixType2>& mat2) noexcept {
+    template<Matrix T1, Matrix T2>
+    [[nodiscard]] inline typename std::enable_if<(T1::ColAtCompile != 1 && T2::ColAtCompile != 1) ||
+                                                 (T1::ColAtCompile == 1 && T2::ColAtCompile == 1),
+                                                  MatrixProduct<T1, T2>>::type
+    operator*(const T1& mat1, const T2& mat2) noexcept {
         assert(mat1.getCol() == mat2.getRow());
         return MatrixProduct(mat1, mat2);
     }
 }
 
 namespace Physica {
-    template<class MatrixType1, class MatrixType2>
-    class Traits<MatrixProduct<MatrixType1, MatrixType2>> {
-        static_assert(MatrixType1::ColAtCompile == MatrixType2::RowAtCompile ||
-                      MatrixType1::ColAtCompile == Dynamic ||
-                      MatrixType2::RowAtCompile == Dynamic,
+    template<Core::Matrix T1, Core::Matrix T2>
+    class Traits<Core::MatrixProduct<T1, T2>> {
+        static_assert(T1::ColAtCompile == T2::RowAtCompile ||
+                      T1::ColAtCompile == Dynamic ||
+                      T2::RowAtCompile == Dynamic,
                       "[Error]: Row and column do not match in matrix-vector product");
     public:
-        using ScalarType = typename Core::Internal::BinaryScalarOpReturnType<typename MatrixType1::ScalarType,
-                                                                             typename MatrixType2::ScalarType>::Type;
+        using ScalarType = typename Core::Internal::BinaryScalarOpReturnType<typename T1::ScalarType,
+                                                                             typename T2::ScalarType>::Type;
         constexpr static int Option = MatrixOption::AnyMajor | MatrixOption::AnyStorage;
-        constexpr static size_t RowAtCompile = MatrixType1::RowAtCompile;
-        constexpr static size_t ColAtCompile = MatrixType2::ColAtCompile;
+        constexpr static size_t RowAtCompile = T1::RowAtCompile;
+        constexpr static size_t ColAtCompile = T2::ColAtCompile;
         constexpr static size_t SizeAtCompile = RowAtCompile * ColAtCompile;
     };
 }

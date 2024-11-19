@@ -19,12 +19,12 @@
 #pragma once
 
 #include <QtCharts/QLineSeries>
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/MatrixImpl/LValueMatrix.h"
+#include <Physica/Core/Math/Algebra/LinearAlgebra/Matrix/MatrixImpl/LValueMatrix.h>
 
 namespace Physica::Gui {
-    template<class MatrixType>
+    template<Matrix T>
     class ContourSeries : public QObject {
-        using ScalarType = typename MatrixType::ScalarType;
+        using ScalarType = typename T::ScalarType;
         using ContourLine = std::pair<Core::Array<double>, Core::Array<double>>;
 
         struct Quad {
@@ -71,14 +71,14 @@ namespace Physica::Gui {
         class Grid {
             using FlagMatrix = Core::Array<Core::Array<bool>>;
 
-            const Core::LValueMatrix<MatrixType>& x;
-            const Core::LValueMatrix<MatrixType>& y;
-            const Core::LValueMatrix<MatrixType>& z;
+            const Core::LValueMatrix<T>& x;
+            const Core::LValueMatrix<T>& y;
+            const Core::LValueMatrix<T>& z;
             FlagMatrix flags;
         public:            
-            Grid(const Core::LValueMatrix<MatrixType>& x_,
-                 const Core::LValueMatrix<MatrixType>& y_,
-                 const Core::LValueMatrix<MatrixType>& z_);
+            Grid(const Core::LValueMatrix<T>& x_,
+                 const Core::LValueMatrix<T>& y_,
+                 const Core::LValueMatrix<T>& z_);
             Grid(const Grid&) = delete;
             Grid(Grid&&) noexcept = delete;
             ~Grid() = default;
@@ -101,9 +101,9 @@ namespace Physica::Gui {
         Core::Array<ContourLine> contourLines;
         Core::Array<QLineSeries*> splines;
     public:
-        ContourSeries(const Core::LValueMatrix<MatrixType>& x,
-                      const Core::LValueMatrix<MatrixType>& y,
-                      const Core::LValueMatrix<MatrixType>& z,
+        ContourSeries(const Core::LValueMatrix<T>& x,
+                      const Core::LValueMatrix<T>& y,
+                      const Core::LValueMatrix<T>& z,
                       Core::Array<double> level,
                       QObject* parent = nullptr);
         ContourSeries(const ContourSeries&) = delete;

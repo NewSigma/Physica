@@ -22,7 +22,7 @@
 #include "DenseMatrixImpl/HalfDenseMatrixStorage.h"
 
 namespace Physica::Core {
-    template<class T, size_t Order = Dynamic>
+    template<Scalar T, size_t Order = Dynamic>
     class DenseSymmMatrix : public LValueMatrix<DenseSymmMatrix<T, Order>>
                           , private HalfDenseMatrixStorage<T, Order> {
         using This = DenseSymmMatrix<T, Order>;
@@ -35,8 +35,8 @@ namespace Physica::Core {
         using RowMatrix = This;
         using RealMatrix = DenseSymmMatrix<typename ScalarType::RealType, Order>;
     public:
-        template<class OtherMatrix>
-        DenseSymmMatrix(const RValueMatrix<OtherMatrix>& mat);
+        template<Matrix M>
+        DenseSymmMatrix(const M& mat);
         using Storage::Storage;
         DenseSymmMatrix(const This&) = default;
         DenseSymmMatrix(This&&) noexcept = default;
@@ -46,8 +46,8 @@ namespace Physica::Core {
         using Base::operator();
         This& operator=(This obj) noexcept { swap(obj); return *this; }
         inline This& operator=(const ScalarType& value);
-        template<class VectorType>
-        [[nodiscard]] inline MatrixVectorProduct<This, VectorType> operator*(const RValueVector<VectorType>& vec) const noexcept;
+        template<Vector V>
+        [[nodiscard]] inline auto operator*(const V& vec) const noexcept;
         /* Operations */
         using Base::assignTo;
         using Base::calc;
@@ -59,12 +59,12 @@ namespace Physica::Core {
         [[nodiscard]] const This& transpose() const noexcept { return *this; }
         void swap(This& __restrict m) noexcept;
 
-        template<class RandomGenerator>
-        void random_uniform(RandomGenerator& gen) { asVector().random_uniform(gen); }
-        template<class RandomGenerator>
-        void random_normal(RandomGenerator& gen) { asVector().random_normal(gen); }
-        template<class Distribution, class RandomGenerator>
-        void random_any(Distribution& dist, RandomGenerator& gen) { asVector().random_any(dist, gen); }
+        template<class RandomType>
+        void random_uniform(RandomType& gen) { asVector().random_uniform(gen); }
+        template<class RandomType>
+        void random_normal(RandomType& gen) { asVector().random_normal(gen); }
+        template<class Distribution, class RandomType>
+        void random_any(Distribution& dist, RandomType& gen) { asVector().random_any(dist, gen); }
 
         inline const H5DataSet<1> read(const H5Location& loc, const char* name);
         inline H5DataSet<1> write(H5Location& loc, const char* name) const;
@@ -73,25 +73,23 @@ namespace Physica::Core {
         using Storage::getCol;
         using Storage::getOrder;
         using Storage::getRow;
-        [[nodiscard]] Base& asMatrix() noexcept { return *this; }
-        [[nodiscard]] const Base& asMatrix() const noexcept { return *this; }
         [[nodiscard]] VectorStorage& asVector() noexcept { return Storage::asArray(); }
         [[nodiscard]] const VectorStorage& asVector() const noexcept { return Storage::asArray(); }
         /* Static members */
         [[nodiscard]] static DenseSymmMatrix unitMatrix(size_t order);
-        template<class RandomGenerator>
-        [[nodiscard]] inline static This random_uniform(size_t order, RandomGenerator& gen);
-        template<class RandomGenerator>
-        [[nodiscard]] inline static This random_normal(size_t order, RandomGenerator& gen);
-        template<class Distribution, class RandomGenerator>
-        [[nodiscard]] inline static This random_any(size_t order, Distribution& dist, RandomGenerator& gen);
+        template<class RandomType>
+        [[nodiscard]] inline static This random_uniform(size_t order, RandomType& gen);
+        template<class RandomType>
+        [[nodiscard]] inline static This random_normal(size_t order, RandomType& gen);
+        template<class Distribution, class RandomType>
+        [[nodiscard]] inline static This random_any(size_t order, Distribution& dist, RandomType& gen);
     };
     /**
      * Assuming mat is a symmetric matrix, if it is not the case, only half of the elements is saved correctly
      */
-    template<class T, size_t Order>
-    template<class OtherMatrix>
-    DenseSymmMatrix<T, Order>::DenseSymmMatrix(const RValueMatrix<OtherMatrix>& mat)
+    template<Scalar T, size_t Order>
+    template<Matrix M>
+    DenseSymmMatrix<T, Order>::DenseSymmMatrix(const M& mat)
             : DenseSymmMatrix(mat.getRow()) {
         assert(mat.getRow() == mat.getCol());
         for (size_t i = 0; i < mat.getRow(); ++i)
@@ -99,65 +97,64 @@ namespace Physica::Core {
                 Base::operator()(i, j) = mat.calc(i, j);
     }
 
-    template<class T, size_t Order>
+    template<Scalar T, size_t Order>
     inline DenseSymmMatrix<T, Order>& DenseSymmMatrix<T, Order>::operator=(const ScalarType& value) {
         asVector() = value;
         return *this;
     }
 
-    template<class T, size_t Order>
-    template<class VectorType>
-    inline MatrixVectorProduct<DenseSymmMatrix<T, Order>, VectorType>
-    DenseSymmMatrix<T, Order>::operator*(const RValueVector<VectorType>& vec) const noexcept {
-        return static_cast<const Base&>(*this) * vec;
+    template<Scalar T, size_t Order>
+    template<Vector V>
+    inline auto DenseSymmMatrix<T, Order>::operator*(const V& vec) const noexcept {
+        return MatrixVectorProduct<This, V>(*this, vec);
     }
 
-    template<class T, size_t Order>
+    template<Scalar T, size_t Order>
     void DenseSymmMatrix<T, Order>::swap(This& __restrict m) noexcept {
         assert(this != &m && "[Error]: Self swap is likely a bug");
         Storage::swap(m);
     }
 
-    template<class T, size_t Order>
+    template<Scalar T, size_t Order>
     DenseSymmMatrix<T, Order> DenseSymmMatrix<T, Order>::unitMatrix(size_t order) {
         DenseSymmMatrix<T, Order> result(order);
         result.toUnitMatrix();
         return result;
     }
 
-    template<class T, size_t Order>
-    template<class RandomGenerator>
+    template<Scalar T, size_t Order>
+    template<class RandomType>
     [[nodiscard]] inline DenseSymmMatrix<T, Order>
-    DenseSymmMatrix<T, Order>::random_uniform(size_t order, RandomGenerator& gen) {
+    DenseSymmMatrix<T, Order>::random_uniform(size_t order, RandomType& gen) {
         This result(order);
         result.random_uniform(gen);
         return result;
     }
 
-    template<class T, size_t Order>
-    template<class RandomGenerator>
+    template<Scalar T, size_t Order>
+    template<class RandomType>
     [[nodiscard]] inline DenseSymmMatrix<T, Order>
-    DenseSymmMatrix<T, Order>::random_normal(size_t order, RandomGenerator& gen) {
+    DenseSymmMatrix<T, Order>::random_normal(size_t order, RandomType& gen) {
         This result(order);
         result.random_normal(gen);
         return result;
     }
 
-    template<class T, size_t Order>
-    template<class Distribution, class RandomGenerator>
+    template<Scalar T, size_t Order>
+    template<class Distribution, class RandomType>
     [[nodiscard]] inline DenseSymmMatrix<T, Order>
-    DenseSymmMatrix<T, Order>::random_any(size_t order, Distribution& dist, RandomGenerator& gen) {
+    DenseSymmMatrix<T, Order>::random_any(size_t order, Distribution& dist, RandomType& gen) {
         This result(order);
         result.random_any(dist, gen);
         return result;
     }
 #ifdef PHYSICA_HDF5
-    template<class T, size_t Order>
+    template<Scalar T, size_t Order>
     inline const H5DataSet<1> DenseSymmMatrix<T, Order>::read(const H5Location& loc, const char* name) {
         return asVector().read(loc, name);
     }
 
-    template<class T, size_t Order>
+    template<Scalar T, size_t Order>
     inline H5DataSet<1> DenseSymmMatrix<T, Order>::write(H5Location& loc, const char* name) const {
         return asVector().write(loc, name);
     }
@@ -165,9 +162,7 @@ namespace Physica::Core {
 }
 
 namespace Physica {
-    using namespace Core;
-
-    template<class T, size_t Order>
+    template<Scalar T, size_t Order>
     class Traits<DenseSymmMatrix<T, Order>> {
     public:
         using ScalarType = T;
@@ -179,7 +174,7 @@ namespace Physica {
 }
 
 namespace std {
-    template<class T, size_t Order>
+    template<Physica::Core::Scalar T, size_t Order>
     inline void swap(Physica::Core::DenseSymmMatrix<T, Order>& __restrict m1,
                      Physica::Core::DenseSymmMatrix<T, Order>& __restrict m2) noexcept {
         m1.swap(m2);

@@ -46,16 +46,16 @@ namespace Physica::Core {
     public:
         SymmEigenSolver();
         SymmEigenSolver(size_t size);
-        template<class MatrixType>
-        SymmEigenSolver(const RValueMatrix<MatrixType>& source, bool computeEigenvectors_);
+        template<Matrix M>
+        SymmEigenSolver(const M& source, bool computeEigenvectors_);
         SymmEigenSolver(const This&) = default;
         SymmEigenSolver(This&& solver) noexcept = default;
         ~SymmEigenSolver() = default;
         /* Operators */
         This& operator=(This obj) noexcept { swap(obj); return *this; }
         /* Operations */
-        template<class MatrixType>
-        void compute(const RValueMatrix<MatrixType>& source, bool computeEigenvectors_);
+        template<Matrix M>
+        void compute(const M& source, bool computeEigenvectors_);
         void sort();
         template<class Compare>
         void sort(Compare comp);
@@ -77,15 +77,15 @@ namespace Physica::Core {
     }
 
     template<Scalar T, size_t Order>
-    template<class MatrixType>
-    SymmEigenSolver<T, Order>::SymmEigenSolver(const RValueMatrix<MatrixType>& source, bool computeEigenvectors_)
+    template<Matrix M>
+    SymmEigenSolver<T, Order>::SymmEigenSolver(const M& source, bool computeEigenvectors_)
             : SymmEigenSolver(source.getRow()) {
         compute(source, computeEigenvectors_);
     }
 
     template<Scalar T, size_t Order>
-    template<class MatrixType>
-    void SymmEigenSolver<T, Order>::compute(const RValueMatrix<MatrixType>& source, bool computeEigenvectors_) {
+    template<Matrix M>
+    void SymmEigenSolver<T, Order>::compute(const M& source, bool computeEigenvectors_) {
         assert(source.isSymm() && "[Error]: Bad symm matrix");
         assert(source.getRow() == eigenvalues.getLength() && "[Error]: Dimensions do not match");
         computeEigenvectors = computeEigenvectors_;

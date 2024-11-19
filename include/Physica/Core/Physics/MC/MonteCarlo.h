@@ -19,20 +19,20 @@
 #pragma once
 
 namespace Physica::Core {
-    template<class ScalarType, unsigned int Dim = 3>
+    template<Scalar T, unsigned int Dim = 3>
     class MonteCarlo {
-        using MDCellType = MDCell<ScalarType, Dim>;
+        using MDCellType = MDCell<T, Dim>;
         using PositionMatrix = typename MDCellType::PositionMatrix;
-        using VectorType = VectorND<ScalarType>;
-        using MachineType = typename ScalarType::MachineType;
+        using VectorType = VectorND<T>;
+        using MachineType = typename T::MachineType;
 
         MDCellType cell;
         PositionMatrix buffer;
-        ScalarType repTemperature;
-        ScalarType lastEnergy;
+        T repTemperature;
+        T lastEnergy;
         std::uniform_real_distribution<MachineType> dist;
     public:
-        MonteCarlo(MDCellType cell_, ScalarType temperatureT, ScalarType sigma);
+        MonteCarlo(MDCellType cell_, T temperatureT, T sigma);
         MonteCarlo(const MonteCarlo&) = default;
         MonteCarlo(MonteCarlo&&) noexcept = default;
         ~MonteCarlo() = default;
@@ -49,21 +49,21 @@ namespace Physica::Core {
         [[nodiscard]] const MDCellType& getCell() const noexcept { return cell; }
     };
 
-    template<class ScalarType, unsigned int Dim>
-    MonteCarlo<ScalarType, Dim>::MonteCarlo(MDCellType cell_, ScalarType temperatureT, ScalarType sigma)
+    template<Scalar T, unsigned int Dim>
+    MonteCarlo<T, Dim>::MonteCarlo(MDCellType cell_, T temperatureT, T sigma)
             : cell(std::move(cell_)), repTemperature(reciprocal(temperatureT)), lastEnergy(0), dist(-MachineType(sigma), MachineType(sigma)) {
         buffer.resize(cell.getNumParticle(), Dim);
     }
 
-    template<class ScalarType, unsigned int Dim>
-    MonteCarlo<ScalarType, Dim>& MonteCarlo<ScalarType, Dim>::operator=(MonteCarlo mc) noexcept {
+    template<Scalar T, unsigned int Dim>
+    MonteCarlo<T, Dim>& MonteCarlo<T, Dim>::operator=(MonteCarlo mc) noexcept {
         swap(mc);
         return *this;
     }
 
-    template<class ScalarType, unsigned int Dim>
+    template<Scalar T, unsigned int Dim>
     template<class RandomGenerator, class ForceModel, class Executor>
-    void MonteCarlo<ScalarType, Dim>::nvt_step(RandomGenerator& gen, const ForceModel& forceModel) {
+    void MonteCarlo<T, Dim>::nvt_step(RandomGenerator& gen, const ForceModel& forceModel) {
         std::uniform_real_distribution<> uniform_dist{};
 
         for (size_t i = 0; i < cell.getNumParticle(); ++i) {
@@ -72,14 +72,14 @@ namespace Physica::Core {
         }
         cell.swapPos(buffer);
 
-        const ScalarType energy = forceModel.potentialV(cell);
+        const T energy = forceModel.potentialV(cell);
         
         if (energy < lastEnergy) {
             lastEnergy = energy;
         }
         else {
-            const ScalarType prob = exp((lastEnergy - energy) * repTemperature);
-            const ScalarType temp = uniform_dist(gen);
+            const T prob = exp((lastEnergy - energy) * repTemperature);
+            const T temp = uniform_dist(gen);
             if (temp < prob)
                 lastEnergy = energy;
             else
@@ -87,8 +87,8 @@ namespace Physica::Core {
         }
     }
 
-    template<class ScalarType, unsigned int Dim>
-    void MonteCarlo<ScalarType, Dim>::swap(MonteCarlo& __restrict mc) noexcept {
+    template<Scalar T, unsigned int Dim>
+    void MonteCarlo<T, Dim>::swap(MonteCarlo& __restrict mc) noexcept {
         assert(this != &mc && "[Error]: Self swap is likely a bug");
         cell.swap(mc.cell);
         buffer.swap(mc.buffer);

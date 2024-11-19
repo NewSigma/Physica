@@ -29,14 +29,14 @@ namespace Physica::Gui {
     public:
         PolarPlot(QWidget* parent = nullptr);
 
-        template<class VectorType1, class VectorType2>
-        QSplineSeries& spline(const Core::RValueVector<VectorType1>& theta, const Core::RValueVector<VectorType2>& rho);
+        template<Core::Vector T1, Core::Vector T2>
+        QSplineSeries& spline(const T1& theta, const T2& rho);
         /* Getters */
         [[nodiscard]] QPolarChart* chart() { return static_cast<QPolarChart*>(Base::chart()); }
     };
 
-    template<class VectorType1, class VectorType2>
-    QSplineSeries& PolarPlot::spline(const Core::RValueVector<VectorType1>& theta, const Core::RValueVector<VectorType2>& rho) {
+    template<Core::Vector T1, Core::Vector T2>
+    QSplineSeries& PolarPlot::spline(const T1& theta, const T2& rho) {
         assert(rho.getLength() == theta.getLength());
         QSplineSeries* series = new QSplineSeries();
         for (size_t i = 0; i < rho.getLength(); ++i)

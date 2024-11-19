@@ -84,8 +84,8 @@ namespace Physica::Core {
         /* Operators */
         CsvFile& operator=(CsvFile obj) noexcept { swap(obj); return *this; }
         /* Operations */
-        template<class ScalarType>
-        [[nodiscard]] VectorND<ScalarType> asVector(size_t col) const;
+        template<Scalar T>
+        [[nodiscard]] VectorND<T> asVector(size_t col) const;
         size_t countMissingValue(size_t col, const char* missingTag = "NA") const;
         void swap(CsvFile& __restrict obj) noexcept;
         /* Getters */
@@ -113,10 +113,10 @@ namespace Physica::Core {
         void readFile(const char* path);
     };
 
-    template<class ScalarType>
-    VectorND<ScalarType> CsvFile::asVector(size_t col) const {
+    template<Scalar T>
+    VectorND<T> CsvFile::asVector(size_t col) const {
         const DataType type = datatypes[col];
-        VectorND<ScalarType> result(getRow());
+        VectorND<T> result(getRow());
         if (type == FLOAT)
             result = asFloats(col);
         else if (type == DOUBLE)
@@ -125,31 +125,31 @@ namespace Physica::Core {
             for (size_t i = 0; i < result.getLength(); ++i) {
                 switch (type) {
                 case CHAR:
-                    result[i] = ScalarType(asChars(col)[i]);
+                    result[i] = T(asChars(col)[i]);
                     break;
                 case UCHAR:
-                    result[i] = ScalarType(asUsignedChars(col)[i]);
+                    result[i] = T(asUsignedChars(col)[i]);
                     break;
                 case SHORT:
-                    result[i] = ScalarType(asShorts(col)[i]);
+                    result[i] = T(asShorts(col)[i]);
                     break;
                 case USHORT:
-                    result[i] = ScalarType(asUnsignedShorts(col)[i]);
+                    result[i] = T(asUnsignedShorts(col)[i]);
                     break;
                 case INT:
-                    result[i] = ScalarType(asInts(col)[i]);
+                    result[i] = T(asInts(col)[i]);
                     break;
                 case UINT:
-                    result[i] = ScalarType(asUnsignedInts(col)[i]);
+                    result[i] = T(asUnsignedInts(col)[i]);
                     break;
                 case LONG:
-                    result[i] = ScalarType(asLongs(col)[i]);
+                    result[i] = T(asLongs(col)[i]);
                     break;
                 case ULONG:
-                    result[i] = ScalarType(asUnsignedLongs(col)[i]);
+                    result[i] = T(asUnsignedLongs(col)[i]);
                     break;
                 case BOOL:
-                    result[i] = ScalarType(asBools(col)[i]);
+                    result[i] = T(asBools(col)[i]);
                     break;
                 default: [[unlikely]]
                     throw std::invalid_argument("[Error]: Cannot convert string type to float type");

@@ -20,19 +20,19 @@
 
 namespace Physica::Core {
     namespace Internal {
-        template<class MatrixType, class VectorType>
+        template<Matrix T, Vector V>
         __global__ void DiffMatrixProduct_gemvKernel(
-                Physica::PlainStruct<const MatrixType> m_,
-                Physica::PlainStruct<const VectorType> v_,
-                Physica::PlainStruct<MatrixType> dots_,
-                Physica::PlainStruct<VectorType> result_) {
-            using DiffRecord = typename VectorType::DiffRecord;
-            using ScalarType = typename VectorType::ScalarType;
+                Physica::PlainStruct<const T> m_,
+                Physica::PlainStruct<const V> v_,
+                Physica::PlainStruct<T> dots_,
+                Physica::PlainStruct<V> result_) {
+            using DiffRecord = typename V::DiffRecord;
+            using ScalarType = typename V::ScalarType;
             using ValueType = typename ScalarType::ValueType;
             extern __shared__ ValueType buffer[];
-            const MatrixType& m = m_.getDerived();
-            const VectorType& v = v_.getDerived();
-            MatrixType& dots = dots_.getDerived();
+            const T& m = m_.getDerived();
+            const V& v = v_.getDerived();
+            T& dots = dots_.getDerived();
             const int col = m.getCol();
 
             const unsigned int r = blockIdx.x;
@@ -62,7 +62,7 @@ namespace Physica::Core {
 
             if (index != 0)
                 return;
-            VectorType& result = result_.getDerived();
+            V& result = result_.getDerived();
             result.getRecord(r) = DiffRecord{r * 2, ExprType::Sum};
             result.getOperands()[r * 2] = dots.calc(r, 0);
             result.getOperands()[r * 2 + 1] = dots.calc(r, col - 1);
@@ -71,18 +71,18 @@ namespace Physica::Core {
         }
     }
 
-    template<class T, int Option, int Order>
+    template<Scalar T, int Option, int Order>
     auto operator*(
             const device_obj<Diff<DenseMatrix<T, Option>, DiffMode::Reverse, Order>>& m,
             const device_obj<Diff<VectorND<T>, DiffMode::Reverse, Order>>& v) {
-        using MatrixType = device_obj<Diff<DenseMatrix<T, Option>, DiffMode::Reverse, Order>>;
-        using VectorType = device_obj<Diff<VectorND<T>, DiffMode::Reverse, Order>>;
+        using M = device_obj<Diff<DenseMatrix<T, Option>, DiffMode::Reverse, Order>>;
+        using V = device_obj<Diff<VectorND<T>, DiffMode::Reverse, Order>>;
         assert(m.getRow() > 0 && "[Error]: This is a empty matrix");
         assert(m.getCol() == v.getLength() && "[Error]: Dims do not match");
-        MatrixType dots(m.getRow(), m.getCol(), ExprType::Mul);
-        VectorType result(m.getRow(), ExprType::Sum);
-        const size_t numThread = std::min(m.getCol(), VectorType::MaxThreadPerBlock);
-        Internal::DiffMatrixProduct_gemvKernel<MatrixType, VectorType>
+        M dots(m.getRow(), m.getCol(), ExprType::Mul);
+        V result(m.getRow(), ExprType::Sum);
+        const size_t numThread = std::min(m.getCol(), V::MaxThreadPerBlock);
+        Internal::DiffMatrixProduct_gemvKernel<M, V>
                 <<<m.getRow(), numThread, numThread * sizeof(T), CUDAContext::getInstance()>>>(asStruct(m), asStruct(v), asStruct(dots), asStruct(result));
         check(cudaGetLastError());
         return result;

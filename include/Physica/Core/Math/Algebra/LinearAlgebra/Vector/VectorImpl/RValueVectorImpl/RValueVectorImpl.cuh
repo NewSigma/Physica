@@ -23,10 +23,10 @@
 
 namespace Physica::Core {
     namespace Internal {
-        template<class Derived, class OtherDerived>
+        template<Vector T1, Vector T2>
         __global__ void RValueVector_assignToKernel(
-                Physica::PlainStruct<const Derived> source_, Physica::PlainStruct<OtherDerived> target_) {
-            using ScalarType = typename OtherDerived::ScalarType;
+                Physica::PlainStruct<const device_obj<T1>> source_, Physica::PlainStruct<device_obj<T2>> target_) {
+            using ScalarType = typename T2::ScalarType;
 
             const auto& source = source_.getDerived();
             auto& target = target_.getDerived();
@@ -38,16 +38,15 @@ namespace Physica::Core {
     }
 
     template<class Derived>
-    template<class OtherDerived>
-    __host__ __device__ void device_obj<RValueVector<Derived>>::assignTo(device_obj<LValueVector<OtherDerived>>& target_) const {
-        [[maybe_unused]] const auto kernel = Internal::RValueVector_assignToKernel<device_obj<Derived>, device_obj<OtherDerived>>;
+    template<LVector V>
+    __host__ __device__ void device_obj<RValueVector<Derived>>::assignTo(device_obj<V>& target) const {
+        [[maybe_unused]] const auto kernel = Internal::RValueVector_assignToKernel<Derived, V>;
 
-        constexpr size_t OtherSize = Traits<OtherDerived>::SizeAtCompile;
+        constexpr size_t OtherSize = Traits<V>::SizeAtCompile;
         constexpr bool SizeMatch = SizeAtCompile == Dynamic || OtherSize == Dynamic || SizeAtCompile == OtherSize;
         static_assert(SizeMatch, "[Error]: Size mismatch between two vector");
 
         const size_t length = getLength();
-        auto& target = target_.getDerived();
         assert(length == target.getLength() && "[Error]: Size mismatch between two vector");
         if constexpr (IsHost()) {
             const unsigned int numThread = std::min(length, MaxThreadPerBlock);
@@ -56,12 +55,27 @@ namespace Physica::Core {
             check(cudaGetLastError());
         }
         else
-            assignToImpl<OtherDerived>(target);
+            assignToImpl<V>(target);
     }
 
     template<class Derived>
-    __host__ __device__ inline device_obj<TransposeVector<Derived>> device_obj<RValueVector<Derived>>::transpose() const noexcept {
-        return device_obj<TransposeVector<Derived>>(*this);
+    template<class AnyPacket, Side Owner>
+    __device__ inline AnyPacket device_obj<RValueVector<Derived>>::packet(size_t index) const {
+        static_assert(Scalar<AnyPacket>, "[Error]: Not implemented");
+        return calc(index);
+    }
+
+    template<class Derived>
+    template<class AnyPacket, Side Owner>
+    __device__ inline AnyPacket device_obj<RValueVector<Derived>>::packetPartial(size_t index, size_t count) const {
+        static_assert(Scalar<AnyPacket>, "[Error]: Not implemented");
+        assert(count == 1 && "[Error]: No need to call partial version");
+        return calc(index);
+    }
+
+    template<class Derived>
+    __host__ __device__ inline auto device_obj<RValueVector<Derived>>::transpose() const noexcept {
+        return device_obj<TransposeVector<Derived>>(Base::getDerived());
     }
 
     template<class Derived>
@@ -111,20 +125,19 @@ namespace Physica::Core {
     }
 
     template<class Derived>
-    template<class OtherDerived>
-    __device__ inline device_obj<CrossProduct<Derived, OtherDerived>>
-    device_obj<RValueVector<Derived>>::crossProduct(const device_obj<RValueVector<OtherDerived>>& v) const noexcept {
-        return device_obj<CrossProduct<Derived, OtherDerived>>(*this, v);
+    template<Vector V>
+    __device__ inline device_obj<CrossProduct<Derived, V>>
+    device_obj<RValueVector<Derived>>::crossProduct(const device_obj<V>& v) const noexcept {
+        return device_obj<CrossProduct<Derived, V>>(*this, v);
     }
 
     template<class Derived>
-    template<class OtherDerived>
-    __device__ void device_obj<RValueVector<Derived>>::assignToImpl(device_obj<LValueVector<OtherDerived>>& target_) const {
-        constexpr bool enableSIMD = Internal::EnableSIMD<Derived, OtherDerived>::value;
-        auto& target = target_.getDerived();
+    template<LVector V>
+    __device__ void device_obj<RValueVector<Derived>>::assignToImpl(device_obj<V>& target) const {
+        constexpr bool enableSIMD = Internal::EnableSIMD<Derived, V>::value;
         if constexpr (enableSIMD) {
             constexpr static size_t Size1 = Derived::SizeAtCompile;
-            constexpr static size_t Size2 = OtherDerived::SizeAtCompile;
+            constexpr static size_t Size2 = V::SizeAtCompile;
             constexpr static size_t VectorSize = Size1 > Size2 ? Size1 : Size2;
             using PacketType = typename device_obj<BestPacket<ScalarType, VectorSize>>::Type;
             constexpr static size_t PacketSize = PacketType::size();
@@ -157,7 +170,7 @@ namespace Physica::Core {
             }
         }
         else {
-            using OtherScalar = typename OtherDerived::ScalarType;
+            using OtherScalar = typename V::ScalarType;
             for (size_t i = 0; i < getLength(); ++i)
                 target[i] = OtherScalar(calc(i));
         }

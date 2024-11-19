@@ -28,9 +28,9 @@ namespace Physica::Core {
      * Reference:
      * [1] I. F. Silvera and V. V. Goldman, J. Chem. Phys. 69, 4209 (1978).
      */
-    template<class ScalarType, bool IsPeriodBoundary, bool IsSmallCell>
-    class device_obj<SilveraGoldman<ScalarType, IsPeriodBoundary, IsSmallCell>> final
-            : public device_obj<PairModel<SilveraGoldman<ScalarType, IsPeriodBoundary, IsSmallCell>>> {
+    template<Scalar T, bool IsPeriodBoundary, bool IsSmallCell>
+    class device_obj<SilveraGoldman<T, IsPeriodBoundary, IsSmallCell>> final
+            : public device_obj<PairModel<SilveraGoldman<T, IsPeriodBoundary, IsSmallCell>>> {
         constexpr static float alpha = 1.713;
         constexpr static float beta = 1.5671;
         constexpr static float gamma = 0.00993;
@@ -40,14 +40,14 @@ namespace Physica::Core {
         constexpr static float c9 = 143.1;
         constexpr static float c10 = 4813.9;
 
-        using host_obj = SilveraGoldman<ScalarType, IsPeriodBoundary, IsSmallCell>;
+        using host_obj = SilveraGoldman<T, IsPeriodBoundary, IsSmallCell>;
         using This = device_obj<host_obj>;
     public:
         using Base = device_obj<PairModel<host_obj>>;
         using typename Base::MDCellType;
     public:
         device_obj() = default;
-        device_obj(size_t numParticle, ScalarType cutoff_);
+        device_obj(size_t numParticle, T cutoff_);
         device_obj(const host_obj& obj, size_t numParticle);
         device_obj(const This&) = default;
         device_obj(This&&) noexcept = default;
@@ -55,39 +55,39 @@ namespace Physica::Core {
         /* Operators */
         This& operator=(This obj) noexcept { swap(obj); return *this; }
         /* Operations */
-        [[nodiscard]] __host__ __device__ inline ScalarType pot_functor(size_t i, size_t j, ScalarType r, ScalarType r2) const;
-        [[nodiscard]] __host__ __device__ inline ScalarType force_functor(size_t i, size_t j, ScalarType r, ScalarType r2) const;
+        [[nodiscard]] __host__ __device__ inline T pot_functor(size_t i, size_t j, T r, T r2) const;
+        [[nodiscard]] __host__ __device__ inline T force_functor(size_t i, size_t j, T r, T r2) const;
         inline void swap(This& __restrict obj) noexcept;
     };
 
-    template<class ScalarType, bool IsPeriodBoundary, bool IsSmallCell>
-    device_obj<SilveraGoldman<ScalarType, IsPeriodBoundary, IsSmallCell>>::device_obj(size_t numParticle, ScalarType cutoff_)
+    template<Scalar T, bool IsPeriodBoundary, bool IsSmallCell>
+    device_obj<SilveraGoldman<T, IsPeriodBoundary, IsSmallCell>>::device_obj(size_t numParticle, T cutoff_)
             : Base(numParticle, cutoff_) {}
 
-    template<class ScalarType, bool IsPeriodBoundary, bool IsSmallCell>
-    device_obj<SilveraGoldman<ScalarType, IsPeriodBoundary, IsSmallCell>>::device_obj(const host_obj& obj, size_t numParticle)
+    template<Scalar T, bool IsPeriodBoundary, bool IsSmallCell>
+    device_obj<SilveraGoldman<T, IsPeriodBoundary, IsSmallCell>>::device_obj(const host_obj& obj, size_t numParticle)
             : device_obj(numParticle, obj.getCutoff()) {}
 
-    template<class ScalarType, bool IsPeriodBoundary, bool IsSmallCell>
-    inline void device_obj<SilveraGoldman<ScalarType, IsPeriodBoundary, IsSmallCell>>::swap(This& __restrict obj) noexcept {
+    template<Scalar T, bool IsPeriodBoundary, bool IsSmallCell>
+    inline void device_obj<SilveraGoldman<T, IsPeriodBoundary, IsSmallCell>>::swap(This& __restrict obj) noexcept {
         Base::swap(obj);
     }
 
-    template<class ScalarType, bool IsPeriodBoundary, bool IsSmallCell>
-    __host__ __device__ inline ScalarType device_obj<SilveraGoldman<ScalarType, IsPeriodBoundary, IsSmallCell>>::pot_functor(
-            [[maybe_unused]] size_t i, [[maybe_unused]] size_t j, ScalarType r, ScalarType r2) const {
-        ScalarType result = exp(-r2 * gamma - r * beta + alpha);
-        const ScalarType rep_r = reciprocal(r);
-        const ScalarType rep_r2 = square(rep_r);
-        const ScalarType rep_r4 = square(rep_r2);
-        const ScalarType rep_r6 = rep_r4 * rep_r2;
-        const ScalarType rep_r8 = square(rep_r4);
-        const ScalarType rep_r9 = rep_r8 * rep_r;
-        const ScalarType rep_r10 = rep_r6 * rep_r4;
-        const ScalarType g = rep_r6 * c6 + rep_r8 * c8 - rep_r9 * c9 + rep_r10 * c10;
+    template<Scalar T, bool IsPeriodBoundary, bool IsSmallCell>
+    __host__ __device__ inline T device_obj<SilveraGoldman<T, IsPeriodBoundary, IsSmallCell>>::pot_functor(
+            [[maybe_unused]] size_t i, [[maybe_unused]] size_t j, T r, T r2) const {
+        T result = exp(-r2 * gamma - r * beta + alpha);
+        const T rep_r = reciprocal(r);
+        const T rep_r2 = square(rep_r);
+        const T rep_r4 = square(rep_r2);
+        const T rep_r6 = rep_r4 * rep_r2;
+        const T rep_r8 = square(rep_r4);
+        const T rep_r9 = rep_r8 * rep_r;
+        const T rep_r10 = rep_r6 * rep_r4;
+        const T g = rep_r6 * c6 + rep_r8 * c8 - rep_r9 * c9 + rep_r10 * c10;
 
         if (r < cutoff) {
-            const ScalarType f_cutoff = exp(-square(rep_r * cutoff - 1));
+            const T f_cutoff = exp(-square(rep_r * cutoff - 1));
             result -= g * f_cutoff;
         }
         else
@@ -95,23 +95,23 @@ namespace Physica::Core {
         return result;
     }
 
-    template<class ScalarType, bool IsPeriodBoundary, bool IsSmallCell>
-    __host__ __device__ inline ScalarType device_obj<SilveraGoldman<ScalarType, IsPeriodBoundary, IsSmallCell>>::force_functor(
-            [[maybe_unused]] size_t i, [[maybe_unused]] size_t j, ScalarType r, ScalarType r2) const {
-        const ScalarType factor = r * (gamma * 2) + beta;
-        ScalarType result = exp(-r2 * gamma - (r * beta - alpha)) * factor;
-        const ScalarType rep_r = reciprocal(r);
-        const ScalarType rep_r2 = square(rep_r);
-        const ScalarType rep_r3 = rep_r * rep_r2;
-        const ScalarType rep_r4 = square(rep_r2);
-        const ScalarType rep_r5 = rep_r2 * rep_r3;
+    template<Scalar T, bool IsPeriodBoundary, bool IsSmallCell>
+    __host__ __device__ inline T device_obj<SilveraGoldman<T, IsPeriodBoundary, IsSmallCell>>::force_functor(
+            [[maybe_unused]] size_t i, [[maybe_unused]] size_t j, T r, T r2) const {
+        const T factor = r * (gamma * 2) + beta;
+        T result = exp(-r2 * gamma - (r * beta - alpha)) * factor;
+        const T rep_r = reciprocal(r);
+        const T rep_r2 = square(rep_r);
+        const T rep_r3 = rep_r * rep_r2;
+        const T rep_r4 = square(rep_r2);
+        const T rep_r5 = rep_r2 * rep_r3;
 
-        const ScalarType rep_r6 = rep_r5 * rep_r;
-        ScalarType d_g = ScalarType(-6 * c6) * rep_r + ScalarType(-8 * c8) * rep_r3 + ScalarType(9 * c9) * rep_r4 + ScalarType(-10 * c10) * rep_r5;
+        const T rep_r6 = rep_r5 * rep_r;
+        T d_g = T(-6 * c6) * rep_r + T(-8 * c8) * rep_r3 + T(9 * c9) * rep_r4 + T(-10 * c10) * rep_r5;
         d_g *= rep_r6;
         if (r < cutoff) {
-            const ScalarType g = (rep_r2 * c6 + rep_r4 * c8) * rep_r4 - (rep_r5 * c9 - rep_r6 * c10) * rep_r4;
-            const ScalarType f_cutoff = exp(-square(rep_r * cutoff - 1));
+            const T g = (rep_r2 * c6 + rep_r4 * c8) * rep_r4 - (rep_r5 * c9 - rep_r6 * c10) * rep_r4;
+            const T f_cutoff = exp(-square(rep_r * cutoff - 1));
             result += (d_g + g * (rep_r3 * (2 * cutoff * cutoff) - rep_r2 * (2 * cutoff))) * f_cutoff;
         }
         else {
@@ -122,8 +122,6 @@ namespace Physica::Core {
 }
 
 namespace Physica {
-    using namespace Core;
-
     template<class T, bool B, bool IsSmallCell>
     class Traits<Core::device_obj<SilveraGoldman<T, B, IsSmallCell>>> {
     public:

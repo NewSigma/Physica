@@ -271,8 +271,6 @@ namespace Physica::Core {
 }
 
 namespace Physica {
-    using namespace Core;
-
     template<Scalar T, class RandomType>
     class Traits<RandomBatchEwald<T, RandomType>> : public Traits<RSpaceEwald<T, false>> {
     public:

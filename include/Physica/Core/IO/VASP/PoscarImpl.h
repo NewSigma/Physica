@@ -20,18 +20,18 @@
 
 #include <unordered_set>
 #include <algorithm>
-#include "Physica/Core/Exception/BadFileFormatException.h"
-#include "Physica/Core/Exception/NoImplException.h"
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/Householder.h"
-#include "Physica/Core/Physics/PhyConst.h"
+#include <Physica/Core/Exception/BadFileFormatException.h>
+#include <Physica/Core/Exception/NoImplException.h>
+#include <Physica/Core/Math/Algebra/LinearAlgebra/Vector/Householder.h>
+#include <Physica/Core/Physics/PhyConst.h>
 
 namespace Physica::Core {
-    template<class ScalarType>
-    Poscar<ScalarType>::Poscar()
+    template<Scalar T>
+    Poscar<T>::Poscar()
             : Base(), elementTypes(), numOfEachType() {}
 
-    template<class ScalarType>
-    Poscar<ScalarType>::Poscar(Base base, ElementTypeArray elementTypes_, Array<size_t> numOfEachType_)
+    template<Scalar T>
+    Poscar<T>::Poscar(Base base, ElementTypeArray elementTypes_, Array<size_t> numOfEachType_)
             : Base(std::move(base))
             , elementTypes(std::move(elementTypes_))
             , numOfEachType(std::move(numOfEachType_)) {
@@ -39,8 +39,8 @@ namespace Physica::Core {
         assert(elementTypes.getLength() == numOfEachType.getLength());
     }
 
-    template<class ScalarType>
-    Poscar<ScalarType>::Poscar(CrystalCell<ScalarType> cell) : Base(std::move(cell)) {
+    template<Scalar T>
+    Poscar<T>::Poscar(CrystalCell<T> cell) : Base(std::move(cell)) {
         /* Get size */ {
             std::unordered_set<uint16_t> set{};
             for (uint16_t elem : cell.getAtomicNumbers())
@@ -62,8 +62,8 @@ namespace Physica::Core {
         }
     }
 
-    template<Scalar T>
-    std::ostream& operator<<(std::ostream& os, const Poscar<T>& poscar) {
+    template<Scalar U>
+    std::ostream& operator<<(std::ostream& os, const Poscar<U>& poscar) {
         os << '\n';
         os << 1.0 << '\n';
         os << poscar.lattice.format();
@@ -75,13 +75,13 @@ namespace Physica::Core {
         for (size_t i = 0; i < poscar.numOfEachType.getLength(); ++i)
             os << ' ' << poscar.numOfEachType[i];
         os << '\n';
-        os << ((poscar.type == Poscar<T>::Type::Direct) ? "Direct\n" : "Cartesian\n");
+        os << ((poscar.type == Poscar<U>::Type::Direct) ? "Direct\n" : "Cartesian\n");
         os << poscar.pos.format();
         return os;
     }
 
-    template<Scalar T>
-    std::istream& operator>>(std::istream& is, Poscar<T>& poscar) {
+    template<Scalar U>
+    std::istream& operator>>(std::istream& is, Poscar<U>& poscar) {
         assert(is.good());
         is.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
         is.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
@@ -95,9 +95,9 @@ namespace Physica::Core {
             const int ch = std::tolower(is.get());
             is.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
             if (ch == 'd')
-                poscar.type = Poscar<T>::Type::Direct;
+                poscar.type = Poscar<U>::Type::Direct;
             else if (ch == 'c')
-                poscar.type = Poscar<T>::Type::Cartesian;
+                poscar.type = Poscar<U>::Type::Cartesian;
             else
                 throw BadFileFormatException("[Error]: Failed to read format type");
         }
@@ -107,11 +107,11 @@ namespace Physica::Core {
         return is;
     }
 
-    template<class ScalarType>
-    void Poscar<ScalarType>::standrizeLattice() {
+    template<Scalar T>
+    void Poscar<T>::standrizeLattice() {
         using MatrixType = typename LatticeMatrix::ColMatrix;
         MatrixType temp = lattice.transpose();
-        using VectorType = Vector3D<ScalarType>;
+        using VectorType = Vector3D<T>;
         VectorType buffer{};
         householder(temp.col(0), buffer);
         applyHouseholder(buffer, temp);
@@ -123,17 +123,17 @@ namespace Physica::Core {
         for (int i = 0; i < 3; ++i) {
             if (temp(i, i).isNegative()) {
                 auto row = temp.row(i);
-                row = -row.asVector();
+                row = -row;
             }
         }
-        temp(1, 0) = temp(2, 0) = temp(2, 1) = ScalarType(0); //Clear numeric error
+        temp(1, 0) = temp(2, 0) = temp(2, 1) = T(0); //Clear numeric error
         lattice = temp.transpose();
     }
     /**
      * Extend the cell in z direction, with all distance of atoms in cell not changed. Use for 2D material only
      */
-    template<class ScalarType>
-    void Poscar<ScalarType>::extendInZ(ScalarType factor) {
+    template<Scalar T>
+    void Poscar<T>::extendInZ(T factor) {
         if (Base::type == Type::Cartesian) {
             Base::toDirect();
             extendInZ_direct(factor);
@@ -143,15 +143,15 @@ namespace Physica::Core {
             extendInZ_direct(factor);
     }
 
-    template<class ScalarType>
-    void Poscar<ScalarType>::toUnitCell(unsigned int x, unsigned int y, unsigned int z) {
+    template<Scalar T>
+    void Poscar<T>::toUnitCell(unsigned int x, unsigned int y, unsigned int z) {
         Base::toUnitCell(x, y, z);
         for (size_t& num : numOfEachType)
             num /= (x * y * z);
     }
 
-    template<class ScalarType>
-    void Poscar<ScalarType>::toQECell(std::ostream& os) const {
+    template<Scalar T>
+    void Poscar<T>::toQECell(std::ostream& os) const {
         os << "CELL_PARAMETERS (angstrom)\n";
         os << lattice << '\n';
 
@@ -168,20 +168,20 @@ namespace Physica::Core {
         }
     }
 
-    template<class ScalarType>
-    void Poscar<ScalarType>::swap(Poscar& __restrict poscar) noexcept {
+    template<Scalar T>
+    void Poscar<T>::swap(Poscar& __restrict poscar) noexcept {
         assert(this != &poscar && "[Error]: Self swap is likely a bug");
         Base::swap(poscar);
         elementTypes.swap(poscar.elementTypes);
         numOfEachType.swap(poscar.numOfEachType);
     }
 
-    template<class ScalarType>
-    typename Poscar<ScalarType>::CrystalSystem Poscar<ScalarType>::getCrystalSystem(double precision) const noexcept {
-        const ScalarType norm_list[3]{lattice.row(0).squaredNorm(),
+    template<Scalar T>
+    typename Poscar<T>::CrystalSystem Poscar<T>::getCrystalSystem(double precision) const noexcept {
+        const T norm_list[3]{lattice.row(0).squaredNorm(),
                                       lattice.row(1).squaredNorm(),
                                       lattice.row(2).squaredNorm()};
-        const ScalarType angle_list[3]{lattice.row(1).angleTo(lattice.row(2)),
+        const T angle_list[3]{lattice.row(1).angleTo(lattice.row(2)),
                                        lattice.row(0).angleTo(lattice.row(2)),
                                        lattice.row(0).angleTo(lattice.row(1))};
         const bool norm_equal_list[3]{scalarNear(norm_list[0], norm_list[1], precision),
@@ -193,7 +193,7 @@ namespace Physica::Core {
 
         const bool allAngleSame = angle_equal_list[0] && angle_equal_list[1];
         if (allAngleSame) {
-            if (scalarNear(angle_list[0], ScalarType(M_PI_2), precision)) {
+            if (scalarNear(angle_list[0], T(M_PI_2), precision)) {
                 const unsigned int sameNormCount = norm_equal_list[0] + norm_equal_list[1] + norm_equal_list[2];
                 [[maybe_unused]] const bool compareTransitive = sameNormCount != 2;
                 assert(compareTransitive);
@@ -208,8 +208,8 @@ namespace Physica::Core {
         else {
             for (int i = 0; i < 3; ++i) {
                 if (angle_equal_list[i]) {
-                    if (scalarNear(angle_list[i], ScalarType(M_PI_2), precision)) {
-                        if (scalarNear(angle_list[(i + 2) % 3], ScalarType(M_PI * 2 / 3), precision))
+                    if (scalarNear(angle_list[i], T(M_PI_2), precision)) {
+                        if (scalarNear(angle_list[(i + 2) % 3], T(M_PI * 2 / 3), precision))
                             return Hexagonal;
                         return Monoclinic;
                     }
@@ -222,8 +222,8 @@ namespace Physica::Core {
         return Triclinic;
     }
 
-    template<class ScalarType>
-    void Poscar<ScalarType>::readTypesAndNumber(std::istream& is) {
+    template<Scalar T>
+    void Poscar<T>::readTypesAndNumber(std::istream& is) {
         size_t count = 0;
         /* Read types */ {
             is >> count;
@@ -270,8 +270,8 @@ namespace Physica::Core {
         numOfEachType.squeeze();
     }
 
-    template<class ScalarType>
-    void Poscar<ScalarType>::readAtomPos(std::istream& is) {
+    template<Scalar T>
+    void Poscar<T>::readAtomPos(std::istream& is) {
         const size_t atomCount = sumNumOfEachType();
         pos.resize(atomCount, 3);
         size_t i = 0;
@@ -282,34 +282,34 @@ namespace Physica::Core {
         is >> pos(i, 0) >> pos(i, 1) >> pos(i, 2);
     }
 
-    template<class ScalarType>
-    size_t Poscar<ScalarType>::sumNumOfEachType() const {
+    template<Scalar T>
+    size_t Poscar<T>::sumNumOfEachType() const {
         size_t result = 0;
         for (size_t num : numOfEachType)
             result += num;
         return result;
     }
 
-    template<class ScalarType>
-    void Poscar<ScalarType>::extendInZ_direct(ScalarType factor) {
+    template<Scalar T>
+    void Poscar<T>::extendInZ_direct(T factor) {
         assert(type == Type::Direct);
         assert(lattice(0, 2).isZero());
         assert(lattice(1, 2).isZero());
         lattice(2, 2) *= factor;
 
-        const ScalarType inv_factor = Core::reciprocal(factor);
+        const T inv_factor = Core::reciprocal(factor);
 
         auto col = pos.col(2);
         for (size_t i = 0; i < col.getLength(); ++i) {
-            if (col[i] > ScalarType(0.5))
-                col[i] += (ScalarType(1) - col[i]) * inv_factor;
+            if (col[i] > T(0.5))
+                col[i] += (T(1) - col[i]) * inv_factor;
             else
                 col[i] *= inv_factor;
         }
     }
 
-    template<class ScalarType>
-    uint8_t Poscar<ScalarType>::elementSymbolToNumber(char ch1, char ch2) {
+    template<Scalar T>
+    uint8_t Poscar<T>::elementSymbolToNumber(char ch1, char ch2) {
         assert(std::isalpha(ch1) && (std::isalpha(ch2) || ch2 == '\0'));
         uint8_t i = 0;
         for (const char* symbol : PhyConst<SI>::elementSymbol) {

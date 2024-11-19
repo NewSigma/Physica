@@ -21,48 +21,48 @@
 #include <Physica/Core/Math/Algebra/LinearAlgebra/Vector/DenseVector.h>
 
 namespace Physica::Core {
-    template<class ScalarType>
+    template<Scalar T>
     class Loss {
-        static_assert(!is_device_obj<ScalarType>::value, "[Error]: Include corresponding *.cuh file to enable CUDA support");
+        static_assert(!is_device_obj<T>::value, "[Error]: Include corresponding *.cuh file to enable CUDA support");
     public:
-        constexpr static bool IsTrainMode = ScalarType::isDifferentiable;
-        using ValueType = typename ScalarType::ValueType;
-        using LossType = ScalarType;
+        constexpr static bool IsTrainMode = T::isDifferentiable;
+        using ValueType = typename T::ValueType;
+        using LossType = T;
     private:
-        using VectorType = VectorND<ScalarType>;
+        using VectorType = VectorND<T>;
     public:
-        [[nodiscard]] static ScalarType softmax(const VectorType& v, size_t label);
-        [[nodiscard]] static ScalarType crossEntropy(const VectorType& v, size_t label);
-        [[nodiscard]] static ScalarType polar_rate(ScalarType train_loss, ScalarType valid_loss);
-        [[nodiscard]] static ScalarType mixed_loss(ScalarType train_loss, ScalarType valid_loss);
+        [[nodiscard]] static T softmax(const VectorType& v, size_t label);
+        [[nodiscard]] static T crossEntropy(const VectorType& v, size_t label);
+        [[nodiscard]] static T polar_rate(T train_loss, T valid_loss);
+        [[nodiscard]] static T mixed_loss(T train_loss, T valid_loss);
     };
 
-    template<class ScalarType>
-    ScalarType Loss<ScalarType>::softmax(const VectorType& v, size_t label) {
-        const ScalarType maximum = v.max();
-        const ScalarType factor = reciprocal(exp(v - maximum).sum());
+    template<Scalar T>
+    T Loss<T>::softmax(const VectorType& v, size_t label) {
+        const T maximum = v.max();
+        const T factor = reciprocal(exp(v - maximum).sum());
         return exp(v.calc(label) - maximum) * factor;
     }
 
-    template<class ScalarType>
-    ScalarType Loss<ScalarType>::crossEntropy(const VectorType& v, size_t label) {
+    template<Scalar T>
+    T Loss<T>::crossEntropy(const VectorType& v, size_t label) {
         assert(label < v.getLength() && "[Error]: The label is not exist");
-        return -ln(softmax(v, label) + ScalarType(std::numeric_limits<ValueType>::min())); //Add minimum to avoid ln(0)
+        return -ln(softmax(v, label) + T(std::numeric_limits<ValueType>::min())); //Add minimum to avoid ln(0)
     }
     /**
      * \returns polarization rate, the lower the better, minus value means overfitting
      */
-    template<class ScalarType>
-    ScalarType Loss<ScalarType>::polar_rate(ScalarType train_loss, ScalarType valid_loss) {
-        const ScalarType total = train_loss + valid_loss;
-        const ScalarType delta = train_loss - valid_loss;
-        if (abs(delta) * ScalarType(std::numeric_limits<ScalarType>::epsilon()) >= total)
-            return ScalarType(0);
-        return delta / total * ScalarType(2);
+    template<Scalar T>
+    T Loss<T>::polar_rate(T train_loss, T valid_loss) {
+        const T total = train_loss + valid_loss;
+        const T delta = train_loss - valid_loss;
+        if (abs(delta) * T(std::numeric_limits<T>::epsilon()) >= total)
+            return T(0);
+        return delta / total * T(2);
     }
 
-    template<class ScalarType>
-    ScalarType Loss<ScalarType>::mixed_loss(ScalarType train_loss, ScalarType valid_loss) {
+    template<Scalar T>
+    T Loss<T>::mixed_loss(T train_loss, T valid_loss) {
         return std::max(train_loss, valid_loss) + abs(train_loss - valid_loss);
     }
 }

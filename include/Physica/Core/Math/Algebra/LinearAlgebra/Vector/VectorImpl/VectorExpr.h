@@ -26,9 +26,9 @@ namespace Physica::Core {
     /**
      * \class VectorExpr implements template expression for vectors, which will reduce temporary objects.
      * 
-     * Operations defined as \tparam T1 \tparam Type \tparam T2. e.g. vector + scalar, expression * expression
+     * Operations defined as \tparam LHS \tparam Type \tparam RHS. e.g. vector + scalar, expression * expression
      */
-    template<ExprType Type, class T1, class T2 = T1> class VectorExpr;
+    template<ExprType Type, Vector LHS, class RHS = LHS> class VectorExpr;
 
     template<ExprType Type, Vector V>
     class UnitaryVectorExpr : public RValueVector<VectorExpr<Type, V>> {
@@ -37,7 +37,7 @@ namespace Physica::Core {
     private:
         const V& expr;
     public:
-        UnitaryVectorExpr(const RValueVector<V>& expr_) : expr(expr_.getDerived()) {}
+        UnitaryVectorExpr(const V& expr_) : expr(expr_) {}
         UnitaryVectorExpr(const This&) = delete;
         UnitaryVectorExpr(This&&) noexcept = delete;
         ~UnitaryVectorExpr() = default;
@@ -59,13 +59,9 @@ namespace Physica::Core {
         const LHS1* lhs;
         const RHS1* rhs;
     public:
-        BinaryVectorExpr(const LHS& lhs_, const RHS& rhs_) : lhs(&lhs_) {
-            if constexpr (Scalar<RHS>)
-                rhs = &rhs_.getDerived();
-            else {
-                rhs = &rhs_;
+        BinaryVectorExpr(const LHS& lhs_, const RHS& rhs_) : lhs(&lhs_), rhs(&rhs_) {
+            if constexpr (!Scalar<RHS>)
                 assert(lhs->getLength() == rhs->getLength());
-            }
         }
         BinaryVectorExpr(const This&) = delete;
         BinaryVectorExpr(This&&) noexcept = delete;
@@ -81,19 +77,19 @@ namespace Physica::Core {
 }
 
 namespace Physica {
-    template<Core::ExprType Type, class Expr1, class Expr2>
-    class Traits<Core::VectorExpr<Type, Expr1, Expr2>> {
-        constexpr static size_t Size1 = Traits<Expr1>::SizeAtCompile;
-        constexpr static size_t Size2 = Traits<Expr2>::SizeAtCompile;
-        constexpr static bool FastAssign1 = Traits<Expr1>::FastAssign;
-        constexpr static bool FastAssign2 = Traits<Expr2>::FastAssign;
-        constexpr static bool FastPacket1 = Traits<Expr1>::FastPacket;
-        constexpr static bool FastPacket2 = Traits<Expr2>::FastPacket;
+    template<Core::ExprType Type, Vector LHS, class RHS>
+    class Traits<Core::VectorExpr<Type, LHS, RHS>> {
+        constexpr static size_t Size1 = Traits<LHS>::SizeAtCompile;
+        constexpr static size_t Size2 = Traits<RHS>::SizeAtCompile;
+        constexpr static bool FastAssign1 = Traits<LHS>::FastAssign;
+        constexpr static bool FastAssign2 = Traits<RHS>::FastAssign;
+        constexpr static bool FastPacket1 = Traits<LHS>::FastPacket;
+        constexpr static bool FastPacket2 = Traits<RHS>::FastPacket;
         constexpr static bool IsAddOrSub = Type == Core::ExprType::Add || Type == Core::ExprType::Sub;
 
-        using ScalarType1 = typename Expr1::ScalarType;
+        using ScalarType1 = typename LHS::ScalarType;
         using RealType = typename ScalarType1::RealType;
-        using BinaryScalarType = typename Core::Internal::BinaryScalarOpReturnType<ScalarType1, typename Expr2::ScalarType>::Type;
+        using BinaryScalarType = typename Core::Internal::BinaryScalarOpReturnType<ScalarType1, typename RHS::ScalarType>::Type;
         static_assert(Size1 == Dynamic || Size2 == Dynamic || (Size1 == Size2), "[Error]: Vector dimentions do not match");
     public:
         using ScalarType = typename std::conditional<Type == Core::ExprType::Abs, RealType, BinaryScalarType>::type;
@@ -102,13 +98,13 @@ namespace Physica {
         constexpr static bool FastPacket = FastPacket1 && FastPacket2;
     };
 
-    template<Core::ExprType Type, class Expr, Scalar T>
-    class Traits<Core::VectorExpr<Type, Expr, T>> {
+    template<Core::ExprType Type, Vector LHS, Scalar RHS>
+    class Traits<Core::VectorExpr<Type, LHS, RHS>> {
     public:
-        using ScalarType = typename Core::Internal::BinaryScalarOpReturnType<typename Expr::ScalarType, T>::Type;
-        constexpr static size_t SizeAtCompile = Traits<Expr>::SizeAtCompile;
-        constexpr static bool FastAssign = Traits<Expr>::FastAssign;
-        constexpr static bool FastPacket = Traits<Expr>::FastPacket;
+        using ScalarType = typename Core::Internal::BinaryScalarOpReturnType<typename LHS::ScalarType, RHS>::Type;
+        constexpr static size_t SizeAtCompile = Traits<LHS>::SizeAtCompile;
+        constexpr static bool FastAssign = Traits<LHS>::FastAssign;
+        constexpr static bool FastPacket = Traits<LHS>::FastPacket;
     };
 }
 

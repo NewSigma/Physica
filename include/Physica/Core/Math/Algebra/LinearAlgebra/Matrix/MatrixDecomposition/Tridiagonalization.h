@@ -23,80 +23,80 @@
 #include <Physica/Core/Math/Algebra/LinearAlgebra/Matrix/HouseholderSequence.h>
 
 namespace Physica::Core {
-    template<class ScalarType, size_t Order> class TridiagonalMatrixT;
+    template<Scalar T, size_t Order> class TridiagonalMatrixT;
     /**
      * Decomposite hermite matrix A like A = QTQ^H
      * 
      * References:
      * [1] Gene H. Golub, Charles F. Van Loan. Matrix computations 4th edition[M]. John Hopkins University Press, 2013:458-459
      */
-    template<class ScalarType, size_t Order = Dynamic>
+    template<Scalar T, size_t Order = Dynamic>
     class Tridiagonalization {
         static_assert(Order > 2 || Order == Dynamic,
                       "Unnecessary hessenburg operation on matrixes whose rank is 1 or 2");
-        using This = Tridiagonalization<ScalarType, Order>;
-        using RealType = typename ScalarType::RealType;
-        using MatrixT = TridiagonalMatrixT<ScalarType, Order>;
-        using SymmMatrix = DenseSymmMatrix<ScalarType, Order>;
-        using HermiteMatrix = DenseHermiteMatrix<ScalarType, Order>;
+        using This = Tridiagonalization<T, Order>;
+        using RealType = typename T::RealType;
+        using MatrixT = TridiagonalMatrixT<T, Order>;
+        using SymmMatrix = DenseSymmMatrix<T, Order>;
+        using HermiteMatrix = DenseHermiteMatrix<T, Order>;
 
         constexpr static size_t NormVectorLength = Order == Dynamic ? Dynamic : (Order - 2);
         constexpr static size_t BufferLength = Order == Dynamic ? Dynamic : (Order - 1);
-        using HouseholderNorm = DenseVector<ScalarType, NormVectorLength>;
-        using BufferVector = DenseVector<ScalarType, BufferLength>;
+        using HouseholderNorm = DenseVector<T, NormVectorLength>;
+        using BufferVector = DenseVector<T, BufferLength>;
     public:
-        using WorkingMatrix = typename std::conditional<ScalarType::isComplex, HermiteMatrix, SymmMatrix>::type;
+        using WorkingMatrix = typename std::conditional<T::isComplex, HermiteMatrix, SymmMatrix>::type;
     private:
         WorkingMatrix working;
         HouseholderNorm normBuffer;
         BufferVector buffer;
     public:
         Tridiagonalization(size_t size);
-        template<class MatrixType>
-        Tridiagonalization(const RValueMatrix<MatrixType>& source);
+        template<Matrix M>
+        Tridiagonalization(const M& source);
         Tridiagonalization(const This&) = default;
         Tridiagonalization(This&&) noexcept = default;
         ~Tridiagonalization() = default;
         /* Operators */
         This& operator=(This obj) noexcept { swap(obj); return *this; }
         /* Operations */
-        template<class MatrixType>
-        void compute(const RValueMatrix<MatrixType>& source);
+        template<Matrix M>
+        void compute(const M& source);
         void swap(This& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] MatrixT getMatrixT() const noexcept { return MatrixT(*this); }
         [[nodiscard]] HouseholderSequence<WorkingMatrix> getMatrixQ() const noexcept;
 
-        friend class TridiagonalMatrixT<ScalarType, Order>;
+        friend class TridiagonalMatrixT<T, Order>;
     };
 
-    template<class ScalarType, size_t Order>
-    Tridiagonalization<ScalarType, Order>::Tridiagonalization(size_t size)
+    template<Scalar T, size_t Order>
+    Tridiagonalization<T, Order>::Tridiagonalization(size_t size)
             : working(size, size)
             , normBuffer(size - 2)
             , buffer(size - 1) {
         assert(size > 2 && "[Error]: Matrix is too small, no need for tridiagonalization");
     }
 
-    template<class ScalarType, size_t Order>
-    template<class MatrixType>
-    Tridiagonalization<ScalarType, Order>::Tridiagonalization(const RValueMatrix<MatrixType>& source)
+    template<Scalar T, size_t Order>
+    template<Matrix M>
+    Tridiagonalization<T, Order>::Tridiagonalization(const M& source)
             : Tridiagonalization(source.getRow()) {
         compute(source);
     }
 
-    template<class ScalarType, size_t Order>
-    template<class MatrixType>
-    void Tridiagonalization<ScalarType, Order>::compute(const RValueMatrix<MatrixType>& source) {
+    template<Scalar T, size_t Order>
+    template<Matrix M>
+    void Tridiagonalization<T, Order>::compute(const M& source) {
         const size_t order = source.getRow();
         working = source;
         for (size_t i = 0; i < order - 2; ++i) {
             auto to_col = working.col(i);
             auto temp = to_col.tail(i + 1);
 
-            ScalarType unit;
+            T unit;
             if (temp.calc(0).squaredNorm() <= RealType(std::numeric_limits<RealType>::min()))
-                unit = ScalarType(1);
+                unit = T(1);
             else
                 unit = temp.calc(0).unit();
 
@@ -107,44 +107,44 @@ namespace Physica::Core {
             normBuffer[i] = -norm * unit;
 
             if (!norm.isZero()) {
-                const ScalarType factor = working(i, i + 1);
-                working(i, i + 1) = ScalarType(1);
+                const T factor = working(i, i + 1);
+                working(i, i + 1) = T(1);
                 auto corner = working.bottomRightCorner(i + 1);
                 p = factor * (corner * temp);
-                p -= (p.conjugate() * temp * factor * ScalarType(0.5)) * temp;
+                p -= (p.conjugate() * temp * factor * T(0.5)) * temp;
                 for (size_t r = 0; r < corner.getRow(); ++r)
                     for (size_t c = r; c < corner.getCol(); ++c)
-                        working(r + i + 1, c + i + 1) -= temp.calc(r) * p[c].conjugate() + temp.calc(c).conjugate() * ScalarType(p[r]);
+                        working(r + i + 1, c + i + 1) -= temp.calc(r) * p[c].conjugate() + temp.calc(c).conjugate() * T(p[r]);
                 working(i, i + 1) = factor;
             }
         }
     }
 
-    template<class ScalarType, size_t Order>
-    void Tridiagonalization<ScalarType, Order>::swap(This& __restrict obj) noexcept {
+    template<Scalar T, size_t Order>
+    void Tridiagonalization<T, Order>::swap(This& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         working.swap(obj.working);
         normBuffer.swap(obj.normBuffer);
         buffer.swap(obj.buffer);
     }
 
-    template<class ScalarType, size_t Order>
-    HouseholderSequence<typename Tridiagonalization<ScalarType, Order>::WorkingMatrix>
-    Tridiagonalization<ScalarType, Order>::getMatrixQ() const noexcept {
+    template<Scalar T, size_t Order>
+    HouseholderSequence<typename Tridiagonalization<T, Order>::WorkingMatrix>
+    Tridiagonalization<T, Order>::getMatrixQ() const noexcept {
         HouseholderSequence result(working);
         result.setSize(working.getRow() - 2);
         result.setShift(1);
         return result;
     }
 
-    template<class ScalarType, size_t Order>
-    class TridiagonalMatrixT : public RValueMatrix<TridiagonalMatrixT<ScalarType, Order>> {
-        using This = TridiagonalMatrixT<ScalarType, Order>;
-        using RealType = typename ScalarType::RealType;
+    template<Scalar T, size_t Order>
+    class TridiagonalMatrixT : public RValueMatrix<TridiagonalMatrixT<T, Order>> {
+        using This = TridiagonalMatrixT<T, Order>;
+        using RealType = typename T::RealType;
 
-        const Tridiagonalization<ScalarType, Order>& tri;
+        const Tridiagonalization<T, Order>& tri;
     public:
-        TridiagonalMatrixT(const Tridiagonalization<ScalarType, Order>& tri_);
+        TridiagonalMatrixT(const Tridiagonalization<T, Order>& tri_);
         TridiagonalMatrixT(const This&) = delete;
         TridiagonalMatrixT(This&&) noexcept = delete;
         ~TridiagonalMatrixT() = default;
@@ -152,19 +152,19 @@ namespace Physica::Core {
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
         /* Operations */
-        template<class OtherMatrix>
-        void assignTo(LValueMatrix<OtherMatrix>& target) const;
+        template<Matrix M>
+        void assignTo(LValueMatrix<M>& target) const;
         /* Getters */
         [[nodiscard]] __host__ __device__ size_t getRow() const noexcept { return tri.working.getRow(); }
         [[nodiscard]] __host__ __device__ size_t getCol() const noexcept { return tri.working.getCol(); }
     };
 
-    template<class ScalarType, size_t Order>
-    TridiagonalMatrixT<ScalarType, Order>::TridiagonalMatrixT(const Tridiagonalization<ScalarType, Order>& tri_) : tri(tri_) {}
+    template<Scalar T, size_t Order>
+    TridiagonalMatrixT<T, Order>::TridiagonalMatrixT(const Tridiagonalization<T, Order>& tri_) : tri(tri_) {}
 
-    template<class ScalarType, size_t Order>
-    template<class OtherMatrix>
-    void TridiagonalMatrixT<ScalarType, Order>::assignTo(LValueMatrix<OtherMatrix>& target) const {
+    template<Scalar T, size_t Order>
+    template<Matrix M>
+    void TridiagonalMatrixT<T, Order>::assignTo(LValueMatrix<M>& target) const {
         const size_t order = getRow();
         target = RealType(0);
         target(0, 0) = tri.working.calc(0, 0);
@@ -185,9 +185,7 @@ namespace Physica::Core {
 }
 
 namespace Physica {
-    using namespace Core;
-
-    template<class T, size_t Order>
+    template<Scalar T, size_t Order>
     class Traits<TridiagonalMatrixT<T, Order>> {
     public:
         using ScalarType = T;

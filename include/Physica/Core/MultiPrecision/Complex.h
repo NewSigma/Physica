@@ -22,8 +22,8 @@
 #include <Physica/Core/MultiPrecision/Real.h>
 
 namespace Physica::Core {
-    template<class T>
-    class Complex : public ScalarBase<Complex<T>> {
+    template<Scalar T>
+    class Complex<T> : public ScalarBase<Complex<T>> {
         using This = Complex<T>;
         using Base = ScalarBase<This>;
         using PacketType = typename BestPacket<T, 2>::Type;
@@ -44,7 +44,7 @@ namespace Physica::Core {
         Complex(T re_, T im_);
         Complex(std::initializer_list<T> list);
         explicit Complex(std::complex<MachineType> c);
-        template<class U, DiffMode Mode, int Order>
+        template<Scalar U, DiffMode Mode, int Order>
         explicit Complex(const Diff<U, Mode, Order>& d);
         Complex(const This&) = default;
         Complex(This&&) noexcept = default;
@@ -77,55 +77,55 @@ namespace Physica::Core {
         [[nodiscard]] static const H5::DataType& getH5DataType();
     };
 
-    template<class T>
+    template<Scalar T>
     std::ostream& operator<<(std::ostream& os, const Complex<T>& c);
 
-    template<class T>
+    template<Scalar T>
     inline Complex<T> operator+(const Complex<T>& c1, const Complex<T>& c2);
 
-    template<class T>
+    template<Scalar T>
     inline Complex<T> operator-(const Complex<T>& c1, const Complex<T>& c2);
 
-    template<class T>
+    template<Scalar T>
     Complex<T> operator*(const Complex<T>& c1, const Complex<T>& c2);
 
-    template<class T>
+    template<Scalar T>
     Complex<T> operator/(const Complex<T>& c1, const Complex<T>& c2);
 
-    template<class ScalarType, ScalarOption Option>
-    Complex<typename Internal::BinaryScalarOpReturnType<ScalarType, Real<Option>>::Type> operator+(
-            const Complex<ScalarType>& c,const Real<Option>& s);
+    template<Scalar T, ScalarOption Option>
+    Complex<typename Internal::BinaryScalarOpReturnType<T, Real<Option>>::Type> operator+(
+            const Complex<T>& c,const Real<Option>& s);
 
-    template<class ScalarType, ScalarOption Option>
-    Complex<typename Internal::BinaryScalarOpReturnType<ScalarType, Real<Option>>::Type> operator-(
-            const Complex<ScalarType>& c, const Real<Option>& s);
+    template<Scalar T, ScalarOption Option>
+    Complex<typename Internal::BinaryScalarOpReturnType<T, Real<Option>>::Type> operator-(
+            const Complex<T>& c, const Real<Option>& s);
 
-    template<class ScalarType, ScalarOption Option>
-    Complex<typename Internal::BinaryScalarOpReturnType<ScalarType, Real<Option>>::Type> operator*(
-            const Complex<ScalarType>& c, const Real<Option>& s);
+    template<Scalar T, ScalarOption Option>
+    Complex<typename Internal::BinaryScalarOpReturnType<T, Real<Option>>::Type> operator*(
+            const Complex<T>& c, const Real<Option>& s);
 
-    template<class ScalarType, ScalarOption Option>
-    Complex<typename Internal::BinaryScalarOpReturnType<ScalarType, Real<Option>>::Type> operator/(
-            const Complex<ScalarType>& c, const Real<Option>& s);
+    template<Scalar T, ScalarOption Option>
+    Complex<typename Internal::BinaryScalarOpReturnType<T, Real<Option>>::Type> operator/(
+            const Complex<T>& c, const Real<Option>& s);
 
-    template<class ScalarType, ScalarOption Option>
-    Complex<typename Internal::BinaryScalarOpReturnType<ScalarType, Real<Option>>::Type> operator+(
-            const Real<Option>& s, const Complex<ScalarType>& c);
+    template<Scalar T, ScalarOption Option>
+    Complex<typename Internal::BinaryScalarOpReturnType<T, Real<Option>>::Type> operator+(
+            const Real<Option>& s, const Complex<T>& c);
 
-    template<class ScalarType, ScalarOption Option>
-    Complex<typename Internal::BinaryScalarOpReturnType<ScalarType, Real<Option>>::Type> operator-(
-            const Real<Option>& s, const Complex<ScalarType>& c);
+    template<Scalar T, ScalarOption Option>
+    Complex<typename Internal::BinaryScalarOpReturnType<T, Real<Option>>::Type> operator-(
+            const Real<Option>& s, const Complex<T>& c);
 
-    template<class ScalarType, ScalarOption Option>
-    Complex<typename Internal::BinaryScalarOpReturnType<ScalarType, Real<Option>>::Type> operator*(
-            const Real<Option>& s, const Complex<ScalarType>& c);
+    template<Scalar T, ScalarOption Option>
+    Complex<typename Internal::BinaryScalarOpReturnType<T, Real<Option>>::Type> operator*(
+            const Real<Option>& s, const Complex<T>& c);
 
-    template<class ScalarType, ScalarOption Option>
-    Complex<typename Internal::BinaryScalarOpReturnType<ScalarType, Real<Option>>::Type> operator/(
-            const Real<Option>& s, const Complex<ScalarType>& c);
+    template<Scalar T, ScalarOption Option>
+    Complex<typename Internal::BinaryScalarOpReturnType<T, Real<Option>>::Type> operator/(
+            const Real<Option>& s, const Complex<T>& c);
 
-    template<class T>
-    Complex<T> operator-(const Complex<T>& c) { return Complex(-c.real(), -c.imag()); }
+    template<Scalar T>
+    auto operator-(const Complex<T>& c) { return Complex<T>(-c.real(), -c.imag()); }
 
     template<Scalar T, Scalar U>
     void operator+=(Complex<T>& c, const U& t) { c = c + t; }
@@ -141,9 +141,7 @@ namespace Physica::Core {
 }
 
 namespace Physica {
-    using namespace Core;
-
-    template<class T>
+    template<Scalar T>
     class Traits<Complex<T>> {
         static_assert(!T::isComplex, "[Error]: Double complex mark is not allowed");
         static_assert(!T::isDifferentiable, "[Error]: Diff mark should locate in outsite");
@@ -168,10 +166,10 @@ namespace Physica {
 }
 
 namespace std {
-    template<class T>
+    template<Physica::Core::Scalar T>
     struct numeric_limits<Physica::Core::Complex<T>> : public numeric_limits<T> {};
 
-    template<class T>
+    template<Physica::Core::Scalar T>
     void swap(Physica::Core::Complex<T>& __restrict c1, Physica::Core::Complex<T>& __restrict c2) noexcept { c1.swap(c2); }
 }
 

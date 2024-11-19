@@ -21,22 +21,20 @@
 namespace Physica::Core {
     template<class Derived>
     inline LValueVector<Derived>& LValueVector<Derived>::operator=(const This& v) {
-        auto& target = Base::getDerived();
-        target.resize(v.getLength());
-        v.assignTo(target);
-        return target;
+        return operator=<Derived>(v);
     }
 
     template<class Derived>
     inline LValueVector<Derived>& LValueVector<Derived>::operator=(This&& v) {
-        return *this = v;
+        return operator=<Derived>(v);
     }
 
     template<class Derived>
-    template<class OtherVector, class Executor>
-    inline Derived& LValueVector<Derived>::operator=(const RValueVector<OtherVector>& v_) {
+    template<Vector V, class Executor>
+    inline Derived& LValueVector<Derived>::operator=(const V& v) {
+        if constexpr (std::is_same<Derived, V>::value)
+            assert(this != &v && "[Error]: Self assign is likely a bug");
         Derived& v1 = Base::getDerived();
-        const auto& v = v_.getDerived();
         v1.resize(v.getLength());
         v.template assignTo<Derived, Executor>(v1);
         return v1;

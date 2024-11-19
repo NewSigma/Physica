@@ -33,11 +33,11 @@ namespace Physica::Core {
             const DeviceMatrix* ptr;
         } expr;
     public:
-        __host__ __device__ inline device_obj(const device_obj<RValueMatrix<M>>& expr_) {
+        __host__ __device__ inline device_obj(const device_obj<M>& expr_) {
             if constexpr (IsHost())
-                expr.value = asStruct(expr_.getDerived());
+                expr.value = asStruct(expr_);
             else
-                expr.ptr = &expr_.getDerived();
+                expr.ptr = &expr_;
         }
         device_obj(const This&) = delete;
         device_obj(This&&) noexcept = delete;
@@ -134,7 +134,7 @@ namespace Physica::Core {
 }
 
 namespace Physica {
-    template <ExprType type, class T1, class T2>
+    template <ExprType type, Matrix T1, class T2>
     class Traits<Core::device_obj<Core::MatrixExpr<type, T1, T2>>> : public Traits<Core::MatrixExpr<type, T1, T2>> {};
 }
 

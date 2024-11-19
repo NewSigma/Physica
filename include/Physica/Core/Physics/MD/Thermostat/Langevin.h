@@ -19,25 +19,25 @@
 #pragma once
 
 namespace Physica::Core {
-    template<class ScalarType, unsigned int Dim, size_t NumReplica> class RingPolymer;
+    template<Scalar T, unsigned int Dim, size_t NumReplica> class RingPolymer;
     /**
      * PILE thermostat as introduced in [1]
      * 
      * Reference:
      * [1] J. Chem. Phys. 133, 124104 (2010); https://doi.org/10.1063/1.3489925
      */
-    template<class ScalarType, unsigned int Dim = 3, size_t NumReplica = Dynamic>
+    template<Scalar T, unsigned int Dim = 3, size_t NumReplica = Dynamic>
     class Langevin {
-        using MDCellType = MDCell<ScalarType, Dim>;
+        using MDCellType = MDCell<T, Dim>;
         using MassVector = typename MDCellType::MassVector;
-        using RingPolymerType = RingPolymer<ScalarType, Dim, NumReplica>;
+        using RingPolymerType = RingPolymer<T, Dim, NumReplica>;
         using BufferType = typename RingPolymerType::BufferType;
 
-        ScalarType temperatureT;
-        ScalarType thermostatTime;
+        T temperatureT;
+        T thermostatTime;
         bool removeDrift;
     public:
-        Langevin(ScalarType temperatureT_, ScalarType thermostatTime_, bool removeDrift_);
+        Langevin(T temperatureT_, T thermostatTime_, bool removeDrift_);
         Langevin(const Langevin&) = default;
         Langevin(Langevin&&) noexcept = default;
         ~Langevin() = default;
@@ -45,63 +45,63 @@ namespace Physica::Core {
         Langevin& operator=(Langevin obj) noexcept;
         /* Operations */
         template<class RandomType, class Executor>
-        void step(RingPolymerType& ringPolymer, ScalarType deltaT, RandomType& pool) const;
+        void step(RingPolymerType& ringPolymer, T deltaT, RandomType& pool) const;
         void swap(Langevin& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] bool isRemoveDriftEnabled() const noexcept { return removeDrift; }
         /* Setters */
-        void setTemperature(ScalarType temperatureT_) { temperatureT = temperatureT_; }
-        void setThermostatTime(ScalarType time) { thermostatTime = time; }
+        void setTemperature(T temperatureT_) { temperatureT = temperatureT_; }
+        void setThermostatTime(T time) { thermostatTime = time; }
         /* Static members */
-        template<class OtherScalar>
+        template<Scalar U>
         static inline void langevinImpl(
-            OtherScalar& momentum,
-            ScalarType deltaT,
-            ScalarType viscosityY,
-            ScalarType factor,
-            OtherScalar random);
+            U& momentum,
+            T deltaT,
+            T viscosityY,
+            T factor,
+            U random);
     };
 
-    template<class ScalarType, unsigned int Dim, size_t NumReplica>
-    Langevin<ScalarType, Dim, NumReplica>::Langevin(ScalarType temperatureT_, ScalarType thermostatTime_, bool removeDrift_)
+    template<Scalar T, unsigned int Dim, size_t NumReplica>
+    Langevin<T, Dim, NumReplica>::Langevin(T temperatureT_, T thermostatTime_, bool removeDrift_)
             : temperatureT(temperatureT_)
             , thermostatTime(thermostatTime_)
             , removeDrift(removeDrift_) {}
 
-    template<class ScalarType, unsigned int Dim, size_t NumReplica>
-    Langevin<ScalarType, Dim, NumReplica>&
-    Langevin<ScalarType, Dim, NumReplica>::operator=(Langevin<ScalarType, Dim, NumReplica> obj) noexcept {
+    template<Scalar T, unsigned int Dim, size_t NumReplica>
+    Langevin<T, Dim, NumReplica>&
+    Langevin<T, Dim, NumReplica>::operator=(Langevin<T, Dim, NumReplica> obj) noexcept {
         swap(obj);
         return *this;
     }
 
-    template<class ScalarType, unsigned int Dim, size_t NumReplica>
+    template<Scalar T, unsigned int Dim, size_t NumReplica>
     template<class RandomType, class Executor>
-    void Langevin<ScalarType, Dim, NumReplica>::step(
-            RingPolymerType& ringPolymer, ScalarType deltaT, RandomType& pool) const {
+    void Langevin<T, Dim, NumReplica>::step(
+            RingPolymerType& ringPolymer, T deltaT, RandomType& pool) const {
         const size_t dof = ringPolymer.getDOF();
-        const ScalarType repBeta = ringPolymer.calcRepBeta(temperatureT);
-        const ScalarType momentumViscosityY = Core::reciprocal(thermostatTime);
+        const T repBeta = ringPolymer.calcRepBeta(temperatureT);
+        const T momentumViscosityY = Core::reciprocal(thermostatTime);
         const auto& massVec = ringPolymer.getMassVec();
         if constexpr (NumReplica != 1) {
-            const ScalarType omegaW = ringPolymer.calcOmegaW(temperatureT);
+            const T omegaW = ringPolymer.calcOmegaW(temperatureT);
             auto future = Executor::parallel_for(
                 [deltaT, repBeta, omegaW, momentumViscosityY, &ringPolymer, &massVec, &pool](unsigned int i) {
                     const size_t numReplica = ringPolymer.getNumReplica();
                     const auto mass = massVec[i / Dim];
-                    const ScalarType factor = sqrt(repBeta * mass);
-                    auto fft = FFT<ScalarType, 1>::makeEmptyFFT(numReplica);
+                    const T factor = sqrt(repBeta * mass);
+                    auto fft = FFT<T, 1>::makeEmptyFFT(numReplica);
                     BufferType buffer(2, ringPolymer.getKSpaceSize());
 
                     ringPolymer.toNormalRepr(i, ringPolymer.asMatrix(), buffer, fft);
                     fft.getRSpace().random_normal(pool);
-                    FFT<ScalarType, 1>::transform(ringPolymer.getFFT(), fft);
+                    FFT<T, 1>::transform(ringPolymer.getFFT(), fft);
                     /* Translational mode */ {
                         langevinImpl(buffer(0, 0), deltaT, momentumViscosityY, factor, fft.getKSpace()[0]);
                     }
                     for (size_t j = 1; j < buffer.getCol(); ++j) {
-                        const ScalarType phase = M_PI * j / numReplica;
-                        const ScalarType viscosityY = sin(phase) * omegaW;
+                        const T phase = M_PI * j / numReplica;
+                        const T viscosityY = sin(phase) * omegaW;
                         langevinImpl(buffer(0, j), deltaT, viscosityY, factor, fft.getKSpace()[j]);
                     }
                     ringPolymer.toBeadRepr(i, ringPolymer.asMatrix(), buffer, fft);
@@ -111,8 +111,8 @@ namespace Physica::Core {
         else {
             for (size_t i = 0; i < dof; ++i) {
                 const auto mass = massVec[i / Dim];
-                const ScalarType factor = sqrt(repBeta * mass);
-                langevinImpl(ringPolymer.asMatrix()(i, 0), deltaT, momentumViscosityY, factor, ScalarType::random_normal(pool));
+                const T factor = sqrt(repBeta * mass);
+                langevinImpl(ringPolymer.asMatrix()(i, 0), deltaT, momentumViscosityY, factor, T::random_normal(pool));
             }
         }
 
@@ -120,21 +120,21 @@ namespace Physica::Core {
             ringPolymer.removeDrift();
     }
 
-    template<class ScalarType, unsigned int Dim, size_t NumReplica>
-    template<class OtherScalar>
-    void Langevin<ScalarType, Dim, NumReplica>::langevinImpl(
-            OtherScalar& momentum,
-            ScalarType deltaT,
-            ScalarType viscosityY,
-            ScalarType factor,
-            OtherScalar random) {
-        const ScalarType c1 = exp(-viscosityY * deltaT);
-        const ScalarType c2 = sqrt(ScalarType(1) - square(c1));
+    template<Scalar T, unsigned int Dim, size_t NumReplica>
+    template<Scalar U>
+    void Langevin<T, Dim, NumReplica>::langevinImpl(
+            U& momentum,
+            T deltaT,
+            T viscosityY,
+            T factor,
+            U random) {
+        const T c1 = exp(-viscosityY * deltaT);
+        const T c2 = sqrt(T(1) - square(c1));
         momentum = c1 * momentum + factor * c2 * random;
     }
 
-    template<class ScalarType, unsigned int Dim, size_t NumReplica>
-    void Langevin<ScalarType, Dim, NumReplica>::swap(Langevin& __restrict obj) noexcept {
+    template<Scalar T, unsigned int Dim, size_t NumReplica>
+    void Langevin<T, Dim, NumReplica>::swap(Langevin& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         temperatureT.swap(obj.temperatureT);
         thermostatTime.swap(obj.thermostatTime);
@@ -143,8 +143,8 @@ namespace Physica::Core {
 }
 
 namespace Physica {
-    template<class ScalarType, unsigned int Dim, size_t NumReplica>
-    class Traits<Core::Langevin<ScalarType, Dim, NumReplica>> {
+    template<Scalar T, unsigned int Dim, size_t NumReplica>
+    class Traits<Core::Langevin<T, Dim, NumReplica>> {
     public:
         constexpr static bool IsCentroidCoupled = true;
     };

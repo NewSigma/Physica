@@ -21,24 +21,24 @@
 namespace Physica::Core {
     template<class Derived> class ContinuousVector;
 
-    template<class VectorType, size_t Length>
-    class ContinuousVectorBlock : public ContinuousVector<ContinuousVectorBlock<VectorType, Length>> {
-        using This = ContinuousVectorBlock<VectorType, Length>;
+    template<Vector T, size_t Length>
+    class ContinuousVectorBlock : public ContinuousVector<ContinuousVectorBlock<T, Length>> {
+        using This = ContinuousVectorBlock<T, Length>;
     public:
         using Base = ContinuousVector<This>;
-        using ScalarType = typename VectorType::ScalarType;
+        using ScalarType = typename T::ScalarType;
     protected:
         using typename Base::PtrTy;
         using typename Base::ConstPtrTy;
         using typename Base::RefTy;
         using typename Base::ConstRefTy;
     private:
-        VectorType& vec;
+        T& vec;
         size_t from;
         size_t to;
     public:
-        ContinuousVectorBlock(ContinuousVector<VectorType>& vec_, size_t from_, size_t to_);
-        ContinuousVectorBlock(ContinuousVector<VectorType>& vec_, size_t from_);
+        ContinuousVectorBlock(ContinuousVector<T>& vec_, size_t from_, size_t to_);
+        ContinuousVectorBlock(ContinuousVector<T>& vec_, size_t from_);
         ContinuousVectorBlock(const ContinuousVectorBlock& block) = delete;
         ContinuousVectorBlock(ContinuousVectorBlock&&) noexcept = delete;
         ~ContinuousVectorBlock() = default;
@@ -60,72 +60,72 @@ namespace Physica::Core {
         [[nodiscard]] __host__ __device__ inline ConstPtrTy data_ptr(size_t index) const { return vec.data() + from + index; }
     };
 
-    template<class VectorType, size_t Length>
-    ContinuousVectorBlock<VectorType, Length>::ContinuousVectorBlock(ContinuousVector<VectorType>& vec_, size_t from_, size_t to_)
+    template<Vector T, size_t Length>
+    ContinuousVectorBlock<T, Length>::ContinuousVectorBlock(ContinuousVector<T>& vec_, size_t from_, size_t to_)
             : vec(vec_.getDerived()), from(from_), to(to_) {
         assert(from_ < to);
         assert(to <= vec.getLength());
         assert(Length == Dynamic || Length == getLength());
     }
 
-    template<class VectorType, size_t Length>
-    ContinuousVectorBlock<VectorType, Length>::ContinuousVectorBlock(
-        ContinuousVector<VectorType>& vec_, size_t from_) : ContinuousVectorBlock(vec_, from_, vec_.getLength()) {}
+    template<Vector T, size_t Length>
+    ContinuousVectorBlock<T, Length>::ContinuousVectorBlock(
+        ContinuousVector<T>& vec_, size_t from_) : ContinuousVectorBlock(vec_, from_, vec_.getLength()) {}
 
-    template<class VectorType, size_t Length>
-    inline ContinuousVectorBlock<VectorType, Length>&
-    ContinuousVectorBlock<VectorType, Length>::operator=(const ContinuousVectorBlock<VectorType, Length>& v) {
+    template<Vector T, size_t Length>
+    inline ContinuousVectorBlock<T, Length>&
+    ContinuousVectorBlock<T, Length>::operator=(const ContinuousVectorBlock<T, Length>& v) {
         v.assignTo(*this);
         return *this;
     }
     
-    template<class VectorType, size_t Length>
-    inline ContinuousVectorBlock<VectorType, Length>&
-    ContinuousVectorBlock<VectorType, Length>::operator=(ContinuousVectorBlock<VectorType, Length>&& v) noexcept {
+    template<Vector T, size_t Length>
+    inline ContinuousVectorBlock<T, Length>&
+    ContinuousVectorBlock<T, Length>::operator=(ContinuousVectorBlock<T, Length>&& v) noexcept {
         v.assignTo(*this);
         return *this;
     }
 
-    template<class VectorType, size_t Length>
-    inline typename ContinuousVectorBlock<VectorType, Length>::RefTy
-    ContinuousVectorBlock<VectorType, Length>::operator[](size_t index) {
+    template<Vector T, size_t Length>
+    inline typename ContinuousVectorBlock<T, Length>::RefTy
+    ContinuousVectorBlock<T, Length>::operator[](size_t index) {
         assert((index + from) < to);
         return vec[index + from];
     }
 
-    template<class VectorType, size_t Length>
-    inline typename ContinuousVectorBlock<VectorType, Length>::ConstRefTy
-    ContinuousVectorBlock<VectorType, Length>::operator[](size_t index) const {
+    template<Vector T, size_t Length>
+    inline typename ContinuousVectorBlock<T, Length>::ConstRefTy
+    ContinuousVectorBlock<T, Length>::operator[](size_t index) const {
         assert((index + from) < to);
         return vec[index + from];
     }
 
-    template<class VectorType, size_t Length>
+    template<Vector T, size_t Length>
     template<class AnyPacket>
-    inline AnyPacket ContinuousVectorBlock<VectorType, Length>::packet(size_t index) const {
+    inline AnyPacket ContinuousVectorBlock<T, Length>::packet(size_t index) const {
         return vec.template packet<AnyPacket>(from + index);
     }
 
-    template<class VectorType, size_t Length>
+    template<Vector T, size_t Length>
     template<class AnyPacket>
-    inline AnyPacket ContinuousVectorBlock<VectorType, Length>::packetPartial(size_t index, size_t count) const {
+    inline AnyPacket ContinuousVectorBlock<T, Length>::packetPartial(size_t index, size_t count) const {
         return vec.template packetPartial<AnyPacket>(from + index, count);
     }
 
-    template<class VectorType, size_t Length>
+    template<Vector T, size_t Length>
     template<class AnyPacket>
-    inline void ContinuousVectorBlock<VectorType, Length>::writePacket(size_t index, const AnyPacket packet) {
+    inline void ContinuousVectorBlock<T, Length>::writePacket(size_t index, const AnyPacket packet) {
         return vec.template writePacket<AnyPacket>(from + index, packet);
     }
 
-    template<class VectorType, size_t Length>
+    template<Vector T, size_t Length>
     template<class AnyPacket>
-    inline void ContinuousVectorBlock<VectorType, Length>::writePacketPartial(size_t index, size_t count, const AnyPacket packet) {
+    inline void ContinuousVectorBlock<T, Length>::writePacketPartial(size_t index, size_t count, const AnyPacket packet) {
         return vec.template writePacketPartial<AnyPacket>(from + index, count, packet);
     }
 
-    template<class VectorType, size_t Length>
-    __host__ __device__ inline size_t ContinuousVectorBlock<VectorType, Length>::getLength() const noexcept {
+    template<Vector T, size_t Length>
+    __host__ __device__ inline size_t ContinuousVectorBlock<T, Length>::getLength() const noexcept {
         if constexpr (Length == Dynamic)
             return to - from;
         else
@@ -134,12 +134,10 @@ namespace Physica::Core {
 }
 
 namespace Physica {
-    using namespace Core;
-
-    template<class VectorType, size_t Length>
-    class Traits<ContinuousVectorBlock<VectorType, Length>> {
+    template<Vector T, size_t Length>
+    class Traits<ContinuousVectorBlock<T, Length>> {
     public:
-        using ScalarType = typename VectorType::ScalarType;
+        using ScalarType = typename T::ScalarType;
         constexpr static size_t SizeAtCompile = Length;
         constexpr static bool FastAssign = false;
         constexpr static bool FastPacket = true;

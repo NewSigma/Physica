@@ -29,27 +29,27 @@
 
 using namespace Physica::Core;
 
-template<class ScalarType> class MnistNet;
+template<Scalar T> class MnistNet;
 
 namespace Physica {
     template<class T>
     class Traits<MnistNet<T>> : public Traits<LinearLayer<T>> {};
 }
 
-template<class ScalarType>
-class MnistNet : public SimpleNet<MnistNet<ScalarType>> {
-    using Base = SimpleNet<MnistNet<ScalarType>>;
+template<Scalar T>
+class MnistNet : public SimpleNet<MnistNet<T>> {
+    using Base = SimpleNet<MnistNet<T>>;
     using typename Base::ValueType;
     using typename Base::InputType;
     using typename Base::OutputType;
 
-    LinearLayer<ScalarType> layer1;
-    LinearLayer<ScalarType> layer2;
-    LinearLayer<ScalarType> layer3;
+    LinearLayer<T> layer1;
+    LinearLayer<T> layer2;
+    LinearLayer<T> layer3;
 public:
     MnistNet() = default;
-    template<class RandomGenerator>
-    MnistNet(size_t width1, size_t width2, RandomGenerator& gen)
+    template<class RandomType>
+    MnistNet(size_t width1, size_t width2, RandomType& gen)
             : layer1(Mnist::NumPixelInImage, width1)
             , layer2(width1, width2)
             , layer3(width2, 10) {
@@ -58,8 +58,8 @@ public:
         layer2.random_any(dist, gen);
         layer3.random_any(dist, gen);
     }
-    template<class OtherScalar>
-    MnistNet(const MnistNet<OtherScalar>& net) : layer1(net.layer1), layer2(net.layer2), layer3(net.layer3) {}
+    template<Scalar U>
+    MnistNet(const MnistNet<U>& net) : layer1(net.layer1), layer2(net.layer2), layer3(net.layer3) {}
     MnistNet(const MnistNet& other) = default;
     MnistNet(MnistNet&&) noexcept = default;
     ~MnistNet() = default;
@@ -74,12 +74,12 @@ public:
     }
 
     template<class Dataset>
-    [[nodiscard]] ScalarType loss(const Dataset& dataset, size_t index) const {
-        return Loss<ScalarType>::crossEntropy(forward(dataset.getSamples()[index]), dataset.getLabels()[index]);
+    [[nodiscard]] T loss(const Dataset& dataset, size_t index) const {
+        return Loss<T>::crossEntropy(forward(dataset.getSamples()[index]), dataset.getLabels()[index]);
     }
 
     template<class Dataset>
-    [[nodiscard]] ScalarType loss(const Dataset& dataset) const { return Base::loss(dataset); }
+    [[nodiscard]] T loss(const Dataset& dataset) const { return Base::loss(dataset); }
 
     [[nodiscard]] MnistNet copy() const {
         MnistNet result{};
@@ -108,7 +108,7 @@ public:
         layer3.swap(obj.layer3);
     }
 private:
-    template<class OtherScalar> friend class MnistNet;
+    template<Scalar> friend class MnistNet;
 };
 
 using ValueType = float32;

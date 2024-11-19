@@ -19,9 +19,9 @@
 #pragma once
 
 namespace Physica::Core {
-    template<class ScalarType, int Order> class DiffTracer;
+    template<Scalar, int Order> class DiffTracer;
 
-    template<class T, int Order, size_t Length>
+    template<Scalar T, int Order, size_t Length>
     class BestPacket<Diff<T, DiffMode::Forward, Order>, Length> {
         using ScalarType = Diff<T, DiffMode::Forward, Order>;
     public:
@@ -29,14 +29,14 @@ namespace Physica::Core {
         using Type = typename std::conditional<Size == 1, ScalarType, SIMD<ScalarType, Size>>::type;
     };
 
-    template<class T, int Order, size_t Length>
+    template<Scalar T, int Order, size_t Length>
     class device_obj<BestPacket<Diff<T, DiffMode::Forward, Order>, Length>> {
     public:
         constexpr static size_t Size = 1;
         using Type = Diff<T, DiffMode::Forward, Order>;
     };
 
-    template<class T, int Order, size_t Size>
+    template<Scalar T, int Order, size_t Size>
     class SIMD<Diff<T, DiffMode::Forward, Order>, Size> {
         using ScalarType = Diff<T, DiffMode::Forward, Order>;
         using This = SIMD<ScalarType, Size>;
@@ -112,7 +112,7 @@ namespace Physica::Core {
         [[nodiscard]] static SIMD asComplex(const AsRealRtnTy& reals);
     };
 
-    template<class T, size_t Size>
+    template<Scalar T, size_t Size>
     class SIMD<Diff<T, DiffMode::Reverse, 1>, Size> : public SIMD<T, Size> {
         static_assert(!T::isDifferentiable, "[Error]: Invalid template param");
         using ScalarType = Diff<T, DiffMode::Reverse, 1>;
@@ -169,7 +169,7 @@ namespace Physica::Core {
         [[nodiscard]] static bool checkContinuous(const ScalarType* p, int n);
     };
 
-    template<class T, DiffMode Mode, int Order, size_t Size>
+    template<Scalar T, DiffMode Mode, int Order, size_t Size>
     [[nodiscard]] inline SIMD<Diff<T, Mode, Order>, Size> mul_add(
             const SIMD<Diff<T, Mode, Order>, Size>& a,
             const SIMD<Diff<T, Mode, Order>, Size>& b,
@@ -177,7 +177,7 @@ namespace Physica::Core {
 }
 
 namespace Physica {
-    template<class T, Core::DiffMode Mode, int Order, size_t Size>
+    template<Scalar T, Core::DiffMode Mode, int Order, size_t Size>
     class Traits<Core::SIMD<Core::Diff<T, Mode, Order>, Size>> : public Traits<Core::SIMD<T, Size>> {
     public:
         using ScalarType = Core::Diff<T, Mode, Order>;

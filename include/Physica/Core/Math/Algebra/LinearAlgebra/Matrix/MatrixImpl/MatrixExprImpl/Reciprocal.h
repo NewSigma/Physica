@@ -19,10 +19,10 @@
 #pragma once
 
 namespace Physica::Core {
-    template<class MatrixType>
-    class MatrixExpr<ExprType::Reciprocal, MatrixType>
-            : public UnitaryMatrixExpr<ExprType::Reciprocal, MatrixType> {
-        using Base = UnitaryMatrixExpr<ExprType::Reciprocal, MatrixType>;
+    template<Matrix T>
+    class MatrixExpr<ExprType::Reciprocal, T>
+            : public UnitaryMatrixExpr<ExprType::Reciprocal, T> {
+        using Base = UnitaryMatrixExpr<ExprType::Reciprocal, T>;
     public:
         using typename Base::ScalarType;
     public:
@@ -31,8 +31,8 @@ namespace Physica::Core {
         [[nodiscard]] ScalarType calc(size_t row, size_t col) const { return reciprocal(Base::getExpr().calc(row, col)); }
     };
 
-    template<class MatrixType>
-    [[nodiscard]] inline auto reciprocal_elem(const RValueMatrix<MatrixType>& m) noexcept {
-        return MatrixExpr<ExprType::Reciprocal, MatrixType>(m.getDerived());
+    template<Matrix T>
+    [[nodiscard]] inline auto reciprocal_elem(const T& m) noexcept {
+        return MatrixExpr<ExprType::Reciprocal, T>(m);
     }
 }

@@ -27,7 +27,7 @@
 #include "FFTImpl/FFTKSpace.h"
 
 namespace Physica::Core {
-    template<class ScalarType, size_t Dim = 1> class FFT;
+    template<Scalar, size_t Dim = 1> class FFT;
 
     enum class PlanFlag {
         Measure = FFTW_MEASURE,
@@ -38,7 +38,7 @@ namespace Physica::Core {
     /**
      * A FFT transform a tensor in r-space to a tensor in k-space.
      */
-    template<class T>
+    template<Scalar T>
     class FFT<T, 1>
             : public FFTRSpace<FFT<T, 1>, 1>
             , public FFTKSpace<FFT<T, 1>, 1> {
@@ -111,7 +111,7 @@ namespace Physica::Core {
         friend class FFTKSpace<This, 1>;
     };
 
-    template<class T, size_t Dim>
+    template<Scalar T, size_t Dim>
     class FFT : public FFTRSpace<FFT<T, Dim>, Dim>
               , public FFTKSpace<FFT<T, Dim>, Dim> {
         static_assert(!T::isDifferentiable, "[Error]: Not implemented");
@@ -195,7 +195,7 @@ namespace Physica::Core {
 }
 
 namespace Physica {
-    template<class T, size_t dim>
+    template<Scalar T, size_t dim>
     class Traits<Core::FFT<T, dim>> {
     public :
         using ScalarType = T;

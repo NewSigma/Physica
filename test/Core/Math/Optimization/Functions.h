@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Weibo He.
+ * Copyright 2021-2024 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -25,7 +25,7 @@ using namespace Physica::Core;
  * Data sources:
  * [1] http://www.sfu.ca/~ssurjano/index.html
  */
-template<class T>
+template<Scalar T>
 T func1(const VectorND<T>& v) {
     const T& x = v[0];
     const T& y = v[1];
@@ -33,7 +33,7 @@ T func1(const VectorND<T>& v) {
     return x * x + y * y + z * z - x * y - x * z - y * z;
 }
 
-template<class T>
+template<Scalar T>
 T func2(const VectorND<T>& v) {
     const T& x = v[0];
     const T& y = v[1];
@@ -44,7 +44,7 @@ T func2(const VectorND<T>& v) {
     return (reciprocal(term1 * term1) + reciprocal(term2 * term2) + reciprocal(term3 * term3)) * T(x * y + x * z + y * z);
 }
 
-template<class ScalarType>
-ScalarType rosenbrock(const VectorND<ScalarType>& v) {
-    return ScalarType(100) * square(v[1] - square(v[0])) + square(ScalarType(1) - v[0]);
+template<Scalar T>
+T rosenbrock(const VectorND<T>& v) {
+    return T(100) * square(v[1] - square(v[0])) + square(T(1) - v[0]);
 }

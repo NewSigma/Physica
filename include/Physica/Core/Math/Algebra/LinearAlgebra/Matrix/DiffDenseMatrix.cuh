@@ -18,11 +18,11 @@
  */
 #pragma once
 
-#include "DiffDenseMatrix.h"
 #include <Physica/Core/Math/Algebra/LinearAlgebra/Matrix/MatrixImpl/RValueMatrix.cuh>
+#include "DiffDenseMatrix.h"
 
 namespace Physica::Core {
-    template<class T, int Option, int Order>
+    template<Scalar T, int Option, int Order>
     class device_obj<Diff<DenseMatrix<T, Option>, DiffMode::Reverse, Order>>
             : public device_obj<RValueMatrix<Diff<DenseMatrix<T, Option>, DiffMode::Reverse, Order>>>
             , public DenseMatrixDim<device_obj<Diff<DenseMatrix<T, Option>, DiffMode::Reverse, Order>>, Dynamic, Dynamic> {
@@ -56,10 +56,10 @@ namespace Physica::Core {
         template<Side Owner = GetSide()>
         [[nodiscard]] __device__ inline ScalarType calc(size_t row, size_t col) const;
 
-        template<class RandomGenerator> inline void random_uniform(RandomGenerator& gen);
-        template<class RandomGenerator> inline void random_normal(RandomGenerator& gen);
-        template<class Distribution, class RandomGenerator>
-        inline void random_any(Distribution& dist, RandomGenerator& gen);
+        template<class RandomType> inline void random_uniform(RandomType& gen);
+        template<class RandomType> inline void random_normal(RandomType& gen);
+        template<class Distribution, class RandomType>
+        inline void random_any(Distribution& dist, RandomType& gen);
 
         [[nodiscard]] This copy() const;
         void swap(device_obj& obj) noexcept { std::swap(*this, obj); }
@@ -74,12 +74,12 @@ namespace Physica::Core {
         [[nodiscard]] __device__ inline T& getGrad(size_t row, size_t col);
         [[nodiscard]] __device__ inline const T& getGrad(size_t row, size_t col) const;
         /* Static members */
-        template<class RandomGenerator>
-        [[nodiscard]] inline static This random_uniform(size_t row, size_t col, RandomGenerator& gen);
-        template<class RandomGenerator>
-        [[nodiscard]] inline static This random_normal(size_t row, size_t col, RandomGenerator& gen);
-        template<class Distribution, class RandomGenerator>
-        [[nodiscard]] inline static This random_any(size_t row, size_t col, Distribution& dist, RandomGenerator& gen);
+        template<class RandomType>
+        [[nodiscard]] inline static This random_uniform(size_t row, size_t col, RandomType& gen);
+        template<class RandomType>
+        [[nodiscard]] inline static This random_normal(size_t row, size_t col, RandomType& gen);
+        template<class Distribution, class RandomType>
+        [[nodiscard]] inline static This random_any(size_t row, size_t col, Distribution& dist, RandomType& gen);
     private:
         /* Operations */
         using Dim::resize;
@@ -88,51 +88,51 @@ namespace Physica::Core {
         [[nodiscard]] __host__ __device__ const SegmentType& getTraceSegment() const noexcept { return traceSeg.getDerived(); }
     };
 
-    template<class T, int Option, int Order>
+    template<Scalar T, int Option, int Order>
     device_obj<Diff<DenseMatrix<T, Option>, DiffMode::Reverse, Order>>::device_obj(size_t row, size_t col, ExprType type)
             : Dim(row, col)
             , traceSeg(asStruct(TracerType::getInstance().pushSegment(row * col, type))) {}
 
-    template<class T, int Option, int Order>
+    template<Scalar T, int Option, int Order>
     device_obj<Diff<DenseMatrix<T, Option>, DiffMode::Reverse, Order>>::device_obj(const PlainMatrix& values)
             : Dim(values.getRow(), values.getCol())
             , traceSeg(asStruct(TracerType::getInstance().pushSegment(values.flatten()))) {}
 
-    template<class T, int Option, int Order>
+    template<Scalar T, int Option, int Order>
     __device__ inline size_t
     device_obj<Diff<DenseMatrix<T, Option>, DiffMode::Reverse, Order>>::calcOffset(size_t row, size_t col) const {
-        if constexpr (Base::isRowMatrix)
+        if constexpr (MatrixOption::isRowMatrix<This>())
             return row * getCol() + col;
         else
             return col * getRow() + row;
     }
 
-    template<class T, int Option, int Order>
+    template<Scalar T, int Option, int Order>
     template<Side Owner>
     __device__ inline typename device_obj<Diff<DenseMatrix<T, Option>, DiffMode::Reverse, Order>>::ScalarType
     device_obj<Diff<DenseMatrix<T, Option>, DiffMode::Reverse, Order>>::calc(size_t row, size_t col) const {
         return getTraceSegment()[calcOffset(row, col)];
     }
 
-    template<class T, int Option, int Order>
-    template<class RandomGenerator>
-    inline void device_obj<Diff<DenseMatrix<T, Option>, DiffMode::Reverse, Order>>::random_uniform(RandomGenerator& gen) {
+    template<Scalar T, int Option, int Order>
+    template<class RandomType>
+    inline void device_obj<Diff<DenseMatrix<T, Option>, DiffMode::Reverse, Order>>::random_uniform(RandomType& gen) {
         *this = random_uniform(getRow(), getCol(), gen);
     }
 
-    template<class T, int Option, int Order>
-    template<class RandomGenerator>
-    inline void device_obj<Diff<DenseMatrix<T, Option>, DiffMode::Reverse, Order>>::random_normal(RandomGenerator& gen) {
+    template<Scalar T, int Option, int Order>
+    template<class RandomType>
+    inline void device_obj<Diff<DenseMatrix<T, Option>, DiffMode::Reverse, Order>>::random_normal(RandomType& gen) {
         *this = random_normal(getRow(), getCol(), gen);
     }
 
-    template<class T, int Option, int Order>
-    template<class Distribution, class RandomGenerator>
-    inline void device_obj<Diff<DenseMatrix<T, Option>, DiffMode::Reverse, Order>>::random_any(Distribution& dist, RandomGenerator& gen) {
+    template<Scalar T, int Option, int Order>
+    template<class Distribution, class RandomType>
+    inline void device_obj<Diff<DenseMatrix<T, Option>, DiffMode::Reverse, Order>>::random_any(Distribution& dist, RandomType& gen) {
         *this = random_any(getRow(), getCol(), dist, gen);
     }
 
-    template<class T, int Option, int Order>
+    template<Scalar T, int Option, int Order>
     device_obj<Diff<DenseMatrix<T, Option>, DiffMode::Reverse, Order>>
     device_obj<Diff<DenseMatrix<T, Option>, DiffMode::Reverse, Order>>::copy() const {
         This result{};
@@ -141,65 +141,63 @@ namespace Physica::Core {
         return result;
     }
 
-    template<class T, int Option, int Order>
+    template<Scalar T, int Option, int Order>
     __device__ inline typename device_obj<Diff<DenseMatrix<T, Option>, DiffMode::Reverse, Order>>::DiffRecord&
     device_obj<Diff<DenseMatrix<T, Option>, DiffMode::Reverse, Order>>::getRecord(size_t row, size_t col) {
         return getTraceSegment().getRecords()[calcOffset(row, col)];
     }
 
-    template<class T, int Option, int Order>
+    template<Scalar T, int Option, int Order>
     __device__ inline T&
     device_obj<Diff<DenseMatrix<T, Option>, DiffMode::Reverse, Order>>::getValue(size_t row, size_t col) {
         return getTraceSegment().getValues()[calcOffset(row, col)];
     }
 
-    template<class T, int Option, int Order>
+    template<Scalar T, int Option, int Order>
     __device__ inline const T&
     device_obj<Diff<DenseMatrix<T, Option>, DiffMode::Reverse, Order>>::getValue(size_t row, size_t col) const {
         return getTraceSegment().getValues()[calcOffset(row, col)];
     }
 
-    template<class T, int Option, int Order>
+    template<Scalar T, int Option, int Order>
     __device__ inline T&
     device_obj<Diff<DenseMatrix<T, Option>, DiffMode::Reverse, Order>>::getGrad(size_t row, size_t col) {
         return getTraceSegment().getGrads()[calcOffset(row, col)];
     }
 
-    template<class T, int Option, int Order>
+    template<Scalar T, int Option, int Order>
     __device__ inline const T&
     device_obj<Diff<DenseMatrix<T, Option>, DiffMode::Reverse, Order>>::getGrad(size_t row, size_t col) const {
         return getTraceSegment().getGrads()[calcOffset(row, col)];
     }
 
-    template<class T, int Option, int Order>
-    template<class RandomGenerator>
+    template<Scalar T, int Option, int Order>
+    template<class RandomType>
     inline device_obj<Diff<DenseMatrix<T, Option>, DiffMode::Reverse, Order>>
     device_obj<Diff<DenseMatrix<T, Option>, DiffMode::Reverse, Order>>::random_uniform(
-            size_t row, size_t col, RandomGenerator& gen) {
+            size_t row, size_t col, RandomType& gen) {
         return This(PlainMatrix::random_uniform(row, col, gen));
     }
 
-    template<class T, int Option, int Order>
-    template<class RandomGenerator>
+    template<Scalar T, int Option, int Order>
+    template<class RandomType>
     inline device_obj<Diff<DenseMatrix<T, Option>, DiffMode::Reverse, Order>>
     device_obj<Diff<DenseMatrix<T, Option>, DiffMode::Reverse, Order>>::random_normal(
-            size_t row, size_t col, RandomGenerator& gen) {
+            size_t row, size_t col, RandomType& gen) {
         return This(PlainMatrix::random_normal(row, col, gen));
     }
 
-    template<class T, int Option, int Order>
-    template<class Distribution, class RandomGenerator>
+    template<Scalar T, int Option, int Order>
+    template<class Distribution, class RandomType>
     inline device_obj<Diff<DenseMatrix<T, Option>, DiffMode::Reverse, Order>>
     device_obj<Diff<DenseMatrix<T, Option>, DiffMode::Reverse, Order>>::random_any(
-            size_t row, size_t col, Distribution& dist, RandomGenerator& gen) {
+            size_t row, size_t col, Distribution& dist, RandomType& gen) {
         return This(PlainMatrix::random_any(row, col, dist, gen));
     }
 }
 
 namespace Physica {
-    using namespace Core;
-
-    template<class T, int Option, int Order>
+    template<Scalar T, int Option, int Order>
     class Traits<Core::device_obj<Diff<DenseMatrix<T, Option>, DiffMode::Reverse, Order>>>
             : public Traits<DenseMatrix<T, Option>> {
     public:

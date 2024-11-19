@@ -112,8 +112,6 @@ namespace Physica::Core {
 }
 
 namespace Physica {
-    using namespace Core;
-
     template<unsigned int Dim, unsigned int NumSite, bool UseInversionSymm>
     class Traits<KSpinRepr<Dim, NumSite, UseInversionSymm>> : public SpinRepr<Dim, NumSite, UseInversionSymm> {
     public:

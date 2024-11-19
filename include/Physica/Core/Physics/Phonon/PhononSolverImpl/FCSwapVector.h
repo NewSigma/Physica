@@ -27,9 +27,9 @@ namespace Physica::Core {
      * References:
      * [1] Mounet, N. Structural, vibrational and thermodynamic properties of carbon allotropes from ﬁrst-principles: diamond, graphite, and nanotubes. Master’s thesis, Massachusetts Institute of Technology (2005); http://hdl.handle.net/1721.1/33400
      */
-    template<class ScalarType>
-    class FCSwapVector : public SparseVector<ScalarType> {
-        using Base = SparseVector<ScalarType>;
+    template<Scalar T>
+    class FCSwapVector : public SparseVector<T> {
+        using Base = SparseVector<T>;
         using Index3D = Array<size_t, 3>;
         using Index5D = Array<size_t, 5>;
 
@@ -55,8 +55,8 @@ namespace Physica::Core {
         inline static void checkParam(size_t numDOF, const Index3D& superSize, const Index5D& index);
     };
 
-    template<class ScalarType>
-    FCSwapVector<ScalarType>::FCSwapVector(Index3D superSize_, Index3D cellIndex_, size_t numDOF_, size_t dof1_, size_t dof2_)
+    template<Scalar T>
+    FCSwapVector<T>::FCSwapVector(Index3D superSize_, Index3D cellIndex_, size_t numDOF_, size_t dof1_, size_t dof2_)
             : superSize(std::move(superSize_))
             , cellIndex(std::move(cellIndex_))
             , numDOF(numDOF_)
@@ -73,17 +73,17 @@ namespace Physica::Core {
             temp[i] = cellIndex[i];
         temp[3] = dof1;
         temp[4] = dof2;
-        Base::operator[](index5DTo1D(numDOF, superSize, temp)) = ScalarType(M_SQRT1_2);
+        Base::operator[](index5DTo1D(numDOF, superSize, temp)) = T(M_SQRT1_2);
 
         for (int i = 0; i < 3; ++i)
             temp[i] = (superSize[i] - cellIndex[i]) % superSize[i];
         temp[3] = dof2;
         temp[4] = dof1;
-        Base::operator[](index5DTo1D(numDOF, superSize, temp)) = ScalarType(-M_SQRT1_2);
+        Base::operator[](index5DTo1D(numDOF, superSize, temp)) = T(-M_SQRT1_2);
     }
 
-    template<class ScalarType>
-    void FCSwapVector<ScalarType>::swap(FCSwapVector& __restrict obj) noexcept {
+    template<Scalar T>
+    void FCSwapVector<T>::swap(FCSwapVector& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         Base::swap(obj);
         std::swap(dof1, obj.dof1);
@@ -93,8 +93,8 @@ namespace Physica::Core {
         superSize.swap(obj.superSize);
     }
 
-    template<class ScalarType>
-    typename FCSwapVector<ScalarType>::Index5D FCSwapVector<ScalarType>::index1DTo5D(
+    template<Scalar T>
+    typename FCSwapVector<T>::Index5D FCSwapVector<T>::index1DTo5D(
             size_t numDOF, const Index3D& superSize, size_t index1D) {
         assert(index1D < calcLength(numDOF, superSize) && "[Error]: Index out of range");
         Index5D result{};
@@ -109,19 +109,19 @@ namespace Physica::Core {
         return result;
     }
 
-    template<class ScalarType>
-    size_t FCSwapVector<ScalarType>::index5DTo1D(size_t numDOF, const Index3D& superSize, const Index5D& index5D) {
+    template<Scalar T>
+    size_t FCSwapVector<T>::index5DTo1D(size_t numDOF, const Index3D& superSize, const Index5D& index5D) {
         checkParam(numDOF, superSize, index5D);
         return (((index5D[0] * superSize[1] + index5D[1]) * superSize[2] + index5D[2]) * numDOF + index5D[3]) * numDOF + index5D[4];
     }
 
-    template<class ScalarType>
-    inline size_t FCSwapVector<ScalarType>::calcLength(size_t numDOF, const Index3D& superSize) {
+    template<Scalar T>
+    inline size_t FCSwapVector<T>::calcLength(size_t numDOF, const Index3D& superSize) {
         return numDOF * numDOF * superSize[0] * superSize[1] * superSize[2];
     }
 
-    template<class ScalarType>
-    void FCSwapVector<ScalarType>::checkParam(
+    template<Scalar T>
+    void FCSwapVector<T>::checkParam(
             [[maybe_unused]] size_t numDOF,
             [[maybe_unused]] const Index3D& superSize,
             [[maybe_unused]] const Index5D& index) {
@@ -133,8 +133,6 @@ namespace Physica::Core {
 }
 
 namespace Physica {
-    using namespace Core; 
-
     template<class T>
     class Traits<FCSwapVector<T>> {
     public:

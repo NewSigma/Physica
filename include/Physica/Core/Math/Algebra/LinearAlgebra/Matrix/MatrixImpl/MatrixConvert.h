@@ -21,16 +21,16 @@
 #include "RValueMatrix.h"
 
 namespace Physica::Core {
-    template<class MatrixType>
-    class RealMatrix : public RValueMatrix<RealMatrix<MatrixType>> {
-        using This = RealMatrix<MatrixType>;
+    template<Matrix T>
+    class RealMatrix : public RValueMatrix<RealMatrix<T>> {
+        using This = RealMatrix<T>;
         using Base = RValueMatrix<This>;
     public:
         using typename Base::ScalarType;
     private:
-        const MatrixType& mat;
+        const T& mat;
     public:
-        RealMatrix(const RValueMatrix<MatrixType>& mat_) : mat(mat_.getDerived()) {}
+        RealMatrix(const T& mat_) : mat(mat_) {}
         RealMatrix(const This&) = delete;
         RealMatrix(This&&) noexcept = delete;
         ~RealMatrix() = default;
@@ -43,16 +43,16 @@ namespace Physica::Core {
         [[nodiscard]] size_t getCol() const { return mat.getCol(); }
     };
 
-    template<class MatrixType>
-    class ValueMatrix : public RValueMatrix<ValueMatrix<MatrixType>> {
-        using This = ValueMatrix<MatrixType>;
+    template<Matrix T>
+    class ValueMatrix : public RValueMatrix<ValueMatrix<T>> {
+        using This = ValueMatrix<T>;
         using Base = RValueMatrix<This>;
     public:
         using typename Base::ScalarType;
     private:
-        const MatrixType& mat;
+        const T& mat;
     public:
-        ValueMatrix(const RValueMatrix<MatrixType>& mat_) : mat(mat_.getDerived()) {}
+        ValueMatrix(const T& mat_) : mat(mat_) {}
         ValueMatrix(const This&) = delete;
         ValueMatrix(This&&) noexcept = delete;
         ~ValueMatrix() = default;
@@ -65,16 +65,16 @@ namespace Physica::Core {
         [[nodiscard]] size_t getCol() const { return mat.getCol(); }
     };
 
-    template<class MatrixType, int GradOrder>
-    class GradMatrix : public RValueMatrix<GradMatrix<MatrixType, GradOrder>> {
-        using This = GradMatrix<MatrixType, GradOrder>;
+    template<Matrix T, int GradOrder>
+    class GradMatrix : public RValueMatrix<GradMatrix<T, GradOrder>> {
+        using This = GradMatrix<T, GradOrder>;
         using Base = RValueMatrix<This>;
     public:
         using typename Base::ScalarType;
     private:
-        const MatrixType& mat;
+        const T& mat;
     public:
-        GradMatrix(const RValueMatrix<MatrixType>& mat_) : mat(mat_.getDerived()) {}
+        GradMatrix(const T& mat_) : mat(mat_) {}
         GradMatrix(const This&) = delete;
         GradMatrix(This&&) noexcept = delete;
         ~GradMatrix() = default;
@@ -87,54 +87,52 @@ namespace Physica::Core {
         [[nodiscard]] size_t getCol() const { return mat.getCol(); }
     };
 
-    template<class MatrixType>
-    [[nodiscard]] inline auto toRealMatrix(const RValueMatrix<MatrixType>& m) noexcept {
-        return RealMatrix<MatrixType>(m);
+    template<Matrix T>
+    [[nodiscard]] inline auto toRealMatrix(const T& m) noexcept {
+        return RealMatrix<T>(m);
     }
 
-    template<class MatrixType>
-    [[nodiscard]] inline auto toValueMatrix(const RValueMatrix<MatrixType>& m) noexcept {
-        return ValueMatrix<MatrixType>(m);
+    template<Matrix T>
+    [[nodiscard]] inline auto toValueMatrix(const T& m) noexcept {
+        return ValueMatrix<T>(m);
     }
 
-    template<class MatrixType, int GradOrder = 1>
-    [[nodiscard]] inline auto toGradMatrix(const RValueMatrix<MatrixType>& m) noexcept {
-        return GradMatrix<MatrixType, GradOrder>(m);
+    template<Matrix T, int GradOrder = 1>
+    [[nodiscard]] inline auto toGradMatrix(const T& m) noexcept {
+        return GradMatrix<T, GradOrder>(m);
     }
 }
 
 namespace Physica {
-    template <class MatrixType>
-    class Traits<Core::RealMatrix<MatrixType>> {
+    template <Matrix T>
+    class Traits<Core::RealMatrix<T>> {
     public:
-        using ScalarType = typename MatrixType::ScalarType::RealType;
-        constexpr static int Option = MatrixType::Option;
-        constexpr static size_t RowAtCompile = MatrixType::RowAtCompile;
-        constexpr static size_t ColAtCompile = MatrixType::ColAtCompile;
-        constexpr static size_t SizeAtCompile = MatrixType::SizeAtCompile;
+        using ScalarType = typename T::ScalarType::RealType;
+        constexpr static int Option = T::Option;
+        constexpr static size_t RowAtCompile = T::RowAtCompile;
+        constexpr static size_t ColAtCompile = T::ColAtCompile;
+        constexpr static size_t SizeAtCompile = T::SizeAtCompile;
     };
 
-    template <class MatrixType>
-    class Traits<Core::ValueMatrix<MatrixType>> {
-        using T = typename MatrixType::ScalarType;
-        static_assert(T::isDifferentiable, "[Error]: Unnecessary toValueVector() call or toGradVector() call");
+    template <Matrix T>
+    class Traits<Core::ValueMatrix<T>> {
+        static_assert(T::ScalarType::isDifferentiable, "[Error]: Unnecessary toValueVector() call or toGradVector() call");
     public:
         using ScalarType = typename T::ValueType;
-        constexpr static int Option = MatrixType::Option;
-        constexpr static size_t RowAtCompile = MatrixType::RowAtCompile;
-        constexpr static size_t ColAtCompile = MatrixType::ColAtCompile;
-        constexpr static size_t SizeAtCompile = MatrixType::SizeAtCompile;
+        constexpr static int Option = T::Option;
+        constexpr static size_t RowAtCompile = T::RowAtCompile;
+        constexpr static size_t ColAtCompile = T::ColAtCompile;
+        constexpr static size_t SizeAtCompile = T::SizeAtCompile;
     };
 
-    template <class MatrixType, int GradOrder>
-    class Traits<Core::GradMatrix<MatrixType, GradOrder>> {
-        using T = typename MatrixType::ScalarType;
-        static_assert(T::isDifferentiable, "[Error]: Unnecessary toValueVector() call or toGradVector() call");
+    template <Matrix T, int GradOrder>
+    class Traits<Core::GradMatrix<T, GradOrder>> {
+        static_assert(T::ScalarType::isDifferentiable, "[Error]: Unnecessary toValueVector() call or toGradVector() call");
     public:
-        using ScalarType = typename T::template GradRtnTy<GradOrder>;
-        constexpr static int Option = MatrixType::Option;
-        constexpr static size_t RowAtCompile = MatrixType::RowAtCompile;
-        constexpr static size_t ColAtCompile = MatrixType::ColAtCompile;
-        constexpr static size_t SizeAtCompile = MatrixType::SizeAtCompile;
+        using ScalarType = typename T::ScalarType::template GradRtnTy<GradOrder>;
+        constexpr static int Option = T::Option;
+        constexpr static size_t RowAtCompile = T::RowAtCompile;
+        constexpr static size_t ColAtCompile = T::ColAtCompile;
+        constexpr static size_t SizeAtCompile = T::SizeAtCompile;
     };
 }

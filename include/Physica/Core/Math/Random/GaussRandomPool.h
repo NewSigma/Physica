@@ -22,12 +22,12 @@
 #include <Physica/Core/Math/Algebra/LinearAlgebra/Vector/DenseVector.h>
 
 namespace Physica::Core {
-    template<class ScalarType, class RandomPoolType>
+    template<Scalar T, class RandomPoolType>
     class GaussRandomPool {
     public:
         using GeneratorType = typename RandomPoolType::GeneratorType;
     private:
-        VectorND<ScalarType> rands;
+        VectorND<T> rands;
     public:
         GaussRandomPool(size_t size);
         GaussRandomPool(const GaussRandomPool&) = default;
@@ -35,7 +35,7 @@ namespace Physica::Core {
         ~GaussRandomPool() = default;
         /* Operators */
         GaussRandomPool& operator=(GaussRandomPool obj) noexcept { swap(obj); return *this; }
-        [[nodiscard]] inline ScalarType operator()() const noexcept;
+        [[nodiscard]] inline T operator()() const noexcept;
         /* Operations */
         template<class RandomGenerator>
         inline void init(RandomGenerator& gen);
@@ -46,31 +46,31 @@ namespace Physica::Core {
         [[nodiscard]] static GeneratorType& getGen() noexcept { return RandomPoolType::getInstance().getGen(); }
     };
 
-    template<class ScalarType, class RandomPoolType>
-    GaussRandomPool<ScalarType, RandomPoolType>::GaussRandomPool(size_t size) : rands(size) {
+    template<Scalar T, class RandomPoolType>
+    GaussRandomPool<T, RandomPoolType>::GaussRandomPool(size_t size) : rands(size) {
         init(RandomPoolType::getInstance().getGen());
     }
 
-    template<class ScalarType, class RandomPoolType>
+    template<Scalar T, class RandomPoolType>
     template<class RandomGenerator>
-    inline void GaussRandomPool<ScalarType, RandomPoolType>::init(RandomGenerator& gen) {
+    inline void GaussRandomPool<T, RandomPoolType>::init(RandomGenerator& gen) {
         rands.random_normal(gen);
     }
 
-    template<class ScalarType, class RandomPoolType>
-    inline ScalarType GaussRandomPool<ScalarType, RandomPoolType>::operator()() const noexcept {
+    template<Scalar T, class RandomPoolType>
+    inline T GaussRandomPool<T, RandomPoolType>::operator()() const noexcept {
         std::uniform_int_distribution<size_t> dist(0, getSize() - 1);
         return rands[dist(RandomPoolType::getInstance().getGen())];
     }
 
-    template<class ScalarType, class RandomPoolType>
-    inline void GaussRandomPool<ScalarType, RandomPoolType>::swap(GaussRandomPool& __restrict obj) noexcept {
+    template<Scalar T, class RandomPoolType>
+    inline void GaussRandomPool<T, RandomPoolType>::swap(GaussRandomPool& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         rands.swap(obj.rands);
     }
 }
 
 namespace Physica {
-    template<class ScalarType, class RandomPoolType>
-    class Traits<Core::GaussRandomPool<ScalarType, RandomPoolType>> : public Traits<RandomPoolType> {};
+    template<Scalar T, class RandomPoolType>
+    class Traits<Core::GaussRandomPool<T, RandomPoolType>> : public Traits<RandomPoolType> {};
 }

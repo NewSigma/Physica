@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Weibo He.
+ * Copyright 2022-2024 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -18,29 +18,28 @@
  */
 #pragma once
 
-#include "Physica/Core/Exception/BadConvergenceException.h"
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseHermiteMatrix.h"
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Eigen/JacobiDavidson.h"
-#include "Physica/Core/Physics/MD/ForceModel/Ewald/Ewald.h"
-#include "Basis/PlainWaveBasis.h"
+#include <Physica/Core/Exception/BadConvergenceException.h>
+#include <Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseHermiteMatrix.h>
+#include <Physica/Core/Math/Algebra/LinearAlgebra/Eigen/JacobiDavidson.h>
+#include <Physica/Core/Physics/MD/ForceModel/Ewald/Ewald.h>
 #include "BandGrid.h"
 #include "ChargeMixer.h"
 #include "KSHamilton.h"
 
 namespace Physica::Core {
-    template<class ScalarType, class XCProvider>
+    template<Scalar T, class XCProvider>
     class KSSolver {
     public:
         constexpr static bool IsSpinPolarized = XCProvider::IsSpinPolarized;
-        using ComplexType = Complex<ScalarType>;
-        using Vector3D = Vector3D<ScalarType>;
-        using BandType = BandGrid<ScalarType, IsSpinPolarized>;
-        using HamiltonType = KSHamilton<ScalarType, IsSpinPolarized>;
+        using ComplexType = Complex<T>;
+        using Vector3D = Vector3D<T>;
+        using BandType = BandGrid<T, IsSpinPolarized>;
+        using HamiltonType = KSHamilton<T, IsSpinPolarized>;
         using EigenSolverType = SpinPair<JacobiDavidson<ComplexType>, IsSpinPolarized>;
-        using DensityType = DensityGrid<ScalarType, IsSpinPolarized>;
+        using DensityType = DensityGrid<T, IsSpinPolarized>;
         using BasisType = typename DensityType::BasisType;
         using KSOrbitArray = typename DensityType::KSOrbitArray;
-        using PotType = SpinPair<RSpaceGrid<ScalarType>, IsSpinPolarized>;
+        using PotType = SpinPair<RSpaceGrid<T>, IsSpinPolarized>;
         using Index3D = typename GridBase::Index3D;
 
         using LatticeMatrix = typename HamiltonType::LatticeMatrix;
@@ -54,20 +53,20 @@ namespace Physica::Core {
 
         EigenSolverType eigSolver;
         DensityType density;
-        ChargeMixer<ScalarType, IsSpinPolarized> chargeMixer;
+        ChargeMixer<T, IsSpinPolarized> chargeMixer;
         PotType xcPot;
         XCProvider xcProvider;
 
         FFT3D fft;
     public:
-        KSSolver(CrystalCell<ScalarType> cell_, ScalarType cutEnergyPsi_, ScalarType cutEnergyRho_, BandType band_, size_t numBand);
+        KSSolver(CrystalCell<T> cell_, T cutEnergyPsi_, T cutEnergyRho_, BandType band_, size_t numBand);
         KSSolver(const KSSolver&) = default;
         KSSolver(KSSolver&&) noexcept = default;
         ~KSSolver() = default;
         /* Operators */
         KSSolver& operator=(KSSolver obj) noexcept;
         /* Operations */
-        bool solve(ScalarType criteria, size_t maxIte);
+        bool solve(T criteria, size_t maxIte);
 
         template<class RandomGenerator> void initWaveFunc(const SpinPair<BasisType, IsSpinPolarized>& initial, RandomGenerator& gen);
         void swap(KSSolver& __restrict obj) noexcept;
@@ -92,11 +91,11 @@ namespace Physica::Core {
         friend class Physica::Test;
     };
 
-    template<class ScalarType, class XCProvider>
-    KSSolver<ScalarType, XCProvider>::KSSolver(
-                CrystalCell<ScalarType> cell_,
-                ScalarType cutEnergyPsi_,
-                ScalarType cutEnergyRho_,
+    template<Scalar T, class XCProvider>
+    KSSolver<T, XCProvider>::KSSolver(
+                CrystalCell<T> cell_,
+                T cutEnergyPsi_,
+                T cutEnergyRho_,
                 BandType band_,
                 size_t numBand)
             : iteration(0)
@@ -119,19 +118,19 @@ namespace Physica::Core {
 
         fft = FFT3D(rSpaceSize, PlanFlag::Estimate);
 
-        chargeMixer = ChargeMixer<ScalarType, IsSpinPolarized>(getRepLattice(), rSpaceSize);
+        chargeMixer = ChargeMixer<T, IsSpinPolarized>(getRepLattice(), rSpaceSize);
         xcPot = PotType(rSpaceSize);
         xcProvider = XCProvider(getNumPlainWave());
     }
 
-    template<class ScalarType, class XCProvider>
-    KSSolver<ScalarType, XCProvider>& KSSolver<ScalarType, XCProvider>::operator=(KSSolver obj) noexcept {
+    template<Scalar T, class XCProvider>
+    KSSolver<T, XCProvider>& KSSolver<T, XCProvider>::operator=(KSSolver obj) noexcept {
         swap(obj);
         return *this;
     }
 
-    template<class ScalarType, class XCProvider>
-    bool KSSolver<ScalarType, XCProvider>::solve(ScalarType criteria, size_t maxIte) {
+    template<Scalar T, class XCProvider>
+    bool KSSolver<T, XCProvider>::solve(T criteria, size_t maxIte) {
         for (auto& kPoint : band.getKPointGrid()) {
             iteration = 0;
             while (true) {
@@ -153,7 +152,7 @@ namespace Physica::Core {
 
                 if (iteration != 0) {
                     const auto& delta_rho = chargeMixer.getResidule().getTotalDensity().flatten();
-                    const ScalarType error = delta_rho.squaredNorm();
+                    const T error = delta_rho.squaredNorm();
                     const bool isConverged = error < criteria;
                     std::cout << error << std::endl;
                     if (isConverged)
@@ -171,9 +170,9 @@ namespace Physica::Core {
         return true;
     }
 
-    template<class ScalarType, class XCProvider>
+    template<Scalar T, class XCProvider>
     template<class RandomGenerator>
-    void KSSolver<ScalarType, XCProvider>::initWaveFunc(const SpinPair<BasisType, IsSpinPolarized>& initial, RandomGenerator& gen) {
+    void KSSolver<T, XCProvider>::initWaveFunc(const SpinPair<BasisType, IsSpinPolarized>& initial, RandomGenerator& gen) {
         const ssize_t dimX = std::min(initial[SpinState::Up].getDimX(), orbits[0][SpinState::Up].getDimX());
         const ssize_t dimY = std::min(initial[SpinState::Up].getDimY(), orbits[0][SpinState::Up].getDimY());
         const ssize_t dimZ = std::min(initial[SpinState::Up].getDimZ(), orbits[0][SpinState::Up].getDimZ());
@@ -195,8 +194,8 @@ namespace Physica::Core {
         }
     }
 
-    template<class ScalarType, class XCProvider>
-    void KSSolver<ScalarType, XCProvider>::swap(KSSolver& __restrict obj) noexcept {
+    template<Scalar T, class XCProvider>
+    void KSSolver<T, XCProvider>::swap(KSSolver& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         std::swap(iteration, obj.iteration);
 
@@ -213,15 +212,15 @@ namespace Physica::Core {
         fft.swap(obj.fft);
     }
 
-    template<class ScalarType, class XCProvider>
-    void KSSolver<ScalarType, XCProvider>::calcDensity(const BasisType& orbit) {
+    template<Scalar T, class XCProvider>
+    void KSSolver<T, XCProvider>::calcDensity(const BasisType& orbit) {
         const auto& kSpacePsi = orbit.getCoeffGrid();
         const size_t psiDimX = kSpacePsi.getDimX() / 2;
         const size_t psiDimY = kSpacePsi.getDimY() / 2;
         const size_t psiDimZ = kSpacePsi.getDimZ() / 2;
 
         auto& kSpaceRho = fft.getKSpace();
-        kSpaceRho = ScalarType(0);
+        kSpaceRho = T(0);
         const size_t rhoDimX = kSpaceRho.getDimX();
         const size_t rhoDimY = kSpaceRho.getDimY();
         const size_t rhoDimZ = kSpaceRho.getDimZ();
@@ -260,12 +259,12 @@ namespace Physica::Core {
         fft.invTransform();
         const size_t numCellOld = kSpacePsi.getSize();
         const size_t numCellNew = kSpaceRho.getSize();
-        const ScalarType numElectronScale = sqrt(ScalarType(numCellNew) / ScalarType(numCellOld));
+        const T numElectronScale = sqrt(T(numCellNew) / T(numCellOld));
         fft.getRSpace() *= numElectronScale;
     }
 
-    template<class ScalarType, class XCProvider>
-    void KSSolver<ScalarType, XCProvider>::updateOrbits() {
+    template<Scalar T, class XCProvider>
+    void KSSolver<T, XCProvider>::updateOrbits() {
         const auto& eigSolverUp = eigSolver[SpinState::Up];
         const auto& eigSolverDown = eigSolver[SpinState::Down];
         for (size_t band = 0; band < getNumFilledBand(); ++band) {
@@ -276,17 +275,17 @@ namespace Physica::Core {
         }
     }
 
-    template<class ScalarType, class XCProvider>
-    void KSSolver<ScalarType, XCProvider>::updateDensity() {
+    template<Scalar T, class XCProvider>
+    void KSSolver<T, XCProvider>::updateDensity() {
         const size_t numFilledBand = getNumFilledBand();
         const int numElectronLastBand = getNumElectron() % 2 == 0 ? 2 : 1;
         chargeMixer.fetchInputDensity(density);
-        density.getTotalDensity() = ScalarType(0);
+        density.getTotalDensity() = T(0);
         for (size_t band = 0; band < numFilledBand; ++band) {
             calcDensity(orbits[band][SpinState::Up]);
             const bool isLastBand = band == numFilledBand - 1;
             const int numFillElectron = isLastBand ? numElectronLastBand : 2;
-            density.getTotalDensity() += toRealGrid(fft.getRSpace()) * ScalarType(numFillElectron);
+            density.getTotalDensity() += toRealGrid(fft.getRSpace()) * T(numFillElectron);
         }
         chargeMixer.mix(density);
     }

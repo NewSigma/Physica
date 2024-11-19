@@ -21,11 +21,11 @@
 #include "Physica/Core/Physics/SolidState/CrystalCell.h"
 
 namespace Physica::Core {
-    template<class ScalarType>
+    template<Scalar T>
     class DeepModelDataset {
-        using CellType = CrystalCell<ScalarType>;
+        using CellType = CrystalCell<T>;
         using CellArray = Array<CellType>;
-        using VectorType = VectorND<ScalarType>;
+        using VectorType = VectorND<T>;
         using ForceArray = Array<VectorType>;
 
         CellArray cells;
@@ -39,7 +39,7 @@ namespace Physica::Core {
         /* Operators */
         DeepModelDataset& operator=(DeepModelDataset obj) noexcept { swap(obj); return *this; }
         /* Operations */
-        void append(CellType cell, ScalarType energy, VectorType force);
+        void append(CellType cell, T energy, VectorType force);
         H5Group read(const H5Location& loc, const char* name);
         H5Group write(H5Location& loc, const char* name) const;
         void swap(DeepModelDataset& __restrict obj) noexcept;
@@ -50,16 +50,16 @@ namespace Physica::Core {
         [[nodiscard]] const ForceArray& getForces() const noexcept { return forces; }
     };
 
-    template<class ScalarType>
-    void DeepModelDataset<ScalarType>::append(CellType cell, ScalarType energy, VectorType force) {
+    template<Scalar T>
+    void DeepModelDataset<T>::append(CellType cell, T energy, VectorType force) {
         assert(cell.getNumParticle() * CellType::Dim == force.getLength());
         cells.append(std::move(cell));
         energys.append(std::move(energy));
         forces.append(std::move(force));
     }
 
-    template<class ScalarType>
-    H5Group DeepModelDataset<ScalarType>::read(const H5Location& loc, const char* name) {
+    template<Scalar T>
+    H5Group DeepModelDataset<T>::read(const H5Location& loc, const char* name) {
         const auto group = loc.openGroup(name);
         energys.read(group, "Energys");
         
@@ -78,8 +78,8 @@ namespace Physica::Core {
         return group;
     }
 
-    template<class ScalarType>
-    H5Group DeepModelDataset<ScalarType>::write(H5Location& loc, const char* name) const {
+    template<Scalar T>
+    H5Group DeepModelDataset<T>::write(H5Location& loc, const char* name) const {
         auto group = loc.openGroup(name);
         energys.write(group, "Energys");
 
@@ -94,8 +94,8 @@ namespace Physica::Core {
         return H5Group(group);
     }
 
-    template<class ScalarType>
-    void DeepModelDataset<ScalarType>::swap(DeepModelDataset& __restrict obj) noexcept {
+    template<Scalar T>
+    void DeepModelDataset<T>::swap(DeepModelDataset& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         cells.swap(obj.cells);
         energys.swap(obj.energys);

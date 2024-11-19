@@ -24,9 +24,9 @@ namespace Physica::Core {
     /**
      * Construct a givens transformation that eleminate the element in \param vector at index \param j
      */
-    template<class VectorType>
-    auto givens(const LValueVector<VectorType>& vector, size_t i, size_t j) {
-        using ScalarType = typename VectorType::ScalarType;
+    template<Vector T>
+    auto givens(const LValueVector<T>& vector, size_t i, size_t j) {
+        using ScalarType = typename T::ScalarType;
         using ResultType = Vector2D<ScalarType>;
         if constexpr (ScalarType::isComplex) {
             using RealType = typename ScalarType::RealType;
@@ -52,9 +52,9 @@ namespace Physica::Core {
     /**
      * Apply givens on left
      */
-    template<class MatrixType>
-    void applyGivens(const Vector2D<typename MatrixType::ScalarType>& givens, LValueMatrix<MatrixType>& mat, size_t i, size_t j) {
-        using ScalarType = typename MatrixType::ScalarType;
+    template<Matrix T>
+    void applyGivens(const Vector2D<typename T::ScalarType>& givens, LValueMatrix<T>& mat, size_t i, size_t j) {
+        using ScalarType = typename T::ScalarType;
         auto row_i = mat.row(i);
         auto row_j = mat.row(j);
         const size_t length = row_i.getLength();
@@ -70,9 +70,9 @@ namespace Physica::Core {
     /**
      * Apply givens on right
      */
-    template<class MatrixType>
-    void applyGivens(LValueMatrix<MatrixType>& mat, const Vector2D<typename MatrixType::ScalarType>& givens, size_t i, size_t j) {
-        using ScalarType = typename MatrixType::ScalarType;
+    template<Matrix T>
+    void applyGivens(LValueMatrix<T>& mat, const Vector2D<typename T::ScalarType>& givens, size_t i, size_t j) {
+        using ScalarType = typename T::ScalarType;
         auto col_i = mat.col(i);
         auto col_j = mat.col(j);
         const size_t length = col_i.getLength();

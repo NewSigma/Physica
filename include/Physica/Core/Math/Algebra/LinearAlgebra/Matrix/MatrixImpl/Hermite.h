@@ -29,14 +29,14 @@ namespace Physica::Core {
         using Type = T;
     };
 
-    template<class MatrixType>
-    struct remove_hermite<Hermite<MatrixType>> {
-        using Type = MatrixType;
+    template<Matrix T>
+    struct remove_hermite<Hermite<T>> {
+        using Type = T;
     };
 
-    template<class VectorType>
-    struct remove_hermite<HermiteVector<VectorType>> {
-        using Type = VectorType;
+    template<Vector T>
+    struct remove_hermite<HermiteVector<T>> {
+        using Type = T;
     };
 
     template<class T>
@@ -44,73 +44,69 @@ namespace Physica::Core {
         constexpr static bool value = std::is_same<T, typename remove_hermite<T>::Type>::value;
     };
 
-    template<class MatrixType>
-    class Hermite : public RValueMatrix<Hermite<MatrixType>> {
+    template<Matrix T>
+    class Hermite<T> : public RValueMatrix<Hermite<T>> {
     public:
-        using Base = RValueMatrix<Hermite<MatrixType>>;
+        using Base = RValueMatrix<Hermite<T>>;
         using typename Base::ScalarType;
     private:
-        const MatrixType& matrix;
+        const T& matrix;
     public:
-        Hermite(const RValueMatrix<MatrixType>& matrix_) : matrix(matrix_.getDerived()) {}
+        Hermite(const T& matrix_) : matrix(matrix_) {}
         /* Getters */
         [[nodiscard]] ScalarType calc(size_t row, size_t col) const { return matrix.calc(col, row).conjugate(); }
         [[nodiscard]] __host__ __device__ size_t getRow() const noexcept { return matrix.getCol(); }
         [[nodiscard]] __host__ __device__ size_t getCol() const noexcept { return matrix.getRow(); }
     };
 
-    template<class VectorType>
-    class HermiteVector : public RValueMatrix<HermiteVector<VectorType>> {
+    template<Vector T>
+    class HermiteVector<T> : public RValueMatrix<HermiteVector<T>> {
     public:
-        using Base = RValueMatrix<HermiteVector<VectorType>>;
+        using Base = RValueMatrix<HermiteVector<T>>;
         using typename Base::ScalarType;
     private:
-        const VectorType& vec;
+        const T& vec;
     public:
-        explicit HermiteVector(const RValueVector<VectorType>& vec_) : vec(vec_.getDerived()) {}
+        explicit HermiteVector(const T& vec_) : vec(vec_) {}
         /* Operations */
-        template<class OtherMatrix>
-        void assignTo(LValueMatrix<OtherMatrix>& target) const;
+        template<LMatrix M>
+        void assignTo(M& target) const;
         /* Getters */
         [[nodiscard]] ScalarType calc([[maybe_unused]] size_t row, size_t col) const { assert(row == 0); return vec.calc(col).conjugate(); }
         [[nodiscard]] __host__ __device__ constexpr static size_t getRow() noexcept { return 1; }
         [[nodiscard]] __host__ __device__ size_t getCol() const noexcept { return vec.getLength(); }
     };
 
-    template<class VectorType>
-    template<class OtherMatrix>
-    void HermiteVector<VectorType>::assignTo(LValueMatrix<OtherMatrix>& target) const {
-        using TargetType = LValueMatrix<OtherMatrix>;
+    template<Vector T>
+    template<LMatrix M>
+    void HermiteVector<T>::assignTo(M& target) const {
         for (size_t i = 0; i < vec.getLength(); ++i)
-            target.refFromMajorMinor(0, i) = calc(TargetType::rowFromMajorMinor(0, i), TargetType::colFromMajorMinor(0, i));
+            target.refFromMajorMinor(0, i) = calc(M::rowFromMajorMinor(0, i), M::colFromMajorMinor(0, i));
     }
 }
 
 namespace Physica {
-    using namespace Core;
-
-    template <class MatrixType>
-    class Traits<Hermite<MatrixType>> {
+    template <Matrix T>
+    class Traits<Hermite<T>> {
     private:
-        constexpr static int OtherMajor = MatrixOption::isColMatrix<MatrixType>() ? MatrixOption::Row : MatrixOption::Col;
-        constexpr static int Major = MatrixOption::isAnyMajor<MatrixType>() ? MatrixOption::AnyMajor : OtherMajor;
-        constexpr static int Storage = MatrixOption::getStorage<MatrixType>();
-
+        constexpr static int OtherMajor = MatrixOption::isColMatrix<T>() ? MatrixOption::Row : MatrixOption::Col;
+        constexpr static int Major = MatrixOption::isAnyMajor<T>() ? MatrixOption::AnyMajor : OtherMajor;
+        constexpr static int Storage = MatrixOption::getStorage<T>();
     public:
-        using ScalarType = typename MatrixType::ScalarType;
+        using ScalarType = typename T::ScalarType;
         constexpr static int Option = Major | Storage;
-        constexpr static size_t RowAtCompile = MatrixType::ColAtCompile;
-        constexpr static size_t ColAtCompile = MatrixType::RowAtCompile;
-        constexpr static size_t SizeAtCompile = MatrixType::SizeAtCompile;
+        constexpr static size_t RowAtCompile = T::ColAtCompile;
+        constexpr static size_t ColAtCompile = T::RowAtCompile;
+        constexpr static size_t SizeAtCompile = T::SizeAtCompile;
     };
 
-    template <class VectorType>
-    class Traits<HermiteVector<VectorType>> {
+    template <Vector T>
+    class Traits<HermiteVector<T>> {
     public:
-        using ScalarType = typename VectorType::ScalarType;
+        using ScalarType = typename T::ScalarType;
         constexpr static int Option = MatrixOption::Row | MatrixOption::Vector;
         constexpr static size_t RowAtCompile = 1;
-        constexpr static size_t ColAtCompile = VectorType::SizeAtCompile;
-        constexpr static size_t SizeAtCompile = VectorType::SizeAtCompile;
+        constexpr static size_t ColAtCompile = T::SizeAtCompile;
+        constexpr static size_t SizeAtCompile = T::SizeAtCompile;
     };
 }

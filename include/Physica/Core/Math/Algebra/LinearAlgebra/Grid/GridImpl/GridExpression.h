@@ -21,21 +21,20 @@
 #include <Physica/Core/MultiPrecision/ExprType.h>
 
 namespace Physica::Core {
-    template<ExprType type, class T1, class T2 = T1> class GridExpression;
+    template<ExprType type, Grid T1, class T2 = T1> class GridExpression;
     //////////////////////////////////////Add//////////////////////////////////////
-    template<class GridType1, class GridType2>
-    class GridExpression<ExprType::Add, GridType1, GridType2>
-            : public RValueGrid<GridExpression<ExprType::Add, GridType1, GridType2>> {
-        using Base = RValueGrid<GridExpression<ExprType::Add, GridType1, GridType2>>;
+    template<Grid T1, Grid T2>
+    class GridExpression<ExprType::Add, T1, T2>
+            : public RValueGrid<GridExpression<ExprType::Add, T1, T2>> {
+        using Base = RValueGrid<GridExpression<ExprType::Add, T1, T2>>;
     public:
         using typename Base::Index3D;
         using typename Base::ScalarType;
     private:
-        const GridType1& grid1;
-        const GridType2& grid2;
+        const T1& grid1;
+        const T2& grid2;
     public:
-        GridExpression(const RValueGrid<GridType1>& grid1_, const RValueGrid<GridType2>& grid2_)
-                : grid1(grid1_.getDerived()), grid2(grid2_.getDerived()) {
+        GridExpression(const T1& grid1_, const T2& grid2_) : grid1(grid1_), grid2(grid2_) {
             for (int i = 0; i < 3; ++i)
                 assert(grid1.getDim()[i] == grid2.getDim()[i]);
         }
@@ -46,19 +45,19 @@ namespace Physica::Core {
         [[nodiscard]] size_t getDimZ() const noexcept { return grid1.getDimZ(); }
     };
     //////////////////////////////////////Mul//////////////////////////////////////
-    template<class GridType, Scalar T>
-    class GridExpression<ExprType::Mul, GridType, T>
-            : public RValueGrid<GridExpression<ExprType::Mul, GridType, T>> {
-        using Base = RValueGrid<GridExpression<ExprType::Mul, GridType, T>>;
+    template<Grid T, Scalar U>
+    class GridExpression<ExprType::Mul, T, U>
+            : public RValueGrid<GridExpression<ExprType::Mul, T, U>> {
+        using Base = RValueGrid<GridExpression<ExprType::Mul, T, U>>;
     public:
         using typename Base::Index3D;
         using typename Base::ScalarType;
     private:
-        const GridType& grid;
-        const T& s;
+        const T& grid;
+        const U& s;
     public:
-        GridExpression(const RValueGrid<GridType>& grid_, const T& s_)
-                : grid(grid_.getDerived()), s(s_) {}
+        GridExpression(const T& grid_, const U& s_)
+                : grid(grid_), s(s_) {}
         /* Getters */
         [[nodiscard]] ScalarType calc(Index3D index) const { return ScalarType(grid.calc(index)) * ScalarType(s); }
         [[nodiscard]] size_t getDimX() const noexcept { return grid.getDimX(); }
@@ -66,19 +65,19 @@ namespace Physica::Core {
         [[nodiscard]] size_t getDimZ() const noexcept { return grid.getDimZ(); }
     };
 
-    template<class GridType1, class GridType2>
-    class GridExpression<ExprType::Mul, GridType1, GridType2>
-            : public RValueGrid<GridExpression<ExprType::Mul, GridType1, GridType2>> {
-        using Base = RValueGrid<GridExpression<ExprType::Mul, GridType1, GridType2>>;
+    template<Grid T1, Grid T2>
+    class GridExpression<ExprType::Mul, T1, T2>
+            : public RValueGrid<GridExpression<ExprType::Mul, T1, T2>> {
+        using Base = RValueGrid<GridExpression<ExprType::Mul, T1, T2>>;
     public:
         using typename Base::Index3D;
         using typename Base::ScalarType;
     private:
-        const GridType1& grid1;
-        const GridType2& grid2;
+        const T1& grid1;
+        const T2& grid2;
     public:
-        GridExpression(const RValueGrid<GridType1>& grid1_, const RValueGrid<GridType2>& grid2_)
-                : grid1(grid1_.getDerived()), grid2(grid2_.getDerived()) {
+        GridExpression(const T1& grid1_, const T2& grid2_)
+                : grid1(grid1_), grid2(grid2_) {
             for (int i = 0; i < 3; ++i)
                 assert(grid1.getDim()[i] == grid2.getDim()[i]);
         }
@@ -90,32 +89,29 @@ namespace Physica::Core {
     };
     //////////////////////////////////////Operators//////////////////////////////////////
     //////////////////////////////////////Add//////////////////////////////////////
-    template<class GridType1, class GridType2>
-    inline GridExpression<ExprType::Add, GridType1, GridType2> operator+(
-            const RValueGrid<GridType1>& g1, const RValueGrid<GridType2>& g2) {
-        return GridExpression<ExprType::Add, GridType1, GridType2>(g1.getDerived(), g2.getDerived());
+    template<Grid T1, Grid T2>
+    inline GridExpression<ExprType::Add, T1, T2> operator+(const T1& g1, const T2& g2) {
+        return GridExpression<ExprType::Add, T1, T2>(g1, g2);
     }
     //////////////////////////////////////Mul//////////////////////////////////////
-    template<class GridType, Scalar T>
-    inline auto operator*(const RValueGrid<GridType>& g, const T& x) {
-        return GridExpression<ExprType::Mul, GridType, T>(g.getDerived(), x);
+    template<Grid T, Scalar U>
+    inline auto operator*(const T& g, const U& x) {
+        return GridExpression<ExprType::Mul, T, U>(g, x);
     }
 
-    template<Scalar T, class GridType>
-    inline auto operator*(const T& s, const RValueGrid<GridType>& g) {
+    template<Grid T, Scalar U>
+    inline auto operator*(const U& s, const T& g) {
         return g * s;
     }
 
-    template<class GridType1, class GridType2>
-    inline auto hadamard(const RValueGrid<GridType1>& g1, const RValueGrid<GridType2>& g2) {
-        return GridExpression<ExprType::Mul, GridType1, GridType2>(g1.getDerived(), g2.getDerived());
+    template<Grid T1, Grid T2>
+    inline auto hadamard(const T1& g1, const T2& g2) {
+        return GridExpression<ExprType::Mul, T1, T2>(g1, g2);
     }
 }
 
 namespace Physica {
-    using namespace Core;
-
-    template<ExprType type, class Exp1, class Exp2>
+    template<ExprType type, Core::Grid Exp1, Core::Grid Exp2>
     class Traits<GridExpression<type, Exp1, Exp2>> {
         using ScalarType1 = typename Exp1::ScalarType;
         using RealType = typename ScalarType1::RealType;
@@ -124,9 +120,9 @@ namespace Physica {
         using ScalarType = typename std::conditional<type == ExprType::Abs, RealType, BinaryScalarType>::type;
     };
 
-    template<ExprType type, class Exp, Scalar T>
-    class Traits<GridExpression<type, Exp, T>> {
+    template<ExprType type, Core::Grid Exp, Core::Scalar U>
+    class Traits<GridExpression<type, Exp, U>> {
     public:
-        using ScalarType = typename Core::Internal::BinaryScalarOpReturnType<typename Exp::ScalarType, T>::Type;
+        using ScalarType = typename Core::Internal::BinaryScalarOpReturnType<typename Exp::ScalarType, U>::Type;
     };
 }

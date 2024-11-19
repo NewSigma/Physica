@@ -29,7 +29,7 @@
 using namespace Physica::Core;
 using namespace Physica::Gui;
 
-template<class ScalarType> class MnistNet;
+template<Scalar> class MnistNet;
 
 namespace Physica {
     template<class T>
@@ -37,9 +37,9 @@ namespace Physica {
 }
 
 namespace Physica::Core {
-    template<class ScalarType>
-    class device_obj<MnistNet<ScalarType>> : public device_obj<SimpleNet<MnistNet<ScalarType>>> {
-        using host_obj = MnistNet<ScalarType>;
+    template<Scalar T>
+    class device_obj<MnistNet<T>> : public device_obj<SimpleNet<MnistNet<T>>> {
+        using host_obj = MnistNet<T>;
         using This = device_obj<host_obj>;
         using Base = device_obj<SimpleNet<host_obj>>;
         using typename Base::ValueType;
@@ -50,16 +50,16 @@ namespace Physica::Core {
     public:
         using device_obj_type = This;
     private:
-        device_obj<LinearLayer<ScalarType>> layer1;
-        device_obj<LinearLayer<ScalarType, false>> layer2;
+        device_obj<LinearLayer<T>> layer1;
+        device_obj<LinearLayer<T, false>> layer2;
     public:
         device_obj() = default;
-        template<class RandomGenerator>
-        device_obj(size_t width1, RandomGenerator& gen)
+        template<class RandomType>
+        device_obj(size_t width1, RandomType& gen)
                 : layer1(decltype(layer1)::random_xavier_normal(Mnist::NumPixelInImage, width1, 1, gen))
                 , layer2(decltype(layer2)::random_xavier_normal(width1, 10, 1, gen)) {}
-        template<class OtherScalar>
-        device_obj(const device_obj<MnistNet<OtherScalar>>& net) : layer1(net.getLayer1()), layer2(net.getLayer2()) {}
+        template<Scalar U>
+        device_obj(const device_obj<MnistNet<U>>& net) : layer1(net.getLayer1()), layer2(net.getLayer2()) {}
         device_obj(const This& other) = default;
         device_obj(This&&) noexcept = default;
         ~device_obj() = default;
@@ -79,7 +79,7 @@ namespace Physica::Core {
                 output = forward(dataset.getSamples()[index]);
             else
                 output = forward(dataset.getSamples()[index].getValues());
-            return device_obj<Loss<ScalarType>>::crossEntropy(output, dataset.getLabels()[index]);
+            return device_obj<Loss<T>>::crossEntropy(output, dataset.getLabels()[index]);
         }
 
         template<class Dataset>

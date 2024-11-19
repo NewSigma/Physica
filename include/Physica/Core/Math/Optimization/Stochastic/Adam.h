@@ -25,21 +25,21 @@ namespace Physica::Core {
      * Reference:
      * [1] Adam: A Method for Stochastic Optimization (arXiv:1412.6980 [cs.LG])
      */
-    template<class ScalarType, class VectorType>
+    template<Scalar T, Vector U>
     class Adam {
-        const Array<ScalarType, 6> args;
-        VectorType params;
+        const Array<T, 6> args;
+        U params;
     public:
-        Adam(const Array<ScalarType, 6>& args_);
+        Adam(const Array<T, 6>& args_);
         ~Adam() = default;
         /* Operations */
         template<class Function>
-        void compute(Function func, const VectorType& params_, size_t maxIteration);
+        void compute(Function func, const U& params_, size_t maxIteration);
         /* Getters */
-        [[nodiscard]] const VectorType& getParams() const noexcept { return params; }
+        [[nodiscard]] const U& getParams() const noexcept { return params; }
     private:
         template<class Function>
-        [[nodiscard]] VectorType gradient(Function func);
+        [[nodiscard]] U gradient(Function func);
     };
     /**
      * Five args:
@@ -50,38 +50,38 @@ namespace Physica::Core {
      * args[4]: Very small real number in (0, inf)
      * args[5]: Expected relative error, small real number in (0, inf)
      */
-    template<class ScalarType, class VectorType>
-    Adam<ScalarType, VectorType>::Adam(const Array<ScalarType, 6>& args_) : args(args_), params() {
+    template<Scalar T, Vector U>
+    Adam<T, U>::Adam(const Array<T, 6>& args_) : args(args_), params() {
         assert(args[0].isPositive());
-        assert(args[1].isPositive() && args[1] < ScalarType(1));
-        assert(args[2].isPositive() && args[2] < ScalarType(1));
-        assert(args[3].isPositive() && args[3] < ScalarType(1));
+        assert(args[1].isPositive() && args[1] < T(1));
+        assert(args[2].isPositive() && args[2] < T(1));
+        assert(args[3].isPositive() && args[3] < T(1));
         assert(args[4].isPositive());
         assert(args[5].isPositive());
     }
     /**
      * \class Function is declared like:
-     * ScalarType func(const VectorType& params)
+     * T func(const U& params)
      * 
      * \param maxIteration
      * Set to 0 to disable this criteria
      */
-    template<class ScalarType, class VectorType>
+    template<Scalar T, Vector U>
     template<class Function>
-    void Adam<ScalarType, VectorType>::compute(Function func, const VectorType& params_, size_t maxIteration) {
+    void Adam<T, U>::compute(Function func, const U& params_, size_t maxIteration) {
         params = params_;
-        auto m = VectorType::zeros(params.getLength());
-        auto v = VectorType::zeros(params.getLength());
-        ScalarType beta1 = args[1];
+        auto m = U::zeros(params.getLength());
+        auto v = U::zeros(params.getLength());
+        T beta1 = args[1];
         size_t count = 0;
-        VectorType temp(params.getLength());
+        U temp(params.getLength());
         bool stop = false;
         do {
-            VectorType g = gradient(func);
-            const ScalarType beta1_1 = ScalarType(1) - beta1;
+            U g = gradient(func);
+            const T beta1_1 = T(1) - beta1;
             m = m * beta1 + g * beta1_1;
-            v = v * args[2] + hadamard(g, g) * ScalarType(ScalarType(1) -  args[2]);
-            const ScalarType alpha = args[0] / beta1_1 * sqrt(ScalarType(ScalarType(1) - args[2]));
+            v = v * args[2] + hadamard(g, g) * T(T(1) -  args[2]);
+            const T alpha = args[0] / beta1_1 * sqrt(T(T(1) - args[2]));
             temp = params - alpha * hadamard(m, reciprocal(sqrt(v) + args[4]));
             beta1 *= args[3];
             ++count;
@@ -91,16 +91,16 @@ namespace Physica::Core {
         } while(!stop);
     }
 
-    template<class ScalarType, class VectorType>
+    template<Scalar T, Vector U>
     template<class Function>
-    VectorType Adam<ScalarType, VectorType>::gradient(Function func) {
+    U Adam<T, U>::gradient(Function func) {
         const size_t length = params.getLength();
-        VectorType result(length);
-        const ScalarType y0 = func(std::cref(params));
+        U result(length);
+        const T y0 = func(std::cref(params));
         for (size_t i = 0; i < length; ++i) {
-            ScalarType new_param = params[i] + args[0];
+            T new_param = params[i] + args[0];
             params[i].swap(new_param);
-            const ScalarType y1 = func(std::cref(params));
+            const T y1 = func(std::cref(params));
             result[i] = (y1 - y0) / args[0];
             params[i].swap(new_param);
         }

@@ -19,18 +19,17 @@
 #pragma once
 
 namespace Physica::Core {
-    template<class MatrixType, class VectorType>
-    class MatrixVectorProduct : public RValueVector<MatrixVectorProduct<MatrixType, VectorType>> {
-        using This = MatrixVectorProduct<MatrixType, VectorType>;
+    template<Matrix T, Vector U>
+    class MatrixVectorProduct : public RValueVector<MatrixVectorProduct<T, U>> {
+        using This = MatrixVectorProduct<T, U>;
     public:
         using Base = RValueVector<This>;
         using typename Base::ScalarType;
     private:
-        const MatrixType& mat;
-        const VectorType& vec;
+        const T& mat;
+        const U& vec;
     public:
-        MatrixVectorProduct(const RValueMatrix<MatrixType>& mat_, const RValueVector<VectorType>& vec_)
-                : mat(mat_.getDerived()), vec(vec_.getDerived()) {
+        MatrixVectorProduct(const T& mat_, const U& vec_) : mat(mat_), vec(vec_) {
             assert(mat.getCol() == vec.getLength());
         }
         MatrixVectorProduct(const This&) = delete;
@@ -40,67 +39,66 @@ namespace Physica::Core {
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
         /* Operations */
-        template<class OtherDerived, class Executor = SequentialExecutor>
-        inline void assignTo(LValueVector<OtherDerived>& target) const;
+        template<LVector V, class Executor = SequentialExecutor>
+        inline void assignTo(V& target) const;
         /* Getters */
         [[nodiscard]] inline ScalarType calc(size_t index) const;
         [[nodiscard]] __host__ __device__ size_t getLength() const { return mat.getRow(); }
-        [[nodiscard]] const MatrixType& getLHS() const noexcept { return mat; }
-        [[nodiscard]] const VectorType& getRHS() const noexcept { return vec; }
+        [[nodiscard]] const T& getLHS() const noexcept { return mat; }
+        [[nodiscard]] const U& getRHS() const noexcept { return vec; }
     };
 
-    template<class MatrixType, class VectorType>
-    template<class OtherDerived, class Executor>
-    inline void MatrixVectorProduct<MatrixType, VectorType>::assignTo(LValueVector<OtherDerived>& target) const {
-        if constexpr (MatrixOption::isColMatrix<MatrixType>()) {
-            target = mat.col(0).asVector() * vec.calc(0);
+    template<Matrix T, Vector U>
+    template<LVector V, class Executor>
+    inline void MatrixVectorProduct<T, U>::assignTo(V& target) const {
+        if constexpr (MatrixOption::isColMatrix<T>()) {
+            target = mat.col(0) * vec.calc(0);
             for (size_t i = 1; i < vec.getLength(); ++i)
-                target += mat.col(i).asVector() * vec.calc(i);
+                target += mat.col(i) * vec.calc(i);
         }
         else {
             for (size_t i = 0; i < getLength(); ++i)
                 target[i] = calc(i);
-            
-            constexpr bool isContinuous = std::is_base_of<ContinuousVector<OtherDerived>, OtherDerived>::value;
-            if constexpr (isContinuous && Base::isReverseDiff)
-                target.getDerived().makeContinuous();
+
+            if constexpr (is_continuous<V>::value && Base::isReverseDiff)
+                target.makeContinuous();
         }
     }
 
-    template<class MatrixType, class VectorType>
-    inline typename MatrixVectorProduct<MatrixType, VectorType>::ScalarType MatrixVectorProduct<MatrixType, VectorType>::calc(size_t index) const {
+    template<Matrix T, Vector U>
+    inline typename MatrixVectorProduct<T, U>::ScalarType MatrixVectorProduct<T, U>::calc(size_t index) const {
         return mat.row(index) * vec;
     }
 
-    template<class MatrixType, class VectorType>
-    [[nodiscard]] inline typename std::enable_if<MatrixType::RowAtCompile != 1, MatrixVectorProduct<MatrixType, VectorType>>::type
-    operator*(const RValueMatrix<MatrixType>& mat, const RValueVector<VectorType>& vec) noexcept {
+    template<Matrix T, Vector U>
+    [[nodiscard]] inline typename std::enable_if<T::RowAtCompile != 1, MatrixVectorProduct<T, U>>::type
+    operator*(const T& mat, const U& vec) noexcept {
         assert(mat.getCol() == vec.getLength());
-        return MatrixVectorProduct(mat.getDerived(), vec.getDerived());
+        return MatrixVectorProduct(mat, vec);
     }
 
-    template<class MatrixType, class VectorType>
-    [[nodiscard]] inline typename std::enable_if<MatrixType::RowAtCompile == 1 && MatrixType::ColAtCompile == 1,
-                                                 typename Internal::BinaryScalarOpReturnType<typename MatrixType::ScalarType,
-                                                                                             typename VectorType::ScalarType>::Type>::type
-    operator*(const RValueMatrix<MatrixType>& mat, const RValueVector<VectorType>& vec) {
+    template<Matrix T, Vector U>
+    [[nodiscard]] inline typename std::enable_if<T::RowAtCompile == 1 && T::ColAtCompile == 1,
+                                                 typename Internal::BinaryScalarOpReturnType<typename T::ScalarType,
+                                                                                             typename U::ScalarType>::Type>::type
+    operator*(const T& mat, const U& vec) {
         assert(mat.getCol() == vec.getLength());
         return mat.row(0) * vec;
     }
 }
 
 namespace Physica {
-    template<class MatrixType, class VectorType>
-    class Traits<Core::MatrixVectorProduct<MatrixType, VectorType>> {
-        static_assert(MatrixType::ColAtCompile == VectorType::SizeAtCompile ||
-                      MatrixType::ColAtCompile == Dynamic ||
-                      VectorType::SizeAtCompile == Dynamic,
+    template<Matrix T, Vector U>
+    class Traits<Core::MatrixVectorProduct<T, U>> {
+        static_assert(T::ColAtCompile == U::SizeAtCompile ||
+                      T::ColAtCompile == Dynamic ||
+                      U::SizeAtCompile == Dynamic,
                       "Row and column do not match in matrix product");
     public:
-        using ScalarType = typename Core::Internal::BinaryScalarOpReturnType<typename MatrixType::ScalarType,
-                                                                             typename VectorType::ScalarType>::Type;
-        constexpr static size_t SizeAtCompile = MatrixType::RowAtCompile;
-        constexpr static bool FastAssign = Core::MatrixOption::isColMatrix<MatrixType>();
+        using ScalarType = typename Core::Internal::BinaryScalarOpReturnType<typename T::ScalarType,
+                                                                             typename U::ScalarType>::Type;
+        constexpr static size_t SizeAtCompile = T::RowAtCompile;
+        constexpr static bool FastAssign = Core::MatrixOption::isColMatrix<T>();
         constexpr static bool FastPacket = false;
     };
 }

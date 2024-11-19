@@ -27,17 +27,17 @@ namespace Physica::Core {
      * Reference:
      * [1] Phys. Rev. 188, 1407; https://doi.org/10.1103/PhysRev.188.1407
      */
-    template<class ScalarType, bool IsSmallCell = false>
-    class LJModel1 : public PairModel<LJModel1<ScalarType, IsSmallCell>> {
-        using This = LJModel1<ScalarType, IsSmallCell>;
+    template<Scalar T, bool IsSmallCell = false>
+    class LJModel1 : public PairModel<LJModel1<T, IsSmallCell>> {
+        using This = LJModel1<T, IsSmallCell>;
         using Base = PairModel<This>;
         using typename Base::ValueType;
 
-        ScalarType sigma;
-        ScalarType epsilon;
-        ScalarType factor;
+        T sigma;
+        T epsilon;
+        T factor;
     public:
-        LJModel1(ScalarType sigma_, ScalarType epsilon_, ValueType cutoff);
+        LJModel1(T sigma_, T epsilon_, ValueType cutoff);
         LJModel1(const LJModel1&) = default;
         LJModel1(LJModel1&&) noexcept = default;
         ~LJModel1() = default;
@@ -46,47 +46,47 @@ namespace Physica::Core {
         /* Operations */
         void swap(LJModel1& __restrict obj) noexcept;
         /* Static members */
-        [[nodiscard]] inline ScalarType pot_functor(size_t i, size_t j, ScalarType r, ScalarType r2) const;
-        [[nodiscard]] inline ScalarType force_functor(size_t i, size_t j, ScalarType r, ScalarType r2) const;
+        [[nodiscard]] inline T pot_functor(size_t i, size_t j, T r, T r2) const;
+        [[nodiscard]] inline T force_functor(size_t i, size_t j, T r, T r2) const;
     };
 
-    template<class ScalarType, bool IsSmallCell>
-    LJModel1<ScalarType, IsSmallCell>::LJModel1(ScalarType sigma_, ScalarType epsilon_, ValueType cutoff)
+    template<Scalar T, bool IsSmallCell>
+    LJModel1<T, IsSmallCell>::LJModel1(T sigma_, T epsilon_, ValueType cutoff)
             : Base(), sigma(std::move(sigma_)), epsilon(std::move(epsilon_)) {
         factor = ValueType(12) * epsilon / sigma;
         Base::setCutoff(std::move(cutoff));
     }
 
-    template<class ScalarType, bool IsSmallCell>
-    LJModel1<ScalarType, IsSmallCell>& LJModel1<ScalarType, IsSmallCell>::operator=(LJModel1 obj) noexcept {
+    template<Scalar T, bool IsSmallCell>
+    LJModel1<T, IsSmallCell>& LJModel1<T, IsSmallCell>::operator=(LJModel1 obj) noexcept {
         swap(obj);
         return *this;
     }
 
-    template<class ScalarType, bool IsSmallCell>
-    inline ScalarType LJModel1<ScalarType, IsSmallCell>::pot_functor(
-            [[maybe_unused]] size_t i, [[maybe_unused]] size_t j, [[maybe_unused]] ScalarType r, ScalarType r2) const {
-        const ScalarType rep_r2 = ScalarType(sigma * sigma) / r2;
-        const ScalarType rep_r4 = square(rep_r2);
-        const ScalarType rep_r6 = rep_r4 * rep_r2;
-        const ScalarType rep_r12 = square(rep_r6);
-        return (rep_r12 - rep_r6 * ScalarType(2)) * epsilon;
+    template<Scalar T, bool IsSmallCell>
+    inline T LJModel1<T, IsSmallCell>::pot_functor(
+            [[maybe_unused]] size_t i, [[maybe_unused]] size_t j, [[maybe_unused]] T r, T r2) const {
+        const T rep_r2 = T(sigma * sigma) / r2;
+        const T rep_r4 = square(rep_r2);
+        const T rep_r6 = rep_r4 * rep_r2;
+        const T rep_r12 = square(rep_r6);
+        return (rep_r12 - rep_r6 * T(2)) * epsilon;
     }
 
-    template<class ScalarType, bool IsSmallCell>
-    inline ScalarType LJModel1<ScalarType, IsSmallCell>::force_functor(
-            [[maybe_unused]] size_t i, [[maybe_unused]] size_t j, ScalarType r, [[maybe_unused]] ScalarType r2) const {
-        const ScalarType rep_r = sigma / r;
-        const ScalarType rep_r2 = square(rep_r);
-        const ScalarType rep_r4 = square(rep_r2);
-        const ScalarType rep_r6 = rep_r4 * rep_r2;
-        const ScalarType rep_r7 = rep_r6 * rep_r;
-        const ScalarType rep_r13 = rep_r7 * rep_r6;
+    template<Scalar T, bool IsSmallCell>
+    inline T LJModel1<T, IsSmallCell>::force_functor(
+            [[maybe_unused]] size_t i, [[maybe_unused]] size_t j, T r, [[maybe_unused]] T r2) const {
+        const T rep_r = sigma / r;
+        const T rep_r2 = square(rep_r);
+        const T rep_r4 = square(rep_r2);
+        const T rep_r6 = rep_r4 * rep_r2;
+        const T rep_r7 = rep_r6 * rep_r;
+        const T rep_r13 = rep_r7 * rep_r6;
         return (rep_r13 - rep_r7) * factor;
     }
 
-    template<class ScalarType, bool IsSmallCell>
-    void LJModel1<ScalarType, IsSmallCell>::swap(LJModel1& __restrict obj) noexcept {
+    template<Scalar T, bool IsSmallCell>
+    void LJModel1<T, IsSmallCell>::swap(LJModel1& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         Base::swap(obj);
         sigma.swap(obj.sigma);
@@ -96,8 +96,6 @@ namespace Physica::Core {
 }
 
 namespace Physica {
-    using namespace Core;
-
     template<class T, bool B>
     class Traits<LJModel1<T, B>> : public Traits<PairModel<LJModel1<T, B>>> {
     public:

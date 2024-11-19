@@ -35,17 +35,17 @@ namespace Physica::Core {
         /* Operators */
         device_obj& operator=(const device_obj& m) = delete;
         device_obj& operator=(device_obj&& m) = delete;
-        template<class OtherMatrix>
-        __host__ __device__ device_obj<Derived>& operator=(const device_obj<RValueMatrix<OtherMatrix>>& m);
+        template<Matrix M>
+        __host__ __device__ device_obj<Derived>& operator=(const device_obj<M>& m);
         __device__ device_obj<Derived>& operator=(const ScalarType& x);
         [[nodiscard]] __device__ ScalarType& operator()(size_t row, size_t col) { return *data_ptr(row, col); }
         [[nodiscard]] __device__ const ScalarType& operator()(size_t row, size_t col) const { return *data_ptr(row, col); }
-        __device__ void operator+=(const ScalarType& s) { (*this) = (*this) + s; }
-        __device__ void operator-=(const ScalarType& s) { (*this) = (*this) - s; }
-        __device__ void operator*=(const ScalarType& s) { (*this) = (*this) * s; }
-        __device__ void operator/=(const ScalarType& s) { (*this) = (*this) / s; }
-        template<class OtherDerived> __device__ void operator+=(const device_obj<RValueMatrix<OtherDerived>>& m) { (*this) = (*this) + m; }
-        template<class OtherDerived> __device__ void operator-=(const device_obj<RValueMatrix<OtherDerived>>& m) { (*this) = (*this) - m; }
+        __device__ void operator+=(const ScalarType& s) { Base::getDerived() = Base::getDerived() + s; }
+        __device__ void operator-=(const ScalarType& s) { Base::getDerived() = Base::getDerived() - s; }
+        __device__ void operator*=(const ScalarType& s) { Base::getDerived() = Base::getDerived() * s; }
+        __device__ void operator/=(const ScalarType& s) { Base::getDerived() = Base::getDerived() / s; }
+        template<Matrix M> __device__ void operator+=(const device_obj<M>& m) { Base::getDerived() = Base::getDerived() + m; }
+        template<Matrix M> __device__ void operator-=(const device_obj<M>& m) { Base::getDerived() = Base::getDerived() - m; }
         /* Getters */
         template<Side Owner = GetSide()>
         [[nodiscard]] __device__ ScalarType calc(size_t row, size_t col) const { return *data_ptr(row, col); }

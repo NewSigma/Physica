@@ -21,7 +21,7 @@
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/MatrixDecomposition/PLUDecomposition.h"
 
 namespace Physica::Core {
-    template<class T, int Option, size_t Order = Dynamic>
+    template<Scalar T, int Option, size_t Order = Dynamic>
     class LUSolver {
         using LUType = PLUDecomposition<T, Option, Order, Order>;
         using MatrixType = typename LUType::MatrixType;
@@ -37,31 +37,31 @@ namespace Physica::Core {
         LUSolver& operator=(LUSolver obj) noexcept;
         /* Operations */
         void decomposition(MatrixType A);
-        template<class VectorType>
-        DenseVector<T, Order> solve(const RValueVector<VectorType>& b) const;
+        template<Vector V>
+        DenseVector<T, Order> solve(const V& b) const;
         void swap(LUSolver& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] size_t getOrder() const { return lu.getMatrix().getRow(); }
     };
 
-    template<class T, int Option, size_t Order>
+    template<Scalar T, int Option, size_t Order>
     LUSolver<T, Option, Order>::LUSolver(MatrixType A) : lu(std::move(A)) {}
 
-    template<class T, int Option, size_t Order>
+    template<Scalar T, int Option, size_t Order>
     LUSolver<T, Option, Order>&
     LUSolver<T, Option, Order>::operator=(LUSolver<T, Option, Order> obj) noexcept {
         swap(obj);
         return *this;
     }
 
-    template<class T, int Option, size_t Order>
+    template<Scalar T, int Option, size_t Order>
     void LUSolver<T, Option, Order>::decomposition(MatrixType A) {
         lu.compute(std::move(A));
     }
 
-    template<class T, int Option, size_t Order>
-    template<class VectorType>
-    DenseVector<T, Order> LUSolver<T, Option, Order>::solve(const RValueVector<VectorType>& b) const {
+    template<Scalar T, int Option, size_t Order>
+    template<Vector V>
+    DenseVector<T, Order> LUSolver<T, Option, Order>::solve(const V& b) const {
         const size_t order = getOrder();
         DenseVector<T, Order> result(order);
         for (size_t i = 0; i < order; ++i)
@@ -71,19 +71,19 @@ namespace Physica::Core {
         for (size_t i = 0; i < order - 1; ++i) {
             auto bottom = working.bottomRows(i + 1);
             auto tail = result.tail(i + 1);
-            tail -= bottom.col(i).asVector() * result[i];
+            tail -= bottom.col(i) * result[i];
         }
         for (size_t i = order - 1; i > 0; --i) {
             result[i] /= working(i, i);
             auto top = working.topRows(i);
             auto head = result.head(i);
-            head -= top.col(i).asVector() * result[i];
+            head -= top.col(i) * result[i];
         }
         result[0] /= working(0, 0);
         return result;
     }
 
-    template<class T, int Option, size_t Order>
+    template<Scalar T, int Option, size_t Order>
     void LUSolver<T, Option, Order>::swap(LUSolver& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         lu.swap(obj.lu);

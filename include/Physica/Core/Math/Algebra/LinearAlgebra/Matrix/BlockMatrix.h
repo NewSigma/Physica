@@ -22,11 +22,11 @@
 #include "MatrixImpl/RValueMatrix.h"
 
 namespace Physica::Core {
-    template<class MatrixType>
-    class BlockMatrix : public RValueMatrix<BlockMatrix<MatrixType>> {
-        using This = BlockMatrix<MatrixType>;
+    template<Matrix T>
+    class BlockMatrix : public RValueMatrix<BlockMatrix<T>> {
+        using This = BlockMatrix<T>;
         using Base = RValueMatrix<This>;
-        using BlockArray = Array<MatrixType>;
+        using BlockArray = Array<T>;
     public:
         using typename Base::ScalarType;
     private:
@@ -53,14 +53,14 @@ namespace Physica::Core {
         size_t findBlock(size_t globalIndex) const;
     };
 
-    template<class MatrixType>
-    BlockMatrix<MatrixType>::BlockMatrix(BlockArray blocks_) : blocks(std::move(blocks_)) {
+    template<Matrix T>
+    BlockMatrix<T>::BlockMatrix(BlockArray blocks_) : blocks(std::move(blocks_)) {
         assert(getNumBlock() != 0 && "[Error]: Empty blocks does nothing");
         updateEnds();
     }
 
-    template<class MatrixType>
-    typename BlockMatrix<MatrixType>::ScalarType BlockMatrix<MatrixType>::calc(size_t row, size_t col) const {
+    template<Matrix T>
+    typename BlockMatrix<T>::ScalarType BlockMatrix<T>::calc(size_t row, size_t col) const {
         const size_t indexR = findBlock(row);
         const size_t indexC = findBlock(col);
         if (indexR != indexC)
@@ -69,15 +69,15 @@ namespace Physica::Core {
         return blocks[indexR].calc(row - shift, col - shift);
     }
 
-    template<class MatrixType>
-    void BlockMatrix<MatrixType>::swap(This& __restrict obj) noexcept {
+    template<Matrix T>
+    void BlockMatrix<T>::swap(This& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         blocks.swap(obj.blocks);
         indexEnds.swap(obj.indexEnds);
     }
 
-    template<class MatrixType>
-    void BlockMatrix<MatrixType>::updateEnds() {
+    template<Matrix T>
+    void BlockMatrix<T>::updateEnds() {
         const size_t numBlock = getNumBlock();
         indexEnds.resize(numBlock);
         size_t end = 0;
@@ -87,8 +87,8 @@ namespace Physica::Core {
         }
     }
 
-    template<class MatrixType>
-    size_t BlockMatrix<MatrixType>::findBlock(size_t globalIndex) const {
+    template<Matrix T>
+    size_t BlockMatrix<T>::findBlock(size_t globalIndex) const {
         assert(globalIndex < getRow() && "[Error]: Index out of range");
         for (size_t i = 0; i < getNumBlock(); ++i) {
             const bool inTheBlock = globalIndex < indexEnds[i];
@@ -100,11 +100,11 @@ namespace Physica::Core {
 }
 
 namespace Physica {
-    template<class MatrixType>
-    class Traits<Core::BlockMatrix<MatrixType>> {
+    template<Matrix T>
+    class Traits<Core::BlockMatrix<T>> {
     public:
-        using ScalarType = typename MatrixType::ScalarType;
-        constexpr static int Option = MatrixType::Option;
+        using ScalarType = typename T::ScalarType;
+        constexpr static int Option = T::Option;
         constexpr static size_t RowAtCompile = Dynamic;
         constexpr static size_t ColAtCompile = Dynamic;
         constexpr static size_t SizeAtCompile = RowAtCompile * ColAtCompile;

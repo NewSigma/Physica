@@ -19,10 +19,10 @@
 #pragma once
 
 namespace Physica::Core {
-    template<class VectorType, Scalar T>
-    class VectorExpr<ExprType::Pow, VectorType, T>
-            : public BinaryVectorExpr<ExprType::Pow, VectorType, T> {
-        using Base = BinaryVectorExpr<ExprType::Pow, VectorType, T>;
+    template<Vector T, Scalar U>
+    class VectorExpr<ExprType::Pow, T, U>
+            : public BinaryVectorExpr<ExprType::Pow, T, U> {
+        using Base = BinaryVectorExpr<ExprType::Pow, T, U>;
     public:
         using typename Base::ScalarType;
     public:
@@ -31,8 +31,8 @@ namespace Physica::Core {
         [[nodiscard]] ScalarType calc(size_t i) const { return pow(Base::getLHS().calc(i), Base::getRHS()); }
     };
 
-    template<class VectorType, Scalar T>
-    [[nodiscard]] inline auto pow(const RValueVector<VectorType>& v, const T& x) noexcept {
-        return VectorExpr<ExprType::Pow, VectorType, T>(v.getDerived(), x);
+    template<Vector T, Scalar U>
+    [[nodiscard]] inline auto pow(const T& v, const U& x) noexcept {
+        return VectorExpr<ExprType::Pow, T, U>(v, x);
     }
 }

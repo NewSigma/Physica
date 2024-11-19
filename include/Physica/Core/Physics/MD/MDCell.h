@@ -24,31 +24,31 @@
 #include "Physica/Core/Physics/PhyConst.h"
 
 namespace Physica::Core {
-    template<class ScalarType, unsigned int Dim = 3>
-    class MDCell : public PeriodicCell<ScalarType, Dim> {
+    template<Scalar T, unsigned int Dim = 3>
+    class MDCell : public PeriodicCell<T, Dim> {
     public:
-        using Base = PeriodicCell<ScalarType, Dim>;
+        using Base = PeriodicCell<T, Dim>;
         using typename Base::LatticeMatrix;
         using typename Base::InvLatticeMatrix;
         using typename Base::PositionMatrix;
         using typename Base::Type;
-        using MassVector = VectorND<ScalarType>;
+        using MassVector = VectorND<T>;
         using ParticleType = uint8_t; // uint8_t should be enough to hold the periodic table
-        using MassTypeMap = std::unordered_map<ScalarType, ParticleType>;
+        using MassTypeMap = std::unordered_map<T, ParticleType>;
     private:
         MassVector massVec;
         InvLatticeMatrix invLattice;
     public:
         explicit MDCell(size_t numParticle);
-        template<class OtherScalar>
-        MDCell(CrystalCell<OtherScalar> cell);
-        template<class OtherScalar>
-        MDCell(PeriodicCell<OtherScalar, Dim> cell, MassVector massVec_);
-        template<class OtherScalar>
-        MDCell(Poscar<OtherScalar> poscar);
+        template<Scalar U>
+        MDCell(CrystalCell<U> cell);
+        template<Scalar U>
+        MDCell(PeriodicCell<U, Dim> cell, MassVector massVec_);
+        template<Scalar U>
+        MDCell(Poscar<U> poscar);
         MDCell(LatticeMatrix lattice, PositionMatrix pos, MassVector massVec_);
         /* Operations */
-        void scale(ScalarType factor);
+        void scale(T factor);
         void normalize();
         void normalizePos(PositionMatrix& target) const;
         void toDirect(PositionMatrix& target) const { Base::toDirect(target, invLattice); }
@@ -65,13 +65,13 @@ namespace Physica::Core {
         /* Getters */
         [[nodiscard]] size_t getDOF() const noexcept { return Dim * Base::getNumParticle(); }
         [[nodiscard]] const MassVector& getMassVec() const { return massVec; }
-        [[nodiscard]] ScalarType getMass(size_t particleID) const { return massVec[particleID]; }
+        [[nodiscard]] T getMass(size_t particleID) const { return massVec[particleID]; }
         [[nodiscard]] const InvLatticeMatrix& getInvLattice() const noexcept { return invLattice; }
         [[nodiscard]] constexpr static Type getType() noexcept { return Type::Cartesian; }
         /* Setters */
         void setLattice(const MDCell& cell);
         void setLattice(LatticeMatrix new_lattice);
-        inline void setMass(size_t atom, ScalarType value);
+        inline void setMass(size_t atom, T value);
     protected:
         void toDirect() { Base::toDirect(invLattice); }
     private:
@@ -81,12 +81,12 @@ namespace Physica::Core {
         using Base::setLattice;
     };
 
-    template<class ScalarType, unsigned int Dim>
-    MDCell<ScalarType, Dim>::MDCell(size_t numParticle) : Base(numParticle), massVec(numParticle) {}
+    template<Scalar T, unsigned int Dim>
+    MDCell<T, Dim>::MDCell(size_t numParticle) : Base(numParticle), massVec(numParticle) {}
 
-    template<class ScalarType, unsigned int Dim>
-    template<class OtherScalar>
-    MDCell<ScalarType, Dim>::MDCell(CrystalCell<OtherScalar> cell) {
+    template<Scalar T, unsigned int Dim>
+    template<Scalar U>
+    MDCell<T, Dim>::MDCell(CrystalCell<U> cell) {
         if (cell.getType() == Type::Direct)
             cell.toCartesian();
         Base::operator=(Base(cell.getLattice(), cell.getPos(), Type::Cartesian));
@@ -99,52 +99,52 @@ namespace Physica::Core {
         }
     }
 
-    template<class ScalarType, unsigned int Dim>
-    template<class OtherScalar>
-    MDCell<ScalarType, Dim>::MDCell(PeriodicCell<OtherScalar, Dim> cell, MassVector massVec_) : massVec(std::move(massVec_)) {
+    template<Scalar T, unsigned int Dim>
+    template<Scalar U>
+    MDCell<T, Dim>::MDCell(PeriodicCell<U, Dim> cell, MassVector massVec_) : massVec(std::move(massVec_)) {
         if (cell.getType() == Type::Direct)
             cell.toCartesian();
         Base::operator=(Base(cell.getLattice(), cell.getPos(), Type::Cartesian));
         invLattice = Base::makeInvLattice();
     }
 
-    template<class ScalarType, unsigned int Dim>
-    template<class OtherScalar>
-    MDCell<ScalarType, Dim>::MDCell(Poscar<OtherScalar> poscar) : MDCell(CrystalCell<OtherScalar>(poscar)) {}
+    template<Scalar T, unsigned int Dim>
+    template<Scalar U>
+    MDCell<T, Dim>::MDCell(Poscar<U> poscar) : MDCell(CrystalCell<U>(poscar)) {}
 
-    template<class ScalarType, unsigned int Dim>
-    MDCell<ScalarType, Dim>::MDCell(LatticeMatrix lattice, PositionMatrix pos, MassVector massVec_)
+    template<Scalar T, unsigned int Dim>
+    MDCell<T, Dim>::MDCell(LatticeMatrix lattice, PositionMatrix pos, MassVector massVec_)
             : Base(std::move(lattice), std::move(pos), Base::Type::Cartesian)
             , massVec(std::move(massVec_)) {
         invLattice = Base::makeInvLattice();
     }
 
-    template<class ScalarType, unsigned int Dim>
-    void MDCell<ScalarType, Dim>::scale(ScalarType factor) {
+    template<Scalar T, unsigned int Dim>
+    void MDCell<T, Dim>::scale(T factor) {
         Base::scale_cartesian(factor);
         invLattice *= Core::reciprocal(factor);
     }
 
-    template<class ScalarType, unsigned int Dim>
-    void MDCell<ScalarType, Dim>::normalize() {
+    template<Scalar T, unsigned int Dim>
+    void MDCell<T, Dim>::normalize() {
         toDirect();
         Base::normalize_direct();
         Base::toCartesian();
     }
 
-    template<class ScalarType, unsigned int Dim>
-    void MDCell<ScalarType, Dim>::normalizePos(PositionMatrix& target) const {
+    template<Scalar T, unsigned int Dim>
+    void MDCell<T, Dim>::normalizePos(PositionMatrix& target) const {
         Base::toDirect(target, invLattice);
         for (auto& elem : target.asArray()) {
             elem -= floor(elem);
-            assert(ScalarType(0) <= elem && elem <= ScalarType(1));
+            assert(T(0) <= elem && elem <= T(1));
         }
         Base::toCartesian(target, Base::getLattice());
     }
 
-    template<class ScalarType, unsigned int Dim>
+    template<Scalar T, unsigned int Dim>
     template<ExtendCellOption Option>
-    void MDCell<ScalarType, Dim>::toSuperCell(unsigned int x, unsigned int y, unsigned int z) {
+    void MDCell<T, Dim>::toSuperCell(unsigned int x, unsigned int y, unsigned int z) {
         /* Extend mass */ {
             const size_t oldNumParticle = Base::getNumParticle();
             const unsigned int numCell = x * y * z;
@@ -175,44 +175,44 @@ namespace Physica::Core {
         invLattice = Base::makeInvLattice();
     }
 
-    template<class ScalarType, unsigned int Dim>
+    template<Scalar T, unsigned int Dim>
     template<ExtendCellOption Option>
-    MDCell<ScalarType, Dim>
-    MDCell<ScalarType, Dim>::makeSuperCell(unsigned int x, unsigned int y, unsigned int z) const {
+    MDCell<T, Dim>
+    MDCell<T, Dim>::makeSuperCell(unsigned int x, unsigned int y, unsigned int z) const {
         MDCell result = *this;
         result.toSuperCell<Option>(x, y, z);
         return result;
     }
 
-    template<class ScalarType, unsigned int Dim>
-    typename MDCell<ScalarType, Dim>::MassTypeMap MDCell<ScalarType, Dim>::makeMassTypeMap() const {
+    template<Scalar T, unsigned int Dim>
+    typename MDCell<T, Dim>::MassTypeMap MDCell<T, Dim>::makeMassTypeMap() const {
         ParticleType nextType = 0;
-        std::unordered_map<ScalarType, ParticleType> massToType{};
-        std::set<ScalarType> massSet{};
+        std::unordered_map<T, ParticleType> massToType{};
+        std::set<T> massSet{};
         for (auto mass : massVec)
             massSet.insert(mass);
 
-        for (ScalarType mass : massSet) {
+        for (T mass : massSet) {
             massToType.insert(std::make_pair(mass, nextType));
             nextType += 1;
         }
         return massToType;
     }
 
-    template<class ScalarType, unsigned int Dim>
-    void MDCell<ScalarType, Dim>::setLattice(const MDCell& cell) {
+    template<Scalar T, unsigned int Dim>
+    void MDCell<T, Dim>::setLattice(const MDCell& cell) {
         Base::setLattice(cell.getLattice());
         invLattice = cell.invLattice();
     }
 
-    template<class ScalarType, unsigned int Dim>
-    void MDCell<ScalarType, Dim>::setLattice(LatticeMatrix new_lattice) {
+    template<Scalar T, unsigned int Dim>
+    void MDCell<T, Dim>::setLattice(LatticeMatrix new_lattice) {
         Base::setLattice(new_lattice);
         invLattice = Base::makeInvLattice();
     }
 
-    template<class ScalarType, unsigned int Dim>
-    inline void MDCell<ScalarType, Dim>::setMass(size_t atom, ScalarType value) {
+    template<Scalar T, unsigned int Dim>
+    inline void MDCell<T, Dim>::setMass(size_t atom, T value) {
         assert(atom < Base::getNumParticle() && "[Error]: Index out of range");
         assert(value.isPositive() && "[Error]: Mass must be positive");
         massVec[atom] = value;
@@ -220,7 +220,7 @@ namespace Physica::Core {
 }
 
 namespace Physica {
-    template<class T, unsigned int D>
+    template<Scalar T, unsigned int D>
     class Traits<Core::MDCell<T, D>> {
     public:
         using ScalarType = T;

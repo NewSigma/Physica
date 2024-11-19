@@ -97,8 +97,6 @@ namespace Physica::Core {
 }
 
 namespace Physica {
-    using namespace Core;
-
     template<Scalar T, int Order>
     class Traits<Core::device_obj<Diff<VectorND<T>, DiffMode::Reverse, Order>>> : public Traits<VectorND<T>> {
     public:

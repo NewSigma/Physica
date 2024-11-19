@@ -29,16 +29,16 @@ namespace Physica::Core {
      * References:
      * [1] William H. Press, Saul A. Teukolsky, William T. Vetterling, Brian P. Flannery. C++数值算法(第二版)[M]. 北京: 电子工业出版社, 2005
      */
-    template<class ScalarType>
+    template<Scalar T>
     class LinearEquations {
-        using This = LinearEquations<ScalarType>;
-        using WorkingMatrix = DenseMatrix<ScalarType, MatrixOption::Col | MatrixOption::Vector>;
+        using This = LinearEquations<T>;
+        using WorkingMatrix = DenseMatrix<T, MatrixOption::Col | MatrixOption::Vector>;
 
         WorkingMatrix working;
     public:
         explicit LinearEquations(WorkingMatrix&& working_);
-        template<class MatrixType>
-        explicit LinearEquations(const RValueMatrix<MatrixType>& working_);
+        template<Matrix M>
+        explicit LinearEquations(const M& working_);
         LinearEquations(const This& l) = default;
         LinearEquations(This&& l) noexcept = default;
         ~LinearEquations() = default;
@@ -60,9 +60,9 @@ namespace Physica::Core {
 }
 
 namespace std {
-    template<class ScalarType>
-    inline void swap(Physica::Core::LinearEquations<ScalarType>& __restrict equ1,
-                     Physica::Core::LinearEquations<ScalarType>& __restrict equ2) noexcept {
+    template<Physica::Core::Scalar T>
+    inline void swap(Physica::Core::LinearEquations<T>& __restrict equ1,
+                     Physica::Core::LinearEquations<T>& __restrict equ2) noexcept {
         equ1.swap(equ2);
     }
 }

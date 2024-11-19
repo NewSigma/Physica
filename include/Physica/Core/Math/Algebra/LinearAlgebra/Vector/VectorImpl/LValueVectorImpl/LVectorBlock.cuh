@@ -19,12 +19,12 @@
 #pragma once
 
 namespace Physica::Core {
-    template<class VectorType, size_t Length>
-    class device_obj<LVectorBlock<VectorType, Length>> : public device_obj<LValueVector<LVectorBlock<VectorType, Length>>> {
-        using host_obj = LVectorBlock<VectorType, Length>;
+    template<Vector T, size_t Length>
+    class device_obj<LVectorBlock<T, Length>> : public device_obj<LValueVector<LVectorBlock<T, Length>>> {
+        using host_obj = LVectorBlock<T, Length>;
         using This = device_obj<host_obj>;
         using Base = device_obj<LValueVector<host_obj>>;
-        using DeviceVector = device_obj<VectorType>;
+        using DeviceVector = device_obj<T>;
     public:
         using ScalarType = typename Base::ScalarType;
     protected:
@@ -35,8 +35,8 @@ namespace Physica::Core {
         size_t from;
         size_t to;
     public:
-        __host__ __device__ device_obj(device_obj<LValueVector<VectorType>>& vec_, size_t from_, size_t to_);
-        __host__ __device__ device_obj(device_obj<LValueVector<VectorType>>& vec_, size_t from_);
+        __host__ __device__ device_obj(device_obj<LValueVector<T>>& vec_, size_t from_, size_t to_);
+        __host__ __device__ device_obj(device_obj<LValueVector<T>>& vec_, size_t from_);
         LVectorBlock(const LVectorBlock& block) = delete;
         LVectorBlock(LVectorBlock&&) noexcept = delete;
         ~LVectorBlock() = default;
@@ -52,40 +52,40 @@ namespace Physica::Core {
         [[nodiscard]] __host__ __device__ inline ConstPtrTy data_ptr(size_t index) const;
     };
 
-    template<class VectorType, size_t Length>
-    __host__ __device__ device_obj<LVectorBlock<VectorType, Length>>::device_obj(
-            device_obj<LValueVector<VectorType>>& vec_, size_t from_, size_t to_) : vec(asStruct(vec_.getDerived())), from(from_), to(to_) {
+    template<Vector T, size_t Length>
+    __host__ __device__ device_obj<LVectorBlock<T, Length>>::device_obj(
+            device_obj<LValueVector<T>>& vec_, size_t from_, size_t to_) : vec(asStruct(vec_)), from(from_), to(to_) {
         assert(from_ < to);
         assert(to <= vec.getLength());
         assert(Length == Dynamic || Length == getLength());
     }
 
-    template<class VectorType, size_t Length>
-    __host__ __device__ device_obj<LVectorBlock<VectorType, Length>>::device_obj(
-            device_obj<LValueVector<VectorType>>& vec_, size_t from_) : device_obj(vec_, from_, vec_.getLength()) {}
+    template<Vector T, size_t Length>
+    __host__ __device__ device_obj<LVectorBlock<T, Length>>::device_obj(
+            device_obj<LValueVector<T>>& vec_, size_t from_) : device_obj(vec_, from_, vec_.getLength()) {}
     
-    template<class VectorType, size_t Length>
-    __host__ __device__ inline size_t device_obj<LVectorBlock<VectorType, Length>>::getLength() const noexcept {
+    template<Vector T, size_t Length>
+    __host__ __device__ inline size_t device_obj<LVectorBlock<T, Length>>::getLength() const noexcept {
         if constexpr (Length == Dynamic)
             return to - from;
         return Length;
     }
 
-    template<class VectorType, size_t Length>
-    __host__ __device__ inline typename device_obj<LVectorBlock<VectorType, Length>>::PtrTy
-    device_obj<LVectorBlock<VectorType, Length>>::data_ptr(size_t index) {
+    template<Vector T, size_t Length>
+    __host__ __device__ inline typename device_obj<LVectorBlock<T, Length>>::PtrTy
+    device_obj<LVectorBlock<T, Length>>::data_ptr(size_t index) {
         assert((index + from) < to);
         return vec.getDerived().data_ptr(index);
     }
 
-    template<class VectorType, size_t Length>
-    __host__ __device__ inline const typename device_obj<LVectorBlock<VectorType, Length>>::ConstPtrTy
-    device_obj<LVectorBlock<VectorType, Length>>::data_ptr(size_t index) const {
+    template<Vector T, size_t Length>
+    __host__ __device__ inline const typename device_obj<LVectorBlock<T, Length>>::ConstPtrTy
+    device_obj<LVectorBlock<T, Length>>::data_ptr(size_t index) const {
         return const_cast<This&>(*this).data_ptr(index);
     }
 }
 
 namespace Physica {
-    template<class VectorType, size_t Length>
-    class Traits<Core::device_obj<Core::LVectorBlock<VectorType, Length>>> : public Traits<Core::LVectorBlock<VectorType, Length>> {};
+    template<Vector T, size_t Length>
+    class Traits<Core::device_obj<Core::LVectorBlock<T, Length>>> : public Traits<Core::LVectorBlock<T, Length>> {};
 }

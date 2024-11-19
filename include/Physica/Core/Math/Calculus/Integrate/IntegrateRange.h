@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2022 Weibo He.
+ * Copyright 2020-2024 Weibo He.
  *
  * This file is part of Physica.
  * 
@@ -21,12 +21,12 @@
 #include <Physica/Core/Math/Algebra/LinearAlgebra/Vector/DenseVector.h>
 
 namespace Physica::Core {
-    template<class ScalarType, size_t dim>
+    template<Scalar T, int Dim>
     class IntegrateRange {
         //We consider dimension which is larger than 3 is unsuitable to allocate domain data on stack.
-        static_assert(dim <= 3, "Dimension larger than 3 must be set Dynamic.");
+        static_assert(Dim <= 3, "Dimension larger than 3 must be set Dynamic.");
     public:
-        using VectorType = DenseVector<ScalarType, dim>;
+        using VectorType = DenseVector<T, Dim>;
     private:
         VectorType range_from;
         VectorType range_to;
@@ -37,7 +37,7 @@ namespace Physica::Core {
         [[nodiscard]] const VectorType& to() const { return range_to; }
     };
 
-    template<class ScalarType, size_t dim>
-    IntegrateRange<ScalarType, dim>::IntegrateRange(VectorType range_from_, VectorType range_to_)
+    template<Scalar T, int Dim>
+    IntegrateRange<T, Dim>::IntegrateRange(VectorType range_from_, VectorType range_to_)
             : range_from(std::move(range_from_)), range_to(std::move(range_to_)) {}
 }

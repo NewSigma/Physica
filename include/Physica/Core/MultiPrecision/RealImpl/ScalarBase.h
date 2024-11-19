@@ -28,9 +28,9 @@ namespace Physica::Core {
         Forward,
         Reverse
     };
-    template<class T> class ScalarRef;
-    template<class T> class ScalarPtr;
-    template<class T, DiffMode Mode, int Order = 1> class Diff;
+    template<class ScalarType> class ScalarRef;
+    template<class ScalarType> class ScalarPtr;
+    template<class ScalarType, DiffMode Mode, int Order = 1> class Diff;
 
     template<class Derived>
     class ScalarBase : public CRTPBase<ScalarBase<Derived>> {
@@ -72,10 +72,10 @@ namespace Physica::Core {
         __host__ __device__ inline bool operator<(float s) const noexcept;
         __host__ __device__ inline bool operator>(double s) const noexcept;
         __host__ __device__ inline bool operator<(double s) const noexcept;
-        template<class T>
-        __host__ __device__ inline bool operator>(const ScalarBase<T>& s) const noexcept;
-        template<class T>
-        __host__ __device__ inline bool operator<(const ScalarBase<T>& s) const noexcept;
+        template<Scalar T>
+        __host__ __device__ inline bool operator>(const T& s) const noexcept;
+        template<Scalar T>
+        __host__ __device__ inline bool operator<(const T& s) const noexcept;
         /* Getters */
         [[nodiscard]] __host__ __device__ RealType real() const;
         [[nodiscard]] __host__ __device__ RealType imag() const;
@@ -172,15 +172,15 @@ namespace Physica::Core {
      * TODO: Move to \class Diff once we merge forward and reverse pass
      */
     template<class Derived>
-    template<class T>
-    __host__ __device__ inline bool ScalarBase<Derived>::operator>(const ScalarBase<T>& s) const noexcept {
+    template<Scalar T>
+    __host__ __device__ inline bool ScalarBase<Derived>::operator>(const T& s) const noexcept {
         static_assert(!isComplex && !T::isComplex, "[Error]: Comparison between complex scalars is invalid");
         return getValue() > s.getValue();
     }
 
     template<class Derived>
-    template<class T>
-    __host__ __device__ inline bool ScalarBase<Derived>::operator<(const ScalarBase<T>& s) const noexcept {
+    template<Scalar T>
+    __host__ __device__ inline bool ScalarBase<Derived>::operator<(const T& s) const noexcept {
         static_assert(!isComplex && !T::isComplex, "[Error]: Comparison between complex scalars is invalid");
         return getValue() < s.getValue();
     }

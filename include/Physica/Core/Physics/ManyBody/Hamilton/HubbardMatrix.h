@@ -32,12 +32,12 @@ namespace Physica::Core {
      * Reference:
      * [1] J. Korean Phys. Soc. 76, 670–683 (2020); https://doi.org/10.3938/jkps.76.670
      */
-    template<class ScalarType, class ReprType>
+    template<Scalar T, class ReprType>
     class HubbardMatrix
-            : public HamiltonMatrix<HubbardMatrix<ScalarType, ReprType>>
-            , public Hubbard<typename ScalarType::RealType, ReprType::Dim> {
-        using RealType = typename ScalarType::RealType;
-        using This = HubbardMatrix<ScalarType, ReprType>;
+            : public HamiltonMatrix<HubbardMatrix<T, ReprType>>
+            , public Hubbard<typename T::RealType, ReprType::Dim> {
+        using RealType = typename T::RealType;
+        using This = HubbardMatrix<T, ReprType>;
         using Base = HamiltonMatrix<This>;
         using ModelBase = Hubbard<RealType, ReprType::Dim>;
         
@@ -49,7 +49,7 @@ namespace Physica::Core {
         constexpr static unsigned int NumSite = StateType::NumSite;
         constexpr static unsigned int SiteDOF = StateType::SiteDOF;
         constexpr static bool IsTransInvariant = Traits<ReprType>::IsTransInvariant;
-        static_assert((IsTransInvariant && ScalarType::isComplex) || !IsTransInvariant, "[Error]: Use complex scalar if translational invariance is enabled");
+        static_assert((IsTransInvariant && T::isComplex) || !IsTransInvariant, "[Error]: Use complex scalar if translational invariance is enabled");
         static_assert(!IsTransInvariant || (Dim == 1), "[Error]: Trans invariantce is not implemented in high dimension");
     private:
         ReprType repr;
@@ -66,8 +66,8 @@ namespace Physica::Core {
         template<class Functor>
         void forNeighSites(Functor func, int site) const;
 
-        [[nodiscard]] ScalarType calc(size_t row, size_t col) const;
-        [[nodiscard]] ScalarType trace() const;
+        [[nodiscard]] T calc(size_t row, size_t col) const;
+        [[nodiscard]] T trace() const;
         void swap(This& __restrict obj) noexcept;
         /* Getters */
         using ModelBase::getHoppingT;
@@ -79,14 +79,12 @@ namespace Physica::Core {
         inline RealType repelElem(StateType psi) const;
         RealType hoppingElem(StateType rowPsi, StateType colPsi) const;
     private:
-        template<class, class> friend class MatrixVectorProduct;
+        template<Matrix, Vector> friend class MatrixVectorProduct;
     };
 }
 
 namespace Physica {
-    using namespace Core;
-
-    template<class T, class U>
+    template<Scalar T, class U>
     class Traits<HubbardMatrix<T, U>> : public Traits<HamiltonMatrix<HubbardMatrix<T, U>>> {
     public:
         using ScalarType = T;

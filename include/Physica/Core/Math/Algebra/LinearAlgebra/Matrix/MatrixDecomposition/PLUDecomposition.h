@@ -19,10 +19,10 @@
 #pragma once
 
 #include <cstdlib>
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h"
+#include <Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h>
 
 namespace Physica::Core {
-    template<class T, int type, size_t maxRow, size_t maxColumn>
+    template<Scalar T, int type, size_t maxRow, size_t maxColumn>
     class PLUDecomposition {
     public:
         using MatrixType = DenseMatrix<T, type, maxRow, maxColumn>;

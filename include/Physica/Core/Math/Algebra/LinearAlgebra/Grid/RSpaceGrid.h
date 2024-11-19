@@ -58,10 +58,10 @@ namespace Physica::Core {
         using Base::forIndexInGrid;
         using Base::forPointIndexInGrid;
         using Base::forPointInGrid;
-        template<class RandomGenerator>
-        static RSpaceGrid random_uniform(Index3D size, RandomGenerator& gen);
-        template<class RandomGenerator>
-        static RSpaceGrid random_normal(Index3D size, RandomGenerator& gen);
+        template<class RandomType>
+        static RSpaceGrid random_uniform(Index3D size, RandomType& gen);
+        template<class RandomType>
+        static RSpaceGrid random_normal(Index3D size, RandomType& gen);
     };
 
     template<Scalar T>
@@ -106,16 +106,16 @@ namespace Physica::Core {
     }
 
     template<Scalar T>
-    template<class RandomGenerator>
-    inline RSpaceGrid<T> RSpaceGrid<T>::random_uniform(Index3D size, RandomGenerator& gen) {
+    template<class RandomType>
+    inline RSpaceGrid<T> RSpaceGrid<T>::random_uniform(Index3D size, RandomType& gen) {
         auto result = RSpaceGrid<T>(size);
         result.flatten().random_uniform(gen);
         return result;
     }
 
     template<Scalar T>
-    template<class RandomGenerator>
-    inline RSpaceGrid<T> RSpaceGrid<T>::random_normal(Index3D size, RandomGenerator& gen) {
+    template<class RandomType>
+    inline RSpaceGrid<T> RSpaceGrid<T>::random_normal(Index3D size, RandomType& gen) {
         auto result = RSpaceGrid<T>(size);
         result.flatten().random_normal(gen);
         return result;
@@ -128,8 +128,6 @@ namespace Physica::Core {
 }
 
 namespace Physica {
-    using namespace Core;
-
     template<Scalar T>
     class Traits<RSpaceGrid<T>> {
     public:

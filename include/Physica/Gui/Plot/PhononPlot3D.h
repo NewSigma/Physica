@@ -22,15 +22,15 @@
 #include "Plot3D.h"
 
 namespace Physica::Gui {
-    template<class ScalarType>
+    template<Scalar T>
     class PhononPlot3D : public Plot3D {
         using Base = Plot3D;
-        using Vector3D = Core::Vector3D<ScalarType>;
-        using VectorType = Core::VectorND<ScalarType>;
-        using MatrixType = Core::DenseMatrix<ScalarType>;
+        using Vector3D = Core::Vector3D<T>;
+        using VectorType = Core::VectorND<T>;
+        using MatrixType = Core::DenseMatrix<T>;
         using MeshType = std::pair<MatrixType, MatrixType>;
         using BandArray = Core::Array<MatrixType>;
-        using PhononType = Core::FrozenPhonon<ScalarType>;
+        using PhononType = Core::FrozenPhonon<T>;
         using KSpaceFCGrid = typename PhononType::KSpaceFCGrid;
     public:
         PhononPlot3D() = default;
@@ -46,8 +46,8 @@ namespace Physica::Gui {
         BandArray calcBands(const PhononType& ph, const KSpaceFCGrid& forceConstants, const MeshType& mesh);
     };
 
-    template<class ScalarType>
-    QList<QSurface3DSeries*> PhononPlot3D<ScalarType>::plotBand(
+    template<Scalar T>
+    QList<QSurface3DSeries*> PhononPlot3D<T>::plotBand(
             const PhononType& ph, const KSpaceFCGrid& forceConstants, size_t numPointX, size_t numPointY) {
         const auto x = VectorType::linspace(0, 1, numPointX);
         const auto y = VectorType::linspace(0, 1, numPointY);
@@ -79,15 +79,15 @@ namespace Physica::Gui {
         return Base::surface->seriesList();
     }
 
-    template<class ScalarType>
-    typename PhononPlot3D<ScalarType>::BandArray PhononPlot3D<ScalarType>::calcBands(
+    template<Scalar T>
+    typename PhononPlot3D<T>::BandArray PhononPlot3D<T>::calcBands(
             const PhononType& ph, const KSpaceFCGrid& forceConstants, const MeshType& mesh) {
         using namespace Physica::Core;
         const MatrixType& meshX = mesh.first;
         const MatrixType& meshY = mesh.second;
         BandArray result(ph.getNumBand(), meshX.getRow(), meshX.getCol());
-        ScalarType minFreq = Base::getMinZ();
-        ScalarType maxFreq = Base::getMaxZ();
+        T minFreq = Base::getMinZ();
+        T maxFreq = Base::getMaxZ();
         for (size_t major = 0; major < meshX.getMaxMajor(); ++major) {
             for (size_t minor = 0; minor < meshX.getMaxMinor(); ++minor) {
                 const Vector3D qPoint{meshX.calcFromMajorMinor(major, minor), meshY.calcFromMajorMinor(major, minor), 0};
@@ -95,7 +95,7 @@ namespace Physica::Gui {
                 ph.toDynamicMatrix(fcMatrix);
                 auto eigen = PhononType::diagonalize(fcMatrix);
                 auto freq = ph.makeFreq(eigen);
-                freq *= ScalarType(PhyConst<AU>::freqToTHz(1));
+                freq *= T(PhyConst<AU>::freqToTHz(1));
 
                 minFreq = std::min(minFreq, freq.min());
                 maxFreq = std::max(maxFreq, freq.max());

@@ -21,21 +21,20 @@
 #include "RSparseVector.h"
 
 namespace Physica::Core {
-    template<ExprType type, class T1, class T2 = T1> class SparseVectorExpr;
+    template<ExprType type, Vector T1, class T2 = T1> class SparseVectorExpr;
 
-    template<class VectorType, Scalar T>
-    class SparseVectorExpr<ExprType::Mul, VectorType, T>
-            : public RSparseVector<SparseVectorExpr<ExprType::Mul, VectorType, T>> {
-        using This = SparseVectorExpr<ExprType::Mul, VectorType, T>;
+    template<Vector T, Scalar U>
+    class SparseVectorExpr<ExprType::Mul, T, U>
+            : public RSparseVector<SparseVectorExpr<ExprType::Mul, T, U>> {
+        using This = SparseVectorExpr<ExprType::Mul, T, U>;
         using Base = RSparseVector<This>;
         using typename Base::ScalarType;
         using typename Base::NonZeroPair;
 
-        const VectorType& v;
-        const T& s;
+        const T& v;
+        const U& s;
     public:
-        SparseVectorExpr(const RSparseVector<VectorType>& v_, const T& s_)
-                : v(v_.getDerived()), s(s_.getDerived()) {}
+        SparseVectorExpr(const RSparseVector<T>& v_, const U& s_) : v(v_.getDerived()), s(s_) {}
         SparseVectorExpr(const This&) = delete;
         SparseVectorExpr(This&&) noexcept = delete;
         ~SparseVectorExpr() = default;
@@ -53,24 +52,22 @@ namespace Physica::Core {
     };
     //////////////////////////////////////Operators//////////////////////////////////////
     //////////////////////////////////////Mul//////////////////////////////////////
-    template<class VectorType, Scalar T>
-    [[nodiscard]] inline auto operator*(const RSparseVector<VectorType>& v, const T& x) noexcept {
-        return SparseVectorExpr<ExprType::Mul, VectorType, T>(v.getDerived(), x);
+    template<Vector T, Scalar U>
+    [[nodiscard]] inline auto operator*(const RSparseVector<T>& v, const U& x) noexcept {
+        return SparseVectorExpr<ExprType::Mul, T, U>(v.getDerived(), x);
     }
 
-    template<class VectorType, Scalar T>
-    [[nodiscard]] inline auto operator*(const T& x, const RSparseVector<VectorType>& v) noexcept {
-        return SparseVectorExpr<ExprType::Mul, VectorType, T>(v * x);
+    template<Vector T, Scalar U>
+    [[nodiscard]] inline auto operator*(const U& x, const RSparseVector<T>& v) noexcept {
+        return SparseVectorExpr<ExprType::Mul, T, U>(v * x);
     }
 }
 
 namespace Physica {
-    using namespace Core;
-
-    template<ExprType type, class Exp, Scalar T>
-    class Traits<SparseVectorExpr<type, Exp, T>> {
+    template<ExprType type, Vector T, Scalar U>
+    class Traits<SparseVectorExpr<type, T, U>> {
     public:
-        using ScalarType = typename Core::Internal::BinaryScalarOpReturnType<typename Exp::ScalarType, T>::Type;
-        constexpr static size_t SizeAtCompile = Exp::SizeAtCompile;
+        using ScalarType = typename Core::Internal::BinaryScalarOpReturnType<typename T::ScalarType, U>::Type;
+        constexpr static size_t SizeAtCompile = T::SizeAtCompile;
     };
 }

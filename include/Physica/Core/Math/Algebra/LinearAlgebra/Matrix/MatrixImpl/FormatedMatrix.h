@@ -22,11 +22,11 @@ namespace Physica::Core {
     /**
      * \class FormatedMatrix convert a matrix to text, either readable to human, or other softwares.
      */
-    template<class MatrixType>
-    class FormatedMatrix {
-        using ScalarType = typename MatrixType::ScalarType;
+    template<Matrix T>
+    class FormatedMatrix<T> {
+        using ScalarType = typename T::ScalarType;
 
-        const RValueMatrix<MatrixType>& data;
+        const T& data;
         std::string matPrefix;
         std::string matSuffix;
         std::string rowPrefix;
@@ -34,10 +34,10 @@ namespace Physica::Core {
         std::string rowSeparator;
         std::string separator;
     public:
-        FormatedMatrix(const RValueMatrix<MatrixType>& data_);
+        FormatedMatrix(const T& data_);
         /* Operators */
-        template<class T>
-        friend std::ostream& operator<<(std::ostream& os, const FormatedMatrix<T>& m);
+        template<Matrix U>
+        friend std::ostream& operator<<(std::ostream& os, const FormatedMatrix<U>& m);
         /* Operations */
         FormatedMatrix& toFormatMMA();
         /* Getters */
@@ -53,8 +53,8 @@ namespace Physica::Core {
         FormatedMatrix& setSeparator(std::string separator_);
     };
 
-    template<class MatrixType>
-    FormatedMatrix<MatrixType>::FormatedMatrix(const RValueMatrix<MatrixType>& data_)
+    template<Matrix T>
+    FormatedMatrix<T>::FormatedMatrix(const T& data_)
             : data(data_)
             , matPrefix("")
             , matSuffix("")
@@ -63,8 +63,8 @@ namespace Physica::Core {
             , rowSeparator("")
             , separator(" ") {}
 
-    template<class MatrixType>
-    std::ostream& operator<<(std::ostream& os, const FormatedMatrix<MatrixType>& m) {
+    template<Matrix U>
+    std::ostream& operator<<(std::ostream& os, const FormatedMatrix<U>& m) {
         const size_t col = m.getCol();
         const size_t row = m.getRow();
         size_t width = 0;
@@ -100,8 +100,8 @@ namespace Physica::Core {
         return os;
     }
 
-    template<class MatrixType>
-    FormatedMatrix<MatrixType>& FormatedMatrix<MatrixType>::toFormatMMA() {
+    template<Matrix T>
+    FormatedMatrix<T>& FormatedMatrix<T>::toFormatMMA() {
         setMatPrefix("{");
         setMatSuffix("}");
         setRowPrefix("{");
@@ -111,38 +111,38 @@ namespace Physica::Core {
         return *this;
     }
 
-    template<class MatrixType>
-    FormatedMatrix<MatrixType>& FormatedMatrix<MatrixType>::setMatPrefix(std::string matPrefix_) {
+    template<Matrix T>
+    FormatedMatrix<T>& FormatedMatrix<T>::setMatPrefix(std::string matPrefix_) {
         matPrefix = std::move(matPrefix_);
         return *this;
     }
 
-    template<class MatrixType>
-    FormatedMatrix<MatrixType>& FormatedMatrix<MatrixType>::setMatSuffix(std::string matSuffix_) {
+    template<Matrix T>
+    FormatedMatrix<T>& FormatedMatrix<T>::setMatSuffix(std::string matSuffix_) {
         matSuffix = std::move(matSuffix_);
         return *this;
     }
 
-    template<class MatrixType>
-    FormatedMatrix<MatrixType>& FormatedMatrix<MatrixType>::setRowPrefix(std::string rowPrefix_) {
+    template<Matrix T>
+    FormatedMatrix<T>& FormatedMatrix<T>::setRowPrefix(std::string rowPrefix_) {
         rowPrefix = std::move(rowPrefix_);
         return *this;
     }
 
-    template<class MatrixType>
-    FormatedMatrix<MatrixType>& FormatedMatrix<MatrixType>::setRowSuffix(std::string rowSuffix_) {
+    template<Matrix T>
+    FormatedMatrix<T>& FormatedMatrix<T>::setRowSuffix(std::string rowSuffix_) {
         rowSuffix = std::move(rowSuffix_);
         return *this;
     }
 
-    template<class MatrixType>
-    FormatedMatrix<MatrixType>& FormatedMatrix<MatrixType>::setRowSeparator(std::string rowSeparator_) {
+    template<Matrix T>
+    FormatedMatrix<T>& FormatedMatrix<T>::setRowSeparator(std::string rowSeparator_) {
         rowSeparator = std::move(rowSeparator_);
         return *this;
     }
 
-    template<class MatrixType>
-    FormatedMatrix<MatrixType>& FormatedMatrix<MatrixType>::setSeparator(std::string separator_) {
+    template<Matrix T>
+    FormatedMatrix<T>& FormatedMatrix<T>::setSeparator(std::string separator_) {
         separator = std::move(separator_);
         return *this;
     }

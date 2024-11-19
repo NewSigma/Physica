@@ -30,9 +30,9 @@ namespace Physica::Core {
      * Reference:
      * [1] Eigen https://eigen.tuxfamily.org/
      */
-    template<class MatrixType, bool ColWiseRead = true>
-    class HouseholderSequence : public RValueMatrix<HouseholderSequence<MatrixType, ColWiseRead>> {
-        const MatrixType& source;
+    template<Matrix T, bool ColWiseRead = true>
+    class HouseholderSequence : public RValueMatrix<HouseholderSequence<T, ColWiseRead>> {
+        const T& source;
         /**
          * Number of householder transformation in this sequence
          */
@@ -42,10 +42,10 @@ namespace Physica::Core {
          */
         size_t shift;
     public:
-        HouseholderSequence(const RValueMatrix<MatrixType>& source_);
+        HouseholderSequence(const T& source_);
         /* Operations */
-        template<class OtherMatrix>
-        void assignTo(LValueMatrix<OtherMatrix>& target) const;
+        template<Matrix U>
+        void assignTo(LValueMatrix<U>& target) const;
         /* Getters */
         [[nodiscard]] __host__ __device__ size_t getRow() const noexcept { return ColWiseRead ? source.getRow() : source.getCol(); }
         [[nodiscard]] __host__ __device__ size_t getCol() const noexcept { return getRow(); }
@@ -56,15 +56,15 @@ namespace Physica::Core {
         inline void setShift(size_t shift_);
     };
 
-    template<class MatrixType, bool ColWiseRead>
-    HouseholderSequence<MatrixType, ColWiseRead>::HouseholderSequence(const RValueMatrix<MatrixType>& source_)
-            : source(source_.getDerived())
-            , size(source.getCol())
+    template<Matrix T, bool ColWiseRead>
+    HouseholderSequence<T, ColWiseRead>::HouseholderSequence(const T& source_)
+            : source(source_)
+            , size(source_.getCol())
             , shift(0) {}
 
-    template<class MatrixType, bool ColWiseRead>
-    template<class OtherMatrix>
-    void HouseholderSequence<MatrixType, ColWiseRead>::assignTo(LValueMatrix<OtherMatrix>& target) const {
+    template<Matrix T, bool ColWiseRead>
+    template<Matrix U>
+    void HouseholderSequence<T, ColWiseRead>::assignTo(LValueMatrix<U>& target) const {
         target.toUnitMatrix();
         const size_t shift1 = shift + target.getRow() - (ColWiseRead ? source.getRow() : source.getCol());
         assert(shift1 < target.getRow());
@@ -82,23 +82,23 @@ namespace Physica::Core {
         }
     }
 
-    template<class MatrixType, bool ColWiseRead>
-    inline void HouseholderSequence<MatrixType, ColWiseRead>::setSize(size_t size_) {
+    template<Matrix T, bool ColWiseRead>
+    inline void HouseholderSequence<T, ColWiseRead>::setSize(size_t size_) {
         assert(size_ <= source.getCol());
         size = size_;
     }
 
-    template<class MatrixType, bool ColWiseRead>
-    inline void HouseholderSequence<MatrixType, ColWiseRead>::setShift(size_t shift_) {
+    template<Matrix T, bool ColWiseRead>
+    inline void HouseholderSequence<T, ColWiseRead>::setShift(size_t shift_) {
         shift = shift_;
     }
 }
 
 namespace Physica {
-    template<class MatrixType, bool ColWiseRead>
-    class Traits<Core::HouseholderSequence<MatrixType, ColWiseRead>> {
+    template<Matrix T, bool ColWiseRead>
+    class Traits<Core::HouseholderSequence<T, ColWiseRead>> {
     public:
-        using ScalarType = typename MatrixType::ScalarType;
+        using ScalarType = typename T::ScalarType;
         constexpr static int Option = MatrixOption::AnyMajor | MatrixOption::AnyStorage;
         constexpr static size_t RowAtCompile = Dynamic;
         constexpr static size_t ColAtCompile = Dynamic;

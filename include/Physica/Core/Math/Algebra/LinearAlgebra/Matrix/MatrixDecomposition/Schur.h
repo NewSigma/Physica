@@ -46,15 +46,15 @@ namespace Physica::Core {
         bool computeMatrixU;
         T exshift;
     public:
-        template<class MatrixType>
-        Schur(const RValueMatrix<MatrixType>& source, bool computeMatrixU_ = false);
+        template<Matrix M>
+        Schur(const M& source, bool computeMatrixU_ = false);
         Schur(const This&) = default;
         Schur(This&&) noexcept = default;
         /* Operators */
         This& operator=(This obj) { swap(obj); return *this; }
         /* Operations */
-        template<class MatrixType>
-        void compute(const RValueMatrix<MatrixType>& source_, bool computeMatrixU_ = false);
+        template<Matrix M>
+        void compute(const M& source, bool computeMatrixU_ = false);
         void swap(This& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] WorkingMatrix& getMatrixT() noexcept { return matrixT; }
@@ -72,17 +72,16 @@ namespace Physica::Core {
     };
 
     template<Scalar T, size_t Order>
-    template<class MatrixType>
-    Schur<T, Order>::Schur(const RValueMatrix<MatrixType>& source, bool computeMatrixU_)
+    template<Matrix M>
+    Schur<T, Order>::Schur(const M& source, bool computeMatrixU_)
             : matrixT(source.getRow(), source.getCol()), matrixU() {
         compute(source, computeMatrixU_);
     }
 
     template<Scalar T, size_t Order>
-    template<class MatrixType>
-    void Schur<T, Order>::compute(const RValueMatrix<MatrixType>& source_, bool computeMatrixU_) {
-        static_assert(std::is_same<T, typename MatrixType::ScalarType>::value, "[Error]: Inconsistent ScalarType");
-        const auto& source = source_.getDerived();
+    template<Matrix M>
+    void Schur<T, Order>::compute(const M& source, bool computeMatrixU_) {
+        static_assert(std::is_same<T, typename M::ScalarType>::value, "[Error]: Inconsistent ScalarType");
         assert(source.getRow() == source.getCol());
         computeMatrixU = computeMatrixU_;
         if (computeMatrixU)

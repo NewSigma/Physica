@@ -75,7 +75,7 @@ namespace Physica::Core {
         [[nodiscard]] static const H5::DataType& getH5DataType();
     };
 
-    template<class T, int Order>
+    template<Scalar T, int Order>
     class ScalarRef<Diff<T, DiffMode::Forward, Order>> {
         using ScalarType = Diff<T, DiffMode::Forward, Order>;
         using This = ScalarRef<ScalarType>;
@@ -105,14 +105,14 @@ namespace Physica::Core {
         template<Scalar U> void operator-=(const U& s) { *this = ScalarType(*this) - s; }
         template<Scalar U> void operator*=(const U& s) { *this = ScalarType(*this) * s; }
         template<Scalar U> void operator/=(const U& s) { *this = ScalarType(*this) / s; }
-        template<class U> auto operator+(const ScalarRef<U>& s) const { return operator+(U(s)); }
-        template<class U> auto operator-(const ScalarRef<U>& s) const { return operator-(U(s)); }
-        template<class U> auto operator*(const ScalarRef<U>& s) const { return operator*(U(s)); }
-        template<class U> auto operator/(const ScalarRef<U>& s) const { return operator/(U(s)); }
-        template<class U> void operator+=(const ScalarRef<U>& s) { operator+=(U(s)); }
-        template<class U> void operator-=(const ScalarRef<U>& s) { operator-=(U(s)); }
-        template<class U> void operator*=(const ScalarRef<U>& s) { operator*=(U(s)); }
-        template<class U> void operator/=(const ScalarRef<U>& s) { operator/=(U(s)); }
+        template<Scalar U> auto operator+(const ScalarRef<U>& s) const { return operator+(U(s)); }
+        template<Scalar U> auto operator-(const ScalarRef<U>& s) const { return operator-(U(s)); }
+        template<Scalar U> auto operator*(const ScalarRef<U>& s) const { return operator*(U(s)); }
+        template<Scalar U> auto operator/(const ScalarRef<U>& s) const { return operator/(U(s)); }
+        template<Scalar U> void operator+=(const ScalarRef<U>& s) { operator+=(U(s)); }
+        template<Scalar U> void operator-=(const ScalarRef<U>& s) { operator-=(U(s)); }
+        template<Scalar U> void operator*=(const ScalarRef<U>& s) { operator*=(U(s)); }
+        template<Scalar U> void operator/=(const ScalarRef<U>& s) { operator/=(U(s)); }
         [[nodiscard]] ScalarType operator-() const { return -ScalarType(*this); }
         __host__ __device__ inline bool operator>(double s) const noexcept { return ScalarType(*this) > s; }
         __host__ __device__ inline bool operator<(double s) const noexcept { return ScalarType(*this) < s; }
@@ -120,9 +120,9 @@ namespace Physica::Core {
         __host__ __device__ bool operator>(const U& s) const noexcept { return ScalarType(*this) > s; }
         template<Scalar U>
         __host__ __device__ bool operator<(const U& s) const noexcept { return ScalarType(*this) < s; }
-        template<class U>
+        template<Scalar U>
         __host__ __device__ bool operator>(const ScalarRef<U>& s) const noexcept { return operator>(U(s)); }
-        template<class U>
+        template<Scalar U>
         __host__ __device__ bool operator<(const ScalarRef<U>& s) const noexcept { return operator<(U(s)); }
         /* Operations */
         void swap(This&& obj) noexcept;
@@ -139,7 +139,7 @@ namespace Physica::Core {
         [[nodiscard]] const GradRtnTy<GradOrder> getGrad() const noexcept;
     };
 
-    template<class T, int Order>
+    template<Scalar T, int Order>
     class ScalarPtr<Diff<T, DiffMode::Forward, Order>> {
         using ScalarType = Diff<T, DiffMode::Forward, Order>;
         using This = ScalarPtr<ScalarType>;
@@ -164,7 +164,7 @@ namespace Physica::Core {
         This& operator=(This&& obj) noexcept = default;
         [[nodiscard]] inline bool operator==(const This& other) const noexcept;
         [[nodiscard]] bool operator!=(const This& other) const noexcept { return !(*this == other); }
-        template<class U>
+        template<Scalar U>
         [[nodiscard]] explicit operator ScalarPtr<Diff<U, DiffMode::Forward, Order>>() noexcept {
             using Target = ScalarPtr<Diff<U, DiffMode::Forward, Order>>;
             using GradPtrTy1 = typename Target::GradPtrTy;
@@ -253,28 +253,28 @@ namespace Physica::Core {
     };
     ////////////////////////////////////////////////////////////
     template<Scalar T, DiffMode Mode, int Order, Scalar U>
-    [[nodiscard]] inline auto operator+(const Diff<T, Mode, Order>& s1, const U& s2_);
+    [[nodiscard]] inline auto operator+(const Diff<T, Mode, Order>& s1, const U& s2);
 
     template<Scalar T, DiffMode Mode, int Order, Scalar U>
     [[nodiscard]] inline typename std::enable_if<!U::isDifferentiable, typename Internal::BinaryScalarOpReturnType<Diff<T, Mode, Order>, U>::Type>::type
     operator+(const U& s1, const Diff<T, Mode, Order>& s2);
 
     template<Scalar T, DiffMode Mode, int Order, Scalar U>
-    [[nodiscard]] inline auto operator-(const Diff<T, Mode, Order>& s1, const U& s2_);
+    [[nodiscard]] inline auto operator-(const Diff<T, Mode, Order>& s1, const U& s2);
 
     template<Scalar T, DiffMode Mode, int Order, Scalar U>
     [[nodiscard]] inline typename std::enable_if<!U::isDifferentiable, typename Internal::BinaryScalarOpReturnType<Diff<T, Mode, Order>, U>::Type>::type
     operator-(const U& s1, const Diff<T, Mode, Order>& s2);
 
     template<Scalar T, DiffMode Mode, int Order, Scalar U>
-    [[nodiscard]] inline auto operator*(const Diff<T, Mode, Order>& s1, const U& s2_);
+    [[nodiscard]] inline auto operator*(const Diff<T, Mode, Order>& s1, const U& s2);
 
     template<Scalar T, DiffMode Mode, int Order, Scalar U>
     [[nodiscard]] inline typename std::enable_if<!U::isDifferentiable, typename Internal::BinaryScalarOpReturnType<Diff<T, Mode, Order>, U>::Type>::type
     operator*(const U& s1, const Diff<T, Mode, Order>& s2);
 
     template<Scalar T, DiffMode Mode, int Order, Scalar U>
-    [[nodiscard]] inline auto operator/(const Diff<T, Mode, Order>& s1, const U& s2_);
+    [[nodiscard]] inline auto operator/(const Diff<T, Mode, Order>& s1, const U& s2);
 
     template<Scalar T, DiffMode Mode, int Order, Scalar U>
     [[nodiscard]] inline typename std::enable_if<!U::isDifferentiable, typename Internal::BinaryScalarOpReturnType<Diff<T, Mode, Order>, U>::Type>::type
@@ -316,8 +316,8 @@ namespace Physica {
 }
 
 namespace std {
-    template<class ScalarType, Physica::Core::DiffMode Mode, int Order>
-    struct numeric_limits<Physica::Core::Diff<ScalarType, Mode, Order>> : public numeric_limits<ScalarType> {};
+    template<Physica::Core::Scalar T, Physica::Core::DiffMode Mode, int Order>
+    struct numeric_limits<Physica::Core::Diff<T, Mode, Order>> : public numeric_limits<T> {};
 }
 
 #include "DiffImpl/DiffImpl.h"

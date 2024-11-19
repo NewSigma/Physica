@@ -64,40 +64,37 @@ namespace Physica::Core {
 
     template<class Derived>
     inline LValueMatrix<Derived>& LValueMatrix<Derived>::operator=(const This& m) {
-        auto& target = Base::getDerived();
-        target.resize(m.getRow(), m.getCol());
-        m.assignTo(target);
-        return target;
+        return operator=<Derived>(m);
     }
 
     template<class Derived>
     inline LValueMatrix<Derived>& LValueMatrix<Derived>::operator=(This&& m) {
-        return *this = m;
+        return operator=<Derived>(m);
     }
 
     template<class Derived>
-    template<class OtherMatrix>
-    Derived& LValueMatrix<Derived>::operator=(const RValueMatrix<OtherMatrix>& m) {
-        static_assert(RowAtCompile == Dynamic || OtherMatrix::RowAtCompile == Dynamic || RowAtCompile == OtherMatrix::RowAtCompile, "[Error]: Incompatible row number");
-        static_assert(ColAtCompile == Dynamic || OtherMatrix::ColAtCompile == Dynamic || ColAtCompile == OtherMatrix::ColAtCompile, "[Error]: Incompatible col number");
-        static_assert(!(!isComplex && OtherMatrix::isComplex), "[Error]: Cannot assign a complex matrix to real matrix");
+    template<Matrix M>
+    Derived& LValueMatrix<Derived>::operator=(const M& m) {
+        if constexpr (std::is_same<Derived, M>::value)
+            assert(this != &m && "[Error]: Self assign is likely a bug");
+        static_assert(RowAtCompile == Dynamic || M::RowAtCompile == Dynamic || RowAtCompile == M::RowAtCompile, "[Error]: Incompatible row number");
+        static_assert(ColAtCompile == Dynamic || M::ColAtCompile == Dynamic || ColAtCompile == M::ColAtCompile, "[Error]: Incompatible col number");
+        static_assert(!(!isComplex && M::isComplex), "[Error]: Cannot assign a complex matrix to real matrix");
         Base::getDerived().resize(m.getRow(), m.getCol());
-        m.getDerived().assignTo(Base::getDerived());
+        m.assignTo(Base::getDerived());
         return Base::getDerived();
     }
     
     template<class Derived>
-    Derived& LValueMatrix<Derived>::operator=(const ScalarType& s_) {
+    Derived& LValueMatrix<Derived>::operator=(const ScalarType& s) {
         const size_t maxMajor = Base::getMaxMajor();
         const size_t maxMinor = Base::getMaxMinor();
         if constexpr (isReverseDiff) {
-            const auto& s = s_.getDerived();
             for (size_t i = 0; i < maxMajor; ++i)
                 for (size_t j = 0; j < maxMinor; ++j)
                     refFromMajorMinor(i, j) = s.copy();
         }
         else {
-            const auto s = ScalarType(s_.getDerived());
             for (size_t i = 0; i < maxMajor; ++i)
                 for (size_t j = 0; j < maxMinor; ++j)
                     refFromMajorMinor(i, j) = s;
@@ -319,7 +316,7 @@ namespace Physica::Core {
         assert(abs(matrix(r1, elementIndex)) > ScalarType(std::numeric_limits<ScalarType>::min()));
         const ScalarType factor = matrix(r2, elementIndex) / matrix(r1, elementIndex);
         auto row2 = row(r2);
-        row2 -= row(r1).asVector() * factor;
+        row2 -= row(r1) * factor;
         matrix(r2, elementIndex) = 0;
     }
 
@@ -329,7 +326,7 @@ namespace Physica::Core {
         assert(abs(matrix(elementIndex, c1)) > ScalarType(std::numeric_limits<ScalarType>::min()));
         const ScalarType factor = matrix(c2, elementIndex) / matrix(c1, elementIndex);
         auto col2 = col(c2);
-        col2 -= col(c1).asVector() * factor;
+        col2 -= col(c1) * factor;
         matrix(elementIndex, c2) = 0;
     }
 
@@ -345,11 +342,11 @@ namespace Physica::Core {
     inline void LValueMatrix<Derived>::majorReduce(size_t v1, size_t v2, const ScalarType& factor) {
         if constexpr (MatrixOption::isColMatrix<Derived>()) {
             auto col1 = col(v1);
-            col1 -= col(v2).asVector() * factor;
+            col1 -= col(v2) * factor;
         }
         else {
             auto row1 = row(v1);
-            row1 -= row(v2).asVector() * factor;
+            row1 -= row(v2) * factor;
         }
     }
 
@@ -357,11 +354,11 @@ namespace Physica::Core {
     inline void LValueMatrix<Derived>::majorMulScalar(size_t v, const ScalarType& factor) {
         if constexpr (MatrixOption::isColMatrix<Derived>()) {
             auto c = col(v);
-            c.asVector() *= factor;
+            c *= factor;
         }
         else {
             auto r = row(v);
-            r.asVector() *= factor;
+            r *= factor;
         }
     }
 

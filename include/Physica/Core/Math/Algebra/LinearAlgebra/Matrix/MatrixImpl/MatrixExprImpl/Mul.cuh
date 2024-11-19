@@ -19,10 +19,10 @@
 #pragma once
 
 namespace Physica::Core {
-    template<class MatrixType, Scalar T>
-    class device_obj<MatrixExpr<ExprType::Mul, MatrixType, T>>
-            : public device_obj<BinaryMatrixExpr<ExprType::Mul, MatrixType, T>> {
-        using Base = device_obj<BinaryMatrixExpr<ExprType::Mul, MatrixType, T>>;
+    template<Matrix T, Scalar U>
+    class device_obj<MatrixExpr<ExprType::Mul, T, U>>
+            : public device_obj<BinaryMatrixExpr<ExprType::Mul, T, U>> {
+        using Base = device_obj<BinaryMatrixExpr<ExprType::Mul, T, U>>;
     public:
         using typename Base::ScalarType;
     public:
@@ -34,13 +34,13 @@ namespace Physica::Core {
         }
     };
 
-    template<class MatrixType, Scalar T>
-    [[nodiscard]] __device__ inline auto operator*(const T& x, const device_obj<RValueMatrix<MatrixType>>& m) noexcept {
-        return device_obj<MatrixExpr<ExprType::Mul, MatrixType, T>>(m.getDerived(), x);
+    template<Matrix T, Scalar U>
+    [[nodiscard]] __device__ inline auto operator*(const U& x, const device_obj<T>& m) noexcept {
+        return device_obj<MatrixExpr<ExprType::Mul, T, U>>(m, x);
     }
 
-    template<class MatrixType, Scalar T>
-    [[nodiscard]] __device__ inline auto operator*(const device_obj<RValueMatrix<MatrixType>>& m, const T& x) noexcept {
-        return device_obj<MatrixExpr<ExprType::Mul, MatrixType, T>>(m.getDerived(), x);
+    template<Matrix T, Scalar U>
+    [[nodiscard]] __device__ inline auto operator*(const device_obj<T>& m, const U& x) noexcept {
+        return device_obj<MatrixExpr<ExprType::Mul, T, U>>(m, x);
     }
 }

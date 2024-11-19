@@ -26,8 +26,8 @@ namespace Physica::Core {
      * Reference:
      * [1] William H. Press, Saul A. Teukolsky, William T. Vetterling, Brian P. Flannery. C++数值算法(第二版)[M]. 北京: 电子工业出版社, 2005:142
      */
-    template<class T, class VectorType, class Function>
-    void chebyshev_fit(const T& from, const T& to, LValueVector<VectorType>& coeff, Function func) {
+    template<Scalar T, Vector U, class Function>
+    void chebyshev_fit(const T& from, const T& to, LValueVector<U>& coeff, Function func) {
         constexpr double pi = M_PI;
         assert(from < to);
 
@@ -56,8 +56,8 @@ namespace Physica::Core {
      * Reference:
      * [1] William H. Press, Saul A. Teukolsky, William T. Vetterling, Brian P. Flannery. C++数值算法(第二版)[M]. 北京: 电子工业出版社, 2005:143
      */
-    template<class T, class VectorType, class Function>
-    void chebyshev_fit_even(const T& from, const T& to, LValueVector<VectorType>& coeff, Function func) {
+    template<Scalar T, Vector U, class Function>
+    void chebyshev_fit_even(const T& from, const T& to, LValueVector<U>& coeff, Function func) {
         constexpr double pi = M_PI;
         assert(from < to);
 
@@ -87,8 +87,8 @@ namespace Physica::Core {
      * Reference:
      * [1] William H. Press, Saul A. Teukolsky, William T. Vetterling, Brian P. Flannery. C++数值算法(第二版)[M]. 北京: 电子工业出版社, 2005:143
      */
-    template<class T, class VectorType, class Function>
-    void chebyshev_fit_odd(const T& from, const T& to, LValueVector<VectorType>& coeff, Function func) {
+    template<Scalar T, Vector U, class Function>
+    void chebyshev_fit_odd(const T& from, const T& to, LValueVector<U>& coeff, Function func) {
         constexpr double pi = M_PI;
         assert(from < to);
 
@@ -117,8 +117,8 @@ namespace Physica::Core {
      * Reference:
      * [1] William H. Press, Saul A. Teukolsky, William T. Vetterling, Brian P. Flannery. C++数值算法(第二版)[M]. 北京: 电子工业出版社, 2005:142
      */
-    template<class T, class VectorType>
-    T chebyshev_calc(const T& from, const T& to, const RValueVector<VectorType>& coeff, const T& x) {
+    template<Scalar T, Vector U>
+    T chebyshev_calc(const T& from, const T& to, const U& coeff, const T& x) {
         assert(from <= x && x <= to);
         const T y = T(x * T(2) - to - from) / T(to - from);
         const T y2 = y * T(2);
@@ -134,15 +134,15 @@ namespace Physica::Core {
      * Reference:
      * [1] William H. Press, Saul A. Teukolsky, William T. Vetterling, Brian P. Flannery. C++数值算法(第二版)[M]. 北京: 电子工业出版社, 2005:143
      */
-    template<class T, class VectorType>
-    T chebyshev_calc_even(const T& from, const T& to, const RValueVector<VectorType>& coeff, const T& x) {
+    template<Scalar T, Vector U>
+    T chebyshev_calc_even(const T& from, const T& to, const U& coeff, const T& x) {
         assert(from <= x && x <= to);
-        return chebyshev_calc<T, VectorType>(from, to, coeff, square(x) * T(2) - T(1));
+        return chebyshev_calc<T, U>(from, to, coeff, square(x) * T(2) - T(1));
     }
 
-    template<class T, class VectorType>
-    T chebyshev_calc_odd(const T& from, const T& to, const RValueVector<VectorType>& coeff, const T& x) {
+    template<Scalar T, Vector U>
+    T chebyshev_calc_odd(const T& from, const T& to, const U& coeff, const T& x) {
         assert(from <= x && x <= to);
-        return chebyshev_calc_even<T, VectorType>(from, to, coeff, x) * x;
+        return chebyshev_calc_even<T, U>(from, to, coeff, x) * x;
     }
 }

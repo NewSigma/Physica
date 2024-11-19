@@ -20,15 +20,15 @@
 
 namespace Physica::Core {
     namespace Internal {
-        template<class SourceType, class TargetType, size_t Size>
+        template<LMatrix SourceType, LMatrix TargetType, size_t Size>
         struct InverseImpl {
-            static void run(const LValueMatrix<SourceType>& source, LValueMatrix<TargetType>& target) {
+            static void run(const SourceType& source, TargetType& target) {
                 const size_t order = source.getRow();
-                const size_t order_1 = order - 1;
-                SourceType copy = source.getDerived();
+                const ssize_t order1 = ssize_t(order) - 1;
+                SourceType copy = source;
                 if constexpr (MatrixOption::isSameMajor<SourceType, TargetType>()) {
-                    target.getDerived().toUnitMatrix();
-                    for (size_t i = 0; i < order_1; ++i) {
+                    target.toUnitMatrix();
+                    for (ssize_t i = 0; i < order1; ++i) {
                         size_t k = i;
                         while (copy.refFromMajorMinor(k, i).isZero()) {
                             ++k;
@@ -37,17 +37,17 @@ namespace Physica::Core {
                         }
                         if (k != i) {
                             copy.majorSwap(k, i);
-                            target.getDerived().majorSwap(k, i);
+                            target.majorSwap(k, i);
                         }
 
                         for (size_t j = i + 1; j < order; ++j) {
                             auto factor = copy.refFromMajorMinor(j, i) / copy.refFromMajorMinor(i, i);
                             copy.majorReduce(j, i, factor);
-                            target.getDerived().majorReduce(j, i, factor);
+                            target.majorReduce(j, i, factor);
                         }
                     }
 
-                    for (size_t i = order_1; i > 0; --i) {
+                    for (ssize_t i = order1; i > 0; --i) {
                         size_t k = i;
                         while (copy.refFromMajorMinor(k, i).isZero()) {
                             --k;
@@ -56,22 +56,22 @@ namespace Physica::Core {
                         }
                         if (k != i) {
                             copy.majorSwap(k, i);
-                            target.getDerived().majorSwap(k, i);
+                            target.majorSwap(k, i);
                         }
 
                         for (size_t j = 0; j < i; ++j) {
                             auto factor = copy.refFromMajorMinor(j, i) / copy.refFromMajorMinor(i, i);
                             copy.majorReduce(j, i, factor);
-                            target.getDerived().majorReduce(j, i, factor);
+                            target.majorReduce(j, i, factor);
                         }
                     }
                     for (size_t i = 0; i < order; ++i)
-                        target.getDerived().majorMulScalar(i, reciprocal(copy(i, i)));
+                        target.majorMulScalar(i, reciprocal(copy(i, i)));
                 }
                 else {
                     auto temp = SourceType::unitMatrix(order);
-                    for (size_t i = 0; i < order_1; ++i) {
-                        size_t k = i;
+                    for (ssize_t i = 0; i < order1; ++i) {
+                        auto k = i;
                         while (copy.refFromMajorMinor(k, i).isZero()) {
                             ++k;
                             assert(k < order);
@@ -88,18 +88,18 @@ namespace Physica::Core {
                         }
                     }
 
-                    for (size_t i = order_1; i > 0; --i) {
-                        size_t k = i;
+                    for (ssize_t i = order1; i > 0; --i) {
+                        auto k = i;
                         while (copy.refFromMajorMinor(k, i).isZero()) {
                             --k;
                             assert(k < order);
                         }
                         if (k != i) {
                             copy.majorSwap(k, i);
-                            target.getDerived().majorSwap(k, i);
+                            target.majorSwap(k, i);
                         }
 
-                        for (size_t j = 0; j < i; ++j) {
+                        for (ssize_t j = 0; j < i; ++j) {
                             auto factor = copy.refFromMajorMinor(j, i) / copy.refFromMajorMinor(i, i);
                             copy.majorReduce(j, i, factor);
                             temp.majorReduce(j, i, factor);
@@ -107,17 +107,17 @@ namespace Physica::Core {
                     }
                     for (size_t i = 0; i < order; ++i)
                         temp.majorMulScalar(i, reciprocal(copy(i, i)));
-                    target.getDerived() = temp;
+                    target = temp;
                 }
             }
         };
 
-        template<class SourceType, class TargetType>
+        template<LMatrix SourceType, LMatrix TargetType>
         struct InverseImpl<SourceType, TargetType, 3> {
-            static void run(const LValueMatrix<SourceType>& source, LValueMatrix<TargetType>& target) {
+            static void run(const SourceType& source, TargetType& target) {
                 using ScalarType = typename SourceType::ScalarType;
-                const ScalarType repDet = reciprocal(source.getDerived().determinate());
-                if constexpr (TargetType::isRowMatrix) {
+                const ScalarType repDet = reciprocal(source.determinate());
+                if constexpr (MatrixOption::isRowMatrix<TargetType>()) {
                     target(0, 0) = (source(1, 1) * source(2, 2) - source(1, 2) * source(2, 1)) * repDet;
                     target(0, 1) = -(source(0, 1) * source(2, 2) - source(2, 1) * source(0, 2)) * repDet;
                     target(0, 2) = (source(0, 1) * source(1, 2) - source(1, 1) * source(0, 2)) * repDet;
@@ -140,37 +140,36 @@ namespace Physica::Core {
                     target(2, 2) = (source(0, 0) * source(1, 1) - source(1, 0) * source(0, 1)) * repDet;
                 }
 
-                constexpr bool isContinuous = std::is_base_of<ContinuousMatrix<TargetType>, TargetType>::value;
-                if constexpr (isContinuous && ScalarType::isReverseDiff)
-                    target.getDerived().makeContinuous();
+                if constexpr (is_continuous<TargetType>::value && ScalarType::isReverseDiff)
+                    target.makeContinuous();
             }
         };
     }
 
-    template<class MatrixType>
-    class InverseMatrix : public RValueMatrix<InverseMatrix<MatrixType>> {
-        const MatrixType& matrix;
+    template<Matrix T>
+    class InverseMatrix<T> : public RValueMatrix<InverseMatrix<T>> {
+        const T& matrix;
     public:
-        InverseMatrix(const LValueMatrix<MatrixType>& matrix_) : matrix(matrix_.getDerived()) {
+        InverseMatrix(const LValueMatrix<T>& matrix_) : matrix(matrix_.getDerived()) {
             assert(matrix.getRow() == matrix.getCol());
         }
-        template<class OtherMatrix>
-        void assignTo(LValueMatrix<OtherMatrix>& target) const;
+        template<LMatrix M>
+        void assignTo(M& target) const;
         /* Getters */
-        [[nodiscard]] const MatrixType& getMatrix() const noexcept { return matrix; }
+        [[nodiscard]] const T& getMatrix() const noexcept { return matrix; }
         [[nodiscard]] __host__ __device__ size_t getRow() const noexcept { return matrix.getRow(); }
         [[nodiscard]] __host__ __device__ size_t getCol() const noexcept { return matrix.getRow(); }
     };
 
-    template<class MatrixType>
-    template<class OtherMatrix>
-    void InverseMatrix<MatrixType>::assignTo(LValueMatrix<OtherMatrix>& target) const {
-        constexpr size_t Size = MatrixType::RowAtCompile == Dynamic ? OtherMatrix::RowAtCompile : MatrixType::RowAtCompile;
-        Internal::InverseImpl<MatrixType, OtherMatrix, Size>::run(matrix, target.getDerived());
+    template<Matrix T>
+    template<LMatrix M>
+    void InverseMatrix<T>::assignTo(M& target) const {
+        constexpr size_t Size = T::RowAtCompile == Dynamic ? M::RowAtCompile : T::RowAtCompile;
+        Internal::InverseImpl<T, M, Size>::run(matrix, target);
     }
 }
 
 namespace Physica {
-    template<class MatrixType>
-    class Traits<Core::InverseMatrix<MatrixType>> : public Traits<MatrixType> {};
+    template<Matrix T>
+    class Traits<Core::InverseMatrix<T>> : public Traits<T> {};
 }

@@ -19,17 +19,17 @@
 #pragma once
 
 #include <unordered_set>
-#include "Physica/Core/Physics/SolidState/PeriodicCell.h"
+#include <Physica/Core/Physics/SolidState/PeriodicCell.h>
 
 namespace Physica::Core {
-    template<class ScalarType> class Poscar;
+    template<Scalar T> class Poscar;
 
-    template<class ScalarType>
-    class CrystalCell final : public PeriodicCell<ScalarType, 3> {
+    template<Scalar T>
+    class CrystalCell final : public PeriodicCell<T, 3> {
     public:
         constexpr static unsigned int Dim = 3;
-        using Base = PeriodicCell<ScalarType, Dim>;
-        using ComplexType = Complex<ScalarType>;
+        using Base = PeriodicCell<T, Dim>;
+        using ComplexType = Complex<T>;
         using AtomicArray = Array<uint16_t>;
         using typename Base::Type;
     private:
@@ -37,8 +37,8 @@ namespace Physica::Core {
     public:
         CrystalCell() = default;
         CrystalCell(Base base, AtomicArray atomicNumbers_);
-        template<class OtherScalar>
-        CrystalCell(Poscar<OtherScalar> poscar);
+        template<Scalar U>
+        CrystalCell(Poscar<U> poscar);
         CrystalCell(const CrystalCell&) = default;
         CrystalCell(CrystalCell&&) noexcept = default;
         ~CrystalCell() = default;

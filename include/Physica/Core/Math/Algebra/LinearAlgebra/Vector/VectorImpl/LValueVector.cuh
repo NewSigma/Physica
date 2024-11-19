@@ -76,29 +76,29 @@ namespace Physica::Core {
         device_obj(device_obj&&) noexcept = default;
     };
 
-    template<class Derived, class OtherDerived>
-    __host__ __device__ inline void operator+=(device_obj<LValueVector<Derived>>& v1, const device_obj<RValueVector<OtherDerived>>& v2) {
-        v1.getDerived() = v1.getDerived() + v2.getDerived();
+    template<LVector T1, Vector T2>
+    __host__ __device__ inline void operator+=(device_obj<T1>& v1, const device_obj<T2>& v2) {
+        v1 = v1 + v2;
     }
 
-    template<class Derived, class OtherDerived>
-    __host__ __device__ inline void operator-=(device_obj<LValueVector<Derived>>& v1, const device_obj<RValueVector<OtherDerived>>& v2) {
-        v1.getDerived() = v1.getDerived() - v2.getDerived();
+    template<LVector T1, Vector T2>
+    __host__ __device__ inline void operator-=(device_obj<T1>& v1, const device_obj<T2>& v2) {
+        v1 = v1 - v2;
     }
 
-    template<class VectorType, Scalar T>
-    __host__ __device__ inline void operator+=(device_obj<LValueVector<VectorType>>& v, const T& x) {
-        v.getDerived() = v.getDerived() + x;
+    template<LVector T, Scalar U>
+    __host__ __device__ inline void operator+=(device_obj<T>& v, const U& x) {
+        v = v + x;
     }
 
-    template<class VectorType, Scalar T>
-    __host__ __device__ inline void operator*=(device_obj<LValueVector<VectorType>>& v, const T& x) {
-        v.getDerived() = v.getDerived() * x;
+    template<LVector T, Scalar U>
+    __host__ __device__ inline void operator*=(device_obj<T>& v, const U& x) {
+        v = v * x;
     }
 
-    template<class VectorType, Scalar T>
-    __host__ __device__ inline void operator/=(device_obj<LValueVector<VectorType>>& v, const T& x) {
-        v.getDerived() = v.getDerived() * reciprocal(x);
+    template<LVector T, Scalar U>
+    __host__ __device__ inline void operator/=(device_obj<T>& v, const U& x) {
+        v = v * reciprocal(x);
     }
 }
 

@@ -33,19 +33,19 @@ namespace Physica::Core {
         using BlockType = device_obj<RMatrixBlock<Derived>>;
     public:
         using ScalarType = typename TraitsType::ScalarType;
+        using ValueType = typename ScalarType::ValueType;
         constexpr static int Option = TraitsType::Option;
         constexpr static size_t RowAtCompile = TraitsType::RowAtCompile;
         constexpr static size_t ColAtCompile = TraitsType::ColAtCompile;
         constexpr static size_t SizeAtCompile = TraitsType::SizeAtCompile;
         constexpr static bool isReverseDiff = ScalarType::isReverseDiff;
         constexpr static bool isComplex = ScalarType::isComplex;
-        constexpr static bool isColMatrix = host_obj::isColMatrix;
-        constexpr static bool isRowMatrix = host_obj::isRowMatrix;
         constexpr static size_t MaxThreadPerBlock = 256;
     public:
+        ~device_obj() = default;
         /* Operations */
-        template<class OtherDerived>
-        __host__ __device__ void assignTo(device_obj<LValueMatrix<OtherDerived>>& target) const;
+        template<Matrix M>
+        __host__ __device__ void assignTo(device_obj<LValueMatrix<M>>& target) const;
         [[nodiscard]] __host__ __device__ inline RowVector row(size_t r);
         [[nodiscard]] __host__ __device__ inline const RowVector row(size_t r) const;
         [[nodiscard]] __host__ __device__ inline ColVector col(size_t c);
@@ -80,8 +80,8 @@ namespace Physica::Core {
         template<Side Owner = GetSide()>
         [[nodiscard]] __device__ ScalarType calc(size_t row, size_t col) const { return Base::getDerived().template calc<Owner>(row, col); }
         [[nodiscard]] __device__ inline ScalarType calcFromMajorMinor(size_t row, size_t col) const;
-        [[nodiscard]] __host__ __device__ device_obj<Transpose<Derived>> transpose() const noexcept;
-        [[nodiscard]] __host__ __device__ device_obj<RValueFlatten<Derived>> flatten() const noexcept;
+        [[nodiscard]] __host__ __device__ auto transpose() const noexcept;
+        [[nodiscard]] __host__ __device__ auto flatten() const noexcept;
         /* Getters */
         template<Side Owner = GetSide()>
         [[nodiscard]] __host__ __device__ size_t getRow() const noexcept { return Base::getDerived().template getRow<Owner>(); }
@@ -92,12 +92,19 @@ namespace Physica::Core {
         /* Static members */
         [[nodiscard]] __host__ __device__ static size_t rowFromMajorMinor(size_t major, size_t minor) noexcept { return MatrixOption::rowFromMajorMinor<device_obj<Derived>>(major, minor); }
         [[nodiscard]] __host__ __device__ static size_t colFromMajorMinor(size_t major, size_t minor) noexcept { return MatrixOption::colFromMajorMinor<device_obj<Derived>>(major, minor); }
+    protected:
+        device_obj() = default;
+        device_obj(const This&) = default;
+        device_obj(This&&) noexcept = default;
+        /* Operators */
+        This& operator=(const This&) = default;
+        This& operator=(This&&) noexcept = default;
     };
 }
 
 namespace Physica {
     template<class T>
-    class Traits<Core::device_obj<Core::RValueMatrix<T>>> {
+    class Traits<device_obj<RValueMatrix<T>>> {
     public:
         using Derived = device_obj<T>;
     };

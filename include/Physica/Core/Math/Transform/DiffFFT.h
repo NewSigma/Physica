@@ -22,7 +22,7 @@
 #include "FFT.h"
 
 namespace Physica::Core {
-    template<class T, DiffMode Mode>
+    template<Scalar T, DiffMode Mode>
     class FFT<Diff<T, Mode, 1>, 1>
             : public FFTRSpace<FFT<Diff<T, Mode, 1>, 1>, 1>
             , public FFTKSpace<FFT<Diff<T, Mode, 1>, 1>, 1> {
@@ -87,41 +87,41 @@ namespace Physica::Core {
         friend class FFTKSpace<This, 1>;
     };
 
-    template<class T, DiffMode Mode>
+    template<Scalar T, DiffMode Mode>
     FFT<Diff<T, Mode, 1>, 1>::FFT() : fft_impl(), buffer() {}
 
-    template<class T, DiffMode Mode>
+    template<Scalar T, DiffMode Mode>
     FFT<Diff<T, Mode, 1>, 1>::FFT(size_t rSpaceSize, PlanFlag planFlag)
             : fft_impl(rSpaceSize, planFlag) {
         buffer.resize(getKSpaceSize());
     }
 
-    template<class T, DiffMode Mode>
+    template<Scalar T, DiffMode Mode>
     FFT<Diff<T, Mode, 1>, 1>::FFT(const VectorND<ScalarType>& data, PlanFlag planFlag)
             : FFT(data.getLength(), planFlag) {
         RSpaceType::transform(data);
     }
 
-    template<class T, DiffMode Mode>
+    template<Scalar T, DiffMode Mode>
     FFT<Diff<T, Mode, 1>, 1>::FFT(size_t rSpaceSize)
             : fft_impl(FFTType::makeEmptyFFT(rSpaceSize)) {
         buffer.resize(getKSpaceSize());
     }
 
-    template<class T, DiffMode Mode>
+    template<Scalar T, DiffMode Mode>
     void FFT<Diff<T, Mode, 1>, 1>::swap(FFT& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         fft_impl.swap(obj.fft_impl);
         buffer.swap(obj.buffer);
     }
 
-    template<class T, DiffMode Mode>
+    template<Scalar T, DiffMode Mode>
     inline FFT<Diff<T, Mode, 1>, 1>
     FFT<Diff<T, Mode, 1>, 1>::makeEmptyFFT(size_t rSpaceSize) {
         return This(rSpaceSize);
     }
 
-    template<class T, DiffMode Mode>
+    template<Scalar T, DiffMode Mode>
     inline void FFT<Diff<T, Mode, 1>, 1>::transform(const This& planProvider, This& bufferProvider) {
         assert(planProvider.getRSpaceSize() == bufferProvider.getRSpaceSize());
         assert(planProvider.getKSpaceSize() == bufferProvider.getKSpaceSize());
@@ -159,7 +159,7 @@ namespace Physica::Core {
             kSpace[i].getGrad() = kSpaceImpl[i];
     }
 
-    template<class T, DiffMode Mode>
+    template<Scalar T, DiffMode Mode>
     inline void FFT<Diff<T, Mode, 1>, 1>::invTransform(const This& planProvider, This& bufferProvider) {
         assert(planProvider.getRSpaceSize() == bufferProvider.getRSpaceSize());
         assert(planProvider.getKSpaceSize() == bufferProvider.getKSpaceSize());
@@ -197,22 +197,22 @@ namespace Physica::Core {
             rSpace[i].getGrad() = rSpaceImpl[i];
     }
 
-    template<class T, DiffMode Mode>
+    template<Scalar T, DiffMode Mode>
     inline typename FFT<Diff<T, Mode, 1>, 1>::RealPtrTy FFT<Diff<T, Mode, 1>, 1>::asRealBuffer() {
         return RealPtrTy(buffer.data());
     }
 
-    template<class T, DiffMode Mode>
+    template<Scalar T, DiffMode Mode>
     inline typename FFT<Diff<T, Mode, 1>, 1>::RealConstPtrTy FFT<Diff<T, Mode, 1>, 1>::asRealBuffer() const {
         return const_cast<This&>(*this).asRealBuffer();
     }
 
-    template<class T, DiffMode Mode>
+    template<Scalar T, DiffMode Mode>
     inline typename FFT<Diff<T, Mode, 1>, 1>::ComplexPtrTy FFT<Diff<T, Mode, 1>, 1>::asComplexBuffer() {
         return buffer.data();
     }
 
-    template<class T, DiffMode Mode>
+    template<Scalar T, DiffMode Mode>
     inline typename FFT<Diff<T, Mode, 1>, 1>::ComplexConstPtrTy FFT<Diff<T, Mode, 1>, 1>::asComplexBuffer() const {
         return const_cast<This&>(*this).asComplexBuffer();
     }

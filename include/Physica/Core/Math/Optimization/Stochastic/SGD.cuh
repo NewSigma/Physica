@@ -21,13 +21,13 @@
 #include "SGD.h"
 
 namespace Physica::Core {
-    template<class ScalarType>
-    class SGD<device_obj<ScalarType>> {
-        static_assert(ScalarType::isDifferentiable, "[Error]: ScalarType must be differentiable");
-        using This = SGD<device_obj<ScalarType>>;
-        using DeviceScalar = device_obj<ScalarType>;
+    template<Scalar T>
+    class SGD<device_obj<T>> {
+        static_assert(T::isDifferentiable, "[Error]: T must be differentiable");
+        using This = SGD<device_obj<T>>;
+        using DeviceScalar = device_obj<T>;
     public:
-        using ValueType = typename ScalarType::ValueType;
+        using ValueType = typename T::ValueType;
         constexpr static size_t MaxNumThreadPerBlock = 256;
     protected:
         ValueType learnRate;

@@ -28,20 +28,20 @@ namespace Physica::Core {
      * Reference:
      * [1] D. Frenkel and B. Smit, Understanding Molecular Simulation: From Algorithms to Applications; San Diego: Academic, 2002:304-306
      */
-    template<class ScalarType, bool IsSmallCell = false>
-    class RSpaceEwald : public PairModel<RSpaceEwald<ScalarType, IsSmallCell>> {
-        using This = RSpaceEwald<ScalarType, IsSmallCell>;
+    template<Scalar T, bool IsSmallCell = false>
+    class RSpaceEwald : public PairModel<RSpaceEwald<T, IsSmallCell>> {
+        using This = RSpaceEwald<T, IsSmallCell>;
         using Base = PairModel<This>;
     public:
-        using ComplexType = Complex<ScalarType>;
+        using ComplexType = Complex<T>;
         using Base::Dim;
         using typename Base::ValueType;
         using typename Base::LatticeMatrix;
         using typename Base::PositionMatrix;
         using typename Base::Vec3D;
         using typename Base::ForceConstMatrix;
-        using SearchRangeType = typename PeriodicCell<ScalarType, Dim>::SearchRangeType;
-        using Matrix3D = DenseMatrix<ScalarType, MatrixOption::Col | MatrixOption::Vector, 3, 3>;
+        using SearchRangeType = typename PeriodicCell<T, Dim>::SearchRangeType;
+        using Matrix3D = DenseMatrix<T, MatrixOption::Col | MatrixOption::Vector, 3, 3>;
         using BornChargeArray = Array<Matrix3D>;
         constexpr static size_t ErfcTableSize = 4096 + 512 + 2;
         constexpr static double ErfcTableStep = 0.001;
@@ -49,29 +49,29 @@ namespace Physica::Core {
     private:
         LatticeMatrix lattice;
         LatticeMatrix repLatt;
-        VectorND<ScalarType> charges;
-        VectorND<ScalarType> erfc_table;
-        ScalarType volume;
-        ScalarType inv_volume;
-        ScalarType integralLimit;
-        ScalarType erfcStep;
-        ScalarType repErfcStep;
-        ScalarType repDoubleSquareStep;
+        VectorND<T> charges;
+        VectorND<T> erfc_table;
+        T volume;
+        T inv_volume;
+        T integralLimit;
+        T erfcStep;
+        T repErfcStep;
+        T repDoubleSquareStep;
         SearchRangeType rSpaceSumRange;
         SearchRangeType kSpaceSumRange;
     public:
         RSpaceEwald() = default;
-        RSpaceEwald(LatticeMatrix lattice_, VectorND<ScalarType> charges_);
+        RSpaceEwald(LatticeMatrix lattice_, VectorND<T> charges_);
         RSpaceEwald(const RSpaceEwald&) = default;
         RSpaceEwald(RSpaceEwald&&) noexcept = default;
         ~RSpaceEwald() = default;
         /* Operator */
         RSpaceEwald& operator=(RSpaceEwald obj) noexcept { swap(obj); return *this; }
         /* Operations */
-        [[nodiscard]] inline ScalarType potentialV(const PositionMatrix& pos) const;
+        [[nodiscard]] inline T potentialV(const PositionMatrix& pos) const;
 
         template<class Executor>
-        [[nodiscard]] inline VectorND<ScalarType> force_short(const PositionMatrix& pos) const;
+        [[nodiscard]] inline VectorND<T> force_short(const PositionMatrix& pos) const;
 
         [[nodiscard]] ComplexType forceConst(const PositionMatrix& pos, const Vec3D& waveQ, size_t dof1, size_t dof2) const;
 
@@ -81,87 +81,87 @@ namespace Physica::Core {
         /* Getters */
         [[nodiscard]] const LatticeMatrix& getLattice() const noexcept { return lattice; }
         [[nodiscard]] const LatticeMatrix& getRepLattice() const noexcept { return repLatt; }
-        [[nodiscard]] const VectorND<ScalarType>& getCharges() const noexcept { return charges; }
+        [[nodiscard]] const VectorND<T>& getCharges() const noexcept { return charges; }
         [[nodiscard]] size_t getNumParticle() const noexcept { return charges.getLength(); }
-        [[nodiscard]] ScalarType getVolume() const noexcept { return volume; }
-        [[nodiscard]] ScalarType getInvVolume() const noexcept { return inv_volume; }
-        [[nodiscard]] ScalarType getIntegralLimit() const noexcept { return integralLimit; }
-        [[nodiscard]] ScalarType getRSpaceCutoff() const noexcept { return Base::getCutoff(); }
-        [[nodiscard]] ScalarType getSquaredRSpaceCutoff() const noexcept { return Base::getSquaredCutoff(); }
+        [[nodiscard]] T getVolume() const noexcept { return volume; }
+        [[nodiscard]] T getInvVolume() const noexcept { return inv_volume; }
+        [[nodiscard]] T getIntegralLimit() const noexcept { return integralLimit; }
+        [[nodiscard]] T getRSpaceCutoff() const noexcept { return Base::getCutoff(); }
+        [[nodiscard]] T getSquaredRSpaceCutoff() const noexcept { return Base::getSquaredCutoff(); }
         [[nodiscard]] const SearchRangeType& getRSpaceSumRange() const noexcept { return rSpaceSumRange; }
         [[nodiscard]] const SearchRangeType& getKSpaceSumRange() const noexcept { return kSpaceSumRange; }
         /* Setters */
         void setLattice(LatticeMatrix lattice_);
-        void setIntegralLimit(ScalarType integralLimit_);
+        void setIntegralLimit(T integralLimit_);
     protected:
-        [[nodiscard]] inline ScalarType calcSelfE() const;
-        [[nodiscard]] inline ScalarType calcGammaPointE() const;
-        [[nodiscard]] inline ScalarType pot_functor(size_t i, size_t j, ScalarType r, ScalarType r2) const;
-        [[nodiscard]] inline ScalarType force_functor(size_t i, size_t j, ScalarType r, ScalarType r2) const;
+        [[nodiscard]] inline T calcSelfE() const;
+        [[nodiscard]] inline T calcGammaPointE() const;
+        [[nodiscard]] inline T pot_functor(size_t i, size_t j, T r, T r2) const;
+        [[nodiscard]] inline T force_functor(size_t i, size_t j, T r, T r2) const;
     private:
         /* Operations */
         void makeTables();
-        [[nodiscard]] inline ScalarType pot_functor_slow(size_t i, size_t j, ScalarType r, ScalarType r2) const;
-        [[nodiscard]] inline ScalarType force_functor_slow(size_t i, size_t j, ScalarType r, ScalarType r2) const;
-        [[nodiscard]] ScalarType rSpaceForceConstImpl1(ScalarType r) const;
-        [[nodiscard]] ScalarType rSpaceForceConstImpl2(ScalarType r) const;
+        [[nodiscard]] inline T pot_functor_slow(size_t i, size_t j, T r, T r2) const;
+        [[nodiscard]] inline T force_functor_slow(size_t i, size_t j, T r, T r2) const;
+        [[nodiscard]] T rSpaceForceConstImpl1(T r) const;
+        [[nodiscard]] T rSpaceForceConstImpl2(T r) const;
         using Base::potentialV;
         using Base::forceConst;
         /* Getters */
         using Base::getCutoff;
         using Base::getSquaredCutoff;
         /* Static members */
-        [[nodiscard]] static BornChargeArray makeBornCharge(const VectorND<ScalarType>& charges);
+        [[nodiscard]] static BornChargeArray makeBornCharge(const VectorND<T>& charges);
         /* Friends */
-        friend class PairModel<RSpaceEwald<ScalarType, IsSmallCell>>;
+        friend class PairModel<RSpaceEwald<T, IsSmallCell>>;
         friend class device_obj<This>;
         friend class Physica::Test;
     };
 
-    template<class ScalarType, bool IsSmallCell>
-    RSpaceEwald<ScalarType, IsSmallCell>::RSpaceEwald(LatticeMatrix lattice_, VectorND<ScalarType> charges_)
+    template<Scalar T, bool IsSmallCell>
+    RSpaceEwald<T, IsSmallCell>::RSpaceEwald(LatticeMatrix lattice_, VectorND<T> charges_)
             : charges(std::move(charges_)), erfc_table(ErfcTableSize + 1) {
         setLattice(std::move(lattice_));
     }
     /**
      * \param pos must be in cartesian convension
      */
-    template<class ScalarType, bool IsSmallCell>
-    inline ScalarType RSpaceEwald<ScalarType, IsSmallCell>::potentialV(const PositionMatrix& pos) const {
+    template<Scalar T, bool IsSmallCell>
+    inline T RSpaceEwald<T, IsSmallCell>::potentialV(const PositionMatrix& pos) const {
         return Base::potentialV(lattice, pos);
     }
 
-    template<class ScalarType, bool IsSmallCell>
+    template<Scalar T, bool IsSmallCell>
     template<class Executor> 
-    inline VectorND<ScalarType> RSpaceEwald<ScalarType, IsSmallCell>::force_short(const PositionMatrix& pos) const {
-        const VectorND<ScalarType> rSpaceSum = Base::template force<SequentialExecutor>(lattice, pos);
+    inline VectorND<T> RSpaceEwald<T, IsSmallCell>::force_short(const PositionMatrix& pos) const {
+        const VectorND<T> rSpaceSum = Base::template force<SequentialExecutor>(lattice, pos);
         return rSpaceSum;
     }
     /**
      * Reference:
      * [1] Rev. Mod. Phys. 73, 515; https://doi.org/10.1103/RevModPhys.73.515
      */
-    template<class ScalarType, bool IsSmallCell>
-    typename RSpaceEwald<ScalarType, IsSmallCell>::ComplexType
-    RSpaceEwald<ScalarType, IsSmallCell>::forceConst(const PositionMatrix& pos, const Vec3D& waveQ, size_t dof1, size_t dof2) const {
+    template<Scalar T, bool IsSmallCell>
+    typename RSpaceEwald<T, IsSmallCell>::ComplexType
+    RSpaceEwald<T, IsSmallCell>::forceConst(const PositionMatrix& pos, const Vec3D& waveQ, size_t dof1, size_t dof2) const {
         const size_t atom1 = dof1 / 3;
         const size_t atom2 = dof2 / 3;
         const size_t direction1 = dof1 % 3U;
         const size_t direction2 = dof2 % 3U;
-        const ScalarType charge1 = charges[atom1];
-        const ScalarType charge2 = charges[atom2];
+        const T charge1 = charges[atom1];
+        const T charge2 = charges[atom2];
 
         ComplexType rSpaceSum = 0;
-        PeriodicCell<ScalarType, Dim>::forCellInRange(rSpaceSumRange, lattice,
+        PeriodicCell<T, Dim>::forCellInRange(rSpaceSumRange, lattice,
             [this, atom1, atom2, direction1, direction2, charge1, charge2, waveQ, &pos, &rSpaceSum](Vec3D delta) {
                 const bool isSameDirection = direction1 == direction2;
                 ComplexType temp = 0;
                 {
-                    const Vec3D x = pos.row(atom1).asVector() - pos.row(atom2).asVector() + delta;
-                    const ScalarType norm = x.norm();
-                    const bool isNotSelf = norm > ScalarType(std::numeric_limits<ScalarType>::min());
+                    const Vec3D x = pos.row(atom1) - pos.row(atom2) + delta;
+                    const T norm = x.norm();
+                    const bool isNotSelf = norm > T(std::numeric_limits<T>::min());
                     if (isNotSelf) {
-                        const ScalarType phase = waveQ * delta;
+                        const T phase = waveQ * delta;
                         temp = rSpaceForceConstImpl1(norm) * (x[direction1] * x[direction2]);
                         if (isSameDirection)
                             temp += rSpaceForceConstImpl2(norm);
@@ -173,9 +173,9 @@ namespace Physica::Core {
                 if (isSameAtom) {
                     ComplexType temp1 = 0;
                     for (size_t i = 0; i < getNumParticle(); ++i) {
-                        const Vec3D x = pos.row(atom1).asVector() - pos.row(i).asVector() + delta;
-                        const ScalarType norm = x.norm();
-                        const bool isNotSelf = norm > ScalarType(std::numeric_limits<ScalarType>::min());
+                        const Vec3D x = pos.row(atom1) - pos.row(i) + delta;
+                        const T norm = x.norm();
+                        const bool isNotSelf = norm > T(std::numeric_limits<T>::min());
                         if (isNotSelf) {
                             ComplexType temp2 = rSpaceForceConstImpl1(norm) * (x[direction1] * x[direction2]);
                             if (isSameDirection)
@@ -190,14 +190,14 @@ namespace Physica::Core {
         return rSpaceSum;
     }
 
-    template<class ScalarType, bool IsSmallCell>
-    inline typename RSpaceEwald<ScalarType, IsSmallCell>::LatticeMatrix
-    RSpaceEwald<ScalarType, IsSmallCell>::virial(const PositionMatrix& pos) const {
+    template<Scalar T, bool IsSmallCell>
+    inline typename RSpaceEwald<T, IsSmallCell>::LatticeMatrix
+    RSpaceEwald<T, IsSmallCell>::virial(const PositionMatrix& pos) const {
         return Base::virial(lattice, pos);
     }
 
-    template<class ScalarType, bool IsSmallCell>
-    void RSpaceEwald<ScalarType, IsSmallCell>::swap(RSpaceEwald& __restrict obj) noexcept {
+    template<Scalar T, bool IsSmallCell>
+    void RSpaceEwald<T, IsSmallCell>::swap(RSpaceEwald& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         Base::swap(obj);
         lattice.swap(obj.lattice);
@@ -214,72 +214,72 @@ namespace Physica::Core {
         kSpaceSumRange.swap(obj.kSpaceSumRange);
     }
 
-    template<class ScalarType, bool IsSmallCell>
-    void RSpaceEwald<ScalarType, IsSmallCell>::setLattice(LatticeMatrix lattice_) {
+    template<Scalar T, bool IsSmallCell>
+    void RSpaceEwald<T, IsSmallCell>::setLattice(LatticeMatrix lattice_) {
         assert(charges.getLength() != 0 && "[Error]: Charges should be initialized before lattice update");
         lattice = std::move(lattice_);
-        repLatt = PeriodicCell<ScalarType, Dim>::makeRepLattice(lattice);
-        volume = PeriodicCell<ScalarType, Dim>::getVolume(lattice);
+        repLatt = PeriodicCell<T, Dim>::makeRepLattice(lattice);
+        volume = PeriodicCell<T, Dim>::getVolume(lattice);
         inv_volume = reciprocal(volume);
 
-        const ScalarType averageCellSize = cbrt(ScalarType(volume));
-        const ScalarType estimate = sqrt(cbrt(ScalarType(getNumParticle())) * ScalarType(M_PI)) / averageCellSize;
+        const T averageCellSize = cbrt(T(volume));
+        const T estimate = sqrt(cbrt(T(getNumParticle())) * T(M_PI)) / averageCellSize;
         setIntegralLimit(estimate);
     }
 
-    template<class ScalarType, bool IsSmallCell>
-    void RSpaceEwald<ScalarType, IsSmallCell>::setIntegralLimit(ScalarType integralLimit_) {
+    template<Scalar T, bool IsSmallCell>
+    void RSpaceEwald<T, IsSmallCell>::setIntegralLimit(T integralLimit_) {
         assert(integralLimit_.isPositive() && "[Error]: Invalid integralLimit");
-        const ScalarType heightX_2Pi = reciprocal(repLatt.row(0).norm());
-        const ScalarType heightY_2Pi = reciprocal(repLatt.row(1).norm());
-        const ScalarType heightZ_2Pi = reciprocal(repLatt.row(2).norm());
-        constexpr double factor1 = 2 * M_PI * (1 - std::numeric_limits<ScalarType>::epsilon()); //To avoid rSpaceCutoff larger than max value
-        const ScalarType maxRSpaceCutoff = std::min(heightX_2Pi, std::min(heightY_2Pi, heightZ_2Pi)) * ValueType(factor1);
-        const ScalarType minLimit = ScalarType(SumPrec) / maxRSpaceCutoff;
+        const T heightX_2Pi = reciprocal(repLatt.row(0).norm());
+        const T heightY_2Pi = reciprocal(repLatt.row(1).norm());
+        const T heightZ_2Pi = reciprocal(repLatt.row(2).norm());
+        constexpr double factor1 = 2 * M_PI * (1 - std::numeric_limits<T>::epsilon()); //To avoid rSpaceCutoff larger than max value
+        const T maxRSpaceCutoff = std::min(heightX_2Pi, std::min(heightY_2Pi, heightZ_2Pi)) * ValueType(factor1);
+        const T minLimit = T(SumPrec) / maxRSpaceCutoff;
         integralLimit = std::max(integralLimit_, minLimit).getValue();
 
         const ValueType rSpaceCutoff = ValueType(SumPrec) / integralLimit.getValue();
-        rSpaceSumRange = PeriodicCell<ScalarType, Dim>::estimateRange(lattice, rSpaceCutoff);
-        kSpaceSumRange = PeriodicCell<ScalarType, Dim>::estimateRange(repLatt, ValueType(SumPrec * 2) * integralLimit.getValue());
+        rSpaceSumRange = PeriodicCell<T, Dim>::estimateRange(lattice, rSpaceCutoff);
+        kSpaceSumRange = PeriodicCell<T, Dim>::estimateRange(repLatt, ValueType(SumPrec * 2) * integralLimit.getValue());
         makeTables();
         Base::setCutoff(rSpaceCutoff);
     }
 
-    template<class ScalarType, bool IsSmallCell>
-    inline ScalarType RSpaceEwald<ScalarType, IsSmallCell>::calcSelfE() const {
+    template<Scalar T, bool IsSmallCell>
+    inline T RSpaceEwald<T, IsSmallCell>::calcSelfE() const {
         return square(charges).sum() * integralLimit / sqrt(ValueType(M_PI));
     }
 
-    template<class ScalarType, bool IsSmallCell>
-    inline ScalarType RSpaceEwald<ScalarType, IsSmallCell>::calcGammaPointE() const {
+    template<Scalar T, bool IsSmallCell>
+    inline T RSpaceEwald<T, IsSmallCell>::calcGammaPointE() const {
         return square(charges.sum()) * ValueType(-M_PI) / (ValueType(2) * square(integralLimit)) * inv_volume;
     }
     /**
      * Optimize: make use of x1, x2, x3 are equal distance
      */
-    template<class ScalarType, bool IsSmallCell>
-    inline ScalarType RSpaceEwald<ScalarType, IsSmallCell>::pot_functor(
-            size_t i, size_t j, ScalarType r, [[maybe_unused]] ScalarType r2) const {
-        const ScalarType temp = r * repErfcStep + ValueType(0.5);
+    template<Scalar T, bool IsSmallCell>
+    inline T RSpaceEwald<T, IsSmallCell>::pot_functor(
+            size_t i, size_t j, T r, [[maybe_unused]] T r2) const {
+        const T temp = r * repErfcStep + ValueType(0.5);
         const int index = double(temp);
-        const ScalarType x1 = erfcStep * floor(temp);
+        const T x1 = erfcStep * floor(temp);
         auto y = erfc_table.template segment<3>(index, index + 3);
-        const ScalarType interp = Internal::quadraticInterpolate<ScalarType>(x1 - erfcStep, x1, x1 + erfcStep, y[0], y[1], y[2], r);
+        const T interp = Internal::quadraticInterpolate<T>(x1 - erfcStep, x1, x1 + erfcStep, y[0], y[1], y[2], r);
         return charges[i] * charges[j] * interp;
     }
 
-    template<class ScalarType, bool IsSmallCell>
-    inline ScalarType RSpaceEwald<ScalarType, IsSmallCell>::force_functor(
-            size_t i, size_t j, ScalarType r, [[maybe_unused]] ScalarType r2) const {
-        const ScalarType temp = r * repErfcStep + ValueType(0.5);
+    template<Scalar T, bool IsSmallCell>
+    inline T RSpaceEwald<T, IsSmallCell>::force_functor(
+            size_t i, size_t j, T r, [[maybe_unused]] T r2) const {
+        const T temp = r * repErfcStep + ValueType(0.5);
         const int index = double(temp);
-        const ScalarType x1 = erfcStep * floor(temp);
+        const T x1 = erfcStep * floor(temp);
         auto y = erfc_table.template segment<3>(index, index + 3);
-        return -charges[i] * charges[j] * Internal::quadraticInterpolate_diff1<ScalarType>(repDoubleSquareStep, erfcStep, x1, y[0], y[1], y[2], r);
+        return -charges[i] * charges[j] * Internal::quadraticInterpolate_diff1<T>(repDoubleSquareStep, erfcStep, x1, y[0], y[1], y[2], r);
     }
 
-    template<class ScalarType, bool IsSmallCell>
-    void RSpaceEwald<ScalarType, IsSmallCell>::makeTables() {
+    template<Scalar T, bool IsSmallCell>
+    void RSpaceEwald<T, IsSmallCell>::makeTables() {
         for (size_t i = 2; i < erfc_table.getLength(); ++i) {
             const auto x = ValueType((i - 1) * ErfcTableStep);
             erfc_table[i] = erfc(x) / x * integralLimit;
@@ -292,39 +292,39 @@ namespace Physica::Core {
     /**
      * Slow version functors are provided for debug use
      */
-    template<class ScalarType, bool IsSmallCell>
-    ScalarType RSpaceEwald<ScalarType, IsSmallCell>::pot_functor_slow(size_t i, size_t j, ScalarType r, [[maybe_unused]] ScalarType r2) const {
-        const ScalarType x = r * integralLimit;
+    template<Scalar T, bool IsSmallCell>
+    T RSpaceEwald<T, IsSmallCell>::pot_functor_slow(size_t i, size_t j, T r, [[maybe_unused]] T r2) const {
+        const T x = r * integralLimit;
         return charges[i] * charges[j] * erfc(x) / r;
     }
 
-    template<class ScalarType, bool IsSmallCell>
-    ScalarType RSpaceEwald<ScalarType, IsSmallCell>::force_functor_slow(size_t i, size_t j, ScalarType r, ScalarType r2) const {
-        const ScalarType x = r * integralLimit;
+    template<Scalar T, bool IsSmallCell>
+    T RSpaceEwald<T, IsSmallCell>::force_functor_slow(size_t i, size_t j, T r, T r2) const {
+        const T x = r * integralLimit;
         return charges[i] * charges[j] * (erfc(x) + x * exp(-square(x)) * ValueType(M_2_SQRTPI)) / r2;
     }
 
-    template<class ScalarType, bool IsSmallCell>
-    ScalarType RSpaceEwald<ScalarType, IsSmallCell>::rSpaceForceConstImpl1(ScalarType r) const {
-        const ScalarType x = integralLimit * r;
-        const ScalarType x2 = square(x);
-        const ScalarType term1 = ScalarType(3) * erfc(x);
-        const ScalarType term2 = ScalarType(2 * M_2_SQRTPI) * x * (ScalarType(1.5) + x2) / exp(x2);
+    template<Scalar T, bool IsSmallCell>
+    T RSpaceEwald<T, IsSmallCell>::rSpaceForceConstImpl1(T r) const {
+        const T x = integralLimit * r;
+        const T x2 = square(x);
+        const T term1 = T(3) * erfc(x);
+        const T term2 = T(2 * M_2_SQRTPI) * x * (T(1.5) + x2) / exp(x2);
         return (term1 + term2) / (square(square(r)) * r);
     }
 
-    template<class ScalarType, bool IsSmallCell>
-    ScalarType RSpaceEwald<ScalarType, IsSmallCell>::rSpaceForceConstImpl2(ScalarType r) const {
-        const ScalarType x = integralLimit * r;
-        const ScalarType term1 = erfc(x);
-        const ScalarType term2 = ScalarType(M_2_SQRTPI) * x / exp(square(x));
+    template<Scalar T, bool IsSmallCell>
+    T RSpaceEwald<T, IsSmallCell>::rSpaceForceConstImpl2(T r) const {
+        const T x = integralLimit * r;
+        const T term1 = erfc(x);
+        const T term2 = T(M_2_SQRTPI) * x / exp(square(x));
         return -(term1 + term2) / (square(r) * r);
     }
 
-    template<class ScalarType, bool IsSmallCell>
-    typename RSpaceEwald<ScalarType, IsSmallCell>::BornChargeArray
-    RSpaceEwald<ScalarType, IsSmallCell>::makeBornCharge(const VectorND<ScalarType>& charges) {
-        BornChargeArray result(charges.getLength(), Matrix3D(3, 3, ScalarType(0)));
+    template<Scalar T, bool IsSmallCell>
+    typename RSpaceEwald<T, IsSmallCell>::BornChargeArray
+    RSpaceEwald<T, IsSmallCell>::makeBornCharge(const VectorND<T>& charges) {
+        BornChargeArray result(charges.getLength(), Matrix3D(3, 3, T(0)));
         for (size_t i = 0; i < result.getLength(); ++i) {
             auto diag = result[i].diag();
             diag = charges[i];

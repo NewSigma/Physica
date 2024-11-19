@@ -61,8 +61,8 @@ namespace Physica::Core {
         PeriodicCell();
         PeriodicCell(size_t numParticle, Type type_);
         PeriodicCell(LatticeMatrix lattice_, PositionMatrix pos_, Type type_);
-        template<class OtherScalar>
-        PeriodicCell(const PeriodicCell<OtherScalar, Dim>& cell);
+        template<Scalar U>
+        PeriodicCell(const PeriodicCell<U, Dim>& cell);
         PeriodicCell(const PeriodicCell&) = default;
         PeriodicCell(PeriodicCell&&) noexcept = default;
         ~PeriodicCell() = default;
@@ -163,8 +163,8 @@ namespace Physica::Core {
             , type(type_) {}
 
     template<Scalar T, unsigned int Dim>
-    template<class OtherScalar>
-    PeriodicCell<T, Dim>::PeriodicCell(const PeriodicCell<OtherScalar, Dim>& cell)
+    template<Scalar U>
+    PeriodicCell<T, Dim>::PeriodicCell(const PeriodicCell<U, Dim>& cell)
             : lattice(cell.getLattice())
             , pos(cell.getPos())
             , type(cell.getType()) {}
@@ -180,7 +180,7 @@ namespace Physica::Core {
     PeriodicCell<T, Dim>::minDistVector(size_t id_from, size_t id_to) const {
         T record_dist = std::numeric_limits<T>::max();
         VectorType result{};
-        VectorType delta = pos.row(id_to).asVector() - pos.row(id_from).asVector();
+        VectorType delta = pos.row(id_to) - pos.row(id_from);
         if (type == Type::Direct)
             delta = lattice.transpose() * delta;
         if constexpr (Dim == 1) {
@@ -189,7 +189,7 @@ namespace Physica::Core {
                 const bool isSelf = id_from == id_to && x == 0;
                 if (isSelf)
                     continue; // We are not interested to distance between particle and itself
-                v1 = delta + lattice.row(0).asVector() * T(x);
+                v1 = delta + lattice.row(0) * T(x);
                 const T squared_norm = v1.squaredNorm();
                 if (squared_norm < record_dist) {
                     record_dist = squared_norm;
@@ -200,12 +200,12 @@ namespace Physica::Core {
         else if constexpr (Dim == 2) {
             VectorType v1, v2;
             for (int x = -1; x <= 1; ++x) {
-                v1 = delta + lattice.row(0).asVector() * T(x);
+                v1 = delta + lattice.row(0) * T(x);
                 for (int y = -1; y <= 1; ++y) {
                     const bool isSelf = id_from == id_to && x == 0 && y == 0;
                     if (isSelf)
                         continue; // We are not interested to distance between particle and itself
-                    v2 = v1 + lattice.row(1).asVector() * T(y);
+                    v2 = v1 + lattice.row(1) * T(y);
                     const T squared_norm = v2.squaredNorm();
                     if (squared_norm < record_dist) {
                         record_dist = squared_norm;
@@ -217,14 +217,14 @@ namespace Physica::Core {
         else if constexpr (Dim == 3) {
             VectorType v1, v2, v3;
             for (int x = -1; x <= 1; ++x) {
-                v1 = delta + lattice.row(0).asVector() * T(x);
+                v1 = delta + lattice.row(0) * T(x);
                 for (int y = -1; y <= 1; ++y) {
-                    v2 = v1 + lattice.row(1).asVector() * T(y);
+                    v2 = v1 + lattice.row(1) * T(y);
                     for (int z = -1; z <= 1; ++z) {
                         const bool isSelf = id_from == id_to && x == 0 && y == 0 && z == 0;
                         if (isSelf)
                             continue; // We are not interested to distance between particle and itself
-                        v3 = v2 + lattice.row(2).asVector() * T(z);
+                        v3 = v2 + lattice.row(2) * T(z);
                         const T squared_norm = v3.squaredNorm();
                         if (squared_norm < record_dist) {
                             record_dist = squared_norm;
@@ -244,15 +244,15 @@ namespace Physica::Core {
         VectorType result{};
         VectorType delta;
         if (type == Type::Direct)
-            delta = lattice.transpose() * pos.row(id_to).asVector();
+            delta = lattice.transpose() * pos.row(id_to);
         else
-            delta = pos.row(id_to).asVector();
+            delta = pos.row(id_to);
         delta -= from;
 
         if constexpr (Dim == 1) {
             VectorType v1;
             for (int x = -1; x <= 1; ++x) {
-                v1 = delta + lattice.row(0).asVector() * T(x);
+                v1 = delta + lattice.row(0) * T(x);
                 const T squared_norm = v1.squaredNorm();
                 if (squared_norm < record_dist) {
                     record_dist = squared_norm;
@@ -263,9 +263,9 @@ namespace Physica::Core {
         else if constexpr (Dim == 2) {
             VectorType v1, v2;
             for (int x = -1; x <= 1; ++x) {
-                v1 = delta + lattice.row(0).asVector() * T(x);
+                v1 = delta + lattice.row(0) * T(x);
                 for (int y = -1; y <= 1; ++y) {
-                    v2 = v1 + lattice.row(1).asVector() * T(y);
+                    v2 = v1 + lattice.row(1) * T(y);
                     const T squared_norm = v2.squaredNorm();
                     if (squared_norm < record_dist) {
                         record_dist = squared_norm;
@@ -277,11 +277,11 @@ namespace Physica::Core {
         else if constexpr (Dim == 3) {
             VectorType v1, v2, v3;
             for (int x = -1; x <= 1; ++x) {
-                v1 = delta + lattice.row(0).asVector() * T(x);
+                v1 = delta + lattice.row(0) * T(x);
                 for (int y = -1; y <= 1; ++y) {
-                    v2 = v1 + lattice.row(1).asVector() * T(y);
+                    v2 = v1 + lattice.row(1) * T(y);
                     for (int z = -1; z <= 1; ++z) {
-                        v3 = v2 + lattice.row(2).asVector() * T(z);
+                        v3 = v2 + lattice.row(2) * T(z);
                         const T squared_norm = v3.squaredNorm();
                         if (squared_norm < record_dist) {
                             record_dist = squared_norm;
@@ -467,9 +467,9 @@ namespace Physica::Core {
         T squaredNormA = lattice.row(0).squaredNorm();
         T squaredNormB = lattice.row(1).squaredNorm();
         T squaredNormC = lattice.row(2).squaredNorm();
-        T dot1 = T(2) * (lattice.row(1).asVector() * lattice.row(2).asVector());
-        T dot2 = T(2) * (lattice.row(0).asVector() * lattice.row(2).asVector());
-        T dot3 = T(2) * (lattice.row(0).asVector() * lattice.row(1).asVector());
+        T dot1 = T(2) * (lattice.row(1) * lattice.row(2));
+        T dot2 = T(2) * (lattice.row(0) * lattice.row(2));
+        T dot3 = T(2) * (lattice.row(0) * lattice.row(1));
         unsigned int iteration = 0;
         do {
             if (iteration == maxIteration) [[unlikely]]
@@ -573,7 +573,7 @@ namespace Physica::Core {
         assert(maxIteration > 0 && "[Error]: Set maxIteration = 0 does nothing");
         T squaredNormA = lattice.row(0).squaredNorm();
         T squaredNormB = lattice.row(1).squaredNorm();
-        T dot = T(2) * (lattice.row(0).asVector() * lattice.row(1).asVector());
+        T dot = T(2) * (lattice.row(0) * lattice.row(1));
         unsigned int iteration = 0;
         do {
             if (iteration == maxIteration) [[unlikely]]
@@ -604,7 +604,7 @@ namespace Physica::Core {
         result.row(0) = lattice.row(1).crossProduct(lattice.row(2));
         result.row(1) = lattice.row(2).crossProduct(lattice.row(0));
         result.row(2) = lattice.row(0).crossProduct(lattice.row(1));
-        const T factor = T(2 * M_PI) / (lattice.row(0) * result.row(0).asVector());
+        const T factor = T(2 * M_PI) / (lattice.row(0) * result.row(0));
         result *= factor;
         return result;
     }
@@ -616,7 +616,7 @@ namespace Physica::Core {
         else if constexpr (Dim == 2)
             return (lattice.row(0).crossProduct(lattice.row(1))).compute().norm();
         else
-            return abs(VectorType(lattice.row(0).crossProduct(lattice.row(1))) * lattice.row(2).asVector());
+            return abs(VectorType(lattice.row(0).crossProduct(lattice.row(1))) * lattice.row(2));
     }
 
     template<Scalar T, unsigned int Dim>
@@ -659,7 +659,7 @@ namespace Physica::Core {
 
             VectorType v1;
             for (ssize_t x = -range[0]; x <= range[0]; ++x) {
-                v1 = T(x) * a1.asVector();
+                v1 = T(x) * a1;
                 func(v1);
             }
         }
@@ -669,9 +669,9 @@ namespace Physica::Core {
 
             VectorType v1, v2;
             for (ssize_t x = -range[0]; x <= range[0]; ++x) {
-                v1 = T(x) * a1.asVector();
+                v1 = T(x) * a1;
                 for (ssize_t y = -range[1]; y <= range[1]; ++y) {
-                    v2 = v1 + T(y) * a2.asVector();
+                    v2 = v1 + T(y) * a2;
                     func(v2);
                 }
             }
@@ -683,11 +683,11 @@ namespace Physica::Core {
 
             VectorType v1, v2, v3;
             for (ssize_t x = -range[0]; x <= range[0]; ++x) {
-                v1 = T(x) * a1.asVector();
+                v1 = T(x) * a1;
                 for (ssize_t y = -range[1]; y <= range[1]; ++y) {
-                    v2 = v1 + T(y) * a2.asVector();
+                    v2 = v1 + T(y) * a2;
                     for (ssize_t z = -range[2]; z <= range[2]; ++z) {
-                        v3 = v2 + T(z) * a3.asVector();
+                        v3 = v2 + T(z) * a3;
                         func(v3);
                     }
                 }
@@ -703,7 +703,7 @@ namespace Physica::Core {
 
             VectorType v1;
             for (ssize_t x = 0; x <= range[0]; ++x) {
-                v1 = T(x) * a1.asVector();
+                v1 = T(x) * a1;
                 func(v1);
             }
         }
@@ -713,10 +713,10 @@ namespace Physica::Core {
 
             VectorType v1, v2;
             for (ssize_t x = 0; x <= range[0]; ++x) {
-                v1 = T(x) * a1.asVector();
+                v1 = T(x) * a1;
                 const ssize_t minY = x == 0 ? 0 : -range[1];
                 for (ssize_t y = minY; y <= range[1]; ++y) {
-                    v2 = v1 + T(y) * a2.asVector();
+                    v2 = v1 + T(y) * a2;
                     func(v2);
                 }
             }
@@ -728,13 +728,13 @@ namespace Physica::Core {
 
             VectorType v1, v2, v3;
             for (ssize_t x = 0; x <= range[0]; ++x) {
-                v1 = T(x) * a1.asVector();
+                v1 = T(x) * a1;
                 const ssize_t minY = x == 0 ? 0 : -range[1];
                 for (ssize_t y = minY; y <= range[1]; ++y) {
-                    v2 = v1 + T(y) * a2.asVector();
+                    v2 = v1 + T(y) * a2;
                     const ssize_t minZ = (x == 0 && y == 0) ? 0 : -range[2];
                     for (ssize_t z = minZ; z <= range[2]; ++z) {
-                        v3 = v2 + T(z) * a3.asVector();
+                        v3 = v2 + T(z) * a3;
                         func(v3);
                     }
                 }
@@ -779,11 +779,11 @@ namespace Physica::Core {
         assert(type == Type::Direct);
         toSuperPosDirect<Option>(pos, x, y, z);
         auto rowX = lattice.row(0);
-        rowX.asVector() *= T(x);
+        rowX *= T(x);
         auto rowY = lattice.row(1);
-        rowY.asVector() *= T(y);
+        rowY *= T(y);
         auto rowZ = lattice.row(2);
-        rowZ.asVector() *= T(z);
+        rowZ *= T(z);
         if constexpr (T::isReverseDiff)
             lattice.makeContinuous();
     }
@@ -797,11 +797,11 @@ namespace Physica::Core {
         const T inv_z = Core::reciprocal(T(z));
 
         auto rowX = lattice.row(0);
-        rowX.asVector() *= inv_x;
+        rowX *= inv_x;
         auto rowY = lattice.row(1);
-        rowY.asVector() *= inv_y;
+        rowY *= inv_y;
         auto rowZ = lattice.row(2);
-        rowZ.asVector() *= inv_z;
+        rowZ *= inv_z;
     }
 
     template<Scalar T, unsigned int Dim>
@@ -860,11 +860,11 @@ namespace Physica::Core {
         assert(target.getRow() % (x * y * z) == 0);
 
         auto colX = target.col(0);
-        colX.asVector() *= T(x);
+        colX *= T(x);
         auto colY = target.col(1);
-        colY.asVector() *= T(y);
+        colY *= T(y);
         auto colZ = target.col(2);
-        colZ.asVector() *= T(z);
+        colZ *= T(z);
 
         const size_t numParticle = target.getRow();
         const size_t newNumParticle = numParticle / (x * y * z);
@@ -877,7 +877,7 @@ namespace Physica::Core {
                 auto rowToCheck = target.row(toCheck);
                 if (rowToCheck[0] <= one && rowToCheck[1] <= one && rowToCheck[2] <= one) {
                     auto rowToFill = new_pos.row(toFill);
-                    rowToFill = rowToCheck.asVector();
+                    rowToFill = rowToCheck;
                     ++toCheck;
                     break;
                 }

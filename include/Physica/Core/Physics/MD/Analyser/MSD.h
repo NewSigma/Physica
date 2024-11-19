@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Weibo He.
+ * Copyright 2023-2024 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -18,16 +18,16 @@
  */
 #pragma once
 
-#include "Physica/Core/Math/Statistics/NumCharacter.h"
-#include "Physica/Core/Physics/MD/MDCell.h"
-#include "Physica/Core/Physics/MD/RPMD.h"
+#include <Physica/Core/Math/Statistics/NumCharacter.h>
+#include <Physica/Core/Physics/MD/MDCell.h>
+#include <Physica/Core/Physics/MD/RPMD.h>
 
 namespace Physica::Core {
-    template<class ScalarType, unsigned int Dim>
+    template<Scalar T, unsigned int Dim>
     class MSD {
-        using MDCellType = MDCell<ScalarType, Dim>;
+        using MDCellType = MDCell<T, Dim>;
         using PositionMatrix = typename MDCellType::PositionMatrix;
-        using VectorType = DenseVector<ScalarType, Dim>;
+        using VectorType = DenseVector<T, Dim>;
 
         MDCellType initCell;
         PositionMatrix buffer;
@@ -42,13 +42,13 @@ namespace Physica::Core {
         /* Operations */
         void sample(const MDCellType& sample);
         template<size_t NumReplica, class ForceMatrixAllocator>
-        inline void sample(const RPMD<ScalarType, Dim, NumReplica, ForceMatrixAllocator>& rpmd);
+        inline void sample(const RPMD<T, Dim, NumReplica, ForceMatrixAllocator>& rpmd);
 
-        [[nodiscard]] ScalarType calcMSD() const { return mean(calcAtomMSD()); }
-        [[nodiscard]] ScalarType calcMSD2D() const { return mean(calcAtomMSD2D()); }
-        [[nodiscard]] VectorND<ScalarType> calcAtomMSD() const;
-        [[nodiscard]] VectorND<ScalarType> calcAtomMSD2D() const;
-        [[nodiscard]] inline ScalarType calcFiniteSizeLimit(size_t atomId) const noexcept;
+        [[nodiscard]] T calcMSD() const { return mean(calcAtomMSD()); }
+        [[nodiscard]] T calcMSD2D() const { return mean(calcAtomMSD2D()); }
+        [[nodiscard]] VectorND<T> calcAtomMSD() const;
+        [[nodiscard]] VectorND<T> calcAtomMSD2D() const;
+        [[nodiscard]] inline T calcFiniteSizeLimit(size_t atomId) const noexcept;
         void clear();
         void swap(MSD& __restrict obj) noexcept;
         /* Getters */
@@ -56,14 +56,14 @@ namespace Physica::Core {
         [[nodiscard]] size_t getNumSample() const noexcept { return numSample; }
     };
 
-    template<class ScalarType, unsigned int Dim>
-    MSD<ScalarType, Dim>::MSD(MDCellType initCell_) : initCell(std::move(initCell_)), numSample(0) {
+    template<Scalar T, unsigned int Dim>
+    MSD<T, Dim>::MSD(MDCellType initCell_) : initCell(std::move(initCell_)), numSample(0) {
         buffer.resize(getNumParticle(), 3);
-        buffer = ScalarType(0);
+        buffer = T(0);
     }
 
-    template<class ScalarType, unsigned int Dim>
-    void MSD<ScalarType, Dim>::sample(const MDCellType& sample) {
+    template<Scalar T, unsigned int Dim>
+    void MSD<T, Dim>::sample(const MDCellType& sample) {
         const size_t numParticle = getNumParticle();
         const auto& pos = sample.getPos();
         for (size_t i = 0; i < numParticle; ++i) {
@@ -75,26 +75,26 @@ namespace Physica::Core {
         numSample += 1;
     }
 
-    template<class ScalarType, unsigned int Dim>
+    template<Scalar T, unsigned int Dim>
     template<size_t NumReplica, class ForceMatrixAllocator>
-    inline void MSD<ScalarType, Dim>::sample(const RPMD<ScalarType, Dim, NumReplica, ForceMatrixAllocator>& rpmd) {
+    inline void MSD<T, Dim>::sample(const RPMD<T, Dim, NumReplica, ForceMatrixAllocator>& rpmd) {
         for (size_t i = 0; i < rpmd.getNumReplica(); ++i)
             sample(rpmd.phaseToCell(i));
     }
 
-    template<class ScalarType, unsigned int Dim>
-    VectorND<ScalarType> MSD<ScalarType, Dim>::calcAtomMSD() const {
+    template<Scalar T, unsigned int Dim>
+    VectorND<T> MSD<T, Dim>::calcAtomMSD() const {
         const size_t numParticle = getNumParticle();
-        VectorND<ScalarType> result(numParticle);
+        VectorND<T> result(numParticle);
         for (size_t i = 0; i < numParticle; ++i)
             result[i] = buffer.row(i).sum();
         return result;
     }
 
-    template<class ScalarType, unsigned int Dim>
-    VectorND<ScalarType> MSD<ScalarType, Dim>::calcAtomMSD2D() const {
+    template<Scalar T, unsigned int Dim>
+    VectorND<T> MSD<T, Dim>::calcAtomMSD2D() const {
         const size_t numParticle = getNumParticle();
-        VectorND<ScalarType> result(numParticle);
+        VectorND<T> result(numParticle);
         for (size_t i = 0; i < numParticle; ++i) {
             const auto row = buffer.row(i);
             result[i] = row[0] + row[1];
@@ -104,19 +104,19 @@ namespace Physica::Core {
     /**
      * \returns MSD cannot larger than this value because of finite size effect
      */
-    template<class ScalarType, unsigned int Dim>
-    inline ScalarType MSD<ScalarType, Dim>::calcFiniteSizeLimit(size_t atomId) const noexcept {
+    template<Scalar T, unsigned int Dim>
+    inline T MSD<T, Dim>::calcFiniteSizeLimit(size_t atomId) const noexcept {
         return initCell.minDistVector(atomId, atomId).squaredNorm();
     }
 
-    template<class ScalarType, unsigned int Dim>
-    void MSD<ScalarType, Dim>::clear() {
-        buffer = ScalarType(0);
+    template<Scalar T, unsigned int Dim>
+    void MSD<T, Dim>::clear() {
+        buffer = T(0);
         numSample = 0;
     }
 
-    template<class ScalarType, unsigned int Dim>
-    void MSD<ScalarType, Dim>::swap(MSD& __restrict obj) noexcept {
+    template<Scalar T, unsigned int Dim>
+    void MSD<T, Dim>::swap(MSD& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         initCell.swap(obj.initCell);
         buffer.swap(obj.buffer);

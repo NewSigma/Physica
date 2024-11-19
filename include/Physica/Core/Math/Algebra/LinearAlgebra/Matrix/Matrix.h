@@ -21,8 +21,17 @@
 #include <cstdlib>
 #include <utility>
 #include <Physica/Macro.h>
+#include <Physica/Core/Utils/CUDA/device_obj.cuh>
 
 namespace Physica::Core {
+    template<class Derived> class RValueMatrix;
+    template<class Derived> class LValueMatrix;
+
+    template<class T>
+    concept Matrix = std::derived_from<T, RValueMatrix<T>> || std::derived_from<T, device_obj<RValueMatrix<T>>>;
+
+    template<class T>
+    concept LMatrix = std::derived_from<T, LValueMatrix<T>> || std::derived_from<T, device_obj<LValueMatrix<T>>>;
     /**
      * This enum decides how the data is stored in a matrix.
      * A dense matrix can be stored as elements or vectors in rows or cols.
@@ -40,96 +49,96 @@ namespace Physica::Core {
             AnyStorage = 0b1000
         };
     public:
-        template<class Matrix>
+        template<class MatrixType>
         __host__ __device__ constexpr static bool isColMatrix() {
-            return isAnyMajor<Matrix>() || !(Traits<Matrix>::Option & Row);
+            return isAnyMajor<MatrixType>() || !(Traits<MatrixType>::Option & Row);
         }
 
-        template<class Matrix>
+        template<class MatrixType>
         __host__ __device__ constexpr static bool isRowMatrix() {
-            return isAnyMajor<Matrix>() || !isColMatrix<Matrix>();
+            return isAnyMajor<MatrixType>() || !isColMatrix<MatrixType>();
         }
 
-        template<class Matrix>
+        template<class MatrixType>
         __host__ __device__ constexpr static bool isAnyMajor() {
-            return Traits<Matrix>::Option & AnyMajor;
+            return Traits<MatrixType>::Option & AnyMajor;
         }
 
-        template<class Matrix>
+        template<class MatrixType>
         __host__ __device__ constexpr static int getMajor() {
-            return isAnyMajor<Matrix>() ? AnyMajor : (isColMatrix<Matrix>() ? Col : Row);
+            return isAnyMajor<MatrixType>() ? AnyMajor : (isColMatrix<MatrixType>() ? Col : Row);
         }
 
-        template<class Matrix>
+        template<class MatrixType>
         __host__ __device__ constexpr static bool isElementMatrix() {
-            return isAnyStorage<Matrix>() || Traits<Matrix>::Option & Element;
+            return isAnyStorage<MatrixType>() || Traits<MatrixType>::Option & Element;
         }
 
-        template<class Matrix>
+        template<class MatrixType>
         __host__ __device__ constexpr static bool isVectorMatrix() {
-            return isAnyStorage<Matrix>() || !isElementMatrix<Matrix>();
+            return isAnyStorage<MatrixType>() || !isElementMatrix<MatrixType>();
         }
 
-        template<class Matrix>
+        template<class MatrixType>
         __host__ __device__ constexpr static bool isAnyStorage() {
-            return Traits<Matrix>::Option & AnyStorage;
+            return Traits<MatrixType>::Option & AnyStorage;
         }
 
-        template<class Matrix>
+        template<class MatrixType>
         __host__ __device__ constexpr static int getStorage() {
-            return isAnyStorage<Matrix>() ? AnyStorage : (isElementMatrix<Matrix>() ? Element : Vector);
+            return isAnyStorage<MatrixType>() ? AnyStorage : (isElementMatrix<MatrixType>() ? Element : Vector);
         }
 
-        template<class Matrix1, class Matrix2>
-        __host__ __device__ constexpr static bool isSameMajor() { return isColMatrix<Matrix1>() == isColMatrix<Matrix2>(); }
+        template<class MatrixType1, class MatrixType2>
+        __host__ __device__ constexpr static bool isSameMajor() { return getMajor<MatrixType1>() == getMajor<MatrixType2>(); }
 
-        template<class Matrix1, class Matrix2>
-        __host__ __device__ constexpr static bool isSameStorage() { return isElementMatrix<Matrix1>() == isElementMatrix<Matrix2>(); }
+        template<class MatrixType1, class MatrixType2>
+        __host__ __device__ constexpr static bool isSameStorage() { return getStorage<MatrixType1>() == getStorage<MatrixType2>(); }
 
-        template<class Matrix>
+        template<class MatrixType>
         [[nodiscard]] __host__ __device__ constexpr static size_t selectMajor(size_t row, size_t col) {
-            return isColMatrix<Matrix>() ? col : row;
+            return isColMatrix<MatrixType>() ? col : row;
         }
 
-        template<class Matrix>
+        template<class MatrixType>
         [[nodiscard]] __host__ __device__ constexpr static size_t selectMinor(size_t row, size_t col) {
-            return isColMatrix<Matrix>() ? row : col;
+            return isColMatrix<MatrixType>() ? row : col;
         }
 
-        template<class Matrix>
-        [[nodiscard]] __host__ __device__ static size_t getMaxMajor(const Matrix& mat) noexcept {
-            return isColMatrix<Matrix>() ? mat.getCol() : mat.getRow();
+        template<class MatrixType>
+        [[nodiscard]] __host__ __device__ static size_t getMaxMajor(const MatrixType& mat) noexcept {
+            return isColMatrix<MatrixType>() ? mat.getCol() : mat.getRow();
         }
 
-        template<class Matrix>
-        [[nodiscard]] __host__ __device__ static size_t getMaxMinor(const Matrix& mat) noexcept {
-            return isColMatrix<Matrix>() ? mat.getRow() : mat.getCol();
+        template<class MatrixType>
+        [[nodiscard]] __host__ __device__ static size_t getMaxMinor(const MatrixType& mat) noexcept {
+            return isColMatrix<MatrixType>() ? mat.getRow() : mat.getCol();
         }
 
-        template<class Matrix>
+        template<class MatrixType>
         [[nodiscard]] __host__ __device__ constexpr static size_t rowFromMajorMinor(size_t major, size_t minor) noexcept {
-            return isColMatrix<Matrix>() ? minor : major;
+            return isColMatrix<MatrixType>() ? minor : major;
         }
 
-        template<class Matrix>
+        template<class MatrixType>
         [[nodiscard]] __host__ __device__ constexpr static size_t colFromMajorMinor(size_t major, size_t minor) noexcept {
-            return isColMatrix<Matrix>() ? major : minor;
+            return isColMatrix<MatrixType>() ? major : minor;
         }
 
-        template<class Matrix>
+        template<class MatrixType>
         [[nodiscard]] __host__ __device__ constexpr static bool isSymmMatrix() noexcept {
-            using TransposeType = decltype(std::declval<Matrix>().transpose());
+            using TransposeType = decltype(std::declval<MatrixType>().transpose());
             using TransposeType1 = typename std::remove_cv<TransposeType>::type;
             using TransposeType2 = typename std::remove_reference<TransposeType1>::type;
-            return std::is_base_of<TransposeType2, Matrix>::value;
+            return std::is_base_of<TransposeType2, MatrixType>::value;
         }
 
-        template<class Matrix>
+        template<class MatrixType>
         [[nodiscard]] __host__ __device__ constexpr static bool isHermiteMatrix() noexcept {
-            using HermiteType = decltype(std::declval<Matrix>().hermite());
+            using HermiteType = decltype(std::declval<MatrixType>().hermite());
             using HermiteType1 = typename std::remove_cv<HermiteType>::type;
             using HermiteType2 = typename std::remove_reference<HermiteType1>::type;
-            return std::is_base_of<HermiteType2, Matrix>::value;
+            return std::is_base_of<HermiteType2, MatrixType>::value;
         }
     private:
         MatrixOption();

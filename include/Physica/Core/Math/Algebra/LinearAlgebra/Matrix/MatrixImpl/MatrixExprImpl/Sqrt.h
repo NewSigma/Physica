@@ -19,10 +19,10 @@
 #pragma once
 
 namespace Physica::Core {
-    template<class MatrixType>
-    class MatrixExpr<ExprType::Sqrt, MatrixType>
-            : public UnitaryMatrixExpr<ExprType::Sqrt, MatrixType> {
-        using Base = UnitaryMatrixExpr<ExprType::Sqrt, MatrixType>;
+    template<Matrix T>
+    class MatrixExpr<ExprType::Sqrt, T>
+            : public UnitaryMatrixExpr<ExprType::Sqrt, T> {
+        using Base = UnitaryMatrixExpr<ExprType::Sqrt, T>;
     public:
         using typename Base::ScalarType;
     public:
@@ -31,8 +31,8 @@ namespace Physica::Core {
         [[nodiscard]] ScalarType calc(size_t row, size_t col) const { return sqrt(Base::getExpr().calc(row, col)); }
     };
 
-    template<class MatrixType>
-    [[nodiscard]] inline auto sqrt_elem(const RValueMatrix<MatrixType>& m) noexcept {
-        return MatrixExpr<ExprType::Sqrt, MatrixType>(m.getDerived());
+    template<Matrix T>
+    [[nodiscard]] inline auto sqrt_elem(const T& m) noexcept {
+        return MatrixExpr<ExprType::Sqrt, T>(m);
     }
 }

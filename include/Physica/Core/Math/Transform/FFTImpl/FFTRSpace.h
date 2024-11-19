@@ -41,8 +41,8 @@ namespace Physica::Core {
         using VectorBase::operator=;
         using VectorBase::operator[];
         /* Operations */
-        template<class VectorType>
-        inline void transform(const RValueVector<VectorType>& data);
+        template<Vector T>
+        inline void transform(const T& data);
         void resize([[maybe_unused]] size_t length) { assert(length == getLength()); }
         /* Getters */
         [[nodiscard]] __host__ __device__ size_t getLength() const noexcept { return Base::getDerived().getRSpaceSize(); }
@@ -63,8 +63,8 @@ namespace Physica::Core {
     }
 
     template<class Derived>
-    template<class VectorType>
-    inline void FFTRSpace<Derived, 1>::transform(const RValueVector<VectorType>& data) {
+    template<Vector T>
+    inline void FFTRSpace<Derived, 1>::transform(const T& data) {
         assert(data.getLength() == getLength());
         *this = data;
         Base::getDerived().transform();
@@ -104,8 +104,8 @@ namespace Physica::Core {
         using MatrixBase::operator=;
         using MatrixBase::operator();
         /* Operations */
-        template<class MatrixType>
-        inline void transform(const RValueMatrix<MatrixType>& data);
+        template<Matrix T>
+        inline void transform(const T& data);
         void resize([[maybe_unused]] size_t row, [[maybe_unused]] size_t col) { assert(row == getRow()); assert(col == getCol()); }
         /* Getters */
         [[nodiscard]] __host__ __device__ size_t getRow() const noexcept { return Base::getDerived().getRSpaceSize()[0]; }
@@ -126,8 +126,8 @@ namespace Physica::Core {
     }
 
     template<class Derived>
-    template<class MatrixType>
-    inline void FFTRSpace<Derived, 2>::transform(const RValueMatrix<MatrixType>& data) {
+    template<Matrix T>
+    inline void FFTRSpace<Derived, 2>::transform(const T& data) {
         assert(data.getRow() == getRow());
         assert(data.getCol() == getCol());
         *this = data;
@@ -173,7 +173,7 @@ namespace Physica::Core {
         using GridBase::operator=;
         using GridBase::operator();
         /* Operations */
-        template<class GridType> inline void transform(const LValueGrid<GridType>& data);
+        template<Grid T> inline void transform(const LValueGrid<T>& data);
         inline void resize([[maybe_unused]] Index3D size);
         using GridBase::forIndexInGrid;
         /* Getters */
@@ -196,8 +196,8 @@ namespace Physica::Core {
     }
 
     template<class Derived>
-    template<class GridType>
-    inline void FFTRSpace<Derived, 3>::transform(const LValueGrid<GridType>& data) {
+    template<Grid T>
+    inline void FFTRSpace<Derived, 3>::transform(const LValueGrid<T>& data) {
         assert(data.getDimX() == getDimX());
         assert(data.getDimY() == getDimY());
         assert(data.getDimZ() == getDimZ());
@@ -234,8 +234,6 @@ namespace Physica::Core {
 }
 
 namespace Physica {
-    using namespace Core;
-
     template<class T>
     class Traits<FFTRSpace<T, 1>> {
         static_assert(Traits<T>::Dim == 1, "[Error]: Inconsistent template param");

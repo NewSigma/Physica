@@ -30,13 +30,13 @@ namespace Physica::Core {
      * Reference:
      * [1] Phys. Rev. Lett. 64, 1955 (1990); https://doi.org/10.1103/PhysRevLett.64.1955
      */
-    template<class ScalarType, class EwaldType, bool AvoidTooNear>
-    class BKSModel : public PairModel<BKSModel<ScalarType, EwaldType, AvoidTooNear>> {
-        using This = BKSModel<ScalarType, EwaldType, AvoidTooNear>;
+    template<Scalar T, class EwaldType, bool AvoidTooNear>
+    class BKSModel : public PairModel<BKSModel<T, EwaldType, AvoidTooNear>> {
+        using This = BKSModel<T, EwaldType, AvoidTooNear>;
         using Base = PairModel<This>;
-        using AABModelType = AABModel<ScalarType>;
+        using AABModelType = AABModel<T>;
         using REwaldType = typename Traits<EwaldType>::REwaldType;
-        using DoublePotType = typename std::conditional<AvoidTooNear, ScalarType, PlainStruct<void>>::type;
+        using DoublePotType = typename std::conditional<AvoidTooNear, T, PlainStruct<void>>::type;
     public:
         using typename Base::ValueType;
         using typename Base::MDCellType;
@@ -70,16 +70,16 @@ namespace Physica::Core {
         /* Operators */
         BKSModel& operator=(BKSModel obj) noexcept { swap(obj); return *this; }
         /* Operations */
-        [[nodiscard]] ScalarType pot_functor(size_t i, size_t j, ScalarType r, ScalarType r2) const;
-        [[nodiscard]] ScalarType force_functor(size_t i, size_t j, ScalarType r, ScalarType r2) const;
+        [[nodiscard]] T pot_functor(size_t i, size_t j, T r, T r2) const;
+        [[nodiscard]] T force_functor(size_t i, size_t j, T r, T r2) const;
 
-        [[nodiscard]] inline ScalarType potentialV(const MDCellType& cell) const;
+        [[nodiscard]] inline T potentialV(const MDCellType& cell) const;
 
-        template<class Executor> [[nodiscard]] VectorND<ScalarType> force(const MDCellType& cell);
-        template<class VectorType, class Executor>
-        void forceAsync(const MDCellType& cell, ContinuousVector<VectorType>& result);
-        template<class Executor> [[nodiscard]] VectorND<ScalarType> force_short(const MDCellType& cell) const;
-        template<class Executor> [[nodiscard]] inline VectorND<ScalarType> force_long(const MDCellType& cell);
+        template<class Executor> [[nodiscard]] VectorND<T> force(const MDCellType& cell);
+        template<Vector V, class Executor>
+        void forceAsync(const MDCellType& cell, ContinuousVector<V>& result);
+        template<class Executor> [[nodiscard]] VectorND<T> force_short(const MDCellType& cell) const;
+        template<class Executor> [[nodiscard]] inline VectorND<T> force_long(const MDCellType& cell);
 
         [[nodiscard]] inline LatticeMatrix virial(const MDCellType& cell);
         void swap(BKSModel& __restrict obj) noexcept;
@@ -91,14 +91,14 @@ namespace Physica::Core {
         /* Setters */
         inline void setLattice(LatticeMatrix lattice);
         /* Static members */
-        inline static PermutationMatrix<ScalarType> sortPosition(MDCellType& cell);
+        inline static PermutationMatrix<T> sortPosition(MDCellType& cell);
     private:
-        [[nodiscard]] inline static ScalarType pot_functor_impl(ScalarType A, ScalarType b, ScalarType c, ScalarType r, ScalarType r2);
+        [[nodiscard]] inline static T pot_functor_impl(T A, T b, T c, T r, T r2);
         [[nodiscard]] inline static bool isCellOrdered(const MDCellType& cell);
     };
 
-    template<class ScalarType, class EwaldType, bool AvoidTooNear>
-    BKSModel<ScalarType, EwaldType, AvoidTooNear>::BKSModel(const MDCellType& refer_cell, ValueType cutoff, EwaldType ewald_)
+    template<Scalar T, class EwaldType, bool AvoidTooNear>
+    BKSModel<T, EwaldType, AvoidTooNear>::BKSModel(const MDCellType& refer_cell, ValueType cutoff, EwaldType ewald_)
             : Base(cutoff)
             , ewald(std::move(ewald_)) {
         assert(refer_cell.getNumParticle() % 3 == 0 && "[Error]: This is not a cell of SiO2");
@@ -110,42 +110,42 @@ namespace Physica::Core {
         }
     }
 
-    template<class ScalarType, class EwaldType, bool AvoidTooNear>
-    ScalarType BKSModel<ScalarType, EwaldType, AvoidTooNear>::pot_functor(size_t i, size_t j, ScalarType r, ScalarType r2) const {
+    template<Scalar T, class EwaldType, bool AvoidTooNear>
+    T BKSModel<T, EwaldType, AvoidTooNear>::pot_functor(size_t i, size_t j, T r, T r2) const {
         const size_t numMolecule = getNumMolecule();
         if (i > j)
             std::swap(i, j);
         const bool isSiSi = i >= 2 * numMolecule;
         if (isSiSi)
-            return ScalarType(0);
+            return T(0);
         const bool isOO = j < 2 * numMolecule;
         const double A = isOO ? A_OO : A_SiO;
         const double b = isOO ? b_OO : b_SiO;
         const double c = isOO ? c_OO : c_SiO;
-        const ScalarType pot = pot_functor_impl(A, b, c, r, r2);
+        const T pot = pot_functor_impl(A, b, c, r, r2);
         if constexpr (AvoidTooNear) {
             const double r0 = isOO ? r0_OO : r0_SiO;
-            const ScalarType doublePot0 = isOO ? doublePot0_OO : doublePot0_SiO;
+            const T doublePot0 = isOO ? doublePot0_OO : doublePot0_SiO;
             return r < r0 ? (doublePot0 - pot) : pot;
         }
         else
             return pot;
     }
 
-    template<class ScalarType, class EwaldType, bool AvoidTooNear>
-    ScalarType BKSModel<ScalarType, EwaldType, AvoidTooNear>::force_functor(size_t i, size_t j, ScalarType r, ScalarType r2) const {
+    template<Scalar T, class EwaldType, bool AvoidTooNear>
+    T BKSModel<T, EwaldType, AvoidTooNear>::force_functor(size_t i, size_t j, T r, T r2) const {
         const size_t numMolecule = getNumMolecule();
         if (i > j)
             std::swap(i, j);
         const bool isSiSi = i >= 2 * numMolecule;
         if (isSiSi)
-            return ScalarType(0);
+            return T(0);
         const bool isOO = j < 2 * numMolecule;
         const double A = isOO ? A_OO : A_SiO;
         const double b = isOO ? b_OO : b_SiO;
         const double c = isOO ? c_OO : c_SiO;
-        const ScalarType r4 = square(r2);
-        const ScalarType f = ScalarType(A * b) * exp(ScalarType(-b) * r) - ScalarType(6 * c) / (r * r2 * r4);
+        const T r4 = square(r2);
+        const T f = T(A * b) * exp(T(-b) * r) - T(6 * c) / (r * r2 * r4);
         if constexpr (AvoidTooNear) {
             const double r0 = isOO ? r0_OO : r0_SiO;
             return r < r0 ? -f : f;
@@ -154,53 +154,53 @@ namespace Physica::Core {
             return f;
     }
 
-    template<class ScalarType, class EwaldType, bool AvoidTooNear>
-    inline ScalarType BKSModel<ScalarType, EwaldType, AvoidTooNear>::potentialV(const MDCellType& cell) const {
+    template<Scalar T, class EwaldType, bool AvoidTooNear>
+    inline T BKSModel<T, EwaldType, AvoidTooNear>::potentialV(const MDCellType& cell) const {
         return Base::potentialV(cell) + ewald.potentialV(cell.getPos());
     }
 
-    template<class ScalarType, class EwaldType, bool AvoidTooNear>
+    template<Scalar T, class EwaldType, bool AvoidTooNear>
     template<class Executor>
-    VectorND<ScalarType> BKSModel<ScalarType, EwaldType, AvoidTooNear>::force(const MDCellType& cell) {
-        VectorND<ScalarType> result;
-        forceAsync<VectorND<ScalarType>, Executor>(cell, result);
+    VectorND<T> BKSModel<T, EwaldType, AvoidTooNear>::force(const MDCellType& cell) {
+        VectorND<T> result;
+        forceAsync<VectorND<T>, Executor>(cell, result);
         return result;
     }
 
-    template<class ScalarType, class EwaldType, bool AvoidTooNear>
-    template<class VectorType, class Executor>
-    void BKSModel<ScalarType, EwaldType, AvoidTooNear>::forceAsync(const MDCellType& cell, ContinuousVector<VectorType>& result) {
+    template<Scalar T, class EwaldType, bool AvoidTooNear>
+    template<Vector V, class Executor>
+    void BKSModel<T, EwaldType, AvoidTooNear>::forceAsync(const MDCellType& cell, ContinuousVector<V>& result) {
         static_assert(!Traits<Executor>::UseCUDA, "[Error]: CUDA is not supported");
         assert(cell.getNumParticle() % 3 == 0);
         auto future = Executor::schedule([this, &cell, &result]() {
             result = force_short<Executor>(cell);
         });
 
-        const VectorND<ScalarType> coulomb = force_long<Executor>(cell);
+        const VectorND<T> coulomb = force_long<Executor>(cell);
         Executor::auto_wait(future);
         result += coulomb;
     }
 
-    template<class ScalarType, class EwaldType, bool AvoidTooNear>
+    template<Scalar T, class EwaldType, bool AvoidTooNear>
     template<class Executor>
-    VectorND<ScalarType> BKSModel<ScalarType, EwaldType, AvoidTooNear>::force_short(const MDCellType& cell) const {
+    VectorND<T> BKSModel<T, EwaldType, AvoidTooNear>::force_short(const MDCellType& cell) const {
         return Base::template force_short<Executor>(cell);
     }
 
-    template<class ScalarType, class EwaldType, bool AvoidTooNear>
+    template<Scalar T, class EwaldType, bool AvoidTooNear>
     template<class Executor>
-    inline VectorND<ScalarType> BKSModel<ScalarType, EwaldType, AvoidTooNear>::force_long(const MDCellType& cell) {
+    inline VectorND<T> BKSModel<T, EwaldType, AvoidTooNear>::force_long(const MDCellType& cell) {
         return ewald.template force<Executor>(cell.getPos());
     }
 
-    template<class ScalarType, class EwaldType, bool AvoidTooNear>
-    typename BKSModel<ScalarType, EwaldType, AvoidTooNear>::LatticeMatrix
-    inline BKSModel<ScalarType, EwaldType, AvoidTooNear>::virial(const MDCellType& cell) {
+    template<Scalar T, class EwaldType, bool AvoidTooNear>
+    typename BKSModel<T, EwaldType, AvoidTooNear>::LatticeMatrix
+    inline BKSModel<T, EwaldType, AvoidTooNear>::virial(const MDCellType& cell) {
         return Base::virial(cell) + ewald.virial(cell.getPos());
     }
 
-    template<class ScalarType, class EwaldType, bool AvoidTooNear>
-    void BKSModel<ScalarType, EwaldType, AvoidTooNear>::swap(BKSModel& __restrict obj) noexcept {
+    template<Scalar T, class EwaldType, bool AvoidTooNear>
+    void BKSModel<T, EwaldType, AvoidTooNear>::swap(BKSModel& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         ewald.swap(obj.ewald);
         if constexpr (AvoidTooNear) {
@@ -209,31 +209,31 @@ namespace Physica::Core {
         }
     }
 
-    template<class ScalarType, class EwaldType, bool AvoidTooNear>
-    inline void BKSModel<ScalarType, EwaldType, AvoidTooNear>::setLattice(LatticeMatrix lattice) {
+    template<Scalar T, class EwaldType, bool AvoidTooNear>
+    inline void BKSModel<T, EwaldType, AvoidTooNear>::setLattice(LatticeMatrix lattice) {
         ewald.setLattice(std::move(lattice));
     }
 
-    template<class ScalarType, class EwaldType, bool AvoidTooNear>
-    inline PermutationMatrix<ScalarType> BKSModel<ScalarType, EwaldType, AvoidTooNear>::sortPosition(MDCellType& cell) {
+    template<Scalar T, class EwaldType, bool AvoidTooNear>
+    inline PermutationMatrix<T> BKSModel<T, EwaldType, AvoidTooNear>::sortPosition(MDCellType& cell) {
         return AABModelType::sortPosition(cell, 8, 14);
     }
 
-    template<class ScalarType, class EwaldType, bool AvoidTooNear>
-    inline ScalarType BKSModel<ScalarType, EwaldType, AvoidTooNear>::pot_functor_impl(
-            ScalarType A, ScalarType b, ScalarType c, ScalarType r, ScalarType r2) {
-        const ScalarType r4 = square(r2);
+    template<Scalar T, class EwaldType, bool AvoidTooNear>
+    inline T BKSModel<T, EwaldType, AvoidTooNear>::pot_functor_impl(
+            T A, T b, T c, T r, T r2) {
+        const T r4 = square(r2);
         return A * exp(-b * r) - c / (r2 * r4);
     }
 
-    template<class ScalarType, class EwaldType, bool AvoidTooNear>
-    inline bool BKSModel<ScalarType, EwaldType, AvoidTooNear>::isCellOrdered(const MDCellType& cell) {
+    template<Scalar T, class EwaldType, bool AvoidTooNear>
+    inline bool BKSModel<T, EwaldType, AvoidTooNear>::isCellOrdered(const MDCellType& cell) {
         return AABModelType::isCellOrdered(cell, 8, 14);
     }
 }
 
 namespace Physica {
-    template<class T, class EwaldType, bool AvoidTooNear>
+    template<Scalar T, class EwaldType, bool AvoidTooNear>
     class Traits<Core::BKSModel<T, EwaldType, AvoidTooNear>> {
     public:
         using ScalarType = T;

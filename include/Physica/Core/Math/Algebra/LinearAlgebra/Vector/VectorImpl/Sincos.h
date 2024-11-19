@@ -21,19 +21,19 @@
 #include "vectorclass/vectormath_trig.h"
 
 namespace Physica::Core {
-    template<class VectorType1, class VectorType2>
-    void sincos(const RValueVector<VectorType1>& x, LValueVector<VectorType2>& s, LValueVector<VectorType2>& c) {
+    template<Vector T1, LVector T2>
+    void sincos(const T1& x, T2& s, T2& c) {
         assert(x.getLength() == s.getLength() && x.getLength() == c.getLength());
-        constexpr static size_t Size1 = VectorType1::SizeAtCompile;
-        constexpr static size_t Size2 = VectorType2::SizeAtCompile;
+        constexpr static size_t Size1 = T1::SizeAtCompile;
+        constexpr static size_t Size2 = T2::SizeAtCompile;
         constexpr static size_t SizeAtCompile = Size1 > Size2 ? Size1 : Size2;
-        using ScalarType1 = typename VectorType1::ScalarType;
-        using ScalarType2 = typename VectorType2::ScalarType;
+        using ScalarType1 = typename T1::ScalarType;
+        using ScalarType2 = typename T2::ScalarType;
         using ScalarType = typename Internal::BinaryScalarOpReturnType<ScalarType1, ScalarType2>::Type;
         using PacketType = typename BestPacket<ScalarType, SizeAtCompile>::Type;
         if constexpr (PacketType::size() == 1) {
             for (size_t i = 0; i < x.getLength(); ++i)
-                sincos(x.getDerived().calc(i), s[i], c[i]);
+                sincos(x.calc(i), s[i], c[i]);
         }
         else {
             const size_t length = x.getLength();
@@ -41,23 +41,23 @@ namespace Physica::Core {
             const size_t to = length / PacketType::size() * PacketType::size();
             PacketType s_buffer, c_buffer;
             for (; i < to; i += PacketType::size()) {
-                sincos(x.getDerived().template packet<PacketType>(i), s_buffer, c_buffer);
-                s.getDerived().writePacket(i, s_buffer);
-                c.getDerived().writePacket(i, c_buffer);
+                sincos(x.template packet<PacketType>(i), s_buffer, c_buffer);
+                s.writePacket(i, s_buffer);
+                c.writePacket(i, c_buffer);
             }
             if (to != length) {
                 const size_t count = length - i;
-                sincos(x.getDerived().template packetPartial<PacketType>(i, count), s_buffer, c_buffer);
-                s.getDerived().writePacketPartial(i, count, s_buffer);
-                c.getDerived().writePacketPartial(i, count, c_buffer);
+                sincos(x.template packetPartial<PacketType>(i, count), s_buffer, c_buffer);
+                s.writePacketPartial(i, count, s_buffer);
+                c.writePacketPartial(i, count, c_buffer);
             }
         }
 
-        constexpr bool isV2Continuous = std::is_base_of<ContinuousVector<VectorType2>, VectorType2>::value;
+        constexpr bool isContinuous = is_continuous<T2>::value;
         constexpr bool isReverseDiff = ScalarType::isReverseDiff;
-        if constexpr (isReverseDiff && isV2Continuous) {
-            s.getDerived().makeContinuous();
-            c.getDerived().makeContinuous();
+        if constexpr (isContinuous && isReverseDiff) {
+            s.makeContinuous();
+            c.makeContinuous();
         }
     }
 }

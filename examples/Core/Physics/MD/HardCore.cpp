@@ -72,7 +72,7 @@ int main(int argc, char** argv) {
     for (size_t i = 0; i < record.getRow(); ++i) {
         ForceModel forceModel{};
         rpmd.nve_step<KineticModel, ForceModel, SequentialExecutor>(kineticModel, forceModel);
-        record.row(i) = rpmd.getRingPolymer().makeBeadPos(0).transpose();
+        record.row(i) = rpmd.getRingPolymer().makeBeadPos(0).col(0);
     }
     const VectorType t = VectorType::linspace(0, record.getRow() * timeStep, record.getRow());
 

@@ -19,17 +19,17 @@
 #pragma once
 
 namespace Physica::Core {
-    template<class VectorType, Scalar T>
-    class VectorExpr<ExprType::Mul, VectorType, T>
-            : public BinaryVectorExpr<ExprType::Mul, VectorType, T> {
-        using Base = BinaryVectorExpr<ExprType::Mul, VectorType, T>;
+    template<Vector T, Scalar U>
+    class VectorExpr<ExprType::Mul, T, U>
+            : public BinaryVectorExpr<ExprType::Mul, T, U> {
+        using Base = BinaryVectorExpr<ExprType::Mul, T, U>;
     public:
         using typename Base::ScalarType;
     public:
         using Base::Base;
         /* Operations */
-        template<class OtherDerived, class Executor = SequentialExecutor>
-        inline void assignTo(LValueVector<OtherDerived>& v) const;
+        template<LVector V, class Executor = SequentialExecutor>
+        inline void assignTo(V& v) const;
 
         [[nodiscard]] ScalarType calc(size_t index) const { return ScalarType(Base::getLHS().calc(index)) * ScalarType(Base::getRHS()); }
 
@@ -46,22 +46,22 @@ namespace Physica::Core {
         [[nodiscard]] ScalarType sum() const { return Base::getLHS().sum() * Base::getRHS(); }
     };
 
-    template<class VectorType, Scalar T>
-    template<class OtherDerived, class Executor>
-    inline void VectorExpr<ExprType::Mul, VectorType, T>::assignTo(LValueVector<OtherDerived>& v) const {
-        constexpr bool FastAssign = Traits<VectorType>::FastAssign;
+    template<Vector T, Scalar U>
+    template<LVector V, class Executor>
+    inline void VectorExpr<ExprType::Mul, T, U>::assignTo(V& v) const {
+        constexpr bool FastAssign = Traits<T>::FastAssign;
         if constexpr (FastAssign) {
-            Base::getLHS().template assignTo<OtherDerived, Executor>(v.getDerived());
-            v.getDerived() *= Base::getRHS();
+            Base::getLHS().template assignTo<V, Executor>(v);
+            v *= Base::getRHS();
         }
         else
             Base::assignTo(v);
     }
 
-    template<class VectorType1, class VectorType2>
-    class VectorExpr<ExprType::Mul, VectorType1, VectorType2>
-            : public BinaryVectorExpr<ExprType::Mul, VectorType1, VectorType2> {
-        using Base = BinaryVectorExpr<ExprType::Mul, VectorType1, VectorType2>;
+    template<Vector T1, Vector T2>
+    class VectorExpr<ExprType::Mul, T1, T2>
+            : public BinaryVectorExpr<ExprType::Mul, T1, T2> {
+        using Base = BinaryVectorExpr<ExprType::Mul, T1, T2>;
     public:
         using Base::Base;
         /* Operations */
@@ -80,18 +80,18 @@ namespace Physica::Core {
         }
     };
 
-    template<class VectorType, Scalar T>
-    [[nodiscard]] inline auto operator*(const RValueVector<VectorType>& v, const T& x) noexcept {
-        return VectorExpr<ExprType::Mul, VectorType, T>(v.getDerived(), x);
+    template<Vector T, Scalar U>
+    [[nodiscard]] inline auto operator*(const T& v, const U& x) noexcept {
+        return VectorExpr<ExprType::Mul, T, U>(v, x);
     }
 
-    template<Scalar T, class VectorType>
-    [[nodiscard]] inline auto operator*(const T& x, const RValueVector<VectorType>& v) noexcept {
+    template<Vector T, Scalar U>
+    [[nodiscard]] inline auto operator*(const U& x, const T& v) noexcept {
         return v * x;
     }
     
-    template<class VectorType1, class VectorType2>
-    [[nodiscard]] inline auto hadamard(const RValueVector<VectorType1>& v1, const RValueVector<VectorType2>& v2) noexcept {
-        return VectorExpr<ExprType::Mul, VectorType1, VectorType2>(v1.getDerived(), v2.getDerived());
+    template<Vector T1, Vector T2>
+    [[nodiscard]] inline auto hadamard(const T1& v1, const T2& v2) noexcept {
+        return VectorExpr<ExprType::Mul, T1, T2>(v1, v2);
     }
 }

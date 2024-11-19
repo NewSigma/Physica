@@ -22,14 +22,14 @@
 #include "Element.h"
 
 namespace Physica::Core {
-    template<class ScalarType>
-    class Triangle1 : public Element<Triangle1<ScalarType>> {
+    template<Scalar T>
+    class Triangle1 : public Element<Triangle1<T>> {
     public:
-        using Base = Element<Triangle1<ScalarType>>;
+        using Base = Element<Triangle1<T>>;
         using typename Base::VectorType;
         using typename Base::MatrixType;
         using typename Base::IndexArray;
-        using PosArray = Array<VectorType, Traits<Triangle1<ScalarType>>::NumPoint>;
+        using PosArray = Array<VectorType, Traits<Triangle1<T>>::NumPoint>;
     private:
         PosArray pos;
     public:
@@ -48,9 +48,9 @@ namespace Physica::Core {
         [[nodiscard]] VectorType toLocalPos(VectorType globalPos) const;
         [[nodiscard]] VectorType toGlobalPos(VectorType localPos) const;
         /* Static members */
-        [[nodiscard]] static ScalarType baseFunc(size_t localNode, VectorType p);
-        [[nodiscard]] static ScalarType dBase_dr(size_t localNode, [[maybe_unused]] VectorType p);
-        [[nodiscard]] static ScalarType dBase_ds(size_t localNode, [[maybe_unused]] VectorType p);
+        [[nodiscard]] static T baseFunc(size_t localNode, VectorType p);
+        [[nodiscard]] static T dBase_dr(size_t localNode, [[maybe_unused]] VectorType p);
+        [[nodiscard]] static T dBase_ds(size_t localNode, [[maybe_unused]] VectorType p);
         [[nodiscard]] static VectorType grad(size_t localNode, [[maybe_unused]] VectorType p);
         [[nodiscard]] static Mesh<Triangle1> rectangle(VectorType bottomLeft,
                                                        VectorType topRight,
@@ -60,7 +60,7 @@ namespace Physica::Core {
 }
 
 namespace Physica {
-    template<class T>
+    template<Scalar T>
     class Traits<Core::Triangle1<T>> {
     public:
         constexpr static unsigned int Dim = 2;
@@ -68,7 +68,7 @@ namespace Physica {
         constexpr static unsigned int NumPoint = 3;
         constexpr static unsigned int DegreeOfFreedom = NumPoint * Order;
         using ScalarType = T;
-        using MatrixType = Core::DenseMatrix<ScalarType, MatrixOption::Col | MatrixOption::Element, Dim, Dim>;
+        using MatrixType = Core::DenseMatrix<T, MatrixOption::Col | MatrixOption::Element, Dim, Dim>;
     };
 }
 

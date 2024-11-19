@@ -39,7 +39,9 @@ namespace Physica::Core {
             template<Vector V>
             [[nodiscard]] V asVector() const;
         };
-        template<class VectorType> using DatasetType = SimpleDataset<VectorType, unsigned char>;
+
+        template<class T>
+        using DatasetType = SimpleDataset<T, unsigned char>;
     private:
         union IntDecomp {
             char c[4];

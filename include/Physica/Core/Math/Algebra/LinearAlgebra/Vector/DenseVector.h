@@ -20,7 +20,7 @@
 
 #include <Physica/Core/MultiPrecision/Real.h>
 #include <Physica/Core/Utils/Container/Array.h>
-#include <Physica/Core/Math/Algebra/LinearAlgebra/Matrix/MatrixOption.h>
+#include <Physica/Core/Math/Algebra/LinearAlgebra/Matrix/Matrix.h>
 #include "VectorImpl/ContinuousVector.h"
 
 namespace Physica::Core {
@@ -48,8 +48,8 @@ namespace Physica::Core {
         DenseVector(size_t length, const T& init);
         DenseVector(std::initializer_list<T> list);
         explicit DenseVector(Storage array) noexcept;
-        template<class Derived>
-        DenseVector(const RValueVector<Derived>& v);
+        template<Vector V>
+        DenseVector(const V& v);
         DenseVector(const This&) = default;
         DenseVector(This&&) noexcept = default;
         ~DenseVector() = default;
@@ -106,7 +106,7 @@ namespace Physica {
 }
 
 namespace std {
-    template<class T, size_t Length>
+    template<Physica::Core::Scalar T, size_t Length>
     inline void swap(Physica::Core::DenseVector<T, Length>& __restrict v1, Physica::Core::DenseVector<T, Length>& __restrict v2) noexcept {
         v1.swap(v2);
     }

@@ -21,9 +21,9 @@
 #include "PeriodicCell.h"
 
 namespace Physica::Core {
-    template<class ScalarType, unsigned int Dim>
-    class device_obj<PeriodicCell<ScalarType, Dim>> : public Internal::PeriodicCellImpl {
-        using host_obj = PeriodicCell<ScalarType, Dim>;
+    template<Scalar T, unsigned int Dim>
+    class device_obj<PeriodicCell<T, Dim>> : public Internal::PeriodicCellImpl {
+        using host_obj = PeriodicCell<T, Dim>;
         using This = device_obj<host_obj>;
     public:
         using LatticeMatrix = device_obj<typename host_obj::LatticeMatrix>;
@@ -32,7 +32,7 @@ namespace Physica::Core {
         using MomentumMatrix = PositionMatrix;
         using SearchRangeType = Array<ssize_t, Dim>;
     protected:
-        using VectorType = device_obj<DenseVector<ScalarType, Dim>>;
+        using VectorType = device_obj<DenseVector<T, Dim>>;
 
         LatticeMatrix lattice;
         PositionMatrix pos;
@@ -54,47 +54,47 @@ namespace Physica::Core {
         [[nodiscard]] __host__ __device__ const PositionMatrix& getPos() const noexcept { return pos; }
         [[nodiscard]] __host__ __device__ Type getType() const noexcept { return type; }
         [[nodiscard]] __host__ __device__ size_t getNumParticle() const noexcept { return pos.getRow(); }
-        [[nodiscard]] __device__ ScalarType getVolume() const noexcept { return getVolume(lattice); }
+        [[nodiscard]] __device__ T getVolume() const noexcept { return getVolume(lattice); }
         /* Setters */
         void setLattice(LatticeMatrix new_lattice) { lattice = std::move(new_lattice); }
         /* Static members */
-        [[nodiscard]] __device__ static ScalarType getVolume(const LatticeMatrix& lattice);
+        [[nodiscard]] __device__ static T getVolume(const LatticeMatrix& lattice);
     };
 
-    template<class ScalarType, unsigned int Dim>
-    device_obj<PeriodicCell<ScalarType, Dim>>::device_obj()
+    template<Scalar T, unsigned int Dim>
+    device_obj<PeriodicCell<T, Dim>>::device_obj()
             : lattice(LatticeMatrix::unitMatrix(Dim))
             , pos()
             , type(Type::Direct) {}
 
-    template<class ScalarType, unsigned int Dim>
-    device_obj<PeriodicCell<ScalarType, Dim>>::device_obj(size_t numParticle, Type type_)
+    template<Scalar T, unsigned int Dim>
+    device_obj<PeriodicCell<T, Dim>>::device_obj(size_t numParticle, Type type_)
             : device_obj() {
         pos.resize(numParticle, Dim);
         type = type_;
     }
 
-    template<class ScalarType, unsigned int Dim>
-    device_obj<PeriodicCell<ScalarType, Dim>>::device_obj(const host_obj& obj)
+    template<Scalar T, unsigned int Dim>
+    device_obj<PeriodicCell<T, Dim>>::device_obj(const host_obj& obj)
             : lattice(obj.lattice)
             , pos(obj.pos)
             , type(obj.type) {}
 
-    template<class ScalarType, unsigned int Dim>
-    void device_obj<PeriodicCell<ScalarType, Dim>>::swap(device_obj& __restrict obj) noexcept {
+    template<Scalar T, unsigned int Dim>
+    void device_obj<PeriodicCell<T, Dim>>::swap(device_obj& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         lattice.swap(obj.lattice);
         pos.swap(obj.pos);
         std::swap(type, obj.type);
     }
 
-    template<class ScalarType, unsigned int Dim>
-    __device__ ScalarType device_obj<PeriodicCell<ScalarType, Dim>>::getVolume(const LatticeMatrix& lattice) {
+    template<Scalar T, unsigned int Dim>
+    __device__ T device_obj<PeriodicCell<T, Dim>>::getVolume(const LatticeMatrix& lattice) {
         if constexpr (Dim == 1)
             return abs(lattice(0, 0));
         else if constexpr (Dim == 2)
             return (lattice.row(0).crossProduct(lattice.row(1))).compute().norm();
         else
-            return abs(VectorType(lattice.row(0).crossProduct(lattice.row(1))) * lattice.row(2).asVector());
+            return abs(VectorType(lattice.row(0).crossProduct(lattice.row(1))) * lattice.row(2));
     }
 }

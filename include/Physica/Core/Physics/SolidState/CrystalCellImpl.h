@@ -22,16 +22,16 @@
 #include "Physica/Core/IO/VASP/Poscar.h"
 
 namespace Physica::Core {
-    template<class ScalarType>
-    CrystalCell<ScalarType>::CrystalCell(Base base, AtomicArray atomicNumbers_)
+    template<Scalar T>
+    CrystalCell<T>::CrystalCell(Base base, AtomicArray atomicNumbers_)
             : Base(std::move(base))
             , atomicNumbers(std::move(atomicNumbers_)) {
         assert(Base::pos.getRow() == atomicNumbers.getLength());
     }
 
-    template<class ScalarType>
-    template<class OtherScalar>
-    CrystalCell<ScalarType>::CrystalCell(Poscar<OtherScalar> poscar) : Base(std::move(poscar)) {
+    template<Scalar T>
+    template<Scalar U>
+    CrystalCell<T>::CrystalCell(Poscar<U> poscar) : Base(std::move(poscar)) {
         assert(poscar.isElementTypeInitialized());
         atomicNumbers.reserve(Base::getNumParticle());
         size_t index = 0;
@@ -43,14 +43,14 @@ namespace Physica::Core {
         }
     }
 
-    template<class ScalarType>
-    CrystalCell<ScalarType>& CrystalCell<ScalarType>::operator=(CrystalCell cell) noexcept {
+    template<Scalar T>
+    CrystalCell<T>& CrystalCell<T>::operator=(CrystalCell cell) noexcept {
         swap(cell);
         return *this;
     }
 
-    template<class ScalarType>
-    void CrystalCell<ScalarType>::toSuperCell(unsigned int x, unsigned int y, unsigned int z) {
+    template<Scalar T>
+    void CrystalCell<T>::toSuperCell(unsigned int x, unsigned int y, unsigned int z) {
         const size_t numAtom = Base::getNumParticle();
         Base::template toSuperCell<ExtendCellOption::AtomMajor>(x, y, z);
         
@@ -67,15 +67,15 @@ namespace Physica::Core {
         atomicNumbers.swap(new_atomic);
     }
 
-    template<class ScalarType>
-    CrystalCell<ScalarType> CrystalCell<ScalarType>::makeSuperCell(unsigned int x, unsigned int y, unsigned int z) const {
+    template<Scalar T>
+    CrystalCell<T> CrystalCell<T>::makeSuperCell(unsigned int x, unsigned int y, unsigned int z) const {
         CrystalCell result = *this;
         result.toSuperCell(x, y, z);
         return result;
     }
 #ifdef PHYSICA_HDF5
-    template<class ScalarType>
-    H5Group CrystalCell<ScalarType>::read(const H5Location& loc, const char* name) {
+    template<Scalar T>
+    H5Group CrystalCell<T>::read(const H5Location& loc, const char* name) {
         const auto group = Base::read(loc, name);
         const auto dataset = group.template openDataSet<1>("AtomicNumber");
         const size_t numParticle = dataset.getSize(0);
@@ -86,8 +86,8 @@ namespace Physica::Core {
         return H5Group(group);
     }
 
-    template<class ScalarType>
-    H5Group CrystalCell<ScalarType>::write(H5Location& loc, const char* name) const {
+    template<Scalar T>
+    H5Group CrystalCell<T>::write(H5Location& loc, const char* name) const {
         auto group = Base::write(loc, name);
         const auto space = H5DataSpace<1>({Base::getNumParticle()});
         auto dataset = group.template createDataSet<1>("AtomicNumber", H5::PredType::NATIVE_UINT16, space);
@@ -95,23 +95,23 @@ namespace Physica::Core {
         return group;
     }
 #endif
-    template<class ScalarType>
-    void CrystalCell<ScalarType>::swap(CrystalCell& __restrict cell) noexcept {
+    template<Scalar T>
+    void CrystalCell<T>::swap(CrystalCell& __restrict cell) noexcept {
         assert(this != &cell && "[Error]: Self swap is likely a bug");
         Base::swap(cell);
         atomicNumbers.swap(cell.atomicNumbers);
     }
 
-    template<class ScalarType>
-    std::unordered_set<uint16_t> CrystalCell<ScalarType>::getSpecies() const noexcept {
+    template<Scalar T>
+    std::unordered_set<uint16_t> CrystalCell<T>::getSpecies() const noexcept {
         std::unordered_set<uint16_t> set{};
         for (size_t i = 0; i < atomicNumbers.getLength(); ++i)
             set.emplace(atomicNumbers[i]);
         return set;
     }
 
-    template<class ScalarType>
-    size_t CrystalCell<ScalarType>::getElectronCount() const {
+    template<Scalar T>
+    size_t CrystalCell<T>::getElectronCount() const {
         const size_t numParticle = Base::getNumParticle();
         size_t result = 0;
         for (size_t i = 0; i < numParticle; ++i)

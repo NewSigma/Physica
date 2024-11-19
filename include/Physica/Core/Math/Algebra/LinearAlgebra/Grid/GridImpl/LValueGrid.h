@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Weibo He.
+ * Copyright 2023-2024 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -41,17 +41,17 @@ namespace Physica::Core {
         using RefTy = typename ScalarType::RefTy;
         using ConstRefTy = typename ScalarType::ConstRefTy;
     public:
-        template<class OtherDerived>
-        Derived& operator=(const RValueGrid<OtherDerived>& other);
+        template<Grid T>
+        Derived& operator=(const T& other);
         Derived& operator=(const ScalarType& s);
         [[nodiscard]] ScalarType& operator()(size_t x, size_t y, size_t z) { return *data_ptr({x, y, z}); }
         [[nodiscard]] const ScalarType& operator()(size_t x, size_t y, size_t z) const { return *data_ptr({x, y, z}); }
         [[nodiscard]] ScalarType& operator()(Index3D index) { return *data_ptr(index); }
         [[nodiscard]] const ScalarType& operator()(Index3D index) const { return *data_ptr(index); }
-        template<Scalar T> void operator+=(const T& s) { (*this) = (*this) + s; }
-        template<Scalar T> void operator-=(const T& s) { (*this) = (*this) - s; }
-        template<Scalar T> void operator*=(const T& s) { (*this) = (*this) * s; }
-        template<Scalar T> void operator/=(const T& s) { (*this) = (*this) / s; }
+        template<Scalar T> void operator+=(const T& s) { Base::getDerived() = Base::getDerived() + s; }
+        template<Scalar T> void operator-=(const T& s) { Base::getDerived() = Base::getDerived() - s; }
+        template<Scalar T> void operator*=(const T& s) { Base::getDerived() = Base::getDerived() * s; }
+        template<Scalar T> void operator/=(const T& s) { Base::getDerived() = Base::getDerived() / s; }
         /* Operations */
         [[nodiscard]] inline LGridBlock<Derived> leftFrontBottomCorner(Index3D cornerIndex);
         [[nodiscard]] inline const LGridBlock<Derived> leftFrontBottomCorner(Index3D cornerIndex) const;
@@ -76,8 +76,8 @@ namespace Physica::Core {
 
         [[nodiscard]] FlattenGrid<Derived> flatten() const { return FlattenGrid<Derived>(Base::getDerived()); }
         void resize(Index3D size) { Base::getDerived().resize(size); }
-        template<class RandomGenerator> void random_uniform(RandomGenerator& gen);
-        template<class RandomGenerator> void random_normal(RandomGenerator& gen);
+        template<class RandomType> void random_uniform(RandomType& gen);
+        template<class RandomType> void random_normal(RandomType& gen);
         /* Getters */
         [[nodiscard]] ScalarType calc(Index3D index) const { return operator()(index); }
         [[nodiscard]] __host__ __device__ ScalarType* data_ptr(Index3D index) { return Base::getDerived().data_ptr(index); }
@@ -92,13 +92,13 @@ namespace Physica::Core {
         using Base::forIndexInGrid;
     };
 
-    template<class Derived, class OtherDerived>
-    inline void operator+=(LValueGrid<Derived>& g1, const RValueGrid<OtherDerived>& g2) {
+    template<Grid T, Grid U>
+    inline void operator+=(LValueGrid<T>& g1, const U& g2) {
         g1.getDerived() = g1.getDerived() + g2.getDerived();
     }
 
-    template<class Derived, class OtherDerived>
-    inline void operator-=(LValueGrid<Derived>& g1, const RValueGrid<OtherDerived>& g2) {
+    template<Grid T, Grid U>
+    inline void operator-=(LValueGrid<T>& g1, const U& g2) {
         g1.getDerived() = g1.getDerived() - g2.getDerived();
     }
 }

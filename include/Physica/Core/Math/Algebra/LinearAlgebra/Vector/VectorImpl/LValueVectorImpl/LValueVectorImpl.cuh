@@ -20,11 +20,10 @@
 
 namespace Physica::Core {
     namespace Internal {
-        template<class Derived, class ScalarType>
+        template<class Derived, Scalar T>
         __global__ void assignConst_kernel(
                 Physica::PlainStruct<Derived> target,
-                ScalarType constant) {
-            using namespace Physica::Core;
+                T constant) {
             const unsigned int delta = gridDim.x * blockDim.x;
             const unsigned int id = blockIdx.x * blockDim.x + threadIdx.x;
             const size_t length = target.getDerived().getLength();
@@ -55,16 +54,16 @@ namespace Physica::Core {
     template<Vector V>
     __host__ __device__
     device_obj<Derived>& device_obj<LValueVector<Derived>>::operator=(const device_obj<V>& v) {
+        auto& x = Base::getDerived();
         if constexpr (IsHost())
-            Base::getDerived().resize(v.getLength());
-        v.assignTo(*this);
-        return Base::getDerived();
+            x.resize(v.getLength());
+        v.assignTo(x);
+        return x;
     }
 
     template<class Derived>
     template<Scalar T>
     inline device_obj<Derived>& device_obj<LValueVector<Derived>>::operator=(const T& x) {
-        using namespace Physica;
         constexpr unsigned int WarpSize = Physica::CUDADevAttr::WarpSize;
         const int numBlock = (Base::getLength() + WarpSize - 1) / WarpSize;
         const int numThread = WarpSize;

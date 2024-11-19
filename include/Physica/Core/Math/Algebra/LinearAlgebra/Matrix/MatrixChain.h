@@ -1,5 +1,5 @@
 /*
- * Copyright 2020-2021 Weibo He.
+ * Copyright 2020-2024 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -19,10 +19,10 @@
 #pragma once
 
 #include <cstdlib>
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h"
+#include "DenseMatrix.h"
 
 namespace Physica::Core {
-    template<class T, int type, size_t maxRow, size_t maxColumn>
+    template<Scalar T, int type, size_t maxRow, size_t maxColumn>
     class MatrixChain {
         DenseMatrix<T, type, maxRow, maxColumn>** chain;
         size_t** price;
@@ -51,7 +51,7 @@ namespace Physica::Core {
      *
      * Reference: 算法导论 第三版 Page: 210-215
      */
-    template<class T, int type, size_t maxRow, size_t maxColumn>
+    template<Scalar T, int type, size_t maxRow, size_t maxColumn>
     MatrixChain<T, type, maxRow, maxColumn>::MatrixChain(size_t length)
             : chain(new DenseMatrix<T, type, maxRow, maxColumn>*[length])
             , length(length), price(new size_t*[length]), point(new size_t*[length - 1]) {
@@ -64,7 +64,7 @@ namespace Physica::Core {
         price[length_1] = new size_t[length];
     }
 
-    template<class T, int type, size_t maxRow, size_t maxColumn>
+    template<Scalar T, int type, size_t maxRow, size_t maxColumn>
     MatrixChain<T, type, maxRow, maxColumn>::~MatrixChain() {
         delete[] chain;
         const auto length_1 = length - 1;
@@ -78,7 +78,7 @@ namespace Physica::Core {
         delete[] point;
     }
     //!Optimize: Only half of the space of price and point is used. Maybe change them into a 1D array.
-    template<class T, int type, size_t maxRow, size_t maxColumn>
+    template<Scalar T, int type, size_t maxRow, size_t maxColumn>
     DenseMatrix<T, type, Dynamic, Dynamic> MatrixChain<T, type, maxRow, maxColumn>::solve() {
         for(size_t i = 0; i < length; ++i)
             price[i][i] = 0;
@@ -112,7 +112,7 @@ namespace Physica::Core {
         return multiply(0, length - 1);
     }
     //!Both \from and \to are included.
-    template<class T, int type, size_t maxRow, size_t maxColumn>
+    template<Scalar T, int type, size_t maxRow, size_t maxColumn>
     DenseMatrix<T, type, Dynamic, Dynamic> MatrixChain<T, type, maxRow, maxColumn>::multiply(size_t from, size_t to) {
         if(from == to)
             return DenseMatrix<T, type, Dynamic, Dynamic>(*chain[from]);

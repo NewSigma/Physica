@@ -23,16 +23,16 @@ using namespace Physica::Core;
 using ScalarType = float64;
 using MatrixType = DenseMatrix<ScalarType, MatrixOption::Col | MatrixOption::Vector>;
 
-template<class MatrixType>
-bool doTest(const MatrixType& source, double tolerance) {
+template<Matrix T>
+bool doTest(const T& source, double tolerance) {
     SVD<ScalarType, Physica::Dynamic, Physica::Dynamic> svd(source);
-    MatrixType U = svd.getMatrixU();
-    MatrixType V = svd.getMatrixV();
+    T U = svd.getMatrixU();
+    T V = svd.getMatrixV();
     auto v = svd.getSingulars();
-    MatrixType A(source.getRow(), source.getCol());
+    T A(source.getRow(), source.getCol());
     A = ScalarType(0);
     for (size_t i = 0; i < v.getLength(); ++i)
-        A += U.col(i) * V.col(i).asVector().transpose() * v[i];
+        A += U.col(i) * V.col(i).transpose() * v[i];
     if (!matrixNear(A, source, tolerance))
         return false;
     return true;

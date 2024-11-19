@@ -29,21 +29,21 @@ namespace Physica::Core {
      * Reference:
      * [1] J. Chem. Phys. 157, 114801 (2022); https://doi.org/10.1063/5.0106617
      */
-    template<class ScalarType, bool IsSmallCell>
-    class ChebyshevRadial : protected PairModel<ChebyshevRadial<ScalarType, IsSmallCell>> {
-        using Base = PairModel<ChebyshevRadial<ScalarType, IsSmallCell>>;
-        using ValueType = typename ScalarType::ValueType;
+    template<Scalar T, bool IsSmallCell>
+    class ChebyshevRadial : protected PairModel<ChebyshevRadial<T, IsSmallCell>> {
+        using Base = PairModel<ChebyshevRadial<T, IsSmallCell>>;
+        using ValueType = typename T::ValueType;
     public:
         using MDCellType = MDCell<ValueType, 3>;
         using ParticleType = typename MDCellType::ParticleType;
         using MassTypeMap = typename MDCellType::MassTypeMap;
-        using DescriptorMatrix = DenseMatrix<ScalarType>;
+        using DescriptorMatrix = DenseMatrix<T>;
         using DescriptorArray = Array<DescriptorMatrix>;
     private:
         MassTypeMap massTypeMap;
         unsigned int maxOrder;
     public:
-        ChebyshevRadial(MassTypeMap massTypeMap_, unsigned int maxOrder_, ScalarType cutoff);
+        ChebyshevRadial(MassTypeMap massTypeMap_, unsigned int maxOrder_, T cutoff);
         ChebyshevRadial(const ChebyshevRadial&) = default;
         ChebyshevRadial(ChebyshevRadial&&) noexcept = default;
         ~ChebyshevRadial() = default;
@@ -55,60 +55,60 @@ namespace Physica::Core {
         /* Getters */
         [[nodiscard]] unsigned int getMaxOrder() const noexcept { return maxOrder; }
     private:
-        [[nodiscard]] inline ScalarType pot_functor(size_t i, size_t j, ScalarType r, ScalarType r2) const;
-        [[nodiscard]] inline ScalarType force_functor(size_t i, size_t j, ScalarType r, ScalarType r2) const;
+        [[nodiscard]] inline T pot_functor(size_t i, size_t j, T r, T r2) const;
+        [[nodiscard]] inline T force_functor(size_t i, size_t j, T r, T r2) const;
         /* Static members */
-        [[nodiscard]] inline static ScalarType cutoff_functor(ScalarType r) noexcept;
+        [[nodiscard]] inline static T cutoff_functor(T r) noexcept;
         /* Friends */
-        friend class PairModel<ChebyshevRadial<ScalarType, IsSmallCell>>;
+        friend class PairModel<ChebyshevRadial<T, IsSmallCell>>;
     };
 
-    template<class ScalarType, bool IsSmallCell>
-    ChebyshevRadial<ScalarType, IsSmallCell>::ChebyshevRadial(MassTypeMap massTypeMap_, unsigned int maxOrder_, ScalarType cutoff)
+    template<Scalar T, bool IsSmallCell>
+    ChebyshevRadial<T, IsSmallCell>::ChebyshevRadial(MassTypeMap massTypeMap_, unsigned int maxOrder_, T cutoff)
             : Base(cutoff)
             , massTypeMap(std::move(massTypeMap_))
             , maxOrder(maxOrder_) {
         assert(maxOrder > 1 && "[Error]: Max order is too small to describe meaningful physics");
     }
 
-    template<class ScalarType, bool IsSmallCell>
-    void ChebyshevRadial<ScalarType, IsSmallCell>::swap(ChebyshevRadial& __restrict obj) noexcept {
+    template<Scalar T, bool IsSmallCell>
+    void ChebyshevRadial<T, IsSmallCell>::swap(ChebyshevRadial& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         Base::swap(obj);
         massTypeMap.swap(obj.massTypeMap);
         std::swap(maxOrder, obj.maxOrder);
     }
 
-    template<class ScalarType, bool IsSmallCell>
-    typename ChebyshevRadial<ScalarType, IsSmallCell>::DescriptorArray ChebyshevRadial<ScalarType, IsSmallCell>::project(
+    template<Scalar T, bool IsSmallCell>
+    typename ChebyshevRadial<T, IsSmallCell>::DescriptorArray ChebyshevRadial<T, IsSmallCell>::project(
             const MDCellType& cell) const {
-        using Vector3D = Vector3D<ScalarType>;
+        using Vector3D = Vector3D<T>;
         const size_t numType = massTypeMap.size();
-        DescriptorArray result(cell.getNumParticle(), maxOrder, numType, ScalarType(0));
-        auto kernel = [this, &cell, &result](size_t i, size_t j, Vector3D r, ScalarType norm1, ScalarType norm2) {
+        DescriptorArray result(cell.getNumParticle(), maxOrder, numType, T(0));
+        auto kernel = [this, &cell, &result](size_t i, size_t j, Vector3D r, T norm1, T norm2) {
             const ParticleType typeI = massTypeMap[cell.getMass(i)];
             const ParticleType typeJ = massTypeMap[cell.getMass(j)];
             auto descriptorDi = result[i].col(typeJ);
             auto descriptorDj = result[j].col(typeI);
 
-            const ScalarType normalR = norm1 / Base::getCutoff();
-            const ScalarType x0 = square(normalR - ScalarType(1));
-            const ScalarType cutoffFactor = cutoff_functor(normalR);
+            const T normalR = norm1 / Base::getCutoff();
+            const T x0 = square(normalR - T(1));
+            const T cutoffFactor = cutoff_functor(normalR);
             /* Make order 0 and 1 */ {
                 descriptorDi[0] += cutoffFactor;
                 descriptorDj[0] += cutoffFactor;
 
-                const ScalarType descriptorD = x0 * cutoffFactor;
+                const T descriptorD = x0 * cutoffFactor;
                 descriptorDi[1] += descriptorD;
                 descriptorDj[1] += descriptorD;
             }
-            const ScalarType x = x0 * ScalarType(2) - ScalarType(1);
-            ScalarType chebyshevN_2 = ScalarType(1);
-            ScalarType chebyshevN_1 = x;
-            ScalarType chebyshevN;
+            const T x = x0 * T(2) - T(1);
+            T chebyshevN_2 = T(1);
+            T chebyshevN_1 = x;
+            T chebyshevN;
             for (size_t order = 2; order < maxOrder; ++order) {
-                chebyshevN = ScalarType(2) * x * chebyshevN_1 - chebyshevN_2;
-                const ScalarType descriptorD = chebyshevN * cutoffFactor + cutoffFactor;
+                chebyshevN = T(2) * x * chebyshevN_1 - chebyshevN_2;
+                const T descriptorD = chebyshevN * cutoffFactor + cutoffFactor;
                 descriptorDi[order] += descriptorD;
                 descriptorDj[order] += descriptorD;
                 chebyshevN_2.swap(chebyshevN_1);
@@ -119,20 +119,20 @@ namespace Physica::Core {
         return result;
     }
 
-    template<class ScalarType, bool IsSmallCell>
-    inline ScalarType ChebyshevRadial<ScalarType, IsSmallCell>::pot_functor(size_t, size_t, ScalarType, ScalarType) const {
+    template<Scalar T, bool IsSmallCell>
+    inline T ChebyshevRadial<T, IsSmallCell>::pot_functor(size_t, size_t, T, T) const {
         noImpl("[Error]: This function is disabled");
     }
 
-    template<class ScalarType, bool IsSmallCell>
-    inline ScalarType ChebyshevRadial<ScalarType, IsSmallCell>::force_functor(size_t, size_t, ScalarType, ScalarType) const {
+    template<Scalar T, bool IsSmallCell>
+    inline T ChebyshevRadial<T, IsSmallCell>::force_functor(size_t, size_t, T, T) const {
         noImpl("[Error]: This function is disabled");
     }
 
-    template<class ScalarType, bool IsSmallCell>
-    inline ScalarType ChebyshevRadial<ScalarType, IsSmallCell>::cutoff_functor(ScalarType normalR) noexcept {
-        assert(normalR.isPositive() && (normalR <= ScalarType(1)) && "[Error]: Distance out of cutoff");
-        return square(cos(normalR * ScalarType(M_PI_2)));
+    template<Scalar T, bool IsSmallCell>
+    inline T ChebyshevRadial<T, IsSmallCell>::cutoff_functor(T normalR) noexcept {
+        assert(normalR.isPositive() && (normalR <= T(1)) && "[Error]: Distance out of cutoff");
+        return square(cos(normalR * T(M_PI_2)));
     }
 }
 

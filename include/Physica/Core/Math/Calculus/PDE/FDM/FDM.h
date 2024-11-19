@@ -49,7 +49,7 @@ namespace Physica::Core {
     /*!
      * Solve 2D laplacian function using FDM.
      */
-    template<class T>
+    template<Scalar T>
     class FDM : public FDMBase {
     public:
         using DataMatrix = DenseMatrix<T, MatrixOption::Col | MatrixOption::Vector, Dynamic, Dynamic>;

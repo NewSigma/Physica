@@ -19,18 +19,18 @@
 #pragma once
 
 namespace Physica::Core {
-    template<class MatrixType, class VectorType>
-    class MatrixVectorProduct<BlockMatrix<MatrixType>, VectorType>
-            : public RValueVector<MatrixVectorProduct<BlockMatrix<MatrixType>, VectorType>> {
-        using This = MatrixVectorProduct<BlockMatrix<MatrixType>, VectorType>;
+    template<Matrix T, Vector U>
+    class MatrixVectorProduct<BlockMatrix<T>, U>
+            : public RValueVector<MatrixVectorProduct<BlockMatrix<T>, U>> {
+        using This = MatrixVectorProduct<BlockMatrix<T>, U>;
         using Base = RValueVector<This>;
     public:
         using ScalarType = typename Base::ScalarType;
     private:
-        const BlockMatrix<MatrixType>& m;
-        const VectorType& v;
+        const BlockMatrix<T>& m;
+        const U& v;
     public:
-        MatrixVectorProduct(const BlockMatrix<MatrixType>& m_, const VectorType& v_);
+        MatrixVectorProduct(const BlockMatrix<T>& m_, const U& v_);
         MatrixVectorProduct(const This&) = delete;
         MatrixVectorProduct(This&&) noexcept = delete;
         ~MatrixVectorProduct() = default;
@@ -38,27 +38,26 @@ namespace Physica::Core {
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
         /* Operations */
-        template<class OtherVector, class Executor = SequentialExecutor>
-        void assignTo(LValueVector<OtherVector>& target_) const;
+        template<LVector V, class Executor = SequentialExecutor>
+        void assignTo(V& target_) const;
 
         [[nodiscard]] ScalarType calc(size_t index) const { noImpl(); }
         /* Getters */
         [[nodiscard]] size_t getLength() const noexcept { return v.getLength(); }
-        [[nodiscard]] const BlockMatrix<MatrixType>& getLHS() const noexcept { return m; }
-        [[nodiscard]] const VectorType& getRHS() const noexcept { return v; }
+        [[nodiscard]] const BlockMatrix<T>& getLHS() const noexcept { return m; }
+        [[nodiscard]] const U& getRHS() const noexcept { return v; }
     };
 
-    template<class MatrixType, class VectorType>
-    MatrixVectorProduct<BlockMatrix<MatrixType>, VectorType>::MatrixVectorProduct(
-            const BlockMatrix<MatrixType>& m, const VectorType& v) {
+    template<Matrix T, Vector U>
+    MatrixVectorProduct<BlockMatrix<T>, U>::MatrixVectorProduct(
+            const BlockMatrix<T>& m, const U& v) {
         assert(m.getCol() == v.getLength() && "[Error]: Dimensions do not match");
     }
 
-    template<class MatrixType, class VectorType>
-    template<class OtherVector, class Executor>
-    void MatrixVectorProduct<BlockMatrix<MatrixType>, VectorType>::assignTo(LValueVector<OtherVector>& target_) const {
+    template<Matrix T, Vector U>
+    template<LVector V, class Executor>
+    void MatrixVectorProduct<BlockMatrix<T>, U>::assignTo(V& target_) const {
         assert(getLength() == target_.getLength() && "[Error]: Dimensions do not match");
-        auto& target = target_.getDerived();
         size_t from = 0;
         for (size_t i = 0; i < m.getNumBlocks(); ++i) {
             const size_t to = m.getIndexEnds()[i];
@@ -71,12 +70,10 @@ namespace Physica::Core {
 }
 
 namespace Physica {
-    using namespace Core;
-
-    template<class MatrixType, class VectorType>
-    class Traits<MatrixVectorProduct<BlockMatrix<MatrixType>, VectorType>> {
+    template<Matrix T, Vector U>
+    class Traits<MatrixVectorProduct<BlockMatrix<T>, U>> {
     public:
-        using ScalarType = typename MatrixType::ScalarType;
+        using ScalarType = typename T::ScalarType;
         constexpr static size_t SizeAtCompile = Dynamic;
 
         constexpr static bool FastAssign = true;

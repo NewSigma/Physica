@@ -26,10 +26,10 @@
 #include <Physica/Core/Utils/Unix/TempFile.h>
 
 namespace Physica::Core {
-    template<class ScalarType>
+    template<Scalar T>
     class QEModel {
-        using MDCellType = MDCell<ScalarType>;
-        using ElementTypeArray = typename Poscar<ScalarType>::ElementTypeArray;
+        using MDCellType = MDCell<T>;
+        using ElementTypeArray = typename Poscar<T>::ElementTypeArray;
 
         std::string pathToPW;
         Array<char> input;
@@ -44,13 +44,13 @@ namespace Physica::Core {
         QEModel& operator=(QEModel obj) noexcept;
         /* Operations */
         template<class Executor>
-        [[nodiscard]] VectorND<ScalarType> force(const MDCellType& cell) const;
-        template<class VectorType, class Executor>
-        void forceAsync(const MDCellType& cell, ContinuousVector<VectorType>& result) const noexcept;
+        [[nodiscard]] VectorND<T> force(const MDCellType& cell) const;
+        template<Vector V, class Executor>
+        void forceAsync(const MDCellType& cell, ContinuousVector<V>& result) const noexcept;
         template<class Executor>
-        [[nodiscard]] VectorND<ScalarType> force_short(const MDCellType& cell) const { return force<Executor>(cell); }
+        [[nodiscard]] VectorND<T> force_short(const MDCellType& cell) const { return force<Executor>(cell); }
         template<class Executor>
-        [[nodiscard]] VectorND<ScalarType> force_long(const MDCellType& cell) const { return VectorND<ScalarType>(cell.getDOF(), 0); }
+        [[nodiscard]] VectorND<T> force_long(const MDCellType& cell) const { return VectorND<T>(cell.getDOF(), 0); }
         void swap(QEModel& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] size_t getNumParticle() const noexcept { return elementTypes.getLength(); }
@@ -59,8 +59,8 @@ namespace Physica::Core {
         template<size_t N> ProcessFuture run_qe(TempFile<N>& __restrict input, TempFile<N>& __restrict output) const;
     };
 
-    template<class ScalarType>
-    QEModel<ScalarType>::QEModel(const char* pathToPW_, const char* pathToInput, ElementTypeArray elementTypes_, unsigned int numMPIProcess_)
+    template<Scalar T>
+    QEModel<T>::QEModel(const char* pathToPW_, const char* pathToInput, ElementTypeArray elementTypes_, unsigned int numMPIProcess_)
             : pathToPW(pathToPW_)
             , elementTypes(std::move(elementTypes_))
             , numMPIProcess(numMPIProcess_) {
@@ -75,17 +75,17 @@ namespace Physica::Core {
         input[size] = '\0';
     }
 
-    template<class ScalarType>
+    template<Scalar T>
     template<class Executor>
-    VectorND<ScalarType> QEModel<ScalarType>::force(const MDCellType& cell) const {
-        VectorND<ScalarType> result(cell.getNumParticle());
-        forceAsync<VectorND<ScalarType>, Executor>(cell, result);
+    VectorND<T> QEModel<T>::force(const MDCellType& cell) const {
+        VectorND<T> result(cell.getNumParticle());
+        forceAsync<VectorND<T>, Executor>(cell, result);
         return result;
     }
 
-    template<class ScalarType>
-    template<class VectorType, class Executor>
-    void QEModel<ScalarType>::forceAsync(const MDCellType& cell, ContinuousVector<VectorType>& result) const noexcept {
+    template<Scalar T>
+    template<Vector V, class Executor>
+    void QEModel<T>::forceAsync(const MDCellType& cell, ContinuousVector<V>& result) const noexcept {
         assert(cell.getNumParticle() == getNumParticle());
         try {
             auto inputTmp = TempFile("/tmp/tmpXXXXXX");
@@ -119,14 +119,14 @@ namespace Physica::Core {
         }
     }
 
-    template<class ScalarType>
-    QEModel<ScalarType>& QEModel<ScalarType>::operator=(QEModel obj) noexcept {
+    template<Scalar T>
+    QEModel<T>& QEModel<T>::operator=(QEModel obj) noexcept {
         swap(obj);
         return *this;
     }
 
-    template<class ScalarType>
-    void QEModel<ScalarType>::swap(QEModel& __restrict obj) noexcept {
+    template<Scalar T>
+    void QEModel<T>::swap(QEModel& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         pathToPW.swap(obj.pathToPW);
         input.swap(obj.input);
@@ -134,9 +134,9 @@ namespace Physica::Core {
         std::swap(numMPIProcess, obj.numMPIProcess);
     }
 
-    template<class ScalarType>
+    template<Scalar T>
     template<size_t N>
-    ProcessFuture QEModel<ScalarType>::run_qe(
+    ProcessFuture QEModel<T>::run_qe(
             TempFile<N>& __restrict input, TempFile<N>& __restrict output) const {
         int fd[2];
         if (pipe(fd) == -1)
@@ -182,8 +182,8 @@ namespace Physica::Core {
 }
 
 namespace Physica {
-    template<class ScalarType>
-    class Traits<Core::QEModel<ScalarType>> {
+    template<Scalar T>
+    class Traits<Core::QEModel<T>> {
     public:
         constexpr static bool IsPeriodBoundary = true;
         constexpr static bool IsContractable = false;

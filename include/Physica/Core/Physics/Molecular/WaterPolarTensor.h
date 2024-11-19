@@ -28,7 +28,7 @@ namespace Physica::Core {
      * Reference:
      * [1] Avila, G. Ab initio dipole polarizability surfaces of water molecule: static and dynamic at 514.5 nm. J. Chem. Phys. 122, 144310 (2005).
      */
-    template<class ScalarType, bool UseDynamicPolar>
+    template<Scalar T, bool UseDynamicPolar>
     class WaterPolarTensor {
         /* Make curve pos */
         constexpr static double refBondLength = PhyConst<AU>::angstormToBohr(0.95843);
@@ -48,10 +48,10 @@ namespace Physica::Core {
 
         constexpr static size_t NumDiagBase = 22;
         constexpr static size_t NumOffDiagBase = 13;
-        using Vector3D = Vector3D<ScalarType>;
-        using Matrix3D = typename PeriodicCell<ScalarType, 3>::LatticeMatrix;
-        using DiagBaseVector = DenseVector<ScalarType, NumDiagBase>;
-        using OffDiagBaseVector = DenseVector<ScalarType, NumOffDiagBase>;
+        using Vector3D = Vector3D<T>;
+        using Matrix3D = typename PeriodicCell<T, 3>::LatticeMatrix;
+        using DiagBaseVector = DenseVector<T, NumDiagBase>;
+        using OffDiagBaseVector = DenseVector<T, NumOffDiagBase>;
     private:
         Matrix3D polarTensor; //In Molecular Frame
         Matrix3D labFrame;
@@ -66,24 +66,24 @@ namespace Physica::Core {
         /* Operations */
         void swap(WaterPolarTensor& __restrict model) noexcept;
     private:
-        static Matrix3D makePolarTensor(ScalarType curvePos1, ScalarType curvePos2, ScalarType curvePos3);
-        inline static DiagBaseVector makeDiagBases(ScalarType curvePos1, ScalarType curvePos2, ScalarType curvePos3);
-        inline static OffDiagBaseVector makeOffDiagBases(ScalarType curvePos1, ScalarType curvePos2, ScalarType curvePos3);
+        static Matrix3D makePolarTensor(T curvePos1, T curvePos2, T curvePos3);
+        inline static DiagBaseVector makeDiagBases(T curvePos1, T curvePos2, T curvePos3);
+        inline static OffDiagBaseVector makeOffDiagBases(T curvePos1, T curvePos2, T curvePos3);
         inline static DiagBaseVector makeFactorXX();
         inline static DiagBaseVector makeFactorYY();
         inline static DiagBaseVector makeFactorZZ();
         inline static OffDiagBaseVector makeFactorXZ();
     };
 
-    template<class ScalarType, bool UseDynamicPolar>
-    WaterPolarTensor<ScalarType, UseDynamicPolar>::WaterPolarTensor(
+    template<Scalar T, bool UseDynamicPolar>
+    WaterPolarTensor<T, UseDynamicPolar>::WaterPolarTensor(
             Vector3D posOH1, Vector3D posOH2) {
-        const ScalarType bondLength1 = posOH1.norm();
-        const ScalarType bondLength2 = posOH2.norm();
-        const ScalarType bondAngle = arccos(posOH1 * posOH2 / (bondLength1 * bondLength2));
-        const ScalarType curvePos1 = (bondLength1 + bondLength2 - ScalarType(2 * refBondLength)) * ScalarType(M_SQRT1_2);
-        const ScalarType curvePos2 = ScalarType(normalLength) * (bondAngle - ScalarType(refBondAngle));
-        const ScalarType curvePos3 = (bondLength2 - bondLength1) * ScalarType(M_SQRT1_2);
+        const T bondLength1 = posOH1.norm();
+        const T bondLength2 = posOH2.norm();
+        const T bondAngle = arccos(posOH1 * posOH2 / (bondLength1 * bondLength2));
+        const T curvePos1 = (bondLength1 + bondLength2 - T(2 * refBondLength)) * T(M_SQRT1_2);
+        const T curvePos2 = T(normalLength) * (bondAngle - T(refBondAngle));
+        const T curvePos3 = (bondLength2 - bondLength1) * T(M_SQRT1_2);
         polarTensor = makePolarTensor(curvePos1, curvePos2, curvePos3);
         
         posOH1 *= reciprocal(bondLength1);
@@ -99,32 +99,32 @@ namespace Physica::Core {
         z.toUnit();
     }
 
-    template<class ScalarType, bool UseDynamicPolar>
-    WaterPolarTensor<ScalarType, UseDynamicPolar>&
-    WaterPolarTensor<ScalarType, UseDynamicPolar>::operator=(WaterPolarTensor model) noexcept {
+    template<Scalar T, bool UseDynamicPolar>
+    WaterPolarTensor<T, UseDynamicPolar>&
+    WaterPolarTensor<T, UseDynamicPolar>::operator=(WaterPolarTensor model) noexcept {
         swap(model);
         return *this;
     }
 
-    template<class ScalarType, bool UseDynamicPolar>
-    typename WaterPolarTensor<ScalarType, UseDynamicPolar>::Vector3D
-    WaterPolarTensor<ScalarType, UseDynamicPolar>::operator*(const Vector3D& v) const {
+    template<Scalar T, bool UseDynamicPolar>
+    typename WaterPolarTensor<T, UseDynamicPolar>::Vector3D
+    WaterPolarTensor<T, UseDynamicPolar>::operator*(const Vector3D& v) const {
         const Vector3D vInMolecularFrame = labFrame * v;
         const Vector3D uInMolecularFrame = polarTensor * vInMolecularFrame;
         const Vector3D u = labFrame.transpose() * uInMolecularFrame;
         return u;
     }
 
-    template<class ScalarType, bool UseDynamicPolar>
-    void WaterPolarTensor<ScalarType, UseDynamicPolar>::swap(WaterPolarTensor& __restrict model) noexcept {
+    template<Scalar T, bool UseDynamicPolar>
+    void WaterPolarTensor<T, UseDynamicPolar>::swap(WaterPolarTensor& __restrict model) noexcept {
         assert(this != &model && "[Error]: Self swap is likely a bug");
         polarTensor.swap(model.polarTensor);
         labFrame.swap(model.labFrame);
     }
 
-    template<class ScalarType, bool UseDynamicPolar>
-    typename WaterPolarTensor<ScalarType, UseDynamicPolar>::Matrix3D
-    WaterPolarTensor<ScalarType, UseDynamicPolar>::makePolarTensor(ScalarType curvePos1, ScalarType curvePos2, ScalarType curvePos3) {
+    template<Scalar T, bool UseDynamicPolar>
+    typename WaterPolarTensor<T, UseDynamicPolar>::Matrix3D
+    WaterPolarTensor<T, UseDynamicPolar>::makePolarTensor(T curvePos1, T curvePos2, T curvePos3) {
         Matrix3D polarTensor(3, 3, 0);
         const DiagBaseVector diagBases = makeDiagBases(curvePos1, curvePos2, curvePos3);
         polarTensor(0, 0) = diagBases * makeFactorXX();
@@ -134,9 +134,9 @@ namespace Physica::Core {
         return polarTensor;
     }
 
-    template<class ScalarType, bool UseDynamicPolar>
-    inline typename WaterPolarTensor<ScalarType, UseDynamicPolar>::DiagBaseVector
-    WaterPolarTensor<ScalarType, UseDynamicPolar>::makeDiagBases(ScalarType curvePos1, ScalarType curvePos2, ScalarType curvePos3) {
+    template<Scalar T, bool UseDynamicPolar>
+    inline typename WaterPolarTensor<T, UseDynamicPolar>::DiagBaseVector
+    WaterPolarTensor<T, UseDynamicPolar>::makeDiagBases(T curvePos1, T curvePos2, T curvePos3) {
         DiagBaseVector bases(NumDiagBase);
         bases[0] = 1;
         bases[1] = curvePos2;
@@ -163,9 +163,9 @@ namespace Physica::Core {
         return bases;
     }
 
-    template<class ScalarType, bool UseDynamicPolar>
-    inline typename WaterPolarTensor<ScalarType, UseDynamicPolar>::OffDiagBaseVector
-    WaterPolarTensor<ScalarType, UseDynamicPolar>::makeOffDiagBases(ScalarType curvePos1, ScalarType curvePos2, ScalarType curvePos3) {
+    template<Scalar T, bool UseDynamicPolar>
+    inline typename WaterPolarTensor<T, UseDynamicPolar>::OffDiagBaseVector
+    WaterPolarTensor<T, UseDynamicPolar>::makeOffDiagBases(T curvePos1, T curvePos2, T curvePos3) {
         OffDiagBaseVector bases(NumOffDiagBase);
         bases[0] = curvePos3;
         bases[1] = curvePos2 + curvePos3;
@@ -183,9 +183,9 @@ namespace Physica::Core {
         return bases;
     }
 
-    template<class ScalarType, bool UseDynamicPolar>
-    inline typename WaterPolarTensor<ScalarType, UseDynamicPolar>::DiagBaseVector
-    WaterPolarTensor<ScalarType, UseDynamicPolar>::makeFactorXX() {
+    template<Scalar T, bool UseDynamicPolar>
+    inline typename WaterPolarTensor<T, UseDynamicPolar>::DiagBaseVector
+    WaterPolarTensor<T, UseDynamicPolar>::makeFactorXX() {
         if constexpr (UseDynamicPolar) {
             DiagBaseVector result{
                 1.63133 * convertFactor1,
@@ -240,9 +240,9 @@ namespace Physica::Core {
         }
     }
 
-    template<class ScalarType, bool UseDynamicPolar>
-    inline typename WaterPolarTensor<ScalarType, UseDynamicPolar>::DiagBaseVector
-    WaterPolarTensor<ScalarType, UseDynamicPolar>::makeFactorYY() {
+    template<Scalar T, bool UseDynamicPolar>
+    inline typename WaterPolarTensor<T, UseDynamicPolar>::DiagBaseVector
+    WaterPolarTensor<T, UseDynamicPolar>::makeFactorYY() {
         if constexpr (UseDynamicPolar) {
             DiagBaseVector result{
                 1.59884 * convertFactor1,
@@ -297,9 +297,9 @@ namespace Physica::Core {
         }
     }
 
-    template<class ScalarType, bool UseDynamicPolar>
-    inline typename WaterPolarTensor<ScalarType, UseDynamicPolar>::DiagBaseVector
-    WaterPolarTensor<ScalarType, UseDynamicPolar>::makeFactorZZ() {
+    template<Scalar T, bool UseDynamicPolar>
+    inline typename WaterPolarTensor<T, UseDynamicPolar>::DiagBaseVector
+    WaterPolarTensor<T, UseDynamicPolar>::makeFactorZZ() {
         if constexpr (UseDynamicPolar) {
             DiagBaseVector result{
                 1.68167 * convertFactor1,
@@ -354,9 +354,9 @@ namespace Physica::Core {
         }
     }
 
-    template<class ScalarType, bool UseDynamicPolar>
-    inline typename WaterPolarTensor<ScalarType, UseDynamicPolar>::OffDiagBaseVector
-    WaterPolarTensor<ScalarType, UseDynamicPolar>::makeFactorXZ() {
+    template<Scalar T, bool UseDynamicPolar>
+    inline typename WaterPolarTensor<T, UseDynamicPolar>::OffDiagBaseVector
+    WaterPolarTensor<T, UseDynamicPolar>::makeFactorXZ() {
         if constexpr (UseDynamicPolar) {
             OffDiagBaseVector result{
                 1.24322 * convertFactor2,

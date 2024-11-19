@@ -86,9 +86,9 @@ namespace Physica::Core {
                 for (size_t i = 0; i < base.getCol(); ++i) {
                     const ScalarType eigenvalue = schur.getMatrixT().diag().calc(i);
                     if (eigenvalue > ScalarType(ConsiderAsZeroThrehold))
-                        base.col(i) = schur.getMatrixU().col(i).asVector() * reciprocal(sqrt(eigenvalue));
+                        base.col(i) = schur.getMatrixU().col(i) * reciprocal(sqrt(eigenvalue));
                     else
-                        base.col(i).asVector() = ScalarType(0);
+                        base.col(i) = ScalarType(0);
                 }
             }
             else {
@@ -96,12 +96,12 @@ namespace Physica::Core {
                 for (size_t i = 0; i < base.getCol(); ++i) {
                     const ScalarType eigenvalue = schur.getMatrixT().diag().calc(i).real();
                     if (eigenvalue > ScalarType(ConsiderAsZeroThrehold))
-                        base.col(i) = schur.getMatrixU().col(i).asVector() * reciprocal(sqrt(eigenvalue));
+                        base.col(i) = schur.getMatrixU().col(i) * reciprocal(sqrt(eigenvalue));
                     else
-                        base.col(i).asVector() = ScalarType(0);
+                        base.col(i) = ScalarType(0);
                 }
             }
-            buffer = base.hermite() * kSpaceForceCorr[qPointId].asMatrix();
+            buffer = base.hermite() * kSpaceForceCorr[qPointId];
             buffer *= base;
             
             solver.compute(buffer, true);

@@ -38,7 +38,7 @@ int main() {
 
     VectorType result_seq(4);
     VectorType result_par(4);
-    auto sum_col = [&](VectorType& result, unsigned int i) { result[i] = A.col(i).asVector().sum(); };
+    auto sum_col = [&](VectorType& result, unsigned int i) { result[i] = A.col(i).sum(); };
     SequentialExecutor::parallel_for([=, &result_seq](unsigned int i) { sum_col(result_seq, i); }, 4, 4);
     ThreadExecutor::parallel_for([=, &result_par](unsigned int i) { sum_col(result_par, i); }, 4, 4).wait();
 

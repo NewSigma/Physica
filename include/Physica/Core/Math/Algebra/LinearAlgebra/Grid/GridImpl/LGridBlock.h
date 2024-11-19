@@ -20,20 +20,21 @@
 
 namespace Physica::Core {
     template<class Derived> class LValueGrid;
+    template<class GridType> class LGridBlock;
 
-    template<class GridType>
-    class LGridBlock : public LValueGrid<LGridBlock<GridType>> {
-        using This = LGridBlock<GridType>;
+    template<Grid T>
+    class LGridBlock<T> : public LValueGrid<LGridBlock<T>> {
+        using This = LGridBlock<T>;
         using Base = LValueGrid<This>;
         using Index3D = typename GridBase::Index3D;
     public:
         using typename Base::ScalarType;
     private:
-        GridType& grid;
+        T& grid;
         Index3D from;
         Index3D count;
     public:
-        LGridBlock(GridType& grid_, Index3D from_, Index3D count_);
+        LGridBlock(T& grid_, Index3D from_, Index3D count_);
         LGridBlock(const LGridBlock&) = delete;
         LGridBlock(LGridBlock&&) noexcept = delete;
         ~LGridBlock() = default;
@@ -51,8 +52,8 @@ namespace Physica::Core {
         [[nodiscard]] __host__ __device__ inline const ScalarType* data_ptr(Index3D index) const;
     };
 
-    template<class GridType>
-    LGridBlock<GridType>::LGridBlock(GridType& grid_, Index3D from_, Index3D count_)
+    template<Grid T>
+    LGridBlock<T>::LGridBlock(T& grid_, Index3D from_, Index3D count_)
             : grid(grid_)
             , from(from_)
             , count(count_) {
@@ -62,21 +63,21 @@ namespace Physica::Core {
         }
     }
 
-    template<class GridType>
-    __host__ __device__ inline typename LGridBlock<GridType>::ScalarType* LGridBlock<GridType>::data_ptr(Index3D index) {
+    template<Grid T>
+    __host__ __device__ inline typename LGridBlock<T>::ScalarType* LGridBlock<T>::data_ptr(Index3D index) {
         return grid.data_ptr({from[0] + index[0], from[1] + index[1], from[2] + index[2]});
     }
 
-    template<class GridType>
-    __host__ __device__ inline const typename LGridBlock<GridType>::ScalarType* LGridBlock<GridType>::data_ptr(Index3D index) const {
+    template<Grid T>
+    __host__ __device__ inline const typename LGridBlock<T>::ScalarType* LGridBlock<T>::data_ptr(Index3D index) const {
         return const_cast<This&>(*this).data_ptr(index);
     }
 }
 
 namespace Physica {
-    template<class GridType>
-    class Traits<Core::LGridBlock<GridType>> {
+    template<Grid T>
+    class Traits<Core::LGridBlock<T>> {
     public:
-        using ScalarType = typename GridType::ScalarType;
+        using ScalarType = typename T::ScalarType;
     };
 }

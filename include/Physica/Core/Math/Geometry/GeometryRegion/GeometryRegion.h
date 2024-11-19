@@ -24,9 +24,9 @@ namespace Physica::Core {
     /*!
      * Describe a region in 2D or 3D. Used tree to implement it.
      */
-    template<int dim>
+    template<int Dim>
     class GeometryRegion {
-        static_assert(dim == 2 || dim == 3, "Dimension of a region must be either 2 or 3.");
+        static_assert(Dim == 2 || Dim == 3, "Dimension of a region must be either 2 or 3.");
     };
 
     template<>

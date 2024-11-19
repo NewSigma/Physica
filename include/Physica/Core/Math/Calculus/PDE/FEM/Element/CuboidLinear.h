@@ -21,9 +21,9 @@
 #include "Element.h"
 
 namespace Physica::Core {
-    template<class ScalarType>
-    class CuboidLinear : public Element<CuboidLinear<ScalarType>> {
-        using Base = Element<CuboidLinear<ScalarType>>;
+    template<Scalar T>
+    class CuboidLinear : public Element<CuboidLinear<T>> {
+        using Base = Element<CuboidLinear<T>>;
     public:
         using typename Base::VectorType;
         using typename Base::MatrixType;
@@ -59,29 +59,29 @@ namespace Physica::Core {
         [[nodiscard]] const VectorType& getLeftFrontBottom() const noexcept { return leftFrontBottom; }
         [[nodiscard]] const VectorType& getRightBehindTop() const noexcept { return rightBehindTop; }
         /* Static members */
-        [[nodiscard]] static ScalarType baseFunc(size_t localNode, VectorType p);
-        [[nodiscard]] static ScalarType dBase_dr(size_t localNode);
-        [[nodiscard]] static ScalarType dBase_ds(size_t localNode);
-        [[nodiscard]] static ScalarType dBase_dt(size_t localNode);
-        [[nodiscard]] static ScalarType dBase_dr(size_t localNode, [[maybe_unused]] VectorType p) { return dBase_dr(localNode); }
-        [[nodiscard]] static ScalarType dBase_ds(size_t localNode, [[maybe_unused]] VectorType p) { return dBase_ds(localNode); }
-        [[nodiscard]] static ScalarType dBase_dt(size_t localNode, [[maybe_unused]] VectorType p) { return dBase_dt(localNode); }
+        [[nodiscard]] static T baseFunc(size_t localNode, VectorType p);
+        [[nodiscard]] static T dBase_dr(size_t localNode);
+        [[nodiscard]] static T dBase_ds(size_t localNode);
+        [[nodiscard]] static T dBase_dt(size_t localNode);
+        [[nodiscard]] static T dBase_dr(size_t localNode, [[maybe_unused]] VectorType p) { return dBase_dr(localNode); }
+        [[nodiscard]] static T dBase_ds(size_t localNode, [[maybe_unused]] VectorType p) { return dBase_ds(localNode); }
+        [[nodiscard]] static T dBase_dt(size_t localNode, [[maybe_unused]] VectorType p) { return dBase_dt(localNode); }
     };
 
-    template<class ScalarType>
-    CuboidLinear<ScalarType>::CuboidLinear(VectorType leftFrontBottom_, VectorType rightBehindTop_, IndexArray globalNodes)
+    template<Scalar T>
+    CuboidLinear<T>::CuboidLinear(VectorType leftFrontBottom_, VectorType rightBehindTop_, IndexArray globalNodes)
             : Base(std::move(globalNodes))
             , leftFrontBottom(std::move(leftFrontBottom_))
             , rightBehindTop(std::move(rightBehindTop_)) {}
 
-    template<class ScalarType>
-    CuboidLinear<ScalarType>& CuboidLinear<ScalarType>::operator=(CuboidLinear obj) noexcept {
+    template<Scalar T>
+    CuboidLinear<T>& CuboidLinear<T>::operator=(CuboidLinear obj) noexcept {
         swap(obj);
         return *this;
     }
 
-    template<class ScalarType>
-    bool CuboidLinear<ScalarType>::contains(const VectorType& point) const {
+    template<Scalar T>
+    bool CuboidLinear<T>::contains(const VectorType& point) const {
         return leftFrontBottom[0] <= point[0]
             && point[0] <= rightBehindTop[0]
             && leftFrontBottom[1] <= point[1]
@@ -90,8 +90,8 @@ namespace Physica::Core {
             && point[2] <= rightBehindTop[2];
     }
 
-    template<class ScalarType>
-    typename CuboidLinear<ScalarType>::VectorType CuboidLinear<ScalarType>::getNodePos(size_t localNode) const {
+    template<Scalar T>
+    typename CuboidLinear<T>::VectorType CuboidLinear<T>::getNodePos(size_t localNode) const {
         switch (localNode) {
             case LeftFrontBottom:
                 return leftFrontBottom;
@@ -113,100 +113,100 @@ namespace Physica::Core {
         throw std::invalid_argument("[Error]: Invalid local node index");
     }
 
-    template<class ScalarType>
-    typename CuboidLinear<ScalarType>::VectorType CuboidLinear<ScalarType>::toLocalPos(VectorType globalPos) const {
-        return divide(ScalarType(2) * globalPos - rightBehindTop - leftFrontBottom, rightBehindTop - leftFrontBottom);
+    template<Scalar T>
+    typename CuboidLinear<T>::VectorType CuboidLinear<T>::toLocalPos(VectorType globalPos) const {
+        return divide(T(2) * globalPos - rightBehindTop - leftFrontBottom, rightBehindTop - leftFrontBottom);
     }
 
-    template<class ScalarType>
-    typename CuboidLinear<ScalarType>::VectorType CuboidLinear<ScalarType>::toGlobalPos(VectorType localPos) const {
-        return (leftFrontBottom + rightBehindTop - hadamard(rightBehindTop - leftFrontBottom, localPos)) * ScalarType(0.5);
+    template<Scalar T>
+    typename CuboidLinear<T>::VectorType CuboidLinear<T>::toGlobalPos(VectorType localPos) const {
+        return (leftFrontBottom + rightBehindTop - hadamard(rightBehindTop - leftFrontBottom, localPos)) * T(0.5);
     }
 
-    template<class ScalarType>
-    void CuboidLinear<ScalarType>::swap(CuboidLinear& __restrict obj) noexcept {
+    template<Scalar T>
+    void CuboidLinear<T>::swap(CuboidLinear& __restrict obj) noexcept {
         Base::swap(obj);
         leftFrontBottom.swap(obj.leftFrontBottom);
         rightBehindTop.swap(obj.rightBehindTop);
     }
 
-    template<class ScalarType>
-    ScalarType CuboidLinear<ScalarType>::baseFunc(size_t localNode, VectorType p) {
+    template<Scalar T>
+    T CuboidLinear<T>::baseFunc(size_t localNode, VectorType p) {
         switch (localNode) {
             case LeftFrontBottom:
-                return (ScalarType(1) - p[0]) * (ScalarType(1) - p[1]) * (ScalarType(1) - p[2]) * ScalarType(0.125);
+                return (T(1) - p[0]) * (T(1) - p[1]) * (T(1) - p[2]) * T(0.125);
             case LeftFrontTop:
-                return (ScalarType(1) - p[0]) * (ScalarType(1) - p[1]) * (ScalarType(1) + p[2]) * ScalarType(0.125);
+                return (T(1) - p[0]) * (T(1) - p[1]) * (T(1) + p[2]) * T(0.125);
             case LeftBehindBottom:
-                return (ScalarType(1) - p[0]) * (ScalarType(1) + p[1]) * (ScalarType(1) - p[2]) * ScalarType(0.125);
+                return (T(1) - p[0]) * (T(1) + p[1]) * (T(1) - p[2]) * T(0.125);
             case LeftBehindTop:
-                return (ScalarType(1) - p[0]) * (ScalarType(1) + p[1]) * (ScalarType(1) + p[2]) * ScalarType(0.125);
+                return (T(1) - p[0]) * (T(1) + p[1]) * (T(1) + p[2]) * T(0.125);
             case RightFrontBottom:
-                return (ScalarType(1) + p[0]) * (ScalarType(1) - p[1]) * (ScalarType(1) - p[2]) * ScalarType(0.125);
+                return (T(1) + p[0]) * (T(1) - p[1]) * (T(1) - p[2]) * T(0.125);
             case RightFrontTop:
-                return (ScalarType(1) + p[0]) * (ScalarType(1) - p[1]) * (ScalarType(1) + p[2]) * ScalarType(0.125);
+                return (T(1) + p[0]) * (T(1) - p[1]) * (T(1) + p[2]) * T(0.125);
             case RightBehindBottom:
-                return (ScalarType(1) + p[0]) * (ScalarType(1) + p[1]) * (ScalarType(1) - p[2]) * ScalarType(0.125);
+                return (T(1) + p[0]) * (T(1) + p[1]) * (T(1) - p[2]) * T(0.125);
             case RightBehindTop:
-                return (ScalarType(1) + p[0]) * (ScalarType(1) + p[1]) * (ScalarType(1) + p[2]) * ScalarType(0.125);
+                return (T(1) + p[0]) * (T(1) + p[1]) * (T(1) + p[2]) * T(0.125);
         }
         throw std::invalid_argument("[Error]: Invalid local node index");
     }
 
-    template<class ScalarType>
-    ScalarType CuboidLinear<ScalarType>::dBase_dr(size_t localNode) {
+    template<Scalar T>
+    T CuboidLinear<T>::dBase_dr(size_t localNode) {
         switch (localNode) {
             case LeftFrontBottom:
             case LeftFrontTop:
             case LeftBehindBottom:
             case LeftBehindTop:
-                return ScalarType(-0.125);
+                return T(-0.125);
             case RightFrontBottom:
             case RightFrontTop:
             case RightBehindBottom:
             case RightBehindTop:
-                return ScalarType(0.125);
+                return T(0.125);
         }
         throw std::invalid_argument("[Error]: Invalid local node index");
     }
 
-    template<class ScalarType>
-    ScalarType CuboidLinear<ScalarType>::dBase_ds(size_t localNode) {
+    template<Scalar T>
+    T CuboidLinear<T>::dBase_ds(size_t localNode) {
         switch (localNode) {
             case LeftFrontBottom:
             case LeftFrontTop:
             case RightFrontBottom:
             case RightFrontTop:
-                return ScalarType(-0.125);
+                return T(-0.125);
             case LeftBehindBottom:
             case LeftBehindTop:
             case RightBehindBottom:
             case RightBehindTop:
-                return ScalarType(0.125);
+                return T(0.125);
         }
         throw std::invalid_argument("[Error]: Invalid local node index");
     }
 
-    template<class ScalarType>
-    ScalarType CuboidLinear<ScalarType>::dBase_dt(size_t localNode) {
+    template<Scalar T>
+    T CuboidLinear<T>::dBase_dt(size_t localNode) {
         switch (localNode) {
             case LeftFrontBottom:
             case LeftBehindBottom:
             case RightFrontBottom:
             case RightBehindBottom:
-                return ScalarType(-0.125);
+                return T(-0.125);
             case LeftFrontTop:
             case LeftBehindTop:
             case RightFrontTop:
             case RightBehindTop:
-                return ScalarType(0.125);
+                return T(0.125);
         }
         throw std::invalid_argument("[Error]: Invalid local node index");
     }
 }
 
 namespace Physica {
-    template<class T>
+    template<Scalar T>
     class Traits<Core::CuboidLinear<T>> {
     public:
         constexpr static unsigned int Dim = 3;
@@ -214,6 +214,6 @@ namespace Physica {
         constexpr static unsigned int NumPoint = 8;
         constexpr static unsigned int DegreeOfFreedom = NumPoint * Order;
         using ScalarType = T;
-        using MatrixType = Core::DenseMatrix<ScalarType, MatrixOption::Col | MatrixOption::Element, Dim, Dim>;
+        using MatrixType = Core::DenseMatrix<T, MatrixOption::Col | MatrixOption::Element, Dim, Dim>;
     };
 }

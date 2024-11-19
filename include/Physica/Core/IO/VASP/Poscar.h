@@ -24,8 +24,8 @@
 namespace Physica::Core {
     class Xdatcar;
 
-    template<class ScalarType>
-    class Poscar final : public PeriodicCell<ScalarType, 3> {
+    template<Scalar T>
+    class Poscar final : public PeriodicCell<T, 3> {
     public:
         enum CrystalSystem : char {
             Triclinic,
@@ -37,7 +37,7 @@ namespace Physica::Core {
             Cubic
         };
 
-        using Base = PeriodicCell<ScalarType, 3>;
+        using Base = PeriodicCell<T, 3>;
         using LatticeMatrix = typename Base::LatticeMatrix;
         using Type = typename Base::Type;
         using ElementTypeArray = Array<uint8_t>;
@@ -50,15 +50,15 @@ namespace Physica::Core {
     public:
         Poscar();
         Poscar(Base base, ElementTypeArray elementTypes_, Array<size_t> numOfEachType_);
-        Poscar(CrystalCell<ScalarType> cell);
+        Poscar(CrystalCell<T> cell);
         /* Operators */
-        template<Scalar T>
-        friend std::ostream& operator<<(std::ostream& os, const Poscar<T>& poscar);
-        template<Scalar T>
-        friend std::istream& operator>>(std::istream& is, Poscar<T>& poscar);
+        template<Scalar U>
+        friend std::ostream& operator<<(std::ostream& os, const Poscar<U>& poscar);
+        template<Scalar U>
+        friend std::istream& operator>>(std::istream& is, Poscar<U>& poscar);
         /* Operations */
         void standrizeLattice();
-        void extendInZ(ScalarType factor);
+        void extendInZ(T factor);
         void toUnitCell(unsigned int x, unsigned int y, unsigned int z);
         void toQECell(std::ostream& os) const;
         void swap(Poscar& __restrict poscar) noexcept;
@@ -72,7 +72,7 @@ namespace Physica::Core {
         void readTypesAndNumber(std::istream& is);
         void readAtomPos(std::istream& is);
         size_t sumNumOfEachType() const;
-        void extendInZ_direct(ScalarType factor);
+        void extendInZ_direct(T factor);
         /* Static members */
         [[nodiscard]] static uint8_t elementSymbolToNumber(char ch1, char ch2);
 

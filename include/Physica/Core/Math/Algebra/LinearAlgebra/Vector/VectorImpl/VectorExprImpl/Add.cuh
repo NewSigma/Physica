@@ -19,10 +19,10 @@
 #pragma once
 
 namespace Physica::Core {
-    template<class VectorType, Scalar T>
-    class device_obj<VectorExpr<ExprType::Add, VectorType, T>>
-            : public device_obj<BinaryVectorExpr<ExprType::Add, VectorType, T>> {
-        using Base = device_obj<BinaryVectorExpr<ExprType::Add, VectorType, T>>;
+    template<Vector T, Scalar U>
+    class device_obj<VectorExpr<ExprType::Add, T, U>>
+            : public device_obj<BinaryVectorExpr<ExprType::Add, T, U>> {
+        using Base = device_obj<BinaryVectorExpr<ExprType::Add, T, U>>;
     public:
         using typename Base::ScalarType;
     public:
@@ -47,10 +47,10 @@ namespace Physica::Core {
         }
     };
 
-    template<class VectorType1, class VectorType2>
-    class device_obj<VectorExpr<ExprType::Add, VectorType1, VectorType2>>
-            : public device_obj<BinaryVectorExpr<ExprType::Add, VectorType1, VectorType2>> {
-        using Base = device_obj<BinaryVectorExpr<ExprType::Add, VectorType1, VectorType2>>;
+    template<Vector T1, Vector T2>
+    class device_obj<VectorExpr<ExprType::Add, T1, T2>>
+            : public device_obj<BinaryVectorExpr<ExprType::Add, T1, T2>> {
+        using Base = device_obj<BinaryVectorExpr<ExprType::Add, T1, T2>>;
     public:
         using typename Base::ScalarType;
     public:
@@ -75,15 +75,13 @@ namespace Physica::Core {
         }
     };
 
-    template<class VectorType, Scalar T>
-    [[nodiscard]] __host__ __device__ inline auto operator+(
-            const device_obj<RValueVector<VectorType>>& v, const T& x) noexcept {
-        return device_obj<VectorExpr<ExprType::Add, VectorType, T>>(v.getDerived(), x);
+    template<Vector T, Scalar U>
+    [[nodiscard]] __host__ __device__ inline auto operator+(const device_obj<T>& v, const U& x) noexcept {
+        return device_obj<VectorExpr<ExprType::Add, T, U>>(v, x);
     }
 
-    template<class Derived, class OtherDerived>
-    [[nodiscard]] __host__ __device__ inline auto operator+(
-            const device_obj<RValueVector<Derived>>& v1, const device_obj<RValueVector<OtherDerived>>& v2) noexcept {
-        return device_obj<VectorExpr<ExprType::Add, Derived, OtherDerived>>(v1.getDerived(), v2.getDerived());
+    template<Vector T1, Vector T2>
+    [[nodiscard]] __host__ __device__ inline auto operator+(const device_obj<T1>& v1, const device_obj<T2>& v2) noexcept {
+        return device_obj<VectorExpr<ExprType::Add, T1, T2>>(v1, v2);
     }
 }

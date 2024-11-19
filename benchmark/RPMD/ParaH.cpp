@@ -38,8 +38,8 @@ constexpr double molarVolume = 31.7;
 constexpr double mass = PhyConst<AU>::atomMass(1) * 2;
 
 namespace {
-    template<class RandomGenerator>
-    RPMD<ScalarType> makeSystem(size_t numMolecular, RandomGenerator& gen) {
+    template<class RandomType>
+    RPMD<ScalarType> makeSystem(size_t numMolecular, RandomType& gen) {
         using MDCellType = typename RPMD<ScalarType>::MDCellType;
         typename MDCellType::LatticeMatrix lattice = MDCellType::LatticeMatrix::unitMatrix(3);
         typename MDCellType::PositionMatrix pos(numMolecular, 3);

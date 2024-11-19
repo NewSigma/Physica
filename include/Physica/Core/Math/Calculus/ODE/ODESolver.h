@@ -21,7 +21,7 @@
 #include <Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h>
 
 namespace Physica::Core {
-    template<class T, size_t Dim>
+    template<Scalar T, size_t Dim>
     class ODESolver {
     public:
         using VectorType = DenseVector<T, Dim>;
@@ -49,7 +49,7 @@ namespace Physica::Core {
         static VectorType rungeKutta4_step(T stepSize, T x, const VectorType& sol, Function func);
     };
 
-    template<class T, size_t Dim>
+    template<Scalar T, size_t Dim>
     ODESolver<T, Dim>::ODESolver(const T& start, const T& end, const T& stepSize_, const VectorType& initial)
             : stepSize(stepSize_) {
         assert(start < end);
@@ -66,7 +66,7 @@ namespace Physica::Core {
      * A function object like this
      * VectorType func(const T& x, const VectorType& y)
      */
-    template<class T, size_t Dim>
+    template<Scalar T, size_t Dim>
     template<class Function>
     void ODESolver<T, Dim>::rungeKutta4(Function func) {
         using FunctionResult = typename std::invoke_result<Function, T, VectorType>::type;
@@ -82,7 +82,7 @@ namespace Physica::Core {
      * Reference:
      * [1] William H. Press, Saul A. Teukolsky, William T. Vetterling, Brian P. Flannery. C++数值算法(第二版)[M]. 北京: 电子工业出版社, 2005:524
      */
-    template<class T, size_t Dim>
+    template<Scalar T, size_t Dim>
     template<class Function>
     typename ODESolver<T, Dim>::VectorType
     ODESolver<T, Dim>::rungeKutta4_step(T stepSize, T x, const VectorType& sol, Function func) {
@@ -107,7 +107,7 @@ namespace Physica::Core {
      * Reference:
      * [1] J. H. Thijssen. Computational Physics[M]. London: Cambridge University Press, 2013:572
      */
-    template<class T, size_t Dim>
+    template<Scalar T, size_t Dim>
     template<class Function>
     void ODESolver<T, Dim>::verlet(Function func, const T& initial1) {
         x[1] = x[0] + stepSize;
@@ -135,7 +135,7 @@ namespace Physica::Core {
      * Reference:
      * [1] J. H. Thijssen. Computational Physics[M]. London: Cambridge University Press, 2013:573
      */
-    template<class T, size_t Dim>
+    template<Scalar T, size_t Dim>
     template<class Function>
     void ODESolver<T, Dim>::degenerate_numerov(Function func, const T& tangent) {
         const T x0 = x[0];
@@ -169,7 +169,7 @@ namespace Physica::Core {
         }
     }
 
-    template<class T, size_t Dim>
+    template<Scalar T, size_t Dim>
     size_t ODESolver<T, Dim>::getNumStep(T start, T end, T stepSize) {
         return static_cast<size_t>(double((end - start) / stepSize));
     }

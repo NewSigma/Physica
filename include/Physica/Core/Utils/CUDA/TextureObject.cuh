@@ -36,8 +36,8 @@ namespace Physica::Core {
         This& operator=(This obj) noexcept { swap(obj); return *this; }
         [[nodiscard]] __device__ operator cudaTextureObject_t() const { return texObj; }
         /* Operations */
-        template<class MatrixType>
-        void fromMatrix(const RValueMatrix<MatrixType>& m);
+        template<Matrix M>
+        void fromMatrix(const M& m);
         void swap(This& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] cudaResourceDesc getResourceDesc() const noexcept;
@@ -90,12 +90,12 @@ namespace Physica::Core {
     }
 
     template<class T>
-    template<class MatrixType>
-    void TextureObject<T>::fromMatrix(const RValueMatrix<MatrixType>& m) {
+    template<Matrix M>
+    void TextureObject<T>::fromMatrix(const M& m) {
         const size_t major = m.getMaxMajor();
         const size_t minor = m.getMaxMinor();
         const size_t spitch = minor * sizeof(T);
-        check(cudaMemcpy2DToArray(getArray(), 0, 0, m.getDerived().data(), spitch, spitch, major, cudaMemcpyHostToDevice));
+        check(cudaMemcpy2DToArray(getArray(), 0, 0, m.data(), spitch, spitch, major, cudaMemcpyHostToDevice));
     }
 
     template<class T>

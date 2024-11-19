@@ -78,14 +78,14 @@ namespace Physica::Core {
         template<class Executor>
         [[nodiscard]] inline VectorND<ScalarType> force(const MDCellType& hostCell);
 
-        template<class VectorType, class Executor>
+        template<Vector V, class Executor>
         void forceAsync(
                 const LatticeMatrix& lattice,
                 const InvLatticeMatrix& invLattice,
                 const PositionMatrix& cartesianPos,
-                ContinuousVector<VectorType>& result);
-        template<class VectorType, class Executor>
-        inline void forceAsync(const MDCellType& cell, ContinuousVector<VectorType>& result);
+                ContinuousVector<V>& result);
+        template<Vector V, class Executor>
+        inline void forceAsync(const MDCellType& cell, ContinuousVector<V>& result);
         template<class Executor>
         [[nodiscard]] inline VectorND<ScalarType> force_short(const MDCellType& cell);
         template<class Executor>

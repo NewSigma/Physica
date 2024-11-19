@@ -19,18 +19,18 @@
 #pragma once
 
 namespace Physica::Core {
-    template<class MatrixType, class VectorType>
-    class device_obj<MatrixVectorProduct<MatrixType, VectorType>>
-            : public device_obj<RValueVector<MatrixVectorProduct<MatrixType, VectorType>>> {
-        static_assert(MatrixType::ColAtCompile == VectorType::SizeAtCompile ||
-                      MatrixType::ColAtCompile == Dynamic ||
-                      VectorType::SizeAtCompile == Dynamic,
+    template<Matrix T, Vector U>
+    class device_obj<MatrixVectorProduct<T, U>>
+            : public device_obj<RValueVector<MatrixVectorProduct<T, U>>> {
+        static_assert(T::ColAtCompile == U::SizeAtCompile ||
+                      T::ColAtCompile == Dynamic ||
+                      U::SizeAtCompile == Dynamic,
                       "[Error]: Row and column do not match in matrix-vector product");
-        using host_obj = MatrixVectorProduct<MatrixType, VectorType>;
+        using host_obj = MatrixVectorProduct<T, U>;
         using Base = device_obj<RValueVector<host_obj>>;
         using This = device_obj<host_obj>;
-        using DeviceVector = device_obj<VectorType>;
-        using DeviceMatrix = device_obj<MatrixType>;
+        using DeviceVector = device_obj<U>;
+        using DeviceMatrix = device_obj<T>;
     public:
         using typename Base::ScalarType;
     private:
@@ -45,7 +45,7 @@ namespace Physica::Core {
         } vec;
     public:
         __host__ __device__ device_obj(
-                const device_obj<RValueMatrix<MatrixType>>& mat_, const device_obj<RValueVector<VectorType>>& vec_);
+                const device_obj<T>& mat_, const device_obj<U>& vec_);
         device_obj(const This&) = delete;
         device_obj(This&&) noexcept = delete;
         ~device_obj() = default;
@@ -53,8 +53,8 @@ namespace Physica::Core {
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
         /* Operations */
-        template<class OtherDerived>
-        __host__ __device__ void assignTo(device_obj<LValueVector<OtherDerived>>& target) const;
+        template<LVector V>
+        __host__ __device__ void assignTo(device_obj<V>& target) const;
         /* Getters */
         template<Side Owner>
         [[nodiscard]] __device__ inline ScalarType calc(size_t index) const;
@@ -79,55 +79,53 @@ namespace Physica::Core {
         }
     };
 
-    template<class MatrixType, class VectorType>
-    __host__ __device__ device_obj<MatrixVectorProduct<MatrixType, VectorType>>::device_obj(
-            const device_obj<RValueMatrix<MatrixType>>& mat_, const device_obj<RValueVector<VectorType>>& vec_) {
+    template<Matrix T, Vector U>
+    __host__ __device__ device_obj<MatrixVectorProduct<T, U>>::device_obj(
+            const device_obj<T>& mat_, const device_obj<U>& vec_) {
         assert(mat_.getCol() == vec_.getLength());
         if constexpr (IsHost()) {
-            mat.value = asStruct(mat_.getDerived());
-            vec.value = asStruct(vec_.getDerived());
+            mat.value = asStruct(mat_);
+            vec.value = asStruct(vec_);
         }
         else {
-            mat.ptr = &mat_.getDerived();
-            vec.ptr = &vec_.getDerived();
+            mat.ptr = &mat_;
+            vec.ptr = &vec_;
         }
     }
 
-    template<class MatrixType, class VectorType>
+    template<Matrix T, Vector U>
     template<Side Owner>
-    __device__ inline typename device_obj<MatrixVectorProduct<MatrixType, VectorType>>::ScalarType
-    device_obj<MatrixVectorProduct<MatrixType, VectorType>>::calc(size_t index) const {
+    __device__ inline typename device_obj<MatrixVectorProduct<T, U>>::ScalarType
+    device_obj<MatrixVectorProduct<T, U>>::calc(size_t index) const {
         return getLHS<Owner>().row(index) * getRHS<Owner>();
     }
 
-    template<class MatrixType, class VectorType>
-    template<class OtherDerived>
-    __host__ __device__ void device_obj<MatrixVectorProduct<MatrixType, VectorType>>::assignTo(
-            device_obj<LValueVector<OtherDerived>>& target) const {
+    template<Matrix T, Vector U>
+    template<LVector V>
+    __host__ __device__ void device_obj<MatrixVectorProduct<T, U>>::assignTo(device_obj<V>& target) const {
         if constexpr (IsHost())
-            Base::template assignTo<OtherDerived>(target);
+            Base::template assignTo<V>(target);
         else {
-            if constexpr (MatrixOption::isColMatrix<MatrixType>()) {
+            if constexpr (MatrixOption::isColMatrix<T>()) {
                 const auto& m = getLHS();
                 const auto& v = getRHS();
-                target = m.col(0).asVector() * v.calc(0);
+                target = m.col(0) * v.calc(0);
                 for (size_t i = 1; i < v.getLength(); ++i)
-                    target += m.col(i).asVector() * v.calc(i);
+                    target += m.col(i) * v.calc(i);
             }
             else
-                Base::template assignTo<OtherDerived>(target);
+                Base::template assignTo<V>(target);
         }
     }
 
-    template<class MatrixType, class VectorType>
-    [[nodiscard]] __host__ __device__ inline typename std::enable_if<MatrixType::RowAtCompile != 1, device_obj<MatrixVectorProduct<MatrixType, VectorType>>>::type
-    operator*(const device_obj<RValueMatrix<MatrixType>>& mat, const device_obj<RValueVector<VectorType>>& vec) noexcept {
-        return {mat.getDerived(), vec.getDerived()};
+    template<Matrix T, Vector U>
+    [[nodiscard]] __host__ __device__ inline typename std::enable_if<T::RowAtCompile != 1, device_obj<MatrixVectorProduct<T, U>>>::type
+    operator*(const device_obj<T>& mat, const device_obj<U>& vec) noexcept {
+        return {mat, vec};
     }
 }
 
 namespace Physica {
-    template<class MatrixType, class VectorType>
-    class Traits<Core::device_obj<MatrixVectorProduct<MatrixType, VectorType>>>
-            : public Traits<MatrixVectorProduct<MatrixType, VectorType>> {};
+    template<Matrix T, Vector U>
+    class Traits<Core::device_obj<MatrixVectorProduct<T, U>>> : public Traits<MatrixVectorProduct<T, U>> {};
 }

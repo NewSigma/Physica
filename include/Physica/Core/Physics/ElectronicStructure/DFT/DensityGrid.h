@@ -18,19 +18,20 @@
  */
 #pragma once
 
+#include <Physica/Core/Math/Algebra/LinearAlgebra/Grid/RSpaceGrid.h>
+#include <Physica/Core/Math/Statistics/NumCharacter.h>
+#include "Basis/PlainWaveBasis.h"
 #include "SpinPair.h"
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Grid/RSpaceGrid.h"
-#include "Physica/Core/Math/Statistics/NumCharacter.h"
 
 namespace Physica::Core {
-    template<class ScalarType, bool IsSpinPolarized>
+    template<Scalar T, bool IsSpinPolarized>
     class DensityGrid {
-        using LatticeMatrix = typename PeriodicCell<ScalarType, 3>::LatticeMatrix;
-        using Vector3D = Vector3D<ScalarType>;
-        using GridType = RSpaceGrid<ScalarType>;
+        using LatticeMatrix = typename PeriodicCell<T, 3>::LatticeMatrix;
+        using Vector3D = Vector3D<T>;
+        using GridType = RSpaceGrid<T>;
     public:
-        using Index3D = typename RSpaceGrid<ScalarType>::Index3D;
-        using BasisType = PlainWaveBasis<ScalarType>;
+        using Index3D = typename RSpaceGrid<T>::Index3D;
+        using BasisType = PlainWaveBasis<T>;
         using KSOrbitArray = Array<SpinPair<BasisType, IsSpinPolarized>>;
     private:
         SpinPair<GridType, IsSpinPolarized> densityPair;
@@ -42,9 +43,9 @@ namespace Physica::Core {
         ~DensityGrid() = default;
         /* Oprators */
         DensityGrid& operator=(DensityGrid obj) noexcept;
-        [[nodiscard]] ScalarType operator()(SpinState spin, Vector3D pos) const;
+        [[nodiscard]] T operator()(SpinState spin, Vector3D pos) const;
         /* Operations */
-        void initDensity(ScalarType averageRho);
+        void initDensity(T averageRho);
         inline void initDensity(const DensityGrid& rho);
 
         void resize(size_t x, size_t y, size_t z) { resize({x, y, z}); }
@@ -58,42 +59,42 @@ namespace Physica::Core {
         [[nodiscard]] GridType& getPolarDensity() noexcept { return densityPair[SpinState::Down]; }
     };
 
-    template<class ScalarType, bool IsSpinPolarized>
-    DensityGrid<ScalarType, IsSpinPolarized>::DensityGrid(Index3D dim) : densityPair(dim) {}
+    template<Scalar T, bool IsSpinPolarized>
+    DensityGrid<T, IsSpinPolarized>::DensityGrid(Index3D dim) : densityPair(dim) {}
 
-    template<class ScalarType, bool IsSpinPolarized>
-    DensityGrid<ScalarType, IsSpinPolarized>& DensityGrid<ScalarType, IsSpinPolarized>::operator=(DensityGrid obj) noexcept {
+    template<Scalar T, bool IsSpinPolarized>
+    DensityGrid<T, IsSpinPolarized>& DensityGrid<T, IsSpinPolarized>::operator=(DensityGrid obj) noexcept {
         swap(obj);
         return *this;
     }
 
-    template<class ScalarType, bool IsSpinPolarized>
-    ScalarType DensityGrid<ScalarType, IsSpinPolarized>::operator()(SpinState spin, Vector3D pos) const {
-        assert(ScalarType(0) <= pos[0] && pos[0] <= ScalarType(1));
-        assert(ScalarType(0) <= pos[1] && pos[1] <= ScalarType(1));
-        assert(ScalarType(0) <= pos[2] && pos[2] <= ScalarType(1));
+    template<Scalar T, bool IsSpinPolarized>
+    T DensityGrid<T, IsSpinPolarized>::operator()(SpinState spin, Vector3D pos) const {
+        assert(T(0) <= pos[0] && pos[0] <= T(1));
+        assert(T(0) <= pos[1] && pos[1] <= T(1));
+        assert(T(0) <= pos[2] && pos[2] <= T(1));
         const size_t dimX = getTotalDensity().getDimX();
         const size_t dimY = getTotalDensity().getDimY();
         const size_t dimZ = getTotalDensity().getDimZ();
-        const size_t nx1 = double(ScalarType(dimX) * pos[0]);
-        const size_t ny1 = double(ScalarType(dimY) * pos[1]);
-        const size_t nz1 = double(ScalarType(dimZ) * pos[2]);
+        const size_t nx1 = double(T(dimX) * pos[0]);
+        const size_t ny1 = double(T(dimY) * pos[1]);
+        const size_t nz1 = double(T(dimZ) * pos[2]);
         const size_t nx2 = (nx1 + 1) % dimX;
         const size_t ny2 = (ny1 + 1) % dimY;
         const size_t nz2 = (nz1 + 1) % dimZ;
 
-        const ScalarType deltaX = reciprocal(ScalarType(dimX));
-        const ScalarType deltaY = reciprocal(ScalarType(dimY));
-        const ScalarType deltaZ = reciprocal(ScalarType(dimZ));
-        const ScalarType x1 = deltaX * ScalarType(nx1);
-        const ScalarType y1 = deltaY * ScalarType(ny1);
-        const ScalarType z1 = deltaZ * ScalarType(nz1);
-        const ScalarType factorX2 = (pos[0] - x1) / deltaX;
-        const ScalarType factorY2 = (pos[1] - y1) / deltaY;
-        const ScalarType factorZ2 = (pos[2] - z1) / deltaZ;
-        const ScalarType factorX1 = ScalarType(1) - factorX2;
-        const ScalarType factorY1 = ScalarType(1) - factorY2;
-        const ScalarType factorZ1 = ScalarType(1) - factorZ2;
+        const T deltaX = reciprocal(T(dimX));
+        const T deltaY = reciprocal(T(dimY));
+        const T deltaZ = reciprocal(T(dimZ));
+        const T x1 = deltaX * T(nx1);
+        const T y1 = deltaY * T(ny1);
+        const T z1 = deltaZ * T(nz1);
+        const T factorX2 = (pos[0] - x1) / deltaX;
+        const T factorY2 = (pos[1] - y1) / deltaY;
+        const T factorZ2 = (pos[2] - z1) / deltaZ;
+        const T factorX1 = T(1) - factorX2;
+        const T factorY1 = T(1) - factorY2;
+        const T factorZ1 = T(1) - factorZ2;
         const auto& grid = densityPair[spin];
         return grid(nx1, ny1, nz1) * (factorX1 * factorY1 * factorZ1)
              + grid(nx2, ny1, nz1) * (factorX2 * factorY1 * factorZ1)
@@ -105,32 +106,32 @@ namespace Physica::Core {
              + grid(nx2, ny2, nz2) * (factorX2 * factorY2 * factorZ2);
     }
 
-    template<class ScalarType, bool IsSpinPolarized>
-    void DensityGrid<ScalarType, IsSpinPolarized>::resize(Index3D dim) {
+    template<Scalar T, bool IsSpinPolarized>
+    void DensityGrid<T, IsSpinPolarized>::resize(Index3D dim) {
         getTotalDensity().resize(dim);
         if constexpr (IsSpinPolarized)
             getPolarDensity().resize(dim);
     }
 
-    template<class ScalarType, bool IsSpinPolarized>
-    void DensityGrid<ScalarType, IsSpinPolarized>::initDensity(ScalarType averageRho) {
+    template<Scalar T, bool IsSpinPolarized>
+    void DensityGrid<T, IsSpinPolarized>::initDensity(T averageRho) {
         {
             auto rho = getTotalDensity().flatten();
             rho = averageRho;
         }
         if constexpr (IsSpinPolarized) {
             auto zeta = getPolarDensity().flatten();
-            zeta = ScalarType(0);
+            zeta = T(0);
         }
     }
 
-    template<class ScalarType, bool IsSpinPolarized>
-    inline void DensityGrid<ScalarType, IsSpinPolarized>::initDensity(const DensityGrid& rho) {
+    template<Scalar T, bool IsSpinPolarized>
+    inline void DensityGrid<T, IsSpinPolarized>::initDensity(const DensityGrid& rho) {
         fit(rho);
     }
 
-    template<class ScalarType, bool IsSpinPolarized>
-    void DensityGrid<ScalarType, IsSpinPolarized>::fit(const DensityGrid& rho) {
+    template<Scalar T, bool IsSpinPolarized>
+    void DensityGrid<T, IsSpinPolarized>::fit(const DensityGrid& rho) {
         const LatticeMatrix latt = LatticeMatrix::unitMatrix(3);
         auto kernel = [this, &rho](Vector3D pos, Index3D index) {
             {
@@ -142,37 +143,37 @@ namespace Physica::Core {
                 rho_down(index) = rho(SpinState::Down, pos);
             }
         };
-        RSpaceGrid<ScalarType>::template forPointIndexInGrid<ScalarType, true, decltype(kernel)>(getTotalDensity(), latt, kernel);
+        RSpaceGrid<T>::template forPointIndexInGrid<T, true, decltype(kernel)>(getTotalDensity(), latt, kernel);
         {
             auto rho_up_new = getTotalDensity().flatten();
             const auto& rho_up_old = rho.getTotalDensity().flatten();
-            const ScalarType factor = mean(rho_up_old) / mean(rho_up_new);
+            const T factor = mean(rho_up_old) / mean(rho_up_new);
             rho_up_new *= factor;
         }
         if constexpr (IsSpinPolarized) {
             auto rho_down_new = getPolarDensity().flatten();
             const auto& rho_down_old = rho.getPolarDensity().flatten();
-            const ScalarType factor = mean(rho_down_old) / mean(rho_down_new);
+            const T factor = mean(rho_down_old) / mean(rho_down_new);
             rho_down_new *= factor;
         }
     }
 
-    template<class ScalarType, bool IsSpinPolarized>
-    void DensityGrid<ScalarType, IsSpinPolarized>::swap(DensityGrid& __restrict obj) noexcept {
+    template<Scalar T, bool IsSpinPolarized>
+    void DensityGrid<T, IsSpinPolarized>::swap(DensityGrid& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         densityPair.swap(obj.densityPair);
     }
 
-    template<class ScalarType, bool IsSpinPolarized>
-    std::ostream& operator<<(std::ostream& os, const DensityGrid<ScalarType, IsSpinPolarized>& grid) {
+    template<Scalar T, bool IsSpinPolarized>
+    std::ostream& operator<<(std::ostream& os, const DensityGrid<T, IsSpinPolarized>& grid) {
         os << grid.getTotalDensity();
         if (IsSpinPolarized)
             os << grid.getPolarDensity();
         return os;
     }
 
-    template<class ScalarType, bool IsSpinPolarized>
-    std::istream& operator>>(std::istream& is, DensityGrid<ScalarType, IsSpinPolarized>& grid) {
+    template<Scalar T, bool IsSpinPolarized>
+    std::istream& operator>>(std::istream& is, DensityGrid<T, IsSpinPolarized>& grid) {
         is >> grid.getTotalDensity();
         if (IsSpinPolarized)
             is >> grid.getPolarDensity();

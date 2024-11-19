@@ -19,16 +19,16 @@
 #pragma once
 
 namespace Physica::Core {
-    template<class VectorType>
-    class RealVector : public RValueVector<RealVector<VectorType>> {
-        using This = RealVector<VectorType>;
+    template<Vector T>
+    class RealVector : public RValueVector<RealVector<T>> {
+        using This = RealVector<T>;
         using Base = RValueVector<This>;
     public:
         using typename Base::ScalarType;
     private:
-        const VectorType& v;
+        const T& v;
     public:
-        explicit RealVector(const RValueVector<VectorType>& v_) : v(v_.getDerived()) {}
+        explicit RealVector(const T& v_) : v(v_) {}
         RealVector(const This&) = delete;
         RealVector(This&&) noexcept = delete;
         ~RealVector() = default;
@@ -40,16 +40,16 @@ namespace Physica::Core {
         [[nodiscard]] size_t getLength() const { return v.getLength(); }
     };
 
-    template<class VectorType>
-    class ImagVector : public RValueVector<ImagVector<VectorType>> {
-        using This = ImagVector<VectorType>;
+    template<Vector T>
+    class ImagVector : public RValueVector<ImagVector<T>> {
+        using This = ImagVector<T>;
         using Base = RValueVector<This>;
     public:
         using typename Base::ScalarType;
     private:
-        const VectorType& v;
+        const T& v;
     public:
-        explicit ImagVector(const RValueVector<VectorType>& v_) : v(v_.getDerived()) {}
+        explicit ImagVector(const T& v_) : v(v_) {}
         ImagVector(const This&) = delete;
         ImagVector(This&&) noexcept = delete;
         ~ImagVector() = default;
@@ -61,20 +61,20 @@ namespace Physica::Core {
         [[nodiscard]] size_t getLength() const { return v.getLength(); }
     };
 
-    template<class VectorType>
-    class SquaredNormVector : public RValueVector<SquaredNormVector<VectorType>> {
-        using This = SquaredNormVector<VectorType>;
+    template<Vector T>
+    class SquaredNormVector : public RValueVector<SquaredNormVector<T>> {
+        using This = SquaredNormVector<T>;
         using Base = RValueVector<This>;
-        using ComplexType = typename VectorType::ScalarType;
+        using ComplexType = typename T::ScalarType;
     public:
         using typename Base::ScalarType;
         using Base::isReverseDiff;
     private:
-        constexpr static bool isComplexV = VectorType::isComplex;
+        constexpr static bool isComplexV = T::isComplex;
 
-        const VectorType& v;
+        const T& v;
     public:
-        explicit SquaredNormVector(const RValueVector<VectorType>& v_) : v(v_.getDerived()) {}
+        explicit SquaredNormVector(const T& v_) : v(v_) {}
         SquaredNormVector(const This&) = delete;
         SquaredNormVector(This&&) noexcept = delete;
         ~SquaredNormVector() = default;
@@ -145,16 +145,16 @@ namespace Physica::Core {
         [[nodiscard]] size_t getLength() const { return v.getLength(); }
     };
 
-    template<class VectorType>
-    class NormVector : public RValueVector<NormVector<VectorType>> {
-        using This = NormVector<VectorType>;
+    template<Vector T>
+    class NormVector : public RValueVector<NormVector<T>> {
+        using This = NormVector<T>;
         using Base = RValueVector<This>;
     public:
         using typename Base::ScalarType;
     private:
-        const VectorType& v;
+        const T& v;
     public:
-        explicit NormVector(const RValueVector<VectorType>& v_) : v(v_.getDerived()) {}
+        explicit NormVector(const T& v_) : v(v_) {}
         NormVector(const This&) = delete;
         NormVector(This&&) noexcept = delete;
         ~NormVector() = default;
@@ -166,16 +166,16 @@ namespace Physica::Core {
         [[nodiscard]] size_t getLength() const { return v.getLength(); }
     };
 
-    template<class VectorType>
-    class ValueVector : public RValueVector<ValueVector<VectorType>> {
-        using This = ValueVector<VectorType>;
+    template<Vector T>
+    class ValueVector : public RValueVector<ValueVector<T>> {
+        using This = ValueVector<T>;
         using Base = RValueVector<This>;
     public:
         using typename Base::ScalarType;
     private:
-        const VectorType& v;
+        const T& v;
     public:
-        explicit ValueVector(const RValueVector<VectorType>& v_) : v(v_.getDerived()) {}
+        explicit ValueVector(const T& v_) : v(v_) {}
         ValueVector(const This&) = delete;
         ValueVector(This&&) noexcept = delete;
         ~ValueVector() = default;
@@ -187,16 +187,16 @@ namespace Physica::Core {
         [[nodiscard]] size_t getLength() const { return v.getLength(); }
     };
 
-    template<class VectorType, int GradOrder>
-    class GradVector : public RValueVector<GradVector<VectorType, GradOrder>> {
-        using This = GradVector<VectorType, GradOrder>;
+    template<Vector T, int GradOrder>
+    class GradVector : public RValueVector<GradVector<T, GradOrder>> {
+        using This = GradVector<T, GradOrder>;
         using Base = RValueVector<This>;
     public:
         using typename Base::ScalarType;
     private:
-        const VectorType& v;
+        const T& v;
     public:
-        explicit GradVector(const RValueVector<VectorType>& v_) : v(v_.getDerived()) {}
+        explicit GradVector(const T& v_) : v(v_) {}
         GradVector(const This&) = delete;
         GradVector(This&&) noexcept = delete;
         ~GradVector() = default;
@@ -208,76 +208,72 @@ namespace Physica::Core {
         [[nodiscard]] size_t getLength() const { return v.getLength(); }
     };
 
-    template<class VectorType>
-    [[nodiscard]] inline auto toRealVector(const RValueVector<VectorType>& v) noexcept {
-        return RealVector<VectorType>{v};
+    template<Vector T>
+    [[nodiscard]] inline auto toRealVector(const T& v) noexcept {
+        return RealVector<T>{v};
     }
 
-    template<class VectorType>
-    [[nodiscard]] inline auto toImagVector(const RValueVector<VectorType>& v) noexcept {
-        return ImagVector<VectorType>{v};
+    template<Vector T>
+    [[nodiscard]] inline auto toImagVector(const T& v) noexcept {
+        return ImagVector<T>{v};
     }
 
-    template<class VectorType>
-    [[nodiscard]] inline auto toSquaredNormVector(const RValueVector<VectorType>& v) noexcept {
-        return SquaredNormVector<VectorType>{v};
+    template<Vector T>
+    [[nodiscard]] inline auto toSquaredNormVector(const T& v) noexcept {
+        return SquaredNormVector<T>{v};
     }
 
-    template<class VectorType>
-    [[nodiscard]] inline auto toNormVector(const RValueVector<VectorType>& v) noexcept {
-        return NormVector<VectorType>{v};
+    template<Vector T>
+    [[nodiscard]] inline auto toNormVector(const T& v) noexcept {
+        return NormVector<T>{v};
     }
 
-    template<class VectorType>
-    [[nodiscard]] inline auto toValueVector(const RValueVector<VectorType>& v) noexcept {
-        return ValueVector<VectorType>{v};
+    template<Vector T>
+    [[nodiscard]] inline auto toValueVector(const T& v) noexcept {
+        return ValueVector<T>{v};
     }
 
-    template<class VectorType, int GradOrder = 1>
-    [[nodiscard]] inline auto toGradVector(const RValueVector<VectorType>& v) noexcept {
-        return GradVector<VectorType, GradOrder>{v};
+    template<Vector T, int GradOrder = 1>
+    [[nodiscard]] inline auto toGradVector(const T& v) noexcept {
+        return GradVector<T, GradOrder>{v};
     }
 }
 
 namespace Physica {
-    using namespace Core;
-
-    template<class VectorType>
-    class Traits<RealVector<VectorType>> {
+    template<Vector T>
+    class Traits<RealVector<T>> {
     public:
-        using ScalarType = typename VectorType::ScalarType::RealType;
-        constexpr static size_t SizeAtCompile = VectorType::SizeAtCompile;
+        using ScalarType = typename T::ScalarType::RealType;
+        constexpr static size_t SizeAtCompile = T::SizeAtCompile;
         constexpr static bool FastAssign = false;
-        constexpr static bool FastPacket = Traits<VectorType>::FastPacket;
+        constexpr static bool FastPacket = Traits<T>::FastPacket;
     };
 
-    template<class VectorType>
-    class Traits<ImagVector<VectorType>> : public Traits<RealVector<VectorType>> {};
+    template<Vector T>
+    class Traits<ImagVector<T>> : public Traits<RealVector<T>> {};
 
-    template<class VectorType>
-    class Traits<SquaredNormVector<VectorType>> : public Traits<RealVector<VectorType>> {};
+    template<Vector T>
+    class Traits<SquaredNormVector<T>> : public Traits<RealVector<T>> {};
 
-    template<class VectorType>
-    class Traits<NormVector<VectorType>> : public Traits<RealVector<VectorType>> {};
+    template<Vector T>
+    class Traits<NormVector<T>> : public Traits<RealVector<T>> {};
 
-    template<class VectorType>
-    class Traits<ValueVector<VectorType>> {
-        using T = typename VectorType::ScalarType;
-        static_assert(T::isDifferentiable, "[Error]: Unnecessary toValueVector() call or toGradVector() call");
+    template<Vector T>
+    class Traits<ValueVector<T>> {
+        static_assert(T::ScalarType::isDifferentiable, "[Error]: Unnecessary toValueVector() call or toGradVector() call");
     public:
         using ScalarType = typename T::ValueType;
-        constexpr static size_t SizeAtCompile = VectorType::SizeAtCompile;
+        constexpr static size_t SizeAtCompile = T::SizeAtCompile;
         constexpr static bool FastAssign = false;
         constexpr static bool FastPacket = false;
     };
 
-    template<class VectorType, int GradOrder>
-    class Traits<GradVector<VectorType, GradOrder>> {
-        using T = typename VectorType::ScalarType;
-        static_assert(T::isDifferentiable, "[Error]: Unnecessary toValueVector() call or toGradVector() call");
+    template<Vector T, int GradOrder>
+    class Traits<GradVector<T, GradOrder>> {
+        static_assert(T::ScalarType::isDifferentiable, "[Error]: Unnecessary toValueVector() call or toGradVector() call");
     public:
-        using ScalarType = typename T::template GradRtnTy<GradOrder>;
-        constexpr static size_t SizeAtCompile = VectorType::SizeAtCompile;
+        using ScalarType = typename T::ScalarType::template GradRtnTy<GradOrder>;
+        constexpr static size_t SizeAtCompile = T::SizeAtCompile;
         constexpr static bool FastAssign = false;
         constexpr static bool FastPacket = false;
     };

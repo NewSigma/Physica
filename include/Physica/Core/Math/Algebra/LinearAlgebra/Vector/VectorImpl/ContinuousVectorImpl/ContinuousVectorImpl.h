@@ -23,16 +23,16 @@
 
 namespace Physica::Core {
     namespace Internal {
-        template<class T1, class T2, bool enableSIMD>
+        template<LVector T1, Vector T2, bool enableSIMD>
         struct AddAssignImpl {
-            static void run(LValueVector<T1>& v1, const RValueVector<T2>& v2) {
+            static void run(T1& v1, const T2& v2) {
                 using ScalarType = typename T1::ScalarType;
                 for(size_t i = 0; i < v1.getLength(); ++i)
-                    v1.getDerived()[i] += ScalarType(v2.calc(i));
+                    v1[i] += ScalarType(v2.calc(i));
             }
         };
 
-        template<class T1, class T2>
+        template<LVector T1, Vector T2>
         class AddAssignImpl<T1, T2, true> {
             static_assert(std::is_same<typename T1::ScalarType, typename T2::ScalarType>::value, "[Error]: SIMD on different scalars is not supported");
             constexpr static size_t Size1 = T1::SizeAtCompile;
@@ -40,19 +40,19 @@ namespace Physica::Core {
             constexpr static size_t SizeAtCompile = Size1 > Size2 ? Size1 : Size2;
             using PacketType = typename BestPacket<typename T1::ScalarType, SizeAtCompile>::Type;
         public:
-            static void run(LValueVector<T1>& v1, const RValueVector<T2>& v2) {
+            static void run(T1& v1, const T2& v2) {
                 if constexpr (SizeAtCompile != Dynamic) {
                     constexpr size_t to = SizeAtCompile / PacketType::size() * PacketType::size();
                     for (size_t i = 0; i < to; i += PacketType::size()) {
-                        const PacketType sum = v1.getDerived().template packet<PacketType>(i) + v2.getDerived().template packet<PacketType>(i);
-                        v1.getDerived().writePacket(i, sum);
+                        const PacketType sum = v1.template packet<PacketType>(i) + v2.template packet<PacketType>(i);
+                        v1.writePacket(i, sum);
                     }
 
                     constexpr size_t i = SizeAtCompile - SizeAtCompile % PacketType::size();
                     if constexpr (i != SizeAtCompile) {
                         constexpr size_t count = SizeAtCompile - i;
-                        const PacketType sum = v1.getDerived().template packetPartial<PacketType>(i, count) + v2.getDerived().template packetPartial<PacketType>(i, count);
-                        v1.getDerived().writePacketPartial(i, count, sum);
+                        const PacketType sum = v1.template packetPartial<PacketType>(i, count) + v2.template packetPartial<PacketType>(i, count);
+                        v1.writePacketPartial(i, count, sum);
                     }
                 }
                 else {
@@ -60,13 +60,13 @@ namespace Physica::Core {
                     size_t i = 0;
                     const size_t to = length / PacketType::size() * PacketType::size();
                     for (; i < to; i += PacketType::size()) {
-                        const PacketType sum = v1.getDerived().template packet<PacketType>(i) + v2.getDerived().template packet<PacketType>(i);
-                        v1.getDerived().writePacket(i, sum);
+                        const PacketType sum = v1.template packet<PacketType>(i) + v2.template packet<PacketType>(i);
+                        v1.writePacket(i, sum);
                     }
                     if (to != length) {
                         const size_t count = length - i;
-                        const PacketType sum = v1.getDerived().template packetPartial<PacketType>(i, count) + v2.getDerived().template packetPartial<PacketType>(i, count);
-                        v1.getDerived().writePacketPartial(i, count, sum);
+                        const PacketType sum = v1.template packetPartial<PacketType>(i, count) + v2.template packetPartial<PacketType>(i, count);
+                        v1.writePacketPartial(i, count, sum);
                     }
                 }
             }
@@ -104,6 +104,16 @@ namespace Physica::Core {
                 (*this)[i] = x1;
         }
         return Base::getDerived();
+    }
+
+    template<class Derived>
+    template<Vector V>
+    inline void ContinuousVector<Derived>::operator+=(const V& v) {
+        constexpr size_t Size1 = SizeAtCompile;
+        constexpr size_t Size2 = Traits<V>::SizeAtCompile;
+        static_assert(Size1 == Dynamic || Size2 == Dynamic || Size1 == Size2, "[Error]: Size mismatch between two vector");
+        assert(Base::getLength() == v.getLength());
+        Internal::AddAssignImpl<Derived, V, Internal::EnableSIMD<Derived, V>::value>::run(Base::getDerived(), v);
     }
 
     template<class Derived>
@@ -317,26 +327,17 @@ namespace Physica::Core {
         return std::cref(dataset);
     }
 #endif
-    template<class Derived>
-    std::ostream& operator<<(std::ostream& os, const ContinuousVector<Derived>& v) {
-        using ScalarType = typename Derived::ScalarType;
+    template<Vector T>
+    std::ostream& operator<<(std::ostream& os, const ContinuousVector<T>& v) {
+        using ScalarType = typename T::ScalarType;
         os.write(reinterpret_cast<const char*>(v.data_ptr(0)), v.getLength() * sizeof(ScalarType));
         return os;
     }
 
-    template<class Derived>
-    std::istream& operator>>(std::istream& is, ContinuousVector<Derived>& v) {
-        using ScalarType = typename Derived::ScalarType;
+    template<Vector T>
+    std::istream& operator>>(std::istream& is, ContinuousVector<T>& v) {
+        using ScalarType = typename T::ScalarType;
         is.read(reinterpret_cast<char*>(v.data_ptr(0)), v.getLength() * sizeof(ScalarType));
         return is;
-    }
-
-    template<class Derived, class OtherDerived>
-    inline void operator+=(ContinuousVector<Derived>& v1, const RValueVector<OtherDerived>& v2) {
-        constexpr size_t Size1 = Traits<Derived>::SizeAtCompile;
-        constexpr size_t Size2 = Traits<OtherDerived>::SizeAtCompile;
-        static_assert(Size1 == Dynamic || Size2 == Dynamic || Size1 == Size2, "[Error]: Size mismatch between two vector");
-        assert(v1.getLength() == v2.getLength());
-        Internal::AddAssignImpl<Derived, OtherDerived, Internal::EnableSIMD<Derived, OtherDerived>::value>::run(v1, v2);
     }
 }

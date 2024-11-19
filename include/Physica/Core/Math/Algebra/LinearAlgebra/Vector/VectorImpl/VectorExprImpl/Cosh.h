@@ -19,10 +19,10 @@
 #pragma once
 
 namespace Physica::Core {
-    template<class VectorType>
-    class VectorExpr<ExprType::Cosh, VectorType> : public UnitaryVectorExpr<ExprType::Cosh, VectorType> {
-        using This = VectorExpr<ExprType::Cosh, VectorType>;
-        using Base = UnitaryVectorExpr<ExprType::Cosh, VectorType>;
+    template<Vector T>
+    class VectorExpr<ExprType::Cosh, T> : public UnitaryVectorExpr<ExprType::Cosh, T> {
+        using This = VectorExpr<ExprType::Cosh, T>;
+        using Base = UnitaryVectorExpr<ExprType::Cosh, T>;
     public:
         using typename Base::ScalarType;
     public:
@@ -31,8 +31,8 @@ namespace Physica::Core {
         [[nodiscard]] ScalarType calc(size_t index) const { return cosh(Base::getExpr().calc(index)); }
     };
 
-    template<class VectorType>
-    [[nodiscard]] inline auto cosh(const RValueVector<VectorType>& v) noexcept {
-        return VectorExpr<ExprType::Cosh, VectorType>(v);
+    template<Vector T>
+    [[nodiscard]] inline auto cosh(const T& v) noexcept {
+        return VectorExpr<ExprType::Cosh, T>(v);
     }
 }

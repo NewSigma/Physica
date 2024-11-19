@@ -44,7 +44,7 @@ Addtional libraries:
 [fftw](http://www.fftw.org)  3.3.10  
 [HDF5](https://www.hdfgroup.org/solutions/hdf5/) 1.14.1  (Optional, Recommended data format)  
 [oneMKL](https://www.intel.com/) 2024.2 (Optional)  
-[CUDA](https://developer.nvidia.com/cuda-downloads)  12.3  (Optional)  
+[CUDA](https://developer.nvidia.com/cuda-downloads)  12.6  (Optional)  
 [Qt](https://www.qt.io/)  6.5.3  (Optional, Plotting support)  
 [pybind11](https://github.com/pybind/pybind11) 2.11 (Optional, Python binding, Experimental)  
 [LLVM](https://llvm.org/) 17.0.6 (Optional, Python binding, Experimental)  

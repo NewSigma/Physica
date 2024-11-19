@@ -22,7 +22,14 @@
 #include "GridBase.h"
 
 namespace Physica::Core {
+    template<class Derived> class RValueGrid;
     template<class Derived> class LValueGrid;
+
+    template<class T>
+    concept Grid = std::derived_from<T, RValueGrid<T>>;
+
+    template<class T>
+    concept LGrid = std::derived_from<T, LValueGrid<T>>;
 
     template<class Derived>
     class RValueGrid : public CRTPBase<RValueGrid<Derived>>, public GridBase {
@@ -33,8 +40,8 @@ namespace Physica::Core {
         constexpr static bool isComplex = ScalarType::isComplex;
     public:
         /* Operations */
-        template<class OtherDerived>
-        void assignTo(LValueGrid<OtherDerived>& other) const;
+        template<Grid T>
+        void assignTo(LValueGrid<T>& other) const;
         template<class Functor> void forIndexInGrid(Functor func) const { GridBase::forIndexInGrid(getDim(), func); }
         /* Getters */
         [[nodiscard]] ScalarType calc(size_t x, size_t y, size_t z) const { return calc({x, y, z}); }
@@ -48,40 +55,40 @@ namespace Physica::Core {
         using GridBase::forPointInGrid;
         using GridBase::forPointIndexInGrid;
         using GridBase::forIndexInGrid;
-        template<class PosScalarType, bool IsUnitLattice, class Functor>
+        template<Scalar T, bool IsUnitLattice, class Functor>
         inline static void forPointInGrid(
-                const RValueGrid& grid, const typename PeriodicCell<PosScalarType, 3>::LatticeMatrix& lattice, Functor func);
-        template<class PosScalarType, bool IsUnitLattice, class Functor>
+                const RValueGrid& grid, const typename PeriodicCell<T, 3>::LatticeMatrix& lattice, Functor func);
+        template<Scalar T, bool IsUnitLattice, class Functor>
         inline static void forPointIndexInGrid(
-                const RValueGrid& grid, const typename PeriodicCell<PosScalarType, 3>::LatticeMatrix& lattice, Functor func);
+                const RValueGrid& grid, const typename PeriodicCell<T, 3>::LatticeMatrix& lattice, Functor func);
     };
 
     template<class Derived>
-    template<class OtherDerived>
-    void RValueGrid<Derived>::assignTo(LValueGrid<OtherDerived>& other) const {
+    template<Grid T>
+    void RValueGrid<Derived>::assignTo(LValueGrid<T>& other) const {
         forIndexInGrid(getDim(), [this, &other](Index3D index) {
             other(index) = calc(index);
         });
     }
 
     template<class Derived>
-    template<class PosScalarType, bool IsUnitLattice, class Functor>
+    template<Scalar T, bool IsUnitLattice, class Functor>
     inline void RValueGrid<Derived>::forPointInGrid(
-            const RValueGrid& grid, const typename PeriodicCell<PosScalarType, 3>::LatticeMatrix& lattice, Functor func) {
-        return forPointInGrid<PosScalarType, IsUnitLattice, Functor>(grid.getDim(), lattice, func);
+            const RValueGrid& grid, const typename PeriodicCell<T, 3>::LatticeMatrix& lattice, Functor func) {
+        return forPointInGrid<T, IsUnitLattice, Functor>(grid.getDim(), lattice, func);
     }
 
     template<class Derived>
-    template<class PosScalarType, bool IsUnitLattice, class Functor>
+    template<Scalar T, bool IsUnitLattice, class Functor>
     inline void RValueGrid<Derived>::forPointIndexInGrid(
-            const RValueGrid& grid, const typename PeriodicCell<PosScalarType, 3>::LatticeMatrix& lattice, Functor func) {
-        forPointIndexInGrid<PosScalarType, IsUnitLattice, Functor>(grid.getDim(), lattice, func);
+            const RValueGrid& grid, const typename PeriodicCell<T, 3>::LatticeMatrix& lattice, Functor func) {
+        forPointIndexInGrid<T, IsUnitLattice, Functor>(grid.getDim(), lattice, func);
     }
 }
 
 namespace Physica {
     template<class T>
-    class Traits<Core::RValueGrid<T>> {
+    class Traits<RValueGrid<T>> {
     public:
         using Derived = T;
     };

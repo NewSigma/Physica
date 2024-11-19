@@ -19,19 +19,19 @@
 #pragma once
 
 namespace Physica::Core {
-    template<class T, int type, size_t maxRow, size_t maxColumn>
+    template<Scalar T, int type, size_t maxRow, size_t maxColumn>
     PLUDecomposition<T, type, maxRow, maxColumn>::PLUDecomposition(MatrixType m) {
         compute(std::move(m));
     }
 
-    template<class T, int type, size_t maxRow, size_t maxColumn>
+    template<Scalar T, int type, size_t maxRow, size_t maxColumn>
     PLUDecomposition<T, type, maxRow, maxColumn>&
     PLUDecomposition<T, type, maxRow, maxColumn>::operator=(PLUDecomposition obj) noexcept {
         swap(obj);
         return *this;
     }
 
-    template<class T, int type, size_t maxRow, size_t maxColumn>
+    template<Scalar T, int type, size_t maxRow, size_t maxColumn>
     void PLUDecomposition<T, type, maxRow, maxColumn>::compute(MatrixType m) {
         matrix = std::move(m);
         biasOrder.resize(matrix.getRow());
@@ -44,7 +44,7 @@ namespace Physica::Core {
         }
     }
 
-    template<class T, int type, size_t maxRow, size_t maxColumn>
+    template<Scalar T, int type, size_t maxRow, size_t maxColumn>
     void PLUDecomposition<T, type, maxRow, maxColumn>::swap(PLUDecomposition& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         matrix.swap(obj.matrix);
@@ -56,7 +56,7 @@ namespace Physica::Core {
      * Reference:
      * [1] William H. Press, Saul A. Teukolsky, William T. Vetterling, Brian P. Flannery. C++数值算法(第二版)[M]. 北京: 电子工业出版社, 2005:32
      */
-    template<class T, int type, size_t maxRow, size_t maxColumn>
+    template<Scalar T, int type, size_t maxRow, size_t maxColumn>
     void PLUDecomposition<T, type, maxRow, maxColumn>::decompositionColumn(size_t col) {
         const auto startAlphaIndex = col + 1;
         for (size_t j = 1; j < startAlphaIndex; ++j) { //Start from 1, unnecessary to handle j = 0

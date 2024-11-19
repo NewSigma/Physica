@@ -27,20 +27,20 @@ namespace Physica::Core {
     /**
      * AAB(2 : 1) molecular, for example H2O(\class Q_TIP4P)
      */
-    template<class ScalarType>
+    template<Scalar T>
     class AABModel {
     public:
         constexpr static unsigned int Dim = 3;
-        using ValueType = typename ScalarType::ValueType;
-        using MDCellType = MDCell<ScalarType, Dim>;
+        using ValueType = typename T::ValueType;
+        using MDCellType = MDCell<T, Dim>;
         using LatticeMatrix = typename MDCellType::LatticeMatrix;
         using PositionMatrix = typename MDCellType::PositionMatrix;
     public:
         ~AABModel() = default;
         /* Static members */
-        static PermutationMatrix<ScalarType> sortPosition(MDCellType& cell, size_t atomicNum1, size_t atomicNum2);
+        static PermutationMatrix<T> sortPosition(MDCellType& cell, size_t atomicNum1, size_t atomicNum2);
         static bool isCellOrdered(const MDCellType& cell, size_t atomicNum1, size_t atomicNum2);
-        static VectorND<ScalarType> makeCharges(size_t numMolecule, ValueType atomCharge1, ValueType atomCharge2);
+        static VectorND<T> makeCharges(size_t numMolecule, ValueType atomCharge1, ValueType atomCharge2);
     protected:
         AABModel() = default;
         AABModel(const AABModel&) = default;
@@ -50,8 +50,8 @@ namespace Physica::Core {
         AABModel& operator=(AABModel&&) noexcept = default;
     };
 
-    template<class ScalarType>
-    PermutationMatrix<ScalarType> AABModel<ScalarType>::sortPosition(MDCellType& cell, size_t atomicNum1, size_t atomicNum2) {
+    template<Scalar T>
+    PermutationMatrix<T> AABModel<T>::sortPosition(MDCellType& cell, size_t atomicNum1, size_t atomicNum2) {
         using MassVector = typename MDCellType::MassVector;
         const auto& source = cell.getPos();
         const size_t numAtom = source.getRow();
@@ -83,12 +83,12 @@ namespace Physica::Core {
                 const size_t indexO = i + numH;
                 size_t indexH1 = 0, indexH2 = 0;
                 /* Make indexH1, indexH2 */ {
-                    ScalarType dist1, dist2;
-                    dist1 = dist2 = std::numeric_limits<ScalarType>::max();
+                    T dist1, dist2;
+                    dist1 = dist2 = std::numeric_limits<T>::max();
                     
                     for (size_t j = 0; j < numH; ++j) {
                         auto posOH = cell.minDistVector(indexO, j);
-                        const ScalarType dist = posOH.squaredNorm();
+                        const T dist = posOH.squaredNorm();
                         if (dist1 > dist2) {
                             if (dist1 > dist) {
                                 dist1 = dist;
@@ -106,21 +106,21 @@ namespace Physica::Core {
                         std::swap(indexH1, indexH2);
                 }
                 auto posH1 = new_pos.row(2 * i);
-                posH1 = source.row(indexH1).asVector();
+                posH1 = source.row(indexH1);
                 orderStage2[2 * i] = orderStage1[indexH1];
 
                 auto posH2 = new_pos.row(2 * i + 1);
-                posH2 = source.row(indexH2).asVector();
+                posH2 = source.row(indexH2);
                 orderStage2[2 * i + 1] = orderStage1[indexH2];
                 orderStage2[indexO] = orderStage1[indexO];
             }
             cell = MDCellType(cell.getLattice(), std::move(new_pos), std::move(new_mass));
         }
-        return PermutationMatrix<ScalarType>(std::move(orderStage2));
+        return PermutationMatrix<T>(std::move(orderStage2));
     }
 
-    template<class ScalarType>
-    bool AABModel<ScalarType>::isCellOrdered(const MDCellType& cell, size_t atomicNum1, size_t atomicNum2) {
+    template<Scalar T>
+    bool AABModel<T>::isCellOrdered(const MDCellType& cell, size_t atomicNum1, size_t atomicNum2) {
         const size_t numParticle= cell.getNumParticle();
         const size_t maxIndexH = 2 * numParticle / 3;
         const size_t minIndexO = maxIndexH;
@@ -138,12 +138,12 @@ namespace Physica::Core {
         return true;
     }
 
-    template<class ScalarType>
-    VectorND<ScalarType> AABModel<ScalarType>::makeCharges(size_t numMolecule, ValueType atomCharge1, ValueType atomCharge2) {
+    template<Scalar T>
+    VectorND<T> AABModel<T>::makeCharges(size_t numMolecule, ValueType atomCharge1, ValueType atomCharge2) {
         const size_t maxIndexH = 2 * numMolecule;
         const size_t minIndexO = maxIndexH;
         const size_t maxIndexO = minIndexO + numMolecule;
-        VectorND<ScalarType> charges(maxIndexO);
+        VectorND<T> charges(maxIndexO);
         for (size_t i = 0; i < maxIndexH; ++i)
             charges[i] = atomCharge1;
         

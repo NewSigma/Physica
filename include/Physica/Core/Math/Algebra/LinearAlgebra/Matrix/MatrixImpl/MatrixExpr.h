@@ -22,9 +22,9 @@
 
 namespace Physica::Core {
     /**
-     * \class MatrixExpr represents \param T1 \param type \param T2. e.g. matrix + scalar, expression * expression
+     * \class MatrixExpr represents \param T \param type \param U. e.g. matrix + scalar, expression * expression
      */
-    template<ExprType Type, class T1, class T2 = T1> class MatrixExpr;
+    template<ExprType Type, Matrix T, class U = T> class MatrixExpr;
 
     template<ExprType Type, Matrix M>
     class UnitaryMatrixExpr : public RValueMatrix<MatrixExpr<Type, M>> {
@@ -33,7 +33,7 @@ namespace Physica::Core {
     private:
         const M& expr;
     public:
-        UnitaryMatrixExpr(const RValueMatrix<M>& expr_) : expr(expr_.getDerived()) {}
+        UnitaryMatrixExpr(const M& expr_) : expr(expr_) {}
         UnitaryMatrixExpr(const This&) = delete;
         UnitaryMatrixExpr(This&&) noexcept = delete;
         ~UnitaryMatrixExpr() = default;
@@ -58,7 +58,7 @@ namespace Physica::Core {
     public:
         BinaryMatrixExpr(const LHS& lhs_, const RHS& rhs_) : lhs(&lhs_) {
             if constexpr (Scalar<RHS>)
-                rhs = &rhs_.getDerived();
+                rhs = &rhs_;
             else {
                 rhs = &rhs_;
                 assert(lhs->getRow() == rhs->getRow());
@@ -80,34 +80,34 @@ namespace Physica::Core {
 }
 
 namespace Physica {
-    template<Core::ExprType Type, class T1, class T2>
-    class Traits<Core::MatrixExpr<Type, T1, T2>> {
+    template<Core::ExprType Type, Matrix T, class U>
+    class Traits<Core::MatrixExpr<Type, T, U>> {
         using MatrixOption = Core::MatrixOption;
-        constexpr static bool SameMajor = MatrixOption::isSameMajor<T1, T2>();
-        constexpr static int Major = SameMajor ? MatrixOption::getMajor<T1>()
+        constexpr static bool SameMajor = MatrixOption::isSameMajor<T, U>();
+        constexpr static int Major = SameMajor ? MatrixOption::getMajor<T>()
                                                : int(MatrixOption::AnyMajor);
-        constexpr static bool SameStorage = MatrixOption::isSameStorage<T1, T2>();
-        constexpr static int Storage = SameStorage ? MatrixOption::getStorage<T1>()
+        constexpr static bool SameStorage = MatrixOption::isSameStorage<T, U>();
+        constexpr static int Storage = SameStorage ? MatrixOption::getStorage<T>()
                                                    : int(MatrixOption::AnyStorage);
         constexpr static bool IsReal = Type == ExprType::Abs || Type == ExprType::Square;
-        using ResultType = typename Internal::BinaryScalarOpReturnType<typename T1::ScalarType, typename T2::ScalarType>::Type;
+        using ResultType = typename Internal::BinaryScalarOpReturnType<typename T::ScalarType, typename U::ScalarType>::Type;
     public:
         using ScalarType = typename std::conditional<IsReal, typename ResultType::RealType, ResultType>::type;
         constexpr static int Option = Major | Storage;
-        // Optimize: T1 and T2 may not have same compiling size, for example, T1 may be fixed size and T2 may be dynamic
-        constexpr static size_t RowAtCompile = T1::RowAtCompile;
-        constexpr static size_t ColAtCompile = T1::ColAtCompile;
-        constexpr static size_t SizeAtCompile = T1::SizeAtCompile;
+        // Optimize: T and U may not have same compiling size, for example, T may be fixed size and U may be dynamic
+        constexpr static size_t RowAtCompile = T::RowAtCompile;
+        constexpr static size_t ColAtCompile = T::ColAtCompile;
+        constexpr static size_t SizeAtCompile = T::SizeAtCompile;
     };
 
-    template<Core::ExprType Type, class T1, Scalar T2>
-    class Traits<Core::MatrixExpr<Type, T1, T2>> {
+    template<Core::ExprType Type, Matrix T, Scalar U>
+    class Traits<Core::MatrixExpr<Type, T, U>> {
     public:
-        using ScalarType = typename Core::Internal::BinaryScalarOpReturnType<typename T1::ScalarType, T2>::Type;
-        constexpr static int Option = T1::Option;
-        constexpr static size_t RowAtCompile = T1::RowAtCompile;
-        constexpr static size_t ColAtCompile = T1::ColAtCompile;
-        constexpr static size_t SizeAtCompile = T1::SizeAtCompile;
+        using ScalarType = typename Core::Internal::BinaryScalarOpReturnType<typename T::ScalarType, U>::Type;
+        constexpr static int Option = T::Option;
+        constexpr static size_t RowAtCompile = T::RowAtCompile;
+        constexpr static size_t ColAtCompile = T::ColAtCompile;
+        constexpr static size_t SizeAtCompile = T::SizeAtCompile;
     };
 }
 

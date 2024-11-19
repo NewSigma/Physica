@@ -19,10 +19,10 @@
 #pragma once
 
 namespace Physica::Core {
-    template<class T, size_t Size>
+    template<Scalar T, size_t Size>
     SIMD<Complex<T>, Size>::SIMD(int x) : SIMD(ScalarType(x)) {}
 
-    template<class T, size_t Size>
+    template<Scalar T, size_t Size>
     SIMD<Complex<T>, Size>::SIMD(ScalarType x) {
         if constexpr (isSeparatable) {
             using Half = SIMD<Complex<T>, Size / 2>;
@@ -37,17 +37,17 @@ namespace Physica::Core {
         }
     }
 
-    template<class T, size_t Size>
+    template<Scalar T, size_t Size>
     inline typename SIMD<Complex<T>, Size>::ScalarType SIMD<Complex<T>, Size>::operator[](int index) const {
         return ScalarType(Base::operator[](2 * index), Base::operator[](2 * index + 1));
     }
 
-    template<class T, size_t Size>
+    template<Scalar T, size_t Size>
     inline SIMD<Complex<T>, Size> SIMD<Complex<T>, Size>::operator+(const SIMD& other) const {
         return asComplex(Base::operator+(other));
     }
 
-    template<class T, size_t Size>
+    template<Scalar T, size_t Size>
     inline SIMD<Complex<T>, Size> SIMD<Complex<T>, Size>::operator-(const SIMD& other) const {
         return asComplex(Base::operator-(other));
     }
@@ -55,7 +55,7 @@ namespace Physica::Core {
      * Reference:
      * [1] vectorclass add-on; https://github.com/vectorclass/add-on
      */
-    template<class T, size_t Size>
+    template<Scalar T, size_t Size>
     inline SIMD<Complex<T>, Size> SIMD<Complex<T>, Size>::operator*(const SIMD& other) const {
         Base a_re, a_im;
         if constexpr (T::Option == Float32) {
@@ -80,42 +80,42 @@ namespace Physica::Core {
         return asComplex(mul_addsub(a_re, other.asReal(), a_im * other.swapRealImag()));
     }
 
-    template<class T, size_t Size>
+    template<Scalar T, size_t Size>
     inline SIMD<Complex<T>, Size> SIMD<Complex<T>, Size>::operator*(const ScalarType& x) const {
         return operator*(SIMD(x));
     }
 
-    template<class T, size_t Size>
+    template<Scalar T, size_t Size>
     inline SIMD<Complex<T>, Size> SIMD<Complex<T>, Size>::operator*(const T& x) const {
         return asComplex(Base::operator*(x));
     }
 
-    template<class T, size_t Size>
+    template<Scalar T, size_t Size>
     inline SIMD<Complex<T>, Size> SIMD<Complex<T>, Size>::operator-() const {
         return asComplex(Base::operator-());
     }
 
-    template<class T, size_t Size>
+    template<Scalar T, size_t Size>
     inline void SIMD<Complex<T>, Size>::load(const ScalarType* p) {
         Base::load(reinterpret_cast<const T*>(p));
     }
 
-    template<class T, size_t Size>
+    template<Scalar T, size_t Size>
     inline void SIMD<Complex<T>, Size>::load_partial(const ScalarType* p, int n) {
         Base::load_partial(reinterpret_cast<const T*>(p), 2 * n);
     }
 
-    template<class T, size_t Size>
+    template<Scalar T, size_t Size>
     inline void SIMD<Complex<T>, Size>::store(ScalarType* p) const {
         Base::store(reinterpret_cast<T*>(p));
     }
 
-    template<class T, size_t Size>
+    template<Scalar T, size_t Size>
     inline void SIMD<Complex<T>, Size>::store_partial(ScalarType* p, int n) const {
         Base::store_partial(reinterpret_cast<T*>(p), 2 * n);
     }
 
-    template<class T, size_t Size>
+    template<Scalar T, size_t Size>
     typename SIMD<Complex<T>, Size>::AsRealRtnTy SIMD<Complex<T>, Size>::swapRealImag() const noexcept {
         AsRealRtnTy result;
         if constexpr (T::Option == Float32)
@@ -133,7 +133,7 @@ namespace Physica::Core {
         return result;
     }
 
-    template<class T, size_t Size>
+    template<Scalar T, size_t Size>
     inline typename SIMD<Complex<T>, Size>::AsRealRtnTy SIMD<Complex<T>, Size>::permRealImag() const noexcept {
         auto result = asReal();
         if constexpr (Size == 2)
@@ -147,7 +147,7 @@ namespace Physica::Core {
         return result;
     }
 
-    template<class T, size_t Size>
+    template<Scalar T, size_t Size>
     inline typename SIMD<Complex<T>, Size>::ScalarType SIMD<Complex<T>, Size>::sum() const {
         if constexpr (isSeparatable)
             return getHigh().sum() + getLow().sum();
@@ -159,17 +159,17 @@ namespace Physica::Core {
         }
     }
 
-    template<class T, size_t Size>
+    template<Scalar T, size_t Size>
     inline typename SIMD<Complex<T>, Size>::RealType SIMD<Complex<T>, Size>::real() const noexcept {
         return permRealImag().getLow();
     }
 
-    template<class T, size_t Size>
+    template<Scalar T, size_t Size>
     inline typename SIMD<Complex<T>, Size>::RealType SIMD<Complex<T>, Size>::imag() const noexcept {
         return permRealImag().getHigh();
     }
 
-    template<class T, size_t Size>
+    template<Scalar T, size_t Size>
     SIMD<Complex<T>, Size> SIMD<Complex<T>, Size>::asComplex(AsRealRtnTy reals) {
         This result{};
         static_cast<Base&>(result) = std::move(reals);

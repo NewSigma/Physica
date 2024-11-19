@@ -19,11 +19,11 @@
 #pragma once
 
 namespace Physica::Core {
-    template<class VectorType, size_t Length>
-    class device_obj<ContinuousVectorBlock<VectorType, Length>> : public device_obj<ContinuousVector<ContinuousVectorBlock<VectorType, Length>>> {
-        using host_obj = ContinuousVectorBlock<VectorType, Length>;
+    template<Vector T, size_t Length>
+    class device_obj<ContinuousVectorBlock<T, Length>> : public device_obj<ContinuousVector<ContinuousVectorBlock<T, Length>>> {
+        using host_obj = ContinuousVectorBlock<T, Length>;
         using Base = device_obj<ContinuousVector<host_obj>>;
-        using DeviceVector = device_obj<VectorType>;
+        using DeviceVector = device_obj<T>;
     public:
         using typename Base::ScalarType;
     protected:
@@ -36,8 +36,8 @@ namespace Physica::Core {
         size_t from;
         size_t to;
     public:
-        __host__ __device__ device_obj(device_obj<ContinuousVector<VectorType>>& vec_, size_t from_, size_t to_);
-        __host__ __device__ device_obj(device_obj<ContinuousVector<VectorType>>& vec_, size_t from_);
+        __host__ __device__ device_obj(device_obj<ContinuousVector<T>>& vec_, size_t from_, size_t to_);
+        __host__ __device__ device_obj(device_obj<ContinuousVector<T>>& vec_, size_t from_);
         device_obj(const device_obj& block) = delete;
         device_obj(device_obj&&) noexcept = delete;
         ~device_obj() = default;
@@ -56,9 +56,9 @@ namespace Physica::Core {
         [[nodiscard]] __host__ __device__ ConstPtrTy data_ptr(size_t index) const { return vec.getDerived().data() + from + index; }
     };
 
-    template<class VectorType, size_t Length>
-    __host__ __device__ device_obj<ContinuousVectorBlock<VectorType, Length>>::device_obj(
-            device_obj<ContinuousVector<VectorType>>& vec_,
+    template<Vector T, size_t Length>
+    __host__ __device__ device_obj<ContinuousVectorBlock<T, Length>>::device_obj(
+            device_obj<ContinuousVector<T>>& vec_,
             size_t from_,
             size_t to_) : vec(asStruct(vec_.getDerived())), from(from_), to(to_) {
         assert(from_ < to);
@@ -66,41 +66,41 @@ namespace Physica::Core {
         assert(Length == Dynamic || Length == getLength());
     }
 
-    template<class VectorType, size_t Length>
-    __host__ __device__ device_obj<ContinuousVectorBlock<VectorType, Length>>::device_obj(
-            device_obj<ContinuousVector<VectorType>>& vec_, size_t from_) : device_obj(vec_, from_, vec_.getLength()) {}
+    template<Vector T, size_t Length>
+    __host__ __device__ device_obj<ContinuousVectorBlock<T, Length>>::device_obj(
+            device_obj<ContinuousVector<T>>& vec_, size_t from_) : device_obj(vec_, from_, vec_.getLength()) {}
 
-    template<class VectorType, size_t Length>
-    inline device_obj<ContinuousVectorBlock<VectorType, Length>>&
-    device_obj<ContinuousVectorBlock<VectorType, Length>>::operator=(const device_obj<ContinuousVectorBlock<VectorType, Length>>& obj) {
+    template<Vector T, size_t Length>
+    inline device_obj<ContinuousVectorBlock<T, Length>>&
+    device_obj<ContinuousVectorBlock<T, Length>>::operator=(const device_obj<ContinuousVectorBlock<T, Length>>& obj) {
         Base::operator=(obj);
         return *this;
     }
     
-    template<class VectorType, size_t Length>
-    inline device_obj<ContinuousVectorBlock<VectorType, Length>>&
-    device_obj<ContinuousVectorBlock<VectorType, Length>>::operator=(device_obj<ContinuousVectorBlock<VectorType, Length>>&& obj) noexcept {
+    template<Vector T, size_t Length>
+    inline device_obj<ContinuousVectorBlock<T, Length>>&
+    device_obj<ContinuousVectorBlock<T, Length>>::operator=(device_obj<ContinuousVectorBlock<T, Length>>&& obj) noexcept {
         Base::operator=(std::move(obj));
         return *this;
     }
 
-    template<class VectorType, size_t Length>
-    __device__ inline typename device_obj<ContinuousVectorBlock<VectorType, Length>>::RefTy
-    device_obj<ContinuousVectorBlock<VectorType, Length>>::operator[](size_t index) {
+    template<Vector T, size_t Length>
+    __device__ inline typename device_obj<ContinuousVectorBlock<T, Length>>::RefTy
+    device_obj<ContinuousVectorBlock<T, Length>>::operator[](size_t index) {
         assert((index + from) < to);
         return vec.getDerived()[index + from];
     }
 
-    template<class VectorType, size_t Length>
-    __device__ inline typename device_obj<ContinuousVectorBlock<VectorType, Length>>::ConstRefTy
-    device_obj<ContinuousVectorBlock<VectorType, Length>>::operator[](size_t index) const {
+    template<Vector T, size_t Length>
+    __device__ inline typename device_obj<ContinuousVectorBlock<T, Length>>::ConstRefTy
+    device_obj<ContinuousVectorBlock<T, Length>>::operator[](size_t index) const {
         assert((index + from) < to);
         return vec.getDerived()[index + from];
     }
 
-    template<class VectorType, size_t Length>
+    template<Vector T, size_t Length>
     template<Side Owner>
-    __host__ __device__ inline size_t device_obj<ContinuousVectorBlock<VectorType, Length>>::getLength() const noexcept {
+    __host__ __device__ inline size_t device_obj<ContinuousVectorBlock<T, Length>>::getLength() const noexcept {
         if constexpr (Length == Dynamic)
             return to - from;
         return Length;
@@ -108,6 +108,6 @@ namespace Physica::Core {
 }
 
 namespace Physica {
-    template<class VectorType, size_t Length>
-    class Traits<Core::device_obj<Core::ContinuousVectorBlock<VectorType, Length>>> : public Traits<Core::ContinuousVectorBlock<VectorType, Length>> {};
+    template<Vector T, size_t Length>
+    class Traits<Core::device_obj<Core::ContinuousVectorBlock<T, Length>>> : public Traits<Core::ContinuousVectorBlock<T, Length>> {};
 }

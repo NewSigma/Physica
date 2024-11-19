@@ -19,10 +19,10 @@
 #pragma once
 
 namespace Physica::Core {
-    template<class ScalarType>
+    template<Scalar T>
     class SparseReference {
-        using This = SparseReference<ScalarType>;
-        using VectorType = SparseVector<ScalarType>;
+        using This = SparseReference<T>;
+        using VectorType = SparseVector<T>;
         using IndexArray = typename VectorType::IndexArray;
         using ElemArray = typename VectorType::ElemArray;
 
@@ -36,25 +36,25 @@ namespace Physica::Core {
         /* Operators */
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
-        void operator=(ScalarType value);
-        void operator+=(ScalarType value);
+        void operator=(T value);
+        void operator+=(T value);
     private:
         /* Operations */
-        [[nodiscard]] ScalarType* findValue();
-        void append(ScalarType value);
+        [[nodiscard]] T* findValue();
+        void append(T value);
         /* Getters */
         [[nodiscard]] size_t getLength() const noexcept { return v.getLength(); }
         [[nodiscard]] IndexArray& getIndexes() noexcept { return v.indexes; }
         [[nodiscard]] ElemArray& getElems() noexcept { return v.elems; }
     };
 
-    template<class ScalarType>
-    SparseReference<ScalarType>::SparseReference(VectorType& v_, size_t index_) : v(v_), index(index_) {
+    template<Scalar T>
+    SparseReference<T>::SparseReference(VectorType& v_, size_t index_) : v(v_), index(index_) {
         assert(index < getLength() && "[Error]: Index out of range");
     }
 
-    template<class ScalarType>
-    void SparseReference<ScalarType>::operator=(ScalarType value) {
+    template<Scalar T>
+    void SparseReference<T>::operator=(T value) {
         auto* pValue = findValue();
         if (pValue != nullptr) {
             *pValue = value;
@@ -63,8 +63,8 @@ namespace Physica::Core {
         append(value);
     }
 
-    template<class ScalarType>
-    void SparseReference<ScalarType>::operator+=(ScalarType value) {
+    template<Scalar T>
+    void SparseReference<T>::operator+=(T value) {
         auto* pValue = findValue();
         if (pValue != nullptr) {
             *pValue += value;
@@ -73,14 +73,14 @@ namespace Physica::Core {
         append(value);
     }
 
-    template<class ScalarType>
-    void SparseReference<ScalarType>::append(ScalarType value) {
+    template<Scalar T>
+    void SparseReference<T>::append(T value) {
         getIndexes().append(index);
         getElems().append(std::move(value));
     }
 
-    template<class ScalarType>
-    ScalarType* SparseReference<ScalarType>::findValue() {
+    template<Scalar T>
+    T* SparseReference<T>::findValue() {
         const auto& indexes = getIndexes();
         for (size_t i = 0; i < indexes.getLength(); ++i)
             if (index == indexes[i])

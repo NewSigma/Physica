@@ -21,10 +21,10 @@
 #include "GeoBase.h"
 
 namespace Physica::Core {
-    template<class ScalarType>
-    class GeoBase2D : public GeoBase<2, ScalarType> {
+    template<Scalar T>
+    class GeoBase2D : public GeoBase<2, T> {
     public:
-        using Base = GeoBase<2, ScalarType>;
+        using Base = GeoBase<2, T>;
         using typename Base::PointType;
         using typename Base::VectorType;
     public:
@@ -34,7 +34,7 @@ namespace Physica::Core {
         [[nodiscard]] static bool pointOnPoly(const VectorType& p, const Array<VectorType, PolyVertex>& vertexes);
     private:
         template<size_t PolyVertex>
-        static ScalarType pointPolyImpl(const VectorType& p, const Array<VectorType, PolyVertex>& vertexes);
+        static T pointPolyImpl(const VectorType& p, const Array<VectorType, PolyVertex>& vertexes);
     };
     /**
      * \param vertexes
@@ -43,9 +43,9 @@ namespace Physica::Core {
      * Reference:
      * [1] Lo S. H. Finite Element Mesh Generation[M]. Taylor and Francis, 2015.32
      */
-    template<class ScalarType>
+    template<Scalar T>
     template<size_t PolyVertex>
-    bool GeoBase2D<ScalarType>::pointInPoly(const VectorType& p, const Array<VectorType, PolyVertex>& vertexes) {
+    bool GeoBase2D<T>::pointInPoly(const VectorType& p, const Array<VectorType, PolyVertex>& vertexes) {
         const size_t numVertex = vertexes.getLength();
         for (size_t i = 0; i < numVertex; ++i) {
             const size_t next_i = (i + 1) % numVertex;
@@ -57,9 +57,9 @@ namespace Physica::Core {
         return true;
     }
 
-    template<class ScalarType>
+    template<Scalar T>
     template<size_t PolyVertex>
-    bool GeoBase2D<ScalarType>::pointOnPoly(const VectorType& p, const Array<VectorType, PolyVertex>& vertexes) {
+    bool GeoBase2D<T>::pointOnPoly(const VectorType& p, const Array<VectorType, PolyVertex>& vertexes) {
         const size_t numVertex = vertexes.getLength();
         for (size_t i = 0; i < numVertex; ++i) {
             const size_t next_i = (i + 1) % numVertex;

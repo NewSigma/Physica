@@ -21,18 +21,18 @@
 #include "MatrixImpl/RValueMatrix.h"
 
 namespace Physica::Core {
-    template<class VectorType, int MatrixMajor, size_t Row, size_t Col>
-    class ReshapedVector : public RValueMatrix<ReshapedVector<VectorType, MatrixMajor, Row, Col>> {
-        using This = ReshapedVector<VectorType, MatrixMajor, Row, Col>;
+    template<Vector T, int MatrixMajor, size_t Row, size_t Col>
+    class ReshapedVector<T, MatrixMajor, Row, Col> : public RValueMatrix<ReshapedVector<T, MatrixMajor, Row, Col>> {
+        using This = ReshapedVector<T, MatrixMajor, Row, Col>;
         using Base = RValueMatrix<This>;
     public:
-        using ScalarType = typename VectorType::ScalarType;
+        using ScalarType = typename T::ScalarType;
     private:
-        const VectorType& v;
+        const T& v;
         size_t row;
         size_t col;
     public:
-        ReshapedVector(const VectorType& v_, size_t row, size_t col);
+        ReshapedVector(const T& v_, size_t row, size_t col);
         ReshapedVector(const ReshapedVector&) = default;
         ReshapedVector(ReshapedVector&&) noexcept = default;
         ~ReshapedVector() = default;
@@ -60,17 +60,17 @@ namespace Physica::Core {
         [[nodiscard]] ScalarType sum() const { return v.sum(); }
     };
 
-    template<class VectorType, int MatrixMajor, size_t Row, size_t Col>
-    ReshapedVector<VectorType, MatrixMajor, Row, Col>::ReshapedVector(const VectorType& v_, size_t row_, size_t col_)
+    template<Vector T, int MatrixMajor, size_t Row, size_t Col>
+    ReshapedVector<T, MatrixMajor, Row, Col>::ReshapedVector(const T& v_, size_t row_, size_t col_)
             : v(v_), row(row_), col(col_) {
         assert(row == Row || Row == Dynamic);
         assert(col == Col || Col == Dynamic);
     }
 
     template<class Derived>
-    template<class OtherDerived>
-    ReshapedVector<Derived, MatrixOption::getMajor<OtherDerived>(), OtherDerived::RowAtCompile, OtherDerived::ColAtCompile>
-    RValueVector<Derived>::reshape(const RValueMatrix<OtherDerived>& mat) const {
+    template<Matrix M>
+    ReshapedVector<Derived, MatrixOption::getMajor<M>(), M::RowAtCompile, M::ColAtCompile>
+    RValueVector<Derived>::reshape(const M& mat) const {
         return {Base::getDerived(), mat.getRow(), mat.getCol()};
     }
 
@@ -88,16 +88,14 @@ namespace Physica::Core {
 }
 
 namespace Physica {
-    using namespace Core;
-
-    template<class VectorType, int MatrixMajor, size_t Row, size_t Col>
-    class Traits<ReshapedVector<VectorType, MatrixMajor, Row, Col>> {
+    template<Vector T, int MatrixMajor, size_t Row, size_t Col>
+    class Traits<ReshapedVector<T, MatrixMajor, Row, Col>> {
         static_assert(MatrixMajor == MatrixOption::Col || MatrixMajor == MatrixOption::Row, "[Error]: Invalid major");
     public:
-        using ScalarType = typename VectorType::ScalarType;
+        using ScalarType = typename T::ScalarType;
         constexpr static int Option = MatrixMajor | MatrixOption::AnyStorage;
         constexpr static size_t RowAtCompile = Row;
         constexpr static size_t ColAtCompile = Col;
-        constexpr static size_t SizeAtCompile = VectorType::SizeAtCompile;
+        constexpr static size_t SizeAtCompile = T::SizeAtCompile;
     };
 }

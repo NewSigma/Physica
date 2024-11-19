@@ -21,11 +21,11 @@
 #include <Physica/Core/Utils/Unix/ColorGuard.h>
 
 namespace Physica::Core {
-    template<class ScalarType, int Order> class TraceSegment;
+    template<Scalar T, int Order> class TraceSegment;
 
-    template<class ScalarType, int Order>
+    template<Scalar T, int Order>
     class ColorfulTraceSegment {
-        using SegmentType = TraceSegment<ScalarType, Order>;
+        using SegmentType = TraceSegment<T, Order>;
 
         const SegmentType& segment;
     public:
@@ -36,15 +36,15 @@ namespace Physica::Core {
         /* Operators */
         ColorfulTraceSegment& operator=(const ColorfulTraceSegment&) = delete;
         ColorfulTraceSegment& operator=(ColorfulTraceSegment&&) noexcept = delete;
-        template<Scalar T, unsigned int AnyOrder>
+        template<Scalar U, int AnyOrder>
         friend std::ostream& operator<<(std::ostream& os, const ColorfulTraceSegment<T, AnyOrder>& obj);
     };
 
-    template<class ScalarType, int Order>
-    ColorfulTraceSegment<ScalarType, Order>::ColorfulTraceSegment(const SegmentType& segment_) : segment(segment_) {}
+    template<Scalar T, int Order>
+    ColorfulTraceSegment<T, Order>::ColorfulTraceSegment(const SegmentType& segment_) : segment(segment_) {}
 
-    template<Scalar T, unsigned int AnyOrder>
-    std::ostream& operator<<(std::ostream& os, const ColorfulTraceSegment<T, AnyOrder>& obj) {
+    template<Scalar U, int AnyOrder>
+    std::ostream& operator<<(std::ostream& os, const ColorfulTraceSegment<U, AnyOrder>& obj) {
         using Color = typename ColorGuard::Color;
         using ColorGuard = ColorGuard;
         const auto& segment = obj.segment;
@@ -67,7 +67,7 @@ namespace Physica::Core {
             }
             os << "Op: ";
             const size_t idFirstOperand = segment.getRecords()[i].idFirstOperand;
-            const size_t num = TraceSegment<T, AnyOrder>::numOperand(source);
+            const size_t num = TraceSegment<U, AnyOrder>::numOperand(source);
             for (size_t j = 0; j < num; ++j) {
                 const auto& op = segment.getOperands()[idFirstOperand + j];
                 const size_t index = segment.find(op);

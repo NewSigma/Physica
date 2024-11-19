@@ -25,37 +25,38 @@ namespace Physica::Core {
      * Reference:
      * [1] William H. Press, Saul A. Teukolsky, William T. Vetterling, Brian P. Flannery. C++数值算法(第二版)[M]. 北京: 电子工业出版社, 2005:480-484
      */
-    template<class ScalarType>
+    template<Scalar T>
     class SavitzkyGolay {
-        using MatrixType = DenseMatrix<ScalarType>;
+        using MatrixType = DenseMatrix<T>;
+
         unsigned char lRange;
         unsigned char rRange;
         MatrixType coeffs;
         MatrixType inv;
-        ScalarType delta;
+        T delta;
     public:
-        SavitzkyGolay(unsigned char lRange_, unsigned char rRange_, size_t order, ScalarType delta_);
+        SavitzkyGolay(unsigned char lRange_, unsigned char rRange_, size_t order, T delta_);
         SavitzkyGolay(const SavitzkyGolay&) = default;
         SavitzkyGolay(SavitzkyGolay&&) noexcept = default;
         ~SavitzkyGolay() = default;
         /* Operators */
         SavitzkyGolay& operator=(SavitzkyGolay filter) noexcept { swap(filter); return *this; }
         /* Operations */
-        template<class VectorType>
-        void smooth(LValueVector<VectorType>& data) const;
-        template<class VectorType>
-        void smooth_zero(LValueVector<VectorType>& data) const;
+        template<LVector V>
+        void smooth(V& data) const;
+        template<LVector V>
+        void smooth_zero(V& data) const;
         void swap(SavitzkyGolay& __restrict filter) noexcept;
         /* Getters */
         [[nodiscard]] unsigned char getLRange() const noexcept { return lRange; }
         [[nodiscard]] unsigned char getRRange() const noexcept { return rRange; }
         [[nodiscard]] size_t getOrder() const noexcept { return coeffs.getRow() - 1; }
         [[nodiscard]] size_t getWindowSize() const noexcept { return coeffs.getRow(); }
-        [[nodiscard]] ScalarType getDelta() const noexcept { return delta; }
+        [[nodiscard]] T getDelta() const noexcept { return delta; }
     };
 
-    template<class ScalarType>
-    SavitzkyGolay<ScalarType>::SavitzkyGolay(unsigned char lRange_, unsigned char rRange_, size_t order, ScalarType delta_)
+    template<Scalar T>
+    SavitzkyGolay<T>::SavitzkyGolay(unsigned char lRange_, unsigned char rRange_, size_t order, T delta_)
             : lRange(lRange_)
             , rRange(rRange_)
             , coeffs(lRange_ + rRange_ + 1, order + 1)
@@ -68,7 +69,7 @@ namespace Physica::Core {
                 const size_t row = MatrixOption::rowFromMajorMinor<MatrixType>(major, minor);
                 const size_t col = MatrixOption::colFromMajorMinor<MatrixType>(major, minor);
                 const int i = int(row) - int(lRange);
-                coeffs.refFromMajorMinor(major, minor) = pow(delta * i, ScalarType(col));
+                coeffs.refFromMajorMinor(major, minor) = pow(delta * i, T(col));
             }
         }
 
@@ -77,15 +78,15 @@ namespace Physica::Core {
         inv.swap(temp);
     }
 
-    template<class ScalarType>
-    template<class VectorType>
-    void SavitzkyGolay<ScalarType>::smooth(LValueVector<VectorType>& data) const {
+    template<Scalar T>
+    template<LVector V>
+    void SavitzkyGolay<T>::smooth(V& data) const {
         const size_t windowSize = getWindowSize();
-        VectorND<ScalarType> mask(windowSize);
+        VectorND<T> mask(windowSize);
         for (size_t i = 0; i < windowSize; ++i)
-            mask[i] = inv.row(0).asVector() * coeffs.row(i).asVector();
+            mask[i] = inv.row(0) * coeffs.row(i);
 
-        VectorND<ScalarType> temp = data;
+        VectorND<T> temp = data;
         for (size_t pos = lRange; pos < data.getLength() - rRange; ++pos) {
             auto window = data.getDerived().segment(pos - lRange, pos - lRange + windowSize);
             temp[pos] = mask * window;
@@ -95,16 +96,16 @@ namespace Physica::Core {
     /**
      * Append zeros if data is undefined
      */
-    template<class ScalarType>
-    template<class VectorType>
-    void SavitzkyGolay<ScalarType>::smooth_zero(LValueVector<VectorType>& data) const {
+    template<Scalar T>
+    template<LVector V>
+    void SavitzkyGolay<T>::smooth_zero(V& data) const {
         const size_t windowSize = getWindowSize();
-        VectorND<ScalarType> mask(windowSize);
+        VectorND<T> mask(windowSize);
         for (size_t i = 0; i < windowSize; ++i)
-            mask[i] = inv.row(0).asVector() * coeffs.row(i).asVector();
+            mask[i] = inv.row(0) * coeffs.row(i);
 
         const size_t length = data.getLength();
-        VectorND<ScalarType> temp = data;
+        VectorND<T> temp = data;
         /* Append zeros to pos < 0 */ {
             const size_t rRange1 = rRange + 1;
             for (size_t pos = 0; pos < lRange; ++pos) {
@@ -128,8 +129,8 @@ namespace Physica::Core {
         data.getDerived() = std::move(temp);
     }
 
-    template<class ScalarType>
-    void SavitzkyGolay<ScalarType>::swap(SavitzkyGolay<ScalarType>& __restrict filter) noexcept {
+    template<Scalar T>
+    void SavitzkyGolay<T>::swap(SavitzkyGolay<T>& __restrict filter) noexcept {
         assert(this != &filter && "[Error]: Self swap is likely a bug");
         std::swap(lRange, filter.lRange);
         std::swap(rRange, filter.rRange);

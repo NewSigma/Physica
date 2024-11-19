@@ -19,20 +19,20 @@
 #pragma once
 
 namespace Physica::Core {
-    template<class MatrixType, class VectorType> class MatrixVectorProduct;
+    template<Matrix T, Vector U> class MatrixVectorProduct;
 
-    template<class MatrixType, class VectorType>
-    class MatrixVectorProduct<MatrixPow<MatrixType>, VectorType>
-            : public RValueVector<MatrixVectorProduct<MatrixPow<MatrixType>, VectorType>> {
-        using This = MatrixVectorProduct<MatrixPow<MatrixType>, VectorType>;
+    template<Matrix T, Vector U>
+    class MatrixVectorProduct<MatrixPow<T>, U>
+            : public RValueVector<MatrixVectorProduct<MatrixPow<T>, U>> {
+        using This = MatrixVectorProduct<MatrixPow<T>, U>;
         using Base = RValueVector<This>;
     public:
         using typename Base::ScalarType;
     private:
-        const MatrixPow<MatrixType>& mpow;
-        const VectorType& v;
+        const MatrixPow<T>& mpow;
+        const U& v;
     public:
-        MatrixVectorProduct(const MatrixPow<MatrixType>& mpow_, const VectorType& v_);
+        MatrixVectorProduct(const MatrixPow<T>& mpow_, const U& v_);
         MatrixVectorProduct(const This&) = delete;
         MatrixVectorProduct(This&&) noexcept = delete;
         ~MatrixVectorProduct() = default;
@@ -40,33 +40,32 @@ namespace Physica::Core {
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
         /* Operations */
-        template<class OtherVector, class Executor = SequentialExecutor>
-        inline void assignTo(LValueVector<OtherVector>& target_) const;
+        template<LVector V, class Executor = SequentialExecutor>
+        inline void assignTo(V& target) const;
 
         [[nodiscard]] ScalarType calc(size_t) const { noImpl(); }
         /* Getters */
         [[nodiscard]] size_t getLength() const noexcept { return v.getLength(); }
-        [[nodiscard]] const MatrixPow<MatrixType>& getLHS() const noexcept { return mpow; }
-        [[nodiscard]] const VectorType& getRHS() const noexcept { return v; }
+        [[nodiscard]] const MatrixPow<T>& getLHS() const noexcept { return mpow; }
+        [[nodiscard]] const U& getRHS() const noexcept { return v; }
     };
 
-    template<class MatrixType, class VectorType>
-    MatrixVectorProduct<MatrixPow<MatrixType>, VectorType>::MatrixVectorProduct(
-            const MatrixPow<MatrixType>& mpow_, const VectorType& v_) : mpow(mpow_), v(v_) {
+    template<Matrix T, Vector U>
+    MatrixVectorProduct<MatrixPow<T>, U>::MatrixVectorProduct(
+            const MatrixPow<T>& mpow_, const U& v_) : mpow(mpow_), v(v_) {
         assert(mpow.getCol() == v.getLength());
     }
 
-    template<class MatrixType, class VectorType>
-    template<class OtherVector, class Executor>
-    inline void MatrixVectorProduct<MatrixPow<MatrixType>, VectorType>::assignTo(LValueVector<OtherVector>& target_) const {
+    template<Matrix T, Vector U>
+    template<LVector V, class Executor>
+    inline void MatrixVectorProduct<MatrixPow<T>, U>::assignTo(V& target) const {
         const int power = mpow.getPower();
-        auto& target = target_.getDerived();
         if (power == 0) {
             target = v;
             return;
         }
 
-        OtherVector buffer = mpow.getMatrix() * v;
+        V buffer = mpow.getMatrix() * v;
         for (int i = 1; i < power; ++i) {
             buffer.swap(target);
             buffer = mpow.getMatrix() * target;
@@ -76,7 +75,6 @@ namespace Physica::Core {
 }
 
 namespace Physica {
-    template<class MatrixType, class VectorType>
-    class Traits<MatrixVectorProduct<MatrixPow<MatrixType>, VectorType>>
-            : public Traits<MatrixVectorProduct<MatrixType, VectorType>> {};
+    template<Core::Matrix T, Core::Vector U>
+    class Traits<Core::MatrixVectorProduct<Core::MatrixPow<T>, U>> : public Traits<Core::MatrixVectorProduct<T, U>> {};
 }

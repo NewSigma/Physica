@@ -60,7 +60,7 @@ bool testDriftMomentum(double precision) {
     for (int i = 0; i < 3; ++i) {
         ScalarType sum = 0;
         for (size_t j = i; j < rpmd.getDOF(); j += 3)
-            sum += rpmd.getPhaseMatrix().row(j).asVector().sum();
+            sum += rpmd.getPhaseMatrix().row(j).sum();
         if (!scalarNear(sum, ScalarType(0), precision))
             return false;
     }

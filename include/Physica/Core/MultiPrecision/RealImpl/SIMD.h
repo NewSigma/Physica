@@ -27,14 +27,14 @@
 namespace Physica::Core {
     template<Scalar T, size_t Size> class BoolSIMD;
 
-    template<class ScalarType, size_t Size>
-    class SIMD : private Traits<SIMD<ScalarType, Size>>::BaseType {
-        using This = SIMD<ScalarType, Size>;
+    template<Scalar T, size_t Size>
+    class SIMD : private Traits<SIMD<T, Size>>::BaseType {
+        using This = SIMD<T, Size>;
         using Base = typename Traits<This>::BaseType;
-        using ValueType = typename ScalarType::ValueType;
-        using MachineType = typename ScalarType::MachineType;
-        using HalfType = typename std::conditional<sizeof(Base) * CHAR_BIT != 128, SIMD<ScalarType, Size / 2>, PlainStruct<void>>::type;
-        constexpr static bool isForward = ScalarType::isForwardDiff;
+        using ValueType = typename T::ValueType;
+        using MachineType = typename T::MachineType;
+        using HalfType = typename std::conditional<sizeof(Base) * CHAR_BIT != 128, SIMD<T, Size / 2>, PlainStruct<void>>::type;
+        constexpr static bool isForward = T::isForwardDiff;
     public:
         using BoolSIMDType = typename Traits<This>::BoolSIMDType;
         using PlainPacket = This;
@@ -42,8 +42,8 @@ namespace Physica::Core {
         constexpr static bool isSeparatable = !std::is_same<HalfType, PlainStruct<void>>::value;
     public:
         SIMD() = default;
-        explicit SIMD(ScalarType s) : Base(s.toMachine()) {}
-        SIMD(ScalarType s, int count);
+        explicit SIMD(T s) : Base(s.toMachine()) {}
+        SIMD(T s, int count);
         SIMD(Base value) : Base(value) {}
         SIMD(HalfType a, HalfType b);
         using Base::Base;
@@ -59,11 +59,11 @@ namespace Physica::Core {
         [[nodiscard]] operator __m128d() const noexcept { return toMachine(); }
         [[nodiscard]] operator __m256d() const noexcept { return toMachine(); }
         [[nodiscard]] operator __m512d() const noexcept { return toMachine(); }
-        [[nodiscard]] inline ScalarType operator[](int index) const;
+        [[nodiscard]] inline T operator[](int index) const;
         [[nodiscard]] inline SIMD operator+(const SIMD& other) const;
         [[nodiscard]] inline SIMD operator-(const SIMD& other) const;
         [[nodiscard]] inline SIMD operator*(const SIMD& other) const;
-        [[nodiscard]] inline SIMD operator*(const ScalarType& x) const;
+        [[nodiscard]] inline SIMD operator*(const T& x) const;
         [[nodiscard]] inline SIMD operator/(const SIMD& other) const;
         [[nodiscard]] inline SIMD operator-() const;
         [[nodiscard]] inline SIMD operator&(const SIMD& other) const;
@@ -73,7 +73,7 @@ namespace Physica::Core {
         void operator+=(const SIMD& other) { *this = *this + other; }
         void operator-=(const SIMD& other) { *this = *this - other; }
         void operator*=(const SIMD& other) { *this = *this * other; }
-        void operator*=(const ScalarType& x) { *this = *this * x; }
+        void operator*=(const T& x) { *this = *this * x; }
         void operator/=(const SIMD& other) { *this = *this / other; }
         void operator&=(const SIMD& other) { *this = *this & other; }
         void operator|=(const SIMD& other) { *this = *this | other; }
@@ -85,20 +85,20 @@ namespace Physica::Core {
         [[nodiscard]] auto operator>=(const SIMD& other) const { return !(*this < other); }
         [[nodiscard]] auto operator<=(const SIMD& other) const { return !(*this > other); }
         /* Operations */
-        inline void load(const ScalarType* p);
-        inline void load_partial(const ScalarType* p, int n);
-        inline void store(ScalarType* p) const;
-        inline void store_partial(ScalarType* p, int n) const;
-        inline void insert(int index, const ScalarType& value);
+        inline void load(const T* p);
+        inline void load_partial(const T* p, int n);
+        inline void store(T* p) const;
+        inline void store_partial(T* p, int n) const;
+        inline void insert(int index, const T& value);
         template<int... Order> inline SIMD shuffle() const;
         template<int... Order> inline SIMD permute() const;
         template<int... Flags> inline SIMD change_sign() const;
 
         inline This& cutoff(int count);
 
-        [[nodiscard]] inline ScalarType sum() const;
-        [[nodiscard]] inline ScalarType max() const;
-        [[nodiscard]] inline ScalarType min() const;
+        [[nodiscard]] inline T sum() const;
+        [[nodiscard]] inline T max() const;
+        [[nodiscard]] inline T min() const;
         void swap(SIMD& __restrict other) noexcept { std::swap(*this, other); }
         /* Getters */
         [[nodiscard]] constexpr static size_t size() { return Size; }
@@ -120,38 +120,38 @@ namespace Physica::Core {
         [[nodiscard]] constexpr static unsigned int makeShuffleMask(int order);
     };
 
-    template<class ScalarType, size_t Size>
-    [[nodiscard]] inline SIMD<ScalarType, Size> operator*(const ScalarType& scalar, const SIMD<ScalarType, Size>& packet) {
+    template<Scalar T, size_t Size>
+    [[nodiscard]] inline SIMD<T, Size> operator*(const T& scalar, const SIMD<T, Size>& packet) {
         return packet * scalar;
     }
 
-    template<class ScalarType, size_t Size>
-    [[nodiscard]] inline SIMD<ScalarType, Size> mul_add(
-            const SIMD<ScalarType, Size>& a,
-            const SIMD<ScalarType, Size>& b,
-            const SIMD<ScalarType, Size>& c);
+    template<Scalar T, size_t Size>
+    [[nodiscard]] inline SIMD<T, Size> mul_add(
+            const SIMD<T, Size>& a,
+            const SIMD<T, Size>& b,
+            const SIMD<T, Size>& c);
 
-    template<class ScalarType, size_t Size>
-    [[nodiscard]] inline SIMD<ScalarType, Size> nmul_add(
-            const SIMD<ScalarType, Size> a,
-            const SIMD<ScalarType, Size> b,
-            const SIMD<ScalarType, Size> c);
+    template<Scalar T, size_t Size>
+    [[nodiscard]] inline SIMD<T, Size> nmul_add(
+            const SIMD<T, Size> a,
+            const SIMD<T, Size> b,
+            const SIMD<T, Size> c);
 
-    template<class ScalarType, size_t Size>
-    [[nodiscard]] inline SIMD<ScalarType, Size> mul_sub(
-            const SIMD<ScalarType, Size> a,
-            const SIMD<ScalarType, Size> b,
-            const SIMD<ScalarType, Size> c);
+    template<Scalar T, size_t Size>
+    [[nodiscard]] inline SIMD<T, Size> mul_sub(
+            const SIMD<T, Size> a,
+            const SIMD<T, Size> b,
+            const SIMD<T, Size> c);
 
-    template<class ScalarType, size_t Size>
-    [[nodiscard]] inline SIMD<ScalarType, Size> mul_addsub(
-            const SIMD<ScalarType, Size> a,
-            const SIMD<ScalarType, Size> b,
-            const SIMD<ScalarType, Size> c);
+    template<Scalar T, size_t Size>
+    [[nodiscard]] inline SIMD<T, Size> mul_addsub(
+            const SIMD<T, Size> a,
+            const SIMD<T, Size> b,
+            const SIMD<T, Size> c);
 }
 
 namespace Physica {
-    template<class T, size_t Size>
+    template<Scalar T, size_t Size>
     class Traits<Core::SIMD<T, Size>> {
         constexpr static bool isFloat32 = T::Option == Core::Float32;
         static_assert(isFloat32 || T::Option == Core::Float64, "[Error]: Unsupported float type");
@@ -174,11 +174,11 @@ namespace Physica {
 }
 
 namespace std {
-    #define PacketType Physica::Core::SIMD<ScalarType, Size>
+    #define PacketType Physica::Core::SIMD<T, Size>
 
-    template<class ScalarType, size_t Size>
+    template<Physica::Core::Scalar T, size_t Size>
     inline PacketType max(PacketType a, PacketType b) {
-        if constexpr (ScalarType::isForwardDiff) {
+        if constexpr (T::isForwardDiff) {
             using GradPacket = typename PacketType::GradPacket;
             const auto values = max(a.getValue(), b.getValue());
             return PacketType(values, GradPacket::select(values == a.getValue(), a.getGrad(), b.getGrad()));
@@ -187,9 +187,9 @@ namespace std {
             return Physica::max(a.toMachine(), b.toMachine());
     }
 
-    template<class ScalarType, size_t Size>
+    template<Physica::Core::Scalar T, size_t Size>
     inline PacketType min(PacketType a, PacketType b) {
-        if constexpr (ScalarType::isForwardDiff) {
+        if constexpr (T::isForwardDiff) {
             using GradPacket = typename PacketType::GradPacket;
             const auto values = min(a.getValue(), b.getValue());
             return PacketType(values, GradPacket::select(values == a.getValue(), a.getGrad(), b.getGrad()));

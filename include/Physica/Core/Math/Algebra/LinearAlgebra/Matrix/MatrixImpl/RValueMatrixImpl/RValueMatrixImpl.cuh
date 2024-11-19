@@ -25,10 +25,10 @@
 
 namespace Physica::Core {
     namespace Internal {
-        template<class Derived, class OtherDerived>
+        template<class Derived, Matrix M>
         __global__ void RValueMatrix_assignToKernel(
-                Physica::PlainStruct<const device_obj<Derived>> source_, Physica::PlainStruct<device_obj<OtherDerived>> target_) {
-            using ScalarType = typename device_obj<OtherDerived>::ScalarType;
+                Physica::PlainStruct<const device_obj<Derived>> source_, Physica::PlainStruct<device_obj<M>> target_) {
+            using ScalarType = typename device_obj<M>::ScalarType;
             const auto& source = source_.getDerived();
             auto& target = target_.getDerived();
             const size_t maxMinor = source.getMaxMinor();
@@ -43,9 +43,9 @@ namespace Physica::Core {
     }
 
     template<class Derived>
-    template<class OtherDerived>
-    __host__ __device__ void device_obj<RValueMatrix<Derived>>::assignTo(device_obj<LValueMatrix<OtherDerived>>& target) const {
-        [[maybe_unused]] const auto kernel = Internal::RValueMatrix_assignToKernel<Derived, OtherDerived>;
+    template<Matrix M>
+    __host__ __device__ void device_obj<RValueMatrix<Derived>>::assignTo(device_obj<LValueMatrix<M>>& target) const {
+        [[maybe_unused]] const auto kernel = Internal::RValueMatrix_assignToKernel<Derived, M>;
         const size_t maxMajor = target.getMaxMajor();
         const size_t maxMinor = target.getMaxMinor();
         if constexpr (IsHost()) {
@@ -56,7 +56,7 @@ namespace Physica::Core {
             check(cudaGetLastError());
         }
         else {
-            using OtherScalar = typename OtherDerived::ScalarType;
+            using OtherScalar = typename M::ScalarType;
             for (size_t major = 0; major < maxMajor; ++major) {
                 for (size_t minor = 0; minor < maxMinor; ++minor) {
                     const size_t r = target.rowFromMajorMinor(major, minor);
@@ -254,12 +254,12 @@ namespace Physica::Core {
     }
 
     template<class Derived>
-    __host__ __device__ device_obj<Transpose<Derived>> device_obj<RValueMatrix<Derived>>::transpose() const noexcept {
-        return device_obj<Transpose<Derived>>(*this);
+    __host__ __device__ auto device_obj<RValueMatrix<Derived>>::transpose() const noexcept {
+        return device_obj<Transpose<Derived>>(Base::getDerived());
     }
 
     template<class Derived>
-    __host__ __device__ device_obj<RValueFlatten<Derived>> device_obj<RValueMatrix<Derived>>::flatten() const noexcept {
-        return device_obj<RValueFlatten<Derived>>(*this);
+    __host__ __device__ auto device_obj<RValueMatrix<Derived>>::flatten() const noexcept {
+        return device_obj<RValueFlatten<Derived>>(Base::getDerived());
     }
 }

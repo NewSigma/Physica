@@ -40,8 +40,8 @@ namespace Physica::Core {
 
         template<class Executor>
         [[nodiscard]] VectorND<ScalarType> force(const MDCellType& cell);
-        template<class VectorType, class Executor>
-        void forceAsync(const MDCellType& cell, ContinuousVector<VectorType>& result);
+        template<Vector V, class Executor>
+        void forceAsync(const MDCellType& cell, ContinuousVector<V>& result);
 
         template<class Executor>
         [[nodiscard]] VectorND<ScalarType> force_short(const MDCellType& cell) { return force<Executor>(cell); }
@@ -69,15 +69,15 @@ namespace Physica::Core {
     }
 
     template<class HostModel, class DeviceModel>
-    template<class VectorType, class Executor>
-    void CPUGPUModel<HostModel, DeviceModel>::forceAsync(const MDCellType& cell, ContinuousVector<VectorType>& result) {
+    template<Vector V, class Executor>
+    void CPUGPUModel<HostModel, DeviceModel>::forceAsync(const MDCellType& cell, ContinuousVector<V>& result) {
         static_assert(Traits<Executor>::UseCUDA, "[Error]: Invalid executor");
         const auto threadId = ThreadPool::getThreadInfo().id;
         const bool useCPU = ThreadPool::isMainThread() || static_cast<size_t>(threadId) >= getNumCUDAThread();
         if (useCPU)
             result = hostModel.template force<ThreadExecutor>(cell);
         else
-            deviceModels[threadId].template forceAsync<VectorType, CUDAExecutor>(cell, result);
+            deviceModels[threadId].template forceAsync<V, CUDAExecutor>(cell, result);
     }
 }
 

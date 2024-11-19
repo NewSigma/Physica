@@ -19,13 +19,13 @@
 #pragma once
 
 namespace Physica::Core {
-    template<class MatrixType1, class MatrixType2>
-    class MatrixExpr<ExprType::Sub, MatrixType1, MatrixType2>
-            : public BinaryMatrixExpr<ExprType::Sub, MatrixType1, MatrixType2> {
-        using Base = BinaryMatrixExpr<ExprType::Sub, MatrixType1, MatrixType2>;
-        using This = MatrixExpr<ExprType::Sub, MatrixType1, MatrixType2>;
-        constexpr static bool IsSymm = MatrixOption::isSymmMatrix<MatrixType1>() && MatrixOption::isSymmMatrix<MatrixType2>();
-        constexpr static bool IsHermite = MatrixOption::isHermiteMatrix<MatrixType1>() && MatrixOption::isHermiteMatrix<MatrixType2>();
+    template<Matrix T1, Matrix T2>
+    class MatrixExpr<ExprType::Sub, T1, T2>
+            : public BinaryMatrixExpr<ExprType::Sub, T1, T2> {
+        using Base = BinaryMatrixExpr<ExprType::Sub, T1, T2>;
+        using This = MatrixExpr<ExprType::Sub, T1, T2>;
+        constexpr static bool IsSymm = MatrixOption::isSymmMatrix<T1>() && MatrixOption::isSymmMatrix<T2>();
+        constexpr static bool IsHermite = MatrixOption::isHermiteMatrix<T1>() && MatrixOption::isHermiteMatrix<T2>();
         using TransposeRtnTy = typename std::conditional<IsSymm, const This&, Transpose<This>>::type;
         using HermiteRtnTy = typename std::conditional<IsHermite, const This&, Hermite<This>>::type;
     public:
@@ -41,10 +41,10 @@ namespace Physica::Core {
         [[nodiscard]] HermiteRtnTy hermite() const noexcept { return HermiteRtnTy(*this); }
     };
 
-    template<class MatrixType, Scalar T>
-    class MatrixExpr<ExprType::Sub, MatrixType, T>
-            : public BinaryMatrixExpr<ExprType::Sub, MatrixType, T> {
-        using Base = BinaryMatrixExpr<ExprType::Sub, MatrixType, T>;
+    template<Matrix T, Scalar U>
+    class MatrixExpr<ExprType::Sub, T, U>
+            : public BinaryMatrixExpr<ExprType::Sub, T, U> {
+        using Base = BinaryMatrixExpr<ExprType::Sub, T, U>;
     public:
         using typename Base::ScalarType;
     public:
@@ -55,13 +55,13 @@ namespace Physica::Core {
         }
     };
 
-    template<class MatrixType, Scalar T>
-    [[nodiscard]] inline auto operator-(const RValueMatrix<MatrixType>& mat, const T& x) noexcept {
-        return MatrixExpr<ExprType::Sub, MatrixType, T>(mat.getDerived(), x);
+    template<Matrix T, Scalar U>
+    [[nodiscard]] inline auto operator-(const T& m, const U& x) noexcept {
+        return MatrixExpr<ExprType::Sub, T, U>(m, x);
     }
 
-    template<class MatrixType1, class MatrixType2>
-    [[nodiscard]] inline auto operator-(const RValueMatrix<MatrixType1>& mat1, const RValueMatrix<MatrixType2>& mat2) noexcept {
-        return MatrixExpr<ExprType::Sub, MatrixType1, MatrixType2>(mat1.getDerived(), mat2.getDerived());
+    template<Matrix T1, Matrix T2>
+    [[nodiscard]] inline auto operator-(const T1& m1, const T2& m2) noexcept {
+        return MatrixExpr<ExprType::Sub, T1, T2>(m1, m2);
     }
 }

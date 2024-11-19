@@ -20,8 +20,10 @@
 
 namespace Physica::Core {
     template<class Derived>
-    template<class OtherDerived>
-    Derived& LValueGrid<Derived>::operator=(const RValueGrid<OtherDerived>& other) {
+    template<Grid T>
+    Derived& LValueGrid<Derived>::operator=(const T& other) {
+        if constexpr (std::is_same<Derived, T>::value)
+            assert(this != &other && "[Error]: Self assign is likely a bug");
         resize(other.getDim());
         other.assignTo(*this);
         return Base::getDerived();
@@ -125,16 +127,16 @@ namespace Physica::Core {
     }
 
     template<class Derived>
-    template<class RandomGenerator>
-    void LValueGrid<Derived>::random_uniform(RandomGenerator& gen) {
+    template<class RandomType>
+    void LValueGrid<Derived>::random_uniform(RandomType& gen) {
         forIndexInGrid(getDim(), [this, &gen](Index3D index) {
             this->operator()(index) = ScalarType::random_uniform(gen);
         });
     }
 
     template<class Derived>
-    template<class RandomGenerator>
-    void LValueGrid<Derived>::random_normal(RandomGenerator& gen) {
+    template<class RandomType>
+    void LValueGrid<Derived>::random_normal(RandomType& gen) {
         forIndexInGrid(getDim(), [this, &gen](Index3D index) {
             this->operator()(index) = ScalarType::random_normal(gen);
         });

@@ -25,23 +25,23 @@ namespace Physica::Core {
      * Reference:
      * [1] Daan Frenkel and Berend Smit. Understanding Molecular Simulation[M]. Academic Press. 2002:85-86
      */
-    template<class ScalarType>
+    template<Scalar T>
     class RDF {
         constexpr static unsigned int Dim = 3;
     private:
         Array<bool> isFromParticle;
         Array<bool> isToParticle;
         Array<uint64_t> particleBucket;
-        ScalarType cellVolume;
-        ScalarType stepSize;
+        T cellVolume;
+        T stepSize;
         unsigned int numStep;
         unsigned int numSample;
     public:
         RDF() = default;
         RDF(Array<bool> isFromParticle_,
             Array<bool> isToParticle_,
-            ScalarType cellVolume_,
-            ScalarType stepSize_,
+            T cellVolume_,
+            T stepSize_,
             unsigned int numStep_);
         RDF(const RDF&) = default;
         RDF(RDF&&) noexcept = default;
@@ -49,28 +49,28 @@ namespace Physica::Core {
         /* Operators */
         RDF& operator=(RDF obj) noexcept { swap(obj); return *this; }
         /* Operations */
-        template<class T>
-        void sample(const MDCell<T>& cell);
-        VectorND<ScalarType> makeDists() const;
-        VectorND<ScalarType> makeRDF() const;
+        template<Scalar U>
+        void sample(const MDCell<U>& cell);
+        VectorND<T> makeDists() const;
+        VectorND<T> makeRDF() const;
         void swap(RDF& __restrict rdf) noexcept;
-        [[nodiscard]] bool checkRadius(const PeriodicCell<ScalarType, 3>& cell) const;
+        [[nodiscard]] bool checkRadius(const PeriodicCell<T, 3>& cell) const;
         /* Getters */
         [[nodiscard]] size_t getNumParticle() const noexcept { return isFromParticle.getLength(); }
-        [[nodiscard]] ScalarType getCellVolume() const noexcept { return cellVolume; }
-        [[nodiscard]] ScalarType getMaxRadius() const noexcept { return stepSize * (numStep + 1); }
+        [[nodiscard]] T getCellVolume() const noexcept { return cellVolume; }
+        [[nodiscard]] T getMaxRadius() const noexcept { return stepSize * (numStep + 1); }
         /* Setters */
-        void setCellVolume(ScalarType cellVolume_) { cellVolume = cellVolume_; }
+        void setCellVolume(T cellVolume_) { cellVolume = cellVolume_; }
     private:
         uint64_t sumFromParticle() const;
         uint64_t sumToParticle() const;
     };
 
-    template<class ScalarType>
-    RDF<ScalarType>::RDF(Array<bool> isFromParticle_,
+    template<Scalar T>
+    RDF<T>::RDF(Array<bool> isFromParticle_,
                          Array<bool> isToParticle_,
-                         ScalarType cellVolume_,
-                         ScalarType stepSize_,
+                         T cellVolume_,
+                         T stepSize_,
                          unsigned int numStep_)
             : isFromParticle(std::move(isFromParticle_))
             , isToParticle(std::move(isToParticle_))
@@ -85,11 +85,11 @@ namespace Physica::Core {
     /**
      * Optimize: If isFromParticle == isToParticle, we may make use of symmetry
      */
-    template<class ScalarType>
-    template<class T>
-    void RDF<ScalarType>::sample(const MDCell<T>& cell) {
-        using CellType = MDCell<T>;
-        using VectorType = DenseVector<ScalarType, Dim>;
+    template<Scalar T>
+    template<Scalar U>
+    void RDF<T>::sample(const MDCell<U>& cell) {
+        using CellType = MDCell<U>;
+        using VectorType = DenseVector<T, Dim>;
 
         assert(getNumParticle() == cell.getNumParticle());
         const auto range = CellType::estimateRange(cell.getLattice(), getMaxRadius());
@@ -102,7 +102,7 @@ namespace Physica::Core {
                 for (size_t to = 0; to < getNumParticle(); ++to) {
                     if (!isToParticle[to])
                         continue;
-                    const ScalarType r = (from_pos - cell.getPos().row(to)).norm();
+                    const T r = (from_pos - cell.getPos().row(to)).norm();
                     const uint64_t index = double(r / stepSize);
                     if (0 < index && index <= numStep)
                         ++particleBucket[index - 1];
@@ -111,30 +111,30 @@ namespace Physica::Core {
         });
     }
 
-    template<class ScalarType>
-    VectorND<ScalarType> RDF<ScalarType>::makeDists() const {
-        VectorND<ScalarType> dists(numStep);
+    template<Scalar T>
+    VectorND<T> RDF<T>::makeDists() const {
+        VectorND<T> dists(numStep);
         for (size_t i = 0; i < dists.getLength(); ++i)
             dists[i] = stepSize * (i + 1.5);
         return dists;
     }
 
-    template<class ScalarType>
-    VectorND<ScalarType> RDF<ScalarType>::makeRDF() const {
-        VectorND<ScalarType> rdf(numStep);
+    template<Scalar T>
+    VectorND<T> RDF<T>::makeRDF() const {
+        VectorND<T> rdf(numStep);
         const uint64_t numFromParticle = sumFromParticle();
         const uint64_t numToParticle = sumToParticle();
         for (size_t i = 0; i < numStep; ++i) {
-            const ScalarType temp = (stepSize * stepSize * stepSize) * ((i + 2) * (i + 2) * (i + 2) - (i + 1) * (i + 1) * (i + 1));
-            const ScalarType numParticleIdealGas = ScalarType(4.0 / 3 * M_PI) * temp / cellVolume * numToParticle;
-            const ScalarType factor = reciprocal(numParticleIdealGas * (numFromParticle * numSample));
+            const T temp = (stepSize * stepSize * stepSize) * ((i + 2) * (i + 2) * (i + 2) - (i + 1) * (i + 1) * (i + 1));
+            const T numParticleIdealGas = T(4.0 / 3 * M_PI) * temp / cellVolume * numToParticle;
+            const T factor = reciprocal(numParticleIdealGas * (numFromParticle * numSample));
             rdf[i] = factor * particleBucket[i];
         }
         return rdf;
     }
 
-    template<class ScalarType>
-    void RDF<ScalarType>::swap(RDF& __restrict obj) noexcept {
+    template<Scalar T>
+    void RDF<T>::swap(RDF& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         isFromParticle.swap(obj.isFromParticle);
         isToParticle.swap(obj.isToParticle);
@@ -145,23 +145,23 @@ namespace Physica::Core {
         std::swap(numSample, obj.numSample);
     }
 
-    template<class ScalarType>
-    bool RDF<ScalarType>::checkRadius(const PeriodicCell<ScalarType, 3>& cell) const {
-        const ScalarType radius = getMaxRadius();
+    template<Scalar T>
+    bool RDF<T>::checkRadius(const PeriodicCell<T, 3>& cell) const {
+        const T radius = getMaxRadius();
         const bool isBadRadius = cell.minDistVector(0, 0).norm() < radius;
         return isBadRadius;
     }
 
-    template<class ScalarType>
-    uint64_t RDF<ScalarType>::sumFromParticle() const {
+    template<Scalar T>
+    uint64_t RDF<T>::sumFromParticle() const {
         uint64_t sum = 0;
         for (bool elem : isFromParticle)
             sum += elem;
         return sum;
     }
 
-    template<class ScalarType>
-    uint64_t RDF<ScalarType>::sumToParticle() const {
+    template<Scalar T>
+    uint64_t RDF<T>::sumToParticle() const {
         uint64_t sum = 0;
         for (bool elem : isToParticle)
             sum += elem;

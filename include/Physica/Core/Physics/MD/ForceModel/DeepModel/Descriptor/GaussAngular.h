@@ -28,13 +28,13 @@ namespace Physica::Core {
      * Reference:
      * [1] Phys. Rev. Lett. 98, 146401 (2007); https://doi.org/10.1103/PhysRevLett.98.146401
      */
-    template<class ScalarType, bool IsSmallCell>
+    template<Scalar T, bool IsSmallCell>
     class GaussAngular {
-        using VectorType = VectorND<ScalarType>;
-        using CellType = PeriodicCell<ScalarType, 3>;
+        using VectorType = VectorND<T>;
+        using CellType = PeriodicCell<T, 3>;
 
-        ScalarType paramEta;
-        ScalarType distR;
+        T paramEta;
+        T distR;
     public:
         GaussAngular();
         GaussAngular(const GaussAngular&) = default;
@@ -47,8 +47,8 @@ namespace Physica::Core {
         void swap(GaussAngular& __restrict obj) noexcept;
     };
 
-    template<class ScalarType, bool IsSmallCell>
-    typename GaussAngular<ScalarType, IsSmallCell>::VectorType GaussAngular<ScalarType, IsSmallCell>::calc(const CellType& cell) const {
+    template<Scalar T, bool IsSmallCell>
+    typename GaussAngular<T, IsSmallCell>::VectorType GaussAngular<T, IsSmallCell>::calc(const CellType& cell) const {
         VectorType result(cell.getNumParticle());
         if constexpr (IsSmallCell) {
 

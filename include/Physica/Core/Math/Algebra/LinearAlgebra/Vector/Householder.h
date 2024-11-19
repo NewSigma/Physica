@@ -31,8 +31,8 @@ namespace Physica::Core {
      * [1] Gene H. Golub, Charles F. Van Loan. Matrix computations 4th edition[M]. John Hopkins University Press, 2013
      * [2] Eigen; https://eigen.tuxfamily.org/
      */
-    template<Vector T, Vector U>
-    typename T::ScalarType::RealType householder(const T& source, LValueVector<U>& target) {
+    template<Vector T, LVector U>
+    typename T::ScalarType::RealType householder(const T& source, U& target) {
         using ScalarType = typename T::ScalarType;
         using RealType = typename ScalarType::RealType;
         assert(source.getLength() == target.getLength());
@@ -62,13 +62,13 @@ namespace Physica::Core {
         return sqrt(sourceNorm0);
     }
 
-    template<Vector T>
-    typename T::ScalarType::RealType householderInPlace(LValueVector<T>& v) {
-        return householder(v.getDerived(), v);
+    template<LVector T>
+    typename T::ScalarType::RealType householderInPlace(T& v) {
+        return householder(v, v);
     }
 
-    template<Matrix M, Vector V>
-    void applyHouseholder(const RValueVector<V>& householder, LValueMatrix<M>& mat) {
+    template<LMatrix M, Vector V>
+    void applyHouseholder(const V& householder, M& mat) {
         using ScalarType = typename M::ScalarType;
         using BufferType = DenseVector<ScalarType, V::SizeAtCompile>;
         BufferType copy = householder;
@@ -78,8 +78,8 @@ namespace Physica::Core {
         mat -= temp1 * (copy.hermite() * mat).compute();
     }
 
-    template<Matrix M, Vector V>
-    void applyHouseholder(LValueMatrix<M>& mat, const RValueVector<V>& householder) {
+    template<LMatrix M, Vector V>
+    void applyHouseholder(M& mat, const V& householder) {
         using ScalarType = typename M::ScalarType;
         using BufferType = DenseVector<ScalarType, V::SizeAtCompile>;
         BufferType copy = householder;

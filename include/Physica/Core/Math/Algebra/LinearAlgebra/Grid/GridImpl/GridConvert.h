@@ -21,15 +21,15 @@
 namespace Physica::Core {
     template<class GridType> class RValueGrid;
 
-    template<class GridType>
-    class RealGrid : public RValueGrid<RealGrid<GridType>> {
-        using Base = RValueGrid<RealGrid<GridType>>;
-        const GridType& g;
+    template<Grid T>
+    class RealGrid : public RValueGrid<RealGrid<T>> {
+        using Base = RValueGrid<RealGrid<T>>;
+        const T& g;
     public:
         using typename Base::Index3D;
         using typename Base::ScalarType;
     public:
-        explicit RealGrid(const RValueGrid<GridType>& g_) : g(g_.getDerived()) {}
+        explicit RealGrid(const T& g_) : g(g_) {}
         /* Getters */
         [[nodiscard]] ScalarType calc(Index3D index) const { return g.calc(index).real(); }
         [[nodiscard]] size_t getDimX() const noexcept { return g.getDimX(); }
@@ -37,15 +37,15 @@ namespace Physica::Core {
         [[nodiscard]] size_t getDimZ() const noexcept { return g.getDimZ(); }
     };
 
-    template<class GridType>
-    class ImagGrid : public RValueGrid<ImagGrid<GridType>> {
-        using Base = RValueGrid<ImagGrid<GridType>>;
-        const GridType& g;
+    template<Grid T>
+    class ImagGrid : public RValueGrid<ImagGrid<T>> {
+        using Base = RValueGrid<ImagGrid<T>>;
+        const T& g;
     public:
         using typename Base::Index3D;
         using typename Base::ScalarType;
     public:
-        explicit ImagGrid(const RValueGrid<GridType>& g_) : g(g_.getDerived()) {}
+        explicit ImagGrid(const T& g_) : g(g_) {}
         /* Getters */
         [[nodiscard]] ScalarType calc(Index3D index) const { return g.calc(index).imag(); }
         [[nodiscard]] size_t getDimX() const noexcept { return g.getDimX(); }
@@ -53,15 +53,15 @@ namespace Physica::Core {
         [[nodiscard]] size_t getDimZ() const noexcept { return g.getDimZ(); }
     };
 
-    template<class GridType>
-    class NormGrid : public RValueGrid<NormGrid<GridType>> {
-        using Base = RValueGrid<NormGrid<GridType>>;
-        const GridType& g;
+    template<Grid T>
+    class NormGrid : public RValueGrid<NormGrid<T>> {
+        using Base = RValueGrid<NormGrid<T>>;
+        const T& g;
     public:
         using typename Base::Index3D;
         using typename Base::ScalarType;
     public:
-        explicit NormGrid(const RValueGrid<GridType>& g_) : g(g_.getDerived()) {}
+        explicit NormGrid(const T& g_) : g(g_) {}
         /* Getters */
         [[nodiscard]] ScalarType calc(Index3D index) const { return g.calc(index).norm(); }
         [[nodiscard]] size_t getDimX() const noexcept { return g.getDimX(); }
@@ -69,15 +69,15 @@ namespace Physica::Core {
         [[nodiscard]] size_t getDimZ() const noexcept { return g.getDimZ(); }
     };
 
-    template<class GridType>
-    class ValueGrid : public RValueGrid<ValueGrid<GridType>> {
-        using Base = RValueGrid<ValueGrid<GridType>>;
-        const GridType& g;
+    template<Grid T>
+    class ValueGrid : public RValueGrid<ValueGrid<T>> {
+        using Base = RValueGrid<ValueGrid<T>>;
+        const T& g;
     public:
         using typename Base::Index3D;
         using typename Base::ScalarType;
     public:
-        explicit ValueGrid(const RValueGrid<GridType>& g_) : g(g_.getDerived()) {}
+        explicit ValueGrid(const T& g_) : g(g_) {}
         /* Getters */
         [[nodiscard]] ScalarType calc(Index3D index) const { return g.calc(index).getValue(); }
         [[nodiscard]] size_t getDimX() const noexcept { return g.getDimX(); }
@@ -85,15 +85,15 @@ namespace Physica::Core {
         [[nodiscard]] size_t getDimZ() const noexcept { return g.getDimZ(); }
     };
 
-    template<class GridType>
-    class GradGrid : public RValueGrid<GradGrid<GridType>> {
-        using Base = RValueGrid<GradGrid<GridType>>;
-        const GridType& g;
+    template<Grid T>
+    class GradGrid : public RValueGrid<GradGrid<T>> {
+        using Base = RValueGrid<GradGrid<T>>;
+        const T& g;
     public:
         using typename Base::Index3D;
         using typename Base::ScalarType;
     public:
-        explicit GradGrid(const RValueGrid<GridType>& g_) : g(g_.getDerived()) {}
+        explicit GradGrid(const T& g_) : g(g_) {}
         /* Getters */
         [[nodiscard]] ScalarType calc(Index3D index) const { return g.calc(index).getGrad(); }
         [[nodiscard]] size_t getDimX() const noexcept { return g.getDimX(); }
@@ -101,55 +101,52 @@ namespace Physica::Core {
         [[nodiscard]] size_t getDimZ() const noexcept { return g.getDimZ(); }
     };
 
-    template<class GridType>
-    [[nodiscard]] inline RealGrid<GridType> toRealGrid(const RValueGrid<GridType>& v) {
-        return RealGrid<GridType>{v};
+    template<Grid T>
+    [[nodiscard]] inline RealGrid<T> toRealGrid(const T& v) {
+        return RealGrid<T>{v};
     }
 
-    template<class GridType>
-    [[nodiscard]] inline ImagGrid<GridType> toImagGrid(const RValueGrid<GridType>& v) {
-        return ImagGrid<GridType>{v};
+    template<Grid T>
+    [[nodiscard]] inline ImagGrid<T> toImagGrid(const T& v) {
+        return ImagGrid<T>{v};
     }
 
-    template<class GridType>
-    [[nodiscard]] inline NormGrid<GridType> toNormGrid(const RValueGrid<GridType>& v) {
-        return NormGrid<GridType>{v};
+    template<Grid T>
+    [[nodiscard]] inline NormGrid<T> toNormGrid(const T& v) {
+        return NormGrid<T>{v};
     }
 
-    template<class GridType>
-    [[nodiscard]] inline ValueGrid<GridType> toValueGrid(const RValueGrid<GridType>& v) {
-        return ValueGrid<GridType>{v};
+    template<Grid T>
+    [[nodiscard]] inline ValueGrid<T> toValueGrid(const T& v) {
+        return ValueGrid<T>{v};
     }
 
-    template<class GridType>
-    [[nodiscard]] inline GradGrid<GridType> toGradGrid(const RValueGrid<GridType>& v) {
-        return GradGrid<GridType>{v};
+    template<Grid T>
+    [[nodiscard]] inline GradGrid<T> toGradGrid(const T& v) {
+        return GradGrid<T>{v};
     }
 }
 
 namespace Physica {
-    using namespace Core;
-
-    template<class GridType>
-    class Traits<RealGrid<GridType>> {
+    template<Grid T>
+    class Traits<RealGrid<T>> {
     public:
-        using ScalarType = typename GridType::ScalarType::RealType;
+        using ScalarType = typename T::ScalarType::RealType;
     };
 
-    template<class GridType>
-    class Traits<ImagGrid<GridType>> : public Traits<RealGrid<GridType>> {};
+    template<Grid T>
+    class Traits<ImagGrid<T>> : public Traits<RealGrid<T>> {};
 
-    template<class GridType>
-    class Traits<NormGrid<GridType>> : public Traits<RealGrid<GridType>> {};
+    template<Grid T>
+    class Traits<NormGrid<T>> : public Traits<RealGrid<T>> {};
 
-    template<class GridType>
-    class Traits<ValueGrid<GridType>> {
-        using T = typename GridType::ScalarType;
-        static_assert(T::isDifferentiable, "[Error]: Unnecessary toValueGrid() call or toGradGrid() call");
+    template<Grid T>
+    class Traits<ValueGrid<T>> {
+        static_assert(T::ScalarType::isDifferentiable, "[Error]: Unnecessary toValueGrid() call or toGradGrid() call");
     public:
         using ScalarType = typename T::PlainType;
     };
 
-    template<class GridType>
-    class Traits<GradGrid<GridType>> : public Traits<ValueGrid<GridType>> {};
+    template<Grid T>
+    class Traits<GradGrid<T>> : public Traits<ValueGrid<T>> {};
 }

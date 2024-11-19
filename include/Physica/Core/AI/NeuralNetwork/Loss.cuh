@@ -21,26 +21,26 @@
 #include "Loss.h"
 
 namespace Physica::Core {
-    template<class ScalarType>
-    class device_obj<Loss<ScalarType>> {
-        static_assert(!is_device_obj<ScalarType>::value, "[Error]: Nested device_obj<> is not allowed");
-        using host_obj = Loss<ScalarType>;
+    template<Scalar T>
+    class device_obj<Loss<T>> {
+        static_assert(!is_device_obj<T>::value, "[Error]: Nested device_obj<> is not allowed");
+        using host_obj = Loss<T>;
     public:
-        constexpr static bool IsTrainMode = ScalarType::isDifferentiable;
-        using ValueType = typename ScalarType::ValueType;
-        using LossType = typename std::conditional<IsTrainMode, device_obj<ScalarType>, ScalarType>::type;
+        constexpr static bool IsTrainMode = T::isDifferentiable;
+        using ValueType = typename T::ValueType;
+        using LossType = typename std::conditional<IsTrainMode, device_obj<T>, T>::type;
     private:
         using ValueVector = VectorND<ValueType>;
-        using DiffVector = Diff<ValueVector, DiffMode::Reverse, ScalarType::Order>;
+        using DiffVector = Diff<ValueVector, DiffMode::Reverse, T::Order>;
         using VectorType = device_obj<typename std::conditional<IsTrainMode, DiffVector, ValueVector>::type>;
     public:
         [[nodiscard]] static LossType softmax(const VectorType& v, size_t label);
         [[nodiscard]] static LossType crossEntropy(const VectorType& v, size_t label);
     };
 
-    template<class ScalarType>
-    typename device_obj<Loss<ScalarType>>::LossType
-    device_obj<Loss<ScalarType>>::softmax(const VectorType& v, size_t label) {
+    template<Scalar T>
+    typename device_obj<Loss<T>>::LossType
+    device_obj<Loss<T>>::softmax(const VectorType& v, size_t label) {
         if constexpr (IsTrainMode) {
             const auto maximum = v.max();
             const auto temp = exp(v - maximum);
@@ -50,9 +50,9 @@ namespace Physica::Core {
             return host_obj::softmax(v.toHost(), label);
     }
 
-    template<class ScalarType>
-    typename device_obj<Loss<ScalarType>>::LossType
-    device_obj<Loss<ScalarType>>::crossEntropy(const VectorType& v, size_t label) {
+    template<Scalar T>
+    typename device_obj<Loss<T>>::LossType
+    device_obj<Loss<T>>::crossEntropy(const VectorType& v, size_t label) {
         assert(label < v.getLength() && "[Error]: The label is not exist");
         return -ln(softmax(v, label) + LossType(std::numeric_limits<ValueType>::min())); //Add minimum to avoid ln(0)
     }

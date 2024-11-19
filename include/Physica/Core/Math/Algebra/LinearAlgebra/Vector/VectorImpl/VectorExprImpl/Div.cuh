@@ -19,10 +19,10 @@
 #pragma once
 
 namespace Physica::Core {
-    template<class VectorType, Scalar T>
-    class device_obj<VectorExpr<ExprType::Div, VectorType, T>>
-            : public device_obj<BinaryVectorExpr<ExprType::Div, VectorType, T>> {
-        using Base = device_obj<BinaryVectorExpr<ExprType::Div, VectorType, T>>;
+    template<Vector T, Scalar U>
+    class device_obj<VectorExpr<ExprType::Div, T, U>>
+            : public device_obj<BinaryVectorExpr<ExprType::Div, T, U>> {
+        using Base = device_obj<BinaryVectorExpr<ExprType::Div, T, U>>;
     public:
         using typename Base::ScalarType;
     public:
@@ -34,9 +34,8 @@ namespace Physica::Core {
         }
     };
 
-    template<class VectorType, Scalar T>
-    [[nodiscard]] __host__ __device__ inline device_obj<VectorExpr<ExprType::Div, VectorType, T>>
-    operator/(const device_obj<RValueVector<VectorType>>& v, const T& x) noexcept {
-        return {v.getDerived(), x};
+    template<Vector T, Scalar U>
+    [[nodiscard]] __host__ __device__ inline auto operator/(const device_obj<T>& v, const U& x) noexcept {
+        return device_obj<VectorExpr<ExprType::Div, T, U>>(v, x);
     }
 }

@@ -23,12 +23,12 @@
 #include "KPoint.h"
 
 namespace Physica::Core {
-    template<class ScalarType, bool isSpinPolarized> class BandGrid;
+    template<Scalar T, bool isSpinPolarized> class BandGrid;
 
-    template<class ScalarType, bool isSpinPolarized>
+    template<Scalar T, bool isSpinPolarized>
     class BandGrid {
-        using KPointGrid = GridStorage<KPoint<ScalarType, 0, isSpinPolarized>>;
-        using LatticeMatrix = typename CrystalCell<ScalarType>::LatticeMatrix;
+        using KPointGrid = GridStorage<KPoint<T, 0, isSpinPolarized>>;
+        using LatticeMatrix = typename CrystalCell<T>::LatticeMatrix;
 
         KPointGrid kPointGrid;
         LatticeMatrix repLatt;
@@ -47,15 +47,15 @@ namespace Physica::Core {
         [[nodiscard]] KPointGrid& getKPointGrid() { return kPointGrid; }
         [[nodiscard]] const KPointGrid& getKPointGrid() const noexcept { return kPointGrid; }
         [[nodiscard]] size_t getNumBand() const noexcept { return numBand; }
-        [[nodiscard]] ScalarType getTotalEnergy() const noexcept;
-        template<class VectorType>
-        [[nodiscard]] VectorType getDensityOfStates(const LValueVector<VectorType>& atEnergy) const;
+        [[nodiscard]] T getTotalEnergy() const noexcept;
+        template<Vector V>
+        [[nodiscard]] V getDensityOfStates(const V& atEnergy) const;
     private:
-        [[nodiscard]] Vector3D<ScalarType> gradEnergy(size_t kPointId) const;
+        [[nodiscard]] Vector3D<T> gradEnergy(size_t kPointId) const;
     };
 
-    template<class ScalarType, bool isSpinPolarized>
-    BandGrid<ScalarType, isSpinPolarized>::BandGrid(LatticeMatrix repLatt_,
+    template<Scalar T, bool isSpinPolarized>
+    BandGrid<T, isSpinPolarized>::BandGrid(LatticeMatrix repLatt_,
                                                     size_t kPointX,
                                                     size_t kPointY,
                                                     size_t kPointZ,
@@ -69,23 +69,23 @@ namespace Physica::Core {
         assert(numBand >= (electronCount + 1) / 2);
         size_t kPointID = 0;
 
-        const ScalarType kPointWeight = reciprocal(ScalarType(kPointGrid.getSize()));
-        const ScalarType stepX = reciprocal(ScalarType(kPointX));
-        const ScalarType stepY = reciprocal(ScalarType(kPointY));
-        const ScalarType stepZ = reciprocal(ScalarType(kPointZ));
+        const T kPointWeight = reciprocal(T(kPointGrid.getSize()));
+        const T stepX = reciprocal(T(kPointX));
+        const T stepY = reciprocal(T(kPointY));
+        const T stepZ = reciprocal(T(kPointZ));
 
-        Vector3D<ScalarType> k{};
-        ScalarType& kx = k[0];
-        ScalarType& ky = k[1];
-        ScalarType& kz = k[2];
+        Vector3D<T> k{};
+        T& kx = k[0];
+        T& ky = k[1];
+        T& kz = k[2];
 
-        kx = (ScalarType(1) - ScalarType(kPointX)) / ScalarType(2 * kPointX);
+        kx = (T(1) - T(kPointX)) / T(2 * kPointX);
         for (size_t x = 1; x <= kPointX; ++x) {
-            ky = (ScalarType(1) - ScalarType(kPointY)) / ScalarType(2 * kPointY);
+            ky = (T(1) - T(kPointY)) / T(2 * kPointY);
             for (size_t y = 1; y <= kPointY; ++y) {
-                kz = (ScalarType(1) - ScalarType(kPointZ)) / ScalarType(2 * kPointZ);
+                kz = (T(1) - T(kPointZ)) / T(2 * kPointZ);
                 for (size_t z = 1; z <= kPointZ; ++z) {
-                    kPointGrid.asArray()[kPointID] = KPoint<ScalarType, 0, isSpinPolarized>(k, kPointWeight, numBand);
+                    kPointGrid.asArray()[kPointID] = KPoint<T, 0, isSpinPolarized>(k, kPointWeight, numBand);
                     kz += stepZ;
                     ++kPointID;
                 }
@@ -95,19 +95,19 @@ namespace Physica::Core {
         }
     }
 
-    template<class ScalarType, bool isSpinPolarized>
-    void BandGrid<ScalarType, isSpinPolarized>::swap(BandGrid& __restrict band) noexcept {
+    template<Scalar T, bool isSpinPolarized>
+    void BandGrid<T, isSpinPolarized>::swap(BandGrid& __restrict band) noexcept {
         assert(this != &band && "[Error]: Self swap is likely a bug");
         swap(kPointGrid, band.kPointGrid);
         swap(electronCount, band.electronCount);
     }
 
-    template<class ScalarType, bool isSpinPolarized>
-    ScalarType BandGrid<ScalarType, isSpinPolarized>::getTotalEnergy() const noexcept {
-        ScalarType energy = ScalarType(0);
+    template<Scalar T, bool isSpinPolarized>
+    T BandGrid<T, isSpinPolarized>::getTotalEnergy() const noexcept {
+        T energy = T(0);
         for (const auto& kPoint : kPointGrid) {
-            const ScalarType energyUp = kPoint.getBandEnergy(SpinState::Up).sum();
-            const ScalarType energyDown = kPoint.getBandEnergy(SpinState::Down).head(electronCount / 2).sum();
+            const T energyUp = kPoint.getBandEnergy(SpinState::Up).sum();
+            const T energyDown = kPoint.getBandEnergy(SpinState::Down).head(electronCount / 2).sum();
             energy += (energyUp + energyDown) * kPoint.getWeight();
         }
         return energy;
@@ -116,27 +116,27 @@ namespace Physica::Core {
      * Reference:
      * [1] Bross H. On the Efficiency of Different Schemes for the Evaluation of the Density of States and Related Properties in Solids[J]. Physica Status Solidi, 2010, 179(2):429-439.
      */
-    template<class ScalarType, bool isSpinPolarized>
-    template<class VectorType>
-    VectorType BandGrid<ScalarType, isSpinPolarized>::getDensityOfStates(const LValueVector<VectorType>& atEnergy) const {
-        auto dos = VectorType(atEnergy.getLength());
+    template<Scalar T, bool isSpinPolarized>
+    template<Vector V>
+    V BandGrid<T, isSpinPolarized>::getDensityOfStates(const V& atEnergy) const {
+        auto dos = V(atEnergy.getLength());
         for (size_t i = 0; i < atEnergy.getLength(); ++i) {
-            const ScalarType energy = atEnergy[i];
-            ScalarType density = ScalarType(0);
+            const T energy = atEnergy[i];
+            T density = T(0);
             for (size_t kPointId = 0; kPointId < kPointGrid.getSize(); ++i) {
-                const ScalarType energy0 = kPointGrid[kPointId].getTotalEnergy();
+                const T energy0 = kPointGrid[kPointId].getTotalEnergy();
                 const auto gradE = gradEnergy(kPointId);
-                const ScalarType normalizer = gradE[0] * gradE[1] * gradE[2] * ScalarType(0.5);
+                const T normalizer = gradE[0] * gradE[1] * gradE[2] * T(0.5);
 
-                ScalarType deltaDensity = ScalarType(0);
+                T deltaDensity = T(0);
                 for (int sigma1; sigma1 < 2; ++sigma1) {
                     for (int sigma2; sigma2 < 2; ++sigma2) {
                         for (int sigma3; sigma3 < 2; ++sigma3) {
                             const int sum = sigma1 + sigma2 + sigma3;
-                            ScalarType temp = energy - energy0;
-                            temp -= ScalarType(sigma1 == 0 ? 1 : -1) * gradE(0);
-                            temp -= ScalarType(sigma2 == 0 ? 1 : -2) * gradE(1);
-                            temp -= ScalarType(sigma3 == 0 ? 1 : -3) * gradE(2);
+                            T temp = energy - energy0;
+                            temp -= T(sigma1 == 0 ? 1 : -1) * gradE(0);
+                            temp -= T(sigma2 == 0 ? 1 : -2) * gradE(1);
+                            temp -= T(sigma3 == 0 ? 1 : -3) * gradE(2);
                             if (temp.isPositive()) {
                                 temp = square(temp);
                                 deltaDensity += (sum % 2 == 0 ? temp : -temp);
@@ -151,9 +151,9 @@ namespace Physica::Core {
         return dos;
     }
 
-    template<class ScalarType, bool isSpinPolarized>
-    inline void swap(Physica::Core::BandGrid<ScalarType, isSpinPolarized>& __restrict band1,
-                     Physica::Core::BandGrid<ScalarType, isSpinPolarized>& __restrict band2) noexcept {
+    template<Scalar T, bool isSpinPolarized>
+    inline void swap(Physica::Core::BandGrid<T, isSpinPolarized>& __restrict band1,
+                     Physica::Core::BandGrid<T, isSpinPolarized>& __restrict band2) noexcept {
         band1.swap(band2);
     }
     /**
@@ -162,18 +162,18 @@ namespace Physica::Core {
      * Reference:
      * [1] Bross H. On the Efficiency of Different Schemes for the Evaluation of the Density of States and Related Properties in Solids[J]. Physica Status Solidi, 2010, 179(2):429-439.
      */
-    template<class ScalarType, bool isSpinPolarized>
-    Vector3D<ScalarType> BandGrid<ScalarType, isSpinPolarized>::gradEnergy(size_t kPointId) const {
+    template<Scalar T, bool isSpinPolarized>
+    Vector3D<T> BandGrid<T, isSpinPolarized>::gradEnergy(size_t kPointId) const {
         auto dimAdd = [](size_t dim, size_t dim_all) { return dim == dim_all - 1 ? 0 : dim + 1; };
         auto dimSub = [](size_t dim, size_t dim_all) { return dim == 0 ? dim_all - 1 : dim - 1; };
         const auto[x, y, z] = kPointGrid.indexToDim(kPointId);
         const size_t dimX = kPointGrid.getDimX();
         const size_t dimY = kPointGrid.getDimY();
         const size_t dimZ = kPointGrid.getDimZ();
-        const ScalarType factor = ScalarType(0.25);
-        const ScalarType gradX = (kPointGrid(dimAdd(x, dimX), y, z) -  kPointGrid(dimSub(x, dimX), y, z)) * factor;
-        const ScalarType gradY = (kPointGrid(x, dimAdd(y, dimY), z) -  kPointGrid(x, dimSub(y, dimY), z)) * factor;
-        const ScalarType gradZ = (kPointGrid(x, y, dimAdd(z, dimZ)) -  kPointGrid(x, y, dimSub(z, dimZ))) * factor;
+        const T factor = T(0.25);
+        const T gradX = (kPointGrid(dimAdd(x, dimX), y, z) -  kPointGrid(dimSub(x, dimX), y, z)) * factor;
+        const T gradY = (kPointGrid(x, dimAdd(y, dimY), z) -  kPointGrid(x, dimSub(y, dimY), z)) * factor;
+        const T gradZ = (kPointGrid(x, y, dimAdd(z, dimZ)) -  kPointGrid(x, y, dimSub(z, dimZ))) * factor;
         return {gradX, gradY, gradZ};
     }
 }

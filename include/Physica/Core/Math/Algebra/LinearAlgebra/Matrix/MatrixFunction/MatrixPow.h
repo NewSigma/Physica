@@ -19,22 +19,22 @@
 #pragma once
 
 namespace Physica::Core {
-    template<class MatrixType>
-    class MatrixPow : public RValueMatrix<MatrixPow<MatrixType>> {
-        using This = MatrixPow<MatrixType>;
+    template<Matrix T>
+    class MatrixPow : public RValueMatrix<MatrixPow<T>> {
+        using This = MatrixPow<T>;
         using Base = RValueMatrix<This>;
 
-        constexpr static bool IsSymm = MatrixOption::isSymmMatrix<MatrixType>();
-        constexpr static bool IsHermite = MatrixOption::isHermiteMatrix<MatrixType>();
+        constexpr static bool IsSymm = MatrixOption::isSymmMatrix<T>();
+        constexpr static bool IsHermite = MatrixOption::isHermiteMatrix<T>();
         using TransposeRtnTy = typename std::conditional<IsSymm, const This&, Transpose<This>>::type;
         using HermiteRtnTy = typename std::conditional<IsHermite, const This&, Hermite<This>>::type;
     public:
         using typename Base::ScalarType;
     private:
-        const MatrixType& m;
+        const T& m;
         int power;
     public:
-        MatrixPow(const RValueMatrix<MatrixType>& m_, int power_);
+        MatrixPow(const T& m_, int power_);
         MatrixPow(const This&) = delete;
         MatrixPow(This&&) = delete;
         ~MatrixPow() = default;
@@ -47,24 +47,24 @@ namespace Physica::Core {
         [[nodiscard]] TransposeRtnTy transpose() const noexcept { return TransposeRtnTy(*this); }
         [[nodiscard]] HermiteRtnTy hermite() const noexcept { return HermiteRtnTy(*this); }
         /* Getters */
-        [[nodiscard]] const MatrixType& getMatrix() const noexcept { return m; }
+        [[nodiscard]] const T& getMatrix() const noexcept { return m; }
         [[nodiscard]] __host__ __device__ size_t getRow() const noexcept { return m.getRow(); }
         [[nodiscard]] __host__ __device__ size_t getCol() const noexcept { return m.getCol(); }
         [[nodiscard]] int getPower() const noexcept { return power; }
     };
 
-    template<class MatrixType>
-    MatrixPow<MatrixType>::MatrixPow(const RValueMatrix<MatrixType>& m_, int power_) : m(m_.getDerived()), power(power_) {}
+    template<Matrix T>
+    MatrixPow<T>::MatrixPow(const T& m_, int power_) : m(m_), power(power_) {}
 
-    template<class MatrixType>
-    [[nodiscard]] inline MatrixPow<MatrixType> pow(const RValueMatrix<MatrixType>& m, int power) noexcept {
-        return MatrixPow<MatrixType>(m, power);
+    template<Matrix T>
+    [[nodiscard]] inline MatrixPow<T> pow(const T& m, int power) noexcept {
+        return MatrixPow<T>(m, power);
     }
 }
 
 namespace Physica {
-    template<class MatrixType>
-    class Traits<Core::MatrixPow<MatrixType>> : public Traits<MatrixType> {
+    template<Core::Matrix T>
+    class Traits<Core::MatrixPow<T>> : public Traits<T> {
     public:
         constexpr static int Option = MatrixOption::AnyMajor | MatrixOption::AnyStorage;
     };

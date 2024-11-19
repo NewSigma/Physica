@@ -19,10 +19,10 @@
 #pragma once
 
 namespace Physica::Core {
-    template<class VectorType>
-    class VectorExpr<ExprType::Sqrt, VectorType> : public UnitaryVectorExpr<ExprType::Sqrt, VectorType> {
-        using This = VectorExpr<ExprType::Sqrt, VectorType>;
-        using Base = UnitaryVectorExpr<ExprType::Sqrt, VectorType>;
+    template<Vector T>
+    class VectorExpr<ExprType::Sqrt, T> : public UnitaryVectorExpr<ExprType::Sqrt, T> {
+        using This = VectorExpr<ExprType::Sqrt, T>;
+        using Base = UnitaryVectorExpr<ExprType::Sqrt, T>;
     public:
         using typename Base::ScalarType;
     public:
@@ -37,8 +37,8 @@ namespace Physica::Core {
         [[nodiscard]] AnyPacket packetPartial(size_t index, size_t count) const { return sqrt(Base::getExpr().template packetPartial<AnyPacket>(index, count)); }
     };
 
-    template<class VectorType>
-    [[nodiscard]] inline auto sqrt(const RValueVector<VectorType>& v) noexcept {
-        return VectorExpr<ExprType::Sqrt, VectorType>(v);
+    template<Vector T>
+    [[nodiscard]] inline auto sqrt(const T& v) noexcept {
+        return VectorExpr<ExprType::Sqrt, T>(v);
     }
 }

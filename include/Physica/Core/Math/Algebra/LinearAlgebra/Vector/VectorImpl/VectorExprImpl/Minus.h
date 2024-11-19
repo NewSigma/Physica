@@ -19,10 +19,10 @@
 #pragma once
 
 namespace Physica::Core {
-    template<class VectorType>
-    class VectorExpr<ExprType::Minus, VectorType>
-            : public UnitaryVectorExpr<ExprType::Minus, VectorType> {
-        using Base = UnitaryVectorExpr<ExprType::Minus, VectorType>;
+    template<Vector T>
+    class VectorExpr<ExprType::Minus, T>
+            : public UnitaryVectorExpr<ExprType::Minus, T> {
+        using Base = UnitaryVectorExpr<ExprType::Minus, T>;
     public:
         using typename Base::ScalarType;
     public:
@@ -37,8 +37,8 @@ namespace Physica::Core {
         [[nodiscard]] AnyPacket packetPartial(size_t index, size_t count) const { return -Base::getExpr().template packetPartial<AnyPacket>(index, count); }
     };
 
-    template<class Derived>
-    [[nodiscard]] inline auto operator-(const RValueVector<Derived>& v) noexcept {
-        return VectorExpr<ExprType::Minus, Derived>(v.getDerived());
+    template<Vector T>
+    [[nodiscard]] inline auto operator-(const T& v) noexcept {
+        return VectorExpr<ExprType::Minus, T>(v);
     }
 }

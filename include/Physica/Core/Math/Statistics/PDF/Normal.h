@@ -21,45 +21,45 @@
 #include <Physica/Core/Math/Algebra/LinearAlgebra/Vector/DenseVector.h>
 
 namespace Physica::Core {
-    template<class ScalarType>
+    template<Scalar T>
     class Normal {
-        ScalarType mean;
-        ScalarType deviation;
+        T mean;
+        T deviation;
     public:
-        Normal(ScalarType mean_ = 0, ScalarType deviation_ = 1);
+        Normal(T mean_ = 0, T deviation_ = 1);
         Normal(const Normal&) = default;
         Normal(Normal&&) noexcept = default;
         ~Normal() = default;
         /* Operator */
         Normal& operator=(Normal obj) noexcept { swap(obj); return *this; }
-        [[nodiscard]] ScalarType operator()(const ScalarType& x) const;
-        template<class VectorType>
-        [[nodiscard]] VectorND<ScalarType> operator()(const RValueVector<VectorType>& x) const;
+        [[nodiscard]] T operator()(const T& x) const;
+        template<Vector V>
+        [[nodiscard]] VectorND<T> operator()(const V& x) const;
         /* Operations */
         void swap(Normal& __restrict obj) noexcept;
     };
 
-    template<class ScalarType>
-    Normal<ScalarType>::Normal(ScalarType mean_, ScalarType deviation_)
+    template<Scalar T>
+    Normal<T>::Normal(T mean_, T deviation_)
             : mean(std::move(mean_)), deviation(std::move(deviation_)) {}
 
-    template<class ScalarType>
-    ScalarType Normal<ScalarType>::operator()(const ScalarType& x) const {
-        const ScalarType repDevia = reciprocal(repDevia);
-        const ScalarType factor = repDevia / sqrt(ScalarType(2 * M_PI));
-        return exp(square((x - mean) * repDevia) * ScalarType(-0.5)) * factor;
+    template<Scalar T>
+    T Normal<T>::operator()(const T& x) const {
+        const T repDevia = reciprocal(repDevia);
+        const T factor = repDevia / sqrt(T(2 * M_PI));
+        return exp(square((x - mean) * repDevia) * T(-0.5)) * factor;
     }
 
-    template<class ScalarType>
-    template<class VectorType>
-    VectorND<ScalarType> Normal<ScalarType>::operator()(const RValueVector<VectorType>& x) const {
-        const ScalarType repDevia = reciprocal(deviation);
-        const ScalarType factor = repDevia / sqrt(ScalarType(2 * M_PI));
-        return exp(square((x - mean) * repDevia) * ScalarType(-0.5)) * factor;
+    template<Scalar T>
+    template<Vector V>
+    VectorND<T> Normal<T>::operator()(const V& x) const {
+        const T repDevia = reciprocal(deviation);
+        const T factor = repDevia / sqrt(T(2 * M_PI));
+        return exp(square((x - mean) * repDevia) * T(-0.5)) * factor;
     }
 
-    template<class ScalarType>
-    void Normal<ScalarType>::swap(Normal& __restrict obj) noexcept {
+    template<Scalar T>
+    void Normal<T>::swap(Normal& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         mean.swap(obj.mean);
         deviation.swap(obj.deviation);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2019-2021 Weibo He.
+ * Copyright 2019-2024 Weibo He.
  *
  * This file is part of Physica.
 
@@ -18,8 +18,8 @@
  */
 #pragma once
 
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h"
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Eigen/EigenSolver.h"
+#include <Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h>
+#include <Physica/Core/Math/Algebra/LinearAlgebra/Eigen/EigenSolver.h>
 
 namespace Physica::Core {
     /**
@@ -28,9 +28,9 @@ namespace Physica::Core {
      * A polynomial is:
      * y(x) = a0 + a1 x + a2 x ^ 2 + ... + (an - 1) x ^ (n - 1) + 1 x^n
      */
-    template<class ScalarType, size_t Power>
+    template<Scalar T, size_t Power>
     class Polynomial {
-        using VectorType = DenseVector<ScalarType, Power>;
+        using VectorType = DenseVector<T, Power>;
     private:
         VectorType coeffs;
     public:
@@ -42,22 +42,22 @@ namespace Physica::Core {
         /* Operators */
         Polynomial& operator=(const Polynomial& p) = default;
         Polynomial& operator=(Polynomial&& p) noexcept { coeffs = std::move(p.coeffs); return *this; }
-        template<Scalar T>
-        typename Internal::BinaryScalarOpReturnType<ScalarType, T>::Type operator()(const T& x) const;
+        template<Scalar U>
+        typename Internal::BinaryScalarOpReturnType<T, U>::Type operator()(const U& x) const;
         /* Getters */
         [[nodiscard]] size_t getPower() const noexcept { return coeffs.getLength(); }
         [[nodiscard]] const VectorType& getCoeffVector() const noexcept { return coeffs; }
     };
 
-    template<class ScalarType, size_t Power>
-    template<Scalar T>
-    typename Internal::BinaryScalarOpReturnType<ScalarType, T>::Type
-    Polynomial<ScalarType, Power>::operator()(const T& x) const {
-        using ResultType = typename Internal::BinaryScalarOpReturnType<ScalarType, T>::Type;
+    template<Scalar T, size_t Power>
+    template<Scalar U>
+    typename Internal::BinaryScalarOpReturnType<T, U>::Type
+    Polynomial<T, Power>::operator()(const U& x) const {
+        using ResultType = typename Internal::BinaryScalarOpReturnType<T, U>::Type;
         if (coeffs.empty())
             return ResultType(0);
         ResultType result = ResultType(coeffs[0]);
-        T temp = x.getDerived();
+        U temp = x.getDerived();
         const auto length = coeffs.getLength();
         for (size_t i = 1; i < length; ++i) {
             result += temp * coeffs[i];
@@ -72,19 +72,19 @@ namespace Physica::Core {
      * Reference:
      * [1] https://www.mathworks.com/help/matlab/ref/roots.html
      */
-    template<class ScalarType, size_t Power>
-    DenseVector<Complex<ScalarType>, Power>
-    polyRoot(const Polynomial<ScalarType, Power>& poly) {
-        using MatrixType = DenseMatrix<ScalarType, MatrixOption::Col | MatrixOption::Vector, Power, Power>;
+    template<Scalar T, size_t Power>
+    DenseVector<Complex<T>, Power>
+    polyRoot(const Polynomial<T, Power>& poly) {
+        using MatrixType = DenseMatrix<T, MatrixOption::Col | MatrixOption::Vector, Power, Power>;
 
         const size_t power = poly.getPower();
         auto companion = MatrixType::zeros(power);
         for (size_t i = 0; i < power - 1; ++i)
-            companion(i + 1, i) = ScalarType(1);
+            companion(i + 1, i) = T(1);
         auto col = companion.col(power - 1);
         col = -poly.getCoeffVector();
 
-        EigenSolver<ScalarType, Power> solver(companion, false);
+        EigenSolver<T, Power> solver(companion, false);
         return solver.getEigenvalues();
     }
 }

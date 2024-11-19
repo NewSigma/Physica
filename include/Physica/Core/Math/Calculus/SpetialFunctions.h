@@ -18,9 +18,10 @@
  */
 #pragma once
 
-#include "Physica/Core/MultiPrecision/Real.h"
-#include "Physica/Core/MultiPrecision/Complex.h"
-#include "Physica/Core/Math/NumberTheory/NumberTheory.h"
+#include <Physica/Core/MultiPrecision/Real.h>
+#include <Physica/Core/MultiPrecision/Complex.h>
+#include <Physica/Core/Math/Algebra/LinearAlgebra/Matrix/Matrix.h>
+#include <Physica/Core/Math/NumberTheory/NumberTheory.h>
 
 namespace Physica::Core {
     namespace Internal {
@@ -157,14 +158,14 @@ namespace Physica::Core {
      * Reference:
      * [1] https://github.com/google/spherical-harmonics.git
      */
-    template<class Matrix>
+    template<Matrix M>
     class HamonicRotator final {
-        using ScalarType = typename Matrix::ScalarType;
+        using ScalarType = typename M::ScalarType;
     private:
-        Matrix initialMat; //Optimize: initialMat may be fixed matrix
-        Matrix hamonicRotation; //Current hamonic rotation matrix
+        M initialMat; //Optimize: initialMat may be fixed matrix
+        M hamonicRotation; //Current hamonic rotation matrix
     public:
-        HamonicRotator(const Matrix& axisRotation);
+        HamonicRotator(const M& axisRotation);
         HamonicRotator(const HamonicRotator&) = delete;
         HamonicRotator(HamonicRotator&&) = delete;
         ~HamonicRotator() = default;
@@ -174,7 +175,7 @@ namespace Physica::Core {
         /* Operations */
         void nextHamonicRotation();
         /* Getters */
-        Matrix getCurrentRotation() const { return hamonicRotation; }
+        M getCurrentRotation() const { return hamonicRotation; }
     private:
         ScalarType getCenteredElement(size_t row, size_t col);
         bool nearByMargin(double actual, double expected);

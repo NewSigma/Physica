@@ -22,13 +22,13 @@
 #include "SGD.h"
 
 namespace Physica::Core {
-    template<class ScalarType>
-    class MomentumSGD : public SGD<ScalarType> {
-        static_assert(ScalarType::isDifferentiable, "[Error]: ScalarType must be differentiable");
-        static_assert(!is_device_obj<ScalarType>::value, "[Error]: Not implemented");
-        using Base = SGD<ScalarType>;
+    template<Scalar T>
+    class MomentumSGD : public SGD<T> {
+        static_assert(T::isDifferentiable, "[Error]: T must be differentiable");
+        static_assert(!is_device_obj<T>::value, "[Error]: Not implemented");
+        using Base = SGD<T>;
         using typename Base::ValueType;
-        using TracerType = typename ScalarType::TracerType;
+        using TracerType = typename T::TracerType;
     private:
         using Base::from;
         using Base::to;
@@ -49,21 +49,21 @@ namespace Physica::Core {
         using Base::step;
     };
 
-    template<class ScalarType>
-    MomentumSGD<ScalarType>::MomentumSGD(ValueType momentum_, ValueType learnRate, unsigned int batchSize)
+    template<Scalar T>
+    MomentumSGD<T>::MomentumSGD(ValueType momentum_, ValueType learnRate, unsigned int batchSize)
             : Base(std::move(learnRate), batchSize)
             , momentum(std::move(momentum_)) {
         assert(momentum.isPositive() && "[Error]: Invalid momentum");
     }
 
-    template<class ScalarType>
-    void MomentumSGD<ScalarType>::recordEnd() {
+    template<Scalar T>
+    void MomentumSGD<T>::recordEnd() {
         Base::recordEnd();
         lastGrad.resize(TracerType::distance(from, to), ValueType(0));
     }
 
-    template<class ScalarType>
-    void MomentumSGD<ScalarType>::step() {
+    template<Scalar T>
+    void MomentumSGD<T>::step() {
         using SegmentType = typename TracerType::SegmentType;
         using DiffScalar = typename TracerType::DiffScalar;
         auto& tracer = TracerType::getInstance();
@@ -77,8 +77,8 @@ namespace Physica::Core {
         });
     }
 
-    template<class ScalarType>
-    void MomentumSGD<ScalarType>::swap(MomentumSGD& __restrict obj) noexcept {
+    template<Scalar T>
+    void MomentumSGD<T>::swap(MomentumSGD& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         Base::swap(obj);
         momentum.swap(obj.momentum);

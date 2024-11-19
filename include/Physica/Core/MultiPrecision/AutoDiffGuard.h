@@ -21,16 +21,16 @@
 #include "Diff.h"
 
 namespace Physica::Core {
-    template<class ScalarType>
+    template<Scalar T>
     class AutoDiffGuard {
-        static_assert(ScalarType::isDifferentiable, "[Error]: ScalarType must be differentiable");
-        constexpr static bool isDeviceSide = is_device_obj<ScalarType>::value;
-        using This = AutoDiffGuard<ScalarType>;
+        static_assert(T::isDifferentiable, "[Error]: ScalarType must be differentiable");
+        constexpr static bool isDeviceSide = is_device_obj<T>::value;
+        using This = AutoDiffGuard<T>;
     public:
-        using ValueType = typename ScalarType::ValueType;
-        using TracerType = typename ScalarType::TracerType;
+        using ValueType = typename T::ValueType;
+        using TracerType = typename T::TracerType;
     private:
-        ScalarType node;
+        T node;
     public:
         AutoDiffGuard();
         AutoDiffGuard(const AutoDiffGuard&) = delete;
@@ -39,33 +39,33 @@ namespace Physica::Core {
         /* Operators */
         AutoDiffGuard& operator=(AutoDiffGuard obj) noexcept { swap(obj); return *this; }
         This& operator=(std::nullptr_t) noexcept { node = nullptr; return *this; }
-        [[nodiscard]] operator const ScalarType&() const noexcept { return node; }
+        [[nodiscard]] operator const T&() const noexcept { return node; }
         /* Operations */
         void swap(AutoDiffGuard& __restrict obj) noexcept { node.swap(obj.node); }
         /* Getters */
         [[nodiscard]] bool isValid() const noexcept { return node != nullptr; }
     };
 
-    template<class ScalarType>
-    AutoDiffGuard<ScalarType>::AutoDiffGuard() {
+    template<Scalar T>
+    AutoDiffGuard<T>::AutoDiffGuard() {
         if constexpr (isDeviceSide) {
             const auto& segment = TracerType::getInstance().pushSegment(1, ExprType::Set);
             node = segment[0];
         }
         else {
             TracerType::getInstance().pushSegment(1);
-            const ScalarType anyNewNode = ScalarType(0);
+            const T anyNewNode = T(0);
             node = anyNewNode;
         }
     }
 
-    template<class ScalarType>
-    AutoDiffGuard<ScalarType>::AutoDiffGuard(AutoDiffGuard&& other) noexcept : node(other.node) {
+    template<Scalar T>
+    AutoDiffGuard<T>::AutoDiffGuard(AutoDiffGuard&& other) noexcept : node(other.node) {
         other = nullptr;
     }
 
-    template<class ScalarType>
-    AutoDiffGuard<ScalarType>::~AutoDiffGuard() {
+    template<Scalar T>
+    AutoDiffGuard<T>::~AutoDiffGuard() {
         if (isValid()) {
             TracerType::getInstance().forget_to(node);
             node = nullptr;

@@ -31,7 +31,7 @@ namespace Physica::Core {
 
     __host__ __device__ [[noreturn]] inline void noImpl(const char* msg = NoImplException::DefaultMsg) {
     #ifdef __CUDA_ARCH__
-        printf("%s", msg);
+        printf("%s\n", msg);
         __trap();
     #else
         throw NoImplException(msg);

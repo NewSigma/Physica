@@ -41,9 +41,9 @@ namespace Physica::Core {
             : values(std::move(values_)), grads(std::move(grads_)) {}
 
     template<Scalar T, int Order, size_t Length, class Allocator>
-    template<class Derived>
-    DenseVector<Diff<T, DiffMode::Forward, Order>, Length, Allocator>::DenseVector(const RValueVector<Derived>& v) : DenseVector(v.getLength()) {
-        v.getDerived().assignTo(*this);
+    template<Vector V>
+    DenseVector<Diff<T, DiffMode::Forward, Order>, Length, Allocator>::DenseVector(const V& v) : DenseVector(v.getLength()) {
+        v.assignTo(*this);
     }
 
     template<Scalar T, int Order, size_t Length, class Allocator>

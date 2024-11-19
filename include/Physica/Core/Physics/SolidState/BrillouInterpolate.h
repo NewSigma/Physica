@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Weibo He.
+ * Copyright 2023-2024 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -30,13 +30,13 @@ namespace Physica::Core {
      * References:
      * [1] R.N. Euwema, D.J. Stukel, T.C. Collins, J.S. DeWitt, D.G. Shankland, Phys. Rev. 178 (1969) 1419–1423. http://dx.doi.org/10.1103/PhysRev.178.1419.
      */
-    template<class ScalarType>
+    template<Scalar T>
     class BrillouInterpolate {
         constexpr static unsigned int Dim = 3;
-        constexpr static bool isComplex = ScalarType::isComplex;
+        constexpr static bool isComplex = T::isComplex;
         using Index3D = typename GridBase::Index3D;
-        using RealType = typename ScalarType::RealType;
-        using ComplexType = typename ScalarType::ComplexType;
+        using RealType = typename T::RealType;
+        using ComplexType = typename T::ComplexType;
         using LatticeMatrix = typename PeriodicCell<RealType, Dim>::LatticeMatrix;
         using CoeffMatrixM = DenseMatrix<ComplexType, MatrixOption::Row | MatrixOption::Vector>;
         using Vec3D = Vector3D<RealType>;
@@ -55,13 +55,13 @@ namespace Physica::Core {
         ~BrillouInterpolate() = default;
         /* Operators */
         BrillouInterpolate& operator=(BrillouInterpolate obj) noexcept;
-        [[nodiscard]] ScalarType operator()(Vec3D kPoint);
+        [[nodiscard]] T operator()(Vec3D kPoint);
         /* Operations */
         RealType calcRoughness() const;
-        void interpolate(const RSpaceGrid<ScalarType>& data);
-        ScalarType interpolateFEM(Vec3D kPoint, const RSpaceGrid<ScalarType>& data) const;
-        template<class MatrixType>
-        MatrixType interpolateHermiteMatrix(Vec3D qPoint, const GridStorage<MatrixType>& matrixGrid);
+        void interpolate(const RSpaceGrid<T>& data);
+        T interpolateFEM(Vec3D kPoint, const RSpaceGrid<T>& data) const;
+        template<Matrix M>
+        M interpolateHermiteMatrix(Vec3D qPoint, const GridStorage<M>& matrixGrid);
         void swap(BrillouInterpolate& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] Index3D getBaseDim() const noexcept { return baseCoeff.getDim(); }
@@ -70,8 +70,8 @@ namespace Physica::Core {
         CoeffMatrixM makeMatrixM() const;
     };
 
-    template<class ScalarType>
-    BrillouInterpolate<ScalarType>::BrillouInterpolate(Index3D baseDim, LatticeMatrix unitcell, RealType smoothFactor1_, RealType smoothFactor2_)
+    template<Scalar T>
+    BrillouInterpolate<T>::BrillouInterpolate(Index3D baseDim, LatticeMatrix unitcell, RealType smoothFactor1_, RealType smoothFactor2_)
             : baseCoeff(baseDim)
             , lattice(unitcell)
             , smoothFactor1(smoothFactor1_)
@@ -84,10 +84,10 @@ namespace Physica::Core {
         smoothFactor2 /= square(minSquaredNorm);
     }
 
-    template<class ScalarType>
-    ScalarType BrillouInterpolate<ScalarType>::operator()(Vec3D kPoint) {
+    template<Scalar T>
+    T BrillouInterpolate<T>::operator()(Vec3D kPoint) {
         const Index3D baseDim = getBaseDim();
-        ScalarType result(0);
+        T result(0);
         GridBase::forIndexInGrid(baseDim, [this, kPoint, baseDim, &result](Index3D index) {
             RealType phase(0);
             for (size_t dim = 0; dim < Dim; ++dim)
@@ -110,8 +110,8 @@ namespace Physica::Core {
         return result;
     }
 
-    template<class ScalarType>
-    typename BrillouInterpolate<ScalarType>::RealType BrillouInterpolate<ScalarType>::calcRoughness() const {
+    template<Scalar T>
+    typename BrillouInterpolate<T>::RealType BrillouInterpolate<T>::calcRoughness() const {
         RealType result = 0;
         const auto kernel = [this, &result](Vec3D r, Index3D index) {
             const RealType r2 = r.squaredNorm();
@@ -125,8 +125,8 @@ namespace Physica::Core {
         return result;
     }
 
-    template<class ScalarType>
-    void BrillouInterpolate<ScalarType>::interpolate(const RSpaceGrid<ScalarType>& data) {
+    template<Scalar T>
+    void BrillouInterpolate<T>::interpolate(const RSpaceGrid<T>& data) {
         assert(dataDim[0] <= getBaseDim()[0] && "[Error]: Not enough base function, interpolation is overdetermined");
         assert(dataDim[1] <= getBaseDim()[1] && "[Error]: Not enough base function, interpolation is overdetermined");
         assert(dataDim[2] <= getBaseDim()[2] && "[Error]: Not enough base function, interpolation is overdetermined");
@@ -164,8 +164,8 @@ namespace Physica::Core {
         }
     }
 
-    template<class ScalarType>
-    ScalarType BrillouInterpolate<ScalarType>::interpolateFEM(Vec3D kPoint, const RSpaceGrid<ScalarType>& data) const {
+    template<Scalar T>
+    T BrillouInterpolate<T>::interpolateFEM(Vec3D kPoint, const RSpaceGrid<T>& data) const {
         using ElementType = CuboidLinear<RealType>;
         using IndexArray = typename ElementType::IndexArray;
         for (size_t i = 0; i < Dim; ++i) {
@@ -193,7 +193,7 @@ namespace Physica::Core {
         const auto element = ElementType(point1, point2, nodeArr);
         const Vec3D localPos = element.toLocalPos(globalPos);
 
-        ScalarType result = 0;
+        T result = 0;
         size_t localNodeIndex = 0;
         for (int x = 0; x < 2; ++x) {
             for (int y = 0; y < 2; ++y) {
@@ -208,12 +208,12 @@ namespace Physica::Core {
         return result;
     }
 
-    template<class ScalarType>
-    template<class MatrixType>
-    MatrixType BrillouInterpolate<ScalarType>::interpolateHermiteMatrix(Vec3D qPoint, const GridStorage<MatrixType>& matrixGrid) {
+    template<Scalar T>
+    template<Matrix M>
+    M BrillouInterpolate<T>::interpolateHermiteMatrix(Vec3D qPoint, const GridStorage<M>& matrixGrid) {
         const Index3D gridDim = matrixGrid.getDim();
         const size_t order = matrixGrid(0, 0, 0).getRow();
-        MatrixType result(order, order, ScalarType(0));
+        M result(order, order, T(0));
         RSpaceGrid<ComplexType> buffer(gridDim);
         for (size_t c = 0; c < order; ++c) {
             for (size_t r = 0; r < order; ++r) {
@@ -228,8 +228,8 @@ namespace Physica::Core {
         return result;
     }
 
-    template<class ScalarType>
-    void BrillouInterpolate<ScalarType>::swap(BrillouInterpolate& __restrict obj) noexcept {
+    template<Scalar T>
+    void BrillouInterpolate<T>::swap(BrillouInterpolate& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         baseCoeff.swap(obj.baseCoeff);
         lattice.swap(obj.lattice);
@@ -240,8 +240,8 @@ namespace Physica::Core {
         dataDim.swap(obj.dataDim);
     }
 
-    template<class ScalarType>
-    void BrillouInterpolate<ScalarType>::initBaseCoeff() {
+    template<Scalar T>
+    void BrillouInterpolate<T>::initBaseCoeff() {
         const auto kernel = [this](Vec3D r, Index3D index) {
             const RealType r2 = r.squaredNorm();
             const bool isGammaPoint = r2 < std::numeric_limits<RealType>::epsilon();
@@ -255,8 +255,8 @@ namespace Physica::Core {
     /**
      * Matrix M as defined in [1]
      */
-    template<class ScalarType>
-    typename BrillouInterpolate<ScalarType>::CoeffMatrixM BrillouInterpolate<ScalarType>::makeMatrixM() const {
+    template<Scalar T>
+    typename BrillouInterpolate<T>::CoeffMatrixM BrillouInterpolate<T>::makeMatrixM() const {
         const auto baseDim = getBaseDim();
         const size_t numDataPoint = dataDim[0] * dataDim[1] * dataDim[2];
         CoeffMatrixM matrixM(numDataPoint, numDataPoint);

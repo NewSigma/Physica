@@ -19,10 +19,10 @@
 #pragma once
 
 namespace Physica::Core {
-    template<class VectorType>
-    class device_obj<VectorExpr<ExprType::Reciprocal, VectorType>>
-            : public device_obj<UnitaryVectorExpr<ExprType::Reciprocal, VectorType>> {
-        using Base = device_obj<UnitaryVectorExpr<ExprType::Reciprocal, VectorType>>;
+    template<Vector T>
+    class device_obj<VectorExpr<ExprType::Reciprocal, T>>
+            : public device_obj<UnitaryVectorExpr<ExprType::Reciprocal, T>> {
+        using Base = device_obj<UnitaryVectorExpr<ExprType::Reciprocal, T>>;
     public:
         using typename Base::ScalarType;
     public:
@@ -44,8 +44,8 @@ namespace Physica::Core {
         }
     };
 
-    template<class VectorType>
-    [[nodiscard]] __host__ __device__ inline auto reciprocal(const device_obj<RValueVector<VectorType>>& v) noexcept {
-        return device_obj<VectorExpr<ExprType::Reciprocal, VectorType>>(v);
+    template<Vector T>
+    [[nodiscard]] __host__ __device__ inline auto reciprocal(const device_obj<T>& v) noexcept {
+        return device_obj<VectorExpr<ExprType::Reciprocal, T>>(v);
     }
 }

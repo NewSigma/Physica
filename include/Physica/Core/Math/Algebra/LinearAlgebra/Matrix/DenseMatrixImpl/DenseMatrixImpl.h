@@ -21,31 +21,31 @@
 #include <Physica/Core/Exception/BadFileFormatException.h>
 
 namespace Physica::Core {
-    template<class T, int Option, size_t Row, size_t Col, class Allocator>
+    template<Scalar T, int Option, size_t Row, size_t Col, class Allocator>
     DenseMatrix<T, Option, Row, Col, Allocator>::DenseMatrix(size_t row, size_t col)
             : Storage(row, col) {}
 
-    template<class T, int Option, size_t Row, size_t Col, class Allocator>
+    template<Scalar T, int Option, size_t Row, size_t Col, class Allocator>
     DenseMatrix<T, Option, Row, Col, Allocator>::DenseMatrix(size_t row, size_t col, T value)
             : Storage(row, col, std::move(value)) {}
 
-    template<class T, int Option, size_t Row, size_t Col, class Allocator>
+    template<Scalar T, int Option, size_t Row, size_t Col, class Allocator>
     DenseMatrix<T, Option, Row, Col, Allocator>::DenseMatrix(std::initializer_list<InitializerType> list)
             : Storage(std::move(list)) {}
 
-    template<class T, int Option, size_t Row, size_t Col, class Allocator>
-    template<class OtherMatrix>
-    DenseMatrix<T, Option, Row, Col, Allocator>::DenseMatrix(const RValueMatrix<OtherMatrix>& mat)
+    template<Scalar T, int Option, size_t Row, size_t Col, class Allocator>
+    template<Matrix M>
+    DenseMatrix<T, Option, Row, Col, Allocator>::DenseMatrix(const M& mat)
             : DenseMatrix(mat.getRow(), mat.getCol()) {
-        mat.getDerived().assignTo(*this);
+        mat.assignTo(*this);
     }
 
-    template<class T, int Option, size_t Row, size_t Col, class Allocator>
-    template<class VectorType>
-    DenseMatrix<T, Option, Row, Col, Allocator>::DenseMatrix(const RValueVector<VectorType>& vec)
+    template<Scalar T, int Option, size_t Row, size_t Col, class Allocator>
+    template<Vector V>
+    DenseMatrix<T, Option, Row, Col, Allocator>::DenseMatrix(const V& vec)
             : DenseMatrix(vec.getLength(), 1) {
         auto col = this->col(0);
-        vec.getDerived().assignTo(col);
+        vec.assignTo(col);
     }
     /**
      * \returns the origin column index of the main element
@@ -53,7 +53,7 @@ namespace Physica::Core {
      * Reference:
      * [1] William H. Press, Saul A. Teukolsky, William T. Vetterling, Brian P. Flannery. C++数值算法(第二版)[M]. 北京: 电子工业出版社, 2005:35
      */
-    template<class T, int Option, size_t Row, size_t Col, class Allocator>
+    template<Scalar T, int Option, size_t Row, size_t Col, class Allocator>
     size_t DenseMatrix<T, Option, Row, Col, Allocator>::completePivoting(size_t col) {
         const auto rank = getRow();
         assert(col < rank);
@@ -80,7 +80,7 @@ namespace Physica::Core {
      * Reference:
      * [1] William H. Press, Saul A. Teukolsky, William T. Vetterling, Brian P. Flannery. C++数值算法(第二版)[M]. 北京: 电子工业出版社, 2005:35
      */
-    template<class T, int Option, size_t Row, size_t Col, class Allocator>
+    template<Scalar T, int Option, size_t Row, size_t Col, class Allocator>
     size_t DenseMatrix<T, Option, Row, Col, Allocator>::partialPivoting(size_t col) {
         const auto rank = getRow();
         assert(col < rank);
@@ -98,7 +98,7 @@ namespace Physica::Core {
         return main_col_index;
     }
 
-    template<class T, int Option, size_t Row, size_t Col, class Allocator>
+    template<Scalar T, int Option, size_t Row, size_t Col, class Allocator>
     DenseMatrix<T, Option, Row, Col, Allocator>
     DenseMatrix<T, Option, Row, Col, Allocator>::copy() const {
         if constexpr (isReverseDiff) {
@@ -114,49 +114,47 @@ namespace Physica::Core {
             return *this;
     }
 
-    template<class T, int Option, size_t Row, size_t Col, class Allocator>
+    template<Scalar T, int Option, size_t Row, size_t Col, class Allocator>
     DenseMatrix<T, Option, Row, Col, Allocator> DenseMatrix<T, Option, Row, Col, Allocator>::unitMatrix(size_t order) {
         DenseMatrix result(order, order);
         result.toUnitMatrix();
         return result;
     }
 
-    template<class T, int Option, size_t Row, size_t Col, class Allocator>
-    template<class RandomGenerator>
+    template<Scalar T, int Option, size_t Row, size_t Col, class Allocator>
+    template<class RandomType>
     inline DenseMatrix<T, Option, Row, Col, Allocator>
     DenseMatrix<T, Option, Row, Col, Allocator>::random_uniform(
-            size_t row, size_t col, RandomGenerator& gen) {
+            size_t row, size_t col, RandomType& gen) {
         DenseMatrix result(row, col);
         result.random_uniform(gen);
         return result;
     }
 
-    template<class T, int Option, size_t Row, size_t Col, class Allocator>
-    template<class RandomGenerator>
+    template<Scalar T, int Option, size_t Row, size_t Col, class Allocator>
+    template<class RandomType>
     inline DenseMatrix<T, Option, Row, Col, Allocator>
     DenseMatrix<T, Option, Row, Col, Allocator>::random_normal(
-            size_t row, size_t col, RandomGenerator& gen) {
+            size_t row, size_t col, RandomType& gen) {
         DenseMatrix result(row, col);
         result.random_normal(gen);
         return result;
     }
 
-    template<class T, int Option, size_t Row, size_t Col, class Allocator>
-    template<class Distribution, class RandomGenerator>
+    template<Scalar T, int Option, size_t Row, size_t Col, class Allocator>
+    template<class Distribution, class RandomType>
     inline DenseMatrix<T, Option, Row, Col, Allocator>
     DenseMatrix<T, Option, Row, Col, Allocator>::random_any(
-            size_t row, size_t col, Distribution& dist, RandomGenerator& gen) {
+            size_t row, size_t col, Distribution& dist, RandomType& gen) {
         DenseMatrix result(row, col);
         result.random_any(dist, gen);
         return result;
     }
 
-    template<class T, int Option, size_t Row, size_t Col, class Allocator>
-    template<class VectorType>
+    template<Scalar T, int Option, size_t Row, size_t Col, class Allocator>
+    template<Vector V>
     std::pair<DenseMatrix<T, Option, Row, Col, Allocator>, DenseMatrix<T, Option, Row, Col, Allocator>>
-    DenseMatrix<T, Option, Row, Col, Allocator>::meshgrid(
-            const LValueVector<VectorType>& vecX,
-            const LValueVector<VectorType>& vecY) {
+    DenseMatrix<T, Option, Row, Col, Allocator>::meshgrid(const V& vecX, const V& vecY) {
         using MatrixType = DenseMatrix<T, Option, Row, Col, Allocator>;
         const size_t row = vecY.getLength();
         const size_t col = vecX.getLength();
@@ -164,14 +162,14 @@ namespace Physica::Core {
         MatrixType y(row, col);
         for (size_t i = 0; i < x.getMaxMajor(); ++i) {
             for (size_t j = 0; j < x.getMaxMinor(); ++j) {
-                x.refFromMajorMinor(i, j) = vecX[MatrixOption::colFromMajorMinor<MatrixType>(i, j)];
-                y.refFromMajorMinor(i, j) = vecY[MatrixOption::rowFromMajorMinor<MatrixType>(i, j)];
+                x.refFromMajorMinor(i, j) = vecX.calc(MatrixOption::colFromMajorMinor<MatrixType>(i, j));
+                y.refFromMajorMinor(i, j) = vecY.calc(MatrixOption::rowFromMajorMinor<MatrixType>(i, j));
             }
         }
         return std::make_pair(std::move(x), std::move(y));
     }
 
-    template<class T, int Option, size_t Row, size_t Col, class Allocator>
+    template<Scalar T, int Option, size_t Row, size_t Col, class Allocator>
     std::istream& operator>>(std::istream& is, DenseMatrix<T, Option, Row, Col, Allocator>& mat) {
         const size_t col = mat.getCol();
         const size_t row = mat.getRow();

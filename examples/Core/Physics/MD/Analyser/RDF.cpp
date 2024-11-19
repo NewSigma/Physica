@@ -43,8 +43,7 @@ constexpr double timeStep = PhyConst<AU>::secondToTime(1E-15) * 0.25;
 constexpr double pair_cutoff = PhyConst<AU>::angstormToBohr(9);
 constexpr double massMoleculeInSI = PhyConst<SI>::atomMass(1) * 2 + PhyConst<SI>::atomMass(8);
 
-template<class RandomGenerator>
-Vector3D<ScalarType> randomVector(RandomGenerator& gen) {
+Vector3D<ScalarType> randomVector(RandomType& gen) {
     std::uniform_real_distribution dist{};
     const ScalarType theta(dist(gen) * M_PI);
     const ScalarType phi(dist(gen) * M_PI * 2);
@@ -53,8 +52,7 @@ Vector3D<ScalarType> randomVector(RandomGenerator& gen) {
     return result;
 }
 
-template<class RandomGenerator>
-MDCell<ScalarType> makeSystem(unsigned int cellSize, RandomGenerator& gen) {
+MDCell<ScalarType> makeSystem(unsigned int cellSize, RandomType& gen) {
     using CrystalCellType = CrystalCell<ScalarType>;
     constexpr size_t MoleculePerCell = 4;
     constexpr size_t maxIndexH = MoleculePerCell * 2;
@@ -112,11 +110,12 @@ RDF<ScalarType> calcRDF(size_t numReplica) {
     using KineticModel = FreeModel<ScalarType, 3, NumReplica, RPMDIntegrator::Exact>;
     using ThermoType = DoubleThermo<KineticModel>;
     auto& pool = RandomType::getInstance();
-    auto& gen = pool.getGen();
-    auto cell = makeSystem(3, gen);
+    auto cell = makeSystem(3, pool);
     ForceModel::sortPosition(cell);
     const ThermoType thermo(temperatureT, thermostatTime);
     RPMD<ScalarType, 3, NumReplica> rpmd(std::move(cell), numReplica, numReplica, temperatureT, timeStep);
+
+    auto& gen = pool.getGen();
     rpmd.template initMomentum<KineticModel, decltype(gen)>(gen);
     ForceModel forceModel(rpmd.phaseToCell(0), pair_cutoff, EwaldType(1000, 100));
     KineticModel kineticModel(temperatureT, numReplica);

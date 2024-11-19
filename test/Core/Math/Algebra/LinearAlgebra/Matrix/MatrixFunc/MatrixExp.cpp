@@ -39,7 +39,7 @@ int main() {
     v1 = hadamard(eigenvalues, v1);
 
     const VectorType answer = eigenvectors * v1;
-    const VectorType result = exp(mat.asMatrix()) * v;
+    const VectorType result = exp(mat) * v;
     if (!vectorNear(answer, result, 1E-13))
         return 1;
     return 0;

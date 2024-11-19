@@ -80,8 +80,8 @@ namespace Physica::Core {
         return Complex<T>(result_module * cos(m_phi), result_module * sin(m_phi));
     }
 
-    template<class Matrix>
-    HamonicRotator<Matrix>::HamonicRotator(const Matrix& axisRotation) : initialMat(3, 3), hamonicRotation() {
+    template<Matrix M>
+    HamonicRotator<M>::HamonicRotator(const M& axisRotation) : initialMat(3, 3), hamonicRotation() {
         assert(axisRotation.getRow() == 3 && axisRotation.getCol() == 3);
         initialMat(0, 0) = axisRotation(1, 1);
         initialMat(0, 1) = -axisRotation(1, 2);
@@ -95,8 +95,8 @@ namespace Physica::Core {
         hamonicRotation = initialMat;
     }
 
-    template<class Matrix>
-    bool HamonicRotator<Matrix>::nearByMargin(double actual, double expected) {
+    template<Matrix M>
+    bool HamonicRotator<M>::nearByMargin(double actual, double expected) {
         double diff = actual - expected;
         if (diff < 0.0)
             diff = -diff;
@@ -104,11 +104,11 @@ namespace Physica::Core {
         return diff < 32 * std::numeric_limits<double>::epsilon();
     }
 
-    template<class Matrix>
-    void HamonicRotator<Matrix>::nextHamonicRotation() {
-        using T = typename Matrix::ScalarType;
+    template<Matrix M>
+    void HamonicRotator<M>::nextHamonicRotation() {
+        using T = typename M::ScalarType;
         const int l = static_cast<int>((hamonicRotation.getRow() >> 1U) + 1U);
-        Matrix result(2 * l + 1, 2 * l + 1);
+        M result(2 * l + 1, 2 * l + 1);
         for (int m = -l; m <= l; ++m) {
             for (int n = -l; n <= l; ++n) {
                 T u, v, w;
@@ -138,16 +138,16 @@ namespace Physica::Core {
         hamonicRotation = std::move(result);
     }
 
-    template<class Matrix>
-    typename Matrix::ScalarType HamonicRotator<Matrix>::getCenteredElement(size_t row, size_t col) {
+    template<Matrix M>
+    typename M::ScalarType HamonicRotator<M>::getCenteredElement(size_t row, size_t col) {
         const size_t matRow = hamonicRotation.getRow();
         assert(matRow % 2U == 1U);
         const size_t offset = matRow >> 1U;
         return hamonicRotation(row + offset, col + offset);
     }
 
-    template<class Matrix>
-    typename Matrix::ScalarType HamonicRotator<Matrix>::P(int i, int a, int b, int l) {
+    template<Matrix M>
+    typename M::ScalarType HamonicRotator<M>::P(int i, int a, int b, int l) {
         const int i_1 = i + 1;
         if (b == l)
             return initialMat(i_1, 2) * getCenteredElement(a, l - 1) - initialMat(i_1, 0) * getCenteredElement(a, -l + 1);
@@ -156,13 +156,13 @@ namespace Physica::Core {
         return initialMat(i_1, 1) * getCenteredElement(a, b);
     }
 
-    template<class Matrix>
-    typename Matrix::ScalarType HamonicRotator<Matrix>::U(int m, int n, int l) {
+    template<Matrix M>
+    typename M::ScalarType HamonicRotator<M>::U(int m, int n, int l) {
         return P(0, m, n, l);
     }
 
-    template<class Matrix>
-    typename Matrix::ScalarType HamonicRotator<Matrix>::V(int m, int n, int l) {
+    template<Matrix M>
+    typename M::ScalarType HamonicRotator<M>::V(int m, int n, int l) {
         if (m == 0)
             return P(1, 1, n, l) + P(-1, -1, n, l);
         if (m > 0) {
@@ -178,8 +178,8 @@ namespace Physica::Core {
         return P(1, m + 1, n, l) * (1 - delta) + P(-1, -m - 1, n, l) * std::sqrt(1 + delta);
     }
 
-    template<class Matrix>
-    typename Matrix::ScalarType HamonicRotator<Matrix>::W(int m, int n, int l) {
+    template<Matrix M>
+    typename M::ScalarType HamonicRotator<M>::W(int m, int n, int l) {
         // whenever this happens, w is also 0 so W can be anything
         if (m == 0)
             return 0.0;

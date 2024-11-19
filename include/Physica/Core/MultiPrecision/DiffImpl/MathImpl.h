@@ -19,152 +19,152 @@
 #pragma once
 
 namespace Physica::Core {
-    template<class ScalarType, DiffMode Mode, int Order>
-    __host__ __device__ inline Diff<ScalarType, Mode, Order> abs(const Diff<ScalarType, Mode, Order>& s) {
-        const ScalarType value = abs(s.getValue());
+    template<Scalar T, DiffMode Mode, int Order>
+    __host__ __device__ inline Diff<T, Mode, Order> abs(const Diff<T, Mode, Order>& s) {
+        const T value = abs(s.getValue());
         if constexpr (Mode == DiffMode::Forward)
             return {value, s.getValue().isPositive() ? s.getGrad() : -s.getGrad()};
         else {
-            auto& tracer = DiffTracer<ScalarType, Order>::getInstance();
+            auto& tracer = DiffTracer<T, Order>::getInstance();
             const auto result = tracer.pushOperation(value, ExprType::Abs);
             tracer.pushOperand(s);
             return result;
         }
     }
 
-    template<class ScalarType, DiffMode Mode, int Order>
-    __host__ __device__ inline auto abs(const ScalarRef<Diff<ScalarType, Mode, Order>>& x) {
-        return abs(Diff<ScalarType, Mode, Order>(x));
+    template<Scalar T, DiffMode Mode, int Order>
+    __host__ __device__ inline auto abs(const ScalarRef<Diff<T, Mode, Order>>& x) {
+        return abs(Diff<T, Mode, Order>(x));
     }
 
-    template<class ScalarType, DiffMode Mode, int Order>
-    inline Diff<ScalarType, Mode, Order> relu(const Diff<ScalarType, Mode, Order>& s) {
-        const ScalarType value = relu(s.getValue());
+    template<Scalar T, DiffMode Mode, int Order>
+    inline Diff<T, Mode, Order> relu(const Diff<T, Mode, Order>& s) {
+        const T value = relu(s.getValue());
         if constexpr (Mode == DiffMode::Forward)
-            return {value, s.getValue().isPositive() ? s.getGrad() : ScalarType(0)};
+            return {value, s.getValue().isPositive() ? s.getGrad() : T(0)};
         else {
-            auto& tracer = DiffTracer<ScalarType, Order>::getInstance();
+            auto& tracer = DiffTracer<T, Order>::getInstance();
             const auto result = tracer.pushOperation(value, ExprType::Relu);
             tracer.pushOperand(s);
             return result;
         }
     }
 
-    template<class ScalarType, DiffMode Mode, int Order>
-    __host__ __device__ inline Diff<ScalarType, Mode, Order> square(const Diff<ScalarType, Mode, Order>& s) {
-        using ResultType = Diff<ScalarType, Mode, Order>;
-        const ScalarType value = square(s.getValue());
+    template<Scalar T, DiffMode Mode, int Order>
+    __host__ __device__ inline Diff<T, Mode, Order> square(const Diff<T, Mode, Order>& s) {
+        using ResultType = Diff<T, Mode, Order>;
+        const T value = square(s.getValue());
         if constexpr (Mode == DiffMode::Forward) {
             using GradType = typename ResultType::GradType;
-            return ResultType(value, GradType(ScalarType(2) * s * s.getGrad()));
+            return ResultType(value, GradType(T(2) * s * s.getGrad()));
         }
         else {
-            auto& tracer = DiffTracer<ScalarType, Order>::getInstance();
+            auto& tracer = DiffTracer<T, Order>::getInstance();
             const auto result = tracer.pushOperation(value, ExprType::Square);
             tracer.pushOperand(s);
             return result;
         }
     }
 
-    template<class ScalarType, DiffMode Mode, int Order>
-    __host__ __device__ inline auto square(const ScalarRef<Diff<ScalarType, Mode, Order>>& x) {
-        return square(Diff<ScalarType, Mode, Order>(x));
+    template<Scalar T, DiffMode Mode, int Order>
+    __host__ __device__ inline auto square(const ScalarRef<Diff<T, Mode, Order>>& x) {
+        return square(Diff<T, Mode, Order>(x));
     }
 
-    template<class ScalarType, DiffMode Mode, int Order>
-    __host__ __device__ inline Diff<ScalarType, Mode, Order> reciprocal(const Diff<ScalarType, Mode, Order>& s) {
-        using ResultType = Diff<ScalarType, Mode, Order>;
+    template<Scalar T, DiffMode Mode, int Order>
+    __host__ __device__ inline Diff<T, Mode, Order> reciprocal(const Diff<T, Mode, Order>& s) {
+        using ResultType = Diff<T, Mode, Order>;
         if constexpr (Mode == DiffMode::Forward) {
             using GradType = typename ResultType::GradType;
             const GradType v = reciprocal(GradType(s));
             return ResultType(v.getValue(), -s.getGrad() * square(v));
         }
         else {
-            auto& tracer = DiffTracer<ScalarType, Order>::getInstance();
+            auto& tracer = DiffTracer<T, Order>::getInstance();
             const auto result = tracer.pushOperation(reciprocal(s.getValue()), ExprType::Reciprocal);
             tracer.pushOperand(s);
             return result;
         }
     }
 
-    template<class ScalarType, DiffMode Mode, int Order>
-    __host__ __device__ Diff<ScalarType, Mode, Order> sqrt(const Diff<ScalarType, Mode, Order>& s) {
-        using ResultType = Diff<ScalarType, Mode, Order>;
+    template<Scalar T, DiffMode Mode, int Order>
+    __host__ __device__ Diff<T, Mode, Order> sqrt(const Diff<T, Mode, Order>& s) {
+        using ResultType = Diff<T, Mode, Order>;
         if constexpr (Mode == DiffMode::Forward) {
             using GradType = typename ResultType::GradType;
             const GradType v = sqrt(GradType(s));
-            return ResultType(v.getValue(), ScalarType(0.5) * s.getGrad() / v);
+            return ResultType(v.getValue(), T(0.5) * s.getGrad() / v);
         }
         else {
-            auto& tracer = DiffTracer<ScalarType, Order>::getInstance();
+            auto& tracer = DiffTracer<T, Order>::getInstance();
             const auto result = tracer.pushOperation(sqrt(s.getValue()), ExprType::Sqrt);
             tracer.pushOperand(s);
             return result;
         }
     }
 
-    template<class ScalarType, DiffMode Mode, int Order>
-    Diff<ScalarType, Mode, Order> cbrt(const Diff<ScalarType, Mode, Order>& s) {
-        using ResultType = Diff<ScalarType, Mode, Order>;
+    template<Scalar T, DiffMode Mode, int Order>
+    Diff<T, Mode, Order> cbrt(const Diff<T, Mode, Order>& s) {
+        using ResultType = Diff<T, Mode, Order>;
         if constexpr (Mode == DiffMode::Forward) {
             using GradType = typename ResultType::GradType;
             const GradType v = cbrt(GradType(s));
-            return ResultType(v.getValue(), ScalarType(1.0 / 3) * v * s.getGrad() / GradType(s));
+            return ResultType(v.getValue(), T(1.0 / 3) * v * s.getGrad() / GradType(s));
         }
         else {
-            auto& tracer = DiffTracer<ScalarType, Order>::getInstance();
+            auto& tracer = DiffTracer<T, Order>::getInstance();
             const auto result = tracer.pushOperation(cbrt(s.getValue()), ExprType::Cbrt);
             tracer.pushOperand(s);
             return result;
         }
     }
 
-    template<class ScalarType, DiffMode Mode, int Order>
-    Diff<ScalarType, Mode, Order> ln(const Diff<ScalarType, Mode, Order>& s) {
-        using ResultType = Diff<ScalarType, Mode, Order>;
+    template<Scalar T, DiffMode Mode, int Order>
+    Diff<T, Mode, Order> ln(const Diff<T, Mode, Order>& s) {
+        using ResultType = Diff<T, Mode, Order>;
         if constexpr (Mode == DiffMode::Forward) {
             using GradType = typename ResultType::GradType;
             return ResultType(ln(s.getValue()), s.getGrad() / GradType(s));
         }
         else {
-            auto& tracer = DiffTracer<ScalarType, Order>::getInstance();
+            auto& tracer = DiffTracer<T, Order>::getInstance();
             const auto result = tracer.pushOperation(ln(s.getValue()), ExprType::Ln);
             tracer.pushOperand(s);
             return result;
         }
     }
 
-    template<class ScalarType, DiffMode Mode, int Order>
-    Diff<ScalarType, Mode, Order> ln1p(const Diff<ScalarType, Mode, Order>& x) {
+    template<Scalar T, DiffMode Mode, int Order>
+    Diff<T, Mode, Order> ln1p(const Diff<T, Mode, Order>& x) {
         static_assert(Mode == DiffMode::Forward, "[Error]: Not implemented");
-        using ResultType = Diff<ScalarType, Mode, Order>;
+        using ResultType = Diff<T, Mode, Order>;
         if constexpr (Mode == DiffMode::Forward) {
             using GradType = typename ResultType::GradType;
-            return ResultType(ln1p(x.getValue()), x.getGrad() / (ScalarType(1) + GradType(x)));
+            return ResultType(ln1p(x.getValue()), x.getGrad() / (T(1) + GradType(x)));
         }
         else
             noImpl();
     }
 
-    template<class ScalarType, DiffMode Mode, int Order>
-    Diff<ScalarType, Mode, Order> exp(const Diff<ScalarType, Mode, Order>& s) {
-        using ResultType = Diff<ScalarType, Mode, Order>;
+    template<Scalar T, DiffMode Mode, int Order>
+    Diff<T, Mode, Order> exp(const Diff<T, Mode, Order>& s) {
+        using ResultType = Diff<T, Mode, Order>;
         if constexpr (Mode == DiffMode::Forward) {
             using GradType = typename ResultType::GradType;
             const GradType v = exp(GradType(s));
             return {v.getValue(), v * s.getGrad()};
         }
         else {
-            auto& tracer = DiffTracer<ScalarType, Order>::getInstance();
+            auto& tracer = DiffTracer<T, Order>::getInstance();
             const auto result = tracer.pushOperation(exp(s.getValue()), ExprType::Exp);
             tracer.pushOperand(s);
             return result;
         }
     }
 
-    template<class ScalarType, DiffMode Mode, int Order>
-    Diff<ScalarType, Mode, Order> cos(const Diff<ScalarType, Mode, Order>& s) {
-        using ResultType = Diff<ScalarType, Mode, Order>;
+    template<Scalar T, DiffMode Mode, int Order>
+    Diff<T, Mode, Order> cos(const Diff<T, Mode, Order>& s) {
+        using ResultType = Diff<T, Mode, Order>;
         if constexpr (Mode == DiffMode::Forward) {
             using GradType = typename ResultType::GradType;
             GradType sin_value, cos_value;
@@ -172,17 +172,17 @@ namespace Physica::Core {
             return ResultType(cos_value.getValue(), -sin_value * s.getGrad());
         }
         else {
-            const ScalarType value = cos(s.getValue());
-            auto& tracer = DiffTracer<ScalarType, Order>::getInstance();
+            const T value = cos(s.getValue());
+            auto& tracer = DiffTracer<T, Order>::getInstance();
             const auto result = tracer.pushOperation(value, ExprType::Cos);
             tracer.pushOperand(s);
             return result;
         }
     }
 
-    template<class ScalarType, DiffMode Mode, int Order>
-    Diff<ScalarType, Mode, Order> sin(const Diff<ScalarType, Mode, Order>& s) {
-        using ResultType = Diff<ScalarType, Mode, Order>;
+    template<Scalar T, DiffMode Mode, int Order>
+    Diff<T, Mode, Order> sin(const Diff<T, Mode, Order>& s) {
+        using ResultType = Diff<T, Mode, Order>;
         if constexpr (Mode == DiffMode::Forward) {
             using GradType = typename ResultType::GradType;
             GradType sin_value, cos_value;
@@ -190,17 +190,17 @@ namespace Physica::Core {
             return ResultType(sin_value.getValue(), cos_value * s.getGrad());
         }
         else {
-            const ScalarType value = sin(s.getValue());
-            auto& tracer = DiffTracer<ScalarType, Order>::getInstance();
+            const T value = sin(s.getValue());
+            auto& tracer = DiffTracer<T, Order>::getInstance();
             const auto result = tracer.pushOperation(value, ExprType::Sin);
             tracer.pushOperand(s);
             return result;
         }
     }
 
-    template<class ScalarType, DiffMode Mode, int Order>
-    void sincos(Diff<ScalarType, Mode, Order> s, Diff<ScalarType, Mode, Order>& sin_result, Diff<ScalarType, Mode, Order>& cos_result) {
-        using ResultType = Diff<ScalarType, Mode, Order>;
+    template<Scalar T, DiffMode Mode, int Order>
+    void sincos(Diff<T, Mode, Order> s, Diff<T, Mode, Order>& sin_result, Diff<T, Mode, Order>& cos_result) {
+        using ResultType = Diff<T, Mode, Order>;
         if constexpr (Mode == DiffMode::Forward) {
             using GradType = typename ResultType::GradType;
             GradType sin_value, cos_value;
@@ -209,8 +209,8 @@ namespace Physica::Core {
             cos_result = ResultType(cos_value, -sin_value * s.getGrad());
         }
         else {
-            auto& tracer = DiffTracer<ScalarType, Order>::getInstance();
-            ScalarType sin_value, cos_value;
+            auto& tracer = DiffTracer<T, Order>::getInstance();
+            T sin_value, cos_value;
             sincos(s.getValue(), sin_value, cos_value);
             sin_result = tracer.pushOperation(sin_value, ExprType::Sin);
             tracer.pushOperand(s);
@@ -219,9 +219,9 @@ namespace Physica::Core {
         }
     }
 
-    template<class ScalarType, DiffMode Mode, int Order>
-    Diff<ScalarType, Mode, Order> tan(const Diff<ScalarType, Mode, Order>& s) {
-        using ResultType = Diff<ScalarType, Mode, Order>;
+    template<Scalar T, DiffMode Mode, int Order>
+    Diff<T, Mode, Order> tan(const Diff<T, Mode, Order>& s) {
+        using ResultType = Diff<T, Mode, Order>;
         if constexpr (Mode == DiffMode::Forward) {
             using GradType = typename ResultType::GradType;
             return ResultType(tan(s.getValue()), s.getGrad() * square(sec(GradType(s))));
@@ -230,9 +230,9 @@ namespace Physica::Core {
             noImpl();
     }
 
-    template<class ScalarType, DiffMode Mode, int Order>
-    Diff<ScalarType, Mode, Order> sec(const Diff<ScalarType, Mode, Order>& s) {
-        using ResultType = Diff<ScalarType, Mode, Order>;
+    template<Scalar T, DiffMode Mode, int Order>
+    Diff<T, Mode, Order> sec(const Diff<T, Mode, Order>& s) {
+        using ResultType = Diff<T, Mode, Order>;
         if constexpr (Mode == DiffMode::Forward) {
             using GradType = typename ResultType::GradType;
             const auto x1 = GradType(s);
@@ -243,9 +243,9 @@ namespace Physica::Core {
             noImpl();
     }
 
-    template<class ScalarType, DiffMode Mode, int Order>
-    Diff<ScalarType, Mode, Order> csc(const Diff<ScalarType, Mode, Order>& s) {
-        using ResultType = Diff<ScalarType, Mode, Order>;
+    template<Scalar T, DiffMode Mode, int Order>
+    Diff<T, Mode, Order> csc(const Diff<T, Mode, Order>& s) {
+        using ResultType = Diff<T, Mode, Order>;
         if constexpr (Mode == DiffMode::Forward) {
             using GradType = typename ResultType::GradType;
             const auto x1 = GradType(s);
@@ -256,9 +256,9 @@ namespace Physica::Core {
             noImpl();
     }
 
-    template<class ScalarType, DiffMode Mode, int Order>
-    Diff<ScalarType, Mode, Order> cot(const Diff<ScalarType, Mode, Order>& s) {
-        using ResultType = Diff<ScalarType, Mode, Order>;
+    template<Scalar T, DiffMode Mode, int Order>
+    Diff<T, Mode, Order> cot(const Diff<T, Mode, Order>& s) {
+        using ResultType = Diff<T, Mode, Order>;
         if constexpr (Mode == DiffMode::Forward) {
             using GradType = typename ResultType::GradType;
             return ResultType(cot(s.getValue()), -s.getGrad() * square(csc(GradType(s))));
@@ -267,25 +267,25 @@ namespace Physica::Core {
             noImpl();
     }
 
-    template<class ScalarType, DiffMode Mode, int Order>
-    Diff<ScalarType, Mode, Order> arccos(const Diff<ScalarType, Mode, Order>& s) {
-        using ResultType = Diff<ScalarType, Mode, Order>;
+    template<Scalar T, DiffMode Mode, int Order>
+    Diff<T, Mode, Order> arccos(const Diff<T, Mode, Order>& s) {
+        using ResultType = Diff<T, Mode, Order>;
         if constexpr (Mode == DiffMode::Forward) {
             using GradType = typename ResultType::GradType;
-            return ResultType(arccos(s.getValue()), -s.getGrad() / sqrt(ScalarType(1) - square(GradType(s))));
+            return ResultType(arccos(s.getValue()), -s.getGrad() / sqrt(T(1) - square(GradType(s))));
         }
         else {
-            const ScalarType value = arccos(s.getValue());
-            auto& tracer = DiffTracer<ScalarType, Order>::getInstance();
+            const T value = arccos(s.getValue());
+            auto& tracer = DiffTracer<T, Order>::getInstance();
             const auto result = tracer.pushOperation(value, ExprType::ArcCos);
             tracer.pushOperand(s);
             return result;
         }
     }
 
-    template<class ScalarType, DiffMode Mode, int Order>
-    Diff<ScalarType, Mode, Order> cosh(const Diff<ScalarType, Mode, Order>& s) {
-        using ResultType = Diff<ScalarType, Mode, Order>;
+    template<Scalar T, DiffMode Mode, int Order>
+    Diff<T, Mode, Order> cosh(const Diff<T, Mode, Order>& s) {
+        using ResultType = Diff<T, Mode, Order>;
         if constexpr (Mode == DiffMode::Forward) {
             using GradType = typename ResultType::GradType;
             return ResultType(cosh(s.getValue()), s.getGrad() * sinh(GradType(s)));
@@ -294,9 +294,9 @@ namespace Physica::Core {
             noImpl();
     }
 
-    template<class ScalarType, DiffMode Mode, int Order>
-    Diff<ScalarType, Mode, Order> sinh(const Diff<ScalarType, Mode, Order>& s) {
-        using ResultType = Diff<ScalarType, Mode, Order>;
+    template<Scalar T, DiffMode Mode, int Order>
+    Diff<T, Mode, Order> sinh(const Diff<T, Mode, Order>& s) {
+        using ResultType = Diff<T, Mode, Order>;
         if constexpr (Mode == DiffMode::Forward) {
             using GradType = typename ResultType::GradType;
             return ResultType(sinh(s.getValue()), s.getGrad() * cosh(GradType(s)));
@@ -305,25 +305,25 @@ namespace Physica::Core {
             noImpl();
     }
 
-    template<class ScalarType, DiffMode Mode, int Order>
-    Diff<ScalarType, Mode, Order> tanh(const Diff<ScalarType, Mode, Order>& s) {
-        using ResultType = Diff<ScalarType, Mode, Order>;
+    template<Scalar T, DiffMode Mode, int Order>
+    Diff<T, Mode, Order> tanh(const Diff<T, Mode, Order>& s) {
+        using ResultType = Diff<T, Mode, Order>;
         if constexpr (Mode == DiffMode::Forward) {
             using GradType = typename ResultType::GradType;
             const GradType v = tanh(GradType(s));
-            return ResultType(v.getValue(), (ScalarType(1) - square(v)) * s.getGrad());
+            return ResultType(v.getValue(), (T(1) - square(v)) * s.getGrad());
         }
         else {
-            auto& tracer = DiffTracer<ScalarType, Order>::getInstance();
+            auto& tracer = DiffTracer<T, Order>::getInstance();
             const auto result = tracer.pushOperation(tanh(s.getValue()), ExprType::Tanh);
             tracer.pushOperand(s);
             return result;
         }
     }
 
-    template<class ScalarType, DiffMode Mode, int Order>
-    Diff<ScalarType, Mode, Order> lncosh(const Diff<ScalarType, Mode, Order>& s) noexcept {
-        using ResultType = Diff<ScalarType, Mode, Order>;
+    template<Scalar T, DiffMode Mode, int Order>
+    Diff<T, Mode, Order> lncosh(const Diff<T, Mode, Order>& s) noexcept {
+        using ResultType = Diff<T, Mode, Order>;
         if constexpr (Mode == DiffMode::Forward) {
             using GradType = typename ResultType::GradType;
             return ResultType(lncosh(s.getValue()), s.getGrad() * tanh(GradType(s)));

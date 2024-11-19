@@ -21,40 +21,40 @@
 #include "Normal.h"
 
 namespace Physica::Core {
-    template<class ScalarType>
+    template<Scalar T>
     class LogNormal {
-        Normal<ScalarType> normal;
+        Normal<T> normal;
     public:
-        LogNormal(ScalarType logMean, ScalarType logDevia);
+        LogNormal(T logMean, T logDevia);
         LogNormal(const LogNormal&) = default;
         LogNormal(LogNormal&&) noexcept = default;
         ~LogNormal() = default;
         /* Operators */
         LogNormal& operator=(LogNormal obj) noexcept { swap(obj); return *this; }
-        [[nodiscard]] ScalarType operator()(const ScalarType& x) const;
-        template<class VectorType>
-        [[nodiscard]] VectorND<ScalarType> operator()(const RValueVector<VectorType>& x) const;
+        [[nodiscard]] T operator()(const T& x) const;
+        template<Vector V>
+        [[nodiscard]] VectorND<T> operator()(const V& x) const;
         /* Operations */
         void swap(LogNormal& __restrict obj) noexcept;
     };
 
-    template<class ScalarType>
-    LogNormal<ScalarType>::LogNormal(ScalarType logMean, ScalarType logDevia)
+    template<Scalar T>
+    LogNormal<T>::LogNormal(T logMean, T logDevia)
             : normal(std::move(logMean), std::move(logDevia)) {}
 
-    template<class ScalarType>
-    ScalarType LogNormal<ScalarType>::operator()(const ScalarType& x) const {
+    template<Scalar T>
+    T LogNormal<T>::operator()(const T& x) const {
         return normal(ln(x)) / x;
     }
 
-    template<class ScalarType>
-    template<class VectorType>
-    VectorND<ScalarType> LogNormal<ScalarType>::operator()(const RValueVector<VectorType>& x) const {
+    template<Scalar T>
+    template<Vector V>
+    VectorND<T> LogNormal<T>::operator()(const V& x) const {
         return divide(normal(ln(x)), x);
     }
 
-    template<class ScalarType>
-    void LogNormal<ScalarType>::swap(LogNormal& __restrict obj) noexcept {
+    template<Scalar T>
+    void LogNormal<T>::swap(LogNormal& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         normal.swap(obj.normal);
     }

@@ -68,10 +68,10 @@ namespace Physica::Core {
         [[nodiscard]] VectorND<ScalarType> force(const LatticeMatrix& lattice, const PositionMatrix& cartesianPos) const;
         template<class Executor>
         [[nodiscard]] inline VectorND<ScalarType> force(const MDCellType& cell) const;
-        template<class VectorType, class Executor>
-        inline void forceAsync(const LatticeMatrix& lattice, const PositionMatrix& cartesianPos, ContinuousVector<VectorType>& result) const;
-        template<class VectorType, class Executor>
-        inline void forceAsync(const MDCellType& cell, ContinuousVector<VectorType>& result) const;
+        template<Vector V, class Executor>
+        inline void forceAsync(const LatticeMatrix& lattice, const PositionMatrix& cartesianPos, ContinuousVector<V>& result) const;
+        template<Vector V, class Executor>
+        inline void forceAsync(const MDCellType& cell, ContinuousVector<V>& result) const;
         template<class Executor>
         [[nodiscard]] VectorND<ScalarType> force_short(const MDCellType& cell) const { return force<Executor>(cell); }
         template<class Executor>
@@ -94,7 +94,7 @@ namespace Physica::Core {
         PairModel(const PairModel&) = default;
         PairModel(PairModel&&) noexcept = default;
         /* Operators */
-        PairModel& operator=(PairModel pair) noexcept;
+        PairModel& operator=(PairModel obj) noexcept { swap(obj); return *this; }
         /* Operations */
         template<class Functor>
         void forPairInCutoff(const LatticeMatrix& lattice, const PositionMatrix& cartesianPos, Functor func) const;
@@ -105,12 +105,6 @@ namespace Physica::Core {
     template<class Derived>
     PairModel<Derived>::PairModel(ValueType cutoff_) {
         setCutoff(std::move(cutoff_));
-    }
-
-    template<class Derived>
-    PairModel<Derived>& PairModel<Derived>::operator=(PairModel pair) noexcept {
-        swap(pair);
-        return *this;
     }
 
     template<class Derived>
@@ -183,9 +177,9 @@ namespace Physica::Core {
     }
 
     template<class Derived>
-    template<class VectorType, class Executor>
+    template<Vector V, class Executor>
     inline void PairModel<Derived>::forceAsync(
-            const LatticeMatrix& lattice, const PositionMatrix& cartesianPos, ContinuousVector<VectorType>& result) const {
+            const LatticeMatrix& lattice, const PositionMatrix& cartesianPos, ContinuousVector<V>& result) const {
         result = ScalarType(0);
         auto kernel = [this, &result](size_t i, size_t j, Vec3D r, ScalarType norm1, ScalarType norm2) {
             const ScalarType f_norm = force_functor(i, j, norm1, norm2);
@@ -201,9 +195,9 @@ namespace Physica::Core {
     }
 
     template<class Derived>
-    template<class VectorType, class Executor>
-    inline void PairModel<Derived>::forceAsync(const MDCellType& cell, ContinuousVector<VectorType>& result) const {
-        forceAsync<VectorType, Executor>(cell.getLattice(), cell.getPos(), result);
+    template<Vector V, class Executor>
+    inline void PairModel<Derived>::forceAsync(const MDCellType& cell, ContinuousVector<V>& result) const {
+        forceAsync<V, Executor>(cell.getLattice(), cell.getPos(), result);
     }
 
     template<class Derived>
@@ -307,7 +301,7 @@ namespace Physica::Core {
                         from = pos.row(i) + delta;
                         for (size_t j = i; j < numParticle; ++j) {
                             auto to = pos.row(j);
-                            r = to.asVector() - from;
+                            r = to - from;
                             const ScalarType norm2 = r.squaredNorm();
                             const bool isNotSelf = ScalarType(std::numeric_limits<ScalarType>::min()) < norm2;
                             if (isNotSelf && norm2 < squared_cutoff) {
@@ -333,7 +327,7 @@ namespace Physica::Core {
                         for (size_t j = i + 1; j < length; ++j) {
                             const size_t atom2 = arr1[j];
                             const auto to = pos.row(atom2);
-                            Vec3D r = to.asVector() - from;
+                            Vec3D r = to - from;
                             const ScalarType norm2 = r.squaredNorm();
                             if (norm2 < squared_cutoff) {
                                 const ScalarType norm1 = sqrt(norm2);
@@ -354,7 +348,7 @@ namespace Physica::Core {
                         Vec3D r, f(Dim, 0);
                         for (const size_t atom2 : arr2) {
                             const auto to = pos.row(atom2);
-                            r = to.asVector() - from;
+                            r = to - from;
                             const ScalarType norm2 = r.squaredNorm();
                             if (norm2 < squared_cutoff) {
                                 const ScalarType norm1 = sqrt(norm2);
@@ -378,7 +372,7 @@ namespace Physica::Core {
         assert(atom1 != atom2 && "[Error]: The function is not responsible for this case");
         const size_t dir1 = dof1 % 3U;
         const size_t dir2 = dof2 % 3U;
-        const Vec3D delta = cell.getPos().row(atom2).asVector() - cell.getPos().row(atom1).asVector();
+        const Vec3D delta = cell.getPos().row(atom2) - cell.getPos().row(atom1);
         const ScalarType squaredNorm = delta.squaredNorm();
         const ScalarType norm = sqrt(squaredNorm);
         const ScalarType factor = delta[dir1] * delta[dir2] / squaredNorm;

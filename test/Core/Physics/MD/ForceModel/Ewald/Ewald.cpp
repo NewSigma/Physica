@@ -24,29 +24,29 @@
 using namespace Physica;
 using namespace Physica::Core;
 
-template<class ScalarType>
+template<Scalar T>
 void VASPTest() {
-    constexpr static bool isFloat = ScalarType::Option == Float;
+    constexpr static bool isFloat = T::Option == Float;
     constexpr double prec = isFloat ? 2E-5 : 1E-5;
 
     const double lengthInBohr = PhyConst<AU>::angstormToBohr(3);
-    CrystalCell<ScalarType> cell({{lengthInBohr, 0, 0, 0, lengthInBohr, 0, 0, 0, lengthInBohr}, {0.5, 0.5, 0.5}, CrystalCell<ScalarType>::Type::Direct}, {14});
-    Ewald<ScalarType> ewald(cell.getLattice(), {4});
+    CrystalCell<T> cell({{lengthInBohr, 0, 0, 0, lengthInBohr, 0, 0, 0, lengthInBohr}, {0.5, 0.5, 0.5}, CrystalCell<T>::Type::Direct}, {14});
+    Ewald<T> ewald(cell.getLattice(), {4});
     const auto energy = ewald.potentialV(cell.getPos());
-    if (!scalarNear(energy, ScalarType(PhyConst<AU>::eVToHartree(-108.95061336198556)), prec))
+    if (!scalarNear(energy, T(PhyConst<AU>::eVToHartree(-108.95061336198556)), prec))
         exit(EXIT_FAILURE);
 }
 /**
  * Reference:
  * [1] pyewald; https://github.com/lukeolson/pyewald
  */
-template<class ScalarType>
+template<Scalar T>
 void madelungTest() {
-    constexpr static bool isFloat = ScalarType::Option == Float;
-    using EwaldType = Ewald<ScalarType>;
+    constexpr static bool isFloat = T::Option == Float;
+    using EwaldType = Ewald<T>;
     {
         const double lengthInBohr = PhyConst<AU>::angstormToBohr(5.6903014761756712);
-        CrystalCell<ScalarType> NaCl({{lengthInBohr, 0, 0, 0, lengthInBohr, 0, 0, 0, lengthInBohr}, {
+        CrystalCell<T> NaCl({{lengthInBohr, 0, 0, 0, lengthInBohr, 0, 0, 0, lengthInBohr}, {
                             0.0, 0.0, 0.0,
                             0.0, 0.5, 0.5,
                             0.5, 0.0, 0.5,
@@ -55,40 +55,40 @@ void madelungTest() {
                             0.5, 0.0, 0.0,
                             0.0, 0.5, 0.0,
                             0.0, 0.0, 0.5
-                        }, CrystalCell<ScalarType>::Type::Direct}, {1, 1, 1, 1, 1, 1, 1, 1});
+                        }, CrystalCell<T>::Type::Direct}, {1, 1, 1, 1, 1, 1, 1, 1});
         NaCl.toCartesian();
         EwaldType ewald(NaCl.getLattice(), {1, 1, 1, 1, -1, -1, -1, -1});
         const auto energy = ewald.potentialV(NaCl.getPos());
         const auto madelung = -(energy / 4) * (lengthInBohr / 2); //We have 4x unit cell so energy is divided by 4
         constexpr double prec = isFloat ? 1E-6 : 1E-7;
-        if (!scalarNear(madelung, ScalarType(1.7475645946331822), prec))
+        if (!scalarNear(madelung, T(1.7475645946331822), prec))
             exit(EXIT_FAILURE);
     }
     {
         const double lengthInBohr = 1;
-        CrystalCell<ScalarType> CsCl({{lengthInBohr, 0, 0, 0, lengthInBohr, 0, 0, 0, lengthInBohr}, {
+        CrystalCell<T> CsCl({{lengthInBohr, 0, 0, 0, lengthInBohr, 0, 0, 0, lengthInBohr}, {
                             0.0, 0.0, 0.0,
                             0.5, 0.5, 0.5,
-                         }, CrystalCell<ScalarType>::Type::Cartesian}, {1, 1});
+                         }, CrystalCell<T>::Type::Cartesian}, {1, 1});
         EwaldType ewald(CsCl.getLattice(), {1, -1});
         const auto energy = ewald.potentialV(CsCl.getPos());
         const auto madelung = -energy * (lengthInBohr * 0.5 * std::sqrt(3.0));
         constexpr double prec = isFloat ? 1E-5 : 1E-9;
-        if (!scalarNear(madelung, ScalarType(1.76267477307099), prec))
+        if (!scalarNear(madelung, T(1.76267477307099), prec))
             exit(EXIT_FAILURE);
     }
     {
         const double lengthInBohr = 0.5;
-        CrystalCell<ScalarType> ZnS({{0, lengthInBohr, lengthInBohr, lengthInBohr, 0, lengthInBohr, lengthInBohr, lengthInBohr, 0}, {
+        CrystalCell<T> ZnS({{0, lengthInBohr, lengthInBohr, lengthInBohr, 0, lengthInBohr, lengthInBohr, lengthInBohr, 0}, {
                             0.0, 0.0, 0.0,
                             0.25, 0.25, 0.25,
-                        }, CrystalCell<ScalarType>::Type::Direct}, {1, 1});
+                        }, CrystalCell<T>::Type::Direct}, {1, 1});
         ZnS.toCartesian();
         EwaldType ewald(ZnS.getLattice(), {1, -1});
         const auto energy = ewald.potentialV(ZnS.getPos());
         const auto madelung = -energy * (lengthInBohr * 0.5 * std::sqrt(3.0));
         constexpr double prec = isFloat ? 1E-5 : 1E-9;
-        if (!scalarNear(madelung, ScalarType(1.63805505338879), prec))
+        if (!scalarNear(madelung, T(1.63805505338879), prec))
             exit(EXIT_FAILURE);
     }
 }

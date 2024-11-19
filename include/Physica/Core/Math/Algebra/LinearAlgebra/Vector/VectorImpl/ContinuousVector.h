@@ -55,14 +55,17 @@ namespace Physica::Core {
         inline This& operator=(This&& v);
         template<Scalar T>
         inline Derived& operator=(const T& x);
+
+        template<Vector V>
+        inline void operator+=(const V& v);
         /* Operations */
         template<class AnyPacket> [[nodiscard]] inline AnyPacket packet(size_t index) const;
         template<class AnyPacket> [[nodiscard]] inline AnyPacket packetPartial(size_t index, size_t count) const;
         template<class AnyPacket> inline void writePacket(size_t index, const AnyPacket packet);
         template<class AnyPacket> inline void writePacketPartial(size_t index, size_t count, const AnyPacket packet);
 
-        template<class OtherDerived> void toDevice(device_obj<ContinuousVector<OtherDerived>>& obj) const;
-        template<class OtherDerived> void toDeviceAsync(device_obj<ContinuousVector<OtherDerived>>& obj) const;
+        template<Vector T> void toDevice(device_obj<ContinuousVector<T>>& obj) const;
+        template<Vector T> void toDeviceAsync(device_obj<ContinuousVector<T>>& obj) const;
 
         template<size_t Length = Dynamic>
         [[nodiscard]] inline BlockType<Length> head(size_t to);
@@ -98,20 +101,17 @@ namespace Physica::Core {
         ContinuousVector(This&&) noexcept = default;
     private:
         /* Friends */
-        template<class T>
+        template<Vector T>
         friend std::ostream& operator<<(std::ostream& os, const ContinuousVector<T>& v);
-        template<class T>
+        template<Vector T>
         friend std::istream& operator>>(std::istream& is, ContinuousVector<T>& v);
     };
 
-    template<class Derived>
-    std::ostream& operator<<(std::ostream& os, const ContinuousVector<Derived>& v);
+    template<Vector T>
+    std::ostream& operator<<(std::ostream& os, const ContinuousVector<T>& v);
 
-    template<class Derived>
-    std::istream& operator>>(std::istream& is, ContinuousVector<Derived>& v);
-
-    template<class Derived, class OtherDerived>
-    inline void operator+=(ContinuousVector<Derived>& v1, const RValueVector<OtherDerived>& v2);
+    template<Vector T>
+    std::istream& operator>>(std::istream& is, ContinuousVector<T>& v);
 }
 
 #include "ContinuousVectorImpl/ContinuousVectorImpl.h"

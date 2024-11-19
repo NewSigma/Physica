@@ -30,7 +30,7 @@ namespace Physica::Core {
      * \tparam Option
      * Option is combinations of \enum MatrixOption
      */
-    template<class T,
+    template<Scalar T,
              int Option = MatrixOption::Col | MatrixOption::Vector,
              size_t Row = Dynamic,
              size_t Col = Dynamic,
@@ -54,10 +54,10 @@ namespace Physica::Core {
         DenseMatrix(size_t row, size_t col);
         DenseMatrix(size_t row, size_t col, T value);
         DenseMatrix(std::initializer_list<InitializerType> list);
-        template<class OtherMatrix>
-        DenseMatrix(const RValueMatrix<OtherMatrix>& mat);
-        template<class VectorType>
-        DenseMatrix(const RValueVector<VectorType>& mat);
+        template<Matrix M>
+        DenseMatrix(const M& mat);
+        template<Vector V>
+        DenseMatrix(const V& mat);
         DenseMatrix(const This&) = default;
         DenseMatrix(This&&) noexcept = default;
         /* Operators */
@@ -88,27 +88,27 @@ namespace Physica::Core {
         [[nodiscard]] static DenseMatrix zeros(size_t rank) { return DenseMatrix(rank, rank, T(0)); }
         [[nodiscard]] static DenseMatrix zeros(size_t row, size_t col) { return DenseMatrix(row, col, T(0)); }
         [[nodiscard]] static DenseMatrix unitMatrix(size_t order);
-        template<class RandomGenerator>
-        [[nodiscard]] static DenseMatrix random_uniform(size_t order, RandomGenerator& gen) { return random_uniform(order, order, gen); }
-        template<class RandomGenerator>
-        [[nodiscard]] inline static DenseMatrix random_uniform(size_t row, size_t col, RandomGenerator& gen);
-        template<class RandomGenerator>
-        [[nodiscard]] inline static DenseMatrix random_normal(size_t row, size_t col, RandomGenerator& gen);
-        template<class Distribution, class RandomGenerator>
-        [[nodiscard]] inline static DenseMatrix random_any(size_t row, size_t col, Distribution& dist, RandomGenerator& gen);
-        template<class VectorType>
-        [[nodiscard]] static std::pair<DenseMatrix, DenseMatrix> meshgrid(const LValueVector<VectorType>& vecInCols, const LValueVector<VectorType>& vecInRows);
+        template<class RandomType>
+        [[nodiscard]] static DenseMatrix random_uniform(size_t order, RandomType& gen) { return random_uniform(order, order, gen); }
+        template<class RandomType>
+        [[nodiscard]] inline static DenseMatrix random_uniform(size_t row, size_t col, RandomType& gen);
+        template<class RandomType>
+        [[nodiscard]] inline static DenseMatrix random_normal(size_t row, size_t col, RandomType& gen);
+        template<class Distribution, class RandomType>
+        [[nodiscard]] inline static DenseMatrix random_any(size_t row, size_t col, Distribution& dist, RandomType& gen);
+        template<Vector V>
+        [[nodiscard]] static std::pair<DenseMatrix, DenseMatrix> meshgrid(const V& vecInCols, const V& vecInRows);
     private:
         DenseMatrix(Storage storage) : Storage(std::move(storage)) {}
         friend class device_obj<This>;
     };
 
-    template<class T, int Option, size_t Row, size_t Col, class Allocator>
+    template<Scalar T, int Option, size_t Row, size_t Col, class Allocator>
     std::istream& operator>>(std::istream& is, DenseMatrix<T, Option, Row, Col, Allocator>& mat);
 }
 
 namespace Physica {
-    template<class T, int Op, size_t Row, size_t Col, class Allocator>
+    template<Core::Scalar T, int Op, size_t Row, size_t Col, class Allocator>
     class Traits<Core::DenseMatrix<T, Op, Row, Col, Allocator>> {
         static_assert(!T::isForwardDiff, "[Error]: Use diffable matrix instead");
     public:
@@ -122,7 +122,7 @@ namespace Physica {
 }
 
 namespace std {
-    template<class T, int Option, size_t Row, size_t Col, class Allocator>
+    template<Physica::Core::Scalar T, int Option, size_t Row, size_t Col, class Allocator>
     inline void swap(
             Physica::Core::DenseMatrix<T, Option, Row, Col, Allocator>& __restrict m1,
             Physica::Core::DenseMatrix<T, Option, Row, Col, Allocator>& __restrict m2) noexcept {

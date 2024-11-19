@@ -20,7 +20,7 @@
 
 namespace Physica::Core {
     namespace Internal {
-        template<class T1, class T2>
+        template<Vector T1, Vector T2>
         class InnerDotImpl {
             using This = InnerDotImpl<T1, T2>;
         public:
@@ -39,12 +39,12 @@ namespace Physica::Core {
             constexpr static bool enableSIMD = isFastPacket1 && isFastPacket2 && isSameType && !isComplex && !isBadPacket;
             constexpr static bool isReverseDiff = T1::isReverseDiff || T2::isReverseDiff;
         public:
-            inline static ResultType run(const RValueVector<T1>& v1, const RValueVector<T2>& v2);
+            inline static ResultType run(const T1& v1, const T2& v2);
         };
 
-        template<class T1, class T2>
+        template<Vector T1, Vector T2>
         inline typename InnerDotImpl<T1, T2>::ResultType
-        InnerDotImpl<T1, T2>::run(const RValueVector<T1>& v1, const RValueVector<T2>& v2) {
+        InnerDotImpl<T1, T2>::run(const T1& v1, const T2& v2) {
             if constexpr (enableSIMD) {
                 const size_t length = v1.getLength();
                 size_t i = 0;
@@ -52,8 +52,8 @@ namespace Physica::Core {
                 PacketType buffer(0);
                 if constexpr (isReverseDiff) {
                     using PlainPacket = typename PacketType::PlainPacket;
-                    const auto head1 = v1.getDerived()[0];
-                    const auto head2 = v2.getDerived()[0];
+                    const auto head1 = v1[0];
+                    const auto head2 = v2[0];
                     for (; i < to; i += PacketType::size()) {
                         const ResultType node1(head1.value_ptr() + i, head1.grad_ptr() + i);
                         const ResultType node2(head2.value_ptr() + i, head2.grad_ptr() + i);
@@ -74,14 +74,14 @@ namespace Physica::Core {
                 }
                 else {
                     for (; i < to; i += PacketType::size()) {
-                        PacketType p1 = v1.getDerived().template packet<PacketType>(i);
-                        PacketType p2 = v2.getDerived().template packet<PacketType>(i);
+                        PacketType p1 = v1.template packet<PacketType>(i);
+                        PacketType p2 = v2.template packet<PacketType>(i);
                         buffer = mul_add(p1, p2, buffer);
                     }
                     if (to != length) {
                         const size_t count = length - i;
-                        PacketType p1 = v1.getDerived().template packetPartial<PacketType>(i, count);
-                        PacketType p2 = v2.getDerived().template packetPartial<PacketType>(i, count);
+                        PacketType p1 = v1.template packetPartial<PacketType>(i, count);
+                        PacketType p2 = v2.template packetPartial<PacketType>(i, count);
                         buffer = mul_add(p1, p2, buffer);
                     }
                 }
@@ -96,10 +96,9 @@ namespace Physica::Core {
         }
     }
 
-    template<class VectorType1, class VectorType2>
-    inline typename Internal::BinaryScalarOpReturnType<typename VectorType1::ScalarType, typename VectorType2::ScalarType>::Type
-    operator*(const RValueVector<VectorType1>& v1, const RValueVector<VectorType2>& v2) {
+    template<Vector T1, Vector T2>
+    [[nodiscard]] inline auto operator*(const T1& v1, const T2& v2) {
         assert(v1.getLength() == v2.getLength());
-        return Internal::InnerDotImpl<VectorType1, VectorType2>::run(v1.getDerived(), v2.getDerived());
+        return Internal::InnerDotImpl<T1, T2>::run(v1, v2);
     }
 }

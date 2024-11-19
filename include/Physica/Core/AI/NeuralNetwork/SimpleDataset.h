@@ -47,8 +47,8 @@ namespace Physica::Core {
         /* Operations */
         inline void reserve(size_t size);
         inline void append(DataType data);
-        template<class RandomGenerator>
-        SplitResultType randomSplit(size_t firstSize, RandomGenerator& gen) const;
+        template<class RandomType>
+        SplitResultType randomSplit(size_t firstSize, RandomType& gen) const;
         void swap(SimpleDataset& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] SampleArray& getSamples() noexcept { return samples; }
@@ -97,9 +97,9 @@ namespace Physica::Core {
     }
 
     template<class SampleType, class LabelType>
-    template<class RandomGenerator>
+    template<class RandomType>
     typename SimpleDataset<SampleType, LabelType>::SplitResultType
-    SimpleDataset<SampleType, LabelType>::randomSplit(size_t firstSize, RandomGenerator& gen) const {
+    SimpleDataset<SampleType, LabelType>::randomSplit(size_t firstSize, RandomType& gen) const {
         assert(firstSize > 0 && "[Error]: Spliting a zero size dataset does nothing");
         assert(firstSize < getSize() && "[Error]: Split a dataset whose size is larger than original");
         const size_t secondSize = getSize() - firstSize;

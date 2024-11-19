@@ -27,13 +27,13 @@ namespace Physica::Core {
      * Reference:
      * [1] Computer Simulation of Liquids (2nd edn); https://doi.org/10.1093/oso/9780198803195.001.0001
      */
-    template<class ScalarType>
+    template<Scalar T>
     class Correlation {
-        using VectorType = VectorND<ScalarType>;
+        using VectorType = VectorND<T>;
 
-        FFT<ScalarType, 1> fft;
+        FFT<T, 1> fft;
         VectorType corr;
-        ScalarType mean;
+        T mean;
         size_t numSample;
         size_t step;
     public:
@@ -45,18 +45,18 @@ namespace Physica::Core {
         /* Operators */
         Correlation& operator=(Correlation obj) noexcept { swap(obj); return *this; }
         /* Operations */
-        void sample(ScalarType data);
+        void sample(T data);
         void resample() noexcept { step = 0; }
         [[nodiscard]] VectorType makeCorr(bool removeDrift) const;
         void swap(Correlation& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] size_t getNumStep() const noexcept { return corr.getLength(); }
-        [[nodiscard]] ScalarType getMean() const noexcept { return mean; }
+        [[nodiscard]] T getMean() const noexcept { return mean; }
         [[nodiscard]] size_t getNumSample() const noexcept { return numSample; }
     };
 
-    template<class ScalarType>
-    Correlation<ScalarType>::Correlation(size_t numStep)
+    template<Scalar T>
+    Correlation<T>::Correlation(size_t numStep)
             : fft(numStep * 2, PlanFlag::Estimate)
             , corr(numStep, 0)
             , numSample(0)
@@ -64,8 +64,8 @@ namespace Physica::Core {
         assert(numStep > 1 && "[Error]: Invalid step number");
     }
 
-    template<class ScalarType>
-    void Correlation<ScalarType>::sample(ScalarType data) {
+    template<Scalar T>
+    void Correlation<T>::sample(T data) {
         const size_t numStep = getNumStep();
         auto& rSpace = fft.getRSpace();
         auto head = rSpace.head(numStep);
@@ -75,32 +75,32 @@ namespace Physica::Core {
         const bool isDataEnough = step == numStep;
         if (isDataEnough) {
             auto tail = rSpace.tail(numStep);
-            tail = ScalarType(0);
+            tail = T(0);
 
             fft.transform();
             auto& kSpace = fft.getKSpace();
-            toNextMean(mean, numSample, kSpace[0].real() / ScalarType(numStep));
+            toNextMean(mean, numSample, kSpace[0].real() / T(numStep));
             kSpace = toSquaredNormVector(kSpace);
             fft.invTransform();
 
             for (size_t i = 0; i < numStep; ++i)
-                head[i] /= ScalarType(numStep - i);
+                head[i] /= T(numStep - i);
             toNextMean(corr, numSample, head);
             numSample += 1;
             step = 0;
         }
     }
 
-    template<class ScalarType>
-    typename Correlation<ScalarType>::VectorType Correlation<ScalarType>::makeCorr(bool removeDrift) const {
+    template<Scalar T>
+    typename Correlation<T>::VectorType Correlation<T>::makeCorr(bool removeDrift) const {
         VectorType result = corr;
         if (removeDrift)
             result -= square(mean);
         return result;
     }
 
-    template<class ScalarType>
-    void Correlation<ScalarType>::swap(Correlation& __restrict obj) noexcept {
+    template<Scalar T>
+    void Correlation<T>::swap(Correlation& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         fft.swap(obj.fft);
         corr.swap(obj.corr);

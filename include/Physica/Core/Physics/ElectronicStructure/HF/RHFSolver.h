@@ -367,7 +367,7 @@ namespace Physica::Core::Physics {
             const size_t orbitPos = electronConfig.getOccupiedOrbitPos(i);
             ScalarType temp = eigenvalues[orbitPos].real();
             auto orbit = wave.col(i);
-            temp += (orbit.asMatrix().transpose() * singleHamilton).compute().row(0) * orbit;
+            temp += (orbit.transpose() * singleHamilton).compute().row(0) * orbit;
             const auto orbitState = electronConfig.getOrbitState(orbitPos);
             assert(orbitState != ElectronConfig::NoOccupacy);
             const bool isSingleOccupacy = orbitState == ElectronConfig::SingleOccupacy;

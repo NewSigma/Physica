@@ -26,29 +26,29 @@ namespace Physica::Core {
      * [1] Phys. Rev. Lett. 97, 170201 (2006); https://doi.org/10.1103/PhysRevLett.97.170201
      * [2] Comput. Mater. Sci. 175, 109584 (2020); https://doi.org/10.1016/j.commatsci.2020.109584
      */
-    template<class ScalarType, unsigned int Dim>
+    template<Scalar T, unsigned int Dim>
     class FireModel {
     public:
-        using MDType = RPMD<ScalarType, Dim, 1>;
+        using MDType = RPMD<T, Dim, 1>;
     private:
-        ScalarType timeStep;
-        ScalarType maxTimeStep;
-        ScalarType stepIncFactor;
-        ScalarType stepDecFactor;
-        ScalarType mixAlpha0;
-        ScalarType mixAlpha;
-        ScalarType alphaDecFactor;
+        T timeStep;
+        T maxTimeStep;
+        T stepIncFactor;
+        T stepDecFactor;
+        T mixAlpha0;
+        T mixAlpha;
+        T alphaDecFactor;
         unsigned int numLasyStep;
 
-        ScalarType normF;
+        T normF;
         unsigned int numStep;
     public:
-        FireModel(ScalarType timeStep_,
-                  ScalarType maxTimeStep,
-                  ScalarType stepIncFactor_ = 1.1,
-                  ScalarType stepDecFactor_ = 0.5,
-                  ScalarType mixAlpha_ = 0.1,
-                  ScalarType alphaDecFactor_ = 0.99,
+        FireModel(T timeStep_,
+                  T maxTimeStep,
+                  T stepIncFactor_ = 1.1,
+                  T stepDecFactor_ = 0.5,
+                  T mixAlpha_ = 0.1,
+                  T alphaDecFactor_ = 0.99,
                   unsigned int numLasyStep_ = 5);
         FireModel(const FireModel&) = default;
         FireModel(FireModel&&) noexcept = default;
@@ -60,21 +60,21 @@ namespace Physica::Core {
         void mixingStep(MDType& rpmd);
         void swap(FireModel& __restrict obj) noexcept;
         /* Getters */
-        [[nodiscard]] ScalarType getTimeStep() const noexcept { return timeStep; }
-        [[nodiscard]] ScalarType getMixAlpha() const noexcept { return mixAlpha; }
-        [[nodiscard]] ScalarType getForceNorm() const noexcept { return normF; } //Use force norm as convergence criteria as suggested by [2]
+        [[nodiscard]] T getTimeStep() const noexcept { return timeStep; }
+        [[nodiscard]] T getMixAlpha() const noexcept { return mixAlpha; }
+        [[nodiscard]] T getForceNorm() const noexcept { return normF; } //Use force norm as convergence criteria as suggested by [2]
     };
     /**
      * Default param provided in [1]
      */
-    template<class ScalarType, unsigned int Dim>
-    FireModel<ScalarType, Dim>::FireModel(
-            ScalarType timeStep_,
-            ScalarType maxTimeStep_,
-            ScalarType stepIncFactor_,
-            ScalarType stepDecFactor_,
-            ScalarType mixAlpha_,
-            ScalarType alphaDecFactor_,
+    template<Scalar T, unsigned int Dim>
+    FireModel<T, Dim>::FireModel(
+            T timeStep_,
+            T maxTimeStep_,
+            T stepIncFactor_,
+            T stepDecFactor_,
+            T mixAlpha_,
+            T alphaDecFactor_,
             unsigned int numLasyStep_)
             : timeStep(timeStep_)
             , maxTimeStep(maxTimeStep_)
@@ -86,20 +86,20 @@ namespace Physica::Core {
             , numStep(0) {
         assert(timeStep.isPositive());
         assert(timeStep <= maxTimeStep);
-        assert(stepIncFactor > ScalarType(1));
-        assert(ScalarType(0) < stepDecFactor && stepDecFactor < ScalarType(1));
+        assert(stepIncFactor > T(1));
+        assert(T(0) < stepDecFactor && stepDecFactor < T(1));
         assert(numLasyStep > 0 && "[Error]: It is unstable if numLasyStep = 0");
-        assert(ScalarType(0) < mixAlpha0 && mixAlpha0 < ScalarType(1));
-        assert(ScalarType(0) < alphaDecFactor && alphaDecFactor < ScalarType(1));
+        assert(T(0) < mixAlpha0 && mixAlpha0 < T(1));
+        assert(T(0) < alphaDecFactor && alphaDecFactor < T(1));
         mixAlpha = mixAlpha0;
     }
 
-    template<class ScalarType, unsigned int Dim>
-    void FireModel<ScalarType, Dim>::paramStep(MDType& rpmd) {
+    template<Scalar T, unsigned int Dim>
+    void FireModel<T, Dim>::paramStep(MDType& rpmd) {
         const auto force = rpmd.getForce().col(0);
         auto phase = rpmd.getPhaseMatrix().col(0);
         auto momentum = phase.head(rpmd.getDOF());
-        const ScalarType power = force.asVector() * momentum; //Assuming unit mass
+        const T power = force * momentum; //Assuming unit mass
         if (power.isPositive()) {
             if (numStep > numLasyStep) {
                 timeStep = std::min(stepIncFactor * timeStep, maxTimeStep);
@@ -109,25 +109,25 @@ namespace Physica::Core {
         }
         else {
             timeStep *= stepDecFactor;
-            momentum = ScalarType(0);
+            momentum = T(0);
             mixAlpha = mixAlpha0;
             numStep = 0;
         }
     }
 
-    template<class ScalarType, unsigned int Dim>
-    void FireModel<ScalarType, Dim>::mixingStep(MDType& rpmd) {
+    template<Scalar T, unsigned int Dim>
+    void FireModel<T, Dim>::mixingStep(MDType& rpmd) {
         const auto force = rpmd.getForce().col(0);
         auto phase = rpmd.getPhaseMatrix().col(0);
         auto momentum = phase.head(rpmd.getDOF());
 
-        const ScalarType normP = momentum.norm();
+        const T normP = momentum.norm();
         normF = force.norm();
-        momentum = (ScalarType(1) - mixAlpha) * momentum + (mixAlpha * normP / normF) * force.asVector();
+        momentum = (T(1) - mixAlpha) * momentum + (mixAlpha * normP / normF) * force;
     }
 
-    template<class ScalarType, unsigned int Dim>
-    void FireModel<ScalarType, Dim>::swap(FireModel& __restrict obj) noexcept {
+    template<Scalar T, unsigned int Dim>
+    void FireModel<T, Dim>::swap(FireModel& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         timeStep.swap(obj.timeStep);
         maxTimeStep.swap(obj.maxTimeStep);

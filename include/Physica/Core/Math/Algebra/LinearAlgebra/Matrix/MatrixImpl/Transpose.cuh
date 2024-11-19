@@ -22,17 +22,17 @@
 #include "RValueMatrix.cuh"
 
 namespace Physica::Core {
-    template<class MatrixType>
-    class device_obj<Transpose<MatrixType>> : public device_obj<RValueMatrix<Transpose<MatrixType>>> {
-        using host_obj = Transpose<MatrixType>;
+    template<Matrix T>
+    class device_obj<Transpose<T>> : public device_obj<RValueMatrix<Transpose<T>>> {
+        using host_obj = Transpose<T>;
         using This = device_obj<host_obj>;
         using Base = device_obj<RValueMatrix<host_obj>>;
 
-        const device_obj<MatrixType>& mat;
+        const device_obj<T>& mat;
     public:
         using typename Base::ScalarType;
     public:
-        __host__ __device__ device_obj(const device_obj<RValueMatrix<MatrixType>>& mat_) : mat(mat_.getDerived()) {}
+        __host__ __device__ device_obj(const device_obj<T>& mat_) : mat(mat_) {}
         /* Getters */
         [[nodiscard]] __device__ ScalarType calc(size_t row, size_t col) const { return mat.calc(col, row); }
         template<Side Owner = GetSide()>
@@ -41,17 +41,17 @@ namespace Physica::Core {
         [[nodiscard]] __host__ __device__ size_t getCol() const noexcept { return mat.template getRow<Owner>(); }
     };
 
-    template<class VectorType>
-    class device_obj<TransposeVector<VectorType>> : public device_obj<RValueMatrix<TransposeVector<VectorType>>> {
-        using host_obj = TransposeVector<VectorType>;
+    template<Vector T>
+    class device_obj<TransposeVector<T>> : public device_obj<RValueMatrix<TransposeVector<T>>> {
+        using host_obj = TransposeVector<T>;
         using This = device_obj<host_obj>;
         using Base = device_obj<RValueMatrix<host_obj>>;
 
-        const device_obj<VectorType>& vec;
+        const device_obj<T>& vec;
     public:
         using typename Base::ScalarType;
     public:
-        __host__ __device__ explicit device_obj(const device_obj<RValueVector<VectorType>>& vec_) : vec(vec_.getDerived()) {}
+        __host__ __device__ explicit device_obj(const device_obj<T>& vec_) : vec(vec_) {}
         /* Getters */
         [[nodiscard]] __device__ ScalarType calc([[maybe_unused]] size_t row, size_t col) const { assert(row == 0); return vec.calc(col); }
         template<Side Owner = GetSide()>
@@ -62,11 +62,9 @@ namespace Physica::Core {
 }
 
 namespace Physica {
-    using namespace Core;
+    template<Core::Matrix T>
+    class Traits<Core::device_obj<Core::Transpose<T>>> : public Traits<Core::Transpose<T>> {};
 
-    template<class MatrixType>
-    class Traits<Core::device_obj<Transpose<MatrixType>>> : public Traits<Transpose<MatrixType>> {};
-
-    template<class VectorType>
-    class Traits<Core::device_obj<TransposeVector<VectorType>>> : public Traits<TransposeVector<VectorType>> {};
+    template<Core::Vector T>
+    class Traits<Core::device_obj<Core::TransposeVector<T>>> : public Traits<Core::TransposeVector<T>> {};
 }

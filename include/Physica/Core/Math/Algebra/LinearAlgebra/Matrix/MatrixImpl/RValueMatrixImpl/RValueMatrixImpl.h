@@ -23,14 +23,14 @@
 
 namespace Physica::Core {
     template<class Derived>
-    template<Matrix M>
-    void RValueMatrix<Derived>::assignTo(LValueMatrix<M>& target) const {
-        using OtherScalar = typename M::ScalarType;
-        constexpr size_t OtherRow = M::RowAtCompile;
-        constexpr size_t OtherColumn = M::ColAtCompile;
+    template<Matrix T>
+    void RValueMatrix<Derived>::assignTo(LValueMatrix<T>& target) const {
+        using OtherScalar = typename T::ScalarType;
+        constexpr size_t OtherRow = T::RowAtCompile;
+        constexpr size_t OtherColumn = T::ColAtCompile;
         static_assert(RowAtCompile == OtherRow || RowAtCompile == Dynamic || OtherRow == Dynamic, "[Error]: Row mismatch between two matrix");
         static_assert(ColAtCompile == OtherColumn || ColAtCompile == Dynamic || OtherColumn == Dynamic, "[Error]: Col mismatch between two matrix");
-        static_assert(!(isComplex && !M::isComplex), "[Error]: Cannot assign a complex matrix to real matrix");
+        static_assert(!(isComplex && !T::isComplex), "[Error]: Cannot assign a complex matrix to real matrix");
         assert(getRow() == target.getRow());
         assert(getCol() == target.getCol());
         const size_t maxMajor = target.getMaxMajor();
@@ -39,8 +39,7 @@ namespace Physica::Core {
             for (size_t j = 0; j < maxMinor; ++j)
                 target.refFromMajorMinor(i, j) = OtherScalar(calc(target.rowFromMajorMinor(i, j), target.colFromMajorMinor(i, j)));
 
-        constexpr bool isContinuous = std::is_base_of<ContinuousMatrix<M>, M>::value;
-        if constexpr (isContinuous && isReverseDiff)
+        if constexpr (is_continuous<T>::value && isReverseDiff)
             target.getDerived().makeContinuous();
     }
 
@@ -220,14 +219,14 @@ namespace Physica::Core {
     }
 
     template<class Derived>
-    inline FormatedMatrix<Derived> RValueMatrix<Derived>::format() const {
-        return FormatedMatrix<Derived>(*this);
+    inline auto RValueMatrix<Derived>::format() const noexcept {
+        return FormatedMatrix<Derived>(Base::getDerived());
     }
 
     template<class Derived>
     typename RValueMatrix<Derived>::ScalarType RValueMatrix<Derived>::max() const {
         ScalarType result;
-        if constexpr (isColMatrix) {
+        if constexpr (MatrixOption::isColMatrix<This>()) {
             result = col(0).max();
             for (size_t i = 1; i < getCol(); ++i) {
                 ScalarType temp = col(i).max();
@@ -249,7 +248,7 @@ namespace Physica::Core {
     template<class Derived>
     typename RValueMatrix<Derived>::ScalarType RValueMatrix<Derived>::min() const {
         ScalarType result;
-        if constexpr (isColMatrix) {
+        if constexpr (MatrixOption::isColMatrix<This>()) {
             result = col(0).min();
             for (size_t i = 1; i < getCol(); ++i) {
                 ScalarType temp = col(i).min();
@@ -278,22 +277,22 @@ namespace Physica::Core {
     }
 
     template<class Derived>
-    inline Transpose<Derived> RValueMatrix<Derived>::transpose() const noexcept {
+    inline auto RValueMatrix<Derived>::transpose() const noexcept {
         return Transpose<Derived>(Base::getDerived());
     }
 
     template<class Derived>
-    inline Conjugate<Derived> RValueMatrix<Derived>::conjugate() const noexcept {
+    inline auto RValueMatrix<Derived>::conjugate() const noexcept {
         return Conjugate<Derived>(Base::getDerived());
     }
 
     template<class Derived>
-    inline Hermite<Derived> RValueMatrix<Derived>::hermite() const noexcept {
+    inline auto RValueMatrix<Derived>::hermite() const noexcept {
         return Hermite<Derived>(Base::getDerived());
     }
 
     template<class Derived>
-    RValueFlatten<Derived> RValueMatrix<Derived>::flatten() const noexcept {
+    inline auto RValueMatrix<Derived>::flatten() const noexcept {
         return RValueFlatten<Derived>(Base::getDerived());
     }
 
@@ -318,8 +317,8 @@ namespace Physica::Core {
         return true;
     }
 
-    template<class MatrixType, class MatrixType2>
-    bool matrixNear(const RValueMatrix<MatrixType>& m1, const RValueMatrix<MatrixType2>& m2, double precision) {
+    template<Matrix T1, Matrix T2>
+    bool matrixNear(const T1& m1, const T2& m2, double precision) {
         assert(m1.getRow() == m2.getRow());
         assert(m1.getCol() == m2.getCol());
         for (size_t i = 0; i < m1.getCol(); ++i)
@@ -329,8 +328,8 @@ namespace Physica::Core {
         return true;
     }
 
-    template<class Derived>
-    bool operator==(const RValueMatrix<Derived>& m1, const RValueMatrix<Derived>& m2) {
+    template<Matrix T>
+    bool operator==(const T& m1, const T& m2) {
         if (m1.getRow() != m2.getRow())
             return false;
         if (m1.getCol() != m2.getCol())

@@ -22,9 +22,9 @@
 
 namespace Physica::Core {
     namespace Internal {
-        template<class T1, class T2, bool enableSIMD, class Executor>
+        template<LVector T1, Vector T2, bool enableSIMD, class Executor>
         struct AssignImpl {
-            inline static void run(LValueVector<T1>& v1, const RValueVector<T2>& v2) {
+            inline static void run(T1& v1, const T2& v2) {
                 using ScalarType = typename T1::ScalarType;
                 Executor::parallel_for([&](size_t i) {
                     v1[i] = ScalarType(v2.calc(i));
@@ -32,7 +32,7 @@ namespace Physica::Core {
             }
         };
 
-        template<class T1, class T2, class Executor>
+        template<LVector T1, Vector T2, class Executor>
         class AssignImpl<T1, T2, true, Executor> {
             constexpr static size_t size1 = T1::SizeAtCompile;
             constexpr static size_t size2 = T2::SizeAtCompile;
@@ -44,9 +44,7 @@ namespace Physica::Core {
             constexpr static size_t PacketSize = AnyPacket::size();
             constexpr static bool isReverseDiff = ScalarType::isReverseDiff;
 
-            inline static void run(LValueVector<T1>& v1_, const RValueVector<T2>& v2_) {
-                auto& v1 = v1_.getDerived();
-                const auto& v2 = v2_.getDerived();
+            inline static void run(T1& v1, const T2& v2) {
                 if constexpr (SizeAtCompile != Dynamic) {
                     constexpr size_t to = SizeAtCompile / PacketSize * PacketSize;
                     for (size_t i = 0; i < to; i += PacketSize)
@@ -96,13 +94,13 @@ namespace Physica::Core {
     }
 
     template<class Derived>
-    template<Vector V, class Executor>
-    inline void RValueVector<Derived>::assignTo(LValueVector<V>& v) const {
+    template<LVector V, class Executor>
+    inline void RValueVector<Derived>::assignTo(V& v) const {
         constexpr size_t OtherSize = Traits<V>::SizeAtCompile;
         static_assert(SizeAtCompile == Dynamic || OtherSize == Dynamic || SizeAtCompile == OtherSize,
                 "[Error]: Size mismatch between two vector");
         assert(v.getLength() == getLength() && "[Error]: Size mismatch between two vector");
-        Internal::AssignImpl<V, Derived, Internal::EnableSIMD<V, Derived>::value, Executor>::run(v, *this);
+        Internal::AssignImpl<V, Derived, Internal::EnableSIMD<V, Derived>::value, Executor>::run(v, Base::getDerived());
     }
 
     template<class Derived>
@@ -115,8 +113,9 @@ namespace Physica::Core {
             using ValuePacket = typename AnyPacket::ValuePacket;
             if constexpr (isForwardDiff) {
                 using GradPacket = typename AnyPacket::GradPacket;
-                auto values = toValueVector(*this).template packet<ValuePacket>(index);
-                auto grads = toGradVector(*this).template packet<GradPacket>(index);
+                const auto& x = Base::getDerived();
+                auto values = toValueVector(x).template packet<ValuePacket>(index);
+                auto grads = toGradVector(x).template packet<GradPacket>(index);
                 return AnyPacket(std::move(values), std::move(grads));
             }
             else {
@@ -155,8 +154,9 @@ namespace Physica::Core {
             using ValuePacket = typename AnyPacket::ValuePacket;
             if constexpr (isForwardDiff) {
                 using GradPacket = typename AnyPacket::GradPacket;
-                auto values = toValueVector(*this).template packetPartial<ValuePacket>(index, count);
-                auto grads = toGradVector(*this).template packetPartial<GradPacket>(index, count);
+                const auto& x = Base::getDerived();
+                auto values = toValueVector(x).template packetPartial<ValuePacket>(index, count);
+                auto grads = toGradVector(x).template packetPartial<GradPacket>(index, count);
                 return AnyPacket(std::move(values), std::move(grads));
             }
             else {
@@ -186,8 +186,8 @@ namespace Physica::Core {
     }
 
     template<class Derived>
-    inline FormatedVector<Derived> RValueVector<Derived>::format() const {
-        return FormatedVector<Derived>(*this);
+    inline auto RValueVector<Derived>::format() const {
+        return FormatedVector<Derived>(Base::getDerived());
     }
 
     template<class Derived>
@@ -384,10 +384,9 @@ namespace Physica::Core {
     }
 
     template<class Derived>
-    template<class OtherDerived>
-    typename RValueVector<Derived>::ScalarType
-    RValueVector<Derived>::angleTo(const RValueVector<OtherDerived>& v) const noexcept {
-        return arccos(Base::getDerived() * v.getDerived() / (norm() * v.norm()));
+    template<Vector V>
+    typename RValueVector<Derived>::ScalarType RValueVector<Derived>::angleTo(const V& v) const noexcept {
+        return arccos(Base::getDerived() * v / (norm() * v.norm()));
     }
 
     template<class Derived>
@@ -436,9 +435,9 @@ namespace Physica::Core {
         return ReverseVector<Derived>(Base::getDerived());
     }
 
-    template<class VectorType1, class VectorType2>
-    bool vectorNear(const RValueVector<VectorType1>& v1, const RValueVector<VectorType2>& v2, double precision) {
-        using ScalarType = typename Internal::BinaryScalarOpReturnType<typename VectorType1::ScalarType, typename VectorType2::ScalarType>::Type;
+    template<Vector T1, Vector T2>
+    bool vectorNear(const T1& v1, const T2& v2, double precision) {
+        using ScalarType = typename Internal::BinaryScalarOpReturnType<typename T1::ScalarType, typename T2::ScalarType>::Type;
         assert(v1.getLength() == v2.getLength());
         for (size_t i = 0; i < v1.getLength(); ++i)
             if (!scalarNear(ScalarType(v1.calc(i)), ScalarType(v2.calc(i)), precision))

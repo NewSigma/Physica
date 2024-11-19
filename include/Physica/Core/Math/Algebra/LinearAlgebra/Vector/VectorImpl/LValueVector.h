@@ -46,17 +46,16 @@ namespace Physica::Core {
         inline This& operator=(const This& v);
         inline This& operator=(This&& v);
 
-        template<Scalar T>
-        inline Derived& operator=(const T& x);
-        void operator+=(const ScalarType& s) { (*this) = (*this) + s; }
-        void operator-=(const ScalarType& s) { (*this) = (*this) - s; }
-        void operator*=(const ScalarType& s) { (*this) = (*this) * s; }
-        void operator/=(const ScalarType& s) { (*this) = (*this) / s; }
+        template<Scalar T> inline Derived& operator=(const T& x);
+        template<Scalar T> void operator+=(const T& x) { Base::getDerived() = Base::getDerived() + x; }
+        template<Scalar T> void operator-=(const T& x) { Base::getDerived() = Base::getDerived() - x; }
+        template<Scalar T> void operator*=(const T& x) { Base::getDerived() = Base::getDerived() * x; }
+        template<Scalar T> void operator/=(const T& x) { Base::getDerived() = Base::getDerived() / x; }
 
-        template<class OtherVector, class Executor = SequentialExecutor>
-        inline Derived& operator=(const RValueVector<OtherVector>& v_);
-        template<class OtherVector> void operator+=(const RValueVector<OtherVector>& v) { (*this) = (*this) + v; }
-        template<class OtherVector> void operator-=(const RValueVector<OtherVector>& v) { Base::getDerived() += (-v.getDerived()); }
+        template<Vector T, class Executor = SequentialExecutor>
+        inline Derived& operator=(const T& v_);
+        template<Vector T> void operator+=(const T& v) { Base::getDerived() = Base::getDerived() + v; }
+        template<Vector T> void operator-=(const T& v) { Base::getDerived() += -v; }
         [[nodiscard]] inline RefTy operator[](size_t index);
         [[nodiscard]] inline ConstRefTy operator[](size_t index) const;
         /* Operations */

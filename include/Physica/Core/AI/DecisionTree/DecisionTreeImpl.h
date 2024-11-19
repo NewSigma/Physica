@@ -19,28 +19,28 @@
 #pragma once
 
 namespace Physica::Core {
-    template<class ScalarType, DecisionTreeType Type>
-    DecisionTree<ScalarType, Type>::DecisionTree(const Dataset& dataset) : DecisionTree(train(dataset)) {}
+    template<Scalar T, DecisionTreeType Type>
+    DecisionTree<T, Type>::DecisionTree(const Dataset& dataset) : DecisionTree(train(dataset)) {}
 
-    template<class ScalarType, DecisionTreeType Type>
-    DecisionTree<ScalarType, Type>::DecisionTree(size_t featureId_, ScalarType splitPoint_, Array<DecisionTree> subTrees_, NodeType nodeType_)
+    template<Scalar T, DecisionTreeType Type>
+    DecisionTree<T, Type>::DecisionTree(size_t featureId_, T splitPoint_, Array<DecisionTree> subTrees_, NodeType nodeType_)
             : featureId(featureId_)
             , splitPoint(std::move(splitPoint_))
             , subTrees(std::move(subTrees_))
             , nodeType(nodeType_) {}
 
-    template<class ScalarType, DecisionTreeType Type>
-    DecisionTree<ScalarType, Type>& DecisionTree<ScalarType, Type>::operator=(DecisionTree tree) noexcept {
+    template<Scalar T, DecisionTreeType Type>
+    DecisionTree<T, Type>& DecisionTree<T, Type>::operator=(DecisionTree tree) noexcept {
         swap(tree);
         return *this;
     }
 
-    template<class ScalarType, DecisionTreeType Type>
-    ScalarType DecisionTree<ScalarType, Type>::predict(const VectorType& features) const {
+    template<Scalar T, DecisionTreeType Type>
+    T DecisionTree<T, Type>::predict(const VectorType& features) const {
         if (isLeafNode())
             return splitPoint;
 
-        const ScalarType feature = features[featureId];
+        const T feature = features[featureId];
         size_t index;
         if (isClassifyNode())
             index = (feature == splitPoint) ? 0U : 1U;
@@ -49,8 +49,8 @@ namespace Physica::Core {
         return subTrees[index].predict(features);
     }
 
-    template<class ScalarType, DecisionTreeType Type>
-    void DecisionTree<ScalarType, Type>::swap(DecisionTree& __restrict tree) noexcept {
+    template<Scalar T, DecisionTreeType Type>
+    void DecisionTree<T, Type>::swap(DecisionTree& __restrict tree) noexcept {
         assert(this != &tree && "[Error]: Self swap is likely a bug");
         std::swap(featureId, tree.featureId);
         splitPoint.swap(tree.splitPoint);
@@ -58,8 +58,8 @@ namespace Physica::Core {
         std::swap(nodeType, tree.nodeType);
     }
 
-    template<class ScalarType, DecisionTreeType Type>
-    DecisionTree<ScalarType, Type> DecisionTree<ScalarType, Type>::train(const Dataset& dataset) {
+    template<Scalar T, DecisionTreeType Type>
+    DecisionTree<T, Type> DecisionTree<T, Type>::train(const Dataset& dataset) {
         std::forward_list<size_t> availableSample;
         const size_t numSample = dataset.features.getRow();
         for (size_t i = 0; i < numSample; ++i)
@@ -67,16 +67,16 @@ namespace Physica::Core {
         return train(dataset, std::move(availableSample), makeInitialFeatures(dataset.features.getCol()));
     }
 
-    template<class ScalarType, DecisionTreeType Type>
-    std::forward_list<size_t> DecisionTree<ScalarType, Type>::makeInitialFeatures(size_t numFeature) {
+    template<Scalar T, DecisionTreeType Type>
+    std::forward_list<size_t> DecisionTree<T, Type>::makeInitialFeatures(size_t numFeature) {
         std::forward_list<size_t> availableFeature;
         for (size_t i = 0; i < numFeature; ++i)
             availableFeature.push_front(i);
         return availableFeature;
     }
 
-    template<class ScalarType, DecisionTreeType Type>
-    ScalarType DecisionTree<ScalarType, Type>::checkStopRecursion(
+    template<Scalar T, DecisionTreeType Type>
+    T DecisionTree<T, Type>::checkStopRecursion(
             const Dataset& dataset,
             const std::forward_list<size_t>& availableSample,
             const std::forward_list<size_t>& availableFeature) {
@@ -86,7 +86,7 @@ namespace Physica::Core {
         const auto& labels = dataset.labels;
 
         if constexpr (isClassifyTree) {
-            const ScalarType label = labels[availableSample.front()];
+            const T label = labels[availableSample.front()];
             bool isAllLabelSame = true;
             for (size_t index : availableSample)
                 isAllLabelSame &= label == labels[index];
@@ -97,7 +97,7 @@ namespace Physica::Core {
 
         const bool isFeatureEmpty = availableFeature.empty();
         if (isFeatureEmpty) {
-            ScalarType prediction;
+            T prediction;
             if constexpr (isClassifyTree)
                 prediction = findCommonLabel(labels, availableSample);
             else
@@ -106,7 +106,7 @@ namespace Physica::Core {
         }
 
         for (auto featureId : availableFeature) {
-            const ScalarType feature = features(availableSample.front(), featureId);
+            const T feature = features(availableSample.front(), featureId);
             for (size_t sample : availableSample) {
                 const bool isSeparable = features(sample, featureId) != feature;
                 if (isSeparable)
@@ -120,13 +120,13 @@ namespace Physica::Core {
             return makeAverageLabel(labels, availableSample);
     }
 
-    template<class ScalarType, DecisionTreeType Type>
+    template<Scalar T, DecisionTreeType Type>
     template<class TrainFunctor>
-    DecisionTree<ScalarType, Type> DecisionTree<ScalarType, Type>::doRecursion(const Dataset& dataset,
+    DecisionTree<T, Type> DecisionTree<T, Type>::doRecursion(const Dataset& dataset,
                                                                                const std::forward_list<size_t>& availableSample,
                                                                                const std::forward_list<size_t>& availableFeature,
                                                                                size_t featureId,
-                                                                               ScalarType splitPoint,
+                                                                               T splitPoint,
                                                                                TrainFunctor functor) {
         std::forward_list<size_t> newAvailableFeature{};
         for (auto feature : availableFeature) {
@@ -159,14 +159,14 @@ namespace Physica::Core {
         return DecisionTree(featureId, splitPoint, std::move(subTrees), isContinuous ? Regression : Classify);
     }
 
-    template<class ScalarType, DecisionTreeType Type>
-    DecisionTree<ScalarType, Type> DecisionTree<ScalarType, Type>::train(
+    template<Scalar T, DecisionTreeType Type>
+    DecisionTree<T, Type> DecisionTree<T, Type>::train(
             const Dataset& dataset,
             std::forward_list<size_t> availableSample,
             std::forward_list<size_t> availableFeature) {
         using TrainFunctor = DecisionTree (*)(const Dataset& dataset, std::forward_list<size_t>, std::forward_list<size_t>);
         const size_t numFeature = dataset.features.getCol();
-        const ScalarType criteria = checkStopRecursion(dataset, availableSample, availableFeature);
+        const T criteria = checkStopRecursion(dataset, availableSample, availableFeature);
         const bool shouldStopRecursion = !std::isnan(double(criteria));
         if (shouldStopRecursion)
             return DecisionTree(numFeature, criteria, {}, NodeType::Classify);
@@ -176,17 +176,17 @@ namespace Physica::Core {
     }
 
 
-    template<class ScalarType, DecisionTreeType Type>
-    ScalarType DecisionTree<ScalarType, Type>::findCommonLabel(
+    template<Scalar T, DecisionTreeType Type>
+    T DecisionTree<T, Type>::findCommonLabel(
             const VectorType& labels,
             const std::forward_list<size_t>& availableSample) {
         assert(!availableSample.empty());
-        std::multiset<ScalarType> set{};
+        std::multiset<T> set{};
         for (size_t sample : availableSample)
             set.insert(labels[sample]);
         
         size_t numCount = 0;
-        ScalarType result = 0;
+        T result = 0;
         for (auto ite = set.begin(); ite != set.end(); ++ite) {
             size_t temp = set.count(*ite);
             if (temp > numCount) {
@@ -197,51 +197,51 @@ namespace Physica::Core {
         return result;
     }
 
-    template<class ScalarType, DecisionTreeType Type>
-    ScalarType DecisionTree<ScalarType, Type>::makeAverageLabel(const VectorType& labels, const std::forward_list<size_t>& availableSample) {
-        ScalarType result = 0;
+    template<Scalar T, DecisionTreeType Type>
+    T DecisionTree<T, Type>::makeAverageLabel(const VectorType& labels, const std::forward_list<size_t>& availableSample) {
+        T result = 0;
         size_t count = 0;
         for (auto sample : availableSample) {
             result += labels[sample];
             count += 1;
         }
-        result /= ScalarType(count);
+        result /= T(count);
         return result;
     }
 
-    template<class ScalarType, DecisionTreeType Type>
-    ScalarType DecisionTree<ScalarType, Type>::giniIndex(const Dataset& dataset, const Array<size_t>& availableSample) {
-        std::multiset<ScalarType> set{};
+    template<Scalar T, DecisionTreeType Type>
+    T DecisionTree<T, Type>::giniIndex(const Dataset& dataset, const Array<size_t>& availableSample) {
+        std::multiset<T> set{};
         for (size_t sample : availableSample)
             set.insert(dataset.labels[sample]);
         
-        ScalarType result = 1;
-        const ScalarType numSample = std::distance(availableSample.begin(), availableSample.end());
+        T result = 1;
+        const T numSample = std::distance(availableSample.begin(), availableSample.end());
         for (auto ite = set.begin(); ite != set.end(); ++ite) {
-            const ScalarType temp = set.count(*ite);
+            const T temp = set.count(*ite);
             result -= square(temp / numSample);
         }
         return result;
     }
 
-    template<class ScalarType, DecisionTreeType Type>
-    ScalarType DecisionTree<ScalarType, Type>::mse(const Dataset& dataset, const Array<size_t>& availableSample) {
-        ScalarType sum = 0;
-        ScalarType sumSquare = 0;
+    template<Scalar T, DecisionTreeType Type>
+    T DecisionTree<T, Type>::mse(const Dataset& dataset, const Array<size_t>& availableSample) {
+        T sum = 0;
+        T sumSquare = 0;
         size_t count = 0;
         for (auto sample : availableSample) {
-            const ScalarType label = dataset.labels[sample];
+            const T label = dataset.labels[sample];
             sum += label;
             sumSquare += square(label);
             count += 1;
         }
-        const ScalarType factor = reciprocal(ScalarType(count));
+        const T factor = reciprocal(T(count));
         return sumSquare * factor - square(sum * factor);
     }
 
-    template<class ScalarType, DecisionTreeType Type>
-    std::pair<size_t, ScalarType>
-    DecisionTree<ScalarType, Type>::selectOptimalFeature(
+    template<Scalar T, DecisionTreeType Type>
+    std::pair<size_t, T>
+    DecisionTree<T, Type>::selectOptimalFeature(
             const Dataset& dataset,
             const std::forward_list<size_t>& availableSample,
             const std::forward_list<size_t>& availableFeature,
@@ -250,15 +250,15 @@ namespace Physica::Core {
 
         const size_t numAvailableSample = std::distance(availableSample.begin(), availableSample.end());
         size_t optimalFeatureId = dataset.features.getCol();
-        ScalarType optimalSplitPoint = 0;
-        ScalarType minLoss = std::numeric_limits<ScalarType>::max();
+        T optimalSplitPoint = 0;
+        T minLoss = std::numeric_limits<T>::max();
         Array<size_t> list1{}, list2{};
         list1.reserve(numAvailableSample);
         list2.reserve(numAvailableSample);
         for (auto featureId : availableFeature) {
             VectorType featureVector{};
             {
-                std::set<ScalarType> featureSet{};
+                std::set<T> featureSet{};
                 for (auto sample : availableSample)
                     featureSet.insert(dataset.features(sample, featureId));
 
@@ -270,11 +270,11 @@ namespace Physica::Core {
                 }
             }
 
-            ScalarType splitPoint = 0;
-            ScalarType loss = std::numeric_limits<ScalarType>::max();
+            T splitPoint = 0;
+            T loss = std::numeric_limits<T>::max();
             if (dataset.isFeatureContinuous[featureId]) {
                 for (size_t i = 0; i < featureVector.getLength() - 1; ++i) {
-                    const ScalarType midpoint = (featureVector[i] + featureVector[i + 1]) * 0.5;
+                    const T midpoint = (featureVector[i] + featureVector[i + 1]) * 0.5;
                     size_t weight1 = 0;
                     for (auto sample : availableSample) {
                         if (dataset.features(sample, featureId) < midpoint) {
@@ -286,7 +286,7 @@ namespace Physica::Core {
                     }
 
                     const size_t weight2 = featureVector.getLength() - weight1;
-                    const ScalarType temp = functor(dataset, list1) * ScalarType(weight1) + functor(dataset, list2) * ScalarType(weight2);
+                    const T temp = functor(dataset, list1) * T(weight1) + functor(dataset, list2) * T(weight2);
                     if (temp < loss) {
                         loss = temp;
                         splitPoint = midpoint;
@@ -308,7 +308,7 @@ namespace Physica::Core {
                     }
 
                     const size_t weight2 = featureVector.getLength() - weight1;
-                    const ScalarType temp = functor(dataset, list1) * ScalarType(weight1) + functor(dataset, list2) * ScalarType(weight2);
+                    const T temp = functor(dataset, list1) * T(weight1) + functor(dataset, list2) * T(weight2);
                     if (temp < loss) {
                         loss = temp;
                         splitPoint = featureVector[i];

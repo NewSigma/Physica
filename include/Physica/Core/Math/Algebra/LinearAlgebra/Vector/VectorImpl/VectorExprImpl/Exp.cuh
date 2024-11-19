@@ -19,10 +19,10 @@
 #pragma once
 
 namespace Physica::Core {
-    template<class VectorType>
-    class device_obj<VectorExpr<ExprType::Exp, VectorType>>
-            : public device_obj<UnitaryVectorExpr<ExprType::Exp, VectorType>> {
-        using Base = device_obj<UnitaryVectorExpr<ExprType::Exp, VectorType>>;
+    template<Vector T>
+    class device_obj<VectorExpr<ExprType::Exp, T>>
+            : public device_obj<UnitaryVectorExpr<ExprType::Exp, T>> {
+        using Base = device_obj<UnitaryVectorExpr<ExprType::Exp, T>>;
     public:
         using typename Base::ScalarType;
     public:
@@ -34,8 +34,8 @@ namespace Physica::Core {
         }
     };
 
-    template<class VectorType>
-    [[nodiscard]] __host__ __device__ inline auto exp(const device_obj<RValueVector<VectorType>>& v) noexcept {
-        return device_obj<VectorExpr<ExprType::Exp, VectorType>>(v);
+    template<Vector T>
+    [[nodiscard]] __host__ __device__ inline auto exp(const device_obj<T>& v) noexcept {
+        return device_obj<VectorExpr<ExprType::Exp, T>>(v);
     }
 }

@@ -19,52 +19,50 @@
 #pragma once
 
 namespace Physica::Core {
-    template<class MatrixType>
-    class Conjugate : public RValueMatrix<Conjugate<MatrixType>> {
+    template<Matrix T>
+    class Conjugate<T> : public RValueMatrix<Conjugate<T>> {
     public:
-        using Base = RValueMatrix<Conjugate<MatrixType>>;
+        using Base = RValueMatrix<Conjugate<T>>;
         using typename Base::ScalarType;
     private:
-        const MatrixType& matrix;
+        const T& matrix;
     public:
-        Conjugate(const RValueMatrix<MatrixType>& matrix_) : matrix(matrix_.getDerived()) {}
+        Conjugate(const T& matrix_) : matrix(matrix_) {}
         /* Getters */
         [[nodiscard]] ScalarType calc(size_t row, size_t col) const { return matrix.calc(row, col).conjugate(); }
         [[nodiscard]] __host__ __device__ size_t getRow() const noexcept { return matrix.getRow(); }
         [[nodiscard]] __host__ __device__ size_t getCol() const noexcept { return matrix.getCol(); }
     };
 
-    template<class VectorType>
-    class ConjugateVector : public RValueVector<ConjugateVector<VectorType>> {
+    template<Vector T>
+    class ConjugateVector<T> : public RValueVector<ConjugateVector<T>> {
     public:
-        using Base = RValueVector<ConjugateVector<VectorType>>;
+        using Base = RValueVector<ConjugateVector<T>>;
         using typename Base::ScalarType;
     private:
-        const VectorType& vec;
+        const T& vec;
     public:
-        explicit ConjugateVector(const RValueVector<VectorType>& vec_) : vec(vec_.getDerived()) {}
+        explicit ConjugateVector(const T& vec_) : vec(vec_) {}
         /* Operations */
-        template<class OtherVector, class Executor = SequentialExecutor>
-        void assignTo(LValueVector<OtherVector>& target) const;
+        template<LVector V, class Executor = SequentialExecutor>
+        void assignTo(V& target) const;
         /* Getters */
         [[nodiscard]] ScalarType calc(size_t index) const { return vec.calc(index).conjugate(); }
         [[nodiscard]] __host__ __device__ size_t getLength() const noexcept { return vec.getLength(); }
     };
 
-    template<class VectorType>
-    template<class OtherVector, class Executor>
-    void ConjugateVector<VectorType>::assignTo(LValueVector<OtherVector>& target) const {
+    template<Vector T>
+    template<LVector V, class Executor>
+    void ConjugateVector<T>::assignTo(V& target) const {
         for (size_t i = 0; i < vec.getLength(); ++i)
             target[i] = calc(i);
     }
 }
 
 namespace Physica {
-    using namespace Core;
+    template<Matrix T>
+    class Traits<Conjugate<T>> : public Traits<T> {};
 
-    template<class MatrixType>
-    class Traits<Conjugate<MatrixType>> : public Traits<MatrixType> {};
-
-    template<class VectorType>
-    class Traits<ConjugateVector<VectorType>> : public Traits<VectorType> {};
+    template<Vector T>
+    class Traits<ConjugateVector<T>> : public Traits<T> {};
 }

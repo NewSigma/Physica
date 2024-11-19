@@ -18,36 +18,36 @@
  */
 #pragma once
 
-#include "Physica/Core/Physics/SolidState/CrystalCell.h"
+#include <Physica/Core/Physics/SolidState/CrystalCell.h>
 #include "DensityGrid.h"
 
 namespace Physica::Core {
-    template<class ScalarType, bool IsSpinPolarized>
+    template<Scalar T, bool IsSpinPolarized>
     class KSHamilton {
         static_assert(!IsSpinPolarized, "[Error]: Not implemented");
     public:
-        using ComplexType = Complex<ScalarType>;
+        using ComplexType = Complex<T>;
         using GridType = RSpaceGrid<ComplexType>;
         using StrucFactorArray = Array<GridType>;
-        using LatticeMatrix = typename PeriodicCell<ScalarType, 3>::LatticeMatrix;
-        using BasisType = PlainWaveBasis<ScalarType>;
+        using LatticeMatrix = typename PeriodicCell<T, 3>::LatticeMatrix;
+        using BasisType = PlainWaveBasis<T>;
         using HermiteMatrix = DenseHermiteMatrix<ComplexType>;
-        using Vector3D = Vector3D<ScalarType>;
+        using Vector3D = Vector3D<T>;
         using Index3D = typename GridBase::Index3D;
-        using FFT3D = FFT<ScalarType, 3>;
+        using FFT3D = FFT<T, 3>;
     private:
         HermiteMatrix hamiltonH;
-        CrystalCell<ScalarType> cell;
+        CrystalCell<T> cell;
         LatticeMatrix repLatt;
-        ScalarType cutEnergyPsi;
-        ScalarType cutEnergyRho;
+        T cutEnergyPsi;
+        T cutEnergyRho;
         Index3D basisDim;
 
         GridType kSpaceIonCoulomb;
         FFT3D fft_rho;
         FFT3D fft_xc;
     public:
-        KSHamilton(CrystalCell<ScalarType> cell_, ScalarType cutEnergyPsi_, ScalarType cutEnergyRho_);
+        KSHamilton(CrystalCell<T> cell_, T cutEnergyPsi_, T cutEnergyRho_);
         KSHamilton(const KSHamilton&) = default;
         KSHamilton(KSHamilton&&) noexcept = default;
         ~KSHamilton() = default;
@@ -57,19 +57,19 @@ namespace Physica::Core {
         /* Operations */
         void makeFreeHamilton(Vector3D kPoint);
         void makeNearFreeHamilton(Vector3D kPoint);
-        void makeHamiltonWithoutXC(const DensityGrid<ScalarType, IsSpinPolarized>& densityRho, Vector3D kPoint);
+        void makeHamiltonWithoutXC(const DensityGrid<T, IsSpinPolarized>& densityRho, Vector3D kPoint);
         void makeHamiltonWithXC(
-            const RSpaceGrid<ScalarType>& xcPot,
-            const DensityGrid<ScalarType, IsSpinPolarized>& densityRho,
+            const RSpaceGrid<T>& xcPot,
+            const DensityGrid<T, IsSpinPolarized>& densityRho,
             Vector3D kPoint);
 
         void swap(KSHamilton& __restrict obj);
         /* Getters */
-        [[nodiscard]] const CrystalCell<ScalarType>& getCrystalCell() const noexcept { return cell; }
+        [[nodiscard]] const CrystalCell<T>& getCrystalCell() const noexcept { return cell; }
         [[nodiscard]] const LatticeMatrix& getLattice() const noexcept { return cell.getLattice(); }
         [[nodiscard]] const LatticeMatrix& getRepLattice() const noexcept { return repLatt; }
-        [[nodiscard]] ScalarType getCutEnergyPsi() const noexcept { return cutEnergyPsi; }
-        [[nodiscard]] ScalarType getCutEnergyRho() const noexcept { return cutEnergyRho; }
+        [[nodiscard]] T getCutEnergyPsi() const noexcept { return cutEnergyPsi; }
+        [[nodiscard]] T getCutEnergyRho() const noexcept { return cutEnergyRho; }
         [[nodiscard]] size_t getNumBasis() const noexcept { return basisDim[0] * basisDim[1] * basisDim[2]; }
         [[nodiscard]] Index3D getFFTRSpaceSize() const noexcept { return fft_rho.getRSpaceSize(); }
     private:
@@ -78,8 +78,8 @@ namespace Physica::Core {
         void makeKSpaceIonCoulomb();
     };
 
-    template<class ScalarType, bool IsSpinPolarized>
-    KSHamilton<ScalarType, IsSpinPolarized>::KSHamilton(CrystalCell<ScalarType> cell_, ScalarType cutEnergyPsi_, ScalarType cutEnergyRho_)
+    template<Scalar T, bool IsSpinPolarized>
+    KSHamilton<T, IsSpinPolarized>::KSHamilton(CrystalCell<T> cell_, T cutEnergyPsi_, T cutEnergyRho_)
             : cell(std::move(cell_))
             , cutEnergyPsi(cutEnergyPsi_)
             , cutEnergyRho(cutEnergyRho_) {
@@ -92,8 +92,8 @@ namespace Physica::Core {
         makeKSpaceIonCoulomb();
     }
 
-    template<class ScalarType, bool IsSpinPolarized>
-    void KSHamilton<ScalarType, IsSpinPolarized>::swap(KSHamilton& __restrict obj) {
+    template<Scalar T, bool IsSpinPolarized>
+    void KSHamilton<T, IsSpinPolarized>::swap(KSHamilton& __restrict obj) {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         hamiltonH.swap(obj.hamiltonH);
         cell.swap(obj.cell);
@@ -105,20 +105,20 @@ namespace Physica::Core {
         fft_xc.swap(obj.fft_xc);
     }
 
-    template<class ScalarType, bool IsSpinPolarized>
-    void KSHamilton<ScalarType, IsSpinPolarized>::makeFreeHamilton(Vector3D kPoint) {
-        hamiltonH = ScalarType(0);
+    template<Scalar T, bool IsSpinPolarized>
+    void KSHamilton<T, IsSpinPolarized>::makeFreeHamilton(Vector3D kPoint) {
+        hamiltonH = T(0);
         size_t i = 0;
         BasisType::forKInBasis(repLatt, basisDim, [this, kPoint, &i](Vector3D waveK) {
             constexpr double factor = PhyConst<AU>::reducedPlanck * PhyConst<AU>::reducedPlanck / PhyConst<AU>::electronMass * 0.5;
-            const ScalarType kineticE = (kPoint + waveK).squaredNorm() * factor;
+            const T kineticE = (kPoint + waveK).squaredNorm() * factor;
             hamiltonH(i, i) = kineticE;
             i += 1;
         });
     }
 
-    template<class ScalarType, bool IsSpinPolarized>
-    void KSHamilton<ScalarType, IsSpinPolarized>::makeNearFreeHamilton(Vector3D kPoint) {
+    template<Scalar T, bool IsSpinPolarized>
+    void KSHamilton<T, IsSpinPolarized>::makeNearFreeHamilton(Vector3D kPoint) {
         makeFreeHamilton(kPoint);
 
         GridBase::forIndexInGrid(basisDim, [this](Index3D index1) {
@@ -131,16 +131,16 @@ namespace Physica::Core {
         });
     }
 
-    template<class ScalarType, bool IsSpinPolarized>
-    void KSHamilton<ScalarType, IsSpinPolarized>::makeHamiltonWithoutXC(
-            const DensityGrid<ScalarType, IsSpinPolarized>& densityRho,
+    template<Scalar T, bool IsSpinPolarized>
+    void KSHamilton<T, IsSpinPolarized>::makeHamiltonWithoutXC(
+            const DensityGrid<T, IsSpinPolarized>& densityRho,
             Vector3D kPoint) {
         makeNearFreeHamilton(kPoint);
 
         fft_rho.getRSpace().flatten() = densityRho.getTotalDensity().flatten();
         fft_rho.transform();
         auto& kSpaceDensity = fft_rho.getKSpace();
-        const ScalarType repVolume = reciprocal(cell.getVolume());
+        const T repVolume = reciprocal(cell.getVolume());
         GridBase::forIndexInGrid(basisDim, [this, repVolume, &kSpaceDensity](Index3D index1) {
             const size_t r = PeriodIndex3D(basisDim, index1).toIndex1D();
             GridBase::forIndexInGrid(basisDim, [this, repVolume, r, index1, &kSpaceDensity](Index3D index2) {
@@ -148,22 +148,22 @@ namespace Physica::Core {
                 const size_t c = PeriodIndex3D(basisDim, index2).toIndex1D();
                 const Index3D delta = calcDeltaIndex(index1, index2, kSpaceDensity.getDim());
                 const Vector3D waveG = BasisType::makeWaveVector(repLatt, delta, basisDim);
-                hamiltonH(r, c) += ScalarType(factor) * repVolume * kSpaceDensity(delta) / waveG.squaredNorm();
+                hamiltonH(r, c) += T(factor) * repVolume * kSpaceDensity(delta) / waveG.squaredNorm();
             });
         });
     }
 
-    template<class ScalarType, bool IsSpinPolarized>
-    void KSHamilton<ScalarType, IsSpinPolarized>::makeHamiltonWithXC(
-            const RSpaceGrid<ScalarType>& xcPot,
-            const DensityGrid<ScalarType, IsSpinPolarized>& densityRho,
+    template<Scalar T, bool IsSpinPolarized>
+    void KSHamilton<T, IsSpinPolarized>::makeHamiltonWithXC(
+            const RSpaceGrid<T>& xcPot,
+            const DensityGrid<T, IsSpinPolarized>& densityRho,
             Vector3D kPoint) {
         makeHamiltonWithoutXC(densityRho, kPoint);
 
         fft_xc.getRSpace().flatten() = xcPot.flatten();
         fft_xc.transform();
         auto& kSpaceXC = fft_xc.getKSpace();
-        const ScalarType repVolume = reciprocal(cell.getVolume());
+        const T repVolume = reciprocal(cell.getVolume());
         GridBase::forIndexInGrid(basisDim, [this, repVolume, &kSpaceXC](Index3D index1) {
             const size_t r = PeriodIndex3D(basisDim, index1).toIndex1D();
             GridBase::forIndexInGrid(basisDim, [this, repVolume, r, index1, &kSpaceXC](Index3D index2) {
@@ -174,9 +174,9 @@ namespace Physica::Core {
         });
     }
 
-    template<class ScalarType, bool IsSpinPolarized>
-    typename KSHamilton<ScalarType, IsSpinPolarized>::Index3D
-    KSHamilton<ScalarType, IsSpinPolarized>::calcDeltaIndex(Index3D index1, Index3D index2, Index3D deltaDim) const {
+    template<Scalar T, bool IsSpinPolarized>
+    typename KSHamilton<T, IsSpinPolarized>::Index3D
+    KSHamilton<T, IsSpinPolarized>::calcDeltaIndex(Index3D index1, Index3D index2, Index3D deltaDim) const {
         for (int i = 0; i < 3; ++i) {
             assert(index1[i] < basisDim[i]);
             assert(index2[i] < basisDim[i]);
@@ -194,9 +194,9 @@ namespace Physica::Core {
         return delta;
     }
 
-    template<class ScalarType, bool IsSpinPolarized>
-    typename KSHamilton<ScalarType, IsSpinPolarized>::StrucFactorArray
-    KSHamilton<ScalarType, IsSpinPolarized>::makeStructureFactor() const {
+    template<Scalar T, bool IsSpinPolarized>
+    typename KSHamilton<T, IsSpinPolarized>::StrucFactorArray
+    KSHamilton<T, IsSpinPolarized>::makeStructureFactor() const {
         const auto species = cell.getSpecies();
         auto result = Array<GridType>(species.size(), kSpaceIonCoulomb.getDim());
         size_t i = 0;
@@ -208,7 +208,7 @@ namespace Physica::Core {
                 auto factor = ComplexType(0);
                 for (size_t ion = 0; ion < cell.getNumParticle(); ++ion) {
                     if (cell.getAtomicNumber(ion) == element) { //Optimize: We can use searching table method
-                        const ScalarType phase = waveK * cell.getPos().row(ion).asVector();
+                        const T phase = waveK * cell.getPos().row(ion);
                         factor += ComplexType::fromPhase(phase);
                     }
                 }
@@ -219,8 +219,8 @@ namespace Physica::Core {
         return result;
     }
 
-    template<class ScalarType, bool IsSpinPolarized>
-    void KSHamilton<ScalarType, IsSpinPolarized>::makeKSpaceIonCoulomb() {
+    template<Scalar T, bool IsSpinPolarized>
+    void KSHamilton<T, IsSpinPolarized>::makeKSpaceIonCoulomb() {
         {
             Index3D dim{};
             for (int i = 0; i < 3; ++i)
@@ -229,20 +229,20 @@ namespace Physica::Core {
         }
         const std::unordered_set<uint16_t> species = cell.getSpecies();
         const auto strucFactorGrids = makeStructureFactor();
-        const ScalarType factor1 = ScalarType(-4 * M_PI * PhyConst<AU>::unitCharge * PhyConst<AU>::unitCharge) / cell.getVolume();
+        const T factor1 = T(-4 * M_PI * PhyConst<AU>::unitCharge * PhyConst<AU>::unitCharge) / cell.getVolume();
         size_t i = 0;
         for (uint16_t element : species) {
-            const ScalarType chargeZ = ScalarType(element);
-            const ScalarType factor2 = factor1 * chargeZ;
+            const T chargeZ = T(element);
+            const T factor2 = factor1 * chargeZ;
             const auto& grid = strucFactorGrids[i];
             BasisType::forKIndexInBasis(repLatt, kSpaceIonCoulomb.getDim(), [this, factor2, &grid](Vector3D waveK, Index3D index) {
-                const ScalarType squaredNorm = waveK.squaredNorm();
-                const bool isNotGammaPoint = ScalarType(std::numeric_limits<ScalarType>::min()) < squaredNorm;
+                const T squaredNorm = waveK.squaredNorm();
+                const bool isNotGammaPoint = T(std::numeric_limits<T>::min()) < squaredNorm;
                 if (isNotGammaPoint) [[likely]]
                     kSpaceIonCoulomb(index) += factor2 * grid(index) / squaredNorm;
             });
             i += 1;
         }
-        kSpaceIonCoulomb(0, 0, 0) = ScalarType(0);
+        kSpaceIonCoulomb(0, 0, 0) = T(0);
     }
 }

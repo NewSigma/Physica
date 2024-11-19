@@ -21,9 +21,9 @@
 #include "EmptyForceModel.h"
 
 namespace Physica::Core {
-    template<class ScalarType, unsigned int Dim>
-    class Hamonic : private EmptyForceModel<ScalarType, Dim> {
-        using Base = EmptyForceModel<ScalarType, Dim>;
+    template<Scalar T, unsigned int Dim>
+    class Hamonic : private EmptyForceModel<T, Dim> {
+        using Base = EmptyForceModel<T, Dim>;
     public:
         using typename Base::MDCellType;
         using typename Base::LatticeMatrix;
@@ -31,107 +31,107 @@ namespace Physica::Core {
         using PositionMatrix = typename MDCellType::PositionMatrix;
     private:
         PositionMatrix sites;
-        VectorND<ScalarType> springCoeffs;
+        VectorND<T> springCoeffs;
     public:
-        Hamonic(PositionMatrix sites_, VectorND<ScalarType> springCoeffs_);
+        Hamonic(PositionMatrix sites_, VectorND<T> springCoeffs_);
         Hamonic(const Hamonic&) = default;
         Hamonic(Hamonic&&) noexcept = default;
         ~Hamonic() = default;
         /* Operators */
         Hamonic& operator=(Hamonic obj) noexcept { swap(obj); return *this; }
         /* Operations */
-        [[nodiscard]] ScalarType potentialV(const MDCellType& cell) const;
+        [[nodiscard]] T potentialV(const MDCellType& cell) const;
 
         template<class Executor>
-        [[nodiscard]] VectorND<ScalarType> force(const MDCellType& cell) const;
-        template<class VectorType, class Executor>
-        void forceAsync(const MDCellType& cell, ContinuousVector<VectorType>& result) const;
+        [[nodiscard]] VectorND<T> force(const MDCellType& cell) const;
+        template<Vector V, class Executor>
+        void forceAsync(const MDCellType& cell, ContinuousVector<V>& result) const;
         template<class Executor>
-        [[nodiscard]] VectorND<ScalarType> force_short(const MDCellType& cell) const { return force<Executor>(cell); }
+        [[nodiscard]] VectorND<T> force_short(const MDCellType& cell) const { return force<Executor>(cell); }
         using Base::force_long;
 
-        [[nodiscard]] ScalarType forceConst([[maybe_unused]] const MDCellType& cell, size_t dof1, size_t dof2) const;
+        [[nodiscard]] T forceConst([[maybe_unused]] const MDCellType& cell, size_t dof1, size_t dof2) const;
         [[nodiscard]] ForceConstMatrix forceConst(const MDCellType& cell) const;
 
         [[nodiscard]] LatticeMatrix virial(const MDCellType& cell) const;
         void swap(Hamonic& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] size_t getNumParticle() const noexcept { return sites.getRow(); }
-        [[nodiscard]] const VectorND<ScalarType>& getSpringCoeffs() const noexcept { return springCoeffs; }
+        [[nodiscard]] const VectorND<T>& getSpringCoeffs() const noexcept { return springCoeffs; }
     };
 
-    template<class ScalarType, unsigned int Dim>
-    Hamonic<ScalarType, Dim>::Hamonic(PositionMatrix sites_, VectorND<ScalarType> springCoeffs_)
+    template<Scalar T, unsigned int Dim>
+    Hamonic<T, Dim>::Hamonic(PositionMatrix sites_, VectorND<T> springCoeffs_)
             : sites(std::move(sites_))
             , springCoeffs(std::move(springCoeffs_)) {
         assert(springCoeffs.getLength() == getNumParticle() && "[Error]: Number of particles is not consistent");
     }
 
-    template<class ScalarType, unsigned int Dim>
-    ScalarType Hamonic<ScalarType, Dim>::potentialV(const MDCellType& cell) const {
+    template<Scalar T, unsigned int Dim>
+    T Hamonic<T, Dim>::potentialV(const MDCellType& cell) const {
         assert(cell.getNumParticle() == getNumParticle() && "[Error]: Number of particles is not consistent");
-        ScalarType result = 0;
+        T result = 0;
         for (size_t i = 0; i < getNumParticle(); ++i)
             result += springCoeffs[i] * cell.minDistVector(sites.row(i), i).squaredNorm();
-        return result * ScalarType(0.5);
+        return result * T(0.5);
     }
 
-    template<class ScalarType, unsigned int Dim>
+    template<Scalar T, unsigned int Dim>
     template<class Executor>
-    VectorND<ScalarType> Hamonic<ScalarType, Dim>::force(const MDCellType& cell) const {
-        VectorND<ScalarType> result(cell.getDOF());
-        forceAsync<VectorND<ScalarType>, Executor>(cell, result);
+    VectorND<T> Hamonic<T, Dim>::force(const MDCellType& cell) const {
+        VectorND<T> result(cell.getDOF());
+        forceAsync<VectorND<T>, Executor>(cell, result);
         return result;
     }
 
-    template<class ScalarType, unsigned int Dim>
-    template<class VectorType, class Executor>
-    void Hamonic<ScalarType, Dim>::forceAsync(const MDCellType& cell, ContinuousVector<VectorType>& result) const {
+    template<Scalar T, unsigned int Dim>
+    template<Vector V, class Executor>
+    void Hamonic<T, Dim>::forceAsync(const MDCellType& cell, ContinuousVector<V>& result) const {
         assert(cell.getNumParticle() == getNumParticle() && "[Error]: Number of particles is not consistent");
-        result = ScalarType(0);
+        result = T(0);
         for (size_t i = 0; i < getNumParticle(); ++i) {
             auto force_i = result.template segment<Dim>(i * Dim, (i + 1) * Dim);
             force_i = -springCoeffs[i] * cell.minDistVector(sites.row(i), i);
         }
     }
 
-    template<class ScalarType, unsigned int Dim>
-    ScalarType Hamonic<ScalarType, Dim>::forceConst([[maybe_unused]] const MDCellType& cell, size_t dof1, size_t dof2) const {
+    template<Scalar T, unsigned int Dim>
+    T Hamonic<T, Dim>::forceConst([[maybe_unused]] const MDCellType& cell, size_t dof1, size_t dof2) const {
         assert(cell.getNumParticle() == getNumParticle() && "[Error]: Number of particles is not consistent");
         assert(dof1 < cell.getDOF() && dof2 < cell.getDOF() && "[Error]: Index overflow");
         if (dof1 == dof2) {
             const size_t atom = dof1 / Dim;
             return springCoeffs[atom];
         }
-        return ScalarType(0);
+        return T(0);
     }
 
-    template<class ScalarType, unsigned int Dim>
-    typename Hamonic<ScalarType, Dim>::ForceConstMatrix
-    Hamonic<ScalarType, Dim>::forceConst(const MDCellType& cell) const {
+    template<Scalar T, unsigned int Dim>
+    typename Hamonic<T, Dim>::ForceConstMatrix
+    Hamonic<T, Dim>::forceConst(const MDCellType& cell) const {
         assert(cell.getNumParticle() == getNumParticle() && "[Error]: Number of particles is not consistent");
         const size_t dof = cell.getDOF();
-        ForceConstMatrix result(dof, ScalarType(0));
+        ForceConstMatrix result(dof, T(0));
         for (size_t i = 0; i < dof; ++i)
             result(i, i) = forceConst(cell, i, i);
         return result;
     }
 
-    template<class ScalarType, unsigned int Dim>
-    typename Hamonic<ScalarType, Dim>::LatticeMatrix Hamonic<ScalarType, Dim>::virial(const MDCellType& cell) const {
+    template<Scalar T, unsigned int Dim>
+    typename Hamonic<T, Dim>::LatticeMatrix Hamonic<T, Dim>::virial(const MDCellType& cell) const {
         assert(cell.getNumParticle() == getNumParticle() && "[Error]: Number of particles is not consistent");
         LatticeMatrix result(Dim, Dim, 0);
         for (size_t i = 0; i < getNumParticle(); ++i) {
-            const DenseVector<ScalarType, Dim> delta = cell.minDistVector(sites.row(i), i);
-            const DenseVector<ScalarType, Dim> temp = springCoeffs[i] * delta;
+            const DenseVector<T, Dim> delta = cell.minDistVector(sites.row(i), i);
+            const DenseVector<T, Dim> temp = springCoeffs[i] * delta;
             result += temp * delta.transpose();
         }
         result *= -reciprocal(cell.getVolume());
         return result;
     }
 
-    template<class ScalarType, unsigned int Dim>
-    void Hamonic<ScalarType, Dim>::swap(Hamonic& __restrict obj) noexcept {
+    template<Scalar T, unsigned int Dim>
+    void Hamonic<T, Dim>::swap(Hamonic& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         sites.swap(obj.sites);
         springCoeffs.swap(obj.springCoeffs);
@@ -139,8 +139,8 @@ namespace Physica::Core {
 }
 
 namespace Physica {
-    template<class ScalarType, unsigned int Dim>
-    class Traits<Core::Hamonic<ScalarType, Dim>> {
+    template<Scalar T, unsigned int Dim>
+    class Traits<Core::Hamonic<T, Dim>> {
     public:
         constexpr static bool IsPeriodBoundary = true;
         constexpr static bool IsContractable = false;

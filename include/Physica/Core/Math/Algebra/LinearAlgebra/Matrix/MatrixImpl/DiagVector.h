@@ -21,47 +21,57 @@
 #include <Physica/Core/Math/Algebra/LinearAlgebra/Vector/VectorImpl/LValueVector.h>
 
 namespace Physica::Core {
-    template<class MatrixType, bool isLValueMatrix>
-    class DiagVector : public RValueVector<DiagVector<MatrixType, isLValueMatrix>> {
-        const MatrixType& mat;
-        using Base = RValueVector<DiagVector<MatrixType, isLValueMatrix>>;
+    template<Matrix T, bool isLValueMatrix>
+    class DiagVector<T, isLValueMatrix> : public RValueVector<DiagVector<T, isLValueMatrix>> {
+        using This = DiagVector<T, isLValueMatrix>;
+        using Base = RValueVector<This>;
     public:
         using typename Base::ScalarType;
+    private:
+        const T& mat;
     public:
-        explicit DiagVector(const MatrixType& mat_) : mat(mat_) {}
+        explicit DiagVector(const T& mat_) : mat(mat_) {}
+        DiagVector(const This&) = delete;
+        DiagVector(This&&) = delete;
+        ~DiagVector() = default;
         /* Getters */
         [[nodiscard]] ScalarType calc(size_t index) const { return mat.calc(index, index); }
         [[nodiscard]] size_t getLength() const noexcept { return mat.getRow(); }
     };
 
-    template<class MatrixType>
-    class DiagVector<MatrixType, true> : public LValueVector<DiagVector<MatrixType, true>> {
-        using Base = LValueVector<DiagVector<MatrixType, true>>;
+    template<Matrix T>
+    class DiagVector<T, true> : public LValueVector<DiagVector<T, true>> {
+        using This = DiagVector<T, true>;
+        using Base = LValueVector<This>;
     public:
         using typename Base::ScalarType;
+    protected:
+        using PtrTy = typename ScalarType::PtrTy;
+        using ConstPtrTy = typename ScalarType::ConstPtrTy;
     private:
-        MatrixType& mat;
+        T& mat;
     public:
-        explicit DiagVector(MatrixType& mat_) : mat(mat_) {}
+        explicit DiagVector(T& mat_) : mat(mat_) {}
+        DiagVector(const This&) = delete;
+        DiagVector(This&&) = delete;
+        ~DiagVector() = default;
         /* Operators */
         using Base::operator=;
         /* Operations */
         void resize([[maybe_unused]] size_t size) { assert(getLength() == size); }
         /* Getters */
         [[nodiscard]] size_t getLength() const noexcept { return mat.getRow(); }
-        [[nodiscard]] __host__ __device__ ScalarType* data_ptr(size_t index) { return mat.data_ptr(index, index); }
-        [[nodiscard]] __host__ __device__ const ScalarType* data_ptr(size_t index) const { return mat.data_ptr(index, index); }
+        [[nodiscard]] __host__ __device__ PtrTy data_ptr(size_t index) { return mat.data_ptr(index, index); }
+        [[nodiscard]] __host__ __device__ ConstPtrTy data_ptr(size_t index) const { return mat.data_ptr(index, index); }
     };
 }
 
 namespace Physica {
-    using namespace Core;
-
-    template<class MatrixType, bool isLValueMatrix>
-    class Traits<DiagVector<MatrixType, isLValueMatrix>> {
-        static_assert(std::is_convertible<MatrixType&, LValueMatrix<MatrixType>&>::value == isLValueMatrix, "[Error]: Invalid LValueMatrix");
+    template<Matrix T, bool isLValueMatrix>
+    class Traits<DiagVector<T, isLValueMatrix>> {
+        static_assert(std::is_convertible<T&, LValueMatrix<T>&>::value == isLValueMatrix, "[Error]: Invalid LValueMatrix");
     public:
-        using ScalarType = typename MatrixType::ScalarType;
-        constexpr static size_t SizeAtCompile = MatrixType::RowAtCompile > MatrixType::ColAtCompile ? MatrixType::RowAtCompile : MatrixType::ColAtCompile;
+        using ScalarType = typename T::ScalarType;
+        constexpr static size_t SizeAtCompile = T::RowAtCompile > T::ColAtCompile ? T::RowAtCompile : T::ColAtCompile;
     };
 }

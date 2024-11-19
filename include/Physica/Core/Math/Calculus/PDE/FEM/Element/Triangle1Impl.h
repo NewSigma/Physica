@@ -22,9 +22,9 @@
 
 namespace Physica::Core {
     namespace Internal {
-        template<class ScalarType, class Functor, int DeltaOrder>
-        struct GaussIntegral<Triangle1<ScalarType>, Functor, DeltaOrder> {
-            static ScalarType run(Functor func) {
+        template<Scalar T, class Functor, int DeltaOrder>
+        struct GaussIntegral<Triangle1<T>, Functor, DeltaOrder> {
+            static T run(Functor func) {
                 constexpr static double factor = 0.577350269189626;
                 constexpr static double factor1 = (1 - factor) * 0.25;
                 constexpr static double factor2 = (1 + factor) * 0.5;
@@ -35,66 +35,66 @@ namespace Physica::Core {
         };
     }
 
-    template<class ScalarType>
-    Triangle1<ScalarType>::Triangle1(PosArray pos_, IndexArray globalNodes)
+    template<Scalar T>
+    Triangle1<T>::Triangle1(PosArray pos_, IndexArray globalNodes)
             : Base(std::move(globalNodes)), pos(std::move(pos_)) {}
 
-    template<class ScalarType>
-    Triangle1<ScalarType>& Triangle1<ScalarType>::operator=(Triangle1<ScalarType> elem) noexcept {
+    template<Scalar T>
+    Triangle1<T>& Triangle1<T>::operator=(Triangle1<T> elem) noexcept {
         swap(elem);
         return *this;
     }
 
-    template<class ScalarType>
-    void Triangle1<ScalarType>::swap(Triangle1& __restrict obj) noexcept {
+    template<Scalar T>
+    void Triangle1<T>::swap(Triangle1& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         Base::swap(obj);
         pos.swap(obj.pos);
     }
 
-    template<class ScalarType>
-    typename Triangle1<ScalarType>::MatrixType Triangle1<ScalarType>::jacobi([[maybe_unused]] VectorType localPos) const {
+    template<Scalar T>
+    typename Triangle1<T>::MatrixType Triangle1<T>::jacobi([[maybe_unused]] VectorType localPos) const {
         return MatrixType{pos[1][0] - pos[0][0], pos[1][1] - pos[0][1], pos[2][0] - pos[0][0], pos[2][1] - pos[0][1]};
     }
 
-    template<class ScalarType>
-    typename Triangle1<ScalarType>::MatrixType Triangle1<ScalarType>::inv_jacobi([[maybe_unused]] VectorType globalPos) const {
+    template<Scalar T>
+    typename Triangle1<T>::MatrixType Triangle1<T>::inv_jacobi([[maybe_unused]] VectorType globalPos) const {
         const VectorType delta21 = pos[1] - pos[0];
         const VectorType delta31 = pos[2] - pos[0];
-        const ScalarType factor = reciprocal(delta21[0] * delta31[1] - delta31[0] * delta21[1]);
+        const T factor = reciprocal(delta21[0] * delta31[1] - delta31[0] * delta21[1]);
         return MatrixType{delta31[1], -delta21[1], -delta31[0], delta21[0]} * factor;
     }
 
-    template<class ScalarType>
-    bool Triangle1<ScalarType>::contains(const VectorType& point) const {
-        return GeoBase2D<ScalarType>::pointOnPoly(point, pos);
+    template<Scalar T>
+    bool Triangle1<T>::contains(const VectorType& point) const {
+        return GeoBase2D<T>::pointOnPoly(point, pos);
     }
 
-    template<class ScalarType>
-    typename Triangle1<ScalarType>::VectorType Triangle1<ScalarType>::getNodePos(size_t localNode) const {
+    template<Scalar T>
+    typename Triangle1<T>::VectorType Triangle1<T>::getNodePos(size_t localNode) const {
         return pos[localNode];
     }
 
-    template<class ScalarType>
-    typename Triangle1<ScalarType>::VectorType Triangle1<ScalarType>::toLocalPos(VectorType globalPos) const {
+    template<Scalar T>
+    typename Triangle1<T>::VectorType Triangle1<T>::toLocalPos(VectorType globalPos) const {
         const VectorType delta21 = pos[1] - pos[0];
         const VectorType delta31 = pos[2] - pos[0];
         globalPos -= pos[0];
-        const ScalarType factor = reciprocal(delta21[0] * delta31[1] - delta31[0] * delta21[1]);
+        const T factor = reciprocal(delta21[0] * delta31[1] - delta31[0] * delta21[1]);
         return VectorType{globalPos[0] * delta31[1] - globalPos[1] * delta31[0], globalPos[1] * delta21[0] - globalPos[0] * delta21[1]} * factor;
     }
 
-    template<class ScalarType>
-    typename Triangle1<ScalarType>::VectorType Triangle1<ScalarType>::toGlobalPos(VectorType localPos) const {
-        return (ScalarType(1) - localPos[0] - localPos[1]) * pos[0] + localPos[0] * pos[1] + localPos[1] * pos[2];
+    template<Scalar T>
+    typename Triangle1<T>::VectorType Triangle1<T>::toGlobalPos(VectorType localPos) const {
+        return (T(1) - localPos[0] - localPos[1]) * pos[0] + localPos[0] * pos[1] + localPos[1] * pos[2];
     }
 
-    template<class ScalarType>
-    ScalarType Triangle1<ScalarType>::baseFunc(size_t localNode, VectorType p) {
-        ScalarType temp;
+    template<Scalar T>
+    T Triangle1<T>::baseFunc(size_t localNode, VectorType p) {
+        T temp;
         switch (localNode) {
             case 0:
-                temp = ScalarType(1) - p[0] - p[1];
+                temp = T(1) - p[0] - p[1];
                 break;
             case 1:
                 temp = p[0];
@@ -105,8 +105,8 @@ namespace Physica::Core {
         return temp;
     }
 
-    template<class ScalarType>
-    ScalarType Triangle1<ScalarType>::dBase_dr(size_t localNode, [[maybe_unused]] VectorType p){
+    template<Scalar T>
+    T Triangle1<T>::dBase_dr(size_t localNode, [[maybe_unused]] VectorType p){
         int temp = 0;
         switch (localNode) {
             case 0:
@@ -118,11 +118,11 @@ namespace Physica::Core {
             case 2:
                 temp = 0;
         }
-        return ScalarType(temp);
+        return T(temp);
     }
 
-    template<class ScalarType>
-    ScalarType Triangle1<ScalarType>::dBase_ds(size_t localNode, [[maybe_unused]] VectorType p) {
+    template<Scalar T>
+    T Triangle1<T>::dBase_ds(size_t localNode, [[maybe_unused]] VectorType p) {
         int temp = 0;
         switch (localNode) {
             case 0:
@@ -134,24 +134,24 @@ namespace Physica::Core {
             case 2:
                 temp = 1;
         }
-        return ScalarType(temp);
+        return T(temp);
     }
 
-    template<class ScalarType>
-    typename Triangle1<ScalarType>::VectorType Triangle1<ScalarType>::grad(size_t localNode, VectorType p) {
+    template<Scalar T>
+    typename Triangle1<T>::VectorType Triangle1<T>::grad(size_t localNode, VectorType p) {
         return {dBase_dr(localNode, p), dBase_ds(localNode, p)};
     }
 
-    template<class ScalarType>
-    Mesh<Triangle1<ScalarType>> Triangle1<ScalarType>::rectangle(VectorType bottomLeft,
+    template<Scalar T>
+    Mesh<Triangle1<T>> Triangle1<T>::rectangle(VectorType bottomLeft,
                                                                  VectorType topRight,
                                                                  size_t numSeparateX,
                                                                  size_t numSeparateY) {
         const size_t numNodeX = numSeparateX + 1;
         const size_t numNodeY = numSeparateY + 1;
-        Mesh<Triangle1<ScalarType>> mesh(numSeparateX * numSeparateY * 2, numNodeX * numNodeY);
-        const ScalarType xPerElem = (topRight[0] - bottomLeft[0]) / ScalarType(numSeparateX);
-        const ScalarType yPerElem = (topRight[1] - bottomLeft[1]) / ScalarType(numSeparateY);
+        Mesh<Triangle1<T>> mesh(numSeparateX * numSeparateY * 2, numNodeX * numNodeY);
+        const T xPerElem = (topRight[0] - bottomLeft[0]) / T(numSeparateX);
+        const T yPerElem = (topRight[1] - bottomLeft[1]) / T(numSeparateY);
 
         VectorType p = bottomLeft;
         size_t nextElem = 0;

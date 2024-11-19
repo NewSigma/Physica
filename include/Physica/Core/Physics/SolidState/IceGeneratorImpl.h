@@ -400,7 +400,7 @@ namespace Physica::Core {
         delta.toUnit();
         delta *= T(BondLengthOH);
         auto row = pos.row(indexO * 2U + (2U - numHydrogenRequired[indexO]));
-        row = initialCell.getPos().row(shiftIndexO).asVector() + delta;
+        row = initialCell.getPos().row(shiftIndexO) + delta;
 
         isHydrogenOccupied[indexH] = true;
         numHydrogenRequired[indexO] -= 1;
@@ -446,7 +446,7 @@ namespace Physica::Core {
         for (size_t i = 0; i < getNumMolecule(); ++i) {
             while (numHydrogenRequired[i] != 0) {
                 auto row = pos.row(i * 2U + (2U - numHydrogenRequired[i]));
-                row = initialCell.getPos().row(i + getStartIndexO()).asVector() + randUnitVector(gen) * T(BondLengthOH);
+                row = initialCell.getPos().row(i + getStartIndexO()) + randUnitVector(gen) * T(BondLengthOH);
                 numHydrogenRequired[i] -= 1;
             }
         }

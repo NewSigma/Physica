@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Weibo He.
+ * Copyright 2023-2024 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -18,18 +18,18 @@
  */
 #pragma once
 
+#include <Physica/Core/Math/Calculus/Differential.h>
+#include <Physica/Core/Math/Optimization/SteepestDescent.h>
+#include <Physica/Core/Math/Algebra/LinearAlgebra/Matrix/ReshapedVector.h>
 #include "MDCell.h"
-#include "Physica/Core/Math/Calculus/Differential.h"
-#include "Physica/Core/Math/Optimization/SteepestDescent.h"
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/ReshapedVector.h"
 
 namespace Physica::Core {
-    template<class ScalarType, unsigned int Dim = 3>
+    template<Scalar T, unsigned int Dim = 3>
     class EnergyMinimizer {
     public:
-        using MDCellType = MDCell<ScalarType, Dim>;
+        using MDCellType = MDCell<T, Dim>;
         using LatticeMatrix = typename MDCellType::LatticeMatrix;
-        using VectorType = VectorND<ScalarType>;
+        using VectorType = VectorND<T>;
     private:
         MDCellType cell;
     public:
@@ -45,9 +45,9 @@ namespace Physica::Core {
         template<class ForceModel, class Executor, class Optimizer>
         void pos_step(const ForceModel& model, Optimizer& optimizer);
         template<class ForceModel, class Executor, class Optimizer>
-        void pre_lattice2D_step(const ForceModel& model, Optimizer& optimizer, ScalarType diffStep);
+        void pre_lattice2D_step(const ForceModel& model, Optimizer& optimizer, T diffStep);
         template<class ForceModel, class Executor, class Optimizer>
-        void lattice2D_step(const ForceModel& model, Optimizer& optimizer, ScalarType diffStep);
+        void lattice2D_step(const ForceModel& model, Optimizer& optimizer, T diffStep);
         void swap(EnergyMinimizer& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] const MDCellType& getCell() const noexcept { return cell; }
@@ -55,31 +55,31 @@ namespace Physica::Core {
         template<class ForceModel> auto makePosStepFunc(const ForceModel& model);
         template<class ForceModel, class Executor> auto makePosStepGrad(const ForceModel& model);
         template<class ForceModel> auto makeLattice2DStepFunc(const ForceModel& model);
-        template<class ForceModel> auto makeLattice2DStepGrad(const ForceModel& model, ScalarType diffStep);
+        template<class ForceModel> auto makeLattice2DStepGrad(const ForceModel& model, T diffStep);
     };
 
-    template<class ScalarType, unsigned int Dim>
-    EnergyMinimizer<ScalarType, Dim>::EnergyMinimizer(MDCellType cell_)
+    template<Scalar T, unsigned int Dim>
+    EnergyMinimizer<T, Dim>::EnergyMinimizer(MDCellType cell_)
             : cell(std::move(cell_)) {}
 
-    template<class ScalarType, unsigned int Dim>
-    EnergyMinimizer<ScalarType, Dim>&
-    EnergyMinimizer<ScalarType, Dim>::operator=(EnergyMinimizer<ScalarType, Dim> obj) noexcept {
+    template<Scalar T, unsigned int Dim>
+    EnergyMinimizer<T, Dim>&
+    EnergyMinimizer<T, Dim>::operator=(EnergyMinimizer<T, Dim> obj) noexcept {
         swap(obj);
         return *this;
     }
 
-    template<class ScalarType, unsigned int Dim>
+    template<Scalar T, unsigned int Dim>
     template<class ForceModel, class Executor, class Optimizer>
-    void EnergyMinimizer<ScalarType, Dim>::pre_pos_step(const ForceModel& model, Optimizer& optimizer) {
+    void EnergyMinimizer<T, Dim>::pre_pos_step(const ForceModel& model, Optimizer& optimizer) {
         const auto func = makePosStepFunc(model);
         const auto grad = makePosStepGrad<ForceModel, Executor>(model);
         optimizer.init(cell.getPos().flatten(), func, grad);
     }
 
-    template<class ScalarType, unsigned int Dim>
+    template<Scalar T, unsigned int Dim>
     template<class ForceModel, class Executor, class Optimizer>
-    void EnergyMinimizer<ScalarType, Dim>::pos_step(const ForceModel& model, Optimizer& optimizer) {
+    void EnergyMinimizer<T, Dim>::pos_step(const ForceModel& model, Optimizer& optimizer) {
         assert(optimizer.getDim() == cell.getDOF() && "[Error]: pre_pos_step must be called before this function");
         const auto func = makePosStepFunc(model);
         const auto grad = makePosStepGrad<ForceModel, Executor>(model);
@@ -87,9 +87,9 @@ namespace Physica::Core {
         cell.setPos(optimizer.getArgX().reshape(cell.getPos()));
     }
 
-    template<class ScalarType, unsigned int Dim>
+    template<Scalar T, unsigned int Dim>
     template<class ForceModel, class Executor, class Optimizer>
-    void EnergyMinimizer<ScalarType, Dim>::pre_lattice2D_step(const ForceModel& model, Optimizer& optimizer, ScalarType diffStep) {
+    void EnergyMinimizer<T, Dim>::pre_lattice2D_step(const ForceModel& model, Optimizer& optimizer, T diffStep) {
         assert(cell.getLattice()(0, 1).isZero());
         assert(cell.getLattice()(0, 2).isZero());
         assert(cell.getLattice()(1, 2).isZero());
@@ -101,9 +101,9 @@ namespace Physica::Core {
         optimizer.init({lattice(0, 0), lattice(1, 0), lattice(1, 1)}, func, grad);
     }
 
-    template<class ScalarType, unsigned int Dim>
+    template<Scalar T, unsigned int Dim>
     template<class ForceModel, class Executor, class Optimizer>
-    void EnergyMinimizer<ScalarType, Dim>::lattice2D_step(const ForceModel& model, Optimizer& optimizer, ScalarType diffStep) {
+    void EnergyMinimizer<T, Dim>::lattice2D_step(const ForceModel& model, Optimizer& optimizer, T diffStep) {
         assert(optimizer.getDim() == 3 && "[Error]: pre_lattice2D_step must be called before this function");
         const auto func = makeLattice2DStepFunc(model);
         const auto grad = makeLattice2DStepGrad(model, diffStep);
@@ -117,25 +117,25 @@ namespace Physica::Core {
         cell.setLattice(lattice);
     }
 
-    template<class ScalarType, unsigned int Dim>
-    void EnergyMinimizer<ScalarType, Dim>::swap(EnergyMinimizer& __restrict obj) noexcept {
+    template<Scalar T, unsigned int Dim>
+    void EnergyMinimizer<T, Dim>::swap(EnergyMinimizer& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         cell.swap(obj.cell);
     }
 
-    template<class ScalarType, unsigned int Dim>
+    template<Scalar T, unsigned int Dim>
     template<class ForceModel>
-    auto EnergyMinimizer<ScalarType, Dim>::makePosStepFunc(const ForceModel& model) {
-        auto func = [this, &model](const VectorType& v) -> ScalarType {
+    auto EnergyMinimizer<T, Dim>::makePosStepFunc(const ForceModel& model) {
+        auto func = [this, &model](const VectorType& v) -> T {
             const auto temp = MDCellType(cell.getLattice(), v.reshape(cell.getPos()), cell.getMassVec());
             return model.potentialV(temp);
         };
         return func;
     }
 
-    template<class ScalarType, unsigned int Dim>
+    template<Scalar T, unsigned int Dim>
     template<class ForceModel, class Executor>
-    auto EnergyMinimizer<ScalarType, Dim>::makePosStepGrad(const ForceModel& model) {
+    auto EnergyMinimizer<T, Dim>::makePosStepGrad(const ForceModel& model) {
         const auto grad = [this, &model](const VectorType& v) -> VectorType {
             const auto temp = MDCellType(cell.getLattice(), v.reshape(cell.getPos()), cell.getMassVec());
             return -model.template force<Executor, true>(temp);
@@ -143,10 +143,10 @@ namespace Physica::Core {
         return grad;
     }
 
-    template<class ScalarType, unsigned int Dim>
+    template<Scalar T, unsigned int Dim>
     template<class ForceModel>
-    auto EnergyMinimizer<ScalarType, Dim>::makeLattice2DStepFunc(const ForceModel& model) {
-        const auto func = [this, &model](const VectorType& v) -> ScalarType {
+    auto EnergyMinimizer<T, Dim>::makeLattice2DStepFunc(const ForceModel& model) {
+        const auto func = [this, &model](const VectorType& v) -> T {
             LatticeMatrix lattice = cell.getLattice();
             lattice(0, 0) = v[0];
             lattice(1, 0) = v[1];
@@ -157,14 +157,14 @@ namespace Physica::Core {
         return func;
     }
 
-    template<class ScalarType, unsigned int Dim>
+    template<Scalar T, unsigned int Dim>
     template<class ForceModel>
-    auto EnergyMinimizer<ScalarType, Dim>::makeLattice2DStepGrad(const ForceModel& model, ScalarType diffStep) {
+    auto EnergyMinimizer<T, Dim>::makeLattice2DStepGrad(const ForceModel& model, T diffStep) {
         const auto func = makeLattice2DStepFunc(model);
         const auto grad = [func, diffStep](const VectorType& v) -> VectorType {
             VectorType result(3);
             for (int i = 0; i < int(result.getLength()); ++i) {
-                result[i] = Differential<ScalarType>::doublePoint([i, func, &v](ScalarType x) {
+                result[i] = Differential<T>::doublePoint([i, func, &v](T x) {
                     VectorType v1 = v;
                     v1[i] = x;
                     return func(v1);

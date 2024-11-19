@@ -19,23 +19,23 @@
 #pragma once
 
 namespace Physica::Core {
-    template<class MatrixType, class VectorType>
+    template<Matrix T, Vector V>
     class MatrixVectorProduct;
 
-    template<ExprType Type, class T1, class T2, class VectorType>
-    class MatrixVectorProduct<MatrixExpr<Type, T1, T2>, VectorType>
-            : public RValueVector<MatrixVectorProduct<MatrixExpr<Type, T1, T2>, VectorType>> {
-        using MatrixType = MatrixExpr<Type, T1, T2>;
-        using This = MatrixVectorProduct<MatrixType, VectorType>;
+    template<ExprType Type, Matrix T, class U, Vector V>
+    class MatrixVectorProduct<MatrixExpr<Type, T, U>, V>
+            : public RValueVector<MatrixVectorProduct<MatrixExpr<Type, T, U>, V>> {
+        using MatrixType = MatrixExpr<Type, T, U>;
+        using This = MatrixVectorProduct<MatrixType, V>;
     public:
         using Base = RValueVector<This>;
         using typename Base::ScalarType;
     private:
         const MatrixType& expr;
-        const VectorType& vec;
+        const V& vec;
     public:
-        MatrixVectorProduct(const MatrixType& expr_, const RValueVector<VectorType>& vec_)
-                : expr(expr_), vec(vec_.getDerived()) {
+        MatrixVectorProduct(const MatrixType& expr_, const V& vec_)
+                : expr(expr_), vec(vec_) {
             assert(expr.getCol() == vec.getLength());
         }
         MatrixVectorProduct(const This&) = delete;
@@ -45,24 +45,22 @@ namespace Physica::Core {
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
         /* Operations */
-        template<class OtherDerived, class Executor = SequentialExecutor>
-        inline void assignTo(LValueVector<OtherDerived>& target_) const;
+        template<LVector V1, class Executor = SequentialExecutor>
+        inline void assignTo(V1& target) const;
         /* Getters */
         [[nodiscard]] inline ScalarType calc(size_t index) const;
         [[nodiscard]] __host__ __device__ size_t getLength() const { return expr.getRow(); }
         [[nodiscard]] const MatrixType& getLHS() const noexcept { return expr; }
-        [[nodiscard]] const VectorType& getRHS() const noexcept { return vec; }
+        [[nodiscard]] const V& getRHS() const noexcept { return vec; }
     private:
-        template<class OtherDerived>
-        inline void generalImpl(OtherDerived& target_) const;
+        template<LVector V1>
+        inline void generalImpl(V1& target_) const;
     };
 
-    template<ExprType Type, class T1, class T2, class VectorType>
-    template<class OtherDerived, class Executor>
-    inline void MatrixVectorProduct<MatrixExpr<Type, T1, T2>, VectorType>::assignTo(
-            LValueVector<OtherDerived>& target_) const {
+    template<ExprType Type, Matrix T, class U, Vector V>
+    template<LVector V1, class Executor>
+    inline void MatrixVectorProduct<MatrixExpr<Type, T, U>, V>::assignTo(V1& target) const {
         constexpr bool FastAssign = Traits<This>::FastAssign;
-        auto& target = target_.getDerived();
         if constexpr (!FastAssign)
             generalImpl(target);
         else if constexpr (Type == ExprType::Add) {
@@ -81,38 +79,37 @@ namespace Physica::Core {
             static_assert(!FastAssign, "[Error]: assignTo is not implemented");
     }
 
-    template<ExprType Type, class T1, class T2, class VectorType>
-    inline typename MatrixVectorProduct<MatrixExpr<Type, T1, T2>, VectorType>::ScalarType
-    MatrixVectorProduct<MatrixExpr<Type, T1, T2>, VectorType>::calc(size_t index) const {
+    template<ExprType Type, Matrix T, class U, Vector V>
+    inline typename MatrixVectorProduct<MatrixExpr<Type, T, U>, V>::ScalarType
+    MatrixVectorProduct<MatrixExpr<Type, T, U>, V>::calc(size_t index) const {
         return expr.row(index) * vec;
     }
 
-    template<ExprType Type, class T1, class T2, class VectorType>
-    template<class OtherDerived>
-    inline void MatrixVectorProduct<MatrixExpr<Type, T1, T2>, VectorType>::generalImpl(OtherDerived& target) const {
+    template<ExprType Type, Matrix T, class U, Vector V>
+    template<LVector V1>
+    inline void MatrixVectorProduct<MatrixExpr<Type, T, U>, V>::generalImpl(V1& target) const {
         for (size_t i = 0; i < getLength(); ++i)
             target[i] = calc(i);
 
-        constexpr bool isContinuous = std::is_base_of<ContinuousVector<OtherDerived>, OtherDerived>::value;
-        if constexpr (isContinuous && Base::isReverseDiff)
+        if constexpr (is_continuous<V1>::value && Base::isReverseDiff)
             target.getDerived().makeContinuous();
     }
 }
 
 namespace Physica {
-    template<Core::ExprType Type, class T1, class T2, class VectorType>
-    class Traits<Core::MatrixVectorProduct<MatrixExpr<Type, T1, T2>, VectorType>> {
-        using MatrixType = Core::MatrixExpr<Type, T1, T2>;
-        using ExprType = Core::ExprType;
-        static_assert(MatrixType::ColAtCompile == VectorType::SizeAtCompile || MatrixType::ColAtCompile == Dynamic || VectorType::SizeAtCompile == Dynamic,
+    template<ExprType Type, Matrix T, class U, Vector V>
+    class Traits<MatrixVectorProduct<MatrixExpr<Type, T, U>, V>> {
+        using MatrixType = MatrixExpr<Type, T, U>;
+        using ExprType = ExprType;
+        static_assert(MatrixType::ColAtCompile == V::SizeAtCompile || MatrixType::ColAtCompile == Dynamic || V::SizeAtCompile == Dynamic,
                       "Row and col do not match in matrix product");
 
         constexpr static bool calcFastAssign() {
-            constexpr bool isScalarT2 = Core::Scalar<T2>;
+            constexpr bool isScalarT2 = Scalar<U>;
             if constexpr (Type == ExprType::Add || Type == ExprType::Sub) {
                 if constexpr (!isScalarT2) {
-                    using LHS = decltype(std::declval<T1>() * std::declval<VectorType>());
-                    using RHS = decltype(std::declval<T2>() * std::declval<VectorType>());
+                    using LHS = decltype(std::declval<T>() * std::declval<V>());
+                    using RHS = decltype(std::declval<U>() * std::declval<V>());
                     using ExprType = decltype(std::declval<LHS>() + std::declval<RHS>());
                     return Traits<ExprType>::FastAssign;
                 }
@@ -124,7 +121,7 @@ namespace Physica {
             return false;
         }
     public:
-        using ScalarType = typename Core::Internal::BinaryScalarOpReturnType<typename MatrixType::ScalarType, typename VectorType::ScalarType>::Type;
+        using ScalarType = typename Internal::BinaryScalarOpReturnType<typename MatrixType::ScalarType, typename V::ScalarType>::Type;
         constexpr static size_t SizeAtCompile = MatrixType::RowAtCompile;
 
         constexpr static bool FastAssign = calcFastAssign();

@@ -22,7 +22,7 @@ namespace Physica::Core {
     /**
      * FIterator(Forward)
      */
-    template<class T, int Order, size_t Length, class Allocator>
+    template<Scalar T, int Order, size_t Length, class Allocator>
     class FIterator<DenseVector<Diff<T, DiffMode::Forward, Order>, Length, Allocator>> {
         using ElemType = Diff<T, DiffMode::Forward, Order>;
         using Container = DenseVector<ElemType, Length, Allocator>;
@@ -59,7 +59,7 @@ namespace Physica::Core {
     /**
      * RIterator(Reverse)
      */
-    template<class T, int Order, size_t Length, class Allocator>
+    template<Scalar T, int Order, size_t Length, class Allocator>
     class RIterator<DenseVector<Diff<T, DiffMode::Forward, Order>, Length, Allocator>> {
         using ElemType = Diff<T, DiffMode::Forward, Order>;
         using Container = DenseVector<ElemType, Length, Allocator>;

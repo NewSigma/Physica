@@ -25,7 +25,7 @@ using namespace Physica::Core;
 using RealType = float64;
 using ComplexType = Complex<RealType>;
 
-template<class T>
+template<Scalar T>
 void test1() {
     Vector2D<T> v{2, 1};
     auto givens_vector = givens(v, 0, 1);

@@ -44,7 +44,7 @@ namespace Physica::Core {
 
         template<class Executor>
         [[nodiscard]] VectorND<ValueType> force(const MDCellType& cell) const;
-        template<class VectorType, class Executor>
+        template<Vector V, class Executor>
         void forceAsync([[maybe_unused]] const MDCellType& cell, ContinuousVector<VectorType>& result) const;
         void swap(DeepEAM& __restrict obj) noexcept;
         /* Getters */

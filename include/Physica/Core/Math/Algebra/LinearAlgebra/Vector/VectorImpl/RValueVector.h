@@ -21,27 +21,23 @@
 #include <Physica/CRTPBase.h>
 #include <Physica/Core/MultiPrecision/Real.h>
 #include <Physica/Core/MultiPrecision/Complex.h>
-#include <Physica/Core/Math/Algebra/LinearAlgebra/Matrix/MatrixOption.h>
+#include <Physica/Core/Math/Algebra/LinearAlgebra/Matrix/Matrix.h>
 #include <Physica/Core/Parallel/Executor/SequentialExecutor.h>
 #include "RValueVectorImpl/RVectorBlock.h"
 
 namespace Physica::Core {
-    template<class T>
-    concept Vector = std::derived_from<T, RValueVector<T>> || std::derived_from<T, device_obj<RValueVector<T>>>;
-
     template<class Derived> class LValueVector;
     template<class Derived> class ContinuousVector;
+    template<class Derived> class RValueMatrix;
     template<class Derived> class ContinuousMatrix;
-    template<class T, int Option, size_t Row, size_t Col, class Allocator> class DenseMatrix;
+    template<Scalar, int Option, size_t Row, size_t Col, class Allocator> class DenseMatrix;
     template<class VectorType> class TransposeVector;
     template<class VectorType> class ConjugateVector;
     template<class VectorType> class HermiteVector;
-    template<class VectorType, int MatrixMajor, size_t Row, size_t Col> class ReshapedVector;
     template<class VectorType> class FormatedVector;
     template<class VectorType> class ReverseVector;
+    template<class VectorType, int MatrixMajor, size_t Row, size_t Col> class ReshapedVector;
     template<Vector V1, Vector V2> class CrossProduct;
-    template<class Derived> class ContinuousVector;
-    template<class Derived> class RValueMatrix;
 
     template<class T>
     struct is_continuous {
@@ -49,19 +45,19 @@ namespace Physica::Core {
     };
 
     namespace Internal {
-        template<class VectorType1, class VectorType2 = VectorType1>
+        template<Vector T1, Vector T2 = T1>
         class EnableSIMD {
-            using ScalarType = typename VectorType1::ScalarType;
+            using ScalarType = typename T1::ScalarType;
             using ValueType = typename ScalarType::ValueType;
-            constexpr static bool isSameScalar = std::is_same<ValueType, typename VectorType2::ValueType>::value;
+            constexpr static bool isSameScalar = std::is_same<ValueType, typename T2::ValueType>::value;
         public:
-            constexpr static bool value = isSameScalar && BestPacket<ScalarType, VectorType1::SizeAtCompile>::Size > 1;
+            constexpr static bool value = isSameScalar && BestPacket<ScalarType, T1::SizeAtCompile>::Size > 1;
         };
     }
 
-    template<class VectorType1, class VectorType2 = VectorType1>
+    template<Vector T1, Vector T2 = T1>
     struct EnableMKL {
-        constexpr static bool value = HasMKL() && is_continuous<VectorType1>::value && is_continuous<VectorType2>::value;
+        constexpr static bool value = HasMKL() && is_continuous<T1>::value && is_continuous<T2>::value;
     };
     /**
      * \class RValueVector is a base class for vectors. You cannot take the address of elements in an RValueVector.
@@ -90,8 +86,8 @@ namespace Physica::Core {
     public:
         ~RValueVector() = default;
         /* Operations */
-        template<Vector V, class Executor = SequentialExecutor>
-        inline void assignTo(LValueVector<V>& v) const;
+        template<LVector V, class Executor = SequentialExecutor>
+        inline void assignTo(V& v) const;
         /* Getters */
         [[nodiscard]] ScalarType calc(size_t index) const { return Base::getDerived().calc(index); }
         template<class AnyPacket>
@@ -99,10 +95,10 @@ namespace Physica::Core {
         template<class AnyPacket>
         [[nodiscard]] inline AnyPacket packetPartial(size_t index, size_t count) const;
 
-        [[nodiscard]] inline FormatedVector<Derived> format() const;
-        [[nodiscard]] TransposeVector<Derived> transpose() const noexcept { return TransposeVector<Derived>(*this); }
-        [[nodiscard]] ConjugateVector<Derived> conjugate() const noexcept { return ConjugateVector<Derived>(*this); }
-        [[nodiscard]] HermiteVector<Derived> hermite() const noexcept { return HermiteVector<Derived>(*this); }
+        [[nodiscard]] inline auto format() const;
+        [[nodiscard]] auto transpose() const noexcept { return TransposeVector<Derived>(Base::getDerived()); }
+        [[nodiscard]] auto conjugate() const noexcept { return ConjugateVector<Derived>(Base::getDerived()); }
+        [[nodiscard]] auto hermite() const noexcept { return HermiteVector<Derived>(Base::getDerived()); }
         [[nodiscard]] size_t getLength() const noexcept { return Base::getDerived().getLength(); }
 
         [[nodiscard]] inline RealType norm1() const;
@@ -119,8 +115,8 @@ namespace Physica::Core {
         [[nodiscard]] bool isZeros() const;
         template<Vector V>
         [[nodiscard]] inline auto crossProduct(const V& v) const noexcept;
-        template<class OtherDerived>
-        [[nodiscard]] ScalarType angleTo(const RValueVector<OtherDerived>& v) const noexcept;
+        template<Vector V>
+        [[nodiscard]] ScalarType angleTo(const V& v) const noexcept;
         template<size_t Length = Dynamic>
         [[nodiscard]] inline BlockType<Length> head(size_t to);
         template<size_t Length = Dynamic>
@@ -136,9 +132,9 @@ namespace Physica::Core {
         [[nodiscard]] inline ReverseVector<Derived> reverse();
         [[nodiscard]] inline const ReverseVector<Derived> reverse() const;
 
-        template<class OtherDerived>
-        ReshapedVector<Derived, MatrixOption::getMajor<OtherDerived>(), OtherDerived::RowAtCompile, OtherDerived::ColAtCompile>
-        reshape(const RValueMatrix<OtherDerived>& mat) const;
+        template<Matrix M>
+        ReshapedVector<Derived, MatrixOption::getMajor<M>(), M::RowAtCompile, M::ColAtCompile>
+        reshape(const M& mat) const;
         template<size_t Row = Dynamic, size_t Col = Dynamic>
         ReshapedVector<Derived, MatrixOption::Col, Row, Col> reshape_col(size_t row, size_t col) const;
         template<size_t Row = Dynamic, size_t Col = Dynamic>
@@ -152,8 +148,8 @@ namespace Physica::Core {
         RValueVector& operator=(RValueVector&&) noexcept = default;
     };
 
-    template<class VectorType1, class VectorType2>
-    bool vectorNear(const RValueVector<VectorType1>& v1, const RValueVector<VectorType2>& v2, double precision);
+    template<Vector T1, Vector T2>
+    bool vectorNear(const T1& v1, const T2& v2, double precision);
 }
 
 namespace Physica {

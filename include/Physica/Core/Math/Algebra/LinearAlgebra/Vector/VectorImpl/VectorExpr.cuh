@@ -31,11 +31,11 @@ namespace Physica::Core {
             const DeviceVector* ptr;
         } expr;
     public:
-        __host__ __device__ inline device_obj(const device_obj<RValueVector<V>>& expr_) {
+        __host__ __device__ inline device_obj(const device_obj<V>& expr_) {
             if constexpr (IsHost())
-                expr.value = asStruct(expr_.getDerived());
+                expr.value = asStruct(expr_);
             else
-                expr.ptr = &expr_.getDerived();
+                expr.ptr = &expr_;
         }
         device_obj(const This&) = delete;
         device_obj(This&&) noexcept = delete;
@@ -118,7 +118,7 @@ namespace Physica::Core {
 }
 
 namespace Physica {
-    template<ExprType Type, class Expr1, class Expr2>
+    template<ExprType Type, Vector Expr1, class Expr2>
     class Traits<Core::device_obj<Core::VectorExpr<Type, Expr1, Expr2>>> : public Traits<Core::VectorExpr<Type, Expr1, Expr2>> {};
 }
 

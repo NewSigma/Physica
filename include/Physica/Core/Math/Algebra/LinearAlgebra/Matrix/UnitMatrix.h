@@ -21,9 +21,9 @@
 #include "MatrixImpl/RValueMatrix.h"
 
 namespace Physica::Core {
-    template<class ScalarType, size_t Order = Dynamic>
-    class UnitMatrix : public RValueMatrix<UnitMatrix<ScalarType, Order>> {
-        using This = UnitMatrix<ScalarType, Order>;
+    template<Scalar T, size_t Order = Dynamic>
+    class UnitMatrix : public RValueMatrix<UnitMatrix<T, Order>> {
+        using This = UnitMatrix<T, Order>;
         using Base = RValueMatrix<This>;
 
         size_t order; // TODO: use void if Order != Dynamic
@@ -35,7 +35,7 @@ namespace Physica::Core {
         /* Operators */
         This& operator=(This obj) noexcept { swap(obj); return *this; }
         /* Operations */
-        [[nodiscard]] ScalarType calc(size_t row, size_t col) const { return ScalarType(row == col ? 1 : 0); }
+        [[nodiscard]] T calc(size_t row, size_t col) const { return T(row == col ? 1 : 0); }
 
         [[nodiscard]] const This& transpose() const noexcept { return *this; }
         [[nodiscard]] const This& conjugate() const noexcept { return *this; }
@@ -46,29 +46,27 @@ namespace Physica::Core {
         [[nodiscard]] __host__ __device__ size_t getCol() const noexcept { return order; }
     };
 
-    template<class ScalarType, size_t Order>
-    UnitMatrix<ScalarType, Order>::UnitMatrix(size_t order_) : order(order_) {
+    template<Scalar T, size_t Order>
+    UnitMatrix<T, Order>::UnitMatrix(size_t order_) : order(order_) {
         assert((Order == Dynamic || Order == order) && "[Error]: tparam and param is not consistent");
     }
 
-    template<class ScalarType, size_t Order>
-    inline void UnitMatrix<ScalarType, Order>::swap(This& __restrict obj) noexcept {
+    template<Scalar T, size_t Order>
+    inline void UnitMatrix<T, Order>::swap(This& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         std::swap(order, obj.order);
     }
 
-    template<class ScalarType, size_t Order, class VectorType>
-    [[nodiscard]] inline const VectorType&
-    operator*([[maybe_unused]] const UnitMatrix<ScalarType, Order>& mat, const RValueVector<VectorType>& vec) noexcept {
+    template<Scalar T, size_t Order, Vector U>
+    [[nodiscard]] inline const U&
+    operator*([[maybe_unused]] const UnitMatrix<T, Order>& mat, const U& vec) noexcept {
         assert(mat.getCol() == vec.getLength());
-        return vec.getDerived();
+        return vec;
     }
 }
 
 namespace Physica {
-    using namespace Core;
-
-    template<class T, size_t Order>
+    template<Scalar T, size_t Order>
     class Traits<UnitMatrix<T, Order>> {
     public:
         using ScalarType = T;

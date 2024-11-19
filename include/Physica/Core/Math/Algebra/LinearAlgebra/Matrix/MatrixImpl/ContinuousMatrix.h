@@ -35,13 +35,13 @@ namespace Physica::Core {
         using typename Base::ValueType;
         using Base::RowAtCompile;
         using Base::ColAtCompile;
-        using Base::isRowMatrix;
-        using Base::isColMatrix;
         using Base::isReverseDiff;
     protected:
         using typename Base::PtrTy;
         using typename Base::ConstPtrTy;
     private:
+        constexpr static bool isRowMatrix = MatrixOption::isRowMatrix<This>();
+        constexpr static bool isColMatrix = MatrixOption::isColMatrix<This>();
         using RowVector = std::conditional<isRowMatrix, ContinuousMatrixBlock<Derived, 1, ColAtCompile>, LMatrixBlock<Derived, 1, ColAtCompile>>::type;
         using ColVector = std::conditional<isColMatrix, ContinuousMatrixBlock<Derived, RowAtCompile, 1>, LMatrixBlock<Derived, RowAtCompile, 1>>::type;
         template<size_t Row>
@@ -135,6 +135,11 @@ namespace Physica::Core {
         ContinuousMatrix(const This&) = default;
         ContinuousMatrix(This&&) noexcept = default;
     };
+}
+
+namespace Physica {
+    template<class Derived>
+    class Traits<Core::ContinuousMatrix<Derived>> : public Traits<Derived> {};
 }
 
 #include "ContinuousMatrixImpl/ContinuousMatrixImpl.h"

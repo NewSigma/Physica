@@ -26,25 +26,25 @@ namespace Physica::Core {
         }
     }
 
-    template<class ScalarType>
-    SGD<device_obj<ScalarType>>::SGD(ValueType learnRate_, unsigned int batchSize_) : batchSize(batchSize_) {
+    template<Scalar T>
+    SGD<device_obj<T>>::SGD(ValueType learnRate_, unsigned int batchSize_) : batchSize(batchSize_) {
         setLearnRate(learnRate_);
     }
 
-    template<class ScalarType>
-    inline void SGD<device_obj<ScalarType>>::recordBegin() {
+    template<Scalar T>
+    inline void SGD<device_obj<T>>::recordBegin() {
         auto& segment = TracerType::getInstance().pushSegment(1, ExprType::Set);
         to = DeviceScalar(segment.getValues().data(), segment.getGrads().data());
     }
     
-    template<class ScalarType>
-    inline void SGD<device_obj<ScalarType>>::recordEnd() {
+    template<Scalar T>
+    inline void SGD<device_obj<T>>::recordEnd() {
         auto& segment = TracerType::getInstance().pushSegment(1, ExprType::Set);
         from = DeviceScalar(segment.getValues().data(), segment.getGrads().data());
     }
 
-    template<class ScalarType>
-    void SGD<device_obj<ScalarType>>::step() {
+    template<Scalar T>
+    void SGD<device_obj<T>>::step() {
         auto& tracer = TracerType::getInstance();
         tracer.forSegmentInRange(from, to, [this](SegmentType& segment) {
             const size_t length = segment.getLength();
@@ -55,8 +55,8 @@ namespace Physica::Core {
         });
     }
 
-    template<class ScalarType>
-    void SGD<device_obj<ScalarType>>::swap(SGD& __restrict obj) noexcept {
+    template<Scalar T>
+    void SGD<device_obj<T>>::swap(SGD& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         learnRate.swap(obj.learnRate);
         meanLearnRate.swap(obj.meanLearnRate);
@@ -65,8 +65,8 @@ namespace Physica::Core {
         to.swap(obj.to);
     }
 
-    template<class ScalarType>
-    __device__ void SGD<device_obj<ScalarType>>::stepKernelImpl(SegmentType& segment) const {
+    template<Scalar T>
+    __device__ void SGD<device_obj<T>>::stepKernelImpl(SegmentType& segment) const {
         using DiffScalar = typename SegmentType::DiffScalar;
         const unsigned int index = blockIdx.x * blockDim.x + threadIdx.x;
         if (index < segment.getLength()) {
@@ -75,8 +75,8 @@ namespace Physica::Core {
         }
     }
 
-    template<class ScalarType>
-    void SGD<device_obj<ScalarType>>::setLearnRate(ValueType lr) {
+    template<Scalar T>
+    void SGD<device_obj<T>>::setLearnRate(ValueType lr) {
         learnRate = lr;
         meanLearnRate = lr / ValueType(batchSize);
     }

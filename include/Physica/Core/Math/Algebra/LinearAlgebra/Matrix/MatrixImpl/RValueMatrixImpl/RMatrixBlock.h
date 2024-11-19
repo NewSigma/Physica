@@ -19,146 +19,80 @@
 #pragma once
 
 #include <Physica/Core/Math/Algebra/LinearAlgebra/Vector/VectorImpl/ContinuousVector.h>
+#include <Physica/Core/Math/Algebra/LinearAlgebra/Matrix/Matrix.h>
 
 namespace Physica::Core {
     template<class Derived> class RValueMatrix;
     template<class MatrixType, size_t Row = Dynamic, size_t Col = Dynamic> class RMatrixBlock;
-    /**
-     * \class RowRVector and \class ColRVector is designed to implement \class RMatrixBlock, and they can be used indepently.
-     */
-    template<class MatrixType>
-    class RowRVector : public RValueVector<RowRVector<MatrixType>> {
+
+    template<Matrix T>
+    class RMatrixBlock<T, 1, Dynamic> : public RValueVector<RMatrixBlock<T, 1, Dynamic>> {
+        using This = RMatrixBlock<T, 1, Dynamic>;
+        using Base = RValueVector<This>;
     public:
-        using Base = RValueVector<RowRVector<MatrixType>>;
-        using ScalarType = typename MatrixType::ScalarType;
+        using typename Base::ScalarType;
+        using typename Base::ValueType;
+        using Base::isComplex;
+        using Base::SizeAtCompile;
     private:
-        MatrixType& mat;
-        size_t row;
+        T& mat;
+        size_t fromRow;
         size_t fromCol;
         size_t colCount;
     public:
-        RowRVector(MatrixType& mat_, size_t row_, size_t fromCol_, size_t colCount_) : mat(mat_), row(row_), fromCol(fromCol_), colCount(colCount_) {
-            assert(row < mat.getRow());
+        RMatrixBlock(T& mat_, size_t fromRow_, size_t fromCol_, size_t colCount_) : mat(mat_), fromRow(fromRow_), fromCol(fromCol_), colCount(colCount_) {
+            assert(fromRow < mat.getRow());
             assert(fromCol + colCount <= mat.getCol());
         }
-        RowRVector(const RowRVector&) = delete;
-        RowRVector(RowRVector&&) noexcept = delete;
-        ~RowRVector() = default;
+        RMatrixBlock(const This&) = delete;
+        RMatrixBlock(This&&) noexcept = delete;
+        ~RMatrixBlock() = default;
         /* Getters */
-        [[nodiscard]] ScalarType calc(size_t index) const { assert(index < colCount); return mat.calc(row, fromCol + index); }
+        [[nodiscard]] ScalarType calc(size_t index) const { assert(index < colCount); return mat.calc(fromRow, fromCol + index); }
         [[nodiscard]] __host__ __device__ size_t getLength() const noexcept { return colCount; }
     };
 
-    template<class MatrixType>
-    class ColRVector : public RValueVector<ColRVector<MatrixType>> {
+    template<Matrix T>
+    class RMatrixBlock<T, Dynamic, 1> : public RValueVector<RMatrixBlock<T, Dynamic, 1>> {
+        using This = RMatrixBlock<T, Dynamic, 1>;
+        using Base = RValueVector<This>;
     public:
-        using Base = RValueVector<ColRVector<MatrixType>>;
-        using ScalarType = typename MatrixType::ScalarType;
+        using typename Base::ScalarType;
+        using typename Base::ValueType;
+        using Base::isComplex;
+        using Base::SizeAtCompile;
     private:
-        MatrixType& mat;
-        size_t col;
+        T& mat;
         size_t fromRow;
+        size_t fromCol;
         size_t rowCount;
     public:
-        ColRVector(MatrixType& mat_, size_t fromRow_, size_t rowCount_, size_t col_)
-                : mat(mat_), col(col_), fromRow(fromRow_), rowCount(rowCount_) {
+        RMatrixBlock(T& mat_, size_t fromRow_, size_t rowCount_, size_t fromCol_) : mat(mat_), fromRow(fromRow_), fromCol(fromCol_), rowCount(rowCount_) {
             assert(fromRow + rowCount <= mat.getRow());
-            assert(col < mat.getCol());
+            assert(fromCol < mat.getCol());
         }
-        ColRVector(const ColRVector&) = delete;
-        ColRVector(ColRVector&&) noexcept = delete;
-        ~ColRVector() = default;
+        RMatrixBlock(const This&) = delete;
+        RMatrixBlock(This&&) noexcept = delete;
+        ~RMatrixBlock() = default;
         /* Getters */
-        [[nodiscard]] ScalarType calc(size_t index) const { assert(index < rowCount); return mat.calc(fromRow + index, col); }
+        [[nodiscard]] ScalarType calc(size_t index) const { assert(index < rowCount); return mat.calc(fromRow + index, fromCol); }
         [[nodiscard]] __host__ __device__ size_t getLength() const noexcept { return rowCount; }
     };
 
-    template<class MatrixType>
-    class RMatrixBlock<MatrixType, 1, Dynamic> : public RValueMatrix<RMatrixBlock<MatrixType, 1, Dynamic>>
-                                               , public RowRVector<MatrixType> {
-        using This = RMatrixBlock<MatrixType, 1, Dynamic>;
-        using Base = RValueMatrix<This>;
-    public:
-        using VectorBase = RowRVector<MatrixType>;
-        using ScalarType = typename MatrixType::ScalarType;
-    public:
-        RMatrixBlock(MatrixType& mat_, size_t row_, size_t fromCol_, size_t colCount_) : VectorBase(mat_, row_, fromCol_, colCount_) {}
-        RMatrixBlock(const This&) = delete;
-        RMatrixBlock(This&&) noexcept = delete;
-        ~RMatrixBlock() = default;
-        /* Operations */
-        using Base::assignTo;
-        using VectorBase::assignTo;
-
-        using VectorBase::format;
-        /* Getters */
-        using VectorBase::calc;
-        using VectorBase::conjugate;
-        using VectorBase::max;
-        using VectorBase::min;
-        using VectorBase::sum;
-        [[nodiscard]] ScalarType calc([[maybe_unused]] size_t row, size_t col) const { assert(row == 0); return VectorBase::calc(col); }
-        [[nodiscard]] __host__ __device__ constexpr static size_t getRow() noexcept { return 1; }
-        [[nodiscard]] __host__ __device__ size_t getCol() const noexcept { return VectorBase::getLength(); }
-        /**
-         * There are some common functions shared by vector and matrix, it is necessary to decide which function to call explicitly.
-         */
-        [[nodiscard]] Base& asMatrix() noexcept { return *this; }
-        [[nodiscard]] const Base& asMatrix() const noexcept { return *this; }
-        [[nodiscard]] VectorBase& asVector() noexcept { return *this; }
-        [[nodiscard]] const VectorBase& asVector() const noexcept { return *this; }
-    };
-
-    template<class MatrixType>
-    class RMatrixBlock<MatrixType, Dynamic, 1> : public RValueMatrix<RMatrixBlock<MatrixType, Dynamic, 1>>
-                                               , public ColRVector<MatrixType> {
-        using This = RMatrixBlock<MatrixType, Dynamic, 1>;
-        using Base = RValueMatrix<This>;
-    public:
-        using VectorBase = ColRVector<MatrixType>;
-        using ScalarType = typename MatrixType::ScalarType;
-    public:
-        RMatrixBlock(MatrixType& mat_, size_t fromRow_, size_t rowCount_, size_t col_) : VectorBase(mat_, fromRow_, rowCount_, col_) {}
-        RMatrixBlock(const This&) = delete;
-        RMatrixBlock(This&&) noexcept = delete;
-        ~RMatrixBlock() = default;
-        /* Operations */
-        using Base::assignTo;
-        using VectorBase::assignTo;
-
-        using VectorBase::format;
-        /* Getters */
-        using VectorBase::calc;
-        using VectorBase::conjugate;
-        using VectorBase::max;
-        using VectorBase::min;
-        using VectorBase::sum;
-        [[nodiscard]] ScalarType calc(size_t row, [[maybe_unused]] size_t col) const { assert(col == 0); return VectorBase::calc(row); }
-        [[nodiscard]] __host__ __device__ size_t getRow() const noexcept { return VectorBase::getLength(); }
-        [[nodiscard]] __host__ __device__ constexpr static size_t getCol() noexcept { return 1; }
-        /**
-         * There are some common functions shared by vector and matrix, it is necessary to decide which function to call explicitly.
-         */
-        [[nodiscard]] Base& asMatrix() noexcept { return *this; }
-        [[nodiscard]] const Base& asMatrix() const noexcept { return *this; }
-        [[nodiscard]] VectorBase& asVector() noexcept { return *this; }
-        [[nodiscard]] const VectorBase& asVector() const noexcept { return *this; }
-    };
-
-    template<class MatrixType>
-    class RMatrixBlock<MatrixType, Dynamic, Dynamic> : public RValueMatrix<RMatrixBlock<MatrixType, Dynamic, Dynamic>> {
-        using This = RMatrixBlock<MatrixType, Dynamic, Dynamic>;
+    template<Matrix T>
+    class RMatrixBlock<T, Dynamic, Dynamic> : public RValueMatrix<RMatrixBlock<T, Dynamic, Dynamic>> {
+        using This = RMatrixBlock<T, Dynamic, Dynamic>;
         using Base = RValueMatrix<This>;
     public:
         using typename Base::ScalarType;
     private:
-        MatrixType& mat;
+        T& mat;
         size_t fromRow;
         size_t rowCount;
         size_t fromCol;
         size_t colCount;
     public:
-        RMatrixBlock(MatrixType& mat_, size_t fromRow_, size_t rowCount_, size_t fromCol_, size_t colCount_);
+        RMatrixBlock(T& mat_, size_t fromRow_, size_t rowCount_, size_t fromCol_, size_t colCount_);
         RMatrixBlock(const This&) = delete;
         RMatrixBlock(This&&) noexcept = delete;
         ~RMatrixBlock() = default;
@@ -168,8 +102,8 @@ namespace Physica::Core {
         [[nodiscard]] __host__ __device__ size_t getCol() const noexcept { return colCount; }
     };
 
-    template<class MatrixType>
-    RMatrixBlock<MatrixType, Dynamic, Dynamic>::RMatrixBlock(MatrixType& mat_, size_t fromRow_, size_t rowCount_, size_t fromCol_, size_t colCount_)
+    template<Matrix T>
+    RMatrixBlock<T, Dynamic, Dynamic>::RMatrixBlock(T& mat_, size_t fromRow_, size_t rowCount_, size_t fromCol_, size_t colCount_)
             : mat(mat_)
             , fromRow(fromRow_)
             , rowCount(rowCount_)
@@ -179,9 +113,9 @@ namespace Physica::Core {
         assert((fromCol + colCount) <= mat.getCol());
     }
 
-    template<class MatrixType>
-    typename RMatrixBlock<MatrixType, Dynamic, Dynamic>::ScalarType
-    RMatrixBlock<MatrixType, Dynamic, Dynamic>::calc(size_t row, size_t col) const {
+    template<Matrix T>
+    typename RMatrixBlock<T, Dynamic, Dynamic>::ScalarType
+    RMatrixBlock<T, Dynamic, Dynamic>::calc(size_t row, size_t col) const {
         assert(row < rowCount);
         assert(col < colCount);
         return mat.calc(row + fromRow, col + fromCol);
@@ -189,33 +123,16 @@ namespace Physica::Core {
 }
 
 namespace Physica {
-    using namespace Core;
-
-    template<class MatrixType>
-    class Traits<RowRVector<MatrixType>> {
+    template<Matrix T, size_t Row, size_t Col>
+    class Traits<Core::RMatrixBlock<T, Row, Col>> {
     public:
-        using ScalarType = typename MatrixType::ScalarType;
-        constexpr static size_t SizeAtCompile = Traits<MatrixType>::ColAtCompile;
-        constexpr static bool FastAssign = false;
-        constexpr static bool FastPacket = false;
-    };
-
-    template<class MatrixType>
-    class Traits<ColRVector<MatrixType>> {
-    public:
-        using ScalarType = typename MatrixType::ScalarType;
-        constexpr static size_t SizeAtCompile = Traits<MatrixType>::RowAtCompile;
-        constexpr static bool FastAssign = false;
-        constexpr static bool FastPacket = false;
-    };
-
-    template<class MatrixType, size_t Row, size_t Col>
-    class Traits<RMatrixBlock<MatrixType, Row, Col>> {
-    public:
-        using ScalarType = typename MatrixType::ScalarType;
-        constexpr static int Option = MatrixType::Option;
+        using ScalarType = typename T::ScalarType;
+        constexpr static int Option = T::Option;
         constexpr static size_t RowAtCompile = Row;
         constexpr static size_t ColAtCompile = Col;
         constexpr static size_t SizeAtCompile = Row * Col;
+
+        constexpr static bool FastAssign = false;
+        constexpr static bool FastPacket = false;
     };
 }

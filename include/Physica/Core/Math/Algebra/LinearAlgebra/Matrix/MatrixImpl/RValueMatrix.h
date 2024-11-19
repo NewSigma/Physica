@@ -21,9 +21,6 @@
 #include "RValueMatrixImpl/RMatrixBlock.h"
 
 namespace Physica::Core {
-    template<class T>
-    concept Matrix = std::derived_from<T, RValueMatrix<T>> || std::derived_from<T, device_obj<RValueMatrix<T>>>;
-
     template<class Derived> class LValueMatrix;
     template<class Derived> class ContinuousMatrix;
     template<class MatrixType> class Transpose;
@@ -57,9 +54,8 @@ namespace Physica::Core {
         constexpr static bool isForwardDiff = ScalarType::isForwardDiff;
         constexpr static bool isReverseDiff = ScalarType::isReverseDiff;
         constexpr static bool isComplex = ScalarType::isComplex;
-        constexpr static bool isColMatrix = MatrixOption::isColMatrix<Derived>();
-        constexpr static bool isRowMatrix = MatrixOption::isRowMatrix<Derived>();
     public:
+        ~RValueMatrix() = default;
         /* Operations */
         template<Matrix M>
         void assignTo(LValueMatrix<M>& target) const;
@@ -98,7 +94,7 @@ namespace Physica::Core {
 
         [[nodiscard]] ScalarType calc(size_t row, size_t col) const { return Base::getDerived().calc(row, col); }
         [[nodiscard]] inline ScalarType calcFromMajorMinor(size_t major, size_t minor) const;
-        [[nodiscard]] inline FormatedMatrix<Derived> format() const;
+        [[nodiscard]] inline auto format() const noexcept;
 
         [[nodiscard]] RealType norm1() const;
         template<class Executor = SequentialExecutor>
@@ -107,10 +103,10 @@ namespace Physica::Core {
         [[nodiscard]] ScalarType max() const;
         [[nodiscard]] ScalarType min() const;
         [[nodiscard]] ScalarType trace() const;
-        [[nodiscard]] inline Transpose<Derived> transpose() const noexcept;
-        [[nodiscard]] inline Conjugate<Derived> conjugate() const noexcept;
-        [[nodiscard]] inline Hermite<Derived> hermite() const noexcept;
-        [[nodiscard]] RValueFlatten<Derived> flatten() const noexcept;
+        [[nodiscard]] inline auto transpose() const noexcept;
+        [[nodiscard]] inline auto conjugate() const noexcept;
+        [[nodiscard]] inline auto hermite() const noexcept;
+        [[nodiscard]] inline auto flatten() const noexcept;
         [[nodiscard]] ScalarType sum() const;
         /* Getters */
         [[nodiscard]] __host__ __device__ size_t getRow() const noexcept { return Base::getDerived().getRow(); }
@@ -122,21 +118,28 @@ namespace Physica::Core {
         /* Static members */
         [[nodiscard]] __host__ __device__ static size_t rowFromMajorMinor(size_t major, size_t minor) noexcept { return MatrixOption::rowFromMajorMinor<Derived>(major, minor); }
         [[nodiscard]] __host__ __device__ static size_t colFromMajorMinor(size_t major, size_t minor) noexcept { return MatrixOption::colFromMajorMinor<Derived>(major, minor); }
+    protected:
+        RValueMatrix() = default;
+        RValueMatrix(const This&) = default;
+        RValueMatrix(This&&) noexcept = default;
+        /* Operators */
+        This& operator=(const This&) = default;
+        This& operator=(This&&) noexcept = default;
     };
 
-    template<class MatrixType, class MatrixType2>
-    bool matrixNear(const RValueMatrix<MatrixType>& m1, const RValueMatrix<MatrixType2>& m2, double precision);
+    template<Matrix T1, Matrix T2>
+    bool matrixNear(const T1& m1, const T2& m2, double precision);
 
-    template<class Derived>
-    bool operator==(const RValueMatrix<Derived>& m1, const RValueMatrix<Derived>& m2);
+    template<Matrix T>
+    bool operator==(const T& m1, const T& m2);
 
-    template<class Derived>
-    inline bool operator!=(const RValueMatrix<Derived>& m1, const RValueMatrix<Derived>& m2) { return !(m1 == m2); }
+    template<Matrix T>
+    inline bool operator!=(const T& m1, const T& m2) { return !(m1 == m2); }
 }
 
 namespace Physica {
     template<class T>
-    class Traits<Core::RValueMatrix<T>> {
+    class Traits<RValueMatrix<T>> : public Traits<T> {
     public:
         using Derived = T;
     };

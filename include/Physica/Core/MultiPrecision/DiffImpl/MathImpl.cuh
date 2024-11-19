@@ -20,11 +20,11 @@
 
 namespace Physica::Core {
     namespace Internal {
-        template<class ScalarType, ExprType Type>
+        template<Scalar T, ExprType Type>
         __global__ void __launch_bounds__(1, 1) ElementaryFunction_calcKernel(
-                Physica::PlainStruct<device_obj<TraceSegment<ScalarType, 1>>> segment_,
-                Physica::PlainStruct<const device_obj<Diff<ScalarType, DiffMode::Reverse, 1>>> s_) {
-            using SegmentType = device_obj<TraceSegment<ScalarType, 1>>;
+                Physica::PlainStruct<device_obj<TraceSegment<T, 1>>> segment_,
+                Physica::PlainStruct<const device_obj<Diff<T, DiffMode::Reverse, 1>>> s_) {
+            using SegmentType = device_obj<TraceSegment<T, 1>>;
             using DiffRecord = typename SegmentType::DiffRecord;
             auto& segment = segment_.getDerived();
             segment.getRecords()[0] = DiffRecord{0, Type};
@@ -38,11 +38,11 @@ namespace Physica::Core {
         }
     }
 
-    template<class ScalarType>
-    device_obj<Diff<ScalarType, DiffMode::Reverse, 1>> ln(const device_obj<Diff<ScalarType, DiffMode::Reverse, 1>>& s) {
-        using TracerType = device_obj<DiffTracer<ScalarType, 1>>;
+    template<Scalar T>
+    device_obj<Diff<T, DiffMode::Reverse, 1>> ln(const device_obj<Diff<T, DiffMode::Reverse, 1>>& s) {
+        using TracerType = device_obj<DiffTracer<T, 1>>;
         auto& segment = TracerType::getInstance().pushSegment(1, ExprType::Ln);
-        Internal::ElementaryFunction_calcKernel<ScalarType, ExprType::Ln>
+        Internal::ElementaryFunction_calcKernel<T, ExprType::Ln>
                 <<<1, 1, 0, CUDAContext::getInstance()>>>(asStruct(segment), asStruct(s));
         check(cudaGetLastError());
         return segment[0];

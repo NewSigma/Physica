@@ -22,8 +22,8 @@
 #include "MatrixImpl/RValueMatrix.h"
 
 namespace Physica::Core {
-    template<class ScalarType>
-    class PermutationMatrix : public RValueMatrix<PermutationMatrix<ScalarType>> {
+    template<Scalar T>
+    class PermutationMatrix : public RValueMatrix<PermutationMatrix<T>> {
         Array<size_t> indexes;
     public:
         PermutationMatrix() = default;
@@ -39,19 +39,19 @@ namespace Physica::Core {
         [[nodiscard]] PermutationMatrix inverse() const noexcept;
         void swap(PermutationMatrix& __restrict obj) noexcept;
         /* Getters */
-        [[nodiscard]] ScalarType calc(size_t row, size_t col) const;
+        [[nodiscard]] T calc(size_t row, size_t col) const;
         [[nodiscard]] size_t getRow() const noexcept { return indexes.getLength(); }
         [[nodiscard]] size_t getCol() const noexcept { return indexes.getLength(); }
     };
 
-    template<class ScalarType>
-    PermutationMatrix<ScalarType>::PermutationMatrix(size_t order) : indexes(order) {
+    template<Scalar T>
+    PermutationMatrix<T>::PermutationMatrix(size_t order) : indexes(order) {
         for (size_t i = 0; i < order; ++i)
             indexes[i] = i;
     }
 
-    template<class ScalarType>
-    PermutationMatrix<ScalarType>::PermutationMatrix(Array<size_t> indexes_) : indexes(std::move(indexes_)) {
+    template<Scalar T>
+    PermutationMatrix<T>::PermutationMatrix(Array<size_t> indexes_) : indexes(std::move(indexes_)) {
         std::unordered_set<size_t> buffer{};
         for (size_t index : indexes) {
             if (index >= indexes.getLength())
@@ -62,45 +62,43 @@ namespace Physica::Core {
             throw std::invalid_argument("[Error]: Duplicate index is not allowed");
     }
 
-    template<class ScalarType>
-    PermutationMatrix<ScalarType>& PermutationMatrix<ScalarType>::operator=(PermutationMatrix obj) noexcept {
+    template<Scalar T>
+    PermutationMatrix<T>& PermutationMatrix<T>::operator=(PermutationMatrix obj) noexcept {
         swap(obj);
         return *this;
     }
 
-    template<class ScalarType>
-    void PermutationMatrix<ScalarType>::swapRows(size_t row1, size_t row2) {
+    template<Scalar T>
+    void PermutationMatrix<T>::swapRows(size_t row1, size_t row2) {
         std::swap(indexes[row1], indexes[row2]);
     }
 
-    template<class ScalarType>
-    PermutationMatrix<ScalarType> PermutationMatrix<ScalarType>::inverse() const noexcept {
+    template<Scalar T>
+    PermutationMatrix<T> PermutationMatrix<T>::inverse() const noexcept {
         Array<size_t> result(indexes.getLength());
         for (size_t i = 0; i < result.getLength(); ++i)
             result[indexes[i]] = i;
-        return PermutationMatrix<ScalarType>(std::move(result));
+        return PermutationMatrix<T>(std::move(result));
     }
 
-    template<class ScalarType>
-    void PermutationMatrix<ScalarType>::swap(PermutationMatrix& __restrict obj) noexcept {
+    template<Scalar T>
+    void PermutationMatrix<T>::swap(PermutationMatrix& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         indexes.swap(obj.indexes);
     }
 
-    template<class ScalarType>
-    ScalarType PermutationMatrix<ScalarType>::calc(size_t row, size_t col) const {
-        return indexes[row] == col ? ScalarType(1) : ScalarType(0);
+    template<Scalar T>
+    T PermutationMatrix<T>::calc(size_t row, size_t col) const {
+        return indexes[row] == col ? T(1) : T(0);
     }
 }
 
 namespace Physica {
-    using namespace Core;
-
-    template<class T>
-    class Traits<PermutationMatrix<T>> {
+    template<Core::Scalar T>
+    class Traits<Core::PermutationMatrix<T>> {
     public:
         using ScalarType = T;
-        constexpr static int Option = MatrixOption::AnyMajor | MatrixOption::AnyStorage;
+        constexpr static int Option = Core::MatrixOption::AnyMajor | Core::MatrixOption::AnyStorage;
         constexpr static size_t RowAtCompile = Dynamic;
         constexpr static size_t ColAtCompile = Dynamic;
         constexpr static size_t SizeAtCompile = RowAtCompile * ColAtCompile;

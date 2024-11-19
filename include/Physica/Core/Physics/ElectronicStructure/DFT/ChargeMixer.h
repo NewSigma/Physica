@@ -26,17 +26,17 @@ namespace Physica::Core {
      * References:
      * [1] G. Kresse and J. Furthmüller, Efficient iterative schemes for ab initio total-energy calculations using a plane-wave basis set(https://doi.org/10.1103/physrevb.54.11169)
      */
-    template<class ScalarType, bool isSpinPolarized>
+    template<Scalar T, bool isSpinPolarized>
     class ChargeMixer {
         constexpr static size_t DIISBufferSize = 5;
         constexpr static double amix = 0.8; //Refer to [1]
         constexpr static double bmix = 0.8; //Refer to [1]
         constexpr static double amin = 0.4; //Refer to VASP wiki
         constexpr static double pulay_mix = 0.4;
-        using LatticeMatrix = typename CrystalCell<ScalarType>::LatticeMatrix;
-        using DensityType = DensityGrid<ScalarType, isSpinPolarized>;
+        using LatticeMatrix = typename CrystalCell<T>::LatticeMatrix;
+        using DensityType = DensityGrid<T, isSpinPolarized>;
         using DensityArray = Array<DensityType, DIISBufferSize>;
-        using FFT3D = FFT<ScalarType, 3>;
+        using FFT3D = FFT<T, 3>;
         using Index3D = typename DensityType::Index3D;
     private:
         LatticeMatrix repLatt;
@@ -61,22 +61,22 @@ namespace Physica::Core {
         [[nodiscard]] const DensityType& getResidule() const noexcept { return residules[mixIteration]; }
     };
 
-    template<class ScalarType, bool isSpinPolarized>
-    ChargeMixer<ScalarType, isSpinPolarized>::ChargeMixer(LatticeMatrix repLatt_, Index3D dim)
+    template<Scalar T, bool isSpinPolarized>
+    ChargeMixer<T, isSpinPolarized>::ChargeMixer(LatticeMatrix repLatt_, Index3D dim)
             : repLatt(std::move(repLatt_))
             , oldDensities(DIISBufferSize, dim)
             , residules(DIISBufferSize, dim)
             , fft(dim, PlanFlag::Estimate)
             , mixIteration(0) {}
 
-    template<class ScalarType, bool isSpinPolarized>
-    ChargeMixer<ScalarType, isSpinPolarized>& ChargeMixer<ScalarType, isSpinPolarized>::operator=(ChargeMixer mixer) noexcept {
+    template<Scalar T, bool isSpinPolarized>
+    ChargeMixer<T, isSpinPolarized>& ChargeMixer<T, isSpinPolarized>::operator=(ChargeMixer mixer) noexcept {
         swap(mixer);
         return *this;
     }
 
-    template<class ScalarType, bool isSpinPolarized>
-    void ChargeMixer<ScalarType, isSpinPolarized>::swap(ChargeMixer& __restrict mixer) noexcept {
+    template<Scalar T, bool isSpinPolarized>
+    void ChargeMixer<T, isSpinPolarized>::swap(ChargeMixer& __restrict mixer) noexcept {
         assert(this != &mixer && "[Error]: Self swap is likely a bug");
         repLatt.swap(mixer.repLatt);
         oldDensities.swap(mixer.oldDensities);
@@ -85,19 +85,19 @@ namespace Physica::Core {
         std::swap(mixIteration, mixer.mixIteration);
     }
 
-    template<class ScalarType, bool isSpinPolarized>
-    void ChargeMixer<ScalarType, isSpinPolarized>::fetchInputDensity(DensityType& input) {
+    template<Scalar T, bool isSpinPolarized>
+    void ChargeMixer<T, isSpinPolarized>::fetchInputDensity(DensityType& input) {
         oldDensities[mixIteration].swap(input);
     }
 
-    template<class ScalarType, bool isSpinPolarized>
-    void ChargeMixer<ScalarType, isSpinPolarized>::mix(const DensityType& output) {
+    template<Scalar T, bool isSpinPolarized>
+    void ChargeMixer<T, isSpinPolarized>::mix(const DensityType& output) {
         const DensityType& input = oldDensities[mixIteration];
         residules[mixIteration].getTotalDensity().flatten() = output.getTotalDensity().flatten() - input.getTotalDensity().flatten();
     }
 
-    template<class ScalarType, bool isSpinPolarized>
-    void ChargeMixer<ScalarType, isSpinPolarized>::mix(size_t iteration, DensityType& result) {
+    template<Scalar T, bool isSpinPolarized>
+    void ChargeMixer<T, isSpinPolarized>::mix(size_t iteration, DensityType& result) {
         if (iteration == 0) {
             using GridType = typename FFT3D::KSpaceType;
             using Index3D = typename GridType::Index3D;
@@ -106,12 +106,12 @@ namespace Physica::Core {
             fft.transform();
 
             auto& kSpace = fft.getKSpace();
-            auto kernel = [&kSpace](Vector3D<ScalarType> k, Index3D index) {
-                const ScalarType kNorm = k.squaredNorm();
-                const ScalarType factor = ScalarType(amix) * std::min(kNorm / (kNorm + square(ScalarType(bmix))), ScalarType(amin));
+            auto kernel = [&kSpace](Vector3D<T> k, Index3D index) {
+                const T kNorm = k.squaredNorm();
+                const T factor = T(amix) * std::min(kNorm / (kNorm + square(T(bmix))), T(amin));
                 kSpace(index) *= factor;
             };
-            GridType::template forPointIndexInGrid<ScalarType, true, decltype(kernel)>(kSpace.getDim(), repLatt, kernel);
+            GridType::template forPointIndexInGrid<T, true, decltype(kernel)>(kSpace.getDim(), repLatt, kernel);
             fft.invTransform();
 
             const auto& rho_old = oldDensities[0].getTotalDensity().flatten();
@@ -119,33 +119,33 @@ namespace Physica::Core {
             rho_new = rho_old + fft.getRSpace().flatten();
         }
         else {
-            using MatrixType = DenseMatrix<ScalarType, MatrixOption::Col | MatrixOption::Element>;
+            using MatrixType = DenseMatrix<T, MatrixOption::Col | MatrixOption::Element>;
             const size_t numValidRecord = iteration > mixIteration ? (DIISBufferSize - 1) : (mixIteration + 1);
             MatrixType diisMat = MatrixType(numValidRecord + 1, numValidRecord + 1, 1.0);
-            diisMat(0, 0) = ScalarType(0);
+            diisMat(0, 0) = T(0);
             /* Construct equation */ {
                 for (size_t i = 1; i < diisMat.getRow(); ++i) {
                     for (size_t j = i; j < diisMat.getCol(); ++j) {
-                        ScalarType temp = residules[i - 1].getTotalDensity().flatten() * residules[j - 1].getTotalDensity().flatten();
+                        T temp = residules[i - 1].getTotalDensity().flatten() * residules[j - 1].getTotalDensity().flatten();
                         diisMat(i, j) = temp;
                         diisMat(j, i) = temp;
                     }
                 }
             }
-            VectorND<ScalarType> x(diisMat.getRow());
+            VectorND<T> x(diisMat.getRow());
             /* Solve */ {
-                auto b = VectorND<ScalarType>(diisMat.getRow(), 0);
+                auto b = VectorND<T>(diisMat.getRow(), 0);
                 b[0] = 1;
                 const MatrixType inv_A = diisMat.inverse();
                 x = inv_A * b;
             }
 
             auto rho_new = result.getTotalDensity().flatten();
-            rho_new = ScalarType(0);
+            rho_new = T(0);
             for (size_t i = 1; i < x.getLength(); ++i) {
                 const auto& rho_old = oldDensities[i - 1].getTotalDensity().flatten();
                 const auto& residule = residules[i - 1].getTotalDensity().flatten();
-                rho_new += (rho_old + ScalarType(pulay_mix) * residule) * x[i];
+                rho_new += (rho_old + T(pulay_mix) * residule) * x[i];
             }
 
             for (size_t i = 0; i < rho_new.getLength(); ++i)

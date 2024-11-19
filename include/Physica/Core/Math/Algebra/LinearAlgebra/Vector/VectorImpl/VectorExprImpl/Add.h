@@ -19,10 +19,10 @@
 #pragma once
 
 namespace Physica::Core {
-    template<class VectorType, Scalar T>
-    class VectorExpr<ExprType::Add, VectorType, T>
-            : public BinaryVectorExpr<ExprType::Add, VectorType, T> {
-        using Base = BinaryVectorExpr<ExprType::Add, VectorType, T>;
+    template<Vector T, Scalar U>
+    class VectorExpr<ExprType::Add, T, U>
+            : public BinaryVectorExpr<ExprType::Add, T, U> {
+        using Base = BinaryVectorExpr<ExprType::Add, T, U>;
     public:
         using typename Base::ScalarType;
     public:
@@ -41,17 +41,17 @@ namespace Physica::Core {
         }
     };
 
-    template<class VectorType1, class VectorType2>
-    class VectorExpr<ExprType::Add, VectorType1, VectorType2>
-            : public BinaryVectorExpr<ExprType::Add, VectorType1, VectorType2> {
-        using Base = BinaryVectorExpr<ExprType::Add, VectorType1, VectorType2>;
+    template<Vector T1, Vector T2>
+    class VectorExpr<ExprType::Add, T1, T2>
+            : public BinaryVectorExpr<ExprType::Add, T1, T2> {
+        using Base = BinaryVectorExpr<ExprType::Add, T1, T2>;
     public:
         using typename Base::ScalarType;
     public:
         using Base::Base;
         /* Operations */
-        template<class OtherDerived, class Executor = SequentialExecutor>
-        inline void assignTo(LValueVector<OtherDerived>& v) const;
+        template<LVector V, class Executor = SequentialExecutor>
+        inline void assignTo(V& v) const;
 
         [[nodiscard]] ScalarType calc(size_t s) const { return ScalarType(getLHS().calc(s)) + ScalarType(getRHS().calc(s)); }
 
@@ -69,45 +69,45 @@ namespace Physica::Core {
         using Base::getRHS;
     };
 
-    template<class VectorType1, class VectorType2>
-    template<class OtherDerived, class Executor>
-    inline void VectorExpr<ExprType::Add, VectorType1, VectorType2>::assignTo(LValueVector<OtherDerived>& v) const {
-        constexpr bool FastAssign1 = Traits<VectorType1>::FastAssign;
-        constexpr bool FastAssign2 = Traits<VectorType2>::FastAssign;
+    template<Vector T1, Vector T2>
+    template<LVector V, class Executor>
+    inline void VectorExpr<ExprType::Add, T1, T2>::assignTo(V& v) const {
+        constexpr bool FastAssign1 = Traits<T1>::FastAssign;
+        constexpr bool FastAssign2 = Traits<T2>::FastAssign;
         if constexpr (FastAssign1) {
             if constexpr (FastAssign2) {
-                getLHS().template assignTo<OtherDerived, Executor>(v);
-                OtherDerived buffer;
-                buffer.template operator=<VectorType2, Executor>(getRHS());
+                getLHS().template assignTo<V, Executor>(v);
+                V buffer;
+                buffer.template operator=<T2, Executor>(getRHS());
                 v += buffer;
             }
             else {
-                getLHS().template assignTo<OtherDerived, Executor>(v);
+                getLHS().template assignTo<V, Executor>(v);
                 v += getRHS();
             }
         }
         else {
             if constexpr (FastAssign2) {
-                getRHS().template assignTo<OtherDerived, Executor>(v);
+                getRHS().template assignTo<V, Executor>(v);
                 v += getLHS();
             }
             else
-                Base::template assignTo<OtherDerived, Executor>(v);
+                Base::template assignTo<V, Executor>(v);
         }
     }
 
-    template<class VectorType, Scalar T>
-    [[nodiscard]] inline auto operator+(const RValueVector<VectorType>& v, const T& x) noexcept {
-        return VectorExpr<ExprType::Add, VectorType, T>(v.getDerived(), x);
+    template<Vector T, Scalar U>
+    [[nodiscard]] inline auto operator+(const T& v, const U& x) noexcept {
+        return VectorExpr<ExprType::Add, T, U>(v, x);
     }
 
-    template<Scalar T, class VectorType>
-    [[nodiscard]] inline auto operator+(const T& x, const RValueVector<VectorType>& v) noexcept {
+    template<Scalar U, Vector T>
+    [[nodiscard]] inline auto operator+(const U& x, const T& v) noexcept {
         return v + x;
     }
 
-    template<class Derived, class OtherDerived>
-    [[nodiscard]] inline auto operator+(const RValueVector<Derived>& v1, const RValueVector<OtherDerived>& v2) noexcept {
-        return VectorExpr<ExprType::Add, Derived, OtherDerived>(v1.getDerived(), v2.getDerived());
+    template<Vector T1, Vector T2>
+    [[nodiscard]] inline auto operator+(const T1& v1, const T2& v2) noexcept {
+        return VectorExpr<ExprType::Add, T1, T2>(v1, v2);
     }
 }

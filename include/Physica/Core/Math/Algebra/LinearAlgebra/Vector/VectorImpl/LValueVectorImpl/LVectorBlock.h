@@ -23,9 +23,9 @@ namespace Physica::Core {
     /**
      * Reference a part of the given vector
      */
-    template<class VectorType, size_t Length>
-    class LVectorBlock : public LValueVector<LVectorBlock<VectorType, Length>> {
-        using This = LVectorBlock<VectorType, Length>;
+    template<LVector T, size_t Length>
+    class LVectorBlock : public LValueVector<LVectorBlock<T, Length>> {
+        using This = LVectorBlock<T, Length>;
         using Base = LValueVector<This>;
     public:
         using ScalarType = typename Base::ScalarType;
@@ -33,19 +33,19 @@ namespace Physica::Core {
         using typename Base::PtrTy;
         using typename Base::ConstPtrTy;
     private:
-        VectorType& vec;
+        T& vec;
         size_t from;
         size_t to;
     public:
-        LVectorBlock(LValueVector<VectorType>& vec_, size_t from_, size_t to_);
-        LVectorBlock(LValueVector<VectorType>& vec_, size_t from_);
+        LVectorBlock(T& vec_, size_t from_, size_t to_);
+        LVectorBlock(T& vec_, size_t from_);
         LVectorBlock(const This& block) = delete;
         LVectorBlock(This&&) noexcept = delete;
         ~LVectorBlock() = default;
         /* Operators */
         using Base::operator=;
-        LVectorBlock& operator=(const This& v) { Base::operator=(static_cast<const RValueVector<This>&>(v)); return *this; }
-        LVectorBlock& operator=(This&& v) noexcept { Base::operator=(static_cast<const RValueVector<This>&>(v)); return *this; }
+        LVectorBlock& operator=(const This& v) { return Base::operator=(v); }
+        LVectorBlock& operator=(This&& v) noexcept { return Base::operator=(v); }
         /* Operations */
         void resize([[maybe_unused]] size_t length) const { assert(length == getLength()); }
         /* Getters */
@@ -54,45 +54,45 @@ namespace Physica::Core {
         [[nodiscard]] __host__ __device__ ConstPtrTy data_ptr(size_t index) const;
     };
 
-    template<class VectorType, size_t Length>
-    LVectorBlock<VectorType, Length>::LVectorBlock(LValueVector<VectorType>& vec_, size_t from_, size_t to_)
-            : vec(vec_.getDerived()), from(from_), to(to_) {
+    template<LVector T, size_t Length>
+    LVectorBlock<T, Length>::LVectorBlock(T& vec_, size_t from_, size_t to_)
+            : vec(vec_), from(from_), to(to_) {
         assert(from_ < to);
         assert(to <= vec.getLength());
         assert(Length == Dynamic || Length == getLength());
     }
 
-    template<class VectorType, size_t Length>
-    LVectorBlock<VectorType, Length>::LVectorBlock(LValueVector<VectorType>& vec_, size_t from_) : LVectorBlock(vec_, from_, vec_.getLength()) {}
+    template<LVector T, size_t Length>
+    LVectorBlock<T, Length>::LVectorBlock(T& vec_, size_t from_) : LVectorBlock(vec_, from_, vec_.getLength()) {}
 
-    template<class VectorType, size_t Length>
-    __host__ __device__ size_t LVectorBlock<VectorType, Length>::getLength() const noexcept {
+    template<LVector T, size_t Length>
+    __host__ __device__ size_t LVectorBlock<T, Length>::getLength() const noexcept {
         if constexpr (Length == Dynamic)
             return to - from;
         else
             return Length;
     }
 
-    template<class VectorType, size_t Length>
-    __host__ __device__ inline typename LVectorBlock<VectorType, Length>::PtrTy
-    LVectorBlock<VectorType, Length>::data_ptr(size_t index) {
+    template<LVector T, size_t Length>
+    __host__ __device__ inline typename LVectorBlock<T, Length>::PtrTy
+    LVectorBlock<T, Length>::data_ptr(size_t index) {
         assert((index + from) < to);
         return vec.data_ptr(index + from);
     }
 
-    template<class VectorType, size_t Length>
-    __host__ __device__ inline typename LVectorBlock<VectorType, Length>::ConstPtrTy
-    LVectorBlock<VectorType, Length>::data_ptr(size_t index) const {
+    template<LVector T, size_t Length>
+    __host__ __device__ inline typename LVectorBlock<T, Length>::ConstPtrTy
+    LVectorBlock<T, Length>::data_ptr(size_t index) const {
         assert((index + from) < to);
         return vec.data_ptr(index + from);
     }
 }
 
 namespace Physica {
-    template<class VectorType, size_t Length>
-    class Traits<Core::LVectorBlock<VectorType, Length>> {
+    template<LVector T, size_t Length>
+    class Traits<LVectorBlock<T, Length>> {
     public:
-        using ScalarType = typename VectorType::ScalarType;
+        using ScalarType = typename T::ScalarType;
         constexpr static size_t SizeAtCompile = Length;
         constexpr static bool FastAssign = false;
         constexpr static bool FastPacket = false;

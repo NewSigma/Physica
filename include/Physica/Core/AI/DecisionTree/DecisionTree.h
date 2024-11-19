@@ -28,15 +28,15 @@ namespace Physica::Core {
         Classify
     };
 
-    template<class ScalarType, DecisionTreeType Type> class RandomForest;
+    template<Scalar T, DecisionTreeType Type> class RandomForest;
     /*
      * Reference:
      * [1] 周志华. 机器学习[M]. 清华大学出版社, 2016.73-
      */
-    template<class ScalarType, DecisionTreeType Type>
+    template<Scalar T, DecisionTreeType Type>
     class DecisionTree {
-        using MatrixType = Core::DenseMatrix<ScalarType>;
-        using VectorType = Core::VectorND<ScalarType>;
+        using MatrixType = DenseMatrix<T>;
+        using VectorType = VectorND<T>;
     public:
         struct Dataset {
             MatrixType features;
@@ -44,7 +44,7 @@ namespace Physica::Core {
             Array<bool> isFeatureContinuous;
         };
 
-        using LossFunctor = ScalarType (*)(const Dataset&, const Array<size_t>&);
+        using LossFunctor = T (*)(const Dataset&, const Array<size_t>&);
     private:
         enum NodeType {
             Regression,
@@ -52,7 +52,7 @@ namespace Physica::Core {
         };
 
         size_t featureId;
-        ScalarType splitPoint;
+        T splitPoint;
         Array<DecisionTree> subTrees;
         NodeType nodeType;
     public:
@@ -63,19 +63,19 @@ namespace Physica::Core {
         /* Operators */
         DecisionTree& operator=(DecisionTree tree) noexcept;
         /* Operations */
-        [[nodiscard]] ScalarType predict(const VectorType& features) const;
+        [[nodiscard]] T predict(const VectorType& features) const;
         void swap(DecisionTree& __restrict tree) noexcept;
         /* Static members */
         static DecisionTree train(const Dataset& dataset);
     private:
-        DecisionTree(size_t featureId_, ScalarType splitPoint_, Array<DecisionTree> subTrees_, NodeType nodeType_);
+        DecisionTree(size_t featureId_, T splitPoint_, Array<DecisionTree> subTrees_, NodeType nodeType_);
         /* Getters */
         [[nodiscard]] bool isClassifyNode() const noexcept { return !isLeafNode() && nodeType == NodeType::Classify; }
         [[nodiscard]] bool isRegressionNode() const noexcept { return !isLeafNode() && nodeType == NodeType::Regression; }
         [[nodiscard]] bool isLeafNode() const noexcept { return subTrees.getLength() == 0; }
         /* Static members */
         static std::forward_list<size_t> makeInitialFeatures(size_t numFeature);
-        static ScalarType checkStopRecursion(const Dataset& dataset,
+        static T checkStopRecursion(const Dataset& dataset,
                                              const std::forward_list<size_t>& availableSample,
                                              const std::forward_list<size_t>& availableFeature);
         template<class TrainFunctor>
@@ -83,26 +83,26 @@ namespace Physica::Core {
                                         const std::forward_list<size_t>& availableSample,
                                         const std::forward_list<size_t>& availableFeature,
                                         size_t featureId,
-                                        ScalarType splitPoint,
+                                        T splitPoint,
                                         TrainFunctor functor);
         static DecisionTree train(const Dataset& dataset,
                                   std::forward_list<size_t> availableSample,
                                   std::forward_list<size_t> availableFeature);
-        static ScalarType findCommonLabel(const VectorType& labels, const std::forward_list<size_t>& availableSample);
-        static ScalarType makeAverageLabel(const VectorType& labels, const std::forward_list<size_t>& availableSample);
-        static ScalarType giniIndex(const Dataset& dataset, const Array<size_t>& availableSample);
-        static ScalarType mse(const Dataset& dataset, const Array<size_t>& availableSample);
-        static std::pair<size_t, ScalarType> selectOptimalFeature(const Dataset& dataset,
+        static T findCommonLabel(const VectorType& labels, const std::forward_list<size_t>& availableSample);
+        static T makeAverageLabel(const VectorType& labels, const std::forward_list<size_t>& availableSample);
+        static T giniIndex(const Dataset& dataset, const Array<size_t>& availableSample);
+        static T mse(const Dataset& dataset, const Array<size_t>& availableSample);
+        static std::pair<size_t, T> selectOptimalFeature(const Dataset& dataset,
                                                                   const std::forward_list<size_t>& availableSample,
                                                                   const std::forward_list<size_t>& availableFeature,
                                                                   LossFunctor functor);
         static inline LossFunctor getLossFunctor();
         /* Friends */
-        friend class RandomForest<ScalarType, Type>;
+        friend class RandomForest<T, Type>;
     };
 
-    template<class ScalarType, DecisionTreeType Type>
-    inline typename DecisionTree<ScalarType, Type>::LossFunctor DecisionTree<ScalarType, Type>::getLossFunctor() {
+    template<Scalar T, DecisionTreeType Type>
+    inline typename DecisionTree<T, Type>::LossFunctor DecisionTree<T, Type>::getLossFunctor() {
         constexpr bool isClassifyTree = Type == DecisionTreeType::Classify;
         return isClassifyTree ? giniIndex : mse;
     }

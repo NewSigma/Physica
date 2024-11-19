@@ -20,9 +20,9 @@
 
 namespace Physica::Core {
     namespace Internal {
-        template<class ScalarType, class Functor, int DeltaOrder>
-        struct GaussIntegral<Rectangle1<ScalarType>, Functor, DeltaOrder> {
-            static ScalarType run(Functor func) {
+        template<Scalar T, class Functor, int DeltaOrder>
+        struct GaussIntegral<Rectangle1<T>, Functor, DeltaOrder> {
+            static T run(Functor func) {
                 constexpr static double factor = 0.577350269189626;
                 return func({factor, factor}) +
                        func({-factor, factor}) +
@@ -31,20 +31,20 @@ namespace Physica::Core {
             }
         };
 
-        template<class ScalarType, class Functor>
-        struct GaussIntegral<Rectangle1<ScalarType>, Functor, -1> {
-            static ScalarType run(Functor func) {
+        template<Scalar T, class Functor>
+        struct GaussIntegral<Rectangle1<T>, Functor, -1> {
+            static T run(Functor func) {
                 return func({0, 0}) * 4;
             }
         };
 
-        template<class ScalarType, class Functor>
-        struct GaussIntegral<Rectangle1<ScalarType>, Functor, 1> {
-            static ScalarType run(Functor func) {
+        template<Scalar T, class Functor>
+        struct GaussIntegral<Rectangle1<T>, Functor, 1> {
+            static T run(Functor func) {
                 constexpr double x = 0.774596669241483;
                 constexpr double weight1 = 0.5555555555555556;
                 constexpr double weight2 = 0.8888888888888889;
-                ScalarType result = 0;
+                T result = 0;
                 result += (func({-x, -x}) + func({x, -x}) + func({-x, x}) + func({x, x})) * (weight1 * weight1);
                 result += (func({x, 0}) + func({-x, 0}) + func({0, x}) + func({0, -x})) * (weight1 * weight2);
                 result += func({0, 0}) * (weight2 * weight2);
@@ -52,14 +52,14 @@ namespace Physica::Core {
             }
         };
 
-        template<class ScalarType, class Functor>
-        struct GaussIntegral<Rectangle1<ScalarType>, Functor, 2> {
-            static ScalarType run(Functor func) {
+        template<Scalar T, class Functor>
+        struct GaussIntegral<Rectangle1<T>, Functor, 2> {
+            static T run(Functor func) {
                 constexpr double x1 = 0.861136311594053;
                 constexpr double x2 = 0.339981043584856;
                 constexpr double weight1 = 0.347854845137454;
                 constexpr double weight2 = 0.652145154862546;
-                ScalarType result = 0;
+                T result = 0;
                 result += (func({-x1, -x1}) + func({x1, -x1}) + func({-x1, x1}) + func({x1, x1})) * (weight1 * weight1);
                 result += (func({-x1, -x2}) + func({-x1, x2}) + func({-x2, -x1}) + func({-x2, x1}) + func({x2, -x1}) + func({x2, x1}) + func({x1, -x2}) + func({x1, x2})) * (weight1 * weight2);
                 result += (func({-x2, -x2}) + func({x2, -x2}) + func({-x2, x2}) + func({x2, x2})) * (weight2 * weight2);
@@ -68,46 +68,46 @@ namespace Physica::Core {
         };
     }
 
-    template<class ScalarType>
-    Rectangle1<ScalarType>::Rectangle1(VectorType bottomLeft_,
+    template<Scalar T>
+    Rectangle1<T>::Rectangle1(VectorType bottomLeft_,
                                        VectorType topRight_,
                                        IndexArray globalNodes)
             : Base(std::move(globalNodes)), bottomLeft(bottomLeft_), topRight(topRight_) {}
 
-    template<class ScalarType>
-    Rectangle1<ScalarType>& Rectangle1<ScalarType>::operator=(Rectangle1<ScalarType> elem) noexcept {
+    template<Scalar T>
+    Rectangle1<T>& Rectangle1<T>::operator=(Rectangle1<T> elem) noexcept {
         swap(elem);
         return *this;
     }
 
-    template<class ScalarType>
-    void Rectangle1<ScalarType>::swap(Rectangle1& __restrict obj) noexcept {
+    template<Scalar T>
+    void Rectangle1<T>::swap(Rectangle1& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         Base::swap(obj);
         bottomLeft.swap(obj.bottomLeft);
         topRight.swap(obj.topRight);
     }
 
-    template<class ScalarType>
-    typename Rectangle1<ScalarType>::MatrixType Rectangle1<ScalarType>::jacobi([[maybe_unused]] VectorType localPos) const {
+    template<Scalar T>
+    typename Rectangle1<T>::MatrixType Rectangle1<T>::jacobi([[maybe_unused]] VectorType localPos) const {
         return MatrixType{(topRight[0] - bottomLeft[0]) * 0.5, 0, 0, (topRight[1] - bottomLeft[1]) * 0.5};
     }
 
-    template<class ScalarType>
-    typename Rectangle1<ScalarType>::MatrixType Rectangle1<ScalarType>::inv_jacobi([[maybe_unused]] VectorType globalPos) const {
-        return MatrixType{ScalarType(2) / (topRight[0] - bottomLeft[0]), 0, 0, ScalarType(2) / (topRight[1] - bottomLeft[1])};
+    template<Scalar T>
+    typename Rectangle1<T>::MatrixType Rectangle1<T>::inv_jacobi([[maybe_unused]] VectorType globalPos) const {
+        return MatrixType{T(2) / (topRight[0] - bottomLeft[0]), 0, 0, T(2) / (topRight[1] - bottomLeft[1])};
     }
 
-    template<class ScalarType>
-    bool Rectangle1<ScalarType>::contains(const VectorType& point) const {
+    template<Scalar T>
+    bool Rectangle1<T>::contains(const VectorType& point) const {
         return bottomLeft[0] <= point[0]
             && point[0] <= topRight[0]
             && bottomLeft[1] <= point[1]
             && point[1] <= topRight[1];
     }
 
-    template<class ScalarType>
-    typename Rectangle1<ScalarType>::VectorType Rectangle1<ScalarType>::getNodePos(size_t localNode) const {
+    template<Scalar T>
+    typename Rectangle1<T>::VectorType Rectangle1<T>::getNodePos(size_t localNode) const {
         switch (localNode) {
             case BottomLeft:
                 return bottomLeft;
@@ -121,33 +121,33 @@ namespace Physica::Core {
         throw std::invalid_argument("[Error]: Invalid local node index");
     }
 
-    template<class ScalarType>
-    typename Rectangle1<ScalarType>::VectorType Rectangle1<ScalarType>::toLocalPos(VectorType globalPos) const {
-        return divide(ScalarType(2) * globalPos - bottomLeft - topRight, topRight - bottomLeft);
+    template<Scalar T>
+    typename Rectangle1<T>::VectorType Rectangle1<T>::toLocalPos(VectorType globalPos) const {
+        return divide(T(2) * globalPos - bottomLeft - topRight, topRight - bottomLeft);
     }
 
-    template<class ScalarType>
-    typename Rectangle1<ScalarType>::VectorType Rectangle1<ScalarType>::toGlobalPos(VectorType localPos) const {
-        return (bottomLeft + topRight - hadamard(topRight - bottomLeft, localPos)) * ScalarType(0.5);
+    template<Scalar T>
+    typename Rectangle1<T>::VectorType Rectangle1<T>::toGlobalPos(VectorType localPos) const {
+        return (bottomLeft + topRight - hadamard(topRight - bottomLeft, localPos)) * T(0.5);
     }
 
-    template<class ScalarType>
-    ScalarType Rectangle1<ScalarType>::baseFunc(size_t localNode, VectorType p) {
+    template<Scalar T>
+    T Rectangle1<T>::baseFunc(size_t localNode, VectorType p) {
         switch (localNode) {
             case BottomLeft:
-                return (ScalarType(1) - p[0]) * (ScalarType(1) - p[1]) * ScalarType(0.25);
+                return (T(1) - p[0]) * (T(1) - p[1]) * T(0.25);
             case BottomRight:
-                return (ScalarType(1) + p[0]) * (ScalarType(1) - p[1]) * ScalarType(0.25);
+                return (T(1) + p[0]) * (T(1) - p[1]) * T(0.25);
             case TopLeft:
-                return (ScalarType(1) - p[0]) * (ScalarType(1) + p[1]) * ScalarType(0.25);
+                return (T(1) - p[0]) * (T(1) + p[1]) * T(0.25);
             case TopRight:
-                return (ScalarType(1) + p[0]) * (ScalarType(1) + p[1]) * ScalarType(0.25);
+                return (T(1) + p[0]) * (T(1) + p[1]) * T(0.25);
         }
         throw std::invalid_argument("[Error]: Invalid local node index");
     }
 
-    template<class ScalarType>
-    ScalarType Rectangle1<ScalarType>::dBase_dr(size_t localNode, [[maybe_unused]] VectorType p){
+    template<Scalar T>
+    T Rectangle1<T>::dBase_dr(size_t localNode, [[maybe_unused]] VectorType p){
         switch (localNode) {
             case BottomLeft:
             case TopLeft:
@@ -159,8 +159,8 @@ namespace Physica::Core {
         throw std::invalid_argument("[Error]: Invalid local node index");
     }
 
-    template<class ScalarType>
-    ScalarType Rectangle1<ScalarType>::dBase_ds(size_t localNode, [[maybe_unused]] VectorType p) {
+    template<Scalar T>
+    T Rectangle1<T>::dBase_ds(size_t localNode, [[maybe_unused]] VectorType p) {
         switch (localNode) {
             case BottomLeft:
             case BottomRight:
@@ -172,22 +172,22 @@ namespace Physica::Core {
         throw std::invalid_argument("[Error]: Invalid local node index");
     }
 
-    template<class ScalarType>
-    typename Rectangle1<ScalarType>::VectorType Rectangle1<ScalarType>::grad(size_t localNode, VectorType p) {
+    template<Scalar T>
+    typename Rectangle1<T>::VectorType Rectangle1<T>::grad(size_t localNode, VectorType p) {
         return {dBase_dr(localNode, p), dBase_ds(localNode, p)};
     }
 
-    template<class ScalarType>
-    Mesh<Rectangle1<ScalarType>> Rectangle1<ScalarType>::rectangle(VectorType bottomLeft,
+    template<Scalar T>
+    Mesh<Rectangle1<T>> Rectangle1<T>::rectangle(VectorType bottomLeft,
                                                                    VectorType topRight,
                                                                    size_t numElementX,
                                                                    size_t numElementY) {
-        using VectorType = Vector2D<ScalarType>;
+        using VectorType = Vector2D<T>;
         const size_t numNodeX = numElementX + 1;
         const size_t numNodeY = numElementY + 1;
-        Mesh<Rectangle1<ScalarType>> mesh(numElementX * numElementY, numNodeX * numNodeY);
-        const ScalarType xPerElem = (topRight[0] - bottomLeft[0]) / ScalarType(numElementX);
-        const ScalarType yPerElem = (topRight[1] - bottomLeft[1]) / ScalarType(numElementY);
+        Mesh<Rectangle1<T>> mesh(numElementX * numElementY, numNodeX * numNodeY);
+        const T xPerElem = (topRight[0] - bottomLeft[0]) / T(numElementX);
+        const T yPerElem = (topRight[1] - bottomLeft[1]) / T(numElementY);
         const VectorType diagnal{xPerElem, yPerElem};
 
         VectorType p = bottomLeft;
@@ -198,7 +198,7 @@ namespace Physica::Core {
                 size_t nodeBottomRight = nodeBottomLeft + 1;
                 size_t nodeTopLeft = nodeBottomLeft + numNodeX;
                 size_t nodeTopRight = nodeBottomRight + numNodeX;
-                mesh.setElem(Rectangle1<ScalarType>(p, p + diagnal, {nodeBottomLeft, nodeBottomRight, nodeTopRight, nodeTopLeft}),
+                mesh.setElem(Rectangle1<T>(p, p + diagnal, {nodeBottomLeft, nodeBottomRight, nodeTopRight, nodeTopLeft}),
                              nextElem++);
                 p[0] += xPerElem;
             }

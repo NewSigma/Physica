@@ -20,14 +20,13 @@
 
 namespace Physica::Core {
     template<class Derived>
-    template<class OtherMatrix>
-    __host__ __device__ device_obj<Derived>& device_obj<LValueMatrix<Derived>>::operator=(
-            const device_obj<RValueMatrix<OtherMatrix>>& m) {
-        static_assert(RowAtCompile == Dynamic || OtherMatrix::RowAtCompile == Dynamic || RowAtCompile == OtherMatrix::RowAtCompile, "[Error]: Incompatible row number");
-        static_assert(ColAtCompile == Dynamic || OtherMatrix::ColAtCompile == Dynamic || ColAtCompile == OtherMatrix::ColAtCompile, "[Error]: Incompatible col number");
+    template<Matrix M>
+    __host__ __device__ device_obj<Derived>& device_obj<LValueMatrix<Derived>>::operator=(const device_obj<M>& m) {
+        static_assert(RowAtCompile == Dynamic || M::RowAtCompile == Dynamic || RowAtCompile == M::RowAtCompile, "[Error]: Incompatible row number");
+        static_assert(ColAtCompile == Dynamic || M::ColAtCompile == Dynamic || ColAtCompile == M::ColAtCompile, "[Error]: Incompatible col number");
         auto& target = Base::getDerived();
         target.resize(m.getRow(), m.getCol());
-        m.getDerived().assignTo(target);
+        m.assignTo(target);
         return target;
     }
 

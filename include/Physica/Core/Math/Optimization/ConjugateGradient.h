@@ -27,18 +27,18 @@ namespace Physica::Core {
      * Reference:
      * [1] Nocedal J, Wright S J, Mikosch T V, et al. Numerical Optimization. Springer, 2006.121-122
      */
-    template<class ScalarType, size_t Dim>
+    template<Scalar T, size_t Dim>
     class ConjugateGradient {
-        using VectorType = DenseVector<ScalarType, Dim>;
+        using VectorType = DenseVector<T, Dim>;
 
         VectorType gradG;
         VectorType direction;
         VectorType nowX;
-        ScalarType squaredGradNorm;
-        LineSearch<ScalarType, Dim> lineSearch;
+        T squaredGradNorm;
+        LineSearch<T, Dim> lineSearch;
         size_t iteration;
     public:
-        ConjugateGradient(ScalarType maxStepSize);
+        ConjugateGradient(T maxStepSize);
         ConjugateGradient(const ConjugateGradient&) = default;
         ConjugateGradient(ConjugateGradient&&) noexcept = default;
         ~ConjugateGradient() = default;
@@ -47,7 +47,7 @@ namespace Physica::Core {
         /* Operations */
         template<class Functor, class GradFunctor> void init(VectorType initial, Functor func, GradFunctor grad);
         template<class Functor, class GradFunctor> void step(Functor func, GradFunctor grad);
-        template<class Functor, class GradFunctor> ScalarType solve(ScalarType epsilon, VectorType initial, Functor func, GradFunctor grad);
+        template<class Functor, class GradFunctor> T solve(T epsilon, VectorType initial, Functor func, GradFunctor grad);
         void swap(ConjugateGradient& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] inline size_t getDim() const noexcept;
@@ -55,21 +55,21 @@ namespace Physica::Core {
         [[nodiscard]] const VectorType& getArgX() const noexcept { return nowX; }
     };
 
-    template<class ScalarType, size_t Dim>
-    ConjugateGradient<ScalarType, Dim>::ConjugateGradient(ScalarType maxStepSize)
+    template<Scalar T, size_t Dim>
+    ConjugateGradient<T, Dim>::ConjugateGradient(T maxStepSize)
             : lineSearch(maxStepSize)
             , iteration(0) {}
 
-    template<class ScalarType, size_t Dim>
-    ConjugateGradient<ScalarType, Dim>&
-    ConjugateGradient<ScalarType, Dim>::operator=(ConjugateGradient<ScalarType, Dim> obj) noexcept {
+    template<Scalar T, size_t Dim>
+    ConjugateGradient<T, Dim>&
+    ConjugateGradient<T, Dim>::operator=(ConjugateGradient<T, Dim> obj) noexcept {
         swap(obj);
         return *this;
     }
 
-    template<class ScalarType, size_t Dim>
+    template<Scalar T, size_t Dim>
     template<class Functor, class GradFunctor>
-    void ConjugateGradient<ScalarType, Dim>::init(VectorType initial, [[maybe_unused]] Functor func, GradFunctor grad) {
+    void ConjugateGradient<T, Dim>::init(VectorType initial, [[maybe_unused]] Functor func, GradFunctor grad) {
         nowX = std::move(initial);
         gradG = grad(nowX);
         direction = -gradG;
@@ -77,30 +77,30 @@ namespace Physica::Core {
         iteration = 0;
     }
 
-    template<class ScalarType, size_t Dim>
+    template<Scalar T, size_t Dim>
     template<class Functor, class GradFunctor>
-    void ConjugateGradient<ScalarType, Dim>::step(Functor func, GradFunctor grad) {
+    void ConjugateGradient<T, Dim>::step(Functor func, GradFunctor grad) {
         const size_t dim = nowX.getLength();
-        const ScalarType stepSize = lineSearch.run(func, grad, nowX, gradG, direction);
+        const T stepSize = lineSearch.run(func, grad, nowX, gradG, direction);
         nowX += stepSize * direction;
 
         const VectorType gradG1 = grad(nowX);
-        const ScalarType squaredGradNorm1 = gradG1.squaredNorm();
+        const T squaredGradNorm1 = gradG1.squaredNorm();
         if (++iteration == dim) {
             direction = -gradG1;
             iteration = 0;
         }
         else {
-            const ScalarType alpha = (squaredGradNorm1 - gradG * gradG1) / squaredGradNorm; //Polak-Ribière method[1]
+            const T alpha = (squaredGradNorm1 - gradG * gradG1) / squaredGradNorm; //Polak-Ribière method[1]
             direction = -gradG1 + alpha * direction;
         }
         gradG = gradG1;
         squaredGradNorm = squaredGradNorm1;
     }
 
-    template<class ScalarType, size_t Dim>
+    template<Scalar T, size_t Dim>
     template<class Functor, class GradFunctor>
-    ScalarType ConjugateGradient<ScalarType, Dim>::solve(ScalarType epsilon, VectorType initial, Functor func, GradFunctor grad) {
+    T ConjugateGradient<T, Dim>::solve(T epsilon, VectorType initial, Functor func, GradFunctor grad) {
         init(std::move(initial), func, grad);
         while (squaredGradNorm > epsilon) {
             step(func, grad);
@@ -108,8 +108,8 @@ namespace Physica::Core {
         return func(nowX);
     }
 
-    template<class ScalarType, size_t Dim>
-    void ConjugateGradient<ScalarType, Dim>::swap(ConjugateGradient& __restrict obj) noexcept {
+    template<Scalar T, size_t Dim>
+    void ConjugateGradient<T, Dim>::swap(ConjugateGradient& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         gradG.swap(obj.gradG);
         direction.swap(obj.direction);
@@ -119,8 +119,8 @@ namespace Physica::Core {
         std::swap(iteration, obj.iteration);
     }
 
-    template<class ScalarType, size_t Dim>
-    inline size_t ConjugateGradient<ScalarType, Dim>::getDim() const noexcept {
+    template<Scalar T, size_t Dim>
+    inline size_t ConjugateGradient<T, Dim>::getDim() const noexcept {
         if constexpr (Dim != Dynamic)
             return Dim;
         return gradG.getLength();
