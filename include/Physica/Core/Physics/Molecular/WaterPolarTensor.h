@@ -48,7 +48,6 @@ namespace Physica::Core {
 
         constexpr static size_t NumDiagBase = 22;
         constexpr static size_t NumOffDiagBase = 13;
-        using Vector3D = Vector3D<T>;
         using Matrix3D = typename PeriodicCell<T, 3>::LatticeMatrix;
         using DiagBaseVector = DenseVector<T, NumDiagBase>;
         using OffDiagBaseVector = DenseVector<T, NumOffDiagBase>;
@@ -56,13 +55,13 @@ namespace Physica::Core {
         Matrix3D polarTensor; //In Molecular Frame
         Matrix3D labFrame;
     public:
-        WaterPolarTensor(Vector3D posOH1, Vector3D posOH2);
+        WaterPolarTensor(Vector3D<T> posOH1, Vector3D<T> posOH2);
         WaterPolarTensor(const WaterPolarTensor&) = default;
         WaterPolarTensor(WaterPolarTensor&&) noexcept = default;
         ~WaterPolarTensor() = default;
         /* Operators */
         WaterPolarTensor& operator=(WaterPolarTensor model) noexcept;
-        [[nodiscard]] Vector3D operator*(const Vector3D& v) const;
+        [[nodiscard]] Vector3D<T> operator*(const Vector3D<T>& v) const;
         /* Operations */
         void swap(WaterPolarTensor& __restrict model) noexcept;
     private:
@@ -77,7 +76,7 @@ namespace Physica::Core {
 
     template<Scalar T, bool UseDynamicPolar>
     WaterPolarTensor<T, UseDynamicPolar>::WaterPolarTensor(
-            Vector3D posOH1, Vector3D posOH2) {
+            Vector3D<T> posOH1, Vector3D<T> posOH2) {
         const T bondLength1 = posOH1.norm();
         const T bondLength2 = posOH2.norm();
         const T bondAngle = arccos(posOH1 * posOH2 / (bondLength1 * bondLength2));
@@ -107,11 +106,10 @@ namespace Physica::Core {
     }
 
     template<Scalar T, bool UseDynamicPolar>
-    typename WaterPolarTensor<T, UseDynamicPolar>::Vector3D
-    WaterPolarTensor<T, UseDynamicPolar>::operator*(const Vector3D& v) const {
-        const Vector3D vInMolecularFrame = labFrame * v;
-        const Vector3D uInMolecularFrame = polarTensor * vInMolecularFrame;
-        const Vector3D u = labFrame.transpose() * uInMolecularFrame;
+    Vector3D<T> WaterPolarTensor<T, UseDynamicPolar>::operator*(const Vector3D<T>& v) const {
+        const Vector3D<T> vInMolecularFrame = labFrame * v;
+        const Vector3D<T> uInMolecularFrame = polarTensor * vInMolecularFrame;
+        const Vector3D<T> u = labFrame.transpose() * uInMolecularFrame;
         return u;
     }
 

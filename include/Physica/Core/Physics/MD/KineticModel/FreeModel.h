@@ -50,12 +50,11 @@ namespace Physica::Core {
         using BufferType = typename RingPolymerType::BufferType;
         using FFTType = typename RingPolymerType::FFTType;
         using VectorType = VectorND<T>;
-        using Vector2D = Vector2D<T>;
         static_assert(std::is_same<ComplexType, typename BufferType::ScalarType>::value, "[Error]: Inconsistent type");
     private:
         VectorType omegaK;
         T omegaW;
-        Array<Vector2D> coeffMatrixBase;
+        Array<Vector2D<T>> coeffMatrixBase;
         T lastTimeStep;
         size_t numReplica;
     public:
@@ -214,10 +213,10 @@ namespace Physica::Core {
         for (size_t i = 0; i < omegaK.getLength(); ++i) {
             const T phase = omegaK[i] * deltaT;
             if constexpr (Integrator == RPMDIntegrator::Exact)
-                coeffMatrixBase[i] = Vector2D{cos(phase), sin(phase)};
+                coeffMatrixBase[i] = Vector2D<T>{cos(phase), sin(phase)};
             else {
                 const T factor = reciprocal(sqrt(T(1) + square(phase)));
-                coeffMatrixBase[i] = Vector2D{factor, factor * deltaT};
+                coeffMatrixBase[i] = Vector2D<T>{factor, factor * deltaT};
             }
         }
         lastTimeStep = deltaT;

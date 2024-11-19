@@ -44,7 +44,6 @@ namespace Physica::Core {
         using ComplexType = Complex<T>;
         using CellListType = CellList<T>;
         using Index3D = typename CellListType::Index3D;
-        using Vector3D = Vector3D<T>;
         using LatticeReturnType = typename std::conditional<IsDeviceREwald, LatticeMatrix, const LatticeMatrix&>::type;
         using HostChargeVector = typename std::conditional<IsDeviceREwald, VectorND<T>, PlainStruct<void>>::type;
     public:
@@ -71,9 +70,9 @@ namespace Physica::Core {
         template<class Executor>
         [[nodiscard]] VectorND<T> force_long(const PositionMatrix& pos) const;
 
-        [[nodiscard]] ComplexType forceConst(const PositionMatrix& pos, Vector3D qPoint, size_t dof1, size_t dof2) const;
-        [[nodiscard]] ComplexType kSpaceForceConst(const PositionMatrix& pos, Vector3D qPoint, size_t dof1, size_t dof2) const;
-        [[nodiscard]] ComplexType rSpaceForceConst(const PositionMatrix& pos, Vector3D qPoint, size_t dof1, size_t dof2) const;
+        [[nodiscard]] ComplexType forceConst(const PositionMatrix& pos, Vector3D<T> qPoint, size_t dof1, size_t dof2) const;
+        [[nodiscard]] ComplexType kSpaceForceConst(const PositionMatrix& pos, Vector3D<T> qPoint, size_t dof1, size_t dof2) const;
+        [[nodiscard]] ComplexType rSpaceForceConst(const PositionMatrix& pos, Vector3D<T> qPoint, size_t dof1, size_t dof2) const;
 
 
         [[nodiscard]] LatticeMatrix virial(const PositionMatrix& pos);
@@ -93,8 +92,8 @@ namespace Physica::Core {
         void setLattice(LatticeMatrix lattice);
     private:
         /* Operations */
-        [[nodiscard]] ComplexType kSpaceForceConstImpl(const PositionMatrix& pos, const Vector3D& waveQ, size_t dof1, size_t dof2) const;
-        [[nodiscard]] inline ComplexType rSpaceForceConstImpl(const PositionMatrix& pos, const Vector3D& waveQ, size_t dof1, size_t dof2) const;
+        [[nodiscard]] ComplexType kSpaceForceConstImpl(const PositionMatrix& pos, const Vector3D<T>& waveQ, size_t dof1, size_t dof2) const;
+        [[nodiscard]] inline ComplexType rSpaceForceConstImpl(const PositionMatrix& pos, const Vector3D<T>& waveQ, size_t dof1, size_t dof2) const;
         /* Friends */
         friend class ::Physica::Test;
     };
@@ -130,7 +129,7 @@ namespace Physica::Core {
         VectorND<T> sin_vec(numParticle);
         VectorND<T> cos_vec(numParticle);
         PeriodicCell<T, Dim>::forReducedCellInRange( // Reduce cell using time reversal symmetry
-            getKSpaceSumRange(), getRepLattice(), [this, factor, &pos, &kSpaceSum, &dots, &sin_vec, &cos_vec](Vector3D delta) {
+            getKSpaceSumRange(), getRepLattice(), [this, factor, &pos, &kSpaceSum, &dots, &sin_vec, &cos_vec](Vector3D<T> delta) {
                 const auto& charges = getCharges();
                 const T squaredNorm = delta.squaredNorm();
                 const bool isNotGammaPoint = T(std::numeric_limits<T>::min()) < squaredNorm;
@@ -170,7 +169,7 @@ namespace Physica::Core {
         VectorND<T> cos_vec(numParticle);
         const T factor1 = reciprocal(square(ValueType(2) * getIntegralLimit()));
         PeriodicCell<T, Dim>::forReducedCellInRange( // Reduce cell using time reversal symmetry
-            getKSpaceSumRange(), getRepLattice(), [this, numParticle, factor1, &dots, &sin_vec, &cos_vec, &pos, &kSpaceSum](Vector3D delta) {
+            getKSpaceSumRange(), getRepLattice(), [this, numParticle, factor1, &dots, &sin_vec, &cos_vec, &pos, &kSpaceSum](Vector3D<T> delta) {
                 const auto& charges = getCharges();
                 const T squaredNorm = T(delta.squaredNorm());
                 const bool isNotGammaPoint = T(std::numeric_limits<T>::min()) < squaredNorm;
@@ -200,22 +199,22 @@ namespace Physica::Core {
      */
     template<Scalar T, class REwaldType>
     typename Ewald<T, REwaldType>::ComplexType
-    Ewald<T, REwaldType>::forceConst(const PositionMatrix& pos, Vector3D qPoint, size_t dof1, size_t dof2) const {
-        const Vector3D waveQ = getRepLattice().transpose() * qPoint;
+    Ewald<T, REwaldType>::forceConst(const PositionMatrix& pos, Vector3D<T> qPoint, size_t dof1, size_t dof2) const {
+        const Vector3D<T> waveQ = getRepLattice().transpose() * qPoint;
         return kSpaceForceConstImpl(pos, waveQ, dof1, dof2) + rSpaceForceConstImpl(pos, waveQ, dof1, dof2);
     }
 
     template<Scalar T, class REwaldType>
     typename Ewald<T, REwaldType>::ComplexType
-    Ewald<T, REwaldType>::kSpaceForceConst(const PositionMatrix& pos, Vector3D qPoint, size_t dof1, size_t dof2) const {
-        const Vector3D waveQ = getRepLattice().transpose() * qPoint;
+    Ewald<T, REwaldType>::kSpaceForceConst(const PositionMatrix& pos, Vector3D<T> qPoint, size_t dof1, size_t dof2) const {
+        const Vector3D<T> waveQ = getRepLattice().transpose() * qPoint;
         return kSpaceForceConstImpl(pos, waveQ, dof1, dof2);
     }
 
     template<Scalar T, class REwaldType>
     typename Ewald<T, REwaldType>::ComplexType
-    Ewald<T, REwaldType>::rSpaceForceConst(const PositionMatrix& pos, Vector3D qPoint, size_t dof1, size_t dof2) const {
-        const Vector3D waveQ = getRepLattice().transpose() * qPoint;
+    Ewald<T, REwaldType>::rSpaceForceConst(const PositionMatrix& pos, Vector3D<T> qPoint, size_t dof1, size_t dof2) const {
+        const Vector3D<T> waveQ = getRepLattice().transpose() * qPoint;
         return rSpaceForceConstImpl(pos, waveQ, dof1, dof2);
     }
 
@@ -228,7 +227,7 @@ namespace Physica::Core {
         VectorND<T> cos_vec(numParticle);
         LatticeMatrix kSpaceVirial(Dim, Dim, 0);
         PeriodicCell<T, Dim>::forReducedCellInRange( // Reduce cell using time reversal symmetry
-            getKSpaceSumRange(), getRepLattice(), [this, &pos, &kSpaceVirial, &dots, &sin_vec, &cos_vec, factor](Vector3D delta) {
+            getKSpaceSumRange(), getRepLattice(), [this, &pos, &kSpaceVirial, &dots, &sin_vec, &cos_vec, factor](Vector3D<T> delta) {
                 const auto& charges = getCharges();
                 const T squaredNorm = T(delta.squaredNorm());
                 const bool isNotGammaPoint = T(std::numeric_limits<T>::min()) < squaredNorm;
@@ -299,7 +298,7 @@ namespace Physica::Core {
 
     template<Scalar T, class REwaldType>
     typename Ewald<T, REwaldType>::ComplexType
-    Ewald<T, REwaldType>::kSpaceForceConstImpl(const PositionMatrix& pos, const Vector3D& waveQ, size_t dof1, size_t dof2) const {
+    Ewald<T, REwaldType>::kSpaceForceConstImpl(const PositionMatrix& pos, const Vector3D<T>& waveQ, size_t dof1, size_t dof2) const {
         const size_t atom1 = dof1 / Dim;
         const size_t atom2 = dof2 / Dim;
         const size_t direction1 = dof1 % Dim;
@@ -311,10 +310,10 @@ namespace Physica::Core {
         const T factor1 = reciprocal(square(ValueType(2) * getIntegralLimit()));
         ComplexType kSpaceSum = 0;
         PeriodicCell<T, Dim>::forCellInRange(getKSpaceSumRange(), getRepLattice(),
-            [this, atom1, atom2, direction1, direction2, charge1, charge2, waveQ, factor1, &pos, &kSpaceSum](Vector3D waveG) {
+            [this, atom1, atom2, direction1, direction2, charge1, charge2, waveQ, factor1, &pos, &kSpaceSum](Vector3D<T> waveG) {
                 ComplexType temp = 0;
                 {
-                    const Vector3D waveSum = waveQ + waveG;
+                    const Vector3D<T> waveSum = waveQ + waveG;
                     const T squaredNorm = waveSum.squaredNorm();
                     const bool isNotGammaPoint = T(std::numeric_limits<T>::min()) < squaredNorm;
                     if (isNotGammaPoint) {
@@ -353,7 +352,7 @@ namespace Physica::Core {
 
     template<Scalar T, class REwaldType>
     inline typename Ewald<T, REwaldType>::ComplexType
-    Ewald<T, REwaldType>::rSpaceForceConstImpl(const PositionMatrix& pos, const Vector3D& waveQ, size_t dof1, size_t dof2) const {
+    Ewald<T, REwaldType>::rSpaceForceConstImpl(const PositionMatrix& pos, const Vector3D<T>& waveQ, size_t dof1, size_t dof2) const {
         return Base::forceConst(pos, waveQ, dof1, dof2);
     }
 }

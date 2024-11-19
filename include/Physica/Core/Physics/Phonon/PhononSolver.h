@@ -28,7 +28,6 @@ namespace Physica::Core {
         using This = PhononSolver<T>;
     public:
         using ComplexType = Complex<T>;
-        using Vector3D = Vector3D<T>;
         using FFT3D = FFT<T, 3>;
         using MDCellType = MDCell<T>;
         using PositionMatrix = typename MDCellType::PositionMatrix;
@@ -60,7 +59,7 @@ namespace Physica::Core {
         void projectTransRotH(RSpaceFCGrid& fcGrid, T maxAbsDot, size_t maxIteration) const;
 
         [[nodiscard]] KSpaceFCGrid toKSpace(const RSpaceFCGrid& rSpaceGrid) const;
-        [[nodiscard]] KSpaceFCMat interpolatePoint(Vector3D qPoint, const KSpaceFCGrid& forceConstants) const;
+        [[nodiscard]] KSpaceFCMat interpolatePoint(Vector3D<T> qPoint, const KSpaceFCGrid& forceConstants) const;
 
         void applyNAC(RSpaceFCGrid& rSpaceGrid, const BornChargeArray& born) const;
 
@@ -241,8 +240,8 @@ namespace Physica::Core {
 
     template<Scalar T>
     typename PhononSolver<T>::KSpaceFCMat PhononSolver<T>::interpolatePoint(
-            Vector3D qPoint, const KSpaceFCGrid& forceConstants) const {
-        const Vector3D qVector = unitCell.makeRepLattice().transpose() * qPoint;
+            Vector3D<T> qPoint, const KSpaceFCGrid& forceConstants) const {
+        const Vector3D<T> qVector = unitCell.makeRepLattice().transpose() * qPoint;
         const size_t unitCellDOF = getUnitCellDOF();
         FFT3D fft(superSize, PlanFlag::Estimate);
         KSpaceFCMat result(unitCellDOF, unitCellDOF);
@@ -289,11 +288,11 @@ namespace Physica::Core {
         const auto repLatt = unitCell.makeRepLattice();
         rSpaceGrid.forIndexInGrid([this, factor, &repLatt, &rSpaceGrid, &born](Index3D index) {
             const bool isGammaPoint = index[0] == 0 && index[1] == 0 && index[2] == 0;
-            Vector3D qVector{};
+            Vector3D<T> qVector{};
             if (isGammaPoint)
                 qVector = {1, 0, 0};
             else {
-                Vector3D qPoint{};
+                Vector3D<T> qPoint{};
                 for (unsigned int i = 0; i < Dim; ++i)
                     qPoint[i] = T(index[i]) / T(superSize[i]);
                 qVector = repLatt.transpose() * qPoint;

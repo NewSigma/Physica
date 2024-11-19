@@ -110,7 +110,7 @@ namespace Physica::Core {
             original.template forceAsync<V, Executor>(cell, result);
         const VectorND<ScalarType> hamonicF = hamonic.template force<Executor>(cell);
         Executor::wait();
-        result = lambda * result + (ScalarType(1) - lambda) * hamonicF;
+        result = lambda * result.getDerived() + (ScalarType(1) - lambda) * hamonicF;
     }
 
     template<class ForceModel>

@@ -23,7 +23,7 @@
 namespace Physica::Core {
     /**
      * Reference:
-     * [1] Rossi M, Ceriotti M, Manolopoulos D E. How to remove the spurious resonances from ring polymer molecular dynamics[J]. J. Chem. Phys, 2014, 140(23):5106.
+     * [1] J. Chem. Phys. 140, 234116 (2014); https://doi.org/10.1063/1.4883861
      */
     template<Scalar T, unsigned int Dim = 3, size_t NumReplica = Dynamic>
     class TRPMDThermo {
@@ -72,7 +72,7 @@ namespace Physica::Core {
         if constexpr (NumReplica != 1) {
             const T omegaW = ringPolymer.calcOmegaW(temperatureT);
             auto future = Executor::parallel_for(
-                [this, repBeta, omegaW, deltaT, &ringPolymer, &pool](unsigned int i) {
+                [repBeta, omegaW, deltaT, &ringPolymer, &pool](unsigned int i) {
                     const size_t numReplica = ringPolymer.getNumReplica();
                     const auto& massVec = ringPolymer.getMassVec();
 

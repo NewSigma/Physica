@@ -134,13 +134,7 @@ namespace Physica::Core {
         obj.resize(length);
         if constexpr (std::is_trivially_copy_constructible<T>::value)
             memcpy(obj.data(), data(), size);
-        else {
-            /**
-             * Without it some tests fail, may be a compiler bug
-             * We are using GCC 9.4.0 + nvcc 12.6, Ubuntu 20.04
-             */
-            const device_obj<ContinuousVector<T>>& const_obj = obj;
-            check(cudaMemcpyAsync((void*)const_obj.data(), data(), size, cudaMemcpyKind::cudaMemcpyHostToDevice, CUDAContext::getInstance()));
-        }
+        else
+            check(cudaMemcpyAsync(obj.data(), data(), size, cudaMemcpyKind::cudaMemcpyHostToDevice, CUDAContext::getInstance()));
     }
 }

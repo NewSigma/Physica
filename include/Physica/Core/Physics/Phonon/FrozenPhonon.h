@@ -39,7 +39,6 @@ namespace Physica::Core {
         using Base = PhononSolver<T>;
     public:
         using typename Base::ComplexType;
-        using typename Base::Vector3D;
         using typename Base::Index3D;
         using typename Base::FFT3D;
         using typename Base::MDCellType;
@@ -77,7 +76,7 @@ namespace Physica::Core {
     private:
         PositionMatrix makeWignerSeitzRadius() const;
         GridStorage<DenseMatrix<T>> makeWignerSeitzWeights() const;
-        T calcWignerSeitzWeight(const Vector3D r, const PositionMatrix& wignerSeitzRadius) const;
+        T calcWignerSeitzWeight(const Vector3D<T> r, const PositionMatrix& wignerSeitzRadius) const;
     };
 
     template<Scalar T>
@@ -170,7 +169,7 @@ namespace Physica::Core {
         for (int i = -OneSideDim; i <= OneSideDim; ++i) {
             for (int j = -OneSideDim; j <= OneSideDim; ++j) {
                 for (int k = -OneSideDim; k <= OneSideDim; ++k) {
-                    const Vector3D factor{T(i * superSize[0]), T(j * superSize[1]), T(k * superSize[2])};
+                    const Vector3D<T> factor{T(i * superSize[0]), T(j * superSize[1]), T(k * superSize[2])};
                     auto row = wignerSeitzRadius.row(index);
                     row = Base::getUnitCell().getLattice().transpose() * factor;
                     const bool isNotGammaPoint = row.squaredNorm() > std::numeric_limits<T>::epsilon();
@@ -228,14 +227,14 @@ namespace Physica::Core {
         GridStorage<DenseMatrix<T>> result(gridDim, numAtom, numAtom);
         GridBase::forIndexInGrid(gridDim, [this, superSize, numAtom, &result, &wignerSeitzRadius](Index3D index) {
             const auto& unitCell = Base::getUnitCell();
-            const Vector3D factor{T(index[0]) - T(2 * superSize[0]),
+            const Vector3D<T> factor{T(index[0]) - T(2 * superSize[0]),
                                   T(index[1]) - T(2 * superSize[1]),
                                   T(index[2]) - T(2 * superSize[2])};
-            const Vector3D r0 = unitCell.getLattice().transpose() * factor;
+            const Vector3D<T> r0 = unitCell.getLattice().transpose() * factor;
             auto& mat = result(index);
             for (size_t c = 0; c < result.getCol(); ++c) {
                 for (size_t r = 0; r < result.getRow(); ++r) {
-                    const Vector3D r1 = r0 + unitCell.getPos().row(r) - unitCell.getPos().row(c);
+                    const Vector3D<T> r1 = r0 + unitCell.getPos().row(r) - unitCell.getPos().row(c);
                     mat(r, c) = calcWignerSeitzWeight(r1, wignerSeitzRadius);
                 }
             }
@@ -245,7 +244,7 @@ namespace Physica::Core {
 
     template<Scalar T>
     T FrozenPhonon<T>::calcWignerSeitzWeight(
-            const Vector3D r, const PositionMatrix& wignerSeitzRadius) const {
+            const Vector3D<T> r, const PositionMatrix& wignerSeitzRadius) const {
         constexpr double precision = 1E-5;
         size_t count = 1;
         for (size_t i = 0; i < wignerSeitzRadius.getRow(); ++i) {

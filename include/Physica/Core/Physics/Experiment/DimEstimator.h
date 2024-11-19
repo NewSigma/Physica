@@ -28,8 +28,8 @@
 namespace Physica::Core {
     /**
      * References:
-     * [1] F. Camastra and A. Vinciarelli, Neural Process. Lett. 14, 27 (2001).
-     * [2] Grassberger, P. and Procaccia, I.: Measuring the strangeness of strange attractors, Physica, D9 (1983) 189^208.
+     * [1] Neural Process. Lett. 14, 27–34 (2001). https://doi.org/10.1023/A:1011326007550
+     * [2] Physica D 9, 189-208 (1983); https://doi.org/10.1016/0167-2789(83)90298-1
      */
     class DimEstimator {
         using ScalarType = float64;

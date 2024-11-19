@@ -100,7 +100,6 @@ namespace Physica {
     template<ExprType Type, Matrix T, class U, Vector V>
     class Traits<MatrixVectorProduct<MatrixExpr<Type, T, U>, V>> {
         using MatrixType = MatrixExpr<Type, T, U>;
-        using ExprType = ExprType;
         static_assert(MatrixType::ColAtCompile == V::SizeAtCompile || MatrixType::ColAtCompile == Dynamic || V::SizeAtCompile == Dynamic,
                       "Row and col do not match in matrix product");
 

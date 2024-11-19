@@ -35,7 +35,6 @@ namespace Physica::Core {
         using MDCellType = MDCell<T, Dim>;
         using LatticeMatrix = typename MDCellType::LatticeMatrix;
         using InvLatticeMatrix = typename MDCellType::InvLatticeMatrix;
-        using Vector3D = DenseVector<T, Dim>;
     protected:
         T compressRate;
         T tempT;
@@ -161,13 +160,13 @@ namespace Physica::Core {
             auto momentum = col.head(dof);
             for (size_t j = 0; j < numParticle; ++j) {
                 auto momentum_j = momentum.segment(j * Dim, (j + 1) * Dim);
-                const Vector3D delta = scaleMatrix * momentum_j;
+                const Vector3D<T> delta = scaleMatrix * momentum_j;
                 momentum_j -= delta;
             }
             auto pos = col.tail(dof);
             for (size_t j = 0; j < numParticle; ++j) {
                 auto pos_j = pos.segment(j * Dim, (j + 1) * Dim);
-                const Vector3D delta = scaleMatrix * pos_j;
+                const Vector3D<T> delta = scaleMatrix * pos_j;
                 pos_j += delta;
             }
         }

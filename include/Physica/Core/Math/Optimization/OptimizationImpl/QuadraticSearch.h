@@ -21,12 +21,10 @@
 namespace Physica::Core {
     template<Scalar T>
     class QuadraticSearch {
-        using Vector3D = Vector3D<T>;
-
-        Vector3D x;
-        Vector3D y;
+        Vector3D<T> x;
+        Vector3D<T> y;
     public:
-        QuadraticSearch(Vector3D x_, Vector3D y_);
+        QuadraticSearch(Vector3D<T> x_, Vector3D<T> y_);
         QuadraticSearch(const QuadraticSearch&) = default;
         QuadraticSearch(QuadraticSearch&&) noexcept = default;
         ~QuadraticSearch() = default;
@@ -43,7 +41,7 @@ namespace Physica::Core {
     };
 
     template<Scalar T>
-    QuadraticSearch<T>::QuadraticSearch(Vector3D x_, Vector3D y_) : x(std::move(x_)), y(std::move(y_)) {}
+    QuadraticSearch<T>::QuadraticSearch(Vector3D<T> x_, Vector3D<T> y_) : x(std::move(x_)), y(std::move(y_)) {}
 
     template<Scalar T>
     template<class Functor>

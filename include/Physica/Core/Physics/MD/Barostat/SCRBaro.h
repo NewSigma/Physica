@@ -35,7 +35,6 @@ namespace Physica::Core {
         using typename Base::MDCellType;
         using typename Base::LatticeMatrix;
         using typename Base::InvLatticeMatrix;
-        using typename Base::Vector3D;
         using Base::Dim;
     public:
         SCRBaro() = default;

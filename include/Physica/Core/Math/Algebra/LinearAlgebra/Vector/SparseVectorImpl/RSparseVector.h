@@ -52,32 +52,22 @@ namespace Physica::Core {
         return v2 * v1;
     }
 
-    template<class Derived, Vector T>
-    void operator+=(LValueVector<Derived>& v1, const RSparseVector<T>& v2) {
-        using ResultType = typename Derived::ScalarType;
+    template<LVector T, Vector U>
+    void operator+=(T& v1, const U& v2) requires Sparse<U> {
+        using ResultType = typename T::ScalarType;
         for (size_t i = 0; i < v2.getNumNonZero(); ++i) {
             const auto pair = v2.calcNonZero(i);
             v1[pair.first] += ResultType(pair.second);
         }
     }
 
-    template<class Derived, Vector T>
-    void operator-=(LValueVector<Derived>& v1, const RSparseVector<T>& v2) {
-        using ResultType = typename Derived::ScalarType;
+    template<LVector T, Vector U>
+    void operator-=(T& v1, const U& v2) requires Sparse<U> {
+        using ResultType = typename T::ScalarType;
         for (size_t i = 0; i < v2.getNumNonZero(); ++i) {
             const auto pair = v2.calcNonZero(i);
-            v1.getDerived()[pair.first] -= ResultType(pair.second);
+            v1[pair.first] -= ResultType(pair.second);
         }
-    }
-
-    template<class Derived, Vector T>
-    inline void operator+=(ContinuousVector<Derived>& v1, const RSparseVector<T>& v2) {
-        static_cast<LValueVector<Derived>&>(v1) += v2;
-    }
-
-    template<class Derived, Vector T>
-    inline void operator-=(ContinuousVector<Derived>& v1, const RSparseVector<T>& v2) {
-        static_cast<LValueVector<Derived>&>(v1) -= v2;
     }
 }
 

@@ -111,7 +111,7 @@ namespace Physica::Core {
         }
 
         Internal::PairModel_forceKernel<Derived>
-                <<<gridDims, numThread, numThread * sizeof(Vector3D), CUDAContext::getInstance()>>>(asStruct(Base::getDerived()));
+                <<<gridDims, numThread, numThread * sizeof(DeviceVector3D), CUDAContext::getInstance()>>>(asStruct(Base::getDerived()));
         if constexpr (IsSmallCell)
             Internal::PairModel_postForceKernel<Derived><<<gridDims.x, numThread, 0, CUDAContext::getInstance()>>>(asStruct(Base::getDerived()));
         check(cudaGetLastError());
@@ -151,7 +151,7 @@ namespace Physica::Core {
         virialBuffer.resize(NumVirialElem, numParticle);
 
         Internal::PairModel_virialKernel<Derived>
-                <<<gridDims, numThread, numThread * sizeof(Vector3D), CUDAContext::getInstance()>>>(asStruct(Base::getDerived()));
+                <<<gridDims, numThread, numThread * sizeof(DeviceVector3D), CUDAContext::getInstance()>>>(asStruct(Base::getDerived()));
         Internal::PairModel_postVirialKernel<Derived>
                 <<<1, NumVirialElem, 0, CUDAContext::getInstance()>>>(asStruct(Base::getDerived()));
         check(cudaGetLastError());
@@ -186,8 +186,8 @@ namespace Physica::Core {
 
     template<class Derived>
     __device__ void device_obj<PairModel<Derived>>::forceKernelImpl() {
-        Vector3D atomForce(3, 0);
-        auto kernel = [this, &atomForce](size_t i, size_t j, Vector3D r, ScalarType norm1, ScalarType norm2) {
+        DeviceVector3D atomForce(3, 0);
+        auto kernel = [this, &atomForce](size_t i, size_t j, DeviceVector3D r, ScalarType norm1, ScalarType norm2) {
             const ScalarType f_norm = force_functor(i, j, norm1, norm2);
             atomForce -= r * (f_norm / norm1);
         };
@@ -219,9 +219,9 @@ namespace Physica::Core {
     __device__ void device_obj<PairModel<Derived>>::virialKernelImpl() {
         using DeviceMatrix = typename DeviceMDCell::LatticeMatrix;
         DeviceMatrix atomVirial(Dim, Dim, 0);
-        auto kernel = [this, &atomVirial](size_t i, size_t j, Vector3D r, ScalarType norm1, ScalarType norm2) {
+        auto kernel = [this, &atomVirial](size_t i, size_t j, DeviceVector3D r, ScalarType norm1, ScalarType norm2) {
             const ScalarType f_norm = force_functor(i, j, norm1, norm2);
-            const Vector3D f = r * (f_norm / norm1);
+            const DeviceVector3D f = r * (f_norm / norm1);
             atomVirial += f * r.transpose();
         };
         const size_t atom1 = forPairInCutoff(kernel);
@@ -300,7 +300,7 @@ namespace Physica::Core {
     template<class Derived>
     template<class Functor>
     __device__ size_t device_obj<PairModel<Derived>>::forPairInCutoff(Functor func) const {
-        extern __shared__ Vector3D posBuffer[];
+        extern __shared__ DeviceVector3D posBuffer[];
         const auto& pos = cell.getPos();
         if constexpr (IsSmallCell) {
             assert(cell.getNumParticle() < INT_MAX && "[Error]: This is not a small cell");
@@ -311,11 +311,11 @@ namespace Physica::Core {
 
             const auto& cellGridDim = cellList.getCellGridDim();
             const Index3D cellIndex = PeriodIndex3D(blockIdx.y, cellGridDim);
-            Vector3D factor{};
+            DeviceVector3D factor{};
             for (int i = 0; i < Dim; ++i)
                 factor[i] = ScalarType(int(cellIndex[i]) - int(cellGridDim[i]) / 2);
-            const Vector3D delta = cell.getLattice().transpose() * factor;
-            const Vector3D from = pos.row(atom1) + delta;
+            const DeviceVector3D delta = cell.getLattice().transpose() * factor;
+            const DeviceVector3D from = pos.row(atom1) + delta;
 
             const int numActiveThread = __syncthreads_count(true);
             const int numBlock = (numParticle + numActiveThread - 1) / numActiveThread;
@@ -330,8 +330,8 @@ namespace Physica::Core {
 
                 for (int i = 0; i < numRead; ++i) {
                     const int atom2 = shift + i;
-                    const Vector3D& to = posBuffer[i];
-                    Vector3D r = to - from;
+                    const DeviceVector3D& to = posBuffer[i];
+                    DeviceVector3D r = to - from;
                     const ScalarType norm2 = r.squaredNorm();
                     const bool isNotSelf = ScalarType(std::numeric_limits<ScalarType>::min()) < norm2;
                     if (isNotSelf && norm2 < squared_cutoff) {
@@ -351,10 +351,10 @@ namespace Physica::Core {
 
             const size_t atom1 = cellList.getCellAtomMap()[cellList.getCellStartOffset()[cell] + threadIdx.x];
             /* Current cell */ {
-                const Vector3D from = pos.row(atom1);
+                const DeviceVector3D from = pos.row(atom1);
                 cellList.forAtomInCell(centerCell, [this, &pos, &from, &func, atom1](size_t atom2) {
                     auto to = pos.row(atom2);
-                    Vector3D r = to - from;
+                    DeviceVector3D r = to - from;
                     const ScalarType norm2 = r.squaredNorm();
                     const bool isNotSelf = atom1 != atom2;
                     if (isNotSelf && norm2 < squared_cutoff) {
@@ -363,11 +363,11 @@ namespace Physica::Core {
                     }
                 });
             }
-            cellList.forNeighInRange(centerCell, [this, &pos, &func, atom1](Vector3D translate, Index3D neigh) {
-                const Vector3D from = pos.row(atom1) - translate;
+            cellList.forNeighInRange(centerCell, [this, &pos, &func, atom1](DeviceVector3D translate, Index3D neigh) {
+                const DeviceVector3D from = pos.row(atom1) - translate;
                 cellList.forAtomInCell(neigh, [this, &pos, &from, &func, atom1](size_t atom2) {
                     auto to = pos.row(atom2);
-                    Vector3D r = to - from;
+                    DeviceVector3D r = to - from;
                     const ScalarType norm2 = r.squaredNorm();
                     if (norm2 < squared_cutoff) {
                         const ScalarType norm1 = sqrt(norm2);

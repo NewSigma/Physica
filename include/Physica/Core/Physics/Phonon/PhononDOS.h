@@ -29,7 +29,6 @@ namespace Physica::Core {
         using SolverType = PhononSolver<T>;
         using ElementType = CuboidLinear<T>;
         using Index3D = typename SolverType::Index3D;
-        using Vector3D = typename SolverType::Vector3D;
         using CoeffVector = DenseVector<T, ElementType::DegreeOfFreedom>;
         using MDCellType = typename SolverType::MDCellType;
         using KSpaceFCGrid = typename SolverType::KSpaceFCGrid;
@@ -70,7 +69,7 @@ namespace Physica::Core {
             : PhononDOS(std::move(unitCell), std::move(superSize), std::move(gridDim)) {
         eigenvalues.forIndexInGrid([this, &forceConstants](Index3D index) {
             const Index3D gridDim = eigenvalues.getDim();
-            Vector3D qPoint{};
+            Vector3D<T> qPoint{};
             for (unsigned int i = 0; i < Dim; ++i)
                 qPoint[i] = T(index[i]) / T(gridDim[i]);
             auto fcMatrix = solver.interpolatePoint(qPoint, forceConstants);
@@ -161,8 +160,7 @@ namespace Physica::Core {
         cornerFreq[6] = eigenvalues(index1[0], index1[1], index[2])[band];
         cornerFreq[7] = eigenvalues(index1)[band];
 
-        using Vector4D = Vector4D<T>;
-        const Vector4D plane{cornerFreq * diffCoeffX, cornerFreq * diffCoeffY, cornerFreq * diffCoeffZ, freq - mean(cornerFreq)};
+        const Vector4D<T> plane{cornerFreq * diffCoeffX, cornerFreq * diffCoeffY, cornerFreq * diffCoeffZ, freq - mean(cornerFreq)};
         const auto head = plane.head(3);
         const auto cross = CubeCross<T>(plane);
         const T norm = head.norm();

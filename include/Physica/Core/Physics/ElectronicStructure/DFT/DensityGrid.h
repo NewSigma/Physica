@@ -27,7 +27,6 @@ namespace Physica::Core {
     template<Scalar T, bool IsSpinPolarized>
     class DensityGrid {
         using LatticeMatrix = typename PeriodicCell<T, 3>::LatticeMatrix;
-        using Vector3D = Vector3D<T>;
         using GridType = RSpaceGrid<T>;
     public:
         using Index3D = typename RSpaceGrid<T>::Index3D;
@@ -43,7 +42,7 @@ namespace Physica::Core {
         ~DensityGrid() = default;
         /* Oprators */
         DensityGrid& operator=(DensityGrid obj) noexcept;
-        [[nodiscard]] T operator()(SpinState spin, Vector3D pos) const;
+        [[nodiscard]] T operator()(SpinState spin, Vector3D<T> pos) const;
         /* Operations */
         void initDensity(T averageRho);
         inline void initDensity(const DensityGrid& rho);
@@ -69,7 +68,7 @@ namespace Physica::Core {
     }
 
     template<Scalar T, bool IsSpinPolarized>
-    T DensityGrid<T, IsSpinPolarized>::operator()(SpinState spin, Vector3D pos) const {
+    T DensityGrid<T, IsSpinPolarized>::operator()(SpinState spin, Vector3D<T> pos) const {
         assert(T(0) <= pos[0] && pos[0] <= T(1));
         assert(T(0) <= pos[1] && pos[1] <= T(1));
         assert(T(0) <= pos[2] && pos[2] <= T(1));
@@ -133,7 +132,7 @@ namespace Physica::Core {
     template<Scalar T, bool IsSpinPolarized>
     void DensityGrid<T, IsSpinPolarized>::fit(const DensityGrid& rho) {
         const LatticeMatrix latt = LatticeMatrix::unitMatrix(3);
-        auto kernel = [this, &rho](Vector3D pos, Index3D index) {
+        auto kernel = [this, &rho](Vector3D<T> pos, Index3D index) {
             {
                 auto& rho_up = getTotalDensity();
                 rho_up(index) = rho(SpinState::Up, pos);

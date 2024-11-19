@@ -558,6 +558,7 @@ namespace Physica::Core {
             }
             buffer[replica] = kineticStress * reciprocal(getVolume());
 
+            [[maybe_unused]] auto& _ = model; // Silent warnings
             if constexpr (!isFreeModel) {
                 constexpr bool IsPeriodBoundary = Traits<ForceModel>::IsPeriodBoundary;
                 MDCellType cell = phaseToCell(replica);
@@ -614,6 +615,7 @@ namespace Physica::Core {
             }
             buffer[replica] = kineticStress * reciprocal(getVolume());
 
+            [[maybe_unused]] auto& _ = model; // Silent warnings
             if constexpr (!isFreeModel) {
                 constexpr bool IsPeriodBoundary = Traits<ForceModel>::IsPeriodBoundary;
                 auto cell = phaseToCell(replica);
@@ -663,7 +665,6 @@ namespace Physica::Core {
                 const size_t numReplica = getNumReplica();
                 const auto col = getPhaseMatrix().col(replica);
                 const auto momentum = col.head(dof);
-                const auto pos = col.tail(dof);
 
                 LatticeMatrix kineticStress(Dim, Dim, 0);
                 for (size_t i = 0; i < getNumParticle(); ++i) {
@@ -676,6 +677,7 @@ namespace Physica::Core {
                 }
                 buffer[replica] = kineticStress * reciprocal(getVolume());
 
+                [[maybe_unused]] auto& _ = model; // Silent warnings
                 if constexpr (!isFreeModel) {
                     MDCellType cell = phaseToCell(replica);
                     if constexpr (IsPeriodBoundary)

@@ -10,9 +10,7 @@ target_sources(Benchmark PRIVATE RPMD/Q_TIP4P.cpp)
 if(${PHYSICA_CUDA})
     target_sources(Benchmark PRIVATE RPMD/HardCore.cu)
     target_sources(Benchmark PRIVATE RPMD/ParaH.cu)
-    if(NOT ${CMAKE_BUILD_TYPE} MATCHES "Debug") # nvcc 12.2 internal compiler error in debug mode
-        target_sources(Benchmark PRIVATE RPMD/ParaH_auto.cu)
-    endif()
+    target_sources(Benchmark PRIVATE RPMD/ParaH_auto.cu)
     target_sources(Benchmark PRIVATE RPMD/Q_TIP4P2D.cu)
 endif()
 # Anonymous

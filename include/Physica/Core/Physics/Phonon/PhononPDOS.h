@@ -26,7 +26,6 @@ namespace Physica::Core {
         using Base = PhononDOS<T>;
         using typename Base::SolverType;
         using typename Base::MDCellType;
-        using typename Base::Vector3D;
         using typename Base::CoeffVector;
         using typename Base::Index3D;
         using typename Base::KSpaceFCGrid;
@@ -67,7 +66,7 @@ namespace Physica::Core {
         assert(direction.getLength() == getUnitCellDOF() && "[Error]: DOF of direction and unit cell do not match");
         eigenvalues.forIndexInGrid([this, &forceConstants](Index3D index) {
             const Index3D gridDim = eigenvalues.getDim();
-            Vector3D qPoint{};
+            Vector3D<T> qPoint{};
             for (unsigned int i = 0; i < Dim; ++i)
                 qPoint[i] = T(index[i]) / T(gridDim[i]);
             auto fcMatrix = solver.interpolatePoint(qPoint, forceConstants);

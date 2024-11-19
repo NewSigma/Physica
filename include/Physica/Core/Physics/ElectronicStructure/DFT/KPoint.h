@@ -26,16 +26,15 @@ namespace Physica::Core {
     public:
         constexpr static size_t NumSpin = isSpinPolarized ? 2 : 1;
         using ComplexType = Complex<T>;
-        using Vector3D = Vector3D<T>;
         using BandEnergy = DenseVector<T, NumBand>;
         using BandEnergyPair = std::pair<BandEnergy, BandEnergy>;
     private:
-        Vector3D pos;
+        Vector3D<T> pos;
         T weight;
         Array<BandEnergy, NumSpin> bandE;
     public:
         KPoint() = default;
-        KPoint(Vector3D pos_, T weight_, size_t numBand);
+        KPoint(Vector3D<T> pos_, T weight_, size_t numBand);
         KPoint(const KPoint&) = default;
         KPoint(KPoint&&) noexcept = default;
         ~KPoint() = default;
@@ -44,7 +43,7 @@ namespace Physica::Core {
         /* Operations */
         void swap(KPoint& __restrict kPoint) noexcept;
         /* Getters */
-        [[nodiscard]] const Vector3D& getPos() const noexcept { return pos; }
+        [[nodiscard]] const Vector3D<T>& getPos() const noexcept { return pos; }
         [[nodiscard]] const T& getWeight() const noexcept { return weight; }
         [[nodiscard]] inline const BandEnergy& getBandEnergy(SpinState spin) const noexcept;
         /* Setters */
@@ -53,7 +52,7 @@ namespace Physica::Core {
     };
 
     template<Scalar T, size_t NumBand, bool isSpinPolarized>
-    KPoint<T, NumBand, isSpinPolarized>::KPoint(Vector3D pos_, T weight_, size_t numBand)
+    KPoint<T, NumBand, isSpinPolarized>::KPoint(Vector3D<T> pos_, T weight_, size_t numBand)
             : pos(std::move(pos_)), weight(std::move(weight_)), bandE(NumSpin, numBand) {}
 
     template<Scalar T, size_t NumBand, bool isSpinPolarized>

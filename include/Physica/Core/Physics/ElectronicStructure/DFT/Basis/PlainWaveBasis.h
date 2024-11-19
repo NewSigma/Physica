@@ -28,7 +28,6 @@ namespace Physica::Core {
         using GridType = RSpaceGrid<ComplexType>;
         using LatticeMatrix = typename PeriodicCell<T, 3>::LatticeMatrix;
         using Index3D = typename GridBase::Index3D;
-        using Vector3D = Vector3D<T>;
 
         GridType coeffGrid;
         LatticeMatrix repLatt;
@@ -44,8 +43,8 @@ namespace Physica::Core {
         template<Vector V>
         PlainWaveBasis& operator=(const V& statePsi);
         /* Operations */
-        [[nodiscard]] inline Vector3D makeWaveVector(size_t x, size_t y, size_t z) const noexcept;
-        [[nodiscard]] inline Vector3D makeWaveVector(Index3D index) const noexcept;
+        [[nodiscard]] inline Vector3D<T> makeWaveVector(size_t x, size_t y, size_t z) const noexcept;
+        [[nodiscard]] inline Vector3D<T> makeWaveVector(Index3D index) const noexcept;
         inline void normalize();
         T calcNumElectron() const;
 
@@ -60,7 +59,7 @@ namespace Physica::Core {
         [[nodiscard]] T getCutEnergyPsi() const noexcept { return cutEnergyPsi; }
         /* Static members */
         static Index3D makeGridDim(T cutEnergy, const LatticeMatrix& repLatt);
-        static Vector3D makeWaveVector(const LatticeMatrix& repLatt, Index3D index, Index3D dim) noexcept;
+        static Vector3D<T> makeWaveVector(const LatticeMatrix& repLatt, Index3D index, Index3D dim) noexcept;
         template<class Functor>
         inline static void forKInBasis(const LatticeMatrix& repLatt, Index3D dim, Functor func);
         template<class Functor>
@@ -90,14 +89,12 @@ namespace Physica::Core {
     }
 
     template<Scalar T>
-    inline typename PlainWaveBasis<T>::Vector3D
-    PlainWaveBasis<T>::makeWaveVector(size_t x, size_t y, size_t z) const noexcept {
+    inline Vector3D<T> PlainWaveBasis<T>::makeWaveVector(size_t x, size_t y, size_t z) const noexcept {
         return makeWaveVector({x, y, z});
     }
 
     template<Scalar T>
-    inline typename PlainWaveBasis<T>::Vector3D
-    PlainWaveBasis<T>::makeWaveVector(Index3D index) const noexcept {
+    inline Vector3D<T> PlainWaveBasis<T>::makeWaveVector(Index3D index) const noexcept {
         return makeWaveVector(repLatt, index, getDim());
     }
 
@@ -135,9 +132,8 @@ namespace Physica::Core {
     }
 
     template<Scalar T>
-    typename PlainWaveBasis<T>::Vector3D
-    PlainWaveBasis<T>::makeWaveVector(const LatticeMatrix& repLatt, Index3D index, Index3D dim) noexcept {
-        Vector3D v{};
+    Vector3D<T> PlainWaveBasis<T>::makeWaveVector(const LatticeMatrix& repLatt, Index3D index, Index3D dim) noexcept {
+        Vector3D<T> v{};
         for (int i = 0; i < 3; ++i) {
             const ssize_t index_i = index[i];
             const ssize_t dim_i = dim[i];

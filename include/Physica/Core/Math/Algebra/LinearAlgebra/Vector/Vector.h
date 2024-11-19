@@ -18,15 +18,20 @@
  */
 #pragma once
 
+#include <concepts>
 #include <Physica/Core/Utils/CUDA/device_obj.cuh>
 
 namespace Physica::Core {
     template<class Derived> class RValueVector;
     template<class Derived> class LValueVector;
+    template<class Derived> class RSparseVector;
 
     template<class T>
     concept Vector = std::derived_from<T, RValueVector<T>> || std::derived_from<T, device_obj<RValueVector<T>>>;
 
     template<class T>
     concept LVector = std::derived_from<T, LValueVector<T>> || std::derived_from<T, device_obj<LValueVector<T>>>;
+
+    template<class T>
+    concept Sparse = std::derived_from<T, RSparseVector<T>>;
 }

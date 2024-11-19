@@ -148,12 +148,12 @@ namespace Physica::Core {
     template<Scalar T>
     typename TPQ<T>::RealType TPQ<T>::lnSquaredDot(const VectorND<RealType>& other) const {
         assert(Base::getLength() == other.getLength() && "[Error]: Dimensions do not match");
-        const RealType maxabs = abs(*this).max();
+        const RealType maxabs = abs(asVector()).max();
         const bool isUnderflow = maxabs < RealType(std::numeric_limits<RealType>::min());
         if (isUnderflow)
             return RealType(-std::numeric_limits<T>::max());
         const RealType factor = reciprocal(maxabs);
-        const auto expr1 = (*this) * factor;
+        const auto expr1 = asVector() * factor;
         const auto expr2 = toSquaredNormVector(expr1);
         const RealType dot = hadamard(expr2, other).sum();
         if (dot.isZero())
@@ -178,7 +178,7 @@ namespace Physica::Core {
         if (useDefault) // Default norm is as small as possible while keep all effective digits
             norm = RealType(std::numeric_limits<RealType>::min() / std::numeric_limits<RealType>::epsilon());
         Base::random_normal(gen);
-        (*this) *= norm;
+        asVector() *= norm;
     }
 
     template<Scalar T>

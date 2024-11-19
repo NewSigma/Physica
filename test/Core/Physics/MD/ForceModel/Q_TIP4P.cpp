@@ -69,8 +69,6 @@ namespace Physica {
 
         static MDCell<ScalarType> makeSystem(unsigned int cellSize, ScalarType cellVolume, RandomGenerator& gen) {
             using CrystalCellType = CrystalCell<ScalarType>;
-            using Vector3D = Vector3D<ScalarType>;
-            
             constexpr size_t maxIndexH = MoleculePerCell * 2;
             constexpr size_t maxIndexO = MoleculePerCell * 3;
             constexpr size_t numAtom = MoleculePerCell * 3;
@@ -82,7 +80,7 @@ namespace Physica {
             typename CrystalCellType::PositionMatrix pos(numAtom, 3);
             std::uniform_real_distribution dist(-0.1, 0.1);
             for (size_t i = 0; i < MoleculePerCell; ++i) {
-                Vector3D temp = Vector3D::random_any(3, dist, gen);
+                auto temp = Vector3D<ScalarType>::random_any(3, dist, gen);
                 if (i == 0) {
                     temp[0] += ScalarType(0.25);
                     temp[1] += ScalarType(0.25);

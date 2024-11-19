@@ -1,5 +1,5 @@
 /*
- * Copyright 2022 Weibo He.
+ * Copyright 2022-2024 Weibo He.
  *
  * This file is part of Physica.
  *
@@ -18,16 +18,16 @@
  */
 #include "Physica/Core/Physics/Experiment/DimEstimator.h"
 
-using namespace Physica::Core;
+using namespace Physica;
 using ScalarType = float64;
-
+/**
+ * References:
+ * [1] Physica D 9, 189-208 (1983); https://doi.org/10.1016/0167-2789(83)90298-1
+ * [2] Phys. Rev. Lett. 45, 1175 (1980); https://doi.org/10.1103/PhysRevLett.45.1175
+ */
 int main() {
-    /**
-     * References:
-     * [1] PHYSICA D 9, 189-208 (1983); https://doi.org/10.1016/0167-2789(83)90298-1
-     */
     /* logistic */ {
-        DenseMatrix<ScalarType, MatrixOption::Col | MatrixOption::Vector, Physica::Dynamic, 1> data(30000, 1);
+        DenseMatrix<ScalarType, MatrixOption::Col | MatrixOption::Vector, Dynamic, 1> data(30000, 1);
         auto col = data.col(0);
         const ScalarType factor = 3.5699456;
         col[0] = 0.5;
@@ -40,11 +40,12 @@ int main() {
             return 1;
     }
     /* Henon map */ {
-        DenseMatrix<ScalarType, MatrixOption::Col | MatrixOption::Vector, Physica::Dynamic, 2> data(15000, 2);
+        // On newer architectures, FMA instructions will affect precision, so we use more data instead of 15000 as [1] does.
+        DenseMatrix<ScalarType, MatrixOption::Col | MatrixOption::Vector, Dynamic, 2> data(20000, 2);
         auto col1 = data.col(0);
         auto col2 = data.col(1);
         const ScalarType factor1 = 1.4;
-        const ScalarType factor2 = 0.3;
+        const ScalarType factor2 = 0.3; // There is a typo in [1]. For supplementary information, refer to [2] (specifically, reference [11] in [1]).
         col1[0] = 1;
         col2[0] = 0;
         for (size_t i = 1; i < col1.getLength(); ++i) {

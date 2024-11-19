@@ -49,7 +49,7 @@ namespace Physica::Core {
         using CellListType = CellList<ScalarType>;
         using DeviceCellList = device_obj<CellListType>;
         using Index3D = typename GridBase::Index3D;
-        using Vector3D = device_obj<Vector3D<ScalarType>>;
+        using DeviceVector3D = device_obj<Vector3D<ScalarType>>;
         using ForceBufferType = device_obj<DenseMatrix<ScalarType>>;
         using VirialBufferType = device_obj<DenseMatrix<ScalarType, MatrixOption::Col | MatrixOption::Element, NumVirialElem>>;
         using PageLockedVector = DenseVector<ScalarType, Dynamic, PageLockedAllocator<ScalarType>>;

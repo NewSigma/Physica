@@ -18,6 +18,7 @@
  */
 #pragma once
 
+#include <concepts>
 #include <cstdlib>
 #include <utility>
 #include <Physica/Macro.h>

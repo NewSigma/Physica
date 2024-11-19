@@ -88,10 +88,10 @@ namespace Physica::Core {
 
         VectorND<T> temp = data;
         for (size_t pos = lRange; pos < data.getLength() - rRange; ++pos) {
-            auto window = data.getDerived().segment(pos - lRange, pos - lRange + windowSize);
+            auto window = data.segment(pos - lRange, pos - lRange + windowSize);
             temp[pos] = mask * window;
         }
-        data.getDerived() = std::move(temp);
+        data = std::move(temp);
     }
     /**
      * Append zeros if data is undefined
@@ -109,24 +109,24 @@ namespace Physica::Core {
         /* Append zeros to pos < 0 */ {
             const size_t rRange1 = rRange + 1;
             for (size_t pos = 0; pos < lRange; ++pos) {
-                auto window = data.getDerived().segment(0, pos + rRange1);
+                auto window = data.segment(0, pos + rRange1);
                 auto mask1 = mask.segment(windowSize - window.getLength(), windowSize);
                 temp[pos] = mask1 * window;
             }
         }
         for (size_t pos = lRange; pos < length - rRange; ++pos) {
-            auto window = data.getDerived().segment(pos - lRange, pos - lRange + windowSize);
+            auto window = data.segment(pos - lRange, pos - lRange + windowSize);
             temp[pos] = mask * window;
         }
         /* Append zeros to pos > length - 1 */ {
             const size_t lRange1 = lRange + 1;
             for (size_t pos = length - lRange1; pos < length; ++pos) {
-                auto window = data.getDerived().segment(pos, length);
+                auto window = data.segment(pos, length);
                 auto mask1 = mask.segment(0, window.getLength());
                 temp[pos] = mask1 * window;
             }
         }
-        data.getDerived() = std::move(temp);
+        data = std::move(temp);
     }
 
     template<Scalar T>

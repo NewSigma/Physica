@@ -18,6 +18,7 @@
  */
 #pragma once
 
+#include <list>
 #include <Physica/Core/Exception/CUDA/CUDA.cuh>
 #include "DiffTracer.h"
 #include "TraceSegment.cuh"

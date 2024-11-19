@@ -32,7 +32,6 @@ namespace Physica::Core {
         using LatticeMatrix = typename PeriodicCell<T, 3>::LatticeMatrix;
         using BasisType = PlainWaveBasis<T>;
         using HermiteMatrix = DenseHermiteMatrix<ComplexType>;
-        using Vector3D = Vector3D<T>;
         using Index3D = typename GridBase::Index3D;
         using FFT3D = FFT<T, 3>;
     private:
@@ -55,13 +54,13 @@ namespace Physica::Core {
         KSHamilton& operator=(KSHamilton obj) noexcept { swap(obj); return *this; }
         const HermiteMatrix& operator[]([[maybe_unused]] SpinState spin) const noexcept { return hamiltonH; }
         /* Operations */
-        void makeFreeHamilton(Vector3D kPoint);
-        void makeNearFreeHamilton(Vector3D kPoint);
-        void makeHamiltonWithoutXC(const DensityGrid<T, IsSpinPolarized>& densityRho, Vector3D kPoint);
+        void makeFreeHamilton(Vector3D<T> kPoint);
+        void makeNearFreeHamilton(Vector3D<T> kPoint);
+        void makeHamiltonWithoutXC(const DensityGrid<T, IsSpinPolarized>& densityRho, Vector3D<T> kPoint);
         void makeHamiltonWithXC(
             const RSpaceGrid<T>& xcPot,
             const DensityGrid<T, IsSpinPolarized>& densityRho,
-            Vector3D kPoint);
+            Vector3D<T> kPoint);
 
         void swap(KSHamilton& __restrict obj);
         /* Getters */
@@ -106,10 +105,10 @@ namespace Physica::Core {
     }
 
     template<Scalar T, bool IsSpinPolarized>
-    void KSHamilton<T, IsSpinPolarized>::makeFreeHamilton(Vector3D kPoint) {
+    void KSHamilton<T, IsSpinPolarized>::makeFreeHamilton(Vector3D<T> kPoint) {
         hamiltonH = T(0);
         size_t i = 0;
-        BasisType::forKInBasis(repLatt, basisDim, [this, kPoint, &i](Vector3D waveK) {
+        BasisType::forKInBasis(repLatt, basisDim, [this, kPoint, &i](Vector3D<T> waveK) {
             constexpr double factor = PhyConst<AU>::reducedPlanck * PhyConst<AU>::reducedPlanck / PhyConst<AU>::electronMass * 0.5;
             const T kineticE = (kPoint + waveK).squaredNorm() * factor;
             hamiltonH(i, i) = kineticE;
@@ -118,7 +117,7 @@ namespace Physica::Core {
     }
 
     template<Scalar T, bool IsSpinPolarized>
-    void KSHamilton<T, IsSpinPolarized>::makeNearFreeHamilton(Vector3D kPoint) {
+    void KSHamilton<T, IsSpinPolarized>::makeNearFreeHamilton(Vector3D<T> kPoint) {
         makeFreeHamilton(kPoint);
 
         GridBase::forIndexInGrid(basisDim, [this](Index3D index1) {
@@ -134,7 +133,7 @@ namespace Physica::Core {
     template<Scalar T, bool IsSpinPolarized>
     void KSHamilton<T, IsSpinPolarized>::makeHamiltonWithoutXC(
             const DensityGrid<T, IsSpinPolarized>& densityRho,
-            Vector3D kPoint) {
+            Vector3D<T> kPoint) {
         makeNearFreeHamilton(kPoint);
 
         fft_rho.getRSpace().flatten() = densityRho.getTotalDensity().flatten();
@@ -147,7 +146,7 @@ namespace Physica::Core {
                 constexpr double factor = 1 / PhyConst<AU>::vacuumDielectric;
                 const size_t c = PeriodIndex3D(basisDim, index2).toIndex1D();
                 const Index3D delta = calcDeltaIndex(index1, index2, kSpaceDensity.getDim());
-                const Vector3D waveG = BasisType::makeWaveVector(repLatt, delta, basisDim);
+                const Vector3D<T> waveG = BasisType::makeWaveVector(repLatt, delta, basisDim);
                 hamiltonH(r, c) += T(factor) * repVolume * kSpaceDensity(delta) / waveG.squaredNorm();
             });
         });
@@ -157,7 +156,7 @@ namespace Physica::Core {
     void KSHamilton<T, IsSpinPolarized>::makeHamiltonWithXC(
             const RSpaceGrid<T>& xcPot,
             const DensityGrid<T, IsSpinPolarized>& densityRho,
-            Vector3D kPoint) {
+            Vector3D<T> kPoint) {
         makeHamiltonWithoutXC(densityRho, kPoint);
 
         fft_xc.getRSpace().flatten() = xcPot.flatten();
@@ -204,7 +203,7 @@ namespace Physica::Core {
             GridType& grid = result[i];
             i += 1;
             size_t j = 0;
-            BasisType::forKInBasis(repLatt, grid.getDim(), [this, element, &j, &grid](Vector3D waveK) {
+            BasisType::forKInBasis(repLatt, grid.getDim(), [this, element, &j, &grid](Vector3D<T> waveK) {
                 auto factor = ComplexType(0);
                 for (size_t ion = 0; ion < cell.getNumParticle(); ++ion) {
                     if (cell.getAtomicNumber(ion) == element) { //Optimize: We can use searching table method
@@ -235,7 +234,7 @@ namespace Physica::Core {
             const T chargeZ = T(element);
             const T factor2 = factor1 * chargeZ;
             const auto& grid = strucFactorGrids[i];
-            BasisType::forKIndexInBasis(repLatt, kSpaceIonCoulomb.getDim(), [this, factor2, &grid](Vector3D waveK, Index3D index) {
+            BasisType::forKIndexInBasis(repLatt, kSpaceIonCoulomb.getDim(), [this, factor2, &grid](Vector3D<T> waveK, Index3D index) {
                 const T squaredNorm = waveK.squaredNorm();
                 const bool isNotGammaPoint = T(std::numeric_limits<T>::min()) < squaredNorm;
                 if (isNotGammaPoint) [[likely]]
