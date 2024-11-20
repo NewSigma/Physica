@@ -18,7 +18,7 @@
  */
 #pragma once
 
-#include <Physica/Core/Math/Algebra/LinearAlgebra/Vector/DenseVector.cuh>
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/DenseVector.cuh"
 #include "MatrixImpl/ContinuousMatrix.cuh"
 #include "DenseMatrixImpl/DenseMatrixStorage.cuh"
 

@@ -19,7 +19,7 @@
 #pragma once
 
 #include <system_error>
-#include <Physica/Macro.h>
+#include "Physica/Macro.h"
 #ifdef PHYSICA_MKL
     #include <mkl_vsl.h>
 #endif

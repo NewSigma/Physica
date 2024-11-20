@@ -17,9 +17,9 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include <iostream>
-#include <Physica/Core/Physics/MD/ForceModel/Ewald/Ewald.h>
-#include <Physica/Core/MultiPrecision/AutoDiffGuard.h>
-#include <Physica/Core/Parallel/Executor/SequentialExecutor.h>
+#include "Physica/Core/Physics/MD/ForceModel/Ewald/Ewald.h"
+#include "Physica/Core/MultiPrecision/AutoDiffGuard.h"
+#include "Physica/Core/Parallel/Executor/SequentialExecutor.h"
 
 using namespace Physica;
 using namespace Physica::Core;

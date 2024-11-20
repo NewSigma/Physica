@@ -23,6 +23,8 @@ along with Physica.  If not, see <https://www.gnu.org/licenses/>.
 
 规定头文件拓展名为.h，源文件拓展名为.cpp
 
+标准库、第三方库头文件使用<>, Physica头文件使用""
+
 ### Header guard
 
 所有头文件应使用#pragma once以避免多重include，禁止使用#define

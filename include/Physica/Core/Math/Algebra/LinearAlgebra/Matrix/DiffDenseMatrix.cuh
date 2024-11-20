@@ -18,7 +18,7 @@
  */
 #pragma once
 
-#include <Physica/Core/Math/Algebra/LinearAlgebra/Matrix/MatrixImpl/RValueMatrix.cuh>
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/MatrixImpl/RValueMatrix.cuh"
 #include "DiffDenseMatrix.h"
 
 namespace Physica::Core {

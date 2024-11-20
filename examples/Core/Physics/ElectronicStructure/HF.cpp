@@ -18,9 +18,9 @@
  */
 #include <iostream>
 #include <QApplication>
-#include <Physica/Core/Physics/ElectronicStructure/HF/RHFSolver.h>
-#include <Physica/Core/Physics/ElectronicStructure/HF/GTOnG.h>
-#include <Physica/Gui/Plot/Plot.h>
+#include "Physica/Core/Physics/ElectronicStructure/HF/RHFSolver.h"
+#include "Physica/Core/Physics/ElectronicStructure/HF/GTOnG.h"
+#include "Physica/Gui/Plot/Plot.h"
 
 using namespace Physica::Core;
 using namespace Physica::Core::Physics;

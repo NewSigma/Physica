@@ -18,7 +18,7 @@
  */
 #pragma once
 
-#include <Physica/Core/Physics/SolidState/PeriodicCell.cuh>
+#include "Physica/Core/Physics/SolidState/PeriodicCell.cuh"
 #include "MDCell.h"
 
 namespace Physica::Core {

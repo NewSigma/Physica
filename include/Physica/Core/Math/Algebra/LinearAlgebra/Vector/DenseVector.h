@@ -18,9 +18,9 @@
  */
 #pragma once
 
-#include <Physica/Core/MultiPrecision/Real.h>
-#include <Physica/Core/Utils/Container/Array.h>
-#include <Physica/Core/Math/Algebra/LinearAlgebra/Matrix/Matrix.h>
+#include "Physica/Core/MultiPrecision/Real.h"
+#include "Physica/Core/Utils/Container/Array.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/Matrix.h"
 #include "VectorImpl/ContinuousVector.h"
 
 namespace Physica::Core {

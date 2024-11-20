@@ -18,7 +18,7 @@
  */
 #pragma once
 
-#include <Physica/Core/Physics/SolidState/CrystalCell.h>
+#include "Physica/Core/Physics/SolidState/CrystalCell.h"
 #include "DensityGrid.h"
 
 namespace Physica::Core {

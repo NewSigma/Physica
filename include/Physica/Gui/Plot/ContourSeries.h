@@ -19,7 +19,7 @@
 #pragma once
 
 #include <QtCharts/QLineSeries>
-#include <Physica/Core/Math/Algebra/LinearAlgebra/Matrix/MatrixImpl/LValueMatrix.h>
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/MatrixImpl/LValueMatrix.h"
 
 namespace Physica::Gui {
     template<Matrix T>

@@ -18,9 +18,9 @@
  */
 #pragma once
 
-#include <Physica/Core/Math/Statistics/NumCharacter.h>
-#include <Physica/Core/Physics/MD/MDCell.h>
-#include <Physica/Core/Physics/MD/RPMD.h>
+#include "Physica/Core/Math/Statistics/NumCharacter.h"
+#include "Physica/Core/Physics/MD/MDCell.h"
+#include "Physica/Core/Physics/MD/RPMD.h"
 
 namespace Physica::Core {
     template<Scalar T, unsigned int Dim>

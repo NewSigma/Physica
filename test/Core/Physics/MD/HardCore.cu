@@ -18,10 +18,10 @@
  */
 #include <random>
 #include <algorithm>
-#include <Physica/Core/Parallel/Executor/ThreadExecutor.h>
-#include <Physica/Core/Parallel/CUDAContext.cuh>
-#include <Physica/Core/Physics/MD/RPMD.h>
-#include <Physica/Core/Physics/MD/KineticModel/HardCore.cuh>
+#include "Physica/Core/Parallel/Executor/ThreadExecutor.h"
+#include "Physica/Core/Parallel/CUDAContext.cuh"
+#include "Physica/Core/Physics/MD/RPMD.h"
+#include "Physica/Core/Physics/MD/KineticModel/HardCore.cuh"
 
 using namespace Physica::Core;
 constexpr double timeStep = 0.1;

@@ -18,7 +18,7 @@
  */
 #pragma once
 
-#include <Physica/Core/Exception/CUDA/CUDA.cuh>
+#include "Physica/Core/Exception/CUDA/CUDA.cuh"
 
 namespace Physica::Core {
     class PHYSICA_API CUDAEvent {

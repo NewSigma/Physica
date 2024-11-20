@@ -19,12 +19,12 @@
 #include <iostream>
 #include <benchmark/benchmark.h>
 #include <gperftools/profiler.h>
-#include <Physica/Core/Physics/MD/RPMD.h>
-#include <Physica/Core/Physics/MD/KineticModel/FreeModel.h>
-#include <Physica/Core/Physics/MD/ForceModel/SilveraGoldman.cuh>
-#include <Physica/Core/Parallel/Executor/CUDAExecutor.cuh>
-#include <Physica/Core/Math/Random/Random.h>
-#include <Physica/Core/Utils/BenchmarkHelper.h>
+#include "Physica/Core/Physics/MD/RPMD.h"
+#include "Physica/Core/Physics/MD/KineticModel/FreeModel.h"
+#include "Physica/Core/Physics/MD/ForceModel/SilveraGoldman.cuh"
+#include "Physica/Core/Parallel/Executor/CUDAExecutor.cuh"
+#include "Physica/Core/Math/Random/Random.h"
+#include "Physica/Core/Utils/BenchmarkHelper.h"
 
 using namespace Physica::Core;
 using Physica::Dynamic;

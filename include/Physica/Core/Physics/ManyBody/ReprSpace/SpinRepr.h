@@ -22,7 +22,7 @@
 #include "ReprImpl/ReprSpace.h"
 #include "State/SpinFermion.h"
 #include "Physica/Core/Utils/Container/Array.h"
-#include <Physica/PlainStruct.h>
+#include "Physica/PlainStruct.h"
 
 namespace Physica::Core {
     template<int Dim, int NumSite, bool UseInversionSymm>

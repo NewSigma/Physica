@@ -20,7 +20,7 @@
 
 #include <system_error>
 #include <cublas_v2.h>
-#include <Physica/Macro.h>
+#include "Physica/Macro.h"
 
 namespace Physica::Core {
     class PHYSICA_API cuBLASException : public std::system_error {

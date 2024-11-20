@@ -18,8 +18,8 @@
  */
 #pragma once
 
-#include <Physica/Core/Utils/Container/Array.h>
-#include <Physica/Core/Physics/SolidState/PeriodicCell.h>
+#include "Physica/Core/Utils/Container/Array.h"
+#include "Physica/Core/Physics/SolidState/PeriodicCell.h"
 
 namespace Physica::Core {
     class GridBase {

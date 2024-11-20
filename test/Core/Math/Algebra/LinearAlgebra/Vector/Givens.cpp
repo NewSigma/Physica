@@ -17,9 +17,9 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include <iostream>
-#include <Physica/Core/MultiPrecision/Complex.h>
-#include <Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DiffDenseMatrix.h>
-#include <Physica/Core/Math/Algebra/LinearAlgebra/Vector/Givens.h>
+#include "Physica/Core/MultiPrecision/Complex.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DiffDenseMatrix.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/Givens.h"
 
 using namespace Physica::Core;
 using RealType = float64;

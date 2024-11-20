@@ -19,8 +19,8 @@
 #pragma once
 
 #include <random>
-#include <Physica/Core/Exception/MKL/VSL.h>
-#include <Physica/Core/Parallel/ThreadPool.h>
+#include "Physica/Core/Exception/MKL/VSL.h"
+#include "Physica/Core/Parallel/ThreadPool.h"
 #include "RandomSeed.h"
 
 namespace Physica::Core {

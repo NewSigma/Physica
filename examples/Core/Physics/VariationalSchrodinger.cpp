@@ -18,10 +18,10 @@
  */
 #include <iostream>
 #include <QtWidgets/QApplication>
-#include <Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h>
-#include <Physica/Core/Math/Algebra/LinearAlgebra/Matrix/MatrixDecomposition/Cholesky.h>
-#include <Physica/Core/Math/Algebra/LinearAlgebra/Eigen/EigenSolver.h>
-#include <Physica/Gui/Plot/Plot.h>
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/MatrixDecomposition/Cholesky.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Eigen/EigenSolver.h"
+#include "Physica/Gui/Plot/Plot.h"
 
 using namespace Physica::Core;
 using namespace Physica::Gui;

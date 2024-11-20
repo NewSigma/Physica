@@ -18,7 +18,7 @@
  */
 #pragma once
 
-#include <Physica/Core/Math/Calculus/Differential.h>
+#include "Physica/Core/Math/Calculus/Differential.h"
 
 namespace Physica::Core {
     namespace Internal {

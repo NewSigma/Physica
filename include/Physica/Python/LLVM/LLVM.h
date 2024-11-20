@@ -18,8 +18,8 @@
  */
 #pragma once
 
-#include <llvm/ExecutionEngine/Orc/ThreadSafeModule.h>
-#include <llvm/Support/ManagedStatic.h>
+#include <llvm/ExecutionEngine/Orc/ThreadSafeModule.h"
+#include <llvm/Support/ManagedStatic.h"
 
 namespace Physica::Python {
     class LLVM final {

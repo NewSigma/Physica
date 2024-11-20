@@ -19,9 +19,9 @@
 #include <cmath>
 #include <cstdlib>
 #include <cstring>
-#include <Physica/Core/Exception/DivideByZeroException.h>
-#include <Physica/Core/MultiPrecision/Integer.h>
-#include <Physica/Core/MultiPrecision/Real.h>
+#include "Physica/Core/Exception/DivideByZeroException.h"
+#include "Physica/Core/MultiPrecision/Integer.h"
+#include "Physica/Core/MultiPrecision/Real.h"
 
 namespace Physica::Core {
     Integer::Integer(int i)

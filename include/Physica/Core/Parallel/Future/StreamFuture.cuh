@@ -20,7 +20,7 @@
 
 #include <mutex>
 #include <condition_variable>
-#include <Physica/Macro.h>
+#include "Physica/Macro.h"
 
 namespace Physica::Core {
     class PHYSICA_API StreamFuture {

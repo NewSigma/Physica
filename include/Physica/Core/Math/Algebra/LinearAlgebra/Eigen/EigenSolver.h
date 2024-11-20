@@ -18,8 +18,8 @@
  */
 #pragma once
 
-#include <Physica/Core/Math/Algebra/LinearAlgebra/Matrix/MatrixDecomposition/Schur.h>
-#include <Physica/Core/MultiPrecision/Complex.h>
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/MatrixDecomposition/Schur.h"
 
 namespace Physica::Core {
     /**
@@ -182,19 +182,15 @@ namespace Physica::Core {
         EigenvectorMatrix result(size, size);
         if constexpr (isComplex) {
             RawEigenvectorType inv = rawEigenvectors.inverse();
-            for (size_t i = 0; i < size; ++i) {
-                auto col = result.col(i);
-                col = rawEigenvectors * hadamard(eigenvalues, inv.col(i));
-            }
+            for (size_t i = 0; i < size; ++i)
+                result.col(i) = rawEigenvectors * hadamard(eigenvalues, inv.col(i));
             return result;
         }
         else {
             const EigenvectorMatrix eigenvectors = getEigenvectors();
             const EigenvectorMatrix inv = eigenvectors.inverse();
-            for (size_t i = 0; i < size; ++i) {
-                auto col = result.col(i);
-                col = eigenvectors * hadamard(eigenvalues, inv.col(i));
-            }
+            for (size_t i = 0; i < size; ++i)
+                result.col(i) = eigenvectors * hadamard(eigenvalues, inv.col(i));
             return RawEigenvectorType(toRealMatrix(result));
         }
     }
@@ -206,18 +202,14 @@ namespace Physica::Core {
         const size_t size = getSize();
         EigenvectorMatrix result(size, size);
         if constexpr (isComplex) {
-            for (size_t i = 0; i < size; ++i) {
-                auto col = result.col(i);
-                col = rawEigenvectors * hadamard(eigenvalues, rawEigenvectors.conjugate().row(i));
-            }
+            for (size_t i = 0; i < size; ++i)
+                result.col(i) = rawEigenvectors * hadamard(eigenvalues, rawEigenvectors.conjugate().row(i));
             return result;
         }
         else {
             const EigenvectorMatrix eigenvectors = getEigenvectors();
-            for (size_t i = 0; i < size; ++i) {
-                auto col = result.col(i);
-                col = eigenvectors * hadamard(eigenvalues, eigenvectors.conjugate().row(i));
-            }
+            for (size_t i = 0; i < size; ++i)
+                result.col(i) = eigenvectors * hadamard(eigenvalues, eigenvectors.conjugate().row(i));
             return RawEigenvectorType(toRealMatrix(result));
         }
     }

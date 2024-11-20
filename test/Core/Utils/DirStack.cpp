@@ -18,7 +18,7 @@
  */
 #include <cassert>
 #include <cstring>
-#include <Physica/Core/Utils/DirStack.h>
+#include "Physica/Core/Utils/DirStack.h"
 
 namespace Physica::Core {
     class Test {

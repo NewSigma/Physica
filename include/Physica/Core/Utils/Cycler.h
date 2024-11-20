@@ -19,8 +19,8 @@
 #pragma once
 
 #include <cstdint>
-#include <Physica/Macro.h>
-#include <Physica/Core/Exception/NoImplException.h>
+#include "Physica/Macro.h"
+#include "Physica/Core/Exception/NoImplException.h"
 
 namespace Physica::Core {
     /**

@@ -19,7 +19,7 @@
 #pragma once
 
 #include "LayerBase.h"
-#include <Physica/Core/Math/Algebra/LinearAlgebra/Vector/DiffVector.cuh>
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/DiffVector.cuh"
 
 namespace Physica::Core {
     template<class Derived>

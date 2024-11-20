@@ -18,7 +18,7 @@
  */
 #include <fstream>
 #include "Physica/Core/IO/Gnuplot.h"
-#include <Physica/Core/Utils/Unix/TempFile.h>
+#include "Physica/Core/Utils/Unix/TempFile.h"
 
 using namespace Physica::Core;
 

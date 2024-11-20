@@ -18,8 +18,8 @@
  */
 #pragma once
 
-#include <Physica/Core/Math/Algebra/LinearAlgebra/Vector/VectorImpl/ContinuousVector.h>
-#include <Physica/Core/Math/Algebra/LinearAlgebra/Matrix/Matrix.h>
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/VectorImpl/ContinuousVector.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/Matrix.h"
 
 namespace Physica::Core {
     template<class Derived> class RValueMatrix;

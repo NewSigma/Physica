@@ -20,8 +20,8 @@
 
 #include <cstdlib>
 #include <memory>
-#include <Physica/Core/Parallel/CUDAContext.cuh>
-#include <Physica/Core/Utils/CUDA/device_obj.cuh>
+#include "Physica/Core/Parallel/CUDAContext.cuh"
+#include "Physica/Core/Utils/CUDA/device_obj.cuh"
 
 namespace Physica::Core {
     namespace Internal {

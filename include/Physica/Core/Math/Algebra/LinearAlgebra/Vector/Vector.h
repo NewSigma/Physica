@@ -19,7 +19,7 @@
 #pragma once
 
 #include <concepts>
-#include <Physica/Core/Utils/CUDA/device_obj.cuh>
+#include "Physica/Core/Utils/CUDA/device_obj.cuh"
 
 namespace Physica::Core {
     template<class Derived> class RValueVector;

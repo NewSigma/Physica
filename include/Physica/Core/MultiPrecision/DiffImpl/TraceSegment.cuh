@@ -18,9 +18,9 @@
  */
 #pragma once
 
-#include <Physica/Core/Parallel/CUDAContext.cuh>
-#include <Physica/Core/Parallel/Future/StreamFuture.cuh>
-#include <Physica/Core/MultiPrecision/Diff.cuh>
+#include "Physica/Core/Parallel/CUDAContext.cuh"
+#include "Physica/Core/Parallel/Future/StreamFuture.cuh"
+#include "Physica/Core/MultiPrecision/Diff.cuh"
 #include "TraceSegment.h"
 
 namespace Physica::Core {

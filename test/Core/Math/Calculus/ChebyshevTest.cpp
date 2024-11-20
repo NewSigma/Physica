@@ -17,8 +17,8 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include <iostream>
-#include <Physica/Core/Math/Calculus/Chebyshev.h>
-#include <Physica/Core/Math/Algebra/LinearAlgebra/Vector/DenseVector.h>
+#include "Physica/Core/Math/Calculus/Chebyshev.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/DenseVector.h"
 
 using namespace Physica::Core;
 using T = float64;

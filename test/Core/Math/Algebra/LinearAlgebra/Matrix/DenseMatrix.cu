@@ -16,8 +16,8 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include <Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h>
-#include <Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.cuh>
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.cuh"
 
 using namespace Physica::Core;
 

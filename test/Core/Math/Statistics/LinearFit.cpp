@@ -17,7 +17,7 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include <iostream>
-#include <Physica/Core/Math/Statistics/LinearFit.h>
+#include "Physica/Core/Math/Statistics/LinearFit.h"
 
 using namespace Physica::Core;
 using ScalarType = float64;

@@ -17,9 +17,9 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include <iostream>
-#include <Physica/Core/Math/Algebra/LinearAlgebra/Vector/DenseVector.cuh>
-#include <Physica/Core/Math/Random/Random.h>
-#include <Physica/Core/Parallel/Executor/CUDAExecutor.cuh>
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/DenseVector.cuh"
+#include "Physica/Core/Math/Random/Random.h"
+#include "Physica/Core/Parallel/Executor/CUDAExecutor.cuh"
 
 using namespace Physica;
 using namespace Physica::Core;

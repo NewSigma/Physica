@@ -18,7 +18,7 @@
  */
 #pragma once
 
-#include <Physica/CRTPBase.h>
+#include "Physica/CRTPBase.h"
 
 namespace Physica {
     template<class T> class Traits;

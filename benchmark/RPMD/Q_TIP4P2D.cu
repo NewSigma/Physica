@@ -19,15 +19,15 @@
 #include <iostream>
 #include <benchmark/benchmark.h>
 #include <gperftools/profiler.h>
-#include <Physica/Core/Physics/MD/ForceModel/Q_TIP4P.h>
-#include <Physica/Core/Physics/MD/ForceModel/Ewald/RSpaceEwald.cuh>
-#include <Physica/Core/Physics/MD/ForceModel/Ewald/Ewald.h>
-#include <Physica/Core/Physics/MD/RPMD.h>
-#include <Physica/Core/Physics/MD/KineticModel/FreeModel.h>
-#include <Physica/Core/Physics/MD/Thermostat/DoubleThermo.h>
-#include <Physica/Core/Physics/MD/Barostat/SCRBaro.h>
-#include <Physica/Core/Parallel/Executor/CUDAExecutor.cuh>
-#include <Physica/Core/Utils/BenchmarkHelper.h>
+#include "Physica/Core/Physics/MD/ForceModel/Q_TIP4P.h"
+#include "Physica/Core/Physics/MD/ForceModel/Ewald/RSpaceEwald.cuh"
+#include "Physica/Core/Physics/MD/ForceModel/Ewald/Ewald.h"
+#include "Physica/Core/Physics/MD/RPMD.h"
+#include "Physica/Core/Physics/MD/KineticModel/FreeModel.h"
+#include "Physica/Core/Physics/MD/Thermostat/DoubleThermo.h"
+#include "Physica/Core/Physics/MD/Barostat/SCRBaro.h"
+#include "Physica/Core/Parallel/Executor/CUDAExecutor.cuh"
+#include "Physica/Core/Utils/BenchmarkHelper.h"
 
 using namespace Physica::Core;
 using ScalarType = float32;

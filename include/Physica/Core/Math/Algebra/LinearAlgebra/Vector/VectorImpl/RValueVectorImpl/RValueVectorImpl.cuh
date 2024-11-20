@@ -18,8 +18,8 @@
  */
 #pragma once
 
-#include <Physica/PlainStruct.h>
-#include <Physica/Core/Parallel/CUDAContext.cuh>
+#include "Physica/PlainStruct.h"
+#include "Physica/Core/Parallel/CUDAContext.cuh"
 
 namespace Physica::Core {
     namespace Internal {

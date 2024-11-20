@@ -17,7 +17,7 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include <QSvgGenerator>
-#include <Physica/Gui/Plot/MultiPlot.h>
+#include "Physica/Gui/Plot/MultiPlot.h"
 
 namespace Physica::Gui {
     MultiPlot::MultiPlot(int row, int col, QWidget* parent) : QWidget(parent), layout(new QGridLayout(this)) {

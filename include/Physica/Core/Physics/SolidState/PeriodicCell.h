@@ -18,9 +18,9 @@
  */
 #pragma once
 
-#include <Physica/Core/Exception/BadConvergenceException.h>
-#include <Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h>
-#include <Physica/Core/MultiPrecision/Real.h>
+#include "Physica/Core/Exception/BadConvergenceException.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h"
+#include "Physica/Core/MultiPrecision/Real.h"
 
 namespace Physica::Core {
     namespace Internal {

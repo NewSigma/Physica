@@ -18,7 +18,7 @@
  */
 #pragma once
 
-#include <Physica/Core/Math/Algebra/LinearAlgebra/Vector/DenseVector.h>
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/DenseVector.h"
 #include "Physica/Core/Math/Calculus/Differential.h"
 #include "OptimizationImpl/LineSearch.h"
 

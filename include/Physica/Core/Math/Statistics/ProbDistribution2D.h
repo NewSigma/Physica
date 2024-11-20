@@ -18,8 +18,8 @@
  */
 #pragma once
 
-#include <Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h>
-#include <Physica/Core/Math/Algebra/LinearAlgebra/Grid/GridImpl/GridStorage.h>
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Grid/GridImpl/GridStorage.h"
 
 namespace Physica::Core {
     template<Scalar T>

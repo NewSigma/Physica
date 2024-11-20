@@ -18,8 +18,8 @@
  */
 #pragma once
 
-#include <Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseSymmMatrix.h>
-#include <Physica/Core/Physics/MD/MDCell.h>
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseSymmMatrix.h"
+#include "Physica/Core/Physics/MD/MDCell.h"
 
 namespace Physica::Core {
     template<Scalar T, unsigned int Dim> class EmptyForceModel;

@@ -18,7 +18,7 @@
  */
 #pragma once
 
-#include <Physica/Core/Utils/Container/Array.h>
+#include "Physica/Core/Utils/Container/Array.h"
 
 namespace Physica::Core {
     template<unsigned int Dim>

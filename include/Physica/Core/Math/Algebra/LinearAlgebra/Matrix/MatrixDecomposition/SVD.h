@@ -18,9 +18,9 @@
  */
 #pragma once
 
-#include <Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h>
-#include <Physica/Core/Math/Algebra/LinearAlgebra/Vector/Givens.h>
-#include <Physica/Core/Exception/BadConvergenceException.h>
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/Givens.h"
+#include "Physica/Core/Exception/BadConvergenceException.h"
 #include "Bidiagonalization.h"
 #include "Decouplable.h"
 

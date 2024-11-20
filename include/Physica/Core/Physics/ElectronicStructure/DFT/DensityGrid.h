@@ -18,8 +18,8 @@
  */
 #pragma once
 
-#include <Physica/Core/Math/Algebra/LinearAlgebra/Grid/RSpaceGrid.h>
-#include <Physica/Core/Math/Statistics/NumCharacter.h>
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Grid/RSpaceGrid.h"
+#include "Physica/Core/Math/Statistics/NumCharacter.h"
 #include "Basis/PlainWaveBasis.h"
 #include "SpinPair.h"
 

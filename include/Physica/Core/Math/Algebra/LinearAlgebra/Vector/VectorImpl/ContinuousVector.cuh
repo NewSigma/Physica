@@ -18,7 +18,7 @@
  */
 #pragma once
 
-#include <Physica/Core/Exception/CUDA/CUDA.cuh>
+#include "Physica/Core/Exception/CUDA/CUDA.cuh"
 #include "ContinuousVector.h"
 #include "LValueVector.cuh"
 #include "ContinuousVectorImpl/ContinuousVectorBlock.cuh"

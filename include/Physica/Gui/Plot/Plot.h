@@ -24,8 +24,8 @@
 #include <QtCharts/QScatterSeries>
 #include <QtCharts/QAreaSeries>
 #include <QtCharts/QBoxPlotSeries>
-#include <Physica/Core/MultiPrecision/Real.h>
-#include <Physica/Core/Math/Algebra/LinearAlgebra/Vector/DenseVector.h>
+#include "Physica/Core/MultiPrecision/Real.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/DenseVector.h"
 #include "PlotImpl/ChartView.h"
 #include "ContourSeries.h"
 

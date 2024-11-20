@@ -18,7 +18,7 @@
  */
 #pragma once
 
-#include <Physica/Core/Math/Algebra/LinearAlgebra/LinearEquations/LinearEquations.h>
+#include "Physica/Core/Math/Algebra/LinearAlgebra/LinearEquations/LinearEquations.h"
 #include "NumCharacter.h"
 
 namespace Physica::Core {

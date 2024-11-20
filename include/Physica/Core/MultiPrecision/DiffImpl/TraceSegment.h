@@ -19,7 +19,7 @@
 #pragma once
 
 #include "Physica/Core/MultiPrecision/ExprType.h"
-#include <Physica/Core/Math/Algebra/LinearAlgebra/Vector/DenseVector.h>
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/DenseVector.h"
 #include "Print/ColorfulTraceSegment.h"
 
 namespace Physica::Core {

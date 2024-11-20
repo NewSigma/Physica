@@ -18,7 +18,7 @@
  */
 #pragma once
 
-#include <Physica/Core/Utils/CUDA/device_obj.cuh>
+#include "Physica/Core/Utils/CUDA/device_obj.cuh"
 #include "CellList.h"
 
 namespace Physica::Core {

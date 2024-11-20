@@ -19,7 +19,7 @@
 #pragma once
 
 #include <forward_list>
-#include <llvm/IR/Module.h>
+#include <llvm/IR/Module.h"
 #include "llvm/Support/CrashRecoveryContext.h"
 #include "clang/Frontend/CompilerInstance.h"
 #include "clang/CodeGen/ModuleBuilder.h"

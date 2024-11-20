@@ -19,11 +19,11 @@
 #include <random>
 #include <iostream>
 #include <QtWidgets/QApplication>
-#include <Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h>
-#include <Physica/Core/Math/Statistics/NumCharacter.h>
-#include <Physica/Core/Math/Random/Random.h>
-#include <Physica/Core/Parallel/Executor/ThreadExecutor.h>
-#include <Physica/Gui/Plot/Plot.h>
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h"
+#include "Physica/Core/Math/Statistics/NumCharacter.h"
+#include "Physica/Core/Math/Random/Random.h"
+#include "Physica/Core/Parallel/Executor/ThreadExecutor.h"
+#include "Physica/Gui/Plot/Plot.h"
 
 using namespace Physica::Core;
 using namespace Physica::Gui;

@@ -19,7 +19,7 @@
 #pragma once
 
 #include <cassert>
-#include <Physica/CRTPBase.h>
+#include "Physica/CRTPBase.h"
 
 namespace Physica::Core {
     template<class Derived, size_t Row, size_t Col>

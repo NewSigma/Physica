@@ -18,8 +18,8 @@
  */
 #pragma once
 
-#include <Physica/Core/Utils/Container/Array.h>
-#include <Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h>
+#include "Physica/Core/Utils/Container/Array.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h"
 
 namespace Physica::Core {
     template<Vector T>

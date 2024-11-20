@@ -18,10 +18,10 @@
  */
 #pragma once
 
-#include <Physica/Core/MultiPrecision/Real.h>
-#include <Physica/Core/MultiPrecision/Complex.h>
-#include <Physica/Core/Math/Algebra/LinearAlgebra/Matrix/Matrix.h>
-#include <Physica/Core/Math/NumberTheory/NumberTheory.h>
+#include "Physica/Core/MultiPrecision/Real.h"
+#include "Physica/Core/MultiPrecision/Complex.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/Matrix.h"
+#include "Physica/Core/Math/NumberTheory/NumberTheory.h"
 
 namespace Physica::Core {
     namespace Internal {

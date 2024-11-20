@@ -18,8 +18,8 @@
  */
 #pragma once
 
-#include <Physica/Core/Physics/MD/ForceModel/EmptyForceModel.h>
-#include <Physica/Core/Math/Random/Random.h>
+#include "Physica/Core/Physics/MD/ForceModel/EmptyForceModel.h"
+#include "Physica/Core/Math/Random/Random.h"
 
 namespace Physica::Core {
     template<Scalar T, unsigned int Dim, size_t NumReplica, class ForceMatrixAllocator>

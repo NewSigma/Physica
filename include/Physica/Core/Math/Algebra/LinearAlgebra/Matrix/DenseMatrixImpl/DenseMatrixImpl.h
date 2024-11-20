@@ -18,7 +18,7 @@
  */
 #pragma once
 
-#include <Physica/Core/Exception/BadFileFormatException.h>
+#include "Physica/Core/Exception/BadFileFormatException.h"
 
 namespace Physica::Core {
     template<Scalar T, int Option, size_t Row, size_t Col, class Allocator>

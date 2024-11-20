@@ -17,8 +17,8 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include <cassert>
-#include <Physica/Python/FFI/FuncInfo.h>
-#include <Physica/Python/Exception/FFIException.h>
+#include "Physica/Python/FFI/FuncInfo.h"
+#include "Physica/Python/Exception/FFIException.h"
 
 namespace Physica::Python {
     FuncInfo::FuncInfo(unsigned int nargs, const ffi_type* rtype, const ffi_type** atypes) {

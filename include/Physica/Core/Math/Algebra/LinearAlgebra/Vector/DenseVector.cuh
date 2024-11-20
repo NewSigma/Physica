@@ -20,7 +20,7 @@
 
 #include "DenseVector.h"
 #include "VectorImpl/ContinuousVector.cuh"
-#include <Physica/Core/Utils/Container/Array.cuh>
+#include "Physica/Core/Utils/Container/Array.cuh"
 
 namespace Physica::Core {
     template<Scalar T, size_t Length, class Allocator>

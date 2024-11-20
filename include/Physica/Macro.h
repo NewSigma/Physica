@@ -20,7 +20,7 @@
 
 #include <climits>
 #include <cstddef>
-#include <Physica/Config.h>
+#include "Physica/Config.h"
 
 /**
  * Improve: Platform dependent, may be wrong on some spatial platforms, add a test before compile.

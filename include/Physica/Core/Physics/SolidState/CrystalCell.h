@@ -19,7 +19,7 @@
 #pragma once
 
 #include <unordered_set>
-#include <Physica/Core/Physics/SolidState/PeriodicCell.h>
+#include "Physica/Core/Physics/SolidState/PeriodicCell.h"
 
 namespace Physica::Core {
     template<Scalar T> class Poscar;

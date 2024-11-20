@@ -23,9 +23,9 @@
 #ifdef __linux__
     #include <sys/wait.h>
 #endif
-#include <Physica/Core/Parallel/Future/ProcessFuture.h>
-#include <Physica/Core/Exception/SystemException.h>
-#include <Physica/Core/Exception/NoImplException.h>
+#include "Physica/Core/Parallel/Future/ProcessFuture.h"
+#include "Physica/Core/Exception/SystemException.h"
+#include "Physica/Core/Exception/NoImplException.h"
 
 namespace Physica::Core {
     ProcessFuture::ProcessFuture() : error(-1), isValid(false) {}

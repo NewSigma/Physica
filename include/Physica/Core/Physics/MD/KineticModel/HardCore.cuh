@@ -18,10 +18,10 @@
  */
 #pragma once
 
-#include <Physica/PlainStruct.h>
-#include <Physica/Core/Math/Algebra/LinearAlgebra/Vector/DenseVector.cuh>
-#include <Physica/Core/Parallel/Executor/CUDAExecutor.cuh>
-#include <Physica/Core/Utils/Allocator/PageLockedAllocator.cuh>
+#include "Physica/PlainStruct.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/DenseVector.cuh"
+#include "Physica/Core/Parallel/Executor/CUDAExecutor.cuh"
+#include "Physica/Core/Utils/Allocator/PageLockedAllocator.cuh"
 #include "HardCore.h"
 
 namespace Physica::Core {

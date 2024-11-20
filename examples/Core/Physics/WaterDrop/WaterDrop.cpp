@@ -18,7 +18,7 @@
  */
 #include <iostream>
 #include <QtWidgets/QApplication>
-#include <Physica/Core/Parallel/Executor/ThreadExecutor.h>
+#include "Physica/Core/Parallel/Executor/ThreadExecutor.h"
 #include "Physica/Core/Math/Calculus/ODE/ODESolver.h"
 #include "Physica/Core/Math/Calculus/Function/FindRoot/Bisection.h"
 #include "Physica/Gui/Plot/Plot.h"

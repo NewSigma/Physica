@@ -19,8 +19,8 @@
 #pragma once
 
 #include <cassert>
-#include <Physica/Core/Math/Algebra/LinearAlgebra/Matrix/Matrix.h>
-#include <Physica/Core/Math/Algebra/LinearAlgebra/Vector/DenseVector.h>
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/Matrix.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/DenseVector.h"
 #include "DenseMatrixDim.h"
 
 namespace Physica::Core {

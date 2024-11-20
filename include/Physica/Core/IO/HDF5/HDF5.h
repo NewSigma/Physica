@@ -18,7 +18,7 @@
  */
 #pragma once
 
-#include <Physica/Macro.h>
+#include "Physica/Macro.h"
 
 #ifdef PHYSICA_HDF5
     #include <H5Cpp.h>

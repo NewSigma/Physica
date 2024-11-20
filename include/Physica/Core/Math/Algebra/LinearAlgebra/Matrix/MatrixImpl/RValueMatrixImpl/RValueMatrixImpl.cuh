@@ -18,9 +18,9 @@
  */
 #pragma once
 
-#include <Physica/Core/Exception/CUDA/CUDA.cuh>
-#include <Physica/Core/Parallel/CUDAContext.cuh>
-#include <Physica/PlainStruct.h>
+#include "Physica/Core/Exception/CUDA/CUDA.cuh"
+#include "Physica/Core/Parallel/CUDAContext.cuh"
+#include "Physica/PlainStruct.h"
 #include "RValueFlatten.cuh"
 
 namespace Physica::Core {

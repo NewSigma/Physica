@@ -19,11 +19,11 @@
 #include <iostream>
 #include <benchmark/benchmark.h>
 #include <gperftools/profiler.h>
-#include <Physica/Core/Physics/MD/RPMD.h>
-#include <Physica/Core/Physics/MD/ForceModel/SilveraGoldman.h>
-#include <Physica/Core/Parallel/Executor/ThreadExecutor.h>
-#include <Physica/Core/Physics/MD/KineticModel/FreeModel.h>
-#include <Physica/Core/Utils/BenchmarkHelper.h>
+#include "Physica/Core/Physics/MD/RPMD.h"
+#include "Physica/Core/Physics/MD/ForceModel/SilveraGoldman.h"
+#include "Physica/Core/Parallel/Executor/ThreadExecutor.h"
+#include "Physica/Core/Physics/MD/KineticModel/FreeModel.h"
+#include "Physica/Core/Utils/BenchmarkHelper.h"
 
 using namespace Physica::Core;
 using ScalarType = float32;

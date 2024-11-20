@@ -16,8 +16,8 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include <Physica/Core/Physics/MD/ForceModel/Ewald/RSpaceEwald.cuh>
-#include <Physica/Core/Math/Random/Random.h>
+#include "Physica/Core/Physics/MD/ForceModel/Ewald/RSpaceEwald.cuh"
+#include "Physica/Core/Math/Random/Random.h"
 
 using namespace Physica::Core;
 using ScalarType = float32;

@@ -18,7 +18,7 @@
  */
 #pragma once
 
-#include <Physica/Core/Math/Algebra/LinearAlgebra/Vector/VectorImpl/LValueVector.h>
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/VectorImpl/LValueVector.h"
 
 namespace Physica::Core {
     template<class MatrixType, size_t Row = Dynamic, size_t Col = Dynamic> class LMatrixBlock;

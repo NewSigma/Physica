@@ -18,8 +18,8 @@
  */
 #pragma once
 
-#include <Physica/Core/Utils/CUDA/device_obj.cuh>
-#include <Physica/Core/Utils/CUDA/DeviceProp.cuh>
+#include "Physica/Core/Utils/CUDA/device_obj.cuh"
+#include "Physica/Core/Utils/CUDA/DeviceProp.cuh"
 #include "RValueVector.h"
 
 namespace Physica::Core {

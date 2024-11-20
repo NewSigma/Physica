@@ -18,8 +18,8 @@
  */
 #pragma once
 
-#include <Physica/Core/Exception/NoImplException.h>
-#include <Physica/Core/Exception/MKL/VSL.h>
+#include "Physica/Core/Exception/NoImplException.h"
+#include "Physica/Core/Exception/MKL/VSL.h"
 
 namespace Physica::Core {
     namespace Internal {

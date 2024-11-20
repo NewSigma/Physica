@@ -18,8 +18,8 @@
  */
 #pragma once
 
-#include <Physica/Core/Math/Algebra/LinearAlgebra/Vector/DenseVector.h>
-#include <Physica/Core/Exception/BadConvergenceException.h>
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/DenseVector.h"
+#include "Physica/Core/Exception/BadConvergenceException.h"
 
 namespace Physica::Core {
     template<class Derived>

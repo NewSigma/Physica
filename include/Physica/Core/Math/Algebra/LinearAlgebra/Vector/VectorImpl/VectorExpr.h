@@ -19,8 +19,8 @@
 #pragma once
 
 #include <cassert>
-#include <Physica/Core/MultiPrecision/Real.h>
-#include <Physica/Core/MultiPrecision/ExprType.h>
+#include "Physica/Core/MultiPrecision/Real.h"
+#include "Physica/Core/MultiPrecision/ExprType.h"
 
 namespace Physica::Core {
     /**

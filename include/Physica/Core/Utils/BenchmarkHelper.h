@@ -18,9 +18,9 @@
  */
 #pragma once
 
-#include <Physica/Core/MultiPrecision/Real.h>
-#include <Physica/Core/Math/Statistics/NumCharacter.h>
-#include <Physica/Core/Math/Calculus/SpetialFunctions.h>
+#include "Physica/Core/MultiPrecision/Real.h"
+#include "Physica/Core/Math/Statistics/NumCharacter.h"
+#include "Physica/Core/Math/Calculus/SpetialFunctions.h"
 #include "Cycler.h"
 
 namespace Physica::Core {

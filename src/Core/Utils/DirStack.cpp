@@ -19,7 +19,7 @@
 #include <cstring>
 #include <cassert>
 #include <stdexcept>
-#include <Physica/Core/Utils/DirStack.h>
+#include "Physica/Core/Utils/DirStack.h"
 
 namespace Physica::Core {
     DirStack::DirStack(const char* path) {

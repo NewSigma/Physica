@@ -19,9 +19,9 @@
 #pragma once
 
 #include <cassert>
-#include <Physica/CRTPBase.h>
-#include <Physica/PlainStruct.h>
-#include <Physica/Core/Exception/NoImplException.h>
+#include "Physica/CRTPBase.h"
+#include "Physica/PlainStruct.h"
+#include "Physica/Core/Exception/NoImplException.h"
 
 namespace Physica::Core {
     enum class DiffMode {

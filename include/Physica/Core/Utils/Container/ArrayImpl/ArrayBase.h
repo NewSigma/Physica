@@ -21,7 +21,7 @@
 #include <cstddef>
 #include <type_traits>
 #include <memory>
-#include <Physica/CRTPBase.h>
+#include "Physica/CRTPBase.h"
 #include "Iterator.h"
 
 namespace Physica::Core {

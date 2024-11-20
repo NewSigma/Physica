@@ -16,8 +16,8 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include <Physica/Core/Parallel/ThreadPool.h>
-#include <Physica/Core/Math/Random/RandomSeed.h>
+#include "Physica/Core/Parallel/ThreadPool.h"
+#include "Physica/Core/Math/Random/RandomSeed.h"
 
 namespace Physica::Core {
     int ThreadPool::numThreadRequired = 0;

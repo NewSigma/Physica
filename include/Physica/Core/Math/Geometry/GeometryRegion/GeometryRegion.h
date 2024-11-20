@@ -18,7 +18,7 @@
  */
 #pragma once
 
-#include <Physica/Core/Math/Geometry/Point.h>
+#include "Physica/Core/Math/Geometry/Point.h"
 
 namespace Physica::Core {
     /*!

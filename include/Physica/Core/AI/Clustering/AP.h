@@ -21,9 +21,9 @@
 #include <unordered_set>
 #include <forward_list>
 #include <algorithm>
-#include <Physica/Core/Exception/BadConvergenceException.h>
-#include <Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h>
-#include <Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseSymmMatrix.h>
+#include "Physica/Core/Exception/BadConvergenceException.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseSymmMatrix.h"
 
 namespace Physica::Core {
     /**

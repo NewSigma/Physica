@@ -18,7 +18,7 @@
  */
 #pragma once
 
-#include <Physica/Core/Utils/Unix/ColorGuard.h>
+#include "Physica/Core/Utils/Unix/ColorGuard.h"
 
 namespace Physica::Core {
     template<Scalar T, int Order> class DiffTracer;

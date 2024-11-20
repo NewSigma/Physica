@@ -20,8 +20,8 @@
     #include <sys/time.h>
 #endif
 #include <cassert>
-#include <Physica/Core/Utils/Cycler.h>
-#include <Physica/Core/Exception/SystemException.h>
+#include "Physica/Core/Utils/Cycler.h"
+#include "Physica/Core/Exception/SystemException.h"
 
 namespace Physica::Core {
     /*!

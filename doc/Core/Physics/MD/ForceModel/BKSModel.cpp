@@ -18,9 +18,9 @@
  */
 #include <iostream>
 #include <QApplication>
-#include <Physica/Core/Physics/MD/ForceModel/Ewald/Ewald.h>
-#include <Physica/Core/Physics/MD/ForceModel/BKSModel.h>
-#include <Physica/Gui/Plot/Plot.h>
+#include "Physica/Core/Physics/MD/ForceModel/Ewald/Ewald.h"
+#include "Physica/Core/Physics/MD/ForceModel/BKSModel.h"
+#include "Physica/Gui/Plot/Plot.h"
 
 using namespace Physica::Core;
 using namespace Physica::Gui;

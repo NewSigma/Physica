@@ -19,7 +19,7 @@
 #ifdef PHYSICA_MPI
 
 #include <cstring>
-#include <Physica/Core/Exception/MPIException.h>
+#include "Physica/Core/Exception/MPIException.h"
 
 namespace Physica::Core {
     MPIException::MPIException(const char* msg_) noexcept {

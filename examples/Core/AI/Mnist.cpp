@@ -18,13 +18,13 @@
  */
 #include <iostream>
 #include <QApplication>
-#include <Physica/Core/IO/Mnist.h>
-#include <Physica/Core/AI/NeuralNetwork/Layer/LinearLayer.h>
-#include <Physica/Core/AI/NeuralNetwork/SimpleNet.h>
-#include <Physica/Core/Math/Random/Random.h>
-#include <Physica/Core/Math/Optimization/Stochastic/MomentumSGD.h>
-#include <Physica/Core/Parallel/Executor/ThreadExecutor.h>
-#include <Physica/Gui/Plot/Plot.h>
+#include "Physica/Core/IO/Mnist.h"
+#include "Physica/Core/AI/NeuralNetwork/Layer/LinearLayer.h"
+#include "Physica/Core/AI/NeuralNetwork/SimpleNet.h"
+#include "Physica/Core/Math/Random/Random.h"
+#include "Physica/Core/Math/Optimization/Stochastic/MomentumSGD.h"
+#include "Physica/Core/Parallel/Executor/ThreadExecutor.h"
+#include "Physica/Gui/Plot/Plot.h"
 
 using namespace Physica::Core;
 using namespace Physica::Gui;

@@ -20,7 +20,7 @@
 
 #include <ctime>
 #include <cstdint>
-#include <Physica/Core/Utils/Cycler.h>
+#include "Physica/Core/Utils/Cycler.h"
 
 namespace Physica::Logger {
     /**

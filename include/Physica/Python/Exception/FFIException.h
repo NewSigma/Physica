@@ -20,7 +20,7 @@
 
 #include <ffi.h>
 #include <system_error>
-#include <Physica/Macro.h>
+#include "Physica/Macro.h"
 
 namespace Physica::Python {
     class PHYSICA_API FFIException : public std::system_error {

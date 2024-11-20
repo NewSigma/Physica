@@ -18,7 +18,7 @@
  */
 #pragma once
 
-#include <Physica/Core/Exception/BadConvergenceException.h>
+#include "Physica/Core/Exception/BadConvergenceException.h"
 #include "FreeModel.h"
 
 namespace Physica::Core {

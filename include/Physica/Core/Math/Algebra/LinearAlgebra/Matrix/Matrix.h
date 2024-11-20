@@ -21,8 +21,8 @@
 #include <concepts>
 #include <cstdlib>
 #include <utility>
-#include <Physica/Macro.h>
-#include <Physica/Core/Utils/CUDA/device_obj.cuh>
+#include "Physica/Macro.h"
+#include "Physica/Core/Utils/CUDA/device_obj.cuh"
 
 namespace Physica::Core {
     template<class Derived> class RValueMatrix;

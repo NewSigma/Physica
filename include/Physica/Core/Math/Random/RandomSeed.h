@@ -22,7 +22,7 @@
     #include <x86intrin.h>
 #endif
 #include <cstdint>
-#include <Physica/Core/Exception/RdrandException.h>
+#include "Physica/Core/Exception/RdrandException.h"
 
 namespace Physica::Core {
     /**

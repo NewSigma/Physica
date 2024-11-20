@@ -19,7 +19,7 @@
 #pragma once
 
 #include <QtWidgets/QWidget>
-#include <Physica/Core/Math/Geometry/Point.h>
+#include "Physica/Core/Math/Geometry/Point.h"
 
 namespace Physica::Gui {
     /*!

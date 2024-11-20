@@ -19,10 +19,10 @@
 #include <iostream>
 #include <memory>
 #include <QtWidgets/QApplication>
-#include <Physica/Core/Math/Calculus/ODE/ODESolver.h>
-#include <Physica/Core/Math/Calculus/SpetialFunctions.h>
-#include <Physica/Core/Physics/PhyConst.h>
-#include <Physica/Gui/Plot/Plot.h>
+#include "Physica/Core/Math/Calculus/ODE/ODESolver.h"
+#include "Physica/Core/Math/Calculus/SpetialFunctions.h"
+#include "Physica/Core/Physics/PhyConst.h"
+#include "Physica/Gui/Plot/Plot.h"
 
 using namespace Physica::Core;
 using namespace Physica::Gui;

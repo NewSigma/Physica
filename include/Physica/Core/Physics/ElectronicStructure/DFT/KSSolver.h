@@ -18,10 +18,10 @@
  */
 #pragma once
 
-#include <Physica/Core/Exception/BadConvergenceException.h>
-#include <Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseHermiteMatrix.h>
-#include <Physica/Core/Math/Algebra/LinearAlgebra/Eigen/JacobiDavidson.h>
-#include <Physica/Core/Physics/MD/ForceModel/Ewald/Ewald.h>
+#include "Physica/Core/Exception/BadConvergenceException.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseHermiteMatrix.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Eigen/JacobiDavidson.h"
+#include "Physica/Core/Physics/MD/ForceModel/Ewald/Ewald.h"
 #include "BandGrid.h"
 #include "ChargeMixer.h"
 #include "KSHamilton.h"

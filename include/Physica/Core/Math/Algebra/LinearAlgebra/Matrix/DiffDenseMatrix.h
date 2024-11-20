@@ -18,7 +18,7 @@
  */
 #pragma once
 
-#include <Physica/Core/Math/Algebra/LinearAlgebra/Vector/DiffVector.h>
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/DiffVector.h"
 #include "DenseMatrix.h"
 
 namespace Physica::Core {

@@ -21,7 +21,7 @@
 #include <cstdint>
 #include <limits>
 #include <concepts>
-#include <Physica/Macro.h>
+#include "Physica/Macro.h"
 
 namespace Physica::Core {
     template<class Derived> class ScalarBase;

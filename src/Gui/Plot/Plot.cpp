@@ -17,7 +17,7 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include <QSvgGenerator>
-#include <Physica/Gui/Plot/Plot.h>
+#include "Physica/Gui/Plot/Plot.h"
 
 using namespace Physica::Core;
 

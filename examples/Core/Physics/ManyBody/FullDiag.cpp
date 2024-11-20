@@ -18,13 +18,13 @@
  */
 #include <iostream>
 #include <QApplication>
-#include <Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseSymmMatrix.h>
-#include <Physica/Core/Math/Statistics/NumCharacter.h>
-#include <Physica/Core/Math/Random/Random.h>
-#include <Physica/Core/Math/Algebra/LinearAlgebra/Eigen/SymmEigenSolver.h>
-#include <Physica/Core/Physics/ManyBody/Hamilton/HubbardMatrix.h>
-#include <Physica/Core/Physics/ManyBody/ReprSpace/SpinRepr.h>
-#include <Physica/Gui/Plot/Plot.h>
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseSymmMatrix.h"
+#include "Physica/Core/Math/Statistics/NumCharacter.h"
+#include "Physica/Core/Math/Random/Random.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Eigen/SymmEigenSolver.h"
+#include "Physica/Core/Physics/ManyBody/Hamilton/HubbardMatrix.h"
+#include "Physica/Core/Physics/ManyBody/ReprSpace/SpinRepr.h"
+#include "Physica/Gui/Plot/Plot.h"
 
 using namespace Physica::Core;
 using namespace Physica::Gui;

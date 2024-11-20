@@ -18,7 +18,7 @@
  */
 #pragma once
 
-#include <Physica/Core/MultiPrecision/Diff.cuh>
+#include "Physica/Core/MultiPrecision/Diff.cuh"
 #include "DiffVector.h"
 #include "DenseVector.cuh"
 

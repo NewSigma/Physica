@@ -24,8 +24,8 @@
 #ifdef PHYSICA_CUDA
     #include <cuda/std/limits>
 #endif
-#include <Physica/Core/Exception/NoImplException.h>
-#include <Physica/Core/IO/HDF5/HDF5.h>
+#include "Physica/Core/Exception/NoImplException.h"
+#include "Physica/Core/IO/HDF5/HDF5.h"
 #include "Scalar.h"
 #include "RealImpl/ScalarBase.h"
 

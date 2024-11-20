@@ -18,9 +18,9 @@
  */
 #pragma once
 
-#include <Physica/Core/Physics/PhyConst.h>
-#include <Physica/Core/Math/Geometry/Point.h>
-#include <Physica/Core/Utils/Container/Array.h>
+#include "Physica/Core/Physics/PhyConst.h"
+#include "Physica/Core/Math/Geometry/Point.h"
+#include "Physica/Core/Utils/Container/Array.h"
 
 namespace Physica::Core::Physics {
     template<Scalar T>

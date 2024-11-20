@@ -20,8 +20,8 @@
 
 #include <vectorclass/vectorclass.h>
 #include <vectorclass/vectormath_exp.h>
-#include <Physica/PlainStruct.h>
-#include <Physica/Core/Utils/Container/Array.h>
+#include "Physica/PlainStruct.h"
+#include "Physica/Core/Utils/Container/Array.h"
 #include "SIMDImpl/Instruset.h"
 
 namespace Physica::Core {

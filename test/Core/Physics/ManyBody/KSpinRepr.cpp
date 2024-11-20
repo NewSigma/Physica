@@ -17,10 +17,10 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include <iostream>
-#include <Physica/Core/Math/Random/Random.h>
-#include <Physica/Core/Math/Algebra/LinearAlgebra/Eigen/JacobiDavidson.h>
-#include <Physica/Core/Physics/ManyBody/Hamilton/HubbardMatrix.h>
-#include <Physica/Core/Physics/ManyBody/ReprSpace/KSpinRepr.h>
+#include "Physica/Core/Math/Random/Random.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Eigen/JacobiDavidson.h"
+#include "Physica/Core/Physics/ManyBody/Hamilton/HubbardMatrix.h"
+#include "Physica/Core/Physics/ManyBody/ReprSpace/KSpinRepr.h"
 
 using namespace Physica::Core;
 using RealType = float64;

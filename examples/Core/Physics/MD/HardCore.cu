@@ -29,7 +29,7 @@
 #include "Physica/Core/Parallel/Executor/ThreadExecutor.h"
 #include "Physica/Gui/Plot/Plot.h"
 #include "Physica/Core/Utils/BenchmarkHelper.h"
-#include <Physica/Core/Utils/Cycler.h>
+#include "Physica/Core/Utils/Cycler.h"
 
 using namespace Physica::Core;
 using namespace Physica::Gui;

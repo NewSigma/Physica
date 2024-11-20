@@ -18,9 +18,9 @@
  */
 #pragma once
 
-#include <Physica/Core/Math/Calculus/Differential.h>
-#include <Physica/Core/Math/Optimization/SteepestDescent.h>
-#include <Physica/Core/Math/Algebra/LinearAlgebra/Matrix/ReshapedVector.h>
+#include "Physica/Core/Math/Calculus/Differential.h"
+#include "Physica/Core/Math/Optimization/SteepestDescent.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/ReshapedVector.h"
 #include "MDCell.h"
 
 namespace Physica::Core {

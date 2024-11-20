@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include <Physica/Core/Utils/Unix/ColorGuard.h>
+#include "Physica/Core/Utils/Unix/ColorGuard.h"
 
 namespace Physica::Core {
     #define COLOR(FGBG, CODE, BOLD) "\033[0;" BOLD FGBG CODE "m"

@@ -19,7 +19,7 @@
 #pragma once
 
 #include <QtCharts/QCategoryAxis>
-#include <Physica/Core/Physics/Phonon/FrozenPhonon.h>
+#include "Physica/Core/Physics/Phonon/FrozenPhonon.h"
 #include "Plot.h"
 
 namespace Physica::Gui {

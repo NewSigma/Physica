@@ -18,7 +18,7 @@
  */
 #pragma once
 
-#include <Physica/CRTPBase.h>
+#include "Physica/CRTPBase.h"
 #include "GridBase.h"
 
 namespace Physica::Core {

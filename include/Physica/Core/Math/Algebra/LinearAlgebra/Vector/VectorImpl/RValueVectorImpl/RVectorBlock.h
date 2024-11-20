@@ -18,7 +18,7 @@
  */
 #pragma once
 
-#include <Physica/Core/Math/Algebra/LinearAlgebra/Vector/Vector.h>
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/Vector.h"
 
 namespace Physica::Core {
     /**

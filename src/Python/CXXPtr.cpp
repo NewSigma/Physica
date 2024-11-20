@@ -17,7 +17,7 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include <sstream>
-#include <Physica/Python/CXXPtr.h>
+#include "Physica/Python/CXXPtr.h"
 
 namespace Physica::Python {
     std::string CXXPtr::toString() const {

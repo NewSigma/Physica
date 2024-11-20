@@ -17,12 +17,12 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include <iostream>
-#include <clang/AST/GlobalDecl.h>
-#include <Physica/Python/PhysicaPython.h>
-#include <Physica/Python/CXXPtr.h>
-#include <Physica/Python/CXXObj.h>
-#include <Physica/Python/LLVM/LLVM.h>
-#include <Physica/Python/Exception/LLVMException.h>
+#include <clang/AST/GlobalDecl.h"
+#include "Physica/Python/PhysicaPython.h"
+#include "Physica/Python/CXXPtr.h"
+#include "Physica/Python/CXXObj.h"
+#include "Physica/Python/LLVM/LLVM.h"
+#include "Physica/Python/Exception/LLVMException.h"
 
 namespace Physica::Python {
     PhysicaPython::PhysicaPython() {

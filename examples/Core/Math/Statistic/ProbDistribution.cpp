@@ -17,9 +17,9 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include <QtWidgets/QApplication>
-#include <Physica/Core/Math/Random/Random.h>
-#include <Physica/Core/Math/Statistics/ProbDistribution.h>
-#include <Physica/Gui/Plot/Plot.h>
+#include "Physica/Core/Math/Random/Random.h"
+#include "Physica/Core/Math/Statistics/ProbDistribution.h"
+#include "Physica/Gui/Plot/Plot.h"
 
 using namespace Physica::Core;
 using namespace Physica::Gui;

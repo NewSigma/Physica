@@ -18,8 +18,8 @@
  */
 #pragma once
 
-#include <Physica/Core/Parallel/CUDAContext.cuh>
-#include <Physica/Core/Exception/CUDA/CUDA.cuh>
+#include "Physica/Core/Parallel/CUDAContext.cuh"
+#include "Physica/Core/Exception/CUDA/CUDA.cuh"
 #include "SequentialExecutor.h"
 
 namespace Physica::Core {

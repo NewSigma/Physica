@@ -18,7 +18,7 @@
  */
 #pragma once
 
-#include <Physica/Core/MultiPrecision/ExprType.h>
+#include "Physica/Core/MultiPrecision/ExprType.h"
 
 namespace Physica::Core {
     template<ExprType type, Grid T1, class T2 = T1> class GridExpression;

@@ -18,8 +18,8 @@
  */
 #pragma once
 
-#include <Physica/CRTPBase.h>
-#include <Physica/Core/Utils/Container/Array.h>
+#include "Physica/CRTPBase.h"
+#include "Physica/Core/Utils/Container/Array.h"
 
 namespace Physica::Core {
     template<class Derived>

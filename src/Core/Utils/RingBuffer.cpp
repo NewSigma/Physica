@@ -19,7 +19,7 @@
 #include <cassert>
 #include <cstring>
 #include <thread>
-#include <Physica/Core/Utils/Container/RingBuffer.h>
+#include "Physica/Core/Utils/Container/RingBuffer.h"
 
 namespace Physica::Core {
     RingBuffer::RingBuffer(size_t size)

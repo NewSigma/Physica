@@ -19,9 +19,9 @@
 #pragma once
 
 #include <cub/cub.cuh>
-#include <Physica/PlainStruct.h>
-#include <Physica/Core/Math/Algebra/LinearAlgebra/Grid/PeriodIndex3D.h>
-#include <Physica/Core/Parallel/Executor/CUDAExecutor.cuh>
+#include "Physica/PlainStruct.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Grid/PeriodIndex3D.h"
+#include "Physica/Core/Parallel/Executor/CUDAExecutor.cuh"
 
 namespace Physica::Core {
     namespace Internal {

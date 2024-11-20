@@ -18,9 +18,9 @@
  */
 #pragma once
 
-#include <Physica/Core/Math/Statistics/NumCharacter.h>
-#include <Physica/Core/MultiPrecision/AutoDiffGuard.h>
-#include <Physica/Core/Parallel/Executor/ThreadExecutor.h>
+#include "Physica/Core/Math/Statistics/NumCharacter.h"
+#include "Physica/Core/MultiPrecision/AutoDiffGuard.h"
+#include "Physica/Core/Parallel/Executor/ThreadExecutor.h"
 #include "Layer/LayerBase.h"
 #include "Loss.h"
 

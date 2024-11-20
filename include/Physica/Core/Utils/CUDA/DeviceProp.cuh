@@ -18,8 +18,8 @@
  */
 #pragma once
 
-#include <Physica/Macro.h>
-#include <Physica/Core/Utils/Container/Array.h>
+#include "Physica/Macro.h"
+#include "Physica/Core/Utils/Container/Array.h"
 
 namespace Physica::Core {
     class PHYSICA_API DeviceProp {

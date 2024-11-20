@@ -20,8 +20,8 @@
 
 #include "LinearLayer.h"
 #include "LayerBase.cuh"
-#include <Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.cuh>
-#include <Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DiffDenseMatrix.cuh>
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.cuh"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DiffDenseMatrix.cuh"
 
 namespace Physica::Core {
     template<Scalar T, bool WithBias>

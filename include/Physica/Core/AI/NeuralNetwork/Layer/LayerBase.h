@@ -18,8 +18,8 @@
  */
 #pragma once
 
-#include <Physica/CRTPBase.h>
-#include <Physica/Core/Math/Algebra/LinearAlgebra/Vector/DenseVector.h>
+#include "Physica/CRTPBase.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/DenseVector.h"
 
 namespace Physica::Core {
     template<class Derived>

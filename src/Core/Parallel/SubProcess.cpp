@@ -23,8 +23,8 @@
 #include <signal.h>
 #include <sys/wait.h>
 #include <sys/prctl.h>
-#include <Physica/Core/Parallel/SubProcess.h>
-#include <Physica/Core/Exception/SystemException.h>
+#include "Physica/Core/Parallel/SubProcess.h"
+#include "Physica/Core/Exception/SystemException.h"
 
 namespace Physica::Core {
     SubProcess::SubProcess() : task(), pid(-1), nice_incr(0) {}

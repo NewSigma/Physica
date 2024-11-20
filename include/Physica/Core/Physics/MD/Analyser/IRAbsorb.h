@@ -18,9 +18,9 @@
  */
 #pragma once
 
-#include <Physica/Core/Math/Transform/FFT.h>
-#include <Physica/Core/Physics/Filter/SavitzkyGolay.h>
-#include <Physica/Core/Physics/PhyConst.h>
+#include "Physica/Core/Math/Transform/FFT.h"
+#include "Physica/Core/Physics/Filter/SavitzkyGolay.h"
+#include "Physica/Core/Physics/PhyConst.h"
 
 namespace Physica::Core {
     /**

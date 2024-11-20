@@ -21,7 +21,7 @@
 #include <cassert>
 #include <climits>
 #include <limits>
-#include <Physica/Core/Utils/Container/BitArray.h>
+#include "Physica/Core/Utils/Container/BitArray.h"
 
 namespace Physica::Core {
     /*!

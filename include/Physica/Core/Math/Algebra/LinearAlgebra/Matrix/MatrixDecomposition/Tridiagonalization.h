@@ -18,9 +18,9 @@
  */
 #pragma once
 
-#include <Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseSymmMatrix.h>
-#include <Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseHermiteMatrix.h>
-#include <Physica/Core/Math/Algebra/LinearAlgebra/Matrix/HouseholderSequence.h>
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseSymmMatrix.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseHermiteMatrix.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/HouseholderSequence.h"
 
 namespace Physica::Core {
     template<Scalar T, size_t Order> class TridiagonalMatrixT;

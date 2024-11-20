@@ -18,8 +18,8 @@
  */
 #pragma once
 
-#include <Physica/Core/Math/Geometry/Point.h>
-#include <Physica/Core/Math/Geometry/GeometryRegion/GeometryRegion.h>
+#include "Physica/Core/Math/Geometry/Point.h"
+#include "Physica/Core/Math/Geometry/GeometryRegion/GeometryRegion.h"
 
 namespace Physica::Core {
     /*!

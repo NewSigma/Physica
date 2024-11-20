@@ -21,8 +21,8 @@
 #include <type_traits>
 #include <future>
 #include <cassert>
-#include <Physica/Core/Parallel/Future/FutureGroup.h>
-#include <Physica/Core/Parallel/ThreadPool.h>
+#include "Physica/Core/Parallel/Future/FutureGroup.h"
+#include "Physica/Core/Parallel/ThreadPool.h"
 #include "SequentialExecutor.h"
 
 namespace Physica::Core {

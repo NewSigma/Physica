@@ -21,7 +21,7 @@
 #include <vector>
 #include <memory>
 #include <string>
-#include <Physica/Macro.h>
+#include "Physica/Macro.h"
 
 namespace Physica::Core {
     class PHYSICA_API DirStack {

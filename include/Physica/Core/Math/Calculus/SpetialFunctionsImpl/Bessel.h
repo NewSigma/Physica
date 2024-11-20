@@ -18,7 +18,7 @@
  */
 #pragma once
 
-#include <Physica/Core/Math/Calculus/Chebyshev.h>
+#include "Physica/Core/Math/Calculus/Chebyshev.h"
 
 namespace Physica::Core {
     /**

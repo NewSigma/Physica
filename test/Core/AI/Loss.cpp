@@ -17,7 +17,7 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include <iostream>
-#include <Physica/Core/AI/NeuralNetwork/Loss.h>
+#include "Physica/Core/AI/NeuralNetwork/Loss.h"
 
 using namespace Physica::Core;
 using ScalarType = float32;

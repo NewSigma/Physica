@@ -17,10 +17,10 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include <iostream>
-#include <Physica/Core/Math/Transform/FFT.h>
-#include <Physica/Core/Math/Transform/DiffFFT.h>
-#include <Physica/Core/Math/Algebra/LinearAlgebra/Vector/DiffVector.h>
-#include <Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h>
+#include "Physica/Core/Math/Transform/FFT.h"
+#include "Physica/Core/Math/Transform/DiffFFT.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/DiffVector.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h"
 
 using namespace Physica::Core;
 using RealType = float64;

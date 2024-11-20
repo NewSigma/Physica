@@ -18,7 +18,7 @@
  */
 #pragma once
 
-#include <Physica/Core/Exception/DivideByZeroException.h>
+#include "Physica/Core/Exception/DivideByZeroException.h"
 #include "AddBasic.h"
 #include "DivBasic.h"
 #include "ArraySupport.h"

@@ -19,7 +19,7 @@
 #pragma once
 
 #include <random>
-#include <Physica/Core/Math/Algebra/LinearAlgebra/Vector/DenseVector.h>
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/DenseVector.h"
 
 namespace Physica::Core {
     template<Scalar T, class RandomPoolType>

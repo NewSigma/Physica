@@ -18,7 +18,7 @@
  */
 #pragma once
 
-#include <Physica/PlainStruct.h>
+#include "Physica/PlainStruct.h"
 
 namespace Physica::Core {
     template<Vector T, Matrix U>

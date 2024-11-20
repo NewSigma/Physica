@@ -18,9 +18,9 @@
  */
 #pragma once
 
-#include <Physica/PlainStruct.h>
-#include <Physica/Core/Utils/Allocator/DeviceAllocator.cuh>
-#include <Physica/Core/Exception/CUDA/CUDA.cuh>
+#include "Physica/PlainStruct.h"
+#include "Physica/Core/Utils/Allocator/DeviceAllocator.cuh"
+#include "Physica/Core/Exception/CUDA/CUDA.cuh"
 
 namespace Physica::Core {
     template<class T, size_t Length, class Allocator>

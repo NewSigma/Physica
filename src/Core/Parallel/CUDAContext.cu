@@ -16,8 +16,8 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include <Physica/Core/Parallel/CUDAContext.cuh>
-#include <Physica/Core/Exception/CUDA/cuBLAS.cuh>
+#include "Physica/Core/Parallel/CUDAContext.cuh"
+#include "Physica/Core/Exception/CUDA/cuBLAS.cuh"
 
 namespace Physica::Core {
     CUDAContext::CUDAContext() : CUDAStream(), cublas(nullptr) {}

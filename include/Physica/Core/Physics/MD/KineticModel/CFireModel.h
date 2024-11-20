@@ -18,7 +18,7 @@
  */
 #pragma once
 
-#include <Physica/Core/Physics/MD/Barostat/Berendsen.h>
+#include "Physica/Core/Physics/MD/Barostat/Berendsen.h"
 #include "FireModel.h"
 
 namespace Physica::Core {

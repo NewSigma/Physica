@@ -18,7 +18,7 @@
  */
 #pragma once
 
-#include <Physica/Core/Parallel/Executor/SequentialExecutor.h>
+#include "Physica/Core/Parallel/Executor/SequentialExecutor.h"
 
 namespace Physica::Core {
     template<Scalar T, bool IsPeriodBoundary, unsigned int Dim>

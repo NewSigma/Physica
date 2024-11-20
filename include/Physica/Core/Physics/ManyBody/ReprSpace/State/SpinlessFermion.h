@@ -19,8 +19,8 @@
 #pragma once
 
 #include <iostream>
-#include <Physica/Core/Math/Discrete/Combination.h>
-#include <Physica/Core/MultiPrecision/Real.h>
+#include "Physica/Core/Math/Discrete/Combination.h"
+#include "Physica/Core/MultiPrecision/Real.h"
 #include "State.h"
 
 namespace Physica::Core {
