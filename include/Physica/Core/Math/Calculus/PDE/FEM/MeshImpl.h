@@ -32,7 +32,7 @@ namespace Physica::Core {
     }
 
     template<class T>
-    typename Mesh<T>::ScalarType Mesh<T>::operator()(VectorType p) const {
+    Mesh<T>::ScalarType Mesh<T>::operator()(VectorType p) const {
         for (const auto& elem : elements) {
             if (elem.contains(p)) {
                 const auto& globalNodes = elem.getGlobalNodes();

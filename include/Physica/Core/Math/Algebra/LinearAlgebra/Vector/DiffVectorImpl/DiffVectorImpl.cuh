@@ -63,7 +63,7 @@ namespace Physica::Core {
 
     template<Scalar T, int Order>
     template<Side Owner>
-    __host__ __device__ inline typename device_obj<Diff<VectorND<T>, DiffMode::Reverse, Order>>::ScalarType
+    __host__ __device__ inline device_obj<Diff<VectorND<T>, DiffMode::Reverse, Order>>::ScalarType
     device_obj<Diff<VectorND<T>, DiffMode::Reverse, Order>>::calc(size_t index) const {
         assert(index < getLength() && "[Error]: Index out of range");
         return getTraceSegment()[index];
@@ -166,7 +166,7 @@ namespace Physica::Core {
     }
 
     template<Scalar T, int Order>
-    __device__ inline typename device_obj<Diff<VectorND<T>, DiffMode::Reverse, Order>>::DiffRecord&
+    __device__ inline device_obj<Diff<VectorND<T>, DiffMode::Reverse, Order>>::DiffRecord&
     device_obj<Diff<VectorND<T>, DiffMode::Reverse, Order>>::getRecord(size_t index) {
         return getTraceSegment().getRecords()[index];
     }
@@ -196,7 +196,7 @@ namespace Physica::Core {
     }
 
     template<Scalar T, int Order>
-    typename device_obj<Diff<VectorND<T>, DiffMode::Reverse, Order>>::ScalarType
+    device_obj<Diff<VectorND<T>, DiffMode::Reverse, Order>>::ScalarType
     device_obj<Diff<VectorND<T>, DiffMode::Reverse, Order>>::max() const {
         auto& trace = TracerType::getInstance().pushSegment(1, ExprType::Assign);
         const size_t length = getLength();
@@ -208,7 +208,7 @@ namespace Physica::Core {
     }
 
     template<Scalar T, int Order>
-    typename device_obj<Diff<VectorND<T>, DiffMode::Reverse, Order>>::ScalarType
+    device_obj<Diff<VectorND<T>, DiffMode::Reverse, Order>>::ScalarType
     device_obj<Diff<VectorND<T>, DiffMode::Reverse, Order>>::min() const {
         auto& trace = TracerType::getInstance().pushSegment(1, ExprType::Assign);
         const size_t length = getLength();
@@ -220,7 +220,7 @@ namespace Physica::Core {
     }
 
     template<Scalar T, int Order>
-    typename device_obj<Diff<VectorND<T>, DiffMode::Reverse, Order>>::ScalarType
+    device_obj<Diff<VectorND<T>, DiffMode::Reverse, Order>>::ScalarType
     device_obj<Diff<VectorND<T>, DiffMode::Reverse, Order>>::sum() const {
         auto& trace = TracerType::getInstance().pushSegment(1, ExprType::Sum);
         const size_t length = getLength();

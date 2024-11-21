@@ -44,7 +44,7 @@ namespace Physica::Core {
     };
 
     template<Matrix T>
-    __device__ typename device_obj<RValueFlatten<T>>::ScalarType device_obj<RValueFlatten<T>>::calc(size_t index) const {
+    __device__ device_obj<RValueFlatten<T>>::ScalarType device_obj<RValueFlatten<T>>::calc(size_t index) const {
         const size_t major = index / mat.getMaxMinor();
         const size_t minor = index % mat.getMaxMinor();
         return mat.calcFromMajorMinor(major, minor);

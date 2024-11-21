@@ -28,7 +28,7 @@ namespace Physica::Core {
         using This = FFTKSpace<Derived, 1>;
         using Base = CRTPBase<This>;
         using VectorBase = ContinuousVector<This>;
-        using RealType = typename Traits<This>::ScalarType::RealType;
+        using RealType = Traits<This>::ScalarType::RealType;
     public:
         using typename VectorBase::ScalarType;
     protected:
@@ -65,7 +65,7 @@ namespace Physica::Core {
     }
 
     template<class Derived>
-    typename FFTKSpace<Derived, 1>::ScalarType FFTKSpace<Derived, 1>::calc(size_t index) const {
+    FFTKSpace<Derived, 1>::ScalarType FFTKSpace<Derived, 1>::calc(size_t index) const {
         assert(index < getRSpaceSize());
         if (index < getLength())
             return (*this)[index];
@@ -81,14 +81,14 @@ namespace Physica::Core {
     }
 
     template<class Derived>
-    __host__ __device__ inline typename FFTKSpace<Derived, 1>::PtrTy FFTKSpace<Derived, 1>::data_ptr(size_t index) {
+    __host__ __device__ inline FFTKSpace<Derived, 1>::PtrTy FFTKSpace<Derived, 1>::data_ptr(size_t index) {
         assert(index < getLength());
         return Base::getDerived().asComplexBuffer() + index;
 
     }
 
     template<class Derived>
-    __host__ __device__ inline typename FFTKSpace<Derived, 1>::ConstPtrTy FFTKSpace<Derived, 1>::data_ptr(size_t index) const {
+    __host__ __device__ inline FFTKSpace<Derived, 1>::ConstPtrTy FFTKSpace<Derived, 1>::data_ptr(size_t index) const {
         return const_cast<This&>(*this).data_ptr(index);
     }
     //////////////////////////////////////////////////////////////////////
@@ -142,14 +142,14 @@ namespace Physica::Core {
     }
 
     template<class Derived>
-    inline typename FFTKSpace<Derived, 2>::PtrTy FFTKSpace<Derived, 2>::data_ptr(size_t row, size_t col) {
+    inline FFTKSpace<Derived, 2>::PtrTy FFTKSpace<Derived, 2>::data_ptr(size_t row, size_t col) {
         assert(row < getRow());
         assert(col < getCol());
         return Base::getDerived().asComplexBuffer() + row * getCol() + col;
     }
 
     template<class Derived>
-    inline typename FFTKSpace<Derived, 2>::ConstPtrTy FFTKSpace<Derived, 2>::data_ptr(size_t row, size_t col) const {
+    inline FFTKSpace<Derived, 2>::ConstPtrTy FFTKSpace<Derived, 2>::data_ptr(size_t row, size_t col) const {
         return const_cast<This&>(*this).data_ptr(row, col);
     }
     //////////////////////////////////////////////////////////////////////
@@ -162,7 +162,7 @@ namespace Physica::Core {
         using GridBase = LValueGrid<This>;
     public:
         using typename GridBase::ScalarType;
-        using Index3D = typename GridBase::Index3D;
+        using Index3D = GridBase::Index3D;
     protected:
         using typename GridBase::PtrTy;
         using typename GridBase::ConstPtrTy;
@@ -213,7 +213,7 @@ namespace Physica::Core {
     }
 
     template<class Derived>
-    __host__ __device__ inline typename FFTKSpace<Derived, 3>::PtrTy
+    __host__ __device__ inline FFTKSpace<Derived, 3>::PtrTy
     FFTKSpace<Derived, 3>::data_ptr(Index3D index) {
         assert(index[0] < getDimX());
         assert(index[1] < getDimY());
@@ -222,7 +222,7 @@ namespace Physica::Core {
     }
 
     template<class Derived>
-    __host__ __device__ inline typename FFTKSpace<Derived, 3>::ConstPtrTy
+    __host__ __device__ inline FFTKSpace<Derived, 3>::ConstPtrTy
     FFTKSpace<Derived, 3>::data_ptr(Index3D index) const {
         return const_cast<This&>(*this).data_ptr(index);
     }
@@ -234,7 +234,7 @@ namespace Physica {
         static_assert(Traits<T>::Dim == 1, "[Error]: Inconsistent template param");
     public:
         using Derived = T;
-        using ScalarType = typename Traits<T>::ScalarType::ComplexType;
+        using ScalarType = Traits<T>::ScalarType::ComplexType;
         constexpr static size_t SizeAtCompile = Dynamic;
         constexpr static bool FastAssign = false;
         constexpr static bool FastPacket = true;
@@ -245,7 +245,7 @@ namespace Physica {
         static_assert(Traits<T>::Dim == 2, "[Error]: Inconsistent template param");
     public:
         using Derived = T;
-        using ScalarType = typename Traits<T>::ScalarType::ComplexType;
+        using ScalarType = Traits<T>::ScalarType::ComplexType;
         constexpr static int Option = MatrixOption::Row | MatrixOption::Element;
         constexpr static size_t RowAtCompile = Dynamic;
         constexpr static size_t ColAtCompile = Dynamic;
@@ -257,6 +257,6 @@ namespace Physica {
         static_assert(Traits<T>::Dim == 3, "[Error]: Inconsistent template param");
     public:
         using Derived = T;
-        using ScalarType = typename Traits<T>::ScalarType::ComplexType;
+        using ScalarType = Traits<T>::ScalarType::ComplexType;
     };
 }

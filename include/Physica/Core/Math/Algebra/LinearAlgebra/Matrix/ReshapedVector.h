@@ -26,7 +26,7 @@ namespace Physica::Core {
         using This = ReshapedVector<T, MatrixMajor, Row, Col>;
         using Base = RValueMatrix<This>;
     public:
-        using ScalarType = typename T::ScalarType;
+        using ScalarType = T::ScalarType;
     private:
         const T& v;
         size_t row;
@@ -92,7 +92,7 @@ namespace Physica {
     class Traits<ReshapedVector<T, MatrixMajor, Row, Col>> {
         static_assert(MatrixMajor == MatrixOption::Col || MatrixMajor == MatrixOption::Row, "[Error]: Invalid major");
     public:
-        using ScalarType = typename T::ScalarType;
+        using ScalarType = T::ScalarType;
         constexpr static int Option = MatrixMajor | MatrixOption::AnyStorage;
         constexpr static size_t RowAtCompile = Row;
         constexpr static size_t ColAtCompile = Col;

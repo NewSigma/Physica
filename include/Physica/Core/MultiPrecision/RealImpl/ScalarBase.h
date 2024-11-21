@@ -39,15 +39,15 @@ namespace Physica::Core {
         constexpr static bool isReverseDiff = Traits<Derived>::isReverseDiff;
         constexpr static DiffMode Mode = isForwardDiff ? DiffMode::Forward : DiffMode::Reverse;
 
-        using ValueType = typename Traits<Derived>::ValueType;
-        using ScalarType = typename Traits<Derived>::ScalarType;
-        using PtrTy = typename Traits<Derived>::PtrTy;
-        using ConstPtrTy = typename Traits<Derived>::ConstPtrTy;
-        using RefTy = typename Traits<Derived>::RefTy;
-        using ConstRefTy = typename Traits<Derived>::ConstRefTy;
-        using RealType = typename Traits<Derived>::RealType;
-        using ComplexType = typename Traits<Derived>::ComplexType;
-        using MachineType = typename Traits<Derived>::MachineType;
+        using ValueType = Traits<Derived>::ValueType;
+        using ScalarType = Traits<Derived>::ScalarType;
+        using PtrTy = Traits<Derived>::PtrTy;
+        using ConstPtrTy = Traits<Derived>::ConstPtrTy;
+        using RefTy = Traits<Derived>::RefTy;
+        using ConstRefTy = Traits<Derived>::ConstRefTy;
+        using RealType = Traits<Derived>::RealType;
+        using ComplexType = Traits<Derived>::ComplexType;
+        using MachineType = Traits<Derived>::MachineType;
         using device_obj_type = Derived;
     private:
         constexpr static bool isConsistent1 = isDifferentiable && (isForwardDiff != isReverseDiff) && (Order > 0);
@@ -55,12 +55,12 @@ namespace Physica::Core {
         static_assert(isConsistent1 || isConsistent2, "[Error]: DiffMode is not self consistent");
         static_assert(std::is_same<Derived, ScalarType>::value, "[Error]: Inconsistence type between traits and inherit class");
 
-        using ValuePtr = typename std::conditional<isForwardDiff || !isDifferentiable, ValueType, ValueType*>::type;
-        using GradType1 = typename std::conditional<Order == 1, ValuePtr, Diff<ValueType, Mode, Order - 1>>::type;
+        using ValuePtr = std::conditional<isForwardDiff || !isDifferentiable, ValueType, ValueType*>::type;
+        using GradType1 = std::conditional<Order == 1, ValuePtr, Diff<ValueType, Mode, Order - 1>>::type;
     public:
-        using GradType = typename std::conditional<isDifferentiable, GradType1, PlainStruct<void>>::type;
+        using GradType = std::conditional<isDifferentiable, GradType1, PlainStruct<void>>::type;
         template<int GradOrder>
-        using GradRtnTy = typename std::conditional<Order == GradOrder, ValueType, Diff<ValueType, Mode, Order - GradOrder>>::type;
+        using GradRtnTy = std::conditional<Order == GradOrder, ValueType, Diff<ValueType, Mode, Order - GradOrder>>::type;
     public:
         /* Operators */
         __host__ __device__ inline bool operator>(float s) const noexcept;
@@ -181,7 +181,7 @@ namespace Physica::Core {
     }
 
     template<class Derived>
-    __host__ __device__ typename ScalarBase<Derived>::RealType ScalarBase<Derived>::real() const {
+    __host__ __device__ ScalarBase<Derived>::RealType ScalarBase<Derived>::real() const {
         if constexpr (isDifferentiable)
             return RealType(getValue().real(), getGrad().real());
         else if constexpr (isComplex)
@@ -191,7 +191,7 @@ namespace Physica::Core {
     }
 
     template<class Derived>
-    __host__ __device__ typename ScalarBase<Derived>::RealType ScalarBase<Derived>::imag() const {
+    __host__ __device__ ScalarBase<Derived>::RealType ScalarBase<Derived>::imag() const {
         if constexpr (isDifferentiable)
             return RealType(getValue().imag(), getGrad().imag());
         else if constexpr (isComplex)
@@ -215,7 +215,7 @@ namespace Physica::Core {
         assert(precision > 0);
         constexpr bool isDifferentiable = T::isDifferentiable;
         if constexpr (T::isComplex) {
-            using PlainRealType = typename T::ValueType::RealType;
+            using PlainRealType = T::ValueType::RealType;
             const T diff = x - y;
             const bool isValueNear = scalarNear(abs(diff.getValue()), PlainRealType(0), precision);
             if constexpr (isDifferentiable)
@@ -224,7 +224,7 @@ namespace Physica::Core {
                 return isValueNear;
         }
         else {
-            using ValueType = typename T::ValueType;
+            using ValueType = T::ValueType;
             const bool isValueNear = relativeError(x.getValue(), y.getValue()) < ValueType(precision);
             if constexpr (T::isDifferentiable)
                 return isValueNear && scalarNear(x.getGrad(), y.getGrad(), precision);

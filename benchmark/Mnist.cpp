@@ -113,7 +113,7 @@ private:
 
 using ValueType = float32;
 using ScalarType = Diff<ValueType, DiffMode::Reverse, 1>;
-using Dataset = typename Mnist::DatasetType<VectorND<ValueType>>;
+using Dataset = Mnist::DatasetType<VectorND<ValueType>>;
 using Optimizer = SGD<ScalarType>;
 using RandomType = Random<std::mt19937>;
 constexpr size_t batchSize = 9000;

@@ -32,8 +32,8 @@ namespace Physica::Core {
         using ColVector = device_obj<RMatrixBlock<Derived, Dynamic, 1>>;
         using BlockType = device_obj<RMatrixBlock<Derived>>;
     public:
-        using ScalarType = typename TraitsType::ScalarType;
-        using ValueType = typename ScalarType::ValueType;
+        using ScalarType = TraitsType::ScalarType;
+        using ValueType = ScalarType::ValueType;
         constexpr static int Option = TraitsType::Option;
         constexpr static size_t RowAtCompile = TraitsType::RowAtCompile;
         constexpr static size_t ColAtCompile = TraitsType::ColAtCompile;

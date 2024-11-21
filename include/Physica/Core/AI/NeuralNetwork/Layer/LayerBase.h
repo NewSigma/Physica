@@ -28,10 +28,10 @@ namespace Physica::Core {
         using Base = CRTPBase<This>;
         using TraitsType = Traits<Derived>;
     public:
-        using ScalarType = typename TraitsType::ScalarType;
-        using ValueType = typename ScalarType::ValueType;
-        using InputType = typename TraitsType::InputType;
-        using OutputType = typename TraitsType::OutputType;
+        using ScalarType = TraitsType::ScalarType;
+        using ValueType = ScalarType::ValueType;
+        using InputType = TraitsType::InputType;
+        using OutputType = TraitsType::OutputType;
         constexpr static bool IsTrainMode = ScalarType::isDifferentiable;
     public:
         ~LayerBase() = default;

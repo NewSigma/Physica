@@ -30,7 +30,7 @@ namespace Physica::Core {
         using This = ReprBasis<Derived>;
         using Base = CRTPBase<This>;
     public:
-        using StateType = typename Traits<Derived>::StateType;
+        using StateType = Traits<Derived>::StateType;
         constexpr static unsigned int Dim = Traits<Derived>::Dim;
     public:
         ~ReprBasis() = default;

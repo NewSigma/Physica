@@ -40,7 +40,7 @@ namespace Physica::Core {
     };
 
     template<Scalar T>
-    typename LinearFit<T>::ScalarPair LinearFit<T>::fit(const VectorType& x, const VectorType& y) {
+    LinearFit<T>::ScalarPair LinearFit<T>::fit(const VectorType& x, const VectorType& y) {
         assert(x.getLength() == y.getLength());
         const size_t length = x.getLength();
         T xy_sum(0);
@@ -68,7 +68,7 @@ namespace Physica::Core {
     }
 
     template<Scalar T>
-    typename LinearFit<T>::ScalarPair LinearFit<T>::deviation(
+    LinearFit<T>::ScalarPair LinearFit<T>::deviation(
             const VectorType& x, const VectorType& y, ScalarPair pair) {
         const T mean_sse = square(y - pair.first * x - pair.second).sum() / T(x.getLength() - 2);
         const T mean_x = mean(x);
@@ -82,7 +82,7 @@ namespace Physica::Core {
      * [1] William H. Press, Saul A. Teukolsky, William T. Vetterling, Brian P. Flannery. C++数值算法(第二版)[M]. 北京: 电子工业出版社, 2005:496-499
      */
     template<Scalar T>
-    typename LinearFit<T>::VectorType LinearFit<T>::polyfit(const VectorType& x, const VectorType& y, int order) {
+    LinearFit<T>::VectorType LinearFit<T>::polyfit(const VectorType& x, const VectorType& y, int order) {
         using MatrixType = DenseMatrix<T, MatrixOption::Row | MatrixOption::Vector>;
         assert(x.getLength() == y.getLength() && "[Error]: Dimensions do not match");
         assert(order > 1 && "[Error]: Invalid order");
@@ -106,7 +106,7 @@ namespace Physica::Core {
     }
 
     template<Scalar T>
-    typename LinearFit<T>::VectorType LinearFit<T>::polyval(const VectorType& x, const VectorType& polyCoeff) {
+    LinearFit<T>::VectorType LinearFit<T>::polyval(const VectorType& x, const VectorType& polyCoeff) {
         VectorType result(x.getLength(), 0);
         VectorType x1(x.getLength(), 1);
         for (auto coeff : polyCoeff) {

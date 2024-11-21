@@ -95,7 +95,7 @@ namespace Physica::Core {
     }
 
     template<unsigned int Dim>
-    typename LatticeModel<Dim>::IndexType LatticeModel<Dim>::getDims() const noexcept {
+    LatticeModel<Dim>::IndexType LatticeModel<Dim>::getDims() const noexcept {
         if constexpr (Dim == 1)
             return IndexType{superSize[0], numUnitCellSite};
         if constexpr (Dim == 2)

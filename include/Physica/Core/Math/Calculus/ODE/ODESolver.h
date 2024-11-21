@@ -69,7 +69,7 @@ namespace Physica::Core {
     template<Scalar T, size_t Dim>
     template<class Function>
     void ODESolver<T, Dim>::rungeKutta4(Function func) {
-        using FunctionResult = typename std::invoke_result<Function, T, VectorType>::type;
+        using FunctionResult = std::invoke_result<Function, T, VectorType>::type;
         static_assert(FunctionResult::SizeAtCompile == Dim, "[Possible optimization]: Dimention between ODESolver and functor do not match");
         const size_t col_1 = solution.getCol() - 1;
         for (size_t i = 0; i < col_1; ++i) {
@@ -84,7 +84,7 @@ namespace Physica::Core {
      */
     template<Scalar T, size_t Dim>
     template<class Function>
-    typename ODESolver<T, Dim>::VectorType
+    ODESolver<T, Dim>::VectorType
     ODESolver<T, Dim>::rungeKutta4_step(T stepSize, T x, const VectorType& sol, Function func) {
         const VectorType k1 = T(0.5) * stepSize * func(x, sol);
         const T temp = x + stepSize * T(0.5);

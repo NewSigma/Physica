@@ -36,12 +36,12 @@ namespace Physica::Core {
         using HamiltonType = KSHamilton<T, IsSpinPolarized>;
         using EigenSolverType = SpinPair<JacobiDavidson<ComplexType>, IsSpinPolarized>;
         using DensityType = DensityGrid<T, IsSpinPolarized>;
-        using BasisType = typename DensityType::BasisType;
-        using KSOrbitArray = typename DensityType::KSOrbitArray;
+        using BasisType = DensityType::BasisType;
+        using KSOrbitArray = DensityType::KSOrbitArray;
         using PotType = SpinPair<RSpaceGrid<T>, IsSpinPolarized>;
-        using Index3D = typename GridBase::Index3D;
+        using Index3D = GridBase::Index3D;
 
-        using LatticeMatrix = typename HamiltonType::LatticeMatrix;
+        using LatticeMatrix = HamiltonType::LatticeMatrix;
         using FFT3D = FFT<ComplexType, 3>;
     protected:
         size_t iteration;

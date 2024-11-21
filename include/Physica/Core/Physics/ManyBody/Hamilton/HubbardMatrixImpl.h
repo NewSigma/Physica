@@ -93,12 +93,12 @@ namespace Physica::Core {
     }
 
     template<Scalar T, class ReprType>
-    inline typename HubbardMatrix<T, ReprType>::RealType HubbardMatrix<T, ReprType>::repelElem(StateType psi) const {
+    inline HubbardMatrix<T, ReprType>::RealType HubbardMatrix<T, ReprType>::repelElem(StateType psi) const {
         return getRepelU() * RealType(psi.getNumDoubleOccupy());
     }
 
     template<Scalar T, class ReprType>
-    typename HubbardMatrix<T, ReprType>::RealType
+    HubbardMatrix<T, ReprType>::RealType
     HubbardMatrix<T, ReprType>::hoppingElem(StateType rowPsi, StateType colPsi) const {
         int count = 0;
         if constexpr (Dim == 1) {

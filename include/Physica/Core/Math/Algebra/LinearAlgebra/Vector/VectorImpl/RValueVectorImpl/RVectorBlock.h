@@ -29,7 +29,7 @@ namespace Physica::Core {
         using This = RVectorBlock<T, Length>;
         using Base = RValueVector<This>;
     public:
-        using ScalarType = typename Base::ScalarType;
+        using ScalarType = Base::ScalarType;
     private:
         const T& vec;
         size_t from;
@@ -73,7 +73,7 @@ namespace Physica {
     template<Vector T, size_t Length>
     class Traits<Core::RVectorBlock<T, Length>> {
     public:
-        using ScalarType = typename T::ScalarType;
+        using ScalarType = T::ScalarType;
         constexpr static size_t SizeAtCompile = Length;
         constexpr static bool FastAssign = false;
         constexpr static bool FastPacket = false;

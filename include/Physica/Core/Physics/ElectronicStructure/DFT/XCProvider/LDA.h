@@ -32,8 +32,8 @@ namespace Physica::Core {
         using This = LDA<T, type, true>;
     public:
         constexpr static bool IsSpinPolarized = Traits<This>::IsSpinPolarized;
-        using DensityType = typename Traits<This>::DensityType;
-        using PotType = typename Traits<This>::PotType;
+        using DensityType = Traits<This>::DensityType;
+        using PotType = Traits<This>::PotType;
     private:
         VectorND<T> buffer;
         VectorND<T> buffer1;
@@ -149,8 +149,8 @@ namespace Physica::Core {
         using This = LDA<T, type, false>;
     public:
         constexpr static bool IsSpinPolarized = Traits<This>::IsSpinPolarized;
-        using DensityType = typename Traits<This>::DensityType;
-        using PotType = typename Traits<This>::PotType;
+        using DensityType = Traits<This>::DensityType;
+        using PotType = Traits<This>::PotType;
     private:
         VectorND<T> buffer;
     public:

@@ -36,7 +36,7 @@ namespace Physica::Core {
         using This = RValueGrid<Derived>;
         using Base = CRTPBase<This>;
     public:
-        using ScalarType = typename Traits<Derived>::ScalarType;
+        using ScalarType = Traits<Derived>::ScalarType;
         constexpr static bool isComplex = ScalarType::isComplex;
     public:
         /* Operations */
@@ -57,10 +57,10 @@ namespace Physica::Core {
         using GridBase::forIndexInGrid;
         template<Scalar T, bool IsUnitLattice, class Functor>
         inline static void forPointInGrid(
-                const RValueGrid& grid, const typename PeriodicCell<T, 3>::LatticeMatrix& lattice, Functor func);
+                const RValueGrid& grid, const PeriodicCell<T, 3>::LatticeMatrix& lattice, Functor func);
         template<Scalar T, bool IsUnitLattice, class Functor>
         inline static void forPointIndexInGrid(
-                const RValueGrid& grid, const typename PeriodicCell<T, 3>::LatticeMatrix& lattice, Functor func);
+                const RValueGrid& grid, const PeriodicCell<T, 3>::LatticeMatrix& lattice, Functor func);
     };
 
     template<class Derived>
@@ -74,14 +74,14 @@ namespace Physica::Core {
     template<class Derived>
     template<Scalar T, bool IsUnitLattice, class Functor>
     inline void RValueGrid<Derived>::forPointInGrid(
-            const RValueGrid& grid, const typename PeriodicCell<T, 3>::LatticeMatrix& lattice, Functor func) {
+            const RValueGrid& grid, const PeriodicCell<T, 3>::LatticeMatrix& lattice, Functor func) {
         return forPointInGrid<T, IsUnitLattice, Functor>(grid.getDim(), lattice, func);
     }
 
     template<class Derived>
     template<Scalar T, bool IsUnitLattice, class Functor>
     inline void RValueGrid<Derived>::forPointIndexInGrid(
-            const RValueGrid& grid, const typename PeriodicCell<T, 3>::LatticeMatrix& lattice, Functor func) {
+            const RValueGrid& grid, const PeriodicCell<T, 3>::LatticeMatrix& lattice, Functor func) {
         forPointIndexInGrid<T, IsUnitLattice, Functor>(grid.getDim(), lattice, func);
     }
 }

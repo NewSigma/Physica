@@ -29,9 +29,9 @@ using ScalarType = Diff<ValueType, DiffMode::Reverse, 1>;
 class PressTest {
     using RandomGenerator = std::mt19937;
     using MDCellType = MDCell<ScalarType>;
-    using LatticeMatrix = typename MDCellType::LatticeMatrix;
-    using PositionMatrix = typename MDCellType::PositionMatrix;
-    using MassVector = typename MDCellType::MassVector;
+    using LatticeMatrix = MDCellType::LatticeMatrix;
+    using PositionMatrix = MDCellType::PositionMatrix;
+    using MassVector = MDCellType::MassVector;
     constexpr static double mass = PhyConst<AU>::atomMass(1) * 2;
     constexpr static size_t numMolecular = 108;
     constexpr static double pair_cutoff = 15;

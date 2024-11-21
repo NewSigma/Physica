@@ -21,7 +21,7 @@
 using namespace Physica::Core;
 using ScalarType = float64;
 using Optimizer = SteepestDescent<ScalarType, 2>;
-using VectorType = typename Optimizer::VectorType;
+using VectorType = Optimizer::VectorType;
 
 int main() {
     const auto func = [](VectorType x) -> ScalarType { return x.squaredNorm(); };

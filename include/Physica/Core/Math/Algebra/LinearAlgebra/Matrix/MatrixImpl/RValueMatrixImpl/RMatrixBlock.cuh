@@ -125,7 +125,7 @@ namespace Physica::Core {
     }
 
     template<Matrix T>
-    __device__ typename device_obj<RMatrixBlock<T, Dynamic, Dynamic>>::ScalarType
+    __device__ device_obj<RMatrixBlock<T, Dynamic, Dynamic>>::ScalarType
     device_obj<RMatrixBlock<T, Dynamic, Dynamic>>::calc(size_t row, size_t col) const {
         assert(row < rowCount);
         assert(col < colCount);

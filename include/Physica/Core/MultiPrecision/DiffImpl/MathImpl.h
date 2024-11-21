@@ -55,7 +55,7 @@ namespace Physica::Core {
         using ResultType = Diff<T, Mode, Order>;
         const T value = square(s.getValue());
         if constexpr (Mode == DiffMode::Forward) {
-            using GradType = typename ResultType::GradType;
+            using GradType = ResultType::GradType;
             return ResultType(value, GradType(T(2) * s * s.getGrad()));
         }
         else {
@@ -75,7 +75,7 @@ namespace Physica::Core {
     __host__ __device__ inline Diff<T, Mode, Order> reciprocal(const Diff<T, Mode, Order>& s) {
         using ResultType = Diff<T, Mode, Order>;
         if constexpr (Mode == DiffMode::Forward) {
-            using GradType = typename ResultType::GradType;
+            using GradType = ResultType::GradType;
             const GradType v = reciprocal(GradType(s));
             return ResultType(v.getValue(), -s.getGrad() * square(v));
         }
@@ -91,7 +91,7 @@ namespace Physica::Core {
     __host__ __device__ Diff<T, Mode, Order> sqrt(const Diff<T, Mode, Order>& s) {
         using ResultType = Diff<T, Mode, Order>;
         if constexpr (Mode == DiffMode::Forward) {
-            using GradType = typename ResultType::GradType;
+            using GradType = ResultType::GradType;
             const GradType v = sqrt(GradType(s));
             return ResultType(v.getValue(), T(0.5) * s.getGrad() / v);
         }
@@ -107,7 +107,7 @@ namespace Physica::Core {
     Diff<T, Mode, Order> cbrt(const Diff<T, Mode, Order>& s) {
         using ResultType = Diff<T, Mode, Order>;
         if constexpr (Mode == DiffMode::Forward) {
-            using GradType = typename ResultType::GradType;
+            using GradType = ResultType::GradType;
             const GradType v = cbrt(GradType(s));
             return ResultType(v.getValue(), T(1.0 / 3) * v * s.getGrad() / GradType(s));
         }
@@ -123,7 +123,7 @@ namespace Physica::Core {
     Diff<T, Mode, Order> ln(const Diff<T, Mode, Order>& s) {
         using ResultType = Diff<T, Mode, Order>;
         if constexpr (Mode == DiffMode::Forward) {
-            using GradType = typename ResultType::GradType;
+            using GradType = ResultType::GradType;
             return ResultType(ln(s.getValue()), s.getGrad() / GradType(s));
         }
         else {
@@ -139,7 +139,7 @@ namespace Physica::Core {
         static_assert(Mode == DiffMode::Forward, "[Error]: Not implemented");
         using ResultType = Diff<T, Mode, Order>;
         if constexpr (Mode == DiffMode::Forward) {
-            using GradType = typename ResultType::GradType;
+            using GradType = ResultType::GradType;
             return ResultType(ln1p(x.getValue()), x.getGrad() / (T(1) + GradType(x)));
         }
         else
@@ -150,7 +150,7 @@ namespace Physica::Core {
     Diff<T, Mode, Order> exp(const Diff<T, Mode, Order>& s) {
         using ResultType = Diff<T, Mode, Order>;
         if constexpr (Mode == DiffMode::Forward) {
-            using GradType = typename ResultType::GradType;
+            using GradType = ResultType::GradType;
             const GradType v = exp(GradType(s));
             return {v.getValue(), v * s.getGrad()};
         }
@@ -166,7 +166,7 @@ namespace Physica::Core {
     Diff<T, Mode, Order> cos(const Diff<T, Mode, Order>& s) {
         using ResultType = Diff<T, Mode, Order>;
         if constexpr (Mode == DiffMode::Forward) {
-            using GradType = typename ResultType::GradType;
+            using GradType = ResultType::GradType;
             GradType sin_value, cos_value;
             sincos(GradType(s), sin_value, cos_value);
             return ResultType(cos_value.getValue(), -sin_value * s.getGrad());
@@ -184,7 +184,7 @@ namespace Physica::Core {
     Diff<T, Mode, Order> sin(const Diff<T, Mode, Order>& s) {
         using ResultType = Diff<T, Mode, Order>;
         if constexpr (Mode == DiffMode::Forward) {
-            using GradType = typename ResultType::GradType;
+            using GradType = ResultType::GradType;
             GradType sin_value, cos_value;
             sincos(GradType(s), sin_value, cos_value);
             return ResultType(sin_value.getValue(), cos_value * s.getGrad());
@@ -202,7 +202,7 @@ namespace Physica::Core {
     void sincos(Diff<T, Mode, Order> s, Diff<T, Mode, Order>& sin_result, Diff<T, Mode, Order>& cos_result) {
         using ResultType = Diff<T, Mode, Order>;
         if constexpr (Mode == DiffMode::Forward) {
-            using GradType = typename ResultType::GradType;
+            using GradType = ResultType::GradType;
             GradType sin_value, cos_value;
             sincos(GradType(s), sin_value, cos_value);
             sin_result = ResultType(sin_value, cos_value * s.getGrad());
@@ -223,7 +223,7 @@ namespace Physica::Core {
     Diff<T, Mode, Order> tan(const Diff<T, Mode, Order>& s) {
         using ResultType = Diff<T, Mode, Order>;
         if constexpr (Mode == DiffMode::Forward) {
-            using GradType = typename ResultType::GradType;
+            using GradType = ResultType::GradType;
             return ResultType(tan(s.getValue()), s.getGrad() * square(sec(GradType(s))));
         }
         else
@@ -234,7 +234,7 @@ namespace Physica::Core {
     Diff<T, Mode, Order> sec(const Diff<T, Mode, Order>& s) {
         using ResultType = Diff<T, Mode, Order>;
         if constexpr (Mode == DiffMode::Forward) {
-            using GradType = typename ResultType::GradType;
+            using GradType = ResultType::GradType;
             const auto x1 = GradType(s);
             const auto v = sec(x1);
             return ResultType(v.getValue(), s.getGrad() * v * tan(x1));
@@ -247,7 +247,7 @@ namespace Physica::Core {
     Diff<T, Mode, Order> csc(const Diff<T, Mode, Order>& s) {
         using ResultType = Diff<T, Mode, Order>;
         if constexpr (Mode == DiffMode::Forward) {
-            using GradType = typename ResultType::GradType;
+            using GradType = ResultType::GradType;
             const auto x1 = GradType(s);
             const auto v = csc(x1);
             return ResultType(v.getValue(), -s.getGrad() * v * cot(x1));
@@ -260,7 +260,7 @@ namespace Physica::Core {
     Diff<T, Mode, Order> cot(const Diff<T, Mode, Order>& s) {
         using ResultType = Diff<T, Mode, Order>;
         if constexpr (Mode == DiffMode::Forward) {
-            using GradType = typename ResultType::GradType;
+            using GradType = ResultType::GradType;
             return ResultType(cot(s.getValue()), -s.getGrad() * square(csc(GradType(s))));
         }
         else
@@ -271,7 +271,7 @@ namespace Physica::Core {
     Diff<T, Mode, Order> arccos(const Diff<T, Mode, Order>& s) {
         using ResultType = Diff<T, Mode, Order>;
         if constexpr (Mode == DiffMode::Forward) {
-            using GradType = typename ResultType::GradType;
+            using GradType = ResultType::GradType;
             return ResultType(arccos(s.getValue()), -s.getGrad() / sqrt(T(1) - square(GradType(s))));
         }
         else {
@@ -287,7 +287,7 @@ namespace Physica::Core {
     Diff<T, Mode, Order> cosh(const Diff<T, Mode, Order>& s) {
         using ResultType = Diff<T, Mode, Order>;
         if constexpr (Mode == DiffMode::Forward) {
-            using GradType = typename ResultType::GradType;
+            using GradType = ResultType::GradType;
             return ResultType(cosh(s.getValue()), s.getGrad() * sinh(GradType(s)));
         }
         else
@@ -298,7 +298,7 @@ namespace Physica::Core {
     Diff<T, Mode, Order> sinh(const Diff<T, Mode, Order>& s) {
         using ResultType = Diff<T, Mode, Order>;
         if constexpr (Mode == DiffMode::Forward) {
-            using GradType = typename ResultType::GradType;
+            using GradType = ResultType::GradType;
             return ResultType(sinh(s.getValue()), s.getGrad() * cosh(GradType(s)));
         }
         else
@@ -309,7 +309,7 @@ namespace Physica::Core {
     Diff<T, Mode, Order> tanh(const Diff<T, Mode, Order>& s) {
         using ResultType = Diff<T, Mode, Order>;
         if constexpr (Mode == DiffMode::Forward) {
-            using GradType = typename ResultType::GradType;
+            using GradType = ResultType::GradType;
             const GradType v = tanh(GradType(s));
             return ResultType(v.getValue(), (T(1) - square(v)) * s.getGrad());
         }
@@ -325,7 +325,7 @@ namespace Physica::Core {
     Diff<T, Mode, Order> lncosh(const Diff<T, Mode, Order>& s) noexcept {
         using ResultType = Diff<T, Mode, Order>;
         if constexpr (Mode == DiffMode::Forward) {
-            using GradType = typename ResultType::GradType;
+            using GradType = ResultType::GradType;
             return ResultType(lncosh(s.getValue()), s.getGrad() * tanh(GradType(s)));
         }
         else

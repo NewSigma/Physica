@@ -29,7 +29,7 @@ namespace Physica::Core {
     class ThreadExecutor {
     public:
         using FutureType = std::future<void>;
-        using Range = typename SequentialExecutor::Range;
+        using Range = SequentialExecutor::Range;
     public:
         /* Operations */
         template<class Functor, class... Args>
@@ -52,13 +52,13 @@ namespace Physica::Core {
      * 2. exception stored in std::future, which is usually ignored
      */
     template<class Functor, class... Args>
-    typename ThreadExecutor::FutureType ThreadExecutor::schedule(Functor func, Args&&... args) noexcept {
+    ThreadExecutor::FutureType ThreadExecutor::schedule(Functor func, Args&&... args) noexcept {
         return ThreadPool::getInstance().schedule(std::move(func), std::forward<Args>(args)...);
     }
 
     template<class Functor>
     FutureGroup<typename ThreadExecutor::FutureType> ThreadExecutor::parallel_for(Functor func, size_t loopCount) {
-        using ResultType = typename std::invoke_result<Functor, size_t>::type;
+        using ResultType = std::invoke_result<Functor, size_t>::type;
         static_assert(std::is_same<void, ResultType>::value, "[Error]: Invalid functor");
         assert(loopCount > 0);
         FutureGroup<FutureType> result(loopCount);
@@ -72,7 +72,7 @@ namespace Physica::Core {
     template<class Functor>
     FutureGroup<typename ThreadExecutor::FutureType> ThreadExecutor::parallel_for(
             Functor func, size_t loopCount, int core) {
-        using ResultType = typename std::invoke_result<Functor, size_t>::type;
+        using ResultType = std::invoke_result<Functor, size_t>::type;
         static_assert(std::is_same<void, ResultType>::value, "[Error]: Invalid functor");
         assert(core > 0 && "[Error]: core must be a positive int");
         FutureGroup<FutureType> result(core);
@@ -92,7 +92,7 @@ namespace Physica::Core {
             auto_wait(future);
     }
 
-    inline typename ThreadExecutor::Range ThreadExecutor::splitJob(size_t loopCount, int core, int part) {
+    inline ThreadExecutor::Range ThreadExecutor::splitJob(size_t loopCount, int core, int part) {
         assert(0 <= part && "[Error]: part must be a positive int");
         assert(part < core && "[Error]: More partition than core number requested");
         const size_t maxLoopPerCore = (loopCount + core - 1) / core;

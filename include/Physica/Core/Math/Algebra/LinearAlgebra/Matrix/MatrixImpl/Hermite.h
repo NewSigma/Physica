@@ -93,7 +93,7 @@ namespace Physica {
         constexpr static int Major = MatrixOption::isAnyMajor<T>() ? MatrixOption::AnyMajor : OtherMajor;
         constexpr static int Storage = MatrixOption::getStorage<T>();
     public:
-        using ScalarType = typename T::ScalarType;
+        using ScalarType = T::ScalarType;
         constexpr static int Option = Major | Storage;
         constexpr static size_t RowAtCompile = T::ColAtCompile;
         constexpr static size_t ColAtCompile = T::RowAtCompile;
@@ -103,7 +103,7 @@ namespace Physica {
     template <Vector T>
     class Traits<HermiteVector<T>> {
     public:
-        using ScalarType = typename T::ScalarType;
+        using ScalarType = T::ScalarType;
         constexpr static int Option = MatrixOption::Row | MatrixOption::Vector;
         constexpr static size_t RowAtCompile = 1;
         constexpr static size_t ColAtCompile = T::SizeAtCompile;

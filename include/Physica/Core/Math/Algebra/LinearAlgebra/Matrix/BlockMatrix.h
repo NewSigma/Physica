@@ -60,7 +60,7 @@ namespace Physica::Core {
     }
 
     template<Matrix T>
-    typename BlockMatrix<T>::ScalarType BlockMatrix<T>::calc(size_t row, size_t col) const {
+    BlockMatrix<T>::ScalarType BlockMatrix<T>::calc(size_t row, size_t col) const {
         const size_t indexR = findBlock(row);
         const size_t indexC = findBlock(col);
         if (indexR != indexC)
@@ -103,7 +103,7 @@ namespace Physica {
     template<Matrix T>
     class Traits<Core::BlockMatrix<T>> {
     public:
-        using ScalarType = typename T::ScalarType;
+        using ScalarType = T::ScalarType;
         constexpr static int Option = T::Option;
         constexpr static size_t RowAtCompile = Dynamic;
         constexpr static size_t ColAtCompile = Dynamic;

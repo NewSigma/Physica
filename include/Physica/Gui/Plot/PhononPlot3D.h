@@ -31,7 +31,7 @@ namespace Physica::Gui {
         using MeshType = std::pair<MatrixType, MatrixType>;
         using BandArray = Core::Array<MatrixType>;
         using PhononType = Core::FrozenPhonon<T>;
-        using KSpaceFCGrid = typename PhononType::KSpaceFCGrid;
+        using KSpaceFCGrid = PhononType::KSpaceFCGrid;
     public:
         PhononPlot3D() = default;
         PhononPlot3D(const PhononPlot3D&) = default;
@@ -80,7 +80,7 @@ namespace Physica::Gui {
     }
 
     template<Scalar T>
-    typename PhononPlot3D<T>::BandArray PhononPlot3D<T>::calcBands(
+    PhononPlot3D<T>::BandArray PhononPlot3D<T>::calcBands(
             const PhononType& ph, const KSpaceFCGrid& forceConstants, const MeshType& mesh) {
         using namespace Physica::Core;
         const MatrixType& meshX = mesh.first;

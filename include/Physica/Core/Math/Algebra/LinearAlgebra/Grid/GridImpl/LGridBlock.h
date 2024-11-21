@@ -26,7 +26,7 @@ namespace Physica::Core {
     class LGridBlock<T> : public LValueGrid<LGridBlock<T>> {
         using This = LGridBlock<T>;
         using Base = LValueGrid<This>;
-        using Index3D = typename GridBase::Index3D;
+        using Index3D = GridBase::Index3D;
     public:
         using typename Base::ScalarType;
     private:
@@ -40,8 +40,8 @@ namespace Physica::Core {
         ~LGridBlock() = default;
         /* Operators */
         using Base::operator=;
-        LGridBlock& operator=(const LGridBlock& b) { Base::operator=(static_cast<const typename Base::Base&>(b)); return *this; }
-        LGridBlock& operator=(LGridBlock&& b) noexcept { Base::operator=(static_cast<const typename Base::Base&>(b)); return *this; }
+        LGridBlock& operator=(const LGridBlock& b) { Base::operator=(static_cast<const Base::Base&>(b)); return *this; }
+        LGridBlock& operator=(LGridBlock&& b) noexcept { Base::operator=(static_cast<const Base::Base&>(b)); return *this; }
         /* Operations */
         void resize([[maybe_unused]] Index3D size) { assert(size == count && "[Error]: Resize part of a grid is not allowed"); }
         /* Getters */
@@ -64,12 +64,12 @@ namespace Physica::Core {
     }
 
     template<Grid T>
-    __host__ __device__ inline typename LGridBlock<T>::ScalarType* LGridBlock<T>::data_ptr(Index3D index) {
+    __host__ __device__ inline LGridBlock<T>::ScalarType* LGridBlock<T>::data_ptr(Index3D index) {
         return grid.data_ptr({from[0] + index[0], from[1] + index[1], from[2] + index[2]});
     }
 
     template<Grid T>
-    __host__ __device__ inline const typename LGridBlock<T>::ScalarType* LGridBlock<T>::data_ptr(Index3D index) const {
+    __host__ __device__ inline const LGridBlock<T>::ScalarType* LGridBlock<T>::data_ptr(Index3D index) const {
         return const_cast<This&>(*this).data_ptr(index);
     }
 }
@@ -78,6 +78,6 @@ namespace Physica {
     template<Grid T>
     class Traits<Core::LGridBlock<T>> {
     public:
-        using ScalarType = typename T::ScalarType;
+        using ScalarType = T::ScalarType;
     };
 }

@@ -66,21 +66,20 @@ namespace Physica::Core {
     }
 
     template<Matrix T, Vector U>
-    inline typename MatrixVectorProduct<T, U>::ScalarType MatrixVectorProduct<T, U>::calc(size_t index) const {
+    inline MatrixVectorProduct<T, U>::ScalarType MatrixVectorProduct<T, U>::calc(size_t index) const {
         return mat.row(index) * vec;
     }
 
     template<Matrix T, Vector U>
-    [[nodiscard]] inline typename std::enable_if<T::RowAtCompile != 1, MatrixVectorProduct<T, U>>::type
+    [[nodiscard]] inline std::enable_if<T::RowAtCompile != 1, MatrixVectorProduct<T, U>>::type
     operator*(const T& mat, const U& vec) noexcept {
         assert(mat.getCol() == vec.getLength());
         return MatrixVectorProduct(mat, vec);
     }
 
     template<Matrix T, Vector U>
-    [[nodiscard]] inline typename std::enable_if<T::RowAtCompile == 1 && T::ColAtCompile == 1,
-                                                 typename Internal::BinaryScalarOpRtnTy<typename T::ScalarType,
-                                                                                             typename U::ScalarType>::Type>::type
+    [[nodiscard]] inline std::enable_if<T::RowAtCompile == 1 && T::ColAtCompile == 1,
+                                        typename Internal::BinaryScalarOpRtnTy<typename T::ScalarType, typename U::ScalarType>::Type>::type
     operator*(const T& mat, const U& vec) {
         assert(mat.getCol() == vec.getLength());
         return mat.row(0) * vec;
@@ -95,8 +94,7 @@ namespace Physica {
                       U::SizeAtCompile == Dynamic,
                       "Row and column do not match in matrix product");
     public:
-        using ScalarType = typename Core::Internal::BinaryScalarOpRtnTy<typename T::ScalarType,
-                                                                             typename U::ScalarType>::Type;
+        using ScalarType = Core::Internal::BinaryScalarOpRtnTy<typename T::ScalarType, typename U::ScalarType>::Type;
         constexpr static size_t SizeAtCompile = T::RowAtCompile;
         constexpr static bool FastAssign = Core::MatrixOption::isColMatrix<T>();
         constexpr static bool FastPacket = false;

@@ -67,7 +67,7 @@ namespace Physica::Core {
 
     template<Scalar T>
     __device__ void SGD<device_obj<T>>::stepKernelImpl(SegmentType& segment) const {
-        using DiffScalar = typename SegmentType::DiffScalar;
+        using DiffScalar = SegmentType::DiffScalar;
         const unsigned int index = blockIdx.x * blockDim.x + threadIdx.x;
         if (index < segment.getLength()) {
             DiffScalar s = segment[index];

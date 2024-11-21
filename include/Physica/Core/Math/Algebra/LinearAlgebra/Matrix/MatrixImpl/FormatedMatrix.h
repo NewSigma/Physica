@@ -24,7 +24,7 @@ namespace Physica::Core {
      */
     template<Matrix T>
     class FormatedMatrix<T> {
-        using ScalarType = typename T::ScalarType;
+        using ScalarType = T::ScalarType;
 
         const T& data;
         std::string matPrefix;

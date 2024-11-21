@@ -66,7 +66,7 @@ namespace Physica::Core::Physics {
      */
     template<Scalar T>
     T Molecular<T>::getTripleAngle(size_t i, size_t j, size_t k) const {
-        using VectorType = typename PointType::VectorType;
+        using VectorType = PointType::VectorType;
         const VectorType vector_ji = atoms[i].getVector() - atoms[j].getVector();
         const VectorType vector_jk = atoms[k].getVector() - atoms[j].getVector();
         return arccos(vector_ji * vector_jk / (vector_ji.norm() * vector_jk.norm()));
@@ -76,7 +76,7 @@ namespace Physica::Core::Physics {
      */
     template<Scalar T>
     T Molecular<T>::getOutOfPlaneAngle(size_t i, size_t j, size_t k, size_t l) const {
-        using VectorType = typename PointType::VectorType;
+        using VectorType = PointType::VectorType;
         const VectorType vector_ki = atoms[i].getVector() - atoms[k].getVector();
         const VectorType vector_kj = atoms[j].getVector() - atoms[k].getVector();
         const VectorType cross = crossProduct(vector_ki, vector_kj);
@@ -88,7 +88,7 @@ namespace Physica::Core::Physics {
      */
     template<Scalar T>
     T Molecular<T>::getDihedralAngle(size_t i, size_t j, size_t k, size_t l) const {
-        using VectorType = typename PointType::VectorType;
+        using VectorType = PointType::VectorType;
         const VectorType vector_ki = atoms[i].getVector() - atoms[k].getVector();
         const VectorType vector_kj = atoms[j].getVector() - atoms[k].getVector();
         const VectorType cross1 = crossProduct(vector_ki, vector_kj);
@@ -98,8 +98,8 @@ namespace Physica::Core::Physics {
     }
 
     template<Scalar T>
-    typename Molecular<T>::PointType Molecular<T>::getMassCenter() const {
-        using VectorType = typename PointType::VectorType;
+    Molecular<T>::PointType Molecular<T>::getMassCenter() const {
+        using VectorType = PointType::VectorType;
         double totalMass = 0;
         const size_t length = atoms.getLength();
         auto result = VectorType::zeros(length);

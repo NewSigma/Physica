@@ -23,13 +23,13 @@
 namespace Physica::Core {
     template<Scalar T, unsigned int Dim, size_t NumReplica>
     class RingPolymer {
-        using ValueType = typename T::ValueType;
-        using BufferScalarType = typename ValueType::ComplexType;
+        using ValueType = T::ValueType;
+        using BufferScalarType = ValueType::ComplexType;
         constexpr static int PhaseMatrixMajor = NumReplica == 1 ? MatrixOption::Col : MatrixOption::Row;
     public:
         using MDCellType = MDCell<T, Dim>;
-        using MassVector = typename MDCellType::MassVector;
-        using PositionMatrix = typename MDCellType::PositionMatrix;
+        using MassVector = MDCellType::MassVector;
+        using PositionMatrix = MDCellType::PositionMatrix;
         using PhaseMatrix = DenseMatrix<T, PhaseMatrixMajor | MatrixOption::Vector, Dynamic, NumReplica>;
         using BufferType = DenseMatrix<BufferScalarType, MatrixOption::Row | MatrixOption::Vector, 2>;
         using FFTType = FFT<T, 1>;
@@ -254,7 +254,7 @@ namespace Physica::Core {
     }
 
     template<Scalar T, unsigned int Dim, size_t NumReplica>
-    typename RingPolymer<T, Dim, NumReplica>::PositionMatrix
+    RingPolymer<T, Dim, NumReplica>::PositionMatrix
     RingPolymer<T, Dim, NumReplica>::makeBeadPos(size_t replica) const {
         PositionMatrix result(getNumParticle(), Dim);
         auto col = phase.col(replica);
@@ -267,7 +267,7 @@ namespace Physica::Core {
     }
 
     template<Scalar T, unsigned int Dim, size_t NumReplica>
-    typename RingPolymer<T, Dim, NumReplica>::PositionMatrix
+    RingPolymer<T, Dim, NumReplica>::PositionMatrix
     RingPolymer<T, Dim, NumReplica>::makeCentroidPos() const {
         PositionMatrix result(getNumParticle(), Dim);
         const size_t dof = getDOF();
@@ -280,7 +280,7 @@ namespace Physica::Core {
     }
 
     template<Scalar T, unsigned int Dim, size_t NumReplica>
-    typename RingPolymer<T, Dim, NumReplica>::PositionMatrix
+    RingPolymer<T, Dim, NumReplica>::PositionMatrix
     RingPolymer<T, Dim, NumReplica>::makeBeadMomentum(size_t replica) const {
         PositionMatrix result(getNumParticle(), Dim, 0);
         size_t index = 0;
@@ -292,7 +292,7 @@ namespace Physica::Core {
     }
 
     template<Scalar T, unsigned int Dim, size_t NumReplica>
-    typename RingPolymer<T, Dim, NumReplica>::PositionMatrix
+    RingPolymer<T, Dim, NumReplica>::PositionMatrix
     RingPolymer<T, Dim, NumReplica>::makeCentroidMomentum() const {
         PositionMatrix result(getNumParticle(), Dim, 0);
         size_t index = 0;

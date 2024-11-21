@@ -185,7 +185,7 @@ namespace Physica::Core {
     }
 
     template<Scalar T, unsigned int Dim>
-    typename MDCell<T, Dim>::MassTypeMap MDCell<T, Dim>::makeMassTypeMap() const {
+    MDCell<T, Dim>::MassTypeMap MDCell<T, Dim>::makeMassTypeMap() const {
         ParticleType nextType = 0;
         std::unordered_map<T, ParticleType> massToType{};
         std::set<T> massSet{};

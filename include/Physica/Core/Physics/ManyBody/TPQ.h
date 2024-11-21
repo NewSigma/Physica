@@ -35,7 +35,7 @@ namespace Physica::Core {
     class TPQ : public VectorND<T> {
         using This = TPQ<T>;
         using Base = VectorND<T>;
-        using RealType = typename T::RealType;
+        using RealType = T::RealType;
 
         RealType beta;
         RealType traceMu;
@@ -133,12 +133,12 @@ namespace Physica::Core {
     }
 
     template<Scalar T>
-    inline typename TPQ<T>::RealType TPQ<T>::calcPartitionXi() const {
+    inline TPQ<T>::RealType TPQ<T>::calcPartitionXi() const {
         return Base::squaredNorm();
     }
 
     template<Scalar T>
-    inline typename TPQ<T>::RealType TPQ<T>::lnPartitionXi() const {
+    inline TPQ<T>::RealType TPQ<T>::lnPartitionXi() const {
         const bool isUnderflow = abs(asVector()).max() < RealType(std::numeric_limits<RealType>::min());
         if (isUnderflow)
             return RealType(-std::numeric_limits<T>::max());
@@ -146,7 +146,7 @@ namespace Physica::Core {
     }
 
     template<Scalar T>
-    typename TPQ<T>::RealType TPQ<T>::lnSquaredDot(const VectorND<RealType>& other) const {
+    TPQ<T>::RealType TPQ<T>::lnSquaredDot(const VectorND<RealType>& other) const {
         assert(Base::getLength() == other.getLength() && "[Error]: Dimensions do not match");
         const RealType maxabs = abs(asVector()).max();
         const bool isUnderflow = maxabs < RealType(std::numeric_limits<RealType>::min());

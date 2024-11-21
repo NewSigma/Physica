@@ -127,7 +127,7 @@ namespace Physica::Python {
         return std::aligned_alloc(ctx.getTypeAlign(type), ctx.getTypeSize(type));
     }
 
-    const typename CXXObj::CXXRecordDecl* CXXObj::findSpecialization(const ClassTemplateDecl& templateDecl, py::args tparams) {
+    const CXXObj::CXXRecordDecl* CXXObj::findSpecialization(const ClassTemplateDecl& templateDecl, py::args tparams) {
         using namespace clang;
         const size_t numArgs = tparams.size();
         for (const ClassTemplateSpecializationDecl* pSpec : templateDecl.specializations()) {
@@ -172,7 +172,7 @@ namespace Physica::Python {
         }
     }
 
-    typename CXXObj::ForeignFunc CXXObj::lookupFunc(clang::GlobalDecl decl) {
+    CXXObj::ForeignFunc CXXObj::lookupFunc(clang::GlobalDecl decl) {
         auto& pp = PhysicaPython::getInstance();
         auto& codeGen = pp.getClang().getCodeGen();
         const auto symbol = codeGen.GetMangledName(decl);

@@ -56,7 +56,7 @@ namespace Physica::Core {
         testLabels.swap(obj.testLabels);
     }
 
-    typename Mnist::DataArray Mnist::readDatas(const std::string& path) {
+    Mnist::DataArray Mnist::readDatas(const std::string& path) {
         std::ifstream fin(path);
         if (!fin)
             throw IOException("[Error]: File not found");
@@ -72,7 +72,7 @@ namespace Physica::Core {
         return result;
     }
 
-    typename Mnist::LabelArray Mnist::readLabels(const std::string& path) {
+    Mnist::LabelArray Mnist::readLabels(const std::string& path) {
         std::ifstream fin(path);
         if (!fin)
             throw IOException("[Error]: File not found");

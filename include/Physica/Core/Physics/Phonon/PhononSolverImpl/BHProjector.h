@@ -110,7 +110,7 @@ namespace Physica::Core {
     }
 
     template<Scalar T>
-    typename BHProjector<T>::VectorType BHProjector<T>::makeRotBase(
+    BHProjector<T>::VectorType BHProjector<T>::makeRotBase(
             size_t dof, unsigned int direction, const MDCellType& unitCell) const {
         const unsigned int dir1 = (direction + 1) % Dim;
         const unsigned int dir2 = (direction + 2) % Dim;
@@ -141,7 +141,7 @@ namespace Physica::Core {
     }
 
     template<Scalar T>
-    typename BHProjector<T>::VectorType BHProjector<T>::makeHuangBase(
+    BHProjector<T>::VectorType BHProjector<T>::makeHuangBase(
             unsigned int alpha, unsigned int beta, unsigned int gamma, unsigned int delta, const MDCellType& unitCell) const {
         assert(alpha < Dim && beta < Dim && gamma < Dim && delta < Dim && "[Error]: Invalid dimension");
         const auto& lattice = unitCell.getLattice();

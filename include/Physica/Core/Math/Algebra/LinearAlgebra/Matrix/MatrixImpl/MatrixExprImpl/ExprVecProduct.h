@@ -80,7 +80,7 @@ namespace Physica::Core {
     }
 
     template<ExprType Type, Matrix T, class U, Vector V>
-    inline typename MatrixVectorProduct<MatrixExpr<Type, T, U>, V>::ScalarType
+    inline MatrixVectorProduct<MatrixExpr<Type, T, U>, V>::ScalarType
     MatrixVectorProduct<MatrixExpr<Type, T, U>, V>::calc(size_t index) const {
         return expr.row(index) * vec;
     }
@@ -120,7 +120,7 @@ namespace Physica {
             return false;
         }
     public:
-        using ScalarType = typename Internal::BinaryScalarOpRtnTy<typename MatrixType::ScalarType, typename V::ScalarType>::Type;
+        using ScalarType = Internal::BinaryScalarOpRtnTy<typename MatrixType::ScalarType, typename V::ScalarType>::Type;
         constexpr static size_t SizeAtCompile = MatrixType::RowAtCompile;
 
         constexpr static bool FastAssign = calcFastAssign();

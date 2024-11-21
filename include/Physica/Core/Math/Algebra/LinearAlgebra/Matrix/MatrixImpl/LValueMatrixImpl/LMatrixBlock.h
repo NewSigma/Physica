@@ -33,8 +33,8 @@ namespace Physica::Core {
         using Base::isComplex;
         using Base::SizeAtCompile;
     protected:
-        using PtrTy = typename ScalarType::PtrTy;
-        using ConstPtrTy = typename ScalarType::ConstPtrTy;
+        using PtrTy = ScalarType::PtrTy;
+        using ConstPtrTy = ScalarType::ConstPtrTy;
     private:
         T& mat;
         size_t fromRow;
@@ -73,8 +73,8 @@ namespace Physica::Core {
         using Base::isComplex;
         using Base::SizeAtCompile;
     protected:
-        using PtrTy = typename ScalarType::PtrTy;
-        using ConstPtrTy = typename ScalarType::ConstPtrTy;
+        using PtrTy = ScalarType::PtrTy;
+        using ConstPtrTy = ScalarType::ConstPtrTy;
     private:
         T& mat;
         size_t fromRow;
@@ -114,8 +114,8 @@ namespace Physica::Core {
         using Base::isComplex;
         using Base::SizeAtCompile;
     protected:
-        using PtrTy = typename ScalarType::PtrTy;
-        using ConstPtrTy = typename ScalarType::ConstPtrTy;
+        using PtrTy = ScalarType::PtrTy;
+        using ConstPtrTy = ScalarType::ConstPtrTy;
     private:
         T& mat;
         size_t fromRow;
@@ -154,8 +154,8 @@ namespace Physica::Core {
         using Base::isComplex;
         using Base::SizeAtCompile;
     protected:
-        using PtrTy = typename ScalarType::PtrTy;
-        using ConstPtrTy = typename ScalarType::ConstPtrTy;
+        using PtrTy = ScalarType::PtrTy;
+        using ConstPtrTy = ScalarType::ConstPtrTy;
     private:
         T& mat;
         size_t fromRow;
@@ -190,7 +190,7 @@ namespace Physica::Core {
     }
 
     template<Matrix T>
-    __host__ __device__ inline typename LMatrixBlock<T, Dynamic, Dynamic>::PtrTy
+    __host__ __device__ inline LMatrixBlock<T, Dynamic, Dynamic>::PtrTy
     LMatrixBlock<T, Dynamic, Dynamic>::data_ptr(size_t row, size_t col) {
         assert(row < rowCount);
         assert(col < colCount);
@@ -198,7 +198,7 @@ namespace Physica::Core {
     }
 
     template<Matrix T>
-    __host__ __device__ typename LMatrixBlock<T, Dynamic, Dynamic>::ConstPtrTy
+    __host__ __device__ LMatrixBlock<T, Dynamic, Dynamic>::ConstPtrTy
     LMatrixBlock<T, Dynamic, Dynamic>::data_ptr(size_t row, size_t col) const {
         return const_cast<This&>(*this).data_ptr(row, col);
     }
@@ -208,7 +208,7 @@ namespace Physica {
     template<Core::Matrix T, size_t Row, size_t Col>
     class Traits<Core::LMatrixBlock<T, Row, Col>> {
     public:
-        using ScalarType = typename T::ScalarType;
+        using ScalarType = T::ScalarType;
         constexpr static int Option = T::Option;
         constexpr static size_t RowAtCompile = Row;
         constexpr static size_t ColAtCompile = Col;

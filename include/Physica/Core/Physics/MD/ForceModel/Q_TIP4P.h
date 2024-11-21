@@ -35,17 +35,17 @@ namespace Physica::Core {
         using This = Q_TIP4P<T, EwaldType>;
         using Base = AABModel<T>;
         using Base::Dim;
-        using ValueType = typename T::ValueType;
-        using REwaldType = typename Traits<EwaldType>::REwaldType;
-        using BornChargeArray = typename REwaldType::BornChargeArray;
+        using ValueType = T::ValueType;
+        using REwaldType = Traits<EwaldType>::REwaldType;
+        using BornChargeArray = REwaldType::BornChargeArray;
         constexpr static bool IsSmallCell = Traits<REwaldType>::IsSmallCell;
         using LJModelType = LJModel<T, IsSmallCell>;
 
         static_assert(Dim == 3, "[Error]: Not implemented");
     public:
         using MDCellType = MDCell<T, Dim>;
-        using LatticeMatrix = typename MDCellType::LatticeMatrix;
-        using PositionMatrix = typename MDCellType::PositionMatrix;
+        using LatticeMatrix = MDCellType::LatticeMatrix;
+        using PositionMatrix = MDCellType::PositionMatrix;
 
         constexpr static double epsilon = PhyConst<AU>::eVToHartree(PhyConst<SI>::calorieToJoule(0.1852 * 1000) / PhyConst<SI>::unitCharge) / PhyConst<SI>::avogadroNa;
         constexpr static double epsilon4 = 4 * epsilon;
@@ -93,7 +93,7 @@ namespace Physica::Core {
         [[nodiscard]] size_t getNumMolecule() const noexcept { return getNumParticle() / 3; }
         [[nodiscard]] size_t getNumParticle() const noexcept { return ewald.getNumParticle(); }
         [[nodiscard]] const EwaldType& getEwald() const noexcept { return ewald; }
-        [[nodiscard]] const typename MDCellType::LatticeMatrix& getLattice() const noexcept { return ewald.getLattice(); }
+        [[nodiscard]] const MDCellType::LatticeMatrix& getLattice() const noexcept { return ewald.getLattice(); }
         /* Setters */
         inline void setLattice(LatticeMatrix lattice);
         /* Static members */
@@ -246,7 +246,7 @@ namespace Physica::Core {
     }
 
     template<Scalar T, class EwaldType>
-    typename Q_TIP4P<T, EwaldType>::LatticeMatrix
+    Q_TIP4P<T, EwaldType>::LatticeMatrix
     Q_TIP4P<T, EwaldType>::virial(const MDCellType& cell) {
         LatticeMatrix result(Dim, Dim, 0);
         const size_t numMolecule = getNumMolecule();
@@ -302,7 +302,7 @@ namespace Physica::Core {
     }
 
     template<Scalar T, class EwaldType>
-    typename Q_TIP4P<T, EwaldType>::LatticeMatrix Q_TIP4P<T, EwaldType>::virial_morse(const MDCellType& cell) const {
+    Q_TIP4P<T, EwaldType>::LatticeMatrix Q_TIP4P<T, EwaldType>::virial_morse(const MDCellType& cell) const {
         LatticeMatrix result(Dim, Dim, 0);
         const size_t numMolecule = getNumMolecule();
         const size_t offset = 2 * numMolecule;
@@ -323,7 +323,7 @@ namespace Physica::Core {
     }
 
     template<Scalar T, class EwaldType>
-    typename Q_TIP4P<T, EwaldType>::BornChargeArray Q_TIP4P<T, EwaldType>::calcBornCharge() const {
+    Q_TIP4P<T, EwaldType>::BornChargeArray Q_TIP4P<T, EwaldType>::calcBornCharge() const {
         BornChargeArray result = ewald.calcBornCharge();
         for (size_t i = 0; i < result.getLength(); ++i) {
             auto diag = result[i].diag();
@@ -334,7 +334,7 @@ namespace Physica::Core {
 
     template<Scalar T, class EwaldType>
     template<class Executor, bool UseDynamicPolar>
-    typename Q_TIP4P<T, EwaldType>::PositionMatrix
+    Q_TIP4P<T, EwaldType>::PositionMatrix
     Q_TIP4P<T, EwaldType>::makeInducedDipole(const MDCellType& cell) {
         assert(cell.getNumParticle() % 3 == 0 && "[Error]: This is not cell for water");
         const size_t numMolecule = cell.getNumParticle() / 3;
@@ -371,7 +371,7 @@ namespace Physica::Core {
     }
 
     template<Scalar T, class EwaldType>
-    typename Q_TIP4P<T, EwaldType>::PositionMatrix
+    Q_TIP4P<T, EwaldType>::PositionMatrix
     Q_TIP4P<T, EwaldType>::makePermanentDipole(const PeriodicCell<T, 3>& cell) {
         assert(cell.getNumParticle() % 3 == 0 && "[Error]: This is not cell for water");
         const size_t numMolecule = cell.getNumParticle() / 3;
@@ -392,7 +392,7 @@ namespace Physica::Core {
     }
 
     template<Scalar T, class EwaldType>
-    typename Q_TIP4P<T, EwaldType>::PositionMatrix
+    Q_TIP4P<T, EwaldType>::PositionMatrix
     Q_TIP4P<T, EwaldType>::makeChargePos(const MDCellType& cell) const {
         assert(cell.getNumParticle() % 3 == 0);
         assert(isCellOrdered(cell));
@@ -615,7 +615,7 @@ namespace Physica::Core {
     }
 
     template<Scalar T, class EwaldType>
-    inline typename Q_TIP4P<T, EwaldType>::MDCellType Q_TIP4P<T, EwaldType>::makeCellWithoutH(
+    inline Q_TIP4P<T, EwaldType>::MDCellType Q_TIP4P<T, EwaldType>::makeCellWithoutH(
             const MDCellType& original) {
         const size_t numMolecule = original.getNumParticle() / 3;
         return MDCellType(original.getLattice(), original.getPos().bottomRows(2 * numMolecule), original.getMassVec());

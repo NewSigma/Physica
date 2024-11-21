@@ -59,13 +59,13 @@ namespace Physica::Core {
     }
 
     template<class Derived>
-    __host__ __device__ inline typename device_obj<PairModel<Derived>>::ScalarType
+    __host__ __device__ inline device_obj<PairModel<Derived>>::ScalarType
     device_obj<PairModel<Derived>>::pot_functor(size_t i, size_t j, ScalarType r, ScalarType r2) const {
         return Base::getDerived().pot_functor(i, j, r, r2);
     }
 
     template<class Derived>
-    __host__ __device__ inline typename device_obj<PairModel<Derived>>::ScalarType
+    __host__ __device__ inline device_obj<PairModel<Derived>>::ScalarType
     device_obj<PairModel<Derived>>::force_functor(size_t i, size_t j, ScalarType r, ScalarType r2) const {
         return Base::getDerived().force_functor(i, j, r, r2);
     }
@@ -139,7 +139,7 @@ namespace Physica::Core {
     }
 
     template<class Derived>
-    typename device_obj<PairModel<Derived>>::LatticeMatrix device_obj<PairModel<Derived>>::virial(
+    device_obj<PairModel<Derived>>::LatticeMatrix device_obj<PairModel<Derived>>::virial(
             const LatticeMatrix& lattice,
             const InvLatticeMatrix& invLattice,
             const PositionMatrix& cartesianPos) {
@@ -168,7 +168,7 @@ namespace Physica::Core {
     }
 
     template<class Derived>
-    inline typename device_obj<PairModel<Derived>>::LatticeMatrix device_obj<PairModel<Derived>>::virial(const MDCellType& hostCell) {
+    inline device_obj<PairModel<Derived>>::LatticeMatrix device_obj<PairModel<Derived>>::virial(const MDCellType& hostCell) {
         return virial(hostCell.getLattice(), hostCell.getInvLattice(), hostCell.getPos());
     }
 
@@ -217,7 +217,7 @@ namespace Physica::Core {
 
     template<class Derived>
     __device__ void device_obj<PairModel<Derived>>::virialKernelImpl() {
-        using DeviceMatrix = typename DeviceMDCell::LatticeMatrix;
+        using DeviceMatrix = DeviceMDCell::LatticeMatrix;
         DeviceMatrix atomVirial(Dim, Dim, 0);
         auto kernel = [this, &atomVirial](size_t i, size_t j, DeviceVector3D r, ScalarType norm1, ScalarType norm2) {
             const ScalarType f_norm = force_functor(i, j, norm1, norm2);

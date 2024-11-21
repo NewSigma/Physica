@@ -80,8 +80,8 @@ namespace Physica::Core {
     };
 
     template<Vector V>
-    typename Mnist::DatasetType<V> Mnist::makeTrainDataset() const {
-        using SampleArray = typename DatasetType<V>::SampleArray;
+    Mnist::DatasetType<V> Mnist::makeTrainDataset() const {
+        using SampleArray = DatasetType<V>::SampleArray;
         const size_t numSample = getNumTrainSample();
         SampleArray samples(numSample);
         for (size_t i = 0; i < numSample; ++i)
@@ -90,8 +90,8 @@ namespace Physica::Core {
     }
 
     template<Vector V>
-    typename Mnist::DatasetType<V> Mnist::makeTestDataset() const {
-        using SampleArray = typename DatasetType<V>::SampleArray;
+    Mnist::DatasetType<V> Mnist::makeTestDataset() const {
+        using SampleArray = DatasetType<V>::SampleArray;
         const size_t numSample = getNumTestSample();
         SampleArray samples(numSample);
         for (size_t i = 0; i < numSample; ++i)
@@ -101,7 +101,7 @@ namespace Physica::Core {
 
     template<Vector V>
     V Mnist::ImageType::asVector() const {
-        using ScalarType = typename V::ScalarType::ValueType;
+        using ScalarType = V::ScalarType::ValueType;
         VectorND<ScalarType> result(NumPixelInImage);
         for (size_t i = 0; i < NumPixelInImage; ++i)
             result[i] = ScalarType(pixels[i]);

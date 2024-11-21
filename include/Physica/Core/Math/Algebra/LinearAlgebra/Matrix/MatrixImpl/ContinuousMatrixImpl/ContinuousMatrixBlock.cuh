@@ -32,8 +32,8 @@ namespace Physica::Core {
         using Base::isReverseDiff;
         using Base::SizeAtCompile;
     protected:
-        using PtrTy = typename ScalarType::PtrTy;
-        using ConstPtrTy = typename ScalarType::ConstPtrTy;
+        using PtrTy = ScalarType::PtrTy;
+        using ConstPtrTy = ScalarType::ConstPtrTy;
     private:
         device_obj<T>& mat;
         size_t fromRow;
@@ -74,8 +74,8 @@ namespace Physica::Core {
         using Base::isReverseDiff;
         using Base::SizeAtCompile;
     protected:
-        using PtrTy = typename ScalarType::PtrTy;
-        using ConstPtrTy = typename ScalarType::ConstPtrTy;
+        using PtrTy = ScalarType::PtrTy;
+        using ConstPtrTy = ScalarType::ConstPtrTy;
     private:
         device_obj<T>& mat;
         size_t fromRow;
@@ -113,8 +113,8 @@ namespace Physica::Core {
     public:
         using typename Base::ScalarType;
     protected:
-        using PtrTy = typename ScalarType::PtrTy;
-        using ConstPtrTy = typename ScalarType::ConstPtrTy;
+        using PtrTy = ScalarType::PtrTy;
+        using ConstPtrTy = ScalarType::ConstPtrTy;
     private:
         device_obj<T>& mat;
         size_t fromRow;

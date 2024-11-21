@@ -32,7 +32,7 @@ namespace Physica::Core {
     template<Scalar T>
     class RPMDBase {        
     public:
-        using ValueType = typename T::ValueType;
+        using ValueType = T::ValueType;
 
         [[nodiscard]] static uint64_t durationToStep(ValueType duration, ValueType timeStep) {
             return double(duration / timeStep) + 0.5;
@@ -57,11 +57,11 @@ namespace Physica::Core {
         using typename Base::ValueType;
     public:
         using RingPolymerType = RingPolymer<T, Dim, NumReplica>;
-        using PhaseMatrix = typename RingPolymerType::PhaseMatrix;
+        using PhaseMatrix = RingPolymerType::PhaseMatrix;
         using ForceMatrix = DenseMatrix<T, MatrixOption::Col | MatrixOption::Vector, Dynamic, Dynamic, ForceMatrixAllocator>;
-        using MDCellType = typename RingPolymerType::MDCellType;
-        using LatticeMatrix = typename MDCellType::LatticeMatrix;
-        using PositionMatrix = typename MDCellType::PositionMatrix;
+        using MDCellType = RingPolymerType::MDCellType;
+        using LatticeMatrix = MDCellType::LatticeMatrix;
+        using PositionMatrix = MDCellType::PositionMatrix;
     private:
         using FireModelType = FireModel<T, Dim>;
 
@@ -169,8 +169,8 @@ namespace Physica::Core {
         /* Getters */
         [[nodiscard]] constexpr unsigned int getDim() const noexcept { return Dim; }
         [[nodiscard]] const LatticeMatrix& getLattice() const noexcept { return cell.getLattice(); }
-        [[nodiscard]] const typename MDCellType::InvLatticeMatrix& getInvLattice() const noexcept { return cell.getInvLattice(); }
-        [[nodiscard]] const typename MDCellType::MassVector& getMassVec() const noexcept { return cell.getMassVec(); }
+        [[nodiscard]] const MDCellType::InvLatticeMatrix& getInvLattice() const noexcept { return cell.getInvLattice(); }
+        [[nodiscard]] const MDCellType::MassVector& getMassVec() const noexcept { return cell.getMassVec(); }
         [[nodiscard]] size_t getNumParticle() const noexcept { return cell.getNumParticle(); }
         [[nodiscard]] T getVolume() const noexcept { return cell.getVolume(); }
         [[nodiscard]] RingPolymerType& getRingPolymer() noexcept { return ringPolymer; }

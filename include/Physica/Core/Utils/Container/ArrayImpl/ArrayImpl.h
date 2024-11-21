@@ -215,7 +215,7 @@ namespace Physica::Core {
     }
 
     template<class T, class Allocator>
-    inline typename Array<T, Dynamic, Allocator>::pointer Array<T, Dynamic, Allocator>::release() noexcept {
+    inline Array<T, Dynamic, Allocator>::pointer Array<T, Dynamic, Allocator>::release() noexcept {
         pointer p = arr;
         arr = nullptr;
         length = capacity = 0;

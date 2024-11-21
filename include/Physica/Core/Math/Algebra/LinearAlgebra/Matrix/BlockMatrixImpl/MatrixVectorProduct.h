@@ -25,7 +25,7 @@ namespace Physica::Core {
         using This = MatrixVectorProduct<BlockMatrix<T>, U>;
         using Base = RValueVector<This>;
     public:
-        using ScalarType = typename Base::ScalarType;
+        using ScalarType = Base::ScalarType;
     private:
         const BlockMatrix<T>& m;
         const U& v;
@@ -73,7 +73,7 @@ namespace Physica {
     template<Matrix T, Vector U>
     class Traits<MatrixVectorProduct<BlockMatrix<T>, U>> {
     public:
-        using ScalarType = typename T::ScalarType;
+        using ScalarType = T::ScalarType;
         constexpr static size_t SizeAtCompile = Dynamic;
 
         constexpr static bool FastAssign = true;

@@ -24,12 +24,12 @@ namespace Physica::Core {
         class InnerDotImpl {
             using This = InnerDotImpl<T1, T2>;
         public:
-            using ResultType = typename Internal::BinaryScalarOpRtnTy<typename T1::ScalarType, typename T2::ScalarType>::Type;
+            using ResultType = Internal::BinaryScalarOpRtnTy<typename T1::ScalarType, typename T2::ScalarType>::Type;
 
             constexpr static size_t Size1 = T1::SizeAtCompile;
             constexpr static size_t Size2 = T2::SizeAtCompile;
             constexpr static size_t SizeAtCompile = Size1 > Size2 ? Size1 : Size2;
-            using PacketType = typename BestPacket<ResultType, SizeAtCompile>::Type;
+            using PacketType = BestPacket<ResultType, SizeAtCompile>::Type;
 
             constexpr static bool isFastPacket1 = Traits<T1>::FastPacket;
             constexpr static bool isFastPacket2 = Traits<T2>::FastPacket;
@@ -43,7 +43,7 @@ namespace Physica::Core {
         };
 
         template<Vector T1, Vector T2>
-        inline typename InnerDotImpl<T1, T2>::ResultType
+        inline InnerDotImpl<T1, T2>::ResultType
         InnerDotImpl<T1, T2>::run(const T1& v1, const T2& v2) {
             if constexpr (enableSIMD) {
                 const size_t length = v1.getLength();
@@ -51,7 +51,7 @@ namespace Physica::Core {
                 const size_t to = length / PacketType::size() * PacketType::size();
                 PacketType buffer(0);
                 if constexpr (isReverseDiff) {
-                    using PlainPacket = typename PacketType::PlainPacket;
+                    using PlainPacket = PacketType::PlainPacket;
                     const auto head1 = v1[0];
                     const auto head2 = v2[0];
                     for (; i < to; i += PacketType::size()) {

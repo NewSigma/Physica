@@ -30,7 +30,7 @@ namespace Physica::Core {
         constexpr static bool UntrivialNearestNeighbor = Dim > 1;
         using typename Base::IndexType;
     private:
-        using HopIndexArray = typename std::conditional<UntrivialNearestNeighbor, Array<Array<size_t>>, PlainStruct<void>>::type;
+        using HopIndexArray = std::conditional<UntrivialNearestNeighbor, Array<Array<size_t>>, PlainStruct<void>>::type;
 
         T hoppingT;
         T repelU;
@@ -68,7 +68,7 @@ namespace Physica::Core {
     }
 
     template<Scalar T, unsigned int Dim>
-    typename Hubbard<T, Dim>::HopIndexArray Hubbard<T, Dim>::makeHopIndexArray() {
+    Hubbard<T, Dim>::HopIndexArray Hubbard<T, Dim>::makeHopIndexArray() {
         const auto numSite = Base::getNumSuperCellSite();
         HopIndexArray result(numSite);
         Base::forSiteInLattice([this, numSite, &result](IndexType index) {

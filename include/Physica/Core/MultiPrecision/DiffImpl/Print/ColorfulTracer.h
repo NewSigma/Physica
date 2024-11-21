@@ -45,7 +45,7 @@ namespace Physica::Core {
 
     template<Scalar U, int AnyOrder>
     std::ostream& operator<<(std::ostream& os, const ColorfulTracer<U, AnyOrder>& obj) {
-        using Color = typename ColorGuard::Color;
+        using Color = ColorGuard::Color;
         using ColorGuard = ColorGuard;
         const auto& tracer = obj.tracer;
         const auto& list = tracer.getTraceList();

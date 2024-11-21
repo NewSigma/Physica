@@ -21,8 +21,8 @@
 using namespace Physica::Core;
 using ScalarType = float32;
 using CrystalCellType = CrystalCell<ScalarType>;
-using LatticeMatrix = typename CrystalCellType::LatticeMatrix;
-using PositionMatrix = typename CrystalCellType::PositionMatrix;
+using LatticeMatrix = CrystalCellType::LatticeMatrix;
+using PositionMatrix = CrystalCellType::PositionMatrix;
 
 int main() {
     const LatticeMatrix lattice{1, 0, 0, 2, 3, 0, 4, 5, 6};

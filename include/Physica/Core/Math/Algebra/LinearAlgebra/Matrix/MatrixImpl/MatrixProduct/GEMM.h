@@ -102,7 +102,7 @@ namespace Physica::Core {
     }
 
     template<Matrix T1, Matrix T2>
-    typename MatrixProduct<T1, T2>::ScalarType MatrixProduct<T1, T2>::calc(size_t row, size_t col) const {
+    MatrixProduct<T1, T2>::ScalarType MatrixProduct<T1, T2>::calc(size_t row, size_t col) const {
         ScalarType result(0);
         for (size_t i = 0; i < mat1.getCol(); ++i)
             result += ScalarType(mat1.calc(row, i)) * ScalarType(mat2.calc(i, col));
@@ -110,7 +110,7 @@ namespace Physica::Core {
     }
 
     template<Matrix T1, Matrix T2>
-    [[nodiscard]] inline typename std::enable_if<(T1::ColAtCompile != 1 && T2::ColAtCompile != 1) ||
+    [[nodiscard]] inline std::enable_if<(T1::ColAtCompile != 1 && T2::ColAtCompile != 1) ||
                                                  (T1::ColAtCompile == 1 && T2::ColAtCompile == 1),
                                                   MatrixProduct<T1, T2>>::type
     operator*(const T1& mat1, const T2& mat2) noexcept {
@@ -127,8 +127,7 @@ namespace Physica {
                       T2::RowAtCompile == Dynamic,
                       "[Error]: Row and column do not match in matrix-vector product");
     public:
-        using ScalarType = typename Core::Internal::BinaryScalarOpRtnTy<typename T1::ScalarType,
-                                                                             typename T2::ScalarType>::Type;
+        using ScalarType = Core::Internal::BinaryScalarOpRtnTy<typename T1::ScalarType, typename T2::ScalarType>::Type;
         constexpr static int Option = MatrixOption::AnyMajor | MatrixOption::AnyStorage;
         constexpr static size_t RowAtCompile = T1::RowAtCompile;
         constexpr static size_t ColAtCompile = T2::ColAtCompile;

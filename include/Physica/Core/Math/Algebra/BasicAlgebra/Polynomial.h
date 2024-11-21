@@ -43,7 +43,7 @@ namespace Physica::Core {
         Polynomial& operator=(const Polynomial& p) = default;
         Polynomial& operator=(Polynomial&& p) noexcept { coeffs = std::move(p.coeffs); return *this; }
         template<Scalar U>
-        typename Internal::BinaryScalarOpRtnTy<T, U>::Type operator()(const U& x) const;
+        Internal::BinaryScalarOpRtnTy<T, U>::Type operator()(const U& x) const;
         /* Getters */
         [[nodiscard]] size_t getPower() const noexcept { return coeffs.getLength(); }
         [[nodiscard]] const VectorType& getCoeffVector() const noexcept { return coeffs; }
@@ -51,9 +51,9 @@ namespace Physica::Core {
 
     template<Scalar T, size_t Power>
     template<Scalar U>
-    typename Internal::BinaryScalarOpRtnTy<T, U>::Type
+    Internal::BinaryScalarOpRtnTy<T, U>::Type
     Polynomial<T, Power>::operator()(const U& x) const {
-        using ResultType = typename Internal::BinaryScalarOpRtnTy<T, U>::Type;
+        using ResultType = Internal::BinaryScalarOpRtnTy<T, U>::Type;
         if (coeffs.empty())
             return ResultType(0);
         ResultType result = ResultType(coeffs[0]);

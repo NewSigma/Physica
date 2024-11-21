@@ -48,7 +48,7 @@ namespace Physica::Core {
     };
 
     template<Scalar T, bool IsSmallCell>
-    typename GaussAngular<T, IsSmallCell>::VectorType GaussAngular<T, IsSmallCell>::calc(const CellType& cell) const {
+    GaussAngular<T, IsSmallCell>::VectorType GaussAngular<T, IsSmallCell>::calc(const CellType& cell) const {
         VectorType result(cell.getNumParticle());
         if constexpr (IsSmallCell) {
 

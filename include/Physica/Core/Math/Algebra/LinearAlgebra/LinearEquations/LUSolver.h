@@ -24,7 +24,7 @@ namespace Physica::Core {
     template<Scalar T, int Option, size_t Order = Dynamic>
     class LUSolver {
         using LUType = PLUDecomposition<T, Option, Order, Order>;
-        using MatrixType = typename LUType::MatrixType;
+        using MatrixType = LUType::MatrixType;
     private:
         LUType lu;
     public:

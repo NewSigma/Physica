@@ -30,8 +30,8 @@ namespace Physica::Core {
     class Mesh {
     public:
         using ElementType = T;
-        using ScalarType = typename ElementType::ScalarType;
-        using VectorType = typename ElementType::VectorType;
+        using ScalarType = ElementType::ScalarType;
+        using VectorType = ElementType::VectorType;
     private:
         Array<ElementType> elements;
         VectorND<ScalarType> coeffs;

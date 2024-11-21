@@ -25,7 +25,7 @@ namespace Physica::Core {
     class IterateSolver {
         using This = IterateSolver<T>;
         using VectorType = VectorND<T>;
-        using RealType = typename T::RealType;
+        using RealType = T::RealType;
     private:
         VectorType residual;
         VectorType searchP;

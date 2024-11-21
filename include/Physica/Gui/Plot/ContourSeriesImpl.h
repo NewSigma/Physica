@@ -27,44 +27,44 @@ namespace Physica::Gui {
     }
 
     template<Matrix T>
-    typename ContourSeries<T>::Quad::Vertex ContourSeries<T>::Quad::getTopLeftVertex() const {
+    ContourSeries<T>::Quad::Vertex ContourSeries<T>::Quad::getTopLeftVertex() const {
         return {row, col};
     }
 
     template<Matrix T>
-    typename ContourSeries<T>::Quad::Vertex ContourSeries<T>::Quad::getTopRightVertex() const {
+    ContourSeries<T>::Quad::Vertex ContourSeries<T>::Quad::getTopRightVertex() const {
         return {row, col + 1};
     }
 
     template<Matrix T>
-    typename ContourSeries<T>::Quad::Vertex ContourSeries<T>::Quad::getBottomLeftVertex() const {
+    ContourSeries<T>::Quad::Vertex ContourSeries<T>::Quad::getBottomLeftVertex() const {
         return {row + 1, col};
     }
 
     template<Matrix T>
-    typename ContourSeries<T>::Quad::Vertex ContourSeries<T>::Quad::getBottomRightVertex() const {
+    ContourSeries<T>::Quad::Vertex ContourSeries<T>::Quad::getBottomRightVertex() const {
         return {row + 1, col + 1};
     }
 
     template<Matrix T>
-    typename ContourSeries<T>::Quad ContourSeries<T>::Quad::topNeigh() const {
+    ContourSeries<T>::Quad ContourSeries<T>::Quad::topNeigh() const {
         assert(row > 0);
         return {row - 1, col};
     }
 
     template<Matrix T>
-    typename ContourSeries<T>::Quad ContourSeries<T>::Quad::bottomNeigh() const {
+    ContourSeries<T>::Quad ContourSeries<T>::Quad::bottomNeigh() const {
         return {row + 1, col};
     }
 
     template<Matrix T>
-    typename ContourSeries<T>::Quad ContourSeries<T>::Quad::leftNeigh() const {
+    ContourSeries<T>::Quad ContourSeries<T>::Quad::leftNeigh() const {
         assert(col > 0);
         return {row, col - 1};
     }
 
     template<Matrix T>
-    typename ContourSeries<T>::Quad ContourSeries<T>::Quad::rightNeigh() const {
+    ContourSeries<T>::Quad ContourSeries<T>::Quad::rightNeigh() const {
         return {row, col + 1};
     }
 
@@ -92,7 +92,7 @@ namespace Physica::Gui {
      * Label 1 and 2 is by clockwise
      */
     template<Matrix T>
-    typename ContourSeries<T>::Edge::Vertex ContourSeries<T>::Edge::getVertex1() const {
+    ContourSeries<T>::Edge::Vertex ContourSeries<T>::Edge::getVertex1() const {
         switch (dir) {
             case Edge::Top:
                 return quad.getTopLeftVertex();
@@ -108,7 +108,7 @@ namespace Physica::Gui {
     }
 
     template<Matrix T>
-    typename ContourSeries<T>::Edge::Vertex ContourSeries<T>::Edge::getVertex2() const {
+    ContourSeries<T>::Edge::Vertex ContourSeries<T>::Edge::getVertex2() const {
         switch (dir) {
             case Edge::Top:
                 return quad.getTopRightVertex();
@@ -164,7 +164,7 @@ namespace Physica::Gui {
     }
 
     template<Matrix T>
-    typename ContourSeries<T>::ContourLine ContourSeries<T>::Grid::interpolateFromEdge(Edge edge, double level) {
+    ContourSeries<T>::ContourLine ContourSeries<T>::Grid::interpolateFromEdge(Edge edge, double level) {
         assert(!haveVisited(edge.quad));
         ContourLine line{};
         /* Initialize */ {

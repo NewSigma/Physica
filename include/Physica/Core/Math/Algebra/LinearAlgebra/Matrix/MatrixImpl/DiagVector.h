@@ -46,8 +46,8 @@ namespace Physica::Core {
     public:
         using typename Base::ScalarType;
     protected:
-        using PtrTy = typename ScalarType::PtrTy;
-        using ConstPtrTy = typename ScalarType::ConstPtrTy;
+        using PtrTy = ScalarType::PtrTy;
+        using ConstPtrTy = ScalarType::ConstPtrTy;
     private:
         T& mat;
     public:
@@ -71,7 +71,7 @@ namespace Physica {
     class Traits<DiagVector<T, isLValueMatrix>> {
         static_assert(std::is_convertible<T&, LValueMatrix<T>&>::value == isLValueMatrix, "[Error]: Invalid LValueMatrix");
     public:
-        using ScalarType = typename T::ScalarType;
+        using ScalarType = T::ScalarType;
         constexpr static size_t SizeAtCompile = T::RowAtCompile > T::ColAtCompile ? T::RowAtCompile : T::ColAtCompile;
     };
 }

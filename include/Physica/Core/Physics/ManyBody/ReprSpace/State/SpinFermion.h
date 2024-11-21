@@ -28,7 +28,7 @@ namespace Physica::Core {
         using Base = State<This>;
         using SpinlessType = SpinlessFermion<Dim, NumSite>;
     public:
-        using IntType = typename SpinlessType::IntType;
+        using IntType = SpinlessType::IntType;
     private:
         SpinlessType spinUp;
         SpinlessType spinDown;

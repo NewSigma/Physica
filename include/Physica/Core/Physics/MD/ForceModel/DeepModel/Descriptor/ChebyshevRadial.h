@@ -32,11 +32,11 @@ namespace Physica::Core {
     template<Scalar T, bool IsSmallCell>
     class ChebyshevRadial : protected PairModel<ChebyshevRadial<T, IsSmallCell>> {
         using Base = PairModel<ChebyshevRadial<T, IsSmallCell>>;
-        using ValueType = typename T::ValueType;
+        using ValueType = T::ValueType;
     public:
         using MDCellType = MDCell<ValueType, 3>;
-        using ParticleType = typename MDCellType::ParticleType;
-        using MassTypeMap = typename MDCellType::MassTypeMap;
+        using ParticleType = MDCellType::ParticleType;
+        using MassTypeMap = MDCellType::MassTypeMap;
         using DescriptorMatrix = DenseMatrix<T>;
         using DescriptorArray = Array<DescriptorMatrix>;
     private:
@@ -80,7 +80,7 @@ namespace Physica::Core {
     }
 
     template<Scalar T, bool IsSmallCell>
-    typename ChebyshevRadial<T, IsSmallCell>::DescriptorArray ChebyshevRadial<T, IsSmallCell>::project(
+    ChebyshevRadial<T, IsSmallCell>::DescriptorArray ChebyshevRadial<T, IsSmallCell>::project(
             const MDCellType& cell) const {
         const size_t numType = massTypeMap.size();
         DescriptorArray result(cell.getNumParticle(), maxOrder, numType, T(0));

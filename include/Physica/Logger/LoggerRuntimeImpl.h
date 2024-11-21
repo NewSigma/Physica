@@ -24,7 +24,7 @@
 namespace Physica::Logger {
     template<typename T1, typename... Ts>
     inline
-    typename std::enable_if<!std::is_same<T1, char*>::value
+    std::enable_if<!std::is_same<T1, char*>::value
                             && !std::is_same<T1, const char*>::value>::type
     writeArgs(const ArgType* p_args, T1 head, Ts... args) {
         LoggerRuntime::getInstance().getBuffer().write(head);
@@ -33,7 +33,7 @@ namespace Physica::Logger {
 
     template<typename T1, typename... Ts>
     inline
-    typename std::enable_if<std::is_same<T1, char*>::value
+    std::enable_if<std::is_same<T1, char*>::value
                             || std::is_same<T1, const char*>::value>::type
     writeArgs(const ArgType* p_args, T1 head, Ts... args) {
         Core::RingBuffer& buffer = LoggerRuntime::getInstance().getBuffer();

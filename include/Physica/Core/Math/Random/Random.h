@@ -36,7 +36,7 @@ namespace Physica::Core {
     class PHYSICA_API Random {
         using This = Random<RandomGenerator, FixedSeed>;
     public:
-        using result_type = typename RandomGenerator::result_type;
+        using result_type = RandomGenerator::result_type;
         using SeedType = result_type;
         using GeneratorType = RandomGenerator;
         constexpr static bool IsSeedFixed = Traits<This>::IsSeedFixed;
@@ -96,7 +96,7 @@ namespace Physica::Core {
     }
 
     template<class RandomGenerator, typename RandomGenerator::result_type FixedSeed>
-    inline typename Random<RandomGenerator, FixedSeed>::SeedType
+    inline Random<RandomGenerator, FixedSeed>::SeedType
     Random<RandomGenerator, FixedSeed>::getThreadSeed() const noexcept {
         if constexpr (IsSeedFixed) {
             const auto threadId = ThreadPool::getThreadInfo().id;

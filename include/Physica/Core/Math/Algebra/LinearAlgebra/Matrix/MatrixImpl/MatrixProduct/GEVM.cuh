@@ -52,13 +52,13 @@ namespace Physica::Core {
     };
 
     template<Vector T, Matrix U>
-    __device__ typename device_obj<VectorMatrixProduct<T, U>>::ScalarType
+    __device__ device_obj<VectorMatrixProduct<T, U>>::ScalarType
     device_obj<VectorMatrixProduct<T, U>>::calc(size_t row, size_t col) const {
         return vec.getDerived().calc(row) * mat.getDerived().calc(0, col);
     }
 
     template<Vector T, Matrix U>
-    [[nodiscard]] __host__ __device__ inline typename std::enable_if<U::RowAtCompile == 1, device_obj<VectorMatrixProduct<T, U>>>::type
+    [[nodiscard]] __host__ __device__ inline std::enable_if<U::RowAtCompile == 1, device_obj<VectorMatrixProduct<T, U>>>::type
     operator*(const device_obj<T>& vec, const device_obj<U>& mat) noexcept {
         assert(mat.getRow() == 1);
         return {vec, mat};

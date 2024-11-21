@@ -92,7 +92,7 @@ namespace Physica::Core {
     }
 
     template<Scalar T>
-    typename Correlation<T>::VectorType Correlation<T>::makeCorr(bool removeDrift) const {
+    Correlation<T>::VectorType Correlation<T>::makeCorr(bool removeDrift) const {
         VectorType result = corr;
         if (removeDrift)
             result -= square(mean);

@@ -22,19 +22,19 @@
 using namespace Physica::Core;
 using ScalarType = float32;
 using MDCellType = MDCell<ScalarType>;
-using LatticeMatrix = typename MDCellType::LatticeMatrix;
-using PositionMatrix = typename MDCellType::PositionMatrix;
-using MassVector = typename MDCellType::MassVector;
+using LatticeMatrix = MDCellType::LatticeMatrix;
+using PositionMatrix = MDCellType::PositionMatrix;
+using MassVector = MDCellType::MassVector;
 using HostForceModel = RSpaceEwald<ScalarType>;
 using DeviceForceModel = device_obj<HostForceModel>;
 using RandomType = Random<std::mt19937, 10000>;
 
 template<class RandomGenerator>
 MDCellType makeSystem(size_t numMolecular, RandomGenerator& gen) {
-    typename MDCellType::LatticeMatrix lattice = MDCellType::LatticeMatrix::unitMatrix(3);
-    typename MDCellType::PositionMatrix pos(numMolecular, 3);
+    MDCellType::LatticeMatrix lattice = MDCellType::LatticeMatrix::unitMatrix(3);
+    MDCellType::PositionMatrix pos(numMolecular, 3);
     pos.random_uniform(gen);
-    typename MDCellType::MassVector massVec(numMolecular, 1.0);
+    MDCellType::MassVector massVec(numMolecular, 1.0);
     MDCellType cell(std::move(lattice), std::move(pos), std::move(massVec));
     cell.scale(ScalarType(20));
     return cell;

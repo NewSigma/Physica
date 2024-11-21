@@ -26,10 +26,10 @@ namespace Physica::Core {
     template<class MeshType>
     class AbstractModel {
     public:
-        using ScalarType = typename MeshType::ScalarType;
+        using ScalarType = MeshType::ScalarType;
     protected:
-        using ElementType = typename MeshType::ElementType;
-        using VectorType = typename ElementType::VectorType;
+        using ElementType = MeshType::ElementType;
+        using VectorType = ElementType::VectorType;
         using SolverType = IterateSolver<ScalarType>;
 
         MeshType mesh;

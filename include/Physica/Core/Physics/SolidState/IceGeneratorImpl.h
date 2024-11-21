@@ -52,7 +52,7 @@ namespace Physica::Core {
 
     template<Scalar T>
     template<class RandomGenerator>
-    typename IceGenerator<T>::CrystalCellType IceGenerator<T>::makeRand(RandomGenerator& gen) {
+    IceGenerator<T>::CrystalCellType IceGenerator<T>::makeRand(RandomGenerator& gen) {
         PositionMatrix pos = prepareRun();;
         searchDanglingH(pos);
         while (!isFinished()) {
@@ -69,7 +69,7 @@ namespace Physica::Core {
 
     template<Scalar T>
     template<class RandomGenerator>
-    typename IceGenerator<T>::CrystalCellType IceGenerator<T>::makeDefects(unsigned int numDefect, RandomGenerator& gen) const {
+    IceGenerator<T>::CrystalCellType IceGenerator<T>::makeDefects(unsigned int numDefect, RandomGenerator& gen) const {
         assert(numDefect < getNumMolecule());
         PositionMatrix pos = initialCell.getPos();
 
@@ -171,7 +171,7 @@ namespace Physica::Core {
      * [1] S. W. Rick and A. D. J. Haymet, J. Chem. Phys. 118, 9291 (2003). DOI: 10.1063/1.1568337
      */
     template<Scalar T>
-    typename IceGenerator<T>::CrystalCellType IceGenerator<T>::makeRingMove(
+    IceGenerator<T>::CrystalCellType IceGenerator<T>::makeRingMove(
                 const Array<size_t>& ring, PositionMatrix& momentumMat) const {
         const bool isInvalidRing = ring.getLength() == 0;
         if (isInvalidRing)
@@ -232,7 +232,7 @@ namespace Physica::Core {
     }
 
     template<Scalar T>
-    typename IceGenerator<T>::PositionMatrix IceGenerator<T>::prepareRun() {
+    IceGenerator<T>::PositionMatrix IceGenerator<T>::prepareRun() {
         for (auto& elem : isHydrogenOccupied)
             elem = false;
         for (auto& elem : numHydrogenRequired)

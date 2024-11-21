@@ -30,13 +30,13 @@ namespace Physica::Core {
     template<Scalar T, size_t Size>
     class SIMD : private Traits<SIMD<T, Size>>::BaseType {
         using This = SIMD<T, Size>;
-        using Base = typename Traits<This>::BaseType;
-        using ValueType = typename T::ValueType;
-        using MachineType = typename T::MachineType;
-        using HalfType = typename std::conditional<sizeof(Base) * CHAR_BIT != 128, SIMD<T, Size / 2>, PlainStruct<void>>::type;
+        using Base = Traits<This>::BaseType;
+        using ValueType = T::ValueType;
+        using MachineType = T::MachineType;
+        using HalfType = std::conditional<sizeof(Base) * CHAR_BIT != 128, SIMD<T, Size / 2>, PlainStruct<void>>::type;
         constexpr static bool isForward = T::isForwardDiff;
     public:
-        using BoolSIMDType = typename Traits<This>::BoolSIMDType;
+        using BoolSIMDType = Traits<This>::BoolSIMDType;
         using PlainPacket = This;
 
         constexpr static bool isSeparatable = !std::is_same<HalfType, PlainStruct<void>>::value;
@@ -159,16 +159,16 @@ namespace Physica {
         static_assert(!T::isDifferentiable, "[Error]: The main template targets on plain scalar");
         static_assert(Size % 2 == 0 && Size <= 16, "[Error]: Invalid Size");
 
-        using ValueType = typename T::ValueType;
-        using Size2Type = typename std::conditional<isFloat32, void, Vec2d>::type;
-        using Size4Type = typename std::conditional<isFloat32, Vec4f, Vec4d>::type;
-        using Size8Type = typename std::conditional<isFloat32, Vec8f, Vec8d>::type;
-        using Size16Type = typename std::conditional<isFloat32, Vec16f, void>::type;
-        using Base1 = typename std::conditional<Size == 2, Size2Type, Size4Type>::type;
-        using Base2 = typename std::conditional<Size == 8, Size8Type, Size16Type>::type;
+        using ValueType = T::ValueType;
+        using Size2Type = std::conditional<isFloat32, void, Vec2d>::type;
+        using Size4Type = std::conditional<isFloat32, Vec4f, Vec4d>::type;
+        using Size8Type = std::conditional<isFloat32, Vec8f, Vec8d>::type;
+        using Size16Type = std::conditional<isFloat32, Vec16f, void>::type;
+        using Base1 = std::conditional<Size == 2, Size2Type, Size4Type>::type;
+        using Base2 = std::conditional<Size == 8, Size8Type, Size16Type>::type;
     public:
         using ScalarType = T;
-        using BaseType = typename std::conditional<Size <= 4, Base1, Base2>::type;
+        using BaseType = std::conditional<Size <= 4, Base1, Base2>::type;
         using BoolSIMDType = Core::BoolSIMD<T, Size>;
     };
 }
@@ -179,7 +179,7 @@ namespace std {
     template<Physica::Core::Scalar T, size_t Size>
     inline PacketType max(PacketType a, PacketType b) {
         if constexpr (T::isForwardDiff) {
-            using GradPacket = typename PacketType::GradPacket;
+            using GradPacket = PacketType::GradPacket;
             const auto values = max(a.getValue(), b.getValue());
             return PacketType(values, GradPacket::select(values == a.getValue(), a.getGrad(), b.getGrad()));
         }
@@ -190,7 +190,7 @@ namespace std {
     template<Physica::Core::Scalar T, size_t Size>
     inline PacketType min(PacketType a, PacketType b) {
         if constexpr (T::isForwardDiff) {
-            using GradPacket = typename PacketType::GradPacket;
+            using GradPacket = PacketType::GradPacket;
             const auto values = min(a.getValue(), b.getValue());
             return PacketType(values, GradPacket::select(values == a.getValue(), a.getGrad(), b.getGrad()));
         }

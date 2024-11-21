@@ -35,7 +35,7 @@ namespace Physica::Core {
         static_assert(Order > 2 || Order == Dynamic,
                       "Unnecessary hessenburg operation on matrixes whose rank is 1 or 2");
         using This = Tridiagonalization<T, Order>;
-        using RealType = typename T::RealType;
+        using RealType = T::RealType;
         using MatrixT = TridiagonalMatrixT<T, Order>;
         using SymmMatrix = DenseSymmMatrix<T, Order>;
         using HermiteMatrix = DenseHermiteMatrix<T, Order>;
@@ -45,7 +45,7 @@ namespace Physica::Core {
         using HouseholderNorm = DenseVector<T, NormVectorLength>;
         using BufferVector = DenseVector<T, BufferLength>;
     public:
-        using WorkingMatrix = typename std::conditional<T::isComplex, HermiteMatrix, SymmMatrix>::type;
+        using WorkingMatrix = std::conditional<T::isComplex, HermiteMatrix, SymmMatrix>::type;
     private:
         WorkingMatrix working;
         HouseholderNorm normBuffer;
@@ -140,7 +140,7 @@ namespace Physica::Core {
     template<Scalar T, size_t Order>
     class TridiagonalMatrixT : public RValueMatrix<TridiagonalMatrixT<T, Order>> {
         using This = TridiagonalMatrixT<T, Order>;
-        using RealType = typename T::RealType;
+        using RealType = T::RealType;
 
         const Tridiagonalization<T, Order>& tri;
     public:

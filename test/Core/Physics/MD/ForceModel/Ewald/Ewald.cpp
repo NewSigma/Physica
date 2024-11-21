@@ -97,8 +97,8 @@ namespace Physica {
     class Test {
         using ScalarType = Diff<float64, DiffMode::Reverse, 1>;
         using CrystalCellType = CrystalCell<ScalarType>;
-        using LatticeMatrix = typename CrystalCellType::LatticeMatrix;
-        using PositionMatrix = typename CrystalCellType::PositionMatrix;
+        using LatticeMatrix = CrystalCellType::LatticeMatrix;
+        using PositionMatrix = CrystalCellType::PositionMatrix;
     
         LatticeMatrix lattice;
         PositionMatrix pos;
@@ -159,9 +159,9 @@ namespace Physica {
         using ValueType = float64;
         using ScalarType = Diff<ValueType, DiffMode::Reverse, 1>;
         using MDCellType = MDCell<ScalarType>;
-        using LatticeMatrix = typename MDCellType::LatticeMatrix;
-        using PositionMatrix = typename MDCellType::PositionMatrix;
-        using MassVector = typename MDCellType::MassVector;
+        using LatticeMatrix = MDCellType::LatticeMatrix;
+        using PositionMatrix = MDCellType::PositionMatrix;
+        using MassVector = MDCellType::MassVector;
         using EwaldType = Ewald<ScalarType>;
     public:
         static void run() {

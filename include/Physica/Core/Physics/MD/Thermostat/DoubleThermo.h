@@ -32,13 +32,13 @@ namespace Physica::Core {
     template<class KineticModel>
     class DoubleThermo {
         using TraitsType = Traits<KineticModel>;
-        using ScalarType = typename TraitsType::ScalarType;
+        using ScalarType = TraitsType::ScalarType;
         constexpr static unsigned int Dim = TraitsType::Dim;
         constexpr static size_t NumReplica = TraitsType::NumReplica;
         using MDCellType = MDCell<ScalarType, Dim>;
-        using MassVector = typename MDCellType::MassVector;
+        using MassVector = MDCellType::MassVector;
         using RingPolymerType = RingPolymer<ScalarType, Dim, NumReplica>;
-        using BufferType = typename RingPolymerType::BufferType;
+        using BufferType = RingPolymerType::BufferType;
 
         ScalarType temperatureT;
         ScalarType thermostatTime;
@@ -117,10 +117,10 @@ namespace Physica::Core {
 
     template<class KineticModel>
     template<class RandomType>
-    typename DoubleThermo<KineticModel>::ScalarType DoubleThermo<KineticModel>::makeTranslationalFactor(
+    DoubleThermo<KineticModel>::ScalarType DoubleThermo<KineticModel>::makeTranslationalFactor(
             const RingPolymerType& ringPolymer, ScalarType deltaT, RandomType& pool) const {
         using Integrator = SRK2<ScalarType, 1>;
-        using VectorType = typename Integrator::VectorType;
+        using VectorType = Integrator::VectorType;
 
         if (temperatureT.isZero())
             return 0;

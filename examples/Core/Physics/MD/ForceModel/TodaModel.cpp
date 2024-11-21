@@ -40,7 +40,7 @@ using ThermoType = Langevin<ScalarType, 1, 1>;
 using KineticModel = HardCore<ScalarType, false, 1, RPMDIntegrator::Exact>;
 using ForceModel = TodaModel<ScalarType, true>;
 using MDType = RPMD<ScalarType, 1, 1>;
-using MDCellType = typename MDType::MDCellType;
+using MDCellType = MDType::MDCellType;
 using RandomType = Random<std::mt19937>;
 constexpr size_t numReplica = 1;
 constexpr double temperatureT = 0.02;
@@ -51,13 +51,13 @@ constexpr double latticeSize0 = 20;
 constexpr unsigned int numMolecular = 20;
 
 MDCellType makeSystem(ScalarType latticeSize) {
-    typename MDCellType::LatticeMatrix lattice{latticeSize};
+    MDCellType::LatticeMatrix lattice{latticeSize};
 
-    typename MDCellType::PositionMatrix pos(numMolecular, 1);
+    MDCellType::PositionMatrix pos(numMolecular, 1);
     for (size_t i = 0; i < numMolecular; ++i)
         pos(i, 0) = latticeSize * ScalarType(i + 1) / ScalarType(numMolecular + 1);
 
-    typename MDCellType::MassVector massVec(numMolecular);
+    MDCellType::MassVector massVec(numMolecular);
     for (size_t i = 0; i < numMolecular; ++i) {
         massVec[i] = (i % 2 == 0) ? 1.0 : 2.0;
     }

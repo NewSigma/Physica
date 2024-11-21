@@ -115,7 +115,7 @@ namespace Physica::Core {
         template<LMatrix SourceType, LMatrix TargetType>
         struct InverseImpl<SourceType, TargetType, 3> {
             static void run(const SourceType& source, TargetType& target) {
-                using ScalarType = typename SourceType::ScalarType;
+                using ScalarType = SourceType::ScalarType;
                 const ScalarType repDet = reciprocal(source.determinate());
                 if constexpr (MatrixOption::isRowMatrix<TargetType>()) {
                     target(0, 0) = (source(1, 1) * source(2, 2) - source(1, 2) * source(2, 1)) * repDet;

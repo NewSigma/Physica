@@ -33,9 +33,9 @@ namespace Physica::Core {
     public:
         using SegmentType = device_obj<typename host_obj::SegmentType>;
         using TraceListType = std::forward_list<SegmentType>;
-        using DiffScalar = typename SegmentType::DiffScalar;
+        using DiffScalar = SegmentType::DiffScalar;
     private:
-        using HostValueVector = typename SegmentType::HostValueVector;
+        using HostValueVector = SegmentType::HostValueVector;
 
         TraceListType traceList; //forward_list is FILO
         std::list<SegmentType> reserveList; //list is FIFO
@@ -75,7 +75,7 @@ namespace Physica::Core {
     };
 
     template<Scalar T, int Order>
-    typename device_obj<DiffTracer<T, Order>>::SegmentType& device_obj<DiffTracer<T, Order>>::pushSegment(size_t size, ExprType type) {
+    device_obj<DiffTracer<T, Order>>::SegmentType& device_obj<DiffTracer<T, Order>>::pushSegment(size_t size, ExprType type) {
         const auto end = reserveList.end();
         for (auto ite = reserveList.begin(); ite != end; ++ite) {
             auto& segment = *ite;
@@ -100,14 +100,14 @@ namespace Physica::Core {
     }
 
     template<Scalar T, int Order>
-    typename device_obj<DiffTracer<T, Order>>::SegmentType& device_obj<DiffTracer<T, Order>>::pushSegment(T value) {
+    device_obj<DiffTracer<T, Order>>::SegmentType& device_obj<DiffTracer<T, Order>>::pushSegment(T value) {
         auto& result = pushSegment(1, ExprType::Set);
         result.init(value);
         return result;
     }
 
     template<Scalar T, int Order>
-    typename device_obj<DiffTracer<T, Order>>::SegmentType& device_obj<DiffTracer<T, Order>>::pushSegment(const HostValueVector& value) {
+    device_obj<DiffTracer<T, Order>>::SegmentType& device_obj<DiffTracer<T, Order>>::pushSegment(const HostValueVector& value) {
         auto& result = pushSegment(value.getLength(), ExprType::Set);
         result.init(value);
         return result;

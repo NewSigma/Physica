@@ -33,7 +33,7 @@ using ScalarType = float64;
 using VectorType = VectorND<ScalarType>;
 using MatrixType = DenseMatrix<ScalarType>;
 using MDType = RPMD<ScalarType, 1, 1>;
-using MDCellType = typename MDType::MDCellType;
+using MDCellType = MDType::MDCellType;
 using ForceModel = EmptyForceModel<ScalarType, 1>;
 using ThermoType = Langevin<ScalarType, 1, 1>;
 using KineticModel = HardCore<ScalarType, true, 1, RPMDIntegrator::Exact>;
@@ -49,17 +49,17 @@ constexpr size_t maxHandleNum = 100;
 constexpr size_t numStep = 2000000;
 
 MDCellType makeSystem(std::mt19937& gen) {
-    typename MDCellType::LatticeMatrix lattice{latticeSize};
+    MDCellType::LatticeMatrix lattice{latticeSize};
 
     std::uniform_real_distribution dist{};
     VectorND<ScalarType> posVec(numMolecular);
     for (auto& elem : posVec)
         elem = dist(gen) * latticeSize;
     std::sort(posVec.begin(), posVec.end());
-    typename MDCellType::PositionMatrix pos(numMolecular, 1);
+    MDCellType::PositionMatrix pos(numMolecular, 1);
     pos.col(0) = posVec;
 
-    typename MDCellType::MassVector massVec(numMolecular);
+    MDCellType::MassVector massVec(numMolecular);
     for (size_t i = 0; i < numMolecular; ++i) {
         massVec[i] = (i % 2U == 0) ? unitMassM : (unitMassM * 10);
     }

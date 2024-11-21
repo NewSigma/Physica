@@ -27,13 +27,13 @@ namespace Physica::Core {
     template<Scalar T>
     class CellList {
         using This = CellList<T>;
-        using ValueType = typename T::ValueType;
+        using ValueType = T::ValueType;
     public:
         using MDCellType = MDCell<T>;
-        using LatticeMatrix = typename MDCellType::LatticeMatrix;
-        using PositionMatrix = typename MDCellType::PositionMatrix;
+        using LatticeMatrix = MDCellType::LatticeMatrix;
+        using PositionMatrix = MDCellType::PositionMatrix;
         using CellGrid = GridStorage<std::forward_list<size_t>>;
-        using Index3D = typename GridBase::Index3D;
+        using Index3D = GridBase::Index3D;
     private:
         LatticeMatrix lattice;
         PositionMatrix directPos;
@@ -261,7 +261,7 @@ namespace Physica::Core {
     }
 
     template<Scalar T>
-    typename CellList<T>::Index3D
+    CellList<T>::Index3D
     CellList<T>::posToIndex(size_t atomId) const {
         const T x0 = abs(directPos(atomId, 0) - ValueType(std::numeric_limits<T>::epsilon()));
         const T y0 = abs(directPos(atomId, 1) - ValueType(std::numeric_limits<T>::epsilon()));
@@ -310,7 +310,7 @@ namespace Physica::Core {
     }
 
     template<Scalar T>
-    typename CellList<T>::Index3D
+    CellList<T>::Index3D
     CellList<T>::makeGridDim(const LatticeMatrix& lattice, ValueType cutoff) {
         const auto repLatt = MDCellType::makeRepLattice(lattice);
         const ValueType factor = reciprocal(cutoff) * ValueType(2 * M_PI);

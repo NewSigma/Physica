@@ -24,7 +24,7 @@ namespace Physica::Core {
         using This = SubDataSpace<SpaceType, Dim>;
         using Base = DataSpaceBase<This>;
     public:
-        using SizeArray = typename Base::SizeArray;
+        using SizeArray = Base::SizeArray;
     private:
         SpaceType& space;
         size_t fromDim;
@@ -53,7 +53,7 @@ namespace Physica::Core {
 
     template<class SpaceType, size_t Dim>
     void SubDataSpace<SpaceType, Dim>::selectHyperslab(H5S_seloper_t op, const SizeArray& count, const SizeArray& start) {
-        using ExtendSizeArray = typename SpaceType::SizeArray;
+        using ExtendSizeArray = SpaceType::SizeArray;
         assert((op == H5S_seloper_t::H5S_SELECT_SET) && "[Error]: Not implemented");
         ExtendSizeArray count1 = space.getSelectedCount();
         ExtendSizeArray start1 = space.getSelectedStart();

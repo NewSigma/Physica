@@ -49,7 +49,7 @@ namespace Physica::Core {
     template<Scalar T, size_t Length, class Allocator>
     DenseVector<T, Length, Allocator> DenseVector<T, Length, Allocator>::copy() const {
         if constexpr (isReverseDiff) {
-            using TracerType = typename T::TracerType;
+            using TracerType = T::TracerType;
             const size_t length = Base::getLength();
             TracerType::getInstance().reserve(length);
             This result(length);

@@ -131,7 +131,7 @@ namespace Physica {
     template<Grid T>
     class Traits<RealGrid<T>> {
     public:
-        using ScalarType = typename T::ScalarType::RealType;
+        using ScalarType = T::ScalarType::RealType;
     };
 
     template<Grid T>
@@ -144,7 +144,7 @@ namespace Physica {
     class Traits<ValueGrid<T>> {
         static_assert(T::ScalarType::isDifferentiable, "[Error]: Unnecessary toValueGrid() call or toGradGrid() call");
     public:
-        using ScalarType = typename T::PlainType;
+        using ScalarType = T::PlainType;
     };
 
     template<Grid T>

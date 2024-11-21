@@ -84,7 +84,7 @@ int main() {
         using PoscarType = Poscar<float64>;
         PoscarType poscar = readTest1();
 
-        typename PoscarType::LatticeMatrix mat = poscar.getLattice();
+        PoscarType::LatticeMatrix mat = poscar.getLattice();
         poscar.standrizeLattice();
         if (!matrixNear(mat, poscar.getLattice(), 1E-15))
             return 1;
@@ -95,12 +95,12 @@ int main() {
     {
         using ScalarType = float32;
         using CrystalCellType = CrystalCell<ScalarType>;
-        typename CrystalCellType::LatticeMatrix lattice{
+        CrystalCellType::LatticeMatrix lattice{
             -4.6635062604325164,   -0.2499522611778955,    0.0000000000000000,
             -2.1629745970109657,   -4.1943944839773311,    0.0000000000000000,
             -0.2750800827878018,   -0.4169789280520980,   18.0000000000000000
         };
-        typename CrystalCellType::PositionMatrix pos {
+        CrystalCellType::PositionMatrix pos {
             0.4553508091084409,  0.3980437584135783,  0.1240303800896787,
             0.4937103263031835,  0.4030549988960055,  0.9488679230950712,
             0.5596918259357793,  0.8517822319914985,  0.1226285591691945,

@@ -46,8 +46,8 @@ namespace Physica::Core {
     };
 
     // MP = MultiPrecision
-    using MPUnit = typename std::conditional<PhysicaWordSize == 64, uint64_t, uint32_t>::type;
-    using SignedMPUnit = typename std::conditional<PhysicaWordSize == 64, int64_t, int32_t>::type;
+    using MPUnit = std::conditional<PhysicaWordSize == 64, uint64_t, uint32_t>::type;
+    using SignedMPUnit = std::conditional<PhysicaWordSize == 64, int64_t, int32_t>::type;
     constexpr static unsigned int MPUnitWidth = PhysicaWordSize;
     constexpr static MPUnit MPUnitMax = std::numeric_limits<MPUnit>::max();
     constexpr static MPUnit MPUnitHighestBitMask = static_cast<MPUnit>(1) << (MPUnitWidth - 1);
@@ -91,8 +91,8 @@ namespace Physica::Core {
             static_assert(!(Mode == DiffMode::Reverse && UseMixOrder), "[Error]: Reverse mode does not support mixed order");
 
             using Type0 = Real<Option>;
-            using Type1 = typename std::conditional<isComplex, Complex<Type0>, Type0>::type;
-            using Type2 = typename std::conditional<isDiffable, Diff<Type1, Mode, Order>, Type1>::type;
+            using Type1 = std::conditional<isComplex, Complex<Type0>, Type0>::type;
+            using Type2 = std::conditional<isDiffable, Diff<Type1, Mode, Order>, Type1>::type;
         public:
             using Type = Type2;
         };

@@ -26,8 +26,8 @@ namespace Physica::Core {
     class PlainWaveBasis {
         using ComplexType = Complex<T>;
         using GridType = RSpaceGrid<ComplexType>;
-        using LatticeMatrix = typename PeriodicCell<T, 3>::LatticeMatrix;
-        using Index3D = typename GridBase::Index3D;
+        using LatticeMatrix = PeriodicCell<T, 3>::LatticeMatrix;
+        using Index3D = GridBase::Index3D;
 
         GridType coeffGrid;
         LatticeMatrix repLatt;
@@ -124,7 +124,7 @@ namespace Physica::Core {
     }
 
     template<Scalar T>
-    typename GridBase::Index3D PlainWaveBasis<T>::makeGridDim(T cutEnergy, const LatticeMatrix& repLatt) {
+    GridBase::Index3D PlainWaveBasis<T>::makeGridDim(T cutEnergy, const LatticeMatrix& repLatt) {
         constexpr double factor = 2 * PhyConst<AU>::electronMass / PhyConst<AU>::reducedPlanck / PhyConst<AU>::reducedPlanck;
         const T maxWaveVec = sqrt(T(factor) * cutEnergy);
         const auto range = PeriodicCell<T, 3>::estimateRange(repLatt, maxWaveVec);

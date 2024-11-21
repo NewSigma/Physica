@@ -68,7 +68,7 @@ namespace Physica::Core {
     }
 
     template<Vector T, Matrix U>
-    typename DimEstimator::ScalarType
+    DimEstimator::ScalarType
     DimEstimator::intrinDim(const U& data, const T& radius) const {
         return lagrange(intrinsicDim, correlateDim, corrDimen(data, radius));
     }
@@ -77,7 +77,7 @@ namespace Physica::Core {
      * Each row represents a piece of data
      */
     template<Vector T, Matrix U>
-    typename DimEstimator::ScalarType
+    DimEstimator::ScalarType
     DimEstimator::corrDimen(const U& data, const T& radius) {
         const T logCorrIntegral = ln(corrIntegral(data, radius));
         const T logR = ln(radius);
@@ -87,7 +87,7 @@ namespace Physica::Core {
      * Helper function for distinguishing chaos and random noise, refer to [2]
      */
     template<Vector T>
-    typename DimEstimator::DataMatrix DimEstimator::toHighDimForm(
+    DimEstimator::DataMatrix DimEstimator::toHighDimForm(
             const T& data,
             size_t step,
             size_t dim) {

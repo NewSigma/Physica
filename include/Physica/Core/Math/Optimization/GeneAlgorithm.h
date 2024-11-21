@@ -27,7 +27,7 @@ namespace Physica::Core {
      */
     template<class Function, Vector T>
     class GeneAlgorithm {
-        using ScalarType = typename T::ScalarType;
+        using ScalarType = T::ScalarType;
     public:
         struct AlgorithmConfig {
             float crossoverRate;

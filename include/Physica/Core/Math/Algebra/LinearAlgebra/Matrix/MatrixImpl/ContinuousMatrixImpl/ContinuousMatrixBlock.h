@@ -32,8 +32,8 @@ namespace Physica::Core {
         using Base::isReverseDiff;
         using Base::SizeAtCompile;
     protected:
-        using PtrTy = typename ScalarType::PtrTy;
-        using ConstPtrTy = typename ScalarType::ConstPtrTy;
+        using PtrTy = ScalarType::PtrTy;
+        using ConstPtrTy = ScalarType::ConstPtrTy;
     private:
         PtrTy pVecHead;
         size_t colCount;
@@ -87,8 +87,8 @@ namespace Physica::Core {
         using Base::isReverseDiff;
         using Base::SizeAtCompile;
     protected:
-        using PtrTy = typename ScalarType::PtrTy;
-        using ConstPtrTy = typename ScalarType::ConstPtrTy;
+        using PtrTy = ScalarType::PtrTy;
+        using ConstPtrTy = ScalarType::ConstPtrTy;
     private:
         PtrTy pVecHead;
         size_t rowCount;
@@ -142,8 +142,8 @@ namespace Physica::Core {
         using Base::isReverseDiff;
         using Base::SizeAtCompile;
     protected:
-        using PtrTy = typename ScalarType::PtrTy;
-        using ConstPtrTy = typename ScalarType::ConstPtrTy;
+        using PtrTy = ScalarType::PtrTy;
+        using ConstPtrTy = ScalarType::ConstPtrTy;
     private:
         PtrTy pVecHead;
         size_t rowCount;
@@ -197,8 +197,8 @@ namespace Physica::Core {
         using Base::isComplex;
         using typename Base::ScalarType;
     protected:
-        using PtrTy = typename ScalarType::PtrTy;
-        using ConstPtrTy = typename ScalarType::ConstPtrTy;
+        using PtrTy = ScalarType::PtrTy;
+        using ConstPtrTy = ScalarType::ConstPtrTy;
     private:
         T& mat;
         size_t fromRow;
@@ -238,7 +238,7 @@ namespace Physica::Core {
     }
 
     template<Matrix T, size_t Row, size_t Col>
-    __host__ __device__ typename ContinuousMatrixBlock<T, Row, Col>::PtrTy
+    __host__ __device__ ContinuousMatrixBlock<T, Row, Col>::PtrTy
     ContinuousMatrixBlock<T, Row, Col>::data_ptr(size_t row, size_t col) {
         assert(row < rowCount);
         assert(col < colCount);
@@ -246,7 +246,7 @@ namespace Physica::Core {
     }
 
     template<Matrix T, size_t Row, size_t Col>
-    __host__ __device__ typename ContinuousMatrixBlock<T, Row, Col>::ConstPtrTy
+    __host__ __device__ ContinuousMatrixBlock<T, Row, Col>::ConstPtrTy
     ContinuousMatrixBlock<T, Row, Col>::data_ptr(size_t row, size_t col) const {
         assert(row < rowCount);
         assert(col < colCount);
@@ -258,7 +258,7 @@ namespace Physica {
     template<Matrix T, size_t Row, size_t Col>
     class Traits<Core::ContinuousMatrixBlock<T, Row, Col>> {
     public:
-        using ScalarType = typename T::ScalarType;
+        using ScalarType = T::ScalarType;
         constexpr static int Option = T::Option;
         constexpr static size_t RowAtCompile = Row;
         constexpr static size_t ColAtCompile = Col;

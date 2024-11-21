@@ -29,7 +29,7 @@ namespace Physica::Core {
     class CFireModel : private FireModel<T, Dim> {
         using Base = FireModel<T, Dim>;
         using typename Base::MDType;
-        using LatticeMatrix = typename MDType::LatticeMatrix;
+        using LatticeMatrix = MDType::LatticeMatrix;
         using BerendsenType = Berendsen<T, 1, Type>;
 
         BerendsenType baro;

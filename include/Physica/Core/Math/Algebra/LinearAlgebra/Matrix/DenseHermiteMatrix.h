@@ -30,10 +30,10 @@ namespace Physica::Core {
         using This = DenseHermiteMatrix<T, Order>;
         using Base = RValueMatrix<This>;
         using Storage = HalfDenseMatrixStorage<T, Order>;
-        using VectorStorage = typename Storage::ArrayType;
+        using VectorStorage = Storage::ArrayType;
     public:
         using typename Base::ScalarType;
-        using RealType = typename ScalarType::RealType;
+        using RealType = ScalarType::RealType;
         using ColMatrix = This;
         using RowMatrix = This;
         using RealMatrix = DenseSymmMatrix<typename ScalarType::RealType, Order>;
@@ -110,7 +110,7 @@ namespace Physica::Core {
     }
 
     template<Scalar T, size_t Order>
-    typename DenseHermiteMatrix<T, Order>::ScalarType&
+    DenseHermiteMatrix<T, Order>::ScalarType&
     DenseHermiteMatrix<T, Order>::operator()(size_t row, size_t col) {
         assert(row <= col); // Optimize: possible to make use of this condition
         const size_t index = Storage::toIndex1D(row, col);
@@ -118,7 +118,7 @@ namespace Physica::Core {
     }
 
     template<Scalar T, size_t Order>
-    const typename DenseHermiteMatrix<T, Order>::ScalarType&
+    const DenseHermiteMatrix<T, Order>::ScalarType&
     DenseHermiteMatrix<T, Order>::operator()(size_t row, size_t col) const {
         const size_t index = Storage::toIndex1D(row, col);
         return Storage::operator[](index);
@@ -131,7 +131,7 @@ namespace Physica::Core {
     }
 
     template<Scalar T, size_t Order>
-    typename DenseHermiteMatrix<T, Order>::ScalarType
+    DenseHermiteMatrix<T, Order>::ScalarType
     DenseHermiteMatrix<T, Order>::calc(size_t row, size_t col) const {
         const size_t index = Storage::toIndex1D(row, col);
         return col >= row ? Storage::operator[](index) : Storage::operator[](index).conjugate();

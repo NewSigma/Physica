@@ -27,10 +27,10 @@ namespace Physica::Core {
     template<Scalar T, bool IsFixedBoundary, size_t NumReplica, RPMDIntegrator Integrator, class Executor = SequentialExecutor>
     class HardCore : private FreeModel<T, 1, NumReplica, Integrator> {
         using Base = FreeModel<T, 1, NumReplica, Integrator>;
-        using ValueType = typename T::ValueType;
+        using ValueType = T::ValueType;
     public:
         using RingPolymerType = RingPolymer<T, 1, NumReplica>;
-        using PhaseMatrix = typename RingPolymerType::PhaseMatrix;
+        using PhaseMatrix = RingPolymerType::PhaseMatrix;
     private:
         T latticeSize;
         ValueType collideFactor;
@@ -221,8 +221,8 @@ namespace Physica::Core {
     template<Scalar T, bool IsFixedBoundary, size_t NumReplica, RPMDIntegrator Integrator, class Executor>
     bool HardCore<T, IsFixedBoundary, NumReplica, Integrator, Executor>::checkCollision(
             [[maybe_unused]] size_t id_dof, const RingPolymerType& ringPolymer) const {
-        using PacketType = typename BestPacket<T, Dynamic>::Type;
-        using BoolPacketType = typename Traits<PacketType>::BoolSIMDType;
+        using PacketType = BestPacket<T, Dynamic>::Type;
+        using BoolPacketType = Traits<PacketType>::BoolSIMDType;
         const size_t numParticle = getNumParticle();
         if constexpr (NumReplica == 1) {
             auto phase = ringPolymer.asMatrix().col(0);

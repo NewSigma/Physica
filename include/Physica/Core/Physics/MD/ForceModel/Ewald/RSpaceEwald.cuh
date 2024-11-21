@@ -36,8 +36,8 @@ namespace Physica::Core {
         using typename Base::InvLatticeMatrix;
         using typename Base::PositionMatrix;
         using DeviceLattice = device_obj<LatticeMatrix>;
-        using SearchRangeType = typename device_obj<PeriodicCell<T, Dim>>::SearchRangeType;
-        using BornChargeArray = typename host_obj::BornChargeArray;
+        using SearchRangeType = device_obj<PeriodicCell<T, Dim>>::SearchRangeType;
+        using BornChargeArray = host_obj::BornChargeArray;
         constexpr static size_t ErfcTableSize = host_obj::ErfcTableSize;
         constexpr static double ErfcTableStep = host_obj::ErfcTableStep;
         constexpr static double SumPrec = host_obj::SumPrec;
@@ -118,7 +118,7 @@ namespace Physica::Core {
     }
 
     template<Scalar T, bool IsSmallCell>
-    inline typename device_obj<RSpaceEwald<T, IsSmallCell>>::LatticeMatrix
+    inline device_obj<RSpaceEwald<T, IsSmallCell>>::LatticeMatrix
     device_obj<RSpaceEwald<T, IsSmallCell>>::virial(const PositionMatrix& pos) {
         return Base::virial(lattice.toHost(), invLatt, pos);
     }

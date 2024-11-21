@@ -28,7 +28,7 @@ namespace Physica::Core {
         using This = DenseSymmMatrix<T, Order>;
         using Base = LValueMatrix<This>;
         using Storage = HalfDenseMatrixStorage<T, Order>;
-        using VectorStorage = typename Storage::ArrayType;
+        using VectorStorage = Storage::ArrayType;
     public:
         using typename Base::ScalarType;
         using ColMatrix = This;

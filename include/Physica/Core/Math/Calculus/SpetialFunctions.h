@@ -160,7 +160,7 @@ namespace Physica::Core {
      */
     template<Matrix M>
     class HamonicRotator final {
-        using ScalarType = typename M::ScalarType;
+        using ScalarType = M::ScalarType;
     private:
         M initialMat; //Optimize: initialMat may be fixed matrix
         M hamonicRotation; //Current hamonic rotation matrix

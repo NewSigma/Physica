@@ -43,8 +43,8 @@ namespace Physica::Core {
      */
     template<Matrix T, LVector U>
     void normGramSchmidt(const T& base, U& v, typename U::ScalarType::RealType squaredNorm = 1) {
-        using ScalarType = typename U::ScalarType;
-        using RealType = typename ScalarType::RealType;
+        using ScalarType = U::ScalarType;
+        using RealType = ScalarType::RealType;
         [[maybe_unused]] constexpr double epsilon = 1E-3;
         assert(base.getRow() > base.getCol() && "[Error]: base is over complete");
         assert(scalarNear(v.squaredNorm(), squaredNorm, epsilon) && "[Error]: Invalid param");

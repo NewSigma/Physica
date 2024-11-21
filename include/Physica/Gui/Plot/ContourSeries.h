@@ -24,7 +24,7 @@
 namespace Physica::Gui {
     template<Matrix T>
     class ContourSeries : public QObject {
-        using ScalarType = typename T::ScalarType;
+        using ScalarType = T::ScalarType;
         using ContourLine = std::pair<Core::Array<double>, Core::Array<double>>;
 
         struct Quad {
@@ -48,7 +48,7 @@ namespace Physica::Gui {
         };
 
         struct Edge {
-            using Vertex = typename Quad::Vertex;
+            using Vertex = Quad::Vertex;
 
             enum Direction {
                 Top,

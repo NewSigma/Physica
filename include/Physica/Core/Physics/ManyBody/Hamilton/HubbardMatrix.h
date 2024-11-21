@@ -36,12 +36,12 @@ namespace Physica::Core {
     class HubbardMatrix
             : public HamiltonMatrix<HubbardMatrix<T, ReprType>>
             , public Hubbard<typename T::RealType, ReprType::Dim> {
-        using RealType = typename T::RealType;
+        using RealType = T::RealType;
         using This = HubbardMatrix<T, ReprType>;
         using Base = HamiltonMatrix<This>;
         using ModelBase = Hubbard<RealType, ReprType::Dim>;
         
-        using StateType = typename ReprType::StateType;
+        using StateType = ReprType::StateType;
         using typename ModelBase::IndexType;
     public:
         using FFTType = FFT<RealType, 1>;

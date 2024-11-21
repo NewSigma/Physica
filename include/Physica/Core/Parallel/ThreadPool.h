@@ -95,7 +95,7 @@ namespace Physica::Core {
 
     template<class Function, class... Args>
     std::future<typename std::invoke_result<Function, Args&&...>::type> ThreadPool::schedule(Function func, Args&&... args) noexcept {
-        using ResultType = typename std::invoke_result<Function, Args&&...>::type;
+        using ResultType = std::invoke_result<Function, Args&&...>::type;
         int schedule_to;
         auto& info = getThreadInfo();
         if (isMainThread())

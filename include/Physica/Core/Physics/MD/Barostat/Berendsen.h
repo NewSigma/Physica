@@ -33,8 +33,8 @@ namespace Physica::Core {
     public:
         constexpr static unsigned int Dim = 3;
         using MDCellType = MDCell<T, Dim>;
-        using LatticeMatrix = typename MDCellType::LatticeMatrix;
-        using InvLatticeMatrix = typename MDCellType::InvLatticeMatrix;
+        using LatticeMatrix = MDCellType::LatticeMatrix;
+        using InvLatticeMatrix = MDCellType::InvLatticeMatrix;
     protected:
         T compressRate;
         T tempT;
@@ -77,7 +77,7 @@ namespace Physica::Core {
     }
 
     template<Scalar T, size_t NumReplica, BaroType Type>
-    typename Berendsen<T, NumReplica, Type>::LatticeMatrix
+    Berendsen<T, NumReplica, Type>::LatticeMatrix
     Berendsen<T, NumReplica, Type>::makeDecayMatrix(const LatticeMatrix& stress, T pressPerDOF) {
         lastStress = stress;
         LatticeMatrix result{};
@@ -112,7 +112,7 @@ namespace Physica::Core {
         const auto decayMatrix = makeDecayMatrix(stress, pressPerDOF);
         scaleRPMD(rpmd, makeDeltaLattice([&, deltaT](size_t r, size_t c) -> T {
                 using Integrator = ODESolver<T, 1>;
-                using VectorType = typename Integrator::VectorType;
+                using VectorType = Integrator::VectorType;
                 const VectorType y{T(0)};
                 const T deltaElem = Integrator::rungeKutta4_step(deltaT, 0, y,
                     [&, r, c]([[maybe_unused]] T x, [[maybe_unused]] const VectorType& y) -> VectorType {
@@ -134,7 +134,7 @@ namespace Physica::Core {
     }
 
     template<Scalar T, size_t NumReplica, BaroType Type>
-    typename Berendsen<T, NumReplica, Type>::LatticeMatrix
+    Berendsen<T, NumReplica, Type>::LatticeMatrix
     Berendsen<T, NumReplica, Type>::makeScaleMatrix(const InvLatticeMatrix& invLatt, const LatticeMatrix& deltaLattice) {
         LatticeMatrix result;
         if constexpr (Type == BaroType::Anisotropic)
@@ -175,9 +175,9 @@ namespace Physica::Core {
 
     template<Scalar T, size_t NumReplica, BaroType Type>
     template<class Integrator>
-    typename Berendsen<T, NumReplica, Type>::LatticeMatrix
+    Berendsen<T, NumReplica, Type>::LatticeMatrix
     Berendsen<T, NumReplica, Type>::makeDeltaLattice(Integrator kernel) {
-        using ResultType = typename std::invoke_result<Integrator, size_t, size_t>::type;
+        using ResultType = std::invoke_result<Integrator, size_t, size_t>::type;
         static_assert(std::is_same<T, ResultType>::value, "[Error]: Invalid integrator");
         LatticeMatrix result(Dim, Dim, 0);
         if constexpr (Type == BaroType::Anisotropic) {

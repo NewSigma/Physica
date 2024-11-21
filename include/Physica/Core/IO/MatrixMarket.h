@@ -40,7 +40,7 @@ namespace Physica::Core {
 
     template<LMatrix T>
     void MatrixMarket::read(const char* path, T& target) {
-        using ScalarType = typename T::ScalarType;
+        using ScalarType = T::ScalarType;
         std::ifstream fin(path);
         if (!fin)
             throw IOException("[Error]: No file found");

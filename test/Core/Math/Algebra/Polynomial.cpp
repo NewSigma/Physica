@@ -22,7 +22,7 @@ using namespace Physica::Core;
 
 template<Vector T>
 bool testPolyRoot(const T& coeffs, double precision) {
-    using ScalarType = typename T::ScalarType;
+    using ScalarType = T::ScalarType;
     const Polynomial<ScalarType, T::SizeAtCompile> poly(coeffs);
     auto roots = polyRoot(poly);
     for (const auto& root : roots) {

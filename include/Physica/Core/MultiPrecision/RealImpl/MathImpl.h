@@ -137,7 +137,7 @@ namespace Physica::Core {
 
     template<ScalarOption Option>
     __host__ __device__ inline void sincos(Real<Option> s, Real<Option>& sin_result, Real<Option>& cos_result) noexcept {
-        using MachineType = typename Real<Option>::MachineType;
+        using MachineType = Real<Option>::MachineType;
         MachineType sin_temp, cos_temp;
         if constexpr (Option == Double)
             ::sincos(s.toMachine(), (double*)&sin_temp, (double*)&cos_temp);

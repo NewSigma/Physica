@@ -29,16 +29,16 @@ namespace Physica::Core {
         using Base = CRTPBase<This>;
         using TraitsType = Traits<device_obj<Derived>>;
     public:
-        using ScalarType = typename TraitsType::ScalarType;
-        using ValueType = typename ScalarType::ValueType;
+        using ScalarType = TraitsType::ScalarType;
+        using ValueType = ScalarType::ValueType;
         constexpr static size_t SizeAtCompile = TraitsType::SizeAtCompile;
-        using PacketType = typename device_obj<BestPacket<ScalarType, SizeAtCompile>>::Type;
+        using PacketType = device_obj<BestPacket<ScalarType, SizeAtCompile>>::Type;
         constexpr static bool isForwardDiff = ScalarType::isForwardDiff;
         constexpr static bool isReverseDiff = ScalarType::isReverseDiff;
         constexpr static bool isComplex = ScalarType::isComplex;
         constexpr static size_t MaxThreadPerBlock = 256;
     private:
-        using RealType = typename ScalarType::RealType;
+        using RealType = ScalarType::RealType;
     public:
         ~device_obj() = default;
         /* Operations */

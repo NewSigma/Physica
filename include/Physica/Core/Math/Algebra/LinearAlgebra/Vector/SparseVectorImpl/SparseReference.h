@@ -23,8 +23,8 @@ namespace Physica::Core {
     class SparseReference {
         using This = SparseReference<T>;
         using VectorType = SparseVector<T>;
-        using IndexArray = typename VectorType::IndexArray;
-        using ElemArray = typename VectorType::ElemArray;
+        using IndexArray = VectorType::IndexArray;
+        using ElemArray = VectorType::ElemArray;
 
         VectorType& v;
         size_t index;

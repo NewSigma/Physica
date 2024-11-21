@@ -70,7 +70,7 @@ namespace Physica::Core {
     }
 
     template<Scalar T>
-    inline typename Complex<T>::PacketType Complex<T>::packet() const {
+    inline Complex<T>::PacketType Complex<T>::packet() const {
         PacketType packet{};
         packet.load(&re);
         return packet;

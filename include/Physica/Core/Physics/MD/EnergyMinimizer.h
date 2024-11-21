@@ -28,7 +28,7 @@ namespace Physica::Core {
     class EnergyMinimizer {
     public:
         using MDCellType = MDCell<T, Dim>;
-        using LatticeMatrix = typename MDCellType::LatticeMatrix;
+        using LatticeMatrix = MDCellType::LatticeMatrix;
         using VectorType = VectorND<T>;
     private:
         MDCellType cell;

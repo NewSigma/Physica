@@ -54,7 +54,7 @@ namespace Physica::Core {
         using This = BinaryVectorExpr<Type, LHS, RHS>;
         using Base = RValueVector<This>;
         using LHS1 = LHS;
-        using RHS1 = typename std::conditional<Scalar<RHS>, typename RHS::ScalarType, RHS>::type;
+        using RHS1 = std::conditional<Scalar<RHS>, typename RHS::ScalarType, RHS>::type;
     private:
         const LHS1* lhs;
         const RHS1* rhs;
@@ -87,12 +87,12 @@ namespace Physica {
         constexpr static bool FastPacket2 = Traits<RHS>::FastPacket;
         constexpr static bool IsAddOrSub = Type == Core::ExprType::Add || Type == Core::ExprType::Sub;
 
-        using ScalarType1 = typename LHS::ScalarType;
-        using RealType = typename ScalarType1::RealType;
-        using BinaryScalarType = typename Core::Internal::BinaryScalarOpRtnTy<ScalarType1, typename RHS::ScalarType>::Type;
+        using ScalarType1 = LHS::ScalarType;
+        using RealType = ScalarType1::RealType;
+        using BinaryScalarType = Core::Internal::BinaryScalarOpRtnTy<ScalarType1, typename RHS::ScalarType>::Type;
         static_assert(Size1 == Dynamic || Size2 == Dynamic || (Size1 == Size2), "[Error]: Vector dimentions do not match");
     public:
-        using ScalarType = typename std::conditional<Type == Core::ExprType::Abs, RealType, BinaryScalarType>::type;
+        using ScalarType = std::conditional<Type == Core::ExprType::Abs, RealType, BinaryScalarType>::type;
         constexpr static size_t SizeAtCompile = Size1 > Size2 ? Size1 : Size2;
         constexpr static bool FastAssign = IsAddOrSub && (FastAssign1 || FastAssign2);
         constexpr static bool FastPacket = FastPacket1 && FastPacket2;
@@ -101,7 +101,7 @@ namespace Physica {
     template<Core::ExprType Type, Vector LHS, Scalar RHS>
     class Traits<Core::VectorExpr<Type, LHS, RHS>> {
     public:
-        using ScalarType = typename Core::Internal::BinaryScalarOpRtnTy<typename LHS::ScalarType, RHS>::Type;
+        using ScalarType = Core::Internal::BinaryScalarOpRtnTy<typename LHS::ScalarType, RHS>::Type;
         constexpr static size_t SizeAtCompile = Traits<LHS>::SizeAtCompile;
         constexpr static bool FastAssign = Traits<LHS>::FastAssign;
         constexpr static bool FastPacket = Traits<LHS>::FastPacket;

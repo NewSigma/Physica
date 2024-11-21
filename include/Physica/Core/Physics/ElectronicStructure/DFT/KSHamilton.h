@@ -29,10 +29,10 @@ namespace Physica::Core {
         using ComplexType = Complex<T>;
         using GridType = RSpaceGrid<ComplexType>;
         using StrucFactorArray = Array<GridType>;
-        using LatticeMatrix = typename PeriodicCell<T, 3>::LatticeMatrix;
+        using LatticeMatrix = PeriodicCell<T, 3>::LatticeMatrix;
         using BasisType = PlainWaveBasis<T>;
         using HermiteMatrix = DenseHermiteMatrix<ComplexType>;
-        using Index3D = typename GridBase::Index3D;
+        using Index3D = GridBase::Index3D;
         using FFT3D = FFT<T, 3>;
     private:
         HermiteMatrix hamiltonH;
@@ -174,7 +174,7 @@ namespace Physica::Core {
     }
 
     template<Scalar T, bool IsSpinPolarized>
-    typename KSHamilton<T, IsSpinPolarized>::Index3D
+    KSHamilton<T, IsSpinPolarized>::Index3D
     KSHamilton<T, IsSpinPolarized>::calcDeltaIndex(Index3D index1, Index3D index2, Index3D deltaDim) const {
         for (int i = 0; i < 3; ++i) {
             assert(index1[i] < basisDim[i]);
@@ -194,7 +194,7 @@ namespace Physica::Core {
     }
 
     template<Scalar T, bool IsSpinPolarized>
-    typename KSHamilton<T, IsSpinPolarized>::StrucFactorArray
+    KSHamilton<T, IsSpinPolarized>::StrucFactorArray
     KSHamilton<T, IsSpinPolarized>::makeStructureFactor() const {
         const auto species = cell.getSpecies();
         auto result = Array<GridType>(species.size(), kSpaceIonCoulomb.getDim());

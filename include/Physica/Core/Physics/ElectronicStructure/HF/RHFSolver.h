@@ -35,7 +35,7 @@ namespace Physica::Core::Physics {
      */
     template<class BaseSetType>
     class RHFSolver {
-        using ScalarType = typename Traits<BaseSetType>::ScalarType;
+        using ScalarType = Traits<BaseSetType>::ScalarType;
         using MatrixType = DenseMatrix<ScalarType, MatrixOption::Col | MatrixOption::Vector>;
 
         constexpr static size_t EDIISBufferSize = 3; //Refer EDIIS from [3]
@@ -328,7 +328,7 @@ namespace Physica::Core::Physics {
     }
 
     template<class BaseSetType>
-    typename RHFSolver<BaseSetType>::MatrixType RHFSolver<BaseSetType>::DIISExtrapolation(MatrixBuffer& fockMatrices,
+    RHFSolver<BaseSetType>::MatrixType RHFSolver<BaseSetType>::DIISExtrapolation(MatrixBuffer& fockMatrices,
                                                                                           DIISMatrix& DIISMat) {
         DenseVector<ScalarType, DIISBufferSize> x{};
         /* Solve linear equation */ {
@@ -356,7 +356,7 @@ namespace Physica::Core::Physics {
     }
 
     template<class BaseSetType>
-    typename RHFSolver<BaseSetType>::ScalarType RHFSolver<BaseSetType>::updateSelfConsistentEnergy(
+    RHFSolver<BaseSetType>::ScalarType RHFSolver<BaseSetType>::updateSelfConsistentEnergy(
             DenseVector<ScalarType, EDIISBufferSize>& energyBuffer) {
         for (size_t i = 0; i < energyBuffer.getLength() - 1; ++i)
             energyBuffer[i].swap(energyBuffer[i + 1]);

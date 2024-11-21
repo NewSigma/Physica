@@ -40,7 +40,7 @@ namespace Physica::Core {
         using This = DenseMatrix<T, Option, Row, Col, Allocator>;
         using Base = ContinuousMatrix<This>;
         using Storage = DenseMatrixStorage<T, Option, Row, Col, Allocator>;
-        using InitializerType = typename Storage::InitializerType;
+        using InitializerType = Storage::InitializerType;
         using Base::isReverseDiff;
     public:
         using typename Base::ValueType;

@@ -39,17 +39,17 @@ namespace Physica::Core {
         constexpr static bool IsPotDependOnAtomIndex = TraitType::IsPotDependOnAtomIndex;
         constexpr static bool IsSmallCell = TraitType::IsSmallCell;
     public:
-        using ScalarType = typename TraitType::ScalarType;
+        using ScalarType = TraitType::ScalarType;
         constexpr static unsigned int Dim = 3;
 
-        using ValueType = typename ScalarType::ValueType;
+        using ValueType = ScalarType::ValueType;
         using MDCellType = MDCell<ScalarType, Dim>;
-        using LatticeMatrix = typename MDCellType::LatticeMatrix;
-        using PositionMatrix = typename MDCellType::PositionMatrix;
+        using LatticeMatrix = MDCellType::LatticeMatrix;
+        using PositionMatrix = MDCellType::PositionMatrix;
         using CellListType = CellList<ScalarType>;
-        using Index3D = typename GridBase::Index3D;
+        using Index3D = GridBase::Index3D;
         using Vec3D = Vector3D<ScalarType>;
-        using ForceConstMatrix = typename EmptyForceModel<ScalarType, Dim>::ForceConstMatrix;
+        using ForceConstMatrix = EmptyForceModel<ScalarType, Dim>::ForceConstMatrix;
     private:
         ValueType cutoff;
         ScalarType squared_cutoff;
@@ -108,25 +108,25 @@ namespace Physica::Core {
     }
 
     template<class Derived>
-    inline typename PairModel<Derived>::ScalarType
+    inline PairModel<Derived>::ScalarType
     PairModel<Derived>::pot_functor(size_t i, size_t j, ScalarType r, ScalarType r2) const {
         return Base::getDerived().pot_functor(i, j, r, r2);
     }
 
     template<class Derived>
-    inline typename PairModel<Derived>::ScalarType
+    inline PairModel<Derived>::ScalarType
     PairModel<Derived>::force_functor(size_t i, size_t j, ScalarType r, ScalarType r2) const {
         return Base::getDerived().force_functor(i, j, r, r2);
     }
 
     template<class Derived>
-    inline typename PairModel<Derived>::ScalarType
+    inline PairModel<Derived>::ScalarType
     PairModel<Derived>::forceConst_functor(ScalarType r, ScalarType r2) const {
         return Base::getDerived().forceConst_functor(r, r2);
     }
 
     template<class Derived>
-    typename PairModel<Derived>::ScalarType PairModel<Derived>::potentialV(
+    PairModel<Derived>::ScalarType PairModel<Derived>::potentialV(
             const LatticeMatrix& lattice, const PositionMatrix& cartesianPos) const {
         const auto& pos = cartesianPos;
         const auto range = MDCellType::estimateRange(lattice, cutoff);
@@ -156,7 +156,7 @@ namespace Physica::Core {
     }
 
     template<class Derived>
-    inline typename PairModel<Derived>::ScalarType PairModel<Derived>::potentialV(const MDCellType& cell) const {
+    inline PairModel<Derived>::ScalarType PairModel<Derived>::potentialV(const MDCellType& cell) const {
         return potentialV(cell.getLattice(), cell.getPos());
     }
 
@@ -201,7 +201,7 @@ namespace Physica::Core {
     }
 
     template<class Derived>
-    typename PairModel<Derived>::ScalarType PairModel<Derived>::forceConst(const MDCellType& cell, size_t dof1, size_t dof2) const {
+    PairModel<Derived>::ScalarType PairModel<Derived>::forceConst(const MDCellType& cell, size_t dof1, size_t dof2) const {
         static_assert(TraitType::IsPeriodBoundary, "[Error]: Fixed boundary is not implemented");
         const size_t atom1 = dof1 / 3U;
         const size_t atom2 = dof2 / 3U;
@@ -220,7 +220,7 @@ namespace Physica::Core {
     }
 
     template<class Derived>
-    typename PairModel<Derived>::ForceConstMatrix PairModel<Derived>::forceConst(const MDCellType& cell) const {
+    PairModel<Derived>::ForceConstMatrix PairModel<Derived>::forceConst(const MDCellType& cell) const {
         const size_t numParticle = cell.getNumParticle();
         const size_t dof = cell.getDOF();
         ForceConstMatrix result(dof);
@@ -247,7 +247,7 @@ namespace Physica::Core {
     }
 
     template<class Derived>
-    typename PairModel<Derived>::LatticeMatrix
+    PairModel<Derived>::LatticeMatrix
     PairModel<Derived>::virial(const MDCellType& cell) const {
         return virial(cell.getLattice(), cell.getPos());
     }
@@ -256,7 +256,7 @@ namespace Physica::Core {
      * [1] M. J. Louwerse and E. J. Baerends, Chem. Phys. Lett. 421, 138 (2006); https://doi.org/10.1016/J.CPLETT.2006.01.087
      */
     template<class Derived>
-    typename PairModel<Derived>::LatticeMatrix
+    PairModel<Derived>::LatticeMatrix
     PairModel<Derived>::virial(const LatticeMatrix& lattice, const PositionMatrix& pos) const {        
         LatticeMatrix result(Dim, Dim, 0);
         auto kernel = [this, &result](size_t i, size_t j, Vec3D r, ScalarType norm1, ScalarType norm2) {
@@ -364,7 +364,7 @@ namespace Physica::Core {
     }
 
     template<class Derived>
-    typename PairModel<Derived>::ScalarType PairModel<Derived>::forceConstImpl(const MDCellType& cell, size_t dof1, size_t dof2) const {
+    PairModel<Derived>::ScalarType PairModel<Derived>::forceConstImpl(const MDCellType& cell, size_t dof1, size_t dof2) const {
         static_assert(!IsPotDependOnAtomIndex, "[Error]: It is assumed force not depends on atom index");
         constexpr int unused = 0;
         const size_t atom1 = dof1 / 3U;

@@ -48,8 +48,8 @@ constexpr double pair_cutoff = PhyConst<AU>::angstormToBohr(9);
 namespace {
     MDCell<ScalarType> makeSystem(unsigned int cellSize) {
         using CrystalCellType = CrystalCell<ScalarType>;
-        using LatticeMatrix = typename CrystalCellType::LatticeMatrix;
-        using PositionMatrix = typename CrystalCellType::PositionMatrix;
+        using LatticeMatrix = CrystalCellType::LatticeMatrix;
+        using PositionMatrix = CrystalCellType::PositionMatrix;
         const LatticeMatrix lattice{
             -4.6635062604325164,   -0.2499522611778955,    0.0000000000000000,
             -2.1629745970109657,   -4.1943944839773311,    0.0000000000000000,

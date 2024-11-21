@@ -28,7 +28,7 @@ namespace Physica::Core {
         using Base = LValueGrid<This>;
         using Storage = GridStorage<T>;
     public:
-        using Index3D = typename Storage::Index3D;
+        using Index3D = Storage::Index3D;
     public:
         RSpaceGrid() = default;
         template<class... Args>
@@ -76,7 +76,7 @@ namespace Physica::Core {
 
     template<Scalar T>
     std::ostream& operator<<(std::ostream& os, const RSpaceGrid<T>& grid) {
-        using Index3D = typename RSpaceGrid<T>::Index3D;
+        using Index3D = RSpaceGrid<T>::Index3D;
         const Index3D dim = grid.getDim();
         os.write(reinterpret_cast<const char*>(&dim), sizeof(Index3D));
         os.write(reinterpret_cast<const char*>(grid.asArray().data()), grid.getSize() * sizeof(T));
@@ -85,7 +85,7 @@ namespace Physica::Core {
 
     template<Scalar T>
     std::istream& operator>>(std::istream& is, RSpaceGrid<T>& grid) {
-        using Index3D = typename RSpaceGrid<T>::Index3D;
+        using Index3D = RSpaceGrid<T>::Index3D;
         Index3D dim;
         is.read(reinterpret_cast<char*>(&dim), sizeof(Index3D));
         grid.resize(dim);

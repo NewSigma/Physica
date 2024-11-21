@@ -35,8 +35,8 @@ namespace Physica::Core {
     }
 
     std::istream& operator>>(std::istream& is, Gnuplot& gnuplot) {
-        typename Gnuplot::VectorType xBuffer{};
-        typename Gnuplot::VectorType yBuffer{};
+        Gnuplot::VectorType xBuffer{};
+        Gnuplot::VectorType yBuffer{};
         while (is.good()) {
             int ch = is.peek();
             while (ch == ' ') {

@@ -49,7 +49,7 @@ namespace Physica::Core {
     template<Matrix M>
     void Cholesky<T>::assignTo(LValueMatrix<M>& target) const {
         using ResultType = M;
-        using ScalarType = typename ResultType::ScalarType;
+        using ScalarType = ResultType::ScalarType;
         const size_t order = source.getRow();
         /* Handle first vector */ {
             const auto diag = sqrt(source(0, 0));
@@ -89,7 +89,7 @@ namespace Physica {
     template<Matrix T>
     class Traits<Cholesky<T>> {
     public:
-        using ScalarType = typename T::ScalarType;
+        using ScalarType = T::ScalarType;
         constexpr static int Option = T::MatrixOption;
         constexpr static size_t RowAtCompile = T::RowAtCompile;
         constexpr static size_t ColAtCompile = T::ColAtCompile;

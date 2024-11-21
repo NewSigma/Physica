@@ -23,7 +23,7 @@ namespace Physica::Core {
     class BoolSIMD : private Traits<BoolSIMD<T, Size>>::BaseType {
         using This = BoolSIMD<T, Size>;
     public:
-        using Base = typename Traits<This>::BaseType;
+        using Base = Traits<This>::BaseType;
     public:
         BoolSIMD() = default;
         explicit BoolSIMD(Base value) : Base(value) {}
@@ -51,7 +51,7 @@ namespace Physica::Core {
     class BoolSIMD<T, 1> {
         using This = BoolSIMD<T, 1>;
     public:
-        using Base = typename Traits<This>::BaseType;
+        using Base = Traits<This>::BaseType;
     private:
         bool b;
     public:
@@ -78,13 +78,13 @@ namespace Physica {
     private:
         constexpr static bool isSinglePrec = ScalarType::Option == Float;
             
-        using Size2Type = typename std::conditional<isSinglePrec, void, Vec2db>::type;
-        using Size4Type = typename std::conditional<isSinglePrec, Vec4fb, Vec4db>::type;
-        using Size8Type = typename std::conditional<isSinglePrec, Vec8fb, Vec8db>::type;
-        using Size16Type = typename std::conditional<isSinglePrec, Vec16fb, void>::type;
-        using Type1 = typename std::conditional<Size == 2, Size2Type, Size4Type>::type;
-        using Type2 = typename std::conditional<Size == 8, Size8Type, Size16Type>::type;
+        using Size2Type = std::conditional<isSinglePrec, void, Vec2db>::type;
+        using Size4Type = std::conditional<isSinglePrec, Vec4fb, Vec4db>::type;
+        using Size8Type = std::conditional<isSinglePrec, Vec8fb, Vec8db>::type;
+        using Size16Type = std::conditional<isSinglePrec, Vec16fb, void>::type;
+        using Type1 = std::conditional<Size == 2, Size2Type, Size4Type>::type;
+        using Type2 = std::conditional<Size == 8, Size8Type, Size16Type>::type;
     public:
-        using BaseType = typename std::conditional<Size <= 4, Type1, Type2>::type;
+        using BaseType = std::conditional<Size <= 4, Type1, Type2>::type;
     };
 }

@@ -64,7 +64,7 @@ namespace Physica::Core {
      * [1] http://www.pi314.net/eng/salamin.php
      * [2] https://blog.csdn.net/liangbch/article/details/78724041
      */
-    typename MathConst::ScalarType MathConst::calcPI(int precision) {
+    MathConst::ScalarType MathConst::calcPI(int precision) {
         const auto& basicConst = BasicConst::getInstance();
 
         ScalarType a(static_cast<SignedMPUnit>(1));

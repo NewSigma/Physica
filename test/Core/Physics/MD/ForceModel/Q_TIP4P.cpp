@@ -30,9 +30,9 @@ namespace Physica {
         using ValueType = float64;
         using ScalarType = Diff<ValueType, DiffMode::Reverse, 1>;
         using MDCellType = MDCell<ScalarType>;
-        using LatticeMatrix = typename MDCellType::LatticeMatrix;
-        using PositionMatrix = typename MDCellType::PositionMatrix;
-        using MassVector = typename MDCellType::MassVector;
+        using LatticeMatrix = MDCellType::LatticeMatrix;
+        using PositionMatrix = MDCellType::PositionMatrix;
+        using MassVector = MDCellType::MassVector;
         using ForceModel = Q_TIP4P<ScalarType, Ewald<ScalarType>>;
         constexpr static size_t MoleculePerCell = 4;
         constexpr static double pair_cutoff = PhyConst<AU>::angstormToBohr(9);
@@ -74,10 +74,10 @@ namespace Physica {
             constexpr size_t numAtom = MoleculePerCell * 3;
 
             const ScalarType latticeConst(cbrt(cellVolume));
-            typename CrystalCellType::LatticeMatrix lattice = CrystalCellType::LatticeMatrix::unitMatrix(3);
+            CrystalCellType::LatticeMatrix lattice = CrystalCellType::LatticeMatrix::unitMatrix(3);
             lattice *= latticeConst;
 
-            typename CrystalCellType::PositionMatrix pos(numAtom, 3);
+            CrystalCellType::PositionMatrix pos(numAtom, 3);
             std::uniform_real_distribution dist(-0.1, 0.1);
             for (size_t i = 0; i < MoleculePerCell; ++i) {
                 auto temp = Vector3D<ScalarType>::random_any(3, dist, gen);
@@ -112,7 +112,7 @@ namespace Physica {
                 posH2 = temp + randomVector(latticeConst, gen);
             }
 
-            typename CrystalCellType::AtomicArray atomicNumbers(numAtom);
+            CrystalCellType::AtomicArray atomicNumbers(numAtom);
             for (size_t i = 0; i < maxIndexH; ++i)
                 atomicNumbers[i] = 1;
             for (size_t i = maxIndexH; i < maxIndexO; ++i)

@@ -258,7 +258,7 @@ public:
                                 MatrixOption::Col | MatrixOption::Vector,
                                 baseSetCount,
                                 baseSetCount>;
-    using VectorType = typename MatrixType::VectorType;
+    using VectorType = MatrixType::VectorType;
 public:
     int execute(int argc, char** argv, VectorType& trial_solution, const ScalarType& criteria) {
         MatrixType overlap = getOverlapMatrix();
@@ -387,7 +387,7 @@ int main(int argc, char** argv) {
     exit_code |= HedrogenAtom().execute(argc, argv);
 
     std::cout << "Example 3:\n";
-    typename HeliumAtom::VectorType solution{0.25, 0.25, 0.25, 0.25};
+    HeliumAtom::VectorType solution{0.25, 0.25, 0.25, 0.25};
     exit_code |= HeliumAtom().execute(argc, argv, solution, 1E-8);
     return exit_code;
 }

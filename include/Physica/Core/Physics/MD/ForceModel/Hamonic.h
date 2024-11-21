@@ -28,7 +28,7 @@ namespace Physica::Core {
         using typename Base::MDCellType;
         using typename Base::LatticeMatrix;
         using typename Base::ForceConstMatrix;
-        using PositionMatrix = typename MDCellType::PositionMatrix;
+        using PositionMatrix = MDCellType::PositionMatrix;
     private:
         PositionMatrix sites;
         VectorND<T> springCoeffs;
@@ -107,7 +107,7 @@ namespace Physica::Core {
     }
 
     template<Scalar T, unsigned int Dim>
-    typename Hamonic<T, Dim>::ForceConstMatrix
+    Hamonic<T, Dim>::ForceConstMatrix
     Hamonic<T, Dim>::forceConst(const MDCellType& cell) const {
         assert(cell.getNumParticle() == getNumParticle() && "[Error]: Number of particles is not consistent");
         const size_t dof = cell.getDOF();
@@ -118,7 +118,7 @@ namespace Physica::Core {
     }
 
     template<Scalar T, unsigned int Dim>
-    typename Hamonic<T, Dim>::LatticeMatrix Hamonic<T, Dim>::virial(const MDCellType& cell) const {
+    Hamonic<T, Dim>::LatticeMatrix Hamonic<T, Dim>::virial(const MDCellType& cell) const {
         assert(cell.getNumParticle() == getNumParticle() && "[Error]: Number of particles is not consistent");
         LatticeMatrix result(Dim, Dim, 0);
         for (size_t i = 0; i < getNumParticle(); ++i) {

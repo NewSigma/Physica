@@ -24,10 +24,10 @@ using namespace Physica::Core;
 
 template<Matrix T>
 bool eigenTest(const T& mat, double precision) {
-    using ScalarType = typename T::ScalarType;
-    using RealType = typename ScalarType::RealType;
+    using ScalarType = T::ScalarType;
+    using RealType = ScalarType::RealType;
     using ComplexVector = DenseVector<typename RealType::ComplexType, T::RowAtCompile>;
-    using EigenvectorMatrix = typename SymmEigenSolver<ScalarType>::EigenvectorMatrix;
+    using EigenvectorMatrix = SymmEigenSolver<ScalarType>::EigenvectorMatrix;
 
     auto solver = SymmEigenSolver<ScalarType>(mat, true);
     solver.sort();

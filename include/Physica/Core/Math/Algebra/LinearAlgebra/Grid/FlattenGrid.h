@@ -54,12 +54,12 @@ namespace Physica::Core {
     }
 
     template<Grid T>
-    __host__ __device__ typename FlattenGrid<T>::PtrTy FlattenGrid<T>::data_ptr(size_t index) {
+    __host__ __device__ FlattenGrid<T>::PtrTy FlattenGrid<T>::data_ptr(size_t index) {
         return const_cast<ScalarType*>(const_cast<const This&>(*this).data_ptr(index));
     }
 
     template<Grid T>
-    __host__ __device__ typename FlattenGrid<T>::ConstPtrTy FlattenGrid<T>::data_ptr(size_t index) const {
+    __host__ __device__ FlattenGrid<T>::ConstPtrTy FlattenGrid<T>::data_ptr(size_t index) const {
         const size_t temp = index / grid.getDimZ();
         const size_t x = temp / grid.getDimY();
         const size_t y = temp % grid.getDimY();
@@ -72,7 +72,7 @@ namespace Physica {
     template<Grid T>
     class Traits<FlattenGrid<T>> {
     public:
-        using ScalarType = typename T::ScalarType;
+        using ScalarType = T::ScalarType;
         constexpr static size_t SizeAtCompile = Dynamic;
 
         constexpr static bool FastAssign = false;

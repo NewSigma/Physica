@@ -34,9 +34,9 @@ namespace Physica::Core {
     private:
         using SpinlessState = SpinlessFermion<Dim, NumSite>;
         using StateArray = Array<SpinlessState>;
-        using DownStateArray = typename std::conditional<UseInversionSymm, PlainStruct<void>, StateArray>::type;
+        using DownStateArray = std::conditional<UseInversionSymm, PlainStruct<void>, StateArray>::type;
         using StateIndexMap = std::unordered_map<SpinlessState, size_t>;
-        using DownStateIndexMap = typename std::conditional<UseInversionSymm, PlainStruct<void>, StateIndexMap>::type;
+        using DownStateIndexMap = std::conditional<UseInversionSymm, PlainStruct<void>, StateIndexMap>::type;
         using PairType = std::pair<StateArray, StateIndexMap>;
 
         int numSpinUp;
@@ -90,7 +90,7 @@ namespace Physica::Core {
     }
 
     template<int Dim, int NumSite, bool UseInversionSymm>
-    typename SpinRepr<Dim, NumSite, UseInversionSymm>::StateType
+    SpinRepr<Dim, NumSite, UseInversionSymm>::StateType
     SpinRepr<Dim, NumSite, UseInversionSymm>::operator[](size_t index) const noexcept {
         assert(index < getNumState() && "[Error]: Index out of range");
         const size_t numDownStates = getNumDownStates();
@@ -121,7 +121,7 @@ namespace Physica::Core {
     }
 
     template<int Dim, int NumSite, bool UseInversionSymm>
-    inline const typename SpinRepr<Dim, NumSite, UseInversionSymm>::StateArray&
+    inline const SpinRepr<Dim, NumSite, UseInversionSymm>::StateArray&
     SpinRepr<Dim, NumSite, UseInversionSymm>::getDownStates() const noexcept {
         if constexpr (UseInversionSymm)
             return upStates;
@@ -130,7 +130,7 @@ namespace Physica::Core {
     }
 
     template<int Dim, int NumSite, bool UseInversionSymm>
-    inline const typename SpinRepr<Dim, NumSite, UseInversionSymm>::StateIndexMap&
+    inline const SpinRepr<Dim, NumSite, UseInversionSymm>::StateIndexMap&
     SpinRepr<Dim, NumSite, UseInversionSymm>::getDownIndexMap() const noexcept {
         if constexpr (UseInversionSymm)
             return getUpIndexMap();
@@ -139,7 +139,7 @@ namespace Physica::Core {
     }
 
     template<int Dim, int NumSite, bool UseInversionSymm>
-    typename SpinRepr<Dim, NumSite, UseInversionSymm>::PairType
+    SpinRepr<Dim, NumSite, UseInversionSymm>::PairType
     SpinRepr<Dim, NumSite, UseInversionSymm>::makeSpinlessStates(int numParticle) const noexcept {
         constexpr size_t numSpinlessState = SpinlessState::calcFullNumState();
         assert(numParticle >= 0);

@@ -36,7 +36,7 @@ namespace Physica::Core {
      */
     template<Scalar T>
     class JacobiDavidson {
-        using RealType = typename T::RealType;
+        using RealType = T::RealType;
         using WorkingMatrix = DenseMatrix<T>;
         using VectorType = VectorND<T>;
         using LinearSolverType = IterateSolver<T>;

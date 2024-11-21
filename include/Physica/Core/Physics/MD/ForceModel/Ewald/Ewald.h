@@ -43,9 +43,9 @@ namespace Physica::Core {
         using typename Base::PositionMatrix;
         using ComplexType = Complex<T>;
         using CellListType = CellList<T>;
-        using Index3D = typename CellListType::Index3D;
-        using LatticeReturnType = typename std::conditional<IsDeviceREwald, LatticeMatrix, const LatticeMatrix&>::type;
-        using HostChargeVector = typename std::conditional<IsDeviceREwald, VectorND<T>, PlainStruct<void>>::type;
+        using Index3D = CellListType::Index3D;
+        using LatticeReturnType = std::conditional<IsDeviceREwald, LatticeMatrix, const LatticeMatrix&>::type;
+        using HostChargeVector = std::conditional<IsDeviceREwald, VectorND<T>, PlainStruct<void>>::type;
     public:
         using typename Base::BornChargeArray;
     private:
@@ -198,28 +198,28 @@ namespace Physica::Core {
      * [1] Rev. Mod. Phys. 73, 515; https://doi.org/10.1103/RevModPhys.73.515
      */
     template<Scalar T, class REwaldType>
-    typename Ewald<T, REwaldType>::ComplexType
+    Ewald<T, REwaldType>::ComplexType
     Ewald<T, REwaldType>::forceConst(const PositionMatrix& pos, Vector3D<T> qPoint, size_t dof1, size_t dof2) const {
         const Vector3D<T> waveQ = getRepLattice().transpose() * qPoint;
         return kSpaceForceConstImpl(pos, waveQ, dof1, dof2) + rSpaceForceConstImpl(pos, waveQ, dof1, dof2);
     }
 
     template<Scalar T, class REwaldType>
-    typename Ewald<T, REwaldType>::ComplexType
+    Ewald<T, REwaldType>::ComplexType
     Ewald<T, REwaldType>::kSpaceForceConst(const PositionMatrix& pos, Vector3D<T> qPoint, size_t dof1, size_t dof2) const {
         const Vector3D<T> waveQ = getRepLattice().transpose() * qPoint;
         return kSpaceForceConstImpl(pos, waveQ, dof1, dof2);
     }
 
     template<Scalar T, class REwaldType>
-    typename Ewald<T, REwaldType>::ComplexType
+    Ewald<T, REwaldType>::ComplexType
     Ewald<T, REwaldType>::rSpaceForceConst(const PositionMatrix& pos, Vector3D<T> qPoint, size_t dof1, size_t dof2) const {
         const Vector3D<T> waveQ = getRepLattice().transpose() * qPoint;
         return rSpaceForceConstImpl(pos, waveQ, dof1, dof2);
     }
 
     template<Scalar T, class REwaldType>
-    typename Ewald<T, REwaldType>::LatticeMatrix Ewald<T, REwaldType>::virial(const PositionMatrix& pos) {
+    Ewald<T, REwaldType>::LatticeMatrix Ewald<T, REwaldType>::virial(const PositionMatrix& pos) {
         const T factor = reciprocal(square(ValueType(2) * getIntegralLimit()));
         const size_t numParticle = getNumParticle();
         VectorND<T> dots(numParticle);
@@ -266,7 +266,7 @@ namespace Physica::Core {
     }
 
     template<Scalar T, class REwaldType>
-    inline typename Ewald<T, REwaldType>::LatticeReturnType Ewald<T, REwaldType>::getLattice() const noexcept {
+    inline Ewald<T, REwaldType>::LatticeReturnType Ewald<T, REwaldType>::getLattice() const noexcept {
         if constexpr (IsDeviceREwald)
             return Base::getLattice().toHost();
         else
@@ -274,7 +274,7 @@ namespace Physica::Core {
     }
 
     template<Scalar T, class REwaldType>
-    inline typename Ewald<T, REwaldType>::LatticeReturnType Ewald<T, REwaldType>::getRepLattice() const noexcept {
+    inline Ewald<T, REwaldType>::LatticeReturnType Ewald<T, REwaldType>::getRepLattice() const noexcept {
         if constexpr (IsDeviceREwald)
             return Base::getRepLattice().toHost();
         else
@@ -297,7 +297,7 @@ namespace Physica::Core {
     }
 
     template<Scalar T, class REwaldType>
-    typename Ewald<T, REwaldType>::ComplexType
+    Ewald<T, REwaldType>::ComplexType
     Ewald<T, REwaldType>::kSpaceForceConstImpl(const PositionMatrix& pos, const Vector3D<T>& waveQ, size_t dof1, size_t dof2) const {
         const size_t atom1 = dof1 / Dim;
         const size_t atom2 = dof2 / Dim;
@@ -351,7 +351,7 @@ namespace Physica::Core {
     }
 
     template<Scalar T, class REwaldType>
-    inline typename Ewald<T, REwaldType>::ComplexType
+    inline Ewald<T, REwaldType>::ComplexType
     Ewald<T, REwaldType>::rSpaceForceConstImpl(const PositionMatrix& pos, const Vector3D<T>& waveQ, size_t dof1, size_t dof2) const {
         return Base::forceConst(pos, waveQ, dof1, dof2);
     }

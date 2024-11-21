@@ -85,14 +85,14 @@ namespace Physica::Core {
     }
 
     template<Vector T, size_t Length>
-    __device__ inline typename device_obj<ContinuousVectorBlock<T, Length>>::RefTy
+    __device__ inline device_obj<ContinuousVectorBlock<T, Length>>::RefTy
     device_obj<ContinuousVectorBlock<T, Length>>::operator[](size_t index) {
         assert((index + from) < to);
         return vec.getDerived()[index + from];
     }
 
     template<Vector T, size_t Length>
-    __device__ inline typename device_obj<ContinuousVectorBlock<T, Length>>::ConstRefTy
+    __device__ inline device_obj<ContinuousVectorBlock<T, Length>>::ConstRefTy
     device_obj<ContinuousVectorBlock<T, Length>>::operator[](size_t index) const {
         assert((index + from) < to);
         return vec.getDerived()[index + from];

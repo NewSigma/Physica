@@ -26,8 +26,8 @@ namespace Physica::Core {
      * Provide a algebra for Index1D and Index3D in periodic boundary condition
      */
     class PHYSICA_API PeriodIndex3D {
-        using Index3D = typename GridBase::Index3D;
-        using Index1D = typename Index3D::ElemType;
+        using Index3D = GridBase::Index3D;
+        using Index1D = Index3D::ElemType;
 
         Index3D index;
         Index3D dim;
@@ -74,7 +74,7 @@ namespace Physica::Core {
         return PeriodIndex3D(result, dim);
     }
 
-    __host__ __device__ inline typename PeriodIndex3D::Index1D PeriodIndex3D::toIndex1D() const {
+    __host__ __device__ inline PeriodIndex3D::Index1D PeriodIndex3D::toIndex1D() const {
         return (index[0] * dim[1] + index[1]) * dim[2] + index[2];
     }
 
@@ -83,7 +83,7 @@ namespace Physica::Core {
         return index[2] < kSpaceDimZ;
     }
 
-    __host__ __device__ inline typename PeriodIndex3D::Index3D PeriodIndex3D::toReducedK() const {
+    __host__ __device__ inline PeriodIndex3D::Index3D PeriodIndex3D::toReducedK() const {
         Index3D result = index;
         if (!isInReducedK()) {
             result[0] = (dim[0] - result[0]) % dim[0];
@@ -104,7 +104,7 @@ namespace Physica::Core {
         dim.swap(obj.dim);
     }
 
-    __host__ __device__ inline typename PeriodIndex3D::Index3D PeriodIndex3D::toIndex3D(Index1D index, Index3D dim) {
+    __host__ __device__ inline PeriodIndex3D::Index3D PeriodIndex3D::toIndex3D(Index1D index, Index3D dim) {
         Index3D result{};
         result[0] = index / (dim[1] * dim[2]);
         const Index1D temp = index % (dim[1] * dim[2]);

@@ -46,7 +46,7 @@ namespace Physica::Core {
     template<Scalar T>
     template<class Functor>
     void QuadraticSearch<T>::step(Functor func) {
-        using ResultType = typename std::invoke_result<Functor, T>::type;
+        using ResultType = std::invoke_result<Functor, T>::type;
         static_assert(std::is_same<T, ResultType>::value, "[Error]: Invalid functor");
         const T term1 = x[0] * (y[1] - y[2]);
         const T term2 = x[1] * (y[2] - y[0]);

@@ -67,10 +67,10 @@ MDCell<ScalarType> makeSystem() {
     using CrystalCellType = CrystalCell<ScalarType>;
     constexpr size_t MoleculePerCell = 4;
 
-    typename CrystalCellType::LatticeMatrix lattice = CrystalCellType::LatticeMatrix::unitMatrix(3);
+    CrystalCellType::LatticeMatrix lattice = CrystalCellType::LatticeMatrix::unitMatrix(3);
     lattice *= ScalarType(latticeConst);
 
-    typename CrystalCellType::PositionMatrix pos(MoleculePerCell, 3);
+    CrystalCellType::PositionMatrix pos(MoleculePerCell, 3);
     {
         auto atomPos = pos.row(0);
         atomPos[0] = 0;
@@ -96,7 +96,7 @@ MDCell<ScalarType> makeSystem() {
         atomPos[2] = latticeConst * 0.5;
     }
 
-    typename CrystalCellType::AtomicArray atomicNumbers(MoleculePerCell, 36);
+    CrystalCellType::AtomicArray atomicNumbers(MoleculePerCell, 36);
 
     CrystalCellType cell({std::move(lattice), std::move(pos), CrystalCellType::Type::Cartesian}, std::move(atomicNumbers));
     cell.toSuperCell(cellSize, cellSize, cellSize);

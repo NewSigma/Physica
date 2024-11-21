@@ -27,8 +27,8 @@ namespace Physica::Core {
         using host_obj = Loss<T>;
     public:
         constexpr static bool IsTrainMode = T::isDifferentiable;
-        using ValueType = typename T::ValueType;
-        using LossType = typename std::conditional<IsTrainMode, device_obj<T>, T>::type;
+        using ValueType = T::ValueType;
+        using LossType = std::conditional<IsTrainMode, device_obj<T>, T>::type;
     private:
         using ValueVector = VectorND<ValueType>;
         using DiffVector = Diff<ValueVector, DiffMode::Reverse, T::Order>;
@@ -39,7 +39,7 @@ namespace Physica::Core {
     };
 
     template<Scalar T>
-    typename device_obj<Loss<T>>::LossType
+    device_obj<Loss<T>>::LossType
     device_obj<Loss<T>>::softmax(const VectorType& v, size_t label) {
         if constexpr (IsTrainMode) {
             const auto maximum = v.max();
@@ -51,7 +51,7 @@ namespace Physica::Core {
     }
 
     template<Scalar T>
-    typename device_obj<Loss<T>>::LossType
+    device_obj<Loss<T>>::LossType
     device_obj<Loss<T>>::crossEntropy(const VectorType& v, size_t label) {
         assert(label < v.getLength() && "[Error]: The label is not exist");
         return -ln(softmax(v, label) + LossType(std::numeric_limits<ValueType>::min())); //Add minimum to avoid ln(0)

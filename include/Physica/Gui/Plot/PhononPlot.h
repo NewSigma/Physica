@@ -32,9 +32,9 @@ namespace Physica::Gui {
         using MatrixType = Core::DenseMatrix<T>;
         using ComplexMatrix = Core::DenseMatrix<ComplexType>;
         using PhononType = Core::FrozenPhonon<T>;
-        using KSpaceFCGrid = typename PhononType::KSpaceFCGrid;
-        using EigenSolverType = typename PhononType::EigenSolverType;
-        using Index3D = typename Core::GridBase::Index3D;
+        using KSpaceFCGrid = PhononType::KSpaceFCGrid;
+        using EigenSolverType = PhononType::EigenSolverType;
+        using Index3D = Core::GridBase::Index3D;
         using ColorArray = Core::Array<QColor>;
 
         enum BandConnectMethod {
@@ -247,7 +247,7 @@ namespace Physica::Gui {
     }
 
     template<Scalar T>
-    typename PhononPlot<T>::EigenSolverType PhononPlot<T>::diagonalize(
+    PhononPlot<T>::EigenSolverType PhononPlot<T>::diagonalize(
             const PhononType& phonon,
             const KSpaceFCGrid& forceConstants,
             T factor,
@@ -260,7 +260,7 @@ namespace Physica::Gui {
     }
 
     template<Scalar T>
-    typename PhononPlot<T>::VectorType
+    PhononPlot<T>::VectorType
     PhononPlot<T>::makeFreq(const EigenSolverType& eigen) {
         using namespace Physica::Core;
         auto freq = PhononType::makeFreq(eigen);
@@ -271,7 +271,7 @@ namespace Physica::Gui {
     }
 
     template<Scalar T>
-    typename PhononPlot<T>::MatrixType PhononPlot<T>::calcPaths(
+    PhononPlot<T>::MatrixType PhononPlot<T>::calcPaths(
             const PhononType& phonon,
             const KSpaceFCGrid& forceConstants,
             const VectorType& factors,

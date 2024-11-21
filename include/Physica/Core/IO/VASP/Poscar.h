@@ -38,8 +38,8 @@ namespace Physica::Core {
         };
 
         using Base = PeriodicCell<T, 3>;
-        using LatticeMatrix = typename Base::LatticeMatrix;
-        using Type = typename Base::Type;
+        using LatticeMatrix = Base::LatticeMatrix;
+        using Type = Base::Type;
         using ElementTypeArray = Array<uint8_t>;
     private:
         using Base::lattice;

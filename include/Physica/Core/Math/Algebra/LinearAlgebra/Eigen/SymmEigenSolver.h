@@ -32,7 +32,7 @@ namespace Physica::Core {
     template<Scalar T, size_t Order = Dynamic>
     class SymmEigenSolver : public Decouplable {
         using This = SymmEigenSolver<T, Order>;
-        using RealType = typename T::RealType;
+        using RealType = T::RealType;
         constexpr static bool isComplex = T::isComplex;
         static_assert(!isComplex, "[Error]: Complex matrix is not supported");
     public:
@@ -172,7 +172,7 @@ namespace Physica::Core {
     }
 
     template<Scalar T, size_t Order>
-    inline typename SymmEigenSolver<T, Order>::EigenvectorMatrix SymmEigenSolver<T, Order>::getEigenvectors() const noexcept {
+    inline SymmEigenSolver<T, Order>::EigenvectorMatrix SymmEigenSolver<T, Order>::getEigenvectors() const noexcept {
         assert(computeEigenvectors && "[Error]: Eigenvectors are not ready");
         return eigenvectors;
     }

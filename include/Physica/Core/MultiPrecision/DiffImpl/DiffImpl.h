@@ -63,7 +63,7 @@ namespace Physica::Core {
 
     template<Scalar T, int Order>
     template<int GradOrder>
-    typename Diff<T, DiffMode::Forward, Order>::Base::template GradRtnTy<GradOrder>&
+    Diff<T, DiffMode::Forward, Order>::Base::template GradRtnTy<GradOrder>&
     Diff<T, DiffMode::Forward, Order>::getGrad() noexcept {
         static_assert(Order >= GradOrder, "[Error]: Order is not enough to calculate the required grad");
         static_assert(GradOrder > 0, "[Error]: 0 or minus order is not well defined");
@@ -75,7 +75,7 @@ namespace Physica::Core {
 
     template<Scalar T, int Order>
     template<int GradOrder>
-    inline const typename Diff<T, DiffMode::Forward, Order>::Base::template GradRtnTy<GradOrder>&
+    inline const Diff<T, DiffMode::Forward, Order>::Base::template GradRtnTy<GradOrder>&
     Diff<T, DiffMode::Forward, Order>::getGrad() const noexcept {
         return const_cast<This&>(*this).template getGrad<GradOrder>();
     }
@@ -142,7 +142,7 @@ namespace Physica::Core {
 
     template<Scalar T, int Order>
     template<int GradOrder>
-    typename ScalarRef<Diff<T, DiffMode::Forward, Order>>::template GradRtnTy<GradOrder> ScalarRef<Diff<T, DiffMode::Forward, Order>>::getGrad() noexcept {
+    ScalarRef<Diff<T, DiffMode::Forward, Order>>::template GradRtnTy<GradOrder> ScalarRef<Diff<T, DiffMode::Forward, Order>>::getGrad() noexcept {
         if constexpr (GradOrder == 1) {
             if constexpr (Order == GradOrder)
                 return *ptr.grad_ptr();
@@ -155,7 +155,7 @@ namespace Physica::Core {
 
     template<Scalar T, int Order>
     template<int GradOrder>
-    const typename ScalarRef<Diff<T, DiffMode::Forward, Order>>::template GradRtnTy<GradOrder> ScalarRef<Diff<T, DiffMode::Forward, Order>>::getGrad() const noexcept {
+    const ScalarRef<Diff<T, DiffMode::Forward, Order>>::template GradRtnTy<GradOrder> ScalarRef<Diff<T, DiffMode::Forward, Order>>::getGrad() const noexcept {
         return const_cast<This&>(*this).template getGrad<GradOrder>();
     }
 
@@ -321,7 +321,7 @@ namespace Physica::Core {
 
     template<Scalar T, int Order>
     template<int GradOrder>
-    inline typename Diff<T, DiffMode::Reverse, Order>::Base::template GradRtnTy<GradOrder>&
+    inline Diff<T, DiffMode::Reverse, Order>::Base::template GradRtnTy<GradOrder>&
     Diff<T, DiffMode::Reverse, Order>::getGrad() noexcept {
         static_assert(Order >= GradOrder, "[Error]: Order is not enough to calculate the required grad");
         static_assert(GradOrder > 0, "[Error]: 0 or minus order is not well defined");
@@ -342,7 +342,7 @@ namespace Physica::Core {
 
     template<Scalar T, int Order>
     template<int GradOrder>
-    inline const typename Diff<T, DiffMode::Reverse, Order>::Base::template GradRtnTy<GradOrder>&
+    inline const Diff<T, DiffMode::Reverse, Order>::Base::template GradRtnTy<GradOrder>&
     Diff<T, DiffMode::Reverse, Order>::getGrad() const noexcept {
         return const_cast<This&>(*this).template getGrad<GradOrder>();
     }
@@ -385,7 +385,7 @@ namespace Physica::Core {
     [[nodiscard]] inline auto operator+(const Diff<T, Mode, Order>& s1, const U& s2) {
         using FirstType = Diff<T, Mode, Order>;
         using SecondType = U;
-        using ResultType = typename Internal::BinaryScalarOpRtnTy<FirstType, SecondType>::Type;
+        using ResultType = Internal::BinaryScalarOpRtnTy<FirstType, SecondType>::Type;
         if constexpr (Mode == DiffMode::Forward) {
             if constexpr (U::isDifferentiable)
                 return ResultType(s1.getValue() + s2.getValue(), s1.getGrad() + s2.getGrad());
@@ -393,9 +393,9 @@ namespace Physica::Core {
                 return ResultType(s1.getValue() + s2.getValue(), s1.getGrad());
         }
         else {
-            using FirstValue = typename FirstType::ValueType;
-            using SecondValue = typename SecondType::ValueType;
-            using ValueType = typename Internal::BinaryScalarOpRtnTy<FirstValue, SecondValue>::Type;
+            using FirstValue = FirstType::ValueType;
+            using SecondValue = SecondType::ValueType;
+            using ValueType = Internal::BinaryScalarOpRtnTy<FirstValue, SecondValue>::Type;
             static_assert(std::is_same<FirstValue, SecondValue>::value, "[Error]: Reverse mode between different type is not supported");
             
             auto& tracer = DiffTracer<T, Order>::getInstance();
@@ -417,7 +417,7 @@ namespace Physica::Core {
     }
 
     template<Scalar T, DiffMode Mode, int Order, Scalar U>
-    [[nodiscard]] inline typename std::enable_if<!U::isDifferentiable, typename Internal::BinaryScalarOpRtnTy<Diff<T, Mode, Order>, U>::Type>::type
+    [[nodiscard]] inline std::enable_if<!U::isDifferentiable, typename Internal::BinaryScalarOpRtnTy<Diff<T, Mode, Order>, U>::Type>::type
     operator+(const U& s1, const Diff<T, Mode, Order>& s2) {
         return s2 + s1.getDerived();
     }
@@ -426,7 +426,7 @@ namespace Physica::Core {
     [[nodiscard]] inline auto operator-(const Diff<T, Mode, Order>& s1, const U& s2) {
         using FirstType = Diff<T, Mode, Order>;
         using SecondType = U;
-        using ResultType = typename Internal::BinaryScalarOpRtnTy<FirstType, SecondType>::Type;
+        using ResultType = Internal::BinaryScalarOpRtnTy<FirstType, SecondType>::Type;
         if constexpr (Mode == DiffMode::Forward) {
             if constexpr (U::isDifferentiable)
                 return ResultType(s1.getValue() - s2.getValue(), s1.getGrad() - s2.getGrad());
@@ -434,9 +434,9 @@ namespace Physica::Core {
                 return ResultType(s1.getValue() - s2.getValue(), s1.getGrad());
         }
         else {
-            using FirstValue = typename FirstType::ValueType;
-            using SecondValue = typename SecondType::ValueType;
-            using ValueType = typename Internal::BinaryScalarOpRtnTy<FirstValue, SecondValue>::Type;
+            using FirstValue = FirstType::ValueType;
+            using SecondValue = SecondType::ValueType;
+            using ValueType = Internal::BinaryScalarOpRtnTy<FirstValue, SecondValue>::Type;
             static_assert(std::is_same<FirstValue, SecondValue>::value, "[Error]: Reverse mode between different type is not supported");
             
             auto& tracer = DiffTracer<T, Order>::getInstance();
@@ -458,7 +458,7 @@ namespace Physica::Core {
     }
 
     template<Scalar T, DiffMode Mode, int Order, Scalar U>
-    [[nodiscard]] inline typename std::enable_if<!U::isDifferentiable, typename Internal::BinaryScalarOpRtnTy<Diff<T, Mode, Order>, U>::Type>::type
+    [[nodiscard]] inline std::enable_if<!U::isDifferentiable, typename Internal::BinaryScalarOpRtnTy<Diff<T, Mode, Order>, U>::Type>::type
     operator-(const U& s1, const Diff<T, Mode, Order>& s2) {
         return -(s2 - s1.getDerived());
     }
@@ -467,19 +467,19 @@ namespace Physica::Core {
     [[nodiscard]] inline auto operator*(const Diff<T, Mode, Order>& s1, const U& s2) {
         using FirstType = Diff<T, Mode, Order>;
         using SecondType = U;
-        using ResultType = typename Internal::BinaryScalarOpRtnTy<FirstType, SecondType>::Type;
+        using ResultType = Internal::BinaryScalarOpRtnTy<FirstType, SecondType>::Type;
         if constexpr (Mode == DiffMode::Forward) {
             if constexpr (U::isDifferentiable) {
-                using GradType = typename ResultType::GradType;
+                using GradType = ResultType::GradType;
                 return ResultType(s1.getValue() * s2.getValue(), GradType(GradType(s2) * s1.getGrad() + GradType(s1) * s2.getGrad()));
             }
             else
                 return ResultType(s1.getValue() * s2.getValue(), s1.getGrad() * s2.getValue());
         }
         else {
-            using FirstValue = typename FirstType::ValueType;
-            using SecondValue = typename SecondType::ValueType;
-            using ValueType = typename Internal::BinaryScalarOpRtnTy<FirstValue, SecondValue>::Type;
+            using FirstValue = FirstType::ValueType;
+            using SecondValue = SecondType::ValueType;
+            using ValueType = Internal::BinaryScalarOpRtnTy<FirstValue, SecondValue>::Type;
             static_assert(std::is_same<FirstValue, SecondValue>::value, "[Error]: Reverse mode between different type is not supported");
             
             auto& tracer = DiffTracer<T, Order>::getInstance();
@@ -501,7 +501,7 @@ namespace Physica::Core {
     }
 
     template<Scalar T, DiffMode Mode, int Order, Scalar U>
-    [[nodiscard]] inline typename std::enable_if<!U::isDifferentiable, typename Internal::BinaryScalarOpRtnTy<Diff<T, Mode, Order>, U>::Type>::type
+    [[nodiscard]] inline std::enable_if<!U::isDifferentiable, typename Internal::BinaryScalarOpRtnTy<Diff<T, Mode, Order>, U>::Type>::type
     operator*(const U& s1, const Diff<T, Mode, Order>& s2) {
         return s2 * s1.getDerived();
     }
@@ -510,10 +510,10 @@ namespace Physica::Core {
     [[nodiscard]] inline auto operator/(const Diff<T, Mode, Order>& s1, const U& s2) {
         using FirstType = Diff<T, Mode, Order>;
         using SecondType = U;
-        using ResultType = typename Internal::BinaryScalarOpRtnTy<FirstType, SecondType>::Type;
+        using ResultType = Internal::BinaryScalarOpRtnTy<FirstType, SecondType>::Type;
         if constexpr (Mode == DiffMode::Forward) {
             if constexpr (U::isDifferentiable) {
-                using GradType = typename ResultType::GradType;
+                using GradType = ResultType::GradType;
                 const auto v = reciprocal(GradType(s2));
                 return ResultType(s1.getValue() * v.getValue(), GradType((s1.getGrad() * GradType(s2) - GradType(s1) * s2.getGrad()) * square(v)));
             }
@@ -523,9 +523,9 @@ namespace Physica::Core {
             }
         }
         else {
-            using FirstValue = typename FirstType::ValueType;
-            using SecondValue = typename SecondType::ValueType;
-            using ValueType = typename Internal::BinaryScalarOpRtnTy<FirstValue, SecondValue>::Type;
+            using FirstValue = FirstType::ValueType;
+            using SecondValue = SecondType::ValueType;
+            using ValueType = Internal::BinaryScalarOpRtnTy<FirstValue, SecondValue>::Type;
             static_assert(std::is_same<FirstValue, SecondValue>::value, "[Error]: Reverse mode between different type is not supported");
             
             auto& tracer = DiffTracer<T, Order>::getInstance();
@@ -547,9 +547,9 @@ namespace Physica::Core {
     }
 
     template<Scalar T, DiffMode Mode, int Order, Scalar U>
-    [[nodiscard]] inline typename std::enable_if<!U::isDifferentiable, typename Internal::BinaryScalarOpRtnTy<Diff<T, Mode, Order>, U>::Type>::type
+    [[nodiscard]] inline std::enable_if<!U::isDifferentiable, typename Internal::BinaryScalarOpRtnTy<Diff<T, Mode, Order>, U>::Type>::type
     operator/(const U& s1, const Diff<T, Mode, Order>& s2) {
-        using ResultType = typename Internal::BinaryScalarOpRtnTy<Diff<T, Mode, Order>, U>::Type;
+        using ResultType = Internal::BinaryScalarOpRtnTy<Diff<T, Mode, Order>, U>::Type;
         if constexpr (Mode == DiffMode::Forward) {
             const auto rep = reciprocal(s2.getValue());
             return ResultType(s1.getValue() * rep, -s1.getValue() * s2.getGrad() * square(rep));

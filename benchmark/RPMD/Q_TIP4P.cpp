@@ -64,10 +64,10 @@ namespace {
 
         ScalarType cellVolume = ((MoleculePerCell * massMoleculeInSI * 1000 / 0.997) * 1E-6) / (PhyConst<SI>::bohrRadius * PhyConst<SI>::bohrRadius * PhyConst<SI>::bohrRadius);
         const ScalarType latticeFactor(cbrt(cellVolume));
-        typename CrystalCellType::LatticeMatrix lattice = CrystalCellType::LatticeMatrix::unitMatrix(3);
+        CrystalCellType::LatticeMatrix lattice = CrystalCellType::LatticeMatrix::unitMatrix(3);
         lattice *= latticeFactor;
 
-        typename CrystalCellType::PositionMatrix pos(numAtom, 3);
+        CrystalCellType::PositionMatrix pos(numAtom, 3);
         std::uniform_real_distribution dist{};
         for (size_t i = 0; i < MoleculePerCell; ++i) {
             auto posO = pos.row(i + maxIndexH);
@@ -97,7 +97,7 @@ namespace {
             posH2 = posO + randomVector(gen);
         }
 
-        typename CrystalCellType::AtomicArray atomicNumbers(numAtom);
+        CrystalCellType::AtomicArray atomicNumbers(numAtom);
         for (size_t i = 0; i < maxIndexH; ++i)
             atomicNumbers[i] = 1;
         for (size_t i = maxIndexH; i < maxIndexO; ++i)

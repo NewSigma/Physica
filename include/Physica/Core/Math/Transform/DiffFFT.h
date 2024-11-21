@@ -28,17 +28,17 @@ namespace Physica::Core {
             , public FFTKSpace<FFT<Diff<T, Mode, 1>, 1>, 1> {
         using ScalarType = Diff<T, Mode, 1>;
         using This = FFT<ScalarType, 1>;
-        using RealType = typename Traits<This>::RealType;
-        using RealPtrTy = typename RealType::PtrTy;
-        using RealConstPtrTy = typename RealType::ConstPtrTy;
-        using ComplexType = typename Traits<This>::ComplexType;
-        using ComplexPtrTy = typename ComplexType::PtrTy;
-        using ComplexConstPtrTy = typename ComplexType::ConstPtrTy;
+        using RealType = Traits<This>::RealType;
+        using RealPtrTy = RealType::PtrTy;
+        using RealConstPtrTy = RealType::ConstPtrTy;
+        using ComplexType = Traits<This>::ComplexType;
+        using ComplexPtrTy = ComplexType::PtrTy;
+        using ComplexConstPtrTy = ComplexType::ConstPtrTy;
         using RSpaceType = FFTRSpace<This, 1>;
         using KSpaceType = FFTKSpace<This, 1>;
     private:
-        using PlainRealType = typename T::RealType;
-        using PlainComplexType = typename T::ComplexType;
+        using PlainRealType = T::RealType;
+        using PlainComplexType = T::ComplexType;
         constexpr static bool isComplex = Traits<This>::isComplex;
         using FFTType = FFT<typename std::conditional<isComplex, PlainComplexType, PlainRealType>::type, 1>;
 
@@ -198,22 +198,22 @@ namespace Physica::Core {
     }
 
     template<Scalar T, DiffMode Mode>
-    inline typename FFT<Diff<T, Mode, 1>, 1>::RealPtrTy FFT<Diff<T, Mode, 1>, 1>::asRealBuffer() {
+    inline FFT<Diff<T, Mode, 1>, 1>::RealPtrTy FFT<Diff<T, Mode, 1>, 1>::asRealBuffer() {
         return RealPtrTy(buffer.data());
     }
 
     template<Scalar T, DiffMode Mode>
-    inline typename FFT<Diff<T, Mode, 1>, 1>::RealConstPtrTy FFT<Diff<T, Mode, 1>, 1>::asRealBuffer() const {
+    inline FFT<Diff<T, Mode, 1>, 1>::RealConstPtrTy FFT<Diff<T, Mode, 1>, 1>::asRealBuffer() const {
         return const_cast<This&>(*this).asRealBuffer();
     }
 
     template<Scalar T, DiffMode Mode>
-    inline typename FFT<Diff<T, Mode, 1>, 1>::ComplexPtrTy FFT<Diff<T, Mode, 1>, 1>::asComplexBuffer() {
+    inline FFT<Diff<T, Mode, 1>, 1>::ComplexPtrTy FFT<Diff<T, Mode, 1>, 1>::asComplexBuffer() {
         return buffer.data();
     }
 
     template<Scalar T, DiffMode Mode>
-    inline typename FFT<Diff<T, Mode, 1>, 1>::ComplexConstPtrTy FFT<Diff<T, Mode, 1>, 1>::asComplexBuffer() const {
+    inline FFT<Diff<T, Mode, 1>, 1>::ComplexConstPtrTy FFT<Diff<T, Mode, 1>, 1>::asComplexBuffer() const {
         return const_cast<This&>(*this).asComplexBuffer();
     }
 }

@@ -60,8 +60,8 @@ namespace Physica::Core {
     template<Scalar T, size_t Dim>
     template<class Function, class RandomFunc>
     inline void SRK2<T, Dim>::step(T stepSize, T& x, VectorType& sol, Function func, RandomFunc random) {
-        using FunctionResult = typename std::invoke_result<Function, T, VectorType>::type;
-        using RandFunctionResult = typename std::invoke_result<RandomFunc, T, VectorType>::type;
+        using FunctionResult = std::invoke_result<Function, T, VectorType>::type;
+        using RandFunctionResult = std::invoke_result<RandomFunc, T, VectorType>::type;
         static_assert(FunctionResult::SizeAtCompile == Dim, "[Possible optimization]: Dimention between ODESolver and functor do not match");
         static_assert(RandFunctionResult::SizeAtCompile == Dim, "[Possible optimization]: Dimention between ODESolver and functor do not match");
         const VectorType randVec = random(x, sol);

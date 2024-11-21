@@ -30,8 +30,8 @@ namespace Physica::Core {
         using host_obj = LinearLayer<T, WithBias>;
         using This = device_obj<host_obj>;
         using Base = device_obj<LayerBase<host_obj>>;
-        using MatrixType = typename host_obj::MatrixType;
-        using MachineType = typename T::MachineType;
+        using MatrixType = host_obj::MatrixType;
+        using MachineType = T::MachineType;
     public:
         using Base::IsTrainMode;
         using typename Base::ValueType;
@@ -39,7 +39,7 @@ namespace Physica::Core {
         using typename Base::OutputType;
         using DiffMatrix = Diff<DenseMatrix<ValueType, host_obj::Option>, DiffMode::Reverse, T::Order>;
         using DeviceMatrix = device_obj<typename std::conditional<IsTrainMode, DiffMatrix, MatrixType>::type>;
-        using BiasType = typename std::conditional<WithBias, InputType, PlainStruct<void>>::type;
+        using BiasType = std::conditional<WithBias, InputType, PlainStruct<void>>::type;
     private:
         DeviceMatrix weights;
         BiasType bias;
@@ -86,7 +86,7 @@ namespace Physica::Core {
             , bias(layer.getBias()) {}
 
     template<Scalar T, bool WithBias>
-    typename device_obj<LinearLayer<T, WithBias>>::OutputType
+    device_obj<LinearLayer<T, WithBias>>::OutputType
     device_obj<LinearLayer<T, WithBias>>::forward(const InputType& x) const {
         assert(x.getLength() == getInputDim() && "[Error]: Data dim and required input dim must be equal");
         if constexpr (WithBias)
@@ -115,7 +115,7 @@ namespace Physica::Core {
     template<Scalar T, bool WithBias>
     template<class RandomType>
     void device_obj<LinearLayer<T, WithBias>>::random_xavier_uniform(ValueType gain, RandomType& gen) {
-        using MachineType = typename T::MachineType;
+        using MachineType = T::MachineType;
         const auto factor = (gain * sqrt(ValueType(6) / ValueType(getInputDim() + getOutputDim()))).toMachine();
         std::uniform_real_distribution<MachineType> dist(-factor, factor);
         weights.random_any(dist, gen);
@@ -192,7 +192,7 @@ namespace Physica {
     class Traits<Core::device_obj<LinearLayer<T, WithBias>>> : public Traits<LinearLayer<T, WithBias>> {
         using Base = Traits<LinearLayer<T, WithBias>>;
         using VectorType = VectorND<typename Base::ScalarType>;
-        using ValueType = typename Base::ScalarType::ValueType;
+        using ValueType = Base::ScalarType::ValueType;
         using DiffVector = Diff<VectorND<ValueType>, DiffMode::Reverse, T::Order>;
         constexpr static bool IsTrainMode = Base::ScalarType::isDifferentiable;
     public:

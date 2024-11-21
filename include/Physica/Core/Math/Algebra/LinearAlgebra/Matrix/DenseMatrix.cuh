@@ -28,7 +28,7 @@ namespace Physica::Core {
             : public device_obj<ContinuousMatrix<DenseMatrix<T, Option, Row, Col, Allocator>>>
             , public device_obj<DenseMatrixStorage<T, Option, Row, Col, Allocator>> {
         using host_obj = DenseMatrix<T, Option, Row, Col, Allocator>;
-        using host_storage = typename host_obj::Storage;
+        using host_storage = host_obj::Storage;
         using This = device_obj<host_obj>;
         using Base = device_obj<ContinuousMatrix<DenseMatrix<T, Option, Row, Col, Allocator>>>;
         using Storage = device_obj<DenseMatrixStorage<T, Option, Row, Col, Allocator>>;

@@ -35,13 +35,13 @@ namespace Physica::Core {
         using This = EigenSolver<T, Order>;
         constexpr static bool isComplex = T::isComplex;
     public:
-        using RealType = typename T::RealType;
+        using RealType = T::RealType;
         using ComplexType = Complex<RealType>;
         using EigenvalueVector = DenseVector<ComplexType, Order>;
         using EigenvectorMatrix = DenseMatrix<ComplexType, MatrixOption::Col | MatrixOption::Vector, Order, Order>;
         using RawEigenvectorType = DenseMatrix<T, MatrixOption::Col | MatrixOption::Vector, Order, Order>;
     private:
-        using WorkingMatrix = typename Schur<T, Order>::WorkingMatrix;
+        using WorkingMatrix = Schur<T, Order>::WorkingMatrix;
 
         EigenvalueVector eigenvalues;
         RawEigenvectorType rawEigenvectors;
@@ -223,7 +223,7 @@ namespace Physica::Core {
     }
 
     template<Scalar T, size_t Order>
-    typename EigenSolver<T, Order>::EigenvectorMatrix EigenSolver<T, Order>::getEigenvectors() const {
+    EigenSolver<T, Order>::EigenvectorMatrix EigenSolver<T, Order>::getEigenvectors() const {
         assert(computeEigenvectors && "[Error]: Eigenvectors are not ready");
         if constexpr (isComplex)
             return rawEigenvectors;

@@ -65,13 +65,13 @@ namespace Physica::Core {
     }
 
     template<Scalar T, int Order, int Option, size_t Row, size_t Col>
-    inline typename DenseMatrix<Diff<T, DiffMode::Forward, Order>, Option, Row, Col>::PtrTy
+    inline DenseMatrix<Diff<T, DiffMode::Forward, Order>, Option, Row, Col>::PtrTy
     DenseMatrix<Diff<T, DiffMode::Forward, Order>, Option, Row, Col>::data_ptr(size_t row, size_t col) noexcept {
         return PtrTy(values.data_ptr(row, col), grads.data_ptr(row, col));
     }
 
     template<Scalar T, int Order, int Option, size_t Row, size_t Col>
-    inline typename DenseMatrix<Diff<T, DiffMode::Forward, Order>, Option, Row, Col>::ConstPtrTy
+    inline DenseMatrix<Diff<T, DiffMode::Forward, Order>, Option, Row, Col>::ConstPtrTy
     DenseMatrix<Diff<T, DiffMode::Forward, Order>, Option, Row, Col>::data_ptr(size_t row, size_t col) const noexcept {
         return const_cast<This&>(*this).data_ptr(row, col);
     }
@@ -89,7 +89,7 @@ namespace Physica::Core {
             : traceSeg(TracerType::getInstance().pushSegment(values.flatten())) {}
 
     template<Scalar T, int Option, int Order>
-    inline typename Diff<DenseMatrix<T, Option>, DiffMode::Reverse, Order>::ScalarType
+    inline Diff<DenseMatrix<T, Option>, DiffMode::Reverse, Order>::ScalarType
     Diff<DenseMatrix<T, Option>, DiffMode::Reverse, Order>::calc(size_t row, size_t col) const {
         if constexpr (MatrixOption::isRowMatrix<This>())
             return traceSeg[row * getCol() + col];

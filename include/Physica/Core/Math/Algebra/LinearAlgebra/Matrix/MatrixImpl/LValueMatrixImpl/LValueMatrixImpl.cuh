@@ -39,7 +39,7 @@ namespace Physica::Core {
     }
 
     template<class Derived>
-    __device__ inline typename device_obj<LValueMatrix<Derived>>::ScalarType&
+    __device__ inline device_obj<LValueMatrix<Derived>>::ScalarType&
     device_obj<LValueMatrix<Derived>>::refFromMajorMinor(size_t major, size_t minor) {
         const size_t r = MatrixOption::rowFromMajorMinor<Derived>(major, minor);
         const size_t c = MatrixOption::colFromMajorMinor<Derived>(major, minor);
@@ -48,7 +48,7 @@ namespace Physica::Core {
     }
 
     template<class Derived>
-    __device__ inline const typename device_obj<LValueMatrix<Derived>>::ScalarType&
+    __device__ inline const device_obj<LValueMatrix<Derived>>::ScalarType&
     device_obj<LValueMatrix<Derived>>::refFromMajorMinor(size_t major, size_t minor) const {
         const size_t r = MatrixOption::rowFromMajorMinor<Derived>(major, minor);
         const size_t c = MatrixOption::colFromMajorMinor<Derived>(major, minor);

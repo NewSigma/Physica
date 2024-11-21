@@ -94,7 +94,7 @@ namespace Physica::Core {
     }
 
     template<Scalar T>
-    typename FCSwapVector<T>::Index5D FCSwapVector<T>::index1DTo5D(
+    FCSwapVector<T>::Index5D FCSwapVector<T>::index1DTo5D(
             size_t numDOF, const Index3D& superSize, size_t index1D) {
         assert(index1D < calcLength(numDOF, superSize) && "[Error]: Index out of range");
         Index5D result{};

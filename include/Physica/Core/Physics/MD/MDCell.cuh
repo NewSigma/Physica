@@ -34,8 +34,8 @@ namespace Physica::Core {
         using typename Base::Type;
         using MassVector = device_obj<VectorND<T>>;
     private:
-        using HostLatticeMatrix = typename host_obj::LatticeMatrix;
-        using HostInvLatticeMatrix = typename host_obj::InvLatticeMatrix;
+        using HostLatticeMatrix = host_obj::LatticeMatrix;
+        using HostInvLatticeMatrix = host_obj::InvLatticeMatrix;
 
         MassVector massVec;
         InvLatticeMatrix invLattice;

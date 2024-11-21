@@ -44,18 +44,18 @@ namespace Physica::Core {
             , public FFTKSpace<FFT<T, 1>, 1> {
         static_assert(!T::isDifferentiable, "[Error]: Header of differentiable fft should be included");
         using This = FFT<T, 1>;
-        using MachineType = typename Traits<This>::MachineType;
-        using RealType = typename Traits<This>::RealType;
-        using ComplexType = typename Traits<This>::ComplexType;
-        using PlanType = typename Traits<This>::PlanType;
-        using ComplexTypeFFTW = typename Traits<This>::ComplexTypeFFTW;
+        using MachineType = Traits<This>::MachineType;
+        using RealType = Traits<This>::RealType;
+        using ComplexType = Traits<This>::ComplexType;
+        using PlanType = Traits<This>::PlanType;
+        using ComplexTypeFFTW = Traits<This>::ComplexTypeFFTW;
         constexpr static bool isComplex = Traits<This>::isComplex;
         constexpr static bool isSinglePrec = Traits<This>::isSinglePrec;
     public:
         using RSpaceType = FFTRSpace<This, 1>;
         using KSpaceType = FFTKSpace<This, 1>;
 
-        using ScalarType = typename RSpaceType::ScalarType;
+        using ScalarType = RSpaceType::ScalarType;
     private:
         PlanType forward_plan;
         PlanType backward_plan;
@@ -116,11 +116,11 @@ namespace Physica::Core {
               , public FFTKSpace<FFT<T, Dim>, Dim> {
         static_assert(!T::isDifferentiable, "[Error]: Not implemented");
         using This = FFT<T, Dim>;
-        using MachineType = typename Traits<This>::MachineType;
-        using RealType = typename Traits<This>::RealType;
-        using ComplexType = typename Traits<This>::ComplexType;
-        using PlanType = typename Traits<This>::PlanType;
-        using ComplexTypeFFTW = typename Traits<This>::ComplexTypeFFTW;
+        using MachineType = Traits<This>::MachineType;
+        using RealType = Traits<This>::RealType;
+        using ComplexType = Traits<This>::ComplexType;
+        using PlanType = Traits<This>::PlanType;
+        using ComplexTypeFFTW = Traits<This>::ComplexTypeFFTW;
         using IndexArray = Array<size_t, Dim>;
         constexpr static bool isComplex = Traits<This>::isComplex;
         constexpr static bool isSinglePrec = Traits<This>::isSinglePrec;
@@ -128,7 +128,7 @@ namespace Physica::Core {
         using RSpaceType = FFTRSpace<This, Dim>;
         using KSpaceType = FFTKSpace<This, Dim>;
 
-        using ScalarType = typename RSpaceType::ScalarType;
+        using ScalarType = RSpaceType::ScalarType;
     private:
         PlanType forward_plan;
         PlanType backward_plan;
@@ -199,16 +199,16 @@ namespace Physica {
     class Traits<Core::FFT<T, dim>> {
     public :
         using ScalarType = T;
-        using MachineType = typename ScalarType::MachineType;
-        using RealType = typename ScalarType::RealType;
-        using ComplexType = typename ScalarType::ComplexType;
+        using MachineType = ScalarType::MachineType;
+        using RealType = ScalarType::RealType;
+        using ComplexType = ScalarType::ComplexType;
         constexpr static size_t Dim = dim;
 
         constexpr static bool isComplex = T::isComplex;
         constexpr static bool isDifferentiable = T::isDifferentiable;
         constexpr static bool isSinglePrec = std::is_same<MachineType, float>::value;
-        using PlanType = typename std::conditional<isSinglePrec, fftwf_plan, fftw_plan>::type;
-        using ComplexTypeFFTW = typename std::conditional<isSinglePrec, fftwf_complex, fftw_complex>::type;
+        using PlanType = std::conditional<isSinglePrec, fftwf_plan, fftw_plan>::type;
+        using ComplexTypeFFTW = std::conditional<isSinglePrec, fftwf_complex, fftw_complex>::type;
 
         static_assert(isDifferentiable || sizeof(RealType) == sizeof(MachineType), "[Error]: Invalid ScalarType");
         static_assert(isDifferentiable || sizeof(ComplexType) == sizeof(ComplexTypeFFTW), "[Error]: Invalid ScalarType");

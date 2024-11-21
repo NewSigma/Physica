@@ -82,8 +82,8 @@ namespace Physica::Core {
         using typename Base::rvalue_reference;
 
         using typename Base::ElemType;
-        using PlainElemType = typename std::conditional<isTrivial, ElemType, Physica::PlainStruct<ElemType>>::type;
-        using PlainElemAllocator = typename Allocator::template rebind_alloc<PlainElemType>;
+        using PlainElemType = std::conditional<isTrivial, ElemType, Physica::PlainStruct<ElemType>>::type;
+        using PlainElemAllocator = Allocator::template rebind_alloc<PlainElemType>;
         using PlainHostObj = Array<PlainElemType, Dynamic, PlainElemAllocator>;
     protected:
         using typename Base::FIteType;
@@ -214,7 +214,7 @@ namespace Physica::Core {
      * Synchronization is expected before this, copy is async to task stream
      */
     template<class T, class Allocator>
-    typename device_obj<Array<T, Dynamic, Allocator>>::PlainHostObj
+    device_obj<Array<T, Dynamic, Allocator>>::PlainHostObj
     device_obj<Array<T, Dynamic, Allocator>>::toPlainHost() const {
         PlainHostObj result(getLength());
         check(cudaMemcpy(result.data(), (void*)d_data, getLength() * sizeof(ElemType), cudaMemcpyKind::cudaMemcpyDeviceToHost));
@@ -294,7 +294,7 @@ namespace Physica::Core {
     }
 
     template<class T, class Allocator>
-    typename device_obj<Array<T, Dynamic, Allocator>>::pointer
+    device_obj<Array<T, Dynamic, Allocator>>::pointer
     device_obj<Array<T, Dynamic, Allocator>>::release() noexcept {
         auto* copy = d_data;
         d_data = nullptr;
@@ -317,7 +317,7 @@ namespace Physica::Core {
 
     template<class T, class Allocator>
     void Array<T, Dynamic, Allocator>::toDevice(device_obj<This>& obj) const {
-        using ElemType = typename device_obj<This>::ElemType;
+        using ElemType = device_obj<This>::ElemType;
         constexpr bool isTrivial = device_obj<This>::isTrivial;
         const size_t length = getLength();
         obj.resize(length);
@@ -340,7 +340,7 @@ namespace Physica::Core {
     template<class T, class Allocator>
     void Array<T, Dynamic, Allocator>::toDeviceAsync(device_obj<This>& obj) const {
         static_assert(device_obj<This>::isTrivial, "[Error]: Do not pass non trivial elements to device asynchronously");
-        using ElemType = typename device_obj<This>::ElemType;
+        using ElemType = device_obj<This>::ElemType;
         const size_t length = getLength();
         obj.resize(length);
 
@@ -354,7 +354,7 @@ namespace Physica {
     class Traits<Core::device_obj<Core::Array<T, Length, Allocator>>> {
     public:
         using AllocatorType = Core::DeviceAllocator<T>;
-        using ElemType = typename AllocatorType::value_type;
+        using ElemType = AllocatorType::value_type;
         constexpr static size_t SizeAtCompile = Length;
     };
 }

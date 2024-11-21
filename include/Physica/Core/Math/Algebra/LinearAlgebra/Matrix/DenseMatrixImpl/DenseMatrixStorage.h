@@ -36,9 +36,9 @@ namespace Physica::Core {
             : public DenseMatrixDim<DenseMatrixStorage<T, MatrixOption::Col | MatrixOption::Element, Row, Col, Allocator>, Row, Col> {
         using This = DenseMatrixStorage<T, MatrixOption::Col | MatrixOption::Element, Row, Col, Allocator>;
         using Dim = DenseMatrixDim<This, Row, Col>;
-        using RefTy = typename T::RefTy;
-        using ConstRefTy = typename T::ConstRefTy;
-        using ArrayType = typename std::conditional<Scalar<T>, DenseVector<T, Row * Col>, Array<T, Row * Col>>::type;
+        using RefTy = T::RefTy;
+        using ConstRefTy = T::ConstRefTy;
+        using ArrayType = std::conditional<Scalar<T>, DenseVector<T, Row * Col>, Array<T, Row * Col>>::type;
     public:
         using InitializerType = T;
     private:
@@ -95,9 +95,9 @@ namespace Physica::Core {
             : public DenseMatrixDim<DenseMatrixStorage<T, MatrixOption::Row | MatrixOption::Element, Row, Col, Allocator>, Row, Col> {
         using This = DenseMatrixStorage<T, MatrixOption::Row | MatrixOption::Element, Row, Col, Allocator>;
         using Dim = DenseMatrixDim<This, Row, Col>;
-        using RefTy = typename T::RefTy;
-        using ConstRefTy = typename T::ConstRefTy;
-        using ArrayType = typename std::conditional<Scalar<T>, DenseVector<T, Row * Col>, Array<T, Row * Col>>::type;
+        using RefTy = T::RefTy;
+        using ConstRefTy = T::ConstRefTy;
+        using ArrayType = std::conditional<Scalar<T>, DenseVector<T, Row * Col>, Array<T, Row * Col>>::type;
     public:
         using InitializerType = T;
     private:
@@ -152,13 +152,13 @@ namespace Physica::Core {
             : public DenseMatrixDim<DenseMatrixStorage<T, MatrixOption::Col | MatrixOption::Vector, Row, Col, Allocator>, Row, Col> {
         using This = DenseMatrixStorage<T, MatrixOption::Col | MatrixOption::Vector, Row, Col, Allocator>;
         using Dim = DenseMatrixDim<This, Row, Col>;
-        using RefTy = typename T::RefTy;
-        using ConstRefTy = typename T::ConstRefTy;
+        using RefTy = T::RefTy;
+        using ConstRefTy = T::ConstRefTy;
     public:
-        using VectorType = typename std::conditional<Scalar<T>, DenseVector<T, Row>, Array<T, Row>>::type;
+        using VectorType = std::conditional<Scalar<T>, DenseVector<T, Row>, Array<T, Row>>::type;
         using InitializerType = VectorType;
     private:
-        using AllocatorV = typename Allocator::template rebind_alloc<VectorType>;
+        using AllocatorV = Allocator::template rebind_alloc<VectorType>;
         using ArrayType = Array<VectorType, Col, AllocatorV>;
 
         ArrayType array;
@@ -213,13 +213,13 @@ namespace Physica::Core {
             : public DenseMatrixDim<DenseMatrixStorage<T, MatrixOption::Row | MatrixOption::Vector, Row, Col, Allocator>, Row, Col> {
         using This = DenseMatrixStorage<T, MatrixOption::Row | MatrixOption::Vector, Row, Col, Allocator>;
         using Dim = DenseMatrixDim<This, Row, Col>;
-        using RefTy = typename T::RefTy;
-        using ConstRefTy = typename T::ConstRefTy;
+        using RefTy = T::RefTy;
+        using ConstRefTy = T::ConstRefTy;
     public:
-        using VectorType = typename std::conditional<Scalar<T>, DenseVector<T, Col>, Array<T, Col>>::type;
+        using VectorType = std::conditional<Scalar<T>, DenseVector<T, Col>, Array<T, Col>>::type;
         using InitializerType = VectorType;
     private:
-        using AllocatorV = typename Allocator::template rebind_alloc<VectorType>;
+        using AllocatorV = Allocator::template rebind_alloc<VectorType>;
         using ArrayType = Array<VectorType, Row, AllocatorV>;
 
         ArrayType array;

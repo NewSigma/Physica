@@ -45,7 +45,7 @@ namespace Physica::Core {
         constexpr static size_t BiggestSize = support512 ? size512 : BiggestSize2;
     public:
         constexpr static size_t Size = isDynamic ? BiggestSize : Size3;
-        using Type = typename std::conditional<Size == 1, T, SIMD<T, Size>>::type;
+        using Type = std::conditional<Size == 1, T, SIMD<T, Size>>::type;
     };
 
     template<Scalar T, size_t Length>

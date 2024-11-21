@@ -30,8 +30,8 @@ namespace Physica {
 }
 
 CrystalCell<ScalarType> makeCell() {
-    using LatticeMatrix = typename CrystalCell<ScalarType>::LatticeMatrix;
-    using PositionMatrix = typename CrystalCell<ScalarType>::PositionMatrix;
+    using LatticeMatrix = CrystalCell<ScalarType>::LatticeMatrix;
+    using PositionMatrix = CrystalCell<ScalarType>::PositionMatrix;
     const LatticeMatrix lattice{
         -5.1399889103954424,    0.0043684262340578,    0.0000000000000000,
         -0.0032117921883728,   -4.1600557380116499,    0.0000000000000000,

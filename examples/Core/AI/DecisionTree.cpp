@@ -35,7 +35,7 @@ int main() {
 
     auto features = dataMat.block(0, dataMat.getRow(), 1, 9);
     auto labels = dataMat.col(10);
-    typename TreeType::Dataset dataset{features, labels, std::move(isFeatureContinuous)};
+    TreeType::Dataset dataset{features, labels, std::move(isFeatureContinuous)};
     auto tree = TreeType::train(dataset);
     size_t count = 0;
     for (size_t i = 0; i < labels.getLength(); ++i)

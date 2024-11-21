@@ -35,10 +35,10 @@ namespace Physica::Core {
         using TracerType = device_obj<typename host_obj::TracerType>;
         using SegmentType = device_obj<typename host_obj::SegmentType>;
     public:
-        using ScalarType = typename Base::ScalarType;
+        using ScalarType = Base::ScalarType;
         static_assert(is_device_obj<ScalarType>::value, "Invalid ScalarType");
-        using DiffRecord = typename SegmentType::DiffRecord;
-        using OperandArray = typename SegmentType::OperandArray;
+        using DiffRecord = SegmentType::DiffRecord;
+        using OperandArray = SegmentType::OperandArray;
     private:
         PlainStruct<SegmentType> traceSeg;
     public:
@@ -109,7 +109,7 @@ namespace Physica::Core {
 
     template<Scalar T, int Option, int Order>
     template<Side Owner>
-    __device__ inline typename device_obj<Diff<DenseMatrix<T, Option>, DiffMode::Reverse, Order>>::ScalarType
+    __device__ inline device_obj<Diff<DenseMatrix<T, Option>, DiffMode::Reverse, Order>>::ScalarType
     device_obj<Diff<DenseMatrix<T, Option>, DiffMode::Reverse, Order>>::calc(size_t row, size_t col) const {
         return getTraceSegment()[calcOffset(row, col)];
     }
@@ -142,7 +142,7 @@ namespace Physica::Core {
     }
 
     template<Scalar T, int Option, int Order>
-    __device__ inline typename device_obj<Diff<DenseMatrix<T, Option>, DiffMode::Reverse, Order>>::DiffRecord&
+    __device__ inline device_obj<Diff<DenseMatrix<T, Option>, DiffMode::Reverse, Order>>::DiffRecord&
     device_obj<Diff<DenseMatrix<T, Option>, DiffMode::Reverse, Order>>::getRecord(size_t row, size_t col) {
         return getTraceSegment().getRecords()[calcOffset(row, col)];
     }

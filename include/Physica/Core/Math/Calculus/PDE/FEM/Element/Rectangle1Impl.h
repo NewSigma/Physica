@@ -89,12 +89,12 @@ namespace Physica::Core {
     }
 
     template<Scalar T>
-    typename Rectangle1<T>::MatrixType Rectangle1<T>::jacobi([[maybe_unused]] VectorType localPos) const {
+    Rectangle1<T>::MatrixType Rectangle1<T>::jacobi([[maybe_unused]] VectorType localPos) const {
         return MatrixType{(topRight[0] - bottomLeft[0]) * 0.5, 0, 0, (topRight[1] - bottomLeft[1]) * 0.5};
     }
 
     template<Scalar T>
-    typename Rectangle1<T>::MatrixType Rectangle1<T>::inv_jacobi([[maybe_unused]] VectorType globalPos) const {
+    Rectangle1<T>::MatrixType Rectangle1<T>::inv_jacobi([[maybe_unused]] VectorType globalPos) const {
         return MatrixType{T(2) / (topRight[0] - bottomLeft[0]), 0, 0, T(2) / (topRight[1] - bottomLeft[1])};
     }
 
@@ -107,7 +107,7 @@ namespace Physica::Core {
     }
 
     template<Scalar T>
-    typename Rectangle1<T>::VectorType Rectangle1<T>::getNodePos(size_t localNode) const {
+    Rectangle1<T>::VectorType Rectangle1<T>::getNodePos(size_t localNode) const {
         switch (localNode) {
             case BottomLeft:
                 return bottomLeft;
@@ -122,12 +122,12 @@ namespace Physica::Core {
     }
 
     template<Scalar T>
-    typename Rectangle1<T>::VectorType Rectangle1<T>::toLocalPos(VectorType globalPos) const {
+    Rectangle1<T>::VectorType Rectangle1<T>::toLocalPos(VectorType globalPos) const {
         return divide(T(2) * globalPos - bottomLeft - topRight, topRight - bottomLeft);
     }
 
     template<Scalar T>
-    typename Rectangle1<T>::VectorType Rectangle1<T>::toGlobalPos(VectorType localPos) const {
+    Rectangle1<T>::VectorType Rectangle1<T>::toGlobalPos(VectorType localPos) const {
         return (bottomLeft + topRight - hadamard(topRight - bottomLeft, localPos)) * T(0.5);
     }
 
@@ -173,7 +173,7 @@ namespace Physica::Core {
     }
 
     template<Scalar T>
-    typename Rectangle1<T>::VectorType Rectangle1<T>::grad(size_t localNode, VectorType p) {
+    Rectangle1<T>::VectorType Rectangle1<T>::grad(size_t localNode, VectorType p) {
         return {dBase_dr(localNode, p), dBase_ds(localNode, p)};
     }
 

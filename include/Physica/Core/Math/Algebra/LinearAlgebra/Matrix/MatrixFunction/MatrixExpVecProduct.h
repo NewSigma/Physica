@@ -36,8 +36,8 @@ namespace Physica::Core {
         using typename Base::ScalarType;
         using ParamPair = std::pair<int, int>;
     private:
-        using RealType = typename ScalarType::RealType;
-        using MachineType = typename RealType::MachineType;
+        using RealType = ScalarType::RealType;
+        using MachineType = RealType::MachineType;
         constexpr static bool IsFloat = ScalarType::Option == Float;
         constexpr static int MaxNumTaylorTerm = 55;
         constexpr static int MaxNormOrder = 8;
@@ -119,7 +119,7 @@ namespace Physica::Core {
     }
 
     template<Matrix T, Vector U>
-    typename MatrixVectorProduct<MatrixExp<T>, U>::RealType
+    MatrixVectorProduct<MatrixExp<T>, U>::RealType
     MatrixVectorProduct<MatrixExp<T>, U>::calcTraceMu() const {
         const auto& mat = mexp.getMatrix();
         const ScalarType trace = mat.trace();
@@ -129,7 +129,7 @@ namespace Physica::Core {
 
     template<Matrix T, Vector U>
     template<class Executor>
-    typename MatrixVectorProduct<MatrixExp<T>, U>::ParamPair
+    MatrixVectorProduct<MatrixExp<T>, U>::ParamPair
     MatrixVectorProduct<MatrixExp<T>, U>::calcParam(RealType traceMu) const {
         constexpr static MachineType NormLimit = ((2 * MaxNormOrder * (MaxNormOrder + 3)) * calcTheta(MaxNumTaylorTerm)) / MaxNumTaylorTerm;
         const auto unit = UnitMatrix<ScalarType>(getLength());

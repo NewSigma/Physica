@@ -26,7 +26,7 @@ namespace Physica::Core {
         template<LVector T1, Vector T2, bool enableSIMD>
         struct AddAssignImpl {
             static void run(T1& v1, const T2& v2) {
-                using ScalarType = typename T1::ScalarType;
+                using ScalarType = T1::ScalarType;
                 for(size_t i = 0; i < v1.getLength(); ++i)
                     v1[i] += ScalarType(v2.calc(i));
             }
@@ -38,7 +38,7 @@ namespace Physica::Core {
             constexpr static size_t Size1 = T1::SizeAtCompile;
             constexpr static size_t Size2 = T2::SizeAtCompile;
             constexpr static size_t SizeAtCompile = Size1 > Size2 ? Size1 : Size2;
-            using PacketType = typename BestPacket<typename T1::ScalarType, SizeAtCompile>::Type;
+            using PacketType = BestPacket<typename T1::ScalarType, SizeAtCompile>::Type;
         public:
             static void run(T1& v1, const T2& v2) {
                 if constexpr (SizeAtCompile != Dynamic) {
@@ -89,7 +89,7 @@ namespace Physica::Core {
     inline Derived& ContinuousVector<Derived>::operator=(const T& x) {
         const size_t length = Base::getLength();
         if constexpr (isReverseDiff) {
-            using TracerType = typename ScalarType::TracerType;
+            using TracerType = ScalarType::TracerType;
             TracerType::getInstance().reserve(length);
             for (size_t i = 0; i < length; ++i) {
                 if constexpr (std::is_same<ScalarType, T>::value)
@@ -225,7 +225,7 @@ namespace Physica::Core {
     template<class RandomGenerator>
     inline void ContinuousVector<Derived>::random_uniform(RandomGenerator& gen) {
         if constexpr (isReverseDiff) {
-            using TracerType = typename ScalarType::TracerType;
+            using TracerType = ScalarType::TracerType;
             const size_t length = Base::getLength();
             TracerType::getInstance().reserve(length);
             for (size_t i = 0; i < length; ++i)
@@ -248,7 +248,7 @@ namespace Physica::Core {
     template<class RandomGenerator>
     inline void ContinuousVector<Derived>::random_normal(RandomGenerator& gen) {
         if constexpr (isReverseDiff) {
-            using TracerType = typename ScalarType::TracerType;
+            using TracerType = ScalarType::TracerType;
             const size_t length = Base::getLength();
             TracerType::getInstance().reserve(length);
             for (size_t i = 0; i < length; ++i)
@@ -271,7 +271,7 @@ namespace Physica::Core {
     template<class Distribution, class RandomGenerator>
     inline void ContinuousVector<Derived>::random_any(Distribution& dist, RandomGenerator& gen) {
         if constexpr (isReverseDiff) {
-            using TracerType = typename ScalarType::TracerType;
+            using TracerType = ScalarType::TracerType;
             const size_t length = Base::getLength();
             TracerType::getInstance().reserve(length);
             for (size_t i = 0; i < length; ++i)
@@ -282,7 +282,7 @@ namespace Physica::Core {
     }
 #ifdef PHYSICA_HDF5
     template<class Derived>
-    const typename ContinuousVector<Derived>::DataSetType ContinuousVector<Derived>::read(const H5Location& loc, const char* name) {
+    const ContinuousVector<Derived>::DataSetType ContinuousVector<Derived>::read(const H5Location& loc, const char* name) {
         const auto dataset = loc.openDataSet<DataDim>(name);
         const size_t length = dataset.getSize(0);
         resize(length);
@@ -301,7 +301,7 @@ namespace Physica::Core {
     }
 
     template<class Derived>
-    typename ContinuousVector<Derived>::DataSetType ContinuousVector<Derived>::write(H5Location& loc, const char* name) const {
+    ContinuousVector<Derived>::DataSetType ContinuousVector<Derived>::write(H5Location& loc, const char* name) const {
         const size_t length = Base::getLength();
         const auto memSpace = H5DataSpace<1>(length);
         DataSpaceType fileSpace;
@@ -329,14 +329,14 @@ namespace Physica::Core {
 #endif
     template<Vector T>
     std::ostream& operator<<(std::ostream& os, const ContinuousVector<T>& v) {
-        using ScalarType = typename T::ScalarType;
+        using ScalarType = T::ScalarType;
         os.write(reinterpret_cast<const char*>(v.data_ptr(0)), v.getLength() * sizeof(ScalarType));
         return os;
     }
 
     template<Vector T>
     std::istream& operator>>(std::istream& is, ContinuousVector<T>& v) {
-        using ScalarType = typename T::ScalarType;
+        using ScalarType = T::ScalarType;
         is.read(reinterpret_cast<char*>(v.data_ptr(0)), v.getLength() * sizeof(ScalarType));
         return is;
     }

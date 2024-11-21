@@ -119,12 +119,12 @@ namespace std {
         using lvalue_reference = T&;
         using const_lvalue_reference = const T&;
         using rvalue_reference = T&&;
-        using size_type = typename allocator_type::size_type;
-        using difference_type = typename allocator_type::difference_type;
+        using size_type = allocator_type::size_type;
+        using difference_type = allocator_type::difference_type;
         using propagate_on_container_copy_assignment = std::false_type;
         using propagate_on_container_move_assignment = std::false_type;
         using propagate_on_container_swap = std::false_type;
-        using is_always_equal = typename std::is_empty<allocator_type>::type;
+        using is_always_equal = std::is_empty<allocator_type>::type;
         template<class U>
         using rebind_alloc = Physica::Core::HostAllocator<U>;
         template<class U>

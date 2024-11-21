@@ -38,13 +38,13 @@ constexpr double molarVolume = 31.7;
 constexpr double mass = PhyConst<AU>::atomMass(1) * 2;
 
 RPMD<ScalarType> makeSystem(RandomGenerator& gen) {
-    using MDCellType = typename RPMD<ScalarType>::MDCellType;
-    typename MDCellType::LatticeMatrix lattice = MDCellType::LatticeMatrix::unitMatrix(3);
-    typename MDCellType::PositionMatrix pos(numMolecular, 3);
+    using MDCellType = RPMD<ScalarType>::MDCellType;
+    MDCellType::LatticeMatrix lattice = MDCellType::LatticeMatrix::unitMatrix(3);
+    MDCellType::PositionMatrix pos(numMolecular, 3);
     std::uniform_real_distribution dist{};
     for (auto& elem : pos.asArray())
         elem = dist(gen);
-    typename MDCellType::MassVector massVec(numMolecular, mass);
+    MDCellType::MassVector massVec(numMolecular, mass);
     MDCellType cell(std::move(lattice), std::move(pos), std::move(massVec));
 
     const double factor = (std::cbrt(numMolecular * molarVolume / PhyConst<SI>::avogadroNa) / 100) / PhyConst<SI>::bohrRadius;

@@ -32,7 +32,7 @@ namespace Physica::Core {
     public:
         using Base::isReverseDiff;
         using typename Base::ScalarType;
-        using DefaultType = typename host_obj::DefaultType::device_obj_type;
+        using DefaultType = host_obj::DefaultType::device_obj_type;
     private:
         Physica::PlainStruct<const device_obj<T1>> mat1;
         Physica::PlainStruct<const device_obj<T2>> mat2;
@@ -72,7 +72,7 @@ namespace Physica::Core {
         constexpr bool IsDeviceMatrix = Traits<T1>::SizeAtCompile == Dynamic && Traits<T2>::SizeAtCompile == Dynamic;
         static_assert(IsDeviceMatrix, "[Error]: Fixed matrix is on host, pass it to device before calling cuBLAS");
 
-        using T = typename ScalarType::MachineType;
+        using T = ScalarType::MachineType;
         const auto& lhs = getLHS();
         const auto& rhs = getRHS();
         const size_t r = getRow();

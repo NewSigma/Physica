@@ -30,9 +30,9 @@ namespace Physica::Core {
         constexpr static bool isConst = std::is_const<Container>::value;
     public:
         using difference_type = std::ptrdiff_t;
-        using value_type = typename std::conditional<isConst, const ElemType, ElemType>::type;
-        using pointer = typename ElemType::PtrTy;
-        using reference = typename ElemType::RefTy;
+        using value_type = std::conditional<isConst, const ElemType, ElemType>::type;
+        using pointer = ElemType::PtrTy;
+        using reference = ElemType::RefTy;
         using iterator_category = std::random_access_iterator_tag;
     private:
         pointer p;
@@ -67,9 +67,9 @@ namespace Physica::Core {
         constexpr static bool isConst = std::is_const<Container>::value;
     public:
         using difference_type = std::ptrdiff_t;
-        using value_type = typename std::conditional<isConst, const ElemType, ElemType>::type;
-        using pointer = typename ElemType::PtrTy;
-        using reference = typename ElemType::RefTy;
+        using value_type = std::conditional<isConst, const ElemType, ElemType>::type;
+        using pointer = ElemType::PtrTy;
+        using reference = ElemType::RefTy;
         using iterator_category = std::random_access_iterator_tag;
     private:
         pointer p;

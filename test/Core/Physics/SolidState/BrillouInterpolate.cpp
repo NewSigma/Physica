@@ -26,8 +26,8 @@ using namespace Physica::Core;
 using ScalarType = float64;
 using ComplexType = Complex<ScalarType>;
 using PhononType = FrozenPhonon<ScalarType>;
-using MDCellType = typename PhononType::MDCellType;
-using Index3D = typename GridBase::Index3D;
+using MDCellType = PhononType::MDCellType;
+using Index3D = GridBase::Index3D;
 
 const static char* data = "Structure\n"
                            "1\n"

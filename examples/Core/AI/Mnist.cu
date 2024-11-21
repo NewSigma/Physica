@@ -118,7 +118,7 @@ namespace Physica::Core {
 using ValueType = float32;
 using ScalarType = Diff<ValueType, DiffMode::Reverse, 1>;
 using DeviceVector = device_obj<Diff<VectorND<ValueType>, DiffMode::Reverse, 1>>;
-using Dataset = typename Mnist::DatasetType<DeviceVector>;
+using Dataset = Mnist::DatasetType<DeviceVector>;
 using Optimizer = SGD<device_obj<ScalarType>>;
 using RandomGenerator = std::mt19937;
 using RandomType = Random<RandomGenerator>;

@@ -29,7 +29,7 @@ namespace Physica::Core {
     class GeoBase {
     public:
         using PointType = Point<Dim, T>;
-        using VectorType = typename PointType::VectorType;
+        using VectorType = PointType::VectorType;
     public:
         [[nodiscard]] static T distToSegment(const PointType& p, const PointType& segFrom, const PointType& segTo);
     };

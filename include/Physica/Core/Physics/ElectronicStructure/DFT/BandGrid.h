@@ -28,7 +28,7 @@ namespace Physica::Core {
     template<Scalar T, bool isSpinPolarized>
     class BandGrid {
         using KPointGrid = GridStorage<KPoint<T, 0, isSpinPolarized>>;
-        using LatticeMatrix = typename CrystalCell<T>::LatticeMatrix;
+        using LatticeMatrix = CrystalCell<T>::LatticeMatrix;
 
         KPointGrid kPointGrid;
         LatticeMatrix repLatt;

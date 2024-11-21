@@ -81,7 +81,7 @@ namespace Physica::Core {
     }
 
     template<Scalar T, int Option, Vector U>
-    typename MatrixVectorProduct<SparseMatrix<T, Option>, U>::ScalarType
+    MatrixVectorProduct<SparseMatrix<T, Option>, U>::ScalarType
     MatrixVectorProduct<SparseMatrix<T, Option>, U>::calc(size_t index) const {
         const auto& elements = mat.getElements();
         const auto& minorIndexes = mat.getMinorIndexes();

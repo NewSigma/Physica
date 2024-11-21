@@ -31,13 +31,13 @@ namespace Physica::Core {
         using This = Element<Derived>;
         using Base = CRTPBase<This>;
     public:
-        using ScalarType = typename Traits<Derived>::ScalarType;
+        using ScalarType = Traits<Derived>::ScalarType;
         constexpr static unsigned int Dim = Traits<Derived>::Dim;
         constexpr static unsigned int Order = Traits<Derived>::Order;
         constexpr static unsigned int DegreeOfFreedom = Traits<Derived>::DegreeOfFreedom;
         using IndexArray = Array<size_t, DegreeOfFreedom>;
         using VectorType = DenseVector<ScalarType, Dim>;
-        using MatrixType = typename Traits<Derived>::MatrixType;
+        using MatrixType = Traits<Derived>::MatrixType;
         static_assert(!ScalarType::isComplex, "[Error]: Complex scalar is not allowed");
     protected:
         IndexArray globalNodes;
@@ -65,7 +65,7 @@ namespace Physica::Core {
 
     template<class Derived>
     template<class Functor, int DeltaOrder>
-    typename Element<Derived>::ScalarType Element<Derived>::gauss_integral(Functor func) {
+    Element<Derived>::ScalarType Element<Derived>::gauss_integral(Functor func) {
         return Internal::GaussIntegral<Derived, Functor, DeltaOrder>::run(func);
     }
 

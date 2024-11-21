@@ -31,7 +31,7 @@ namespace Physica::Core {
         static_assert(NumReplica == 1, "[Error]: PIMD is not implemented");
         static_assert(Integrator == RPMDIntegrator::Exact, "[Error]: Cayley integrator not implemented");
     public:
-        using RingPolymerType = typename HardCore<T, IsFixedBoundary, NumReplica, Integrator>::RingPolymerType;
+        using RingPolymerType = HardCore<T, IsFixedBoundary, NumReplica, Integrator>::RingPolymerType;
         using DeviceVector = device_obj<VectorND<T>>;
         using PageLockedVector = DenseVector<T, Dynamic, PageLockedAllocator<T>>;
     private:

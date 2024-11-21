@@ -26,7 +26,7 @@ namespace Physica::Core {
         using This = ContinuousVectorBlock<T, Length>;
     public:
         using Base = ContinuousVector<This>;
-        using ScalarType = typename T::ScalarType;
+        using ScalarType = T::ScalarType;
     protected:
         using typename Base::PtrTy;
         using typename Base::ConstPtrTy;
@@ -87,14 +87,14 @@ namespace Physica::Core {
     }
 
     template<Vector T, size_t Length>
-    inline typename ContinuousVectorBlock<T, Length>::RefTy
+    inline ContinuousVectorBlock<T, Length>::RefTy
     ContinuousVectorBlock<T, Length>::operator[](size_t index) {
         assert((index + from) < to);
         return vec[index + from];
     }
 
     template<Vector T, size_t Length>
-    inline typename ContinuousVectorBlock<T, Length>::ConstRefTy
+    inline ContinuousVectorBlock<T, Length>::ConstRefTy
     ContinuousVectorBlock<T, Length>::operator[](size_t index) const {
         assert((index + from) < to);
         return vec[index + from];
@@ -137,7 +137,7 @@ namespace Physica {
     template<Vector T, size_t Length>
     class Traits<ContinuousVectorBlock<T, Length>> {
     public:
-        using ScalarType = typename T::ScalarType;
+        using ScalarType = T::ScalarType;
         constexpr static size_t SizeAtCompile = Length;
         constexpr static bool FastAssign = false;
         constexpr static bool FastPacket = true;

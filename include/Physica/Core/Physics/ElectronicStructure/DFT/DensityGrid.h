@@ -26,10 +26,10 @@
 namespace Physica::Core {
     template<Scalar T, bool IsSpinPolarized>
     class DensityGrid {
-        using LatticeMatrix = typename PeriodicCell<T, 3>::LatticeMatrix;
+        using LatticeMatrix = PeriodicCell<T, 3>::LatticeMatrix;
         using GridType = RSpaceGrid<T>;
     public:
-        using Index3D = typename RSpaceGrid<T>::Index3D;
+        using Index3D = RSpaceGrid<T>::Index3D;
         using BasisType = PlainWaveBasis<T>;
         using KSOrbitArray = Array<SpinPair<BasisType, IsSpinPolarized>>;
     private:

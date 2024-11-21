@@ -26,10 +26,10 @@ namespace Physica::Core {
      */
     template<Vector T>
     auto givens(const LValueVector<T>& vector, size_t i, size_t j) {
-        using ScalarType = typename T::ScalarType;
+        using ScalarType = T::ScalarType;
         using ResultType = Vector2D<ScalarType>;
         if constexpr (ScalarType::isComplex) {
-            using RealType = typename ScalarType::RealType;
+            using RealType = ScalarType::RealType;
             using RealResultType = Vector2D<RealType>;
 
             ScalarType x_i = vector[i];
@@ -54,7 +54,7 @@ namespace Physica::Core {
      */
     template<Matrix T>
     void applyGivens(const Vector2D<typename T::ScalarType>& givens, LValueMatrix<T>& mat, size_t i, size_t j) {
-        using ScalarType = typename T::ScalarType;
+        using ScalarType = T::ScalarType;
         auto row_i = mat.row(i);
         auto row_j = mat.row(j);
         const size_t length = row_i.getLength();
@@ -72,7 +72,7 @@ namespace Physica::Core {
      */
     template<Matrix T>
     void applyGivens(LValueMatrix<T>& mat, const Vector2D<typename T::ScalarType>& givens, size_t i, size_t j) {
-        using ScalarType = typename T::ScalarType;
+        using ScalarType = T::ScalarType;
         auto col_i = mat.col(i);
         auto col_j = mat.col(j);
         const size_t length = col_i.getLength();

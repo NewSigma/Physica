@@ -34,7 +34,7 @@ namespace Physica::Core {
         using VectorType = VectorND<T>;
         using RSpaceFCMat = DenseMatrix<T>;
         using RSpaceFCGrid = GridStorage<RSpaceFCMat>;
-        using Index3D = typename RSpaceFCGrid::Index3D;
+        using Index3D = RSpaceFCGrid::Index3D;
     protected:
         Index3D superSize;
         size_t numDOF;
@@ -110,7 +110,7 @@ namespace Physica::Core {
     }
 
     template<Scalar T>
-    typename FCProjector<T>::VectorType FCProjector<T>::toVector(const RSpaceFCGrid& fcGrid) const {
+    FCProjector<T>::VectorType FCProjector<T>::toVector(const RSpaceFCGrid& fcGrid) const {
         assert(fcGrid.getDim() == superSize && "[Error]: Cell sizes do not match");
         assert(fcGrid(0, 0, 0).getRow() == numDOF && "[Error]: DOFs do not match");
         VectorType result(getNumForceConsts());
@@ -148,7 +148,7 @@ namespace Physica::Core {
     }
 
     template<Scalar T>
-    typename FCProjector<T>::VectorType FCProjector<T>::makeTransBase(size_t dof, unsigned int direction) const {
+    FCProjector<T>::VectorType FCProjector<T>::makeTransBase(size_t dof, unsigned int direction) const {
         VectorType result(getNumForceConsts(), 0);
         for (size_t i = 0; i < result.getLength(); ++i) {
             const auto index5D = FCSwapVector<T>::index1DTo5D(numDOF, superSize, i);

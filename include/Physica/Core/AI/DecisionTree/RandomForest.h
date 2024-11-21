@@ -30,10 +30,10 @@ namespace Physica::Core {
     template<Scalar T, DecisionTreeType Type>
     class RandomForest {
         using TreeType = DecisionTree<T, Type>;
-        using VectorType = typename TreeType::VectorType;
-        using MatrixType = typename TreeType::MatrixType;
+        using VectorType = TreeType::VectorType;
+        using MatrixType = TreeType::MatrixType;
     public:
-        using Dataset = typename TreeType::Dataset;
+        using Dataset = TreeType::Dataset;
     private:
         Array<TreeType> trees;
     public:
@@ -233,7 +233,7 @@ namespace Physica::Core {
 
     template<Scalar T, DecisionTreeType Type>
     template<class RandomType>
-    typename RandomForest<T, Type>::TreeType RandomForest<T, Type>::trainTree(
+    RandomForest<T, Type>::TreeType RandomForest<T, Type>::trainTree(
             const Dataset& dataset,
             std::forward_list<size_t> availableSample,
             std::forward_list<size_t> availableFeature,

@@ -81,14 +81,14 @@ namespace Physica::Core {
     }
 
     template<Scalar T, int Order, size_t Length, class Allocator>
-    __host__ __device__ inline typename DenseVector<Diff<T, DiffMode::Forward, Order>, Length, Allocator>::PtrTy
+    __host__ __device__ inline DenseVector<Diff<T, DiffMode::Forward, Order>, Length, Allocator>::PtrTy
     DenseVector<Diff<T, DiffMode::Forward, Order>, Length, Allocator>::data_ptr(size_t index) noexcept {
         assert(index < getLength() && "[Error]: Index out of range");
         return PtrTy(values.data_ptr(index), grads.data_ptr(index));
     }
 
     template<Scalar T, int Order, size_t Length, class Allocator>
-    __host__ __device__ inline typename DenseVector<Diff<T, DiffMode::Forward, Order>, Length, Allocator>::ConstPtrTy
+    __host__ __device__ inline DenseVector<Diff<T, DiffMode::Forward, Order>, Length, Allocator>::ConstPtrTy
     DenseVector<Diff<T, DiffMode::Forward, Order>, Length, Allocator>::data_ptr(size_t index) const noexcept {
         return const_cast<This&>(*this).data_ptr(index);
     }
@@ -158,7 +158,7 @@ namespace Physica::Core {
     }
 
     template<Scalar T, int Order>
-    inline typename Diff<VectorND<T>, DiffMode::Reverse, Order>::ScalarType
+    inline Diff<VectorND<T>, DiffMode::Reverse, Order>::ScalarType
     Diff<VectorND<T>, DiffMode::Reverse, Order>::calc(size_t index) const {
         assert(index < getLength() && "[Error]: Index out of range");
         return traceSeg[index];

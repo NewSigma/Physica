@@ -44,9 +44,9 @@ namespace Physica::Core {
         using ColVector = RMatrixBlock<Derived, Dynamic, 1>;
         using BlockType = RMatrixBlock<Derived>;
     public:
-        using ScalarType = typename Traits<Derived>::ScalarType;
-        using ValueType = typename ScalarType::ValueType;
-        using RealType = typename ScalarType::RealType;
+        using ScalarType = Traits<Derived>::ScalarType;
+        using ValueType = ScalarType::ValueType;
+        using RealType = ScalarType::RealType;
         constexpr static int Option = Traits<Derived>::Option;
         constexpr static size_t RowAtCompile = Traits<Derived>::RowAtCompile;
         constexpr static size_t ColAtCompile = Traits<Derived>::ColAtCompile;

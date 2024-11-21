@@ -70,7 +70,7 @@ namespace Physica::Core {
     }
 
     template<Scalar T, size_t NumBand, bool isSpinPolarized>
-    inline const typename KPoint<T, NumBand, isSpinPolarized>::BandEnergy&
+    inline const KPoint<T, NumBand, isSpinPolarized>::BandEnergy&
     KPoint<T, NumBand, isSpinPolarized>::getBandEnergy(SpinState spin) const noexcept {
         return bandE[isSpinPolarized ? int(spin) : 0];
     }

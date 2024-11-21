@@ -26,9 +26,9 @@ namespace Physica::Core {
                 Physica::PlainStruct<const V> v_,
                 Physica::PlainStruct<T> dots_,
                 Physica::PlainStruct<V> result_) {
-            using DiffRecord = typename V::DiffRecord;
-            using ScalarType = typename V::ScalarType;
-            using ValueType = typename ScalarType::ValueType;
+            using DiffRecord = V::DiffRecord;
+            using ScalarType = V::ScalarType;
+            using ValueType = ScalarType::ValueType;
             extern __shared__ ValueType buffer[];
             const T& m = m_.getDerived();
             const V& v = v_.getDerived();

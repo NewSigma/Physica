@@ -25,7 +25,7 @@ namespace Physica::Core {
         using This = device_obj<host_obj>;
         using Base = device_obj<RValueVector<host_obj>>;
     public:
-        using ScalarType = typename Base::ScalarType;
+        using ScalarType = Base::ScalarType;
     private:
         const T& vec;
         size_t from;

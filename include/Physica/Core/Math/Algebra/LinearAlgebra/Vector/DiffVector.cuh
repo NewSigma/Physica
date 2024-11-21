@@ -33,13 +33,13 @@ namespace Physica::Core {
         using Base = device_obj<RValueVector<host_obj>>;
         using TracerType = device_obj<typename host_obj::TracerType>;
         using SegmentType = device_obj<typename host_obj::SegmentType>;
-        using RecordArray = typename SegmentType::RecordArray;
-        using ValueVector = typename SegmentType::ValueVector;
-        using GradVector = typename SegmentType::GradVector;
+        using RecordArray = SegmentType::RecordArray;
+        using ValueVector = SegmentType::ValueVector;
+        using GradVector = SegmentType::GradVector;
     public:
-        using ScalarType = typename Base::ScalarType;
-        using DiffRecord = typename SegmentType::DiffRecord;
-        using OperandArray = typename SegmentType::OperandArray;
+        using ScalarType = Base::ScalarType;
+        using DiffRecord = SegmentType::DiffRecord;
+        using OperandArray = SegmentType::OperandArray;
         using Base::MaxThreadPerBlock;
     private:
         PlainStruct<SegmentType> traceSeg;

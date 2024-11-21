@@ -35,9 +35,9 @@ namespace Physica::Core {
         using typename Base::InputType;
         using typename Base::OutputType;
         using Base::IsTrainMode;
-        using LossType = typename Loss<ScalarType>::LossType;
+        using LossType = Loss<ScalarType>::LossType;
     private:
-        using DiffGuard = typename std::conditional<IsTrainMode, AutoDiffGuard<ScalarType>, PlainStruct<void>>::type;
+        using DiffGuard = std::conditional<IsTrainMode, AutoDiffGuard<ScalarType>, PlainStruct<void>>::type;
 
         DiffGuard diffGuard;
     public:
@@ -67,7 +67,7 @@ namespace Physica::Core {
     template<class Dataset, class Optimizer, class RandomType, class Executor>
     void SimpleNet<Derived>::train_step(const Dataset& dataset, Optimizer& opt) {
         static_assert(IsTrainMode, "[Error]: train_step must be called under training mode");
-        using TracerType = typename ScalarType::TracerType;
+        using TracerType = ScalarType::TracerType;
         if constexpr (std::is_same<Executor, SequentialExecutor>::value) {
             auto dist = std::uniform_int_distribution<size_t>(0, dataset.getSize() - 1);
             auto& gen = RandomType::getInstance().getGen();

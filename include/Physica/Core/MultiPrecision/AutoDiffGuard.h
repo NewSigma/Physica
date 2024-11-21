@@ -27,8 +27,8 @@ namespace Physica::Core {
         constexpr static bool isDeviceSide = is_device_obj<T>::value;
         using This = AutoDiffGuard<T>;
     public:
-        using ValueType = typename T::ValueType;
-        using TracerType = typename T::TracerType;
+        using ValueType = T::ValueType;
+        using TracerType = T::TracerType;
     private:
         T node;
     public:

@@ -109,7 +109,7 @@ namespace Physica::Core {
 
     template<Scalar T>
     void Poscar<T>::standrizeLattice() {
-        using MatrixType = typename LatticeMatrix::ColMatrix;
+        using MatrixType = LatticeMatrix::ColMatrix;
         MatrixType temp = lattice.transpose();
         using VectorType = Vector3D<T>;
         VectorType buffer{};
@@ -177,7 +177,7 @@ namespace Physica::Core {
     }
 
     template<Scalar T>
-    typename Poscar<T>::CrystalSystem Poscar<T>::getCrystalSystem(double precision) const noexcept {
+    Poscar<T>::CrystalSystem Poscar<T>::getCrystalSystem(double precision) const noexcept {
         const T norm_list[3]{lattice.row(0).squaredNorm(),
                                       lattice.row(1).squaredNorm(),
                                       lattice.row(2).squaredNorm()};

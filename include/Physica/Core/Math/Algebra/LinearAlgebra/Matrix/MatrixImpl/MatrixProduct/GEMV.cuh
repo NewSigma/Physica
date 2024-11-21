@@ -95,7 +95,7 @@ namespace Physica::Core {
 
     template<Matrix T, Vector U>
     template<Side Owner>
-    __device__ inline typename device_obj<MatrixVectorProduct<T, U>>::ScalarType
+    __device__ inline device_obj<MatrixVectorProduct<T, U>>::ScalarType
     device_obj<MatrixVectorProduct<T, U>>::calc(size_t index) const {
         return getLHS<Owner>().row(index) * getRHS<Owner>();
     }
@@ -119,7 +119,7 @@ namespace Physica::Core {
     }
 
     template<Matrix T, Vector U>
-    [[nodiscard]] __host__ __device__ inline typename std::enable_if<T::RowAtCompile != 1, device_obj<MatrixVectorProduct<T, U>>>::type
+    [[nodiscard]] __host__ __device__ inline std::enable_if<T::RowAtCompile != 1, device_obj<MatrixVectorProduct<T, U>>>::type
     operator*(const device_obj<T>& mat, const device_obj<U>& vec) noexcept {
         return {mat, vec};
     }

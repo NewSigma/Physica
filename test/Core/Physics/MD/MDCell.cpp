@@ -23,8 +23,8 @@ using namespace Physica::Core;
 using ScalarType = float64;
 using MDCellType = MDCell<ScalarType>;
 using CrystalCellType = CrystalCell<ScalarType>;
-using LatticeMatrix = typename CrystalCellType::LatticeMatrix;
-using PositionMatrix = typename CrystalCellType::PositionMatrix;
+using LatticeMatrix = CrystalCellType::LatticeMatrix;
+using PositionMatrix = CrystalCellType::PositionMatrix;
 
 bool isMDCellNear(const MDCellType& cell1, const MDCellType& cell2, double precision) {
     if (!matrixNear(cell1.getLattice(), cell2.getLattice(), precision))

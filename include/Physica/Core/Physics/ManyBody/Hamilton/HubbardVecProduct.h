@@ -25,15 +25,15 @@ namespace Physica::Core {
         using MatrixType = HubbardMatrix<T, ReprType>;
         using This = MatrixVectorProduct<MatrixType, U>;
         using Base = RValueVector<This>;
-        using FFTType = typename MatrixType::FFTType;
-        using StateType = typename ReprType::StateType;
+        using FFTType = MatrixType::FFTType;
+        using StateType = ReprType::StateType;
         constexpr static unsigned int Dim = MatrixType::Dim;
         constexpr static unsigned int NumSite = MatrixType::NumSite;
         constexpr static unsigned int SiteDOF = MatrixType::SiteDOF;
         constexpr static bool IsTransInvariant = MatrixType::IsTransInvariant;
     public:
-        using ScalarType = typename Base::ScalarType;
-        using RealType = typename ScalarType::RealType;
+        using ScalarType = Base::ScalarType;
+        using RealType = ScalarType::RealType;
     private:
         const MatrixType& mat;
         const U& vec;
@@ -94,7 +94,7 @@ namespace Physica::Core {
     }
 
     template<Scalar T, class ReprType, Vector U>
-    typename MatrixVectorProduct<HubbardMatrix<T, ReprType>, U>::ScalarType
+    MatrixVectorProduct<HubbardMatrix<T, ReprType>, U>::ScalarType
     MatrixVectorProduct<HubbardMatrix<T, ReprType>, U>::calc(size_t index) const {
         static_assert(!IsTransInvariant && "[Error]: Not implemented");
         const ScalarType hop = -mat.getHoppingT();
@@ -198,9 +198,9 @@ namespace Physica {
     template<Scalar T, class ReprType, Vector U>
     class Traits<MatrixVectorProduct<HubbardMatrix<T, ReprType>, U>> {
         using MatrixType = HubbardMatrix<T, ReprType>;
-        using T1 = typename U::ScalarType;
+        using T1 = U::ScalarType;
     public:
-        using ScalarType = typename Core::Internal::BinaryScalarOpRtnTy<T, T1>::Type;
+        using ScalarType = Core::Internal::BinaryScalarOpRtnTy<T, T1>::Type;
         constexpr static size_t SizeAtCompile = MatrixType::RowAtCompile;
         constexpr static bool FastAssign = true;
         constexpr static bool FastPacket = false;

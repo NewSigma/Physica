@@ -26,7 +26,7 @@ namespace Physica::Core {
     class device_obj<CellList<T>> {
         using host_obj = CellList<T>;
         using This = device_obj<host_obj>;
-        using Index3D = typename GridBase::Index3D;
+        using Index3D = GridBase::Index3D;
         using LatticeMatrix = device_obj<typename host_obj::LatticeMatrix>;
         using DeviceIndexArray = device_obj<Array<size_t>>;
         using DeviceNeighShift = device_obj<Array<Vector3D<T>>>;

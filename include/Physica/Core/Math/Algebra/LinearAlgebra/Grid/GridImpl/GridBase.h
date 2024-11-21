@@ -27,16 +27,16 @@ namespace Physica::Core {
         using Index3D = Array<size_t, 3>;
         /* Static members */
         template<Scalar T, bool IsUnitLattice, class Functor>
-        static void forPointInGrid(Index3D dim, const typename PeriodicCell<T, 3>::LatticeMatrix& lattice, Functor func);
+        static void forPointInGrid(Index3D dim, const PeriodicCell<T, 3>::LatticeMatrix& lattice, Functor func);
         template<Scalar T, bool IsUnitLattice, class Functor>
-        static void forPointIndexInGrid(Index3D dim, const typename PeriodicCell<T, 3>::LatticeMatrix& lattice, Functor func);
+        static void forPointIndexInGrid(Index3D dim, const PeriodicCell<T, 3>::LatticeMatrix& lattice, Functor func);
         template<class Functor> static void forIndexInGrid(Index3D dim, Functor func);
     };
 
     template<Scalar T, bool IsUnitLattice, class Functor>
     void GridBase::forPointInGrid(
-            Index3D dim, const typename PeriodicCell<T, 3>::LatticeMatrix& lattice, Functor func) {
-        using LatticeMatrix = typename PeriodicCell<T, 3>::LatticeMatrix;
+            Index3D dim, const PeriodicCell<T, 3>::LatticeMatrix& lattice, Functor func) {
+        using LatticeMatrix = PeriodicCell<T, 3>::LatticeMatrix;
         using VectorType = Vector3D<T>;
 
         LatticeMatrix sub_lattice{};
@@ -66,9 +66,9 @@ namespace Physica::Core {
 
     template<Scalar T, bool IsUnitLattice, class Functor>
     void GridBase::forPointIndexInGrid(
-            Index3D dim, const typename PeriodicCell<T, 3>::LatticeMatrix& lattice, Functor func) {
+            Index3D dim, const PeriodicCell<T, 3>::LatticeMatrix& lattice, Functor func) {
         static_assert(!T::isComplex, "[Error]: Position in 3D space can not be complex number");
-        using LatticeMatrix = typename PeriodicCell<T, 3>::LatticeMatrix;
+        using LatticeMatrix = PeriodicCell<T, 3>::LatticeMatrix;
         using VectorType = Vector3D<T>;
 
         LatticeMatrix sub_lattice{};

@@ -46,7 +46,7 @@ namespace Physica::Core {
             : values(other.getValue()), grads(other.getGrad()) {}
 
     template<Scalar T, int Order, size_t Size>
-    inline typename SIMD<Diff<T, DiffMode::Forward, Order>, Size>::ScalarType
+    inline SIMD<Diff<T, DiffMode::Forward, Order>, Size>::ScalarType
     SIMD<Diff<T, DiffMode::Forward, Order>, Size>::operator[](int index) const {
         return ScalarType(values[index], grads[index]);
     }
@@ -124,13 +124,13 @@ namespace Physica::Core {
     }
 
     template<Scalar T, int Order, size_t Size>
-    inline typename SIMD<Diff<T, DiffMode::Forward, Order>, Size>::AsRealRtnTy
+    inline SIMD<Diff<T, DiffMode::Forward, Order>, Size>::AsRealRtnTy
     SIMD<Diff<T, DiffMode::Forward, Order>, Size>::swapRealImag() const noexcept {
         return AsRealRtnTy(values.swapRealImag(), grads.swapRealImag());
     }
 
     template<Scalar T, int Order, size_t Size>
-    inline typename SIMD<Diff<T, DiffMode::Forward, Order>, Size>::AsRealRtnTy
+    inline SIMD<Diff<T, DiffMode::Forward, Order>, Size>::AsRealRtnTy
     SIMD<Diff<T, DiffMode::Forward, Order>, Size>::permRealImag() const noexcept {
         return AsRealRtnTy(values.permRealImag(), grads.permRealImag());
     }
@@ -160,7 +160,7 @@ namespace Physica::Core {
     }
 
     template<Scalar T, int Order, size_t Size>
-    typename SIMD<Diff<T, DiffMode::Forward, Order>, Size>::AsRealRtnTy SIMD<Diff<T, DiffMode::Forward, Order>, Size>::asReal() const noexcept {
+    SIMD<Diff<T, DiffMode::Forward, Order>, Size>::AsRealRtnTy SIMD<Diff<T, DiffMode::Forward, Order>, Size>::asReal() const noexcept {
         if constexpr (T::isComplex)
             return AsRealRtnTy(values.asReal(), grads.asReal());
         else
@@ -168,13 +168,13 @@ namespace Physica::Core {
     }
 
     template<Scalar T, int Order, size_t Size>
-    inline typename SIMD<Diff<T, DiffMode::Forward, Order>, Size>::RealType
+    inline SIMD<Diff<T, DiffMode::Forward, Order>, Size>::RealType
     SIMD<Diff<T, DiffMode::Forward, Order>, Size>::real() const noexcept {
         return RealType(values.real(), grads.real());
     }
 
     template<Scalar T, int Order, size_t Size>
-    inline typename SIMD<Diff<T, DiffMode::Forward, Order>, Size>::RealType
+    inline SIMD<Diff<T, DiffMode::Forward, Order>, Size>::RealType
     SIMD<Diff<T, DiffMode::Forward, Order>, Size>::imag() const noexcept {
         return RealType(values.imag(), grads.imag());
     }
@@ -213,7 +213,7 @@ namespace Physica::Core {
             : Base(std::move(base)), headNode(headNode_) {}
 
     template<Scalar T, size_t Size>
-    inline typename SIMD<Diff<T, DiffMode::Reverse, 1>, Size>::ScalarType
+    inline SIMD<Diff<T, DiffMode::Reverse, 1>, Size>::ScalarType
     SIMD<Diff<T, DiffMode::Reverse, 1>, Size>::operator[](int i) const {
         return ScalarType(value_ptr() + i, grad_ptr() + i);
     }
@@ -324,7 +324,7 @@ namespace Physica::Core {
     }
 
     template<Scalar T, size_t Size>
-    inline typename SIMD<Diff<T, DiffMode::Reverse, 1>, Size>::ScalarType
+    inline SIMD<Diff<T, DiffMode::Reverse, 1>, Size>::ScalarType
     SIMD<Diff<T, DiffMode::Reverse, 1>, Size>::sum() const {
         ScalarType result = 0;
         for (size_t i = 0; i < Size; ++i)
@@ -359,7 +359,7 @@ namespace Physica::Core {
             const SIMD<Diff<T, Mode, Order>, Size>& c) {
         using ResultType = SIMD<Diff<T, Mode, Order>, Size>;
         if constexpr (Mode == DiffMode::Forward) {
-            using GradPacket = typename ResultType::GradPacket;
+            using GradPacket = ResultType::GradPacket;
             auto value = mul_add(a.getValue(), b.getValue(), c.getValue());
             auto grad1 = mul_add(GradPacket(a), b.getGrad(), c.getGrad());
             auto grad2 = mul_add(GradPacket(b), a.getGrad(), grad1);
@@ -367,7 +367,7 @@ namespace Physica::Core {
         }
         else {
             static_assert(Size == 2 || Size == 4 || Size == 8, "[Error]: Not implemented");
-            using TracerType = typename ResultType::TracerType;
+            using TracerType = ResultType::TracerType;
             auto& tracer = TracerType::getInstance();
             const auto temp = mul_add<T, Size>(a, b, c);
             ExprType source;

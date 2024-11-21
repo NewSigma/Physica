@@ -49,7 +49,7 @@ namespace Physica::Core {
     };
 
     template<class T>
-    typename PageLockedAllocator<T>::pointer PageLockedAllocator<T>::allocate(size_t n) {
+    PageLockedAllocator<T>::pointer PageLockedAllocator<T>::allocate(size_t n) {
         pointer p;
         check(cudaMallocHost(&p, n * sizeof(value_type)));
         return p;
@@ -105,7 +105,7 @@ namespace std {
         using propagate_on_container_copy_assignment = std::false_type;
         using propagate_on_container_move_assignment = std::false_type;
         using propagate_on_container_swap = std::false_type;
-        using is_always_equal = typename std::is_empty<allocator_type>::type;
+        using is_always_equal = std::is_empty<allocator_type>::type;
         template<class U>
         using rebind_alloc = Physica::Core::PageLockedAllocator<U>;
         template<class U>

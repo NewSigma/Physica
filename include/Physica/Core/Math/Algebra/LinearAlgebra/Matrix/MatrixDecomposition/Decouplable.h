@@ -41,8 +41,8 @@ namespace Physica::Core {
      */
     template<Matrix T>
     size_t Decouplable::activeWindowDownDiag(LValueMatrix<T>& __restrict mat, size_t upper) {
-        using ScalarType = typename T::ScalarType;
-        using RealType = typename ScalarType::RealType;
+        using ScalarType = T::ScalarType;
+        using RealType = ScalarType::RealType;
         const RealType epsilon = std::numeric_limits<RealType>::epsilon();
 
         assert(upper < mat.getRow());
@@ -61,8 +61,8 @@ namespace Physica::Core {
 
     template<Matrix T>
     size_t Decouplable::activeWindowUpDiag(LValueMatrix<T>& __restrict mat, size_t upper) {
-        using ScalarType = typename T::ScalarType;
-        using RealType = typename ScalarType::RealType;
+        using ScalarType = T::ScalarType;
+        using RealType = ScalarType::RealType;
 
         assert(upper < mat.getRow());
         size_t lower = upper;

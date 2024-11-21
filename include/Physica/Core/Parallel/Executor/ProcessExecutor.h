@@ -37,8 +37,8 @@ namespace Physica::Core {
     };
 
     template<class Functor, class... Args>
-    typename ProcessExecutor::FutureType ProcessExecutor::schedule(Functor func, Args&&... args) {
-        using ResultType = typename std::invoke_result<Functor, Args&&...>::type;
+    ProcessExecutor::FutureType ProcessExecutor::schedule(Functor func, Args&&... args) {
+        using ResultType = std::invoke_result<Functor, Args&&...>::type;
         static_assert(std::is_same<void, ResultType>::value, "[Error]: ProcessExecutor does not support functors with return value");
 
         SubProcess process([=]() { func(std::forward<Args>(args)...); }, nice_incr);
@@ -48,7 +48,7 @@ namespace Physica::Core {
     template<class Functor>
     FutureGroup<typename ProcessExecutor::FutureType> ProcessExecutor::parallel_for(
             Functor func, unsigned int loopCount, unsigned int core) {
-        using ResultType = typename std::invoke_result<Functor, unsigned int>::type;
+        using ResultType = std::invoke_result<Functor, unsigned int>::type;
         static_assert(std::is_same<void, ResultType>::value, "[Error]: Invalid functor");
         assert(loopCount >= core);
         assert(core > 0);

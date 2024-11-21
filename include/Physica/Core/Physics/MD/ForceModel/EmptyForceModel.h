@@ -40,7 +40,7 @@ namespace Physica::Core {
     class EmptyForceModel {
     public:
         using MDCellType = MDCell<T, Dim>;
-        using LatticeMatrix = typename MDCellType::LatticeMatrix;
+        using LatticeMatrix = MDCellType::LatticeMatrix;
         using ForceConstMatrix = DenseSymmMatrix<T>;
     public:
         /* Operations */
@@ -70,7 +70,7 @@ namespace Physica::Core {
     }
 
     template<Scalar T, unsigned int Dim>
-    typename EmptyForceModel<T, Dim>::ForceConstMatrix
+    EmptyForceModel<T, Dim>::ForceConstMatrix
     EmptyForceModel<T, Dim>::forceConst([[maybe_unused]] const MDCellType& cell) const {
         return ForceConstMatrix(cell.getDOF(), T(0));
     }

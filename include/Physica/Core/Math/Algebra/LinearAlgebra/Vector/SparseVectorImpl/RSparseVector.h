@@ -34,9 +34,9 @@ namespace Physica::Core {
     };
 
     template<Vector T1, Vector T2>
-    typename Internal::BinaryScalarOpRtnTy<typename T1::ScalarType, typename T2::ScalarType>::Type
+    Internal::BinaryScalarOpRtnTy<typename T1::ScalarType, typename T2::ScalarType>::Type
     operator*(const RSparseVector<T1>& v1, const T2& v2) {
-        using ResultType = typename Internal::BinaryScalarOpRtnTy<typename T1::ScalarType, typename T2::ScalarType>::Type;
+        using ResultType = Internal::BinaryScalarOpRtnTy<typename T1::ScalarType, typename T2::ScalarType>::Type;
         assert(v1.getLength() == v2.getLength());
         ResultType result(0);
         for (size_t i = 0; i < v1.getNumNonZero(); ++i) {
@@ -47,14 +47,14 @@ namespace Physica::Core {
     }
 
     template<Vector T1, Vector T2>
-    typename Internal::BinaryScalarOpRtnTy<typename T1::ScalarType, typename T2::ScalarType>::Type
+    Internal::BinaryScalarOpRtnTy<typename T1::ScalarType, typename T2::ScalarType>::Type
     operator*(const T1& v1, const RSparseVector<T2>& v2) {
         return v2 * v1;
     }
 
     template<LVector T, Vector U>
     void operator+=(T& v1, const U& v2) requires Sparse<U> {
-        using ResultType = typename T::ScalarType;
+        using ResultType = T::ScalarType;
         for (size_t i = 0; i < v2.getNumNonZero(); ++i) {
             const auto pair = v2.calcNonZero(i);
             v1[pair.first] += ResultType(pair.second);
@@ -63,7 +63,7 @@ namespace Physica::Core {
 
     template<LVector T, Vector U>
     void operator-=(T& v1, const U& v2) requires Sparse<U> {
-        using ResultType = typename T::ScalarType;
+        using ResultType = T::ScalarType;
         for (size_t i = 0; i < v2.getNumNonZero(); ++i) {
             const auto pair = v2.calcNonZero(i);
             v1[pair.first] -= ResultType(pair.second);

@@ -31,9 +31,9 @@ namespace Physica {
         using ValueType = float64;
         using ScalarType = Diff<ValueType, DiffMode::Reverse, 1>;
         using MDCellType = MDCell<ScalarType>;
-        using LatticeMatrix = typename MDCellType::LatticeMatrix;
-        using PositionMatrix = typename MDCellType::PositionMatrix;
-        using MassVector = typename MDCellType::MassVector;
+        using LatticeMatrix = MDCellType::LatticeMatrix;
+        using PositionMatrix = MDCellType::PositionMatrix;
+        using MassVector = MDCellType::MassVector;
     public:
         static void run() {
             const ScalarType volume = 125;

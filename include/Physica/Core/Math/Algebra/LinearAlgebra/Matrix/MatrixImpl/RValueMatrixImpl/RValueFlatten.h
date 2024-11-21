@@ -41,7 +41,7 @@ namespace Physica::Core {
     };
 
     template<Matrix T>
-    typename RValueFlatten<T>::ScalarType RValueFlatten<T>::calc(size_t index) const {
+    RValueFlatten<T>::ScalarType RValueFlatten<T>::calc(size_t index) const {
         const size_t major = index / mat.getMaxMinor();
         const size_t minor = index % mat.getMaxMinor();
         return mat.calcFromMajorMinor(major, minor);
@@ -52,7 +52,7 @@ namespace Physica {
     template<Matrix T>
     class Traits<Core::RValueFlatten<T>> {
     public:
-        using ScalarType = typename T::ScalarType;
+        using ScalarType = T::ScalarType;
         constexpr static size_t SizeAtCompile = T::RowAtCompile * T::ColAtCompile;
         constexpr static bool FastAssign = false;
         constexpr static bool FastPacket = false;

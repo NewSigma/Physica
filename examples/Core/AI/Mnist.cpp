@@ -113,7 +113,7 @@ private:
 
 using ValueType = float32;
 using ScalarType = Diff<ValueType, DiffMode::Reverse>;
-using Dataset = typename Mnist::DatasetType<VectorND<ValueType>>;
+using Dataset = Mnist::DatasetType<VectorND<ValueType>>;
 using Optimizer = MomentumSGD<ScalarType>;
 using RandomGenerator = std::mt19937;
 using RandomType = Random<RandomGenerator>;

@@ -28,8 +28,8 @@ namespace Physica::Core {
         using Base = LValueVector<This>;
         using typename Base::ScalarType;
     protected:
-        using PtrTy = typename ScalarType::PtrTy;
-        using ConstPtrTy = typename ScalarType::ConstPtrTy;
+        using PtrTy = ScalarType::PtrTy;
+        using ConstPtrTy = ScalarType::ConstPtrTy;
     public:
         LValueFlatten(const LValueMatrix<T>& mat_) : mat(mat_.getDerived()) {}
         LValueFlatten(const This&) = delete;
@@ -48,13 +48,13 @@ namespace Physica::Core {
     };
 
     template<Matrix T>
-    __host__ __device__ inline typename LValueFlatten<T>::PtrTy
+    __host__ __device__ inline LValueFlatten<T>::PtrTy
     LValueFlatten<T>::data_ptr(size_t index) {
         return const_cast<ScalarType*>(const_cast<const This&>(*this).data_ptr(index));
     }
 
     template<Matrix T>
-    __host__ __device__ inline typename LValueFlatten<T>::ConstPtrTy
+    __host__ __device__ inline LValueFlatten<T>::ConstPtrTy
     LValueFlatten<T>::data_ptr(size_t index) const {
         const size_t major = index / mat.getMaxMinor();
         const size_t minor = index % mat.getMaxMinor();
@@ -68,7 +68,7 @@ namespace Physica {
     template<Core::Matrix T>
     class Traits<Core::LValueFlatten<T>> {
     public:
-        using ScalarType = typename T::ScalarType;
+        using ScalarType = T::ScalarType;
         constexpr static size_t SizeAtCompile = T::RowAtCompile * T::ColAtCompile;
 
         constexpr static bool FastAssign = false;

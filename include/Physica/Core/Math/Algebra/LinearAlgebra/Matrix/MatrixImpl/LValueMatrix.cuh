@@ -29,8 +29,8 @@ namespace Physica::Core {
         using Base::RowAtCompile;
         using Base::ColAtCompile;
     protected:
-        using PtrTy = typename ScalarType::PtrTy;
-        using ConstPtrTy = typename ScalarType::ConstPtrTy;
+        using PtrTy = ScalarType::PtrTy;
+        using ConstPtrTy = ScalarType::ConstPtrTy;
     public:
         /* Operators */
         device_obj& operator=(const device_obj& m) = delete;

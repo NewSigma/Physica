@@ -38,8 +38,8 @@ constexpr size_t numStep = 1000;
  */
 MDCell<ScalarType> makeSystem() {
     using CrystalCellType = CrystalCell<ScalarType>;
-    using LatticeMatrix = typename MDCell<ScalarType>::LatticeMatrix;
-    using PositionMatrix = typename MDCell<ScalarType>::PositionMatrix;
+    using LatticeMatrix = MDCell<ScalarType>::LatticeMatrix;
+    using PositionMatrix = MDCell<ScalarType>::PositionMatrix;
     const LatticeMatrix lattice{
         5.0000000000, 0.0000000000, 0.0000000000,
        -2.5000000000, 4.3333333333, 0.0000000000,

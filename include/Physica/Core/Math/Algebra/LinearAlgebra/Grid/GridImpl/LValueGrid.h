@@ -36,10 +36,10 @@ namespace Physica::Core {
         using typename Base::ScalarType;
         using typename Base::Index3D;
     protected:
-        using PtrTy = typename ScalarType::PtrTy;
-        using ConstPtrTy = typename ScalarType::ConstPtrTy;
-        using RefTy = typename ScalarType::RefTy;
-        using ConstRefTy = typename ScalarType::ConstRefTy;
+        using PtrTy = ScalarType::PtrTy;
+        using ConstPtrTy = ScalarType::ConstPtrTy;
+        using RefTy = ScalarType::RefTy;
+        using ConstRefTy = ScalarType::ConstRefTy;
     public:
         template<Grid T>
         Derived& operator=(const T& other);

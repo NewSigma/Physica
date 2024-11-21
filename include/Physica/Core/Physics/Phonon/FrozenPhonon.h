@@ -91,7 +91,7 @@ namespace Physica::Core {
 
     template<Scalar T>
     template<class ForceModel>
-    typename FrozenPhonon<T>::RSpaceFCGrid
+    FrozenPhonon<T>::RSpaceFCGrid
     FrozenPhonon<T>::makeForceConstants(ForceModel& model) const {
         const size_t unitCellDOF = getUnitCellDOF();
         const T factor = -reciprocal(displace);
@@ -158,7 +158,7 @@ namespace Physica::Core {
     }
 
     template<Scalar T>
-    typename FrozenPhonon<T>::PositionMatrix
+    FrozenPhonon<T>::PositionMatrix
     FrozenPhonon<T>::makeWignerSeitzRadius() const {
         constexpr int OneSideDim = 2; // 2 is enough to generate a Wigner-Seitz cell
         constexpr int TwoSideDim = 2 * OneSideDim + 1;

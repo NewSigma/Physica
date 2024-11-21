@@ -46,7 +46,7 @@ namespace Physica::Core {
             return SIMD<T, Size>(sqrt(x.toMachine()));
         else {
             using PlainSIMD = SIMD<typename T::ValueType, Size>;
-            using TracerType = typename T::TracerType;
+            using TracerType = T::TracerType;
             auto& tracer = TracerType::getInstance();
             const PlainSIMD values(sqrt(x.toMachine()));
             const size_t newHeadNode = tracer.pushOperation(values, ExprType::Sqrt);
@@ -62,7 +62,7 @@ namespace Physica::Core {
             return SIMD<T, Size>(cbrt(x.toMachine()));
         else {
             using PlainSIMD = SIMD<typename T::ValueType, Size>;
-            using TracerType = typename T::TracerType;
+            using TracerType = T::TracerType;
             auto& tracer = TracerType::getInstance();
             const PlainSIMD values(cbrt(x.toMachine()));
             const size_t newHeadNode = tracer.pushOperation(values, ExprType::Cbrt);
@@ -91,7 +91,7 @@ namespace Physica::Core {
     inline static void sincos(const SIMD<T, Size>& x, SIMD<T, Size>& s, SIMD<T, Size>& c) {
         sincos(x.toMachine(), s.toMachine(), c.toMachine());
         if constexpr (T::isDifferentiable) {
-            using TracerType = typename T::TracerType;
+            using TracerType = T::TracerType;
             auto& tracer = TracerType::getInstance();
             const T sinHeadNode = tracer.pushOperation(s, ExprType::Sin);
             for (size_t i = 0; i < Size; ++i)

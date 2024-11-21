@@ -34,11 +34,11 @@ namespace Physica::Core {
 
         using device_obj_type = device_obj<LinearLayer<ScalarType, true>>;
         using DiffScalar1 = Diff<ValueType, DiffMode::Reverse, 1>;
-        using LossType = typename Loss<ScalarType>::LossType;
+        using LossType = Loss<ScalarType>::LossType;
         constexpr static bool IsTrainMode = ScalarType::Order == 2;
         static_assert(std::is_same<OutputType, ScalarType>::value, "[Error]: Output is energy, which should be a scalar");
     private:
-        using DiffGuard = typename std::conditional<IsTrainMode, AutoDiffGuard<ScalarType>, PlainStruct<void>>::type;
+        using DiffGuard = std::conditional<IsTrainMode, AutoDiffGuard<ScalarType>, PlainStruct<void>>::type;
 
         DiffGuard diffGuard;
     public:

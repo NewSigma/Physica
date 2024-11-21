@@ -47,8 +47,8 @@ namespace Physica::Core {
     namespace Internal {
         template<Vector T1, Vector T2 = T1>
         class EnableSIMD {
-            using ScalarType = typename T1::ScalarType;
-            using ValueType = typename ScalarType::ValueType;
+            using ScalarType = T1::ScalarType;
+            using ValueType = ScalarType::ValueType;
             constexpr static bool isSameScalar = std::is_same<ValueType, typename T2::ValueType>::value;
         public:
             constexpr static bool value = isSameScalar && BestPacket<ScalarType, T1::SizeAtCompile>::Size > 1;
@@ -72,17 +72,17 @@ namespace Physica::Core {
         template<size_t Length>
         using BlockType = RVectorBlock<Derived, Length>;
     public:
-        using ScalarType = typename Traits<Derived>::ScalarType;
-        using ValueType = typename ScalarType::ValueType;
+        using ScalarType = Traits<Derived>::ScalarType;
+        using ValueType = ScalarType::ValueType;
         constexpr static size_t SizeAtCompile = Traits<Derived>::SizeAtCompile;
-        using PacketType = typename BestPacket<ScalarType, SizeAtCompile>::Type;
+        using PacketType = BestPacket<ScalarType, SizeAtCompile>::Type;
         using ColMatrix = DenseMatrix<ScalarType, MatrixOption::Col | MatrixOption::Vector, SizeAtCompile, 1, HostAllocator<ScalarType>>;
         using RowMatrix = DenseMatrix<ScalarType, MatrixOption::Row | MatrixOption::Vector, 1, SizeAtCompile, HostAllocator<ScalarType>>;
         constexpr static bool isForwardDiff = ScalarType::isForwardDiff;
         constexpr static bool isReverseDiff = ScalarType::isReverseDiff;
         constexpr static bool isComplex = ScalarType::isComplex;
     private:
-        using RealType = typename ScalarType::RealType;
+        using RealType = ScalarType::RealType;
     public:
         ~RValueVector() = default;
         /* Operations */

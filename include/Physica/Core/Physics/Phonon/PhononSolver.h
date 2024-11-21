@@ -30,15 +30,15 @@ namespace Physica::Core {
         using ComplexType = Complex<T>;
         using FFT3D = FFT<T, 3>;
         using MDCellType = MDCell<T>;
-        using PositionMatrix = typename MDCellType::PositionMatrix;
-        using Index3D = typename FCProjector<T>::Index3D;
-        using RSpaceFCMat = typename FCProjector<T>::RSpaceFCMat;
-        using RSpaceFCGrid = typename FCProjector<T>::RSpaceFCGrid;
+        using PositionMatrix = MDCellType::PositionMatrix;
+        using Index3D = FCProjector<T>::Index3D;
+        using RSpaceFCMat = FCProjector<T>::RSpaceFCMat;
+        using RSpaceFCGrid = FCProjector<T>::RSpaceFCGrid;
         using KSpaceFCMat = DenseMatrix<ComplexType>;
         using KSpaceFCGrid = GridStorage<KSpaceFCMat>;
         using EigenSolverType = EigenSolver<ComplexType>;
         using QPointGrid = GridStorage<EigenSolverType>;
-        using BornChargeArray = typename RSpaceEwald<T, true>::BornChargeArray;
+        using BornChargeArray = RSpaceEwald<T, true>::BornChargeArray;
         constexpr static unsigned int Dim = Traits<MDCellType>::Dim;
     private:
         using EwaldType = Ewald<T>;
@@ -215,7 +215,7 @@ namespace Physica::Core {
     }
 
     template<Scalar T>
-    typename PhononSolver<T>::KSpaceFCGrid PhononSolver<T>::toKSpace(const RSpaceFCGrid& rSpaceGrid) const {
+    PhononSolver<T>::KSpaceFCGrid PhononSolver<T>::toKSpace(const RSpaceFCGrid& rSpaceGrid) const {
         assert(superSize == rSpaceGrid.getDim() && "[Error]: Super sizes do not match");
         assert(getUnitCellDOF() == rSpaceGrid(0, 0, 0).getRow() && "[Error]: DOF do not match");
         const size_t unitCellDOF = getUnitCellDOF();
@@ -239,7 +239,7 @@ namespace Physica::Core {
     }
 
     template<Scalar T>
-    typename PhononSolver<T>::KSpaceFCMat PhononSolver<T>::interpolatePoint(
+    PhononSolver<T>::KSpaceFCMat PhononSolver<T>::interpolatePoint(
             Vector3D<T> qPoint, const KSpaceFCGrid& forceConstants) const {
         const Vector3D<T> qVector = unitCell.makeRepLattice().transpose() * qPoint;
         const size_t unitCellDOF = getUnitCellDOF();
@@ -375,7 +375,7 @@ namespace Physica::Core {
     }
 
     template<Scalar T>
-    typename PhononSolver<T>::MDCellType
+    PhononSolver<T>::MDCellType
     PhononSolver<T>::shiftAtom(const VectorND<T>& eigenVector, T distance) {
         assert(eigenVector.getLength() == getUnitCellDOF() && "[Error]: This is not a eigenVector of current cell");
         PositionMatrix shiftPos = unitCell.getPos() + eigenVector.reshape_row(getNumUnitCellAtom(), 3) * distance;
@@ -390,7 +390,7 @@ namespace Physica::Core {
     }
 
     template<Scalar T>
-    typename PhononSolver<T>::EigenSolverType
+    PhononSolver<T>::EigenSolverType
     PhononSolver<T>::diagonalize(const KSpaceFCMat& dynamicMatrix) {
         const size_t unitCellDOF = dynamicMatrix.getRow();
         auto eigen = EigenSolverType(unitCellDOF);
@@ -400,7 +400,7 @@ namespace Physica::Core {
     }
 
     template<Scalar T>
-    typename PhononSolver<T>::QPointGrid PhononSolver<T>::diagonalize(
+    PhononSolver<T>::QPointGrid PhononSolver<T>::diagonalize(
             const KSpaceFCGrid& dynamicMatrixes) {
         const auto& matrixes = dynamicMatrixes.flatten();
         const size_t unitCellDOF = matrixes[0].getRow();

@@ -23,7 +23,7 @@ namespace Physica::Core {
         template<Scalar T, int Order>
         __global__ void __launch_bounds__(1, 1) TraceSegment_setKernel(
                 Physica::PlainStruct<Core::device_obj<TraceSegment<T, Order>>> segment_, T value) {
-            using DiffRecord = typename Core::device_obj<TraceSegment<T, Order>>::DiffRecord;
+            using DiffRecord = Core::device_obj<TraceSegment<T, Order>>::DiffRecord;
             auto& segment = segment_.getDerived();
             segment.getRecords()[0] = DiffRecord{0, ExprType::Set};
             segment.getValues()[0] = value;
@@ -68,13 +68,13 @@ namespace Physica::Core {
     }
 
     template<Scalar T, int Order>
-    __host__ __device__ inline typename device_obj<TraceSegment<T, Order>>::DiffScalar
+    __host__ __device__ inline device_obj<TraceSegment<T, Order>>::DiffScalar
     device_obj<TraceSegment<T, Order>>::operator[](size_t index) {
         return DiffScalar(values.data_ptr(index), grads.data_ptr(index));
     }
 
     template<Scalar T, int Order>
-    __host__ __device__ inline const typename device_obj<TraceSegment<T, Order>>::DiffScalar
+    __host__ __device__ inline const device_obj<TraceSegment<T, Order>>::DiffScalar
     device_obj<TraceSegment<T, Order>>::operator[](size_t index) const {
         return const_cast<This&>(*this).operator[](index);
     }

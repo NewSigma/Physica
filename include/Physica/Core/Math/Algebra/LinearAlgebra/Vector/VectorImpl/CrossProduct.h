@@ -40,7 +40,7 @@ namespace Physica::Core {
             v[1] = v1[2] * v2[0] - v1[0] * v2[2];
             v[2] = v1[0] * v2[1] - v1[1] * v2[0];
             if constexpr (isReverseDiff) {
-                using TracerType = typename ScalarType::TracerType;
+                using TracerType = ScalarType::TracerType;
                 TracerType::getInstance().reserve(3);
                 for (int i = 0; i < 3; ++i)
                     v[i] = v[i].copy();
@@ -58,8 +58,7 @@ namespace Physica {
                       (Traits<V2>::SizeAtCompile == 3 || Traits<V2>::SizeAtCompile == Dynamic),
                       "CrossProduct can apply on 3-dim vectors only");
     public:
-        using ScalarType = typename Core::Internal::BinaryScalarOpRtnTy<typename V1::ScalarType,
-                                                                             typename V2::ScalarType>::Type;
+        using ScalarType = Core::Internal::BinaryScalarOpRtnTy<typename V1::ScalarType, typename V2::ScalarType>::Type;
         constexpr static size_t SizeAtCompile = 3;
     };
 }

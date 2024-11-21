@@ -31,8 +31,8 @@ namespace Physica::Core {
     template<Matrix T>
     class Bidiagonalization {
         using This = Bidiagonalization<T>;
-        using ScalarType = typename T::ScalarType;
-        using WorkingMatrix = typename T::ColMatrix;
+        using ScalarType = T::ScalarType;
+        using WorkingMatrix = T::ColMatrix;
         constexpr static size_t NumSingularValue = T::RowAtCompile > T::ColAtCompile
                                                                             ? T::ColAtCompile
                                                                             : T::RowAtCompile;

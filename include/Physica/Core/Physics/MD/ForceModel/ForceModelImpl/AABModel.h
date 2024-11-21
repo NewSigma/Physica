@@ -31,10 +31,10 @@ namespace Physica::Core {
     class AABModel {
     public:
         constexpr static unsigned int Dim = 3;
-        using ValueType = typename T::ValueType;
+        using ValueType = T::ValueType;
         using MDCellType = MDCell<T, Dim>;
-        using LatticeMatrix = typename MDCellType::LatticeMatrix;
-        using PositionMatrix = typename MDCellType::PositionMatrix;
+        using LatticeMatrix = MDCellType::LatticeMatrix;
+        using PositionMatrix = MDCellType::PositionMatrix;
     public:
         ~AABModel() = default;
         /* Static members */
@@ -52,7 +52,7 @@ namespace Physica::Core {
 
     template<Scalar T>
     PermutationMatrix<T> AABModel<T>::sortPosition(MDCellType& cell, size_t atomicNum1, size_t atomicNum2) {
-        using MassVector = typename MDCellType::MassVector;
+        using MassVector = MDCellType::MassVector;
         const auto& source = cell.getPos();
         const size_t numAtom = source.getRow();
         assert(numAtom % 3 == 0);

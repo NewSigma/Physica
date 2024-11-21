@@ -28,7 +28,7 @@ namespace Physica::Core {
         using This = LVectorBlock<T, Length>;
         using Base = LValueVector<This>;
     public:
-        using ScalarType = typename Base::ScalarType;
+        using ScalarType = Base::ScalarType;
     protected:
         using typename Base::PtrTy;
         using typename Base::ConstPtrTy;
@@ -74,14 +74,14 @@ namespace Physica::Core {
     }
 
     template<LVector T, size_t Length>
-    __host__ __device__ inline typename LVectorBlock<T, Length>::PtrTy
+    __host__ __device__ inline LVectorBlock<T, Length>::PtrTy
     LVectorBlock<T, Length>::data_ptr(size_t index) {
         assert((index + from) < to);
         return vec.data_ptr(index + from);
     }
 
     template<LVector T, size_t Length>
-    __host__ __device__ inline typename LVectorBlock<T, Length>::ConstPtrTy
+    __host__ __device__ inline LVectorBlock<T, Length>::ConstPtrTy
     LVectorBlock<T, Length>::data_ptr(size_t index) const {
         assert((index + from) < to);
         return vec.data_ptr(index + from);
@@ -92,7 +92,7 @@ namespace Physica {
     template<LVector T, size_t Length>
     class Traits<LVectorBlock<T, Length>> {
     public:
-        using ScalarType = typename T::ScalarType;
+        using ScalarType = T::ScalarType;
         constexpr static size_t SizeAtCompile = Length;
         constexpr static bool FastAssign = false;
         constexpr static bool FastPacket = false;

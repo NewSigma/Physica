@@ -28,7 +28,7 @@ namespace Physica::Core {
     template<class Derived>
     Derived& ContinuousMatrix<Derived>::operator=(const ScalarType& s) {
         if constexpr (isReverseDiff) {
-            using TracerType = typename ScalarType::TracerType;
+            using TracerType = ScalarType::TracerType;
             const size_t maxMajor = Base::getMaxMajor();
             const size_t maxMinor = Base::getMaxMinor();
             TracerType::getInstance().reserve(maxMajor * maxMinor);
@@ -37,7 +37,7 @@ namespace Physica::Core {
     }
 
     template<class Derived>
-    inline typename ContinuousMatrix<Derived>::RowVector ContinuousMatrix<Derived>::row(size_t r) {
+    inline ContinuousMatrix<Derived>::RowVector ContinuousMatrix<Derived>::row(size_t r) {
         const bool useSpecialization = ContinuousMatrix<Derived>::ColAtCompile == 1;
         if constexpr (useSpecialization)
             return {Base::getDerived(), r, 1, 0};
@@ -46,7 +46,7 @@ namespace Physica::Core {
     }
 
     template<class Derived>
-    inline const typename ContinuousMatrix<Derived>::RowVector ContinuousMatrix<Derived>::row(size_t r) const {
+    inline const ContinuousMatrix<Derived>::RowVector ContinuousMatrix<Derived>::row(size_t r) const {
         const bool useSpecialization = ContinuousMatrix<Derived>::ColAtCompile == 1;
         if constexpr (useSpecialization)
             return {Base::getConstCastDerived(), r, 1, 0};
@@ -60,12 +60,12 @@ namespace Physica::Core {
     }
 
     template<class Derived>
-    inline typename ContinuousMatrix<Derived>::ColVector ContinuousMatrix<Derived>::col(size_t c) {
+    inline ContinuousMatrix<Derived>::ColVector ContinuousMatrix<Derived>::col(size_t c) {
         return {Base::getDerived(), 0, Base::getRow(), c};
     }
 
     template<class Derived>
-    inline const typename ContinuousMatrix<Derived>::ColVector ContinuousMatrix<Derived>::col(size_t c) const {
+    inline const ContinuousMatrix<Derived>::ColVector ContinuousMatrix<Derived>::col(size_t c) const {
         if constexpr (isColMatrix && isReverseDiff) {
             ColVector result{Base::getConstCastDerived(), 0, Base::getRow(), c};
             assert(result.checkContinuous() && "[Error]: Const matrix must be continuous because we cannot modify it and make it continuous");
@@ -75,84 +75,84 @@ namespace Physica::Core {
 
     template<class Derived>
     template<size_t Row>
-    inline typename ContinuousMatrix<Derived>::template RowBlock<Row>
+    inline ContinuousMatrix<Derived>::template RowBlock<Row>
     ContinuousMatrix<Derived>::rows(size_t fromRow, size_t rowCount) {
         return {Base::getDerived(), fromRow, rowCount, 0, Base::getCol()};
     }
 
     template<class Derived>
     template<size_t Row>
-    inline const typename ContinuousMatrix<Derived>::template RowBlock<Row>
+    inline const ContinuousMatrix<Derived>::template RowBlock<Row>
     ContinuousMatrix<Derived>::rows(size_t fromRow, size_t rowCount) const {
         return {Base::getConstCastDerived(), fromRow, rowCount, 0, Base::getCol()};
     }
 
     template<class Derived>
     template<size_t Row>
-    inline typename ContinuousMatrix<Derived>::template RowBlock<Row>
+    inline ContinuousMatrix<Derived>::template RowBlock<Row>
     ContinuousMatrix<Derived>::topRows(size_t to) {
         return {Base::getDerived(), 0, to, 0, Base::getCol()};
     }
 
     template<class Derived>
     template<size_t Row>
-    inline const typename ContinuousMatrix<Derived>::template RowBlock<Row>
+    inline const ContinuousMatrix<Derived>::template RowBlock<Row>
     ContinuousMatrix<Derived>::topRows(size_t to) const {
         return {Base::getConstCastDerived(), 0, to, 0, Base::getCol()};
     }
 
     template<class Derived>
     template<size_t Row>
-    inline typename ContinuousMatrix<Derived>::template RowBlock<Row>
+    inline ContinuousMatrix<Derived>::template RowBlock<Row>
     ContinuousMatrix<Derived>::bottomRows(size_t from) {
         return {Base::getDerived(), from, Base::getRow() - from, 0, Base::getCol()};
     }
 
     template<class Derived>
     template<size_t Row>
-    inline const typename ContinuousMatrix<Derived>::template RowBlock<Row>
+    inline const ContinuousMatrix<Derived>::template RowBlock<Row>
     ContinuousMatrix<Derived>::bottomRows(size_t from) const {
         return {Base::getConstCastDerived(), from, Base::getRow() - from, 0, Base::getCol()};
     }
 
     template<class Derived>
     template<size_t Col>
-    inline typename ContinuousMatrix<Derived>::template ColBlock<Col>
+    inline ContinuousMatrix<Derived>::template ColBlock<Col>
     ContinuousMatrix<Derived>::cols(size_t fromCol, size_t colCount) {
         return {Base::getDerived(), 0, Base::getRow(), fromCol, colCount};
     }
 
     template<class Derived>
     template<size_t Col>
-    inline const typename ContinuousMatrix<Derived>::template ColBlock<Col>
+    inline const ContinuousMatrix<Derived>::template ColBlock<Col>
     ContinuousMatrix<Derived>::cols(size_t fromCol, size_t colCount) const {
         return {Base::getConstCastDerived(), 0, Base::getRow(), fromCol, colCount};
     }
 
     template<class Derived>
     template<size_t Col>
-    inline typename ContinuousMatrix<Derived>::template ColBlock<Col>
+    inline ContinuousMatrix<Derived>::template ColBlock<Col>
     ContinuousMatrix<Derived>::leftCols(size_t to) {
         return {Base::getDerived(), 0, Base::getRow(), 0, to};
     }
 
     template<class Derived>
     template<size_t Col>
-    inline const typename ContinuousMatrix<Derived>::template ColBlock<Col>
+    inline const ContinuousMatrix<Derived>::template ColBlock<Col>
     ContinuousMatrix<Derived>::leftCols(size_t to) const {
         return {Base::getConstCastDerived(), 0, Base::getRow(), 0, to};
     }
 
     template<class Derived>
     template<size_t Col>
-    inline typename ContinuousMatrix<Derived>::template ColBlock<Col>
+    inline ContinuousMatrix<Derived>::template ColBlock<Col>
     ContinuousMatrix<Derived>::rightCols(size_t from) {
         return {Base::getDerived(), 0, Base::getRow(), from, Base::getCol() - from};
     }
 
     template<class Derived>
     template<size_t Col>
-    inline const typename ContinuousMatrix<Derived>::template ColBlock<Col>
+    inline const ContinuousMatrix<Derived>::template ColBlock<Col>
     ContinuousMatrix<Derived>::rightCols(size_t from) const {
         return {Base::getConstCastDerived(), 0, Base::getRow(), from, Base::getCol() - from};
     }
@@ -278,7 +278,7 @@ namespace Physica::Core {
     template<class RandomGenerator>
     void ContinuousMatrix<Derived>::random_uniform(RandomGenerator& gen) {
         if constexpr (isReverseDiff) {
-            using TracerType = typename ScalarType::TracerType;
+            using TracerType = ScalarType::TracerType;
             const size_t maxMajor = Base::getMaxMajor();
             const size_t maxMinor = Base::getMaxMinor();
             TracerType::getInstance().reserve(maxMajor * maxMinor);
@@ -294,7 +294,7 @@ namespace Physica::Core {
     template<class RandomGenerator>
     void ContinuousMatrix<Derived>::random_normal(RandomGenerator& gen) {
         if constexpr (isReverseDiff) {
-            using TracerType = typename ScalarType::TracerType;
+            using TracerType = ScalarType::TracerType;
             const size_t maxMajor = Base::getMaxMajor();
             const size_t maxMinor = Base::getMaxMinor();
             TracerType::getInstance().reserve(maxMajor * maxMinor);
@@ -310,7 +310,7 @@ namespace Physica::Core {
     template<class Distribution, class RandomGenerator>
     void ContinuousMatrix<Derived>::random_any(Distribution& dist, RandomGenerator& gen) {
         if constexpr (isReverseDiff) {
-            using TracerType = typename ScalarType::TracerType;
+            using TracerType = ScalarType::TracerType;
             const size_t maxMajor = Base::getMaxMajor();
             const size_t maxMinor = Base::getMaxMinor();
             TracerType::getInstance().reserve(maxMajor * maxMinor);

@@ -51,7 +51,7 @@ namespace Physica::Core {
         using This = BinaryMatrixExpr<Type, LHS, RHS>;
         using Base = RValueMatrix<This>;
         using LHS1 = LHS;
-        using RHS1 = typename std::conditional<Scalar<RHS>, typename RHS::ScalarType, RHS>::type;
+        using RHS1 = std::conditional<Scalar<RHS>, typename RHS::ScalarType, RHS>::type;
     private:
         const LHS1* lhs;
         const RHS1* rhs;
@@ -90,9 +90,9 @@ namespace Physica {
         constexpr static int Storage = SameStorage ? MatrixOption::getStorage<T>()
                                                    : int(MatrixOption::AnyStorage);
         constexpr static bool IsReal = Type == ExprType::Abs || Type == ExprType::Square;
-        using ResultType = typename Internal::BinaryScalarOpRtnTy<typename T::ScalarType, typename U::ScalarType>::Type;
+        using ResultType = Internal::BinaryScalarOpRtnTy<typename T::ScalarType, typename U::ScalarType>::Type;
     public:
-        using ScalarType = typename std::conditional<IsReal, typename ResultType::RealType, ResultType>::type;
+        using ScalarType = std::conditional<IsReal, typename ResultType::RealType, ResultType>::type;
         constexpr static int Option = Major | Storage;
         // Optimize: T and U may not have same compiling size, for example, T may be fixed size and U may be dynamic
         constexpr static size_t RowAtCompile = T::RowAtCompile;
@@ -103,7 +103,7 @@ namespace Physica {
     template<Core::ExprType Type, Matrix T, Scalar U>
     class Traits<Core::MatrixExpr<Type, T, U>> {
     public:
-        using ScalarType = typename Core::Internal::BinaryScalarOpRtnTy<typename T::ScalarType, U>::Type;
+        using ScalarType = Core::Internal::BinaryScalarOpRtnTy<typename T::ScalarType, U>::Type;
         constexpr static int Option = T::Option;
         constexpr static size_t RowAtCompile = T::RowAtCompile;
         constexpr static size_t ColAtCompile = T::ColAtCompile;

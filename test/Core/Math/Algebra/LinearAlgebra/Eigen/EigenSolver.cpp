@@ -24,7 +24,7 @@ using namespace Physica::Core;
 
 template<Vector T>
 bool vectorNearZero(const LValueVector<T>& v, double precision) {
-    using ScalarType = typename T::ScalarType;
+    using ScalarType = T::ScalarType;
     for (size_t i = 0; i < v.getLength(); ++i)
         if (!scalarNear(v[i], ScalarType(0), precision))
             return false;
@@ -33,10 +33,10 @@ bool vectorNearZero(const LValueVector<T>& v, double precision) {
 
 template<Matrix T>
 bool eigenTest(const T& mat, double precision) {
-    using ScalarType = typename T::ScalarType;
+    using ScalarType = T::ScalarType;
     auto solver = EigenSolver<ScalarType>(mat, true);
-    using ComplexVector = typename EigenSolver<ScalarType>::EigenvalueVector;
-    using ComplexMatrix = typename EigenSolver<ScalarType>::EigenvectorMatrix;
+    using ComplexVector = EigenSolver<ScalarType>::EigenvalueVector;
+    using ComplexMatrix = EigenSolver<ScalarType>::EigenvectorMatrix;
     const size_t order = mat.getRow();
     auto eigenvectors = solver.getEigenvectors();
     for (size_t i = 0; i < order; ++i) {
@@ -59,7 +59,7 @@ bool eigenTest(const T& mat, double precision) {
 
 template<Matrix T, bool IsHermite>
 bool reconstructTest(const T& mat, double precision) {
-    using ScalarType = typename T::ScalarType;
+    using ScalarType = T::ScalarType;
     auto solver = EigenSolver<ScalarType>(mat, true);
     const T result = IsHermite ? solver.reconstruct_hermite() : solver.reconstruct();
     if (!matrixNear(result, mat, precision))

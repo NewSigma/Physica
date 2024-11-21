@@ -28,8 +28,8 @@ namespace Physica::Core {
     template<Scalar T, bool IsPeriodBoundary>
     class TodaModel {
         using MDCellType = MDCell<T, 1>;
-        using LatticeMatrix = typename MDCellType::LatticeMatrix;
-        using ForceConstMatrix = typename EmptyForceModel<T, 1>::ForceConstMatrix;
+        using LatticeMatrix = MDCellType::LatticeMatrix;
+        using ForceConstMatrix = EmptyForceModel<T, 1>::ForceConstMatrix;
 
         T springLength;
     public:
@@ -183,7 +183,7 @@ namespace Physica::Core {
     }
 
     template<Scalar T, bool IsPeriodBoundary>
-    typename TodaModel<T, IsPeriodBoundary>::ForceConstMatrix
+    TodaModel<T, IsPeriodBoundary>::ForceConstMatrix
     TodaModel<T, IsPeriodBoundary>::forceConst(const MDCellType& cell) const {
         const size_t dof = cell.getDOF();
         ForceConstMatrix result(dof, T(0));
@@ -215,7 +215,7 @@ namespace Physica::Core {
     }
 
     template<Scalar T, bool IsPeriodBoundary>
-    typename TodaModel<T, IsPeriodBoundary>::LatticeMatrix
+    TodaModel<T, IsPeriodBoundary>::LatticeMatrix
     TodaModel<T, IsPeriodBoundary>::virial(const MDCellType& cell) const {
         const size_t numParticle = cell.getNumParticle();
         const auto& pos = cell.getPos();

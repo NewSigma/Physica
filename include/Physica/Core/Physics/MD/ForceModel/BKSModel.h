@@ -35,8 +35,8 @@ namespace Physica::Core {
         using This = BKSModel<T, EwaldType, AvoidTooNear>;
         using Base = PairModel<This>;
         using AABModelType = AABModel<T>;
-        using REwaldType = typename Traits<EwaldType>::REwaldType;
-        using DoublePotType = typename std::conditional<AvoidTooNear, T, PlainStruct<void>>::type;
+        using REwaldType = Traits<EwaldType>::REwaldType;
+        using DoublePotType = std::conditional<AvoidTooNear, T, PlainStruct<void>>::type;
     public:
         using typename Base::ValueType;
         using typename Base::MDCellType;
@@ -87,7 +87,7 @@ namespace Physica::Core {
         [[nodiscard]] size_t getNumMolecule() const noexcept { return getNumParticle() / 3; }
         [[nodiscard]] size_t getNumParticle() const noexcept { return ewald.getNumParticle(); }
         [[nodiscard]] const EwaldType& getEwald() const noexcept { return ewald; }
-        [[nodiscard]] const typename MDCellType::LatticeMatrix& getLattice() const noexcept { return ewald.getLattice(); }
+        [[nodiscard]] const MDCellType::LatticeMatrix& getLattice() const noexcept { return ewald.getLattice(); }
         /* Setters */
         inline void setLattice(LatticeMatrix lattice);
         /* Static members */
@@ -194,7 +194,7 @@ namespace Physica::Core {
     }
 
     template<Scalar T, class EwaldType, bool AvoidTooNear>
-    typename BKSModel<T, EwaldType, AvoidTooNear>::LatticeMatrix
+    BKSModel<T, EwaldType, AvoidTooNear>::LatticeMatrix
     inline BKSModel<T, EwaldType, AvoidTooNear>::virial(const MDCellType& cell) {
         return Base::virial(cell) + ewald.virial(cell.getPos());
     }

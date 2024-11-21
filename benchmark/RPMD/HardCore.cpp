@@ -40,23 +40,23 @@ constexpr double unitMassM = 1;
 constexpr size_t numReplica = 1;
 constexpr size_t maxHandleNum = 100;
 using MDType = RPMD<ScalarType, 1, numReplica>;
-using MDCellType = typename MDType::MDCellType;
+using MDCellType = MDType::MDCellType;
 using ForceModel = EmptyForceModel<ScalarType, 1>;
 using KineticModel = HardCore<ScalarType, true, numReplica, RPMDIntegrator::Exact>;
 
 namespace {
     MDCellType makeSystem(std::mt19937& gen) {
-        typename MDCellType::LatticeMatrix lattice{latticeSize};
+        MDCellType::LatticeMatrix lattice{latticeSize};
 
         std::uniform_real_distribution dist{};
         VectorND<ScalarType> posVec(numMolecular);
         for (auto& elem : posVec)
             elem = dist(gen) * latticeSize;
         std::sort(posVec.begin(), posVec.end());
-        typename MDCellType::PositionMatrix pos(numMolecular, 1);
+        MDCellType::PositionMatrix pos(numMolecular, 1);
         pos.col(0) = posVec;
 
-        typename MDCellType::MassVector massVec(numMolecular);
+        MDCellType::MassVector massVec(numMolecular);
         for (size_t i = 0; i < numMolecular; ++i) {
             massVec[i] = unitMassM;
         }

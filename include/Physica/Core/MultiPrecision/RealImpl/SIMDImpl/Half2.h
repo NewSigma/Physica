@@ -29,7 +29,7 @@ namespace Physica::Core {
         using ScalarType = float16;
     public:
         constexpr static size_t Size = Length == 1 ? 1 : 2;
-        using Type = typename std::conditional<Length == 1, float16, SIMD<float16, 2>>::type;
+        using Type = std::conditional<Length == 1, float16, SIMD<float16, 2>>::type;
     };
 
     template<size_t Length>

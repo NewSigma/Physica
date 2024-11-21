@@ -37,8 +37,8 @@ namespace Physica::Core {
         using CRIteType = RIterator<const This>;
     private:
         using ValueVector = DenseVector<T, Length>;
-        using GradType = typename ScalarType::GradType;
-        using GradVector = typename std::conditional<Order == 1, ValueVector, DenseVector<GradType, Length>>::type;
+        using GradType = ScalarType::GradType;
+        using GradVector = std::conditional<Order == 1, ValueVector, DenseVector<GradType, Length>>::type;
 
         ValueVector values;
         GradVector grads;
@@ -101,7 +101,7 @@ namespace Physica::Core {
         using TracerType = DiffTracer<T, Order>;
         using SegmentType = TraceSegment<T, Order>;
     public:
-        using ScalarType = typename Base::ScalarType;
+        using ScalarType = Base::ScalarType;
     private:
         SegmentType& traceSeg;
     public:

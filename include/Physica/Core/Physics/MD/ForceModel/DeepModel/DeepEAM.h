@@ -25,10 +25,10 @@ namespace Physica::Core {
     template<class NetType, bool IsSmallCell>
     class DeepEAM {
         static_assert(std::is_base_of<ConservedFieldNet<NetType>, NetType>::value, "[Error]: DeepEAM must be a conserved field");
-        using ScalarType = typename NetType::ScalarType;
-        using ValueType = typename ScalarType::ValueType;
+        using ScalarType = NetType::ScalarType;
+        using ValueType = ScalarType::ValueType;
         using DescriptorBase = ChebyshevRadial<ScalarType, IsSmallCell>;
-        using MDCellType = typename DescriptorBase::MDCellType;
+        using MDCellType = DescriptorBase::MDCellType;
 
         DescriptorBase base;
         NetType net;
@@ -55,7 +55,7 @@ namespace Physica::Core {
     DeepEAM<NetType, IsSmallCell>::DeepEAM(DescriptorBase base_, NetType net_) : base(std::move(base_)), net(std::move(net_)) {}
 
     template<class NetType, bool IsSmallCell>
-    typename DeepEAM<NetType, IsSmallCell>::ValueType
+    DeepEAM<NetType, IsSmallCell>::ValueType
     DeepEAM<NetType, IsSmallCell>::potentialV(const MDCellType& cell) const {
         ValueType result = 0;
         const auto descriptors = base.project(cell);

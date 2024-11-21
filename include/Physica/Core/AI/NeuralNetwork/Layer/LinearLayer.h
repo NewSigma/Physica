@@ -32,7 +32,7 @@ namespace Physica::Core {
         using typename Base::ValueType;
         constexpr static int Option = MatrixOption::Row | MatrixOption::Vector;
         using MatrixType = DenseMatrix<T, Option>;
-        using BiasType = typename std::conditional<WithBias, InputType, PlainStruct<void>>::type;
+        using BiasType = std::conditional<WithBias, InputType, PlainStruct<void>>::type;
     public:
         using device_obj_type = device_obj<This>;
     private:
@@ -83,7 +83,7 @@ namespace Physica::Core {
             : weights(layer.getWeights()), bias(layer.getBias()) {}
 
     template<Scalar T, bool WithBias>
-    inline typename LinearLayer<T, WithBias>::OutputType LinearLayer<T, WithBias>::forward(const InputType& x) const {
+    inline LinearLayer<T, WithBias>::OutputType LinearLayer<T, WithBias>::forward(const InputType& x) const {
         assert(x.getLength() == getInputDim() && "[Error]: Data dim and required input dim must be equal");
         if constexpr (WithBias)
             return weights * x + bias;
@@ -111,7 +111,7 @@ namespace Physica::Core {
     template<Scalar T, bool WithBias>
     template<class RandomType>
     void LinearLayer<T, WithBias>::random_xavier_uniform(ValueType gain, RandomType& gen) {
-        using MachineType = typename T::MachineType;
+        using MachineType = T::MachineType;
         const auto factor = (gain * sqrt(ValueType(6) / ValueType(getInputDim() + getOutputDim()))).toMachine();
         std::uniform_real_distribution<MachineType> dist(-factor, factor);
         weights.random_any(dist, gen);
@@ -122,7 +122,7 @@ namespace Physica::Core {
     template<Scalar T, bool WithBias>
     template<class RandomType>
     void LinearLayer<T, WithBias>::random_xavier_normal(ValueType gain, RandomType& gen) {
-        using MachineType = typename T::MachineType;
+        using MachineType = T::MachineType;
         const auto deviation = (gain * sqrt(ValueType(2) / ValueType(getInputDim() + getOutputDim()))).toMachine();
         std::normal_distribution<MachineType> dist(0, deviation);
         weights.random_any(dist, gen);

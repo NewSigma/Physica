@@ -30,8 +30,8 @@ namespace Physica::Core {
         using Base = ContinuousVector<This>;
         using typename Base::ScalarType;
     protected:
-        using PtrTy = typename ScalarType::PtrTy;
-        using ConstPtrTy = typename ScalarType::ConstPtrTy;
+        using PtrTy = ScalarType::PtrTy;
+        using ConstPtrTy = ScalarType::ConstPtrTy;
     public:
         ContinuousFlatten(ContinuousMatrix<T>& mat_) : mat(mat_.getDerived()) {}
         ContinuousFlatten(const This&) = delete;
@@ -52,7 +52,7 @@ namespace Physica::Core {
     };
 
     template<Matrix T>
-    __host__ __device__ inline typename ContinuousFlatten<T>::PtrTy ContinuousFlatten<T>::data_ptr(size_t index) {
+    __host__ __device__ inline ContinuousFlatten<T>::PtrTy ContinuousFlatten<T>::data_ptr(size_t index) {
         const size_t major = index / mat.getMaxMinor();
         const size_t minor = index % mat.getMaxMinor();
         const size_t row = MatrixOption::rowFromMajorMinor<T>(major, minor);
@@ -61,7 +61,7 @@ namespace Physica::Core {
     }
 
     template<Matrix T>
-    __host__ __device__ inline typename ContinuousFlatten<T>::ConstPtrTy ContinuousFlatten<T>::data_ptr(size_t index) const {
+    __host__ __device__ inline ContinuousFlatten<T>::ConstPtrTy ContinuousFlatten<T>::data_ptr(size_t index) const {
         return const_cast<This&>(*this).data_ptr(index);
     }
 }
@@ -70,7 +70,7 @@ namespace Physica {
     template<Matrix T>
     class Traits<ContinuousFlatten<T>> {
     public:
-        using ScalarType = typename T::ScalarType;
+        using ScalarType = T::ScalarType;
         constexpr static size_t SizeAtCompile = T::RowAtCompile * T::ColAtCompile;
 
         constexpr static bool FastAssign = false;

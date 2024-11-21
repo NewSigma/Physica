@@ -28,7 +28,7 @@ namespace Physica::Core {
      */
     template<Scalar T>
     class IceGenerator {
-        using PositionMatrix = typename PeriodicCell<T, 3>::PositionMatrix;
+        using PositionMatrix = PeriodicCell<T, 3>::PositionMatrix;
         using CrystalCellType = CrystalCell<T>;
         constexpr static double BondLengthOH = PhyConst<AU>::angstormToBohr(1);
 

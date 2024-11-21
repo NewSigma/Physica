@@ -26,7 +26,7 @@ namespace Physica::Core {
         static_assert(!is_device_obj<T>::value, "[Error]: Include corresponding *.cuh file to enable CUDA support");
     public:
         constexpr static bool IsTrainMode = T::isDifferentiable;
-        using ValueType = typename T::ValueType;
+        using ValueType = T::ValueType;
         using LossType = T;
     private:
         using VectorType = VectorND<T>;

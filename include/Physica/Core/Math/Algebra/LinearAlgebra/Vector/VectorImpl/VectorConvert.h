@@ -65,7 +65,7 @@ namespace Physica::Core {
     class SquaredNormVector : public RValueVector<SquaredNormVector<T>> {
         using This = SquaredNormVector<T>;
         using Base = RValueVector<This>;
-        using ComplexType = typename T::ScalarType;
+        using ComplexType = T::ScalarType;
     public:
         using typename Base::ScalarType;
         using Base::isReverseDiff;
@@ -243,7 +243,7 @@ namespace Physica {
     template<Vector T>
     class Traits<RealVector<T>> {
     public:
-        using ScalarType = typename T::ScalarType::RealType;
+        using ScalarType = T::ScalarType::RealType;
         constexpr static size_t SizeAtCompile = T::SizeAtCompile;
         constexpr static bool FastAssign = false;
         constexpr static bool FastPacket = Traits<T>::FastPacket;
@@ -262,7 +262,7 @@ namespace Physica {
     class Traits<ValueVector<T>> {
         static_assert(T::ScalarType::isDifferentiable, "[Error]: Unnecessary toValueVector() call or toGradVector() call");
     public:
-        using ScalarType = typename T::ValueType;
+        using ScalarType = T::ValueType;
         constexpr static size_t SizeAtCompile = T::SizeAtCompile;
         constexpr static bool FastAssign = false;
         constexpr static bool FastPacket = false;
@@ -272,7 +272,7 @@ namespace Physica {
     class Traits<GradVector<T, GradOrder>> {
         static_assert(T::ScalarType::isDifferentiable, "[Error]: Unnecessary toValueVector() call or toGradVector() call");
     public:
-        using ScalarType = typename T::ScalarType::template GradRtnTy<GradOrder>;
+        using ScalarType = T::ScalarType::template GradRtnTy<GradOrder>;
         constexpr static size_t SizeAtCompile = T::SizeAtCompile;
         constexpr static bool FastAssign = false;
         constexpr static bool FastPacket = false;

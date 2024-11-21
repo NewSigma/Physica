@@ -25,7 +25,7 @@ namespace Physica::Core {
         template<LVector T1, Vector T2, bool enableSIMD, class Executor>
         struct AssignImpl {
             inline static void run(T1& v1, const T2& v2) {
-                using ScalarType = typename T1::ScalarType;
+                using ScalarType = T1::ScalarType;
                 Executor::parallel_for([&](size_t i) {
                     v1[i] = ScalarType(v2.calc(i));
                 }, v2.getLength(), Executor::getNumThread()).wait();
@@ -39,8 +39,8 @@ namespace Physica::Core {
             constexpr static size_t SizeAtCompile = size1 > size2 ? size1 : size2;
             constexpr static bool isContinuous = is_continuous<T1>::value;
         public:
-            using ScalarType = typename T1::ScalarType;
-            using AnyPacket = typename BestPacket<ScalarType, SizeAtCompile>::Type;
+            using ScalarType = T1::ScalarType;
+            using AnyPacket = BestPacket<ScalarType, SizeAtCompile>::Type;
             constexpr static size_t PacketSize = AnyPacket::size();
             constexpr static bool isReverseDiff = ScalarType::isReverseDiff;
 
@@ -107,19 +107,19 @@ namespace Physica::Core {
     template<class AnyPacket>
     inline AnyPacket RValueVector<Derived>::packet(size_t index) const {
         constexpr static bool isExpr = !std::is_base_of<LValueVector<Derived>, Derived>::value;
-        using T = typename Traits<AnyPacket>::ScalarType;
+        using T = Traits<AnyPacket>::ScalarType;
         assert(index + AnyPacket::size() <= getLength() && "[Error]: Index out of range");
         if constexpr (T::isForwardDiff) {
-            using ValuePacket = typename AnyPacket::ValuePacket;
+            using ValuePacket = AnyPacket::ValuePacket;
             if constexpr (isForwardDiff) {
-                using GradPacket = typename AnyPacket::GradPacket;
+                using GradPacket = AnyPacket::GradPacket;
                 const auto& x = Base::getDerived();
                 auto values = toValueVector(x).template packet<ValuePacket>(index);
                 auto grads = toGradVector(x).template packet<GradPacket>(index);
                 return AnyPacket(std::move(values), std::move(grads));
             }
             else {
-                using ValueType = typename T::ValueType;
+                using ValueType = T::ValueType;
                 ValueType values[AnyPacket::size()];
                 for (size_t i = 0; i < AnyPacket::size(); ++i, ++index)
                     values[i] = ValueType(calc(index));
@@ -133,7 +133,7 @@ namespace Physica::Core {
             for (size_t i = 0; i < AnyPacket::size(); ++i, ++index)
                 buffer[i] = T(calc(index));
             if constexpr (isExpr && isReverseDiff) { //Optimize: For expression such as A + B, there is no need to create new node
-                using TracerType = typename ScalarType::TracerType;
+                using TracerType = ScalarType::TracerType;
                 TracerType::getInstance().reserve(AnyPacket::size());
                 for (auto& elem : buffer)
                     elem = elem.copy();
@@ -148,19 +148,19 @@ namespace Physica::Core {
     template<class AnyPacket>
     inline AnyPacket RValueVector<Derived>::packetPartial(size_t index, size_t count) const {
         constexpr static bool isExpr = !std::is_base_of<LValueVector<Derived>, Derived>::value;
-        using T = typename Traits<AnyPacket>::ScalarType;
+        using T = Traits<AnyPacket>::ScalarType;
         assert(index + count <= getLength() && "[Error]: Index out of range");
         if constexpr (T::isForwardDiff) {
-            using ValuePacket = typename AnyPacket::ValuePacket;
+            using ValuePacket = AnyPacket::ValuePacket;
             if constexpr (isForwardDiff) {
-                using GradPacket = typename AnyPacket::GradPacket;
+                using GradPacket = AnyPacket::GradPacket;
                 const auto& x = Base::getDerived();
                 auto values = toValueVector(x).template packetPartial<ValuePacket>(index, count);
                 auto grads = toGradVector(x).template packetPartial<GradPacket>(index, count);
                 return AnyPacket(std::move(values), std::move(grads));
             }
             else {
-                using ValueType = typename T::ValueType;
+                using ValueType = T::ValueType;
                 ValueType values[AnyPacket::size()];
                 for (size_t i = 0; i < AnyPacket::size(); ++i, ++index)
                     values[i] = i < count ? ValueType(calc(index)) : ValueType(0);
@@ -174,7 +174,7 @@ namespace Physica::Core {
             for (size_t i = 0; i < AnyPacket::size(); ++i, ++index)
                 buffer[i] = i < count ? T(calc(index)) : T(0);
             if constexpr (isExpr && isReverseDiff) {
-                using TracerType = typename ScalarType::TracerType;
+                using TracerType = ScalarType::TracerType;
                 TracerType::getInstance().reserve(count);
                 for (size_t i = 0; i < count; ++i)
                     buffer[i] = buffer[i].copy();
@@ -191,27 +191,27 @@ namespace Physica::Core {
     }
 
     template<class Derived>
-    inline typename RValueVector<Derived>::RealType RValueVector<Derived>::norm1() const {
+    inline RValueVector<Derived>::RealType RValueVector<Derived>::norm1() const {
         return abs(Base::getDerived()).sum();
     }
 
     template<class Derived>
-    inline typename RValueVector<Derived>::RealType RValueVector<Derived>::norm2() const {
+    inline RValueVector<Derived>::RealType RValueVector<Derived>::norm2() const {
         return norm();
     }
 
     template<class Derived>
-    inline typename RValueVector<Derived>::RealType RValueVector<Derived>::norm() const {
+    inline RValueVector<Derived>::RealType RValueVector<Derived>::norm() const {
         return sqrt(Base::getDerived().squaredNorm());
     }
 
     template<class Derived>
-    inline typename RValueVector<Derived>::RealType RValueVector<Derived>::squaredNorm() const {
+    inline RValueVector<Derived>::RealType RValueVector<Derived>::squaredNorm() const {
         return toSquaredNormVector(Base::getDerived()).sum();
     }
 
     template<class Derived>
-    typename RValueVector<Derived>::RealType RValueVector<Derived>::lnSquaredNorm() const {
+    RValueVector<Derived>::RealType RValueVector<Derived>::lnSquaredNorm() const {
         const auto& derived = Base::getDerived();
         const RealType maxabs = abs(derived).max();
         assert(maxabs > RealType(std::numeric_limits<ScalarType>::min()) && "[Error]: ln(0) is not allowed");
@@ -220,12 +220,12 @@ namespace Physica::Core {
     }
 
     template<class Derived>
-    inline typename RValueVector<Derived>::RealType RValueVector<Derived>::normInf() const {
+    inline RValueVector<Derived>::RealType RValueVector<Derived>::normInf() const {
         return abs(Base::getDerived()).max();
     }
 
     template<class Derived>
-    typename RValueVector<Derived>::ScalarType RValueVector<Derived>::max() const {
+    RValueVector<Derived>::ScalarType RValueVector<Derived>::max() const {
         assert(getLength() != 0);
         constexpr bool EnableSIMD = Internal::EnableSIMD<Derived>::value;
         if constexpr (!EnableSIMD || isReverseDiff) {  // Optimize: Not implemented for reverse diff
@@ -273,7 +273,7 @@ namespace Physica::Core {
     }
 
     template<class Derived>
-    typename RValueVector<Derived>::ScalarType RValueVector<Derived>::min() const {
+    RValueVector<Derived>::ScalarType RValueVector<Derived>::min() const {
         assert(getLength() != 0);
         constexpr bool EnableSIMD = Internal::EnableSIMD<Derived>::value;
         if constexpr (!EnableSIMD || isReverseDiff) { // Optimize: Not implemented for reverse diff
@@ -321,7 +321,7 @@ namespace Physica::Core {
     }
 
     template<class Derived>
-    typename RValueVector<Derived>::ScalarType RValueVector<Derived>::sum() const {
+    RValueVector<Derived>::ScalarType RValueVector<Derived>::sum() const {
         assert(getLength() != 0);
         constexpr bool EnableSIMD = Internal::EnableSIMD<Derived>::value;
         if constexpr (!EnableSIMD || isReverseDiff) { // Optimize: Not implemented for reverse diff
@@ -361,7 +361,7 @@ namespace Physica::Core {
     }
 
     template<class Derived>
-    typename RValueVector<Derived>::ScalarType RValueVector<Derived>::prod() const {
+    RValueVector<Derived>::ScalarType RValueVector<Derived>::prod() const {
         assert(getLength() != 0);
         auto result = calc(0);
         for(size_t i = 1; i < getLength(); ++i)
@@ -385,7 +385,7 @@ namespace Physica::Core {
 
     template<class Derived>
     template<Vector V>
-    typename RValueVector<Derived>::ScalarType RValueVector<Derived>::angleTo(const V& v) const noexcept {
+    RValueVector<Derived>::ScalarType RValueVector<Derived>::angleTo(const V& v) const noexcept {
         return arccos(Base::getDerived() * v / (norm() * v.norm()));
     }
 
@@ -437,7 +437,7 @@ namespace Physica::Core {
 
     template<Vector T1, Vector T2>
     bool vectorNear(const T1& v1, const T2& v2, double precision) {
-        using ScalarType = typename Internal::BinaryScalarOpRtnTy<typename T1::ScalarType, typename T2::ScalarType>::Type;
+        using ScalarType = Internal::BinaryScalarOpRtnTy<typename T1::ScalarType, typename T2::ScalarType>::Type;
         assert(v1.getLength() == v2.getLength());
         for (size_t i = 0; i < v1.getLength(); ++i)
             if (!scalarNear(ScalarType(v1.calc(i)), ScalarType(v2.calc(i)), precision))

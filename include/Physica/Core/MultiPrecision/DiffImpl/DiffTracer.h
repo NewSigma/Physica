@@ -34,8 +34,8 @@ namespace Physica::Core {
     public:
         using SegmentType = TraceSegment<T, Order>;
         using TraceListType = std::forward_list<SegmentType>;
-        using DiffScalar = typename SegmentType::DiffScalar;
-        using DiffRecord = typename SegmentType::DiffRecord;
+        using DiffScalar = SegmentType::DiffScalar;
+        using DiffRecord = SegmentType::DiffRecord;
     private:
         using ColorfulType = ColorfulTracer<T, Order>;
 
@@ -145,7 +145,7 @@ namespace Physica::Core {
     }
 
     template<Scalar T, int Order>
-    inline typename DiffTracer<T, Order>::DiffScalar
+    inline DiffTracer<T, Order>::DiffScalar
     DiffTracer<T, Order>::pushOperation(T value, ExprType source) {
         assert(checkLastOpDone() && "[Error]: New record cannot begin unless last record is done");
         if (traceList.empty() || traceList.front().full())
@@ -177,7 +177,7 @@ namespace Physica::Core {
 
     template<Scalar T, int Order>
     template<size_t Size>
-    typename DiffTracer<T, Order>::DiffScalar
+    DiffTracer<T, Order>::DiffScalar
     DiffTracer<T, Order>::pushOperation(const SIMD<T, Size>& simd, ExprType source) {
         assert(checkLastOpDone() && "[Error]: New record cannot begin unless last record is done");
         /* Allocate */ {
@@ -225,7 +225,7 @@ namespace Physica::Core {
      * Usually have seperated nodes continuous on memory to apply SIMD, or communicate between \class DiffTracers.
      */
     template<Scalar T, int Order>
-    typename DiffTracer<T, Order>::DiffScalar DiffTracer<T, Order>::copy(DiffScalar s) {
+    DiffTracer<T, Order>::DiffScalar DiffTracer<T, Order>::copy(DiffScalar s) {
         if constexpr (Order == 1) {
             const auto result = pushOperation(s.getValue(), ExprType::Assign);
             pushOperand(s);
@@ -253,7 +253,7 @@ namespace Physica::Core {
 
     template<Scalar T, int Order>
     template<class... Args>
-    typename DiffTracer<T, Order>::SegmentType& DiffTracer<T, Order>::pushSegment(Args&&... args) {
+    DiffTracer<T, Order>::SegmentType& DiffTracer<T, Order>::pushSegment(Args&&... args) {
         if (!traceList.empty())
             traceList.front().squeeze();
         return traceList.emplace_front(SegmentType(std::forward<Args>(args)...));
@@ -480,7 +480,7 @@ namespace Physica::Core {
     }
 
     template<Scalar T, int Order>
-    typename DiffTracer<T, Order>::DiffScalar* DiffTracer<T, Order>::getFirstOperand(DiffScalar s) {
+    DiffTracer<T, Order>::DiffScalar* DiffTracer<T, Order>::getFirstOperand(DiffScalar s) {
         for (auto ite = traceList.begin(); ite != traceList.end(); ++ite) {
             auto& segment = *ite;
             if (!segment.isFound(s))
@@ -519,7 +519,7 @@ namespace Physica::Core {
     }
 
     template<Scalar T, int Order>
-    typename DiffTracer<T, Order>::DiffRecord DiffTracer<T, Order>::makeSetOpNode(const Array<DiffRecord>& records) {
+    DiffTracer<T, Order>::DiffRecord DiffTracer<T, Order>::makeSetOpNode(const Array<DiffRecord>& records) {
         const size_t length = records.getLength();
         size_t lastSetOpNode = 0;
         if (length != 0) {

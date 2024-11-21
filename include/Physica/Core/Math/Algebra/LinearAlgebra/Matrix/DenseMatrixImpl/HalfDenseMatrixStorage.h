@@ -31,7 +31,7 @@ namespace Physica::Core {
         using typename Base::lvalue_reference;
         using typename Base::const_lvalue_reference;
     protected:
-        using ArrayType = typename Traits<This>::ArrayType;
+        using ArrayType = Traits<This>::ArrayType;
     private:
         ArrayType arr;
         size_t order;
@@ -83,13 +83,13 @@ namespace Physica::Core {
     }
 
     template<class T, size_t Order>
-    __host__ __device__ inline typename HalfDenseMatrixStorage<T, Order>::lvalue_reference
+    __host__ __device__ inline HalfDenseMatrixStorage<T, Order>::lvalue_reference
     HalfDenseMatrixStorage<T, Order>::operator()(size_t row, size_t col) {
         return (*this)[toIndex1D(row, col)];
     }
 
     template<class T, size_t Order>
-    __host__ __device__ inline typename HalfDenseMatrixStorage<T, Order>::const_lvalue_reference
+    __host__ __device__ inline HalfDenseMatrixStorage<T, Order>::const_lvalue_reference
     HalfDenseMatrixStorage<T, Order>::operator()(size_t row, size_t col) const {
         return (*this)[toIndex1D(row, col)];
     }
@@ -146,7 +146,7 @@ namespace Physica {
         constexpr static size_t SizeAtCompile = Order * (Order + 1) / 2;
     public:
         using ElemType = T;
-        using ArrayType = typename Helper<IsScalar, SizeAtCompile>::Type;
+        using ArrayType = Helper<IsScalar, SizeAtCompile>::Type;
     };
 }
 

@@ -50,24 +50,24 @@ namespace Physica::Core {
     }
 
     template<class Derived>
-    inline typename LValueVector<Derived>::RefTy LValueVector<Derived>::operator[](size_t index) {
+    inline LValueVector<Derived>::RefTy LValueVector<Derived>::operator[](size_t index) {
         return *data_ptr(index);
     }
 
     template<class Derived>
-    inline typename LValueVector<Derived>::ConstRefTy LValueVector<Derived>::operator[](size_t index) const {
+    inline LValueVector<Derived>::ConstRefTy LValueVector<Derived>::operator[](size_t index) const {
         return const_cast<This&>(*this).operator[](index);
     }
 
     template<class Derived>
-    typename LValueVector<Derived>::ScalarType LValueVector<Derived>::calc(size_t index) const {
+    LValueVector<Derived>::ScalarType LValueVector<Derived>::calc(size_t index) const {
         return ScalarType(*data_ptr(index));
     }
 
     template<class Derived>
     template<class AnyPacket>
     void LValueVector<Derived>::writePacket(size_t index, const AnyPacket packet) {
-        using T = typename Traits<AnyPacket>::ScalarType;
+        using T = Traits<AnyPacket>::ScalarType;
         if constexpr (T::isForwardDiff) {
             for (size_t i = 0; i < AnyPacket::size(); ++i, ++index)
                 (*this)[index] = packet[i];
@@ -83,7 +83,7 @@ namespace Physica::Core {
     template<class Derived>
     template<class AnyPacket>
     void LValueVector<Derived>::writePacketPartial(size_t index, size_t count, const AnyPacket packet) {
-        using T = typename Traits<AnyPacket>::ScalarType;
+        using T = Traits<AnyPacket>::ScalarType;
         if constexpr (T::isForwardDiff) {
             for (size_t i = 0; i < count; ++i, ++index)
                 (*this)[index] = packet[i];
@@ -161,13 +161,13 @@ namespace Physica::Core {
      * Add this function because we cannot simply return &(*this)[index], it is invalid to dereference a device pointer on host.
      */
     template<class Derived>
-    __host__ __device__ inline typename LValueVector<Derived>::PtrTy LValueVector<Derived>::data_ptr(size_t index) noexcept {
+    __host__ __device__ inline LValueVector<Derived>::PtrTy LValueVector<Derived>::data_ptr(size_t index) noexcept {
         assert(index < Base::getLength() && "[Error]: Index out of range");
         return Base::getDerived().data_ptr(index);
     }
 
     template<class Derived>
-    __host__ __device__ inline typename LValueVector<Derived>::ConstPtrTy LValueVector<Derived>::data_ptr(size_t index) const noexcept {
+    __host__ __device__ inline LValueVector<Derived>::ConstPtrTy LValueVector<Derived>::data_ptr(size_t index) const noexcept {
         return const_cast<This&>(*this).data_ptr(index);
     }
 }

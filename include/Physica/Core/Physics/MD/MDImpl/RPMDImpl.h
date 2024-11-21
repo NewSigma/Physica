@@ -174,7 +174,7 @@ namespace Physica::Core {
         static_assert(isFreeModel || (IsPeriodBoundary1 == IsPeriodBoundary2), "[Error]: Inconsistent boundary condition");
 
         constexpr bool isSeedFixed = Traits<RandomType>::IsSeedFixed;
-        using NoRandExecutor = typename std::conditional<isSeedFixed, SequentialExecutor, Executor>::type;
+        using NoRandExecutor = std::conditional<isSeedFixed, SequentialExecutor, Executor>::type;
 
         constexpr bool IsCentroidCoupled = Traits<Thermostat>::IsCentroidCoupled;
         if constexpr (IsCentroidCoupled && IsPeriodBoundary1)
@@ -234,7 +234,7 @@ namespace Physica::Core {
         static_assert(BarostatOrder == 2 || BarostatOrder == 1, "[Error]: Invalid barostat");
 
         constexpr bool isSeedFixed = Traits<RandomType>::IsSeedFixed;
-        using NoRandExecutor = typename std::conditional<isSeedFixed, SequentialExecutor, Executor>::type;
+        using NoRandExecutor = std::conditional<isSeedFixed, SequentialExecutor, Executor>::type;
 
         constexpr bool IsCentroidCoupled = Traits<Thermostat>::IsCentroidCoupled;
         if constexpr (IsCentroidCoupled && IsPeriodBoundary1)
@@ -361,13 +361,13 @@ namespace Physica::Core {
     }
 
     template<Scalar T, unsigned int Dim, size_t NumReplica, class ForceMatrixAllocator>
-    typename RPMD<T, Dim, NumReplica, ForceMatrixAllocator>::MDCellType
+    RPMD<T, Dim, NumReplica, ForceMatrixAllocator>::MDCellType
     RPMD<T, Dim, NumReplica, ForceMatrixAllocator>::phaseToCell(size_t replica) const {
         return MDCellType(cell.getLattice(), ringPolymer.makeBeadPos(replica), cell.getMassVec());
     }
 
     template<Scalar T, unsigned int Dim, size_t NumReplica, class ForceMatrixAllocator>
-    typename RPMD<T, Dim, NumReplica, ForceMatrixAllocator>::MDCellType
+    RPMD<T, Dim, NumReplica, ForceMatrixAllocator>::MDCellType
     RPMD<T, Dim, NumReplica, ForceMatrixAllocator>::contractToCell(size_t contract) const {
         assert(contract < getNumContract());
         PositionMatrix pos(getNumParticle(), Dim);
@@ -381,7 +381,7 @@ namespace Physica::Core {
     }
 
     template<Scalar T, unsigned int Dim, size_t NumReplica, class ForceMatrixAllocator>
-    typename RPMD<T, Dim, NumReplica, ForceMatrixAllocator>::MDCellType
+    RPMD<T, Dim, NumReplica, ForceMatrixAllocator>::MDCellType
     RPMD<T, Dim, NumReplica, ForceMatrixAllocator>::makeAverageCell() const {
         return MDCellType(getLattice(), ringPolymer.makeCentroidPos(), cell.getMassVec());
     }
@@ -523,7 +523,7 @@ namespace Physica::Core {
 
     template<Scalar T, unsigned int Dim, size_t NumReplica, class ForceMatrixAllocator>
     template<class ForceModel, class Executor>
-    typename RPMD<T, Dim, NumReplica, ForceMatrixAllocator>::LatticeMatrix
+    RPMD<T, Dim, NumReplica, ForceMatrixAllocator>::LatticeMatrix
     RPMD<T, Dim, NumReplica, ForceMatrixAllocator>::makeStressPrim(ForceModel& model) const {
         constexpr bool isFreeModel = Internal::is_empty_force_model<ForceModel>::value;
         if constexpr (NumReplica == 1)
@@ -579,7 +579,7 @@ namespace Physica::Core {
      */
     template<Scalar T, unsigned int Dim, size_t NumReplica, class ForceMatrixAllocator>
     template<class ForceModel, class Executor>
-    typename RPMD<T, Dim, NumReplica, ForceMatrixAllocator>::LatticeMatrix
+    RPMD<T, Dim, NumReplica, ForceMatrixAllocator>::LatticeMatrix
     RPMD<T, Dim, NumReplica, ForceMatrixAllocator>::makeStressVirial(ForceModel& model) const {
         constexpr bool isFreeModel = Internal::is_empty_force_model<ForceModel>::value;
         static_assert(!isFreeModel, "[Error]: This function does not apply to ideal gas model");
@@ -633,7 +633,7 @@ namespace Physica::Core {
 
     template<Scalar T, unsigned int Dim, size_t NumReplica, class ForceMatrixAllocator>
     template<class ForceModel, class Executor>
-    typename RPMD<T, Dim, NumReplica, ForceMatrixAllocator>::LatticeMatrix
+    RPMD<T, Dim, NumReplica, ForceMatrixAllocator>::LatticeMatrix
     RPMD<T, Dim, NumReplica, ForceMatrixAllocator>::makeStressClassical(ForceModel& model) const {
         constexpr bool isFreeModel = Internal::is_empty_force_model<ForceModel>::value;
         constexpr bool IsPeriodBoundary = Traits<ForceModel>::IsPeriodBoundary;

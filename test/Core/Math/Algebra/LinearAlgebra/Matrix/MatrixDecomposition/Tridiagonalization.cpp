@@ -24,7 +24,7 @@ using namespace Physica::Core;
 
 template<Matrix M>
 bool doTest(const M& source, double tolerance) {
-    using ScalarType = typename M::ScalarType;
+    using ScalarType = M::ScalarType;
     using GeneralMatrix = DenseMatrix<ScalarType>;
     Tridiagonalization<ScalarType> tri(source);
     GeneralMatrix T = tri.getMatrixT();

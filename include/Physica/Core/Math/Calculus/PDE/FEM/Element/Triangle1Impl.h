@@ -53,12 +53,12 @@ namespace Physica::Core {
     }
 
     template<Scalar T>
-    typename Triangle1<T>::MatrixType Triangle1<T>::jacobi([[maybe_unused]] VectorType localPos) const {
+    Triangle1<T>::MatrixType Triangle1<T>::jacobi([[maybe_unused]] VectorType localPos) const {
         return MatrixType{pos[1][0] - pos[0][0], pos[1][1] - pos[0][1], pos[2][0] - pos[0][0], pos[2][1] - pos[0][1]};
     }
 
     template<Scalar T>
-    typename Triangle1<T>::MatrixType Triangle1<T>::inv_jacobi([[maybe_unused]] VectorType globalPos) const {
+    Triangle1<T>::MatrixType Triangle1<T>::inv_jacobi([[maybe_unused]] VectorType globalPos) const {
         const VectorType delta21 = pos[1] - pos[0];
         const VectorType delta31 = pos[2] - pos[0];
         const T factor = reciprocal(delta21[0] * delta31[1] - delta31[0] * delta21[1]);
@@ -71,12 +71,12 @@ namespace Physica::Core {
     }
 
     template<Scalar T>
-    typename Triangle1<T>::VectorType Triangle1<T>::getNodePos(size_t localNode) const {
+    Triangle1<T>::VectorType Triangle1<T>::getNodePos(size_t localNode) const {
         return pos[localNode];
     }
 
     template<Scalar T>
-    typename Triangle1<T>::VectorType Triangle1<T>::toLocalPos(VectorType globalPos) const {
+    Triangle1<T>::VectorType Triangle1<T>::toLocalPos(VectorType globalPos) const {
         const VectorType delta21 = pos[1] - pos[0];
         const VectorType delta31 = pos[2] - pos[0];
         globalPos -= pos[0];
@@ -85,7 +85,7 @@ namespace Physica::Core {
     }
 
     template<Scalar T>
-    typename Triangle1<T>::VectorType Triangle1<T>::toGlobalPos(VectorType localPos) const {
+    Triangle1<T>::VectorType Triangle1<T>::toGlobalPos(VectorType localPos) const {
         return (T(1) - localPos[0] - localPos[1]) * pos[0] + localPos[0] * pos[1] + localPos[1] * pos[2];
     }
 
@@ -138,7 +138,7 @@ namespace Physica::Core {
     }
 
     template<Scalar T>
-    typename Triangle1<T>::VectorType Triangle1<T>::grad(size_t localNode, VectorType p) {
+    Triangle1<T>::VectorType Triangle1<T>::grad(size_t localNode, VectorType p) {
         return {dBase_dr(localNode, p), dBase_ds(localNode, p)};
     }
 

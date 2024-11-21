@@ -53,8 +53,8 @@ const static char* input = "&CONTROL\n"
 
 MDCell<ScalarType> makeSystem() {
     using CrystalCellType = CrystalCell<ScalarType>;
-    using LatticeMatrix = typename MDCell<ScalarType>::LatticeMatrix;
-    using PositionMatrix = typename MDCell<ScalarType>::PositionMatrix;
+    using LatticeMatrix = MDCell<ScalarType>::LatticeMatrix;
+    using PositionMatrix = MDCell<ScalarType>::PositionMatrix;
     const LatticeMatrix lattice{
          4.6635062604325164,    0.2499522611778955,    0.0000000000000000,
          2.1629745970109657,    4.1943944839773311,    0.0000000000000000,

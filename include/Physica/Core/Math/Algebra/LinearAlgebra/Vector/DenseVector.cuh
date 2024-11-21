@@ -76,7 +76,7 @@ namespace Physica::Core {
     }
 
     template<Scalar T, size_t Length, class Allocator>
-    inline typename device_obj<DenseVector<T, Length, Allocator>>::host_obj
+    inline device_obj<DenseVector<T, Length, Allocator>>::host_obj
     device_obj<DenseVector<T, Length, Allocator>>::toHost() const {
         return host_obj(Storage::toHost());
     }

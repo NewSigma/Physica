@@ -28,10 +28,10 @@ namespace Physica::Core {
     public:
         using SolverType = PhononSolver<T>;
         using ElementType = CuboidLinear<T>;
-        using Index3D = typename SolverType::Index3D;
+        using Index3D = SolverType::Index3D;
         using CoeffVector = DenseVector<T, ElementType::DegreeOfFreedom>;
-        using MDCellType = typename SolverType::MDCellType;
-        using KSpaceFCGrid = typename SolverType::KSpaceFCGrid;
+        using MDCellType = SolverType::MDCellType;
+        using KSpaceFCGrid = SolverType::KSpaceFCGrid;
         using EigenValueGrid = GridStorage<VectorND<T>>;
         constexpr static unsigned int Dim = Traits<MDCellType>::Dim;
         constexpr static unsigned int ElementVolume = 8;

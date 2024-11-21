@@ -33,13 +33,13 @@ namespace Physica::Core {
             : Dim(storage.getRow(), storage.getCol()), arr(storage.arr) {}
 
     template<tparams>
-    __device__ typename device_obj<ColumnElementStorage>::ElemType& device_obj<ColumnElementStorage>::operator()(size_t r, size_t c) {
+    __device__ device_obj<ColumnElementStorage>::ElemType& device_obj<ColumnElementStorage>::operator()(size_t r, size_t c) {
         assert(r < getRow() && c < getCol());
         return arr[toIndex(r, c)];
     }
 
     template<tparams>
-    __device__ const typename device_obj<ColumnElementStorage>::ElemType& device_obj<ColumnElementStorage>::operator()(size_t r, size_t c) const {
+    __device__ const device_obj<ColumnElementStorage>::ElemType& device_obj<ColumnElementStorage>::operator()(size_t r, size_t c) const {
         assert(r < getRow() && c < getCol());
         return arr[toIndex(r, c)];
     }
@@ -96,14 +96,14 @@ namespace Physica::Core {
             : Dim(storage.getRow(), storage.getCol()), arr(storage.arr) {}
 
     template<tparams>
-    __device__ typename device_obj<RowElementStorage>::ElemType&
+    __device__ device_obj<RowElementStorage>::ElemType&
     device_obj<RowElementStorage>::operator()(size_t r, size_t c) {
         assert(r < getRow() && c < getCol());
         return arr[toIndex(r, c)];
     }
 
     template<tparams>
-    __device__ const typename device_obj<RowElementStorage>::ElemType&
+    __device__ const device_obj<RowElementStorage>::ElemType&
     device_obj<RowElementStorage>::operator()(size_t r, size_t c) const {
         assert(r < getRow() && c < getCol());
         return arr[toIndex(r, c)];

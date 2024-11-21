@@ -109,13 +109,13 @@ namespace Physica::Core {
     }
 
     template<class Derived>
-    __host__ __device__ inline typename device_obj<LValueVector<Derived>>::PtrTy
+    __host__ __device__ inline device_obj<LValueVector<Derived>>::PtrTy
     device_obj<LValueVector<Derived>>::data_ptr(size_t index) {
         return Base::getDerived().data_ptr(index);
     }
     
     template<class Derived>
-    __host__ __device__ inline typename device_obj<LValueVector<Derived>>::ConstPtrTy
+    __host__ __device__ inline device_obj<LValueVector<Derived>>::ConstPtrTy
     device_obj<LValueVector<Derived>>::data_ptr(size_t index) const {
         return Base::getDerived().data_ptr(index);
     }

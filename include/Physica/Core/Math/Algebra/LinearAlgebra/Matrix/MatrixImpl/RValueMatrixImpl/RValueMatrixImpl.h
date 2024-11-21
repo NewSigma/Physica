@@ -25,7 +25,7 @@ namespace Physica::Core {
     template<class Derived>
     template<Matrix T>
     void RValueMatrix<Derived>::assignTo(LValueMatrix<T>& target) const {
-        using OtherScalar = typename T::ScalarType;
+        using OtherScalar = T::ScalarType;
         constexpr size_t OtherRow = T::RowAtCompile;
         constexpr size_t OtherColumn = T::ColAtCompile;
         static_assert(RowAtCompile == OtherRow || RowAtCompile == Dynamic || OtherRow == Dynamic, "[Error]: Row mismatch between two matrix");
@@ -44,22 +44,22 @@ namespace Physica::Core {
     }
 
     template<class Derived>
-    inline typename RValueMatrix<Derived>::RowVector RValueMatrix<Derived>::row(size_t r) {
+    inline RValueMatrix<Derived>::RowVector RValueMatrix<Derived>::row(size_t r) {
         return {Base::getDerived(), r, 0, getCol()};
     }
 
     template<class Derived>
-    inline const typename RValueMatrix<Derived>::RowVector RValueMatrix<Derived>::row(size_t r) const {
+    inline const RValueMatrix<Derived>::RowVector RValueMatrix<Derived>::row(size_t r) const {
         return {Base::getConstCastDerived(), r, 0, getCol()};
     }
 
     template<class Derived>
-    inline typename RValueMatrix<Derived>::ColVector RValueMatrix<Derived>::col(size_t c) {
+    inline RValueMatrix<Derived>::ColVector RValueMatrix<Derived>::col(size_t c) {
         return {Base::getDerived(), 0, getRow(), c};
     }
 
     template<class Derived>
-    inline const typename RValueMatrix<Derived>::ColVector RValueMatrix<Derived>::col(size_t c) const {
+    inline const RValueMatrix<Derived>::ColVector RValueMatrix<Derived>::col(size_t c) const {
         return {Base::getConstCastDerived(), 0, getRow(), c};
     }
 
@@ -214,7 +214,7 @@ namespace Physica::Core {
     }
 
     template<class Derived>
-    inline typename RValueMatrix<Derived>::ScalarType RValueMatrix<Derived>::calcFromMajorMinor(size_t major, size_t minor) const {
+    inline RValueMatrix<Derived>::ScalarType RValueMatrix<Derived>::calcFromMajorMinor(size_t major, size_t minor) const {
         return calc(rowFromMajorMinor(major, minor), colFromMajorMinor(major, minor));
     }
 
@@ -224,7 +224,7 @@ namespace Physica::Core {
     }
 
     template<class Derived>
-    typename RValueMatrix<Derived>::ScalarType RValueMatrix<Derived>::max() const {
+    RValueMatrix<Derived>::ScalarType RValueMatrix<Derived>::max() const {
         ScalarType result;
         if constexpr (MatrixOption::isColMatrix<This>()) {
             result = col(0).max();
@@ -246,7 +246,7 @@ namespace Physica::Core {
     }
 
     template<class Derived>
-    typename RValueMatrix<Derived>::ScalarType RValueMatrix<Derived>::min() const {
+    RValueMatrix<Derived>::ScalarType RValueMatrix<Derived>::min() const {
         ScalarType result;
         if constexpr (MatrixOption::isColMatrix<This>()) {
             result = col(0).min();
@@ -268,7 +268,7 @@ namespace Physica::Core {
     }
 
     template<class Derived>
-    typename RValueMatrix<Derived>::ScalarType RValueMatrix<Derived>::trace() const {
+    RValueMatrix<Derived>::ScalarType RValueMatrix<Derived>::trace() const {
         assert(getRow() == getCol());
         ScalarType result = ScalarType(0);
         for (size_t i = 0; i < getRow(); ++i)
@@ -297,7 +297,7 @@ namespace Physica::Core {
     }
 
     template<class Derived>
-    typename RValueMatrix<Derived>::ScalarType RValueMatrix<Derived>::sum() const {
+    RValueMatrix<Derived>::ScalarType RValueMatrix<Derived>::sum() const {
         ScalarType result = 0;
         for (size_t major = 0; major < getMaxMajor(); ++major)
             for (size_t minor = 0; minor < getMaxMinor(); ++minor)

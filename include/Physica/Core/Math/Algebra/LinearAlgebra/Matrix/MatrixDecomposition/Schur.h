@@ -37,9 +37,9 @@ namespace Physica::Core {
         using HessenburgType = Hessenburg<T, Order>;
         using This = Schur<T, Order>;
     public:
-        using RealType = typename T::RealType;
+        using RealType = T::RealType;
         using ComplexType = Complex<RealType>;
-        using WorkingMatrix = typename HessenburgType::WorkingMatrix;
+        using WorkingMatrix = HessenburgType::WorkingMatrix;
     private:
         WorkingMatrix matrixT;
         WorkingMatrix matrixU;
@@ -342,7 +342,7 @@ namespace Physica::Core {
     }
 
     template<Scalar T, size_t Order>
-    typename Schur<T, Order>::ComplexType Schur<T, Order>::complexShift(size_t upper, size_t iter) {
+    Schur<T, Order>::ComplexType Schur<T, Order>::complexShift(size_t upper, size_t iter) {
         using Matrix2D = DenseMatrix<T, MatrixOption::Col | MatrixOption::Element, 2, 2>;
         if ((iter == 10 || iter == 20) && upper > 1) {
             // exceptional shift, taken from http://www.netlib.org/eispack/comqr.f

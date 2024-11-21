@@ -29,9 +29,9 @@ namespace Physica::Core {
     class SGD {
         static_assert(T::isDifferentiable, "[Error]: T must be differentiable");
         static_assert(!is_device_obj<T>::value, "[Error]: Include corresponding *.cuh file to enable CUDA support");
-        using TracerType = typename T::TracerType;
+        using TracerType = T::TracerType;
     public:
-        using ValueType = typename T::ValueType;
+        using ValueType = T::ValueType;
     private:
         constexpr static int AnyValue = 0;
     protected:
@@ -79,8 +79,8 @@ namespace Physica::Core {
 
     template<Scalar T>
     void SGD<T>::step() const {
-        using SegmentType = typename TracerType::SegmentType;
-        using DiffScalar = typename TracerType::DiffScalar;
+        using SegmentType = TracerType::SegmentType;
+        using DiffScalar = TracerType::DiffScalar;
         auto& tracer = TracerType::getInstance();
         tracer.forSegmentInRange(from, to, [this](SegmentType& segment) {
             segment.forNodeInRange(from, to, [this](DiffScalar s) {

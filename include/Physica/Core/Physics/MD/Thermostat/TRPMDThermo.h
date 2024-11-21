@@ -28,9 +28,9 @@ namespace Physica::Core {
     template<Scalar T, unsigned int Dim = 3, size_t NumReplica = Dynamic>
     class TRPMDThermo {
         using MDCellType = MDCell<T, Dim>;
-        using MassVector = typename MDCellType::MassVector;
+        using MassVector = MDCellType::MassVector;
         using RingPolymerType = RingPolymer<T, Dim, NumReplica>;
-        using BufferType = typename RingPolymerType::BufferType;
+        using BufferType = RingPolymerType::BufferType;
 
         T temperatureT;
     public:

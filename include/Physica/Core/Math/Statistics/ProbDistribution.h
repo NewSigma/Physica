@@ -82,14 +82,14 @@ namespace Physica::Core {
     }
 
     template<Scalar T>
-    typename ProbDistribution<T>::VectorType
+    ProbDistribution<T>::VectorType
     ProbDistribution<T>::makePosition() const {
         const T delta = (getToPoint() - getFromPoint()) / T(getNumBin());
         return seperates.head(getNumBin()) + (delta * 0.5);
     }
 
     template<Scalar T>
-    typename ProbDistribution<T>::VectorType
+    ProbDistribution<T>::VectorType
     ProbDistribution<T>::makeDistribution() const {
         const T factor = repDelta / T(calcNumSample());
         VectorType result(getNumBin());

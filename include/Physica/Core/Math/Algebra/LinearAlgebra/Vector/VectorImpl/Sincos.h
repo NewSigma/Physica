@@ -27,10 +27,10 @@ namespace Physica::Core {
         constexpr static size_t Size1 = T1::SizeAtCompile;
         constexpr static size_t Size2 = T2::SizeAtCompile;
         constexpr static size_t SizeAtCompile = Size1 > Size2 ? Size1 : Size2;
-        using ScalarType1 = typename T1::ScalarType;
-        using ScalarType2 = typename T2::ScalarType;
-        using ScalarType = typename Internal::BinaryScalarOpRtnTy<ScalarType1, ScalarType2>::Type;
-        using PacketType = typename BestPacket<ScalarType, SizeAtCompile>::Type;
+        using ScalarType1 = T1::ScalarType;
+        using ScalarType2 = T2::ScalarType;
+        using ScalarType = Internal::BinaryScalarOpRtnTy<ScalarType1, ScalarType2>::Type;
+        using PacketType = BestPacket<ScalarType, SizeAtCompile>::Type;
         if constexpr (PacketType::size() == 1) {
             for (size_t i = 0; i < x.getLength(); ++i)
                 sincos(x.calc(i), s[i], c[i]);

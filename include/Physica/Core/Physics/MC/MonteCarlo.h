@@ -22,9 +22,9 @@ namespace Physica::Core {
     template<Scalar T, unsigned int Dim = 3>
     class MonteCarlo {
         using MDCellType = MDCell<T, Dim>;
-        using PositionMatrix = typename MDCellType::PositionMatrix;
+        using PositionMatrix = MDCellType::PositionMatrix;
         using VectorType = VectorND<T>;
-        using MachineType = typename T::MachineType;
+        using MachineType = T::MachineType;
 
         MDCellType cell;
         PositionMatrix buffer;

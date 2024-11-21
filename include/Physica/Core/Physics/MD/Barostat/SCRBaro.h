@@ -69,7 +69,7 @@ namespace Physica::Core {
         const auto diffuseMatrix = makeDiffuseMatrix(pressPerDOF);
         Base::scaleRPMD(rpmd, Base::makeDeltaLattice([&, deltaT](size_t r, size_t c) -> T {
                 using Integrator = SRK2<T, 1>;
-                using VectorType = typename Integrator::VectorType;
+                using VectorType = Integrator::VectorType;
                 [[maybe_unused]] T unused = 0;
                 VectorType sol{T(0)};
                 Integrator::step(deltaT, unused, sol,
@@ -86,7 +86,7 @@ namespace Physica::Core {
     }
 
     template<Scalar T, size_t NumReplica, class RandomType, BaroType Type>
-    typename SCRBaro<T, NumReplica, RandomType, Type>::LatticeMatrix
+    SCRBaro<T, NumReplica, RandomType, Type>::LatticeMatrix
     SCRBaro<T, NumReplica, RandomType, Type>::makeDiffuseMatrix(T pressPerDOF) const {
         const T diffuseFactor = sqrt(T(2.0 / Dim) * Base::compressRate * pressPerDOF);
         auto& gen = RandomType::getInstance().getGen();

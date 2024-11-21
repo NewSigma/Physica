@@ -36,14 +36,14 @@ namespace Physica::Core {
         using AllocatorTraits = std::allocator_traits<Allocator>;
     public:
         using allocator_type = Allocator;
-        using value_type = typename AllocatorTraits::value_type;
-        using pointer = typename AllocatorTraits::pointer;
-        using const_pointer = typename AllocatorTraits::const_pointer;
-        using lvalue_reference = typename AllocatorTraits::lvalue_reference;
-        using const_lvalue_reference = typename AllocatorTraits::const_lvalue_reference;
-        using rvalue_reference = typename AllocatorTraits::rvalue_reference;
+        using value_type = AllocatorTraits::value_type;
+        using pointer = AllocatorTraits::pointer;
+        using const_pointer = AllocatorTraits::const_pointer;
+        using lvalue_reference = AllocatorTraits::lvalue_reference;
+        using const_lvalue_reference = AllocatorTraits::const_lvalue_reference;
+        using rvalue_reference = AllocatorTraits::rvalue_reference;
 
-        using ElemType = typename Traits<Derived>::ElemType;
+        using ElemType = Traits<Derived>::ElemType;
     protected:
         using FIteType = FIterator<Derived>;
         using RIteType = RIterator<Derived>;

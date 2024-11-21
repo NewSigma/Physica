@@ -27,7 +27,7 @@ namespace Physica::Core {
     namespace Internal {
         template<class T, bool IsClass>
         struct DeviceAllocatorValueType {
-            using Type = typename T::device_obj_type;
+            using Type = T::device_obj_type;
         };
 
         template<class T>
@@ -39,7 +39,7 @@ namespace Physica::Core {
     template<class T>
     class DeviceAllocator {
     public:
-        using value_type = typename Internal::DeviceAllocatorValueType<T, std::is_class<T>::value>::Type;
+        using value_type = Internal::DeviceAllocatorValueType<T, std::is_class<T>::value>::Type;
         using pointer = value_type*;
         using size_type = size_t;
         using difference_type = std::ptrdiff_t;
@@ -63,7 +63,7 @@ namespace Physica::Core {
     };
 
     template<class T>
-    __host__ __device__ inline typename DeviceAllocator<T>::pointer DeviceAllocator<T>::allocate(size_t n) noexcept {
+    __host__ __device__ inline DeviceAllocator<T>::pointer DeviceAllocator<T>::allocate(size_t n) noexcept {
         pointer p;
         if constexpr (IsDevice())
             p = reinterpret_cast<pointer>(malloc(n * sizeof(value_type)));
@@ -121,7 +121,7 @@ namespace std {
     struct allocator_traits<Physica::Core::DeviceAllocator<T>> {
     public:
         using allocator_type = Physica::Core::DeviceAllocator<T>;
-        using value_type = typename allocator_type::value_type;
+        using value_type = allocator_type::value_type;
         using pointer = value_type*;
         using const_pointer = const value_type*;
         using void_pointer = void*;
@@ -134,7 +134,7 @@ namespace std {
         using propagate_on_container_copy_assignment = std::false_type;
         using propagate_on_container_move_assignment = std::false_type;
         using propagate_on_container_swap = std::false_type;
-        using is_always_equal = typename std::is_empty<allocator_type>::type;
+        using is_always_equal = std::is_empty<allocator_type>::type;
         template<class U>
         using rebind_alloc = Physica::Core::DeviceAllocator<U>;
         template<class U>

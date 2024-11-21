@@ -26,7 +26,7 @@ namespace Physica::Core {
         using Base = device_obj<LValueVector<host_obj>>;
         using DeviceVector = device_obj<T>;
     public:
-        using ScalarType = typename Base::ScalarType;
+        using ScalarType = Base::ScalarType;
     protected:
         using typename Base::PtrTy;
         using typename Base::ConstPtrTy;
@@ -72,14 +72,14 @@ namespace Physica::Core {
     }
 
     template<Vector T, size_t Length>
-    __host__ __device__ inline typename device_obj<LVectorBlock<T, Length>>::PtrTy
+    __host__ __device__ inline device_obj<LVectorBlock<T, Length>>::PtrTy
     device_obj<LVectorBlock<T, Length>>::data_ptr(size_t index) {
         assert((index + from) < to);
         return vec.getDerived().data_ptr(index);
     }
 
     template<Vector T, size_t Length>
-    __host__ __device__ inline const typename device_obj<LVectorBlock<T, Length>>::ConstPtrTy
+    __host__ __device__ inline const device_obj<LVectorBlock<T, Length>>::ConstPtrTy
     device_obj<LVectorBlock<T, Length>>::data_ptr(size_t index) const {
         return const_cast<This&>(*this).data_ptr(index);
     }

@@ -40,7 +40,7 @@ namespace Physica::Core {
         using typename Base::PositionMatrix;
         using typename Base::Vec3D;
         using typename Base::ForceConstMatrix;
-        using SearchRangeType = typename PeriodicCell<T, Dim>::SearchRangeType;
+        using SearchRangeType = PeriodicCell<T, Dim>::SearchRangeType;
         using Matrix3D = DenseMatrix<T, MatrixOption::Col | MatrixOption::Vector, 3, 3>;
         using BornChargeArray = Array<Matrix3D>;
         constexpr static size_t ErfcTableSize = 4096 + 512 + 2;
@@ -142,7 +142,7 @@ namespace Physica::Core {
      * [1] Rev. Mod. Phys. 73, 515; https://doi.org/10.1103/RevModPhys.73.515
      */
     template<Scalar T, bool IsSmallCell>
-    typename RSpaceEwald<T, IsSmallCell>::ComplexType
+    RSpaceEwald<T, IsSmallCell>::ComplexType
     RSpaceEwald<T, IsSmallCell>::forceConst(const PositionMatrix& pos, const Vec3D& waveQ, size_t dof1, size_t dof2) const {
         const size_t atom1 = dof1 / 3;
         const size_t atom2 = dof2 / 3;
@@ -191,7 +191,7 @@ namespace Physica::Core {
     }
 
     template<Scalar T, bool IsSmallCell>
-    inline typename RSpaceEwald<T, IsSmallCell>::LatticeMatrix
+    inline RSpaceEwald<T, IsSmallCell>::LatticeMatrix
     RSpaceEwald<T, IsSmallCell>::virial(const PositionMatrix& pos) const {
         return Base::virial(lattice, pos);
     }
@@ -322,7 +322,7 @@ namespace Physica::Core {
     }
 
     template<Scalar T, bool IsSmallCell>
-    typename RSpaceEwald<T, IsSmallCell>::BornChargeArray
+    RSpaceEwald<T, IsSmallCell>::BornChargeArray
     RSpaceEwald<T, IsSmallCell>::makeBornCharge(const VectorND<T>& charges) {
         BornChargeArray result(charges.getLength(), Matrix3D(3, 3, T(0)));
         for (size_t i = 0; i < result.getLength(); ++i) {

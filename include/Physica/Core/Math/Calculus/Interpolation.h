@@ -74,8 +74,8 @@ namespace Physica::Core {
      * [1] William H. Press, Saul A. Teukolsky, William T. Vetterling, Brian P. Flannery. C++数值算法(第二版)[M]. 北京: 电子工业出版社, 2005:81-82
      */
     template<LVector V>
-    typename V::ScalarType lagrange(const V& x0, const V& y0, typename V::ScalarType x) {
-        using T = typename V::ScalarType;
+    V::ScalarType lagrange(const V& x0, const V& y0, typename V::ScalarType x) {
+        using T = V::ScalarType;
         assert(x0.getLength() == y0.getLength());
 
         const size_t length = x0.getLength();
@@ -109,9 +109,9 @@ namespace Physica::Core {
 
     template<LVector V>
     V interpolate_fft(const V& data, size_t newDim) {
-        using T = typename V::ScalarType;
-        using RealType = typename T::RealType;
-        using ComplexType = typename T::ComplexType;
+        using T = V::ScalarType;
+        using RealType = T::RealType;
+        using ComplexType = T::ComplexType;
         constexpr bool isComplex = T::isComplex;
 
         const size_t rSpaceSize = data.getLength();
@@ -147,10 +147,10 @@ namespace Physica::Core {
     }
 
     template<LVector V>
-    typename V::ScalarType interpolate_fft(const V& data, typename V::ScalarType::RealType x, typename V::ScalarType::RealType period) {
-        using T = typename V::ScalarType;
-        using RealType = typename T::RealType;
-        using ComplexType = typename T::ComplexType;
+    V::ScalarType interpolate_fft(const V& data, typename V::ScalarType::RealType x, typename V::ScalarType::RealType period) {
+        using T = V::ScalarType;
+        using RealType = T::RealType;
+        using ComplexType = T::ComplexType;
         constexpr bool isComplex = T::isComplex;
 
         const size_t rSpaceSize = data.getLength();
@@ -186,11 +186,11 @@ namespace Physica::Core {
 
     template<LGrid G>
     RSpaceGrid<typename G::ScalarType> interpolate_fft(const G& data, typename GridBase::Index3D newDim) {
-        using T = typename G::ScalarType;
+        using T = G::ScalarType;
         using ResultType = RSpaceGrid<T>;
-        using RealType = typename T::RealType;
-        using ComplexType = typename T::ComplexType;
-        using Index3D = typename GridBase::Index3D;
+        using RealType = T::RealType;
+        using ComplexType = T::ComplexType;
+        using Index3D = GridBase::Index3D;
         constexpr size_t Dim = 3;
         constexpr bool isComplex = T::isComplex;
 
@@ -234,13 +234,13 @@ namespace Physica::Core {
     }
 
     template<LGrid G>
-    typename G::ScalarType interpolate_fft(
+    G::ScalarType interpolate_fft(
             const G& data,
             Vector3D<typename G::ScalarType::RealType> r,
             Vector3D<typename G::ScalarType::RealType> period) {
-        using T = typename G::ScalarType;
-        using RealType = typename T::RealType;
-        using ComplexType = typename T::ComplexType;
+        using T = G::ScalarType;
+        using RealType = T::RealType;
+        using ComplexType = T::ComplexType;
         using Index3D = Array<size_t, 3>;
         constexpr size_t Dim = 3;
         constexpr bool isComplex = T::isComplex;

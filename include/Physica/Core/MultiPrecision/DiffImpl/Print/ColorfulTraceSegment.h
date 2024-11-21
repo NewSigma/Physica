@@ -45,7 +45,7 @@ namespace Physica::Core {
 
     template<Scalar U, int AnyOrder>
     std::ostream& operator<<(std::ostream& os, const ColorfulTraceSegment<U, AnyOrder>& obj) {
-        using Color = typename ColorGuard::Color;
+        using Color = ColorGuard::Color;
         using ColorGuard = ColorGuard;
         const auto& segment = obj.segment;
         const size_t length = segment.getLength();

@@ -114,7 +114,7 @@ namespace Physica::Core {
     }
 
     template<Matrix T>
-    typename RMatrixBlock<T, Dynamic, Dynamic>::ScalarType
+    RMatrixBlock<T, Dynamic, Dynamic>::ScalarType
     RMatrixBlock<T, Dynamic, Dynamic>::calc(size_t row, size_t col) const {
         assert(row < rowCount);
         assert(col < colCount);
@@ -126,7 +126,7 @@ namespace Physica {
     template<Matrix T, size_t Row, size_t Col>
     class Traits<Core::RMatrixBlock<T, Row, Col>> {
     public:
-        using ScalarType = typename T::ScalarType;
+        using ScalarType = T::ScalarType;
         constexpr static int Option = T::Option;
         constexpr static size_t RowAtCompile = Row;
         constexpr static size_t ColAtCompile = Col;

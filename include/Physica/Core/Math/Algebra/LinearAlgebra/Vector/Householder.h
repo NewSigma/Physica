@@ -32,9 +32,9 @@ namespace Physica::Core {
      * [2] Eigen; https://eigen.tuxfamily.org/
      */
     template<Vector T, LVector U>
-    typename T::ScalarType::RealType householder(const T& source, U& target) {
-        using ScalarType = typename T::ScalarType;
-        using RealType = typename ScalarType::RealType;
+    T::ScalarType::RealType householder(const T& source, U& target) {
+        using ScalarType = T::ScalarType;
+        using RealType = ScalarType::RealType;
         assert(source.getLength() == target.getLength());
 
         const ScalarType v0 = source.calc(0);
@@ -63,13 +63,13 @@ namespace Physica::Core {
     }
 
     template<LVector T>
-    typename T::ScalarType::RealType householderInPlace(T& v) {
+    T::ScalarType::RealType householderInPlace(T& v) {
         return householder(v, v);
     }
 
     template<LMatrix M, Vector V>
     void applyHouseholder(const V& householder, M& mat) {
-        using ScalarType = typename M::ScalarType;
+        using ScalarType = M::ScalarType;
         using BufferType = DenseVector<ScalarType, V::SizeAtCompile>;
         BufferType copy = householder;
         auto temp = ScalarType(1);
@@ -80,7 +80,7 @@ namespace Physica::Core {
 
     template<LMatrix M, Vector V>
     void applyHouseholder(M& mat, const V& householder) {
-        using ScalarType = typename M::ScalarType;
+        using ScalarType = M::ScalarType;
         using BufferType = DenseVector<ScalarType, V::SizeAtCompile>;
         BufferType copy = householder;
         ScalarType temp = ScalarType(1);

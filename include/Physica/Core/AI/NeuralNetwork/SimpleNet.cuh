@@ -34,9 +34,9 @@ namespace Physica::Core {
         using typename Base::InputType;
         using typename Base::OutputType;
         using Base::IsTrainMode;
-        using LossType = typename device_obj<Loss<ScalarType>>::LossType;
+        using LossType = device_obj<Loss<ScalarType>>::LossType;
     private:
-        using DiffGuardType = typename std::conditional<IsTrainMode, AutoDiffGuard<device_obj<ScalarType>>, PlainStruct<void>>::type;
+        using DiffGuardType = std::conditional<IsTrainMode, AutoDiffGuard<device_obj<ScalarType>>, PlainStruct<void>>::type;
 
         DiffGuardType net_guard;
     public:
@@ -65,7 +65,7 @@ namespace Physica::Core {
     template<class Dataset, class Optimizer, class RandomType>
     void device_obj<SimpleNet<Derived>>::train_step(const Dataset& dataset, Optimizer& opt) {
         static_assert(IsTrainMode, "[Error]: train_step must be called under training mode");
-        using TracerType = typename device_obj<ScalarType>::TracerType;
+        using TracerType = device_obj<ScalarType>::TracerType;
 
         auto dist = std::uniform_int_distribution<size_t>(0, dataset.getSize() - 1);
         auto& gen = RandomType::getInstance().getGen();
@@ -80,7 +80,7 @@ namespace Physica::Core {
 
     template<class Derived>
     template<class Dataset>
-    typename device_obj<SimpleNet<Derived>>::LossType device_obj<SimpleNet<Derived>>::loss(const Dataset& dataset) const {
+    device_obj<SimpleNet<Derived>>::LossType device_obj<SimpleNet<Derived>>::loss(const Dataset& dataset) const {
         static_assert(!IsTrainMode, "[Error]: It is suggested using eval mode to reduce memory use");
         const size_t size = dataset.getSize();
         LossType result = 0;

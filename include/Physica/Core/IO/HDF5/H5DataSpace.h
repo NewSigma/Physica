@@ -28,9 +28,9 @@ namespace Physica::Core {
         using ImplType = H5::DataSpace;
         using This = H5DataSpace<Dim>;
     public:
-        using SizeArray = typename Base::SizeArray;
+        using SizeArray = Base::SizeArray;
     private:
-        using SizeType = typename SizeArray::ElemType;
+        using SizeType = SizeArray::ElemType;
 
         SizeArray selectedCount;
         SizeArray selectedStart;

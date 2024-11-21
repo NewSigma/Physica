@@ -78,7 +78,7 @@ namespace Physica::Core {
     }
 
     template<class SampleType, class LabelType>
-    inline typename SimpleDataset<SampleType, LabelType>::DataType
+    inline SimpleDataset<SampleType, LabelType>::DataType
     SimpleDataset<SampleType, LabelType>::operator[](size_t index) const {
         assert(index < getSize() && "[Error]: Index overflow");
         return std::make_pair(samples[index], labels[index]);
@@ -98,7 +98,7 @@ namespace Physica::Core {
 
     template<class SampleType, class LabelType>
     template<class RandomType>
-    typename SimpleDataset<SampleType, LabelType>::SplitResultType
+    SimpleDataset<SampleType, LabelType>::SplitResultType
     SimpleDataset<SampleType, LabelType>::randomSplit(size_t firstSize, RandomType& gen) const {
         assert(firstSize > 0 && "[Error]: Spliting a zero size dataset does nothing");
         assert(firstSize < getSize() && "[Error]: Split a dataset whose size is larger than original");

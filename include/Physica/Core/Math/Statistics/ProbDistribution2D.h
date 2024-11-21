@@ -107,7 +107,7 @@ namespace Physica::Core {
     }
 
     template<Scalar T>
-    typename ProbDistribution2D<T>::MeshType
+    ProbDistribution2D<T>::MeshType
     ProbDistribution2D<T>::makePosition() const {
         const T deltaX = (getToPointX() - getFromPointX()) / T(getNumBinX());
         const T deltaY = (getToPointY() - getFromPointY()) / T(getNumBinY());
@@ -117,7 +117,7 @@ namespace Physica::Core {
     }
 
     template<Scalar T>
-    typename ProbDistribution2D<T>::MatrixType
+    ProbDistribution2D<T>::MatrixType
     ProbDistribution2D<T>::makeDistribution() const {
         const T factor = repDeltaX * repDeltaY / T(calcNumSample());
         MatrixType result(getNumBinX(), getNumBinY());

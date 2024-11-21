@@ -50,7 +50,7 @@ namespace Physica::Core {
     };
 
     template<Vector T, Matrix U>
-    typename VectorMatrixProduct<T, U>::ScalarType VectorMatrixProduct<T, U>::calc(size_t row, size_t col) const {
+    VectorMatrixProduct<T, U>::ScalarType VectorMatrixProduct<T, U>::calc(size_t row, size_t col) const {
         return vec.calc(row) * mat.calc(0, col);
     }
     /**
@@ -58,7 +58,7 @@ namespace Physica::Core {
      * To compute row vector * matrix, users should converted it to matrix^T * col vector.
      */
     template<Vector T, Matrix U>
-    [[nodiscard]] inline typename std::enable_if<U::RowAtCompile == 1, VectorMatrixProduct<T, U>>::type
+    [[nodiscard]] inline std::enable_if<U::RowAtCompile == 1, VectorMatrixProduct<T, U>>::type
     operator*(const T& vec, const U& mat) noexcept {
         assert(mat.getRow() == 1);
         return VectorMatrixProduct(vec, mat);
@@ -71,8 +71,7 @@ namespace Physica {
         static_assert(U::RowAtCompile == 1 || U::RowAtCompile == Dynamic,
                       "Row and column do not match in matrix product");
     public:
-        using ScalarType = typename Core::Internal::BinaryScalarOpRtnTy<typename T::ScalarType,
-                                                                             typename U::ScalarType>::Type;
+        using ScalarType = Core::Internal::BinaryScalarOpRtnTy<typename T::ScalarType, typename U::ScalarType>::Type;
         constexpr static int Option = MatrixOption::AnyMajor | MatrixOption::AnyStorage;
         constexpr static size_t RowAtCompile = T::SizeAtCompile;
         constexpr static size_t ColAtCompile = U::ColAtCompile;

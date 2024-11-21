@@ -26,7 +26,7 @@ namespace Physica::Core {
     template<Scalar T, unsigned int Dim>
     class MSD {
         using MDCellType = MDCell<T, Dim>;
-        using PositionMatrix = typename MDCellType::PositionMatrix;
+        using PositionMatrix = MDCellType::PositionMatrix;
         using VectorType = DenseVector<T, Dim>;
 
         MDCellType initCell;

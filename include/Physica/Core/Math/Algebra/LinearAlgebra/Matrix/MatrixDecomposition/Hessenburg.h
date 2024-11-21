@@ -33,7 +33,7 @@ namespace Physica::Core {
     class Hessenburg {
         static_assert(Order > 2 || Order == Dynamic, "Unnecessary hessenburg operation on matrixes whose rank is 1 or 2");
         constexpr static size_t NormVectorLength = Order == Dynamic ? Dynamic : (Order - 2);
-        using RealType = typename T::RealType;
+        using RealType = T::RealType;
         using MatrixH = HessenburgMatrixH<T, Order>;
         using HouseholderNorm = DenseVector<T, NormVectorLength>;
         using This = Hessenburg<T, Order>;
@@ -139,7 +139,7 @@ namespace Physica::Core {
     template<Scalar T, size_t Order>
     template<Matrix M>
     void HessenburgMatrixH<T, Order>::assignTo(LValueMatrix<M>& target) const {
-        using RealType = typename T::RealType;
+        using RealType = T::RealType;
         const size_t order = getRow();
         size_t i = 0;
         for (; i < order - 2; ++i) {

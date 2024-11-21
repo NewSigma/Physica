@@ -30,7 +30,7 @@ using namespace Physica::Core;
 using Physica::Dynamic;
 using ScalarType = float32;
 using MDType = RPMD<ScalarType, 3, Physica::Dynamic, PageLockedAllocator<ScalarType>>;
-using MDCellType = typename MDType::MDCellType;
+using MDCellType = MDType::MDCellType;
 using KineticModel = FreeModel<ScalarType, 3, Dynamic, RPMDIntegrator::Exact>;
 using RandomType = Random<std::mt19937, 10000>;
 constexpr size_t numReplica = 24;
@@ -43,12 +43,12 @@ constexpr double mass = PhyConst<AU>::atomMass(1) * 2;
 namespace {
     template<class RandomType>
     MDType makeSystem(size_t numMolecular, RandomType& gen) {
-        typename MDCellType::LatticeMatrix lattice = MDCellType::LatticeMatrix::unitMatrix(3);
-        typename MDCellType::PositionMatrix pos(numMolecular, 3);
+        MDCellType::LatticeMatrix lattice = MDCellType::LatticeMatrix::unitMatrix(3);
+        MDCellType::PositionMatrix pos(numMolecular, 3);
         std::uniform_real_distribution dist{};
         for (auto& elem : pos.asArray())
             elem = dist(gen);
-        typename MDCellType::MassVector massVec(numMolecular, mass);
+        MDCellType::MassVector massVec(numMolecular, mass);
         MDCellType cell(std::move(lattice), std::move(pos), std::move(massVec));
 
         const double factor = (std::cbrt(numMolecular * molarVolume / PhyConst<SI>::avogadroNa) / 100) / PhyConst<SI>::bohrRadius;

@@ -36,19 +36,19 @@ namespace Physica::Core {
         constexpr static bool IsPotDependOnAtomIndex = TraitType::IsPotDependOnAtomIndex;
         constexpr static bool IsSmallCell = TraitType::IsSmallCell;
     public:
-        using ScalarType = typename TraitType::ScalarType;
+        using ScalarType = TraitType::ScalarType;
         constexpr static int Dim = host_obj::Dim;
         constexpr static int NumVirialElem = Dim * Dim;
 
-        using ValueType = typename ScalarType::ValueType;
+        using ValueType = ScalarType::ValueType;
         using MDCellType = MDCell<ScalarType>;
         using DeviceMDCell = device_obj<MDCellType>;
-        using LatticeMatrix = typename MDCellType::LatticeMatrix;
-        using InvLatticeMatrix = typename MDCellType::InvLatticeMatrix;
-        using PositionMatrix = typename MDCellType::PositionMatrix;
+        using LatticeMatrix = MDCellType::LatticeMatrix;
+        using InvLatticeMatrix = MDCellType::InvLatticeMatrix;
+        using PositionMatrix = MDCellType::PositionMatrix;
         using CellListType = CellList<ScalarType>;
         using DeviceCellList = device_obj<CellListType>;
-        using Index3D = typename GridBase::Index3D;
+        using Index3D = GridBase::Index3D;
         using DeviceVector3D = device_obj<Vector3D<ScalarType>>;
         using ForceBufferType = device_obj<DenseMatrix<ScalarType>>;
         using VirialBufferType = device_obj<DenseMatrix<ScalarType, MatrixOption::Col | MatrixOption::Element, NumVirialElem>>;

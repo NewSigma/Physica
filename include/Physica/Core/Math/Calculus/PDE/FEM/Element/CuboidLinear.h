@@ -91,7 +91,7 @@ namespace Physica::Core {
     }
 
     template<Scalar T>
-    typename CuboidLinear<T>::VectorType CuboidLinear<T>::getNodePos(size_t localNode) const {
+    CuboidLinear<T>::VectorType CuboidLinear<T>::getNodePos(size_t localNode) const {
         switch (localNode) {
             case LeftFrontBottom:
                 return leftFrontBottom;
@@ -114,12 +114,12 @@ namespace Physica::Core {
     }
 
     template<Scalar T>
-    typename CuboidLinear<T>::VectorType CuboidLinear<T>::toLocalPos(VectorType globalPos) const {
+    CuboidLinear<T>::VectorType CuboidLinear<T>::toLocalPos(VectorType globalPos) const {
         return divide(T(2) * globalPos - rightBehindTop - leftFrontBottom, rightBehindTop - leftFrontBottom);
     }
 
     template<Scalar T>
-    typename CuboidLinear<T>::VectorType CuboidLinear<T>::toGlobalPos(VectorType localPos) const {
+    CuboidLinear<T>::VectorType CuboidLinear<T>::toGlobalPos(VectorType localPos) const {
         return (leftFrontBottom + rightBehindTop - hadamard(rightBehindTop - leftFrontBottom, localPos)) * T(0.5);
     }
 

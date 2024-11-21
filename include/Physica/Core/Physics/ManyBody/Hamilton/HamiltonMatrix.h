@@ -26,7 +26,7 @@ namespace Physica::Core {
     class HamiltonMatrix : public RValueMatrix<Derived> {
         using This = HamiltonMatrix<Derived>;
         using Base = RValueMatrix<Derived>;
-        using ReprType = typename Traits<Derived>::ReprType;
+        using ReprType = Traits<Derived>::ReprType;
         constexpr static unsigned int NumSite = ReprType::StateType::NumSite;
     public:
         ~HamiltonMatrix() = default;

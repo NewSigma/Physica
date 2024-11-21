@@ -118,12 +118,12 @@ namespace Physica::Core {
     }
 
     template<Scalar T>
-    inline typename FFT<T, 1>::RealType FFT<T, 1>::getRSpaceDelta(RealType kSpaceDelta) const noexcept {
+    inline FFT<T, 1>::RealType FFT<T, 1>::getRSpaceDelta(RealType kSpaceDelta) const noexcept {
         return RealType(2 * M_PI) / (kSpaceDelta * getRSpaceSize());
     }
 
     template<Scalar T>
-    inline typename FFT<T, 1>::RealType FFT<T, 1>::getKSpaceDelta(RealType rSpaceDelta) const noexcept {
+    inline FFT<T, 1>::RealType FFT<T, 1>::getKSpaceDelta(RealType rSpaceDelta) const noexcept {
         return RealType(2 * M_PI) / (rSpaceDelta * getRSpaceSize());
     }
 
@@ -300,7 +300,7 @@ namespace Physica::Core {
     }
 
     template<Scalar T, size_t Dim>
-    typename FFT<T, Dim>::IndexArray FFT<T, Dim>::getRSpaceSize() const noexcept{
+    FFT<T, Dim>::IndexArray FFT<T, Dim>::getRSpaceSize() const noexcept{
         IndexArray result{};
         for (size_t i = 0; i < Dim; ++i)
             result[i] = rSpaceSize[i];
@@ -308,7 +308,7 @@ namespace Physica::Core {
     }
 
     template<Scalar T, size_t Dim>
-    typename FFT<T, Dim>::IndexArray FFT<T, Dim>::getKSpaceSize() const noexcept {
+    FFT<T, Dim>::IndexArray FFT<T, Dim>::getKSpaceSize() const noexcept {
         IndexArray result{};
         for (size_t i = 0; i < Dim; ++i)
             result[i] = kSpaceSize[i];
@@ -316,13 +316,13 @@ namespace Physica::Core {
     }
 
     template<Scalar T, size_t Dim>
-    inline typename FFT<T, Dim>::RealType FFT<T, Dim>::getRSpaceDelta(
+    inline FFT<T, Dim>::RealType FFT<T, Dim>::getRSpaceDelta(
             RealType kSpaceDelta, unsigned int dim) const noexcept{
         return RealType(2 * M_PI) / (kSpaceDelta * getRSpaceSize()[dim]);
     }
 
     template<Scalar T, size_t Dim>
-    inline typename FFT<T, Dim>::RealType FFT<T, Dim>::getKSpaceDelta(
+    inline FFT<T, Dim>::RealType FFT<T, Dim>::getKSpaceDelta(
             RealType rSpaceDelta, unsigned int dim) const noexcept {
         return RealType(2 * M_PI) / (rSpaceDelta * getRSpaceSize()[dim]);
     }
@@ -404,7 +404,7 @@ namespace Physica::Core {
     }
 
     template<Scalar T, size_t Dim>
-    typename FFT<T, Dim>::PlanType FFT<T, Dim>::makeForwardPlan() {
+    FFT<T, Dim>::PlanType FFT<T, Dim>::makeForwardPlan() {
         PlanType plan;
         if constexpr (Dim == 2) {
             if constexpr (isComplex) {
@@ -452,7 +452,7 @@ namespace Physica::Core {
     }
     
     template<Scalar T, size_t Dim>
-    typename FFT<T, Dim>::PlanType FFT<T, Dim>::makeBackwardPlan() {
+    FFT<T, Dim>::PlanType FFT<T, Dim>::makeBackwardPlan() {
         PlanType plan;
         if constexpr (Dim == 2) {
             if constexpr (isComplex) {

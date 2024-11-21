@@ -33,8 +33,8 @@ namespace Physica::Core {
         using typename Base::ConstPtrTy;
     private:
         using ValueMatrix = DenseMatrix<T, Option, Row, Col>;
-        using GradType = typename ScalarType::GradType;
-        using GradMatrix = typename std::conditional<Order == 1, ValueMatrix, DenseMatrix<GradType, Option, Row, Col>>::type;
+        using GradType = ScalarType::GradType;
+        using GradMatrix = std::conditional<Order == 1, ValueMatrix, DenseMatrix<GradType, Option, Row, Col>>::type;
 
         ValueMatrix values;
         GradMatrix grads;
@@ -74,10 +74,10 @@ namespace Physica::Core {
         using Base = RValueMatrix<This>;
         using Dim = DenseMatrixDim<This, Dynamic, Dynamic>;
         using TracerType = DiffTracer<T, Order>;
-        using SegmentType = typename TracerType::SegmentType;
+        using SegmentType = TracerType::SegmentType;
     public:
         using device_obj_type = device_obj<This>;
-        using ScalarType = typename Base::ScalarType;
+        using ScalarType = Base::ScalarType;
     private:
         SegmentType& traceSeg;
     public:

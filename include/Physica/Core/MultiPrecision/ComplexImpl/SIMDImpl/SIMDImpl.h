@@ -38,7 +38,7 @@ namespace Physica::Core {
     }
 
     template<Scalar T, size_t Size>
-    inline typename SIMD<Complex<T>, Size>::ScalarType SIMD<Complex<T>, Size>::operator[](int index) const {
+    inline SIMD<Complex<T>, Size>::ScalarType SIMD<Complex<T>, Size>::operator[](int index) const {
         return ScalarType(Base::operator[](2 * index), Base::operator[](2 * index + 1));
     }
 
@@ -116,7 +116,7 @@ namespace Physica::Core {
     }
 
     template<Scalar T, size_t Size>
-    typename SIMD<Complex<T>, Size>::AsRealRtnTy SIMD<Complex<T>, Size>::swapRealImag() const noexcept {
+    SIMD<Complex<T>, Size>::AsRealRtnTy SIMD<Complex<T>, Size>::swapRealImag() const noexcept {
         AsRealRtnTy result;
         if constexpr (T::Option == Float32)
             result = Base::template shuffle<1, 0, 3, 2>();
@@ -134,7 +134,7 @@ namespace Physica::Core {
     }
 
     template<Scalar T, size_t Size>
-    inline typename SIMD<Complex<T>, Size>::AsRealRtnTy SIMD<Complex<T>, Size>::permRealImag() const noexcept {
+    inline SIMD<Complex<T>, Size>::AsRealRtnTy SIMD<Complex<T>, Size>::permRealImag() const noexcept {
         auto result = asReal();
         if constexpr (Size == 2)
             result = result.template permute<0, 2, 1, 3>();
@@ -148,7 +148,7 @@ namespace Physica::Core {
     }
 
     template<Scalar T, size_t Size>
-    inline typename SIMD<Complex<T>, Size>::ScalarType SIMD<Complex<T>, Size>::sum() const {
+    inline SIMD<Complex<T>, Size>::ScalarType SIMD<Complex<T>, Size>::sum() const {
         if constexpr (isSeparatable)
             return getHigh().sum() + getLow().sum();
         else {
@@ -160,12 +160,12 @@ namespace Physica::Core {
     }
 
     template<Scalar T, size_t Size>
-    inline typename SIMD<Complex<T>, Size>::RealType SIMD<Complex<T>, Size>::real() const noexcept {
+    inline SIMD<Complex<T>, Size>::RealType SIMD<Complex<T>, Size>::real() const noexcept {
         return permRealImag().getLow();
     }
 
     template<Scalar T, size_t Size>
-    inline typename SIMD<Complex<T>, Size>::RealType SIMD<Complex<T>, Size>::imag() const noexcept {
+    inline SIMD<Complex<T>, Size>::RealType SIMD<Complex<T>, Size>::imag() const noexcept {
         return permRealImag().getHigh();
     }
 

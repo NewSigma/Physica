@@ -482,9 +482,9 @@ struct EList {
 template <typename V>
 constexpr auto get_inttype() {
     constexpr int elementsize = sizeof(V) / V::size();  // size of vector elements
-    using ResultType1 = typename std::conditional<elementsize >= 2, int16_t, int8_t>::type;
-    using ResultType2 = typename std::conditional<elementsize >= 4, int32_t, ResultType1>::type;
-    using ResultType = typename std::conditional<elementsize >= 8, int64_t, ResultType2>::type;
+    using ResultType1 = std::conditional<elementsize >= 2, int16_t, int8_t>::type;
+    using ResultType2 = std::conditional<elementsize >= 4, int32_t, ResultType1>::type;
+    using ResultType = std::conditional<elementsize >= 8, int64_t, ResultType2>::type;
     return ResultType(-1);
 }
 

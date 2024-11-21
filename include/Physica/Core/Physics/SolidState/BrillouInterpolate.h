@@ -34,10 +34,10 @@ namespace Physica::Core {
     class BrillouInterpolate {
         constexpr static unsigned int Dim = 3;
         constexpr static bool isComplex = T::isComplex;
-        using Index3D = typename GridBase::Index3D;
-        using RealType = typename T::RealType;
-        using ComplexType = typename T::ComplexType;
-        using LatticeMatrix = typename PeriodicCell<RealType, Dim>::LatticeMatrix;
+        using Index3D = GridBase::Index3D;
+        using RealType = T::RealType;
+        using ComplexType = T::ComplexType;
+        using LatticeMatrix = PeriodicCell<RealType, Dim>::LatticeMatrix;
         using CoeffMatrixM = DenseMatrix<ComplexType, MatrixOption::Row | MatrixOption::Vector>;
         using Vec3D = Vector3D<RealType>;
 
@@ -111,7 +111,7 @@ namespace Physica::Core {
     }
 
     template<Scalar T>
-    typename BrillouInterpolate<T>::RealType BrillouInterpolate<T>::calcRoughness() const {
+    BrillouInterpolate<T>::RealType BrillouInterpolate<T>::calcRoughness() const {
         RealType result = 0;
         const auto kernel = [this, &result](Vec3D r, Index3D index) {
             const RealType r2 = r.squaredNorm();
@@ -167,7 +167,7 @@ namespace Physica::Core {
     template<Scalar T>
     T BrillouInterpolate<T>::interpolateFEM(Vec3D kPoint, const RSpaceGrid<T>& data) const {
         using ElementType = CuboidLinear<RealType>;
-        using IndexArray = typename ElementType::IndexArray;
+        using IndexArray = ElementType::IndexArray;
         for (size_t i = 0; i < Dim; ++i) {
             kPoint[i] -= floor(kPoint[i]);
             assert(!kPoint[i].isNegative());
@@ -256,7 +256,7 @@ namespace Physica::Core {
      * Matrix M as defined in [1]
      */
     template<Scalar T>
-    typename BrillouInterpolate<T>::CoeffMatrixM BrillouInterpolate<T>::makeMatrixM() const {
+    BrillouInterpolate<T>::CoeffMatrixM BrillouInterpolate<T>::makeMatrixM() const {
         const auto baseDim = getBaseDim();
         const size_t numDataPoint = dataDim[0] * dataDim[1] * dataDim[2];
         CoeffMatrixM matrixM(numDataPoint, numDataPoint);

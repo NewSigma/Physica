@@ -63,55 +63,55 @@ namespace Physica::Core {
     template<class Derived>
     template<class AnyPacket>
     __device__ inline void device_obj<ContinuousVector<Derived>>::writePacket(size_t index, const AnyPacket packet) {
-        using LocalPacket = typename std::conditional<AnyPacket::size() == 1, ScalarType, SIMD<ScalarType, AnyPacket::size()>>::type;
+        using LocalPacket = std::conditional<AnyPacket::size() == 1, ScalarType, SIMD<ScalarType, AnyPacket::size()>>::type;
         LocalPacket(packet).store(Base::data_ptr(index));
     }
 
     template<class Derived>
     template<class AnyPacket>
     __device__ inline void device_obj<ContinuousVector<Derived>>::writePacketPartial(size_t index, size_t count, const AnyPacket packet) {
-        using LocalPacket = typename std::conditional<AnyPacket::size() == 1, ScalarType, SIMD<ScalarType, AnyPacket::size()>>::type;
+        using LocalPacket = std::conditional<AnyPacket::size() == 1, ScalarType, SIMD<ScalarType, AnyPacket::size()>>::type;
         LocalPacket(packet).store_partial(Base::data_ptr(index), count);
     }
 
     template<class Derived>
     template<size_t Length>
-    __host__ __device__ inline typename device_obj<ContinuousVector<Derived>>::template BlockType<Length>
+    __host__ __device__ inline device_obj<ContinuousVector<Derived>>::template BlockType<Length>
     device_obj<ContinuousVector<Derived>>::head(size_t to) {
         return {Base::getDerived(), 0, to};
     }
 
     template<class Derived>
     template<size_t Length>
-    __host__ __device__ inline const typename device_obj<ContinuousVector<Derived>>::template BlockType<Length>
+    __host__ __device__ inline const device_obj<ContinuousVector<Derived>>::template BlockType<Length>
     device_obj<ContinuousVector<Derived>>::head(size_t to) const {
         return {Base::getConstCastDerived(), 0, to};
     }
 
     template<class Derived>
     template<size_t Length>
-    __host__ __device__ inline typename device_obj<ContinuousVector<Derived>>::template BlockType<Length>
+    __host__ __device__ inline device_obj<ContinuousVector<Derived>>::template BlockType<Length>
     device_obj<ContinuousVector<Derived>>::tail(size_t from) {
         return {Base::getDerived(), from};
     }
 
     template<class Derived>
     template<size_t Length>
-    __host__ __device__ inline const typename device_obj<ContinuousVector<Derived>>::template BlockType<Length>
+    __host__ __device__ inline const device_obj<ContinuousVector<Derived>>::template BlockType<Length>
     device_obj<ContinuousVector<Derived>>::tail(size_t from) const {
         return {Base::getConstCastDerived(), from};
     }
 
     template<class Derived>
     template<size_t Length>
-    __host__ __device__ inline typename device_obj<ContinuousVector<Derived>>::template BlockType<Length>
+    __host__ __device__ inline device_obj<ContinuousVector<Derived>>::template BlockType<Length>
     device_obj<ContinuousVector<Derived>>::segment(size_t from, size_t to) {
         return {Base::getDerived(), from, to};
     }
 
     template<class Derived>
     template<size_t Length>
-    __host__ __device__ inline const typename device_obj<ContinuousVector<Derived>>::template BlockType<Length>
+    __host__ __device__ inline const device_obj<ContinuousVector<Derived>>::template BlockType<Length>
     device_obj<ContinuousVector<Derived>>::segment(size_t from, size_t to) const {
         return {Base::getConstCastDerived(), from, to};
     }

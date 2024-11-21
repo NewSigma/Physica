@@ -23,8 +23,8 @@
 
 namespace Physica::Core {
     template<Vector T>
-    typename T::ScalarType mean(const T& x) {
-        using ScalarType = typename T::ScalarType;
+    T::ScalarType mean(const T& x) {
+        using ScalarType = T::ScalarType;
         return x.sum() / ScalarType(x.getLength());
     }
 
@@ -37,7 +37,7 @@ namespace Physica::Core {
 
     template<LVector T1, Vector T2>
     inline void toNextMean(T1& mean, size_t lastNumSample, const T2& sample) {
-        using ScalarType = typename Internal::BinaryScalarOpRtnTy<typename T1::ScalarType, typename T2::ScalarType>::Type;
+        using ScalarType = Internal::BinaryScalarOpRtnTy<typename T1::ScalarType, typename T2::ScalarType>::Type;
         const ScalarType factor1 = ScalarType(lastNumSample);
         const ScalarType factor2 = reciprocal(ScalarType(lastNumSample + 1));
         mean = (factor1 * mean + sample) * factor2;
@@ -45,15 +45,15 @@ namespace Physica::Core {
 
     template<LMatrix T1, Matrix T2>
     inline void toNextMean(T1& mean, size_t lastNumSample, const T2& sample) {
-        using ScalarType = typename Internal::BinaryScalarOpRtnTy<typename T1::ScalarType, typename T2::ScalarType>::Type;
+        using ScalarType = Internal::BinaryScalarOpRtnTy<typename T1::ScalarType, typename T2::ScalarType>::Type;
         const ScalarType factor1 = ScalarType(lastNumSample);
         const ScalarType factor2 = reciprocal(ScalarType(lastNumSample + 1));
         mean = (factor1 * mean + sample) * factor2;
     }
 
     template<Vector T>
-    typename T::ScalarType mean_stable(const T& x) {
-        using ScalarType = typename T::ScalarType;
+    T::ScalarType mean_stable(const T& x) {
+        using ScalarType = T::ScalarType;
         ScalarType result = 0;
         for (size_t i = 0; i < x.getLength(); ++i)
             toNextMean(result, i, x.calc(i));
@@ -61,16 +61,16 @@ namespace Physica::Core {
     }
 
     template<Vector T>
-    typename T::ScalarType variance(const T& x) {
-        using ScalarType = typename T::ScalarType;
+    T::ScalarType variance(const T& x) {
+        using ScalarType = T::ScalarType;
         const size_t length = x.getLength();
         const ScalarType x_mean = mean(x);
         return square(x - x_mean).sum() / ScalarType(length - 1);
     }
 
     template<Vector T>
-    typename T::ScalarType variance(const T& x, typename T::ScalarType prior_mean) {
-        using ScalarType = typename T::ScalarType;
+    T::ScalarType variance(const T& x, typename T::ScalarType prior_mean) {
+        using ScalarType = T::ScalarType;
         const size_t length = x.getLength();
         return square(x - prior_mean).sum() / ScalarType(length);
     }
@@ -85,7 +85,7 @@ namespace Physica::Core {
 
     template<LVector T1, LVector T2>
     inline void toNextVariance(T1& var, T1& mean, size_t lastNumSample, const T2& sample) {
-        using ScalarType = typename Internal::BinaryScalarOpRtnTy<typename T1::ScalarType, typename T2::ScalarType>::Type;
+        using ScalarType = Internal::BinaryScalarOpRtnTy<typename T1::ScalarType, typename T2::ScalarType>::Type;
         const ScalarType factor1 = ScalarType(lastNumSample);
         const ScalarType factor2 = reciprocal(ScalarType(lastNumSample + 1));
         var = (var + square(mean - sample) * factor2) * (factor1 * factor2);
@@ -94,7 +94,7 @@ namespace Physica::Core {
 
     template<LMatrix T1, LMatrix T2>
     inline void toNextVariance(T1& var, T1& mean, size_t lastNumSample, const T2& sample) {
-        using ScalarType = typename Internal::BinaryScalarOpRtnTy<typename T1::ScalarType, typename T2::ScalarType>::Type;
+        using ScalarType = Internal::BinaryScalarOpRtnTy<typename T1::ScalarType, typename T2::ScalarType>::Type;
         const ScalarType factor1 = ScalarType(lastNumSample);
         const ScalarType factor2 = reciprocal(ScalarType(lastNumSample + 1));
         var = (var + square_elem(mean - sample) * factor2) * (factor1 * factor2);
@@ -104,8 +104,8 @@ namespace Physica::Core {
      * Stable if large dataset is used, prior version is not provided because they behave similarly at large dataset.
      */
     template<Vector T>
-    typename T::ScalarType variance_stable(const T& x) {
-        using ScalarType = typename T::ScalarType;
+    T::ScalarType variance_stable(const T& x) {
+        using ScalarType = T::ScalarType;
         ScalarType result = 0;
         ScalarType mean = 0;
         for (size_t i = 0; i < x.getLength(); ++i)
@@ -114,28 +114,28 @@ namespace Physica::Core {
     }
 
     template<Vector T>
-    inline typename T::ScalarType deviation(const T& x) {
+    inline T::ScalarType deviation(const T& x) {
         return sqrt(variance(x));
     }
 
     template<Vector T>
-    inline typename T::ScalarType deviation_stable(const T& x) {
+    inline T::ScalarType deviation_stable(const T& x) {
         return sqrt(variance_stable(x));
     }
 
     template<Vector T>
     DenseVector<typename T::ScalarType, T::SizeAtCompile>
     normalize(const T& x) {
-        using ScalarType = typename T::ScalarType;
+        using ScalarType = T::ScalarType;
         const ScalarType x_mean = mean(x);
         const ScalarType factor = reciprocal(deviation(x));
         return (x - x_mean) * factor;
     }
 
     template<Vector T>
-    typename T::ScalarType covariance(const T& x, const T& y) {
+    T::ScalarType covariance(const T& x, const T& y) {
         assert(x.getLength() == y.getLength());
-        using ScalarType = typename T::ScalarType;
+        using ScalarType = T::ScalarType;
         const ScalarType x_mean = mean(x);
         const ScalarType y_mean = mean(y);
         DenseVector<typename T::ScalarType, T::SizeAtCompile> temp = hadamard((x - x_mean), (y - y_mean));
@@ -143,8 +143,8 @@ namespace Physica::Core {
     }
 
     template<Vector T>
-    typename T::ScalarType skew(const T& x) {
-        using ScalarType = typename T::ScalarType;
+    T::ScalarType skew(const T& x) {
+        using ScalarType = T::ScalarType;
         T temp = normalize(x);
         temp = hadamard(square(temp), temp);
         const size_t length = x.getLength();
@@ -153,8 +153,8 @@ namespace Physica::Core {
     }
 
     template<Vector T>
-    typename T::ScalarType excess_kurt(const T& x) {
-        using ScalarType = typename T::ScalarType;
+    T::ScalarType excess_kurt(const T& x) {
+        using ScalarType = T::ScalarType;
         T temp = normalize(x);
         temp = square(temp);
         const ScalarType mean2 = mean(temp);
@@ -168,7 +168,7 @@ namespace Physica::Core {
     }
 
     template<Vector T>
-    inline typename T::ScalarType kurt(const T& x) {
+    inline T::ScalarType kurt(const T& x) {
         return excess_kurt(x) + 3.0;
     }
 }

@@ -25,7 +25,7 @@ namespace Physica::Core {
     template<Scalar T, class RandomPoolType>
     class GaussRandomPool {
     public:
-        using GeneratorType = typename RandomPoolType::GeneratorType;
+        using GeneratorType = RandomPoolType::GeneratorType;
     private:
         VectorND<T> rands;
     public:

@@ -28,7 +28,7 @@ namespace Physica::Core {
 
     template<class T, bool IsSpinPolarized>
     class SpinPair : public Traits<SpinPair<T, IsSpinPolarized>>::Base {
-        using Base = typename Traits<SpinPair<T, IsSpinPolarized>>::Base;
+        using Base = Traits<SpinPair<T, IsSpinPolarized>>::Base;
         constexpr static unsigned char NumSpin = Base::getLength();
     public:
         using ElemType = T;

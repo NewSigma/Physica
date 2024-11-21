@@ -28,7 +28,7 @@ namespace Physica::Python {
         using This = PhysicaPython;
         using ExecutorAddr = llvm::orc::ExecutorAddr;
         using StrTypeMap = std::unordered_map<std::string, CXXType>;
-        using LLJIT = typename Executor::LLJIT;
+        using LLJIT = Executor::LLJIT;
 
         Clang clang;
         Executor exec;

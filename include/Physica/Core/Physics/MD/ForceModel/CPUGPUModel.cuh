@@ -30,8 +30,8 @@ namespace Physica::Core {
     class CPUGPUModel {
         static_assert(!is_device_obj<HostModel>::value, "[Error]: Host model must not be device object");
         static_assert(!is_device_obj<DeviceModel>::value, "[Error]: device_obj<> is unnecessary");
-        using ScalarType = typename HostModel::ScalarType;
-        using MDCellType = typename HostModel::MDCellType;
+        using ScalarType = HostModel::ScalarType;
+        using MDCellType = HostModel::MDCellType;
         HostModel hostModel;
         Array<device_obj<DeviceModel>> deviceModels;
     public:

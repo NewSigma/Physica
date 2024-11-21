@@ -27,12 +27,12 @@ namespace Physica::Core {
     class FIterator {
         constexpr static bool isConst = std::is_const<Container>::value;
         using This = FIterator<Container>;
-        using ElemType = typename Traits<std::remove_const_t<Container>>::ElemType;
+        using ElemType = Traits<std::remove_const_t<Container>>::ElemType;
     public:
         using difference_type = std::ptrdiff_t;
-        using value_type = typename std::conditional<isConst, const ElemType, ElemType>::type;
-        using pointer = typename std::add_pointer<value_type>::type;
-        using reference = typename std::add_lvalue_reference<value_type>::type;
+        using value_type = std::conditional<isConst, const ElemType, ElemType>::type;
+        using pointer = std::add_pointer<value_type>::type;
+        using reference = std::add_lvalue_reference<value_type>::type;
         using iterator_category = std::random_access_iterator_tag;
     private:
         pointer p;
@@ -63,12 +63,12 @@ namespace Physica::Core {
     class RIterator {
         constexpr static bool isConst = std::is_const<Container>::value;
         using This = RIterator<Container>;
-        using ElemType = typename Traits<std::remove_const_t<Container>>::ElemType;
+        using ElemType = Traits<std::remove_const_t<Container>>::ElemType;
     public:
         using difference_type = std::ptrdiff_t;
-        using value_type = typename std::conditional<isConst, const ElemType, ElemType>::type;
-        using pointer = typename std::add_pointer<value_type>::type;
-        using reference = typename std::add_lvalue_reference<value_type>::type;
+        using value_type = std::conditional<isConst, const ElemType, ElemType>::type;
+        using pointer = std::add_pointer<value_type>::type;
+        using reference = std::add_lvalue_reference<value_type>::type;
         using iterator_category = std::random_access_iterator_tag;
     private:
         pointer p;

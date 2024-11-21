@@ -25,7 +25,7 @@ namespace Physica::Core {
     class FPUModel {
         static_assert(Dim == 1, "[Error]: FPUModel must be 1-dimensional");
         using MDCellType = MDCell<T, Dim>;
-        using LatticeMatrix = typename MDCellType::LatticeMatrix;
+        using LatticeMatrix = MDCellType::LatticeMatrix;
 
         T springLength;
     public:
@@ -129,7 +129,7 @@ namespace Physica::Core {
     }
 
     template<Scalar T, bool IsPeriodBoundary, unsigned int Dim>
-    typename FPUModel<T, IsPeriodBoundary, Dim>::LatticeMatrix
+    FPUModel<T, IsPeriodBoundary, Dim>::LatticeMatrix
     FPUModel<T, IsPeriodBoundary, Dim>::virial(const MDCellType& cell) const {
         const size_t numParticle = cell.getNumParticle();
         const auto& pos = cell.getPos();

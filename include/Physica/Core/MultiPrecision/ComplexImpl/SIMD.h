@@ -25,7 +25,7 @@ namespace Physica::Core {
         using ScalarType = Complex<T>;
     public:
         constexpr static size_t Size = RealPacket::Size / 2;
-        using Type = typename std::conditional<Size == 1, ScalarType, SIMD<ScalarType, Size>>::type;
+        using Type = std::conditional<Size == 1, ScalarType, SIMD<ScalarType, Size>>::type;
     };
 
     template<Scalar T, size_t Length>
@@ -42,11 +42,11 @@ namespace Physica::Core {
         using Base = SIMD<T, Size * 2>;
         using RealType = SIMD<T, Size>;
         using AsRealRtnTy = Base;
-        using MachineType = typename ScalarType::MachineType;
-        using HalfType = typename std::conditional<sizeof(Base) * CHAR_BIT != 128, SIMD<Complex<T>, Size / 2>, PlainStruct<void>>::type;
+        using MachineType = ScalarType::MachineType;
+        using HalfType = std::conditional<sizeof(Base) * CHAR_BIT != 128, SIMD<Complex<T>, Size / 2>, PlainStruct<void>>::type;
         using Base::isSeparatable;
     public:
-        using BoolSIMDType = typename Base::BoolSIMDType;
+        using BoolSIMDType = Base::BoolSIMDType;
         using PlainPacket = This;
     public:
         SIMD() = default;

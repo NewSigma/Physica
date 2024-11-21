@@ -29,7 +29,7 @@ namespace Physica::Core {
     template<Scalar T>
     class QEModel {
         using MDCellType = MDCell<T>;
-        using ElementTypeArray = typename Poscar<T>::ElementTypeArray;
+        using ElementTypeArray = Poscar<T>::ElementTypeArray;
 
         std::string pathToPW;
         Array<char> input;

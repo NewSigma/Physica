@@ -30,8 +30,8 @@ namespace Physica::Core {
         __global__ void DiffVectorExpr_unitaryOpKernel(
                 Physica::PlainStruct<T> result_,
                 Physica::PlainStruct<const T> v_) {
-            using ScalarType = typename T::ScalarType;
-            using DiffRecord = typename T::DiffRecord;
+            using ScalarType = T::ScalarType;
+            using DiffRecord = T::DiffRecord;
             const T& v = v_.getDerived();
             T& result = result_.getDerived();
             const size_t index = blockIdx.x * blockDim.x + threadIdx.x;
@@ -53,9 +53,9 @@ namespace Physica::Core {
         __global__ void DiffVectorExpr_binaryOpKernel(
                 Physica::PlainStruct<T> result_,
                 Physica::PlainStruct<const T> v_,
-                Physica::PlainStruct<const typename T::ScalarType> s_) {
-            using ScalarType = typename T::ScalarType;
-            using DiffRecord = typename T::DiffRecord;
+                Physica::PlainStruct<const T::ScalarType> s_) {
+            using ScalarType = T::ScalarType;
+            using DiffRecord = T::DiffRecord;
             const T& v = v_.getDerived();
             const ScalarType& s = s_.getDerived();
             T& result = result_.getDerived();
@@ -84,8 +84,8 @@ namespace Physica::Core {
                 Physica::PlainStruct<T> result_,
                 Physica::PlainStruct<const T> v1_,
                 Physica::PlainStruct<const T> v2_) {
-            using ScalarType = typename T::ScalarType;
-            using DiffRecord = typename T::DiffRecord;
+            using ScalarType = T::ScalarType;
+            using DiffRecord = T::DiffRecord;
             const T& v1 = v1_.getDerived();
             const T& v2 = v2_.getDerived();
             T& result = result_.getDerived();
@@ -130,7 +130,7 @@ namespace Physica::Core {
     template<ExprType Type, int Order, Scalar T>
     class DiffVectorExprBinary<Type, Order, VectorND<T>, T> {
         using VectorType = device_obj<Diff<VectorND<T>, DiffMode::Reverse, Order>>;
-        using ScalarType = typename VectorType::ScalarType;
+        using ScalarType = VectorType::ScalarType;
     public:
         [[nodiscard]] static VectorType calc(const VectorType& v, const ScalarType& s) {
             const size_t length = v.getLength();

@@ -64,7 +64,7 @@ namespace Physica::Python {
         return compiler.getCI().getPreprocessor();
     }
 
-    typename HeaderManager::ClassDecl* HeaderManager::findClassDecl(DeclContext& tree, StringRef className) {
+    HeaderManager::ClassDecl* HeaderManager::findClassDecl(DeclContext& tree, StringRef className) {
         assert(!className.empty() && "[Error]: Invalid class name");
         using namespace clang;
         for (clang::Decl* pDecl : tree.decls()) {

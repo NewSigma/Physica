@@ -102,7 +102,7 @@ namespace Physica::Core {
     DenseMatrix<T, Option, Row, Col, Allocator>
     DenseMatrix<T, Option, Row, Col, Allocator>::copy() const {
         if constexpr (isReverseDiff) {
-            using TracerType = typename ScalarType::TracerType;
+            using TracerType = ScalarType::TracerType;
             TracerType::getInstance().reserve(Storage::getSize());
             This result(Base::getRow(), Base::getCol());
             for (size_t major = 0; major < Base::getMaxMajor(); ++major)

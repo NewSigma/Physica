@@ -102,7 +102,7 @@ namespace Physica::Core {
     };
 
     template<Scalar T, DecisionTreeType Type>
-    inline typename DecisionTree<T, Type>::LossFunctor DecisionTree<T, Type>::getLossFunctor() {
+    inline DecisionTree<T, Type>::LossFunctor DecisionTree<T, Type>::getLossFunctor() {
         constexpr bool isClassifyTree = Type == DecisionTreeType::Classify;
         return isClassifyTree ? giniIndex : mse;
     }

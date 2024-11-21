@@ -27,7 +27,7 @@ namespace Physica::Core {
         using This = SGD<device_obj<T>>;
         using DeviceScalar = device_obj<T>;
     public:
-        using ValueType = typename T::ValueType;
+        using ValueType = T::ValueType;
         constexpr static size_t MaxNumThreadPerBlock = 256;
     protected:
         ValueType learnRate;
@@ -36,8 +36,8 @@ namespace Physica::Core {
         DeviceScalar from;
         DeviceScalar to;
     private:
-        using TracerType = typename DeviceScalar::TracerType;
-        using SegmentType = typename TracerType::SegmentType;
+        using TracerType = DeviceScalar::TracerType;
+        using SegmentType = TracerType::SegmentType;
     public:
         SGD(ValueType learnRate_, unsigned int batchSize_);
         SGD(const SGD&) = default;

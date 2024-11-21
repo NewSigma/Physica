@@ -44,7 +44,7 @@ namespace Physica::Core {
 
         using This = PeriodicCell<T, Dim>;
         using Base = Internal::PeriodicCellImpl;
-        using ValueType = typename T::ValueType;
+        using ValueType = T::ValueType;
     public:
         using LatticeMatrix = DenseMatrix<T, MatrixOption::Row | MatrixOption::Element, Dim, Dim>;
         using InvLatticeMatrix = DenseMatrix<T, MatrixOption::Col | MatrixOption::Element, Dim, Dim>;
@@ -176,7 +176,7 @@ namespace Physica::Core {
     }
 
     template<Scalar T, unsigned int Dim>
-    typename PeriodicCell<T, Dim>::VectorType
+    PeriodicCell<T, Dim>::VectorType
     PeriodicCell<T, Dim>::minDistVector(size_t id_from, size_t id_to) const {
         T record_dist = std::numeric_limits<T>::max();
         VectorType result{};
@@ -238,7 +238,7 @@ namespace Physica::Core {
     }
 
     template<Scalar T, unsigned int Dim>
-    typename PeriodicCell<T, Dim>::VectorType
+    PeriodicCell<T, Dim>::VectorType
     PeriodicCell<T, Dim>::minDistVector(VectorType from, size_t id_to) const {
         T record_dist = std::numeric_limits<T>::max();
         VectorType result{};
@@ -336,7 +336,7 @@ namespace Physica::Core {
     }
 
     template<Scalar T, unsigned int Dim>
-    inline typename PeriodicCell<T, Dim>::LatticeMatrix PeriodicCell<T, Dim>::makeRepLattice() const {
+    inline PeriodicCell<T, Dim>::LatticeMatrix PeriodicCell<T, Dim>::makeRepLattice() const {
         return makeRepLattice(lattice);
     }
 
@@ -415,7 +415,7 @@ namespace Physica::Core {
     }
 
     template<Scalar T, unsigned int Dim>
-    typename PeriodicCell<T, Dim>::LatticeMatrix PeriodicCell<T, Dim>::makeLattice(
+    PeriodicCell<T, Dim>::LatticeMatrix PeriodicCell<T, Dim>::makeLattice(
             T normA,
             T normB,
             T normC,
@@ -436,7 +436,7 @@ namespace Physica::Core {
     }
 
     template<Scalar T, unsigned int Dim>
-    typename PeriodicCell<T, Dim>::LatticeMatrix PeriodicCell<T, Dim>::makeLattice2D(
+    PeriodicCell<T, Dim>::LatticeMatrix PeriodicCell<T, Dim>::makeLattice2D(
             T normA,
             T normB,
             T normC,
@@ -460,7 +460,7 @@ namespace Physica::Core {
      * [1] Acta Cryst. A32, 297 (1976); https://doi.org/10.1107/S0567739476000636
      */
     template<Scalar T, unsigned int Dim>
-    typename PeriodicCell<T, Dim>::LatticeMatrix PeriodicCell<T, Dim>::makeNiggliLattice(
+    PeriodicCell<T, Dim>::LatticeMatrix PeriodicCell<T, Dim>::makeNiggliLattice(
             const LatticeMatrix& lattice, double precision, unsigned int maxIteration) {
         assert(precision > 0 && "[Error]: Precision should be positive");
         assert(maxIteration > 0 && "[Error]: Set maxIteration = 0 does nothing");
@@ -568,7 +568,7 @@ namespace Physica::Core {
      * A directly simplified version of above function
      */
     template<Scalar T, unsigned int Dim>
-    typename PeriodicCell<T, Dim>::LatticeMatrix PeriodicCell<T, Dim>::makeNiggliLattice2D(
+    PeriodicCell<T, Dim>::LatticeMatrix PeriodicCell<T, Dim>::makeNiggliLattice2D(
             const LatticeMatrix& lattice, unsigned int maxIteration) {
         assert(maxIteration > 0 && "[Error]: Set maxIteration = 0 does nothing");
         T squaredNormA = lattice.row(0).squaredNorm();
@@ -599,7 +599,7 @@ namespace Physica::Core {
     }
 
     template<Scalar T, unsigned int Dim>
-    typename PeriodicCell<T, Dim>::LatticeMatrix PeriodicCell<T, Dim>::makeRepLattice(const LatticeMatrix& lattice) {
+    PeriodicCell<T, Dim>::LatticeMatrix PeriodicCell<T, Dim>::makeRepLattice(const LatticeMatrix& lattice) {
         LatticeMatrix result{};
         result.row(0) = lattice.row(1).crossProduct(lattice.row(2));
         result.row(1) = lattice.row(2).crossProduct(lattice.row(0));
@@ -631,7 +631,7 @@ namespace Physica::Core {
     }
 
     template<Scalar T, unsigned int Dim>
-    typename PeriodicCell<T, Dim>::SearchRangeType
+    PeriodicCell<T, Dim>::SearchRangeType
     PeriodicCell<T, Dim>::estimateRange(const LatticeMatrix& lattice, ValueType cutoff) {
         const auto repLatt = makeRepLattice(lattice);
         const ValueType factor = cutoff * ValueType(1 / (2 * M_PI));

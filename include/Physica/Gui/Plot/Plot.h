@@ -181,7 +181,7 @@ namespace Physica::Gui {
 
     template<Core::Vector T>
     QAreaSeries& Plot::hist(const T& data, size_t binCount, bool density) {
-        using ScalarType = typename T::ScalarType;
+        using ScalarType = T::ScalarType;
         
         double binWidth, min;
         const size_t length = data.getLength();

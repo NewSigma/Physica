@@ -30,10 +30,10 @@ namespace Physica::Core {
      */
     template<class ForceModel>
     class TIModel {
-        using ScalarType = typename Traits<ForceModel>::ScalarType;
+        using ScalarType = Traits<ForceModel>::ScalarType;
         using HamonicType = Hamonic<ScalarType, 3>;
-        using MDCellType = typename HamonicType::MDCellType;
-        using PositionMatrix = typename HamonicType::PositionMatrix;
+        using MDCellType = HamonicType::MDCellType;
+        using PositionMatrix = HamonicType::PositionMatrix;
 
         ForceModel original;
         HamonicType hamonic;
@@ -82,7 +82,7 @@ namespace Physica::Core {
     }
     
     template<class ForceModel>
-    typename TIModel<ForceModel>::ScalarType TIModel<ForceModel>::potentialV(const MDCellType& cell) const {
+    TIModel<ForceModel>::ScalarType TIModel<ForceModel>::potentialV(const MDCellType& cell) const {
         const ScalarType hamonicV = hamonic.potentialV(cell);
         if (lambda.isZero())
             return hamonicV;
@@ -90,7 +90,7 @@ namespace Physica::Core {
     }
 
     template<class ForceModel>
-    typename TIModel<ForceModel>::ScalarType TIModel<ForceModel>::deltaPotentialV(const MDCellType& cell) const {
+    TIModel<ForceModel>::ScalarType TIModel<ForceModel>::deltaPotentialV(const MDCellType& cell) const {
         return (original.potentialV(cell) - refPotentialV) - hamonic.potentialV(cell);
     }
 

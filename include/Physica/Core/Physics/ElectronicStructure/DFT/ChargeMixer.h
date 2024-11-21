@@ -33,11 +33,11 @@ namespace Physica::Core {
         constexpr static double bmix = 0.8; //Refer to [1]
         constexpr static double amin = 0.4; //Refer to VASP wiki
         constexpr static double pulay_mix = 0.4;
-        using LatticeMatrix = typename CrystalCell<T>::LatticeMatrix;
+        using LatticeMatrix = CrystalCell<T>::LatticeMatrix;
         using DensityType = DensityGrid<T, isSpinPolarized>;
         using DensityArray = Array<DensityType, DIISBufferSize>;
         using FFT3D = FFT<T, 3>;
-        using Index3D = typename DensityType::Index3D;
+        using Index3D = DensityType::Index3D;
     private:
         LatticeMatrix repLatt;
         DensityArray oldDensities;
@@ -99,8 +99,8 @@ namespace Physica::Core {
     template<Scalar T, bool isSpinPolarized>
     void ChargeMixer<T, isSpinPolarized>::mix(size_t iteration, DensityType& result) {
         if (iteration == 0) {
-            using GridType = typename FFT3D::KSpaceType;
-            using Index3D = typename GridType::Index3D;
+            using GridType = FFT3D::KSpaceType;
+            using Index3D = GridType::Index3D;
             const auto& deltaRho = residules[0].getTotalDensity();
             fft.getRSpace().flatten() = deltaRho.flatten();
             fft.transform();

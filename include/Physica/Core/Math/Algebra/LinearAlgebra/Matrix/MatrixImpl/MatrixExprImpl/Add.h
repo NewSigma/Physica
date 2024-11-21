@@ -26,8 +26,8 @@ namespace Physica::Core {
         using This = MatrixExpr<ExprType::Add, T1, T2>;
         constexpr static bool IsSymm = MatrixOption::isSymmMatrix<T1>() && MatrixOption::isSymmMatrix<T2>();
         constexpr static bool IsHermite = MatrixOption::isHermiteMatrix<T1>() && MatrixOption::isHermiteMatrix<T2>();
-        using TransposeRtnTy = typename std::conditional<IsSymm, const This&, Transpose<This>>::type;
-        using HermiteRtnTy = typename std::conditional<IsHermite, const This&, Hermite<This>>::type;
+        using TransposeRtnTy = std::conditional<IsSymm, const This&, Transpose<This>>::type;
+        using HermiteRtnTy = std::conditional<IsHermite, const This&, Hermite<This>>::type;
     public:
         using typename Base::ScalarType;
     public:

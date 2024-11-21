@@ -39,16 +39,16 @@ namespace Physica::Core {
              size_t NumReplica,
              RPMDIntegrator Integrator>
     class FreeModel {
-        using ValueType = typename T::ValueType;
+        using ValueType = T::ValueType;
         using ComplexType = Complex<T>;
         using MDType = RPMD<T, Dim, NumReplica>;
-        using MDCellType = typename MDType::MDCellType;
-        using RingPolymerType = typename MDType::RingPolymerType;
-        using LatticeMatrix = typename MDCellType::LatticeMatrix;
-        using MassVector = typename MDCellType::MassVector;
-        using PhaseMatrix = typename RingPolymerType::PhaseMatrix;
-        using BufferType = typename RingPolymerType::BufferType;
-        using FFTType = typename RingPolymerType::FFTType;
+        using MDCellType = MDType::MDCellType;
+        using RingPolymerType = MDType::RingPolymerType;
+        using LatticeMatrix = MDCellType::LatticeMatrix;
+        using MassVector = MDCellType::MassVector;
+        using PhaseMatrix = RingPolymerType::PhaseMatrix;
+        using BufferType = RingPolymerType::BufferType;
+        using FFTType = RingPolymerType::FFTType;
         using VectorType = VectorND<T>;
         static_assert(std::is_same<ComplexType, typename BufferType::ScalarType>::value, "[Error]: Inconsistent type");
     private:

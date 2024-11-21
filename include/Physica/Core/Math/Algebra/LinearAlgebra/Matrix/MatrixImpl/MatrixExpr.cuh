@@ -71,7 +71,7 @@ namespace Physica::Core {
         using This = device_obj<host_obj>;
         using Base = device_obj<RValueMatrix<MatrixExpr<Type, LHS, RHS>>>;
         using DeviceLHS = device_obj<LHS>;
-        using DeviceRHS = typename std::conditional<Scalar<RHS>, typename RHS::ScalarType, device_obj<RHS>>::type;
+        using DeviceRHS = std::conditional<Scalar<RHS>, typename RHS::ScalarType, device_obj<RHS>>::type;
     private:
         union {
             PlainStruct<const DeviceLHS> value;

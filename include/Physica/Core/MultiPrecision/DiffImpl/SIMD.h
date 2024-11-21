@@ -26,7 +26,7 @@ namespace Physica::Core {
         using ScalarType = Diff<T, DiffMode::Forward, Order>;
     public:
         constexpr static size_t Size = BestPacket<T, Length>::Size;
-        using Type = typename std::conditional<Size == 1, ScalarType, SIMD<ScalarType, Size>>::type;
+        using Type = std::conditional<Size == 1, ScalarType, SIMD<ScalarType, Size>>::type;
     };
 
     template<Scalar T, int Order, size_t Length>
@@ -40,16 +40,16 @@ namespace Physica::Core {
     class SIMD<Diff<T, DiffMode::Forward, Order>, Size> {
         using ScalarType = Diff<T, DiffMode::Forward, Order>;
         using This = SIMD<ScalarType, Size>;
-        using PtrTy = typename ScalarType::PtrTy;
-        using ConstPtrTy = typename ScalarType::ConstPtrTy;
-        using GradType = typename ScalarType::GradType;
+        using PtrTy = ScalarType::PtrTy;
+        using ConstPtrTy = ScalarType::ConstPtrTy;
+        using GradType = ScalarType::GradType;
         using RealType = SIMD<Diff<typename T::RealType, DiffMode::Forward, Order>, Size>;
         using AsRealRtnTy = SIMD<Diff<typename T::RealType, DiffMode::Forward, Order>, Size * (T::isComplex ? 2 : 1)>;
     public:
         using ValuePacket = SIMD<T, Size>;
         using GradPacket = SIMD<GradType, Size>;
-        using BoolSIMDType = typename ValuePacket::BoolSIMDType;
-        using HalfType = typename std::conditional<sizeof(ValuePacket) * CHAR_BIT != 128, SIMD<ScalarType, Size / 2>, PlainStruct<void>>::type;
+        using BoolSIMDType = ValuePacket::BoolSIMDType;
+        using HalfType = std::conditional<sizeof(ValuePacket) * CHAR_BIT != 128, SIMD<ScalarType, Size / 2>, PlainStruct<void>>::type;
 
         ValuePacket values;
         GradPacket grads;
@@ -118,7 +118,7 @@ namespace Physica::Core {
         using ScalarType = Diff<T, DiffMode::Reverse, 1>;
         using This = SIMD<ScalarType, Size>;
         using Base = SIMD<T, Size>;
-        using BoolSIMDType = typename Traits<This>::BoolSIMDType;
+        using BoolSIMDType = Traits<This>::BoolSIMDType;
     public:
         using PlainPacket = Base;
         using TracerType = DiffTracer<T, 1>;

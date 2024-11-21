@@ -28,7 +28,7 @@ namespace Physica::Core {
         using ScalarType = float64;
         using ComplexType = Complex<ScalarType>;
         using CorrMatrix = HalfDenseMatrixStorage<VectorND<ScalarType>, Dynamic>;
-        using Index3D = typename RSpaceGrid<ScalarType>::Index3D;
+        using Index3D = RSpaceGrid<ScalarType>::Index3D;
         using FFT3D = FFT<ScalarType, 3>;
         constexpr static unsigned int Dim = 3;
         constexpr static double ConsiderAsZeroThrehold = 100 * std::numeric_limits<double>::epsilon();

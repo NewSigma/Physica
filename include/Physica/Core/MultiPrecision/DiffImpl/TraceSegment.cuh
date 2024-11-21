@@ -30,12 +30,12 @@ namespace Physica::Core {
         static_assert(Order > 0, "[Error]: 0 order is not differentiable");
         using host_obj = TraceSegment<T, Order>;
         using This = device_obj<host_obj>;
-        using HostDiffScalar = typename host_obj::DiffScalar;
-        using HostValueVector = typename host_obj::ValueVector;
-        using HostGradVector = typename host_obj::GradVector;
+        using HostDiffScalar = host_obj::DiffScalar;
+        using HostValueVector = host_obj::ValueVector;
+        using HostGradVector = host_obj::GradVector;
     public:
         using DiffScalar = device_obj<HostDiffScalar>;
-        using DiffRecord = typename host_obj::DiffRecord;
+        using DiffRecord = host_obj::DiffRecord;
         using RecordArray = device_obj<Array<DiffRecord>>;
         using OperandArray = device_obj<Array<HostDiffScalar>>;
         using ValueVector = device_obj<HostValueVector>;

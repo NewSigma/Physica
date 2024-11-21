@@ -32,7 +32,7 @@ namespace Physica::Core {
         static_assert(!T::isDifferentiable, "[Error]: Diff<> pack is not necessary");
         static_assert(Order > 0, "[Error]: 0 order is not differentiable");
         using This = TraceSegment<T, Order>;
-        using GradType = typename std::conditional<Order == 1, T, Diff<T, DiffMode::Reverse, Order - 1>>::type;
+        using GradType = std::conditional<Order == 1, T, Diff<T, DiffMode::Reverse, Order - 1>>::type;
     public:
         constexpr static size_t DefaultSize = 4096; // I guess it is not a bad choice
         using DiffScalar = Diff<T, DiffMode::Reverse, Order>;
@@ -127,7 +127,7 @@ namespace Physica::Core {
     }
 
     template<Scalar T, int Order>
-    inline typename TraceSegment<T, Order>::DiffScalar TraceSegment<T, Order>::operator[](size_t index) {
+    inline TraceSegment<T, Order>::DiffScalar TraceSegment<T, Order>::operator[](size_t index) {
         if constexpr (Order == 1)
             return DiffScalar(values.data_ptr(index), grads.data_ptr(index));
         else
@@ -135,7 +135,7 @@ namespace Physica::Core {
     }
 
     template<Scalar T, int Order>
-    inline const typename TraceSegment<T, Order>::DiffScalar TraceSegment<T, Order>::operator[](size_t index) const {
+    inline const TraceSegment<T, Order>::DiffScalar TraceSegment<T, Order>::operator[](size_t index) const {
         return const_cast<This&>(*this).operator[](index);
     }
 

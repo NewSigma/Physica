@@ -106,7 +106,7 @@ namespace Physica::Core {
 
     template<Matrix M>
     void HamonicRotator<M>::nextHamonicRotation() {
-        using T = typename M::ScalarType;
+        using T = M::ScalarType;
         const int l = static_cast<int>((hamonicRotation.getRow() >> 1U) + 1U);
         M result(2 * l + 1, 2 * l + 1);
         for (int m = -l; m <= l; ++m) {
@@ -139,7 +139,7 @@ namespace Physica::Core {
     }
 
     template<Matrix M>
-    typename M::ScalarType HamonicRotator<M>::getCenteredElement(size_t row, size_t col) {
+    M::ScalarType HamonicRotator<M>::getCenteredElement(size_t row, size_t col) {
         const size_t matRow = hamonicRotation.getRow();
         assert(matRow % 2U == 1U);
         const size_t offset = matRow >> 1U;
@@ -147,7 +147,7 @@ namespace Physica::Core {
     }
 
     template<Matrix M>
-    typename M::ScalarType HamonicRotator<M>::P(int i, int a, int b, int l) {
+    M::ScalarType HamonicRotator<M>::P(int i, int a, int b, int l) {
         const int i_1 = i + 1;
         if (b == l)
             return initialMat(i_1, 2) * getCenteredElement(a, l - 1) - initialMat(i_1, 0) * getCenteredElement(a, -l + 1);
@@ -157,12 +157,12 @@ namespace Physica::Core {
     }
 
     template<Matrix M>
-    typename M::ScalarType HamonicRotator<M>::U(int m, int n, int l) {
+    M::ScalarType HamonicRotator<M>::U(int m, int n, int l) {
         return P(0, m, n, l);
     }
 
     template<Matrix M>
-    typename M::ScalarType HamonicRotator<M>::V(int m, int n, int l) {
+    M::ScalarType HamonicRotator<M>::V(int m, int n, int l) {
         if (m == 0)
             return P(1, 1, n, l) + P(-1, -1, n, l);
         if (m > 0) {
@@ -179,7 +179,7 @@ namespace Physica::Core {
     }
 
     template<Matrix M>
-    typename M::ScalarType HamonicRotator<M>::W(int m, int n, int l) {
+    M::ScalarType HamonicRotator<M>::W(int m, int n, int l) {
         // whenever this happens, w is also 0 so W can be anything
         if (m == 0)
             return 0.0;

@@ -26,13 +26,13 @@ namespace Physica::Core {
     class Complex<T> : public ScalarBase<Complex<T>> {
         using This = Complex<T>;
         using Base = ScalarBase<This>;
-        using PacketType = typename BestPacket<T, 2>::Type;
+        using PacketType = BestPacket<T, 2>::Type;
     public:
         using typename Base::ScalarType;
         using typename Base::MachineType;
         constexpr static bool enableSIMD = !std::is_same<T, PacketType>::value;
     #ifdef PHYSICA_MKL
-        using MKL_Complex = typename std::conditional<T::Option == Float32, MKL_Complex8, MKL_Complex16>::type;
+        using MKL_Complex = std::conditional<T::Option == Float32, MKL_Complex8, MKL_Complex16>::type;
     #endif
     private:
         T re;
@@ -161,7 +161,7 @@ namespace Physica {
         using ConstRefTy = const ScalarType&;
         using RealType = T;
         using ComplexType = ScalarType;
-        using MachineType = typename T::MachineType;
+        using MachineType = T::MachineType;
     };
 }
 

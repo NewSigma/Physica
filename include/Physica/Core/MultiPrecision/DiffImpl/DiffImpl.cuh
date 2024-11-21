@@ -25,7 +25,7 @@ namespace Physica::Core {
                 Physica::PlainStruct<device_obj<TraceSegment<T, Order>>> segment_,
                 Physica::PlainStruct<const device_obj<Diff<T, DiffMode::Reverse, Order>>> s_) {
             using SegmentType = device_obj<TraceSegment<T, Order>>;
-            using DiffRecord = typename SegmentType::DiffRecord;
+            using DiffRecord = SegmentType::DiffRecord;
             auto& segment = segment_.getDerived();
             segment.getRecords()[0] = DiffRecord{0, ExprType::Minus};
             const auto& s = s_.getDerived();
@@ -40,7 +40,7 @@ namespace Physica::Core {
                 Physica::PlainStruct<const device_obj<Diff<T, DiffMode::Reverse, Order>>> s1_,
                 Physica::PlainStruct<const device_obj<Diff<T, DiffMode::Reverse, Order>>> s2_) {
             using SegmentType = device_obj<TraceSegment<T, Order>>;
-            using DiffRecord = typename SegmentType::DiffRecord;
+            using DiffRecord = SegmentType::DiffRecord;
             auto& segment = segment_.getDerived();
             segment.getRecords()[0] = DiffRecord{0, Type};
             const auto& s1 = s1_.getDerived();

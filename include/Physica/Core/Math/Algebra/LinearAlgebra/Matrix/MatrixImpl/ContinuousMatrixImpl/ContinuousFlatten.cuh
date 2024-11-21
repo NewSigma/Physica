@@ -29,8 +29,8 @@ namespace Physica::Core {
         using Base = device_obj<ContinuousVector<host_obj>>;
         using typename Base::ScalarType;
     protected:
-        using PtrTy = typename ScalarType::PtrTy;
-        using ConstPtrTy = typename ScalarType::ConstPtrTy;
+        using PtrTy = ScalarType::PtrTy;
+        using ConstPtrTy = ScalarType::ConstPtrTy;
     public:
         device_obj(device_obj<ContinuousMatrix<T>>& mat_) : mat(mat_.getDerived()) {}
         device_obj(const This&) = delete;
@@ -51,7 +51,7 @@ namespace Physica::Core {
     };
 
     template<Matrix T>
-    __host__ __device__ inline typename device_obj<ContinuousFlatten<T>>::PtrTy
+    __host__ __device__ inline device_obj<ContinuousFlatten<T>>::PtrTy
     device_obj<ContinuousFlatten<T>>::data_ptr(size_t index) {
         const size_t major = index / mat.getMaxMinor();
         const size_t minor = index % mat.getMaxMinor();
@@ -61,7 +61,7 @@ namespace Physica::Core {
     }
 
     template<Matrix T>
-    __host__ __device__ inline typename device_obj<ContinuousFlatten<T>>::ConstPtrTy
+    __host__ __device__ inline device_obj<ContinuousFlatten<T>>::ConstPtrTy
     device_obj<ContinuousFlatten<T>>::data_ptr(size_t index) const {
         return const_cast<This&>(*this).data_ptr(index);
     }

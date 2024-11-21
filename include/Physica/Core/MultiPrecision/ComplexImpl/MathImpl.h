@@ -47,7 +47,7 @@ namespace Physica::Core {
         using ResultType = Complex<T>;
         if (c.isZero())
             return ResultType(0);
-        using RealType = typename T::RealType;
+        using RealType = T::RealType;
         const RealType abs_real = abs(c.real());
         const RealType w = sqrt((abs_real + c.norm()) * T(0.5));
         const RealType v = c.imag() / w * T(0.5);
