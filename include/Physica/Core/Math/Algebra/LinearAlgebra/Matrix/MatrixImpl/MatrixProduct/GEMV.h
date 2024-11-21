@@ -79,7 +79,7 @@ namespace Physica::Core {
 
     template<Matrix T, Vector U>
     [[nodiscard]] inline typename std::enable_if<T::RowAtCompile == 1 && T::ColAtCompile == 1,
-                                                 typename Internal::BinaryScalarOpReturnType<typename T::ScalarType,
+                                                 typename Internal::BinaryScalarOpRtnTy<typename T::ScalarType,
                                                                                              typename U::ScalarType>::Type>::type
     operator*(const T& mat, const U& vec) {
         assert(mat.getCol() == vec.getLength());
@@ -95,7 +95,7 @@ namespace Physica {
                       U::SizeAtCompile == Dynamic,
                       "Row and column do not match in matrix product");
     public:
-        using ScalarType = typename Core::Internal::BinaryScalarOpReturnType<typename T::ScalarType,
+        using ScalarType = typename Core::Internal::BinaryScalarOpRtnTy<typename T::ScalarType,
                                                                              typename U::ScalarType>::Type;
         constexpr static size_t SizeAtCompile = T::RowAtCompile;
         constexpr static bool FastAssign = Core::MatrixOption::isColMatrix<T>();

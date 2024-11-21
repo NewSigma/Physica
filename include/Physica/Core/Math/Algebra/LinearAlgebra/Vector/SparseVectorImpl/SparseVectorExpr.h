@@ -67,7 +67,7 @@ namespace Physica {
     template<ExprType type, Vector T, Scalar U>
     class Traits<SparseVectorExpr<type, T, U>> {
     public:
-        using ScalarType = typename Core::Internal::BinaryScalarOpReturnType<typename T::ScalarType, U>::Type;
+        using ScalarType = typename Core::Internal::BinaryScalarOpRtnTy<typename T::ScalarType, U>::Type;
         constexpr static size_t SizeAtCompile = T::SizeAtCompile;
     };
 }

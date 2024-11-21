@@ -115,7 +115,7 @@ namespace Physica {
     class Traits<GridExpression<type, Exp1, Exp2>> {
         using ScalarType1 = typename Exp1::ScalarType;
         using RealType = typename ScalarType1::RealType;
-        using BinaryScalarType = typename Core::Internal::BinaryScalarOpReturnType<ScalarType1, typename Exp2::ScalarType>::Type;
+        using BinaryScalarType = typename Core::Internal::BinaryScalarOpRtnTy<ScalarType1, typename Exp2::ScalarType>::Type;
     public:
         using ScalarType = typename std::conditional<type == ExprType::Abs, RealType, BinaryScalarType>::type;
     };
@@ -123,6 +123,6 @@ namespace Physica {
     template<ExprType type, Core::Grid Exp, Core::Scalar U>
     class Traits<GridExpression<type, Exp, U>> {
     public:
-        using ScalarType = typename Core::Internal::BinaryScalarOpReturnType<typename Exp::ScalarType, U>::Type;
+        using ScalarType = typename Core::Internal::BinaryScalarOpRtnTy<typename Exp::ScalarType, U>::Type;
     };
 }

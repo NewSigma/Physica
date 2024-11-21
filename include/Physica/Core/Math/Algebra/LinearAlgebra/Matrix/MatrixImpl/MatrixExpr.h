@@ -90,7 +90,7 @@ namespace Physica {
         constexpr static int Storage = SameStorage ? MatrixOption::getStorage<T>()
                                                    : int(MatrixOption::AnyStorage);
         constexpr static bool IsReal = Type == ExprType::Abs || Type == ExprType::Square;
-        using ResultType = typename Internal::BinaryScalarOpReturnType<typename T::ScalarType, typename U::ScalarType>::Type;
+        using ResultType = typename Internal::BinaryScalarOpRtnTy<typename T::ScalarType, typename U::ScalarType>::Type;
     public:
         using ScalarType = typename std::conditional<IsReal, typename ResultType::RealType, ResultType>::type;
         constexpr static int Option = Major | Storage;
@@ -103,7 +103,7 @@ namespace Physica {
     template<Core::ExprType Type, Matrix T, Scalar U>
     class Traits<Core::MatrixExpr<Type, T, U>> {
     public:
-        using ScalarType = typename Core::Internal::BinaryScalarOpReturnType<typename T::ScalarType, U>::Type;
+        using ScalarType = typename Core::Internal::BinaryScalarOpRtnTy<typename T::ScalarType, U>::Type;
         constexpr static int Option = T::Option;
         constexpr static size_t RowAtCompile = T::RowAtCompile;
         constexpr static size_t ColAtCompile = T::ColAtCompile;

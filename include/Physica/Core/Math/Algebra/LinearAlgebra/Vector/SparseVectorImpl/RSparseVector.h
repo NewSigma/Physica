@@ -34,9 +34,9 @@ namespace Physica::Core {
     };
 
     template<Vector T1, Vector T2>
-    typename Internal::BinaryScalarOpReturnType<typename T1::ScalarType, typename T2::ScalarType>::Type
+    typename Internal::BinaryScalarOpRtnTy<typename T1::ScalarType, typename T2::ScalarType>::Type
     operator*(const RSparseVector<T1>& v1, const T2& v2) {
-        using ResultType = typename Internal::BinaryScalarOpReturnType<typename T1::ScalarType, typename T2::ScalarType>::Type;
+        using ResultType = typename Internal::BinaryScalarOpRtnTy<typename T1::ScalarType, typename T2::ScalarType>::Type;
         assert(v1.getLength() == v2.getLength());
         ResultType result(0);
         for (size_t i = 0; i < v1.getNumNonZero(); ++i) {
@@ -47,7 +47,7 @@ namespace Physica::Core {
     }
 
     template<Vector T1, Vector T2>
-    typename Internal::BinaryScalarOpReturnType<typename T1::ScalarType, typename T2::ScalarType>::Type
+    typename Internal::BinaryScalarOpRtnTy<typename T1::ScalarType, typename T2::ScalarType>::Type
     operator*(const T1& v1, const RSparseVector<T2>& v2) {
         return v2 * v1;
     }

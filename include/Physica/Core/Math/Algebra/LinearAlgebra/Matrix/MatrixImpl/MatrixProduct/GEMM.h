@@ -127,7 +127,7 @@ namespace Physica {
                       T2::RowAtCompile == Dynamic,
                       "[Error]: Row and column do not match in matrix-vector product");
     public:
-        using ScalarType = typename Core::Internal::BinaryScalarOpReturnType<typename T1::ScalarType,
+        using ScalarType = typename Core::Internal::BinaryScalarOpRtnTy<typename T1::ScalarType,
                                                                              typename T2::ScalarType>::Type;
         constexpr static int Option = MatrixOption::AnyMajor | MatrixOption::AnyStorage;
         constexpr static size_t RowAtCompile = T1::RowAtCompile;

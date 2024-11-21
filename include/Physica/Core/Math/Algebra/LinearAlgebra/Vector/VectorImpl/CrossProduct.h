@@ -58,7 +58,7 @@ namespace Physica {
                       (Traits<V2>::SizeAtCompile == 3 || Traits<V2>::SizeAtCompile == Dynamic),
                       "CrossProduct can apply on 3-dim vectors only");
     public:
-        using ScalarType = typename Core::Internal::BinaryScalarOpReturnType<typename V1::ScalarType,
+        using ScalarType = typename Core::Internal::BinaryScalarOpRtnTy<typename V1::ScalarType,
                                                                              typename V2::ScalarType>::Type;
         constexpr static size_t SizeAtCompile = 3;
     };

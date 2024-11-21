@@ -24,7 +24,7 @@ namespace Physica::Core {
         class InnerDotImpl {
             using This = InnerDotImpl<T1, T2>;
         public:
-            using ResultType = typename Internal::BinaryScalarOpReturnType<typename T1::ScalarType, typename T2::ScalarType>::Type;
+            using ResultType = typename Internal::BinaryScalarOpRtnTy<typename T1::ScalarType, typename T2::ScalarType>::Type;
 
             constexpr static size_t Size1 = T1::SizeAtCompile;
             constexpr static size_t Size2 = T2::SizeAtCompile;

@@ -182,50 +182,50 @@ namespace Physica::Core {
     }
 
     template<Scalar T, ScalarOption Option>
-    Complex<typename Internal::BinaryScalarOpReturnType<T, Real<Option>>::Type> operator+(
+    Complex<typename Internal::BinaryScalarOpRtnTy<T, Real<Option>>::Type> operator+(
             const Complex<T>& c,const Real<Option>& s) {
         return {c.real() + s, c.imag()};
     }
 
     template<Scalar T, ScalarOption Option>
-    Complex<typename Internal::BinaryScalarOpReturnType<T, Real<Option>>::Type> operator-(
+    Complex<typename Internal::BinaryScalarOpRtnTy<T, Real<Option>>::Type> operator-(
             const Complex<T>& c, const Real<Option>& s) {
         return {c.real() - s, c.imag()};
     }
 
     template<Scalar T, ScalarOption Option>
-    Complex<typename Internal::BinaryScalarOpReturnType<T, Real<Option>>::Type> operator*(
+    Complex<typename Internal::BinaryScalarOpRtnTy<T, Real<Option>>::Type> operator*(
             const Complex<T>& c, const Real<Option>& s) {
         return {c.real() * s, c.imag() * s};
     }
 
     template<Scalar T, ScalarOption Option>
-    Complex<typename Internal::BinaryScalarOpReturnType<T, Real<Option>>::Type> operator/(
+    Complex<typename Internal::BinaryScalarOpRtnTy<T, Real<Option>>::Type> operator/(
             const Complex<T>& c, const Real<Option>& s) {
         const auto rep = reciprocal(s);
         return {c.real() * rep, c.imag() * rep};
     }
 
     template<Scalar T, ScalarOption Option>
-    Complex<typename Internal::BinaryScalarOpReturnType<T, Real<Option>>::Type> operator+(
+    Complex<typename Internal::BinaryScalarOpRtnTy<T, Real<Option>>::Type> operator+(
             const Real<Option>& s, const Complex<T>& c) {
         return c + s;
     }
 
     template<Scalar T, ScalarOption Option>
-    Complex<typename Internal::BinaryScalarOpReturnType<T, Real<Option>>::Type> operator-(
+    Complex<typename Internal::BinaryScalarOpRtnTy<T, Real<Option>>::Type> operator-(
             const Real<Option>& s, const Complex<T>& c) {
         return {s - c.real(), c.imag()};
     }
 
     template<Scalar T, ScalarOption Option>
-    Complex<typename Internal::BinaryScalarOpReturnType<T, Real<Option>>::Type> operator*(
+    Complex<typename Internal::BinaryScalarOpRtnTy<T, Real<Option>>::Type> operator*(
             const Real<Option>& s, const Complex<T>& c) {
         return c * s;
     }
 
     template<Scalar T, ScalarOption Option>
-    Complex<typename Internal::BinaryScalarOpReturnType<T, Real<Option>>::Type> operator/(
+    Complex<typename Internal::BinaryScalarOpRtnTy<T, Real<Option>>::Type> operator/(
             const Real<Option>& s, const Complex<T>& c) {
         const auto& re = c.real();
         const auto& im = c.imag();

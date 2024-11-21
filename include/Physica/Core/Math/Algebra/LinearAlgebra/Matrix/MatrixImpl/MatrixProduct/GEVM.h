@@ -71,7 +71,7 @@ namespace Physica {
         static_assert(U::RowAtCompile == 1 || U::RowAtCompile == Dynamic,
                       "Row and column do not match in matrix product");
     public:
-        using ScalarType = typename Core::Internal::BinaryScalarOpReturnType<typename T::ScalarType,
+        using ScalarType = typename Core::Internal::BinaryScalarOpRtnTy<typename T::ScalarType,
                                                                              typename U::ScalarType>::Type;
         constexpr static int Option = MatrixOption::AnyMajor | MatrixOption::AnyStorage;
         constexpr static size_t RowAtCompile = T::SizeAtCompile;

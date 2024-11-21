@@ -256,28 +256,28 @@ namespace Physica::Core {
     [[nodiscard]] inline auto operator+(const Diff<T, Mode, Order>& s1, const U& s2);
 
     template<Scalar T, DiffMode Mode, int Order, Scalar U>
-    [[nodiscard]] inline typename std::enable_if<!U::isDifferentiable, typename Internal::BinaryScalarOpReturnType<Diff<T, Mode, Order>, U>::Type>::type
+    [[nodiscard]] inline typename std::enable_if<!U::isDifferentiable, typename Internal::BinaryScalarOpRtnTy<Diff<T, Mode, Order>, U>::Type>::type
     operator+(const U& s1, const Diff<T, Mode, Order>& s2);
 
     template<Scalar T, DiffMode Mode, int Order, Scalar U>
     [[nodiscard]] inline auto operator-(const Diff<T, Mode, Order>& s1, const U& s2);
 
     template<Scalar T, DiffMode Mode, int Order, Scalar U>
-    [[nodiscard]] inline typename std::enable_if<!U::isDifferentiable, typename Internal::BinaryScalarOpReturnType<Diff<T, Mode, Order>, U>::Type>::type
+    [[nodiscard]] inline typename std::enable_if<!U::isDifferentiable, typename Internal::BinaryScalarOpRtnTy<Diff<T, Mode, Order>, U>::Type>::type
     operator-(const U& s1, const Diff<T, Mode, Order>& s2);
 
     template<Scalar T, DiffMode Mode, int Order, Scalar U>
     [[nodiscard]] inline auto operator*(const Diff<T, Mode, Order>& s1, const U& s2);
 
     template<Scalar T, DiffMode Mode, int Order, Scalar U>
-    [[nodiscard]] inline typename std::enable_if<!U::isDifferentiable, typename Internal::BinaryScalarOpReturnType<Diff<T, Mode, Order>, U>::Type>::type
+    [[nodiscard]] inline typename std::enable_if<!U::isDifferentiable, typename Internal::BinaryScalarOpRtnTy<Diff<T, Mode, Order>, U>::Type>::type
     operator*(const U& s1, const Diff<T, Mode, Order>& s2);
 
     template<Scalar T, DiffMode Mode, int Order, Scalar U>
     [[nodiscard]] inline auto operator/(const Diff<T, Mode, Order>& s1, const U& s2);
 
     template<Scalar T, DiffMode Mode, int Order, Scalar U>
-    [[nodiscard]] inline typename std::enable_if<!U::isDifferentiable, typename Internal::BinaryScalarOpReturnType<Diff<T, Mode, Order>, U>::Type>::type
+    [[nodiscard]] inline typename std::enable_if<!U::isDifferentiable, typename Internal::BinaryScalarOpRtnTy<Diff<T, Mode, Order>, U>::Type>::type
     operator/(const U& s1, const Diff<T, Mode, Order>& s2);
 
     template<Scalar T, DiffMode Mode, int Order>

@@ -120,7 +120,7 @@ namespace Physica {
             return false;
         }
     public:
-        using ScalarType = typename Internal::BinaryScalarOpReturnType<typename MatrixType::ScalarType, typename V::ScalarType>::Type;
+        using ScalarType = typename Internal::BinaryScalarOpRtnTy<typename MatrixType::ScalarType, typename V::ScalarType>::Type;
         constexpr static size_t SizeAtCompile = MatrixType::RowAtCompile;
 
         constexpr static bool FastAssign = calcFastAssign();

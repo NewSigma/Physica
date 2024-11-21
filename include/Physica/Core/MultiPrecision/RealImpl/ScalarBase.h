@@ -24,13 +24,8 @@
 #include "Physica/Core/Exception/NoImplException.h"
 
 namespace Physica::Core {
-    enum class DiffMode {
-        Forward,
-        Reverse
-    };
     template<class ScalarType> class ScalarRef;
     template<class ScalarType> class ScalarPtr;
-    template<class ScalarType, DiffMode Mode, int Order = 1> class Diff;
 
     template<class Derived>
     class ScalarBase : public CRTPBase<ScalarBase<Derived>> {

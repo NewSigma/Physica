@@ -200,7 +200,7 @@ namespace Physica {
         using MatrixType = HubbardMatrix<T, ReprType>;
         using T1 = typename U::ScalarType;
     public:
-        using ScalarType = typename Core::Internal::BinaryScalarOpReturnType<T, T1>::Type;
+        using ScalarType = typename Core::Internal::BinaryScalarOpRtnTy<T, T1>::Type;
         constexpr static size_t SizeAtCompile = MatrixType::RowAtCompile;
         constexpr static bool FastAssign = true;
         constexpr static bool FastPacket = false;

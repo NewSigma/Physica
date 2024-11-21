@@ -437,7 +437,7 @@ namespace Physica::Core {
 
     template<Vector T1, Vector T2>
     bool vectorNear(const T1& v1, const T2& v2, double precision) {
-        using ScalarType = typename Internal::BinaryScalarOpReturnType<typename T1::ScalarType, typename T2::ScalarType>::Type;
+        using ScalarType = typename Internal::BinaryScalarOpRtnTy<typename T1::ScalarType, typename T2::ScalarType>::Type;
         assert(v1.getLength() == v2.getLength());
         for (size_t i = 0; i < v1.getLength(); ++i)
             if (!scalarNear(ScalarType(v1.calc(i)), ScalarType(v2.calc(i)), precision))

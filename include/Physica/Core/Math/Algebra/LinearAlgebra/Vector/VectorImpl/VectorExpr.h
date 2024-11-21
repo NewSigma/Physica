@@ -89,7 +89,7 @@ namespace Physica {
 
         using ScalarType1 = typename LHS::ScalarType;
         using RealType = typename ScalarType1::RealType;
-        using BinaryScalarType = typename Core::Internal::BinaryScalarOpReturnType<ScalarType1, typename RHS::ScalarType>::Type;
+        using BinaryScalarType = typename Core::Internal::BinaryScalarOpRtnTy<ScalarType1, typename RHS::ScalarType>::Type;
         static_assert(Size1 == Dynamic || Size2 == Dynamic || (Size1 == Size2), "[Error]: Vector dimentions do not match");
     public:
         using ScalarType = typename std::conditional<Type == Core::ExprType::Abs, RealType, BinaryScalarType>::type;
@@ -101,7 +101,7 @@ namespace Physica {
     template<Core::ExprType Type, Vector LHS, Scalar RHS>
     class Traits<Core::VectorExpr<Type, LHS, RHS>> {
     public:
-        using ScalarType = typename Core::Internal::BinaryScalarOpReturnType<typename LHS::ScalarType, RHS>::Type;
+        using ScalarType = typename Core::Internal::BinaryScalarOpRtnTy<typename LHS::ScalarType, RHS>::Type;
         constexpr static size_t SizeAtCompile = Traits<LHS>::SizeAtCompile;
         constexpr static bool FastAssign = Traits<LHS>::FastAssign;
         constexpr static bool FastPacket = Traits<LHS>::FastPacket;

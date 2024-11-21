@@ -93,12 +93,8 @@ namespace Physica::Core {
         /* Static Members */
         template<class RandomGenerator>
         [[nodiscard]] inline static Real random_uniform(RandomGenerator& gen);
-        template<class RandomGenerator, typename RandomGenerator::result_type FixedSeed>
-        [[nodiscard]] inline static Real random_uniform(Random<RandomGenerator, FixedSeed>& pool);
         template<class RandomGenerator>
         [[nodiscard]] inline static Real random_normal(RandomGenerator& gen);
-        template<class RandomGenerator, typename RandomGenerator::result_type FixedSeed>
-        [[nodiscard]] inline static Real random_normal(Random<RandomGenerator, FixedSeed>& pool);
         template<class RandomType>
         [[nodiscard]] static Real random_normal(GaussRandomPool<This, RandomType>& pool) { return pool(); }
         template<class Distribution, class RandomGenerator>
@@ -125,20 +121,10 @@ namespace Physica::Core {
         return Real(dist(gen));
     }
 
-    template<class RandomGenerator, typename RandomGenerator::result_type FixedSeed>
-    inline Real<Float64> Real<Float64>::random_uniform(Random<RandomGenerator, FixedSeed>& pool) {
-        return random_uniform<RandomGenerator>(pool.getGen());
-    }
-
     template<class RandomGenerator>
     inline Real<Float64> Real<Float64>::random_normal(RandomGenerator& gen) {
         std::normal_distribution<double> dist{};
         return Real(dist(gen));
-    }
-
-    template<class RandomGenerator, typename RandomGenerator::result_type FixedSeed>
-    inline Real<Float64> Real<Float64>::random_normal(Random<RandomGenerator, FixedSeed>& pool) {
-        return random_normal<RandomGenerator>(pool.getGen());
     }
 
     template<class Distribution, class RandomGenerator>

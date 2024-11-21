@@ -37,7 +37,7 @@ namespace Physica::Core {
 
     template<LVector T1, Vector T2>
     inline void toNextMean(T1& mean, size_t lastNumSample, const T2& sample) {
-        using ScalarType = typename Internal::BinaryScalarOpReturnType<typename T1::ScalarType, typename T2::ScalarType>::Type;
+        using ScalarType = typename Internal::BinaryScalarOpRtnTy<typename T1::ScalarType, typename T2::ScalarType>::Type;
         const ScalarType factor1 = ScalarType(lastNumSample);
         const ScalarType factor2 = reciprocal(ScalarType(lastNumSample + 1));
         mean = (factor1 * mean + sample) * factor2;
@@ -45,7 +45,7 @@ namespace Physica::Core {
 
     template<LMatrix T1, Matrix T2>
     inline void toNextMean(T1& mean, size_t lastNumSample, const T2& sample) {
-        using ScalarType = typename Internal::BinaryScalarOpReturnType<typename T1::ScalarType, typename T2::ScalarType>::Type;
+        using ScalarType = typename Internal::BinaryScalarOpRtnTy<typename T1::ScalarType, typename T2::ScalarType>::Type;
         const ScalarType factor1 = ScalarType(lastNumSample);
         const ScalarType factor2 = reciprocal(ScalarType(lastNumSample + 1));
         mean = (factor1 * mean + sample) * factor2;
@@ -85,7 +85,7 @@ namespace Physica::Core {
 
     template<LVector T1, LVector T2>
     inline void toNextVariance(T1& var, T1& mean, size_t lastNumSample, const T2& sample) {
-        using ScalarType = typename Internal::BinaryScalarOpReturnType<typename T1::ScalarType, typename T2::ScalarType>::Type;
+        using ScalarType = typename Internal::BinaryScalarOpRtnTy<typename T1::ScalarType, typename T2::ScalarType>::Type;
         const ScalarType factor1 = ScalarType(lastNumSample);
         const ScalarType factor2 = reciprocal(ScalarType(lastNumSample + 1));
         var = (var + square(mean - sample) * factor2) * (factor1 * factor2);
@@ -94,7 +94,7 @@ namespace Physica::Core {
 
     template<LMatrix T1, LMatrix T2>
     inline void toNextVariance(T1& var, T1& mean, size_t lastNumSample, const T2& sample) {
-        using ScalarType = typename Internal::BinaryScalarOpReturnType<typename T1::ScalarType, typename T2::ScalarType>::Type;
+        using ScalarType = typename Internal::BinaryScalarOpRtnTy<typename T1::ScalarType, typename T2::ScalarType>::Type;
         const ScalarType factor1 = ScalarType(lastNumSample);
         const ScalarType factor2 = reciprocal(ScalarType(lastNumSample + 1));
         var = (var + square_elem(mean - sample) * factor2) * (factor1 * factor2);
