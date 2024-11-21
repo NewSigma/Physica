@@ -51,7 +51,7 @@ namespace Physica::Core {
     private:
         T selfE;
         T gammaPointE;
-        HostChargeVector hostCharges;
+        [[no_unique_address]] HostChargeVector hostCharges;
     public:
         Ewald() = default;
         Ewald(LatticeMatrix lattice, VectorND<T> charges);

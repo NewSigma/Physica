@@ -19,10 +19,10 @@
 #pragma once
 
 #include <unordered_map>
-#include "ReprImpl/ReprSpace.h"
-#include "State/SpinFermion.h"
 #include "Physica/Core/Utils/Container/Array.h"
 #include "Physica/PlainStruct.h"
+#include "ReprImpl/ReprSpace.h"
+#include "State/SpinFermion.h"
 
 namespace Physica::Core {
     template<int Dim, int NumSite, bool UseInversionSymm>
@@ -42,9 +42,9 @@ namespace Physica::Core {
         int numSpinUp;
         int numSpinDown;
         StateArray upStates;
-        DownStateArray downStates;
         StateIndexMap upIndexMap;
-        DownStateIndexMap downIndexMap;
+        [[no_unique_address]] DownStateArray downStates;
+        [[no_unique_address]] DownStateIndexMap downIndexMap;
     public:
         SpinRepr() = default;
         SpinRepr(int numSpinUp_, int numSpinDown_);
@@ -62,8 +62,8 @@ namespace Physica::Core {
         [[nodiscard]] int getNumSpinDown() const noexcept { return numSpinDown; }
         [[nodiscard]] int getNumParticle() const noexcept { return numSpinUp + numSpinDown; }
         [[nodiscard]] const StateArray& getUpStates() const noexcept { return upStates; }
-        [[nodiscard]] inline const StateArray& getDownStates() const noexcept;
         [[nodiscard]] const StateIndexMap& getUpIndexMap() const noexcept { return upIndexMap; }
+        [[nodiscard]] inline const StateArray& getDownStates() const noexcept;
         [[nodiscard]] inline const StateIndexMap& getDownIndexMap() const noexcept;
         [[nodiscard]] size_t getNumState() const noexcept { return getNumUpStates() * getNumDownStates(); }
         [[nodiscard]] size_t getNumUpStates() const noexcept { return getUpStates().getLength(); }
@@ -118,6 +118,8 @@ namespace Physica::Core {
         std::swap(numSpinDown, obj.numSpinDown);
         upStates.swap(obj.upStates);
         downStates.swap(obj.downStates);
+        upIndexMap.swap(obj.upIndexMap);
+        downIndexMap.swap(obj.downIndexMap);
     }
 
     template<int Dim, int NumSite, bool UseInversionSymm>
@@ -159,7 +161,7 @@ namespace Physica::Core {
 
     template<int Dim, int NumSite, bool UseInversionSymm>
     size_t SpinRepr<Dim, NumSite, UseInversionSymm>::findStateIndex(const StateArray& arr, SpinlessState psi) const {
-        size_t left = 0, right = arr.getLength() - 1;  
+        size_t left = 0, right = arr.getLength() - 1;
         while (left < right) {
             const size_t mid = left + (right - left) / 2;
             const auto& psi0 = arr[mid];
@@ -183,9 +185,9 @@ namespace Physica::Core {
 
 namespace Physica {
     template<int I1, int I2, bool UseInversionSymm>
-    class Traits<Core::SpinRepr<I1, I2, UseInversionSymm>> {
+    class Traits<SpinRepr<I1, I2, UseInversionSymm>> {
     public:
-        using StateType = Core::SpinFermion<I1, I2>;
+        using StateType = SpinFermion<I1, I2>;
         constexpr static int Dim = I1;
         constexpr static bool IsTransInvariant = false;
     };

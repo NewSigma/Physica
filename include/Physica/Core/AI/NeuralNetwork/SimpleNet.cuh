@@ -38,7 +38,7 @@ namespace Physica::Core {
     private:
         using DiffGuardType = std::conditional<IsTrainMode, AutoDiffGuard<device_obj<ScalarType>>, PlainStruct<void>>::type;
 
-        DiffGuardType net_guard;
+        [[no_unique_address]] DiffGuardType net_guard;
     public:
         device_obj(const device_obj&) = delete;
         ~device_obj() = default;

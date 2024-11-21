@@ -34,7 +34,7 @@ namespace Physica::Core {
 
         T hoppingT;
         T repelU;
-        HopIndexArray hopIndexArr;
+        [[no_unique_address]] HopIndexArray hopIndexArr;
     public:
         Hubbard(Base lattice, T hoppingT_, T repelU_);
         Hubbard(const This&) = default;

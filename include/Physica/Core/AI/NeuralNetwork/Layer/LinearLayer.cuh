@@ -42,7 +42,7 @@ namespace Physica::Core {
         using BiasType = std::conditional<WithBias, InputType, PlainStruct<void>>::type;
     private:
         DeviceMatrix weights;
-        BiasType bias;
+        [[no_unique_address]] BiasType bias;
     public:
         device_obj() = default;
         template<Scalar U>

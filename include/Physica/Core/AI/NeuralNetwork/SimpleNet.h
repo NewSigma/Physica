@@ -39,7 +39,7 @@ namespace Physica::Core {
     private:
         using DiffGuard = std::conditional<IsTrainMode, AutoDiffGuard<ScalarType>, PlainStruct<void>>::type;
 
-        DiffGuard diffGuard;
+        [[no_unique_address]] DiffGuard diffGuard;
     public:
         SimpleNet(const SimpleNet&) = delete;
         ~SimpleNet() = default;

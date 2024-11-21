@@ -37,7 +37,7 @@ namespace Physica::Core {
         using device_obj_type = device_obj<This>;
     private:
         MatrixType weights;
-        BiasType bias;
+        [[no_unique_address]] BiasType bias;
     public:
         LinearLayer() = default;
         LinearLayer(size_t inputDim, size_t outputDim);

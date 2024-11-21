@@ -60,8 +60,8 @@ namespace Physica::Core {
         constexpr static double chargeSi = -2 * chargeO;
     private:
         EwaldType ewald;
-        DoublePotType doublePot0_OO;
-        DoublePotType doublePot0_SiO;
+        [[no_unique_address]] DoublePotType doublePot0_OO;
+        [[no_unique_address]] DoublePotType doublePot0_SiO;
     public:
         BKSModel(const MDCellType& refer_cell, ValueType cutoff, EwaldType ewald_);
         BKSModel(const BKSModel&) = default;
