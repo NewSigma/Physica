@@ -23,7 +23,7 @@
 
 using namespace Physica::Core;
 using namespace Physica::Gui;
-using RandomType = Random<std::mt19937>;
+using RandomType = Random<MT19937>;
 
 int main(int argc, char** argv) {
     QApplication app(argc, argv);

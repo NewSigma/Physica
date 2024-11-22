@@ -17,6 +17,7 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include "Functions.h"
+#include "Physica/Core/Math/Calculus/Differential.h"
 #include "Physica/Core/Math/Optimization/ConjugateGradient.h"
 
 using namespace Physica::Core;

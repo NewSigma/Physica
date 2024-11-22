@@ -26,7 +26,7 @@ using namespace Physica::Core;
 using RealType = float64;
 using ScalarType = Complex<RealType>;
 using VectorType = VectorND<RealType>;
-using RandomType = Random<std::mt19937, 10000>;
+using RandomType = Random<MT19937, 10000>;
 constexpr unsigned int NumSite = 6;
 constexpr unsigned int NumParticle = NumSite / 2;
 constexpr double HoppingT = 1.0;

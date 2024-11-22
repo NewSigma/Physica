@@ -27,7 +27,7 @@ using ComplexType = Complex<ScalarType>;
 
 int main() {
     using MatrixType = DenseMatrix<ComplexType, MatrixOption::Row | MatrixOption::Vector>;
-    auto& gen = Random<std::mt19937, std::mt19937::default_seed>::getInstance();
+    auto& gen = Random<MT19937, std::mt19937::default_seed>::getInstance();
     const MatrixType data = MatrixType::random_uniform(64, gen);
     const DenseHermiteMatrix<ComplexType> hermite = data + data.hermite();
 

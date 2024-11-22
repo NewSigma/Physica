@@ -84,7 +84,7 @@ int main(int argc, char** argv) {
     if constexpr (IsComputeMode) {
         ThreadPool::numThreadRequired = record.getCol();
         ThreadExecutor::parallel_for([&record](unsigned int sys) {
-            auto& gen = Random<RandomGenerator>::getInstance().getGen();
+            auto& gen = Random<MT19937>::getInstance().getGen();
             MDType rpmd = MDType(makeSystem(gen), 1, 1, temperatureT, timeStep);
             KineticModel kineticModel(latticeSize, collideFactor, temperatureT, numMolecular, 100);
             kineticModel.updateMass(rpmd.getRingPolymer());

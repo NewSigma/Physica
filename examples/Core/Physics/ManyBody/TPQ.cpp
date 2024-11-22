@@ -30,7 +30,7 @@ using namespace Physica::Core;
 using namespace Physica::Gui;
 using ScalarType = float64;
 using VectorType = VectorND<ScalarType>;
-using RandomType = Random<std::mt19937, 10000>;
+using RandomType = Random<MT19937, 10000>;
 constexpr unsigned int NumSite = 4;
 constexpr double HoppingT = 1;
 constexpr double RepelU = 8;

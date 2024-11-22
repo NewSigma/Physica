@@ -62,7 +62,7 @@ int main() {
     {
         constexpr size_t len = 32;
         const ScalarType factor = 1.4;
-        auto& gen = Random<std::mt19937, std::mt19937::default_seed>::getInstance();
+        auto& gen = Random<MT19937, std::mt19937::default_seed>::getInstance();
         const auto a = VectorType::random_uniform(len, gen);
         const auto b = VectorType::random_uniform(len, gen);
         const VectorType answer = a + b * factor;

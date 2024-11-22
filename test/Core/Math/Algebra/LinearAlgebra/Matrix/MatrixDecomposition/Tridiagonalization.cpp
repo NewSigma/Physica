@@ -46,7 +46,7 @@ int main() {
     }
     {
         using MatrixType = DenseSymmMatrix<RealType>;
-        const auto mat = MatrixType::random_uniform(8, Random<std::mt19937, std::mt19937::default_seed>::getInstance());
+        const auto mat = MatrixType::random_uniform(8, Random<MT19937, std::mt19937::default_seed>::getInstance());
         if (!doTest(mat, 1E-12))
             return 1;
     }

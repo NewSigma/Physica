@@ -30,7 +30,7 @@ using Physica::Dynamic;
 using ScalarType = float32;
 using ForceModel = Physica::Core::device_obj<SilveraGoldman<ScalarType, true>>;
 using KineticModel = FreeModel<ScalarType, 3, Dynamic, RPMDIntegrator::Exact>;
-using RandomType = Random<std::mt19937, 10000>;
+using RandomType = Random<MT19937, 10000>;
 using MDType = RPMD<ScalarType, 3, Dynamic, PageLockedAllocator<ScalarType>>;
 constexpr size_t numReplica = 24;
 constexpr double temperatureT = PhyConst<AU>::kToTemperature(25);

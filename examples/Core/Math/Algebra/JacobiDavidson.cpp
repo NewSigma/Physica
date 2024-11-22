@@ -27,7 +27,7 @@ using ComplexType = Complex<ScalarType>;
 using MatrixType = DenseHermiteMatrix<ComplexType>;
 
 int main() {
-    auto& gen = Random<std::mt19937, std::mt19937::default_seed>::getInstance();
+    auto& gen = Random<MT19937, std::mt19937::default_seed>::getInstance();
     const auto mat = MatrixType::random_uniform(5000, gen);
 
     JacobiDavidson<ComplexType> jd(mat.getRow(), 4);

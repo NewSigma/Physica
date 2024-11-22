@@ -21,7 +21,7 @@ using namespace Physica::Core;
 using namespace Physica::Gui;
 using ScalarType = float64;
 using VectorType = VectorND<ScalarType>;
-using RandomType = Random<std::mt19937>;
+using RandomType = Random<MT19937>;
 using MDType = RPMD<ScalarType, 3, 1>;
 using ThermostatType = Langevin<ScalarType, 3, 1>;
 using KineticModel = FreeModel<ScalarType, 3, 1, RPMDIntegrator::Exact>;

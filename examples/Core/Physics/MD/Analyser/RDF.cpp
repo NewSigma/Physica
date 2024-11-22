@@ -34,7 +34,7 @@ using namespace Physica::Core;
 using namespace Physica::Gui;
 using ScalarType = float64;
 using VectorType = VectorND<ScalarType>;
-using RandomType = Random<std::mt19937>;
+using RandomType = Random<MT19937>;
 using EwaldType = RandomBatchEwald<ScalarType, RandomType>;
 using ForceModel = Q_TIP4P<ScalarType, EwaldType>;
 constexpr double temperatureT = PhyConst<AU>::kToTemperature(298);

@@ -28,7 +28,7 @@
 using namespace Physica::Core;
 using ScalarType = float64;
 using VectorType = VectorND<ScalarType>;
-using RandomType = Random<std::mt19937>;
+using RandomType = Random<MT19937>;
 constexpr unsigned int NumSiteX = 4;
 constexpr unsigned int NumSiteY = 2;
 constexpr unsigned int NumSite = NumSiteX * NumSiteY;

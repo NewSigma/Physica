@@ -29,7 +29,7 @@ using namespace Physica::Core;
 using ScalarType = float32;
 using KineticModel = FreeModel<ScalarType, 3, Physica::Dynamic, RPMDIntegrator::Exact>;
 using ForceModel = SilveraGoldman<ScalarType, true>;
-using RandomType = Random<std::mt19937, 3438603950906262893>;
+using RandomType = Random<MT19937, 3438603950906262893>;
 constexpr size_t numReplica = 24;
 constexpr double temperatureT = PhyConst<AU>::kToTemperature(25);
 constexpr double timeStep = PhyConst<AU>::secondToTime(1E-15) * 0.5;

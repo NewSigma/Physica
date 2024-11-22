@@ -25,7 +25,7 @@
 using namespace Physica::Core;
 using ScalarType = float64;
 using VectorType = VectorND<ScalarType>;
-using RandomType = Random<std::mt19937, std::mt19937::default_seed>;
+using RandomType = Random<MT19937, std::mt19937::default_seed>;
 
 void testLaglange() {
     const VectorType x{0, 1, 2};

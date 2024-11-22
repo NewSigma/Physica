@@ -32,7 +32,7 @@
 using namespace Physica::Core;
 using ScalarType = float32;
 using RandomGenerator = std::mt19937;
-using RandomType = Random<RandomGenerator>;
+using RandomType = Random<MT19937>;
 using EwaldType = Ewald<ScalarType, Physica::Core::device_obj<RSpaceEwald<ScalarType>>>;
 using ForceModel = Q_TIP4P<ScalarType, EwaldType>;
 using MDType = RPMD<ScalarType, 3, 1, PageLockedAllocator<ScalarType>>;

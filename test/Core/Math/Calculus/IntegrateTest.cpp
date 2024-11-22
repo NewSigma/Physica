@@ -55,7 +55,7 @@ int main() {
         const ScalarType answer = 1.317363136305819;
         ScalarType result, deviation;
         {
-            using RandomType = Random<std::mt19937, std::mt19937::default_seed>;
+            using RandomType = Random<MT19937, std::mt19937::default_seed>;
             result = mc.solve_e(6, [](Vector2D<ScalarType> x) -> ScalarType { return reciprocal(sqrt(square(x[0]) + sin(x[1]))); }
                                  , RandomType::getInstance(), deviation);
         }

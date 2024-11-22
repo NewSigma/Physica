@@ -28,7 +28,7 @@ using VectorType = VectorND<ScalarType>;
 using MatrixType = DenseSymmMatrix<ScalarType>;
 
 int main() {
-    auto& gen = Random<std::mt19937, std::mt19937::default_seed>::getInstance();
+    auto& gen = Random<MT19937, std::mt19937::default_seed>::getInstance();
     const auto mat = MatrixType::random_uniform(16, gen);
     const VectorType v = VectorType::random_uniform(16, gen);
 

@@ -28,7 +28,7 @@
 using namespace Physica::Core;
 using namespace Physica::Gui;
 using ScalarType = float32;
-using RandomType = Random<std::mt19937>;
+using RandomType = Random<MT19937>;
 /**
  * Reference:
  * [1] J. H. Thijssen. Computational Physics[M]. London: Cambridge University Press, 2013:304-308

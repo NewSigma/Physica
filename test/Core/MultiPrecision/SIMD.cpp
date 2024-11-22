@@ -21,7 +21,7 @@
 #include "Physica/Core/MultiPrecision/Complex.h"
 
 using namespace Physica::Core;
-using RandomType = Random<std::mt19937, 10000>;
+using RandomType = Random<MT19937, 10000>;
 
 int main() {
     const auto x = SIMD<cfloat32, 2>::random_uniform(RandomType::getInstance());

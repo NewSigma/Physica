@@ -65,7 +65,7 @@ int main() {
     }
     {
         using MatrixType = DenseSymmMatrix<float64>;
-        const auto mat = MatrixType::random_uniform(8, Random<std::mt19937, std::mt19937::default_seed>::getInstance());
+        const auto mat = MatrixType::random_uniform(8, Random<MT19937, std::mt19937::default_seed>::getInstance());
         if (!eigenTest(mat, 1E-14))
             return 1;
     }

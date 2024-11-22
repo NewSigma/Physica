@@ -18,7 +18,7 @@ using namespace Physica::Core;
 using namespace Physica::Gui;
 using ScalarType = float64;
 using VectorType = VectorND<ScalarType>;
-using RandomType = Random<std::mt19937, 10002>;
+using RandomType = Random<MT19937, 10002>;
 using KineticModel = FreeModel<ScalarType, 3, 1, RPMDIntegrator::Exact>;
 using BarostatType = Berendsen<ScalarType, 1, BaroType::XY>;
 using ForceModel = Q_TIP4P<ScalarType, Ewald<ScalarType, RSpaceEwald<ScalarType, true>>>;

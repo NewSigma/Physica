@@ -33,7 +33,7 @@ void crossProductTest() {
 
 void hdfTest() {
 #ifdef PHYSICA_HDF5
-    auto& gen = Random<std::mt19937, std::mt19937::default_seed>::getInstance();
+    auto& gen = Random<MT19937, std::mt19937::default_seed>::getInstance();
     /* Real */ {
         using T = float64;
         const auto data = VectorND<T>::random_uniform(64, gen);

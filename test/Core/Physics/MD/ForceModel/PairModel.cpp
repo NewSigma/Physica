@@ -32,7 +32,7 @@ using ScalarType = Diff<float64, DiffMode::Reverse, 1>;
  */
 class ForceConstTest {
     using MDCellType = MDCell<ScalarType>;
-    using RandomType = Random<std::mt19937, 12345>;
+    using RandomType = Random<MT19937, 12345>;
     constexpr static unsigned int numMolecular = 32;
     constexpr static double pair_cutoff = 15;
     constexpr static double molarVolume = 31.7;

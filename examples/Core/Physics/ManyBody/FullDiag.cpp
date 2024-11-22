@@ -31,7 +31,7 @@ using namespace Physica::Gui;
 using Physica::Dynamic;
 using ScalarType = float64; // Will overflow if use float32
 using VectorType = VectorND<ScalarType>;
-using RandomType = Random<std::mt19937>;
+using RandomType = Random<MT19937>;
 using VectorPair = std::pair<VectorType, VectorType>;
 using SpectrumMatrix = HalfDenseMatrixStorage<VectorPair, Dynamic>;
 constexpr unsigned int NumSite = 4;

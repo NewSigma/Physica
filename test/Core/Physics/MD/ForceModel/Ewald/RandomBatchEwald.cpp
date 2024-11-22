@@ -26,7 +26,7 @@
 
 using namespace Physica::Core;
 using ScalarType = float64;
-using RandomType = Random<std::mt19937, 12989825518855205292UL>;
+using RandomType = Random<MT19937, 12989825518855205292UL>;
 using ForceModel = Q_TIP4P<ScalarType, RandomBatchEwald<ScalarType, RandomType>>;
 using KineticModel = FreeModel<ScalarType, 3, Physica::Dynamic, RPMDIntegrator::Exact>;
 using ThermoType = DoubleThermo<KineticModel>;

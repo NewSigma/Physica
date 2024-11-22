@@ -27,7 +27,7 @@ using PositionMatrix = MDCellType::PositionMatrix;
 using MassVector = MDCellType::MassVector;
 using HostForceModel = RSpaceEwald<ScalarType>;
 using DeviceForceModel = device_obj<HostForceModel>;
-using RandomType = Random<std::mt19937, 10000>;
+using RandomType = Random<MT19937, 10000>;
 
 template<class RandomGenerator>
 MDCellType makeSystem(size_t numMolecular, RandomGenerator& gen) {

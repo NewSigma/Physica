@@ -23,7 +23,7 @@
 using namespace Physica::Core;
 
 using ScalarType = float64;
-using RandomType = Random<std::mt19937, 10000>;
+using RandomType = Random<MT19937, 10000>;
 using MDCellType = MDCell<ScalarType, 1>;
 constexpr double latticeSize = 20;
 constexpr size_t numMolecular = 20;

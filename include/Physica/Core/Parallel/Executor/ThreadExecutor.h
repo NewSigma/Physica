@@ -33,7 +33,8 @@ namespace Physica::Core {
     public:
         /* Operations */
         template<class Functor, class... Args>
-        [[nodiscard]] static FutureType schedule(Functor func, Args&&... args) noexcept;
+        [[nodiscard("[Warn]: Discarding async return value or exception")]]
+        static FutureType schedule(Functor func, Args&&... args) noexcept;
         template<class Functor>
         [[nodiscard]] static FutureGroup<FutureType> parallel_for(Functor func, size_t loopCount);
         template<class Functor>
@@ -46,11 +47,7 @@ namespace Physica::Core {
         /* Static members */
         [[nodiscard]] inline static Range splitJob(size_t loopCount, int core, int part);
     };
-    /**
-     * Return value are declared as [[nodiscard]] to warn user pay attention to
-     * 1. asynchronous return value
-     * 2. exception stored in std::future, which is usually ignored
-     */
+
     template<class Functor, class... Args>
     ThreadExecutor::FutureType ThreadExecutor::schedule(Functor func, Args&&... args) noexcept {
         return ThreadPool::getInstance().schedule(std::move(func), std::forward<Args>(args)...);

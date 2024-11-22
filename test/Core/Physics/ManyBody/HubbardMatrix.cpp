@@ -106,8 +106,7 @@ void testVecProduct() {
     constexpr int NumSite = 4;
     using ReprType = SpinRepr<1, NumSite, false>;
     using Hamilton = HubbardMatrix<float64, ReprType>;
-    using RandomGenerator = std::mt19937;
-    using RandomType = Random<RandomGenerator, 10000>;
+    using RandomType = Random<MT19937, 10000>;
 
     LatticeModel<Dim> lattice({NumSite}, 1);
     Hubbard<float64, Dim> hubbard(lattice, HoppingT, RepelU);

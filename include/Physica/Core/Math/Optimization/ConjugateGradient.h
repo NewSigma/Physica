@@ -19,7 +19,6 @@
 #pragma once
 
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/DenseVector.h"
-#include "Physica/Core/Math/Calculus/Differential.h"
 #include "OptimizationImpl/LineSearch.h"
 
 namespace Physica::Core {
@@ -29,6 +28,7 @@ namespace Physica::Core {
      */
     template<Scalar T, size_t Dim>
     class ConjugateGradient {
+        using This = ConjugateGradient<T, Dim>;
         using VectorType = DenseVector<T, Dim>;
 
         VectorType gradG;
@@ -39,16 +39,16 @@ namespace Physica::Core {
         size_t iteration;
     public:
         ConjugateGradient(T maxStepSize);
-        ConjugateGradient(const ConjugateGradient&) = default;
-        ConjugateGradient(ConjugateGradient&&) noexcept = default;
+        ConjugateGradient(const This&) = default;
+        ConjugateGradient(This&&) noexcept = default;
         ~ConjugateGradient() = default;
         /* Operators */
-        ConjugateGradient& operator=(ConjugateGradient obj) noexcept;
+        This& operator=(This obj) noexcept { swap(obj); return *this; }
         /* Operations */
         template<class Functor, class GradFunctor> void init(VectorType initial, Functor func, GradFunctor grad);
         template<class Functor, class GradFunctor> void step(Functor func, GradFunctor grad);
         template<class Functor, class GradFunctor> T solve(T epsilon, VectorType initial, Functor func, GradFunctor grad);
-        void swap(ConjugateGradient& __restrict obj) noexcept;
+        void swap(This& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] inline size_t getDim() const noexcept;
         [[nodiscard]] const VectorType& getGradG() const noexcept { return gradG; }
@@ -59,13 +59,6 @@ namespace Physica::Core {
     ConjugateGradient<T, Dim>::ConjugateGradient(T maxStepSize)
             : lineSearch(maxStepSize)
             , iteration(0) {}
-
-    template<Scalar T, size_t Dim>
-    ConjugateGradient<T, Dim>&
-    ConjugateGradient<T, Dim>::operator=(ConjugateGradient<T, Dim> obj) noexcept {
-        swap(obj);
-        return *this;
-    }
 
     template<Scalar T, size_t Dim>
     template<class Functor, class GradFunctor>
@@ -109,7 +102,7 @@ namespace Physica::Core {
     }
 
     template<Scalar T, size_t Dim>
-    void ConjugateGradient<T, Dim>::swap(ConjugateGradient& __restrict obj) noexcept {
+    void ConjugateGradient<T, Dim>::swap(This& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         gradG.swap(obj.gradG);
         direction.swap(obj.direction);

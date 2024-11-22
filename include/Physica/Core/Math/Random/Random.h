@@ -24,6 +24,9 @@
 #include "RandomSeed.h"
 
 namespace Physica::Core {
+    enum RandomOption {
+        MT19937
+    };
     /**
      * \class Random provides a general, per-thread, reusable random generator implementation.
      * 
@@ -32,20 +35,20 @@ namespace Physica::Core {
      * So \tparam FixedSeed is declared as a template param,
      * making it possible for other parts of the program to check whether the seed is fixed at compiling time.
      */
-    template<class RandomGenerator, typename RandomGenerator::result_type FixedSeed = Physica::Dynamic>
+    template<RandomOption Option, uint64_t FixedSeed = Physica::Dynamic>
     class PHYSICA_API Random {
-        using This = Random<RandomGenerator, FixedSeed>;
+        using This = Random<Option, FixedSeed>;
     public:
-        using result_type = RandomGenerator::result_type;
+        using result_type = uint64_t;
         using SeedType = result_type;
-        using GeneratorType = RandomGenerator;
         constexpr static bool IsSeedFixed = Traits<This>::IsSeedFixed;
     private:
+        using GenType = std::mt19937;
     #ifndef PHYSICA_MKL
         using VSLStreamStatePtr = void*;
     #endif
 
-        RandomGenerator gen;
+        GenType gen;
         VSLStreamStatePtr pStream;
 
         SeedType seed;
@@ -54,13 +57,15 @@ namespace Physica::Core {
         /* Operators */
         [[nodiscard]] result_type operator()() { return gen(); }
         [[nodiscard]] operator VSLStreamStatePtr() noexcept { return pStream; }
+        /* Operations */
+        [[nodiscard("[Info]: Record the new seed for reproducible result")]] SeedType reseed();
         /* Getters */
-        [[nodiscard]] RandomGenerator& getGen() noexcept { return gen; }
+        [[nodiscard]] GenType& getGen() noexcept { return gen; }
         [[nodiscard]] VSLStreamStatePtr getStream() noexcept { return pStream; }
-        [[nodiscard]] inline SeedType getThreadSeed() const noexcept;
+        [[nodiscard]] SeedType getSeed() const noexcept { return seed; }
         /* Static members */
-        [[nodiscard]] constexpr static result_type min() { return RandomGenerator::min(); }
-        [[nodiscard]] constexpr static result_type max() { return RandomGenerator::max(); }
+        [[nodiscard]] constexpr static result_type min() { return GenType::min(); }
+        [[nodiscard]] constexpr static result_type max() { return GenType::max(); }
 
         [[nodiscard]] static Random& getInstance();
         [[nodiscard]] static Array<int> random_int(size_t length, int from, int to);
@@ -71,12 +76,24 @@ namespace Physica::Core {
         /* Operators */
         Random& operator=(const Random&) = default;
         Random& operator=(Random&&) noexcept = default;
+        /* Getters */
+        [[nodiscard]] inline SeedType getThreadSeed() const noexcept;
         /* Static members */
         constexpr static int getMKLRngID();
     };
 
-    template<class RandomGenerator, typename RandomGenerator::result_type FixedSeed>
-    Random<RandomGenerator, FixedSeed>::Random() {
+    template<RandomOption Option, uint64_t FixedSeed>
+    Random<Option, FixedSeed>::Random() {
+        [[maybe_unused]] auto _ = reseed();
+    }
+
+    template<RandomOption Option, uint64_t FixedSeed>
+    Random<Option, FixedSeed>::~Random() {
+        vslCheck(vslDeleteStream(&pStream));
+    }
+
+    template<RandomOption Option, uint64_t FixedSeed>
+    typename Random<Option, FixedSeed>::SeedType Random<Option, FixedSeed>::reseed() {
         if constexpr (IsSeedFixed)
             seed = FixedSeed;
         else
@@ -88,16 +105,26 @@ namespace Physica::Core {
             RandomSeed::toNextSeed(tseed);
             vslCheck(vslNewStream(&pStream, getMKLRngID(), tseed));
         }
+        return seed;
     }
 
-    template<class RandomGenerator, typename RandomGenerator::result_type FixedSeed>
-    Random<RandomGenerator, FixedSeed>::~Random() {
-        vslCheck(vslDeleteStream(&pStream));
+    template<RandomOption Option, uint64_t FixedSeed>
+    Random<Option, FixedSeed>& Random<Option, FixedSeed>::getInstance() {
+        thread_local static This instance{};
+        return instance;
     }
 
-    template<class RandomGenerator, typename RandomGenerator::result_type FixedSeed>
-    inline Random<RandomGenerator, FixedSeed>::SeedType
-    Random<RandomGenerator, FixedSeed>::getThreadSeed() const noexcept {
+    template<RandomOption Option, uint64_t FixedSeed>
+    Array<int> Random<Option, FixedSeed>::random_int(size_t length, int from, int to) {
+        assert(from <= to && to < INT_MAX);
+        Array<int> result(length);
+        vslCheck(viRngUniform(VSL_RNG_METHOD_UNIFORM_STD, getInstance(), length, result.data(), from, to + 1));
+        return result;
+    }
+
+    template<RandomOption Option, uint64_t FixedSeed>
+    inline Random<Option, FixedSeed>::SeedType
+    Random<Option, FixedSeed>::getThreadSeed() const noexcept {
         if constexpr (IsSeedFixed) {
             const auto threadId = ThreadPool::getThreadInfo().id;
             return seed + threadId;
@@ -106,23 +133,8 @@ namespace Physica::Core {
             return seed;
     }
 
-    template<class RandomGenerator, typename RandomGenerator::result_type FixedSeed>
-    Random<RandomGenerator, FixedSeed>& Random<RandomGenerator, FixedSeed>::getInstance() {
-        thread_local static This instance{};
-        return instance;
-    }
-
-    template<class RandomGenerator, typename RandomGenerator::result_type FixedSeed>
-    Array<int> Random<RandomGenerator, FixedSeed>::random_int(size_t length, int from, int to) {
-        assert(from <= to && to < INT_MAX);
-        Array<int> result(length);
-        vslCheck(viRngUniform(VSL_RNG_METHOD_UNIFORM_STD, getInstance(), length, result.data(), from, to + 1));
-        return result;
-    }
-
-    template<class RandomGenerator, typename RandomGenerator::result_type FixedSeed>
-    constexpr int Random<RandomGenerator, FixedSeed>::getMKLRngID() {
-        static_assert(std::is_same<RandomGenerator, std::mt19937>::value, "[Error]: Other RandomGenerator not implemented");
+    template<RandomOption Option, uint64_t FixedSeed>
+    constexpr int Random<Option, FixedSeed>::getMKLRngID() {
     #ifdef PHYSICA_MKL
         return VSL_BRNG_MT19937;
     #else
@@ -132,8 +144,8 @@ namespace Physica::Core {
 }
 
 namespace Physica {
-    template<class RandomGenerator, typename RandomGenerator::result_type FixedSeed>
-    class Traits<Core::Random<RandomGenerator, FixedSeed>> {
+    template<RandomOption Option, uint64_t FixedSeed>
+    class Traits<Random<Option, FixedSeed>> {
     public:
         constexpr static bool IsSeedFixed = FixedSeed != Dynamic;
     };
