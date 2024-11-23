@@ -46,13 +46,10 @@ constexpr size_t maxHandleNum = 100;
 constexpr size_t numSystem = 8;
 constexpr size_t numStep = 20000;
 
-MDCellType makeSystem(std::mt19937& gen) {
+MDCellType makeSystem() {
     MDCellType::LatticeMatrix lattice{latticeSize};
 
-    std::uniform_real_distribution dist{};
-    VectorND<ScalarType> posVec(numMolecular);
-    for (auto& elem : posVec)
-        elem = dist(gen) * latticeSize;
+    auto posVec = VectorND<ScalarType>::random_uniform<RandomType>(numMolecular);
     std::sort(posVec.begin(), posVec.end());
     MDCellType::PositionMatrix pos(numMolecular, 1);
     pos.col(0) = posVec;
@@ -70,9 +67,8 @@ int main() {
     KineticModel kineticModel(latticeSize, collideFactor, temperatureT, numMolecular, numReplica, maxHandleNum);
     ThermoType thermo(temperatureT, thermostatTime, false);
 
-    auto& gen = pool.getGen();
-    MDType rpmd = MDType(makeSystem(gen), numReplica, numReplica, temperatureT, timeStep);
-    rpmd.initMomentum<KineticModel, decltype(gen)>(gen);
+    MDType rpmd = MDType(makeSystem(), numReplica, numReplica, temperatureT, timeStep);
+    rpmd.initMomentum<KineticModel, RandomType>();
     kineticModel.updateMass(rpmd.getRingPolymer());
 
     MatrixType meanCorr(numMolecular, numReplica);
@@ -86,7 +82,7 @@ int main() {
         ScalarType temperature_sample = 0;
         for (size_t i = 0; i < numStep; ++i) {
             ForceModel forceModel{};
-            rpmd.nvt_step<ThermoType, RandomType, KineticModel, ForceModel, SequentialExecutor>(thermo, pool, kineticModel, forceModel);
+            rpmd.nvt_step<ThermoType, RandomType, KineticModel, ForceModel, SequentialExecutor>(thermo, kineticModel, forceModel);
             auto momentum = rpmd.getRingPolymer().asMatrix().topRows(numMolecular);
             for (size_t replica = 0; replica < numReplica; ++replica) {
                 auto col = temp.col(replica);

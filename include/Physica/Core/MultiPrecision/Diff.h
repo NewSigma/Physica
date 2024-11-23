@@ -66,12 +66,12 @@ namespace Physica::Core {
         [[nodiscard]] __host__ __device__ bool isPositive() const { return value.isPositive(); }
         [[nodiscard]] __host__ __device__ bool isNegative() const { return value.isNegative(); }
         /* Static members */
-        template<class RandomGenerator>
-        [[nodiscard]] inline static Diff random_uniform(RandomGenerator& gen);
-        template<class RandomGenerator>
-        [[nodiscard]] inline static Diff random_normal(RandomGenerator& gen);
-        template<class Distribution, class RandomGenerator>
-        [[nodiscard]] inline static Diff random_any(Distribution& dist, RandomGenerator& gen);
+        template<RandomGenerator R>
+        [[nodiscard]] inline static Diff random_uniform();
+        template<RandomGenerator R>
+        [[nodiscard]] inline static Diff random_normal();
+        template<class Distribution, RandomGenerator R>
+        [[nodiscard]] inline static Diff random_any(Distribution& dist);
         [[nodiscard]] static const H5::DataType& getH5DataType();
     };
 
@@ -241,12 +241,12 @@ namespace Physica::Core {
         /* Setters */
         void setValue(const T& x) { *pValue = x; }
         /* Static members */
-        template<class RandomGenerator>
-        [[nodiscard]] inline static Diff random_uniform(RandomGenerator& gen);
-        template<class RandomGenerator>
-        [[nodiscard]] inline static Diff random_normal(RandomGenerator& gen);
-        template<class Distribution, class RandomGenerator>
-        [[nodiscard]] inline static Diff random_any(Distribution& dist, RandomGenerator& gen);
+        template<RandomGenerator R>
+        [[nodiscard]] inline static Diff random_uniform();
+        template<RandomGenerator R>
+        [[nodiscard]] inline static Diff random_normal();
+        template<class Distribution, RandomGenerator R>
+        [[nodiscard]] inline static Diff random_any(Distribution& dist);
     private:
         /* Friends */
         friend class device_obj<This>;

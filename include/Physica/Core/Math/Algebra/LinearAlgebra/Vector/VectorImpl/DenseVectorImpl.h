@@ -72,36 +72,36 @@ namespace Physica::Core {
     }
 
     template<Scalar T, size_t Length, class Allocator>
-    template<class RandomGenerator>
-    DenseVector<T, Length, Allocator> DenseVector<T, Length, Allocator>::random_uniform(size_t len, RandomGenerator& gen) {
+    template<RandomGenerator R>
+    DenseVector<T, Length, Allocator> DenseVector<T, Length, Allocator>::random_uniform(size_t len) {
         This result(len);
-        result.random_uniform(gen);
+        result.random_uniform<R>();
         return result;
     }
 
     template<Scalar T, size_t Length, class Allocator>
-    template<class RandomGenerator>
-    DenseVector<T, Length, Allocator> DenseVector<T, Length, Allocator>::random_uniform(const This& v1, const This& v2, RandomGenerator& gen) {
+    template<RandomGenerator R>
+    DenseVector<T, Length, Allocator> DenseVector<T, Length, Allocator>::random_uniform(const This& v1, const This& v2) {
         assert(v1.getLength() == v2.getLength());
-        This result = random_uniform(v1.getLength(), gen);
+        This result = random_uniform<R>(v1.getLength());
         result = v1 + hadamard((v2 - v1), result);
         return result;
     }
 
     template<Scalar T, size_t Length, class Allocator>
-    template<class RandomGenerator>
-    DenseVector<T, Length, Allocator> DenseVector<T, Length, Allocator>::random_normal(size_t len, RandomGenerator& gen) {
+    template<RandomGenerator R>
+    DenseVector<T, Length, Allocator> DenseVector<T, Length, Allocator>::random_normal(size_t len) {
         This result(len);
-        result.random_normal(gen);
+        result.random_normal<R>();
         return result;
     }
 
     template<Scalar T, size_t Length, class Allocator>
-    template<class Distribution, class RandomGenerator>
+    template<class Distribution, RandomGenerator R>
     DenseVector<T, Length, Allocator> DenseVector<T, Length, Allocator>::random_any(
-            size_t len, Distribution& dist, RandomGenerator& gen) {
+            size_t len, Distribution& dist) {
         This result(len);
-        result.random_any(dist, gen);
+        result.random_any<decltype(dist), R>(dist);
         return result;
     }
     /**

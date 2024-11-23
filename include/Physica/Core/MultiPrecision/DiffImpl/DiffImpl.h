@@ -81,24 +81,24 @@ namespace Physica::Core {
     }
 
     template<Scalar T, int Order>
-    template<class RandomGenerator>
+    template<RandomGenerator R>
     inline Diff<T, DiffMode::Forward, Order>
-    Diff<T, DiffMode::Forward, Order>::random_uniform(RandomGenerator& gen) {
-        return Diff(T::random_uniform(gen));
+    Diff<T, DiffMode::Forward, Order>::random_uniform() {
+        return Diff(T::template random_uniform<R>());
     }
 
     template<Scalar T, int Order>
-    template<class RandomGenerator>
+    template<RandomGenerator R>
     inline Diff<T, DiffMode::Forward, Order>
-    Diff<T, DiffMode::Forward, Order>::random_normal(RandomGenerator& gen) {
-        return Diff(T::random_normal(gen));
+    Diff<T, DiffMode::Forward, Order>::random_normal() {
+        return Diff(T::template random_normal<R>());
     }
 
     template<Scalar T, int Order>
-    template<class Distribution, class RandomGenerator>
+    template<class Distribution, RandomGenerator R>
     [[nodiscard]] inline Diff<T, DiffMode::Forward, Order>
-    Diff<T, DiffMode::Forward, Order>::random_any(Distribution& dist, RandomGenerator& gen) {
-        return Diff(T::random_any(dist, gen));
+    Diff<T, DiffMode::Forward, Order>::random_any(Distribution& dist) {
+        return Diff(T::template random_any<R>(dist));
     }
 
 #ifdef PHYSICA_HDF5
@@ -361,24 +361,24 @@ namespace Physica::Core {
     }
 
     template<Scalar T, int Order>
-    template<class RandomGenerator>
+    template<RandomGenerator R>
     inline Diff<T, DiffMode::Reverse, Order>
-    Diff<T, DiffMode::Reverse, Order>::random_uniform(RandomGenerator& gen) {
-        return Diff(T::random_uniform(gen));
+    Diff<T, DiffMode::Reverse, Order>::random_uniform() {
+        return Diff(T::template random_uniform<R>());
     }
 
     template<Scalar T, int Order>
-    template<class RandomGenerator>
+    template<RandomGenerator R>
     inline Diff<T, DiffMode::Reverse, Order>
-    Diff<T, DiffMode::Reverse, Order>::random_normal(RandomGenerator& gen) {
-        return Diff(T::random_normal(gen));
+    Diff<T, DiffMode::Reverse, Order>::random_normal() {
+        return Diff(T::template random_normal<R>());
     }
 
     template<Scalar T, int Order>
-    template<class Distribution, class RandomGenerator>
+    template<class Distribution, RandomGenerator R>
     inline Diff<T, DiffMode::Reverse, Order>
-    Diff<T, DiffMode::Reverse, Order>::random_any(Distribution& dist, RandomGenerator& gen) {
-        return Diff(T::random_any(dist, gen));
+    Diff<T, DiffMode::Reverse, Order>::random_any(Distribution& dist) {
+        return Diff(T::template random_any<decltype(dist), R>(dist));
     }
     ////////////////////////////////////////////////////////////
     template<Scalar T, DiffMode Mode, int Order, Scalar U>

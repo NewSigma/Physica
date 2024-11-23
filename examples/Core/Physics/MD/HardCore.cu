@@ -49,15 +49,14 @@ using MDType = RPMD<ScalarType, 1, 1>;
 using MDCellType = MDType::MDCellType;
 using ForceModel = EmptyForceModel<ScalarType, 1>;
 using KineticModel = HardCore<ScalarType, false, 1, RPMDIntegrator::Exact, CUDAExecutor>;
-using RandomGenerator = std::mt19937;
+using RandomType = Random<MT19937>;
 
-MDCellType makeSystem(RandomGenerator& gen) {
+MDCellType makeSystem() {
     MDCellType::LatticeMatrix lattice{latticeSize};
 
     std::uniform_real_distribution dist{};
-    VectorND<ScalarType> posVec(numMolecular);
-    for (auto& elem : posVec)
-        elem = dist(gen) * latticeSize;
+    auto posVec = VectorND<ScalarType>::random_uniform<RandomType>(numMolecular);
+    posVec *= ScalarType(latticeSize);
     std::sort(posVec.begin(), posVec.end());
     MDCellType::PositionMatrix pos(numMolecular, 1);
     pos.col(0) = posVec;
@@ -84,11 +83,10 @@ int main(int argc, char** argv) {
     if constexpr (IsComputeMode) {
         ThreadPool::numThreadRequired = record.getCol();
         ThreadExecutor::parallel_for([&record](unsigned int sys) {
-            auto& gen = Random<MT19937>::getInstance().getGen();
-            MDType rpmd = MDType(makeSystem(gen), 1, 1, temperatureT, timeStep);
+            MDType rpmd = MDType(makeSystem(), 1, 1, temperatureT, timeStep);
             KineticModel kineticModel(latticeSize, collideFactor, temperatureT, numMolecular, 100);
             kineticModel.updateMass(rpmd.getRingPolymer());
-            rpmd.initMomentum<KineticModel, decltype(gen)>(gen);
+            rpmd.initMomentum<KineticModel, RandomType>();
 
             VectorND<ScalarType> mean(record.getRow(), 0);
             for (size_t sample = 0; sample < numSample; ++sample) {

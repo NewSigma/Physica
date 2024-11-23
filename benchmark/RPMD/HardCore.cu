@@ -41,14 +41,10 @@ constexpr double molarVolume = 31.7;
 constexpr double mass = PhyConst<AU>::atomMass(1) * 2;
 
 namespace {
-    template<class RandomType>
-    MDType makeSystem(RandomType& gen) {
+    MDType makeSystem() {
         using MDCellType = MDType::MDCellType;
         MDCellType::LatticeMatrix lattice = MDCellType::LatticeMatrix::unitMatrix(3);
-        MDCellType::PositionMatrix pos(numMolecular, 3);
-        std::uniform_real_distribution dist{};
-        for (auto& elem : pos.asArray())
-            elem = dist(gen);
+        auto pos = MDCellType::PositionMatrix::random_uniform<RandomType>(numMolecular, 3);
         MDCellType::MassVector massVec(numMolecular, mass);
         MDCellType cell(std::move(lattice), std::move(pos), std::move(massVec));
 
@@ -62,9 +58,8 @@ namespace {
     * [1] Miller TF, Manolopoulos DE. 2005. Quantum diffusion in liquid para-hydrogen from ring polymer molecular dynamics. J. Chem. Phys. 122:184503
     */
     void main(benchmark::State& state) {
-        auto& gen = RandomType::getInstance().getGen();
-        MDType rpmd = makeSystem(gen);
-        rpmd.initMomentum<KineticModel, decltype(gen)>(gen);
+        MDType rpmd = makeSystem();
+        rpmd.initMomentum<KineticModel, RandomType>();
 
         KineticModel kineticModel(temperatureT, numReplica);
         ForceModel forceModel(numMolecular, pair_cutoff);

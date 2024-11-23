@@ -48,30 +48,27 @@ namespace Physica::Core {
         /* Getters */
         [[nodiscard]] size_t getNumTree() const noexcept { return trees.getLength(); }
         /* Static members */
-        template<class RandomType>
-        [[nodiscard]] static std::pair<RandomForest, T> train(unsigned int numTree, const Dataset& dataset, RandomType& gen);
-        template<class RandomType>
+        template<RandomGenerator R>
+        [[nodiscard]] static std::pair<RandomForest, T> train(unsigned int numTree, const Dataset& dataset);
+        template<RandomGenerator R>
         [[nodiscard]] static T makeFeatureImportance(
                 size_t featureId,
                 unsigned int numForest,
                 unsigned int numTree,
-                Dataset dataset,
-                RandomType& gen);
-        template<class RandomType>
+                Dataset dataset,);
+        template<RandomGenerator R>
         [[nodiscard]] std::forward_list<size_t> selectImportantFeature(
                 unsigned int numForest,
                 unsigned int numTree,
-                Dataset dataset,
-                RandomType& gen);
+                Dataset dataset);
     private:
         RandomForest(Array<TreeType> trees_);
-        template<class RandomType>
+        template<RandomGenerator R>
         static TreeType trainTree(const Dataset& dataset,
                                   std::forward_list<size_t> availableSample,
-                                  std::forward_list<size_t> availableFeature,
-                                  RandomType& gen);
-        template<class RandomType>
-        static std::pair<std::forward_list<size_t>, std::forward_list<size_t>> randTrainTestSet(size_t numSample, RandomType& gen);
+                                  std::forward_list<size_t> availableFeature);
+        template<RandomGenerator R>
+        static std::pair<std::forward_list<size_t>, std::forward_list<size_t>> randTrainTestSet(size_t numSample);
         static void testTree(T prediction, T label, size_t sampleId, VectorType& predictions, Array<size_t>& numTestSample);
         static T makeTestError(const VectorType& predictions, const VectorType& labels, const Array<size_t>& numTestSample);
     };
@@ -118,11 +115,10 @@ namespace Physica::Core {
     }
 
     template<Scalar T, DecisionTreeType Type>
-    template<class RandomType>
+    template<RandomGenerator R>
     std::pair<RandomForest<T, Type>, T> RandomForest<T, Type>::train(
             unsigned int numTree,
-            const Dataset& dataset,
-            RandomType& gen) {
+            const Dataset& dataset) {
         const size_t numSample = dataset.features.getRow();
         const auto availableFeature = TreeType::makeInitialFeatures(dataset.features.getCol());
         Array<TreeType> trees{};
@@ -130,11 +126,11 @@ namespace Physica::Core {
         VectorType predictions(numSample, 0);
         Array<size_t> numTestSample(numSample, 0);
         for (size_t i = 0; i < numTree; ++i) {
-            auto pair = randTrainTestSet(numSample, gen);
+            auto pair = randTrainTestSet<R>(numSample);
             auto& trainSample = pair.first;
             auto& testSample = pair.second;
 
-            auto tree = trainTree(dataset, std::move(trainSample), availableFeature, gen);
+            auto tree = trainTree<R>(dataset, std::move(trainSample), availableFeature);
             for (size_t sample : testSample)
                 testTree(tree.predict(dataset.features.row(sample)), dataset.labels[sample], sample, predictions, numTestSample);
             trees.append(std::move(tree));
@@ -147,13 +143,12 @@ namespace Physica::Core {
      * [2] Manual On Setting Up, Using, And Understanding Random Forests V3.1 (https://www.stat.berkeley.edu/~breiman/Using_random_forests_V3.1.pdf)
      */
     template<Scalar T, DecisionTreeType Type>
-    template<class RandomType>
+    template<RandomGenerator R>
     T RandomForest<T, Type>::makeFeatureImportance(
             size_t featureId,
             unsigned int numForest,
             unsigned int numTree,
-            Dataset dataset,
-            RandomType& gen) {
+            Dataset dataset) {
         const size_t numSample = dataset.features.getRow();
         const size_t numFeature = dataset.features.getCol();
         assert(featureId < numFeature * 2);
@@ -166,6 +161,8 @@ namespace Physica::Core {
             for (size_t i = 0; i < numFeature; ++i)
                 dataset.isFeatureContinuous[i + numFeature] = dataset.isFeatureContinuous[i];
         }
+
+        auto& gen = R::getInstance();
         T mean = 0;
         for (size_t i = 0; i < numForest; ++i) {
             for (size_t i = 0; i < numFeature; ++i)
@@ -175,11 +172,11 @@ namespace Physica::Core {
             VectorType predictions(numSample, 0);
             Array<size_t> numTestSample(numSample, 0);
             for (size_t _ = 0; _ < numTree; ++_) {
-                auto pair = randTrainTestSet(numSample, gen);
+                auto pair = randTrainTestSet<R>(numSample);
                 auto& trainSample = pair.first;
                 auto& testSample = pair.second;
 
-                auto tree = trainTree(dataset, std::move(trainSample), availableFeature, gen);
+                auto tree = trainTree<R>(dataset, std::move(trainSample), availableFeature);
                 for (size_t sample : testSample) {
                     VectorType feature = features.row(sample);
                     feature[featureId] = features(dist(gen), featureId);
@@ -187,19 +184,18 @@ namespace Physica::Core {
                 }
             }
             const T newError = makeTestError(predictions, dataset.labels, numTestSample);
-            const T deltaError = newError - train(numTree, dataset, gen).second;
+            const T deltaError = newError - train<R>(numTree, dataset).second;
             Core::toNextMean(mean, i, deltaError);
         }
         return mean;
     }
 
     template<Scalar T, DecisionTreeType Type>
-    template<class RandomType>
+    template<RandomGenerator R>
     std::forward_list<size_t> RandomForest<T, Type>::selectImportantFeature(
             unsigned int numForest,
             unsigned int numTree,
-            Dataset dataset,
-            RandomType& gen) {
+            Dataset dataset) {
         std::forward_list<size_t> result{};
         for (size_t i = 0; i < dataset.isFeatureContinuous.getLength(); ++i)
             result.push_front(i);
@@ -218,7 +214,7 @@ namespace Physica::Core {
             }
             auto importance = VectorType(numFeature * 2);
             for (size_t i = 0; i < importance.getLength(); ++i)
-                importance[i] = makeFeatureImportance(i, numForest, numTree, {features, dataset.labels, isFeatureContinuous}, gen);
+                importance[i] = makeFeatureImportance<R>(i, numForest, numTree, {features, dataset.labels, isFeatureContinuous});
             
             const auto shadow_importance = importance.tail(numFeature);
             const T upper_bound = mean(shadow_importance) + deviation(shadow_importance);
@@ -232,13 +228,13 @@ namespace Physica::Core {
     }
 
     template<Scalar T, DecisionTreeType Type>
-    template<class RandomType>
+    template<RandomGenerator R>
     RandomForest<T, Type>::TreeType RandomForest<T, Type>::trainTree(
             const Dataset& dataset,
             std::forward_list<size_t> availableSample,
-            std::forward_list<size_t> availableFeature,
-            RandomType& gen) {
+            std::forward_list<size_t> availableFeature) {
         std::forward_list<size_t> randomFeature = availableFeature;
+        auto& gen = R::getInstance();
         /* make randomFeature */ {
             const size_t numAvailableFeature = std::distance(availableFeature.cbegin(), availableFeature.cend());
             const size_t numRandFeature = double(ln(T(numAvailableFeature)) / M_LN2 + 1.0);
@@ -267,21 +263,21 @@ namespace Physica::Core {
                                      availableFeature,
                                      pair.first,
                                      std::move(pair.second),
-                                     [&gen](const Dataset& dataset,
+                                     [](const Dataset& dataset,
                                             std::forward_list<size_t> availableSample,
                                             std::forward_list<size_t> availableFeature) {
-                                        return trainTree(dataset, availableSample, availableFeature, gen);
+                                        return trainTree<R>(dataset, availableSample, availableFeature);
                                      });
     }
 
     template<Scalar T, DecisionTreeType Type>
-    template<class RandomType>
+    template<RandomGenerator R>
     std::pair<std::forward_list<size_t>, std::forward_list<size_t>>
-    RandomForest<T, Type>::randTrainTestSet(size_t numSample, RandomType& gen) {
+    RandomForest<T, Type>::randTrainTestSet(size_t numSample) {
         std::uniform_int_distribution<size_t> dist(0, numSample - 1);
         std::set<size_t> set{};
         for (size_t _ = 0; _ < numSample; ++_)
-            set.insert(dist(gen));
+            set.insert(dist(R::getInstance();));
 
         std::forward_list<size_t> trainSample{}, testSample{};
         for (size_t j = 0; j < numSample; ++j) {

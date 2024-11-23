@@ -122,32 +122,32 @@ namespace Physica::Core {
     }
 
     template<Scalar T, int Option, size_t Row, size_t Col, class Allocator>
-    template<class RandomType>
+    template<RandomGenerator R>
     inline DenseMatrix<T, Option, Row, Col, Allocator>
     DenseMatrix<T, Option, Row, Col, Allocator>::random_uniform(
-            size_t row, size_t col, RandomType& gen) {
+            size_t row, size_t col) {
         DenseMatrix result(row, col);
-        result.random_uniform(gen);
+        result.template random_uniform<R>();
         return result;
     }
 
     template<Scalar T, int Option, size_t Row, size_t Col, class Allocator>
-    template<class RandomType>
+    template<RandomGenerator R>
     inline DenseMatrix<T, Option, Row, Col, Allocator>
     DenseMatrix<T, Option, Row, Col, Allocator>::random_normal(
-            size_t row, size_t col, RandomType& gen) {
+            size_t row, size_t col) {
         DenseMatrix result(row, col);
-        result.random_normal(gen);
+        result.template random_normal<R>();
         return result;
     }
 
     template<Scalar T, int Option, size_t Row, size_t Col, class Allocator>
-    template<class Distribution, class RandomType>
+    template<class Distribution, RandomGenerator R>
     inline DenseMatrix<T, Option, Row, Col, Allocator>
     DenseMatrix<T, Option, Row, Col, Allocator>::random_any(
-            size_t row, size_t col, Distribution& dist, RandomType& gen) {
+            size_t row, size_t col, Distribution& dist) {
         DenseMatrix result(row, col);
-        result.random_any(dist, gen);
+        result.template random_any<R>(dist);
         return result;
     }
 

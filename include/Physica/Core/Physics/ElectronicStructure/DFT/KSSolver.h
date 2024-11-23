@@ -67,7 +67,7 @@ namespace Physica::Core {
         /* Operations */
         bool solve(T criteria, size_t maxIte);
 
-        template<class RandomGenerator> void initWaveFunc(const SpinPair<BasisType, IsSpinPolarized>& initial, RandomGenerator& gen);
+        template<RandomGenerator R> void initWaveFunc(const SpinPair<BasisType, IsSpinPolarized>& initial);
         void swap(KSSolver& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] const LatticeMatrix& getLattice() const noexcept { return hamiltonH.getRepLattice(); }
@@ -170,14 +170,14 @@ namespace Physica::Core {
     }
 
     template<Scalar T, class XCProvider>
-    template<class RandomGenerator>
-    void KSSolver<T, XCProvider>::initWaveFunc(const SpinPair<BasisType, IsSpinPolarized>& initial, RandomGenerator& gen) {
+    template<RandomGenerator R>
+    void KSSolver<T, XCProvider>::initWaveFunc(const SpinPair<BasisType, IsSpinPolarized>& initial) {
         const ssize_t dimX = std::min(initial[SpinState::Up].getDimX(), orbits[0][SpinState::Up].getDimX());
         const ssize_t dimY = std::min(initial[SpinState::Up].getDimY(), orbits[0][SpinState::Up].getDimY());
         const ssize_t dimZ = std::min(initial[SpinState::Up].getDimZ(), orbits[0][SpinState::Up].getDimZ());
         {
             auto& waveUp = orbits[0][SpinState::Up];
-            waveUp.flatten().random_normal(gen);
+            waveUp.flatten().template random_normal<R>();
             for (ssize_t x = -dimX; x <= dimX; ++x)
                 for (ssize_t y = -dimY; y <= dimY; ++y)
                     for (ssize_t z = 0; z <= dimZ; ++z)
@@ -185,7 +185,7 @@ namespace Physica::Core {
         }
         if constexpr (IsSpinPolarized) {
             auto& waveDown = orbits[0][SpinState::Down];
-            waveDown.flatten().random_normal(gen);
+            waveDown.flatten().template random_normal<R>();
             for (ssize_t x = -dimX; x <= dimX; ++x)
                 for (ssize_t y = -dimY; y <= dimY; ++y)
                     for (ssize_t z = 0; z <= dimZ; ++z)

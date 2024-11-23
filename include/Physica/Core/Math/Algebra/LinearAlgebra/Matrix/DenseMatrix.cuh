@@ -57,12 +57,12 @@ namespace Physica::Core {
         using Storage::getCol;
         /* Static members */
         [[nodiscard]] static inline device_obj unitMatrix(size_t order);
-        template<class RandomType>
-        [[nodiscard]] inline static This random_uniform(size_t row, size_t col, RandomType& gen);
-        template<class RandomType>
-        [[nodiscard]] inline static This random_normal(size_t row, size_t col, RandomType& gen);
-        template<class Distribution, class RandomType>
-        [[nodiscard]] inline static This random_any(size_t row, size_t col, Distribution& dist, RandomType& gen);
+        template<RandomGenerator R>
+        [[nodiscard]] inline static This random_uniform(size_t row, size_t col);
+        template<RandomGenerator R>
+        [[nodiscard]] inline static This random_normal(size_t row, size_t col);
+        template<class Distribution, RandomGenerator R>
+        [[nodiscard]] inline static This random_any(size_t row, size_t col, Distribution& dist);
     };
 
     template<Scalar T, int Option, size_t Row, size_t Col, class Allocator>
@@ -91,27 +91,27 @@ namespace Physica::Core {
     }
 
     template<Scalar T, int Option, size_t Row, size_t Col, class Allocator>
-    template<class RandomType>
+    template<RandomGenerator R>
     inline device_obj<DenseMatrix<T, Option, Row, Col, Allocator>>
     device_obj<DenseMatrix<T, Option, Row, Col, Allocator>>::random_uniform(
-            size_t row, size_t col, RandomType& gen) {
-        return host_obj::random_uniform(row, col, gen).toDevice();
+            size_t row, size_t col) {
+        return host_obj::template random_uniform<R>(row, col).toDevice();
     }
 
     template<Scalar T, int Option, size_t Row, size_t Col, class Allocator>
-    template<class RandomType>
+    template<RandomGenerator R>
     inline device_obj<DenseMatrix<T, Option, Row, Col, Allocator>>
     device_obj<DenseMatrix<T, Option, Row, Col, Allocator>>::random_normal(
-            size_t row, size_t col, RandomType& gen) {
-        return host_obj::random_normal(row, col, gen).toDevice();
+            size_t row, size_t col) {
+        return host_obj::template random_normal<R>(row, col).toDevice();
     }
 
     template<Scalar T, int Option, size_t Row, size_t Col, class Allocator>
-    template<class Distribution, class RandomType>
+    template<class Distribution, RandomGenerator R>
     inline device_obj<DenseMatrix<T, Option, Row, Col, Allocator>>
     device_obj<DenseMatrix<T, Option, Row, Col, Allocator>>::random_any(
-            size_t row, size_t col, Distribution& dist, RandomType& gen) {
-        return host_obj::random_any(row, col, dist, gen).toDevice();
+            size_t row, size_t col, Distribution& dist) {
+        return host_obj::random_any(row, col, dist).toDevice();
     }
 
     template<Scalar T, int Option, size_t Row, size_t Col, class Allocator>

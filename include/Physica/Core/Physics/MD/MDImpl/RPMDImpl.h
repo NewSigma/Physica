@@ -159,13 +159,12 @@ namespace Physica::Core {
      */
     template<Scalar T, unsigned int Dim, size_t NumReplica, class ForceMatrixAllocator>
     template<class Thermostat,
-             class RandomType,
+             RandomGenerator R,
              class KineticModel,
              class ForceModel,
              class Executor>
     void RPMD<T, Dim, NumReplica, ForceMatrixAllocator>::nvt_step(
             const Thermostat& thermostat,
-            RandomType& pool,
             KineticModel& kineticModel,
             ForceModel& forceModel) {
         constexpr bool isFreeModel = Internal::is_empty_force_model<ForceModel>::value;
@@ -173,7 +172,7 @@ namespace Physica::Core {
         constexpr bool IsPeriodBoundary2 = Traits<ForceModel>::IsPeriodBoundary;
         static_assert(isFreeModel || (IsPeriodBoundary1 == IsPeriodBoundary2), "[Error]: Inconsistent boundary condition");
 
-        constexpr bool isSeedFixed = Traits<RandomType>::IsSeedFixed;
+        constexpr bool isSeedFixed = Traits<R>::IsSeedFixed;
         using NoRandExecutor = std::conditional<isSeedFixed, SequentialExecutor, Executor>::type;
 
         constexpr bool IsCentroidCoupled = Traits<Thermostat>::IsCentroidCoupled;
@@ -182,13 +181,13 @@ namespace Physica::Core {
 
         if constexpr (isFreeModel) {
             kineticModel.nve_step(ringPolymer, timeStep * 0.5);
-            thermostat.template step<RandomType, NoRandExecutor>(ringPolymer, timeStep, pool);
+            thermostat.template step<R, NoRandExecutor>(ringPolymer, timeStep);
             kineticModel.nve_step(ringPolymer, timeStep * 0.5);
         }
         else {
             forceStep(timeStep * 0.5);
             kineticModel.nve_step(ringPolymer, timeStep * 0.5);
-            thermostat.template step<RandomType, NoRandExecutor>(ringPolymer, timeStep, pool);
+            thermostat.template step<R, NoRandExecutor>(ringPolymer, timeStep);
             kineticModel.nve_step(ringPolymer, timeStep * 0.5);
             updateForce<ForceModel, Executor>(forceModel);
             forceStep(timeStep * 0.5);
@@ -197,31 +196,29 @@ namespace Physica::Core {
 
     template<Scalar T, unsigned int Dim, size_t NumReplica, class ForceMatrixAllocator>
     template<class Thermostat,
-             class RandomType,
+             RandomGenerator R,
              class KineticModel,
              class ForceModel,
              class Executor>
     void RPMD<T, Dim, NumReplica, ForceMatrixAllocator>::nvt_step_for(
             T duration,
             const Thermostat& thermostat,
-            RandomType& pool,
             KineticModel& kineticModel,
             ForceModel& forceModel) {
         const uint64_t step = Base::durationToStep(duration, timeStep);
         for (uint64_t _ = 0; _ < step; ++_)
-            nvt_step<Thermostat, RandomType, KineticModel, ForceModel, Executor>(thermostat, pool, kineticModel, forceModel);
+            nvt_step<Thermostat, R, KineticModel, ForceModel, Executor>(thermostat, kineticModel, forceModel);
     }
 
     template<Scalar T, unsigned int Dim, size_t NumReplica, class ForceMatrixAllocator>
     template<class Thermostat,
-             class RandomType,
+             RandomGenerator R,
              class Barostat,
              class KineticModel,
              class ForceModel,
              class Executor>
     void RPMD<T, Dim, NumReplica, ForceMatrixAllocator>::npt_step(
             const Thermostat& thermostat,
-            RandomType& pool,
             Barostat& barostat,
             KineticModel& kineticModel,
             ForceModel& forceModel) {
@@ -233,7 +230,7 @@ namespace Physica::Core {
         constexpr unsigned int BarostatOrder = Traits<Barostat>::Order;
         static_assert(BarostatOrder == 2 || BarostatOrder == 1, "[Error]: Invalid barostat");
 
-        constexpr bool isSeedFixed = Traits<RandomType>::IsSeedFixed;
+        constexpr bool isSeedFixed = Traits<R>::IsSeedFixed;
         using NoRandExecutor = std::conditional<isSeedFixed, SequentialExecutor, Executor>::type;
 
         constexpr bool IsCentroidCoupled = Traits<Thermostat>::IsCentroidCoupled;
@@ -243,7 +240,7 @@ namespace Physica::Core {
         if constexpr (BarostatOrder == 2) {
             barostat.forceStep(*this, forceModel, timeStep * 0.5);
             kineticModel.npt_step(*this, barostat, timeStep * 0.5);
-            thermostat.template step<RandomType, NoRandExecutor>(ringPolymer, timeStep, pool);
+            thermostat.template step<R, NoRandExecutor>(ringPolymer, timeStep);
             kineticModel.npt_step(*this, barostat, timeStep * 0.5);
             updateForce<ForceModel, Executor>(forceModel);
             barostat.forceStep(*this, forceModel, timeStep * 0.5);
@@ -253,7 +250,7 @@ namespace Physica::Core {
             forceStep(timeStep * 0.5);
             kineticModel.nve_step(ringPolymer, timeStep * 0.5);
             barostat.template npt_step<This, ForceModel>(*this, stress, timeStep * 0.5);
-            thermostat.template step<RandomType, NoRandExecutor>(ringPolymer, timeStep, pool);
+            thermostat.template step<R, NoRandExecutor>(ringPolymer, timeStep);
             barostat.template npt_step<This, ForceModel>(*this, stress, timeStep * 0.5);
             kineticModel.nve_step(ringPolymer, timeStep * 0.5);
             if constexpr (Traits<ForceModel>::IsLatticeDependent)
@@ -264,17 +261,16 @@ namespace Physica::Core {
     }
 
     template<Scalar T, unsigned int Dim, size_t NumReplica, class ForceMatrixAllocator>
-    template<class Thermostat, class RandomType, class Barostat, class KineticModel, class ForceModel, class Executor>
+    template<class Thermostat, RandomGenerator R, class Barostat, class KineticModel, class ForceModel, class Executor>
     void RPMD<T, Dim, NumReplica, ForceMatrixAllocator>::npt_step_for(
             T duration,
             const Thermostat& thermostat,
-            RandomType& pool,
             Barostat& barostat,
             KineticModel& kineticModel,
             ForceModel& forceModel) {
         const uint64_t step = Base::durationToStep(duration, timeStep);
         for (uint64_t _ = 0; _ < step; ++_)
-            npt_step<Thermostat, RandomType, Barostat, KineticModel, ForceModel, Executor>(thermostat, pool, barostat, kineticModel, forceModel);
+            npt_step<Thermostat, R, Barostat, KineticModel, ForceModel, Executor>(thermostat, barostat, kineticModel, forceModel);
     }
     /**
      * fire_vstep is fire_v(olume)step
@@ -328,9 +324,9 @@ namespace Physica::Core {
     }
 
     template<Scalar T, unsigned int Dim, size_t NumReplica, class ForceMatrixAllocator>
-    template<class KineticModel, class RandomGenerator>
-    inline void RPMD<T, Dim, NumReplica, ForceMatrixAllocator>::initMomentum(RandomGenerator& gen) {
-        return ringPolymer.template initMomentum<KineticModel, RandomGenerator>(temperatureT, gen);
+    template<class KineticModel, RandomGenerator R>
+    inline void RPMD<T, Dim, NumReplica, ForceMatrixAllocator>::initMomentum() {
+        return ringPolymer.template initMomentum<KineticModel, R>(temperatureT);
     }
 
     template<Scalar T, unsigned int Dim, size_t NumReplica, class ForceMatrixAllocator>

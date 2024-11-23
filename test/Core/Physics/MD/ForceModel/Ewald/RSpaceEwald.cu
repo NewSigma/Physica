@@ -29,11 +29,9 @@ using HostForceModel = RSpaceEwald<ScalarType>;
 using DeviceForceModel = device_obj<HostForceModel>;
 using RandomType = Random<MT19937, 10000>;
 
-template<class RandomGenerator>
-MDCellType makeSystem(size_t numMolecular, RandomGenerator& gen) {
+MDCellType makeSystem(size_t numMolecular) {
     MDCellType::LatticeMatrix lattice = MDCellType::LatticeMatrix::unitMatrix(3);
-    MDCellType::PositionMatrix pos(numMolecular, 3);
-    pos.random_uniform(gen);
+    auto pos = MDCellType::PositionMatrix::template random_uniform<RandomType>(numMolecular, 3);
     MDCellType::MassVector massVec(numMolecular, 1.0);
     MDCellType cell(std::move(lattice), std::move(pos), std::move(massVec));
     cell.scale(ScalarType(20));
@@ -41,7 +39,7 @@ MDCellType makeSystem(size_t numMolecular, RandomGenerator& gen) {
 }
 
 int main() {
-    const auto cell = makeSystem(108, RandomType::getInstance().getGen());
+    const auto cell = makeSystem(108);
     const auto& pos = cell.getPos();
     VectorND<ScalarType> charges(cell.getNumParticle(), 1.0);
     auto tail = charges.tail(cell.getNumParticle() / 2);

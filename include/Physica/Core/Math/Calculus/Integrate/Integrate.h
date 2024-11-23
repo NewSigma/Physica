@@ -124,21 +124,18 @@ namespace Physica::Core {
     public:
         Integrate(Base range, uint64_t sampleCount_);
         /* Operations */
-        template<class Function, class RandomGenerator>
-        T solve(Function func, RandomGenerator& generator) const;
-        template<class Function, class RandomGenerator, class Executor>
-        T parallel_solve(Function func, const Array<typename RandomGenerator::result_type>& seeds) const;
-        template<class Function, class RandomGenerator>
-        T solve_e(unsigned int numSequence, Function func, RandomGenerator& generator, T& deviation) const;
+        template<class Function, RandomGenerator R>
+        T solve(Function func) const;
+        template<class Function, RandomGenerator R>
+        T solve_e(unsigned int numSequence, Function func, T& deviation) const;
 
-        template<class Functor1, class Functor2, class Distribution, class RandomGenerator>
-        T solve(Functor1 func, Functor2 importance, Distribution& dist, RandomGenerator& generator) const;
-        template<class Functor1, class Functor2, class Distribution, class RandomGenerator>
+        template<class Functor1, class Functor2, class Distribution, RandomGenerator R>
+        T solve(Functor1 func, Functor2 importance, Distribution& disterator) const;
+        template<class Functor1, class Functor2, class Distribution, RandomGenerator R>
         T solve_e(unsigned int numSequence,
                            Functor1 func,
                            Functor2 importance,
                            Distribution& dist,
-                           RandomGenerator& generator,
                            T& deviation) const;
     };
 }

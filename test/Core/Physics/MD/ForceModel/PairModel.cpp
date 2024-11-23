@@ -40,8 +40,7 @@ class ForceConstTest {
 public:
     static void run() {
         SilveraGoldman<ScalarType, true> sg(pair_cutoff);
-        auto& gen = RandomType::getInstance().getGen();
-        const auto cell = makeSystem(gen);
+        const auto cell = makeSystem();
         const auto fc = sg.forceConst(cell);
         for (size_t i = 0; i < cell.getDOF(); ++i) {
             for (size_t j = 0; j < cell.getDOF(); ++j) {
@@ -52,13 +51,12 @@ public:
         }
     }
 private:
-    template<class RandomGenerator>
-    static MDCellType makeSystem(RandomGenerator& gen) {
+    static MDCellType makeSystem() {
         MDCellType::LatticeMatrix lattice = MDCellType::LatticeMatrix::unitMatrix(3);
         MDCellType::PositionMatrix pos(numMolecular, 3);
         std::uniform_real_distribution dist{};
         for (auto& elem : pos.asArray())
-            elem = dist(gen);
+            elem = dist(RandomType::getInstance());
         MDCellType::MassVector massVec(numMolecular, mass);
         MDCellType cell(std::move(lattice), std::move(pos), std::move(massVec));
 

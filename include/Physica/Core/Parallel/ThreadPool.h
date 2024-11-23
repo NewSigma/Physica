@@ -57,7 +57,8 @@ namespace Physica::Core {
 
         static int numThreadRequired;
     private:
-        constexpr static size_t MainThreadID = std::numeric_limits<decltype(numThreadRequired)>::max();
+        // Larger than any thread ID, main thread is not controled by thread pool
+        constexpr static int MainThreadID = std::numeric_limits<decltype(numThreadRequired)>::max();
 
         Array<ThreadData> thread_data;
         std::mutex poolMutex;

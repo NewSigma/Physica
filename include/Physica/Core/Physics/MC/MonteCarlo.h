@@ -39,10 +39,10 @@ namespace Physica::Core {
         /* Operators */
         MonteCarlo& operator=(MonteCarlo mc) noexcept;
         /* Operations */
-        template<class RandomGenerator,
+        template<RandomGenerator R,
                  class ForceModel,
                  class Executor>
-        void nvt_step(RandomGenerator& gen, const ForceModel& forceModel);
+        void nvt_step(, const ForceModel& forceModel);
         void normalizePos() { cell.normalize(); }
         void swap(MonteCarlo& __restrict mc) noexcept;
         /* Getters */
@@ -62,13 +62,13 @@ namespace Physica::Core {
     }
 
     template<Scalar T, unsigned int Dim>
-    template<class RandomGenerator, class ForceModel, class Executor>
-    void MonteCarlo<T, Dim>::nvt_step(RandomGenerator& gen, const ForceModel& forceModel) {
+    template<RandomGenerator R, class ForceModel, class Executor>
+    void MonteCarlo<T, Dim>::nvt_step(, const ForceModel& forceModel) {
         std::uniform_real_distribution<> uniform_dist{};
 
         for (size_t i = 0; i < cell.getNumParticle(); ++i) {
             for (unsigned int j = 0; j < Dim; ++j)
-                buffer(i, j) = cell.getPos()(i, j) + dist(gen);
+                buffer(i, j) = cell.getPos()(i, j) + T::random_uniform<R>();
         }
         cell.swapPos(buffer);
 
@@ -79,7 +79,7 @@ namespace Physica::Core {
         }
         else {
             const T prob = exp((lastEnergy - energy) * repTemperature);
-            const T temp = uniform_dist(gen);
+            const T temp = T::random_uniform<R>();
             if (temp < prob)
                 lastEnergy = energy;
             else

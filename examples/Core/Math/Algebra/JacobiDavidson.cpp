@@ -25,13 +25,13 @@ using namespace Physica::Core;
 using ScalarType = Real<Double>;
 using ComplexType = Complex<ScalarType>;
 using MatrixType = DenseHermiteMatrix<ComplexType>;
+using RandomType = Random<MT19937, std::mt19937::default_seed>;
 
 int main() {
-    auto& gen = Random<MT19937, std::mt19937::default_seed>::getInstance();
-    const auto mat = MatrixType::random_uniform(5000, gen);
+    const auto mat = MatrixType::random_uniform<RandomType>(5000);
 
     JacobiDavidson<ComplexType> jd(mat.getRow(), 4);
-    jd.compute(mat, VectorND<ComplexType>::random_uniform(mat.getRow(), gen));
+    jd.compute(mat, VectorND<ComplexType>::random_uniform<RandomType>(mat.getRow()));
     jd.sort();
 
     std::cout << toRealVector(jd.getEigenvalues()).format() << std::endl;

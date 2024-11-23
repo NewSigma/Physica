@@ -88,14 +88,14 @@ namespace Physica::Core {
         [[nodiscard]] static DenseMatrix zeros(size_t rank) { return DenseMatrix(rank, rank, T(0)); }
         [[nodiscard]] static DenseMatrix zeros(size_t row, size_t col) { return DenseMatrix(row, col, T(0)); }
         [[nodiscard]] static DenseMatrix unitMatrix(size_t order);
-        template<class RandomType>
-        [[nodiscard]] static DenseMatrix random_uniform(size_t order, RandomType& gen) { return random_uniform(order, order, gen); }
-        template<class RandomType>
-        [[nodiscard]] inline static DenseMatrix random_uniform(size_t row, size_t col, RandomType& gen);
-        template<class RandomType>
-        [[nodiscard]] inline static DenseMatrix random_normal(size_t row, size_t col, RandomType& gen);
-        template<class Distribution, class RandomType>
-        [[nodiscard]] inline static DenseMatrix random_any(size_t row, size_t col, Distribution& dist, RandomType& gen);
+        template<RandomGenerator R>
+        [[nodiscard]] static DenseMatrix random_uniform(size_t order) { return random_uniform<R>(order, order); }
+        template<RandomGenerator R>
+        [[nodiscard]] inline static DenseMatrix random_uniform(size_t row, size_t col);
+        template<RandomGenerator R>
+        [[nodiscard]] inline static DenseMatrix random_normal(size_t row, size_t col);
+        template<class Distribution, RandomGenerator R>
+        [[nodiscard]] inline static DenseMatrix random_any(size_t row, size_t col, Distribution& dist);
         template<Vector V>
         [[nodiscard]] static std::pair<DenseMatrix, DenseMatrix> meshgrid(const V& vecInCols, const V& vecInRows);
     private:

@@ -19,6 +19,7 @@
 #include "Functions.h"
 #include "Physica/Core/Math/Calculus/Differential.h"
 #include "Physica/Core/Math/Optimization/ConjugateGradient.h"
+#include "Physica/Core/Math/Calculus/Differential.h"
 
 using namespace Physica::Core;
 

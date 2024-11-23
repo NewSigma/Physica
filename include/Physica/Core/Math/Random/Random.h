@@ -27,6 +27,11 @@ namespace Physica::Core {
     enum RandomOption {
         MT19937
     };
+
+    class RandomBase {};
+
+    template<class T>
+    concept RandomGenerator = std::derived_from<T, RandomBase>;
     /**
      * \class Random provides a general, per-thread, reusable random generator implementation.
      * 
@@ -36,7 +41,7 @@ namespace Physica::Core {
      * making it possible for other parts of the program to check whether the seed is fixed at compiling time.
      */
     template<RandomOption Option, uint64_t FixedSeed = Physica::Dynamic>
-    class PHYSICA_API Random {
+    class PHYSICA_API Random : public RandomBase {
         using This = Random<Option, FixedSeed>;
     public:
         using result_type = uint64_t;
@@ -125,10 +130,8 @@ namespace Physica::Core {
     template<RandomOption Option, uint64_t FixedSeed>
     inline Random<Option, FixedSeed>::SeedType
     Random<Option, FixedSeed>::getThreadSeed() const noexcept {
-        if constexpr (IsSeedFixed) {
-            const auto threadId = ThreadPool::getThreadInfo().id;
-            return seed + threadId;
-        }
+        if constexpr (IsSeedFixed)
+            return ThreadPool::isMainThread() ? seed : (seed + ThreadPool::getThreadInfo().id + 1);
         else
             return seed;
     }

@@ -26,6 +26,7 @@ using namespace Physica::Core;
 using ScalarType = float32;
 using VectorType = VectorND<ScalarType>;
 using DeviceVector = Core::device_obj<VectorType>;
+using RandomType = Random<MT19937, std::mt19937::default_seed>;
 
 __global__ void test_kernel(
         PlainStruct<DeviceVector> a,
@@ -62,9 +63,8 @@ int main() {
     {
         constexpr size_t len = 32;
         const ScalarType factor = 1.4;
-        auto& gen = Random<MT19937, std::mt19937::default_seed>::getInstance();
-        const auto a = VectorType::random_uniform(len, gen);
-        const auto b = VectorType::random_uniform(len, gen);
+        const auto a = VectorType::random_uniform<RandomType>(len);
+        const auto b = VectorType::random_uniform<RandomType>(len);
         const VectorType answer = a + b * factor;
         auto d_a = a.toDevice();
         auto d_b = b.toDevice();

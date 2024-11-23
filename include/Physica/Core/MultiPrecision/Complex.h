@@ -70,10 +70,10 @@ namespace Physica::Core {
         [[nodiscard]] bool isZero() const noexcept { return re.isZero() && im.isZero(); }
         /* Static Members */
         [[nodiscard]] inline static Complex fromPhase(T phase);
-        template<class RandomGenerator>
-        [[nodiscard]] static Complex random_uniform(RandomGenerator& gen);
-        template<class RandomGenerator>
-        [[nodiscard]] static Complex random_normal(RandomGenerator& gen);
+        template<RandomGenerator R>
+        [[nodiscard]] static Complex random_uniform();
+        template<RandomGenerator R>
+        [[nodiscard]] static Complex random_normal();
         [[nodiscard]] static const H5::DataType& getH5DataType();
     };
 

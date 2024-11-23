@@ -21,6 +21,7 @@
 #include "Physica/Core/Math/Random/Random.h"
 
 using namespace Physica::Core;
+using RandomType = Random<MT19937, std::mt19937::default_seed>;
 
 void crossProductTest() {
     using T = float32;
@@ -33,10 +34,9 @@ void crossProductTest() {
 
 void hdfTest() {
 #ifdef PHYSICA_HDF5
-    auto& gen = Random<MT19937, std::mt19937::default_seed>::getInstance();
     /* Real */ {
         using T = float64;
-        const auto data = VectorND<T>::random_uniform(64, gen);
+        const auto data = VectorND<T>::template random_uniform<RandomType>(64);
 
         TempFile tmp("/tmp/tmpXXXXXX");
         {
@@ -53,7 +53,7 @@ void hdfTest() {
     }
     /* Complex */ {
         using T = Complex<float64>;
-        const auto data = VectorND<T>::random_uniform(64, gen);
+        const auto data = VectorND<T>::template random_uniform<RandomType>(64);
 
         TempFile tmp("/tmp/tmpXXXXXX");
         {

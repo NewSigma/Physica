@@ -277,12 +277,12 @@ namespace Physica::Core {
     }
 
     template<Scalar T, size_t Size>
-    template<class RandomType>
-    SIMD<T, Size> SIMD<T, Size>::random_uniform(RandomType& gen) {
+    template<RandomGenerator R>
+    SIMD<T, Size> SIMD<T, Size>::random_uniform() {
         SIMD result{};
         T buffer[Size];
         for (auto& elem : buffer)
-            elem = T::random_uniform(gen);
+            elem = T::template random_uniform<R>();
         result.load(buffer);
         return result;
     }

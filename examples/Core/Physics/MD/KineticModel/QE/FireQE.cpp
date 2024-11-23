@@ -81,10 +81,9 @@ MDCell<ScalarType> makeSystem() {
     //for (size_t i = 1; i < cell1.getNumParticle(); ++i)
     //    cell1.setMass(i, cell1.getMass(0)); // Set all mass equal to mass H is vital to performance
     pos = cell1.getPos();
-    auto& gen = RandomType::getInstance().getGen();
     std::normal_distribution<double> dist(0, 0.5);
     for (auto& elem : pos.asArray())
-        elem += ScalarType::random_any(dist, gen); //Perturbation
+        elem += ScalarType::random_any<decltype(dist), RandomType>(dist); //Perturbation
     cell1.setPos(pos);
     return cell1;
 }

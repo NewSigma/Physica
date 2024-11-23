@@ -24,8 +24,7 @@
 #include "Physica/Core/Parallel/Executor/ThreadExecutor.h"
 
 using namespace Physica::Core;
-using RandomGenerator = std::mt19937;
-using RandomType = Random<RandomGenerator, 3438603950906262893>;
+using RandomType = Random<MT19937, 3438603950906262893>;
 using ScalarType = float64;
 using KineticModel = FreeModel<ScalarType, 3, Physica::Dynamic, RPMDIntegrator::Exact>;
 constexpr size_t numReplica = 24;
@@ -37,13 +36,10 @@ constexpr double pair_cutoff = 15;
 constexpr double molarVolume = 31.7;
 constexpr double mass = PhyConst<AU>::atomMass(1) * 2;
 
-RPMD<ScalarType> makeSystem(RandomGenerator& gen) {
+RPMD<ScalarType> makeSystem() {
     using MDCellType = RPMD<ScalarType>::MDCellType;
     MDCellType::LatticeMatrix lattice = MDCellType::LatticeMatrix::unitMatrix(3);
-    MDCellType::PositionMatrix pos(numMolecular, 3);
-    std::uniform_real_distribution dist{};
-    for (auto& elem : pos.asArray())
-        elem = dist(gen);
+    auto pos = MDCellType::PositionMatrix::random_uniform<RandomType>(numMolecular, 3);
     MDCellType::MassVector massVec(numMolecular, mass);
     MDCellType cell(std::move(lattice), std::move(pos), std::move(massVec));
 
@@ -54,9 +50,8 @@ RPMD<ScalarType> makeSystem(RandomGenerator& gen) {
 }
 
 bool testDriftMomentum(double precision) {
-    auto& gen = RandomType::getInstance().getGen();
-    auto rpmd = makeSystem(gen);
-    rpmd.initMomentum<KineticModel, decltype(gen)>(gen);
+    auto rpmd = makeSystem();
+    rpmd.initMomentum<KineticModel, RandomType>();
     for (int i = 0; i < 3; ++i) {
         ScalarType sum = 0;
         for (size_t j = i; j < rpmd.getDOF(); j += 3)
@@ -70,9 +65,8 @@ bool testDriftMomentum(double precision) {
 bool testCalcKinetic(double precision) {
     using ForceModel = SilveraGoldman<ScalarType, true, false>;
 
-    auto& gen = RandomType::getInstance().getGen();
-    auto rpmd = makeSystem(gen);
-    rpmd.initMomentum<KineticModel, decltype(gen)>(gen);
+    auto rpmd = makeSystem();
+    rpmd.initMomentum<KineticModel, RandomType>();
     ForceModel forceModel(pair_cutoff);
     rpmd.updateForce<ForceModel, ThreadExecutor>(forceModel);
 
@@ -96,21 +90,16 @@ void testMDRun() {
         KineticModel kineticModel(temperatureT, numReplica);
         ForceModel forceModel(pair_cutoff);
         auto& pool = RandomType::getInstance();
-        auto& gen = pool.getGen();
-        auto rpmd = makeSystem(gen);
-        rpmd.initMomentum<KineticModel, decltype(gen)>(gen);
+        auto rpmd = makeSystem();
+        rpmd.initMomentum<KineticModel, RandomType>();
 
         for (unsigned int i = 0; i < 6; ++i) {
             ScalarType temp = 0;
             rpmd.nvt_step_for<ThermoType, RandomType, KineticModel, ForceModel, ThreadExecutor>(
-                PhyConst<AU>::secondToTime(2 * 1E-12),
-                thermo,
-                pool,
-                kineticModel,
-                forceModel);
+                PhyConst<AU>::secondToTime(2 * 1E-12), thermo, kineticModel, forceModel);
 
             for (unsigned int j = 0; j < 100; ++j) {
-                rpmd.nvt_step<ThermoType, RandomType, KineticModel, ForceModel, ThreadExecutor>(thermo, pool, kineticModel, forceModel);
+                rpmd.nvt_step<ThermoType, RandomType, KineticModel, ForceModel, ThreadExecutor>(thermo, kineticModel, forceModel);
                 toNextMean(temp, j, rpmd.calcKinetic<KineticModel>());
             }
             toNextVariance(var, mean, i, temp);

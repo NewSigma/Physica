@@ -17,10 +17,7 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include <iostream>
-#include <fstream>
 #include "Physica/Core/Physics/MD/RPMD.h"
-#include "Physica/Core/Physics/MD/Thermostat/TRPMDThermo.h"
-#include "Physica/Core/Physics/MD/KineticModel/FreeModel.h"
 #include "Physica/Core/Physics/MD/ForceModel/SilveraGoldman.cuh"
 #include "Physica/Core/Parallel/Executor/CUDAExecutor.cuh"
 #include "Physica/Core/Math/Random/Random.h"
@@ -29,7 +26,7 @@ using namespace Physica::Core;
 using ScalarType = float32;
 using HostForceModel = SilveraGoldman<ScalarType, true, true>;
 using DeviceForceModel = device_obj<HostForceModel>;
-using RandomType = Random<MT19937, 10000>;
+using RandomType = Random<MT19937, 15522090741289029828UL>;
 constexpr size_t numReplica = 24;
 constexpr double temperatureT = PhyConst<AU>::kToTemperature(25);
 constexpr double timeStep = PhyConst<AU>::secondToTime(1E-15) * 0.5;
@@ -37,14 +34,10 @@ constexpr double pair_cutoff = 15;
 constexpr double molarVolume = 31.7;
 constexpr double mass = PhyConst<AU>::atomMass(1) * 2;
 
-template<class RandomGenerator>
-RPMD<ScalarType> makeSystem(size_t numMolecular, RandomGenerator& gen) {
+RPMD<ScalarType> makeSystem(size_t numMolecular) {
     using MDCellType = RPMD<ScalarType>::MDCellType;
     MDCellType::LatticeMatrix lattice = MDCellType::LatticeMatrix::unitMatrix(3);
-    MDCellType::PositionMatrix pos(numMolecular, 3);
-    std::uniform_real_distribution dist{};
-    for (auto& elem : pos.asArray())
-        elem = dist(gen);
+    auto pos = MDCellType::PositionMatrix::random_uniform<RandomType>(numMolecular, 3);
     MDCellType::MassVector massVec(numMolecular, mass);
     MDCellType cell(std::move(lattice), std::move(pos), std::move(massVec));
 
@@ -58,11 +51,10 @@ RPMD<ScalarType> makeSystem(size_t numMolecular, RandomGenerator& gen) {
  * [1] Miller TF, Manolopoulos DE. 2005. Quantum diffusion in liquid para-hydrogen from ring polymer molecular dynamics. J. Chem. Phys. 122:184503
  */
 int main() {
-    auto& gen = RandomType::getInstance().getGen();
     HostForceModel hostModel(pair_cutoff);
     for (size_t numMolecular : {108, 160}) {
         DeviceForceModel deviceModel(numMolecular, pair_cutoff);
-        RPMD<ScalarType> rpmd = makeSystem(numMolecular, gen);
+        RPMD<ScalarType> rpmd = makeSystem(numMolecular);
         const auto f0 = hostModel.template force<SequentialExecutor>(rpmd.phaseToCell(0));
         const auto f1 = deviceModel.template force<CUDAExecutor>(rpmd.phaseToCell(0));
         if (!vectorNear(f0, f1, 1E-3))
@@ -71,7 +63,7 @@ int main() {
     {
         constexpr unsigned int numMolecular = 108;
         DeviceForceModel deviceModel(numMolecular, pair_cutoff);
-        RPMD<ScalarType> rpmd = makeSystem(numMolecular, gen);
+        RPMD<ScalarType> rpmd = makeSystem(numMolecular);
         const auto f0 = hostModel.template force<SequentialExecutor>(rpmd.phaseToCell(0));
         const auto f1 = deviceModel.template force<CUDAExecutor>(rpmd.phaseToCell(0));
         if (!vectorNear(f0, f1, 1E-4))

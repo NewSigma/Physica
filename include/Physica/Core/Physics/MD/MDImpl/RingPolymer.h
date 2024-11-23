@@ -47,7 +47,7 @@ namespace Physica::Core {
         /* Operators */
         RingPolymer& operator=(RingPolymer obj) noexcept;
         /* Operations */
-        template<class KineticModel, class RandomGenerator> void initMomentum(T temperatureT, RandomGenerator& gen);
+        template<class KineticModel, RandomGenerator R> void initMomentum(T temperatureT);
         template<class KineticModel> void scaleVelocity(T temperatureT);
         [[nodiscard]] DenseVector<T, Dim> makeDriftMomentum() const;
         void removeDrift();
@@ -122,8 +122,8 @@ namespace Physica::Core {
     }
 
     template<Scalar T, unsigned int Dim, size_t NumReplica>
-    template<class KineticModel, class RandomGenerator>
-    void RingPolymer<T, Dim, NumReplica>::initMomentum(T temperatureT, RandomGenerator& gen) {
+    template<class KineticModel, RandomGenerator R>
+    void RingPolymer<T, Dim, NumReplica>::initMomentum(T temperatureT) {
         const size_t dof = getDOF();
         [[unlikely]] if (temperatureT.isZero()) {
             auto momentum = phase.topRows(dof);
@@ -131,7 +131,6 @@ namespace Physica::Core {
             return;
         }
 
-        std::normal_distribution<> dist{};
         const T repBeta = calcRepBeta(temperatureT);
         DenseVector<T, Dim> driftMomentum(Dim, 0);
         for (size_t i = 0; i < dof; ++i) {
@@ -139,7 +138,7 @@ namespace Physica::Core {
             const size_t direction = i % Dim;
             const T factor = sqrt(repBeta * mass);
             for (size_t j = 0; j < getNumReplica(); ++j) {
-                const T temp = factor * ValueType(dist(gen));
+                const T temp = factor * ValueType::template random_normal<R>();
                 phase(i, j) = temp;
                 driftMomentum[direction] += temp;
             }

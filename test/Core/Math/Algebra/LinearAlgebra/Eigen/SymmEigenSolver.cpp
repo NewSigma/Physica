@@ -21,6 +21,7 @@
 #include "Physica/Core/Math/Random/Random.h"
 
 using namespace Physica::Core;
+using RandomType = Random<MT19937, std::mt19937::default_seed>;
 
 template<Matrix T>
 bool eigenTest(const T& mat, double precision) {
@@ -65,7 +66,7 @@ int main() {
     }
     {
         using MatrixType = DenseSymmMatrix<float64>;
-        const auto mat = MatrixType::random_uniform(8, Random<MT19937, std::mt19937::default_seed>::getInstance());
+        const auto mat = MatrixType::random_uniform<RandomType>(8);
         if (!eigenTest(mat, 1E-14))
             return 1;
     }

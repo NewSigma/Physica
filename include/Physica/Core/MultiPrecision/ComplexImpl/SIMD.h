@@ -90,8 +90,8 @@ namespace Physica::Core {
         [[nodiscard]] inline RealType real() const noexcept;
         [[nodiscard]] inline RealType imag() const noexcept;
         /* Static members */
-        template<class RandomType>
-        [[nodiscard]] static SIMD random_uniform(RandomType& gen) { return asComplex(Base::random_uniform(gen)); }
+        template<RandomGenerator R>
+        [[nodiscard]] static SIMD random_uniform() { return asComplex(Base::template random_uniform<R>()); }
         [[nodiscard]] static SIMD asComplex(AsRealRtnTy reals);
     };
 }

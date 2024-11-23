@@ -74,14 +74,14 @@ namespace Physica::Core {
         [[nodiscard]] __host__ __device__ ConstPtrTy data_ptr(size_t index) const { return data() + index; }
         /* Static members */
         [[nodiscard]] static This zeros(size_t len);
-        template<class RandomGenerator>
-        [[nodiscard]] static This random_uniform(size_t len, RandomGenerator& gen);
-        template<class RandomGenerator>
-        [[nodiscard]] static This random_uniform(const This& v1, const This& v2, RandomGenerator& gen);
-        template<class RandomGenerator>
-        [[nodiscard]] static This random_normal(size_t len, RandomGenerator& gen);
-        template<class Distribution, class RandomGenerator>
-        [[nodiscard]] static This random_any(size_t len, Distribution& dist, RandomGenerator& gen);
+        template<RandomGenerator R>
+        [[nodiscard]] static This random_uniform(size_t len);
+        template<RandomGenerator R>
+        [[nodiscard]] static This random_uniform(const This& v1, const This& v2);
+        template<RandomGenerator R>
+        [[nodiscard]] static This random_normal(size_t len);
+        template<class Distribution, RandomGenerator R>
+        [[nodiscard]] static This random_any(size_t len, Distribution& dist);
         [[nodiscard]] static This linspace(T from, T to, size_t count);
     };
 

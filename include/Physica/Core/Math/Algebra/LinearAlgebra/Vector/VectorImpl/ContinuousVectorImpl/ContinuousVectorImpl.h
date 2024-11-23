@@ -222,63 +222,65 @@ namespace Physica::Core {
     }
 
     template<class Derived>
-    template<class RandomGenerator>
-    inline void ContinuousVector<Derived>::random_uniform(RandomGenerator& gen) {
+    template<RandomGenerator R>
+    inline void ContinuousVector<Derived>::random_uniform() {
         if constexpr (isReverseDiff) {
             using TracerType = ScalarType::TracerType;
             const size_t length = Base::getLength();
             TracerType::getInstance().reserve(length);
             for (size_t i = 0; i < length; ++i)
-                this->operator[](i) = ScalarType::random_uniform(gen);
+                this->operator[](i) = ScalarType::template random_uniform<R>();
         }
         else if constexpr (HasMKL()) {
             [[maybe_unused]] const size_t length = Base::getLength() * (Base::isComplex ? 2 : 1) * (Base::isForwardDiff ? 2 : 1);
+            [[maybe_unused]] auto& gen = R::getInstance();
             if constexpr (ScalarType::Option == Float32)
                 vslCheck(vsRngUniform(VSL_RNG_METHOD_UNIFORM_STD, gen, length, (float*)data(), 0, 1));
             else if constexpr (ScalarType::Option == Float64)
                 vslCheck(vdRngUniform(VSL_RNG_METHOD_UNIFORM_STD, gen, length, (double*)data(), 0, 1));
             else
-                Base::random_uniform(gen);
+                Base::template random_uniform<R>();
         }
         else
-            Base::random_uniform(gen);
+            Base::template random_uniform<R>();
     }
 
     template<class Derived>
-    template<class RandomGenerator>
-    inline void ContinuousVector<Derived>::random_normal(RandomGenerator& gen) {
+    template<RandomGenerator R>
+    inline void ContinuousVector<Derived>::random_normal() {
         if constexpr (isReverseDiff) {
             using TracerType = ScalarType::TracerType;
             const size_t length = Base::getLength();
             TracerType::getInstance().reserve(length);
             for (size_t i = 0; i < length; ++i)
-                this->operator[](i) = ScalarType::random_normal(gen);
+                this->operator[](i) = ScalarType::template random_normal<R>();
         }
         else if constexpr (HasMKL() && !isForwardDiff) {
             [[maybe_unused]] const size_t length = Base::getLength() * (Base::isComplex ? 2 : 1);
+            [[maybe_unused]] auto& gen = R::getInstance();
             if constexpr (ScalarType::Option == Float32)
                 vslCheck(vsRngGaussian(VSL_RNG_METHOD_GAUSSIAN_BOXMULLER2, gen, length, (float*)data(), 0, 1));
             else if constexpr (ScalarType::Option == Float64)
                 vslCheck(vdRngGaussian(VSL_RNG_METHOD_GAUSSIAN_BOXMULLER2, gen, length, (double*)data(), 0, 1));
             else
-                Base::random_normal(gen);
+                Base::template random_normal<R>();
         }
         else
-            Base::random_normal(gen);
+            Base::template random_normal<R>();
     }
 
     template<class Derived>
-    template<class Distribution, class RandomGenerator>
-    inline void ContinuousVector<Derived>::random_any(Distribution& dist, RandomGenerator& gen) {
+    template<class Distribution, RandomGenerator R>
+    inline void ContinuousVector<Derived>::random_any(Distribution& dist) {
         if constexpr (isReverseDiff) {
             using TracerType = ScalarType::TracerType;
             const size_t length = Base::getLength();
             TracerType::getInstance().reserve(length);
             for (size_t i = 0; i < length; ++i)
-                this->operator[](i) = ScalarType::random_any(dist, gen);
+                this->operator[](i) = ScalarType::template random_any<decltype(dist), R>(dist);
         }
         else
-            Base::random_any(dist, gen);
+            Base::random_any(dist);
     }
 #ifdef PHYSICA_HDF5
     template<class Derived>

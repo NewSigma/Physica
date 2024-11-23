@@ -26,7 +26,7 @@ using namespace Physica::Core;
 
 namespace Physica {
     class Test {
-        using RandomGenerator = std::mt19937;
+        using RandomType = Random<MT19937>;
         using ValueType = float64;
         using ScalarType = Diff<ValueType, DiffMode::Reverse, 1>;
         using MDCellType = MDCell<ScalarType>;
@@ -41,8 +41,7 @@ namespace Physica {
             const ScalarType volume = 125;
             const unsigned int cellSize = 3;
             const AutoDiffGuard<ScalarType> guard{};
-            RandomGenerator gen{};
-            auto cell = makeSystem(cellSize, volume, gen);
+            auto cell = makeSystem(cellSize, volume);
             ForceModel forceModel(cell, pair_cutoff, Ewald<ScalarType>{});
             {
                 const AutoDiffGuard<ScalarType> guard1{};
@@ -60,17 +59,17 @@ namespace Physica {
          * Reference:
          * [1] mp-7000; https://doi.org/10.17188/1272685
          */
-        static Vector3D<ScalarType> randomVector(ScalarType latticeConst, RandomGenerator& gen) {
+        static Vector3D<ScalarType> randomVector(ScalarType latticeConst) {
             constexpr double equalR = PhyConst<AU>::angstormToBohr(1.62844); // Bond length of Si-O, refer to [1]
             std::uniform_real_distribution dist{};
-            const ScalarType theta(dist(gen) * M_PI);
-            const ScalarType phi(dist(gen) * M_PI * 2);
+            const auto theta = ScalarType::random_uniform<RandomType>() * ScalarType(M_PI);
+            const auto phi = ScalarType::random_uniform<RandomType>() * ScalarType(M_PI * 2);
             Vector3D<ScalarType> result{cos(phi) * sin(theta), sin(phi) * sin(theta), cos(theta)};
             result *= ScalarType(equalR / double(latticeConst.getValue())) * latticeConst; // Pass grad to latticeConst while keep O-H bond length unchanged
             return result;
         }
 
-        static MDCell<ScalarType> makeSystem(unsigned int cellSize, ScalarType cellVolume, RandomGenerator& gen) {
+        static MDCell<ScalarType> makeSystem(unsigned int cellSize, ScalarType cellVolume) {
             using CrystalCellType = CrystalCell<ScalarType>;
             constexpr size_t maxIndexO = MoleculePerCell * 2;
             constexpr size_t maxIndexSi = MoleculePerCell * 3;
@@ -83,7 +82,7 @@ namespace Physica {
             CrystalCellType::PositionMatrix pos(numAtom, 3);
             std::uniform_real_distribution dist(-0.1, 0.1);
             for (size_t i = 0; i < MoleculePerCell; ++i) {
-                auto temp = Vector3D<ScalarType>::random_any(3, dist, gen);
+                auto temp = Vector3D<ScalarType>::template random_any<decltype(dist), RandomType>(3, dist);
                 if (i == 0) {
                     temp[0] += ScalarType(0.25);
                     temp[1] += ScalarType(0.25);
@@ -111,8 +110,8 @@ namespace Physica {
                 auto posO1 = pos.row(2 * i);
                 auto posO2 = pos.row(2 * i + 1);
                 posSi = temp;
-                posO1 = temp + randomVector(latticeConst, gen);
-                posO2 = temp + randomVector(latticeConst, gen);
+                posO1 = temp + randomVector(latticeConst);
+                posO2 = temp + randomVector(latticeConst);
             }
 
             CrystalCellType::AtomicArray atomicNumbers(numAtom);

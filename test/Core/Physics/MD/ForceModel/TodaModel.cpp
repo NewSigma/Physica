@@ -29,13 +29,12 @@ constexpr double latticeSize = 20;
 constexpr size_t numMolecular = 20;
 constexpr double unitMassM = 1;
 
-MDCellType makeSystem(std::mt19937& gen) {
+MDCellType makeSystem() {
     MDCellType::LatticeMatrix lattice{latticeSize};
 
     std::uniform_real_distribution dist{};
-    VectorND<ScalarType> posVec(numMolecular);
-    for (auto& elem : posVec)
-        elem = dist(gen) * latticeSize;
+    auto posVec = VectorND<ScalarType>::random_uniform<RandomType>(numMolecular);
+    posVec *= ScalarType(latticeSize);
     std::sort(posVec.begin(), posVec.end());
     MDCellType::PositionMatrix pos(numMolecular, 1);
     pos.col(0) = posVec;
@@ -51,7 +50,7 @@ template<bool IsPeriodBoundary>
 void forceConstTest() {
     using ForceModel = TodaModel<ScalarType, IsPeriodBoundary>;
     ForceModel model(1.0);
-    const auto cell = makeSystem(RandomType::getInstance().getGen());
+    const auto cell = makeSystem();
     const auto fc = model.forceConst(cell);
     if constexpr (IsPeriodBoundary) {
         for (size_t i = 0; i < fc.getRow(); ++i)

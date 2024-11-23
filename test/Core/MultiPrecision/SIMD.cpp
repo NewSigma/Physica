@@ -24,7 +24,7 @@ using namespace Physica::Core;
 using RandomType = Random<MT19937, 10000>;
 
 int main() {
-    const auto x = SIMD<cfloat32, 2>::random_uniform(RandomType::getInstance());
+    const auto x = SIMD<cfloat32, 2>::random_uniform<RandomType>();
     const auto result = sqrt(x);
     for (int i = 0; i < 2; ++i) {
         if (!scalarNear(result[i], sqrt(x[i]), 1E-7))

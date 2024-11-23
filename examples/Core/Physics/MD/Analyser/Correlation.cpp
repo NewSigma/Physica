@@ -110,10 +110,8 @@ int main(int argc, char** argv) {
         std::mutex mutex{};
         size_t sys = 0;
         ThreadExecutor::parallel_for([&](unsigned int) {
-            auto& pool = RandomType::getInstance();
             auto rpmd = MDType(makeSystem(), numReplica, numReplica, temperatureT, timeStep);
-            auto& gen = pool.getGen();
-            rpmd.initMomentum<KineticModel, decltype(gen)>(gen);
+            rpmd.initMomentum<KineticModel, RandomType>();
 
             ForceModel forceModel{};
             KineticModel kineticModel(temperatureT, numReplica);
@@ -124,12 +122,12 @@ int main(int argc, char** argv) {
             VectorType corr_dir_sample(numStep, 0);
             for (size_t sample = 0; sample < numSample; ++sample) {
                 rpmd.nvt_step_for<ThermoType, RandomType, KineticModel, ForceModel, SequentialExecutor>(
-                        PhyConst<AU>::secondToTime(2 * 1E-12), thermo, pool, kineticModel, forceModel);
+                        PhyConst<AU>::secondToTime(2 * 1E-12), thermo, kineticModel, forceModel);
                 const ScalarType p0 = ringPolymer.makeCentroidMomentum()(0, 0);
                 for (unsigned int step = 0; step < numStep; ++step) {
                     const ScalarType p1 = ringPolymer.makeCentroidMomentum()(0, 0);
                     rpmd.nvt_step<ThermoType, RandomType, KineticModel, ForceModel, SequentialExecutor>(
-                            thermo, pool, kineticModel, forceModel);
+                            thermo, kineticModel, forceModel);
                     sampler.sample(p1);
                     toNextMean(corr_dir_sample[step], sample, p0 * p1);
                 }

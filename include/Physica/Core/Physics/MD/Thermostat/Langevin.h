@@ -44,8 +44,8 @@ namespace Physica::Core {
         /* Operators */
         Langevin& operator=(Langevin obj) noexcept;
         /* Operations */
-        template<class RandomType, class Executor>
-        void step(RingPolymerType& ringPolymer, T deltaT, RandomType& pool) const;
+        template<RandomGenerator R, class Executor>
+        void step(RingPolymerType& ringPolymer, T deltaT) const;
         void swap(Langevin& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] bool isRemoveDriftEnabled() const noexcept { return removeDrift; }
@@ -76,9 +76,8 @@ namespace Physica::Core {
     }
 
     template<Scalar T, unsigned int Dim, size_t NumReplica>
-    template<class RandomType, class Executor>
-    void Langevin<T, Dim, NumReplica>::step(
-            RingPolymerType& ringPolymer, T deltaT, RandomType& pool) const {
+    template<RandomGenerator R, class Executor>
+    void Langevin<T, Dim, NumReplica>::step(RingPolymerType& ringPolymer, T deltaT) const {
         const size_t dof = ringPolymer.getDOF();
         const T repBeta = ringPolymer.calcRepBeta(temperatureT);
         const T momentumViscosityY = Core::reciprocal(thermostatTime);
@@ -86,7 +85,7 @@ namespace Physica::Core {
         if constexpr (NumReplica != 1) {
             const T omegaW = ringPolymer.calcOmegaW(temperatureT);
             auto future = Executor::parallel_for(
-                [deltaT, repBeta, omegaW, momentumViscosityY, &ringPolymer, &massVec, &pool](unsigned int i) {
+                [deltaT, repBeta, omegaW, momentumViscosityY, &ringPolymer, &massVec](unsigned int i) {
                     const size_t numReplica = ringPolymer.getNumReplica();
                     const auto mass = massVec[i / Dim];
                     const T factor = sqrt(repBeta * mass);
@@ -94,7 +93,7 @@ namespace Physica::Core {
                     BufferType buffer(2, ringPolymer.getKSpaceSize());
 
                     ringPolymer.toNormalRepr(i, ringPolymer.asMatrix(), buffer, fft);
-                    fft.getRSpace().random_normal(pool);
+                    fft.getRSpace().template random_normal<R>();
                     FFT<T, 1>::transform(ringPolymer.getFFT(), fft);
                     /* Translational mode */ {
                         langevinImpl(buffer(0, 0), deltaT, momentumViscosityY, factor, fft.getKSpace()[0]);
@@ -112,7 +111,7 @@ namespace Physica::Core {
             for (size_t i = 0; i < dof; ++i) {
                 const auto mass = massVec[i / Dim];
                 const T factor = sqrt(repBeta * mass);
-                langevinImpl(ringPolymer.asMatrix()(i, 0), deltaT, momentumViscosityY, factor, T::random_normal(pool));
+                langevinImpl(ringPolymer.asMatrix()(i, 0), deltaT, momentumViscosityY, factor, T::template random_normal<R>());
             }
         }
 

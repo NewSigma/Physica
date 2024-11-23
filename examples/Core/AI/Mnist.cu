@@ -54,10 +54,10 @@ namespace Physica::Core {
         device_obj<LinearLayer<T, false>> layer2;
     public:
         device_obj() = default;
-        template<class RandomType>
-        device_obj(size_t width1, RandomType& gen)
-                : layer1(decltype(layer1)::random_xavier_normal(Mnist::NumPixelInImage, width1, 1, gen))
-                , layer2(decltype(layer2)::random_xavier_normal(width1, 10, 1, gen)) {}
+        template<RandomGenerator R>
+        device_obj(size_t width1)
+                : layer1(decltype(layer1)::random_xavier_normal<R>(Mnist::NumPixelInImage, width1, 1))
+                , layer2(decltype(layer2)::random_xavier_normal<R>(width1, 10, 1)) {}
         template<Scalar U>
         device_obj(const device_obj<MnistNet<U>>& net) : layer1(net.getLayer1()), layer2(net.getLayer2()) {}
         device_obj(const This& other) = default;
@@ -120,31 +120,29 @@ using ScalarType = Diff<ValueType, DiffMode::Reverse, 1>;
 using DeviceVector = device_obj<Diff<VectorND<ValueType>, DiffMode::Reverse, 1>>;
 using Dataset = Mnist::DatasetType<DeviceVector>;
 using Optimizer = SGD<device_obj<ScalarType>>;
-using RandomGenerator = std::mt19937;
 using RandomType = Random<MT19937>;
 constexpr size_t numEpoch = 10;
 constexpr size_t batchSize = 64;
 constexpr double learnRate = 0.05;
 
-std::pair<Dataset, Dataset> makeDataset(RandomGenerator& gen) {
+std::pair<Dataset, Dataset> makeDataset() {
     const Mnist mnist("/home/sigma/Documents/data");
     auto dataset = mnist.makeTrainDataset<VectorND<ValueType>>();
     for (size_t i = 0; i < dataset.getSize(); ++i) {
         auto& sample = dataset.getSamples()[i];
         sample = sample * ValueType(1.0 / 128) - ValueType(1);
     }
-    return dataset.randomSplit(54000, gen);
+    return dataset.template randomSplit<RandomType>(54000);
 }
 
 int main(int argc, char** argv) {
     ThreadPool::numThreadRequired = 4;
-    auto& gen = RandomType::getInstance().getGen();
-    const auto dataset = makeDataset(gen);
+    const auto dataset = makeDataset();
     const size_t itePerEpoch = (dataset.first.getSize() + batchSize - 1) / batchSize;
 
     auto opt = Optimizer(learnRate, batchSize);
     opt.recordBegin();
-    auto nn = device_obj<MnistNet<ScalarType>>(32, gen);
+    auto nn = device_obj<MnistNet<ScalarType>>(32);
     opt.recordEnd();
 
     VectorND<ValueType> loss_train(numEpoch), loss_valid(numEpoch), acc_train(numEpoch), acc_valid(numEpoch);

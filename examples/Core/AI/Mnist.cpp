@@ -47,19 +47,19 @@ private:
     LinearLayer<T, false> layer2;
 public:
     MnistNet() = default;
-    template<class RandomType>
-    MnistNet(size_t width1, RandomType& gen)
+    template<RandomGenerator R>
+    MnistNet(size_t width1, R&)
             : layer1(Mnist::NumPixelInImage, width1)
             , layer2(width1, 10) {
         //auto dist = std::normal_distribution<float>(0, 0.01);
-        //layer1.random_any(dist, gen);
-        //layer2.random_any(dist, gen);
+        //layer1.template random_any<R>(dist);
+        //layer2.template random_any<R>(dist);
 
-        //layer1.random_xavier_uniform(1, gen);
-        //layer2.random_xavier_uniform(1, gen);
+        //layer1.template random_xavier_uniform<R>(1);
+        //layer2.template random_xavier_uniform<R>(1);
 
-        layer1.random_xavier_normal(1, gen);
-        layer2.random_xavier_normal(1, gen);
+        layer1.template random_xavier_normal<R>(1);
+        layer2.template random_xavier_normal<R>(1);
     }
     template<Scalar U>
     MnistNet(const MnistNet<U>& net) : layer1(net.layer1), layer2(net.layer2) {}
@@ -115,32 +115,31 @@ using ValueType = float32;
 using ScalarType = Diff<ValueType, DiffMode::Reverse>;
 using Dataset = Mnist::DatasetType<VectorND<ValueType>>;
 using Optimizer = MomentumSGD<ScalarType>;
-using RandomGenerator = std::mt19937;
 using RandomType = Random<MT19937>;
 constexpr size_t numEpoch = 10;
 constexpr size_t batchSize = 64;
 constexpr double momentum = 0.5;
 constexpr double learnRate = 0.05;
 
-std::pair<Dataset, Dataset> makeDataset(RandomGenerator& gen) {
+std::pair<Dataset, Dataset> makeDataset() {
     const Mnist mnist("/home/sigma/Documents/data");
     auto dataset = mnist.makeTrainDataset<VectorND<ValueType>>();
     for (size_t i = 0; i < dataset.getSize(); ++i) {
         auto& sample = dataset.getSamples()[i];
         sample = sample * ValueType(1.0 / 128) - ValueType(1);
     }
-    return dataset.randomSplit(54000, gen);
+    return dataset.randomSplit<RandomType>(54000);
 }
 
 int main(int argc, char** argv) {
     ThreadPool::numThreadRequired = 4;
-    auto& gen = RandomType::getInstance().getGen();
-    const auto dataset = makeDataset(gen);
+    const auto dataset = makeDataset();
     const size_t itePerEpoch = (dataset.first.getSize() + batchSize - 1) / batchSize;
 
     auto opt = Optimizer(momentum, learnRate, batchSize);
     opt.recordBegin();
-    auto nn = MnistNet<ScalarType>(32, gen);
+    using NetType = MnistNet<ScalarType>;
+    auto nn = NetType(32, RandomType::getInstance());
     opt.recordEnd();
 
     VectorND<ValueType> loss_train(numEpoch), loss_valid(numEpoch), acc_train(numEpoch), acc_valid(numEpoch);

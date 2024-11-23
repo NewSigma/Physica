@@ -47,8 +47,8 @@ namespace Physica::Core {
         /* Operations */
         inline void reserve(size_t size);
         inline void append(DataType data);
-        template<class RandomType>
-        SplitResultType randomSplit(size_t firstSize, RandomType& gen) const;
+        template<RandomGenerator R>
+        SplitResultType randomSplit(size_t firstSize) const;
         void swap(SimpleDataset& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] SampleArray& getSamples() noexcept { return samples; }
@@ -97,9 +97,9 @@ namespace Physica::Core {
     }
 
     template<class SampleType, class LabelType>
-    template<class RandomType>
+    template<RandomGenerator R>
     SimpleDataset<SampleType, LabelType>::SplitResultType
-    SimpleDataset<SampleType, LabelType>::randomSplit(size_t firstSize, RandomType& gen) const {
+    SimpleDataset<SampleType, LabelType>::randomSplit(size_t firstSize) const {
         assert(firstSize > 0 && "[Error]: Spliting a zero size dataset does nothing");
         assert(firstSize < getSize() && "[Error]: Split a dataset whose size is larger than original");
         const size_t secondSize = getSize() - firstSize;
@@ -116,7 +116,7 @@ namespace Physica::Core {
 
         for (size_t i = 0; i < smallSize; ++i) {
             std::uniform_int_distribution<size_t> dist(i, getSize() - 1);
-            const size_t j = dist(gen);
+            const size_t j = dist(R::getInstance());
             std::swap(permutation[i], permutation[j]);
             small.append((*this)[j]);
         }

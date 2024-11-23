@@ -21,11 +21,10 @@
 using namespace Physica::Core;
 using ScalarType = float64;
 using MatrixType = Diff<DenseMatrix<ScalarType>, DiffMode::Reverse, 1>;
-using RandomGenerator = std::mt19937;
+using RandomType = Random<MT19937>;
 
 int main() {
-    RandomGenerator gen{};
-    MatrixType m = MatrixType::random_uniform(4, 4, gen);
+    MatrixType m = MatrixType::random_uniform<RandomType>(4, 4);
     auto sum = m.sum();
     sum.reverse();
     auto v = m.flatten();

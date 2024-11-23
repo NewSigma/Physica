@@ -30,8 +30,7 @@ using ForceModel = device_obj<SilveraGoldman<ScalarType, true>>;
 using KineticModel = FreeModel<ScalarType, 3, Dynamic, RPMDIntegrator::Exact>;
 using ThermoType = DoubleThermo<KineticModel>;
 using MDType = RPMD<ScalarType, 3, Physica::Dynamic, PageLockedAllocator<ScalarType>>;
-using RandomGenerator = std::mt19937;
-using RandomType = Random<RandomGenerator, 3438603950906262893>;
+using RandomType = Random<MT19937, 3438603950906262893>;
 constexpr size_t numReplica = 24;
 constexpr double temperatureT = PhyConst<AU>::kToTemperature(25);
 constexpr double thermostatTime = PhyConst<AU>::secondToTime(100 * 1E-15);
@@ -41,13 +40,10 @@ constexpr double pair_cutoff = 15;
 constexpr double molarVolume = 31.7;
 constexpr double mass = PhyConst<AU>::atomMass(1) * 2;
 
-MDType makeSystem(RandomGenerator& gen) {
+MDType makeSystem() {
     using MDCellType = MDType::MDCellType;
     MDCellType::LatticeMatrix lattice = MDCellType::LatticeMatrix::unitMatrix(3);
-    MDCellType::PositionMatrix pos(numMolecular, 3);
-    std::uniform_real_distribution dist{};
-    for (auto& elem : pos.asArray())
-        elem = dist(gen);
+    auto pos = MDCellType::PositionMatrix::random_uniform<RandomType>(numMolecular, 3);
     MDCellType::MassVector massVec(numMolecular, mass);
     MDCellType cell(std::move(lattice), std::move(pos), std::move(massVec));
 
@@ -67,22 +63,19 @@ void testMDRun() {
         const ThermoType thermo(temperatureT, thermostatTime);
         KineticModel kineticModel(temperatureT, numReplica);
         ForceModel forceModel(numMolecular, pair_cutoff);
-        auto& pool = RandomType::getInstance();
-        auto& gen = pool.getGen();
-        auto rpmd = makeSystem(gen);
-        rpmd.initMomentum<KineticModel, decltype(gen)>(gen);
+        auto rpmd = makeSystem();
+        rpmd.initMomentum<KineticModel, RandomType>();
 
         for (unsigned int i = 0; i < 6; ++i) {
             ScalarType temp = 0;
             rpmd.nvt_step_for<ThermoType, RandomType, KineticModel, ForceModel, CUDAExecutor>(
                 PhyConst<AU>::secondToTime(2 * 1E-12),
                 thermo,
-                pool,
                 kineticModel,
                 forceModel);
 
             for (unsigned int j = 0; j < 100; ++j) {
-                rpmd.nvt_step<ThermoType, RandomType, KineticModel, ForceModel, CUDAExecutor>(thermo, pool, kineticModel, forceModel);
+                rpmd.nvt_step<ThermoType, RandomType, KineticModel, ForceModel, CUDAExecutor>(thermo, kineticModel, forceModel);
                 toNextMean(temp, j, rpmd.calcKinetic<KineticModel>());
             }
             toNextVariance(var, mean, i, temp);

@@ -49,7 +49,7 @@ namespace {
 
                 const size_t numState = model.getNumState();
                 JacobiDavidson<ScalarType> jd(numState, 4);
-                jd.compute(model, VectorType::random_uniform(numState, RandomType::getInstance()));
+                jd.compute(model, VectorType::random_uniform<RandomType>(numState));
             }
         }
     }

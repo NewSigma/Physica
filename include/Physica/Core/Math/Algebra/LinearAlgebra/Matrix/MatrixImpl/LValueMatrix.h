@@ -109,12 +109,12 @@ namespace Physica::Core {
         inline void majorMulScalar(size_t v, const ScalarType& factor);
         inline void majorSwap(size_t v1, size_t v2);
 
-        template<class RandomGenerator>
-        void random_uniform(RandomGenerator& gen);
-        template<class RandomGenerator>
-        void random_normal(RandomGenerator& gen);
-        template<class Distribution, class RandomGenerator>
-        void random_any(Distribution& dist, RandomGenerator& gen);
+        template<RandomGenerator R>
+        void random_uniform();
+        template<RandomGenerator R>
+        void random_normal();
+        template<class Distribution, RandomGenerator R>
+        void random_any(Distribution& dist);
         /* Getters */
         [[nodiscard]] ScalarType calc(size_t row, size_t col) const;
         [[nodiscard]] __host__ __device__ inline PtrTy data_ptr(size_t row, size_t col) noexcept;

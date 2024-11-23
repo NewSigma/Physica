@@ -48,8 +48,8 @@ namespace Physica::Core {
         inline void normalize();
         T calcNumElectron() const;
 
-        template<class RandomGenerator>
-        inline void random_normal(RandomGenerator& gen);
+        template<RandomGenerator R>
+        inline void random_normal();
         void swap(PlainWaveBasis& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] const GridType& getCoeffGrid() const noexcept { return coeffGrid; }
@@ -110,9 +110,9 @@ namespace Physica::Core {
     }
 
     template<Scalar T>
-    template<class RandomGenerator>
-    inline void PlainWaveBasis<T>::random_normal(RandomGenerator& gen) {
-        coeffGrid.template random_normal<RandomGenerator>(gen);
+    template<RandomGenerator R>
+    inline void PlainWaveBasis<T>::random_normal() {
+        coeffGrid.template random_normal<R>();
     }
 
     template<Scalar T>

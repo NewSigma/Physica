@@ -47,9 +47,9 @@ namespace Physica::Core {
         IceGenerator& operator=(IceGenerator obj) noexcept;
         /* Operations */
         Array<CrystalCellType> exhaust();
-        template<class RandomGenerator> CrystalCellType makeRand(RandomGenerator& gen);
-        template<class RandomGenerator> CrystalCellType makeDefects(unsigned int numDefect, RandomGenerator& gen) const;
-        template<class RandomGenerator> Array<size_t> randRing(RandomGenerator& gen) const;
+        template<RandomGenerator R> CrystalCellType makeRand();
+        template<RandomGenerator R> CrystalCellType makeDefects(unsigned int numDefect) const;
+        template<RandomGenerator R> Array<size_t> randRing() const;
         CrystalCellType makeRingMove(const Array<size_t>& ring, PositionMatrix& momentumMat) const;
         void swap(IceGenerator& __restrict obj) noexcept;
         /* Setters */
@@ -64,13 +64,13 @@ namespace Physica::Core {
         Array<size_t> findFreeBondedHInRadius(size_t indexO) const;
         std::pair<size_t, size_t> findHydrogenInMolecule(size_t indexMolecule) const;
         size_t findHydrogenBetweenO(size_t indexO1, size_t indexO2) const;
-        template<class RandomGenerator> size_t makeRandEmptyO(RandomGenerator& gen) const;
-        template<class RandomGenerator> size_t makeRandFreeH(size_t indexO, RandomGenerator& gen) const;
+        template<RandomGenerator R> size_t makeRandEmptyO() const;
+        template<RandomGenerator R> size_t makeRandFreeH(size_t indexO) const;
         void fetchHydrogen(PositionMatrix& pos, size_t indexO, size_t indexH);
         size_t countFreeH(const Array<size_t>& hIndexes) const;
         void searchForPairs(PositionMatrix& pos);
         size_t getIndexToPair() const;
-        template<class RandomGenerator> void randUninitializedH(PositionMatrix& pos, RandomGenerator& gen);
+        template<RandomGenerator R> void randUninitializedH(PositionMatrix& pos);
         void exhaustImpl(size_t stackDepth, const PositionMatrix& pos, Array<CrystalCellType>& result);
         /* Getters */
         [[nodiscard]] size_t getEndIndexH() const noexcept { return getNumMolecule() * 2U; }
@@ -79,8 +79,8 @@ namespace Physica::Core {
         [[nodiscard]] bool isFinished() const noexcept;
         /* Static members */
         static Vector3D<T> rotate(T angle, Vector3D<T> axis, Vector3D<T> target);
-        template<class RandomGenerator>
-        static Vector3D<T> randUnitVector(RandomGenerator& gen);
+        template<RandomGenerator R>
+        static Vector3D<T> randUnitVector();
 
         friend class ::Physica::Test;
     };

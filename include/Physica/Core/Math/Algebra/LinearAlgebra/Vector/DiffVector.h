@@ -72,10 +72,10 @@ namespace Physica::Core {
         __host__ __device__ CRIteType crend() const noexcept { return CRIteType(data() - 1); }
         /* Operations */
         inline void resize(size_t size);
-        template<class RandomType> inline void random_uniform(RandomType& gen);
-        template<class RandomType> inline void random_normal(RandomType& gen);
-        template<class Distribution, class RandomType>
-        inline void random_any(Distribution& dist, RandomType& gen);
+        template<RandomGenerator R> inline void random_uniform();
+        template<RandomGenerator R> inline void random_normal();
+        template<class Distribution, RandomGenerator R>
+        inline void random_any(Distribution& dist);
         void swap(This& __restrict obj) noexcept;
         /* Getters */
         using Base::data;
@@ -83,12 +83,12 @@ namespace Physica::Core {
         [[nodiscard]] __host__ __device__ inline PtrTy data_ptr(size_t index) noexcept;
         [[nodiscard]] __host__ __device__ inline ConstPtrTy data_ptr(size_t index) const noexcept;
         /* Static members */
-        template<class RandomType>
-        [[nodiscard]] inline static This random_uniform(size_t len, RandomType& gen);
-        template<class RandomType>
-        [[nodiscard]] inline static This random_normal(size_t len, RandomType& gen);
-        template<class Distribution, class RandomType>
-        [[nodiscard]] inline static This random_any(size_t len, Distribution& dist, RandomType& gen);
+        template<RandomGenerator R>
+        [[nodiscard]] inline static This random_uniform(size_t len);
+        template<RandomGenerator R>
+        [[nodiscard]] inline static This random_normal(size_t len);
+        template<class Distribution, RandomGenerator R>
+        [[nodiscard]] inline static This random_any(size_t len, Distribution& dist);
         [[nodiscard]] static auto linspace(ScalarType from, ScalarType to, size_t count);
     };
     ////////////////////////////////////////////////////////////////////////////////////
@@ -115,10 +115,10 @@ namespace Physica::Core {
         Diff& operator=(const Diff&) = default;
         Diff& operator=(Diff&&) noexcept = default;
         /* Operations */
-        template<class RandomGenerator> inline void random_uniform(RandomGenerator& gen);
-        template<class RandomGenerator> inline void random_normal(RandomGenerator& gen);
-        template<class Distribution, class RandomGenerator>
-        inline void random_any(Distribution& dist, RandomGenerator& gen);
+        template<RandomGenerator R> inline void random_uniform();
+        template<RandomGenerator R> inline void random_normal();
+        template<class Distribution, RandomGenerator R>
+        inline void random_any(Distribution& dist);
         void swap(Diff& obj) noexcept { std::swap(*this, obj); }
         /* Getters */
         [[nodiscard]] inline ScalarType calc(size_t index) const;
@@ -126,12 +126,12 @@ namespace Physica::Core {
         [[nodiscard]] const VectorType& getValue() const noexcept { return traceSeg.getValues(); }
         [[nodiscard]] const VectorType& getGrad() const noexcept { return traceSeg.getGrads(); }
         /* Static members */
-        template<class RandomGenerator>
-        [[nodiscard]] inline static This random_uniform(size_t len, RandomGenerator& gen);
-        template<class RandomGenerator>
-        [[nodiscard]] inline static This random_normal(size_t len, RandomGenerator& gen);
-        template<class Distribution, class RandomGenerator>
-        [[nodiscard]] inline static This random_any(size_t len, Distribution& dist, RandomGenerator& gen);
+        template<RandomGenerator R>
+        [[nodiscard]] inline static This random_uniform(size_t len);
+        template<RandomGenerator R>
+        [[nodiscard]] inline static This random_normal(size_t len);
+        template<class Distribution, RandomGenerator R>
+        [[nodiscard]] inline static This random_any(size_t len, Distribution& dist);
         /* Friends */
         friend class device_obj<This>;
     };

@@ -36,7 +36,7 @@ void testLaglange() {
 }
 
 void testFFT1D() {
-    const auto data = VectorType::random_normal(20, RandomType::getInstance());
+    const auto data = VectorType::template random_normal<RandomType>(20);
     const auto result = interpolate_fft(data, 100);
 
     const size_t delta = result.getLength() / data.getLength();
@@ -62,8 +62,7 @@ void testFFT3D() {
     using GridType = RSpaceGrid<ScalarType>;
     using Index3D = GridType::Index3D;
 
-    std::mt19937 gen{};
-    const auto data = GridType::random_uniform({5, 5, 5}, RandomType::getInstance());
+    const auto data = GridType::random_uniform<RandomType>({5, 5, 5});
     {
         const auto result = interpolate_fft(data, {10, 10, 10});
         GridType::forIndexInGrid(data.getDim(), [&data, &result](Index3D index) {

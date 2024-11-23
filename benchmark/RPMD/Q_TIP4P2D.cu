@@ -31,7 +31,6 @@
 
 using namespace Physica::Core;
 using ScalarType = float32;
-using RandomGenerator = std::mt19937;
 using RandomType = Random<MT19937>;
 using EwaldType = Ewald<ScalarType, Physica::Core::device_obj<RSpaceEwald<ScalarType>>>;
 using ForceModel = Q_TIP4P<ScalarType, EwaldType>;
@@ -82,7 +81,7 @@ namespace {
         auto cell = makeSystem(5);
         ForceModel::sortPosition(cell);
         MDType rpmd(std::move(cell), 1, 1, temperatureT, timeStep);
-        rpmd.initMomentum<KineticModel, RandomGenerator>(pool.getGen());
+        rpmd.initMomentum<KineticModel, RandomType>();
         
         KineticModel kineticModel(temperatureT, 1);
         ForceModel forceModel(rpmd.phaseToCell(0), pair_cutoff, EwaldType{});
@@ -92,7 +91,6 @@ namespace {
             rpmd.npt_step_for<ThermoType, RandomType, BarostatType, KineticModel, decltype(forceModel), CUDAExecutor>(
                 PhyConst<AU>::secondToTime(1 * 1E-13),
                 thermo,
-                pool,
                 barostat,
                 kineticModel,
                 forceModel);

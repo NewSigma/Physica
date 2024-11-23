@@ -26,6 +26,7 @@
 #endif
 #include "Physica/Core/Exception/NoImplException.h"
 #include "Physica/Core/IO/HDF5/HDF5.h"
+#include "Physica/Core/Math/Random/Random.h"
 #include "Scalar.h"
 #include "RealImpl/ScalarBase.h"
 

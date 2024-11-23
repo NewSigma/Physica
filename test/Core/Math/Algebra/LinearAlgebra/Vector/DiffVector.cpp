@@ -22,9 +22,10 @@
 using namespace Physica::Core;
 using ScalarType = float64;
 using VectorType = Diff<VectorND<ScalarType>, DiffMode::Reverse, 1>;
+using RandomType = Random<MT19937, std::mt19937::default_seed>;
 
 int main() {
-    VectorType v = VectorType::random_uniform(16, Random<MT19937, std::mt19937::default_seed>::getInstance());
+    VectorType v = VectorType::random_uniform<RandomType>(16);
     auto sum = v.sum();
     sum.reverse();
     for (size_t i = 0; i < v.getLength(); ++i)

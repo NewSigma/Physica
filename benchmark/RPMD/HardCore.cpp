@@ -30,6 +30,7 @@ using namespace Physica::Core;
 using ScalarType = float64;
 using VectorType = VectorND<ScalarType>;
 using MatrixType = DenseMatrix<ScalarType>;
+using RandomType = Random<MT19937>;
 using PDFType = ProbDistribution<ScalarType>;
 constexpr double timeStepLambda = 0.01;
 constexpr double collideFactor = 0.01;
@@ -45,13 +46,11 @@ using ForceModel = EmptyForceModel<ScalarType, 1>;
 using KineticModel = HardCore<ScalarType, true, numReplica, RPMDIntegrator::Exact>;
 
 namespace {
-    MDCellType makeSystem(std::mt19937& gen) {
+    MDCellType makeSystem() {
         MDCellType::LatticeMatrix lattice{latticeSize};
 
         std::uniform_real_distribution dist{};
-        VectorND<ScalarType> posVec(numMolecular);
-        for (auto& elem : posVec)
-            elem = dist(gen) * latticeSize;
+        auto posVec = VectorND<ScalarType>::random_uniform<RandomType>(numMolecular);
         std::sort(posVec.begin(), posVec.end());
         MDCellType::PositionMatrix pos(numMolecular, 1);
         pos.col(0) = posVec;
@@ -65,9 +64,8 @@ namespace {
 
     static void main(benchmark::State& state) {
         const double timeStep = timeStepLambda * (latticeSize / numMolecular) * std::sqrt(unitMassM / temperatureT);
-        std::mt19937 gen{};
-        MDType rpmd = MDType(makeSystem(gen), numReplica, numReplica, temperatureT, timeStep);
-        rpmd.initMomentum<KineticModel, decltype(gen)>(gen);
+        MDType rpmd = MDType(makeSystem(), numReplica, numReplica, temperatureT, timeStep);
+        rpmd.initMomentum<KineticModel, RandomType>();
         KineticModel kineticModel(latticeSize, collideFactor, temperatureT, numMolecular, numReplica, maxHandleNum);
         kineticModel.updateMass(rpmd.getRingPolymer());
 

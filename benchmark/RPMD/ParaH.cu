@@ -40,14 +40,13 @@ constexpr double molarVolume = 31.7;
 constexpr double mass = PhyConst<AU>::atomMass(1) * 2;
 
 namespace {
-    template<class RandomType>
-    MDType makeSystem(size_t numMolecular, RandomType& gen) {
+    MDType makeSystem(size_t numMolecular) {
         using MDCellType = MDType::MDCellType;
         MDCellType::LatticeMatrix lattice = MDCellType::LatticeMatrix::unitMatrix(3);
         MDCellType::PositionMatrix pos(numMolecular, 3);
         std::uniform_real_distribution dist{};
         for (auto& elem : pos.asArray())
-            elem = dist(gen);
+            elem = dist(RandomType::getInstance());
         MDCellType::MassVector massVec(numMolecular, mass);
         MDCellType cell(std::move(lattice), std::move(pos), std::move(massVec));
 
@@ -63,10 +62,9 @@ namespace {
     void bench108(benchmark::State& state) {
         using ForceModel = device_obj<SilveraGoldman<ScalarType, true, true>>;
         constexpr size_t numMolecular = 108;
-        auto& gen = RandomType::getInstance().getGen();
         KineticModel kineticModel(temperatureT, numReplica);
-        MDType rpmd = makeSystem(numMolecular, gen);
-        rpmd.initMomentum<KineticModel, decltype(gen)>(gen);
+        MDType rpmd = makeSystem(numMolecular);
+        rpmd.initMomentum<KineticModel, RandomType>();
         ForceModel forceModel(numMolecular, pair_cutoff);
         for (auto _ : state)
             rpmd.nve_step_for<KineticModel, ForceModel, CUDAExecutor>(PhyConst<AU>::secondToTime(2 * 1E-13), kineticModel, forceModel);
@@ -75,10 +73,9 @@ namespace {
     void bench256(benchmark::State& state) {
         using ForceModel = device_obj<SilveraGoldman<ScalarType, true, true>>;
         constexpr size_t numMolecular = 256;
-        auto& gen = RandomType::getInstance().getGen();
         KineticModel kineticModel(temperatureT, numReplica);
-        MDType rpmd = makeSystem(numMolecular, gen);
-        rpmd.initMomentum<KineticModel, decltype(gen)>(gen);
+        MDType rpmd = makeSystem(numMolecular);
+        rpmd.initMomentum<KineticModel, RandomType>();
         ForceModel forceModel(numMolecular, pair_cutoff);
         for (auto _ : state)
             rpmd.nve_step_for<KineticModel, ForceModel, CUDAExecutor>(PhyConst<AU>::secondToTime(2 * 1E-13), kineticModel, forceModel);
@@ -87,10 +84,9 @@ namespace {
     void bench500(benchmark::State& state) {
         using ForceModel = device_obj<SilveraGoldman<ScalarType, true, true>>;
         constexpr size_t numMolecular = 500;
-        auto& gen = RandomType::getInstance().getGen();
         KineticModel kineticModel(temperatureT, numReplica);
-        MDType rpmd = makeSystem(numMolecular, gen);
-        rpmd.initMomentum<KineticModel, decltype(gen)>(gen);
+        MDType rpmd = makeSystem(numMolecular);
+        rpmd.initMomentum<KineticModel, RandomType>();
         ForceModel forceModel(numMolecular, pair_cutoff);
         for (auto _ : state)
             rpmd.nve_step_for<KineticModel, ForceModel, CUDAExecutor>(PhyConst<AU>::secondToTime(1 * 1E-13), kineticModel, forceModel);
@@ -99,10 +95,9 @@ namespace {
     void bench864(benchmark::State& state) {
         using ForceModel = device_obj<SilveraGoldman<ScalarType, true, true>>;
         constexpr size_t numMolecular = 864;
-        auto& gen = RandomType::getInstance().getGen();
         KineticModel kineticModel(temperatureT, numReplica);
-        MDType rpmd = makeSystem(numMolecular, gen);
-        rpmd.initMomentum<KineticModel, decltype(gen)>(gen);
+        MDType rpmd = makeSystem(numMolecular);
+        rpmd.initMomentum<KineticModel, RandomType>();
         ForceModel forceModel(numMolecular, pair_cutoff);
         for (auto _ : state)
             rpmd.nve_step_for<KineticModel, ForceModel, CUDAExecutor>(PhyConst<AU>::secondToTime(5 * 1E-14), kineticModel, forceModel);

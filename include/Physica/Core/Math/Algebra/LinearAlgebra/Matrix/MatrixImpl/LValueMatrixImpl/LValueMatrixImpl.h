@@ -371,33 +371,33 @@ namespace Physica::Core {
     }
 
     template<class Derived>
-    template<class RandomGenerator>
-    void LValueMatrix<Derived>::random_uniform(RandomGenerator& gen) {
+    template<RandomGenerator R>
+    void LValueMatrix<Derived>::random_uniform() {
         const size_t maxMajor = Base::getMaxMajor();
         const size_t maxMinor = Base::getMaxMinor();
         for (size_t major = 0; major < maxMajor; ++major)
             for (size_t minor = 0; minor < maxMinor; ++minor)
-                refFromMajorMinor(major, minor) = ScalarType::random_uniform(gen);
+                refFromMajorMinor(major, minor) = ScalarType::template random_uniform<R>();
     }
 
     template<class Derived>
-    template<class RandomGenerator>
-    void LValueMatrix<Derived>::random_normal(RandomGenerator& gen) {
+    template<RandomGenerator R>
+    void LValueMatrix<Derived>::random_normal() {
         const size_t maxMajor = Base::getMaxMajor();
         const size_t maxMinor = Base::getMaxMinor();
         for (size_t major = 0; major < maxMajor; ++major)
             for (size_t minor = 0; minor < maxMinor; ++minor)
-                refFromMajorMinor(major, minor) = ScalarType::random_normal(gen);
+                refFromMajorMinor(major, minor) = ScalarType::template random_normal<R>();
     }
 
     template<class Derived>
-    template<class Distribution, class RandomGenerator>
-    void LValueMatrix<Derived>::random_any(Distribution& dist, RandomGenerator& gen) {
+    template<class Distribution, RandomGenerator R>
+    void LValueMatrix<Derived>::random_any(Distribution& dist) {
         const size_t maxMajor = Base::getMaxMajor();
         const size_t maxMinor = Base::getMaxMinor();
         for (size_t major = 0; major < maxMajor; ++major)
             for (size_t minor = 0; minor < maxMinor; ++minor)
-                refFromMajorMinor(major, minor) = ScalarType::random_any(dist, gen);
+                refFromMajorMinor(major, minor) = ScalarType::random_any(dist);
     }
 
     template<class Derived>

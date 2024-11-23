@@ -43,13 +43,12 @@ VectorType calcPartition(ReprType repr_, const VectorType& betas) {
     LatticeModel<1> lattice({NumSite}, 1);
     Hubbard<ScalarType, 1> hubbard(lattice, HoppingT, RepelU);
     const Hamilton hamilton(hubbard, std::move(repr_));
-    auto& gen = RandomType::getInstance();
     VectorType result(NumBeta);
     const ScalarType deltaBeta = betas[1] - betas[0];
     auto psi = TPQ<ScalarType>(hamilton.getNumState());
     psi.pre_nvt_step(hamilton, deltaBeta);
     for (unsigned int i = 0; i < NumSample; ++i) {
-        psi.random_normal(gen, 1);
+        psi.template random_normal<RandomType>(1);
         for (unsigned int j = 0; j < NumBeta; ++j) {
             if (j != 0)
                 psi.nvt_step(hamilton, deltaBeta);

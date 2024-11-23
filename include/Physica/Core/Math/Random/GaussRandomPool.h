@@ -37,8 +37,8 @@ namespace Physica::Core {
         GaussRandomPool& operator=(GaussRandomPool obj) noexcept { swap(obj); return *this; }
         [[nodiscard]] inline T operator()() const noexcept;
         /* Operations */
-        template<class RandomGenerator>
-        inline void init(RandomGenerator& gen);
+        template<RandomGenerator R>
+        inline void init();
         inline void swap(GaussRandomPool& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] size_t getSize() const noexcept { return rands.getLength(); }
@@ -52,9 +52,9 @@ namespace Physica::Core {
     }
 
     template<Scalar T, class RandomPoolType>
-    template<class RandomGenerator>
-    inline void GaussRandomPool<T, RandomPoolType>::init(RandomGenerator& gen) {
-        rands.random_normal(gen);
+    template<RandomGenerator R>
+    inline void GaussRandomPool<T, RandomPoolType>::init() {
+        rands.template random_normal<R>();
     }
 
     template<Scalar T, class RandomPoolType>

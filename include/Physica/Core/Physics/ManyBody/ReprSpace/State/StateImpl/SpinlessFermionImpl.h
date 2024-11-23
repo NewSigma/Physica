@@ -125,24 +125,24 @@ namespace Physica::Core {
     }
 
     template<int Dim, int NumSite>
-    template<class RandomGenerator>
-    SpinlessFermion<Dim, NumSite> SpinlessFermion<Dim, NumSite>::random_state(RandomGenerator& gen) {
-        constexpr bool flag = NumSite < sizeof(typename RandomGenerator::result_type) * CHAR_BIT;
+    template<RandomGenerator R>
+    SpinlessFermion<Dim, NumSite> SpinlessFermion<Dim, NumSite>::random_state() {
+        constexpr bool flag = NumSite < sizeof(typename R::result_type) * CHAR_BIT;
         static_assert(flag, "[Error]: The random generator cannot provide enough random bits");
-        return gen() & makeFullMask();
+        return R::getInstance()() & makeFullMask();
     }
 
     template<int Dim, int NumSite>
-    template<class RandomGenerator>
-    SpinlessFermion<Dim, NumSite> SpinlessFermion<Dim, NumSite>::random_state(size_t numParticle, RandomGenerator& gen) {
-        constexpr bool flag = NumSite < sizeof(typename RandomGenerator::result_type) * CHAR_BIT;
+    template<RandomGenerator R>
+    SpinlessFermion<Dim, NumSite> SpinlessFermion<Dim, NumSite>::random_state(size_t numParticle) {
+        constexpr bool flag = NumSite < sizeof(typename R::result_type) * CHAR_BIT;
         static_assert(flag, "[Error]: The random generator cannot provide enough random bits");
         assert(numParticle <= NumSite);
         char bits[NumSite];
         memset(bits, 0, NumSite * sizeof(char));
         for (size_t i = 0; i < numParticle; ++i)
             bits[i] = 1;
-        std::shuffle(bits, bits + NumSite, gen);
+        std::shuffle(bits, bits + NumSite, R::getInstance());
 
         IntType result = bits[0];
         for (int i = 1; i < NumSite; ++i) {

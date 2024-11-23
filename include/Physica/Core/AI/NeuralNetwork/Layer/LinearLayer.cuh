@@ -56,14 +56,14 @@ namespace Physica::Core {
         [[nodiscard]] OutputType forward(const InputType& x) const;
         [[nodiscard]] device_obj copy() const;
 
-        template<class RandomType>
-        void random_normal(RandomType& gen);
-        template<class RandomType>
-        void random_xavier_uniform(ValueType gain, RandomType& gen);
-        template<class RandomType>
-        void random_xavier_normal(ValueType gain, RandomType& gen);
-        template<class Distribution, class RandomType>
-        void random_any(Distribution& dist, RandomType& gen);
+        template<RandomGenerator R>
+        void random_normal();
+        template<RandomGenerator R>
+        void random_xavier_uniform(ValueType gain);
+        template<RandomGenerator R>
+        void random_xavier_normal(ValueType gain);
+        template<class Distribution, RandomGenerator R>
+        void random_any(Distribution& dist);
         void swap(device_obj& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] __host__ __device__ size_t getInputDim() const noexcept { return weights.getCol(); }
@@ -71,12 +71,12 @@ namespace Physica::Core {
         [[nodiscard]] const DeviceMatrix& getWeights() const noexcept { return weights; }
         [[nodiscard]] const BiasType& getBias() const noexcept { return bias; }
         /* Static members */
-        template<class RandomType>
-        [[nodiscard]] static This random_normal(size_t inputDim, size_t outputDim, RandomType& gen);
-        template<class RandomType>
-        [[nodiscard]] static This random_xavier_uniform(size_t inputDim, size_t outputDim, ValueType gain, RandomType& gen);
-        template<class RandomType>
-        [[nodiscard]] static This random_xavier_normal(size_t inputDim, size_t outputDim, ValueType gain, RandomType& gen);
+        template<RandomGenerator R>
+        [[nodiscard]] static This random_normal(size_t inputDim, size_t outputDim);
+        template<RandomGenerator R>
+        [[nodiscard]] static This random_xavier_uniform(size_t inputDim, size_t outputDim, ValueType gain);
+        template<RandomGenerator R>
+        [[nodiscard]] static This random_xavier_normal(size_t inputDim, size_t outputDim, ValueType gain);
     };
 
     template<Scalar T, bool WithBias>
@@ -105,40 +105,40 @@ namespace Physica::Core {
     }
 
     template<Scalar T, bool WithBias>
-    template<class RandomType>
-    void device_obj<LinearLayer<T, WithBias>>::random_normal(RandomType& gen) {
-        weights.random_normal(gen);
+    template<RandomGenerator R>
+    void device_obj<LinearLayer<T, WithBias>>::random_normal() {
+        weights.template random_normal<R>();
         if constexpr (WithBias)
-            bias.random_normal(gen);
+            bias.template random_normal<R>();
     }
     
     template<Scalar T, bool WithBias>
-    template<class RandomType>
-    void device_obj<LinearLayer<T, WithBias>>::random_xavier_uniform(ValueType gain, RandomType& gen) {
+    template<RandomGenerator R>
+    void device_obj<LinearLayer<T, WithBias>>::random_xavier_uniform(ValueType gain) {
         using MachineType = T::MachineType;
         const auto factor = (gain * sqrt(ValueType(6) / ValueType(getInputDim() + getOutputDim()))).toMachine();
         std::uniform_real_distribution<MachineType> dist(-factor, factor);
-        weights.random_any(dist, gen);
+        weights.template random_any<R>(dist);
         if constexpr (WithBias)
-            bias.random_any(dist, gen);
+            bias.template random_any<R>(dist);
     }
     
     template<Scalar T, bool WithBias>
-    template<class RandomType>
-    void device_obj<LinearLayer<T, WithBias>>::random_xavier_normal(ValueType gain, RandomType& gen) {
+    template<RandomGenerator R>
+    void device_obj<LinearLayer<T, WithBias>>::random_xavier_normal(ValueType gain) {
         const auto deviation = (gain * sqrt(ValueType(2) / ValueType(getInputDim() + getOutputDim()))).toMachine();
         std::normal_distribution<MachineType> dist(0, deviation);
-        weights.random_any(dist, gen);
+        weights.template random_any<R>(dist);
         if constexpr (WithBias)
-            bias.random_any(dist, gen);
+            bias.template random_any<R>(dist);
     }
     
     template<Scalar T, bool WithBias>
-    template<class Distribution, class RandomType>
-    void device_obj<LinearLayer<T, WithBias>>::random_any(Distribution& dist, RandomType& gen) {
-        weights.random_any(dist, gen);
+    template<class Distribution, RandomGenerator R>
+    void device_obj<LinearLayer<T, WithBias>>::random_any(Distribution& dist) {
+        weights.random_any(dist);
         if constexpr (WithBias)
-            bias.random_any(dist, gen);
+            bias.random_any(dist);
     }
 
     template<Scalar T, bool WithBias>
@@ -150,39 +150,39 @@ namespace Physica::Core {
     }
 
     template<Scalar T, bool WithBias>
-    template<class RandomType>
+    template<RandomGenerator R>
     device_obj<LinearLayer<T, WithBias>> device_obj<LinearLayer<T, WithBias>>::random_normal(
-            size_t inputDim, size_t outputDim, RandomType& gen) {
+            size_t inputDim, size_t outputDim) {
         This result{};
-        result.weights = DeviceMatrix::random_normal(outputDim, inputDim, gen);
+        result.weights = DeviceMatrix::template random_normal<R>(outputDim, inputDim);
         if constexpr (WithBias)
-            result.bias = BiasType::random_normal(outputDim, gen);
+            result.bias = BiasType::template random_normal<R>(outputDim);
         return result;
     }
     
     template<Scalar T, bool WithBias>
-    template<class RandomType>
+    template<RandomGenerator R>
     device_obj<LinearLayer<T, WithBias>> device_obj<LinearLayer<T, WithBias>>::random_xavier_uniform(
-            size_t inputDim, size_t outputDim, ValueType gain, RandomType& gen) {
+            size_t inputDim, size_t outputDim, ValueType gain) {
         This result{};
         const auto factor = (gain * sqrt(ValueType(6) / ValueType(inputDim + outputDim))).toMachine();
         std::uniform_real_distribution<MachineType> dist(-factor, factor);
-        result.weights = DeviceMatrix::random_any(outputDim, inputDim, dist, gen);
+        result.weights = DeviceMatrix::random_any(outputDim, inputDim, dist);
         if constexpr (WithBias)
-            result.bias = BiasType::random_any(outputDim, dist, gen);
+            result.bias = BiasType::random_any(outputDim, dist);
         return result;
     }
     
     template<Scalar T, bool WithBias>
-    template<class RandomType>
+    template<RandomGenerator R>
     device_obj<LinearLayer<T, WithBias>> device_obj<LinearLayer<T, WithBias>>::random_xavier_normal(
-            size_t inputDim, size_t outputDim, ValueType gain, RandomType& gen) {
+            size_t inputDim, size_t outputDim, ValueType gain) {
         This result{};
         const auto deviation = (gain * sqrt(ValueType(2) / ValueType(inputDim + outputDim))).toMachine();
         std::normal_distribution<MachineType> dist(0, deviation);
-        result.weights = DeviceMatrix::random_any(outputDim, inputDim, dist, gen);
+        result.weights = DeviceMatrix::random_any(outputDim, inputDim, dist);
         if constexpr (WithBias)
-            result.bias = BiasType::random_any(outputDim, dist, gen);
+            result.bias = BiasType::random_any(outputDim, dist);
         return result;
     }
 }

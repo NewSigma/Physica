@@ -20,13 +20,13 @@
 #include "Physica/Core/Utils/Unix/TempFile.h"
 
 using namespace Physica::Core;
+using RandomType = Random<MT19937>;
 
 int main() {
-    std::mt19937 gen{};
     /* Col float matrix */ {
         using T = float32;
         using MatrixType = DenseMatrix<T>;
-        const auto data = MatrixType::random_uniform(32, 16, gen);
+        const auto data = MatrixType::random_uniform<RandomType>(32, 16);
 
         TempFile tmp("/tmp/tmpXXXXXX");
         H5File h5f(tmp.getName(), H5File::OpenFlag(H5File::OpenFlag::ReadWrite | H5File::OpenFlag::Creat));
@@ -40,7 +40,7 @@ int main() {
     /* Row double matrix */ {
         using T = float64;
         using MatrixType = DenseMatrix<T, MatrixOption::Row | MatrixOption::Vector>;
-        const auto data = MatrixType::random_uniform(16, 20, gen);
+        const auto data = MatrixType::random_uniform<RandomType>(16, 20);
 
         TempFile tmp("/tmp/tmpXXXXXX");
         H5File h5f(tmp.getName(), H5File::OpenFlag(H5File::OpenFlag::ReadWrite | H5File::OpenFlag::Creat));
@@ -54,7 +54,7 @@ int main() {
     /* Row complex float matrix */ {
         using T = Complex<float32>;
         using MatrixType = DenseMatrix<T, MatrixOption::Row | MatrixOption::Vector>;
-        const auto data = MatrixType::random_uniform(16, 12, gen);
+        const auto data = MatrixType::random_uniform<RandomType>(16, 12);
 
         TempFile tmp("/tmp/tmpXXXXXX");
         H5File h5f(tmp.getName(), H5File::OpenFlag(H5File::OpenFlag::ReadWrite | H5File::OpenFlag::Creat));

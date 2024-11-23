@@ -77,12 +77,12 @@ namespace Physica::Core {
         [[nodiscard]] inline const BlockType<Length> segment(size_t from, size_t to) const;
 
         inline void toUnit();
-        template<class RandomGenerator>
-        inline void random_uniform(RandomGenerator& gen);
-        template<class RandomGenerator>
-        inline void random_normal(RandomGenerator& gen);
-        template<class Distribution, class RandomGenerator>
-        inline void random_any(Distribution& dist, RandomGenerator& gen);
+        template<RandomGenerator R>
+        inline void random_uniform();
+        template<RandomGenerator R>
+        inline void random_normal();
+        template<class Distribution, RandomGenerator R>
+        inline void random_any(Distribution& dist);
         /* Getters */
         [[nodiscard]] __host__ __device__ inline PtrTy data_ptr(size_t index) noexcept;
         [[nodiscard]] __host__ __device__ inline ConstPtrTy data_ptr(size_t index) const noexcept;

@@ -71,10 +71,10 @@ namespace Physica::Core {
         [[nodiscard]] int getNumSpinDownParticle() const noexcept { return spinDown.getNumParticle(); }
         [[nodiscard]] inline int getNumDoubleOccupy() const noexcept;
         /* Static member */
-        template<class RandomGenerator>
-        [[nodiscard]] static This random_state(RandomGenerator& gen);
-        template<class RandomGenerator>
-        [[nodiscard]] static This random_state(size_t numSpinUp, size_t numSpinDown, RandomGenerator& gen);
+        template<RandomGenerator R>
+        [[nodiscard]] static This random_state();
+        template<RandomGenerator R>
+        [[nodiscard]] static This random_state(size_t numSpinUp, size_t numSpinDown);
     };
 
     template<int Dim, int NumSite>

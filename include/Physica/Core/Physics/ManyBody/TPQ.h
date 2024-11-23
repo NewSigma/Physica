@@ -61,8 +61,8 @@ namespace Physica::Core {
         [[nodiscard]] RealType lnSquaredDot(const VectorND<RealType>& other) const;
         void swap(This& __restrict obj) noexcept;
 
-        template<class RandomGenerator>
-        inline void random_normal(RandomGenerator& gen, RealType norm = 0);
+        template<RandomGenerator R>
+        inline void random_normal(RealType norm = 0);
         /* Getters */
         [[nodiscard]] RealType getBeta() const noexcept { return beta; }
         [[nodiscard]] RealType getTraceMu() const noexcept { return traceMu; }
@@ -71,8 +71,8 @@ namespace Physica::Core {
         [[nodiscard]] const Base& asVector() const noexcept { return *this; }
         [[nodiscard]] Base& asVector() noexcept { return *this; }
         /* Static members */
-        template<class RandomGenerator>
-        [[nodiscard]] static This random_normal(size_t len, RandomGenerator& gen, RealType norm = 0);
+        template<RandomGenerator R>
+        [[nodiscard]] static This random_normal(size_t len, RealType norm);
     private:
         using Base::random_uniform;
         using Base::random_any;
@@ -172,20 +172,20 @@ namespace Physica::Core {
     }
 
     template<Scalar T>
-    template<class RandomGenerator>
-    inline void TPQ<T>::random_normal(RandomGenerator& gen, RealType norm) {
+    template<RandomGenerator R>
+    inline void TPQ<T>::random_normal(RealType norm) {
         const bool useDefault = norm.isZero();
         if (useDefault) // Default norm is as small as possible while keep all effective digits
             norm = RealType(std::numeric_limits<RealType>::min() / std::numeric_limits<RealType>::epsilon());
-        Base::random_normal(gen);
+        Base::template random_normal<R>();
         asVector() *= norm;
     }
 
     template<Scalar T>
-    template<class RandomGenerator>
-    TPQ<T> TPQ<T>::random_normal(size_t len, RandomGenerator& gen, RealType norm) {
+    template<RandomGenerator R>
+    TPQ<T> TPQ<T>::random_normal(size_t len, RealType norm) {
         This result(len);
-        result.random_normal(gen, norm);
+        result.random_normal<R>(norm);
         return result;
     }
 

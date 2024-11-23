@@ -138,24 +138,24 @@ namespace Physica::Core {
     }
 
     template<class Derived>
-    template<class RandomGenerator>
-    inline void LValueVector<Derived>::random_uniform(RandomGenerator& gen) {
+    template<RandomGenerator R>
+    inline void LValueVector<Derived>::random_uniform() {
         for (size_t i = 0; i < this->getLength(); ++i)
-            this->operator[](i) = ScalarType::random_uniform(gen);
+            this->operator[](i) = ScalarType::template random_uniform<R>();
     }
 
     template<class Derived>
-    template<class RandomGenerator>
-    inline void LValueVector<Derived>::random_normal(RandomGenerator& gen) {
+    template<RandomGenerator R>
+    inline void LValueVector<Derived>::random_normal() {
         for (size_t i = 0; i < this->getLength(); ++i)
-            this->operator[](i) = ScalarType::random_normal(gen);
+            this->operator[](i) = ScalarType::template random_normal<R>();
     }
 
     template<class Derived>
-    template<class Distribution, class RandomGenerator>
-    inline void LValueVector<Derived>::random_any(Distribution& dist, RandomGenerator& gen) {
+    template<class Distribution, RandomGenerator R>
+    inline void LValueVector<Derived>::random_any(Distribution& dist) {
         for (size_t i = 0; i < this->getLength(); ++i)
-            this->operator[](i) = ScalarType::random_any(dist, gen);
+            this->operator[](i) = ScalarType::random_any(dist);
     }
     /**
      * Add this function because we cannot simply return &(*this)[index], it is invalid to dereference a device pointer on host.

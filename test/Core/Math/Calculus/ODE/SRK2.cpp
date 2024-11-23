@@ -16,39 +16,42 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include <random>
+#include <iostream>
 #include "Physica/Core/Math/Calculus/ODE/SRK2.h"
+#include "Physica/Core/Math/Statistics/LinearFit.h"
 
 using namespace Physica::Core;
+using RandomType = Random<MT19937, 4036979388296844000UL>;
 /**
+ * We solve Eq. 5.1 of [1] and the slope of the result is expected to be lambda.
+ *
  * Reference:
- * [1] R. L. Honeycutt, Stochastic Runge-Kutta algorithm: I. White noise, Phys. Rev. A 45, 600 (1992).
+ * [1] Phys. Rev. A 45, 600 (1992); https://doi.org/10.1103/PhysRevA.45.600
  */
 int main() {
-    using ScalarType = float64;
-    using XVector = Vector1D<ScalarType>;
+    using T = float64;
+    using XVector = Vector1D<T>;
     constexpr double stepSize = 0.1;
-    constexpr double D = 0.1;
+    constexpr double diffuseD = 0.1;
     constexpr double lambda = 1;
     constexpr double t_max = 4;
-    constexpr size_t iteration = 5000;
+    constexpr size_t iteration = 10000;
 
-    const size_t count = t_max / stepSize;
-    VectorND<ScalarType> x(count, 0);
+    SRK2<T, 1> solver(0, t_max, stepSize, {1});
+    VectorND<T> y(solver.getNumStep(), 0);
     for (size_t i = 0; i < iteration; ++i) {
-        std::mt19937 gen{i};
-        std::normal_distribution phi{};
-
-        SRK2<ScalarType, 1> solver(0, t_max, stepSize, {1});
-        solver.solve([](ScalarType t, const XVector& x) -> XVector { (void)t; return {-ScalarType(lambda) * x[0]}; },
-                    [&](ScalarType t, const XVector& x) -> XVector { (void)t; (void)x; return {ScalarType(lambda) * sqrt(2 * stepSize * D) * phi(gen)}; });
-        x += solver.getSolution().row(0);
+        solver.solve([](T, const XVector& x) -> XVector { return {-T(lambda) * x[0]}; },
+                     [](T, const XVector&) -> XVector {
+                         return {T(lambda) * sqrt(2 * stepSize * diffuseD) * T::random_normal<RandomType>()};
+                     });
+        toNextMean(y, i, solver.getSolution().row(0));
     }
-    x *= reciprocal(ScalarType(iteration));
-    const VectorND<ScalarType> log_x = ln(x);
-    const VectorND<ScalarType> t = VectorND<ScalarType>::linspace(0, t_max - stepSize, count);
-    const VectorND<ScalarType> log_x_theory = ScalarType(-lambda) * t;
-    if (abs(log_x - log_x_theory).max() > ScalarType(0.178))
+
+    const VectorND<T> t = VectorND<T>::linspace(0, t_max, y.getLength());
+    const VectorND<T> ln_y = ln(y);
+    const auto param = LinearFit<T>::fit(t, ln_y);
+    const auto devia = LinearFit<T>::deviation(t, ln_y, param);
+    if (abs(-param.first - lambda) > T(3) * devia.first)
         return 1;
     return 0;
 }

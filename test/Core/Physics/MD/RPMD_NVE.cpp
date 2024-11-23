@@ -42,13 +42,12 @@ constexpr double unitMassM = 1;
 constexpr size_t numReplica = 8;
 constexpr size_t maxHandleNum = 100;
 
-MDCellType makeSystem(std::mt19937& gen) {
+MDCellType makeSystem() {
     MDCellType::LatticeMatrix lattice{latticeSize};
 
     std::uniform_real_distribution dist{};
-    VectorND<ScalarType> posVec(numMolecular);
-    for (auto& elem : posVec)
-        elem = dist(gen) * latticeSize;
+    auto posVec = VectorND<ScalarType>::random_uniform<RandomType>(numMolecular);
+    posVec *= ScalarType(latticeSize);
     std::sort(posVec.begin(), posVec.end());
     MDCellType::PositionMatrix pos(numMolecular, 1);
     pos.col(0) = posVec;
@@ -63,11 +62,10 @@ MDCellType makeSystem(std::mt19937& gen) {
 int main() {
     const double timeStep = timeStepLambda * (latticeSize / numMolecular) * std::sqrt(unitMassM / temperatureT);
     auto& pool = RandomType::getInstance();
-    auto& gen = pool.getGen();
     VectorType nve(20000);
     {
-        MDType rpmd = MDType(makeSystem(gen), numReplica, numReplica, temperatureT, timeStep);
-        rpmd.initMomentum<KineticModel, decltype(gen)>(gen);
+        MDType rpmd = MDType(makeSystem(), numReplica, numReplica, temperatureT, timeStep);
+        rpmd.initMomentum<KineticModel, RandomType>();
         KineticModel kineticModel(latticeSize, collideFactor, temperatureT, numMolecular, numReplica, maxHandleNum);
         kineticModel.updateMass(rpmd.getRingPolymer());
         ForceModel forceModel{};

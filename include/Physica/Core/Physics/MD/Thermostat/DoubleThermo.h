@@ -50,15 +50,15 @@ namespace Physica::Core {
         /* Operators */
         DoubleThermo& operator=(DoubleThermo obj) noexcept { swap(obj); return *this; }
         /* Operations */
-        template<class RandomType, class Executor>
-        void step(RingPolymerType& ringPolymer, ScalarType deltaT, RandomType& pool) const;
+        template<RandomGenerator R, class Executor>
+        void step(RingPolymerType& ringPolymer, ScalarType deltaT) const;
         void swap(DoubleThermo& __restrict obj) noexcept;
         /* Setters */
         void setTemperature(ScalarType temperatureT_) { temperatureT = temperatureT_; }
         void setThermostatTime(ScalarType time) { thermostatTime = time; }
     private:
-        template<class RandomType>
-        ScalarType makeTranslationalFactor(const RingPolymerType& ringPolymer, ScalarType deltaT, RandomType& pool) const;
+        template<RandomGenerator R>
+        ScalarType makeTranslationalFactor(const RingPolymerType& ringPolymer, ScalarType deltaT) const;
     };
 
     template<class KineticModel>
@@ -67,16 +67,16 @@ namespace Physica::Core {
             , thermostatTime(thermostatTime_) {}
 
     template<class KineticModel>
-    template<class RandomType, class Executor>
+    template<RandomGenerator R, class Executor>
     void DoubleThermo<KineticModel>::step(
-            RingPolymerType& ringPolymer, ScalarType deltaT, RandomType& pool) const {
+            RingPolymerType& ringPolymer, ScalarType deltaT) const {
         const size_t dof = ringPolymer.getDOF();
-        const ScalarType factor_translational = makeTranslationalFactor<RandomType>(ringPolymer, deltaT, pool);
+        const ScalarType factor_translational = makeTranslationalFactor<R>(ringPolymer, deltaT);
         if constexpr (NumReplica != 1) {
             const ScalarType repBeta = ringPolymer.calcRepBeta(temperatureT);
             const ScalarType omegaW = ringPolymer.calcOmegaW(temperatureT);
             auto future = Executor::parallel_for(
-                [factor_translational, repBeta, omegaW, deltaT, &ringPolymer, &pool](unsigned int i) {
+                [factor_translational, repBeta, omegaW, deltaT, &ringPolymer](unsigned int i) {
                     const size_t numReplica = ringPolymer.getNumReplica();
                     const auto& massVec = ringPolymer.getMassVec();
 
@@ -86,7 +86,7 @@ namespace Physica::Core {
                     BufferType buffer(2, ringPolymer.getKSpaceSize());
 
                     ringPolymer.toNormalRepr(i, ringPolymer.asMatrix(), buffer, fft);
-                    fft.getRSpace().random_normal(pool);
+                    fft.getRSpace().template random_normal<R>();
                     FFT<ScalarType, 1>::transform(ringPolymer.getFFT(), fft);
                     /* Translational mode */ {
                         buffer(0, 0) *= factor_translational;
@@ -116,9 +116,9 @@ namespace Physica::Core {
     }
 
     template<class KineticModel>
-    template<class RandomType>
+    template<RandomGenerator R>
     DoubleThermo<KineticModel>::ScalarType DoubleThermo<KineticModel>::makeTranslationalFactor(
-            const RingPolymerType& ringPolymer, ScalarType deltaT, RandomType& pool) const {
+            const RingPolymerType& ringPolymer, ScalarType deltaT) const {
         using Integrator = SRK2<ScalarType, 1>;
         using VectorType = Integrator::VectorType;
 
@@ -132,8 +132,8 @@ namespace Physica::Core {
                             [this]([[maybe_unused]] ScalarType x, VectorType sol) -> VectorType {
                                 return {(temperatureT - sol[0]) / thermostatTime};
                             },
-                            [this, dof, &pool]([[maybe_unused]] ScalarType x, VectorType sol) -> VectorType {
-                                const ScalarType rand = ScalarType::random_normal(pool);
+                            [this, dof]([[maybe_unused]] ScalarType x, VectorType sol) -> VectorType {
+                                const ScalarType rand = ScalarType::template random_normal<R>();
                                 return {sqrt((temperatureT * sol[0]) / (thermostatTime * dof)) * 2 * rand};
                             });
         if (!sol[0].isPositive()) [[unlikely]]

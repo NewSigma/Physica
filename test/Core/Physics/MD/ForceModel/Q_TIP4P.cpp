@@ -16,17 +16,17 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
+#include <iostream>
 #include "Physica/Core/Physics/MD/ForceModel/Ewald/Ewald.h"
 #include "Physica/Core/Physics/MD/ForceModel/Q_TIP4P.h"
 #include "Physica/Core/MultiPrecision/AutoDiffGuard.h"
-#include "Physica/Core/Parallel/Executor/SequentialExecutor.h"
 
 using namespace Physica;
 using namespace Physica::Core;
 
 namespace Physica {
     class Test {
-        using RandomGenerator = std::mt19937;
+        using RandomType = Random<MT19937, 3251508104675666787>;
         using ValueType = float64;
         using ScalarType = Diff<ValueType, DiffMode::Reverse, 1>;
         using MDCellType = MDCell<ScalarType>;
@@ -42,8 +42,7 @@ namespace Physica {
             const ScalarType volume = ((MoleculePerCell * massMoleculeInSI * 1000 / 0.997) * 1E-6) / (PhyConst<SI>::bohrRadius * PhyConst<SI>::bohrRadius * PhyConst<SI>::bohrRadius);
             const unsigned int cellSize = 3;
             const AutoDiffGuard<ScalarType> guard{};
-            RandomGenerator gen{};
-            auto cell = makeSystem(cellSize, volume, gen);
+            auto cell = makeSystem(cellSize, volume);
             ForceModel::sortPosition(cell);
             ForceModel forceModel(cell, pair_cutoff, Ewald<ScalarType>{});
             {
@@ -58,16 +57,15 @@ namespace Physica {
             }
         }
     private:
-        static Vector3D<ScalarType> randomVector(ScalarType latticeConst, RandomGenerator& gen) {
-            std::uniform_real_distribution dist{};
-            const ScalarType theta(dist(gen) * M_PI);
-            const ScalarType phi(dist(gen) * M_PI * 2);
+        static Vector3D<ScalarType> randomVector(ScalarType latticeConst) {
+            const ScalarType theta(ScalarType::random_uniform<RandomType>() * ScalarType(M_PI));
+            const ScalarType phi(ScalarType::random_uniform<RandomType>() * ScalarType(M_PI * 2));
             Vector3D<ScalarType> result{cos(phi) * sin(theta), sin(phi) * sin(theta), cos(theta)};
             result *= ScalarType(ForceModel::equalR / double(latticeConst.getValue())) * latticeConst; // Pass grad to latticeConst while keep O-H bond length unchanged
             return result;
         }
 
-        static MDCell<ScalarType> makeSystem(unsigned int cellSize, ScalarType cellVolume, RandomGenerator& gen) {
+        static MDCell<ScalarType> makeSystem(unsigned int cellSize, ScalarType cellVolume) {
             using CrystalCellType = CrystalCell<ScalarType>;
             constexpr size_t maxIndexH = MoleculePerCell * 2;
             constexpr size_t maxIndexO = MoleculePerCell * 3;
@@ -80,7 +78,7 @@ namespace Physica {
             CrystalCellType::PositionMatrix pos(numAtom, 3);
             std::uniform_real_distribution dist(-0.1, 0.1);
             for (size_t i = 0; i < MoleculePerCell; ++i) {
-                auto temp = Vector3D<ScalarType>::random_any(3, dist, gen);
+                auto temp = Vector3D<ScalarType>::random_any<decltype(dist), RandomType>(3, dist);
                 if (i == 0) {
                     temp[0] += ScalarType(0.25);
                     temp[1] += ScalarType(0.25);
@@ -108,8 +106,8 @@ namespace Physica {
                 auto posH1 = pos.row(2 * i);
                 auto posH2 = pos.row(2 * i + 1);
                 posO = temp;
-                posH1 = temp + randomVector(latticeConst, gen);
-                posH2 = temp + randomVector(latticeConst, gen);
+                posH1 = temp + randomVector(latticeConst);
+                posH2 = temp + randomVector(latticeConst);
             }
 
             CrystalCellType::AtomicArray atomicNumbers(numAtom);

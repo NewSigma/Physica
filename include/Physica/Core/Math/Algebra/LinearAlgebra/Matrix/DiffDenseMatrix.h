@@ -93,24 +93,24 @@ namespace Physica::Core {
         /* Operations */
         [[nodiscard]] inline ScalarType calc(size_t row, size_t col) const;
 
-        template<class RandomType>
-        inline void random_uniform(RandomType& gen);
-        template<class RandomType>
-        inline void random_normal(RandomType& gen);
-        template<class Distribution, class RandomType>
-        inline void random_any(Distribution& dist, RandomType& gen);
+        template<RandomGenerator R>
+        inline void random_uniform();
+        template<RandomGenerator R>
+        inline void random_normal();
+        template<class Distribution, RandomGenerator R>
+        inline void random_any(Distribution& dist);
         void swap(Diff& obj) noexcept { std::swap(*this, obj); }
         /* Getters */
         using Dim::getCol;
         using Dim::getRow;
         [[nodiscard]] size_t getSize() const noexcept { return traceSeg.getLength(); }
         /* Static members */
-        template<class RandomType>
-        [[nodiscard]] inline static This random_uniform(size_t row, size_t col, RandomType& gen);
-        template<class RandomType>
-        [[nodiscard]] inline static This random_normal(size_t row, size_t col, RandomType& gen);
-        template<class Distribution, class RandomType>
-        [[nodiscard]] inline static This random_any(size_t row, size_t col, Distribution& dist, RandomType& gen);
+        template<RandomGenerator R>
+        [[nodiscard]] inline static This random_uniform(size_t row, size_t col);
+        template<RandomGenerator R>
+        [[nodiscard]] inline static This random_normal(size_t row, size_t col);
+        template<class Distribution, RandomGenerator R>
+        [[nodiscard]] inline static This random_any(size_t row, size_t col, Distribution& dist);
     private:
         friend class device_obj<This>;
     };

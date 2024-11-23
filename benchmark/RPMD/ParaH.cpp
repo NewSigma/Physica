@@ -38,14 +38,13 @@ constexpr double molarVolume = 31.7;
 constexpr double mass = PhyConst<AU>::atomMass(1) * 2;
 
 namespace {
-    template<class RandomType>
-    RPMD<ScalarType> makeSystem(size_t numMolecular, RandomType& gen) {
+    RPMD<ScalarType> makeSystem(size_t numMolecular) {
         using MDCellType = RPMD<ScalarType>::MDCellType;
         MDCellType::LatticeMatrix lattice = MDCellType::LatticeMatrix::unitMatrix(3);
         MDCellType::PositionMatrix pos(numMolecular, 3);
         std::uniform_real_distribution dist{};
         for (auto& elem : pos.asArray())
-            elem = dist(gen);
+            elem = dist(RandomType::getInstance());
         MDCellType::MassVector massVec(numMolecular, mass);
         MDCellType cell(std::move(lattice), std::move(pos), std::move(massVec));
 
@@ -60,12 +59,11 @@ namespace {
      */
     void bench108(benchmark::State& state) {
         ThreadPool::numThreadRequired = 4;
-        auto& gen = RandomType::getInstance().getGen();
         KineticModel kineticModel(temperatureT, numReplica);
         ForceModel forceModel(pair_cutoff);
 
-        auto rpmd = makeSystem(108, gen);
-        rpmd.initMomentum<KineticModel, decltype(gen)>(gen);
+        auto rpmd = makeSystem(108);
+        rpmd.initMomentum<KineticModel, RandomType>();
         for (auto _ : state)
             rpmd.nve_step_for<KineticModel, ForceModel, ThreadExecutor>(
                 PhyConst<AU>::secondToTime(2 * 1E-13),
@@ -75,12 +73,11 @@ namespace {
 
     void bench256(benchmark::State& state) {
         ThreadPool::numThreadRequired = 4;
-        auto& gen = RandomType::getInstance().getGen();
         KineticModel kineticModel(temperatureT, numReplica);
         ForceModel forceModel(pair_cutoff);
 
-        auto rpmd = makeSystem(256, gen);
-        rpmd.initMomentum<KineticModel, decltype(gen)>(gen);
+        auto rpmd = makeSystem(256);
+        rpmd.initMomentum<KineticModel, RandomType>();
         for (auto _ : state)
             rpmd.nve_step_for<KineticModel, ForceModel, ThreadExecutor>(
                 PhyConst<AU>::secondToTime(2 * 1E-13),
@@ -90,12 +87,11 @@ namespace {
 
     void bench500(benchmark::State& state) {
         ThreadPool::numThreadRequired = 4;
-        auto& gen = RandomType::getInstance().getGen();
         KineticModel kineticModel(temperatureT, numReplica);
         ForceModel forceModel(pair_cutoff);
 
-        auto rpmd = makeSystem(500, gen);
-        rpmd.initMomentum<KineticModel, decltype(gen)>(gen);
+        auto rpmd = makeSystem(500);
+        rpmd.initMomentum<KineticModel, RandomType>();
         for (auto _ : state)
             rpmd.nve_step_for<KineticModel, ForceModel, ThreadExecutor>(
                 PhyConst<AU>::secondToTime(1 * 1E-13),
@@ -105,12 +101,11 @@ namespace {
 
     void bench864(benchmark::State& state) {
         ThreadPool::numThreadRequired = 4;
-        auto& gen = RandomType::getInstance().getGen();
         KineticModel kineticModel(temperatureT, numReplica);
         ForceModel forceModel(pair_cutoff);
 
-        auto rpmd = makeSystem(864, gen);
-        rpmd.initMomentum<KineticModel, decltype(gen)>(gen);
+        auto rpmd = makeSystem(864);
+        rpmd.initMomentum<KineticModel, RandomType>();
         for (auto _ : state)
             rpmd.nve_step_for<KineticModel, ForceModel, ThreadExecutor>(
                 PhyConst<AU>::secondToTime(5 * 1E-14),

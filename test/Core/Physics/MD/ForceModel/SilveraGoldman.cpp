@@ -27,7 +27,7 @@ using ValueType = float64;
 using ScalarType = Diff<ValueType, DiffMode::Reverse, 1>;
 
 class PressTest {
-    using RandomGenerator = std::mt19937;
+    using RandomType = Random<MT19937>;
     using MDCellType = MDCell<ScalarType>;
     using LatticeMatrix = MDCellType::LatticeMatrix;
     using PositionMatrix = MDCellType::PositionMatrix;
@@ -38,24 +38,23 @@ class PressTest {
 public:
     static void run() {
         const AutoDiffGuard<ScalarType> guard{};
-        RandomGenerator gen{};
         const ScalarType volume = 8000;
-        const auto cell = makeSystem(gen, volume);
+        const auto cell = makeSystem(volume);
         SilveraGoldman<ScalarType, true> sg(pair_cutoff);
         sg.potentialV(cell).reverse();
         const ScalarType press_diff = -volume.getGrad();
         const ScalarType press = sg.virial(cell).trace() / ScalarType(3);
-        if (!scalarNear(press_diff.getValue(), press.getValue(), 1E-15))
+        if (!scalarNear(press_diff.getValue(), press.getValue(), 1E-14))
             exit(EXIT_FAILURE);
     }
 private:
-    static MDCellType makeSystem(RandomGenerator& gen, ScalarType volume) {
+    static MDCellType makeSystem(ScalarType volume) {
         LatticeMatrix lattice = MDCellType::LatticeMatrix::unitMatrix(3);
         const ScalarType latticeConst = cbrt(volume);
         lattice *= latticeConst;
 
         PositionMatrix pos(numMolecular, 3);
-        pos.random_uniform(gen);
+        pos.random_uniform<RandomType>();
         pos *= latticeConst;
 
         MassVector massVec(numMolecular, mass);

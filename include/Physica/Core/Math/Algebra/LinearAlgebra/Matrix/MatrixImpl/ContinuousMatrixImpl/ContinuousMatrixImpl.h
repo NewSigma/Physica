@@ -275,8 +275,8 @@ namespace Physica::Core {
     }
 
     template<class Derived>
-    template<class RandomGenerator>
-    void ContinuousMatrix<Derived>::random_uniform(RandomGenerator& gen) {
+    template<RandomGenerator R>
+    void ContinuousMatrix<Derived>::random_uniform() {
         if constexpr (isReverseDiff) {
             using TracerType = ScalarType::TracerType;
             const size_t maxMajor = Base::getMaxMajor();
@@ -284,15 +284,15 @@ namespace Physica::Core {
             TracerType::getInstance().reserve(maxMajor * maxMinor);
             for (size_t major = 0; major < maxMajor; ++major)
                 for (size_t minor = 0; minor < maxMinor; ++minor)
-                    Base::refFromMajorMinor(major, minor) = ScalarType::random_uniform(gen);
+                    Base::refFromMajorMinor(major, minor) = ScalarType::template random_uniform<R>();
         }
         else
-            Base::random_uniform(gen);
+            Base::template random_uniform<R>();
     }
 
     template<class Derived>
-    template<class RandomGenerator>
-    void ContinuousMatrix<Derived>::random_normal(RandomGenerator& gen) {
+    template<RandomGenerator R>
+    void ContinuousMatrix<Derived>::random_normal() {
         if constexpr (isReverseDiff) {
             using TracerType = ScalarType::TracerType;
             const size_t maxMajor = Base::getMaxMajor();
@@ -300,15 +300,15 @@ namespace Physica::Core {
             TracerType::getInstance().reserve(maxMajor * maxMinor);
             for (size_t major = 0; major < maxMajor; ++major)
                 for (size_t minor = 0; minor < maxMinor; ++minor)
-                    Base::refFromMajorMinor(major, minor) = ScalarType::random_normal(gen);
+                    Base::refFromMajorMinor(major, minor) = ScalarType::template random_normal<R>();
         }
         else
-            Base::random_normal(gen);
+            Base::template random_normal<R>();
     }
 
     template<class Derived>
-    template<class Distribution, class RandomGenerator>
-    void ContinuousMatrix<Derived>::random_any(Distribution& dist, RandomGenerator& gen) {
+    template<class Distribution, RandomGenerator R>
+    void ContinuousMatrix<Derived>::random_any(Distribution& dist) {
         if constexpr (isReverseDiff) {
             using TracerType = ScalarType::TracerType;
             const size_t maxMajor = Base::getMaxMajor();
@@ -316,10 +316,10 @@ namespace Physica::Core {
             TracerType::getInstance().reserve(maxMajor * maxMinor);
             for (size_t major = 0; major < maxMajor; ++major)
                 for (size_t minor = 0; minor < maxMinor; ++minor)
-                    Base::refFromMajorMinor(major, minor) = ScalarType::random_any(dist, gen);
+                    Base::refFromMajorMinor(major, minor) = ScalarType::template random_any<decltype(dist), R>(dist);
         }
         else
-            Base::random_any(dist, gen);
+            Base::template random_any<R>(dist);
     }
 #ifdef PHYSICA_HDF5
     template<class Derived>

@@ -112,8 +112,8 @@ namespace Physica::Core {
         /* Static members */
         template<bool... Flags>
         [[nodiscard]] static SIMD makeSignBits();
-        template<class RandomType>
-        [[nodiscard]] static SIMD random_uniform(RandomType& gen);
+        template<RandomGenerator R>
+        [[nodiscard]] static SIMD random_uniform();
         [[nodiscard]] static SIMD select(BoolSIMDType flags, const SIMD& x, const SIMD& y);
     private:
         template<int Order, int... Orders>

@@ -27,9 +27,9 @@ namespace Physica::Core {
      * Reference:
      * [1] SIAM J. Sci. Comput. 43, B937-B960 (2021); https://doi.org/10.1137/20M1371385
      */
-    template<Scalar T, class RandomType>
+    template<Scalar T, RandomGenerator R>
     class RandomBatchEwald : private RSpaceEwald<T, false> {
-        using This = RandomBatchEwald<T, RandomType>;
+        using This = RandomBatchEwald<T, R>;
         using Base = RSpaceEwald<T, false>;
         using Base::Dim;
         using typename Base::ValueType;
@@ -76,14 +76,14 @@ namespace Physica::Core {
         [[nodiscard]] static bool checkParam(const LatticeMatrix& lattice);
     };
 
-    template<Scalar T, class RandomType>
-    RandomBatchEwald<T, RandomType>::RandomBatchEwald(size_t samplePoolSize, size_t batchSize_)
+    template<Scalar T, RandomGenerator R>
+    RandomBatchEwald<T, R>::RandomBatchEwald(size_t samplePoolSize, size_t batchSize_)
             : Base()
             , samplePool(samplePoolSize, Dim)
             , batchSize(batchSize_)  {}
 
-    template<Scalar T, class RandomType>
-    RandomBatchEwald<T, RandomType>::RandomBatchEwald(
+    template<Scalar T, RandomGenerator R>
+    RandomBatchEwald<T, R>::RandomBatchEwald(
             size_t samplePoolSize,
             size_t batchSize_,
             LatticeMatrix lattice,
@@ -94,16 +94,16 @@ namespace Physica::Core {
         setIntegralLimit(calcDefaultIntegralLimit());
     }
 
-    template<Scalar T, class RandomType>
-    RandomBatchEwald<T, RandomType>& RandomBatchEwald<T, RandomType>::operator=(Base base) {
+    template<Scalar T, RandomGenerator R>
+    RandomBatchEwald<T, R>& RandomBatchEwald<T, R>::operator=(Base base) {
         Base::swap(base);
         setIntegralLimit(calcDefaultIntegralLimit());
         return *this;
     }
 
-    template<Scalar T, class RandomType>
+    template<Scalar T, RandomGenerator R>
     template<class Executor>
-    VectorND<T> RandomBatchEwald<T, RandomType>::force(const PositionMatrix& pos) const {
+    VectorND<T> RandomBatchEwald<T, R>::force(const PositionMatrix& pos) const {
         VectorND<T> result;
         auto kSpaceFuture = Executor::schedule([this, pos, &result]() {
             result = force_long<SequentialExecutor>(pos);
@@ -114,9 +114,9 @@ namespace Physica::Core {
         return result;
     }
     //TODO: time reversal symmetry?
-    template<Scalar T, class RandomType>
+    template<Scalar T, RandomGenerator R>
     template<class Executor>
-    VectorND<T> RandomBatchEwald<T, RandomType>::force_long(const PositionMatrix& pos) const {
+    VectorND<T> RandomBatchEwald<T, R>::force_long(const PositionMatrix& pos) const {
         const size_t numParticle = getNumParticle();
         VectorND<T> kSpaceSum(numParticle * Dim, 0);
         VectorND<T> dots(numParticle);
@@ -151,15 +151,15 @@ namespace Physica::Core {
         return kSpaceSum;
     }
 
-    template<Scalar T, class RandomType>
-    T RandomBatchEwald<T, RandomType>::calcDefaultIntegralLimit() const {
+    template<Scalar T, RandomGenerator R>
+    T RandomBatchEwald<T, R>::calcDefaultIntegralLimit() const {
         const T averageCellSize = cbrt(Base::getVolume());
         const T result = cbrt(T(getNumParticle())) * T(M_PI * 0.5) / averageCellSize; // Constant estimated from results of [1]
         return result;
     }
 
-    template<Scalar T, class RandomType>
-    void RandomBatchEwald<T, RandomType>::swap(RandomBatchEwald& __restrict obj) noexcept {
+    template<Scalar T, RandomGenerator R>
+    void RandomBatchEwald<T, R>::swap(RandomBatchEwald& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         Base::swap(obj);
         sumGauss.swap(obj.sumGauss);
@@ -167,21 +167,21 @@ namespace Physica::Core {
         samplePool.swap(obj.samplePool);
     }
 
-    template<Scalar T, class RandomType>
-    void RandomBatchEwald<T, RandomType>::setLattice(LatticeMatrix lattice) {
+    template<Scalar T, RandomGenerator R>
+    void RandomBatchEwald<T, R>::setLattice(LatticeMatrix lattice) {
         Base::setLattice(std::move(lattice));
         setIntegralLimit(calcDefaultIntegralLimit());
     }
 
-    template<Scalar T, class RandomType>
-    void RandomBatchEwald<T, RandomType>::setIntegralLimit(T integralLimit) {
+    template<Scalar T, RandomGenerator R>
+    void RandomBatchEwald<T, R>::setIntegralLimit(T integralLimit) {
         Base::setIntegralLimit(integralLimit);
         updateSumGauss();
         updateSamplePool();
     }
 
-    template<Scalar T, class RandomType>
-    void RandomBatchEwald<T, RandomType>::updateSumGauss() {
+    template<Scalar T, RandomGenerator R>
+    void RandomBatchEwald<T, R>::updateSumGauss() {
         sumGauss = 0;
         const T factor = reciprocal(square(ValueType(2) * Base::getIntegralLimit()));
         PeriodicCell<T, Dim>::forReducedCellInRange( // Reduce cell using time reversal symmetry
@@ -194,8 +194,8 @@ namespace Physica::Core {
         sumGauss *= ValueType(2);
     }
 
-    template<Scalar T, class RandomType>
-    void RandomBatchEwald<T, RandomType>::updateSamplePool() {
+    template<Scalar T, RandomGenerator R>
+    void RandomBatchEwald<T, R>::updateSamplePool() {
         const size_t poolSize = getSamplePoolSize();
         for (size_t i = 0; i < Dim; ++i) {
             const auto& repLattice = Base::getRepLattice();
@@ -212,15 +212,14 @@ namespace Physica::Core {
         }
     }
 
-    template<Scalar T, class RandomType>
-    inline void RandomBatchEwald<T, RandomType>::monteCarloStep(
+    template<Scalar T, RandomGenerator R>
+    inline void RandomBatchEwald<T, R>::monteCarloStep(
             int& sample,
             T& prop_last,
             T deviation,
             T factor,
             T propAtZero) const {
-        auto& pool = RandomType::getInstance();
-        const T rand = T::random_normal(pool);
+        const T rand = T::template random_normal<R>();
         const T x0 = rand * deviation + T(rand.isPositive() ? 0.5 : -0.5);
         const int sample_new = double(x0);
         const T x1 = T(sample_new);
@@ -238,7 +237,7 @@ namespace Physica::Core {
             prop_last = prop_new;
         }
         else {
-            const T temp = T::random_uniform(pool);
+            const T temp = T::template random_uniform<R>();
             if (prop_new / prop_last > temp) {
                 sample = sample_new;
                 prop_last = prop_new;
@@ -246,18 +245,18 @@ namespace Physica::Core {
         }
     }
 
-    template<Scalar T, class RandomType>
-    Vector3D<T> RandomBatchEwald<T, RandomType>::randWaveG() const {
+    template<Scalar T, RandomGenerator R>
+    Vector3D<T> RandomBatchEwald<T, R>::randWaveG() const {
         auto dist = std::uniform_int_distribution<size_t>(0, getSamplePoolSize() - 1);
-        auto& gen = RandomType::getInstance().getGen();
+        auto& gen = R::getInstance();
         Vector3D<T> result{};
         for (size_t i = 0; i < Dim; ++i)
             result[i] = samplePool(dist(gen), i);
         return result;
     }
 
-    template<Scalar T, class RandomType>
-    bool RandomBatchEwald<T, RandomType>::checkParam(const LatticeMatrix& lattice) {
+    template<Scalar T, RandomGenerator R>
+    bool RandomBatchEwald<T, R>::checkParam(const LatticeMatrix& lattice) {
         for (int i = 0; i < Dim; ++i) {
             for (int j = 0; j < Dim; ++j) {
                 if (i == j)
@@ -271,8 +270,8 @@ namespace Physica::Core {
 }
 
 namespace Physica {
-    template<Scalar T, class RandomType>
-    class Traits<RandomBatchEwald<T, RandomType>> : public Traits<RSpaceEwald<T, false>> {
+    template<Scalar T, RandomGenerator R>
+    class Traits<RandomBatchEwald<T, R>> : public Traits<RSpaceEwald<T, false>> {
     public:
         using REwaldType = RSpaceEwald<T, false>;
     };

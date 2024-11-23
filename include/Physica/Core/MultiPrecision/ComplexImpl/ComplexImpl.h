@@ -101,18 +101,18 @@ namespace Physica::Core {
     }
 
     template<Scalar T>
-    template<class RandomGenerator>
-    Complex<T> Complex<T>::random_uniform(RandomGenerator& gen) {
-        T re = T::random_uniform(gen);
-        T im = T::random_uniform(gen);
+    template<RandomGenerator R>
+    Complex<T> Complex<T>::random_uniform() {
+        T re = T::template random_uniform<R>();
+        T im = T::template random_uniform<R>();
         return Complex(std::move(re), std::move(im));
     }
 
     template<Scalar T>
-    template<class RandomGenerator>
-    Complex<T> Complex<T>::random_normal(RandomGenerator& gen) {
-        T re = T::random_normal(gen);
-        T im = T::random_normal(gen);
+    template<RandomGenerator R>
+    Complex<T> Complex<T>::random_normal() {
+        T re = T::template random_normal<R>();
+        T im = T::template random_normal<R>();
         return Complex(std::move(re), std::move(im));
     }
 #ifdef PHYSICA_HDF5

@@ -87,7 +87,7 @@ int main() {
         ThermostatType thermo(temperatureT, thermostatTime, true);
 
         rpmd.nvt_step_for<ThermostatType, RandomType, KineticModel, ForceModel, ThreadExecutor>(
-                PhyConst<AU>::secondToTime(1E-12), thermo, RandomType::getInstance(), kineticModel, forceModel);
+                PhyConst<AU>::secondToTime(1E-12), thermo, kineticModel, forceModel);
         energy[step] = rpmd.calcPotential<ForceModel, SequentialExecutor>(forceModel);
     }
 

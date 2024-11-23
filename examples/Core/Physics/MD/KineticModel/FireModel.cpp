@@ -52,10 +52,9 @@ MDCell<ScalarType> makeSystem() {
     ForceModel::sortPosition(cell1);
 
     pos = cell1.getPos();
-    auto& gen = RandomType::getInstance().getGen();
     std::normal_distribution<double> dist(0, 0.5);
     for (auto& elem : pos)
-        elem += ScalarType::random_any(dist, gen); //Perturbation
+        elem += ScalarType::random_any<RandomType>(dist); //Perturbation
     cell1.setPos(pos);
     return cell1;
 }

@@ -38,18 +38,15 @@ constexpr double timeStep = PhyConst<AU>::secondToTime(1E-15) * 0.25;
 constexpr double pair_cutoff = PhyConst<AU>::angstormToBohr(9);
 constexpr double massMoleculeInSI = PhyConst<SI>::atomMass(1) * 2 + PhyConst<SI>::atomMass(8);
 
-template<class RandomGenerator>
-Vector3D<ScalarType> randomVector(RandomGenerator& gen) {
-    std::uniform_real_distribution dist{};
-    const ScalarType theta(dist(gen) * M_PI);
-    const ScalarType phi(dist(gen) * M_PI * 2);
+Vector3D<ScalarType> randomVector() {
+    const ScalarType theta(ScalarType::random_uniform<RandomType>() * M_PI);
+    const ScalarType phi(ScalarType::random_uniform<RandomType>() * M_PI * 2);
     Vector3D<ScalarType> result{cos(phi) * sin(theta), sin(phi) * sin(theta), cos(theta)};
     result *= ScalarType(ForceModel::equalR);
     return result;
 }
 
-template<class RandomGenerator>
-MDCell<ScalarType> makeSystem(unsigned int cellSize, RandomGenerator& gen) {
+MDCell<ScalarType> makeSystem(unsigned int cellSize) {
     using CrystalCellType = CrystalCell<ScalarType>;
     constexpr size_t MoleculePerCell = 4;
     constexpr size_t maxIndexH = MoleculePerCell * 2;
@@ -63,6 +60,7 @@ MDCell<ScalarType> makeSystem(unsigned int cellSize, RandomGenerator& gen) {
 
     CrystalCellType::PositionMatrix pos(numAtom, 3);
     std::uniform_real_distribution dist{};
+    auto& gen = RandomType::getInstance();
     for (size_t i = 0; i < MoleculePerCell; ++i) {
         auto posO = pos.row(i + maxIndexH);
         if (i == 0) {
@@ -87,8 +85,8 @@ MDCell<ScalarType> makeSystem(unsigned int cellSize, RandomGenerator& gen) {
         }
         auto posH1 = pos.row(2 * i);
         auto posH2 = pos.row(2 * i + 1);
-        posH1 = posO + randomVector(gen);
-        posH2 = posO + randomVector(gen);
+        posH1 = posO + randomVector();
+        posH2 = posO + randomVector();
     }
 
     CrystalCellType::AtomicArray atomicNumbers(numAtom);
@@ -106,13 +104,11 @@ MDCell<ScalarType> makeSystem(unsigned int cellSize, RandomGenerator& gen) {
  * [1] S. Habershon, T. E. Markland, and D. E. Manolopoulosa, J. Chem. Phys. 131, 024501(2009)
  */
 int main() {
-    auto& pool = RandomType::getInstance();
-    auto& gen = pool.getGen();
-    auto cell = makeSystem(2, gen);
+    auto cell = makeSystem(2);
     ForceModel::sortPosition(cell);
     ForceModel forceModel(cell, pair_cutoff, RandomBatchEwald<ScalarType, RandomType>(1000, 200));
     RPMD<ScalarType> rpmd(std::move(cell), numReplica, numContract, temperatureT, timeStep);
-    rpmd.initMomentum<KineticModel, decltype(gen)>(gen);
+    rpmd.initMomentum<KineticModel, RandomType>();
 
     constexpr double answer = PhyConst<AU>::angstormToBohr(0.978);
     ScalarType bond = 0;
@@ -124,7 +120,6 @@ int main() {
         rpmd.nvt_step_for<ThermoType, RandomType, KineticModel, decltype(forceModel), SequentialExecutor>(
             PhyConst<AU>::secondToTime(1 * 1E-12),
             thermo,
-            pool,
             kineticModel,
             forceModel);
         for (size_t i = 0; i < 100; ++i) {
@@ -137,7 +132,7 @@ int main() {
                 toNextMean(temp, 2 * j + 1, cell.minDistVector(numH + j, 2 * j + 1).norm());
             }
             toNextMean(bond, i, temp);
-            rpmd.nvt_step<ThermoType, RandomType, KineticModel, decltype(forceModel), SequentialExecutor>(thermo, pool, kineticModel, forceModel);
+            rpmd.nvt_step<ThermoType, RandomType, KineticModel, decltype(forceModel), SequentialExecutor>(thermo, kineticModel, forceModel);
         }
     }
     ThreadPool::getInstance().shouldExit();

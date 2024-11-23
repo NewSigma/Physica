@@ -34,6 +34,7 @@ using MDType = RPMD<ScalarType, 1, 1>;
 using MDCellType = MDType::MDCellType;
 using ForceModel = EmptyForceModel<ScalarType, 1>;
 using KineticModel = HardCore<ScalarType, true, 1, RPMDIntegrator::Exact>;
+using RandomType = Random<MT19937>;
 constexpr double timeStep = 0.001;
 constexpr double collideFactor = 0.01;
 constexpr double latticeSize = 512;
@@ -43,30 +44,21 @@ constexpr double temperatureT = 2 * energy / numMolecular;
 constexpr size_t numStep = 1000000;
 constexpr size_t numSystem = 8;
 
-MDCellType makeSystem(std::mt19937& gen) {
+MDCellType makeSystem() {
     MDCellType::LatticeMatrix lattice{latticeSize};
-
-    std::uniform_real_distribution dist{};
-    VectorND<ScalarType> posVec(numMolecular);
-    for (auto& elem : posVec)
-        elem = dist(gen) * latticeSize;
+    auto posVec = VectorND<ScalarType>::random_uniform<RandomType>(numMolecular);
+    posVec *= ScalarType(latticeSize);
     std::sort(posVec.begin(), posVec.end());
     MDCellType::PositionMatrix pos(numMolecular, 1);
     pos.col(0) = posVec;
 
-    MDCellType::MassVector massVec(numMolecular);
-    for (auto& elem : massVec)
-        elem = dist(gen);
+    auto massVec = MDCellType::MassVector::random_uniform<RandomType>(numMolecular);
     return MDCellType(std::move(lattice), std::move(pos), std::move(massVec));
 }
 
 int main(int argc, char** argv) {
-    std::mt19937::result_type seed;
-    RandomSeed::rdrand(seed);
-    std::mt19937 gen(seed);
-
-    MDType rpmd = MDType(makeSystem(gen), 1, 1, temperatureT, timeStep);
-    rpmd.initMomentum<KineticModel, decltype(gen)>(gen);
+    MDType rpmd = MDType(makeSystem(), 1, 1, temperatureT, timeStep);
+    rpmd.initMomentum<KineticModel, RandomType>();
     KineticModel kineticModel(latticeSize, collideFactor, temperatureT, numMolecular, 1, 1000);
     kineticModel.updateMass(rpmd.getRingPolymer());
 

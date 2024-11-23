@@ -116,12 +116,12 @@ namespace Physica::Core {
         void resize(size_t r, size_t c) { Base::getDerived().resize(r, c); }
         inline void makeContinuous();
         [[nodiscard]] bool checkContinuous() const;
-        template<class RandomGenerator>
-        void random_uniform(RandomGenerator& gen);
-        template<class RandomGenerator>
-        void random_normal(RandomGenerator& gen);
-        template<class Distribution, class RandomGenerator>
-        void random_any(Distribution& dist, RandomGenerator& gen);
+        template<RandomGenerator R>
+        void random_uniform();
+        template<RandomGenerator R>
+        void random_normal();
+        template<class Distribution, RandomGenerator R>
+        void random_any(Distribution& dist);
 
         const H5DataSet<2> read(const H5Location& loc, const char* name);
         H5DataSet<2> write(H5Location& loc, const char* name) const;

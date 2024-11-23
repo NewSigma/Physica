@@ -66,10 +66,10 @@ namespace Physica::Core {
         [[nodiscard]] int getNumParticle() const noexcept { return countOnes(occupyBits); }
         [[nodiscard]] inline bool isTransReducible(int period = 1) const noexcept;
         /* Static members */
-        template<class RandomGenerator>
-        [[nodiscard]] static This random_state(RandomGenerator& gen);
-        template<class RandomGenerator>
-        [[nodiscard]] static This random_state(size_t numParticle, RandomGenerator& gen);
+        template<RandomGenerator R>
+        [[nodiscard]] static This random_state();
+        template<RandomGenerator R>
+        [[nodiscard]] static This random_state(size_t numParticle);
         [[nodiscard]] constexpr static IntType makeFullMask() noexcept { return (static_cast<IntType>(1) << NumSite) - 1; }
         [[nodiscard]] constexpr static IntType makeHighMask() noexcept { return (static_cast<IntType>(1) << (NumSite - 1)); }
     };

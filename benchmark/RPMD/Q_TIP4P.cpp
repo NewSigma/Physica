@@ -33,7 +33,6 @@ using ScalarType = float64;
 using KineticModel = FreeModel<ScalarType, 3, Physica::Dynamic, RPMDIntegrator::Exact>;
 using ForceModel = Q_TIP4P<ScalarType, Ewald<ScalarType>>;
 using ThermoType = DoubleThermo<KineticModel>;
-using RandomGenerator = std::mt19937;
 using RandomType = Random<MT19937>;
 constexpr size_t numReplica = 32;
 constexpr size_t numContract = 8;
@@ -44,18 +43,15 @@ constexpr double pair_cutoff = PhyConst<AU>::angstormToBohr(9);
 constexpr double massMoleculeInSI = PhyConst<SI>::atomMass(1) * 2 + PhyConst<SI>::atomMass(8);
 
 namespace {
-    template<class RandomType>
-    Vector3D<ScalarType> randomVector(RandomType& gen) {
-        std::uniform_real_distribution dist{};
-        const ScalarType theta(dist(gen) * M_PI);
-        const ScalarType phi(dist(gen) * M_PI * 2);
+    Vector3D<ScalarType> randomVector() {
+        const ScalarType theta(ScalarType::random_uniform<RandomType>() * M_PI);
+        const ScalarType phi(ScalarType::random_uniform<RandomType>() * M_PI * 2);
         Vector3D<ScalarType> result{cos(phi) * sin(theta), sin(phi) * sin(theta), cos(theta)};
         result *= ScalarType(ForceModel::equalR);
         return result;
     }
 
-    template<class RandomType>
-    MDCell<ScalarType> makeSystem(unsigned int cellSize, RandomType& gen) {
+    MDCell<ScalarType> makeSystem(unsigned int cellSize) {
         using CrystalCellType = CrystalCell<ScalarType>;
         constexpr size_t MoleculePerCell = 4;
         constexpr size_t maxIndexH = MoleculePerCell * 2;
@@ -93,8 +89,8 @@ namespace {
             }
             auto posH1 = pos.row(2 * i);
             auto posH2 = pos.row(2 * i + 1);
-            posH1 = posO + randomVector(gen);
-            posH2 = posO + randomVector(gen);
+            posH1 = posO + randomVector();
+            posH2 = posO + randomVector();
         }
 
         CrystalCellType::AtomicArray atomicNumbers(numAtom);
@@ -109,42 +105,39 @@ namespace {
     }
 
     void bench1(benchmark::State& state) {
-        auto& gen = RandomType::getInstance().getGen();
-        auto cell = makeSystem(2, gen);
+        auto cell = makeSystem(2);
         ForceModel::sortPosition(cell);
         ForceModel forceModel(cell, pair_cutoff, {});
         KineticModel kineticModel(temperatureT, numReplica);
         const ThermoType thermo(temperatureT, thermostatTime);
         RPMD<ScalarType> rpmd(std::move(cell), numReplica, numContract, temperatureT, timeStep);
-        rpmd.initMomentum<KineticModel, RandomGenerator>(gen);
+        rpmd.initMomentum<KineticModel, RandomType>();
         for (auto _ : state)
             rpmd.nve_step_for<KineticModel, ForceModel, SequentialExecutor>(PhyConst<AU>::secondToTime(1 * 1E-14), kineticModel, forceModel);
     }
 
     void bench2(benchmark::State& state) {
         ThreadPool::numThreadRequired = 2;
-        auto& gen = RandomType::getInstance().getGen();
-        auto cell = makeSystem(2, gen);
+        auto cell = makeSystem(2);
         ForceModel::sortPosition(cell);
         ForceModel forceModel(cell, pair_cutoff, {});
         KineticModel kineticModel(temperatureT, numReplica);
         const ThermoType thermo(temperatureT, thermostatTime);
         RPMD<ScalarType> rpmd(std::move(cell), numReplica, numContract, temperatureT, timeStep);
-        rpmd.initMomentum<KineticModel, RandomGenerator>(gen);
+        rpmd.initMomentum<KineticModel, RandomType>();
         for (auto _ : state)
             rpmd.nve_step_for<KineticModel, ForceModel, SequentialExecutor>(PhyConst<AU>::secondToTime(2 * 1E-14), kineticModel, forceModel);
     }
 
     void bench4(benchmark::State& state) {
         ThreadPool::numThreadRequired = 4;
-        auto& gen = RandomType::getInstance().getGen();
-        auto cell = makeSystem(2, gen);
+        auto cell = makeSystem(2);
         ForceModel::sortPosition(cell);
         ForceModel forceModel(cell, pair_cutoff, {});
         KineticModel kineticModel(temperatureT, numReplica);
         const ThermoType thermo(temperatureT, thermostatTime);
         RPMD<ScalarType> rpmd(std::move(cell), numReplica, numContract, temperatureT, timeStep);
-        rpmd.initMomentum<KineticModel, RandomGenerator>(gen);
+        rpmd.initMomentum<KineticModel, RandomType>();
         for (auto _ : state)
             rpmd.nve_step_for<KineticModel, ForceModel, SequentialExecutor>(PhyConst<AU>::secondToTime(2 * 1E-14), kineticModel, forceModel);
     }

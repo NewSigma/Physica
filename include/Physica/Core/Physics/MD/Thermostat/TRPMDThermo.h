@@ -41,8 +41,8 @@ namespace Physica::Core {
         /* Operators */
         TRPMDThermo& operator=(TRPMDThermo obj) noexcept;
         /* Operations */
-        template<class RandomType, class Executor>
-        void step(RingPolymerType& ringPolymer, T deltaT, RandomType& pool) const;
+        template<RandomGenerator R, class Executor>
+        void step(RingPolymerType& ringPolymer, T deltaT) const;
         void swap(TRPMDThermo& __restrict obj) noexcept;
         /* Setters */
         void setTemperature(T temperatureT_) { temperatureT = temperatureT_; }
@@ -60,11 +60,8 @@ namespace Physica::Core {
     }
 
     template<Scalar T, unsigned int Dim, size_t NumReplica>
-    template<class RandomType, class Executor>
-    void TRPMDThermo<T, Dim, NumReplica>::step(
-            RingPolymerType& ringPolymer,
-            T deltaT,
-            RandomType& pool) const {
+    template<RandomGenerator R, class Executor>
+    void TRPMDThermo<T, Dim, NumReplica>::step(RingPolymerType& ringPolymer, T deltaT) const {
         if constexpr (NumReplica == 1)
             return;
         const size_t dof = ringPolymer.getDOF();
@@ -72,7 +69,7 @@ namespace Physica::Core {
         if constexpr (NumReplica != 1) {
             const T omegaW = ringPolymer.calcOmegaW(temperatureT);
             auto future = Executor::parallel_for(
-                [repBeta, omegaW, deltaT, &ringPolymer, &pool](unsigned int i) {
+                [repBeta, omegaW, deltaT, &ringPolymer](unsigned int i) {
                     const size_t numReplica = ringPolymer.getNumReplica();
                     const auto& massVec = ringPolymer.getMassVec();
 
@@ -82,7 +79,7 @@ namespace Physica::Core {
                     BufferType buffer(2, ringPolymer.getKSpaceSize());
 
                     ringPolymer.toNormalRepr(i, ringPolymer.asMatrix(), buffer, fft);
-                    fft.getRSpace().random_normal(pool);
+                    fft.getRSpace().template random_normal<R>();
                     FFT<T, 1>::transform(ringPolymer.getFFT(), fft);
                     for (size_t j = 1; j < buffer.getCol(); ++j) {
                         const T phase = M_PI * j / numReplica;

@@ -34,17 +34,18 @@ constexpr double energy = numMolecular * temperatureT / 2;
 using ScalarType = float64;
 using VectorType = VectorND<ScalarType>;
 using MatrixType = DenseMatrix<ScalarType>;
+using RandomType = Random<MT19937, 12345>;
 using MDType = RPMD<ScalarType, 1, 1>;
 using MDCellType = MDType::MDCellType;
 using ForceModel = EmptyForceModel<ScalarType, 1>;
 
-MDCellType makeSystem(std::mt19937& gen) {
+MDCellType makeSystem() {
     MDCellType::LatticeMatrix lattice{latticeSize};
 
     std::uniform_real_distribution dist{};
     VectorND<ScalarType> posVec(numMolecular);
     for (auto& elem : posVec)
-        elem = dist(gen) * latticeSize;
+        elem = dist(RandomType::getInstance()) * latticeSize;
     std::sort(posVec.begin(), posVec.end());
     MDCellType::PositionMatrix pos(numMolecular, 1);
     pos.col(0) = posVec;
@@ -74,11 +75,10 @@ ScalarType calcThermoFlux(MDType& rpmd) {
 
 void testMergeStep() {
     using KineticModel = HardCore<ScalarType, true, 1, RPMDIntegrator::Exact, CUDAExecutor>;
-    std::mt19937 gen{};
-    MDType rpmd = MDType(makeSystem(gen), 1, 1, temperatureT, timeStep);
+    MDType rpmd = MDType(makeSystem(), 1, 1, temperatureT, timeStep);
     KineticModel kineticModel(latticeSize, collideFactor, temperatureT, numMolecular, 100);
     kineticModel.updateMass(rpmd.getRingPolymer());
-    rpmd.initMomentum<KineticModel, decltype(gen)>(gen);
+    rpmd.initMomentum<KineticModel, RandomType>();
 
     const MatrixType origin = rpmd.getPhaseMatrix();
     kineticModel.nve_step(rpmd.getRingPolymer(), timeStep);
@@ -103,11 +103,11 @@ void testCpuGpuCompare() {
     ScalarType cpu_data[NumData];
     {
         using KineticModel = HardCore<ScalarType, IsFixedBoundary, 1, RPMDIntegrator::Exact>;
-        std::mt19937 gen{};
-        MDType rpmd = MDType(makeSystem(gen), 1, 1, temperatureT, timeStep);
+        std::ignore = RandomType::getInstance().reseed();
+        MDType rpmd = MDType(makeSystem(), 1, 1, temperatureT, timeStep);
         KineticModel kineticModel(latticeSize, collideFactor, temperatureT, numMolecular, 1, 100);
         kineticModel.updateMass(rpmd.getRingPolymer());
-        rpmd.initMomentum<KineticModel, decltype(gen)>(gen);
+        rpmd.initMomentum<KineticModel, RandomType>();
 
         ForceModel forceModel{};
         rpmd.nve_step<KineticModel, ForceModel, SequentialExecutor>(kineticModel, forceModel);
@@ -122,11 +122,11 @@ void testCpuGpuCompare() {
     ScalarType gpu_data[NumData];
     {
         using KineticModel = HardCore<ScalarType, IsFixedBoundary, 1, RPMDIntegrator::Exact, CUDAExecutor>;
-        std::mt19937 gen{};
-        MDType rpmd = MDType(makeSystem(gen), 1, 1, temperatureT, timeStep);
+        std::ignore = RandomType::getInstance().reseed();
+        MDType rpmd = MDType(makeSystem(), 1, 1, temperatureT, timeStep);
         KineticModel kineticModel(latticeSize, collideFactor, temperatureT, numMolecular, 100);
         kineticModel.updateMass(rpmd.getRingPolymer());
-        rpmd.initMomentum<KineticModel, decltype(gen)>(gen);
+        rpmd.initMomentum<KineticModel, RandomType>();
 
         kineticModel.nve_step(rpmd.getRingPolymer(), timeStep);
         gpu_data[0] = calcThermoFlux(rpmd);

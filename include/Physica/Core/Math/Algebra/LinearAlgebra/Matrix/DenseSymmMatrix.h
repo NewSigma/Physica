@@ -59,12 +59,12 @@ namespace Physica::Core {
         [[nodiscard]] const This& transpose() const noexcept { return *this; }
         void swap(This& __restrict m) noexcept;
 
-        template<class RandomType>
-        void random_uniform(RandomType& gen) { asVector().random_uniform(gen); }
-        template<class RandomType>
-        void random_normal(RandomType& gen) { asVector().random_normal(gen); }
-        template<class Distribution, class RandomType>
-        void random_any(Distribution& dist, RandomType& gen) { asVector().random_any(dist, gen); }
+        template<RandomGenerator R>
+        void random_uniform() { asVector().template random_uniform<R>(); }
+        template<RandomGenerator R>
+        void random_normal() { asVector().template random_normal<R>(); }
+        template<class Distribution, RandomGenerator R>
+        void random_any(Distribution& dist) { asVector().template random_any<R>(dist); }
 
         inline const H5DataSet<1> read(const H5Location& loc, const char* name);
         inline H5DataSet<1> write(H5Location& loc, const char* name) const;
@@ -77,12 +77,12 @@ namespace Physica::Core {
         [[nodiscard]] const VectorStorage& asVector() const noexcept { return Storage::asArray(); }
         /* Static members */
         [[nodiscard]] static DenseSymmMatrix unitMatrix(size_t order);
-        template<class RandomType>
-        [[nodiscard]] inline static This random_uniform(size_t order, RandomType& gen);
-        template<class RandomType>
-        [[nodiscard]] inline static This random_normal(size_t order, RandomType& gen);
-        template<class Distribution, class RandomType>
-        [[nodiscard]] inline static This random_any(size_t order, Distribution& dist, RandomType& gen);
+        template<RandomGenerator R>
+        [[nodiscard]] inline static This random_uniform(size_t order);
+        template<RandomGenerator R>
+        [[nodiscard]] inline static This random_normal(size_t order);
+        template<class Distribution, RandomGenerator R>
+        [[nodiscard]] inline static This random_any(size_t order, Distribution& dist);
     };
     /**
      * Assuming mat is a symmetric matrix, if it is not the case, only half of the elements is saved correctly
@@ -123,29 +123,29 @@ namespace Physica::Core {
     }
 
     template<Scalar T, size_t Order>
-    template<class RandomType>
+    template<RandomGenerator R>
     [[nodiscard]] inline DenseSymmMatrix<T, Order>
-    DenseSymmMatrix<T, Order>::random_uniform(size_t order, RandomType& gen) {
+    DenseSymmMatrix<T, Order>::random_uniform(size_t order) {
         This result(order);
-        result.random_uniform(gen);
+        result.template random_uniform<R>();
         return result;
     }
 
     template<Scalar T, size_t Order>
-    template<class RandomType>
+    template<RandomGenerator R>
     [[nodiscard]] inline DenseSymmMatrix<T, Order>
-    DenseSymmMatrix<T, Order>::random_normal(size_t order, RandomType& gen) {
+    DenseSymmMatrix<T, Order>::random_normal(size_t order) {
         This result(order);
-        result.random_normal(gen);
+        result.template random_normal<R>();
         return result;
     }
 
     template<Scalar T, size_t Order>
-    template<class Distribution, class RandomType>
+    template<class Distribution, RandomGenerator R>
     [[nodiscard]] inline DenseSymmMatrix<T, Order>
-    DenseSymmMatrix<T, Order>::random_any(size_t order, Distribution& dist, RandomType& gen) {
+    DenseSymmMatrix<T, Order>::random_any(size_t order, Distribution& dist) {
         This result(order);
-        result.random_any(dist, gen);
+        result.template random_any<R>(dist);
         return result;
     }
 #ifdef PHYSICA_HDF5

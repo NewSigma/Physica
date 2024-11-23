@@ -56,10 +56,10 @@ namespace Physica::Core {
         template<Side Owner = GetSide()>
         [[nodiscard]] __device__ inline ScalarType calc(size_t row, size_t col) const;
 
-        template<class RandomType> inline void random_uniform(RandomType& gen);
-        template<class RandomType> inline void random_normal(RandomType& gen);
-        template<class Distribution, class RandomType>
-        inline void random_any(Distribution& dist, RandomType& gen);
+        template<RandomGenerator R> inline void random_uniform();
+        template<RandomGenerator R> inline void random_normal();
+        template<class Distribution, RandomGenerator R>
+        inline void random_any(Distribution& dist);
 
         [[nodiscard]] This copy() const;
         void swap(device_obj& obj) noexcept { std::swap(*this, obj); }
@@ -74,12 +74,12 @@ namespace Physica::Core {
         [[nodiscard]] __device__ inline T& getGrad(size_t row, size_t col);
         [[nodiscard]] __device__ inline const T& getGrad(size_t row, size_t col) const;
         /* Static members */
-        template<class RandomType>
-        [[nodiscard]] inline static This random_uniform(size_t row, size_t col, RandomType& gen);
-        template<class RandomType>
-        [[nodiscard]] inline static This random_normal(size_t row, size_t col, RandomType& gen);
-        template<class Distribution, class RandomType>
-        [[nodiscard]] inline static This random_any(size_t row, size_t col, Distribution& dist, RandomType& gen);
+        template<RandomGenerator R>
+        [[nodiscard]] inline static This random_uniform(size_t row, size_t col);
+        template<RandomGenerator R>
+        [[nodiscard]] inline static This random_normal(size_t row, size_t col);
+        template<class Distribution, RandomGenerator R>
+        [[nodiscard]] inline static This random_any(size_t row, size_t col, Distribution& dist);
     private:
         /* Operations */
         using Dim::resize;
@@ -115,21 +115,21 @@ namespace Physica::Core {
     }
 
     template<Scalar T, int Option, int Order>
-    template<class RandomType>
-    inline void device_obj<Diff<DenseMatrix<T, Option>, DiffMode::Reverse, Order>>::random_uniform(RandomType& gen) {
-        *this = random_uniform(getRow(), getCol(), gen);
+    template<RandomGenerator R>
+    inline void device_obj<Diff<DenseMatrix<T, Option>, DiffMode::Reverse, Order>>::random_uniform() {
+        *this = random_uniform<R>(getRow(), getCol());
     }
 
     template<Scalar T, int Option, int Order>
-    template<class RandomType>
-    inline void device_obj<Diff<DenseMatrix<T, Option>, DiffMode::Reverse, Order>>::random_normal(RandomType& gen) {
-        *this = random_normal(getRow(), getCol(), gen);
+    template<RandomGenerator R>
+    inline void device_obj<Diff<DenseMatrix<T, Option>, DiffMode::Reverse, Order>>::random_normal() {
+        *this = random_normal<R>(getRow(), getCol());
     }
 
     template<Scalar T, int Option, int Order>
-    template<class Distribution, class RandomType>
-    inline void device_obj<Diff<DenseMatrix<T, Option>, DiffMode::Reverse, Order>>::random_any(Distribution& dist, RandomType& gen) {
-        *this = random_any(getRow(), getCol(), dist, gen);
+    template<class Distribution, RandomGenerator R>
+    inline void device_obj<Diff<DenseMatrix<T, Option>, DiffMode::Reverse, Order>>::random_any(Distribution& dist) {
+        *this = random_any<R>(getRow(), getCol(), dist);
     }
 
     template<Scalar T, int Option, int Order>
@@ -172,27 +172,27 @@ namespace Physica::Core {
     }
 
     template<Scalar T, int Option, int Order>
-    template<class RandomType>
+    template<RandomGenerator R>
     inline device_obj<Diff<DenseMatrix<T, Option>, DiffMode::Reverse, Order>>
     device_obj<Diff<DenseMatrix<T, Option>, DiffMode::Reverse, Order>>::random_uniform(
-            size_t row, size_t col, RandomType& gen) {
-        return This(PlainMatrix::random_uniform(row, col, gen));
+            size_t row, size_t col) {
+        return This(PlainMatrix::template random_uniform<R>(row, col));
     }
 
     template<Scalar T, int Option, int Order>
-    template<class RandomType>
+    template<RandomGenerator R>
     inline device_obj<Diff<DenseMatrix<T, Option>, DiffMode::Reverse, Order>>
     device_obj<Diff<DenseMatrix<T, Option>, DiffMode::Reverse, Order>>::random_normal(
-            size_t row, size_t col, RandomType& gen) {
-        return This(PlainMatrix::random_normal(row, col, gen));
+            size_t row, size_t col) {
+        return This(PlainMatrix::template random_normal<R>(row, col));
     }
 
     template<Scalar T, int Option, int Order>
-    template<class Distribution, class RandomType>
+    template<class Distribution, RandomGenerator R>
     inline device_obj<Diff<DenseMatrix<T, Option>, DiffMode::Reverse, Order>>
     device_obj<Diff<DenseMatrix<T, Option>, DiffMode::Reverse, Order>>::random_any(
-            size_t row, size_t col, Distribution& dist, RandomType& gen) {
-        return This(PlainMatrix::random_any(row, col, dist, gen));
+            size_t row, size_t col, Distribution& dist) {
+        return This(PlainMatrix::template random_any<R>(row, col, dist));
     }
 }
 

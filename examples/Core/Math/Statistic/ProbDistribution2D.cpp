@@ -48,13 +48,11 @@ constexpr double unitMassM = 1;
 constexpr size_t maxHandleNum = 100;
 constexpr size_t numStep = 2000000;
 
-MDCellType makeSystem(std::mt19937& gen) {
+MDCellType makeSystem() {
     MDCellType::LatticeMatrix lattice{latticeSize};
 
-    std::uniform_real_distribution dist{};
-    VectorND<ScalarType> posVec(numMolecular);
-    for (auto& elem : posVec)
-        elem = dist(gen) * latticeSize;
+    auto posVec = VectorND<ScalarType>::random_uniform<RandomType>(numMolecular);
+    posVec *= ScalarType(latticeSize);
     std::sort(posVec.begin(), posVec.end());
     MDCellType::PositionMatrix pos(numMolecular, 1);
     pos.col(0) = posVec;
@@ -68,11 +66,9 @@ MDCellType makeSystem(std::mt19937& gen) {
 
 int main(int argc, char** argv) {
     const double timeStep = timeStepLambda * (latticeSize / numMolecular) * std::sqrt(unitMassM / temperatureT);
-    auto& pool = RandomType::getInstance();
 
-    auto& gen = pool.getGen();
-    MDType rpmd = MDType(makeSystem(gen), 1, 1, temperatureT, timeStep);
-    rpmd.initMomentum<KineticModel, decltype(gen)>(gen);
+    MDType rpmd = MDType(makeSystem(), 1, 1, temperatureT, timeStep);
+    rpmd.initMomentum<KineticModel, RandomType>();
     KineticModel kineticModel(latticeSize, collideFactor, temperatureT, numMolecular, 1, maxHandleNum);
     kineticModel.updateMass(rpmd.getRingPolymer());
     ThermoType thermo(temperatureT, thermostatTime, true);
@@ -80,7 +76,7 @@ int main(int argc, char** argv) {
     ProbDistribution2D<ScalarType> pdf(-10, 10, -10, 10, 100, 100);
     for (size_t i = 0; i < numStep; ++i) {
         ForceModel forceModel{};
-        rpmd.nvt_step<ThermoType, RandomType, KineticModel, ForceModel, SequentialExecutor>(thermo, pool, kineticModel, forceModel);
+        rpmd.nvt_step<ThermoType, RandomType, KineticModel, ForceModel, SequentialExecutor>(thermo, kineticModel, forceModel);
         pdf.sample(rpmd.getRingPolymer().asMatrix()(0, 0), rpmd.getRingPolymer().asMatrix()(1, 0));
     }
     const auto grid = pdf.makePosition();

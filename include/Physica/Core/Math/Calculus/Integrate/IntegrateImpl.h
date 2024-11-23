@@ -126,11 +126,11 @@ namespace Physica::Core {
             : Base(std::move(range)), sampleCount(sampleCount_) {}
 
     template<Scalar T, size_t dim>
-    template<class Function, class RandomGenerator>
-    T Integrate<IntegrateMethod::MonteCarlo, T, dim>::solve(Function func, RandomGenerator& generator) const {
+    template<class Function, RandomGenerator R>
+    T Integrate<IntegrateMethod::MonteCarlo, T, dim>::solve(Function func) const {
         T result = 0;
         for (uint64_t i = 0; i < sampleCount; ++i) {
-            VectorType x = VectorType::template random_uniform(Base::from(), Base::to(), generator);
+            VectorType x = VectorType::template random_uniform<R>(Base::from(), Base::to());
             toNextMean(result, i, func(x));
         }
 
@@ -142,62 +142,44 @@ namespace Physica::Core {
     }
 
     template<Scalar T, size_t dim>
-    template<class Function, class RandomGenerator, class Executor>
-    T Integrate<IntegrateMethod::MonteCarlo, T, dim>::parallel_solve(
-            Function func,
-            const Array<typename RandomGenerator::result_type>& seeds) const {
-        const size_t numGen = seeds.getLength();
-        Array<RandomGenerator> gens(numGen);
-        for (size_t i = 0; i < numGen; ++i)
-            gens[i] = RandomGenerator(seeds[i]);
-
-        VectorND<T> results(numGen);
-        auto future = Executor::parallel_for([this, func, &gens, &results](unsigned int i) { results[i] = solve(func, gens[i]); }, numGen, numGen);
-        Executor::auto_wait(future);
-        return mean(results);
-    }
-
-    template<Scalar T, size_t dim>
-    template<class Function, class RandomGenerator>
-    T Integrate<IntegrateMethod::MonteCarlo, T, dim>::solve_e(unsigned int numSequence, Function func, RandomGenerator& generator, T& deviation) const {
+    template<class Function, RandomGenerator R>
+    T Integrate<IntegrateMethod::MonteCarlo, T, dim>::solve_e(unsigned int numSequence, Function func, T& deviation) const {
         assert(numSequence > 0);
         T mean = 0;
         T variance = 0;
         for (unsigned int i = 0; i < numSequence; ++i)
-            toNextVariance(variance, mean, i, solve(func, generator));
+            toNextVariance(variance, mean, i, solve<Function, R>(func));
         deviation = sqrt(variance);
         return mean;
     }
 
     template<Scalar T, size_t dim>
-    template<class Functor1, class Functor2, class Distribution, class RandomGenerator>
+    template<class Functor1, class Functor2, class Distribution, RandomGenerator R>
     T Integrate<IntegrateMethod::MonteCarlo, T, dim>::solve(
             Functor1 func,
             Functor2 importance,
-            Distribution& dist,
-            RandomGenerator& generator) const {
+            Distribution& dist) const {
         T result = 0;
         for (uint64_t i = 0; i < sampleCount; ++i) {
-            const VectorType x = VectorType::template random_any(dim, dist, generator);
+            const VectorType x = VectorType::template random_any<R>(dim);
             toNextMean(result, i, func(x) / importance(x));
         }
         return result;
     }
 
     template<Scalar T, size_t dim>
-    template<class Functor1, class Functor2, class Distribution, class RandomGenerator>
+    template<class Functor1, class Functor2, class Distribution, RandomGenerator R>
     T Integrate<IntegrateMethod::MonteCarlo, T, dim>::solve_e(
             unsigned int numSequence,
             Functor1 func,
             Functor2 importance,
             Distribution& dist,
-            RandomGenerator& generator,
             T& deviation) const {
         assert(numSequence > 0);
         T mean = 0;
         T variance = 0;
         for (unsigned int i = 0; i < numSequence; ++i)
-            toNextVariance(variance, mean, i, solve(func, importance, dist, generator));
+            toNextVariance(variance, mean, i, solve(func, importance));
         deviation = sqrt(variance);
         return mean;
     }

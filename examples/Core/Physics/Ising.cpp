@@ -47,28 +47,28 @@ public:
             , temperature(temperature_)
             , energy(0) {}
     /* Operations */
-    template<class RandomType>
-    void init(RandomType& generator) {
+    template<RandomGenerator R>
+    void init() {
         std::uniform_real_distribution<float> dist{};
         for (uint64_t i = 0; i < lattice.getCol(); ++i)
             for (uint64_t j = 0; j < lattice.getRow(); ++j)
-                lattice(j, i) = (dist(generator) > 0.5) ? 1 : -1;
+                lattice(j, i) = (dist(R::getInstance()) > 0.5) ? 1 : -1;
         energy = 0;
     }
 
-    template<class RandomType>
-    void step(uint64_t stepNum, RandomType& generator) {
+    template<RandomGenerator R>
+    void step(uint64_t stepNum) {
         uint64_t iteration = stepNum * lattice.getRow() * lattice.getCol();
 
         std::uniform_int_distribution<size_t> int_dist(0, lattice.getRow() - 1);
-        std::uniform_real_distribution<float> dist{};
         const ScalarType beta = reciprocal(boltzmannK * temperature);
+        auto& gen = R::getInstance();
         for (uint64_t _ = 0; _ < iteration; ++_) {
-            const size_t i = int_dist(generator);
-            const size_t j = int_dist(generator);
+            const size_t i = int_dist(gen);
+            const size_t j = int_dist(gen);
 
             const ScalarType deltaE = -deltaDotSpin(i, j) * couplingJ;
-            if (!deltaE.isPositive() || ScalarType(dist(generator)) < exp(-deltaE * beta)) {
+            if (!deltaE.isPositive() || ScalarType::random_uniform<R>() < exp(-deltaE * beta)) {
                 lattice(i, j) = -lattice(i, j);
                 energy += deltaE;
             }
@@ -106,14 +106,13 @@ int main(int argc, char** argv) {
     const auto t = VectorND<ScalarType>::linspace(1, 7, NumPoint);
     VectorND<ScalarType> Cv(NumPoint);
     ThreadExecutor::parallel_for([&](size_t i) {
-        auto& gen = RandomType::getInstance().getGen();
         Ising ising(20, 1, 1, t[i]);
-        ising.init(gen);
-        ising.step(2000, gen);
+        ising.init<RandomType>();
+        ising.step<RandomType>(2000);
 
         ScalarType energy = 0, energy2 = 0;
         for (size_t i = 0; i < NumSample; ++i) {
-            ising.step(10, gen);
+            ising.step<RandomType>(10);
             toNextMean(energy, i, ising.getEnergy());
             toNextMean(energy2, i, square(ising.getEnergy()));
         }

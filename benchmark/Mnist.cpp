@@ -29,16 +29,16 @@
 
 using namespace Physica::Core;
 
-template<Scalar T> class MnistNet;
+template<Scalar T, RandomGenerator R> class MnistNet;
 
 namespace Physica {
-    template<class T>
-    class Traits<MnistNet<T>> : public Traits<LinearLayer<T>> {};
+    template<class T, RandomGenerator R>
+    class Traits<MnistNet<T, R>> : public Traits<LinearLayer<T>> {};
 }
 
-template<Scalar T>
-class MnistNet : public SimpleNet<MnistNet<T>> {
-    using Base = SimpleNet<MnistNet<T>>;
+template<Scalar T, RandomGenerator R>
+class MnistNet : public SimpleNet<MnistNet<T, R>> {
+    using Base = SimpleNet<MnistNet<T, R>>;
     using typename Base::ValueType;
     using typename Base::InputType;
     using typename Base::OutputType;
@@ -48,18 +48,17 @@ class MnistNet : public SimpleNet<MnistNet<T>> {
     LinearLayer<T> layer3;
 public:
     MnistNet() = default;
-    template<class RandomType>
-    MnistNet(size_t width1, size_t width2, RandomType& gen)
+    MnistNet(size_t width1, size_t width2)
             : layer1(Mnist::NumPixelInImage, width1)
             , layer2(width1, width2)
             , layer3(width2, 10) {
         auto dist = std::normal_distribution<float>(0, 0.01);
-        layer1.random_any(dist, gen);
-        layer2.random_any(dist, gen);
-        layer3.random_any(dist, gen);
+        layer1.template random_any<decltype(dist), R>(dist);
+        layer2.template random_any<decltype(dist), R>(dist);
+        layer3.template random_any<decltype(dist), R>(dist);
     }
     template<Scalar U>
-    MnistNet(const MnistNet<U>& net) : layer1(net.layer1), layer2(net.layer2), layer3(net.layer3) {}
+    MnistNet(const MnistNet<U, R>& net) : layer1(net.layer1), layer2(net.layer2), layer3(net.layer3) {}
     MnistNet(const MnistNet& other) = default;
     MnistNet(MnistNet&&) noexcept = default;
     ~MnistNet() = default;
@@ -108,7 +107,7 @@ public:
         layer3.swap(obj.layer3);
     }
 private:
-    template<Scalar> friend class MnistNet;
+    template<Scalar, RandomGenerator> friend class MnistNet;
 };
 
 using ValueType = float32;
@@ -132,11 +131,10 @@ namespace {
     static void main(benchmark::State& state) {
         ThreadPool::numThreadRequired = 4;
 
-        auto& gen = RandomType::getInstance().getGen();
         const auto dataset = makeDataset();
         auto opt = Optimizer(0.01, batchSize);
         opt.recordBegin();
-        auto nn = MnistNet<ScalarType>(512, 512, gen);
+        auto nn = MnistNet<ScalarType, RandomType>(512, 512);
         opt.recordEnd();
 
         for (auto _ : state)
