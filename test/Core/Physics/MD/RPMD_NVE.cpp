@@ -61,7 +61,6 @@ MDCellType makeSystem() {
 
 int main() {
     const double timeStep = timeStepLambda * (latticeSize / numMolecular) * std::sqrt(unitMassM / temperatureT);
-    auto& pool = RandomType::getInstance();
     VectorType nve(20000);
     {
         MDType rpmd = MDType(makeSystem(), numReplica, numReplica, temperatureT, timeStep);

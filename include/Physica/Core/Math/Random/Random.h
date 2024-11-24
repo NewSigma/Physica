@@ -89,7 +89,7 @@ namespace Physica::Core {
 
     template<RandomOption Option, uint64_t FixedSeed>
     Random<Option, FixedSeed>::Random() {
-        [[maybe_unused]] auto _ = reseed();
+        std::ignore = reseed();
     }
 
     template<RandomOption Option, uint64_t FixedSeed>

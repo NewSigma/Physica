@@ -60,7 +60,9 @@ namespace Physica::Core {
 
         template<class AnyPacket>
         [[nodiscard]] AnyPacket packetPartial(size_t index, size_t count) const {
-            return Base::getLHS().template packetPartial<AnyPacket>(index, count) / Base::getRHS().template packetPartial<AnyPacket>(index, count);
+            const auto pack1 = Base::getLHS().template packetPartial<AnyPacket>(index, count);
+            const auto pack2 = Base::getRHS().template packetPartial<AnyPacket>(index, count);
+            return (pack1 / pack2).cutoff(count);
         }
     };
 

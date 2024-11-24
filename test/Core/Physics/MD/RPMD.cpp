@@ -89,10 +89,9 @@ void testMDRun() {
         const ThermoType thermo(temperatureT, thermostatTime);
         KineticModel kineticModel(temperatureT, numReplica);
         ForceModel forceModel(pair_cutoff);
-        auto& pool = RandomType::getInstance();
+
         auto rpmd = makeSystem();
         rpmd.initMomentum<KineticModel, RandomType>();
-
         for (unsigned int i = 0; i < 6; ++i) {
             ScalarType temp = 0;
             rpmd.nvt_step_for<ThermoType, RandomType, KineticModel, ForceModel, ThreadExecutor>(

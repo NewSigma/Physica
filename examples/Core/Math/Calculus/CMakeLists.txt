@@ -1,2 +1,3 @@
 physica_add_example(DuffingOscillator DuffingOscillator.cpp)
 physica_add_example(FokkerPlanck FokkerPlanck.cpp)
+physica_add_example(Vegas Vegas.cpp)

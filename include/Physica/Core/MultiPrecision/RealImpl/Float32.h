@@ -81,6 +81,7 @@ namespace Physica::Core {
         __host__ __device__ bool operator==(const Real& s) const { return f == s.f; }
         PHYSICA_API friend std::istream& operator>>(std::istream& is, Real& scalar);
         /* Operations */
+        [[nodiscard]] inline Real mod() const noexcept;
         void swap(Real& __restrict s) noexcept { std::swap(f, s.f); }
         /* Getters */
         [[nodiscard]] constexpr static ScalarOption getOption() { return Float32; }
@@ -91,6 +92,7 @@ namespace Physica::Core {
         [[nodiscard]] __host__ __device__ inline bool isFinite() const noexcept;
         [[nodiscard]] bool isInteger() const;
         /* Static Members */
+        [[nodiscard]] inline static Real nan() noexcept;
         template<RandomGenerator R>
         [[nodiscard]] inline static Real random_uniform();
         template<RandomGenerator R>
@@ -107,12 +109,21 @@ namespace Physica::Core {
     template<Scalar T>
     __host__ __device__ inline Real<Float32>::Real(const T& x) : f(float(x)) {}
 
+    inline Real<Float32> Real<Float32>::mod() const noexcept {
+        float buffer;
+        return std::modf(toMachine(), &buffer);
+    }
+
     __host__ __device__ inline bool Real<Float32>::isFinite() const noexcept {
     #ifdef __CUDA_ARCH__
         return isfinite(f);
     #else
         return std::isfinite(f);
     #endif
+    }
+
+    inline Real<Float32> Real<Float32>::nan() noexcept {
+        return std::nanf("");
     }
 
     template<RandomGenerator R>

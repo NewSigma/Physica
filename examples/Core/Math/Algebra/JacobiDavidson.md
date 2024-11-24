@@ -68,3 +68,16 @@ $$\theta_{k + 1} = \argmin_\lambda |\mathbf{r}_{k + 1}(\lambda)|$$
 使用JDCG求解5000维厄米矩阵的前4个最小的本征值, 结果为
 
 (-1062.865585527699, -456.5290883347747, -291.9029897722832, -216.657138458762)
+
+## Reference
+
+[1] Golub, GeneH. Matrix computations = 矩阵计算 / 4th edition[M]. 人民邮电出版社, 2014.284-285
+[2] Quart. Appl. Math. 9, 17–29 (1951); https://doi.org/10.1090/QAM/42792
+[3] J. Comput. Phys. 17, 87–94 (1975); https://doi.org/10.1016/0021-9991(75)90065-0
+[4] SIAM Review 42(2), 267–293 (2000); https://doi.org/10.1137/S0036144599363084
+[5] Phys. Rev. B 79, 115112 (2009); https://doi.org/10.1103/PhysRevB.79.115112
+[6] SIAM J. Sci. Comput. 23(2) 517–541 (2001); https://doi.org/10.1137/S1064827500366124
+[7] https://ww2.mathworks.cn/help/matlab/ref/eigs.html
+[8] https://reference.wolfram.com/language/ref/Eigenvalues.html
+[9] J. Comput. Electron. 14, 593–603 (2015); https://doi.org/10.1007/s10825-015-0695-z
+[10] Numerical Linear Algebra with Applications 9(1), 21-44 (2001); https://doi.org/10.1002/nla.246

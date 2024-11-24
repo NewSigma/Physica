@@ -15,7 +15,7 @@ along with Physica.  If not, see <https://www.gnu.org/licenses/>.
 
 本示例演示如何使用有限元方法求解偏微分方程(PDE)
 
-以有阻尼的谐振子的Fokker-Planck方程$^{[1]}$:
+以有阻尼的谐振子的Fokker-Planck方程为例$^{[1]}$:
 
 $$\frac{\partial W(x, p, t)}{\partial t} = [-\frac{p}{m} \frac{\partial}{\partial x} + \frac{\partial}{\partial p} (x + \gamma p) + \frac{\partial^2}{\partial p^2} D] W(x, p, t)$$
 

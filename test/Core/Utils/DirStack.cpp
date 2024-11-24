@@ -30,11 +30,16 @@ namespace Physica::Core {
 int main() {
     using namespace Physica::Core;
     DirStack stack("/home/user/Program");
-    [[maybe_unused]] auto& dirs = Test::getDirs(stack);
-    assert(dirs.size() == 3);
-    assert(strcmp(dirs[0], "home") == 0);
-    assert(strcmp(dirs[1], "user") == 0);
-    assert(strcmp(dirs[2], "Program") == 0);
+    auto& dirs = Test::getDirs(stack);
+    if (dirs.size() != 3)
+        return 1;
+    if (strcmp(dirs[0], "home") != 0)
+        return 1;
+    if (strcmp(dirs[1], "user") != 0)
+        return 1;
+    if (strcmp(dirs[2], "Program") != 0)
+        return 1;
+
     stack.pop();
     if (stack.toPath() != "/home/user")
         return 1;

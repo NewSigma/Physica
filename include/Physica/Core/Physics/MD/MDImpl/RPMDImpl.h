@@ -554,7 +554,7 @@ namespace Physica::Core {
             }
             buffer[replica] = kineticStress * reciprocal(getVolume());
 
-            [[maybe_unused]] auto& _ = model; // Silent warnings
+            std::ignore = model; // Silent warnings
             if constexpr (!isFreeModel) {
                 constexpr bool IsPeriodBoundary = Traits<ForceModel>::IsPeriodBoundary;
                 MDCellType cell = phaseToCell(replica);
@@ -611,7 +611,7 @@ namespace Physica::Core {
             }
             buffer[replica] = kineticStress * reciprocal(getVolume());
 
-            [[maybe_unused]] auto& _ = model; // Silent warnings
+            std::ignore = model; // Silent warnings
             if constexpr (!isFreeModel) {
                 constexpr bool IsPeriodBoundary = Traits<ForceModel>::IsPeriodBoundary;
                 auto cell = phaseToCell(replica);
@@ -673,7 +673,7 @@ namespace Physica::Core {
                 }
                 buffer[replica] = kineticStress * reciprocal(getVolume());
 
-                [[maybe_unused]] auto& _ = model; // Silent warnings
+                std::ignore = model; // Silent warnings
                 if constexpr (!isFreeModel) {
                     MDCellType cell = phaseToCell(replica);
                     if constexpr (IsPeriodBoundary)

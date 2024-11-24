@@ -63,7 +63,6 @@ MDCellType makeSystem() {
 
 int main() {
     const double timeStep = timeStepLambda * (latticeSize / numMolecular) * std::sqrt(unitMassM / temperatureT);
-    auto& pool = RandomType::getInstance();
     KineticModel kineticModel(latticeSize, collideFactor, temperatureT, numMolecular, numReplica, maxHandleNum);
     ThermoType thermo(temperatureT, thermostatTime, false);
 

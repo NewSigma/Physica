@@ -19,7 +19,6 @@
 #include <iostream>
 #include <QtWidgets/QApplication>
 #include "Physica/Core/Math/Calculus/ODE/ODESolver.h"
-#include "Physica/Core/Math/Algebra/BoolAlgebra/BoolMatrix.h"
 #include "Physica/Core/Physics/Experiment/DimEstimator.h"
 #include "Physica/Gui/Plot/Plot.h"
 

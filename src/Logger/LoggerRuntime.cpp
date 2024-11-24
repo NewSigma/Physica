@@ -37,7 +37,7 @@ namespace Physica::Logger {
         registerLogger(std::unique_ptr<AbstractLogger>(new StdLogger(std::cout)));
         registerLogger(std::unique_ptr<AbstractLogger>(new StdLogger(std::cerr)));
         //Init buffer for current thread or logThread will try to access a empty bufferList
-        [[maybe_unused]] auto& buffer = getBuffer();
+        std::ignore = getBuffer();
 
         logThread = std::thread(&LoggerRuntime::logThreadMain, this);
 

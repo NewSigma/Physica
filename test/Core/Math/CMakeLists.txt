@@ -1,13 +1,5 @@
 add_subdirectory(Algebra)
-# Calculus
-physica_add_test(ODESolver Calculus/ODE/ODESolver.cpp)
-physica_add_test(SRK2 Calculus/ODE/SRK2.cpp)
-physica_add_test(PoissonFEM Calculus/PDE/FEM/PoissonFEM.cpp)
-physica_add_test(Chebyshev Calculus/ChebyshevTest.cpp)
-physica_add_test(Differential Calculus/Differential.cpp)
-physica_add_test(Integrate Calculus/IntegrateTest.cpp)
-physica_add_test(Interpolation Calculus/Interpolation.cpp)
-physica_add_test(SpetialFunctions Calculus/SpetialFunctionsTest.cpp)
+add_subdirectory(Calculus)
 # Discrete
 physica_add_test(Combination Discrete/Combination.cpp)
 # Geometry

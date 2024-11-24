@@ -48,7 +48,7 @@ namespace {
         for (auto _ : state) {
             psi.random_normal<RandomType>();
             psi.template nvt_step<Hamilton, SequentialExecutor>(hamilton, Beta);
-            [[maybe_unused]] auto xi = psi.lnPartitionXi();
+            std::ignore = psi.lnPartitionXi();
         };
     }
 }
