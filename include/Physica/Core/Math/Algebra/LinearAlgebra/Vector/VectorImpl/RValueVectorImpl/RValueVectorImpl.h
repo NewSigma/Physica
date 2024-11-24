@@ -361,6 +361,13 @@ namespace Physica::Core {
     }
 
     template<class Derived>
+    RValueVector<Derived>::ScalarType RValueVector<Derived>::lnSumExp() const {
+        const Derived& v = Base::getDerived();
+        const ScalarType m = max();
+        return ln(exp(v - m).sum()) + m;
+    }
+
+    template<class Derived>
     RValueVector<Derived>::ScalarType RValueVector<Derived>::prod() const {
         assert(getLength() != 0);
         auto result = calc(0);

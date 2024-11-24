@@ -56,6 +56,7 @@ namespace Physica::Core {
         [[nodiscard]] ScalarType trace() const { return ScalarType(getLHS().trace()) * ScalarType(getRHS()); }
         [[nodiscard]] TransposeRtnTy transpose() const noexcept { return TransposeRtnTy(*this); }
         [[nodiscard]] HermiteRtnTy hermite() const noexcept { return HermiteRtnTy(*this); }
+        [[nodiscard]] ScalarType sum() const { return Base::getLHS().sum() * Base::getRHS(); }
     };
 
     template<Matrix T, Scalar U>

@@ -30,28 +30,28 @@ namespace Physica::Core {
     public:
         /* Operations */
         template<class Functor, class... Args>
-        static FutureType schedule(Functor func, Args&&... args);
+        inline static FutureType schedule(Functor func, Args&&... args);
         template<class Functor>
-        static FutureGroup<FutureType> parallel_for(Functor func, unsigned int loopCount);
+        inline static FutureGroup<FutureType> parallel_for(Functor func, unsigned int loopCount);
         template<class Functor>
-        static FutureGroup<FutureType> parallel_for(Functor func, unsigned int loopCount, unsigned int core);
-        static void auto_wait([[maybe_unused]] FutureType& future) {}
-        static void auto_wait([[maybe_unused]] FutureGroup<FutureType>& group) {}
+        inline static FutureGroup<FutureType> parallel_for(Functor func, unsigned int loopCount, unsigned int core);
+        static void auto_wait(FutureType&) {}
+        static void auto_wait(FutureGroup<FutureType>&) {}
         static void wait() {}
         /* Getters */
         [[nodiscard]] constexpr static unsigned int getNumThread() { return 1; }
         /* Static members */
-        [[nodiscard]] inline static Range splitJob(unsigned int loopCount, [[maybe_unused]] unsigned int core, [[maybe_unused]] unsigned int part);
+        [[nodiscard]] inline static Range splitJob(unsigned int loopCount, unsigned int core, unsigned int part);
     };
 
     template<class Functor, class... Args>
-    SequentialExecutor::FutureType SequentialExecutor::schedule(Functor func, Args&&... args) {
+    inline SequentialExecutor::FutureType SequentialExecutor::schedule(Functor func, Args&&... args) {
         func(std::forward<Args>(args)...);
         return FutureType{};
     }
 
     template<class Functor>
-    FutureGroup<typename SequentialExecutor::FutureType> SequentialExecutor::parallel_for(
+    inline FutureGroup<typename SequentialExecutor::FutureType> SequentialExecutor::parallel_for(
             Functor func, unsigned int loopCount) {
         using ResultType = std::invoke_result<Functor, unsigned int>::type;
         static_assert(std::is_same<void, ResultType>::value, "[Error]: Invalid functor");
@@ -62,7 +62,7 @@ namespace Physica::Core {
     }
 
     template<class Functor>
-    FutureGroup<typename SequentialExecutor::FutureType> SequentialExecutor::parallel_for(
+    inline FutureGroup<typename SequentialExecutor::FutureType> SequentialExecutor::parallel_for(
             Functor func, unsigned int loopCount, unsigned int) {
         using ResultType = std::invoke_result<Functor, unsigned int>::type;
         static_assert(std::is_same<void, ResultType>::value, "[Error]: Invalid functor");

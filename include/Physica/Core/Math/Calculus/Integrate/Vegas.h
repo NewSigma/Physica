@@ -38,10 +38,11 @@ namespace Physica::Core {
         int numRefine;
         int numSample;
         T compressRate;
-
+    protected:
         VectorND<T> means;
         VectorND<T> vars;
     public:
+        Vegas() = default;
         Vegas(VectorND<T> from_, VectorND<T> to_, int numRefine_, int numSample_, int numPoint = 1000, T compressRate_ = 1.5);
         Vegas(const This&) = default;
         Vegas(This&&) noexcept = default;
@@ -49,10 +50,8 @@ namespace Physica::Core {
         /* Operators */
         This& operator=(This obj) noexcept { swap(obj); return *this; }
         /* Operations */
-        template<class Functor, RandomGenerator R>
+        template<class Functor, RandomGenerator R, class Executor = SequentialExecutor>
         void integral(Functor func);
-        template<class Functor, RandomGenerator R>
-        void lnIntegral(Functor lnFunc);
         template<class Functor, RandomGenerator R>
         [[nodiscard]] T accessMerit(Functor func);
 
@@ -65,23 +64,27 @@ namespace Physica::Core {
         [[nodiscard]] const auto& getPointGrid() const noexcept { return pointGrid; }
         [[nodiscard]] size_t getNumPoint() const noexcept { return pointGrid.getRow(); }
         [[nodiscard]] size_t getDim() const noexcept { return pointGrid.getCol(); }
+        [[nodiscard]] int getNumRefine() const noexcept { return numRefine; }
+        [[nodiscard]] int getNumSample() const noexcept { return numSample; }
+        /* Setters */
+        void setNumRefine(int numRefine_);
+    protected:
+        template<class Executor>
+        void refineGrid(DenseMatrix<T>& varsDevia);
+        static T accessMeritImpl(const DenseMatrix<T>& varsDevia);
     private:
-        template<class Functor, RandomGenerator R>
+        template<class Functor, RandomGenerator R, class Executor>
         void trialIntegral(DenseMatrix<T>& varsDevia, int refine, Functor func);
-        static void smooth(VectorND<T>& vars);
+        T compress(VectorND<T>& vars);
     };
 
     template<Scalar T>
     Vegas<T>::Vegas(VectorND<T> from_, VectorND<T> to_, int numRefine_, int numSample_, int numPoint, T compressRate_)
             : from(std::move(from_))
             , to(std::move(to_))
-            , numRefine(numRefine_)
             , numSample(numSample_)
-            , compressRate(compressRate_)
-            , means(numRefine_, 0)
-            , vars(numRefine_, 0) {
+            , compressRate(compressRate_) {
         assert(from.getLength() == to.getLength() && "[Error]: Inconsistent dim");
-        assert(numRefine > 0);
         assert(numSample > 0);
         assert(numPoint > 2 && "[Error]: Invalid point number");
         assert(compressRate.isPositive() && "[Error]: Rate = 0 implies no grid refinement");
@@ -89,40 +92,19 @@ namespace Physica::Core {
         pointGrid.resize(numPoint, from.getLength());
         for (size_t i = 0; i < getDim(); ++i)
             pointGrid.col(i) = VectorND<T>::linspace(from[i], to[i], numPoint);
+        setNumRefine(numRefine_);
     }
 
     template<Scalar T>
-    template<class Functor, RandomGenerator R>
+    template<class Functor, RandomGenerator R, class Executor>
     void Vegas<T>::integral(Functor func) {
         using CallResult = std::invoke_result<Functor, VectorND<T>>::type;
         static_assert(std::is_same<CallResult, T>::value, "[Error]: Invalid functor");
 
         DenseMatrix<T> varsDevia(getNumPoint() - 1, getDim(), 0);
         for (int refine = 0; refine < numRefine; ++refine) {
-            trialIntegral<Functor, R>(varsDevia, refine, func);
-            for (size_t dim = 0; dim < getDim(); ++dim) {
-                auto& col = varsDevia.asArray()[dim];
-                smooth(col);
-                col = pow(divide(col - T(1), ln(col)), compressRate);
-
-                const T meanVar = mean(col);
-                auto oldPoints = pointGrid.col(dim);
-                VectorND<T> newPoints(getNumPoint());
-                newPoints[0] = oldPoints[0];
-                T temp = 0;
-                size_t i = 1;
-                for (size_t j = 0; i < newPoints.getLength() - 1; ++i) {
-                    while (temp < meanVar) {
-                        assert(j < varsDevia.getRow() && "[Error]: Unexpected not enough vars, this is likely a bug");
-                        temp += varsDevia(j, dim);
-                        j += 1;
-                    }
-                    temp -= meanVar;
-                    newPoints[i] = oldPoints[j] - temp * (oldPoints[j] - oldPoints[j - 1]) / varsDevia(j - 1, dim);
-                }
-                newPoints[i] = oldPoints[i];
-                oldPoints = newPoints;
-            }
+            trialIntegral<Functor, R, Executor>(varsDevia, refine, func);
+            refineGrid<Executor>(varsDevia);
         }
     }
 
@@ -130,14 +112,8 @@ namespace Physica::Core {
     template<class Functor, RandomGenerator R>
     T Vegas<T>::accessMerit(Functor func) {
         DenseMatrix<T> varsDevia(getNumPoint() - 1, getDim(), 0);
-        trialIntegral<Functor, R>(varsDevia, 0, func);
-        T maxDevia = 0;
-        for (size_t i = 0; i < varsDevia.getCol(); ++i) {
-            const auto col = varsDevia.col(i);
-            const T prior = mean(col);
-            maxDevia = std::max(maxDevia, variance(col, prior) / square(prior));
-        }
-        return maxDevia;
+        trialIntegral<Functor, R, SequentialExecutor>(varsDevia, 0, func);
+        return accessMeritImpl(varsDevia);
     }
 
     template<Scalar T>
@@ -158,7 +134,7 @@ namespace Physica::Core {
     template<Scalar T>
     T Vegas<T>::calcSquaredChi() const {
         if (numRefine == 1)
-            return T(0);
+            return 0;
         const T mean1 = calcMean();
         return divide(square(means - mean1), vars).sum() / T(numRefine - 1); // Normalize, refer to [2]
     }
@@ -178,16 +154,15 @@ namespace Physica::Core {
     }
 
     template<Scalar T>
-    template<class Functor, RandomGenerator R>
+    template<class Functor, RandomGenerator R, class Executor>
     void Vegas<T>::trialIntegral(DenseMatrix<T>& varsDevia, int refine, Functor func) {
-        Array<Array<int>> counts(varsDevia.getRow(), getDim(), 0);
-
-        VectorND<T> fromX(getDim());
-        VectorND<T> deltaX(getDim());
-        for (int sample = 0; sample < numSample; ++sample) {
-            const auto indexes = R::getInstance().random_int(getDim(), 0, varsDevia.getRow() - 1);
+        const auto indexes = R::getInstance().random_int(getDim() * numSample, 0, varsDevia.getRow() - 1);
+        VectorND<T> samples(numSample);
+        Executor::parallel_for([&, this](size_t n) {
+            VectorND<T> fromX(getDim());
+            VectorND<T> deltaX(getDim());
             for (size_t i = 0; i < getDim(); ++i) {
-                const auto index = indexes[i];
+                const auto index = indexes[n * getDim() + i];
                 fromX[i] = pointGrid(index, i);
                 deltaX[i] = pointGrid(index + 1, i);
             }
@@ -196,9 +171,15 @@ namespace Physica::Core {
             const VectorND<T> x = fromX + hadamard(deltaX, VectorND<T>::template random_uniform<R>(getDim()));
             const T y = func(x);
             const T xy = y * (deltaX * T(varsDevia.getRow())).prod();
-            toNextVariance(vars[refine], means[refine], sample, xy);
+            samples[n] = xy;
+        }, numSample, Executor::getNumThread()).wait();
+
+        Array<Array<int>> counts(varsDevia.getRow(), getDim(), 0);
+        for (int n = 0; n < numSample; ++n) {
+            const T xy = samples[n];
+            toNextVariance(vars[refine], means[refine], n, xy);
             for (size_t i = 0; i < getDim(); ++i) {
-                const auto index = indexes[i];
+                const auto index = indexes[n * getDim() + i];
                 toNextMean(varsDevia(index, i), counts[index][i], square(xy));
                 counts[index][i] += 1;
             }
@@ -206,14 +187,68 @@ namespace Physica::Core {
     }
 
     template<Scalar T>
-    void Vegas<T>::smooth(VectorND<T>& vars) {
-        const VectorND<T> buffer = vars * reciprocal(vars.sum()); // Normalized values fall into a range that is good for the compression function.
-        const Vector3D<T> kernel{1.0 / 8, 6.0 / 8, 1.0 / 8};
+    void Vegas<T>::setNumRefine(int numRefine_) {
+        assert(numRefine > 0);
+        numRefine = numRefine_;
+        means.resize(numRefine, 0);
+        vars.resize(numRefine, 0);
+    }
 
-        vars[0] = T(7.0 / 8) * buffer[0] + T(1.0 / 8) * buffer[1];
+    template<Scalar T>
+    template<class Executor>
+    void Vegas<T>::refineGrid(DenseMatrix<T>& varsDevia) {
+        Executor::parallel_for([this, &varsDevia](size_t dim) {
+            const T meanVar = compress(varsDevia.asArray()[dim]);
+            const bool noData = meanVar.isZero();
+            if (noData) [[unlikely]] // No data in the dimension, usually we should have enough samples to avoid it
+                return;
+
+            auto oldPoints = pointGrid.col(dim);
+            VectorND<T> newPoints(getNumPoint());
+            newPoints[0] = oldPoints[0];
+            T temp = 0;
+            size_t i = 1;
+            for (size_t j = 0; i < newPoints.getLength() - 1; ++i) {
+                while (temp < meanVar) {
+                    assert(j < varsDevia.getRow() && "[Error]: Unexpected not enough vars, this is likely a bug");
+                    temp += varsDevia(j, dim);
+                    j += 1;
+                }
+                temp -= meanVar;
+                newPoints[i] = oldPoints[j] - temp * (oldPoints[j] - oldPoints[j - 1]) / varsDevia(j - 1, dim);
+            }
+            newPoints[i] = oldPoints[i];
+            oldPoints = newPoints;
+        }, getDim(), Executor::getNumThread()).wait();
+    }
+
+    template<Scalar T>
+    T Vegas<T>::accessMeritImpl(const DenseMatrix<T>& varsDevia) {
+        T maxDevia = 0;
+        for (size_t i = 0; i < varsDevia.getCol(); ++i) {
+            const auto col = varsDevia.col(i);
+            const T prior = mean(col);
+            maxDevia = std::max(maxDevia, variance(col, prior) / square(prior));
+        }
+        return maxDevia;
+    }
+
+    template<Scalar T>
+    T Vegas<T>::compress(VectorND<T>& vars) {
+        const T norm1 = vars.norm1();
+        const bool noData = norm1.isZero();
+        if (noData)
+            return 0;
+
+        const VectorND<T> buffer = vars * reciprocal(norm1); // Normalized values fall into a range that is feasible for compression function.
+        const Vector3D<T> kernel{1.0 / 8, 6.0 / 8, 1.0 / 8};
         size_t i = 0;
+        vars[0] = T(7.0 / 8) * buffer[0] + T(1.0 / 8) * buffer[1];
         for (; i < vars.getLength() - 2; ++i)
             vars[i + 1] = buffer.template segment<3>(i, i + 3) * kernel;
         vars[i + 1] = T(7.0 / 8) * buffer[i] + T(1.0 / 8) * buffer[i + 1];
+
+        vars = pow(divide(vars - T(1), ln(vars)), compressRate);
+        return mean(vars);
     }
 }

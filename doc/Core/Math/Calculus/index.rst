@@ -19,3 +19,4 @@ Calculus
 
    FokkerPlanckModel
    Legendre
+   Vegas
