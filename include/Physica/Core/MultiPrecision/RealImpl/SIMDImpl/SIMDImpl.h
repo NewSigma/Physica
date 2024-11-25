@@ -239,7 +239,7 @@ namespace Physica::Core {
     template<bool... Flags>
     SIMD<T, Size> SIMD<T, Size>::makeSignBits() {
         using IntType = std::conditional<T::Option == Float32, uint32_t, uint64_t>::type;
-        constexpr auto Functor = [](bool flag) constexpr -> IntType {
+        constexpr auto Functor = [](bool flag) consteval -> IntType {
             constexpr IntType Mask = T::Option == Float32 ? IntType(0x80000000U) : IntType(0x8000000000000000U);
             return flag ? Mask : 0;
         };

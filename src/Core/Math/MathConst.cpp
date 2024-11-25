@@ -60,7 +60,7 @@ namespace Physica::Core {
         return a * a / c;
     }
 
-    const MathConst<FloatMP>& MathConst<FloatMP>::getInstance() {
+    const MathConst<FloatMP>& MathConst<FloatMP>::getInstance() noexcept {
         static MathConst mathConst{};
         return mathConst;
     }

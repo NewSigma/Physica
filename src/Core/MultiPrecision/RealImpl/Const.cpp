@@ -46,7 +46,7 @@ namespace Physica::Core {
         _10 = 10;
     }
 
-    const BasicConst& BasicConst::getInstance() {
+    const BasicConst& BasicConst::getInstance() noexcept {
         static BasicConst basicConst{};
         return basicConst;
     }

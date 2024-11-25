@@ -51,50 +51,50 @@ namespace Physica::Core {
         };
     public:
         template<class MatrixType>
-        __host__ __device__ constexpr static bool isColMatrix() {
+        __host__ __device__ consteval static bool isColMatrix() {
             return isAnyMajor<MatrixType>() || !(Traits<MatrixType>::Option & Row);
         }
 
         template<class MatrixType>
-        __host__ __device__ constexpr static bool isRowMatrix() {
+        __host__ __device__ consteval static bool isRowMatrix() {
             return isAnyMajor<MatrixType>() || !isColMatrix<MatrixType>();
         }
 
         template<class MatrixType>
-        __host__ __device__ constexpr static bool isAnyMajor() {
+        __host__ __device__ consteval static bool isAnyMajor() {
             return Traits<MatrixType>::Option & AnyMajor;
         }
 
         template<class MatrixType>
-        __host__ __device__ constexpr static int getMajor() {
+        __host__ __device__ consteval static int getMajor() {
             return isAnyMajor<MatrixType>() ? AnyMajor : (isColMatrix<MatrixType>() ? Col : Row);
         }
 
         template<class MatrixType>
-        __host__ __device__ constexpr static bool isElementMatrix() {
+        __host__ __device__ consteval static bool isElementMatrix() {
             return isAnyStorage<MatrixType>() || Traits<MatrixType>::Option & Element;
         }
 
         template<class MatrixType>
-        __host__ __device__ constexpr static bool isVectorMatrix() {
+        __host__ __device__ consteval static bool isVectorMatrix() {
             return isAnyStorage<MatrixType>() || !isElementMatrix<MatrixType>();
         }
 
         template<class MatrixType>
-        __host__ __device__ constexpr static bool isAnyStorage() {
+        __host__ __device__ consteval static bool isAnyStorage() {
             return Traits<MatrixType>::Option & AnyStorage;
         }
 
         template<class MatrixType>
-        __host__ __device__ constexpr static int getStorage() {
+        __host__ __device__ consteval static int getStorage() {
             return isAnyStorage<MatrixType>() ? AnyStorage : (isElementMatrix<MatrixType>() ? Element : Vector);
         }
 
         template<class MatrixType1, class MatrixType2>
-        __host__ __device__ constexpr static bool isSameMajor() { return getMajor<MatrixType1>() == getMajor<MatrixType2>(); }
+        __host__ __device__ consteval static bool isSameMajor() { return getMajor<MatrixType1>() == getMajor<MatrixType2>(); }
 
         template<class MatrixType1, class MatrixType2>
-        __host__ __device__ constexpr static bool isSameStorage() { return getStorage<MatrixType1>() == getStorage<MatrixType2>(); }
+        __host__ __device__ consteval static bool isSameStorage() { return getStorage<MatrixType1>() == getStorage<MatrixType2>(); }
 
         template<class MatrixType>
         [[nodiscard]] __host__ __device__ constexpr static size_t selectMajor(size_t row, size_t col) {
@@ -107,12 +107,12 @@ namespace Physica::Core {
         }
 
         template<class MatrixType>
-        [[nodiscard]] __host__ __device__ static size_t getMaxMajor(const MatrixType& mat) noexcept {
+        [[nodiscard]] __host__ __device__ constexpr static size_t getMaxMajor(const MatrixType& mat) noexcept {
             return isColMatrix<MatrixType>() ? mat.getCol() : mat.getRow();
         }
 
         template<class MatrixType>
-        [[nodiscard]] __host__ __device__ static size_t getMaxMinor(const MatrixType& mat) noexcept {
+        [[nodiscard]] __host__ __device__ constexpr static size_t getMaxMinor(const MatrixType& mat) noexcept {
             return isColMatrix<MatrixType>() ? mat.getRow() : mat.getCol();
         }
 
@@ -127,7 +127,7 @@ namespace Physica::Core {
         }
 
         template<class MatrixType>
-        [[nodiscard]] __host__ __device__ constexpr static bool isSymmMatrix() noexcept {
+        [[nodiscard]] __host__ __device__ consteval static bool isSymmMatrix() noexcept {
             using TransposeType = decltype(std::declval<MatrixType>().transpose());
             using TransposeType1 = std::remove_cv<TransposeType>::type;
             using TransposeType2 = std::remove_reference<TransposeType1>::type;
@@ -135,7 +135,7 @@ namespace Physica::Core {
         }
 
         template<class MatrixType>
-        [[nodiscard]] __host__ __device__ constexpr static bool isHermiteMatrix() noexcept {
+        [[nodiscard]] __host__ __device__ consteval static bool isHermiteMatrix() noexcept {
             using HermiteType = decltype(std::declval<MatrixType>().hermite());
             using HermiteType1 = std::remove_cv<HermiteType>::type;
             using HermiteType2 = std::remove_reference<HermiteType1>::type;

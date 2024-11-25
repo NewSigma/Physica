@@ -83,6 +83,11 @@ namespace Physica::Logger {
         return *threadLogBuffer;
     }
 
+    LoggerRuntime& LoggerRuntime::getInstance() noexcept {
+        static LoggerRuntime runtime{};
+        return runtime;
+    }
+
     void LoggerRuntime::logThreadMain() {
         //Format [11:49:23] [Physica:12|Info]: This is a log.
         using namespace std::chrono_literals;

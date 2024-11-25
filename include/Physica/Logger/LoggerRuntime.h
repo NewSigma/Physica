@@ -88,7 +88,7 @@ namespace Physica::Logger {
         /* Setters */
         void releaseBuffer() noexcept { threadLogBuffer->schedualDelete(); threadLogBuffer = nullptr; }
         /* Static Members */
-        static inline LoggerRuntime& getInstance();
+        [[nodiscard]] static LoggerRuntime& getInstance() noexcept;
     private:
         LoggerRuntime();
         /* Operations */
@@ -100,11 +100,6 @@ namespace Physica::Logger {
 
     inline AbstractLogger& getLogger(size_t index) {
         return LoggerRuntime::getInstance().getLogger(index);
-    }
-
-    inline LoggerRuntime& LoggerRuntime::getInstance() {
-        static LoggerRuntime runtime{};
-        return runtime;
     }
 
     template<typename... Ts>

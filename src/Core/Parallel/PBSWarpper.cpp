@@ -19,11 +19,10 @@
 #include <errno.h>
 #include <fstream>
 #include "Physica/Core/Parallel/PBSWarpper.h"
-#include "Physica/Core/Exception/SystemException.h"
 #include "Physica/Core/Exception/BadFileFormatException.h"
 
 namespace Physica::Core {
-    const PBSWarpper& PBSWarpper::getInstance() {
+    const PBSWarpper& PBSWarpper::getInstance() noexcept {
         static PBSWarpper pbs{};
         return pbs;
     }

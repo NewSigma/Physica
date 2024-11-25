@@ -25,7 +25,7 @@ namespace Physica::Core {
      */
     class Instruset {
     public:
-        [[nodiscard]] constexpr static bool hasAVX512VL() {
+        [[nodiscard]] consteval static bool hasAVX512VL() {
         #ifdef __AVX512VL__
             return true;
         #else
@@ -33,7 +33,7 @@ namespace Physica::Core {
         #endif
         }
 
-        [[nodiscard]] constexpr static bool hasAVX512BW() {
+        [[nodiscard]] consteval static bool hasAVX512BW() {
         #ifdef __AVX512BW__
             return true;
         #else
@@ -41,7 +41,7 @@ namespace Physica::Core {
         #endif
         }
 
-        [[nodiscard]] constexpr static bool hasAVX512DQ() {
+        [[nodiscard]] consteval static bool hasAVX512DQ() {
         #ifdef __AVX512DQ__
             return true;
         #else
@@ -49,7 +49,7 @@ namespace Physica::Core {
         #endif
         }
 
-        [[nodiscard]] constexpr static bool hasAVX512() {
+        [[nodiscard]] consteval static bool hasAVX512() {
         #if defined (__AVX512F__) || defined (__AVX512__)
             return true;
         #else
@@ -57,7 +57,7 @@ namespace Physica::Core {
         #endif
         }
 
-        [[nodiscard]] constexpr static bool hasAVX2() {
+        [[nodiscard]] consteval static bool hasAVX2() {
             if constexpr (hasAVX512())
                 return true;
         #ifdef __AVX2__
@@ -67,7 +67,7 @@ namespace Physica::Core {
         #endif
         }
 
-        [[nodiscard]] constexpr static bool hasAVX() {
+        [[nodiscard]] consteval static bool hasAVX() {
             if constexpr (hasAVX2())
                 return true;
         #ifdef __AVX__
@@ -77,7 +77,7 @@ namespace Physica::Core {
         #endif
         }
 
-        [[nodiscard]] constexpr static bool hasSSE4_2() {
+        [[nodiscard]] consteval static bool hasSSE4_2() {
             if constexpr (hasAVX())
                 return true;
         #ifdef __SSE_4_2__
@@ -87,7 +87,7 @@ namespace Physica::Core {
         #endif
         }
 
-        [[nodiscard]] constexpr static bool hasSSE4_1() {
+        [[nodiscard]] consteval static bool hasSSE4_1() {
             if constexpr (hasSSE4_2())
                 return true;
         #ifdef __SSE_4_1__
@@ -97,7 +97,7 @@ namespace Physica::Core {
         #endif
         }
 
-        [[nodiscard]] constexpr static bool hasSSSE3() {
+        [[nodiscard]] consteval static bool hasSSSE3() {
             if constexpr (hasSSE4_1())
                 return true;
         #ifdef __SSSE3__
@@ -107,7 +107,7 @@ namespace Physica::Core {
         #endif
         }
 
-        [[nodiscard]] constexpr static bool hasSSE3() {
+        [[nodiscard]] consteval static bool hasSSE3() {
             if constexpr (hasSSSE3())
                 return true;
         #ifdef __SSE3__
@@ -117,7 +117,7 @@ namespace Physica::Core {
         #endif
         }
 
-        [[nodiscard]] constexpr static bool hasSSE2() {
+        [[nodiscard]] consteval static bool hasSSE2() {
             if constexpr (hasSSE3())
                 return true;
         #if defined (__SSE2__) || defined (__x86_64__)
@@ -129,7 +129,7 @@ namespace Physica::Core {
         #endif
         }
 
-        [[nodiscard]] constexpr static bool hasSSE() {
+        [[nodiscard]] consteval static bool hasSSE() {
             if constexpr (hasSSE2())
                 return true;
         #ifdef __SSE__
@@ -141,7 +141,7 @@ namespace Physica::Core {
         #endif
         }
 
-        [[nodiscard]] constexpr static bool hasFMA() {
+        [[nodiscard]] consteval static bool hasFMA() {
         #ifdef __FMA__
             return true;
         #else
@@ -149,7 +149,7 @@ namespace Physica::Core {
         #endif
         }
 
-        [[nodiscard]] constexpr static bool hasFMA4() {
+        [[nodiscard]] consteval static bool hasFMA4() {
         #ifdef __FMA4__
             return true;
         #else

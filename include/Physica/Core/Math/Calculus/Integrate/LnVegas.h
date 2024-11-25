@@ -26,8 +26,10 @@ namespace Physica::Core {
      */
     template<Scalar T>
     class LnVegas : private Vegas<T> {
-        using Base = Vegas<T>;
         using This = LnVegas<T>;
+        using Base = Vegas<T>;
+        using typename Base::ValueType;
+        using typename Base::MeritMatrix;
 
         using Base::means;
         using Base::vars;
@@ -42,7 +44,7 @@ namespace Physica::Core {
         template<class Functor, RandomGenerator R, class Executor = SequentialExecutor>
         void lnIntegral(Functor lnFunc);
         template<class Functor, RandomGenerator R>
-        [[nodiscard]] T accessMerit(Functor func);
+        [[nodiscard]] ValueType accessMerit(Functor func);
 
         [[nodiscard]] T calcLnMean() const;
         [[nodiscard]] T calcLnDevia() const;
@@ -59,7 +61,7 @@ namespace Physica::Core {
         using Base::setNumRefine;
     private:
         template<class Functor, RandomGenerator R, class Executor>
-        void trialIntegral(DenseMatrix<T>& varsDevia, int refine, Functor lnFunc);
+        void trialIntegral(MeritMatrix& merits, int refine, Functor lnFunc);
     };
 
     template<Scalar T>
@@ -68,19 +70,19 @@ namespace Physica::Core {
         using CallResult = std::invoke_result<Functor, VectorND<T>>::type;
         static_assert(std::is_same<CallResult, T>::value, "[Error]: Invalid functor");
 
-        DenseMatrix<T> varsDevia(getNumPoint() - 1, getDim(), 0);
+        MeritMatrix merits(getNumPoint() - 1, getDim(), 0);
         for (int refine = 0; refine < getNumRefine(); ++refine) {
-            trialIntegral<Functor, R, Executor>(varsDevia, refine, lnFunc);
-            Base::template refineGrid<Executor>(varsDevia);
+            trialIntegral<Functor, R, Executor>(merits, refine, lnFunc);
+            Base::template refineGrid<Executor>(merits);
         }
     }
 
     template<Scalar T>
     template<class Functor, RandomGenerator R>
-    T LnVegas<T>::accessMerit(Functor func) {
-        DenseMatrix<T> varsDevia(getNumPoint() - 1, getDim(), 0);
-        trialIntegral<Functor, R, SequentialExecutor>(varsDevia, 0, func);
-        return Base::accessMeritImpl(varsDevia);
+    LnVegas<T>::ValueType LnVegas<T>::accessMerit(Functor func) {
+        MeritMatrix merits(getNumPoint() - 1, getDim(), 0);
+        trialIntegral<Functor, R, SequentialExecutor>(merits, 0, func);
+        return Base::accessMeritImpl(merits);
     }
 
     template<Scalar T>
@@ -101,7 +103,7 @@ namespace Physica::Core {
     template<Scalar T>
     T LnVegas<T>::calcSquaredChi() const {
         if (getNumRefine() == 1)
-            return 0;
+            return 1;
         const T lnMean = calcLnMean();
         VectorND<T> buffer = exp(means - lnMean);
         buffer = ln(abs(buffer - T(1))) + lnMean;
@@ -111,9 +113,9 @@ namespace Physica::Core {
 
     template<Scalar T>
     template<class Functor, RandomGenerator R, class Executor>
-    void LnVegas<T>::trialIntegral(DenseMatrix<T>& varsDevia, int refine, Functor lnFunc) {
+    void LnVegas<T>::trialIntegral(MeritMatrix& merits, int refine, Functor lnFunc) {
         const int numSample = getNumSample();
-        const auto indexes = R::getInstance().random_int(getDim() * numSample, 0, varsDevia.getRow() - 1);
+        const auto indexes = R::getInstance().random_int(getDim() * numSample, 0, merits.getRow() - 1);
         VectorND<T> samples(numSample);
         Executor::parallel_for([&, this](size_t n) {
             VectorND<T> fromX(getDim());
@@ -128,23 +130,25 @@ namespace Physica::Core {
 
             const VectorND<T> x = fromX + hadamard(deltaX, VectorND<T>::template random_uniform<R>(getDim()));
             const T lny = lnFunc(x);
-            const T lnxy = lny + ln(deltaX).sum() + T(getDim()) * ln(T(varsDevia.getRow()));
+            const T lnxy = lny + ln(deltaX).sum() + T(getDim()) * ln(T(merits.getRow()));
             samples[n] = lnxy;
         }, numSample, Executor::getNumThread()).wait();
 
-        Array<Array<int>> counts(varsDevia.getRow(), getDim(), 0);
+        Array<Array<int>> counts(merits.getRow(), getDim(), 0);
         const T maxSample = samples.max();
         samples = exp(samples - maxSample);
+        T mean0 = 0;
+        T vars0 = 0;
         for (int n = 0; n < numSample; ++n) {
             const T xy = samples[n];
-            toNextVariance(vars[refine], means[refine], n, xy);
+            toNextVariance(vars0, mean0, n, xy);
             for (size_t i = 0; i < getDim(); ++i) {
                 const auto index = indexes[n * getDim() + i];
-                toNextMean(varsDevia(index, i), counts[index][i], square(xy));
+                toNextMean(merits(index, i), counts[index][i], square(xy.getValue()));
                 counts[index][i] += 1;
             }
         }
-        means[refine] = ln(means[refine]) + maxSample;
-        vars[refine] = ln(vars[refine]) + T(2) * maxSample;
+        means[refine] = ln(mean0) + maxSample;
+        vars[refine] = ln(vars0) + T(2) * maxSample;
     }
 }

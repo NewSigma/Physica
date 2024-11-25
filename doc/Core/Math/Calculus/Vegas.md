@@ -11,9 +11,21 @@ with no Invariant Sections, no Front-Cover Texts, and no Back-Cover Texts.
 You should have received a copy of the GNU Free Documentation License
 along with Physica.  If not, see <https://www.gnu.org/licenses/>.
 -->
-# LnVegas
+# Vegas
 
-## Introduction
+## 卡方统计
+
+[1]使用卡方统计评估网格优化的可靠性
+
+$$\chi_0^2 = \sum_j \frac{(I_j - \overline{I})^2}{\sigma_j^2}$$
+
+根据中心极限定理, 求和式的每一项满足标准差为$(N_s)^{-1/2}$的正态分布, $N_s$为样本数NumSample. 因此$N_s\chi_0^2$满足自由度为$N_r - 1$的卡方分布, $N_r$为网格迭代次数NumRefine. 对上式进行归一化
+
+$$\chi^2 = \frac{N_s}{N_r - 1} \sum_j \frac{(I_j - \overline{I})^2}{\sigma_j^2}$$
+
+与[1]中定义不同, 上式的平均值为1. 特别地, $N_r = 1$时不涉及网格优化, 规定$\chi^2 = 1$
+
+## Vegas变式 - LnVegas
 
 对一系列大数量级样本进行平均通常导致上溢, 可以通过计算对数均值和对数方差规避该问题. 核心思想是利用恒等式$x = e^{\ln x} \quad (x > 0)$, 将数量级最大的部分分离出去
 
@@ -28,8 +40,6 @@ $$\ln \sigma^2(x) = \ln(\braket{x_i^2} - \braket{x_i}^2) = 2\ln x_m + \ln \sigma
 其中$x_m = \max(x_1, x_2, ..., x_n)$. 由于$e^{\ln x_i - \ln x_m} \le 1$, 对其求和的性质是良好的.
 
 该技术对下溢同样适用
-
-## Vegas变式
 
 使用上述方法确保Vegas积分中的稳定性, 同样可以对不同迭代次数的结果进行加权求和以得到不确定度更低的统计量([1]中Eq. 30 ~ Eq. 32):
 

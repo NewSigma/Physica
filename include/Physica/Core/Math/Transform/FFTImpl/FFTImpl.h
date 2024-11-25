@@ -18,27 +18,9 @@
  */
 #pragma once
 
-#include <mutex>
+#include "ThreadGuardFFTW.h"
 
 namespace Physica::Core {
-    namespace Internal {
-        class ThreadGuardFFTW final {
-        public:
-            std::mutex globalMutex;
-        public:
-            ThreadGuardFFTW(const ThreadGuardFFTW&) = delete;
-            ThreadGuardFFTW(ThreadGuardFFTW&&) noexcept = delete;
-            ~ThreadGuardFFTW() = default;
-            /* Operators */
-            ThreadGuardFFTW& operator=(const ThreadGuardFFTW&) = delete;
-            ThreadGuardFFTW& operator=(ThreadGuardFFTW&&) noexcept = delete;
-            /* Static members */
-            [[nodiscard]] PHYSICA_API static ThreadGuardFFTW& getInstance();
-        private:
-            ThreadGuardFFTW() = default;
-        };
-    }
-
     template<Scalar T>
     FFT<T, 1>::FFT()
             : forward_plan(nullptr)

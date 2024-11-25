@@ -59,7 +59,7 @@ namespace Physica::Core {
         MathConst& operator=(const MathConst&) = delete;
         MathConst& operator=(MathConst&&) noexcept = delete;
         /* Operations */
-        [[nodiscard]] static const MathConst& getInstance();
+        [[nodiscard]] static const MathConst& getInstance() noexcept;
     private:
         MathConst();
 

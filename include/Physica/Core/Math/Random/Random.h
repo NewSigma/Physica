@@ -72,7 +72,7 @@ namespace Physica::Core {
         [[nodiscard]] constexpr static result_type min() { return GenType::min(); }
         [[nodiscard]] constexpr static result_type max() { return GenType::max(); }
 
-        [[nodiscard]] static Random& getInstance();
+        [[nodiscard]] static Random& getInstance() noexcept;
         [[nodiscard]] static Array<int> random_int(size_t length, int from, int to);
     private:
         Random();
@@ -114,7 +114,7 @@ namespace Physica::Core {
     }
 
     template<RandomOption Option, uint64_t FixedSeed>
-    Random<Option, FixedSeed>& Random<Option, FixedSeed>::getInstance() {
+    Random<Option, FixedSeed>& Random<Option, FixedSeed>::getInstance() noexcept {
         thread_local static This instance{};
         return instance;
     }

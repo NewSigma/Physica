@@ -83,7 +83,7 @@ namespace Physica::Core {
         [[nodiscard]] __host__ __device__ const_pointer data_ptr(size_t index) const noexcept { return data() + index; }
         /* Static members */
         template<class... Args>
-        __host__ __device__ constexpr static bool isTrivialDefaultConstruct();
+        __host__ __device__ consteval static bool isTrivialDefaultConstruct();
     protected:
         ArrayBase() = default;
         ArrayBase(const ArrayBase&) = default;

@@ -110,7 +110,7 @@ namespace Physica {
         Device
     };
 
-    __host__ __device__ constexpr inline static Side GetSide() {
+    __host__ __device__ consteval inline static Side GetSide() {
     #ifdef __CUDA_ARCH__
         return Side::Device;
     #else
@@ -118,15 +118,15 @@ namespace Physica {
     #endif
     }
 
-    __host__ __device__ constexpr inline static bool IsHost() {
+    __host__ __device__ consteval inline static bool IsHost() {
         return GetSide() == Side::Host;
     }
 
-    __host__ __device__ constexpr inline static bool IsDevice() {
+    __host__ __device__ consteval inline static bool IsDevice() {
         return GetSide() == Side::Device;
     }
 
-    constexpr inline static bool IsMSVC() {
+    consteval inline static bool IsMSVC() {
     #ifdef _MSC_VER
         return true;
     #else
@@ -134,7 +134,7 @@ namespace Physica {
     #endif
     }
 
-    constexpr inline static bool UseASM() {
+    consteval inline static bool UseASM() {
     #ifdef PHYSICA_ASM
         return true;
     #else
@@ -142,7 +142,7 @@ namespace Physica {
     #endif
     }
 
-    constexpr inline static bool HasHDF5() {
+    consteval inline static bool HasHDF5() {
     #ifdef PHYSICA_HDF5
         return true;
     #else
@@ -150,7 +150,7 @@ namespace Physica {
     #endif
     }
 
-    constexpr inline static bool HasMKL() {
+    consteval inline static bool HasMKL() {
     #ifdef PHYSICA_MKL
         return true;
     #else
@@ -158,7 +158,7 @@ namespace Physica {
     #endif
     }
 
-    constexpr inline static bool HasMPI() {
+    consteval inline static bool HasMPI() {
     #ifdef PHYSICA_MPI
         return true;
     #else
@@ -166,7 +166,7 @@ namespace Physica {
     #endif
     }
 
-    constexpr inline static bool HasCUDA() {
+    consteval inline static bool HasCUDA() {
     #ifdef PHYSICA_CUDA
         return true;
     #else

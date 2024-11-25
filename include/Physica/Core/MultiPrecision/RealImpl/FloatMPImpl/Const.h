@@ -47,7 +47,7 @@ namespace Physica::Core {
         BasicConst& operator=(const BasicConst&) = delete;
         BasicConst& operator=(BasicConst&&) noexcept = delete;
         /* Operations */
-        [[nodiscard]] static const BasicConst& getInstance();
+        [[nodiscard]] static const BasicConst& getInstance() noexcept;
     private:
         BasicConst();
     };
