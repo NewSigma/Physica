@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include "Physica/Core/MultiPrecision/Real.h"
+#include "Physica/Core/Math/MathConst.h"
 #include "Physica/Core/Math/Algebra/EquationSolver/ElementaryEquation.h"
 
 namespace Physica::Core {
@@ -191,7 +191,7 @@ namespace Physica::Core {
         auto func = [&](const ScalarType& x) -> ScalarType { return cos(x) - s; };
         return bisectionMethod<decltype(func), ScalarType>(func,
                                                            BasicConst::getInstance()._0,
-                                                           MathConst::getInstance().PI,
+                                                           MathConst<FloatMP>::getInstance().PI,
                                                            BasicConst::getInstance()._1,
                                                            BasicConst::getInstance().Minus_1);
     }
@@ -201,8 +201,8 @@ namespace Physica::Core {
         using ScalarType = Real<FloatMP>;
         auto func = [&](const ScalarType& x) -> ScalarType { return sin(x) - s; };
         return bisectionMethod<decltype(func), ScalarType>(func,
-                                                           MathConst::getInstance().Minus_PI_2,
-                                                           MathConst::getInstance().PI_2,
+                                                           MathConst<FloatMP>::getInstance().Minus_PI_2,
+                                                           MathConst<FloatMP>::getInstance().PI_2,
                                                            BasicConst::getInstance().Minus_1,
                                                            BasicConst::getInstance()._1);
     }

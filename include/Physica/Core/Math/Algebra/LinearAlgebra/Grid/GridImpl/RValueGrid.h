@@ -24,6 +24,7 @@
 namespace Physica::Core {
     template<class Derived> class RValueGrid;
     template<class Derived> class LValueGrid;
+    template<class GridType> class FlattenGrid;
 
     template<class T>
     concept Grid = std::derived_from<T, RValueGrid<T>>;

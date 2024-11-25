@@ -56,8 +56,8 @@ namespace Physica::Core {
 
     template<Matrix T, Vector U>
     template<LVector V, class Executor>
-    void MatrixVectorProduct<BlockMatrix<T>, U>::assignTo(V& target_) const {
-        assert(getLength() == target_.getLength() && "[Error]: Dimensions do not match");
+    void MatrixVectorProduct<BlockMatrix<T>, U>::assignTo(V& target) const {
+        assert(getLength() == target.getLength() && "[Error]: Dimensions do not match");
         size_t from = 0;
         for (size_t i = 0; i < m.getNumBlocks(); ++i) {
             const size_t to = m.getIndexEnds()[i];

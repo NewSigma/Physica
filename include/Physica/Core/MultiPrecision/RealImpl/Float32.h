@@ -53,15 +53,15 @@ namespace Physica::Core {
     private:
         float f;
     public:
-        Real() = default;
-        __host__ __device__ Real(float f_) : f(f_) {}
+        constexpr Real() = default;
+        __host__ __device__ constexpr Real(float f_) : f(f_) {}
         Real(const Integer& i) : Real(float(double(i))) {}
         Real(const Rational& r) : Real(float(double(r))) {}
         template<Scalar T>
         __host__ __device__ explicit inline Real(const T& x);
-        Real(const Real&) = default;
-        Real(Real&&) noexcept = default;
-        //~Real() = default; /* Dynamic parallelism of CUDA 12.1 does not recognize that PlainStruct is trivial */
+        constexpr Real(const Real&) = default;
+        constexpr Real(Real&&) noexcept = default;
+        constexpr ~Real() = default;
         /* Operators */
         using Base::operator>;
         using Base::operator<;

@@ -22,7 +22,6 @@
 #include "LGridBlock.h"
 
 namespace Physica::Core {
-    template<class GridType> class FlattenGrid;
     /**
      * Notes:
      * Right is positive direction of x.
@@ -74,7 +73,7 @@ namespace Physica::Core {
         [[nodiscard]] inline LGridBlock<Derived> block(Index3D from, Index3D count);
         [[nodiscard]] inline const LGridBlock<Derived> block(Index3D from, Index3D count) const;
 
-        [[nodiscard]] FlattenGrid<Derived> flatten() const { return FlattenGrid<Derived>(Base::getDerived()); }
+        [[nodiscard]] auto flatten() const { return FlattenGrid<Derived>(Base::getDerived()); }
         void resize(Index3D size) { Base::getDerived().resize(size); }
         template<RandomGenerator R> void random_uniform();
         template<RandomGenerator R> void random_normal();

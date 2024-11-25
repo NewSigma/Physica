@@ -19,6 +19,7 @@
 #pragma once
 
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/VectorImpl/LValueVector.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Grid/GridImpl/RValueGrid.h"
 
 namespace Physica::Core {
     template<class GridType> class LValueGrid;

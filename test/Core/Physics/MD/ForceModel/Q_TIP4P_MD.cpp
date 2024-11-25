@@ -112,7 +112,6 @@ void testSort() {
 }
 
 void testMD() {
-    auto& pool = RandomType::getInstance();
     auto cell = makeSystem(2);
     ForceModel::sortPosition(cell);
     ForceModel forceModel(cell, pair_cutoff, Ewald<ScalarType>{});

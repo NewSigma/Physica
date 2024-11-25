@@ -54,14 +54,14 @@ namespace Physica::Core {
         const auto populationSize = config.populationSize;
         const auto crossoverRate = config.crossoverRate;
         for (size_t i = 0; i < populationSize; i++) {
-            const ScalarType random = ScalarType::random_uniform<R>();
+            const ScalarType random = ScalarType::template random_uniform<R>();
             if (random < ScalarType(crossoverRate)) {
                 unsigned int sampleIndex1 = std::rand() % populationSize;
                 unsigned int sampleIndex2 = std::rand() % populationSize;
                 auto& sample1 = population[sampleIndex1];
                 auto& sample2 = population[sampleIndex2];
 
-                const ScalarType random1 = ScalarType::random_uniform<R>();
+                const ScalarType random1 = ScalarType::template random_uniform<R>();
                 //Whether random2 > random1 or not does not matter.
                 T child = sample1 + (sample2 - sample1) * random1;
                 ScalarType fitness_child = func(std::cref(child));

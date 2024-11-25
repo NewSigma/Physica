@@ -55,7 +55,7 @@ namespace Physica::Core {
                 size_t featureId,
                 unsigned int numForest,
                 unsigned int numTree,
-                Dataset dataset,);
+                Dataset dataset);
         template<RandomGenerator R>
         [[nodiscard]] std::forward_list<size_t> selectImportantFeature(
                 unsigned int numForest,
@@ -277,7 +277,7 @@ namespace Physica::Core {
         std::uniform_int_distribution<size_t> dist(0, numSample - 1);
         std::set<size_t> set{};
         for (size_t _ = 0; _ < numSample; ++_)
-            set.insert(dist(R::getInstance();));
+            set.insert(dist(R::getInstance()));
 
         std::forward_list<size_t> trainSample{}, testSample{};
         for (size_t j = 0; j < numSample; ++j) {
