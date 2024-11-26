@@ -121,10 +121,8 @@ namespace Physica::Core {
     }
 
     template<Scalar T, int Order, size_t Length, class Allocator>
-    auto DenseVector<Diff<T, DiffMode::Forward, Order>, Length, Allocator>::linspace(ScalarType from, ScalarType to, size_t count) {
-        auto values = ValueVector::linspace(from.getValue(), to.getValue(), count);
-        auto grads = GradVector::linspace(from.getGrad(), to.getGrad(), count);
-        return This(std::move(values), std::move(grads));
+    auto DenseVector<Diff<T, DiffMode::Forward, Order>, Length, Allocator>::linspace(T from, T to, size_t count) {
+        return This(ValueVector::linspace(from, to, count), GradVector(count, T(0)));
     }
     ////////////////////////////////////////////////////////////////////////////////////
     template<Scalar T, int Order>

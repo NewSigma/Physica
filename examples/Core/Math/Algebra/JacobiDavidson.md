@@ -46,14 +46,14 @@ $$\mathbf{A} (\mathbf{x}_k + \delta \mathbf{x}_k) = (\theta_k + \delta \theta_k)
 
 $$(\mathbf{A} - \theta I) \delta \mathbf{x}_k - \mathbf{x}_k \delta \theta_k = -\mathbf{r}_k(\theta_k)$$
 
-为了求解该方程，我们可以在两边乘以一个投影矩阵$I - \mathbf{x}_k^T \mathbf{x}_k$，第二项投影后结果为$0$
+为了求解该方程，我们可以在两边乘以一个投影矩阵$I - \mathbf{x}_k \mathbf{x}_k^T$，第二项投影后结果为$0$
 
-$$(I - \mathbf{x}_k^T \mathbf{x}_k) (\mathbf{A} - \theta I) \delta \mathbf{x}_k = -\mathbf{r}_k(\theta_k)$$
+$$(I - \mathbf{x}_k \mathbf{x}_k^T) (\mathbf{A} - \theta I) \delta \mathbf{x}_k = -\mathbf{r}_k(\theta_k)$$
  
 
 显然沿着$\mathbf{x}_k$方向对修正近似解没有帮助，我们感兴趣的$\delta \mathbf{x}_k$必定与$\mathbf{x}_k$正交，将解空间限制在$\mathbf{x}_k$的正交补空间:
 
-$$(I - \mathbf{x}_k^T \mathbf{x}_k) (\mathbf{A} - \theta I) (I - \mathbf{x}_k^T \mathbf{x}_k) \delta \mathbf{x}_k = -\mathbf{r}_k(\theta_k)$$
+$$(I - \mathbf{x}_k \mathbf{x}_k^T) (\mathbf{A} - \theta I) (I - \mathbf{x}_k \mathbf{x}_k^T) \delta \mathbf{x}_k = -\mathbf{r}_k(\theta_k)$$
 
 此即Jacobi-Davidson修正方程，修正可以如下进行直至结果收敛
 

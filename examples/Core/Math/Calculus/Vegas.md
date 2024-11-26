@@ -13,19 +13,23 @@ along with Physica.  If not, see <https://www.gnu.org/licenses/>.
 -->
 # Vegas - 自适应蒙特卡洛积分
 
-考虑8维积分
+Vegas算法自适应地调整积分网格以降低采样误差, 考虑8维积分
 
 $$I = \int_{-a}^a \text{d}\mathbf{x} \exp(-\frac{1}{2} \mathbf{x}^T \mathbf{x})$$
 
-Vegas算法自适应地调整积分网格以降低采样误差
+定义网格损失函数为所有维度中$d_i$标准差的最大值
+
+$$L = \text{max}_i \; \sigma(d_i) = \text{max}_i \sqrt{\frac{\braket{d_i^2} - \braket{d_i}^2}{\braket{d_i}^2}}$$
+
+其中$d_i$由[1]中(17)式定义.
 
 ![](./Vegas1.png)
 
-**图1** 网格优度随迭代次数变化. compressRate控制网格调整的速度, 压缩率越大网格收敛越快, 过大的压缩率将导致不稳定$^{[1]}$
+**图1** 网格损失随迭代次数变化. compressRate控制网格调整的速度, 压缩率越大网格收敛越快, 过大的压缩率将导致不稳定$^{[1]}$
 
 ![](./Vegas2.png)
 
-**图2** 更密的网格通常能够达到更好的网格优度
+**图2** 更密的网格通常能够达到更好的网格损失
 
 ![](./Vegas3.png)
 

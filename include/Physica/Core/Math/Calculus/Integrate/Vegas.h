@@ -33,7 +33,7 @@ namespace Physica::Core {
         using This = Vegas<T>;
     protected:
         using ValueType = T::ValueType;
-        using MeritMatrix = DenseMatrix<ValueType>;
+        using LossMatrix = DenseMatrix<ValueType>;
     private:
         DenseMatrix<ValueType> pointGrid;
         VectorND<ValueType> from;
@@ -55,8 +55,8 @@ namespace Physica::Core {
         /* Operations */
         template<class Functor, RandomGenerator R, class Executor = SequentialExecutor>
         void integral(Functor func);
-        template<class Functor, RandomGenerator R>
-        [[nodiscard]] T accessMerit(Functor func);
+        template<class Functor, RandomGenerator R, class Executor = SequentialExecutor>
+        [[nodiscard]] ValueType calcGridLoss(Functor func) const;
 
         [[nodiscard]] T calcMean() const;
         [[nodiscard]] T calcDevia() const;
@@ -73,11 +73,11 @@ namespace Physica::Core {
         void setNumRefine(int numRefine_);
     protected:
         template<class Executor>
-        void refineGrid(MeritMatrix& merits);
-        static ValueType accessMeritImpl(const MeritMatrix& merits);
+        void refineGrid(LossMatrix& losses);
+        static ValueType calcGridLossImpl(const LossMatrix& losses);
     private:
         template<class Functor, RandomGenerator R, class Executor>
-        void trialIntegral(MeritMatrix& merits, int refine, Functor func);
+        std::pair<T, T> trialIntegral(LossMatrix& losses, int refine, Functor func) const;
         ValueType compress(VectorND<ValueType>& vars);
     };
 
@@ -104,19 +104,22 @@ namespace Physica::Core {
         using CallResult = std::invoke_result<Functor, VectorND<T>>::type;
         static_assert(std::is_same<CallResult, T>::value, "[Error]: Invalid functor");
 
-        MeritMatrix merits(getNumPoint() - 1, getDim(), 0);
+        LossMatrix losses(getNumPoint() - 1, getDim(), 0);
         for (int refine = 0; refine < numRefine; ++refine) {
-            trialIntegral<Functor, R, Executor>(merits, refine, func);
-            refineGrid<Executor>(merits);
+            auto pair = trialIntegral<Functor, R, Executor>(losses, refine, func);
+            means[refine] = std::move(pair.first);
+            vars[refine] = std::move(pair.second);
+
+            refineGrid<Executor>(losses);
         }
     }
 
     template<Scalar T>
-    template<class Functor, RandomGenerator R>
-    T Vegas<T>::accessMerit(Functor func) {
-        MeritMatrix merits(getNumPoint() - 1, getDim(), 0);
-        trialIntegral<Functor, R, SequentialExecutor>(merits, 0, func);
-        return accessMeritImpl(merits);
+    template<class Functor, RandomGenerator R, class Executor>
+    Vegas<T>::ValueType Vegas<T>::calcGridLoss(Functor func) const {
+        LossMatrix losses(getNumPoint() - 1, getDim(), 0);
+        trialIntegral<Functor, R, Executor>(losses, 0, func);
+        return calcGridLossImpl(losses);
     }
 
     template<Scalar T>
@@ -158,8 +161,8 @@ namespace Physica::Core {
 
     template<Scalar T>
     template<class Functor, RandomGenerator R, class Executor>
-    void Vegas<T>::trialIntegral(MeritMatrix& merits, int refine, Functor func) {
-        const auto indexes = R::getInstance().random_int(getDim() * numSample, 0, merits.getRow() - 1);
+    std::pair<T, T> Vegas<T>::trialIntegral(LossMatrix& losses, int refine, Functor func) const {
+        const auto indexes = R::getInstance().random_int(getDim() * numSample, 0, losses.getRow() - 1);
         VectorND<T> samples(numSample);
         Executor::parallel_for([&, this](size_t n) {
             VectorND<T> fromX(getDim());
@@ -173,20 +176,22 @@ namespace Physica::Core {
 
             const VectorND<T> x = fromX + hadamard(deltaX, VectorND<T>::template random_uniform<R>(getDim()));
             const T y = func(x);
-            const T xy = y * (deltaX * T(merits.getRow())).prod();
+            const T xy = y * (deltaX * T(losses.getRow())).prod();
             samples[n] = xy;
         }, numSample, Executor::getNumThread()).wait();
 
-        Array<Array<int>> counts(merits.getRow(), getDim(), 0);
+        Array<Array<int>> counts(losses.getRow(), getDim(), 0);
+        T mean = 0, var = 0;
         for (int n = 0; n < numSample; ++n) {
             const T xy = samples[n];
-            toNextVariance(vars[refine], means[refine], n, xy);
+            toNextVariance(var, mean, n, xy);
             for (size_t i = 0; i < getDim(); ++i) {
                 const auto index = indexes[n * getDim() + i];
-                toNextMean(merits(index, i), counts[index][i], square(xy));
+                toNextMean(losses(index, i), counts[index][i], square(xy));
                 counts[index][i] += 1;
             }
         }
+        return std::make_pair(std::move(mean), std::move(var));
     }
 
     template<Scalar T>
@@ -201,9 +206,9 @@ namespace Physica::Core {
 
     template<Scalar T>
     template<class Executor>
-    void Vegas<T>::refineGrid(MeritMatrix& merits) {
-        Executor::parallel_for([this, &merits](size_t dim) {
-            const auto meanVar = compress(merits.asArray()[dim]);
+    void Vegas<T>::refineGrid(LossMatrix& losses) {
+        Executor::parallel_for([this, &losses](size_t dim) {
+            const auto meanVar = compress(losses.asArray()[dim]);
             const bool noData = meanVar.isZero();
             if (noData) [[unlikely]] // No data in the dimension, usually we should have enough samples to avoid it
                 return;
@@ -215,12 +220,12 @@ namespace Physica::Core {
             size_t i = 1;
             for (size_t j = 0; i < newPoints.getLength() - 1; ++i) {
                 while (temp < meanVar) {
-                    assert(j < merits.getRow() && "[Error]: Unexpected not enough vars, this is likely a bug");
-                    temp += merits(j, dim);
+                    assert(j < losses.getRow() && "[Error]: Unexpected not enough vars, this is likely a bug");
+                    temp += losses(j, dim);
                     j += 1;
                 }
                 temp -= meanVar;
-                newPoints[i] = oldPoints[j] - temp * (oldPoints[j] - oldPoints[j - 1]) / merits(j - 1, dim);
+                newPoints[i] = oldPoints[j] - temp * (oldPoints[j] - oldPoints[j - 1]) / losses(j - 1, dim);
             }
             newPoints[i] = oldPoints[i];
             oldPoints = newPoints;
@@ -228,30 +233,30 @@ namespace Physica::Core {
     }
 
     template<Scalar T>
-    Vegas<T>::ValueType Vegas<T>::accessMeritImpl(const MeritMatrix& merits) {
-        ValueType maxDevia = 0;
-        for (size_t i = 0; i < merits.getCol(); ++i) {
-            const auto col = merits.col(i);
+    Vegas<T>::ValueType Vegas<T>::calcGridLossImpl(const LossMatrix& losses) {
+        ValueType maxVar = 0;
+        for (size_t i = 0; i < losses.getCol(); ++i) {
+            const auto col = losses.col(i);
             const T prior = mean(col);
-            maxDevia = std::max(maxDevia, variance(col, prior) / square(prior));
+            maxVar = std::max(maxVar, variance(col, prior) / square(prior));
         }
-        return maxDevia;
+        return sqrt(maxVar);
     }
 
     template<Scalar T>
     Vegas<T>::ValueType Vegas<T>::compress(VectorND<ValueType>& vars) {
-        const ValueType norm1 = vars.norm1();
-        const bool noData = norm1.isZero();
+        const ValueType sum = vars.sum();
+        const bool noData = sum.isZero();
         if (noData)
             return 0;
 
-        const VectorND<ValueType> buffer = vars * reciprocal(norm1); // Normalized values fall into a range that is feasible for compression function.
+        const VectorND<ValueType> buffer = vars * reciprocal(sum); // Normalized values fall into a range that is feasible for compression function.
         const Vector3D<ValueType> kernel{1.0 / 8, 6.0 / 8, 1.0 / 8};
         size_t i = 0;
         vars[0] = ValueType(7.0 / 8) * buffer[0] + ValueType(1.0 / 8) * buffer[1];
         for (; i < vars.getLength() - 2; ++i)
             vars[i + 1] = buffer.template segment<3>(i, i + 3) * kernel;
-        vars[i + 1] = ValueType(7.0 / 8) * buffer[i] + ValueType(1.0 / 8) * buffer[i + 1];
+        vars[i + 1] = ValueType(1.0 / 8) * buffer[i] + ValueType(7.0 / 8) * buffer[i + 1];
 
         vars = pow(divide(vars - ValueType(1), ln(vars)), compressRate);
         return mean(vars);

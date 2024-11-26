@@ -89,7 +89,7 @@ namespace Physica::Core {
         [[nodiscard]] inline static This random_normal(size_t len);
         template<class Distribution, RandomGenerator R>
         [[nodiscard]] inline static This random_any(size_t len, Distribution& dist);
-        [[nodiscard]] static auto linspace(ScalarType from, ScalarType to, size_t count);
+        [[nodiscard]] static auto linspace(T from, T to, size_t count);
     };
     ////////////////////////////////////////////////////////////////////////////////////
     template<Scalar T, int Order>

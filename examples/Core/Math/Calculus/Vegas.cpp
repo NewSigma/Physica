@@ -36,21 +36,21 @@ void plotCompressRate() {
     const VectorND<T> from(8, T(-r));
     const VectorND<T> to(8, T(r));
 
-    Plot* plot = new Plot(0, 75, -2.5, 1, 25, 1);
+    Plot* plot = new Plot(0, 75, -3.5, 0.5, 25, 1);
     plot->getLegend().setAlignment(Qt::AlignRight);
     plot->getLegend().show();
     plot->getAxisX()->setLabelFormat("%d");
     plot->getAxisY()->setLabelFormat("%d");
     plot->getAxisX()->setTitleText("NumRefine");
-    plot->getAxisY()->setTitleText("ln Merit");
+    plot->getAxisY()->setTitleText("ln(L)");
 
     double rates[3]{0.1, 0.2, 0.5};
     const char* names[3]{"0.1", "0.2", "0.5"};
     for (int i = 0; i < 3; ++i) {
-        Vegas<T> vegas(from, to, 1, 10000, 10, rates[i]);
+        Vegas<T> vegas(from, to, 1, 100000, 10, rates[i]);
         VectorND<T> vars(100);
         for (int refine = 0; refine < vars.getLength(); ++refine) {
-            vars[refine] = vegas.accessMerit<decltype(func), RandomType>(func);
+            vars[refine] = vegas.calcGridLoss<decltype(func), RandomType>(func);
             vegas.integral<decltype(func), RandomType>(func);
         }
         vars = ln(vars);
@@ -65,13 +65,13 @@ void plotNumPoint() {
     const VectorND<T> from(8, T(-r));
     const VectorND<T> to(8, T(r));
 
-    Plot* plot = new Plot(0, 1000, -10, 1, 250, 2);
+    Plot* plot = new Plot(0, 1000, -6, -1, 250, 2);
     plot->getLegend().setAlignment(Qt::AlignRight);
     plot->getLegend().show();
     plot->getAxisX()->setLabelFormat("%d");
     plot->getAxisY()->setLabelFormat("%d");
     plot->getAxisX()->setTitleText("NumRefine");
-    plot->getAxisY()->setTitleText("ln Merit");
+    plot->getAxisY()->setTitleText("ln(L)");
 
     int points[3]{10, 100, 1000};
     const char* names[3]{"10", "100", "1000"};
@@ -79,7 +79,7 @@ void plotNumPoint() {
         Vegas<T> vegas(from, to, 1, 100000, points[i], 0.1);
         VectorND<T> vars(1000);
         for (int refine = 0; refine < vars.getLength(); ++refine) {
-            vars[refine] = vegas.accessMerit<decltype(func), RandomType>(func);
+            vars[refine] = vegas.calcGridLoss<decltype(func), RandomType>(func);
             vegas.integral<decltype(func), RandomType>(func);
         }
         vars = ln(vars);
@@ -94,13 +94,13 @@ void plotNumSample() {
     const VectorND<T> from(8, T(-r));
     const VectorND<T> to(8, T(r));
 
-    Plot* plot = new Plot(0, 1000, -10, -4, 250, 2);
+    Plot* plot = new Plot(0, 1000, -5.5, -2.5, 250, 1);
     plot->getLegend().setAlignment(Qt::AlignRight);
     plot->getLegend().show();
     plot->getAxisX()->setLabelFormat("%d");
     plot->getAxisY()->setLabelFormat("%d");
     plot->getAxisX()->setTitleText("NumRefine");
-    plot->getAxisY()->setTitleText("ln Merit");
+    plot->getAxisY()->setTitleText("ln(L)");
 
     int samples[2]{10000, 100000};
     const char* names[2]{"10<sup>4</sup>", "10<sup>5</sup>"};
@@ -108,7 +108,7 @@ void plotNumSample() {
         Vegas<T> vegas(from, to, 1, samples[i], 1000, 0.1);
         VectorND<T> vars(1000);
         for (int refine = 0; refine < vars.getLength(); ++refine) {
-            vars[refine] = vegas.accessMerit<decltype(func), RandomType>(func);
+            vars[refine] = vegas.calcGridLoss<decltype(func), RandomType>(func);
             vegas.integral<decltype(func), RandomType>(func);
         }
         vars = ln(vars);

@@ -29,7 +29,7 @@ namespace Physica::Core {
         using This = LnVegas<T>;
         using Base = Vegas<T>;
         using typename Base::ValueType;
-        using typename Base::MeritMatrix;
+        using typename Base::LossMatrix;
 
         using Base::means;
         using Base::vars;
@@ -43,8 +43,8 @@ namespace Physica::Core {
         /* Operations */
         template<class Functor, RandomGenerator R, class Executor = SequentialExecutor>
         void lnIntegral(Functor lnFunc);
-        template<class Functor, RandomGenerator R>
-        [[nodiscard]] ValueType accessMerit(Functor func);
+        template<class Functor, RandomGenerator R, class Executor = SequentialExecutor>
+        [[nodiscard]] ValueType calcGridLoss(Functor func) const;
 
         [[nodiscard]] T calcLnMean() const;
         [[nodiscard]] T calcLnDevia() const;
@@ -61,7 +61,7 @@ namespace Physica::Core {
         using Base::setNumRefine;
     private:
         template<class Functor, RandomGenerator R, class Executor>
-        void trialIntegral(MeritMatrix& merits, int refine, Functor lnFunc);
+        std::pair<T, T> trialIntegral(LossMatrix& losses, int refine, Functor lnFunc) const;
     };
 
     template<Scalar T>
@@ -70,19 +70,22 @@ namespace Physica::Core {
         using CallResult = std::invoke_result<Functor, VectorND<T>>::type;
         static_assert(std::is_same<CallResult, T>::value, "[Error]: Invalid functor");
 
-        MeritMatrix merits(getNumPoint() - 1, getDim(), 0);
+        LossMatrix losses(getNumPoint() - 1, getDim(), 0);
         for (int refine = 0; refine < getNumRefine(); ++refine) {
-            trialIntegral<Functor, R, Executor>(merits, refine, lnFunc);
-            Base::template refineGrid<Executor>(merits);
+            auto pair = trialIntegral<Functor, R, Executor>(losses, refine, lnFunc);
+            means[refine] = std::move(pair.first);
+            vars[refine] = std::move(pair.second);
+
+            Base::template refineGrid<Executor>(losses);
         }
     }
 
     template<Scalar T>
-    template<class Functor, RandomGenerator R>
-    LnVegas<T>::ValueType LnVegas<T>::accessMerit(Functor func) {
-        MeritMatrix merits(getNumPoint() - 1, getDim(), 0);
-        trialIntegral<Functor, R, SequentialExecutor>(merits, 0, func);
-        return Base::accessMeritImpl(merits);
+    template<class Functor, RandomGenerator R, class Executor>
+    LnVegas<T>::ValueType LnVegas<T>::calcGridLoss(Functor func) const {
+        LossMatrix losses(getNumPoint() - 1, getDim(), 0);
+        trialIntegral<Functor, R, Executor>(losses, 0, func);
+        return Base::calcGridLossImpl(losses);
     }
 
     template<Scalar T>
@@ -113,9 +116,9 @@ namespace Physica::Core {
 
     template<Scalar T>
     template<class Functor, RandomGenerator R, class Executor>
-    void LnVegas<T>::trialIntegral(MeritMatrix& merits, int refine, Functor lnFunc) {
+    std::pair<T, T> LnVegas<T>::trialIntegral(LossMatrix& losses, int refine, Functor lnFunc) const {
         const int numSample = getNumSample();
-        const auto indexes = R::getInstance().random_int(getDim() * numSample, 0, merits.getRow() - 1);
+        const auto indexes = R::getInstance().random_int(getDim() * numSample, 0, losses.getRow() - 1);
         VectorND<T> samples(numSample);
         Executor::parallel_for([&, this](size_t n) {
             VectorND<T> fromX(getDim());
@@ -130,25 +133,25 @@ namespace Physica::Core {
 
             const VectorND<T> x = fromX + hadamard(deltaX, VectorND<T>::template random_uniform<R>(getDim()));
             const T lny = lnFunc(x);
-            const T lnxy = lny + ln(deltaX).sum() + T(getDim()) * ln(T(merits.getRow()));
+            const T lnxy = lny + ln(deltaX).sum() + T(getDim()) * ln(T(losses.getRow()));
             samples[n] = lnxy;
         }, numSample, Executor::getNumThread()).wait();
 
-        Array<Array<int>> counts(merits.getRow(), getDim(), 0);
+        Array<Array<int>> counts(losses.getRow(), getDim(), 0);
         const T maxSample = samples.max();
         samples = exp(samples - maxSample);
-        T mean0 = 0;
-        T vars0 = 0;
+        T mean = 0, var = 0;
         for (int n = 0; n < numSample; ++n) {
             const T xy = samples[n];
-            toNextVariance(vars0, mean0, n, xy);
+            toNextVariance(var, mean, n, xy);
             for (size_t i = 0; i < getDim(); ++i) {
                 const auto index = indexes[n * getDim() + i];
-                toNextMean(merits(index, i), counts[index][i], square(xy.getValue()));
+                toNextMean(losses(index, i), counts[index][i], square(xy.getValue()));
                 counts[index][i] += 1;
             }
         }
-        means[refine] = ln(mean0) + maxSample;
-        vars[refine] = ln(vars0) + T(2) * maxSample;
+        mean = ln(mean) + maxSample;
+        var = ln(var) + T(2) * maxSample;
+        return std::make_pair(std::move(mean), std::move(var));
     }
 }
