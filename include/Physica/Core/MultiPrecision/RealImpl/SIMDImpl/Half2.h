@@ -20,6 +20,16 @@
 
 #include "Physica/Core/Utils/Unreachable.h"
 
+namespace Physica {
+    template<>
+    class Traits<SIMD<Real<Float16>, 2>> {
+    public:
+        using ScalarType = Real<Float16>;
+        using RealType = SIMD<Real<Float16>, 2>;
+        using FullRealType = RealType;
+    };
+}
+
 namespace Physica::Core {
     template<Scalar T, size_t Length>
     class BestPacket;
@@ -36,7 +46,7 @@ namespace Physica::Core {
     class device_obj<BestPacket<float16, Length>> : public BestPacket<float16, Length> {};
 
     template<>
-    class SIMD<Real<Float16>, 2> : private __half2 {
+    class SIMD<Real<Float16>, 2> : public SIMDBase<SIMD<Real<Float16>, 2>>, private __half2 {
         constexpr static size_t Size = 2;
         using ScalarType = Real<Float16>;
         using This = SIMD<ScalarType, Size>;
@@ -152,19 +162,6 @@ namespace Physica::Core {
         return a * b + c;
     #endif
     }
-}
-
-namespace Physica {
-#define T Core::Real<Core::Float16>
-
-    template<>
-    class Traits<Core::SIMD<T, 2>> {
-    public:
-        using ScalarType = T;
-        using BaseType = __half2;
-    };
-
-#undef T
 }
 
 namespace std {

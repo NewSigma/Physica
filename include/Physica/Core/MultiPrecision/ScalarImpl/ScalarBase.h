@@ -29,25 +29,27 @@ namespace Physica::Core {
 
     template<class Derived>
     class ScalarBase : public CRTPBase<ScalarBase<Derived>> {
-        using Base = CRTPBase<ScalarBase<Derived>>;
+        using This = ScalarBase<Derived>;
+        using Base = CRTPBase<This>;
+        using TraitsType = Traits<Derived>;
     public:
-        constexpr static ScalarOption Option = Traits<Derived>::Option;
-        constexpr static int Order = Traits<Derived>::Order;
-        constexpr static bool isComplex = Traits<Derived>::isComplex;
-        constexpr static bool isDifferentiable = Traits<Derived>::isDifferentiable;
-        constexpr static bool isForwardDiff = Traits<Derived>::isForwardDiff;
-        constexpr static bool isReverseDiff = Traits<Derived>::isReverseDiff;
+        constexpr static ScalarOption Option = TraitsType::Option;
+        constexpr static int Order = TraitsType::Order;
+        constexpr static bool isComplex = TraitsType::isComplex;
+        constexpr static bool isDifferentiable = TraitsType::isDifferentiable;
+        constexpr static bool isForwardDiff = TraitsType::isForwardDiff;
+        constexpr static bool isReverseDiff = TraitsType::isReverseDiff;
         constexpr static DiffMode Mode = isForwardDiff ? DiffMode::Forward : DiffMode::Reverse;
 
-        using ValueType = Traits<Derived>::ValueType;
-        using ScalarType = Traits<Derived>::ScalarType;
-        using PtrTy = Traits<Derived>::PtrTy;
-        using ConstPtrTy = Traits<Derived>::ConstPtrTy;
-        using RefTy = Traits<Derived>::RefTy;
-        using ConstRefTy = Traits<Derived>::ConstRefTy;
-        using RealType = Traits<Derived>::RealType;
-        using ComplexType = Traits<Derived>::ComplexType;
-        using MachineType = Traits<Derived>::MachineType;
+        using ValueType = TraitsType::ValueType;
+        using ScalarType = TraitsType::ScalarType;
+        using PtrTy = TraitsType::PtrTy;
+        using ConstPtrTy = TraitsType::ConstPtrTy;
+        using RefTy = TraitsType::RefTy;
+        using ConstRefTy = TraitsType::ConstRefTy;
+        using RealType = TraitsType::RealType;
+        using ComplexType = TraitsType::ComplexType;
+        using MachineType = TraitsType::MachineType;
         using device_obj_type = Derived;
     private:
         constexpr static bool isConsistent1 = isDifferentiable && (isForwardDiff != isReverseDiff) && (Order > 0);
@@ -62,6 +64,7 @@ namespace Physica::Core {
         template<int GradOrder>
         using GradRtnTy = std::conditional<Order == GradOrder, ValueType, Diff<ValueType, Mode, Order - GradOrder>>::type;
     public:
+        constexpr ~ScalarBase() = default;
         /* Operators */
         __host__ __device__ inline bool operator>(float s) const noexcept;
         __host__ __device__ inline bool operator<(float s) const noexcept;
@@ -72,72 +75,33 @@ namespace Physica::Core {
         template<Scalar T>
         __host__ __device__ inline bool operator<(const T& s) const noexcept;
         /* Getters */
-        [[nodiscard]] __host__ __device__ RealType real() const;
-        [[nodiscard]] __host__ __device__ RealType imag() const;
-        [[nodiscard]] __host__ __device__ ScalarType conjugate() const {
-            if constexpr (isComplex)
-                return this->getDerived().conjugate();
-            else
-                return real();
-        }
-
-        [[nodiscard]] __host__ __device__ ScalarType unit() const {
-            if constexpr (isComplex)
-                return this->getDerived().unit();
-            else
-                return ScalarType(real().isNegative() ? -1 : 1);
-        }
-
-        [[nodiscard]] __host__ __device__ RealType norm() const { return sqrt(squaredNorm()); }
-
-        [[nodiscard]] __host__ __device__ RealType squaredNorm() const {
-            if constexpr (isComplex)
-                return this->getDerived().squaredNorm();
-            else
-                return square(this->getDerived());
-        }
+        [[nodiscard]] __host__ __device__ inline RealType real() const;
+        [[nodiscard]] __host__ __device__ inline RealType imag() const;
+        [[nodiscard]] __host__ __device__ inline ScalarType conjugate() const;
+        [[nodiscard]] __host__ __device__ inline ScalarType unit() const;
+        [[nodiscard]] __host__ __device__ inline RealType norm() const;
+        [[nodiscard]] __host__ __device__ inline RealType squaredNorm() const;
         /* SIMD support */
         __host__ __device__ constexpr static size_t size() { return 1; }
-
-        __host__ __device__ Derived& load(const ScalarType* p) {
-            this->getDerived() = *p;
-            return this->getDerived();
-        }
-
-        __host__ __device__ void store(ScalarType* p) const { *p = this->getDerived().getValue(); }
-
-        __host__ __device__ Derived& load_partial(const ScalarType* p, int n) {
-            if (n)
-                load(p);
-            return this->getDerived();
-        }
-
-        __host__ __device__ void store_partial(ScalarType* p, int n) const {
-            if (n)
-                store(p);
-        }
-
+        __host__ __device__ inline Derived& load(const ScalarType* p);
+        __host__ __device__ inline void store(ScalarType* p) const;
+        __host__ __device__ inline Derived& load_partial(const ScalarType* p, int n);
+        __host__ __device__ inline void store_partial(ScalarType* p, int n) const;
         void insert([[maybe_unused]] int index, ScalarType value) { this->getDerived() = ScalarType(value); }
         [[nodiscard]] ScalarType sum() const { return this->getDerived(); }
         /* Auto differential support */
-        [[nodiscard]] __host__ __device__  const ValueType& getValue() const noexcept {
-            if constexpr (isDifferentiable)
-                return this->getDerived().getValue();
-            else
-                return this->getDerived();
-        }
-
+        [[nodiscard]] __host__ __device__  const ValueType& getValue() const noexcept;
         template<int GradOrder = 1>
-        [[nodiscard]] __host__ __device__  const GradRtnTy<GradOrder>& getGrad() const noexcept {
-            if constexpr (isDifferentiable)
-                return this->getDerived().getGrad();
-            else
-                noImpl();
-        }
+        [[nodiscard]] __host__ __device__  const GradRtnTy<GradOrder>& getGrad() const noexcept;
         /* Static Members */
-        static inline bool matchSign(const ScalarType& s1, const ScalarType& s2) {
-            return (s1.isPositive() && s2.isPositive()) || (s1.isNegative() && s2.isNegative());
-        }
+        static inline bool matchSign(const ScalarType& s1, const ScalarType& s2);
+    protected:
+        constexpr ScalarBase() = default;
+        constexpr ScalarBase(const This&) = default;
+        constexpr ScalarBase(This&&) = default;
+        /* Operators */
+        This& operator=(const This& obj) = default;
+        This& operator=(This&& obj) noexcept = default;
     };
 
     template<class Derived>
@@ -181,7 +145,7 @@ namespace Physica::Core {
     }
 
     template<class Derived>
-    __host__ __device__ ScalarBase<Derived>::RealType ScalarBase<Derived>::real() const {
+    __host__ __device__ inline ScalarBase<Derived>::RealType ScalarBase<Derived>::real() const {
         if constexpr (isDifferentiable)
             return RealType(getValue().real(), getGrad().real());
         else if constexpr (isComplex)
@@ -191,13 +155,88 @@ namespace Physica::Core {
     }
 
     template<class Derived>
-    __host__ __device__ ScalarBase<Derived>::RealType ScalarBase<Derived>::imag() const {
+    __host__ __device__ inline ScalarBase<Derived>::RealType ScalarBase<Derived>::imag() const {
         if constexpr (isDifferentiable)
             return RealType(getValue().imag(), getGrad().imag());
         else if constexpr (isComplex)
             return this->getDerived().imag();
         else
             return RealType(0);
+    }
+
+    template<class Derived>
+    __host__ __device__ inline ScalarBase<Derived>::ScalarType ScalarBase<Derived>::conjugate() const {
+        if constexpr (isComplex)
+            return this->getDerived().conjugate();
+        else
+            return real();
+    }
+
+    template<class Derived>
+    __host__ __device__ inline ScalarBase<Derived>::ScalarType ScalarBase<Derived>::unit() const {
+        if constexpr (isComplex)
+            return this->getDerived().unit();
+        else
+            return ScalarType(real().isNegative() ? -1 : 1);
+    }
+
+    template<class Derived>
+    __host__ __device__ inline ScalarBase<Derived>::RealType ScalarBase<Derived>::norm() const {
+        return sqrt(squaredNorm());
+    }
+
+    template<class Derived>
+    __host__ __device__ inline ScalarBase<Derived>::RealType ScalarBase<Derived>::squaredNorm() const {
+        if constexpr (isComplex)
+            return this->getDerived().squaredNorm();
+        else
+            return square(this->getDerived());
+    }
+
+    template<class Derived>
+    __host__ __device__ inline Derived& ScalarBase<Derived>::load(const ScalarType* p) {
+        this->getDerived() = *p;
+        return this->getDerived();
+    }
+
+    template<class Derived>
+    __host__ __device__ inline void ScalarBase<Derived>::store(ScalarType* p) const {
+        *p = this->getDerived().getValue();
+    }
+
+    template<class Derived>
+    __host__ __device__ inline Derived& ScalarBase<Derived>::load_partial(const ScalarType* p, int n) {
+        if (n)
+            load(p);
+        return this->getDerived();
+    }
+
+    template<class Derived>
+    __host__ __device__ inline void ScalarBase<Derived>::store_partial(ScalarType* p, int n) const {
+        if (n)
+            store(p);
+    }
+
+    template<class Derived>
+    __host__ __device__ inline const ScalarBase<Derived>::ValueType& ScalarBase<Derived>::getValue() const noexcept {
+        if constexpr (isDifferentiable)
+            return this->getDerived().getValue();
+        else
+            return this->getDerived();
+    }
+
+    template<class Derived>
+    template<int GradOrder>
+    __host__ __device__  const ScalarBase<Derived>::GradRtnTy<GradOrder>& ScalarBase<Derived>::getGrad() const noexcept {
+        if constexpr (isDifferentiable)
+            return this->getDerived().getGrad();
+        else
+            noImpl();
+    }
+
+    template<class Derived>
+    inline bool ScalarBase<Derived>::matchSign(const ScalarType& s1, const ScalarType& s2) {
+        return (s1.isPositive() && s2.isPositive()) || (s1.isNegative() && s2.isNegative());
     }
 
     template<Scalar T>
@@ -293,7 +332,7 @@ namespace Physica::Core {
 
 namespace Physica {
     template<class T>
-    class Traits<Core::ScalarBase<T>> {
+    class Traits<ScalarBase<T>> {
     public:
         using Derived = T;
     };

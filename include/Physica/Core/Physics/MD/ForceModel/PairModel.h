@@ -34,12 +34,12 @@ namespace Physica::Core {
     class PairModel : public CRTPBase<PairModel<Derived>> {
         using This = PairModel<Derived>;
         using Base = CRTPBase<This>;
-        using TraitType = Traits<Derived>;
+        using TraitsType = Traits<Derived>;
 
-        constexpr static bool IsPotDependOnAtomIndex = TraitType::IsPotDependOnAtomIndex;
-        constexpr static bool IsSmallCell = TraitType::IsSmallCell;
+        constexpr static bool IsPotDependOnAtomIndex = TraitsType::IsPotDependOnAtomIndex;
+        constexpr static bool IsSmallCell = TraitsType::IsSmallCell;
     public:
-        using ScalarType = TraitType::ScalarType;
+        using ScalarType = TraitsType::ScalarType;
         constexpr static unsigned int Dim = 3;
 
         using ValueType = ScalarType::ValueType;
@@ -202,7 +202,7 @@ namespace Physica::Core {
 
     template<class Derived>
     PairModel<Derived>::ScalarType PairModel<Derived>::forceConst(const MDCellType& cell, size_t dof1, size_t dof2) const {
-        static_assert(TraitType::IsPeriodBoundary, "[Error]: Fixed boundary is not implemented");
+        static_assert(TraitsType::IsPeriodBoundary, "[Error]: Fixed boundary is not implemented");
         const size_t atom1 = dof1 / 3U;
         const size_t atom2 = dof2 / 3U;
         [[unlikely]] if (atom1 == atom2) {

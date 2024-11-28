@@ -21,14 +21,15 @@
 #include <vectorclass/vectorclass.h>
 #include <vectorclass/vectormath_exp.h>
 #include "Physica/PlainStruct.h"
-#include "Physica/Core/Utils/Container/Array.h"
+#include "Physica/Core/MultiPrecision/ScalarImpl/SIMDBase.h"
+
 #include "SIMDImpl/Instruset.h"
 
 namespace Physica::Core {
     template<Scalar T, size_t Size> class BoolSIMD;
 
     template<Scalar T, size_t Size>
-    class SIMD : private Traits<SIMD<T, Size>>::BaseType {
+    class SIMD : public SIMDBase<SIMD<T, Size>>, private Traits<SIMD<T, Size>>::BaseType {
         using This = SIMD<T, Size>;
         using Base = Traits<This>::BaseType;
         using ValueType = T::ValueType;
@@ -151,10 +152,13 @@ namespace Physica::Core {
 }
 
 namespace Physica {
-    template<Scalar T, size_t Size>
-    class Traits<Core::SIMD<T, Size>> {
-        constexpr static bool isFloat32 = T::Option == Core::Float32;
-        static_assert(isFloat32 || T::Option == Core::Float64, "[Error]: Unsupported float type");
+    template<Scalar T, size_t S>
+    class Traits<SIMD<T, S>> {
+    public:
+        constexpr static int Size = S;
+    private:
+        constexpr static bool isFloat32 = T::Option == Float32;
+        static_assert(isFloat32 || T::Option == Float64, "[Error]: Unsupported float type");
         static_assert(!T::isComplex, "[Error]: The main template targets on real scalar");
         static_assert(!T::isDifferentiable, "[Error]: The main template targets on plain scalar");
         static_assert(Size % 2 == 0 && Size <= 16, "[Error]: Invalid Size");
@@ -169,7 +173,9 @@ namespace Physica {
     public:
         using ScalarType = T;
         using BaseType = std::conditional<Size <= 4, Base1, Base2>::type;
-        using BoolSIMDType = Core::BoolSIMD<T, Size>;
+        using RealType = SIMD<T, Size>;
+        using FullRealType = RealType;
+        using BoolSIMDType = BoolSIMD<T, Size>;
     };
 }
 

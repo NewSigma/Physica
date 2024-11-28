@@ -124,15 +124,15 @@ namespace Physica::Core {
     }
 
     template<Scalar T, int Order, size_t Size>
-    inline SIMD<Diff<T, DiffMode::Forward, Order>, Size>::AsRealRtnTy
+    inline SIMD<Diff<T, DiffMode::Forward, Order>, Size>::FullRealType
     SIMD<Diff<T, DiffMode::Forward, Order>, Size>::swapRealImag() const noexcept {
-        return AsRealRtnTy(values.swapRealImag(), grads.swapRealImag());
+        return FullRealType(values.swapRealImag(), grads.swapRealImag());
     }
 
     template<Scalar T, int Order, size_t Size>
-    inline SIMD<Diff<T, DiffMode::Forward, Order>, Size>::AsRealRtnTy
+    inline SIMD<Diff<T, DiffMode::Forward, Order>, Size>::FullRealType
     SIMD<Diff<T, DiffMode::Forward, Order>, Size>::permRealImag() const noexcept {
-        return AsRealRtnTy(values.permRealImag(), grads.permRealImag());
+        return FullRealType(values.permRealImag(), grads.permRealImag());
     }
 
     template<Scalar T, int Order, size_t Size>
@@ -160,9 +160,9 @@ namespace Physica::Core {
     }
 
     template<Scalar T, int Order, size_t Size>
-    SIMD<Diff<T, DiffMode::Forward, Order>, Size>::AsRealRtnTy SIMD<Diff<T, DiffMode::Forward, Order>, Size>::asReal() const noexcept {
+    SIMD<Diff<T, DiffMode::Forward, Order>, Size>::FullRealType SIMD<Diff<T, DiffMode::Forward, Order>, Size>::asReal() const noexcept {
         if constexpr (T::isComplex)
-            return AsRealRtnTy(values.asReal(), grads.asReal());
+            return FullRealType(values.asReal(), grads.asReal());
         else
             return *this;
     }
@@ -185,7 +185,7 @@ namespace Physica::Core {
     }
 
     template<Scalar T, int Order, size_t Size>
-    SIMD<Diff<T, DiffMode::Forward, Order>, Size> SIMD<Diff<T, DiffMode::Forward, Order>, Size>::asComplex(const AsRealRtnTy& reals) {
+    SIMD<Diff<T, DiffMode::Forward, Order>, Size> SIMD<Diff<T, DiffMode::Forward, Order>, Size>::asComplex(const FullRealType& reals) {
         This result{};
         result.values = ValuePacket::asComplex(reals.getValue());
         result.grads = GradPacket::asComplex(reals.getGrad());

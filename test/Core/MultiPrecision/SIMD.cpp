@@ -25,10 +25,20 @@ using RandomType = Random<MT19937, 10000>;
 
 int main() {
     const auto x = SIMD<cfloat32, 2>::random_uniform<RandomType>();
-    const auto result = sqrt(x);
-    for (int i = 0; i < 2; ++i) {
-        if (!scalarNear(result[i], sqrt(x[i]), 1E-7))
-            return 1;
+    /* Divide */ {
+        const auto y = SIMD<cfloat32, 2>::random_uniform<RandomType>();
+        const auto result = x / y;
+        for (int i = 0; i < 2; ++i) {
+            if (!scalarNear(result[i], x[i] / y[i], 1E-7))
+                return 1;
+        }
+    }
+    /* Sqrt */ {
+        const auto result = sqrt(x);
+        for (int i = 0; i < 2; ++i) {
+            if (!scalarNear(result[i], sqrt(x[i]), 1E-7))
+                return 1;
+        }
     }
     return 0;
 }

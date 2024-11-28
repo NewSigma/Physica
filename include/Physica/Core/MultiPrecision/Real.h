@@ -19,19 +19,40 @@
 #pragma once
 
 #include <cmath>
-#include <ostream>
-#include <random>
+#include <bit>
 #ifdef PHYSICA_CUDA
     #include <cuda/std/limits>
 #endif
-#include "Physica/Core/Exception/NoImplException.h"
-#include "Physica/Core/IO/HDF5/HDF5.h"
-#include "Physica/Core/Math/Random/Random.h"
 #include "Scalar.h"
-#include "RealImpl/ScalarBase.h"
 
 namespace Physica::Core {
     template<Scalar, class RandomType> class GaussRandomPool;
+
+    union float_extract {
+    private:
+        constexpr static bool Flag = std::endian::native == std::endian::little;
+    public:
+        float value;
+        struct {
+            unsigned int low : Flag ? 16 : 1;
+            unsigned int high : Flag ? 7 : 8;
+            unsigned int exp : Flag ? 8 : 7;
+            unsigned int sign : Flag ? 1 : 16;
+        };
+    };
+
+    union double_extract {
+    private:
+        constexpr static bool Flag = std::endian::native == std::endian::little;
+    public:
+        double value;
+        struct {
+            unsigned int low : Flag ? 32 : 1;
+            unsigned int high : Flag ? 20 : 11;
+            unsigned int exp : Flag ? 11 : 20;
+            unsigned int sign : Flag ? 1 : 32;
+        };
+    };
 
     inline int countLeadingZeros(MPUnit n) noexcept;
     inline int countBackZeros(unsigned long n) noexcept;
@@ -41,6 +62,10 @@ namespace Physica::Core {
 
 #include "Rational.h"
 #include "RealImpl/RealImpl.h"
+
+#include "Physica/Core/IO/HDF5/HDF5.h"
+#include "Physica/Core/Math/Random/Random.h"
+#include "ScalarImpl/ScalarBase.h"
 #include "RealImpl/Float32.h"
 #include "RealImpl/Float64.h"
 #include "RealImpl/Math.h"

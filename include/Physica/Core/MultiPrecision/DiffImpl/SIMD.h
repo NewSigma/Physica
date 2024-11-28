@@ -37,14 +37,14 @@ namespace Physica::Core {
     };
 
     template<Scalar T, int Order, size_t Size>
-    class SIMD<Diff<T, DiffMode::Forward, Order>, Size> {
+    class SIMD<Diff<T, DiffMode::Forward, Order>, Size> : public SIMDBase<SIMD<Diff<T, DiffMode::Forward, Order>, Size>> {
         using ScalarType = Diff<T, DiffMode::Forward, Order>;
         using This = SIMD<ScalarType, Size>;
         using PtrTy = ScalarType::PtrTy;
         using ConstPtrTy = ScalarType::ConstPtrTy;
         using GradType = ScalarType::GradType;
         using RealType = SIMD<Diff<typename T::RealType, DiffMode::Forward, Order>, Size>;
-        using AsRealRtnTy = SIMD<Diff<typename T::RealType, DiffMode::Forward, Order>, Size * (T::isComplex ? 2 : 1)>;
+        using FullRealType = SIMD<Diff<typename T::RealType, DiffMode::Forward, Order>, Size * (T::isComplex ? 2 : 1)>;
     public:
         using ValuePacket = SIMD<T, Size>;
         using GradPacket = SIMD<GradType, Size>;
@@ -91,8 +91,8 @@ namespace Physica::Core {
         inline void store_partial(PtrTy p, int n) const;
 
         inline This& cutoff(int count);
-        [[nodiscard]] inline AsRealRtnTy swapRealImag() const noexcept;
-        [[nodiscard]] inline AsRealRtnTy permRealImag() const noexcept;
+        [[nodiscard]] inline FullRealType swapRealImag() const noexcept;
+        [[nodiscard]] inline FullRealType permRealImag() const noexcept;
 
         [[nodiscard]] inline ScalarType sum() const;
         [[nodiscard]] inline ScalarType max() const;
@@ -100,7 +100,7 @@ namespace Physica::Core {
         void swap(SIMD& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] constexpr static size_t size() { return Size; }
-        [[nodiscard]] AsRealRtnTy asReal() const noexcept;
+        [[nodiscard]] FullRealType asReal() const noexcept;
         [[nodiscard]] ValuePacket getValue() const noexcept { return values; }
         [[nodiscard]] GradPacket getGrad() const noexcept { return grads; }
         [[nodiscard]] HalfType getLow() const noexcept { return HalfType(values.getLow(), grads.getLow()); }
@@ -109,11 +109,11 @@ namespace Physica::Core {
         [[nodiscard]] inline RealType imag() const noexcept;
         /* Static members */
         [[nodiscard]] static SIMD select(BoolSIMDType flags, const SIMD& x, const SIMD& y);
-        [[nodiscard]] static SIMD asComplex(const AsRealRtnTy& reals);
+        [[nodiscard]] static SIMD asComplex(const FullRealType& reals);
     };
 
     template<Scalar T, size_t Size>
-    class SIMD<Diff<T, DiffMode::Reverse, 1>, Size> : public SIMD<T, Size> {
+    class SIMD<Diff<T, DiffMode::Reverse, 1>, Size> : public SIMDBase<SIMD<Diff<T, DiffMode::Reverse, 1>, Size>>, public SIMD<T, Size> {
         static_assert(!T::isDifferentiable, "[Error]: Invalid template param");
         using ScalarType = Diff<T, DiffMode::Reverse, 1>;
         using This = SIMD<ScalarType, Size>;

@@ -28,12 +28,13 @@ namespace Physica::Python {
         public:
             [[nodiscard]] const char* name() const noexcept override final { return "FFI"; }
             [[nodiscard]] std::string message(int code) const override final {
+                using enum ffi_status;
                 switch (code) {
-                case ffi_status::FFI_OK:
+                case FFI_OK:
                     return "No error";
-                case ffi_status::FFI_BAD_ABI:
+                case FFI_BAD_ABI:
                     return "Bad ABI";
-                case ffi_status::FFI_BAD_TYPEDEF:
+                case FFI_BAD_TYPEDEF:
                     return "Bad typedef";
                 default:
                     return "Unknown";

@@ -292,34 +292,35 @@ namespace Physica::Core {
 
     template<Scalar T, int Order>
     constexpr unsigned int TraceSegment<T, Order>::numOperand(ExprType type) {
+        using enum ExprType;
         switch (type) {
-            case ExprType::Set: return 0;
-            case ExprType::Assign: return 1;
-            case ExprType::Diff: return 1;
-            case ExprType::Minus: return 1;
-            case ExprType::Add: return 2;
-            case ExprType::Sub: return 2;
-            case ExprType::Mul: return 2;
-            case ExprType::Div: return 2;
-            case ExprType::Sum: return 2;
-            case ExprType::MulAdd2: [[fallthrough]];
-            case ExprType::MulAdd4: [[fallthrough]];
-            case ExprType::MulAdd8: return 3;
-            case ExprType::More: return 2;
-            case ExprType::MoreEq: return 2;
-            case ExprType::Reciprocal: return 1;
-            case ExprType::Sqrt: return 1;
-            case ExprType::Cbrt: return 1;
-            case ExprType::Abs: return 1;
-            case ExprType::Relu: return 1;
-            case ExprType::Square: return 1;
-            case ExprType::Ln: return 1;
-            case ExprType::Exp: return 1;
-            case ExprType::Pow: return 2;
-            case ExprType::Sin: return 1;
-            case ExprType::Cos: return 1;
-            case ExprType::ArcCos: return 1;
-            case ExprType::Tanh: return 1;
+            case Set: return 0;
+            case Assign: return 1;
+            case Diff: return 1;
+            case Minus: return 1;
+            case Add: return 2;
+            case Sub: return 2;
+            case Mul: return 2;
+            case Div: return 2;
+            case Sum: return 2;
+            case MulAdd2: [[fallthrough]];
+            case MulAdd4: [[fallthrough]];
+            case MulAdd8: return 3;
+            case More: return 2;
+            case MoreEq: return 2;
+            case Reciprocal: return 1;
+            case Sqrt: return 1;
+            case Cbrt: return 1;
+            case Abs: return 1;
+            case Relu: return 1;
+            case Square: return 1;
+            case Ln: return 1;
+            case Exp: return 1;
+            case Pow: return 2;
+            case Sin: return 1;
+            case Cos: return 1;
+            case ArcCos: return 1;
+            case Tanh: return 1;
             default: [[unlikely]]
                 throw std::invalid_argument("[Error]: Unrecognized type");
         }
@@ -358,45 +359,46 @@ namespace Physica::Core {
             if (grad.isZero())
                 continue;
             /* Unitary Operations */ {
+                using enum ExprType;
                 switch (source) {
-                    case ExprType::Assign:
-                    case ExprType::Minus:
-                        updateGrad(gradX, grad * GradType(source == ExprType::Assign ? 1.0 : -1.0));
+                    case Assign:
+                    case Minus:
+                        updateGrad(gradX, grad * GradType(source == Assign ? 1.0 : -1.0));
                         continue;
-                    case ExprType::Reciprocal:
+                    case Reciprocal:
                         updateGrad(gradX, -grad * square(GradType(currentNode)));
                         continue;
-                    case ExprType::Sqrt:
+                    case Sqrt:
                         updateGrad(gradX, grad / GradType(currentNode) * GradType(0.5));
                         continue;
-                    case ExprType::Cbrt:
+                    case Cbrt:
                         updateGrad(gradX, grad / (square(GradType(currentNode)) * GradType(3)));
                         continue;
-                    case ExprType::Abs:
+                    case Abs:
                         updateGrad(gradX, operandX.getValue().isPositive() ? grad : -grad);
                         continue;
-                    case ExprType::Relu:
+                    case Relu:
                         updateGrad(gradX, operandX.getValue().isPositive() ? grad : GradType(0));
                         continue;
-                    case ExprType::Square:
+                    case Square:
                         updateGrad(gradX, grad * GradType(operandX) * GradType(2));
                         continue;
-                    case ExprType::Ln:
+                    case Ln:
                         updateGrad(gradX, grad / GradType(operandX));
                         continue;
-                    case ExprType::Exp:
+                    case Exp:
                         updateGrad(gradX, grad * GradType(currentNode));
                         continue;
-                    case ExprType::Sin:
+                    case Sin:
                         updateGrad(gradX, grad * cos(GradType(operandX)));
                         continue;
-                    case ExprType::Cos:
+                    case Cos:
                         updateGrad(gradX, -grad * sin(GradType(operandX)));
                         continue;
-                    case ExprType::ArcCos:
+                    case ArcCos:
                         updateGrad(gradX, -grad / sqrt(GradType(1) - square(GradType(operandX))));
                         continue;
-                    case ExprType::Tanh:
+                    case Tanh:
                         updateGrad(gradX, grad - grad * square(GradType(currentNode)));
                         continue;
                     default:;
@@ -405,23 +407,24 @@ namespace Physica::Core {
             /* Binary Operations */ {
                 DiffScalar operandY = operands[idFirstOperand + 1];
                 GradType& gradY = operandY.getGrad();
+                using enum ExprType;
                 switch (source) {
-                    case ExprType::Add:
-                    case ExprType::Sub:
+                    case Add:
+                    case Sub:
                         updateGrad(gradX, grad);
-                        updateGrad(gradY, grad * GradType(source == ExprType::Add ? 1.0 : -1.0));
+                        updateGrad(gradY, grad * GradType(source == Add ? 1.0 : -1.0));
                         continue;
-                    case ExprType::Mul:
+                    case Mul:
                         updateGrad(gradX, grad * GradType(operandY));
                         updateGrad(gradY, grad * GradType(operandX));
                         continue;
-                    case ExprType::Div: {
+                    case Div: {
                         const GradType dx = grad * reciprocal(GradType(operandY));
                         updateGrad(gradX, dx);
                         updateGrad(gradY, -dx * GradType(currentNode));
                         continue;
                     }
-                    case ExprType::MulAdd2:
+                    case MulAdd2:
                         if constexpr (Order == 1) {
                             if constexpr (T::Option == Double) {
                                 DiffScalar operandZ = operands[idFirstOperand + 2];
@@ -438,7 +441,7 @@ namespace Physica::Core {
                             assert(false && "[Error]: MulAdd2 for high order autodiff not implemented");
                         }
                         continue;
-                    case ExprType::MulAdd4: {
+                    case MulAdd4: {
                         if constexpr (Order == 1) {
                             DiffScalar operandZ = operands[idFirstOperand + 2];
                             i -= 3;
@@ -451,7 +454,7 @@ namespace Physica::Core {
                         }
                         continue;
                     }
-                    case ExprType::MulAdd8: {
+                    case MulAdd8: {
                         if constexpr (Order == 1) {
                             DiffScalar operandZ = operands[idFirstOperand + 2];
                             i -= 7;

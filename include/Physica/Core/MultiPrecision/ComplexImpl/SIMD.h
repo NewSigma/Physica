@@ -36,17 +36,19 @@ namespace Physica::Core {
     };
 
     template<Scalar T, size_t Size>
-    class SIMD<Complex<T>, Size> : private SIMD<T, Size * 2> {
+    class SIMD<Complex<T>, Size> : public SIMDBase<SIMD<Complex<T>, Size>>, private SIMD<T, Size * 2> {
         using ScalarType = Complex<T>;
         using This = SIMD<ScalarType, Size>;
-        using Base = SIMD<T, Size * 2>;
+        using Base = SIMDBase<This>;
         using RealType = SIMD<T, Size>;
-        using AsRealRtnTy = Base;
+        using FullRealType = SIMD<T, Size * 2>;
         using MachineType = ScalarType::MachineType;
-        using HalfType = std::conditional<sizeof(Base) * CHAR_BIT != 128, SIMD<Complex<T>, Size / 2>, PlainStruct<void>>::type;
-        using Base::isSeparatable;
+        using HalfType = std::conditional<sizeof(FullRealType) * CHAR_BIT != 128, SIMD<Complex<T>, Size / 2>, PlainStruct<void>>::type;
+        using FullRealType::isSeparatable;
+
+        using FullRealPair = std::pair<FullRealType, FullRealType>;
     public:
-        using BoolSIMDType = Base::BoolSIMDType;
+        using BoolSIMDType = FullRealType::BoolSIMDType;
         using PlainPacket = This;
     public:
         SIMD() = default;
@@ -64,43 +66,50 @@ namespace Physica::Core {
         [[nodiscard]] inline SIMD operator*(const SIMD& other) const;
         [[nodiscard]] inline SIMD operator*(const ScalarType& x) const;
         [[nodiscard]] inline SIMD operator*(const T& x) const;
-        //[[nodiscard]] inline SIMD operator/(const SIMD& other) const;
+        [[nodiscard]] inline SIMD operator/(const SIMD& other) const;
         [[nodiscard]] inline SIMD operator-() const;
         void operator+=(const SIMD& other) { *this = *this + other; }
         void operator-=(const SIMD& other) { *this = *this - other; }
         void operator*=(const SIMD& other) { *this = *this * other; }
-        //void operator/=(const SIMD& other) { *this = *this / other; }
+        void operator/=(const SIMD& other) { *this = *this / other; }
         /* Operations */
         inline void load(const ScalarType* p);
         inline void load_partial(const ScalarType* p, int n);
         inline void store(ScalarType* p) const;
         inline void store_partial(ScalarType* p, int n) const;
 
-        [[nodiscard]] inline Base swapRealImag() const noexcept;
-        [[nodiscard]] inline Base permRealImag() const noexcept;
+        using Base::swapRealImag;
+        using Base::squaredNorm;
+        [[nodiscard]] inline FullRealType permRealImag() const noexcept;
 
         //inline void insert(int index, const ScalarType& value);
         [[nodiscard]] inline ScalarType sum() const;
         void swap(SIMD& __restrict other) noexcept { std::swap(*this, other); }
         /* Getters */
         [[nodiscard]] constexpr static size_t size() { return Size; }
-        [[nodiscard]] AsRealRtnTy asReal() const noexcept { return Base::toMachine(); }
-        [[nodiscard]] HalfType getLow() const noexcept { return HalfType::asComplex(Base::getLow()); }
-        [[nodiscard]] HalfType getHigh() const noexcept { return HalfType::asComplex(Base::getHigh()); }
+        [[nodiscard]] FullRealType asReal() const noexcept { return FullRealType::toMachine(); }
+        [[nodiscard]] HalfType getLow() const noexcept { return HalfType::asComplex(FullRealType::getLow()); }
+        [[nodiscard]] HalfType getHigh() const noexcept { return HalfType::asComplex(FullRealType::getHigh()); }
         [[nodiscard]] inline RealType real() const noexcept;
         [[nodiscard]] inline RealType imag() const noexcept;
         /* Static members */
         template<RandomGenerator R>
-        [[nodiscard]] static SIMD random_uniform() { return asComplex(Base::template random_uniform<R>()); }
-        [[nodiscard]] static SIMD asComplex(AsRealRtnTy reals);
+        [[nodiscard]] static SIMD random_uniform() { return asComplex(FullRealType::template random_uniform<R>()); }
+        [[nodiscard]] static SIMD asComplex(FullRealType reals);
+    private:
+        inline FullRealPair makeFullReIm() const noexcept;
     };
 }
 
 namespace Physica {
-    template<Scalar T, size_t Size>
-    class Traits<Core::SIMD<Core::Complex<T>, Size>> {
+    template<Scalar T, size_t S>
+    class Traits<Core::SIMD<Core::Complex<T>, S>> {
     public:
+        constexpr static int Size = S;
+
         using ScalarType = Core::Complex<T>;
+        using RealType = SIMD<T, Size>;
+        using FullRealType = SIMD<T, Size * 2>;
     };
 }
 

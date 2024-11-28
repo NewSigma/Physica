@@ -7,20 +7,6 @@ if (${Git_FOUND})
                     OUTPUT_STRIP_TRAILING_WHITESPACE)
 endif()
 
-#TestBigEndian
-include(TestBigEndian)
-TEST_BIG_ENDIAN(PhysicaEndian)
-if(${PhysicaEndian})
-    set(PhysicaEndian PhysicaBigEndian)
-else()
-    set(PhysicaEndian PhysicaLittleEndian)
-endif()
-#CheckIntegerCast
-physica_check(CheckIntegerCast Check/CheckIntegerCast.cpp)
-if(${RUN_RESULT_VAR} MATCHES 1)
-    message(STATUS "Performing CheckIntegerCast --Failed")
-endif()
-message(STATUS "Performing CheckIntegerCast --Passed")
 #CheckRightShift
 physica_check(CheckRightShift Check/CheckRightShift.cpp)
 if(${RUN_RESULT_VAR} MATCHES 1)

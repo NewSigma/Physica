@@ -92,18 +92,15 @@ namespace Physica::Core {
                 constexpr size_t Size = AnyPacket::size();
                 if constexpr (Size <= MaxSize) {
                     using PacketType = SIMD<ComplexType, Size>;
-                    const auto reim = PacketType::asComplex(square(v.template packet<PacketType>(index).asReal()));
-                    const auto imre = PacketType::asComplex(reim.swapRealImag());
-                    return AnyPacket((reim + imre).real());
+                    const auto x2 = PacketType::asComplex(v.template packet<PacketType>(index).squaredNorm());
+                    return AnyPacket(x2.real());
                 }
                 else {
                     constexpr size_t Size1 = Size / 2;
                     using PacketType = SIMD<ComplexType, Size1>;
-                    const auto reim1 = PacketType::asComplex(square(v.template packet<PacketType>(index).asReal()));
-                    const auto imre1 = PacketType::asComplex(reim1.swapRealImag());
-                    const auto reim2 = PacketType::asComplex(square(v.template packet<PacketType>(index + Size1).asReal()));
-                    const auto imre2 = PacketType::asComplex(reim2.swapRealImag());
-                    return AnyPacket((reim1 + imre1).real(), (reim2 + imre2).real());
+                    const auto x2 = PacketType::asComplex(v.template packet<PacketType>(index).squaredNorm());
+                    const auto y2 = PacketType::asComplex(v.template packet<PacketType>(index + Size1).squaredNorm());
+                    return AnyPacket(x2.real(), y2.real());
                 }
             }
             else
@@ -118,24 +115,21 @@ namespace Physica::Core {
                 constexpr size_t Size = AnyPacket::size();
                 if constexpr (Size <= MaxSize) {
                     using PacketType = SIMD<ComplexType, Size>;
-                    const auto reim = PacketType::asComplex(square(v.template packetPartial<PacketType>(index, count).asReal()));
-                    const auto imre = PacketType::asComplex(reim.swapRealImag());
-                    return AnyPacket((reim + imre).real());
+                    const auto x2 = PacketType::asComplex(v.template packetPartial<PacketType>(index, count).squaredNorm());
+                    return AnyPacket(x2.real());
                 }
                 else {
                     constexpr size_t Size1 = Size / 2;
                     using PacketType = SIMD<ComplexType, Size1>;
                     const bool flag = count <= Size1;
                     const size_t count1 = flag ? count : Size1;
-                    const auto reim1 = PacketType::asComplex(square(v.template packetPartial<PacketType>(index, count1).asReal()));
-                    const auto imre1 = PacketType::asComplex(reim1.swapRealImag());
+                    const auto x2 = PacketType::asComplex(v.template packetPartial<PacketType>(index, count1).squaredNorm());
 
                     if (flag)
-                        return AnyPacket((reim1 + imre1).real(), SIMD<ScalarType, Size1>(0));
+                        return AnyPacket(x2.real(), SIMD<ScalarType, Size1>(0));
                     const size_t count2 = count - count1;
-                    const auto reim2 = PacketType::asComplex(square(v.template packetPartial<PacketType>(index + Size / 2, count2).asReal()));
-                    const auto imre2 = PacketType::asComplex(reim2.swapRealImag());
-                    return AnyPacket((reim1 + imre1).real(), (reim2 + imre2).real());
+                    const auto y2 = PacketType::asComplex(v.template packetPartial<PacketType>(index + Size / 2, count2).squaredNorm());
+                    return AnyPacket(x2.real(), y2.real());
                 }
             }
             else

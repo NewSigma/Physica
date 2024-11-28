@@ -22,10 +22,6 @@
  */
 #pragma once
 
-#define PhysicaLittleEndian 0
-#define PhysicaBigEndian 1
-#cmakedefine PhysicaEndian @PhysicaEndian@
-
 namespace Physica {
     constexpr static const char* GitHash = "@GIT_HASH@";
 

@@ -31,12 +31,12 @@ namespace Physica::Core {
         using host_obj = PairModel<Derived>;
         using This = device_obj<PairModel<Derived>>;
         using Base = CRTPBase<This>;
-        using TraitType = Traits<Derived>;
+        using TraitsType = Traits<Derived>;
 
-        constexpr static bool IsPotDependOnAtomIndex = TraitType::IsPotDependOnAtomIndex;
-        constexpr static bool IsSmallCell = TraitType::IsSmallCell;
+        constexpr static bool IsPotDependOnAtomIndex = TraitsType::IsPotDependOnAtomIndex;
+        constexpr static bool IsSmallCell = TraitsType::IsSmallCell;
     public:
-        using ScalarType = TraitType::ScalarType;
+        using ScalarType = TraitsType::ScalarType;
         constexpr static int Dim = host_obj::Dim;
         constexpr static int NumVirialElem = Dim * Dim;
 

@@ -335,7 +335,9 @@ namespace Physica::Core {
         static_assert(!T::isDifferentiable, "[Error]: Not implemented");
         return SIMD<T, Size>(mul_sub(a.toMachine(), b.toMachine(), c.toMachine()));
     }
-
+    /**
+     * \returns a * b +/- c
+     */
     template<Scalar T, size_t Size>
     [[nodiscard]] inline SIMD<T, Size> mul_addsub(
             const SIMD<T, Size> a,

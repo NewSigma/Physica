@@ -27,29 +27,29 @@ namespace Physica::Core {
         if constexpr (isSeparatable) {
             using Half = SIMD<Complex<T>, Size / 2>;
             const Half h(x);
-            *this = asComplex(Base(h.asReal(), h.asReal()));
+            *this = asComplex({h.asReal(), h.asReal()});
         }
         else {
             if constexpr (T::Option == Float32)
-                *this = asComplex(Base(x.real().toMachine(), x.imag().toMachine(), x.real().toMachine(), x.imag().toMachine()));
+                *this = asComplex({x.real().toMachine(), x.imag().toMachine(), x.real().toMachine(), x.imag().toMachine()});
             else
-                *this = asComplex(Base(x.real().toMachine(), x.imag().toMachine()));
+                *this = asComplex({x.real().toMachine(), x.imag().toMachine()});
         }
     }
 
     template<Scalar T, size_t Size>
     inline SIMD<Complex<T>, Size>::ScalarType SIMD<Complex<T>, Size>::operator[](int index) const {
-        return ScalarType(Base::operator[](2 * index), Base::operator[](2 * index + 1));
+        return ScalarType(FullRealType::operator[](2 * index), FullRealType::operator[](2 * index + 1));
     }
 
     template<Scalar T, size_t Size>
     inline SIMD<Complex<T>, Size> SIMD<Complex<T>, Size>::operator+(const SIMD& other) const {
-        return asComplex(Base::operator+(other));
+        return asComplex(FullRealType::operator+(other));
     }
 
     template<Scalar T, size_t Size>
     inline SIMD<Complex<T>, Size> SIMD<Complex<T>, Size>::operator-(const SIMD& other) const {
-        return asComplex(Base::operator-(other));
+        return asComplex(FullRealType::operator-(other));
     }
     /**
      * Reference:
@@ -57,27 +57,8 @@ namespace Physica::Core {
      */
     template<Scalar T, size_t Size>
     inline SIMD<Complex<T>, Size> SIMD<Complex<T>, Size>::operator*(const SIMD& other) const {
-        Base a_re, a_im;
-        if constexpr (T::Option == Float32) {
-            a_re = Base::template shuffle<0, 0, 2, 2>();
-            a_im = Base::template shuffle<1, 1, 3, 3>();
-        }
-        else {
-            if constexpr (Size == 1) {
-                a_re = Base::template shuffle<0, 0>();
-                a_im = Base::template shuffle<1, 1>();
-            }
-            else if constexpr (Size == 2) {
-                a_re = Base::template shuffle<0, 0, 0, 0>();
-                a_im = Base::template shuffle<1, 1, 1, 1>();
-            }
-            else {
-                static_assert(Size == 4, "[Error]: Unexpected size");
-                a_re = Base::template shuffle<0, 0, 0, 0, 0, 0, 0, 0>();
-                a_im = Base::template shuffle<1, 1, 1, 1, 1, 1, 1, 1>();
-            }
-        }
-        return asComplex(mul_addsub(a_re, other.asReal(), a_im * other.swapRealImag()));
+        const auto pair = makeFullReIm();
+        return asComplex(mul_addsub(pair.first, other.asReal(), pair.second * other.swapRealImag()));
     }
 
     template<Scalar T, size_t Size>
@@ -87,54 +68,45 @@ namespace Physica::Core {
 
     template<Scalar T, size_t Size>
     inline SIMD<Complex<T>, Size> SIMD<Complex<T>, Size>::operator*(const T& x) const {
-        return asComplex(Base::operator*(x));
+        return asComplex(FullRealType::operator*(x));
+    }
+    /**
+     * Reference:
+     * [1] vectorclass add-on; https://github.com/vectorclass/add-on
+     */
+    template<Scalar T, size_t Size>
+    inline SIMD<Complex<T>, Size> SIMD<Complex<T>, Size>::operator/(const SIMD& other) const {
+        const auto pair = makeFullReIm();
+        return asComplex(mul_addsub(pair.second, other.swapRealImag(), -pair.first * other.asReal()) / other.squaredNorm());
     }
 
     template<Scalar T, size_t Size>
     inline SIMD<Complex<T>, Size> SIMD<Complex<T>, Size>::operator-() const {
-        return asComplex(Base::operator-());
+        return asComplex(FullRealType::operator-());
     }
 
     template<Scalar T, size_t Size>
     inline void SIMD<Complex<T>, Size>::load(const ScalarType* p) {
-        Base::load(reinterpret_cast<const T*>(p));
+        FullRealType::load(reinterpret_cast<const T*>(p));
     }
 
     template<Scalar T, size_t Size>
     inline void SIMD<Complex<T>, Size>::load_partial(const ScalarType* p, int n) {
-        Base::load_partial(reinterpret_cast<const T*>(p), 2 * n);
+        FullRealType::load_partial(reinterpret_cast<const T*>(p), 2 * n);
     }
 
     template<Scalar T, size_t Size>
     inline void SIMD<Complex<T>, Size>::store(ScalarType* p) const {
-        Base::store(reinterpret_cast<T*>(p));
+        FullRealType::store(reinterpret_cast<T*>(p));
     }
 
     template<Scalar T, size_t Size>
     inline void SIMD<Complex<T>, Size>::store_partial(ScalarType* p, int n) const {
-        Base::store_partial(reinterpret_cast<T*>(p), 2 * n);
+        FullRealType::store_partial(reinterpret_cast<T*>(p), 2 * n);
     }
 
     template<Scalar T, size_t Size>
-    SIMD<Complex<T>, Size>::AsRealRtnTy SIMD<Complex<T>, Size>::swapRealImag() const noexcept {
-        AsRealRtnTy result;
-        if constexpr (T::Option == Float32)
-            result = Base::template shuffle<1, 0, 3, 2>();
-        else {
-            if constexpr (Size == 1)
-                result = Base::template shuffle<1, 0>();
-            else if constexpr (Size == 2)
-                result = Base::template shuffle<1, 0, 1, 0>();
-            else {
-                static_assert(Size == 4, "[Error]: Unexpected size");
-                result = Base::template shuffle<1, 0, 1, 0, 1, 0, 1, 0>();
-            }
-        }
-        return result;
-    }
-
-    template<Scalar T, size_t Size>
-    inline SIMD<Complex<T>, Size>::AsRealRtnTy SIMD<Complex<T>, Size>::permRealImag() const noexcept {
+    inline SIMD<Complex<T>, Size>::FullRealType SIMD<Complex<T>, Size>::permRealImag() const noexcept {
         auto result = asReal();
         if constexpr (Size == 2)
             result = result.template permute<0, 2, 1, 3>();
@@ -170,9 +142,34 @@ namespace Physica::Core {
     }
 
     template<Scalar T, size_t Size>
-    SIMD<Complex<T>, Size> SIMD<Complex<T>, Size>::asComplex(AsRealRtnTy reals) {
+    SIMD<Complex<T>, Size> SIMD<Complex<T>, Size>::asComplex(FullRealType reals) {
         This result{};
-        static_cast<Base&>(result) = std::move(reals);
+        static_cast<FullRealType&>(result) = std::move(reals);
         return result;
+    }
+
+    template<Scalar T, size_t Size>
+    inline SIMD<Complex<T>, Size>::FullRealPair SIMD<Complex<T>, Size>::makeFullReIm() const noexcept {
+        FullRealType re, im;
+        if constexpr (T::Option == Float32) {
+            re = FullRealType::template shuffle<0, 0, 2, 2>();
+            im = FullRealType::template shuffle<1, 1, 3, 3>();
+        }
+        else {
+            if constexpr (Size == 1) {
+                re = FullRealType::template shuffle<0, 0>();
+                im = FullRealType::template shuffle<1, 1>();
+            }
+            else if constexpr (Size == 2) {
+                re = FullRealType::template shuffle<0, 0, 0, 0>();
+                im = FullRealType::template shuffle<1, 1, 1, 1>();
+            }
+            else {
+                static_assert(Size == 4, "[Error]: Unexpected size");
+                re = FullRealType::template shuffle<0, 0, 0, 0, 0, 0, 0, 0>();
+                im = FullRealType::template shuffle<1, 1, 1, 1, 1, 1, 1, 1>();
+            }
+        }
+        return std::make_pair(std::move(re), std::move(im));
     }
 }
