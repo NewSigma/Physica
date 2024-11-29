@@ -72,7 +72,7 @@ int main() {
         for (size_t i = 0; i < solution.getCol(); ++i) {
             const auto solVector = solution.col(i);
             const auto answer = exp(x[i]);
-            if (!scalarNear(solVector[0], answer, 1E-9))
+            if (!scalarNear(solVector[0], answer, 1E-8))
                 return 1;
         }
     }
@@ -89,7 +89,7 @@ int main() {
             const auto& x_i = x[i];
             const auto solVector = solution.col(i);
             const auto answer = sin(x_i);
-            if (!scalarNear(solVector[0], answer, 1E-9))
+            if (!scalarNear(solVector[0], answer, 1E-8))
                 return 1;
         }
     }

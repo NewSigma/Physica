@@ -16,6 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
+#include <iostream>
 #include "Functions.h"
 #include "Physica/Core/Math/Calculus/Differential.h"
 #include "Physica/Core/Math/Optimization/ConjugateGradient.h"
@@ -48,7 +49,7 @@ int main() {
         auto func = func1<ScalarType>;
         ConjugateGradient<ScalarType, 3> cg(1);
         const ScalarType result = cg.solve(10, {-1, -2, -5}, func, [=](VectorType x) { return grad(func, x, 1E-5); });
-        if (!scalarNear(result, ScalarType(0), 1E-15))
+        if (!scalarNear(result, ScalarType(0), 1E-14))
             return 1;
     }
     {

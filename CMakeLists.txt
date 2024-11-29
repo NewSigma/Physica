@@ -38,9 +38,6 @@ if(${RUN_CHECKS})
 endif()
 add_subdirectory(cmake/Modules)
 ##############################################Project################################################
-set(CMAKE_INSTALL_RPATH ${CMAKE_INSTALL_PREFIX}/lib)
-set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
-
 set(Physica_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/include")
 include_directories(SYSTEM 3rdparty)
 include_directories(${Physica_INCLUDE_DIR})

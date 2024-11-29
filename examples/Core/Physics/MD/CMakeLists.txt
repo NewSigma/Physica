@@ -11,7 +11,9 @@ physica_add_example(SiO2 KineticModel/SiO2.cpp)
 physica_add_example(SiO2_1 KineticModel/SiO2_1.cpp)
 # ForceModel
 physica_add_example(TodaModel ForceModel/TodaModel.cpp)
-physica_add_example(HardCore_cuda HardCore.cu)
+if(${PHYSICA_CUDA})
+    physica_add_example(HardCore_cuda HardCore.cu)
+endif()
 # Anonymous
 physica_add_example(HardCore HardCore.cpp)
 physica_add_example(TestNVE TestNVE.cpp)

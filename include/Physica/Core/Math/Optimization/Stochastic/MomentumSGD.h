@@ -70,7 +70,7 @@ namespace Physica::Core {
         size_t i = 0;
         tracer.forSegmentInRange(from, to, [this, &i](SegmentType& segment) {
             segment.forNodeInRange(from, to, [this, &i](DiffScalar s) {
-                lastGrad[i] = momentum * lastGrad[i] + s.template getGrad();
+                lastGrad[i] = momentum * lastGrad[i] + s.template getGrad<>();
                 s.setValue(s.getValue() - Base::getMeanLearnRate() * lastGrad[i]);
                 i += 1;
             });

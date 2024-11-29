@@ -4,6 +4,11 @@ add_library(Physica::Core INTERFACE IMPORTED)
 target_link_libraries(Physica::Core INTERFACE ${PhysicaCore_LIBRARIES})
 target_link_libraries(Physica::Core INTERFACE ${FFTW3_LIBRARIES} INTERFACE pthread)
 
+if(CMAKE_CXX_COMPILER_ID MATCHES IntelLLVM)
+    target_link_libraries(Physica::Core INTERFACE IntelSYCL::SYCL_CXX)
+    target_link_libraries(Physica::Core INTERFACE imf INTERFACE svml INTERFACE irng INTERFACE intlc)
+endif()
+
 if(${PHYSICA_HDF5})
     target_link_libraries(Physica::Core INTERFACE ${HDF5_CXX_SHARED_LIBRARY})
 endif()

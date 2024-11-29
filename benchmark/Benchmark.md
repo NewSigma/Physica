@@ -31,3 +31,26 @@ ParaH auto/500        1.37 ms         1.21 ms          587
 ParaH auto/864        2.13 ms         1.97 ms          356
 Q_TIP4P cuda          4.09 ms         4.09 ms          171
 Mnist                 17.6 s          17.6 s             1
+
+OS: Ubuntu24.04  
+Compiler: IntelLLVM 2025.0  
+Hardware: Intel(R) Core(TM) i7-14700KF + 32G  
+Date: 2024-11-29  
+Maintainer: Weibo He (NewSigma@163.com) 
+
+----------------------------------------------------------
+Benchmark                Time             CPU   Iterations
+----------------------------------------------------------
+HubbardMatrix1D       5.10 ms         5.10 ms          134
+TPQ                   1.20 s          1.20 s             1
+lncosh float32        58.2 ns         58.2 ns     11874724
+lncosh float64         134 ns          134 ns      5219502
+lncosh cfloat32        130 ns          130 ns      5380303
+lncosh cfloat64        306 ns          306 ns      2279583
+HardCore              2.21 us         2.21 us       390356
+ParaH/108            0.382 ms        0.154 ms         4054
+ParaH/256             1.03 ms        0.824 ms          868
+ParaH/500             1.68 ms         1.37 ms          522
+ParaH/864             2.72 ms         2.26 ms          299
+Q_TIP4P               5.46 ms         5.46 ms          128
+Mnist                 15.9 s          15.9 s             1

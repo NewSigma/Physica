@@ -149,7 +149,7 @@ namespace Physica::Core {
         if constexpr (isSameScalar)
             packet.store(Base::data_ptr(index));
         else
-            Base::template writePacket(index, packet);
+            Base::template writePacket<AnyPacket>(index, packet);
     }
 
     template<class Derived>
