@@ -16,43 +16,35 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include <iostream>
 #include <benchmark/benchmark.h>
 #include <gperftools/profiler.h>
 #include "Physica/Core/Math/Random/Random.h"
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Eigen/JacobiDavidson.h"
 #include "Physica/Core/Physics/ManyBody/Hamilton/HubbardMatrix.h"
 #include "Physica/Core/Physics/ManyBody/ReprSpace/KSpinRepr.h"
-#include "Physica/Core/Parallel/Executor/ThreadExecutor.h"
-#include "Physica/Core/Utils/Cycler.h"
 
-using namespace Physica::Core;
-using RealType = float64;
-using ScalarType = Complex<RealType>;
-using VectorType = VectorND<RealType>;
-using RandomType = Random<MT19937>;
-constexpr unsigned int NumSite = 10;
-constexpr unsigned int NumParticle = NumSite / 2;
-constexpr double HoppingT = 1.0;
-constexpr double RepelU = 4;
+using namespace Physica;
 
-namespace {
-    static void main(benchmark::State& state) {
-        const size_t kSize = FFT<RealType, 1>::rSizeToKSize(NumSite);
-        const LatticeModel<1> lattice({NumSite}, 1);
-        const Hubbard<RealType, 1> hubbard(lattice, HoppingT, RepelU);
-        for (auto _ : state) {
-            for (unsigned int kIndex = 0; kIndex < kSize; ++kIndex) {
-                using ReprType = KSpinRepr<1, NumSite, true>;
-                ReprType repr({NumParticle, NumParticle}, kIndex);
-                const HubbardMatrix<ScalarType, ReprType> model(hubbard, std::move(repr));
+static void func(benchmark::State& state) {
+    constexpr unsigned int NumSite = 10;
+    constexpr unsigned int NumParticle = NumSite / 2;
+    constexpr double HoppingT = 1.0;
+    constexpr double RepelU = 4;
 
-                const size_t numState = model.getNumState();
-                JacobiDavidson<ScalarType> jd(numState, 4);
-                jd.compute(model, VectorType::random_uniform<RandomType>(numState));
-            }
-        }
+    using RealType = float64;
+    using ScalarType = Complex<RealType>;
+    using RandomType = Random<MT19937>;
+    using ReprType = KSpinRepr<1, NumSite, true>;
+
+    const LatticeModel<1> lattice({NumSite}, 1);
+    const Hubbard<RealType, 1> hubbard(lattice, HoppingT, RepelU);
+    const HubbardMatrix<ScalarType, ReprType> model(hubbard, ReprType({NumParticle, NumParticle}, 0));
+    auto v = VectorND<ScalarType>::random_uniform<RandomType>(model.getRow());
+    VectorND<ScalarType> v1(model.getRow());
+
+    for (auto _ : state) {
+        v1 = model * v;
+        v1.swap(v);
     }
 }
 
-BENCHMARK(main)->Name("HubbardMatrix1D")->Unit(benchmark::kSecond);
+BENCHMARK(func)->Name("HubbardMatrix1D")->Unit(benchmark::kMillisecond);

@@ -45,11 +45,9 @@ namespace {
         const Hamilton hamilton(hubbard, ReprType(4, 4));
         auto psi = TPQ<ScalarType>::random_normal<RandomType>(hamilton.getNumState(), 0);
         psi.pre_nvt_step(hamilton, Beta);
-        for (auto _ : state) {
-            psi.random_normal<RandomType>();
+        psi.random_normal<RandomType>();
+        for (auto _ : state)
             psi.template nvt_step<Hamilton, SequentialExecutor>(hamilton, Beta);
-            std::ignore = psi.lnPartitionXi();
-        };
     }
 }
 

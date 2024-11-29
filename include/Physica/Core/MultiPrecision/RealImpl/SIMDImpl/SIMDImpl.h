@@ -23,35 +23,35 @@
 
 namespace Physica::Core {
     template<Scalar T, size_t Size>
-    SIMD<T, Size>::SIMD(HalfType a, HalfType b) : Base(a.toMachine(), b.toMachine()) {}
+    SIMD<T, Size>::SIMD(HalfType a, HalfType b) : pack(a.toMachine(), b.toMachine()) {}
 
     template<Scalar T, size_t Size>
-    SIMD<T, Size>::SIMD(T s, int count) {
+    SIMD<T, Size>::SIMD(T x, int count) {
         assert(0 < count && count <= int(Size) && "[Error]: Invalid count");
         if (count == Size) {
-            *this = SIMD(s);
+            *this = SIMD(x);
             return;
         }
 
         constexpr int HalfSize = Size / 2;
         if constexpr (isSeparatable) {
             if (count > HalfSize)
-                *this = SIMD(HalfType(s), HalfType(s, count - HalfSize));
+                *this = SIMD(HalfType(x), HalfType(x, count - HalfSize));
             else
-                *this = SIMD(HalfType(s, count), HalfType(0));
+                *this = SIMD(HalfType(x, count), HalfType(0));
         }
         else {
             if constexpr (T::Option == Float32) {
-                const float f = float(s);
+                const float f = float(x);
                 switch(count) {
                 case 1:
-                    *this = SIMD(Base(f, 0.0F, 0.0F, 0.0F));
+                    *this = SIMD(Pack(f, 0.0F, 0.0F, 0.0F));
                     break;
                 case 2:
-                    *this = SIMD(Base(f, f, 0.0F, 0.0F));
+                    *this = SIMD(Pack(f, f, 0.0F, 0.0F));
                     break;
                 case 3:
-                    *this = SIMD(Base(f, f, f, 0.0F));
+                    *this = SIMD(Pack(f, f, f, 0.0F));
                     break;
                 default:
                     unreachable();
@@ -59,17 +59,23 @@ namespace Physica::Core {
             }
             else {
                 static_assert(T::Option == Float64, "[Error]: Unsupported float type");
-                *this = SIMD(Base(double(s), 0.0));
+                *this = SIMD(Pack(double(x), 0.0));
             }
         }
     }
 
     template<Scalar T, size_t Size>
+    template<Scalar... Args>
+    SIMD<T, Size>::SIMD(Args... args) : pack(args.toMachine()...) {
+        static_assert(sizeof...(Args) == Size, "[Error]: Number of elements does not match");
+    }
+
+    template<Scalar T, size_t Size>
     inline T SIMD<T, Size>::operator[](int index) const {
         if constexpr (isForward)
-            return T(Base::operator[](index * 2), Base::operator[](index * 2 + 1));
+            return T(pack.operator[](index * 2), pack.operator[](index * 2 + 1));
         else
-            return T(Base::operator[](index));
+            return T(pack.operator[](index));
     }
 
     template<Scalar T, size_t Size>
@@ -139,32 +145,32 @@ namespace Physica::Core {
 
     template<Scalar T, size_t Size>
     inline void SIMD<T, Size>::load(const T* p) {
-        Base::load(reinterpret_cast<const MachineType*>(p));
+        pack.load(reinterpret_cast<const typename T::MachineType*>(p));
     }
 
     template<Scalar T, size_t Size>
     inline void SIMD<T, Size>::load_partial(const T* p, int n) {
-        Base::load_partial(n, reinterpret_cast<const MachineType*>(p));
+        pack.load_partial(n, reinterpret_cast<const typename T::MachineType*>(p));
     }
 
     template<Scalar T, size_t Size>
     inline void SIMD<T, Size>::store(T* p) const {
-        Base::store(reinterpret_cast<MachineType*>(p));
+        pack.store(reinterpret_cast<typename T::MachineType*>(p));
     }
 
     template<Scalar T, size_t Size>
     inline void SIMD<T, Size>::store_partial(T* p, int n) const {
-        Base::store_partial(n, reinterpret_cast<MachineType*>(p));
+        pack.store_partial(n, reinterpret_cast<typename T::MachineType*>(p));
     }
 
     template<Scalar T, size_t Size>
     inline void SIMD<T, Size>::insert(int index, const T& value) {
         if constexpr (isForward) {
-            Base::insert(index * 2, value.getValue().toMachine());
-            Base::insert(index * 2 + 1, value.getGrad().toMachine());
+            pack.insert(index * 2, value.getValue().toMachine());
+            pack.insert(index * 2 + 1, value.getGrad().toMachine());
         }
         else
-            Base::insert(index, value.toMachine());
+            pack.insert(index, value.toMachine());
     }
 
     template<Scalar T, size_t Size>
@@ -216,7 +222,7 @@ namespace Physica::Core {
     template<Scalar T, size_t Size>
     inline SIMD<T, Size>& SIMD<T, Size>::cutoff(int count) {
         assert(0 < count && count < int(Size) && "[Error]: Invalid count");
-        Base::cutoff(count);
+        pack.cutoff(count);
         return *this;
     }
 
@@ -263,9 +269,9 @@ namespace Physica::Core {
         }
         else {
             if constexpr (Size == 2)
-                return __m128d(_mm_setr_epi64(Functor(Flags)...));
+                return __m128d(_mm_setr_epi64(__m64(Functor(Flags))...));
             else if constexpr (Size == 4)
-                return __m256d(_mm256_setr_epi64(Functor(Flags)...));
+                return __m256d(_mm256_setr_epi64x(Functor(Flags)...));
             else {
                 static_assert(Size == 8);
                 const static auto mm512_setr_epi64 = [](int64_t i0, int64_t i1, int64_t i2, int64_t i3, int64_t i4, int64_t i5, int64_t i6, int64_t i7) {
@@ -273,6 +279,22 @@ namespace Physica::Core {
                 };
                 return __m512d(mm512_setr_epi64(Functor(Flags)...));
             }
+        }
+    }
+
+    template<Scalar T, size_t Size>
+    template<int... Order>
+    inline SIMD<T, Size> SIMD<T, Size>::blend(const SIMD& x, const SIMD& y) {
+        static_assert(sizeof...(Order) == Size, "[Error]: Size of Order do not match the packet");
+        if constexpr (Size == 2)
+            return Physica::blend2<Order...>(x.toMachine(), y.toMachine());
+        else if constexpr (Size == 4)
+            return Physica::blend4<Order...>(x.toMachine(), y.toMachine());
+        else if constexpr (Size == 8)
+            return Physica::blend8<Order...>(x.toMachine(), y.toMachine());
+        else {
+            static_assert(Size == 16, "[Error]: Unexpected size");
+            return Physica::blend16<Order...>(x.toMachine(), y.toMachine());
         }
     }
 
@@ -336,7 +358,7 @@ namespace Physica::Core {
         return SIMD<T, Size>(mul_sub(a.toMachine(), b.toMachine(), c.toMachine()));
     }
     /**
-     * \returns a * b +/- c
+     * \returns a * b -/+ c
      */
     template<Scalar T, size_t Size>
     [[nodiscard]] inline SIMD<T, Size> mul_addsub(

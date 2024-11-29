@@ -18,6 +18,8 @@
  */
 #pragma once
 
+#include <vectorclass/vectormath_trig.h>
+
 namespace Physica::Core {
     template<Scalar T, size_t Size>
     [[nodiscard]] __host__ __device__ inline SIMD<T, Size> abs(const SIMD<T, Size>& x) {
@@ -88,21 +90,13 @@ namespace Physica::Core {
     }
 
     template<Scalar T, size_t Size>
-    inline static void sincos(const SIMD<T, Size>& x, SIMD<T, Size>& s, SIMD<T, Size>& c) {
-        sincos(x.toMachine(), s.toMachine(), c.toMachine());
-        if constexpr (T::isDifferentiable) {
-            using TracerType = T::TracerType;
-            auto& tracer = TracerType::getInstance();
-            const T sinHeadNode = tracer.pushOperation(s, ExprType::Sin);
-            for (size_t i = 0; i < Size; ++i)
-                tracer.pushOperand(T(x.value_ptr() + i, x.grad_ptr() + i));
-            s = SIMD<T, Size>(s, sinHeadNode);
+    inline void sincos(const SIMD<T, Size>& x, SIMD<T, Size>& s, SIMD<T, Size>& c) {
+        Physica::sincos(x.toMachine(), s.toMachine(), c.toMachine());
+    }
 
-            const T cosHeadNode = tracer.pushOperation(c, ExprType::Cos);
-            for (size_t i = 0; i < Size; ++i)
-                tracer.pushOperand(T(x.value_ptr() + i, x.grad_ptr() + i));
-            c = SIMD<T, Size>(c, cosHeadNode);
-        }
+    template<Scalar T, size_t Size>
+    inline auto arctan2(const SIMD<T, Size>& y, const SIMD<T, Size>& x) {
+        return Physica::atan2(y.toMachine(), x.toMachine());
     }
 
     template<Scalar T, size_t Size>

@@ -3,12 +3,13 @@ find_package(benchmark REQUIRED)
 add_executable(Benchmark)
 
 add_subdirectory(ManyBody)
+# Math
+target_sources(Benchmark PRIVATE Math/LnCosh.cpp)
 # RPMD
 target_sources(Benchmark PRIVATE RPMD/HardCore.cpp)
 target_sources(Benchmark PRIVATE RPMD/ParaH.cpp)
 target_sources(Benchmark PRIVATE RPMD/Q_TIP4P.cpp)
 if(${PHYSICA_CUDA})
-    target_sources(Benchmark PRIVATE RPMD/HardCore.cu)
     target_sources(Benchmark PRIVATE RPMD/ParaH.cu)
     target_sources(Benchmark PRIVATE RPMD/ParaH_auto.cu)
     target_sources(Benchmark PRIVATE RPMD/Q_TIP4P2D.cu)

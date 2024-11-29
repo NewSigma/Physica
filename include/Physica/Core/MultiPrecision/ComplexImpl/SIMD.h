@@ -40,16 +40,18 @@ namespace Physica::Core {
         using ScalarType = Complex<T>;
         using This = SIMD<ScalarType, Size>;
         using Base = SIMDBase<This>;
-        using RealType = SIMD<T, Size>;
-        using FullRealType = SIMD<T, Size * 2>;
+        using RealBase = SIMD<T, Size * 2>;
         using MachineType = ScalarType::MachineType;
-        using HalfType = std::conditional<sizeof(FullRealType) * CHAR_BIT != 128, SIMD<Complex<T>, Size / 2>, PlainStruct<void>>::type;
-        using FullRealType::isSeparatable;
-
-        using FullRealPair = std::pair<FullRealType, FullRealType>;
     public:
+        using typename Base::RealType;
+        using typename Base::FullRealType;
+        using Base::isSeparatable;
         using BoolSIMDType = FullRealType::BoolSIMDType;
         using PlainPacket = This;
+    private:
+        using HalfType = std::conditional<sizeof(FullRealType) * CHAR_BIT != 128, SIMD<Complex<T>, Size / 2>, PlainStruct<void>>::type;
+
+        using FullRealPair = std::pair<FullRealType, FullRealType>;
     public:
         SIMD() = default;
         explicit SIMD(int x);
@@ -78,9 +80,10 @@ namespace Physica::Core {
         inline void store(ScalarType* p) const;
         inline void store_partial(ScalarType* p, int n) const;
 
+        inline FullRealPair makeFullRealImag() const noexcept;
         using Base::swapRealImag;
+        using Base::permRealImag;
         using Base::squaredNorm;
-        [[nodiscard]] inline FullRealType permRealImag() const noexcept;
 
         //inline void insert(int index, const ScalarType& value);
         [[nodiscard]] inline ScalarType sum() const;
@@ -96,20 +99,20 @@ namespace Physica::Core {
         template<RandomGenerator R>
         [[nodiscard]] static SIMD random_uniform() { return asComplex(FullRealType::template random_uniform<R>()); }
         [[nodiscard]] static SIMD asComplex(FullRealType reals);
-    private:
-        inline FullRealPair makeFullReIm() const noexcept;
     };
 }
 
 namespace Physica {
     template<Scalar T, size_t S>
-    class Traits<Core::SIMD<Core::Complex<T>, S>> {
+    class Traits<SIMD<Complex<T>, S>> {
     public:
         constexpr static int Size = S;
 
-        using ScalarType = Core::Complex<T>;
-        using RealType = SIMD<T, Size>;
+        using ScalarType = Complex<T>;
         using FullRealType = SIMD<T, Size * 2>;
+        using RealType = std::conditional<FullRealType::isSeparatable, SIMD<T, Size>, FullRealType>::type;
+        using MachineType = FullRealType::MachineType;
+        constexpr static bool isSeparatable = FullRealType::isSeparatable;
     };
 }
 

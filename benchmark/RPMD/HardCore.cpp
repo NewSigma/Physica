@@ -20,11 +20,8 @@
 #include <gperftools/profiler.h>
 #include "Physica/Core/Physics/MD/RPMD.h"
 #include "Physica/Core/Physics/MD/KineticModel/HardCore.h"
-#include "Physica/Core/Physics/MD/Thermostat/Langevin.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h"
 #include "Physica/Core/Math/Statistics/ProbDistribution.h"
-#include "Physica/Core/Parallel/Executor/ThreadExecutor.h"
-#include "Physica/Core/Utils/BenchmarkHelper.h"
 
 using namespace Physica::Core;
 using ScalarType = float64;
@@ -39,42 +36,37 @@ constexpr size_t numMolecular = 512;
 constexpr double temperatureT = 2;
 constexpr double unitMassM = 1;
 constexpr size_t numReplica = 1;
-constexpr size_t maxHandleNum = 100;
+constexpr size_t maxHandleNum = 1000;
 using MDType = RPMD<ScalarType, 1, numReplica>;
 using MDCellType = MDType::MDCellType;
 using ForceModel = EmptyForceModel<ScalarType, 1>;
 using KineticModel = HardCore<ScalarType, true, numReplica, RPMDIntegrator::Exact>;
 
-namespace {
-    MDCellType makeSystem() {
-        MDCellType::LatticeMatrix lattice{latticeSize};
+static MDCellType makeSystem() {
+    MDCellType::LatticeMatrix lattice{latticeSize};
 
-        std::uniform_real_distribution dist{};
-        auto posVec = VectorND<ScalarType>::random_uniform<RandomType>(numMolecular);
-        std::sort(posVec.begin(), posVec.end());
-        MDCellType::PositionMatrix pos(numMolecular, 1);
-        pos.col(0) = posVec;
+    std::uniform_real_distribution dist{};
+    auto posVec = VectorND<ScalarType>::random_uniform<RandomType>(numMolecular);
+    std::sort(posVec.begin(), posVec.end());
+    MDCellType::PositionMatrix pos(numMolecular, 1);
+    pos.col(0) = posVec;
 
-        MDCellType::MassVector massVec(numMolecular);
-        for (size_t i = 0; i < numMolecular; ++i) {
-            massVec[i] = unitMassM;
-        }
-        return MDCellType(std::move(lattice), std::move(pos), std::move(massVec));
-    }
-
-    static void main(benchmark::State& state) {
-        const double timeStep = timeStepLambda * (latticeSize / numMolecular) * std::sqrt(unitMassM / temperatureT);
-        MDType rpmd = MDType(makeSystem(), numReplica, numReplica, temperatureT, timeStep);
-        rpmd.initMomentum<KineticModel, RandomType>();
-        KineticModel kineticModel(latticeSize, collideFactor, temperatureT, numMolecular, numReplica, maxHandleNum);
-        kineticModel.updateMass(rpmd.getRingPolymer());
-
-        for (auto _ : state) {
-            ForceModel forceModel{};
-            for (size_t i = 0; i < 50000; ++i)
-                rpmd.nve_step<KineticModel, ForceModel, SequentialExecutor>(kineticModel, forceModel);
-        };
-    }
+    MDCellType::MassVector massVec(numMolecular);
+    for (size_t i = 0; i < numMolecular; ++i)
+        massVec[i] = unitMassM;
+    return MDCellType(std::move(lattice), std::move(pos), std::move(massVec));
 }
 
-BENCHMARK(main)->Name("HardCore")->Unit(benchmark::kSecond);
+static void func(benchmark::State& state) {
+    const double timeStep = timeStepLambda * (latticeSize / numMolecular) * std::sqrt(unitMassM / temperatureT);
+    MDType rpmd = MDType(makeSystem(), numReplica, numReplica, temperatureT, timeStep);
+    rpmd.initMomentum<KineticModel, RandomType>();
+    KineticModel kineticModel(latticeSize, collideFactor, temperatureT, numMolecular, numReplica, maxHandleNum);
+    ForceModel forceModel{};
+    kineticModel.updateMass(rpmd.getRingPolymer());
+
+    for (auto _ : state)
+        rpmd.nve_step<KineticModel, ForceModel, SequentialExecutor>(kineticModel, forceModel);
+}
+
+BENCHMARK(func)->Name("HardCore")->Unit(benchmark::kMicrosecond);

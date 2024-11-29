@@ -130,8 +130,13 @@ namespace {
 
     static void main(benchmark::State& state) {
         ThreadPool::numThreadRequired = 4;
-
-        const auto dataset = makeDataset();
+        Dataset dataset;
+        try {
+            dataset = makeDataset();
+        }
+        catch (std::exception& e) {
+            state.SkipWithError(e.what());
+        }
         auto opt = Optimizer(0.01, batchSize);
         opt.recordBegin();
         auto nn = MnistNet<ScalarType, RandomType>(512, 512);

@@ -27,6 +27,7 @@ namespace Physica {
         using ScalarType = Real<Float16>;
         using RealType = SIMD<Real<Float16>, 2>;
         using FullRealType = RealType;
+        using MachineType = __half2;
     };
 }
 

@@ -16,14 +16,12 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include <iostream>
 #include <benchmark/benchmark.h>
 #include <gperftools/profiler.h>
 #include "Physica/Core/Physics/MD/RPMD.h"
 #include "Physica/Core/Physics/MD/ForceModel/SilveraGoldman.h"
 #include "Physica/Core/Parallel/Executor/ThreadExecutor.h"
 #include "Physica/Core/Physics/MD/KineticModel/FreeModel.h"
-#include "Physica/Core/Utils/BenchmarkHelper.h"
 
 using namespace Physica::Core;
 using ScalarType = float32;
@@ -37,84 +35,31 @@ constexpr double pair_cutoff = 15;
 constexpr double molarVolume = 31.7;
 constexpr double mass = PhyConst<AU>::atomMass(1) * 2;
 
-namespace {
-    RPMD<ScalarType> makeSystem(size_t numMolecular) {
-        using MDCellType = RPMD<ScalarType>::MDCellType;
-        MDCellType::LatticeMatrix lattice = MDCellType::LatticeMatrix::unitMatrix(3);
-        MDCellType::PositionMatrix pos(numMolecular, 3);
-        std::uniform_real_distribution dist{};
-        for (auto& elem : pos.asArray())
-            elem = dist(RandomType::getInstance());
-        MDCellType::MassVector massVec(numMolecular, mass);
-        MDCellType cell(std::move(lattice), std::move(pos), std::move(massVec));
+static RPMD<ScalarType> makeSystem(size_t numMolecular) {
+    using MDCellType = RPMD<ScalarType>::MDCellType;
+    MDCellType::LatticeMatrix lattice = MDCellType::LatticeMatrix::unitMatrix(3);
+    MDCellType::PositionMatrix pos(numMolecular, 3);
+    std::uniform_real_distribution dist{};
+    for (auto& elem : pos.asArray())
+        elem = dist(RandomType::getInstance());
+    MDCellType::MassVector massVec(numMolecular, mass);
+    MDCellType cell(std::move(lattice), std::move(pos), std::move(massVec));
 
-        const double factor = (std::cbrt(numMolecular * molarVolume / PhyConst<SI>::avogadroNa) / 100) / PhyConst<SI>::bohrRadius;
-        cell.scale(factor);
-
-        return RPMD<ScalarType>(std::move(cell), numReplica, numReplica, temperatureT, timeStep);
-    }
-    /**
-     * Reference:
-     * [1] Miller TF, Manolopoulos DE. 2005. Quantum diffusion in liquid para-hydrogen from ring polymer molecular dynamics. J. Chem. Phys. 122:184503
-     */
-    void bench108(benchmark::State& state) {
-        ThreadPool::numThreadRequired = 4;
-        KineticModel kineticModel(temperatureT, numReplica);
-        ForceModel forceModel(pair_cutoff);
-
-        auto rpmd = makeSystem(108);
-        rpmd.initMomentum<KineticModel, RandomType>();
-        for (auto _ : state)
-            rpmd.nve_step_for<KineticModel, ForceModel, ThreadExecutor>(
-                PhyConst<AU>::secondToTime(2 * 1E-13),
-                kineticModel,
-                forceModel);
-    }
-
-    void bench256(benchmark::State& state) {
-        ThreadPool::numThreadRequired = 4;
-        KineticModel kineticModel(temperatureT, numReplica);
-        ForceModel forceModel(pair_cutoff);
-
-        auto rpmd = makeSystem(256);
-        rpmd.initMomentum<KineticModel, RandomType>();
-        for (auto _ : state)
-            rpmd.nve_step_for<KineticModel, ForceModel, ThreadExecutor>(
-                PhyConst<AU>::secondToTime(2 * 1E-13),
-                kineticModel,
-                forceModel);
-    }
-
-    void bench500(benchmark::State& state) {
-        ThreadPool::numThreadRequired = 4;
-        KineticModel kineticModel(temperatureT, numReplica);
-        ForceModel forceModel(pair_cutoff);
-
-        auto rpmd = makeSystem(500);
-        rpmd.initMomentum<KineticModel, RandomType>();
-        for (auto _ : state)
-            rpmd.nve_step_for<KineticModel, ForceModel, ThreadExecutor>(
-                PhyConst<AU>::secondToTime(1 * 1E-13),
-                kineticModel,
-                forceModel);
-    }
-
-    void bench864(benchmark::State& state) {
-        ThreadPool::numThreadRequired = 4;
-        KineticModel kineticModel(temperatureT, numReplica);
-        ForceModel forceModel(pair_cutoff);
-
-        auto rpmd = makeSystem(864);
-        rpmd.initMomentum<KineticModel, RandomType>();
-        for (auto _ : state)
-            rpmd.nve_step_for<KineticModel, ForceModel, ThreadExecutor>(
-                PhyConst<AU>::secondToTime(5 * 1E-14),
-                kineticModel,
-                forceModel);
-    }
+    const double factor = (std::cbrt(numMolecular * molarVolume / PhyConst<SI>::avogadroNa) / 100) / PhyConst<SI>::bohrRadius;
+    cell.scale(factor);
+    return RPMD<ScalarType>(std::move(cell), numReplica, numReplica, temperatureT, timeStep);
 }
 
-BENCHMARK(bench108)->Name("ParaH 108")->Unit(benchmark::kSecond);
-BENCHMARK(bench256)->Name("ParaH 256")->Unit(benchmark::kSecond);
-BENCHMARK(bench500)->Name("ParaH 500")->Unit(benchmark::kSecond);
-BENCHMARK(bench864)->Name("ParaH 864")->Unit(benchmark::kSecond);
+static void bench(benchmark::State& state) {
+    ThreadPool::numThreadRequired = 4;
+    KineticModel kineticModel(temperatureT, numReplica);
+    ForceModel forceModel(pair_cutoff);
+
+    const int numMolecular = state.range(0);
+    auto rpmd = makeSystem(numMolecular);
+    rpmd.initMomentum<KineticModel, RandomType>();
+    for (auto _ : state)
+        rpmd.nve_step<KineticModel, ForceModel, ThreadExecutor>(kineticModel, forceModel);
+}
+
+BENCHMARK(bench)->Name("ParaH")->Unit(benchmark::kMillisecond)->Arg(108)->Arg(256)->Arg(500)->Arg(864);

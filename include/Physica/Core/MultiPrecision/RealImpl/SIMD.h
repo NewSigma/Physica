@@ -22,44 +22,43 @@
 #include <vectorclass/vectormath_exp.h>
 #include "Physica/PlainStruct.h"
 #include "Physica/Core/MultiPrecision/ScalarImpl/SIMDBase.h"
-
 #include "SIMDImpl/Instruset.h"
 
 namespace Physica::Core {
     template<Scalar T, size_t Size> class BoolSIMD;
 
     template<Scalar T, size_t Size>
-    class SIMD : public SIMDBase<SIMD<T, Size>>, private Traits<SIMD<T, Size>>::BaseType {
-        using This = SIMD<T, Size>;
-        using Base = Traits<This>::BaseType;
-        using ValueType = T::ValueType;
-        using MachineType = T::MachineType;
-        using HalfType = std::conditional<sizeof(Base) * CHAR_BIT != 128, SIMD<T, Size / 2>, PlainStruct<void>>::type;
+    class SIMD : public SIMDBase<SIMD<T, Size>> {
+        constexpr static bool isFloat32 = T::Option == Float32;
         constexpr static bool isForward = T::isForwardDiff;
+        using This = SIMD<T, Size>;
+        using Base = SIMDBase<This>;
+        using Pack = Traits<This>::Pack;
+        using HalfType = std::conditional<sizeof(Pack) * CHAR_BIT != 128, SIMD<T, Size / 2>, PlainStruct<void>>::type;
     public:
+        using typename Base::MachineType;
+        using Base::isSeparatable;
         using BoolSIMDType = Traits<This>::BoolSIMDType;
         using PlainPacket = This;
-
-        constexpr static bool isSeparatable = !std::is_same<HalfType, PlainStruct<void>>::value;
+    private:
+        Pack pack;
     public:
         SIMD() = default;
-        explicit SIMD(T s) : Base(s.toMachine()) {}
-        SIMD(T s, int count);
-        SIMD(Base value) : Base(value) {}
+        explicit SIMD(double x) : pack(x) {}
+        explicit SIMD(T x) : pack(x.toMachine()) {}
+        SIMD(T x, int count);
+        template<Scalar... Args>
+        SIMD(Args... args);
+        SIMD(MachineType x) : pack(x) {}
+        SIMD(Pack value) : pack(value) {}
         SIMD(HalfType a, HalfType b);
-        using Base::Base;
         SIMD(const SIMD&) = default;
         SIMD(SIMD&&) noexcept = default;
         ~SIMD() = default;
         /* Operators */
         SIMD& operator=(const SIMD&) = default;
         SIMD& operator=(SIMD&&) noexcept = default;
-        [[nodiscard]] operator __m128() const noexcept { return toMachine(); }
-        [[nodiscard]] operator __m256() const noexcept { return toMachine(); }
-        [[nodiscard]] operator __m512() const noexcept { return toMachine(); }
-        [[nodiscard]] operator __m128d() const noexcept { return toMachine(); }
-        [[nodiscard]] operator __m256d() const noexcept { return toMachine(); }
-        [[nodiscard]] operator __m512d() const noexcept { return toMachine(); }
+        [[nodiscard]] operator MachineType() const noexcept { return toMachine(); }
         [[nodiscard]] inline T operator[](int index) const;
         [[nodiscard]] inline SIMD operator+(const SIMD& other) const;
         [[nodiscard]] inline SIMD operator-(const SIMD& other) const;
@@ -103,14 +102,16 @@ namespace Physica::Core {
         void swap(SIMD& __restrict other) noexcept { std::swap(*this, other); }
         /* Getters */
         [[nodiscard]] constexpr static size_t size() { return Size; }
-        [[nodiscard]] Base& toMachine() noexcept { return *this; }
-        [[nodiscard]] const Base& toMachine() const noexcept { return *this; }
-        [[nodiscard]] HalfType getLow() const noexcept { return Base::get_low(); }
-        [[nodiscard]] HalfType getHigh() const noexcept { return Base::get_high(); }
+        [[nodiscard]] Pack& toMachine() noexcept { return pack; }
+        [[nodiscard]] const Pack& toMachine() const noexcept { return pack; }
+        [[nodiscard]] HalfType getLow() const noexcept { return pack.get_low(); }
+        [[nodiscard]] HalfType getHigh() const noexcept { return pack.get_high(); }
         [[nodiscard]] This getValue() const noexcept { return *this; }
         [[nodiscard]] auto isPositive() const noexcept { return operator>(This(0)); }
         [[nodiscard]] auto isNegative() const noexcept { return operator<(This(0)); }
         /* Static members */
+        template<int... Order>
+        inline static SIMD blend(const SIMD& x, const SIMD& y);
         template<bool... Flags>
         [[nodiscard]] static SIMD makeSignBits();
         template<RandomGenerator R>
@@ -168,19 +169,32 @@ namespace Physica {
         using Size4Type = std::conditional<isFloat32, Vec4f, Vec4d>::type;
         using Size8Type = std::conditional<isFloat32, Vec8f, Vec8d>::type;
         using Size16Type = std::conditional<isFloat32, Vec16f, void>::type;
-        using Base1 = std::conditional<Size == 2, Size2Type, Size4Type>::type;
-        using Base2 = std::conditional<Size == 8, Size8Type, Size16Type>::type;
+        using Pack1 = std::conditional<Size == 2, Size2Type, Size4Type>::type;
+        using Pack2 = std::conditional<Size == 8, Size8Type, Size16Type>::type;
+
+        template<class, int I = 0> struct MachineTypeHelper; // We have to use specialization to avoid discarding type attribute
+        template<int I> struct MachineTypeHelper<Vec4f, I> { using Type = __m128; };
+        template<int I> struct MachineTypeHelper<Vec8f, I> { using Type = __m256; };
+        template<int I> struct MachineTypeHelper<Vec16f, I> { using Type = __m512; };
+        template<int I> struct MachineTypeHelper<Vec2d, I> { using Type = __m128d; };
+        template<int I> struct MachineTypeHelper<Vec4d, I> { using Type = __m256d; };
+        template<int I> struct MachineTypeHelper<Vec8d, I> { using Type = __m512d; };
     public:
+        using Pack = std::conditional<Size <= 4, Pack1, Pack2>::type;
+
         using ScalarType = T;
-        using BaseType = std::conditional<Size <= 4, Base1, Base2>::type;
         using RealType = SIMD<T, Size>;
         using FullRealType = RealType;
+        using MachineType = MachineTypeHelper<Pack>::Type;
         using BoolSIMDType = BoolSIMD<T, Size>;
+
+        constexpr static bool isSeparatable = sizeof(MachineType) * CHAR_BIT != 128;
+        static_assert(!std::is_same<Pack, void>::value, "[Error]: Bad packet");
     };
 }
 
 namespace std {
-    #define PacketType Physica::Core::SIMD<T, Size>
+#define PacketType Physica::Core::SIMD<T, Size>
 
     template<Physica::Core::Scalar T, size_t Size>
     inline PacketType max(PacketType a, PacketType b) {
@@ -204,12 +218,12 @@ namespace std {
             return Physica::min(a.toMachine(), b.toMachine());
     }
 
-    #undef PacketType
+#undef PacketType
 }
 
+#include "SIMDImpl/BestPacket.h"
 #include "SIMDImpl/BoolSIMD.h"
 #include "SIMDImpl/SIMDImpl.h"
-#include "SIMDImpl/BestPacket.h"
 #ifdef PHYSICA_CUDA
     #include "SIMDImpl/Half2.h"
 #endif

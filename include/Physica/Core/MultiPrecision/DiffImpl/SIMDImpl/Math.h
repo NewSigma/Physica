@@ -20,74 +20,25 @@
 
 namespace Physica::Core {
     template<Scalar T, DiffMode Mode, int Order, size_t Size>
-    [[nodiscard]] inline auto abs(const SIMD<Diff<T, Mode, Order>, Size>& x) {
-        using ResultType = SIMD<Diff<T, Mode, Order>, Size>;
-        if constexpr (Mode == DiffMode::Forward) {
-            using GradPacket = ResultType::GradPacket;
-            return ResultType(abs(x.getValue()), GradPacket::select(x.getValue().isPositive(), x.getGrad(), -x.getGrad()));
-        }
-        else {
-            using PlainSIMD = SIMD<T, Size>;
-            using TracerType = T::TracerType;
-            auto& tracer = TracerType::getInstance();
-            const PlainSIMD values(abs(x.toMachine()));
-            const auto newHeadNode = tracer.pushOperation(values, ExprType::Abs);
-            for (size_t i = 0; i < Size; ++i)
-                tracer.pushOperand(T(x.value_ptr() + i, x.grad_ptr() + i));
-            return ResultType(values, newHeadNode);
-        }
-    }
+    [[nodiscard]] inline auto abs(const SIMD<Diff<T, Mode, Order>, Size>& x);
 
     template<Scalar T, DiffMode Mode, int Order, size_t Size>
-    [[nodiscard]] inline auto square(const SIMD<Diff<T, Mode, Order>, Size>& x) {
-        using ResultType = SIMD<Diff<T, Mode, Order>, Size>;
-        if constexpr (Mode == DiffMode::Forward) {
-            using GradPacket = ResultType::GradPacket;
-            return ResultType(square(x.getValue()), GradPacket(x) * x.getGrad() * T(2));
-        }
-        else {
-            using PlainSIMD = SIMD<T, Size>;
-            using TracerType = T::TracerType;
-            auto& tracer = TracerType::getInstance();
-            const PlainSIMD values(square(x.toMachine()));
-            const auto newHeadNode = tracer.pushOperation(values, ExprType::Square);
-            for (size_t i = 0; i < Size; ++i)
-                tracer.pushOperand(T(x.value_ptr() + i, x.grad_ptr() + i));
-            return ResultType(values, newHeadNode);
-        }
-    }
+    [[nodiscard]] inline auto square(const SIMD<Diff<T, Mode, Order>, Size>& x);
 
     template<Scalar T, DiffMode Mode, int Order, size_t Size>
-    [[nodiscard]] inline auto reciprocal(const SIMD<Diff<T, Mode, Order>, Size>& x) {
-        static_assert(Mode != DiffMode::Reverse, "[Error]: Not implemented");
-        using ResultType = SIMD<Diff<T, Mode, Order>, Size>;
-        using GradPacket = ResultType::GradPacket;
-        const auto y = reciprocal(GradPacket(x));
-        return ResultType(y.getValue(), -x.getGrad() * square(y));
-    }
+    [[nodiscard]] inline auto reciprocal(const SIMD<Diff<T, Mode, Order>, Size>& x);
 
     template<Scalar T, DiffMode Mode, int Order, size_t Size>
-    [[nodiscard]] inline auto ln(const SIMD<Diff<T, Mode, Order>, Size>& x) {
-        static_assert(Mode != DiffMode::Reverse, "[Error]: Not implemented");
-        using ResultType = SIMD<Diff<T, Mode, Order>, Size>;
-        using GradPacket = ResultType::GradPacket;
-        return ResultType(ln(x.getValue()), reciprocal(GradPacket(x)) * x.getGrad());
-    }
+    [[nodiscard]] inline auto ln(const SIMD<Diff<T, Mode, Order>, Size>& x);
 
     template<Scalar T, DiffMode Mode, int Order, size_t Size>
-    [[nodiscard]] inline auto ln1p(const SIMD<Diff<T, Mode, Order>, Size>& x) {
-        static_assert(Mode != DiffMode::Reverse, "[Error]: Not implemented");
-        using ResultType = SIMD<Diff<T, Mode, Order>, Size>;
-        using GradPacket = ResultType::GradPacket;
-        return ResultType(ln1p(x.getValue()), reciprocal(GradPacket(1) + GradPacket(x)) * x.getGrad());
-    }
+    [[nodiscard]] inline auto ln1p(const SIMD<Diff<T, Mode, Order>, Size>& x);
 
     template<Scalar T, DiffMode Mode, int Order, size_t Size>
-    [[nodiscard]] inline auto exp(const SIMD<Diff<T, Mode, Order>, Size>& x) {
-        static_assert(Mode != DiffMode::Reverse, "[Error]: Not implemented");
-        using ResultType = SIMD<Diff<T, Mode, Order>, Size>;
-        using GradPacket = ResultType::GradPacket;
-        const auto y = exp(GradPacket(x));
-        return ResultType(y.getValue(), y * x.getGrad());
-    }
+    [[nodiscard]] inline auto exp(const SIMD<Diff<T, Mode, Order>, Size>& x);
+
+    template<Scalar T, DiffMode Mode, int Order, size_t Size>
+    [[nodiscard]] inline auto sincos(const SIMD<Diff<T, Mode, Order>, Size>& x, SIMD<Diff<T, Mode, Order>, Size>& s, SIMD<Diff<T, Mode, Order>, Size>& c);
 }
+
+#include "MathImpl.h"

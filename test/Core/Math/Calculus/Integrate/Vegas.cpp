@@ -71,7 +71,6 @@ int main() {
         const T result = exp(vegas.calcLnMean());
         if (abs(answer - result) > T(2) * exp(vegas.calcLnDevia()))
             return 1;
-        return 0;
     }
     return 0;
 }

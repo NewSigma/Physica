@@ -3,30 +3,31 @@
 OS: Ubuntu24.04  
 Compiler: clang 17.0.6 + NVCC 12.6.20  
 Hardware: Intel(R) Core(TM) i7-14700KF + 32G + NVIDIA GeForce RTX 4060  
-Date: 2024-11-17  
+Date: 2024-11-29  
 Maintainer: Weibo He (NewSigma@163.com)  
 
 ----------------------------------------------------------
 Benchmark                Time             CPU   Iterations
 ----------------------------------------------------------
-HubbardMatrix1D       29.9 s          29.9 s             1
-TPQ                   1.14 s          1.14 s             1
-HardCore             0.334 s         0.334 s             2
-ParaH 108            0.164 s         0.089 s             7
-ParaH 256            0.451 s         0.360 s             2
-ParaH 500            0.363 s         0.298 s             2
-ParaH 864            0.291 s         0.242 s             3
-Q_TIP4P 1            0.685 s         0.685 s             1
-Q_TIP4P 2             1.37 s          1.37 s             1
-Q_TIP4P 4             1.37 s          1.37 s             1
-HardCore_cuda         36.3 s          36.3 s             1
-ParaH cuda 108       0.366 s         0.366 s             2
-ParaH cuda 256       0.613 s         0.613 s             1
-ParaH cuda 500       0.518 s         0.518 s             1
-ParaH cuda 864       0.431 s         0.431 s             2
-ParaH auto 108       0.200 s         0.108 s             5
-ParaH auto 256       0.335 s         0.263 s             3
-ParaH auto 500       0.273 s         0.239 s             3
-ParaH auto 864       0.158 s         0.147 s             5
-Q_TIP4P cuda         0.813 s         0.813 s             1
-Mnist                 17.9 s          17.9 s             1
+HubbardMatrix1D       5.71 ms         5.71 ms          120
+TPQ                   1.11 s          1.11 s             1
+lncosh float32         936 ns          936 ns       743537
+lncosh float64        2125 ns         2125 ns       327960
+lncosh cfloat32       5705 ns         5705 ns       120842
+lncosh cfloat64      13446 ns        13446 ns        51884
+HardCore              5.19 us         5.19 us       172608
+ParaH/108            0.411 ms        0.211 ms         3367
+ParaH/256             1.12 ms        0.883 ms          801
+ParaH/500             1.82 ms         1.49 ms          474
+ParaH/864             2.99 ms         2.50 ms          292
+Q_TIP4P               7.01 ms         7.01 ms          100
+ParaH cuda/108       0.911 ms        0.911 ms          763
+ParaH cuda/256        1.45 ms         1.45 ms          492
+ParaH cuda/500        2.53 ms         2.53 ms          276
+ParaH cuda/864        4.13 ms         4.13 ms          172
+ParaH auto/108       0.422 ms        0.197 ms         3599
+ParaH auto/256       0.811 ms        0.631 ms         1126
+ParaH auto/500        1.37 ms         1.21 ms          587
+ParaH auto/864        2.13 ms         1.97 ms          356
+Q_TIP4P cuda          4.09 ms         4.09 ms          171
+Mnist                 17.6 s          17.6 s             1

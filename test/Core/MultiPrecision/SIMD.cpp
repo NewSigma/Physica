@@ -23,22 +23,52 @@
 using namespace Physica::Core;
 using RandomType = Random<MT19937, 10000>;
 
-int main() {
-    const auto x = SIMD<cfloat32, 2>::random_uniform<RandomType>();
+template<Scalar T, int Size>
+void test() {
+    constexpr double prec = T::Option == Float32 ? 1E-6 : 1E-15;
+    const auto x = SIMD<T, Size>::template random_uniform<RandomType>();
     /* Divide */ {
-        const auto y = SIMD<cfloat32, 2>::random_uniform<RandomType>();
+        const auto y = SIMD<T, Size>::template random_uniform<RandomType>();
         const auto result = x / y;
-        for (int i = 0; i < 2; ++i) {
-            if (!scalarNear(result[i], x[i] / y[i], 1E-7))
-                return 1;
+        for (int i = 0; i < Size; ++i) {
+            if (!scalarNear(result[i], x[i] / y[i], prec))
+                exit(EXIT_FAILURE);
         }
     }
     /* Sqrt */ {
         const auto result = sqrt(x);
-        for (int i = 0; i < 2; ++i) {
-            if (!scalarNear(result[i], sqrt(x[i]), 1E-7))
-                return 1;
+        for (int i = 0; i < Size; ++i) {
+            if (!scalarNear(result[i], sqrt(x[i]), prec))
+                exit(EXIT_FAILURE);
         }
     }
+    /* Exp */ {
+        const auto result = exp(x);
+        for (int i = 0; i < Size; ++i) {
+            if (!scalarNear(result[i], exp(x[i]), prec))
+                exit(EXIT_FAILURE);
+        }
+    }
+    /* Ln */ {
+        const auto result = ln(x);
+        for (int i = 0; i < Size; ++i) {
+            if (!scalarNear(result[i], ln(x[i]), prec))
+                exit(EXIT_FAILURE);
+        }
+    }
+    /* LnCosh */ {
+        const auto result = lncosh(x);
+        for (int i = 0; i < Size; ++i) {
+            if (!scalarNear(result[i], lncosh(x[i]), prec))
+                exit(EXIT_FAILURE);
+        }
+    }
+}
+
+int main() {
+    test<cfloat32, 2>();
+    test<cfloat32, 4>();
+    test<cfloat64, 1>();
+    test<cfloat64, 2>();
     return 0;
 }

@@ -19,6 +19,7 @@
 #pragma once
 
 #include "Physica/Core/Math/Calculus/ODE/ODESolver.h"
+#include "Physica/Core/Physics/MD/MDCell.h"
 #include "BaroType.h"
 
 namespace Physica::Core {

@@ -18,6 +18,8 @@
  */
 #pragma once
 
+#include "Physica/Core/Physics/MD/RPMD.h"
+
 namespace Physica::Core {
     /**
      * Exact as introduced in [1]: Exact free ring-polymer update
