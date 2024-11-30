@@ -54,9 +54,6 @@ namespace Physica::Core {
         };
     };
 
-    inline int countLeadingZeros(MPUnit n) noexcept;
-    inline int countBackZeros(unsigned long n) noexcept;
-    inline int countOnes(MPUnit n) noexcept;
     inline double convertDoubleImpl(int length, int power, MPUnit* __restrict byte);
 }
 

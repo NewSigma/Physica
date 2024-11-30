@@ -159,12 +159,12 @@ namespace Physica::Core {
          * We shift s1 and s2, making the less highest bit of s1 is set and the highest bit of s2 is set
          * to meet the acquirement of the function divArrByFullArrWith1Word().
          */
-        const int i1_shift = static_cast<int>(countLeadingZeros(byte[i1_size - 1])) - 1;
+        const int i1_shift = static_cast<int>(std::countl_zero(byte[i1_size - 1])) - 1;
         if(i1_shift > 0)
             byteLeftShiftEq(arr1, arr1_len, i1_shift);
         else
             byteRightShiftEq(arr1, arr1_len, -i1_shift);
-        const int i2_shift = static_cast<int>(countLeadingZeros(i.byte[i2_size - 1]));
+        const int i2_shift = static_cast<int>(std::countl_zero(i.byte[i2_size - 1]));
         byteLeftShiftEq(arr2, arr2_len, i2_shift);
         ////////////////////////////////Calculate cursory first//////////////////////////////////////
         //Estimate the length of result.
@@ -203,7 +203,7 @@ namespace Physica::Core {
             memcpy(resultByte + quotient, byte, resultLength * sizeof(MPUnit));
             return Integer(resultByte, resultLength);
         }
-        const bool carry = countLeadingZeros(byte[size - 1]) < remainder;
+        const bool carry = std::countl_zero(byte[size - 1]) < remainder;
         resultLength += carry;
         resultByte = reinterpret_cast<MPUnit*>(malloc(resultLength * sizeof(MPUnit)));
         memset(resultByte, 0, quotient * sizeof(MPUnit));
@@ -236,7 +236,7 @@ namespace Physica::Core {
             resultByte[0] = size > quotient ? resultByte[0] : 0;
             return Integer(resultByte, resultLength);
         }
-        const bool carry = (countLeadingZeros(byte[size - 1]) + remainder) >= MPUnitWidth;
+        const bool carry = (std::countl_zero(byte[size - 1]) + remainder) >= MPUnitWidth;
         resultLength -= carry;
         resultByte = reinterpret_cast<MPUnit*>(malloc(resultLength * sizeof(MPUnit)));
         if(!carry)

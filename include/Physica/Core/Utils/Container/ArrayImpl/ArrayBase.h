@@ -25,7 +25,6 @@
 #include "Iterator.h"
 
 namespace Physica::Core {
-
     /**
      * Public parts among specializations of \class Array.
      */
@@ -71,6 +70,13 @@ namespace Physica::Core {
         __host__ __device__ RIteType rend() noexcept { return RIteType(data() - 1); }
         __host__ __device__ CRIteType rend() const noexcept { return crend(); }
         __host__ __device__ CRIteType crend() const noexcept { return CRIteType(data() - 1); }
+        /* Operations */
+    #ifdef PHYSICA_HDF5
+        template<class T>
+        void read(const T& loc, const char* name);
+        template<class T>
+        void write(T& loc, const char* name) const;
+    #endif
         /* Getters */
         [[nodiscard]] __host__ __device__ size_t size() const noexcept { return Base::getDerived().size(); }
         [[nodiscard]] __host__ __device__ size_t getLength() const noexcept { return Base::getDerived().getLength(); }

@@ -106,7 +106,7 @@ namespace Physica::Core {
 
     template<int Dim, int NumSite>
     inline int SpinFermion<Dim, NumSite>::getNumDoubleOccupy() const noexcept {
-        return countOnes(spinUp.getOccupyBits() & spinDown.getOccupyBits());
+        return std::popcount(spinUp.getOccupyBits() & spinDown.getOccupyBits());
     }
 
     template<int Dim, int NumSite>

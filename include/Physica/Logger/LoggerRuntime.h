@@ -150,7 +150,7 @@ namespace Physica::Logger {
     do {                                                \
         using namespace Physica::Logger;                \
         Log(loggerID, Fatal, format, ##__VA_ARGS__);    \
-        exit(EXIT_FAILURE);                             \
+        std::abort();                                   \
     } while(false)
 /**
  * Use Error instead of Fatal when a system call fails.

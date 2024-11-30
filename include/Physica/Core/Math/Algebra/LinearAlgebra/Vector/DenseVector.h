@@ -66,6 +66,9 @@ namespace Physica::Core {
         [[nodiscard]] inline device_obj<This> toDevice() const;
         using Base::toDevice;
         using Base::toDeviceAsync;
+
+        using Base::read;
+        using Base::write;
         using Storage::swap;
         /* Getters */
         using Storage::getLength;

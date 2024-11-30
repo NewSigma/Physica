@@ -25,7 +25,7 @@ namespace Physica::Core {
      * \class LnVegas targets divergent integrals and computes logarithmic observations.
      */
     template<Scalar T>
-    class LnVegas : private Vegas<T> {
+    class LnVegas : public Vegas<T> {
         using This = LnVegas<T>;
         using Base = Vegas<T>;
         using typename Base::ValueType;
@@ -33,6 +33,7 @@ namespace Physica::Core {
 
         using Base::means;
         using Base::vars;
+        using Base::loss;
     public:
         using Base::Base;
         LnVegas(const This&) = default;
@@ -42,7 +43,9 @@ namespace Physica::Core {
         This& operator=(This obj) noexcept { swap(obj); return *this; }
         /* Operations */
         template<class Functor, RandomGenerator R, class Executor = SequentialExecutor>
-        void lnIntegral(Functor lnFunc);
+        void warmup(Functor func, int numWarm);
+        template<class Functor, RandomGenerator R, class Executor = SequentialExecutor>
+        void integral(Functor lnFunc);
         template<class Functor, RandomGenerator R, class Executor = SequentialExecutor>
         [[nodiscard]] ValueType calcGridLoss(Functor func) const;
 
@@ -50,6 +53,7 @@ namespace Physica::Core {
         [[nodiscard]] T calcLnDevia() const;
         [[nodiscard]] T calcLnVar() const;
         [[nodiscard]] T calcSquaredChi() const;
+
         void swap(This& __restrict obj) noexcept { Base::swap(obj); }
         /* Getters */
         using Base::getPointGrid;
@@ -57,35 +61,47 @@ namespace Physica::Core {
         using Base::getDim;
         using Base::getNumRefine;
         using Base::getNumSample;
-        /* Setters */
-        using Base::setNumRefine;
     private:
         template<class Functor, RandomGenerator R, class Executor>
-        std::pair<T, T> trialIntegral(LossMatrix& losses, int refine, Functor lnFunc) const;
+        std::pair<T, T> trialIntegral(LossMatrix& lossMat, Functor lnFunc) const;
     };
 
     template<Scalar T>
     template<class Functor, RandomGenerator R, class Executor>
-    void LnVegas<T>::lnIntegral(Functor lnFunc) {
+    void LnVegas<T>::warmup(Functor lnFunc, int numWarm) {
+        using CallResult = std::invoke_result<Functor, VectorND<T>>::type;
+        static_assert(std::is_same<CallResult, T>::value, "[Error]: Invalid functor");
+        assert(numWarm > 0 && "[Error]: Invalid param");
+
+        LossMatrix lossMat(getNumPoint() - 1, getDim());
+        for (int _ = 0; _ < numWarm; ++_) {
+            trialIntegral<Functor, R, Executor>(lossMat, lnFunc);
+            Base::template refineGrid<Executor>(lossMat);
+        }
+    }
+
+    template<Scalar T>
+    template<class Functor, RandomGenerator R, class Executor>
+    void LnVegas<T>::integral(Functor lnFunc) {
         using CallResult = std::invoke_result<Functor, VectorND<T>>::type;
         static_assert(std::is_same<CallResult, T>::value, "[Error]: Invalid functor");
 
-        LossMatrix losses(getNumPoint() - 1, getDim());
+        LossMatrix lossMat(getNumPoint() - 1, getDim());
         for (int refine = 0; refine < getNumRefine(); ++refine) {
-            auto pair = trialIntegral<Functor, R, Executor>(losses, refine, lnFunc);
+            auto pair = trialIntegral<Functor, R, Executor>(lossMat, lnFunc);
             means[refine] = std::move(pair.first);
             vars[refine] = std::move(pair.second);
-
-            Base::template refineGrid<Executor>(losses);
+            loss[refine] = Base::calcGridLossImpl(lossMat);
+            Base::template refineGrid<Executor>(lossMat);
         }
     }
 
     template<Scalar T>
     template<class Functor, RandomGenerator R, class Executor>
     LnVegas<T>::ValueType LnVegas<T>::calcGridLoss(Functor func) const {
-        LossMatrix losses(getNumPoint() - 1, getDim());
-        trialIntegral<Functor, R, Executor>(losses, 0, func);
-        return Base::calcGridLossImpl(losses);
+        LossMatrix lossMat(getNumPoint() - 1, getDim());
+        trialIntegral<Functor, R, Executor>(lossMat, func);
+        return Base::calcGridLossImpl(lossMat);
     }
 
     template<Scalar T>
@@ -116,9 +132,9 @@ namespace Physica::Core {
 
     template<Scalar T>
     template<class Functor, RandomGenerator R, class Executor>
-    std::pair<T, T> LnVegas<T>::trialIntegral(LossMatrix& losses, int refine, Functor lnFunc) const {
+    std::pair<T, T> LnVegas<T>::trialIntegral(LossMatrix& lossMat, Functor lnFunc) const {
         const int numSample = getNumSample();
-        const auto indexes = R::getInstance().random_int(getDim() * numSample, 0, losses.getRow() - 1);
+        const auto indexes = R::getInstance().random_int(getDim() * numSample, 0, lossMat.getRow() - 1);
         VectorND<T> samples(numSample);
         Executor::parallel_for([&, this](size_t n) {
             VectorND<T> fromX(getDim());
@@ -133,12 +149,12 @@ namespace Physica::Core {
 
             const VectorND<T> x = fromX + hadamard(deltaX, VectorND<T>::template random_uniform<R>(getDim()));
             const T lny = lnFunc(x);
-            const T lnxy = lny + ln(deltaX).sum() + T(getDim()) * ln(T(losses.getRow()));
+            const T lnxy = lny + ln(deltaX).sum() + T(getDim()) * ln(T(lossMat.getRow()));
             samples[n] = lnxy;
         }, numSample, Executor::getNumThread()).wait();
 
-        Array<Array<int>> counts(losses.getRow(), getDim(), 0);
-        losses = std::numeric_limits<T>::min();
+        Array<Array<int>> counts(lossMat.getRow(), getDim(), 0);
+        lossMat = std::numeric_limits<T>::min();
 
         const T maxSample = samples.max();
         samples = exp(samples - maxSample);
@@ -147,10 +163,10 @@ namespace Physica::Core {
             const T xy = samples[n];
             toNextVariance(var, mean, n, xy);
 
-            const ValueType loss = std::max(square(xy.getValue()), ValueType(std::numeric_limits<T>::min()));
+            const ValueType l = std::max(square(xy.getValue()), ValueType(std::numeric_limits<T>::min()));
             for (size_t i = 0; i < getDim(); ++i) {
                 const auto index = indexes[n * getDim() + i];
-                toNextMean(losses(index, i), counts[index][i], loss);
+                toNextMean(lossMat(index, i), counts[index][i], l);
                 counts[index][i] += 1;
             }
         }

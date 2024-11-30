@@ -27,7 +27,7 @@ namespace Physica::Core {
     public:
         H5Group(H5::Group group) : Base(group) {}
         H5Group(const H5Group&) = default;
-        H5Group(H5Group&&) noexcept = delete;
+        H5Group(H5Group&&) noexcept = default;
         ~H5Group() = default;
         /* Operators */
         H5Group& operator=(H5Group& obj) = default;
@@ -38,6 +38,8 @@ namespace Physica::Core {
         using Location::openGroup;
 
         template<class T>
+        const H5::Attribute readAttr(const char* name, T& value) const;
+        template<class T>
         H5::Attribute writeAttr(const char* name, T value);
     private:
         using Base::createDataSet;
@@ -45,6 +47,24 @@ namespace Physica::Core {
         template<class T>
         [[nodiscard]] static const H5::PredType& getPredType();
     };
+
+    template<class T>
+    const H5::Attribute H5Group::readAttr(const char* name, T& value) const {
+        constexpr bool IsArray = std::is_array<T>::value;
+        constexpr size_t NumElem = IsArray ? std::extent<T>::value : 1;
+        static_assert(!IsArray || std::rank<T>::value == 1, "[Error]: High dim array is not supported");
+        static_assert(NumElem > 0, "[Error]: Bad array size");
+
+        const auto type = getPredType<T>();
+        const auto space = H5DataSpace<1>(NumElem);
+        H5::Attribute attr;
+        if (Base::attrExists(name))
+            attr = Base::openAttribute(name);
+        else
+            attr = Base::createAttribute(name, type, space);
+        attr.read(type, &value);
+        return attr;
+    }
 
     template<class T>
     H5::Attribute H5Group::writeAttr(const char* name, T value) {
@@ -66,7 +86,15 @@ namespace Physica::Core {
 
     template<class T>
     const H5::PredType& H5Group::getPredType() {
-        if constexpr (std::is_same<T, uint8_t>::value)
+        if constexpr (std::is_same<T, int8_t>::value)
+            return H5::PredType::NATIVE_INT8;
+        else if constexpr (std::is_same<T, int16_t>::value)
+            return H5::PredType::NATIVE_INT16;
+        else if constexpr (std::is_same<T, int32_t>::value)
+            return H5::PredType::NATIVE_INT32;
+        else if constexpr (std::is_same<T, int64_t>::value)
+            return H5::PredType::NATIVE_INT64;
+        else if constexpr (std::is_same<T, uint8_t>::value)
             return H5::PredType::NATIVE_UINT8;
         else if constexpr (std::is_same<T, uint16_t>::value)
             return H5::PredType::NATIVE_UINT16;
@@ -80,9 +108,9 @@ namespace Physica::Core {
             return H5::PredType::NATIVE_FLOAT;
         else if constexpr (std::is_same<T, double>::value)
             return H5::PredType::NATIVE_DOUBLE;
-        else if constexpr (std::is_same<T, float64>::value)
+        else {
+            static_assert(std::is_same<T, float64>::value, "[Error]: Not implemented");
             return H5::PredType::NATIVE_DOUBLE;
-        else
-            static_assert(std::is_same<T, uint8_t>::value, "[Error]: Not implemented");
+        }
     }
 }

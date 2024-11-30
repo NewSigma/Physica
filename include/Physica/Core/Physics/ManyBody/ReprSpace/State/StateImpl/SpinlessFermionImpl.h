@@ -58,7 +58,7 @@ namespace Physica::Core {
 
     template<int Dim, int NumSite>
     inline int SpinlessFermion<Dim, NumSite>::hopSign(uint8_t from, uint8_t to) const {
-        const int numElectron = countOnes(occupyBits >> (from + 1)) - countOnes(occupyBits >> (to + 1));
+        const int numElectron = std::popcount(occupyBits >> (from + 1)) - std::popcount(occupyBits >> (to + 1));
         const bool flag1 = from < to;
         const bool flag2 = numElectron % 2 == 0;
         return (flag1 == flag2) ? 1 : -1;

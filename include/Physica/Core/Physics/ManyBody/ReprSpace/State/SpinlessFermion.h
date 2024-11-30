@@ -63,7 +63,7 @@ namespace Physica::Core {
         [[nodiscard]] IntType getOccupyBits() const noexcept { return occupyBits; }
         [[nodiscard]] bool isVacuum() const noexcept { return occupyBits == 0; }
         [[nodiscard]] inline bool isOccupy(int8_t site) const noexcept;
-        [[nodiscard]] int getNumParticle() const noexcept { return countOnes(occupyBits); }
+        [[nodiscard]] int getNumParticle() const noexcept { return std::popcount(occupyBits); }
         [[nodiscard]] inline bool isTransReducible(int period = 1) const noexcept;
         /* Static members */
         template<RandomGenerator R>

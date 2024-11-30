@@ -34,7 +34,7 @@ namespace Physica::Core {
     //!Compute a ^ unit.
     inline Real<FloatMP> powWord(const Real<FloatMP>& a, MPUnit unit) {
         Real<FloatMP> result(a);
-        const auto lastUnitBits = countLeadingZeros(unit);
+        const auto lastUnitBits = std::countl_zero(unit);
         for(unsigned int j = 0; j < MPUnitWidth - lastUnitBits; ++j) {
             result = square(result);
             if((unit & 1U) != 0)

@@ -64,7 +64,7 @@ int main() {
             return T(-100) * (x - r1).squaredNorm();
         };
         auto vegas = LnVegas<T>({0, 0, 0, 0}, {1, 1, 1, 1}, 50, 10000);
-        vegas.lnIntegral<decltype(func), RandomType>(func);
+        vegas.integral<decltype(func), RandomType>(func);
 
         const T temp = erf(T(5));
         const T answer = T(std::numbers::pi * std::numbers::pi / 20000) * square(temp) * temp * (erf(T(10.0 / 3)) + erf(T(20.0 / 3)));

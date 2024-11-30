@@ -28,6 +28,7 @@ namespace Physica::Core {
         using Base = CRTPBase<This>;
     public:
         constexpr static size_t Dim = Traits<Derived>::Dim;
+        using SizeType = hsize_t;
         using SizeArray = Array<hsize_t, Dim>;
     public:
         /* Operations */

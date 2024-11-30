@@ -215,7 +215,7 @@ namespace Physica::Core {
             return copy;
         }
 
-        const bool carry = countLeadingZeros(byte[size - 1]) < remainder;
+        const bool carry = std::countl_zero(byte[size - 1]) < remainder;
         Real result(length >= 0 ? (size + carry) : -(size + carry), power + quotient + carry);
         result.byte[0] = 0;
         const int size_1 = size - 1;
@@ -244,7 +244,7 @@ namespace Physica::Core {
             return copy;
         }
 
-        const bool carry = (countLeadingZeros(byte[size - 1]) + remainder) < MPUnitWidth;
+        const bool carry = (std::countl_zero(byte[size - 1]) + remainder) < MPUnitWidth;
         Real result(length >= 0 ? (size + carry) : -(size + carry), power - quotient + carry - 1);
         if(carry)
             result.byte[size] = byte[size - 1] >> remainder;
@@ -396,10 +396,10 @@ namespace Physica::Core {
             if(extract.high == 0U)
                 return true;
             else
-                zeros = countBackZeros(extract.high) + 16; //extract.low is zero, which has 16 bits.
+                zeros = std::countr_zero(extract.high) + 16; //extract.low is zero, which has 16 bits.
         }
         else
-            zeros = countBackZeros(extract.low);
+            zeros = std::countr_zero(extract.low);
         /**
          * exp + zeros - 127 >= 23
          * , 127 is the exp bias of float numbers, 23 is the number of bits of significand of float numbers.
@@ -424,10 +424,10 @@ namespace Physica::Core {
             if(extract.high == 0U)
                 return true;
             else
-                zeros = countBackZeros(extract.high) + 32; //extract.low is zero, which has 32 bits.
+                zeros = std::countr_zero(extract.high) + 32; //extract.low is zero, which has 32 bits.
         }
         else
-            zeros = countBackZeros(extract.low);
+            zeros = std::countr_zero(extract.low);
         /**
          * exp + zeros - 1023 >= 52
          * , 1023 is the exp bias of float numbers, 52 is the number of bits of significand of float numbers.

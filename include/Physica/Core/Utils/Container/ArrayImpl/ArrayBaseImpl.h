@@ -47,6 +47,30 @@ namespace Physica::Core {
         return true;
     }
 
+#ifdef PHYSICA_HDF5
+    template<class Derived, class Allocator>
+    template<class T>
+    void ArrayBase<Derived, Allocator>::read(const T& loc, const char* name) {
+        const auto group = loc.openGroup(name);
+        char buffer[32]; //32 is enough for uint64_t
+        for (size_t i = 0; i < getLength(); ++i) {
+            std::sprintf(buffer, "%zu", i);
+            (*this)[i].read(group, buffer);
+        }
+    }
+
+    template<class Derived, class Allocator>
+    template<class T>
+    void ArrayBase<Derived, Allocator>::write(T& loc, const char* name) const {
+        auto group = loc.openGroup(name);
+        char buffer[32]; //32 is enough for uint64_t
+        for (size_t i = 0; i < getLength(); ++i) {
+            std::sprintf(buffer, "%zu", i);
+            (*this)[i].write(group, buffer);
+        }
+    }
+#endif
+
     template<class Derived, class Allocator>
     template<class... Args>
     __host__ __device__ consteval bool ArrayBase<Derived, Allocator>::isTrivialDefaultConstruct() {

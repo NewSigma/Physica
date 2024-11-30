@@ -30,7 +30,7 @@ namespace Physica::Core {
     public:
         using SizeArray = Base::SizeArray;
     private:
-        using SizeType = SizeArray::ElemType;
+        using typename Base::SizeType;
 
         SizeArray selectedCount;
         SizeArray selectedStart;

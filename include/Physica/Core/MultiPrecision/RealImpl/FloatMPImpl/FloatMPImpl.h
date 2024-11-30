@@ -263,12 +263,12 @@ namespace Physica::Core {
                  * We shift s1 and s2, making the less highest bit of s1 is set and the highest bit of s2 is set
                  * to meet the acquirement of the function divArrByFullArrWith1Word().
                  */
-                const int s1_shift = static_cast<int>(countLeadingZeros(s1.byte[s1_size - 1])) - 1;
+                const int s1_shift = static_cast<int>(std::countl_zero(s1.byte[s1_size - 1])) - 1;
                 if(s1_shift > 0)
                     byteLeftShiftEq(arr1, arr1_len, s1_shift);
                 else
                     byteRightShiftEq(arr1, arr1_len, -s1_shift);
-                const int s2_shift = static_cast<int>(countLeadingZeros(s2.byte[s2_size - 1]));
+                const int s2_shift = static_cast<int>(std::countl_zero(s2.byte[s2_size - 1]));
                 byteLeftShiftEq(arr2, arr2_len, s2_shift);
                 ////////////////////////////////Calculate cursory first//////////////////////////////////////
                 //Estimate the length of result.
