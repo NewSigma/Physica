@@ -62,7 +62,7 @@ namespace Physica::Core {
     public:
         using GradType = std::conditional<isDifferentiable, GradType1, PlainStruct<void>>::type;
         template<int GradOrder>
-        using GradRtnTy = std::conditional<Order == GradOrder, ValueType, Diff<ValueType, Mode, Order - GradOrder>>::type;
+        using GradRtnTy = std::conditional<!isDifferentiable || Order == GradOrder, ValueType, Diff<ValueType, Mode, Order - GradOrder>>::type;
     public:
         constexpr ~ScalarBase() = default;
         /* Operators */

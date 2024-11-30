@@ -90,8 +90,23 @@ namespace Physica::Core {
     }
 
     template<Scalar T, size_t Size>
+    inline auto cos(const SIMD<T, Size>& x) {
+        return SIMD<T, Size>(Physica::cos(x.toMachine()));
+    }
+
+    template<Scalar T, size_t Size>
     inline void sincos(const SIMD<T, Size>& x, SIMD<T, Size>& s, SIMD<T, Size>& c) {
         Physica::sincos(x.toMachine(), s.toMachine(), c.toMachine());
+    }
+
+    template<Scalar T, size_t Size>
+    inline auto tan(const SIMD<T, Size>& x) {
+        return SIMD<T, Size>(Physica::tan(x.toMachine()));
+    }
+
+    template<Scalar T, size_t Size>
+    inline auto sec(const SIMD<T, Size>& x) {
+        return reciprocal(cos(x));
     }
 
     template<Scalar T, size_t Size>

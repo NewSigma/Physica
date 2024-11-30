@@ -76,29 +76,29 @@ namespace Physica::Core {
 }
 
 namespace Physica {
-    template<Core::ExprType Type, Vector LHS, class RHS>
-    class Traits<Core::VectorExpr<Type, LHS, RHS>> {
+    template<ExprType Type, Vector LHS, class RHS>
+    class Traits<VectorExpr<Type, LHS, RHS>> {
         constexpr static size_t Size1 = Traits<LHS>::SizeAtCompile;
         constexpr static size_t Size2 = Traits<RHS>::SizeAtCompile;
         constexpr static bool FastAssign1 = Traits<LHS>::FastAssign;
         constexpr static bool FastAssign2 = Traits<RHS>::FastAssign;
         constexpr static bool FastPacket1 = Traits<LHS>::FastPacket;
         constexpr static bool FastPacket2 = Traits<RHS>::FastPacket;
-        constexpr static bool IsAddOrSub = Type == Core::ExprType::Add || Type == Core::ExprType::Sub;
+        constexpr static bool IsAddOrSub = Type == ExprType::Add || Type == ExprType::Sub;
 
         using ScalarType1 = LHS::ScalarType;
         using RealType = ScalarType1::RealType;
         using BinaryScalarType = Core::Internal::BinaryScalarOpRtnTy<ScalarType1, typename RHS::ScalarType>::Type;
         static_assert(Size1 == Dynamic || Size2 == Dynamic || (Size1 == Size2), "[Error]: Vector dimentions do not match");
     public:
-        using ScalarType = std::conditional<Type == Core::ExprType::Abs, RealType, BinaryScalarType>::type;
+        using ScalarType = std::conditional<Type == ExprType::Abs, RealType, BinaryScalarType>::type;
         constexpr static size_t SizeAtCompile = Size1 > Size2 ? Size1 : Size2;
         constexpr static bool FastAssign = IsAddOrSub && (FastAssign1 || FastAssign2);
         constexpr static bool FastPacket = FastPacket1 && FastPacket2;
     };
 
-    template<Core::ExprType Type, Vector LHS, Scalar RHS>
-    class Traits<Core::VectorExpr<Type, LHS, RHS>> {
+    template<ExprType Type, Vector LHS, Scalar RHS>
+    class Traits<VectorExpr<Type, LHS, RHS>> {
     public:
         using ScalarType = Core::Internal::BinaryScalarOpRtnTy<typename LHS::ScalarType, RHS>::Type;
         constexpr static size_t SizeAtCompile = Traits<LHS>::SizeAtCompile;
@@ -127,6 +127,8 @@ namespace Physica {
 #include "VectorExprImpl/Pow.h"
 #include "VectorExprImpl/Sin.h"
 #include "VectorExprImpl/Cos.h"
+#include "VectorExprImpl/Tan.h"
+#include "VectorExprImpl/Sec.h"
 #include "VectorExprImpl/Cosh.h"
 #include "VectorExprImpl/Tanh.h"
 #include "VectorExprImpl/Sech.h"

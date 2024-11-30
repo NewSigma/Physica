@@ -57,7 +57,8 @@ namespace Physica::Core {
         SIMD() = default;
         explicit SIMD(int x);
         explicit SIMD(double x);
-        explicit SIMD(ScalarType x);
+        template<Scalar U>
+        explicit SIMD(U x);
         SIMD(ScalarType x, int count);
         explicit SIMD(ValuePacket values_);
         SIMD(ValuePacket values_, GradPacket grads_);

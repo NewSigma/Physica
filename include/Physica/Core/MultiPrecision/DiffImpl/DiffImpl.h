@@ -81,6 +81,11 @@ namespace Physica::Core {
     }
 
     template<Scalar T, int Order>
+    __host__ __device__ inline bool Diff<T, DiffMode::Forward, Order>::isFinite() const noexcept {
+        return value.isFinite() && grad.isFinite();
+    }
+
+    template<Scalar T, int Order>
     template<RandomGenerator R>
     inline Diff<T, DiffMode::Forward, Order>
     Diff<T, DiffMode::Forward, Order>::random_uniform() {

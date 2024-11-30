@@ -62,6 +62,7 @@ namespace Physica::Core {
 
     template<ScalarOption Option>
     __host__ __device__ inline Real<Option> ln(const Real<Option>& s) noexcept {
+        assert(s.isPositive() && "[Error]: Invalid param");
         if constexpr (Option == Float)
             return Real<Option>(::logf(s.toMachine()));
         else

@@ -65,6 +65,7 @@ namespace Physica::Core {
         [[nodiscard]] __host__ __device__ bool isZero() const noexcept { return value.isZero(); }
         [[nodiscard]] __host__ __device__ bool isPositive() const { return value.isPositive(); }
         [[nodiscard]] __host__ __device__ bool isNegative() const { return value.isNegative(); }
+        [[nodiscard]] __host__ __device__ inline bool isFinite() const noexcept;
         /* Static members */
         template<RandomGenerator R>
         [[nodiscard]] inline static Diff random_uniform();

@@ -26,7 +26,8 @@ namespace Physica::Core {
     SIMD<Diff<T, DiffMode::Forward, Order>, Size>::SIMD(double x) : values(x), grads(0) {}
 
     template<Scalar T, int Order, size_t Size>
-    SIMD<Diff<T, DiffMode::Forward, Order>, Size>::SIMD(ScalarType x) : values(x.getValue()), grads(x.getGrad()) {}
+    template<Scalar U>
+    SIMD<Diff<T, DiffMode::Forward, Order>, Size>::SIMD(U x) : values(x.getValue()), grads(x.getGrad()) {}
 
     template<Scalar T, int Order, size_t Size>
     SIMD<Diff<T, DiffMode::Forward, Order>, Size>::SIMD(ScalarType x, int count) : values(x.getValue(), count), grads(x.getGrad()) {}

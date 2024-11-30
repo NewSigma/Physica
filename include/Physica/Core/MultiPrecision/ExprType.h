@@ -50,6 +50,8 @@ namespace Physica::Core {
         Pow,
         Sin,
         Cos,
+        Tan,
+        Sec,
         ArcCos,
         Cosh,
         Tanh,
@@ -87,6 +89,8 @@ namespace Physica::Core {
             case Pow: return "Pow";
             case Sin: return "Sin";
             case Cos: return "Cos";
+            case Tan: return "Tan";
+            case Sec: return "Sec";
             case ArcCos: return "ArcCos";
             case Cosh: return "Cosh";
             case Tanh: return "Tanh";

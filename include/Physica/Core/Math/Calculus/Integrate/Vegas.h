@@ -104,7 +104,7 @@ namespace Physica::Core {
         using CallResult = std::invoke_result<Functor, VectorND<T>>::type;
         static_assert(std::is_same<CallResult, T>::value, "[Error]: Invalid functor");
 
-        LossMatrix losses(getNumPoint() - 1, getDim(), 0);
+        LossMatrix losses(getNumPoint() - 1, getDim());
         for (int refine = 0; refine < numRefine; ++refine) {
             auto pair = trialIntegral<Functor, R, Executor>(losses, refine, func);
             means[refine] = std::move(pair.first);
@@ -117,7 +117,7 @@ namespace Physica::Core {
     template<Scalar T>
     template<class Functor, RandomGenerator R, class Executor>
     Vegas<T>::ValueType Vegas<T>::calcGridLoss(Functor func) const {
-        LossMatrix losses(getNumPoint() - 1, getDim(), 0);
+        LossMatrix losses(getNumPoint() - 1, getDim());
         trialIntegral<Functor, R, Executor>(losses, 0, func);
         return calcGridLossImpl(losses);
     }
@@ -181,13 +181,17 @@ namespace Physica::Core {
         }, numSample, Executor::getNumThread()).wait();
 
         Array<Array<int>> counts(losses.getRow(), getDim(), 0);
+        losses = std::numeric_limits<T>::min(); // Initial value avoids situation where number of samples is too small to sample effective data
+
         T mean = 0, var = 0;
         for (int n = 0; n < numSample; ++n) {
             const T xy = samples[n];
             toNextVariance(var, mean, n, xy);
+            // Loss has minimal value to avoid the grid size reducing to 0
+            const ValueType loss = std::max(square(xy.getValue()), ValueType(std::numeric_limits<T>::min()));
             for (size_t i = 0; i < getDim(); ++i) {
                 const auto index = indexes[n * getDim() + i];
-                toNextMean(losses(index, i), counts[index][i], square(xy));
+                toNextMean(losses(index, i), counts[index][i], loss);
                 counts[index][i] += 1;
             }
         }
