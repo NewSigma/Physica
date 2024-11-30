@@ -19,6 +19,7 @@
 #pragma once
 
 #include "Physica/Core/Utils/Container/Array.h"
+#include "Physica/Core/Math/Random/Random.h"
 
 namespace Physica::Core {
     template<class SampleType, class LabelType>

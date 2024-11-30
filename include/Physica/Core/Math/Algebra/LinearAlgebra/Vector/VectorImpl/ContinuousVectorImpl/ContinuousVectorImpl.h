@@ -280,7 +280,7 @@ namespace Physica::Core {
                 this->operator[](i) = ScalarType::template random_any<decltype(dist), R>(dist);
         }
         else
-            Base::random_any(dist);
+            Base::template random_any<decltype(dist), R>(dist);
     }
 #ifdef PHYSICA_HDF5
     template<class Derived>

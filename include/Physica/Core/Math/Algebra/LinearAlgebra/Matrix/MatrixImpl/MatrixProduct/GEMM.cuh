@@ -49,7 +49,7 @@ namespace Physica::Core {
         void assignTo(device_obj<ContinuousMatrix<M>>& target) const;
         [[nodiscard]] DefaultType compute() const { return DefaultType(*this); }
         /* Getters */
-        [[nodiscard]] __device__ ScalarType calc(size_t, size_t) const { noImpl(); }
+        [[nodiscard]] __device__ ScalarType calc(size_t, size_t) const { noImpl("calc() is low performance and should be avoided"); }
         template<Side Owner = GetSide()>
         [[nodiscard]] __host__ __device__ size_t getRow() const { return getLHS().getRow(); }
         template<Side Owner = GetSide()>

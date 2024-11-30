@@ -228,10 +228,8 @@ namespace Physica::Core {
     template<class Derived>
     template<int GradOrder>
     __host__ __device__  const ScalarBase<Derived>::GradRtnTy<GradOrder>& ScalarBase<Derived>::getGrad() const noexcept {
-        if constexpr (isDifferentiable)
-            return this->getDerived().getGrad();
-        else
-            noImpl();
+        static_assert(isDifferentiable, "Cannot take grad of indifferentiable scalar");
+        return this->getDerived().getGrad();
     }
 
     template<class Derived>

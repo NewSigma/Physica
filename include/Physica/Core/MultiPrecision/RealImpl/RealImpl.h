@@ -33,7 +33,7 @@ namespace Physica::Core {
             );
             (count) ^= 63U;
         #else
-            noImpl();
+            noImpl(__func__);
         #endif
         }
         else {
@@ -59,7 +59,7 @@ namespace Physica::Core {
                 : "rm" (n)
             );
         #else
-            noImpl();
+            noImpl(__func__);
         #endif
         }
         else {

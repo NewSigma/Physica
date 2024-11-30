@@ -48,7 +48,7 @@ namespace Physica::Core {
             }
             return result;
         #else
-            noImpl();
+            noImpl(__func__);
         #endif
         }
         else {
@@ -90,7 +90,7 @@ namespace Physica::Core {
                 );
             }
         #else
-            noImpl();
+            noImpl(__func__);
         #endif
         }
         else {

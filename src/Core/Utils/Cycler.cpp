@@ -176,7 +176,7 @@ namespace Physica::Core {
         }
         return result;
     #else
-        noImpl();
+        noImpl(__func__);
     #endif
     }
 }

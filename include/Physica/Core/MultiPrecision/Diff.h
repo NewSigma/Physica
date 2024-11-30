@@ -219,7 +219,7 @@ namespace Physica::Core {
         [[nodiscard]] inline bool operator!=(std::nullptr_t) const noexcept { return !((*this) == nullptr); }
         [[nodiscard]] inline Diff operator-() const;
         /* Operations */
-        [[nodiscard]] This conjugate() const { noImpl(); }
+        [[nodiscard]] This conjugate() const { noImpl(__func__); }
         inline void reverse();
         inline void reverse_to(Diff to);
         inline void zero_grad();

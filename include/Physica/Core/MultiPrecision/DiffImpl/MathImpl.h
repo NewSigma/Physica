@@ -143,7 +143,7 @@ namespace Physica::Core {
             return ResultType(ln1p(x.getValue()), x.getGrad() / (T(1) + GradType(x)));
         }
         else
-            noImpl();
+            noImpl(__func__);
     }
 
     template<Scalar T, DiffMode Mode, int Order>
@@ -227,7 +227,7 @@ namespace Physica::Core {
             return ResultType(tan(s.getValue()), s.getGrad() * square(sec(GradType(s))));
         }
         else
-            noImpl();
+            noImpl(__func__);
     }
 
     template<Scalar T, DiffMode Mode, int Order>
@@ -240,7 +240,7 @@ namespace Physica::Core {
             return ResultType(v.getValue(), s.getGrad() * v * tan(x1));
         }
         else
-            noImpl();
+            noImpl(__func__);
     }
 
     template<Scalar T, DiffMode Mode, int Order>
@@ -253,7 +253,7 @@ namespace Physica::Core {
             return ResultType(v.getValue(), -s.getGrad() * v * cot(x1));
         }
         else
-            noImpl();
+            noImpl(__func__);
     }
 
     template<Scalar T, DiffMode Mode, int Order>
@@ -264,7 +264,7 @@ namespace Physica::Core {
             return ResultType(cot(s.getValue()), -s.getGrad() * square(csc(GradType(s))));
         }
         else
-            noImpl();
+            noImpl(__func__);
     }
 
     template<Scalar T, DiffMode Mode, int Order>
@@ -291,7 +291,7 @@ namespace Physica::Core {
             return ResultType(cosh(s.getValue()), s.getGrad() * sinh(GradType(s)));
         }
         else
-            noImpl();
+            noImpl(__func__);
     }
 
     template<Scalar T, DiffMode Mode, int Order>
@@ -302,7 +302,7 @@ namespace Physica::Core {
             return ResultType(sinh(s.getValue()), s.getGrad() * cosh(GradType(s)));
         }
         else
-            noImpl();
+            noImpl(__func__);
     }
 
     template<Scalar T, DiffMode Mode, int Order>
@@ -329,6 +329,6 @@ namespace Physica::Core {
             return ResultType(lncosh(s.getValue()), s.getGrad() * tanh(GradType(s)));
         }
         else
-            noImpl();
+            noImpl(__func__);
     }
 }

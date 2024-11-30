@@ -50,7 +50,7 @@ namespace Physica::Core {
         if (WIFEXITED(status))
             error = WEXITSTATUS(status);
     #else
-        noImpl();
+        noImpl(__func__);
     #endif
         return error;
     }

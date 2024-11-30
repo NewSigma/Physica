@@ -72,7 +72,7 @@ namespace Physica::Core {
     template<int Dim, int NumSite>
     SpinFermion<Dim, NumSite> SpinFermion<Dim, NumSite>::transReduce() const {
         if constexpr (Dim != 1)
-            noImpl();
+            noImpl(__func__);
         This result = *this, temp = *this;
         for (int i = 0; i < NumSite; ++i) {
             temp <<= 1;
@@ -91,7 +91,7 @@ namespace Physica::Core {
     template<int Dim, int NumSite>
     inline int SpinFermion<Dim, NumSite>::calcPeriod() const noexcept {
         if constexpr (Dim != 1)
-            noImpl();
+            noImpl(__func__);
         const int result = lcm<int, false>(spinUp.calcPeriod(), spinDown.calcPeriod());
         assert(0 < result && result <= NumSite && "[Error]: Unexpected period, this is a bug");
         return result;

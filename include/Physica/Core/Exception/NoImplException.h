@@ -24,12 +24,10 @@
 namespace Physica::Core {
     class PHYSICA_API NoImplException : public std::runtime_error {
     public:
-        constexpr static const char* DefaultMsg = "[Error]: Not implemented";
-    public:
-        NoImplException(const char* msg = DefaultMsg) : std::runtime_error(msg) {}
+        NoImplException(const char* msg) : std::runtime_error(msg) {}
     };
 
-    __host__ __device__ [[noreturn]] inline void noImpl(const char* msg = NoImplException::DefaultMsg) {
+    __host__ __device__ [[noreturn]] inline void noImpl(const char* msg) {
     #ifdef __CUDA_ARCH__
         printf("%s\n", msg);
         __trap();

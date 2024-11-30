@@ -63,7 +63,7 @@ namespace Physica::Core {
         template<LVector V, class Executor = SequentialExecutor>
         void assignTo(V& target, RealType traceMu, ParamPair params) const;
 
-        [[nodiscard]] ScalarType calc(size_t) const { noImpl(); }
+        [[nodiscard]] ScalarType calc(size_t) const { noImpl("calc() is low performance and should be avoided"); }
         [[nodiscard]] RealType calcTraceMu() const;
         template<class Executor>
         [[nodiscard]] ParamPair calcParam(RealType traceMu) const;

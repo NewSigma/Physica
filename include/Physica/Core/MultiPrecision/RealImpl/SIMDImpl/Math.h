@@ -28,7 +28,7 @@ namespace Physica::Core {
         else if constexpr (IsHost())
             return SIMD<T, Size>(abs(x.toMachine()));
         else
-            noImpl();
+            noImpl(__func__);
     }
 
     template<Scalar T, size_t Size>

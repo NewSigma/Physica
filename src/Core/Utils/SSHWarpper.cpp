@@ -54,7 +54,7 @@ namespace Physica::Core {
             throw SystemException();
         close(fd[1]);
     #else
-        noImpl();
+        noImpl(__func__);
     #endif
     }
 

@@ -59,7 +59,7 @@ namespace Physica::Core {
                     ::
             );
         #else
-            noImpl();
+            noImpl(__func__);
         #endif
             return ((static_cast<uint64_t>(hi) << 32U) | lo);
         }
@@ -79,7 +79,7 @@ namespace Physica::Core {
                     :: "ebx", "ecx"
             );
         #else
-            noImpl();
+            noImpl(__func__);
         #endif
             return ((static_cast<uint64_t>(hi) << 32U) | lo);
         }
@@ -101,7 +101,7 @@ namespace Physica::Core {
                     ::: "eax", "ebx", "ecx", "edx"
             );
         #else
-            noImpl();
+            noImpl(__func__);
         #endif
             return ((static_cast<uint64_t>(hi) << 32U) | lo);
         }

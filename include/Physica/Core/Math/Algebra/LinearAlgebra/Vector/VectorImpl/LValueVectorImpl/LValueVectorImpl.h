@@ -155,7 +155,7 @@ namespace Physica::Core {
     template<class Distribution, RandomGenerator R>
     inline void LValueVector<Derived>::random_any(Distribution& dist) {
         for (size_t i = 0; i < this->getLength(); ++i)
-            this->operator[](i) = ScalarType::random_any(dist);
+            this->operator[](i) = ScalarType::template random_any<Distribution, R>(dist);
     }
     /**
      * Add this function because we cannot simply return &(*this)[index], it is invalid to dereference a device pointer on host.
