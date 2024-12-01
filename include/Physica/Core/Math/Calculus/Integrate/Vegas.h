@@ -111,7 +111,7 @@ namespace Physica::Core {
     void Vegas<T>::warmup(Functor func, int numWarm) {
         using CallResult = std::invoke_result<Functor, VectorND<T>>::type;
         static_assert(std::is_same<CallResult, T>::value, "[Error]: Invalid functor");
-        assert(numWarm > 0 && "[Error]: Invalid param");
+        assert(numWarm >= 0 && "[Error]: Invalid param");
 
         LossMatrix lossMat(getNumPoint() - 1, getDim());
         for (int _ = 0; _ < numWarm; ++_) {
@@ -140,7 +140,7 @@ namespace Physica::Core {
     template<class Functor, RandomGenerator R, class Executor>
     Vegas<T>::ValueType Vegas<T>::calcGridLoss(Functor func) const {
         LossMatrix lossMat(getNumPoint() - 1, getDim());
-        trialIntegral<Functor, R, Executor>(lossMat, 0, func);
+        trialIntegral<Functor, R, Executor>(lossMat, func);
         return calcGridLossImpl(lossMat);
     }
 

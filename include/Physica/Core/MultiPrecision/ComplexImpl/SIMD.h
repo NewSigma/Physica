@@ -89,6 +89,7 @@ namespace Physica::Core {
         [[nodiscard]] inline ScalarType sum() const;
         void swap(SIMD& __restrict other) noexcept { std::swap(*this, other); }
         /* Getters */
+        using Base::getValue;
         [[nodiscard]] constexpr static size_t size() { return Size; }
         [[nodiscard]] FullRealType asReal() const noexcept { return FullRealType::toMachine(); }
         [[nodiscard]] HalfType getLow() const noexcept { return HalfType::asComplex(FullRealType::getLow()); }
@@ -109,6 +110,7 @@ namespace Physica {
         constexpr static int Size = S;
 
         using ScalarType = Complex<T>;
+        using ValueType = SIMD<Complex<T>, S>;
         using FullRealType = SIMD<T, Size * 2>;
         using RealType = std::conditional<FullRealType::isSeparatable, SIMD<T, Size>, FullRealType>::type;
         using MachineType = FullRealType::MachineType;

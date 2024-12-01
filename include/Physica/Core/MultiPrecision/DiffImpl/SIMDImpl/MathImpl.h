@@ -113,4 +113,21 @@ namespace Physica::Core {
             c = SIMD<ScalarType, Size>(c, cosHeadNode);
         }
     }
+
+    template<Scalar T, DiffMode Mode, int Order, size_t Size>
+    [[nodiscard]] inline auto tanh(const SIMD<Diff<T, Mode, Order>, Size>& x) {
+        static_assert(Mode != DiffMode::Reverse, "[Error]: Not implemented");
+        using ResultType = SIMD<Diff<T, Mode, Order>, Size>;
+        using GradPacket = ResultType::GradPacket;
+        const GradPacket y = tanh(GradPacket(x));
+        return ResultType(y.getValue(), (GradPacket(1) - square(y)) * x.getGrad());
+    }
+
+    template<Scalar T, DiffMode Mode, int Order, size_t Size>
+    [[nodiscard]] inline auto lncosh(const SIMD<Diff<T, Mode, Order>, Size>& x) {
+        static_assert(Mode != DiffMode::Reverse, "[Error]: Not implemented");
+        using ResultType = SIMD<Diff<T, Mode, Order>, Size>;
+        using GradPacket = ResultType::GradPacket;
+        return ResultType(lncosh(x.getValue()), tanh(GradPacket(x)) * x.getGrad());
+    }
 }

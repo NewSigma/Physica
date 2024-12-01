@@ -19,6 +19,10 @@
 #pragma once
 
 namespace Physica::Core {
+    template<Scalar T, size_t Size>
+    SIMD<T, Size * 2> abs(const SIMD<Complex<T>, Size>& x) {
+        return sqrt(x.squaredNorm());
+    }
     /**
      * References:
      * [1] add-on; https://github.com/vectorclass/add-on
@@ -128,6 +132,22 @@ namespace Physica::Core {
     }
 
     template<Scalar T, size_t Size>
+    SIMD<Complex<T>, Size> ln1p(const SIMD<Complex<T>, Size>& x) {
+        return ln(T(1) + x);
+    }
+
+    template<Scalar T, size_t Size>
+    SIMD<Complex<T>, Size> tanh(const SIMD<Complex<T>, Size>& x) {
+        using ResultType = SIMD<Complex<T>, Size>;
+        Complex<T> arr[Size];
+        for (int i = 0; i < Size; ++i)
+            arr[i] = tanh(x[i]);
+        ResultType result{};
+        result.load(arr);
+        return result;
+    }
+
+    template<Scalar T, size_t Size>
     SIMD<Complex<T>, Size> lncosh(const SIMD<Complex<T>, Size>& x) {
         using ResultType = SIMD<Complex<T>, Size>;
         using RealType = ResultType::RealType;
@@ -159,12 +179,5 @@ namespace Physica::Core {
             const auto temp = ResultType::asComplex(mul_addsub(norm1, cs, -cs) * T(0.5));
             return ResultType::asComplex(ResultType::asComplex(abs_real).real()) + ln(temp);
         }
-        /*
-        const T abs_real = abs(c.real());
-        const T norm1 = exp(T(-2) * abs_real);
-        const T phase = c.real().isPositive() ? c.imag() : -c.imag();
-        const auto temp = Complex<T>((T(1) + norm1) * cos(phase), (T(1) - norm1) * sin(phase)) * T(0.5);
-        return abs_real + ln(temp);
-        */
     }
 }

@@ -178,10 +178,10 @@ namespace Physica::Core {
 }
 
 namespace Physica {
-    template<Scalar T, Core::DiffMode Mode, int Order, size_t Size>
-    class Traits<Core::SIMD<Core::Diff<T, Mode, Order>, Size>> : public Traits<Core::SIMD<T, Size>> {
+    template<Scalar T, DiffMode Mode, int Order, size_t Size>
+    class Traits<SIMD<Diff<T, Mode, Order>, Size>> : public Traits<SIMD<T, Size>> {
     public:
-        using ScalarType = Core::Diff<T, Mode, Order>;
+        using ScalarType = Diff<T, Mode, Order>;
     };
 }
 

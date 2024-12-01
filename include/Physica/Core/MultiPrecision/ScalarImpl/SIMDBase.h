@@ -32,11 +32,13 @@ namespace Physica::Core {
         constexpr static bool isSeparatable = TraitsType::isSeparatable;
 
         using ScalarType = TraitsType::ScalarType;
+        using ValueType = TraitsType::ValueType;
         using FullRealType = TraitsType::FullRealType;
         using RealType = TraitsType::RealType;
         using MachineType = TraitsType::MachineType;
         
         constexpr static bool isComplex = ScalarType::isComplex;
+        constexpr static bool isDifferentiable = ScalarType::isDifferentiable;
     public:
         constexpr ~SIMDBase() = default;
         /* Operations */
@@ -45,6 +47,7 @@ namespace Physica::Core {
         [[nodiscard]] inline FullRealType permRealImag() const noexcept;
         [[nodiscard]] inline FullRealType scatterRealImag() const noexcept;
         /* Getters */
+        [[nodiscard]] inline ValueType getValue() const;
         [[nodiscard]] inline FullRealType asReal() const;
     protected:
         constexpr SIMDBase() = default;
@@ -112,6 +115,14 @@ namespace Physica::Core {
             static_assert(Size == 16, "[Error]: Unexpected size");
             return x.template permute<0, 8, 1, 9, 2, 10, 3, 11, 4, 12, 5, 13, 6, 14, 7, 15>();
         }
+    }
+
+    template<class Derived>
+    inline SIMDBase<Derived>::ValueType SIMDBase<Derived>::getValue() const {
+        if constexpr (isDifferentiable)
+            return Base::getDerived().getValue();
+        else
+            return Base::getDerived();
     }
 
     template<class Derived>

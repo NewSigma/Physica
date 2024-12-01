@@ -20,6 +20,9 @@
 
 namespace Physica::Core {
     template<Scalar T, size_t Size>
+    SIMD<T, Size * 2> abs(const SIMD<Complex<T>, Size>& x);
+
+    template<Scalar T, size_t Size>
     inline SIMD<Complex<T>, Size> sqrt(const SIMD<Complex<T>, Size>& x);
 
     template<Scalar T, size_t Size>
@@ -27,6 +30,15 @@ namespace Physica::Core {
 
     template<Scalar T, size_t Size>
     SIMD<Complex<T>, Size> ln(const SIMD<Complex<T>, Size>& x);
+
+    template<Scalar T, size_t Size>
+    SIMD<Complex<T>, Size> ln1p(const SIMD<Complex<T>, Size>& x);
+
+    template<Scalar T, size_t Size>
+    SIMD<Complex<T>, Size> tanh(const SIMD<Complex<T>, Size>& x);
+
+    template<Scalar T, size_t Size>
+    SIMD<Complex<T>, Size> lncosh(const SIMD<Complex<T>, Size>& x);
 }
 
 #include "MathImpl.h"

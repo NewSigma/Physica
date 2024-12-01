@@ -164,7 +164,6 @@ namespace Physica {
         static_assert(!T::isDifferentiable, "[Error]: The main template targets on plain scalar");
         static_assert(Size % 2 == 0 && Size <= 16, "[Error]: Invalid Size");
 
-        using ValueType = T::ValueType;
         using Size2Type = std::conditional<isFloat32, void, Vec2d>::type;
         using Size4Type = std::conditional<isFloat32, Vec4f, Vec4d>::type;
         using Size8Type = std::conditional<isFloat32, Vec8f, Vec8d>::type;
@@ -183,8 +182,9 @@ namespace Physica {
         using Pack = std::conditional<Size <= 4, Pack1, Pack2>::type;
 
         using ScalarType = T;
-        using RealType = SIMD<T, Size>;
-        using FullRealType = RealType;
+        using ValueType = SIMD<T, Size>;
+        using RealType = ValueType;
+        using FullRealType = ValueType;
         using MachineType = MachineTypeHelper<Pack>::Type;
         using BoolSIMDType = BoolSIMD<T, Size>;
 

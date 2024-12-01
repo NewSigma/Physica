@@ -39,6 +39,12 @@ namespace Physica::Core {
 
     template<Scalar T, DiffMode Mode, int Order, size_t Size>
     [[nodiscard]] inline auto sincos(const SIMD<Diff<T, Mode, Order>, Size>& x, SIMD<Diff<T, Mode, Order>, Size>& s, SIMD<Diff<T, Mode, Order>, Size>& c);
+
+    template<Scalar T, DiffMode Mode, int Order, size_t Size>
+    [[nodiscard]] inline auto tanh(const SIMD<Diff<T, Mode, Order>, Size>& x);
+
+    template<Scalar T, DiffMode Mode, int Order, size_t Size>
+    [[nodiscard]] inline auto lncosh(const SIMD<Diff<T, Mode, Order>, Size>& x);
 }
 
 #include "MathImpl.h"
