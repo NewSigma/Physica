@@ -18,7 +18,7 @@
  */
 #ifdef __linux__
 
-#include <iostream>
+#include <cassert>
 #include <unistd.h>
 #include <signal.h>
 #include <sys/wait.h>

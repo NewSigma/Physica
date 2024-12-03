@@ -3,18 +3,16 @@
  *
  * This file is part of PhysicaNotes.
  */
-#include <iostream>
+#include <filesystem>
 #include <fstream>
 #include <QApplication>
 #include "Physica/Core/IO/VASP/Poscar.h"
 #include "Physica/Core/Physics/MD/ForceModel/Ewald/Ewald.h"
 #include "Physica/Core/Physics/MD/ForceModel/BKSModel.h"
 #include "Physica/Core/Physics/MD/RPMD.h"
-#include "Physica/Core/Physics/MD/Thermostat/DoubleThermo.h"
 #include "Physica/Core/Physics/MD/KineticModel/FreeModel.h"
-#include "Physica/Core/Physics/MD/KineticModel/FireModel.h"
+#include "Physica/Core/Physics/MD/Thermostat/Langevin.h"
 #include "Physica/Core/Parallel/Executor/ThreadExecutor.h"
-#include "Physica/Core/Utils/Unix/UnixHelper.h"
 #include "Physica/Gui/Plot/Plot.h"
 
 using namespace Physica::Core;
@@ -23,7 +21,7 @@ using ScalarType = float64;
 using VectorType = VectorND<ScalarType>;
 using RandomType = Random<MT19937>;
 using MDType = RPMD<ScalarType, 3, 1>;
-using ThermostatType = Langevin<ScalarType, 3, 1>;
+using ThermoType = Langevin<ScalarType, 3, 1>;
 using KineticModel = FreeModel<ScalarType, 3, 1, RPMDIntegrator::Exact>;
 using ForceModel = BKSModel<ScalarType, Ewald<ScalarType, RSpaceEwald<ScalarType, true>>, false>;
 constexpr double timeStep = PhyConst<AU>::secondToTime(1E-15);
@@ -73,7 +71,7 @@ MDCell<ScalarType> makeSystem() {
 int main() {
     MDType rpmd(makeSystem(), 1, 1, 0, timeStep);
     const char* oldDataPath = "/kaggle/input/tempsio2/SiO2.h5";
-    if (fileExists(oldDataPath)) {
+    if (std::filesystem::exists(oldDataPath)) {
         H5File h5f(oldDataPath, H5File::ReadOnly);
         rpmd.read(h5f, "md");
     }
@@ -84,9 +82,9 @@ int main() {
         ScalarType temperatureT = ScalarType(PhyConst<AU>::kToTemperature(step * 10));
         
         KineticModel kineticModel(temperatureT, 1);
-        ThermostatType thermo(temperatureT, thermostatTime, true);
+        ThermoType thermo(temperatureT, thermostatTime, true);
 
-        rpmd.nvt_step_for<ThermostatType, RandomType, KineticModel, ForceModel, ThreadExecutor>(
+        rpmd.nvt_step_for<ThermoType, RandomType, KineticModel, ForceModel, ThreadExecutor>(
                 PhyConst<AU>::secondToTime(1E-12), thermo, kineticModel, forceModel);
         energy[step] = rpmd.calcPotential<ForceModel, SequentialExecutor>(forceModel);
     }

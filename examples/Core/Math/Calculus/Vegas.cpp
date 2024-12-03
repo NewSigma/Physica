@@ -20,6 +20,7 @@
 #include <QtWidgets/QApplication>
 #include "Physica/Core/Math/Calculus/Integrate/Vegas.h"
 #include "Physica/Core/Math/Random/Random.h"
+#include "Physica/Core/Parallel/Executor/ThreadExecutor.h"
 #include "Physica/Gui/Plot/Plot.h"
 
 using namespace Physica;
@@ -47,13 +48,9 @@ void plotCompressRate() {
     double rates[3]{0.1, 0.2, 0.5};
     const char* names[3]{"0.1", "0.2", "0.5"};
     for (int i = 0; i < 3; ++i) {
-        Vegas<T> vegas(from, to, 1, 100000, 10, rates[i]);
-        VectorND<T> vars(100);
-        for (int refine = 0; refine < vars.getLength(); ++refine) {
-            vars[refine] = vegas.calcGridLoss<decltype(func), RandomType>(func);
-            vegas.integral<decltype(func), RandomType>(func);
-        }
-        vars = ln(vars);
+        Vegas<T> vegas(from, to, 100, 100000, 10, rates[i]);
+        vegas.integral<decltype(func), RandomType, ThreadExecutor>(func);
+        VectorND<T> vars = ln(vegas.getLoss());
         plot->line(vars).setName(names[i]);
     }
     plot->show();
@@ -76,13 +73,9 @@ void plotNumPoint() {
     int points[3]{10, 100, 1000};
     const char* names[3]{"10", "100", "1000"};
     for (int i = 0; i < 3; ++i) {
-        Vegas<T> vegas(from, to, 1, 100000, points[i], 0.1);
-        VectorND<T> vars(1000);
-        for (int refine = 0; refine < vars.getLength(); ++refine) {
-            vars[refine] = vegas.calcGridLoss<decltype(func), RandomType>(func);
-            vegas.integral<decltype(func), RandomType>(func);
-        }
-        vars = ln(vars);
+        Vegas<T> vegas(from, to, 1000, 100000, points[i], 0.1);
+        vegas.integral<decltype(func), RandomType, ThreadExecutor>(func);
+        VectorND<T> vars = ln(vegas.getLoss());
         plot->line(vars).setName(names[i]);
     }
     plot->show();
@@ -105,13 +98,9 @@ void plotNumSample() {
     int samples[2]{10000, 100000};
     const char* names[2]{"10<sup>4</sup>", "10<sup>5</sup>"};
     for (int i = 0; i < 2; ++i) {
-        Vegas<T> vegas(from, to, 1, samples[i], 1000, 0.1);
-        VectorND<T> vars(1000);
-        for (int refine = 0; refine < vars.getLength(); ++refine) {
-            vars[refine] = vegas.calcGridLoss<decltype(func), RandomType>(func);
-            vegas.integral<decltype(func), RandomType>(func);
-        }
-        vars = ln(vars);
+        Vegas<T> vegas(from, to, 1000, samples[i], 1000, 0.1);
+        vegas.integral<decltype(func), RandomType, ThreadExecutor>(func);
+        VectorND<T> vars = ln(vegas.getLoss());
         plot->line(vars).setName(names[i]);
     }
     plot->show();
@@ -119,6 +108,7 @@ void plotNumSample() {
 }
 
 int main(int argc, char** argv) {
+    ThreadPool::numThreadRequired = 4;
     QApplication app(argc, argv);
     plotCompressRate();
     plotNumPoint();

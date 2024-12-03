@@ -19,7 +19,6 @@
 #pragma once
 
 #include <functional>
-#include "Physica/Core/Utils/Unix/UnixHelper.h"
 #include "Physica/Core/Parallel/Future/ProcessFuture.h"
 
 namespace Physica::Core {

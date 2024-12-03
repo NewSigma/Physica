@@ -18,14 +18,15 @@
  */
 #pragma once
 
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/Givens.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/MatrixDecomposition/Decouplable.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/MatrixDecomposition/Tridiagonalization.h"
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/MatrixDecomposition/Schur.h"
 
 namespace Physica::Core {
     /**
      * A = XTX^{-1}
      * where X is matrix of eigenvectors
-     * 
+     *
      * References:
      * [1] Gene H. Golub, Charles F. Van Loan. Matrix computations 4th edition[M]. John Hopkins University Press, 2013
      */
@@ -38,7 +39,7 @@ namespace Physica::Core {
     public:
         using EigenvalueVector = DenseVector<RealType, Order>;
         using EigenvectorMatrix = DenseMatrix<T, MatrixOption::Col | MatrixOption::Vector, Order, Order>;
-        using WorkingMatrix = DenseMatrix<T, MatrixOption::Col | MatrixOption::Vector, Order, Order>; //Optimize: Use tridiagonal matrix is better
+        using WorkingMatrix = DenseMatrix<T, MatrixOption::Col | MatrixOption::Vector, Order, Order>; // Optimize: Use tridiagonal matrix is better
     private:
         EigenvalueVector eigenvalues;
         EigenvectorMatrix eigenvectors;
@@ -101,7 +102,7 @@ namespace Physica::Core {
             return;
         }
         const RealType inv_factor = reciprocal(factor);
-        const WorkingMatrix normalized = source * inv_factor; //Referenced from eigen, to avoid under/overflow in householder
+        const WorkingMatrix normalized = source * inv_factor; // Referenced from eigen, to avoid under/overflow in householder
         auto tridiagonal = Tridiagonalization<T, Order>(normalized);
         WorkingMatrix working = tridiagonal.getMatrixT();
         if (computeEigenvectors)
@@ -187,7 +188,7 @@ namespace Physica::Core {
             const RealType factor = (subBlock(sub_order - 2, sub_order - 2).real() - subBlock(sub_order - 1, sub_order - 1).real()) * T(0.5);
             const RealType factor2 = square(subBlock(sub_order - 1, sub_order - 2));
             const RealType factor3 = sqrt(square(factor) + factor2);
-            const T shift = subBlock(sub_order - 1, sub_order - 1) - factor2 / (factor + (factor.isPositive() ? factor3 : -factor3)); //TODO: why we introduce a divide operation
+            const T shift = subBlock(sub_order - 1, sub_order - 1) - factor2 / (factor + (factor.isPositive() ? factor3 : -factor3)); // TODO: why we introduce a divide operation
             buffer[0] = subBlock(0, 0) - shift;
             buffer[1] = subBlock(1, 0);
         }
