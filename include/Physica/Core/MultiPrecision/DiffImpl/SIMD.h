@@ -100,7 +100,6 @@ namespace Physica::Core {
         [[nodiscard]] inline ScalarType min() const;
         void swap(SIMD& __restrict obj) noexcept;
         /* Getters */
-        [[nodiscard]] constexpr static size_t size() { return Size; }
         [[nodiscard]] FullRealType asReal() const noexcept;
         [[nodiscard]] ValuePacket getValue() const noexcept { return values; }
         [[nodiscard]] GradPacket getGrad() const noexcept { return grads; }

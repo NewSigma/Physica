@@ -25,7 +25,8 @@ namespace Physica {
     class Traits<SIMD<Real<Float16>, 2>> {
     public:
         using ScalarType = Real<Float16>;
-        using RealType = SIMD<Real<Float16>, 2>;
+        using ValueType = SIMD<Real<Float16>, 2>;
+        using RealType = ValueType;
         using FullRealType = RealType;
         using MachineType = __half2;
     };
@@ -89,7 +90,6 @@ namespace Physica::Core {
         //[[nodiscard]] inline ScalarType min() const;
         __host__ __device__ void swap(SIMD& __restrict other) noexcept { std::swap(*this, other); }
         /* Getters */
-        [[nodiscard]] __host__ __device__ constexpr static size_t size() { return Size; }
         [[nodiscard]] __host__ __device__ Base& toMachine() noexcept { return *this; }
         [[nodiscard]] __host__ __device__ const Base& toMachine() const noexcept { return *this; }
     };

@@ -101,7 +101,6 @@ namespace Physica::Core {
         [[nodiscard]] inline T min() const;
         void swap(SIMD& __restrict other) noexcept { std::swap(*this, other); }
         /* Getters */
-        [[nodiscard]] constexpr static size_t size() { return Size; }
         [[nodiscard]] Pack& toMachine() noexcept { return pack; }
         [[nodiscard]] const Pack& toMachine() const noexcept { return pack; }
         [[nodiscard]] HalfType getLow() const noexcept { return pack.get_low(); }
@@ -131,25 +130,25 @@ namespace Physica::Core {
     [[nodiscard]] inline SIMD<T, Size> mul_add(
             const SIMD<T, Size>& a,
             const SIMD<T, Size>& b,
-            const SIMD<T, Size>& c);
+            const SIMD<T, Size>& c) noexcept;
 
     template<Scalar T, size_t Size>
     [[nodiscard]] inline SIMD<T, Size> nmul_add(
             const SIMD<T, Size> a,
             const SIMD<T, Size> b,
-            const SIMD<T, Size> c);
+            const SIMD<T, Size> c) noexcept;
 
     template<Scalar T, size_t Size>
     [[nodiscard]] inline SIMD<T, Size> mul_sub(
             const SIMD<T, Size> a,
             const SIMD<T, Size> b,
-            const SIMD<T, Size> c);
+            const SIMD<T, Size> c) noexcept;
 
     template<Scalar T, size_t Size>
     [[nodiscard]] inline SIMD<T, Size> mul_addsub(
             const SIMD<T, Size> a,
             const SIMD<T, Size> b,
-            const SIMD<T, Size> c);
+            const SIMD<T, Size> c) noexcept;
 }
 
 namespace Physica {

@@ -20,9 +20,8 @@
 
 namespace Physica::Core {
     template<Vector T1, Vector T2>
-    __device__ Internal::InnerDotImpl<T1, T2>::ResultType
-    operator*(const device_obj<T1>& v1, const device_obj<T2>& v2) {
-        using ResultType = Internal::InnerDotImpl<T1, T2>::ResultType;
+    __device__ InnerDot<T1, T2>::ResultType operator*(const device_obj<T1>& v1, const device_obj<T2>& v2) {
+        using ResultType = InnerDot<T1, T2>::ResultType;
 
         assert(v1.getLength() == v2.getLength() && "[Error]: Dimensions do not match");
         ResultType result = 0;

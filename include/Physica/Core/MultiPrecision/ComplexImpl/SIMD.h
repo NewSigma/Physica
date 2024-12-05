@@ -89,8 +89,8 @@ namespace Physica::Core {
         [[nodiscard]] inline ScalarType sum() const;
         void swap(SIMD& __restrict other) noexcept { std::swap(*this, other); }
         /* Getters */
+        using Base::size;
         using Base::getValue;
-        [[nodiscard]] constexpr static size_t size() { return Size; }
         [[nodiscard]] FullRealType asReal() const noexcept { return FullRealType::toMachine(); }
         [[nodiscard]] HalfType getLow() const noexcept { return HalfType::asComplex(FullRealType::getLow()); }
         [[nodiscard]] HalfType getHigh() const noexcept { return HalfType::asComplex(FullRealType::getHigh()); }
@@ -101,6 +101,12 @@ namespace Physica::Core {
         [[nodiscard]] static SIMD random_uniform() { return asComplex(FullRealType::template random_uniform<R>()); }
         [[nodiscard]] static SIMD asComplex(FullRealType reals);
     };
+
+    template<Scalar T, size_t Size>
+    [[nodiscard]] inline SIMD<Complex<T>, Size> mul_add(
+            const SIMD<Complex<T>, Size>& a,
+            const SIMD<Complex<T>, Size>& b,
+            const SIMD<Complex<T>, Size>& c) noexcept;
 }
 
 namespace Physica {

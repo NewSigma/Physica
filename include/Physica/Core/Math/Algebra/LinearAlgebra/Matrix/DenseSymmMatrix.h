@@ -45,7 +45,11 @@ namespace Physica::Core {
         using Base::operator=;
         using Base::operator();
         This& operator=(This obj) noexcept { swap(obj); return *this; }
-        inline This& operator=(const ScalarType& value);
+        template<Scalar U> inline This& operator=(const U& x);
+        template<Scalar U> inline void operator+=(const U& x);
+        template<Scalar U> inline void operator-=(const U& x);
+        template<Scalar U> inline void operator*=(const U& x);
+        template<Scalar U> inline void operator/=(const U& x);
         template<Vector V>
         [[nodiscard]] inline auto operator*(const V& vec) const noexcept;
         /* Operations */
@@ -98,9 +102,34 @@ namespace Physica::Core {
     }
 
     template<Scalar T, size_t Order>
-    inline DenseSymmMatrix<T, Order>& DenseSymmMatrix<T, Order>::operator=(const ScalarType& value) {
-        asVector() = value;
+    template<Scalar U>
+    inline DenseSymmMatrix<T, Order>& DenseSymmMatrix<T, Order>::operator=(const U& x) {
+        asVector() = x;
         return *this;
+    }
+
+    template<Scalar T, size_t Order>
+    template<Scalar U>
+    inline void DenseSymmMatrix<T, Order>::operator+=(const U& x) {
+        asVector() += x;
+    }
+
+    template<Scalar T, size_t Order>
+    template<Scalar U>
+    inline void DenseSymmMatrix<T, Order>::operator-=(const U& x) {
+        asVector() -= x;
+    }
+
+    template<Scalar T, size_t Order>
+    template<Scalar U>
+    inline void DenseSymmMatrix<T, Order>::operator*=(const U& x) {
+        asVector() *= x;
+    }
+
+    template<Scalar T, size_t Order>
+    template<Scalar U>
+    inline void DenseSymmMatrix<T, Order>::operator/=(const U& x) {
+        asVector() /= x;
     }
 
     template<Scalar T, size_t Order>

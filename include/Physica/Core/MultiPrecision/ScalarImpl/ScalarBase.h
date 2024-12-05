@@ -21,7 +21,6 @@
 #include <cassert>
 #include "Physica/CRTPBase.h"
 #include "Physica/PlainStruct.h"
-#include "Physica/Core/Exception/NoImplException.h"
 
 namespace Physica::Core {
     template<class ScalarType> class ScalarRef;
@@ -66,6 +65,14 @@ namespace Physica::Core {
     public:
         constexpr ~ScalarBase() = default;
         /* Operators */
+        template<Scalar U>
+        __host__ __device__ inline void operator+=(const U& x);
+        template<Scalar U>
+        __host__ __device__ inline void operator-=(const U& x);
+        template<Scalar U>
+        __host__ __device__ inline void operator*=(const U& x);
+        template<Scalar U>
+        __host__ __device__ inline void operator/=(const U& x);
         __host__ __device__ inline bool operator>(float s) const noexcept;
         __host__ __device__ inline bool operator<(float s) const noexcept;
         __host__ __device__ inline bool operator>(double s) const noexcept;
@@ -74,6 +81,9 @@ namespace Physica::Core {
         __host__ __device__ inline bool operator>(const T& s) const noexcept;
         template<Scalar T>
         __host__ __device__ inline bool operator<(const T& s) const noexcept;
+        /* Operations */
+        template<int MaskOrder>
+        [[nodiscard]] const auto& mask() const noexcept;
         /* Getters */
         [[nodiscard]] __host__ __device__ inline RealType real() const;
         [[nodiscard]] __host__ __device__ inline RealType imag() const;
@@ -103,6 +113,30 @@ namespace Physica::Core {
         This& operator=(const This& obj) = default;
         This& operator=(This&& obj) noexcept = default;
     };
+
+    template<class Derived>
+    template<Scalar U>
+    __host__ __device__ inline void ScalarBase<Derived>::operator+=(const U& x) {
+        Base::getDerived() = Base::getDerived() + x;
+    }
+
+    template<class Derived>
+    template<Scalar U>
+    __host__ __device__ inline void ScalarBase<Derived>::operator-=(const U& x) {
+        Base::getDerived() = Base::getDerived() - x;
+    }
+
+    template<class Derived>
+    template<Scalar U>
+    __host__ __device__ inline void ScalarBase<Derived>::operator*=(const U& x) {
+        Base::getDerived() = Base::getDerived() * x;
+    }
+
+    template<class Derived>
+    template<Scalar U>
+    __host__ __device__ inline void ScalarBase<Derived>::operator/=(const U& x) {
+        Base::getDerived() = Base::getDerived() / x;
+    }
 
     template<class Derived>
     __host__ __device__ inline bool ScalarBase<Derived>::operator>(float s) const noexcept {
@@ -142,6 +176,15 @@ namespace Physica::Core {
     __host__ __device__ inline bool ScalarBase<Derived>::operator<(const T& s) const noexcept {
         static_assert(!isComplex && !T::isComplex, "[Error]: Comparison between complex scalars is invalid");
         return getValue() < s.getValue();
+    }
+
+    template<class Derived>
+    template<int MaskOrder>
+    const auto& ScalarBase<Derived>::mask() const noexcept {
+        if constexpr (isDifferentiable)
+            return Base::getDerived().template mask<MaskOrder>();
+        else
+            return Base::getDerived();
     }
 
     template<class Derived>
@@ -273,26 +316,6 @@ namespace Physica::Core {
     template<Scalar T>
     inline T operator+(const T& x) {
         return T(x);
-    }
-
-    template<Scalar T1, Scalar T2>
-    __host__ __device__ inline void operator+=(T1& x, const T2& y) {
-        x = x + y;
-    }
-
-    template<Scalar T1, Scalar T2>
-    __host__ __device__ inline void operator-=(T1& x, const T2& y) {
-        x = x - y;
-    }
-
-    template<Scalar T1, Scalar T2>
-    __host__ __device__ inline void operator*=(T1& x, const T2& y) {
-        x = x * y;
-    }
-
-    template<Scalar T1, Scalar T2>
-    __host__ __device__ inline void operator/=(T1& x, const T2& y) {
-        x = x / y;
     }
 
     template<Scalar T>

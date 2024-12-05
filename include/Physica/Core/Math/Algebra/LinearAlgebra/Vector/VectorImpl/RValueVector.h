@@ -47,11 +47,17 @@ namespace Physica::Core {
     namespace Internal {
         template<Vector T1, Vector T2 = T1>
         class EnableSIMD {
-            using ScalarType = T1::ScalarType;
-            using ValueType = ScalarType::ValueType;
-            constexpr static bool isSameScalar = std::is_same<ValueType, typename T2::ValueType>::value;
+            constexpr static size_t Size1 = T1::SizeAtCompile;
+            constexpr static size_t Size2 = T2::SizeAtCompile;
+            constexpr static size_t SizeAtCompile = Size1 > Size2 ? Size1 : Size2;
         public:
-            constexpr static bool value = isSameScalar && BestPacket<ScalarType, T1::SizeAtCompile>::Size > 1;
+            using ResultType = BinaryScalarOpRtnTy<typename T1::ScalarType, typename T2::ScalarType>::Type;
+            using PacketType = BestPacket<ResultType, SizeAtCompile>::Type;
+        private:
+            constexpr static bool isSameScalar = std::is_same<typename T1::ValueType, typename T2::ValueType>::value;
+            constexpr static bool isBadPacket = PacketType::size() == 1;
+        public:
+            constexpr static bool value = isSameScalar && !isBadPacket;
         };
     }
 
@@ -166,4 +172,4 @@ namespace Physica {
 #include "CrossProduct.h"
 #include "InnerDot.h"
 #include "VectorExpr.h"
-#include "VectorConvert.h"
+#include "RValueVectorImpl/VectorConvert.h"

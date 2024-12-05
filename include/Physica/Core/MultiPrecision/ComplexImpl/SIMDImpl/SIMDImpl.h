@@ -174,4 +174,12 @@ namespace Physica::Core {
         static_cast<FullRealType&>(result) = std::move(reals);
         return result;
     }
+
+    template<Scalar T, size_t Size>
+    inline SIMD<Complex<T>, Size> mul_add(
+            const SIMD<Complex<T>, Size>& a,
+            const SIMD<Complex<T>, Size>& b,
+            const SIMD<Complex<T>, Size>& c) noexcept {
+        return a * b + c;
+    }
 }

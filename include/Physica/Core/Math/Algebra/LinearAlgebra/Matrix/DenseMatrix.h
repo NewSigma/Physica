@@ -108,8 +108,8 @@ namespace Physica::Core {
 }
 
 namespace Physica {
-    template<Core::Scalar T, int Op, size_t Row, size_t Col, class Allocator>
-    class Traits<Core::DenseMatrix<T, Op, Row, Col, Allocator>> {
+    template<Scalar T, int Op, size_t Row, size_t Col, class Allocator>
+    class Traits<DenseMatrix<T, Op, Row, Col, Allocator>> {
         static_assert(!T::isForwardDiff, "[Error]: Use diffable matrix instead");
     public:
         using ScalarType = T;

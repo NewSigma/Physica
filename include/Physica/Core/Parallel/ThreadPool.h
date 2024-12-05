@@ -132,8 +132,7 @@ namespace Physica::Core {
     inline int ThreadPool::makeNumThread() noexcept {
         const auto numProcesser = getNumProcesser();
         if (numThreadRequired == 0 || numThreadRequired > numProcesser)
-            return numProcesser * 3 / 4;
-        else
-            return numThreadRequired;
+            numThreadRequired = numProcesser * 3 / 4;
+        return numThreadRequired;
     }
 }

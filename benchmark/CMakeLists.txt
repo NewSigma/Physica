@@ -4,6 +4,8 @@ add_executable(Benchmark)
 
 add_subdirectory(ManyBody)
 # Math
+target_sources(Benchmark PRIVATE Math/InnerDot.cpp)
+target_sources(Benchmark PRIVATE Math/InnerDot_MKL.cpp)
 target_sources(Benchmark PRIVATE Math/LnCosh.cpp)
 # RPMD
 target_sources(Benchmark PRIVATE RPMD/HardCore.cpp)

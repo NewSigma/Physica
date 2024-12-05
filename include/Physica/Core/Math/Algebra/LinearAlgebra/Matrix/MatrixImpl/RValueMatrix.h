@@ -153,7 +153,7 @@ namespace Physica {
 #include "DiagVector.h"
 #include "MatrixNorm.h"
 #include "MatrixExpr.h"
-#include "MatrixConvert.h"
+#include "RValueMatrixImpl/MatrixConvert.h"
 #include "MatrixProduct/GEMM.h"
 #include "MatrixProduct/GEMV.h"
 #include "MatrixProduct/GEVM.h"

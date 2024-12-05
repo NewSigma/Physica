@@ -47,6 +47,7 @@ namespace Physica::Core {
         [[nodiscard]] inline FullRealType permRealImag() const noexcept;
         [[nodiscard]] inline FullRealType scatterRealImag() const noexcept;
         /* Getters */
+        [[nodiscard]] constexpr static int size() { return Size; }
         [[nodiscard]] inline ValueType getValue() const;
         [[nodiscard]] inline FullRealType asReal() const;
     protected:

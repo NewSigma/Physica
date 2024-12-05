@@ -91,8 +91,7 @@ namespace Physica::Core {
     //////////////////////////////////Tanh_Sinh//////////////////////////////////
     /**
      * Reference:
-     * [1] Vanherck, Joren Sorée, Bart Magnus, Wim.
-     * Tanh-sinh quadrature for single and multiple integration using floating-point arithmetic. arXiv:2007.15057
+     * [1] arXiv:2007.15057; https://doi.org/10.48550/arXiv.2007.15057
      */
     template<Scalar T, size_t dim>
     class Integrate<IntegrateMethod::Tanh_Sinh, T, dim> : public IntegrateRange<T, dim> {

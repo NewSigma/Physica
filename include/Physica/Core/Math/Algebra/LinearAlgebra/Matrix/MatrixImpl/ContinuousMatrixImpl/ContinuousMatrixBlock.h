@@ -256,7 +256,7 @@ namespace Physica::Core {
 
 namespace Physica {
     template<Matrix T, size_t Row, size_t Col>
-    class Traits<Core::ContinuousMatrixBlock<T, Row, Col>> {
+    class Traits<ContinuousMatrixBlock<T, Row, Col>> {
     public:
         using ScalarType = T::ScalarType;
         constexpr static int Option = T::Option;

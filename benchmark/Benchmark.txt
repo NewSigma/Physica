@@ -1,0 +1,80 @@
+# Benchmark
+
+OS: Ubuntu24.04  
+Compiler: clang 17.0.6 + NVCC 12.6.20  
+Hardware: Intel(R) Core(TM) i7-14700KF + 32G + NVIDIA GeForce RTX 4060  
+Date: 2024-12-5  
+Maintainer: Weibo He (NewSigma@163.com)  
+
+-----------------------------------------------------------------
+Benchmark                       Time             CPU   Iterations
+-----------------------------------------------------------------
+HubbardMatrix1D              5.75 ms         5.75 ms          120
+TPQ                          1.13 s          1.13 s             1
+innerDot float32             24.6 ns         24.6 ns     28519613
+innerDot float64             47.5 ns         47.5 ns     15243207
+innerDot cfloat32            94.0 ns         94.0 ns      7405213
+innerDot cfloat64             183 ns          183 ns      3791622
+innerDot_base float32        54.4 ns         54.4 ns     12699432
+innerDot_base float64         136 ns          136 ns      5145522
+innerDot_base cfloat32        101 ns          101 ns      6934010
+innerDot_base cfloat64        203 ns          203 ns      3448177
+innerDot_mkl float32         24.8 ns         24.8 ns     28246940
+innerDot_mkl float64         50.0 ns         50.0 ns     14372542
+innerDot_mkl cfloat32        92.6 ns         92.6 ns      7425882
+innerDot_mkl cfloat64         182 ns          182 ns      3839130
+lncosh float32                952 ns          952 ns       727338
+lncosh float64               2134 ns         2134 ns       328233
+lncosh cfloat32              5743 ns         5743 ns       120825
+lncosh cfloat64             13540 ns        13540 ns        51348
+HardCore                     5.23 us         5.23 us       166043
+ParaH/108                   0.473 ms        0.282 ms         2467
+ParaH/256                    1.22 ms        0.976 ms          694
+ParaH/500                    2.00 ms         1.64 ms          422
+ParaH/864                    3.32 ms         2.74 ms          257
+Q_TIP4P                      11.4 ms         11.4 ms           61
+ParaH cuda/108              0.908 ms        0.908 ms          765
+ParaH cuda/256               1.44 ms         1.44 ms          491
+ParaH cuda/500               2.54 ms         2.54 ms          275
+ParaH cuda/864               4.15 ms         4.15 ms          172
+ParaH auto/108              0.447 ms        0.245 ms         3111
+ParaH auto/256              0.807 ms        0.633 ms         1076
+ParaH auto/500               1.46 ms         1.29 ms          532
+ParaH auto/864               2.18 ms         1.98 ms          334
+Q_TIP4P cuda                 10.9 ms         10.9 ms           68
+Mnist                       0.755 s         0.755 s             1
+
+OS: Ubuntu24.04  
+Compiler: IntelLLVM 2025.0  
+Hardware: Intel(R) Core(TM) i7-14700KF + 32G  
+Date: 2024-12-5  
+Maintainer: Weibo He (NewSigma@163.com) 
+
+-----------------------------------------------------------------
+Benchmark                       Time             CPU   Iterations
+-----------------------------------------------------------------
+HubbardMatrix1D              5.31 ms         5.31 ms          130
+TPQ                          1.24 s          1.24 s             1
+innerDot float32             24.6 ns         24.6 ns     28399260
+innerDot float64             46.3 ns         46.3 ns     15125022
+innerDot cfloat32            92.1 ns         92.1 ns      7444904
+innerDot cfloat64             182 ns          182 ns      3831248
+innerDot_base float32        54.5 ns         54.5 ns     12690600
+innerDot_base float64         130 ns          130 ns      5372732
+innerDot_base cfloat32        102 ns          102 ns      6905377
+innerDot_base cfloat64        198 ns          198 ns      3510367
+innerDot_mkl float32         24.1 ns         24.1 ns     28869645
+innerDot_mkl float64         45.5 ns         45.5 ns     15266346
+innerDot_mkl cfloat32        91.7 ns         91.7 ns      7596690
+innerDot_mkl cfloat64         185 ns          185 ns      3779828
+lncosh float32               58.8 ns         58.8 ns     11799313
+lncosh float64                136 ns          136 ns      5140679
+lncosh cfloat32               132 ns          132 ns      5303527
+lncosh cfloat64               305 ns          305 ns      2282392
+HardCore                     2.18 us         2.18 us       389115
+ParaH/108                   0.450 ms        0.266 ms         2626
+ParaH/256                    1.18 ms        0.939 ms          735
+ParaH/500                    1.94 ms         1.56 ms          448
+ParaH/864                    3.20 ms         2.63 ms          268
+Q_TIP4P                      9.91 ms         9.91 ms           71
+Mnist                       0.694 s         0.694 s             1

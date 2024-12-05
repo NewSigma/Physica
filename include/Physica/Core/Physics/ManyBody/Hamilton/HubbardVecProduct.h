@@ -18,6 +18,8 @@
  */
 #pragma once
 
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/SparseVector.h"
+
 namespace Physica::Core {
     template<Scalar T, class ReprType, Vector U>
     class MatrixVectorProduct<HubbardMatrix<T, ReprType>, U>

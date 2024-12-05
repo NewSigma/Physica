@@ -43,6 +43,14 @@ namespace Physica::Core {
     }
 
     template<Scalar T, int Order>
+    template<int MaskOrder>
+    const auto& Diff<T, DiffMode::Forward, Order>::mask() const noexcept {
+        using MaskedType = std::conditional<MaskOrder == 0, const T&, const Diff<typename Base::ValueType, DiffMode::Forward, MaskOrder>&>::type;
+        using ResultType = std::conditional<std::less<int>{}(MaskOrder, Order), MaskedType, const This&>::type;
+        return reinterpret_cast<ResultType>(*this);
+    }
+
+    template<Scalar T, int Order>
     Diff<T, DiffMode::Forward, Order> Diff<T, DiffMode::Forward, Order>::conjugate() const {
         return This(getValue().conjugate(), getGrad().conjugate());
     }

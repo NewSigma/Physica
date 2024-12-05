@@ -115,3 +115,4 @@ namespace Physica::Core {
 }
 
 #include "ContinuousVectorImpl/ContinuousVectorImpl.h"
+#include "ContinuousVectorImpl/VectorConvert.h"

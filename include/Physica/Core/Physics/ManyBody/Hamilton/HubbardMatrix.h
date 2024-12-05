@@ -19,7 +19,6 @@
 #pragma once
 
 #include "Physica/Core/Math/Transform/FFT.h"
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/SparseVector.h"
 #include "Physica/Core/Physics/ManyBody/ReprSpace/ReprImpl/ReprSpace.h"
 #include "Physica/Core/Physics/ManyBody/Model/Hubbard.h"
 #include "HamiltonMatrix.h"

@@ -118,16 +118,16 @@ namespace Physica::Core {
 
 namespace Physica {
     template<Scalar T, int Order, int Option, size_t Row, size_t Col>
-    class Traits<Core::DenseMatrix<Core::Diff<T, Core::DiffMode::Forward, Order>, Option, Row, Col>> : public Traits<Core::DenseMatrix<T, Option>> {
+    class Traits<DenseMatrix<Diff<T, DiffMode::Forward, Order>, Option, Row, Col>> : public Traits<DenseMatrix<T, Option, Row, Col>> {
     public:
-        using ScalarType = Core::Diff<T, Core::DiffMode::Forward, Order>;
+        using ScalarType = Diff<T, DiffMode::Forward, Order>;
     };
 
     template<Scalar T, int Option, int Order>
-    class Traits<Core::Diff<Core::DenseMatrix<T, Option>, Core::DiffMode::Reverse, Order>> : public Traits<Core::DenseMatrix<T, Option>> {
+    class Traits<Diff<DenseMatrix<T, Option>, DiffMode::Reverse, Order>> : public Traits<DenseMatrix<T, Option>> {
         static_assert(!T::isDifferentiable, "[Error]: Nested Diff<> is not allowed");
     public:
-        using ScalarType = Core::Diff<T, Core::DiffMode::Reverse, Order>;
+        using ScalarType = Diff<T, DiffMode::Reverse, Order>;
     };
 }
 

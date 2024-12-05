@@ -336,7 +336,7 @@ namespace Physica::Core {
     [[nodiscard]] inline SIMD<T, Size> mul_add(
             const SIMD<T, Size>& a,
             const SIMD<T, Size>& b,
-            const SIMD<T, Size>& c) {
+            const SIMD<T, Size>& c) noexcept {
         return SIMD<T, Size>(mul_add(a.toMachine(), b.toMachine(), c.toMachine()));
     }
 
@@ -344,7 +344,7 @@ namespace Physica::Core {
     [[nodiscard]] inline SIMD<T, Size> nmul_add(
             const SIMD<T, Size> a,
             const SIMD<T, Size> b,
-            const SIMD<T, Size> c) {
+            const SIMD<T, Size> c) noexcept {
         static_assert(!T::isDifferentiable, "[Error]: Not implemented");
         return SIMD<T, Size>(nmul_add(a.toMachine(), b.toMachine(), c.toMachine()));
     }
@@ -353,7 +353,7 @@ namespace Physica::Core {
     [[nodiscard]] inline SIMD<T, Size> mul_sub(
             const SIMD<T, Size> a,
             const SIMD<T, Size> b,
-            const SIMD<T, Size> c) {
+            const SIMD<T, Size> c) noexcept {
         static_assert(!T::isDifferentiable, "[Error]: Not implemented");
         return SIMD<T, Size>(mul_sub(a.toMachine(), b.toMachine(), c.toMachine()));
     }
@@ -364,7 +364,7 @@ namespace Physica::Core {
     [[nodiscard]] inline SIMD<T, Size> mul_addsub(
             const SIMD<T, Size> a,
             const SIMD<T, Size> b,
-            const SIMD<T, Size> c) {
+            const SIMD<T, Size> c) noexcept {
         static_assert(!T::isDifferentiable, "[Error]: Not implemented");
         if constexpr (T::Option == Float32) {
             if constexpr (Size == 4) {
