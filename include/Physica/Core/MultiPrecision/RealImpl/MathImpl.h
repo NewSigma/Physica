@@ -264,6 +264,11 @@ namespace Physica::Core {
     }
 
     template<ScalarOption Option>
+    Real<Option> ln1pexp(const Real<Option>& x) noexcept {
+        return relu(x) + ln1p(exp(-abs(x)));
+    }
+
+    template<ScalarOption Option>
     Real<Option> lncosh(const Real<Option>& s) noexcept {
         using T = Real<Option>;
         const auto x = abs(s);

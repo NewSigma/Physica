@@ -22,29 +22,34 @@
 
 namespace Physica::Core {
     namespace Internal {
-        template<LVector T1, Vector T2, bool enableSIMD, class Executor>
-        struct AssignImpl {
+        template<LVector T1, Vector T2, class Executor>
+        class AssignImpl {
+            constexpr static size_t Size1 = T1::SizeAtCompile;
+            constexpr static size_t Size2 = T2::SizeAtCompile;
+            constexpr static size_t SizeAtCompile = Size1 > Size2 ? Size1 : Size2;
+            static_assert(Size1 == Dynamic || Size2 == Dynamic || Size1 == Size2, "[Error]: Size mismatch between two vector");
+            static_assert(T1::isComplex || !T2::isComplex, "[Error]: Cannot convert a complex to a real");
+        public:
+            using ScalarType = T1::ScalarType;
+            using AnyPacket = BestPacket<ScalarType, SizeAtCompile>::Type;
+            constexpr static size_t PacketSize = AnyPacket::size();
+
             inline static void run(T1& v1, const T2& v2) {
+                assert(v1.getLength() == v2.getLength() && "[Error]: Size mismatch between two vector");
+                if constexpr (Internal::EnableSIMD<T1, T2>::value)
+                    run_simd(v1, v2);
+                else
+                    run_for(v1, v2);
+            }
+        private:
+            inline static void run_for(T1& v1, const T2& v2) {
                 using ScalarType = T1::ScalarType;
                 Executor::parallel_for([&](size_t i) {
                     v1[i] = ScalarType(v2.calc(i));
                 }, v2.getLength(), Executor::getNumThread()).wait();
             }
-        };
 
-        template<LVector T1, Vector T2, class Executor>
-        class AssignImpl<T1, T2, true, Executor> {
-            constexpr static size_t size1 = T1::SizeAtCompile;
-            constexpr static size_t size2 = T2::SizeAtCompile;
-            constexpr static size_t SizeAtCompile = size1 > size2 ? size1 : size2;
-            constexpr static bool isContinuous = is_continuous<T1>::value;
-        public:
-            using ScalarType = T1::ScalarType;
-            using AnyPacket = BestPacket<ScalarType, SizeAtCompile>::Type;
-            constexpr static size_t PacketSize = AnyPacket::size();
-            constexpr static bool isReverseDiff = ScalarType::isReverseDiff;
-
-            inline static void run(T1& v1, const T2& v2) {
+            inline static void run_simd(T1& v1, const T2& v2) {
                 if constexpr (SizeAtCompile != Dynamic) {
                     constexpr size_t to = SizeAtCompile / PacketSize * PacketSize;
                     for (size_t i = 0; i < to; i += PacketSize)
@@ -87,6 +92,8 @@ namespace Physica::Core {
                     }
                 }
 
+                constexpr static bool isContinuous = is_continuous<T1>::value;
+                constexpr static bool isReverseDiff = ScalarType::isReverseDiff;
                 if constexpr (isContinuous && isReverseDiff)
                     v1.makeContinuous();
             }
@@ -96,11 +103,7 @@ namespace Physica::Core {
     template<class Derived>
     template<LVector V, class Executor>
     inline void RValueVector<Derived>::assignTo(V& v) const {
-        constexpr size_t OtherSize = Traits<V>::SizeAtCompile;
-        static_assert(SizeAtCompile == Dynamic || OtherSize == Dynamic || SizeAtCompile == OtherSize,
-                "[Error]: Size mismatch between two vector");
-        assert(v.getLength() == getLength() && "[Error]: Size mismatch between two vector");
-        Internal::AssignImpl<V, Derived, Internal::EnableSIMD<V, Derived>::value, Executor>::run(v, Base::getDerived());
+        Internal::AssignImpl<V, Derived, Executor>::run(v, Base::getDerived());
     }
 
     template<class Derived>
@@ -226,6 +229,8 @@ namespace Physica::Core {
 
     template<class Derived>
     RValueVector<Derived>::ScalarType RValueVector<Derived>::max() const {
+        static_assert(!ScalarType::isComplex, "[Error]: Compare between complex number is ill defined");
+
         assert(getLength() != 0);
         constexpr bool EnableSIMD = Internal::EnableSIMD<Derived>::value;
         if constexpr (!EnableSIMD || isReverseDiff) {  // Optimize: Not implemented for reverse diff
@@ -274,6 +279,8 @@ namespace Physica::Core {
 
     template<class Derived>
     RValueVector<Derived>::ScalarType RValueVector<Derived>::min() const {
+        static_assert(!ScalarType::isComplex, "[Error]: Compare between complex number is ill defined");
+
         assert(getLength() != 0);
         constexpr bool EnableSIMD = Internal::EnableSIMD<Derived>::value;
         if constexpr (!EnableSIMD || isReverseDiff) { // Optimize: Not implemented for reverse diff
@@ -363,7 +370,11 @@ namespace Physica::Core {
     template<class Derived>
     RValueVector<Derived>::ScalarType RValueVector<Derived>::lnSumExp() const {
         const Derived& v = Base::getDerived();
-        const ScalarType m = max();
+        ValueType m;
+        if constexpr (isComplex)
+            m = abs(toValueVector(v)).max();
+        else
+            m = max().getValue();
         return ln(exp(v - m).sum()) + m;
     }
 

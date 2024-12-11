@@ -30,7 +30,9 @@ namespace Physica::Core {
     template<Scalar T, int Order>
     template<Scalar U, int OtherOrder>
     Diff<T, DiffMode::Forward, Order>::Diff(const Diff<U, DiffMode::Forward, OtherOrder>& other)
-            : value(other.getValue()), grad(other.getGrad()) {}
+            : value(other.getValue()), grad(other.getGrad()) {
+        static_assert(T::isComplex || !U::isComplex, "[Error]: Cannot convert a complex to a real");
+    }
 
     template<Scalar T, int Order>
     inline bool Diff<T, DiffMode::Forward, Order>::operator==(const This& other) const {

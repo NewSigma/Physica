@@ -29,14 +29,14 @@ namespace Physica::Core {
     template<Scalar T, int Order, int Option, size_t Row, size_t Col>
     template<Matrix M>
     DenseMatrix<Diff<T, DiffMode::Forward, Order>, Option, Row, Col>::DenseMatrix(const M& mat) : DenseMatrix(mat.getRow(), mat.getCol()) {
-        mat.getDerived().assignTo(*this);
+        mat.assignTo(*this);
     }
 
     template<Scalar T, int Order, int Option, size_t Row, size_t Col>
     template<Vector V>
     DenseMatrix<Diff<T, DiffMode::Forward, Order>, Option, Row, Col>::DenseMatrix(const V& vec) : DenseMatrix(vec.getLength(), 1) {
         auto col = this->col(0);
-        vec.getDerived().assignTo(col);
+        vec.assignTo(col);
     }
 
     template<Scalar T, int Order, int Option, size_t Row, size_t Col>

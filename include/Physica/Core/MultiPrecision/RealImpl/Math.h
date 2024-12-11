@@ -131,6 +131,9 @@ namespace Physica::Core {
     Real<Option> arccoth(const Real<Option>& s) noexcept;
 
     template<ScalarOption Option>
+    Real<Option> ln1pexp(const Real<Option>& x) noexcept;
+
+    template<ScalarOption Option>
     Real<Option> lncosh(const Real<Option>& s) noexcept;
 
     template<ScalarOption Option>

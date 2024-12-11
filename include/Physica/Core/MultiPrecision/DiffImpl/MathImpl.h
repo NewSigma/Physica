@@ -163,6 +163,19 @@ namespace Physica::Core {
     }
 
     template<Scalar T, DiffMode Mode, int Order>
+    Diff<T, Mode, Order> pow(const Diff<T, Mode, Order>& x, const T& a) {
+        using ResultType = Diff<T, Mode, Order>;
+        if constexpr (Mode == DiffMode::Forward) {
+            using GradType = ResultType::GradType;
+            constexpr int GradOrder = GradType::Order;
+            const auto y = pow(GradType(x), a);
+            return ResultType(y.getValue(), x.getGrad() * y / x.template mask<GradOrder>() * a);
+        }
+        else
+            noImpl(__func__);
+    }
+
+    template<Scalar T, DiffMode Mode, int Order>
     Diff<T, Mode, Order> cos(const Diff<T, Mode, Order>& s) {
         using ResultType = Diff<T, Mode, Order>;
         if constexpr (Mode == DiffMode::Forward) {

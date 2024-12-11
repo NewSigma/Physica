@@ -37,6 +37,7 @@ namespace Physica::Core {
         using ParamPair = std::pair<int, int>;
     private:
         using RealType = ScalarType::RealType;
+        using RealValue = RealType::ValueType;
         using MachineType = RealType::MachineType;
         constexpr static bool IsFloat = ScalarType::Option == Float;
         constexpr static int MaxNumTaylorTerm = 55;
@@ -91,6 +92,7 @@ namespace Physica::Core {
     template<Matrix T, Vector U>
     template<LVector V, class Executor>
     void MatrixVectorProduct<MatrixExp<T>, U>::assignTo(V& target, RealType traceMu, ParamPair params) const {
+        using BufferType = DenseVector<ScalarType, U::SizeAtCompile>;
         assert(getLength() == target.getLength());
         const RealType epsilon = std::numeric_limits<RealType>::epsilon();
         const auto& mat = mexp.getMatrix();
@@ -98,7 +100,7 @@ namespace Physica::Core {
         const int numSplit = params.second;
         const RealType factor = exp(traceMu / RealType(numSplit));
 
-        V buffer, term;
+        BufferType buffer, term;
         target = v;
         for (int i = 0; i < numSplit; ++i) {
             term = target;
@@ -151,11 +153,11 @@ namespace Physica::Core {
             return std::make_pair(numMinCostTerm, numSplit);
         }
 
-        RealType powerNorms[MaxNormOrder];
+        RealValue powerNorms[MaxNormOrder];
         const RealType normalizer = reciprocal(norm1); // pow() has the risk of overflow
         for (int order = 2; order <= MaxNormOrder + 1; ++order) {
             const RealType pNorm1 = pow(mexp.getMatrix() * normalizer - (traceMu * normalizer) * unit, order).template norm1_power<Executor>(MaxNormIteration);
-            powerNorms[order - 2] = pow(pNorm1, reciprocal(RealType(order))) * norm1;
+            powerNorms[order - 2] = pow(pNorm1.getValue(), reciprocal(RealValue(order))) * norm1.getValue();
         }
 
         for (int order = 2; order <= MaxNormOrder; ++order) {

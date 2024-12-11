@@ -56,11 +56,11 @@ namespace Physica::Core {
         using Base::assignTo;
         using Base::calc;
         using Base::format;
-        using Base::hermite;
         using Storage::resize;
         [[nodiscard]] ScalarType max() const { return asVector().max(); }
         [[nodiscard]] ScalarType min() const { return asVector().min(); }
         [[nodiscard]] const This& transpose() const noexcept { return *this; }
+        [[nodiscard]] inline auto hermite() const noexcept;
         void swap(This& __restrict m) noexcept;
 
         template<RandomGenerator R>
@@ -136,6 +136,14 @@ namespace Physica::Core {
     template<Vector V>
     inline auto DenseSymmMatrix<T, Order>::operator*(const V& vec) const noexcept {
         return MatrixVectorProduct<This, V>(*this, vec);
+    }
+
+    template<Scalar T, size_t Order>
+    inline auto DenseSymmMatrix<T, Order>::hermite() const noexcept {
+        if constexpr (T::isComplex)
+            return Base::hermite();
+        else
+            return *this;
     }
 
     template<Scalar T, size_t Order>

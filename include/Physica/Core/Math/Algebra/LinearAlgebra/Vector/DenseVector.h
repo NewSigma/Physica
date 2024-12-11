@@ -97,7 +97,7 @@ namespace Physica::Core {
 
 namespace Physica {
     template<Scalar T, size_t Length, class Allocator>
-    class Traits<Core::DenseVector<T, Length, Allocator>> {
+    class Traits<DenseVector<T, Length, Allocator>> {
         static_assert(!T::isForwardDiff, "[Error]: Use diffable vector instead");
     public:
         using ScalarType = T;

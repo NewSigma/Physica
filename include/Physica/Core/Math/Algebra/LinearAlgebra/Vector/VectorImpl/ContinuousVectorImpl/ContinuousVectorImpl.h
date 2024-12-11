@@ -34,7 +34,6 @@ namespace Physica::Core {
 
         template<LVector T1, Vector T2>
         class AddAssignImpl<T1, T2, true> {
-            static_assert(std::is_same<typename T1::ScalarType, typename T2::ScalarType>::value, "[Error]: SIMD on different scalars is not supported");
             constexpr static size_t Size1 = T1::SizeAtCompile;
             constexpr static size_t Size2 = T2::SizeAtCompile;
             constexpr static size_t SizeAtCompile = Size1 > Size2 ? Size1 : Size2;

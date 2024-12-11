@@ -56,6 +56,7 @@ namespace Physica::Core {
         SIMD() = default;
         explicit SIMD(int x);
         explicit SIMD(ScalarType x);
+        SIMD(ScalarType x, int count);
         SIMD(const SIMD&) = default;
         SIMD(SIMD&&) noexcept = default;
         ~SIMD() = default;
@@ -79,6 +80,8 @@ namespace Physica::Core {
         inline void load_partial(const ScalarType* p, int n);
         inline void store(ScalarType* p) const;
         inline void store_partial(ScalarType* p, int n) const;
+
+        inline This& cutoff(int count);
 
         inline FullRealPair makeFullRealImag() const noexcept;
         using Base::swapRealImag;

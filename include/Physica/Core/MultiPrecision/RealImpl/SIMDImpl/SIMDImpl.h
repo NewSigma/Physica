@@ -23,7 +23,8 @@
 
 namespace Physica::Core {
     template<Scalar T, size_t Size>
-    SIMD<T, Size>::SIMD(HalfType a, HalfType b) : pack(a.toMachine(), b.toMachine()) {}
+    template<Scalar U>
+    SIMD<T, Size>::SIMD(const U& x) : pack(x.getValue().toMachine()) {}
 
     template<Scalar T, size_t Size>
     SIMD<T, Size>::SIMD(T x, int count) {
@@ -69,6 +70,9 @@ namespace Physica::Core {
     SIMD<T, Size>::SIMD(Args... args) : pack(args.toMachine()...) {
         static_assert(sizeof...(Args) == Size, "[Error]: Number of elements does not match");
     }
+
+    template<Scalar T, size_t Size>
+    SIMD<T, Size>::SIMD(HalfType a, HalfType b) : pack(a.toMachine(), b.toMachine()) {}
 
     template<Scalar T, size_t Size>
     inline T SIMD<T, Size>::operator[](int index) const {

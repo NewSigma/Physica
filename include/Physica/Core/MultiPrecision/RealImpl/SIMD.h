@@ -45,7 +45,8 @@ namespace Physica::Core {
     public:
         SIMD() = default;
         explicit SIMD(double x) : pack(x) {}
-        explicit SIMD(T x) : pack(x.toMachine()) {}
+        template<Scalar U>
+        explicit SIMD(const U& x);
         SIMD(T x, int count);
         template<Scalar... Args>
         SIMD(Args... args);
@@ -197,6 +198,7 @@ namespace std {
 
     template<Physica::Core::Scalar T, size_t Size>
     inline PacketType max(PacketType a, PacketType b) {
+        static_assert(!T::isComplex, "[Error]: Compare between complex number is ill defined");
         if constexpr (T::isForwardDiff) {
             using GradPacket = PacketType::GradPacket;
             const auto values = max(a.getValue(), b.getValue());
@@ -208,6 +210,7 @@ namespace std {
 
     template<Physica::Core::Scalar T, size_t Size>
     inline PacketType min(PacketType a, PacketType b) {
+        static_assert(!T::isComplex, "[Error]: Compare between complex number is ill defined");
         if constexpr (T::isForwardDiff) {
             using GradPacket = PacketType::GradPacket;
             const auto values = min(a.getValue(), b.getValue());

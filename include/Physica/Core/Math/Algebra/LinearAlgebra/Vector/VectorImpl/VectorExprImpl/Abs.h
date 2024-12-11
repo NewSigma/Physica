@@ -48,6 +48,13 @@ namespace Physica::Core {
             else
                 return abs(Base::getExpr().template packetPartial<AnyPacket>(index, count));
         }
+
+        ScalarType max() const {
+            if constexpr (isComplexV)
+                return sqrt(toSquaredNormVector(Base::getExpr()).max());
+            else
+                return Base::max();
+        }
     };
 
     template<Vector T>

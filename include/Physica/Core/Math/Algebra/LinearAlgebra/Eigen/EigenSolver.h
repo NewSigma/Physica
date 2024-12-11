@@ -36,7 +36,7 @@ namespace Physica::Core {
         constexpr static bool isComplex = T::isComplex;
     public:
         using RealType = T::RealType;
-        using ComplexType = Complex<RealType>;
+        using ComplexType = RealType::ComplexType;
         using EigenvalueVector = DenseVector<ComplexType, Order>;
         using EigenvectorMatrix = DenseMatrix<ComplexType, MatrixOption::Col | MatrixOption::Vector, Order, Order>;
         using RawEigenvectorType = DenseMatrix<T, MatrixOption::Col | MatrixOption::Vector, Order, Order>;

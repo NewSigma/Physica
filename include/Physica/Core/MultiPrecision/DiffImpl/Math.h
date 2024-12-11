@@ -48,6 +48,9 @@ namespace Physica::Core {
 */
     template<Scalar T, DiffMode Mode, int Order>
     Diff<T, Mode, Order> exp(const Diff<T, Mode, Order>& s);
+
+    template<Scalar T, DiffMode Mode, int Order>
+    Diff<T, Mode, Order> pow(const Diff<T, Mode, Order>& x, const T& a);
 /*
     template<Scalar T, DiffMode Mode, int Order>
     Diff<T, Mode, Order> pow(const Diff<T, Mode, Order>& s, const Diff<T, Mode, Order>& n);

@@ -18,6 +18,7 @@
  */
 #pragma once
 
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/UnitVector.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/MatrixImpl/RValueMatrix.h"
 
 namespace Physica::Core {
@@ -38,6 +39,8 @@ namespace Physica::Core {
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
         /* Operations */
+        template<Matrix M>
+        void assignTo(LValueMatrix<M>& target) const;
         [[nodiscard]] ScalarType calc(size_t, size_t) const { noImpl("calc() is low performance and should be avoided"); }
         /* Getters */
         [[nodiscard]] const T& getMatrix() const noexcept { return m; }
@@ -51,7 +54,14 @@ namespace Physica::Core {
     }
 
     template<Matrix T>
-    [[nodiscard]] inline MatrixExp<T> exp(const T& m) noexcept {
+    template<Matrix M>
+    void MatrixExp<T>::assignTo(LValueMatrix<M>& target) const {
+        for (size_t i = 0; i < getCol(); ++i)
+            target.col(i) = (*this) * UnitVector<ScalarType>(i, getRow());
+    }
+
+    template<Matrix T>
+    [[nodiscard]] inline auto exp(const T& m) noexcept {
         return MatrixExp<T>(m);
     }
 }

@@ -29,6 +29,7 @@ namespace Physica::Core {
         using This = LnVegas<T>;
         using Base = Vegas<T>;
         using typename Base::ValueType;
+        using typename Base::RealValue;
         using typename Base::LossMatrix;
 
         using Base::means;
@@ -47,7 +48,7 @@ namespace Physica::Core {
         template<class Functor, RandomGenerator R, class Executor = SequentialExecutor>
         void integral(Functor lnFunc);
         template<class Functor, RandomGenerator R, class Executor = SequentialExecutor>
-        [[nodiscard]] ValueType calcGridLoss(Functor func) const;
+        [[nodiscard]] RealValue calcGridLoss(Functor func) const;
 
         [[nodiscard]] T calcLnMean() const;
         [[nodiscard]] T calcLnDevia() const;
@@ -98,7 +99,7 @@ namespace Physica::Core {
 
     template<Scalar T>
     template<class Functor, RandomGenerator R, class Executor>
-    LnVegas<T>::ValueType LnVegas<T>::calcGridLoss(Functor func) const {
+    LnVegas<T>::RealValue LnVegas<T>::calcGridLoss(Functor func) const {
         LossMatrix lossMat(getNumPoint() - 1, getDim());
         trialIntegral<Functor, R, Executor>(lossMat, func);
         return Base::calcGridLossImpl(lossMat);
@@ -111,7 +112,7 @@ namespace Physica::Core {
 
     template<Scalar T>
     T LnVegas<T>::calcLnDevia() const {
-        return T(0.5) * calcLnVar();
+        return RealValue(0.5) * calcLnVar();
     }
 
     template<Scalar T>
@@ -125,9 +126,9 @@ namespace Physica::Core {
             return 1;
         const T lnMean = calcLnMean();
         VectorND<T> buffer = exp(means - lnMean);
-        buffer = ln(abs(buffer - T(1))) + lnMean;
-        buffer = T(2) * buffer - vars;
-        return exp(buffer).sum() / T(getNumRefine() - 1);
+        buffer = ln(abs(buffer - RealValue(1))) + lnMean;
+        buffer = RealValue(2) * buffer - vars;
+        return exp(buffer).sum() / RealValue(getNumRefine() - 1);
     }
 
     template<Scalar T>
@@ -137,8 +138,8 @@ namespace Physica::Core {
         const auto indexes = R::getInstance().random_int(getDim() * numSample, 0, lossMat.getRow() - 1);
         VectorND<T> samples(numSample);
         Executor::parallel_for([&, this](size_t n) {
-            VectorND<T> fromX(getDim());
-            VectorND<T> deltaX(getDim());
+            VectorND<RealValue> fromX(getDim());
+            VectorND<RealValue> deltaX(getDim());
             for (size_t i = 0; i < getDim(); ++i) {
                 const auto& pointGrid = getPointGrid();
                 const auto index = indexes[n * getDim() + i];
@@ -147,23 +148,27 @@ namespace Physica::Core {
             }
             deltaX -= fromX;
 
-            const VectorND<T> x = fromX + hadamard(deltaX, VectorND<T>::template random_uniform<R>(getDim()));
+            const VectorND<RealValue> x = fromX + hadamard(deltaX, VectorND<RealValue>::template random_uniform<R>(getDim()));
             const T lny = lnFunc(x);
-            const T lnxy = lny + ln(deltaX).sum() + T(getDim()) * ln(T(lossMat.getRow()));
+            const T lnxy = lny + ln(deltaX).sum() + RealValue(getDim()) * ln(RealValue(lossMat.getRow()));
             samples[n] = lnxy;
         }, numSample, Executor::getNumThread()).wait();
 
         Array<Array<int>> counts(lossMat.getRow(), getDim(), 0);
         lossMat = std::numeric_limits<T>::min();
 
-        const T maxSample = samples.max();
+        ValueType maxSample;
+        if constexpr (T::isComplex)
+            maxSample = toRealVector(samples).max().getValue();
+        else
+            maxSample = samples.max().getValue(); // Real LnVegas assumes f(x) > 0, so ln(f(x)) is defined
         samples = exp(samples - maxSample);
         T mean = 0, var = 0;
         for (int n = 0; n < numSample; ++n) {
             const T xy = samples[n];
             toNextVariance(var, mean, n, xy);
 
-            const ValueType l = std::max(square(xy.getValue()), ValueType(std::numeric_limits<T>::min()));
+            const auto l = std::max(xy.getValue().squaredNorm(), RealValue(std::numeric_limits<T>::min()));
             for (size_t i = 0; i < getDim(); ++i) {
                 const auto index = indexes[n * getDim() + i];
                 toNextMean(lossMat(index, i), counts[index][i], l);
@@ -171,7 +176,7 @@ namespace Physica::Core {
             }
         }
         mean = ln(mean) + maxSample;
-        var = ln(var) + T(2) * maxSample;
+        var = ln(var) + RealValue(2) * maxSample;
         return std::make_pair(std::move(mean), std::move(var));
     }
 }

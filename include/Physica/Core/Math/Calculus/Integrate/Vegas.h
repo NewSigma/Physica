@@ -33,21 +33,29 @@ namespace Physica::Core {
         using This = Vegas<T>;
     protected:
         using ValueType = T::ValueType;
-        using LossMatrix = DenseMatrix<ValueType>;
+        using RealValue = ValueType::RealType;
+        using LossMatrix = DenseMatrix<RealValue>;
     private:
-        DenseMatrix<ValueType> pointGrid;
-        VectorND<ValueType> from;
-        VectorND<ValueType> to;
+        DenseMatrix<RealValue> pointGrid;
+        VectorND<RealValue> from;
+        VectorND<RealValue> to;
         int numRefine;
         int numSample;
-        ValueType compressRate;
+        RealValue compressRate;
+        RealValue mixBeta;
     protected:
         VectorND<T> means;
         VectorND<T> vars;
-        VectorND<ValueType> loss;
+        VectorND<RealValue> loss;
     public:
         Vegas() = default;
-        Vegas(VectorND<ValueType> from_, VectorND<ValueType> to_, int numRefine_, int numSample_, int numPoint = 1000, ValueType compressRate_ = 1.5);
+        Vegas(VectorND<RealValue> from_,
+              VectorND<RealValue> to_,
+              int numRefine_,
+              int numSample_,
+              int numPoint = 1000,
+              RealValue compressRate_ = 1.5,
+              RealValue mixBeta_ = 0);
         Vegas(const This&) = default;
         Vegas(This&&) noexcept = default;
         ~Vegas() = default;
@@ -59,7 +67,7 @@ namespace Physica::Core {
         template<class Functor, RandomGenerator R, class Executor = SequentialExecutor>
         void integral(Functor func);
         template<class Functor, RandomGenerator R, class Executor = SequentialExecutor>
-        [[nodiscard]] ValueType calcGridLoss(Functor func) const;
+        [[nodiscard]] RealValue calcGridLoss(Functor func) const;
 
         [[nodiscard]] T calcMean() const;
         [[nodiscard]] T calcDevia() const;
@@ -76,33 +84,37 @@ namespace Physica::Core {
         [[nodiscard]] size_t getDim() const noexcept { return pointGrid.getCol(); }
         [[nodiscard]] int getNumRefine() const noexcept { return numRefine; }
         [[nodiscard]] int getNumSample() const noexcept { return numSample; }
-        [[nodiscard]] const VectorND<ValueType>& getLoss() const noexcept { return loss; }
+        [[nodiscard]] const VectorND<T>& getMeans() const noexcept { return means; }
+        [[nodiscard]] const VectorND<T>& getVars() const noexcept { return vars; }
+        [[nodiscard]] const VectorND<RealValue>& getLoss() const noexcept { return loss; }
         /* Setters */
         void setNumRefine(int numRefine_);
     protected:
         template<class Executor>
         void refineGrid(LossMatrix& lossMat);
-        static ValueType calcGridLossImpl(const LossMatrix& lossMat);
+        static RealValue calcGridLossImpl(const LossMatrix& lossMat);
     private:
         template<class Functor, RandomGenerator R, class Executor>
         std::pair<T, T> trialIntegral(LossMatrix& lossMat, Functor func) const;
-        ValueType compress(VectorND<ValueType>& vars);
+        RealValue compress(VectorND<RealValue>& vars);
     };
 
     template<Scalar T>
-    Vegas<T>::Vegas(VectorND<ValueType> from_, VectorND<ValueType> to_, int numRefine_, int numSample_, int numPoint, ValueType compressRate_)
+    Vegas<T>::Vegas(VectorND<RealValue> from_, VectorND<RealValue> to_, int numRefine_, int numSample_, int numPoint, RealValue compressRate_, RealValue mixBeta_)
             : from(std::move(from_))
             , to(std::move(to_))
             , numSample(numSample_)
-            , compressRate(compressRate_) {
+            , compressRate(compressRate_)
+            , mixBeta(mixBeta_) {
         assert(from.getLength() == to.getLength() && "[Error]: Inconsistent dim");
         assert(numSample > 0);
         assert(numPoint > 2 && "[Error]: Invalid point number");
         assert(compressRate.isPositive() && "[Error]: Rate = 0 implies no grid refinement");
-        assert(compressRate < T(2) && "[Error]: Rate should be ~ 1");
+        assert(compressRate < RealValue(2) && "[Error]: Rate should be ~ 1");
+        assert(!mixBeta.isNegative() && (mixBeta < RealValue(1)) && "[Error]: Invalid beta");
         pointGrid.resize(numPoint, from.getLength());
         for (size_t i = 0; i < getDim(); ++i)
-            pointGrid.col(i) = VectorND<T>::linspace(from[i], to[i], numPoint);
+            pointGrid.col(i) = VectorND<RealValue>::linspace(from[i], to[i], numPoint);
         setNumRefine(numRefine_);
     }
 
@@ -138,7 +150,7 @@ namespace Physica::Core {
 
     template<Scalar T>
     template<class Functor, RandomGenerator R, class Executor>
-    Vegas<T>::ValueType Vegas<T>::calcGridLoss(Functor func) const {
+    Vegas<T>::RealValue Vegas<T>::calcGridLoss(Functor func) const {
         LossMatrix lossMat(getNumPoint() - 1, getDim());
         trialIntegral<Functor, R, Executor>(lossMat, func);
         return calcGridLossImpl(lossMat);
@@ -164,7 +176,7 @@ namespace Physica::Core {
         if (numRefine == 1)
             return 1;
         const T mean1 = calcMean();
-        return (T(numSample) / T(numRefine - 1)) * divide(square(means - mean1), vars).sum(); // Normalize, refer to [2]
+        return (RealValue(numSample) / RealValue(numRefine - 1)) * divide(toSquaredNormVector(means - mean1), vars).sum(); // Normalize, refer to [2]
     }
 #ifdef PHYSICA_HDF5
     template<Scalar T>
@@ -209,6 +221,7 @@ namespace Physica::Core {
         std::swap(numRefine, obj.numRefine);
         std::swap(numSample, obj.numSample);
         compressRate.swap(obj.compressRate);
+        mixBeta.swap(obj.mixBeta);
 
         means.swap(obj.means);
         vars.swap(obj.vars);
@@ -221,8 +234,8 @@ namespace Physica::Core {
         const auto indexes = R::getInstance().random_int(getDim() * numSample, 0, lossMat.getRow() - 1);
         VectorND<T> samples(numSample);
         Executor::parallel_for([&, this](size_t n) {
-            VectorND<T> fromX(getDim());
-            VectorND<T> deltaX(getDim());
+            VectorND<RealValue> fromX(getDim());
+            VectorND<RealValue> deltaX(getDim());
             for (size_t i = 0; i < getDim(); ++i) {
                 const auto index = indexes[n * getDim() + i];
                 fromX[i] = pointGrid(index, i);
@@ -230,9 +243,9 @@ namespace Physica::Core {
             }
             deltaX -= fromX;
 
-            const VectorND<T> x = fromX + hadamard(deltaX, VectorND<T>::template random_uniform<R>(getDim()));
+            const VectorND<RealValue> x = fromX + hadamard(deltaX, VectorND<RealValue>::template random_uniform<R>(getDim()));
             const T y = func(x);
-            const T xy = y * (deltaX * T(lossMat.getRow())).prod();
+            const T xy = y * (deltaX * RealValue(lossMat.getRow())).prod();
             samples[n] = xy;
         }, numSample, Executor::getNumThread()).wait();
 
@@ -244,7 +257,7 @@ namespace Physica::Core {
             const T xy = samples[n];
             toNextVariance(var, mean, n, xy);
             // Loss has minimal value to avoid the grid size reducing to 0
-            const ValueType l = std::max(square(xy.getValue()), ValueType(std::numeric_limits<T>::min()));
+            const auto l = std::max(xy.getValue().squaredNorm(), RealValue(std::numeric_limits<T>::min()));
             for (size_t i = 0; i < getDim(); ++i) {
                 const auto index = indexes[n * getDim() + i];
                 toNextMean(lossMat(index, i), counts[index][i], l);
@@ -261,8 +274,8 @@ namespace Physica::Core {
         means.resize(numRefine);
         vars.resize(numRefine);
         loss.resize(numRefine);
-        means = T(0);
-        vars = T(0);
+        means = RealValue(0);
+        vars = RealValue(0);
     }
 
     template<Scalar T>
@@ -275,9 +288,9 @@ namespace Physica::Core {
                 return;
 
             auto oldPoints = pointGrid.col(dim);
-            VectorND<T> newPoints(getNumPoint());
+            VectorND<RealValue> newPoints(getNumPoint());
             newPoints[0] = oldPoints[0];
-            T temp = 0;
+            RealValue temp = 0;
             size_t i = 1;
             for (size_t j = 0; i < newPoints.getLength() - 1; ++i) {
                 while (temp < meanVar) {
@@ -289,37 +302,37 @@ namespace Physica::Core {
                 newPoints[i] = oldPoints[j] - temp * (oldPoints[j] - oldPoints[j - 1]) / lossMat(j - 1, dim);
             }
             newPoints[i] = oldPoints[i];
-            oldPoints = newPoints;
+            oldPoints = newPoints * (RealValue(1) - mixBeta) + oldPoints * mixBeta;
         }, getDim(), Executor::getNumThread()).wait();
     }
 
     template<Scalar T>
-    Vegas<T>::ValueType Vegas<T>::calcGridLossImpl(const LossMatrix& lossMat) {
-        ValueType maxVar = 0;
+    Vegas<T>::RealValue Vegas<T>::calcGridLossImpl(const LossMatrix& lossMat) {
+        RealValue maxVar = 0;
         for (size_t i = 0; i < lossMat.getCol(); ++i) {
             const auto col = lossMat.col(i);
-            const ValueType prior = mean(col);
-            maxVar = std::max(maxVar, variance(col, prior) / square(prior));
+            const RealValue prior = mean(col);
+            maxVar = std::max(maxVar, variance(col, prior) / prior.squaredNorm());
         }
         return sqrt(maxVar);
     }
 
     template<Scalar T>
-    Vegas<T>::ValueType Vegas<T>::compress(VectorND<ValueType>& vars) {
-        const ValueType sum = vars.sum();
+    Vegas<T>::RealValue Vegas<T>::compress(VectorND<RealValue>& vars) {
+        const auto sum = vars.sum();
         const bool noData = sum.isZero();
         if (noData)
             return 0;
 
-        const VectorND<ValueType> buffer = vars * reciprocal(sum); // Normalized values fall into a range that is feasible for compression function.
-        const Vector3D<ValueType> kernel{1.0 / 8, 6.0 / 8, 1.0 / 8};
+        const VectorND<RealValue> buffer = vars * reciprocal(sum); // Normalized values fall into a range that is feasible for compression function.
+        const Vector3D<RealValue> kernel{1.0 / 8, 6.0 / 8, 1.0 / 8};
         size_t i = 0;
-        vars[0] = ValueType(7.0 / 8) * buffer[0] + ValueType(1.0 / 8) * buffer[1];
+        vars[0] = RealValue(7.0 / 8) * buffer[0] + RealValue(1.0 / 8) * buffer[1];
         for (; i < vars.getLength() - 2; ++i)
             vars[i + 1] = buffer.template segment<3>(i, i + 3) * kernel;
-        vars[i + 1] = ValueType(1.0 / 8) * buffer[i] + ValueType(7.0 / 8) * buffer[i + 1];
+        vars[i + 1] = RealValue(1.0 / 8) * buffer[i] + RealValue(7.0 / 8) * buffer[i + 1];
 
-        vars = pow(divide(vars - ValueType(1), ln(vars)), compressRate);
+        vars = pow(divide(vars - RealValue(1), ln(vars)), compressRate);
         return mean(vars);
     }
 }

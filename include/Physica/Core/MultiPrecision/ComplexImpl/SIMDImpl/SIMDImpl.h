@@ -38,6 +38,11 @@ namespace Physica::Core {
     }
 
     template<Scalar T, size_t Size>
+    SIMD<Complex<T>, Size>::SIMD(ScalarType x, int count) : SIMD(x) {
+        cutoff(count);
+    }
+
+    template<Scalar T, size_t Size>
     inline SIMD<Complex<T>, Size>::ScalarType SIMD<Complex<T>, Size>::operator[](int index) const {
         return ScalarType(FullRealType::operator[](2 * index), FullRealType::operator[](2 * index + 1));
     }
@@ -103,6 +108,13 @@ namespace Physica::Core {
     template<Scalar T, size_t Size>
     inline void SIMD<Complex<T>, Size>::store_partial(ScalarType* p, int n) const {
         FullRealType::store_partial(reinterpret_cast<T*>(p), 2 * n);
+    }
+
+    template<Scalar T, size_t Size>
+    inline SIMD<Complex<T>, Size>& SIMD<Complex<T>, Size>::cutoff(int count) {
+        assert(0 < count && count < int(Size) && "[Error]: Invalid count");
+        RealBase::cutoff(2 * count);
+        return *this;
     }
 
     template<Scalar T, size_t Size>
