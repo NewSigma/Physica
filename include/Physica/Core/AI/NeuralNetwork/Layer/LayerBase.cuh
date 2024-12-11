@@ -35,7 +35,7 @@ namespace Physica::Core {
         using ValueType = ScalarType::ValueType;
         using InputType = TraitsType::InputType;
         using OutputType = TraitsType::OutputType;
-        constexpr static bool IsTrainMode = ScalarType::isDifferentiable;
+        constexpr static bool IsTrainMode = ScalarType::isDiffable;
         static_assert(!is_device_obj<ScalarType>::value, "[Error]: Nested device_obj<> is not allowed");
     public:
         ~device_obj() = default;

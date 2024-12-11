@@ -262,28 +262,28 @@ namespace Physica::Core {
     [[nodiscard]] inline auto operator+(const Diff<T, Mode, Order>& s1, const U& s2);
 
     template<Scalar T, DiffMode Mode, int Order, Scalar U>
-    [[nodiscard]] inline std::enable_if<!U::isDifferentiable, typename Internal::BinaryScalarOpRtnTy<Diff<T, Mode, Order>, U>::Type>::type
+    [[nodiscard]] inline std::enable_if<!U::isDiffable, typename Internal::BinaryScalarOpRtnTy<Diff<T, Mode, Order>, U>::Type>::type
     operator+(const U& s1, const Diff<T, Mode, Order>& s2);
 
     template<Scalar T, DiffMode Mode, int Order, Scalar U>
     [[nodiscard]] inline auto operator-(const Diff<T, Mode, Order>& s1, const U& s2);
 
     template<Scalar T, DiffMode Mode, int Order, Scalar U>
-    [[nodiscard]] inline std::enable_if<!U::isDifferentiable, typename Internal::BinaryScalarOpRtnTy<Diff<T, Mode, Order>, U>::Type>::type
+    [[nodiscard]] inline std::enable_if<!U::isDiffable, typename Internal::BinaryScalarOpRtnTy<Diff<T, Mode, Order>, U>::Type>::type
     operator-(const U& s1, const Diff<T, Mode, Order>& s2);
 
     template<Scalar T, DiffMode Mode, int Order, Scalar U>
     [[nodiscard]] inline auto operator*(const Diff<T, Mode, Order>& s1, const U& s2);
 
     template<Scalar T, DiffMode Mode, int Order, Scalar U>
-    [[nodiscard]] inline std::enable_if<!U::isDifferentiable, typename Internal::BinaryScalarOpRtnTy<Diff<T, Mode, Order>, U>::Type>::type
+    [[nodiscard]] inline std::enable_if<!U::isDiffable, typename Internal::BinaryScalarOpRtnTy<Diff<T, Mode, Order>, U>::Type>::type
     operator*(const U& s1, const Diff<T, Mode, Order>& s2);
 
     template<Scalar T, DiffMode Mode, int Order, Scalar U>
     [[nodiscard]] inline auto operator/(const Diff<T, Mode, Order>& s1, const U& s2);
 
     template<Scalar T, DiffMode Mode, int Order, Scalar U>
-    [[nodiscard]] inline std::enable_if<!U::isDifferentiable, typename Internal::BinaryScalarOpRtnTy<Diff<T, Mode, Order>, U>::Type>::type
+    [[nodiscard]] inline std::enable_if<!U::isDiffable, typename Internal::BinaryScalarOpRtnTy<Diff<T, Mode, Order>, U>::Type>::type
     operator/(const U& s1, const Diff<T, Mode, Order>& s2);
 
     template<Scalar T, DiffMode Mode, int Order>
@@ -295,7 +295,7 @@ namespace Physica::Core {
 namespace Physica {
     template<Scalar T, DiffMode Mode, int Order_>
     class Traits<Diff<T, Mode, Order_>> {
-        static_assert(!T::isDifferentiable, "[Error]: Nested Diff<> is not allowed");
+        static_assert(!T::isDiffable, "[Error]: Nested Diff<> is not allowed");
         static_assert(Order_ > 0, "[Error]: Use plain type instead of 0 order differentiable");
         using RealT = T::RealType;
         using ComplexT = T::ComplexType;
@@ -303,7 +303,7 @@ namespace Physica {
         constexpr static ScalarOption Option = T::Option;
         constexpr static int Order = Order_;
         constexpr static bool isComplex = T::isComplex;
-        constexpr static bool isDifferentiable = true;
+        constexpr static bool isDiffable = true;
         constexpr static bool isForwardDiff = Mode == DiffMode::Forward;
         constexpr static bool isReverseDiff = Mode == DiffMode::Reverse;
     private:

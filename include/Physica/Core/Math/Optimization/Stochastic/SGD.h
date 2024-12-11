@@ -27,7 +27,7 @@ namespace Physica::Core {
      */
     template<Scalar T>
     class SGD {
-        static_assert(T::isDifferentiable, "[Error]: T must be differentiable");
+        static_assert(T::isDiffable, "[Error]: T must be differentiable");
         static_assert(!is_device_obj<T>::value, "[Error]: Include corresponding *.cuh file to enable CUDA support");
         using TracerType = T::TracerType;
     public:

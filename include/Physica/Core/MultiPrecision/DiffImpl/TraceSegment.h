@@ -29,7 +29,7 @@ namespace Physica::Core {
      */
     template<Scalar T, int Order>
     class TraceSegment {
-        static_assert(!T::isDifferentiable, "[Error]: Diff<> pack is not necessary");
+        static_assert(!T::isDiffable, "[Error]: Diff<> pack is not necessary");
         static_assert(Order > 0, "[Error]: 0 order is not differentiable");
         using This = TraceSegment<T, Order>;
         using GradType = std::conditional<Order == 1, T, Diff<T, DiffMode::Reverse, Order - 1>>::type;

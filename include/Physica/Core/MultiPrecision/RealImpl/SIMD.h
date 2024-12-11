@@ -161,7 +161,7 @@ namespace Physica {
         constexpr static bool isFloat32 = T::Option == Float32;
         static_assert(isFloat32 || T::Option == Float64, "[Error]: Unsupported float type");
         static_assert(!T::isComplex, "[Error]: The main template targets on real scalar");
-        static_assert(!T::isDifferentiable, "[Error]: The main template targets on plain scalar");
+        static_assert(!T::isDiffable, "[Error]: The main template targets on plain scalar");
         static_assert(Size % 2 == 0 && Size <= 16, "[Error]: Invalid Size");
 
         using Size2Type = std::conditional<isFloat32, void, Vec2d>::type;

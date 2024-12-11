@@ -349,7 +349,7 @@ namespace Physica::Core {
             const SIMD<T, Size> a,
             const SIMD<T, Size> b,
             const SIMD<T, Size> c) noexcept {
-        static_assert(!T::isDifferentiable, "[Error]: Not implemented");
+        static_assert(!T::isDiffable, "[Error]: Not implemented");
         return SIMD<T, Size>(nmul_add(a.toMachine(), b.toMachine(), c.toMachine()));
     }
 
@@ -358,7 +358,7 @@ namespace Physica::Core {
             const SIMD<T, Size> a,
             const SIMD<T, Size> b,
             const SIMD<T, Size> c) noexcept {
-        static_assert(!T::isDifferentiable, "[Error]: Not implemented");
+        static_assert(!T::isDiffable, "[Error]: Not implemented");
         return SIMD<T, Size>(mul_sub(a.toMachine(), b.toMachine(), c.toMachine()));
     }
     /**
@@ -369,7 +369,7 @@ namespace Physica::Core {
             const SIMD<T, Size> a,
             const SIMD<T, Size> b,
             const SIMD<T, Size> c) noexcept {
-        static_assert(!T::isDifferentiable, "[Error]: Not implemented");
+        static_assert(!T::isDiffable, "[Error]: Not implemented");
         if constexpr (T::Option == Float32) {
             if constexpr (Size == 4) {
                 if constexpr (Instruset::hasFMA() || Instruset::hasAVX2())

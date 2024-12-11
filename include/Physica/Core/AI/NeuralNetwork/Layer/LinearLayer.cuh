@@ -194,7 +194,7 @@ namespace Physica {
         using VectorType = VectorND<typename Base::ScalarType>;
         using ValueType = Base::ScalarType::ValueType;
         using DiffVector = Diff<VectorND<ValueType>, DiffMode::Reverse, T::Order>;
-        constexpr static bool IsTrainMode = Base::ScalarType::isDifferentiable;
+        constexpr static bool IsTrainMode = Base::ScalarType::isDiffable;
     public:
         using InputType = Core::device_obj<typename std::conditional<IsTrainMode, DiffVector, VectorType>::type>;
         using OutputType = InputType;

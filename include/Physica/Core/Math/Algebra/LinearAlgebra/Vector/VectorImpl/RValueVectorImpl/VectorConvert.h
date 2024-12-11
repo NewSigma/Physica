@@ -283,7 +283,7 @@ namespace Physica {
 
     template<class T>
     class Traits<ValueVector<T>> {
-        static_assert(T::ScalarType::isDifferentiable, "[Error]: Unnecessary toValueVector() call");
+        static_assert(T::ScalarType::isDiffable, "[Error]: Unnecessary toValueVector() call");
     public:
         using ScalarType = T::ValueType;
         constexpr static size_t SizeAtCompile = T::SizeAtCompile;
@@ -293,7 +293,7 @@ namespace Physica {
 
     template<class T, int GradOrder>
     class Traits<GradVector<T, GradOrder>> {
-        static_assert(T::ScalarType::isDifferentiable, "[Error]: Unnecessary toGradVector() call");
+        static_assert(T::ScalarType::isDiffable, "[Error]: Unnecessary toGradVector() call");
     public:
         using ScalarType = T::ScalarType::template GradRtnTy<GradOrder>;
         constexpr static size_t SizeAtCompile = T::SizeAtCompile;
@@ -305,7 +305,7 @@ namespace Physica {
     class Traits<DiffMaskVector<T, MaskOrder>> {
         using U = T::ScalarType;
         using ValueType = typename U::ValueType;
-        static_assert(U::isDifferentiable, "[Error]: Unnecessary toDiffMaskVector() call");
+        static_assert(U::isDiffable, "[Error]: Unnecessary toDiffMaskVector() call");
     public:
         using ScalarType = std::conditional<MaskOrder == 0, ValueType, Diff<ValueType, U::Mode, MaskOrder>>::type;
         constexpr static size_t SizeAtCompile = T::SizeAtCompile;

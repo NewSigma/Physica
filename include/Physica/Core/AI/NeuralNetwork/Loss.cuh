@@ -26,7 +26,7 @@ namespace Physica::Core {
         static_assert(!is_device_obj<T>::value, "[Error]: Nested device_obj<> is not allowed");
         using host_obj = Loss<T>;
     public:
-        constexpr static bool IsTrainMode = T::isDifferentiable;
+        constexpr static bool IsTrainMode = T::isDiffable;
         using ValueType = T::ValueType;
         using LossType = std::conditional<IsTrainMode, device_obj<T>, T>::type;
     private:

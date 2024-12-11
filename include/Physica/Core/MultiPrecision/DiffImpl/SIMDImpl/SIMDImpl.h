@@ -28,7 +28,7 @@ namespace Physica::Core {
     template<Scalar T, int Order, size_t Size>
     template<Scalar U>
     SIMD<Diff<T, DiffMode::Forward, Order>, Size>::SIMD(U x) {
-        if constexpr (U::isDifferentiable) {
+        if constexpr (U::isDiffable) {
             values = ValuePacket(x.getValue());
             grads = GradPacket(x.getGrad());
         }
@@ -84,7 +84,7 @@ namespace Physica::Core {
     template<Scalar T, int Order, size_t Size>
     template<Scalar U>
     inline SIMD<Diff<T, DiffMode::Forward, Order>, Size> SIMD<Diff<T, DiffMode::Forward, Order>, Size>::operator*(const U& x) const {
-        if constexpr (U::isDifferentiable)
+        if constexpr (U::isDiffable)
             return *this * ScalarType(x);
         else
             return This(values * x, grads * x);

@@ -114,7 +114,7 @@ namespace Physica::Core {
 
     template<Scalar T, size_t Size>
     class SIMD<Diff<T, DiffMode::Reverse, 1>, Size> : public SIMDBase<SIMD<Diff<T, DiffMode::Reverse, 1>, Size>>, public SIMD<T, Size> {
-        static_assert(!T::isDifferentiable, "[Error]: Invalid template param");
+        static_assert(!T::isDiffable, "[Error]: Invalid template param");
         using ScalarType = Diff<T, DiffMode::Reverse, 1>;
         using This = SIMD<ScalarType, Size>;
         using Base = SIMD<T, Size>;

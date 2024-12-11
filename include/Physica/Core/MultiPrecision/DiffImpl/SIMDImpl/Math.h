@@ -18,6 +18,8 @@
  */
 #pragma once
 
+#include "Physica/Core/MultiPrecision/Scalar.h"
+
 namespace Physica::Core {
     template<Scalar T, DiffMode Mode, int Order, size_t Size>
     [[nodiscard]] inline auto abs(const SIMD<Diff<T, Mode, Order>, Size>& x);

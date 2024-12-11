@@ -24,7 +24,7 @@
 namespace Physica::Core {
     template<Scalar T>
     class MomentumSGD : public SGD<T> {
-        static_assert(T::isDifferentiable, "[Error]: T must be differentiable");
+        static_assert(T::isDiffable, "[Error]: T must be differentiable");
         static_assert(!is_device_obj<T>::value, "[Error]: Not implemented");
         using Base = SGD<T>;
         using typename Base::ValueType;

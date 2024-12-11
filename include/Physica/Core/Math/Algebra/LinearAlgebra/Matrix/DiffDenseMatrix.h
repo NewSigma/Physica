@@ -125,7 +125,7 @@ namespace Physica {
 
     template<Scalar T, int Option, int Order>
     class Traits<Diff<DenseMatrix<T, Option>, DiffMode::Reverse, Order>> : public Traits<DenseMatrix<T, Option>> {
-        static_assert(!T::isDifferentiable, "[Error]: Nested Diff<> is not allowed");
+        static_assert(!T::isDiffable, "[Error]: Nested Diff<> is not allowed");
     public:
         using ScalarType = Diff<T, DiffMode::Reverse, Order>;
     };

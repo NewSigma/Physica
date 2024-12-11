@@ -23,23 +23,22 @@
 
 namespace Physica {
     template<>
-    class Traits<Core::float16> {
+    class Traits<float16> {
     public:
-        constexpr static Core::ScalarOption Option = Core::Float16;
+        constexpr static ScalarOption Option = Float16;
         constexpr static int Order = 0;
         constexpr static bool isComplex = false;
-        constexpr static bool isDifferentiable = false;
         constexpr static bool isForwardDiff = false;
         constexpr static bool isReverseDiff = false;
 
-        using ValueType = Core::float16;
+        using ValueType = float16;
         using ScalarType = ValueType;
         using PtrTy = ScalarType*;
         using ConstPtrTy = const ScalarType*;
         using RefTy = ScalarType&;
         using ConstRefTy = const ScalarType&;
         using RealType = ScalarType;
-        using ComplexType = Core::Complex<ScalarType>;
+        using ComplexType = Complex<ScalarType>;
         using MachineType = __half;
     };
 }

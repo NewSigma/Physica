@@ -101,7 +101,7 @@ namespace Physica::Core {
 namespace Physica {
     template<Scalar T, DiffMode Mode, int Order_>
     class Traits<Core::device_obj<Diff<T, Mode, Order_>>> {
-        static_assert(!T::isDifferentiable, "[Error]: Nested Diff<> is not allowed");
+        static_assert(!T::isDiffable, "[Error]: Nested Diff<> is not allowed");
         static_assert(!is_device_obj<T>::value, "[Error]: Nested device_obj<> is not allowed");
         using RealT = T::RealType;
         using ComplexT = T::ComplexType;
@@ -109,7 +109,7 @@ namespace Physica {
         constexpr static ScalarOption Option = T::Option;
         constexpr static int Order = Order_;
         constexpr static bool isComplex = T::isComplex;
-        constexpr static bool isDifferentiable = true;
+        constexpr static bool isDiffable = true;
         constexpr static bool isForwardDiff = false;
         constexpr static bool isReverseDiff = true;
 

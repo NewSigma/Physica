@@ -38,7 +38,7 @@ namespace Physica::Core {
         using MachineType = TraitsType::MachineType;
         
         constexpr static bool isComplex = ScalarType::isComplex;
-        constexpr static bool isDifferentiable = ScalarType::isDifferentiable;
+        constexpr static bool isDiffable = ScalarType::isDiffable;
     public:
         constexpr ~SIMDBase() = default;
         /* Operations */
@@ -120,7 +120,7 @@ namespace Physica::Core {
 
     template<class Derived>
     inline SIMDBase<Derived>::ValueType SIMDBase<Derived>::getValue() const {
-        if constexpr (isDifferentiable)
+        if constexpr (isDiffable)
             return Base::getDerived().getValue();
         else
             return Base::getDerived();

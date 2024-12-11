@@ -116,7 +116,7 @@ namespace Physica {
 
     template <Matrix T>
     class Traits<Core::ValueMatrix<T>> {
-        static_assert(T::ScalarType::isDifferentiable, "[Error]: Unnecessary toValueVector() call or toGradVector() call");
+        static_assert(T::ScalarType::isDiffable, "[Error]: Unnecessary toValueVector() call or toGradVector() call");
     public:
         using ScalarType = T::ValueType;
         constexpr static int Option = T::Option;
@@ -127,7 +127,7 @@ namespace Physica {
 
     template <Matrix T, int GradOrder>
     class Traits<Core::GradMatrix<T, GradOrder>> {
-        static_assert(T::ScalarType::isDifferentiable, "[Error]: Unnecessary toValueVector() call or toGradVector() call");
+        static_assert(T::ScalarType::isDiffable, "[Error]: Unnecessary toValueVector() call or toGradVector() call");
     public:
         using ScalarType = T::ScalarType::template GradRtnTy<GradOrder>;
         constexpr static int Option = T::Option;

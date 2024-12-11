@@ -63,6 +63,9 @@ if(${BUILD_BENCHMARKS})
 endif()
 
 if(${BUILD_DOC})
+    if(NOT ${PHYSICA_GUI})
+        message(FATAL_ERROR "To use Physica documentation, you should enable PHYSICA_GUI.")
+    endif()
     find_package(Sphinx REQUIRED)
     add_custom_target(Sphinx
                       COMMAND ${SPHINX_EXEC} -b html ${CMAKE_SOURCE_DIR}/doc ${CMAKE_BINARY_DIR}/sphinx

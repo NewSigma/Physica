@@ -44,7 +44,7 @@ namespace Physica::Core {
 
     template<Scalar T, size_t Size>
     [[nodiscard]] inline SIMD<T, Size> sqrt(const SIMD<T, Size>& x) {
-        if constexpr (!T::isDifferentiable)
+        if constexpr (!T::isDiffable)
             return SIMD<T, Size>(sqrt(x.toMachine()));
         else {
             using PlainSIMD = SIMD<typename T::ValueType, Size>;
@@ -60,7 +60,7 @@ namespace Physica::Core {
 
     template<Scalar T, size_t Size>
     [[nodiscard]] inline SIMD<T, Size> cbrt(const SIMD<T, Size>& x) {
-        if constexpr (!T::isDifferentiable)
+        if constexpr (!T::isDiffable)
             return SIMD<T, Size>(cbrt(x.toMachine()));
         else {
             using PlainSIMD = SIMD<typename T::ValueType, Size>;

@@ -26,7 +26,7 @@
 namespace Physica::Core {
     template<Scalar T, int Order>
     class device_obj<TraceSegment<T, Order>> {
-        static_assert(!T::isDifferentiable, "[Error]: Diff<> pack is not necessary");
+        static_assert(!T::isDiffable, "[Error]: Diff<> pack is not necessary");
         static_assert(Order > 0, "[Error]: 0 order is not differentiable");
         using host_obj = TraceSegment<T, Order>;
         using This = device_obj<host_obj>;

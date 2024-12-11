@@ -25,7 +25,7 @@ namespace Physica::Core {
     class Loss {
         static_assert(!is_device_obj<T>::value, "[Error]: Include corresponding *.cuh file to enable CUDA support");
     public:
-        constexpr static bool IsTrainMode = T::isDifferentiable;
+        constexpr static bool IsTrainMode = T::isDiffable;
         using ValueType = T::ValueType;
         using LossType = T;
     private:

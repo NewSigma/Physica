@@ -32,7 +32,7 @@ namespace Physica::Core {
         using ValueType = ScalarType::ValueType;
         using InputType = TraitsType::InputType;
         using OutputType = TraitsType::OutputType;
-        constexpr static bool IsTrainMode = ScalarType::isDifferentiable;
+        constexpr static bool IsTrainMode = ScalarType::isDiffable;
     public:
         ~LayerBase() = default;
         /* Operations */

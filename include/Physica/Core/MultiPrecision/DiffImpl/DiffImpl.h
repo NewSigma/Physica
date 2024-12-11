@@ -402,7 +402,7 @@ namespace Physica::Core {
         using SecondType = U;
         using ResultType = Internal::BinaryScalarOpRtnTy<FirstType, SecondType>::Type;
         if constexpr (Mode == DiffMode::Forward) {
-            if constexpr (U::isDifferentiable)
+            if constexpr (U::isDiffable)
                 return ResultType(s1.getValue() + s2.getValue(), s1.getGrad() + s2.getGrad());
             else
                 return ResultType(s1.getValue() + s2.getValue(), s1.getGrad());
@@ -416,7 +416,7 @@ namespace Physica::Core {
             auto& tracer = DiffTracer<T, Order>::getInstance();
             const ValueType value = s1.getValue() + s2.getValue();
             ResultType result;
-            if constexpr (U::isDifferentiable) {
+            if constexpr (U::isDiffable) {
                 result = tracer.pushOperation(value, ExprType::Add);
                 tracer.pushOperand(s1.getDerived());
                 tracer.pushOperand(s2.getDerived());
@@ -432,7 +432,7 @@ namespace Physica::Core {
     }
 
     template<Scalar T, DiffMode Mode, int Order, Scalar U>
-    [[nodiscard]] inline std::enable_if<!U::isDifferentiable, typename Internal::BinaryScalarOpRtnTy<Diff<T, Mode, Order>, U>::Type>::type
+    [[nodiscard]] inline std::enable_if<!U::isDiffable, typename Internal::BinaryScalarOpRtnTy<Diff<T, Mode, Order>, U>::Type>::type
     operator+(const U& s1, const Diff<T, Mode, Order>& s2) {
         return s2 + s1.getDerived();
     }
@@ -443,7 +443,7 @@ namespace Physica::Core {
         using SecondType = U;
         using ResultType = Internal::BinaryScalarOpRtnTy<FirstType, SecondType>::Type;
         if constexpr (Mode == DiffMode::Forward) {
-            if constexpr (U::isDifferentiable)
+            if constexpr (U::isDiffable)
                 return ResultType(s1.getValue() - s2.getValue(), s1.getGrad() - s2.getGrad());
             else
                 return ResultType(s1.getValue() - s2.getValue(), s1.getGrad());
@@ -457,7 +457,7 @@ namespace Physica::Core {
             auto& tracer = DiffTracer<T, Order>::getInstance();
             const ValueType value = s1.getValue() - s2.getValue();
             ResultType result;
-            if constexpr (U::isDifferentiable) {
+            if constexpr (U::isDiffable) {
                 result = tracer.pushOperation(value, ExprType::Sub);
                 tracer.pushOperand(s1.getDerived());
                 tracer.pushOperand(s2.getDerived());
@@ -473,7 +473,7 @@ namespace Physica::Core {
     }
 
     template<Scalar T, DiffMode Mode, int Order, Scalar U>
-    [[nodiscard]] inline std::enable_if<!U::isDifferentiable, typename Internal::BinaryScalarOpRtnTy<Diff<T, Mode, Order>, U>::Type>::type
+    [[nodiscard]] inline std::enable_if<!U::isDiffable, typename Internal::BinaryScalarOpRtnTy<Diff<T, Mode, Order>, U>::Type>::type
     operator-(const U& s1, const Diff<T, Mode, Order>& s2) {
         return -(s2 - s1.getDerived());
     }
@@ -484,7 +484,7 @@ namespace Physica::Core {
         using SecondType = U;
         using ResultType = Internal::BinaryScalarOpRtnTy<FirstType, SecondType>::Type;
         if constexpr (Mode == DiffMode::Forward) {
-            if constexpr (U::isDifferentiable) {
+            if constexpr (U::isDiffable) {
                 using GradType = ResultType::GradType;
                 return ResultType(s1.getValue() * s2.getValue(), GradType(GradType(s2) * s1.getGrad() + GradType(s1) * s2.getGrad()));
             }
@@ -500,7 +500,7 @@ namespace Physica::Core {
             auto& tracer = DiffTracer<T, Order>::getInstance();
             const ValueType value = s1.getValue() * s2.getValue();
             ResultType result;
-            if constexpr (U::isDifferentiable) {
+            if constexpr (U::isDiffable) {
                 result = tracer.pushOperation(value, ExprType::Mul);
                 tracer.pushOperand(s1);
                 tracer.pushOperand(s2);
@@ -516,7 +516,7 @@ namespace Physica::Core {
     }
 
     template<Scalar T, DiffMode Mode, int Order, Scalar U>
-    [[nodiscard]] inline std::enable_if<!U::isDifferentiable, typename Internal::BinaryScalarOpRtnTy<Diff<T, Mode, Order>, U>::Type>::type
+    [[nodiscard]] inline std::enable_if<!U::isDiffable, typename Internal::BinaryScalarOpRtnTy<Diff<T, Mode, Order>, U>::Type>::type
     operator*(const U& s1, const Diff<T, Mode, Order>& s2) {
         return s2 * s1.getDerived();
     }
@@ -527,7 +527,7 @@ namespace Physica::Core {
         using SecondType = U;
         using ResultType = Internal::BinaryScalarOpRtnTy<FirstType, SecondType>::Type;
         if constexpr (Mode == DiffMode::Forward) {
-            if constexpr (U::isDifferentiable) {
+            if constexpr (U::isDiffable) {
                 using GradType = ResultType::GradType;
                 const auto v = reciprocal(GradType(s2));
                 return ResultType(s1.getValue() * v.getValue(), GradType((s1.getGrad() * GradType(s2) - GradType(s1) * s2.getGrad()) * square(v)));
@@ -546,7 +546,7 @@ namespace Physica::Core {
             auto& tracer = DiffTracer<T, Order>::getInstance();
             const ValueType value = s1.getValue() / s2.getValue();
             ResultType result;
-            if constexpr (U::isDifferentiable) {
+            if constexpr (U::isDiffable) {
                 result = tracer.pushOperation(value, ExprType::Div);
                 tracer.pushOperand(s1.getDerived());
                 tracer.pushOperand(s2.getDerived());
@@ -562,7 +562,7 @@ namespace Physica::Core {
     }
 
     template<Scalar T, DiffMode Mode, int Order, Scalar U>
-    [[nodiscard]] inline std::enable_if<!U::isDifferentiable, typename Internal::BinaryScalarOpRtnTy<Diff<T, Mode, Order>, U>::Type>::type
+    [[nodiscard]] inline std::enable_if<!U::isDiffable, typename Internal::BinaryScalarOpRtnTy<Diff<T, Mode, Order>, U>::Type>::type
     operator/(const U& s1, const Diff<T, Mode, Order>& s2) {
         using ResultType = Internal::BinaryScalarOpRtnTy<Diff<T, Mode, Order>, U>::Type;
         if constexpr (Mode == DiffMode::Forward) {

@@ -26,7 +26,7 @@ namespace Physica::Core {
     class device_obj<Diff<DenseMatrix<T, Option>, DiffMode::Reverse, Order>>
             : public device_obj<RValueMatrix<Diff<DenseMatrix<T, Option>, DiffMode::Reverse, Order>>>
             , public DenseMatrixDim<device_obj<Diff<DenseMatrix<T, Option>, DiffMode::Reverse, Order>>, Dynamic, Dynamic> {
-        static_assert(!T::isDifferentiable, "[Error]: Nested Diff<> is not allowed");
+        static_assert(!T::isDiffable, "[Error]: Nested Diff<> is not allowed");
         using PlainMatrix = DenseMatrix<T, Option>;
         using host_obj = Diff<PlainMatrix, DiffMode::Reverse, Order>;
         using This = device_obj<host_obj>;

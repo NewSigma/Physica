@@ -140,7 +140,7 @@ namespace Physica::Core {
 namespace Physica {
     template<Scalar T, int Order, size_t Length, class Allocator>
     class Traits<Core::DenseVector<Diff<T, DiffMode::Forward, Order>, Length, Allocator>> {
-        static_assert(!T::isDifferentiable, "[Error]: Nested Diff<> is not allowed");
+        static_assert(!T::isDiffable, "[Error]: Nested Diff<> is not allowed");
     public:
         using ScalarType = Diff<T, DiffMode::Forward, Order>;
         constexpr static size_t SizeAtCompile = Length;
@@ -151,7 +151,7 @@ namespace Physica {
 
     template<Scalar T, int Order>
     class Traits<Core::Diff<VectorND<T>, Core::DiffMode::Reverse, Order>> : public Traits<VectorND<T>> {
-        static_assert(!T::isDifferentiable, "[Error]: Nested Diff<> is not allowed");
+        static_assert(!T::isDiffable, "[Error]: Nested Diff<> is not allowed");
     public:
         using ScalarType = Diff<T, DiffMode::Reverse, Order>;
     };

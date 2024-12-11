@@ -132,12 +132,11 @@ namespace Physica {
     template<Scalar T>
     class Traits<Complex<T>> {
         static_assert(!T::isComplex, "[Error]: Double complex mark is not allowed");
-        static_assert(!T::isDifferentiable, "[Error]: Diff mark should locate in outsite");
+        static_assert(!T::isDiffable, "[Error]: Diff mark should locate in outsite");
     public:
         constexpr static ScalarOption Option = Traits<T>::Option;
         constexpr static int Order = 0;
         constexpr static bool isComplex = true;
-        constexpr static bool isDifferentiable = false;
         constexpr static bool isForwardDiff = false;
         constexpr static bool isReverseDiff = false;
 

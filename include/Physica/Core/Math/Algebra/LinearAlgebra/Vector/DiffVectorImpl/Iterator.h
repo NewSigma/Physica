@@ -22,9 +22,9 @@ namespace Physica::Core {
     /**
      * FIterator(Forward)
      */
-    template<Scalar T, int Order, size_t Length, class Allocator>
-    class FIterator<DenseVector<Diff<T, DiffMode::Forward, Order>, Length, Allocator>> {
-        using ElemType = Diff<T, DiffMode::Forward, Order>;
+    template<Scalar T, DiffMode Mode, int Order, size_t Length, class Allocator>
+    class FIterator<DenseVector<Diff<T, Mode, Order>, Length, Allocator>> {
+        using ElemType = Diff<T, Mode, Order>;
         using Container = DenseVector<ElemType, Length, Allocator>;
         using This = FIterator<Container>;
         constexpr static bool isConst = std::is_const<Container>::value;
@@ -59,9 +59,9 @@ namespace Physica::Core {
     /**
      * RIterator(Reverse)
      */
-    template<Scalar T, int Order, size_t Length, class Allocator>
-    class RIterator<DenseVector<Diff<T, DiffMode::Forward, Order>, Length, Allocator>> {
-        using ElemType = Diff<T, DiffMode::Forward, Order>;
+    template<Scalar T, DiffMode Mode, int Order, size_t Length, class Allocator>
+    class RIterator<DenseVector<Diff<T, Mode, Order>, Length, Allocator>> {
+        using ElemType = Diff<T, Mode, Order>;
         using Container = DenseVector<ElemType, Length, Allocator>;
         using This = RIterator<Container>;
         constexpr static bool isConst = std::is_const<Container>::value;

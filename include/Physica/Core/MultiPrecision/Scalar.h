@@ -25,10 +25,13 @@
 #include "Physica/Macro.h"
 
 namespace Physica::Core {
+    template<class ScalarType> class ScalarRef;
+    template<class ScalarType> class ScalarPtr;
     template<class Derived> class ScalarBase;
 
     template<class T>
-    concept Scalar = std::derived_from<T, ScalarBase<T>>;
+    concept Scalar = std::derived_from<std::remove_cvref_t<T>, ScalarBase<std::remove_cvref_t<T>>>
+                  || std::derived_from<std::remove_cvref_t<T>, typename std::remove_cvref_t<T>::ScalarType>;
 
     enum ScalarOption {
         Float16 = 0,
@@ -65,7 +68,9 @@ namespace Physica::Core {
     using cfloat16 = Complex<float16>;
     using cfloat32 = Complex<float32>;
     using cfloat64 = Complex<float64>;
-
+    /**
+     * \class Diff provides auto differential support for scalars
+     */
     template<class ScalarType, DiffMode Mode, int Order = 1>
     class Diff;
 
@@ -77,12 +82,12 @@ namespace Physica::Core {
         class BinaryScalarOpRtnTy {
             constexpr static ScalarOption Option = std::max(T1::Option, T2::Option);
             constexpr static bool isComplex = T1::isComplex || T2::isComplex;
-            constexpr static bool isDiffable1 = T1::isDifferentiable;
-            constexpr static bool isDiffable2 = T2::isDifferentiable;
+            constexpr static bool isDiffable1 = T1::isDiffable;
+            constexpr static bool isDiffable2 = T2::isDiffable;
             constexpr static bool isDiffable = isDiffable1 || isDiffable2;
 
-            constexpr static DiffMode Mode = T1::isDifferentiable ? T1::Mode : T2::Mode;
-            constexpr static DiffMode Mode1 = T2::isDifferentiable ? T2::Mode : T1::Mode;
+            constexpr static DiffMode Mode = T1::isDiffable ? T1::Mode : T2::Mode;
+            constexpr static DiffMode Mode1 = T2::isDiffable ? T2::Mode : T1::Mode;
             static_assert(Mode == Mode1, "[Error]: Operation between differentiable scalars with different mode is not well defined");
 
             constexpr static int Order1 = T1::Order;

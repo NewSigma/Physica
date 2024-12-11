@@ -78,7 +78,7 @@ namespace Physica::Core {
     SpinRepr<Dim, NumSite, UseInversionSymm>::SpinRepr(int numSpinUp_, int numSpinDown_)
             : numSpinUp(numSpinUp_), numSpinDown(numSpinDown_) {
         assert((numSpinUp >= 0) && (numSpinDown >= 0));
-        assert(!((numSpinUp == numSpinDown) ^ UseInversionSymm) && "[Error]: Inconsistent inversion symmetry");
+        assert(((numSpinUp == numSpinDown) == UseInversionSymm) && "[Error]: Inconsistent inversion symmetry");
         auto pair = makeSpinlessStates(numSpinUp);
         upStates = std::move(pair.first);
         upIndexMap = std::move(pair.second);

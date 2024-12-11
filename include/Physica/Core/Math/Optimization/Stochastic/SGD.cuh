@@ -23,7 +23,7 @@
 namespace Physica::Core {
     template<Scalar T>
     class SGD<device_obj<T>> {
-        static_assert(T::isDifferentiable, "[Error]: T must be differentiable");
+        static_assert(T::isDiffable, "[Error]: T must be differentiable");
         using This = SGD<device_obj<T>>;
         using DeviceScalar = device_obj<T>;
     public:

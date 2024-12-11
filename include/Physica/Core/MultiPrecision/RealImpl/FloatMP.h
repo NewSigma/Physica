@@ -25,7 +25,6 @@ namespace Physica {
         constexpr static Core::ScalarOption Option = Core::FloatMP;
         constexpr static int Order = 0;
         constexpr static bool isComplex = false;
-        constexpr static bool isDifferentiable = false;
         constexpr static bool isForwardDiff = false;
         constexpr static bool isReverseDiff = false;
 

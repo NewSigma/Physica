@@ -63,6 +63,10 @@ namespace Physica::Core {
         using Base::getNumRefine;
         using Base::getNumSample;
     private:
+        using Base::calcMean;
+        using Base::calcDevia;
+        using Base::calcVar;
+
         template<class Functor, RandomGenerator R, class Executor>
         std::pair<T, T> trialIntegral(LossMatrix& lossMat, Functor lnFunc) const;
     };

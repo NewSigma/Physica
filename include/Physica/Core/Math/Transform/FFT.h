@@ -42,7 +42,7 @@ namespace Physica::Core {
     class FFT<T, 1>
             : public FFTRSpace<FFT<T, 1>, 1>
             , public FFTKSpace<FFT<T, 1>, 1> {
-        static_assert(!T::isDifferentiable, "[Error]: Header of differentiable fft should be included");
+        static_assert(!T::isDiffable, "[Error]: Header of differentiable fft should be included");
         using This = FFT<T, 1>;
         using MachineType = Traits<This>::MachineType;
         using RealType = Traits<This>::RealType;
@@ -114,7 +114,7 @@ namespace Physica::Core {
     template<Scalar T, size_t Dim>
     class FFT : public FFTRSpace<FFT<T, Dim>, Dim>
               , public FFTKSpace<FFT<T, Dim>, Dim> {
-        static_assert(!T::isDifferentiable, "[Error]: Not implemented");
+        static_assert(!T::isDiffable, "[Error]: Not implemented");
         using This = FFT<T, Dim>;
         using MachineType = Traits<This>::MachineType;
         using RealType = Traits<This>::RealType;
@@ -205,13 +205,13 @@ namespace Physica {
         constexpr static size_t Dim = dim;
 
         constexpr static bool isComplex = T::isComplex;
-        constexpr static bool isDifferentiable = T::isDifferentiable;
+        constexpr static bool isDiffable = T::isDiffable;
         constexpr static bool isSinglePrec = std::is_same<MachineType, float>::value;
         using PlanType = std::conditional<isSinglePrec, fftwf_plan, fftw_plan>::type;
         using ComplexTypeFFTW = std::conditional<isSinglePrec, fftwf_complex, fftw_complex>::type;
 
-        static_assert(isDifferentiable || sizeof(RealType) == sizeof(MachineType), "[Error]: Invalid ScalarType");
-        static_assert(isDifferentiable || sizeof(ComplexType) == sizeof(ComplexTypeFFTW), "[Error]: Invalid ScalarType");
+        static_assert(isDiffable || sizeof(RealType) == sizeof(MachineType), "[Error]: Invalid ScalarType");
+        static_assert(isDiffable || sizeof(ComplexType) == sizeof(ComplexTypeFFTW), "[Error]: Invalid ScalarType");
         static_assert(Dim <= 3U, "[Error]: Dimension higher than 3 should be declared as dynamic");
         static_assert(Dim != 0, "[Error]: Not implemented");
     };

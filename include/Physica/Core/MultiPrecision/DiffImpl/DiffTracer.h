@@ -28,7 +28,7 @@ namespace Physica::Core {
      */
     template<Scalar T, int Order>
     class DiffTracer {
-        static_assert(!T::isDifferentiable, "[Error]: Diff<> pack is not necessary");
+        static_assert(!T::isDiffable, "[Error]: Diff<> pack is not necessary");
         static_assert(Order > 0, "[Error]: 0 order is not differentiable");
         using This = DiffTracer<T, Order>;
     public:
