@@ -16,15 +16,10 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include "Physica/Core/Math/Calculus/Differential.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DiffDenseMatrix.h"
 #include "Physica/Core/Physics/MD/ForceModel/Ewald/RSpaceEwald.h"
-#include "Physica/Core/Physics/SolidState/CrystalCell.h"
-#include "Physica/Core/Physics/PhyConst.h"
-#include "Physica/Core/MultiPrecision/AutoDiffGuard.h"
-#include "Physica/Core/Parallel/Executor/SequentialExecutor.h"
 
 using namespace Physica;
-using namespace Physica::Core;
 
 namespace Physica {
     class Test {
@@ -38,17 +33,13 @@ namespace Physica {
         static void run() {
             const ScalarType volume = 125;
             const size_t cellSize = 3;
-            const AutoDiffGuard<ScalarType> guard{};
             const auto cell = makeSystem(volume, cellSize);
             const auto& pos = cell.getPos();
             VectorND<ScalarType> charges(cell.getNumParticle(), 1.0);
             auto tail = charges.tail(cell.getNumParticle() / 2);
             tail = ScalarType(-1);
             RSpaceEwald<ScalarType, false> ewald(cell.getLattice(), std::move(charges));
-            {
-                const AutoDiffGuard<ScalarType> guard1{};
-                ewald.potentialV(pos).reverse();
-            }
+            ewald.potentialV(pos).reverse();
             /* Test press */ {
                 const ValueType press_diff = -volume.getGrad() / ValueType(cellSize * cellSize * cellSize);
                 const ValueType press = (ewald.virial(pos).trace() / ScalarType(3)).getValue();

@@ -64,7 +64,6 @@ namespace Physica::Core {
             return *this;
         }
         void resize([[maybe_unused]] size_t length) { assert(length == getLength()); }
-        void makeContinuous() { /* Nothing, it is matrix's responsibility */ }
         /* Getters */
         [[nodiscard]] __host__ __device__ size_t getLength() const noexcept { return Col == Dynamic ? colCount : Col; }
         [[nodiscard]] __host__ __device__ PtrTy data_ptr(size_t index) {
@@ -119,7 +118,6 @@ namespace Physica::Core {
             return *this;
         }
         void resize([[maybe_unused]] size_t length) { assert(length == getLength()); }
-        void makeContinuous() { /* Nothing, it is matrix's responsibility */ }
         /* Getters */
         [[nodiscard]] __host__ __device__ size_t getLength() const noexcept { return Row == Dynamic ? rowCount : Row; }
         [[nodiscard]] __host__ __device__ PtrTy data_ptr(size_t index) {

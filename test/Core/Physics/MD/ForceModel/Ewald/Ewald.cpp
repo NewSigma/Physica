@@ -18,7 +18,6 @@
  */
 #include <iostream>
 #include "Physica/Core/Physics/MD/ForceModel/Ewald/Ewald.h"
-#include "Physica/Core/MultiPrecision/AutoDiffGuard.h"
 #include "Physica/Core/Parallel/Executor/SequentialExecutor.h"
 
 using namespace Physica;
@@ -130,7 +129,6 @@ namespace Physica {
         };
         /* Operations */
         void functorTest() {
-            const AutoDiffGuard<ScalarType> guard{};
             const ScalarType r = 2;
             const ScalarType r2 = square(r);
             ewald.pot_functor(0, 1, r, r2).reverse();
@@ -140,11 +138,8 @@ namespace Physica {
         }
 
         void forceTest() {
-            {
-                const AutoDiffGuard<ScalarType> guard{};
-                ewald.potentialV(pos).reverse();
-            }
-            const AutoDiffGuard<ScalarType> guard{};
+            ewald.potentialV(pos).reverse();
+
             const VectorND<ScalarType> force = ewald.force<SequentialExecutor>(pos);
             PositionMatrix force_diff(pos.getRow(), pos.getCol());
             for (size_t i = 0; i < pos.getRow(); ++i)
@@ -172,10 +167,8 @@ namespace Physica {
             auto tail = charges.tail(cell.getNumParticle() / 2);
             tail = ScalarType(-1);
             EwaldType ewald(cell.getLattice(), std::move(charges));
-            {
-                AutoDiffGuard<ScalarType> guard{};
-                ewald.potentialV(cell.getPos()).reverse();
-            }
+            ewald.potentialV(cell.getPos()).reverse();
+
             const ValueType press_diff = -volume.getGrad() / ValueType(cellSize * cellSize * cellSize);
             const ValueType press = (ewald.virial(cell.getPos()).trace() / ScalarType(3)).getValue();
             if (!scalarNear(press_diff, press, 1E-13))

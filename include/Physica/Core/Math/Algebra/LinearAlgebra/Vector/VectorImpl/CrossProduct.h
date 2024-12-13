@@ -39,12 +39,6 @@ namespace Physica::Core {
             v[0] = v1[1] * v2[2] - v1[2] * v2[1];
             v[1] = v1[2] * v2[0] - v1[0] * v2[2];
             v[2] = v1[0] * v2[1] - v1[1] * v2[0];
-            if constexpr (isReverseDiff) {
-                using TracerType = ScalarType::TracerType;
-                TracerType::getInstance().reserve(3);
-                for (int i = 0; i < 3; ++i)
-                    v[i] = v[i].copy();
-            }
         }
         /* Getters */
         [[nodiscard]] constexpr size_t getLength() const noexcept { return 3; }

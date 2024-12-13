@@ -18,41 +18,41 @@
  */
 #pragma once
 
-namespace Physica::Core {
-    template<Scalar, int Order> class DiffTracer;
+#include "../Diff.h"
 
-    template<Scalar T, int Order, size_t Length>
-    class BestPacket<Diff<T, DiffMode::Forward, Order>, Length> {
-        using ScalarType = Diff<T, DiffMode::Forward, Order>;
+namespace Physica::Core {
+    template<Scalar T, DiffMode Mode, int Order, size_t Length>
+    class BestPacket<Diff<T, Mode, Order>, Length> {
+        using ScalarType = Diff<T, Mode, Order>;
     public:
         constexpr static size_t Size = BestPacket<T, Length>::Size;
         using Type = std::conditional<Size == 1, ScalarType, SIMD<ScalarType, Size>>::type;
     };
 
-    template<Scalar T, int Order, size_t Length>
-    class device_obj<BestPacket<Diff<T, DiffMode::Forward, Order>, Length>> {
+    template<Scalar T, DiffMode Mode, int Order, size_t Length>
+    class device_obj<BestPacket<Diff<T, Mode, Order>, Length>> {
     public:
         constexpr static size_t Size = 1;
-        using Type = Diff<T, DiffMode::Forward, Order>;
+        using Type = Diff<T, Mode, Order>;
     };
 
-    template<Scalar T, int Order, size_t Size>
-    class SIMD<Diff<T, DiffMode::Forward, Order>, Size> : public SIMDBase<SIMD<Diff<T, DiffMode::Forward, Order>, Size>> {
-        using ScalarType = Diff<T, DiffMode::Forward, Order>;
-        using This = SIMD<ScalarType, Size>;
+    template<Scalar T, DiffMode Mode, int Order, size_t Size>
+    class SIMD<Diff<T, Mode, Order>, Size> : public SIMDBase<SIMD<Diff<T, Mode, Order>, Size>> {
+        using This = SIMD<Diff<T, Mode, Order>, Size>;
+        using Base = SIMDBase<This>;
+        using RealType = SIMD<Diff<typename T::RealType, Mode, Order>, Size>;
+        using FullRealType = SIMD<Diff<typename T::RealType, Mode, Order>, Size * (T::isComplex ? 2 : 1)>;
+    public:
+        using typename Base::ScalarType;
+        using typename Base::ValueType;
+        using typename Base::GradType;
+        using typename Base::BoolSIMDType;
         using PtrTy = ScalarType::PtrTy;
         using ConstPtrTy = ScalarType::ConstPtrTy;
-        using GradType = ScalarType::GradType;
-        using RealType = SIMD<Diff<typename T::RealType, DiffMode::Forward, Order>, Size>;
-        using FullRealType = SIMD<Diff<typename T::RealType, DiffMode::Forward, Order>, Size * (T::isComplex ? 2 : 1)>;
-    public:
-        using ValuePacket = SIMD<T, Size>;
-        using GradPacket = SIMD<GradType, Size>;
-        using BoolSIMDType = ValuePacket::BoolSIMDType;
-        using HalfType = std::conditional<sizeof(ValuePacket) * CHAR_BIT != 128, SIMD<ScalarType, Size / 2>, PlainStruct<void>>::type;
-
-        ValuePacket values;
-        GradPacket grads;
+        using HalfType = std::conditional<sizeof(ValueType) * CHAR_BIT != 128, SIMD<ScalarType, Size / 2>, PlainStruct<void>>::type;
+    private:
+        ValueType values;
+        GradType grads;
     public:
         SIMD() = default;
         explicit SIMD(int x);
@@ -60,18 +60,18 @@ namespace Physica::Core {
         template<Scalar U>
         explicit SIMD(U x);
         SIMD(ScalarType x, int count);
-        explicit SIMD(ValuePacket values_);
-        SIMD(ValuePacket values_, GradPacket grads_);
+        explicit SIMD(ValueType values_);
+        SIMD(ValueType values_, GradType grads_);
         SIMD(HalfType a, HalfType b);
         template<int OtherOrder>
-        explicit SIMD(const SIMD<Diff<T, DiffMode::Forward, OtherOrder>, Size>& other);
+        explicit SIMD(const SIMD<Diff<T, Mode, OtherOrder>, Size>& other);
         SIMD(const SIMD&) = default;
         SIMD(SIMD&&) noexcept = default;
         ~SIMD() = default;
         /* Operators */
         SIMD& operator=(const SIMD&) = default;
         SIMD& operator=(SIMD&&) noexcept = default;
-        [[nodiscard]] explicit operator ValuePacket() const noexcept { return values; }
+        [[nodiscard]] explicit operator ValueType() const noexcept { return values; }
         [[nodiscard]] inline ScalarType operator[](int index) const;
         [[nodiscard]] inline SIMD operator+(const SIMD& other) const;
         [[nodiscard]] inline SIMD operator-(const SIMD& other) const;
@@ -86,6 +86,8 @@ namespace Physica::Core {
         void operator*=(const SIMD& x) { *this = *this * x; }
         void operator/=(const SIMD& x) { *this = *this / x; }
         /* Operations */
+        ValueType reverse(GradType grad = 1) const noexcept;
+
         inline void load(ConstPtrTy p);
         inline void load_partial(ConstPtrTy p, int n);
         inline void store(PtrTy p) const;
@@ -95,14 +97,16 @@ namespace Physica::Core {
         [[nodiscard]] inline FullRealType swapRealImag() const noexcept;
         [[nodiscard]] inline FullRealType permRealImag() const noexcept;
 
-        [[nodiscard]] inline ScalarType sum() const;
-        [[nodiscard]] inline ScalarType max() const;
-        [[nodiscard]] inline ScalarType min() const;
+        [[nodiscard]] inline auto sum() const;
+        [[nodiscard]] inline auto max() const;
+        [[nodiscard]] inline auto min() const;
         void swap(SIMD& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] FullRealType asReal() const noexcept;
-        [[nodiscard]] ValuePacket getValue() const noexcept { return values; }
-        [[nodiscard]] GradPacket getGrad() const noexcept { return grads; }
+        [[nodiscard]] ValueType& getValue() noexcept { return values; }
+        [[nodiscard]] const ValueType& getValue() const noexcept { return values; }
+        [[nodiscard]] GradType& getGrad() noexcept { return grads; }
+        [[nodiscard]] const GradType& getGrad() const noexcept { return grads; }
         [[nodiscard]] HalfType getLow() const noexcept { return HalfType(values.getLow(), grads.getLow()); }
         [[nodiscard]] HalfType getHigh() const noexcept { return HalfType(values.getHigh(), grads.getHigh()); }
         [[nodiscard]] inline RealType real() const noexcept;
@@ -112,65 +116,8 @@ namespace Physica::Core {
         [[nodiscard]] static SIMD asComplex(const FullRealType& reals);
     };
 
-    template<Scalar T, size_t Size>
-    class SIMD<Diff<T, DiffMode::Reverse, 1>, Size> : public SIMDBase<SIMD<Diff<T, DiffMode::Reverse, 1>, Size>>, public SIMD<T, Size> {
-        static_assert(!T::isDiffable, "[Error]: Invalid template param");
-        using ScalarType = Diff<T, DiffMode::Reverse, 1>;
-        using This = SIMD<ScalarType, Size>;
-        using Base = SIMD<T, Size>;
-        using BoolSIMDType = Traits<This>::BoolSIMDType;
-    public:
-        using PlainPacket = Base;
-        using TracerType = DiffTracer<T, 1>;
-    private:
-        ScalarType headNode;
-    public:
-        SIMD() = default;
-        explicit SIMD(int i) : SIMD(T(i)) {}
-        explicit SIMD(T s);
-        explicit SIMD(ScalarType s);
-        SIMD(Base base, ScalarType headNode_);
-        SIMD(const SIMD&) = default;
-        SIMD(SIMD&&) noexcept = default;
-        ~SIMD() = default;
-        /* Operators */
-        SIMD& operator=(const SIMD&) = default;
-        SIMD& operator=(SIMD&&) noexcept = default;
-        [[nodiscard]] inline ScalarType operator[](int i) const;
-        [[nodiscard]] inline SIMD operator+(const SIMD& other) const;
-        [[nodiscard]] inline SIMD operator-(const SIMD& other) const;
-        [[nodiscard]] inline SIMD operator*(const SIMD& other) const;
-        [[nodiscard]] inline SIMD operator*(const ScalarType& v) const;
-        [[nodiscard]] inline SIMD operator/(const SIMD& other) const;
-        [[nodiscard]] inline SIMD operator-() const;
-        void operator+=(const SIMD& x) { *this = *this + x; }
-        void operator-=(const SIMD& x) { *this = *this - x; }
-        void operator*=(const SIMD& x) { *this = *this * x; }
-        void operator/=(const SIMD& x) { *this = *this / x; }
-        using Base::operator>;
-        using Base::operator<;
-        using Base::operator>=;
-        using Base::operator<=;
-        /* Operations */
-        inline void load(const ScalarType* p);
-        inline void load_partial(const ScalarType* p, int n);
-        inline void store(ScalarType* p) const;
-        inline void store_partial(ScalarType* p, int n) const;
-        [[nodiscard]] inline ScalarType sum() const;
-        inline void swap(SIMD& __restrict obj) noexcept;
-        /* Getters */
-        using Base::size;
-        using Base::toMachine;
-        [[nodiscard]] ScalarType getHeadNode() const noexcept { return headNode; }
-        [[nodiscard]] T* value_ptr() const noexcept { return headNode.value_ptr(); }
-        [[nodiscard]] T* grad_ptr() const noexcept { return headNode.grad_ptr(); }
-    private:
-        using Base::insert; //Insert a scalar may lead to incontineous memory, which harms performance
-        [[nodiscard]] static bool checkContinuous(const ScalarType* p, int n);
-    };
-
     template<Scalar T, DiffMode Mode, int Order, size_t Size>
-    [[nodiscard]] inline SIMD<Diff<T, Mode, Order>, Size> mul_add(
+    [[nodiscard]] inline auto mul_add(
             const SIMD<Diff<T, Mode, Order>, Size>& a,
             const SIMD<Diff<T, Mode, Order>, Size>& b,
             const SIMD<Diff<T, Mode, Order>, Size>& c);
@@ -181,6 +128,7 @@ namespace Physica {
     class Traits<SIMD<Diff<T, Mode, Order>, Size>> : public Traits<SIMD<T, Size>> {
     public:
         using ScalarType = Diff<T, Mode, Order>;
+        using GradType = SIMD<typename ScalarType::GradType, Size>;
     };
 }
 

@@ -18,130 +18,132 @@
  */
 #pragma once
 
+#include "Physica/Core/MultiPrecision/Diff.h"
+
 namespace Physica::Core {
-    template<Scalar T, DiffMode Mode, int Order>
-    __host__ __device__ inline Diff<T, Mode, Order> abs(const Diff<T, Mode, Order>& s);
+    template<Scalar T, int Order>
+    __host__ __device__ inline auto abs(const Diff<T, DiffMode::Forward, Order>& x);
 
-    template<Scalar T, DiffMode Mode, int Order>
-    inline Diff<T, Mode, Order> relu(const Diff<T, Mode, Order>& s);
+    template<Scalar T, int Order>
+    inline auto relu(const Diff<T, DiffMode::Forward, Order>& x);
 
-    template<Scalar T, DiffMode Mode, int Order>
-    __host__ __device__ inline Diff<T, Mode, Order> square(const Diff<T, Mode, Order>& s);
+    template<Scalar T>
+    __host__ __device__ inline CoDiff<T> square(T&& x) requires(Diffable<T>);
 
-    template<Scalar T, DiffMode Mode, int Order>
-    __host__ __device__ inline Diff<T, Mode, Order> reciprocal(const Diff<T, Mode, Order>& s);
+    template<Scalar T>
+    __host__ __device__ inline CoDiff<T> reciprocal(T&& x) requires(Diffable<T>);
 
-    template<Scalar T, DiffMode Mode, int Order>
-    __host__ __device__ Diff<T, Mode, Order> sqrt(const Diff<T, Mode, Order>& s);
+    template<Scalar T>
+    __host__ __device__ CoDiff<T> sqrt(T&& x) requires(Diffable<T>);
 
-    template<Scalar T, DiffMode Mode, int Order>
-    Diff<T, Mode, Order> cbrt(const Diff<T, Mode, Order>& s);
+    template<Scalar T>
+    CoDiff<T> cbrt(T&& x) requires(Diffable<T>);
 
-    template<Scalar T, DiffMode Mode, int Order>
-    Diff<T, Mode, Order> ln(const Diff<T, Mode, Order>& s);
+    template<Scalar T, int Order>
+    auto ln(const Diff<T, DiffMode::Forward, Order>& x);
 
-    template<Scalar T, DiffMode Mode, int Order>
-    Diff<T, Mode, Order> ln1p(const Diff<T, Mode, Order>& x);
+    template<Scalar T, int Order>
+    auto ln1p(const Diff<T, DiffMode::Forward, Order>& x);
 /*
-    template<Scalar T, DiffMode Mode, int Order>
-    Diff<T, Mode, Order> log(const Diff<T, Mode, Order>& s, const Diff<T, Mode, Order>& a);
+    template<Scalar T, int Order>
+    auto log(const Diff<T, DiffMode::Forward, Order>& x, const Diff<T, DiffMode::Forward, Order>& a);
 */
-    template<Scalar T, DiffMode Mode, int Order>
-    Diff<T, Mode, Order> exp(const Diff<T, Mode, Order>& s);
+    template<Scalar T>
+    CoDiff<T> exp(T&& x) requires(Diffable<T>);
 
-    template<Scalar T, DiffMode Mode, int Order>
-    Diff<T, Mode, Order> pow(const Diff<T, Mode, Order>& x, const T& a);
+    template<Scalar T, int Order>
+    auto pow(const Diff<T, DiffMode::Forward, Order>& x, const T& a);
 /*
-    template<Scalar T, DiffMode Mode, int Order>
-    Diff<T, Mode, Order> pow(const Diff<T, Mode, Order>& s, const Diff<T, Mode, Order>& n);
+    template<Scalar T, int Order>
+    auto pow(const Diff<T, DiffMode::Forward, Order>& x, const Diff<T, DiffMode::Forward, Order>& n);
 */
-    template<Scalar T, DiffMode Mode, int Order>
-    Diff<T, Mode, Order> cos(const Diff<T, Mode, Order>& s);
+    template<Scalar T>
+    CoDiff<T> cos(T&& x) requires(Diffable<T>);
 
-    template<Scalar T, DiffMode Mode, int Order>
-    Diff<T, Mode, Order> sin(const Diff<T, Mode, Order>& s);
+    template<Scalar T>
+    CoDiff<T> sin(T&& x) requires(Diffable<T>);
 
-    template<Scalar T, DiffMode Mode, int Order>
-    void sincos(Diff<T, Mode, Order> s, Diff<T, Mode, Order>& sin_result, Diff<T, Mode, Order>& cos_result);
+    template<Scalar T, int Order>
+    void sincos(const Diff<T, DiffMode::Forward, Order>& x, Diff<T, DiffMode::Forward, Order>& sin_result, Diff<T, DiffMode::Forward, Order>& cos_result);
 
-    template<Scalar T, DiffMode Mode, int Order>
-    Diff<T, Mode, Order> tan(const Diff<T, Mode, Order>& s);
+    template<Scalar T, int Order>
+    auto tan(const Diff<T, DiffMode::Forward, Order>& x);
 
-    template<Scalar T, DiffMode Mode, int Order>
-    Diff<T, Mode, Order> sec(const Diff<T, Mode, Order>& s);
+    template<Scalar T, int Order>
+    auto sec(const Diff<T, DiffMode::Forward, Order>& x);
 
-    template<Scalar T, DiffMode Mode, int Order>
-    Diff<T, Mode, Order> csc(const Diff<T, Mode, Order>& s);
+    template<Scalar T, int Order>
+    auto csc(const Diff<T, DiffMode::Forward, Order>& x);
 
-    template<Scalar T, DiffMode Mode, int Order>
-    Diff<T, Mode, Order> cot(const Diff<T, Mode, Order>& s);
+    template<Scalar T, int Order>
+    auto cot(const Diff<T, DiffMode::Forward, Order>& x);
 
-    template<Scalar T, DiffMode Mode, int Order>
-    Diff<T, Mode, Order> arccos(const Diff<T, Mode, Order>& s);
+    template<Scalar T, int Order>
+    auto arccos(const Diff<T, DiffMode::Forward, Order>& x);
 /*
     //!Domain of definition: [-Pi / 2, Pi / 2]
-    template<Scalar T, DiffMode Mode, int Order>
-    Diff<T, Mode, Order> arcsin(const Diff<T, Mode, Order>& s);
+    template<Scalar T, int Order>
+    auto arcsin(const Diff<T, DiffMode::Forward, Order>& x);
     //!Domain of definition: [-Pi / 2, Pi / 2]
-    template<Scalar T, DiffMode Mode, int Order>
-    Diff<T, Mode, Order> arctan(const Diff<T, Mode, Order>& s);
+    template<Scalar T, int Order>
+    auto arctan(const Diff<T, DiffMode::Forward, Order>& x);
 
-    template<Scalar T, DiffMode Mode, int Order>
-    Diff<T, Mode, Order> arcsec(const Diff<T, Mode, Order>& s);
+    template<Scalar T, int Order>
+    auto arcsec(const Diff<T, DiffMode::Forward, Order>& x);
 
-    template<Scalar T, DiffMode Mode, int Order>
-    Diff<T, Mode, Order> arccsc(const Diff<T, Mode, Order>& s);
+    template<Scalar T, int Order>
+    auto arccsc(const Diff<T, DiffMode::Forward, Order>& x);
 
-    template<Scalar T, DiffMode Mode, int Order>
-    Diff<T, Mode, Order> arccot(const Diff<T, Mode, Order>& s);
+    template<Scalar T, int Order>
+    auto arccot(const Diff<T, DiffMode::Forward, Order>& x);
 */
-    template<Scalar T, DiffMode Mode, int Order>
-    Diff<T, Mode, Order> cosh(const Diff<T, Mode, Order>& s);
+    template<Scalar T, int Order>
+    auto cosh(const Diff<T, DiffMode::Forward, Order>& x);
 
-    template<Scalar T, DiffMode Mode, int Order>
-    Diff<T, Mode, Order> sinh(const Diff<T, Mode, Order>& s);
+    template<Scalar T, int Order>
+    auto sinh(const Diff<T, DiffMode::Forward, Order>& x);
 
-    template<Scalar T, DiffMode Mode, int Order>
-    Diff<T, Mode, Order> tanh(const Diff<T, Mode, Order>& s);
+    template<Scalar T, int Order>
+    auto tanh(const Diff<T, DiffMode::Forward, Order>& x);
 /*
-    template<Scalar T, DiffMode Mode, int Order>
-    Diff<T, Mode, Order> sech(const Diff<T, Mode, Order>& s);
+    template<Scalar T, int Order>
+    auto sech(const Diff<T, DiffMode::Forward, Order>& x);
 
-    template<Scalar T, DiffMode Mode, int Order>
-    Diff<T, Mode, Order> csch(const Diff<T, Mode, Order>& s);
+    template<Scalar T, int Order>
+    auto csch(const Diff<T, DiffMode::Forward, Order>& x);
 
-    template<Scalar T, DiffMode Mode, int Order>
-    Diff<T, Mode, Order> coth(const Diff<T, Mode, Order>& s);
+    template<Scalar T, int Order>
+    auto coth(const Diff<T, DiffMode::Forward, Order>& x);
 
-    template<Scalar T, DiffMode Mode, int Order>
-    Diff<T, Mode, Order> arccosh(const Diff<T, Mode, Order>& s);
+    template<Scalar T, int Order>
+    auto arccosh(const Diff<T, DiffMode::Forward, Order>& x);
 
-    template<Scalar T, DiffMode Mode, int Order>
-    Diff<T, Mode, Order> arcsinh(const Diff<T, Mode, Order>& s);
+    template<Scalar T, int Order>
+    auto arcsinh(const Diff<T, DiffMode::Forward, Order>& x);
 
-    template<Scalar T, DiffMode Mode, int Order>
-    Diff<T, Mode, Order> arctanh(const Diff<T, Mode, Order>& s);
+    template<Scalar T, int Order>
+    auto arctanh(const Diff<T, DiffMode::Forward, Order>& x);
 
-    template<Scalar T, DiffMode Mode, int Order>
-    Diff<T, Mode, Order> arcsech(const Diff<T, Mode, Order>& s);
+    template<Scalar T, int Order>
+    auto arcsech(const Diff<T, DiffMode::Forward, Order>& x);
 
-    template<Scalar T, DiffMode Mode, int Order>
-    Diff<T, Mode, Order> arccsch(const Diff<T, Mode, Order>& s);
+    template<Scalar T, int Order>
+    auto arccsch(const Diff<T, DiffMode::Forward, Order>& x);
 
-    template<Scalar T, DiffMode Mode, int Order>
-    Diff<T, Mode, Order> arccoth(const Diff<T, Mode, Order>& s);
+    template<Scalar T, int Order>
+    auto arccoth(const Diff<T, DiffMode::Forward, Order>& x);
 */
-    template<Scalar T, DiffMode Mode, int Order>
-    Diff<T, Mode, Order> lncosh(const Diff<T, Mode, Order>& s) noexcept;
+    template<Scalar T, int Order>
+    auto lncosh(const Diff<T, DiffMode::Forward, Order>& x) noexcept;
 
-    template<Scalar T, DiffMode Mode, int Order>
-    inline T floor(const Diff<T, Mode, Order>& s) {
-        return floor(s.getValue());
+    template<Scalar T, int Order>
+    inline T floor(const Diff<T, DiffMode::Forward, Order>& x) {
+        return floor(x.getValue());
     }
     
-    template<Scalar T, DiffMode Mode, int Order>
-    inline T ceil(const Diff<T, Mode, Order>& s) {
-        return ceil(s.getValue());
+    template<Scalar T, int Order>
+    inline T ceil(const Diff<T, DiffMode::Forward, Order>& x) {
+        return ceil(x.getValue());
     }
 }
 

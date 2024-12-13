@@ -98,22 +98,6 @@ namespace Physica::Core {
     }
 
     template<Scalar T, int Option, size_t Row, size_t Col, class Allocator>
-    DenseMatrix<T, Option, Row, Col, Allocator>
-    DenseMatrix<T, Option, Row, Col, Allocator>::copy() const {
-        if constexpr (isReverseDiff) {
-            using TracerType = ScalarType::TracerType;
-            TracerType::getInstance().reserve(Storage::getSize());
-            This result(Base::getRow(), Base::getCol());
-            for (size_t major = 0; major < Base::getMaxMajor(); ++major)
-                for (size_t minor = 0; minor < Base::getMaxMinor(); ++minor)
-                    result.refFromMajorMinor(major, minor) = Base::refFromMajorMinor(major, minor).copy();
-            return result;
-        }
-        else
-            return *this;
-    }
-
-    template<Scalar T, int Option, size_t Row, size_t Col, class Allocator>
     DenseMatrix<T, Option, Row, Col, Allocator> DenseMatrix<T, Option, Row, Col, Allocator>::unitMatrix(size_t order) {
         DenseMatrix result(order, order);
         result.toUnitMatrix();

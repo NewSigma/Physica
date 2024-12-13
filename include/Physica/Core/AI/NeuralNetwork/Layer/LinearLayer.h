@@ -50,7 +50,6 @@ namespace Physica::Core {
         This& operator=(This obj) noexcept { swap(obj); return *this; }
         /* Operations */
         [[nodiscard]] inline OutputType forward(const InputType& x) const;
-        [[nodiscard]] LinearLayer copy() const;
 
         template<RandomGenerator R>
         void random_normal();
@@ -89,15 +88,6 @@ namespace Physica::Core {
             return weights * x + bias;
         else
             return weights * x;
-    }
-
-    template<Scalar T, bool WithBias>
-    LinearLayer<T, WithBias> LinearLayer<T, WithBias>::copy() const {
-        LinearLayer result{};
-        result.weights = weights.copy();
-        if constexpr (WithBias)
-            result.bias = bias.copy();
-        return result;
     }
 
     template<Scalar T, bool WithBias>

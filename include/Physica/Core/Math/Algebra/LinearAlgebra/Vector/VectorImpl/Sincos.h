@@ -52,12 +52,5 @@ namespace Physica::Core {
                 c.writePacketPartial(i, count, c_buffer);
             }
         }
-
-        constexpr bool isContinuous = is_continuous<T2>::value;
-        constexpr bool isReverseDiff = ScalarType::isReverseDiff;
-        if constexpr (isContinuous && isReverseDiff) {
-            s.makeContinuous();
-            c.makeContinuous();
-        }
     }
 }

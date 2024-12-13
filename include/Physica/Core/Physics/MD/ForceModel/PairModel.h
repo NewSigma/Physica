@@ -190,8 +190,6 @@ namespace Physica::Core {
             force_j += r;
         };
         forPairInCutoff(lattice, cartesianPos, kernel);
-        if constexpr (ScalarType::isReverseDiff)
-            result.makeContinuous();
     }
 
     template<class Derived>

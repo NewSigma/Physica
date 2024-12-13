@@ -25,8 +25,9 @@ namespace Physica::Core {
     class InnerDot {
         using This = InnerDot<T1, T2>;
         using Helper = Internal::EnableSIMD<T1, T2>;
-        using ResultType = Helper::ResultType;
+        using ScalarType = Helper::ResultType;
         using PacketType = Helper::PacketType;
+        constexpr static size_t SizeAtCompile = Helper::SizeAtCompile;
         constexpr static bool isFastPacket1 = Traits<T1>::FastPacket;
         constexpr static bool isFastPacket2 = Traits<T2>::FastPacket;
         constexpr static bool enableSIMD = isFastPacket1 && isFastPacket2 && Helper::value;
@@ -44,9 +45,9 @@ namespace Physica::Core {
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
         /* Operations */
-        ResultType calc() const;
-        ResultType calc_base() const;
-        ResultType calc_mkl() const;
+        auto calc() const;
+        CoDiff<ScalarType> calc_base() const;
+        ScalarType calc_mkl() const;
     };
 
     template<Vector T1, Vector T2>
@@ -55,72 +56,55 @@ namespace Physica::Core {
     }
 
     template<Vector T1, Vector T2>
-    InnerDot<T1, T2>::ResultType InnerDot<T1, T2>::calc() const {
+    auto InnerDot<T1, T2>::calc() const {
         if constexpr (isForwardDiff) {
             if constexpr (!T1::isForwardDiff)
-                return ResultType(toValueVector(v2) * v1, toGradVector(v2) * v1);
+                return ScalarType(toValueVector(v2) * v1, toGradVector(v2) * v1);
             else if constexpr (!T2::isForwardDiff)
-                return ResultType(toValueVector(v1) * v2, toGradVector(v1) * v2);
+                return ScalarType(toValueVector(v1) * v2, toGradVector(v1) * v2);
             else {
-                constexpr static int Order = ResultType::Order - 1;
-                return ResultType(toValueVector(v1) * toValueVector(v2), toDiffMaskVector<T2, Order>(v2) * toGradVector(v1) + toDiffMaskVector<T1, Order>(v1) * toGradVector(v2));
+                constexpr static int Order = ScalarType::Order - 1;
+                return ScalarType(toValueVector(v1) * toValueVector(v2), toDiffMaskVector<T2, Order>(v2) * toGradVector(v1) + toDiffMaskVector<T1, Order>(v1) * toGradVector(v2));
             }
         }
-        else if constexpr (HasMKL() && is_continuous<T1>::value && is_continuous<T2>::value && !isReverseDiff)
+        else if constexpr (Internal::EnableMKL<T1, T2>::value)
             return calc_mkl();
         else
             return calc_base();
     }
 
     template<Vector T1, Vector T2>
-    InnerDot<T1, T2>::ResultType InnerDot<T1, T2>::calc_base() const {
-        if constexpr (enableSIMD) {
+    CoDiff<typename InnerDot<T1, T2>::ScalarType> InnerDot<T1, T2>::calc_base() const {
+        if constexpr (isReverseDiff) {
+            ScalarType result = toValueVector(v1) * toValueVector(v2);
+            co_yield result;
+
+            v1.reverse(result.getGrad() * v2);
+            v2.reverse(result.getGrad() * v1);
+        }
+        else if constexpr (enableSIMD) {
             const size_t length = v1.getLength();
             size_t i = 0;
             const size_t to = length / PacketType::size() * PacketType::size();
             PacketType buffer(0);
-            if constexpr (isReverseDiff) {
-                using PlainPacket = PacketType::PlainPacket;
-                const auto head1 = v1[0];
-                const auto head2 = v2[0];
-                for (; i < to; i += PacketType::size()) {
-                    const ResultType node1(head1.value_ptr() + i, head1.grad_ptr() + i);
-                    const ResultType node2(head2.value_ptr() + i, head2.grad_ptr() + i);
-                    PlainPacket p1{}, p2{};
-                    p1.load(node1.value_ptr());
-                    p2.load(node2.value_ptr());
-                    buffer = mul_add(PacketType(p1, node1), PacketType(p2, node2), buffer);
-                }
-                if (to != length) {
-                    const size_t count = length - i;
-                    const ResultType node1(head1.value_ptr() + i, head1.grad_ptr() + i);
-                    const ResultType node2(head2.value_ptr() + i, head2.grad_ptr() + i);
-                    PlainPacket p1{}, p2{};
-                    p1.load_partial(node1.value_ptr(), count);
-                    p2.load_partial(node2.value_ptr(), count);
-                    buffer = mul_add(PacketType(p1, node1), PacketType(p2, node2), buffer);
-                }
+            for (; i < to; i += PacketType::size()) {
+                PacketType p1 = v1.template packet<PacketType>(i);
+                PacketType p2 = v2.template packet<PacketType>(i);
+                buffer = mul_add(p1, p2, buffer);
             }
-            else {
-                for (; i < to; i += PacketType::size()) {
-                    PacketType p1 = v1.template packet<PacketType>(i);
-                    PacketType p2 = v2.template packet<PacketType>(i);
-                    buffer = mul_add(p1, p2, buffer);
-                }
-                if (to != length) {
-                    const size_t count = length - i;
-                    PacketType p1 = v1.template packetPartial<PacketType>(i, count);
-                    PacketType p2 = v2.template packetPartial<PacketType>(i, count);
-                    buffer = mul_add(p1, p2, buffer);
-                }
+            if (to != length) {
+                const size_t count = length - i;
+                PacketType p1 = v1.template packetPartial<PacketType>(i, count);
+                PacketType p2 = v2.template packetPartial<PacketType>(i, count);
+                buffer = mul_add(p1, p2, buffer);
             }
-            return buffer.sum();
+            co_return buffer.sum();
         }
         else {
-            auto result = ResultType(0);
+            auto result = ScalarType(0);
             for(size_t i = 0; i < v1.getLength(); ++i)
                 result += v1.calc(i) * v2.calc(i);
-            return result;
+            co_return result;
         }
     }
 

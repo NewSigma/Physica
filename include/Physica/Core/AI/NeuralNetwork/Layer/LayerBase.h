@@ -37,7 +37,6 @@ namespace Physica::Core {
         ~LayerBase() = default;
         /* Operations */
         [[nodiscard]] OutputType forward(const InputType& x) const { return Base::getDerived().forward(x); }
-        [[nodiscard]] Derived copy() const { return Base::getDerived().copy(); }
         /* Getters */
         [[nodiscard]] size_t getInputDim() const noexcept { return Base::getDerived().getInputDim(); }
         [[nodiscard]] size_t getOutputDim() const noexcept { return Base::getDerived().getOutputDim(); }

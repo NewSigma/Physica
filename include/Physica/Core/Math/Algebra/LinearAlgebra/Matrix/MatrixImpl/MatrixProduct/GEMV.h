@@ -67,9 +67,6 @@ namespace Physica::Core {
         else {
             for (size_t i = 0; i < getLength(); ++i)
                 target[i] = calc(i);
-
-            if constexpr (is_continuous<V>::value && Base::isReverseDiff)
-                target.makeContinuous();
         }
     }
 

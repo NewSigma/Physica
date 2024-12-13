@@ -38,9 +38,6 @@ namespace Physica::Core {
         for (size_t i = 0; i < maxMajor; ++i)
             for (size_t j = 0; j < maxMinor; ++j)
                 target.refFromMajorMinor(i, j) = OtherScalar(calc(target.rowFromMajorMinor(i, j), target.colFromMajorMinor(i, j)));
-
-        if constexpr (is_continuous<T>::value && isReverseDiff)
-            target.getDerived().makeContinuous();
     }
 
     template<class Derived>

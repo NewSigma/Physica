@@ -35,6 +35,7 @@ namespace Physica::Core {
     public:
         using typename Base::ScalarType;
         using Base::isForwardDiff;
+        using Base::isReverseDiff;
     protected:
         using PtrTy = ScalarType::PtrTy;
         using ConstPtrTy = ScalarType::ConstPtrTy;
@@ -62,6 +63,11 @@ namespace Physica::Core {
         [[nodiscard]] ScalarType calc(size_t index) const;
         template<class AnyPacket> void writePacket(size_t index, const AnyPacket packet);
         template<class AnyPacket> void writePacketPartial(size_t index, size_t count, const AnyPacket packet);
+
+        [[nodiscard]] CoDiff<ScalarType> sum() const;
+
+        template<Vector T>
+        void reverse(const T& v) const noexcept requires(isReverseDiff);
 
         template<size_t Length = Dynamic>
         [[nodiscard]] inline auto head(size_t to) noexcept;

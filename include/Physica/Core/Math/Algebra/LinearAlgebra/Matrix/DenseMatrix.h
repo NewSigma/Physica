@@ -69,7 +69,6 @@ namespace Physica::Core {
         size_t partialPivoting(size_t col);
 
         using Storage::resize;
-        [[nodiscard]] DenseMatrix copy() const;
         [[nodiscard]] inline auto toDevice() const;
         [[nodiscard]] inline auto toDeviceAsync() const;
         void toDevice(device_obj<This>& obj) const;

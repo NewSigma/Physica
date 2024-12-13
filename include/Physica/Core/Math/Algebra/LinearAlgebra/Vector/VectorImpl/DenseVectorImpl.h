@@ -31,34 +31,15 @@ namespace Physica::Core {
     }
 
     template<Scalar T, size_t Length, class Allocator>
-    DenseVector<T, Length, Allocator>::DenseVector(std::initializer_list<T> list) : Storage(std::move(list)) {
-        Base::makeContinuous();
-    }
+    DenseVector<T, Length, Allocator>::DenseVector(std::initializer_list<T> list) : Storage(std::move(list)) {}
 
     template<Scalar T, size_t Length, class Allocator>
-    DenseVector<T, Length, Allocator>::DenseVector(Storage array) noexcept : Storage(std::move(array)) {
-        Base::makeContinuous();
-    }
+    DenseVector<T, Length, Allocator>::DenseVector(Storage array) noexcept : Storage(std::move(array)) {}
 
     template<Scalar T, size_t Length, class Allocator>
     template<Vector V>
     DenseVector<T, Length, Allocator>::DenseVector(const V& v) : Storage(v.getLength()) {
         v.assignTo(*this);
-    }
-
-    template<Scalar T, size_t Length, class Allocator>
-    DenseVector<T, Length, Allocator> DenseVector<T, Length, Allocator>::copy() const {
-        if constexpr (isReverseDiff) {
-            using TracerType = T::TracerType;
-            const size_t length = Base::getLength();
-            TracerType::getInstance().reserve(length);
-            This result(length);
-            for (size_t i = 0; i < length; ++i)
-                result[i] = Base::operator[](i).copy();
-            return result;
-        }
-        else
-            return *this;
     }
 
     template<Scalar T, size_t Length, class Allocator>

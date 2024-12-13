@@ -59,7 +59,6 @@ namespace Physica::Core {
         template<class Distribution, RandomGenerator R>
         inline void random_any(Distribution& dist);
 
-        [[nodiscard]] This copy() const;
         void swap(device_obj& obj) noexcept { std::swap(*this, obj); }
 
         template<bool ComputeMax>

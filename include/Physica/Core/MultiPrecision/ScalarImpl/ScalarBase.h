@@ -23,9 +23,6 @@
 #include "Physica/PlainStruct.h"
 
 namespace Physica::Core {
-    template<class ScalarType> class ScalarRef;
-    template<class ScalarType> class ScalarPtr;
-
     template<class Derived>
     class ScalarBase : public CRTPBase<ScalarBase<Derived>> {
         using This = ScalarBase<Derived>;
@@ -56,8 +53,7 @@ namespace Physica::Core {
         static_assert(isConsistent1 || isConsistent2, "[Error]: DiffMode is not self consistent");
         static_assert(std::is_same<Derived, ScalarType>::value, "[Error]: Inconsistence type between traits and inherit class");
 
-        using ValuePtr = std::conditional<isForwardDiff || !isDiffable, ValueType, ValueType*>::type;
-        using GradType1 = std::conditional<Order == 1, ValuePtr, Diff<ValueType, Mode, Order - 1>>::type;
+        using GradType1 = std::conditional<Order == 1, ValueType, Diff<ValueType, Mode, Order - 1>>::type;
     public:
         using GradType = std::conditional<isDiffable, GradType1, PlainStruct<void>>::type;
         template<int GradOrder>

@@ -19,8 +19,6 @@
 #pragma once
 
 #include "Physica/Core/Math/Statistics/NumCharacter.h"
-#include "Physica/Core/MultiPrecision/AutoDiffGuard.h"
-#include "Physica/Core/Parallel/Executor/ThreadExecutor.h"
 #include "Layer/LayerBase.h"
 #include "Loss.h"
 
@@ -36,10 +34,6 @@ namespace Physica::Core {
         using typename Base::OutputType;
         using Base::IsTrainMode;
         using LossType = Loss<ScalarType>::LossType;
-    private:
-        using DiffGuard = std::conditional<IsTrainMode, AutoDiffGuard<ScalarType>, PlainStruct<void>>::type;
-
-        [[no_unique_address]] DiffGuard diffGuard;
     public:
         SimpleNet(const SimpleNet&) = delete;
         ~SimpleNet() = default;
@@ -52,8 +46,6 @@ namespace Physica::Core {
         template<class Dataset>
         [[nodiscard]] ScalarType loss(const Dataset& dataset) const;
         [[nodiscard]] size_t classify(const InputType& input) const;
-
-        [[nodiscard]] Derived copy() const { return Base::getDerived().copy(); }
     protected:
         SimpleNet() = default;
         SimpleNet(SimpleNet&&) noexcept = default;
@@ -72,7 +64,6 @@ namespace Physica::Core {
             auto dist = std::uniform_int_distribution<size_t>(0, dataset.getSize() - 1);
             auto& gen = RandomType::getInstance().getGen();
             for (unsigned int _ = 0; _ < opt.getBatchSize(); ++_) {
-                AutoDiffGuard<ScalarType> guard{};
                 const size_t index = dist(gen);
                 loss<Dataset>(dataset, index).reverse();
             }
@@ -82,11 +73,10 @@ namespace Physica::Core {
             const size_t batchSizePerThread = (opt.getBatchSize() + numThread - 1) / numThread;
             std::mutex mutex{};
             Executor::parallel_for([this, batchSizePerThread, &mutex, &dataset](unsigned int) {
-                Derived tempNet = copy();
+                Derived tempNet = *this;
                 auto dist = std::uniform_int_distribution<size_t>(0, dataset.getSize() - 1);
                 auto& gen = RandomType::getInstance().getGen();
                 for (size_t _ = 0; _ < batchSizePerThread; ++_) {
-                    AutoDiffGuard<ScalarType> guard{};
                     const size_t index = dist(gen);
                     tempNet.template loss<Dataset>(dataset, index).reverse_to(guard);
                 }

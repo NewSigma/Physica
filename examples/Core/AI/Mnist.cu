@@ -85,13 +85,6 @@ namespace Physica::Core {
         template<class Dataset>
         [[nodiscard]] LossType loss(const Dataset& dataset) const { return Base::loss(dataset); }
 
-        [[nodiscard]] This copy() const {
-            This result{};
-            result.layer1 = layer1.copy();
-            result.layer2 = layer2.copy();
-            return result;
-        }
-
         template<class Dataset>
         ValueType calcAccuracy(const Dataset& dataset) const {
             const auto& testSamples = dataset.getSamples();

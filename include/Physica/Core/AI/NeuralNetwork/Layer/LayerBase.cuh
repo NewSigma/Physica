@@ -41,7 +41,6 @@ namespace Physica::Core {
         ~device_obj() = default;
         /* Operations */
         [[nodiscard]] OutputType forward(const InputType& x) const { return Base::getDerived().forward(x); }
-        [[nodiscard]] device_obj_type copy() const { return Base::getDerived().copy(); }
     protected:
         device_obj() = default;
         device_obj(const device_obj&) = default;

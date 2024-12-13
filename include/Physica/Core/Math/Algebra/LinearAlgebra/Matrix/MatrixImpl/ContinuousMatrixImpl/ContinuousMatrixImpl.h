@@ -50,13 +50,8 @@ namespace Physica::Core {
         const bool useSpecialization = ContinuousMatrix<Derived>::ColAtCompile == 1;
         if constexpr (useSpecialization)
             return {Base::getConstCastDerived(), r, 1, 0};
-        else {
-            if constexpr (isRowMatrix && isReverseDiff) {
-                RowVector result{Base::getConstCastDerived(), r, 0, Base::getCol()};
-                assert(result.checkContinuous() && "[Error]: Const matrix must be continuous because we cannot modify it and make it continuous");
-            }
+        else
             return RowVector(Base::getConstCastDerived(), r, 0, Base::getCol());
-        }
     }
 
     template<class Derived>
@@ -66,10 +61,6 @@ namespace Physica::Core {
 
     template<class Derived>
     inline const ContinuousMatrix<Derived>::ColVector ContinuousMatrix<Derived>::col(size_t c) const {
-        if constexpr (isColMatrix && isReverseDiff) {
-            ColVector result{Base::getConstCastDerived(), 0, Base::getRow(), c};
-            assert(result.checkContinuous() && "[Error]: Const matrix must be continuous because we cannot modify it and make it continuous");
-        }
         return ColVector(Base::getConstCastDerived(), 0, Base::getRow(), c);
     }
 
@@ -249,29 +240,6 @@ namespace Physica::Core {
     template<size_t Row, size_t Col>
     inline const ContinuousMatrixBlock<Derived, Row, Col> ContinuousMatrix<Derived>::block(size_t fromRow, size_t rowCount, size_t fromCol, size_t colCount) const {
         return {Base::getConstCastDerived(), fromRow, rowCount, fromCol, colCount};
-    }
-
-    template<class Derived>
-    inline void ContinuousMatrix<Derived>::makeContinuous() {
-        if constexpr (isReverseDiff)
-            Base::getDerived() = Base::getDerived().copy();
-    }
-
-    template<class Derived>
-    bool ContinuousMatrix<Derived>::checkContinuous() const {
-        if constexpr (isReverseDiff) {
-            if constexpr (MatrixOption::isRowMatrix<Derived>()) {
-                for (size_t i = 0; i < Base::getRow(); ++i)
-                    if (!row(i).checkContinuous())
-                        return false;
-            }
-            else {
-                for (size_t i = 0; i < Base::getCol(); ++i)
-                    if (!col(i).checkContinuous())
-                        return false;
-            }
-        }
-        return true;
     }
 
     template<class Derived>

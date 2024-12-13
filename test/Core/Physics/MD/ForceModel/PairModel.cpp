@@ -17,7 +17,7 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include <iostream>
-#include "Physica/Core/MultiPrecision/Diff.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DiffDenseMatrix.h"
 #include "Physica/Core/Physics/MD/ForceModel/LJModel.h"
 #include "Physica/Core/Physics/MD/ForceModel/SilveraGoldman.h"
 #include "Physica/Core/Math/Random/Random.h"
@@ -45,18 +45,15 @@ public:
         for (size_t i = 0; i < cell.getDOF(); ++i) {
             for (size_t j = 0; j < cell.getDOF(); ++j) {
                 const ScalarType fc1 = sg.forceConst(cell, i, j);
-                if (!scalarNear(fc(i, j), fc1, 1E-15))
+                if (!scalarNear<ScalarType>(fc(i, j), fc1, 1E-15))
                     exit(EXIT_FAILURE);
             }
         }
     }
 private:
     static MDCellType makeSystem() {
-        MDCellType::LatticeMatrix lattice = MDCellType::LatticeMatrix::unitMatrix(3);
-        MDCellType::PositionMatrix pos(numMolecular, 3);
-        std::uniform_real_distribution dist{};
-        for (auto& elem : pos.asArray())
-            elem = dist(RandomType::getInstance());
+        auto lattice = MDCellType::LatticeMatrix::unitMatrix(3);
+        auto pos = MDCellType::PositionMatrix::random_uniform<RandomType>(numMolecular, 3);
         MDCellType::MassVector massVec(numMolecular, mass);
         MDCellType cell(std::move(lattice), std::move(pos), std::move(massVec));
 

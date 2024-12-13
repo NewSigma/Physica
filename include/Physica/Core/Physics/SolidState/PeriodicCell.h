@@ -784,8 +784,6 @@ namespace Physica::Core {
         rowY *= T(y);
         auto rowZ = lattice.row(2);
         rowZ *= T(z);
-        if constexpr (T::isReverseDiff)
-            lattice.makeContinuous();
     }
 
     template<Scalar T, unsigned int Dim>
@@ -849,8 +847,6 @@ namespace Physica::Core {
         else
             static_assert(Option == ExtendCellOption::AtomMajor, "[Error]: Invalid option");
         target.swap(new_pos);
-        if constexpr (T::isReverseDiff)
-            target.makeContinuous();
     }
 
     template<Scalar T, unsigned int Dim>

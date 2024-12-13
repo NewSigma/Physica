@@ -17,9 +17,9 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include <iostream>
+#include "Physica/Core/MultiPrecision/Diff.h"
 #include "Physica/Core/Physics/MD/ForceModel/Ewald/Ewald.h"
 #include "Physica/Core/Physics/MD/ForceModel/Q_TIP4P.h"
-#include "Physica/Core/MultiPrecision/AutoDiffGuard.h"
 
 using namespace Physica;
 using namespace Physica::Core;
@@ -41,14 +41,10 @@ namespace Physica {
         static void run() {
             const ScalarType volume = ((MoleculePerCell * massMoleculeInSI * 1000 / 0.997) * 1E-6) / (PhyConst<SI>::bohrRadius * PhyConst<SI>::bohrRadius * PhyConst<SI>::bohrRadius);
             const unsigned int cellSize = 3;
-            const AutoDiffGuard<ScalarType> guard{};
             auto cell = makeSystem(cellSize, volume);
             ForceModel::sortPosition(cell);
             ForceModel forceModel(cell, pair_cutoff, Ewald<ScalarType>{});
-            {
-                const AutoDiffGuard<ScalarType> guard1{};
-                forceModel.potentialV(cell).reverse();
-            }
+            forceModel.potentialV(cell).reverse();
             /* Test press */ {
                 const ValueType press_diff = -volume.getGrad() / ValueType(cellSize * cellSize * cellSize);
                 const ValueType press = (forceModel.virial(cell).trace() / ScalarType(3)).getValue();
@@ -99,8 +95,7 @@ namespace Physica {
                     temp[1] += ScalarType(0.75);
                     temp[2] += ScalarType(0.75);
                 }
-                if constexpr (ScalarType::isReverseDiff)
-                    temp.makeContinuous();
+
                 temp *= latticeConst;
                 auto posO = pos.row(i + maxIndexH);
                 auto posH1 = pos.row(2 * i);

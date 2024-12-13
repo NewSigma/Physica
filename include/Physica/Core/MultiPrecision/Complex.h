@@ -19,11 +19,12 @@
 #pragma once
 
 #include <complex>
-#include "Physica/Core/MultiPrecision/Real.h"
+#include "Physica/CRCoro.h"
+#include "Physica/Core/MultiPrecision/Real.h" // IWYU pragma: export
 
 namespace Physica::Core {
     template<Scalar T>
-    class Complex<T> : public ScalarBase<Complex<T>> {
+    class Complex<T> : public ScalarBase<Complex<T>>, public CRCoro<Complex<T>> {
         using This = Complex<T>;
         using Base = ScalarBase<This>;
         using PacketType = BestPacket<T, 2>::Type;

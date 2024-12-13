@@ -22,6 +22,7 @@
 #include <cstdint>
 #include <limits>
 #include <concepts>
+#include <coroutine> // IWYU pragma: export
 #include "Physica/Macro.h"
 
 namespace Physica::Core {
@@ -82,6 +83,22 @@ namespace Physica::Core {
      */
     template<class ScalarType, DiffMode Mode, int Order = 1>
     class Diff;
+
+    template<class T>
+    class DiffNode;
+
+    template<class T>
+    struct remove_node {
+        using Type = T;
+    };
+
+    template<class T>
+    struct remove_node<DiffNode<T>> {
+        using Type = T;
+    };
+
+    template<class T>
+    using CoDiff = std::conditional<ReverseDiff<T>, DiffNode<typename remove_node<std::remove_cvref_t<T>>::Type>, std::remove_cvref_t<T>>::type;
 
     namespace Internal {
         /**

@@ -35,10 +35,6 @@ namespace Physica::Core {
         using typename Base::OutputType;
         using Base::IsTrainMode;
         using LossType = device_obj<Loss<ScalarType>>::LossType;
-    private:
-        using DiffGuardType = std::conditional<IsTrainMode, AutoDiffGuard<device_obj<ScalarType>>, PlainStruct<void>>::type;
-
-        [[no_unique_address]] DiffGuardType net_guard;
     public:
         device_obj(const device_obj&) = delete;
         ~device_obj() = default;
@@ -51,7 +47,6 @@ namespace Physica::Core {
         template<class Dataset>
         [[nodiscard]] LossType loss(const Dataset& dataset) const;
         [[nodiscard]] size_t classify(const InputType& input) const;
-        [[nodiscard]] Derived copy() const { return Base::getDerived().copy(); }
     protected:
         device_obj() = default;
         device_obj(device_obj&&) noexcept = default;

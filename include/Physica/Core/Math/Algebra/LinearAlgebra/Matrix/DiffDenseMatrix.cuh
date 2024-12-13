@@ -61,7 +61,6 @@ namespace Physica::Core {
         template<class Distribution, RandomGenerator R>
         inline void random_any(Distribution& dist);
 
-        [[nodiscard]] This copy() const;
         void swap(device_obj& obj) noexcept { std::swap(*this, obj); }
         /* Getters */
         using Dim::getRow;
@@ -130,15 +129,6 @@ namespace Physica::Core {
     template<class Distribution, RandomGenerator R>
     inline void device_obj<Diff<DenseMatrix<T, Option>, DiffMode::Reverse, Order>>::random_any(Distribution& dist) {
         *this = random_any<R>(getRow(), getCol(), dist);
-    }
-
-    template<Scalar T, int Option, int Order>
-    device_obj<Diff<DenseMatrix<T, Option>, DiffMode::Reverse, Order>>
-    device_obj<Diff<DenseMatrix<T, Option>, DiffMode::Reverse, Order>>::copy() const {
-        This result{};
-        const auto& newTrace = TracerType::getInstance().pushSegment(getTraceSegment().copy());
-        result.traceSeg = asStruct(newTrace);
-        return result;
     }
 
     template<Scalar T, int Option, int Order>

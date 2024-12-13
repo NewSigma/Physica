@@ -18,20 +18,24 @@
  */
 #pragma once
 
-#include "DiffImpl/DiffTracer.h"
-#include "Real.h"
+#include <iosfwd>
+#include "Physica/CRCoro.h"
+#include "Physica/Core/MultiPrecision/Real.h"  // IWYU pragma: export
+#include "Physica/Core/MultiPrecision/ExprType.h"
+#include "DiffImpl/CoDiff.h"
 
 namespace Physica::Core {
-    /**
-     * \class Diff provides auto differential support for scalars
-     */
-    template<Scalar T, int Order>
-    class Diff<T, DiffMode::Forward, Order> : public ScalarBase<Diff<T, DiffMode::Forward, Order>> {
-        using This = Diff<T, DiffMode::Forward, Order>;
+    template<Scalar T, DiffMode Mode, int Order>
+    class Diff<T, Mode, Order> : public ScalarBase<Diff<T, Mode, Order>>
+                               , public std::conditional<Mode == DiffMode::Forward, CRCoro<Diff<T, Mode, Order>>, PlainStruct<void>>::type {
+        using This = Diff<T, Mode, Order>;
         using Base = ScalarBase<This>;
     public:
+        using device_obj_type = This;
         using typename Base::GradType;
         using typename Base::MachineType;
+        using Base::isForwardDiff;
+        using Base::isReverseDiff;
     private:
         T value;
         GradType grad;
@@ -40,8 +44,8 @@ namespace Physica::Core {
         Diff(MachineType x) : This(T(x)) {}
         Diff(T value_);
         Diff(T value_, GradType grad_);
-        template<Scalar U, int OtherOrder>
-        explicit Diff(const Diff<U, DiffMode::Forward, OtherOrder>& other);
+        template<Scalar U>
+        explicit Diff(const U& x);
         Diff(const This&) = default;
         Diff(This&&) noexcept = default;
         ~Diff() = default;
@@ -50,244 +54,71 @@ namespace Physica::Core {
         [[nodiscard]] explicit operator float() const { return float(value); }
         [[nodiscard]] explicit operator double() const { return double(value); }
         [[nodiscard]] inline bool operator==(const This& other) const;
-        [[nodiscard]] inline This operator-() const;
         /* Operations */
         template<int MaskOrder>
+        auto& mask() noexcept;
+        template<int MaskOrder>
         const auto& mask() const noexcept;
-        [[nodiscard]] This conjugate() const;
+
+        T reverse(GradType grad_ = 1) const noexcept;
+        inline void zero_grad();
+
+        [[nodiscard]] auto conjugate() const;
         void swap(This& __restrict obj) noexcept;
         void swap(ScalarRef<This>&& ref) noexcept;
         /* Getters */
+        [[nodiscard]] __host__ __device__ T* value_ptr() noexcept { return &value; }
+        [[nodiscard]] __host__ __device__ GradType* grad_ptr() noexcept { return &grad; }
         [[nodiscard]] T& getValue() noexcept { return value; }
-        template<int GradOrder = 1>
-        [[nodiscard]] inline Base::template GradRtnTy<GradOrder>& getGrad() noexcept;
         [[nodiscard]] const T& getValue() const noexcept { return value; }
         template<int GradOrder = 1>
+        [[nodiscard]] inline Base::template GradRtnTy<GradOrder>& getGrad() noexcept;
+        template<int GradOrder = 1>
         [[nodiscard]] inline const Base::template GradRtnTy<GradOrder>& getGrad() const noexcept;
-        [[nodiscard]] __host__ __device__ bool isZero() const noexcept { return value.isZero(); }
-        [[nodiscard]] __host__ __device__ bool isPositive() const { return value.isPositive(); }
-        [[nodiscard]] __host__ __device__ bool isNegative() const { return value.isNegative(); }
         [[nodiscard]] __host__ __device__ inline bool isFinite() const noexcept;
         /* Static members */
         template<RandomGenerator R>
-        [[nodiscard]] inline static Diff random_uniform();
+        [[nodiscard]] inline static auto random_uniform();
         template<RandomGenerator R>
-        [[nodiscard]] inline static Diff random_normal();
+        [[nodiscard]] inline static auto random_normal();
         template<class Distribution, RandomGenerator R>
-        [[nodiscard]] inline static Diff random_any(Distribution& dist);
+        [[nodiscard]] inline static auto random_any(Distribution& dist);
         [[nodiscard]] static const H5::DataType& getH5DataType();
     };
 
-    template<Scalar T, int Order>
-    class ScalarRef<Diff<T, DiffMode::Forward, Order>> {
-        using ScalarType = Diff<T, DiffMode::Forward, Order>;
-        using This = ScalarRef<ScalarType>;
-        using PtrTy = ScalarType::PtrTy;
-        using GradPtrTy = PtrTy::GradPtrTy;
-        template<int GradOrder>
-        using GradRtnTy = std::conditional<Order == GradOrder, T&, ScalarRef<Diff<T, DiffMode::Forward, Order - GradOrder>>>::type;
-    private:
-        PtrTy ptr;
-    public:
-        explicit ScalarRef(PtrTy ptr_) : ptr(ptr_) {}
-        ScalarRef(const ScalarRef&) = default;
-        ScalarRef(ScalarRef&&) noexcept = default;
-        ~ScalarRef() = default;
-        /* Operators */
-        inline ScalarRef& operator=(const This& other);
-        inline ScalarRef& operator=(const ScalarType& other);
-        inline ScalarRef& operator=(int x) { return operator=(ScalarType(x)); }
-        inline ScalarRef& operator=(double x) { return operator=(ScalarType(x)); }
-        [[nodiscard]] operator ScalarType() const { return ScalarType(getValue(), getGrad()); }
-        [[nodiscard]] __host__ __device__ explicit operator float() const noexcept { return float(ScalarType(*this)); }
-        [[nodiscard]] __host__ __device__ explicit operator double() const noexcept { return double(ScalarType(*this)); }
-        template<Scalar U> auto operator+(const U& s) const { return ScalarType(*this) + s; }
-        template<Scalar U> auto operator-(const U& s) const { return ScalarType(*this) - s; }
-        template<Scalar U> auto operator*(const U& s) const { return ScalarType(*this) * s; }
-        template<Scalar U> auto operator/(const U& s) const { return ScalarType(*this) / s; }
-        template<Scalar U> void operator+=(const U& s) { *this = ScalarType(*this) + s; }
-        template<Scalar U> void operator-=(const U& s) { *this = ScalarType(*this) - s; }
-        template<Scalar U> void operator*=(const U& s) { *this = ScalarType(*this) * s; }
-        template<Scalar U> void operator/=(const U& s) { *this = ScalarType(*this) / s; }
-        template<Scalar U> auto operator+(const ScalarRef<U>& s) const { return operator+(U(s)); }
-        template<Scalar U> auto operator-(const ScalarRef<U>& s) const { return operator-(U(s)); }
-        template<Scalar U> auto operator*(const ScalarRef<U>& s) const { return operator*(U(s)); }
-        template<Scalar U> auto operator/(const ScalarRef<U>& s) const { return operator/(U(s)); }
-        template<Scalar U> void operator+=(const ScalarRef<U>& s) { operator+=(U(s)); }
-        template<Scalar U> void operator-=(const ScalarRef<U>& s) { operator-=(U(s)); }
-        template<Scalar U> void operator*=(const ScalarRef<U>& s) { operator*=(U(s)); }
-        template<Scalar U> void operator/=(const ScalarRef<U>& s) { operator/=(U(s)); }
-        [[nodiscard]] ScalarType operator-() const { return -ScalarType(*this); }
-        __host__ __device__ inline bool operator>(double s) const noexcept { return ScalarType(*this) > s; }
-        __host__ __device__ inline bool operator<(double s) const noexcept { return ScalarType(*this) < s; }
-        template<Scalar U>
-        __host__ __device__ bool operator>(const U& s) const noexcept { return ScalarType(*this) > s; }
-        template<Scalar U>
-        __host__ __device__ bool operator<(const U& s) const noexcept { return ScalarType(*this) < s; }
-        template<Scalar U>
-        __host__ __device__ bool operator>(const ScalarRef<U>& s) const noexcept { return operator>(U(s)); }
-        template<Scalar U>
-        __host__ __device__ bool operator<(const ScalarRef<U>& s) const noexcept { return operator<(U(s)); }
-        /* Operations */
-        void swap(This&& obj) noexcept;
-        void swap(ScalarType& obj) noexcept;
-        /* Getters */
-        [[nodiscard]] auto real() const { return ScalarType(*this).real(); }
-        [[nodiscard]] auto imag() const { return ScalarType(*this).imag(); }
-        [[nodiscard]] auto conjugate() const { return ScalarType(*this).conjugate(); }
-        [[nodiscard]] T* value_ptr() const noexcept { return ptr.value_ptr(); }
-        [[nodiscard]] GradPtrTy grad_ptr() const noexcept { return ptr.grad_ptr(); }
-        [[nodiscard]] auto& getValue() noexcept { return *ptr.value_ptr(); }
-        template<int GradOrder = 1>
-        [[nodiscard]] GradRtnTy<GradOrder> getGrad() noexcept;
-        [[nodiscard]] const auto& getValue() const noexcept { return *ptr.value_ptr(); }
-        template<int GradOrder = 1>
-        [[nodiscard]] const GradRtnTy<GradOrder> getGrad() const noexcept;
-    };
+    template<Scalar T, Scalar U>
+    [[nodiscard]] inline CoDiff<typename Internal::BinaryScalarOpRtnTy<std::remove_cvref_t<T>, std::remove_cvref_t<U>>::Type>
+    operator+(T&& x, U&& y) requires(Diffable<T>);
 
-    template<Scalar T, int Order>
-    class ScalarPtr<Diff<T, DiffMode::Forward, Order>> {
-        using ScalarType = Diff<T, DiffMode::Forward, Order>;
-        using This = ScalarPtr<ScalarType>;
-        using GradType = ScalarType::GradType;
-    public:
-        using GradPtrTy = GradType::PtrTy;
-    private:
-        union {
-            std::pair<T*, GradPtrTy> pair;
-            T* arr[Order + 1];
-        };
-    public:
-        ScalarPtr(std::pair<T*, GradPtrTy> pair_) : pair(std::move(pair_)) {}
-        ScalarPtr(T* pValue, GradPtrTy pGrad) : pair(std::make_pair(pValue, pGrad)) {}
-        explicit ScalarPtr(ScalarType& x);
-        explicit ScalarPtr(ScalarRef<ScalarType>& x);
-        ScalarPtr(const This&) = default;
-        ScalarPtr(This&&) noexcept = default;
-        ~ScalarPtr() = default;
-        /* Operators */
-        This& operator=(const This& obj) = default;
-        This& operator=(This&& obj) noexcept = default;
-        [[nodiscard]] inline bool operator==(const This& other) const noexcept;
-        [[nodiscard]] bool operator!=(const This& other) const noexcept { return !(*this == other); }
-        template<Scalar U>
-        [[nodiscard]] explicit operator ScalarPtr<Diff<U, DiffMode::Forward, Order>>() noexcept {
-            using Target = ScalarPtr<Diff<U, DiffMode::Forward, Order>>;
-            using GradPtrTy1 = Target::GradPtrTy;
-            return Target(reinterpret_cast<U*>(value_ptr()), GradPtrTy1(grad_ptr()));
-        }
-        [[nodiscard]] ScalarRef<ScalarType> operator*() const { return ScalarRef<ScalarType>(*this); }
-        [[nodiscard]] This operator+(size_t n) { return ScalarPtr(value_ptr() + n, grad_ptr() + n); }
-        inline This& operator++();
-        inline This& operator--();
-        inline const This operator++(int);
-        inline const This operator--(int);
-        [[nodiscard]] T* operator[](size_t i) const noexcept { assert(i <= Order); return arr[i]; }
-        /* Operations */
-        inline void swap(This& __restrict obj) noexcept;
-        /* Getters */
-        [[nodiscard]] T* value_ptr() const noexcept { return pair.first; }
-        [[nodiscard]] GradPtrTy grad_ptr() const noexcept { return pair.second; }
-    };
-    ////////////////////////////////////////////////////////////
-    template<Scalar T, int Order>
-    class Diff<T, DiffMode::Reverse, Order> : public ScalarBase<Diff<T, DiffMode::Reverse, Order>> {
-        using This = Diff<T, DiffMode::Reverse, Order>;
-        using Base = ScalarBase<This>;
-        using ValuePtr = T* __restrict;
-    public:
-        using device_obj_type = device_obj<This>;
-        using TracerType = DiffTracer<T, Order>;
-        using typename Base::GradType;
-    private:
-        ValuePtr pValue;
-        GradType grad;
-    public:
-        Diff() = default;
-        Diff(double d) : This(T(d)) {}
-        Diff(T value);
-        Diff(T value, T grad);
-        Diff(ValuePtr pValue_, GradType grad_);
-        Diff(const This&) = default;
-        Diff(This&&) noexcept = default;
-        ~Diff() = default;
-        /* Operators */
-        This& operator=(const This&) = default;
-        This& operator=(This&&) noexcept = default;
-        inline This& operator=(std::nullptr_t) noexcept;
-        [[nodiscard]] explicit operator float() const { return float(getValue()); }
-        [[nodiscard]] explicit operator double() const { return double(getValue()); }
-        template<int KeepDeep>
-        [[nodiscard]] explicit operator Diff<T, DiffMode::Reverse, KeepDeep>() const;
-        [[nodiscard]] inline bool operator==(const This& other) const;
-        [[nodiscard]] inline bool operator==(std::nullptr_t) const noexcept;
-        [[nodiscard]] inline bool operator!=(std::nullptr_t) const noexcept { return !((*this) == nullptr); }
-        [[nodiscard]] inline Diff operator-() const;
-        /* Operations */
-        [[nodiscard]] This conjugate() const { noImpl(__func__); }
-        inline void reverse();
-        inline void reverse_to(Diff to);
-        inline void zero_grad();
-        [[nodiscard]] inline This copy() const;
-        inline void swap(This& __restrict obj) noexcept;
-        /* Getters */
-        [[nodiscard]] __host__ __device__ inline T* value_ptr() const noexcept;
-        [[nodiscard]] __host__ __device__ inline T* grad_ptr() const noexcept;
-        [[nodiscard]] inline T& getValue() noexcept;
-        template<int GradOrder = 1>
-        [[nodiscard]] inline Base::template GradRtnTy<GradOrder>& getGrad() noexcept;
-        [[nodiscard]] inline const T& getValue() const noexcept;
-        template<int GradOrder = 1>
-        [[nodiscard]] inline const Base::template GradRtnTy<GradOrder>& getGrad() const noexcept;
-        [[nodiscard]] __host__ __device__ bool isZero() const noexcept { return getValue().isZero(); }
-        [[nodiscard]] __host__ __device__ bool isPositive() const { return getValue().isPositive(); }
-        [[nodiscard]] __host__ __device__ bool isNegative() const { return getValue().isNegative(); }
-        [[nodiscard]] inline ExprType getSource() const noexcept;
-        [[nodiscard]] inline This* getFirstOperand() const;
-        /* Setters */
-        void setValue(const T& x) { *pValue = x; }
-        /* Static members */
-        template<RandomGenerator R>
-        [[nodiscard]] inline static Diff random_uniform();
-        template<RandomGenerator R>
-        [[nodiscard]] inline static Diff random_normal();
-        template<class Distribution, RandomGenerator R>
-        [[nodiscard]] inline static Diff random_any(Distribution& dist);
-    private:
-        /* Friends */
-        friend class device_obj<This>;
-    };
-    ////////////////////////////////////////////////////////////
-    template<Scalar T, DiffMode Mode, int Order, Scalar U>
-    [[nodiscard]] inline auto operator+(const Diff<T, Mode, Order>& s1, const U& s2);
+    template<Scalar T, Scalar U> 
+    [[nodiscard]] inline CoDiff<typename Internal::BinaryScalarOpRtnTy<std::remove_cvref_t<T>, std::remove_cvref_t<U>>::Type>
+    operator-(T&& x, U&& y) requires(Diffable<T>);
 
-    template<Scalar T, DiffMode Mode, int Order, Scalar U>
-    [[nodiscard]] inline std::enable_if<!U::isDiffable, typename Internal::BinaryScalarOpRtnTy<Diff<T, Mode, Order>, U>::Type>::type
-    operator+(const U& s1, const Diff<T, Mode, Order>& s2);
+    template<Scalar T, Scalar U>
+    [[nodiscard]] inline CoDiff<typename Internal::BinaryScalarOpRtnTy<std::remove_cvref_t<T>, std::remove_cvref_t<U>>::Type>
+    operator*(T&& x, U&& y) requires(Diffable<T>);
 
-    template<Scalar T, DiffMode Mode, int Order, Scalar U>
-    [[nodiscard]] inline auto operator-(const Diff<T, Mode, Order>& s1, const U& s2);
+    template<Scalar T, Scalar U>
+    [[nodiscard]] inline CoDiff<typename Internal::BinaryScalarOpRtnTy<std::remove_cvref_t<T>, std::remove_cvref_t<U>>::Type>
+    operator/(T&& x, U&& y) requires(Diffable<T>);
 
-    template<Scalar T, DiffMode Mode, int Order, Scalar U>
-    [[nodiscard]] inline std::enable_if<!U::isDiffable, typename Internal::BinaryScalarOpRtnTy<Diff<T, Mode, Order>, U>::Type>::type
-    operator-(const U& s1, const Diff<T, Mode, Order>& s2);
+    template<Scalar T, Scalar U>
+    [[nodiscard]] inline auto operator+(const U& x, const T& y) requires(Diffable<T> && !Diffable<U>);
 
-    template<Scalar T, DiffMode Mode, int Order, Scalar U>
-    [[nodiscard]] inline auto operator*(const Diff<T, Mode, Order>& s1, const U& s2);
+    template<Scalar T, Scalar U>
+    [[nodiscard]] inline auto operator-(const U& x, const T& y) requires(Diffable<T> && !Diffable<U>);
 
-    template<Scalar T, DiffMode Mode, int Order, Scalar U>
-    [[nodiscard]] inline std::enable_if<!U::isDiffable, typename Internal::BinaryScalarOpRtnTy<Diff<T, Mode, Order>, U>::Type>::type
-    operator*(const U& s1, const Diff<T, Mode, Order>& s2);
+    template<Scalar T, Scalar U>
+    [[nodiscard]] inline auto operator*(const U& x, const T& y) requires(Diffable<T> && !Diffable<U>);
 
-    template<Scalar T, DiffMode Mode, int Order, Scalar U>
-    [[nodiscard]] inline auto operator/(const Diff<T, Mode, Order>& s1, const U& s2);
+    template<Scalar T, Scalar U>
+    [[nodiscard]] inline auto operator/(const U& x, const T& y) requires(Diffable<T> && !Diffable<U>);
 
-    template<Scalar T, DiffMode Mode, int Order, Scalar U>
-    [[nodiscard]] inline std::enable_if<!U::isDiffable, typename Internal::BinaryScalarOpRtnTy<Diff<T, Mode, Order>, U>::Type>::type
-    operator/(const U& s1, const Diff<T, Mode, Order>& s2);
+    template<Scalar T>
+    [[nodiscard]] inline CoDiff<T> operator-(T&& x) requires(Diffable<T>);
 
-    template<Scalar T, DiffMode Mode, int Order>
-    inline std::ostream& operator<<(std::ostream& os, const Diff<T, Mode, Order>& obj) {
+    template<Scalar T>
+    inline std::ostream& operator<<(std::ostream& os, const T& obj) requires(T::isDiffable) {
         return os << obj.getValue();
     }
 }
@@ -303,18 +134,18 @@ namespace Physica {
         constexpr static ScalarOption Option = T::Option;
         constexpr static int Order = Order_;
         constexpr static bool isComplex = T::isComplex;
-        constexpr static bool isDiffable = true;
         constexpr static bool isForwardDiff = Mode == DiffMode::Forward;
         constexpr static bool isReverseDiff = Mode == DiffMode::Reverse;
+        constexpr static ExprType Source = ExprType::Set;
     private:
         using GradType = std::conditional<Order == 1, T, Diff<T, Mode, Order - 1>>::type;
     public:
         using ValueType = T;
         using ScalarType = Diff<T, Mode, Order>;
-        using PtrTy = std::conditional<isForwardDiff, ScalarPtr<ScalarType>, ScalarType*>::type;
-        using ConstPtrTy = std::conditional<isForwardDiff, const ScalarPtr<ScalarType>, const ScalarType*>::type;
-        using RefTy = std::conditional<isForwardDiff, ScalarRef<ScalarType>, ScalarType&>::type;
-        using ConstRefTy = std::conditional<isForwardDiff, const ScalarRef<ScalarType>, const ScalarType&>::type;
+        using PtrTy = ScalarPtr<ScalarType>;
+        using ConstPtrTy = const ScalarPtr<ScalarType>;
+        using RefTy = ScalarRef<ScalarType>;
+        using ConstRefTy = const ScalarRef<ScalarType>;
         using RealType = Diff<RealT, Mode, Order>;
         using ComplexType = Diff<ComplexT, Mode, Order>;
         using MachineType = T::MachineType;
@@ -327,5 +158,7 @@ namespace std {
 }
 
 #include "DiffImpl/DiffImpl.h"
+#include "DiffImpl/ScalarPtr.h"
+#include "DiffImpl/ScalarRef.h"
 #include "DiffImpl/Math.h"
 #include "DiffImpl/SIMD.h"

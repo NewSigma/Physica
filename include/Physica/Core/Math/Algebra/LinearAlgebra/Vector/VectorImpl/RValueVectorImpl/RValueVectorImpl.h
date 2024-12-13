@@ -91,11 +91,6 @@ namespace Physica::Core {
                         future.wait();
                     }
                 }
-
-                constexpr static bool isContinuous = is_continuous<T1>::value;
-                constexpr static bool isReverseDiff = ScalarType::isReverseDiff;
-                if constexpr (isContinuous && isReverseDiff)
-                    v1.makeContinuous();
             }
         };
     }
@@ -109,13 +104,12 @@ namespace Physica::Core {
     template<class Derived>
     template<class AnyPacket>
     inline AnyPacket RValueVector<Derived>::packet(size_t index) const {
-        constexpr static bool isExpr = !std::is_base_of<LValueVector<Derived>, Derived>::value;
         using T = Traits<AnyPacket>::ScalarType;
         assert(index + AnyPacket::size() <= getLength() && "[Error]: Index out of range");
-        if constexpr (T::isForwardDiff) {
-            using ValuePacket = AnyPacket::ValuePacket;
+        if constexpr (Diffable<T>) {
+            using ValuePacket = AnyPacket::ValueType;
             if constexpr (isForwardDiff) {
-                using GradPacket = AnyPacket::GradPacket;
+                using GradPacket = AnyPacket::GradType;
                 const auto& x = Base::getDerived();
                 auto values = toValueVector(x).template packet<ValuePacket>(index);
                 auto grads = toGradVector(x).template packet<GradPacket>(index);
@@ -135,12 +129,6 @@ namespace Physica::Core {
             T buffer[AnyPacket::size()];
             for (size_t i = 0; i < AnyPacket::size(); ++i, ++index)
                 buffer[i] = T(calc(index));
-            if constexpr (isExpr && isReverseDiff) { //Optimize: For expression such as A + B, there is no need to create new node
-                using TracerType = ScalarType::TracerType;
-                TracerType::getInstance().reserve(AnyPacket::size());
-                for (auto& elem : buffer)
-                    elem = elem.copy();
-            }
             AnyPacket packet{};
             packet.load(buffer);
             return packet;
@@ -150,13 +138,12 @@ namespace Physica::Core {
     template<class Derived>
     template<class AnyPacket>
     inline AnyPacket RValueVector<Derived>::packetPartial(size_t index, size_t count) const {
-        constexpr static bool isExpr = !std::is_base_of<LValueVector<Derived>, Derived>::value;
         using T = Traits<AnyPacket>::ScalarType;
         assert(index + count <= getLength() && "[Error]: Index out of range");
-        if constexpr (T::isForwardDiff) {
-            using ValuePacket = AnyPacket::ValuePacket;
+        if constexpr (Diffable<T>) {
+            using ValuePacket = AnyPacket::ValueType;
             if constexpr (isForwardDiff) {
-                using GradPacket = AnyPacket::GradPacket;
+                using GradPacket = AnyPacket::GradType;
                 const auto& x = Base::getDerived();
                 auto values = toValueVector(x).template packetPartial<ValuePacket>(index, count);
                 auto grads = toGradVector(x).template packetPartial<GradPacket>(index, count);
@@ -176,12 +163,6 @@ namespace Physica::Core {
             T buffer[AnyPacket::size()];
             for (size_t i = 0; i < AnyPacket::size(); ++i, ++index)
                 buffer[i] = i < count ? T(calc(index)) : T(0);
-            if constexpr (isExpr && isReverseDiff) {
-                using TracerType = ScalarType::TracerType;
-                TracerType::getInstance().reserve(count);
-                for (size_t i = 0; i < count; ++i)
-                    buffer[i] = buffer[i].copy();
-            }
             AnyPacket packet{};
             packet.load_partial(buffer, count);
             return packet;
@@ -343,16 +324,10 @@ namespace Physica::Core {
     }
 
     template<class Derived>
-    RValueVector<Derived>::ScalarType RValueVector<Derived>::sum() const {
-        assert(getLength() != 0);
-        constexpr bool EnableSIMD = Internal::EnableSIMD<Derived>::value;
-        if constexpr (!EnableSIMD || isReverseDiff) { // Optimize: Not implemented for reverse diff
-            auto result = ScalarType(0);
-            for(size_t i = 0; i < getLength(); ++i)
-                result += calc(i);
-            return result;
-        }
-        else {
+    auto RValueVector<Derived>::sum() const {
+        static_assert(!isReverseDiff, "[Error]: Not implemented");;
+        assert(getLength() != 0 && "[Error]: Sum of a empty vector is not well defined");
+        if constexpr (Internal::EnableSIMD<Derived>::value) {
             const auto& v = Base::getDerived();
             PacketType buffer(0);
             if constexpr (SizeAtCompile != Dynamic) {
@@ -379,6 +354,12 @@ namespace Physica::Core {
                 }
             }
             return buffer.sum();
+        }
+        else {
+            auto result = ScalarType(0);
+            for(size_t i = 0; i < getLength(); ++i)
+                result += calc(i);
+            return result;
         }
     }
 

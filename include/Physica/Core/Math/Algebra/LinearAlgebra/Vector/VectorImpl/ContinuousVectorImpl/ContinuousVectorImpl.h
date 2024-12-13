@@ -85,23 +85,11 @@ namespace Physica::Core {
 
     template<class Derived>
     template<Scalar T>
-    inline Derived& ContinuousVector<Derived>::operator=(const T& x) {
+    inline Derived& ContinuousVector<Derived>::operator=(const T& x) requires(!isReverseDiff || ReverseDiff<T>) {
         const size_t length = Base::getLength();
-        if constexpr (isReverseDiff) {
-            using TracerType = ScalarType::TracerType;
-            TracerType::getInstance().reserve(length);
-            for (size_t i = 0; i < length; ++i) {
-                if constexpr (std::is_same<ScalarType, T>::value)
-                    (*this)[i] = x.copy();
-                else
-                    (*this)[i] = ScalarType(x);
-            }
-        }
-        else {
-            const auto x1 = ScalarType(x);
-            for (size_t i = 0; i < length; ++i)
-                (*this)[i] = x1;
-        }
+        const auto x1 = ScalarType(x);
+        for (size_t i = 0; i < length; ++i)
+            (*this)[i] = x1;
         return Base::getDerived();
     }
 
@@ -195,29 +183,6 @@ namespace Physica::Core {
     template<size_t Length>
     inline const ContinuousVectorBlock<Derived, Length> ContinuousVector<Derived>::segment(size_t from, size_t to) const {
         return ContinuousVectorBlock<Derived, Length>(Base::getConstCastDerived(), from, to);
-    }
-
-    template<class Derived>
-    inline void ContinuousVector<Derived>::makeContinuous() {
-        if constexpr (isReverseDiff)
-            Base::getDerived() = Base::getDerived().copy();
-    }
-
-    template<class Derived>
-    bool ContinuousVector<Derived>::checkContinuous() const {
-        if constexpr (isReverseDiff) {
-            const ScalarType i0 = (*this)[0];
-            const auto* pValue = i0.value_ptr();
-            const auto* pGrad = i0.grad_ptr();
-            for (size_t i = 1; i < Base::getLength(); ++i) {
-                const ScalarType& elem = (*this)[i];
-                if (elem.value_ptr() != pValue + i)
-                    return false;
-                if (elem.grad_ptr() != pGrad + i)
-                    return false;
-            }
-        }
-        return true;
     }
 
     template<class Derived>

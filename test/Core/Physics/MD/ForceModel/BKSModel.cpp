@@ -16,10 +16,9 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DiffDenseMatrix.h"
 #include "Physica/Core/Physics/MD/ForceModel/Ewald/Ewald.h"
 #include "Physica/Core/Physics/MD/ForceModel/BKSModel.h"
-#include "Physica/Core/MultiPrecision/AutoDiffGuard.h"
-#include "Physica/Core/Parallel/Executor/SequentialExecutor.h"
 
 using namespace Physica;
 using namespace Physica::Core;
@@ -40,13 +39,9 @@ namespace Physica {
         static void run() {
             const ScalarType volume = 125;
             const unsigned int cellSize = 3;
-            const AutoDiffGuard<ScalarType> guard{};
             auto cell = makeSystem(cellSize, volume);
             ForceModel forceModel(cell, pair_cutoff, Ewald<ScalarType>{});
-            {
-                const AutoDiffGuard<ScalarType> guard1{};
-                forceModel.potentialV(cell).reverse();
-            }
+            forceModel.potentialV(cell).reverse();
             /* Test press */ {
                 const ValueType press_diff = -volume.getGrad() / ValueType(cellSize * cellSize * cellSize);
                 const ValueType press = (forceModel.virial(cell).trace() / ScalarType(3)).getValue();
@@ -103,8 +98,7 @@ namespace Physica {
                     temp[1] += ScalarType(0.75);
                     temp[2] += ScalarType(0.75);
                 }
-                if constexpr (ScalarType::isReverseDiff)
-                    temp.makeContinuous();
+
                 temp *= latticeConst;
                 auto posSi = pos.row(i + maxIndexO);
                 auto posO1 = pos.row(2 * i);

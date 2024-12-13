@@ -96,9 +96,6 @@ namespace Physica::Core {
                 }
             }
         }
-
-        if constexpr (is_continuous<M>::value && isReverseDiff)
-            target.getDerived().makeContinuous();
     }
 
     template<Matrix T1, Matrix T2>

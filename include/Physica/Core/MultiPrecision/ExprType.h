@@ -31,10 +31,8 @@ namespace Physica::Core {
         Sub,
         Mul,
         Div,
+        MulAdd,
         Sum,
-        MulAdd2,
-        MulAdd4,
-        MulAdd8,
         More,
         MoreEq,
         Reciprocal,
@@ -71,9 +69,6 @@ namespace Physica::Core {
             case Mul: return "Mul";
             case Div: return "Div";
             case Sum: return "Sum";
-            case MulAdd2: return "MulAdd2";
-            case MulAdd4: return "MulAdd4";
-            case MulAdd8: return "MulAdd8";
             case More: return "More";
             case MoreEq: return "MoreEq";
             case Reciprocal: return "Reciprocal";

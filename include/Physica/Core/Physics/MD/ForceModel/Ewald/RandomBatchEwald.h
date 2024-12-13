@@ -145,8 +145,6 @@ namespace Physica::Core {
                 force_i[2] += temp * waveG[2];
             }
         }
-        if constexpr (T::isReverseDiff)
-            kSpaceSum.makeContinuous();
         kSpaceSum *= T(4 * M_PI) * Base::getInvVolume() * sumGauss / T(batchSize);
         return kSpaceSum;
     }

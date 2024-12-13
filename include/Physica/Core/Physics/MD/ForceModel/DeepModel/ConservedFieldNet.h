@@ -37,10 +37,6 @@ namespace Physica::Core {
         using LossType = Loss<ScalarType>::LossType;
         constexpr static bool IsTrainMode = ScalarType::Order == 2;
         static_assert(std::is_same<OutputType, ScalarType>::value, "[Error]: Output is energy, which should be a scalar");
-    private:
-        using DiffGuard = std::conditional<IsTrainMode, AutoDiffGuard<ScalarType>, PlainStruct<void>>::type;
-
-        [[no_unique_address]] DiffGuard diffGuard;
     public:
         ConservedFieldNet(const ConservedFieldNet&) = delete;
         ~ConservedFieldNet() = default;
@@ -52,8 +48,6 @@ namespace Physica::Core {
         [[nodiscard]] ScalarType loss(const Dataset& dataset, size_t index) const { return Base::getDerived().loss(dataset, index); }
         template<class Dataset>
         [[nodiscard]] ScalarType loss(const Dataset& dataset) const;
-
-        [[nodiscard]] Derived copy() const { return Base::getDerived().copy(); }
     protected:
         ConservedFieldNet() = default;
         ConservedFieldNet(ConservedFieldNet&&) noexcept = default;

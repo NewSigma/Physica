@@ -18,124 +18,117 @@
  */
 #pragma once
 
-namespace Physica::Core {
-    template<Scalar T, int Order, int Option, size_t Row, size_t Col>
-    DenseMatrix<Diff<T, DiffMode::Forward, Order>, Option, Row, Col>::DenseMatrix(size_t row, size_t col) : values(row, col), grads(row, col) {}
+#include "../DiffDenseMatrix.h"
 
-    template<Scalar T, int Order, int Option, size_t Row, size_t Col>
-    DenseMatrix<Diff<T, DiffMode::Forward, Order>, Option, Row, Col>::DenseMatrix(size_t row, size_t col, T init)
+namespace Physica::Core {
+#define tparams Scalar T, DiffMode Mode, int Order, int Option, size_t Row, size_t Col
+#define DiffDenseMatrix DenseMatrix<Diff<T, Mode, Order>, Option, Row, Col>
+
+    template<tparams>
+    DiffDenseMatrix::DenseMatrix(size_t row, size_t col) : values(row, col), grads(row, col) {}
+
+    template<tparams>
+    DiffDenseMatrix::DenseMatrix(size_t row, size_t col, T init)
             : values(row, col, init), grads(row, col, init) {}
 
-    template<Scalar T, int Order, int Option, size_t Row, size_t Col>
+    template<tparams>
+    DiffDenseMatrix::DenseMatrix(initializer_list list) : values(std::move(list)) {
+        grads.resize(values.getRow(), values.getCol(), 0);
+    }
+
+    template<tparams>
     template<Matrix M>
-    DenseMatrix<Diff<T, DiffMode::Forward, Order>, Option, Row, Col>::DenseMatrix(const M& mat) : DenseMatrix(mat.getRow(), mat.getCol()) {
+    DiffDenseMatrix::DenseMatrix(const M& mat) : DenseMatrix(mat.getRow(), mat.getCol()) {
         mat.assignTo(*this);
     }
 
-    template<Scalar T, int Order, int Option, size_t Row, size_t Col>
+    template<tparams>
     template<Vector V>
-    DenseMatrix<Diff<T, DiffMode::Forward, Order>, Option, Row, Col>::DenseMatrix(const V& vec) : DenseMatrix(vec.getLength(), 1) {
+    DiffDenseMatrix::DenseMatrix(const V& vec) : DenseMatrix(vec.getLength(), 1) {
         auto col = this->col(0);
         vec.assignTo(col);
     }
 
-    template<Scalar T, int Order, int Option, size_t Row, size_t Col>
-    void DenseMatrix<Diff<T, DiffMode::Forward, Order>, Option, Row, Col>::resize(size_t row, size_t col) {
+    template<tparams>
+    template<RandomGenerator R>
+    inline void DiffDenseMatrix::random_uniform() {
+        *this = random_uniform<R>(getRow(), getCol());
+    }
+
+    template<tparams>
+    template<RandomGenerator R>
+    inline void DiffDenseMatrix::random_normal() {
+        *this = random_normal<R>(getRow(), getCol());
+    }
+
+    template<tparams>
+    template<class Distribution, RandomGenerator R>
+    inline void DiffDenseMatrix::random_any(Distribution& dist) {
+        *this = random_any(getRow(), getCol(), dist);
+    }
+
+    template<tparams>
+    void DiffDenseMatrix::resize(size_t row, size_t col) {
         values.resize(row, col);
         grads.resize(row, col);
     }
 
-    template<Scalar T, int Order, int Option, size_t Row, size_t Col>
-    void DenseMatrix<Diff<T, DiffMode::Forward, Order>, Option, Row, Col>::swap(This& __restrict obj) noexcept {
+    template<tparams>
+    void DiffDenseMatrix::swap(This& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         values.swap(obj.values);
         grads.swap(obj.grads);
     }
 
-    template<Scalar T, int Order, int Option, size_t Row, size_t Col>
-    void DenseMatrix<Diff<T, DiffMode::Forward, Order>, Option, Row, Col>::swap_row(size_t r1, size_t r2) noexcept {
+    template<tparams>
+    void DiffDenseMatrix::swap_row(size_t r1, size_t r2) noexcept {
         values.swap_row(r1, r2);
         grads.swap_row(r1, r2);
     }
 
-    template<Scalar T, int Order, int Option, size_t Row, size_t Col>
-    void DenseMatrix<Diff<T, DiffMode::Forward, Order>, Option, Row, Col>::swap_col(size_t c1, size_t c2) noexcept {
+    template<tparams>
+    void DiffDenseMatrix::swap_col(size_t c1, size_t c2) noexcept {
         values.swap_col(c1, c2);
         grads.swap_col(c1, c2);
     }
 
-    template<Scalar T, int Order, int Option, size_t Row, size_t Col>
-    inline DenseMatrix<Diff<T, DiffMode::Forward, Order>, Option, Row, Col>::PtrTy
-    DenseMatrix<Diff<T, DiffMode::Forward, Order>, Option, Row, Col>::data_ptr(size_t row, size_t col) noexcept {
+    template<tparams>
+    inline DiffDenseMatrix::PtrTy DiffDenseMatrix::data_ptr(size_t row, size_t col) noexcept {
+        assert(row < getRow() && "[Error]: Index out of range");
+        assert(col < getCol() && "[Error]: Index out of range");
         return PtrTy(values.data_ptr(row, col), grads.data_ptr(row, col));
     }
 
-    template<Scalar T, int Order, int Option, size_t Row, size_t Col>
-    inline DenseMatrix<Diff<T, DiffMode::Forward, Order>, Option, Row, Col>::ConstPtrTy
-    DenseMatrix<Diff<T, DiffMode::Forward, Order>, Option, Row, Col>::data_ptr(size_t row, size_t col) const noexcept {
+    template<tparams>
+    inline DiffDenseMatrix::ConstPtrTy DiffDenseMatrix::data_ptr(size_t row, size_t col) const noexcept {
         return const_cast<This&>(*this).data_ptr(row, col);
     }
-    ////////////////////////////////////////////////////////////////////////
-    template<Scalar T, int Option, int Order>
-    Diff<DenseMatrix<T, Option>, DiffMode::Reverse, Order>::Diff()
-            : traceSeg(TracerType::getInstance().pushSegment()) {}
 
-    template<Scalar T, int Option, int Order>
-    Diff<DenseMatrix<T, Option>, DiffMode::Reverse, Order>::Diff(size_t row, size_t col)
-            : traceSeg(TracerType::getInstance().pushSegment(row * col)) {}
-
-    template<Scalar T, int Option, int Order>
-    Diff<DenseMatrix<T, Option>, DiffMode::Reverse, Order>::Diff(PlainMatrix values)
-            : traceSeg(TracerType::getInstance().pushSegment(values.flatten())) {}
-
-    template<Scalar T, int Option, int Order>
-    inline Diff<DenseMatrix<T, Option>, DiffMode::Reverse, Order>::ScalarType
-    Diff<DenseMatrix<T, Option>, DiffMode::Reverse, Order>::calc(size_t row, size_t col) const {
-        if constexpr (MatrixOption::isRowMatrix<This>())
-            return traceSeg[row * getCol() + col];
-        else
-            return traceSeg[col * getRow() + row];
+    template<tparams>
+    DiffDenseMatrix DiffDenseMatrix::unitMatrix(size_t order) {
+        This result(order, order);
+        result.toUnitMatrix();
+        return result;
     }
 
-    template<Scalar T, int Option, int Order>
+    template<tparams>
     template<RandomGenerator R>
-    inline void Diff<DenseMatrix<T, Option>, DiffMode::Reverse, Order>::random_uniform() {
-        *this = random_uniform<R>(getRow(), getCol());
+    inline auto DiffDenseMatrix::random_uniform(size_t row, size_t col) {
+        return This(ValueMatrix::template random_uniform<R>(row, col));
     }
 
-    template<Scalar T, int Option, int Order>
+    template<tparams>
     template<RandomGenerator R>
-    inline void Diff<DenseMatrix<T, Option>, DiffMode::Reverse, Order>::random_normal() {
-        *this = random_normal<R>(getRow(), getCol());
+    inline auto DiffDenseMatrix::random_normal(size_t row, size_t col) {
+        return This(ValueMatrix::template random_normal<R>(row, col));
     }
 
-    template<Scalar T, int Option, int Order>
+    template<tparams>
     template<class Distribution, RandomGenerator R>
-    inline void Diff<DenseMatrix<T, Option>, DiffMode::Reverse, Order>::random_any(Distribution& dist) {
-        *this = random_any(getRow(), getCol(), dist);
+    inline auto DiffDenseMatrix::random_any(size_t row, size_t col, Distribution& dist) {
+        return This(ValueMatrix::random_any(row, col, dist));
     }
 
-    template<Scalar T, int Option, int Order>
-    template<RandomGenerator R>
-    inline Diff<DenseMatrix<T, Option>, DiffMode::Reverse, Order>
-    Diff<DenseMatrix<T, Option>, DiffMode::Reverse, Order>::random_uniform(
-            size_t row, size_t col) {
-        return This(PlainMatrix::template random_uniform<R>(row, col));
-    }
-
-    template<Scalar T, int Option, int Order>
-    template<RandomGenerator R>
-    inline Diff<DenseMatrix<T, Option>, DiffMode::Reverse, Order>
-    Diff<DenseMatrix<T, Option>, DiffMode::Reverse, Order>::random_normal(
-            size_t row, size_t col) {
-        return This(PlainMatrix::template random_normal<R>(row, col));
-    }
-
-    template<Scalar T, int Option, int Order>
-    template<class Distribution, RandomGenerator R>
-    inline Diff<DenseMatrix<T, Option>, DiffMode::Reverse, Order>
-    Diff<DenseMatrix<T, Option>, DiffMode::Reverse, Order>::random_any(
-            size_t row, size_t col, Distribution& dist) {
-        return This(PlainMatrix::random_any(row, col, dist));
-    }
+#undef DiffDenseMatrix
+#undef tparams
 }

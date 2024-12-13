@@ -90,9 +90,6 @@ namespace Physica::Core {
     inline void MatrixVectorProduct<MatrixExpr<Type, T, U>, V>::generalImpl(V1& target) const {
         for (size_t i = 0; i < getLength(); ++i)
             target[i] = calc(i);
-
-        if constexpr (is_continuous<V1>::value && Base::isReverseDiff)
-            target.getDerived().makeContinuous();
     }
 }
 

@@ -17,8 +17,7 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include <iostream>
-#include "Physica/Core/MultiPrecision/Diff.h"
-#include "Physica/Core/MultiPrecision/AutoDiffGuard.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DiffDenseMatrix.h"
 #include "Physica/Core/Physics/MD/ForceModel/SilveraGoldman.h"
 
 using namespace Physica::Core;
@@ -37,7 +36,6 @@ class PressTest {
     constexpr static double pair_cutoff = 15;
 public:
     static void run() {
-        const AutoDiffGuard<ScalarType> guard{};
         const ScalarType volume = 8000;
         const auto cell = makeSystem(volume);
         SilveraGoldman<ScalarType, true> sg(pair_cutoff);
@@ -65,7 +63,6 @@ private:
 int main() {
     SilveraGoldman<ScalarType, true> sg(1.0);
     {
-        const AutoDiffGuard<ScalarType> guard{};
         ScalarType r = 2.0;
         const ScalarType r2 = square(r);
         sg.pot_functor(0, 0, r, r2).reverse();
@@ -75,7 +72,6 @@ int main() {
             return 1;
     }
     {
-        const AutoDiffGuard<ScalarType> guard{};
         ScalarType r = 2.0;
         const ScalarType r2 = square(r);
         sg.force_functor(0, 0, r, r2).reverse();

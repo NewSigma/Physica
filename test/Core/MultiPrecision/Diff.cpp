@@ -17,63 +17,29 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include <iostream>
-#include "Physica/Core/MultiPrecision/Real.h"
 #include "Physica/Core/MultiPrecision/Diff.h"
 
 using namespace Physica::Core;
-
-template<Scalar T>
-T func(T x, T y) {
-    return square(x - T(1.0)) + square(y - T(2.0));
-}
-
 using T = float64;
 
 void testFunc() {
     bool good = true;
     {
-        using ScalarType = Diff<T, DiffMode::Forward, 1>;
+        using dfloat = Diff<T, DiffMode::Forward, 1>;
+        auto func = [](dfloat x, dfloat y) -> dfloat {
+            return square(x - T(1.0)) + square(y - T(2.0));
+        };
         const T x = 3;
         const T y = 4;
-        const ScalarType result = func(ScalarType(x, 1), ScalarType(y, 1));
+        const dfloat result = func(dfloat(x, 1), dfloat(y, 1));
         const T answer = (x + y - 3.0) * 2.0;
         good &= scalarNear(result.getGrad(), answer, 1E-15);
     }
     {
-        using ScalarType = Diff<T, DiffMode::Forward, 2>;
-        ScalarType x{3, 1};
-        ScalarType y = square(x);
+        using dfloat = Diff<T, DiffMode::Forward, 2>;
+        dfloat x{3, 1};
+        dfloat y = square(x);
         good &= scalarNear(y.template getGrad<2>(), float64(2), 1E-15);
-    }
-    {
-        using ScalarType = Diff<T, DiffMode::Reverse, 1>;
-        ScalarType x(3);
-        ScalarType y(4);
-        ScalarType result = func(x, y);
-        result.reverse();
-        good &= scalarNear(x.getGrad(), (x.getValue() - 1.0) * 2.0, 1E-15);
-        good &= scalarNear(y.getGrad(), (y.getValue() - 2.0) * 2.0, 1E-15);
-    }
-    {
-        using ScalarType = Diff<T, DiffMode::Reverse, 2>;
-        ScalarType x(3);
-        ScalarType result = square(x);
-        result.reverse();
-        good &= scalarNear(T(x.getGrad<1>()), T(6), 1E-15);
-        x.getGrad().reverse();
-        good &= scalarNear(x.getGrad<2>(), T(2), 1E-15);
-    }
-    {
-        using ScalarType = Diff<T, DiffMode::Reverse, 2>;
-        ScalarType x(3);
-        ScalarType y(4);
-        ScalarType result = func(x, y);
-        result.reverse();
-        good &= scalarNear(T(x.getGrad<1>()), T(4), 1E-15);
-        good &= scalarNear(T(y.getGrad<1>()), T(4), 1E-15);
-        x.getGrad().reverse();
-        good &= scalarNear(T(x.getGrad<2>()), T(2), 1E-15);
-        good &= scalarNear(T(y.getGrad<2>()), T(0), 1E-15);
     }
     if (!good)
         exit(EXIT_FAILURE);
@@ -127,9 +93,53 @@ void testSIMD() {
         exit(EXIT_FAILURE);
 }
 
+int testReverse() {
+    using dfloat = Diff<float64, DiffMode::Reverse>;
+    auto x = dfloat(2);
+    /* Simple */ {
+        const auto y = sin(x).reverse();
+        if (y != sin(x.getValue()))
+            return 1;
+        if (x.getGrad() != cos(x.getValue()))
+            return 1;
+    }
+    /* Test r-value 1 */ {
+        x.zero_grad();
+        const auto y = sin(sin(x)).reverse();
+        if (y.getValue() != sin(sin(x.getValue())))
+            return 1;
+        if (x.getGrad() != cos(x.getValue()) * cos(sin(x.getValue())))
+            return 1;
+    }
+    /* Test r-value 2 */ {
+        auto func = [](const dfloat& x) {
+            return sin(sin(x));
+        };
+        x.zero_grad();
+        func(x).reverse();
+        if (x.getGrad() != cos(x.getValue()) * cos(sin(x.getValue())))
+            return 1;
+    }
+    {
+        auto func = [](dfloat& x, dfloat& y) {
+            return square(x - T(1.0)) + square(y - T(2.0));
+        };
+        dfloat x(3);
+        dfloat y(4);
+        func(x, y).reverse();
+        bool flag1 = scalarNear(x.getGrad(), (x.getValue() - 1.0) * 2.0, 1E-15);
+        bool flag2 = scalarNear(y.getGrad(), (y.getValue() - 2.0) * 2.0, 1E-15);
+        if (!flag1 || !flag2)
+            return 1;
+    }
+    return 0;
+}
+
 int main() {
     testFunc();
     testMath();
     testSIMD();
+    if (testReverse() == 1)
+        return 1;
     return 0;
 }

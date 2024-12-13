@@ -70,15 +70,6 @@ namespace Physica::Core {
     }
 
     template<Scalar T, int Order>
-    device_obj<Diff<VectorND<T>, DiffMode::Reverse, Order>>
-    device_obj<Diff<VectorND<T>, DiffMode::Reverse, Order>>::copy() const {
-        This result{};
-        const auto& newTrace = TracerType::getInstance().pushSegment(getTraceSegment().copy());
-        result.traceSeg = asStruct(newTrace);
-        return result;
-    }
-
-    template<Scalar T, int Order>
     template<bool ComputeMax>
     __device__ void device_obj<Diff<VectorND<T>, DiffMode::Reverse, Order>>::minmaxKernelImpl(SegmentType& result) const {
         extern __shared__ T buffer[];

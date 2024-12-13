@@ -19,28 +19,27 @@
 #pragma once
 
 #include <mkl_cblas.h>
-#include <mkl_cblas_64.h>
 #include "../InnerDot.h"
 
 namespace Physica::Core {
     template<Vector T1, Vector T2>
-    InnerDot<T1, T2>::ResultType InnerDot<T1, T2>::calc_mkl() const {
-        using MachineType = ResultType::MachineType;
+    InnerDot<T1, T2>::ScalarType InnerDot<T1, T2>::calc_mkl() const {
+        using MachineType = ScalarType::MachineType;
         const auto* p1 = reinterpret_cast<const MachineType*>(v1.data());
         const auto* p2 = reinterpret_cast<const MachineType*>(v2.data());
-        if constexpr (ResultType::isComplex) {
-            ResultType result;
-            if constexpr (ResultType::Option == Float32)
+        if constexpr (ScalarType::isComplex) {
+            ScalarType result;
+            if constexpr (ScalarType::Option == Float32)
                 cblas_cdotu_sub_64(v1.getLength(), p1, 1, p2, 1, &result);
             else
                 cblas_zdotu_sub_64(v1.getLength(), p1, 1, p2, 1, &result);
             return result;
         }
         else {
-            if constexpr (ResultType::Option == Float32)
-                return ResultType(cblas_sdot_64(v1.getLength(), p1, 1, p2, 1));
+            if constexpr (ScalarType::Option == Float32)
+                return ScalarType(cblas_sdot_64(v1.getLength(), p1, 1, p2, 1));
             else
-                return ResultType(cblas_ddot_64(v1.getLength(), p1, 1, p2, 1));
+                return ScalarType(cblas_ddot_64(v1.getLength(), p1, 1, p2, 1));
         }
     }
 }

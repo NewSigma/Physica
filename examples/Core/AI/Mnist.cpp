@@ -83,13 +83,6 @@ public:
     template<class Dataset>
     [[nodiscard]] T loss(const Dataset& dataset) const { return Base::loss(dataset); }
 
-    [[nodiscard]] MnistNet copy() const {
-        MnistNet result{};
-        result.layer1 = layer1.copy();
-        result.layer2 = layer2.copy();
-        return result;
-    }
-
     template<class Dataset>
     ValueType calcAccuracy(const Dataset& dataset) const {
         const auto& testSamples = dataset.getSamples();

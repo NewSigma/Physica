@@ -18,13 +18,13 @@
  */
 #pragma once
 
-#include "Physica/Core/MultiPrecision/Diff.h"
+#include "Physica/Core/MultiPrecision/Diff.h" // IWYU pragma: export
 #include "DenseVector.h"
 
 namespace Physica::Core {
-    template<Scalar T, int Order, size_t Length, class Allocator>
-    class DenseVector<Diff<T, DiffMode::Forward, Order>, Length, Allocator> : public ContinuousVector<DenseVector<Diff<T, DiffMode::Forward, Order>, Length, Allocator>> {
-        using This = DenseVector<Diff<T, DiffMode::Forward, Order>, Length, Allocator>;
+    template<Scalar T, DiffMode Mode, int Order, size_t Length, class Allocator>
+    class DenseVector<Diff<T, Mode, Order>, Length, Allocator> : public ContinuousVector<DenseVector<Diff<T, Mode, Order>, Length, Allocator>> {
+        using This = DenseVector<Diff<T, Mode, Order>, Length, Allocator>;
         using Base = ContinuousVector<This>;
     public:
         using typename Base::ScalarType;
@@ -71,7 +71,9 @@ namespace Physica::Core {
         __host__ __device__ CRIteType rend() const noexcept { return crend(); }
         __host__ __device__ CRIteType crend() const noexcept { return CRIteType(data() - 1); }
         /* Operations */
+        void zero_grad();
         inline void resize(size_t size);
+
         template<RandomGenerator R> inline void random_uniform();
         template<RandomGenerator R> inline void random_normal();
         template<class Distribution, RandomGenerator R>
@@ -91,69 +93,18 @@ namespace Physica::Core {
         [[nodiscard]] inline static This random_any(size_t len, Distribution& dist);
         [[nodiscard]] static auto linspace(T from, T to, size_t count);
     };
-    ////////////////////////////////////////////////////////////////////////////////////
-    template<Scalar T, int Order>
-    class Diff<VectorND<T>, DiffMode::Reverse, Order>
-            : public RValueVector<Diff<VectorND<T>, DiffMode::Reverse, Order>> {
-        using VectorType = VectorND<T>;
-        using This = Diff<VectorType, DiffMode::Reverse, Order>;
-        using Base = RValueVector<This>;
-        using TracerType = DiffTracer<T, Order>;
-        using SegmentType = TraceSegment<T, Order>;
-    public:
-        using ScalarType = Base::ScalarType;
-    private:
-        SegmentType& traceSeg;
-    public:
-        Diff();
-        Diff(size_t length);
-        Diff(VectorType values);
-        Diff(const Diff&) = default;
-        Diff(Diff&&) noexcept = default;
-        ~Diff() = default;
-        /* Operators */
-        Diff& operator=(const Diff&) = default;
-        Diff& operator=(Diff&&) noexcept = default;
-        /* Operations */
-        template<RandomGenerator R> inline void random_uniform();
-        template<RandomGenerator R> inline void random_normal();
-        template<class Distribution, RandomGenerator R>
-        inline void random_any(Distribution& dist);
-        void swap(Diff& obj) noexcept { std::swap(*this, obj); }
-        /* Getters */
-        [[nodiscard]] inline ScalarType calc(size_t index) const;
-        [[nodiscard]] size_t getLength() const noexcept { return traceSeg.getLength(); }
-        [[nodiscard]] const VectorType& getValue() const noexcept { return traceSeg.getValues(); }
-        [[nodiscard]] const VectorType& getGrad() const noexcept { return traceSeg.getGrads(); }
-        /* Static members */
-        template<RandomGenerator R>
-        [[nodiscard]] inline static This random_uniform(size_t len);
-        template<RandomGenerator R>
-        [[nodiscard]] inline static This random_normal(size_t len);
-        template<class Distribution, RandomGenerator R>
-        [[nodiscard]] inline static This random_any(size_t len, Distribution& dist);
-        /* Friends */
-        friend class device_obj<This>;
-    };
 }
 
 namespace Physica {
-    template<Scalar T, int Order, size_t Length, class Allocator>
-    class Traits<Core::DenseVector<Diff<T, DiffMode::Forward, Order>, Length, Allocator>> {
+    template<Scalar T, DiffMode Mode, int Order, size_t Length, class Allocator>
+    class Traits<DenseVector<Diff<T, Mode, Order>, Length, Allocator>> : public Traits<VectorND<T>> {
         static_assert(!T::isDiffable, "[Error]: Nested Diff<> is not allowed");
     public:
-        using ScalarType = Diff<T, DiffMode::Forward, Order>;
+        using ScalarType = Diff<T, Mode, Order>;
         constexpr static size_t SizeAtCompile = Length;
 
         constexpr static bool FastAssign = false;
         constexpr static bool FastPacket = true;
-    };
-
-    template<Scalar T, int Order>
-    class Traits<Core::Diff<VectorND<T>, Core::DiffMode::Reverse, Order>> : public Traits<VectorND<T>> {
-        static_assert(!T::isDiffable, "[Error]: Nested Diff<> is not allowed");
-    public:
-        using ScalarType = Diff<T, DiffMode::Reverse, Order>;
     };
 }
 

@@ -139,9 +139,6 @@ namespace Physica::Core {
                     target(1, 2) = -(source(0, 0) * source(1, 2) - source(1, 0) * source(0, 2)) * repDet;
                     target(2, 2) = (source(0, 0) * source(1, 1) - source(1, 0) * source(0, 1)) * repDet;
                 }
-
-                if constexpr (is_continuous<TargetType>::value && ScalarType::isReverseDiff)
-                    target.makeContinuous();
             }
         };
     }

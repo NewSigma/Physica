@@ -17,7 +17,7 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include <iostream>
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DiffDenseMatrix.h"
 #include "Physica/Core/MultiPrecision/Diff.h"
 
 using namespace Physica::Core;
@@ -39,9 +39,10 @@ int main() {
         using DMatrix = DenseMatrix<ScalarType, MatrixOption::Col | MatrixOption::Element, 3, 3>;
         const DMatrix m{1, 2, 3, 4, 5, 6, 7, 8, 9};
         const DVector x{1, 2, 3};
-        const DVector y = m * x;
-        y.sum().reverse();
-
+        {
+            const DVector y = m * x;
+            y.sum().reverse();
+        }
         const Vector3D<float32> dx = toGradVector(x);
         for (size_t i = 0; i < dx.getLength(); ++i)
             if (!scalarNear(dx[i], toValueMatrix(m).col(i).sum(), 1E-15))

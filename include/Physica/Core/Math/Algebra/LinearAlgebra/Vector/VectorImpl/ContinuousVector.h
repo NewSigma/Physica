@@ -54,7 +54,7 @@ namespace Physica::Core {
         inline This& operator=(const This& v);
         inline This& operator=(This&& v);
         template<Scalar T>
-        inline Derived& operator=(const T& x);
+        inline Derived& operator=(const T& x) requires(!isReverseDiff || ReverseDiff<T>);
 
         template<Vector V>
         inline void operator+=(const V& v);
@@ -81,8 +81,7 @@ namespace Physica::Core {
         [[nodiscard]] inline const BlockType<Length> segment(size_t from, size_t to) const;
 
         void resize(size_t length) { Base::getDerived().resize(length); }
-        inline void makeContinuous();
-        [[nodiscard]] bool checkContinuous() const;
+
         template<RandomGenerator R>
         inline void random_uniform();
         template<RandomGenerator R>

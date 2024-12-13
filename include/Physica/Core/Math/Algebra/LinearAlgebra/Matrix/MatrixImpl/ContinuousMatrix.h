@@ -114,8 +114,7 @@ namespace Physica::Core {
         [[nodiscard]] inline const ContinuousMatrixBlock<Derived, Row, Col> block(size_t fromRow, size_t rowCount, size_t fromCol, size_t colCount) const;
 
         void resize(size_t r, size_t c) { Base::getDerived().resize(r, c); }
-        inline void makeContinuous();
-        [[nodiscard]] bool checkContinuous() const;
+
         template<RandomGenerator R>
         void random_uniform();
         template<RandomGenerator R>

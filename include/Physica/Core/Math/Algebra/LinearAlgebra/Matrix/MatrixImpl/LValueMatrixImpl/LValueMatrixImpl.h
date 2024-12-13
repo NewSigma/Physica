@@ -87,18 +87,12 @@ namespace Physica::Core {
     
     template<class Derived>
     Derived& LValueMatrix<Derived>::operator=(const ScalarType& s) {
+        static_assert(!isReverseDiff, "[Error]: Not implemented");
         const size_t maxMajor = Base::getMaxMajor();
         const size_t maxMinor = Base::getMaxMinor();
-        if constexpr (isReverseDiff) {
-            for (size_t i = 0; i < maxMajor; ++i)
-                for (size_t j = 0; j < maxMinor; ++j)
-                    refFromMajorMinor(i, j) = s.copy();
-        }
-        else {
-            for (size_t i = 0; i < maxMajor; ++i)
-                for (size_t j = 0; j < maxMinor; ++j)
-                    refFromMajorMinor(i, j) = s;
-        }
+        for (size_t i = 0; i < maxMajor; ++i)
+            for (size_t j = 0; j < maxMinor; ++j)
+                refFromMajorMinor(i, j) = s;
         return Base::getDerived();
     }
 
