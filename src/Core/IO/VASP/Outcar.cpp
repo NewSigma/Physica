@@ -52,7 +52,9 @@ namespace Physica::Core {
             if (success) {
                 fin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
                 MatrixType pos_force(getNumAtom(), 6);
-                fin >> pos_force;
+                for (auto& elem : pos_force.asArray())
+                    fin >> elem;
+
                 size_t index = 0;
                 for (size_t r = 0; r < pos_force.getRow(); ++r) {
                     for (size_t c = 3; c < pos_force.getCol(); ++c) {

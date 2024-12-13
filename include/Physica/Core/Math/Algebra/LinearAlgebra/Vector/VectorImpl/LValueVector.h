@@ -64,17 +64,17 @@ namespace Physica::Core {
         template<class AnyPacket> void writePacketPartial(size_t index, size_t count, const AnyPacket packet);
 
         template<size_t Length = Dynamic>
-        [[nodiscard]] inline BlockType<Length> head(size_t to);
+        [[nodiscard]] inline auto head(size_t to) noexcept;
         template<size_t Length = Dynamic>
-        [[nodiscard]] inline const BlockType<Length> head(size_t to) const;
+        [[nodiscard]] inline const auto head(size_t to) const noexcept;
         template<size_t Length = Dynamic>
-        [[nodiscard]] inline BlockType<Length> tail(size_t from);
+        [[nodiscard]] inline auto tail(size_t from) noexcept;
         template<size_t Length = Dynamic>
-        [[nodiscard]] inline const BlockType<Length> tail(size_t from) const;
+        [[nodiscard]] inline const auto tail(size_t from) const noexcept;
         template<size_t Length = Dynamic>
-        [[nodiscard]] inline BlockType<Length> segment(size_t from, size_t to);
+        [[nodiscard]] inline auto segment(size_t from, size_t to) noexcept;
         template<size_t Length = Dynamic>
-        [[nodiscard]] inline const BlockType<Length> segment(size_t from, size_t to) const;
+        [[nodiscard]] inline const auto segment(size_t from, size_t to) const noexcept;
 
         inline void toUnit();
         template<RandomGenerator R>

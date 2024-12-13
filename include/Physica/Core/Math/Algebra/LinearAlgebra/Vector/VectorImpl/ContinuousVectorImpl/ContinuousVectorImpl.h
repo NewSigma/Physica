@@ -328,17 +328,4 @@ namespace Physica::Core {
         return std::cref(dataset);
     }
 #endif
-    template<Vector T>
-    std::ostream& operator<<(std::ostream& os, const ContinuousVector<T>& v) {
-        using ScalarType = T::ScalarType;
-        os.write(reinterpret_cast<const char*>(v.data_ptr(0)), v.getLength() * sizeof(ScalarType));
-        return os;
-    }
-
-    template<Vector T>
-    std::istream& operator>>(std::istream& is, ContinuousVector<T>& v) {
-        using ScalarType = T::ScalarType;
-        is.read(reinterpret_cast<char*>(v.data_ptr(0)), v.getLength() * sizeof(ScalarType));
-        return is;
-    }
 }

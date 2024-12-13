@@ -50,26 +50,6 @@ namespace Physica::Core {
         return *this;
     }
 
-    std::ostream& operator<<(std::ostream& os, const PIPhonon& phonon) {
-        for (size_t r = 0; r < phonon.getUnitCellDOF(); ++r) {
-            for (size_t c = r; c < phonon.getUnitCellDOF(); ++c) {
-                const size_t offset = phonon.force_corr.toIndex1D(r, c);
-                os << phonon.force_corr[offset] << phonon.momentum_corr[offset];
-            }
-        }
-        return os;
-    }
-
-    std::istream& operator>>(std::istream& is, PIPhonon& phonon) {
-        for (size_t r = 0; r < phonon.getUnitCellDOF(); ++r) {
-            for (size_t c = r; c < phonon.getUnitCellDOF(); ++c) {
-                const size_t offset = phonon.force_corr.toIndex1D(r, c);
-                is >> phonon.force_corr[offset] >> phonon.momentum_corr[offset];
-            }
-        }
-        return is;
-    }
-
     void PIPhonon::compute() {
         toKSpace();
         applyTranslationInvariance(kSpaceForceCorr[0]);

@@ -139,7 +139,7 @@ namespace Physica::Core {
 
 namespace Physica {
     template<class Derived>
-    class Traits<Core::ContinuousMatrix<Derived>> : public Traits<Derived> {};
+    class Traits<ContinuousMatrix<Derived>> : public Traits<Derived> {};
 }
 
 #include "ContinuousMatrixImpl/ContinuousMatrixImpl.h"

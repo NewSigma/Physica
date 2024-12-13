@@ -19,6 +19,7 @@
 #include "Physica/Core/Utils/Unix/TempFile.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/DenseVector.h"
 #include "Physica/Core/Math/Random/Random.h"
+#include "Physica/Core/MultiPrecision/Complex.h"
 
 using namespace Physica::Core;
 using RandomType = Random<MT19937, std::mt19937::default_seed>;

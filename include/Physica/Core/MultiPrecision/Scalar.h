@@ -68,6 +68,15 @@ namespace Physica::Core {
     using cfloat16 = Complex<float16>;
     using cfloat32 = Complex<float32>;
     using cfloat64 = Complex<float64>;
+
+    template<class T>
+    concept ForwardDiff = std::remove_cvref_t<T>::ScalarType::isForwardDiff;
+
+    template<class T>
+    concept ReverseDiff = std::remove_cvref_t<T>::ScalarType::isReverseDiff;
+
+    template<class T>
+    concept Diffable = std::remove_cvref_t<T>::ScalarType::isDiffable;
     /**
      * \class Diff provides auto differential support for scalars
      */
@@ -80,6 +89,9 @@ namespace Physica::Core {
          */
         template<Scalar T1, Scalar T2>
         class BinaryScalarOpRtnTy {
+            static_assert(std::is_class<T1>::value);
+            static_assert(std::is_class<T2>::value);
+
             constexpr static ScalarOption Option = std::max(T1::Option, T2::Option);
             constexpr static bool isComplex = T1::isComplex || T2::isComplex;
             constexpr static bool isDiffable1 = T1::isDiffable;

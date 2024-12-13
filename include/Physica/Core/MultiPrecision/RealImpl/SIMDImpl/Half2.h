@@ -26,9 +26,11 @@ namespace Physica {
     public:
         using ScalarType = Real<Float16>;
         using ValueType = SIMD<Real<Float16>, 2>;
+        using GradType = void;
         using RealType = ValueType;
         using FullRealType = RealType;
         using MachineType = __half2;
+        using BoolSIMDType = void;
     };
 }
 

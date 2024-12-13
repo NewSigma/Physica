@@ -110,12 +110,9 @@ namespace Physica::Core {
     }
 
     template<Matrix T1, Matrix T2>
-    [[nodiscard]] inline std::enable_if<(T1::ColAtCompile != 1 && T2::ColAtCompile != 1) ||
-                                                 (T1::ColAtCompile == 1 && T2::ColAtCompile == 1),
-                                                  MatrixProduct<T1, T2>>::type
-    operator*(const T1& mat1, const T2& mat2) noexcept {
+    [[nodiscard]] inline auto operator*(const T1& mat1, const T2& mat2) noexcept requires((T1::ColAtCompile != 1 && T2::ColAtCompile != 1) || (T1::ColAtCompile == 1 && T2::ColAtCompile == 1)) {
         assert(mat1.getCol() == mat2.getRow());
-        return MatrixProduct(mat1, mat2);
+        return MatrixProduct<T1, T2>(mat1, mat2);
     }
 }
 

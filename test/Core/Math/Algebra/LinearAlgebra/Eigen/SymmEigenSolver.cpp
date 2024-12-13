@@ -19,6 +19,7 @@
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Eigen/SymmEigenSolver.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DiffDenseMatrix.h"
 #include "Physica/Core/Math/Random/Random.h"
+#include "Physica/Core/MultiPrecision/Diff.h"
 
 using namespace Physica::Core;
 using RandomType = Random<MT19937, std::mt19937::default_seed>;
@@ -26,8 +27,7 @@ using RandomType = Random<MT19937, std::mt19937::default_seed>;
 template<Matrix T>
 bool eigenTest(const T& mat, double precision) {
     using ScalarType = T::ScalarType;
-    using RealType = ScalarType::RealType;
-    using ComplexVector = DenseVector<typename RealType::ComplexType, T::RowAtCompile>;
+    using VectorType = DenseVector<ScalarType, T::RowAtCompile>;
     using EigenvectorMatrix = SymmEigenSolver<ScalarType>::EigenvectorMatrix;
 
     auto solver = SymmEigenSolver<ScalarType>(mat, true);
@@ -38,8 +38,8 @@ bool eigenTest(const T& mat, double precision) {
     for (size_t i = 0; i < order; ++i) {
         if (i > 1 && solver.getEigenvalues()[i - 1] > solver.getEigenvalues()[i])
             return false;
-        ComplexVector v1 = mat * eigenvectors.col(i);
-        ComplexVector v2 = RealType(solver.getEigenvalues()[i]) * eigenvectors.col(i);
+        VectorType v1 = mat * eigenvectors.col(i);
+        VectorType v2 = eigenvectors.col(i) * ScalarType(solver.getEigenvalues()[i]);
         if (!vectorNear(v1, v2, precision))
             return false;
     }

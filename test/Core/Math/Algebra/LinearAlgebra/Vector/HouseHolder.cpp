@@ -20,6 +20,7 @@
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/DenseVector.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/Householder.h"
+#include "Physica/Core/MultiPrecision/Complex.h"
 
 using namespace Physica::Core;
 using T = float64;

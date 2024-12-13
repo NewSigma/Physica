@@ -18,6 +18,8 @@
  */
 #pragma once
 
+#include "../LValueVector.h"
+
 namespace Physica::Core {
     template<class Derived>
     inline LValueVector<Derived>& LValueVector<Derived>::operator=(const This& v) {
@@ -98,38 +100,38 @@ namespace Physica::Core {
 
     template<class Derived>
     template<size_t Length>
-    inline LVectorBlock<Derived, Length> LValueVector<Derived>::head(size_t to) {
-        return {Base::getDerived(), 0, to};
+    inline auto LValueVector<Derived>::head(size_t to) noexcept {
+        return BlockType<Length>(Base::getDerived(), 0, to);
     }
 
     template<class Derived>
     template<size_t Length>
-    inline const LVectorBlock<Derived, Length> LValueVector<Derived>::head(size_t to) const {
-        return {Base::getConstCastDerived(), 0, to};
+    inline const auto LValueVector<Derived>::head(size_t to) const noexcept {
+        return BlockType<Length>(Base::getConstCastDerived(), 0, to);
     }
 
     template<class Derived>
     template<size_t Length>
-    inline LVectorBlock<Derived, Length> LValueVector<Derived>::tail(size_t from) {
-        return {Base::getDerived(), from};
+    inline auto LValueVector<Derived>::tail(size_t from) noexcept {
+        return BlockType<Length>(Base::getDerived(), from);
     }
 
     template<class Derived>
     template<size_t Length>
-    inline const LVectorBlock<Derived, Length> LValueVector<Derived>::tail(size_t from) const {
-        return {Base::getConstCastDerived(), from};
+    inline const auto LValueVector<Derived>::tail(size_t from) const noexcept {
+        return BlockType<Length>(Base::getConstCastDerived(), from);
     }
 
     template<class Derived>
     template<size_t Length>
-    inline LVectorBlock<Derived, Length> LValueVector<Derived>::segment(size_t from, size_t to) {
-        return {Base::getDerived(), from, to};
+    inline auto LValueVector<Derived>::segment(size_t from, size_t to) noexcept {
+        return BlockType<Length>(Base::getDerived(), from, to);
     }
 
     template<class Derived>
     template<size_t Length>
-    inline const LVectorBlock<Derived, Length> LValueVector<Derived>::segment(size_t from, size_t to) const {
-        return {Base::getConstCastDerived(), from, to};
+    inline const auto LValueVector<Derived>::segment(size_t from, size_t to) const noexcept {
+        return BlockType<Length>(Base::getConstCastDerived(), from, to);
     }
 
     template<class Derived>

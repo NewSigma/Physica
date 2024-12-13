@@ -36,6 +36,7 @@ namespace Physica::Core {
      */
     template<Scalar T>
     class JacobiDavidson {
+        using This = JacobiDavidson<T>;
         using RealType = T::RealType;
         using WorkingMatrix = DenseMatrix<T>;
         using VectorType = VectorND<T>;
@@ -74,11 +75,11 @@ namespace Physica::Core {
                        size_t numRequired,
                        RealType error_ = RealType(std::numeric_limits<RealType>::epsilon()),
                        RealType stableThrehold_ = DefaultStableThreshold);
-        JacobiDavidson(const JacobiDavidson&) = default;
-        JacobiDavidson(JacobiDavidson&&) noexcept = default;
+        JacobiDavidson(const This&) = default;
+        JacobiDavidson(This&&) noexcept = default;
         ~JacobiDavidson() = default;
         /* Operators */
-        JacobiDavidson& operator=(JacobiDavidson obj) noexcept;
+        This& operator=(This obj) noexcept { swap(obj); return *this; }
         /* Operations */
         template<Matrix M>
         void compute(const M& source,
@@ -86,7 +87,7 @@ namespace Physica::Core {
                      T eigenGoal = T(InvalidGoal));
         void sort();
         void resize(size_t size, size_t numRequired);
-        void swap(JacobiDavidson& __restrict obj) noexcept;
+        void swap(This& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] size_t getOrder() const noexcept { return eigenvectors.getRow(); }
         [[nodiscard]] size_t getNumRequired() const noexcept { return eigenvalues.getLength(); }
@@ -122,12 +123,6 @@ namespace Physica::Core {
             , stableThreshold(stableThreshold_) {
         linearSolver.mustConverge = false;
         resize(size, numRequired);
-    }
-
-    template<Scalar T>
-    JacobiDavidson<T>& JacobiDavidson<T>::operator=(JacobiDavidson<T> obj) noexcept {
-        swap(obj);
-        return *this;
     }
 
     template<Scalar T>

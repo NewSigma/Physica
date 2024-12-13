@@ -58,10 +58,9 @@ namespace Physica::Core {
      * To compute row vector * matrix, users should converted it to matrix^T * col vector.
      */
     template<Vector T, Matrix U>
-    [[nodiscard]] inline std::enable_if<U::RowAtCompile == 1, VectorMatrixProduct<T, U>>::type
-    operator*(const T& vec, const U& mat) noexcept {
+    [[nodiscard]] inline auto operator*(const T& vec, const U& mat) noexcept requires(U::RowAtCompile == 1) {
         assert(mat.getRow() == 1);
-        return VectorMatrixProduct(vec, mat);
+        return VectorMatrixProduct<T, U>(vec, mat);
     }
 }
 

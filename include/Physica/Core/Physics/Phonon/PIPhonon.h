@@ -57,8 +57,6 @@ namespace Physica::Core {
         ~PIPhonon() = default;
         /* Operators */
         PIPhonon& operator=(PIPhonon obj) noexcept;
-        friend std::ostream& operator<<(std::ostream& os, const PIPhonon& phonon);
-        friend std::istream& operator>>(std::istream& is, PIPhonon& phonon);
         /* Operations */
         template<Matrix T>
         void sample(const T& force, const T& momentum);

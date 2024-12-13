@@ -40,12 +40,12 @@ namespace Physica::Core {
         using This = DenseMatrix<T, Option, Row, Col, Allocator>;
         using Base = ContinuousMatrix<This>;
         using Storage = DenseMatrixStorage<T, Option, Row, Col, Allocator>;
-        using InitializerType = Storage::InitializerType;
         using Base::isReverseDiff;
     public:
         using typename Base::ValueType;
         using typename Base::ScalarType;
         using device_obj_type = device_obj<This>;
+        using initializer_list = std::initializer_list<typename Storage::InitializerType>;
         using ColMatrix = DenseMatrix<T, MatrixOption::getStorage<DenseMatrix>() | MatrixOption::Col, Row, Col>;
         using RowMatrix = DenseMatrix<T, MatrixOption::getStorage<DenseMatrix>() | MatrixOption::Row, Row, Col>;
         using RealMatrix = DenseMatrix<typename T::RealType, Option, Row, Col>;
@@ -53,7 +53,7 @@ namespace Physica::Core {
         DenseMatrix() = default;
         DenseMatrix(size_t row, size_t col);
         DenseMatrix(size_t row, size_t col, T value);
-        DenseMatrix(std::initializer_list<InitializerType> list);
+        DenseMatrix(initializer_list list);
         template<Matrix M>
         DenseMatrix(const M& mat);
         template<Vector V>
@@ -91,26 +91,23 @@ namespace Physica::Core {
         template<RandomGenerator R>
         [[nodiscard]] static DenseMatrix random_uniform(size_t order) { return random_uniform<R>(order, order); }
         template<RandomGenerator R>
-        [[nodiscard]] inline static DenseMatrix random_uniform(size_t row, size_t col);
+        [[nodiscard]] inline static auto random_uniform(size_t row, size_t col);
         template<RandomGenerator R>
-        [[nodiscard]] inline static DenseMatrix random_normal(size_t row, size_t col);
+        [[nodiscard]] inline static auto random_normal(size_t row, size_t col);
         template<class Distribution, RandomGenerator R>
-        [[nodiscard]] inline static DenseMatrix random_any(size_t row, size_t col, Distribution& dist);
+        [[nodiscard]] inline static auto random_any(size_t row, size_t col, Distribution& dist);
         template<Vector V>
         [[nodiscard]] static std::pair<DenseMatrix, DenseMatrix> meshgrid(const V& vecInCols, const V& vecInRows);
     private:
         DenseMatrix(Storage storage) : Storage(std::move(storage)) {}
         friend class device_obj<This>;
     };
-
-    template<Scalar T, int Option, size_t Row, size_t Col, class Allocator>
-    std::istream& operator>>(std::istream& is, DenseMatrix<T, Option, Row, Col, Allocator>& mat);
 }
 
 namespace Physica {
     template<Scalar T, int Op, size_t Row, size_t Col, class Allocator>
     class Traits<DenseMatrix<T, Op, Row, Col, Allocator>> {
-        static_assert(!T::isForwardDiff, "[Error]: Use diffable matrix instead");
+        static_assert(!Diffable<T>, "[Error]: Use diffable matrix instead");
     public:
         using ScalarType = T;
         constexpr static int Option = Op;

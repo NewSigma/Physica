@@ -194,6 +194,21 @@ namespace Physica::Core {
     }
 
     template<class Derived>
+    inline auto RValueVector<Derived>::transpose() const noexcept {
+        return TransposeVector<Derived>(Base::getDerived());
+    }
+
+    template<class Derived>
+    inline auto RValueVector<Derived>::conjugate() const noexcept {
+        return ConjugateVector<Derived>(Base::getDerived());
+    }
+
+    template<class Derived>
+    inline auto RValueVector<Derived>::hermite() const noexcept {
+        return HermiteVector<Derived>(Base::getDerived());
+    }
+
+    template<class Derived>
     inline RValueVector<Derived>::RealType RValueVector<Derived>::norm1() const {
         return abs(Base::getDerived()).sum();
     }
@@ -409,47 +424,47 @@ namespace Physica::Core {
 
     template<class Derived>
     template<size_t Length>
-    inline RVectorBlock<Derived, Length> RValueVector<Derived>::head(size_t to) {
-        return {Base::getDerived(), 0, to};
+    inline auto RValueVector<Derived>::head(size_t to) noexcept {
+        return BlockType<Length>(Base::getDerived(), 0, to);
     }
 
     template<class Derived>
     template<size_t Length>
-    inline const RVectorBlock<Derived, Length> RValueVector<Derived>::head(size_t to) const {
-        return {Base::getConstCastDerived(), 0, to};
+    inline const auto RValueVector<Derived>::head(size_t to) const noexcept {
+        return BlockType<Length>(Base::getConstCastDerived(), 0, to);
     }
 
     template<class Derived>
     template<size_t Length>
-    inline RVectorBlock<Derived, Length> RValueVector<Derived>::tail(size_t from) {
-        return {Base::getDerived(), from};
+    inline auto RValueVector<Derived>::tail(size_t from) noexcept {
+        return BlockType<Length>(Base::getDerived(), from);
     }
 
     template<class Derived>
     template<size_t Length>
-    inline const RVectorBlock<Derived, Length> RValueVector<Derived>::tail(size_t from) const {
-        return {Base::getConstCastDerived(), from};
+    inline const auto RValueVector<Derived>::tail(size_t from) const noexcept {
+        return BlockType<Length>(Base::getConstCastDerived(), from);
     }
 
     template<class Derived>
     template<size_t Length>
-    inline RVectorBlock<Derived, Length> RValueVector<Derived>::segment(size_t from, size_t to) {
-        return {Base::getDerived(), from, to};
+    inline auto RValueVector<Derived>::segment(size_t from, size_t to) noexcept {
+        return BlockType<Length>(Base::getDerived(), from, to);
     }
 
     template<class Derived>
     template<size_t Length>
-    inline const RVectorBlock<Derived, Length> RValueVector<Derived>::segment(size_t from, size_t to) const {
-        return {Base::getConstCastDerived(), from, to};
+    inline const auto RValueVector<Derived>::segment(size_t from, size_t to) const noexcept {
+        return BlockType<Length>(Base::getConstCastDerived(), from, to);
     }
 
     template<class Derived>
-    inline ReverseVector<Derived> RValueVector<Derived>::reverse() {
+    inline auto RValueVector<Derived>::reverse() noexcept {
         return ReverseVector<Derived>(Base::getDerived());
     }
 
     template<class Derived>
-    inline const ReverseVector<Derived> RValueVector<Derived>::reverse() const {
+    inline const auto RValueVector<Derived>::reverse() const noexcept {
         return ReverseVector<Derived>(Base::getDerived());
     }
 

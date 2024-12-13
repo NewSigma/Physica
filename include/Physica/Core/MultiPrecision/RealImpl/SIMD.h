@@ -39,7 +39,6 @@ namespace Physica::Core {
         using typename Base::MachineType;
         using Base::isSeparatable;
         using BoolSIMDType = Traits<This>::BoolSIMDType;
-        using PlainPacket = This;
     private:
         Pack pack;
     public:
@@ -183,6 +182,7 @@ namespace Physica {
 
         using ScalarType = T;
         using ValueType = SIMD<T, Size>;
+        using GradType = void;
         using RealType = ValueType;
         using FullRealType = ValueType;
         using MachineType = MachineTypeHelper<Pack>::Type;
@@ -200,7 +200,7 @@ namespace std {
     inline PacketType max(PacketType a, PacketType b) {
         static_assert(!T::isComplex, "[Error]: Compare between complex number is ill defined");
         if constexpr (T::isForwardDiff) {
-            using GradPacket = PacketType::GradPacket;
+            using GradPacket = PacketType::GradType;
             const auto values = max(a.getValue(), b.getValue());
             return PacketType(values, GradPacket::select(values == a.getValue(), a.getGrad(), b.getGrad()));
         }
@@ -212,7 +212,7 @@ namespace std {
     inline PacketType min(PacketType a, PacketType b) {
         static_assert(!T::isComplex, "[Error]: Compare between complex number is ill defined");
         if constexpr (T::isForwardDiff) {
-            using GradPacket = PacketType::GradPacket;
+            using GradPacket = PacketType::GradType;
             const auto values = min(a.getValue(), b.getValue());
             return PacketType(values, GradPacket::select(values == a.getValue(), a.getGrad(), b.getGrad()));
         }

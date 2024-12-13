@@ -18,6 +18,11 @@
  */
 #pragma once
 
+#include "Physica/Core/MultiPrecision/Scalar.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/Vector.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/Matrix.h"
+#include "Physica/Core/Parallel/Executor/SequentialExecutor.h"
+
 namespace Physica::Core {
     template<Matrix T, Vector U>
     class MatrixVectorProduct : public RValueVector<MatrixVectorProduct<T, U>> {
@@ -29,9 +34,7 @@ namespace Physica::Core {
         const T& mat;
         const U& vec;
     public:
-        MatrixVectorProduct(const T& mat_, const U& vec_) : mat(mat_), vec(vec_) {
-            assert(mat.getCol() == vec.getLength());
-        }
+        MatrixVectorProduct(const T& mat_, const U& vec_);
         MatrixVectorProduct(const This&) = delete;
         MatrixVectorProduct(This&&) noexcept = delete;
         ~MatrixVectorProduct() = default;
@@ -47,6 +50,11 @@ namespace Physica::Core {
         [[nodiscard]] const T& getLHS() const noexcept { return mat; }
         [[nodiscard]] const U& getRHS() const noexcept { return vec; }
     };
+
+    template<Matrix T, Vector U>
+    MatrixVectorProduct<T, U>::MatrixVectorProduct(const T& mat_, const U& vec_) : mat(mat_), vec(vec_) {
+        assert(mat.getCol() == vec.getLength());
+    }
 
     template<Matrix T, Vector U>
     template<LVector V, class Executor>
@@ -71,16 +79,12 @@ namespace Physica::Core {
     }
 
     template<Matrix T, Vector U>
-    [[nodiscard]] inline std::enable_if<T::RowAtCompile != 1, MatrixVectorProduct<T, U>>::type
-    operator*(const T& mat, const U& vec) noexcept {
-        assert(mat.getCol() == vec.getLength());
-        return MatrixVectorProduct(mat, vec);
+    [[nodiscard]] inline auto operator*(const T& mat, const U& vec) noexcept requires(T::RowAtCompile != 1) {
+        return MatrixVectorProduct<T, U>(mat, vec);
     }
 
     template<Matrix T, Vector U>
-    [[nodiscard]] inline std::enable_if<T::RowAtCompile == 1 && T::ColAtCompile == 1,
-                                        typename Internal::BinaryScalarOpRtnTy<typename T::ScalarType, typename U::ScalarType>::Type>::type
-    operator*(const T& mat, const U& vec) {
+    [[nodiscard]] inline auto operator*(const T& mat, const U& vec) requires(T::RowAtCompile == 1 && T::ColAtCompile == 1) {
         assert(mat.getCol() == vec.getLength());
         return mat.row(0) * vec;
     }

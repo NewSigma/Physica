@@ -45,9 +45,8 @@ namespace Physica::Core {
     public:
         using typename Base::RealType;
         using typename Base::FullRealType;
+        using typename Base::BoolSIMDType;
         using Base::isSeparatable;
-        using BoolSIMDType = FullRealType::BoolSIMDType;
-        using PlainPacket = This;
     private:
         using HalfType = std::conditional<sizeof(FullRealType) * CHAR_BIT != 128, SIMD<Complex<T>, Size / 2>, PlainStruct<void>>::type;
 
@@ -120,8 +119,10 @@ namespace Physica {
 
         using ScalarType = Complex<T>;
         using ValueType = SIMD<Complex<T>, S>;
+        using GradType = void;
         using FullRealType = SIMD<T, Size * 2>;
         using RealType = std::conditional<FullRealType::isSeparatable, SIMD<T, Size>, FullRealType>::type;
+        using BoolSIMDType = FullRealType::BoolSIMDType;
         using MachineType = FullRealType::MachineType;
         constexpr static bool isSeparatable = FullRealType::isSeparatable;
     };

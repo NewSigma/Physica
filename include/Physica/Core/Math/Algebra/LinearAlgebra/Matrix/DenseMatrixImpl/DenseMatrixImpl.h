@@ -18,7 +18,7 @@
  */
 #pragma once
 
-#include "Physica/Core/Exception/BadFileFormatException.h"
+#include "../DenseMatrix.h"
 
 namespace Physica::Core {
     template<Scalar T, int Option, size_t Row, size_t Col, class Allocator>
@@ -30,8 +30,7 @@ namespace Physica::Core {
             : Storage(row, col, std::move(value)) {}
 
     template<Scalar T, int Option, size_t Row, size_t Col, class Allocator>
-    DenseMatrix<T, Option, Row, Col, Allocator>::DenseMatrix(std::initializer_list<InitializerType> list)
-            : Storage(std::move(list)) {}
+    DenseMatrix<T, Option, Row, Col, Allocator>::DenseMatrix(initializer_list list) : Storage(std::move(list)) {}
 
     template<Scalar T, int Option, size_t Row, size_t Col, class Allocator>
     template<Matrix M>
@@ -123,30 +122,27 @@ namespace Physica::Core {
 
     template<Scalar T, int Option, size_t Row, size_t Col, class Allocator>
     template<RandomGenerator R>
-    inline DenseMatrix<T, Option, Row, Col, Allocator>
-    DenseMatrix<T, Option, Row, Col, Allocator>::random_uniform(
+    inline auto DenseMatrix<T, Option, Row, Col, Allocator>::random_uniform(
             size_t row, size_t col) {
-        DenseMatrix result(row, col);
+        This result(row, col);
         result.template random_uniform<R>();
         return result;
     }
 
     template<Scalar T, int Option, size_t Row, size_t Col, class Allocator>
     template<RandomGenerator R>
-    inline DenseMatrix<T, Option, Row, Col, Allocator>
-    DenseMatrix<T, Option, Row, Col, Allocator>::random_normal(
+    inline auto DenseMatrix<T, Option, Row, Col, Allocator>::random_normal(
             size_t row, size_t col) {
-        DenseMatrix result(row, col);
+        This result(row, col);
         result.template random_normal<R>();
         return result;
     }
 
     template<Scalar T, int Option, size_t Row, size_t Col, class Allocator>
     template<class Distribution, RandomGenerator R>
-    inline DenseMatrix<T, Option, Row, Col, Allocator>
-    DenseMatrix<T, Option, Row, Col, Allocator>::random_any(
+    inline auto DenseMatrix<T, Option, Row, Col, Allocator>::random_any(
             size_t row, size_t col, Distribution& dist) {
-        DenseMatrix result(row, col);
+        This result(row, col);
         result.template random_any<R>(dist);
         return result;
     }
@@ -167,17 +163,5 @@ namespace Physica::Core {
             }
         }
         return std::make_pair(std::move(x), std::move(y));
-    }
-
-    template<Scalar T, int Option, size_t Row, size_t Col, class Allocator>
-    std::istream& operator>>(std::istream& is, DenseMatrix<T, Option, Row, Col, Allocator>& mat) {
-        const size_t col = mat.getCol();
-        const size_t row = mat.getRow();
-        for (size_t r = 0; r < row; ++r)
-            for (size_t c = 0; c < col; ++c)
-                is >> mat(r, c);
-        if (!is)
-            throw BadFileFormatException("[Error]: bad matrix format");
-        return is;
     }
 }

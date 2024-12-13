@@ -99,19 +99,7 @@ namespace Physica::Core {
         ContinuousVector() = default;
         ContinuousVector(const This&) = default;
         ContinuousVector(This&&) noexcept = default;
-    private:
-        /* Friends */
-        template<Vector T>
-        friend std::ostream& operator<<(std::ostream& os, const ContinuousVector<T>& v);
-        template<Vector T>
-        friend std::istream& operator>>(std::istream& is, ContinuousVector<T>& v);
     };
-
-    template<Vector T>
-    std::ostream& operator<<(std::ostream& os, const ContinuousVector<T>& v);
-
-    template<Vector T>
-    std::istream& operator>>(std::istream& is, ContinuousVector<T>& v);
 }
 
 #include "ContinuousVectorImpl/ContinuousVectorImpl.h"

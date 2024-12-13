@@ -18,9 +18,23 @@
  */
 #pragma once
 
+#include "DenseMatrixStorage.h"
+
 namespace Physica::Core {
 #define tparams class T, size_t Row, size_t Col, class Allocator
 #define ColumnElementStorage DenseMatrixStorage<T, MatrixOption::Col | MatrixOption::Element, Row, Col, Allocator>
+
+    template<tparams>
+    T& ColumnElementStorage::operator()(size_t r, size_t c) {
+        assert(r < getRow() && c < getCol());
+        return arr[toIndex(r, c)];
+    }
+
+    template<tparams>
+    const T& ColumnElementStorage::operator()(size_t r, size_t c) const {
+        assert(r < getRow() && c < getCol());
+        return arr[toIndex(r, c)];
+    }
 
     template<tparams>
     template<class... Args>
@@ -60,6 +74,18 @@ namespace Physica::Core {
 #define RowElementStorage DenseMatrixStorage<T, MatrixOption::Row | MatrixOption::Element, Row, Col, Allocator>
 
     template<tparams>
+    T& RowElementStorage::operator()(size_t r, size_t c) {
+        assert(r < getRow() && c < getCol());
+        return arr[toIndex(r, c)];
+    }
+
+    template<tparams>
+    const T& RowElementStorage::operator()(size_t r, size_t c) const {
+        assert(r < getRow() && c < getCol());
+        return arr[toIndex(r, c)];
+    }
+
+    template<tparams>
     template<class... Args>
     void RowElementStorage::resize(size_t row, size_t col, Args&&... args) {
         arr.resize(row * col, std::forward<Args>(args)...);
@@ -97,6 +123,18 @@ namespace Physica::Core {
 #define ColumnVectorStorage DenseMatrixStorage<T, MatrixOption::Col | MatrixOption::Vector, Row, Col, Allocator>
 
     template<tparams>
+    T& ColumnVectorStorage::operator()(size_t r, size_t c) {
+        assert(r < getRow() && c < getCol());
+        return array[c][r];
+    }
+
+    template<tparams>
+    const T& ColumnVectorStorage::operator()(size_t r, size_t c) const {
+        assert(r < getRow() && c < getCol());
+        return array[c][r];
+    }
+
+    template<tparams>
     template<class... Args>
     void ColumnVectorStorage::resize(
             size_t row, size_t col, Args&&... args) {
@@ -128,6 +166,18 @@ namespace Physica::Core {
 
 #undef ColumnVectorStorage
 #define RowVectorStorage DenseMatrixStorage<T, MatrixOption::Row | MatrixOption::Vector, Row, Col, Allocator>
+
+    template<tparams>
+    T& RowVectorStorage::operator()(size_t r, size_t c) {
+        assert(r < getRow() && c < getCol());
+        return array[r][c];
+    }
+
+    template<tparams>
+    const T& RowVectorStorage::operator()(size_t r, size_t c) const {
+        assert(r < getRow() && c < getCol());
+        return array[r][c];
+    }
 
     template<tparams>
     template<class... Args>

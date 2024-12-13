@@ -69,21 +69,20 @@ namespace Physica::Core {
 
     template<class Derived>
     template<Matrix M>
-    ReshapedVector<Derived, MatrixOption::getMajor<M>(), M::RowAtCompile, M::ColAtCompile>
-    RValueVector<Derived>::reshape(const M& mat) const {
-        return {Base::getDerived(), mat.getRow(), mat.getCol()};
+    auto RValueVector<Derived>::reshape(const M& mat) const {
+        return ReshapedVector<Derived, MatrixOption::getMajor<M>(), M::RowAtCompile, M::ColAtCompile>(Base::getDerived(), mat.getRow(), mat.getCol());
     }
 
     template<class Derived>
     template<size_t Row, size_t Col>
-    ReshapedVector<Derived, MatrixOption::Col, Row, Col> RValueVector<Derived>::reshape_col(size_t row, size_t col) const {
-        return {Base::getDerived(), row, col};
+    auto RValueVector<Derived>::reshape_col(size_t row, size_t col) const {
+        return ReshapedVector<Derived, MatrixOption::Col, Row, Col>(Base::getDerived(), row, col);
     }
 
     template<class Derived>
     template<size_t Row, size_t Col>
-    ReshapedVector<Derived, MatrixOption::Row, Row, Col> RValueVector<Derived>::reshape_row(size_t row, size_t col) const {
-        return {Base::getDerived(), row, col};
+    auto RValueVector<Derived>::reshape_row(size_t row, size_t col) const {
+        return ReshapedVector<Derived, MatrixOption::Row, Row, Col>(Base::getDerived(), row, col);
     }
 }
 

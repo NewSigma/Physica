@@ -33,8 +33,10 @@ namespace Physica::Core {
 
         using ScalarType = TraitsType::ScalarType;
         using ValueType = TraitsType::ValueType;
+        using GradType = TraitsType::GradType;
         using FullRealType = TraitsType::FullRealType;
         using RealType = TraitsType::RealType;
+        using BoolSIMDType = TraitsType::BoolSIMDType;
         using MachineType = TraitsType::MachineType;
         
         constexpr static bool isComplex = ScalarType::isComplex;
