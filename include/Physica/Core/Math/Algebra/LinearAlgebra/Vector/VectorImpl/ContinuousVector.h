@@ -80,6 +80,8 @@ namespace Physica::Core {
         template<size_t Length = Dynamic>
         [[nodiscard]] inline const BlockType<Length> segment(size_t from, size_t to) const;
 
+        template<Vector V>
+        void resize(const V& x) { resize(x.getLength()); }
         void resize(size_t length) { Base::getDerived().resize(length); }
 
         template<RandomGenerator R>

@@ -85,7 +85,9 @@ namespace Physica::Core {
         std::coroutine_handle<Impl> handle = nullptr;
     public:
         DiffNode() = default;
-        DiffNode(std::coroutine_handle<Impl> handle_);
+        DiffNode(std::coroutine_handle<Impl> handle_) noexcept;
+        template<ReverseDiff T>
+        DiffNode(T&& x) noexcept;
         DiffNode(const This&) = delete;
         DiffNode(This&& other) noexcept;
         ~DiffNode();
@@ -96,7 +98,21 @@ namespace Physica::Core {
     };
 
     template<class Base>
-    DiffNode<Base>::DiffNode(std::coroutine_handle<Impl> handle_) : Base(std::move(handle_.promise().obj)), handle(handle_) {}
+    DiffNode<Base>::DiffNode(std::coroutine_handle<Impl> handle_) noexcept : Base(std::move(handle_.promise().obj)), handle(handle_) {}
+
+    template<class Base>
+    template<ReverseDiff T>
+    DiffNode<Base>::DiffNode(T&& x) noexcept {
+        auto fn = [](T&& x) noexcept -> This {
+            LazyReverse<T&&> x_ = std::forward<T>(x);
+            Base y;
+            y.resize(x_);
+            x_.assignTo(y);
+            auto result = co_yield std::move(y);
+            x_.reverse(result);
+        };
+        *this = fn(std::forward<T>(x));
+    }
 
     template<class Base>
     DiffNode<Base>::DiffNode(This&& other) noexcept : Base(std::move(other)), handle(other.handle) {

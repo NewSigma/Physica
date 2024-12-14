@@ -94,7 +94,7 @@ namespace Physica::Core {
         pointer d_data;
         size_t length;
         size_t capacity;
-        allocator_type alloc;
+        [[no_unique_address]] allocator_type alloc;
     public:
         device_obj();
         template<class... Args>

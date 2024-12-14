@@ -51,7 +51,9 @@ namespace Physica::Core {
         for (size_t i = 0; i < Length; ++i)
             arr[i] = other[i];
     }
-
+    /**
+     * Initializing new elements will not work. A fixed array is assumed to be initialized upon construction.
+     */
     template<class T, size_t Length, class Allocator>
     template<class... Args>
     __host__ __device__ inline void Array<T, Length, Allocator>::resize([[maybe_unused]] size_t length, Args&&...) {

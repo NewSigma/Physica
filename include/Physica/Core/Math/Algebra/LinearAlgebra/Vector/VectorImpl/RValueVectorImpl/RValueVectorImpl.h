@@ -325,7 +325,7 @@ namespace Physica::Core {
 
     template<class Derived>
     auto RValueVector<Derived>::sum() const {
-        static_assert(!isReverseDiff, "[Error]: Not implemented");;
+        static_assert(!isReverseDiff, "[Error]: Not implemented");
         assert(getLength() != 0 && "[Error]: Sum of a empty vector is not well defined");
         if constexpr (Internal::EnableSIMD<Derived>::value) {
             const auto& v = Base::getDerived();

@@ -19,7 +19,6 @@
 #pragma once
 
 #include <iosfwd>
-#include "Physica/CRCoro.h"
 #include "Physica/Core/MultiPrecision/Real.h"  // IWYU pragma: export
 #include "Physica/Core/MultiPrecision/ExprType.h"
 #include "DiffImpl/CoDiff.h"

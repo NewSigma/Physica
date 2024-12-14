@@ -19,6 +19,8 @@
 #pragma once
 
 #include <iomanip>
+#include "Physica/CRCoro.h"
+#include "../Real.h"
 
 namespace Physica {
     template<>
@@ -44,7 +46,7 @@ namespace Physica {
 
 namespace Physica::Core {
     template<>
-    class Real<Float64> : public ScalarBase<Real<Float64>> {
+    class Real<Float64> : public ScalarBase<Real<Float64>>, public CRCoro<Real<Float64>> {
         using This = Real<Float64>;
         using Base = ScalarBase<This>;
     public:

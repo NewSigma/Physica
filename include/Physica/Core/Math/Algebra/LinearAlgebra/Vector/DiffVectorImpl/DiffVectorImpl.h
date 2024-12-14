@@ -25,15 +25,14 @@ namespace Physica::Core {
     DenseVector<Diff<T, Mode, Order>, Length, Allocator>::DenseVector(size_t length) : values(length), grads(length) {}
 
     template<Scalar T, DiffMode Mode, int Order, size_t Length, class Allocator>
-    DenseVector<Diff<T, Mode, Order>, Length, Allocator>::DenseVector(size_t length, const ScalarType& init)
-            : values(length, init.getValue()), grads(length, init.getGrad()) {}
+    DenseVector<Diff<T, Mode, Order>, Length, Allocator>::DenseVector(size_t length, T init)
+            : values(length, init), grads(length, 0) {}
 
     template<Scalar T, DiffMode Mode, int Order, size_t Length, class Allocator>
-    DenseVector<Diff<T, Mode, Order>, Length, Allocator>::DenseVector(std::initializer_list<ScalarType> list) : DenseVector(list.size()) {
+    DenseVector<Diff<T, Mode, Order>, Length, Allocator>::DenseVector(std::initializer_list<T> list) : values(list.size()), grads(list.size(), 0) {
         size_t i = 0;
         for (auto& elem : list) {
             values[i] = elem.getValue();
-            grads[i] = elem.getGrad();
             i += 1;
         }
     }
@@ -44,7 +43,7 @@ namespace Physica::Core {
 
     template<Scalar T, DiffMode Mode, int Order, size_t Length, class Allocator>
     template<Vector V>
-    DenseVector<Diff<T, Mode, Order>, Length, Allocator>::DenseVector(const V& v) : DenseVector(v.getLength()) {
+    DenseVector<Diff<T, Mode, Order>, Length, Allocator>::DenseVector(const V& v) requires(!ReverseDiff<V>) : DenseVector(v.getLength()) {
         v.assignTo(*this);
     }
 

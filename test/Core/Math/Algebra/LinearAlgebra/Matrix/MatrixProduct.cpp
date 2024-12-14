@@ -40,7 +40,7 @@ int main() {
         const DMatrix m{1, 2, 3, 4, 5, 6, 7, 8, 9};
         const DVector x{1, 2, 3};
         {
-            const DVector y = m * x;
+            CoDiff<DVector> y = m * x;
             y.sum().reverse();
         }
         const Vector3D<float32> dx = toGradVector(x);

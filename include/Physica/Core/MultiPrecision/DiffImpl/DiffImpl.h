@@ -213,9 +213,9 @@ namespace Physica::Core {
             auto result = co_yield x_.getValue() * y_.getValue();
             auto& g = result.getGrad();
             if (!g.isZero()) {
-                x_.reverse(y_ * g);
+                x_.reverse(y_.getValue() * g);
                 if constexpr (Diffable<U>)
-                    y_.reverse(x_ * g);
+                    y_.reverse(x_.getValue() * g);
             }
         }
     }

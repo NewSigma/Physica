@@ -19,7 +19,6 @@
 #pragma once
 
 #include <complex>
-#include "Physica/CRCoro.h"
 #include "Physica/Core/MultiPrecision/Real.h" // IWYU pragma: export
 
 namespace Physica::Core {

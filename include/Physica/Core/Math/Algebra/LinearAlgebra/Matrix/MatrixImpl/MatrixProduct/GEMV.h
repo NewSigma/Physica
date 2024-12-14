@@ -30,13 +30,14 @@ namespace Physica::Core {
     public:
         using Base = RValueVector<This>;
         using typename Base::ScalarType;
+        using Base::isReverseDiff;
     private:
         const T& mat;
         const U& vec;
     public:
         MatrixVectorProduct(const T& mat_, const U& vec_);
         MatrixVectorProduct(const This&) = delete;
-        MatrixVectorProduct(This&&) noexcept = delete;
+        MatrixVectorProduct(This&&) noexcept requires(ReverseDiff<ScalarType>) = default;
         ~MatrixVectorProduct() = default;
         /* Operators */
         This& operator=(const This&) = delete;
@@ -44,6 +45,9 @@ namespace Physica::Core {
         /* Operations */
         template<LVector V, class Executor = SequentialExecutor>
         inline void assignTo(V& target) const;
+
+        template<Vector V>
+        void reverse(const V& y) noexcept requires(isReverseDiff);
         /* Getters */
         [[nodiscard]] inline ScalarType calc(size_t index) const;
         [[nodiscard]] __host__ __device__ size_t getLength() const { return mat.getRow(); }
@@ -68,6 +72,15 @@ namespace Physica::Core {
             for (size_t i = 0; i < getLength(); ++i)
                 target[i] = calc(i);
         }
+    }
+
+    template<Matrix T, Vector U>
+    template<Vector V>
+    void MatrixVectorProduct<T, U>::reverse(const V& y) noexcept requires(isReverseDiff) {
+        if constexpr (ReverseDiff<T>)
+            mat.reverse(toGradVector(y) * toValueVector(vec).transpose());
+        if constexpr (ReverseDiff<U>)
+            vec.reverse(toValueMatrix(mat).transpose() * toGradVector(y));
     }
 
     template<Matrix T, Vector U>

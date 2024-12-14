@@ -47,7 +47,7 @@ namespace Physica::Core {
     #pragma GCC diagnostic ignored "-Wattributes"
         alignas(std::allocator_traits<Allocator>::Align) T arr[Length];
     #pragma GCC diagnostic pop
-        allocator_type alloc;
+        [[no_unique_address]] allocator_type alloc;
     public:
         Array() = default;
         template<class... Args>
@@ -101,7 +101,7 @@ namespace Physica::Core {
         pointer arr;
         size_t length;
         size_t capacity;
-        allocator_type alloc;
+        [[no_unique_address]] allocator_type alloc;
     public:
         Array();
         template<class... Args>

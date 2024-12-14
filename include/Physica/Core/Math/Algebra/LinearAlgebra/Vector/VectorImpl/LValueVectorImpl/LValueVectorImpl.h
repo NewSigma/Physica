@@ -101,8 +101,7 @@ namespace Physica::Core {
     template<class Derived>
     CoDiff<typename LValueVector<Derived>::ScalarType> LValueVector<Derived>::sum() const {
         if constexpr (isReverseDiff) {
-            ScalarType result = toValueVector(Base::getDerived()).sum();
-            co_yield result;
+            auto result = co_yield toValueVector(Base::getDerived()).sum();
             const auto& grad = result.getGrad();
             for (size_t i = 0; i < Base::getLength(); ++i)
                 (*this)[i].reverse(grad);
@@ -114,6 +113,8 @@ namespace Physica::Core {
     template<class Derived>
     template<Vector T>
     void LValueVector<Derived>::reverse(const T& v) const noexcept requires(isReverseDiff) {
+        using GradType = ScalarType::GradType;
+        static_assert(std::is_same<GradType, typename T::ScalarType>::value, "[Error]: Inconsistent ScalarType");
         for (size_t i = 0; i < Base::getLength(); ++i)
             (*this)[i].reverse(v.calc(i));
     }

@@ -45,11 +45,11 @@ namespace Physica::Core {
     public:
         DenseVector() = default;
         explicit DenseVector(size_t length);
-        DenseVector(size_t length, const ScalarType& init);
-        DenseVector(std::initializer_list<ScalarType> list);
+        DenseVector(size_t length, T init);
+        DenseVector(std::initializer_list<T> list);
         DenseVector(ValueVector values_, GradVector grads_) noexcept;
         template<Vector V>
-        DenseVector(const V& v);
+        DenseVector(const V& v) requires(!ReverseDiff<V>);
         DenseVector(const This&) = default;
         DenseVector(This&&) noexcept = default;
         ~DenseVector() = default;
@@ -71,6 +71,7 @@ namespace Physica::Core {
         __host__ __device__ CRIteType rend() const noexcept { return crend(); }
         __host__ __device__ CRIteType crend() const noexcept { return CRIteType(data() - 1); }
         /* Operations */
+        using Base::resize;
         void zero_grad();
         inline void resize(size_t size);
 

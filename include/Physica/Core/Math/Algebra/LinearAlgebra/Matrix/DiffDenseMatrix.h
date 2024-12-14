@@ -22,6 +22,10 @@
 #include "DenseMatrix.h"
 
 namespace Physica::Core {
+    /**
+     * Reference:
+     * [1] Giles, M. An extended collection of matrix derivative results for forward and reverse mode algorithmic differentiation (2008); https://people.maths.ox.ac.uk/gilesm/files/NA-08-01.pdf.
+     */
     template<Scalar T, DiffMode Mode, int Order, int Option, size_t Row, size_t Col>
     class DenseMatrix<Diff<T, Mode, Order>, Option, Row, Col> : public ContinuousMatrix<DenseMatrix<Diff<T, Mode, Order> , Option, Row, Col>> {
         using This = DenseMatrix<Diff<T, Mode, Order> , Option, Row, Col>;

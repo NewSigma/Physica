@@ -111,6 +111,22 @@ namespace Physica::Core {
     }
 
     template<class Derived>
+    template<Matrix T>
+    void LValueMatrix<Derived>::reverse(const T& m) const noexcept requires(isReverseDiff) {
+        using GradType = ScalarType::GradType;
+        static_assert(std::is_same<GradType, typename T::ScalarType>::value, "[Error]: Inconsistent ScalarType");
+        const size_t maxMajor = Base::getMaxMajor();
+        const size_t maxMinor = Base::getMaxMinor();
+        for (size_t major = 0; major < maxMajor; ++major) {
+            for (size_t minor = 0; minor < maxMinor; ++minor) {
+                const size_t r = MatrixOption::rowFromMajorMinor<Derived>(major, minor);
+                const size_t c = MatrixOption::colFromMajorMinor<Derived>(major, minor);
+                refFromMajorMinor(major, minor).reverse(m.calc(r, c));
+            }
+        }
+    }
+
+    template<class Derived>
     inline LValueMatrix<Derived>::RowVector LValueMatrix<Derived>::row(size_t r) {
         return RowVector(Base::getDerived(), r, 0, Base::getCol());
     }

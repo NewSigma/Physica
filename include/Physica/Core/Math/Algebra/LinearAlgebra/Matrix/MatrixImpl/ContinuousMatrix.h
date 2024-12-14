@@ -113,6 +113,8 @@ namespace Physica::Core {
         template<size_t Row = Dynamic, size_t Col = Dynamic>
         [[nodiscard]] inline const ContinuousMatrixBlock<Derived, Row, Col> block(size_t fromRow, size_t rowCount, size_t fromCol, size_t colCount) const;
 
+        template<Matrix M>
+        void resize(const M& m) { resize(m.getRow(), m.getCol()); }
         void resize(size_t r, size_t c) { Base::getDerived().resize(r, c); }
 
         template<RandomGenerator R>

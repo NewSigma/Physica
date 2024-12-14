@@ -29,11 +29,11 @@ namespace Physica::Core {
 
     template<tparams>
     DiffDenseMatrix::DenseMatrix(size_t row, size_t col, T init)
-            : values(row, col, init), grads(row, col, init) {}
+            : values(row, col, init), grads(row, col, 0) {}
 
     template<tparams>
     DiffDenseMatrix::DenseMatrix(initializer_list list) : values(std::move(list)) {
-        grads.resize(values.getRow(), values.getCol(), 0);
+        grads = GradMatrix(values.getRow(), values.getCol(), 0);
     }
 
     template<tparams>
