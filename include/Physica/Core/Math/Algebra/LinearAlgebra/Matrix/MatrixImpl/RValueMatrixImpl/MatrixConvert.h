@@ -60,7 +60,7 @@ namespace Physica::Core {
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
         /* Getters */
-        [[nodiscard]] ScalarType calc(size_t row, size_t col) const { return mat.calc(row, col).getValue(); }
+        [[nodiscard]] ScalarType calc(size_t row, size_t col) const { return mat.calc(row, col).value(); }
         [[nodiscard]] size_t getRow() const { return mat.getRow(); }
         [[nodiscard]] size_t getCol() const { return mat.getCol(); }
     };
@@ -82,7 +82,7 @@ namespace Physica::Core {
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
         /* Getters */
-        [[nodiscard]] ScalarType calc(size_t row, size_t col) const { return mat.calc(row, col).template getGrad<GradOrder>(); }
+        [[nodiscard]] ScalarType calc(size_t row, size_t col) const { return mat.calc(row, col).template grad<GradOrder>(); }
         [[nodiscard]] size_t getRow() const { return mat.getRow(); }
         [[nodiscard]] size_t getCol() const { return mat.getCol(); }
     };

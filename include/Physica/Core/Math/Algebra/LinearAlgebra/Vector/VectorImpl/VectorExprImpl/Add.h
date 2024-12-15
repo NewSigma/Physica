@@ -18,6 +18,8 @@
  */
 #pragma once
 
+#include "../VectorExpr.h"
+
 namespace Physica::Core {
     template<Vector T, Scalar U>
     class VectorExpr<ExprType::Add, T, U>
@@ -25,10 +27,11 @@ namespace Physica::Core {
         using Base = BinaryVectorExpr<ExprType::Add, T, U>;
     public:
         using typename Base::ScalarType;
+        using Base::isReverseDiff;
     public:
         using Base::Base;
         /* Operations */
-        [[nodiscard]] ScalarType calc(size_t s) const { return ScalarType(Base::getLHS().calc(s)) + ScalarType(Base::getRHS()); }
+        [[nodiscard]] CoDiff<ScalarType> calc(size_t s) const { return ScalarType(Base::getLHS().calc(s)) + ScalarType(Base::getRHS()); }
 
         template<class AnyPacket>
         [[nodiscard]] AnyPacket packet(size_t index) const {
@@ -39,6 +42,15 @@ namespace Physica::Core {
         [[nodiscard]] AnyPacket packetPartial(size_t index, size_t count) const {
             return Base::getLHS().template packetPartial<AnyPacket>(index, count) + AnyPacket(Base::getRHS(), count);
         }
+
+        template<Vector V>
+        void reverse(const V& grad_) const noexcept requires(isReverseDiff) {
+            const auto& grad = grad_.values();
+            if constexpr (ReverseDiff<T>)
+                Base::getLHS().reverse(grad);
+            if constexpr (ReverseDiff<U>)
+                Base::getRHS().reverse(grad.sum());
+        }
     };
 
     template<Vector T1, Vector T2>
@@ -47,13 +59,14 @@ namespace Physica::Core {
         using Base = BinaryVectorExpr<ExprType::Add, T1, T2>;
     public:
         using typename Base::ScalarType;
+        using Base::isReverseDiff;
     public:
         using Base::Base;
         /* Operations */
         template<LVector V, class Executor = SequentialExecutor>
         inline void assignTo(V& v) const;
 
-        [[nodiscard]] ScalarType calc(size_t s) const { return ScalarType(getLHS().calc(s)) + ScalarType(getRHS().calc(s)); }
+        [[nodiscard]] CoDiff<ScalarType> calc(size_t s) const { return ScalarType(getLHS().calc(s)) + ScalarType(getRHS().calc(s)); }
 
         template<class AnyPacket>
         [[nodiscard]] AnyPacket packet(size_t index) const {
@@ -63,6 +76,15 @@ namespace Physica::Core {
         template<class AnyPacket>
         [[nodiscard]] AnyPacket packetPartial(size_t index, size_t count) const {
             return getLHS().template packetPartial<AnyPacket>(index, count) + getRHS().template packetPartial<AnyPacket>(index, count);
+        }
+
+        template<Vector V>
+        void reverse(const V& grad_) const noexcept requires(isReverseDiff) {
+            const auto& grad = grad_.values();
+            if constexpr (ReverseDiff<T1>)
+                Base::getLHS().reverse(grad);
+            if constexpr (ReverseDiff<T2>)
+                Base::getRHS().reverse(grad);
         }
         /* Getters */
         using Base::getLHS;

@@ -43,10 +43,10 @@ namespace Physica::Core {
                 dots.getRecord(r, i) = DiffRecord{offset * 2, ExprType::Mul};
                 dots.getOperands()[2 * offset] = m.calc(r, i);
                 dots.getOperands()[2 * offset + 1] = v.calc(i);
-                ValueType value = m.getValue(r, i) * v.getValue(i);
+                ValueType value = m.value(r, i) * v.value(i);
                 threadSum += value;
-                dots.getValue(r, i) = value;
-                dots.getGrad(r, i) = 0;
+                dots.value(r, i) = value;
+                dots.grad(r, i) = 0;
             }
             buffer[index] = threadSum;
 
@@ -66,8 +66,8 @@ namespace Physica::Core {
             result.getRecord(r) = DiffRecord{r * 2, ExprType::Sum};
             result.getOperands()[r * 2] = dots.calc(r, 0);
             result.getOperands()[r * 2 + 1] = dots.calc(r, col - 1);
-            result.getValue(r) = threadSum;
-            result.getGrad(r) = 0;
+            result.value(r) = threadSum;
+            result.grad(r) = 0;
         }
     }
 

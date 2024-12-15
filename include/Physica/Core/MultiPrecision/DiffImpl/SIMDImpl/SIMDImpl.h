@@ -29,8 +29,8 @@ namespace Physica::Core {
     template<Scalar U>
     SIMD<Diff<T, Mode, Order>, Size>::SIMD(U x) {
         if constexpr (U::isDiffable) {
-            values = ValueType(x.getValue());
-            grads = GradType(x.getGrad());
+            values = ValueType(x.value());
+            grads = GradType(x.grad());
         }
         else {
             values = ValueType(std::move(x));
@@ -39,7 +39,7 @@ namespace Physica::Core {
     }
 
     template<Scalar T, DiffMode Mode, int Order, size_t Size>
-    SIMD<Diff<T, Mode, Order>, Size>::SIMD(ScalarType x, int count) : values(x.getValue(), count), grads(x.getGrad()) {}
+    SIMD<Diff<T, Mode, Order>, Size>::SIMD(ScalarType x, int count) : values(x.value(), count), grads(x.grad()) {}
 
     template<Scalar T, DiffMode Mode, int Order, size_t Size>
     SIMD<Diff<T, Mode, Order>, Size>::SIMD(ValueType values_) : values(std::move(values_)), grads(0) {}
@@ -48,12 +48,12 @@ namespace Physica::Core {
     SIMD<Diff<T, Mode, Order>, Size>::SIMD(ValueType values_, GradType grads_) : values(std::move(values_)), grads(std::move(grads_)) {}
 
     template<Scalar T, DiffMode Mode, int Order, size_t Size>
-    SIMD<Diff<T, Mode, Order>, Size>::SIMD(HalfType a, HalfType b) : values(a.getValue(), b.getValue()), grads(a.getGrad(), b.getGrad()) {}
+    SIMD<Diff<T, Mode, Order>, Size>::SIMD(HalfType a, HalfType b) : values(a.value(), b.value()), grads(a.grad(), b.grad()) {}
 
     template<Scalar T, DiffMode Mode, int Order, size_t Size>
     template<int OtherOrder>
     SIMD<Diff<T, Mode, Order>, Size>::SIMD(const SIMD<Diff<T, Mode, OtherOrder>, Size>& other)
-            : values(other.getValue()), grads(other.getGrad()) {}
+            : values(other.value()), grads(other.grad()) {}
 
     template<Scalar T, DiffMode Mode, int Order, size_t Size>
     inline SIMD<Diff<T, Mode, Order>, Size>::ScalarType
@@ -73,12 +73,12 @@ namespace Physica::Core {
 
     template<Scalar T, DiffMode Mode, int Order, size_t Size>
     inline SIMD<Diff<T, Mode, Order>, Size> SIMD<Diff<T, Mode, Order>, Size>::operator*(const SIMD& x) const {
-        return This(values * x.getValue(), GradType(GradType(x) * getGrad() + GradType(*this) * x.getGrad()));
+        return This(values * x.value(), GradType(GradType(x) * grad() + GradType(*this) * x.grad()));
     }
 
     template<Scalar T, DiffMode Mode, int Order, size_t Size>
     inline SIMD<Diff<T, Mode, Order>, Size> SIMD<Diff<T, Mode, Order>, Size>::operator*(const ScalarType& x) const {
-        return This(values * x.getValue(), GradType(x.template mask<Order - 1>() * getGrad() + GradType(*this) * x.getGrad()));
+        return This(values * x.value(), GradType(x.template mask<Order - 1>() * grad() + GradType(*this) * x.grad()));
     }
 
     template<Scalar T, DiffMode Mode, int Order, size_t Size>
@@ -94,7 +94,7 @@ namespace Physica::Core {
     inline SIMD<Diff<T, Mode, Order>, Size> SIMD<Diff<T, Mode, Order>, Size>::operator/(const SIMD& x) const {
         const auto x1 = GradType(x);
         const auto v = reciprocal(x1);
-        return This(getValue() * v.getValue(), GradType((getGrad() * GradType(x1) - GradType(*this) * x.getGrad()) * square(v)));
+        return This(value() * v.value(), GradType((grad() * GradType(x1) - GradType(*this) * x.grad()) * square(v)));
     }
 
     template<Scalar T, DiffMode Mode, int Order, size_t Size>
@@ -197,14 +197,14 @@ namespace Physica::Core {
 
     template<Scalar T, DiffMode Mode, int Order, size_t Size>
     SIMD<Diff<T, Mode, Order>, Size> SIMD<Diff<T, Mode, Order>, Size>::select(BoolSIMDType flags, const SIMD& x, const SIMD& y) {
-        return This(ValueType::select(flags, x.getValue(), y.getValue()), GradType::select(flags, x.getGrad(), y.getGrad()));
+        return This(ValueType::select(flags, x.value(), y.value()), GradType::select(flags, x.grad(), y.grad()));
     }
 
     template<Scalar T, DiffMode Mode, int Order, size_t Size>
     SIMD<Diff<T, Mode, Order>, Size> SIMD<Diff<T, Mode, Order>, Size>::asComplex(const FullRealType& reals) {
         This result{};
-        result.values = ValueType::asComplex(reals.getValue());
-        result.grads = GradType::asComplex(reals.getGrad());
+        result.values = ValueType::asComplex(reals.value());
+        result.grads = GradType::asComplex(reals.grad());
         return result;
     }
 
@@ -216,18 +216,18 @@ namespace Physica::Core {
         using ResultType = SIMD<Diff<T, Mode, Order>, Size>;
         if constexpr (Mode == DiffMode::Forward) {
             using GradType = ResultType::GradType;
-            auto value = mul_add(a.getValue(), b.getValue(), c.getValue());
-            auto grad1 = mul_add(GradType(a), b.getGrad(), c.getGrad());
-            auto grad2 = mul_add(GradType(b), a.getGrad(), grad1);
+            auto value = mul_add(a.value(), b.value(), c.value());
+            auto grad1 = mul_add(GradType(a), b.grad(), c.grad());
+            auto grad2 = mul_add(GradType(b), a.grad(), grad1);
             co_return ResultType(std::move(value), std::move(grad2));
         }
         else {
-            auto result = ResultType(mul_add(a.getValue(), b.getValue(), c.getValue()));
+            auto result = ResultType(mul_add(a.value(), b.value(), c.value()));
             co_yield result;
 
-            auto& grad = result.getGrad();
-            a.reverse(grad * b.getValue());
-            b.reverse(grad * a.getValue());
+            auto& grad = result.grad();
+            a.reverse(grad * b.value());
+            b.reverse(grad * a.value());
             c.reverse(grad);
         }
     }

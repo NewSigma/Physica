@@ -120,7 +120,7 @@ namespace Physica::Core {
     template<Scalar T, class EwaldType>
     Q_TIP4P<T, EwaldType>::Q_TIP4P(const MDCellType& refer_cell, ValueType cutoff, EwaldType ewald_)
             : ewald(std::move(ewald_))
-            , lj_model(lj_sigma, cutoff.getValue()) {
+            , lj_model(lj_sigma, cutoff.value()) {
         assert(refer_cell.getNumParticle() % 3 == 0 && "[Error]: This is not a cell of water");
         const size_t numMolecule = refer_cell.getNumParticle() / 3;
         ewald = REwaldType(refer_cell.getLattice(), Base::makeCharges(numMolecule, charge * 0.5, -charge));

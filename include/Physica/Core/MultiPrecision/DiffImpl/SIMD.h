@@ -103,10 +103,10 @@ namespace Physica::Core {
         void swap(SIMD& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] FullRealType asReal() const noexcept;
-        [[nodiscard]] ValueType& getValue() noexcept { return values; }
-        [[nodiscard]] const ValueType& getValue() const noexcept { return values; }
-        [[nodiscard]] GradType& getGrad() noexcept { return grads; }
-        [[nodiscard]] const GradType& getGrad() const noexcept { return grads; }
+        [[nodiscard]] ValueType& value() noexcept { return values; }
+        [[nodiscard]] const ValueType& value() const noexcept { return values; }
+        [[nodiscard]] GradType& grad() noexcept { return grads; }
+        [[nodiscard]] const GradType& grad() const noexcept { return grads; }
         [[nodiscard]] HalfType getLow() const noexcept { return HalfType(values.getLow(), grads.getLow()); }
         [[nodiscard]] HalfType getHigh() const noexcept { return HalfType(values.getHigh(), grads.getHigh()); }
         [[nodiscard]] inline RealType real() const noexcept;

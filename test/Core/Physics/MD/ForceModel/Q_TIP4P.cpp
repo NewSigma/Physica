@@ -46,8 +46,8 @@ namespace Physica {
             ForceModel forceModel(cell, pair_cutoff, Ewald<ScalarType>{});
             forceModel.potentialV(cell).reverse();
             /* Test press */ {
-                const ValueType press_diff = -volume.getGrad() / ValueType(cellSize * cellSize * cellSize);
-                const ValueType press = (forceModel.virial(cell).trace() / ScalarType(3)).getValue();
+                const ValueType press_diff = -volume.grad() / ValueType(cellSize * cellSize * cellSize);
+                const ValueType press = (forceModel.virial(cell).trace() / ScalarType(3)).value();
                 if (!scalarNear(press_diff, press, 1E-12))
                     exit(EXIT_FAILURE);
             }
@@ -57,7 +57,7 @@ namespace Physica {
             const ScalarType theta(ScalarType::random_uniform<RandomType>() * ScalarType(M_PI));
             const ScalarType phi(ScalarType::random_uniform<RandomType>() * ScalarType(M_PI * 2));
             Vector3D<ScalarType> result{cos(phi) * sin(theta), sin(phi) * sin(theta), cos(theta)};
-            result *= ScalarType(ForceModel::equalR / double(latticeConst.getValue())) * latticeConst; // Pass grad to latticeConst while keep O-H bond length unchanged
+            result *= ScalarType(ForceModel::equalR / double(latticeConst.value())) * latticeConst; // Pass grad to latticeConst while keep O-H bond length unchanged
             return result;
         }
 

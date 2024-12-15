@@ -60,7 +60,7 @@ namespace Physica::Core {
         ValueType result = 0;
         const auto descriptors = base.project(cell);
         for (size_t i = 0; i < cell.getNumParticle(); ++i)
-            result += net.forward(descriptors[i].flatten()).getValue();
+            result += net.forward(descriptors[i].flatten()).value();
         return result;
     }
 

@@ -18,18 +18,20 @@
  */
 #pragma once
 
-#include <concepts>
-#include <cstdlib>
-#include <utility>
-#include "Physica/Macro.h"
+#include "Physica/Core/MultiPrecision/Scalar.h"
 #include "Physica/Core/Utils/CUDA/device_obj.cuh"
 
 namespace Physica::Core {
     template<class Derived> class RValueMatrix;
     template<class Derived> class LValueMatrix;
 
+    namespace Internal {
+        template<class T>
+        concept MatrixObj = std::derived_from<T, RValueMatrix<T>> || std::derived_from<T, device_obj<RValueMatrix<T>>>;
+    }
+
     template<class T>
-    concept Matrix = std::derived_from<T, RValueMatrix<T>> || std::derived_from<T, device_obj<RValueMatrix<T>>>;
+    concept Matrix = Internal::MatrixObj<T> || Internal::MatrixObj<typename remove_codiff<T>::Type>;
 
     template<class T>
     concept LMatrix = std::derived_from<T, LValueMatrix<T>> || std::derived_from<T, device_obj<LValueMatrix<T>>>;

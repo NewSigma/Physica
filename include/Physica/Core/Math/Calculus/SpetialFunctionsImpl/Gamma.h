@@ -152,7 +152,7 @@ namespace Physica::Core {
 
     template<Scalar T>
     T bigamma(const T& x, const T& step) {
-        return Differential<T>::ridders(lnGamma<T>, x.getDerived(), step);
+        return Differential<T>::ridders(lnGamma<T>, x, step);
     }
 
     template<ScalarOption Option>

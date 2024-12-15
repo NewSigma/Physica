@@ -63,7 +63,7 @@ namespace Physica::Core {
         void compute_nonconvex(const T& precision = std::numeric_limits<T>::epsilon());
         /* Getters */
         [[nodiscard]] const VectorND<T>& getSolution() const noexcept { return x; }
-        [[nodiscard]] T getValue() const;
+        [[nodiscard]] T value() const;
     private:
         void updateVariables(const VectorND<T>& direction);
         [[nodiscard]] T nextStepSize(const VectorND<T>& direction, size_t& blockedAt);
@@ -134,7 +134,7 @@ namespace Physica::Core {
     }
 
     template<Scalar T>
-    T QuadraticProgramming<T>::getValue() const {
+    T QuadraticProgramming<T>::value() const {
         return (x.copyToRowMatrix() * objectiveMatG).compute().row(0) * x * T(0.5) + objectiveVecC * x;
     }
 

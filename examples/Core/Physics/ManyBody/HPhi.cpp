@@ -41,7 +41,9 @@ VectorType readTPQ() {
         if (!fin)
             exit(EXIT_FAILURE);
         fin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-        fin >> buffer;
+        for (size_t r = 0; r < buffer.getRow(); ++r)
+            for (size_t c = 0; c < buffer.getCol(); ++c)
+                fin >> buffer(r, c);
         toNextMean(result, i, buffer.col(4));
     }
     result *= reciprocal(ScalarType(NumSite));
@@ -56,7 +58,9 @@ VectorType readFullDiag(const VectorType& betas) {
         if (!fin)
             exit(EXIT_FAILURE);
         fin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-        fin >> buffer;
+        for (size_t r = 0; r < buffer.getRow(); ++r)
+            for (size_t c = 0; c < buffer.getCol(); ++c)
+                fin >> buffer(r, c);
         energys = buffer.col(0);
         numParticle = buffer.col(1);
     }

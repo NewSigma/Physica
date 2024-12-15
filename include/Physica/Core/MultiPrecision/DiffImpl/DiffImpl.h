@@ -22,28 +22,28 @@
 
 namespace Physica::Core {
     template<Scalar T, DiffMode Mode, int Order>
-    Diff<T, Mode, Order>::Diff(T value_) : value(std::move(value_)), grad(0) {}
+    Diff<T, Mode, Order>::Diff(T v_) : v(std::move(v_)), g(0) {}
 
     template<Scalar T, DiffMode Mode, int Order>
-    Diff<T, Mode, Order>::Diff(T value_, GradType grad_) : value(std::move(value_)), grad(std::move(grad_)) {}
+    Diff<T, Mode, Order>::Diff(T v_, GradType g_) : v(std::move(v_)), g(std::move(g_)) {}
 
     template<Scalar T, DiffMode Mode, int Order>
     template<Scalar U>
-    Diff<T, Mode, Order>::Diff(const U& x) {
+    Diff<T, Mode, Order>::Diff(const U& x) requires(!ReverseDiff<U>) {
         static_assert(T::isComplex || !U::isComplex, "[Error]: Cannot convert a complex to a real");
         if constexpr (Diffable<U>) {
-            value = x.getValue();
-            grad = x.getGrad().template mask<Order - 1>();
+            v = x.value();
+            g = x.grad().template mask<Order - 1>();
         }
         else {
-            value = x;
+            v = x;
             zero_grad();
         }
     }
 
     template<Scalar T, DiffMode Mode, int Order>
     inline bool Diff<T, Mode, Order>::operator==(const This& other) const {
-        return value == other.value && grad == other.grad;
+        return v == other.v && g == other.g;
     }
 
     template<Scalar T, DiffMode Mode, int Order>
@@ -63,59 +63,59 @@ namespace Physica::Core {
     template<Scalar T, DiffMode Mode, int Order>
     T Diff<T, Mode, Order>::reverse(GradType grad_) const noexcept {
         static_assert(Mode == DiffMode::Reverse, "[Error]: Call reverse() of a forward diff scalar is not well defined");
-        auto& g = const_cast<GradType&>(getGrad());
-        g.getValue() += grad_.getValue();
+        auto& g1 = const_cast<GradType&>(grad());
+        g1.value() += grad_.value();
         if constexpr (Order != 1)
-            g.reverse(grad_.getGrad());
-        return getValue();
+            g1.reverse(grad_.grad());
+        return value();
     }
 
     template<Scalar T, DiffMode Mode, int Order>
     inline void Diff<T, Mode, Order>::zero_grad() {
-        grad = 0;
+        g = 0;
     }
 
     template<Scalar T, DiffMode Mode, int Order>
     auto Diff<T, Mode, Order>::conjugate() const {
-        return This(getValue().conjugate(), getGrad().conjugate());
+        return This(value().conjugate(), grad().conjugate());
     }
 
     template<Scalar T, DiffMode Mode, int Order>
     void Diff<T, Mode, Order>::swap(Diff& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
-        value.swap(obj.value);
-        grad.swap(obj.grad);
+        v.swap(obj.v);
+        g.swap(obj.g);
     }
 
     template<Scalar T, DiffMode Mode, int Order>
     void Diff<T, Mode, Order>::swap(ScalarRef<This>&& ref) noexcept {
         assert(ScalarPtr<This>(*this) != ScalarPtr<This>(ref) && "[Error]: Self swap is likely a bug");
-        value.swap(ref.getValue());
-        grad.swap(ref.getGrad());
+        v.swap(ref.value());
+        g.swap(ref.grad());
     }
 
     template<Scalar T, DiffMode Mode, int Order>
     template<int GradOrder>
     Diff<T, Mode, Order>::Base::template GradRtnTy<GradOrder>&
-    Diff<T, Mode, Order>::getGrad() noexcept {
+    Diff<T, Mode, Order>::grad() noexcept {
         static_assert(Order >= GradOrder, "[Error]: Order is not enough to calculate the required grad");
         static_assert(GradOrder > 0, "[Error]: 0 or minus order is not well defined");
         if constexpr (GradOrder == 1)
-            return grad;
+            return g;
         else
-            return getGrad().template getGrad<GradOrder - 1>();
+            return grad().template grad<GradOrder - 1>();
     }
 
     template<Scalar T, DiffMode Mode, int Order>
     template<int GradOrder>
     inline const Diff<T, Mode, Order>::Base::template GradRtnTy<GradOrder>&
-    Diff<T, Mode, Order>::getGrad() const noexcept {
-        return const_cast<This&>(*this).template getGrad<GradOrder>();
+    Diff<T, Mode, Order>::grad() const noexcept {
+        return const_cast<This&>(*this).template grad<GradOrder>();
     }
 
     template<Scalar T, DiffMode Mode, int Order>
     __host__ __device__ inline bool Diff<T, Mode, Order>::isFinite() const noexcept {
-        return value.isFinite() && grad.isFinite();
+        return v.isFinite() && g.isFinite();
     }
 
     template<Scalar T, DiffMode Mode, int Order>
@@ -142,8 +142,8 @@ namespace Physica::Core {
         static const auto instance = std::unique_ptr<H5::DataType>([]() -> H5::DataType* {
             auto* result = new H5::DataType(H5T_COMPOUND, sizeof(This));
             const auto id = result->getId();
-            H5Tinsert(id, "Value", HOFFSET(This, value), T::getH5DataType().getId());
-            H5Tinsert(id, "Grad", HOFFSET(This, grad), GradType::getH5DataType().getId());
+            H5Tinsert(id, "Value", HOFFSET(This, v), T::getH5DataType().getId());
+            H5Tinsert(id, "Grad", HOFFSET(This, g), GradType::getH5DataType().getId());
             return result;
         }());
         return *instance;
@@ -155,15 +155,15 @@ namespace Physica::Core {
     operator+(T&& x, U&& y) requires(Diffable<T>) {
         if constexpr (ForwardDiff<T>) {
             if constexpr (Diffable<U>)
-                co_return {x.getValue() + y.getValue(), x.getGrad() + y.getGrad()};
+                co_return {x.value() + y.value(), x.grad() + y.grad()};
             else
-                co_return {x.getValue() + y.getValue(), x.getGrad()};
+                co_return {x.value() + y.value(), x.grad()};
         }
         else {
             LazyReverse<T&&> x_ = std::forward<T>(x);
             LazyReverse<U&&> y_ = std::forward<U>(y);
-            auto result = co_yield x_.getValue() + y_.getValue();
-            auto& g = result.getGrad();
+            auto result = co_yield x_.value() + y_.value();
+            auto& g = result.grad();
             if (!g.isZero()) {
                 x_.reverse(g);
                 if constexpr (Diffable<U>)
@@ -177,15 +177,15 @@ namespace Physica::Core {
     operator-(T&& x, U&& y) requires(Diffable<T>) {
         if constexpr (ForwardDiff<T>) {
             if constexpr (Diffable<U>)
-                co_return {x.getValue() - y.getValue(), x.getGrad() - y.getGrad()};
+                co_return {x.value() - y.value(), x.grad() - y.grad()};
             else
-                co_return {x.getValue() - y.getValue(), x.getGrad()};
+                co_return {x.value() - y.value(), x.grad()};
         }
         else {
             LazyReverse<T&&> x_ = std::forward<T>(x);
             LazyReverse<U&&> y_ = std::forward<U>(y);
-            auto result = co_yield x_.getValue() - y_.getValue();
-            auto& g = result.getGrad();
+            auto result = co_yield x_.value() - y_.value();
+            auto& g = result.grad();
             if (!g.isZero()) {
                 x_.reverse(g);
                 if constexpr (Diffable<U>)
@@ -202,20 +202,20 @@ namespace Physica::Core {
             if constexpr (Diffable<U>) {
                 using GradType = ResultType::GradType;
                 constexpr int GradOrder = GradType::Order;
-                co_return ResultType(x.getValue() * y.getValue(), GradType(y.template mask<GradOrder>() * x.getGrad() + x.template mask<GradOrder>() * y.getGrad()));
+                co_return ResultType(x.value() * y.value(), GradType(y.template mask<GradOrder>() * x.grad() + x.template mask<GradOrder>() * y.grad()));
             }
             else
-                co_return ResultType(x.getValue() * y.getValue(), x.getGrad() * y.getValue());
+                co_return ResultType(x.value() * y.value(), x.grad() * y.value());
         }
         else {
             LazyReverse<T&&> x_ = std::forward<T>(x);
             LazyReverse<U&&> y_ = std::forward<U>(y);
-            auto result = co_yield x_.getValue() * y_.getValue();
-            auto& g = result.getGrad();
+            auto result = co_yield x_.value() * y_.value();
+            auto& g = result.grad();
             if (!g.isZero()) {
-                x_.reverse(y_.getValue() * g);
+                x_.reverse(y_.value() * g);
                 if constexpr (Diffable<U>)
-                    y_.reverse(x_.getValue() * g);
+                    y_.reverse(x_.value() * g);
             }
         }
     }
@@ -229,23 +229,23 @@ namespace Physica::Core {
                 using GradType = ResultType::GradType;
                 constexpr int GradOrder = GradType::Order;
                 const auto v = reciprocal(y.template mask<GradOrder>());
-                co_return ResultType(x.getValue() * v.getValue(), GradType((y.template mask<GradOrder>() * x.getGrad() - x.template mask<GradOrder>() * y.getGrad()) * square(v)));
+                co_return ResultType(x.value() * v.value(), GradType((y.template mask<GradOrder>() * x.grad() - x.template mask<GradOrder>() * y.grad()) * square(v)));
             }
             else {
-                const auto v = reciprocal(y.getValue());
-                co_return ResultType(x.getValue() * v, x.getGrad() * v);
+                const auto v = reciprocal(y.value());
+                co_return ResultType(x.value() * v, x.grad() * v);
             }
         }
         else {
             LazyReverse<T&&> x_ = std::forward<T>(x);
             LazyReverse<U&&> y_ = std::forward<U>(y);
-            auto result = co_yield x_.getValue() / y_.getValue();
-            auto& g = result.getGrad();
+            auto result = co_yield x_.value() / y_.value();
+            auto& g = result.grad();
             if (!g.isZero()) {
-                const auto factor = reciprocal(y_) * g;
+                const auto factor = reciprocal(y_.value()) * g;
                 x_.reverse(factor);
                 if constexpr (Diffable<U>)
-                    y_.reverse(-factor * x_.getValue());
+                    y_.reverse(-factor * x_.value());
             }
         }
     }
@@ -268,18 +268,18 @@ namespace Physica::Core {
     template<Scalar T, Scalar U>
     [[nodiscard]] inline auto operator/(const U& x, const T& y) requires(Diffable<T> && !Diffable<U>) {
         using ResultType = Internal::BinaryScalarOpRtnTy<T, U>::Type;
-        const auto rep = reciprocal(y.getValue());
-        return ResultType(y.getValue() * rep, -y.getValue() * y.getGrad() * square(rep));
+        const auto rep = reciprocal(y.value());
+        return ResultType(y.value() * rep, -y.value() * y.grad() * square(rep));
     }
 
     template<Scalar T>
     inline CoDiff<T> operator-(T&& x) requires(Diffable<T>) {
         if constexpr (ForwardDiff<T>)
-            co_return {-x.getValue(), -x.getGrad()};
+            co_return {-x.value(), -x.grad()};
         else {
             LazyReverse<T&&> x_ = std::forward<T>(x);
-            auto result = co_yield x_.getValue();
-            auto& g = result.getGrad();
+            auto result = co_yield x_.value();
+            auto& g = result.grad();
             if (!g.isZero())
                 x_.reverse(-g);
         }

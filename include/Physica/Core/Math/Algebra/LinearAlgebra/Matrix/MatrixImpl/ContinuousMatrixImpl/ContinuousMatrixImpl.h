@@ -284,10 +284,10 @@ namespace Physica::Core {
             TracerType::getInstance().reserve(maxMajor * maxMinor);
             for (size_t major = 0; major < maxMajor; ++major)
                 for (size_t minor = 0; minor < maxMinor; ++minor)
-                    Base::refFromMajorMinor(major, minor) = ScalarType::template random_any<decltype(dist), R>(dist);
+                    Base::refFromMajorMinor(major, minor) = ScalarType::template random_any<Distribution, R>(dist);
         }
         else
-            Base::template random_any<R>(dist);
+            Base::template random_any<Distribution, R>(dist);
     }
 #ifdef PHYSICA_HDF5
     template<class Derived>

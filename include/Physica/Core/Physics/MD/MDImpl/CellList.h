@@ -26,8 +26,8 @@
 namespace Physica::Core {
     template<Scalar T>
     class CellList {
+        static_assert(!Diffable<T>, "[Error]: CellList is not diffable");
         using This = CellList<T>;
-        using ValueType = T::ValueType;
     public:
         using MDCellType = MDCell<T>;
         using LatticeMatrix = MDCellType::LatticeMatrix;
@@ -37,15 +37,15 @@ namespace Physica::Core {
     private:
         LatticeMatrix lattice;
         PositionMatrix directPos;
-        ValueType cutoff;
+        T cutoff;
         Index3D cellGridDim;
         Array<size_t> cellAtomMap;
         Array<size_t> cellStartOffset;
         Array<Index3D> atomCellMap;
         Array<Vector3D<T>> neighShifts;
     public:
-        CellList(LatticeMatrix lattice_, PositionMatrix cartesianPos, ValueType cutoff_);
-        CellList(const MDCellType& mdCell, ValueType cutoff_);
+        CellList(LatticeMatrix lattice_, PositionMatrix cartesianPos, T cutoff_);
+        CellList(const MDCellType& mdCell, T cutoff_);
         CellList(const CellList&) = default;
         CellList(CellList&&) noexcept = default;
         ~CellList() = default;
@@ -67,7 +67,7 @@ namespace Physica::Core {
         /* Getters */
         [[nodiscard]] const LatticeMatrix& getLattice() const noexcept { return lattice; }
         [[nodiscard]] size_t getNumParticle() const noexcept { return directPos.getRow(); }
-        [[nodiscard]] ValueType getCutoff() const noexcept { return cutoff; }
+        [[nodiscard]] T getCutoff() const noexcept { return cutoff; }
         [[nodiscard]] Index3D getCellGridDim() const noexcept { return cellGridDim; }
         [[nodiscard]] size_t getCellGridDimX() const noexcept { return cellGridDim[0]; }
         [[nodiscard]] size_t getCellGridDimY() const noexcept { return cellGridDim[1]; }
@@ -84,13 +84,13 @@ namespace Physica::Core {
         template<size_t DimID>
         [[nodiscard]] __host__ __device__ inline static int findNeighbor(
                 const Index3D& cellGridDim, size_t centerIndex, int deltaIndex, Index3D& neighborIndex);
-        [[nodiscard]] static Index3D makeGridDim(const LatticeMatrix& lattice, ValueType cutoff);
+        [[nodiscard]] static Index3D makeGridDim(const LatticeMatrix& lattice, T cutoff);
         /* Friends */
         friend class device_obj<This>;
     };
 
     template<Scalar T>
-    CellList<T>::CellList(LatticeMatrix lattice_, PositionMatrix cartesianPos, ValueType cutoff_)
+    CellList<T>::CellList(LatticeMatrix lattice_, PositionMatrix cartesianPos, T cutoff_)
             : lattice(std::move(lattice_))
             , directPos(std::move(cartesianPos))
             , cutoff(cutoff_) {
@@ -124,7 +124,7 @@ namespace Physica::Core {
     }
 
     template<Scalar T>
-    CellList<T>::CellList(const MDCellType& mdCell, ValueType cutoff_)
+    CellList<T>::CellList(const MDCellType& mdCell, T cutoff_)
             : CellList(mdCell.getLattice(), mdCell.getPos(), std::move(cutoff_)) {}
 
     template<Scalar T>
@@ -263,9 +263,9 @@ namespace Physica::Core {
     template<Scalar T>
     CellList<T>::Index3D
     CellList<T>::posToIndex(size_t atomId) const {
-        const T x0 = abs(directPos(atomId, 0) - ValueType(std::numeric_limits<T>::epsilon()));
-        const T y0 = abs(directPos(atomId, 1) - ValueType(std::numeric_limits<T>::epsilon()));
-        const T z0 = abs(directPos(atomId, 2) - ValueType(std::numeric_limits<T>::epsilon()));
+        const T x0 = abs(directPos(atomId, 0) - T(std::numeric_limits<T>::epsilon()));
+        const T y0 = abs(directPos(atomId, 1) - T(std::numeric_limits<T>::epsilon()));
+        const T z0 = abs(directPos(atomId, 2) - T(std::numeric_limits<T>::epsilon()));
         assert(T(0) <= x0 && x0 <= T(1));
         assert(T(0) <= y0 && y0 <= T(1));
         assert(T(0) <= z0 && z0 <= T(1));
@@ -311,9 +311,9 @@ namespace Physica::Core {
 
     template<Scalar T>
     CellList<T>::Index3D
-    CellList<T>::makeGridDim(const LatticeMatrix& lattice, ValueType cutoff) {
+    CellList<T>::makeGridDim(const LatticeMatrix& lattice, T cutoff) {
         const auto repLatt = MDCellType::makeRepLattice(lattice);
-        const ValueType factor = reciprocal(cutoff) * ValueType(2 * M_PI);
+        const T factor = reciprocal(cutoff) * T(2 * M_PI);
         size_t dimX = static_cast<size_t>(double(factor * reciprocal(repLatt.row(0).norm())));
         size_t dimY = static_cast<size_t>(double(factor * reciprocal(repLatt.row(1).norm())));
         size_t dimZ = static_cast<size_t>(double(factor * reciprocal(repLatt.row(2).norm())));

@@ -24,7 +24,7 @@ namespace Physica::Core {
         using ResultType = SIMD<Diff<T, Mode, Order>, Size>;
         if constexpr (Mode == DiffMode::Forward) {
             using GradPacket = ResultType::GradType;
-            return ResultType(abs(x.getValue()), GradPacket::select(x.getValue().isPositive(), x.getGrad(), -x.getGrad()));
+            return ResultType(abs(x.value()), GradPacket::select(x.value().isPositive(), x.grad(), -x.grad()));
         }
         else {
             using PlainSIMD = SIMD<T, Size>;
@@ -43,7 +43,7 @@ namespace Physica::Core {
         using ResultType = SIMD<Diff<T, Mode, Order>, Size>;
         if constexpr (Mode == DiffMode::Forward) {
             using GradPacket = ResultType::GradType;
-            return ResultType(square(x.getValue()), GradPacket(x) * x.getGrad() * T(2));
+            return ResultType(square(x.value()), GradPacket(x) * x.grad() * T(2));
         }
         else {
             using PlainSIMD = SIMD<T, Size>;
@@ -63,7 +63,7 @@ namespace Physica::Core {
         using ResultType = SIMD<Diff<T, Mode, Order>, Size>;
         using GradPacket = ResultType::GradType;
         const auto y = reciprocal(GradPacket(x));
-        return ResultType(y.getValue(), -x.getGrad() * square(y));
+        return ResultType(y.value(), -x.grad() * square(y));
     }
 
     template<Scalar T, DiffMode Mode, int Order, size_t Size>
@@ -71,7 +71,7 @@ namespace Physica::Core {
         static_assert(Mode != DiffMode::Reverse, "[Error]: Not implemented");
         using ResultType = SIMD<Diff<T, Mode, Order>, Size>;
         using GradPacket = ResultType::GradType;
-        return ResultType(ln(x.getValue()), reciprocal(GradPacket(x)) * x.getGrad());
+        return ResultType(ln(x.value()), reciprocal(GradPacket(x)) * x.grad());
     }
 
     template<Scalar T, DiffMode Mode, int Order, size_t Size>
@@ -79,7 +79,7 @@ namespace Physica::Core {
         static_assert(Mode != DiffMode::Reverse, "[Error]: Not implemented");
         using ResultType = SIMD<Diff<T, Mode, Order>, Size>;
         using GradPacket = ResultType::GradType;
-        return ResultType(ln1p(x.getValue()), reciprocal(GradPacket(1) + GradPacket(x)) * x.getGrad());
+        return ResultType(ln1p(x.value()), reciprocal(GradPacket(1) + GradPacket(x)) * x.grad());
     }
 
     template<Scalar T, DiffMode Mode, int Order, size_t Size>
@@ -88,7 +88,7 @@ namespace Physica::Core {
         using ResultType = SIMD<Diff<T, Mode, Order>, Size>;
         using GradPacket = ResultType::GradType;
         const auto y = exp(GradPacket(x));
-        return ResultType(y.getValue(), y * x.getGrad());
+        return ResultType(y.value(), y * x.grad());
     }
 
     template<Scalar T, DiffMode Mode, int Order, size_t Size>
@@ -120,7 +120,7 @@ namespace Physica::Core {
         using ResultType = SIMD<Diff<T, Mode, Order>, Size>;
         using GradPacket = ResultType::GradType;
         const GradPacket y = tanh(GradPacket(x));
-        return ResultType(y.getValue(), (GradPacket(1) - square(y)) * x.getGrad());
+        return ResultType(y.value(), (GradPacket(1) - square(y)) * x.grad());
     }
 
     template<Scalar T, DiffMode Mode, int Order, size_t Size>
@@ -128,6 +128,6 @@ namespace Physica::Core {
         static_assert(Mode != DiffMode::Reverse, "[Error]: Not implemented");
         using ResultType = SIMD<Diff<T, Mode, Order>, Size>;
         using GradPacket = ResultType::GradType;
-        return ResultType(lncosh(x.getValue()), tanh(GradPacket(x)) * x.getGrad());
+        return ResultType(lncosh(x.value()), tanh(GradPacket(x)) * x.grad());
     }
 }

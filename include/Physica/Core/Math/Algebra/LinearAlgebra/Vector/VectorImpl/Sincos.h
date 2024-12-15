@@ -22,7 +22,7 @@
 
 namespace Physica::Core {
     template<Vector T1, LVector T2>
-    void sincos(const T1& x, T2& s, T2& c) {
+    auto sincos(const T1& x, T2& s, T2& c) {
         assert(x.getLength() == s.getLength() && x.getLength() == c.getLength());
         constexpr static size_t Size1 = T1::SizeAtCompile;
         constexpr static size_t Size2 = T2::SizeAtCompile;
@@ -31,7 +31,14 @@ namespace Physica::Core {
         using ScalarType2 = T2::ScalarType;
         using ScalarType = Internal::BinaryScalarOpRtnTy<ScalarType1, ScalarType2>::Type;
         using PacketType = BestPacket<ScalarType, SizeAtCompile>::Type;
-        if constexpr (PacketType::size() == 1) {
+        if constexpr (ReverseDiff<ScalarType>) {
+            size_t i = 0;
+            auto result = co_for([=]{ return i < x.getLength(); }, [&]{ ++i; }, [&]{
+                return sincos(x.calc(i), s[i], c[i]);
+            });
+            return result;
+        }
+        else if constexpr (PacketType::size() == 1) {
             for (size_t i = 0; i < x.getLength(); ++i)
                 sincos(x.calc(i), s[i], c[i]);
         }

@@ -29,7 +29,7 @@ int main() {
     sum.reverse();
     auto v = m.flatten();
     for (size_t i = 0; i < v.getLength(); ++i)
-        if (v.calc(i).getGrad() != ScalarType(1))
+        if (v.calc(i).grad() != ScalarType(1))
             return 1;
     return 0;
 }

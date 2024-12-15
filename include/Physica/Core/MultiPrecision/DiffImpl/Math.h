@@ -21,11 +21,11 @@
 #include "Physica/Core/MultiPrecision/Diff.h"
 
 namespace Physica::Core {
-    template<Scalar T, int Order>
-    __host__ __device__ inline auto abs(const Diff<T, DiffMode::Forward, Order>& x);
+    template<Scalar T>
+    __host__ __device__ inline CoDiff<T> abs(T&& x) requires(Diffable<T>);
 
-    template<Scalar T, int Order>
-    inline auto relu(const Diff<T, DiffMode::Forward, Order>& x);
+    template<Scalar T>
+    inline CoDiff<T> relu(T&& x) requires(Diffable<T>);
 
     template<Scalar T>
     __host__ __device__ inline CoDiff<T> square(T&& x) requires(Diffable<T>);
@@ -39,8 +39,8 @@ namespace Physica::Core {
     template<Scalar T>
     CoDiff<T> cbrt(T&& x) requires(Diffable<T>);
 
-    template<Scalar T, int Order>
-    auto ln(const Diff<T, DiffMode::Forward, Order>& x);
+    template<Scalar T>
+    CoDiff<T> ln(T&& x) requires(Diffable<T>);
 
     template<Scalar T, int Order>
     auto ln1p(const Diff<T, DiffMode::Forward, Order>& x);
@@ -63,8 +63,8 @@ namespace Physica::Core {
     template<Scalar T>
     CoDiff<T> sin(T&& x) requires(Diffable<T>);
 
-    template<Scalar T, int Order>
-    void sincos(const Diff<T, DiffMode::Forward, Order>& x, Diff<T, DiffMode::Forward, Order>& sin_result, Diff<T, DiffMode::Forward, Order>& cos_result);
+    template<Scalar T, Scalar U>
+    CoDiff<void> sincos(const T& x, U&& sin_result, U&& cos_result);
 
     template<Scalar T, int Order>
     auto tan(const Diff<T, DiffMode::Forward, Order>& x);
@@ -138,12 +138,12 @@ namespace Physica::Core {
 
     template<Scalar T, int Order>
     inline T floor(const Diff<T, DiffMode::Forward, Order>& x) {
-        return floor(x.getValue());
+        return floor(x.value());
     }
     
     template<Scalar T, int Order>
     inline T ceil(const Diff<T, DiffMode::Forward, Order>& x) {
-        return ceil(x.getValue());
+        return ceil(x.value());
     }
 }
 

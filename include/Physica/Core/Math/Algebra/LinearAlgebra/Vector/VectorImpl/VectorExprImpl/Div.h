@@ -28,7 +28,7 @@ namespace Physica::Core {
     public:
         using Base::Base;
         /* Operations */
-        [[nodiscard]] ScalarType calc(size_t s) const {
+        [[nodiscard]] CoDiff<ScalarType> calc(size_t s) const {
             assert(!Base::getRHS().isZero() && "[Error]: Divide by zero");
             return Base::getLHS().calc(s) / Base::getRHS();
         }
@@ -49,9 +49,11 @@ namespace Physica::Core {
             : public BinaryVectorExpr<ExprType::Div, T1, T2> {
         using Base = BinaryVectorExpr<ExprType::Div, T1, T2>;
     public:
+        using typename Base::ScalarType;
+    public:
         using Base::Base;
         /* Operations */
-        [[nodiscard]] typename Base::ScalarType calc(size_t s) const { return Base::getLHS().calc(s) / Base::getRHS().calc(s); }
+        [[nodiscard]] CoDiff<ScalarType> calc(size_t s) const { return Base::getLHS().calc(s) / Base::getRHS().calc(s); }
 
         template<class AnyPacket>
         [[nodiscard]] AnyPacket packet(size_t index) const {

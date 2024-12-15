@@ -133,7 +133,7 @@ namespace Physica {
             const ScalarType r2 = square(r);
             ewald.pot_functor(0, 1, r, r2).reverse();
             const ScalarType f = ewald.force_functor(0, 1, r, r2);
-            if (!scalarNear(-r.getGrad(), f.getValue(), 1E-10))
+            if (!scalarNear(-r.grad(), f.value(), 1E-10))
                 exit(EXIT_FAILURE);
         }
 
@@ -144,7 +144,7 @@ namespace Physica {
             PositionMatrix force_diff(pos.getRow(), pos.getCol());
             for (size_t i = 0; i < pos.getRow(); ++i)
                 for (size_t j = 0; j < pos.getCol(); ++j)
-                    force_diff(i, j) = -pos(i, j).getGrad();
+                    force_diff(i, j) = -pos(i, j).grad();
             if (!vectorNear(force, force_diff.flatten(), 1E-11))
                 exit(EXIT_FAILURE);
         }
@@ -169,8 +169,8 @@ namespace Physica {
             EwaldType ewald(cell.getLattice(), std::move(charges));
             ewald.potentialV(cell.getPos()).reverse();
 
-            const ValueType press_diff = -volume.getGrad() / ValueType(cellSize * cellSize * cellSize);
-            const ValueType press = (ewald.virial(cell.getPos()).trace() / ScalarType(3)).getValue();
+            const ValueType press_diff = -volume.grad() / ValueType(cellSize * cellSize * cellSize);
+            const ValueType press = (ewald.virial(cell.getPos()).trace() / ScalarType(3)).value();
             if (!scalarNear(press_diff, press, 1E-13))
                 exit(EXIT_FAILURE);
         }

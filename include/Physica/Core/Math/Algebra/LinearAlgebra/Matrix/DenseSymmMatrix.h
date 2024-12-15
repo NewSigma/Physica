@@ -68,7 +68,7 @@ namespace Physica::Core {
         template<RandomGenerator R>
         void random_normal() { asVector().template random_normal<R>(); }
         template<class Distribution, RandomGenerator R>
-        void random_any(Distribution& dist) { asVector().template random_any<R>(dist); }
+        void random_any(Distribution& dist) { asVector().template random_any<Distribution, R>(dist); }
 
         inline const H5DataSet<1> read(const H5Location& loc, const char* name);
         inline H5DataSet<1> write(H5Location& loc, const char* name) const;
@@ -182,7 +182,7 @@ namespace Physica::Core {
     [[nodiscard]] inline DenseSymmMatrix<T, Order>
     DenseSymmMatrix<T, Order>::random_any(size_t order, Distribution& dist) {
         This result(order);
-        result.template random_any<R>(dist);
+        result.template random_any<Distribution, R>(dist);
         return result;
     }
 #ifdef PHYSICA_HDF5

@@ -36,22 +36,22 @@ namespace Physica::Core {
         using Base::isForwardDiff;
         using Base::isReverseDiff;
     private:
-        T value;
-        GradType grad;
+        T v;
+        GradType g;
     public:
         Diff() = default;
         Diff(MachineType x) : This(T(x)) {}
-        Diff(T value_);
-        Diff(T value_, GradType grad_);
+        Diff(T v_);
+        Diff(T v_, GradType g_);
         template<Scalar U>
-        explicit Diff(const U& x);
+        explicit Diff(const U& x) requires(!ReverseDiff<U>);
         Diff(const This&) = default;
         Diff(This&&) noexcept = default;
         ~Diff() = default;
         /* Operators */
         This& operator=(This obj) noexcept { swap(obj); return *this; }
-        [[nodiscard]] explicit operator float() const { return float(value); }
-        [[nodiscard]] explicit operator double() const { return double(value); }
+        [[nodiscard]] explicit operator float() const { return float(v); }
+        [[nodiscard]] explicit operator double() const { return double(v); }
         [[nodiscard]] inline bool operator==(const This& other) const;
         /* Operations */
         template<int MaskOrder>
@@ -66,14 +66,14 @@ namespace Physica::Core {
         void swap(This& __restrict obj) noexcept;
         void swap(ScalarRef<This>&& ref) noexcept;
         /* Getters */
-        [[nodiscard]] __host__ __device__ T* value_ptr() noexcept { return &value; }
-        [[nodiscard]] __host__ __device__ GradType* grad_ptr() noexcept { return &grad; }
-        [[nodiscard]] T& getValue() noexcept { return value; }
-        [[nodiscard]] const T& getValue() const noexcept { return value; }
+        [[nodiscard]] __host__ __device__ T* value_ptr() noexcept { return &v; }
+        [[nodiscard]] __host__ __device__ GradType* grad_ptr() noexcept { return &g; }
+        [[nodiscard]] T& value() noexcept { return v; }
+        [[nodiscard]] const T& value() const noexcept { return v; }
         template<int GradOrder = 1>
-        [[nodiscard]] inline Base::template GradRtnTy<GradOrder>& getGrad() noexcept;
+        [[nodiscard]] inline Base::template GradRtnTy<GradOrder>& grad() noexcept;
         template<int GradOrder = 1>
-        [[nodiscard]] inline const Base::template GradRtnTy<GradOrder>& getGrad() const noexcept;
+        [[nodiscard]] inline const Base::template GradRtnTy<GradOrder>& grad() const noexcept;
         [[nodiscard]] __host__ __device__ inline bool isFinite() const noexcept;
         /* Static members */
         template<RandomGenerator R>
@@ -118,7 +118,7 @@ namespace Physica::Core {
 
     template<Scalar T>
     inline std::ostream& operator<<(std::ostream& os, const T& obj) requires(T::isDiffable) {
-        return os << obj.getValue();
+        return os << obj.value();
     }
 }
 

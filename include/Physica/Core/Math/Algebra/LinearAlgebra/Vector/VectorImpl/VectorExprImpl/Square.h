@@ -18,6 +18,8 @@
  */
 #pragma once
 
+#include "../VectorExpr.h"
+
 namespace Physica::Core {
     template<Vector T>
     class VectorExpr<ExprType::Square, T> : public UnitaryVectorExpr<ExprType::Square, T> {
@@ -28,7 +30,7 @@ namespace Physica::Core {
     public:
         using Base::Base;
         /* Operations */
-        [[nodiscard]] ScalarType calc(size_t index) const { return square(Base::getExpr().calc(index)); }
+        [[nodiscard]] CoDiff<ScalarType> calc(size_t index) const { return square(Base::getExpr().calc(index)); }
 
         template<class AnyPacket>
         [[nodiscard]] AnyPacket packet(size_t index) const {

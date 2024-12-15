@@ -162,7 +162,7 @@ namespace Physica::Core {
     template<Scalar T, size_t Order>
     template<class Distribution, RandomGenerator R>
     void DenseHermiteMatrix<T, Order>::random_any(Distribution& dist) {
-        asVector().template random_any<R>(dist);
+        asVector().template random_any<Distribution, R>(dist);
         for (size_t i = 0; i < getRow(); ++i)
             this->operator()(i, i).imag() = RealType(0);
     }
@@ -197,7 +197,7 @@ namespace Physica::Core {
     [[nodiscard]] inline DenseHermiteMatrix<T, Order>
     DenseHermiteMatrix<T, Order>::random_any(size_t order, Distribution& dist) {
         This result(order);
-        result.template random_any<R>(dist);
+        result.template random_any<Distribution, R>(dist);
         return result;
     }
 #ifdef PHYSICA_HDF5

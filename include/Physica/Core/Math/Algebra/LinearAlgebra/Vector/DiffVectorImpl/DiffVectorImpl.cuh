@@ -58,7 +58,7 @@ namespace Physica::Core {
     template<Scalar T, int Order>
     template<class Distribution, RandomGenerator R>
     inline void device_obj<Diff<VectorND<T>, DiffMode::Reverse, Order>>::random_any(Distribution& dist) {
-        *this = random_any<R>(getLength(), dist);
+        *this = random_any<Distribution, R>(getLength(), dist);
     }
 
     template<Scalar T, int Order>
@@ -76,10 +76,10 @@ namespace Physica::Core {
         const size_t length = getLength();
         const size_t index = threadIdx.x;
 
-        T value = calc(index).getValue();
+        T value = calc(index).value();
         int valueIndex = index;
         for (int i = index + blockDim.x; i < length; i += blockDim.x) {
-            const T temp = calc(i).getValue();
+            const T temp = calc(i).value();
             const bool flag = ComputeMax ? (temp > value) : (temp < value);
             if (flag) {
                 value = temp;
@@ -121,7 +121,7 @@ namespace Physica::Core {
 
         T threadSum = 0;
         for (int i = index; i < length; i += blockDim.x)
-            threadSum += calc(i).getValue();
+            threadSum += calc(i).value();
         buffer[index] = threadSum;
 
         int i0 = blockDim.x;
@@ -164,25 +164,25 @@ namespace Physica::Core {
 
     template<Scalar T, int Order>
     __device__ inline T&
-    device_obj<Diff<VectorND<T>, DiffMode::Reverse, Order>>::getValue(size_t index) {
+    device_obj<Diff<VectorND<T>, DiffMode::Reverse, Order>>::value(size_t index) {
         return getTraceSegment().getValues()[index];
     }
 
     template<Scalar T, int Order>
     __device__ inline const T&
-    device_obj<Diff<VectorND<T>, DiffMode::Reverse, Order>>::getValue(size_t index) const {
+    device_obj<Diff<VectorND<T>, DiffMode::Reverse, Order>>::value(size_t index) const {
         return getTraceSegment().getValues()[index];
     }
 
     template<Scalar T, int Order>
     __device__ inline T&
-    device_obj<Diff<VectorND<T>, DiffMode::Reverse, Order>>::getGrad(size_t index) {
+    device_obj<Diff<VectorND<T>, DiffMode::Reverse, Order>>::grad(size_t index) {
         return getTraceSegment().getGrads()[index];
     }
 
     template<Scalar T, int Order>
     __device__ inline const T&
-    device_obj<Diff<VectorND<T>, DiffMode::Reverse, Order>>::getGrad(size_t index) const {
+    device_obj<Diff<VectorND<T>, DiffMode::Reverse, Order>>::grad(size_t index) const {
         return getTraceSegment().getGrads()[index];
     }
 
@@ -240,6 +240,6 @@ namespace Physica::Core {
     template<class Distribution, RandomGenerator R>
     inline device_obj<Diff<VectorND<T>, DiffMode::Reverse, Order>>
     device_obj<Diff<VectorND<T>, DiffMode::Reverse, Order>>::random_any(size_t len, Distribution& dist) {
-        return This(PlainVector::random_any<R>(len, dist));
+        return This(PlainVector::random_any<Distribution, R>(len, dist));
     }
 }

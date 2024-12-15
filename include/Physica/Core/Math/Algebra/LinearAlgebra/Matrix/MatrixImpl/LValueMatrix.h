@@ -68,7 +68,7 @@ namespace Physica::Core {
         [[nodiscard]] inline ConstRefTy operator()(size_t row, size_t col) const;
         /* Operations */
         template<Matrix T>
-        void reverse(const T& m) const noexcept requires(isReverseDiff);
+        void reverse(const T& grad) const noexcept requires(isReverseDiff);
 
         [[nodiscard]] inline RowVector row(size_t r);
         [[nodiscard]] inline const RowVector row(size_t r) const;

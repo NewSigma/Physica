@@ -31,8 +31,29 @@ namespace Physica::Core {
     template<class Derived> class ScalarBase;
 
     template<class T>
+    struct IsScalarRef {
+        constexpr static bool value = false;
+    };
+
+    template<class T>
+    struct IsScalarRef<ScalarRef<T>> {
+        constexpr static bool value = true;
+    };
+
+    template<class T>
+    struct remove_ScalarRef {
+        using Type = T;
+    };
+
+    template<class T>
+    struct remove_ScalarRef<ScalarRef<T>> {
+        using Type = T;
+    };
+
+    template<class T>
     concept Scalar = std::derived_from<std::remove_cvref_t<T>, ScalarBase<std::remove_cvref_t<T>>>
-                  || std::derived_from<std::remove_cvref_t<T>, typename std::remove_cvref_t<T>::ScalarType>;
+                  || std::derived_from<std::remove_cvref_t<T>, typename std::remove_cvref_t<T>::ScalarType>
+                  || IsScalarRef<std::remove_cvref_t<T>>::value;
 
     enum ScalarOption {
         Float16 = 0,
@@ -85,20 +106,22 @@ namespace Physica::Core {
     class Diff;
 
     template<class T>
-    class DiffNode;
+    class CoDiffNode;
 
     template<class T>
-    struct remove_node {
+    struct remove_codiff {
         using Type = T;
     };
 
     template<class T>
-    struct remove_node<DiffNode<T>> {
+    struct remove_codiff<CoDiffNode<T>> {
         using Type = T;
     };
 
     template<class T>
-    using CoDiff = std::conditional<ReverseDiff<T>, DiffNode<typename remove_node<std::remove_cvref_t<T>>::Type>, std::remove_cvref_t<T>>::type;
+    using CoDiff = std::conditional<std::is_void<T>::value || ReverseDiff<T>
+                 , CoDiffNode<typename remove_codiff<std::remove_cvref_t<T>>::Type>
+                 , typename remove_ScalarRef<std::remove_cvref_t<T>>::Type>::type;
 
     namespace Internal {
         /**
@@ -132,4 +155,9 @@ namespace Physica::Core {
             using Type = Type2;
         };
     }
+}
+
+namespace Physica {
+    template<class T>
+    class Traits<CoDiffNode<T>> : public Traits<T> {};
 }

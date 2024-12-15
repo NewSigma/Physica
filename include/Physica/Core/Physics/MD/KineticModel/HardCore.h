@@ -89,7 +89,7 @@ namespace Physica::Core {
     template<Scalar T, bool IsFixedBoundary, size_t NumReplica, RPMDIntegrator Integrator, class Executor>
     void HardCore<T, IsFixedBoundary, NumReplica, Integrator, Executor>::nve_step(RingPolymerType& ringPolymer, T deltaT) {
         const size_t numParticle = getNumParticle();
-        const ValueType collideStep = collideFactor * deltaT.getValue();
+        const ValueType collideStep = collideFactor * deltaT.value();
         auto& phase = ringPolymer.asMatrix();
         assert(numParticle == ringPolymer.getNumParticle());
         assert(getNumReplica() == ringPolymer.getNumReplica());
@@ -311,7 +311,7 @@ namespace Physica::Core {
                 }
                 if constexpr (IsFixedBoundary) {
                     [[unlikely]] if (id_dof == numParticle - 1) {
-                        const PacketType latticeSizes(latticeSize.getValue().toMachine());
+                        const PacketType latticeSizes(latticeSize.value().toMachine());
                         size_t i = 0;
                         for (; i < to; i += PacketType::size()) {
                             const auto boolPacket = BoolPacketType(pos.template packet<PacketType>(i) > latticeSizes);

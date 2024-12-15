@@ -52,8 +52,8 @@ public:
             : layer1(Mnist::NumPixelInImage, width1)
             , layer2(width1, 10) {
         //auto dist = std::normal_distribution<float>(0, 0.01);
-        //layer1.template random_any<R>(dist);
-        //layer2.template random_any<R>(dist);
+        //layer1.template random_any<Distribution, R>(dist);
+        //layer2.template random_any<Distribution, R>(dist);
 
         //layer1.template random_xavier_uniform<R>(1);
         //layer2.template random_xavier_uniform<R>(1);
@@ -70,7 +70,7 @@ public:
     MnistNet& operator=(MnistNet& obj) noexcept { swap(obj); return *this; }
     /* Operations */
     [[nodiscard]] OutputType forward(const InputType& x) const {
-        OutputType result = relu(layer1.forward(x));
+        CoDiff<OutputType> result = relu(layer1.forward(x));
         result = layer2.forward(result);
         return result;
     }

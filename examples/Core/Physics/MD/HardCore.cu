@@ -17,19 +17,13 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include <algorithm>
-#include <fstream>
-#include <iostream>
 #include <gperftools/profiler.h>
 #include <QApplication>
 #include <QtCharts/QValueAxis>
-#include "Physica/Core/Physics/MD/RPMD.h"
-#include "Physica/Core/Physics/MD/KineticModel/HardCore.cuh"
 #include "Physica/Core/Math/Random/Random.h"
-#include "Physica/Core/Math/Statistics/ProbDistribution.h"
 #include "Physica/Core/Parallel/Executor/ThreadExecutor.h"
+#include "Physica/Core/Physics/MD/KineticModel/HardCore.cuh"
 #include "Physica/Gui/Plot/Plot.h"
-#include "Physica/Core/Utils/BenchmarkHelper.h"
-#include "Physica/Core/Utils/Cycler.h"
 
 using namespace Physica::Core;
 using namespace Physica::Gui;
@@ -40,7 +34,6 @@ constexpr double latticeSize = 512;
 constexpr double temperatureT = 2;
 [[maybe_unused]] constexpr double energy = numMolecular * temperatureT / 2;
 constexpr size_t numSample = 5000;
-constexpr bool IsComputeMode = true;
 
 using ScalarType = float32;
 using VectorType = VectorND<ScalarType>;
@@ -80,7 +73,7 @@ ScalarType calcThermoFlux(MDType& rpmd) {
 int main(int argc, char** argv) {
     MatrixType record(1000, 8);
     VectorType mean(record.getRow()), devia(record.getRow());
-    if constexpr (IsComputeMode) {
+    {
         ThreadPool::numThreadRequired = record.getCol();
         ThreadExecutor::parallel_for([&record](unsigned int sys) {
             MDType rpmd = MDType(makeSystem(), 1, 1, temperatureT, timeStep);
@@ -113,14 +106,6 @@ int main(int argc, char** argv) {
         devia *= factor;
     }
 
-    if constexpr (!IsComputeMode) {
-        std::ifstream fin("data");
-        fin >> mean >> devia;
-    }
-    else {
-        std::ofstream fout("data");
-        fout << mean << devia;
-    }
     const VectorType lgCorr = ln(abs(mean)) * reciprocal(ln(ScalarType(10)));
 
     QApplication app(argc, argv);

@@ -161,7 +161,7 @@ namespace Physica::Core {
             Distribution& dist) const {
         T result = 0;
         for (uint64_t i = 0; i < sampleCount; ++i) {
-            const VectorType x = VectorType::template random_any<R>(dim);
+            const VectorType x = VectorType::template random_any<Distribution, R>(dim);
             toNextMean(result, i, func(x) / importance(x));
         }
         return result;

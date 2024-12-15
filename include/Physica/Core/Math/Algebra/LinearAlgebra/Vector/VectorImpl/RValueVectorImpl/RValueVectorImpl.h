@@ -324,10 +324,9 @@ namespace Physica::Core {
     }
 
     template<class Derived>
-    auto RValueVector<Derived>::sum() const {
-        static_assert(!isReverseDiff, "[Error]: Not implemented");
+    auto RValueVector<Derived>::sum() const -> CoDiff<ScalarType> {
         assert(getLength() != 0 && "[Error]: Sum of a empty vector is not well defined");
-        if constexpr (Internal::EnableSIMD<Derived>::value) {
+        if constexpr (Internal::EnableSIMD<Derived>::value && !isReverseDiff) {
             const auto& v = Base::getDerived();
             PacketType buffer(0);
             if constexpr (SizeAtCompile != Dynamic) {
@@ -353,13 +352,25 @@ namespace Physica::Core {
                     buffer += v.template packetPartial<PacketType>(i, count);
                 }
             }
-            return buffer.sum();
+            co_return buffer.sum();
+        }
+        else if constexpr (isReverseDiff) {
+            size_t i = 0;
+            ValueType v = 0;
+            auto elems = co_for([this, i]() { return i < getLength(); }, [&]() { ++i; }, [&, this, i]() {
+                auto elem = calc(i);
+                v += elem.value();
+                return elem;
+            });
+            auto result = co_yield std::move(v);
+            for (auto& elem : elems)
+                elem.reverse(result.grad());
         }
         else {
             auto result = ScalarType(0);
             for(size_t i = 0; i < getLength(); ++i)
                 result += calc(i);
-            return result;
+            co_return std::move(result);
         }
     }
 
@@ -370,7 +381,7 @@ namespace Physica::Core {
         if constexpr (isComplex)
             m = abs(toValueVector(v)).max();
         else
-            m = max().getValue();
+            m = max().value();
         return ln(exp(v - m).sum()) + m;
     }
 
@@ -447,6 +458,37 @@ namespace Physica::Core {
     template<class Derived>
     inline const auto RValueVector<Derived>::reverse() const noexcept {
         return ReverseVector<Derived>(Base::getDerived());
+    }
+
+    template<class Derived>
+    auto RValueVector<Derived>::reals() const noexcept {
+        return RealVector<Derived>(Base::getDerived());
+    }
+
+    template<class Derived>
+    auto RValueVector<Derived>::imags() const noexcept {
+        return ImagVector<Derived>(Base::getDerived());
+    }
+
+    template<class Derived>
+    auto RValueVector<Derived>::squaredNorms() const noexcept {
+        return SquaredNormVector<Derived>(Base::getDerived());
+    }
+
+    template<class Derived>
+    auto RValueVector<Derived>::norms() const noexcept {
+        return NormVector<Derived>(Base::getDerived());
+    }
+
+    template<class Derived>
+    auto RValueVector<Derived>::values() const noexcept {
+        return ValueVector<Derived>(Base::getDerived());
+    }
+
+    template<class Derived>
+    template<int GradOrder>
+    auto RValueVector<Derived>::grads() const noexcept {
+        return GradVector<Derived, GradOrder>(Base::getDerived());
     }
 
     template<Vector T1, Vector T2>

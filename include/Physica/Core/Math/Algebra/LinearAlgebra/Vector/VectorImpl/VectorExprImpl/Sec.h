@@ -28,7 +28,7 @@ namespace Physica::Core {
     public:
         using Base::Base;
         /* Operations */
-        [[nodiscard]] ScalarType calc(size_t index) const { return sec(Base::getExpr().calc(index)); }
+        [[nodiscard]] CoDiff<ScalarType> calc(size_t index) const { return sec(Base::getExpr().calc(index)); }
 
         template<class AnyPacket>
         [[nodiscard]] AnyPacket packet(size_t index) const { return sec(Base::getExpr().template packet<AnyPacket>(index)); }

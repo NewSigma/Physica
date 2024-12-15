@@ -23,11 +23,14 @@
 
 namespace Physica::Core {
     template<Scalar T, DiffMode Mode, int Order, size_t Length, class Allocator>
-    class DenseVector<Diff<T, Mode, Order>, Length, Allocator> : public ContinuousVector<DenseVector<Diff<T, Mode, Order>, Length, Allocator>> {
+    class DenseVector<Diff<T, Mode, Order>, Length, Allocator>
+            : public ContinuousVector<DenseVector<Diff<T, Mode, Order>, Length, Allocator>>
+            , public std::conditional<Mode == DiffMode::Forward, CRCoro<DenseVector<Diff<T, Mode, Order>, Length, Allocator>>, PlainStruct<void>>::type {
         using This = DenseVector<Diff<T, Mode, Order>, Length, Allocator>;
         using Base = ContinuousVector<This>;
     public:
         using typename Base::ScalarType;
+        using Base::isForwardDiff;
     protected:
         using typename Base::PtrTy;
         using typename Base::ConstPtrTy;
@@ -39,15 +42,16 @@ namespace Physica::Core {
         using ValueVector = DenseVector<T, Length>;
         using GradType = ScalarType::GradType;
         using GradVector = std::conditional<Order == 1, ValueVector, DenseVector<GradType, Length>>::type;
+        using initializer_list = std::initializer_list<typename std::conditional<isForwardDiff, Diff<T, Mode, Order>, T>::type>;
 
-        ValueVector values;
-        GradVector grads;
+        ValueVector v;
+        GradVector g;
     public:
         DenseVector() = default;
         explicit DenseVector(size_t length);
         DenseVector(size_t length, T init);
-        DenseVector(std::initializer_list<T> list);
-        DenseVector(ValueVector values_, GradVector grads_) noexcept;
+        DenseVector(initializer_list list);
+        DenseVector(ValueVector v_, GradVector g_) noexcept;
         template<Vector V>
         DenseVector(const V& v) requires(!ReverseDiff<V>);
         DenseVector(const This&) = default;
@@ -82,7 +86,7 @@ namespace Physica::Core {
         void swap(This& __restrict obj) noexcept;
         /* Getters */
         using Base::data;
-        [[nodiscard]] size_t getLength() const noexcept { return values.getLength(); }
+        [[nodiscard]] size_t getLength() const noexcept { return v.getLength(); }
         [[nodiscard]] __host__ __device__ inline PtrTy data_ptr(size_t index) noexcept;
         [[nodiscard]] __host__ __device__ inline ConstPtrTy data_ptr(size_t index) const noexcept;
         /* Static members */

@@ -25,28 +25,32 @@ namespace Physica::Core {
      * Construct a givens transformation that eleminate the element in \param vector at index \param j
      */
     template<Vector T>
-    auto givens(const LValueVector<T>& vector, size_t i, size_t j) {
+    CoDiff<Vector2D<typename T::ScalarType>> givens(const T& vector, size_t i, size_t j) {
         using ScalarType = T::ScalarType;
         using ResultType = Vector2D<ScalarType>;
-        if constexpr (ScalarType::isComplex) {
-            using RealType = ScalarType::RealType;
-            using RealResultType = Vector2D<RealType>;
 
-            ScalarType x_i = vector[i];
-            ScalarType x_j = vector[j];
+        ScalarType x_i = vector.calc(i);
+        ScalarType x_j = vector.calc(j);
+        if constexpr (ScalarType::isComplex) {
+            using RealResultType = Vector2D<typename ScalarType::RealType>;
             const auto alpha = givens(RealResultType{x_i.real(), x_i.imag()}, 0, 1);
             const auto beta = givens(RealResultType{x_j.real(), x_j.imag()}, 0, 1);
             const auto theta = givens(RealResultType{x_i.norm(), x_j.norm()}, 0, 1);
             const auto factor = ScalarType(alpha[0] * beta[0] + alpha[1] * beta[1], alpha[1] * beta[0] - alpha[0] * beta[1]);
-            return ResultType{theta[0], theta[1] * factor};
+            const auto theta1 = theta[1] * factor;
+            if constexpr (ReverseDiff<ScalarType>)
+                auto _ = co_yield ResultType{theta[0], theta1};
+            else
+                co_return ResultType{theta[0], theta1};
         }
         else {
-            ScalarType x_i = vector[i];
-            ScalarType x_j = vector[j];
             ScalarType rep_norm = reciprocal(sqrt(square(x_i) + square(x_j)));
             ScalarType cos = x_i * rep_norm;
             ScalarType sin = x_j * rep_norm;
-            return ResultType{cos, sin};
+            if constexpr (ReverseDiff<ScalarType>)
+                auto _ = co_yield ResultType{cos, sin};
+            else
+                co_return ResultType{cos, sin};
         }
     }
     /**

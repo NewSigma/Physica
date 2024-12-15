@@ -35,7 +35,6 @@ namespace Physica::Core {
         using Base::IsTrainMode;
         using LossType = Loss<ScalarType>::LossType;
     public:
-        SimpleNet(const SimpleNet&) = delete;
         ~SimpleNet() = default;
         /* Operations */
         template<class Dataset, class Optimizer, class RandomType, class Executor>
@@ -48,18 +47,17 @@ namespace Physica::Core {
         [[nodiscard]] size_t classify(const InputType& input) const;
     protected:
         SimpleNet() = default;
+        SimpleNet(const SimpleNet&) = default;
         SimpleNet(SimpleNet&&) noexcept = default;
         /* Operators */
-        SimpleNet& operator=(SimpleNet obj) noexcept { swap(obj); return *this; }
-        /* Operations */
-        inline void swap(SimpleNet& __restrict obj) noexcept;
+        This& operator=(const This&) = default;
+        This& operator=(This&&) noexcept = default;
     };
 
     template<class Derived>
     template<class Dataset, class Optimizer, class RandomType, class Executor>
     void SimpleNet<Derived>::train_step(const Dataset& dataset, Optimizer& opt) {
         static_assert(IsTrainMode, "[Error]: train_step must be called under training mode");
-        using TracerType = ScalarType::TracerType;
         if constexpr (std::is_same<Executor, SequentialExecutor>::value) {
             auto dist = std::uniform_int_distribution<size_t>(0, dataset.getSize() - 1);
             auto& gen = RandomType::getInstance().getGen();
@@ -71,22 +69,17 @@ namespace Physica::Core {
         else {
             const size_t numThread = Executor::getNumThread();
             const size_t batchSizePerThread = (opt.getBatchSize() + numThread - 1) / numThread;
-            std::mutex mutex{};
-            Executor::parallel_for([this, batchSizePerThread, &mutex, &dataset](unsigned int) {
-                Derived tempNet = *this;
+            Executor::parallel_for([this, batchSizePerThread, &dataset](unsigned int) {
+                Derived tempNet = Base::getDerived();
                 auto dist = std::uniform_int_distribution<size_t>(0, dataset.getSize() - 1);
                 auto& gen = RandomType::getInstance().getGen();
                 for (size_t _ = 0; _ < batchSizePerThread; ++_) {
                     const size_t index = dist(gen);
-                    tempNet.template loss<Dataset>(dataset, index).reverse_to(guard);
+                    tempNet.template loss<Dataset>(dataset, index).reverse();
                 }
-                auto& tracer = TracerType::getInstance();
-                std::lock_guard locker(mutex);
-                tracer.reverse();
             }, numThread, numThread).wait();
         }
         opt.step();
-        TracerType::getInstance().zero_grad_to(diffGuard);
     }
 
     template<class Derived>
@@ -109,15 +102,9 @@ namespace Physica::Core {
         for (size_t i = 1; i < output.getLength(); ++i) {
             if (output[i] > max) {
                 index = i;
-                max = output[i].getValue();
+                max = output[i].value();
             }
         }
         return index;
-    }
-
-    template<class Derived>
-    inline void SimpleNet<Derived>::swap(SimpleNet& __restrict obj) noexcept {
-        assert(this != &obj && "[Error]: Self swap is likely a bug");
-        diffGuard.swap(obj.diffGuard);
     }
 }

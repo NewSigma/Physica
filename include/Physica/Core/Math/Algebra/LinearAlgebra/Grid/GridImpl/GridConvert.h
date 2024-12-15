@@ -79,7 +79,7 @@ namespace Physica::Core {
     public:
         explicit ValueGrid(const T& g_) : g(g_) {}
         /* Getters */
-        [[nodiscard]] ScalarType calc(Index3D index) const { return g.calc(index).getValue(); }
+        [[nodiscard]] ScalarType calc(Index3D index) const { return g.calc(index).value(); }
         [[nodiscard]] size_t getDimX() const noexcept { return g.getDimX(); }
         [[nodiscard]] size_t getDimY() const noexcept { return g.getDimY(); }
         [[nodiscard]] size_t getDimZ() const noexcept { return g.getDimZ(); }
@@ -95,7 +95,7 @@ namespace Physica::Core {
     public:
         explicit GradGrid(const T& g_) : g(g_) {}
         /* Getters */
-        [[nodiscard]] ScalarType calc(Index3D index) const { return g.calc(index).getGrad(); }
+        [[nodiscard]] ScalarType calc(Index3D index) const { return g.calc(index).grad(); }
         [[nodiscard]] size_t getDimX() const noexcept { return g.getDimX(); }
         [[nodiscard]] size_t getDimY() const noexcept { return g.getDimY(); }
         [[nodiscard]] size_t getDimZ() const noexcept { return g.getDimZ(); }

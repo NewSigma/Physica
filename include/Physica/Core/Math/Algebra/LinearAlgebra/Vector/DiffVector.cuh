@@ -73,10 +73,10 @@ namespace Physica::Core {
         [[nodiscard]] __host__ __device__ inline T* grad_ptr(size_t index) const noexcept;
         [[nodiscard]] __device__ inline DiffRecord& getRecord(size_t index);
         [[nodiscard]] __device__ OperandArray& getOperands() noexcept { return getTraceSegment().getOperands(); }
-        [[nodiscard]] __device__ inline T& getValue(size_t index);
-        [[nodiscard]] __device__ inline const T& getValue(size_t index) const;
-        [[nodiscard]] __device__ inline T& getGrad(size_t index);
-        [[nodiscard]] __device__ inline const T& getGrad(size_t index) const;
+        [[nodiscard]] __device__ inline T& value(size_t index);
+        [[nodiscard]] __device__ inline const T& value(size_t index) const;
+        [[nodiscard]] __device__ inline T& grad(size_t index);
+        [[nodiscard]] __device__ inline const T& grad(size_t index) const;
         [[nodiscard]] const ValueVector& getValues() const noexcept { return getTraceSegment().getValues(); }
         [[nodiscard]] const GradVector& getGrads() const noexcept { return getTraceSegment().getGrads(); }
         [[nodiscard]] ScalarType max() const;

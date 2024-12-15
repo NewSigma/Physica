@@ -46,7 +46,7 @@ namespace Physica::Core {
         using MDCellType = MDCell<ScalarType, Dim>;
         using LatticeMatrix = MDCellType::LatticeMatrix;
         using PositionMatrix = MDCellType::PositionMatrix;
-        using CellListType = CellList<ScalarType>;
+        using CellListType = CellList<ValueType>;
         using Index3D = GridBase::Index3D;
         using Vec3D = Vector3D<ScalarType>;
         using ForceConstMatrix = EmptyForceModel<ScalarType, Dim>::ForceConstMatrix;
@@ -137,7 +137,7 @@ namespace Physica::Core {
             [this, numParticle, &pos, &result](Vec3D delta) {
                 ScalarType temp = 0;
                 for (size_t i = 0; i < numParticle; ++i) {
-                    Vec3D from = pos.row(i) + delta;
+                    CoDiff<Vec3D> from = pos.row(i) + delta;
                     for (size_t j = i; j < numParticle; ++j) {
                         const ScalarType r2 = (from - pos.row(j)).squaredNorm();
                         const bool isNotSelf = ValueType(std::numeric_limits<ScalarType>::min()) < r2;
@@ -259,7 +259,7 @@ namespace Physica::Core {
         LatticeMatrix result(Dim, Dim, 0);
         auto kernel = [this, &result](size_t i, size_t j, Vec3D r, ScalarType norm1, ScalarType norm2) {
             const ScalarType f_norm = force_functor(i, j, norm1, norm2);
-            const Vec3D f = r * (f_norm / norm1);
+            const CoDiff<Vec3D> f = r * (f_norm / norm1);
             result += f * r.transpose();
         };
         forPairInCutoff(lattice, pos, kernel);
@@ -325,7 +325,7 @@ namespace Physica::Core {
                         for (size_t j = i + 1; j < length; ++j) {
                             const size_t atom2 = arr1[j];
                             const auto to = pos.row(atom2);
-                            Vec3D r = to - from;
+                            CoDiff<Vec3D> r = to - from;
                             const ScalarType norm2 = r.squaredNorm();
                             if (norm2 < squared_cutoff) {
                                 const ScalarType norm1 = sqrt(norm2);
@@ -342,7 +342,7 @@ namespace Physica::Core {
                     std::sort(arr2.begin(), arr2.end());
 
                     for (const size_t atom1 : arr1) {
-                        const Vec3D from = pos.row(atom1) - translate;
+                        const CoDiff<Vec3D> from = pos.row(atom1) - translate;
                         Vec3D r, f(Dim, 0);
                         for (const size_t atom2 : arr2) {
                             const auto to = pos.row(atom2);
@@ -370,7 +370,7 @@ namespace Physica::Core {
         assert(atom1 != atom2 && "[Error]: The function is not responsible for this case");
         const size_t dir1 = dof1 % 3U;
         const size_t dir2 = dof2 % 3U;
-        const Vec3D delta = cell.getPos().row(atom2) - cell.getPos().row(atom1);
+        const CoDiff<Vec3D> delta = cell.getPos().row(atom2) - cell.getPos().row(atom1);
         const ScalarType squaredNorm = delta.squaredNorm();
         const ScalarType norm = sqrt(squaredNorm);
         const ScalarType factor = delta[dir1] * delta[dir2] / squaredNorm;

@@ -157,7 +157,7 @@ namespace Physica::Core {
         const RealType normalizer = reciprocal(norm1); // pow() has the risk of overflow
         for (int order = 2; order <= MaxNormOrder + 1; ++order) {
             const RealType pNorm1 = pow(mexp.getMatrix() * normalizer - (traceMu * normalizer) * unit, order).template norm1_power<Executor>(MaxNormIteration);
-            powerNorms[order - 2] = pow(pNorm1.getValue(), reciprocal(RealValue(order))) * norm1.getValue();
+            powerNorms[order - 2] = pow(pNorm1.value(), reciprocal(RealValue(order))) * norm1.value();
         }
 
         for (int order = 2; order <= MaxNormOrder; ++order) {

@@ -21,10 +21,18 @@
 #include "Math.h"
 
 namespace Physica::Core {
-    template<Scalar T, int Order>
-    __host__ __device__ inline auto abs(const Diff<T, DiffMode::Forward, Order>& x) {
-        using ResultType = Diff<T, DiffMode::Forward, Order>;
-        return ResultType(abs(x.getValue()), x.getValue().isPositive() ? x.getGrad() : -x.getGrad());
+    template<Scalar T>
+    __host__ __device__ inline CoDiff<T> abs(T&& x) requires(Diffable<T>) {
+        using ScalarType = std::remove_reference_t<T>::ScalarType;
+        if constexpr (ForwardDiff<T>)
+            co_return ScalarType(abs(x.value()), x.value().isPositive() ? x.grad() : -x.grad());
+        else {
+            LazyReverse<T&&> x_ = std::forward<T>(x);
+            auto result = co_yield abs(x_.value());
+            auto& g = result.grad();
+            if (!g.isZero())
+                x_.reverse(x_.isPositive() ? g : -g);
+        }
     }
 
     template<Scalar T, int Order>
@@ -32,10 +40,20 @@ namespace Physica::Core {
         return abs(Diff<T, DiffMode::Forward, Order>(x));
     }
 
-    template<Scalar T, int Order>
-    inline auto relu(const Diff<T, DiffMode::Forward, Order>& x) {
-        using ResultType = Diff<T, DiffMode::Forward, Order>;
-        return ResultType(relu(x.getValue()), x.getValue().isPositive() ? x.getGrad() : T(0));
+    template<Scalar T>
+    inline CoDiff<T> relu(T&& x) requires(Diffable<T>) {
+        using ScalarType = std::remove_reference_t<T>::ScalarType;
+        using ValueType = ScalarType::ValueType;
+        if constexpr (ForwardDiff<T>) {
+            co_return ScalarType(relu(x.value()), x.value().isPositive() ? x.grad() : T(0));
+        }
+        else {
+            LazyReverse<T&&> x_ = std::forward<T>(x);
+            auto result = co_yield relu(x_.value());
+            auto& g = result.grad();
+            if (!g.isZero())
+                x_.reverse(x_.isPositive() ? g : ValueType(0));
+        }
     }
 
     template<Scalar T>
@@ -44,14 +62,14 @@ namespace Physica::Core {
         using ValueType = ScalarType::ValueType;
         if constexpr (ForwardDiff<T>) {
             using GradType = ScalarType::GradType;
-            co_return ScalarType(square(x.getValue()), GradType(ValueType(2) * x * x.getGrad()));
+            co_return ScalarType(square(x.value()), GradType(ValueType(2) * x * x.grad()));
         }
         else {
             LazyReverse<T&&> x_ = std::forward<T>(x);
-            auto result = co_yield square(x_.getValue());
-            auto& g = result.getGrad();
+            auto result = co_yield square(x_.value());
+            auto& g = result.grad();
             if (!g.isZero())
-                x_.reverse(ValueType(2) * x_.getValue() * g);
+                x_.reverse(ValueType(2) * x_.value() * g);
         }
     }
 
@@ -61,14 +79,14 @@ namespace Physica::Core {
         if constexpr (ForwardDiff<T>) {
             using GradType = ScalarType::GradType;
             const GradType v = reciprocal(GradType(x));
-            co_return ScalarType(v.getValue(), -x.getGrad() * square(v));
+            co_return ScalarType(v.value(), -x.grad() * square(v));
         }
         else {
             LazyReverse<T&&> x_ = std::forward<T>(x);
-            auto result = co_yield reciprocal(x_.getValue());
-            auto& g = result.getGrad();
+            auto result = co_yield reciprocal(x_.value());
+            auto& g = result.grad();
             if (!g.isZero())
-                x_.reverse(-square(result.getValue()) * g);
+                x_.reverse(-square(result.value()) * g);
         }
     }
 
@@ -79,14 +97,14 @@ namespace Physica::Core {
         if constexpr (ForwardDiff<T>) {
             using GradType = ScalarType::GradType;
             const GradType v = sqrt(GradType(x));
-            co_return ScalarType(v.getValue(), ValueType(0.5) * x.getGrad() / v);
+            co_return ScalarType(v.value(), ValueType(0.5) * x.grad() / v);
         }
         else {
             LazyReverse<T&&> x_ = std::forward<T>(x);
-            auto result = co_yield sqrt(x_.getValue());
-            auto& g = result.getGrad();
+            auto result = co_yield sqrt(x_.value());
+            auto& g = result.grad();
             if (!g.isZero())
-                x_.reverse(reciprocal(result.getValue()) * ValueType(0.5));
+                x_.reverse(reciprocal(result.value()) * ValueType(0.5));
         }
     }
 
@@ -97,31 +115,40 @@ namespace Physica::Core {
         if constexpr (ForwardDiff<T>) {
             using GradType = ScalarType::GradType;
             const GradType v = cbrt(GradType(x));
-            co_return ScalarType(v.getValue(), ValueType(1.0 / 3) * v * x.getGrad() / GradType(x));
+            co_return ScalarType(v.value(), ValueType(1.0 / 3) * v * x.grad() / GradType(x));
         }
         else {
             LazyReverse<T&&> x_ = std::forward<T>(x);
-            auto result = co_yield cbrt(x_.getValue());
-            auto& g = result.getGrad();
+            auto result = co_yield cbrt(x_.value());
+            auto& g = result.grad();
             if (!g.isZero()) {
-                const auto x2_3 = result.getValue() / x_.getValue();
+                const auto x2_3 = result.value() / x_.value();
                 x_.reverse((ValueType(1.0 / 3) * g) * x2_3);
             }
         }
     }
 
-    template<Scalar T, int Order>
-    auto ln(const Diff<T, DiffMode::Forward, Order>& x) {
-        using ResultType = Diff<T, DiffMode::Forward, Order>;
-        using GradType = ResultType::GradType;
-        return ResultType(ln(x.getValue()), x.getGrad() / GradType(x));
+    template<Scalar T>
+    CoDiff<T> ln(T&& x) requires(Diffable<T>) {
+        using ScalarType = std::remove_reference_t<T>::ScalarType;
+        if constexpr (ForwardDiff<T>) {
+            using GradType = ScalarType::GradType;
+            co_return ResultType(ln(x.value()), x.grad() / GradType(x));
+        }
+        else {
+            LazyReverse<T&&> x_ = std::forward<T>(x);
+            auto result = co_yield ln(x_.value());
+            auto& g = result.grad();
+            if (!g.isZero())
+                x_.reverse(result.value() * g / x_.value());
+        }
     }
 
     template<Scalar T, int Order>
     auto ln1p(const Diff<T, DiffMode::Forward, Order>& x) {
         using ResultType = Diff<T, DiffMode::Forward, Order>;
         using GradType = ResultType::GradType;
-        return ResultType(ln1p(x.getValue()), x.getGrad() / (T(1) + GradType(x)));
+        return ResultType(ln1p(x.value()), x.grad() / (T(1) + GradType(x)));
     }
 
     template<Scalar T>
@@ -130,14 +157,14 @@ namespace Physica::Core {
         if constexpr (ForwardDiff<T>) {
             using GradType = ScalarType::GradType;
             const GradType v = exp(GradType(x));
-            co_return ScalarType(v.getValue(), v * x.getGrad());
+            co_return ScalarType(v.value(), v * x.grad());
         }
         else {
             LazyReverse<T&&> x_ = std::forward<T>(x);
-            auto result = co_yield exp(x_.getValue());
-            auto& g = result.getGrad();
+            auto result = co_yield exp(x_.value());
+            auto& g = result.grad();
             if (!g.isZero())
-                x_.reverse(result.getValue() * g);
+                x_.reverse(result.value() * g);
         }
     }
 
@@ -147,7 +174,7 @@ namespace Physica::Core {
         using GradType = ResultType::GradType;
         constexpr int GradOrder = GradType::Order;
         const auto y = pow(GradType(x), a);
-        return ResultType(y.getValue(), x.getGrad() * y / x.template mask<GradOrder>() * a);
+        return ResultType(y.value(), x.grad() * y / x.template mask<GradOrder>() * a);
     }
 
     template<Scalar T>
@@ -157,15 +184,15 @@ namespace Physica::Core {
             using GradType = ScalarType::GradType;
             GradType sin_value, cos_value;
             sincos(GradType(x), sin_value, cos_value);
-            co_return ScalarType(cos_value.getValue(), -sin_value * x.getGrad());
+            co_return ScalarType(cos_value.value(), -sin_value * x.grad());
         }
         else {
             using ValueType = ScalarType::ValueType;
             LazyReverse<T&&> x_ = std::forward<T>(x);
             ValueType c, s;
-            sincos(x_.getValue(), s, c);
+            sincos(x_.value(), s, c);
             auto result = co_yield c;
-            auto& g = result.getGrad();
+            auto& g = result.grad();
             if (!g.isZero())
                 x_.reverse(-s * g);
         }
@@ -178,35 +205,47 @@ namespace Physica::Core {
             using GradType = ScalarType::GradType;
             GradType sin_value, cos_value;
             sincos(GradType(x), sin_value, cos_value);
-            co_return ScalarType(sin_value.getValue(), cos_value * x.getGrad());
+            co_return ScalarType(sin_value.value(), cos_value * x.grad());
         }
         else {
             using ValueType = ScalarType::ValueType;
             LazyReverse<T&&> x_ = std::forward<T>(x);
             ValueType c, s;
-            sincos(x_.getValue(), s, c);
+            sincos(x_.value(), s, c);
             auto result = co_yield s;
-            auto& g = result.getGrad();
+            auto& g = result.grad();
             if (!g.isZero())
                 x_.reverse(c * g);
         }
     }
 
-    template<Scalar T, int Order>
-    void sincos(const Diff<T, DiffMode::Forward, Order>& x, Diff<T, DiffMode::Forward, Order>& sin_result, Diff<T, DiffMode::Forward, Order>& cos_result) {
-        using ResultType = Diff<T, DiffMode::Forward, Order>;
-        using GradType = ResultType::GradType;
-        GradType sin_value, cos_value;
-        sincos(GradType(x), sin_value, cos_value);
-        sin_result = ResultType(sin_value, cos_value * x.getGrad());
-        cos_result = ResultType(cos_value, -sin_value * x.getGrad());
+    template<Scalar T, Scalar U>
+    CoDiff<void> sincos(const T& x, U&& sin_result, U&& cos_result) {
+        if constexpr (ForwardDiff<T>) {
+            using GradType = T::GradType;
+            GradType sin_value, cos_value;
+            sincos(GradType(x), sin_value, cos_value);
+            sin_result = T(sin_value, cos_value * x.grad());
+            cos_result = T(cos_value, -sin_value * x.grad());
+            co_return;
+        }
+        else {
+            using ValueType = T::ValueType;
+            ValueType s, c;
+            sincos(x.value(), s, c);
+            LazyReverse<U&&> sin_ = std::forward<U>(sin_result);
+            LazyReverse<U&&> cos_ = std::forward<U>(cos_result);
+            sin_ = s;
+            cos_ = c;
+            co_await std::suspend_always{};
+        }
     }
 
     template<Scalar T, int Order>
     auto tan(const Diff<T, DiffMode::Forward, Order>& x) {
         using ResultType = Diff<T, DiffMode::Forward, Order>;
         using GradType = ResultType::GradType;
-        return ResultType(tan(x.getValue()), x.getGrad() * square(sec(GradType(x))));
+        return ResultType(tan(x.value()), x.grad() * square(sec(GradType(x))));
     }
 
     template<Scalar T, int Order>
@@ -215,7 +254,7 @@ namespace Physica::Core {
         using GradType = ResultType::GradType;
         const auto x1 = GradType(x);
         const auto v = sec(x1);
-        return ResultType(v.getValue(), x.getGrad() * v * tan(x1));
+        return ResultType(v.value(), x.grad() * v * tan(x1));
     }
 
     template<Scalar T, int Order>
@@ -224,35 +263,35 @@ namespace Physica::Core {
         using GradType = ResultType::GradType;
         const auto x1 = GradType(x);
         const auto v = csc(x1);
-        return ResultType(v.getValue(), -x.getGrad() * v * cot(x1));
+        return ResultType(v.value(), -x.grad() * v * cot(x1));
     }
 
     template<Scalar T, int Order>
     auto cot(const Diff<T, DiffMode::Forward, Order>& x) {
         using ResultType = Diff<T, DiffMode::Forward, Order>;
         using GradType = ResultType::GradType;
-        return ResultType(cot(x.getValue()), -x.getGrad() * square(csc(GradType(x))));
+        return ResultType(cot(x.value()), -x.grad() * square(csc(GradType(x))));
     }
 
     template<Scalar T, int Order>
     auto arccos(const Diff<T, DiffMode::Forward, Order>& x) {
         using ResultType = Diff<T, DiffMode::Forward, Order>;
         using GradType = ResultType::GradType;
-        return ResultType(arccos(x.getValue()), -x.getGrad() / sqrt(T(1) - square(GradType(x))));
+        return ResultType(arccos(x.value()), -x.grad() / sqrt(T(1) - square(GradType(x))));
     }
 
     template<Scalar T, int Order>
     auto cosh(const Diff<T, DiffMode::Forward, Order>& x) {
         using ResultType = Diff<T, DiffMode::Forward, Order>;
         using GradType = ResultType::GradType;
-        return ResultType(cosh(x.getValue()), x.getGrad() * sinh(GradType(x)));
+        return ResultType(cosh(x.value()), x.grad() * sinh(GradType(x)));
     }
 
     template<Scalar T, int Order>
     auto sinh(const Diff<T, DiffMode::Forward, Order>& x) {
         using ResultType = Diff<T, DiffMode::Forward, Order>;
         using GradType = ResultType::GradType;
-        return ResultType(sinh(x.getValue()), x.getGrad() * cosh(GradType(x)));
+        return ResultType(sinh(x.value()), x.grad() * cosh(GradType(x)));
     }
 
     template<Scalar T, int Order>
@@ -260,13 +299,13 @@ namespace Physica::Core {
         using ResultType = Diff<T, DiffMode::Forward, Order>;
         using GradType = ResultType::GradType;
         const GradType v = tanh(GradType(x));
-        return ResultType(v.getValue(), (T(1) - square(v)) * x.getGrad());
+        return ResultType(v.value(), (T(1) - square(v)) * x.grad());
     }
 
     template<Scalar T, int Order>
     auto lncosh(const Diff<T, DiffMode::Forward, Order>& x) noexcept {
         using ResultType = Diff<T, DiffMode::Forward, Order>;
         using GradType = ResultType::GradType;
-        return ResultType(lncosh(x.getValue()), x.getGrad() * tanh(GradType(x)));
+        return ResultType(lncosh(x.value()), x.grad() * tanh(GradType(x)));
     }
 }

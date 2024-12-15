@@ -28,7 +28,6 @@ namespace Physica::Core {
         static_assert(!is_device_obj<T>::value, "[Error]: Not implemented");
         using Base = SGD<T>;
         using typename Base::ValueType;
-        using TracerType = T::TracerType;
     private:
         using Base::from;
         using Base::to;
@@ -59,22 +58,13 @@ namespace Physica::Core {
     template<Scalar T>
     void MomentumSGD<T>::recordEnd() {
         Base::recordEnd();
-        lastGrad.resize(TracerType::distance(from, to), ValueType(0));
+        noImpl("lastGrad.resize(TracerType::distance(from, to), ValueType(0))");
     }
 
     template<Scalar T>
     void MomentumSGD<T>::step() {
-        using SegmentType = TracerType::SegmentType;
-        using DiffScalar = TracerType::DiffScalar;
-        auto& tracer = TracerType::getInstance();
-        size_t i = 0;
-        tracer.forSegmentInRange(from, to, [this, &i](SegmentType& segment) {
-            segment.forNodeInRange(from, to, [this, &i](DiffScalar s) {
-                lastGrad[i] = momentum * lastGrad[i] + s.template getGrad<>();
-                s.setValue(s.getValue() - Base::getMeanLearnRate() * lastGrad[i]);
-                i += 1;
-            });
-        });
+        noImpl("lastGrad[i] = momentum * lastGrad[i] + s.template grad<>()");
+        noImpl("s.setValue(s.value() - Base::getMeanLearnRate() * lastGrad[i])");
     }
 
     template<Scalar T>

@@ -105,7 +105,7 @@ namespace Physica::Core {
         [[nodiscard]] const Pack& toMachine() const noexcept { return pack; }
         [[nodiscard]] HalfType getLow() const noexcept { return pack.get_low(); }
         [[nodiscard]] HalfType getHigh() const noexcept { return pack.get_high(); }
-        [[nodiscard]] This getValue() const noexcept { return *this; }
+        [[nodiscard]] This value() const noexcept { return *this; }
         [[nodiscard]] auto isPositive() const noexcept { return operator>(This(0)); }
         [[nodiscard]] auto isNegative() const noexcept { return operator<(This(0)); }
         /* Static members */
@@ -201,8 +201,8 @@ namespace std {
         static_assert(!T::isComplex, "[Error]: Compare between complex number is ill defined");
         if constexpr (T::isForwardDiff) {
             using GradPacket = PacketType::GradType;
-            const auto values = max(a.getValue(), b.getValue());
-            return PacketType(values, GradPacket::select(values == a.getValue(), a.getGrad(), b.getGrad()));
+            const auto values = max(a.value(), b.value());
+            return PacketType(values, GradPacket::select(values == a.value(), a.grad(), b.grad()));
         }
         else
             return Physica::max(a.toMachine(), b.toMachine());
@@ -213,8 +213,8 @@ namespace std {
         static_assert(!T::isComplex, "[Error]: Compare between complex number is ill defined");
         if constexpr (T::isForwardDiff) {
             using GradPacket = PacketType::GradType;
-            const auto values = min(a.getValue(), b.getValue());
-            return PacketType(values, GradPacket::select(values == a.getValue(), a.getGrad(), b.getGrad()));
+            const auto values = min(a.value(), b.value());
+            return PacketType(values, GradPacket::select(values == a.value(), a.grad(), b.grad()));
         }
         else
             return Physica::min(a.toMachine(), b.toMachine());

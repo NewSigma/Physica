@@ -39,7 +39,7 @@ namespace Physica::Core {
 
     template<Scalar T>
     template<Scalar U, DiffMode Mode, int Order>
-    Complex<T>::Complex(const Diff<U, Mode, Order>& d) : Complex(d.getValue()) {}
+    Complex<T>::Complex(const Diff<U, Mode, Order>& d) : Complex(d.value()) {}
 
     template<Scalar T>
     inline bool Complex<T>::operator==(const This& other) const {

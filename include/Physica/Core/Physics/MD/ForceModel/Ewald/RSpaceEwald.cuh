@@ -165,11 +165,11 @@ namespace Physica::Core {
         constexpr double factor1 = 2 * M_PI * (1 - std::numeric_limits<T>::epsilon()); //To avoid rSpaceCutoff larger than max value
         const T maxRSpaceCutoff = std::min(heightX_2Pi, std::min(heightY_2Pi, heightZ_2Pi)) * ValueType(factor1);
         const T minLimit = T(SumPrec) / maxRSpaceCutoff;
-        integralLimit = std::max(integralLimit_, minLimit).getValue();
+        integralLimit = std::max(integralLimit_, minLimit).value();
 
-        const ValueType rSpaceCutoff = ValueType(SumPrec) / integralLimit.getValue();
+        const ValueType rSpaceCutoff = ValueType(SumPrec) / integralLimit.value();
         rSpaceSumRange = PeriodicCell<T, Dim>::estimateRange(lattice.toHost(), rSpaceCutoff);
-        kSpaceSumRange = PeriodicCell<T, Dim>::estimateRange(hostRepLatt, ValueType(SumPrec * 2) * integralLimit.getValue());
+        kSpaceSumRange = PeriodicCell<T, Dim>::estimateRange(hostRepLatt, ValueType(SumPrec * 2) * integralLimit.value());
         makeTables();
         Base::setCutoff(rSpaceCutoff);
     }

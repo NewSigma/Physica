@@ -28,7 +28,7 @@ namespace Physica::Core {
     public:
         using Base::Base;
         /* Operations */
-        [[nodiscard]] ScalarType calc(size_t i) const { return pow(Base::getLHS().calc(i), Base::getRHS()); }
+        [[nodiscard]] CoDiff<ScalarType> calc(size_t i) const { return pow(Base::getLHS().calc(i), Base::getRHS()); }
     };
 
     template<Vector T, Scalar U>

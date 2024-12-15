@@ -41,8 +41,8 @@ namespace Physica {
             RSpaceEwald<ScalarType, false> ewald(cell.getLattice(), std::move(charges));
             ewald.potentialV(pos).reverse();
             /* Test press */ {
-                const ValueType press_diff = -volume.getGrad() / ValueType(cellSize * cellSize * cellSize);
-                const ValueType press = (ewald.virial(pos).trace() / ScalarType(3)).getValue();
+                const ValueType press_diff = -volume.grad() / ValueType(cellSize * cellSize * cellSize);
+                const ValueType press = (ewald.virial(pos).trace() / ScalarType(3)).value();
                 if (!scalarNear(press_diff, press, 1E-13))
                     exit(EXIT_FAILURE);
             }

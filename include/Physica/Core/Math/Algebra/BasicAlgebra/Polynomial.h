@@ -57,11 +57,11 @@ namespace Physica::Core {
         if (coeffs.empty())
             return ResultType(0);
         ResultType result = ResultType(coeffs[0]);
-        U temp = x.getDerived();
+        U temp = x;
         const auto length = coeffs.getLength();
         for (size_t i = 1; i < length; ++i) {
             result += temp * coeffs[i];
-            temp *= x.getDerived();
+            temp *= x;
         }
         result += temp;
         return result;

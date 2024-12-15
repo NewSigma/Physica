@@ -67,10 +67,10 @@ namespace Physica::Core {
     };
 
     template<Scalar T, DiffMode Mode, int Order>
-    ScalarPtr<Diff<T, Mode, Order>>::ScalarPtr(ScalarType& x) : ScalarPtr(&x.getValue(), &x.getGrad()) {}
+    ScalarPtr<Diff<T, Mode, Order>>::ScalarPtr(ScalarType& x) : ScalarPtr(&x.value(), &x.grad()) {}
 
     template<Scalar T, DiffMode Mode, int Order>
-    ScalarPtr<Diff<T, Mode, Order>>::ScalarPtr(ScalarRef<ScalarType>& x) : ScalarPtr(&x.getValue(), &x.getGrad()) {}
+    ScalarPtr<Diff<T, Mode, Order>>::ScalarPtr(ScalarRef<ScalarType>& x) : ScalarPtr(&x.value(), &x.grad()) {}
 
     template<Scalar T, DiffMode Mode, int Order>
     inline bool ScalarPtr<Diff<T, Mode, Order>>::operator==(const This& other) const noexcept {

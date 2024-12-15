@@ -31,7 +31,7 @@ void test1() {
     auto givens_vector = givens(v, 0, 1);
     DenseMatrix<T> v_mat = v;
     applyGivens(givens_vector, v_mat, 0, 1);
-    if (abs(v_mat(1, 0)) > RealType(1E-15))
+    if (abs(v_mat(1, 0).value()) > RealType(1E-15))
         exit(EXIT_FAILURE);
 }
 

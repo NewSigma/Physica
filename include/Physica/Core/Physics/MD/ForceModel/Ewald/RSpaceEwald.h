@@ -55,7 +55,7 @@ namespace Physica::Core {
         T inv_volume;
         T integralLimit;
         T erfcStep;
-        T repErfcStep;
+        ValueType repErfcStep;
         T repDoubleSquareStep;
         SearchRangeType rSpaceSumRange;
         SearchRangeType kSpaceSumRange;
@@ -236,11 +236,11 @@ namespace Physica::Core {
         constexpr double factor1 = 2 * M_PI * (1 - std::numeric_limits<T>::epsilon()); //To avoid rSpaceCutoff larger than max value
         const T maxRSpaceCutoff = std::min(heightX_2Pi, std::min(heightY_2Pi, heightZ_2Pi)) * ValueType(factor1);
         const T minLimit = T(SumPrec) / maxRSpaceCutoff;
-        integralLimit = std::max(integralLimit_, minLimit).getValue();
+        integralLimit = std::max(integralLimit_, minLimit).value();
 
-        const ValueType rSpaceCutoff = ValueType(SumPrec) / integralLimit.getValue();
+        const ValueType rSpaceCutoff = ValueType(SumPrec) / integralLimit.value();
         rSpaceSumRange = PeriodicCell<T, Dim>::estimateRange(lattice, rSpaceCutoff);
-        kSpaceSumRange = PeriodicCell<T, Dim>::estimateRange(repLatt, ValueType(SumPrec * 2) * integralLimit.getValue());
+        kSpaceSumRange = PeriodicCell<T, Dim>::estimateRange(repLatt, ValueType(SumPrec * 2) * integralLimit.value());
         makeTables();
         Base::setCutoff(rSpaceCutoff);
     }
@@ -260,7 +260,7 @@ namespace Physica::Core {
     template<Scalar T, bool IsSmallCell>
     inline T RSpaceEwald<T, IsSmallCell>::pot_functor(
             size_t i, size_t j, T r, [[maybe_unused]] T r2) const {
-        const T temp = r * repErfcStep + ValueType(0.5);
+        const ValueType temp = r.value() * repErfcStep + ValueType(0.5);
         const int index = double(temp);
         const T x1 = erfcStep * floor(temp);
         auto y = erfc_table.template segment<3>(index, index + 3);
@@ -271,7 +271,7 @@ namespace Physica::Core {
     template<Scalar T, bool IsSmallCell>
     inline T RSpaceEwald<T, IsSmallCell>::force_functor(
             size_t i, size_t j, T r, [[maybe_unused]] T r2) const {
-        const T temp = r * repErfcStep + ValueType(0.5);
+        const ValueType temp = r.value() * repErfcStep + ValueType(0.5);
         const int index = double(temp);
         const T x1 = erfcStep * floor(temp);
         auto y = erfc_table.template segment<3>(index, index + 3);
@@ -286,7 +286,7 @@ namespace Physica::Core {
         }
         erfc_table[0] = erfc_table[1] = erfc_table[2]; // Smooth out divergent erfc(0) / 0 
         erfcStep = ValueType(ErfcTableStep) / integralLimit;
-        repErfcStep = reciprocal(erfcStep);
+        repErfcStep = reciprocal(erfcStep.value());
         repDoubleSquareStep = reciprocal(square(erfcStep) * ValueType(2));
     }
     /**

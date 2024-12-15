@@ -50,7 +50,7 @@ namespace Physica::Core {
         [[nodiscard]] inline FullRealType scatterRealImag() const noexcept;
         /* Getters */
         [[nodiscard]] constexpr static int size() { return Size; }
-        [[nodiscard]] inline ValueType getValue() const;
+        [[nodiscard]] inline ValueType value() const;
         [[nodiscard]] inline FullRealType asReal() const;
     protected:
         constexpr SIMDBase() = default;
@@ -121,9 +121,9 @@ namespace Physica::Core {
     }
 
     template<class Derived>
-    inline SIMDBase<Derived>::ValueType SIMDBase<Derived>::getValue() const {
+    inline SIMDBase<Derived>::ValueType SIMDBase<Derived>::value() const {
         if constexpr (isDiffable)
-            return Base::getDerived().getValue();
+            return Base::getDerived().value();
         else
             return Base::getDerived();
     }

@@ -20,6 +20,8 @@
 
 #include <cassert>
 #include "Physica/Core/MultiPrecision/ExprType.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/Vector.h"
+#include "Physica/Core/Parallel/Executor/SequentialExecutor.h"
 
 namespace Physica::Core {
     /**
@@ -32,13 +34,15 @@ namespace Physica::Core {
     template<ExprType Type, Vector V>
     class UnitaryVectorExpr : public RValueVector<VectorExpr<Type, V>> {
         using This = UnitaryVectorExpr<Type, V>;
-        using Base = RValueVector<This>;
+        using Base = RValueVector<VectorExpr<Type, V>>;
+    public:
+        using Base::isReverseDiff;
     private:
         const V& expr;
     public:
         UnitaryVectorExpr(const V& expr_) : expr(expr_) {}
         UnitaryVectorExpr(const This&) = delete;
-        UnitaryVectorExpr(This&&) noexcept = delete;
+        UnitaryVectorExpr(This&&) noexcept requires(isReverseDiff) = default;
         ~UnitaryVectorExpr() = default;
         /* Operators */
         This& operator=(const This&) = delete;
@@ -51,9 +55,11 @@ namespace Physica::Core {
     template<ExprType Type, Vector LHS, class RHS>
     class BinaryVectorExpr : public RValueVector<VectorExpr<Type, LHS, RHS>> {
         using This = BinaryVectorExpr<Type, LHS, RHS>;
-        using Base = RValueVector<This>;
+        using Base = RValueVector<VectorExpr<Type, LHS, RHS>>;
         using LHS1 = LHS;
         using RHS1 = std::conditional<Scalar<RHS>, typename RHS::ScalarType, RHS>::type;
+    public:
+        using Base::isReverseDiff;
     private:
         const LHS1* lhs;
         const RHS1* rhs;
@@ -63,7 +69,7 @@ namespace Physica::Core {
                 assert(lhs->getLength() == rhs->getLength());
         }
         BinaryVectorExpr(const This&) = delete;
-        BinaryVectorExpr(This&&) noexcept = delete;
+        BinaryVectorExpr(This&&) noexcept requires(isReverseDiff) = default;
         ~BinaryVectorExpr() = default;
         /* Operators */
         This& operator=(const This&) = delete;
@@ -88,7 +94,7 @@ namespace Physica {
 
         using ScalarType1 = LHS::ScalarType;
         using RealType = ScalarType1::RealType;
-        using BinaryScalarType = Core::Internal::BinaryScalarOpRtnTy<ScalarType1, typename RHS::ScalarType>::Type;
+        using BinaryScalarType = Internal::BinaryScalarOpRtnTy<ScalarType1, typename RHS::ScalarType>::Type;
         static_assert(Size1 == Dynamic || Size2 == Dynamic || (Size1 == Size2), "[Error]: Vector dimentions do not match");
     public:
         using ScalarType = std::conditional<Type == ExprType::Abs, RealType, BinaryScalarType>::type;
@@ -100,7 +106,7 @@ namespace Physica {
     template<ExprType Type, Vector LHS, Scalar RHS>
     class Traits<VectorExpr<Type, LHS, RHS>> {
     public:
-        using ScalarType = Core::Internal::BinaryScalarOpRtnTy<typename LHS::ScalarType, RHS>::Type;
+        using ScalarType = Internal::BinaryScalarOpRtnTy<typename LHS::ScalarType, RHS>::Type;
         constexpr static size_t SizeAtCompile = Traits<LHS>::SizeAtCompile;
         constexpr static bool FastAssign = Traits<LHS>::FastAssign;
         constexpr static bool FastPacket = Traits<LHS>::FastPacket;

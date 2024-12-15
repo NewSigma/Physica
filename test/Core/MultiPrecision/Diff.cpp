@@ -33,13 +33,13 @@ void testFunc() {
         const T y = 4;
         const dfloat result = func(dfloat(x, 1), dfloat(y, 1));
         const T answer = (x + y - 3.0) * 2.0;
-        good &= scalarNear(result.getGrad(), answer, 1E-15);
+        good &= scalarNear(result.grad(), answer, 1E-15);
     }
     {
         using dfloat = Diff<T, DiffMode::Forward, 2>;
         dfloat x{3, 1};
         dfloat y = square(x);
-        good &= scalarNear(y.template getGrad<2>(), float64(2), 1E-15);
+        good &= scalarNear(y.template grad<2>(), float64(2), 1E-15);
     }
     if (!good)
         exit(EXIT_FAILURE);
@@ -50,12 +50,12 @@ void testMath() {
     bool good = true;
     dfloat x(3, 1);
     auto y = reciprocal(x);
-    good &= scalarNear(y.getGrad().getValue(), -square(reciprocal(x.getValue())), 1E-15);
-    good &= scalarNear(y.getGrad<2>(), pow(reciprocal(x.getValue()), T(3)) * T(2), 1E-15);
+    good &= scalarNear(y.grad().value(), -square(reciprocal(x.value())), 1E-15);
+    good &= scalarNear(y.grad<2>(), pow(reciprocal(x.value()), T(3)) * T(2), 1E-15);
 
     y = sqrt(x);
-    good &= scalarNear(y.getGrad().getValue(), reciprocal(T(2) * sqrt(x.getValue())), 1E-15);
-    good &= scalarNear(y.getGrad<2>(), -reciprocal(T(4) * x.getValue() * sqrt(x.getValue())), 1E-15);
+    good &= scalarNear(y.grad().value(), reciprocal(T(2) * sqrt(x.value())), 1E-15);
+    good &= scalarNear(y.grad<2>(), -reciprocal(T(4) * x.value() * sqrt(x.value())), 1E-15);
     if (!good)
         exit(EXIT_FAILURE);
 }
@@ -98,17 +98,17 @@ int testReverse() {
     auto x = dfloat(2);
     /* Simple */ {
         const auto y = sin(x).reverse();
-        if (y != sin(x.getValue()))
+        if (y != sin(x.value()))
             return 1;
-        if (x.getGrad() != cos(x.getValue()))
+        if (x.grad() != cos(x.value()))
             return 1;
     }
     /* Test r-value 1 */ {
         x.zero_grad();
         const auto y = sin(sin(x)).reverse();
-        if (y.getValue() != sin(sin(x.getValue())))
+        if (y.value() != sin(sin(x.value())))
             return 1;
-        if (x.getGrad() != cos(x.getValue()) * cos(sin(x.getValue())))
+        if (x.grad() != cos(x.value()) * cos(sin(x.value())))
             return 1;
     }
     /* Test r-value 2 */ {
@@ -117,7 +117,7 @@ int testReverse() {
         };
         x.zero_grad();
         func(x).reverse();
-        if (x.getGrad() != cos(x.getValue()) * cos(sin(x.getValue())))
+        if (x.grad() != cos(x.value()) * cos(sin(x.value())))
             return 1;
     }
     {
@@ -127,8 +127,8 @@ int testReverse() {
         dfloat x(3);
         dfloat y(4);
         func(x, y).reverse();
-        bool flag1 = scalarNear(x.getGrad(), (x.getValue() - 1.0) * 2.0, 1E-15);
-        bool flag2 = scalarNear(y.getGrad(), (y.getValue() - 2.0) * 2.0, 1E-15);
+        bool flag1 = scalarNear(x.grad(), (x.value() - 1.0) * 2.0, 1E-15);
+        bool flag2 = scalarNear(y.grad(), (y.value() - 2.0) * 2.0, 1E-15);
         if (!flag1 || !flag2)
             return 1;
     }

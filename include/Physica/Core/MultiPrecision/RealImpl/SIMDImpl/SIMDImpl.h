@@ -24,7 +24,7 @@
 namespace Physica::Core {
     template<Scalar T, size_t Size>
     template<Scalar U>
-    SIMD<T, Size>::SIMD(const U& x) : pack(x.getValue().toMachine()) {}
+    SIMD<T, Size>::SIMD(const U& x) : pack(x.value().toMachine()) {}
 
     template<Scalar T, size_t Size>
     SIMD<T, Size>::SIMD(T x, int count) {
@@ -170,8 +170,8 @@ namespace Physica::Core {
     template<Scalar T, size_t Size>
     inline void SIMD<T, Size>::insert(int index, const T& value) {
         if constexpr (isForward) {
-            pack.insert(index * 2, value.getValue().toMachine());
-            pack.insert(index * 2 + 1, value.getGrad().toMachine());
+            pack.insert(index * 2, value.value().toMachine());
+            pack.insert(index * 2 + 1, value.grad().toMachine());
         }
         else
             pack.insert(index, value.toMachine());

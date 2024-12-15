@@ -71,7 +71,7 @@ namespace Physica::Core {
         const unsigned int index = blockIdx.x * blockDim.x + threadIdx.x;
         if (index < segment.getLength()) {
             DiffScalar s = segment[index];
-            s.setValue(s.getValue() - meanLearnRate * s.getGrad());
+            s.setValue(s.value() - meanLearnRate * s.grad());
         }
     }
 

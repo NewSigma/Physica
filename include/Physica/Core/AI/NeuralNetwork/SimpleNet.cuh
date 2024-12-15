@@ -93,7 +93,7 @@ namespace Physica::Core {
         for (size_t i = 1; i < output.getLength(); ++i) {
             if (output[i] > max) {
                 index = i;
-                max = output[i].getValue();
+                max = output[i].value();
             }
         }
         return index;

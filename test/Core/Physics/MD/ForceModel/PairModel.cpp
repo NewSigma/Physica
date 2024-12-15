@@ -68,7 +68,7 @@ int main() {
         LJModel<ScalarType> lj(1.0, 1.0);
         ScalarType r = 1.0;
         lj.pot_functor(0, 0, r, square(r)).reverse();
-        const ScalarType f = -r.getGrad();
+        const ScalarType f = -r.grad();
         const ScalarType f1 = lj.force_functor(0, 0, r, square(r));
         if (!scalarNear(f, f1, 1E-15))
             return 1;

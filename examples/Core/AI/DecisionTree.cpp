@@ -30,7 +30,9 @@ using TreeType = DecisionTree<ScalarType, DecisionTreeType::Classify>;
 int main() {
     std::ifstream fin("glass.data");
     DenseMatrix<ScalarType> dataMat(214, 11);
-    fin >> dataMat;
+    for (size_t r = 0; r < dataMat.getRow(); ++r)
+        for (size_t c = 0; c < dataMat.getCol(); ++c)
+            fin >> dataMat(r, c);
     Array<bool> isFeatureContinuous(9, true);
 
     auto features = dataMat.block(0, dataMat.getRow(), 1, 9);

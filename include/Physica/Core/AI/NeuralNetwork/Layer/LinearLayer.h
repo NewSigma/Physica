@@ -18,7 +18,7 @@
  */
 #pragma once
 
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrix.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DiffDenseMatrix.h"
 #include "Physica/PlainStruct.h"
 #include "LayerBase.h"
 
@@ -104,9 +104,9 @@ namespace Physica::Core {
         using MachineType = T::MachineType;
         const auto factor = (gain * sqrt(ValueType(6) / ValueType(getInputDim() + getOutputDim()))).toMachine();
         std::uniform_real_distribution<MachineType> dist(-factor, factor);
-        weights.template random_any<R>(dist);
+        weights.template random_any<decltype(dist), R>(dist);
         if constexpr (WithBias)
-            bias.template random_any<R>(dist);
+            bias.template random_any<decltype(dist), R>(dist);
     }
 
     template<Scalar T, bool WithBias>
@@ -139,12 +139,12 @@ namespace Physica::Core {
 
 namespace Physica {
     template<Scalar T, bool B>
-    class Traits<Core::LinearLayer<T, B>> {
+    class Traits<LinearLayer<T, B>> {
     public:
         using ScalarType = T;
         constexpr static bool WithBias = B;
 
-        using InputType = Core::VectorND<T>;
-        using OutputType = InputType;
+        using InputType = VectorND<T>;
+        using OutputType = CoDiff<InputType>;
     };
 }

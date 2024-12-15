@@ -25,10 +25,21 @@ namespace Physica::Core {
         using Base = UnitaryVectorExpr<ExprType::Relu, T>;
     public:
         using typename Base::ScalarType;
+        using typename Base::ValueType;
+        using Base::isReverseDiff;
     public:
         using Base::Base;
         /* Operations */
-        [[nodiscard]] ScalarType calc(size_t index) const { return relu(Base::getExpr().calc(index)); }
+        [[nodiscard]] CoDiff<ScalarType> calc(size_t index) const { return relu(Base::getExpr().calc(index)); }
+
+        template<Vector V>
+        void reverse(const V& grad_) const noexcept requires(isReverseDiff) {
+            const auto& grad = grad_.values();
+            for (size_t i = 0; i < Base::getLength(); ++i) {
+                auto v = Base::getExpr().calc(i);
+                v.reverse(v.isPositive() ? grad.calc(i) : ValueType(0));
+            }
+        }
     };
 
     template<Vector T>

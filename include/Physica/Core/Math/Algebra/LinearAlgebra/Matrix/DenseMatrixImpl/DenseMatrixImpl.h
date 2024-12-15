@@ -127,7 +127,7 @@ namespace Physica::Core {
     inline auto DenseMatrix<T, Option, Row, Col, Allocator>::random_any(
             size_t row, size_t col, Distribution& dist) {
         This result(row, col);
-        result.template random_any<R>(dist);
+        result.template random_any<Distribution, R>(dist);
         return result;
     }
 

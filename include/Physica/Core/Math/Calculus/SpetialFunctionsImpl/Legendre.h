@@ -75,8 +75,8 @@ namespace Physica::Core {
         const T factorial1 = Internal::factorial<T>(l - abs_m);
         const T factorial2 = Internal::factorial<T>(l + abs_m);
         const T factor = sqrt((T(2 * l + 1) * factorial1) / (T(pi_4) * factorial2));
-        const T result_module = factor * legendreP(l, abs_m, cos(theta.getDerived()));
-        const T m_phi = T(m) * phi.getDerived();
+        const T result_module = factor * legendreP(l, abs_m, cos(theta));
+        const T m_phi = T(m) * phi;
         return Complex<T>(result_module * cos(m_phi), result_module * sin(m_phi));
     }
 

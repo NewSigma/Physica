@@ -41,12 +41,12 @@ namespace Physica::Core {
             result.getRecord(index) = DiffRecord{index, Type};
             result.getOperands()[index] = v.calc(index);
             if constexpr (Type == ExprType::Relu)
-                result.getValue(index) = relu(v.getValue(index));
+                result.value(index) = relu(v.value(index));
             else if constexpr (Type == ExprType::Exp)
-                result.getValue(index) = exp(v.getValue(index));
+                result.value(index) = exp(v.value(index));
             else
                 static_assert(Type == ExprType::Exp, "[Error]: Not implemented");
-            result.getGrad(index) = 0;
+            result.grad(index) = 0;
         }
 
         template<ExprType Type, Vector T>
@@ -67,16 +67,16 @@ namespace Physica::Core {
             result.getOperands()[index * 2] = v.calc(index);
             result.getOperands()[index * 2 + 1] = s;
             if constexpr (Type == ExprType::Add)
-                result.getValue(index) = v.getValue(index) + s.getValue();
+                result.value(index) = v.value(index) + s.value();
             else if constexpr (Type == ExprType::Sub)
-                result.getValue(index) = v.getValue(index) - s.getValue();
+                result.value(index) = v.value(index) - s.value();
             else if constexpr (Type == ExprType::Mul)
-                result.getValue(index) = v.getValue(index) * s.getValue();
+                result.value(index) = v.value(index) * s.value();
             else if constexpr (Type == ExprType::Div)
-                result.getValue(index) = v.getValue(index) / s.getValue();
+                result.value(index) = v.value(index) / s.value();
             else
                 static_assert(Type == ExprType::Add, "[Error]: Not implemented");
-            result.getGrad(index) = 0;
+            result.grad(index) = 0;
         }
 
         template<ExprType Type, Vector T>
@@ -97,16 +97,16 @@ namespace Physica::Core {
             result.getOperands()[index * 2] = v1.calc(index);
             result.getOperands()[index * 2 + 1] = v2.calc(index);
             if constexpr (Type == ExprType::Add)
-                result.getValue(index) = v1.getValue(index) + v2.getValue(index);
+                result.value(index) = v1.value(index) + v2.value(index);
             else if constexpr (Type == ExprType::Sub)
-                result.getValue(index) = v1.getValue(index) - v2.getValue(index);
+                result.value(index) = v1.value(index) - v2.value(index);
             else if constexpr (Type == ExprType::Mul)
-                result.getValue(index) = v1.getValue(index) * v2.getValue(index);
+                result.value(index) = v1.value(index) * v2.value(index);
             else if constexpr (Type == ExprType::Div)
-                result.getValue(index) = v1.getValue(index) / v2.getValue(index);
+                result.value(index) = v1.value(index) / v2.value(index);
             else
                 static_assert(Type == ExprType::Add, "[Error]: Not implemented");
-            result.getGrad(index) = 0;
+            result.grad(index) = 0;
         }
     }
 

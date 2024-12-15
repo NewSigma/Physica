@@ -82,7 +82,7 @@ namespace Physica::Core {
         This& operator=(const This&) = delete;
         This& operator=(This&&) = delete;
         /* Getters */
-        [[nodiscard]] ScalarType calc(size_t s) const { return v.calc(s).squaredNorm(); }
+        [[nodiscard]] CoDiff<ScalarType> calc(size_t s) const { return v.calc(s).squaredNorm(); }
 
         template<class AnyPacket>
         [[nodiscard]] AnyPacket packet(size_t index) const {
@@ -156,7 +156,7 @@ namespace Physica::Core {
         This& operator=(const This&) = delete;
         This& operator=(This&&) = delete;
         /* Getters */
-        [[nodiscard]] ScalarType calc(size_t s) const { return v.calc(s).norm(); }
+        [[nodiscard]] CoDiff<ScalarType> calc(size_t s) const { return v.calc(s).norm(); }
         [[nodiscard]] size_t getLength() const { return v.getLength(); }
     };
 
@@ -177,7 +177,7 @@ namespace Physica::Core {
         This& operator=(const This&) = delete;
         This& operator=(This&&) = delete;
         /* Getters */
-        [[nodiscard]] ScalarType calc(size_t s) const { return v.calc(s).getValue(); }
+        [[nodiscard]] ScalarType calc(size_t s) const { return v.calc(s).value(); }
         [[nodiscard]] size_t getLength() const { return v.getLength(); }
     };
 
@@ -198,7 +198,7 @@ namespace Physica::Core {
         This& operator=(const This&) = delete;
         This& operator=(This&&) = delete;
         /* Getters */
-        [[nodiscard]] ScalarType calc(size_t s) const { return v.calc(s).template getGrad<GradOrder>(); }
+        [[nodiscard]] ScalarType calc(size_t s) const { return v.calc(s).template grad<GradOrder>(); }
         [[nodiscard]] size_t getLength() const { return v.getLength(); }
     };
 
@@ -283,7 +283,6 @@ namespace Physica {
 
     template<class T>
     class Traits<ValueVector<T>> {
-        static_assert(T::ScalarType::isDiffable, "[Error]: Unnecessary toValueVector() call");
     public:
         using ScalarType = T::ValueType;
         constexpr static size_t SizeAtCompile = T::SizeAtCompile;

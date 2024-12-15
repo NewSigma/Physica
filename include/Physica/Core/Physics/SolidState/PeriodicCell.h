@@ -614,7 +614,7 @@ namespace Physica::Core {
         if constexpr (Dim == 1)
             return abs(lattice(0, 0));
         else if constexpr (Dim == 2)
-            return (lattice.row(0).crossProduct(lattice.row(1))).compute().norm();
+            return (lattice.row(0).crossProduct(lattice.row(1))).norm();
         else
             return abs(VectorType(lattice.row(0).crossProduct(lattice.row(1))) * lattice.row(2));
     }

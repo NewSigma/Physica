@@ -21,6 +21,7 @@
 #include <cassert>
 #include <cstdlib>
 #include <initializer_list>
+#include "Physica/CRCoro.h"
 #include "Physica/Core/Utils/Allocator/HostAllocator.h"
 #include "Physica/Core/Utils/CUDA/device_obj.cuh"
 #include "ArrayImpl/ArrayBase.h"
@@ -30,7 +31,8 @@ namespace Physica::Core {
     template<class T> class PageLockedAllocator;
 
     template<class T, size_t Length, class Allocator>
-    class Array : public ArrayBase<Array<T, Length, Allocator>, Allocator> {
+    class Array : public ArrayBase<Array<T, Length, Allocator>, Allocator>
+                , public CRCoro<Array<T, Length, Allocator>> {
         static_assert(!std::is_same_v<Allocator, PageLockedAllocator<T>>, "[Error]: Page locked array can not have fixed size");
         using This = Array<T, Length, Allocator>;
     public:
@@ -83,7 +85,8 @@ namespace Physica::Core {
     };
 
     template<class T, class Allocator>
-    class Array<T, Dynamic, Allocator> : public ArrayBase<Array<T, Dynamic, Allocator>, Allocator> {
+    class Array<T, Dynamic, Allocator> : public ArrayBase<Array<T, Dynamic, Allocator>, Allocator>
+                                       , public CRCoro<Array<T, Dynamic, Allocator>> {
         using This = Array<T, Dynamic, Allocator>;
     public:
         using Base = ArrayBase<This, Allocator>;

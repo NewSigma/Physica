@@ -99,7 +99,7 @@ namespace Physica::Core {
     template<class Distribution, RandomGenerator R>
     inline device_obj<DenseVector<T, Length, Allocator>> device_obj<DenseVector<T, Length, Allocator>>::random_any(
             size_t len, Distribution& dist) {
-        return host_obj::template random_any<R>(len, dist).toDevice();
+        return host_obj::template random_any<Distribution, R>(len, dist).toDevice();
     }
 
     template<Scalar T, size_t Length, class Allocator>

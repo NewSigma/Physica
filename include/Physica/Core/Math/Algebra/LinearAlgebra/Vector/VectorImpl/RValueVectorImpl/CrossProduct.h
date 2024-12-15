@@ -18,6 +18,8 @@
  */
 #pragma once
 
+#include "../RValueVector.h"
+
 namespace Physica::Core {
     template<Vector V1, Vector V2>
     class CrossProduct : public RValueVector<CrossProduct<V1, V2>> {
@@ -40,9 +42,26 @@ namespace Physica::Core {
             v[1] = v1[2] * v2[0] - v1[0] * v2[2];
             v[2] = v1[0] * v2[1] - v1[1] * v2[0];
         }
+
+        [[nodiscard]] ScalarType calc(size_t index) const;
         /* Getters */
         [[nodiscard]] constexpr size_t getLength() const noexcept { return 3; }
     };
+
+    template<Vector V1, Vector V2>
+    CrossProduct<V1, V2>::ScalarType CrossProduct<V1, V2>::calc(size_t index) const {
+        assert(index < getLength());
+        switch (index) {
+        case 0:
+            return v1[1] * v2[2] - v1[2] * v2[1];
+        case 1:
+            return v1[2] * v2[0] - v1[0] * v2[2];
+        case 2:
+            return v1[0] * v2[1] - v1[1] * v2[0];
+        default:
+            unreachable();
+        }
+    }
 }
 
 namespace Physica {

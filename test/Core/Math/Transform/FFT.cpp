@@ -72,7 +72,7 @@ void test_differentiable() {
         fft.invTransform();
         for (size_t i = 0; i < data.getLength(); ++i) {
             const bool isNear = scalarNear(ScalarType(data[i]), ScalarType(fft.getRSpace()[i]), precision);
-            const bool isSmall = abs(data[i].getValue()) < ValueType(precision) && abs(fft.getRSpace()[i].getValue()) < ValueType(precision);
+            const bool isSmall = abs(data[i].value()) < ValueType(precision) && abs(fft.getRSpace()[i].value()) < ValueType(precision);
             if(!isNear && !isSmall)
                 exit(EXIT_FAILURE);
         }

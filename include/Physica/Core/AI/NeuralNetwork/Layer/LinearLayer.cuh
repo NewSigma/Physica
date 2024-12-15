@@ -108,9 +108,9 @@ namespace Physica::Core {
         using MachineType = T::MachineType;
         const auto factor = (gain * sqrt(ValueType(6) / ValueType(getInputDim() + getOutputDim()))).toMachine();
         std::uniform_real_distribution<MachineType> dist(-factor, factor);
-        weights.template random_any<R>(dist);
+        weights.template random_any<Distribution, R>(dist);
         if constexpr (WithBias)
-            bias.template random_any<R>(dist);
+            bias.template random_any<Distribution, R>(dist);
     }
     
     template<Scalar T, bool WithBias>
@@ -118,9 +118,9 @@ namespace Physica::Core {
     void device_obj<LinearLayer<T, WithBias>>::random_xavier_normal(ValueType gain) {
         const auto deviation = (gain * sqrt(ValueType(2) / ValueType(getInputDim() + getOutputDim()))).toMachine();
         std::normal_distribution<MachineType> dist(0, deviation);
-        weights.template random_any<R>(dist);
+        weights.template random_any<Distribution, R>(dist);
         if constexpr (WithBias)
-            bias.template random_any<R>(dist);
+            bias.template random_any<Distribution, R>(dist);
     }
     
     template<Scalar T, bool WithBias>

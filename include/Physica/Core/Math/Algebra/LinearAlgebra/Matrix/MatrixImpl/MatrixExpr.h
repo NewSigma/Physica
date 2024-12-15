@@ -19,6 +19,7 @@
 #pragma once
 
 #include "Physica/Core/MultiPrecision/ExprType.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/Matrix.h"
 
 namespace Physica::Core {
     /**
@@ -29,13 +30,15 @@ namespace Physica::Core {
     template<ExprType Type, Matrix M>
     class UnitaryMatrixExpr : public RValueMatrix<MatrixExpr<Type, M>> {
         using This = UnitaryMatrixExpr<Type, M>;
-        using Base = RValueMatrix<This>;
+        using Base = RValueMatrix<MatrixExpr<Type, M>>;
+    public:
+        using Base::isReverseDiff;
     private:
         const M& expr;
     public:
         UnitaryMatrixExpr(const M& expr_) : expr(expr_) {}
         UnitaryMatrixExpr(const This&) = delete;
-        UnitaryMatrixExpr(This&&) noexcept = delete;
+        UnitaryMatrixExpr(This&&) noexcept requires(isReverseDiff) = default;
         ~UnitaryMatrixExpr() = default;
         /* Operators */
         This& operator=(const This&) = delete;
@@ -49,9 +52,11 @@ namespace Physica::Core {
     template<ExprType Type, Matrix LHS, class RHS>
     class BinaryMatrixExpr : public RValueMatrix<MatrixExpr<Type, LHS, RHS>> {
         using This = BinaryMatrixExpr<Type, LHS, RHS>;
-        using Base = RValueMatrix<This>;
+        using Base = RValueMatrix<MatrixExpr<Type, LHS, RHS>>;
         using LHS1 = LHS;
         using RHS1 = std::conditional<Scalar<RHS>, typename RHS::ScalarType, RHS>::type;
+    public:
+        using Base::isReverseDiff;
     private:
         const LHS1* lhs;
         const RHS1* rhs;
@@ -66,7 +71,7 @@ namespace Physica::Core {
             }
         }
         BinaryMatrixExpr(const This&) = delete;
-        BinaryMatrixExpr(This&&) noexcept = delete;
+        BinaryMatrixExpr(This&&) noexcept requires(isReverseDiff) = default;
         ~BinaryMatrixExpr() = default;
         /* Operators */
         This& operator=(const This&) = delete;

@@ -76,11 +76,11 @@ namespace Physica::Core {
     template<Vector T1, Vector T2>
     CoDiff<typename InnerDot<T1, T2>::ScalarType> InnerDot<T1, T2>::calc_base() const {
         if constexpr (isReverseDiff) {
-            ScalarType result = toValueVector(v1) * toValueVector(v2);
-            co_yield result;
-
-            v1.reverse(result.getGrad() * v2);
-            v2.reverse(result.getGrad() * v1);
+            auto result = co_yield toValueVector(v1) * toValueVector(v2);
+            if constexpr (ReverseDiff<T1>)
+                v1.reverse(result.grad() * toValueVector(v2));
+            if constexpr (ReverseDiff<T2>)
+                v2.reverse(result.grad() * toValueVector(v1));
         }
         else if constexpr (enableSIMD) {
             const size_t length = v1.getLength();
@@ -104,7 +104,7 @@ namespace Physica::Core {
             auto result = ScalarType(0);
             for(size_t i = 0; i < v1.getLength(); ++i)
                 result += v1.calc(i) * v2.calc(i);
-            co_return result;
+            co_return std::move(result);
         }
     }
 

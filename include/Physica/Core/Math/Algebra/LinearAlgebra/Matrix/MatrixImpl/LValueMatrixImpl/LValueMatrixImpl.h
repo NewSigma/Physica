@@ -112,7 +112,7 @@ namespace Physica::Core {
 
     template<class Derived>
     template<Matrix T>
-    void LValueMatrix<Derived>::reverse(const T& m) const noexcept requires(isReverseDiff) {
+    void LValueMatrix<Derived>::reverse(const T& grad) const noexcept requires(isReverseDiff) {
         using GradType = ScalarType::GradType;
         static_assert(std::is_same<GradType, typename T::ScalarType>::value, "[Error]: Inconsistent ScalarType");
         const size_t maxMajor = Base::getMaxMajor();
@@ -121,7 +121,7 @@ namespace Physica::Core {
             for (size_t minor = 0; minor < maxMinor; ++minor) {
                 const size_t r = MatrixOption::rowFromMajorMinor<Derived>(major, minor);
                 const size_t c = MatrixOption::colFromMajorMinor<Derived>(major, minor);
-                refFromMajorMinor(major, minor).reverse(m.calc(r, c));
+                refFromMajorMinor(major, minor).reverse(grad.calc(r, c));
             }
         }
     }
@@ -407,7 +407,7 @@ namespace Physica::Core {
         const size_t maxMinor = Base::getMaxMinor();
         for (size_t major = 0; major < maxMajor; ++major)
             for (size_t minor = 0; minor < maxMinor; ++minor)
-                refFromMajorMinor(major, minor) = ScalarType::random_any(dist);
+                refFromMajorMinor(major, minor) = ScalarType::template random_any<Distribution, R>(dist);
     }
 
     template<class Derived>

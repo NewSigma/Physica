@@ -23,11 +23,15 @@
 
 namespace Physica::Core {
     template<Scalar T, size_t Length = Dynamic, class Allocator = HostAllocator<T, alignof(typename BestPacket<T, Length>::Type)>>
-    class DenseVector : public ContinuousVector<DenseVector<T, Length, Allocator>>, public Array<T, Length, Allocator> {
+    class DenseVector : public ContinuousVector<DenseVector<T, Length, Allocator>>
+                      , public CRCoro<DenseVector<T, Length, Allocator>>
+                      , public Array<T, Length, Allocator> {
         constexpr static size_t DefaultAlign = alignof(typename BestPacket<T, Length>::Type);
         static_assert(std::allocator_traits<Allocator>::Align % DefaultAlign == 0, "[Error]: Bad alignment for SIMD");
         using This = DenseVector<T, Length, Allocator>;
+        using Coro = CRCoro<This>;
     public:
+        using promise_type = Coro::promise_type;
         using Base = ContinuousVector<This>;
         using Storage = Array<T, Length, Allocator>;
         using device_obj_type = device_obj<This>;
@@ -68,6 +72,12 @@ namespace Physica::Core {
         using Base::read;
         using Base::write;
         using Storage::swap;
+
+        using Coro::get_return_object;
+        using Coro::initial_suspend;
+        using Coro::final_suspend;
+        using Coro::return_value;
+        using Coro::unhandled_exception;
         /* Getters */
         using Storage::getLength;
         using Storage::data;

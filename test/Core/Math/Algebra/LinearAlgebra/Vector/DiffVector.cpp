@@ -28,7 +28,7 @@ int main() {
     auto v = VectorType::random_uniform<RandomType>(16);
     v.sum().reverse();
     for (size_t i = 0; i < v.getLength(); ++i)
-        if (v[i].getGrad() != float64(1))
+        if (v[i].grad() != float64(1))
             return 1;
     return 0;
 }

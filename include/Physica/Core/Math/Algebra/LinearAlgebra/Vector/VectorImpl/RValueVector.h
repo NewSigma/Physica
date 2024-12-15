@@ -37,6 +37,12 @@ namespace Physica::Core {
     template<class VectorType> class ReverseVector;
     template<class VectorType, int MatrixMajor, size_t Row, size_t Col> class ReshapedVector;
     template<Vector V1, Vector V2> class CrossProduct;
+    template<class T> class RealVector;
+    template<class T> class ImagVector;
+    template<class T> class SquaredNormVector;
+    template<class T> class NormVector;
+    template<class T> class ValueVector;
+    template<class T, int GradOrder> class GradVector;
 
     template<class T>
     struct is_continuous {
@@ -99,7 +105,7 @@ namespace Physica::Core {
         template<LVector V, class Executor = SequentialExecutor>
         inline void assignTo(V& v) const;
 
-        [[nodiscard]] ScalarType calc(size_t index) const { return Base::getDerived().calc(index); }
+        [[nodiscard]] auto calc(size_t index) const { return Base::getDerived().calc(index); }
         template<class AnyPacket>
         [[nodiscard]] inline AnyPacket packet(size_t index) const;
         template<class AnyPacket>
@@ -119,7 +125,7 @@ namespace Physica::Core {
 
         [[nodiscard]] ScalarType max() const;
         [[nodiscard]] ScalarType min() const;
-        [[nodiscard]] auto sum() const;
+        [[nodiscard]] CoDiff<ScalarType> sum() const;
         [[nodiscard]] ScalarType lnSumExp() const;
         [[nodiscard]] ScalarType prod() const;
         [[nodiscard]] bool isZeros() const;
@@ -149,6 +155,14 @@ namespace Physica::Core {
         auto reshape_col(size_t row, size_t col) const;
         template<size_t Row = Dynamic, size_t Col = Dynamic>
         auto reshape_row(size_t row, size_t col) const;
+
+        auto reals() const noexcept;
+        auto imags() const noexcept;
+        auto squaredNorms() const noexcept;
+        auto norms() const noexcept;
+        auto values() const noexcept;
+        template<int GradOrder = 1>
+        auto grads() const noexcept;
         /* Getters */
         [[nodiscard]] size_t getLength() const noexcept { return Base::getDerived().getLength(); }
     protected:
@@ -174,7 +188,7 @@ namespace Physica {
 
 #include "RValueVectorImpl/RValueVectorImpl.h"
 #include "RValueVectorImpl/ReverseVector.h"
-#include "CrossProduct.h"
+#include "RValueVectorImpl/CrossProduct.h"
 #include "InnerDot.h"
 #include "VectorExpr.h"
 #include "RValueVectorImpl/VectorConvert.h"

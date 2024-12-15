@@ -18,7 +18,7 @@
  */
 #pragma once
 
-#include <concepts>
+#include "Physica/Core/MultiPrecision/Scalar.h"
 #include "Physica/Core/Utils/CUDA/device_obj.cuh"
 
 namespace Physica::Core {
@@ -26,8 +26,13 @@ namespace Physica::Core {
     template<class Derived> class LValueVector;
     template<class Derived> class RSparseVector;
 
+    namespace Internal {
+        template<class T>
+        concept VectorObj = std::derived_from<T, RValueVector<T>> || std::derived_from<T, device_obj<RValueVector<T>>>;
+    }
+
     template<class T>
-    concept Vector = std::derived_from<T, RValueVector<T>> || std::derived_from<T, device_obj<RValueVector<T>>>;
+    concept Vector = Internal::VectorObj<T> || Internal::VectorObj<typename remove_codiff<T>::Type>;
 
     template<class T>
     concept LVector = std::derived_from<T, LValueVector<T>> || std::derived_from<T, device_obj<LValueVector<T>>>;

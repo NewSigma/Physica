@@ -40,9 +40,9 @@ public:
         const auto cell = makeSystem(volume);
         SilveraGoldman<ScalarType, true> sg(pair_cutoff);
         sg.potentialV(cell).reverse();
-        const ScalarType press_diff = -volume.getGrad();
+        const ScalarType press_diff = -volume.grad();
         const ScalarType press = sg.virial(cell).trace() / ScalarType(3);
-        if (!scalarNear(press_diff.getValue(), press.getValue(), 1E-14))
+        if (!scalarNear(press_diff.value(), press.value(), 1E-14))
             exit(EXIT_FAILURE);
     }
 private:
@@ -66,7 +66,7 @@ int main() {
         ScalarType r = 2.0;
         const ScalarType r2 = square(r);
         sg.pot_functor(0, 0, r, r2).reverse();
-        const ScalarType f = -r.getGrad();
+        const ScalarType f = -r.grad();
         const ScalarType f1 = sg.force_functor(0, 0, r, r2);
         if (!scalarNear(f, f1, 1E-15))
             return 1;
@@ -75,7 +75,7 @@ int main() {
         ScalarType r = 2.0;
         const ScalarType r2 = square(r);
         sg.force_functor(0, 0, r, r2).reverse();
-        const ScalarType fc = -r.getGrad();
+        const ScalarType fc = -r.grad();
         const ScalarType fc1 = sg.forceConst_functor(r, r2);
         if (!scalarNear(fc, fc1, 1E-15))
             return 1;

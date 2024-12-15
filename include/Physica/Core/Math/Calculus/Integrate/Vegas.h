@@ -257,7 +257,7 @@ namespace Physica::Core {
             const T xy = samples[n];
             toNextVariance(var, mean, n, xy);
             // Loss has minimal value to avoid the grid size reducing to 0
-            const auto l = std::max(xy.getValue().squaredNorm(), RealValue(std::numeric_limits<T>::min()));
+            const auto l = std::max(xy.value().squaredNorm(), RealValue(std::numeric_limits<T>::min()));
             for (size_t i = 0; i < getDim(); ++i) {
                 const auto index = indexes[n * getDim() + i];
                 toNextMean(lossMat(index, i), counts[index][i], l);

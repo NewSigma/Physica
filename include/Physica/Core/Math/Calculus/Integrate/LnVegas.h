@@ -163,16 +163,16 @@ namespace Physica::Core {
 
         ValueType maxSample;
         if constexpr (T::isComplex)
-            maxSample = toRealVector(samples).max().getValue();
+            maxSample = toRealVector(samples).max().value();
         else
-            maxSample = samples.max().getValue(); // Real LnVegas assumes f(x) > 0, so ln(f(x)) is defined
+            maxSample = samples.max().value(); // Real LnVegas assumes f(x) > 0, so ln(f(x)) is defined
         samples = exp(samples - maxSample);
         T mean = 0, var = 0;
         for (int n = 0; n < numSample; ++n) {
             const T xy = samples[n];
             toNextVariance(var, mean, n, xy);
 
-            const auto l = std::max(xy.getValue().squaredNorm(), RealValue(std::numeric_limits<T>::min()));
+            const auto l = std::max(xy.value().squaredNorm(), RealValue(std::numeric_limits<T>::min()));
             for (size_t i = 0; i < getDim(); ++i) {
                 const auto index = indexes[n * getDim() + i];
                 toNextMean(lossMat(index, i), counts[index][i], l);

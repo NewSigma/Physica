@@ -92,7 +92,7 @@ namespace Physica::Core {
         void swap(SIMD& __restrict other) noexcept { std::swap(*this, other); }
         /* Getters */
         using Base::size;
-        using Base::getValue;
+        using Base::value;
         [[nodiscard]] FullRealType asReal() const noexcept { return FullRealType::toMachine(); }
         [[nodiscard]] HalfType getLow() const noexcept { return HalfType::asComplex(FullRealType::getLow()); }
         [[nodiscard]] HalfType getHigh() const noexcept { return HalfType::asComplex(FullRealType::getHigh()); }

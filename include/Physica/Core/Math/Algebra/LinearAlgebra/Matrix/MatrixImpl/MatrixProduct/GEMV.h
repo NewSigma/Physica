@@ -47,7 +47,7 @@ namespace Physica::Core {
         inline void assignTo(V& target) const;
 
         template<Vector V>
-        void reverse(const V& y) noexcept requires(isReverseDiff);
+        void reverse(const V& grad_) const noexcept requires(isReverseDiff);
         /* Getters */
         [[nodiscard]] inline ScalarType calc(size_t index) const;
         [[nodiscard]] __host__ __device__ size_t getLength() const { return mat.getRow(); }
@@ -76,11 +76,12 @@ namespace Physica::Core {
 
     template<Matrix T, Vector U>
     template<Vector V>
-    void MatrixVectorProduct<T, U>::reverse(const V& y) noexcept requires(isReverseDiff) {
+    void MatrixVectorProduct<T, U>::reverse(const V& grad_) const noexcept requires(isReverseDiff) {
+        const auto& grad = grad_.values();
         if constexpr (ReverseDiff<T>)
-            mat.reverse(toGradVector(y) * toValueVector(vec).transpose());
+            mat.reverse(grad * toValueVector(vec).transpose());
         if constexpr (ReverseDiff<U>)
-            vec.reverse(toValueMatrix(mat).transpose() * toGradVector(y));
+            vec.reverse(toValueMatrix(mat).transpose() * grad);
     }
 
     template<Matrix T, Vector U>
