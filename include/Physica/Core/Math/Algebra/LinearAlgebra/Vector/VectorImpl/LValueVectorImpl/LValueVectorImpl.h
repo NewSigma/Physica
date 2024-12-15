@@ -58,12 +58,12 @@ namespace Physica::Core {
 
     template<class Derived>
     inline LValueVector<Derived>::ConstRefTy LValueVector<Derived>::operator[](size_t index) const {
-        return const_cast<This&>(*this).operator[](index);
+        return *data_ptr(index);
     }
 
     template<class Derived>
-    LValueVector<Derived>::ScalarType LValueVector<Derived>::calc(size_t index) const {
-        return ScalarType(*data_ptr(index));
+    LValueVector<Derived>::ConstRefTy LValueVector<Derived>::calc(size_t index) const {
+        return operator[](index);
     }
 
     template<class Derived>
@@ -101,7 +101,7 @@ namespace Physica::Core {
     template<class Derived>
     CoDiff<typename LValueVector<Derived>::ScalarType> LValueVector<Derived>::sum() const {
         if constexpr (isReverseDiff) {
-            auto result = co_yield toValueVector(Base::getDerived()).sum();
+            auto result = co_yield Base::values().sum();
             const auto& grad = result.grad();
             for (size_t i = 0; i < Base::getLength(); ++i)
                 (*this)[i].reverse(grad);

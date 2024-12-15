@@ -162,9 +162,9 @@ namespace Physica::Core {
                 chargeMixer.mix(iteration, density);
                 iteration += 1;
             };
-            kPoint.setBandEnergy(SpinState::Up, toRealVector(eigSolver[SpinState::Up].getEigenvalues()));
+            kPoint.setBandEnergy(SpinState::Up, eigSolver[SpinState::Up].getEigenvalues().reals());
             if constexpr (IsSpinPolarized)
-                kPoint.setBandEnergy(SpinState::Down, toRealVector(eigSolver[SpinState::Down].getEigenvalues()));
+                kPoint.setBandEnergy(SpinState::Down, eigSolver[SpinState::Down].getEigenvalues().reals());
         }
         return true;
     }
@@ -284,7 +284,7 @@ namespace Physica::Core {
             calcDensity(orbits[band][SpinState::Up]);
             const bool isLastBand = band == numFilledBand - 1;
             const int numFillElectron = isLastBand ? numElectronLastBand : 2;
-            density.getTotalDensity() += toRealGrid(fft.getRSpace()) * T(numFillElectron);
+            density.getTotalDensity() += fft.getRSpace().reals() * T(numFillElectron);
         }
         chargeMixer.mix(density);
     }

@@ -21,17 +21,16 @@
 #include <cassert>
 #include <coroutine>
 #include <exception>
-#include <forward_list>
 #include "Physica/Core/MultiPrecision/Scalar.h"
 
 namespace Physica::Core {
     template<class T>
-    struct IsCoDiffNode {
+    struct IsCoDiff {
         constexpr static bool value = false;
     };
 
     template<class T>
-    struct IsCoDiffNode<CoDiffNode<T>> {
+    struct IsCoDiff<CoDiffNode<T>> {
         constexpr static bool value = false;
     };
 
@@ -79,7 +78,7 @@ namespace Physica::Core {
     template<class Base>
     class CoDiffNode : public Base {
         static_assert(ReverseDiff<Base>, "[Error]: CoDiffNode save compute graph for reverse diffable objects");
-        static_assert(!IsCoDiffNode<Base>::value, "[Error]: Nested CoDiffNode is not allowed");
+        static_assert(!IsCoDiff<Base>::value, "[Error]: Nested CoDiffNode is not allowed");
         static_assert(std::is_object<Base>::value, "[Error]: Must save the return by value");
         using This = CoDiffNode<Base>;
 
@@ -91,7 +90,7 @@ namespace Physica::Core {
                     handle = std::move(handle_);
                 }
 
-                [[nodiscard]] Base await_resume() const noexcept {
+                [[nodiscard]] const Base await_resume() const noexcept {
                     return Base(std::move(handle.promise().obj));
                 }
             };
@@ -109,7 +108,7 @@ namespace Physica::Core {
             std::suspend_never initial_suspend() noexcept { return {}; }
             std::suspend_always final_suspend() noexcept { return {}; }
             auto yield_value(Base obj_) noexcept {
-                obj = std::move(obj_);
+                obj = Base(std::move(obj_));
                 return suspend_yield{};
             }
             void return_void() noexcept {}
@@ -126,7 +125,7 @@ namespace Physica::Core {
         CoDiffNode() = default;
         CoDiffNode(std::coroutine_handle<Impl> handle_) noexcept;
         template<ReverseDiff T>
-        CoDiffNode(T&& x) noexcept;
+        CoDiffNode(T&& x) noexcept requires(!IsCoDiff<T>::value);
         CoDiffNode(const This&) = delete;
         CoDiffNode(This&& other) noexcept;
         ~CoDiffNode();

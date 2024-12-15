@@ -21,7 +21,7 @@
 #include "../RValueMatrix.h"
 
 namespace Physica::Core {
-    template<Matrix T>
+    template<class T>
     class RealMatrix : public RValueMatrix<RealMatrix<T>> {
         using This = RealMatrix<T>;
         using Base = RValueMatrix<This>;
@@ -43,7 +43,7 @@ namespace Physica::Core {
         [[nodiscard]] size_t getCol() const { return mat.getCol(); }
     };
 
-    template<Matrix T>
+    template<class T>
     class ValueMatrix : public RValueMatrix<ValueMatrix<T>> {
         using This = ValueMatrix<T>;
         using Base = RValueMatrix<This>;
@@ -65,7 +65,7 @@ namespace Physica::Core {
         [[nodiscard]] size_t getCol() const { return mat.getCol(); }
     };
 
-    template<Matrix T, int GradOrder>
+    template<class T, int GradOrder>
     class GradMatrix : public RValueMatrix<GradMatrix<T, GradOrder>> {
         using This = GradMatrix<T, GradOrder>;
         using Base = RValueMatrix<This>;
@@ -86,25 +86,10 @@ namespace Physica::Core {
         [[nodiscard]] size_t getRow() const { return mat.getRow(); }
         [[nodiscard]] size_t getCol() const { return mat.getCol(); }
     };
-
-    template<Matrix T>
-    [[nodiscard]] inline auto toRealMatrix(const T& m) noexcept {
-        return RealMatrix<T>(m);
-    }
-
-    template<Matrix T>
-    [[nodiscard]] inline auto toValueMatrix(const T& m) noexcept {
-        return ValueMatrix<T>(m);
-    }
-
-    template<Matrix T, int GradOrder = 1>
-    [[nodiscard]] inline auto toGradMatrix(const T& m) noexcept {
-        return GradMatrix<T, GradOrder>(m);
-    }
 }
 
 namespace Physica {
-    template <Matrix T>
+    template <class T>
     class Traits<Core::RealMatrix<T>> {
     public:
         using ScalarType = T::ScalarType::RealType;
@@ -114,9 +99,8 @@ namespace Physica {
         constexpr static size_t SizeAtCompile = T::SizeAtCompile;
     };
 
-    template <Matrix T>
+    template <class T>
     class Traits<Core::ValueMatrix<T>> {
-        static_assert(T::ScalarType::isDiffable, "[Error]: Unnecessary toValueVector() call or toGradVector() call");
     public:
         using ScalarType = T::ValueType;
         constexpr static int Option = T::Option;
@@ -125,7 +109,7 @@ namespace Physica {
         constexpr static size_t SizeAtCompile = T::SizeAtCompile;
     };
 
-    template <Matrix T, int GradOrder>
+    template <class T, int GradOrder>
     class Traits<Core::GradMatrix<T, GradOrder>> {
         static_assert(T::ScalarType::isDiffable, "[Error]: Unnecessary toValueVector() call or toGradVector() call");
     public:

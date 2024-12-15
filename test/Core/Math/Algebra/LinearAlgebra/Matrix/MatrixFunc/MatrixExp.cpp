@@ -34,7 +34,7 @@ int main() {
 
     const auto solver = SymmEigenSolver<ScalarType>(mat, true);
     const VectorType eigenvalues = exp(solver.getEigenvalues());
-    const DenseMatrix<ScalarType> eigenvectors = toRealMatrix(solver.getEigenvectors());
+    const DenseMatrix<ScalarType> eigenvectors = solver.getEigenvectors().reals();
     VectorType v1 = eigenvectors.transpose() * v;
     v1 = hadamard(eigenvalues, v1);
 

@@ -192,7 +192,7 @@ namespace Physica::Core {
             const EigenvectorMatrix inv = eigenvectors.inverse();
             for (size_t i = 0; i < size; ++i)
                 result.col(i) = eigenvectors * hadamard(eigenvalues, inv.col(i));
-            return RawEigenvectorType(toRealMatrix(result));
+            return RawEigenvectorType(result.reals());
         }
     }
     /**
@@ -211,7 +211,7 @@ namespace Physica::Core {
             const EigenvectorMatrix eigenvectors = getEigenvectors();
             for (size_t i = 0; i < size; ++i)
                 result.col(i) = eigenvectors * hadamard(eigenvalues, eigenvectors.conjugate().row(i));
-            return RawEigenvectorType(toRealMatrix(result));
+            return RawEigenvectorType(result.reals());
         }
     }
 

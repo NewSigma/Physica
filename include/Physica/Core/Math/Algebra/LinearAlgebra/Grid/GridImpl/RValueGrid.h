@@ -25,6 +25,12 @@ namespace Physica::Core {
     template<class Derived> class RValueGrid;
     template<class Derived> class LValueGrid;
     template<class GridType> class FlattenGrid;
+    template<class T> class RealGrid;
+    template<class T> class ImagGrid;
+    template<class T> class SquaredNormGrid;
+    template<class T> class NormGrid;
+    template<class T> class ValueGrid;
+    template<class T, int GradOrder> class GradGrid;
 
     template<class T>
     concept Grid = std::derived_from<T, RValueGrid<T>>;
@@ -44,6 +50,14 @@ namespace Physica::Core {
         template<Grid T>
         void assignTo(LValueGrid<T>& other) const;
         template<class Functor> void forIndexInGrid(Functor func) const { GridBase::forIndexInGrid(getDim(), func); }
+
+        auto reals() const noexcept;
+        auto imags() const noexcept;
+        auto squaredNorms() const noexcept;
+        auto norms() const noexcept;
+        auto values() const noexcept;
+        template<int GradOrder = 1>
+        auto grads() const noexcept;
         /* Getters */
         [[nodiscard]] ScalarType calc(size_t x, size_t y, size_t z) const { return calc({x, y, z}); }
         [[nodiscard]] ScalarType calc(Index3D index) const { return Base::getDerived().calc(index); }
@@ -70,6 +84,37 @@ namespace Physica::Core {
         forIndexInGrid(getDim(), [this, &other](Index3D index) {
             other(index) = calc(index);
         });
+    }
+
+    template<class Derived>
+    auto RValueGrid<Derived>::reals() const noexcept {
+        return RealGrid<Derived>(Base::getDerived());
+    }
+
+    template<class Derived>
+    auto RValueGrid<Derived>::imags() const noexcept {
+        return ImagGrid<Derived>(Base::getDerived());
+    }
+
+    template<class Derived>
+    auto RValueGrid<Derived>::squaredNorms() const noexcept {
+        return SquaredNormGrid<Derived>(Base::getDerived());
+    }
+
+    template<class Derived>
+    auto RValueGrid<Derived>::norms() const noexcept {
+        return NormGrid<Derived>(Base::getDerived());
+    }
+
+    template<class Derived>
+    auto RValueGrid<Derived>::values() const noexcept {
+        return ValueGrid<Derived>(Base::getDerived());
+    }
+
+    template<class Derived>
+    template<int GradOrder>
+    auto RValueGrid<Derived>::grads() const noexcept {
+        return GradGrid<Derived, GradOrder>(Base::getDerived());
     }
 
     template<class Derived>

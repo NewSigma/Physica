@@ -37,6 +37,7 @@ namespace Physica::Core {
         using ColVector = LMatrixBlock<Derived, Dynamic, 1>;
     public:
         using typename Base::ScalarType;
+        using typename Base::ValueType;
         using typename Base::RealType;
         using Base::RowAtCompile;
         using Base::ColAtCompile;
@@ -103,8 +104,12 @@ namespace Physica::Core {
         [[nodiscard]] inline DiagVector<Derived, true> diag();
         [[nodiscard]] inline const DiagVector<Derived, true> diag() const;
 
-        [[nodiscard]] InverseMatrix<Derived> inverse() const noexcept;
-        ScalarType determinate() const;
+        [[nodiscard]] ConstRefTy calc(size_t row, size_t col) const { return operator()(row, col); }
+
+        [[nodiscard]] CoDiff<ScalarType> sum() const;
+
+        [[nodiscard]] auto inverse() const noexcept;
+        [[nodiscard]] ScalarType determinate() const;
         void rowReduce(size_t r1, size_t r2, size_t elementIndex);
         void colReduce(size_t c1, size_t c2, size_t elementIndex);
         inline void majorReduce(size_t v1, size_t v2, size_t elementIndex);
@@ -119,7 +124,6 @@ namespace Physica::Core {
         template<class Distribution, RandomGenerator R>
         void random_any(Distribution& dist);
         /* Getters */
-        [[nodiscard]] ScalarType calc(size_t row, size_t col) const;
         [[nodiscard]] __host__ __device__ inline PtrTy data_ptr(size_t row, size_t col) noexcept;
         [[nodiscard]] __host__ __device__ inline ConstPtrTy data_ptr(size_t row, size_t col) const noexcept;
         [[nodiscard]] inline RefTy refFromMajorMinor(size_t major, size_t minor);

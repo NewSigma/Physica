@@ -95,7 +95,7 @@ int main() {
             }
         }
         FFT<RealType> fft(data, PlanFlag::Measure);
-        const VectorND<RealType> intense = toNormVector(fft.getKSpace());
+        const VectorND<RealType> intense = fft.getKSpace().norms();
 
         /* Parseval theorem */ {
             const RealType power = square(data).sum();
@@ -167,7 +167,7 @@ int main() {
         /* Test freq */ {
             const double deltaFreq1 = double(fft.getKSpaceDelta(deltaX, 0)) / (2 * M_PI);
             const double deltaFreq2 = double(fft.getKSpaceDelta(deltaY, 1)) / (2 * M_PI);
-            const VectorND<RealType> intense = toNormVector(fft.getKSpace().flatten());
+            const VectorND<RealType> intense = fft.getKSpace().flatten().norms();
             const RealType freq1_power = intense[size_t(freq1 / deltaFreq1) * fft.getKSpaceSize()[1]];
             const RealType freq1_power_conj = intense[(N1 - size_t(freq1 / deltaFreq1)) * fft.getKSpaceSize()[1]];
             const RealType freq2_power = intense[freq2 / deltaFreq2];

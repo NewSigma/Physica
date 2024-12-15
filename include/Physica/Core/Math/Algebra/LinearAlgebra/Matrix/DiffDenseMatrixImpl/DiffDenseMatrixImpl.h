@@ -25,15 +25,15 @@ namespace Physica::Core {
 #define DiffDenseMatrix DenseMatrix<Diff<T, Mode, Order>, Option, Row, Col>
 
     template<tparams>
-    DiffDenseMatrix::DenseMatrix(size_t row, size_t col) : values(row, col), grads(row, col) {}
+    DiffDenseMatrix::DenseMatrix(size_t row, size_t col) : v(row, col), g(row, col) {}
 
     template<tparams>
     DiffDenseMatrix::DenseMatrix(size_t row, size_t col, T init)
-            : values(row, col, init), grads(row, col, 0) {}
+            : v(row, col, init), g(row, col, 0) {}
 
     template<tparams>
-    DiffDenseMatrix::DenseMatrix(initializer_list list) : values(std::move(list)) {
-        grads = GradMatrix(values.getRow(), values.getCol(), 0);
+    DiffDenseMatrix::DenseMatrix(initializer_list list) : v(std::move(list)) {
+        g = GradMatrix(v.getRow(), v.getCol(), 0);
     }
 
     template<tparams>
@@ -69,34 +69,34 @@ namespace Physica::Core {
 
     template<tparams>
     void DiffDenseMatrix::resize(size_t row, size_t col) {
-        values.resize(row, col);
-        grads.resize(row, col);
+        v.resize(row, col);
+        g.resize(row, col);
     }
 
     template<tparams>
     void DiffDenseMatrix::swap(This& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
-        values.swap(obj.values);
-        grads.swap(obj.grads);
+        v.swap(obj.v);
+        g.swap(obj.g);
     }
 
     template<tparams>
     void DiffDenseMatrix::swap_row(size_t r1, size_t r2) noexcept {
-        values.swap_row(r1, r2);
-        grads.swap_row(r1, r2);
+        v.swap_row(r1, r2);
+        g.swap_row(r1, r2);
     }
 
     template<tparams>
     void DiffDenseMatrix::swap_col(size_t c1, size_t c2) noexcept {
-        values.swap_col(c1, c2);
-        grads.swap_col(c1, c2);
+        v.swap_col(c1, c2);
+        g.swap_col(c1, c2);
     }
 
     template<tparams>
     inline DiffDenseMatrix::PtrTy DiffDenseMatrix::data_ptr(size_t row, size_t col) noexcept {
         assert(row < getRow() && "[Error]: Index out of range");
         assert(col < getCol() && "[Error]: Index out of range");
-        return PtrTy(values.data_ptr(row, col), grads.data_ptr(row, col));
+        return PtrTy(v.data_ptr(row, col), g.data_ptr(row, col));
     }
 
     template<tparams>

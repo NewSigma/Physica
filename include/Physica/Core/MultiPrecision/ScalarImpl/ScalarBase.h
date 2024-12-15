@@ -62,13 +62,13 @@ namespace Physica::Core {
         constexpr ~ScalarBase() = default;
         /* Operators */
         template<Scalar U>
-        __host__ __device__ inline void operator+=(const U& x);
+        __host__ __device__ inline void operator+=(const U& x) requires(!isReverseDiff || !ReverseDiff<U>);
         template<Scalar U>
-        __host__ __device__ inline void operator-=(const U& x);
+        __host__ __device__ inline void operator-=(const U& x) requires(!isReverseDiff || !ReverseDiff<U>);
         template<Scalar U>
-        __host__ __device__ inline void operator*=(const U& x);
+        __host__ __device__ inline void operator*=(const U& x) requires(!isReverseDiff);
         template<Scalar U>
-        __host__ __device__ inline void operator/=(const U& x);
+        __host__ __device__ inline void operator/=(const U& x) requires(!isReverseDiff);
         __host__ __device__ inline bool operator>(float s) const noexcept;
         __host__ __device__ inline bool operator<(float s) const noexcept;
         __host__ __device__ inline bool operator>(double s) const noexcept;
@@ -120,26 +120,36 @@ namespace Physica::Core {
 
     template<class Derived>
     template<Scalar U>
-    __host__ __device__ inline void ScalarBase<Derived>::operator+=(const U& x) {
-        Base::getDerived() = Base::getDerived() + x;
+    __host__ __device__ inline void ScalarBase<Derived>::operator+=(const U& x) requires(!isReverseDiff || !ReverseDiff<U>) {
+        auto& y = Base::getDerived();
+        if constexpr (isReverseDiff)
+            y.value() += x;
+        else
+            y = y + x;
     }
 
     template<class Derived>
     template<Scalar U>
-    __host__ __device__ inline void ScalarBase<Derived>::operator-=(const U& x) {
-        Base::getDerived() = Base::getDerived() - x;
+    __host__ __device__ inline void ScalarBase<Derived>::operator-=(const U& x) requires(!isReverseDiff || !ReverseDiff<U>) {
+        auto& y = Base::getDerived();
+        if constexpr (isReverseDiff)
+            y.value() -= x;
+        else
+            y = y - x;
     }
 
     template<class Derived>
     template<Scalar U>
-    __host__ __device__ inline void ScalarBase<Derived>::operator*=(const U& x) {
-        Base::getDerived() = Base::getDerived() * x;
+    __host__ __device__ inline void ScalarBase<Derived>::operator*=(const U& x) requires(!isReverseDiff) {
+        auto& y = Base::getDerived();
+        y = y * x;
     }
 
     template<class Derived>
     template<Scalar U>
-    __host__ __device__ inline void ScalarBase<Derived>::operator/=(const U& x) {
-        Base::getDerived() = Base::getDerived() / x;
+    __host__ __device__ inline void ScalarBase<Derived>::operator/=(const U& x) requires(!isReverseDiff) {
+        auto& y = Base::getDerived();
+        y = y / x;
     }
 
     template<class Derived>

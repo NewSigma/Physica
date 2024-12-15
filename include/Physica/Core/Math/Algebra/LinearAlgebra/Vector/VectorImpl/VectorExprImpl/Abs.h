@@ -36,7 +36,7 @@ namespace Physica::Core {
         template<class AnyPacket>
         [[nodiscard]] AnyPacket packet(size_t index) const {
             if constexpr (isComplexV)
-                return sqrt(toSquaredNormVector(Base::getExpr()).template packet<AnyPacket>(index));
+                return sqrt(Base::getExpr().squaredNorms().template packet<AnyPacket>(index));
             else
                 return abs(Base::getExpr().template packet<AnyPacket>(index));
         }
@@ -44,14 +44,14 @@ namespace Physica::Core {
         template<class AnyPacket>
         [[nodiscard]] AnyPacket packetPartial(size_t index, size_t count) const {
             if constexpr (isComplexV)
-                return sqrt(toSquaredNormVector(Base::getExpr()).template packetPartial<AnyPacket>(index, count));
+                return sqrt(Base::getExpr().squaredNorms().template packetPartial<AnyPacket>(index, count));
             else
                 return abs(Base::getExpr().template packetPartial<AnyPacket>(index, count));
         }
 
         ScalarType max() const {
             if constexpr (isComplexV)
-                return sqrt(toSquaredNormVector(Base::getExpr()).max());
+                return sqrt(Base::getExpr().squaredNorms().max());
             else
                 return Base::max();
         }

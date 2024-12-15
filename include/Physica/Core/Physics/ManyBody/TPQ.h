@@ -154,7 +154,7 @@ namespace Physica::Core {
             return RealType(-std::numeric_limits<T>::max());
         const RealType factor = reciprocal(maxabs);
         const auto expr1 = asVector() * factor;
-        const auto expr2 = toSquaredNormVector(expr1);
+        const auto expr2 = expr1.squaredNorms();
         const RealType dot = hadamard(expr2, other).sum();
         if (dot.isZero())
             return RealType(-std::numeric_limits<T>::max());

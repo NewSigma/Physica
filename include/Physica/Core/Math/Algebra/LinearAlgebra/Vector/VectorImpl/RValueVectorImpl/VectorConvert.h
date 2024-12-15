@@ -225,36 +225,6 @@ namespace Physica::Core {
         [[nodiscard]] size_t getLength() const { return v.getLength(); }
     };
 
-    template<Vector T>
-    [[nodiscard]] inline auto toRealVector(const RValueVector<T>& v) noexcept {
-        return RealVector<T>(v.getDerived());
-    }
-
-    template<Vector T>
-    [[nodiscard]] inline auto toImagVector(const RValueVector<T>& v) noexcept {
-        return ImagVector<T>(v.getDerived());
-    }
-
-    template<Vector T>
-    [[nodiscard]] inline auto toSquaredNormVector(const RValueVector<T>& v) noexcept {
-        return SquaredNormVector<T>(v.getDerived());
-    }
-
-    template<Vector T>
-    [[nodiscard]] inline auto toNormVector(const RValueVector<T>& v) noexcept {
-        return NormVector<T>(v.getDerived());
-    }
-
-    template<Vector T>
-    [[nodiscard]] inline auto toValueVector(const RValueVector<T>& v) noexcept {
-        return ValueVector<T>(v.getDerived());
-    }
-
-    template<Vector T, int GradOrder = 1>
-    [[nodiscard]] inline auto toGradVector(const RValueVector<T>& v) noexcept {
-        return GradVector<T, GradOrder>(v.getDerived());
-    }
-
     template<Vector T, int MaskOrder>
     [[nodiscard]] inline std::conditional<std::less<int>{}(MaskOrder, T::ScalarType::Order), DiffMaskVector<T, MaskOrder>, const T&>::type
     toDiffMaskVector(const RValueVector<T>& v) noexcept {

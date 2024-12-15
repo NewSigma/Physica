@@ -163,7 +163,7 @@ namespace Physica::Core {
 
         ValueType maxSample;
         if constexpr (T::isComplex)
-            maxSample = toRealVector(samples).max().value();
+            maxSample = samples.reals().max().value();
         else
             maxSample = samples.max().value(); // Real LnVegas assumes f(x) > 0, so ln(f(x)) is defined
         samples = exp(samples - maxSample);

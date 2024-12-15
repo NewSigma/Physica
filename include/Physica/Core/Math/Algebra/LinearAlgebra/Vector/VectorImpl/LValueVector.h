@@ -60,7 +60,7 @@ namespace Physica::Core {
         [[nodiscard]] inline RefTy operator[](size_t index);
         [[nodiscard]] inline ConstRefTy operator[](size_t index) const;
         /* Operations */
-        [[nodiscard]] ScalarType calc(size_t index) const;
+        [[nodiscard]] ConstRefTy calc(size_t index) const;
         template<class AnyPacket> void writePacket(size_t index, const AnyPacket packet);
         template<class AnyPacket> void writePacketPartial(size_t index, size_t count, const AnyPacket packet);
 

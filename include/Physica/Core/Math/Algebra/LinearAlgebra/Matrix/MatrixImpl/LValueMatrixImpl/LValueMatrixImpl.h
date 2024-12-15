@@ -98,16 +98,12 @@ namespace Physica::Core {
 
     template<class Derived>
     inline LValueMatrix<Derived>::RefTy LValueMatrix<Derived>::operator()(size_t row, size_t col) {
-        auto p = data_ptr(row, col);
-        if constexpr (isForwardDiff)
-            return RefTy(p);
-        else
-            return *p;
+        return *data_ptr(row, col);
     }
 
     template<class Derived>
     inline LValueMatrix<Derived>::ConstRefTy LValueMatrix<Derived>::operator()(size_t row, size_t col) const {
-        return const_cast<This&>(*this).operator()(row, col);
+        return *data_ptr(row, col);
     }
 
     template<class Derived>
@@ -297,7 +293,26 @@ namespace Physica::Core {
     }
 
     template<class Derived>
-    InverseMatrix<Derived> LValueMatrix<Derived>::inverse() const noexcept {
+    auto LValueMatrix<Derived>::sum() const -> CoDiff<ScalarType> {
+        if constexpr (isReverseDiff) {
+            const size_t maxMajor = Base::getMaxMajor();
+            const size_t maxMinor = Base::getMaxMinor();
+            ValueType v = 0;
+            for (size_t major = 0; major < maxMajor; ++major)
+                for (size_t minor = 0; minor < maxMinor; ++minor)
+                    v += refFromMajorMinor(major, minor).value();
+
+            const auto result = co_yield std::move(v);
+            for (size_t major = 0; major < maxMajor; ++major)
+                for (size_t minor = 0; minor < maxMinor; ++minor)
+                    refFromMajorMinor(major, minor).reverse(result.grad());
+        }
+        else
+            co_return Base::sum();
+    }
+
+    template<class Derived>
+    auto LValueMatrix<Derived>::inverse() const noexcept {
         return InverseMatrix<Derived>(this->getDerived());
     }
 
@@ -408,11 +423,6 @@ namespace Physica::Core {
         for (size_t major = 0; major < maxMajor; ++major)
             for (size_t minor = 0; minor < maxMinor; ++minor)
                 refFromMajorMinor(major, minor) = ScalarType::template random_any<Distribution, R>(dist);
-    }
-
-    template<class Derived>
-    LValueMatrix<Derived>::ScalarType LValueMatrix<Derived>::calc(size_t row, size_t col) const {
-        return ScalarType(*data_ptr(row, col));
     }
 
     template<class Derived>

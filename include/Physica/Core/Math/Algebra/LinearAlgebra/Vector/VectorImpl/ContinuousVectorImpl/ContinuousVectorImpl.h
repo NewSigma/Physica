@@ -26,9 +26,8 @@ namespace Physica::Core {
         template<LVector T1, Vector T2, bool enableSIMD>
         struct AddAssignImpl {
             static void run(T1& v1, const T2& v2) {
-                using ScalarType = T1::ScalarType;
                 for(size_t i = 0; i < v1.getLength(); ++i)
-                    v1[i] += ScalarType(v2.calc(i));
+                    v1[i] += v2.calc(i);
             }
         };
 
@@ -293,4 +292,15 @@ namespace Physica::Core {
         return std::cref(dataset);
     }
 #endif
+    template<class Derived>
+    auto ContinuousVector<Derived>::values() const noexcept -> ValuesRtnTy {
+        return Base::getDerived();
+    }
+
+    template<class Derived>
+    template<int GradOrder>
+    auto ContinuousVector<Derived>::grads() const noexcept {
+        static_assert(Diffable<ScalarType>, "[Error]: Undiffable vector does not have grads");
+        return GradVector<ContinuousVector<Derived>, GradOrder>(Base::getDerived());
+    }
 }

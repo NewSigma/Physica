@@ -176,7 +176,7 @@ namespace Physica::Core {
         if (numRefine == 1)
             return 1;
         const T mean1 = calcMean();
-        return (RealValue(numSample) / RealValue(numRefine - 1)) * divide(toSquaredNormVector(means - mean1), vars).sum(); // Normalize, refer to [2]
+        return (RealValue(numSample) / RealValue(numRefine - 1)) * divide((means - mean1).squaredNorms(), vars).sum(); // Normalize, refer to [2]
     }
 #ifdef PHYSICA_HDF5
     template<Scalar T>

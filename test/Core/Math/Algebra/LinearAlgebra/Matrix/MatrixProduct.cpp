@@ -43,15 +43,15 @@ int main() {
             CoDiff<DVector> y = m * x;
             y.sum().reverse();
         }
-        const Vector3D<float32> dx = toGradVector(x);
+        const Vector3D<float32> dx = x.grads();
         for (size_t i = 0; i < dx.getLength(); ++i)
-            if (!scalarNear(dx[i], toValueMatrix(m).col(i).sum(), 1E-15))
+            if (!scalarNear(dx[i], m.values().col(i).sum(), 1E-15))
                 return 1;
 
-        const MatrixType dm = toGradMatrix(m);
+        const MatrixType dm = m.grads();
         for (size_t r = 0; r < dm.getRow(); ++r)
             for (size_t c = 0; c < dm.getCol(); ++c)
-                if (!scalarNear(dm(r, c), toValueVector(x).calc(c), 1E-15))
+                if (!scalarNear(dm(r, c), x.values().calc(c), 1E-15))
                     return 1;
     }
     return 0;

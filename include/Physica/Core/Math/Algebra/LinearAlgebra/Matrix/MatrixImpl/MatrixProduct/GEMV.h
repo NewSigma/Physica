@@ -27,9 +27,10 @@ namespace Physica::Core {
     template<Matrix T, Vector U>
     class MatrixVectorProduct : public RValueVector<MatrixVectorProduct<T, U>> {
         using This = MatrixVectorProduct<T, U>;
-    public:
         using Base = RValueVector<This>;
+    public:
         using typename Base::ScalarType;
+        using typename Base::ValueType;
         using Base::isReverseDiff;
     private:
         const T& mat;
@@ -49,7 +50,8 @@ namespace Physica::Core {
         template<Vector V>
         void reverse(const V& grad_) const noexcept requires(isReverseDiff);
         /* Getters */
-        [[nodiscard]] inline ScalarType calc(size_t index) const;
+        [[nodiscard]] inline CoDiff<ScalarType> calc(size_t index) const;
+        [[nodiscard]] inline ValueType calc_value(size_t index) const;
         [[nodiscard]] __host__ __device__ size_t getLength() const { return mat.getRow(); }
         [[nodiscard]] const T& getLHS() const noexcept { return mat; }
         [[nodiscard]] const U& getRHS() const noexcept { return vec; }
@@ -63,14 +65,27 @@ namespace Physica::Core {
     template<Matrix T, Vector U>
     template<LVector V, class Executor>
     inline void MatrixVectorProduct<T, U>::assignTo(V& target) const {
-        if constexpr (MatrixOption::isColMatrix<T>()) {
-            target = mat.col(0) * vec.calc(0);
-            for (size_t i = 1; i < vec.getLength(); ++i)
-                target += mat.col(i) * vec.calc(i);
+        if constexpr (isReverseDiff) {
+            if constexpr (MatrixOption::isColMatrix<T>()) {
+                target = mat.values().col(0) * vec.values().calc(0);
+                for (size_t i = 1; i < vec.getLength(); ++i)
+                    target += mat.values().col(i) * vec.values().calc(i);
+            }
+            else {
+                for (size_t i = 0; i < getLength(); ++i)
+                    target[i] = calc_value(i);
+            }
         }
         else {
-            for (size_t i = 0; i < getLength(); ++i)
-                target[i] = calc(i);
+            if constexpr (MatrixOption::isColMatrix<T>()) {
+                target = mat.col(0) * vec.calc(0);
+                for (size_t i = 1; i < vec.getLength(); ++i)
+                    target += mat.col(i) * vec.calc(i);
+            }
+            else {
+                for (size_t i = 0; i < getLength(); ++i)
+                    target[i] = calc(i);
+            }
         }
     }
 
@@ -79,14 +94,19 @@ namespace Physica::Core {
     void MatrixVectorProduct<T, U>::reverse(const V& grad_) const noexcept requires(isReverseDiff) {
         const auto& grad = grad_.values();
         if constexpr (ReverseDiff<T>)
-            mat.reverse(grad * toValueVector(vec).transpose());
+            mat.reverse(grad * vec.values().transpose());
         if constexpr (ReverseDiff<U>)
-            vec.reverse(toValueMatrix(mat).transpose() * grad);
+            vec.reverse(mat.values().transpose() * grad);
     }
 
     template<Matrix T, Vector U>
-    inline MatrixVectorProduct<T, U>::ScalarType MatrixVectorProduct<T, U>::calc(size_t index) const {
+    inline auto MatrixVectorProduct<T, U>::calc(size_t index) const -> CoDiff<ScalarType> {
         return mat.row(index) * vec;
+    }
+
+    template<Matrix T, Vector U>
+    inline auto MatrixVectorProduct<T, U>::calc_value(size_t index) const -> ValueType {
+        return mat.values().row(index) * vec.values();
     }
 
     template<Matrix T, Vector U>

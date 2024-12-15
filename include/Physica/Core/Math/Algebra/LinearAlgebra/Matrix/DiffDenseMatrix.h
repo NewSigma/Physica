@@ -42,8 +42,8 @@ namespace Physica::Core {
         using GradType = ScalarType::GradType;
         using GradMatrix = std::conditional<Order == 1, ValueMatrix, DenseMatrix<GradType, Option, Row, Col>>::type;
 
-        ValueMatrix values;
-        GradMatrix grads;
+        ValueMatrix v;
+        GradMatrix g;
     public:
         DenseMatrix() = default;
         DenseMatrix(size_t row, size_t col);
@@ -76,8 +76,8 @@ namespace Physica::Core {
         using Base::data;
         [[nodiscard]] __host__ __device__ inline PtrTy data_ptr(size_t row, size_t col) noexcept;
         [[nodiscard]] __host__ __device__ inline ConstPtrTy data_ptr(size_t row, size_t col) const noexcept;
-        [[nodiscard]] size_t getCol() const noexcept { return values.getCol(); }
-        [[nodiscard]] size_t getRow() const noexcept { return values.getRow(); }
+        [[nodiscard]] size_t getCol() const noexcept { return v.getCol(); }
+        [[nodiscard]] size_t getRow() const noexcept { return v.getRow(); }
         /* Static members */
         [[nodiscard]] static This unitMatrix(size_t order);
         template<RandomGenerator R>

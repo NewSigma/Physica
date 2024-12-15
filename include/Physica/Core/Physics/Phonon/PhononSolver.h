@@ -417,7 +417,7 @@ namespace Physica::Core {
     VectorND<T> PhononSolver<T>::makeFreq(const EigenSolverType& eigen) {
         const size_t unitCellDOF = eigen.getSize();
         VectorND<T> result(unitCellDOF);
-        const VectorND<T> eigenvalues = toRealVector(eigen.getEigenvalues());
+        const VectorND<T> eigenvalues = eigen.getEigenvalues().reals();
         for (size_t i = 0; i < unitCellDOF; ++i)
             result[i] = eigenvalues[i].isNegative() ? -1 : 1;
         result = hadamard(result, sqrt(abs(eigenvalues)));

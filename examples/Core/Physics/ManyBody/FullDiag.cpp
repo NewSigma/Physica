@@ -52,7 +52,7 @@ VectorPair calcPair(ReprType repr_) {
     const auto& repr = hamilton.getRepr();
     VectorType numParticles(numState);
     for (size_t i = 0; i < numState; ++i)
-        numParticles += toSquaredNormVector(eigenvectors.row(i)) * ScalarType(repr[i].getNumParticle());
+        numParticles += eigenvectors.row(i).squaredNorms() * ScalarType(repr[i].getNumParticle());
     return std::make_pair(VectorType(solver.getEigenvalues()), std::move(numParticles));
 }
 

@@ -29,7 +29,7 @@ namespace Physica::Core {
     private:
         const T& v;
     public:
-        explicit ValueVector(const T& v_) : v(v_) {}
+        ValueVector(const T& v_) : v(v_) {}
         ValueVector(const This&) = delete;
         ValueVector(This&&) noexcept = delete;
         ~ValueVector() = default;
@@ -53,7 +53,7 @@ namespace Physica::Core {
     private:
         const T& v;
     public:
-        explicit GradVector(const T& v_) : v(v_) {}
+        GradVector(const T& v_) : v(v_) {}
         GradVector(const This&) = delete;
         GradVector(This&&) noexcept = delete;
         ~GradVector() = default;
@@ -65,14 +65,4 @@ namespace Physica::Core {
         [[nodiscard]] __host__ __device__ ConstPtrTy data_ptr(size_t i) const { return const_cast<This&>(*this).data_ptr(i); }
         [[nodiscard]] size_t getLength() const { return v.getLength(); }
     };
-
-    template<Vector T>
-    [[nodiscard]] inline auto toValueVector(const ContinuousVector<T>& v) noexcept {
-        return ValueVector<ContinuousVector<T>>(v.getDerived());
-    }
-
-    template<Vector T, int GradOrder = 1>
-    [[nodiscard]] inline auto toGradVector(const ContinuousVector<T>& v) noexcept {
-        return GradVector<ContinuousVector<T>, GradOrder>(v.getDerived());
-    }
 }

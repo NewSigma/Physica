@@ -23,7 +23,7 @@ namespace Physica::Core {
      * \class FormatedMatrix convert a matrix to text, either readable to human, or other softwares.
      */
     template<Matrix T>
-    class FormatedMatrix<T> {
+    class FormatedMatrix {
         using ScalarType = T::ScalarType;
 
         const T& data;

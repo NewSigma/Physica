@@ -19,6 +19,7 @@
 #pragma once
 
 #include <cassert>
+#include <forward_list>
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/MatrixImpl/FormatedMatrix.h"
 
 namespace Physica::Core {
@@ -211,7 +212,7 @@ namespace Physica::Core {
     }
 
     template<class Derived>
-    inline RValueMatrix<Derived>::ScalarType RValueMatrix<Derived>::calcFromMajorMinor(size_t major, size_t minor) const {
+    inline auto RValueMatrix<Derived>::calcFromMajorMinor(size_t major, size_t minor) const {
         return calc(rowFromMajorMinor(major, minor), colFromMajorMinor(major, minor));
     }
 
@@ -265,6 +266,33 @@ namespace Physica::Core {
     }
 
     template<class Derived>
+    inline auto RValueMatrix<Derived>::sum() const -> CoDiff<ScalarType> {
+        if constexpr (isReverseDiff) {
+            ValueType v = 0;
+            std::forward_list<CoDiff<ScalarType>> elems{};
+            for (size_t major = 0; major < getMaxMajor(); ++major) {
+                size_t minor = 0;
+                auto list = co_for([=, this]{ return minor < getMaxMinor(); }, [&]{ ++minor; }, [=, this, &v]{
+                    auto elem = calcFromMajorMinor(major, minor);
+                    v += elem.value();
+                    return elem;
+                });
+                elems.merge(std::move(list));
+            }
+            auto result = co_yield std::move(v);
+            for (auto& elem : elems)
+                elem.reverse(result.grad());
+        }
+        else {
+            ScalarType result = 0;
+            for (size_t major = 0; major < getMaxMajor(); ++major)
+                for (size_t minor = 0; minor < getMaxMinor(); ++minor)
+                    result += calcFromMajorMinor(major, minor);
+            co_return result;
+        }
+    }
+
+    template<class Derived>
     RValueMatrix<Derived>::ScalarType RValueMatrix<Derived>::trace() const {
         assert(getRow() == getCol());
         ScalarType result = ScalarType(0);
@@ -294,12 +322,34 @@ namespace Physica::Core {
     }
 
     template<class Derived>
-    RValueMatrix<Derived>::ScalarType RValueMatrix<Derived>::sum() const {
-        ScalarType result = 0;
-        for (size_t major = 0; major < getMaxMajor(); ++major)
-            for (size_t minor = 0; minor < getMaxMinor(); ++minor)
-                result += calcFromMajorMinor(major, minor);
-        return result;
+    auto RValueMatrix<Derived>::reals() const noexcept {
+        return RealMatrix<Derived>(Base::getDerived());
+    }
+
+    template<class Derived>
+    auto RValueMatrix<Derived>::imags() const noexcept {
+        return ImagMatrix<Derived>(Base::getDerived());
+    }
+    
+    template<class Derived>
+    auto RValueMatrix<Derived>::squaredNorms() const noexcept {
+        return SquaredNormMatrix<Derived>(Base::getDerived());
+    }
+
+    template<class Derived>
+    auto RValueMatrix<Derived>::norms() const noexcept {
+        return NormMatrix<Derived>(Base::getDerived());
+    }
+
+    template<class Derived>
+    auto RValueMatrix<Derived>::values() const noexcept {
+        return ValueMatrix<Derived>(Base::getDerived());
+    }
+
+    template<class Derived>
+    template<int GradOrder>
+    auto RValueMatrix<Derived>::grads() const noexcept {
+        return GradMatrix<Derived, GradOrder>(Base::getDerived());
     }
 
     template<class Derived>

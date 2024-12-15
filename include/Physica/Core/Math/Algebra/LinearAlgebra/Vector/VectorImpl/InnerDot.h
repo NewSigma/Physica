@@ -31,8 +31,8 @@ namespace Physica::Core {
         constexpr static bool isFastPacket1 = Traits<T1>::FastPacket;
         constexpr static bool isFastPacket2 = Traits<T2>::FastPacket;
         constexpr static bool enableSIMD = isFastPacket1 && isFastPacket2 && Helper::value;
-        constexpr static bool isForwardDiff = T1::isForwardDiff || T2::isForwardDiff;
-        constexpr static bool isReverseDiff = T1::isReverseDiff || T2::isReverseDiff;
+        constexpr static bool isForwardDiff = ScalarType::isForwardDiff;
+        constexpr static bool isReverseDiff = ScalarType::isReverseDiff;
     private:
         const T1& v1;
         const T2& v2;
@@ -59,12 +59,12 @@ namespace Physica::Core {
     auto InnerDot<T1, T2>::calc() const {
         if constexpr (isForwardDiff) {
             if constexpr (!T1::isForwardDiff)
-                return ScalarType(toValueVector(v2) * v1, toGradVector(v2) * v1);
+                return ScalarType(v2.values() * v1, v2.grads() * v1);
             else if constexpr (!T2::isForwardDiff)
-                return ScalarType(toValueVector(v1) * v2, toGradVector(v1) * v2);
+                return ScalarType(v1.values() * v2, v1.grads() * v2);
             else {
                 constexpr static int Order = ScalarType::Order - 1;
-                return ScalarType(toValueVector(v1) * toValueVector(v2), toDiffMaskVector<T2, Order>(v2) * toGradVector(v1) + toDiffMaskVector<T1, Order>(v1) * toGradVector(v2));
+                return ScalarType(v1.values() * v2.values(), toDiffMaskVector<T2, Order>(v2) * v1.grads() + toDiffMaskVector<T1, Order>(v1) * v2.grads());
             }
         }
         else if constexpr (Internal::EnableMKL<T1, T2>::value)
@@ -76,11 +76,11 @@ namespace Physica::Core {
     template<Vector T1, Vector T2>
     CoDiff<typename InnerDot<T1, T2>::ScalarType> InnerDot<T1, T2>::calc_base() const {
         if constexpr (isReverseDiff) {
-            auto result = co_yield toValueVector(v1) * toValueVector(v2);
+            auto result = co_yield v1.values() * v2.values();
             if constexpr (ReverseDiff<T1>)
-                v1.reverse(result.grad() * toValueVector(v2));
+                v1.reverse(v2.values() * result.grad());
             if constexpr (ReverseDiff<T2>)
-                v2.reverse(result.grad() * toValueVector(v1));
+                v2.reverse(v1.values() * result.grad());
         }
         else if constexpr (enableSIMD) {
             const size_t length = v1.getLength();

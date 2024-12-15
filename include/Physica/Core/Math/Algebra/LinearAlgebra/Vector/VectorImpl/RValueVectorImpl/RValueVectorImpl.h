@@ -111,8 +111,8 @@ namespace Physica::Core {
             if constexpr (isForwardDiff) {
                 using GradPacket = AnyPacket::GradType;
                 const auto& x = Base::getDerived();
-                auto values = toValueVector(x).template packet<ValuePacket>(index);
-                auto grads = toGradVector(x).template packet<GradPacket>(index);
+                auto values = x.values().template packet<ValuePacket>(index);
+                auto grads = x.grads().template packet<GradPacket>(index);
                 return AnyPacket(std::move(values), std::move(grads));
             }
             else {
@@ -145,8 +145,8 @@ namespace Physica::Core {
             if constexpr (isForwardDiff) {
                 using GradPacket = AnyPacket::GradType;
                 const auto& x = Base::getDerived();
-                auto values = toValueVector(x).template packetPartial<ValuePacket>(index, count);
-                auto grads = toGradVector(x).template packetPartial<GradPacket>(index, count);
+                auto values = x.values().template packetPartial<ValuePacket>(index, count);
+                auto grads = x.grads().template packetPartial<GradPacket>(index, count);
                 return AnyPacket(std::move(values), std::move(grads));
             }
             else {
@@ -206,7 +206,7 @@ namespace Physica::Core {
 
     template<class Derived>
     inline RValueVector<Derived>::RealType RValueVector<Derived>::squaredNorm() const {
-        return toSquaredNormVector(Base::getDerived()).sum();
+        return squaredNorms().sum();
     }
 
     template<class Derived>
@@ -379,7 +379,7 @@ namespace Physica::Core {
         const Derived& v = Base::getDerived();
         ValueType m;
         if constexpr (isComplex)
-            m = abs(toValueVector(v)).max();
+            m = abs(values()).max();
         else
             m = max().value();
         return ln(exp(v - m).sum()) + m;

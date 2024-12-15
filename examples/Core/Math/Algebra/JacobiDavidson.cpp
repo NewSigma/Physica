@@ -34,6 +34,6 @@ int main() {
     jd.compute(mat, VectorND<ComplexType>::random_uniform<RandomType>(mat.getRow()));
     jd.sort();
 
-    std::cout << toRealVector(jd.getEigenvalues()).format() << std::endl;
+    std::cout << jd.getEigenvalues().reals().format() << std::endl;
     return 0;
 }

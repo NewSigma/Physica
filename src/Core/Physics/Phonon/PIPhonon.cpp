@@ -61,7 +61,7 @@ namespace Physica::Core {
         for (size_t qPointId = 0; qPointId < kSpaceForceCorr.getLength(); ++qPointId) {
             const bool isGammaPoint = qPointId == 0;
             if (isGammaPoint) {
-                const DenseSymmMatrix<ScalarType> m = toRealMatrix(kSpaceMomentumCorr[qPointId]);
+                const DenseSymmMatrix<ScalarType> m = kSpaceMomentumCorr[qPointId].reals();
                 const Schur<ScalarType> schur(m, true);
                 for (size_t i = 0; i < base.getCol(); ++i) {
                     const ScalarType eigenvalue = schur.getMatrixT().diag().calc(i);

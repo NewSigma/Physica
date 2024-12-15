@@ -27,8 +27,13 @@ namespace Physica::Core {
     template<class MatrixType> class Conjugate;
     template<class MatrixType> class Hermite;
     template<class MatrixType> class RValueFlatten;
-    template<class MatrixType> class FormatedMatrix;
     template<class MatrixType, bool isLValueMatrix> class DiagVector;
+    template<class T> class RealMatrix;
+    template<class T> class ImagMatrix;
+    template<class T> class SquaredNormMatrix;
+    template<class T> class NormMatrix;
+    template<class T> class ValueMatrix;
+    template<class T, int GradOrder> class GradMatrix;
     /**
      * \class RValueMatrix is base class of matrixes that can be assigned to \class LValueMatrix
      * and other matrixes cannot be assigned to this class.
@@ -92,8 +97,8 @@ namespace Physica::Core {
         [[nodiscard]] inline DiagVector<Derived, false> diag();
         [[nodiscard]] inline const DiagVector<Derived, false> diag() const;
 
-        [[nodiscard]] ScalarType calc(size_t row, size_t col) const { return Base::getDerived().calc(row, col); }
-        [[nodiscard]] inline ScalarType calcFromMajorMinor(size_t major, size_t minor) const;
+        [[nodiscard]] auto calc(size_t row, size_t col) const { return Base::getDerived().calc(row, col); }
+        [[nodiscard]] inline auto calcFromMajorMinor(size_t major, size_t minor) const;
         [[nodiscard]] inline auto format() const noexcept;
 
         [[nodiscard]] RealType norm1() const;
@@ -102,12 +107,20 @@ namespace Physica::Core {
 
         [[nodiscard]] ScalarType max() const;
         [[nodiscard]] ScalarType min() const;
+        [[nodiscard]] CoDiff<ScalarType> sum() const;
         [[nodiscard]] ScalarType trace() const;
         [[nodiscard]] inline auto transpose() const noexcept;
         [[nodiscard]] inline auto conjugate() const noexcept;
         [[nodiscard]] inline auto hermite() const noexcept;
         [[nodiscard]] inline auto flatten() const noexcept;
-        [[nodiscard]] ScalarType sum() const;
+
+        auto reals() const noexcept;
+        auto imags() const noexcept;
+        auto squaredNorms() const noexcept;
+        auto norms() const noexcept;
+        auto values() const noexcept;
+        template<int GradOrder = 1>
+        auto grads() const noexcept;
         /* Getters */
         [[nodiscard]] __host__ __device__ size_t getRow() const noexcept { return Base::getDerived().getRow(); }
         [[nodiscard]] __host__ __device__ size_t getCol() const noexcept { return Base::getDerived().getCol(); }

@@ -45,8 +45,8 @@ namespace Physica::Core {
         Diff(T v_, GradType g_);
         template<Scalar U>
         explicit Diff(const U& x) requires(!ReverseDiff<U>);
-        Diff(const This&) = default;
-        Diff(This&&) noexcept = default;
+        Diff(const This&) requires(isForwardDiff) = default;
+        explicit(isReverseDiff) Diff(This&&) noexcept = default;
         ~Diff() = default;
         /* Operators */
         This& operator=(This obj) noexcept { swap(obj); return *this; }

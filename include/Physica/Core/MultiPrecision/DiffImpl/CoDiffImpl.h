@@ -18,7 +18,10 @@
  */
 #pragma once
 
+#include <forward_list>
 #include "CoDiff.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/Vector.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/Matrix.h"
 
 namespace Physica::Core {
     template<class Base>
@@ -26,14 +29,22 @@ namespace Physica::Core {
 
     template<class Base>
     template<ReverseDiff T>
-    CoDiffNode<Base>::CoDiffNode(T&& x) noexcept {
+    CoDiffNode<Base>::CoDiffNode(T&& x) noexcept requires(!IsCoDiff<T>::value) {
         auto fn = [](T&& x) noexcept -> This {
             LazyReverse<T&&> x_ = std::forward<T>(x);
             Base y;
-            y.resize(x_);
-            x_.assignTo(y);
+            if constexpr (Vector<T> || Matrix<T>) {
+                y.resize(x_);
+                x_.assignTo(y);
+            }
+
             auto result = co_yield std::move(y);
-            x_.reverse(result);
+            if constexpr (Scalar<T>)
+                x_.reverse(result.grad());
+            else {
+                static_assert(Vector<T> || Matrix<T>, "[Error]: Unexpected type T");
+                x_.reverse(result.grads());
+            }
         };
         *this = fn(std::forward<T>(x));
     }
@@ -47,7 +58,7 @@ namespace Physica::Core {
     CoDiffNode<Base>::~CoDiffNode() {
         if (handle) {
             assert(!handle.done() && "[Error]: Unexpected resume, this is a bug");
-            handle.promise().obj = std::move(*this);
+            handle.promise().obj = Base(std::move(*this));
             handle.resume();
             assert(handle.done() && "[Error]: Invalid reverse diff");
             handle.destroy();
