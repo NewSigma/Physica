@@ -18,62 +18,11 @@
  */
 #pragma once
 
-#include <cassert>
-#include <coroutine>
-#include <exception>
 #include "Physica/Core/MultiPrecision/Scalar.h"
 
 namespace Physica::Core {
-    template<class T>
-    struct IsCoDiff {
-        constexpr static bool value = false;
-    };
-
-    template<class T>
-    struct IsCoDiff<CoDiffNode<T>> {
-        constexpr static bool value = false;
-    };
-
     template<class T> requires(std::is_reference<T>::value)
     using LazyReverse = std::conditional<std::is_rvalue_reference<T>::value, std::remove_reference_t<T>, T&>::type;
-
-    template<>
-    class CoDiffNode<void> {
-        using This = CoDiffNode<void>;
-        class Impl {
-        public:
-            auto get_return_object() { return std::coroutine_handle<Impl>::from_promise(*this); };
-            std::suspend_never initial_suspend() noexcept { return {}; }
-            std::suspend_always final_suspend() noexcept { return {}; }
-            void return_void() noexcept {}
-            void unhandled_exception() { throw std::current_exception(); }
-        };
-    public:
-        using promise_type = Impl;
-    private:
-        std::coroutine_handle<Impl> handle = nullptr;
-    public:
-        CoDiffNode() = default;
-        CoDiffNode(std::coroutine_handle<Impl> handle_) noexcept : handle(handle_) {}
-        CoDiffNode(const This&) = delete;
-        CoDiffNode(This&& other) noexcept : handle(other.handle) { other.handle = nullptr; }
-        ~CoDiffNode() {
-            if (handle) {
-                assert(!handle.done() && "[Error]: Unexpected resume, this is a bug");
-                handle.resume();
-                assert(handle.done() && "[Error]: Invalid reverse diff");
-                handle.destroy();
-                handle = nullptr;
-            }
-        }
-        /* Operators */
-        This& operator=(This obj) noexcept { swap(obj); return *this; }
-        /* Operations */
-        void swap(This& __restrict obj) noexcept {
-            assert(this != &obj && "[Error]: Self swap is likely a bug");
-            std::swap(handle, obj.handle);
-        }
-    };
 
     template<class Base>
     class CoDiffNode : public Base {
@@ -82,11 +31,11 @@ namespace Physica::Core {
         static_assert(std::is_object<Base>::value, "[Error]: Must save the return by value");
         using This = CoDiffNode<Base>;
 
-        class Impl {
+        class Promise {
             struct suspend_yield : public std::suspend_always {
-                std::coroutine_handle<Impl> handle;
+                std::coroutine_handle<Promise> handle;
 
-                void await_suspend(std::coroutine_handle<Impl> handle_) noexcept {
+                void await_suspend(std::coroutine_handle<Promise> handle_) noexcept {
                     handle = std::move(handle_);
                 }
 
@@ -97,14 +46,14 @@ namespace Physica::Core {
         public:
             Base obj;
         public:
-            Impl() = default;
-            Impl(const Impl&) = default;
-            Impl(Impl&&) noexcept = default;
-            ~Impl() = default;
+            Promise() = default;
+            Promise(const Promise&) = default;
+            Promise(Promise&&) noexcept = default;
+            ~Promise() = default;
             /* Operators */
-            Impl& operator=(Impl obj) noexcept { swap(obj); return *this; }
+            Promise& operator=(Promise obj) noexcept { swap(obj); return *this; }
             /* Operations */
-            auto get_return_object() { return std::coroutine_handle<Impl>::from_promise(*this); };
+            auto get_return_object() { return std::coroutine_handle<Promise>::from_promise(*this); };
             std::suspend_never initial_suspend() noexcept { return {}; }
             std::suspend_always final_suspend() noexcept { return {}; }
             auto yield_value(Base obj_) noexcept {
@@ -117,16 +66,16 @@ namespace Physica::Core {
             void swap(This& __restrict obj_) noexcept { obj.swap(obj_); }
         };
     public:
-        using promise_type = Impl;
+        using promise_type = Promise;
         using typename Base::ScalarType;
     private:
-        std::coroutine_handle<Impl> handle = nullptr;
+        std::coroutine_handle<Promise> handle = nullptr;
     public:
         CoDiffNode() = default;
-        CoDiffNode(std::coroutine_handle<Impl> handle_) noexcept;
+        CoDiffNode(std::coroutine_handle<Promise> handle_) noexcept;
         template<ReverseDiff T>
         CoDiffNode(T&& x) noexcept requires(!IsCoDiff<T>::value);
-        CoDiffNode(const This&) = delete;
+        CoDiffNode(const This& other);
         CoDiffNode(This&& other) noexcept;
         ~CoDiffNode();
         /* Operators */
@@ -143,6 +92,11 @@ namespace Physica::Core {
 
     template<class Predicate, class Functor>
     [[nodiscard("[Warn]: Discarding a coroutine")]] auto co_if(Predicate&& pred, Functor&& func) noexcept(noexcept(func()));
+}
+
+namespace Physica {
+    template<class T>
+    class Traits<CoDiffNode<T>> : public Traits<T> {};
 }
 
 #include "CoDiffImpl.h"

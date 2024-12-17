@@ -83,16 +83,6 @@ namespace Physica::Core {
     }
 
     template<class Derived>
-    template<Scalar T>
-    inline Derived& ContinuousVector<Derived>::operator=(const T& x) requires(!isReverseDiff || ReverseDiff<T>) {
-        const size_t length = Base::getLength();
-        const auto x1 = ScalarType(x);
-        for (size_t i = 0; i < length; ++i)
-            (*this)[i] = x1;
-        return Base::getDerived();
-    }
-
-    template<class Derived>
     template<Vector V>
     inline void ContinuousVector<Derived>::operator+=(const V& v) {
         constexpr size_t Size1 = SizeAtCompile;

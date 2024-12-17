@@ -22,6 +22,7 @@
 #include "Physica/PlainStruct.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Grid/PeriodIndex3D.h"
 #include "Physica/Core/Parallel/Executor/CUDAExecutor.cuh"
+#include "PairModel.cuh"
 
 namespace Physica::Core {
     namespace Internal {
@@ -90,12 +91,12 @@ namespace Physica::Core {
     }
 
     template<class Derived>
-    template<Vector T, class Executor>
+    template<Vector V, class Executor>
     void device_obj<PairModel<Derived>>::forceAsync(
             const LatticeMatrix& lattice,
             const InvLatticeMatrix& invLattice,
             const PositionMatrix& cartesianPos,
-            ContinuousVector<T>& result) {
+            ContinuousVector<V>& result) {
         static_assert(std::is_same<Executor, CUDAExecutor>::value, "[Error]: Incorrect type of executor");
         dim3 gridDims;
         size_t numThread;
@@ -119,9 +120,9 @@ namespace Physica::Core {
     }
 
     template<class Derived>
-    template<Vector T, class Executor>
-    inline void device_obj<PairModel<Derived>>::forceAsync(const MDCellType& cell, ContinuousVector<T>& result) {
-        forceAsync<T, Executor>(cell.getLattice(), cell.getInvLattice(), cell.getPos(), result);
+    template<Vector V, class Executor>
+    inline void device_obj<PairModel<Derived>>::forceAsync(const MDCellType& cell, ContinuousVector<V>& result) {
+        forceAsync<V, Executor>(cell.getLattice(), cell.getInvLattice(), cell.getPos(), result);
     }
 
     template<class Derived>

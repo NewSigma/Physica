@@ -53,13 +53,11 @@ namespace Physica::Core {
     class BinaryMatrixExpr : public RValueMatrix<MatrixExpr<Type, LHS, RHS>> {
         using This = BinaryMatrixExpr<Type, LHS, RHS>;
         using Base = RValueMatrix<MatrixExpr<Type, LHS, RHS>>;
-        using LHS1 = LHS;
-        using RHS1 = std::conditional<Scalar<RHS>, typename RHS::ScalarType, RHS>::type;
     public:
         using Base::isReverseDiff;
     private:
-        const LHS1* lhs;
-        const RHS1* rhs;
+        const LHS* lhs;
+        const RHS* rhs;
     public:
         BinaryMatrixExpr(const LHS& lhs_, const RHS& rhs_) : lhs(&lhs_) {
             if constexpr (Scalar<RHS>)
@@ -79,8 +77,8 @@ namespace Physica::Core {
         /* Operations */
         [[nodiscard]] __host__ __device__ size_t getRow() const { return getLHS().getRow(); }
         [[nodiscard]] __host__ __device__ size_t getCol() const { return getLHS().getCol(); }
-        [[nodiscard]] __host__ __device__ const LHS1& getLHS() const noexcept { return *lhs; }
-        [[nodiscard]] __host__ __device__ const RHS1& getRHS() const noexcept { return *rhs; }
+        [[nodiscard]] __host__ __device__ const LHS& getLHS() const noexcept { return *lhs; }
+        [[nodiscard]] __host__ __device__ const RHS& getRHS() const noexcept { return *rhs; }
     };
 }
 

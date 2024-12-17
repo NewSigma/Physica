@@ -31,7 +31,7 @@ namespace Physica::Core {
         using DeviceVector = device_obj<VectorND<T>>;
     public:
         using Base::Dim;
-        using typename Base::ValueType;
+        using typename Base::Tv;
         using typename Base::LatticeMatrix;
         using typename Base::InvLatticeMatrix;
         using typename Base::PositionMatrix;
@@ -163,25 +163,25 @@ namespace Physica::Core {
         const T heightY_2Pi = reciprocal(hostRepLatt.row(1).norm());
         const T heightZ_2Pi = reciprocal(hostRepLatt.row(2).norm());
         constexpr double factor1 = 2 * M_PI * (1 - std::numeric_limits<T>::epsilon()); //To avoid rSpaceCutoff larger than max value
-        const T maxRSpaceCutoff = std::min(heightX_2Pi, std::min(heightY_2Pi, heightZ_2Pi)) * ValueType(factor1);
+        const T maxRSpaceCutoff = std::min(heightX_2Pi, std::min(heightY_2Pi, heightZ_2Pi)) * Tv(factor1);
         const T minLimit = T(SumPrec) / maxRSpaceCutoff;
         integralLimit = std::max(integralLimit_, minLimit).value();
 
-        const ValueType rSpaceCutoff = ValueType(SumPrec) / integralLimit.value();
+        const Tv rSpaceCutoff = Tv(SumPrec) / integralLimit.value();
         rSpaceSumRange = PeriodicCell<T, Dim>::estimateRange(lattice.toHost(), rSpaceCutoff);
-        kSpaceSumRange = PeriodicCell<T, Dim>::estimateRange(hostRepLatt, ValueType(SumPrec * 2) * integralLimit.value());
+        kSpaceSumRange = PeriodicCell<T, Dim>::estimateRange(hostRepLatt, Tv(SumPrec * 2) * integralLimit.value());
         makeTables();
         Base::setCutoff(rSpaceCutoff);
     }
 
     template<Scalar T, bool IsSmallCell>
     inline T device_obj<RSpaceEwald<T, IsSmallCell>>::calcSelfE() const {
-        return square(charges.toHost()).sum() * integralLimit / sqrt(ValueType(M_PI));
+        return square(charges.toHost()).sum() * integralLimit / sqrt(Tv(M_PI));
     }
 
     template<Scalar T, bool IsSmallCell>
     inline T device_obj<RSpaceEwald<T, IsSmallCell>>::calcGammaPointE() const {
-        return square(charges.toHost().sum()) * ValueType(-M_PI) / (ValueType(2) * square(integralLimit)) * inv_volume;
+        return square(charges.toHost().sum()) * Tv(-M_PI) / (Tv(2) * square(integralLimit)) * inv_volume;
     }
     /**
      * Optimize: make use of x1, x2, x3 are equal distance
@@ -189,7 +189,7 @@ namespace Physica::Core {
     template<Scalar T, bool IsSmallCell>
     __device__ inline T device_obj<RSpaceEwald<T, IsSmallCell>>::pot_functor(
             size_t i, size_t j, T r, [[maybe_unused]] T r2) const {
-        const T temp = r * repErfcStep + ValueType(0.5);
+        const T temp = r * repErfcStep + Tv(0.5);
         const int index = temp.toMachine();
         const T x1 = erfcStep * floor(temp);
         auto y = erfc_table.template segment<3>(index, index + 3);
@@ -200,7 +200,7 @@ namespace Physica::Core {
     template<Scalar T, bool IsSmallCell>
     __device__ inline T device_obj<RSpaceEwald<T, IsSmallCell>>::force_functor(
             size_t i, size_t j, T r, [[maybe_unused]] T r2) const {
-        const T temp = r * repErfcStep + ValueType(0.5);
+        const T temp = r * repErfcStep + Tv(0.5);
         const int index = temp.toMachine();
         const T x1 = erfcStep * floor(temp);
         auto y = erfc_table.template segment<3>(index, index + 3);
@@ -211,14 +211,14 @@ namespace Physica::Core {
     void device_obj<RSpaceEwald<T, IsSmallCell>>::makeTables() {
         VectorND<T> hostErfcTable(erfc_table.getLength());
         for (size_t i = 2; i < hostErfcTable.getLength(); ++i) {
-            const auto x = ValueType((i - 1) * ErfcTableStep);
+            const auto x = Tv((i - 1) * ErfcTableStep);
             hostErfcTable[i] = erfc(x) / x * integralLimit;
         }
         hostErfcTable[0] = hostErfcTable[1] = hostErfcTable[2]; // Smooth out divergent erfc(0) / 0
         hostErfcTable.toDevice(erfc_table);
-        erfcStep = ValueType(ErfcTableStep) / integralLimit;
+        erfcStep = Tv(ErfcTableStep) / integralLimit;
         repErfcStep = reciprocal(erfcStep);
-        repDoubleSquareStep = reciprocal(square(erfcStep) * ValueType(2));
+        repDoubleSquareStep = reciprocal(square(erfcStep) * Tv(2));
     }
 }
 

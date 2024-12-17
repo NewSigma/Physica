@@ -39,58 +39,58 @@ namespace Physica::Core {
         constexpr static bool IsPotDependOnAtomIndex = TraitsType::IsPotDependOnAtomIndex;
         constexpr static bool IsSmallCell = TraitsType::IsSmallCell;
     public:
-        using ScalarType = TraitsType::ScalarType;
         constexpr static unsigned int Dim = 3;
-
-        using ValueType = ScalarType::ValueType;
-        using MDCellType = MDCell<ScalarType, Dim>;
+        using ScalarType = TraitsType::ScalarType;
+        using T = ScalarType;
+        using Tv = T::ValueType;
+        using MDCellType = MDCell<T, Dim>;
         using LatticeMatrix = MDCellType::LatticeMatrix;
         using PositionMatrix = MDCellType::PositionMatrix;
-        using CellListType = CellList<ValueType>;
+        using CellListType = CellList<Tv>;
         using Index3D = GridBase::Index3D;
-        using Vec3D = Vector3D<ScalarType>;
-        using ForceConstMatrix = EmptyForceModel<ScalarType, Dim>::ForceConstMatrix;
+        using Vec3D = Vector3D<T>;
+        using ForceConstMatrix = EmptyForceModel<T, Dim>::ForceConstMatrix;
     private:
-        ValueType cutoff;
-        ScalarType squared_cutoff;
-        ScalarType pot_shift;
+        Tv cutoff;
+        Tv squared_cutoff;
+        Tv pot_shift;
     public:
         ~PairModel() = default;
         /* Operations */
-        [[nodiscard]] inline ScalarType pot_functor(size_t i, size_t j, ScalarType r, ScalarType r2) const;
-        [[nodiscard]] inline ScalarType force_functor(size_t i, size_t j, ScalarType r, ScalarType r2) const;
-        [[nodiscard]] inline ScalarType forceConst_functor(ScalarType r, ScalarType r2) const;
+        [[nodiscard]] inline CoDiff<T> pot_functor(size_t i, size_t j, const T& r, const T& r2) const;
+        [[nodiscard]] inline CoDiff<T> force_functor(size_t i, size_t j, const T& r, const T& r2) const;
+        [[nodiscard]] inline CoDiff<T> forceConst_functor(const T& r, const T& r2) const;
 
-        [[nodiscard]] ScalarType potentialV(const LatticeMatrix& lattice, const PositionMatrix& cartesianPos) const;
-        [[nodiscard]] inline ScalarType potentialV(const MDCellType& cell) const;
+        [[nodiscard]] CoDiff<T> potentialV(const LatticeMatrix& lattice, const PositionMatrix& cartesianPos) const;
+        [[nodiscard]] inline CoDiff<T> potentialV(const MDCellType& cell) const;
 
         template<class Executor>
-        [[nodiscard]] VectorND<ScalarType> force(const LatticeMatrix& lattice, const PositionMatrix& cartesianPos) const;
+        [[nodiscard]] VectorND<T> force(const LatticeMatrix& lattice, const PositionMatrix& cartesianPos) const;
         template<class Executor>
-        [[nodiscard]] inline VectorND<ScalarType> force(const MDCellType& cell) const;
+        [[nodiscard]] inline VectorND<T> force(const MDCellType& cell) const;
         template<Vector V, class Executor>
         inline void forceAsync(const LatticeMatrix& lattice, const PositionMatrix& cartesianPos, ContinuousVector<V>& result) const;
         template<Vector V, class Executor>
         inline void forceAsync(const MDCellType& cell, ContinuousVector<V>& result) const;
         template<class Executor>
-        [[nodiscard]] VectorND<ScalarType> force_short(const MDCellType& cell) const { return force<Executor>(cell); }
+        [[nodiscard]] VectorND<T> force_short(const MDCellType& cell) const { return force<Executor>(cell); }
         template<class Executor>
-        [[nodiscard]] VectorND<ScalarType> force_long(const MDCellType& cell) const { return VectorND<ScalarType>(cell.getNumParticle() * 3, 0); }
+        [[nodiscard]] VectorND<T> force_long(const MDCellType& cell) const { return VectorND<T>(cell.getNumParticle() * 3, 0); }
 
-        [[nodiscard]] ScalarType forceConst(const MDCellType& cell, size_t dof1, size_t dof2) const;
-        [[nodiscard]] ForceConstMatrix forceConst(const MDCellType& cell) const;
+        [[nodiscard]] CoDiff<T> forceConst(const MDCellType& cell, size_t dof1, size_t dof2) const;
+        [[nodiscard]] CoDiff<ForceConstMatrix> forceConst(const MDCellType& cell) const;
 
-        [[nodiscard]] LatticeMatrix virial(const MDCellType& cell) const;
-        [[nodiscard]] LatticeMatrix virial(const LatticeMatrix& lattice, const PositionMatrix& pos) const;
+        [[nodiscard]] CoDiff<LatticeMatrix> virial(const MDCellType& cell) const;
+        [[nodiscard]] CoDiff<LatticeMatrix> virial(const LatticeMatrix& lattice, const PositionMatrix& pos) const;
         void swap(PairModel& __restrict pair) noexcept;
         /* Getters */
-        [[nodiscard]] const ValueType& getCutoff() const noexcept { return cutoff; }
-        [[nodiscard]] const ScalarType& getSquaredCutoff() const noexcept { return squared_cutoff; }
+        [[nodiscard]] const Tv& getCutoff() const noexcept { return cutoff; }
+        [[nodiscard]] const Tv& getSquaredCutoff() const noexcept { return squared_cutoff; }
         /* Setters */
-        void setCutoff(ValueType cutoff_);
+        void setCutoff(Tv cutoff_);
     protected:
         PairModel() = default;
-        PairModel(ValueType cutoff_);
+        PairModel(Tv cutoff_);
         PairModel(const PairModel&) = default;
         PairModel(PairModel&&) noexcept = default;
         /* Operators */
@@ -99,50 +99,46 @@ namespace Physica::Core {
         template<class Functor>
         void forPairInCutoff(const LatticeMatrix& lattice, const PositionMatrix& cartesianPos, Functor func) const;
     private:
-        [[nodiscard]] ScalarType forceConstImpl(const MDCellType& cell, size_t dof1, size_t dof2) const;
+        [[nodiscard]] CoDiff<T> forceConstImpl(const MDCellType& cell, size_t dof1, size_t dof2) const;
     };
 
     template<class Derived>
-    PairModel<Derived>::PairModel(ValueType cutoff_) {
+    PairModel<Derived>::PairModel(Tv cutoff_) {
         setCutoff(std::move(cutoff_));
     }
 
     template<class Derived>
-    inline PairModel<Derived>::ScalarType
-    PairModel<Derived>::pot_functor(size_t i, size_t j, ScalarType r, ScalarType r2) const {
+    inline auto PairModel<Derived>::pot_functor(size_t i, size_t j, const T& r, const T& r2) const -> CoDiff<T> {
         return Base::getDerived().pot_functor(i, j, r, r2);
     }
 
     template<class Derived>
-    inline PairModel<Derived>::ScalarType
-    PairModel<Derived>::force_functor(size_t i, size_t j, ScalarType r, ScalarType r2) const {
+    inline auto PairModel<Derived>::force_functor(size_t i, size_t j, const T& r, const T& r2) const -> CoDiff<T> {
         return Base::getDerived().force_functor(i, j, r, r2);
     }
 
     template<class Derived>
-    inline PairModel<Derived>::ScalarType
-    PairModel<Derived>::forceConst_functor(ScalarType r, ScalarType r2) const {
+    inline auto PairModel<Derived>::forceConst_functor(const T& r, const T& r2) const -> CoDiff<T> {
         return Base::getDerived().forceConst_functor(r, r2);
     }
 
     template<class Derived>
-    PairModel<Derived>::ScalarType PairModel<Derived>::potentialV(
-            const LatticeMatrix& lattice, const PositionMatrix& cartesianPos) const {
+    auto PairModel<Derived>::potentialV(const LatticeMatrix& lattice, const PositionMatrix& cartesianPos) const -> CoDiff<T> {
         const auto& pos = cartesianPos;
         const auto range = MDCellType::estimateRange(lattice, cutoff);
         const size_t numParticle = pos.getRow();
 
-        ScalarType result = 0;
+        T result = 0;
         MDCellType::forCellInRange(range, lattice,
             [this, numParticle, &pos, &result](Vec3D delta) {
-                ScalarType temp = 0;
+                T temp = 0;
                 for (size_t i = 0; i < numParticle; ++i) {
                     CoDiff<Vec3D> from = pos.row(i) + delta;
                     for (size_t j = i; j < numParticle; ++j) {
-                        const ScalarType r2 = (from - pos.row(j)).squaredNorm();
-                        const bool isNotSelf = ValueType(std::numeric_limits<ScalarType>::min()) < r2;
+                        const T r2 = (from - pos.row(j)).squaredNorm();
+                        const bool isNotSelf = Tv(std::numeric_limits<T>::min()) < r2;
                         if (isNotSelf && r2 < squared_cutoff) {
-                            const ScalarType dist = sqrt(r2);
+                            const T dist = sqrt(r2);
                             if constexpr (IsPotDependOnAtomIndex)
                                 temp += pot_functor(i, j, dist, r2);
                             else
@@ -156,23 +152,23 @@ namespace Physica::Core {
     }
 
     template<class Derived>
-    inline PairModel<Derived>::ScalarType PairModel<Derived>::potentialV(const MDCellType& cell) const {
+    inline auto PairModel<Derived>::potentialV(const MDCellType& cell) const -> CoDiff<T> {
         return potentialV(cell.getLattice(), cell.getPos());
     }
 
     template<class Derived>
     template<class Executor>
-    VectorND<typename PairModel<Derived>::ScalarType> PairModel<Derived>::force(
+    VectorND<typename PairModel<Derived>::T> PairModel<Derived>::force(
             const LatticeMatrix& lattice, const PositionMatrix& cartesianPos) const {
         const size_t DOF = cartesianPos.getRow() * cartesianPos.getCol();
-        VectorND<ScalarType> result(DOF);
-        forceAsync<VectorND<ScalarType>, Executor>(lattice, cartesianPos, result);
+        VectorND<T> result(DOF);
+        forceAsync<VectorND<T>, Executor>(lattice, cartesianPos, result);
         return result;
     }
 
     template<class Derived>
     template<class Executor>
-    inline VectorND<typename PairModel<Derived>::ScalarType> PairModel<Derived>::force(const MDCellType& cell) const {
+    inline VectorND<typename PairModel<Derived>::T> PairModel<Derived>::force(const MDCellType& cell) const {
         return force<Executor>(cell.getLattice(), cell.getPos());
     }
 
@@ -180,9 +176,9 @@ namespace Physica::Core {
     template<Vector V, class Executor>
     inline void PairModel<Derived>::forceAsync(
             const LatticeMatrix& lattice, const PositionMatrix& cartesianPos, ContinuousVector<V>& result) const {
-        result = ScalarType(0);
-        auto kernel = [this, &result](size_t i, size_t j, Vec3D r, ScalarType norm1, ScalarType norm2) {
-            const ScalarType f_norm = force_functor(i, j, norm1, norm2);
+        result = T(0);
+        auto kernel = [this, &result](size_t i, size_t j, Vec3D r, const T& norm1, const T& norm2) {
+            const T f_norm = force_functor(i, j, norm1, norm2);
             r *= f_norm / norm1;
             auto force_i = result.template segment<Dim>(Dim * i, Dim * i + Dim);
             auto force_j = result.template segment<Dim>(Dim * j, Dim * j + Dim);
@@ -199,72 +195,106 @@ namespace Physica::Core {
     }
 
     template<class Derived>
-    PairModel<Derived>::ScalarType PairModel<Derived>::forceConst(const MDCellType& cell, size_t dof1, size_t dof2) const {
+    auto PairModel<Derived>::forceConst(const MDCellType& cell, size_t dof1, size_t dof2) const -> CoDiff<T> {
         static_assert(TraitsType::IsPeriodBoundary, "[Error]: Fixed boundary is not implemented");
         const size_t atom1 = dof1 / 3U;
         const size_t atom2 = dof2 / 3U;
         [[unlikely]] if (atom1 == atom2) {
             const size_t dir2 = dof2 % 3U;
-            ScalarType result = 0;
-            for (size_t i = 0; i < cell.getNumParticle(); ++i) {
-                if (i == atom2)
-                    continue;
-                const size_t dof_i = Dim * i + dir2;
-                result += forceConstImpl(cell, dof1, dof_i);
+            if constexpr (ReverseDiff<T>) {
+                Tv result = 0;
+                size_t i = 0;
+                auto _ = co_for([&]{ return i < cell.getNumParticle(); }, [&]{ ++i; }, [&]() -> CoDiff<T> {
+                    if (i == atom2)
+                        return {};
+                    const size_t dof_i = Dim * i + dir2;
+                    const auto fc = forceConstImpl(cell, dof1, dof_i);
+                    result += fc;
+                    return fc;
+                });
+                std::ignore = co_yield result;
             }
-            return result;
+            else {
+                T result = 0;
+                for (size_t i = 0; i < cell.getNumParticle(); ++i) {
+                    if (i == atom2)
+                        continue;
+                    const size_t dof_i = Dim * i + dir2;
+                    result += forceConstImpl(cell, dof1, dof_i);
+                }
+                co_return std::move(result);
+            }
         }
-        return -forceConstImpl(cell, dof1, dof2);
+
+        const auto result = -forceConstImpl(cell, dof1, dof2);
+        if constexpr (ReverseDiff<T>) {
+            auto r = co_yield result.value();
+            result.reverse(r.grad());
+        }
+        else
+            co_return std::move(result);
     }
 
     template<class Derived>
-    PairModel<Derived>::ForceConstMatrix PairModel<Derived>::forceConst(const MDCellType& cell) const {
+    auto PairModel<Derived>::forceConst(const MDCellType& cell) const -> CoDiff<ForceConstMatrix> {
+        using MatrixType = std::conditional<ReverseDiff<T>, DenseSymmMatrix<Tv>, ForceConstMatrix>::type;
+        using T1 = MatrixType::ScalarType;
         const size_t numParticle = cell.getNumParticle();
         const size_t dof = cell.getDOF();
-        ForceConstMatrix result(dof);
+        
+        MatrixType result(dof);
         for (size_t atom_r = 0; atom_r < numParticle; ++atom_r) {
             for (size_t dim_r = 0; dim_r < Dim; ++dim_r) {
                 const size_t r = atom_r * Dim + dim_r;
                 for (size_t c = (atom_r + 1) * Dim; c < dof; ++c)
-                    result(r, c) = forceConst(cell, r, c);
+                    result(r, c) = T1(forceConst(cell, r, c));
 
                 //Handle self interaction
                 for (size_t dim_c = dim_r; dim_c < Dim; ++dim_c) {
                     const size_t c = atom_r * Dim + dim_c;
-                    ScalarType temp = 0;
+                    T temp = 0;
                     for (size_t atom_c = 0; atom_c < numParticle; ++atom_c) {
                         if (atom_r == atom_c)
                             continue;
                         temp += result(r, atom_c * Dim + dim_c);
                     }
-                    result(r, c) = -temp;
+                    result(r, c) = -T1(temp);
                 }
             }
         }
-        return result;
+
+        if constexpr (ReverseDiff<T>) {
+            std::ignore = co_yield std::move(result);
+            noImpl(__func__);
+        }
+        else
+            co_return std::move(result);
     }
 
     template<class Derived>
-    PairModel<Derived>::LatticeMatrix
-    PairModel<Derived>::virial(const MDCellType& cell) const {
+    auto PairModel<Derived>::virial(const MDCellType& cell) const -> CoDiff<LatticeMatrix> {
         return virial(cell.getLattice(), cell.getPos());
     }
     /**
      * Reference:
-     * [1] M. J. Louwerse and E. J. Baerends, Chem. Phys. Lett. 421, 138 (2006); https://doi.org/10.1016/J.CPLETT.2006.01.087
+     * [1] Chem. Phys. Lett. 421, 138 (2006); https://doi.org/10.1016/J.CPLETT.2006.01.087
      */
     template<class Derived>
-    PairModel<Derived>::LatticeMatrix
-    PairModel<Derived>::virial(const LatticeMatrix& lattice, const PositionMatrix& pos) const {        
+    auto PairModel<Derived>::virial(const LatticeMatrix& lattice, const PositionMatrix& pos) const -> CoDiff<LatticeMatrix> {        
         LatticeMatrix result(Dim, Dim, 0);
-        auto kernel = [this, &result](size_t i, size_t j, Vec3D r, ScalarType norm1, ScalarType norm2) {
-            const ScalarType f_norm = force_functor(i, j, norm1, norm2);
+        auto kernel = [this, &result](size_t i, size_t j, Vec3D r, const T& norm1, const T& norm2) {
+            const T f_norm = force_functor(i, j, norm1, norm2);
             const CoDiff<Vec3D> f = r * (f_norm / norm1);
             result += f * r.transpose();
         };
         forPairInCutoff(lattice, pos, kernel);
         result *= reciprocal(MDCellType::getVolume(lattice));
-        return result;
+        if constexpr (ReverseDiff<T>) {
+            std::ignore = co_yield std::move(result);
+            noImpl(__func__);
+        }
+        else
+            co_return std::move(result);
     }
 
     template<class Derived>
@@ -276,12 +306,12 @@ namespace Physica::Core {
     }
 
     template<class Derived>
-    void PairModel<Derived>::setCutoff(ValueType cutoff_) {
+    void PairModel<Derived>::setCutoff(Tv cutoff_) {
         cutoff = std::move(cutoff_);
         squared_cutoff = square(cutoff);
         if constexpr (!IsPotDependOnAtomIndex) {
             constexpr int unused = 0;
-            pot_shift = pot_functor(unused, unused, cutoff, squared_cutoff);
+            pot_shift = pot_functor(unused, unused, cutoff, squared_cutoff).value();
         }
     }
 
@@ -300,10 +330,10 @@ namespace Physica::Core {
                         for (size_t j = i; j < numParticle; ++j) {
                             auto to = pos.row(j);
                             r = to - from;
-                            const ScalarType norm2 = r.squaredNorm();
-                            const bool isNotSelf = ScalarType(std::numeric_limits<ScalarType>::min()) < norm2;
+                            const T norm2 = r.squaredNorm();
+                            const bool isNotSelf = T(std::numeric_limits<T>::min()) < norm2;
                             if (isNotSelf && norm2 < squared_cutoff) {
-                                const ScalarType norm1 = sqrt(norm2);
+                                const T norm1 = sqrt(norm2);
                                 func(i, j, r, norm1, norm2);
                             }
                         }
@@ -326,9 +356,9 @@ namespace Physica::Core {
                             const size_t atom2 = arr1[j];
                             const auto to = pos.row(atom2);
                             CoDiff<Vec3D> r = to - from;
-                            const ScalarType norm2 = r.squaredNorm();
+                            const T norm2 = r.squaredNorm();
                             if (norm2 < squared_cutoff) {
-                                const ScalarType norm1 = sqrt(norm2);
+                                const T norm1 = sqrt(norm2);
                                 func(atom1, atom2, r, norm1, norm2);
                             }
                         }
@@ -347,9 +377,9 @@ namespace Physica::Core {
                         for (const size_t atom2 : arr2) {
                             const auto to = pos.row(atom2);
                             r = to - from;
-                            const ScalarType norm2 = r.squaredNorm();
+                            const T norm2 = r.squaredNorm();
                             if (norm2 < squared_cutoff) {
-                                const ScalarType norm1 = sqrt(norm2);
+                                const T norm1 = sqrt(norm2);
                                 func(atom1, atom2, r, norm1, norm2);
                             }
                         }
@@ -362,7 +392,7 @@ namespace Physica::Core {
     }
 
     template<class Derived>
-    PairModel<Derived>::ScalarType PairModel<Derived>::forceConstImpl(const MDCellType& cell, size_t dof1, size_t dof2) const {
+    auto PairModel<Derived>::forceConstImpl(const MDCellType& cell, size_t dof1, size_t dof2) const -> CoDiff<T> {
         static_assert(!IsPotDependOnAtomIndex, "[Error]: It is assumed force not depends on atom index");
         constexpr int unused = 0;
         const size_t atom1 = dof1 / 3U;
@@ -371,12 +401,18 @@ namespace Physica::Core {
         const size_t dir1 = dof1 % 3U;
         const size_t dir2 = dof2 % 3U;
         const CoDiff<Vec3D> delta = cell.getPos().row(atom2) - cell.getPos().row(atom1);
-        const ScalarType squaredNorm = delta.squaredNorm();
-        const ScalarType norm = sqrt(squaredNorm);
-        const ScalarType factor = delta[dir1] * delta[dir2] / squaredNorm;
-        const ScalarType term1 = forceConst_functor(norm, squaredNorm) * factor;
-        const ScalarType term2 = force_functor(unused, unused, norm, squaredNorm) / norm * (ScalarType(dir1 == dir2 ? 1.0 : 0.0) - factor);
-        return term1 - term2;
+        const auto squaredNorm = delta.squaredNorm();
+        const auto norm = sqrt(squaredNorm);
+        const auto factor = delta[dir1] * delta[dir2] / squaredNorm;
+        const auto term1 = forceConst_functor(norm, squaredNorm) * factor;
+        const auto term2 = force_functor(unused, unused, norm, squaredNorm) / norm * (T(dir1 == dir2 ? 1.0 : 0.0) - factor);
+        const auto result = term1 - term2;
+        if constexpr (ReverseDiff<T>) {
+            auto r = co_yield result.value();
+            result.reverse(r.grad());
+        }
+        else
+            co_return std::move(result);
     }
 }
 

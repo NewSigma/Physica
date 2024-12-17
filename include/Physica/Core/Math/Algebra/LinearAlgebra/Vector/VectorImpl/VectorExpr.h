@@ -56,13 +56,11 @@ namespace Physica::Core {
     class BinaryVectorExpr : public RValueVector<VectorExpr<Type, LHS, RHS>> {
         using This = BinaryVectorExpr<Type, LHS, RHS>;
         using Base = RValueVector<VectorExpr<Type, LHS, RHS>>;
-        using LHS1 = LHS;
-        using RHS1 = std::conditional<Scalar<RHS>, typename RHS::ScalarType, RHS>::type;
     public:
         using Base::isReverseDiff;
     private:
-        const LHS1* lhs;
-        const RHS1* rhs;
+        const LHS* lhs;
+        const RHS* rhs;
     public:
         BinaryVectorExpr(const LHS& lhs_, const RHS& rhs_) : lhs(&lhs_), rhs(&rhs_) {
             if constexpr (!Scalar<RHS>)
@@ -76,8 +74,8 @@ namespace Physica::Core {
         This& operator=(This&&) noexcept = delete;
         /* Operations */
         [[nodiscard]] __host__ __device__ size_t getLength() const { return getLHS().getLength(); }
-        [[nodiscard]] __host__ __device__ const LHS1& getLHS() const noexcept { return *lhs; }
-        [[nodiscard]] __host__ __device__ const RHS1& getRHS() const noexcept { return *rhs; }
+        [[nodiscard]] __host__ __device__ const LHS& getLHS() const noexcept { return *lhs; }
+        [[nodiscard]] __host__ __device__ const RHS& getRHS() const noexcept { return *rhs; }
     };
 }
 

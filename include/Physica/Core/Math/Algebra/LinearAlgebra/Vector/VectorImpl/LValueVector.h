@@ -34,6 +34,7 @@ namespace Physica::Core {
         using BlockType = LVectorBlock<Derived, Length>;
     public:
         using typename Base::ScalarType;
+        using typename Base::ValueType;
         using Base::isForwardDiff;
         using Base::isReverseDiff;
     protected:
@@ -47,7 +48,7 @@ namespace Physica::Core {
         inline This& operator=(const This& v);
         inline This& operator=(This&& v);
 
-        template<Scalar T> inline Derived& operator=(const T& x);
+        template<Scalar T> inline Derived& operator=(const T& x) requires(!isReverseDiff || !ReverseDiff<T>);
         template<Scalar T> void operator+=(const T& x) { Base::getDerived() = Base::getDerived() + x; }
         template<Scalar T> void operator-=(const T& x) { Base::getDerived() = Base::getDerived() - x; }
         template<Scalar T> void operator*=(const T& x) { Base::getDerived() = Base::getDerived() * x; }
@@ -61,6 +62,7 @@ namespace Physica::Core {
         [[nodiscard]] inline ConstRefTy operator[](size_t index) const;
         /* Operations */
         [[nodiscard]] ConstRefTy calc(size_t index) const;
+        [[nodiscard]] ValueType calc_value(size_t index) const;
         template<class AnyPacket> void writePacket(size_t index, const AnyPacket packet);
         template<class AnyPacket> void writePacketPartial(size_t index, size_t count, const AnyPacket packet);
 

@@ -105,11 +105,12 @@ namespace Physica::Core {
         [[nodiscard]] inline const DiagVector<Derived, true> diag() const;
 
         [[nodiscard]] ConstRefTy calc(size_t row, size_t col) const { return operator()(row, col); }
+        [[nodiscard]] ValueType calc_value(size_t row, size_t col) const { return calc(row, col).value(); }
 
         [[nodiscard]] CoDiff<ScalarType> sum() const;
 
         [[nodiscard]] auto inverse() const noexcept;
-        [[nodiscard]] ScalarType determinate() const;
+        [[nodiscard]] CoDiff<ScalarType> determinate() const;
         void rowReduce(size_t r1, size_t r2, size_t elementIndex);
         void colReduce(size_t c1, size_t c2, size_t elementIndex);
         inline void majorReduce(size_t v1, size_t v2, size_t elementIndex);

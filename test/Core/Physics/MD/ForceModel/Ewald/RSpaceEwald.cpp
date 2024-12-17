@@ -31,13 +31,13 @@ namespace Physica {
         using MassVector = MDCellType::MassVector;
     public:
         static void run() {
-            const ScalarType volume = 125;
+            ScalarType volume = 125;
             const size_t cellSize = 3;
             const auto cell = makeSystem(volume, cellSize);
             const auto& pos = cell.getPos();
             VectorND<ScalarType> charges(cell.getNumParticle(), 1.0);
             auto tail = charges.tail(cell.getNumParticle() / 2);
-            tail = ScalarType(-1);
+            tail = float64(-1);
             RSpaceEwald<ScalarType, false> ewald(cell.getLattice(), std::move(charges));
             ewald.potentialV(pos).reverse();
             /* Test press */ {
@@ -48,15 +48,15 @@ namespace Physica {
             }
         }
     private:
-        static MDCellType makeSystem(ScalarType volume, size_t cellSize) {
+        static MDCellType makeSystem(ScalarType& volume, size_t cellSize) {
             constexpr size_t numMolecularUnitCell = 2;
             LatticeMatrix lattice = MDCellType::LatticeMatrix::unitMatrix(3);
-            const ScalarType latticeConst = cbrt(volume);
+            const auto latticeConst = cbrt(volume);
             lattice *= latticeConst;
 
             PositionMatrix pos(numMolecularUnitCell, 3, ValueType(0));
             auto row = pos.row(1);
-            row = ScalarType(0.5);
+            row = float64(0.5);
             pos *= latticeConst;
 
             MassVector massVec(numMolecularUnitCell, 1);

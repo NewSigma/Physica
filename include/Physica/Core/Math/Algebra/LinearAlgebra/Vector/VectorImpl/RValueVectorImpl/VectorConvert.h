@@ -177,7 +177,8 @@ namespace Physica::Core {
         This& operator=(const This&) = delete;
         This& operator=(This&&) = delete;
         /* Getters */
-        [[nodiscard]] ScalarType calc(size_t s) const { return v.calc(s).value(); }
+        [[nodiscard]] ScalarType calc(size_t s) const { return v.calc_value(s); }
+        [[nodiscard]] ScalarType calc_value(size_t s) const { return calc(s); }
         [[nodiscard]] size_t getLength() const { return v.getLength(); }
     };
 

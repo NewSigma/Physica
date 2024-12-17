@@ -272,7 +272,7 @@ namespace Physica::Core {
             std::forward_list<CoDiff<ScalarType>> elems{};
             for (size_t major = 0; major < getMaxMajor(); ++major) {
                 size_t minor = 0;
-                auto list = co_for([=, this]{ return minor < getMaxMinor(); }, [&]{ ++minor; }, [=, this, &v]{
+                auto list = co_for([&]{ return minor < getMaxMinor(); }, [&]{ ++minor; }, [&]{
                     auto elem = calcFromMajorMinor(major, minor);
                     v += elem.value();
                     return elem;

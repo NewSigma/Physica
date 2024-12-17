@@ -23,11 +23,11 @@
 using namespace Physica::Core;
 
 using ValueType = float64;
-using ScalarType = Diff<ValueType, DiffMode::Reverse, 1>;
+using dfloat = Diff<ValueType, DiffMode::Reverse, 1>;
 
 class PressTest {
     using RandomType = Random<MT19937>;
-    using MDCellType = MDCell<ScalarType>;
+    using MDCellType = MDCell<dfloat>;
     using LatticeMatrix = MDCellType::LatticeMatrix;
     using PositionMatrix = MDCellType::PositionMatrix;
     using MassVector = MDCellType::MassVector;
@@ -36,19 +36,19 @@ class PressTest {
     constexpr static double pair_cutoff = 15;
 public:
     static void run() {
-        const ScalarType volume = 8000;
+        dfloat volume = 8000;
         const auto cell = makeSystem(volume);
-        SilveraGoldman<ScalarType, true> sg(pair_cutoff);
+        SilveraGoldman<dfloat, true> sg(pair_cutoff);
         sg.potentialV(cell).reverse();
-        const ScalarType press_diff = -volume.grad();
-        const ScalarType press = sg.virial(cell).trace() / ScalarType(3);
-        if (!scalarNear(press_diff.value(), press.value(), 1E-14))
+        const float64 press_diff = -volume.grad();
+        const float64 press = sg.virial(cell).trace().value() / float64(3);
+        if (!scalarNear(press_diff, press, 1E-14))
             exit(EXIT_FAILURE);
     }
 private:
-    static MDCellType makeSystem(ScalarType volume) {
+    static MDCellType makeSystem(dfloat& volume) {
         LatticeMatrix lattice = MDCellType::LatticeMatrix::unitMatrix(3);
-        const ScalarType latticeConst = cbrt(volume);
+        const auto latticeConst = cbrt(volume);
         lattice *= latticeConst;
 
         PositionMatrix pos(numMolecular, 3);
@@ -61,22 +61,22 @@ private:
 };
 
 int main() {
-    SilveraGoldman<ScalarType, true> sg(1.0);
+    SilveraGoldman<dfloat, true> sg(1.0);
     {
-        ScalarType r = 2.0;
-        const ScalarType r2 = square(r);
+        dfloat r = 2.0;
+        const auto r2 = square(r);
         sg.pot_functor(0, 0, r, r2).reverse();
-        const ScalarType f = -r.grad();
-        const ScalarType f1 = sg.force_functor(0, 0, r, r2);
+        const dfloat f = -r.grad();
+        const dfloat f1 = sg.force_functor(0, 0, r, r2);
         if (!scalarNear(f, f1, 1E-15))
             return 1;
     }
     {
-        ScalarType r = 2.0;
-        const ScalarType r2 = square(r);
+        dfloat r = 2.0;
+        const auto r2 = square(r);
         sg.force_functor(0, 0, r, r2).reverse();
-        const ScalarType fc = -r.grad();
-        const ScalarType fc1 = sg.forceConst_functor(r, r2);
+        const dfloat fc = -r.grad();
+        const dfloat fc1 = sg.forceConst_functor(r, r2);
         if (!scalarNear(fc, fc1, 1E-15))
             return 1;
     }

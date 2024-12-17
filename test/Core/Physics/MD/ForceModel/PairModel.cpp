@@ -23,7 +23,7 @@
 #include "Physica/Core/Math/Random/Random.h"
 
 using namespace Physica::Core;
-using ScalarType = Diff<float64, DiffMode::Reverse, 1>;
+using dfloat = Diff<float64, DiffMode::Reverse, 1>;
 /**
  * Params referenced from [1]
  * 
@@ -31,7 +31,7 @@ using ScalarType = Diff<float64, DiffMode::Reverse, 1>;
  * [1] J. Chem. Phys. 122:184503 (2005); https://doi.org/10.1063/1.1893956
  */
 class ForceConstTest {
-    using MDCellType = MDCell<ScalarType>;
+    using MDCellType = MDCell<dfloat>;
     using RandomType = Random<MT19937, 12345>;
     constexpr static unsigned int numMolecular = 32;
     constexpr static double pair_cutoff = 15;
@@ -39,13 +39,13 @@ class ForceConstTest {
     constexpr static double mass = PhyConst<AU>::atomMass(1) * 2;
 public:
     static void run() {
-        SilveraGoldman<ScalarType, true> sg(pair_cutoff);
+        SilveraGoldman<dfloat, true> sg(pair_cutoff);
         const auto cell = makeSystem();
         const auto fc = sg.forceConst(cell);
         for (size_t i = 0; i < cell.getDOF(); ++i) {
             for (size_t j = 0; j < cell.getDOF(); ++j) {
-                const ScalarType fc1 = sg.forceConst(cell, i, j);
-                if (!scalarNear<ScalarType>(fc(i, j), fc1, 1E-15))
+                const auto fc1 = sg.forceConst(cell, i, j);
+                if (!scalarNear<dfloat>(fc(i, j), fc1, 1E-15))
                     exit(EXIT_FAILURE);
             }
         }
@@ -65,12 +65,12 @@ private:
 
 int main() {
     {
-        LJModel<ScalarType> lj(1.0, 1.0);
-        ScalarType r = 1.0;
+        LJModel<dfloat> lj(1.0, 1.0);
+        dfloat r = 1.0;
         lj.pot_functor(0, 0, r, square(r)).reverse();
-        const ScalarType f = -r.grad();
-        const ScalarType f1 = lj.force_functor(0, 0, r, square(r));
-        if (!scalarNear(f, f1, 1E-15))
+        const float64 f = -r.grad();
+        const auto f1 = lj.force_functor(0, 0, r, square(r));
+        if (!scalarNear(f.value(), f1.value(), 1E-15))
             return 1;
     }
     ForceConstTest::run();

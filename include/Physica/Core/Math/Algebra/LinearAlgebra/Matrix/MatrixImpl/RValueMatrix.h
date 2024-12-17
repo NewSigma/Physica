@@ -35,9 +35,7 @@ namespace Physica::Core {
     template<class T> class ValueMatrix;
     template<class T, int GradOrder> class GradMatrix;
     /**
-     * \class RValueMatrix is base class of matrixes that can be assigned to \class LValueMatrix
-     * and other matrixes cannot be assigned to this class.
-     * In other words, you cannot take the address of elements in a RValueMatrix but can calculate its value.
+     * \class RValueMatrix: The base class of all matrixes
      */
     template<class Derived>
     class RValueMatrix : public CRTPBase<RValueMatrix<Derived>> {
@@ -98,6 +96,7 @@ namespace Physica::Core {
         [[nodiscard]] inline const DiagVector<Derived, false> diag() const;
 
         [[nodiscard]] auto calc(size_t row, size_t col) const { return Base::getDerived().calc(row, col); }
+        [[nodiscard]] auto calc_value(size_t row, size_t col) const { return Base::getDerived().calc_value(row, col); }
         [[nodiscard]] inline auto calcFromMajorMinor(size_t major, size_t minor) const;
         [[nodiscard]] inline auto format() const noexcept;
 

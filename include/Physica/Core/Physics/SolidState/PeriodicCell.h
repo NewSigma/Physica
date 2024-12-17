@@ -72,7 +72,7 @@ namespace Physica::Core {
         [[nodiscard]] VectorType minDistVector(size_t id_from, size_t id_to) const;
         [[nodiscard]] VectorType minDistVector(VectorType from, size_t id_to) const;
         void normalize();
-        void scale(T factor);
+        void scale(const T& factor);
         void niggliReduce(double precision, unsigned int maxIteration);
         void niggliReduce2D(unsigned int maxIteration);
         [[nodiscard]] inline LatticeMatrix makeRepLattice() const;
@@ -129,8 +129,8 @@ namespace Physica::Core {
         [[nodiscard]] InvLatticeMatrix makeInvLattice() const noexcept { return lattice.inverse(); }
         void toDirect(const InvLatticeMatrix& invLattice);
         void normalize_direct();
-        void scale_direct(T factor);
-        void scale_cartesian(T factor);
+        CoDiff<void> scale_direct(const T& factor);
+        CoDiff<void> scale_cartesian(const T& factor);
         template<ExtendCellOption Option>
         void toSuperCellDirect(unsigned int x, unsigned int y, unsigned int z);
         void toUnitCellDirect(unsigned int x, unsigned int y, unsigned int z);
@@ -306,7 +306,7 @@ namespace Physica::Core {
     }
 
     template<Scalar T, unsigned int Dim>
-    void PeriodicCell<T, Dim>::scale(T factor) {
+    void PeriodicCell<T, Dim>::scale(const T& factor) {
         if (type == Type::Direct)
             scale_direct(factor);
         else
@@ -759,18 +759,24 @@ namespace Physica::Core {
     }
 
     template<Scalar T, unsigned int Dim>
-    void PeriodicCell<T, Dim>::scale_direct(T factor) {
+    CoDiff<void> PeriodicCell<T, Dim>::scale_direct(const T& factor) {
         assert(factor.isPositive());
         assert(type == Type::Direct);
         lattice *= factor;
+        co_await std::suspend_always{};
+        if constexpr (ReverseDiff<T>)
+            factor.reverse(lattice.grads().sum());
     }
 
     template<Scalar T, unsigned int Dim>
-    void PeriodicCell<T, Dim>::scale_cartesian(T factor) {
+    CoDiff<void> PeriodicCell<T, Dim>::scale_cartesian(const T& factor) {
         assert(factor.isPositive());
         assert(type == Type::Cartesian);
         lattice *= factor;
         pos *= factor;
+        co_await std::suspend_always{};
+        if constexpr (ReverseDiff<T>)
+            factor.reverse(lattice.grads().sum() + pos.grads().sum());
     }
 
     template<Scalar T, unsigned int Dim>

@@ -34,6 +34,7 @@ namespace Physica::Core {
             T* arr[Order + 1];
         };
     public:
+        ScalarPtr() {}
         ScalarPtr(std::pair<T*, GradPtrTy> pair_) : pair(std::move(pair_)) {}
         ScalarPtr(T* pValue, GradPtrTy pGrad) : pair(std::make_pair(pValue, pGrad)) {}
         explicit ScalarPtr(ScalarType& x);
@@ -63,7 +64,8 @@ namespace Physica::Core {
         inline void swap(This& __restrict obj) noexcept;
         /* Getters */
         [[nodiscard]] T* value_ptr() const noexcept { return pair.first; }
-        [[nodiscard]] GradPtrTy grad_ptr() const noexcept { return pair.second; }
+        template<int GradOrder = 1>
+        [[nodiscard]] auto grad_ptr() const noexcept;
     };
 
     template<Scalar T, DiffMode Mode, int Order>
@@ -107,5 +109,15 @@ namespace Physica::Core {
     inline void ScalarPtr<Diff<T, Mode, Order>>::swap(This& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         pair.swap(obj.pair);
+    }
+
+    template<Scalar T, DiffMode Mode, int Order>
+    template<int GradOrder>
+    auto ScalarPtr<Diff<T, Mode, Order>>::grad_ptr() const noexcept {
+        static_assert(GradOrder > 0, "[Error]: Invalid order");
+        if constexpr (GradOrder == 1)
+            return pair.second;
+        else
+            return grad_ptr<GradOrder - 1>();
     }
 }

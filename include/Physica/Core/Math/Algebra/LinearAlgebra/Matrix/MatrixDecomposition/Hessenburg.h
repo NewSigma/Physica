@@ -67,7 +67,7 @@ namespace Physica::Core {
     template<Matrix M>
     Hessenburg<T, Order>::Hessenburg(const M& source) {
         resize(source.getRow());
-        compute(source.getDerived());
+        compute(source);
     }
 
     template<Scalar T, size_t Order>
@@ -85,8 +85,7 @@ namespace Physica::Core {
     }
 
     template<Scalar T, size_t Order>
-    HouseholderSequence<typename Hessenburg<T, Order>::WorkingMatrix>
-    Hessenburg<T, Order>::getMatrixQ() const noexcept {
+    auto Hessenburg<T, Order>::getMatrixQ() const noexcept -> HouseholderSequence<WorkingMatrix> {
         HouseholderSequence result(working);
         result.setSize(working.getRow() - 2);
         result.setShift(1);

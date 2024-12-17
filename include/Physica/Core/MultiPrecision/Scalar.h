@@ -19,14 +19,16 @@
 #pragma once
 
 #include <algorithm>
+#include <cassert>
 #include <cstdint>
+#include <exception>
 #include <limits>
 #include <concepts>
-#include <coroutine> // IWYU pragma: export
+#include <coroutine>
 #include "Physica/Macro.h"
+#include "Physica/Core/Utils/Type.h"
 
 namespace Physica::Core {
-    template<class ScalarType> class ScalarRef;
     template<class ScalarType> class ScalarPtr;
     template<class Derived> class ScalarBase;
 
@@ -38,16 +40,6 @@ namespace Physica::Core {
     template<class T>
     struct IsScalarRef<ScalarRef<T>> {
         constexpr static bool value = true;
-    };
-
-    template<class T>
-    struct remove_ScalarRef {
-        using Type = T;
-    };
-
-    template<class T>
-    struct remove_ScalarRef<ScalarRef<T>> {
-        using Type = T;
     };
 
     template<class T>
@@ -108,6 +100,54 @@ namespace Physica::Core {
     template<class T>
     class CoDiffNode;
 
+    template<>
+    class CoDiffNode<void> {
+        using This = CoDiffNode<void>;
+        class Promise {
+        public:
+            auto get_return_object() { return std::coroutine_handle<Promise>::from_promise(*this); };
+            std::suspend_never initial_suspend() noexcept { return {}; }
+            std::suspend_always final_suspend() noexcept { return {}; }
+            void return_void() noexcept {}
+            void unhandled_exception() { throw std::current_exception(); }
+        };
+    public:
+        using promise_type = Promise;
+    private:
+        std::coroutine_handle<Promise> handle = nullptr;
+    public:
+        CoDiffNode() = default;
+        CoDiffNode(std::coroutine_handle<Promise> handle_) noexcept : handle(handle_) {}
+        CoDiffNode(const This&) = delete;
+        CoDiffNode(This&& other) noexcept : handle(other.handle) { other.handle = nullptr; }
+        ~CoDiffNode() {
+            if (handle) {
+                assert(!handle.done() && "[Error]: Unexpected resume, this is a bug");
+                handle.resume();
+                assert(handle.done() && "[Error]: Invalid reverse diff");
+                handle.destroy();
+                handle = nullptr;
+            }
+        }
+        /* Operators */
+        This& operator=(This obj) noexcept { swap(obj); return *this; }
+        /* Operations */
+        void swap(This& __restrict obj) noexcept {
+            assert(this != &obj && "[Error]: Self swap is likely a bug");
+            std::swap(handle, obj.handle);
+        }
+    };
+
+    template<class T>
+    struct IsCoDiff {
+        constexpr static bool value = false;
+    };
+
+    template<class T>
+    struct IsCoDiff<CoDiffNode<T>> {
+        constexpr static bool value = false;
+    };
+
     template<class T>
     struct remove_codiff {
         using Type = T;
@@ -120,8 +160,8 @@ namespace Physica::Core {
 
     template<class T>
     using CoDiff = std::conditional<std::is_void<T>::value || ReverseDiff<T>
-                 , CoDiffNode<typename remove_codiff<std::remove_cvref_t<T>>::Type>
-                 , typename remove_ScalarRef<std::remove_cvref_t<T>>::Type>::type;
+                 , CoDiffNode<typename remove_codiff<typename remove_cvref<T>::Type>::Type>
+                 , typename remove_cvref<T>::Type>::type;
 
     namespace Internal {
         /**
@@ -155,9 +195,4 @@ namespace Physica::Core {
             using Type = Type2;
         };
     }
-}
-
-namespace Physica {
-    template<class T>
-    class Traits<CoDiffNode<T>> : public Traits<T> {};
 }

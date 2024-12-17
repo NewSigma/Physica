@@ -48,16 +48,10 @@ namespace Physica::Core {
 
     template<Scalar T, DiffMode Mode, int Order>
     template<int MaskOrder>
-    auto& Diff<T, Mode, Order>::mask() noexcept {
+    auto Diff<T, Mode, Order>::mask() const noexcept {
         using MaskedType = std::conditional<MaskOrder == 0, const T&, const Diff<typename Base::ValueType, Mode, MaskOrder>&>::type;
         using ResultType = std::conditional<std::less<int>{}(MaskOrder, Order), MaskedType, const This&>::type;
         return reinterpret_cast<ResultType>(*this);
-    }
-
-    template<Scalar T, DiffMode Mode, int Order>
-    template<int MaskOrder>
-    const auto& Diff<T, Mode, Order>::mask() const noexcept {
-        return const_cast<This&>(*this).mask<MaskOrder>();
     }
 
     template<Scalar T, DiffMode Mode, int Order>
@@ -67,7 +61,7 @@ namespace Physica::Core {
         g1.value() += grad_.value();
         if constexpr (Order != 1)
             g1.reverse(grad_.grad());
-        return value();
+        return v;
     }
 
     template<Scalar T, DiffMode Mode, int Order>
@@ -77,7 +71,7 @@ namespace Physica::Core {
 
     template<Scalar T, DiffMode Mode, int Order>
     auto Diff<T, Mode, Order>::conjugate() const {
-        return This(value().conjugate(), grad().conjugate());
+        return This(v.conjugate(), g.conjugate());
     }
 
     template<Scalar T, DiffMode Mode, int Order>
@@ -266,10 +260,17 @@ namespace Physica::Core {
     }
 
     template<Scalar T, Scalar U>
-    [[nodiscard]] inline auto operator/(const U& x, const T& y) requires(Diffable<T> && !Diffable<U>) {
-        using ResultType = Internal::BinaryScalarOpRtnTy<T, U>::Type;
-        const auto rep = reciprocal(y.value());
-        return ResultType(y.value() * rep, -y.value() * y.grad() * square(rep));
+    [[nodiscard]] inline CoDiff<typename Internal::BinaryScalarOpRtnTy<T, U>::Type>
+    operator/(const U& x, const T& y) requires(Diffable<T> && !Diffable<U>) {
+        if constexpr (ForwardDiff<T>) {
+            using ResultType = Internal::BinaryScalarOpRtnTy<T, U>::Type;
+            const auto rep = reciprocal(y.value());
+            co_return ResultType(y.value() * rep, -y.value() * y.grad() * square(rep));
+        }
+        else {
+            const auto rep = reciprocal(y);
+            std::ignore = co_yield rep * x;
+        }
     }
 
     template<Scalar T>

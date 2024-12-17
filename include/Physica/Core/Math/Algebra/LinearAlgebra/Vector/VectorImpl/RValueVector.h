@@ -77,9 +77,6 @@ namespace Physica::Core {
     }
     /**
      * \class RValueVector: The base class for all vectors.
-     * 
-     * You cannot take the address of elements in an RValueVector.
-     * An RValueVector can be assigned to an LValueVector, but no other vector classes can be assigned to an RValueVector.
      */
     template<class Derived>
     class RValueVector : public CRTPBase<RValueVector<Derived>> {
@@ -106,6 +103,7 @@ namespace Physica::Core {
         inline void assignTo(V& v) const;
 
         [[nodiscard]] auto calc(size_t index) const { return Base::getDerived().calc(index); }
+        [[nodiscard]] auto calc_value(size_t index) const { return Base::getDerived().calc_value(index); }
         template<class AnyPacket>
         [[nodiscard]] inline AnyPacket packet(size_t index) const;
         template<class AnyPacket>
@@ -116,11 +114,11 @@ namespace Physica::Core {
         [[nodiscard]] auto conjugate() const noexcept;
         [[nodiscard]] auto hermite() const noexcept;
 
-        [[nodiscard]] inline RealType norm1() const;
-        [[nodiscard]] inline RealType norm2() const;
-        [[nodiscard]] inline RealType norm() const;
-        [[nodiscard]] inline RealType squaredNorm() const;
-        [[nodiscard]] RealType lnSquaredNorm() const;
+        [[nodiscard]] inline CoDiff<RealType> norm1() const;
+        [[nodiscard]] inline CoDiff<RealType> norm2() const;
+        [[nodiscard]] inline CoDiff<RealType> norm() const;
+        [[nodiscard]] inline CoDiff<RealType> squaredNorm() const;
+        [[nodiscard]] inline RealType lnSquaredNorm() const;
         [[nodiscard]] inline RealType normInf() const;
 
         [[nodiscard]] ScalarType max() const;

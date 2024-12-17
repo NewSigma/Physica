@@ -44,10 +44,13 @@ namespace Physica::Core {
 
     template<class Derived>
     template<Scalar T>
-    inline Derived& LValueVector<Derived>::operator=(const T& x) {
-        const ScalarType x1 = x;
-        for (size_t i = 0; i < Base::getLength(); ++i)
-            (*this)[i] = x1;
+    inline Derived& LValueVector<Derived>::operator=(const T& x) requires(!isReverseDiff || !ReverseDiff<T>) {
+        for (size_t i = 0; i < Base::getLength(); ++i) {
+            if constexpr (ReverseDiff<T>)
+                (*this)[i] = x.value();
+            else
+                (*this)[i] = x;
+        }
         return Base::getDerived();
     }
 
@@ -64,6 +67,11 @@ namespace Physica::Core {
     template<class Derived>
     LValueVector<Derived>::ConstRefTy LValueVector<Derived>::calc(size_t index) const {
         return operator[](index);
+    }
+
+    template<class Derived>
+    LValueVector<Derived>::ValueType LValueVector<Derived>::calc_value(size_t index) const {
+        return operator[](index).value();
     }
 
     template<class Derived>

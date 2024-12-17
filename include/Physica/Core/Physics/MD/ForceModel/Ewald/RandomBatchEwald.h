@@ -32,7 +32,7 @@ namespace Physica::Core {
         using This = RandomBatchEwald<T, R>;
         using Base = RSpaceEwald<T, false>;
         using Base::Dim;
-        using typename Base::ValueType;
+        using typename Base::Tv;
         using typename Base::LatticeMatrix;
         using typename Base::PositionMatrix;
         using SamplePool = DenseMatrix<T, MatrixOption::Col | MatrixOption::Element, Dynamic, Dim>;
@@ -181,7 +181,7 @@ namespace Physica::Core {
     template<Scalar T, RandomGenerator R>
     void RandomBatchEwald<T, R>::updateSumGauss() {
         sumGauss = 0;
-        const T factor = reciprocal(square(ValueType(2) * Base::getIntegralLimit()));
+        const T factor = reciprocal(square(Tv(2) * Base::getIntegralLimit()));
         PeriodicCell<T, Dim>::forReducedCellInRange( // Reduce cell using time reversal symmetry
             Base::getKSpaceSumRange(), Base::getRepLattice(), [this, factor](Vector3D<T> delta) {
                 const T squaredNorm = T(delta.squaredNorm());
@@ -189,7 +189,7 @@ namespace Physica::Core {
                 if (isNotGammaPoint)
                     sumGauss += exp(-squaredNorm * factor);
             });
-        sumGauss *= ValueType(2);
+        sumGauss *= Tv(2);
     }
 
     template<Scalar T, RandomGenerator R>

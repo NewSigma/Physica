@@ -18,6 +18,7 @@
  */
 #pragma once
 
+#include "../RValueVector.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/VectorImpl/FormatedVector.h"
 
 namespace Physica::Core {
@@ -33,19 +34,22 @@ namespace Physica::Core {
             using ScalarType = T1::ScalarType;
             using AnyPacket = BestPacket<ScalarType, SizeAtCompile>::Type;
             constexpr static size_t PacketSize = AnyPacket::size();
+            constexpr static bool isReverseDiff = ReverseDiff<ScalarType>;
 
             inline static void run(T1& v1, const T2& v2) {
                 assert(v1.getLength() == v2.getLength() && "[Error]: Size mismatch between two vector");
-                if constexpr (Internal::EnableSIMD<T1, T2>::value)
+                if constexpr (Internal::EnableSIMD<T1, T2>::value && !isReverseDiff)
                     run_simd(v1, v2);
                 else
                     run_for(v1, v2);
             }
         private:
             inline static void run_for(T1& v1, const T2& v2) {
-                using ScalarType = T1::ScalarType;
                 Executor::parallel_for([&](size_t i) {
-                    v1[i] = ScalarType(v2.calc(i));
+                    if constexpr (isReverseDiff)
+                        v1[i] = v2.calc_value(i);
+                    else
+                        v1[i] = v2.calc(i);
                 }, v2.getLength(), Executor::getNumThread()).wait();
             }
 
@@ -190,22 +194,22 @@ namespace Physica::Core {
     }
 
     template<class Derived>
-    inline RValueVector<Derived>::RealType RValueVector<Derived>::norm1() const {
+    inline auto RValueVector<Derived>::norm1() const -> CoDiff<RealType> {
         return abs(Base::getDerived()).sum();
     }
 
     template<class Derived>
-    inline RValueVector<Derived>::RealType RValueVector<Derived>::norm2() const {
+    inline auto RValueVector<Derived>::norm2() const -> CoDiff<RealType> {
         return norm();
     }
 
     template<class Derived>
-    inline RValueVector<Derived>::RealType RValueVector<Derived>::norm() const {
-        return sqrt(Base::getDerived().squaredNorm());
+    inline auto RValueVector<Derived>::norm() const -> CoDiff<RealType> {
+        return sqrt(squaredNorm());
     }
 
     template<class Derived>
-    inline RValueVector<Derived>::RealType RValueVector<Derived>::squaredNorm() const {
+    inline auto RValueVector<Derived>::squaredNorm() const -> CoDiff<RealType> {
         return squaredNorms().sum();
     }
 
@@ -357,7 +361,7 @@ namespace Physica::Core {
         else if constexpr (isReverseDiff) {
             size_t i = 0;
             ValueType v = 0;
-            auto elems = co_for([this, i]() { return i < getLength(); }, [&]() { ++i; }, [&, this, i]() {
+            auto elems = co_for([&]() { return i < getLength(); }, [&]() { ++i; }, [&]() {
                 auto elem = calc(i);
                 v += elem.value();
                 return elem;

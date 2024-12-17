@@ -48,7 +48,7 @@ namespace Physica::Core {
         MDCell(Poscar<U> poscar);
         MDCell(LatticeMatrix lattice, PositionMatrix pos, MassVector massVec_);
         /* Operations */
-        void scale(T factor);
+        void scale(const T& factor);
         void normalize();
         void normalizePos(PositionMatrix& target) const;
         void toDirect(PositionMatrix& target) const { Base::toDirect(target, invLattice); }
@@ -120,7 +120,7 @@ namespace Physica::Core {
     }
 
     template<Scalar T, unsigned int Dim>
-    void MDCell<T, Dim>::scale(T factor) {
+    void MDCell<T, Dim>::scale(const T& factor) {
         Base::scale_cartesian(factor);
         invLattice *= Core::reciprocal(factor);
     }

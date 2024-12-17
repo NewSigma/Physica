@@ -38,7 +38,7 @@ namespace Physica::Core {
         using This = Ewald<T, REwaldType>;
         using Base = REwaldType;
         using Base::Dim;
-        using typename Base::ValueType;
+        using typename Base::Tv;
         using typename Base::LatticeMatrix;
         using typename Base::PositionMatrix;
         using ComplexType = Complex<T>;
@@ -123,7 +123,7 @@ namespace Physica::Core {
         const size_t numParticle = getNumParticle();
         const T rSpaceSum = Base::potentialV(pos);
         T kSpaceSum = 0;
-        const T factor = reciprocal(square(ValueType(2) * getIntegralLimit()));
+        const T factor = reciprocal(square(Tv(2) * getIntegralLimit()));
         VectorND<T> dots(numParticle);
         VectorND<T> sin_vec(numParticle);
         VectorND<T> cos_vec(numParticle);
@@ -140,7 +140,7 @@ namespace Physica::Core {
                     kSpaceSum += (square(sum_cos) + square(sum_sin)) / (squaredNorm * exp(squaredNorm * factor));
                 }
             });
-        kSpaceSum *= ValueType(4 * M_PI) * Base::getInvVolume();
+        kSpaceSum *= Tv(4 * M_PI) * Base::getInvVolume();
         kSpaceSum += gammaPointE;
         return kSpaceSum + rSpaceSum - selfE;
     }
@@ -166,7 +166,7 @@ namespace Physica::Core {
         VectorND<T> dots(numParticle);
         VectorND<T> sin_vec(numParticle);
         VectorND<T> cos_vec(numParticle);
-        const T factor1 = reciprocal(square(ValueType(2) * getIntegralLimit()));
+        const T factor1 = reciprocal(square(Tv(2) * getIntegralLimit()));
         PeriodicCell<T, Dim>::forReducedCellInRange( // Reduce cell using time reversal symmetry
             getKSpaceSumRange(), getRepLattice(), [this, numParticle, factor1, &dots, &sin_vec, &cos_vec, &pos, &kSpaceSum](Vector3D<T> delta) {
                 const auto& charges = getCharges();
@@ -217,7 +217,7 @@ namespace Physica::Core {
 
     template<Scalar T, class REwaldType>
     Ewald<T, REwaldType>::LatticeMatrix Ewald<T, REwaldType>::virial(const PositionMatrix& pos) {
-        const T factor = reciprocal(square(ValueType(2) * getIntegralLimit()));
+        const T factor = reciprocal(square(Tv(2) * getIntegralLimit()));
         const size_t numParticle = getNumParticle();
         VectorND<T> dots(numParticle);
         VectorND<T> sin_vec(numParticle);
@@ -304,7 +304,7 @@ namespace Physica::Core {
         const T charge1 = charges[atom1];
         const T charge2 = charges[atom2];
 
-        const T factor1 = reciprocal(square(ValueType(2) * getIntegralLimit()));
+        const T factor1 = reciprocal(square(Tv(2) * getIntegralLimit()));
         ComplexType kSpaceSum = 0;
         PeriodicCell<T, Dim>::forCellInRange(getKSpaceSumRange(), getRepLattice(),
             [this, atom1, atom2, direction1, direction2, charge1, charge2, waveQ, factor1, &pos, &kSpaceSum](Vector3D<T> waveG) {
@@ -343,7 +343,7 @@ namespace Physica::Core {
                 }
                 kSpaceSum += temp;
             });
-        kSpaceSum *= ValueType(4 * M_PI) * Base::getInvVolume();
+        kSpaceSum *= Tv(4 * M_PI) * Base::getInvVolume();
         return kSpaceSum;
     }
 

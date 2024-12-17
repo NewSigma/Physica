@@ -56,7 +56,6 @@ namespace Physica::Core {
         [[nodiscard]] inline T norm() const;
         [[nodiscard]] inline T phase() const;
         [[nodiscard]] Complex unit() const;
-        [[nodiscard]] Complex conjugate() const noexcept { return Complex(re, -im); }
 
         [[nodiscard]] inline PacketType packet() const;
         inline void writePacket(const PacketType packet);

@@ -55,8 +55,6 @@ namespace Physica::Core {
         using Base::operator=;
         inline This& operator=(const This& v);
         inline This& operator=(This&& v);
-        template<Scalar T>
-        inline Derived& operator=(const T& x) requires(!isReverseDiff || ReverseDiff<T>);
 
         template<Vector V>
         inline void operator+=(const V& v);

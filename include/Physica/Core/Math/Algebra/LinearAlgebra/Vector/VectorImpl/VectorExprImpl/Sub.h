@@ -27,12 +27,17 @@ namespace Physica::Core {
         using Base = BinaryVectorExpr<ExprType::Sub, T, U>;
     public:
         using typename Base::ScalarType;
+        using typename Base::ValueType;
         using Base::isReverseDiff;
     public:
         using Base::Base;
         /* Operations */
         [[nodiscard]] CoDiff<ScalarType> calc(size_t s) const {
             return Base::getLHS().calc(s) - Base::getRHS();
+        }
+
+        [[nodiscard]] ValueType calc_value(size_t s) const {
+            return Base::getLHS().calc_value(s) - Base::getRHS().value();
         }
 
         template<class AnyPacket>
@@ -61,6 +66,7 @@ namespace Physica::Core {
         using Base = BinaryVectorExpr<ExprType::Sub, T1, T2>;
     public:
         using typename Base::ScalarType;
+        using typename Base::ValueType;
         using Base::isReverseDiff;
     public:
         using Base::Base;
@@ -68,7 +74,13 @@ namespace Physica::Core {
         template<LVector V, class Executor = SequentialExecutor>
         inline void assignTo(V& v) const;
 
-        [[nodiscard]] CoDiff<ScalarType> calc(size_t s) const { return ScalarType(getLHS().calc(s)) - ScalarType(getRHS().calc(s)); }
+        [[nodiscard]] CoDiff<ScalarType> calc(size_t s) const {
+            return getLHS().calc(s) - getRHS().calc(s);
+        }
+
+        [[nodiscard]] ValueType calc_value(size_t s) const {
+            return getLHS().calc_value(s) - getRHS().calc_value(s);
+        }
 
         template<class AnyPacket>
         [[nodiscard]] AnyPacket packet(size_t index) const {

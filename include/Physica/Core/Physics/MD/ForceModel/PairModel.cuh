@@ -36,27 +36,27 @@ namespace Physica::Core {
         constexpr static bool IsPotDependOnAtomIndex = TraitsType::IsPotDependOnAtomIndex;
         constexpr static bool IsSmallCell = TraitsType::IsSmallCell;
     public:
-        using ScalarType = TraitsType::ScalarType;
         constexpr static int Dim = host_obj::Dim;
         constexpr static int NumVirialElem = Dim * Dim;
-
-        using ValueType = ScalarType::ValueType;
-        using MDCellType = MDCell<ScalarType>;
+        using ScalarType = TraitsType::ScalarType;
+        using T = ScalarType;
+        using Tv = T::ValueType;
+        using MDCellType = MDCell<T>;
         using DeviceMDCell = device_obj<MDCellType>;
         using LatticeMatrix = MDCellType::LatticeMatrix;
         using InvLatticeMatrix = MDCellType::InvLatticeMatrix;
         using PositionMatrix = MDCellType::PositionMatrix;
-        using CellListType = CellList<ScalarType>;
+        using CellListType = CellList<T>;
         using DeviceCellList = device_obj<CellListType>;
         using Index3D = GridBase::Index3D;
-        using DeviceVector3D = device_obj<Vector3D<ScalarType>>;
-        using ForceBufferType = device_obj<DenseMatrix<ScalarType>>;
-        using VirialBufferType = device_obj<DenseMatrix<ScalarType, MatrixOption::Col | MatrixOption::Element, NumVirialElem>>;
-        using PageLockedVector = DenseVector<ScalarType, Dynamic, PageLockedAllocator<ScalarType>>;
+        using DeviceVector3D = device_obj<Vector3D<T>>;
+        using ForceBufferType = device_obj<DenseMatrix<T>>;
+        using VirialBufferType = device_obj<DenseMatrix<T, MatrixOption::Col | MatrixOption::Element, NumVirialElem>>;
+        using PageLockedVector = DenseVector<T, Dynamic, PageLockedAllocator<T>>;
     private:
-        ScalarType cutoff;
-        ScalarType squared_cutoff;
-        ScalarType pot_shift;
+        T cutoff;
+        T squared_cutoff;
+        T pot_shift;
         DeviceMDCell cell;
         DeviceCellList cellList;
         ForceBufferType forceBuffer;
@@ -65,18 +65,18 @@ namespace Physica::Core {
     public:
         ~device_obj() = default;
         /* Operations */
-        [[nodiscard]] __host__ __device__ inline ScalarType pot_functor(size_t i, size_t j, ScalarType r, ScalarType r2) const;
-        [[nodiscard]] __host__ __device__ inline ScalarType force_functor(size_t i, size_t j, ScalarType r, ScalarType r2) const;
+        [[nodiscard]] __host__ __device__ inline T pot_functor(size_t i, size_t j, T r, T r2) const;
+        [[nodiscard]] __host__ __device__ inline T force_functor(size_t i, size_t j, T r, T r2) const;
 
-        [[nodiscard]] ScalarType potentialV(const MDCellType& hostCell) const;
+        [[nodiscard]] T potentialV(const MDCellType& hostCell) const;
 
         template<class Executor>
-        [[nodiscard]] VectorND<ScalarType> force(
+        [[nodiscard]] VectorND<T> force(
                 const LatticeMatrix& lattice,
                 const InvLatticeMatrix& invLattice,
                 const PositionMatrix& cartesianPos);
         template<class Executor>
-        [[nodiscard]] inline VectorND<ScalarType> force(const MDCellType& hostCell);
+        [[nodiscard]] inline VectorND<T> force(const MDCellType& hostCell);
 
         template<Vector V, class Executor>
         void forceAsync(
@@ -87,9 +87,9 @@ namespace Physica::Core {
         template<Vector V, class Executor>
         inline void forceAsync(const MDCellType& cell, ContinuousVector<V>& result);
         template<class Executor>
-        [[nodiscard]] inline VectorND<ScalarType> force_short(const MDCellType& cell);
+        [[nodiscard]] inline VectorND<T> force_short(const MDCellType& cell);
         template<class Executor>
-        [[nodiscard]] inline VectorND<ScalarType> force_long(const MDCellType& cell) const;
+        [[nodiscard]] inline VectorND<T> force_long(const MDCellType& cell) const;
 
         [[nodiscard]] LatticeMatrix virial(
                 const LatticeMatrix& lattice,
@@ -103,15 +103,15 @@ namespace Physica::Core {
         __device__ void virialKernelImpl();
         __device__ void postVirialKernelImpl();
         /* Getters */
-        [[nodiscard]] __host__ __device__ const ScalarType& getCutoff() const noexcept { return cutoff; }
-        [[nodiscard]] __host__ __device__ const ScalarType& getSquaredCutoff() const noexcept { return squared_cutoff; }
+        [[nodiscard]] __host__ __device__ const T& getCutoff() const noexcept { return cutoff; }
+        [[nodiscard]] __host__ __device__ const T& getSquaredCutoff() const noexcept { return squared_cutoff; }
         [[nodiscard]] __device__ const DeviceMDCell& getCell() const noexcept { return cell; }
         /* Setters */
-        void setCutoff(ScalarType cutoff_);
+        void setCutoff(T cutoff_);
     protected:
         device_obj() = default;
         device_obj(size_t numParticle);
-        device_obj(size_t numParticle, ScalarType cutoff_);
+        device_obj(size_t numParticle, T cutoff_);
         device_obj(const device_obj&) = default;
         device_obj(device_obj&&) noexcept = default;
         /* Operators */

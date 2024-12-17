@@ -18,11 +18,13 @@
  */
 #pragma once
 
+#include "RValueMatrix.h"
+
 namespace Physica::Core {
     template<Matrix T>
     class Conjugate<T> : public RValueMatrix<Conjugate<T>> {
-    public:
         using Base = RValueMatrix<Conjugate<T>>;
+    public:
         using typename Base::ScalarType;
     private:
         const T& matrix;
@@ -36,9 +38,10 @@ namespace Physica::Core {
 
     template<Vector T>
     class ConjugateVector<T> : public RValueVector<ConjugateVector<T>> {
-    public:
         using Base = RValueVector<ConjugateVector<T>>;
+    public:
         using typename Base::ScalarType;
+        using typename Base::ValueType;
     private:
         const T& vec;
     public:
@@ -48,6 +51,7 @@ namespace Physica::Core {
         void assignTo(V& target) const;
         /* Getters */
         [[nodiscard]] ScalarType calc(size_t index) const { return vec.calc(index).conjugate(); }
+        [[nodiscard]] ValueType calc_value(size_t index) const { return vec.calc_value(index).conjugate(); }
         [[nodiscard]] __host__ __device__ size_t getLength() const noexcept { return vec.getLength(); }
     };
 

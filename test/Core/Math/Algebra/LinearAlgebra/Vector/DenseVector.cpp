@@ -16,6 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
+#include <iostream>
 #include "Physica/Core/Utils/Unix/TempFile.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/DenseVector.h"
 #include "Physica/Core/Math/Random/Random.h"
@@ -26,8 +27,8 @@ using RandomType = Random<MT19937, std::mt19937::default_seed>;
 
 void crossProductTest() {
     using T = float32;
-    VectorND<T> v1{3.845971,0.000000,0.000000};
-    VectorND<T> v2{-0.007733,3.835502,0.000000};
+    VectorND<T> v1{3.845971, 0.000000, 0.000000};
+    VectorND<T> v2{-0.007733, 3.835502, 0.000000};
     VectorND<T> v3(v1.crossProduct(v2));
     if (!scalarNear(v3.norm() / T(2), T(7.375614), 1E-7))
         exit(EXIT_FAILURE);

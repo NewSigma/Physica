@@ -36,6 +36,7 @@ namespace Physica::Core {
              size_t Col = Dynamic,
              class Allocator = HostAllocator<T>>
     class DenseMatrix : public ContinuousMatrix<DenseMatrix<T, Option, Row, Col, Allocator>>
+                      , public CRCoro<DenseMatrix<T, Option, Row, Col, Allocator>>
                       , public DenseMatrixStorage<T, Option, Row, Col, Allocator> {
         using This = DenseMatrix<T, Option, Row, Col, Allocator>;
         using Base = ContinuousMatrix<This>;

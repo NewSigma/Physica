@@ -42,23 +42,23 @@ namespace Physica::Core {
         using This = SilveraGoldman<T, IsPeriodBoundary, IsSmallCell>;
         using Base = PairModel<This>;
         using DVector = CoDiff<Vector4D<T>>;
-        using typename Base::ValueType;
+        using typename Base::Tv;
     public:
-        SilveraGoldman(ValueType cutoff_);
+        SilveraGoldman(Tv cutoff_);
         SilveraGoldman(const SilveraGoldman&) = default;
         SilveraGoldman(SilveraGoldman&&) noexcept = default;
         ~SilveraGoldman() = default;
         /* Operators */
         SilveraGoldman& operator=(SilveraGoldman obj) noexcept;
         /* Operations */
-        [[nodiscard]] inline T pot_functor(size_t i, size_t j, T r, T r2) const;
-        [[nodiscard]] inline T force_functor(size_t i, size_t j, T r, T r2) const;
-        [[nodiscard]] inline T forceConst_functor(T r, T r2) const;
+        [[nodiscard]] inline CoDiff<T> pot_functor(size_t i, size_t j, const T& r, const T& r2) const;
+        [[nodiscard]] inline CoDiff<T> force_functor(size_t i, size_t j, const T& r, const T& r2) const;
+        [[nodiscard]] inline CoDiff<T> forceConst_functor(const T& r, const T& r2) const;
         inline void swap(SilveraGoldman& __restrict obj) noexcept;
     };
 
     template<Scalar T, bool IsPeriodBoundary, bool IsSmallCell>
-    SilveraGoldman<T, IsPeriodBoundary, IsSmallCell>::SilveraGoldman(ValueType cutoff_) : Base(std::move(cutoff_)) {}
+    SilveraGoldman<T, IsPeriodBoundary, IsSmallCell>::SilveraGoldman(Tv cutoff_) : Base(std::move(cutoff_)) {}
 
     template<Scalar T, bool IsPeriodBoundary, bool IsSmallCell>
     SilveraGoldman<T, IsPeriodBoundary, IsSmallCell>&
@@ -73,88 +73,102 @@ namespace Physica::Core {
     }
 
     template<Scalar T, bool IsPeriodBoundary, bool IsSmallCell>
-    inline T SilveraGoldman<T, IsPeriodBoundary, IsSmallCell>::pot_functor(
-            [[maybe_unused]] size_t i, [[maybe_unused]] size_t j, T r, T r2) const {
-        T result = exp(-r2 * ValueType(gamma) - r * ValueType(beta) + ValueType(alpha));
-        const T rep_r = reciprocal(r);
-        const T rep_r2 = square(rep_r);
-        const T rep_r4 = square(rep_r2);
-        const T rep_r6 = rep_r4 * rep_r2;
-        const T rep_r8 = square(rep_r4);
-        const T rep_r9 = rep_r8 * rep_r;
-        const T rep_r10 = rep_r6 * rep_r4;
-        const T g = rep_r6 * ValueType(c6) + rep_r8 * ValueType(c8) - rep_r9 * ValueType(c9) + rep_r10 * ValueType(c10);
+    inline CoDiff<T> SilveraGoldman<T, IsPeriodBoundary, IsSmallCell>::pot_functor(size_t, size_t, const T& r, const T& r2) const {
+        const auto result0 = exp(-r2 * Tv(gamma) - r * Tv(beta) + Tv(alpha));
+        const auto rep_r = reciprocal(r);
+        const auto rep_r2 = square(rep_r);
+        const auto rep_r4 = square(rep_r2);
+        const auto rep_r6 = rep_r4 * rep_r2;
+        const auto rep_r8 = square(rep_r4);
+        const auto rep_r9 = rep_r8 * rep_r;
+        const auto rep_r10 = rep_r6 * rep_r4;
+        const auto g = rep_r6 * Tv(c6) + rep_r8 * Tv(c8) - rep_r9 * Tv(c9) + rep_r10 * Tv(c10);
 
-        if (r < ValueType(cutoff)) {
-            const T f_cutoff = exp(-square(rep_r * ValueType(cutoff) - ValueType(1)));
-            result -= g * f_cutoff;
+        CoDiff<T> result;
+        if (r < Tv(cutoff)) {
+            const auto f_cutoff = exp(-square(rep_r * Tv(cutoff) - Tv(1)));
+            result = result0 - g * f_cutoff;
         }
         else
-            result -= g;
+            result = result0 - g;
         return result;
     }
 
     template<Scalar T, bool IsPeriodBoundary, bool IsSmallCell>
-    inline T SilveraGoldman<T, IsPeriodBoundary, IsSmallCell>::force_functor(
-            [[maybe_unused]] size_t i, [[maybe_unused]] size_t j, T r, T r2) const {
-        const T factor = r * ValueType(gamma * 2) + ValueType(beta);
-        T result = exp(-r2 * ValueType(gamma) - (r * ValueType(beta) - ValueType(alpha))) * factor;
-        const T rep_r = reciprocal(r);
-        const T rep_r2 = square(rep_r);
-        const T rep_r3 = rep_r * rep_r2;
-        const T rep_r4 = square(rep_r2);
-        const T rep_r5 = rep_r2 * rep_r3;
-        const T rep_r6 = rep_r5 * rep_r;
+    inline CoDiff<T> SilveraGoldman<T, IsPeriodBoundary, IsSmallCell>::force_functor(size_t, size_t, const T& r, const T& r2) const {
+        const auto factor = r * Tv(gamma * 2) + Tv(beta);
+        const auto result0 = exp(-r2 * Tv(gamma) - (r * Tv(beta) - Tv(alpha))) * factor;
+        const auto rep_r = reciprocal(r);
+        const auto rep_r2 = square(rep_r);
+        const auto rep_r3 = rep_r * rep_r2;
+        const auto rep_r4 = square(rep_r2);
+        const auto rep_r5 = rep_r2 * rep_r3;
+        const auto rep_r6 = rep_r5 * rep_r;
 
         const Vector4D<T> rep{rep_r.value(), rep_r3.value(), rep_r4.value(), rep_r5.value()};
         const DVector rep1 = rep * rep_r6;
         const Vector4D<T> const1{-6 * c6, -8 * c8, 9 * c9, -10 * c10};
-        const T d_g = (rep1 * const1).sum();
+        const auto d_g = rep1 * const1;
 
-        if (r < ValueType(cutoff)) {
-            const T g = (rep_r2 * ValueType(c6) + rep_r4 * ValueType(c8)) * rep_r4 - (rep_r5 * ValueType(c9) - rep_r6 * ValueType(c10)) * rep_r4;
-            const T f_cutoff = exp(-square(rep_r * ValueType(cutoff) - ValueType(1)));
-            result += (d_g + g * (rep_r3 * ValueType(2 * squaredCutoff) - rep_r2 * ValueType(2 * cutoff))) * f_cutoff;
+        CoDiff<T> result;
+        if (r < Tv(cutoff)) {
+            const auto g = (rep_r2 * Tv(c6) + rep_r4 * Tv(c8)) * rep_r4 - (rep_r5 * Tv(c9) - rep_r6 * Tv(c10)) * rep_r4;
+            const auto f_cutoff = exp(-square(rep_r * Tv(cutoff) - Tv(1)));
+            result = result0 + (d_g + g * (rep_r3 * Tv(2 * squaredCutoff) - rep_r2 * Tv(2 * cutoff))) * f_cutoff;
         }
         else
-            result += d_g;
-        return result;
+            result = result0 + d_g;
+
+        if constexpr (ReverseDiff<T>) {
+            auto r = co_yield result.value();
+            result.reverse(r.grad());
+        }
+        else
+            co_return std::move(result);
     }
 
     template<Scalar T, bool IsPeriodBoundary, bool IsSmallCell>
-    inline T SilveraGoldman<T, IsPeriodBoundary, IsSmallCell>::forceConst_functor(T r, T r2) const {
-        const T factor = square(r * ValueType(2 * gamma) + ValueType(beta)) - ValueType(2 * gamma);
-        T result = exp(-r2 * ValueType(gamma) - (r * ValueType(beta) - ValueType(alpha))) * factor;
-        const T rep_r = reciprocal(r);
-        const T rep_r2 = square(rep_r);
-        const T rep_r3 = rep_r * rep_r2;
-        const T rep_r4 = square(rep_r2);
-        const T rep_r5 = rep_r2 * rep_r3;
+    inline CoDiff<T> SilveraGoldman<T, IsPeriodBoundary, IsSmallCell>::forceConst_functor(const T& r, const T& r2) const {
+        const auto factor = square(r * Tv(2 * gamma) + Tv(beta)) - Tv(2 * gamma);
+        const auto result0 = exp(-r2 * Tv(gamma) - (r * Tv(beta) - Tv(alpha))) * factor;
+        const auto rep_r = reciprocal(r);
+        const auto rep_r2 = square(rep_r);
+        const auto rep_r3 = rep_r * rep_r2;
+        const auto rep_r4 = square(rep_r2);
+        const auto rep_r5 = rep_r2 * rep_r3;
         const Vector4D<T> rep{rep_r.value(), rep_r3.value(), rep_r4.value(), rep_r5.value()};
 
-        const T rep_r7 = rep_r5 * rep_r2;
+        const auto rep_r7 = rep_r5 * rep_r2;
         const DVector rep1 = rep * rep_r7;
-        const Vector4D<T> const1{-42 * c6, -72 * c8, 90 * c9, -110 * c10};
-        const T d2_g = rep1 * const1;
-        if (r < ValueType(cutoff)) {
-            const T rep_r6 = rep_r5 * rep_r;
+        const Vector4D<Tv> const1{-42 * c6, -72 * c8, 90 * c9, -110 * c10};
+        const auto d2_g = rep1 * const1;
+
+        CoDiff<T> result;
+        if (r < Tv(cutoff)) {
+            const auto rep_r6 = rep_r5 * rep_r;
             const DVector rep2 = rep * rep_r6;
-            const Vector4D<T> const2{-12 * c6, -16 * c8, 18 * c9, -20 * c10};
-            const T d_g = rep2 * const2;
+            const Vector4D<Tv> const2{-12 * c6, -16 * c8, 18 * c9, -20 * c10};
+            const auto d_g = rep2 * const2;
 
             const DVector rep3 = rep * rep_r5;
-            const Vector4D<T> const3{-c6, -c8, c9, -c10};
-            const T g = rep3 * const3;
+            const Vector4D<Tv> const3{-c6, -c8, c9, -c10};
+            const auto g = rep3 * const3;
 
-            const T term2 = -d_g * (rep_r3 * ValueType(2 * squaredCutoff) - rep_r2 * ValueType(2 * cutoff));
+            const auto term2 = -d_g * (rep_r3 * Tv(2 * squaredCutoff) - rep_r2 * Tv(2 * cutoff));
             const Vector4D<T> rep4{rep_r3.value(), rep_r4.value(), rep_r5.value(), rep_r6.value()};
-            const Vector4D<T> const4{4 * cutoff, -2 * squaredCutoff, -8 * cutoff * squaredCutoff, 4 * squaredCutoff * squaredCutoff};
-            const T term3 = g * (rep4 * const4);
-            result += (d2_g + term2 + term3) * exp(-square(rep_r * ValueType(cutoff) - ValueType(1)));
+            const Vector4D<Tv> const4{4 * cutoff, -2 * squaredCutoff, -8 * cutoff * squaredCutoff, 4 * squaredCutoff * squaredCutoff};
+            const auto term3 = g * (rep4 * const4);
+            result = result0 + (d2_g + term2 + term3) * exp(-square(rep_r * Tv(cutoff) - Tv(1)));
         }
         else
-            result += d2_g;
-        return result;
+            result = result0 + d2_g;
+
+        if constexpr (ReverseDiff<T>) {
+            auto r = co_yield result.value();
+            result.reverse(r.grad());
+        }
+        else
+            co_return std::move(result);
     }
 }
 

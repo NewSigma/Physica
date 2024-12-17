@@ -30,7 +30,13 @@ namespace Physica::Core {
     public:
         using Base::Base;
         /* Operations */
-        [[nodiscard]] CoDiff<ScalarType> calc(size_t index) const { return relu(Base::getExpr().calc(index)); }
+        [[nodiscard]] CoDiff<ScalarType> calc(size_t index) const {
+            return relu(Base::getExpr().calc(index));
+        }
+
+        [[nodiscard]] ValueType calc_value(size_t index) const {
+            return relu(Base::getExpr().calc_value(index));
+        }
 
         template<Vector V>
         void reverse(const V& grad_) const noexcept requires(isReverseDiff) {

@@ -18,6 +18,7 @@
  */
 #pragma once
 
+#include "../LValueMatrix.h"
 #include "LValueFlatten.h"
 
 namespace Physica::Core {
@@ -30,15 +31,14 @@ namespace Physica::Core {
         class DeterminateImpl {
         public:
             static typename Derived::ScalarType run([[maybe_unused]] const Derived& m) {
-                //TODO
-                assert(false);
+                noImpl("High order determinate");
             }
         };
 
         template<class Derived>
         class DeterminateImpl<Derived, 1> {
         public:
-            static inline Derived::ScalarType run(const Derived& m) {
+            static inline CoDiff<typename Derived::ScalarType> run(const Derived& m) {
                 return m(0, 0);
             }
         };
@@ -46,7 +46,7 @@ namespace Physica::Core {
         template<class Derived>
         class DeterminateImpl<Derived, 2> {
         public:
-            static inline Derived::ScalarType run(const Derived& m) {
+            static inline CoDiff<typename Derived::ScalarType> run(const Derived& m) {
                 return m(0, 0) * m(1, 1) - m(0, 1) * m(1, 0);
             }
         };
@@ -54,10 +54,10 @@ namespace Physica::Core {
         template<class Derived>
         class DeterminateImpl<Derived, 3> {
         public:
-            static inline Derived::ScalarType run(const Derived& m) {
-            return m(0, 0) * (m(1, 1) * m(2, 2) - m(1, 2) * m(2, 1))
-                    + m(0, 1) * (m(1, 2) * m(2, 0) - m(1, 0) * m(2, 2))
-                    + m(0, 2) * (m(1, 0) * m(2, 1) - m(1, 1) * m(2, 0));
+            static inline CoDiff<typename Derived::ScalarType> run(const Derived& m) {
+                return m(0, 0) * (m(1, 1) * m(2, 2) - m(1, 2) * m(2, 1))
+                     + m(0, 1) * (m(1, 2) * m(2, 0) - m(1, 0) * m(2, 2))
+                     + m(0, 2) * (m(1, 0) * m(2, 1) - m(1, 1) * m(2, 0));
             }
         };
     }
@@ -317,14 +317,12 @@ namespace Physica::Core {
     }
 
     template<class Derived>
-    LValueMatrix<Derived>::ScalarType LValueMatrix<Derived>::determinate() const {
+    auto LValueMatrix<Derived>::determinate() const -> CoDiff<ScalarType> {
         assert(Base::getDerived().getRow() == Base::getDerived().getCol());
-        using namespace Internal;
         constexpr size_t RowAtCompile = Traits<Derived>::RowAtCompile;
         constexpr size_t ColAtCompile = Traits<Derived>::ColAtCompile;
-        //Row equals column at runtime from the assert, but RowAtCompile and ColAtCompile may not equal. Ether of them could be dynamic.
         constexpr size_t Rank = RowAtCompile > ColAtCompile ? RowAtCompile : ColAtCompile;
-        return DeterminateImpl<Derived, Rank>::run(Base::getDerived());
+        return Internal::DeterminateImpl<Derived, Rank>::run(Base::getDerived());
     }
     /**
      * Reduce the element at one row using the other row.

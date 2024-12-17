@@ -25,10 +25,17 @@ namespace Physica::Core {
         using Base = UnitaryMatrixExpr<ExprType::Abs, T>;
     public:
         using typename Base::ScalarType;
+        using typename Base::ValueType;
     public:
         using Base::Base;
         /* Operations */
-        [[nodiscard]] ScalarType calc(size_t row, size_t col) const { return abs(Base::getExpr().calc(row, col)); }
+        [[nodiscard]] ScalarType calc(size_t row, size_t col) const {
+            return abs(Base::getExpr().calc(row, col));
+        }
+
+        [[nodiscard]] ValueType calc_value(size_t row, size_t col) const {
+            return abs(Base::getExpr().calc_value(row, col));
+        }
     };
 
     template<Matrix T>

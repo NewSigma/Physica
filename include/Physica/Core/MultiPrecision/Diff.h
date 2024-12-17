@@ -46,7 +46,7 @@ namespace Physica::Core {
         template<Scalar U>
         explicit Diff(const U& x) requires(!ReverseDiff<U>);
         Diff(const This&) requires(isForwardDiff) = default;
-        explicit(isReverseDiff) Diff(This&&) noexcept = default;
+        Diff(This&&) noexcept = default;
         ~Diff() = default;
         /* Operators */
         This& operator=(This obj) noexcept { swap(obj); return *this; }
@@ -55,9 +55,7 @@ namespace Physica::Core {
         [[nodiscard]] inline bool operator==(const This& other) const;
         /* Operations */
         template<int MaskOrder>
-        auto& mask() noexcept;
-        template<int MaskOrder>
-        const auto& mask() const noexcept;
+        auto mask() const noexcept;
 
         T reverse(GradType grad_ = 1) const noexcept;
         inline void zero_grad();
@@ -68,8 +66,6 @@ namespace Physica::Core {
         /* Getters */
         [[nodiscard]] __host__ __device__ T* value_ptr() noexcept { return &v; }
         [[nodiscard]] __host__ __device__ GradType* grad_ptr() noexcept { return &g; }
-        [[nodiscard]] T& value() noexcept { return v; }
-        [[nodiscard]] const T& value() const noexcept { return v; }
         template<int GradOrder = 1>
         [[nodiscard]] inline Base::template GradRtnTy<GradOrder>& grad() noexcept;
         template<int GradOrder = 1>
@@ -111,7 +107,8 @@ namespace Physica::Core {
     [[nodiscard]] inline auto operator*(const U& x, const T& y) requires(Diffable<T> && !Diffable<U>);
 
     template<Scalar T, Scalar U>
-    [[nodiscard]] inline auto operator/(const U& x, const T& y) requires(Diffable<T> && !Diffable<U>);
+    [[nodiscard]] inline CoDiff<typename Internal::BinaryScalarOpRtnTy<T, U>::Type>
+    operator/(const U& x, const T& y) requires(Diffable<T> && !Diffable<U>);
 
     template<Scalar T>
     [[nodiscard]] inline CoDiff<T> operator-(T&& x) requires(Diffable<T>);

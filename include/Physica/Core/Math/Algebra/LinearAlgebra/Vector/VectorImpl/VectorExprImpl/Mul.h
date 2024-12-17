@@ -27,6 +27,7 @@ namespace Physica::Core {
         using Base = BinaryVectorExpr<ExprType::Mul, T, U>;
     public:
         using typename Base::ScalarType;
+        using typename Base::ValueType;
         using Base::isReverseDiff;
     public:
         using Base::Base;
@@ -34,7 +35,13 @@ namespace Physica::Core {
         template<LVector V, class Executor = SequentialExecutor>
         inline void assignTo(V& v) const;
 
-        [[nodiscard]] CoDiff<ScalarType> calc(size_t index) const { return ScalarType(Base::getLHS().calc(index)) * ScalarType(Base::getRHS()); }
+        [[nodiscard]] CoDiff<ScalarType> calc(size_t index) const {
+            return Base::getLHS().calc(index) * Base::getRHS();
+        }
+
+        [[nodiscard]] ValueType calc_value(size_t index) const {
+            return Base::getLHS().calc_value(index) * Base::getRHS().value();
+        }
 
         template<class AnyPacket>
         [[nodiscard]] AnyPacket packet(size_t index) const {
@@ -76,12 +83,17 @@ namespace Physica::Core {
         using Base = BinaryVectorExpr<ExprType::Mul, T1, T2>;
     public:
         using typename Base::ScalarType;
+        using typename Base::ValueType;
         using Base::isReverseDiff;
     public:
         using Base::Base;
         /* Operations */
         [[nodiscard]] CoDiff<ScalarType> calc(size_t index) const {
             return Base::getLHS().calc(index) * Base::getRHS().calc(index);
+        }
+
+        [[nodiscard]] ValueType calc_value(size_t index) const {
+            return Base::getLHS().calc_value(index) * Base::getRHS().calc_value(index);
         }
 
         template<class AnyPacket>

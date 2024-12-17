@@ -20,7 +20,7 @@
 
 #include <climits>
 #include <cstddef>
-#include "Physica/Config.h"
+#include "Physica/Config.h" // IWYU pragma: export
 
 #ifdef PHYSICA_MKL
     #include <mkl_types.h>

@@ -36,9 +36,9 @@ namespace Physica {
         constexpr static double pair_cutoff = PhyConst<AU>::angstormToBohr(5);
     public:
         static void run() {
-            const dfloat volume = 125;
+            dfloat volume = 125;
             const unsigned int cellSize = 3;
-            auto cell = makeSystem(cellSize, volume);
+            auto cell = makeSystem(volume, cellSize);
             ForceModel forceModel(cell, pair_cutoff, Ewald<dfloat>{});
             forceModel.potentialV(cell).reverse();
             /* Test press */ {
@@ -63,7 +63,7 @@ namespace Physica {
             return result;
         }
 
-        static MDCell<dfloat> makeSystem(unsigned int cellSize, dfloat cellVolume) {
+        static MDCell<dfloat> makeSystem(dfloat& cellVolume, unsigned int cellSize) {
             using CrystalCellType = CrystalCell<float64>;
             using LatticeMatrix = CrystalCellType::LatticeMatrix;
             constexpr size_t maxIndexO = MoleculePerCell * 2;

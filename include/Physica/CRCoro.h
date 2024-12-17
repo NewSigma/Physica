@@ -26,7 +26,7 @@ namespace Physica::Core {
     /**
      * \class CRCoro is Curiously Recurring Coroutine
      *
-     * Allow a normal function become a trivial coroutine
+     * Allow a normal function become a trivial coroutine without cost
      */
     template<class T>
     class CRCoro : public CRTPBase<CRCoro<T>> {
@@ -49,6 +49,7 @@ namespace Physica::Core {
         std::suspend_never final_suspend() noexcept { return {}; }
         void return_value(T&& x) noexcept {
             Base::getDerived() = std::move(x);
+            asm volatile("" : : "r,m"(Base::getDerived()) : "memory"); // Forcing assignment has observable side effect
         }
         void unhandled_exception() { throw std::current_exception(); }
     protected:

@@ -25,7 +25,7 @@
 
 namespace Physica::Core {
     template<class Base>
-    CoDiffNode<Base>::CoDiffNode(std::coroutine_handle<Impl> handle_) noexcept : Base(std::move(handle_.promise().obj)), handle(handle_) {}
+    CoDiffNode<Base>::CoDiffNode(std::coroutine_handle<Promise> handle_) noexcept : Base(std::move(handle_.promise().obj)), handle(handle_) {}
 
     template<class Base>
     template<ReverseDiff T>
@@ -33,20 +33,32 @@ namespace Physica::Core {
         auto fn = [](T&& x) noexcept -> This {
             LazyReverse<T&&> x_ = std::forward<T>(x);
             Base y;
-            if constexpr (Vector<T> || Matrix<T>) {
-                y.resize(x_);
-                x_.assignTo(y);
-            }
-
-            auto result = co_yield std::move(y);
-            if constexpr (Scalar<T>)
+            if constexpr (Scalar<T>) {
+                auto result = co_yield Base(std::move(y));
                 x_.reverse(result.grad());
+            }
             else {
                 static_assert(Vector<T> || Matrix<T>, "[Error]: Unexpected type T");
+                y.resize(x_);
+                x_.assignTo(y);
+                auto result = co_yield std::move(y);
                 x_.reverse(result.grads());
             }
         };
         *this = fn(std::forward<T>(x));
+    }
+
+    template<class Base>
+    CoDiffNode<Base>::CoDiffNode(const This& other) {
+        *this = [=]() -> This {
+            auto result = co_yield other;
+            if constexpr (Scalar<Base>)
+                other.reverse(result.grad());
+            else {
+                static_assert(Vector<Base> || Matrix<Base>, "[Error]: Unexpected type T");
+                other.reverse(result.grads());
+            }
+        }();
     }
 
     template<class Base>

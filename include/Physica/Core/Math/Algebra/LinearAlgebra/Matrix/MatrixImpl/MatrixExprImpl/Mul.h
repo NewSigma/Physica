@@ -18,6 +18,8 @@
  */
 #pragma once
 
+#include "../MatrixExpr.h"
+
 namespace Physica::Core {
     template<Matrix T1, Matrix T2>
     class MatrixExpr<ExprType::Mul, T1, T2>
@@ -28,7 +30,7 @@ namespace Physica::Core {
     public:
         using Base::Base;
         /* Operations */
-        [[nodiscard]] ScalarType calc(size_t row, size_t col) const {
+        [[nodiscard]] CoDiff<ScalarType> calc(size_t row, size_t col) const {
             return Base::getLHS().calc(row, col) * Base::getRHS().calc(row, col);
         }
     };
@@ -49,11 +51,11 @@ namespace Physica::Core {
     public:
         using Base::Base;
         /* Operations */
-        [[nodiscard]] ScalarType calc(size_t row, size_t col) const {
-            return ScalarType(getLHS().calc(row, col)) * ScalarType(getRHS());
+        [[nodiscard]] CoDiff<ScalarType> calc(size_t row, size_t col) const {
+            return getLHS().calc(row, col) * getRHS();
         }
 
-        [[nodiscard]] ScalarType trace() const { return ScalarType(getLHS().trace()) * ScalarType(getRHS()); }
+        [[nodiscard]] ScalarType trace() const { return getLHS().trace() * getRHS(); }
         [[nodiscard]] TransposeRtnTy transpose() const noexcept { return TransposeRtnTy(*this); }
         [[nodiscard]] HermiteRtnTy hermite() const noexcept { return HermiteRtnTy(*this); }
         [[nodiscard]] ScalarType sum() const { return Base::getLHS().sum() * Base::getRHS(); }

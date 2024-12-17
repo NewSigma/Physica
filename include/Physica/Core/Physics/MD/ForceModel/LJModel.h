@@ -25,12 +25,12 @@ namespace Physica::Core {
     class LJModel : public PairModel<LJModel<T, IsSmallCell>> {
         using This = LJModel<T, IsSmallCell>;
         using Base = PairModel<This>;
-        using typename Base::ValueType;
+        using typename Base::Tv;
 
         T sigma;
-        T sigma1;
+        CoDiff<T> sigma1;
     public:
-        LJModel(T sigma_, ValueType cutoff);
+        LJModel(T sigma_, Tv cutoff);
         LJModel(const LJModel&) = default;
         LJModel(LJModel&&) noexcept = default;
         ~LJModel() = default;
@@ -39,14 +39,14 @@ namespace Physica::Core {
         /* Operations */
         void swap(LJModel& __restrict obj) noexcept;
         /* Static members */
-        [[nodiscard]] inline T pot_functor(size_t i, size_t j, T r, T r2) const;
-        [[nodiscard]] inline T force_functor(size_t i, size_t j, T r, T r2) const;
+        [[nodiscard]] inline CoDiff<T> pot_functor(size_t i, size_t j, const T& r, const T& r2) const;
+        [[nodiscard]] inline CoDiff<T> force_functor(size_t i, size_t j, const T& r, const T& r2) const;
     };
 
     template<Scalar T, bool IsSmallCell>
-    LJModel<T, IsSmallCell>::LJModel(T sigma_, ValueType cutoff)
+    LJModel<T, IsSmallCell>::LJModel(T sigma_, Tv cutoff)
             : Base(), sigma(std::move(sigma_)) {
-        sigma1 = ValueType(6) / sigma;
+        sigma1 = Tv(6) / sigma;
         Base::setCutoff(std::move(cutoff));
     }
 
@@ -57,25 +57,35 @@ namespace Physica::Core {
     }
 
     template<Scalar T, bool IsSmallCell>
-    inline T LJModel<T, IsSmallCell>::pot_functor(
-            [[maybe_unused]] size_t i, [[maybe_unused]] size_t j, [[maybe_unused]] T r, T r2) const {
-        const T rep_r2 = T(sigma * sigma) / r2;
-        const T rep_r4 = square(rep_r2);
-        const T rep_r6 = rep_r4 * rep_r2;
-        const T rep_r12 = square(rep_r6);
-        return rep_r12 - rep_r6;
+    inline CoDiff<T> LJModel<T, IsSmallCell>::pot_functor(size_t, size_t, const T&, const T& r2) const {
+        auto rep_r2 = square(sigma) / r2;
+        auto rep_r4 = square(rep_r2);
+        auto rep_r6 = rep_r4 * rep_r2;
+        auto rep_r12 = square(rep_r6);
+        auto result = rep_r12 - rep_r6;
+        if constexpr (ReverseDiff<T>) {
+            auto r = co_yield result.value();
+            result.reverse(r.grad());
+        }
+        else
+            co_return std::move(result);
     }
 
     template<Scalar T, bool IsSmallCell>
-    inline T LJModel<T, IsSmallCell>::force_functor(
-            [[maybe_unused]] size_t i, [[maybe_unused]] size_t j, T r, [[maybe_unused]] T r2) const {
-        const T rep_r = sigma / r;
-        const T rep_r2 = square(rep_r);
-        const T rep_r4 = square(rep_r2);
-        const T rep_r6 = rep_r4 * rep_r2;
-        const T rep_r7 = rep_r6 * rep_r;
-        const T rep_r13 = rep_r7 * rep_r6;
-        return (rep_r13 * ValueType(2) - rep_r7) * sigma1;
+    inline CoDiff<T> LJModel<T, IsSmallCell>::force_functor(size_t, size_t, const T& r, const T&) const {
+        auto rep_r = sigma / r;
+        auto rep_r2 = square(rep_r);
+        auto rep_r4 = square(rep_r2);
+        auto rep_r6 = rep_r4 * rep_r2;
+        auto rep_r7 = rep_r6 * rep_r;
+        auto rep_r13 = rep_r7 * rep_r6;
+        auto result = (rep_r13 * Tv(2) - rep_r7) * sigma1;
+        if constexpr (ReverseDiff<T>) {
+            auto r = co_yield result.value();
+            result.reverse(r.grad());
+        }
+        else
+            co_return std::move(result);
     }
 
     template<Scalar T, bool IsSmallCell>

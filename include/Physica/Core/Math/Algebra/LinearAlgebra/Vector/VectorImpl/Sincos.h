@@ -33,7 +33,7 @@ namespace Physica::Core {
         using PacketType = BestPacket<ScalarType, SizeAtCompile>::Type;
         if constexpr (ReverseDiff<ScalarType>) {
             size_t i = 0;
-            auto result = co_for([=]{ return i < x.getLength(); }, [&]{ ++i; }, [&]{
+            auto result = co_for([&]{ return i < x.getLength(); }, [&]{ ++i; }, [&]{
                 return sincos(x.calc(i), s[i], c[i]);
             });
             return result;

@@ -17,6 +17,29 @@ along with Physica.  If not, see <https://www.gnu.org/licenses/>.
 
 受Eigen、Armadillo等C++线性代数库的启发，Physica线性代数模块广泛使用模板表达式技术以减少中间对象和进行编译期表达式优化。
 
+线性代数对象的基类一般有三种:
+
+右值对象(右值向量RValueVector, 右值矩阵RValueMatrix), 左值对象(LValueVector, LValueMatrix), 连续对象(ContinuousVector, ContinuousMatrix)
+
+以密集向量为例, 继承关系为DenseVector -> ContinuousVector -> LValueVector -> RValueVector
+
+可以计算右值对象的元素但不能取其指针, 任何表达式属于右值对象。
+
+可以取左值对象的元素的指针, 显然左值对象可计算, 计算的操作是解引用
+
+进一步规定连续对象是元素在内存上连续分布的
+
+## 右值对象
+
+右值对象的核心操作为
+
+1. calc() 计算元素的值, 按值返回
+2. getLength(), getRow(), getCol()等 返回线性代数对象的尺寸
+
+另外
+
+calc_value() 返回元素的value, 用于反向传播等不需要梯度的情况
+
 ## 模板参数
 
 **FastAssign**

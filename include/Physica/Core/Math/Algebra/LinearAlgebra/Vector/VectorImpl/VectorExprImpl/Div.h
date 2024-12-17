@@ -18,6 +18,8 @@
  */
 #pragma once
 
+#include "../VectorExpr.h"
+
 namespace Physica::Core {
     template<Vector T, Scalar U>
     class VectorExpr<ExprType::Div, T, U>
@@ -25,12 +27,18 @@ namespace Physica::Core {
         using Base = BinaryVectorExpr<ExprType::Div, T, U>;
     public:
         using typename Base::ScalarType;
+        using typename Base::ValueType;
     public:
         using Base::Base;
         /* Operations */
         [[nodiscard]] CoDiff<ScalarType> calc(size_t s) const {
             assert(!Base::getRHS().isZero() && "[Error]: Divide by zero");
             return Base::getLHS().calc(s) / Base::getRHS();
+        }
+
+        [[nodiscard]] ValueType calc_value(size_t s) const {
+            assert(!Base::getRHS().isZero() && "[Error]: Divide by zero");
+            return Base::getLHS().calc_value(s) / Base::getRHS().value();
         }
 
         template<class AnyPacket>
@@ -50,10 +58,19 @@ namespace Physica::Core {
         using Base = BinaryVectorExpr<ExprType::Div, T1, T2>;
     public:
         using typename Base::ScalarType;
+        using typename Base::ValueType;
     public:
         using Base::Base;
         /* Operations */
-        [[nodiscard]] CoDiff<ScalarType> calc(size_t s) const { return Base::getLHS().calc(s) / Base::getRHS().calc(s); }
+        [[nodiscard]] CoDiff<ScalarType> calc(size_t s) const {
+            assert(!Base::getRHS().calc(s).isZero() && "[Error]: Divide by zero");
+            return Base::getLHS().calc(s) / Base::getRHS().calc(s);
+        }
+
+        [[nodiscard]] ValueType calc_value(size_t s) const {
+            assert(!Base::getRHS().calc_value(s).isZero() && "[Error]: Divide by zero");
+            return Base::getLHS().calc_value(s) / Base::getRHS().calc_value(s);
+        }
 
         template<class AnyPacket>
         [[nodiscard]] AnyPacket packet(size_t index) const {

@@ -35,7 +35,7 @@ namespace Physica::Core {
     public:
         using ComplexType = Complex<T>;
         using Base::Dim;
-        using typename Base::ValueType;
+        using typename Base::Tv;
         using typename Base::LatticeMatrix;
         using typename Base::PositionMatrix;
         using typename Base::Vec3D;
@@ -53,9 +53,9 @@ namespace Physica::Core {
         VectorND<T> erfc_table;
         T volume;
         T inv_volume;
-        T integralLimit;
+        Tv integralLimit;
         T erfcStep;
-        ValueType repErfcStep;
+        Tv repErfcStep;
         T repDoubleSquareStep;
         SearchRangeType rSpaceSumRange;
         SearchRangeType kSpaceSumRange;
@@ -85,14 +85,14 @@ namespace Physica::Core {
         [[nodiscard]] size_t getNumParticle() const noexcept { return charges.getLength(); }
         [[nodiscard]] T getVolume() const noexcept { return volume; }
         [[nodiscard]] T getInvVolume() const noexcept { return inv_volume; }
-        [[nodiscard]] T getIntegralLimit() const noexcept { return integralLimit; }
+        [[nodiscard]] Tv getIntegralLimit() const noexcept { return integralLimit; }
         [[nodiscard]] T getRSpaceCutoff() const noexcept { return Base::getCutoff(); }
         [[nodiscard]] T getSquaredRSpaceCutoff() const noexcept { return Base::getSquaredCutoff(); }
         [[nodiscard]] const SearchRangeType& getRSpaceSumRange() const noexcept { return rSpaceSumRange; }
         [[nodiscard]] const SearchRangeType& getKSpaceSumRange() const noexcept { return kSpaceSumRange; }
         /* Setters */
         void setLattice(LatticeMatrix lattice_);
-        void setIntegralLimit(T integralLimit_);
+        void setIntegralLimit(Tv integralLimit_);
     protected:
         [[nodiscard]] inline T calcSelfE() const;
         [[nodiscard]] inline T calcGammaPointE() const;
@@ -222,37 +222,37 @@ namespace Physica::Core {
         volume = PeriodicCell<T, Dim>::getVolume(lattice);
         inv_volume = reciprocal(volume);
 
-        const T averageCellSize = cbrt(T(volume));
-        const T estimate = sqrt(cbrt(T(getNumParticle())) * T(M_PI)) / averageCellSize;
+        const Tv averageCellSize = cbrt(volume.value());
+        const Tv estimate = sqrt(cbrt(Tv(getNumParticle())) * Tv(M_PI)) / averageCellSize;
         setIntegralLimit(estimate);
     }
 
     template<Scalar T, bool IsSmallCell>
-    void RSpaceEwald<T, IsSmallCell>::setIntegralLimit(T integralLimit_) {
+    void RSpaceEwald<T, IsSmallCell>::setIntegralLimit(Tv integralLimit_) {
         assert(integralLimit_.isPositive() && "[Error]: Invalid integralLimit");
-        const T heightX_2Pi = reciprocal(repLatt.row(0).norm());
-        const T heightY_2Pi = reciprocal(repLatt.row(1).norm());
-        const T heightZ_2Pi = reciprocal(repLatt.row(2).norm());
-        constexpr double factor1 = 2 * M_PI * (1 - std::numeric_limits<T>::epsilon()); //To avoid rSpaceCutoff larger than max value
-        const T maxRSpaceCutoff = std::min(heightX_2Pi, std::min(heightY_2Pi, heightZ_2Pi)) * ValueType(factor1);
-        const T minLimit = T(SumPrec) / maxRSpaceCutoff;
-        integralLimit = std::max(integralLimit_, minLimit).value();
+        const Tv heightX_2Pi = reciprocal(repLatt.row(0).values().norm());
+        const Tv heightY_2Pi = reciprocal(repLatt.row(1).values().norm());
+        const Tv heightZ_2Pi = reciprocal(repLatt.row(2).values().norm());
+        const Tv factor1 = 2 * M_PI * (1 - std::numeric_limits<T>::epsilon()); //To avoid rSpaceCutoff larger than max value
+        const Tv maxRSpaceCutoff = std::min(heightX_2Pi, std::min(heightY_2Pi, heightZ_2Pi)) * Tv(factor1);
+        const Tv minLimit = Tv(SumPrec) / maxRSpaceCutoff;
+        integralLimit = std::max(integralLimit_, minLimit);
 
-        const ValueType rSpaceCutoff = ValueType(SumPrec) / integralLimit.value();
+        const Tv rSpaceCutoff = Tv(SumPrec) / integralLimit;
         rSpaceSumRange = PeriodicCell<T, Dim>::estimateRange(lattice, rSpaceCutoff);
-        kSpaceSumRange = PeriodicCell<T, Dim>::estimateRange(repLatt, ValueType(SumPrec * 2) * integralLimit.value());
+        kSpaceSumRange = PeriodicCell<T, Dim>::estimateRange(repLatt, Tv(SumPrec * 2) * integralLimit);
         makeTables();
         Base::setCutoff(rSpaceCutoff);
     }
 
     template<Scalar T, bool IsSmallCell>
     inline T RSpaceEwald<T, IsSmallCell>::calcSelfE() const {
-        return square(charges).sum() * integralLimit / sqrt(ValueType(M_PI));
+        return square(charges).sum() * (integralLimit / sqrt(Tv(M_PI)));
     }
 
     template<Scalar T, bool IsSmallCell>
     inline T RSpaceEwald<T, IsSmallCell>::calcGammaPointE() const {
-        return square(charges.sum()) * ValueType(-M_PI) / (ValueType(2) * square(integralLimit)) * inv_volume;
+        return square(charges.sum()) * Tv(-M_PI) / (Tv(2) * square(integralLimit)) * inv_volume;
     }
     /**
      * Optimize: make use of x1, x2, x3 are equal distance
@@ -260,7 +260,7 @@ namespace Physica::Core {
     template<Scalar T, bool IsSmallCell>
     inline T RSpaceEwald<T, IsSmallCell>::pot_functor(
             size_t i, size_t j, T r, [[maybe_unused]] T r2) const {
-        const ValueType temp = r.value() * repErfcStep + ValueType(0.5);
+        const Tv temp = r.value() * repErfcStep + Tv(0.5);
         const int index = double(temp);
         const T x1 = erfcStep * floor(temp);
         auto y = erfc_table.template segment<3>(index, index + 3);
@@ -271,7 +271,7 @@ namespace Physica::Core {
     template<Scalar T, bool IsSmallCell>
     inline T RSpaceEwald<T, IsSmallCell>::force_functor(
             size_t i, size_t j, T r, [[maybe_unused]] T r2) const {
-        const ValueType temp = r.value() * repErfcStep + ValueType(0.5);
+        const Tv temp = r.value() * repErfcStep + Tv(0.5);
         const int index = double(temp);
         const T x1 = erfcStep * floor(temp);
         auto y = erfc_table.template segment<3>(index, index + 3);
@@ -281,13 +281,13 @@ namespace Physica::Core {
     template<Scalar T, bool IsSmallCell>
     void RSpaceEwald<T, IsSmallCell>::makeTables() {
         for (size_t i = 2; i < erfc_table.getLength(); ++i) {
-            const auto x = ValueType((i - 1) * ErfcTableStep);
+            const auto x = Tv((i - 1) * ErfcTableStep);
             erfc_table[i] = erfc(x) / x * integralLimit;
         }
         erfc_table[0] = erfc_table[1] = erfc_table[2]; // Smooth out divergent erfc(0) / 0 
-        erfcStep = ValueType(ErfcTableStep) / integralLimit;
+        erfcStep = Tv(ErfcTableStep) / integralLimit;
         repErfcStep = reciprocal(erfcStep.value());
-        repDoubleSquareStep = reciprocal(square(erfcStep) * ValueType(2));
+        repDoubleSquareStep = reciprocal(square(erfcStep) * Tv(2));
     }
     /**
      * Slow version functors are provided for debug use
@@ -301,7 +301,7 @@ namespace Physica::Core {
     template<Scalar T, bool IsSmallCell>
     T RSpaceEwald<T, IsSmallCell>::force_functor_slow(size_t i, size_t j, T r, T r2) const {
         const T x = r * integralLimit;
-        return charges[i] * charges[j] * (erfc(x) + x * exp(-square(x)) * ValueType(M_2_SQRTPI)) / r2;
+        return charges[i] * charges[j] * (erfc(x) + x * exp(-square(x)) * Tv(M_2_SQRTPI)) / r2;
     }
 
     template<Scalar T, bool IsSmallCell>

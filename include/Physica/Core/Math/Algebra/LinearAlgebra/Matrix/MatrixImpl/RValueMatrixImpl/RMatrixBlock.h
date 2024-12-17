@@ -48,7 +48,14 @@ namespace Physica::Core {
         RMatrixBlock(This&&) noexcept = delete;
         ~RMatrixBlock() = default;
         /* Getters */
-        [[nodiscard]] ScalarType calc(size_t index) const { assert(index < colCount); return mat.calc(fromRow, fromCol + index); }
+        [[nodiscard]] ScalarType calc(size_t index) const {
+            assert(index < colCount);
+            return mat.calc(fromRow, fromCol + index);
+        }
+        [[nodiscard]] ValueType calc_value(size_t index) const {
+            assert(index < colCount);
+            return mat.calc_value(fromRow, fromCol + index);
+        }
         [[nodiscard]] __host__ __device__ size_t getLength() const noexcept { return colCount; }
     };
 
@@ -75,7 +82,14 @@ namespace Physica::Core {
         RMatrixBlock(This&&) noexcept = delete;
         ~RMatrixBlock() = default;
         /* Getters */
-        [[nodiscard]] ScalarType calc(size_t index) const { assert(index < rowCount); return mat.calc(fromRow + index, fromCol); }
+        [[nodiscard]] ScalarType calc(size_t index) const {
+            assert(index < rowCount);
+            return mat.calc(fromRow + index, fromCol);
+        }
+        [[nodiscard]] ValueType calc_value(size_t index) const {
+            assert(index < rowCount);
+            return mat.calc_value(fromRow + index, fromCol);
+        }
         [[nodiscard]] __host__ __device__ size_t getLength() const noexcept { return rowCount; }
     };
 
@@ -85,6 +99,7 @@ namespace Physica::Core {
         using Base = RValueMatrix<This>;
     public:
         using typename Base::ScalarType;
+        using typename Base::ValueType;
     private:
         T& mat;
         size_t fromRow;
@@ -98,6 +113,7 @@ namespace Physica::Core {
         ~RMatrixBlock() = default;
         /* Getters */
         [[nodiscard]] ScalarType calc(size_t row, size_t col) const;
+        [[nodiscard]] ValueType calc_value(size_t row, size_t col) const;
         [[nodiscard]] __host__ __device__ size_t getRow() const noexcept { return rowCount; }
         [[nodiscard]] __host__ __device__ size_t getCol() const noexcept { return colCount; }
     };
@@ -114,11 +130,17 @@ namespace Physica::Core {
     }
 
     template<Matrix T>
-    RMatrixBlock<T, Dynamic, Dynamic>::ScalarType
-    RMatrixBlock<T, Dynamic, Dynamic>::calc(size_t row, size_t col) const {
+    auto RMatrixBlock<T, Dynamic, Dynamic>::calc(size_t row, size_t col) const -> ScalarType {
         assert(row < rowCount);
         assert(col < colCount);
         return mat.calc(row + fromRow, col + fromCol);
+    }
+
+    template<Matrix T>
+    auto RMatrixBlock<T, Dynamic, Dynamic>::calc_value(size_t row, size_t col) const -> ValueType {
+        assert(row < rowCount);
+        assert(col < colCount);
+        return mat.calc_value(row + fromRow, col + fromCol);
     }
 }
 
