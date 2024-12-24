@@ -29,42 +29,42 @@ namespace Physica::Core {
         using ScalarType = T::ScalarType;
     private:
         const T& v;
-        size_t row;
-        size_t col;
+        size_t r;
+        size_t c;
     public:
-        ReshapedVector(const T& v_, size_t row, size_t col);
-        ReshapedVector(const ReshapedVector&) = default;
-        ReshapedVector(ReshapedVector&&) noexcept = default;
+        ReshapedVector(const T& v_, size_t r_, size_t c_);
+        ReshapedVector(const This&) = default;
+        ReshapedVector(This&&) noexcept = default;
         ~ReshapedVector() = default;
         /* Operators */
-        ReshapedVector& operator=(const ReshapedVector&) = delete;
-        ReshapedVector& operator=(ReshapedVector&&) noexcept = delete;
+        This& operator=(const This&) = delete;
+        This& operator=(This&&) noexcept = delete;
         /* Getters */
-        [[nodiscard]] ScalarType calc(size_t r, size_t c) const {
-            assert(r < getRow() && c < getCol());
+        [[nodiscard]] ScalarType calc(size_t r1, size_t c1) const {
+            assert(r1 < getRow() && c1 < getCol());
             if constexpr (MatrixOption::isColMatrix<This>())
-                return v.calc(c * getRow() + r);
+                return v.calc(c1 * getRow() + r1);
             else
-                return v.calc(r * getCol() + c);
+                return v.calc(r1 * getCol() + c1);
         }
         [[nodiscard]] size_t getRow() const noexcept {
             if constexpr (Row != Dynamic)
                 return Row;
-            return row;
+            return r;
         }
         [[nodiscard]] size_t getCol() const noexcept {
             if constexpr (Col != Dynamic)
                 return Col;
-            return col;
+            return c;
         }
         [[nodiscard]] ScalarType sum() const { return v.sum(); }
     };
 
     template<Vector T, int MatrixMajor, size_t Row, size_t Col>
-    ReshapedVector<T, MatrixMajor, Row, Col>::ReshapedVector(const T& v_, size_t row_, size_t col_)
-            : v(v_), row(row_), col(col_) {
-        assert(row == Row || Row == Dynamic);
-        assert(col == Col || Col == Dynamic);
+    ReshapedVector<T, MatrixMajor, Row, Col>::ReshapedVector(const T& v_, size_t r_, size_t c_)
+            : v(v_), r(r_), c(c_) {
+        assert(r == Row || Row == Dynamic);
+        assert(c == Col || Col == Dynamic);
     }
 
     template<class Derived>

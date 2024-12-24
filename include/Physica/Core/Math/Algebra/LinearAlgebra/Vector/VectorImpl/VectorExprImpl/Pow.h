@@ -25,10 +25,13 @@ namespace Physica::Core {
         using Base = BinaryVectorExpr<ExprType::Pow, T, U>;
     public:
         using typename Base::ScalarType;
+        using typename Base::ValueType;
     public:
         using Base::Base;
         /* Operations */
         [[nodiscard]] CoDiff<ScalarType> calc(size_t i) const { return pow(Base::getLHS().calc(i), Base::getRHS()); }
+
+        [[nodiscard]] ValueType calc_value(size_t index) const { return pow(Base::getExpr().calc_value(index)); }
     };
 
     template<Vector T, Scalar U>

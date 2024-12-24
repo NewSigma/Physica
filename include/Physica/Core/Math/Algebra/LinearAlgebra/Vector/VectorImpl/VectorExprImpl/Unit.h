@@ -18,6 +18,8 @@
  */
 #pragma once
 
+#include "../VectorExpr.h"
+
 namespace Physica::Core {
     template<Vector T>
     class VectorExpr<ExprType::Unit, T>
@@ -25,10 +27,13 @@ namespace Physica::Core {
         using Base = UnitaryVectorExpr<ExprType::Unit, T>;
     public:
         using typename Base::ScalarType;
+        using typename Base::ValueType;
     public:
         using Base::Base;
         /* Operations */
         [[nodiscard]] ScalarType calc(size_t i) const { return Base::getExpr().calc(i).unit(); }
+
+        [[nodiscard]] ValueType calc_value(size_t i) const { return Base::getExpr().calc_value(i).unit(); }
     };
 
     template<Vector T>

@@ -44,6 +44,7 @@ namespace Physica::Core {
         Square,
         Ln,
         Ln1p,
+        Ln1pExp,
         Exp,
         Pow,
         Sin,
@@ -80,6 +81,7 @@ namespace Physica::Core {
             case Square: return "Square";
             case Ln: return "Ln";
             case Ln1p: return "Ln1p";
+            case Ln1pExp: return "Ln1pExp";
             case Exp: return "Exp";
             case Pow: return "Pow";
             case Sin: return "Sin";

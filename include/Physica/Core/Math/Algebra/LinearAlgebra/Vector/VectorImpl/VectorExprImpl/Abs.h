@@ -25,6 +25,7 @@ namespace Physica::Core {
         using Base = UnitaryVectorExpr<ExprType::Abs, T>;
     public:
         using typename Base::ScalarType;
+        using typename Base::ValueType;
     private:
         constexpr static bool isComplexV = T::isComplex;
         constexpr static bool isReverseDiff = Base::isReverseDiff;
@@ -32,6 +33,8 @@ namespace Physica::Core {
         using Base::Base;
         /* Operations */
         [[nodiscard]] CoDiff<ScalarType> calc(size_t index) const { return abs(Base::getExpr().calc(index)); }
+
+        [[nodiscard]] ValueType calc_value(size_t index) const { return abs(Base::getExpr().calc_value(index)); }
 
         template<class AnyPacket>
         [[nodiscard]] AnyPacket packet(size_t index) const {

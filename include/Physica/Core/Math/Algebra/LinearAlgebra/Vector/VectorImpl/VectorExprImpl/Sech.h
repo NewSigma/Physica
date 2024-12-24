@@ -25,10 +25,13 @@ namespace Physica::Core {
         using Base = UnitaryVectorExpr<ExprType::Sech, T>;
     public:
         using typename Base::ScalarType;
+        using typename Base::ValueType;
     public:
         using Base::Base;
         /* Operations */
         [[nodiscard]] CoDiff<ScalarType> calc(size_t index) const { return sech(Base::getExpr().calc(index)); }
+
+        [[nodiscard]] ValueType calc_value(size_t index) const { return sech(Base::getExpr().calc_value(index)); }
     };
 
     template<Vector T>

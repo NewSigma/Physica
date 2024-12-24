@@ -35,6 +35,9 @@ namespace Physica::Core {
     inline Complex<T> ln(const Complex<T>& c);
 
     template<Scalar T>
+    inline Complex<T> ln1pexp(const Complex<T>& c);
+
+    template<Scalar T>
     inline Complex<T> exp(const Complex<T>& c);
 
     template<Scalar T>

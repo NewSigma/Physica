@@ -19,6 +19,7 @@
 #pragma once
 
 #include <cmath>
+#include <numbers>
 
 namespace Physica::Core {
     enum UnitSystem {
@@ -48,7 +49,7 @@ namespace Physica::Core {
         /* Universal */
         constexpr static double gravitationG = 6.67430E-11;
         constexpr static double planck = 6.62607015E-34;
-        constexpr static double reducedPlanck = planck / (2 * M_PI);
+        constexpr static double reducedPlanck = planck / (2 * std::numbers::pi);
         constexpr static double speedOfLight = 299792458;
         constexpr static double vacuumDielectric = 8.8541878188E-12;
         /* Electromagnetic */

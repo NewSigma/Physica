@@ -53,6 +53,7 @@ namespace Physica::Core {
         ~ContinuousVector() = default;
         /* Operators */
         using Base::operator=;
+        using Base::operator+=;
         inline This& operator=(const This& v);
         inline This& operator=(This&& v);
 

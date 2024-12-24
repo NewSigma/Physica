@@ -98,7 +98,7 @@ namespace Physica::Core {
         assert(mat.getRow() == mat.getCol());
         for (size_t i = 0; i < mat.getRow(); ++i)
             for (size_t j = i; j < mat.getRow(); ++j)
-                Base::operator()(i, j) = mat.calc(i, j);
+                Base::operator()(i, j) = T(mat.calc(i, j));
     }
 
     template<Scalar T, size_t Order>

@@ -133,7 +133,7 @@ namespace Physica::Core {
         using ScalarType = std::remove_reference_t<T>::ScalarType;
         if constexpr (ForwardDiff<T>) {
             using GradType = ScalarType::GradType;
-            co_return ResultType(ln(x.value()), x.grad() / GradType(x));
+            co_return ScalarType(ln(x.value()), x.grad() / GradType(x));
         }
         else {
             LazyReverse<T&&> x_ = std::forward<T>(x);
@@ -149,6 +149,14 @@ namespace Physica::Core {
         using ResultType = Diff<T, DiffMode::Forward, Order>;
         using GradType = ResultType::GradType;
         return ResultType(ln1p(x.value()), x.grad() / (T(1) + GradType(x)));
+    }
+
+    template<Scalar T, int Order>
+    auto ln1pexp(const Diff<T, DiffMode::Forward, Order>& x) {
+        using ResultType = Diff<T, DiffMode::Forward, Order>;
+        using GradType = ResultType::GradType;
+        const GradType x1 = GradType(x);
+        return ResultType(ln1pexp(x.value()), reciprocal(GradType(1) + exp(-x1)) * x.grad());
     }
 
     template<Scalar T>

@@ -25,10 +25,13 @@ namespace Physica::Core {
         using Base = UnitaryVectorExpr<ExprType::Minus, T>;
     public:
         using typename Base::ScalarType;
+        using typename Base::ValueType;
     public:
         using Base::Base;
         /* Operations */
         [[nodiscard]] CoDiff<ScalarType> calc(size_t s) const { return -Base::getExpr().calc(s); }
+
+        [[nodiscard]] ValueType calc_value(size_t index) const { return -Base::getExpr().calc_value(index); }
 
         template<class AnyPacket>
         [[nodiscard]] AnyPacket packet(size_t index) const { return -Base::getExpr().template packet<AnyPacket>(index); }

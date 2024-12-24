@@ -103,6 +103,7 @@ namespace Physica::Core {
         [[nodiscard]] RealType norm1() const;
         template<class Executor = SequentialExecutor>
         [[nodiscard]] RealType norm1_power(unsigned int maxIteration) const;
+        [[nodiscard]] RealType normInf() const;
 
         [[nodiscard]] ScalarType max() const;
         [[nodiscard]] ScalarType min() const;

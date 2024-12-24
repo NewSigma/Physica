@@ -18,7 +18,11 @@
  */
 #pragma once
 
+#include "../RValueVector.h"
+
 namespace Physica::Core {
+    template<class VectorType> class FormatedVector;
+
     template<Vector T>
     class FormatedVector<T> {
         const T& data;

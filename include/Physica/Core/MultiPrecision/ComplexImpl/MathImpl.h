@@ -62,6 +62,12 @@ namespace Physica::Core {
     }
 
     template<Scalar T>
+    inline Complex<T> ln1pexp(const Complex<T>& c) {
+        T norm = c.norm();
+        return norm + ln(exp(-norm) + exp(c - norm));
+    }
+
+    template<Scalar T>
     inline Complex<T> exp(const Complex<T>& c) {
         return Complex<T>(std::exp(c.toMachine()));
     }

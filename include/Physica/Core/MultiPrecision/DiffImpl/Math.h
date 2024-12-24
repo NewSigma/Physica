@@ -44,6 +44,9 @@ namespace Physica::Core {
 
     template<Scalar T, int Order>
     auto ln1p(const Diff<T, DiffMode::Forward, Order>& x);
+
+    template<Scalar T, int Order>
+    auto ln1pexp(const Diff<T, DiffMode::Forward, Order>& x);
 /*
     template<Scalar T, int Order>
     auto log(const Diff<T, DiffMode::Forward, Order>& x, const Diff<T, DiffMode::Forward, Order>& a);

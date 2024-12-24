@@ -28,6 +28,7 @@ namespace Physica::Core {
 
         size_t order; // TODO: use void if Order != Dynamic
     public:
+        UnitMatrix() = default;
         UnitMatrix(size_t order_);
         UnitMatrix(const This&) = default;
         UnitMatrix(This&&) noexcept = default;

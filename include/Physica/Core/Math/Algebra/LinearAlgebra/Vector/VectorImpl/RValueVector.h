@@ -33,7 +33,6 @@ namespace Physica::Core {
     template<class VectorType> class TransposeVector;
     template<class VectorType> class ConjugateVector;
     template<class VectorType> class HermiteVector;
-    template<class VectorType> class FormatedVector;
     template<class VectorType> class ReverseVector;
     template<class VectorType, int MatrixMajor, size_t Row, size_t Col> class ReshapedVector;
     template<Vector V1, Vector V2> class CrossProduct;

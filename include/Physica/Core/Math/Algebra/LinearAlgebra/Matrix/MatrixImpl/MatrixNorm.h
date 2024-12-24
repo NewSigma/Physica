@@ -98,4 +98,12 @@ namespace Physica::Core {
         }
         throw BadConvergenceException("[Error]: norm1_power failed to converge");
     }
+
+    template<class Derived>
+    RValueMatrix<Derived>::RealType RValueMatrix<Derived>::normInf() const {
+        RealType result = std::numeric_limits<RealType>::lowest();
+        for (size_t i = 0; i < getRow(); ++i)
+            result = std::max(abs(row(i)).sum(), result);
+        return result;
+    }
 }

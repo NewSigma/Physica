@@ -34,9 +34,9 @@ namespace Physica::Core {
         using Base = RValueVector<This>;
     public:
         using typename Base::ScalarType;
+        using RealType = ScalarType::RealType;
         using ParamPair = std::pair<int, int>;
     private:
-        using RealType = ScalarType::RealType;
         using RealValue = RealType::ValueType;
         using MachineType = RealType::MachineType;
         constexpr static bool IsFloat = ScalarType::Option == Float;

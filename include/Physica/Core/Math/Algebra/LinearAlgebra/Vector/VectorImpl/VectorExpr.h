@@ -127,6 +127,7 @@ namespace Physica {
 #include "VectorExprImpl/Square.h"
 #include "VectorExprImpl/Ln.h"
 #include "VectorExprImpl/Ln1p.h"
+#include "VectorExprImpl/Ln1pExp.h"
 #include "VectorExprImpl/Exp.h"
 #include "VectorExprImpl/Pow.h"
 #include "VectorExprImpl/Sin.h"

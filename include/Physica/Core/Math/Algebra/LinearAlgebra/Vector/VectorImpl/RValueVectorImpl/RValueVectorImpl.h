@@ -18,8 +18,7 @@
  */
 #pragma once
 
-#include "../RValueVector.h"
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/VectorImpl/FormatedVector.h"
+#include "FormatedVector.h"
 
 namespace Physica::Core {
     namespace Internal {
@@ -270,7 +269,7 @@ namespace Physica::Core {
                 if (to != length) {
                     const size_t count = length - i;
                     for (size_t j = 0; j < count; ++j)
-                        result = std::max(result, v.calc(i + j));
+                        result = std::max<ScalarType>(result, v.calc(i + j));
                 }
             }
             return result;
@@ -320,7 +319,7 @@ namespace Physica::Core {
                 if (to != length) {
                     const size_t count = length - i;
                     for (size_t j = 0; j < count; ++j)
-                        result = std::min(result, v.calc(i + j));
+                        result = std::min<ScalarType>(result, v.calc(i + j));
                 }
             }
             return result;

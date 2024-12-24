@@ -77,13 +77,13 @@ namespace Physica::Core {
         constexpr static int defaultMajor = Internal::ProductOption<T1, T2>::Major;
         constexpr static bool isAnyMajor = defaultMajor == MatrixOption::AnyMajor;
         using TargetType = LValueMatrix<M>;
-
+        using T = TargetType::ScalarType;
         if constexpr (isAnyMajor) {
             for (size_t i = 0; i < target.getMaxMajor(); ++i) {
                 for (size_t j = 0; j < target.getMaxMinor(); ++j) {
                     const size_t r = MatrixOption::rowFromMajorMinor<TargetType>(i, j);
                     const size_t c = MatrixOption::colFromMajorMinor<TargetType>(i, j);
-                    target.refFromMajorMinor(i, j) = calc(r, c);
+                    target.refFromMajorMinor(i, j) = T(calc(r, c));
                 }
             }
         }
@@ -92,7 +92,7 @@ namespace Physica::Core {
                 for (size_t j = 0; j < (defaultMajor == MatrixOption::Col ?  getRow() : getCol()); ++j) {
                     const size_t r = MatrixOption::rowFromMajorMinor<DefaultType>(i, j);
                     const size_t c = MatrixOption::colFromMajorMinor<DefaultType>(i, j);
-                    target(r, c) = calc(r, c);
+                    target(r, c) = T(calc(r, c));
                 }
             }
         }

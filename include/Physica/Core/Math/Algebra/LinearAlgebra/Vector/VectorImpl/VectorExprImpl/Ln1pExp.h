@@ -20,22 +20,22 @@
 
 namespace Physica::Core {
     template<Vector T>
-    class VectorExpr<ExprType::Cos, T> : public UnitaryVectorExpr<ExprType::Cos, T> {
-        using This = VectorExpr<ExprType::Cos, T>;
-        using Base = UnitaryVectorExpr<ExprType::Cos, T>;
+    class VectorExpr<ExprType::Ln1pExp, T> : public UnitaryVectorExpr<ExprType::Ln1pExp, T> {
+        using This = VectorExpr<ExprType::Ln1pExp, T>;
+        using Base = UnitaryVectorExpr<ExprType::Ln1pExp, T>;
     public:
         using typename Base::ScalarType;
         using typename Base::ValueType;
     public:
         using Base::Base;
         /* Operations */
-        [[nodiscard]] CoDiff<ScalarType> calc(size_t index) const { return cos(Base::getExpr().calc(index)); }
+        [[nodiscard]] ScalarType calc(size_t index) const { return ln1pexp(Base::getExpr().calc(index)); }
 
-        [[nodiscard]] ValueType calc_value(size_t index) const { return cos(Base::getExpr().calc_value(index)); }
+        [[nodiscard]] ValueType calc_value(size_t index) const { return ln1pexp(Base::getExpr().calc_value(index)); }
     };
 
     template<Vector T>
-    [[nodiscard]] inline auto cos(const T& v) noexcept {
-        return VectorExpr<ExprType::Cos, T>(v);
+    [[nodiscard]] inline auto ln1pexp(const T& v) noexcept {
+        return VectorExpr<ExprType::Ln1pExp, T>(v);
     }
 }

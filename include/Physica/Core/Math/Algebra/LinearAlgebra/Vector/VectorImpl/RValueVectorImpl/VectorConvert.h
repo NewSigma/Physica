@@ -18,6 +18,8 @@
  */
 #pragma once
 
+#include "../RValueVector.h"
+
 namespace Physica::Core {
     template<class T>
     class RealVector : public RValueVector<RealVector<T>> {
@@ -25,6 +27,7 @@ namespace Physica::Core {
         using Base = RValueVector<This>;
     public:
         using typename Base::ScalarType;
+        using typename Base::ValueType;
     private:
         const T& v;
     public:
@@ -37,6 +40,7 @@ namespace Physica::Core {
         This& operator=(This&&) = delete;
         /* Getters */
         [[nodiscard]] ScalarType calc(size_t s) const { return v.calc(s).real(); }
+        [[nodiscard]] ValueType calc_value(size_t s) const { return v.calc_value(s).real(); }
         [[nodiscard]] size_t getLength() const { return v.getLength(); }
     };
 
@@ -46,6 +50,7 @@ namespace Physica::Core {
         using Base = RValueVector<This>;
     public:
         using typename Base::ScalarType;
+        using typename Base::ValueType;
     private:
         const T& v;
     public:
@@ -58,6 +63,7 @@ namespace Physica::Core {
         This& operator=(This&&) = delete;
         /* Getters */
         [[nodiscard]] ScalarType calc(size_t s) const { return v.calc(s).imag(); }
+        [[nodiscard]] ValueType calc_value(size_t s) const { return v.calc_value(s).imag(); }
         [[nodiscard]] size_t getLength() const { return v.getLength(); }
     };
 
@@ -68,6 +74,7 @@ namespace Physica::Core {
         using ComplexType = T::ScalarType;
     public:
         using typename Base::ScalarType;
+        using typename Base::ValueType;
         using Base::isReverseDiff;
     private:
         constexpr static bool isComplexV = T::isComplex;
@@ -83,6 +90,8 @@ namespace Physica::Core {
         This& operator=(This&&) = delete;
         /* Getters */
         [[nodiscard]] CoDiff<ScalarType> calc(size_t s) const { return v.calc(s).squaredNorm(); }
+
+        [[nodiscard]] ValueType calc_value(size_t s) const { return v.calc_value(s).squaredNorm(); }
 
         template<class AnyPacket>
         [[nodiscard]] AnyPacket packet(size_t index) const {
@@ -145,6 +154,7 @@ namespace Physica::Core {
         using Base = RValueVector<This>;
     public:
         using typename Base::ScalarType;
+        using typename Base::ValueType;
     private:
         const T& v;
     public:
@@ -157,6 +167,7 @@ namespace Physica::Core {
         This& operator=(This&&) = delete;
         /* Getters */
         [[nodiscard]] CoDiff<ScalarType> calc(size_t s) const { return v.calc(s).norm(); }
+        [[nodiscard]] ValueType calc_value(size_t s) const { return v.calc_value(s).norm(); }
         [[nodiscard]] size_t getLength() const { return v.getLength(); }
     };
 
@@ -166,6 +177,7 @@ namespace Physica::Core {
         using Base = RValueVector<This>;
     public:
         using typename Base::ScalarType;
+        using typename Base::ValueType;
     private:
         const T& v;
     public:
@@ -188,6 +200,7 @@ namespace Physica::Core {
         using Base = RValueVector<This>;
     public:
         using typename Base::ScalarType;
+        using typename Base::ValueType;
     private:
         const T& v;
     public:
@@ -200,6 +213,7 @@ namespace Physica::Core {
         This& operator=(This&&) = delete;
         /* Getters */
         [[nodiscard]] ScalarType calc(size_t s) const { return v.calc(s).template grad<GradOrder>(); }
+        [[nodiscard]] ValueType calc_value(size_t s) const { return v.calc(s).value(); }
         [[nodiscard]] size_t getLength() const { return v.getLength(); }
     };
 
@@ -211,6 +225,7 @@ namespace Physica::Core {
         using Base = RValueVector<This>;
     public:
         using typename Base::ScalarType;
+        using typename Base::ValueType;
     private:
         const T& v;
     public:
@@ -223,6 +238,7 @@ namespace Physica::Core {
         This& operator=(This&&) = delete;
         /* Getters */
         [[nodiscard]] ScalarType calc(size_t s) const { return v.calc(s).template mask<MaskOrder>(); }
+        [[nodiscard]] ValueType calc_value(size_t s) const { return v.calc(s).value(); }
         [[nodiscard]] size_t getLength() const { return v.getLength(); }
     };
 

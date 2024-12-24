@@ -50,6 +50,7 @@ namespace Physica::Core {
         DenseVector() = default;
         explicit DenseVector(size_t length);
         DenseVector(size_t length, T init);
+        DenseVector(size_t length, ScalarType init) requires(isForwardDiff);
         DenseVector(initializer_list list);
         DenseVector(ValueVector v_, GradVector g_) noexcept;
         template<Vector V>
