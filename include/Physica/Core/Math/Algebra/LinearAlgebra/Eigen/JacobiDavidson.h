@@ -258,6 +258,7 @@ namespace Physica::Core {
         assert(numRequired <= size && "[Error]: Requiring more eigen pairs than matrix size");
         assert(size > MaxSearchDim && "[Error]: Use dense eigen solver is prefered");
         const size_t dim = calcSearchSpaceDim(size);
+        linearSolver.resize(size);
         eigenvalues.resize(numRequired);
         eigenvectors.resize(size, numRequired);
         eigenSolver.resize(dim);

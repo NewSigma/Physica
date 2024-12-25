@@ -18,26 +18,25 @@
  */
 #pragma once
 
-#include "SpinlessFermion.h"
-#include "Physica/Core/Math/NumberTheory/NumberTheory.h"
+#include "SpinState.h"
 
 namespace Physica::Core {
     template<int Dim, int NumSite>
-    class SpinFermion : public State<SpinFermion<Dim, NumSite>> {
-        using This = SpinFermion<Dim, NumSite>;
+    class FermiState : public State<FermiState<Dim, NumSite>> {
+        using This = FermiState<Dim, NumSite>;
         using Base = State<This>;
-        using SpinlessType = SpinlessFermion<Dim, NumSite>;
+        using Spin = SpinState<Dim, NumSite>;
     public:
-        using IntType = SpinlessType::IntType;
+        using IntType = Spin::IntType;
     private:
-        SpinlessType spinUp;
-        SpinlessType spinDown;
+        Spin spinUp;
+        Spin spinDown;
     public:
-        SpinFermion() = default;
-        inline SpinFermion(SpinlessType spinUp_, SpinlessType spinDown_);
-        SpinFermion(const This&) = default;
-        SpinFermion(This&&) noexcept = default;
-        ~SpinFermion() = default;
+        FermiState() = default;
+        inline FermiState(Spin spinUp_, Spin spinDown_);
+        FermiState(const This&) = default;
+        FermiState(This&&) noexcept = default;
+        ~FermiState() = default;
         /* Operators */
         This& operator=(This obj) noexcept { swap(obj); return *this; }
         [[nodiscard]] bool operator==(const This& other) const noexcept { return (spinUp == other.spinUp) && (spinDown == other.spinDown); }
@@ -46,22 +45,22 @@ namespace Physica::Core {
         [[nodiscard]] inline bool operator<(const This& other) const noexcept;
         [[nodiscard]] bool operator>=(const This& other) const noexcept { return !((*this) < other); }
         [[nodiscard]] bool operator<=(const This& other) const noexcept { return !((*this) > other); }
-        [[nodiscard]] This operator<<(int shift) const noexcept { return SpinFermion(spinUp << shift, spinDown << shift); }
-        [[nodiscard]] This operator>>(int shift) const noexcept { return SpinFermion(spinUp >> shift, spinDown >> shift); }
+        [[nodiscard]] This operator<<(int shift) const noexcept { return FermiState(spinUp << shift, spinDown << shift); }
+        [[nodiscard]] This operator>>(int shift) const noexcept { return FermiState(spinUp >> shift, spinDown >> shift); }
         void operator<<=(int shift) noexcept { (*this) = (*this) << shift; }
         void operator>>=(int shift) noexcept { (*this) = (*this) >> shift; }
         /* Operations */
-        [[nodiscard]] SpinFermion hopUp(uint8_t from, uint8_t to) const;
-        [[nodiscard]] SpinFermion hopDown(uint8_t from, uint8_t to) const;
+        [[nodiscard]] FermiState hopUp(uint8_t from, uint8_t to) const;
+        [[nodiscard]] FermiState hopDown(uint8_t from, uint8_t to) const;
         [[nodiscard]] inline int hopUpSign(uint8_t from, uint8_t to) const;
         [[nodiscard]] inline int hopDownSign(uint8_t from, uint8_t to) const;
-        [[nodiscard]] SpinFermion transReduce() const;
+        [[nodiscard]] FermiState transReduce() const;
         [[nodiscard]] inline int lShiftSign() const;
         [[nodiscard]] inline int calcPeriod() const noexcept;
-        inline void swap(SpinFermion& __restrict obj) noexcept;
+        inline void swap(FermiState& __restrict obj) noexcept;
         /* Getters */
-        [[nodiscard]] SpinlessType getSpinUp() const noexcept { return spinUp; }
-        [[nodiscard]] SpinlessType getSpinDown() const noexcept { return spinDown; }
+        [[nodiscard]] Spin getSpinUp() const noexcept { return spinUp; }
+        [[nodiscard]] Spin getSpinDown() const noexcept { return spinDown; }
         [[nodiscard]] int getNumSite() const noexcept { return spinUp.getNumSite(); }
         [[nodiscard]] bool isVacuum() const noexcept { return spinUp.isVacuum() && spinDown.isVacuum(); }
         [[nodiscard]] bool isUpOccupy(uint8_t site) const noexcept { return spinUp.isOccupy(site); }
@@ -78,14 +77,14 @@ namespace Physica::Core {
     };
 
     template<int Dim, int NumSite>
-    inline std::ostream& operator<<(std::ostream& os, SpinFermion<Dim, NumSite> e) {
+    inline std::ostream& operator<<(std::ostream& os, FermiState<Dim, NumSite> e) {
         return os << e.getSpinUp() << ' ' << e.getSpinDown();
     }
 }
 
 namespace Physica {
     template<int I1, int I2>
-    class Traits<Core::SpinFermion<I1, I2>> {
+    class Traits<FermiState<I1, I2>> {
     public:
         constexpr static int Dim = I1;
         constexpr static int NumSite = I2;
@@ -93,4 +92,4 @@ namespace Physica {
     };
 }
 
-#include "StateImpl/SpinFermionImpl.h"
+#include "StateImpl/FermiStateImpl.h"

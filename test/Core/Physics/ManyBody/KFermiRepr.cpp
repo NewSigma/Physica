@@ -20,7 +20,7 @@
 #include "Physica/Core/Math/Random/Random.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Eigen/JacobiDavidson.h"
 #include "Physica/Core/Physics/ManyBody/Hamilton/HubbardMatrix.h"
-#include "Physica/Core/Physics/ManyBody/ReprSpace/KSpinRepr.h"
+#include "Physica/Core/Physics/ManyBody/ReprSpace/KFermiRepr.h"
 
 using namespace Physica::Core;
 using RealType = float64;
@@ -33,11 +33,11 @@ constexpr double HoppingT = 1.0;
 constexpr double RepelU = 4.0;
 
 void testComplete() {
-    const SpinRepr<1, NumSite, true> rRepr(NumParticle, NumParticle);
+    const FermiRepr<1, NumSite, true> rRepr(NumParticle, NumParticle);
     const size_t rNumState = rRepr.getNumState();
     size_t kNumState = 0;
     for (unsigned int i = 0; i < NumSite; ++i) {
-        const size_t temp = KSpinRepr<1, NumSite, true>(rRepr, i).getNumState();
+        const size_t temp = KFermiRepr<1, NumSite, true>(rRepr, i).getNumState();
         kNumState += temp;
     }
     if (rNumState != kNumState)
@@ -49,7 +49,7 @@ void testEigen() {
     LatticeModel<1> lattice({NumSite}, 1);
     Hubbard<RealType, 1> hubbard(lattice, HoppingT, RepelU);
     {
-        using ReprType = SpinRepr<1, NumSite, true>;
+        using ReprType = FermiRepr<1, NumSite, true>;
         ReprType repr(NumParticle, NumParticle);
         HubbardMatrix<RealType, ReprType> model(hubbard, std::move(repr));
 
@@ -61,7 +61,7 @@ void testEigen() {
     }
     RealType result;
     {
-        using ReprType = KSpinRepr<1, NumSite, true>;
+        using ReprType = KFermiRepr<1, NumSite, true>;
         ReprType repr({NumParticle, NumParticle}, 0);
         HubbardMatrix<ScalarType, ReprType> model(hubbard, std::move(repr));
 

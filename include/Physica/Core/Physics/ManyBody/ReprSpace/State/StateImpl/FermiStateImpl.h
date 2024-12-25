@@ -18,13 +18,16 @@
  */
 #pragma once
 
+#include "Physica/Core/Math/NumberTheory/NumberTheory.h"
+#include "../FermiState.h"
+
 namespace Physica::Core {
     template<int Dim, int NumSite>
-    inline SpinFermion<Dim, NumSite>::SpinFermion(SpinlessType spinUp_, SpinlessType spinDown_)
+    inline FermiState<Dim, NumSite>::FermiState(Spin spinUp_, Spin spinDown_)
             : spinUp(spinUp_), spinDown(spinDown_) {}
 
     template<int Dim, int NumSite>
-    inline bool SpinFermion<Dim, NumSite>::operator>(const This& other) const noexcept {
+    inline bool FermiState<Dim, NumSite>::operator>(const This& other) const noexcept {
         if (spinUp > other.spinUp)
             return true;
         if (spinUp == other.spinUp)
@@ -33,7 +36,7 @@ namespace Physica::Core {
     }
 
     template<int Dim, int NumSite>
-    inline bool SpinFermion<Dim, NumSite>::operator<(const This& other) const noexcept {
+    inline bool FermiState<Dim, NumSite>::operator<(const This& other) const noexcept {
         if (spinUp < other.spinUp)
             return true;
         if (spinUp == other.spinUp)
@@ -42,35 +45,35 @@ namespace Physica::Core {
     }
 
     template<int Dim, int NumSite>
-    SpinFermion<Dim, NumSite> SpinFermion<Dim, NumSite>::hopUp(uint8_t from, uint8_t to) const {
+    FermiState<Dim, NumSite> FermiState<Dim, NumSite>::hopUp(uint8_t from, uint8_t to) const {
         auto newSpinUp = spinUp.hop(from, to);
         const bool hopFailed = newSpinUp.isVacuum() && !spinUp.isVacuum();
         if (hopFailed)
-            return SpinFermion();
-        return SpinFermion(std::move(newSpinUp), spinDown);
+            return FermiState();
+        return FermiState(std::move(newSpinUp), spinDown);
     }
 
     template<int Dim, int NumSite>
-    SpinFermion<Dim, NumSite> SpinFermion<Dim, NumSite>::hopDown(uint8_t from, uint8_t to) const {
+    FermiState<Dim, NumSite> FermiState<Dim, NumSite>::hopDown(uint8_t from, uint8_t to) const {
         auto newSpinDown = spinDown.hop(from, to);
         const bool hopFailed = newSpinDown.isVacuum() && !spinDown.isVacuum();
         if (hopFailed)
-            return SpinFermion();
-        return SpinFermion(spinUp, std::move(newSpinDown));
+            return FermiState();
+        return FermiState(spinUp, std::move(newSpinDown));
     }
 
     template<int Dim, int NumSite>
-    inline int SpinFermion<Dim, NumSite>::hopUpSign(uint8_t from, uint8_t to) const {
+    inline int FermiState<Dim, NumSite>::hopUpSign(uint8_t from, uint8_t to) const {
         return spinUp.hopSign(from, to);
     }
 
     template<int Dim, int NumSite>
-    inline int SpinFermion<Dim, NumSite>::hopDownSign(uint8_t from, uint8_t to) const {
+    inline int FermiState<Dim, NumSite>::hopDownSign(uint8_t from, uint8_t to) const {
         return spinDown.hopSign(from, to);
     }
 
     template<int Dim, int NumSite>
-    SpinFermion<Dim, NumSite> SpinFermion<Dim, NumSite>::transReduce() const {
+    FermiState<Dim, NumSite> FermiState<Dim, NumSite>::transReduce() const {
         if constexpr (Dim != 1)
             noImpl(__func__);
         This result = *this, temp = *this;
@@ -84,12 +87,12 @@ namespace Physica::Core {
     }
 
     template<int Dim, int NumSite>
-    inline int SpinFermion<Dim, NumSite>::lShiftSign() const {
+    inline int FermiState<Dim, NumSite>::lShiftSign() const {
         return spinUp.lShiftSign() * spinDown.lShiftSign();
     }
 
     template<int Dim, int NumSite>
-    inline int SpinFermion<Dim, NumSite>::calcPeriod() const noexcept {
+    inline int FermiState<Dim, NumSite>::calcPeriod() const noexcept {
         if constexpr (Dim != 1)
             noImpl(__func__);
         const int result = lcm<int, false>(spinUp.calcPeriod(), spinDown.calcPeriod());
@@ -98,26 +101,26 @@ namespace Physica::Core {
     }
 
     template<int Dim, int NumSite>
-    inline void SpinFermion<Dim, NumSite>::swap(SpinFermion& __restrict obj) noexcept {
+    inline void FermiState<Dim, NumSite>::swap(FermiState& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         spinUp.swap(obj.spinUp);
         spinDown.swap(obj.spinDown);
     }
 
     template<int Dim, int NumSite>
-    inline int SpinFermion<Dim, NumSite>::getNumDoubleOccupy() const noexcept {
+    inline int FermiState<Dim, NumSite>::getNumDoubleOccupy() const noexcept {
         return std::popcount(spinUp.getOccupyBits() & spinDown.getOccupyBits());
     }
 
     template<int Dim, int NumSite>
     template<RandomGenerator R>
-    SpinFermion<Dim, NumSite> SpinFermion<Dim, NumSite>::random_state() {
-        return This(SpinlessType::template random_state<R>(), SpinlessType::template random_state<R>());
+    FermiState<Dim, NumSite> FermiState<Dim, NumSite>::random_state() {
+        return This(Spin::template random_state<R>(), Spin::template random_state<R>());
     }
 
     template<int Dim, int NumSite>
     template<RandomGenerator R>
-    SpinFermion<Dim, NumSite> SpinFermion<Dim, NumSite>::random_state(size_t numSpinUp, size_t numSpinDown) {
-        return This(SpinlessType::template random_state<R>(numSpinUp), SpinlessType::template random_state<R>(numSpinDown));
+    FermiState<Dim, NumSite> FermiState<Dim, NumSite>::random_state(size_t numSpinUp, size_t numSpinDown) {
+        return This(Spin::template random_state<R>(numSpinUp), Spin::template random_state<R>(numSpinDown));
     }
 }

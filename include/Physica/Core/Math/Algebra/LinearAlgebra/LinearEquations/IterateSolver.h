@@ -107,6 +107,7 @@ namespace Physica::Core {
     template<Scalar T>
     template<class Functor, LVector V>
     void IterateSolver<T>::cg_functor(Functor dotFunc, V& b) {
+        assert(dot.getLength() == b.getLength());
         residual = -b;
         searchP = b;
         V& x = b;
@@ -140,6 +141,7 @@ namespace Physica::Core {
     template<Scalar T>
     template<class Functor1, class Functor2, LVector V>
     void IterateSolver<T>::cgnr_functor(Functor1 dotFunc, Functor2 dotTransFunc, V& b) {
+        assert(dot.getLength() == b.getLength());
         residual = -b;
         dotTransFunc(b, searchP);
         V& x = b;

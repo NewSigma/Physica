@@ -19,16 +19,16 @@
 #pragma once
 
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Vector/SparseVector.h"
+#include "HubbardMatrix.h"
 
 namespace Physica::Core {
-    template<Scalar T, class ReprType, Vector U>
-    class MatrixVectorProduct<HubbardMatrix<T, ReprType>, U>
-            : public RValueVector<MatrixVectorProduct<HubbardMatrix<T, ReprType>, U>> {
-        using MatrixType = HubbardMatrix<T, ReprType>;
-        using This = MatrixVectorProduct<MatrixType, U>;
+    template<Scalar T, Representation U, Vector V>
+    class MatrixVectorProduct<HubbardMatrix<T, U>, V> : public RValueVector<MatrixVectorProduct<HubbardMatrix<T, U>, V>> {
+        using MatrixType = HubbardMatrix<T, U>;
+        using This = MatrixVectorProduct<MatrixType, V>;
         using Base = RValueVector<This>;
         using FFTType = MatrixType::FFTType;
-        using StateType = ReprType::StateType;
+        using StateType = U::StateType;
         constexpr static unsigned int Dim = MatrixType::Dim;
         constexpr static unsigned int NumSite = MatrixType::NumSite;
         constexpr static unsigned int SiteDOF = MatrixType::SiteDOF;
@@ -38,9 +38,9 @@ namespace Physica::Core {
         using RealType = ScalarType::RealType;
     private:
         const MatrixType& mat;
-        const U& vec;
+        const V& vec;
     public:
-        MatrixVectorProduct(const MatrixType& mat_, const U& vec_) : mat(mat_), vec(vec_) {
+        MatrixVectorProduct(const MatrixType& mat_, const V& vec_) : mat(mat_), vec(vec_) {
             assert(mat.getCol() == vec.getLength());
         }
         MatrixVectorProduct(const This&) = delete;
@@ -50,25 +50,26 @@ namespace Physica::Core {
         This& operator=(const This&) = delete;
         This& operator=(This&&) noexcept = delete;
         /* Operations */
-        template<LVector V, class Executor = SequentialExecutor>
-        inline void assignTo(V& target) const;
-        /* Getters */
+        template<LVector V1, class Executor = SequentialExecutor>
+        inline void assignTo(V1& target) const;
+
         [[nodiscard]] ScalarType calc(size_t index) const;
+        /* Getters */
         [[nodiscard]] __host__ __device__ size_t getLength() const { return mat.getRow(); }
         [[nodiscard]] const MatrixType& getLHS() const noexcept { return mat; }
-        [[nodiscard]] const U& getRHS() const noexcept { return vec; }
+        [[nodiscard]] const V& getRHS() const noexcept { return vec; }
     private:
-        template<Vector V> void sumHopping(V& target, FFTType& fft, ScalarType factor, StateType psi) const;
-        template<Vector V> void dotImpl(V& target, ScalarType factor, size_t index) const;
+        template<Vector V1> void sumHopping(V1& target, FFTType& fft, ScalarType factor, StateType psi) const;
+        template<Vector V1> void dotImpl(V1& target, ScalarType factor, size_t index) const;
         /* Getters */
         [[nodiscard]] ScalarType getHoppingT() const noexcept { return mat.getHoppingT(); }
         [[nodiscard]] ScalarType getRepelU() const noexcept { return mat.getRepelU(); }
-        [[nodiscard]] const ReprType& getRepr() const noexcept { return mat.getRepr(); }
+        [[nodiscard]] const U& getRepr() const noexcept { return mat.getRepr(); }
     };
 
-    template<Scalar T, class ReprType, Vector U>
-    template<LVector V, class Executor>
-    inline void MatrixVectorProduct<HubbardMatrix<T, ReprType>, U>::assignTo(V& target) const {
+    template<Scalar T, Representation U, Vector V>
+    template<LVector V1, class Executor>
+    inline void MatrixVectorProduct<HubbardMatrix<T, U>, V>::assignTo(V1& target) const {
         assert(target.getLength() == getLength() && "[Error]: Dimensions do not match");
         target = RealType(0);
         if constexpr (std::is_same<Executor, ThreadExecutor>::value) {
@@ -91,13 +92,13 @@ namespace Physica::Core {
         else {
             const size_t length = getLength();
             for (size_t i = 0; i < length; ++i)
-                dotImpl<V>(target, vec.calc(i), i);
+                dotImpl<V1>(target, vec.calc(i), i);
         }
     }
 
-    template<Scalar T, class ReprType, Vector U>
-    MatrixVectorProduct<HubbardMatrix<T, ReprType>, U>::ScalarType
-    MatrixVectorProduct<HubbardMatrix<T, ReprType>, U>::calc(size_t index) const {
+    template<Scalar T, Representation U, Vector V>
+    MatrixVectorProduct<HubbardMatrix<T, U>, V>::ScalarType
+    MatrixVectorProduct<HubbardMatrix<T, U>, V>::calc(size_t index) const {
         static_assert(!IsTransInvariant && "[Error]: Not implemented");
         const ScalarType hop = -mat.getHoppingT();
         const auto state = getRepr()[index];
@@ -127,9 +128,9 @@ namespace Physica::Core {
         return result;
     }
 
-    template<Scalar T, class ReprType, Vector U>
-    template<Vector V>
-    void MatrixVectorProduct<HubbardMatrix<T, ReprType>, U>::sumHopping(V& target, FFTType& fft, ScalarType factor, StateType psi) const {
+    template<Scalar T, Representation U, Vector V>
+    template<Vector V1>
+    void MatrixVectorProduct<HubbardMatrix<T, U>, V>::sumHopping(V1& target, FFTType& fft, ScalarType factor, StateType psi) const {
         if (psi.isVacuum())
             return;
         const auto reducedPsi = psi.transReduce();
@@ -146,9 +147,9 @@ namespace Physica::Core {
         target[index] += fft.getKSpace()[repr.getReducedK()] * sqrt(RealType(repr.getPeriods()[index])) * factor;
     }
 
-    template<Scalar T, class ReprType, Vector U>
-    template<Vector V>
-    void MatrixVectorProduct<HubbardMatrix<T, ReprType>, U>::dotImpl(V& target, ScalarType factor, size_t index) const {
+    template<Scalar T, Representation U, Vector V>
+    template<Vector V1>
+    void MatrixVectorProduct<HubbardMatrix<T, U>, V>::dotImpl(V1& target, ScalarType factor, size_t index) const {
         const auto state = getRepr()[index];
         int numRepel = 0;
         if constexpr (IsTransInvariant) {
@@ -197,12 +198,12 @@ namespace Physica::Core {
 }
 
 namespace Physica {
-    template<Scalar T, class ReprType, Vector U>
-    class Traits<MatrixVectorProduct<HubbardMatrix<T, ReprType>, U>> {
-        using MatrixType = HubbardMatrix<T, ReprType>;
-        using T1 = U::ScalarType;
+    template<Scalar T, Representation U, Vector V>
+    class Traits<MatrixVectorProduct<HubbardMatrix<T, U>, V>> {
+        using MatrixType = HubbardMatrix<T, U>;
+        using T1 = V::ScalarType;
     public:
-        using ScalarType = Core::Internal::BinaryScalarOpRtnTy<T, T1>::Type;
+        using ScalarType = Internal::BinaryScalarOpRtnTy<T, T1>::Type;
         constexpr static size_t SizeAtCompile = MatrixType::RowAtCompile;
         constexpr static bool FastAssign = true;
         constexpr static bool FastPacket = false;

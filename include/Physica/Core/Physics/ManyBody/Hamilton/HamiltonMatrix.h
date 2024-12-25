@@ -33,7 +33,9 @@ namespace Physica::Core {
         /* Operations */
         [[nodiscard]] const This& hermite() const noexcept { return *this; }
         /* Getters */
-        [[nodiscard]] size_t getNumState() const noexcept { return Base::getDerived().getNumState(); }
+        [[nodiscard]] const auto& getModel() const noexcept { return Base::getDerived().getModel(); }
+        [[nodiscard]] const auto& getRepr() const noexcept { return Base::getDerived().getRepr(); }
+        [[nodiscard]] size_t getNumState() const noexcept { return getRepr().getNumState(); }
         [[nodiscard]] size_t getRow() const noexcept { return getNumState(); }
         [[nodiscard]] size_t getCol() const noexcept { return getNumState(); }
     protected:

@@ -18,11 +18,8 @@
  */
 #pragma once
 
+#include <type_traits>
 #include "Physica/CRTPBase.h"
-
-namespace Physica {
-    template<class T> class Traits;
-}
 
 namespace Physica::Core {
     template<class Derived>
@@ -47,11 +44,14 @@ namespace Physica::Core {
         ReprBasis& operator=(const ReprBasis&) = default;
         ReprBasis& operator=(ReprBasis&&) noexcept = default;
     };
+
+    template<class T>
+    concept Representation = std::is_base_of<ReprBasis<T>, T>::value;
 }
 
 namespace Physica {
     template<class T>
-    class Traits<Core::ReprBasis<T>> {
+    class Traits<ReprBasis<T>> {
     public:
         using Derived = T;
     };

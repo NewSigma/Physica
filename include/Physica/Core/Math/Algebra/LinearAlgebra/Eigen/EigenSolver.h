@@ -76,10 +76,16 @@ namespace Physica::Core {
          * It is faster if all eigenvalues are real.
          */
         [[nodiscard]] const RawEigenvectorType& getRawEigenvectors() const noexcept { return rawEigenvectors; }
+        /* Static members */
+        static void sort(EigenvalueVector& eigenvalues, RawEigenvectorType& rawEigenvectors);
+        template<class Compare>
+        static void sort(EigenvalueVector& eigenvalues, RawEigenvectorType& rawEigenvectors, Compare comp);
     private:
         void computeRealMatEigenvalues(const WorkingMatrix& matrixT);
         void computeRealMatEigenvectors(WorkingMatrix& matrixT);
         void computeComplexMatEigenvectors(WorkingMatrix& matrixT);
+        /* Static members */
+        static bool defaultComp(ComplexType a, ComplexType b) noexcept;
     };
 
     template<Scalar T, size_t Order>
@@ -146,7 +152,7 @@ namespace Physica::Core {
 
     template<Scalar T, size_t Order>
     void EigenSolver<T, Order>::sort() {
-        sort([](ComplexType a, ComplexType b) noexcept { return a.real() < b.real(); });
+        sort(defaultComp);
     }
 
     template<Scalar T, size_t Order>
@@ -252,6 +258,31 @@ namespace Physica::Core {
                 }
             }
             return result;
+        }
+    }
+
+    template<Scalar T, size_t Order>
+    void EigenSolver<T, Order>::sort(EigenvalueVector& eigenvalues, RawEigenvectorType& rawEigenvectors) {
+        sort(eigenvalues, rawEigenvectors, defaultComp);
+    }
+
+    template<Scalar T, size_t Order>
+    template<class Compare>
+    void EigenSolver<T, Order>::sort(EigenvalueVector& eigenvalues, RawEigenvectorType& rawEigenvectors, Compare comp) {
+        const size_t order = eigenvalues.getLength();
+        for (size_t i = 0; i < order - 1; ++i) {
+            size_t index_min = i;
+            for (size_t j = i + 1; j < order; ++j) {
+                if (comp(eigenvalues[j], eigenvalues[index_min]))
+                    index_min = j;
+            }
+
+            const bool shouldSwap = i != index_min;
+            if (!shouldSwap)
+                continue;
+
+            eigenvalues[i].swap(eigenvalues[index_min]);
+            rawEigenvectors.swap_col(i, index_min);
         }
     }
 
@@ -395,6 +426,11 @@ namespace Physica::Core {
                 col[j] = (col.tail(j + 1) * row.tail(j + 1)) / (eigenvalues[i] - eigenvalues[j]);
             }
         }
+    }
+
+    template<Scalar T, size_t Order>
+    bool EigenSolver<T, Order>::defaultComp(ComplexType a, ComplexType b) noexcept {
+        return a.real() < b.real();
     }
 }
 

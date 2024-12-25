@@ -19,7 +19,7 @@
 #pragma once
 
 #include "Physica/Core/Math/Transform/FFT.h"
-#include "Physica/Core/Physics/ManyBody/ReprSpace/ReprImpl/ReprSpace.h"
+#include "Physica/Core/Physics/ManyBody/ReprSpace/ReprBasis.h"
 #include "Physica/Core/Physics/ManyBody/Model/Hubbard.h"
 #include "HamiltonMatrix.h"
 
@@ -31,31 +31,31 @@ namespace Physica::Core {
      * Reference:
      * [1] J. Korean Phys. Soc. 76, 670–683 (2020); https://doi.org/10.3938/jkps.76.670
      */
-    template<Scalar T, class ReprType>
+    template<Scalar T, Representation U>
     class HubbardMatrix
-            : public HamiltonMatrix<HubbardMatrix<T, ReprType>>
-            , public Hubbard<typename T::RealType, ReprType::Dim> {
+            : public HamiltonMatrix<HubbardMatrix<T, U>>
+            , public Hubbard<typename T::RealType, U::Dim> {
         using RealType = T::RealType;
-        using This = HubbardMatrix<T, ReprType>;
+        using This = HubbardMatrix<T, U>;
         using Base = HamiltonMatrix<This>;
-        using ModelBase = Hubbard<RealType, ReprType::Dim>;
+        using ModelBase = Hubbard<RealType, U::Dim>;
         
-        using StateType = ReprType::StateType;
+        using StateType = U::StateType;
         using typename ModelBase::IndexType;
     public:
         using FFTType = FFT<RealType, 1>;
-        constexpr static unsigned int Dim = ReprType::Dim;
+        constexpr static unsigned int Dim = U::Dim;
         constexpr static unsigned int NumSite = StateType::NumSite;
         constexpr static unsigned int SiteDOF = StateType::SiteDOF;
-        constexpr static bool IsTransInvariant = Traits<ReprType>::IsTransInvariant;
+        constexpr static bool IsTransInvariant = Traits<U>::IsTransInvariant;
         static_assert((IsTransInvariant && T::isComplex) || !IsTransInvariant, "[Error]: Use complex scalar if translational invariance is enabled");
         static_assert(!IsTransInvariant || (Dim == 1), "[Error]: Trans invariantce is not implemented in high dimension");
     private:
-        ReprType repr;
+        U repr;
         FFTType planProvider;
     public:
         HubbardMatrix() = default;
-        HubbardMatrix(ModelBase hubbard, ReprType repr_);
+        HubbardMatrix(ModelBase hubbard, U repr_);
         HubbardMatrix(const This&) = default;
         HubbardMatrix(This&&) noexcept = default;
         ~HubbardMatrix() = default;
@@ -72,8 +72,8 @@ namespace Physica::Core {
         using ModelBase::getHoppingT;
         using ModelBase::getRepelU;
         using ModelBase::getHopIndexArray;
-        [[nodiscard]] const ReprType& getRepr() const noexcept { return repr; }
-        [[nodiscard]] size_t getNumState() const noexcept { return repr.getNumState(); }
+        [[nodiscard]] const ModelBase& getModel() const noexcept { return *this; }
+        [[nodiscard]] const U& getRepr() const noexcept { return repr; }
     protected:
         inline RealType repelElem(StateType psi) const;
         RealType hoppingElem(StateType rowPsi, StateType colPsi) const;
@@ -83,13 +83,11 @@ namespace Physica::Core {
 }
 
 namespace Physica {
-    template<Scalar T, class U>
+    template<Scalar T, Representation U>
     class Traits<HubbardMatrix<T, U>> : public Traits<HamiltonMatrix<HubbardMatrix<T, U>>> {
     public:
         using ScalarType = T;
         using ReprType = U;
-
-        static_assert(std::is_base_of<ReprBasis<ReprType>, ReprType>::value, "[Error]: ReprType is not a representation");
     };
 }
 

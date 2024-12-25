@@ -20,7 +20,7 @@
 #include <gperftools/profiler.h>
 #include "Physica/Core/Math/Random/Random.h"
 #include "Physica/Core/Physics/ManyBody/Hamilton/HubbardMatrix.h"
-#include "Physica/Core/Physics/ManyBody/ReprSpace/KSpinRepr.h"
+#include "Physica/Core/Physics/ManyBody/ReprSpace/KFermiRepr.h"
 
 using namespace Physica;
 
@@ -33,7 +33,7 @@ static void func(benchmark::State& state) {
     using RealType = float64;
     using ScalarType = Complex<RealType>;
     using RandomType = Random<MT19937>;
-    using ReprType = KSpinRepr<1, NumSite, true>;
+    using ReprType = KFermiRepr<1, NumSite, true>;
 
     const LatticeModel<1> lattice({NumSite}, 1);
     const Hubbard<RealType, 1> hubbard(lattice, HoppingT, RepelU);

@@ -16,14 +16,12 @@
  * You should have received a copy of the GNU General Public License
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include <iostream>
 #include <benchmark/benchmark.h>
 #include <gperftools/profiler.h>
 #include "Physica/Core/Math/Random/Random.h"
 #include "Physica/Core/Physics/ManyBody/Hamilton/HubbardMatrix.h"
-#include "Physica/Core/Physics/ManyBody/ReprSpace/SpinRepr.h"
+#include "Physica/Core/Physics/ManyBody/ReprSpace/FermiRepr.h"
 #include "Physica/Core/Physics/ManyBody/TPQ.h"
-#include "Physica/Core/Utils/BenchmarkHelper.h"
 
 using namespace Physica::Core;
 using ScalarType = float64;
@@ -38,7 +36,7 @@ constexpr double Beta = 16;
 
 namespace {
     static void main(benchmark::State& state) {
-        using ReprType = SpinRepr<2, NumSite, true>;
+        using ReprType = FermiRepr<2, NumSite, true>;
         using Hamilton = HubbardMatrix<ScalarType, ReprType>;
         const LatticeModel<2> lattice({NumSiteX, NumSiteY}, 1);
         const Hubbard<ScalarType, 2> hubbard(lattice, HoppingT, RepelU);

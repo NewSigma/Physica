@@ -18,10 +18,12 @@
  */
 #pragma once
 
+#include "Physica/Core/MultiPrecision/Scalar.h"
+#include "Physica/PlainStruct.h"
 #include "LatticeModel.h"
 
 namespace Physica::Core {
-    template<Scalar T, unsigned int Dim>
+    template<Scalar T, int Dim>
     class Hubbard : public LatticeModel<Dim> {
         static_assert(!T::isComplex, "[Error]: Model param must be real");
         using This = Hubbard<T, Dim>;
@@ -52,14 +54,14 @@ namespace Physica::Core {
         HopIndexArray makeHopIndexArray();
     };
 
-    template<Scalar T, unsigned int Dim>
+    template<Scalar T, int Dim>
     Hubbard<T, Dim>::Hubbard(Base lattice, T hoppingT_, T repelU_)
             : Base(std::move(lattice)), hoppingT(hoppingT_), repelU(repelU_) {
         if constexpr (UntrivialNearestNeighbor)
             hopIndexArr = makeHopIndexArray();
     }
 
-    template<Scalar T, unsigned int Dim>
+    template<Scalar T, int Dim>
     void Hubbard<T, Dim>::swap(This& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         hoppingT.swap(obj.hoppingT);
@@ -67,7 +69,7 @@ namespace Physica::Core {
         hopIndexArr.swap(obj.hopIndexArr);
     }
 
-    template<Scalar T, unsigned int Dim>
+    template<Scalar T, int Dim>
     Hubbard<T, Dim>::HopIndexArray Hubbard<T, Dim>::makeHopIndexArray() {
         const auto numSite = Base::getNumSuperCellSite();
         HopIndexArray result(numSite);
@@ -75,7 +77,7 @@ namespace Physica::Core {
             const auto& dims = Base::getDims();
             Array<size_t> hopTargets{};
             hopTargets.reserve(numSite * Dim * 2);
-            for (unsigned int dim = 0; dim < Dim; ++dim) {
+            for (int dim = 0; dim < Dim; ++dim) {
                 IndexType index1 = index;
                 index1[dim] = (index1[dim] + 1) % Base::getSuperSize()[dim];
                 hopTargets.append(IndexType::toIndex1D(dims, index1));
@@ -86,4 +88,13 @@ namespace Physica::Core {
         });
         return result;
     }
+}
+
+namespace Physica {
+    template<Scalar T, int Dim_>
+    class Traits<Hubbard<T, Dim_>> {
+    public:
+        constexpr static int Dim = Dim_;
+        constexpr static int SiteDOF = 4;
+    };
 }

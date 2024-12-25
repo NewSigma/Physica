@@ -21,7 +21,7 @@
 #include "SiteIndex.h"
 
 namespace Physica::Core {
-    template<unsigned int Dim>
+    template<int Dim>
     class LatticeModel {
         static_assert(1 <= Dim && Dim <= 3, "[Error]: Invalid Dim");
         using This = LatticeModel<Dim>;
@@ -51,11 +51,11 @@ namespace Physica::Core {
         [[nodiscard]] IndexType getDims() const noexcept;
     };
 
-    template<unsigned int Dim>
+    template<int Dim>
     LatticeModel<Dim>::LatticeModel(DimArray superSize_, size_t numUnitCellSite_)
             : superSize(std::move(superSize_)), numUnitCellSite(numUnitCellSite_) {}
 
-    template<unsigned int Dim>
+    template<int Dim>
     template<class Functor>
     void LatticeModel<Dim>::forSiteInLattice(Functor func) const {
         if constexpr (Dim == 1) {
@@ -78,14 +78,14 @@ namespace Physica::Core {
         }
     }
 
-    template<unsigned int Dim>
+    template<int Dim>
     void LatticeModel<Dim>::swap(This& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         superSize.swap(obj.superSize);
         std::swap(numUnitCellSite, obj.numUnitCellSite);
     }
 
-    template<unsigned int Dim>
+    template<int Dim>
     size_t LatticeModel<Dim>::getNumCell() const noexcept {
         size_t result = 1;
         for (auto size : superSize)
@@ -93,7 +93,7 @@ namespace Physica::Core {
         return result;
     }
 
-    template<unsigned int Dim>
+    template<int Dim>
     LatticeModel<Dim>::IndexType LatticeModel<Dim>::getDims() const noexcept {
         if constexpr (Dim == 1)
             return IndexType{superSize[0], numUnitCellSite};

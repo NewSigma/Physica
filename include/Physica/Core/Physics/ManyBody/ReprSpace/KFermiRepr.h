@@ -18,15 +18,15 @@
  */
 #pragma once
 
-#include "SpinRepr.h"
 #include "Physica/Core/Math/Transform/FFT.h"
+#include "FermiRepr.h"
 
 namespace Physica::Core {
     template<unsigned int Dim, unsigned int NumSite, bool UseInversionSymm>
-    class KSpinRepr : public ReprBasis<KSpinRepr<Dim, NumSite, UseInversionSymm>> {
-        using This = KSpinRepr<Dim, NumSite, UseInversionSymm>;
+    class KFermiRepr : public ReprBasis<KFermiRepr<Dim, NumSite, UseInversionSymm>> {
+        using This = KFermiRepr<Dim, NumSite, UseInversionSymm>;
         using Base = ReprBasis<This>;
-        using RSpinType = SpinRepr<Dim, NumSite, UseInversionSymm>;
+        using RSpinType = FermiRepr<Dim, NumSite, UseInversionSymm>;
         using PeriodArray = Array<int>;
     public:
         using typename Base::StateType;
@@ -36,13 +36,13 @@ namespace Physica::Core {
         RSpinType rSpin;
         unsigned int kIndex;
     public:
-        KSpinRepr() = default;
-        KSpinRepr(RSpinType rSpin_, unsigned int kIndex_);
-        KSpinRepr(const KSpinRepr&) = default;
-        KSpinRepr(KSpinRepr&&) noexcept = default;
-        ~KSpinRepr() = default;
+        KFermiRepr() = default;
+        KFermiRepr(RSpinType rSpin_, unsigned int kIndex_);
+        KFermiRepr(const This&) = default;
+        KFermiRepr(This&&) noexcept = default;
+        ~KFermiRepr() = default;
         /* Operators */
-        KSpinRepr& operator=(This obj) noexcept { swap(obj); return *this; }
+        This& operator=(This obj) noexcept { swap(obj); return *this; }
         [[nodiscard]] StateType operator[](size_t index) const noexcept { return states[index]; }
         [[nodiscard]] size_t operator[](StateType psi) const noexcept;
         /* Operations */
@@ -55,7 +55,7 @@ namespace Physica::Core {
     };
 
     template<unsigned int Dim, unsigned int NumSite, bool UseInversionSymm>
-    KSpinRepr<Dim, NumSite, UseInversionSymm>::KSpinRepr(RSpinType rSpin_, unsigned int kIndex_)
+    KFermiRepr<Dim, NumSite, UseInversionSymm>::KFermiRepr(RSpinType rSpin_, unsigned int kIndex_)
             : rSpin(std::move(rSpin_)), kIndex(kIndex_) {
         assert(kIndex < NumSite && "[Error]: Momentum index out of range");
         const size_t numSite = NumSite;
@@ -78,7 +78,7 @@ namespace Physica::Core {
     }
 
     template<unsigned int Dim, unsigned int NumSite, bool UseInversionSymm>
-    size_t KSpinRepr<Dim, NumSite, UseInversionSymm>::operator[](StateType psi) const noexcept {
+    size_t KFermiRepr<Dim, NumSite, UseInversionSymm>::operator[](StateType psi) const noexcept {
         size_t left = 0, right = getNumState() - 1;  
         while (left < right) {
             const size_t mid = left + (right - left) / 2;
@@ -94,7 +94,7 @@ namespace Physica::Core {
     }
 
     template<unsigned int Dim, unsigned int NumSite, bool UseInversionSymm>
-    void KSpinRepr<Dim, NumSite, UseInversionSymm>::swap(This& __restrict obj) noexcept {
+    void KFermiRepr<Dim, NumSite, UseInversionSymm>::swap(This& __restrict obj) noexcept {
         assert(this != &obj && "[Error]: Self swap is likely a bug");
         states.swap(obj.states);
         periods.swap(obj.periods);
@@ -103,7 +103,7 @@ namespace Physica::Core {
     }
 
     template<unsigned int Dim, unsigned int NumSite, bool UseInversionSymm>
-    inline unsigned int KSpinRepr<Dim, NumSite, UseInversionSymm>::getReducedK() const noexcept {
+    inline unsigned int KFermiRepr<Dim, NumSite, UseInversionSymm>::getReducedK() const noexcept {
         const auto kSize = FFT<Real<>, 1>::rSizeToKSize(NumSite);
         if (kIndex < kSize)
             return kIndex;
@@ -113,7 +113,7 @@ namespace Physica::Core {
 
 namespace Physica {
     template<unsigned int Dim, unsigned int NumSite, bool UseInversionSymm>
-    class Traits<KSpinRepr<Dim, NumSite, UseInversionSymm>> : public SpinRepr<Dim, NumSite, UseInversionSymm> {
+    class Traits<KFermiRepr<Dim, NumSite, UseInversionSymm>> : public FermiRepr<Dim, NumSite, UseInversionSymm> {
     public:
         constexpr static bool IsTransInvariant = true;
     };

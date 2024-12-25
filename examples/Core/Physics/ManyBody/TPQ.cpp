@@ -18,11 +18,11 @@
  */
 #include <iostream>
 #include <QApplication>
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseSymmMatrix.h"
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseMatrixImpl/HalfDenseMatrixStorage.h"
 #include "Physica/Core/Math/Statistics/NumCharacter.h"
 #include "Physica/Core/Math/Random/Random.h"
 #include "Physica/Core/Physics/ManyBody/Hamilton/HubbardMatrix.h"
-#include "Physica/Core/Physics/ManyBody/ReprSpace/SpinRepr.h"
+#include "Physica/Core/Physics/ManyBody/ReprSpace/FermiRepr.h"
 #include "Physica/Core/Physics/ManyBody/TPQ.h"
 #include "Physica/Gui/Plot/Plot.h"
 
@@ -65,11 +65,11 @@ HalfDenseMatrixStorage<VectorType> makePartitionMatrix(const VectorType& betas) 
             const bool useInversionSymm = numSpinUp == numSpinDown;
             VectorType elem;
             if (useInversionSymm) {
-                using ReprType = SpinRepr<1, NumSite, true>;
+                using ReprType = FermiRepr<1, NumSite, true>;
                 elem = calcPartition(ReprType(numSpinUp, numSpinDown), betas);
             }
             else {
-                using ReprType = SpinRepr<1, NumSite, false>;
+                using ReprType = FermiRepr<1, NumSite, false>;
                 elem = calcPartition(ReprType(numSpinUp, numSpinDown), betas);
             }
             result(numSpinUp, numSpinDown) = std::move(elem);

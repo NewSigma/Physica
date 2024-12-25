@@ -19,11 +19,10 @@
 #include <iostream>
 #include <QApplication>
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/DenseSymmMatrix.h"
-#include "Physica/Core/Math/Statistics/NumCharacter.h"
 #include "Physica/Core/Math/Random/Random.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Eigen/SymmEigenSolver.h"
 #include "Physica/Core/Physics/ManyBody/Hamilton/HubbardMatrix.h"
-#include "Physica/Core/Physics/ManyBody/ReprSpace/SpinRepr.h"
+#include "Physica/Core/Physics/ManyBody/ReprSpace/FermiRepr.h"
 #include "Physica/Gui/Plot/Plot.h"
 
 using namespace Physica::Core;
@@ -69,11 +68,11 @@ SpectrumMatrix makeSpectrum() {
             const bool useInversionSymm = numSpinUp == numSpinDown;
             VectorPair pair;
             if (useInversionSymm) {
-                using ReprType = SpinRepr<1, NumSite, true>;
+                using ReprType = FermiRepr<1, NumSite, true>;
                 pair = calcPair(ReprType(numSpinUp, numSpinDown));
             }
             else {
-                using ReprType = SpinRepr<1, NumSite, false>;
+                using ReprType = FermiRepr<1, NumSite, false>;
                 pair = calcPair(ReprType(numSpinUp, numSpinDown));
             }
             result(numSpinUp, numSpinDown) = std::move(pair);

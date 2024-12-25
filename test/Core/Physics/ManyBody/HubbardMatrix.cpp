@@ -18,9 +18,8 @@
  */
 #include <iostream>
 #include "Physica/Core/Math/Random/Random.h"
-#include "Physica/Core/Math/Algebra/LinearAlgebra/Eigen/JacobiDavidson.h"
 #include "Physica/Core/Physics/ManyBody/Hamilton/HubbardMatrix.h"
-#include "Physica/Core/Physics/ManyBody/ReprSpace/KSpinRepr.h"
+#include "Physica/Core/Physics/ManyBody/ReprSpace/KFermiRepr.h"
 
 using namespace Physica::Core;
 constexpr double HoppingT = 1.0;
@@ -31,7 +30,7 @@ void testRSpinMatrix1D() {
     using ScalarType = float64;
     using VectorType = VectorND<ScalarType>;
     using MatrixType = DenseMatrix<ScalarType>;
-    using ReprType = SpinRepr<1, NumSite, NumSpinUp == NumSpinDown>;
+    using ReprType = FermiRepr<1, NumSite, NumSpinUp == NumSpinDown>;
 
     ReprType repr(NumSpinUp, NumSpinDown);
     LatticeModel<1> lattice({NumSite}, 1);
@@ -55,7 +54,7 @@ void testRSpinMatrix2D() {
     using ScalarType = float64;
     using VectorType = VectorND<ScalarType>;
     using MatrixType = DenseMatrix<ScalarType>;
-    using ReprType = SpinRepr<2, NumSiteX * NumSiteY, NumSpinUp == NumSpinDown>;
+    using ReprType = FermiRepr<2, NumSiteX * NumSiteY, NumSpinUp == NumSpinDown>;
 
     ReprType repr(NumSpinUp, NumSpinDown);
     LatticeModel<2> lattice({NumSiteX, NumSiteY}, 1);
@@ -81,7 +80,7 @@ void testKSpinMatrix() {
     using ScalarType = Complex<RealType>;
     using VectorType = VectorND<ScalarType>;
     using MatrixType = DenseMatrix<ScalarType>;
-    using ReprType = KSpinRepr<1, NumSite, true>;
+    using ReprType = KFermiRepr<1, NumSite, true>;
 
     ReprType repr({NumParticle, NumParticle}, 0);
 
@@ -104,7 +103,7 @@ void testKSpinMatrix() {
 void testVecProduct() {
     constexpr int Dim = 1;
     constexpr int NumSite = 4;
-    using ReprType = SpinRepr<1, NumSite, false>;
+    using ReprType = FermiRepr<1, NumSite, false>;
     using Hamilton = HubbardMatrix<float64, ReprType>;
     using RandomType = Random<MT19937, 10000>;
 

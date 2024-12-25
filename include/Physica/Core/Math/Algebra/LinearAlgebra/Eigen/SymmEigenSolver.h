@@ -67,6 +67,8 @@ namespace Physica::Core {
         [[nodiscard]] inline EigenvectorMatrix getEigenvectors() const noexcept;
     private:
         void stepQR(WorkingMatrix& working, size_t lower, size_t sub_order);
+        /* Static members */
+        static bool defaultComp(T a, T b) noexcept;
     };
 
     template<Scalar T, size_t Order>
@@ -133,7 +135,7 @@ namespace Physica::Core {
 
     template<Scalar T, size_t Order>
     void SymmEigenSolver<T, Order>::sort() {
-        sort([](T a, T b) noexcept { return a < b; });
+        sort(defaultComp);
     }
 
     template<Scalar T, size_t Order>
@@ -217,6 +219,11 @@ namespace Physica::Core {
             if (!isShiftStep)
                 subBlock(2, 0) = subBlock(0, 2) = T(0);
         }
+    }
+
+    template<Scalar T, size_t Order>
+    bool SymmEigenSolver<T, Order>::defaultComp(T a, T b) noexcept {
+        return a < b;
     }
 }
 
