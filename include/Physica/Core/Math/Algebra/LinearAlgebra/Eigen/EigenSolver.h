@@ -40,7 +40,7 @@ namespace Physica::Core {
         using ComplexType = RealType::ComplexType;
         using EigenvalueVector = DenseVector<ComplexType, Order>;
         using EigenvectorMatrix = DenseMatrix<ComplexType, MatrixOption::Col | MatrixOption::Vector, Order, Order>;
-        using RawEigenvectorType = DenseMatrix<T, MatrixOption::Col | MatrixOption::Vector, Order, Order>;
+        using RawEigenvectorType = DenseMatrix<T, MatrixOption::Col | MatrixOption::Element, Order, Order>;
     private:
         using WorkingMatrix = Schur<T, Order>::WorkingMatrix;
 
@@ -61,6 +61,11 @@ namespace Physica::Core {
         /* Operations */
         template<Matrix M>
         void compute(const M& source, bool computeEigenvectors_);
+        template<Matrix M>
+        void compute_base(const M& source, bool computeEigenvectors_);
+        template<Matrix M>
+        void compute_mkl(const M& source, bool computeEigenvectors_);
+
         void sort();
         template<class Compare>
         void sort(Compare comp);
@@ -81,6 +86,8 @@ namespace Physica::Core {
         template<class Compare>
         static void sort(EigenvalueVector& eigenvalues, RawEigenvectorType& rawEigenvectors, Compare comp);
     private:
+        template<Matrix M>
+        void pre_compute(const M& source, bool computeEigenvectors_);
         void computeRealMatEigenvalues(const WorkingMatrix& matrixT);
         void computeRealMatEigenvectors(WorkingMatrix& matrixT);
         void computeComplexMatEigenvectors(WorkingMatrix& matrixT);
@@ -115,10 +122,16 @@ namespace Physica::Core {
     template<Scalar T, size_t Order>
     template<Matrix M>
     void EigenSolver<T, Order>::compute(const M& source, bool computeEigenvectors_) {
-        static_assert(std::is_same<T, typename M::ScalarType>::value, "[Error]: Inconsistent ScalarType");
-        assert(source.getRow() == source.getCol());
-        assert(source.getRow() == eigenvalues.getLength());
-        computeEigenvectors = computeEigenvectors_;
+        if constexpr (HasMKL())
+            compute_mkl(source, computeEigenvectors_);
+        else
+            compute_base(source, computeEigenvectors_);
+    }
+
+    template<Scalar T, size_t Order>
+    template<Matrix M>
+    void EigenSolver<T, Order>::compute_base(const M& source, bool computeEigenvectors_) {
+        pre_compute(source, computeEigenvectors_);
         if (source.getRow() == 1) [[unlikely]] {
             eigenvalues[0] = source.calc(0, 0);
             rawEigenvectors(0, 0) = T(1);
@@ -286,6 +299,15 @@ namespace Physica::Core {
     }
 
     template<Scalar T, size_t Order>
+    template<Matrix M>
+    void EigenSolver<T, Order>::pre_compute(const M& source, bool computeEigenvectors_) {
+        static_assert(std::is_same<T, typename M::ScalarType>::value, "[Error]: Inconsistent ScalarType");
+        assert(source.getRow() == source.getCol());
+        assert(source.getRow() == eigenvalues.getLength());
+        computeEigenvectors = computeEigenvectors_;
+    }
+
+    template<Scalar T, size_t Order>
     void EigenSolver<T, Order>::computeRealMatEigenvalues(const WorkingMatrix& matrixT) {
         const size_t order = matrixT.getRow();
         for (size_t i = 0; i < order;) {
@@ -441,3 +463,7 @@ namespace std {
         solver1.swap(solver2);
     }
 }
+
+#ifdef PHYSICA_MKL
+    #include "EigenSolver_MKL.h" // IWYU pragma: export
+#endif

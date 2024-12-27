@@ -59,6 +59,11 @@ namespace Physica {
     constexpr static unsigned int PhysicaWordSize = sizeof(void*) * CHAR_BIT;
     constexpr size_t Dynamic = 0;
 
+    enum class Backend {
+        Base,
+        MKL
+    };
+
     enum class Side {
         Host,
         Device

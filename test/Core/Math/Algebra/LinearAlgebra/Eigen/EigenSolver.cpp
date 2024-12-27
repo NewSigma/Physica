@@ -21,7 +21,7 @@
 #include "Physica/Core/Physics/ManyBody/Hamilton/TransIsingMatrix.h"
 #include "Physica/Core/Physics/ManyBody/ReprSpace/SpinRepr.h"
 
-using namespace Physica::Core;
+using namespace Physica;
 
 template<Vector T>
 bool vectorNearZero(const LValueVector<T>& v, double precision) {
@@ -32,12 +32,17 @@ bool vectorNearZero(const LValueVector<T>& v, double precision) {
     return true;
 }
 
-template<Matrix T>
-bool eigenTest(const T& mat, double precision) {
+template<Matrix T, Backend B>
+bool eigenTestImpl(const T& mat, double precision) {
     using ScalarType = T::ScalarType;
-    auto solver = EigenSolver<ScalarType>(mat, true);
     using ComplexVector = EigenSolver<ScalarType>::EigenvalueVector;
     using ComplexMatrix = EigenSolver<ScalarType>::EigenvectorMatrix;
+    auto solver = EigenSolver<ScalarType>(mat.getRow());
+    if constexpr (B == Backend::Base)
+        solver.compute_base(mat, true);
+    else
+        solver.compute_mkl(mat, true);
+
     const size_t order = mat.getRow();
     auto eigenvectors = solver.getEigenvectors();
     for (size_t i = 0; i < order; ++i) {
@@ -53,6 +58,17 @@ bool eigenTest(const T& mat, double precision) {
             return false;
         const ComplexVector result = ComplexMatrix(mat - solver.getEigenvalues()[i] * T::unitMatrix(order)) * eigenvectors.col(i);
         if (!vectorNearZero(result, precision))
+            return false;
+    }
+    return true;
+}
+
+template<Matrix T>
+bool eigenTest(const T& mat, double precision) {
+    if (!eigenTestImpl<T, Backend::Base>(mat, precision))
+        return false;
+    if constexpr (HasMKL()) {
+        if (!eigenTestImpl<T, Backend::MKL>(mat, precision))
             return false;
     }
     return true;

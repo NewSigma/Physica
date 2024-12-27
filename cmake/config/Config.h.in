@@ -23,6 +23,7 @@
 #pragma once
 
 namespace Physica {
+    constexpr static const char* Version = "@CMAKE_PROJECT_VERSION@";
     constexpr static const char* GitHash = "@GIT_HASH@";
 
     class CUDADevAttr {
