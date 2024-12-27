@@ -18,6 +18,8 @@
  */
 #pragma once
 
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/MatrixImpl/RValueMatrix.h"
+
 namespace Physica::Core {
     template<Matrix T, Vector V>
     class MatrixVectorProduct;
@@ -30,6 +32,7 @@ namespace Physica::Core {
     public:
         using Base = RValueVector<This>;
         using typename Base::ScalarType;
+        using typename Base::ValueType;
     private:
         const MatrixType& expr;
         const V& vec;
@@ -49,6 +52,7 @@ namespace Physica::Core {
         inline void assignTo(V1& target) const;
         /* Getters */
         [[nodiscard]] inline ScalarType calc(size_t index) const;
+        [[nodiscard]] inline ValueType calc_value(size_t index) const;
         [[nodiscard]] __host__ __device__ size_t getLength() const { return expr.getRow(); }
         [[nodiscard]] const MatrixType& getLHS() const noexcept { return expr; }
         [[nodiscard]] const V& getRHS() const noexcept { return vec; }
@@ -80,9 +84,13 @@ namespace Physica::Core {
     }
 
     template<ExprType Type, Matrix T, class U, Vector V>
-    inline MatrixVectorProduct<MatrixExpr<Type, T, U>, V>::ScalarType
-    MatrixVectorProduct<MatrixExpr<Type, T, U>, V>::calc(size_t index) const {
+    inline auto MatrixVectorProduct<MatrixExpr<Type, T, U>, V>::calc(size_t index) const -> ScalarType {
         return expr.row(index) * vec;
+    }
+
+    template<ExprType Type, Matrix T, class U, Vector V>
+    inline auto MatrixVectorProduct<MatrixExpr<Type, T, U>, V>::calc_value(size_t index) const -> ValueType {
+        return expr.row(index).values() * vec.values();
     }
 
     template<ExprType Type, Matrix T, class U, Vector V>

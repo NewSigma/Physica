@@ -18,8 +18,9 @@
  */
 #pragma once
 
+#include <format>
 #include <cuda_fp16.h>
-#include <iomanip>
+#include "../Real.h"
 
 namespace Physica {
     template<>
@@ -104,6 +105,19 @@ namespace Physica::Core {
     [[nodiscard]] __host__ __device__ inline float16 operator ""_HF(unsigned long long int x) {
         return float16(int(x));
     }
+}
+
+namespace std {
+    template<>
+    struct formatter<Physica::Core::Real<Physica::Core::Float16>, char> {
+        constexpr auto parse(std::format_parse_context& ctx) {
+            return ctx.begin();
+        }
+
+        auto format(const Physica::Core::Real<Physica::Core::Float16>& obj, std::format_context& ctx) const {
+            return std::format_to(ctx.out(), "{:.4G}", float(obj));
+        }
+    };
 }
 
 #include "MathFP16.h"

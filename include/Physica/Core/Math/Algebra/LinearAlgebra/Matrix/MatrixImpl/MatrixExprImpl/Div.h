@@ -25,11 +25,16 @@ namespace Physica::Core {
         using Base = BinaryMatrixExpr<ExprType::Div, T, U>;
     public:
         using typename Base::ScalarType;
+        using typename Base::ValueType;
     public:
         using Base::Base;
         /* Operations */
         [[nodiscard]] ScalarType calc(size_t row, size_t col) const {
-            return ScalarType(Base::getLHS().calc(row, col)) / ScalarType(Base::getRHS());
+            return Base::getLHS().calc(row, col) / Base::getRHS();
+        }
+
+        [[nodiscard]] ValueType calc_value(size_t row, size_t col) const {
+            return Base::getLHS().calc_value(row, col) / Base::getRHS().value();
         }
     };
 

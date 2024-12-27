@@ -17,6 +17,7 @@
  * along with Physica.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include <iostream>
+#include "Physica/Core/Math/Algebra/LinearAlgebra/Matrix/UnitMatrix.h"
 #include "Physica/Core/Math/Algebra/LinearAlgebra/Eigen/EigenSolver.h"
 #include "Physica/Core/Physics/ManyBody/Hamilton/TransIsingMatrix.h"
 #include "Physica/Core/Physics/ManyBody/ReprSpace/SpinRepr.h"
@@ -36,7 +37,6 @@ template<Matrix T, Backend B>
 bool eigenTestImpl(const T& mat, double precision) {
     using ScalarType = T::ScalarType;
     using ComplexVector = EigenSolver<ScalarType>::EigenvalueVector;
-    using ComplexMatrix = EigenSolver<ScalarType>::EigenvectorMatrix;
     auto solver = EigenSolver<ScalarType>(mat.getRow());
     if constexpr (B == Backend::Base)
         solver.compute_base(mat, true);
@@ -46,7 +46,7 @@ bool eigenTestImpl(const T& mat, double precision) {
     const size_t order = mat.getRow();
     auto eigenvectors = solver.getEigenvectors();
     for (size_t i = 0; i < order; ++i) {
-        const ComplexVector result = ComplexMatrix(mat - solver.getEigenvalues()[i] * T::unitMatrix(order)) * eigenvectors.col(i);
+        const ComplexVector result = (mat - solver.getEigenvalues()[i] * UnitMatrix<ScalarType>(order)) * eigenvectors.col(i);
         if (!vectorNearZero(result, precision))
             return false;
     }
@@ -56,7 +56,7 @@ bool eigenTestImpl(const T& mat, double precision) {
     for (size_t i = 0; i < order; ++i) {
         if (i > 1 && solver.getEigenvalues()[i - 1].real() > solver.getEigenvalues()[i].real())
             return false;
-        const ComplexVector result = ComplexMatrix(mat - solver.getEigenvalues()[i] * T::unitMatrix(order)) * eigenvectors.col(i);
+        const ComplexVector result = (mat - solver.getEigenvalues()[i] * UnitMatrix<ScalarType>(order)) * eigenvectors.col(i);
         if (!vectorNearZero(result, precision))
             return false;
     }

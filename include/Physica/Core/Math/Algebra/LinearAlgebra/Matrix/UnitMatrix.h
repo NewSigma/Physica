@@ -25,7 +25,9 @@ namespace Physica::Core {
     class UnitMatrix : public RValueMatrix<UnitMatrix<T, Order>> {
         using This = UnitMatrix<T, Order>;
         using Base = RValueMatrix<This>;
-
+    public:
+        using typename Base::ValueType;
+    private:
         size_t order; // TODO: use void if Order != Dynamic
     public:
         UnitMatrix() = default;
@@ -37,6 +39,7 @@ namespace Physica::Core {
         This& operator=(This obj) noexcept { swap(obj); return *this; }
         /* Operations */
         [[nodiscard]] T calc(size_t row, size_t col) const { return T(row == col ? 1 : 0); }
+        [[nodiscard]] ValueType calc_value(size_t row, size_t col) const { return ValueType(row == col ? 1 : 0); }
 
         [[nodiscard]] const This& transpose() const noexcept { return *this; }
         [[nodiscard]] const This& conjugate() const noexcept { return *this; }

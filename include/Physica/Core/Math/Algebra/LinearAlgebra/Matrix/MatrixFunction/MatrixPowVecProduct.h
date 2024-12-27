@@ -28,6 +28,7 @@ namespace Physica::Core {
         using Base = RValueVector<This>;
     public:
         using typename Base::ScalarType;
+        using typename Base::ValueType;
     private:
         const MatrixPow<T>& mpow;
         const U& v;
@@ -43,7 +44,8 @@ namespace Physica::Core {
         template<LVector V, class Executor = SequentialExecutor>
         inline void assignTo(V& target) const;
 
-        [[nodiscard]] ScalarType calc(size_t) const { noImpl("calc() is low performance and should be avoided"); }
+        [[nodiscard]] ScalarType calc(size_t) const { noImpl(__func__); }
+        [[nodiscard]] ValueType calc_value(size_t) const { noImpl(__func__); }
         /* Getters */
         [[nodiscard]] size_t getLength() const noexcept { return v.getLength(); }
         [[nodiscard]] const MatrixPow<T>& getLHS() const noexcept { return mpow; }

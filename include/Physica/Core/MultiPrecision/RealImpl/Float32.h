@@ -18,6 +18,7 @@
  */
 #pragma once
 
+#include <format>
 #include <iomanip>
 #include "Physica/CRCoro.h"
 #include "../Real.h"
@@ -174,11 +175,22 @@ namespace Physica::Core {
 
 namespace std {
     template<>
-    struct numeric_limits<Physica::Core::Real<Physica::Core::Float>> : 
+    struct numeric_limits<Physica::Core::Real<Physica::Core::Float32>> : 
     #ifdef PHYSICA_CUDA
         public ::cuda::std::numeric_limits<float>
     #else
         public numeric_limits<float>
     #endif
     {};
+
+    template<>
+    struct formatter<Physica::Core::Real<Physica::Core::Float32>, char> {
+        constexpr auto parse(std::format_parse_context& ctx) {
+            return ctx.begin();
+        }
+
+        auto format(const Physica::Core::Real<Physica::Core::Float32>& obj, std::format_context& ctx) const {
+            return std::format_to(ctx.out(), "{:.7G}", obj.toMachine());
+        }
+    };
 }

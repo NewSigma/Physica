@@ -34,6 +34,7 @@ namespace Physica::Core {
         using Base = RValueVector<This>;
     public:
         using typename Base::ScalarType;
+        using typename Base::ValueType;
         using RealType = ScalarType::RealType;
         using ParamPair = std::pair<int, int>;
     private:
@@ -64,7 +65,8 @@ namespace Physica::Core {
         template<LVector V, class Executor = SequentialExecutor>
         void assignTo(V& target, RealType traceMu, ParamPair params) const;
 
-        [[nodiscard]] ScalarType calc(size_t) const { noImpl("calc() is low performance and should be avoided"); }
+        [[nodiscard]] ScalarType calc(size_t) const { noImpl(__func__); }
+        [[nodiscard]] ValueType calc_value(size_t) const { noImpl(__func__); }
         [[nodiscard]] RealType calcTraceMu() const;
         template<class Executor>
         [[nodiscard]] ParamPair calcParam(RealType traceMu) const;

@@ -215,7 +215,7 @@ namespace Physica::Core {
     template<Scalar T, ScalarOption Option>
     Complex<typename Internal::BinaryScalarOpRtnTy<T, Real<Option>>::Type> operator-(
             const Real<Option>& s, const Complex<T>& c) {
-        return {s - c.real(), c.imag()};
+        return {s - c.real(), -c.imag()};
     }
 
     template<Scalar T, ScalarOption Option>

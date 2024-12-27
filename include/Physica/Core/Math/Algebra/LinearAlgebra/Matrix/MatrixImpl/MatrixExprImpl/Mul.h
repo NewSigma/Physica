@@ -27,11 +27,16 @@ namespace Physica::Core {
         using Base = BinaryMatrixExpr<ExprType::Mul, T1, T2>;
     public:
         using typename Base::ScalarType;
+        using typename Base::ValueType;
     public:
         using Base::Base;
         /* Operations */
         [[nodiscard]] CoDiff<ScalarType> calc(size_t row, size_t col) const {
             return Base::getLHS().calc(row, col) * Base::getRHS().calc(row, col);
+        }
+
+        [[nodiscard]] ValueType calc_value(size_t row, size_t col) const {
+            return Base::getLHS().calc_value(row, col) * Base::getRHS().calc_value(row, col);
         }
     };
 
@@ -46,6 +51,7 @@ namespace Physica::Core {
         using HermiteRtnTy = std::conditional<IsHermite, const This&, Hermite<This>>::type;
     public:
         using typename Base::ScalarType;
+        using typename Base::ValueType;
         using Base::getLHS;
         using Base::getRHS;
     public:
@@ -53,6 +59,10 @@ namespace Physica::Core {
         /* Operations */
         [[nodiscard]] CoDiff<ScalarType> calc(size_t row, size_t col) const {
             return getLHS().calc(row, col) * getRHS();
+        }
+
+        [[nodiscard]] ValueType calc_value(size_t row, size_t col) const {
+            return getLHS().calc_value(row, col) * getRHS().value();
         }
 
         [[nodiscard]] ScalarType trace() const { return getLHS().trace() * getRHS(); }

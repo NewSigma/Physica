@@ -111,25 +111,15 @@ namespace Physica::Core {
         constexpr bool FastAssign1 = Traits<T1>::FastAssign;
         constexpr bool FastAssign2 = Traits<T2>::FastAssign;
         if constexpr (FastAssign1) {
-            if constexpr (FastAssign2) {
-                getLHS().template assignTo<V, Executor>(v);
-                V buffer;
-                buffer.template operator=<T2, Executor>(getRHS());
-                v -= buffer;
-            }
-            else {
-                getLHS().template assignTo<V, Executor>(v);
-                v -= getRHS();
-            }
+            getLHS().template assignTo<V, Executor>(v);
+            v -= getRHS();
         }
-        else {
-            if constexpr (FastAssign2) {
-                (-getRHS()).template assignTo<V, Executor>(v);
-                v += getLHS();
-            }
-            else
-                Base::template assignTo<V, Executor>(v);
+        else if constexpr (FastAssign2) {
+            (-getRHS()).template assignTo<V, Executor>(v);
+            v += getLHS();
         }
+        else
+            Base::template assignTo<V, Executor>(v);
     }
 
     template<Vector T1, Vector T2>

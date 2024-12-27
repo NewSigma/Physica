@@ -18,7 +18,7 @@
  */
 #pragma once
 
-#include <iomanip>
+#include <format>
 #include "Physica/CRCoro.h"
 #include "../Real.h"
 
@@ -181,4 +181,15 @@ namespace std {
         public numeric_limits<double>
     #endif
     {};
+
+    template<>
+    struct formatter<Physica::Core::Real<Physica::Core::Float64>, char> {
+        constexpr auto parse(std::format_parse_context& ctx) {
+            return ctx.begin();
+        }
+
+        auto format(const Physica::Core::Real<Physica::Core::Float64>& obj, std::format_context& ctx) const {
+            return std::format_to(ctx.out(), "{:.16G}", obj.toMachine());
+        }
+    };
 }

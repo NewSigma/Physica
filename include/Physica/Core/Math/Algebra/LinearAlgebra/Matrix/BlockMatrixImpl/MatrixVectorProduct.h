@@ -25,7 +25,8 @@ namespace Physica::Core {
         using This = MatrixVectorProduct<BlockMatrix<T>, U>;
         using Base = RValueVector<This>;
     public:
-        using ScalarType = Base::ScalarType;
+        using typename Base::ScalarType;
+        using typename Base::ValueType;
     private:
         const BlockMatrix<T>& m;
         const U& v;
@@ -41,7 +42,8 @@ namespace Physica::Core {
         template<LVector V, class Executor = SequentialExecutor>
         void assignTo(V& target_) const;
 
-        [[nodiscard]] ScalarType calc(size_t index) const { noImpl("calc() is low performance and should be avoided"); }
+        [[nodiscard]] ScalarType calc(size_t) const { noImpl(__func__); }
+        [[nodiscard]] ValueType calc_value(size_t) const { noImpl(__func__); }
         /* Getters */
         [[nodiscard]] size_t getLength() const noexcept { return v.getLength(); }
         [[nodiscard]] const BlockMatrix<T>& getLHS() const noexcept { return m; }

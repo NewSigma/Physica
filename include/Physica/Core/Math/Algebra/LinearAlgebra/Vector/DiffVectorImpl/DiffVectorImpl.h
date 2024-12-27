@@ -58,8 +58,10 @@ namespace Physica::Core {
 
     template<Scalar T, DiffMode Mode, int Order, size_t Length, class Allocator>
     inline void DenseVector<Diff<T, Mode, Order>, Length, Allocator>::resize(size_t size) {
-        v.resize(size);
-        g.resize(size);
+        if (size != getLength()) {
+            v.resize(size);
+            g.resize(size);
+        }
     }
 
     template<Scalar T, DiffMode Mode, int Order, size_t Length, class Allocator>

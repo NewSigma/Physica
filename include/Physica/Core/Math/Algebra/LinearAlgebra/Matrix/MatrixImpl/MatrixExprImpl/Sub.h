@@ -30,11 +30,16 @@ namespace Physica::Core {
         using HermiteRtnTy = std::conditional<IsHermite, const This&, Hermite<This>>::type;
     public:
         using typename Base::ScalarType;
+        using typename Base::ValueType;
     public:
         using Base::Base;
         /* Operations */
         [[nodiscard]] ScalarType calc(size_t row, size_t col) const {
-            return ScalarType(Base::getLHS().calc(row, col)) - ScalarType(Base::getRHS().calc(row, col));
+            return Base::getLHS().calc(row, col) - Base::getRHS().calc(row, col);
+        }
+
+        [[nodiscard]] ValueType calc_value(size_t row, size_t col) const {
+            return Base::getLHS().calc_value(row, col) - Base::getRHS().calc_value(row, col);
         }
 
         [[nodiscard]] TransposeRtnTy transpose() const noexcept { return TransposeRtnTy(*this); }
@@ -47,11 +52,16 @@ namespace Physica::Core {
         using Base = BinaryMatrixExpr<ExprType::Sub, T, U>;
     public:
         using typename Base::ScalarType;
+        using typename Base::ValueType;
     public:
         using Base::Base;
         /* Operations */
         [[nodiscard]] ScalarType calc(size_t row, size_t col) const {
-            return ScalarType(Base::getLHS().calc(row, col)) - ScalarType(Base::getRHS());
+            return Base::getLHS().calc(row, col) - Base::getRHS();
+        }
+
+        [[nodiscard]] ValueType calc_value(size_t row, size_t col) const {
+            return Base::getLHS().calc_value(row, col) - Base::getRHS().value();
         }
     };
 
